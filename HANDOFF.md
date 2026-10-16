@@ -6,7 +6,12 @@
 
 ---
 
-## 0. START HERE — ask the user first (in Thai)
+## 0. START HERE
+> Session 2 (2026-10-17): the questions below were asked; the user skipped them and picked **minimap first** (done). Still unanswered: audio feel, performance, real online test, UI feedback, "เพลงของฉัน". Ask again briefly if relevant, then offer the next ideas in §10.
+>
+> Tip: if port 8765 is already taken by a stale server, just use it (`http://localhost:8765/?v=N`). `WD.addPlayer` accumulates bots across calls — reload the page for a clean test.
+
+### Original opening questions (ask in Thai)
 The user asked that the next session **open by asking these questions** (one short message, Thai, simple words, numbered so they can answer quickly). Don't start coding before they answer, unless they already gave a task.
 
 1. **เสียงและเพลงใหม่เป็นยังไงบ้าง?** มีเสียงไหนแปลกหรือไม่เข้ากับเกมไหม (เช่น เสียงโดนตี เสียงลูกไฟ เสียงเจ็บ) — จะเปลี่ยนให้ *(sounds were picked by file name, never listened to — see §9)*
@@ -78,7 +83,8 @@ Personal, non-commercial fan project made with/for the user and their friends. U
 | ~3427 | `ฝั่งแสดงผลของโหมดพิเศษ` | `syncModeObjs`, roles, meeting UI |
 | ~3599 | | `render()` loop (+ own footsteps) |
 | ~3652 | `ชิ้นส่วน HUD` | `plate`, `frameBox`, `drawBossBar`, `spellDia`, `thinBar`, `drawHUD`, `drawModeHUD`, `drawBottom`, `drawBoard` |
-| ~3889 | `เมนู / ล็อบบี้ (DOM)` | menu wiring (graphics button, my-music input, UI click sounds), lobby, `renderLobby`, `window.WD` |
+| ~3813 | `drawMinimap` | **minimap** bottom-left (above the player badge): rotating circle (forward = up), view radius `MM.view`=620 sim px, draws OBS, enemies (red), players (team colour in tdm/quid), race rings, quid ball/snitch, BR zone, Voldemort tasks/bodies, "N" north marker; hidden while Tab scoreboard is open |
+| ~3960 | `เมนู / ล็อบบี้ (DOM)` | menu wiring (graphics button, my-music input, UI click sounds), lobby, `renderLobby`, `window.WD` |
 
 ## 6. Game content (current)
 **Modes** (`MODES`): 🗝️ Dungeon Co-op (1–6, waves "floors", boss raid every 5: dragon 3-phase / spider queen 3-phase) • 🎯 Training (dummies, parry practice, host ends with button) • ⚔️ Duel 1v1 • 💥 FFA • 🛡️ Team 2v2/3v3 • 🏟️ Quidditch (team, pitch map, ball + golden snitch) • 🏁 Broom race (10 rings × 2 laps) • 🌀 Battle royale (forest map, shrinking zone, unlock spells by items) • 🐍 Find Lord Voldemort (Among Us style, 4–6, roles: นักเรียนฮอกวอตส์ / ลอร์ดโวลเดอมอร์ / ผู้เสพความตาย at 6 players).
@@ -115,7 +121,7 @@ Can't cast on a broom except in Quidditch/race. Stun or web knocks you off the b
 User asked about real Harry Potter music: told them not to put it in the public repo (copyright, takedown risk); built the "เพลงของฉัน" button instead (local files, IndexedDB, never uploaded).
 
 ## 10. Ideas the user may ask for next
-Minimap (bottom-left, Hogwarts Legacy style), house-crest picker in the menu, vents/secret passages for Voldemort, task mini-games, 3-player Voldemort mode, more bosses (basilisk), more maps (Hogsmeade, Great Hall), cosmetics, ranked/MMR, mobile controls.
+(Minimap done 2026-10-17.) House-crest picker in the menu, vents/secret passages for Voldemort, task mini-games, 3-player Voldemort mode, more bosses (basilisk), more maps (Hogsmeade, Great Hall), cosmetics, ranked/MMR, mobile controls.
 
 ## 11. Changelog
 - 2026-10-16 — v1 2D prototype → 3D third-person (Three.js) → bloom, cloth, student uniforms, forest map.
@@ -126,4 +132,5 @@ Minimap (bottom-left, Hogwarts Legacy style), house-crest picker in the menu, ve
 - 2026-10-16 — **Whole new UX/UI** (refs: Hogwarts Legacy style + Fortnite/Valorant lobby + Hades boon cards + Elden Ring thin HUD): navy/gold theme with Cinzel, text-only main menu with your character standing on a 3D rune dais, 3D party lobby (everyone's character on stage, name plates, empty slots, click plate to swap team), mode list + selected-mode card + big gold start button, Hades-style buff cards, new results/meeting/guide styling, canvas HUD redone (diamond spell cluster, ult emblem, thin bars, boss bar, gold crosshair, framed scoreboard). No protocol change (PREFIX still v3).
 - 2026-10-16 — **Performance pass** (~3x faster frames): half-res bloom, no canvas MSAA, pixel ratio ≤1, shadows every 2nd frame at 2048, static mesh batching, cached stone materials, fewer pool lights, auto/high/low graphics setting with auto resolution scaling, `WD.PROF` profiler. Audio asset research report added.
 - 2026-10-17 — **Real audio**: CC0/CC-BY music per map + boss + imp + win/lose stingers, 73 CC0 SFX with synth fallback, footsteps, UI click/hover sounds, ambience loops, real wind for brooms, "เพลงของฉัน" local-music button (IndexedDB, N = next), credits section in the guide + `audio/CREDITS.md`.
+- 2026-10-17 (session 2) — **Minimap** (แผนที่ย่อมุมซ้ายล่าง) via `drawMinimap`; no protocol change. Tested solo+bots in coop (castle/forest), quid, race, br, imp, ffa: no console errors. Role secrets are not shown on it (all other players use their own/team colour).
 - 2026-10-17 — HANDOFF: added §0 questions to ask the user at the start of the next session; refreshed code map and user notes.

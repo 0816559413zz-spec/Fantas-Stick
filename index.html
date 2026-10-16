@@ -3765,6 +3765,7 @@ function drawHUD(v,me,P){
   if(me&&me.rt)big('🕸️ ติดใยแมงมุม! ขยับไม่ได้ชั่วคราว',SH*0.62,20,'#e8e8f0');
 
   if(me)drawBottom(me,v);
+  if(me&&!showBoard)drawMinimap(v,me,P);
   if(showBoard)drawBoard(v,P);
 }
 function raceRankClient(P){
@@ -3806,6 +3807,76 @@ function drawModeHUD(v,me,P,big){
     }
     if(me.gh)big('👻 คุณเป็นผีแล้ว — ยังช่วยทำภารกิจได้ แต่โหวตไม่ได้',SH-150,15,'#c8d8ff');
   }
+}
+// แผนที่ย่อมุมซ้ายล่าง: วงกลมหมุนตามมุมกล้อง (ด้านหน้า = ขึ้นบน) ตัวเราอยู่กลาง
+const MM={r:82,view:620,col:{pillar:'#7d8499',stone:'#7d8499',rock:'#6e7482',tree:'#2f6b3f',crate:'#8a6a3e',hay:'#a8883e',hoop:'#e8c25a'}};
+function drawMinimap(v,me,P){
+  if(!me)return;
+  const R=MM.r,mx=R+16,my=SH-150-R,sc=R/MM.view,cs=Math.cos(yaw),sn=Math.sin(yaw),M=v.M||{};
+  // แปลงพิกัดโลก -> หน้าจอมินิแมป (clampEdge = ถ้าเกินวงให้ไปแปะที่ขอบ)
+  const pt=(x,y,clampEdge)=>{
+    const dx=x-me.x,dy=y-me.y;let u=(-sn*dx+cs*dy)*sc,f=(cs*dx+sn*dy)*sc;
+    const d=Math.hypot(u,f);
+    if(d>R-4){if(!clampEdge)return null;u*=(R-4)/d;f*=(R-4)/d;}
+    return [mx+u,my-f];
+  };
+  cx.save();
+  cx.beginPath();cx.arc(mx,my,R,0,Math.PI*2);cx.fillStyle='rgba(6,10,22,0.78)';cx.fill();
+  cx.clip();
+  // ขอบแผนที่
+  {
+    const raw=[[0,0],[MW,0],[MW,MH],[0,MH]].map(([x,y])=>{const dx=x-me.x,dy=y-me.y;return [mx+(-sn*dx+cs*dy)*sc,my-(cs*dx+sn*dy)*sc];});
+    cx.beginPath();raw.forEach((q,i)=>i?cx.lineTo(q[0],q[1]):cx.moveTo(q[0],q[1]));cx.closePath();
+    cx.fillStyle='rgba(40,52,86,0.55)';cx.fill();cx.strokeStyle='rgba(217,180,90,0.5)';cx.lineWidth=1.5;cx.stroke();
+  }
+  // สิ่งกีดขวาง
+  for(const o of OBS){
+    if(Math.abs(o.x-me.x)>MM.view+o.r||Math.abs(o.y-me.y)>MM.view+o.r)continue;
+    const q=pt(o.x,o.y,false);if(!q)continue;
+    cx.beginPath();cx.arc(q[0],q[1],Math.max(1.6,o.r*sc),0,Math.PI*2);cx.fillStyle=MM.col[o.k]||'#7d8499';cx.fill();
+  }
+  // วงเวท Battle Royale
+  if(M.zone){
+    const dx=M.zone.cx-me.x,dy=M.zone.cy-me.y,raw=[mx+(-sn*dx+cs*dy)*sc,my-(cs*dx+sn*dy)*sc];
+    cx.beginPath();cx.arc(raw[0],raw[1],M.zone.r*sc,0,Math.PI*2);cx.strokeStyle='#c08cff';cx.lineWidth=2;cx.stroke();
+  }
+  // ห่วงแข่ง: ห่วงถัดไปเรืองทอง
+  if(v.mode==='race'&&M.rings&&!me.fin){
+    M.rings.forEach((r,i)=>{const q=pt(r[0],r[1],i===me.cp);if(!q)return;cx.beginPath();cx.arc(q[0],q[1],i===me.cp?5:2.5,0,Math.PI*2);cx.fillStyle=i===me.cp?'#ffd86b':'rgba(255,216,107,0.4)';cx.fill();});
+  }
+  // ลูกบอล / ลูกบอลทอง
+  if(M.ball){const q=pt(M.ball.x,M.ball.y,true);if(q){cx.beginPath();cx.arc(q[0],q[1],4,0,Math.PI*2);cx.fillStyle='#ff6a5a';cx.fill();cx.strokeStyle='#fff';cx.lineWidth=1;cx.stroke();}}
+  if(M.sn){const q=pt(M.sn.x,M.sn.y,true);if(q){cx.beginPath();cx.arc(q[0],q[1],3.5,0,Math.PI*2);cx.fillStyle='#ffe27a';cx.fill();}}
+  // ภารกิจ + ศพ (โหมดโวลเดอมอร์)
+  if(v.mode==='imp'&&ROLE){
+    const tp=taskPts();
+    for(const t of ROLE.tasks){if(ROLE.tdone.includes(t))continue;const q=pt(tp[t].x,tp[t].y,true);if(q){diaPath(q[0],q[1],5);cx.fillStyle='#ffd86b';cx.fill();}}
+  }
+  for(const b of (M.bodies||[])){const q=pt(b[1],b[2],true);if(q){cx.strokeStyle='#ff5a5a';cx.lineWidth=2;cx.beginPath();cx.moveTo(q[0]-3,q[1]-3);cx.lineTo(q[0]+3,q[1]+3);cx.moveTo(q[0]+3,q[1]-3);cx.lineTo(q[0]-3,q[1]+3);cx.stroke();}}
+  // ศัตรู
+  for(const e of v.E){
+    if(e.hp<=0)continue;const boss=EDEF[e.t]&&EDEF[e.t].boss,q=pt(e.x,e.y,boss);if(!q)continue;
+    cx.beginPath();cx.arc(q[0],q[1],boss?5:2.6,0,Math.PI*2);cx.fillStyle='#ff4040';cx.fill();
+  }
+  // ผู้เล่นคนอื่น (โหมดทีมใช้สีทีม)
+  const teamMode=v.mode==='tdm'||v.mode==='quid';
+  for(const p of P){
+    if(p.id===me.id||!p.al)continue;
+    const q=pt(p.x,p.y,false);if(!q)continue;
+    cx.beginPath();cx.arc(q[0],q[1],3.6,0,Math.PI*2);cx.fillStyle=teamMode?TEAMC[p.tm]:(p.c||'#ccc');cx.fill();cx.strokeStyle='rgba(0,0,0,0.7)';cx.lineWidth=1;cx.stroke();
+  }
+  // ตัวเรา: ลูกศรทองชี้ขึ้น
+  cx.save();cx.translate(mx,my);
+  cx.beginPath();cx.moveTo(0,-7);cx.lineTo(5.5,6);cx.lineTo(0,3);cx.lineTo(-5.5,6);cx.closePath();
+  cx.fillStyle=HG2;cx.fill();cx.strokeStyle='#05070f';cx.lineWidth=1;cx.stroke();cx.restore();
+  cx.restore();
+  // กรอบทอง + ตัว N ชี้ทิศเหนือของแผนที่ (หมุนตามกล้อง)
+  cx.beginPath();cx.arc(mx,my,R,0,Math.PI*2);cx.strokeStyle=HG;cx.lineWidth=2;cx.stroke();
+  cx.beginPath();cx.arc(mx,my,R+4,0,Math.PI*2);cx.strokeStyle='rgba(217,180,90,0.25)';cx.lineWidth=1;cx.stroke();
+  // เหนือของแผนที่ = ทิศ -y ของโลก
+  const nxp=mx-cs*(R+11),nyp=my+sn*(R+11);
+  diaPath(nxp,nyp,8);cx.fillStyle='#05070f';cx.fill();cx.strokeStyle=HG;cx.lineWidth=1;cx.stroke();
+  cx.font='700 10px Cinzel,Kanit,serif';cx.textAlign='center';cx.fillStyle=HG2;cx.fillText('N',nxp,nyp+3.5);
 }
 const SLOTS_IMP=[['E','📜','ภารกิจ',-10],['R','📢','รายงานศพ',-11],['F','🔔','ประชุม',-12],['Q','💀','อวาดา',-13]];
 const BR_LOCK={1:'fire',2:'stun',3:'push',4:'pull'};
