@@ -283,7 +283,7 @@ body[data-screen=lobby] #voice{top:84px;left:auto;right:24px;width:340px}
     <h3>🧙 ตัวละคร &amp; บ้านฮอกวอตส์</h3>
     <p class="gnote">ครั้งแรกที่เข้าเกมจะมีหน้า <b>สร้างตัวละคร</b> — 3 ขั้นตอน: ① หน้าตา (ทรงผม 11 แบบ สีผม สีผิว สีตา สีเสื้อคลุม เนคไท) ② เลือกไม้กายสิทธิ์ (ไม้ แกนเวท ทรงด้าม) ③ เลือกบ้าน (Gryffindor / Slytherin / Hufflepuff / Ravenclaw หรือให้ 🎩 หมวกคัดสรรสุ่มให้) • สีบ้านจะโผล่ที่เนคไท ผ้าพันคอ ซับในเสื้อคลุม และเป็นสีประจำตัวของคุณ (ป้ายชื่อ แผนที่ย่อ) • แก้ทีหลังได้ที่ปุ่ม <b>แต่งตัวละคร</b> หน้าแรก • เพื่อนจะเห็นหน้าตาของคุณในล็อบบี้และในเกม</p>
     <h3>🔮 สายเวทมนตร์ & สถานะ</h3>
-    <p class="gnote">เลือก<b>สาย</b>หลัก 1 สาย (🔥 ไฟ / ❄️ น้ำแข็ง / ⚡ สายฟ้า — สายอื่นกำลังมา) สายหลักกำหนด<b>เวทโบราณ (X)</b> แล้วจัดคาถา Q/E/R/F จากคลัง (ใส่คาถาสายอื่นได้ไม่เกิน 2 ช่อง) • <b>สถานะ</b>: 🔥 ติดไฟ (เผาต่อเนื่อง) • ❄️ เย็น (ช้าลง สะสม 3 ชั้น = 🧊 แข็ง สตัน + โดนแรงขึ้น) • ⚡ ช็อต (โดนสายฟ้าแรงขึ้น) • 🛡️ เกราะ • 💨 เร็วขึ้น • <b>คอมโบ</b>: ไฟโดนเป้าที่เย็น/แข็ง = <b>ละลาย</b> (ดาเมจเพิ่ม) • สายฟ้าหรือเกล็ดน้ำแข็งโดนเป้าที่แข็ง = <b>แตก</b> (ดาเมจเพิ่ม) • บอสทน CC ได้ดี และผู้เล่นโดน CC ซ้ำๆ ติดกันจะสั้นลงเรื่อยๆ</p>
+    <p class="gnote">เลือก<b>สาย</b>หลัก 1 สาย (🔥 ไฟ / ❄️ น้ำแข็ง / ⚡ สายฟ้า / 🌿 ธรรมชาติ / 🌑 คำสาป / 🔮 อัญเชิญ — รวม 36 คาถา) สายหลักกำหนด<b>เวทโบราณ (X)</b> แล้วจัดคาถา Q/E/R/F จากคลัง (ใส่คาถาสายอื่นได้ไม่เกิน 2 ช่อง) • <b>สถานะ</b>: 🔥 ติดไฟ (เผาต่อเนื่อง) • ❄️ เย็น (ช้าลง สะสม 3 ชั้น = 🧊 แข็ง สตัน + โดนแรงขึ้น) • ⚡ ช็อต (โดนสายฟ้าแรงขึ้น) • 🛡️ เกราะ • 💨 เร็วขึ้น • ☠️ พิษ (สะสม 3 ชั้น ลดการรักษา) • 🌿 รากมัด (ขยับไม่ได้) • 🤐 ปิดปาก (ร่ายคาถาไม่ได้) • 😱 กลัว (วิ่งหนี) • 🕶️ มืดบอด (เล็งไม่แม่น) • 🎯 ตรามรณะ (โดนแรงขึ้น) • 🔮 สัตว์เวทช่วยสู้ (ตีตายได้ มีหลอดเลือดเหนือหัว) • <b>คอมโบ</b>: ไฟโดนเป้าที่เย็น/แข็ง = <b>ละลาย</b> (ดาเมจเพิ่ม) • สายฟ้าหรือเกล็ดน้ำแข็งโดนเป้าที่แข็ง = <b>แตก</b> (ดาเมจเพิ่ม) • บอสทน CC ได้ดี และผู้เล่นโดน CC ซ้ำๆ ติดกันจะสั้นลงเรื่อยๆ</p>
     <h3>🎮 ปุ่มควบคุม</h3>
     <table>
       <tr><td><b>คลิกที่จอ</b></td><td>ล็อกเมาส์ให้หมุนกล้องได้ (Esc = ปล่อยเมาส์)</td></tr>
@@ -530,7 +530,8 @@ const PDEF={
   zap:{spd:1500,r:7,dmg:12,life:0.9,col:'#fff27a'},
   vine:{spd:720,r:9,dmg:8,life:1.1,col:'#6fd57f'},
   dart:{spd:1300,r:6,dmg:6,life:0.9,col:'#b6e86a'},
-  hex:{spd:850,r:9,dmg:8,life:1.1,col:'#b57dff'}
+  hex:{spd:850,r:9,dmg:8,life:1.1,col:'#b57dff'},
+  ember:{spd:720,r:6,dmg:6,life:1.2,col:'#ff9a4a'}
 };
 // ch = ความสูงจุดกึ่งกลางลำตัว, vr = ครึ่งความสูง (ใช้เช็กโดนในแนวตั้ง)
 const EDEF={
@@ -574,7 +575,7 @@ const PATHS=[
   {id:'storm',n:'สายสายฟ้า',ic:'⚡',col:'#ffe27a',d:'เร็ว ฟ้าลูกโซ่ ช็อตสตัน — เล่นไวและแม่นยำ'},
   {id:'nature',n:'สายธรรมชาติ',ic:'🌿',col:'#6fd57f',d:'รากพันธนาการ พิษสะสม ฟื้นฟู — ทนทานและยื้อเกม'},
   {id:'hex',n:'สายคำสาป',ic:'🌑',col:'#b57dff',d:'ปิดปาก ทำให้กลัว มืดบอด ตีตรา — ควบคุมฝูงชนตัวจริง'},
-  {id:'summon',n:'สายอัญเชิญ',ic:'🔮',col:'#ff9ad5',d:'เรียกสัตว์เวทมาช่วยสู้ (เร็วๆ นี้)'}
+  {id:'summon',n:'สายอัญเชิญ',ic:'🔮',col:'#ff9ad5',d:'เรียกสัตว์เวทมาช่วยสู้ — เล่นเป็นทีม ยิ่งสั่งการเก่งยิ่งแรง'}
 ];
 const SPELL_LIST=[],SPELLS={};
 function defSpell(path,o){o.path=path;o.i=SPELL_LIST.length;SPELL_LIST.push(o);SPELLS[o.id]=o;return o;}
@@ -649,7 +650,7 @@ function tickStatus(t,dt){
   if(t.frzImm>0)t.frzImm-=dt;if(t.chlImm>0)t.chlImm-=dt;if(t.rootImm>0)t.rootImm-=dt;
   if(t.ccT>0){t.ccT-=dt;if(t.ccT<=0)t.ccN=0;}
   if(t.haste>0)t.haste-=dt;if(t.ovc>0)t.ovc-=dt;
-  if(t.isE&&t.root>0)t.root-=dt;
+  if((t.isE||t.isM)&&t.root>0)t.root-=dt;
   if(t.ward){t.ward.t-=dt;if(t.ward.t<=0)t.ward=null;}
 }
 function clearStatus(t){for(const k of ['slowT','shk','frz','sil','chl','chlT','frzImm','chlImm','rootImm','ccT','ccN','haste','ovc','burn','psn','psnT','fear','bld','mrk'])t[k]=0;t.ward=null;t.dr=null;}
@@ -753,12 +754,12 @@ defSpell(0,{id:'inferno',n:'ไฟนรกกลืนกิน',ic:'🌋',cd:0
 
 // ---------- สายน้ำแข็ง ----------
 defSpell(1,{id:'iceshard',n:'เกล็ดน้ำแข็ง',ic:'🧊',cd:2.8,d:'เกล็ดน้ำแข็งเร็ว ทำให้เป้าเย็นลง สะสม 3 ครั้ง = แช่แข็ง',fx:'โดนเป้าที่แข็งอยู่ = แตกกระจาย ดาเมจเพิ่ม',
-  cast(p,S){shoot(p,'ice',{sp:S.id,dmg:9});},
+  cast(p,S){shoot(p,'ice',{sp:S.id,dmg:10});},
   hit(pr,t){let d=pr.dmg;if(t.frz>0){d+=5;t.frz=0;t.stun=Math.min(t.stun||0,0.2);emit({k:'efx',z:'shatter',x:t.x,y:t.y,h:cH(t)});}damage(t,d,pr.owner,'proj');addChill(t,1);}});
 defSpell(1,{id:'frostnova',n:'วงน้ำแข็ง',ic:'❄️',cd:11,d:'คลื่นน้ำแข็งรอบตัว ชะลอ + ทำให้เย็น 2 ชั้น',fx:'ตามด้วยเกล็ดน้ำแข็ง 1 ครั้ง = แช่แข็งทันที',
   cast(p,S){
     emit({k:'efx',z:'fnova',x:p.x,y:p.y,h:p.z+0.5,r:170});
-    for(const t of foesIn(p.team,p.x,p.y,170,4))aoeHit(p,t,8,t=>{addChill(t,2);addSlow(t,0.75,2);});
+    for(const t of foesIn(p.team,p.x,p.y,170,4))aoeHit(p,t,10,t=>{addChill(t,2);addSlow(t,0.75,2);});
   }});
 defSpell(1,{id:'icewall',n:'กำแพงน้ำแข็ง',ic:'🏔️',cd:18,d:'ตั้งกำแพงน้ำแข็ง 3 ก้อน อยู่ 3.5 วิ บล็อกเวทและทางเดิน',fx:'พังได้ถ้าโดนยิงเยอะ',
   cast(p,S){
@@ -771,8 +772,8 @@ defSpell(1,{id:'blizzard',n:'พายุหิมะ',ic:'🌨️',cd:15,d:'พ
     const q=aimPoint(p,500);
     addZone({x:q.x,y:q.y,r:200,t:5,tick:0.5,owner:p.id,team:p.team,kind:'frost',n:0,hit(t,z){damage(t,2,z.owner,'zone');addSlow(t,0.75,0.7);if((z.n=(z.n|0)+1)%4===0)addChill(t,1);}});
   }});
-defSpell(1,{id:'frostarmor',n:'เกราะน้ำแข็ง',ic:'🛡️',cd:15,d:'เกราะดูดดาเมจ 24 นาน 5 วิ ใครตีเราจะเย็นลง',fx:'เกราะหมดแล้วหายไปทันที',
-  cast(p,S){addWard(p,24,5,true);emit({k:'efx',z:'armor',x:p.x,y:p.y,h:p.z+1,id:p.id});}});
+defSpell(1,{id:'frostarmor',n:'เกราะน้ำแข็ง',ic:'🛡️',cd:15,d:'เกราะดูดดาเมจ 28 นาน 5 วิ ใครตีเราจะเย็นลง',fx:'เกราะหมดแล้วหายไปทันที',
+  cast(p,S){addWard(p,28,5,true);emit({k:'efx',z:'armor',x:p.x,y:p.y,h:p.z+1,id:p.id});}});
 defSpell(1,{id:'abszero',n:'ศูนย์สัมบูรณ์',ic:'🥶',cd:0,ult:true,d:'เวทโบราณสายน้ำแข็ง: คลื่นเยือกแข็งรอบตัว แช่แข็งทุกคนในวง',fx:'บอสแข็งได้สั้นกว่าปกติ',
   cast(p,S){
     emit({k:'efx',z:'absz',x:p.x,y:p.y,h:p.z+0.8,r:330});
@@ -881,6 +882,103 @@ defSpell(4,{id:'darkness',n:'ความมืดมิด',ic:'🌑',cd:0,ult:
   cast(p,S){
     emit({k:'efx',z:'curse',x:p.x,y:p.y,h:p.z+1,r:360});
     for(const t of foesIn(p.team,p.x,p.y,360,6))aoeHit(p,t,20,t=>{addSil(t,3);addBlind(t,2.4);addSlow(t,0.55,3);});
+  }});
+
+// ---------- สัตว์เวท (minion): AI ฝั่งโฮสต์ ----------
+const MIND={
+  wolf:{n:'หมาป่าวิญญาณ',hp:24,spd:270,r:16,life:14,max:1},
+  sprite:{n:'สไปรท์ไฟ',hp:14,spd:200,r:12,life:12,max:1,fly:true},
+  golem:{n:'ยักษ์หิน',hp:75,spd:105,r:30,life:12,max:1},
+  wisp:{n:'วิญญาณรักษา',hp:16,spd:230,r:11,life:9,max:1,fly:true}
+};
+function summonMin(p,type,o){
+  const D=MIND[type];o=o||{};
+  const mine=G.mins.filter(m=>m.owner===p.id&&m.type===type&&!m.dead);
+  if(!o.force&&mine.length>=D.max){mine.sort((a,b)=>a.life-b.life)[0].dead=true;}
+  const a=p.ang+rnd(-1,1),m={id:++G.mid,isM:true,type,owner:p.id,team:p.team,x:p.x+Math.cos(a)*70,y:p.y+Math.sin(a)*70,h:D.fly?2.2:0,z:D.fly?2.2:0,r:D.r,hp:D.hp,maxHp:D.hp,spd:D.spd,life:o.life||D.life,cd:1.0+rnd(0,0.3),vx:0,vy:0,stun:0,od:0};
+  const q={x:m.x,y:m.y};collideWorld(q,m.r);m.x=q.x;m.y=q.y;
+  G.mins.push(m);emit({k:'efx',z:'summon',x:m.x,y:m.y,h:0.6});
+  return m;
+}
+function minTarget(m){
+  const own=G.players[m.owner];
+  if(own&&own.focusT&&G.time<own.focusUntil&&!own.focusT.dead&&own.focusT.alive!==false&&own.focusT.team!==m.team)return own.focusT;
+  let b=null,bd=(m.type==='golem'?520:850)**2;
+  for(const t of foesOf(m.team)){const d=(t.x-m.x)**2+(t.y-m.y)**2;if(d<bd){bd=d;b=t;}}
+  return b;
+}
+function minShoot(m,t,type,dmg){
+  const pd=PDEF[type],a=Math.atan2(t.y-m.y,t.x-m.x),dd=Math.hypot(t.x-m.x,t.y-m.y)||1,h=(m.h||0)+0.8,vh=(cH(t)-h)/(dd/pd.spd);
+  G.proj.push({id:++G.pid,type,x:m.x+Math.cos(a)*14,y:m.y+Math.sin(a)*14,h,vh,vx:Math.cos(a)*pd.spd,vy:Math.sin(a)*pd.spd,r:pd.r,dmg,life:pd.life,owner:m.owner,team:m.team,src:'p'});
+  emit({k:'cast',t:type,x:m.x,y:m.y,h,a:Math.round(a*100)/100});
+}
+function updateMins(dt){
+  for(const m of G.mins){
+    if(m.dead)continue;
+    m.life-=dt;if(m.life<=0){m.dead=true;emit({k:'efx',z:'unsummon',x:m.x,y:m.y,h:(m.h||0)+0.6});continue;}
+    tickStatus(m,dt);if(m.od>0)m.od-=dt;
+    if(m.burn>0){m.burn-=dt;m.bt-=dt;if(m.bt<=0){m.bt=0.5;damage(m,4,m.burnSrc,'burn');if(m.dead)continue;}}
+    m.x+=m.vx*dt;m.y+=m.vy*dt;const fr=Math.exp(-5*dt);m.vx*=fr;m.vy*=fr;
+    m.cd-=dt;
+    if(m.stun>0){m.stun-=dt;continue;}
+    const own=G.players[m.owner],spd=m.spd*moveMul(m)*(m.root>0?0:1)*(m.od>0?1.3:1),od=m.od>0?0.7:1;
+    const mv=(x,y,k)=>{const dx=x-m.x,dy=y-m.y,d=Math.hypot(dx,dy)||1;m.x+=dx/d*spd*dt*(k||1);m.y+=dy/d*spd*dt*(k||1);};
+    const follow=()=>{if(own&&Math.hypot(own.x-m.x,own.y-m.y)>150)mv(own.x,own.y);};
+    if(m.fear>0){mv(m.fearX,m.fearY,-1);}
+    else switch(m.type){
+      case 'wolf':{
+        const tg=minTarget(m);
+        if(tg){const d=Math.hypot(tg.x-m.x,tg.y-m.y);if(d>m.r+(tg.r||PR)+8)mv(tg.x,tg.y);else if(m.cd<=0){m.cd=0.9*od;damage(tg,5,m.owner,'melee');emit({k:'claw',x:tg.x,y:tg.y,h:cH(tg),t:'wolf'});}}
+        else follow();break;}
+      case 'sprite':{
+        const tg=minTarget(m);
+        if(tg){const d=Math.hypot(tg.x-m.x,tg.y-m.y);if(d>340)mv(tg.x,tg.y);else if(d<220)mv(tg.x,tg.y,-1);if(d<720&&m.cd<=0){m.cd=1*od;minShoot(m,tg,'ember',4);}}
+        else follow();
+        m.h=2.2+Math.sin(G.time*3+m.id)*0.4;break;}
+      case 'golem':{
+        const tg=minTarget(m);
+        if(tg){const d=Math.hypot(tg.x-m.x,tg.y-m.y);if(d>m.r+(tg.r||PR)+30)mv(tg.x,tg.y);
+          if(d<m.r+(tg.r||PR)+90&&m.cd<=0){m.cd=2.2*od;emit({k:'slam',x:m.x,y:m.y,r:100});for(const t of foesIn(m.team,m.x,m.y,100,3.5)){damage(t,12,m.owner,'aoe');knock(t,m.x,m.y,350);}}}
+        else follow();break;}
+      case 'wisp':{
+        if(own){const d=Math.hypot(own.x-m.x,own.y-m.y);if(d>110)mv(own.x,own.y);
+          if(m.cd<=0){m.cd=1.2*od;for(const q of plist())if(q.team===m.team&&q.alive&&!q.downed&&Math.hypot(q.x-m.x,q.y-m.y)<170){healT(q,2.5);emit({k:'efx',z:'wispheal',x:m.x,y:m.y,h:m.h+0.3,x2:q.x,y2:q.y,h2:(q.z||0)+1.2});}}}
+        m.h=2+Math.sin(G.time*2.4+m.id)*0.3;break;}
+    }
+    const q={x:m.x,y:m.y};collideWorld(q,m.r,m.h>1?5:0);m.x=q.x;m.y=q.y;m.z=m.h;
+  }
+  G.mins=G.mins.filter(m=>!m.dead);
+}
+function aimTarget(p,range){
+  let best=null,bs=1e9;
+  for(const t of foesOf(p.team)){
+    const dx=t.x-p.x,dy=t.y-p.y,dd=Math.hypot(dx,dy);if(dd>range||dd<1)continue;
+    const da=Math.abs(angDiff(Math.atan2(dy,dx),p.ang));if(da<0.4&&da+dd/4000<bs){bs=da+dd/4000;best=t;}
+  }
+  return best;
+}
+
+// ---------- สายอัญเชิญ ----------
+defSpell(5,{id:'spiritwolf',n:'หมาป่าวิญญาณ',ic:'🐺',cd:14,d:'เรียกหมาป่าวิญญาณ 14 วิ วิ่งไล่กัดศัตรู (มีได้ 1 ตัว เรียกซ้ำจะแทนตัวเก่า)',fx:'เลือดน้อยแต่เร็วมาก',
+  cast(p,S){summonMin(p,'wolf');}});
+defSpell(5,{id:'firesprite',n:'สไปรท์ไฟ',ic:'🧚',cd:16,d:'เรียกสไปรท์ลอยตามเรา ยิงลูกไฟเล็กใส่ศัตรูทุกวินาที 12 วิ (มีได้ 1 ตัว)',fx:'บินได้ อยู่ห่างศัตรู',
+  cast(p,S){summonMin(p,'sprite');}});
+defSpell(5,{id:'stonegolem',n:'ยักษ์หิน',ic:'🗿',cd:22,d:'เรียกยักษ์หินตัวหนา 12 วิ ทุบพื้นผลักศัตรูและรับดาเมจแทนเรา (มีได้ 1 ตัว)',fx:'ช้า แต่ตายยาก',
+  cast(p,S){summonMin(p,'golem');}});
+defSpell(5,{id:'wispheal',n:'วิญญาณรักษา',ic:'💚',cd:18,d:'วิญญาณลอยตามเรา 9 วิ ฟื้นเลือดเรากับเพื่อนที่อยู่ใกล้ๆ (มีได้ 1 ตัว)',fx:'ฆ่าง่าย ต้องคอยปกป้อง',
+  cast(p,S){summonMin(p,'wisp');}});
+defSpell(5,{id:'soulbind',n:'สั่งลุย!',ic:'📣',cd:14,d:'สั่งสัตว์เวททุกตัวพุ่งใส่เป้าหมายที่เล็งอยู่ เร็วและตีไวขึ้น 6 วิ',fx:'ไม่มีสัตว์เวท = เสียคูลดาวน์เปล่า',
+  cast(p,S){
+    const mine=G.mins.filter(m=>m.owner===p.id&&!m.dead),t=aimTarget(p,900);
+    if(t){p.focusT=t;p.focusUntil=G.time+6;}
+    for(const m of mine){m.od=6;m.cd=0;emit({k:'efx',z:'bind',x:m.x,y:m.y,h:(m.h||0)+1});}
+    emit({k:'efx',z:'rally',x:p.x,y:p.y,h:p.z+1});
+  }});
+defSpell(5,{id:'legion',n:'กองทัพวิญญาณ',ic:'👻',cd:0,ult:true,d:'เวทโบราณสายอัญเชิญ: เรียกหมาป่า 3 ตัว + สไปรท์ 2 ตัวพร้อมกัน นาน 12 วิ',fx:'ไม่นับรวมโควตาสัตว์เวทปกติ',
+  cast(p,S){
+    for(let i=0;i<3;i++)summonMin(p,'wolf',{force:1,life:12});
+    for(let i=0;i<2;i++)summonMin(p,'sprite',{force:1,life:12});
+    emit({k:'efx',z:'legion',x:p.x,y:p.y,h:p.z+0.5,r:200});
   }});
 
 // ---------- ร่ายคาถา ----------
@@ -1120,15 +1218,15 @@ function hostTick(dt){
   const acting=g.ph==='play';
   for(const p of plist()){if(p.bot)botBrain(p,dt);updatePlayer(p,dt,acting);}
   if(acting){
-    updateProjectiles(dt);updateSpells(dt);
+    updateProjectiles(dt);updateSpells(dt);updateMins(dt);
     if(g.mode==='coop'||g.mode==='train')updateEnemies(dt);
   }
   modeLogic(dt);
 }
 function angDiff(a,b){let d=a-b;while(d>Math.PI)d-=2*Math.PI;while(d<-Math.PI)d+=2*Math.PI;return d;}
 // ความสูงจุดกึ่งกลางตัว / ครึ่งความสูง ของผู้เล่นหรือศัตรู
-function cH(t){return t.isE?(t.h||0)+EDEF[t.type].ch:(t.z||0)+1.1;}
-function vR(t){return t.isE?EDEF[t.type].vr:1.15;}
+function cH(t){return t.isE?(t.h||0)+EDEF[t.type].ch:t.isM?(t.h||0)+0.9:(t.z||0)+1.1;}
+function vR(t){return t.isE?EDEF[t.type].vr:t.isM?1:1.15;}
 
 function updatePlayer(p,dt,acting){
   const inp=p.inp||emptyInput();
@@ -1269,6 +1367,7 @@ function foesOf(team){
   const out=[];
   for(const q of plist())if(q.alive&&!q.downed&&q.team!==team)out.push(q);
   for(const e of G.en)if(!e.dead)out.push(e);
+  if(G.mins)for(const m of G.mins)if(!m.dead&&m.team!==team)out.push(m);
   return out;
 }
 function pushWave(p){
@@ -1308,6 +1407,16 @@ function lifesteal(p,amt){if(p.buffs.life&&p.alive&&!p.downed)healT(p,amt*p.buff
 function damage(t,amt,srcId,kind){
   const src=srcId!=null?G.players[srcId]:null;
   if(src&&kind!=='burn')amt*=src.buffs.dmg;
+  if(t.isM){
+    if(t.dead)return;
+    if(t.frz>0)amt*=1.15;
+    if(t.shk>0&&kind!=='burn')amt*=1.08;
+    if(t.mrk>0&&kind!=='burn')amt*=1.25;
+    t.hp-=amt;emit({k:'hit',x:t.x,y:t.y,h:(t.h||0)+1.4,n:Math.round(amt)});
+    if(src&&src.alive)gainUlt(src,amt*0.3);
+    if(t.hp<=0){t.dead=true;emit({k:'die',x:t.x,y:t.y,h:(t.h||0)+0.8,c:'#9fd0ff',t:'min'});}
+    return;
+  }
   if(t.isE){
     if(t.dead)return;
     if(t.frz>0)amt*=1.15;
@@ -1431,6 +1540,11 @@ function updateProjectiles(dt){
       }
       hitTarget(pr,p);killProj(pr);break;
     }
+    if(!pr.dead)for(const m of G.mins){
+      if(m.dead||m.team===pr.team)continue;
+      const hc=m.type==='golem'?1.6:m.type==='wolf'?0.8:(m.h||0),tol=(m.type==='golem'?1.7:m.type==='wolf'?0.8:0.55)+pr.r/20;
+      if((m.x-pr.x)**2+(m.y-pr.y)**2<(m.r+pr.r)**2&&Math.abs(pr.h-hc)<tol){hitTarget(pr,m);killProj(pr);break;}
+    }
     if(pr.dead||pr.src!=='p')continue;
     for(const e of G.en){
       if(e.dead)continue;
@@ -1503,6 +1617,7 @@ function updateEnemies(dt){
     e.x+=e.vx*dt;e.y+=e.vy*dt;const fr=Math.exp(-5*dt);e.vx*=fr;e.vy*=fr;
     let t=null,bd=1e12;
     for(const p of ps){const d=dist2(e,p)+((p.z-(e.h||0))*20)**2;if(d<bd){bd=d;t=p;}}
+    for(const m of G.mins)if(!m.dead){const d=dist2(e,m)*1.6;if(d<bd){bd=d;t=m;}}
     if(D.fly&&(!t||e.stun>0))e.h=Math.max(1.5,e.h-(e.stun>0?3:0)*dt);
     if(!t||e.stun>0)continue;
     if(e.fear>0){const fa=Math.atan2(e.y-e.fearY,e.x-e.fearX),fs=e.spd*G.espd*1.1*dt;e.x+=Math.cos(fa)*fs;e.y+=Math.sin(fa)*fs;continue;}
@@ -1723,7 +1838,7 @@ function raceRings(){
 }
 function modeInit(){
   const ps=plist(),m=G.mode;
-  Object.assign(G,{ball:null,snitch:null,rings:null,zone:null,items:null,bodies:[],meet:null,bombs:[],zones:[],strikes:[],walls:[],chan:[],zid:0,fin:0,qs:[0,0],tp:null,taskDone:0,taskTotal:0});
+  Object.assign(G,{ball:null,snitch:null,rings:null,zone:null,items:null,bodies:[],meet:null,bombs:[],zones:[],strikes:[],walls:[],chan:[],mins:[],mid:0,zid:0,fin:0,qs:[0,0],tp:null,taskDone:0,taskTotal:0});
   ps.forEach(p=>{p.gh=false;p.role=null;p.unl=null;p.doing=null;p.lap=0;p.cp=0;p.fin=0;p.boost=0;});
   if(m==='quid'){
     G.ball={x:MW/2,y:MH/2,h:6,vx:0,vy:0,vh:0,holder:null,cool:1,thrower:null};
@@ -2027,6 +2142,7 @@ function makeSnap(){
       fm:fxMask(p),gh:!!p.gh,hb:!!(G.ball&&G.ball.holder===p.id),lap:p.lap|0,cp:p.cp|0,fin:p.fin|0,bs:p.boost>0,ul:p.unl?Object.keys(p.unl).join(','):'',tk:p.doing?r1(p.doing.left):0})),
     M:modeSnap(),
     E:G.en.map(e=>({id:e.id,t:e.type,x:r1(e.x),y:r1(e.y),h:r1(e.h||0),hp:Math.ceil(e.hp),mh:Math.ceil(e.maxHp),sl:e.slam>0,st:e.stun>0,bn:e.burn>0,fm:fxMask(e),lg:e.lunge>0})),
+    MN:(G.mins||[]).map(m=>[m.id,m.type,Math.round(m.x),Math.round(m.y),r1(m.h||0),Math.max(1,Math.round(m.hp/m.maxHp*100)),m.owner,m.team,fxMask(m)]),
     WL:(G.walls||[]).map(w=>[w.id,Math.round(w.x),Math.round(w.y),w.r,Math.round(w.hp),Math.round(w.t*10)/10]),
     J:G.proj.map(p=>({id:p.id,t:p.type,x:r1(p.x),y:r1(p.y),h:r1(p.h),vx:Math.round(p.vx),vy:Math.round(p.vy),vh:r1(p.vh),rf:p.dmg>(PDEF[p.type].dmg*1.2)?1:0}))
   };
@@ -2491,7 +2607,7 @@ addEventListener('resize',resize);
 const VIEW={prev:null,cur:null,tPrev:0,tCur:0};
 let screen='menu',lastBuffKey='',overShown=false,lastCount=0;
 const PARTS=[],RINGS=[],TEXTS=[];let shakeA=0;
-const PCOL={bolt:'#ffe27a',fire:'#ff6a2a',stun:'#5ad1ff',pull:'#c77dff',ebolt:'#7dff6a',web:'#e8e8f0',ice:'#9fe8ff',zap:'#fff27a',vine:'#6fd57f',dart:'#b6e86a',hex:'#b57dff'};
+const PCOL={bolt:'#ffe27a',fire:'#ff6a2a',stun:'#5ad1ff',pull:'#c77dff',ebolt:'#7dff6a',web:'#e8e8f0',ice:'#9fe8ff',zap:'#fff27a',vine:'#6fd57f',dart:'#b6e86a',hex:'#b57dff',ember:'#ff9a4a'};
 
 function setScreen(s){
   screen=s;document.body.dataset.screen=s;
@@ -2605,6 +2721,74 @@ function syncWalls(v){
   }
   for(const [id,o] of WM3)if(!seen.has(id)){disposeObj(o.g);o.mat.dispose();WM3.delete(id);}
 }
+// ---------- สัตว์เวท: โมเดลโปร่งแสง + ซิงก์จาก snapshot (MN) ----------
+const MM3=new Map();
+function makeMinion(type){
+  const g=new THREE.Group(),b=new THREE.Group();g.add(b);
+  const M=(c,em,k,op)=>new THREE.MeshStandardMaterial({color:c,emissive:em,emissiveIntensity:k,transparent:true,opacity:op||0.85,roughness:0.6,flatShading:true});
+  const add=(geo,mat,x,y,z,p)=>{const m=new THREE.Mesh(geo,mat);m.position.set(x,y,z);(p||b).add(m);return m;};
+  const o={g,b,type,legs:[],sz:1.2};
+  if(type==='wolf'){
+    const m=M('#cfe8ff','#5a8aff',0.6);
+    add(new THREE.BoxGeometry(0.55,0.5,1.2),m,0,0.75,0);add(new THREE.BoxGeometry(0.42,0.4,0.5),m,0,0.9,0.8);add(new THREE.BoxGeometry(0.2,0.18,0.32),m,0,0.82,1.12);
+    for(const sx of[-1,1]){add(new THREE.ConeGeometry(0.08,0.2,4),m,sx*0.14,1.18,0.72);}
+    const tl=add(new THREE.BoxGeometry(0.12,0.12,0.7),m,0,0.85,-0.85);tl.rotation.x=0.5;
+    for(const [lx,lz] of [[-0.2,0.45],[0.2,0.45],[-0.2,-0.4],[0.2,-0.4]]){const L=new THREE.Group();L.position.set(lx,0.55,lz);b.add(L);add(new THREE.BoxGeometry(0.14,0.55,0.14),m,0,-0.27,0,L);o.legs.push(L);}
+    for(const sx of[-1,1]){const e=new THREE.Sprite(glowMat('#aef0ff',2.2));e.scale.setScalar(0.18);e.position.set(sx*0.12,0.95,1.02);b.add(e);}
+    b.scale.setScalar(1.25);
+  }else if(type==='sprite'){
+    add(new THREE.SphereGeometry(0.28,12,10),M('#ffb066','#ff6a1a',1.4,0.95),0,0,0);
+    const gs=new THREE.Sprite(glowMat('#ff9a4a',2));gs.scale.setScalar(2);b.add(gs);
+    for(const sx of[-1,1]){const w=new THREE.Mesh(new THREE.PlaneGeometry(0.5,0.22),new THREE.MeshBasicMaterial({color:hdr('#ffd9a8',1.6),transparent:true,opacity:0.7,side:THREE.DoubleSide,blending:THREE.AdditiveBlending,depthWrite:false}));w.position.set(sx*0.3,0.08,0);b.add(w);o.legs.push(w);}
+    o.sz=0.7;
+  }else if(type==='golem'){
+    const m=new THREE.MeshStandardMaterial({color:'#8a8a9a',roughness:0.95,flatShading:true,transparent:true,opacity:0.95});
+    add(new THREE.BoxGeometry(1.1,1.2,0.75),m,0,1.4,0);add(new THREE.BoxGeometry(0.55,0.5,0.55),m,0,2.25,0.05);
+    for(const sx of[-1,1]){add(new THREE.BoxGeometry(0.32,1.1,0.32),m,sx*0.75,1.45,0);add(new THREE.BoxGeometry(0.4,0.85,0.42),m,sx*0.3,0.42,0);
+      const e=new THREE.Sprite(glowMat('#7ff0ff',2.4));e.scale.setScalar(0.22);e.position.set(sx*0.14,2.3,0.34);b.add(e);}
+    const rn=new THREE.Sprite(glowMat('#7ff0ff',1.6));rn.scale.setScalar(0.5);rn.position.set(0,1.5,0.42);b.add(rn);
+    b.scale.setScalar(1.35);o.sz=1.8;
+  }else{ // wisp
+    add(new THREE.SphereGeometry(0.2,12,10),M('#e0ffe8','#4aff8a',1.6,0.95),0,0,0);
+    const gs=new THREE.Sprite(glowMat('#7dff9a',2.2));gs.scale.setScalar(1.8);b.add(gs);
+    o.sz=0.6;
+  }
+  const rg=new THREE.Mesh(ringGeo,new THREE.MeshBasicMaterial({color:'#6fd57f',transparent:true,opacity:0.7,depthWrite:false,side:THREE.DoubleSide}));rg.position.y=0.05;rg.scale.setScalar(type==='golem'?1.5:0.8);g.add(rg);o.ring=rg;
+  scene.add(g);return o;
+}
+function syncMins(v,now,dt){
+  const seen=new Set(),me=v.P.find(q=>q.id===NET.myId);
+  for(const m of (v.MN||[])){
+    const [id,type,x,y,h,hp,owner,team,fm]=m;seen.add(id);
+    let o=MM3.get(id);if(!o){o=makeMinion(type);o.g.position.set(tx(x),h,tz(y));o.px=x;o.py=y;MM3.set(id,o);}
+    const X=tx(x),Z=tz(y),k=1-Math.exp(-14*dt);
+    o.g.position.x+=(X-o.g.position.x)*k;o.g.position.z+=(Z-o.g.position.z)*k;o.g.position.y+=(h-o.g.position.y)*k;
+    const vx=x-o.px,vy=y-o.py,mvd=Math.hypot(vx,vy);
+    if(mvd>0.5){const a=Math.atan2(vx,vy);let d=a-o.g.rotation.y;while(d>Math.PI)d-=2*Math.PI;while(d<-Math.PI)d+=2*Math.PI;o.g.rotation.y+=d*Math.min(1,dt*12);}
+    o.px=x;o.py=y;
+    if(type==='wolf'){const sw=Math.sin(now/70)*Math.min(1,mvd*0.5)*0.8;o.legs.forEach((L,i)=>L.rotation.x=(i%2?-1:1)*sw);o.b.position.y=Math.abs(Math.sin(now/70))*0.06*Math.min(1,mvd);}
+    else if(type==='sprite'){o.legs.forEach((w,i)=>w.rotation.z=(i?-1:1)*Math.sin(now/30)*0.9);}
+    else if(type==='golem'){o.b.position.y=Math.abs(Math.sin(now/260))*0.05*Math.min(1,mvd);o.b.rotation.z=Math.sin(now/260)*0.03*Math.min(1,mvd);}
+    const friend=me&&team===me.tm;
+    o.ring.material.color.set(friend?'#6fd57f':'#ff6a6a');o.ring.visible=true;
+    if(type==='sprite'&&Math.random()<0.5)PARTS.push({x,y,h:h+rnd(-0.1,0.1),vx:rnd(-15,15),vy:rnd(-15,15),vh:rnd(0.2,0.8),life:0.5,max:0.5,col:Math.random()<0.5?'#ff7a2a':'#ffc04a',size:2.4,g:-1});
+    if(type==='wisp'&&Math.random()<0.4)PARTS.push({x,y,h:h+rnd(-0.1,0.1),vx:rnd(-12,12),vy:rnd(-12,12),vh:rnd(0.3,1),life:0.7,max:0.7,col:'#9aff9a',size:1.8,g:-0.3});
+    statusFX(o,fm|0,x,y,h,o.sz,now);
+    o.hp=hp;o.team=team;o.xy=[x,y,h];
+  }
+  for(const [id,o] of MM3)if(!seen.has(id)){disposeObj(o.g);MM3.delete(id);}
+}
+function drawMinBars(v,me){
+  if(!v.MN||!v.MN.length)return;
+  for(const m of v.MN){
+    const [id,type,x,y,h,hp,owner,team]=m;
+    const s=toScreen(x,h+(type==='golem'?3.8:type==='wolf'?2:1.4),y);if(!s)continue;
+    const friend=me&&team===me.tm,w=type==='golem'?54:36;
+    cx.fillStyle='rgba(5,7,15,0.75)';cx.fillRect(s[0]-w/2,s[1],w,5);
+    cx.fillStyle=friend?'#6fd57f':'#ff6a6a';cx.fillRect(s[0]-w/2,s[1],w*hp/100,5);
+    cx.strokeStyle='rgba(217,180,90,0.5)';cx.lineWidth=1;cx.strokeRect(s[0]-w/2-0.5,s[1]-0.5,w+1,6);
+  }
+}
 function efxFX(ev){
   const x=ev.x,y=ev.y,H=ev.h!==undefined?ev.h:1,me=myPos(),near=!me||Math.hypot(x-me.x,y-me.y)<1000;
   switch(ev.z){
@@ -2677,6 +2861,16 @@ function efxFX(ev){
       SHAPES_Q.push({k:'dome',x,y,h:H,col:'#3a1a5a',s0:0.5,s1:ev.r*S3*0.95,life:0.6,op:0.35,full:1});
       burst(x,y,'#2a1a3a',90,ev.r*1.6,1.6,7,{h:H,vh:[0,3],g:-0.4,smoke:true,grow:1.3});burst(x,y,'#b57dff',70,ev.r*2,1,2.4,{h:H,vh:[0,5],g:0});
       FX.flashLight(x,y,H+2,'#8a4aff',8,32,0.6);shake(9);snd('nova',ev);snd('imp',{x,y});break;
+    case 'summon':
+      ring(x,y,'#9fd0ff',70,0.5,0.2);SHAPES_Q.push({k:'rune',x,y,col:'#9fd0ff',s1:70*S3,life:0.9,op:0.8});
+      burst(x,y,'#cfe8ff',30,160,0.7,2.2,{h:0.5,vh:[1,5],g:-0.5});FX.flashLight(x,y,1.2,'#9fd0ff',4,14,0.4);if(near)snd('portal',ev);break;
+    case 'unsummon':burst(x,y,'#cfe8ff',20,100,0.6,2,{h:H,vh:[0,3],g:-0.5});break;
+    case 'bind':for(let i=0;i<10;i++)PARTS.push({x,y,h:H+i*0.1,vx:rnd(-30,30),vy:rnd(-30,30),vh:rnd(1,3),life:0.7,max:0.7,col:'#ff9ad5',size:2.4,g:-0.5});ring(x,y,'#ff9ad5',60,0.4,0.2);break;
+    case 'rally':ring(x,y,'#ff9ad5',130,0.5,0.2);ring(x,y,'#ffd0ee',80,0.4,0.2);burst(x,y,'#ff9ad5',30,260,0.7,2,{h:H,vh:[0,3],g:0});if(near)snd('roar',{x,y,small:1});break;
+    case 'legion':
+      ring(x,y,'#9fd0ff',ev.r,0.7,0.2);ring(x,y,'#ffffff',ev.r*0.6,0.5,0.2);
+      burst(x,y,'#cfe8ff',80,ev.r*2,1,2.6,{h:H,vh:[1,6],g:-0.5});FX.flashLight(x,y,2,'#9fd0ff',8,30,0.6);shake(6);snd('nova',ev);break;
+    case 'wispheal':FX.bolt(x,y,H,ev.x2,ev.y2,ev.h2,0.25,'#7dff9a');burst(ev.x2,ev.y2,'#7dff9a',8,60,0.6,1.6,{h:ev.h2,vh:[0.5,2],g:-0.4});break;
     case 'overc':{const v=VIEW.cur,p=v&&v.P.find(q=>q.id===ev.id);if(p){burst(p.x,p.y,'#fff27a',40,200,0.7,2,{h:(p.z||0)+1,vh:[0,4],g:0});ring(p.x,p.y,'#ffe27a',80,0.4,0.2);}if(ev.id===NET.myId)snd('buff');break;}
   }
 }
@@ -3749,7 +3943,7 @@ function makeEnemy(t){
 }
 function disposeObj(o){scene.remove(o);o.traverse(m=>{if(m.geometry&&m.geometry!==projGeo&&m.geometry!==tailGeo)m.geometry.dispose();});}
 const PM3=new Map(),EM3=new Map(),JM3=new Map();
-function clearDyn(){for(const M of [PM3,EM3,JM3,WM3]){for(const o of M.values())disposeObj(o.g);M.clear();}ZV.length=0;if(typeof MO!=='undefined')clearModeObjs();}
+function clearDyn(){for(const M of [PM3,EM3,JM3,WM3,MM3]){for(const o of M.values())disposeObj(o.g);M.clear();}ZV.length=0;if(typeof MO!=='undefined')clearModeObjs();}
 
 // ---------- อนุภาค 2 ชั้น: แสงเรือง (additive) + ควัน (normal) ----------
 const PMAX=5000;
@@ -4626,7 +4820,7 @@ function render(dt,now){
   animateWorld(now);
   const v=VIEW.cur;
   if(screen!=='game'||!v){
-    if(PM3.size||EM3.size||JM3.size||WM3.size)clearDyn();
+    if(PM3.size||EM3.size||JM3.size||WM3.size||MM3.size)clearDyn();
     PARTS.length=0;TEXTS.length=0;
     if(screen==='menu'||screen==='lobby'){renderStage(dt,now);return;}
     updateParticles(dt);updateShapes(dt);updateLights(dt);
@@ -4655,7 +4849,7 @@ function render(dt,now){
   syncPlayers(P,v.mode,now,dt);pf('players',t0);
   if(me&&me.al&&!me.fl&&!me.dn){const o=PM3.get(me.id);if(o){const k=Math.floor(o.walk/Math.PI);if(o.stepK!==undefined&&k!==o.stepK)snd('step',{vol:0.35,rev:0.1});o.stepK=k;}}t0=performance.now();
   syncEnemies(E,P,now,dt);pf('enemies',t0);t0=performance.now();
-  syncProj(v,now);syncWalls(v);
+  syncProj(v,now);syncWalls(v);syncMins(v,now,dt);
   syncModeObjs(v,P,me,now,dt);pf('projMode',t0);
   KC=Math.max(0,KC-dt);roleShowT=Math.max(0,roleShowT-dt);
   $('#trainEnd').classList.toggle('hidden',!(NET.isHost&&v.mode==='train'&&v.ph!=='over'));
@@ -4663,7 +4857,7 @@ function render(dt,now){
   QUAL.frame++;gl.shadowMap.needsUpdate=QUAL.mode==='high'||QUAL.frame%2===0;
   t0=performance.now();composer.render();pf('gpuSubmit',t0);
   t0=performance.now();const spk=speakingIds();
-  drawLabels(P,E,v,me,spk);
+  drawLabels(P,E,v,me,spk);drawMinBars(v,me);
   drawTexts(dt);
   if(me&&me.al&&!me.dn)drawCrosshair();
   drawHUD(v,me,P);pf('hud2d',t0);
@@ -5208,9 +5402,11 @@ requestAnimationFrame(frame);
 function botBrain(p,dt){
   const inp=p.inp,foe=plist().find(q=>q!==p&&q.alive&&!q.downed&&q.team!==p.team);
   if(!foe)return;
-  const dx=foe.x-p.x,dy=foe.y-p.y,d=Math.hypot(dx,dy),t=G.time;
-  const fvx=foe._px===undefined?0:(foe.x-foe._px)/Math.max(dt,0.001),fvy=foe._py===undefined?0:(foe.y-foe._py)/Math.max(dt,0.001);foe._px=foe.x;foe._py=foe.y;
-  const lead=d/950;inp.ax=foe.x+fvx*lead;inp.ay=foe.y+fvy*lead;
+  let tg=foe;
+  {let md=450*450,bm=null;for(const m of G.mins)if(!m.dead&&m.team!==p.team){const dd=(m.x-p.x)**2+(m.y-p.y)**2;if(dd<md){md=dd;bm=m;}}if(bm&&Math.hypot(foe.x-p.x,foe.y-p.y)>240)tg=bm;}
+  const dx=tg.x-p.x,dy=tg.y-p.y,d=Math.hypot(dx,dy),t=G.time;
+  const fvx=tg._px===undefined?0:(tg.x-tg._px)/Math.max(dt,0.001),fvy=tg._py===undefined?0:(tg.y-tg._py)/Math.max(dt,0.001);tg._px=tg.x;tg._py=tg.y;
+  const lead=d/950;inp.ax=tg.x+fvx*lead;inp.ay=tg.y+fvy*lead;
   const ang=Math.atan2(dy,dx),want=d>430?1:d<260?-1:0,st=Math.sin(t*1.7+p.id.length);
   inp.mx=Math.cos(ang)*want+Math.cos(ang+Math.PI/2)*st*0.8;inp.my=Math.sin(ang)*want+Math.sin(ang+Math.PI/2)*st*0.8;
   inp.fire=d<900?1:0;
@@ -5218,6 +5414,9 @@ function botBrain(p,dt){
   p.kitIds.forEach((id,i)=>{
     const S=SPELLS[id],k=SLOTK[i];if(p.cd[k]>0||p.sil>0)return;
     if(S.id==='bloom'&&p.hp>p.maxHp*0.75)return;
+    if(S.id==='soulbind'&&!G.mins.some(m=>m.owner===p.id))return;
+    if(S.id==='wispheal'&&p.hp>p.maxHp*0.85)return;
+    if(['spiritwolf','firesprite','stonegolem'].includes(S.id)&&G.mins.filter(m=>m.owner===p.id&&m.type===({spiritwolf:'wolf',firesprite:'sprite',stonegolem:'golem'})[S.id]).length>=1)return;
     const r=({emberburst:170,frostnova:170,terror:210,frostarmor:500,barkskin:450,overcharge:600,sporecloud:480,blinddust:500,scorchdash:330,arcblink:330})[S.id]||900;
     const gap=S.id==='scorchdash'||S.id==='arcblink';
     if(gap?d>420&&d<800:d<r)press(k);
@@ -5228,7 +5427,7 @@ let _obsKeep=null;
 function balArena(on){if(on&&!_obsKeep){_obsKeep=OBS;OBS=[];}else if(!on&&_obsKeep){OBS=_obsKeep;_obsKeep=null;}}
 function balReset(a,b){balArena(true);
   for(const p of [a,b]){p.maxHp=100;resetBody(p,p===a?MW*0.14:MW*0.86,MH/2);p.hp=p.maxHp;p.ult=0;p.team=p===a?0:1;p.bot=true;p._px=undefined;p.ang=p===a?0:Math.PI;}
-  G.proj=[];G.zones=[];G.strikes=[];G.walls=[];G.chan=[];G.en=[];G.ph='play';G.rw={};G.round=1;G.banner=null;G.result=null;
+  G.proj=[];G.zones=[];G.strikes=[];G.walls=[];G.chan=[];G.mins=[];G.en=[];G.ph='play';a.focusT=b.focusT=null;G.rw={};G.round=1;G.banner=null;G.result=null;
 }
 function balDuel(kA,kB,rounds,maxT){
   const ps=plist(),a=ps[0],b=ps[1],res={a:0,b:0,draw:0,tw:0};
