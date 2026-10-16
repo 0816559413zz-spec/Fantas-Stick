@@ -87,6 +87,8 @@ Personal, non-commercial fan project made with/for the user and their friends. U
 | ~3840 | `drawMinimap` | **minimap** top-right (kill feed sits below it): rotating circle (forward = up), view radius `MM.view`=620 sim px, draws OBS, enemies (red), players (team colour in tdm/quid), race rings, quid ball/snitch, BR zone, Voldemort tasks/bodies, "N" north marker; hidden while Tab scoreboard is open |
 | ~3960 | `เมนู / ล็อบบี้ (DOM)` | menu wiring (graphics button, my-music input, UI click sounds), lobby, `renderLobby`, `window.WD` |
 
+> **Safety net:** `v6.html` = the game exactly as it was before the skills rework (old Q/E/R/F spells, protocol `v6`, separate rooms). Live URL `.../Fantas-Stick/v6.html`. Delete it once the new system is trusted.
+
 ## 5b. Skills system (rewritten 2026-10-17/18 — "paths × spells")
 **Design (user's brief):** many spells, element spells with side effects, crowd control, summons, split into "paths" (สาย), balanced. Chosen: pick **1 main path (สาย)** → gives the **ultimate (X)**; fill **Q/E/R/F** from the spell library (max **2 off-path** spells); **6 paths × 6 spells = 36** (5 normal + 1 ult per path).
 - Data: `PATHS`, `SPELL_LIST`, `SPELLS` (`defSpell(path,{id,n,ic,cd,d,fx,cast(p,S),hit(pr,t),ult})`) — **append-only** (index = position; kit string `path.q.e.r.f` uses indices). Kit helpers: `parseKit/cleanKit/setKit/kitSpells`, host-side `p.kit/p.kitIds/p.ultId`, client `KITS[id]`/`getKit(id)`. Kit travels in `hello.kit` + lobby `players[].kt`; lobby change = `{t:'kit',k}`.
