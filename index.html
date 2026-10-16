@@ -87,7 +87,25 @@ input[type=text]:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(217,18
 .ccard:hover{filter:saturate(1) brightness(1);transform:scale(.94);box-shadow:none}
 .ccard.on{filter:none;transform:translateY(-10px) scale(1.12);box-shadow:none}
 .ccard.on .crest{filter:drop-shadow(0 0 16px var(--hc))}
-#creator.s1 .cr2,#creator.s1 .cr3,#creator.s2 .cr1,#creator.s2 .cr3,#creator.s3 .cr1,#creator.s3 .cr2,#creator.s3 .cr12{display:none!important}
+#creator.s1 .cr2,#creator.s1 .cr3,#creator.s1 .cr4,#creator.s2 .cr1,#creator.s2 .cr3,#creator.s2 .cr4,#creator.s3 .cr1,#creator.s3 .cr2,#creator.s3 .cr4,#creator.s4 .cr1,#creator.s4 .cr2,#creator.s4 .cr3,#creator.s4 .cr123{display:none!important}
+.crPanel.wide{width:560px;top:92px;max-height:calc(100% - 168px)}
+.crPanel.wide label.f{margin:8px 0 5px}.crPanel.wide h3.sec{font-size:17px}.crPanel.wide .kdesc{min-height:62px;margin-top:6px}
+.kpaths{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.kp{display:flex;align-items:center;gap:8px;text-align:left;padding:7px 9px;font-size:14px}
+.kp b{display:block;font-weight:600}.kp small{display:block;color:var(--mute);font-size:11px;line-height:1.2}
+.kp.on{border-color:var(--gold2);background:linear-gradient(180deg,#2a3a68,#121b36);box-shadow:0 0 14px rgba(243,220,148,.3)}
+.kp.soon{opacity:.45;cursor:not-allowed}
+.kslots{display:flex;gap:8px;align-items:stretch}
+.ks{flex:1;text-align:center;padding:7px 2px;font-size:12px;line-height:1.25}
+.ks i{display:block;font-style:normal;font-size:22px}.ks em{display:block;font-style:normal;color:var(--gold);font-size:11px;letter-spacing:1px}
+.ks.on{border-color:var(--gold2);background:linear-gradient(180deg,#2a3a68,#121b36);box-shadow:0 0 14px rgba(243,220,148,.35)}
+.ks.ult{border-style:dashed;cursor:default}
+.kgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.ksp{padding:6px 8px;font-size:13px;text-align:left;display:flex;gap:7px;align-items:center}
+.ksp span{font-size:20px}.ksp b{display:block;font-weight:600;line-height:1.15}.ksp small{color:var(--mute);font-size:11px}
+.ksp.used{border-color:var(--gold);color:var(--gold2)}.ksp.off{opacity:.4}
+.kdesc{min-height:74px;font-size:13px;line-height:1.5;color:var(--text);border:1px solid var(--line);background:rgba(3,5,12,.6);padding:8px 10px;margin-top:8px}
+.kdesc b{color:var(--gold2)}.kdesc small{display:block;color:var(--mute);margin-top:3px}
 .myhouse{display:flex;align-items:center;gap:10px;margin:12px 0 10px;font-size:14px;color:var(--text)}
 .sw{width:28px;height:28px;cursor:pointer;border:2px solid rgba(255,255,255,.15);transform:rotate(45deg) scale(.82);transition:transform .15s}
 .sw:hover{transform:rotate(45deg) scale(.95)}
@@ -236,15 +254,16 @@ body[data-screen=lobby] #voice{top:84px;left:auto;right:24px;width:340px}
   <div class="crTints"><i style="background:radial-gradient(ellipse at 66% 45%,rgba(255,90,50,.38),rgba(46,8,11,.62) 70%)"></i><i style="background:radial-gradient(ellipse at 66% 45%,rgba(40,220,130,.32),rgba(4,25,14,.66) 70%)"></i><i style="background:radial-gradient(ellipse at 66% 45%,rgba(255,210,60,.34),rgba(43,35,5,.62) 70%)"></i><i style="background:radial-gradient(ellipse at 66% 45%,rgba(70,140,255,.36),rgba(5,13,44,.66) 70%)"></i></div>
   <div class="crShade"></div>
   <div class="crTop"><small>CHARACTER</small><h2 id="crTitle">สร้างตัวละคร</h2></div>
-  <div class="crSteps"><b id="crSt1" class="on">1 · หน้าตา</b><i></i><b id="crSt2">2 · ไม้กายสิทธิ์</b><i></i><b id="crSt3">3 · เลือกบ้าน</b></div>
+  <div class="crSteps" id="crSteps"><b id="crSt1" class="on">1 · หน้าตา</b><i></i><b id="crSt2">2 · ไม้กาย</b><i></i><b id="crSt3">3 · คาถา</b><i></i><b id="crSt4">4 · เลือกบ้าน</b></div>
   <button class="crClose hidden" id="crCancel">✕ ยกเลิก</button>
   <div class="crTabs cr1" id="crTabs"></div>
-  <div class="card slim crPanel cr12" id="crPanel"></div>
-  <div class="crInfo cr3" id="crInfo"></div>
-  <div class="crCrests cr3" id="crCrests"></div>
+  <div class="card slim crPanel cr123" id="crPanel"></div>
+  <div class="crInfo cr4" id="crInfo"></div>
+  <div class="crCrests cr4" id="crCrests"></div>
   <div class="crBar cr1"><button id="crRand">🎲 สุ่มหน้าตา</button><button id="crNext" class="pri">ถัดไป: ไม้กายสิทธิ์ ▶</button></div>
-  <div class="crBar cr2"><button id="crBack2">◀ ย้อนกลับ</button><button id="crNext2" class="pri">ถัดไป: เลือกบ้าน ▶</button></div>
-  <div class="crBar cr3"><button id="crBack">◀ ย้อนกลับ</button><button id="crHat">🎩 หมวกคัดสรร</button><button id="crOk" class="pri">✦ ยืนยันตัวละคร</button></div>
+  <div class="crBar cr2"><button id="crBack2">◀ ย้อนกลับ</button><button id="crNext2" class="pri">ถัดไป: คาถา ▶</button></div>
+  <div class="crBar cr3"><button id="crBack3">◀ ย้อนกลับ</button><button id="crKitOk" class="pri hidden">✦ ยืนยันคาถา</button><button id="crNext3" class="pri">ถัดไป: เลือกบ้าน ▶</button></div>
+  <div class="crBar cr4"><button id="crBack">◀ ย้อนกลับ</button><button id="crHat">🎩 หมวกคัดสรร</button><button id="crOk" class="pri">✦ ยืนยันตัวละคร</button></div>
 </div>
 
 <!-- ===== คู่มือ ===== -->
@@ -263,15 +282,17 @@ body[data-screen=lobby] #voice{top:84px;left:auto;right:24px;width:340px}
     <p class="gnote">💡 อยู่คนละบ้านก็เล่นด้วยกันได้ • ถ้าเข้าห้องไม่ได้ ลองเช็กรหัส / ให้โฮสต์สร้างห้องใหม่ / ปิด VPN • ห้องหนึ่งเล่นได้สูงสุด 6 คน</p>
     <h3>🧙 ตัวละคร &amp; บ้านฮอกวอตส์</h3>
     <p class="gnote">ครั้งแรกที่เข้าเกมจะมีหน้า <b>สร้างตัวละคร</b> — 3 ขั้นตอน: ① หน้าตา (ทรงผม 11 แบบ สีผม สีผิว สีตา สีเสื้อคลุม เนคไท) ② เลือกไม้กายสิทธิ์ (ไม้ แกนเวท ทรงด้าม) ③ เลือกบ้าน (Gryffindor / Slytherin / Hufflepuff / Ravenclaw หรือให้ 🎩 หมวกคัดสรรสุ่มให้) • สีบ้านจะโผล่ที่เนคไท ผ้าพันคอ ซับในเสื้อคลุม และเป็นสีประจำตัวของคุณ (ป้ายชื่อ แผนที่ย่อ) • แก้ทีหลังได้ที่ปุ่ม <b>แต่งตัวละคร</b> หน้าแรก • เพื่อนจะเห็นหน้าตาของคุณในล็อบบี้และในเกม</p>
+    <h3>🔮 สายเวทมนตร์ & สถานะ</h3>
+    <p class="gnote">เลือก<b>สาย</b>หลัก 1 สาย (🔥 ไฟ / ❄️ น้ำแข็ง / ⚡ สายฟ้า — สายอื่นกำลังมา) สายหลักกำหนด<b>เวทโบราณ (X)</b> แล้วจัดคาถา Q/E/R/F จากคลัง (ใส่คาถาสายอื่นได้ไม่เกิน 2 ช่อง) • <b>สถานะ</b>: 🔥 ติดไฟ (เผาต่อเนื่อง) • ❄️ เย็น (ช้าลง สะสม 3 ชั้น = 🧊 แข็ง สตัน + โดนแรงขึ้น) • ⚡ ช็อต (โดนสายฟ้าแรงขึ้น) • 🛡️ เกราะ • 💨 เร็วขึ้น • <b>คอมโบ</b>: ไฟโดนเป้าที่เย็น/แข็ง = <b>ละลาย</b> (ดาเมจเพิ่ม) • สายฟ้าหรือเกล็ดน้ำแข็งโดนเป้าที่แข็ง = <b>แตก</b> (ดาเมจเพิ่ม) • บอสทน CC ได้ดี และผู้เล่นโดน CC ซ้ำๆ ติดกันจะสั้นลงเรื่อยๆ</p>
     <h3>🎮 ปุ่มควบคุม</h3>
     <table>
       <tr><td><b>คลิกที่จอ</b></td><td>ล็อกเมาส์ให้หมุนกล้องได้ (Esc = ปล่อยเมาส์)</td></tr>
       <tr><td><b>WASD</b> / <b>เมาส์</b></td><td>เดิน / หมุนกล้องและเล็ง</td></tr>
       <tr><td><b>คลิกซ้าย</b></td><td>ยิงเวทพื้นฐาน (กดค้างได้)</td></tr>
       <tr><td><b>คลิกขวาค้าง</b></td><td>โล่ — ยกโล่ตอนเวทกำลังจะโดนพอดี = <b>Parry สะท้อนกลับ!</b></td></tr>
-      <tr><td><b>Q / E / R / F</b></td><td>ลูกไฟ / สตัน / ผลัก / ดึง</td></tr>
+      <tr><td><b>Q / E / R / F</b></td><td>คาถา 4 ช่องที่คุณจัดไว้ (เลือกสายและชุดคาถาในขั้น ③ ของหน้าสร้างตัวละคร หรือปุ่ม 🪄 ในล็อบบี้)</td></tr>
       <tr><td><b>Space</b></td><td>หลบ (ตอนบิน = บินขึ้น)</td></tr>
-      <tr><td><b>X</b></td><td>เวทโบราณ (เมื่อเกจทองเต็ม)</td></tr>
+      <tr><td><b>X</b></td><td>เวทโบราณของสายที่เลือก (เมื่อเกจทองเต็ม)</td></tr>
       <tr><td><b>B</b></td><td>🧹 ขึ้น/ลงไม้กวาด — บินเร็ว ข้ามสิ่งกีดขวางได้ แต่<b>ร่ายเวทไม่ได้</b> โดนสตัน/ใยแมงมุมจะตก</td></tr>
       <tr><td><b>C</b></td><td>บินต่ำลง (ตอนอยู่บนไม้กวาด)</td></tr>
       <tr><td><b>Tab</b> / <b>V</b> / <b>M</b> / <b>N</b></td><td>ตารางคะแนน / พูดไมค์ / เปิดปิดเพลง / เปลี่ยนเพลง (ถ้าใช้ "เพลงของฉัน")</td></tr>
@@ -317,6 +338,7 @@ body[data-screen=lobby] #voice{top:84px;left:auto;right:24px;width:340px}
   </aside>
   <div class="lright lp">
     <div class="card slim mcard" id="modeCard"></div>
+    <button id="btnKit">🪄 เลือกสาย / คาถา</button>
     <button id="btnTeam">สลับทีม</button>
     <button class="pri" id="btnStart">เริ่มเกม</button>
     <div class="lwait hidden" id="lobbyWait">รอโฮสต์เลือกโหมดและกดเริ่มเกม...</div>
@@ -459,7 +481,8 @@ const LOOKK=['h','hr','hs','ey','sk','cl','ti','wd','wc','ws'],LOOKN=[4,HAIRC.le
 function lookStr(l){return LOOKK.map(k=>l[k]).join('.');}
 function parseLook(s){const a=String(s||'').split('.'),o={};LOOKK.forEach((k,i)=>{const v=+a[i];o[k]=Number.isInteger(v)&&v>=0&&v<LOOKN[i]?v:0;});return o;}
 function randLook(seed){const R=mulberry(seed===undefined?Math.floor(Math.random()*1e9):seed),o={};LOOKK.forEach((k,i)=>{o[k]=Math.floor(R()*LOOKN[i]);});if(o.cl>3)o.cl=0;return o;}
-const LOOKS={},LOOKP={};
+const LOOKS={},LOOKP={},KITS={};
+function getKit(id){return parseKit(KITS[id]!==undefined?KITS[id]:'0');}
 function getLook(id){const s=LOOKS[id]||(LOOKS[id]=lookStr(randLook(hashStr(id))));return LOOKP[s]||(LOOKP[s]=parseLook(s));}
 const CREST_SH='M8 8H92V62C92 92 66 108 50 116C34 108 8 92 8 62Z';
 const CREST_PAT=[
@@ -502,7 +525,9 @@ const PDEF={
   stun:{spd:820,r:9,dmg:8,life:1.2,col:'#5ad1ff'},
   pull:{spd:860,r:9,dmg:6,life:1.0,col:'#c77dff'},
   ebolt:{spd:500,r:8,dmg:9,life:2.6,col:'#7dff6a'},
-  web:{spd:520,r:11,dmg:4,life:2.2,col:'#e8e8f0'}
+  web:{spd:520,r:11,dmg:4,life:2.2,col:'#e8e8f0'},
+  ice:{spd:1000,r:8,dmg:11,life:1.0,col:'#9fe8ff'},
+  zap:{spd:1500,r:7,dmg:12,life:0.9,col:'#fff27a'}
 };
 // ch = ความสูงจุดกึ่งกลางลำตัว, vr = ครึ่งความสูง (ใช้เช็กโดนในแนวตั้ง)
 const EDEF={
@@ -524,7 +549,7 @@ const POOLS={
   hogsmeade:{early:['gob','pixie'],mid:['wiz','pixie','troll'],boss:'dragon'},
   greathall:{early:['gob','pixie'],mid:['wiz','troll','pixie'],boss:'dragon'}
 };
-const CDK=['basic','fire','stun','push','pull','dodge'];
+const CDK=['basic','q','e','r','f','dodge'];
 const BUFFS=[
   {n:'พลังเวท +20%',i:'✨',d:'ทุกคาถาแรงขึ้น',ap:p=>p.buffs.dmg*=1.2},
   {n:'ร่ายไว +15%',i:'⏳',d:'คูลดาวน์สั้นลง',ap:p=>p.buffs.cdr*=0.85},
@@ -536,9 +561,273 @@ const BUFFS=[
 ];
 
 // =====================================================================
+//  ระบบคาถาใหม่: สาย (path) × คาถา (spell) + สถานะ (status effects)
+//  ผู้เล่นเลือก "สาย" 1 สาย → ได้เวทโบราณ (X) ของสายนั้น + จัดชุดคาถา Q/E/R/F (คาถาสายอื่นได้ไม่เกิน 2 ช่อง)
+//  สตริงชุดคาถา "สาย.q.e.r.f" (ตัวเลข = index ใน SPELL_LIST ห้ามสลับลำดับ เพิ่มต่อท้ายเท่านั้น)
+// =====================================================================
+const PATHS=[
+  {id:'pyro',n:'สายไฟ',ic:'🔥',col:'#ff6a2a',d:'เผาไหม้ ระเบิด ดาเมจต่อเนื่อง — ทำลายสูง แต่ต้องเข้าใกล้'},
+  {id:'frost',n:'สายน้ำแข็ง',ic:'❄️',col:'#8fe0ff',d:'ชะลอ แช่แข็ง ปิดทาง — คุมสนามได้ดี ดาเมจปานกลาง'},
+  {id:'storm',n:'สายสายฟ้า',ic:'⚡',col:'#ffe27a',d:'เร็ว ฟ้าลูกโซ่ ช็อตสตัน — เล่นไวและแม่นยำ'},
+  {id:'nature',n:'สายธรรมชาติ',ic:'🌿',col:'#6fd57f',d:'รากพันธนาการ พิษ ฟื้นฟู — ทนทาน (เร็วๆ นี้)'},
+  {id:'hex',n:'สายคำสาป',ic:'🌑',col:'#b57dff',d:'ควบคุมฝูงชน ปิดปาก ทำให้กลัว (เร็วๆ นี้)'},
+  {id:'summon',n:'สายอัญเชิญ',ic:'🔮',col:'#ff9ad5',d:'เรียกสัตว์เวทมาช่วยสู้ (เร็วๆ นี้)'}
+];
+const SPELL_LIST=[],SPELLS={};
+function defSpell(path,o){o.path=path;o.i=SPELL_LIST.length;SPELL_LIST.push(o);SPELLS[o.id]=o;return o;}
+const SLOTK=['q','e','r','f'],BRMAP={q:'fire',e:'stun',r:'push',f:'pull'};
+const KITP={};
+function parseKit(str){
+  if(KITP[str])return KITP[str];
+  const a=String(str===undefined||str===null?'':str).split('.').map(Number);
+  let path=Number.isInteger(a[0])&&a[0]>=0&&a[0]<PATHS.length?a[0]:0;
+  if(!SPELL_LIST.some(x=>x.path===path&&!x.ult))path=0;
+  const ids=[];let off=0;
+  const main=SPELL_LIST.filter(x=>x.path===path&&!x.ult).map(x=>x.i);
+  for(let k=1;k<=4;k++){
+    const i=a[k],S=Number.isInteger(i)&&SPELL_LIST[i];
+    if(S&&!S.ult&&!ids.includes(i)&&(S.path===path||off<2)){if(S.path!==path)off++;ids.push(i);}else ids.push(null);
+  }
+  for(let k=0;k<4;k++)if(ids[k]===null){const c=main.find(i=>!ids.includes(i));ids[k]=c!==undefined?c:SPELL_LIST.find(x=>!x.ult&&!ids.includes(x.i)).i;}
+  const k={path,ids,ult:SPELL_LIST.find(x=>x.path===path&&x.ult).i};
+  k.str=[path,...ids].join('.');
+  return KITP[str]=k;
+}
+function cleanKit(s){return parseKit(parseKit(s).str).str;}
+function kitSpells(str){const k=parseKit(str);return k.ids.map(i=>SPELL_LIST[i]);}
+function setKit(p,str){p.kit=cleanKit(str);const k=parseKit(p.kit);p.kitIds=k.ids.map(i=>SPELL_LIST[i].id);p.ultId=SPELL_LIST[k.ult].id;}
+
+// ---------- สถานะ (ใช้ได้ทั้งผู้เล่นและศัตรู) ----------
+const isBig=t=>t.isE&&(t.type==='troll'||t.type==='queen'||(EDEF[t.type]&&EDEF[t.type].boss));
+// ผลคูณระยะเวลา CC: บอส/ตัวใหญ่ทนทาน • ผู้เล่นโดน CC ซ้ำใน 6 วิ จะสั้นลง (diminishing returns)
+function ccScale(t){if(t.isE){const D=EDEF[t.type];return D.boss?0.25:isBig(t)?0.4:1;}return [1,0.6,0.35,0.2][Math.min(3,t.ccN|0)];}
+function ccTouch(t){if(!t.isE){t.ccN=(t.ccN|0)+1;t.ccT=6;}}
+function addStun(t,d){d*=ccScale(t);if(d<0.05)return;t.stun=Math.max(t.stun||0,d);ccTouch(t);}
+function addRoot(t,d){d*=ccScale(t);if(d<0.05||t.rootImm>0)return;t.root=Math.max(t.root||0,d);t.rootImm=d+2;ccTouch(t);}
+function addFreeze(t,d){
+  if(t.frzImm>0)return;d*=ccScale(t);if(d<0.1)return;
+  t.frz=Math.max(t.frz||0,d);t.stun=Math.max(t.stun||0,d);t.chl=0;t.frzImm=d+3;ccTouch(t);
+  emit({k:'efx',z:'freeze',x:t.x,y:t.y,h:cH(t)});
+}
+function addSlow(t,f,d){f=Math.max(f,isBig(t)?0.7:0.3);if(!(t.slowT>0)||f<t.slowF)t.slowF=f;t.slowT=Math.max(t.slowT||0,d);}
+function addChill(t,n){
+  if(t.frz>0||t.chlImm>0)return;
+  t.chl=(t.chl|0)+n;t.chlT=4;
+  if(t.chl>=3){addFreeze(t,0.8);t.chl=0;t.chlImm=4;}
+}
+function ignite(t,src,time){
+  if(t.chl>0||t.frz>0){ // ไฟ + เย็น = ละลาย: ดาเมจเพิ่ม ล้างความเย็น/น้ำแข็ง
+    t.chl=0;t.chlT=0;if(t.frz>0){t.frz=0;t.stun=Math.min(t.stun||0,0.2);}
+    emit({k:'efx',z:'melt',x:t.x,y:t.y,h:cH(t)});damage(t,6,src,'burn');
+  }
+  t.burn=Math.max(t.burn||0,time||2);if(!(t.bt>0))t.bt=0.5;t.burnSrc=src;
+}
+function shock(t,src,d){t.shk=Math.max(t.shk||0,d||3);t.shkSrc=src;}
+function knock(t,x,y,f){const dx=t.x-x,dy=t.y-y,d=Math.hypot(dx,dy)||1;if(isBig(t))f*=0.25;t.vx+=dx/d*f;t.vy+=dy/d*f;}
+function addWard(p,abs,time,thorns){p.ward={abs,t:time,thorns:!!thorns};}
+function moveMul(t){let m=1;if(t.chl>0)m*=1-0.1*t.chl;if(t.slowT>0)m*=t.slowF;if(t.haste>0)m*=t.hasteF;return Math.max(0.25,m);}
+function tickStatus(t,dt){
+  if(t.slowT>0)t.slowT-=dt;if(t.shk>0)t.shk-=dt;if(t.frz>0)t.frz-=dt;if(t.sil>0)t.sil-=dt;
+  if(t.chlT>0){t.chlT-=dt;if(t.chlT<=0)t.chl=0;}
+  if(t.frzImm>0)t.frzImm-=dt;if(t.chlImm>0)t.chlImm-=dt;if(t.rootImm>0)t.rootImm-=dt;
+  if(t.ccT>0){t.ccT-=dt;if(t.ccT<=0)t.ccN=0;}
+  if(t.haste>0)t.haste-=dt;if(t.ovc>0)t.ovc-=dt;
+  if(t.isE&&t.root>0)t.root-=dt;
+  if(t.ward){t.ward.t-=dt;if(t.ward.t<=0)t.ward=null;}
+}
+function clearStatus(t){for(const k of ['slowT','shk','frz','sil','chl','chlT','frzImm','chlImm','rootImm','ccT','ccN','haste','ovc','burn'])t[k]=0;t.ward=null;}
+function fxMask(t){return (t.stun>0?1:0)|(t.burn>0?2:0)|((t.chl>0||t.slowT>0)?4:0)|(t.frz>0?8:0)|(t.shk>0?16:0)|(t.root>0?32:0)|(t.sil>0?64:0)|(t.ward?128:0)|(t.haste>0?256:0)|(t.ovc>0?512:0);}
+
+// ---------- วัตถุในสนามที่คาถาสร้าง: โซน / ฟ้าผ่าหน่วงเวลา / กำแพง / ช่องร่ายต่อเนื่อง ----------
+function foesIn(team,x,y,r,hMax){
+  const out=[];
+  for(const t of foesOf(team))if(Math.hypot(t.x-x,t.y-y)<r+(t.r||PR)&&((t.isE?(t.h||0):(t.z||0))<(hMax||4)))out.push(t);
+  return out;
+}
+// ดาเมจวง: โล่/อมตะบล็อกทั้งดาเมจและสถานะ
+function aoeHit(p,t,dmg,fn){
+  const blocked=!t.isE&&(t.shieldOn||t.inv>0);
+  damage(t,dmg,p.id,'aoe');
+  if(!blocked&&fn)fn(t);
+  return !blocked;
+}
+function addZone(o){
+  const z=Object.assign({id:++G.zid,tt:0.05,tick:0.5},o);z.max=z.t;G.zones.push(z);
+  emit({k:'zn',id:z.id,x:z.x,y:z.y,r:z.r,t:z.t,z:z.kind});
+  return z;
+}
+function updateZones(dt){
+  for(const z of G.zones){
+    z.t-=dt;z.tt-=dt;
+    if(z.tt<=0&&z.t>0){z.tt=z.tick;for(const t of foesIn(z.team,z.x,z.y,z.r,3.2)){if(!t.isE&&t.inv>0)continue;z.hit(t,z);}}
+  }
+  G.zones=G.zones.filter(z=>z.t>0);
+}
+function addStrike(o){G.strikes.push(Object.assign({},o));emit({k:'tele',x:o.x,y:o.y,r:o.r,t:o.t,col:o.col});}
+function updateStrikes(dt){for(const s of G.strikes){s.t-=dt;if(s.t<=0){s.done=1;s.fn(s);}}G.strikes=G.strikes.filter(s=>!s.done);}
+function addWall(o){const w=Object.assign({id:++G.zid,hgt:7},o);G.walls.push(w);return w;}
+function updateWalls(dt){
+  for(const w of G.walls)if(w.hp<=0||(w.t-=dt)<=0){w.dead=1;emit({k:'efx',z:'wallbreak',x:w.x,y:w.y,r:w.r});}
+  G.walls=G.walls.filter(w=>!w.dead);
+}
+function updateChan(dt){
+  for(const c of G.chan){c.t-=dt;c.tt-=dt;const p=G.players[c.owner];if(!p||!p.alive||p.downed){c.t=0;continue;}if(c.tt<=0){c.tt=c.tick;c.fn(c,p);}}
+  G.chan=G.chan.filter(c=>c.t>0);
+}
+function updateSpells(dt){updateZones(dt);updateStrikes(dt);updateWalls(dt);updateChan(dt);}
+// จุดเล็งของคาถาวางพื้น: ถ้ามีศัตรูอยู่ในแนวเล็งให้วางที่ตัวมัน ไม่งั้นวางที่ระยะ 75% ของพิสัย
+function aimPoint(p,range){
+  let best=null,bs=1e9;
+  for(const t of foesOf(p.team)){
+    const dx=t.x-p.x,dy=t.y-p.y,dd=Math.hypot(dx,dy);if(dd>range||dd<1)continue;
+    const da=Math.abs(angDiff(Math.atan2(dy,dx),p.ang));if(da<0.35&&da+dd/4000<bs){bs=da+dd/4000;best=t;}
+  }
+  const o=best?{x:best.x,y:best.y}:{x:p.x+Math.cos(p.ang)*range*0.75,y:p.y+Math.sin(p.ang)*range*0.75};
+  o.x=clamp(o.x,40,MW-40);o.y=clamp(o.y,40,MH-40);return o;
+}
+function nearestFoe(team,x,y,r,except){
+  let b=null,bd=r*r;
+  for(const t of foesOf(team)){if(except&&except.includes(t))continue;const d=(t.x-x)**2+(t.y-y)**2;if(d<bd){bd=d;b=t;}}
+  return b;
+}
+const ovc=(t)=>t.ovc>0;
+
+// ---------- สายไฟ ----------
+defSpell(0,{id:'fireball',n:'ลูกไฟ',ic:'🔥',cd:4.2,d:'ลูกไฟพุ่งตรง ระเบิดเป็นวงและติดไฟต่อเนื่อง',fx:'เป้าที่เย็น/แข็งอยู่จะละลาย โดนดาเมจเพิ่ม',
+  cast(p,S){shoot(p,'fire',{sp:S.id,dmg:18,splash:{r:80,dmg:10},spd:780});},
+  hit(pr,t){damage(t,pr.dmg,pr.owner,'proj');ignite(t,pr.owner,2);}});
+defSpell(0,{id:'flamewall',n:'กำแพงเพลิง',ic:'🧱',cd:12,d:'ตั้งกำแพงไฟยาว 4 วิ ใครเดินผ่านจะติดไฟ',fx:'ไฟไม่บล็อกการเดิน แต่ศัตรูที่ติดไฟจะถอยหนี',
+  cast(p,S){
+    const q=aimPoint(p,420),a=p.ang+Math.PI/2;
+    for(let i=-1.5;i<=1.5;i++)addZone({x:q.x+Math.cos(a)*i*72,y:q.y+Math.sin(a)*i*72,r:52,t:4,tick:0.5,owner:p.id,team:p.team,kind:'fire',
+      hit(t,z){damage(t,3,z.owner,'zone');ignite(t,z.owner,1.5);}});
+    emit({k:'efx',z:'wallcast',x:q.x,y:q.y,h:0.3,c:'#ff7a2a'});
+  }});
+defSpell(0,{id:'emberburst',n:'ระเบิดประกาย',ic:'💥',cd:8,d:'ระเบิดไฟรอบตัว ผลักศัตรูออกและจุดไฟ',fx:'ใช้ตอนโดนรุมเพื่อสร้างระยะ',
+  cast(p,S){
+    emit({k:'efx',z:'ember',x:p.x,y:p.y,h:p.z+0.8,r:160});
+    for(const t of foesIn(p.team,p.x,p.y,160,4))aoeHit(p,t,14,t=>{ignite(t,p.id,2);knock(t,p.x,p.y,420);});
+  }});
+defSpell(0,{id:'scorchdash',n:'พุ่งเพลิง',ic:'☄️',cd:9,d:'พุ่งไปข้างหน้า ทิ้งทางไฟไว้ข้างหลัง',fx:'ระหว่างพุ่งอมตะสั้นๆ',
+  cast(p,S){
+    let dx=Math.cos(p.ang),dy=Math.sin(p.ang);const inp=p.inp;if(inp&&(inp.mx||inp.my)){const l=Math.hypot(inp.mx,inp.my);dx=inp.mx/l;dy=inp.my/l;}
+    p.dash=0.2;p.dashSp=1600;p.dashX=dx;p.dashY=dy;p.inv=Math.max(p.inv,0.24);p.shieldOn=false;p.trail={acc:0,owner:p.id,team:p.team};
+    emit({k:'dash',x:p.x,y:p.y});
+  }});
+defSpell(0,{id:'meteor',n:'อุกกาบาต',ic:'🌠',cd:14,d:'เรียกอุกกาบาตตกลงจุดเล็ง (มีวงเตือน 1.1 วิ) แรงมาก ทิ้งพื้นไฟ',fx:'ศัตรูหลบได้ถ้าเห็นวงแดง',
+  cast(p,S){
+    const q=aimPoint(p,650);
+    addStrike({x:q.x,y:q.y,r:130,t:1.1,col:'#ff6a2a',fn:s=>{
+      emit({k:'efx',z:'meteor',x:s.x,y:s.y,h:0.4,r:130});
+      for(const t of foesIn(p.team,s.x,s.y,130,4))aoeHit(p,t,40,t=>{ignite(t,p.id,2.5);knock(t,s.x,s.y,350);});
+      addZone({x:s.x,y:s.y,r:100,t:3,tick:0.5,owner:p.id,team:p.team,kind:'lava',hit(t,z){damage(t,3,z.owner,'zone');ignite(t,z.owner,1);}});
+    }});
+  }});
+defSpell(0,{id:'inferno',n:'ไฟนรกกลืนกิน',ic:'🌋',cd:0,ult:true,d:'เวทโบราณสายไฟ: ระเบิดไฟยักษ์รอบตัว ทิ้งลาวาเผาพื้น 5 วิ',fx:'ลาวาชะลอศัตรูและเผาต่อเนื่อง',
+  cast(p,S){
+    emit({k:'efx',z:'inferno',x:p.x,y:p.y,h:p.z+0.8,r:330});
+    for(const t of foesIn(p.team,p.x,p.y,330,6))aoeHit(p,t,t.isE?50:32,t=>{ignite(t,p.id,3);knock(t,p.x,p.y,320);});
+    addZone({x:p.x,y:p.y,r:250,t:5,tick:0.5,owner:p.id,team:p.team,kind:'lava',hit(t,z){damage(t,4,z.owner,'zone');addSlow(t,0.75,0.7);ignite(t,z.owner,0.8);}});
+  }});
+
+// ---------- สายน้ำแข็ง ----------
+defSpell(1,{id:'iceshard',n:'เกล็ดน้ำแข็ง',ic:'🧊',cd:2.8,d:'เกล็ดน้ำแข็งเร็ว ทำให้เป้าเย็นลง สะสม 3 ครั้ง = แช่แข็ง',fx:'โดนเป้าที่แข็งอยู่ = แตกกระจาย ดาเมจเพิ่ม',
+  cast(p,S){shoot(p,'ice',{sp:S.id,dmg:9});},
+  hit(pr,t){let d=pr.dmg;if(t.frz>0){d+=5;t.frz=0;t.stun=Math.min(t.stun||0,0.2);emit({k:'efx',z:'shatter',x:t.x,y:t.y,h:cH(t)});}damage(t,d,pr.owner,'proj');addChill(t,1);}});
+defSpell(1,{id:'frostnova',n:'วงน้ำแข็ง',ic:'❄️',cd:11,d:'คลื่นน้ำแข็งรอบตัว ชะลอ + ทำให้เย็น 2 ชั้น',fx:'ตามด้วยเกล็ดน้ำแข็ง 1 ครั้ง = แช่แข็งทันที',
+  cast(p,S){
+    emit({k:'efx',z:'fnova',x:p.x,y:p.y,h:p.z+0.5,r:170});
+    for(const t of foesIn(p.team,p.x,p.y,170,4))aoeHit(p,t,8,t=>{addChill(t,2);addSlow(t,0.75,2);});
+  }});
+defSpell(1,{id:'icewall',n:'กำแพงน้ำแข็ง',ic:'🏔️',cd:18,d:'ตั้งกำแพงน้ำแข็ง 3 ก้อน อยู่ 3.5 วิ บล็อกเวทและทางเดิน',fx:'พังได้ถ้าโดนยิงเยอะ',
+  cast(p,S){
+    const q={x:clamp(p.x+Math.cos(p.ang)*230,60,MW-60),y:clamp(p.y+Math.sin(p.ang)*230,60,MH-60)},a=p.ang+Math.PI/2;
+    for(const i of [-1,0,1])addWall({x:q.x+Math.cos(a)*i*62,y:q.y+Math.sin(a)*i*62,r:38,t:3.5,hp:36,team:p.team,owner:p.id});
+    emit({k:'efx',z:'icewall',x:q.x,y:q.y,a:a,h:0.2});
+  }});
+defSpell(1,{id:'blizzard',n:'พายุหิมะ',ic:'🌨️',cd:15,d:'พายุหิมะวงกว้าง 5 วิ ชะลอและสะสมความเย็นให้ทุกคนข้างใน',fx:'อยู่นานเกินไป = แช่แข็ง',
+  cast(p,S){
+    const q=aimPoint(p,500);
+    addZone({x:q.x,y:q.y,r:200,t:5,tick:0.5,owner:p.id,team:p.team,kind:'frost',n:0,hit(t,z){damage(t,2,z.owner,'zone');addSlow(t,0.75,0.7);if((z.n=(z.n|0)+1)%4===0)addChill(t,1);}});
+  }});
+defSpell(1,{id:'frostarmor',n:'เกราะน้ำแข็ง',ic:'🛡️',cd:15,d:'เกราะดูดดาเมจ 24 นาน 5 วิ ใครตีเราจะเย็นลง',fx:'เกราะหมดแล้วหายไปทันที',
+  cast(p,S){addWard(p,24,5,true);emit({k:'efx',z:'armor',x:p.x,y:p.y,h:p.z+1,id:p.id});}});
+defSpell(1,{id:'abszero',n:'ศูนย์สัมบูรณ์',ic:'🥶',cd:0,ult:true,d:'เวทโบราณสายน้ำแข็ง: คลื่นเยือกแข็งรอบตัว แช่แข็งทุกคนในวง',fx:'บอสแข็งได้สั้นกว่าปกติ',
+  cast(p,S){
+    emit({k:'efx',z:'absz',x:p.x,y:p.y,h:p.z+0.8,r:330});
+    for(const t of foesIn(p.team,p.x,p.y,330,6))aoeHit(p,t,t.isE?36:22,t=>{addFreeze(t,1.6);addChill(t,1);});
+  }});
+
+// ---------- สายสายฟ้า ----------
+defSpell(2,{id:'zap',n:'สายฟ้าฟาด',ic:'⚡',cd:2.6,d:'สายฟ้าเร็วมาก กระโดดต่อไปอีก 2 เป้าหมาย และทำให้ช็อต',fx:'ถ้าเป้าช็อตอยู่แล้ว ดาเมจ +60% และสตันสั้น',
+  cast(p,S){shoot(p,'zap',{sp:S.id,dmg:16});},
+  hit(pr,t){
+    let d=pr.dmg;
+    if(t.shk>0){d*=1.6;t.shk=0;addStun(t,0.3);}
+    if(t.frz>0){d*=1.4;t.frz=0;t.stun=Math.min(t.stun||0,0.2);emit({k:'efx',z:'shatter',x:t.x,y:t.y,h:cH(t)});}
+    damage(t,d,pr.owner,'proj');shock(t,pr.owner,3);
+    const hit=[t];let from=t;
+    for(const dm of [9,6]){
+      const nx=nearestFoe(pr.team,from.x,from.y,280,hit);if(!nx||Math.abs(cH(nx)-cH(from))>4)break;
+      emit({k:'efx',z:'chain',x:from.x,y:from.y,h:cH(from),x2:nx.x,y2:nx.y,h2:cH(nx)});
+      damage(nx,dm,pr.owner,'pierce');shock(nx,pr.owner,3);hit.push(nx);from=nx;
+    }
+  }});
+defSpell(2,{id:'staticfield',n:'สนามไฟฟ้า',ic:'🌀',cd:12,d:'ปล่อยสนามไฟฟ้า 4.5 วิ ช็อตทุกคนที่อยู่ข้างในทุกๆ ไม่ถึงวินาที',fx:'ช็อต = โดนสายฟ้าฟาดแล้วแรงขึ้น',
+  cast(p,S){
+    const q=aimPoint(p,450);
+    addZone({x:q.x,y:q.y,r:170,t:4.5,tick:0.8,owner:p.id,team:p.team,kind:'storm',hit(t,z){damage(t,8,z.owner,'zone');shock(t,z.owner,2.5);emit({k:'efx',z:'zapt',x:t.x,y:t.y,h:cH(t)});}});
+  }});
+defSpell(2,{id:'thunderclap',n:'ฟ้าผ่า',ic:'🌩️',cd:10,d:'ฟ้าผ่าลงจุดเล็ง (มีวงเตือน 0.9 วิ) ดาเมจแรง + สตัน',fx:'ศัตรูที่ช็อตอยู่โดนแรงขึ้น 30%',
+  cast(p,S){
+    const q=aimPoint(p,600);
+    addStrike({x:q.x,y:q.y,r:95,t:0.9,col:'#ffe27a',fn:s=>{
+      emit({k:'efx',z:'thunder',x:s.x,y:s.y,h:0.4,r:95});
+      for(const t of foesIn(p.team,s.x,s.y,95,5))aoeHit(p,t,26*(t.shk>0?1.3:1),t=>{addStun(t,0.8);shock(t,p.id,3);});
+    }});
+  }});
+defSpell(2,{id:'overcharge',n:'ชาร์จไฟ',ic:'🔋',cd:16,d:'เร็วขึ้น 30% และคูลดาวน์คืนเร็วขึ้น 30% นาน 5 วิ',fx:'ผลข้างเคียง: ตัวเองโดนดาเมจ +15% ระหว่างนั้น',
+  cast(p,S){p.haste=5;p.hasteF=1.3;p.ovc=5;emit({k:'efx',z:'overc',x:p.x,y:p.y,h:p.z+1,id:p.id});}});
+defSpell(2,{id:'arcblink',n:'วาร์ปสายฟ้า',ic:'💨',cd:7,d:'วาร์ปไปข้างหน้า 330 หน่วย ทิ้งสายฟ้าไว้ตามทางทำดาเมจและช็อต',fx:'วาร์ปผ่านกำแพงไม่ได้',
+  cast(p,S){
+    const a=p.ang,sx=p.x,sy=p.y;let bx=sx,by=sy;
+    for(let i=1;i<=11;i++){const nx=sx+Math.cos(a)*30*i,ny=sy+Math.sin(a)*30*i,o={x:nx,y:ny};collideWorld(o,PR,p.z);if(Math.hypot(o.x-nx,o.y-ny)>2)break;bx=nx;by=ny;}
+    for(const t of foesOf(p.team)){
+      const vx=bx-sx,vy=by-sy,L=vx*vx+vy*vy||1,u=clamp(((t.x-sx)*vx+(t.y-sy)*vy)/L,0,1),dd=Math.hypot(t.x-(sx+vx*u),t.y-(sy+vy*u));
+      if(dd<70+(t.r||PR)&&Math.abs(cH(t)-(p.z+1.1))<3&&(t.isE||t.inv<=0)){damage(t,13,p.id,'pierce');shock(t,p.id,3);}
+    }
+    p.x=bx;p.y=by;p.inv=Math.max(p.inv,0.15);
+    emit({k:'efx',z:'blink',x:sx,y:sy,h:p.z+1,x2:bx,y2:by,id:p.id});
+  }});
+defSpell(2,{id:'tempest',n:'พายุฟ้าคะนอง',ic:'🌪️',cd:0,ult:true,d:'เวทโบราณสายฟ้า: ฟ้าผ่าสุ่มรอบตัว 5 วิ (ขยับได้ระหว่างร่าย)',fx:'ฟ้าผ่าแต่ละครั้งช็อตและสตันสั้น',
+  cast(p,S){
+    emit({k:'efx',z:'tempest',x:p.x,y:p.y,h:p.z+1,id:p.id});
+    G.chan.push({owner:p.id,t:5,tick:0.33,tt:0,fn(c,pl){
+      const a=rnd(0,Math.PI*2),d=rnd(50,340),tg=Math.random()<0.6?nearestFoe(pl.team,pl.x,pl.y,420):null;
+      const x=tg?clamp(tg.x+rnd(-40,40),40,MW-40):clamp(pl.x+Math.cos(a)*d,40,MW-40),y=tg?clamp(tg.y+rnd(-40,40),40,MH-40):clamp(pl.y+Math.sin(a)*d,40,MH-40);
+      addStrike({x,y,r:62,t:0.4,col:'#ffe27a',fn:s=>{
+        emit({k:'efx',z:'thunder',x:s.x,y:s.y,h:0.4,r:62});
+        for(const t of foesIn(pl.team,s.x,s.y,62,5))aoeHit(pl,t,t.isE?20:15,t=>{shock(t,pl.id,3);addStun(t,0.25);});
+      }});
+    }});
+  }});
+
+// ---------- ร่ายคาถา ----------
+function castSlot(p,i){
+  const S=SPELLS[p.kitIds[i]];if(!S)return false;
+  const k=SLOTK[i];
+  if(p.cd[k]>0||p.sil>0)return false;
+  if(G.mode==='br'&&!(p.unl&&p.unl[BRMAP[k]]))return false;
+  S.cast(p,S,i);
+  const cd=S.cd*p.buffs.cdr;p.cd[k]=cd;p.cdMax[k]=cd;
+  return true;
+}
+function castUlt(p){const S=SPELLS[p.ultId];if(!S||p.ult<100||p.sil>0)return false;S.cast(p,S);p.ult=0;return true;}
+
+// =====================================================================
 //  เครือข่าย (PeerJS / WebRTC)
 // =====================================================================
-const PREFIX='wizduel-th-v6-';
+const PREFIX='wizduel-th-v7-';
 const NET={peer:null,isHost:false,online:false,myId:'me',conns:new Map(),hostConn:null,code:''};
 let LOBBY=null;
 function genCode(){const c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let s='';for(let i=0;i<5;i++)s+=c[Math.floor(Math.random()*c.length)];return s;}
@@ -581,7 +870,7 @@ function joinGame(code){
     NET.myId=id;
     const c=peer.connect(PREFIX+code,{reliable:true,serialization:'json'});
     NET.hostConn=c;
-    c.on('open',()=>{c.send({t:'hello',name:myName(),look:lookStr(myLook)});setStatus('');});
+    c.on('open',()=>{c.send({t:'hello',name:myName(),look:lookStr(myLook),kit:myKit});setStatus('');});
     c.on('data',clientOnData);
     c.on('close',()=>{alert('หลุดจากห้อง (โฮสต์ออก หรือการเชื่อมต่อขาด)');location.reload();});
   });
@@ -620,19 +909,19 @@ function cleanColor(c){return /^#[0-9a-f]{6}$/i.test(c)?c:COLORS[0];}
 
 function freshStats(){
   return {hp:100,maxHp:100,alive:true,downed:false,revive:0,respawn:0,vx:0,vy:0,ang:0,z:0,vz:0,fly:false,flyCd:0,root:0,
-    cd:{basic:0,fire:0,stun:0,push:0,pull:0,dodge:0},cdMax:{basic:1,fire:1,stun:1,push:1,pull:1,dodge:1},
+    cd:{basic:0,q:0,e:0,r:0,f:0,dodge:0},cdMax:{basic:1,q:1,e:1,r:1,f:1,dodge:1},
     shieldOn:false,shieldE:100,shieldT:0,shieldBroken:0,dash:0,dashX:0,dashY:0,inv:0,stun:0,burn:0,bt:0,burnSrc:null,
     ult:0,kills:0,deaths:0,dmgDealt:0,lastHit:null,bo:null,picked:true,taken:[],
     buffs:{dmg:1,cdr:1,spd:1,life:0,shReg:1,ult:1}};
 }
 function newPlayer(id,name,color,lk){
-  return Object.assign({id,name,color,lk,team:0,lteam:0,x:800,y:500,inp:emptyInput(),last:{}},freshStats());
+  return Object.assign({id,name,color,lk,kit:'0',kitIds:[],ultId:'inferno',team:0,lteam:0,x:800,y:500,inp:emptyInput(),last:{}},freshStats());
 }
 function emptyInput(){return {u:0,d:0,l:0,r:0,ax:0,ay:0,ap:0,fire:0,sh:0,jh:0,ch:0,c:{q:0,e:0,r:0,f:0,sp:0,x:0,b:0}};}
-function addPlayer(id,name,color,lk){
+function addPlayer(id,name,color,lk,kit){
   // หน้าตา: ไม่ส่งมา (บอท) = สุ่มจาก id / สีประจำตัวมาจากสีบ้านเสมอ
   lk=lookStr(parseLook(lk||lookStr(randLook(hashStr(id)))));LOOKS[id]=lk;color=houseColor(lk);
-  const p=newPlayer(id,name,color,lk);
+  const p=newPlayer(id,name,color,lk);setKit(p,kit);
   const ps=plist(),t0=ps.filter(q=>q.lteam===0).length;
   p.lteam=t0<=ps.length-t0?0:1;
   G.players[id]=p;G.order.push(id);
@@ -640,12 +929,12 @@ function addPlayer(id,name,color,lk){
 }
 function initHostLobby(){
   G={mode:'coop',map:'castle',ph:'lobby',players:{},order:[],proj:[],en:[],feed:[],time:0,pid:0,eid:0,wave:0,round:1,rw:{},teamScore:[0,0],timer:0,banner:null,result:null,queue:[],escale:1,espd:1};
-  const me=addPlayer(NET.myId,myName(),myColor,lookStr(myLook));
+  const me=addPlayer(NET.myId,myName(),myColor,lookStr(myLook),myKit);
   me.inp=INPUT;
   broadcastLobby();
   setScreen('lobby');
 }
-function lobbyMsg(){return {t:'lobby',ph:G.ph,mode:G.mode,map:G.map,code:NET.code,online:NET.online,host:NET.myId,players:plist().map(p=>({id:p.id,n:p.name,c:p.color,lk:p.lk,tm:p.lteam}))};}
+function lobbyMsg(){return {t:'lobby',ph:G.ph,mode:G.mode,map:G.map,code:NET.code,online:NET.online,host:NET.myId,players:plist().map(p=>({id:p.id,n:p.name,c:p.color,lk:p.lk,kt:p.kit,tm:p.lteam}))};}
 function broadcastLobby(){const m=lobbyMsg();sendAll(m);onLobby(m);}
 
 function hostOnData(conn,d){
@@ -656,7 +945,7 @@ function hostOnData(conn,d){
     if(G.ph!=='lobby')return reject('เกมกำลังเล่นอยู่ รอจบเกมแล้วค่อยเข้าใหม่นะ');
     if(plist().length>=6)return reject('ห้องเต็มแล้ว (สูงสุด 6 คน)');
     NET.conns.set(id,conn);
-    const p=addPlayer(id,cleanName(d.name),null,String(d.look||'').slice(0,40));
+    const p=addPlayer(id,cleanName(d.name),null,String(d.look||'').slice(0,40),String(d.kit||'').slice(0,24));
     conn.send({t:'welcome',id});
     toast(p.name+' เข้าห้องแล้ว');
     broadcastLobby();
@@ -665,6 +954,7 @@ function hostOnData(conn,d){
   const p=G.players[id];if(!p)return;
   if(d.t==='in'&&d.i&&d.i.c)p.inp=d.i;
   else if(d.t==='team'&&G.ph==='lobby'){p.lteam^=1;broadcastLobby();}
+  else if(d.t==='kit'&&G.ph==='lobby'){setKit(p,String(d.k||'').slice(0,24));broadcastLobby();}
   else if(d.t==='pick')hostPick(p,d.i|0);
   else if(d.t==='vote')hostVote(p,d.v);
 }
@@ -721,7 +1011,7 @@ function hostToLobby(){G.ph='lobby';G.proj=[];G.en=[];broadcastLobby();}
 function resetBody(p,x,y){
   Object.assign(p,{x,y,z:0,vz:0,fly:false,flyCd:0,root:0,vx:0,vy:0,hp:p.maxHp,alive:true,downed:false,revive:0,stun:0,burn:0,dash:0,inv:0,
     shieldOn:false,shieldE:100,shieldBroken:0,respawn:0});
-  for(const k of CDK)p.cd[k]=0;
+  for(const k of CDK)p.cd[k]=0;clearStatus(p);p.trail=null;
   p.ang=Math.atan2(MH/2-y,MW/2-x);
 }
 function spawnPts(){return SPAWNF.map(f=>[f[0]*MW,f[1]*MH]);}
@@ -757,9 +1047,9 @@ function hostTick(dt){
   g.time+=dt;
   if(g.ph==='count'){g.cdT-=dt;if(g.cdT<=0)g.ph='play';}
   const acting=g.ph==='play';
-  for(const p of plist())updatePlayer(p,dt,acting);
+  for(const p of plist()){if(p.bot)botBrain(p,dt);updatePlayer(p,dt,acting);}
   if(acting){
-    updateProjectiles(dt);
+    updateProjectiles(dt);updateSpells(dt);
     if(g.mode==='coop'||g.mode==='train')updateEnemies(dt);
   }
   modeLogic(dt);
@@ -776,8 +1066,8 @@ function updatePlayer(p,dt,acting){
     const c=(inp.c&&inp.c[k])|0;
     if(c!==(p.last[k]|0)){pr[k]=true;p.last[k]=c;}
   }
-  for(const k of CDK)p.cd[k]=Math.max(0,p.cd[k]-dt);
-  p.stun=Math.max(0,p.stun-dt);p.inv=Math.max(0,p.inv-dt);
+  for(const k of CDK)p.cd[k]=Math.max(0,p.cd[k]-dt*(p.ovc>0?1.3:1));
+  p.stun=Math.max(0,p.stun-dt);p.inv=Math.max(0,p.inv-dt);tickStatus(p,dt);
   p.flyCd=Math.max(0,p.flyCd-dt);p.root=Math.max(0,p.root-dt);
   if(!p.alive){
     if(['ffa','tdm','quid','race','train'].includes(G.mode)&&acting){p.respawn-=dt;if(p.respawn<=0)respawn(p);}
@@ -796,7 +1086,7 @@ function updatePlayer(p,dt,acting){
     }else p.revive=Math.max(0,p.revive-dt*0.5);
     return;
   }
-  if(p.burn>0){p.burn-=dt;p.bt-=dt;if(p.bt<=0){p.bt=0.5;damage(p,3,p.burnSrc,'burn');if(!p.alive||p.downed)return;}}
+  if(p.burn>0){p.burn-=dt;p.bt-=dt;if(p.bt<=0){p.bt=0.5;damage(p,4,p.burnSrc,'burn');if(!p.alive||p.downed)return;}}
   const canAct=acting&&p.stun<=0;
   if(acting&&(inp.ax||inp.ay))p.ang=Math.atan2(inp.ay-p.y,inp.ax-p.x);
 
@@ -826,8 +1116,12 @@ function updatePlayer(p,dt,acting){
   else{mx=(inp.r?1:0)-(inp.l?1:0);my=(inp.d?1:0)-(inp.u?1:0);}
   const ml=Math.hypot(mx,my);if(ml){mx/=ml;my/=ml;}
   if(!canAct||p.root>0){mx=my=0;}
-  const spd=(p.fly?540*p.buffs.spd:260*p.buffs.spd*(p.shieldOn?0.5:1))*(p.boost>0?1.45:1);
-  if(p.dash>0){p.dash-=dt;p.x+=p.dashX*900*dt;p.y+=p.dashY*900*dt;}
+  const spd=(p.fly?540*p.buffs.spd:260*p.buffs.spd*(p.shieldOn?0.5:1))*(p.boost>0?1.45:1)*moveMul(p);
+  if(p.dash>0){
+    p.dash-=dt;const ds=p.dashSp||900;p.x+=p.dashX*ds*dt;p.y+=p.dashY*ds*dt;
+    if(p.trail){p.trail.acc-=dt;if(p.trail.acc<=0){p.trail.acc=0.045;addZone({x:p.x,y:p.y,r:44,t:2.5,tick:0.5,owner:p.id,team:p.team,kind:'fire',hit(t,z){damage(t,2,z.owner,'zone');ignite(t,z.owner,1);}});}}
+    if(p.dash<=0){p.dashSp=0;p.trail=null;}
+  }
   else{p.x+=mx*spd*dt;p.y+=my*spd*dt;}
   p.x+=p.vx*dt;p.y+=p.vy*dt;
   const fr=Math.exp(-6*dt);p.vx*=fr;p.vy*=fr;
@@ -838,7 +1132,6 @@ function updatePlayer(p,dt,acting){
   p.fireHeld=inp.fire;
   // ควิดดิชและแข่งไม้กวาด ร่ายเวทบนไม้กวาดได้ / โหมดอื่นร่ายไม่ได้ (เหมือนในเกม)
   if(!canAct||(p.fly&&G.mode!=='quid'&&G.mode!=='race'))return;
-  const ok=k=>G.mode!=='br'||(p.unl&&p.unl[k]);
 
   const cdr=p.buffs.cdr;
   const setCd=(k,v)=>{p.cd[k]=v;p.cdMax[k]=v;};
@@ -849,11 +1142,11 @@ function updatePlayer(p,dt,acting){
   }
   if(p.shieldOn)return;
   if(inp.fire&&p.cd.basic<=0){shoot(p,'bolt');setCd('basic',0.35);}
-  if(pr.q&&p.cd.fire<=0&&ok('fire')){shoot(p,'fire');setCd('fire',4*cdr);}
-  if(pr.e&&p.cd.stun<=0&&ok('stun')){shoot(p,'stun');setCd('stun',7*cdr);}
-  if(pr.f&&p.cd.pull<=0&&ok('pull')){shoot(p,'pull');setCd('pull',8*cdr);}
-  if(pr.r&&p.cd.push<=0&&ok('push')){pushWave(p);setCd('push',6*cdr);}
-  if(pr.x&&p.ult>=100){nova(p);p.ult=0;}
+  if(pr.q)castSlot(p,0);
+  if(pr.e)castSlot(p,1);
+  if(pr.r)castSlot(p,2);
+  if(pr.f)castSlot(p,3);
+  if(pr.x)castUlt(p);
 }
 
 function collideWorld(o,r,z){
@@ -865,10 +1158,16 @@ function collideWorld(o,r,z){
     const dx=o.x-c.x,dy=o.y-c.y,d=Math.hypot(dx,dy),m=c.r+r;
     if(d<m&&d>0.001){o.x=c.x+dx/d*m;o.y=c.y+dy/d*m;}
   }
+  if(G&&G.walls)for(const c of G.walls){
+    if(c.hgt<=z)continue;
+    if(Math.abs(o.x-c.x)>c.r+r||Math.abs(o.y-c.y)>c.r+r)continue;
+    const dx=o.x-c.x,dy=o.y-c.y,d=Math.hypot(dx,dy),m=c.r+r;
+    if(d<m&&d>0.001){o.x=c.x+dx/d*m;o.y=c.y+dy/d*m;}
+  }
 }
 
-function shoot(p,type){
-  const d=PDEF[type],a=p.ang,h=p.z+1.35;
+function shoot(p,type,o){
+  const d=PDEF[type],a=p.ang,h=p.z+1.35,SP=(o&&o.spd)||d.spd;
   // ล็อกเป้าแนวตั้งอัตโนมัติ: ถ้ามีศัตรูอยู่ในแนวเล็ง คาถาจะเชิดขึ้น/ลงไปหาเอง
   let best=null,bs=1e9;
   for(const t of foesOf(p.team)){
@@ -878,11 +1177,14 @@ function shoot(p,type){
     if(da<0.3&&da+dd/5000<bs){bs=da+dd/5000;best=t;}
   }
   let vh;
-  if(best)vh=(cH(best)-h)/(Math.hypot(best.x-p.x,best.y-p.y)/d.spd);
-  else vh=Math.tan(clamp((p.inp&&p.inp.ap)||0,-0.9,0.9))*d.spd/20;
-  G.proj.push({id:++G.pid,type,x:p.x+Math.cos(a)*26,y:p.y+Math.sin(a)*26,h,vh,vx:Math.cos(a)*d.spd,vy:Math.sin(a)*d.spd,
-    r:d.r,dmg:d.dmg,life:d.life,owner:p.id,team:p.team,src:'p'});
+  if(best)vh=(cH(best)-h)/(Math.hypot(best.x-p.x,best.y-p.y)/SP);
+  else vh=Math.tan(clamp((p.inp&&p.inp.ap)||0,-0.9,0.9))*SP/20;
+  const pr={id:++G.pid,type,x:p.x+Math.cos(a)*26,y:p.y+Math.sin(a)*26,h,vh,vx:Math.cos(a)*SP,vy:Math.sin(a)*SP,
+    r:d.r,dmg:d.dmg,life:d.life,owner:p.id,team:p.team,src:'p'};
+  if(o)Object.assign(pr,o);
+  G.proj.push(pr);
   emit({k:'cast',t:type,x:p.x,y:p.y,h:h+0.05,a:Math.round(a*100)/100,id:p.id});
+  return pr;
 }
 function eShoot(e,type,t,off){
   const pd=PDEF[type],a=Math.atan2(t.y-e.y,t.x-e.x)+(off||0),dd=Math.hypot(t.x-e.x,t.y-e.y)||1;
@@ -936,6 +1238,8 @@ function damage(t,amt,srcId,kind){
   if(src&&kind!=='burn')amt*=src.buffs.dmg;
   if(t.isE){
     if(t.dead)return;
+    if(t.frz>0)amt*=1.15;
+    if(t.shk>0&&kind!=='burn')amt*=1.08;
     t.hp-=amt;
     emit({k:'hit',x:t.x,y:t.y,h:cH(t)+vR(t)+0.4,n:Math.round(amt)});
     if(src){gainUlt(src,amt);lifesteal(src,amt);src.dmgDealt+=amt;}
@@ -949,6 +1253,16 @@ function damage(t,amt,srcId,kind){
     t.shieldE-=amt*1.5;emit({k:'block',x:t.x,y:t.y,h:t.z+1.2});
     if(t.shieldE<=0)breakShield(t);
     return;
+  }
+  if(t.frz>0)amt*=1.15;
+  if(t.ovc>0)amt*=1.15;
+  if(t.shk>0&&kind!=='burn')amt*=1.08;
+  if(t.ward&&t.ward.t>0){
+    const ab=Math.min(t.ward.abs,amt);t.ward.abs-=ab;amt-=ab;
+    emit({k:'block',x:t.x,y:t.y,h:t.z+1.2});
+    if(t.ward.thorns&&src&&src!==t&&kind!=='burn'&&kind!=='zone')addChill(src,1);
+    if(t.ward.abs<=0)t.ward=null;
+    if(amt<=0.01)return;
   }
   t.hp-=amt;t.lastHit=srcId;
   if(src&&src!==t){gainUlt(src,amt*0.7);lifesteal(src,amt);src.dmgDealt+=amt;}
@@ -980,12 +1294,17 @@ function killProj(pr){
 }
 function explode(pr){
   emit({k:'boom',x:pr.x,y:pr.y,h:pr.h});
+  const sr=pr.splash?pr.splash.r:80,sd=pr.splash?pr.splash.dmg:10;
   for(const t of foesOf(pr.team)){
     if(t.id===pr.owner)continue;
-    if(Math.hypot(t.x-pr.x,t.y-pr.y)<80+(t.r||PR)&&Math.abs(cH(t)-pr.h)<3)damage(t,10,pr.owner,'aoe');
+    if(Math.hypot(t.x-pr.x,t.y-pr.y)<sr+(t.r||PR)&&Math.abs(cH(t)-pr.h)<3){
+      const own=G.players[pr.owner];
+      if(pr.sp&&own)aoeHit(own,t,sd,t=>ignite(t,pr.owner,1.5));else damage(t,sd,pr.owner,'aoe');
+    }
   }
 }
 function hitTarget(pr,t){
+  if(pr.sp&&SPELLS[pr.sp]&&SPELLS[pr.sp].hit){SPELLS[pr.sp].hit(pr,t);if(pr.type!=='fire')emit({k:'imp',x:t.x,y:t.y,h:pr.h,t:pr.type});return;}
   damage(t,pr.dmg,pr.owner,'proj');
   if(pr.type!=='fire')emit({k:'imp',x:t.x,y:t.y,h:pr.h,t:pr.type});
   const big=t.type==='troll'||t.type==='queen';
@@ -1009,6 +1328,7 @@ function updateProjectiles(dt){
     if(pr.h<0.05){pr.h=0.1;killProj(pr);continue;}
     let hp=false;
     for(const c of OBS)if(pr.h<c.hgt&&(pr.x-c.x)**2+(pr.y-c.y)**2<(c.r+pr.r)**2){hp=true;break;}
+    if(!hp)for(const w of G.walls)if(pr.team!==w.team&&pr.h<w.hgt&&(pr.x-w.x)**2+(pr.y-w.y)**2<(w.r+pr.r)**2){w.hp-=pr.dmg||5;hp=true;emit({k:'efx',z:'wallhit',x:pr.x,y:pr.y,h:pr.h});break;}
     if(hp){killProj(pr);continue;}
     for(const p of ps){
       if(!p.alive||p.downed||p.id===pr.owner||p.team===pr.team)continue;
@@ -1103,14 +1423,14 @@ function updateEnemies(dt){
   for(const e of G.en){
     if(e.dead)continue;
     const D=EDEF[e.type];
-    e.cd-=dt;e.cd2-=dt;e.cd3-=dt;e.stun=Math.max(0,e.stun-dt);e.ph+=dt;
-    if(e.burn>0){e.burn-=dt;e.bt-=dt;if(e.bt<=0){e.bt=0.5;damage(e,3,e.burnSrc,'burn');if(e.dead)continue;}}
+    e.cd-=dt;e.cd2-=dt;e.cd3-=dt;e.stun=Math.max(0,e.stun-dt);e.ph+=dt;tickStatus(e,dt);
+    if(e.burn>0){e.burn-=dt;e.bt-=dt;if(e.bt<=0){e.bt=0.5;damage(e,4,e.burnSrc,'burn');if(e.dead)continue;}}
     e.x+=e.vx*dt;e.y+=e.vy*dt;const fr=Math.exp(-5*dt);e.vx*=fr;e.vy*=fr;
     let t=null,bd=1e12;
     for(const p of ps){const d=dist2(e,p)+((p.z-(e.h||0))*20)**2;if(d<bd){bd=d;t=p;}}
     if(D.fly&&(!t||e.stun>0))e.h=Math.max(1.5,e.h-(e.stun>0?3:0)*dt);
     if(!t||e.stun>0)continue;
-    const dx=t.x-e.x,dy=t.y-e.y,d=Math.hypot(dx,dy)||1,ux=dx/d,uy=dy/d,sp=e.spd*G.espd;
+    const dx=t.x-e.x,dy=t.y-e.y,d=Math.hypot(dx,dy)||1,ux=dx/d,uy=dy/d,sp=e.spd*G.espd*moveMul(e)*(e.root>0?0:1);
     const reach=Math.abs(t.z-(e.h||0))<2.4;
     const move=(k)=>{e.x+=ux*sp*dt*(k||1);e.y+=uy*sp*dt*(k||1);};
     const bite=(dmg,cd)=>{if(d<e.r+PR+6&&reach&&e.cd<=0){e.cd=cd;damage(t,dmg*G.escale,null,'melee');emit({k:'claw',x:t.x,y:t.y,h:t.z+1.1,t:e.type});}};
@@ -1326,7 +1646,7 @@ function raceRings(){
 }
 function modeInit(){
   const ps=plist(),m=G.mode;
-  Object.assign(G,{ball:null,snitch:null,rings:null,zone:null,items:null,bodies:[],meet:null,bombs:[],fin:0,qs:[0,0],tp:null,taskDone:0,taskTotal:0});
+  Object.assign(G,{ball:null,snitch:null,rings:null,zone:null,items:null,bodies:[],meet:null,bombs:[],zones:[],strikes:[],walls:[],chan:[],zid:0,fin:0,qs:[0,0],tp:null,taskDone:0,taskTotal:0});
   ps.forEach(p=>{p.gh=false;p.role=null;p.unl=null;p.doing=null;p.lap=0;p.cp=0;p.fin=0;p.boost=0;});
   if(m==='quid'){
     G.ball={x:MW/2,y:MH/2,h:6,vx:0,vy:0,vh:0,holder:null,cool:1,thrower:null};
@@ -1369,7 +1689,7 @@ function spawnDummy(x,y){
   G.en.push({id:++G.eid,isE:true,type:'dummy',x:o.x,y:o.y,ax:o.x,ay:o.y,h:0,r:EDEF.dummy.r,hp:EDEF.dummy.hp,maxHp:EDEF.dummy.hp,spd:0,cd:rnd(2,4),cd2:99,cd3:99,stun:0,vx:0,vy:0,slam:0,lunge:0,burn:0,bt:0,team:-1,ph:0});
   emit({k:'spawn',x:o.x,y:o.y,t:'dummy'});
 }
-const TIPS=['💡 คลิกซ้ายค้าง = ยิงรัว • Q ลูกไฟระเบิด • E สตัน','🛡️ ยกโล่ (คลิกขวา) ตอนเวทเขียวกำลังจะโดนพอดี = PARRY สะท้อนกลับ!','💨 R ผลักศัตรูและลบเวทที่พุ่งมา • 🌀 F ดึงศัตรูเข้ามาหา','💫 Space หลบ (อมตะชั่วครู่) • 🌟 X เวทโบราณเมื่อเกจทองเต็ม','🧹 B ขึ้นไม้กวาด • Space บินขึ้น • C บินลง (บนไม้กวาดร่ายเวทไม่ได้)','🏁 โฮสต์กดปุ่ม "จบการฝึก" มุมขวาบนเพื่อกลับล็อบบี้'];
+const TIPS=['💡 คลิกซ้ายค้าง = ยิงรัว • Q/E/R/F = คาถาที่คุณจัดไว้ (เปลี่ยนได้ที่ปุ่ม 🪄 ในล็อบบี้)','🛡️ ยกโล่ (คลิกขวา) ตอนเวทเขียวกำลังจะโดนพอดี = PARRY สะท้อนกลับ!','💨 R ผลักศัตรูและลบเวทที่พุ่งมา • 🌀 F ดึงศัตรูเข้ามาหา','💫 Space หลบ (อมตะชั่วครู่) • 🌟 X เวทโบราณเมื่อเกจทองเต็ม','🧹 B ขึ้นไม้กวาด • Space บินขึ้น • C บินลง (บนไม้กวาดร่ายเวทไม่ได้)','🏁 โฮสต์กดปุ่ม "จบการฝึก" มุมขวาบนเพื่อกลับล็อบบี้'];
 function trainTick(dt){
   G.tipT-=dt;if(G.tipT<=0){G.tipT=7;banner(TIPS[G.tipI++%TIPS.length],6.5);}
   const n=G.en.filter(e=>e.type==='dummy').length;
@@ -1496,7 +1816,7 @@ function brTick(dt){
   G.items=G.items.filter(i=>!i.got);
   if(plist().filter(p=>p.alive).length<=1)endMatch();
 }
-const ITEMN={fire:'🔥 ลูกไฟ',stun:'⚡ สตัน',push:'💨 ผลัก',pull:'🌀 ดึง',hp:'❤️ ยาฟื้นเลือด',sh:'🛡️ ยาโล่',ult:'🌟 พลังโบราณ'};
+const ITEMN={fire:'🔓 คาถาช่อง Q',stun:'🔓 คาถาช่อง E',push:'🔓 คาถาช่อง R',pull:'🔓 คาถาช่อง F',hp:'❤️ ยาฟื้นเลือด',sh:'🛡️ ยาโล่',ult:'🌟 พลังโบราณ'};
 function brPick(p,it){
   const k=it.k;
   if(['fire','stun','push','pull'].includes(k))p.unl[k]=1;
@@ -1627,9 +1947,10 @@ function makeSnap(){
       hp:Math.ceil(p.hp),mh:p.maxHp,al:p.alive,dn:p.downed,rv:r1(p.revive),sh:p.shieldOn,se:Math.round(p.shieldE),
       st:p.stun>0,ds:p.dash>0,iv:p.inv>0,bn:p.burn>0,u:Math.floor(p.ult),k:p.kills,d:p.deaths,rs:Math.ceil(p.respawn),
       cd:CDK.map(k=>r1(p.cd[k])),cm:CDK.map(k=>p.cdMax[k]||1),bo:p.bo,pk:p.picked,bf:p.taken,dmg:Math.round(p.dmgDealt),
-      gh:!!p.gh,hb:!!(G.ball&&G.ball.holder===p.id),lap:p.lap|0,cp:p.cp|0,fin:p.fin|0,bs:p.boost>0,ul:p.unl?Object.keys(p.unl).join(','):'',tk:p.doing?r1(p.doing.left):0})),
+      fm:fxMask(p),gh:!!p.gh,hb:!!(G.ball&&G.ball.holder===p.id),lap:p.lap|0,cp:p.cp|0,fin:p.fin|0,bs:p.boost>0,ul:p.unl?Object.keys(p.unl).join(','):'',tk:p.doing?r1(p.doing.left):0})),
     M:modeSnap(),
-    E:G.en.map(e=>({id:e.id,t:e.type,x:r1(e.x),y:r1(e.y),h:r1(e.h||0),hp:Math.ceil(e.hp),mh:Math.ceil(e.maxHp),sl:e.slam>0,st:e.stun>0,bn:e.burn>0,lg:e.lunge>0})),
+    E:G.en.map(e=>({id:e.id,t:e.type,x:r1(e.x),y:r1(e.y),h:r1(e.h||0),hp:Math.ceil(e.hp),mh:Math.ceil(e.maxHp),sl:e.slam>0,st:e.stun>0,bn:e.burn>0,fm:fxMask(e),lg:e.lunge>0})),
+    WL:(G.walls||[]).map(w=>[w.id,Math.round(w.x),Math.round(w.y),w.r,Math.round(w.hp),Math.round(w.t*10)/10]),
     J:G.proj.map(p=>({id:p.id,t:p.type,x:r1(p.x),y:r1(p.y),h:r1(p.h),vx:Math.round(p.vx),vy:Math.round(p.vy),vh:r1(p.vh),rf:p.dmg>(PDEF[p.type].dmg*1.2)?1:0}))
   };
 }
@@ -2093,7 +2414,7 @@ addEventListener('resize',resize);
 const VIEW={prev:null,cur:null,tPrev:0,tCur:0};
 let screen='menu',lastBuffKey='',overShown=false,lastCount=0;
 const PARTS=[],RINGS=[],TEXTS=[];let shakeA=0;
-const PCOL={bolt:'#ffe27a',fire:'#ff6a2a',stun:'#5ad1ff',pull:'#c77dff',ebolt:'#7dff6a',web:'#e8e8f0'};
+const PCOL={bolt:'#ffe27a',fire:'#ff6a2a',stun:'#5ad1ff',pull:'#c77dff',ebolt:'#7dff6a',web:'#e8e8f0',ice:'#9fe8ff',zap:'#fff27a'};
 
 function setScreen(s){
   screen=s;document.body.dataset.screen=s;
@@ -2104,7 +2425,7 @@ function setScreen(s){
   cv.style.cursor=s==='game'?'crosshair':'default';
 }
 function onLobby(m){
-  LOBBY=m;for(const p of m.players)if(p.lk)LOOKS[p.id]=p.lk;
+  LOBBY=m;for(const p of m.players){if(p.lk)LOOKS[p.id]=p.lk;if(p.kt!==undefined)KITS[p.id]=p.kt;}
   if(m.map&&m.map!==builtMap){setMapVars(m.map);buildWorld(m.map);}
   if(m.ph==='lobby'){if(screen!=='lobby')setScreen('lobby');renderLobby();}
   voiceSync();updateVoiceUI();
@@ -2162,6 +2483,119 @@ function explosionFX(x,y,H){
   smoke(x,y,H,18,'#2a2522',1.8,9,140);
 }
 
+// ---------- เอฟเฟกต์คาถาใหม่ ----------
+const ZV=[];
+function updateZV(dt){
+  for(let i=ZV.length-1;i>=0;i--){
+    const z=ZV[i];z.t-=dt;if(z.t<=0){ZV.splice(i,1);continue;}
+    const n=Math.max(1,Math.round(z.r*dt*(z.kind==='lava'?0.14:0.09)));
+    for(let k=0;k<n;k++){
+      const a=rnd(0,Math.PI*2),d=Math.sqrt(Math.random())*z.r,px=z.x+Math.cos(a)*d,py=z.y+Math.sin(a)*d;
+      if(z.kind==='fire'||z.kind==='lava'){
+        PARTS.push({x:px,y:py,h:0.2,vx:rnd(-12,12),vy:rnd(-12,12),vh:rnd(1.4,3.4),life:rnd(0.4,0.8),max:0.8,col:Math.random()<0.5?'#ff7a2a':'#ffc04a',size:z.kind==='lava'?5.5:4.5,g:-1.5,drag:3});
+        if(Math.random()<0.18)PARTS.push({x:px,y:py,h:0.8,vx:0,vy:0,vh:rnd(0.6,1.4),life:1.2,max:1.2,col:'#2a2522',size:6,g:-0.3,smoke:true,grow:1.3,drag:2});
+      }else if(z.kind==='frost'){
+        PARTS.push({x:px,y:py,h:rnd(4,7),vx:rnd(-60,60),vy:rnd(-60,60),vh:rnd(-3.5,-2),life:1.4,max:1.4,col:Math.random()<0.6?'#ffffff':'#9fe8ff',size:2.2,g:0,drag:1});
+        if(Math.random()<0.2)PARTS.push({x:px,y:py,h:0.5,vx:0,vy:0,vh:0.5,life:1.2,max:1.2,col:'#cfeaff',size:7,g:-0.2,smoke:true,grow:1.2,drag:2});
+      }else if(z.kind==='storm'){
+        PARTS.push({x:px,y:py,h:rnd(0.2,3),vx:rnd(-40,40),vy:rnd(-40,40),vh:rnd(-1,2),life:0.3,max:0.3,col:Math.random()<0.5?'#fff27a':'#ffffff',size:2,g:0,drag:4});
+        if(Math.random()<0.06*z.r/100)FX.bolt(px,py,rnd(0.2,3),px+rnd(-60,60),py+rnd(-60,60),rnd(0,2.5),0.14,'#fff27a');
+      }
+    }
+    if((z.kind==='lava'||z.kind==='storm')&&Math.random()<0.5)LREQ.push({x:tx(z.x),y:1.4,z:tz(z.y),col:z.col,int:1.6,dist:12});
+  }
+}
+const WM3=new Map();
+function syncWalls(v){
+  const seen=new Set();
+  for(const w of (v.WL||[])){
+    seen.add(w[0]);let o=WM3.get(w[0]);
+    if(!o){
+      const g=new THREE.Group(),mat=new THREE.MeshStandardMaterial({color:'#bfeaff',roughness:0.15,metalness:0.1,transparent:true,opacity:0.85,emissive:'#2f6a9a',flatShading:true});
+      const r=w[3]*S3;
+      for(const [ox,oz,sx,sy] of [[0,0,1.1,3.8],[0.5,0.3,0.55,2.4],[-0.5,-0.25,0.6,2.8]]){const m=new THREE.Mesh(new THREE.OctahedronGeometry(1,0),mat);m.scale.set(r*sx,sy,r*sx);m.position.set(ox,sy*0.9,oz);m.rotation.y=w[0]*1.7+ox;m.castShadow=true;g.add(m);}
+      const gl2=new THREE.Sprite(glowMat('#8fe0ff',1.2));gl2.scale.set(5,4,1);gl2.position.y=2.2;g.add(gl2);
+      scene.add(g);o={g,mat};WM3.set(w[0],o);
+    }
+    o.g.position.set(tx(w[1]),0,tz(w[2]));
+    o.mat.opacity=0.5+0.4*clamp(w[4]/70,0,1);
+    if(Math.random()<0.1)burst(w[1]+rnd(-30,30),w[2]+rnd(-30,30),'#cfeaff',1,20,0.8,1.6,{h:rnd(0.5,4),vh:[0,1],g:-0.2});
+  }
+  for(const [id,o] of WM3)if(!seen.has(id)){disposeObj(o.g);o.mat.dispose();WM3.delete(id);}
+}
+function efxFX(ev){
+  const x=ev.x,y=ev.y,H=ev.h!==undefined?ev.h:1,me=myPos(),near=!me||Math.hypot(x-me.x,y-me.y)<1000;
+  switch(ev.z){
+    case 'ember':
+      ring(x,y,'#ff9a4a',ev.r,0.4,H);ring(x,y,'#ffd27a',ev.r*0.6,0.3,H);
+      SHAPES_Q.push({k:'dome',x,y,h:H,col:'#ff7a2a',s0:0.4,s1:ev.r*S3,life:0.35,op:0.3,full:1});
+      burst(x,y,'#ffb347',50,ev.r*3,0.7,2.4,{h:H,vh:[0,4],g:3});burst(x,y,'#ff5a1a',20,ev.r*1.5,0.5,5,{h:H,vh:[0,2],g:-1});
+      FX.flashLight(x,y,H+0.5,'#ff8a3a',5,18,0.35);if(near){snd('boom',ev);shake(4);}break;
+    case 'inferno':
+      ring(x,y,'#ff7a2a',ev.r,0.7,H);ring(x,y,'#ffd27a',ev.r*0.7,0.55,H);
+      SHAPES_Q.push({k:'dome',x,y,h:H,col:'#ff5a1a',s0:0.5,s1:ev.r*S3*0.9,life:0.6,op:0.28,full:1});
+      burst(x,y,'#ffb347',110,ev.r*2.2,1,2.8,{h:H,vh:[1,8],g:4});burst(x,y,'#ff4a10',50,ev.r,0.8,6,{h:H,vh:[0,3],g:-1.5});smoke(x,y,H,26,'#2a2522',2,10,220);
+      FX.flashLight(x,y,H+2,'#ff7a2a',9,34,0.7);shake(12);snd('boom',ev);snd('nova',ev);break;
+    case 'meteor':
+      explosionFX(x,y,0.5);ring(x,y,'#ff9a4a',ev.r,0.5,0.2);ring(x,y,'#ffd27a',ev.r*0.6,0.4,0.2);
+      burst(x,y,'#ff6a2a',60,ev.r*2.5,0.9,5,{h:0.5,vh:[2,9],g:9});FX.flashSprite(x,y,6,'#ffb36a',2,12,0.3,3);
+      shake(10);snd('boom',ev);break;
+    case 'fnova':
+      ring(x,y,'#8fe0ff',ev.r,0.5,H);ring(x,y,'#ffffff',ev.r*0.6,0.35,H);
+      SHAPES_Q.push({k:'dome',x,y,h:H,col:'#bfeaff',s0:0.3,s1:ev.r*S3,life:0.4,op:0.25,full:1});
+      burst(x,y,'#dff6ff',60,ev.r*2.6,0.8,2.2,{h:H,vh:[0,3],g:1});smoke(x,y,H,12,'#cfeaff',1.2,8,ev.r*1.5);
+      FX.flashLight(x,y,H+0.5,'#8fe0ff',5,16,0.35);if(near){snd('push',ev);shake(3);}break;
+    case 'absz':
+      ring(x,y,'#bfeaff',ev.r,0.7,H);ring(x,y,'#ffffff',ev.r*0.7,0.5,H);ring(x,y,'#8fe0ff',ev.r*0.4,0.4,H);
+      SHAPES_Q.push({k:'dome',x,y,h:H,col:'#9fe8ff',s0:0.5,s1:ev.r*S3*0.95,life:0.55,op:0.3,full:1});
+      burst(x,y,'#dff6ff',120,ev.r*2.4,1.1,2.6,{h:H,vh:[0,6],g:1.5});smoke(x,y,H,30,'#cfeaff',2,10,ev.r*2);
+      FX.flashLight(x,y,H+2,'#bfeaff',9,34,0.7);shake(10);snd('nova',ev);break;
+    case 'thunder':
+      for(let i=0;i<3;i++)FX.bolt(x+rnd(-20,20),y+rnd(-20,20),16,x+rnd(-12,12),y+rnd(-12,12),0,0.22,'#fff7b0');
+      ring(x,y,'#ffe27a',ev.r,0.35,0.2);burst(x,y,'#fff27a',40,320,0.5,2.2,{h:0.6,vh:[1,6],g:6});burst(x,y,'#ffffff',16,200,0.3,2,{h:0.5,vh:[1,4],g:4});
+      FX.flashSprite(x,y,1.2,'#fff7b0',1,9,0.25,3);FX.flashLight(x,y,3,'#ffe27a',8,26,0.3);
+      SHAPES_Q.push({k:'decal',x,y,col:'#000000',s1:ev.r/36,life:4,op:0.4});
+      if(near){snd('zap',ev);snd('boom',{x,y,vol:0.5});shake(5);}break;
+    case 'tempest':
+      ring(x,y,'#ffe27a',340,0.6,0.3);burst(x,y,'#fff27a',60,500,0.9,2.4,{h:H,vh:[0,6],g:2});FX.flashLight(x,y,H+2,'#ffe27a',7,28,0.5);snd('nova',ev);break;
+    case 'chain':
+      FX.bolt(x,y,H,ev.x2,ev.y2,ev.h2!==undefined?ev.h2:1,0.28,'#fff7b0');burst(ev.x2,ev.y2,'#fff27a',14,200,0.3,2,{h:ev.h2||1,g:2});
+      FX.flashLight(ev.x2,ev.y2,(ev.h2||1)+0.5,'#fff27a',3,10,0.2);if(near)snd('zap',ev);break;
+    case 'zapt':
+      FX.bolt(x,y,H+2,x+rnd(-25,25),y+rnd(-25,25),H,0.16,'#fff27a');burst(x,y,'#fff27a',8,160,0.25,1.8,{h:H,g:1});break;
+    case 'blink':
+      for(let i=0;i<3;i++)FX.bolt(x+rnd(-8,8),y+rnd(-8,8),H+rnd(-0.4,0.4),ev.x2+rnd(-8,8),ev.y2+rnd(-8,8),H+rnd(-0.4,0.4),0.3,'#fff7b0');
+      burst(x,y,'#fff27a',26,260,0.4,2.2,{h:H,g:1});burst(ev.x2,ev.y2,'#fff27a',26,260,0.4,2.2,{h:H,g:1});
+      FX.flashLight(ev.x2,ev.y2,H+0.5,'#ffe27a',4,14,0.25);ring(ev.x2,ev.y2,'#ffe27a',70,0.3,0.3);snd('dash',ev);break;
+    case 'melt':smoke(x,y,H,10,'#e8eef0',1.2,7,60);burst(x,y,'#ffb347',12,160,0.4,2,{h:H,g:2});floatText(x,y,'ละลาย!','#ffb36a',17,H+1);break;
+    case 'shatter':burst(x,y,'#dff6ff',36,300,0.6,2.2,{h:H,vh:[0,5],g:8});ring(x,y,'#bfeaff',60,0.3,0.3);floatText(x,y,'แตก!','#bfeaff',20,H+1);if(near)snd('break',ev);break;
+    case 'freeze':burst(x,y,'#bfeaff',26,160,0.6,2.4,{h:H,vh:[0,3],g:1});FX.flashLight(x,y,H,'#8fe0ff',3,10,0.3);floatText(x,y,'แข็ง!','#9fe8ff',18,H+1.2);if(near)snd('parry',{x,y,vol:0.4});break;
+    case 'icewall':
+      for(const i of [-1,0,1]){const wx=x+Math.cos(ev.a)*i*62,wy=y+Math.sin(ev.a)*i*62;burst(wx,wy,'#dff6ff',22,200,0.6,2.4,{h:1,vh:[1,6],g:4});ring(wx,wy,'#8fe0ff',50,0.4,0.2);}
+      FX.flashLight(x,y,2,'#8fe0ff',4,14,0.4);if(near){snd('thud',ev);shake(3);}break;
+    case 'wallbreak':burst(x,y,'#dff6ff',34,260,0.7,2.4,{h:1.5,vh:[0,5],g:8});ring(x,y,'#bfeaff',ev.r+10,0.3,0.2);if(near)snd('break',ev);break;
+    case 'wallhit':burst(x,y,'#dff6ff',6,140,0.3,1.8,{h:ev.h||1,g:4});break;
+    case 'wallcast':ring(x,y,'#ff7a2a',120,0.4,0.2);burst(x,y,'#ffb347',30,200,0.6,2.4,{h:0.5,vh:[1,5],g:-1});FX.flashLight(x,y,1.5,'#ff8a3a',4,14,0.4);if(near)snd('boom',{x,y,vol:0.4});break;
+    case 'armor':{const v=VIEW.cur,p=v&&v.P.find(q=>q.id===ev.id);if(p){burst(p.x,p.y,'#dff6ff',40,140,0.9,2.2,{h:(p.z||0)+1,vh:[0,3],g:0});ring(p.x,p.y,'#8fe0ff',70,0.4,0.2);}if(ev.id===NET.myId)snd('buff');break;}
+    case 'overc':{const v=VIEW.cur,p=v&&v.P.find(q=>q.id===ev.id);if(p){burst(p.x,p.y,'#fff27a',40,200,0.7,2,{h:(p.z||0)+1,vh:[0,4],g:0});ring(p.x,p.y,'#ffe27a',80,0.4,0.2);}if(ev.id===NET.myId)snd('buff');break;}
+  }
+}
+// สถานะบนตัวละคร (ผู้เล่น/ศัตรู): fm = บิตมาสก์จาก host
+function statusFX(o,fm,x,y,z,sz,now){
+  if(!fm)return;
+  if(fm&8){
+    if(!o.ice){o.ice=new THREE.Mesh(new THREE.IcosahedronGeometry(1,0),new THREE.MeshStandardMaterial({color:'#bfeaff',transparent:true,opacity:0.5,roughness:0.15,emissive:'#2f6a9a',flatShading:true}));o.g.add(o.ice);}
+    o.ice.visible=true;o.ice.scale.set(sz*0.5,sz*0.9,sz*0.5);o.ice.position.y=sz*0.85;
+    if(Math.random()<0.2)burst(x,y,'#dff6ff',1,30,0.6,1.6,{h:z+rnd(0.2,sz*1.5),vh:[0,0.5],g:0});
+  }else if(o.ice)o.ice.visible=false;
+  if((fm&4)&&!(fm&8)&&Math.random()<0.25)PARTS.push({x:x+rnd(-14,14),y:y+rnd(-14,14),h:z+rnd(0.1,sz*1.6),vx:rnd(-10,10),vy:rnd(-10,10),vh:rnd(-1,-0.2),life:0.7,max:0.7,col:Math.random()<0.5?'#ffffff':'#9fe8ff',size:1.6,g:0});
+  if(fm&16){
+    if(Math.random()<0.5)PARTS.push({x:x+rnd(-14,14),y:y+rnd(-14,14),h:z+rnd(0.1,sz*1.7),vx:rnd(-60,60),vy:rnd(-60,60),vh:rnd(-1,1),life:0.2,max:0.2,col:'#fff27a',size:1.8,g:0});
+    if(Math.random()<0.04)FX.bolt(x,y,z+sz*1.5,x+rnd(-30,30),y+rnd(-30,30),z+rnd(0,sz*1.4),0.12,'#fff27a');
+  }
+  if((fm&256)&&Math.random()<0.4)PARTS.push({x:x+rnd(-10,10),y:y+rnd(-10,10),h:z+rnd(0.1,sz),vx:rnd(-30,30),vy:rnd(-30,30),vh:rnd(0.2,1),life:0.4,max:0.4,col:(fm&512)?'#fff27a':'#bfefff',size:1.6,g:0});
+}
+
 function fx(ev){
   const me=myPos(),near=!me||Math.hypot(ev.x-me.x,ev.y-me.y)<1000,H=ev.h!==undefined?ev.h:1.3;
   switch(ev.k){
@@ -2171,7 +2605,7 @@ function fx(ev){
       FX.flashLight(wx,wy,H,col,ev.t==='fire'?3.5:2.2,10,0.2);
       burst(wx,wy,col,ev.t==='fire'?16:9,140,0.3,2,{h:H,a:ev.a,spread:0.9,g:2});
       const o=ev.id&&PM3.get(ev.id);if(o)o.castT=0.3;
-      if(near)snd('cast_'+ev.t,ev);
+      if(near)snd('cast_'+({ice:'stun',zap:'stun'}[ev.t]||ev.t),ev);
       break;}
     case 'pop':impactFX(ev.x,ev.y,ev.t,false,H);break;
     case 'imp':impactFX(ev.x,ev.y,ev.t,true,H);break;
@@ -2284,10 +2718,17 @@ function fx(ev){
     case 'phase':FX.flashLight(ev.x,ev.y,4,'#ff5030',8,40,0.8);shake(12);snd('roar',ev);break;
     case 'roar':if(!ev.small){shake(8);}snd(ev.small?'whoosh':'roar',ev);break;
     case 'tele':
-      SHAPES_Q.push({k:'warn',x:ev.x,y:ev.y,col:'#ff3020',s1:ev.r*S3,life:ev.t});
-      SHAPES_Q.push({k:'warnr',x:ev.x,y:ev.y,col:'#ff5030',s1:ev.r*S3,life:ev.t});
+      SHAPES_Q.push({k:'warn',x:ev.x,y:ev.y,col:ev.col||'#ff3020',s1:ev.r*S3,life:ev.t});
+      SHAPES_Q.push({k:'warnr',x:ev.x,y:ev.y,col:ev.col||'#ff5030',s1:ev.r*S3,life:ev.t});
       break;
     case 'breath':BREATHS.push({x:ev.x,y:ev.y,a:ev.a,t:ev.t});snd('breath',ev);break;
+    case 'zn':{
+      const col={fire:'#ff7a2a',lava:'#ff5a1a',frost:'#8fe0ff',storm:'#ffe27a'}[ev.z]||'#ffffff';
+      ZV.push({x:ev.x,y:ev.y,r:ev.r,t:ev.t,kind:ev.z,col});
+      SHAPES_Q.push({k:'rune',x:ev.x,y:ev.y,col,s1:ev.r*S3,life:ev.t,op:ev.z==='lava'?0.85:0.6});
+      if(ev.z==='lava'||ev.z==='fire')SHAPES_Q.push({k:'decal',x:ev.x,y:ev.y,col:'#000000',s1:ev.r/28,life:ev.t+2,op:0.45});
+      break;}
+    case 'efx':efxFX(ev);break;
     case 'fbomb':
       explosionFX(ev.x,ev.y,0.6);
       if(ev.r>200){ring(ev.x,ev.y,'#ff7a2a',ev.r,0.6);ring(ev.x,ev.y,'#ffd27a',ev.r*0.7,0.5);burst(ev.x,ev.y,'#ff6a2a',90,ev.r*2.2,0.8,4,{h:0.6,vh:[0,3],g:-1});shake(10);}
@@ -3202,7 +3643,7 @@ function makeEnemy(t){
 }
 function disposeObj(o){scene.remove(o);o.traverse(m=>{if(m.geometry&&m.geometry!==projGeo&&m.geometry!==tailGeo)m.geometry.dispose();});}
 const PM3=new Map(),EM3=new Map(),JM3=new Map();
-function clearDyn(){for(const M of [PM3,EM3,JM3]){for(const o of M.values())disposeObj(o.g);M.clear();}if(typeof MO!=='undefined')clearModeObjs();}
+function clearDyn(){for(const M of [PM3,EM3,JM3,WM3]){for(const o of M.values())disposeObj(o.g);M.clear();}ZV.length=0;if(typeof MO!=='undefined')clearModeObjs();}
 
 // ---------- อนุภาค 2 ชั้น: แสงเรือง (additive) + ควัน (normal) ----------
 const PMAX=5000;
@@ -3455,7 +3896,7 @@ const POSES=[
   [-2.0,-0.1,-0.12,0.5,-0.02,0]];   // 4 = ท่าโชว์ไม้กายสิทธิ์ (ขั้นเลือกไม้กาย)
 function stageIdle(o,now,dt,i){
   o.joinT=Math.max(0,o.joinT-dt);
-  const lift=Math.min(1,o.joinT*1.2),h=(o.pid==='me-preview'&&crOpen&&crStep===2)?4:(o.house|0),T=POSES[h];
+  const lift=Math.min(1,o.joinT*1.2),h=(o.pid==='me-preview'&&crOpen&&(crStep===2||crStep===3))?4:(o.house|0),T=POSES[h];
   if(!o.pp)o.pp=T.slice();
   const k=1-Math.exp(-7*dt);for(let j=0;j<6;j++)o.pp[j]+=(T[j]-o.pp[j])*k;
   const P=o.pp,t=now/1000;
@@ -3570,8 +4011,8 @@ function renderStage(dt,now){
     STAGE.slotRings.forEach(r=>r.visible=false);STAGE.empty=[];
   }
   for(const [id,o] of STAGE.chars)if(!want.has(id)){stage.remove(o.g);disposeObj(o.g);STAGE.chars.delete(id);}
-  stageTone(dt,crOpen&&crStep===3?HOUSES[myLook.h]:null);
-  const eh=crOpen&&crStep===3?myLook.h:-1;
+  stageTone(dt,crOpen&&crStep===4?HOUSES[myLook.h]:null);
+  const eh=crOpen&&crStep===4?myLook.h:-1;
   STAGE.env.forEach((g,i)=>{g.visible=i===eh;const u=g.userData;if(u.L)u.L.intensity=i===eh?u.base*(u.fl?0.8+0.22*Math.sin(now/90)+0.12*Math.sin(now/37):1):0;if(i===eh&&u.sp)u.sp.forEach((q,j)=>{q.position.y=q.userData.y+Math.sin(now/900+j)*0.35;});});
   STAGE.wins.forEach(m=>m.visible=eh<0||eh===3);
   // เปลี่ยนบ้าน: ตัวละครหมุนหนึ่งรอบ + คลื่นพลัง
@@ -3594,7 +4035,7 @@ function renderStage(dt,now){
   // กล้อง: เมนู = ตัวเราอยู่ฝั่งขวา / ล็อบบี้ = มองทั้งแท่น
   const sway=Math.sin(now/5200)*0.15;
   if(lob){const mx=Math.max(0,...rows.map(r=>Math.abs(r.s.x)),...STAGE.empty.map(e=>Math.abs(e.x))),dist=clamp((mx+1.1)/(0.3*cam.aspect),6.5,13);cam.position.set(sway,1.5+dist*0.1,dist);cam.lookAt(0,1.45,0);}
-  else if(crOpen){const s3=crStep===3,sw=crStep===2;cam.position.set(-0.45+sway*0.4,s3?1.95:sw?1.85:1.8,s3?4.5:sw?3.2:3.9);cam.lookAt(-0.45,s3?1.2:sw?1.55:1.5,0);}
+  else if(crOpen){const s3=crStep===4,sw=crStep===2||crStep===3;cam.position.set(-0.45+sway*0.4,s3?1.95:sw?1.85:1.8,s3?4.5:sw?3.2:3.9);cam.lookAt(-0.45,s3?1.2:sw?1.55:1.5,0);}
   else{cam.position.set(-0.85+sway*0.5,1.55,5.6);cam.lookAt(-0.85,1.12,0);}
   if(window.__stageCam)window.__stageCam(cam);
   rpass.scene=stage;gl.shadowMap.needsUpdate=true;composer.render();rpass.scene=scene;
@@ -3683,8 +4124,9 @@ function syncPlayers(P,mode,now,dt){
       o.armR.rotation.x=lerp(-0.35+sw*0.4,-1.55,ck);o.armR.rotation.z=-0.12;
     }
     o.ends.forEach((E,i)=>{E.rotation.x=-clamp(v.lvz*0.07,0,1.2)+Math.sin(now*0.012+i*1.7)*0.08*(1+v.sp*0.15);E.rotation.z=clamp(v.lvx*0.04,-0.6,0.6);});
-    o.shield.visible=!!p.sh;
-    if(p.sh)o.shield.material.uniforms.t.value=now/1000;
+    o.shield.visible=!!p.sh||!!(p.fm&128);
+    if(o.shield.visible){o.shield.material.uniforms.t.value=now/1000;o.shield.material.uniforms.c.value.set((p.fm&128)&&!p.sh?'#bfeaff':'#7ff0ff');}
+    statusFX(o,p.fm|0,p.x,p.y,o.zs||0,2.2,now);
     o.stars.visible=!!p.st;o.stars.rotation.y=now/250;
     const isMe=p.id===NET.myId;
     if(p.fl)o.ring.visible=false;
@@ -3731,6 +4173,7 @@ function syncEnemies(E,P,now,dt){
     o.stars.visible=!!e.st;o.stars.rotation.y=now/250;
     if(o.tele){o.tele.visible=!!e.sl;if(e.sl)o.tele.material.opacity=0.2+0.2*Math.sin(now/60);if(o.club)o.club.rotation.x=e.sl?-0.6:Math.PI/2.6;}
     if(e.bn&&Math.random()<0.7)burst(e.x,e.y,'#ff6a2a',1,30,0.45,3.5,{h:o.hs+rnd(0.3,o.h*0.8),vh:[1,2.5],g:-1});
+    statusFX(o,e.fm|0,e.x,e.y,o.hs||0,Math.max(1.2,(o.h||2)*0.9),now);
     if(e.t==='wiz'&&Math.random()<0.15)smoke(e.x,e.y,0.2,1,'#1a2a14',1.2,4,20);
   }
   for(const [id,o] of EM3)if(!seen.has(id)){disposeObj(o.g);EM3.delete(id);}
@@ -3745,7 +4188,7 @@ function makeProj(col,t){
   const halo=new THREE.Sprite(glowMat(col,0.9));g.add(halo);
   const tail=new THREE.Mesh(tailGeo,new THREE.MeshBasicMaterial({color:hdr(col,1.6),transparent:true,opacity:0.5,blending:THREE.AdditiveBlending,depthWrite:false}));g.add(tail);
   const o={g,core,inner,halo,tail,col,lines:[]};
-  if(t==='stun')for(let i=0;i<2;i++){
+  if(t==='stun'||t==='zap')for(let i=0;i<2;i++){
     const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.BufferAttribute(new Float32Array(9*3),3));
     const L=new THREE.Line(geo,new THREE.LineBasicMaterial({color:hdr('#c8f6ff',3),transparent:true,blending:THREE.AdditiveBlending,depthWrite:false}));
     g.add(L);o.lines.push(L);
@@ -3777,6 +4220,10 @@ function syncProj(v,now){
         for(let i=0;i<3;i++)PARTS.push({x:x+rnd(-6,6),y:y+rnd(-6,6),h:H+rnd(-0.15,0.15),vx:-j.vx*0.08+rnd(-30,30),vy:-j.vy*0.08+rnd(-30,30),vh:rnd(0.5,2),life:0.4,max:0.4,col:Math.random()<0.5?'#ff7a2a':'#ffc04a',size:4.5,g:-2,drag:4});
         if(Math.random()<0.5)PARTS.push({x,y,h:H,vx:rnd(-15,15),vy:rnd(-15,15),vh:rnd(0.5,1.2),life:0.9,max:0.9,col:'#2e2a2a',size:5,g:-0.4,smoke:true,grow:1.4,drag:2});
         break;
+      case 'ice':
+        for(let i=0;i<2;i++)PARTS.push({x:x+rnd(-4,4),y:y+rnd(-4,4),h:H+rnd(-0.15,0.15),vx:rnd(-30,30),vy:rnd(-30,30),vh:rnd(-0.5,0.3),life:0.5,max:0.5,col:i?'#ffffff':'#9fe8ff',size:1.8,g:0.5,drag:3});
+        break;
+      case 'zap':
       case 'stun':
         for(let i=0;i<2;i++)PARTS.push({x,y,h:H+rnd(-0.2,0.2),vx:rnd(-90,90),vy:rnd(-90,90),vh:rnd(-1,1),life:0.25,max:0.25,col:i?'#ffffff':'#5ad1ff',size:1.8,g:0,drag:5});
         break;
@@ -4073,7 +4520,7 @@ function render(dt,now){
   animateWorld(now);
   const v=VIEW.cur;
   if(screen!=='game'||!v){
-    if(PM3.size||EM3.size||JM3.size)clearDyn();
+    if(PM3.size||EM3.size||JM3.size||WM3.size)clearDyn();
     PARTS.length=0;TEXTS.length=0;
     if(screen==='menu'||screen==='lobby'){renderStage(dt,now);return;}
     updateParticles(dt);updateShapes(dt);updateLights(dt);
@@ -4102,11 +4549,11 @@ function render(dt,now){
   syncPlayers(P,v.mode,now,dt);pf('players',t0);
   if(me&&me.al&&!me.fl&&!me.dn){const o=PM3.get(me.id);if(o){const k=Math.floor(o.walk/Math.PI);if(o.stepK!==undefined&&k!==o.stepK)snd('step',{vol:0.35,rev:0.1});o.stepK=k;}}t0=performance.now();
   syncEnemies(E,P,now,dt);pf('enemies',t0);t0=performance.now();
-  syncProj(v,now);
+  syncProj(v,now);syncWalls(v);
   syncModeObjs(v,P,me,now,dt);pf('projMode',t0);
   KC=Math.max(0,KC-dt);roleShowT=Math.max(0,roleShowT-dt);
   $('#trainEnd').classList.toggle('hidden',!(NET.isHost&&v.mode==='train'&&v.ph!=='over'));
-  t0=performance.now();updateParticles(dt);updateShapes(dt);updateLights(dt);pf('fx',t0);
+  t0=performance.now();updateZV(dt);updateParticles(dt);updateShapes(dt);updateLights(dt);pf('fx',t0);
   QUAL.frame++;gl.shadowMap.needsUpdate=QUAL.mode==='high'||QUAL.frame%2===0;
   t0=performance.now();composer.render();pf('gpuSubmit',t0);
   t0=performance.now();const spk=speakingIds();
@@ -4349,6 +4796,11 @@ function drawMinimap(v,me,P){
   diaPath(nxp,nyp,8);cx.fillStyle='#05070f';cx.fill();cx.strokeStyle=HG;cx.lineWidth=1;cx.stroke();
   cx.font='700 10px Cinzel,Kanit,serif';cx.textAlign='center';cx.fillStyle=HG2;cx.fillText('N',nxp,nyp+3.5);
 }
+function mySlots(me){
+  const k=getKit(me.id),sp=k.ids.map(i=>SPELL_LIST[i]),ult=SPELL_LIST[k.ult];
+  return SLOTS.map(s=>s[3]>=1&&s[3]<=4?[s[0],sp[s[3]-1].ic,sp[s[3]-1].n,s[3]]:s[3]===-2?[s[0],ult.ic,ult.n,-2]:s);
+}
+const STATUS_ICO=[[1,'💫'],[2,'🔥'],[4,'❄️'],[8,'🧊'],[16,'⚡'],[32,'🌿'],[64,'🤐'],[128,'🛡️'],[256,'💨'],[512,'🔋']];
 const SLOTS_IMP=[['E','📜','ภารกิจ',-10],['R','📢','รายงานศพ',-11],['F','🔔','ประชุม',-12],['Q','💀','อวาดา',-13]];
 const BR_LOCK={1:'fire',2:'stun',3:'push',4:'pull'};
 // ตำแหน่งช่องคาถา: เพชร 4 ทิศ (Q ซ้าย / E บน / R ขวา / F ล่าง) + แถวเล็ก (ยิง / โล่ / หลบ / เวทโบราณ / ไม้กวาด)
@@ -4398,14 +4850,16 @@ function drawBottom(me,v){
   thinBar(bx,ey-12,bw,12,hr,hr>0.3?'#6fd57f':'#ff6a6a',hr>0.3?'#2c8a45':'#a51e1e');
   cx.textAlign='right';cx.font='600 11px Kanit,sans-serif';cx.fillStyle='#fff';cx.fillText(`${me.hp} / ${me.mh}`,bx+bw-5,ey-2.5);
   thinBar(bx,ey+6,bw*0.72,5,me.se/100,'#9ff0ff','#2d8fc0');
+  {let sx=bx;cx.textAlign='left';cx.font='15px sans-serif';for(const [bit,ic] of STATUS_ICO)if((me.fm|0)&bit){cx.fillText(ic,sx,ey+30);sx+=20;}}
   cx.textAlign='left';cx.font='10px Kanit,sans-serif';cx.fillStyle='#7f8aa6';cx.fillText('โล่',bx+bw*0.72+8,ey+12);
   // มุมขวาล่าง: กลุ่มเพชรคาถา
   const c0x=SW-128,c0y=SH-122,d=47,r=31;
-  for(const [key,ic,name,ci] of SLOTS){
+  const MYS=mySlots(me);
+  for(const [key,ic,name,ci] of MYS){
     if(CLUSTER[ci]){const [ox,oy]=CLUSTER[ci];spellDia(c0x+ox*d,c0y+oy*d,r,ic,key,'',slotState(me,v,ci));}
   }
   diaPath(c0x,c0y,6);cx.fillStyle=HG;cx.fill();
-  const small=SLOTS.filter(s=>s[3]<=0||s[3]===5);
+  const small=MYS.filter(s=>s[3]<=0||s[3]===5);
   small.forEach(([key,ic,name,ci],i)=>spellDia(SW-266-(small.length-1-i)*66,SH-78,25,ic,key,name,slotState(me,v,ci)));
 }
 function drawBoard(v,P){
@@ -4431,78 +4885,126 @@ function drawBoard(v,P){
 //  เมนู / ล็อบบี้ (DOM)
 // =====================================================================
 // ตัวละครของฉัน (เก็บในเครื่อง: wd_look) — ครั้งแรกที่เข้าเกมจะเปิดหน้าสร้างตัวละครให้
-let myLook=parseLook(store('wd_look')),myColor=HOUSES[myLook.h].c;
+let myLook=parseLook(store('wd_look')),myColor=HOUSES[myLook.h].c,myKit=cleanKit(store('wd_kit')||'0');
 function myName(){return cleanName($('#nameIn').value);}
 $('#nameIn').value=store('wd_name')||('พ่อมด'+Math.floor(Math.random()*900+100));
 $('#nameIn').addEventListener('change',()=>store('wd_name',myName()));
 function renderMyHouse(){const H=HOUSES[myLook.h];myColor=H.c;$('#myHouse').innerHTML=`${crestSVG(myLook.h,34,false)}<span><b style="color:var(--gold2)">${H.n}</b><br><small style="color:var(--mute)">${H.th} • ${H.tr}</small></span><span style="margin-left:auto;display:flex;gap:4px"><i class="dot" style="background:${H.c}"></i><i class="dot" style="background:${H.c2};border:1px solid rgba(255,255,255,.3)"></i></span>`;}
 renderMyHouse();
 // ----- หน้าสร้าง/แต่งตัวละคร (2 ขั้น: 1 หน้าตา → 2 เลือกบ้าน) -----
-let crSaved=null,crOpen=false,crStep=1,crTab=0,crFirst=false;
+let crLib=0,crSaved=null,crKitSaved='0',crOpen=false,crStep=1,crTab=0,crFirst=false,crKitOnly=false,crSlot=0;
 const CRTABS=[['👤','ใบหน้า'],['💇','ผม'],['🧥','เสื้อคลุม'],['👔','เนคไท']];
 const sw_=(k,arr)=>`<div class="colors">${arr.map((c,i)=>`<div class="sw ${myLook[k]===i?'on':''}" data-k="${k}" data-v="${i}" style="background:${c}"></div>`).join('')}</div>`;
 const bt_=(k,arr)=>`<div class="opts">${arr.map((t,i)=>`<button class="obtn ${myLook[k]===i?'on':''}" data-k="${k}" data-v="${i}">${t}</button>`).join('')}</div>`;
+const nameBox_=()=>`<label class="f" style="margin-top:0">ชื่อพ่อมด</label><input type="text" id="cName" maxlength="16" value="${esc($('#nameIn').value)}"><div class="orn" style="width:100%;margin:12px 0 4px"></div>`;
+function crPanelSet(html){
+  const cur=document.activeElement&&document.activeElement.id==='cName';
+  $('#crPanel').innerHTML=html;$('#crPanel').classList.toggle('wide',crStep===3);
+  if(cur&&$('#cName'))$('#cName').focus();
+}
 function crRenderStep1(){
   if(crStep===2){crRenderWand();return;}
+  if(crStep===3){crRenderKit();return;}
   $('#crTabs').innerHTML=CRTABS.map((t,i)=>`<button class="crTab ${crTab===i?'on':''}" data-tab="${i}"><span>${t[0]}</span>${t[1]}</button>`).join('');
-  const nm=`<label class="f" style="margin-top:0">ชื่อพ่อมด</label><input type="text" id="cName" maxlength="16" value="${esc($('#nameIn').value)}">`;
   const body=[
     `<h3 class="sec">ใบหน้า</h3><p class="crnote">เลือกสีผิวและสีตาของคุณ</p><label class="f">สีผิว</label>${sw_('sk',SKINC)}<label class="f">สีตา</label>${sw_('ey',EYEC)}`,
     `<h3 class="sec">ทรงผม</h3><p class="crnote">เลือกทรงและสีผม</p><label class="f">ทรงผม</label>${bt_('hs',HAIRSTY)}<label class="f">สีผม</label>${sw_('hr',HAIRC)}`,
-    `<h3 class="sec">เสื้อคลุม</h3><p class="crnote">ในหนังเสื้อคลุมเป็นสีดำ — สีบ้านที่เลือกในขั้นต่อไปจะโผล่ที่ซับใน เนคไท และผ้าพันคอ</p><label class="f">สีเสื้อคลุม</label>${sw_('cl',CLOAKC)}`,
+    `<h3 class="sec">เสื้อคลุม</h3><p class="crnote">ในหนังเสื้อคลุมเป็นสีดำ — สีบ้านที่เลือกในขั้นสุดท้ายจะโผล่ที่ซับใน เนคไท และผ้าพันคอ</p><label class="f">สีเสื้อคลุม</label>${sw_('cl',CLOAKC)}`,
     `<h3 class="sec">เนคไท</h3><p class="crnote">สีของเนคไทจะตามบ้านที่คุณเลือก</p><label class="f">แบบเนคไท</label>${bt_('ti',TIESTY)}`][crTab];
-  const cur=document.activeElement&&document.activeElement.id==='cName';
-  $('#crPanel').innerHTML=nm+'<div class="orn" style="width:100%;margin:12px 0 4px"></div>'+body;
-  if(cur)$('#cName').focus();
+  crPanelSet(nameBox_()+body);
 }
 function crRenderWand(){
-  const nm=`<label class="f" style="margin-top:0">ชื่อพ่อมด</label><input type="text" id="cName" maxlength="16" value="${esc($('#nameIn').value)}">`;
-  const cur=document.activeElement&&document.activeElement.id==='cName';
-  $('#crPanel').innerHTML=nm+'<div class="orn" style="width:100%;margin:12px 0 4px"></div>'+`<h3 class="sec">ไม้กายสิทธิ์ของคุณ</h3><p class="crnote">ไม้กายสิทธิ์เป็นฝ่ายเลือกพ่อมด — แต่ที่นี่คุณเลือกเองได้เลย</p><label class="f">ไม้ (${WOODN[myLook.wd]})</label>${sw_('wd',WOODC)}<label class="f">แกนเวท (${WCOREN[myLook.wc]})</label>${sw_('wc',WCOREC)}<label class="f">ทรงด้าม</label>${bt_('ws',WANDSTY)}`;
-  if(cur)$('#cName').focus();
+  crPanelSet(nameBox_()+`<h3 class="sec">ไม้กายสิทธิ์ของคุณ</h3><p class="crnote">ไม้กายสิทธิ์เป็นฝ่ายเลือกพ่อมด — แต่ที่นี่คุณเลือกเองได้เลย</p><label class="f">ไม้ (${WOODN[myLook.wd]})</label>${sw_('wd',WOODC)}<label class="f">แกนเวท (${WCOREN[myLook.wc]})</label>${sw_('wc',WCOREC)}<label class="f">ทรงด้าม</label>${bt_('ws',WANDSTY)}`);
+}
+// ----- ขั้น 3: สาย + ชุดคาถา -----
+function spellDescHTML(S){
+  const P=PATHS[S.path];
+  return `<b>${S.ic} ${S.n}</b> <small style="display:inline">${P.ic} ${P.n}${S.ult?' • เวทโบราณ (X)':' • คูลดาวน์ '+S.cd+' วิ'}</small><br>${S.d}<small>✦ ${S.fx}</small>`;
+}
+function crRenderKit(){
+  const k=parseKit(myKit),P=PATHS[k.path],ult=SPELL_LIST[k.ult];
+  const off=k.ids.filter(i=>SPELL_LIST[i].path!==k.path).length;
+  let h=`<h3 class="sec">สายเวทมนตร์ & ชุดคาถา</h3><p class="crnote">เลือก "สาย" หลัก 1 สาย (กำหนดเวทโบราณ X) แล้วจัดคาถา 4 ช่อง Q/E/R/F — ใส่คาถาสายอื่นได้ไม่เกิน 2 ช่อง</p>`;
+  h+=`<div class="kpaths">${PATHS.map((p,i)=>{const has=SPELL_LIST.some(x=>x.path===i&&!x.ult);return `<button class="kp ${k.path===i?'on':''} ${has?'':'soon'}" ${has?`data-kp="${i}"`:'disabled'}><span style="font-size:22px">${p.ic}</span><span><b>${p.n}</b><small>${has?'':'เร็วๆ นี้'}</small></span></button>`;}).join('')}</div>`;
+  h+=`<label class="f">ชุดคาถาของคุณ — คลิกช่อง แล้วเลือกคาถาจากคลัง</label><div class="kslots">${k.ids.map((id,i)=>{const S=SPELL_LIST[id];return `<button class="ks ${crSlot===i?'on':''}" data-ks="${i}"><em>${'QERF'[i]}</em><i>${S.ic}</i>${S.n}</button>`;}).join('')}<div class="ks ult card slim" style="padding:7px 2px"><em>X</em><i>${ult.ic}</i>${ult.n}</div></div>`;
+  const libOk=PATHS.map((_,i)=>SPELL_LIST.some(x=>x.path===i&&!x.ult));
+  if(!libOk[crLib])crLib=k.path;
+  h+=`<label class="f">คลังคาถา</label><div class="opts" style="margin-bottom:6px">${PATHS.map((p,i)=>libOk[i]?`<button class="obtn ${crLib===i?'on':''}" data-klib="${i}">${p.ic} ${p.n}${i===k.path?' ★':''}</button>`:'').join('')}</div>`;
+  {
+    const L=SPELL_LIST.filter(x=>x.path===crLib&&!x.ult);
+    h+=`<div class="kgrid">${L.map(S=>{
+      const used=k.ids.includes(S.i),blocked=!used&&S.path!==k.path&&off>=2&&SPELL_LIST[k.ids[crSlot]].path===k.path;
+      return `<button class="ksp ${used?'used':''} ${blocked?'off':''}" data-ksp="${S.i}"><span>${S.ic}</span><span><b>${S.n}</b><small>${S.cd} วิ</small></span></button>`;}).join('')}</div>`;
+  }
+  h+=`<div class="kdesc" id="kdesc">${spellDescHTML(SPELL_LIST[k.ids[crSlot]])}</div>`;
+  crPanelSet(h);
+}
+function crAssign(si){
+  const k=parseKit(myKit),ids=k.ids.slice(),cur=ids.indexOf(si);
+  if(cur>=0)ids[cur]=ids[crSlot];
+  ids[crSlot]=si;
+  const nk=cleanKit([k.path,...ids].join('.'));
+  if(parseKit(nk).ids[crSlot]!==si)toast('คาถาสายอื่นใส่ได้ไม่เกิน 2 ช่อง');
+  myKit=nk;crRenderKit();
 }
 function crRenderHouse(){
   const H=HOUSES[myLook.h];
   $('#crInfo').innerHTML=`<small>HOGWARTS HOUSE</small><h1>${H.n}</h1><div class="th">${H.th}</div><div class="ds">${H.ds}</div><div class="po">${H.po} — กดเลือกบ้านอื่นเพื่อเปลี่ยนท่าและบรรยากาศ</div>`;
   $('#crCrests').innerHTML=HOUSES.map((h,i)=>`<button class="ccard ${myLook.h===i?'on':''}" data-house="${i}" style="--hc:${h.gl}">${crestSVG(i,118)}</button>`).join('');
-  [...document.querySelectorAll('.crTints i')].forEach((el,i)=>el.classList.toggle('on',crStep===3&&myLook.h===i));
+  [...document.querySelectorAll('.crTints i')].forEach((el,i)=>el.classList.toggle('on',crStep===4&&myLook.h===i));
   $('#crInfo').style.setProperty('--ht',H.gl);
 }
 function crGo(n){
   if(crStep===1||crStep===2)crSaveName();
-  crStep=n;const el=$('#creator');for(const k of [1,2,3]){el.classList.toggle('s'+k,n===k);$('#crSt'+k).classList.toggle('on',n===k);}
-  if(n===3){crRenderHouse();STAGE.switchT=0;}else crRenderStep1();
-  [...document.querySelectorAll('.crTints i')].forEach((e,i)=>e.classList.toggle('on',n===3&&myLook.h===i));
+  crStep=n;const el=$('#creator');for(const k of [1,2,3,4]){el.classList.toggle('s'+k,n===k);$('#crSt'+k).classList.toggle('on',n===k);}
+  if(n===4){crRenderHouse();STAGE.switchT=0;}else crRenderStep1();
+  [...document.querySelectorAll('.crTints i')].forEach((e,i)=>e.classList.toggle('on',n===4&&myLook.h===i));
 }
 function crSaveName(){const c=$('#cName');if(c){const n=cleanName(c.value);$('#nameIn').value=n;store('wd_name',n);}}
-function crSetHouse(i){if(i===myLook.h&&crStep===3)return;myLook.h=i;STAGE.switchT=0;renderMyHouse();crRenderHouse();}
-function openCreator(first){
-  crSaved=lookStr(myLook);ac();crFirst=!!first;crOpen=true;crTab=0;
-  $('#crTitle').textContent=first?'สร้างตัวละครของคุณ':'แต่งตัวละคร';
+function crSetHouse(i){if(i===myLook.h&&crStep===4)return;myLook.h=i;STAGE.switchT=0;renderMyHouse();crRenderHouse();}
+function openCreator(first,step){
+  crSaved=lookStr(myLook);crKitSaved=myKit;ac();crFirst=!!first;crOpen=true;crTab=0;crSlot=0;crLib=parseKit(myKit).path;crKitOnly=step===3&&!first&&screen==='lobby';
+  $('#crTitle').textContent=crKitOnly?'เลือกสายและคาถา':first?'สร้างตัวละครของคุณ':'แต่งตัวละคร';
   $('#crCancel').classList.toggle('hidden',!!first);
-  document.querySelector('.mprof').classList.add('hidden');document.querySelector('.mleft').classList.add('hidden');
-  $('#creator').classList.remove('hidden');crGo(1);
+  $('#crSteps').classList.toggle('hidden',crKitOnly);
+  $('#crNext3').classList.toggle('hidden',crKitOnly);$('#crBack3').classList.toggle('hidden',crKitOnly);$('#crKitOk').classList.toggle('hidden',!crKitOnly);
+  if(screen==='menu'){document.querySelector('.mprof').classList.add('hidden');document.querySelector('.mleft').classList.add('hidden');}
+  $('#creator').classList.remove('hidden');crGo(step||1);
 }
 function closeCreator(save){
-  if(save){crSaveName();store('wd_look',lookStr(myLook));}
-  else{myLook=parseLook(crSaved);}
-  crOpen=false;renderMyHouse();$('#creator').classList.add('hidden');document.querySelector('.mprof').classList.remove('hidden');document.querySelector('.mleft').classList.remove('hidden');
+  if(save){crSaveName();store('wd_look',lookStr(myLook));store('wd_kit',myKit);}
+  else{myLook=parseLook(crSaved);myKit=crKitSaved;}
+  crOpen=false;renderMyHouse();$('#creator').classList.add('hidden');
+  if(screen==='menu'){document.querySelector('.mprof').classList.remove('hidden');document.querySelector('.mleft').classList.remove('hidden');}
+}
+function lobbyKitSend(){
+  if(NET.isHost&&G&&G.players[NET.myId]){setKit(G.players[NET.myId],myKit);broadcastLobby();}
+  else if(NET.hostConn)try{NET.hostConn.send({t:'kit',k:myKit});}catch(e){}
 }
 $('#creator').addEventListener('click',e=>{
   const tab=e.target.closest('[data-tab]');if(tab){crSaveName();crTab=+tab.dataset.tab;crRenderStep1();return;}
   const hs=e.target.closest('[data-house]');if(hs){crSetHouse(+hs.dataset.house);return;}
+  const kp=e.target.closest('[data-kp]');if(kp){myKit=cleanKit(String(+kp.dataset.kp));crSlot=0;crLib=+kp.dataset.kp;crRenderKit();return;}
+  const kl=e.target.closest('[data-klib]');if(kl){crLib=+kl.dataset.klib;crRenderKit();return;}
+  const ks=e.target.closest('[data-ks]');if(ks){crSlot=+ks.dataset.ks;crRenderKit();return;}
+  const ksp=e.target.closest('[data-ksp]');if(ksp){crAssign(+ksp.dataset.ksp);return;}
   const t=e.target.closest('[data-k]');if(!t)return;
   myLook[t.dataset.k]=+t.dataset.v;crRenderStep1();
 });
+$('#creator').addEventListener('mouseover',e=>{const ksp=e.target.closest('[data-ksp]');if(ksp&&$('#kdesc'))$('#kdesc').innerHTML=spellDescHTML(SPELL_LIST[+ksp.dataset.ksp]);});
 $('#crRand').onclick=()=>{const k={h:myLook.h,wd:myLook.wd,wc:myLook.wc,ws:myLook.ws};myLook=Object.assign(randLook(),k);crRenderStep1();};
 $('#crNext').onclick=()=>crGo(2);
 $('#crBack2').onclick=()=>crGo(1);
 $('#crNext2').onclick=()=>crGo(3);
-$('#crBack').onclick=()=>crGo(2);
+$('#crBack3').onclick=()=>crGo(2);
+$('#crNext3').onclick=()=>crGo(4);
+$('#crBack').onclick=()=>crGo(3);
+$('#crKitOk').onclick=()=>{store('wd_kit',myKit);closeCreator(true);lobbyKitSend();};
 $('#crHat').onclick=()=>{crSetHouse(Math.floor(Math.random()*4));toast('🎩 หมวกคัดสรรเลือกให้คุณ: '+HOUSES[myLook.h].n+'!');};
 $('#crOk').onclick=()=>closeCreator(true);
 $('#crCancel').onclick=()=>closeCreator(false);
 $('#btnLook').onclick=()=>openCreator(false);
+$('#btnKit').onclick=()=>openCreator(false,3);
 if(!store('wd_look'))openCreator(true);
 $('#btnSolo').onclick=()=>{store('wd_name',myName());hostGame(false);};
 $('#btnHost').onclick=()=>{store('wd_name',myName());hostGame(true);};
@@ -4592,7 +5094,80 @@ buildWorld('castle');
 setScreen('menu');
 requestAnimationFrame(frame);
 // ตัวช่วยทดสอบ/ดีบัก (เปิดคอนโซลแล้วพิมพ์ WD)
-window.WD={get G(){return G;},get screen(){return screen;},get VIEW(){return VIEW;},INPUT,NET,render,choosePick,hostToLobby,hostStart,plist,broadcastLobby,setYaw:v=>{yaw=v;},cam,composer,PM3,tx,tz,addPlayer,hostVote,get ROLE(){return ROLE;},get MO(){return MO;},get PARTS(){return PARTS.length;},get AUDIO(){return {AC:AC&&AC.state,sfx:Object.keys(BUF).length,files:Object.values(BUF).reduce((a,b)=>a+b.length,0),music:MUSF.cur,mt:MUSF.els[MUSF.cur]?+MUSF.els[MUSF.cur].el.currentTime.toFixed(1):null,myT:MY.el?+MY.el.currentTime.toFixed(1):null,failed:MUSF.failed,amb:AMB.cur,wind:!!AMB.windBuf,my:MY.list.length};},PROF,gl,scene,bloom,moonL,LPOOL,stage};
+// =====================================================================
+//  เครื่องมือทดสอบสมดุล (ใช้ผ่านคอนโซล WD.bal / WD.dmgTest เท่านั้น ผู้เล่นปกติไม่เห็น)
+// =====================================================================
+// บอทต่อสู้แบบง่ายๆ: เล็งนำเป้า เดินรักษาระยะ+ส่ายไปมา ร่ายคาถาทุกครั้งที่พร้อมและอยู่ในระยะ
+function botBrain(p,dt){
+  const inp=p.inp,foe=plist().find(q=>q!==p&&q.alive&&!q.downed&&q.team!==p.team);
+  if(!foe)return;
+  const dx=foe.x-p.x,dy=foe.y-p.y,d=Math.hypot(dx,dy),t=G.time;
+  const fvx=foe._px===undefined?0:(foe.x-foe._px)/Math.max(dt,0.001),fvy=foe._py===undefined?0:(foe.y-foe._py)/Math.max(dt,0.001);foe._px=foe.x;foe._py=foe.y;
+  const lead=d/950;inp.ax=foe.x+fvx*lead;inp.ay=foe.y+fvy*lead;
+  const ang=Math.atan2(dy,dx),want=d>430?1:d<260?-1:0,st=Math.sin(t*1.7+p.id.length);
+  inp.mx=Math.cos(ang)*want+Math.cos(ang+Math.PI/2)*st*0.8;inp.my=Math.sin(ang)*want+Math.sin(ang+Math.PI/2)*st*0.8;
+  inp.fire=d<900?1:0;
+  const press=k=>{inp.c[k]=(inp.c[k]|0)+1;};
+  p.kitIds.forEach((id,i)=>{
+    const S=SPELLS[id],k=SLOTK[i];if(p.cd[k]>0||p.sil>0)return;
+    const r=S.id==='emberburst'||S.id==='frostnova'?170:S.id==='frostarmor'?500:S.id==='overcharge'?600:S.id==='scorchdash'||S.id==='arcblink'?330:900;
+    const gap=S.id==='scorchdash'||S.id==='arcblink';
+    if(gap?d>420&&d<800:d<r)press(k);
+  });
+  if(p.ult>=100&&d<320)press('x');
+}
+let _obsKeep=null;
+function balArena(on){if(on&&!_obsKeep){_obsKeep=OBS;OBS=[];}else if(!on&&_obsKeep){OBS=_obsKeep;_obsKeep=null;}}
+function balReset(a,b){balArena(true);
+  for(const p of [a,b]){p.maxHp=100;resetBody(p,p===a?MW*0.14:MW*0.86,MH/2);p.hp=p.maxHp;p.ult=0;p.team=p===a?0:1;p.bot=true;p._px=undefined;p.ang=p===a?0:Math.PI;}
+  G.proj=[];G.zones=[];G.strikes=[];G.walls=[];G.chan=[];G.en=[];G.ph='play';G.rw={};G.round=1;G.banner=null;G.result=null;
+}
+function balDuel(kA,kB,rounds,maxT){
+  const ps=plist(),a=ps[0],b=ps[1],res={a:0,b:0,draw:0,tw:0};
+  for(let r=0;r<rounds;r++){
+    const sw=r%2===1; // สลับฝั่งเกิดทุกรอบ ตัดความได้เปรียบของตำแหน่ง
+    setKit(a,sw?kB:kA);setKit(b,sw?kA:kB);balReset(a,b);
+    let t=0;
+    while(t<(maxT||60)){hostTick(1/60);t+=1/60;if(!a.alive||!b.alive)break;}
+    G.ph='play';
+    const aw=a.alive&&!b.alive,bw=b.alive&&!a.alive;
+    if(aw)(sw?res.b++:res.a++);else if(bw)(sw?res.a++:res.b++);else res.draw++;
+    res.tw+=t;
+  }
+  res.avgT=+(res.tw/rounds).toFixed(1);delete res.tw;return res;
+}
+// ลีกทุกคู่: kits = {ชื่อ:สตริงชุดคาถา} → อัตราชนะรวมของแต่ละชุด
+function balTour(kits,rounds,maxT){
+  const names=Object.keys(kits),wins={},games={},pair={};
+  names.forEach(n=>{wins[n]=0;games[n]=0;});
+  for(let i=0;i<names.length;i++)for(let j=i+1;j<names.length;j++){
+    const r=balDuel(kits[names[i]],kits[names[j]],rounds,maxT);
+    pair[names[i]+' v '+names[j]]=`${r.a}-${r.b}-${r.draw} (${r.avgT}s)`;
+    wins[names[i]]+=r.a+r.draw/2;wins[names[j]]+=r.b+r.draw/2;games[names[i]]+=rounds;games[names[j]]+=rounds;
+  }
+  balArena(false);
+  const rate={};names.forEach(n=>rate[n]=Math.round(wins[n]/games[n]*100)+'%');
+  return {rate,pair};
+}
+// ดาเมจ/CC ที่แต่ละคาถาทำใส่เป้านิ่งใน 8 วิ (รวมไฟลุก/โซน) เพื่อเทียบพลังตรงๆ
+function balSpellTest(){
+  const ps=plist(),a=ps[0],b=ps[1],out={};
+  for(const S of SPELL_LIST){
+    setKit(a,String(S.path));balReset(a,b);
+    b.hp=b.maxHp=99999;a.hp=a.maxHp=99999;a.bot=false;b.bot=false;
+    a.kitIds=[S.ult?a.kitIds[0]:S.id,...a.kitIds.slice(1)];
+    b.x=a.x+(S.id==='emberburst'||S.id==='frostnova'||S.ult?110:300);b.y=a.y;a.ang=0;a.inp.ax=b.x;a.inp.ay=b.y;
+    a.inp.c.q=a.inp.c.q|0;
+    const hp0=b.hp;let stun=0,slow=0,t=0;
+    a.ult=100;
+    if(S.ult){a.ultId=S.id;}else{a.cd.q=0;}
+    const press=S.ult?'x':'q';a.inp.c[press]=(a.inp.c[press]|0)+1;
+    for(;t<8;t+=1/60){hostTick(1/60);if(b.stun>0)stun+=1/60;if(b.slowT>0||b.chl>0)slow+=1/60;}
+    out[S.id]={dmg:Math.round(hp0-b.hp),stun:+stun.toFixed(2),slowT:+slow.toFixed(2),cd:S.cd,dmgPerCd:S.cd?+((hp0-b.hp)/S.cd).toFixed(1):0};
+  }
+  return out;
+}
+window.WD={balArena,bal:balDuel,tour:balTour,dmgTest:balSpellTest,hostTick:dt=>hostTick(dt),castSlot:(p,i)=>castSlot(p,i),castUlt:p=>castUlt(p),setKit:(p,k)=>setKit(p,k),SPELLS,SPELL_LIST,PATHS,parseKit,foesOf,emitLog:()=>EVL,damage:(...a)=>damage(...a),get G(){return G;},get screen(){return screen;},get VIEW(){return VIEW;},INPUT,NET,render,choosePick,hostToLobby,hostStart,plist,broadcastLobby,setYaw:v=>{yaw=v;},cam,composer,PM3,tx,tz,addPlayer,hostVote,get ROLE(){return ROLE;},get MO(){return MO;},get PARTS(){return PARTS.length;},get AUDIO(){return {AC:AC&&AC.state,sfx:Object.keys(BUF).length,files:Object.values(BUF).reduce((a,b)=>a+b.length,0),music:MUSF.cur,mt:MUSF.els[MUSF.cur]?+MUSF.els[MUSF.cur].el.currentTime.toFixed(1):null,myT:MY.el?+MY.el.currentTime.toFixed(1):null,failed:MUSF.failed,amb:AMB.cur,wind:!!AMB.windBuf,my:MY.list.length};},PROF,gl,scene,bloom,moonL,LPOOL,stage};
 </script>
 </body>
 </html>
