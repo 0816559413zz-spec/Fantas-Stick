@@ -44,6 +44,20 @@ label.f{display:block;font-size:12px;letter-spacing:2px;color:var(--gold);margin
 input[type=text]{width:100%;padding:10px 12px;border-radius:2px;border:1px solid var(--line);background:rgba(3,5,12,.75);color:var(--text);font:inherit;font-size:16px;outline:none;transition:border-color .15s,box-shadow .15s}
 input[type=text]:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(217,180,90,.15)}
 .colors{display:flex;gap:6px;flex-wrap:wrap}
+.cr.overlay{justify-content:flex-start;background:linear-gradient(90deg,rgba(2,3,8,.88) 0,rgba(2,3,8,.55) 520px,transparent 900px);padding:0 0 0 24px;align-items:stretch}
+.cr .card{width:min(470px,100%);margin:16px 0;overflow:auto;padding:22px 24px}
+.cr h2{margin:0}
+.cr label.f{margin:14px 0 6px}
+.houses{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.hbtn{display:flex;align-items:center;gap:10px;text-align:left;padding:8px 10px}
+.hbtn .hc{display:flex;flex-direction:column;gap:3px}.hbtn .hc i{display:block;width:16px;height:16px;transform:rotate(45deg) scale(.8);border:1px solid rgba(255,255,255,.35)}
+.hbtn b{font-family:var(--fd);font-size:15px;display:block;line-height:1.2}.hbtn small{display:block;color:var(--mute);font-size:12px}
+.hbtn.on,.obtn.on{border-color:var(--gold2);background:linear-gradient(180deg,#2a3a68,#121b36);color:var(--gold2);box-shadow:0 0 14px rgba(243,220,148,.35)}
+.opts{display:flex;gap:6px;flex-wrap:wrap}
+.obtn{padding:7px 12px;font-size:14px}
+.mini{float:right;padding:2px 10px;font-size:12px;letter-spacing:0;margin:-4px 0 0}
+.crnote{font-size:12px;color:var(--mute);margin:6px 0 0;line-height:1.5}
+.myhouse{display:flex;align-items:center;gap:10px;margin:12px 0 10px;font-size:14px;color:var(--text)}
 .sw{width:28px;height:28px;cursor:pointer;border:2px solid rgba(255,255,255,.15);transform:rotate(45deg) scale(.82);transition:transform .15s}
 .sw:hover{transform:rotate(45deg) scale(.95)}
 .sw.on{border-color:var(--gold2);box-shadow:0 0 12px rgba(243,220,148,.6);transform:rotate(45deg) scale(1)}
@@ -180,10 +194,31 @@ body[data-screen=lobby] #voice{top:84px;left:auto;right:24px;width:340px}
   <div class="mprof card slim">
     <h3 class="sec">พ่อมดของคุณ</h3>
     <input type="text" id="nameIn" maxlength="16">
-    <label class="f">สีบ้าน / ชุดคลุม</label>
-    <div class="colors" id="colors"></div>
+    <div class="myhouse" id="myHouse"></div>
+    <button id="btnLook" style="width:100%">🧙 แต่งตัวละคร / เลือกบ้าน</button>
   </div>
   <div class="mver">CO-OP · DUEL · QUIDDITCH · BATTLE ROYALE</div>
+</div>
+
+<!-- ===== สร้างตัวละคร ===== -->
+<div id="creator" class="overlay cr hidden">
+  <div class="card">
+    <h2 id="crTitle">🧙 สร้างตัวละคร</h2>
+    <p class="crnote" id="crSub">เลือกบ้านและหน้าตา — ตัวละครของคุณอยู่ทางขวา หมุนตามเมาส์ • แก้ทีหลังได้จากหน้าแรก</p>
+    <label class="f">ชื่อพ่อมด</label>
+    <input type="text" id="cName" maxlength="16">
+    <label class="f">บ้านฮอกวอตส์ <button class="mini" id="crHat">🎩 หมวกคัดสรร</button></label>
+    <div class="houses" id="crHouse"></div>
+    <p class="crnote">บ้านกำหนดสีเนคไท ผ้าพันคอ ซับในเสื้อคลุม และสีประจำตัวของคุณในเกม</p>
+    <label class="f">ทรงผม</label><div class="opts" id="crHs"></div>
+    <label class="f">สีผม</label><div class="colors" id="crHr"></div>
+    <label class="f">สีผิว</label><div class="colors" id="crSk"></div>
+    <label class="f">สีตา</label><div class="colors" id="crEy"></div>
+    <label class="f">สีเสื้อคลุม</label><div class="colors" id="crCl"></div>
+    <p class="crnote">ในหนังเสื้อคลุมเป็นสีดำ — สีบ้านจะโผล่ที่ซับใน เนคไท และผ้าพันคอ</p>
+    <label class="f">เนคไท</label><div class="opts" id="crTi"></div>
+    <div class="row"><button id="crRand">🎲 สุ่มหน้าตา</button><button id="crCancel" class="hidden">ยกเลิก</button><button id="crOk" class="pri">เสร็จสิ้น</button></div>
+  </div>
 </div>
 
 <!-- ===== คู่มือ ===== -->
@@ -200,6 +235,8 @@ body[data-screen=lobby] #voice{top:84px;left:auto;right:24px;width:340px}
       <li>อยากคุยกัน: กด <b>เปิดไมค์</b> (ในล็อบบี้อยู่ซ้ายล่าง ในเกมอยู่ซ้ายบน — เบราว์เซอร์จะขออนุญาตไมค์ ให้กดอนุญาต) แล้ว<b>กด V ค้าง</b>ตอนพูด</li>
     </ol>
     <p class="gnote">💡 อยู่คนละบ้านก็เล่นด้วยกันได้ • ถ้าเข้าห้องไม่ได้ ลองเช็กรหัส / ให้โฮสต์สร้างห้องใหม่ / ปิด VPN • ห้องหนึ่งเล่นได้สูงสุด 6 คน</p>
+    <h3>🧙 ตัวละคร &amp; บ้านฮอกวอตส์</h3>
+    <p class="gnote">ครั้งแรกที่เข้าเกมจะมีหน้า <b>สร้างตัวละคร</b> — เลือกบ้าน (Gryffindor / Slytherin / Hufflepuff / Ravenclaw หรือให้ 🎩 หมวกคัดสรรสุ่มให้) ทรงผม สีผม สีผิว สีตา สีเสื้อคลุม และเนคไท • สีบ้านจะโผล่ที่เนคไท ผ้าพันคอ ซับในเสื้อคลุม และเป็นสีประจำตัวของคุณ (ป้ายชื่อ แผนที่ย่อ) • แก้ทีหลังได้ที่ปุ่ม <b>แต่งตัวละคร</b> หน้าแรก • เพื่อนจะเห็นหน้าตาของคุณในล็อบบี้และในเกม</p>
     <h3>🎮 ปุ่มควบคุม</h3>
     <table>
       <tr><td><b>คลิกที่จอ</b></td><td>ล็อกเมาส์ให้หมุนกล้องได้ (Esc = ปล่อยเมาส์)</td></tr>
@@ -344,6 +381,26 @@ const MAPS={
 let MAPID='castle',MW=W,MH=H,OBS=MAPS.castle.obs;
 function setMapVars(id){if(!MAPS[id])id='castle';MAPID=id;MW=MAPS[id].W;MH=MAPS[id].H;OBS=MAPS[id].obs;}
 const COLORS=['#d33a2c','#2e9b5f','#2f6fd6','#e0b420','#8e44ad','#e8e8e8','#ff7ab6','#22c1c3'];
+// ---------- ตัวละคร: บ้านฮอกวอตส์ + หน้าตา ----------
+// สีหลัก c ของบ้านใช้เป็นสีประจำตัวทั่วเกม (ป้ายชื่อ แผนที่ย่อ ตารางคะแนน) / c2 = สีรอง (สีเนคไท ผ้าพันคอ)
+const HOUSES=[
+  {n:'Gryffindor',th:'กริฟฟินดอร์',ic:'🦁',c:'#b3202f',c2:'#e8b923',tr:'กล้าหาญ'},
+  {n:'Slytherin',th:'สลิธีริน',ic:'🐍',c:'#1e7a45',c2:'#b9c3cc',tr:'เจ้าเล่ห์'},
+  {n:'Hufflepuff',th:'ฮัฟเฟิลพัฟ',ic:'🦡',c:'#f0c030',c2:'#2b2b2b',tr:'ซื่อสัตย์'},
+  {n:'Ravenclaw',th:'เรเวนคลอ',ic:'🦅',c:'#2358b0',c2:'#b5813f',tr:'ฉลาด'}];
+const HAIRC=['#15100d','#2b1b10','#4a2c17','#8a5a2b','#c9a15a','#eadba0','#b8431f','#6b2d17','#8a8f99','#2d6a8a'];
+const HAIRSTY=['ทรงสั้น','หน้าม้า','ยาวสยาย','มวยผม'];
+const EYEC=['#4a2e16','#171210','#3f7fd0','#3f9a5a','#8a6a2a','#8a94a0','#8a5ad0','#d08a20'];
+const SKINC=['#fbe3cf','#f1d2b0','#e0b48c','#c68e62','#a6704a','#8d5a3b','#6b4128','#4a2c1c'];
+const CLOAKC=['#141218','#1d2b4a','#1f3a2a','#4a1620','#3a2a1a','#3d3f4a','#4a2a6a','#e6e2da'];
+const TIESTY=['ลายตามบ้าน','สีหลักบ้าน','สีรองบ้าน','ไม่ผูกเนคไท'];
+const LOOKK=['h','hr','hs','ey','sk','cl','ti'],LOOKN=[4,HAIRC.length,HAIRSTY.length,EYEC.length,SKINC.length,CLOAKC.length,TIESTY.length];
+function lookStr(l){return LOOKK.map(k=>l[k]).join('.');}
+function parseLook(s){const a=String(s||'').split('.'),o={};LOOKK.forEach((k,i)=>{const v=+a[i];o[k]=Number.isInteger(v)&&v>=0&&v<LOOKN[i]?v:0;});return o;}
+function randLook(seed){const R=mulberry(seed===undefined?Math.floor(Math.random()*1e9):seed),o={};LOOKK.forEach((k,i)=>{o[k]=Math.floor(R()*LOOKN[i]);});if(o.cl>3)o.cl=0;return o;}
+const LOOKS={},LOOKP={};
+function getLook(id){const s=LOOKS[id]||(LOOKS[id]=lookStr(randLook(hashStr(id))));return LOOKP[s]||(LOOKP[s]=parseLook(s));}
+function houseColor(lk){return HOUSES[parseLook(lk).h].c;}
 const TEAMC=['#4da3ff','#ff5a5a'], TEAMN=['ทีมฟ้า','ทีมแดง'];
 const MODES={
   coop:{name:'🗝️ ดันเจียน Co-op',d:'1-6 คน ฝ่าทีละชั้น บอสเรดทุก 5 ชั้น',min:1,max:6},
@@ -396,7 +453,7 @@ const BUFFS=[
 // =====================================================================
 //  เครือข่าย (PeerJS / WebRTC)
 // =====================================================================
-const PREFIX='wizduel-th-v3-';
+const PREFIX='wizduel-th-v4-';
 const NET={peer:null,isHost:false,online:false,myId:'me',conns:new Map(),hostConn:null,code:''};
 let LOBBY=null;
 function genCode(){const c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let s='';for(let i=0;i<5;i++)s+=c[Math.floor(Math.random()*c.length)];return s;}
@@ -439,7 +496,7 @@ function joinGame(code){
     NET.myId=id;
     const c=peer.connect(PREFIX+code,{reliable:true,serialization:'json'});
     NET.hostConn=c;
-    c.on('open',()=>{c.send({t:'hello',name:myName(),color:myColor});setStatus('');});
+    c.on('open',()=>{c.send({t:'hello',name:myName(),look:lookStr(myLook)});setStatus('');});
     c.on('data',clientOnData);
     c.on('close',()=>{alert('หลุดจากห้อง (โฮสต์ออก หรือการเชื่อมต่อขาด)');location.reload();});
   });
@@ -483,12 +540,14 @@ function freshStats(){
     ult:0,kills:0,deaths:0,dmgDealt:0,lastHit:null,bo:null,picked:true,taken:[],
     buffs:{dmg:1,cdr:1,spd:1,life:0,shReg:1,ult:1}};
 }
-function newPlayer(id,name,color){
-  return Object.assign({id,name,color,team:0,lteam:0,x:800,y:500,inp:emptyInput(),last:{}},freshStats());
+function newPlayer(id,name,color,lk){
+  return Object.assign({id,name,color,lk,team:0,lteam:0,x:800,y:500,inp:emptyInput(),last:{}},freshStats());
 }
 function emptyInput(){return {u:0,d:0,l:0,r:0,ax:0,ay:0,ap:0,fire:0,sh:0,jh:0,ch:0,c:{q:0,e:0,r:0,f:0,sp:0,x:0,b:0}};}
-function addPlayer(id,name,color){
-  const p=newPlayer(id,name,color);
+function addPlayer(id,name,color,lk){
+  // หน้าตา: ไม่ส่งมา (บอท) = สุ่มจาก id / สีประจำตัวมาจากสีบ้านเสมอ
+  lk=lookStr(parseLook(lk||lookStr(randLook(hashStr(id)))));LOOKS[id]=lk;color=houseColor(lk);
+  const p=newPlayer(id,name,color,lk);
   const ps=plist(),t0=ps.filter(q=>q.lteam===0).length;
   p.lteam=t0<=ps.length-t0?0:1;
   G.players[id]=p;G.order.push(id);
@@ -496,12 +555,12 @@ function addPlayer(id,name,color){
 }
 function initHostLobby(){
   G={mode:'coop',map:'castle',ph:'lobby',players:{},order:[],proj:[],en:[],feed:[],time:0,pid:0,eid:0,wave:0,round:1,rw:{},teamScore:[0,0],timer:0,banner:null,result:null,queue:[],escale:1,espd:1};
-  const me=addPlayer(NET.myId,myName(),myColor);
+  const me=addPlayer(NET.myId,myName(),myColor,lookStr(myLook));
   me.inp=INPUT;
   broadcastLobby();
   setScreen('lobby');
 }
-function lobbyMsg(){return {t:'lobby',ph:G.ph,mode:G.mode,map:G.map,code:NET.code,online:NET.online,host:NET.myId,players:plist().map(p=>({id:p.id,n:p.name,c:p.color,tm:p.lteam}))};}
+function lobbyMsg(){return {t:'lobby',ph:G.ph,mode:G.mode,map:G.map,code:NET.code,online:NET.online,host:NET.myId,players:plist().map(p=>({id:p.id,n:p.name,c:p.color,lk:p.lk,tm:p.lteam}))};}
 function broadcastLobby(){const m=lobbyMsg();sendAll(m);onLobby(m);}
 
 function hostOnData(conn,d){
@@ -512,7 +571,7 @@ function hostOnData(conn,d){
     if(G.ph!=='lobby')return reject('เกมกำลังเล่นอยู่ รอจบเกมแล้วค่อยเข้าใหม่นะ');
     if(plist().length>=6)return reject('ห้องเต็มแล้ว (สูงสุด 6 คน)');
     NET.conns.set(id,conn);
-    const p=addPlayer(id,cleanName(d.name),cleanColor(d.color));
+    const p=addPlayer(id,cleanName(d.name),null,String(d.look||'').slice(0,40));
     conn.send({t:'welcome',id});
     toast(p.name+' เข้าห้องแล้ว');
     broadcastLobby();
@@ -1960,7 +2019,7 @@ function setScreen(s){
   cv.style.cursor=s==='game'?'crosshair':'default';
 }
 function onLobby(m){
-  LOBBY=m;
+  LOBBY=m;for(const p of m.players)if(p.lk)LOOKS[p.id]=p.lk;
   if(m.map&&m.map!==builtMap){setMapVars(m.map);buildWorld(m.map);}
   if(m.ph==='lobby'){if(screen!=='lobby')setScreen('lobby');renderLobby();}
   voiceSync();updateVoiceUI();
@@ -2634,8 +2693,6 @@ function updateCloth(c,lvx,lvz,speed,now,dt){
 }
 
 // ---------- โมเดลนักเรียนเวทมนตร์ ----------
-const HAIRS=['#2b1b10','#4a2c17','#0f0d0c','#8a5a2b','#c9a15a','#6b2d17'];
-const SKINS=['#f1d2b0','#e0b48c','#c68e62','#8d5a3b','#f5dcc4'];
 function hashStr(s){let h=7;for(const ch of String(s))h=(h*31+ch.charCodeAt(0))|0;return Math.abs(h);}
 function stripeTex(c1,c2){const t=texCanvas(32,64,(g)=>{for(let i=0;i<8;i++){g.fillStyle=i%2?c2:c1;g.fillRect(0,i*8,32,8);}});t.wrapS=t.wrapT=THREE.RepeatWrapping;return t;}
 function shieldMat(){
@@ -2652,11 +2709,11 @@ function addStatus(g,h){
   stars.position.y=h;stars.visible=false;g.add(stars);
   return stars;
 }
-function makeStudent(color,id){
-  const hs=hashStr(id),g=new THREE.Group(),b=new THREE.Group();g.add(b);
-  const house=new THREE.Color(color);
+function makeStudent(look,id){
+  const g=new THREE.Group(),b=new THREE.Group();g.add(b);
+  const H=HOUSES[look.h],house=new THREE.Color(H.c),cloakCol=CLOAKC[look.cl];
   const M=(c,r,ex)=>new THREE.MeshStandardMaterial(Object.assign({color:c,roughness:r===undefined?0.85:r},ex||{}));
-  const blackM=M('#141218',0.92),skinM=M(SKINS[hs%SKINS.length],0.7),hairM=M(HAIRS[(hs>>3)%HAIRS.length],0.8);
+  const blackM=M(cloakCol,0.92),skinM=M(SKINC[look.sk],0.7),hairM=M(HAIRC[look.hr],0.8);
   const add=(p,geo,mat,x,y,z)=>{const m=new THREE.Mesh(geo,mat);m.position.set(x,y,z);p.add(m);return m;};
   const legs=[];
   for(const s of [-1,1]){
@@ -2667,23 +2724,41 @@ function makeStudent(color,id){
   }
   add(b,new THREE.CylinderGeometry(0.25,0.23,0.72,14),M('#3b3b44'),0,1.2,0);
   add(b,new THREE.CylinderGeometry(0.13,0.16,0.08,12),M('#eeeeee'),0,1.57,0.02);
-  add(b,new THREE.BoxGeometry(0.075,0.34,0.03),M(house,0.6),0,1.36,0.245);
+  // เนคไท (หัวเงื่อน + แถบห้อย) ตามสไตล์ที่เลือก
+  if(look.ti!==3){
+    const tm=look.ti===0?new THREE.MeshStandardMaterial({map:stripeTex(H.c,H.c2),roughness:0.6}):M(look.ti===1?H.c:H.c2,0.6);
+    add(b,new THREE.BoxGeometry(0.085,0.07,0.05),M(look.ti===2?H.c2:H.c,0.6),0,1.51,0.243);
+    add(b,new THREE.BoxGeometry(0.095,0.3,0.026),tm,0,1.34,0.252);
+  }
   add(b,new THREE.CylinderGeometry(0.075,0.085,0.14,10),skinM,0,1.64,0);
   add(b,new THREE.SphereGeometry(0.235,20,16),skinM,0,1.86,0).scale.set(1,1.08,1);
-  for(const s of [-1,1])add(b,new THREE.SphereGeometry(0.028,8,6),M('#1a1410',0.3),s*0.085,1.88,0.215);
-  add(b,new THREE.SphereGeometry(0.255,20,14,0,Math.PI*2,0,Math.PI*0.56),hairM,0,1.88,-0.02);
-  add(b,new THREE.BoxGeometry(0.36,0.08,0.12),hairM,0,2.03,0.16).rotation.x=0.45;
-  const scM=new THREE.MeshStandardMaterial({map:stripeTex('#'+house.getHexString(),'#d8b04a'),roughness:0.9});
+  // ตา: ตาขาว + ม่านตาสีที่เลือก + รูม่านตา
+  const eyeWM=M('#f4f2ee',0.4),irisM=M(EYEC[look.ey],0.3),pupM=M('#0a0806',0.3);
+  for(const s of [-1,1]){
+    add(b,new THREE.SphereGeometry(0.038,10,8),eyeWM,s*0.085,1.865,0.2);
+    add(b,new THREE.SphereGeometry(0.028,10,8),irisM,s*0.085,1.865,0.221);
+    add(b,new THREE.SphereGeometry(0.014,8,6),pupM,s*0.085,1.865,0.238);
+  }
+  // ผม: ฝาบนสุด + ครึ่งหลัง (เปิดหน้าไว้) + ทรงตามที่เลือก
+  add(b,new THREE.SphereGeometry(0.255,20,12,0,Math.PI*2,0,Math.PI*0.34),hairM,0,1.88,-0.02);
+  add(b,new THREE.SphereGeometry(0.255,20,14,Math.PI,Math.PI,0,Math.PI*(look.hs===0?0.5:0.62)),hairM,0,1.88,-0.02);
+  if(look.hs===1)add(b,new THREE.BoxGeometry(0.36,0.08,0.12),hairM,0,2.03,0.16).rotation.x=0.45;
+  if(look.hs===2){
+    add(b,new THREE.BoxGeometry(0.42,0.62,0.13),hairM,0,1.66,-0.2);
+    for(const s of [-1,1])add(b,new THREE.BoxGeometry(0.06,0.44,0.15),hairM,s*0.215,1.72,-0.02);
+  }
+  if(look.hs===3)add(b,new THREE.SphereGeometry(0.11,12,10),hairM,0,2.15,-0.07);
+  const scM=new THREE.MeshStandardMaterial({map:stripeTex(H.c,H.c2),roughness:0.9});
   add(b,new THREE.TorusGeometry(0.17,0.075,8,18),scM,0,1.6,0).rotation.x=Math.PI/2;
   const ends=[];
   for(const [x,len] of [[0.08,0.5],[-0.04,0.42]]){
     const E=new THREE.Group();E.position.set(x,1.57,0.2);b.add(E);
     add(E,new THREE.BoxGeometry(0.13,len,0.035),scM,0,-len/2,0);ends.push(E);
   }
-  const cloak=makeCloak('#141218',house.clone().multiplyScalar(0.5),0.33,0.82,1.5,0.75);
+  const cloak=makeCloak(cloakCol,house.clone().multiplyScalar(0.7),0.33,0.82,1.5,0.75);
   cloak.outer.position.y=cloak.inner.position.y=0.83;b.add(cloak.outer,cloak.inner);
   const hood=add(b,new THREE.SphereGeometry(0.3,14,10,0,Math.PI*2,0,Math.PI/2),blackM,0,1.52,-0.2);hood.rotation.x=-1.9;hood.scale.set(1,0.6,1);
-  const sleeveM=M('#141218',0.92,{side:THREE.DoubleSide});
+  const sleeveM=M(cloakCol,0.92,{side:THREE.DoubleSide});
   const mkArm=s=>{
     const A=new THREE.Group();A.position.set(s*0.33,1.5,0);b.add(A);
     add(A,new THREE.CylinderGeometry(0.085,0.16,0.62,12,1,true),sleeveM,0,-0.3,0);
@@ -3084,10 +3159,10 @@ function stageSpots(L){
   }
   return {out,empty};
 }
-function stageChar(id,color){
-  let o=STAGE.chars.get(id);
-  if(o&&o.color!==color){stage.remove(o.g);disposeObj(o.g);STAGE.chars.delete(id);o=null;}
-  if(!o){o=makeStudent(color,id);stage.add(o.g);o.color=color;o.joinT=1.6;o.x=null;STAGE.chars.set(id,o);}
+function stageChar(id,lk){
+  let o=STAGE.chars.get(id),px=null,had=false;
+  if(o&&o.lk!==lk){px=o.x;had=true;stage.remove(o.g);disposeObj(o.g);STAGE.chars.delete(id);o=null;}
+  if(!o){const re=had&&id==='me-preview';o=makeStudent(parseLook(lk),id);stage.add(o.g);o.lk=lk;o.joinT=re?0:1.6;o.x=re?px:null;STAGE.chars.set(id,o);}
   return o;
 }
 function stageIdle(o,now,dt,i){
@@ -3109,11 +3184,11 @@ function renderStage(dt,now){
   const want=new Set(),rows=[];
   if(lob){
     const {out,empty}=stageSpots(LOBBY);
-    for(const s of out){const o=stageChar(s.p.id,s.p.c);want.add(s.p.id);rows.push({o,s,p:s.p});}
+    for(const s of out){const o=stageChar(s.p.id,s.p.lk||lookStr(getLook(s.p.id)));want.add(s.p.id);rows.push({o,s,p:s.p});}
     STAGE.slotRings.forEach((r,i)=>{const e=empty[i];r.visible=!!e;if(e){r.position.x=e.x;r.position.z=e.z;r.material.opacity=0.5+0.2*Math.sin(now/400+i);}});
     STAGE.empty=empty;
   }else{
-    const o=stageChar('me-preview',myColor);want.add('me-preview');
+    const o=stageChar('me-preview',lookStr(myLook));want.add('me-preview');
     rows.push({o,s:{x:0,z:0},p:null});
     STAGE.slotRings.forEach(r=>r.visible=false);STAGE.empty=[];
   }
@@ -3133,6 +3208,7 @@ function renderStage(dt,now){
   // กล้อง: เมนู = ตัวเราอยู่ฝั่งขวา / ล็อบบี้ = มองทั้งแท่น
   const sway=Math.sin(now/5200)*0.15;
   if(lob){const mx=Math.max(0,...rows.map(r=>Math.abs(r.s.x)),...STAGE.empty.map(e=>Math.abs(e.x))),dist=clamp((mx+1.1)/(0.3*cam.aspect),6.5,13);cam.position.set(sway,1.5+dist*0.1,dist);cam.lookAt(0,1.45,0);}
+  else if(crOpen){cam.position.set(-0.45+sway*0.4,1.8,3.9);cam.lookAt(-0.45,1.5,0);}
   else{cam.position.set(-0.85+sway*0.5,1.55,5.6);cam.lookAt(-0.85,1.12,0);}
   rpass.scene=stage;gl.shadowMap.needsUpdate=true;composer.render();rpass.scene=scene;
   if(lob)drawStageLabels(rows,team);
@@ -3183,7 +3259,7 @@ function syncPlayers(P,mode,now,dt){
   for(const p of P){
     seen.add(p.id);
     let o=PM3.get(p.id);
-    if(!o){o=makeStudent(p.c,p.id);PM3.set(p.id,o);}
+    if(!o){o=makeStudent(getLook(p.id),p.id);PM3.set(p.id,o);}
     const g=o.g;
     g.visible=p.al&&!(p.iv&&!p.ds&&Math.floor(now/80)%2===0);
     // ผี (หาลอร์ดโวลเดอมอร์): คนเป็นมองไม่เห็นผี / ผีเห็นกันเป็นเงาจางๆ
@@ -3521,7 +3597,7 @@ function syncModeObjs(v,P,me,now,dt){
   if(M.bodies)for(const [id,x,y,c] of M.bodies){
     bs.add(id);
     if(!MO.bodies.has(id)){
-      const o=makeStudent(c,id);
+      const o=makeStudent(getLook(id),id);
       o.b.rotation.x=-1.45;o.b.position.y=0.35;o.g.rotation.y=hashStr(id)%6;o.g.position.set(tx(x),0,tz(y));o.ring.visible=false;
       const pool=new THREE.Mesh(discGeo,new THREE.MeshBasicMaterial({color:'#5a0a0a',transparent:true,opacity:0.6,depthWrite:false}));pool.scale.setScalar(1.3);pool.position.y=0.03;o.g.add(pool);
       MO.bodies.set(id,o);
@@ -3959,13 +4035,45 @@ function drawBoard(v,P){
 // =====================================================================
 //  เมนู / ล็อบบี้ (DOM)
 // =====================================================================
-let myColor=store('wd_color')||COLORS[Math.floor(Math.random()*COLORS.length)];
+// ตัวละครของฉัน (เก็บในเครื่อง: wd_look) — ครั้งแรกที่เข้าเกมจะเปิดหน้าสร้างตัวละครให้
+let myLook=parseLook(store('wd_look')),myColor=HOUSES[myLook.h].c;
 function myName(){return cleanName($('#nameIn').value);}
 $('#nameIn').value=store('wd_name')||('พ่อมด'+Math.floor(Math.random()*900+100));
 $('#nameIn').addEventListener('change',()=>store('wd_name',myName()));
-function renderColors(){$('#colors').innerHTML=COLORS.map(c=>`<div class="sw ${c===myColor?'on':''}" data-c="${c}" style="background:${c}"></div>`).join('');}
-renderColors();
-$('#colors').addEventListener('click',e=>{const c=e.target.dataset.c;if(c){myColor=c;store('wd_color',c);renderColors();}});
+function renderMyHouse(){const H=HOUSES[myLook.h];myColor=H.c;$('#myHouse').innerHTML=`<span style="font-size:26px">${H.ic}</span><span><b style="color:var(--gold2)">${H.n}</b><br><small style="color:var(--mute)">${H.th} • ${H.tr}</small></span><span style="margin-left:auto;display:flex;gap:4px"><i class="dot" style="background:${H.c}"></i><i class="dot" style="background:${H.c2};border:1px solid rgba(255,255,255,.3)"></i></span>`;}
+renderMyHouse();
+// ----- หน้าสร้าง/แต่งตัวละคร -----
+let crSaved=null,crOpen=false;
+function crRender(){
+  const L=myLook;
+  $('#crHouse').innerHTML=HOUSES.map((H,i)=>`<button class="hbtn ${L.h===i?'on':''}" data-k="h" data-v="${i}"><span class="hc"><i style="background:${H.c}"></i><i style="background:${H.c2}"></i></span><span><b>${H.ic} ${H.n}</b><small>${H.th} • ${H.tr}</small></span></button>`).join('');
+  const sw=(id,k,arr)=>{$('#'+id).innerHTML=arr.map((c,i)=>`<div class="sw ${L[k]===i?'on':''}" data-k="${k}" data-v="${i}" style="background:${c}"></div>`).join('');};
+  const bt=(id,k,arr)=>{$('#'+id).innerHTML=arr.map((t,i)=>`<button class="obtn ${L[k]===i?'on':''}" data-k="${k}" data-v="${i}">${t}</button>`).join('');};
+  bt('crHs','hs',HAIRSTY);sw('crHr','hr',HAIRC);sw('crSk','sk',SKINC);sw('crEy','ey',EYEC);sw('crCl','cl',CLOAKC);bt('crTi','ti',TIESTY);
+}
+function crChanged(){renderMyHouse();crRender();}
+function openCreator(first){
+  crSaved=lookStr(myLook);ac();
+  $('#crTitle').textContent=first?'🧙 สร้างตัวละครของคุณ':'🧙 แต่งตัวละคร';
+  $('#crCancel').classList.toggle('hidden',!!first);
+  $('#cName').value=$('#nameIn').value;
+  crRender();$('#creator').classList.remove('hidden');crOpen=true;document.querySelector('.mprof').classList.add('hidden');
+}
+function closeCreator(save){
+  if(save){store('wd_look',lookStr(myLook));const n=cleanName($('#cName').value);$('#nameIn').value=n;store('wd_name',n);}
+  else{myLook=parseLook(crSaved);}
+  renderMyHouse();$('#creator').classList.add('hidden');crOpen=false;document.querySelector('.mprof').classList.remove('hidden');
+}
+$('#creator').addEventListener('click',e=>{
+  const t=e.target.closest('[data-k]');if(!t)return;
+  myLook[t.dataset.k]=+t.dataset.v;crChanged();
+});
+$('#crRand').onclick=()=>{myLook=randLook();crChanged();};
+$('#crHat').onclick=()=>{myLook.h=Math.floor(Math.random()*4);crChanged();toast('🎩 หมวกคัดสรรเลือกให้คุณ: '+HOUSES[myLook.h].n+'!');};
+$('#crOk').onclick=()=>closeCreator(true);
+$('#crCancel').onclick=()=>closeCreator(false);
+$('#btnLook').onclick=()=>openCreator(false);
+if(!store('wd_look'))openCreator(true);
 $('#btnSolo').onclick=()=>{store('wd_name',myName());hostGame(false);};
 $('#btnHost').onclick=()=>{store('wd_name',myName());hostGame(true);};
 $('#btnJoin').onclick=()=>{store('wd_name',myName());joinGame($('#codeIn').value);};

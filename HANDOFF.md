@@ -44,7 +44,7 @@ Personal, non-commercial fan project made with/for the user and their friends. U
 
 ## 3. Tech stack (all from CDN, no build step)
 - **Three.js 0.160.0** via importmap (`unpkg.com/three@0.160.0`) + addons: EffectComposer, RenderPass, UnrealBloomPass, OutputPass. `gl.useLegacyLights=true` (light intensities tuned for legacy mode).
-- **PeerJS 1.5.4** (classic script, global `Peer`) — WebRTC data + voice. Uses the public PeerJS cloud for signaling only. Room id = `PREFIX + 5-char code`. **`PREFIX='wizduel-th-v3-'` — bump the version whenever the network protocol/snapshot changes** so old clients can't join new hosts.
+- **PeerJS 1.5.4** (classic script, global `Peer`) — WebRTC data + voice. Uses the public PeerJS cloud for signaling only. Room id = `PREFIX + 5-char code`. **`PREFIX='wizduel-th-v4-'` — bump the version whenever the network protocol/snapshot changes** so old clients can't join new hosts.
 - **Audio files in `audio/`** (14 MB, OGG Vorbis, credits in `audio/CREDITS.md` + in-game guide): `music/` (menu, castle, forest, pitch, boss, imp + victory/defeat stingers), `sfx/<name>_<n>.ogg` (73 files for 39 sound names), `amb/` (wind loop for brooms, castle crickets, forest). Loaded after the first click (`ac()` → `loadSfx()`); any sound that fails or has no file falls back to the original Web Audio synth in `snd()`. Music streams through `<audio>` elements (`MUSF`, not decoded into RAM); SFX/ambience are decoded buffers. Kevin MacLeod tracks are **CC BY 4.0 — the credit in the guide must stay**.
 - **"เพลงของฉัน"** (menu): player picks local audio files → stored in IndexedDB `wd_music` → played via `<audio>` instead of game music, only on that PC (never uploaded). `N` = next song, "ล้าง" clears. This is the answer for "can we use Harry Potter music": players use their own files locally; never commit copyrighted music to the public repo.
 - Google Fonts: **Cinzel** (Latin display — logo, headings, countdown; caps-only) + **Kanit** (all Thai text). Font stack `'Cinzel','Kanit'` lets Latin use Cinzel and Thai fall back to Kanit.
@@ -61,7 +61,8 @@ Personal, non-commercial fan project made with/for the user and their friends. U
 - **Graphics quality** `QUAL` (menu button "กราฟิก", stored in `localStorage wd_gfx`): `auto` (default; `qualTick` drops render scale 1→0.55 when frames average >24 ms, raises it back when <18 ms), `high` (DPR up to 1.5, shadows every frame), `low` (scale 0.7, no shadows, no bloom). `applyQuality()` applies it.
 - Camera: pointer lock; mouse → `yaw/pitch`; WASD is camera-relative (`INPUT.mx/my`); aim `INPUT.ax/ay` + pitch `INPUT.ap`. Spells **auto-lock vertically** onto a foe within ~0.3 rad of the aim (`shoot()`).
 
-## 5. Code map (`index.html`, approximate line numbers — grep the section headers)
+## 5. Code map
+(Character data/helpers: `HOUSES`, `lookStr/parseLook/randLook/getLook` right after `COLORS` (~line 346); `makeStudent(look,id)` ~2670; creator UI JS right before the `btnSolo` wiring at the end of the file.) (`index.html`, approximate line numbers — grep the section headers)
 | Line | Section (Thai header) | What |
 |---|---|---|
 | ~10 | `<style>` | UI theme tokens on `:root` (`--gold`, `--panel`, `--corners` gold corner brackets, `--fd` display font). `.card` = gold-framed panel used everywhere. Menu `.mleft/.mi/.mprof/.myrow`, lobby `.ltop/.lmodes/.lright/.mcard`, buff cards `.boon .bc` |
@@ -83,7 +84,7 @@ Personal, non-commercial fan project made with/for the user and their friends. U
 | ~3427 | `ฝั่งแสดงผลของโหมดพิเศษ` | `syncModeObjs`, roles, meeting UI |
 | ~3599 | | `render()` loop (+ own footsteps) |
 | ~3652 | `ชิ้นส่วน HUD` | `plate`, `frameBox`, `drawBossBar`, `spellDia`, `thinBar`, `drawHUD`, `drawModeHUD`, `drawBottom`, `drawBoard` |
-| ~3813 | `drawMinimap` | **minimap** bottom-left (above the player badge): rotating circle (forward = up), view radius `MM.view`=620 sim px, draws OBS, enemies (red), players (team colour in tdm/quid), race rings, quid ball/snitch, BR zone, Voldemort tasks/bodies, "N" north marker; hidden while Tab scoreboard is open |
+| ~3840 | `drawMinimap` | **minimap** bottom-left (above the player badge): rotating circle (forward = up), view radius `MM.view`=620 sim px, draws OBS, enemies (red), players (team colour in tdm/quid), race rings, quid ball/snitch, BR zone, Voldemort tasks/bodies, "N" north marker; hidden while Tab scoreboard is open |
 | ~3960 | `เมนู / ล็อบบี้ (DOM)` | menu wiring (graphics button, my-music input, UI click sounds), lobby, `renderLobby`, `window.WD` |
 
 ## 6. Game content (current)
@@ -121,7 +122,7 @@ Can't cast on a broom except in Quidditch/race. Stun or web knocks you off the b
 User asked about real Harry Potter music: told them not to put it in the public repo (copyright, takedown risk); built the "เพลงของฉัน" button instead (local files, IndexedDB, never uploaded).
 
 ## 10. Ideas the user may ask for next
-(Minimap done 2026-10-17.) House-crest picker in the menu, vents/secret passages for Voldemort, task mini-games, 3-player Voldemort mode, more bosses (basilisk), more maps (Hogsmeade, Great Hall), cosmetics, ranked/MMR, mobile controls.
+(Minimap done 2026-10-17.) Vents/secret passages for Voldemort, task mini-games, 3-player Voldemort mode, more bosses (basilisk), more maps (Hogsmeade, Great Hall), cosmetics, ranked/MMR, mobile controls.
 
 ## 11. Changelog
 - 2026-10-16 — v1 2D prototype → 3D third-person (Three.js) → bloom, cloth, student uniforms, forest map.
@@ -133,4 +134,5 @@ User asked about real Harry Potter music: told them not to put it in the public 
 - 2026-10-16 — **Performance pass** (~3x faster frames): half-res bloom, no canvas MSAA, pixel ratio ≤1, shadows every 2nd frame at 2048, static mesh batching, cached stone materials, fewer pool lights, auto/high/low graphics setting with auto resolution scaling, `WD.PROF` profiler. Audio asset research report added.
 - 2026-10-17 — **Real audio**: CC0/CC-BY music per map + boss + imp + win/lose stingers, 73 CC0 SFX with synth fallback, footsteps, UI click/hover sounds, ambience loops, real wind for brooms, "เพลงของฉัน" local-music button (IndexedDB, N = next), credits section in the guide + `audio/CREDITS.md`.
 - 2026-10-17 (session 2) — **Minimap** (แผนที่ย่อมุมซ้ายล่าง) via `drawMinimap`; no protocol change. Tested solo+bots in coop (castle/forest), quid, race, br, imp, ffa: no console errors. Role secrets are not shown on it (all other players use their own/team colour).
+- 2026-10-17 (session 2) — **Character creator + Hogwarts houses** (protocol bumped to `v4`). `HOUSES` (Gryffindor/Slytherin/Hufflepuff/Ravenclaw; `c` primary, `c2` secondary), look options `HAIRC/HAIRSTY/EYEC/SKINC/CLOAKC/TIESTY`; a look = string `h.hr.hs.ey.sk.cl.ti` (`lookStr/parseLook/randLook/getLook`, `LOOKS[id]`). `makeStudent(look,id)` builds hair (4 styles), eyes (white+iris+pupil), proper tie, cloak colour (lining/scarf/tie from house). Player colour `p.color`/`p.c` is now always the house primary (host derives it from the look; the `color` arg of `addPlayer` is ignored). Client sends `hello.look`; looks travel in the lobby message (`players[].lk`) and are NOT in the per-tick snapshot — renderers use `getLook(id)`. Creator overlay `#creator` (opens automatically when `localStorage wd_look` is missing; button `#btnLook` on the profile card), live preview = `me-preview` on the menu stage (closer camera while `crOpen`). Guide section added. Verified: creator, lobby with 5 different looks, FFA start, no console errors. Not verified: real online join (look over PeerJS).
 - 2026-10-17 — HANDOFF: added §0 questions to ask the user at the start of the next session; refreshed code map and user notes.
