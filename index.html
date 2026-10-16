@@ -44,19 +44,49 @@ label.f{display:block;font-size:12px;letter-spacing:2px;color:var(--gold);margin
 input[type=text]{width:100%;padding:10px 12px;border-radius:2px;border:1px solid var(--line);background:rgba(3,5,12,.75);color:var(--text);font:inherit;font-size:16px;outline:none;transition:border-color .15s,box-shadow .15s}
 input[type=text]:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(217,180,90,.15)}
 .colors{display:flex;gap:6px;flex-wrap:wrap}
-.cr.overlay{justify-content:flex-start;background:linear-gradient(90deg,rgba(2,3,8,.88) 0,rgba(2,3,8,.55) 520px,transparent 900px);padding:0 0 0 24px;align-items:stretch}
-.cr .card{width:min(470px,100%);margin:16px 0;overflow:auto;padding:22px 24px}
-.cr h2{margin:0}
-.cr label.f{margin:14px 0 6px}
-.houses{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.hbtn{display:flex;align-items:center;gap:10px;text-align:left;padding:8px 10px}
-.hbtn .hc{display:flex;flex-direction:column;gap:3px}.hbtn .hc i{display:block;width:16px;height:16px;transform:rotate(45deg) scale(.8);border:1px solid rgba(255,255,255,.35)}
-.hbtn b{font-family:var(--fd);font-size:15px;display:block;line-height:1.2}.hbtn small{display:block;color:var(--mute);font-size:12px}
-.hbtn.on,.obtn.on{border-color:var(--gold2);background:linear-gradient(180deg,#2a3a68,#121b36);color:var(--gold2);box-shadow:0 0 14px rgba(243,220,148,.35)}
-.opts{display:flex;gap:6px;flex-wrap:wrap}
-.obtn{padding:7px 12px;font-size:14px}
-.mini{float:right;padding:2px 10px;font-size:12px;letter-spacing:0;margin:-4px 0 0}
+#creator{position:fixed;inset:0;z-index:4;pointer-events:none;overflow:hidden}
+#creator>*{pointer-events:auto}
+#creator .crTints,#creator .crShade{pointer-events:none}
+.crTints,.crShade{position:absolute;inset:0}
+.crTints i{position:absolute;inset:0;opacity:0;transition:opacity .7s}
+.crTints i.on{opacity:1}
+.crShade{background:linear-gradient(90deg,rgba(2,3,8,.86) 0,rgba(2,3,8,.55) 36%,transparent 64%),linear-gradient(0deg,rgba(2,3,8,.75),transparent 34%),linear-gradient(180deg,rgba(2,3,8,.55),transparent 18%)}
+.crTop{position:absolute;left:34px;top:20px}
+.crTop small{display:block;letter-spacing:7px;color:var(--gold);font-size:11px;font-family:var(--fd)}
+.crTop h2{margin:2px 0 0;font-size:34px;font-family:var(--fd)}
+.crSteps{position:absolute;left:50%;top:26px;transform:translateX(-50%);display:flex;align-items:center;gap:10px;font-size:14px;color:var(--mute)}
+.crSteps b{display:inline-flex;align-items:center;gap:8px;padding:6px 16px;border:1px solid var(--line);background:rgba(7,11,24,.8);font-weight:400}
+.crSteps b.on{border-color:var(--gold2);color:var(--gold2);box-shadow:0 0 14px rgba(243,220,148,.3)}
+.crSteps i{width:34px;height:1px;background:var(--gold);opacity:.5}
+.crClose{position:absolute;right:22px;top:20px;padding:6px 12px;font-size:14px}
+.crTabs{position:absolute;left:28px;top:118px;display:flex;flex-direction:column;gap:12px}
+.crTab{position:relative;width:70px;padding:10px 0 7px;font-size:12px;color:var(--mute);background:rgba(7,11,24,.85);display:flex;flex-direction:column;align-items:center;gap:2px}
+.crTab span{font-size:24px;line-height:1}
+.crTab.on{border-color:var(--gold2);color:var(--gold2);background:linear-gradient(180deg,#2a3a68,#121b36);box-shadow:0 0 16px rgba(243,220,148,.3)}
+.crPanel{position:absolute;left:112px;top:112px;width:340px;max-height:calc(100% - 232px);overflow:auto;margin:0}
+.crPanel h3.sec{font-size:20px;letter-spacing:2px;margin:0 0 4px;color:var(--gold2);text-transform:none}
 .crnote{font-size:12px;color:var(--mute);margin:6px 0 0;line-height:1.5}
+.crPanel label.f{margin:14px 0 8px}
+.crPanel .colors{gap:8px;padding-left:3px;margin:2px 0 6px}
+.crPanel .sw{width:24px;height:24px}
+.opts{display:flex;gap:6px;flex-wrap:wrap}
+.obtn{padding:8px 13px;font-size:14px}
+.obtn.on{border-color:var(--gold2);background:linear-gradient(180deg,#2a3a68,#121b36);color:var(--gold2);box-shadow:0 0 14px rgba(243,220,148,.35)}
+.crBar{position:absolute;left:112px;bottom:26px;width:340px;display:flex;gap:10px}
+.crBar button{flex:1;padding:12px 8px}
+.s2 .crBar{left:50%;transform:translateX(-50%);width:min(620px,92vw)}
+.crInfo{position:absolute;left:44px;top:110px;width:min(400px,40vw)}
+.crInfo small{display:block;letter-spacing:6px;color:var(--gold);font-size:12px;font-family:var(--fd)}
+.crInfo h1{text-align:left;font-size:54px;margin:4px 0 2px;transition:opacity .3s}
+.crInfo .th{font-size:20px;color:var(--text);margin:0 0 10px}
+.crInfo .ds{font-size:16px;color:var(--gold2);margin:0 0 4px}
+.crInfo .po{font-size:13px;color:var(--mute)}
+.crCrests{position:absolute;left:50%;bottom:98px;transform:translateX(-50%);display:flex;gap:22px;align-items:flex-end}
+.ccard{background:none;border:none;box-shadow:none;padding:0;transition:transform .25s,filter .25s;filter:grayscale(.55) brightness(.7);transform:scale(.86);transform-origin:bottom center}
+.ccard:hover{filter:grayscale(.15) brightness(.95);transform:scale(.94);box-shadow:none}
+.ccard.on{filter:none;transform:translateY(-10px) scale(1.12);box-shadow:none}
+.ccard.on .crest{filter:drop-shadow(0 0 16px var(--hc))}
+.s1 .crStep2only,.s2 .crStep1only{display:none!important}
 .myhouse{display:flex;align-items:center;gap:10px;margin:12px 0 10px;font-size:14px;color:var(--text)}
 .sw{width:28px;height:28px;cursor:pointer;border:2px solid rgba(255,255,255,.15);transform:rotate(45deg) scale(.82);transition:transform .15s}
 .sw:hover{transform:rotate(45deg) scale(.95)}
@@ -201,24 +231,18 @@ body[data-screen=lobby] #voice{top:84px;left:auto;right:24px;width:340px}
 </div>
 
 <!-- ===== สร้างตัวละคร ===== -->
-<div id="creator" class="overlay cr hidden">
-  <div class="card">
-    <h2 id="crTitle">🧙 สร้างตัวละคร</h2>
-    <p class="crnote" id="crSub">เลือกบ้านและหน้าตา — ตัวละครของคุณอยู่ทางขวา หมุนตามเมาส์ • แก้ทีหลังได้จากหน้าแรก</p>
-    <label class="f">ชื่อพ่อมด</label>
-    <input type="text" id="cName" maxlength="16">
-    <label class="f">บ้านฮอกวอตส์ <button class="mini" id="crHat">🎩 หมวกคัดสรร</button></label>
-    <div class="houses" id="crHouse"></div>
-    <p class="crnote">บ้านกำหนดสีเนคไท ผ้าพันคอ ซับในเสื้อคลุม และสีประจำตัวของคุณในเกม</p>
-    <label class="f">ทรงผม</label><div class="opts" id="crHs"></div>
-    <label class="f">สีผม</label><div class="colors" id="crHr"></div>
-    <label class="f">สีผิว</label><div class="colors" id="crSk"></div>
-    <label class="f">สีตา</label><div class="colors" id="crEy"></div>
-    <label class="f">สีเสื้อคลุม</label><div class="colors" id="crCl"></div>
-    <p class="crnote">ในหนังเสื้อคลุมเป็นสีดำ — สีบ้านจะโผล่ที่ซับใน เนคไท และผ้าพันคอ</p>
-    <label class="f">เนคไท</label><div class="opts" id="crTi"></div>
-    <div class="row"><button id="crRand">🎲 สุ่มหน้าตา</button><button id="crCancel" class="hidden">ยกเลิก</button><button id="crOk" class="pri">เสร็จสิ้น</button></div>
-  </div>
+<div id="creator" class="hidden s1">
+  <div class="crTints"><i style="background:radial-gradient(ellipse at 66% 45%,rgba(255,90,50,.38),rgba(46,8,11,.62) 70%)"></i><i style="background:radial-gradient(ellipse at 66% 45%,rgba(40,220,130,.32),rgba(4,25,14,.66) 70%)"></i><i style="background:radial-gradient(ellipse at 66% 45%,rgba(255,210,60,.34),rgba(43,35,5,.62) 70%)"></i><i style="background:radial-gradient(ellipse at 66% 45%,rgba(70,140,255,.36),rgba(5,13,44,.66) 70%)"></i></div>
+  <div class="crShade"></div>
+  <div class="crTop"><small>CHARACTER</small><h2 id="crTitle">สร้างตัวละคร</h2></div>
+  <div class="crSteps"><b id="crSt1" class="on">1 · หน้าตา</b><i></i><b id="crSt2">2 · เลือกบ้าน</b></div>
+  <button class="crClose hidden" id="crCancel">✕ ยกเลิก</button>
+  <div class="crTabs crStep1only" id="crTabs"></div>
+  <div class="card slim crPanel crStep1only" id="crPanel"></div>
+  <div class="crInfo crStep2only" id="crInfo"></div>
+  <div class="crCrests crStep2only" id="crCrests"></div>
+  <div class="crBar crStep1only"><button id="crRand">🎲 สุ่ม</button><button id="crNext" class="pri">ถัดไป: เลือกบ้าน ▶</button></div>
+  <div class="crBar crStep2only"><button id="crBack">◀ ย้อนกลับ</button><button id="crHat">🎩 หมวกคัดสรร</button><button id="crOk" class="pri">✦ ยืนยันตัวละคร</button></div>
 </div>
 
 <!-- ===== คู่มือ ===== -->
@@ -384,10 +408,10 @@ const COLORS=['#d33a2c','#2e9b5f','#2f6fd6','#e0b420','#8e44ad','#e8e8e8','#ff7a
 // ---------- ตัวละคร: บ้านฮอกวอตส์ + หน้าตา ----------
 // สีหลัก c ของบ้านใช้เป็นสีประจำตัวทั่วเกม (ป้ายชื่อ แผนที่ย่อ ตารางคะแนน) / c2 = สีรอง (สีเนคไท ผ้าพันคอ)
 const HOUSES=[
-  {n:'Gryffindor',th:'กริฟฟินดอร์',ic:'🦁',c:'#b3202f',c2:'#e8b923',tr:'กล้าหาญ'},
-  {n:'Slytherin',th:'สลิธีริน',ic:'🐍',c:'#1e7a45',c2:'#b9c3cc',tr:'เจ้าเล่ห์'},
-  {n:'Hufflepuff',th:'ฮัฟเฟิลพัฟ',ic:'🦡',c:'#f0c030',c2:'#2b2b2b',tr:'ซื่อสัตย์'},
-  {n:'Ravenclaw',th:'เรเวนคลอ',ic:'🦅',c:'#2358b0',c2:'#b5813f',tr:'ฉลาด'}];
+  {n:'Gryffindor',th:'กริฟฟินดอร์',ic:'🦁',c:'#b3202f',c2:'#e8b923',tr:'กล้าหาญ',gl:'#ff6a3c',bg:'#2e080b',ds:'กล้าหาญ • เด็ดเดี่ยว • ไม่ยอมถอย',po:'ท่าชูไม้กายสูง'},
+  {n:'Slytherin',th:'สลิธีริน',ic:'🐍',c:'#1e7a45',c2:'#b9c3cc',tr:'เจ้าเล่ห์',gl:'#3cdc8a',bg:'#04190e',ds:'เจ้าเล่ห์ • ทะเยอทะยาน • เฉียบคม',po:'ท่ากอดอกยิ้มมุมปาก'},
+  {n:'Hufflepuff',th:'ฮัฟเฟิลพัฟ',ic:'🦡',c:'#f0c030',c2:'#2b2b2b',tr:'ซื่อสัตย์',gl:'#ffd23c',bg:'#2b2305',ds:'ซื่อสัตย์ • อดทน • ใจดีกับทุกคน',po:'ท่าโบกมือทักทาย'},
+  {n:'Ravenclaw',th:'เรเวนคลอ',ic:'🦅',c:'#2358b0',c2:'#b5813f',tr:'ฉลาด',gl:'#4a8cff',bg:'#050d2c',ds:'ฉลาด • ช่างคิด • รักการเรียนรู้',po:'ท่านักคิด ไม้กายแตะคาง'}];
 const HAIRC=['#15100d','#2b1b10','#4a2c17','#8a5a2b','#c9a15a','#eadba0','#b8431f','#6b2d17','#8a8f99','#2d6a8a'];
 const HAIRSTY=['ทรงสั้น','หน้าม้า','ยาวสยาย','มวยผม'];
 const EYEC=['#4a2e16','#171210','#3f7fd0','#3f9a5a','#8a6a2a','#8a94a0','#8a5ad0','#d08a20'];
@@ -400,6 +424,21 @@ function parseLook(s){const a=String(s||'').split('.'),o={};LOOKK.forEach((k,i)=
 function randLook(seed){const R=mulberry(seed===undefined?Math.floor(Math.random()*1e9):seed),o={};LOOKK.forEach((k,i)=>{o[k]=Math.floor(R()*LOOKN[i]);});if(o.cl>3)o.cl=0;return o;}
 const LOOKS={},LOOKP={};
 function getLook(id){const s=LOOKS[id]||(LOOKS[id]=lookStr(randLook(hashStr(id))));return LOOKP[s]||(LOOKP[s]=parseLook(s));}
+const CREST_SH='M8 8H92V62C92 92 66 108 50 116C34 108 8 92 8 62Z';
+const CREST_PAT=[
+  c2=>`<polygon points="0,18 100,66 100,90 0,42" fill="${c2}" opacity=".9"/>`,
+  c2=>`<path d="M0 26L50 68L100 26L100 50L50 92L0 50Z" fill="${c2}" opacity=".85"/>`,
+  c2=>[0,1,2,3].map(i=>`<rect x="${i*28-6}" y="0" width="13" height="130" fill="${c2}" opacity=".9"/>`).join(''),
+  c2=>`<path d="M50 6L92 62L50 118L8 62Z" fill="${c2}" opacity=".8"/>`];
+// ตราบ้าน: โล่ลายตามสีบ้าน + สัตว์ประจำบ้าน + ริบบิ้นชื่อ (w = ความกว้างพิกเซล, rib = แสดงริบบิ้นไหม)
+function crestSVG(h,w,rib=true){
+  const H=HOUSES[h],id='cg'+h+'_'+w+(rib?'r':'n');
+  return `<svg viewBox="0 0 100 ${rib?130:120}" width="${w}" height="${Math.round(w*(rib?1.3:1.2))}" class="crest"><defs><linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${H.c}"/><stop offset="1" stop-color="#000" stop-opacity=".55"/></linearGradient><clipPath id="${id}c"><path d="${CREST_SH}"/></clipPath></defs>
+<path d="${CREST_SH}" fill="${H.c}"/><g clip-path="url(#${id}c)">${CREST_PAT[h](H.c2)}<path d="${CREST_SH}" fill="url(#${id})"/></g>
+<path d="${CREST_SH}" fill="none" stroke="#e3c06c" stroke-width="3.5"/><path d="M14 14H86V60C86 86 64 100 50 108C36 100 14 86 14 60Z" fill="none" stroke="#f3dc94" stroke-opacity=".45" stroke-width="1"/>
+<circle cx="50" cy="56" r="25" fill="rgba(0,0,0,.34)" stroke="#e3c06c" stroke-width="1.5"/><text x="50" y="69" font-size="36" text-anchor="middle">${H.ic}</text>
+${rib?`<path d="M0 98L100 98L93 111L100 124L0 124L7 111Z" fill="#efe3bf" stroke="#8a6a2a" stroke-width="1.5"/><text x="50" y="115" font-family="Cinzel,serif" font-weight="800" font-size="12" fill="#2a1a08" text-anchor="middle" textLength="74" lengthAdjust="spacingAndGlyphs">${H.n}</text>`:''}</svg>`;
+}
 function houseColor(lk){return HOUSES[parseLook(lk).h].c;}
 const TEAMC=['#4da3ff','#ff5a5a'], TEAMN=['ทีมฟ้า','ทีมแดง'];
 const MODES={
@@ -3093,15 +3132,15 @@ function menuCamera(now){
 const stage=new THREE.Scene();
 stage.background=new THREE.Color('#04060d');
 stage.fog=new THREE.Fog('#04060d',16,46);
-const STAGE={chars:new Map(),candles:[],rune:null,slotRings:[],plates:[],dust:null};
+const STAGE={chars:new Map(),candles:[],rune:null,slotRings:[],plates:[],dust:null,banners:[],switchT:-1,k:0,tg:null,tb:null};
 const STAGE_Y=0.36;
 (function(){
-  stage.add(new THREE.HemisphereLight('#7f95e6','#1a1410',0.45));
+  STAGE.hemi=new THREE.HemisphereLight('#7f95e6','#1a1410',0.45);stage.add(STAGE.hemi);
   stage.add(new THREE.AmbientLight('#2a2a48',0.4));
   const key=new THREE.SpotLight('#ffe0a8',1.9,45,0.55,0.7,1);
   key.position.set(1.5,14,9);key.target.position.set(0,0.4,0);key.castShadow=true;key.shadow.mapSize.set(1024,1024);key.shadow.bias=-0.0008;
-  stage.add(key,key.target);
-  const rim=new THREE.DirectionalLight('#6f8cff',0.9);rim.position.set(-6,7,-10);stage.add(rim);
+  stage.add(key,key.target);STAGE.key=key;
+  const rim=new THREE.DirectionalLight('#6f8cff',0.9);rim.position.set(-6,7,-10);stage.add(rim);STAGE.rim=rim;
   const floor=new THREE.Mesh(new THREE.CircleGeometry(42,48),stoneMat(16,16,'#3e4260'));floor.rotation.x=-Math.PI/2;floor.receiveShadow=true;stage.add(floor);
   const dais=new THREE.Mesh(new THREE.CylinderGeometry(7.6,8,STAGE_Y,72),stoneMat(6,1,'#6c6c8c'));dais.position.y=STAGE_Y/2;dais.receiveShadow=true;stage.add(dais);
   const goldM=new THREE.MeshStandardMaterial({color:'#d9b45a',metalness:0.85,roughness:0.3,emissive:'#3a2a08'});
@@ -3119,7 +3158,7 @@ const STAGE_Y=0.36;
   const HC=['#7a1c1c','#1c3f7a','#1f5a32','#8a6a12'];
   [[-6,-12.5],[6,-12.5],[-14,-9],[14,-9]].forEach(([x,z],i)=>{
     const p=new THREE.Mesh(new THREE.CylinderGeometry(0.75,0.9,16,12),stoneMat(1,5,'#6a6884'));p.position.set(x,8,z);stage.add(p);
-    const b=new THREE.Mesh(new THREE.PlaneGeometry(1.7,5.2),new THREE.MeshStandardMaterial({color:HC[i],roughness:0.9,side:THREE.DoubleSide}));b.position.set(x,8.2,z+0.95);b.lookAt(0,8.2,8);stage.add(b);
+    const b=new THREE.Mesh(new THREE.PlaneGeometry(1.7,5.2),new THREE.MeshStandardMaterial({color:HC[i],roughness:0.9,side:THREE.DoubleSide}));b.position.set(x,8.2,z+0.95);b.lookAt(0,8.2,8);stage.add(b);STAGE.banners.push(b);
     const tr=new THREE.Mesh(new THREE.PlaneGeometry(1.7,0.12),goldM);tr.position.set(x,10.75,z+0.97);tr.lookAt(0,10.75,8);stage.add(tr);
   });
   // เทียนลอย
@@ -3136,6 +3175,9 @@ const STAGE_Y=0.36;
   const dg=new THREE.BufferGeometry();dg.setAttribute('position',new THREE.BufferAttribute(pos,3));
   STAGE.dust=new THREE.Points(dg,new THREE.PointsMaterial({map:glowTex,color:hdr('#ffd98a',1.4),size:0.09,transparent:true,opacity:0.7,depthWrite:false,blending:THREE.AdditiveBlending}));
   stage.add(STAGE.dust);
+  // วงคลื่นพลังตอนเปลี่ยนบ้าน
+  STAGE.burst=new THREE.Mesh(new THREE.RingGeometry(0.9,1,64),new THREE.MeshBasicMaterial({color:hdr('#ffffff',2),transparent:true,opacity:0,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide}));
+  STAGE.burst.rotation.x=-Math.PI/2;STAGE.burst.position.y=STAGE_Y+0.04;STAGE.burst.visible=false;stage.add(STAGE.burst);
   // วงช่องว่าง (รอเพื่อนเข้าห้อง)
   for(let i=0;i<6;i++){
     const r=new THREE.Mesh(new THREE.RingGeometry(0.62,0.7,40),new THREE.MeshBasicMaterial({color:hdr('#d9b45a',1.2),transparent:true,opacity:0.35,depthWrite:false}));
@@ -3160,24 +3202,54 @@ function stageSpots(L){
   return {out,empty};
 }
 function stageChar(id,lk){
-  let o=STAGE.chars.get(id),px=null,had=false;
-  if(o&&o.lk!==lk){px=o.x;had=true;stage.remove(o.g);disposeObj(o.g);STAGE.chars.delete(id);o=null;}
-  if(!o){const re=had&&id==='me-preview';o=makeStudent(parseLook(lk),id);stage.add(o.g);o.lk=lk;o.joinT=re?0:1.6;o.x=re?px:null;STAGE.chars.set(id,o);}
+  let o=STAGE.chars.get(id),px=null,had=false,pp=null;
+  if(o&&o.lk!==lk){px=o.x;pp=o.pp;had=true;stage.remove(o.g);disposeObj(o.g);STAGE.chars.delete(id);o=null;}
+  if(!o){const re=had&&id==='me-preview';o=makeStudent(parseLook(lk),id);stage.add(o.g);o.lk=lk;o.house=parseLook(lk).h;o.joinT=re?0:1.6;o.x=re?px:null;if(pp)o.pp=pp;STAGE.chars.set(id,o);}
   return o;
 }
+// ท่าประจำบ้าน [แขนขวา rx,rz | แขนซ้าย rx,rz | ลำตัว rx,rz] — ปรับนุ่มๆ เวลาเปลี่ยนบ้าน
+const POSES=[
+  [-2.7,-0.28,-0.12,0.55,-0.06,0],
+  [-1.3,0.5,-1.15,-0.6,0.03,0.07],
+  [-0.3,-0.12,-2.6,0.5,0,0],
+  [-1.75,-0.06,-0.95,0.38,0.06,-0.05]];
 function stageIdle(o,now,dt,i){
   o.joinT=Math.max(0,o.joinT-dt);
-  const lift=Math.min(1,o.joinT*1.2);
-  o.b.rotation.x=0;o.b.position.y=Math.sin(now/700+i)*0.012;
+  const lift=Math.min(1,o.joinT*1.2),h=o.house|0,T=POSES[h];
+  if(!o.pp)o.pp=T.slice();
+  const k=1-Math.exp(-7*dt);for(let j=0;j<6;j++)o.pp[j]+=(T[j]-o.pp[j])*k;
+  const P=o.pp,t=now/1000;
+  let bob=Math.sin(now/700+i)*0.012,wv=0,sw=0;
+  if(h===2){wv=Math.sin(t*7)*0.28;bob=Math.abs(Math.sin(t*3.2))*0.05;}
+  if(h===0)bob=Math.sin(t*1.6)*0.02;
+  if(h===1)sw=Math.sin(t*0.9)*0.03;
+  if(h===3)sw=Math.sin(t*0.7)*0.04;
+  o.b.rotation.x=P[4];o.b.rotation.z=P[5]+sw;o.b.position.y=bob;
   o.legs[0].rotation.x=o.legs[1].rotation.x=0;
-  o.armL.rotation.x=Math.sin(now/900+i)*0.05;o.armL.rotation.z=0.14;
-  o.armR.rotation.x=lerp(-0.28+Math.sin(now/800+i)*0.05,-2.3,lift);o.armR.rotation.z=-0.12;
+  o.armL.rotation.x=P[2]+Math.sin(now/900+i)*0.04;o.armL.rotation.z=P[3]+wv;
+  o.armR.rotation.x=lerp(P[0]+Math.sin(now/800+i)*0.04,-2.3,lift);o.armR.rotation.z=P[1];
   updateCloth(o.cloak,0,0,0,now,dt);
   o.ends.forEach((E,k)=>{E.rotation.x=Math.sin(now*0.0015+k+i)*0.05;E.rotation.z=0;});
-  o.tip.scale.setScalar(0.3+0.08*Math.sin(now/120+i)+lift*0.6);
+  o.tip.scale.setScalar(0.3+0.08*Math.sin(now/120+i)+lift*0.6+(h===0?0.15:0));
   o.broom.visible=o.cocoon.visible=o.shield.visible=o.stars.visible=false;
 }
 const _sv=new THREE.Vector3();
+// โทนสีฉากตามบ้านที่เลือก (null = โทนกลางปกติ) ค่อยๆ เปลี่ยนนุ่มๆ
+const TONE0={bg:new THREE.Color('#04060d'),gl:new THREE.Color('#6f8cff'),ac:new THREE.Color('#e8c66a'),sky:new THREE.Color('#7f95e6'),key:new THREE.Color('#ffe0a8'),dust:new THREE.Color('#ffd98a')};
+const _tc=new THREE.Color();
+function stageTone(dt,H){
+  if(!STAGE.tg){STAGE.tg=TONE0.gl.clone();STAGE.tb=TONE0.bg.clone();}
+  const f=1-Math.exp(-4.5*dt);
+  STAGE.k+=((H?1:0)-STAGE.k)*f;
+  STAGE.tg.lerp(H?_tc.set(H.gl):TONE0.gl,f);STAGE.tb.lerp(H?_tc.set(H.bg):TONE0.bg,f);
+  const k=STAGE.k;
+  stage.background.copy(STAGE.tb);stage.fog.color.copy(STAGE.tb);
+  STAGE.rim.color.copy(STAGE.tg);STAGE.hemi.color.copy(TONE0.sky).lerp(STAGE.tg,k*0.8);STAGE.key.color.copy(TONE0.key).lerp(STAGE.tg,k*0.45);
+  STAGE.rune.material.color.copy(TONE0.ac).lerp(STAGE.tg,k).multiplyScalar(1.3+k*0.5);
+  STAGE.dust.material.color.copy(TONE0.dust).lerp(STAGE.tg,k).multiplyScalar(1.4);
+  const hc=H?_tc.set(H.c):null;
+  STAGE.banners.forEach((b,i)=>{b.material.color.set(['#7a1c1c','#1c3f7a','#1f5a32','#8a6a12'][i]);if(hc)b.material.color.lerp(hc,k);});
+}
 function stageScreen(x,y,z){_sv.set(x,y,z).project(cam);if(_sv.z>1)return null;return [(_sv.x+1)/2*SW,(1-_sv.y)/2*SH];}
 function renderStage(dt,now){
   const lob=screen==='lobby'&&LOBBY;
@@ -3193,11 +3265,17 @@ function renderStage(dt,now){
     STAGE.slotRings.forEach(r=>r.visible=false);STAGE.empty=[];
   }
   for(const [id,o] of STAGE.chars)if(!want.has(id)){stage.remove(o.g);disposeObj(o.g);STAGE.chars.delete(id);}
+  stageTone(dt,crOpen&&crStep===2?HOUSES[myLook.h]:null);
+  // เปลี่ยนบ้าน: ตัวละครหมุนหนึ่งรอบ + คลื่นพลัง
+  let spin=0;
+  if(STAGE.switchT>=0){STAGE.switchT+=dt/0.8;const u=Math.min(1,STAGE.switchT),e=1-Math.pow(1-u,3);spin=e*Math.PI*2;
+    STAGE.burst.visible=true;STAGE.burst.scale.setScalar(1+u*8);STAGE.burst.material.opacity=(1-u)*0.9;STAGE.burst.material.color.copy(STAGE.tg).multiplyScalar(2);
+    if(u>=1){STAGE.switchT=-1;STAGE.burst.visible=false;}}
   const team=lob&&MODES[LOBBY.mode]&&MODES[LOBBY.mode].team;
   rows.forEach(({o,s,p},i)=>{
     o.x=o.x===null?s.x:lerp(o.x,s.x,1-Math.exp(-8*dt));
     o.g.position.set(o.x,STAGE_Y,s.z);
-    o.g.rotation.y=lob?-o.x*0.06:-0.22+((mouseX||SW*0.6)/Math.max(1,SW)-0.6)*0.5;
+    o.g.rotation.y=(lob?-o.x*0.06:-0.22+((mouseX||SW*0.6)/Math.max(1,SW)-0.6)*0.5)+(p?0:spin);
     stageIdle(o,now,dt,i);
     const mine=p?p.id===NET.myId:true;
     o.ring.visible=true;o.ring.material.color.set(team?TEAMC[p.tm]:mine?'#f3dc94':'#8a94b8');o.ring.material.opacity=mine||team?0.85:0.4;
@@ -3208,7 +3286,7 @@ function renderStage(dt,now){
   // กล้อง: เมนู = ตัวเราอยู่ฝั่งขวา / ล็อบบี้ = มองทั้งแท่น
   const sway=Math.sin(now/5200)*0.15;
   if(lob){const mx=Math.max(0,...rows.map(r=>Math.abs(r.s.x)),...STAGE.empty.map(e=>Math.abs(e.x))),dist=clamp((mx+1.1)/(0.3*cam.aspect),6.5,13);cam.position.set(sway,1.5+dist*0.1,dist);cam.lookAt(0,1.45,0);}
-  else if(crOpen){cam.position.set(-0.45+sway*0.4,1.8,3.9);cam.lookAt(-0.45,1.5,0);}
+  else if(crOpen){const s2=crStep===2;cam.position.set(-0.45+sway*0.4,s2?1.95:1.8,s2?4.5:3.9);cam.lookAt(-0.45,s2?1.2:1.5,0);}
   else{cam.position.set(-0.85+sway*0.5,1.55,5.6);cam.lookAt(-0.85,1.12,0);}
   rpass.scene=stage;gl.shadowMap.needsUpdate=true;composer.render();rpass.scene=scene;
   if(lob)drawStageLabels(rows,team);
@@ -4040,36 +4118,61 @@ let myLook=parseLook(store('wd_look')),myColor=HOUSES[myLook.h].c;
 function myName(){return cleanName($('#nameIn').value);}
 $('#nameIn').value=store('wd_name')||('พ่อมด'+Math.floor(Math.random()*900+100));
 $('#nameIn').addEventListener('change',()=>store('wd_name',myName()));
-function renderMyHouse(){const H=HOUSES[myLook.h];myColor=H.c;$('#myHouse').innerHTML=`<span style="font-size:26px">${H.ic}</span><span><b style="color:var(--gold2)">${H.n}</b><br><small style="color:var(--mute)">${H.th} • ${H.tr}</small></span><span style="margin-left:auto;display:flex;gap:4px"><i class="dot" style="background:${H.c}"></i><i class="dot" style="background:${H.c2};border:1px solid rgba(255,255,255,.3)"></i></span>`;}
+function renderMyHouse(){const H=HOUSES[myLook.h];myColor=H.c;$('#myHouse').innerHTML=`${crestSVG(myLook.h,34,false)}<span><b style="color:var(--gold2)">${H.n}</b><br><small style="color:var(--mute)">${H.th} • ${H.tr}</small></span><span style="margin-left:auto;display:flex;gap:4px"><i class="dot" style="background:${H.c}"></i><i class="dot" style="background:${H.c2};border:1px solid rgba(255,255,255,.3)"></i></span>`;}
 renderMyHouse();
-// ----- หน้าสร้าง/แต่งตัวละคร -----
-let crSaved=null,crOpen=false;
-function crRender(){
-  const L=myLook;
-  $('#crHouse').innerHTML=HOUSES.map((H,i)=>`<button class="hbtn ${L.h===i?'on':''}" data-k="h" data-v="${i}"><span class="hc"><i style="background:${H.c}"></i><i style="background:${H.c2}"></i></span><span><b>${H.ic} ${H.n}</b><small>${H.th} • ${H.tr}</small></span></button>`).join('');
-  const sw=(id,k,arr)=>{$('#'+id).innerHTML=arr.map((c,i)=>`<div class="sw ${L[k]===i?'on':''}" data-k="${k}" data-v="${i}" style="background:${c}"></div>`).join('');};
-  const bt=(id,k,arr)=>{$('#'+id).innerHTML=arr.map((t,i)=>`<button class="obtn ${L[k]===i?'on':''}" data-k="${k}" data-v="${i}">${t}</button>`).join('');};
-  bt('crHs','hs',HAIRSTY);sw('crHr','hr',HAIRC);sw('crSk','sk',SKINC);sw('crEy','ey',EYEC);sw('crCl','cl',CLOAKC);bt('crTi','ti',TIESTY);
+// ----- หน้าสร้าง/แต่งตัวละคร (2 ขั้น: 1 หน้าตา → 2 เลือกบ้าน) -----
+let crSaved=null,crOpen=false,crStep=1,crTab=0,crFirst=false;
+const CRTABS=[['👤','ใบหน้า'],['💇','ผม'],['🧥','เสื้อคลุม'],['👔','เนคไท']];
+const sw_=(k,arr)=>`<div class="colors">${arr.map((c,i)=>`<div class="sw ${myLook[k]===i?'on':''}" data-k="${k}" data-v="${i}" style="background:${c}"></div>`).join('')}</div>`;
+const bt_=(k,arr)=>`<div class="opts">${arr.map((t,i)=>`<button class="obtn ${myLook[k]===i?'on':''}" data-k="${k}" data-v="${i}">${t}</button>`).join('')}</div>`;
+function crRenderStep1(){
+  $('#crTabs').innerHTML=CRTABS.map((t,i)=>`<button class="crTab ${crTab===i?'on':''}" data-tab="${i}"><span>${t[0]}</span>${t[1]}</button>`).join('');
+  const nm=`<label class="f" style="margin-top:0">ชื่อพ่อมด</label><input type="text" id="cName" maxlength="16" value="${esc($('#nameIn').value)}">`;
+  const body=[
+    `<h3 class="sec">ใบหน้า</h3><p class="crnote">เลือกสีผิวและสีตาของคุณ</p><label class="f">สีผิว</label>${sw_('sk',SKINC)}<label class="f">สีตา</label>${sw_('ey',EYEC)}`,
+    `<h3 class="sec">ทรงผม</h3><p class="crnote">เลือกทรงและสีผม</p><label class="f">ทรงผม</label>${bt_('hs',HAIRSTY)}<label class="f">สีผม</label>${sw_('hr',HAIRC)}`,
+    `<h3 class="sec">เสื้อคลุม</h3><p class="crnote">ในหนังเสื้อคลุมเป็นสีดำ — สีบ้านที่เลือกในขั้นต่อไปจะโผล่ที่ซับใน เนคไท และผ้าพันคอ</p><label class="f">สีเสื้อคลุม</label>${sw_('cl',CLOAKC)}`,
+    `<h3 class="sec">เนคไท</h3><p class="crnote">สีของเนคไทจะตามบ้านที่คุณเลือก</p><label class="f">แบบเนคไท</label>${bt_('ti',TIESTY)}`][crTab];
+  const cur=document.activeElement&&document.activeElement.id==='cName';
+  $('#crPanel').innerHTML=nm+'<div class="orn" style="width:100%;margin:12px 0 4px"></div>'+body;
+  if(cur)$('#cName').focus();
 }
-function crChanged(){renderMyHouse();crRender();}
+function crRenderStep2(){
+  const H=HOUSES[myLook.h];
+  $('#crInfo').innerHTML=`<small>HOGWARTS HOUSE</small><h1>${H.n}</h1><div class="th">${H.ic} ${H.th}</div><div class="ds">${H.ds}</div><div class="po">${H.po} — กดเลือกบ้านอื่นเพื่อเปลี่ยนท่าและบรรยากาศ</div>`;
+  $('#crCrests').innerHTML=HOUSES.map((h,i)=>`<button class="ccard ${myLook.h===i?'on':''}" data-house="${i}" style="--hc:${h.gl}">${crestSVG(i,112)}</button>`).join('');
+  [...document.querySelectorAll('.crTints i')].forEach((el,i)=>el.classList.toggle('on',crStep===2&&myLook.h===i));
+}
+function crGo(n){
+  crStep=n;const el=$('#creator');el.classList.toggle('s1',n===1);el.classList.toggle('s2',n===2);
+  $('#crSt1').classList.toggle('on',n===1);$('#crSt2').classList.toggle('on',n===2);
+  if(n===1)crRenderStep1();else{crSaveName();crRenderStep2();STAGE.switchT=0;}
+  [...document.querySelectorAll('.crTints i')].forEach((e,i)=>e.classList.toggle('on',n===2&&myLook.h===i));
+}
+function crSaveName(){const c=$('#cName');if(c){const n=cleanName(c.value);$('#nameIn').value=n;store('wd_name',n);}}
+function crSetHouse(i){if(i===myLook.h&&crStep===2)return;myLook.h=i;STAGE.switchT=0;renderMyHouse();crRenderStep2();}
 function openCreator(first){
-  crSaved=lookStr(myLook);ac();
-  $('#crTitle').textContent=first?'🧙 สร้างตัวละครของคุณ':'🧙 แต่งตัวละคร';
+  crSaved=lookStr(myLook);ac();crFirst=!!first;crOpen=true;crTab=0;
+  $('#crTitle').textContent=first?'สร้างตัวละครของคุณ':'แต่งตัวละคร';
   $('#crCancel').classList.toggle('hidden',!!first);
-  $('#cName').value=$('#nameIn').value;
-  crRender();$('#creator').classList.remove('hidden');crOpen=true;document.querySelector('.mprof').classList.add('hidden');
+  document.querySelector('.mprof').classList.add('hidden');document.querySelector('.mleft').classList.add('hidden');
+  $('#creator').classList.remove('hidden');crGo(1);
 }
 function closeCreator(save){
-  if(save){store('wd_look',lookStr(myLook));const n=cleanName($('#cName').value);$('#nameIn').value=n;store('wd_name',n);}
+  if(save){crSaveName();store('wd_look',lookStr(myLook));}
   else{myLook=parseLook(crSaved);}
-  renderMyHouse();$('#creator').classList.add('hidden');crOpen=false;document.querySelector('.mprof').classList.remove('hidden');
+  crOpen=false;renderMyHouse();$('#creator').classList.add('hidden');document.querySelector('.mprof').classList.remove('hidden');document.querySelector('.mleft').classList.remove('hidden');
 }
 $('#creator').addEventListener('click',e=>{
+  const tab=e.target.closest('[data-tab]');if(tab){crSaveName();crTab=+tab.dataset.tab;crRenderStep1();return;}
+  const hs=e.target.closest('[data-house]');if(hs){crSetHouse(+hs.dataset.house);return;}
   const t=e.target.closest('[data-k]');if(!t)return;
-  myLook[t.dataset.k]=+t.dataset.v;crChanged();
+  myLook[t.dataset.k]=+t.dataset.v;crRenderStep1();
 });
-$('#crRand').onclick=()=>{myLook=randLook();crChanged();};
-$('#crHat').onclick=()=>{myLook.h=Math.floor(Math.random()*4);crChanged();toast('🎩 หมวกคัดสรรเลือกให้คุณ: '+HOUSES[myLook.h].n+'!');};
+$('#crRand').onclick=()=>{const h=myLook.h;myLook=randLook();myLook.h=h;crRenderStep1();};
+$('#crNext').onclick=()=>crGo(2);
+$('#crBack').onclick=()=>crGo(1);
+$('#crHat').onclick=()=>{crSetHouse(Math.floor(Math.random()*4));toast('🎩 หมวกคัดสรรเลือกให้คุณ: '+HOUSES[myLook.h].n+'!');};
 $('#crOk').onclick=()=>closeCreator(true);
 $('#crCancel').onclick=()=>closeCreator(false);
 $('#btnLook').onclick=()=>openCreator(false);
