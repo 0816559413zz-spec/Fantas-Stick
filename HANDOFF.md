@@ -2,13 +2,27 @@
 
 > **For the next Claude Code session (any device): read this file first.**
 > **Rule: update this file at the end of every task** — the status, changelog, and known issues sections at minimum. Commit and push it together with the code.
-> Last updated: 2026-10-16
+> Last updated: 2026-10-17 (end of session 1 — the user is switching to a new Claude session)
+
+---
+
+## 0. START HERE — ask the user first (in Thai)
+The user asked that the next session **open by asking these questions** (one short message, Thai, simple words, numbered so they can answer quickly). Don't start coding before they answer, unless they already gave a task.
+
+1. **เสียงและเพลงใหม่เป็นยังไงบ้าง?** มีเสียงไหนแปลกหรือไม่เข้ากับเกมไหม (เช่น เสียงโดนตี เสียงลูกไฟ เสียงเจ็บ) — จะเปลี่ยนให้ *(sounds were picked by file name, never listened to — see §9)*
+2. **เกมลื่นขึ้นไหม** บนเครื่องของคุณและของเพื่อน? ปุ่ม "กราฟิก" ตั้งไว้แบบไหน ยังกระตุกตรงไหนอยู่ไหม
+3. **ได้ลองเล่นออนไลน์กับเพื่อนจริงหรือยัง?** มีปัญหาเข้าห้องไม่ได้ / หลุด / หน่วง / ไมค์ไม่ได้ยิน / โหวตโหมดโวลเดอมอร์ไม่ทำงานไหม *(never verified with real friends)*
+4. **หน้าตา UI ใหม่ชอบไหม** มีหน้าไหนอยากแก้ (หน้าแรก ล็อบบี้ HUD ตอนเล่น หน้าเลือกพลัง หน้าจบเกม)
+5. **ปุ่ม "เพลงของฉัน" ใช้ได้ไหม** (เลือกเพลงจากเครื่องตัวเอง)
+6. **อยากทำอะไรต่อ?** ตัวเลือกที่เคยคุยไว้: แผนที่ย่อมุมซ้ายล่าง • เลือกตราบ้าน (กริฟฟินดอร์ ฯลฯ) ในหน้าแรก • บอสใหม่ (บาซิลิสก์) • แผนที่ใหม่ (ฮอกส์มี้ด / ห้องโถงใหญ่) • ช่องลับ+มินิเกมภารกิจในโหมดโวลเดอมอร์ • ชุดแต่งตัว • เล่นบนมือถือ
+
+Then do the work, keep replying in Thai, and update this file at the end (CLAUDE.md rule).
 
 ---
 
 ## 1. What this is
 A 3D third-person (over-the-shoulder, Hogwarts Legacy style) wizard dueling browser game.
-**The entire game is one file: `index.html`** (~3,750 lines, inline CSS + one `<script type="module">`).
+**The entire game is one file: `index.html`** (~4,000 lines, inline CSS + one `<script type="module">`) plus static assets in `audio/`.
 Personal, non-commercial fan project made with/for the user and their friends. UI text is **Thai**; code comments are Thai.
 
 - Live (GitHub Pages): https://0816559413zz-spec.github.io/Fantas-Stick/
@@ -18,7 +32,10 @@ Personal, non-commercial fan project made with/for the user and their friends. U
 ## 2. The user
 - Thai speaker, no programming experience → explain in Thai, simply. Do the work for them.
 - Plays with friends online; wants Harry Potter / Hogwarts Legacy vibes.
-- Prefers: everything in a single HTML file, maps random (not selectable), in-game 📖 guide kept up to date.
+- Prefers: everything in a single HTML file (audio files in `audio/` are OK), maps random (not selectable), in-game 📖 guide kept up to date.
+- Likes to **see references first** before big redesigns (we showed a visual board of 3 directions; they picked a mix). Likes short Thai summaries; asks to use subagents (e.g. "use subagent sonnet") for research — do that when asked.
+- Not commercial, plays only with friends — but the repo/site is **public**, so never commit copyrighted assets (Harry Potter music etc.). Point them to "เพลงของฉัน" instead.
+- They may stop the local preview server by closing the browser pane; just restart it (`preview_start` name `wizardduel`) when needed.
 
 ## 3. Tech stack (all from CDN, no build step)
 - **Three.js 0.160.0** via importmap (`unpkg.com/three@0.160.0`) + addons: EffectComposer, RenderPass, UnrealBloomPass, OutputPass. `gl.useLegacyLights=true` (light intensities tuned for legacy mode).
@@ -40,38 +57,39 @@ Personal, non-commercial fan project made with/for the user and their friends. U
 - Camera: pointer lock; mouse → `yaw/pitch`; WASD is camera-relative (`INPUT.mx/my`); aim `INPUT.ax/ay` + pitch `INPUT.ap`. Spells **auto-lock vertically** onto a foe within ~0.3 rad of the aim (`shoot()`).
 
 ## 5. Code map (`index.html`, approximate line numbers — grep the section headers)
-| Section (Thai header) | What |
-|---|---|
-| ~10 `<style>` | UI theme tokens on `:root` (`--gold`, `--panel`, `--corners` gold corner brackets, `--fd` display font). `.card` = gold-framed panel used everywhere (menu profile, lobby panels, guide, buff, results, meeting). Menu `.mleft/.mi/.mprof`, lobby `.ltop/.lmodes/.lright/.mcard`, buff cards `.boon .bc` |
-| ~160 HTML | `#menu` (logo + text menu left, profile card bottom-right), `#guide`, `#lobby` (top bar w/ room code + copy, mode list left, selected-mode card + start button right), overlays `#buff/#over/#meet`, `#voice` |
-| ~278 `พื้นฐาน` | utils (`$`, `rnd`, `clamp`, `lerp`, `store`, `toast`) |
-| ~293 `ค่าคงที่ของเกม` | `MAPS`, `MODES`, `PDEF` (spells), `EDEF` (enemies), `POOLS`, `BUFFS` (each has icon `i`) |
-| ~385 `เครือข่าย` | host/join, `hostOnData` (hello/in/team/pick/vote), `clientOnData` |
-| ~457 `ฝั่งโฮสต์` | lobby, `hostStart`, `placeAll`, `respawn`, `hostTick`, `updatePlayer`, projectiles, damage, enemies + boss AI, `modeLogic`, `endMatch` |
-| ~1156 `โหมดพิเศษ` | `modeInit`, training, Quidditch, race, battle royale, Voldemort mode, `bombTick`, `modeSnap` |
-| ~1465 | `makeSnap` + host loop |
-| ~1498 `ไมค์` | mesh voice chat |
-| ~1587 `การควบคุม` | keyboard/mouse → `INPUT` |
-| ~1624 `เสียง` | synth SFX `snd()` (tries `playBuf` file first), file audio engine (`SFXN/SFXV/SFXR/SFXSYN`, `loadSfx`, `ambTick`, `wantTrack`/`fileMusicTick` music switching incl. boss + win/lose stingers), "เพลงของฉัน" (`MY`, IndexedDB), synth music fallback (`musicTick`) |
-| ~1800 `ฝั่งแสดงผล` | `setScreen` (also sets `body[data-screen]`), `onLobby`, `onSnap`, particles, `fx(ev)`, overlays (`syncOverlays` buff cards, `showOver` results) |
-| ~2066 `โลก 3D` | renderer + bloom (`rpass` = RenderPass), sky, maps, cloth, `makeStudent`, `makeEnemy`, camera |
-| ~2816 `เวทีเมนู/ล็อบบี้` | `stage` scene, `stageSpots(L)` (host centre, spread out; team = blue left / red right; online shows empty slots), `stageChar`, `stageIdle`, `renderStage` (camera auto-fits to player count + aspect), `drawStageLabels` (name plates, staggered when they overlap; host clicks plate = move team) |
-| ~3226 | mode visuals (`syncModeObjs`), roles, meeting UI |
-| ~3390 | `render()` loop |
-| ~3447 `ชิ้นส่วน HUD` | canvas HUD kit: `plate`, `frameBox`, `drawBossBar` (top-centre boss HP with damage trail), `spellDia` (diamond spell slot), `thinBar`; then `drawHUD`, `drawModeHUD`, `drawBottom` (bottom-left emblem = ult ring + HP/shield bars; bottom-right diamond cluster Q/E/R/F + small row LMB/RMB/Space/X/B; Voldemort mode = its own diamond row), `drawBoard` (Tab) |
-| ~2075 `โลก 3D` top | renderer, `QUAL`/`applyQuality`/`qualTick`, `batchStatic`, `stoneMat` cache |
-| ~3684 `เมนู / ล็อบบี้ (DOM)` | menu wiring, lobby plate click, copy code, `renderLobby`, debug object `window.WD` |
+| Line | Section (Thai header) | What |
+|---|---|---|
+| ~10 | `<style>` | UI theme tokens on `:root` (`--gold`, `--panel`, `--corners` gold corner brackets, `--fd` display font). `.card` = gold-framed panel used everywhere. Menu `.mleft/.mi/.mprof/.myrow`, lobby `.ltop/.lmodes/.lright/.mcard`, buff cards `.boon .bc` |
+| ~163 | HTML | `#menu` (logo + text menu: solo / host / join / guide / กราฟิก / เพลง / เพลงของฉัน; profile card bottom-right), `#guide` (incl. เพลงของฉัน help + **credits**), `#lobby`, overlays `#buff/#over/#meet`, `#voice` |
+| ~290 | `พื้นฐาน` | utils (`$`, `rnd`, `clamp`, `lerp`, `store`, `toast`) |
+| ~305 | `ค่าคงที่ของเกม` | `MAPS`, `MODES`, `PDEF`, `EDEF`, `POOLS`, `BUFFS` (icon `i`) |
+| ~397 | `เครือข่าย` | host/join, `hostOnData`, `clientOnData` |
+| ~469 | `ฝั่งโฮสต์` | lobby, `hostStart`, `hostTick`, `updatePlayer`, projectiles, damage, enemies + boss AI, `modeLogic`, `endMatch` |
+| ~1168 | `โหมดพิเศษ` | training, Quidditch, race, battle royale, Voldemort mode, `modeSnap` |
+| ~1478 | | `makeSnap`, `PROF`/`pf` profiler, host loop |
+| ~1513 | `ไมค์` | mesh voice chat |
+| ~1602 | `การควบคุม` | keyboard/mouse → `INPUT` (M music, N next own song) |
+| ~1640 | `เสียง` | synth SFX `snd()` (tries `playBuf` file first) |
+| ~1756 | `ไฟล์เสียงจริง` | `SFXN/SFXV/SFXR/SFXSYN`, `loadSfx`, `playBuf`, `ambTick`, `MUSF` streamed music (`wantTrack`, `fileMusicTick`, boss + win/lose stingers) |
+| ~1839 | `"เพลงของฉัน"` | `MY` playlist, IndexedDB `wd_music`; then synth music fallback `musicTick`, `toggleMusic` |
+| ~1939 | `ฝั่งแสดงผล` | `setScreen`, `onLobby`, `onSnap`, particles, `fx(ev)`, overlays (`syncOverlays`, `showOver`) |
+| ~2205 | `โลก 3D` | renderer + bloom (`rpass`), **`QUAL`/`applyQuality`/`qualTick` (~2227)**, sky, **`batchStatic` (~2336)**, maps, cloth, `makeStudent`, `makeEnemy`, camera |
+| ~3017 | `เวทีเมนู/ล็อบบี้` | `stage` scene, `stageSpots`, `stageChar`, `renderStage`, `drawStageLabels` |
+| ~3427 | `ฝั่งแสดงผลของโหมดพิเศษ` | `syncModeObjs`, roles, meeting UI |
+| ~3599 | | `render()` loop (+ own footsteps) |
+| ~3652 | `ชิ้นส่วน HUD` | `plate`, `frameBox`, `drawBossBar`, `spellDia`, `thinBar`, `drawHUD`, `drawModeHUD`, `drawBottom`, `drawBoard` |
+| ~3889 | `เมนู / ล็อบบี้ (DOM)` | menu wiring (graphics button, my-music input, UI click sounds), lobby, `renderLobby`, `window.WD` |
 
 ## 6. Game content (current)
 **Modes** (`MODES`): 🗝️ Dungeon Co-op (1–6, waves "floors", boss raid every 5: dragon 3-phase / spider queen 3-phase) • 🎯 Training (dummies, parry practice, host ends with button) • ⚔️ Duel 1v1 • 💥 FFA • 🛡️ Team 2v2/3v3 • 🏟️ Quidditch (team, pitch map, ball + golden snitch) • 🏁 Broom race (10 rings × 2 laps) • 🌀 Battle royale (forest map, shrinking zone, unlock spells by items) • 🐍 Find Lord Voldemort (Among Us style, 4–6, roles: นักเรียนฮอกวอตส์ / ลอร์ดโวลเดอมอร์ / ผู้เสพความตาย at 6 players).
 **Maps** (random unless the mode forces one): 🏰 castle (night), 🌲 forest (large, trees/rocks/stone circle), 🏟️ Quidditch pitch (sunset).
-**Controls:** click = pointer lock • WASD/mouse • LMB bolt • RMB shield (parry window 0.28 s) • Q fire • E stun • R push • F pull • Space dodge (fly: up) • X ultimate • B broom • C descend • Tab score • V push-to-talk • M music. Voldemort mode: E task • Q kill • R report • F emergency meeting.
+**Controls:** click = pointer lock • WASD/mouse • LMB bolt • RMB shield (parry window 0.28 s) • Q fire • E stun • R push • F pull • Space dodge (fly: up) • X ultimate • B broom • C descend • Tab score • V push-to-talk • M music on/off • N next song (เพลงของฉัน). Voldemort mode: E task • Q kill • R report • F emergency meeting.
 Can't cast on a broom except in Quidditch/race. Stun or web knocks you off the broom.
 
 ## 7. How to run / test
 - Just open `index.html` in Chrome/Edge (internet needed for CDN + PeerJS signaling). Solo play works without other players.
 - For the Claude Browser pane, file:// can't be scripted — serve over http. `.claude/launch.json` (git-ignored, recreate if missing) runs `python -m http.server 8765 --bind 127.0.0.1` as `wizardduel`. Any static server works. **The browser caches `index.html` — load `http://localhost:8765/?v=N` with a new N after each edit.** Set the viewport to 1280x720 for screenshots.
-- **Debug object `window.WD`** (console): `WD.G` (host state), `WD.VIEW`, `WD.INPUT`, `WD.hostStart()`, `WD.hostToLobby()`, `WD.addPlayer(id,name,color)` (fake bots for multiplayer modes), `WD.hostVote`, `WD.setYaw`, `WD.render(dt,now)`, `WD.camHook=(cam)=>{...}` (override camera for screenshots), `WD.PM3`, `WD.MO`, `WD.ROLE`.
+- **Debug object `window.WD`** (console): `WD.AUDIO` (loaded sfx count, current music + time, ambience, own songs), `WD.G` (host state), `WD.VIEW`, `WD.INPUT`, `WD.hostStart()`, `WD.hostToLobby()`, `WD.addPlayer(id,name,color)` (fake bots for multiplayer modes), `WD.hostVote`, `WD.setYaw`, `WD.render(dt,now)`, `WD.camHook=(cam)=>{...}` (override camera for screenshots), `WD.PM3`, `WD.MO`, `WD.ROLE`.
 - Typical test: click `#btnSolo`, add bots with `WD.addPlayer(id,name,color)` then `WD.broadcastLobby()` (they appear on the lobby stage), set `WD.G.mode='quid'`, `WD.hostStart()`, then drive `WD.render` from a setInterval if the pane is hidden (rAF pauses) and collect `window.onerror` messages. Boss bar: give players huge HP, then `WD.G.wave=4;WD.G.queue=[];WD.G.en=[]` twice → buff cards → wave 5 boss.
 - **Profiling:** `WD.PROF.on=true` collects avg ms per section in `WD.PROF.t/n` (players, enemies, projMode, fx, gpuSubmit, hud2d, hostTick, snap). For real frame cost (CPU+GPU) call `WD.render(1/60,now)` in a loop followed by `WD.gl.getContext().readPixels(...)` to force a GPU sync, and read `WD.gl.info.render.calls` with `info.autoReset=false`. rAF FPS is useless when the pane is hidden (throttled to 1 Hz).
 - Benchmarks at 1280x720 in the Claude browser pane (median frame ms, before → after): castle 14.4 → 4.6, forest 13.5 → 5.0, pitch 7.9 → 3.6.
@@ -86,14 +104,15 @@ Can't cast on a broom except in Quidditch/race. Stun or web knocks you off the b
 - ⚠️ Host can technically see secret roles via console (accepted — friends only).
 - ✅ New UI (2026-10-16): navy+gold "magic book" theme, 3D party lobby, Hades-style buff cards, diamond spell HUD, boss bar. Checked at 1280x720 and 1024x640, all 9 modes start without console errors.
 - ⚠️ Audio picks were chosen by name/duration, not by listening — the user may want to swap some (`hurt` uses human grunts, `cast_fire` uses a sci-fi thruster). Swap = replace the OGG with the same file name, or change counts in `SFXN`. OGG may not decode on old iPhone Safari → synth fallback.
+- ✅ Audio (2026-10-17): all 73 SFX load, menu/castle/forest/pitch/boss/imp music switch correctly, victory stinger plays, ambience per map, เพลงของฉัน plays/skips/clears and survives reload. Verified in the Claude browser pane only.
 - ⚠️ UI not designed for phones (<900px wide the lobby panels overlap the stage). Not checked with a real online friend yet (only host-side online lobby with room code).
 - ⚠️ Graphics are low-poly primitives (no external models). Heavy maps (forest) may lag on weak PCs.
 - `index.2d-backup.html` (old 2D version) is git-ignored and only exists on the original PC.
 
 ## 9b. Audio research
 (Implemented 2026-10-17 — see the audio bullet in section 3. To re-encode: download sources listed in `audio/CREDITS.md`, ffmpeg via `pip install imageio-ffmpeg`, trim + peak-normalise to -2 dB, mono q2 for SFX, stereo q1 for music.)
-`research/audio-assets.md` (Sonnet subagent, 2026-10-16): licence-checked free music/SFX picks. Verdict: Kenney (CC0) + OpenGameArt CC0 items for SFX, Incompetech/Kevin MacLeod (CC-BY 4.0, needs credits) for music; Pixabay/Sonniss/Mixkit/Zapsplat/Tabletop Audio rejected for raw files in a public repo. Plan: OGG files in `audio/`, lazy `fetch`+`decodeAudioData`, keep the synth as fallback. Nothing downloaded yet.
-User asked about real Harry Potter music: told them not to put it in the public repo (copyright, takedown risk); offered a "เพลงของฉัน" button that plays an mp3 from the player's own PC locally (not built yet).
+`research/audio-assets.md` (Sonnet subagent, 2026-10-16): licence-checked free music/SFX picks. Verdict: Kenney (CC0) + OpenGameArt CC0 items for SFX, Incompetech/Kevin MacLeod (CC-BY 4.0, needs credits) for music; Pixabay/Sonniss/Mixkit/Zapsplat/Tabletop Audio rejected for raw files in a public repo. Done: files are in `audio/` (game music streamed, SFX decoded), synth kept as fallback.
+User asked about real Harry Potter music: told them not to put it in the public repo (copyright, takedown risk); built the "เพลงของฉัน" button instead (local files, IndexedDB, never uploaded).
 
 ## 10. Ideas the user may ask for next
 Minimap (bottom-left, Hogwarts Legacy style), house-crest picker in the menu, vents/secret passages for Voldemort, task mini-games, 3-player Voldemort mode, more bosses (basilisk), more maps (Hogsmeade, Great Hall), cosmetics, ranked/MMR, mobile controls.
@@ -107,3 +126,4 @@ Minimap (bottom-left, Hogwarts Legacy style), house-crest picker in the menu, ve
 - 2026-10-16 — **Whole new UX/UI** (refs: Hogwarts Legacy style + Fortnite/Valorant lobby + Hades boon cards + Elden Ring thin HUD): navy/gold theme with Cinzel, text-only main menu with your character standing on a 3D rune dais, 3D party lobby (everyone's character on stage, name plates, empty slots, click plate to swap team), mode list + selected-mode card + big gold start button, Hades-style buff cards, new results/meeting/guide styling, canvas HUD redone (diamond spell cluster, ult emblem, thin bars, boss bar, gold crosshair, framed scoreboard). No protocol change (PREFIX still v3).
 - 2026-10-16 — **Performance pass** (~3x faster frames): half-res bloom, no canvas MSAA, pixel ratio ≤1, shadows every 2nd frame at 2048, static mesh batching, cached stone materials, fewer pool lights, auto/high/low graphics setting with auto resolution scaling, `WD.PROF` profiler. Audio asset research report added.
 - 2026-10-17 — **Real audio**: CC0/CC-BY music per map + boss + imp + win/lose stingers, 73 CC0 SFX with synth fallback, footsteps, UI click/hover sounds, ambience loops, real wind for brooms, "เพลงของฉัน" local-music button (IndexedDB, N = next), credits section in the guide + `audio/CREDITS.md`.
+- 2026-10-17 — HANDOFF: added §0 questions to ask the user at the start of the next session; refreshed code map and user notes.
