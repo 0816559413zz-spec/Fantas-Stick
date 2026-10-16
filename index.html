@@ -4426,7 +4426,7 @@ function syncPlayers(P,mode,now,dt){
     }
     o.ends.forEach((E,i)=>{E.rotation.x=-clamp(v.lvz*0.07,0,1.2)+Math.sin(now*0.012+i*1.7)*0.08*(1+v.sp*0.15);E.rotation.z=clamp(v.lvx*0.04,-0.6,0.6);});
     o.shield.visible=!!p.sh||!!(p.fm&(128|16384));
-    if(o.shield.visible){o.shield.material.uniforms.t.value=now/1000;o.shield.material.uniforms.c.value.set(p.sh?'#7ff0ff':(p.fm&128)?'#bfeaff':'#9a7a3a');}
+    if(o.shield.visible){o.shield.material.uniforms.t.value=now/1000;o.shield.material.uniforms.c.value.set(p.sh?'#7ff0ff':(p.fm&128)?'#6fb8d8':'#9a7a3a');}
     statusFX(o,p.fm|0,p.x,p.y,o.zs||0,2.2,now);
     o.stars.visible=!!p.st;o.stars.rotation.y=now/250;
     const isMe=p.id===NET.myId;
@@ -5401,7 +5401,8 @@ requestAnimationFrame(frame);
 // =====================================================================
 // บอทต่อสู้แบบง่ายๆ: เล็งนำเป้า เดินรักษาระยะ+ส่ายไปมา ร่ายคาถาทุกครั้งที่พร้อมและอยู่ในระยะ
 function botBrain(p,dt){
-  const inp=p.inp,foe=plist().find(q=>q!==p&&q.alive&&!q.downed&&q.team!==p.team);
+  const inp=p.inp;let foe=plist().find(q=>q!==p&&q.alive&&!q.downed&&q.team!==p.team);
+  if(!foe){let bd=1e12;for(const e of G.en)if(!e.dead){const d=(e.x-p.x)**2+(e.y-p.y)**2;if(d<bd){bd=d;foe=e;}}}
   if(!foe)return;
   let tg=foe;
   {let md=450*450,bm=null;for(const m of G.mins)if(!m.dead&&m.team!==p.team){const dd=(m.x-p.x)**2+(m.y-p.y)**2;if(dd<md){md=dd;bm=m;}}if(bm&&Math.hypot(foe.x-p.x,foe.y-p.y)>240)tg=bm;}
@@ -5458,6 +5459,23 @@ function balTour(kits,rounds,maxT){
   return {rate,pair};
 }
 // ดาเมจ/CC ที่แต่ละคาถาทำใส่เป้านิ่งใน 8 วิ (รวมไฟลุก/โซน) เพื่อเทียบพลังตรงๆ
+// โหมดดันเจียนคนเดียวด้วยบอท: ดูว่าชุดคาถาไหนไปได้ไกลแค่ไหน (ชั้น / เวลา / จำนวนศัตรูที่ฆ่า) — หลายรอบ เฉลี่ย
+function balCoop(kit,maxT,runs){
+  const me=plist()[0],res={wave:0,time:0,kills:0,n:runs||1};
+  for(let r=0;r<(runs||1);r++){
+    G.mode='coop';hostStart();for(let i=0;i<260;i++)hostTick(1/60);
+    setKit(me,kit);me.bot=true;me.kills=0;
+    let t=0;
+    while(t<(maxT||240)){
+      if(G.ph==='buff')hostPick(me,Math.floor(Math.random()*3));
+      if(G.ph==='over')break;
+      hostTick(1/60);t+=1/60;
+      if(me.downed||!me.alive)break;
+    }
+    res.wave+=G.wave;res.time+=t;res.kills+=me.kills;
+  }
+  res.wave=+(res.wave/res.n).toFixed(1);res.time=Math.round(res.time/res.n);res.kills=+(res.kills/res.n).toFixed(0);return res;
+}
 function balSpellTest(){
   const ps=plist(),a=ps[0],b=ps[1],out={};
   for(const S of SPELL_LIST){
@@ -5475,7 +5493,7 @@ function balSpellTest(){
   }
   return out;
 }
-window.WD={fakeHello:(id,name,look,kit)=>hostOnData({peer:id,send(){},close(){}},{t:'hello',name,look,kit}),fakeMsg:(id,d)=>hostOnData({peer:id,send(){},close(){}},d),balArena,bal:balDuel,tour:balTour,dmgTest:balSpellTest,hostTick:dt=>hostTick(dt),castSlot:(p,i)=>castSlot(p,i),castUlt:p=>castUlt(p),setKit:(p,k)=>setKit(p,k),SPELLS,SPELL_LIST,PATHS,parseKit,foesOf,emitLog:()=>EVL,damage:(...a)=>damage(...a),get G(){return G;},get screen(){return screen;},get VIEW(){return VIEW;},INPUT,NET,render,choosePick,hostToLobby,hostStart,plist,broadcastLobby,setYaw:v=>{yaw=v;},cam,composer,PM3,tx,tz,addPlayer,hostVote,get ROLE(){return ROLE;},get MO(){return MO;},get PARTS(){return PARTS.length;},get AUDIO(){return {AC:AC&&AC.state,sfx:Object.keys(BUF).length,files:Object.values(BUF).reduce((a,b)=>a+b.length,0),music:MUSF.cur,mt:MUSF.els[MUSF.cur]?+MUSF.els[MUSF.cur].el.currentTime.toFixed(1):null,myT:MY.el?+MY.el.currentTime.toFixed(1):null,failed:MUSF.failed,amb:AMB.cur,wind:!!AMB.windBuf,my:MY.list.length};},PROF,gl,scene,bloom,moonL,LPOOL,stage};
+window.WD={coop:balCoop,fakeHello:(id,name,look,kit)=>hostOnData({peer:id,send(){},close(){}},{t:'hello',name,look,kit}),fakeMsg:(id,d)=>hostOnData({peer:id,send(){},close(){}},d),balArena,bal:balDuel,tour:balTour,dmgTest:balSpellTest,hostTick:dt=>hostTick(dt),castSlot:(p,i)=>castSlot(p,i),castUlt:p=>castUlt(p),setKit:(p,k)=>setKit(p,k),SPELLS,SPELL_LIST,PATHS,parseKit,foesOf,emitLog:()=>EVL,damage:(...a)=>damage(...a),get G(){return G;},get screen(){return screen;},get VIEW(){return VIEW;},INPUT,NET,render,choosePick,hostToLobby,hostStart,plist,broadcastLobby,setYaw:v=>{yaw=v;},cam,composer,PM3,tx,tz,addPlayer,hostVote,get ROLE(){return ROLE;},get MO(){return MO;},get PARTS(){return PARTS.length;},get AUDIO(){return {AC:AC&&AC.state,sfx:Object.keys(BUF).length,files:Object.values(BUF).reduce((a,b)=>a+b.length,0),music:MUSF.cur,mt:MUSF.els[MUSF.cur]?+MUSF.els[MUSF.cur].el.currentTime.toFixed(1):null,myT:MY.el?+MY.el.currentTime.toFixed(1):null,failed:MUSF.failed,amb:AMB.cur,wind:!!AMB.windBuf,my:MY.list.length};},PROF,gl,scene,bloom,moonL,LPOOL,stage};
 </script>
 </body>
 </html>
