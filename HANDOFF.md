@@ -34,6 +34,8 @@ Personal, non-commercial fan project made with/for the user and their friends. U
 - Maps are generated deterministically (seeded `mulberry`) so every client builds the same world. `buildWorld(id)` rebuilds the 3D scene when `builtMap` differs from the lobby/snapshot map.
 - Two canvases: `#gl` (WebGL 3D) and `#cv` (2D overlay for HUD, name tags, damage numbers). DOM overlays: menu, lobby, buff picker, results, meeting vote, guide, voice panel.
 - **Menu & lobby render a separate 3D scene `stage`** (dark hall, gold rune dais, floating candles) via `renderStage()` — `rpass.scene` is swapped to `stage` for that frame. Characters there come from `makeStudent()` re-parented into `stage` (`STAGE.chars`). The map scene is only rendered in-game.
+- **Performance (2026-10-16):** `antialias:false` (composer RT has no MSAA anyway), pixel ratio ≤1 by default, bloom rendered at half res (patched `bloom.setSize`), `PCFShadowMap` with `shadowMap.autoUpdate=false` (re-rendered every 2nd frame in auto, every frame in high), shadow map 2048 (4096 only on high for forest/pitch), light pool 6, `stoneMat` cached per (repeat,tint), and **`batchStatic(world, skip)`** merges every static, opaque, same-material mesh after `buildWorld` (castle ~480→~270 draw calls). Anything animated must go in the `skip` set (RUNE, CRYSTAL, SNITCH, FIREFLIES, CANDLES, BANNERS) or be a Sprite/InstancedMesh/transparent — **if you add a moving/toggled mesh to a map, add it to that skip list.**
+- **Graphics quality** `QUAL` (menu button "กราฟิก", stored in `localStorage wd_gfx`): `auto` (default; `qualTick` drops render scale 1→0.55 when frames average >24 ms, raises it back when <18 ms), `high` (DPR up to 1.5, shadows every frame), `low` (scale 0.7, no shadows, no bloom). `applyQuality()` applies it.
 - Camera: pointer lock; mouse → `yaw/pitch`; WASD is camera-relative (`INPUT.mx/my`); aim `INPUT.ax/ay` + pitch `INPUT.ap`. Spells **auto-lock vertically** onto a foe within ~0.3 rad of the aim (`shoot()`).
 
 ## 5. Code map (`index.html`, approximate line numbers — grep the section headers)
@@ -56,6 +58,7 @@ Personal, non-commercial fan project made with/for the user and their friends. U
 | ~3226 | mode visuals (`syncModeObjs`), roles, meeting UI |
 | ~3390 | `render()` loop |
 | ~3447 `ชิ้นส่วน HUD` | canvas HUD kit: `plate`, `frameBox`, `drawBossBar` (top-centre boss HP with damage trail), `spellDia` (diamond spell slot), `thinBar`; then `drawHUD`, `drawModeHUD`, `drawBottom` (bottom-left emblem = ult ring + HP/shield bars; bottom-right diamond cluster Q/E/R/F + small row LMB/RMB/Space/X/B; Voldemort mode = its own diamond row), `drawBoard` (Tab) |
+| ~2075 `โลก 3D` top | renderer, `QUAL`/`applyQuality`/`qualTick`, `batchStatic`, `stoneMat` cache |
 | ~3684 `เมนู / ล็อบบี้ (DOM)` | menu wiring, lobby plate click, copy code, `renderLobby`, debug object `window.WD` |
 
 ## 6. Game content (current)
@@ -69,6 +72,8 @@ Can't cast on a broom except in Quidditch/race. Stun or web knocks you off the b
 - For the Claude Browser pane, file:// can't be scripted — serve over http. `.claude/launch.json` (git-ignored, recreate if missing) runs `python -m http.server 8765 --bind 127.0.0.1` as `wizardduel`. Any static server works. **The browser caches `index.html` — load `http://localhost:8765/?v=N` with a new N after each edit.** Set the viewport to 1280x720 for screenshots.
 - **Debug object `window.WD`** (console): `WD.G` (host state), `WD.VIEW`, `WD.INPUT`, `WD.hostStart()`, `WD.hostToLobby()`, `WD.addPlayer(id,name,color)` (fake bots for multiplayer modes), `WD.hostVote`, `WD.setYaw`, `WD.render(dt,now)`, `WD.camHook=(cam)=>{...}` (override camera for screenshots), `WD.PM3`, `WD.MO`, `WD.ROLE`.
 - Typical test: click `#btnSolo`, add bots with `WD.addPlayer(id,name,color)` then `WD.broadcastLobby()` (they appear on the lobby stage), set `WD.G.mode='quid'`, `WD.hostStart()`, then drive `WD.render` from a setInterval if the pane is hidden (rAF pauses) and collect `window.onerror` messages. Boss bar: give players huge HP, then `WD.G.wave=4;WD.G.queue=[];WD.G.en=[]` twice → buff cards → wave 5 boss.
+- **Profiling:** `WD.PROF.on=true` collects avg ms per section in `WD.PROF.t/n` (players, enemies, projMode, fx, gpuSubmit, hud2d, hostTick, snap). For real frame cost (CPU+GPU) call `WD.render(1/60,now)` in a loop followed by `WD.gl.getContext().readPixels(...)` to force a GPU sync, and read `WD.gl.info.render.calls` with `info.autoReset=false`. rAF FPS is useless when the pane is hidden (throttled to 1 Hz).
+- Benchmarks at 1280x720 in the Claude browser pane (median frame ms, before → after): castle 14.4 → 4.6, forest 13.5 → 5.0, pitch 7.9 → 3.6.
 - Not testable alone: real online play between devices, voice chat.
 
 ## 8. Deploy
@@ -83,6 +88,10 @@ Can't cast on a broom except in Quidditch/race. Stun or web knocks you off the b
 - ⚠️ Graphics are low-poly primitives (no external models). Heavy maps (forest) may lag on weak PCs.
 - `index.2d-backup.html` (old 2D version) is git-ignored and only exists on the original PC.
 
+## 9b. Audio research
+`research/audio-assets.md` (Sonnet subagent, 2026-10-16): licence-checked free music/SFX picks. Verdict: Kenney (CC0) + OpenGameArt CC0 items for SFX, Incompetech/Kevin MacLeod (CC-BY 4.0, needs credits) for music; Pixabay/Sonniss/Mixkit/Zapsplat/Tabletop Audio rejected for raw files in a public repo. Plan: OGG files in `audio/`, lazy `fetch`+`decodeAudioData`, keep the synth as fallback. Nothing downloaded yet.
+User asked about real Harry Potter music: told them not to put it in the public repo (copyright, takedown risk); offered a "เพลงของฉัน" button that plays an mp3 from the player's own PC locally (not built yet).
+
 ## 10. Ideas the user may ask for next
 Minimap (bottom-left, Hogwarts Legacy style), house-crest picker in the menu, vents/secret passages for Voldemort, task mini-games, 3-player Voldemort mode, more bosses (basilisk), more maps (Hogsmeade, Great Hall), cosmetics, ranked/MMR, mobile controls.
 
@@ -93,3 +102,4 @@ Minimap (bottom-left, Hogwarts Legacy style), house-crest picker in the menu, ve
 - 2026-10-16 — Impostor mode renamed to 🐍 "หาลอร์ดโวลเดอมอร์" (Voldemort / Death Eater / Hogwarts students, Avada Kedavra kill FX).
 - 2026-10-16 — Added this HANDOFF.md + CLAUDE.md.
 - 2026-10-16 — **Whole new UX/UI** (refs: Hogwarts Legacy style + Fortnite/Valorant lobby + Hades boon cards + Elden Ring thin HUD): navy/gold theme with Cinzel, text-only main menu with your character standing on a 3D rune dais, 3D party lobby (everyone's character on stage, name plates, empty slots, click plate to swap team), mode list + selected-mode card + big gold start button, Hades-style buff cards, new results/meeting/guide styling, canvas HUD redone (diamond spell cluster, ult emblem, thin bars, boss bar, gold crosshair, framed scoreboard). No protocol change (PREFIX still v3).
+- 2026-10-16 — **Performance pass** (~3x faster frames): half-res bloom, no canvas MSAA, pixel ratio ≤1, shadows every 2nd frame at 2048, static mesh batching, cached stone materials, fewer pool lights, auto/high/low graphics setting with auto resolution scaling, `WD.PROF` profiler. Audio asset research report added.

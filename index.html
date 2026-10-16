@@ -168,6 +168,7 @@ body[data-screen=lobby] #voice{top:84px;left:auto;right:24px;width:340px}
       <button class="mi" id="btnHost">สร้างห้องออนไลน์<small>ได้รหัสห้องไปส่งให้เพื่อน</small></button>
       <div class="mi join"><input type="text" id="codeIn" placeholder="รหัสห้อง" maxlength="5"><button id="btnJoin">เข้าร่วม</button></div>
       <button class="mi" id="btnGuide">คู่มือ<small>วิธีเล่น / ปุ่มกด / เล่นกับเพื่อน</small></button>
+      <button class="mi" id="btnGfx">กราฟิก: อัตโนมัติ<small>ถ้าเกมกระตุก เลือก "ประหยัด"</small></button>
       <button class="mi" id="btnMusic">เพลง: เปิด</button>
     </nav>
     <div class="status" id="status" style="text-align:left"></div>
@@ -274,6 +275,7 @@ import {EffectComposer} from 'three/addons/postprocessing/EffectComposer.js';
 import {RenderPass} from 'three/addons/postprocessing/RenderPass.js';
 import {UnrealBloomPass} from 'three/addons/postprocessing/UnrealBloomPass.js';
 import {OutputPass} from 'three/addons/postprocessing/OutputPass.js';
+import {mergeGeometries} from 'three/addons/utils/BufferGeometryUtils.js';
 // =====================================================================
 //  พื้นฐาน
 // =====================================================================
@@ -1477,14 +1479,17 @@ function makeSnap(){
     J:G.proj.map(p=>({id:p.id,t:p.type,x:r1(p.x),y:r1(p.y),h:r1(p.h),vx:Math.round(p.vx),vy:Math.round(p.vy),vh:r1(p.vh),rf:p.dmg>(PDEF[p.type].dmg*1.2)?1:0}))
   };
 }
+// ตัววัดเวลาแต่ละส่วน (เปิดด้วย WD.PROF.on=true แล้วดู WD.PROF.t)
+const PROF={on:false,t:{},n:{}};
+function pf(k,t0){if(!PROF.on)return;const d=performance.now()-t0;PROF.t[k]=(PROF.t[k]||0)+d;PROF.n[k]=(PROF.n[k]||0)+1;}
 setInterval(()=>{
   if(!NET.isHost||!G||G.ph==='lobby')return;
   const t=performance.now();
   const dt=Math.min(0.05,(t-hostLast)/1000);hostLast=t;
-  hostTick(dt);tickN++;
-  const base=makeSnap();
+  hostTick(dt);tickN++;pf('hostTick',t);
+  const t1=performance.now(),base=makeSnap();
   const evl=EVL;EVL=[];
-  onSnap(Object.assign({},base,{ev:evl}));
+  onSnap(Object.assign({},base,{ev:evl}));pf('snap',t1);
   if(NET.online&&tickN%2===0){const evn=EVN;EVN=[];sendAll({t:'s',s:Object.assign({},base,{ev:evn})});}
 },1000/60);
 
@@ -2067,10 +2072,12 @@ $('#over').addEventListener('click',e=>{
 // =====================================================================
 const S3=1/20,tx=x=>(x-MW/2)*S3,tz=y=>(y-MH/2)*S3;
 const hdr=(c,k)=>new THREE.Color(c).multiplyScalar(k);
-const gl=new THREE.WebGLRenderer({canvas:document.getElementById('gl'),antialias:true,powerPreference:'high-performance'});
-gl.setPixelRatio(Math.min(1.5,window.devicePixelRatio||1));
+// antialias ปิดไว้: ภาพผ่าน EffectComposer (render target) อยู่แล้ว MSAA ของ canvas จึงไม่ช่วยอะไร แค่กินแรง
+const gl=new THREE.WebGLRenderer({canvas:document.getElementById('gl'),antialias:false,powerPreference:'high-performance'});
+gl.setPixelRatio(Math.min(1,window.devicePixelRatio||1));
 gl.useLegacyLights=true;
-gl.shadowMap.enabled=true;gl.shadowMap.type=THREE.PCFSoftShadowMap;
+gl.shadowMap.enabled=true;gl.shadowMap.type=THREE.PCFShadowMap;
+gl.shadowMap.autoUpdate=false; // อัปเดตเงาเองใน render() (โหมดอัตโนมัติ = ทุก 2 เฟรม)
 gl.toneMapping=THREE.ACESFilmicToneMapping;gl.toneMappingExposure=1.1;
 const scene=new THREE.Scene();
 scene.fog=new THREE.Fog('#151a33',50,170);
@@ -2078,8 +2085,40 @@ const cam=new THREE.PerspectiveCamera(62,1,0.1,700);
 const composer=new EffectComposer(gl);
 const rpass=new RenderPass(scene,cam);composer.addPass(rpass);
 const bloom=new UnrealBloomPass(new THREE.Vector2(512,512),0.65,0.45,0.88);
+// เรนเดอร์แสงฟุ้งที่ครึ่งความละเอียด (ดูแทบไม่ต่าง แต่เร็วขึ้นมาก)
+{const bs=bloom.setSize.bind(bloom);bloom.setSize=(w,h)=>bs(Math.max(1,Math.round(w/2)),Math.max(1,Math.round(h/2)));}
 composer.addPass(bloom);
 composer.addPass(new OutputPass());
+
+// ---------- คุณภาพกราฟิก: auto = ปรับความละเอียดเองตาม FPS / high = สวยสุด / low = เครื่องช้า ----------
+const QUAL={mode:['auto','high','low'].includes(store('wd_gfx'))?store('wd_gfx'):'auto',scale:1,acc:0,n:0,good:0,frame:0};
+const QUAL_NAME={auto:'อัตโนมัติ',high:'สูง',low:'ประหยัด'};
+function qualPR(){
+  const dpr=window.devicePixelRatio||1;
+  if(QUAL.mode==='high')return Math.min(1.5,dpr);
+  if(QUAL.mode==='low')return Math.min(1,dpr)*0.7;
+  return Math.min(1,dpr)*QUAL.scale;
+}
+function applyQuality(){
+  const pr=qualPR();gl.setPixelRatio(pr);composer.setPixelRatio(pr);
+  const sh=QUAL.mode!=='low';
+  if(gl.shadowMap.enabled!==sh){
+    gl.shadowMap.enabled=sh;
+    for(const sc of [scene,typeof stage!=='undefined'?stage:null])if(sc)sc.traverse(o=>{if(o.material)[].concat(o.material).forEach(m=>m.needsUpdate=true);});
+  }
+  bloom.enabled=QUAL.mode!=='low';
+  if(typeof resize==='function'&&SW)resize();
+}
+// ปรับความละเอียดอัตโนมัติ: เฟรมช้า (<~40fps) ลดลงทีละขั้น / ลื่นต่อเนื่องค่อยเพิ่มกลับ
+function qualTick(dt){
+  if(QUAL.mode!=='auto'||screen!=='game'||dt>0.2)return;
+  QUAL.acc+=dt;QUAL.n++;
+  if(QUAL.acc<2)return;
+  const avg=QUAL.acc/QUAL.n*1000;QUAL.acc=0;QUAL.n=0;
+  if(avg>24&&QUAL.scale>0.55){QUAL.scale=Math.max(0.55,+(QUAL.scale-0.15).toFixed(2));QUAL.good=0;applyQuality();}
+  else if(avg<18&&QUAL.scale<1){if(++QUAL.good>=3){QUAL.good=0;QUAL.scale=Math.min(1,+(QUAL.scale+0.1).toFixed(2));applyQuality();}}
+  else QUAL.good=0;
+}
 
 function texCanvas(w,h,draw,srgb=true){const c=document.createElement('canvas');c.width=w;c.height=h;draw(c.getContext('2d'),w,h);const t=new THREE.CanvasTexture(c);if(srgb)t.colorSpace=THREE.SRGBColorSpace;return t;}
 const glowTex=texCanvas(64,64,(g,w)=>{const r=g.createRadialGradient(32,32,0,32,32,32);r.addColorStop(0,'rgba(255,255,255,1)');r.addColorStop(0.22,'rgba(255,255,255,0.65)');r.addColorStop(0.5,'rgba(255,255,255,0.18)');r.addColorStop(1,'rgba(255,255,255,0)');g.fillStyle=r;g.fillRect(0,0,w,w);},false);
@@ -2099,7 +2138,9 @@ const runeTex=texCanvas(256,256,(g)=>{
 },false);
 const glowMats={};
 function glowMat(col,k=1.6){const key=col+k;if(!glowMats[key])glowMats[key]=new THREE.SpriteMaterial({map:glowTex,color:hdr(col,k),blending:THREE.AdditiveBlending,depthWrite:false,transparent:true});return glowMats[key];}
-function stoneMat(rx,ry,tint){const t=stoneTex.clone();t.needsUpdate=true;t.repeat.set(rx,ry);return new THREE.MeshStandardMaterial({map:t,color:tint||'#ffffff',roughness:0.95});}
+// ใช้วัสดุหินซ้ำ (ค่าเดียวกัน = วัสดุเดียวกัน) เพื่อให้รวมชิ้นส่วนฉากเป็นก้อนเดียวได้
+const STONEM={};
+function stoneMat(rx,ry,tint){const k=rx+'|'+ry+'|'+(tint||'');if(STONEM[k])return STONEM[k];const t=stoneTex.clone();t.needsUpdate=true;t.repeat.set(rx,ry);return STONEM[k]=new THREE.MeshStandardMaterial({map:t,color:tint||'#ffffff',roughness:0.95});}
 function shadowAll(o){o.traverse(m=>{if(m.isMesh){m.castShadow=true;m.receiveShadow=true;}});}
 
 // ท้องฟ้า: กลางคืน (ปราสาท/ป่า) หรือ พระอาทิตย์ตก (สนามควิดดิช)
@@ -2137,7 +2178,7 @@ function setSky(mode){
 }
 // ไฟชั่วคราวสำหรับคาถา (pool คงที่ ไม่ต้อง compile shader ใหม่)
 const LPOOL=[];
-for(let i=0;i<8;i++){const L=new THREE.PointLight('#ffffff',0,12,2);L.position.set(0,-100,0);scene.add(L);LPOOL.push(L);}
+for(let i=0;i<6;i++){const L=new THREE.PointLight('#ffffff',0,12,2);L.position.set(0,-100,0);scene.add(L);LPOOL.push(L);}
 
 // ---------- สร้างแผนที่ ----------
 let builtMap="",world=null,TORCHES=[],CANDLES=[],FIREFLIES=null,CRYSTAL=null,RUNE=null,SNITCH=null,BANNERS=[];
@@ -2148,13 +2189,39 @@ function buildWorld(id){
   clearDyn();
   setSky(id==='pitch'?'sunset':'night');
   if(id==='forest')buildForest();else if(id==='pitch')buildPitch();else buildCastle();
+  batchStatic(world,new Set([RUNE,CRYSTAL,SNITCH,FIREFLIES&&FIREFLIES.pts,...CANDLES.map(c=>c.g),...BANNERS.map(b=>b.m)].filter(Boolean)));
+  gl.shadowMap.needsUpdate=true;
   const ext=Math.max(MW,MH)*S3/2+12;
   Object.assign(moonL.shadow.camera,{left:-ext,right:ext,top:ext,bottom:-ext,near:1,far:400});
   moonL.shadow.camera.updateProjectionMatrix();
-  const ms=id==='castle'?2048:4096;
+  const ms=id==='castle'||QUAL.mode!=='high'?2048:4096;
   if(moonL.shadow.mapSize.x!==ms){moonL.shadow.mapSize.set(ms,ms);if(moonL.shadow.map){moonL.shadow.map.dispose();moonL.shadow.map=null;}}
 }
 function addW(o){world.add(o);return o;}
+// รวมชิ้นส่วนฉากที่ไม่ขยับและใช้วัสดุเดียวกันเป็น mesh เดียว (ลด draw call จากหลายร้อยเหลือไม่กี่สิบ)
+function batchStatic(root,skip){
+  root.updateMatrixWorld(true);
+  const inv=new THREE.Matrix4().copy(root.matrixWorld).invert(),groups=new Map();
+  root.traverse(o=>{
+    if(!o.isMesh||o.isInstancedMesh||!o.visible||Array.isArray(o.material)||o.material.transparent)return;
+    for(let q=o;q&&q!==root;q=q.parent)if(skip.has(q)||!q.visible)return;
+    if(o.matrixWorld.determinant()<0)return;
+    const g=o.geometry;if(g.morphAttributes&&Object.keys(g.morphAttributes).length)return;
+    const key=o.material.uuid+'|'+Object.keys(g.attributes).sort().join(',')+'|'+(g.index?1:0)+'|'+o.castShadow+'|'+o.receiveShadow;
+    let L=groups.get(key);if(!L)groups.set(key,L=[]);L.push(o);
+  });
+  const m4=new THREE.Matrix4();
+  for(const L of groups.values()){
+    if(L.length<2)continue;
+    const geos=L.map(o=>{const g=o.geometry.clone();g.applyMatrix4(m4.multiplyMatrices(inv,o.matrixWorld));return g;});
+    const merged=mergeGeometries(geos,false);
+    geos.forEach(g=>g.dispose());
+    if(!merged)continue;
+    const m=new THREE.Mesh(merged,L[0].material);m.castShadow=L[0].castShadow;m.receiveShadow=L[0].receiveShadow;
+    root.add(m);
+    for(const o of L)o.parent.remove(o);
+  }
+}
 
 function buildCastle(){
   scene.fog.color.set('#151a33');scene.fog.near=50;scene.fog.far=170;
@@ -2933,7 +3000,7 @@ function renderStage(dt,now){
   const sway=Math.sin(now/5200)*0.15;
   if(lob){const mx=Math.max(0,...rows.map(r=>Math.abs(r.s.x)),...STAGE.empty.map(e=>Math.abs(e.x))),dist=clamp((mx+1.1)/(0.3*cam.aspect),6.5,13);cam.position.set(sway,1.5+dist*0.1,dist);cam.lookAt(0,1.45,0);}
   else{cam.position.set(-0.85+sway*0.5,1.55,5.6);cam.lookAt(-0.85,1.12,0);}
-  rpass.scene=stage;composer.render();rpass.scene=scene;
+  rpass.scene=stage;gl.shadowMap.needsUpdate=true;composer.render();rpass.scene=scene;
   if(lob)drawStageLabels(rows,team);
 }
 // ป้ายชื่อเหนือหัวในล็อบบี้ (คลิกเพื่อย้ายทีมได้ถ้าเป็นโฮสต์)
@@ -3391,6 +3458,7 @@ $('#meet').addEventListener('click',e=>{const b=e.target.closest('[data-vote]');
 let lastFrame=performance.now();
 function frame(now){
   const dt=Math.min(0.05,(now-lastFrame)/1000);lastFrame=now;
+  qualTick(dt);
   render(dt,now);
   requestAnimationFrame(frame);
 }
@@ -3404,7 +3472,7 @@ function render(dt,now){
     PARTS.length=0;TEXTS.length=0;
     if(screen==='menu'||screen==='lobby'){renderStage(dt,now);return;}
     updateParticles(dt);updateShapes(dt);updateLights(dt);
-    menuCamera(now);composer.render();return;
+    menuCamera(now);gl.shadowMap.needsUpdate=true;composer.render();return;
   }
   const a=VIEW.prev?clamp((now-VIEW.tCur)/Math.max(8,VIEW.tCur-VIEW.tPrev),0,1):1;
   const pm={},em={};
@@ -3425,19 +3493,21 @@ function render(dt,now){
     const o=PM3.get(me.id);windUpdate(o?Math.hypot(o.svx,o.svz):0,!!me.fl);
   }else menuCamera(now);
   shakeA=Math.max(0,shakeA-dt*30);
-  syncPlayers(P,v.mode,now,dt);
-  syncEnemies(E,P,now,dt);
+  let t0=performance.now();
+  syncPlayers(P,v.mode,now,dt);pf('players',t0);t0=performance.now();
+  syncEnemies(E,P,now,dt);pf('enemies',t0);t0=performance.now();
   syncProj(v,now);
-  syncModeObjs(v,P,me,now,dt);
+  syncModeObjs(v,P,me,now,dt);pf('projMode',t0);
   KC=Math.max(0,KC-dt);roleShowT=Math.max(0,roleShowT-dt);
   $('#trainEnd').classList.toggle('hidden',!(NET.isHost&&v.mode==='train'&&v.ph!=='over'));
-  updateParticles(dt);updateShapes(dt);updateLights(dt);
-  composer.render();
-  const spk=speakingIds();
+  t0=performance.now();updateParticles(dt);updateShapes(dt);updateLights(dt);pf('fx',t0);
+  QUAL.frame++;gl.shadowMap.needsUpdate=QUAL.mode==='high'||QUAL.frame%2===0;
+  t0=performance.now();composer.render();pf('gpuSubmit',t0);
+  t0=performance.now();const spk=speakingIds();
   drawLabels(P,E,v,me,spk);
   drawTexts(dt);
   if(me&&me.al&&!me.dn)drawCrosshair();
-  drawHUD(v,me,P);
+  drawHUD(v,me,P);pf('hud2d',t0);
 }
 
 // ---------- HUD ----------
@@ -3701,6 +3771,9 @@ $('#trainEnd').onclick=()=>{if(NET.isHost)hostEndTraining();};
 $('#guide').addEventListener('click',e=>{if(e.target.id==='guide')$('#guide').classList.add('hidden');});
 $('#btnMusic').textContent=MUSIC.on?'เพลง: เปิด':'เพลง: ปิด';
 $('#btnMusic').onclick=()=>{ac();toggleMusic();};
+function gfxLabel(){$('#btnGfx').innerHTML=`กราฟิก: ${QUAL_NAME[QUAL.mode]}<small>${QUAL.mode==='auto'?'ปรับความละเอียดเองให้ลื่น':QUAL.mode==='high'?'สวยสุด (เครื่องแรงเท่านั้น)':'ไม่มีเงา/แสงฟุ้ง ลื่นสุด'}</small>`;}
+gfxLabel();
+$('#btnGfx').onclick=()=>{const o=['auto','high','low'];QUAL.mode=o[(o.indexOf(QUAL.mode)+1)%3];QUAL.scale=1;store('wd_gfx',QUAL.mode);applyQuality();gfxLabel();};
 // เพลงเริ่มได้หลังผู้ใช้คลิกครั้งแรก (กฎของเบราว์เซอร์)
 addEventListener('pointerdown',()=>ac(),{once:true});
 $('#btnStart').onclick=()=>{if(NET.isHost)hostStart();};
@@ -3756,11 +3829,12 @@ function renderLobby(){
 }
 
 resize();
+applyQuality();
 buildWorld('castle');
 setScreen('menu');
 requestAnimationFrame(frame);
 // ตัวช่วยทดสอบ/ดีบัก (เปิดคอนโซลแล้วพิมพ์ WD)
-window.WD={get G(){return G;},get screen(){return screen;},get VIEW(){return VIEW;},INPUT,NET,render,choosePick,hostToLobby,hostStart,plist,broadcastLobby,setYaw:v=>{yaw=v;},cam,composer,PM3,tx,tz,addPlayer,hostVote,get ROLE(){return ROLE;},get MO(){return MO;},get PARTS(){return PARTS.length;}};
+window.WD={get G(){return G;},get screen(){return screen;},get VIEW(){return VIEW;},INPUT,NET,render,choosePick,hostToLobby,hostStart,plist,broadcastLobby,setYaw:v=>{yaw=v;},cam,composer,PM3,tx,tz,addPlayer,hostVote,get ROLE(){return ROLE;},get MO(){return MO;},get PARTS(){return PARTS.length;},PROF,gl,scene,bloom,moonL,LPOOL,stage};
 </script>
 </body>
 </html>
