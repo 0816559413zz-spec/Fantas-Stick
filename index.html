@@ -70,15 +70,17 @@ th{color:var(--gold);font-weight:400;font-size:12px;letter-spacing:2px}
 .mleft .orn{margin:22px 0 18px;width:100%;background-position:left center;background-size:100% 1px;background-image:linear-gradient(90deg,var(--gold),transparent)}
 .mleft .orn::after{left:0}
 .mnav{display:flex;flex-direction:column}
-.mi{position:relative;display:block;width:100%;text-align:left;background:none;border:none;padding:10px 0 10px 26px;font-size:22px;color:var(--text);box-shadow:none}
+.mi{position:relative;display:block;width:100%;text-align:left;background:none;border:none;padding:8px 0 8px 26px;font-size:21px;color:var(--text);box-shadow:none}
 .mi small{display:block;font-size:13px;color:var(--mute);margin-top:1px}
-.mi::before{content:'';position:absolute;left:4px;top:22px;width:8px;height:8px;border:1px solid var(--gold);transform:rotate(45deg);opacity:.35;transition:opacity .15s,background .15s}
+.mi::before{content:'';position:absolute;left:4px;top:20px;width:8px;height:8px;border:1px solid var(--gold);transform:rotate(45deg);opacity:.35;transition:opacity .15s,background .15s}
 .mi:hover{color:var(--gold2);box-shadow:none;transform:translateX(6px)}
 .mi:hover::before{opacity:1;background:var(--gold)}
 .mi.join{cursor:default;display:flex;gap:8px;align-items:center;padding-right:0}
 .mi.join:hover{transform:none}
 .mi.join input{flex:1;text-transform:uppercase;letter-spacing:4px;font-size:16px}
 .mi.join button{flex:none;padding:10px 16px}
+.myrow{display:flex;align-items:center;gap:8px}
+.myrow #btnMyClear{flex:none;padding:6px 12px;font-size:13px}
 .mprof{position:absolute;right:48px;bottom:40px;width:320px}
 .mver{position:absolute;left:56px;bottom:18px;font-size:11px;color:#5a6178;letter-spacing:2px}
 
@@ -170,6 +172,8 @@ body[data-screen=lobby] #voice{top:84px;left:auto;right:24px;width:340px}
       <button class="mi" id="btnGuide">คู่มือ<small>วิธีเล่น / ปุ่มกด / เล่นกับเพื่อน</small></button>
       <button class="mi" id="btnGfx">กราฟิก: อัตโนมัติ<small>ถ้าเกมกระตุก เลือก "ประหยัด"</small></button>
       <button class="mi" id="btnMusic">เพลง: เปิด</button>
+      <div class="myrow"><button class="mi" id="btnMyMusic">เพลงของฉัน<small id="myMusicInfo">เลือกไฟล์เพลงในเครื่อง (เล่นแค่ในเครื่องคุณ)</small></button><button id="btnMyClear" class="hidden">ล้าง</button></div>
+      <input type="file" id="myMusicIn" accept="audio/*" multiple hidden>
     </nav>
     <div class="status" id="status" style="text-align:left"></div>
   </div>
@@ -207,7 +211,7 @@ body[data-screen=lobby] #voice{top:84px;left:auto;right:24px;width:340px}
       <tr><td><b>X</b></td><td>เวทโบราณ (เมื่อเกจทองเต็ม)</td></tr>
       <tr><td><b>B</b></td><td>🧹 ขึ้น/ลงไม้กวาด — บินเร็ว ข้ามสิ่งกีดขวางได้ แต่<b>ร่ายเวทไม่ได้</b> โดนสตัน/ใยแมงมุมจะตก</td></tr>
       <tr><td><b>C</b></td><td>บินต่ำลง (ตอนอยู่บนไม้กวาด)</td></tr>
-      <tr><td><b>Tab</b> / <b>V</b> / <b>M</b></td><td>ตารางคะแนน / พูดไมค์ / เปิดปิดเพลง</td></tr>
+      <tr><td><b>Tab</b> / <b>V</b> / <b>M</b> / <b>N</b></td><td>ตารางคะแนน / พูดไมค์ / เปิดปิดเพลง / เปลี่ยนเพลง (ถ้าใช้ "เพลงของฉัน")</td></tr>
       <tr><td><b>1 / 2 / 3</b></td><td>เลือกพลังเสริมระหว่างด่าน (Co-op)</td></tr>
     </table>
     <h3>🎮 โหมดทั้งหมด (โฮสต์เลือกในล็อบบี้)</h3>
@@ -225,6 +229,12 @@ body[data-screen=lobby] #voice{top:84px;left:auto;right:24px;width:340px}
     <h3>🗺️ แผนที่ (สุ่ม) และศัตรู</h3>
     <p class="gnote">🏰 ลานปราสาท — ก็อบลิน พ่อมดมืด พิกซี่ โทรลล์ บอสมังกร<br>🌲 ป่ามืด — แมงมุมจิ๋ว แมงมุมยักษ์ (กระโจนกัด + พ่นใย) บอสราชินีแมงมุม<br>🏟️ สนามควิดดิช — พิกซี่บินได้ ก็อบลิน แมงมุม โทรลล์ บอสมังกร<br>(ควิดดิชเล่นที่สนามเสมอ / แบทเทิลรอยัลเล่นในป่าเสมอ / โหมดอื่นสุ่มแผนที่)</p>
     <p class="gnote">💡 เวทจะล็อกเป้าแนวสูงให้อัตโนมัติ เล็งไปทางศัตรูที่บินอยู่ก็ยิงโดน • Co-op: ถ้าเพื่อนล้ม ไปยืนข้างๆ 2.5 วิ เพื่อชุบ</p>
+    <h3>🎵 เพลงของฉัน</h3>
+    <p class="gnote">กด <b>เพลงของฉัน</b> ที่หน้าแรก แล้วเลือกไฟล์เพลง (mp3 ฯลฯ) จากเครื่องคุณได้หลายเพลง — เพลงจะเล่นแทนเพลงของเกม <b>เฉพาะในเครื่องคุณ</b> (ไม่ได้ส่งไปให้เพื่อนหรืออัปโหลดไปไหน) และจำไว้ให้ครั้งหน้า • กด <b>N</b> เปลี่ยนเพลง • กด <b>ล้าง</b> เพื่อกลับไปใช้เพลงของเกม</p>
+    <h3>📜 เครดิตเพลงและเสียง</h3>
+    <p class="gnote">เพลงโดย <b>Kevin MacLeod</b> (incompetech.com): "Moonlight Hall", "The Snow Queen", "Magic Forest", "Call to Adventure", "Final Battle of the Dark Wizards", "Oppressive Gloom" — Licensed under Creative Commons: By Attribution 4.0 (https://creativecommons.org/licenses/by/4.0/) • แปลงเป็น OGG และปรับความดังเพื่อใช้ในเกม<br>
+    เพลงชนะ/แพ้: RandomMind (CC0) • เสียงเอฟเฟกต์: Kenney (kenney.nl), rubberduck, JaggedStone, artisticdude, Ogrebane, trazzz123, Darsycho, SketchMan3, Wolfgang_, congusbongus, qubodup จาก OpenGameArt (CC0)<br>
+    เกมแฟนเมดเล่นกับเพื่อน ไม่เกี่ยวข้องหรือได้รับการรับรองจาก Warner Bros. / J.K. Rowling / Hogwarts Legacy และไม่ได้ใช้เพลงหรือเสียงที่มีลิขสิทธิ์ของเกม/หนัง</p>
     <div class="row"><button class="pri" id="btnGuideClose">เข้าใจแล้ว!</button></div>
   </div>
 </div>
@@ -1605,6 +1615,7 @@ addEventListener('keydown',e=>{
   if(PMAP[e.code]&&screen==='game')INPUT.c[PMAP[e.code]]++;
   if(/^Digit[123]$/.test(e.code)&&!$('#buff').classList.contains('hidden'))choosePick(+e.code[5]-1);
   if(e.code==='KeyM'){ac();toggleMusic();}
+  if(e.code==='KeyN')myNext();
 });
 addEventListener('keyup',e=>{
   if(e.code==='Tab')showBoard=false;
@@ -1644,6 +1655,7 @@ function ac(){
       const wet=AC.createGain();wet.gain.value=0.32;REVERB.connect(wet);wet.connect(MASTER);
       NB=AC.createBuffer(1,AC.sampleRate*2,AC.sampleRate);
       const nd=NB.getChannelData(0);for(let i=0;i<nd.length;i++)nd[i]=Math.random()*2-1;
+      loadSfx();myDecodeReady();
     }catch(e){AC=null;}
   }
   if(AC&&AC.state==='suspended')AC.resume();
@@ -1684,6 +1696,7 @@ function snd(n,o){
   const now=performance.now();if(sfxLast[n]&&now-sfxLast[n]<40)return;sfxLast[n]=now;
   try{
     const d=outNode(o);
+    if(playBuf(n,d)&&!SFXSYN.has(n))return;
     switch(n){
       case 'cast_bolt':tone(d,1300,2100,0.12,'sine',0.18);tone(d,2600,3400,0.08,'triangle',0.06,0.02);noiz(d,0.08,0.08,'bandpass',6000,9000,3);break;
       case 'cast_fire':noiz(d,0.45,0.35,'lowpass',300,2200,1.5,0,0.04);tone(d,140,60,0.4,'sawtooth',0.12);break;
@@ -1739,17 +1752,135 @@ function snd(n,o){
   }catch(e){}
 }
 function sfx(n){snd(n);}
+
+// ---------- ไฟล์เสียงจริง (โฟลเดอร์ audio/) — โหลดตอนคลิกครั้งแรก ถ้าโหลดไม่ได้จะใช้เสียงสังเคราะห์ด้านบนแทน ----------
+// จำนวนไฟล์ต่อชื่อเสียง (ไฟล์ชื่อ audio/sfx/<ชื่อ>_<เลข>.ogg สุ่มเล่น 1 ไฟล์)
+const SFXN={cast_bolt:3,cast_fire:2,cast_stun:2,cast_pull:1,hit:3,hurt:3,zap:2,boom:3,slam:2,parry:2,block:2,break:2,die:4,spiderdie:3,push:1,nova:1,revive:1,buff:1,dash:3,whoosh:2,throw:1,dismount:1,thud:2,bite:2,splat:3,portal:1,tick:1,go:1,goal:1,pickup:2,kill:1,eject:1,task:1,roar:2,breath:1,imp:1,ui_click:1,ui_hover:1,step:6};
+const SFXV={cast_bolt:0.32,cast_fire:0.5,cast_stun:0.4,hit:0.55,hurt:0.45,zap:0.4,boom:0.85,slam:0.8,parry:0.6,block:0.5,die:0.55,spiderdie:0.5,dash:0.5,whoosh:0.45,step:0.5,ui_click:0.45,ui_hover:0.25,tick:0.6,goal:0.7,roar:0.9,breath:0.7,imp:0.8,kill:0.6,nova:0.8};
+const SFXR={cast_bolt:[0.9,1.15],hit:[0.85,1.15],step:[0.85,1.1],ui_click:[1,1],ui_hover:[1,1],tick:[1,1],go:[1,1],roar:[0.9,1],imp:[1,1]};
+const SFXSYN=new Set(['nova','kill','breath','goal','roar']); // เล่นเสียงสังเคราะห์ซ้อนด้วยให้หนักแน่นขึ้น
+const BUF={},AUD={loading:false};
+function loadBuf(url){return fetch(url).then(r=>{if(!r.ok)throw new Error(r.status);return r.arrayBuffer();}).then(a=>new Promise((res,rej)=>AC.decodeAudioData(a,res,rej)));}
+function loadSfx(){
+  if(AUD.loading||!AC)return;AUD.loading=true;
+  for(const [n,c] of Object.entries(SFXN))for(let i=1;i<=c;i++)loadBuf(`audio/sfx/${n}_${i}.ogg`).then(b=>{(BUF[n]=BUF[n]||[]).push(b);}).catch(()=>{});
+  loadBuf('audio/amb/wind.ogg').then(b=>{AMB.windBuf=b;}).catch(()=>{});
+}
+function playBuf(n,d){
+  const L=BUF[n];if(!L||!L.length)return false;
+  const s=AC.createBufferSource(),g=AC.createGain(),r=SFXR[n]||[0.94,1.06];
+  s.buffer=L[Math.floor(Math.random()*L.length)];s.playbackRate.value=rnd(r[0],r[1]);
+  g.gain.value=SFXV[n]!==undefined?SFXV[n]:0.7;s.connect(g);g.connect(d);s.start();
+  return true;
+}
+// เสียงบรรยากาศวนลูปตามแผนที่ (ปราสาท = จิ้งหรีดกลางคืน / ป่า = ป่าลึก)
+const AMB={windBuf:null,cur:null,layer:null,bufs:{},failed:{}};
+function ambTick(){
+  const k=screen==='game'?(MAPID==='forest'?'forest':MAPID==='castle'?'castle':null):null;
+  if(k&&!AMB.bufs[k]&&!AMB.failed[k]){AMB.bufs[k]='loading';loadBuf(`audio/amb/${k}.ogg`).then(b=>{AMB.bufs[k]=b;}).catch(()=>{AMB.failed[k]=1;delete AMB.bufs[k];});}
+  const want=k&&AMB.bufs[k]&&AMB.bufs[k]!=='loading'?k:null;
+  if(want===AMB.cur)return;
+  if(AMB.layer){const L=AMB.layer,t=AC.currentTime;L.g.gain.setTargetAtTime(0,t,0.6);L.s.stop(t+3);AMB.layer=null;}
+  AMB.cur=want;
+  if(want){const s=AC.createBufferSource(),g=AC.createGain();s.buffer=AMB.bufs[want];s.loop=true;g.gain.value=0;g.gain.setTargetAtTime(want==='forest'?0.35:0.22,AC.currentTime,1);s.connect(g);g.connect(SFXBUS);s.start();AMB.layer={s,g};}
+}
+// เพลงประกอบจากไฟล์: เมนู / ปราสาท / ป่า / สนาม / บอส / โหมดโวลเดอมอร์ + เพลงสั้นตอนชนะ-แพ้
+// เพลงเล่นแบบสตรีม (<audio>) ไม่ถอดทั้งเพลงไว้ในแรม — เพลงละ 4 นาทีถ้า decode จะกินแรมเกือบ 100 MB
+const MUSF={cur:null,els:{},failed:{}};
+const MUSF_VOL=0.5,STINGERS=new Set(['victory','defeat']);
+function musicEl(k){
+  let m=MUSF.els[k];if(m)return m;
+  const el=new Audio();el.preload='auto';el.loop=!STINGERS.has(k);
+  el.addEventListener('error',()=>{MUSF.failed[k]=1;});
+  el.src=`audio/music/${k}.ogg`;
+  const g=AC.createGain();g.gain.value=0;AC.createMediaElementSource(el).connect(g);g.connect(MUSIC.bus);
+  return MUSF.els[k]={el,g};
+}
+function fadeMusic(m,to,sec){
+  const t=AC.currentTime;m.g.gain.cancelScheduledValues(t);m.g.gain.setValueAtTime(m.g.gain.value,t);m.g.gain.linearRampToValueAtTime(to,t+sec);
+  clearTimeout(m.stopT);if(to===0)m.stopT=setTimeout(()=>m.el.pause(),sec*1000+100);
+}
+function stopFileMusic(sec){const m=MUSF.els[MUSF.cur];if(m)fadeMusic(m,0,sec);MUSF.cur=null;}
+function isWin(r){
+  if(r.mode==='train')return true;
+  if(r.mode==='coop')return r.wave>=5;
+  if(r.mode==='imp'){const impWon=r.title.startsWith('🐍');return ROLE?((ROLE.role==='imp')===impWon):!impWon;}
+  const me=VIEW.cur&&VIEW.cur.P.find(p=>p.id===NET.myId);
+  if(me&&r.title.includes(me.n))return true;
+  return !!(me&&MODES[r.mode]&&MODES[r.mode].team&&r.title.includes(TEAMN[me.tm]));
+}
+function wantTrack(){
+  const v=VIEW.cur;
+  if(screen!=='game'||!v)return 'menu';
+  if(v.ph==='over')return v.res&&isWin(v.res)?'victory':'defeat';
+  if(v.mode==='imp')return 'imp';
+  if(v.mode==='race'||v.mode==='quid')return 'pitch';
+  if(v.E&&v.E.some(e=>EDEF[e.t]&&EDEF[e.t].boss))return 'boss';
+  return MAPID==='forest'?'forest':MAPID==='pitch'?'pitch':'castle';
+}
+// คืนค่า true ถ้าเพลงจากไฟล์ (หรือ "เพลงของฉัน") ดูแลอยู่ → ไม่ต้องเล่นเพลงสังเคราะห์
+function fileMusicTick(){
+  if(MY.list.length){
+    stopFileMusic(1.5);
+    if(!MY.playing)myPlay();
+    return true;
+  }
+  const key=wantTrack();
+  if(MUSF.failed[key]){stopFileMusic(1.5);return false;}
+  if(key===MUSF.cur)return true;
+  stopFileMusic(1.5);
+  const m=musicEl(key);
+  if(STINGERS.has(key)||key==='boss')m.el.currentTime=0;
+  m.el.play().then(()=>fadeMusic(m,MUSF_VOL,STINGERS.has(key)?0.3:2)).catch(()=>{if(MUSF.cur===key)MUSF.cur=null;});
+  MUSF.cur=key;
+  return true;
+}
+
+// ---------- "เพลงของฉัน": เลือกไฟล์เพลงจากเครื่องตัวเอง เล่นแค่ในเครื่องนี้ (ไม่อัปโหลดไปไหน) เก็บไว้ใน IndexedDB ----------
+const MY={list:[],i:0,el:null,g:null,url:null,playing:false};
+function myDB(){return new Promise((res,rej)=>{const r=indexedDB.open('wd_music',1);r.onupgradeneeded=()=>r.result.createObjectStore('songs',{autoIncrement:true});r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);});}
+async function mySave(files){
+  try{const db=await myDB(),tx=db.transaction('songs','readwrite'),st=tx.objectStore('songs');st.clear();for(const f of files)st.add({name:f.name,blob:f});await new Promise(r=>{tx.oncomplete=r;tx.onerror=r;});}catch(e){}
+}
+async function myLoad(){
+  try{const db=await myDB(),req=db.transaction('songs').objectStore('songs').getAll();
+    const all=await new Promise(r=>{req.onsuccess=()=>r(req.result||[]);req.onerror=()=>r([]);});
+    MY.list=all.map(x=>({name:x.name,blob:x.blob}));}catch(e){}
+  myInfo();
+}
+function myDecodeReady(){if(MY.list.length&&MUSIC.on)setTimeout(()=>{if(!MY.playing)musicTick();},300);}
+function myPlay(){
+  if(!AC||!MY.list.length||!MUSIC.bus)return;
+  if(!MY.el){
+    MY.el=new Audio();MY.el.addEventListener('ended',()=>{MY.i++;myPlay();});
+    const node=AC.createMediaElementSource(MY.el);MY.g=AC.createGain();MY.g.gain.value=0.9;node.connect(MY.g);MY.g.connect(MUSIC.bus);
+  }
+  const s=MY.list[MY.i%MY.list.length];
+  if(MY.url)URL.revokeObjectURL(MY.url);
+  MY.url=URL.createObjectURL(s.blob);MY.el.src=MY.url;MY.playing=true;
+  if(MUSIC.on)MY.el.play().catch(()=>{MY.playing=false;});
+  toast('🎵 '+s.name.replace(/\.[^.]+$/,''));
+}
+function myNext(){if(MY.list.length){MY.i++;myPlay();}}
+function myClear(){MY.list=[];MY.playing=false;if(MY.el)MY.el.pause();mySave([]);myInfo();toast('ล้างเพลงของฉันแล้ว กลับไปใช้เพลงของเกม');}
+function myInfo(){
+  const b=document.getElementById('myMusicInfo'),c=document.getElementById('btnMyClear');if(!b)return;
+  b.textContent=MY.list.length?`${MY.list.length} เพลง • กด N ในเกมเพื่อเปลี่ยนเพลง`:'เลือกไฟล์เพลงในเครื่อง (เล่นแค่ในเครื่องคุณ)';
+  if(c)c.classList.toggle('hidden',!MY.list.length);
+}
 // เสียงลมตอนบินไม้กวาด (ต่อเนื่อง ดังตามความเร็ว)
 function windUpdate(speed,flying){
   if(!AC||AC.state!=='running')return;
+  if(WIND&&WIND.noise&&AMB.windBuf){WIND.s.stop();WIND=null;}
   if(!WIND){
-    const s=AC.createBufferSource(),f=AC.createBiquadFilter(),g=AC.createGain();
-    s.buffer=NB;s.loop=true;f.type='bandpass';f.Q.value=0.8;f.frequency.value=500;g.gain.value=0;
-    s.connect(f);f.connect(g);g.connect(SFXBUS);s.start();WIND={f,g};
+    const s=AC.createBufferSource(),f=AC.createBiquadFilter(),g=AC.createGain(),file=!!AMB.windBuf;
+    s.buffer=AMB.windBuf||NB;s.loop=true;f.type=file?'lowpass':'bandpass';f.Q.value=0.8;f.frequency.value=500;g.gain.value=0;
+    s.connect(f);f.connect(g);g.connect(SFXBUS);s.start();WIND={s,f,g,noise:!file};
   }
-  const target=flying?Math.min(0.25,0.04+speed*0.008):0,t=AC.currentTime;
+  const target=flying?Math.min(WIND.noise?0.25:0.6,(WIND.noise?0.04:0.1)+speed*(WIND.noise?0.008:0.02)):0,t=AC.currentTime;
   WIND.g.gain.setTargetAtTime(target,t,0.15);
-  WIND.f.frequency.setTargetAtTime(300+speed*40,t,0.2);
+  WIND.f.frequency.setTargetAtTime(WIND.noise?300+speed*40:900+speed*120,t,0.2);
+  if(!WIND.noise)WIND.s.playbackRate.setTargetAtTime(0.85+Math.min(0.4,speed*0.012),t,0.3);
 }
 
 // ---------- เพลงประกอบ (สร้างสดตามแผนที่) ----------
@@ -1769,7 +1900,9 @@ function padNote(f,t,dur,cut){
 function musicTick(){
   if(!AC||AC.state!=='running')return;
   if(!MUSIC.bus){MUSIC.bus=AC.createGain();MUSIC.bus.gain.value=MUSIC.on?0.8:0;MUSIC.bus.connect(MASTER);const s=AC.createGain();s.gain.value=0.6;MUSIC.bus.connect(s);s.connect(REVERB);}
+  ambTick();
   if(!MUSIC.on)return;
+  if(fileMusicTick())return;
   const now=AC.currentTime;
   if(now<MUSIC.nextT-0.3)return;
   const th=THEMES[MAPID]||THEMES.castle,t0=Math.max(now+0.05,MUSIC.nextT),dur=4;
@@ -1797,6 +1930,7 @@ function toggleMusic(){
   MUSIC.on=!MUSIC.on;store('wd_music',MUSIC.on?'1':'0');
   if(MUSIC.bus)MUSIC.bus.gain.setTargetAtTime(MUSIC.on?0.8:0,AC.currentTime,0.3);
   if(MUSIC.on&&AC)MUSIC.nextT=AC.currentTime;
+  if(MY.el){if(MUSIC.on&&MY.playing)MY.el.play().catch(()=>{});else MY.el.pause();}
   toast(MUSIC.on?'🎵 เปิดเพลงประกอบ':'🔇 ปิดเพลงประกอบ');
   const b=document.getElementById('btnMusic');if(b)b.textContent=MUSIC.on?'เพลง: เปิด':'เพลง: ปิด';
 }
@@ -3494,7 +3628,8 @@ function render(dt,now){
   }else menuCamera(now);
   shakeA=Math.max(0,shakeA-dt*30);
   let t0=performance.now();
-  syncPlayers(P,v.mode,now,dt);pf('players',t0);t0=performance.now();
+  syncPlayers(P,v.mode,now,dt);pf('players',t0);
+  if(me&&me.al&&!me.fl&&!me.dn){const o=PM3.get(me.id);if(o){const k=Math.floor(o.walk/Math.PI);if(o.stepK!==undefined&&k!==o.stepK)snd('step',{vol:0.35,rev:0.1});o.stepK=k;}}t0=performance.now();
   syncEnemies(E,P,now,dt);pf('enemies',t0);t0=performance.now();
   syncProj(v,now);
   syncModeObjs(v,P,me,now,dt);pf('projMode',t0);
@@ -3771,6 +3906,20 @@ $('#trainEnd').onclick=()=>{if(NET.isHost)hostEndTraining();};
 $('#guide').addEventListener('click',e=>{if(e.target.id==='guide')$('#guide').classList.add('hidden');});
 $('#btnMusic').textContent=MUSIC.on?'เพลง: เปิด':'เพลง: ปิด';
 $('#btnMusic').onclick=()=>{ac();toggleMusic();};
+$('#btnMyMusic').onclick=()=>{ac();$('#myMusicIn').click();};
+$('#myMusicIn').onchange=async e=>{
+  const fs=[...e.target.files].filter(f=>/^audio\//.test(f.type)||/\.(mp3|ogg|wav|m4a|aac|flac|opus|webm)$/i.test(f.name));
+  e.target.value='';if(!fs.length)return;
+  MY.list=fs.map(f=>({name:f.name,blob:f}));MY.i=0;MY.playing=false;myInfo();
+  if(!MUSIC.on)toggleMusic();
+  musicTick();toast(`เพิ่ม ${fs.length} เพลงแล้ว เล่นแค่ในเครื่องคุณ`);
+  mySave(fs);
+};
+$('#btnMyClear').onclick=myClear;
+myLoad();
+// เสียงคลิก/ชี้ปุ่ม
+document.addEventListener('click',e=>{if(e.target.closest('button,.bc,.sw'))snd('ui_click',{rev:0});});
+let hovEl=null;document.addEventListener('pointerover',e=>{const b=e.target.closest('button:not(:disabled),.bc');if(b!==hovEl){hovEl=b;if(b)snd('ui_hover',{rev:0});}});
 function gfxLabel(){$('#btnGfx').innerHTML=`กราฟิก: ${QUAL_NAME[QUAL.mode]}<small>${QUAL.mode==='auto'?'ปรับความละเอียดเองให้ลื่น':QUAL.mode==='high'?'สวยสุด (เครื่องแรงเท่านั้น)':'ไม่มีเงา/แสงฟุ้ง ลื่นสุด'}</small>`;}
 gfxLabel();
 $('#btnGfx').onclick=()=>{const o=['auto','high','low'];QUAL.mode=o[(o.indexOf(QUAL.mode)+1)%3];QUAL.scale=1;store('wd_gfx',QUAL.mode);applyQuality();gfxLabel();};
@@ -3834,7 +3983,7 @@ buildWorld('castle');
 setScreen('menu');
 requestAnimationFrame(frame);
 // ตัวช่วยทดสอบ/ดีบัก (เปิดคอนโซลแล้วพิมพ์ WD)
-window.WD={get G(){return G;},get screen(){return screen;},get VIEW(){return VIEW;},INPUT,NET,render,choosePick,hostToLobby,hostStart,plist,broadcastLobby,setYaw:v=>{yaw=v;},cam,composer,PM3,tx,tz,addPlayer,hostVote,get ROLE(){return ROLE;},get MO(){return MO;},get PARTS(){return PARTS.length;},PROF,gl,scene,bloom,moonL,LPOOL,stage};
+window.WD={get G(){return G;},get screen(){return screen;},get VIEW(){return VIEW;},INPUT,NET,render,choosePick,hostToLobby,hostStart,plist,broadcastLobby,setYaw:v=>{yaw=v;},cam,composer,PM3,tx,tz,addPlayer,hostVote,get ROLE(){return ROLE;},get MO(){return MO;},get PARTS(){return PARTS.length;},get AUDIO(){return {AC:AC&&AC.state,sfx:Object.keys(BUF).length,files:Object.values(BUF).reduce((a,b)=>a+b.length,0),music:MUSF.cur,mt:MUSF.els[MUSF.cur]?+MUSF.els[MUSF.cur].el.currentTime.toFixed(1):null,myT:MY.el?+MY.el.currentTime.toFixed(1):null,failed:MUSF.failed,amb:AMB.cur,wind:!!AMB.windBuf,my:MY.list.length};},PROF,gl,scene,bloom,moonL,LPOOL,stage};
 </script>
 </body>
 </html>

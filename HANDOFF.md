@@ -23,7 +23,8 @@ Personal, non-commercial fan project made with/for the user and their friends. U
 ## 3. Tech stack (all from CDN, no build step)
 - **Three.js 0.160.0** via importmap (`unpkg.com/three@0.160.0`) + addons: EffectComposer, RenderPass, UnrealBloomPass, OutputPass. `gl.useLegacyLights=true` (light intensities tuned for legacy mode).
 - **PeerJS 1.5.4** (classic script, global `Peer`) — WebRTC data + voice. Uses the public PeerJS cloud for signaling only. Room id = `PREFIX + 5-char code`. **`PREFIX='wizduel-th-v3-'` — bump the version whenever the network protocol/snapshot changes** so old clients can't join new hosts.
-- Web Audio — all SFX and music are synthesized at runtime (no audio files).
+- **Audio files in `audio/`** (14 MB, OGG Vorbis, credits in `audio/CREDITS.md` + in-game guide): `music/` (menu, castle, forest, pitch, boss, imp + victory/defeat stingers), `sfx/<name>_<n>.ogg` (73 files for 39 sound names), `amb/` (wind loop for brooms, castle crickets, forest). Loaded after the first click (`ac()` → `loadSfx()`); any sound that fails or has no file falls back to the original Web Audio synth in `snd()`. Music streams through `<audio>` elements (`MUSF`, not decoded into RAM); SFX/ambience are decoded buffers. Kevin MacLeod tracks are **CC BY 4.0 — the credit in the guide must stay**.
+- **"เพลงของฉัน"** (menu): player picks local audio files → stored in IndexedDB `wd_music` → played via `<audio>` instead of game music, only on that PC (never uploaded). `N` = next song, "ล้าง" clears. This is the answer for "can we use Harry Potter music": players use their own files locally; never commit copyrighted music to the public repo.
 - Google Fonts: **Cinzel** (Latin display — logo, headings, countdown; caps-only) + **Kanit** (all Thai text). Font stack `'Cinzel','Kanit'` lets Latin use Cinzel and Thai fall back to Kanit.
 
 ## 4. Architecture (important)
@@ -51,7 +52,7 @@ Personal, non-commercial fan project made with/for the user and their friends. U
 | ~1465 | `makeSnap` + host loop |
 | ~1498 `ไมค์` | mesh voice chat |
 | ~1587 `การควบคุม` | keyboard/mouse → `INPUT` |
-| ~1624 `เสียง` | synth SFX, music |
+| ~1624 `เสียง` | synth SFX `snd()` (tries `playBuf` file first), file audio engine (`SFXN/SFXV/SFXR/SFXSYN`, `loadSfx`, `ambTick`, `wantTrack`/`fileMusicTick` music switching incl. boss + win/lose stingers), "เพลงของฉัน" (`MY`, IndexedDB), synth music fallback (`musicTick`) |
 | ~1800 `ฝั่งแสดงผล` | `setScreen` (also sets `body[data-screen]`), `onLobby`, `onSnap`, particles, `fx(ev)`, overlays (`syncOverlays` buff cards, `showOver` results) |
 | ~2066 `โลก 3D` | renderer + bloom (`rpass` = RenderPass), sky, maps, cloth, `makeStudent`, `makeEnemy`, camera |
 | ~2816 `เวทีเมนู/ล็อบบี้` | `stage` scene, `stageSpots(L)` (host centre, spread out; team = blue left / red right; online shows empty slots), `stageChar`, `stageIdle`, `renderStage` (camera auto-fits to player count + aspect), `drawStageLabels` (name plates, staggered when they overlap; host clicks plate = move team) |
@@ -84,11 +85,13 @@ Can't cast on a broom except in Quidditch/race. Stun or web knocks you off the b
 - ⚠️ Not yet verified with real friends online: Voldemort-mode voting over the network, voice in that mode, battle-royale/quidditch sync under real latency.
 - ⚠️ Host can technically see secret roles via console (accepted — friends only).
 - ✅ New UI (2026-10-16): navy+gold "magic book" theme, 3D party lobby, Hades-style buff cards, diamond spell HUD, boss bar. Checked at 1280x720 and 1024x640, all 9 modes start without console errors.
+- ⚠️ Audio picks were chosen by name/duration, not by listening — the user may want to swap some (`hurt` uses human grunts, `cast_fire` uses a sci-fi thruster). Swap = replace the OGG with the same file name, or change counts in `SFXN`. OGG may not decode on old iPhone Safari → synth fallback.
 - ⚠️ UI not designed for phones (<900px wide the lobby panels overlap the stage). Not checked with a real online friend yet (only host-side online lobby with room code).
 - ⚠️ Graphics are low-poly primitives (no external models). Heavy maps (forest) may lag on weak PCs.
 - `index.2d-backup.html` (old 2D version) is git-ignored and only exists on the original PC.
 
 ## 9b. Audio research
+(Implemented 2026-10-17 — see the audio bullet in section 3. To re-encode: download sources listed in `audio/CREDITS.md`, ffmpeg via `pip install imageio-ffmpeg`, trim + peak-normalise to -2 dB, mono q2 for SFX, stereo q1 for music.)
 `research/audio-assets.md` (Sonnet subagent, 2026-10-16): licence-checked free music/SFX picks. Verdict: Kenney (CC0) + OpenGameArt CC0 items for SFX, Incompetech/Kevin MacLeod (CC-BY 4.0, needs credits) for music; Pixabay/Sonniss/Mixkit/Zapsplat/Tabletop Audio rejected for raw files in a public repo. Plan: OGG files in `audio/`, lazy `fetch`+`decodeAudioData`, keep the synth as fallback. Nothing downloaded yet.
 User asked about real Harry Potter music: told them not to put it in the public repo (copyright, takedown risk); offered a "เพลงของฉัน" button that plays an mp3 from the player's own PC locally (not built yet).
 
@@ -103,3 +106,4 @@ Minimap (bottom-left, Hogwarts Legacy style), house-crest picker in the menu, ve
 - 2026-10-16 — Added this HANDOFF.md + CLAUDE.md.
 - 2026-10-16 — **Whole new UX/UI** (refs: Hogwarts Legacy style + Fortnite/Valorant lobby + Hades boon cards + Elden Ring thin HUD): navy/gold theme with Cinzel, text-only main menu with your character standing on a 3D rune dais, 3D party lobby (everyone's character on stage, name plates, empty slots, click plate to swap team), mode list + selected-mode card + big gold start button, Hades-style buff cards, new results/meeting/guide styling, canvas HUD redone (diamond spell cluster, ult emblem, thin bars, boss bar, gold crosshair, framed scoreboard). No protocol change (PREFIX still v3).
 - 2026-10-16 — **Performance pass** (~3x faster frames): half-res bloom, no canvas MSAA, pixel ratio ≤1, shadows every 2nd frame at 2048, static mesh batching, cached stone materials, fewer pool lights, auto/high/low graphics setting with auto resolution scaling, `WD.PROF` profiler. Audio asset research report added.
+- 2026-10-17 — **Real audio**: CC0/CC-BY music per map + boss + imp + win/lose stingers, 73 CC0 SFX with synth fallback, footsteps, UI click/hover sounds, ambience loops, real wind for brooms, "เพลงของฉัน" local-music button (IndexedDB, N = next), credits section in the guide + `audio/CREDITS.md`.
