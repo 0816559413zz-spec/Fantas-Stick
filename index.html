@@ -63,18 +63,19 @@ input[type=text]:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(217,18
 .crTab{position:relative;width:70px;padding:10px 0 7px;font-size:12px;color:var(--mute);background:rgba(7,11,24,.85);display:flex;flex-direction:column;align-items:center;gap:2px}
 .crTab span{font-size:24px;line-height:1}
 .crTab.on{border-color:var(--gold2);color:var(--gold2);background:linear-gradient(180deg,#2a3a68,#121b36);box-shadow:0 0 16px rgba(243,220,148,.3)}
-.crPanel{position:absolute;left:112px;top:112px;width:340px;max-height:calc(100% - 232px);overflow:auto;margin:0}
+.crPanel{position:absolute;left:112px;top:112px;width:340px;max-height:calc(100% - 232px);overflow:auto;margin:0;scrollbar-width:none}
+.crPanel::-webkit-scrollbar{display:none}
 .crPanel h3.sec{font-size:20px;letter-spacing:2px;margin:0 0 4px;color:var(--gold2);text-transform:none}
 .crnote{font-size:12px;color:var(--mute);margin:6px 0 0;line-height:1.5}
 .crPanel label.f{margin:14px 0 8px}
 .crPanel .colors{gap:8px;padding-left:3px;margin:2px 0 6px}
 .crPanel .sw{width:24px;height:24px}
 .opts{display:flex;gap:6px;flex-wrap:wrap}
-.obtn{padding:8px 13px;font-size:14px}
+.obtn{padding:6px 11px;font-size:13px}
 .obtn.on{border-color:var(--gold2);background:linear-gradient(180deg,#2a3a68,#121b36);color:var(--gold2);box-shadow:0 0 14px rgba(243,220,148,.35)}
 .crBar{position:absolute;left:112px;bottom:26px;width:340px;display:flex;gap:10px}
 .crBar button{flex:1;padding:12px 8px}
-.s2 .crBar{left:50%;transform:translateX(-50%);width:min(620px,92vw)}
+.s3 .crBar{left:50%;transform:translateX(-50%);width:min(620px,92vw)}
 .crInfo{position:absolute;left:44px;top:110px;width:min(400px,40vw)}
 .crInfo small{display:block;letter-spacing:6px;color:var(--gold);font-size:12px;font-family:var(--fd)}
 .crInfo h1{text-align:left;font-family:'Cinzel Decorative','Cinzel','Kanit',serif;font-weight:900;font-size:46px;letter-spacing:1px;margin:4px 0 2px;text-shadow:0 4px 24px var(--ht,#000);filter:none;color:#fff3c8;background:none;-webkit-text-fill-color:#fff3c8}
@@ -86,7 +87,7 @@ input[type=text]:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(217,18
 .ccard:hover{filter:saturate(1) brightness(1);transform:scale(.94);box-shadow:none}
 .ccard.on{filter:none;transform:translateY(-10px) scale(1.12);box-shadow:none}
 .ccard.on .crest{filter:drop-shadow(0 0 16px var(--hc))}
-.s1 .crStep2only,.s2 .crStep1only{display:none!important}
+#creator.s1 .cr2,#creator.s1 .cr3,#creator.s2 .cr1,#creator.s2 .cr3,#creator.s3 .cr1,#creator.s3 .cr2,#creator.s3 .cr12{display:none!important}
 .myhouse{display:flex;align-items:center;gap:10px;margin:12px 0 10px;font-size:14px;color:var(--text)}
 .sw{width:28px;height:28px;cursor:pointer;border:2px solid rgba(255,255,255,.15);transform:rotate(45deg) scale(.82);transition:transform .15s}
 .sw:hover{transform:rotate(45deg) scale(.95)}
@@ -235,14 +236,15 @@ body[data-screen=lobby] #voice{top:84px;left:auto;right:24px;width:340px}
   <div class="crTints"><i style="background:radial-gradient(ellipse at 66% 45%,rgba(255,90,50,.38),rgba(46,8,11,.62) 70%)"></i><i style="background:radial-gradient(ellipse at 66% 45%,rgba(40,220,130,.32),rgba(4,25,14,.66) 70%)"></i><i style="background:radial-gradient(ellipse at 66% 45%,rgba(255,210,60,.34),rgba(43,35,5,.62) 70%)"></i><i style="background:radial-gradient(ellipse at 66% 45%,rgba(70,140,255,.36),rgba(5,13,44,.66) 70%)"></i></div>
   <div class="crShade"></div>
   <div class="crTop"><small>CHARACTER</small><h2 id="crTitle">สร้างตัวละคร</h2></div>
-  <div class="crSteps"><b id="crSt1" class="on">1 · หน้าตา</b><i></i><b id="crSt2">2 · เลือกบ้าน</b></div>
+  <div class="crSteps"><b id="crSt1" class="on">1 · หน้าตา</b><i></i><b id="crSt2">2 · ไม้กายสิทธิ์</b><i></i><b id="crSt3">3 · เลือกบ้าน</b></div>
   <button class="crClose hidden" id="crCancel">✕ ยกเลิก</button>
-  <div class="crTabs crStep1only" id="crTabs"></div>
-  <div class="card slim crPanel crStep1only" id="crPanel"></div>
-  <div class="crInfo crStep2only" id="crInfo"></div>
-  <div class="crCrests crStep2only" id="crCrests"></div>
-  <div class="crBar crStep1only"><button id="crRand">🎲 สุ่ม</button><button id="crNext" class="pri">ถัดไป: เลือกบ้าน ▶</button></div>
-  <div class="crBar crStep2only"><button id="crBack">◀ ย้อนกลับ</button><button id="crHat">🎩 หมวกคัดสรร</button><button id="crOk" class="pri">✦ ยืนยันตัวละคร</button></div>
+  <div class="crTabs cr1" id="crTabs"></div>
+  <div class="card slim crPanel cr12" id="crPanel"></div>
+  <div class="crInfo cr3" id="crInfo"></div>
+  <div class="crCrests cr3" id="crCrests"></div>
+  <div class="crBar cr1"><button id="crRand">🎲 สุ่มหน้าตา</button><button id="crNext" class="pri">ถัดไป: ไม้กายสิทธิ์ ▶</button></div>
+  <div class="crBar cr2"><button id="crBack2">◀ ย้อนกลับ</button><button id="crNext2" class="pri">ถัดไป: เลือกบ้าน ▶</button></div>
+  <div class="crBar cr3"><button id="crBack">◀ ย้อนกลับ</button><button id="crHat">🎩 หมวกคัดสรร</button><button id="crOk" class="pri">✦ ยืนยันตัวละคร</button></div>
 </div>
 
 <!-- ===== คู่มือ ===== -->
@@ -260,7 +262,7 @@ body[data-screen=lobby] #voice{top:84px;left:auto;right:24px;width:340px}
     </ol>
     <p class="gnote">💡 อยู่คนละบ้านก็เล่นด้วยกันได้ • ถ้าเข้าห้องไม่ได้ ลองเช็กรหัส / ให้โฮสต์สร้างห้องใหม่ / ปิด VPN • ห้องหนึ่งเล่นได้สูงสุด 6 คน</p>
     <h3>🧙 ตัวละคร &amp; บ้านฮอกวอตส์</h3>
-    <p class="gnote">ครั้งแรกที่เข้าเกมจะมีหน้า <b>สร้างตัวละคร</b> — เลือกบ้าน (Gryffindor / Slytherin / Hufflepuff / Ravenclaw หรือให้ 🎩 หมวกคัดสรรสุ่มให้) ทรงผม สีผม สีผิว สีตา สีเสื้อคลุม และเนคไท • สีบ้านจะโผล่ที่เนคไท ผ้าพันคอ ซับในเสื้อคลุม และเป็นสีประจำตัวของคุณ (ป้ายชื่อ แผนที่ย่อ) • แก้ทีหลังได้ที่ปุ่ม <b>แต่งตัวละคร</b> หน้าแรก • เพื่อนจะเห็นหน้าตาของคุณในล็อบบี้และในเกม</p>
+    <p class="gnote">ครั้งแรกที่เข้าเกมจะมีหน้า <b>สร้างตัวละคร</b> — 3 ขั้นตอน: ① หน้าตา (ทรงผม 11 แบบ สีผม สีผิว สีตา สีเสื้อคลุม เนคไท) ② เลือกไม้กายสิทธิ์ (ไม้ แกนเวท ทรงด้าม) ③ เลือกบ้าน (Gryffindor / Slytherin / Hufflepuff / Ravenclaw หรือให้ 🎩 หมวกคัดสรรสุ่มให้) • สีบ้านจะโผล่ที่เนคไท ผ้าพันคอ ซับในเสื้อคลุม และเป็นสีประจำตัวของคุณ (ป้ายชื่อ แผนที่ย่อ) • แก้ทีหลังได้ที่ปุ่ม <b>แต่งตัวละคร</b> หน้าแรก • เพื่อนจะเห็นหน้าตาของคุณในล็อบบี้และในเกม</p>
     <h3>🎮 ปุ่มควบคุม</h3>
     <table>
       <tr><td><b>คลิกที่จอ</b></td><td>ล็อกเมาส์ให้หมุนกล้องได้ (Esc = ปล่อยเมาส์)</td></tr>
@@ -440,13 +442,20 @@ const HOUSES=[
   {n:'Slytherin',th:'สลิธีริน',ic:'🐍',c:'#14693a',c2:'#c9d1d8',tr:'เจ้าเล่ห์',gl:'#3cdc8a',bg:'#04190e',ds:'เจ้าเล่ห์ • ทะเยอทะยาน • เฉียบคม',po:'ท่ากอดอกยิ้มมุมปาก'},
   {n:'Hufflepuff',th:'ฮัฟเฟิลพัฟ',ic:'🦡',c:'#f6c928',c2:'#2b2b2b',tr:'ซื่อสัตย์',gl:'#ffd23c',bg:'#2b2305',ds:'ซื่อสัตย์ • อดทน • ใจดีกับทุกคน',po:'ท่าโบกมือทักทาย'},
   {n:'Ravenclaw',th:'เรเวนคลอ',ic:'🦅',c:'#1b4f9e',c2:'#b8863e',tr:'ฉลาด',gl:'#4a8cff',bg:'#050d2c',ds:'ฉลาด • ช่างคิด • รักการเรียนรู้',po:'ท่านักคิด ไม้กายแตะคาง'}];
-const HAIRC=['#15100d','#2b1b10','#4a2c17','#8a5a2b','#c9a15a','#eadba0','#b8431f','#6b2d17','#8a8f99','#2d6a8a'];
-const HAIRSTY=['ทรงสั้น','หน้าม้า','ยาวสยาย','มวยผม'];
+const HAIRC=['#15100d','#2b1b10','#4a2c17','#8a5a2b','#c9a15a','#eadba0','#b8431f','#6b2d17','#8a8f99','#2d6a8a','#f2f2f6','#d9467a','#7a4ad0','#3f9a5a','#e8c24a','#2f4fb0'];
+// ลำดับสำคัญ: ทรง 0-3 เป็นของเดิม (ตัวละครที่บันทึกไว้ยังใช้ได้) 4+ เป็นทรงใหม่
+const HAIRSTY=['ทรงสั้น','หน้าม้า','ยาวสยาย','มวยผม','ยุ่งแบบพอตเตอร์','ผมบ็อบ','หางม้า','ผมเปีย','หยิกฟู','หางเปียคู่','หัวแหลม'];
+// ไม้กายสิทธิ์: ไม้ (สีด้าม) / แกนเวท (สีประกายปลายไม้) / ทรงด้าม
+const WOODC=['#6b4423','#8a5a2f','#2a1a14','#a9885a','#d8c9a0','#5a2e22','#c9b48a','#7a3a2a'];
+const WOODN=['โอ๊ค','ฮอลลี','อีโบนี','วิลโลว์','เอลเดอร์','ยู','เบิร์ช','เชอร์รี'];
+const WCOREC=['#fff2c0','#ffb040','#6aff7a','#6ab4ff','#c88aff','#ff6a6a'];
+const WCOREN=['ขนยูนิคอร์น','ขนฟินิกซ์','เส้นหัวใจมังกร','ผลึกน้ำแข็ง','ธุลีจันทรา','เปลวเพลิง'];
+const WANDSTY=['เรียบ','เกลียว','ปมไม้','ด้ามทอง'];
 const EYEC=['#4a2e16','#171210','#3f7fd0','#3f9a5a','#8a6a2a','#8a94a0','#8a5ad0','#d08a20'];
 const SKINC=['#fbe3cf','#f1d2b0','#e0b48c','#c68e62','#a6704a','#8d5a3b','#6b4128','#4a2c1c'];
 const CLOAKC=['#141218','#1d2b4a','#1f3a2a','#4a1620','#3a2a1a','#3d3f4a','#4a2a6a','#e6e2da'];
 const TIESTY=['ลายตามบ้าน','สีหลักบ้าน','สีรองบ้าน','ไม่ผูกเนคไท'];
-const LOOKK=['h','hr','hs','ey','sk','cl','ti'],LOOKN=[4,HAIRC.length,HAIRSTY.length,EYEC.length,SKINC.length,CLOAKC.length,TIESTY.length];
+const LOOKK=['h','hr','hs','ey','sk','cl','ti','wd','wc','ws'],LOOKN=[4,HAIRC.length,HAIRSTY.length,EYEC.length,SKINC.length,CLOAKC.length,TIESTY.length,WOODC.length,WCOREC.length,WANDSTY.length];
 function lookStr(l){return LOOKK.map(k=>l[k]).join('.');}
 function parseLook(s){const a=String(s||'').split('.'),o={};LOOKK.forEach((k,i)=>{const v=+a[i];o[k]=Number.isInteger(v)&&v>=0&&v<LOOKN[i]?v:0;});return o;}
 function randLook(seed){const R=mulberry(seed===undefined?Math.floor(Math.random()*1e9):seed),o={};LOOKK.forEach((k,i)=>{o[k]=Math.floor(R()*LOOKN[i]);});if(o.cl>3)o.cl=0;return o;}
@@ -529,7 +538,7 @@ const BUFFS=[
 // =====================================================================
 //  เครือข่าย (PeerJS / WebRTC)
 // =====================================================================
-const PREFIX='wizduel-th-v5-';
+const PREFIX='wizduel-th-v6-';
 const NET={peer:null,isHost:false,online:false,myId:'me',conns:new Map(),hostConn:null,code:''};
 let LOBBY=null;
 function genCode(){const c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let s='';for(let i=0;i<5;i++)s+=c[Math.floor(Math.random()*c.length)];return s;}
@@ -2956,7 +2965,7 @@ function makeStudent(look,id){
   const g=new THREE.Group(),b=new THREE.Group();g.add(b);
   const H=HOUSES[look.h],house=new THREE.Color(H.c),cloakCol=CLOAKC[look.cl];
   const M=(c,r,ex)=>new THREE.MeshStandardMaterial(Object.assign({color:c,roughness:r===undefined?0.85:r},ex||{}));
-  const blackM=M(cloakCol,0.92),skinM=M(SKINC[look.sk],0.7),hairM=M(HAIRC[look.hr],0.8);
+  const blackM=M(cloakCol,0.92),skinM=M(SKINC[look.sk],0.7),hairM=M(HAIRC[look.hr],0.55,{side:THREE.DoubleSide});
   const add=(p,geo,mat,x,y,z)=>{const m=new THREE.Mesh(geo,mat);m.position.set(x,y,z);p.add(m);return m;};
   const legs=[];
   for(const s of [-1,1]){
@@ -2982,15 +2991,34 @@ function makeStudent(look,id){
     add(b,new THREE.SphereGeometry(0.028,10,8),irisM,s*0.085,1.865,0.221);
     add(b,new THREE.SphereGeometry(0.014,8,6),pupM,s*0.085,1.865,0.238);
   }
-  // ผม: ฝาบนสุด + ครึ่งหลัง (เปิดหน้าไว้) + ทรงตามที่เลือก
-  add(b,new THREE.SphereGeometry(0.255,20,12,0,Math.PI*2,0,Math.PI*0.34),hairM,0,1.88,-0.02);
-  add(b,new THREE.SphereGeometry(0.255,20,14,Math.PI,Math.PI,0,Math.PI*(look.hs===0?0.5:0.62)),hairM,0,1.88,-0.02);
-  if(look.hs===1)add(b,new THREE.BoxGeometry(0.36,0.08,0.12),hairM,0,2.03,0.16).rotation.x=0.45;
-  if(look.hs===2){
-    add(b,new THREE.BoxGeometry(0.42,0.62,0.13),hairM,0,1.66,-0.2);
-    for(const s of [-1,1])add(b,new THREE.BoxGeometry(0.06,0.44,0.15),hairM,s*0.215,1.72,-0.02);
+  // ผม: ฝาบนสุด + ครึ่งหลัง (เปิดหน้าไว้) แล้วต่อทรงตามที่เลือก
+  {
+    const hS=look.hs,HCt=new THREE.Vector3(0,1.88,-0.02),UP=new THREE.Vector3(0,1,0),tieM=M(H.c2,0.4);
+    const backTh=[0.5,0.6,0.62,0.55,0.55,0.62,0.6,0.6,0.55,0.55,0.5][hS];
+    add(b,new THREE.SphereGeometry(0.255,24,12,0,Math.PI*2,0,Math.PI*0.34),hairM,0,1.88,-0.02);
+    add(b,new THREE.SphereGeometry(0.255,24,14,Math.PI,Math.PI,0,Math.PI*backTh),hairM,0,1.88,-0.02);
+    for(const sd of[-1,1]){const m=add(b,new THREE.SphereGeometry(0.1,12,10),hairM,sd*0.222,1.91,0.03);m.scale.set(0.5,1.2,0.95);}   // จอนผมข้างหู ไม่ให้ดูเป็นหมวก
+    const ball=(x,y,z,r,m)=>add(b,new THREE.SphereGeometry(r,12,10),m||hairM,x,y,z);
+    const caps=(r,l,x,y,z,rx,rz)=>{const m=add(b,new THREE.CapsuleGeometry(r,l,4,10),hairM,x,y,z);m.rotation.x=rx||0;m.rotation.z=rz||0;return m;};
+    const tuft=(dx,dy,dz,len,rad)=>{const d=new THREE.Vector3(dx,dy,dz).normalize(),m=new THREE.Mesh(new THREE.ConeGeometry(rad,len,6),hairM);
+      m.quaternion.setFromUnitVectors(UP,d);m.position.copy(HCt).addScaledVector(d,0.23+len*0.35);b.add(m);};
+    const bangs=(w,y,z,k)=>{const m=add(b,new THREE.SphereGeometry(0.22,18,10),hairM,0,y,z);m.scale.set(w,k,0.62);return m;};
+    if(hS===0){const m=add(b,new THREE.SphereGeometry(0.17,14,8),hairM,-0.06,2.02,0.17);m.scale.set(1.05,0.42,0.6);m.rotation.z=0.28;const m2=add(b,new THREE.SphereGeometry(0.13,14,8),hairM,0.1,2.0,0.17);m2.scale.set(0.9,0.4,0.55);m2.rotation.z=-0.2;}
+    else if(hS===1){bangs(1.05,2.0,0.17,0.36);ball(-0.2,1.93,0.11,0.06);ball(0.2,1.93,0.11,0.06);}
+    else if(hS===2){const m=caps(0.17,0.5,0,1.6,-0.17);m.scale.set(1.25,1,0.55);for(const s of[-1,1])caps(0.045,0.34,s*0.215,1.72,0.04);bangs(1.0,2.0,0.17,0.3);}
+    else if(hS===3){ball(0,2.14,-0.08,0.12);const r=add(b,new THREE.TorusGeometry(0.115,0.022,6,16),tieM,0,2.06,-0.08);r.rotation.x=Math.PI/2;}
+    else if(hS===4){for(const [x,y,z] of [[0.3,1,0.5],[-0.4,1,0.4],[0,1,0.75],[0.6,0.9,0],[-0.6,0.9,0.1],[0.2,1,-0.5],[-0.3,1,-0.4],[0.7,0.5,-0.3],[-0.7,0.5,-0.2]])tuft(x,y,z,0.2,0.075);}
+    else if(hS===5){add(b,new THREE.SphereGeometry(0.285,24,12,Math.PI*0.85,Math.PI*1.3,Math.PI*0.3,Math.PI*0.52),hairM,0,1.82,-0.04);bangs(1.0,2.0,0.17,0.32);}
+    else if(hS===6){ball(0,1.93,-0.27,0.045,tieM);caps(0.075,0.42,0,1.7,-0.4,0.45);}
+    else if(hS===7){for(let i=0;i<5;i++)ball(0,1.78-0.11*i,-0.29,0.085-0.009*i);ball(0,1.2,-0.29,0.04,tieM);}
+    else if(hS===8){
+      ball(0,2.12,-0.02,0.12);
+      for(const th of [0.3,0.5,0.68])for(let k=0;k<8;k++){const ph=k/8*Math.PI*2;if(th>0.42&&Math.sin(ph)>0.35)continue;
+        const r=0.265*Math.sin(th*Math.PI),y=1.88+0.265*Math.cos(th*Math.PI);ball(Math.cos(ph)*r,y,-0.02+Math.sin(ph)*r,0.1);}
+    }
+    else if(hS===9){for(const s of[-1,1]){ball(s*0.26,1.94,-0.02,0.04,tieM);caps(0.07,0.36,s*0.3,1.74,-0.04,0,-s*0.3);}}
+    else if(hS===10){for(const [x,y,z] of [[0,1,0],[0.5,1,0.2],[-0.5,1,0.2],[0.3,1,-0.5],[-0.3,1,-0.5],[0.85,0.7,0],[-0.85,0.7,0],[0,1,0.6]])tuft(x,y,z,0.3,0.09);}
   }
-  if(look.hs===3)add(b,new THREE.SphereGeometry(0.11,12,10),hairM,0,2.15,-0.07);
   const scM=new THREE.MeshStandardMaterial({map:stripeTex(H.c,H.c2),roughness:0.9});
   add(b,new THREE.TorusGeometry(0.17,0.075,8,18),scM,0,1.6,0).rotation.x=Math.PI/2;
   const ends=[];
@@ -3009,8 +3037,15 @@ function makeStudent(look,id){
     return A;
   };
   const armR=mkArm(-1),armL=mkArm(1);
-  add(armR,new THREE.CylinderGeometry(0.016,0.026,0.42,6),M('#4a2e16',0.6),0,-0.85,0);
-  const tip=new THREE.Sprite(glowMat('#fff2c0',2.2));tip.scale.setScalar(0.32);tip.position.set(0,-1.07,0);armR.add(tip);
+  {
+    const wC=WOODC[look.wd],wM=M(wC,0.5),dkM=M(new THREE.Color(wC).multiplyScalar(0.55),0.6),goldW=new THREE.MeshStandardMaterial({color:'#e8c060',metalness:0.85,roughness:0.3,emissive:'#2a1c04'});
+    add(armR,new THREE.CylinderGeometry(0.014,0.026,0.46,8),wM,0,-0.87,0);
+    if(look.ws===0)add(armR,new THREE.SphereGeometry(0.034,8,6),wM,0,-0.65,0);
+    else if(look.ws===1)for(let i=0;i<7;i++){const r=add(armR,new THREE.TorusGeometry(0.024-i*0.0014,0.006,5,10),dkM,0,-0.7-i*0.055,0);r.rotation.x=Math.PI/2+0.35;}
+    else if(look.ws===2){add(armR,new THREE.SphereGeometry(0.04,8,6),wM,0,-0.65,0);for(const [y,r] of [[-0.72,0.034],[-0.84,0.028],[-0.95,0.026]])add(armR,new THREE.SphereGeometry(r,8,6),wM,0.007,y,0);}
+    else{add(armR,new THREE.CylinderGeometry(0.031,0.031,0.13,10),goldW,0,-0.71,0);for(const y of[-0.79,-1.0]){const r=add(armR,new THREE.TorusGeometry(0.024,0.007,6,12),goldW,0,y,0);r.rotation.x=Math.PI/2;}add(armR,new THREE.SphereGeometry(0.02,8,6),goldW,0,-1.1,0);}
+  }
+  const tip=new THREE.Sprite(glowMat(WCOREC[look.wc],2.2));tip.scale.setScalar(0.32);tip.position.set(0,-1.09,0);armR.add(tip);
   shadowAll(b);
   const shield=new THREE.Mesh(new THREE.SphereGeometry(1.35,32,20),shieldMat());shield.position.y=1.1;shield.visible=false;g.add(shield);
   const ring=new THREE.Mesh(new THREE.RingGeometry(0.85,1.05,32),new THREE.MeshBasicMaterial({color:'#ffffff',transparent:true,opacity:0.7,depthWrite:false}));
@@ -3408,7 +3443,7 @@ function stageSpots(L){
 function stageChar(id,lk){
   let o=STAGE.chars.get(id),px=null,had=false,pp=null;
   if(o&&o.lk!==lk){px=o.x;pp=o.pp;had=true;stage.remove(o.g);disposeObj(o.g);STAGE.chars.delete(id);o=null;}
-  if(!o){const re=had&&id==='me-preview';o=makeStudent(parseLook(lk),id);stage.add(o.g);o.lk=lk;o.house=parseLook(lk).h;o.joinT=re?0:1.6;o.x=re?px:null;if(pp)o.pp=pp;STAGE.chars.set(id,o);}
+  if(!o){const re=had&&id==='me-preview';o=makeStudent(parseLook(lk),id);stage.add(o.g);o.lk=lk;o.house=parseLook(lk).h;o.pid=id;o.joinT=re?0:1.6;o.x=re?px:null;if(pp)o.pp=pp;STAGE.chars.set(id,o);}
   return o;
 }
 // ท่าประจำบ้าน [แขนขวา rx,rz | แขนซ้าย rx,rz | ลำตัว rx,rz] — ปรับนุ่มๆ เวลาเปลี่ยนบ้าน
@@ -3416,10 +3451,11 @@ const POSES=[
   [-2.7,-0.28,-0.12,0.55,-0.06,0],
   [-1.3,0.5,-1.15,-0.6,0.03,0.07],
   [-0.3,-0.12,-2.6,0.5,0,0],
-  [-1.75,-0.06,-0.95,0.38,0.06,-0.05]];
+  [-1.75,-0.06,-0.95,0.38,0.06,-0.05],
+  [-2.0,-0.1,-0.12,0.5,-0.02,0]];   // 4 = ท่าโชว์ไม้กายสิทธิ์ (ขั้นเลือกไม้กาย)
 function stageIdle(o,now,dt,i){
   o.joinT=Math.max(0,o.joinT-dt);
-  const lift=Math.min(1,o.joinT*1.2),h=o.house|0,T=POSES[h];
+  const lift=Math.min(1,o.joinT*1.2),h=(o.pid==='me-preview'&&crOpen&&crStep===2)?4:(o.house|0),T=POSES[h];
   if(!o.pp)o.pp=T.slice();
   const k=1-Math.exp(-7*dt);for(let j=0;j<6;j++)o.pp[j]+=(T[j]-o.pp[j])*k;
   const P=o.pp,t=now/1000;
@@ -3434,7 +3470,7 @@ function stageIdle(o,now,dt,i){
   o.armR.rotation.x=lerp(P[0]+Math.sin(now/800+i)*0.04,-2.3,lift);o.armR.rotation.z=P[1];
   updateCloth(o.cloak,0,0,0,now,dt);
   o.ends.forEach((E,k)=>{E.rotation.x=Math.sin(now*0.0015+k+i)*0.05;E.rotation.z=0;});
-  o.tip.scale.setScalar(0.3+0.08*Math.sin(now/120+i)+lift*0.6+(h===0?0.15:0));
+  o.tip.scale.setScalar(0.3+0.08*Math.sin(now/120+i)+lift*0.6+(h===0||h===4?0.15:0));
   o.broom.visible=o.cocoon.visible=o.shield.visible=o.stars.visible=false;
 }
 const _sv=new THREE.Vector3();
@@ -3534,8 +3570,8 @@ function renderStage(dt,now){
     STAGE.slotRings.forEach(r=>r.visible=false);STAGE.empty=[];
   }
   for(const [id,o] of STAGE.chars)if(!want.has(id)){stage.remove(o.g);disposeObj(o.g);STAGE.chars.delete(id);}
-  stageTone(dt,crOpen&&crStep===2?HOUSES[myLook.h]:null);
-  const eh=crOpen&&crStep===2?myLook.h:-1;
+  stageTone(dt,crOpen&&crStep===3?HOUSES[myLook.h]:null);
+  const eh=crOpen&&crStep===3?myLook.h:-1;
   STAGE.env.forEach((g,i)=>{g.visible=i===eh;const u=g.userData;if(u.L)u.L.intensity=i===eh?u.base*(u.fl?0.8+0.22*Math.sin(now/90)+0.12*Math.sin(now/37):1):0;if(i===eh&&u.sp)u.sp.forEach((q,j)=>{q.position.y=q.userData.y+Math.sin(now/900+j)*0.35;});});
   STAGE.wins.forEach(m=>m.visible=eh<0||eh===3);
   // เปลี่ยนบ้าน: ตัวละครหมุนหนึ่งรอบ + คลื่นพลัง
@@ -3547,7 +3583,7 @@ function renderStage(dt,now){
   rows.forEach(({o,s,p},i)=>{
     o.x=o.x===null?s.x:lerp(o.x,s.x,1-Math.exp(-8*dt));
     o.g.position.set(o.x,STAGE_Y,s.z);
-    o.g.rotation.y=(lob?-o.x*0.06:-0.22+((mouseX||SW*0.6)/Math.max(1,SW)-0.6)*0.5)+(p?0:spin);
+    o.g.rotation.y=(lob?-o.x*0.06:-0.22+((mouseX||SW*0.6)/Math.max(1,SW)-0.6)*0.5)+(p?0:spin)+(window.__rotY||0);
     stageIdle(o,now,dt,i);
     const mine=p?p.id===NET.myId:true;
     o.ring.visible=true;o.ring.material.color.set(team?TEAMC[p.tm]:mine?'#f3dc94':'#8a94b8');o.ring.material.opacity=mine||team?0.85:0.4;
@@ -3558,8 +3594,9 @@ function renderStage(dt,now){
   // กล้อง: เมนู = ตัวเราอยู่ฝั่งขวา / ล็อบบี้ = มองทั้งแท่น
   const sway=Math.sin(now/5200)*0.15;
   if(lob){const mx=Math.max(0,...rows.map(r=>Math.abs(r.s.x)),...STAGE.empty.map(e=>Math.abs(e.x))),dist=clamp((mx+1.1)/(0.3*cam.aspect),6.5,13);cam.position.set(sway,1.5+dist*0.1,dist);cam.lookAt(0,1.45,0);}
-  else if(crOpen){const s2=crStep===2;cam.position.set(-0.45+sway*0.4,s2?1.95:1.8,s2?4.5:3.9);cam.lookAt(-0.45,s2?1.2:1.5,0);}
+  else if(crOpen){const s3=crStep===3,sw=crStep===2;cam.position.set(-0.45+sway*0.4,s3?1.95:sw?1.85:1.8,s3?4.5:sw?3.2:3.9);cam.lookAt(-0.45,s3?1.2:sw?1.55:1.5,0);}
   else{cam.position.set(-0.85+sway*0.5,1.55,5.6);cam.lookAt(-0.85,1.12,0);}
+  if(window.__stageCam)window.__stageCam(cam);
   rpass.scene=stage;gl.shadowMap.needsUpdate=true;composer.render();rpass.scene=scene;
   if(lob)drawStageLabels(rows,team);
 }
@@ -4406,6 +4443,7 @@ const CRTABS=[['👤','ใบหน้า'],['💇','ผม'],['🧥','เสื
 const sw_=(k,arr)=>`<div class="colors">${arr.map((c,i)=>`<div class="sw ${myLook[k]===i?'on':''}" data-k="${k}" data-v="${i}" style="background:${c}"></div>`).join('')}</div>`;
 const bt_=(k,arr)=>`<div class="opts">${arr.map((t,i)=>`<button class="obtn ${myLook[k]===i?'on':''}" data-k="${k}" data-v="${i}">${t}</button>`).join('')}</div>`;
 function crRenderStep1(){
+  if(crStep===2){crRenderWand();return;}
   $('#crTabs').innerHTML=CRTABS.map((t,i)=>`<button class="crTab ${crTab===i?'on':''}" data-tab="${i}"><span>${t[0]}</span>${t[1]}</button>`).join('');
   const nm=`<label class="f" style="margin-top:0">ชื่อพ่อมด</label><input type="text" id="cName" maxlength="16" value="${esc($('#nameIn').value)}">`;
   const body=[
@@ -4417,21 +4455,27 @@ function crRenderStep1(){
   $('#crPanel').innerHTML=nm+'<div class="orn" style="width:100%;margin:12px 0 4px"></div>'+body;
   if(cur)$('#cName').focus();
 }
-function crRenderStep2(){
+function crRenderWand(){
+  const nm=`<label class="f" style="margin-top:0">ชื่อพ่อมด</label><input type="text" id="cName" maxlength="16" value="${esc($('#nameIn').value)}">`;
+  const cur=document.activeElement&&document.activeElement.id==='cName';
+  $('#crPanel').innerHTML=nm+'<div class="orn" style="width:100%;margin:12px 0 4px"></div>'+`<h3 class="sec">ไม้กายสิทธิ์ของคุณ</h3><p class="crnote">ไม้กายสิทธิ์เป็นฝ่ายเลือกพ่อมด — แต่ที่นี่คุณเลือกเองได้เลย</p><label class="f">ไม้ (${WOODN[myLook.wd]})</label>${sw_('wd',WOODC)}<label class="f">แกนเวท (${WCOREN[myLook.wc]})</label>${sw_('wc',WCOREC)}<label class="f">ทรงด้าม</label>${bt_('ws',WANDSTY)}`;
+  if(cur)$('#cName').focus();
+}
+function crRenderHouse(){
   const H=HOUSES[myLook.h];
   $('#crInfo').innerHTML=`<small>HOGWARTS HOUSE</small><h1>${H.n}</h1><div class="th">${H.th}</div><div class="ds">${H.ds}</div><div class="po">${H.po} — กดเลือกบ้านอื่นเพื่อเปลี่ยนท่าและบรรยากาศ</div>`;
   $('#crCrests').innerHTML=HOUSES.map((h,i)=>`<button class="ccard ${myLook.h===i?'on':''}" data-house="${i}" style="--hc:${h.gl}">${crestSVG(i,118)}</button>`).join('');
-  [...document.querySelectorAll('.crTints i')].forEach((el,i)=>el.classList.toggle('on',crStep===2&&myLook.h===i));
+  [...document.querySelectorAll('.crTints i')].forEach((el,i)=>el.classList.toggle('on',crStep===3&&myLook.h===i));
   $('#crInfo').style.setProperty('--ht',H.gl);
 }
 function crGo(n){
-  crStep=n;const el=$('#creator');el.classList.toggle('s1',n===1);el.classList.toggle('s2',n===2);
-  $('#crSt1').classList.toggle('on',n===1);$('#crSt2').classList.toggle('on',n===2);
-  if(n===1)crRenderStep1();else{crSaveName();crRenderStep2();STAGE.switchT=0;}
-  [...document.querySelectorAll('.crTints i')].forEach((e,i)=>e.classList.toggle('on',n===2&&myLook.h===i));
+  if(crStep===1||crStep===2)crSaveName();
+  crStep=n;const el=$('#creator');for(const k of [1,2,3]){el.classList.toggle('s'+k,n===k);$('#crSt'+k).classList.toggle('on',n===k);}
+  if(n===3){crRenderHouse();STAGE.switchT=0;}else crRenderStep1();
+  [...document.querySelectorAll('.crTints i')].forEach((e,i)=>e.classList.toggle('on',n===3&&myLook.h===i));
 }
 function crSaveName(){const c=$('#cName');if(c){const n=cleanName(c.value);$('#nameIn').value=n;store('wd_name',n);}}
-function crSetHouse(i){if(i===myLook.h&&crStep===2)return;myLook.h=i;STAGE.switchT=0;renderMyHouse();crRenderStep2();}
+function crSetHouse(i){if(i===myLook.h&&crStep===3)return;myLook.h=i;STAGE.switchT=0;renderMyHouse();crRenderHouse();}
 function openCreator(first){
   crSaved=lookStr(myLook);ac();crFirst=!!first;crOpen=true;crTab=0;
   $('#crTitle').textContent=first?'สร้างตัวละครของคุณ':'แต่งตัวละคร';
@@ -4450,9 +4494,11 @@ $('#creator').addEventListener('click',e=>{
   const t=e.target.closest('[data-k]');if(!t)return;
   myLook[t.dataset.k]=+t.dataset.v;crRenderStep1();
 });
-$('#crRand').onclick=()=>{const h=myLook.h;myLook=randLook();myLook.h=h;crRenderStep1();};
+$('#crRand').onclick=()=>{const k={h:myLook.h,wd:myLook.wd,wc:myLook.wc,ws:myLook.ws};myLook=Object.assign(randLook(),k);crRenderStep1();};
 $('#crNext').onclick=()=>crGo(2);
-$('#crBack').onclick=()=>crGo(1);
+$('#crBack2').onclick=()=>crGo(1);
+$('#crNext2').onclick=()=>crGo(3);
+$('#crBack').onclick=()=>crGo(2);
 $('#crHat').onclick=()=>{crSetHouse(Math.floor(Math.random()*4));toast('🎩 หมวกคัดสรรเลือกให้คุณ: '+HOUSES[myLook.h].n+'!');};
 $('#crOk').onclick=()=>closeCreator(true);
 $('#crCancel').onclick=()=>closeCreator(false);
