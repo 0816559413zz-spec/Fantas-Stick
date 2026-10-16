@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Wizard Duel</title>
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Kanit:wght@300;400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Cinzel+Decorative:wght@700;900&family=Kanit:wght@300;400;600&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
 <script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.160.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.160.0/examples/jsm/"}}</script>
 <style>
@@ -53,7 +53,7 @@ input[type=text]:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(217,18
 .crShade{background:linear-gradient(90deg,rgba(2,3,8,.86) 0,rgba(2,3,8,.55) 36%,transparent 64%),linear-gradient(0deg,rgba(2,3,8,.75),transparent 34%),linear-gradient(180deg,rgba(2,3,8,.55),transparent 18%)}
 .crTop{position:absolute;left:34px;top:20px}
 .crTop small{display:block;letter-spacing:7px;color:var(--gold);font-size:11px;font-family:var(--fd)}
-.crTop h2{margin:2px 0 0;font-size:34px;font-family:var(--fd)}
+.crTop h2{margin:2px 0 0;font-size:30px;font-family:'Cinzel Decorative','Kanit',serif;font-weight:700}
 .crSteps{position:absolute;left:50%;top:26px;transform:translateX(-50%);display:flex;align-items:center;gap:10px;font-size:14px;color:var(--mute)}
 .crSteps b{display:inline-flex;align-items:center;gap:8px;padding:6px 16px;border:1px solid var(--line);background:rgba(7,11,24,.8);font-weight:400}
 .crSteps b.on{border-color:var(--gold2);color:var(--gold2);box-shadow:0 0 14px rgba(243,220,148,.3)}
@@ -77,13 +77,13 @@ input[type=text]:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(217,18
 .s2 .crBar{left:50%;transform:translateX(-50%);width:min(620px,92vw)}
 .crInfo{position:absolute;left:44px;top:110px;width:min(400px,40vw)}
 .crInfo small{display:block;letter-spacing:6px;color:var(--gold);font-size:12px;font-family:var(--fd)}
-.crInfo h1{text-align:left;font-size:54px;margin:4px 0 2px;transition:opacity .3s}
+.crInfo h1{text-align:left;font-family:'Cinzel Decorative','Cinzel','Kanit',serif;font-weight:900;font-size:46px;letter-spacing:1px;margin:4px 0 2px;text-shadow:0 4px 24px var(--ht,#000);filter:none;color:#fff3c8;background:none;-webkit-text-fill-color:#fff3c8}
 .crInfo .th{font-size:20px;color:var(--text);margin:0 0 10px}
 .crInfo .ds{font-size:16px;color:var(--gold2);margin:0 0 4px}
 .crInfo .po{font-size:13px;color:var(--mute)}
 .crCrests{position:absolute;left:50%;bottom:98px;transform:translateX(-50%);display:flex;gap:22px;align-items:flex-end}
-.ccard{background:none;border:none;box-shadow:none;padding:0;transition:transform .25s,filter .25s;filter:grayscale(.55) brightness(.7);transform:scale(.86);transform-origin:bottom center}
-.ccard:hover{filter:grayscale(.15) brightness(.95);transform:scale(.94);box-shadow:none}
+.ccard{background:none;border:none;box-shadow:none;padding:0;transition:transform .25s,filter .25s;filter:saturate(.7) brightness(.8);transform:scale(.88);transform-origin:bottom center}
+.ccard:hover{filter:saturate(1) brightness(1);transform:scale(.94);box-shadow:none}
 .ccard.on{filter:none;transform:translateY(-10px) scale(1.12);box-shadow:none}
 .ccard.on .crest{filter:drop-shadow(0 0 16px var(--hc))}
 .s1 .crStep2only,.s2 .crStep1only{display:none!important}
@@ -408,10 +408,10 @@ const COLORS=['#d33a2c','#2e9b5f','#2f6fd6','#e0b420','#8e44ad','#e8e8e8','#ff7a
 // ---------- ตัวละคร: บ้านฮอกวอตส์ + หน้าตา ----------
 // สีหลัก c ของบ้านใช้เป็นสีประจำตัวทั่วเกม (ป้ายชื่อ แผนที่ย่อ ตารางคะแนน) / c2 = สีรอง (สีเนคไท ผ้าพันคอ)
 const HOUSES=[
-  {n:'Gryffindor',th:'กริฟฟินดอร์',ic:'🦁',c:'#b3202f',c2:'#e8b923',tr:'กล้าหาญ',gl:'#ff6a3c',bg:'#2e080b',ds:'กล้าหาญ • เด็ดเดี่ยว • ไม่ยอมถอย',po:'ท่าชูไม้กายสูง'},
-  {n:'Slytherin',th:'สลิธีริน',ic:'🐍',c:'#1e7a45',c2:'#b9c3cc',tr:'เจ้าเล่ห์',gl:'#3cdc8a',bg:'#04190e',ds:'เจ้าเล่ห์ • ทะเยอทะยาน • เฉียบคม',po:'ท่ากอดอกยิ้มมุมปาก'},
-  {n:'Hufflepuff',th:'ฮัฟเฟิลพัฟ',ic:'🦡',c:'#f0c030',c2:'#2b2b2b',tr:'ซื่อสัตย์',gl:'#ffd23c',bg:'#2b2305',ds:'ซื่อสัตย์ • อดทน • ใจดีกับทุกคน',po:'ท่าโบกมือทักทาย'},
-  {n:'Ravenclaw',th:'เรเวนคลอ',ic:'🦅',c:'#2358b0',c2:'#b5813f',tr:'ฉลาด',gl:'#4a8cff',bg:'#050d2c',ds:'ฉลาด • ช่างคิด • รักการเรียนรู้',po:'ท่านักคิด ไม้กายแตะคาง'}];
+  {n:'Gryffindor',th:'กริฟฟินดอร์',ic:'🦁',c:'#a71b26',c2:'#f0b92a',tr:'กล้าหาญ',gl:'#ff6a3c',bg:'#2e080b',ds:'กล้าหาญ • เด็ดเดี่ยว • ไม่ยอมถอย',po:'ท่าชูไม้กายสูง'},
+  {n:'Slytherin',th:'สลิธีริน',ic:'🐍',c:'#14693a',c2:'#c9d1d8',tr:'เจ้าเล่ห์',gl:'#3cdc8a',bg:'#04190e',ds:'เจ้าเล่ห์ • ทะเยอทะยาน • เฉียบคม',po:'ท่ากอดอกยิ้มมุมปาก'},
+  {n:'Hufflepuff',th:'ฮัฟเฟิลพัฟ',ic:'🦡',c:'#f6c928',c2:'#2b2b2b',tr:'ซื่อสัตย์',gl:'#ffd23c',bg:'#2b2305',ds:'ซื่อสัตย์ • อดทน • ใจดีกับทุกคน',po:'ท่าโบกมือทักทาย'},
+  {n:'Ravenclaw',th:'เรเวนคลอ',ic:'🦅',c:'#1b4f9e',c2:'#b8863e',tr:'ฉลาด',gl:'#4a8cff',bg:'#050d2c',ds:'ฉลาด • ช่างคิด • รักการเรียนรู้',po:'ท่านักคิด ไม้กายแตะคาง'}];
 const HAIRC=['#15100d','#2b1b10','#4a2c17','#8a5a2b','#c9a15a','#eadba0','#b8431f','#6b2d17','#8a8f99','#2d6a8a'];
 const HAIRSTY=['ทรงสั้น','หน้าม้า','ยาวสยาย','มวยผม'];
 const EYEC=['#4a2e16','#171210','#3f7fd0','#3f9a5a','#8a6a2a','#8a94a0','#8a5ad0','#d08a20'];
@@ -426,18 +426,25 @@ const LOOKS={},LOOKP={};
 function getLook(id){const s=LOOKS[id]||(LOOKS[id]=lookStr(randLook(hashStr(id))));return LOOKP[s]||(LOOKP[s]=parseLook(s));}
 const CREST_SH='M8 8H92V62C92 92 66 108 50 116C34 108 8 92 8 62Z';
 const CREST_PAT=[
-  c2=>`<polygon points="0,18 100,66 100,90 0,42" fill="${c2}" opacity=".9"/>`,
-  c2=>`<path d="M0 26L50 68L100 26L100 50L50 92L0 50Z" fill="${c2}" opacity=".85"/>`,
-  c2=>[0,1,2,3].map(i=>`<rect x="${i*28-6}" y="0" width="13" height="130" fill="${c2}" opacity=".9"/>`).join(''),
-  c2=>`<path d="M50 6L92 62L50 118L8 62Z" fill="${c2}" opacity=".8"/>`];
-// ตราบ้าน: โล่ลายตามสีบ้าน + สัตว์ประจำบ้าน + ริบบิ้นชื่อ (w = ความกว้างพิกเซล, rib = แสดงริบบิ้นไหม)
+  c2=>`<polygon points="0,18 100,66 100,92 0,44" fill="${c2}" opacity=".95"/>`,
+  c2=>`<path d="M0 26L50 68L100 26L100 52L50 94L0 52Z" fill="${c2}" opacity=".9"/>`,
+  c2=>`<path d="M0 30L50 72L100 30L100 52L50 94L0 52Z" fill="${c2}" opacity=".92"/><path d="M0 62L50 104L100 62L100 80L50 122L0 80Z" fill="${c2}" opacity=".92"/>`,
+  c2=>`<path d="M50 4L96 62L50 120L4 62Z" fill="${c2}" opacity=".85"/><path d="M50 22L80 62L50 102L20 62Z" fill="rgba(0,0,0,.25)"/>`];
+function starPts(cx,cy,n,ro,ri){let o='';for(let i=0;i<n*2;i++){const a=Math.PI*i/n-Math.PI/2,r=i%2?ri:ro;o+=(cx+Math.cos(a)*r).toFixed(1)+','+(cy+Math.sin(a)*r).toFixed(1)+' ';}return o;}
+// สัตว์ประจำบ้าน วาดเป็นเวกเตอร์เอง (สิงโต / งู / แบดเจอร์ / อินทรี)
+const CREST_ANI=[
+  ()=>`<polygon points="${starPts(50,58,15,27,20)}" fill="#e9a21f" stroke="#5a2f06" stroke-width="1.3"/><circle cx="38" cy="43" r="4.6" fill="#f6c75e" stroke="#5a2f06"/><circle cx="62" cy="43" r="4.6" fill="#f6c75e" stroke="#5a2f06"/><circle cx="50" cy="58" r="16" fill="#f6c75e" stroke="#5a2f06" stroke-width="1.3"/><ellipse cx="44" cy="54" rx="2.2" ry="1.7" fill="#2b1203"/><ellipse cx="56" cy="54" rx="2.2" ry="1.7" fill="#2b1203"/><path d="M46 60L54 60L50 66Z" fill="#6a2a12"/><path d="M50 66V69M43 70Q50 74 57 70" stroke="#6a2a12" stroke-width="1.5" fill="none" stroke-linecap="round"/>`,
+  ()=>`<path d="M62 38C26 34 28 58 50 60C76 62 72 88 36 86" stroke="#06241a" stroke-width="11" fill="none" stroke-linecap="round"/><path d="M62 38C26 34 28 58 50 60C76 62 72 88 36 86" stroke="#e1e7ec" stroke-width="7" fill="none" stroke-linecap="round" stroke-dasharray="14 2.5"/><ellipse cx="65" cy="37" rx="9" ry="6.5" fill="#e1e7ec" stroke="#06241a" stroke-width="1.5" transform="rotate(-14 65 37)"/><circle cx="67" cy="35" r="1.6" fill="#0a2a1c"/><path d="M73 38L81 35M73 38L81 41" stroke="#d6283a" stroke-width="1.6" stroke-linecap="round"/>`,
+  ()=>`<defs><clipPath id="bdg"><ellipse cx="50" cy="60" rx="22" ry="19"/></clipPath></defs><circle cx="33" cy="44" r="6" fill="#1b1b1b"/><circle cx="67" cy="44" r="6" fill="#1b1b1b"/><circle cx="33" cy="44" r="2.4" fill="#f5f1e4"/><circle cx="67" cy="44" r="2.4" fill="#f5f1e4"/><ellipse cx="50" cy="60" rx="22" ry="19" fill="#f5f1e4" stroke="#111" stroke-width="1.6"/><g clip-path="url(#bdg)"><path d="M30 40C35 54 36 68 41 80L48 80L47 38Z" fill="#1b1b1b"/><path d="M70 40C65 54 64 68 59 80L52 80L53 38Z" fill="#1b1b1b"/></g><circle cx="41" cy="57" r="2.2" fill="#f5f1e4"/><circle cx="59" cy="57" r="2.2" fill="#f5f1e4"/><ellipse cx="50" cy="71" rx="5" ry="3.4" fill="#111"/>`,
+  ()=>{const w='<path d="M48 62L8 34L15 48L3 52L16 61L7 72L24 69L22 82L37 73L48 79Z" fill="#cf9f55" stroke="#4a2f0c" stroke-width="1.4"/><path d="M40 60L16 46M38 67L14 62M36 73L22 76" stroke="#4a2f0c" stroke-width="1" opacity=".7"/>';return w+`<g transform="translate(100 0) scale(-1 1)">${w}</g><path d="M44 78L50 96L56 78Z" fill="#8a5a22" stroke="#4a2f0c"/><ellipse cx="50" cy="66" rx="7.5" ry="14" fill="#946226" stroke="#4a2f0c" stroke-width="1.3"/><circle cx="50" cy="47" r="7.5" fill="#efe9d6" stroke="#4a2f0c" stroke-width="1.3"/><path d="M46.5 50L50 58L53.5 50Z" fill="#f2b630" stroke="#7a4a08" stroke-width=".8"/><circle cx="47.5" cy="46" r="1.3" fill="#1a1208"/><circle cx="52.5" cy="46" r="1.3" fill="#1a1208"/>`;}];
+// ตราบ้าน: โล่ลายสีบ้าน + สัตว์ประจำบ้าน + ริบบิ้นชื่อ (w = ความกว้างพิกเซล, rib = แสดงริบบิ้นไหม)
 function crestSVG(h,w,rib=true){
   const H=HOUSES[h],id='cg'+h+'_'+w+(rib?'r':'n');
-  return `<svg viewBox="0 0 100 ${rib?130:120}" width="${w}" height="${Math.round(w*(rib?1.3:1.2))}" class="crest"><defs><linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${H.c}"/><stop offset="1" stop-color="#000" stop-opacity=".55"/></linearGradient><clipPath id="${id}c"><path d="${CREST_SH}"/></clipPath></defs>
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 ${rib?132:120}" width="${w}" height="${Math.round(w*(rib?1.32:1.2))}" class="crest"><defs><linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".22"/><stop offset=".5" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".55"/></linearGradient><clipPath id="${id}c"><path d="${CREST_SH}"/></clipPath></defs>
 <path d="${CREST_SH}" fill="${H.c}"/><g clip-path="url(#${id}c)">${CREST_PAT[h](H.c2)}<path d="${CREST_SH}" fill="url(#${id})"/></g>
-<path d="${CREST_SH}" fill="none" stroke="#e3c06c" stroke-width="3.5"/><path d="M14 14H86V60C86 86 64 100 50 108C36 100 14 86 14 60Z" fill="none" stroke="#f3dc94" stroke-opacity=".45" stroke-width="1"/>
-<circle cx="50" cy="56" r="25" fill="rgba(0,0,0,.34)" stroke="#e3c06c" stroke-width="1.5"/><text x="50" y="69" font-size="36" text-anchor="middle">${H.ic}</text>
-${rib?`<path d="M0 98L100 98L93 111L100 124L0 124L7 111Z" fill="#efe3bf" stroke="#8a6a2a" stroke-width="1.5"/><text x="50" y="115" font-family="Cinzel,serif" font-weight="800" font-size="12" fill="#2a1a08" text-anchor="middle" textLength="74" lengthAdjust="spacingAndGlyphs">${H.n}</text>`:''}</svg>`;
+<path d="${CREST_SH}" fill="none" stroke="#2a1a05" stroke-width="5.5"/><path d="${CREST_SH}" fill="none" stroke="#f0cf78" stroke-width="3"/><path d="M14 14H86V60C86 85 64 99 50 107C36 99 14 85 14 60Z" fill="none" stroke="#fff3c4" stroke-opacity=".4" stroke-width="1"/>
+${CREST_ANI[h]()}
+${rib?`<path d="M-2 100L102 100L94 113L102 126L-2 126L6 113Z" fill="#eadcae" stroke="#5a3d10" stroke-width="2"/><text x="50" y="117" font-family="'Cinzel Decorative',Cinzel,serif" font-weight="900" font-size="12" fill="${H.c}" stroke="#2a1a05" stroke-width=".4" text-anchor="middle" textLength="76" lengthAdjust="spacingAndGlyphs">${H.n.toUpperCase()}</text>`:''}</svg>`;
 }
 function houseColor(lk){return HOUSES[parseLook(lk).h].c;}
 const TEAMC=['#4da3ff','#ff5a5a'], TEAMN=['ทีมฟ้า','ทีมแดง'];
@@ -3132,7 +3139,7 @@ function menuCamera(now){
 const stage=new THREE.Scene();
 stage.background=new THREE.Color('#04060d');
 stage.fog=new THREE.Fog('#04060d',16,46);
-const STAGE={chars:new Map(),candles:[],rune:null,slotRings:[],plates:[],dust:null,banners:[],switchT:-1,k:0,tg:null,tb:null};
+const STAGE={chars:new Map(),env:[],wins:[],candles:[],rune:null,slotRings:[],plates:[],dust:null,banners:[],switchT:-1,k:0,tg:null,tb:null};
 const STAGE_Y=0.36;
 (function(){
   STAGE.hemi=new THREE.HemisphereLight('#7f95e6','#1a1410',0.45);stage.add(STAGE.hemi);
@@ -3151,8 +3158,8 @@ const STAGE_Y=0.36;
   const arch=(w,h)=>{const s=new THREE.Shape();s.moveTo(-w/2,0);s.lineTo(-w/2,h-w/2);s.absarc(0,h-w/2,w/2,Math.PI,0,true);s.lineTo(w/2,0);s.lineTo(-w/2,0);return new THREE.ShapeGeometry(s,24);};
   const winTex=texCanvas(8,128,(g)=>{const r=g.createLinearGradient(0,0,0,128);r.addColorStop(0,'#9fb4ff');r.addColorStop(0.6,'#3a4c94');r.addColorStop(1,'#141a3a');g.fillStyle=r;g.fillRect(0,0,8,128);});
   for(const [x,z,w,h] of [[0,-15,5,11],[-10,-13,3.4,8],[10,-13,3.4,8]]){
-    const m=new THREE.Mesh(arch(w,h),new THREE.MeshBasicMaterial({map:winTex,color:hdr('#ffffff',x?0.32:0.42),fog:false}));m.position.set(x,1.5,z);m.lookAt(0,1.5+0,6);stage.add(m);
-    const fr=new THREE.Mesh(arch(w+0.6,h+0.3),new THREE.MeshStandardMaterial({color:'#2a2838',roughness:0.95}));fr.position.set(x,1.35,z-0.05);fr.lookAt(0,1.35,6);stage.add(fr);
+    const m=new THREE.Mesh(arch(w,h),new THREE.MeshBasicMaterial({map:winTex,color:hdr('#ffffff',x?0.32:0.42),fog:false}));m.position.set(x,1.5,z);m.lookAt(0,1.5+0,6);stage.add(m);STAGE.wins.push(m);
+    const fr=new THREE.Mesh(arch(w+0.6,h+0.3),new THREE.MeshStandardMaterial({color:'#2a2838',roughness:0.95}));fr.position.set(x,1.35,z-0.05);fr.lookAt(0,1.35,6);stage.add(fr);STAGE.wins.push(fr);
   }
   const wall=new THREE.Mesh(new THREE.CylinderGeometry(19,19,18,48,1,true,Math.PI*0.62,Math.PI*0.76),stoneMat(12,4,'#3a3a52'));wall.material.side=THREE.BackSide;wall.position.y=9;stage.add(wall);
   const HC=['#7a1c1c','#1c3f7a','#1f5a32','#8a6a12'];
@@ -3234,6 +3241,71 @@ function stageIdle(o,now,dt,i){
   o.broom.visible=o.cocoon.visible=o.shield.visible=o.stars.visible=false;
 }
 const _sv=new THREE.Vector3();
+// ---------- ฉากประจำบ้าน (โผล่ตอนเลือกบ้านในหน้าสร้างตัวละคร) ----------
+const CRESTTEX=[];
+function crestTex(h){
+  if(CRESTTEX[h])return CRESTTEX[h];
+  const c=document.createElement('canvas');c.width=256;c.height=308;
+  const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=4;CRESTTEX[h]=t;
+  const img=new Image();img.onload=()=>{c.getContext('2d').drawImage(img,0,0,256,308);t.needsUpdate=true;};
+  img.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(crestSVG(h,256,false));
+  return t;
+}
+function crestBanner(h,x,y,z,w){
+  const g=new THREE.Group(),H=HOUSES[h],hh=w*1.9;
+  g.add(new THREE.Mesh(new THREE.PlaneGeometry(w,hh),new THREE.MeshStandardMaterial({color:H.c,roughness:0.9,side:THREE.DoubleSide})));
+  const tr=new THREE.Mesh(new THREE.PlaneGeometry(w*1.04,0.16),new THREE.MeshStandardMaterial({color:'#d9b45a',metalness:0.8,roughness:0.3}));tr.position.set(0,hh/2,0.02);g.add(tr);
+  const bt=tr.clone();bt.position.y=-hh/2;g.add(bt);
+  const em=new THREE.Mesh(new THREE.PlaneGeometry(w*0.82,w*0.82*1.2),new THREE.MeshBasicMaterial({map:crestTex(h),transparent:true}));em.position.set(0,hh*0.1,0.03);g.add(em);
+  g.position.set(x,y,z);return g;
+}
+function buildHouseEnvs(){
+  const E=[],stoneD=stoneMat(3,3,'#4a4a62');
+  const mk=()=>{const g=new THREE.Group();g.visible=false;stage.add(g);return g;};
+  const std=(c,r=0.9)=>new THREE.MeshStandardMaterial({color:c,roughness:r});
+  const box=(g,w,h,d,mat,x,y,z)=>{const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat);m.position.set(x,y,z);g.add(m);return m;};
+  const glow=(g,col,k,sx,sy,x,y,z)=>{const q=new THREE.Sprite(glowMat(col,k));q.scale.set(sx,sy,1);q.position.set(x,y,z);g.add(q);return q;};
+  const light=(g,col,base,x,y,z,fl)=>{const L=new THREE.PointLight(col,0,34,2);L.position.set(x,y,z);stage.add(L);g.userData.L=L;g.userData.base=base;g.userData.fl=fl;};
+  // 0 กริฟฟินดอร์: เตาผิงใหญ่ + ธงแดงทอง
+  {const g=mk();
+   box(g,8,6,1.4,stoneD,0,3,-12);box(g,4.6,3.4,0.5,std('#0a0605'),0,1.9,-11.25);
+   box(g,9,0.5,1.8,std('#5a3a22'),0,6.1,-11.8);
+   glow(g,'#ff7a2a',3,5,4,0,1.8,-10.7);glow(g,'#ffc060',2.4,2.6,2.2,0,1.3,-10.6);
+   for(const sx of[-1,1]){g.add(crestBanner(0,sx*7.2,4.4,-11.6,2.6));box(g,1.6,1,1.6,std('#8a1a22'),sx*5.6,0.5,-8.5);}
+   light(g,'#ff8a40',2.8,0,2.6,-9,1);E[0]=g;}
+  // 1 สลิธีริน: ห้องใต้ดินโค้งหิน + โคมเขียวแขวน
+  {const g=mk();
+   for(const x of[-9,0,9]){box(g,1.3,10,1.3,stoneD,x-2.4,5,-12.6);box(g,1.3,10,1.3,stoneD,x+2.4,5,-12.6);box(g,6.2,1.3,1.3,stoneD,x,10,-12.6);glow(g,'#30ff90',1.5,6.5,9,x,5,-13.4);}
+   for(let i=0;i<7;i++){const x=-10.5+i*3.5,y=6.2+(i%2)*1.6;box(g,0.05,14-y,0.05,std('#2a2a30'),x,y+(14-y)/2,-9);glow(g,'#40ff9a',2.4,1.3,1.3,x,y,-9);}
+   for(const sx of[-1,1])g.add(crestBanner(1,sx*4.5,4.5,-11.9,2.6));
+   light(g,'#30ff90',2.4,0,5,-8,0);E[1]=g;}
+  // 2 ฮัฟเฟิลพัฟ: ประตูกลมอบอุ่น + ต้นไม้ + ถัง
+  {const g=mk();
+   box(g,40,12,0.6,std('#5a4430'),0,6,-13.2);
+   for(const x of[-9,0,9]){const d=new THREE.Mesh(new THREE.CircleGeometry(2.3,32),std('#7a4a22'));d.position.set(x,3.4,-12.8);g.add(d);
+     const r=new THREE.Mesh(new THREE.TorusGeometry(2.3,0.16,8,32),new THREE.MeshStandardMaterial({color:'#c9923a',metalness:0.7,roughness:0.35}));r.position.set(x,3.4,-12.78);g.add(r);
+     glow(g,'#ffc850',1.4,6,6,x,3.4,-13);const kn=new THREE.Mesh(new THREE.SphereGeometry(0.16,10,8),new THREE.MeshStandardMaterial({color:'#e8c060',metalness:0.8}));kn.position.set(x+1.1,3.2,-12.6);g.add(kn);}
+   for(const x of[-10,-7,7,10]){const pot=new THREE.Mesh(new THREE.CylinderGeometry(0.55,0.4,0.8,12),std('#8a4a2a'));pot.position.set(x,0.4,-8);g.add(pot);
+     const lf=new THREE.Mesh(new THREE.IcosahedronGeometry(1,1),std('#3f9a45'));lf.position.set(x,1.7,-8);lf.scale.set(0.95,1.1,0.95);g.add(lf);}
+   for(const x of[-4.8,5]){const b=new THREE.Mesh(new THREE.CylinderGeometry(0.85,0.85,1.5,16),std('#6a4222'));b.position.set(x,0.75,-9.4);g.add(b);}
+   for(const sx of[-1,1])g.add(crestBanner(2,sx*4.6,4.6,-12.4,2.6));
+   const sp=[];for(let i=0;i<16;i++){const q=glow(g,'#ffe86a',2.4,0.3,0.3,rnd(-12,12),rnd(1.5,8),rnd(-12,-5));q.userData.y=q.position.y;sp.push(q);}g.userData.sp=sp;
+   light(g,'#ffc850',2.6,0,4,-8,0);E[2]=g;}
+  // 3 เรเวนคลอ: หอคอยดาว + ชั้นหนังสือ + ลูกแก้วลอย
+  {const g=mk();
+   const n=420,pos=new Float32Array(n*3);for(let i=0;i<n;i++){pos[i*3]=rnd(-24,24);pos[i*3+1]=rnd(1,18);pos[i*3+2]=-18;}
+   const sg=new THREE.BufferGeometry();sg.setAttribute('position',new THREE.BufferAttribute(pos,3));
+   g.add(new THREE.Points(sg,new THREE.PointsMaterial({map:glowTex,color:hdr('#cfe0ff',1.6),size:0.2,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,fog:false})));
+   glow(g,'#bcd4ff',1.6,7,7,2,12,-17.5);
+   const cols=['#2a4a9a','#b8863e','#5a2a6a','#1a6a8a','#8a2a3a','#e8e2d0'];
+   for(const sx of[-1,1]){box(g,3.6,11,1.3,std('#3a2616'),sx*9.5,5.5,-11.8);
+     for(let r=0;r<6;r++)for(let c=0;c<9;c++){const bh=rnd(0.7,1.1);box(g,0.28,bh,0.8,std(cols[(r*3+c*5)%cols.length],0.8),sx*9.5-1.2+c*0.3,1.2+r*1.7+bh/2,-11.1);}}
+   for(const sx of[-1,1])g.add(crestBanner(3,sx*4.6,4.5,-12,2.6));
+   const sp=[];for(let i=0;i<10;i++){const q=glow(g,'#6aa8ff',2.2,0.7,0.7,rnd(-8,8),rnd(2,9),rnd(-11,-5));q.userData.y=q.position.y;sp.push(q);}g.userData.sp=sp;
+   light(g,'#5a9aff',2.4,0,5,-8,0);E[3]=g;}
+  return E;
+}
+STAGE.env=buildHouseEnvs();
 // โทนสีฉากตามบ้านที่เลือก (null = โทนกลางปกติ) ค่อยๆ เปลี่ยนนุ่มๆ
 const TONE0={bg:new THREE.Color('#04060d'),gl:new THREE.Color('#6f8cff'),ac:new THREE.Color('#e8c66a'),sky:new THREE.Color('#7f95e6'),key:new THREE.Color('#ffe0a8'),dust:new THREE.Color('#ffd98a')};
 const _tc=new THREE.Color();
@@ -3266,6 +3338,9 @@ function renderStage(dt,now){
   }
   for(const [id,o] of STAGE.chars)if(!want.has(id)){stage.remove(o.g);disposeObj(o.g);STAGE.chars.delete(id);}
   stageTone(dt,crOpen&&crStep===2?HOUSES[myLook.h]:null);
+  const eh=crOpen&&crStep===2?myLook.h:-1;
+  STAGE.env.forEach((g,i)=>{g.visible=i===eh;const u=g.userData;if(u.L)u.L.intensity=i===eh?u.base*(u.fl?0.8+0.22*Math.sin(now/90)+0.12*Math.sin(now/37):1):0;if(i===eh&&u.sp)u.sp.forEach((q,j)=>{q.position.y=q.userData.y+Math.sin(now/900+j)*0.35;});});
+  STAGE.wins.forEach(m=>m.visible=eh<0||eh===3);
   // เปลี่ยนบ้าน: ตัวละครหมุนหนึ่งรอบ + คลื่นพลัง
   let spin=0;
   if(STAGE.switchT>=0){STAGE.switchT+=dt/0.8;const u=Math.min(1,STAGE.switchT),e=1-Math.pow(1-u,3);spin=e*Math.PI*2;
@@ -4139,9 +4214,10 @@ function crRenderStep1(){
 }
 function crRenderStep2(){
   const H=HOUSES[myLook.h];
-  $('#crInfo').innerHTML=`<small>HOGWARTS HOUSE</small><h1>${H.n}</h1><div class="th">${H.ic} ${H.th}</div><div class="ds">${H.ds}</div><div class="po">${H.po} — กดเลือกบ้านอื่นเพื่อเปลี่ยนท่าและบรรยากาศ</div>`;
-  $('#crCrests').innerHTML=HOUSES.map((h,i)=>`<button class="ccard ${myLook.h===i?'on':''}" data-house="${i}" style="--hc:${h.gl}">${crestSVG(i,112)}</button>`).join('');
+  $('#crInfo').innerHTML=`<small>HOGWARTS HOUSE</small><h1>${H.n}</h1><div class="th">${H.th}</div><div class="ds">${H.ds}</div><div class="po">${H.po} — กดเลือกบ้านอื่นเพื่อเปลี่ยนท่าและบรรยากาศ</div>`;
+  $('#crCrests').innerHTML=HOUSES.map((h,i)=>`<button class="ccard ${myLook.h===i?'on':''}" data-house="${i}" style="--hc:${h.gl}">${crestSVG(i,118)}</button>`).join('');
   [...document.querySelectorAll('.crTints i')].forEach((el,i)=>el.classList.toggle('on',crStep===2&&myLook.h===i));
+  $('#crInfo').style.setProperty('--ht',H.gl);
 }
 function crGo(n){
   crStep=n;const el=$('#creator');el.classList.toggle('s1',n===1);el.classList.toggle('s2',n===2);
