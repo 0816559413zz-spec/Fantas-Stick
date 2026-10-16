@@ -146,7 +146,7 @@ th{color:var(--mute);font-weight:400}
       <tr><td><b>🏟️ ควิดดิช</b><br><small>2-6 คน 2 ทีม</small></td><td>ทุกคนเริ่มบนไม้กวาด บินไปชน<b>บอลแดง</b>เพื่อแย่งมา แล้ว<b>คลิกซ้ายโยน</b>ให้ลอด<b>ห่วงทองฝั่งตรงข้าม</b> = +10 (ทีมฟ้ายิงห่วงขวา ทีมแดงยิงห่วงซ้าย) • ยิงเวทใส่คนถือบอลให้บอลหลุด • เวลาเหลือ 2.5 นาที<b>ลูกบอลทอง</b>จะโผล่ จับได้ +50 จบเกมทันที</td></tr>
       <tr><td><b>🏁 แข่งไม้กวาด</b><br><small>1-6 คน</small></td><td>บินลอด<b>ห่วงสีทอง</b>ตามลำดับ (มีลูกศรชี้ทาง) ครบ 10 ห่วง × 2 รอบ • ลอดห่วงได้บูสต์ความเร็ว • ยิงสตันใส่คู่แข่งให้ตกไม้กวาดได้ (กด B ขึ้นใหม่)</td></tr>
       <tr><td><b>🌀 แบทเทิลรอยัล</b><br><small>2-6 คน</small></td><td>เริ่มมีแค่เวทพื้นฐาน เดินเก็บ<b>ม้วนคาถา</b> (ปลดล็อก Q/E/R/F) และยา ❤️🛡️🌟 • วงเวทม่วงค่อยๆ หด อยู่นอกวงโดนดาเมจ • ตายแล้วไม่เกิดใหม่ คนสุดท้ายที่รอดชนะ</td></tr>
-      <tr><td><b>🕵️ หาผู้ทรยศ</b><br><small>4-6 คน (แบบ Among Us)</small></td><td>เริ่มเกมจะบอกบทบาทลับ • <b>ลูกเรือ</b>: ไปที่ลำแสงทองแล้วกด <b>E</b> ทำภารกิจให้ครบ • <b>ผู้ทรยศ</b>: เข้าใกล้แล้วกด <b>Q</b> สังหาร (คูลดาวน์ 25 วิ) • เจอศพกด <b>R</b> รายงาน หรือไปกลางแผนที่กด <b>F</b> ประชุมฉุกเฉิน • ประชุม: คุยไมค์แล้วคลิกโหวต • ลูกเรือชนะถ้าภารกิจครบหรือโหวตผู้ทรยศออกหมด / ผู้ทรยศชนะถ้าเหลือคนเท่ากัน • ตายแล้วเป็นผี ช่วยทำภารกิจต่อได้</td></tr>
+      <tr><td><b>🐍 หาลอร์ดโวลเดอมอร์</b><br><small>4-6 คน (แบบ Among Us)</small></td><td>เริ่มเกมจะบอกบทบาทลับ • <b>⚡ นักเรียนฮอกวอตส์</b>: ไปที่ลำแสงทองแล้วกด <b>E</b> ทำภารกิจให้ครบ • <b>🐍 ลอร์ดโวลเดอมอร์</b> (6 คนจะมีผู้เสพความตายอีก 1 คน): เข้าใกล้แล้วกด <b>Q</b> ร่ายอวาดา เคดาฟรา (คูลดาวน์ 25 วิ) • เจอศพกด <b>R</b> รายงาน หรือไปกลางแผนที่กด <b>F</b> ประชุมฉุกเฉิน • ประชุม: คุยไมค์แล้วคลิกโหวต • นักเรียนชนะถ้าภารกิจครบหรือโหวตฝ่ายโวลเดอมอร์ออกหมด / ฝ่ายโวลเดอมอร์ชนะถ้าเหลือคนเท่ากัน • ตายแล้วเป็นผี ช่วยทำภารกิจต่อได้</td></tr>
     </table>
     <h3>🗺️ แผนที่ (สุ่ม) และศัตรู</h3>
     <p class="gnote">🏰 ลานปราสาท — ก็อบลิน พ่อมดมืด พิกซี่ โทรลล์ บอสมังกร<br>🌲 ป่ามืด — แมงมุมจิ๋ว แมงมุมยักษ์ (กระโจนกัด + พ่นใย) บอสราชินีแมงมุม<br>🏟️ สนามควิดดิช — พิกซี่บินได้ ก็อบลิน แมงมุม โทรลล์ บอสมังกร<br>(ควิดดิชเล่นที่สนามเสมอ / แบทเทิลรอยัลเล่นในป่าเสมอ / โหมดอื่นสุ่มแผนที่)</p>
@@ -263,7 +263,7 @@ const MODES={
   quid:{name:'🏟️ ควิดดิช',d:'2-6 คน 2 ทีม บินแย่งบอลโยนเข้าห่วง',min:2,max:6,team:true,map:'pitch'},
   race:{name:'🏁 แข่งไม้กวาด',d:'1-6 คน บินลอดห่วงครบ 2 รอบ',min:1,max:6},
   br:{name:'🌀 แบทเทิลรอยัล',d:'2-6 คน เก็บคาถา วงหด คนสุดท้ายชนะ',min:2,max:6,map:'forest'},
-  imp:{name:'🕵️ หาผู้ทรยศ',d:'4-6 คน ทำภารกิจ จับคนร้าย (แบบ Among Us)',min:4,max:6}
+  imp:{name:'🐍 หาลอร์ดโวลเดอมอร์',d:'4-6 คน ทำภารกิจ จับตัวโวลเดอมอร์ (แบบ Among Us)',min:4,max:6}
 };
 const PDEF={
   bolt:{spd:950,r:7,dmg:10,life:1.1,col:'#ffe27a'},
@@ -1056,7 +1056,7 @@ function endMatch(){
   else if(G.mode==='quid'){const [a,b]=G.qs;title=a===b?'เสมอ!':`🏆 ${TEAMN[a>b?0:1]} ชนะควิดดิช!`;sub=`${TEAMN[0]} ${a} — ${b} ${TEAMN[1]}`+(G.snitchBy?`  •  ✨ ${G.snitchBy} จับลูกบอลทองได้`:'');}
   else if(G.mode==='race'){const r=raceRank();title=r[0]?`🏆 ${r[0].name} ชนะการแข่ง!`:'จบการแข่ง';sub=r.map((p,i)=>`${i+1}. ${p.name}${p.fin?` (${p.finT.toFixed(1)} วิ)`:''}`).join('   ');}
   else if(G.mode==='br'){const w=ps.find(p=>p.alive);title=w?`🏆 ${w.name} รอดเป็นคนสุดท้าย!`:'ไม่มีผู้รอดชีวิต';sub='🌀 แบทเทิลรอยัล';}
-  else if(G.mode==='imp'){title=G.impWin==='imp'?'😈 ฝ่ายผู้ทรยศชนะ!':'😇 ฝ่ายลูกเรือชนะ!';sub='ผู้ทรยศคือ: '+ps.filter(p=>p.role==='imp').map(p=>p.name).join(', ');}
+  else if(G.mode==='imp'){title=G.impWin==='imp'?'🐍 ฝ่ายโวลเดอมอร์ชนะ! ความมืดครองฮอกวอตส์':'⚡ ฝ่ายนักเรียนฮอกวอตส์ชนะ!';sub='ฝ่ายโวลเดอมอร์คือ: '+ps.filter(p=>p.role==='imp').map(p=>p.name).join(', ');}
   else if(G.mode==='duel'){
     const s=[...ps].sort((a,b)=>(G.rw[b.id]||0)-(G.rw[a.id]||0));
     title=s[0]?`🏆 ${s[0].name} ชนะการดวล!`:'จบเกม';
@@ -1068,15 +1068,15 @@ function endMatch(){
     sub=`${TEAMN[0]} ${a} — ${b} ${TEAMN[1]}`;
   }
   G.result={title,sub,mode:G.mode,wave:G.wave,
-    rows:(G.mode==='race'?raceRank():byK).map(p=>({n:p.name+(G.mode==='imp'?(p.role==='imp'?' 😈':' 😇'):''),c:p.color,k:p.kills,d:p.deaths,dmg:Math.round(p.dmgDealt),tm:MODES[G.mode].team?p.team:-1}))};
+    rows:(G.mode==='race'?raceRank():byK).map(p=>({n:p.name+(G.mode==='imp'?(p.role==='imp'?' 🐍':' ⚡'):''),c:p.color,k:p.kills,d:p.deaths,dmg:Math.round(p.dmgDealt),tm:MODES[G.mode].team?p.team:-1}))};
   G.ph='over';G.proj=[];
   emit({k:'over',x:0,y:0});
 }
 
 // =====================================================================
-//  โหมดพิเศษ: ควิดดิช / แข่งไม้กวาด / แบทเทิลรอยัล / หาผู้ทรยศ / ห้องฝึก
+//  โหมดพิเศษ: ควิดดิช / แข่งไม้กวาด / แบทเทิลรอยัล / หาลอร์ดโวลเดอมอร์ / ห้องฝึก
 // =====================================================================
-// ส่งข้อความลับถึงผู้เล่นคนเดียว (เช่น บทบาทในโหมดหาผู้ทรยศ)
+// ส่งข้อความลับถึงผู้เล่นคนเดียว (เช่น บทบาทในโหมดหาลอร์ดโวลเดอมอร์)
 function sendPriv(id,m){
   if(id===NET.myId){onPriv(m);return;}
   const c=NET.conns.get(id);if(c&&c.open)try{c.send({t:'priv',m});}catch(e){}
@@ -1117,9 +1117,10 @@ function modeInit(){
     });
     ps.forEach((p,i)=>{
       const a=i/ps.length*Math.PI*2;resetBody(p,MW/2+Math.cos(a)*170,MH/2+Math.sin(a)*170);collideWorld(p,PR);
-      sendPriv(p.id,{t:'role',role:p.role,mates:p.role==='imp'?sh.slice(0,ni).filter(q=>q!==p).map(q=>q.id):[],tasks:p.tasks,tdone:[]});
+      p.title=p.role==='imp'?(sh.indexOf(p)===0?'ลอร์ดโวลเดอมอร์':'ผู้เสพความตาย'):'นักเรียนฮอกวอตส์';
+      sendPriv(p.id,{t:'role',role:p.role,title:p.title,mates:p.role==='imp'?sh.slice(0,ni).filter(q=>q!==p).map(q=>q.id):[],tasks:p.tasks,tdone:[]});
     });
-    banner(`🕵️ มีผู้ทรยศแฝงอยู่ ${ni} คน — ทำภารกิจ แล้วหาตัวให้เจอ!`,4);
+    banner(`🐍 ลอร์ดโวลเดอมอร์${ni>1?'และผู้เสพความตาย':''}แฝงตัวอยู่ในหมู่พวกเรา — ทำภารกิจ แล้วหาตัวให้เจอ!`,4);
   }else if(m==='train'){
     // หุ่นซ้อมเรียงเป็นแถว + 1 ตัวไกลๆ ไว้ฝึกยิงระยะไกล
     const cy=MH/2-260;
@@ -1270,7 +1271,7 @@ function brPick(p,it){
   emit({k:'pick',x:it.x,y:it.y,t:k,id:p.id});
 }
 
-// ---------- หาผู้ทรยศ ----------
+// ---------- หาลอร์ดโวลเดอมอร์ ----------
 function impActions(p,pr,inp,dt){
   // E = ทำภารกิจ (ยืนใกล้จุดของตัวเอง 2.5 วิ) — ผีก็ทำได้
   if(pr.e&&!p.doing){
@@ -1293,7 +1294,7 @@ function impActions(p,pr,inp,dt){
   }
   if(p.gh)return;
   p.killCd=Math.max(0,(p.killCd||0)-dt);
-  // Q = ผู้ทรยศสังหาร (ระยะประชิด)
+  // Q = โวลเดอมอร์ร่ายอวาดา เคดาฟรา (ระยะประชิด)
   if(pr.q&&p.role==='imp'&&p.killCd<=0){
     let v=null,bd=80;
     for(const q of plist())if(q!==p&&!q.gh&&q.role!=='imp'){const d=Math.hypot(q.x-p.x,q.y-p.y);if(d<bd){bd=d;v=q;}}
@@ -1335,7 +1336,7 @@ function meetTick(dt){
     let best=null,bc=0,tie=false;
     for(const [k,c] of Object.entries(cnt)){if(c>bc){best=k;bc=c;tie=false;}else if(c===bc)tie=true;}
     if(!best||best==='skip'||tie)m.res='ไม่มีใครถูกโหวตออก';
-    else{const q=G.players[best];q.gh=true;m.res=`${q.name} ถูกโหวตออก — ${q.role==='imp'?'เป็นผู้ทรยศจริง! 😈':'ไม่ใช่ผู้ทรยศ 😇'}`;}
+    else{const q=G.players[best];q.gh=true;m.res=`${q.name} ถูกโหวตออก — ${q.role==='imp'?'เป็นฝ่ายโวลเดอมอร์จริง! 🐍':'ไม่ใช่โวลเดอมอร์ ⚡'}`;}
     m.rt=4.5;m.tally=cnt;emit({k:'eject',x:0,y:0});
   }
 }
@@ -1913,7 +1914,7 @@ function fx(ev){
       if(ev.id===NET.myId){snd('pickup');floatText(ev.x,ev.y,ITEMN[ev.t]||'',ITEMC[ev.t]||'#fff',18,2.6);}break;
     case 'brout':snd('end',ev);break;
     case 'zone':snd('alarm');break;
-    case 'kill':if(near){burst(ev.x,ev.y,'#a01010',20,160,0.6,2.4,{h:1,g:6});snd('kill',ev);}break;
+    case 'kill':if(near){burst(ev.x,ev.y,'#3aff6a',40,260,0.7,2.6,{h:1.2,g:2});FX.flashSprite(ev.x,ev.y,1.3,'#3aff6a',0.5,6,0.35,2);FX.flashLight(ev.x,ev.y,1.5,'#3aff6a',6,16,0.5);floatText(ev.x,ev.y,'อวาดา เคดาฟรา!','#5aff7a',22,3);snd('kill',ev);}break;
     case 'meeting':snd('alarm');shake(4);break;
     case 'voted':snd('tick');break;
     case 'eject':snd('eject');break;
@@ -2749,7 +2750,7 @@ function syncPlayers(P,mode,now,dt){
     if(!o){o=makeStudent(p.c,p.id);PM3.set(p.id,o);}
     const g=o.g;
     g.visible=p.al&&!(p.iv&&!p.ds&&Math.floor(now/80)%2===0);
-    // ผี (หาผู้ทรยศ): คนเป็นมองไม่เห็นผี / ผีเห็นกันเป็นเงาจางๆ
+    // ผี (หาลอร์ดโวลเดอมอร์): คนเป็นมองไม่เห็นผี / ผีเห็นกันเป็นเงาจางๆ
     if(p.gh&&!meGhost){g.visible=false;continue;}
     if(!!p.gh!==!!o.ghost){
       o.ghost=!!p.gh;
@@ -2988,7 +2989,7 @@ function drawCrosshair(){
 // =====================================================================
 let ROLE=null,KC=0,roleShowT=0;
 function onPriv(m){
-  if(m.t==='role'){ROLE={role:m.role,mates:m.mates||[],tasks:m.tasks||[],tdone:m.tdone||[]};KC=15;roleShowT=5;snd(m.role==='imp'?'imp':'crew');}
+  if(m.t==='role'){ROLE={role:m.role,title:m.title||'',mates:m.mates||[],tasks:m.tasks||[],tdone:m.tdone||[]};KC=15;roleShowT=5;snd(m.role==='imp'?'imp':'crew');}
   else if(m.t==='tasks'&&ROLE)ROLE.tdone=m.tdone;
   else if(m.t==='kc')KC=m.v;
 }
@@ -3076,7 +3077,7 @@ function syncModeObjs(v,P,me,now,dt){
     o.position.set(tx(x),0.9+Math.sin(now/400+id)*0.2,tz(y));o.rotation.y=now/600+id;
   }
   for(const [id,o] of MO.items)if(!seen.has(id)){scene.remove(o);MO.items.delete(id);}
-  // ศพ (หาผู้ทรยศ)
+  // ศพ (หาลอร์ดโวลเดอมอร์)
   const bs=new Set();
   if(M.bodies)for(const [id,x,y,c] of M.bodies){
     bs.add(id);
@@ -3115,7 +3116,7 @@ function syncModeObjs(v,P,me,now,dt){
   }
 }
 
-// ---------- หน้าประชุมโหวต (หาผู้ทรยศ) ----------
+// ---------- หน้าประชุมโหวต (หาลอร์ดโวลเดอมอร์) ----------
 let meetKey='',myVoted=false;
 function castVote(v){
   if(myVoted)return;myVoted=true;
@@ -3215,7 +3216,7 @@ function drawHUD(v,me,P){
   else if(v.mode==='quid')top=`🏟️ ${TEAMN[0]} ${(M.qs||[0,0])[0]}   —   ${(M.qs||[0,0])[1]} ${TEAMN[1]}   •   ⏱ ${fmtTime(v.tm)}${M.sn?'   •   ✨ ลูกบอลทองโผล่แล้ว!':''}`;
   else if(v.mode==='race'&&me){const rk=raceRankClient(P).findIndex(p=>p.id===me.id)+1;top=me.fin?`🏁 เข้าเส้นชัยอันดับ ${me.fin}!`:`🏁 รอบ ${Math.min(me.lap+1,M.laps||2)}/${M.laps||2}   •   ห่วง ${me.cp+1}/${(M.rings||[]).length}   •   อันดับ ${rk}/${P.length}   •   ⏱ ${(M.rt||0).toFixed(1)}`+(M.re>=0?`   •   เหลือ ${M.re} วิ`:'');}
   else if(v.mode==='br')top=`🌀 เหลือ ${M.al||0} คน   •   `+(M.zone&&!M.zone.sh?`วงเริ่มหดใน ${M.zone.tl} วิ`:'วงกำลังหด!');
-  else if(v.mode==='imp'){const r=ROLE?(ROLE.role==='imp'?'😈 คุณคือผู้ทรยศ':'😇 คุณคือลูกเรือ'):'';top=`${r}   •   ภารกิจ ${M.td||0}/${M.tt||0}`;}
+  else if(v.mode==='imp'){const r=ROLE?(ROLE.role==='imp'?'🐍 คุณคือ'+ROLE.title:'⚡ คุณคือนักเรียน'):'';top=`${r}   •   ภารกิจ ${M.td||0}/${M.tt||0}`;}
   else top=`${TEAMN[0]} ${v.ts[0]}   —   ${v.ts[1]} ${TEAMN[1]}   •   ⏱ ${fmtTime(v.tm)}`;
   cx.font='600 17px Kanit,sans-serif';
   const tw=cx.measureText(top).width+40;
@@ -3281,14 +3282,14 @@ function drawModeHUD(v,me,P,big){
     if(me.tk>0)big(`📜 กำลังทำภารกิจ... ${me.tk.toFixed(1)} วิ (ห้ามเดินออก)`,SH*0.62,20,'#ffd86b');
     if(roleShowT>0){
       cx.fillStyle=`rgba(5,3,10,${Math.min(0.75,roleShowT)})`;cx.fillRect(0,0,SW,SH);
-      big(ROLE.role==='imp'?'😈 คุณคือ ผู้ทรยศ':'😇 คุณคือ ลูกเรือ',SH*0.4,48,ROLE.role==='imp'?'#ff5a5a':'#7dd8ff');
-      big(ROLE.role==='imp'?'กำจัดลูกเรือด้วย Q โดยไม่ให้ใครจับได้ (แกล้งทำภารกิจได้)':'ทำภารกิจ (จุดลำแสงสีทอง) ให้ครบ และหาตัวผู้ทรยศ',SH*0.4+48,18,'#efe9ff');
-      if(ROLE.role==='imp'&&ROLE.mates.length)big('ผู้ทรยศอีกคน: '+P.filter(p=>ROLE.mates.includes(p.id)).map(p=>p.n).join(', '),SH*0.4+80,16,'#ff9a9a');
+      big(ROLE.role==='imp'?'🐍 คุณคือ '+ROLE.title:'⚡ คุณคือ นักเรียนฮอกวอตส์',SH*0.4,48,ROLE.role==='imp'?'#5aff7a':'#7dd8ff');
+      big(ROLE.role==='imp'?'ร่ายอวาดา เคดาฟราด้วย Q กำจัดนักเรียนโดยไม่ให้ใครจับได้ (แกล้งทำภารกิจได้)':'ทำภารกิจ (จุดลำแสงสีทอง) ให้ครบ และหาตัวโวลเดอมอร์ให้เจอ',SH*0.4+48,18,'#efe9ff');
+      if(ROLE.role==='imp'&&ROLE.mates.length)big('พวกเดียวกัน: '+P.filter(p=>ROLE.mates.includes(p.id)).map(p=>p.n).join(', '),SH*0.4+80,16,'#ff9a9a');
     }
     if(me.gh)big('👻 คุณเป็นผีแล้ว — ยังช่วยทำภารกิจได้ แต่โหวตไม่ได้',SH-150,15,'#c8d8ff');
   }
 }
-const SLOTS_IMP=[['E','📜','ภารกิจ',-10],['R','📢','รายงานศพ',-11],['F','🔔','ประชุม',-12],['Q','🗡️','สังหาร',-13]];
+const SLOTS_IMP=[['E','📜','ภารกิจ',-10],['R','📢','รายงานศพ',-11],['F','🔔','ประชุม',-12],['Q','💀','อวาดา',-13]];
 const BR_LOCK={1:'fire',2:'stun',3:'push',4:'pull'};
 function drawBottom(me,v){
   const M=(v&&v.M)||{},SL=v&&v.mode==='imp'?SLOTS_IMP.filter(s=>s[3]!==-13||(ROLE&&ROLE.role==='imp')):SLOTS;
