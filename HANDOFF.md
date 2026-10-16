@@ -84,7 +84,7 @@ Personal, non-commercial fan project made with/for the user and their friends. U
 | ~3427 | `ฝั่งแสดงผลของโหมดพิเศษ` | `syncModeObjs`, roles, meeting UI |
 | ~3599 | | `render()` loop (+ own footsteps) |
 | ~3652 | `ชิ้นส่วน HUD` | `plate`, `frameBox`, `drawBossBar`, `spellDia`, `thinBar`, `drawHUD`, `drawModeHUD`, `drawBottom`, `drawBoard` |
-| ~3840 | `drawMinimap` | **minimap** bottom-left (above the player badge): rotating circle (forward = up), view radius `MM.view`=620 sim px, draws OBS, enemies (red), players (team colour in tdm/quid), race rings, quid ball/snitch, BR zone, Voldemort tasks/bodies, "N" north marker; hidden while Tab scoreboard is open |
+| ~3840 | `drawMinimap` | **minimap** top-right (kill feed sits below it): rotating circle (forward = up), view radius `MM.view`=620 sim px, draws OBS, enemies (red), players (team colour in tdm/quid), race rings, quid ball/snitch, BR zone, Voldemort tasks/bodies, "N" north marker; hidden while Tab scoreboard is open |
 | ~3960 | `เมนู / ล็อบบี้ (DOM)` | menu wiring (graphics button, my-music input, UI click sounds), lobby, `renderLobby`, `window.WD` |
 
 ## 6. Game content (current)

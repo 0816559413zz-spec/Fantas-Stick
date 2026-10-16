@@ -4207,7 +4207,7 @@ function drawHUD(v,me,P){
 
   // kill feed
   cx.textAlign='right';cx.font='14px Kanit,sans-serif';
-  v.feed.forEach((f,i)=>{const w=cx.measureText(f).width+26,y=58+i*28;cx.fillStyle=HN;cx.fillRect(SW-12-w,y,w,24);cx.fillStyle=HG;cx.fillRect(SW-14,y,2,24);cx.fillStyle='#efe6cf';cx.fillText(f,SW-24,y+17);});
+  v.feed.forEach((f,i)=>{const w=cx.measureText(f).width+26,y=(me?MM.r*2+56:58)+i*28;cx.fillStyle=HN;cx.fillRect(SW-12-w,y,w,24);cx.fillStyle=HG;cx.fillRect(SW-14,y,2,24);cx.fillStyle='#efe6cf';cx.fillText(f,SW-24,y+17);});
 
   // ข้อความกลางจอ
   cx.textAlign='center';
@@ -4279,11 +4279,11 @@ function drawModeHUD(v,me,P,big){
     if(me.gh)big('👻 คุณเป็นผีแล้ว — ยังช่วยทำภารกิจได้ แต่โหวตไม่ได้',SH-150,15,'#c8d8ff');
   }
 }
-// แผนที่ย่อมุมซ้ายล่าง: วงกลมหมุนตามมุมกล้อง (ด้านหน้า = ขึ้นบน) ตัวเราอยู่กลาง
+// แผนที่ย่อมุมขวาบน (kill feed เลื่อนลงมาอยู่ใต้แผนที่): วงกลมหมุนตามมุมกล้อง (ด้านหน้า = ขึ้นบน) ตัวเราอยู่กลาง
 const MM={r:82,view:620,col:{pillar:'#7d8499',stone:'#7d8499',rock:'#6e7482',tree:'#2f6b3f',crate:'#8a6a3e',hay:'#a8883e',hoop:'#e8c25a',house:'#9a8a78',stall:'#c0603a',lamp:'#ffd070',barrel:'#8a6a3e',well:'#6a7a94',table:'#8a6a3e'}};
 function drawMinimap(v,me,P){
   if(!me)return;
-  const R=MM.r,mx=R+16,my=SH-150-R,sc=R/MM.view,cs=Math.cos(yaw),sn=Math.sin(yaw),M=v.M||{};
+  const R=MM.r,mx=SW-R-18,my=R+22,sc=R/MM.view,cs=Math.cos(yaw),sn=Math.sin(yaw),M=v.M||{};
   // แปลงพิกัดโลก -> หน้าจอมินิแมป (clampEdge = ถ้าเกินวงให้ไปแปะที่ขอบ)
   const pt=(x,y,clampEdge)=>{
     const dx=x-me.x,dy=y-me.y;let u=(-sn*dx+cs*dy)*sc,f=(cs*dx+sn*dy)*sc;
