@@ -95,6 +95,27 @@ input[type=text]:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(217,18
 .crPanel.wide .crnote{display:none}.crPanel.wide .kp{padding:4px 8px}.crPanel.wide .kp span:first-child{font-size:18px!important}.crPanel.wide .ksp{padding:4px 7px}.crPanel.wide .ksp span:first-child{font-size:17px}.crPanel.wide .ks{padding:4px 2px}.crPanel.wide .ks i{font-size:17px}.crPanel.wide .obtn{padding:4px 9px}
 .crPanel.wide label.f{margin:8px 0 5px}.crPanel.wide h3.sec{font-size:17px}.crPanel.wide .kdesc{min-height:62px;margin-top:6px}.kdesc small{font-size:11px;line-height:1.35}
 .kpaths{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.kp{border-left:3px solid var(--pc)!important}
+.kp .new{font-style:normal;color:#7dff9a}
+.kpd{font-size:12.5px;color:var(--text);margin:8px 0 2px;padding:6px 10px;border-left:3px solid var(--pc);background:rgba(3,5,12,.5)}
+.kbase{display:flex;gap:6px;margin:6px 0 2px}
+.kb2{display:flex;align-items:center;gap:6px;padding:4px 10px;font-size:12px;background:rgba(7,11,24,.7);border:1px solid var(--line);color:var(--text)}
+.kb2:hover{border-color:var(--gold)}
+.ks{border-bottom:3px solid var(--pc)!important;transition:transform .12s,box-shadow .12s}
+.ks:hover{transform:translateY(-2px)}
+.ks span{display:block;font-size:11.5px;line-height:1.2;min-height:28px}
+.ks.drop{box-shadow:0 0 0 2px var(--gold2),0 0 18px rgba(243,220,148,.5)}
+.ks.ult{border:1px dashed var(--gold)!important;border-bottom:3px solid var(--gold)!important;background:linear-gradient(180deg,rgba(140,105,30,.25),rgba(20,14,4,.5))}
+.ktabs .obtn{border-bottom:2px solid transparent}.ktabs .obtn.on{border-bottom-color:var(--pc)}
+.ksp{position:relative;border-left:3px solid var(--pc)!important;transition:transform .12s}
+.ksp:hover{transform:translateY(-2px);border-color:var(--gold)}
+.ksp .slotk{position:absolute;right:5px;top:4px;font-style:normal;font-size:10px;color:#05070f;background:var(--gold);padding:0 5px}
+.kdh{display:flex;gap:10px;align-items:center;margin-bottom:5px}
+.kdh b{font-size:16px}
+.tgs{display:flex;gap:4px;flex-wrap:wrap;margin-top:3px}
+.tg{font-style:normal;font-size:10.5px;padding:1px 6px;border:1px solid var(--c,var(--line));color:var(--c,var(--mute));border-radius:2px}
+.tg.ult{--c:#ffe27a}.tg.mel{--c:#ff9a8a}.tg.dual{--c:#8fe0ff}
+.kdt{font-size:13px;line-height:1.5}
 .kp{display:flex;align-items:center;gap:8px;text-align:left;padding:7px 9px;font-size:14px}
 .kp b{display:block;font-weight:600}.kp small{display:block;color:var(--mute);font-size:11px;line-height:1.2}
 .kp.on{border-color:var(--gold2);background:linear-gradient(180deg,#2a3a68,#121b36);box-shadow:0 0 14px rgba(243,220,148,.3)}
@@ -106,7 +127,7 @@ input[type=text]:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(217,18
 .ks.ult{border-style:dashed;cursor:default}
 .kgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
 .ksp{padding:6px 8px;font-size:13px;text-align:left;display:flex;gap:7px;align-items:center}
-.ksp span{font-size:20px}.ksp b{display:block;font-weight:600;line-height:1.15}.ksp small{color:var(--mute);font-size:11px}
+.ksp span{font-size:13px}.ksp b{display:block;font-weight:600;line-height:1.15;font-size:13.5px}.ksp small{color:var(--mute);font-size:11px}
 .ksp.used{border-color:var(--gold);color:var(--gold2)}.ksp.off{opacity:.4}
 .kdesc{min-height:74px;font-size:13px;line-height:1.5;color:var(--text);border:1px solid var(--line);background:rgba(3,5,12,.6);padding:8px 10px;margin-top:8px}
 .kdesc b{color:var(--gold2)}.kdesc small{display:block;color:var(--mute);margin-top:3px}
@@ -119,6 +140,15 @@ button:hover{border-color:var(--gold);color:var(--gold2);box-shadow:0 0 16px rgb
 button.pri{background:linear-gradient(180deg,#f3dc94,#c99d42 55%,#a47a2b);color:#1b1204;border-color:#f7e6ae;font-weight:600}
 button.pri:hover{color:#1b1204;filter:brightness(1.1)}
 button:disabled{opacity:.4;cursor:not-allowed;filter:none;box-shadow:none}
+button:active:not(:disabled){transform:translateY(1px) scale(.985);filter:brightness(.95)}
+button:focus-visible{outline:2px solid var(--gold2);outline-offset:2px}
+.overlay>.card{animation:cardIn .2s ease-out}
+@keyframes cardIn{from{opacity:0;transform:translateY(10px) scale(.97)}to{opacity:1;transform:none}}
+#btnStart:not(:disabled):not(.hidden){animation:startGlow 2.2s ease-in-out infinite}
+@keyframes startGlow{0%,100%{box-shadow:0 0 10px rgba(243,220,148,.25)}50%{box-shadow:0 0 26px rgba(243,220,148,.6)}}
+.mnews{position:absolute;right:28px;top:28px;width:310px;font-size:12.5px;color:var(--mute);line-height:1.55;padding:10px 12px;border-left:2px solid var(--gold);background:linear-gradient(90deg,rgba(7,11,24,.85),rgba(7,11,24,.35))}
+.mnews b{color:var(--gold2);font-weight:600;display:block;margin-bottom:2px;font-size:13px}
+@media (max-height:600px),(max-width:1000px){.mnews{display:none}}
 .row{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap}
 .row>*{flex:1}
 .status{min-height:22px;text-align:center;color:var(--gold2);margin-top:10px;font-size:14px}
@@ -279,6 +309,7 @@ body[data-screen=lobby] #voice{top:84px;left:auto;right:24px;width:340px}
     <div class="myhouse" id="myHouse"></div>
     <button id="btnLook" style="width:100%">🧙 แต่งตัวละคร / เลือกบ้าน</button>
   </div>
+  <div class="mnews"><b>✨ มีอะไรใหม่</b>• สายไฟ 🔥 และสายน้ำแข็ง ❄️ ออกแบบใหม่ทั้งหมด<br>• แผนที่โล่งใหม่ 3 แบบ: ทุ่งหญ้า / ทะเลสาบน้ำแข็ง / ซากลานประลอง (เลือกแผนที่ได้ในล็อบบี้)<br>• หน้าตั้งค่า: ความไวเมาส์ เป้าเล็ง เสียง กราฟิก ตั้งปุ่มเองได้<br>• Shift = พุ่ง • Space = กระโดด • Esc = เมนูหยุดพัก</div>
   <div class="mver">CO-OP · DUEL · QUIDDITCH · BATTLE ROYALE</div>
 </div>
 
@@ -6251,9 +6282,10 @@ function drawMinimap(v,me,P){
   diaPath(nxp,nyp,8);cx.fillStyle='#05070f';cx.fill();cx.strokeStyle=HG;cx.lineWidth=1;cx.stroke();
   cx.font='700 10px Cinzel,Kanit,serif';cx.textAlign='center';cx.fillStyle=HG2;cx.fillText('N',nxp,nyp+3.5);
 }
+function slotKey(s){const m={Q:'q',E:'e',R:'r',F:'f',Shift:'dash',X:'ult',B:'broom'}[s];return m&&KEYS[m]?keyName(KEYS[m]):s;}
 function mySlots(me){
   const k=getKit(me.id),sp=k.ids.map(i=>SPELL_LIST[i]),P=PATHS[k.path],ult=SPELL_LIST[k.ult];
-  return SLOTS.map(s=>s[3]>=1&&s[3]<=4?[s[0],{id:sp[s[3]-1].id,c:P.col},sp[s[3]-1].n,s[3]]:s[3]===-2?[s[0],{id:ult.id,c:P.col},ult.n,-2]:s[3]===0?[s[0],{id:'b_'+P.id+(P.id==='frost'&&me.fr&&me.fr[0]===0?'_m':''),c:P.col},PBASIC[k.path].n,0]:s[3]===-1&&ICODATA['sh_'+P.id]?[s[0],{id:'sh_'+P.id,c:P.col},s[2],-1]:s);
+  return SLOTS.map(s0=>{const s=[slotKey(s0[0]),...s0.slice(1)];return (s[3]>=1&&s[3]<=4?[s[0],{id:sp[s[3]-1].id,c:P.col},sp[s[3]-1].n,s[3]]:s[3]===-2?[s[0],{id:ult.id,c:P.col},ult.n,-2]:s[3]===0?[s[0],{id:'b_'+P.id+(P.id==='frost'&&me.fr&&me.fr[0]===0?'_m':''),c:P.col},PBASIC[k.path].n,0]:s[3]===-1&&ICODATA['sh_'+P.id]?[s[0],{id:'sh_'+P.id,c:P.col},s[2],-1]:s);});
 }
 // เวทโบราณ (X) ตรงกลางล่างจอ แบบ Overwatch: วงกลมใหญ่ มีไอคอน เกจรอบวง เปอร์เซ็นต์ และเรืองแสงเมื่อพร้อม
 function drawUlt(me){
@@ -6273,7 +6305,7 @@ function drawUlt(me){
   if(!full){cx.textAlign='center';cx.font='700 17px Kanit,sans-serif';cx.fillStyle='rgba(0,0,0,0.85)';cx.fillText(me.u+'%',x+1,y+7);cx.fillStyle='#fff';cx.fillText(me.u+'%',x,y+6);}
   // ปุ่ม X + ชื่อ/สถานะ
   cx.font='700 12px Kanit,sans-serif';cx.textAlign='center';
-  cx.fillStyle='#05070f';cx.fillRect(x-12,y+R-4,24,16);cx.strokeStyle=full?HG2:'rgba(217,180,90,0.5)';cx.lineWidth=1;cx.strokeRect(x-11.5,y+R-3.5,23,15);cx.fillStyle=HG2;cx.fillText('X',x,y+R+8);
+  cx.fillStyle='#05070f';cx.fillRect(x-12,y+R-4,24,16);cx.strokeStyle=full?HG2:'rgba(217,180,90,0.5)';cx.lineWidth=1;cx.strokeRect(x-11.5,y+R-3.5,23,15);cx.fillStyle=HG2;cx.fillText(keyName(KEYS.ult||'KeyX'),x,y+R+8);
 }
 const STATUS_ICO=[[1,'💫'],[2,'🔥'],[4,'❄️'],[8,'🧊'],[16,'⚡'],[32,'🌿'],[64,'🤐'],[128,'🛡️'],[256,'💨'],[512,'🔋'],[1024,'☠️'],[2048,'😱'],[4096,'🕶️'],[8192,'🎯'],[16384,'🌳'],[32768,'🔥'],[65536,'✨'],[131072,'🔆'],[262144,'☄️']];
 const SLOTS_IMP=[['E','📜','ภารกิจ',-10],['R','📢','รายงานศพ',-11],['F','🔔','ประชุม',-12],['Q','💀','อวาดา',-13]];
@@ -6390,27 +6422,42 @@ function crRenderWand(){
 // ----- ขั้น 3: สาย + ชุดคาถา -----
 const ROLE_COL={builder:'#ffb066',control:'#8fe0ff',finisher:'#ff7a8a',utility:'#9ad7a0',summon:'#ff9ad5',ult:'#ffe27a'};
 function roleTag(S){return `<i class="rtag" style="--rc:${ROLE_COL[S.role]||'#fff'}">${ROLE_N[S.role]||''}</i>`;}
+const DESIGNED=['pyro','frost'];
+function spellTags(S){
+  const t=[];
+  if(S.ult)t.push('<i class="tg ult">เวทโบราณ X</i>');else t.push(`<i class="tg">⏱ ${S.cd} วิ</i>`);
+  if(S.melee)t.push('<i class="tg mel">⚔️ เฉพาะโหมดประชิด</i>');
+  if(S.dual)t.push('<i class="tg dual">⇄ เปลี่ยนตามโหมด</i>');
+  return t.join('');
+}
 function spellDescHTML(S){
   const P=PATHS[S.path];
-  return `${icoHTML(S.id,P.col,22)} <b>${S.n}</b> ${roleTag(S)} <small style="display:inline">${P.n}${S.ult?' • เวทโบราณ (X)':' • คูลดาวน์ '+S.cd+' วิ'}</small><br>${S.d}<small>✦ ${S.fx}</small><small style="color:${P.col}">คอมโบสาย${P.n.replace('สาย','')}: ${P.combo}</small>`;
+  return `<div class="kdh">${icoHTML(S.id,P.col,40)}<div><b>${S.n}</b> ${roleTag(S)}<div class="tgs">${spellTags(S)}<i class="tg" style="--c:${P.col}">${P.n}</i></div></div></div><div class="kdt">${S.d}</div><small>✦ ${S.fx}</small>`;
+}
+function baseDescHTML(P,B,w){
+  const ic=w==='b'?'b_'+P.id:w==='s'?(ICODATA['sh_'+P.id]?'sh_'+P.id:'b_'+P.id):'p_'+P.id;
+  const n=w==='b'?'ยิงปกติ — '+B.n:w==='s'?'โล่ (คลิกขวา)':'พุ่ง (Shift) / กระโดด (Space)';
+  const d=w==='b'?B.d:w==='s'?(B.shd||'โล่: เหมือนทุกสาย (Parry 0.28 วิ ปัดกระสุนทิ้ง)'):(B.dsd||'พุ่ง: เหมือนทุกสาย (คูลดาวน์ 2.5 วิ)')+' • Space = กระโดด (ทุกสาย)';
+  return `<div class="kdh">${icoHTML(ic,P.col,40)}<div><b>${n}</b><div class="tgs"><i class="tg" style="--c:${P.col}">${P.n}</i><i class="tg">ท่าพื้นฐาน</i></div></div></div><div class="kdt">${d}</div>`;
 }
 function crRenderKit(){
-  const k=parseKit(myKit),P=PATHS[k.path],ult=SPELL_LIST[k.ult];
+  const k=parseKit(myKit),P=PATHS[k.path],ult=SPELL_LIST[k.ult],B=PBASIC[k.path];
   const off=k.ids.filter(i=>SPELL_LIST[i].path!==k.path).length;
-  let h=`<h3 class="sec">สายเวทมนตร์ & ชุดคาถา</h3><p class="crnote">เลือก "สาย" หลัก 1 สาย (กำหนดเวทโบราณ X) แล้วจัดคาถา 4 ช่อง Q/E/R/F — ใส่คาถาสายอื่นได้ไม่เกิน 2 ช่อง</p>`;
-  h+=`<div class="kpaths">${PATHS.map((p,i)=>{const has=SPELL_LIST.some(x=>x.path===i&&!x.ult);return `<button class="kp ${k.path===i?'on':''} ${has?'':'soon'}" ${has?`data-kp="${i}"`:'disabled'}>${icoHTML('p_'+p.id,p.col,26)}<span><b>${p.n}</b><small>${has?'':'เร็วๆ นี้'}</small></span></button>`;}).join('')}</div>`;
-  h+=`<label class="f">ชุดคาถาของคุณ — คลิกช่อง แล้วเลือกคาถาจากคลัง</label><div class="kslots">${k.ids.map((id,i)=>{const S=SPELL_LIST[id];return `<button class="ks ${crSlot===i?'on':''}" data-ks="${i}"><em>${'QERF'[i]}</em><i>${icoHTML(S.id,PATHS[S.path].col,24)}</i>${S.n}</button>`;}).join('')}<div class="ks ult card slim" style="padding:7px 2px"><em>X</em><i>${icoHTML(ult.id,P.col,24)}</i>${ult.n}</div></div>`;
+  let h=`<h3 class="sec">สายเวทมนตร์ & ชุดคาถา</h3>`;
+  h+=`<div class="kpaths">${PATHS.map((p,i)=>{const has=SPELL_LIST.some(x=>x.path===i&&!x.ult);return `<button class="kp ${k.path===i?'on':''} ${has?'':'soon'}" style="--pc:${p.col}" ${has?`data-kp="${i}"`:'disabled'}>${icoHTML('p_'+p.id,p.col,30)}<span><b>${p.n}</b><small>${DESIGNED.includes(p.id)?'<i class="new">ออกแบบใหม่</i>':'ชุดชั่วคราว'}</small></span></button>`;}).join('')}</div>`;
+  h+=`<div class="kpd" style="--pc:${P.col}">${P.d}</div>`;
+  h+=`<div class="kbase">${[['b','b_'+P.id,'ยิงปกติ'],['s',ICODATA['sh_'+P.id]?'sh_'+P.id:'b_'+P.id,'โล่'],['d','p_'+P.id,'พุ่ง']].map(([w,ic,n])=>`<button type="button" class="kb2" data-kbase="${w}">${icoHTML(ic,P.col,22)}<span>${n}</span></button>`).join('')}</div>`;
+  h+=`<label class="f">ชุดคาถาของคุณ — คลิกช่องแล้วเลือกคาถา หรือลากคาถามาวาง</label><div class="kslots">${k.ids.map((id,i)=>{const S=SPELL_LIST[id];return `<button class="ks ${crSlot===i?'on':''}" data-ks="${i}" style="--pc:${PATHS[S.path].col}"><em>${'QERF'[i]}</em><i>${icoHTML(S.id,PATHS[S.path].col,34)}</i><span>${S.n}</span></button>`;}).join('')}<div class="ks ult" data-kult="1" style="--pc:${P.col}"><em>X</em><i>${icoHTML(ult.id,P.col,34)}</i><span>${ult.n}</span></div></div>`;
   const libOk=PATHS.map((_,i)=>SPELL_LIST.some(x=>x.path===i&&!x.ult));
   if(!libOk[crLib])crLib=k.path;
-  h+=`<label class="f">คลังคาถา</label><div class="opts" style="margin-bottom:6px">${PATHS.map((p,i)=>libOk[i]?`<button class="obtn ${crLib===i?'on':''}" data-klib="${i}">${icoHTML('p_'+p.id,p.col,16)} ${p.n}${i===k.path?' ★':''}</button>`:'').join('')}</div>`;
+  h+=`<label class="f">คลังคาถา <small style="color:var(--mute)">(ใส่คาถาสายอื่นได้ไม่เกิน 2 ช่อง)</small></label><div class="opts ktabs">${PATHS.map((p,i)=>libOk[i]?`<button class="obtn ${crLib===i?'on':''}" data-klib="${i}" style="--pc:${p.col}">${icoHTML('p_'+p.id,p.col,16)} ${p.n}${i===k.path?' ★':''}</button>`:'').join('')}</div>`;
   {
     const L=SPELL_LIST.filter(x=>x.path===crLib&&!x.ult);
     h+=`<div class="kgrid">${L.map(S=>{
       const used=k.ids.includes(S.i),blocked=!used&&S.path!==k.path&&off>=2&&SPELL_LIST[k.ids[crSlot]].path===k.path;
-      return `<button class="ksp ${used?'used':''} ${blocked?'off':''}" data-ksp="${S.i}">${icoHTML(S.id,PATHS[S.path].col,24)}<span><b>${S.n}</b><small>${ROLE_N[S.role]} • ${S.cd} วิ</small></span></button>`;}).join('')}</div>`;
+      return `<button class="ksp ${used?'used':''} ${blocked?'off':''}" data-ksp="${S.i}" draggable="true" style="--pc:${PATHS[S.path].col}">${icoHTML(S.id,PATHS[S.path].col,30)}<span><b>${S.n}</b><small>${ROLE_N[S.role]} • ${S.cd} วิ${S.melee?' • ⚔️':''}${S.dual?' • ⇄':''}</small></span>${used?`<em class="slotk">${'QERF'[k.ids.indexOf(S.i)]}</em>`:''}</button>`;}).join('')}</div>`;
   }
   h+=`<div class="kdesc" id="kdesc">${spellDescHTML(SPELL_LIST[k.ids[crSlot]])}</div>`;
-  {const B=PBASIC[k.path];h+=`<div class="kdesc" style="margin-top:6px">${icoHTML('b_'+P.id,P.col,20)} <b>ท่าพื้นฐานของ${P.n}</b><br>ยิงปกติ — ${B.n}: ${B.d}<small>${ICODATA['sh_'+P.id]?icoHTML('sh_'+P.id,P.col,16):'🛡️'} ${B.shd||'โล่: เหมือนทุกสาย (Parry 0.28 วิ ปัดกระสุนทิ้ง)'}</small><small>💫 ${B.dsd||'พุ่ง (Shift): เหมือนทุกสาย (คูลดาวน์ 2.5 วิ)'}</small> <small>⤴️ Space = กระโดด (ทุกสาย)</small></div>`;}
   crPanelSet(h);
 }
 function crAssign(si){
@@ -6465,7 +6512,18 @@ $('#creator').addEventListener('click',e=>{
   const t=e.target.closest('[data-k]');if(!t)return;
   myLook[t.dataset.k]=+t.dataset.v;crRenderStep1();
 });
-$('#creator').addEventListener('mouseover',e=>{const ksp=e.target.closest('[data-ksp]');if(ksp&&$('#kdesc'))$('#kdesc').innerHTML=spellDescHTML(SPELL_LIST[+ksp.dataset.ksp]);});
+$('#creator').addEventListener('mouseover',e=>{
+  const d=$('#kdesc');if(!d)return;const k=parseKit(myKit);
+  const ksp=e.target.closest('[data-ksp]');if(ksp){d.innerHTML=spellDescHTML(SPELL_LIST[+ksp.dataset.ksp]);return;}
+  const kb=e.target.closest('[data-kbase]');if(kb){d.innerHTML=baseDescHTML(PATHS[k.path],PBASIC[k.path],kb.dataset.kbase);return;}
+  const ku=e.target.closest('[data-kult]');if(ku){d.innerHTML=spellDescHTML(SPELL_LIST[k.ult]);return;}
+  const ks=e.target.closest('[data-ks]');if(ks){d.innerHTML=spellDescHTML(SPELL_LIST[k.ids[+ks.dataset.ks]]);}
+});
+// ลากคาถาจากคลังไปวางในช่อง
+$('#creator').addEventListener('dragstart',e=>{const s=e.target.closest('[data-ksp]');if(s){e.dataTransfer.setData('text/plain',s.dataset.ksp);e.dataTransfer.effectAllowed='move';}});
+$('#creator').addEventListener('dragover',e=>{const t=e.target.closest('[data-ks]');if(t){e.preventDefault();t.classList.add('drop');}});
+$('#creator').addEventListener('dragleave',e=>{const t=e.target.closest('[data-ks]');if(t)t.classList.remove('drop');});
+$('#creator').addEventListener('drop',e=>{const t=e.target.closest('[data-ks]');if(!t)return;e.preventDefault();const si=+e.dataTransfer.getData('text/plain');if(!isNaN(si)){crSlot=+t.dataset.ks;crAssign(si);}});
 $('#crRand').onclick=()=>{const k={h:myLook.h,wd:myLook.wd,wc:myLook.wc,ws:myLook.ws};myLook=Object.assign(randLook(),k);crRenderStep1();};
 $('#crNext').onclick=()=>crGo(2);
 $('#crBack2').onclick=()=>crGo(1);
