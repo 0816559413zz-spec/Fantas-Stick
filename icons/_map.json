@@ -46,5 +46,11 @@
 "p_nature": "delapouite/oak-leaf",
 "p_hex": "lorc/evil-moon",
 "p_summon": "lorc/crystal-ball",
-"p_pyro": "lorc/fluffy-flame"
+"p_pyro": "lorc/fluffy-flame",
+"kindle": "lorc/kindle",
+"dragonbreath": "lorc/dragon-breath",
+"ringofembers": "lorc/fire-ring",
+"blazeform": "lorc/fire-silhouette",
+"ignitionsnap": "lorc/magic-palm",
+"colossus": "lorc/ifrit"
 }
