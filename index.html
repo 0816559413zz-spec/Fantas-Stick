@@ -359,6 +359,7 @@ body[data-screen=lobby] #voice{top:84px;left:auto;right:24px;width:340px}
 <div id="over" class="overlay hidden"></div>
 <div id="meet" class="overlay hidden"></div>
 <button id="trainEnd" class="hidden">🏁 จบการฝึก</button>
+<div id="pause" class="overlay hidden"><div class="card" style="width:min(360px,100%);text-align:center"><h1 style="font-size:34px">หยุดพัก</h1><div class="orn"></div><p class="sub">เกมยังเดินต่อสำหรับคนอื่น</p><div class="row" style="justify-content:center"><button class="pri" id="pResume">เล่นต่อ</button></div><div class="row" style="justify-content:center"><button id="pLobby">กลับล็อบบี้</button><button id="pLeave">ออกจากห้อง</button></div></div></div>
 
 <!-- ===== VOICE ===== -->
 <div id="voice" class="hidden">
@@ -1618,7 +1619,7 @@ function updatePlayer(p,dt,acting){
   const ml=Math.hypot(mx,my);if(ml){mx/=ml;my/=ml;}
   if(!canAct||p.root>0||p.dchgOn||p.cryo>0){mx=my=0;}
   else if(p.fear>0){const fa=Math.atan2(p.y-p.fearY,p.x-p.fearX);mx=Math.cos(fa);my=Math.sin(fa);}
-  const spd=(p.fly?540*p.buffs.spd:260*p.buffs.spd*(p.shieldOn?0.5:1))*(p.boost>0?1.45:1)*moveMul(p)*(p.breath>0?0.7:(p.snapT>0||p.colos>0||p.grT>0)?0.5:1)*(p.slideT>0?1.6:1+(p.iceB||0));
+  const spd=(p.fly?540*p.buffs.spd:175*p.buffs.spd*(p.shieldOn?0.5:1))*(p.boost>0?1.45:1)*moveMul(p)*(p.breath>0?0.7:(p.snapT>0||p.colos>0||p.grT>0)?0.5:1)*(p.slideT>0?1.6:1+(p.iceB||0));
   if(p.dash>0){
     p.dash-=dt;const ds=p.dashSp||900;p.x+=p.dashX*ds*dt;p.y+=p.dashY*ds*dt;
     if(p.trail){p.trail.acc-=dt;if(p.trail.acc<=0){p.trail.acc=0.045;addZone({x:p.x,y:p.y,r:44,t:2.5,tick:0.5,owner:p.id,team:p.team,kind:'fire',hit(t,z){damage(t,2,z.owner,'zone');ignite(t,z.owner,1);}});}}
@@ -2968,6 +2969,7 @@ const PARTS=[],RINGS=[],TEXTS=[];let shakeA=0;
 const PCOL={bolt:'#ffe27a',fire:'#ff6a2a',stun:'#5ad1ff',pull:'#c77dff',ebolt:'#7dff6a',web:'#e8e8f0',ice:'#9fe8ff',zap:'#fff27a',vine:'#6fd57f',dart:'#b6e86a',hex:'#b57dff',ember:'#ff9a4a',spike:'#d8f4ff',pb0:'#ff8a3a',pb1:'#9fe8ff',pb2:'#fff27a',pb3:'#8ef07a',pb4:'#b57dff',pb5:'#ff9ad5',spark:'#ffb347',pfire:'#ff6a2a',icicle:'#bfeaff',iceboulder:'#9fe0ff'};
 
 function setScreen(s){
+  if(s!=='game'&&document.getElementById('pause'))document.getElementById('pause').classList.add('hidden');
   screen=s;document.body.dataset.screen=s;
   $('#menu').classList.toggle('hidden',s!=='menu');
   $('#lobby').classList.toggle('hidden',s!=='lobby');
@@ -4576,9 +4578,13 @@ function updateLights(dt){
 
 // ---------- กล้องมุมหลังไหล่ (แบบ Hogwarts Legacy) ----------
 let yaw=0,pitch=0.3,lastPh='',locked=false;
-const SENS=0.0024;
+const SENS=0.0015;
 const camPos=new THREE.Vector3(0,20,40),camLook=new THREE.Vector3();
-document.addEventListener('pointerlockchange',()=>{locked=document.pointerLockElement===cv;});
+document.addEventListener('pointerlockchange',()=>{locked=document.pointerLockElement===cv;if(locked)hidePause();else if(screen==='game')showPause();});
+// เมนู Esc: ปล่อยเมาส์ (Esc) ระหว่างเล่น = เปิดเมนูหยุดพัก
+function overlayOpen(){return ['#over','#buff','#meet'].some(s=>{const el=document.querySelector(s);return el&&!el.classList.contains('hidden');});}
+function showPause(){if(overlayOpen())return;const el=$('#pause');el.classList.remove('hidden');$('#pLobby').style.display=NET.isHost?'':'none';INPUT.fire=INPUT.sh=INPUT.u=INPUT.d=INPUT.l=INPUT.r=INPUT.jh=INPUT.ch=0;}
+function hidePause(){$('#pause').classList.add('hidden');}
 const MAPCAM={castle:{m:1.4,wy:0},forest:{m:6,wy:0},pitch:{m:7,wy:0},hogsmeade:{m:4,wy:0},greathall:{m:1.4,wy:0}};
 // เล็งตามเป้ากลางจอ: ยิงเส้นจากกล้องผ่านกลางจอ หาสิ่งแรกที่เส้นชน (ศัตรู/ผู้เล่น/สิ่งกีดขวาง) แล้วส่งจุดนั้นเป็นเป้า (ax/ay) + ความสูง (ah)
 // กล้องอยู่ข้างไหล่ขวา ถ้าเล็งจุดไกลตายตัว เป้าใกล้ๆ จะเบี้ยวซ้าย/สูงต่ำผิด — ต้องเล็งไปที่จุดชนจริง
@@ -4983,8 +4989,13 @@ function pyroFX(o,p,pz,now,dt){
     o.tip.getWorldPosition(_pw);const s=simOf(_pw),k=p.kd>0?1:p.cg,full=k>=1;
     for(let i=0;i<2+Math.floor(k*3);i++){const an=rnd(0,6.283),r=rnd(25,55),hv=rnd(-0.9,0.9);
       PARTS.push({x:s.x+Math.cos(an)*r,y:s.y+Math.sin(an)*r,h:s.h+hv,vx:-Math.cos(an)*r/0.28,vy:-Math.sin(an)*r/0.28,vh:-hv/0.28,life:0.28,max:0.28,col:i%2?'#ffb347':'#ff6a1a',size:rnd(1.4,2.4),g:0,drag:0});}
-    if(!o.fball){o.fball=new THREE.Sprite(glowMat('#ff7a2a',2.2));scene.add(o.fball);}
-    o.fball.visible=true;o.fball.position.copy(_pw);o.fball.scale.setScalar((0.25+k*0.9)*(1+0.1*Math.sin(now/40)));
+    if(!o.fball){o.fball=new THREE.Sprite(glowMat('#ff6a1a',2.6));scene.add(o.fball);}
+    o.fball.visible=true;o.fball.position.copy(_pw);o.fball.scale.setScalar(full?1.55*(1+0.22*Math.sin(now/70)):(0.25+k*0.9)*(1+0.1*Math.sin(now/40)));
+    if(full){
+      // เต็มแล้ว: ไฟลุกพุ่งขึ้นจากมือ + วงไฟเต้นที่เท้า
+      for(let i=0;i<4;i++)PARTS.push({x:s.x+rnd(-7,7),y:s.y+rnd(-7,7),h:s.h+rnd(-0.15,0.15),vx:rnd(-20,20),vy:rnd(-20,20),vh:rnd(2,4.5),life:rnd(0.3,0.5),max:0.5,col:i===0?'#fff4c8':i<3?'#ffb347':'#ff6a1a',size:rnd(2.6,4),g:-2.5,drag:2});
+      if(Math.floor(now/450)!==o.cgPulse){o.cgPulse=Math.floor(now/450);ring(p.x,p.y,'#ffb347',55,0.4,pz+0.12);}
+    }
     if(full)for(let i=0;i<3;i++){const an=now/90+i*2.094;PARTS.push({x:s.x+Math.cos(an)*14,y:s.y+Math.sin(an)*14,h:s.h+Math.sin(an*1.3)*0.5,vx:0,vy:0,vh:rnd(0.5,1.5),life:0.3,max:0.3,col:i?'#ffd27a':'#fff4c8',size:2.8,g:-1});}
     LREQ.push({x:_pw.x,y:_pw.y,z:_pw.z,col:'#ff8a3a',int:0.8+k*2,dist:8});
   }else if(o.fball)o.fball.visible=false;
@@ -5184,7 +5195,7 @@ function syncPlayers(P,mode,now,dt){
     else if(MODES[mode]&&MODES[mode].team){o.ring.visible=true;o.ring.material.color.set(TEAMC[p.tm]);}
     else if(isMe){o.ring.visible=true;o.ring.material.color.set('#ffffff');}
     else o.ring.visible=false;
-    o.tip.scale.setScalar(0.3+0.08*Math.sin(now/120)+(o.castT>0?0.4:0)+(p.cg||0)*0.9);
+    o.tip.scale.setScalar(0.3+0.08*Math.sin(now/120)+(o.castT>0?0.4:0))*((p.cg||0)>0?0.4:1);
     const pz=o.zs;
     pyroFX(o,p,pz,now,dt);
     frostFX(o,p,pz,now,dt);
@@ -5411,7 +5422,8 @@ function drawCrosshair(){
   const x=SW/2,y=SH/2;
   cx.strokeStyle='rgba(0,0,0,0.5)';cx.lineWidth=3;
   for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){cx.beginPath();cx.moveTo(x+dx*6,y+dy*6);cx.lineTo(x+dx*12,y+dy*12);cx.stroke();}
-  cx.strokeStyle='rgba(243,220,148,0.95)';cx.lineWidth=1.5;
+  const _v=VIEW.cur,_me=_v&&_v.P&&_v.P.find(q=>q.id===NET.myId),hot=_me&&(_me.cg>=1||_me.dc>=1);
+  cx.strokeStyle=hot?'rgba(255,150,50,1)':'rgba(243,220,148,0.95)';cx.lineWidth=hot?2.5:1.5;
   for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){cx.beginPath();cx.moveTo(x+dx*6,y+dy*6);cx.lineTo(x+dx*12,y+dy*12);cx.stroke();}
   diaPath(x,y,2.5);cx.fillStyle='#fff6d8';cx.fill();
   if(!locked){
@@ -6116,6 +6128,10 @@ $('#btnHost').onclick=()=>{store('wd_name',myName());hostGame(true);};
 $('#btnJoin').onclick=()=>{store('wd_name',myName());joinGame($('#codeIn').value);};
 $('#codeIn').addEventListener('keydown',e=>{if(e.key==='Enter')$('#btnJoin').click();});
 $('#btnLeave').onclick=leave;
+$('#pResume').onclick=()=>{hidePause();try{cvEl().requestPointerLock();}catch(e){}};
+$('#pLobby').onclick=()=>{hidePause();if(NET.isHost)hostToLobby();};
+$('#pLeave').onclick=leave;
+addEventListener('keydown',e=>{if(e.code==='Escape'&&screen==='game'&&!locked){const el=$('#pause');if(el.classList.contains('hidden'))showPause();else{hidePause();try{cvEl().requestPointerLock();}catch(err){}}}});
 $('#btnGuide').onclick=()=>{ac();$('#guide').classList.remove('hidden');};
 $('#btnGuideClose').onclick=()=>$('#guide').classList.add('hidden');
 $('#trainEnd').onclick=()=>{if(NET.isHost)hostEndTraining();};
