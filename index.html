@@ -546,7 +546,7 @@ const PDEF={
   spark:{spd:1000,r:7,dmg:6,life:0.4,col:'#ffb347'},
   icicle:{spd:1150,r:7,dmg:7,life:0.61,col:'#bfeaff'},
   iceboulder:{spd:850,r:14,dmg:20,life:0.82,col:'#9fe0ff'},
-  pfire:{spd:900,r:11,dmg:20,life:1.0,col:'#ff6a2a'},
+  pfire:{spd:1500,r:11,dmg:20,life:0.6,col:'#ff6a2a'},
   pb1:{spd:950,r:7,dmg:10,life:1.1,col:'#9fe8ff'},
   pb2:{spd:1100,r:6,dmg:9,life:1.0,col:'#fff27a'},
   pb3:{spd:950,r:6,dmg:8,life:1.1,col:'#8ef07a'},
@@ -674,9 +674,9 @@ function frostSlow(t){
   return Math.min(80,s);
 }
 function moveMul(t){let m=1;const fs=frostSlow(t);if(fs>0)m*=1-fs/100;if(t.chl>0)m*=1-0.1*t.chl;if(t.slowT>0)m*=t.slowF;if(t.haste>0)m*=t.hasteF;if(t.blaze>0)m*=1.25;return Math.max(0.25,m);}
-// Burning (สายไฟ): สูงสุด 5 ชั้น • เผา 0.5/วิ/ชั้น • ไม่โดนเพิ่ม 4 วิ แล้วลดทีละ 1 ชั้นทุก 1 วิ
+// Burning (สายไฟ): สูงสุด 5 ชั้น • เผา 0.5/วิ/ชั้น • ไม่โดนเพิ่ม 10 วิ แล้วลดทีละ 1 ชั้นทุก 1 วิ
 const BRN_MAX=5;
-function addBurn(t,n,src){if(t.dead)return;const was=t.brn|0;t.brn=Math.min(BRN_MAX,was+n);t.brnT=4;t.brnSrc=src;if(!(t.brnTick>0))t.brnTick=0.5;if(t.brn>was)emit({k:'efx',z:'brn',x:t.x,y:t.y,h:cH(t)+0.8,n:t.brn});}
+function addBurn(t,n,src){if(t.dead)return;const was=t.brn|0;t.brn=Math.min(BRN_MAX,was+n);t.brnT=10;t.brnSrc=src;if(!(t.brnTick>0))t.brnTick=0.5;if(t.brn>was)emit({k:'efx',z:'brn',x:t.x,y:t.y,h:cH(t)+0.8,n:t.brn});}
 // Extreme Burning (อัลติสายไฟ): เผา 10/วิ นาน 5 วิ (รวม 50)
 function addXBurn(t,src){t.xb=5;t.xbTick=0.5;t.xbSrc=src;}
 function addPoison(t,src,n){t.psn=Math.min(3,(t.psn|0)+(n||1));t.psnT=4;t.psnSrc=src;if(!(t.psnTick>0))t.psnTick=0.8;}
@@ -792,12 +792,12 @@ function detonateHeat(p,t,per,mul){const n=takeHeat(t);if(n>0){damage(t,per*n*(m
 
 // ---------- ความสามารถพื้นฐาน (คลิกซ้าย) ของแต่ละสาย: สะสมสถานะตั้งต้นให้เองทุกๆ N ครั้งที่ยิงโดน ----------
 const PBASIC=[
-  {id:'b_pyro',type:'spark',n:'ประกายไฟ / ลูกไฟชาร์จ',d:'คลิก = ยิงประกายไฟ (6 ดาเมจ ทุก 0.3 วิ ระยะ ~400) โดนเป้าเดียวครบ 3 นัด = +1 Burning • กดค้าง = รวบรวมลูกไฟที่ปลายไม้ (ไม่ยิง) ครบ 3 วิ แล้วปล่อย = ลูกไฟ (20 ดาเมจ ระยะ ~900 +1 Burning)',
+  {id:'b_pyro',type:'spark',n:'ประกายไฟ / ลูกไฟชาร์จ',d:'คลิก = ยิงประกายไฟ (6 ดาเมจ ทุก 0.3 วิ ระยะ ~400) โดนเป้าเดียวครบ 3 นัด = +1 Burning • กดค้าง = รวบรวมลูกไฟที่ปลายไม้ (ไม่ยิง) ครบ 2 วิ แล้วปล่อย = ลูกไฟ (20 ดาเมจ ระยะ ~900 +1 Burning)',
     shd:'โล่ไฟ: บล็อกครบ 2 ครั้งแล้วปล่อยโล่ = ระเบิดรอบตัว 5 (วง ~150) • Parry = ระเบิดทันที 7 +1 Burning (วง ~180 ครั้งเดียวต่อการยกโล่)',dsd:'พุ่ง: กดค้างชาร์จ (สูงสุด 4 วิ ห้ามขยับ ยิ่งชาร์จยิ่งย่อตัวต่ำ) ปล่อย = ระเบิดดันตัวพุ่ง 150-1100 อมตะระหว่างพุ่ง คูลดาวน์ 3 วิ',
     hit(pr,t){damage(t,pr.dmg,pr.owner,'proj');if((t.spkN=(t.spkN|0)+1)>=3){t.spkN=0;addBurn(t,1,pr.owner);}},
     tick:pyroBasic,onParry:pyroParry,shDrop:pyroShDrop,dash:pyroDash},
-  {id:'b_frost',type:'icicle',n:'ดาบน้ำแข็ง / แท่งน้ำแข็ง',d:'กด V สลับโหมด • ประชิด: ดาบน้ำแข็งคอมโบ 10/10/15 ระยะ ~120 จังหวะ 3 ฮีล 30 ทุกครั้งที่โดน = ช้าลง +5% (สูงสุด 30%) เดินได้ระหว่างฟัน • ไกล: แท่งน้ำแข็ง 7 ดาเมจ ทุก 0.3 วิ ระยะ ~700 ช้าลง +10% (สูงสุด 30%) • อยู่สูงกว่า ~4 เมตร + ฟัน = กระโดดฟาดลงพื้น 30',
-    shd:'โล่อัศวินน้ำแข็ง: กันเฉพาะด้านหน้า 120° ยกได้นานกว่าปกติ 2 เท่า ฟันดาบระหว่างยกโล่ได้ (ช้าลง) • Parry = ฟันครั้งต่อไปใน 1.5 วิ เป็นจังหวะ 3 ทันที',dsd:'ไถลน้ำแข็ง 5 วิ เร็ว +60% (ลื่น หยุดทันทีไม่ได้) ทิ้งทางน้ำแข็ง 4 วิ: ศัตรูเดินทับช้า +10% และลื่น เราเดินทับเร็ว +20% • คูลดาวน์ 6 วิหลังไถลจบ',
+  {id:'b_frost',type:'icicle',n:'ดาบน้ำแข็ง / แท่งน้ำแข็ง',d:'กด V สลับโหมด • ประชิด: ดาบน้ำแข็งคอมโบ 10/10/15 ระยะ ~120 จังหวะ 3 ฮีล 10 ทุกครั้งที่โดน = ช้าลง +5% (สูงสุด 30%) เดินได้ระหว่างฟัน • ไกล: แท่งน้ำแข็ง 7 ดาเมจ ทุก 0.3 วิ ระยะ ~700 ช้าลง +10% (สูงสุด 30%) • อยู่สูงกว่า ~4 เมตร + ฟัน = กระโดดฟาดลงพื้น 30',
+    shd:'โล่อัศวินน้ำแข็ง: กันเฉพาะด้านหน้า 120° ยกได้นานกว่าปกติ 2 เท่า ฟันดาบระหว่างยกโล่ได้ (ช้าลง) • Parry = ฟันครั้งต่อไปใน 1.5 วิ เป็นจังหวะ 3 ทันที',dsd:'ไถลน้ำแข็ง 5 วิ เร็ว +80% (ลื่น หยุดทันทีไม่ได้) ทิ้งทางน้ำแข็ง 4 วิ: ศัตรูเดินทับช้า +10% และลื่น เราเดินทับเร็ว +20% • คูลดาวน์ 6 วิหลังไถลจบ',
     front:true,shDrain:0.5,shieldSwing:true,
     hit(pr,t){damage(t,pr.dmg,pr.owner,'proj');addFrostSlow(t,10);},
     tick:frostBasic,onParry:p=>{p.ripT=1.5;},dash:frostDash},
@@ -844,7 +844,7 @@ function frostBasic(p,inp,dt,setCd){
   let ci=p.cmbT>0?(p.cmbN|0):0;if(p.ripT>0){ci=2;p.ripT=0;}
   const D=ff?[20,20,40]:[10,10,15],R=ff?160:120;
   const n=meleeHit(p,p.x,p.y,R,D[ci],1.0,t=>addFrostSlow(t,5));
-  if(ci===2&&n>0)healT(p,ff?50:30);
+  if(ci===2&&n>0)healT(p,p.mirror>0?(ff?45:30):(ff?15:10));
   if(p.mirror>0)for(const s of [-1,1]){const q=mirrorPos(p,s);meleeHit(p,q.x,q.y,R,D[ci]*0.5,1.0);}
   p.cmbN=(ci+1)%3;p.cmbT=1;p.swN=((p.swN|0)+1)%250;p.swC=ci;
   emit({k:'efx',z:'swing',x:p.x,y:p.y,h:p.z+1.1,a:Math.round(p.ang*100)/100,c:ci,ax:ff?1:0,r:R,id:p.id,m:p.mirror>0?1:0});
@@ -882,7 +882,7 @@ function updateWaves(dt){
   for(const w of G.waves){
     const st=Math.min(w.left,1500*dt);w.x+=w.dx*st;w.y+=w.dy*st;w.left-=st;w.acc+=st;
     const o=G.players[w.owner];
-    if(o)for(const t of foesOf(w.team)){if(w.hit.has(t))continue;if(Math.hypot(t.x-w.x,t.y-w.y)<40+(t.r||PR)&&cH(t)<4){w.hit.add(t);aoeHit(o,t,60,t=>addFrostSlow(t,5));}}
+    if(o)for(const t of foesOf(w.team)){if(w.hit.has(t))continue;if(Math.hypot(t.x-w.x,t.y-w.y)<40+(t.r||PR)&&cH(t)<4){w.hit.add(t);aoeHit(o,t,30,t=>addFrostSlow(t,5));}}
     if(w.acc>=50){w.acc=0;addIce({x:w.x,y:w.y,r:46,t:4,team:w.team,kind:'path'});}
     if(w.x<30||w.x>MW-30||w.y<30||w.y>MH-30)w.left=0;
   }
@@ -920,10 +920,10 @@ function pyroBasic(p,inp,dt,setCd){
     // Kindle: คลิก = ลูกไฟชาร์จเต็มทันที
     if(p.kindle>0&&p.cd.basic<=0){p.kindle--;if(!p.kindle)p.kindleT=0;pyroBall(p);setCd('basic',0.5);p.chg=-1;return;}
     p.chg=0;
-  }else if(inp.fire){if(p.chg>=0)p.chg=Math.min(3,p.chg+dt);}
+  }else if(inp.fire){if(p.chg>=0)p.chg=Math.min(2,p.chg+dt);}
   else if(prev){
     // ปล่อยคลิก: แตะสั้น = ประกายไฟ / ชาร์จครบ 3 วิ = ลูกไฟ / ระหว่างนั้น = ไม่ยิง
-    if(p.chg>=3){pyroBall(p);setCd('basic',0.5);}
+    if(p.chg>=2){pyroBall(p);setCd('basic',0.5);}
     else if(p.chg>=0&&p.chg<0.25&&p.cd.basic<=0){shoot(p,'spark',{sp:'b_pyro',dmg:6});setCd('basic',0.3);}
     p.chg=0;
   }
@@ -986,9 +986,9 @@ defSpell(0,{id:'ringofembers',role:'control',n:'Ring of Embers',ic:'⭕',cd:14,d
     (G.erings||(G.erings=[])).push({x:q.x,y:q.y,r:250,t:3,owner:p.id,team:p.team,in:new Set(),cd:new Map()});
     emit({k:'efx',z:'ering',x:q.x,y:q.y,h:0.2,r:250,t:3});
   }});
-defSpell(0,{id:'blazeform',role:'utility',n:'Blazeform',ic:'🔥',cd:20,d:'กลายร่างเปลวไฟ 8 วิ: ดาเมจทุกสกิล (รวมเผา Burning) +30% • เดินเร็ว +25%',fx:'ผลเสีย: เรารับดาเมจ +25% ระหว่างนั้น',
-  cast(p,S){p.blaze=8;emit({k:'efx',z:'blaze',x:p.x,y:p.y,h:p.z+1,id:p.id});}});
-defSpell(0,{id:'ignitionsnap',role:'finisher',n:'Ignition Snap',ic:'🫰',cd:12,d:'ท่าเตรียม 0.6 วิ แล้วดีดนิ้ว: ศัตรูทุกคนที่มี Burning ในระยะ 500 ระเบิดพร้อมกัน (ไม่ต้องเล็ง)',fx:'15 ดาเมจต่อ 1 ชั้น Burning (5 ชั้น = 75) แล้วใช้ Burning หมด • ไม่มีใครติดไฟในระยะ = ไม่เสียคูลดาวน์',
+defSpell(0,{id:'blazeform',role:'utility',n:'Blazeform',ic:'🔥',cd:20,d:'กลายร่างเปลวไฟ 12 วิ: ดาเมจทุกสกิล (รวมเผา Burning) +30% • เดินเร็ว +25%',fx:'ผลเสีย: เรารับดาเมจ +25% ระหว่างนั้น',
+  cast(p,S){p.blaze=12;emit({k:'efx',z:'blaze',x:p.x,y:p.y,h:p.z+1,id:p.id});}});
+defSpell(0,{id:'ignitionsnap',role:'finisher',n:'Ignition Snap',ic:'🫰',cd:12,d:'ท่าเตรียม 0.6 วิ แล้วดีดนิ้ว: ศัตรูทุกคนที่มี Burning ในระยะ 500 ระเบิดพร้อมกัน (ไม่ต้องเล็ง)',fx:'15 ดาเมจต่อ 1 ชั้น Burning (5 ชั้น = 75) และฮีลเรา 20 ต่อชั้น แล้วใช้ Burning หมด • ไม่มีใครติดไฟในระยะ = ไม่เสียคูลดาวน์',
   cast(p,S){
     if(!foesOf(p.team).some(t=>t.brn>0&&Math.hypot(t.x-p.x,t.y-p.y)<500))return false;
     p.snapT=0.6;emit({k:'efx',z:'snapwind',x:p.x,y:p.y,h:p.z+1.4,id:p.id});
@@ -1000,7 +1000,7 @@ function pyroSnap(p){
   for(const t of foesOf(p.team)){
     if(!(t.brn>0)||Math.hypot(t.x-p.x,t.y-p.y)>500)continue;
     const n=t.brn|0;
-    if(aoeHit(p,t,15*n)){t.brn=0;t.brnT=0;}
+    if(aoeHit(p,t,15*n)){t.brn=0;t.brnT=0;healT(p,20*n);}
     emit({k:'efx',z:'snapboom',x:t.x,y:t.y,h:cH(t),n});
   }
 }
@@ -1041,9 +1041,9 @@ function updateERings(dt){
 // =====================================================================
 //  สายน้ำแข็ง — ความเย็น: สะสม 3 ชั้น = แข็ง • ปิดจบด้วยหอกน้ำแข็ง (ยิ่งเย็นยิ่งแรง ถ้าแข็ง = แตก)
 // =====================================================================
-defSpell(1,{id:'frostforge',role:'utility',dual:1,n:'Frostforge',ic:'🪓',cd:18,d:'6 วิ: ประชิด = ดาบกลายเป็นขวานศึกน้ำแข็ง 20/20/40 ระยะ 160 จังหวะ 3 ฮีล 50 • ไกล = ก้อนน้ำแข็งใหญ่ระเบิด (วง ~100) 20 ดาเมจ ช้าลง 60% 2 วิ',fx:'ใช้ได้ทั้ง 2 โหมด สลับโหมดระหว่างบัฟได้ • คูลดาวน์ 12 วิหลังบัฟหมด • ฟาดจากที่สูงด้วยขวาน = 50',
+defSpell(1,{id:'frostforge',role:'utility',dual:1,n:'Frostforge',ic:'🪓',cd:18,d:'6 วิ: ประชิด = ดาบกลายเป็นขวานศึกน้ำแข็ง 20/20/40 ระยะ 160 จังหวะ 3 ฮีล 15 • ไกล = ก้อนน้ำแข็งใหญ่ระเบิด (วง ~100) 20 ดาเมจ ช้าลง 60% 2 วิ',fx:'ใช้ได้ทั้ง 2 โหมด สลับโหมดระหว่างบัฟได้ • คูลดาวน์ 12 วิหลังบัฟหมด • ฟาดจากที่สูงด้วยขวาน = 50',
   cast(p,S){p.ffT=6;emit({k:'efx',z:'forge',x:p.x,y:p.y,h:p.z+1,id:p.id});}});
-defSpell(1,{id:'glacierrend',role:'control',dual:1,n:'Glacier Rend',ic:'🏔️',cd:10,d:'ประชิด: ชาร์จดาบ 1 วิ แล้วส่งคลื่นดาบ 60 ดาเมจ ไกล ~600 ทะลุหลายคน ทิ้งทางน้ำแข็ง • ไกล: ภูเขาน้ำแข็งแหลมพุ่งเป็นแนว ~700 สูงถึง ~8 เมตร 6 วิ เดินขึ้นไปได้',fx:'โดนภูเขาน้ำแข็ง = 15 ดาเมจ + แช่แข็ง 1 วิ + กระเด็นเล็กน้อย • อยู่บนที่สูงแล้วฟัน = กระโดดฟาดลงพื้น',
+defSpell(1,{id:'glacierrend',role:'control',dual:1,n:'Glacier Rend',ic:'🏔️',cd:10,d:'ประชิด: ชาร์จดาบ 1 วิ แล้วส่งคลื่นดาบ 30 ดาเมจ ไกล ~600 ทะลุหลายคน ทิ้งทางน้ำแข็ง • ไกล: ภูเขาน้ำแข็งแหลมพุ่งเป็นแนว ~700 สูงถึง ~8 เมตร 6 วิ เดินขึ้นไปได้',fx:'โดนภูเขาน้ำแข็ง = 15 ดาเมจ + แช่แข็ง 1 วิ + กระเด็นเล็กน้อย • อยู่บนที่สูงแล้วฟัน = กระโดดฟาดลงพื้น',
   cast(p,S){
     if(p.fmode!==1){p.grT=1;emit({k:'efx',z:'grcharge',x:p.x,y:p.y,h:p.z+1,id:p.id});return;}
     const a=p.ang,c=Math.cos(a),s=Math.sin(a),grp=new Set();
@@ -1052,7 +1052,7 @@ defSpell(1,{id:'glacierrend',role:'control',dual:1,n:'Glacier Rend',ic:'🏔️'
   }});
 defSpell(1,{id:'permafrost',role:'control',melee:1,n:'Permafrost',ic:'❄️',cd:16,d:'พื้นน้ำแข็งวงใหญ่รอบตัว (รัศมี ~300) 6 วิ: ศัตรูในวงช้าลง 20% ทันที (ซ้อนกับสลอว์ยิงปกติ สูงสุด 60%)',fx:'เราเดินในวงเร็ว +30% (ไม่ซ้อนกับไถลน้ำแข็ง) • ใช้ได้เฉพาะโหมดประชิด',
   cast(p,S){addIce({x:p.x,y:p.y,r:300,t:6,team:p.team,owner:p.id,kind:'ring'});emit({k:'efx',z:'perma',x:p.x,y:p.y,h:0.1,r:300});}});
-defSpell(1,{id:'cryoshell',role:'utility',melee:1,n:'Cryo Shell',ic:'🧊',cd:20,d:'แช่แข็งตัวเอง 5 วิ: อมตะ ล้างดีบัฟทั้งหมด ฮีล 30/วิ (ขยับ/ตี/ร่ายไม่ได้ ยกเว้น Frostbite Aura)',fx:'กดซ้ำเพื่อออกก่อนได้ (ฮีลหยุด) • ใช้ได้เฉพาะโหมดประชิด',
+defSpell(1,{id:'cryoshell',role:'utility',melee:1,n:'Cryo Shell',ic:'🧊',cd:28,d:'แช่แข็งตัวเอง 5 วิ: อมตะ ล้างดีบัฟทั้งหมด ฮีล 7.5/วิ (ขยับ/ตี/ร่ายไม่ได้ ยกเว้น Frostbite Aura)',fx:'กดซ้ำเพื่อออกก่อนได้ (ฮีลหยุด) • ใช้ได้เฉพาะโหมดประชิด',
   toggle(p){if(p.cryo>0){p.cryo=0;p.inv=0;emit({k:'efx',z:'cryoend',x:p.x,y:p.y,h:p.z+1,id:p.id});return true;}return false;},
   cast(p,S){
     for(const k of ['stun','slowT','chl','chlT','frz','shk','root','sil','fear','bld','mrk','burn','brn','brnT','xb','psn','psnT','heat','fsl','fslT','fslBigT','fslR','fslP','fslUltT','slip'])p[k]=0;
@@ -1061,9 +1061,9 @@ defSpell(1,{id:'cryoshell',role:'utility',melee:1,n:'Cryo Shell',ic:'🧊',cd:20
   }});
 defSpell(1,{id:'frostaura',role:'control',melee:1,n:'Frostbite Aura',ic:'🌨️',cd:15,d:'ออร่าเยือกแข็งรอบตัว 5 วิ (รัศมี ~180): 20 ดาเมจ/วิ ศัตรูช้าลง 20% (ซ้อนกับสลอว์อื่นได้ รวมไม่เกิน 80%)',fx:'ใช้ได้แม้ตอนแช่แข็งตัวเอง • ใช้ได้เฉพาะโหมดประชิด',
   cast(p,S){p.auraT=5;p.auraTk=0;emit({k:'efx',z:'aura',x:p.x,y:p.y,h:p.z,id:p.id});}});
-defSpell(1,{id:'mirrorlegion',role:'ult',n:'Mirror Legion',ic:'👥',cd:0,ult:true,d:'เวทโบราณสายน้ำแข็ง: ร่างแยกน้ำแข็ง 2 ตัวโผล่ข้างตัว 6 วิ (ฟันตามเราทุกครั้ง ร่างละ 50%) + HP เสริม 100',fx:'ตอนเปิด: พุ่งไปข้างหน้า ~600 (อมตะ) พร้อมร่างแยก ฟันตลอดทาง 70 ดาเมจ + ช้าลง 80% 3 วิ',
+defSpell(1,{id:'mirrorlegion',role:'ult',n:'Mirror Legion',ic:'👥',cd:0,ult:true,d:'เวทโบราณสายน้ำแข็ง: ร่างแยกน้ำแข็ง 2 ตัวโผล่ข้างตัว 10 วิ (ฟันตามเราทุกครั้ง ร่างละ 50%) + HP เสริม 100 • ดาเมจเรา ×2.5 • ฟันจังหวะ 3 ฮีล 30 (ขวาน 45)',fx:'ตอนเปิด: พุ่งไปข้างหน้า ~600 (อมตะ) พร้อมร่างแยก ฟันตลอดทาง 70 ดาเมจ + ช้าลง 80% 3 วิ',
   cast(p,S){
-    p.mirror=6;p.xhp=100;p.fmode=0;
+    p.mirror=10;p.xhp=100;p.fmode=0;
     p.dash=600/2000;p.dashSp=2000;p.dashX=Math.cos(p.ang);p.dashY=Math.sin(p.ang);p.inv=Math.max(p.inv,0.36);p.shieldOn=false;p.slideT=0;
     p.ultSlash=new Set();
     emit({k:'efx',z:'mirror',x:p.x,y:p.y,h:p.z,a:Math.round(p.ang*100)/100,id:p.id});
@@ -1562,7 +1562,7 @@ function updatePlayer(p,dt,acting){
   if(p.colos>0){p.colos-=dt;if(p.colos<=0||!p.alive||p.downed){p.colos=0;emit({k:'efx',z:'colend',x:p.x,y:p.y,h:p.z+2,id:p.id});}}
   if(p.fmCd>0)p.fmCd-=dt;
   if(p.slideT>0)p.slideT-=dt;
-  if(p.cryo>0){p.cryo-=dt;p.inv=Math.max(p.inv,0.05);p.cryoTk-=dt;if(p.cryoTk<=0){p.cryoTk=0.5;healT(p,15);}if(p.cryo<=0){p.inv=0;emit({k:'efx',z:'cryoend',x:p.x,y:p.y,h:p.z+1,id:p.id});}}
+  if(p.cryo>0){p.cryo-=dt;p.inv=Math.max(p.inv,0.05);p.cryoTk-=dt;if(p.cryoTk<=0){p.cryoTk=0.5;healT(p,3.75);}if(p.cryo<=0){p.inv=0;emit({k:'efx',z:'cryoend',x:p.x,y:p.y,h:p.z+1,id:p.id});}}
   if(p.auraT>0&&p.alive&&!p.downed){p.auraT-=dt;p.auraTk-=dt;const tk=p.auraTk<=0;if(tk)p.auraTk=0.5;for(const t of foesIn(p.team,p.x,p.y,180,p.z+3)){t.fslA=0.6;if(tk)damage(t,10,p.id,'zone');}}
   if(p.mirror>0){p.mirror-=dt;if(p.mirror<=0){p.xhp=0;emit({k:'efx',z:'mirrorend',x:p.x,y:p.y,h:p.z+1,id:p.id});}}
   if(p.grT>0&&p.alive){p.grT-=dt;if(p.grT<=0){const c=Math.cos(p.ang),s=Math.sin(p.ang);(G.waves||(G.waves=[])).push({x:p.x+c*30,y:p.y+s*30,dx:c,dy:s,left:600,acc:0,owner:p.id,team:p.team,hit:new Set()});emit({k:'efx',z:'gwave',x:p.x,y:p.y,h:p.z+1,a:Math.round(p.ang*1000)/1000,len:600});}}
@@ -1619,7 +1619,7 @@ function updatePlayer(p,dt,acting){
   const ml=Math.hypot(mx,my);if(ml){mx/=ml;my/=ml;}
   if(!canAct||p.root>0||p.dchgOn||p.cryo>0){mx=my=0;}
   else if(p.fear>0){const fa=Math.atan2(p.y-p.fearY,p.x-p.fearX);mx=Math.cos(fa);my=Math.sin(fa);}
-  const spd=(p.fly?540*p.buffs.spd:175*p.buffs.spd*(p.shieldOn?0.5:1))*(p.boost>0?1.45:1)*moveMul(p)*(p.breath>0?0.7:(p.snapT>0||p.colos>0||p.grT>0)?0.5:1)*(p.slideT>0?1.6:1+(p.iceB||0));
+  const spd=(p.fly?540*p.buffs.spd:175*p.buffs.spd*(p.shieldOn?0.5:1))*(p.boost>0?1.45:1)*moveMul(p)*(p.breath>0?0.7:(p.snapT>0||p.colos>0||p.grT>0)?0.5:1)*(p.slideT>0?1.8:1+(p.iceB||0));
   if(p.dash>0){
     p.dash-=dt;const ds=p.dashSp||900;p.x+=p.dashX*ds*dt;p.y+=p.dashY*ds*dt;
     if(p.trail){p.trail.acc-=dt;if(p.trail.acc<=0){p.trail.acc=0.045;addZone({x:p.x,y:p.y,r:44,t:2.5,tick:0.5,owner:p.id,team:p.team,kind:'fire',hit(t,z){damage(t,2,z.owner,'zone');ignite(t,z.owner,1);}});}}
@@ -1762,6 +1762,7 @@ function damage(t,amt,srcId,kind){
   const src=srcId!=null?G.players[srcId]:null;
   if(src&&kind!=='burn')amt*=src.buffs.dmg;
   if(src&&src.blaze>0)amt*=1.3;
+  if(src&&src.mirror>0)amt*=2.5;
   if(t.isM){
     if(t.dead)return;
     if(t.frz>0)amt*=1.15;
@@ -1879,15 +1880,8 @@ function updateProjectiles(dt){
       if(p.inv>0)continue;
       if(p.shieldOn&&shieldFaces(p,pr.x-pr.vx*0.05,pr.y-pr.vy*0.05)){
         if(G.time-p.shieldT<0.28){
-          // Perfect Parry: สะท้อนกลับไปหาคนยิง
-          const o=G.players[pr.owner];
-          const a=o&&o.alive?Math.atan2(o.y-p.y,o.x-p.x):Math.atan2(-pr.vy,-pr.vx);
-          const sp=Math.hypot(pr.vx,pr.vy)*1.15;
-          let vh=-pr.vh;
-          if(o&&o.alive)vh=(cH(o)-pr.h)/(Math.max(1,Math.hypot(o.x-p.x,o.y-p.y))/sp);
-          else{const src=G.en.find(e=>!e.dead&&Math.abs(angDiff(Math.atan2(e.y-p.y,e.x-p.x),a))<0.2);if(src)vh=(cH(src)-pr.h)/(Math.max(1,Math.hypot(src.x-p.x,src.y-p.y))/sp);}
-          Object.assign(pr,{vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,vh,owner:p.id,team:p.team,src:'p',life:1.6,dmg:pr.dmg*1.25});
-          pr.x=p.x+Math.cos(a)*(PR+pr.r+4);pr.y=p.y+Math.sin(a)*(PR+pr.r+4);
+          // Perfect Parry: ปัดกระสุนทิ้ง (ไม่สะท้อนกลับแล้ว) ไม่เสียพลังโล่ + ผลพิเศษของแต่ละสาย
+          pr.dead=true;
           p.ult=Math.min(100,p.ult+12);
           emit({k:'parry',x:p.x,y:p.y,h:p.z+1.3});
           {const B=PBASIC[p.pathIdx|0];if(B&&B.onParry&&!p.shPar){p.shPar=1;B.onParry(p);}}
@@ -2240,7 +2234,7 @@ function spawnDummy(x,y){
   G.en.push({id:++G.eid,isE:true,type:'dummy',x:o.x,y:o.y,ax:o.x,ay:o.y,h:0,r:EDEF.dummy.r,hp:EDEF.dummy.hp,maxHp:EDEF.dummy.hp,spd:0,cd:rnd(2,4),cd2:99,cd3:99,stun:0,vx:0,vy:0,slam:0,lunge:0,burn:0,bt:0,team:-1,ph:0});
   emit({k:'spawn',x:o.x,y:o.y,t:'dummy'});
 }
-const TIPS=['💡 คลิกซ้ายค้าง = ยิงรัว • Q/E/R/F = คาถาที่คุณจัดไว้ (เปลี่ยนได้ที่ปุ่ม 🪄 ในล็อบบี้)','🛡️ ยกโล่ (คลิกขวา) ตอนเวทเขียวกำลังจะโดนพอดี = PARRY สะท้อนกลับ!','💨 R ผลักศัตรูและลบเวทที่พุ่งมา • 🌀 F ดึงศัตรูเข้ามาหา','💫 Space หลบ (อมตะชั่วครู่) • 🌟 X เวทโบราณเมื่อเกจทองเต็ม','🧹 B ขึ้นไม้กวาด • Space บินขึ้น • C บินลง (บนไม้กวาดร่ายเวทไม่ได้)','🏁 โฮสต์กดปุ่ม "จบการฝึก" มุมขวาบนเพื่อกลับล็อบบี้'];
+const TIPS=['💡 คลิกซ้ายค้าง = ยิงรัว • Q/E/R/F = คาถาที่คุณจัดไว้ (เปลี่ยนได้ที่ปุ่ม 🪄 ในล็อบบี้)','🛡️ ยกโล่ (คลิกขวา) ตอนเวทเขียวกำลังจะโดนพอดี = PARRY ปัดทิ้ง!','💨 R ผลักศัตรูและลบเวทที่พุ่งมา • 🌀 F ดึงศัตรูเข้ามาหา','💫 Space หลบ (อมตะชั่วครู่) • 🌟 X เวทโบราณเมื่อเกจทองเต็ม','🧹 B ขึ้นไม้กวาด • Space บินขึ้น • C บินลง (บนไม้กวาดร่ายเวทไม่ได้)','🏁 โฮสต์กดปุ่ม "จบการฝึก" มุมขวาบนเพื่อกลับล็อบบี้'];
 function trainTick(dt){
 
   const n=G.en.filter(e=>e.type==='dummy').length;
@@ -2498,7 +2492,7 @@ function makeSnap(){
       hp:Math.ceil(p.hp),mh:p.maxHp,al:p.alive,dn:p.downed,rv:r1(p.revive),sh:p.shieldOn,se:Math.round(p.shieldE),
       st:p.stun>0,ds:p.dash>0,iv:p.inv>0,bn:p.burn>0,u:Math.floor(p.ult),k:p.kills,d:p.deaths,rs:Math.ceil(p.respawn),
       cd:CDK.map(k=>r1(p.cd[k])),cm:CDK.map(k=>p.cdMax[k]||1),bo:p.bo,pk:p.picked,bf:p.taken,dmg:Math.round(p.dmgDealt),
-      fm:fxMask(p),gh:!!p.gh,hb:!!(G.ball&&G.ball.holder===p.id),lap:p.lap|0,cp:p.cp|0,fin:p.fin|0,bs:p.boost>0,br:p.brn|0,cg:p.chg>0.25?Math.round(Math.min(1,(p.chg-0.25)/2.75)*20)/20:0,dc:p.dchgOn?Math.round(p.dchg/4*20)/20+0.01:0,bm:p.breath>0?(p.breath>2?1:2):0,sn:p.snapT>0?1:0,co:p.colos>0?(p.colN|0)+1:0,kd:p.kindle|0,fr:p.pathIdx===1?[p.fmode|0,p.swN|0,p.swC|0,(p.slideT>0?1:0)|(p.cryo>0?2:0)|(p.auraT>0?4:0)|(p.ffT>0?8:0)|(p.mirror>0?16:0)|(p.grT>0?32:0)]:0,xh:Math.ceil(p.xhp||0),ul:p.unl?Object.keys(p.unl).join(','):'',tk:p.doing?r1(p.doing.left):0})),
+      fm:fxMask(p),gh:!!p.gh,hb:!!(G.ball&&G.ball.holder===p.id),lap:p.lap|0,cp:p.cp|0,fin:p.fin|0,bs:p.boost>0,br:p.brn|0,cg:p.chg>0.25?Math.round(Math.min(1,(p.chg-0.25)/1.75)*20)/20:0,dc:p.dchgOn?Math.round(p.dchg/4*20)/20+0.01:0,bm:p.breath>0?(p.breath>2?1:2):0,sn:p.snapT>0?1:0,co:p.colos>0?(p.colN|0)+1:0,kd:p.kindle|0,fr:p.pathIdx===1?[p.fmode|0,p.swN|0,p.swC|0,(p.slideT>0?1:0)|(p.cryo>0?2:0)|(p.auraT>0?4:0)|(p.ffT>0?8:0)|(p.mirror>0?16:0)|(p.grT>0?32:0)]:0,xh:Math.ceil(p.xhp||0),ul:p.unl?Object.keys(p.unl).join(','):'',tk:p.doing?r1(p.doing.left):0})),
     M:modeSnap(),
     E:G.en.map(e=>({id:e.id,t:e.type,x:r1(e.x),y:r1(e.y),h:r1(e.h||0),hp:Math.ceil(e.hp),mh:Math.ceil(e.maxHp),sl:e.slam>0,st:e.stun>0,bn:e.burn>0,br:e.brn|0,fm:fxMask(e),lg:e.lunge>0})),
     MN:(G.mins||[]).map(m=>[m.id,m.type,Math.round(m.x),Math.round(m.y),r1(m.h||0),Math.max(1,Math.round(m.hp/m.maxHp*100)),m.owner,m.team,fxMask(m)]),
@@ -3037,7 +3031,54 @@ function explosionFX(x,y,H){
 }
 
 // ---------- เอฟเฟกต์คาถาใหม่ ----------
-const ZV=[],COLB=[],WVV=[],GLV=[];
+const ZV=[],COLB=[],WVV=[],GLV=[],ICEV=[],SLV=[],ULTV=[];
+// พื้นน้ำแข็ง: แผ่นน้ำแข็งใสๆ บนพื้น (ทางไถล/ทางคลื่นดาบ) • วงน้ำแข็ง = แผ่นใหญ่ + ขอบวงเรืองแสง + แท่งน้ำแข็งเล็กรอบขอบ ให้เห็นระยะชัด
+const _iceDisc=new THREE.CircleGeometry(1,28);_iceDisc.rotateX(-Math.PI/2);
+const _iceEdge=new THREE.RingGeometry(0.955,1,72);_iceEdge.rotateX(-Math.PI/2);
+const _iceSpk=new THREE.ConeGeometry(1,1,5);_iceSpk.translate(0,0.5,0);
+function iceFloorMat(op){return new THREE.MeshStandardMaterial({color:'#bfe6fa',emissive:'#2f7fb8',emissiveIntensity:0.25,roughness:0.04,metalness:0.35,transparent:true,opacity:op,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-2,polygonOffsetUnits:-2});}
+function makeIceFloor(x,y,r,t,ring){
+  const g=new THREE.Group();g.position.set(tx(x),0.035,tz(y));scene.add(g);
+  const mats=[];
+  const disc=new THREE.Mesh(_iceDisc,iceFloorMat(ring?0.32:0.55));disc.scale.setScalar(r*S3*(ring?1:rnd(0.95,1.2)));disc.rotation.y=rnd(0,6.28);g.add(disc);mats.push([disc.material,ring?0.32:0.55]);
+  const sheen=new THREE.Mesh(_iceDisc,new THREE.MeshBasicMaterial({color:hdr('#e8f8ff',1),transparent:true,opacity:0.08,blending:THREE.AdditiveBlending,depthWrite:false}));sheen.scale.setScalar(r*S3*0.55);sheen.position.set(rnd(-0.2,0.2)*r*S3,0.01,rnd(-0.2,0.2)*r*S3);g.add(sheen);mats.push([sheen.material,0.08]);
+  const spikes=[];
+  if(ring){
+    const edge=new THREE.Mesh(_iceEdge,new THREE.MeshBasicMaterial({color:hdr('#9fe4ff',1.1),transparent:true,opacity:0.7,blending:THREE.AdditiveBlending,depthWrite:false}));edge.scale.setScalar(r*S3);edge.position.y=0.02;g.add(edge);mats.push([edge.material,0.7]);
+    const sm=iceMat(0.85);mats.push([sm,0.85]);
+    const n=Math.round(r*S3*2.2);
+    for(let i=0;i<n;i++){const a=i/n*Math.PI*2+rnd(-0.05,0.05),m=new THREE.Mesh(_iceSpk,sm);const hh=rnd(0.35,0.9),rr=rnd(0.12,0.22);m.position.set(Math.cos(a)*r*S3,0,Math.sin(a)*r*S3);m.rotation.set(Math.sin(a)*0.35,rnd(0,6),-Math.cos(a)*0.35);m.userData={hh,rr};m.scale.set(0.001,0.001,0.001);g.add(m);spikes.push(m);}
+  }
+  return {g,mats,spikes,age:0,t};
+}
+function updateIceFloors(dt){
+  for(let i=ICEV.length-1;i>=0;i--){
+    const v=ICEV[i];v.age+=dt;
+    const k=Math.min(1,v.age/0.2)*Math.min(1,Math.max(0,(v.t-v.age)/0.6));
+    for(const [m,op] of v.mats)m.opacity=op*k;
+    for(const s of v.spikes){const u=s.userData;s.scale.set(u.rr*k+0.001,u.hh*k+0.001,u.rr*k+0.001);}
+    if(v.age>=v.t){scene.remove(v.g);v.mats.forEach(([m])=>m.dispose());ICEV.splice(i,1);}
+  }
+}
+// รอยฟันดาบ: เสี้ยววงเรืองแสงที่จางเร็ว (แนวนอน = ฟันกวาด / แนวตั้ง = ฟันจากบนลงล่าง)
+function makeSlash(x,y,h,a,R,vert,tilt,col){
+  const half=vert?1.25:1.05,geo=new THREE.RingGeometry(R*S3*0.62,R*S3,32,1,vert?-0.7:-half,vert?2.5:half*2);
+  if(!vert)geo.rotateX(-Math.PI/2);
+  const m=new THREE.Mesh(geo,new THREE.MeshBasicMaterial({color:hdr(col||'#cfefff',1.8),transparent:true,opacity:0.85,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide}));
+  m.position.set(tx(x),h,tz(y));m.rotation.order='YXZ';m.rotation.y=-a;m.rotation.x=tilt||0;scene.add(m);
+  SLV.push({m,age:0,life:0.22});
+}
+function updateSlashes(dt){
+  for(let i=SLV.length-1;i>=0;i--){const s=SLV[i];s.age+=dt;const k=s.age/s.life;s.m.material.opacity=0.85*(1-k);s.m.scale.setScalar(1+0.18*k);if(k>=1){scene.remove(s.m);s.m.geometry.dispose();s.m.material.dispose();SLV.splice(i,1);}}
+  for(let i=ULTV.length-1;i>=0;i--){
+    const u=ULTV[i];const st=Math.min(600-u.d,2000*dt);u.d+=st;u.acc+=st;
+    const c=Math.cos(u.a),sn=Math.sin(u.a),x=u.x+c*u.d,y=u.y+sn*u.d;
+    if(u.acc>=55){u.acc=0;for(const s of [0,-1,1]){const px=x-c*(s?-30:0)*0-sn*55*s+c*(s?30:0),py=y+c*55*s+sn*(s?30:0);makeSlash(px,py,1.1+rnd(-0.2,0.4),u.a+rnd(-0.4,0.4),rnd(70,100),false,rnd(-0.9,0.9),s?'#bfeaff':'#ffffff');}
+      burst(x,y,'#dff6ff',12,200,0.35,2,{h:1,g:2});}
+    if(u.d>=600)ULTV.splice(i,1);
+  }
+}
+
 // ภูเขาน้ำแข็งแบบท่าโทโดโรกิ: กลุ่มแท่งน้ำแข็งแหลมต่อกันเป็นแนว สูงขึ้นเรื่อยๆ (ความสูงตรงกับที่ host ใช้ให้เดินขึ้นไปได้)
 let _glGeo=null,_glMat=null,_glMat2=null;
 function makeGlacier(x,y,a,len,t){
@@ -3071,7 +3112,7 @@ function updateGlacierVis(dt){
   }
 }
 function updateZV(dt){
-  updateGlacierVis(dt);
+  updateGlacierVis(dt);updateIceFloors(dt);updateSlashes(dt);
   for(let i=WVV.length-1;i>=0;i--){
     const w=WVV[i];const st=Math.min(w.len-w.d,1500*dt);w.d+=st;
     const x=w.x+Math.cos(w.a)*w.d,y=w.y+Math.sin(w.a)*w.d,px=-Math.sin(w.a),py=Math.cos(w.a);
@@ -3088,7 +3129,7 @@ function updateZV(dt){
   for(let i=ZV.length-1;i>=0;i--){
     const z=ZV[i];z.t-=dt;if(z.t<=0){ZV.splice(i,1);continue;}
     if(z.kind==='icering'){
-      if(Math.random()<0.8){const a=rnd(0,6.283),d=Math.sqrt(Math.random())*z.r;PARTS.push({x:z.x+Math.cos(a)*d,y:z.y+Math.sin(a)*d,h:0.1,vx:rnd(-6,6),vy:rnd(-6,6),vh:rnd(0.2,0.7),life:1,max:1,col:'#e8f6ff',size:5,g:-0.1,smoke:true,grow:0.6,drag:2});}
+      if(Math.random()<0.2){const a=rnd(0,6.283),d=Math.sqrt(Math.random())*z.r;PARTS.push({x:z.x+Math.cos(a)*d,y:z.y+Math.sin(a)*d,h:0.1,vx:rnd(-6,6),vy:rnd(-6,6),vh:rnd(0.2,0.7),life:1,max:1,col:'#e8f6ff',size:4,g:-0.1,smoke:true,grow:0.6,drag:2});}
       if(Math.random()<0.6){const a=rnd(0,6.283);PARTS.push({x:z.x+Math.cos(a)*z.r,y:z.y+Math.sin(a)*z.r,h:0.15,vx:0,vy:0,vh:rnd(0.8,1.8),life:0.6,max:0.6,col:'#bfeaff',size:2.2,g:-0.5});}
       continue;
     }
@@ -3215,11 +3256,12 @@ function efxFX(ev){
   switch(ev.z){
     // ----- สายน้ำแข็ง (ออกแบบโดยผู้เล่น) -----
     case 'swing':{
-      const a=ev.a,R=ev.r||120,big=ev.c===2,col=ev.ax?'#dff6ff':'#bfeaff';
-      const from=ev.c===1?1:-1;
-      for(let i=0;i<(big?26:18);i++){const k=i/((big?26:18)-1),an=a+(big?0:from*(1-2*k))*1.0,rr=R*rnd(0.55,1);
-        PARTS.push({x:x+Math.cos(an)*rr,y:y+Math.sin(an)*rr,h:H+(big?1.2-k*1.2:rnd(-0.2,0.3)),vx:Math.cos(an)*60,vy:Math.sin(an)*60,vh:rnd(-0.3,0.6),life:0.25+k*0.1,max:0.35,col:i%3?col:'#ffffff',size:big?2.6:2,g:0,drag:4});}
-      if(big){ring(x+Math.cos(a)*R*0.6,y+Math.sin(a)*R*0.6,'#bfeaff',R*0.5,0.3,0.2);}
+      const a=ev.a,R=ev.r||120,big=ev.c===2,col=ev.ax?'#e8f8ff':'#cfefff';
+      const pts=[[x,y]];if(ev.m){const c=Math.cos(a),s=Math.sin(a);for(const k of [-1,1])pts.push([x+c*30-s*55*k,y+s*30+c*55*k]);}
+      pts.forEach(([px,py],i)=>{
+        if(big)makeSlash(px,py,H-0.2,a,R,true,0,col);else makeSlash(px,py,H+0.1,a,R,false,(ev.c===1?-0.25:0.25),col);
+        for(let j=0;j<(i?5:10);j++){const an=a+rnd(-1,1),rr=R*rnd(0.6,1);PARTS.push({x:px+Math.cos(an)*rr,y:py+Math.sin(an)*rr,h:H+rnd(-0.3,0.6),vx:Math.cos(an)*50,vy:Math.sin(an)*50,vh:rnd(-0.2,0.6),life:0.3,max:0.3,col:j%3?col:'#ffffff',size:1.8,g:1,drag:3});}
+      });
       if(near)snd('whoosh',{x,y,vol:0.5});break;}
     case 'iceboom':burst(x,y,'#dff6ff',40,ev.r*2.6,0.6,2.4,{h:H,vh:[0,5],g:6});ring(x,y,'#8fe0ff',ev.r,0.35,Math.max(0.2,H-1));smoke(x,y,H,10,'#e8f6ff',1.4,7,ev.r);FX.flashLight(x,y,H,'#8fe0ff',4,12,0.25);if(near)snd('break',ev);break;
     case 'slamgo':burst(x,y,'#dff6ff',16,160,0.4,2,{h:H,g:2});if(near)snd('whoosh',ev);break;
@@ -3228,17 +3270,18 @@ function efxFX(ev){
     case 'fswap':burst(x,y,ev.m?'#bfeaff':'#ffffff',18,120,0.35,1.8,{h:H,g:0});if(ev.id===NET.myId)snd('ui_click');break;
     case 'slide':burst(x,y,'#dff6ff',24,200,0.4,2,{h:0.3,vh:[0.5,2],g:3});if(near)snd('whoosh',ev);break;
     case 'ice':
-      if(ev.c){SHAPES_Q.push({k:'rune',x,y,col:'#8fe0ff',s1:ev.r*S3,life:ev.t,op:0.65});SHAPES_Q.push({k:'decal',x,y,col:'#e8f6ff',s1:ev.r/26,life:ev.t,op:0.4});ZV.push({x,y,r:ev.r,t:ev.t,kind:'icering',col:'#8fe0ff'});}
-      else{SHAPES_Q.push({k:'decal',x,y,col:'#e8f8ff',s1:ev.r/24,life:ev.t,op:0.55});if(Math.random()<0.5)burst(x,y,'#ffffff',3,60,0.4,1.4,{h:0.2,g:0});}
+      ICEV.push(makeIceFloor(x,y,ev.r,ev.t,ev.c));
+      if(ev.c)ZV.push({x,y,r:ev.r,t:ev.t,kind:'icering',col:'#8fe0ff'});
+      else if(Math.random()<0.5)burst(x,y,'#ffffff',3,60,0.4,1.4,{h:0.2,g:0});
       break;
-    case 'perma':ring(x,y,'#bfeaff',ev.r,0.5,0.2);burst(x,y,'#dff6ff',70,ev.r*1.6,0.8,2.2,{h:0.3,vh:[0,2],g:1});FX.flashLight(x,y,1,'#8fe0ff',5,22,0.4);if(near)snd('nova',{x,y,vol:0.6});break;
+    case 'perma':ring(x,y,'#ffffff',ev.r,0.4,0.15);burst(x,y,'#dff6ff',70,ev.r*1.6,0.8,2.2,{h:0.3,vh:[0,2],g:1});FX.flashLight(x,y,1,'#8fe0ff',5,22,0.4);if(near)snd('nova',{x,y,vol:0.6});break;
     case 'cryo':burst(x,y,'#dff6ff',40,140,0.6,2.4,{h:H,vh:[0,3],g:2});FX.flashLight(x,y,H,'#8fe0ff',4,10,0.3);if(near)snd('break',ev);break;
     case 'cryoend':burst(x,y,'#dff6ff',50,260,0.6,2.4,{h:H,vh:[1,5],g:8});if(near)snd('break',ev);break;
     case 'aura':ring(x,y,'#bfeaff',180,0.4,0.2);if(near)snd('push',{x,y,vol:0.4});break;
     case 'grcharge':if(near)snd('buff',ev);break;
     case 'gwave':WVV.push({x,y,a:ev.a,len:ev.len,d:0});if(near){snd('whoosh',ev);snd('slam',{x,y,vol:0.4});}break;
     case 'glacier':GLV.push(makeGlacier(x,y,ev.a,ev.len,ev.t));if(near){snd('break',ev);shake(5);}break;
-    case 'mirror':burst(x,y,'#dff6ff',50,260,0.5,2.4,{h:1,vh:[1,4],g:2});FX.flashLight(x,y,1.5,'#8fe0ff',6,16,0.4);if(near){snd('nova',{x,y,vol:0.7});shake(4);}break;
+    case 'mirror':ULTV.push({x,y,a:ev.a,d:0,acc:55});burst(x,y,'#dff6ff',50,260,0.5,2.4,{h:1,vh:[1,4],g:2});FX.flashLight(x,y,1.5,'#8fe0ff',6,16,0.4);if(near){snd('nova',{x,y,vol:0.7});shake(4);}break;
     case 'mirrorend':burst(x,y,'#dff6ff',40,200,0.5,2,{h:H,g:3});break;
     // ----- สายไฟ (ออกแบบโดยผู้เล่น) -----
     case 'brn':burst(x,y,'#ff8a2a',8,90,0.4,2,{h:H-0.4,vh:[0.5,2],g:-1});break;
@@ -5058,23 +5101,36 @@ function pyroFX(o,p,pz,now,dt){
 }
 // ---------- ภาพของสายน้ำแข็ง: ดาบ/ขวานน้ำแข็งที่ปลายไม้ ท่าฟัน โล่อัศวิน ไถล แช่แข็งตัวเอง ออร่า ร่างแยก ----------
 function iceMat(op,em){return new THREE.MeshStandardMaterial({color:'#d8f4ff',emissive:em||'#3a8ac0',emissiveIntensity:0.6,roughness:0.08,metalness:0.2,transparent:true,opacity:op,flatShading:true});}
+function iceRim(geo,s){return new THREE.Mesh(geo,new THREE.MeshBasicMaterial({color:hdr('#9fe0ff',1.4),transparent:true,opacity:0.35,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.BackSide}));}
 function makeIceSword(){
+  // ดาบคริสตัลน้ำแข็ง: ใบดาบหยักเป็นผลึก สันกลางเรืองแสง การ์ดเป็นผลึกเฉียงขึ้น อัญมณีกลาง
   const g=new THREE.Group();g.position.set(0,-1.1,0);
-  const blade=new THREE.Mesh(new THREE.CylinderGeometry(0.0,0.17,1.75,4),iceMat(0.88));blade.rotation.x=Math.PI;blade.position.y=-0.95;blade.scale.z=0.3;g.add(blade);
-  const edge=new THREE.Mesh(new THREE.CylinderGeometry(0.0,0.19,1.8,4),new THREE.MeshBasicMaterial({color:hdr('#9fe0ff',1.3),transparent:true,opacity:0.35,blending:THREE.AdditiveBlending,depthWrite:false}));edge.rotation.x=Math.PI;edge.position.y=-0.97;edge.scale.z=0.36;g.add(edge);
-  const guard=new THREE.Mesh(new THREE.BoxGeometry(0.42,0.06,0.1),iceMat(0.95));guard.position.y=-0.06;g.add(guard);
-  for(const s of [-1,1]){const sp=new THREE.Mesh(new THREE.ConeGeometry(0.04,0.22,4),iceMat(0.95));sp.position.set(s*0.24,-0.02,0);sp.rotation.z=s*-1.2;g.add(sp);}
-  const gl=new THREE.Sprite(glowMat('#8fe0ff',1.3));gl.scale.setScalar(0.5);gl.position.y=-0.1;g.add(gl);
+  const s=new THREE.Shape(),P=[[0.05,0],[0.15,-0.1],[0.11,-0.32],[0.17,-0.46],[0.12,-0.72],[0.16,-0.98],[0.1,-1.28],[0.13,-1.5],[0,-2.0]];
+  s.moveTo(-P[0][0],P[0][1]);for(const [px,py] of P)s.lineTo(-px,py);for(let i=P.length-2;i>=0;i--)s.lineTo(P[i][0],P[i][1]);
+  const geo=new THREE.ExtrudeGeometry(s,{depth:0.03,bevelEnabled:true,bevelThickness:0.03,bevelSize:0.022,bevelSegments:1});geo.translate(0,0,-0.015);
+  const blade=new THREE.Mesh(geo,new THREE.MeshStandardMaterial({color:'#e6f8ff',emissive:'#3a90d0',emissiveIntensity:0.55,roughness:0.04,metalness:0.4,transparent:true,opacity:0.86,flatShading:true}));g.add(blade);
+  const rim=iceRim(geo);rim.scale.set(1.12,1.03,1.6);g.add(rim);
+  const core=new THREE.Mesh(new THREE.BoxGeometry(0.02,1.75,0.075),new THREE.MeshBasicMaterial({color:hdr('#cfefff',2),transparent:true,opacity:0.8,blending:THREE.AdditiveBlending,depthWrite:false}));core.position.y=-0.92;g.add(core);
+  const gm=iceMat(0.95,'#5ab8f0');
+  for(const sd of [-1,1]){const q=new THREE.Mesh(new THREE.OctahedronGeometry(0.1),gm);q.scale.set(2.6,0.7,0.8);q.position.set(sd*0.24,0.02,0);q.rotation.z=sd*0.45;g.add(q);
+    const sh=new THREE.Mesh(new THREE.ConeGeometry(0.035,0.24,4),gm);sh.position.set(sd*0.42,0.12,0);sh.rotation.z=-sd*0.6;g.add(sh);}
+  const gem=new THREE.Mesh(new THREE.OctahedronGeometry(0.075),new THREE.MeshBasicMaterial({color:hdr('#7fe0ff',2.4)}));gem.position.set(0,0,0.04);g.add(gem);
+  const gl=new THREE.Sprite(glowMat('#8fe0ff',1.2));gl.scale.setScalar(0.45);g.add(gl);
   return g;
 }
 function makeIceAxe(){
+  // ขวานศึกน้ำแข็งสองคม: ด้ามยาวพันคาด ใบขวานพระจันทร์เสี้ยวสองข้าง หนามบน/ล่าง อัญมณีกลางหัว
   const g=new THREE.Group();g.position.set(0,-1.1,0);
-  const haft=new THREE.Mesh(new THREE.CylinderGeometry(0.035,0.04,1.5,6),iceMat(0.9,'#2a6a9a'));haft.position.y=-0.72;g.add(haft);
-  for(const s of [-1,1]){
-    const bl=new THREE.Mesh(new THREE.CircleGeometry(0.5,14,-Math.PI/2,Math.PI),iceMat(0.85));bl.material.side=THREE.DoubleSide;bl.position.set(s*0.04,-1.3,0);bl.rotation.y=Math.PI/2;bl.scale.set(1,1.15,1);if(s<0)bl.rotation.y=-Math.PI/2;g.add(bl);
-  }
-  const spike=new THREE.Mesh(new THREE.ConeGeometry(0.07,0.4,4),iceMat(0.95));spike.position.y=-1.62;spike.rotation.x=Math.PI;g.add(spike);
-  const gl=new THREE.Sprite(glowMat('#8fe0ff',1.5));gl.scale.setScalar(0.9);gl.position.y=-1.3;g.add(gl);
+  const hm=iceMat(0.92,'#2a6a9a');
+  const haft=new THREE.Mesh(new THREE.CylinderGeometry(0.04,0.045,1.75,7),hm);haft.position.y=-0.85;g.add(haft);
+  for(let i=0;i<4;i++){const w=new THREE.Mesh(new THREE.TorusGeometry(0.05,0.014,5,10),iceMat(0.95,'#6ac0f0'));w.rotation.x=Math.PI/2;w.position.y=-0.1-i*0.09;g.add(w);}
+  const s=new THREE.Shape();s.moveTo(0.04,0.2);s.quadraticCurveTo(0.32,0.42,0.66,0.62);s.quadraticCurveTo(0.48,0.18,0.52,0);s.quadraticCurveTo(0.48,-0.18,0.66,-0.62);s.quadraticCurveTo(0.32,-0.42,0.04,-0.2);s.lineTo(0.04,0.2);
+  const geo=new THREE.ExtrudeGeometry(s,{depth:0.04,bevelEnabled:true,bevelThickness:0.03,bevelSize:0.03,bevelSegments:1});geo.translate(0,0,-0.02);
+  const bm=new THREE.MeshStandardMaterial({color:'#e6f8ff',emissive:'#3a90d0',emissiveIntensity:0.55,roughness:0.04,metalness:0.45,transparent:true,opacity:0.88,flatShading:true});
+  for(const sd of [1,-1]){const b=new THREE.Mesh(geo,bm);b.position.y=-1.55;b.scale.x=sd;g.add(b);const r=iceRim(geo);r.position.y=-1.55;r.scale.set(sd*1.06,1.06,1.5);g.add(r);}
+  const top=new THREE.Mesh(new THREE.ConeGeometry(0.07,0.45,5),hm);top.position.y=-2.05;top.rotation.x=Math.PI;g.add(top);
+  const gem=new THREE.Mesh(new THREE.OctahedronGeometry(0.09),new THREE.MeshBasicMaterial({color:hdr('#7fe0ff',2.4)}));gem.position.set(0,-1.55,0.05);g.add(gem);
+  const gl=new THREE.Sprite(glowMat('#8fe0ff',1.4));gl.scale.setScalar(0.9);gl.position.y=-1.55;g.add(gl);
   return g;
 }
 function makeKiteShield(){
@@ -5099,16 +5155,33 @@ function frostFX(o,p,pz,now,dt){
   const melee=F[0]===0,flags=F[3]|0,ff=flags&8;
   if(!o.sword){o.sword=makeIceSword();o.armR.add(o.sword);o.axe=makeIceAxe();o.armR.add(o.axe);}
   o.sword.visible=melee&&!ff;o.axe.visible=melee&&!!ff;
-  // ท่าฟัน: เปลี่ยนเลขนับการฟัน = เริ่มแอนิเมชันใหม่
+  // ท่าฟัน: ง้าง → ฟัน → คืนท่า (ลื่นๆ มีบิดตัว) — ค่าทำให้นุ่มด้วยการไล่ค่าแบบ exponential
+  const SWT=0.34;
   if(o.swN===undefined)o.swN=F[1];
-  if(F[1]!==o.swN){o.swN=F[1];o.swT=0.26;o.swC=F[2];}
+  if(F[1]!==o.swN){o.swN=F[1];o.swT=SWT;o.swC=F[2];}
   if(o.swT>0)o.swT-=dt;
-  if(melee&&!p.fl){
-    if(o.swT>0){const k=1-o.swT/0.26,e=1-Math.pow(1-k,3);
-      if(o.swC===2){o.armR.rotation.x=lerp(-3.0,0.1,e);o.armR.rotation.z=-0.1;o.b.rotation.x=lerp(-0.15,0.35,e);}
-      else{const s=o.swC===1?-1:1;o.armR.rotation.x=-1.45;o.armR.rotation.z=lerp(-1.25*s,1.05*s,e);o.b.rotation.y=lerp(-0.45*s,0.4*s,e);}
-    }else{o.armR.rotation.x=-0.75;o.armR.rotation.z=-0.25;o.b.rotation.y*=0.8;}
-  }else o.b.rotation.y*=0.8;
+  const fa=o.fa||(o.fa={ax:-0.75,az:-0.25,by:0,bx:0});
+  let ax=-0.75,az=-0.25,by=0,bx=0;
+  if(melee&&!p.fl&&o.swT>0){
+    const k=1-o.swT/SWT,W=0.24,S=0.56,eo=t=>1-Math.pow(1-t,3),ei=t=>t*t*t;
+    if(o.swC===2){
+      if(k<W){const e=eo(k/W);ax=lerp(-0.75,-3.05,e);bx=lerp(0,-0.25,e);}
+      else if(k<S){const e=ei((k-W)/(S-W));ax=lerp(-3.05,0.3,e);bx=lerp(-0.25,0.5,e);}
+      else{const e=eo((k-S)/(1-S));ax=lerp(0.3,-0.75,e);bx=lerp(0.5,0,e);}
+      az=-0.12;
+    }else{
+      const sd=o.swC===1?-1:1;
+      if(k<W){const e=eo(k/W);az=lerp(-0.25,-1.45*sd,e);ax=lerp(-0.75,-1.5,e);by=lerp(0,-0.6*sd,e);}
+      else if(k<S){const e=(k-W)/(S-W),e2=e*e*(3-2*e);az=lerp(-1.45*sd,1.2*sd,e2);ax=-1.5;by=lerp(-0.6*sd,0.55*sd,e2);}
+      else{const e=eo((k-S)/(1-S));az=lerp(1.2*sd,-0.25,e);ax=lerp(-1.5,-0.75,e);by=lerp(0.55*sd,0,e);}
+    }
+  }
+  const sm=o.swT>0?Math.min(1,dt*40):Math.min(1,dt*12);
+  fa.ax+=(ax-fa.ax)*sm;fa.az+=(az-fa.az)*sm;fa.by+=(by-fa.by)*sm;fa.bx+=(bx-fa.bx)*sm;
+  if(melee&&!p.fl){o.armR.rotation.x=fa.ax;o.armR.rotation.z=fa.az;o.b.rotation.y=fa.by;if(Math.abs(fa.bx)>0.01)o.b.rotation.x+=fa.bx;}
+  else o.b.rotation.y*=0.8;
+  // ไอเย็นจางๆ ตามใบดาบ
+  if(melee&&Math.random()<0.25){(ff?o.axe:o.sword).getWorldPosition(_pw);const s=simOf(_pw);PARTS.push({x:s.x+rnd(-8,8),y:s.y+rnd(-8,8),h:s.h-rnd(0.3,1.6),vx:0,vy:0,vh:-0.3,life:0.6,max:0.6,col:'#e8f6ff',size:1.4,g:0});}
   // Glacier Rend ชาร์จ: ดาบเรืองแสง ไอเย็นดูดเข้า
   if(flags&32){o.armR.rotation.x=-2.4;o.armR.rotation.z=-0.4;o.sword.getWorldPosition(_pw);const s=simOf(_pw);
     for(let i=0;i<3;i++){const an=rnd(0,6.283),r=rnd(30,55);PARTS.push({x:s.x+Math.cos(an)*r,y:s.y+Math.sin(an)*r,h:s.h-0.8+rnd(-0.8,0.8),vx:-Math.cos(an)*r/0.25,vy:-Math.sin(an)*r/0.25,vh:0,life:0.25,max:0.25,col:i?'#bfeaff':'#ffffff',size:2,g:0});}
@@ -5129,8 +5202,13 @@ function frostFX(o,p,pz,now,dt){
     o.cryoM.visible=true;o.cryoM.scale.set(0.95,1.45,0.95);o.cryoM.position.y=1.15;o.cryoM.rotation.y=now/3000;
     if(Math.random()<0.4)PARTS.push({x:p.x+rnd(-20,20),y:p.y+rnd(-20,20),h:pz+rnd(0.3,2.4),vx:0,vy:0,vh:0.3,life:0.7,max:0.7,col:'#7dff9a',size:1.6,g:-0.5});
   }else if(o.cryoM)o.cryoM.visible=false;
-  // ออร่าเยือกแข็ง
-  if(flags&4){for(let i=0;i<5;i++){const an=rnd(0,6.283),r=rnd(40,180);PARTS.push({x:p.x+Math.cos(an)*r,y:p.y+Math.sin(an)*r,h:pz+rnd(0.1,2.2),vx:-Math.sin(an)*120,vy:Math.cos(an)*120,vh:rnd(-0.6,0.2),life:0.6,max:0.6,col:i%2?'#ffffff':'#bfeaff',size:rnd(1.6,2.6),g:0,drag:1});}
+  if(!(flags&4)&&o.auraR)o.auraR.visible=o.auraD.visible=false;
+  // ออร่าเยือกแข็ง (ขอบวงบนพื้นให้เห็นระยะ)
+  if(flags&4){
+    if(!o.auraR){o.auraR=new THREE.Mesh(_iceEdge,new THREE.MeshBasicMaterial({color:hdr('#9fe4ff',1.4),transparent:true,opacity:0.75,blending:THREE.AdditiveBlending,depthWrite:false}));o.auraR.scale.setScalar(180*S3);o.g.add(o.auraR);
+      o.auraD=new THREE.Mesh(_iceDisc,new THREE.MeshBasicMaterial({color:hdr('#8fd8ff',1),transparent:true,opacity:0.12,blending:THREE.AdditiveBlending,depthWrite:false}));o.auraD.scale.setScalar(180*S3);o.g.add(o.auraD);}
+    o.auraR.visible=o.auraD.visible=true;o.auraR.position.y=o.auraD.position.y=0.06;o.auraR.material.opacity=0.55+0.25*Math.sin(now/180);
+for(let i=0;i<5;i++){const an=rnd(0,6.283),r=rnd(40,180);PARTS.push({x:p.x+Math.cos(an)*r,y:p.y+Math.sin(an)*r,h:pz+rnd(0.1,2.2),vx:-Math.sin(an)*120,vy:Math.cos(an)*120,vh:rnd(-0.6,0.2),life:0.6,max:0.6,col:i%2?'#ffffff':'#bfeaff',size:rnd(1.6,2.6),g:0,drag:1});}
     if(Math.random()<0.4){const an=rnd(0,6.283);PARTS.push({x:p.x+Math.cos(an)*rnd(0,170),y:p.y+Math.sin(an)*rnd(0,170),h:pz+0.15,vx:0,vy:0,vh:0.2,life:1,max:1,col:'#e8f6ff',size:6,g:0,smoke:true,grow:0.7});}}
   // ร่างแยก
   if(flags&16){
@@ -6053,7 +6131,7 @@ function crRenderKit(){
       return `<button class="ksp ${used?'used':''} ${blocked?'off':''}" data-ksp="${S.i}">${icoHTML(S.id,PATHS[S.path].col,24)}<span><b>${S.n}</b><small>${ROLE_N[S.role]} • ${S.cd} วิ</small></span></button>`;}).join('')}</div>`;
   }
   h+=`<div class="kdesc" id="kdesc">${spellDescHTML(SPELL_LIST[k.ids[crSlot]])}</div>`;
-  {const B=PBASIC[k.path];h+=`<div class="kdesc" style="margin-top:6px">${icoHTML('b_'+P.id,P.col,20)} <b>ท่าพื้นฐานของ${P.n}</b><br>ยิงปกติ — ${B.n}: ${B.d}<small>${ICODATA['sh_'+P.id]?icoHTML('sh_'+P.id,P.col,16):'🛡️'} ${B.shd||'โล่: เหมือนทุกสาย (Parry 0.28 วิ สะท้อนเวท)'}</small><small>💫 ${B.dsd||'พุ่ง: เหมือนทุกสาย (คูลดาวน์ 2.5 วิ)'}</small></div>`;}
+  {const B=PBASIC[k.path];h+=`<div class="kdesc" style="margin-top:6px">${icoHTML('b_'+P.id,P.col,20)} <b>ท่าพื้นฐานของ${P.n}</b><br>ยิงปกติ — ${B.n}: ${B.d}<small>${ICODATA['sh_'+P.id]?icoHTML('sh_'+P.id,P.col,16):'🛡️'} ${B.shd||'โล่: เหมือนทุกสาย (Parry 0.28 วิ ปัดกระสุนทิ้ง)'}</small><small>💫 ${B.dsd||'พุ่ง: เหมือนทุกสาย (คูลดาวน์ 2.5 วิ)'}</small></div>`;}
   crPanelSet(h);
 }
 function crAssign(si){
@@ -6255,7 +6333,7 @@ function botBrain(p,dt){
   });
   if(p.ult>=100&&d<(p.ultId==='colossus'?800:p.ultId==='mirrorlegion'?550:340))press('x');
   // บอทสายไฟ: กดค้างลูกไฟเป็นระยะ / ยิงตอนเป็นร่างยักษ์
-  if(p.pathIdx===0&&!(p.colos>0)){p.bhold=((p.bhold||0)+dt)%5;const c=p.bhold;inp.fire=d>900?0:c<3.1?1:c<3.2?0:(Math.floor(c/0.17)%2);}
+  if(p.pathIdx===0&&!(p.colos>0)){p.bhold=((p.bhold||0)+dt)%4;const c=p.bhold;inp.fire=d>900?0:c<2.1?1:c<2.2?0:(Math.floor(c/0.17)%2);}
 }
 let _obsKeep=null;
 function balArena(on){if(on&&!_obsKeep){_obsKeep=OBS;OBS=[];}else if(!on&&_obsKeep){OBS=_obsKeep;_obsKeep=null;}}
