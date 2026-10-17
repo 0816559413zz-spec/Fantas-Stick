@@ -3111,7 +3111,7 @@ composer.addPass(bloom);
 composer.addPass(new OutputPass());
 
 // ---------- คุณภาพกราฟิก: auto = ปรับความละเอียดเองตาม FPS / high = สวยสุด / low = เครื่องช้า ----------
-const QUAL={mode:['auto','high','low'].includes(store('wd_gfx'))?store('wd_gfx'):'auto',scale:1,acc:0,n:0,good:0,frame:0};
+const QUAL={mode:['auto','high','low'].includes(store('wd_gfx'))?store('wd_gfx'):'auto',scale:1,acc:0,n:0,good:0,frame:0,lvl:0};
 const QUAL_NAME={auto:'อัตโนมัติ',high:'สูง',low:'ประหยัด'};
 function qualPR(){
   const dpr=window.devicePixelRatio||1;
@@ -3121,12 +3121,12 @@ function qualPR(){
 }
 function applyQuality(){
   const pr=qualPR();gl.setPixelRatio(pr);composer.setPixelRatio(pr);
-  const sh=QUAL.mode!=='low';
+  const sh=QUAL.mode!=='low'&&!(QUAL.mode==='auto'&&QUAL.lvl>=2);
   if(gl.shadowMap.enabled!==sh){
     gl.shadowMap.enabled=sh;
     for(const sc of [scene,typeof stage!=='undefined'?stage:null])if(sc)sc.traverse(o=>{if(o.material)[].concat(o.material).forEach(m=>m.needsUpdate=true);});
   }
-  bloom.enabled=QUAL.mode!=='low';
+  bloom.enabled=QUAL.mode!=='low'&&!(QUAL.mode==='auto'&&QUAL.lvl>=1);
   if(typeof resize==='function'&&SW)resize();
 }
 // ปรับความละเอียดอัตโนมัติ: เฟรมช้า (<~40fps) ลดลงทีละขั้น / ลื่นต่อเนื่องค่อยเพิ่มกลับ
@@ -3135,8 +3135,9 @@ function qualTick(dt){
   QUAL.acc+=dt;QUAL.n++;
   if(QUAL.acc<2)return;
   const avg=QUAL.acc/QUAL.n*1000;QUAL.acc=0;QUAL.n=0;
-  if(avg>24&&QUAL.scale>0.55){QUAL.scale=Math.max(0.55,+(QUAL.scale-0.15).toFixed(2));QUAL.good=0;applyQuality();}
-  else if(avg<18&&QUAL.scale<1){if(++QUAL.good>=3){QUAL.good=0;QUAL.scale=Math.min(1,+(QUAL.scale+0.1).toFixed(2));applyQuality();}}
+  // ช้า: ลดความละเอียดก่อน → ปิดแสงฟุ้ง (lvl1) → ปิดเงา (lvl2) / ลื่นต่อเนื่อง: ค่อยๆ คืนกลับทีละขั้น
+  if(avg>24){QUAL.good=0;if(QUAL.scale>0.6)QUAL.scale=Math.max(0.55,+(QUAL.scale-0.15).toFixed(2));else if(QUAL.lvl<2)QUAL.lvl++;else if(QUAL.scale>0.45)QUAL.scale=0.45;applyQuality();}
+  else if(avg<16){if(++QUAL.good>=4){QUAL.good=0;if(QUAL.scale<0.7&&QUAL.lvl>0)QUAL.lvl--;else if(QUAL.scale<1)QUAL.scale=Math.min(1,+(QUAL.scale+0.1).toFixed(2));else if(QUAL.lvl>0)QUAL.lvl--;else return;applyQuality();}}
   else QUAL.good=0;
 }
 
@@ -3201,11 +3202,12 @@ const LPOOL=[];
 for(let i=0;i<6;i++){const L=new THREE.PointLight('#ffffff',0,12,2);L.position.set(0,-100,0);scene.add(L);LPOOL.push(L);}
 
 // ---------- สร้างแผนที่ ----------
+let CANDLESYS=null;
 let builtMap="",world=null,TORCHES=[],CANDLES=[],FIREFLIES=null,CRYSTAL=null,RUNE=null,SNITCH=null,BANNERS=[],SNOW=null;
 function buildWorld(id){
   if(world){scene.remove(world);world.traverse(o=>{if(o.geometry)o.geometry.dispose();});}
   world=new THREE.Group();scene.add(world);
-  builtMap=id;TORCHES=[];CANDLES=[];FIREFLIES=null;CRYSTAL=null;RUNE=null;SNITCH=null;BANNERS=[];SNOW=null;
+  builtMap=id;CANDLESYS=null;TORCHES=[];CANDLES=[];FIREFLIES=null;CRYSTAL=null;RUNE=null;SNITCH=null;BANNERS=[];SNOW=null;
   clearDyn();
   setSky(id==='pitch'?'sunset':'night');
   if(id==='forest')buildForest();else if(id==='pitch')buildPitch();else if(id==='hogsmeade')buildHogsmeade();else if(id==='greathall')buildGreatHall();else buildCastle();
@@ -3243,6 +3245,25 @@ function batchStatic(root,skip){
   }
 }
 
+// เทียนลอย: ไส้เทียนเป็น InstancedMesh ชิ้นเดียว + เปลวไฟเป็น Points ชิ้นเดียว (เดิมเทียนละ 2 draw call → รวมเหลือ 2 ทั้งหมด)
+function makeCandles(n,x0,x1,z0,z1,y0,y1){
+  const wax=new THREE.InstancedMesh(new THREE.CylinderGeometry(0.09,0.09,0.55,6),new THREE.MeshStandardMaterial({color:'#f3ead2',emissive:'#5a4a30',roughness:0.6}),n);
+  const pos=new Float32Array(n*3),xs=[],ys=[],zs=[],ph=[];
+  for(let i=0;i<n;i++){xs.push(rnd(x0,x1));zs.push(rnd(z0,z1));ys.push(rnd(y0,y1));ph.push(rnd(0,10));}
+  const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.BufferAttribute(pos,3));
+  const pts=new THREE.Points(geo,new THREE.PointsMaterial({map:glowTex,color:hdr('#ffcc66',2.4),size:1.15,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending}));
+  pts.frustumCulled=false;wax.frustumCulled=false;addW(wax);addW(pts);
+  CANDLESYS={n,wax,pts,pos,xs,ys,zs,ph,m:new THREE.Matrix4()};updateCandles(0);
+}
+function updateCandles(now){
+  const C=CANDLESYS;
+  for(let i=0;i<C.n;i++){
+    const y=C.ys[i]+Math.sin(now/900+C.ph[i])*0.3;
+    C.m.makeTranslation(C.xs[i],y,C.zs[i]);C.wax.setMatrixAt(i,C.m);
+    C.pos[i*3]=C.xs[i];C.pos[i*3+1]=y+0.42;C.pos[i*3+2]=C.zs[i];
+  }
+  C.wax.instanceMatrix.needsUpdate=true;C.pts.geometry.attributes.position.needsUpdate=true;
+}
 function buildCastle(){
   scene.fog.color.set('#151a33');scene.fog.near=50;scene.fog.far=170;
   hemi.color.set('#8fa6ff');hemi.groundColor.set('#2a1f1a');hemi.intensity=0.55;moonL.intensity=1.0;
@@ -3306,14 +3327,7 @@ function buildCastle(){
     if(c.r<40){const fire=new THREE.Sprite(glowMat('#7fb0ff',2.2));fire.position.y=9.9;fire.scale.set(2.2,2.8,1);g.add(fire);}
     g.position.set(tx(c.x),0,tz(c.y));shadowAll(g);addW(g);
   }
-  const cm=new THREE.MeshStandardMaterial({color:'#f3ead2',emissive:'#5a4a30',roughness:0.6});
-  const geo=new THREE.CylinderGeometry(0.09,0.09,0.55,8);
-  for(let i=0;i<70;i++){
-    const g=new THREE.Group();g.add(new THREE.Mesh(geo,cm));
-    const f2=new THREE.Sprite(glowMat('#ffcc66',2.2));f2.position.y=0.42;f2.scale.set(0.55,0.75,1);g.add(f2);
-    const y=rnd(10,15);g.position.set(rnd(-38,38),y,rnd(-23,23));addW(g);
-    CANDLES.push({g,y,ph:Math.random()*10});
-  }
+  makeCandles(70,-38,38,-23,23,10,15);
 }
 
 function buildHogsmeade(){
@@ -3475,12 +3489,7 @@ function buildGreatHall(){
   for(let x=-hw+3;x<hw;x+=gap/2)for(const sz of[-1,1]){
     const fl2=addW(new THREE.Sprite(glowMat('#ffa040',2.2)));fl2.position.set(x,4.2,sz*(hh-0.9));fl2.scale.set(1.5,2.1,1);TORCHES.push({fl:fl2,x,z:sz*hh,ph:R()*10});
   }
-  const cmat=new THREE.MeshStandardMaterial({color:'#f3ead2',emissive:'#5a4a30',roughness:0.6}),cgeo=new THREE.CylinderGeometry(0.09,0.09,0.55,8);
-  for(let i=0;i<120;i++){
-    const g=new THREE.Group();g.add(new THREE.Mesh(cgeo,cmat));
-    const f2=new THREE.Sprite(glowMat('#ffcc66',2.6));f2.position.y=0.5;f2.scale.set(0.95,1.3,1);g.add(f2);
-    const y=rnd(7,13);g.position.set(rnd(-hw+3,hw-3),y,rnd(-hh+3,hh-3));addW(g);CANDLES.push({g,y,ph:R()*10});
-  }
+  makeCandles(120,-hw+3,hw-3,-hh+3,hh-3,7,13);
 }
 
 function buildForest(){
@@ -3552,14 +3561,14 @@ function buildForest(){
 
   // หญ้า พุ่มไม้ เห็ดเรืองแสง
   const tuftG=new THREE.ConeGeometry(0.04,0.45,3);tuftG.translate(0,0.22,0);
-  const NT=7000,tufts=new THREE.InstancedMesh(tuftG,new THREE.MeshStandardMaterial({color:'#ffffff',roughness:1}),NT);
+  const NT=4200,tufts=new THREE.InstancedMesh(tuftG,new THREE.MeshStandardMaterial({color:'#ffffff',roughness:1}),NT);
   for(let i=0;i<NT;i++){
     q.setFromEuler(new THREE.Euler(rnd(-0.3,0.3),0,rnd(-0.3,0.3)));
     m4.compose(ps.set(rnd(-hw-10,hw+10),0,rnd(-hh-10,hh+10)),q,sc.set(1,rnd(0.35,0.9),1));tufts.setMatrixAt(i,m4);
     c.setHSL(0.27+R()*0.08,0.5,0.12+R()*0.12);tufts.setColorAt(i,c);
   }
   tufts.receiveShadow=true;addW(tufts);
-  const NB=260,bush=new THREE.InstancedMesh(new THREE.IcosahedronGeometry(1,1),new THREE.MeshStandardMaterial({color:'#ffffff',roughness:1,flatShading:true}),NB);
+  const NB=200,bush=new THREE.InstancedMesh(new THREE.IcosahedronGeometry(1,1),new THREE.MeshStandardMaterial({color:'#ffffff',roughness:1,flatShading:true}),NB);
   for(let i=0;i<NB;i++){
     const x=rnd(-hw,hw),z=rnd(-hh,hh);if(Math.hypot(x,z)<14){i--;continue;}
     const s=rnd(0.6,1.4);m4.compose(ps.set(x,s*0.4,z),q.identity(),sc.set(s*1.3,s,s*1.3));bush.setMatrixAt(i,m4);
@@ -4088,14 +4097,20 @@ let yaw=0,pitch=0.3,lastPh='',locked=false;
 const SENS=0.0024;
 const camPos=new THREE.Vector3(0,20,40),camLook=new THREE.Vector3();
 document.addEventListener('pointerlockchange',()=>{locked=document.pointerLockElement===cv;});
+const MAPCAM={castle:{m:1.4,wy:0},forest:{m:6,wy:0},pitch:{m:7,wy:0},hogsmeade:{m:4,wy:0},greathall:{m:1.4,wy:0}};
 function updateCamera(me,dt){
   const px=tx(me.x),pz=tz(me.y);
   const fx=Math.cos(yaw),fz=Math.sin(yaw),rx=-fz,rz=fx;
   const dist=me.fl?7.4:5.6,cp=Math.cos(pitch),sp=Math.sin(pitch);
   const focus=new THREE.Vector3(px+rx*0.85,(me.z||0)+2.05,pz+rz*0.85);
-  let x=focus.x-fx*dist*cp,y=focus.y+dist*sp,z=focus.z-fz*dist*cp;
-  const bx=MW*S3/2-1,bz=MH*S3/2-1;
-  x=clamp(x,-bx,bx);z=clamp(z,-bz,bz);y=Math.max(0.5,y);
+  // กล้องอยู่หลังผู้เล่น: ถ้าหลังชนขอบแผนที่ ให้ "ร่นกล้องเข้าหาตัว + ยกสูงขึ้น" แทนการบีบพิกัดทีละแกน (เดิมกล้องไปทับหัวตัวละคร)
+  // กล้องล้ำเข้าไปในตัวกำแพงได้ (กำแพงหนา ~1.6 หน่วย ฝั่งหลังกำแพงโปร่ง มองทะลุเห็นตัวละคร) เกินกว่านั้นให้ร่นกล้องเข้าหาตัว
+  const cfg=MAPCAM[MAPID]||MAPCAM.castle,hx=MW*S3/2,hz=MH*S3/2,bx=hx-1.2+cfg.m,bz=hz-1.2+cfg.m,ox=-fx*dist*cp,oz=-fz*dist*cp;
+  const lim=(f,o,b)=>o>1e-6?(b-f)/o:o<-1e-6?(-b-f)/o:1;
+  const k=Math.max(0.45,Math.min(1,lim(focus.x,ox,bx),lim(focus.z,oz,bz)));
+  let x=focus.x+ox*k,z=focus.z+oz*k,y=focus.y+dist*sp+(1-k)*dist*0.5;
+  x=clamp(x,-bx,bx);z=clamp(z,-bz,bz);
+  y=Math.max(0.5,y);
   camPos.lerp(new THREE.Vector3(x,y,z),1-Math.exp(-25*dt));
   cam.position.copy(camPos);
   if(shakeA>0)cam.position.add(new THREE.Vector3(rnd(-1,1),rnd(-1,1),rnd(-1,1)).multiplyScalar(shakeA*0.02));
@@ -4543,6 +4558,7 @@ function syncProj(v,now){
   for(const [id,o] of JM3)if(!seen.has(id)){scene.remove(o.g);o.g.traverse(m=>{if(m.material&&m.material!==o.halo.material)m.material.dispose();if(m.isLine)m.geometry.dispose();});JM3.delete(id);}
 }
 function animateWorld(now){
+  if(CANDLESYS)updateCandles(now);
   for(const c of CANDLES)c.g.position.y=c.y+Math.sin(now/900+c.ph)*0.3;
   for(const t of TORCHES){
     const f=0.85+0.15*Math.sin(now/70+t.ph)+0.08*Math.sin(now/23+t.ph*2);
