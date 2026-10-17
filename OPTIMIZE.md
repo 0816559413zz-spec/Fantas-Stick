@@ -1,13 +1,13 @@
 # Optimization backlog
 
-Notes only — **nothing here is implemented yet** (user asked to record first, fix later).
+Notes + status. Items marked [x] were done on 2026-10-18 (overnight session).
 Measured 2026-10-17 on the user's PC in a hidden Claude Browser pane, so absolute numbers are rough; compare before/after with the same harness (bottom of this file).
 Scope of this track: logic, performance, algorithms, loading. Not balance/gameplay.
 
 Priority: **P1** = real bug or big win, **P2** = clear win, **P3** = nice to have / needs more measuring.
 
 ## A. Bugs found while measuring
-- [ ] **P1 Texture leak.** Each `hostToLobby` → `hostStart` leaves 7–10 GPU textures behind (61 → 110 after 6 matches). `buildWorld()` (line ~3462) and `disposeObj()` (~4208) only call `geometry.dispose()`; materials and their `map` CanvasTextures are never disposed. Fix: dispose `material` (+ `material.map`) too, skipping shared ones (`glowTex`, `projGeo`/`tailGeo`-style shared assets).
+- [x] **P1 Texture leak.** (fixed: `disposeTree`/`disposeMaterial`; textures stay ~30 across matches) Each `hostToLobby` → `hostStart` leaves 7–10 GPU textures behind (61 → 110 after 6 matches). `buildWorld()` (line ~3462) and `disposeObj()` (~4208) only call `geometry.dispose()`; materials and their `map` CanvasTextures are never disposed. Fix: dispose `material` (+ `material.map`) too, skipping shared ones (`glowTex`, `projGeo`/`tailGeo`-style shared assets).
 - [ ] **P2 Doc/code mismatch.** Comment at line ~2616 says audio loads on first click; it actually loads at page open (`ac()` runs on load). Decide which is wanted and fix the comment or the trigger.
 
 ## B. Hitches (frame spikes)
@@ -23,8 +23,8 @@ Normal in-game frame here ≈ 9–17 ms.
 | Boss spawn (wave 5) | 45 ms | +90 geometries, +1 shader |
 | 3 bots join lobby | 45 ms | ≈ 43 un-shared geometries per `makeStudent` |
 
-- [ ] **P1 Pre-compile shaders.** Call `renderer.compileAsync(scene, cam)` right after `buildWorld` / during the 3-2-1 countdown, and once for the menu stage. Also pre-warm VFX materials (shield, colossus, boss) by adding them invisible once.
-- [ ] **P2 Find the pyro +381 geometries** on first cast and the frost-ult 213 ms spike (profile with `WD.PROF` + geometry diff).
+- [x] **P1 Pre-compile shaders.** (done: `prewarmShaders()` after `buildWorld`, `gl.compileAsync` + hidden VFX group; first spell casts no longer compile — Permafrost still adds 1 program) Call `renderer.compileAsync(scene, cam)` right after `buildWorld` / during the 3-2-1 countdown, and once for the menu stage. Also pre-warm VFX materials (shield, colossus, boss) by adding them invisible once.
+- [x] **P2 Find the pyro +381 geometries / frost-ult spike** — obsolete: those placeholder spells were replaced by the user's Pyro/Frost designs; the new ones were measured after prewarm (≤ 20 ms).
 - [ ] **P2 Share geometry/material between characters.** `makeStudent` creates ~43 geometries per player; same-shape parts should reuse one geometry, same-colour parts one material.
 - [ ] **P3 Cache built maps** (or at least reuse geometry/material across rebuilds) instead of rebuilding the same map each match.
 - [ ] **P3 Pool enemies and projectiles** instead of create/dispose on spawn/death.
