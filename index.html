@@ -245,6 +245,10 @@ body[data-screen=lobby] #voice{top:84px;left:auto;right:24px;width:340px}
 .kbtn{padding:5px 8px;font-size:13px;min-width:86px;background:rgba(7,11,24,.8);border:1px solid var(--line);color:var(--gold2)}
 .kbtn.wait{border-color:var(--gold);color:#fff;animation:kbw .8s infinite alternate}
 @keyframes kbw{to{background:rgba(140,105,30,.45)}}
+.mpick{display:flex;flex-wrap:wrap;gap:4px;margin-top:10px}
+.mchip{padding:4px 8px;font-size:12px;background:rgba(7,11,24,.75);border:1px solid var(--line);color:var(--mute)}
+.mchip.on{color:#05070f;background:var(--gold);border-color:var(--gold)}
+.mchip:disabled{cursor:default}
 #fps{position:fixed;left:10px;top:8px;z-index:6;font:600 12px Kanit,sans-serif;color:#9fe0a0;text-shadow:0 1px 2px #000;display:none;pointer-events:none}
 </style>
 </head>
@@ -476,6 +480,25 @@ function genHogsmeade(){
   }
   return {W:FW,H:FH,obs};
 }
+// ----- แผนที่โล่ง 3 แบบ (ผู้ใช้: ป่ามืดไม่สนุก อยากได้ที่โล่งๆ) -----
+function genMeadow(){
+  const FW=2800,FH=1800,R=mulberry(5150),obs=[];
+  for(const [fx,fy] of [[.3,.32],[.7,.68],[.3,.68],[.7,.32]])obs.push({x:FW*fx,y:FH*fy,r:22,k:'stone',hgt:5,s:R()});
+  for(const [fx,fy,r] of [[.5,.2,40],[.5,.8,40],[.17,.5,34],[.83,.5,34],[.42,.5,26],[.58,.5,26]])obs.push({x:FW*fx,y:FH*fy,r,k:'rock',hgt:2,s:R()});
+  return {W:FW,H:FH,obs};
+}
+function genLake(){
+  const FW=3000,FH=2000,R=mulberry(7777),obs=[];
+  for(const [fx,fy,r] of [[.32,.3,46],[.68,.7,46],[.5,.5,38],[.22,.62,30],[.78,.38,30],[.5,.18,26],[.5,.82,26]])obs.push({x:FW*fx,y:FH*fy,r,k:'icechunk',hgt:2.4,s:R()});
+  return {W:FW,H:FH,obs};
+}
+function genRuins(){
+  const FW=2600,FH=1800,R=mulberry(3141),obs=[];
+  const cx0=FW/2,cy0=FH/2;
+  for(let i=0;i<10;i++){const a=i/10*Math.PI*2+0.3;const broken=i%3!==0;obs.push({x:cx0+Math.cos(a)*620,y:cy0+Math.sin(a)*420,r:30,k:'column',hgt:broken?2.6+R()*2:8,s:R(),broken});}
+  for(const [dx,dy,a] of [[-260,-120,0.4],[260,130,-0.6]])obs.push({x:cx0+dx,y:cy0+dy,r:44,k:'fallen',hgt:1.8,s:R(),ry:a});
+  return {W:FW,H:FH,obs};
+}
 function genGreatHall(){
   const FW=2400,FH=1500,obs=[],tables=[];
   // โต๊ะยาว 4 บ้านวางตามแนวยาว (ช่องกลางเป็นทางเดินพรม) + โต๊ะอาจารย์ที่ปลายห้อง
@@ -489,8 +512,13 @@ const MAPS={
   forest:Object.assign({name:'🌲 ป่ามืด',d:'ป่ากว้าง ต้นไม้เยอะ ระวังแมงมุมยักษ์!'},genForest()),
   pitch:Object.assign({name:'🏟️ สนามควิดดิช',d:'สนามกว้างยามเย็น เหมาะกับบินไม้กวาด'},genPitch()),
   hogsmeade:Object.assign({name:'❄️ หมู่บ้านฮอกส์มี้ด',d:'หมู่บ้านหิมะยามค่ำ บ้านไม้ แผงตลาด และโคมไฟ'},genHogsmeade()),
-  greathall:Object.assign({name:'🕯️ ห้องโถงใหญ่',d:'โต๊ะยาวสี่บ้าน เทียนลอย เพดานเวทมนตร์'},genGreatHall())
+  greathall:Object.assign({name:'🕯️ ห้องโถงใหญ่',d:'โต๊ะยาวสี่บ้าน เทียนลอย เพดานเวทมนตร์'},genGreatHall()),
+  meadow:Object.assign({name:'🌄 ทุ่งหญ้าฮอกวอตส์',d:'ทุ่งกว้างยามเย็น หินตั้งไม่กี่ก้อน มองเห็นปราสาทไกลๆ'},genMeadow()),
+  lake:Object.assign({name:'🧊 ทะเลสาบน้ำแข็ง',d:'ลานน้ำแข็งกว้างใต้แสงจันทร์ มีก้อนน้ำแข็งให้หลบนิดหน่อย'},genLake()),
+  ruins:Object.assign({name:'🏛️ ซากลานประลอง',d:'ลานประลองโบราณกลางทราย เสาหักรอบขอบ ตรงกลางโล่ง'},genRuins())
 };
+// แผนที่ที่สุ่มได้ (ป่ามืดเอาออกจากการสุ่มตามที่ผู้ใช้ขอ — ยังเลือกเองในล็อบบี้ได้)
+const RANDOM_MAPS=['castle','pitch','hogsmeade','greathall','meadow','lake','ruins'];
 let MAPID='castle',MW=W,MH=H,OBS=MAPS.castle.obs;
 function setMapVars(id){if(!MAPS[id])id='castle';MAPID=id;MW=MAPS[id].W;MH=MAPS[id].H;OBS=MAPS[id].obs;}
 const COLORS=['#d33a2c','#2e9b5f','#2f6fd6','#e0b420','#8e44ad','#e8e8e8','#ff7ab6','#22c1c3'];
@@ -553,7 +581,7 @@ const MODES={
   tdm:{name:'🛡️ ทีม 2v2 / 3v3',d:'2-6 คน ทีมไหนได้ 15 kill ก่อนชนะ',min:2,max:6,team:true},
   quid:{name:'🏟️ ควิดดิช',d:'2-6 คน 2 ทีม บินแย่งบอลโยนเข้าห่วง',min:2,max:6,team:true,map:'pitch'},
   race:{name:'🏁 แข่งไม้กวาด',d:'1-6 คน บินลอดห่วงครบ 2 รอบ',min:1,max:6},
-  br:{name:'🌀 แบทเทิลรอยัล',d:'2-6 คน เก็บคาถา วงหด คนสุดท้ายชนะ',min:2,max:6,map:'forest'},
+  br:{name:'🌀 แบทเทิลรอยัล',d:'2-6 คน เก็บคาถา วงหด คนสุดท้ายชนะ',min:2,max:6,map:'lake'},
   imp:{name:'🐍 หาลอร์ดโวลเดอมอร์',d:'4-6 คน ทำภารกิจ จับตัวโวลเดอมอร์ (แบบ Among Us)',min:4,max:6}
 };
 const PDEF={
@@ -600,7 +628,10 @@ const POOLS={
   forest:{early:['spl','spider'],mid:['spider','wiz'],boss:'queen'},
   pitch:{early:['pixie','gob'],mid:['wiz','spider','pixie','troll'],boss:'dragon'},
   hogsmeade:{early:['gob','pixie'],mid:['wiz','pixie','troll'],boss:'dragon'},
-  greathall:{early:['gob','pixie'],mid:['wiz','troll','pixie'],boss:'dragon'}
+  greathall:{early:['gob','pixie'],mid:['wiz','troll','pixie'],boss:'dragon'},
+  meadow:{early:['gob','pixie'],mid:['wiz','spider','troll'],boss:'dragon'},
+  lake:{early:['pixie','spl'],mid:['spider','wiz','pixie'],boss:'queen'},
+  ruins:{early:['gob','spl'],mid:['wiz','troll','spider'],boss:'dragon'}
 };
 const CDK=['basic','q','e','r','f','dodge'];
 const BUFFS=[
@@ -1461,7 +1492,7 @@ function initHostLobby(){
   broadcastLobby();
   setScreen('lobby');
 }
-function lobbyMsg(){return {t:'lobby',ph:G.ph,mode:G.mode,map:G.map,code:NET.code,online:NET.online,host:NET.myId,players:plist().map(p=>({id:p.id,n:p.name,c:p.color,lk:p.lk,kt:p.kit,tm:p.lteam}))};}
+function lobbyMsg(){return {t:'lobby',ph:G.ph,mode:G.mode,map:G.map,mpk:G.mapPick||'',code:NET.code,online:NET.online,host:NET.myId,players:plist().map(p=>({id:p.id,n:p.name,c:p.color,lk:p.lk,kt:p.kit,tm:p.lteam}))};}
 function broadcastLobby(){const m=lobbyMsg();sendAll(m);onLobby(m);}
 
 function hostOnData(conn,d){
@@ -1515,7 +1546,8 @@ function hostStart(){
   // สุ่มแผนที่ทุกครั้งที่เริ่มเกม (ไม่ซ้ำกับรอบที่แล้วถ้าเป็นไปได้)
   const MD=MODES[G.mode];
   if(MD.map)G.map=MD.map;
-  else{const ks=Object.keys(MAPS).filter(k=>k!==G.lastMap);G.map=ks[Math.floor(Math.random()*ks.length)];}
+  else if(G.mapPick&&MAPS[G.mapPick])G.map=G.mapPick;
+  else{const ks=RANDOM_MAPS.filter(k=>k!==G.lastMap);G.map=ks[Math.floor(Math.random()*ks.length)];}
   G.lastMap=G.map;
   setMapVars(G.map);
   Object.assign(G,{ph:'count',cdT:3,time:0,proj:[],en:[],feed:[],pid:0,eid:0,wave:0,round:1,rw:{},teamScore:[0,0],
@@ -2849,7 +2881,7 @@ function playBuf(n,d){
 // เสียงบรรยากาศวนลูปตามแผนที่ (ปราสาท = จิ้งหรีดกลางคืน / ป่า = ป่าลึก)
 const AMB={windBuf:null,cur:null,layer:null,bufs:{},failed:{}};
 function ambTick(){
-  const k=screen==='game'?(MAPID==='forest'||MAPID==='hogsmeade'?'forest':MAPID==='castle'?'castle':null):null;
+  const k=screen==='game'?(MAPID==='forest'||MAPID==='hogsmeade'||MAPID==='meadow'||MAPID==='lake'?'forest':MAPID==='castle'||MAPID==='ruins'?'castle':null):null;
   if(k&&!AMB.bufs[k]&&!AMB.failed[k]){AMB.bufs[k]='loading';loadBuf(`audio/amb/${k}.ogg`).then(b=>{AMB.bufs[k]=b;}).catch(()=>{AMB.failed[k]=1;delete AMB.bufs[k];});}
   const want=k&&AMB.bufs[k]&&AMB.bufs[k]!=='loading'?k:null;
   if(want===AMB.cur)return;
@@ -2889,7 +2921,7 @@ function wantTrack(){
   if(v.mode==='imp')return 'imp';
   if(v.mode==='race'||v.mode==='quid')return 'pitch';
   if(v.E&&v.E.some(e=>EDEF[e.t]&&EDEF[e.t].boss))return 'boss';
-  return MAPID==='forest'||MAPID==='hogsmeade'?'forest':MAPID==='pitch'?'pitch':'castle';
+  return MAPID==='forest'||MAPID==='hogsmeade'||MAPID==='lake'?'forest':MAPID==='pitch'||MAPID==='meadow'||MAPID==='ruins'?'pitch':'castle';
 }
 // คืนค่า true ถ้าเพลงจากไฟล์ (หรือ "เพลงของฉัน") ดูแลอยู่ → ไม่ต้องเล่นเพลงสังเคราะห์
 function fileMusicTick(){
@@ -3824,8 +3856,8 @@ function buildWorld(id){
   world=new THREE.Group();scene.add(world);
   builtMap=id;CANDLESYS=null;TORCHES=[];CANDLES=[];FIREFLIES=null;CRYSTAL=null;RUNE=null;SNITCH=null;BANNERS=[];SNOW=null;
   clearDyn();
-  setSky(id==='pitch'?'sunset':'night');
-  if(id==='forest')buildForest();else if(id==='pitch')buildPitch();else if(id==='hogsmeade')buildHogsmeade();else if(id==='greathall')buildGreatHall();else buildCastle();
+  setSky(id==='pitch'||id==='meadow'||id==='ruins'?'sunset':'night');
+  if(id==='forest')buildForest();else if(id==='pitch')buildPitch();else if(id==='hogsmeade')buildHogsmeade();else if(id==='greathall')buildGreatHall();else if(id==='meadow')buildMeadow();else if(id==='lake')buildLake();else if(id==='ruins')buildRuins();else buildCastle();
   batchStatic(world,new Set([RUNE,CRYSTAL,SNITCH,FIREFLIES&&FIREFLIES.pts,...CANDLES.map(c=>c.g),...BANNERS.map(b=>b.m)].filter(Boolean)));
   gl.shadowMap.needsUpdate=true;
   setTimeout(prewarmShaders,0);
@@ -4229,6 +4261,84 @@ function buildForest(){
   FIREFLIES.pts.frustumCulled=false;
 }
 
+// ----- ทุ่งหญ้าฮอกวอตส์ (เย็น) -----
+function ringTrees(n,rx,rz,jitter,col,R){
+  const tg=new THREE.ConeGeometry(1,1,7);tg.translate(0,0.5,0);const trunk=new THREE.CylinderGeometry(0.3,0.4,1,6);trunk.translate(0,0.5,0);
+  const im=new THREE.InstancedMesh(tg,new THREE.MeshStandardMaterial({color:col,roughness:0.9,flatShading:true}),n),it=new THREE.InstancedMesh(trunk,new THREE.MeshStandardMaterial({color:'#3a2a1c',roughness:1}),n);
+  const m4=new THREE.Matrix4(),q=new THREE.Quaternion(),s=new THREE.Vector3(),p=new THREE.Vector3();
+  for(let i=0;i<n;i++){const a=i/n*Math.PI*2+R()*0.2,j=1+R()*jitter,h=8+R()*9,w=2.6+R()*1.6;
+    p.set(Math.cos(a)*rx*j,1.5,Math.sin(a)*rz*j);s.set(w,h,w);m4.compose(p,q,s);im.setMatrixAt(i,m4);
+    p.y=0;s.set(1,2,1);m4.compose(p,q,s);it.setMatrixAt(i,m4);}
+  im.castShadow=true;addW(im);addW(it);
+}
+function grassTex(base,seed,rep){const R=mulberry(seed);const t=texCanvas(256,256,g=>{g.fillStyle=base;g.fillRect(0,0,256,256);for(let i=0;i<3200;i++){g.fillStyle=`rgba(${30+R()*40|0},${70+R()*60|0},${20+R()*20|0},0.45)`;g.fillRect(R()*256,R()*256,2,3+R()*4);}for(let i=0;i<90;i++){g.fillStyle=['#f2e6a0','#e8a0c0','#ffffff'][i%3];g.fillRect(R()*256,R()*256,2,2);}});t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(rep,rep);return t;}
+function buildMeadow(){
+  scene.fog.color.set('#d8a888');scene.fog.near=130;scene.fog.far=520;
+  hemi.color.set('#ffe0b8');hemi.groundColor.set('#4a5a2a');hemi.intensity=0.75;moonL.intensity=1.5;
+  const R=mulberry(808),hw=MW*S3/2,hh=MH*S3/2;
+  const fl=addW(new THREE.Mesh(new THREE.PlaneGeometry(MW*S3,MH*S3),new THREE.MeshStandardMaterial({map:grassTex('#4f8a38',11,MW*S3/10),roughness:0.95})));fl.rotation.x=-Math.PI/2;fl.receiveShadow=true;
+  const out=addW(new THREE.Mesh(new THREE.PlaneGeometry(900,900),new THREE.MeshStandardMaterial({map:grassTex('#3f7430',12,90),roughness:1})));out.rotation.x=-Math.PI/2;out.position.y=-0.02;out.receiveShadow=true;
+  // ทะเลสาบไกลๆ ด้านใต้ + ปราสาทเงาๆ ด้านเหนือ + ต้นไม้รอบนอกสนาม
+  const lake=addW(new THREE.Mesh(new THREE.PlaneGeometry(500,120),new THREE.MeshStandardMaterial({color:'#5a7fa8',roughness:0.15,metalness:0.4})));lake.rotation.x=-Math.PI/2;lake.position.set(0,0.02,hh+80);
+  const cm=new THREE.MeshStandardMaterial({color:'#5a4a5a',roughness:1,flatShading:true});
+  for(const [x,w,h] of [[-60,18,40],[-30,12,58],[0,26,46],[28,12,64],[55,18,38],[80,10,50]]){const t=addW(new THREE.Mesh(new THREE.BoxGeometry(w,h,14),cm));t.position.set(x,h/2,-hh-170);const c=addW(new THREE.Mesh(new THREE.ConeGeometry(w*0.55,h*0.4,4),cm));c.position.set(x,h+h*0.2,-hh-170);c.rotation.y=Math.PI/4;}
+  ringTrees(70,hw+40,hh+40,0.35,'#2f5a2a',R);
+  const rockM=new THREE.MeshStandardMaterial({color:'#8a8478',roughness:0.95,flatShading:true}),stM=stoneMat(1,2,'#9a958a');
+  for(const o of OBS){const x=tx(o.x),z=tz(o.y);
+    if(o.k==='rock'){const m=addW(new THREE.Mesh(new THREE.DodecahedronGeometry(o.r*S3,0),rockM));m.position.set(x,o.r*S3*0.45,z);m.scale.set(1,0.7,1);m.rotation.y=o.s*6;shadowAll(m);}
+    else if(o.k==='stone'){const m=addW(new THREE.Mesh(new THREE.BoxGeometry(o.r*S3*1.3,o.hgt,o.r*S3*0.9),stM));m.position.set(x,o.hgt/2,z);m.rotation.set(0,o.s*3,(o.s-0.5)*0.15);shadowAll(m);}
+  }
+  const cloudM=new THREE.SpriteMaterial({map:glowTex,color:'#ffd6c0',transparent:true,opacity:0.35,depthWrite:false,fog:false});
+  for(let i=0;i<18;i++){const c=addW(new THREE.Sprite(cloudM));const a=R()*Math.PI*2,r=200+R()*200;c.position.set(Math.cos(a)*r,70+R()*70,Math.sin(a)*r);c.scale.set(80+R()*80,25+R()*20,1);}
+}
+// ----- ทะเลสาบน้ำแข็ง (กลางคืน) -----
+function buildLake(){
+  scene.fog.color.set('#16223a');scene.fog.near=90;scene.fog.far=380;
+  hemi.color.set('#a8c0f0');hemi.groundColor.set('#304668');hemi.intensity=0.55;moonL.intensity=1.0;
+  const R=mulberry(9191),hw=MW*S3/2,hh=MH*S3/2;
+  const ice=texCanvas(512,512,g=>{g.fillStyle='#6f98be';g.fillRect(0,0,512,512);
+    for(let i=0;i<60;i++){g.fillStyle=`rgba(${190+R()*50|0},${220+R()*30|0},255,0.18)`;g.beginPath();g.arc(R()*512,R()*512,20+R()*60,0,7);g.fill();}
+    g.strokeStyle='rgba(255,255,255,0.55)';g.lineWidth=1.2;for(let i=0;i<40;i++){let x=R()*512,y=R()*512;g.beginPath();g.moveTo(x,y);for(let k=0;k<6;k++){x+=(R()-0.5)*80;y+=(R()-0.5)*80;g.lineTo(x,y);}g.stroke();}});
+  ice.wrapS=ice.wrapT=THREE.RepeatWrapping;ice.repeat.set(MW*S3/40,MH*S3/40);
+  const fl=addW(new THREE.Mesh(new THREE.PlaneGeometry(MW*S3,MH*S3),new THREE.MeshStandardMaterial({map:ice,roughness:0.12,metalness:0.25})));fl.rotation.x=-Math.PI/2;fl.receiveShadow=true;
+  const snow=texCanvas(128,128,g=>{g.fillStyle='#c8d6ec';g.fillRect(0,0,128,128);for(let i=0;i<900;i++){g.fillStyle=R()<0.5?'rgba(240,246,255,.6)':'rgba(140,160,200,.3)';g.fillRect(R()*128,R()*128,2,2);}});snow.wrapS=snow.wrapT=THREE.RepeatWrapping;snow.repeat.set(70,70);
+  const out=addW(new THREE.Mesh(new THREE.PlaneGeometry(900,900),new THREE.MeshStandardMaterial({map:snow,roughness:1})));out.rotation.x=-Math.PI/2;out.position.y=-0.03;out.receiveShadow=true;
+  // ขอบทะเลสาบ: หิมะนูนต่ำๆ + สนสีเข้ม + ภูเขา
+  const bankM=new THREE.MeshStandardMaterial({color:'#d4e0f2',roughness:1,flatShading:true});
+  for(let i=0;i<40;i++){const a=i/40*Math.PI*2,m=addW(new THREE.Mesh(new THREE.DodecahedronGeometry(6+R()*5,0),bankM));m.position.set(Math.cos(a)*(hw+9),0,Math.sin(a)*(hh+9));m.scale.set(1.6,0.45,1.6);}
+  ringTrees(80,hw+30,hh+30,0.4,'#1f3a34',R);
+  const mtM=new THREE.MeshStandardMaterial({color:'#3a4a6a',roughness:1,flatShading:true});
+  for(let i=0;i<14;i++){const a=i/14*Math.PI*2+0.2,r=380+R()*80,hgt=60+R()*70,m=addW(new THREE.Mesh(new THREE.ConeGeometry(70+R()*40,hgt,6),mtM));m.position.set(Math.cos(a)*r,hgt/2-2,Math.sin(a)*r);}
+  const iceM=new THREE.MeshStandardMaterial({color:'#d8f0ff',emissive:'#2a5a8a',emissiveIntensity:0.35,roughness:0.08,metalness:0.2,flatShading:true});
+  for(const o of OBS){if(o.k!=='icechunk')continue;const x=tx(o.x),z=tz(o.y);
+    for(let k=0;k<3;k++){const s=o.r*S3*(k?0.55:0.9),m=addW(new THREE.Mesh(new THREE.IcosahedronGeometry(s,0),iceM));m.position.set(x+(k?(R()-0.5)*s*1.6:0),s*0.55,z+(k?(R()-0.5)*s*1.6:0));m.scale.set(1,k?1.1:0.9,1);m.rotation.set(R(),R()*6,R());shadowAll(m);}}
+}
+// ----- ซากลานประลอง (เย็น ทราย) -----
+function buildRuins(){
+  scene.fog.color.set('#d09a6a');scene.fog.near=120;scene.fog.far=480;
+  hemi.color.set('#ffdcb0');hemi.groundColor.set('#7a5a3a');hemi.intensity=0.75;moonL.intensity=1.5;
+  const R=mulberry(2718),hw=MW*S3/2,hh=MH*S3/2;
+  const sand=texCanvas(512,512,g=>{g.fillStyle='#c8a676';g.fillRect(0,0,512,512);for(let i=0;i<9000;i++){g.fillStyle=`rgba(${150+R()*70|0},${115+R()*60|0},${70+R()*40|0},0.35)`;g.fillRect(R()*512,R()*512,2,2);}
+    g.strokeStyle='rgba(120,90,55,0.55)';g.lineWidth=5;g.beginPath();g.ellipse(256,256,200,140,0,0,7);g.stroke();g.lineWidth=3;g.beginPath();g.ellipse(256,256,60,42,0,0,7);g.stroke();});
+  const fl=addW(new THREE.Mesh(new THREE.PlaneGeometry(MW*S3,MH*S3),new THREE.MeshStandardMaterial({map:sand,roughness:1})));fl.rotation.x=-Math.PI/2;fl.receiveShadow=true;
+  const sand2=texCanvas(128,128,g=>{g.fillStyle='#b8946a';g.fillRect(0,0,128,128);for(let i=0;i<1200;i++){g.fillStyle='rgba(150,115,75,.4)';g.fillRect(R()*128,R()*128,2,2);}});sand2.wrapS=sand2.wrapT=THREE.RepeatWrapping;sand2.repeat.set(80,80);
+  const out=addW(new THREE.Mesh(new THREE.PlaneGeometry(900,900),new THREE.MeshStandardMaterial({map:sand2,roughness:1})));out.rotation.x=-Math.PI/2;out.position.y=-0.02;out.receiveShadow=true;
+  // อัฒจันทร์หินโค้งรอบนอก (เป็นขั้นๆ แตกบางช่วง)
+  const stM=stoneMat(2,1,'#b8a080');
+  const N=44;for(let i=0;i<N;i++){const a=i/N*Math.PI*2;if(R()<0.12)continue;const rx=hw+12,rz=hh+12;for(let t=0;t<3;t++){const h=3+t*3,m=addW(new THREE.Mesh(new THREE.BoxGeometry(9,h,5),stM));m.position.set(Math.cos(a)*(rx+t*5),h/2,Math.sin(a)*(rz+t*5));m.lookAt(0,h/2,0);if(t===0)shadowAll(m);}}
+  const colM=stoneMat(1,2,'#d8c8a8');
+  for(const o of OBS){const x=tx(o.x),z=tz(o.y);
+    if(o.k==='column'){const r=o.r*S3*0.75;const base=addW(new THREE.Mesh(new THREE.BoxGeometry(r*2.6,0.6,r*2.6),colM));base.position.set(x,0.3,z);
+      const c=addW(new THREE.Mesh(new THREE.CylinderGeometry(r,r*1.1,o.hgt,12),colM));c.position.set(x,o.hgt/2+0.6,z);shadowAll(c);
+      if(!o.broken){const cap=addW(new THREE.Mesh(new THREE.BoxGeometry(r*2.6,0.8,r*2.6),colM));cap.position.set(x,o.hgt+1,z);shadowAll(cap);}
+      else{const top=addW(new THREE.Mesh(new THREE.ConeGeometry(r*1.05,0.9,7),colM));top.position.set(x,o.hgt+0.8,z);top.rotation.z=0.4;}}
+    else if(o.k==='fallen'){const c=addW(new THREE.Mesh(new THREE.CylinderGeometry(o.r*S3*0.45,o.r*S3*0.5,o.r*S3*2.6,12),colM));c.position.set(x,o.r*S3*0.45,z);c.rotation.set(0,o.ry,Math.PI/2);shadowAll(c);}
+  }
+  // กระถางไฟ 4 มุมลาน
+  const fireM=glowMat('#ff8a3a',2.2);
+  for(const [fx,fz] of [[-1,-1],[1,-1],[-1,1],[1,1]]){const x=fx*(hw-6),z=fz*(hh-6);const b=addW(new THREE.Mesh(new THREE.CylinderGeometry(0.9,0.5,1.4,10),new THREE.MeshStandardMaterial({color:'#4a3a2a',metalness:0.5,roughness:0.5})));b.position.set(x,0.7,z);
+    const fl2=addW(new THREE.Sprite(fireM));fl2.position.set(x,2,z);fl2.scale.set(2.4,3.2,1);TORCHES.push({fl:fl2,x,z,ph:R()*6});}
+}
 function buildPitch(){
   scene.fog.color.set('#c98a78');scene.fog.near=110;scene.fog.far=470;
   hemi.color.set('#ffd2a8');hemi.groundColor.set('#3e4a2a');hemi.intensity=0.65;moonL.intensity=1.45;
@@ -4761,7 +4871,7 @@ document.addEventListener('pointerlockchange',()=>{locked=document.pointerLockEl
 function overlayOpen(){return ['#over','#buff','#meet'].some(s=>{const el=document.querySelector(s);return el&&!el.classList.contains('hidden');});}
 function showPause(){if(overlayOpen())return;const el=$('#pause');el.classList.remove('hidden');$('#pLobby').style.display=NET.isHost?'':'none';INPUT.fire=INPUT.sh=INPUT.u=INPUT.d=INPUT.l=INPUT.r=INPUT.jh=INPUT.ch=0;}
 function hidePause(){$('#pause').classList.add('hidden');}
-const MAPCAM={castle:{m:1.4,wy:0},forest:{m:6,wy:0},pitch:{m:7,wy:0},hogsmeade:{m:4,wy:0},greathall:{m:1.4,wy:0}};
+const MAPCAM={castle:{m:1.4,wy:0},forest:{m:6,wy:0},pitch:{m:7,wy:0},hogsmeade:{m:4,wy:0},greathall:{m:1.4,wy:0},meadow:{m:8,wy:0},lake:{m:8,wy:0},ruins:{m:5,wy:0}};
 // เล็งตามเป้ากลางจอ: ยิงเส้นจากกล้องผ่านกลางจอ หาสิ่งแรกที่เส้นชน (ศัตรู/ผู้เล่น/สิ่งกีดขวาง) แล้วส่งจุดนั้นเป็นเป้า (ax/ay) + ความสูง (ah)
 // กล้องอยู่ข้างไหล่ขวา ถ้าเล็งจุดไกลตายตัว เป้าใกล้ๆ จะเบี้ยวซ้าย/สูงต่ำผิด — ต้องเล็งไปที่จุดชนจริง
 const _aimD=new THREE.Vector3();
@@ -6457,6 +6567,7 @@ $('#modes').addEventListener('click',e=>{
   const mb=e.target.closest('[data-map]');
   if(mb&&NET.isHost&&G&&G.ph==='lobby'){G.map=mb.dataset.map;broadcastLobby();}
 });
+$('#modeCard').addEventListener('click',e=>{const b=e.target.closest('[data-mappick]');if(b&&NET.isHost&&G&&G.ph==='lobby'){G.mapPick=b.dataset.mappick;broadcastLobby();}});
 // คลิกป้ายชื่อในล็อบบี้ = ย้ายทีม (โฮสต์ / โหมดทีม)
 cv.addEventListener('click',e=>{
   if(screen!=='lobby'||!NET.isHost||!G||G.ph!=='lobby'||!MODES[G.mode].team)return;
@@ -6485,10 +6596,12 @@ function renderLobby(){
   $('#roomHint').textContent=L.online?'ส่งรหัสห้องให้เพื่อน → เพื่อนใส่รหัสที่หน้าแรกแล้วกด "เข้าร่วม"':'โหมดออฟไลน์ — เล่นคนเดียว ไม่ต้องใช้อินเทอร์เน็ต';
   $('#pcount').innerHTML=`ผู้เล่น <b>${L.players.length}</b> / 6`;
   $('#modes').innerHTML=Object.entries(MODES).map(([k,m])=>`<button class="mode ${L.mode===k?'on':''}" data-mode="${k}" ${host?'':'disabled'}><span class="ic"><span>${modeIcon(m)}</span></span><span><b>${modeTitle(m)}</b><small>${m.min===m.max?m.min:m.min+'-'+m.max} คน</small></span></button>`).join('');
-  $('#mapNote').textContent='แผนที่สุ่มให้เอง: '+Object.values(MAPS).map(m=>m.name).join(' • ');
-  const mapTxt=M.map?MAPS[M.map].name:'🎲 สุ่ม';
+  $('#mapNote').textContent='';
+  const mapTxt=M.map?MAPS[M.map].name:L.mpk&&MAPS[L.mpk]?MAPS[L.mpk].name:'🎲 สุ่ม';
+  const mapPick=M.map?'':`<div class="mpick">${['',...RANDOM_MAPS,'forest'].map(k=>`<button type="button" class="mchip ${(L.mpk||'')===k?'on':''}" data-mappick="${k}" ${host?'':'disabled'} title="${k?esc(MAPS[k].d):'สุ่มทุกรอบ'}">${k?MAPS[k].name:'🎲 สุ่ม'}</button>`).join('')}</div>`;
   $('#modeCard').innerHTML=`<div class="k">โหมดที่เลือก</div><div class="n">${modeIcon(M)} ${modeTitle(M)}</div><div class="d">${M.d}</div>
     <div class="meta"><span>👥 ${M.min===M.max?M.min:M.min+'-'+M.max} คน</span><span>🗺️ ${mapTxt}</span>${M.team?'<span>⚔️ 2 ทีม</span>':''}</div>
+    ${mapPick}
     ${M.team?`<div class="d" style="margin-top:8px">${host?'คลิกป้ายชื่อเพื่อนเพื่อย้ายทีม':'กด "สลับทีม" เพื่อย้ายทีม'}</div>`:''}`;
   $('#btnTeam').classList.toggle('hidden',!M.team);
   $('#btnStart').classList.toggle('hidden',!host);
