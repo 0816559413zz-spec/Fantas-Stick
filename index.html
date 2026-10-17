@@ -220,6 +220,32 @@ body[data-screen=lobby] #voice{top:84px;left:auto;right:24px;width:340px}
 #toast{position:fixed;left:50%;bottom:150px;transform:translateX(-50%);background:var(--corners),var(--fill);border:1px solid var(--line);padding:9px 20px;opacity:0;transition:opacity .3s;pointer-events:none;z-index:9}
 #toast.show{opacity:1}
 #trainEnd{position:fixed;right:12px;top:60px;z-index:5}
+#settings{z-index:20}
+.setcard{width:min(560px,100%);max-height:calc(100vh - 40px);overflow-y:auto;scrollbar-width:none}
+.setcard::-webkit-scrollbar{display:none}
+.srow{display:grid;grid-template-columns:170px 1fr 56px;align-items:center;gap:12px;margin:8px 0;font-size:14px;color:var(--text)}
+.srow input[type=range]{width:100%;accent-color:var(--gold)}
+.srow b{text-align:right;color:var(--gold2);font-weight:600}
+.srow select{grid-column:2/4;background:rgba(7,11,24,.9);color:var(--text);border:1px solid var(--line);padding:6px 8px;font:inherit}
+.srow.tog{grid-template-columns:170px 1fr}
+.srow.tog input{justify-self:end;width:18px;height:18px;accent-color:var(--gold)}
+.srow.tog i{display:none}
+.keys{display:grid;grid-template-columns:1fr 1fr;gap:4px 16px;font-size:13px;color:var(--mute)}
+.keys b{display:inline-block;min-width:76px;color:var(--gold2);font-weight:600;margin-right:6px}
+.stabs{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 12px}
+.stab{padding:7px 12px;font-size:13px;background:rgba(7,11,24,.7);border:1px solid var(--line);color:var(--mute)}
+.stab.on{color:var(--gold2);border-color:var(--gold);background:linear-gradient(180deg,rgba(140,105,30,.35),rgba(40,28,6,.4))}
+.segs{grid-column:2/4;display:flex;gap:4px;flex-wrap:wrap}
+.seg{padding:5px 10px;font-size:12px;background:rgba(7,11,24,.7);border:1px solid var(--line);color:var(--mute)}
+.seg.on{color:#05070f;background:var(--gold);border-color:var(--gold)}
+.xhprev{display:flex;justify-content:center;margin:6px 0}
+.xhprev canvas{position:static !important;inset:auto;width:120px !important;height:70px !important;border:1px solid var(--line);z-index:auto}
+.kbind{display:grid;grid-template-columns:1fr 1fr;gap:0 18px}
+.srow.kb{grid-template-columns:1fr 92px;margin:4px 0}
+.kbtn{padding:5px 8px;font-size:13px;min-width:86px;background:rgba(7,11,24,.8);border:1px solid var(--line);color:var(--gold2)}
+.kbtn.wait{border-color:var(--gold);color:#fff;animation:kbw .8s infinite alternate}
+@keyframes kbw{to{background:rgba(140,105,30,.45)}}
+#fps{position:fixed;left:10px;top:8px;z-index:6;font:600 12px Kanit,sans-serif;color:#9fe0a0;text-shadow:0 1px 2px #000;display:none;pointer-events:none}
 </style>
 </head>
 <body>
@@ -237,8 +263,7 @@ body[data-screen=lobby] #voice{top:84px;left:auto;right:24px;width:340px}
       <button class="mi" id="btnHost">สร้างห้องออนไลน์<small>ได้รหัสห้องไปส่งให้เพื่อน</small></button>
       <div class="mi join"><input type="text" id="codeIn" placeholder="รหัสห้อง" maxlength="5"><button id="btnJoin">เข้าร่วม</button></div>
       <button class="mi" id="btnGuide">คู่มือ<small>วิธีเล่น / ปุ่มกด / เล่นกับเพื่อน</small></button>
-      <button class="mi" id="btnGfx">กราฟิก: อัตโนมัติ<small>ถ้าเกมกระตุก เลือก "ประหยัด"</small></button>
-      <button class="mi" id="btnMusic">เพลง: เปิด</button>
+      <button class="mi" id="btnSettings">ตั้งค่า<small>เมาส์ / เสียง / กราฟิก / ภาพ</small></button>
       <div class="myrow"><button class="mi" id="btnMyMusic">เพลงของฉัน<small id="myMusicInfo">เลือกไฟล์เพลงในเครื่อง (เล่นแค่ในเครื่องคุณ)</small></button><button id="btnMyClear" class="hidden">ล้าง</button></div>
       <input type="file" id="myMusicIn" accept="audio/*" multiple hidden>
     </nav>
@@ -353,14 +378,16 @@ body[data-screen=lobby] #voice{top:84px;left:auto;right:24px;width:340px}
     <div class="lwait hidden" id="lobbyWait">รอโฮสต์เลือกโหมดและกดเริ่มเกม...</div>
     <div class="status" id="lobbyStatus" style="margin-top:0"></div>
   </div>
-  <div class="lbottom lp"><button id="btnLeave">ออกจากห้อง</button></div>
+  <div class="lbottom lp"><button id="btnLeave">ออกจากห้อง</button><button id="btnLobbySet">⚙️ ตั้งค่า</button></div>
 </div>
 
 <div id="buff" class="overlay hidden"></div>
 <div id="over" class="overlay hidden"></div>
 <div id="meet" class="overlay hidden"></div>
 <button id="trainEnd" class="hidden">🏁 จบการฝึก</button>
-<div id="pause" class="overlay hidden"><div class="card" style="width:min(360px,100%);text-align:center"><h1 style="font-size:34px">หยุดพัก</h1><div class="orn"></div><p class="sub">เกมยังเดินต่อสำหรับคนอื่น</p><div class="row" style="justify-content:center"><button class="pri" id="pResume">เล่นต่อ</button></div><div class="row" style="justify-content:center"><button id="pLobby">กลับล็อบบี้</button><button id="pLeave">ออกจากห้อง</button></div></div></div>
+<div id="settings" class="overlay hidden"><div class="card setcard"><h1 style="font-size:32px">ตั้งค่า</h1><div class="orn"></div><div id="setTabs" class="stabs"></div><div id="setBody"></div><div class="row" style="justify-content:flex-end"><button id="setReset">ค่าเริ่มต้น</button><button class="pri" id="setClose">เสร็จ</button></div></div></div>
+<div id="fps"></div>
+<div id="pause" class="overlay hidden"><div class="card" style="width:min(360px,100%);text-align:center"><h1 style="font-size:34px">หยุดพัก</h1><div class="orn"></div><p class="sub">เกมยังเดินต่อสำหรับคนอื่น</p><div class="row" style="justify-content:center"><button class="pri" id="pResume">เล่นต่อ</button></div><div class="row" style="justify-content:center"><button id="pSettings">ตั้งค่า</button><button id="pLobby">กลับล็อบบี้</button><button id="pLeave">ออกจากห้อง</button></div></div></div>
 
 <!-- ===== VOICE ===== -->
 <div id="voice" class="hidden">
@@ -1327,7 +1354,7 @@ function castUlt(p){const S=SPELLS[p.ultId];if(!S||p.ult<100||p.sil>0||p.cryo>0)
 // =====================================================================
 //  เครือข่าย (PeerJS / WebRTC)
 // =====================================================================
-const PREFIX='wizduel-th-v13-';
+const PREFIX='wizduel-th-v14-';
 const NET={peer:null,isHost:false,online:false,myId:'me',conns:new Map(),hostConn:null,code:''};
 let LOBBY=null;
 function genCode(){const c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let s='';for(let i=0;i<5;i++)s+=c[Math.floor(Math.random()*c.length)];return s;}
@@ -1785,7 +1812,7 @@ function damage(t,amt,srcId,kind){
     if(t.frz>0)amt*=1.15;
     if(t.shk>0&&kind!=='burn')amt*=1.08;
     if(t.mrk>0&&kind!=='burn')amt*=1.12;
-    t.hp-=amt;emit({k:'hit',x:t.x,y:t.y,h:(t.h||0)+1.4,n:Math.round(amt)});
+    t.hp-=amt;emit({k:'hit',x:t.x,y:t.y,h:(t.h||0)+1.4,n:Math.round(amt),s:srcId||undefined,b:kind==='burn'?1:undefined,kl:t.hp<=0?1:undefined});
     if(src&&src.alive)gainUlt(src,amt*0.3);
     if(t.hp<=0){t.dead=true;emit({k:'die',x:t.x,y:t.y,h:(t.h||0)+0.8,c:'#9fd0ff',t:'min'});}
     return;
@@ -1796,7 +1823,7 @@ function damage(t,amt,srcId,kind){
     if(t.shk>0&&kind!=='burn')amt*=1.08;
     if(t.mrk>0&&kind!=='burn')amt*=1.12;
     t.hp-=amt;
-    emit({k:'hit',x:t.x,y:t.y,h:cH(t)+vR(t)+0.4,n:Math.round(amt)});
+    emit({k:'hit',x:t.x,y:t.y,h:cH(t)+vR(t)+0.4,n:Math.round(amt),s:srcId||undefined,b:kind==='burn'?1:undefined,kl:t.hp<=0?1:undefined});
     if(src){gainUlt(src,amt);lifesteal(src,amt);src.dmgDealt+=amt;}
     if(t.hp<=0){t.dead=true;if(src)src.kills++;emit({k:'die',x:t.x,y:t.y,h:cH(t),c:EDEF[t.type].col,t:t.type});}
     return;
@@ -1827,7 +1854,7 @@ function damage(t,amt,srcId,kind){
   t.hp-=amt;t.lastHit=srcId;
   if(src&&src!==t){gainUlt(src,amt*0.7);lifesteal(src,amt);src.dmgDealt+=amt;}
   gainUlt(t,amt*0.25);
-  emit({k:'hit',x:t.x,y:t.y,h:t.z+2.4,n:Math.round(amt),id:t.id});
+  emit({k:'hit',x:t.x,y:t.y,h:t.z+2.4,n:Math.round(amt),id:t.id,s:srcId||undefined,b:kind==='burn'?1:undefined,kl:t.hp<=0?1:undefined,sx:src&&src!==t?Math.round(src.x):undefined,sy:src&&src!==t?Math.round(src.y):undefined});
   if(t.hp<=0){t.hp=0;playerDown(t,srcId);}
 }
 function playerDown(t,srcId){
@@ -2634,29 +2661,44 @@ setInterval(()=>{
 // =====================================================================
 const INPUT=emptyInput();
 let mouseX=0,mouseY=0,showBoard=false;
-const KMAP={KeyW:'u',ArrowUp:'u',KeyS:'d',ArrowDown:'d',KeyA:'l',ArrowLeft:'l',KeyD:'r',ArrowRight:'r',Space:'jh',KeyC:'ch',ControlLeft:'ch',ControlRight:'ch',ShiftLeft:'dh',ShiftRight:'dh'};
-const PMAP={KeyQ:'q',KeyE:'e',KeyR:'r',KeyF:'f',ShiftLeft:'sp',ShiftRight:'sp',Space:'jp',KeyX:'x',KeyB:'b',KeyV:'v'};
+const SET_DEF={sens:100,inv:0,master:90,sfx:100,music:80,fov:62,fps:0,dmg:1,shake:1,hitm:1,dirm:1,mini:1,names:1,xh:0,xhc:0,xhs:100,keys:{}};
+const SET=Object.assign({},SET_DEF,(()=>{try{return JSON.parse(store('wd_set')||'{}');}catch(e){return {};}})());
+// ปุ่มกดตั้งเองได้ (หน้าตั้งค่า > ปุ่มกด) — KMAP = ปุ่มค้าง / PMAP = ปุ่มกดทีละครั้ง
+const KEYACT=[['up','เดินหน้า','KeyW'],['down','ถอยหลัง','KeyS'],['left','ไปซ้าย','KeyA'],['right','ไปขวา','KeyD'],['dash','พุ่ง/หลบ','ShiftLeft'],['jump','กระโดด / บินขึ้น','Space'],['q','คาถา 1','KeyQ'],['e','คาถา 2','KeyE'],['r','คาถา 3','KeyR'],['f','คาถา 4','KeyF'],['ult','เวทโบราณ','KeyX'],['mode','สลับโหมด (สายน้ำแข็ง)','KeyV'],['broom','ไม้กวาด','KeyB'],['down2','บินลง','KeyC'],['talk','พูดไมค์','KeyT'],['score','ตารางคะแนน','Tab'],['music','เปิด/ปิดเพลง','KeyM']];
+const KMAP={},PMAP={};let KEYS={};
+function rebuildKeys(){
+  KEYS={};for(const [a,,d] of KEYACT)KEYS[a]=(SET.keys&&SET.keys[a])||d;
+  for(const o of [KMAP,PMAP])for(const k in o)delete o[k];
+  const K=(code,v)=>{KMAP[code]=v;},Pp=(code,v)=>{PMAP[code]=v;};
+  K(KEYS.up,'u');K(KEYS.down,'d');K(KEYS.left,'l');K(KEYS.right,'r');K('ArrowUp','u');K('ArrowDown','d');K('ArrowLeft','l');K('ArrowRight','r');
+  K(KEYS.jump,'jh');K(KEYS.down2,'ch');K('ControlLeft','ch');K(KEYS.dash,'dh');if(KEYS.dash==='ShiftLeft')K('ShiftRight','dh');
+  Pp(KEYS.q,'q');Pp(KEYS.e,'e');Pp(KEYS.r,'r');Pp(KEYS.f,'f');Pp(KEYS.dash,'sp');if(KEYS.dash==='ShiftLeft')Pp('ShiftRight','sp');Pp(KEYS.jump,'jp');Pp(KEYS.ult,'x');Pp(KEYS.broom,'b');Pp(KEYS.mode,'v');
+}
+function keyName(c){return ({Space:'Space',ShiftLeft:'Shift',ShiftRight:'Shift R',ControlLeft:'Ctrl',Tab:'Tab',Escape:'Esc'})[c]||c.replace(/^Key|^Digit/,'');}
+rebuildKeys();
+let _rebind=null;
 addEventListener('keydown',e=>{
+  if(_rebind){e.preventDefault();if(e.code!=='Escape'){SET.keys=Object.assign({},SET.keys,{[_rebind]:e.code});saveSet();rebuildKeys();}_rebind=null;renderSettings();return;}
   if(e.target.tagName==='INPUT'||e.target.tagName==='SELECT')return;
-  if(e.code==='Tab'){e.preventDefault();showBoard=true;return;}
-  if(e.code==='Space')e.preventDefault();
-  if(e.code==='KeyT')VOICE.talking=true;
+  if(e.code===KEYS.score){e.preventDefault();showBoard=true;return;}
+  if(e.code==='Space'||e.code==='Tab')e.preventDefault();
+  if(e.code===KEYS.talk)VOICE.talking=true;
   if(e.repeat)return;
   if(KMAP[e.code])INPUT[KMAP[e.code]]=1;
   if(PMAP[e.code]&&screen==='game')INPUT.c[PMAP[e.code]]++;
   if(/^Digit[123]$/.test(e.code)&&!$('#buff').classList.contains('hidden'))choosePick(+e.code[5]-1);
-  if(e.code==='KeyM'){ac();toggleMusic();}
+  if(e.code===KEYS.music){ac();toggleMusic();}
   if(e.code==='KeyN')myNext();
 });
 addEventListener('keyup',e=>{
-  if(e.code==='Tab')showBoard=false;
-  if(e.code==='KeyT')VOICE.talking=false;
+  if(e.code===KEYS.score)showBoard=false;
+  if(e.code===KEYS.talk)VOICE.talking=false;
   if(KMAP[e.code])INPUT[KMAP[e.code]]=0;
 });
 addEventListener('blur',()=>{INPUT.u=INPUT.d=INPUT.l=INPUT.r=INPUT.fire=INPUT.sh=INPUT.jh=INPUT.ch=INPUT.dh=0;VOICE.talking=false;showBoard=false;});
 addEventListener('mousemove',e=>{
   mouseX=e.clientX;mouseY=e.clientY;
-  if(locked&&screen==='game'){const v=VIEW.cur,me=v&&v.P&&v.P.find(q=>q.id===NET.myId),k=me&&me.bm===2?0.55:1;yaw+=e.movementX*SENS*k;pitch=clamp(pitch+e.movementY*SENS*k,-0.25,1.15);}
+  if(locked&&screen==='game'){const v=VIEW.cur,me=v&&v.P&&v.P.find(q=>q.id===NET.myId),k=me&&me.bm===2?0.55:1;yaw+=e.movementX*SENS*k;pitch=clamp(pitch+e.movementY*SENS*k*(SET.inv?-1:1),-0.25,1.15);}
 });
 cvEl().addEventListener('mousedown',e=>{
   if(screen!=='game')return;
@@ -2677,8 +2719,8 @@ function ac(){
     try{
       AC=new (window.AudioContext||window.webkitAudioContext)();
       const comp=AC.createDynamicsCompressor();comp.threshold.value=-14;comp.ratio.value=4;comp.connect(AC.destination);
-      MASTER=AC.createGain();MASTER.gain.value=0.9;MASTER.connect(comp);
-      SFXBUS=AC.createGain();SFXBUS.gain.value=1;SFXBUS.connect(MASTER);
+      MASTER=AC.createGain();MASTER.gain.value=SET.master/100;MASTER.connect(comp);
+      SFXBUS=AC.createGain();SFXBUS.gain.value=SET.sfx/100;SFXBUS.connect(MASTER);
       // reverb แบบห้องโถงหิน (impulse สร้างจาก noise ที่ค่อยๆ เบาลง)
       const len=AC.sampleRate*2.4,ir=AC.createBuffer(2,len,AC.sampleRate);
       for(let c=0;c<2;c++){const d=ir.getChannelData(c);for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/len,3.2);}
@@ -2930,7 +2972,7 @@ function padNote(f,t,dur,cut){
 }
 function musicTick(){
   if(!AC||AC.state!=='running')return;
-  if(!MUSIC.bus){MUSIC.bus=AC.createGain();MUSIC.bus.gain.value=MUSIC.on?0.8:0;MUSIC.bus.connect(MASTER);const s=AC.createGain();s.gain.value=0.6;MUSIC.bus.connect(s);s.connect(REVERB);}
+  if(!MUSIC.bus){MUSIC.bus=AC.createGain();MUSIC.bus.gain.value=MUSIC.on?0.8*SET.music/100:0;MUSIC.bus.connect(MASTER);const s=AC.createGain();s.gain.value=0.6;MUSIC.bus.connect(s);s.connect(REVERB);}
   ambTick();
   if(!MUSIC.on)return;
   if(fileMusicTick())return;
@@ -2959,7 +3001,7 @@ function musicTick(){
 setInterval(musicTick,400);
 function toggleMusic(){
   MUSIC.on=!MUSIC.on;store('wd_music',MUSIC.on?'1':'0');
-  if(MUSIC.bus)MUSIC.bus.gain.setTargetAtTime(MUSIC.on?0.8:0,AC.currentTime,0.3);
+  if(MUSIC.bus)MUSIC.bus.gain.setTargetAtTime(MUSIC.on?0.8*SET.music/100:0,AC.currentTime,0.3);
   if(MUSIC.on&&AC)MUSIC.nextT=AC.currentTime;
   if(MY.el){if(MUSIC.on&&MY.playing)MY.el.play().catch(()=>{});else MY.el.pause();}
   toast(MUSIC.on?'🎵 เปิดเพลงประกอบ':'🔇 ปิดเพลงประกอบ');
@@ -3019,7 +3061,7 @@ function burst(x,y,col,n,sp,life,size,o){
 function smoke(x,y,h,n,col,life,size,sp){burst(x,y,col||'#3a3640',n,sp||60,life||1.4,size||6,{h,vh:[0.3,1.4],g:-0.6,smoke:true,grow:1.6,drag:2});}
 function ring(x,y,col,r,life,h){SHAPES_Q.push({k:'ring',x,y,h:h!==undefined?h:0.15,col,s1:r*S3,life});}
 function floatText(x,y,t,col,size,h){TEXTS.push({x:x+rnd(-8,8),y,h,t:String(t),col,size:size||16,life:0.9,max:0.9});}
-function shake(a){shakeA=Math.max(shakeA,a);}
+function shake(a){if(!SET.shake)return;shakeA=Math.max(shakeA,a);}
 function wandPos(ev){const a=ev.a||0;return [ev.x+Math.cos(a)*24-Math.sin(a)*6,ev.y+Math.sin(a)*24+Math.cos(a)*6];}
 
 function impactFX(x,y,t,onTarget,H){
@@ -3053,16 +3095,16 @@ function explosionFX(x,y,H){
 // ---------- เอฟเฟกต์คาถาใหม่ ----------
 const ZV=[],COLB=[],WVV=[],GLV=[],ICEV=[],SLV=[],ULTV=[],OBV=[];
 // พื้นน้ำแข็ง: แผ่นน้ำแข็งใสๆ บนพื้น (ทางไถล/ทางคลื่นดาบ) • วงน้ำแข็ง = แผ่นใหญ่ + ขอบวงเรืองแสง + แท่งน้ำแข็งเล็กรอบขอบ ให้เห็นระยะชัด
-const _iceDisc=new THREE.CircleGeometry(1,28);_iceDisc.rotateX(-Math.PI/2);
-const _iceEdge=new THREE.RingGeometry(0.955,1,72);_iceEdge.rotateX(-Math.PI/2);
-const _iceSpk=new THREE.ConeGeometry(1,1,5);_iceSpk.translate(0,0.5,0);
+const _iceDisc=new THREE.CircleGeometry(1,28);_iceDisc.rotateX(-Math.PI/2);_iceDisc.userData.keep=true;
+const _iceEdge=new THREE.RingGeometry(0.955,1,72);_iceEdge.rotateX(-Math.PI/2);_iceEdge.userData.keep=true;
+const _iceSpk=new THREE.ConeGeometry(1,1,5);_iceSpk.translate(0,0.5,0);_iceSpk.userData.keep=true;
 function iceFloorMat(op){return new THREE.MeshStandardMaterial({color:'#bfe6fa',emissive:'#2f7fb8',emissiveIntensity:0.25,roughness:0.04,metalness:0.35,transparent:true,opacity:op,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-2,polygonOffsetUnits:-2});}
-const _icePlane=new THREE.PlaneGeometry(1,1);_icePlane.rotateX(-Math.PI/2);
+const _icePlane=new THREE.PlaneGeometry(1,1);_icePlane.rotateX(-Math.PI/2);_icePlane.userData.keep=true;
 let _icePathMat=null;
 function makeIceFloor(x,y,r,t,ring,lx,ly){
   if(!ring){
     // ทางน้ำแข็งเรียบๆ ต่อเนื่อง: วัสดุทึบ (ซ้อนกันไม่เป็นดวง) • ชิ้นยาวจากจุดก่อนหน้า + ข้อต่อกลม
-    if(!_icePathMat)_icePathMat=new THREE.MeshStandardMaterial({color:'#a8d4ec',emissive:'#1f5f90',emissiveIntensity:0.18,roughness:0.03,metalness:0.4,polygonOffset:true,polygonOffsetFactor:-2,polygonOffsetUnits:-2});
+    if(!_icePathMat){_icePathMat=new THREE.MeshStandardMaterial({color:'#a8d4ec',emissive:'#1f5f90',emissiveIntensity:0.18,roughness:0.03,metalness:0.4,polygonOffset:true,polygonOffsetFactor:-2,polygonOffsetUnits:-2});_icePathMat.userData.keep=true;}
     const g=new THREE.Group();g.position.set(tx(x),0.03,tz(y));scene.add(g);
     const w=r*S3*1.6;
     const j=new THREE.Mesh(_iceDisc,_icePathMat);j.scale.setScalar(w/2);g.add(j);
@@ -3114,9 +3156,9 @@ function updateSlashes(dt){
 // ภูเขาน้ำแข็งแบบท่าโทโดโรกิ: กลุ่มแท่งน้ำแข็งแหลมต่อกันเป็นแนว สูงขึ้นเรื่อยๆ (ความสูงตรงกับที่ host ใช้ให้เดินขึ้นไปได้)
 let _glGeo=null,_glMat=null,_glMat2=null;
 function makeGlacier(x,y,a,len,t){
-  if(!_glGeo){_glGeo=new THREE.ConeGeometry(1,1,5);_glGeo.translate(0,0.5,0);
+  if(!_glGeo){_glGeo=new THREE.ConeGeometry(1,1,5);_glGeo.translate(0,0.5,0);_glGeo.userData.keep=true;
     _glMat=new THREE.MeshStandardMaterial({color:'#cfefff',emissive:'#2a6fa0',emissiveIntensity:0.55,roughness:0.12,metalness:0.1,transparent:true,opacity:0.9,flatShading:true});
-    _glMat2=new THREE.MeshStandardMaterial({color:'#e8f8ff',emissive:'#4a9ad0',emissiveIntensity:0.7,roughness:0.08,transparent:true,opacity:0.75,flatShading:true});}
+    _glMat2=new THREE.MeshStandardMaterial({color:'#e8f8ff',emissive:'#4a9ad0',emissiveIntensity:0.7,roughness:0.08,transparent:true,opacity:0.75,flatShading:true});_glMat.userData.keep=_glMat2.userData.keep=true;}
   const g=new THREE.Group();g.position.set(tx(x),0,tz(y));g.rotation.y=-a;scene.add(g);
   const spikes=[];
   for(let d=0;d<=len;d+=45){
@@ -3481,10 +3523,12 @@ function fx(ev){
     case 'pop':impactFX(ev.x,ev.y,ev.t,false,H);break;
     case 'imp':impactFX(ev.x,ev.y,ev.t,true,H);break;
     case 'boom':explosionFX(ev.x,ev.y,H);if(near){snd('boom',ev);shake(7);}break;
-    case 'hit':
-      floatText(ev.x,ev.y,ev.n,ev.id===NET.myId?'#ff6b6b':'#ffffff',16,H);
-      if(ev.id===NET.myId){shake(5);snd('hurt');}
-      break;
+    case 'hit':{
+      const mine=ev.id===NET.myId;
+      if(SET.dmg||mine){if(ev.b)floatText(ev.x,ev.y,ev.n,'#ff9a4a',12,H-0.3);else floatText(ev.x,ev.y,ev.n,mine?'#ff6b6b':ev.s===NET.myId?'#ffe27a':'#ffffff',ev.s===NET.myId?18:16,H);}
+      if(mine&&!ev.b){shake(5);snd('hurt');if(ev.sx!==undefined)DIRI.push({a:Math.atan2(ev.sy-myPos().y,ev.sx-myPos().x),t:1});}
+      if(ev.s===NET.myId&&!mine&&!ev.b&&SET.hitm){HITM.t=0.18;HITM.kill=!!ev.kl;if(ev.kl)snd('kill');}
+      break;}
     case 'parry':
       FX.flashSprite(ev.x,ev.y,H,'#7ff6ff',0.5,7,0.3,3);
       FX.flashLight(ev.x,ev.y,H,'#7ff6ff',6,16,0.4);
@@ -3776,7 +3820,7 @@ for(let i=0;i<6;i++){const L=new THREE.PointLight('#ffffff',0,12,2);L.position.s
 let CANDLESYS=null;
 let builtMap="",world=null,TORCHES=[],CANDLES=[],FIREFLIES=null,CRYSTAL=null,RUNE=null,SNITCH=null,BANNERS=[],SNOW=null;
 function buildWorld(id){
-  if(world){scene.remove(world);world.traverse(o=>{if(o.geometry)o.geometry.dispose();});}
+  if(world){scene.remove(world);disposeTree(world);}
   world=new THREE.Group();scene.add(world);
   builtMap=id;CANDLESYS=null;TORCHES=[];CANDLES=[];FIREFLIES=null;CRYSTAL=null;RUNE=null;SNITCH=null;BANNERS=[];SNOW=null;
   clearDyn();
@@ -3784,6 +3828,7 @@ function buildWorld(id){
   if(id==='forest')buildForest();else if(id==='pitch')buildPitch();else if(id==='hogsmeade')buildHogsmeade();else if(id==='greathall')buildGreatHall();else buildCastle();
   batchStatic(world,new Set([RUNE,CRYSTAL,SNITCH,FIREFLIES&&FIREFLIES.pts,...CANDLES.map(c=>c.g),...BANNERS.map(b=>b.m)].filter(Boolean)));
   gl.shadowMap.needsUpdate=true;
+  setTimeout(prewarmShaders,0);
   const ext=Math.max(MW,MH)*S3/2+12;
   Object.assign(moonL.shadow.camera,{left:-ext,right:ext,top:ext,bottom:-ext,near:1,far:400});
   moonL.shadow.camera.updateProjectionMatrix();
@@ -3791,6 +3836,25 @@ function buildWorld(id){
   if(moonL.shadow.mapSize.x!==ms){moonL.shadow.mapSize.set(ms,ms);if(moonL.shadow.map){moonL.shadow.map.dispose();moonL.shadow.map=null;}}
 }
 function addW(o){world.add(o);return o;}
+// อุ่นเชดเดอร์ล่วงหน้า (ตอนโหลดด่าน/นับถอยหลัง) — ลดอาการกระตุกตอนใช้สกิลครั้งแรก
+let _prewarmed=false;
+function prewarmShaders(){
+  try{
+    const grp=new THREE.Group();grp.position.set(0,-800,0);
+    if(!_prewarmed){
+      const add=o=>{grp.add(o);return o;};
+      add(makeColossus());add(makeMagicCircle());
+      const st=add(new THREE.Group());st.add(makeIceSword());st.add(makeIceAxe());add(makeKiteShield());
+      add(new THREE.Mesh(_iceDisc,iceFloorMat(0.5)));add(new THREE.Mesh(_iceEdge,new THREE.MeshBasicMaterial({color:'#9fe4ff',transparent:true,blending:THREE.AdditiveBlending,depthWrite:false})));
+      add(new THREE.Mesh(_iceSpk,iceMat(0.85)));
+      for(const c of ['#ff6a2a','#bfeaff','#ffb347','#9fe0ff'])add(makeProj(c,'fire').g);
+      add(new THREE.Mesh(new THREE.IcosahedronGeometry(1,1),iceMat(0.6,'#4aa0d8')));
+    }
+    scene.add(grp);
+    const done=()=>{scene.remove(grp);if(!_prewarmed){disposeTree(grp);_prewarmed=true;}};
+    if(gl.compileAsync)gl.compileAsync(scene,cam).then(done,done);else{gl.compile(scene,cam);done();}
+  }catch(e){console.warn('prewarm',e);}
+}
 // รวมชิ้นส่วนฉากที่ไม่ขยับและใช้วัสดุเดียวกันเป็น mesh เดียว (ลด draw call จากหลายร้อยเหลือไม่กี่สิบ)
 function batchStatic(root,skip){
   root.updateMatrixWorld(true);
@@ -4522,7 +4586,23 @@ function makeEnemy(t){
   scene.add(g);
   return {g,b,tele,club,cloak,stars,h,lx:null,lz:null,svx:0,svz:0};
 }
-function disposeObj(o){scene.remove(o);o.traverse(m=>{if(m.geometry&&m.geometry!==projGeo&&m.geometry!==tailGeo)m.geometry.dispose();});}
+// คืนหน่วยความจำ GPU: geometry + material + texture (ข้ามของที่ใช้ร่วมกัน/แคชไว้ ที่ทำเครื่องหมาย userData.keep)
+function keepTex(t){return t===glowTex||t===stoneTex||t===runeTex||t===decalTex||CRESTTEX.includes(t)||!!(t.userData&&t.userData.keep);}
+function keepMatSet(){const s=new Set([...Object.values(glowMats),...Object.values(STONEM)]);return s;}
+function disposeMaterial(m,keep){
+  if(!m||keep.has(m)||(m.userData&&m.userData.keep))return;
+  for(const k in m){const v=m[k];if(v&&v.isTexture&&!keepTex(v))v.dispose();}
+  if(m.uniforms)for(const k in m.uniforms){const v=m.uniforms[k]&&m.uniforms[k].value;if(v&&v.isTexture&&!keepTex(v))v.dispose();}
+  m.dispose();
+}
+function disposeTree(root){
+  const keep=keepMatSet(),seen=new Set();
+  root.traverse(o=>{
+    if(o.geometry&&o.geometry!==projGeo&&o.geometry!==tailGeo&&!(o.geometry.userData&&o.geometry.userData.keep))o.geometry.dispose();
+    if(o.material)for(const m of [].concat(o.material))if(!seen.has(m)){seen.add(m);disposeMaterial(m,keep);}
+  });
+}
+function disposeObj(o){scene.remove(o);disposeTree(o);}
 const PM3=new Map(),EM3=new Map(),JM3=new Map();
 function clearDyn(){for(const M of [PM3,EM3,JM3,WM3,MM3]){for(const o of M.values())disposeObj(o.g);M.clear();}ZV.length=0;if(typeof MO!=='undefined')clearModeObjs();}
 
@@ -4665,7 +4745,16 @@ function updateLights(dt){
 
 // ---------- กล้องมุมหลังไหล่ (แบบ Hogwarts Legacy) ----------
 let yaw=0,pitch=0.3,lastPh='',locked=false;
-const SENS=0.0015;
+let SENS=0.0015*SET.sens/100;
+function saveSet(){store('wd_set',JSON.stringify(SET));}
+function applySettings(){
+  SENS=0.0015*SET.sens/100;
+  cam.fov=SET.fov;cam.updateProjectionMatrix();
+  if(AC&&MASTER)MASTER.gain.setTargetAtTime(SET.master/100,AC.currentTime,0.05);
+  if(AC&&SFXBUS)SFXBUS.gain.setTargetAtTime(SET.sfx/100,AC.currentTime,0.05);
+  if(AC&&MUSIC.bus)MUSIC.bus.gain.setTargetAtTime(MUSIC.on?0.8*SET.music/100:0,AC.currentTime,0.1);
+  const f=document.getElementById('fps');if(f)f.style.display=SET.fps?'block':'none';
+}
 const camPos=new THREE.Vector3(0,20,40),camLook=new THREE.Vector3();
 document.addEventListener('pointerlockchange',()=>{locked=document.pointerLockElement===cv;if(locked)hidePause();else if(screen==='game')showPause();});
 // เมนู Esc: ปล่อยเมาส์ (Esc) ระหว่างเล่น = เปิดเมนูหยุดพัก
@@ -5200,7 +5289,7 @@ function makeKiteShield(){
   const boss=new THREE.Mesh(new THREE.OctahedronGeometry(0.11),iceMat(1,'#6ac0f0'));boss.position.z=0.08;g.add(boss);
   return g;
 }
-const _icyClone=new THREE.MeshStandardMaterial({color:'#bfe8ff',emissive:'#3a8ac0',emissiveIntensity:0.7,roughness:0.1,transparent:true,opacity:0.55,depthWrite:false});
+const _icyClone=new THREE.MeshStandardMaterial({color:'#bfe8ff',emissive:'#3a8ac0',emissiveIntensity:0.7,roughness:0.1,transparent:true,opacity:0.55,depthWrite:false});_icyClone.userData.keep=true;
 function makeMirrorClone(o){
   for(const k of ['shield','ring','broom','cocoon','stars','colo','mcirc','ishield','cryoM','axe'])if(o[k])o[k].name='skip';
   o.armR.name='armR';o.armL.name='armL';o.b.name='body';
@@ -5516,6 +5605,7 @@ function burnNum(x,y,n){
   cx.fillStyle=g;cx.fillText(n,x,y);cx.restore();
 }
 function drawLabels(P,E,v,me,spk){
+  if(!SET.names){const team=MODES[v.mode]&&MODES[v.mode].team;P=P.filter(p=>team&&me&&p.tm===me.tm);}
   cx.textAlign='center';
   for(const e of E){if(!e.br)continue;const o=EM3.get(e.id);if(!o)continue;const s=toScreen(e.x,(o.hs||0)+(o.h||2)*0.5,e.y);if(s)burnNum(s[0],s[1],e.br);}
   for(const p of P){if(!p.br||!p.al||p.id===NET.myId)continue;const s=toScreen(p.x,(p.z||0)+1.2,p.y);if(s)burnNum(s[0],s[1],p.br);}
@@ -5559,14 +5649,28 @@ function drawTexts(dt){
   }
   cx.globalAlpha=1;
 }
+const HITM={t:0,kill:false},DIRI=[];
+// เป้าเล็งตามที่ตั้งค่า: 0 กากบาท / 1 จุด / 2 วงกลม / 3 กากบาท+วง
+function drawXh(x,y,hot,g){
+  g=g||cx;
+  const s=(SET.xhs||100)/100,col=hot?'#ff9632':XHC[SET.xhc|0]||XHC[0],st=SET.xh|0;
+  const cross=()=>{for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){g.beginPath();g.moveTo(x+dx*6*s,y+dy*6*s);g.lineTo(x+dx*12*s,y+dy*12*s);g.stroke();}};
+  const circ=()=>{g.beginPath();g.arc(x,y,9*s,0,Math.PI*2);g.stroke();};
+  g.strokeStyle='rgba(0,0,0,0.55)';g.lineWidth=3;if(st===0||st===3)cross();if(st===2||st===3)circ();
+  g.strokeStyle=col;g.lineWidth=hot?2.5:1.6;if(st===0||st===3)cross();if(st===2||st===3)circ();
+  g.fillStyle='rgba(0,0,0,0.5)';g.beginPath();g.arc(x,y,(st===1?3.2:2.2)*s+1,0,Math.PI*2);g.fill();
+  g.fillStyle=col;g.beginPath();g.arc(x,y,(st===1?3.2:2.2)*s,0,Math.PI*2);g.fill();
+}
 function drawCrosshair(){
   const x=SW/2,y=SH/2;
-  cx.strokeStyle='rgba(0,0,0,0.5)';cx.lineWidth=3;
-  for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){cx.beginPath();cx.moveTo(x+dx*6,y+dy*6);cx.lineTo(x+dx*12,y+dy*12);cx.stroke();}
+  // เครื่องหมายตอนยิงโดน (X รอบเป้า, แดง = ฆ่า)
+  if(HITM.t>0){HITM.t-=1/60;const a=Math.min(1,HITM.t/0.12);cx.strokeStyle=HITM.kill?`rgba(255,80,80,${a})`:`rgba(255,255,255,${a})`;cx.lineWidth=2.5;
+    for(const [dx,dy] of [[1,1],[-1,1],[1,-1],[-1,-1]]){cx.beginPath();cx.moveTo(x+dx*7,y+dy*7);cx.lineTo(x+dx*14,y+dy*14);cx.stroke();}}
+  // ทิศที่โดนยิง (โค้งแดงรอบเป้า ชี้ไปทางคนยิง)
+  for(let i=DIRI.length-1;i>=0;i--){const d=DIRI[i];d.t-=1/60;if(d.t<=0||!SET.dirm){DIRI.splice(i,1);continue;}
+    const rel=d.a-yaw-Math.PI/2;cx.strokeStyle=`rgba(255,60,60,${Math.min(0.85,d.t)})`;cx.lineWidth=6;cx.beginPath();cx.arc(x,y,96,rel-0.32,rel+0.32);cx.stroke();}
   const _v=VIEW.cur,_me=_v&&_v.P&&_v.P.find(q=>q.id===NET.myId),hot=_me&&(_me.cg>=1||_me.dc>=1);
-  cx.strokeStyle=hot?'rgba(255,150,50,1)':'rgba(243,220,148,0.95)';cx.lineWidth=hot?2.5:1.5;
-  for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){cx.beginPath();cx.moveTo(x+dx*6,y+dy*6);cx.lineTo(x+dx*12,y+dy*12);cx.stroke();}
-  diaPath(x,y,2.5);cx.fillStyle='#fff6d8';cx.fill();
+  drawXh(x,y,hot);
   if(!locked){
     cx.font='600 17px Kanit,sans-serif';cx.textAlign='center';
     const t='🖱️ คลิกที่จอเพื่อบังคับกล้อง (Esc = ปล่อยเมาส์)',w=cx.measureText(t).width+48;
@@ -5748,7 +5852,9 @@ function frame(now){
   render(dt,now);
   requestAnimationFrame(frame);
 }
+let _fpsAcc=0,_fpsN=0;
 function render(dt,now){
+  if(SET.fps){_fpsAcc+=dt;_fpsN++;if(_fpsAcc>=0.5){const el=document.getElementById('fps');if(el)el.textContent=Math.round(_fpsN/_fpsAcc)+' FPS';_fpsAcc=0;_fpsN=0;}}
   cx.setTransform(DPR,0,0,DPR,0,0);
   cx.clearRect(0,0,SW,SH);
   animateWorld(now);
@@ -5922,7 +6028,7 @@ function drawHUD(v,me,P){
   if(me&&me.rt)big('🕸️ ติดใยแมงมุม! ขยับไม่ได้ชั่วคราว',SH*0.62,20,'#e8e8f0');
 
   if(me)drawBottom(me,v);
-  if(me&&!showBoard)drawMinimap(v,me,P);
+  if(me&&!showBoard&&SET.mini)drawMinimap(v,me,P);
   if(showBoard)drawBoard(v,P);
 }
 function raceRankClient(P){
@@ -6272,13 +6378,13 @@ $('#btnLeave').onclick=leave;
 $('#pResume').onclick=()=>{hidePause();try{cvEl().requestPointerLock();}catch(e){}};
 $('#pLobby').onclick=()=>{hidePause();if(NET.isHost)hostToLobby();};
 $('#pLeave').onclick=leave;
-addEventListener('keydown',e=>{if(e.code==='Escape'&&screen==='game'&&!locked){const el=$('#pause');if(el.classList.contains('hidden'))showPause();else{hidePause();try{cvEl().requestPointerLock();}catch(err){}}}});
+$('#pSettings').onclick=openSettings;
+$('#btnLobbySet').onclick=()=>{ac();openSettings();};
+addEventListener('keydown',e=>{if(e.code==='Escape'&&!$('#settings').classList.contains('hidden')){closeSettings();return;}if(e.code==='Escape'&&screen==='game'&&!locked){const el=$('#pause');if(el.classList.contains('hidden'))showPause();else{hidePause();try{cvEl().requestPointerLock();}catch(err){}}}});
 $('#btnGuide').onclick=()=>{ac();$('#guide').classList.remove('hidden');};
 $('#btnGuideClose').onclick=()=>$('#guide').classList.add('hidden');
 $('#trainEnd').onclick=()=>{if(NET.isHost)hostEndTraining();};
 $('#guide').addEventListener('click',e=>{if(e.target.id==='guide')$('#guide').classList.add('hidden');});
-$('#btnMusic').textContent=MUSIC.on?'เพลง: เปิด':'เพลง: ปิด';
-$('#btnMusic').onclick=()=>{ac();toggleMusic();};
 $('#btnMyMusic').onclick=()=>{ac();$('#myMusicIn').click();};
 $('#myMusicIn').onchange=async e=>{
   const fs=[...e.target.files].filter(f=>/^audio\//.test(f.type)||/\.(mp3|ogg|wav|m4a|aac|flac|opus|webm)$/i.test(f.name));
@@ -6293,9 +6399,51 @@ myLoad();
 // เสียงคลิก/ชี้ปุ่ม
 document.addEventListener('click',e=>{if(e.target.closest('button,.bc,.sw'))snd('ui_click',{rev:0});});
 let hovEl=null;document.addEventListener('pointerover',e=>{const b=e.target.closest('button:not(:disabled),.bc');if(b!==hovEl){hovEl=b;if(b)snd('ui_hover',{rev:0});}});
-function gfxLabel(){$('#btnGfx').innerHTML=`กราฟิก: ${QUAL_NAME[QUAL.mode]}<small>${QUAL.mode==='auto'?'ปรับความละเอียดเองให้ลื่น':QUAL.mode==='high'?'สวยสุด (เครื่องแรงเท่านั้น)':'ไม่มีเงา/แสงฟุ้ง ลื่นสุด'}</small>`;}
-gfxLabel();
-$('#btnGfx').onclick=()=>{const o=['auto','high','low'];QUAL.mode=o[(o.indexOf(QUAL.mode)+1)%3];QUAL.scale=1;store('wd_gfx',QUAL.mode);applyQuality();gfxLabel();};
+// ----- หน้าตั้งค่า -----
+function setRow(lab,key,min,max,step,unit){return `<label class="srow"><span>${lab}</span><input type="range" min="${min}" max="${max}" step="${step}" data-set="${key}" value="${SET[key]}"><b data-sv="${key}">${SET[key]}${unit||''}</b></label>`;}
+function setTog(lab,key){return `<label class="srow tog"><span>${lab}</span><input type="checkbox" data-set="${key}" ${SET[key]?'checked':''}><i></i></label>`;}
+let setTab=0;
+const XHC=['#f3dc94','#ffffff','#7dff9a','#7fe8ff','#ff6b6b','#ff9ad5'],XHN=['ทอง','ขาว','เขียว','ฟ้า','แดง','ชมพู'];
+function setOpts(lab,key,names){return `<label class="srow"><span>${lab}</span><div class="segs">${names.map((n,i)=>`<button type="button" class="seg ${SET[key]===i?'on':''}" data-seg="${key}" data-v="${i}">${n}</button>`).join('')}</div></label>`;}
+function renderSettings(){
+  const tabs=['เมาส์ & เป้าเล็ง','เสียง','ภาพ','หน้าจอ','ปุ่มกด'];
+  let b='';
+  if(setTab===0)b=`${setRow('ความไวเมาส์','sens',20,250,5,'%')}${setTog('กลับแกนขึ้น-ลง','inv')}
+    <h3 class="sec">เป้าเล็ง</h3>${setOpts('รูปแบบ','xh',['กากบาท','จุด','วงกลม','กากบาท+วง'])}${setOpts('สี','xhc',XHN)}${setRow('ขนาด','xhs',50,200,10,'%')}
+    <div class="xhprev"><canvas id="xhPrev" width="120" height="70"></canvas></div>`;
+  if(setTab===1)b=`${setRow('เสียงรวม','master',0,100,1,'%')}${setRow('เสียงเอฟเฟกต์','sfx',0,100,1,'%')}${setRow('เพลง','music',0,100,1,'%')}${setTog('เปิดเพลงประกอบ','_music')}`;
+  if(setTab===2)b=`<label class="srow"><span>กราฟิก</span><select id="setGfx">${['auto','high','low'].map(m=>`<option value="${m}" ${QUAL.mode===m?'selected':''}>${QUAL_NAME[m]}${m==='auto'?' (ปรับเองให้ลื่น)':m==='high'?' (เครื่องแรง)':' (ลื่นสุด ไม่มีเงา)'}</option>`).join('')}</select></label>
+    ${setRow('มุมกว้างกล้อง (FOV)','fov',50,95,1,'°')}${setTog('กล้องสั่น','shake')}${setTog('แสดง FPS','fps')}`;
+  if(setTab===3)b=`${setTog('ตัวเลขดาเมจ','dmg')}${setTog('เครื่องหมายตอนยิงโดน','hitm')}${setTog('บอกทิศที่โดนยิง','dirm')}${setTog('แผนที่ย่อ','mini')}${setTog('ชื่อผู้เล่นเหนือหัว','names')}`;
+  if(setTab===4)b=`<p class="crnote" style="margin:4px 0 10px">คลิกปุ่มแล้วกดปุ่มบนคีย์บอร์ดที่ต้องการ (Esc = ยกเลิก)</p><div class="kbind">${KEYACT.map(([a,n])=>`<label class="srow kb"><span>${n}</span><button type="button" class="kbtn ${_rebind===a?'wait':''}" data-bind="${a}">${_rebind===a?'กดปุ่ม...':keyName(KEYS[a])}</button></label>`).join('')}</div>
+    <p class="crnote" style="margin-top:10px">คลิกซ้าย = ยิง • คลิกขวา = โล่ • N = เพลงถัดไป • Esc = เมนูหยุดพัก</p>`;
+  $('#setTabs').innerHTML=tabs.map((t,i)=>`<button type="button" class="stab ${setTab===i?'on':''}" data-stab="${i}">${t}</button>`).join('');
+  $('#setBody').innerHTML=b;
+  const mt=$('#setBody').querySelector('[data-set="_music"]');if(mt)mt.checked=MUSIC.on;
+  drawXhPrev();
+}
+function drawXhPrev(){const c=document.getElementById('xhPrev');if(!c)return;const g=c.getContext('2d');g.clearRect(0,0,c.width,c.height);g.fillStyle='#1a2340';g.fillRect(0,0,c.width,c.height);drawXh(c.width/2,c.height/2,false,g);}
+function openSettings(){renderSettings();$('#settings').classList.remove('hidden');}
+function closeSettings(){$('#settings').classList.add('hidden');}
+$('#btnSettings').onclick=()=>{ac();openSettings();};
+$('#setClose').onclick=closeSettings;
+$('#setReset').onclick=()=>{Object.assign(SET,SET_DEF,{keys:{}});saveSet();rebuildKeys();applySettings();renderSettings();};
+$('#settings').addEventListener('click',e=>{
+  const t=e.target.closest('[data-stab]');if(t){setTab=+t.dataset.stab;_rebind=null;renderSettings();return;}
+  const s=e.target.closest('[data-seg]');if(s){SET[s.dataset.seg]=+s.dataset.v;saveSet();renderSettings();return;}
+  const k=e.target.closest('[data-bind]');if(k){_rebind=k.dataset.bind;renderSettings();return;}
+});
+$('#settings').addEventListener('input',e=>{
+  const el=e.target,k=el.dataset&&el.dataset.set;
+  if(el.id==='setGfx'){QUAL.mode=el.value;QUAL.scale=1;QUAL.lvl=0;store('wd_gfx',QUAL.mode);applyQuality();return;}
+  if(!k)return;
+  if(k==='_music'){if(!!el.checked!==MUSIC.on){ac();toggleMusic();}return;}
+  SET[k]=el.type==='checkbox'?(el.checked?1:0):+el.value;
+  const sv=$('#setBody').querySelector(`[data-sv="${k}"]`);if(sv)sv.textContent=el.value+(k==='fov'?'°':'%');
+  saveSet();applySettings();drawXhPrev();
+});
+$('#settings').addEventListener('change',e=>{if(e.target.id==='setGfx'){QUAL.mode=e.target.value;QUAL.scale=1;QUAL.lvl=0;store('wd_gfx',QUAL.mode);applyQuality();}});
+applySettings();
 // เพลงเริ่มได้หลังผู้ใช้คลิกครั้งแรก (กฎของเบราว์เซอร์)
 addEventListener('pointerdown',()=>ac(),{once:true});
 $('#btnStart').onclick=()=>{if(NET.isHost)hostStart();};
