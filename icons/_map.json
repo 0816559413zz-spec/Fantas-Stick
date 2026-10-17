@@ -53,5 +53,13 @@
 "blazeform": "lorc/fire-silhouette",
 "ignitionsnap": "lorc/magic-palm",
 "colossus": "lorc/ifrit",
-"sh_pyro": "lorc/fire-shield"
+"sh_pyro": "lorc/fire-shield",
+"b_frost_m": "lorc/broadsword",
+"sh_frost": "lorc/ice-shield",
+"frostforge": "lorc/battle-axe",
+"glacierrend": "lorc/icicles-fence",
+"permafrost": "delapouite/frozen-ring",
+"cryoshell": "lorc/ice-cube",
+"frostaura": "lorc/icicles-aura",
+"mirrorlegion": "lorc/two-shadows"
 }
