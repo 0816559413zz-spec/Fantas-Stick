@@ -4580,15 +4580,32 @@ const SENS=0.0024;
 const camPos=new THREE.Vector3(0,20,40),camLook=new THREE.Vector3();
 document.addEventListener('pointerlockchange',()=>{locked=document.pointerLockElement===cv;});
 const MAPCAM={castle:{m:1.4,wy:0},forest:{m:6,wy:0},pitch:{m:7,wy:0},hogsmeade:{m:4,wy:0},greathall:{m:1.4,wy:0}};
-// เล็งตามเป้ากลางจอ: ยิงเส้นจากกล้องผ่านกลางจอ หาจุดที่ชนพื้น (หรือไกลสุด ~80 หน่วย) แล้วส่งจุดนั้นเป็นเป้า (ax/ay) + ความสูง (ah)
+// เล็งตามเป้ากลางจอ: ยิงเส้นจากกล้องผ่านกลางจอ หาสิ่งแรกที่เส้นชน (ศัตรู/ผู้เล่น/สิ่งกีดขวาง) แล้วส่งจุดนั้นเป็นเป้า (ax/ay) + ความสูง (ah)
+// กล้องอยู่ข้างไหล่ขวา ถ้าเล็งจุดไกลตายตัว เป้าใกล้ๆ จะเบี้ยวซ้าย/สูงต่ำผิด — ต้องเล็งไปที่จุดชนจริง
 const _aimD=new THREE.Vector3();
-function aimFromCrosshair(me){
+function aimFromCrosshair(me,P,E){
   cam.getWorldDirection(_aimD);
-  const o=cam.position;
-  // ทิศซ้าย-ขวา: จุดไกลบนเส้นเล็ง (60 หน่วย) ให้แนวยิงทับเป้ากลางจอตลอดระยะ
-  const T=60,X=o.x+_aimD.x*T,Z=o.z+_aimD.z*T;
-  // ความสูง: เล็งลงพื้น = ยิงระดับอก (ไม่ปักดินใกล้ตัว) / เล็งขึ้น = เชิดขึ้นตามเส้นเล็ง
-  let Y=o.y+_aimD.y*T;if(Y<(me.z||0)+1.3)Y=(me.z||0)+1.3;
+  const o=cam.position,dx=_aimD.x,dy=_aimD.y,dz=_aimD.z,hDir=dx*dx+dz*dz;
+  const px=tx(me.x),pz=tz(me.y),chest=(me.z||0)+1.3;
+  // ไม่นับสิ่งที่อยู่ระหว่างกล้องกับตัวผู้เล่น (กล้องล้ำเข้าไปในกำแพงได้)
+  const tMin=Math.max(0.5,(px-o.x)*dx+(pz-o.z)*dz);
+  let T=60;
+  const cyl=(cx,cz,r,y0,y1)=>{
+    if(hDir<1e-8)return;
+    const fx=o.x-cx,fz=o.z-cz,b=fx*dx+fz*dz,c=fx*fx+fz*fz-r*r,disc=b*b-hDir*c;
+    if(disc<0)return;
+    const t=(-b-Math.sqrt(disc))/hDir;
+    if(t<=tMin||t>=T)return;
+    const y=o.y+dy*t;if(y>=y0&&y<=y1)T=t;
+  };
+  for(const q of OBS)cyl(tx(q.x),tz(q.y),q.r*S3,0,q.hgt||9);
+  for(const q of P||[])if(q.id!==me.id&&q.al&&!q.dn&&!q.gh)cyl(tx(q.x),tz(q.y),0.55,q.z||0,(q.z||0)+2);
+  for(const e of E||[]){const D=EDEF[e.t];if(D)cyl(tx(e.x),tz(e.y),Math.max(0.4,D.r*S3),e.h||0,(e.h||0)+D.ch+0.8);}
+  // เส้นเล็งลงพื้นก่อนชนอะไร = ยิงไปจุดนั้นบนพื้นตรงเป้า (ล็อกเป้าอัตโนมัติใน shoot() ยังช่วยถ้าเล็งใกล้ศัตรู)
+  if(dy<-1e-4){const tg=-o.y/dy;if(tg>tMin&&tg<T)T=tg;}
+  let X=o.x+dx*T,Z=o.z+dz*T,Y=Math.max(0.1,o.y+dy*T);
+  // จุดเล็งอยู่ใกล้/ข้างหลังตัวเกินไป (ก้มมองเท้า) ให้ยิงตรงไปข้างหน้าระดับอกแทน
+  if(Math.hypot(X-px,Z-pz)<1.5||(X-px)*dx+(Z-pz)*dz<=0){X=o.x+dx*60;Z=o.z+dz*60;Y=Math.max(chest,o.y+dy*60);}
   INPUT.ax=X*20+MW/2;INPUT.ay=Z*20+MH/2;INPUT.ah=Y;
   // จุดที่เป้ากลางจอชนพื้น (ใช้กับคาถาวางพื้น / หน้าไม้ของร่างยักษ์)
   if(_aimD.y<-0.01){const t=(o.y-0.05)/-_aimD.y;INPUT.gx=(o.x+_aimD.x*t)*20+MW/2;INPUT.gy=(o.z+_aimD.z*t)*20+MH/2;}else{INPUT.gx=INPUT.gy=-1;}
@@ -5606,7 +5623,7 @@ function render(dt,now){
     INPUT.ax=me.x+fx*2000;INPUT.ay=me.y+fy*2000;
     INPUT.ap=clamp((0.3-pitch)*1.2,-0.9,0.9);
     updateCamera(me,dt);
-    aimFromCrosshair(me);
+    aimFromCrosshair(me,P,E);
     const o=PM3.get(me.id);windUpdate(o?Math.hypot(o.svx,o.svz):0,!!me.fl);
   }else menuCamera(now);
   shakeA=Math.max(0,shakeA-dt*30);
@@ -6292,7 +6309,7 @@ function balSpellTest(){
   }
   return out;
 }
-window.WD={coop:balCoop,fakeHello:(id,name,look,kit)=>hostOnData({peer:id,send(){},close(){}},{t:'hello',name,look,kit}),fakeMsg:(id,d)=>hostOnData({peer:id,send(){},close(){}},d),balArena,bal:balDuel,tour:balTour,dmgTest:balSpellTest,hostTick:dt=>hostTick(dt),castSlot:(p,i)=>castSlot(p,i),castUlt:p=>castUlt(p),setKit:(p,k)=>setKit(p,k),SPELLS,SPELL_LIST,PATHS,parseKit,foesOf,emitLog:()=>EVL,damage:(...a)=>damage(...a),get G(){return G;},get screen(){return screen;},get VIEW(){return VIEW;},INPUT,NET,render,choosePick,hostToLobby,hostStart,plist,broadcastLobby,setYaw:v=>{yaw=v;},cam,composer,PM3,tx,tz,addPlayer,hostVote,get ROLE(){return ROLE;},get MO(){return MO;},get PARTS(){return PARTS.length;},get AUDIO(){return {AC:AC&&AC.state,sfx:Object.keys(BUF).length,files:Object.values(BUF).reduce((a,b)=>a+b.length,0),music:MUSF.cur,mt:MUSF.els[MUSF.cur]?+MUSF.els[MUSF.cur].el.currentTime.toFixed(1):null,myT:MY.el?+MY.el.currentTime.toFixed(1):null,failed:MUSF.failed,amb:AMB.cur,wind:!!AMB.windBuf,my:MY.list.length};},PROF,gl,scene,bloom,moonL,LPOOL,stage};
+window.WD={coop:balCoop,fakeHello:(id,name,look,kit)=>hostOnData({peer:id,send(){},close(){}},{t:'hello',name,look,kit}),fakeMsg:(id,d)=>hostOnData({peer:id,send(){},close(){}},d),balArena,bal:balDuel,tour:balTour,dmgTest:balSpellTest,hostTick:dt=>hostTick(dt),castSlot:(p,i)=>castSlot(p,i),castUlt:p=>castUlt(p),setKit:(p,k)=>setKit(p,k),SPELLS,SPELL_LIST,PATHS,parseKit,foesOf,emitLog:()=>EVL,damage:(...a)=>damage(...a),get G(){return G;},get screen(){return screen;},get VIEW(){return VIEW;},INPUT,NET,render,choosePick,hostToLobby,hostStart,plist,broadcastLobby,setYaw:v=>{yaw=v;},setPitch:v=>{pitch=v;},cam,composer,PM3,tx,tz,addPlayer,hostVote,get ROLE(){return ROLE;},get MO(){return MO;},get PARTS(){return PARTS.length;},get AUDIO(){return {AC:AC&&AC.state,sfx:Object.keys(BUF).length,files:Object.values(BUF).reduce((a,b)=>a+b.length,0),music:MUSF.cur,mt:MUSF.els[MUSF.cur]?+MUSF.els[MUSF.cur].el.currentTime.toFixed(1):null,myT:MY.el?+MY.el.currentTime.toFixed(1):null,failed:MUSF.failed,amb:AMB.cur,wind:!!AMB.windBuf,my:MY.list.length};},PROF,gl,scene,bloom,moonL,LPOOL,stage};
 </script>
 </body>
 </html>
