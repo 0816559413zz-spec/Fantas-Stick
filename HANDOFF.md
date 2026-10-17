@@ -88,7 +88,7 @@ Personal, non-commercial fan project made with/for the user and their friends. U
 | ~3840 | `drawMinimap` | **minimap** top-right (kill feed sits below it): rotating circle (forward = up), view radius `MM.view`=620 sim px, draws OBS, enemies (red), players (team colour in tdm/quid), race rings, quid ball/snitch, BR zone, Voldemort tasks/bodies, "N" north marker; hidden while Tab scoreboard is open |
 | ~3960 | `เมนู / ล็อบบี้ (DOM)` | menu wiring (graphics button, my-music input, UI click sounds), lobby, `renderLobby`, `window.WD` |
 
-> **Safety net:** `v6.html` = the game exactly as it was before the skills rework (old Q/E/R/F spells, protocol `v6`, separate rooms). Live URL `.../Fantas-Stick/v6.html`. Delete it once the new system is trusted.
+> **Old build removed (2026-10-18):** `v6.html` (the pre-skills-rework game) was deleted at the user's request; it is still in git history (e.g. `git show 4c7abc2:v6.html`).
 
 ## 5b. Skills system (rewritten 2026-10-17/18 — "paths × spells")
 **Design (user's brief):** many spells, element spells with side effects, crowd control, summons, split into "paths" (สาย), balanced. Chosen: pick **1 main path (สาย)** → gives the **ultimate (X)**; fill **Q/E/R/F** from the spell library (max **2 off-path** spells); **6 paths × 6 spells = 36** (5 normal + 1 ult per path).
@@ -148,7 +148,7 @@ Can't cast on a broom except in Quidditch/race. Stun or web knocks you off the b
 
 ## 9b. Audio research
 (Implemented 2026-10-17 — see the audio bullet in section 3. To re-encode: download sources listed in `audio/CREDITS.md`, ffmpeg via `pip install imageio-ffmpeg`, trim + peak-normalise to -2 dB, mono q2 for SFX, stereo q1 for music.)
-`research/audio-assets.md` (Sonnet subagent, 2026-10-16): licence-checked free music/SFX picks. Verdict: Kenney (CC0) + OpenGameArt CC0 items for SFX, Incompetech/Kevin MacLeod (CC-BY 4.0, needs credits) for music; Pixabay/Sonniss/Mixkit/Zapsplat/Tabletop Audio rejected for raw files in a public repo. Done: files are in `audio/` (game music streamed, SFX decoded), synth kept as fallback.
+(The old `research/audio-assets.md` licence report was deleted 2026-10-18 — it's in git history; what we actually ship and its licences are in `audio/CREDITS.md`.) licence-checked free music/SFX picks. Verdict: Kenney (CC0) + OpenGameArt CC0 items for SFX, Incompetech/Kevin MacLeod (CC-BY 4.0, needs credits) for music; Pixabay/Sonniss/Mixkit/Zapsplat/Tabletop Audio rejected for raw files in a public repo. Done: files are in `audio/` (game music streamed, SFX decoded), synth kept as fallback.
 User asked about real Harry Potter music: told them not to put it in the public repo (copyright, takedown risk); built the "เพลงของฉัน" button instead (local files, IndexedDB, never uploaded).
 
 ## 10. Ideas the user may ask for next
@@ -184,3 +184,4 @@ User asked about real Harry Potter music: told them not to put it in the public 
 - 2026-10-17 (session 6) — Analysis only: measured hitches + found the texture leak (see section 9). Harness used in the console: stop the game loop with `window.requestAnimationFrame=()=>0`, then time `WD.render(1/60,now)` followed by `WD.gl.getContext().readPixels(0,0,1,1,...)` per frame and diff `WD.gl.info.programs.length` / `info.memory.geometries|textures` around an event (`WD.hostStart()`, `WD.castSlot(p,i)`, `WD.castUlt(p)` with `p.ult=100`, boss via `G.wave=4;G.queue=[];G.en=[]` then `G.buffT=0`). Direction agreed with the user: move models/VFX/sound toward **streamed asset files** (with the code-built versions as fallback), code stays in `index.html`.
 - 2026-10-17 (session 7) — Added `OPTIMIZE.md`: prioritised optimization backlog from sessions 5–6 (nothing implemented yet, by user request).
 - 2026-10-18 (session 3) — Merged the other chat's work (raycast crosshair aim `aimFromCrosshair(me,P,E)`, load/hitch analysis, `OPTIMIZE.md`) with Pyro/Frost. Only HANDOFF changelog conflicted (kept both). Note: with the raycast aim, ground hits no longer floor `ah` at chest height. Game + bot duel checked after the merge, no console errors.
+- 2026-10-18 (session 3) — **Cleanup** (user asked to delete useless files): removed `v6.html` and `research/`; removed 12 icons of replaced placeholder spells from `icons/` and from `ICODATA` (−16 KB in `index.html`), updated `icons/_map.json` + `CREDITS.md`. **Bug fix found while cleaning:** the summoner spell `wispheal` had no icon (key was `wisp`) — renamed to `wispheal`.

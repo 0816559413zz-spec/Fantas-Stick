@@ -1,18 +1,6 @@
 {
 "b_pyro": "lorc/fire-ray",
-"fireball": "delapouite/fire-spell-cast",
-"flamewall": "delapouite/firewall",
-"scorchdash": "lorc/fire-dash",
-"emberburst": "delapouite/inferno-bomb",
-"meteor": "lorc/meteor-impact",
-"inferno": "lorc/volcano",
 "b_frost": "lorc/frozen-arrow",
-"iceshard": "lorc/ice-bolt",
-"frostnova": "delapouite/frozen-ring",
-"glacialspike": "lorc/ice-spear",
-"blizzard": "lorc/snowing",
-"frostarmor": "delapouite/frozen-body",
-"abszero": "lorc/frozen-block",
 "b_storm": "lorc/lightning-helix",
 "zap": "willdabeast/chain-lightning",
 "staticfield": "delapouite/lightning-dome",
@@ -38,7 +26,6 @@
 "spiritwolf": "lorc/wolf-head",
 "firesprite": "lorc/fairy",
 "stonegolem": "delapouite/rock-golem",
-"wisp": "delapouite/floating-ghost",
 "soulburst": "lorc/skull-bolt",
 "legion": "lorc/ghost-ally",
 "p_frost": "lorc/snowflake-2",
@@ -61,5 +48,6 @@
 "permafrost": "delapouite/frozen-ring",
 "cryoshell": "lorc/ice-cube",
 "frostaura": "lorc/icicles-aura",
-"mirrorlegion": "lorc/two-shadows"
+"mirrorlegion": "lorc/two-shadows",
+"wispheal": "delapouite/floating-ghost"
 }
