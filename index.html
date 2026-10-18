@@ -3968,13 +3968,16 @@ function drawStormHud(x,y,M){
   }
   // ยิงครั้งถัดไป = สายฟ้าสามเหลี่ยม
   if(M[1]){const tx0=x-3*gap-6,ty0=y0;cx.beginPath();cx.moveTo(tx0-6,ty0-6);cx.lineTo(tx0+6,ty0);cx.lineTo(tx0-6,ty0+6);cx.closePath();cx.shadowColor='#fff27a';cx.shadowBlur=8;cx.fillStyle='#fff27a';cx.fill();cx.shadowBlur=0;}
-  // ชาร์จ Dash แบบ Tracer: สายฟ้า 3 อันเรียงโค้งด้านขวาของเป้า
+  // ชาร์จ Dash แบบ Tracer: แถบโค้ง 3 ช่องรอบเป้าด้านขวา (ไม่ใช่สายฟ้า จะได้ไม่ซ้ำกับ stack) — พร้อม = ฟ้าขาวสว่าง / ใช้แล้ว = หรี่ / กำลังฟื้น = เติมตามโค้ง / ฟื้นครบ = แวบ
   const dc=M[2]||0,full=Math.floor(dc+1e-6);if(full>STHUD.dprev)for(let i=STHUD.dprev;i<full&&i<3;i++)STHUD.dfl[i]=0.3;STHUD.dprev=full;
-  for(let i=0;i<3;i++){const an=(-0.42+i*0.42),px=x+Math.cos(an)*52,py=y+Math.sin(an)*52,k=clamp(dc-i,0,1),fl=STHUD.dfl[i]=Math.max(0,STHUD.dfl[i]-dt),sc=1.1+fl*1.2;
-    cx.save();cx.translate(px,py);cx.rotate(an*0.6);
-    bolt(0,0,sc);cx.fillStyle='rgba(40,30,18,0.75)';cx.fill();cx.lineWidth=1.1;cx.strokeStyle='rgba(15,10,5,0.9)';cx.stroke();
-    if(k>0){cx.save();bolt(0,0,sc);cx.clip();const hh=18*sc;cx.fillStyle=k>=1?(fl>0?'#ffffff':'#ffe24a'):'rgba(255,214,60,0.55)';if(k>=1){cx.shadowColor='#fff27a';cx.shadowBlur=8+fl*24;}cx.fillRect(-10*sc,hh/2-hh*k,20*sc,hh*k);cx.restore();}
-    cx.restore();}
+  const R=30,seg=0.46,gp=0.1,a0=-(seg*3+gp*2)/2;
+  cx.lineCap='round';
+  for(let i=0;i<3;i++){const s0=a0+i*(seg+gp),k=clamp(dc-i,0,1),fl=STHUD.dfl[i]=Math.max(0,STHUD.dfl[i]-dt);
+    cx.beginPath();cx.arc(x,y,R,s0,s0+seg);cx.lineWidth=6;cx.strokeStyle='rgba(0,0,0,0.5)';cx.stroke();
+    cx.beginPath();cx.arc(x,y,R,s0,s0+seg);cx.lineWidth=4;cx.strokeStyle='rgba(120,150,170,0.35)';cx.stroke();
+    if(k>0){cx.beginPath();cx.arc(x,y,R,s0,s0+seg*k);cx.lineWidth=4+fl*6;
+      if(k>=1){cx.shadowColor='#9fe6ff';cx.shadowBlur=8+fl*20;cx.strokeStyle=fl>0?'#ffffff':'#bff0ff';}else cx.strokeStyle='rgba(159,230,255,0.55)';
+      cx.stroke();cx.shadowBlur=0;}}
   cx.restore();
 }
 // รอยฟันดาบ: เสี้ยววงเรืองแสงที่จางเร็ว (แนวนอน = ฟันกวาด / แนวตั้ง = ฟันจากบนลงล่าง)
