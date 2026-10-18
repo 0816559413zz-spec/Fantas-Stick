@@ -231,8 +231,31 @@ Can't cast on a broom except in Quidditch/race. Stun or web knocks you off the b
 - ⚠️ Graphics are mostly low-poly primitives (crate, goblin and the Hogsmeade house come from Blender files so far). Heavy maps (forest) may lag on weak PCs.
 - `index.2d-backup.html` (old 2D version) is git-ignored and only exists on the original PC.
 
-## 9c. Next for maps: surfaces + weather (user decision 2026-10-18)
-Phase 1 (maps from Blender files) is done — §5e. Still to do, in order: **phase 2 surfaces** (`env_<kind>_` masks are already in the map JSON as `env`, element reaction table in `MAP-DESIGN.md` §8 is a draft for the gameplay side) → **phase 3 weather** (random per map from the `weather` property, can change mid-match; effects table in §9). Not done for phase 1: fall damage / falling out of the map, minimap height shading, `anim_` speed by wind, map picker in the training test menu (use the lobby picker).
+## 9c. Next for maps — TODO list (user asked to write it down 2026-10-19)
+Phase 1 (maps from Blender files) is done — §5e. Work in this order; tick items here when done. Numbers are placeholders for the gameplay side (§2 team split).
+
+**Phase 2 — surfaces that react to spells** (`MAP-DESIGN.md` §8)
+- [ ] Load `env` masks from the map JSON (`fm.env`: 1-unit bit grids per `env_<kind>_` object) into a host-side surface grid; snapshot only the cells whose state changed (bump `PREFIX`).
+- [ ] Base effects while standing in a surface: water slow, mud slow, ice/oil slippery (reuse `p.slip` momentum), lava damage, web big slow, grass hides you on the minimap.
+- [ ] Element reactions table (data, one place, e.g. `ENVREACT[surface][element]`): water+ice → ice for X s, water+storm → shock everyone in that body of water, water+fire → steam (blocks sight), grass+fire → fire spreads then burnt, oil+fire → fire floor, ice+fire → water. Hook into the same calls as buildings: `damageEnv(x,y,r,dmg,by,el,h)` + projectile hits (`projEl`) + zones (fire/frost/storm zones touching a surface).
+- [ ] Visuals: state change on the existing `env_` mesh (tint/hide) or optional `env_<name>_frozen` / `_burnt` meshes from the file; particles for steam/sparks/fire spread.
+- [ ] Spells that create surfaces (existing fire/ice floors) count as surfaces too.
+- [ ] Add a "สิ่งแวดล้อม/พื้นผิว" field explanation to `SKILL-DESIGN.md` so skill designers say which element each spell is.
+- [ ] Test on `valley` (stream = `env_water_stream`): freeze it, shock it, steam.
+
+**Phase 3 — weather** (`MAP-DESIGN.md` §9)
+- [ ] Host picks weather from the map's `weather` property (`clear:50,rain:30,fog:20`), can change mid-match with a warning banner; in the snapshot (bump `PREFIX`).
+- [ ] Visuals: rain/snow particles around the camera, darker sky + lightning flashes (storm), thicker fog, wind dust; wet ground look in rain.
+- [ ] Effects (placeholders): rain = fire weaker + puddles (`env_water`) + storm stronger in water; storm = random lightning strikes with warning circles (`addStrike`); snow = ice stronger, fire a bit weaker; fog = shorter minimap/visibility; wind = pushes projectiles, broom faster with the wind; heat = fire stronger, ice melts faster.
+- [ ] Ambience sounds per weather (rain/wind/thunder) — CC0 files only (public repo).
+- [ ] `anim_` objects (flags, windmill) faster in wind.
+
+**Loose ends from phase 1**
+- [ ] Fall damage / falling into a pit (ask the gameplay side for numbers first).
+- [ ] Minimap: height shading / cliffs for file maps.
+- [ ] Map picker in the training test menu (P) so map makers can test without a lobby.
+- [ ] Test with two real devices online on `valley`; BR zone, race rings and Voldemort tasks on a file map; leaping/flying enemies over cliffs; frame time on a weak PC.
+- [ ] Collision with many `col_` is a plain loop over `OBS` — add a spatial grid if a map goes over ~1,000 circles (note in `OPTIMIZE.md`).
 
 ## 9a. Remaining work (non-model) — listed for the user 2026-10-18, priority order
 1. **Real tests (user's job):** online with 2+ real devices (protocol v23, props + broken houses over the network, Voldemort voting/voice, quidditch/BR under latency) and a weak PC.
