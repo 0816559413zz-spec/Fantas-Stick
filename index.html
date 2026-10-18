@@ -1247,9 +1247,9 @@ function dragonfallBoom(p,x,y,gh){
   for(const t of foesIn(p.team,x,y,DF_R,gh+4))aoeHit(p,t,28,t=>{addBurn(t,1,p.id);addSlow(t,0.7,1.2);});
   damageEnv(x,y,DF_R,60,p.id,'fireblast',gh);
 }
-defSpell(0,{id:'ringofembers',role:'control',n:'Ring of Embers',ic:'⭕',cd:14,d:'วางวงเพลิงที่จุดเล็ง (ระยะ ~600 รัศมี ~170) นาน 3 วิ — คนข้างในเดินออกไม่ได้',fx:'พยายามเดินออก = 12.5 ดาเมจ + ผลักกลับเข้าวง • ใครแตะขอบวงไฟ = ช้าลง 40% • คนข้างนอกเดินเข้าได้',
+defSpell(0,{id:'ringofembers',role:'control',n:'Ring of Embers',ic:'⭕',cd:14,d:'วางวงเพลิงที่จุดเล็ง (ระยะ ~400 รัศมี ~170) นาน 3 วิ — คนข้างในเดินออกไม่ได้',fx:'พยายามเดินออก = 12.5 ดาเมจ + ผลักกลับเข้าวง • ใครแตะขอบวงไฟ = ช้าลง 40% • คนข้างนอกเดินเข้าได้',
   cast(p,S){
-    const q=aimPoint(p,600);
+    const q=aimPoint(p,400);
     (G.erings||(G.erings=[])).push({x:q.x,y:q.y,r:170,t:3,owner:p.id,team:p.team,in:new Set(),cd:new Map(),ed:new Map()});
     emit({k:'efx',z:'ering',x:q.x,y:q.y,h:0.2,r:170,t:3});
   }});
@@ -6347,7 +6347,7 @@ function showPause(){if(overlayOpen())return;const el=$('#pause');el.classList.r
 function hidePause(){$('#pause').classList.add('hidden');}
 const MAPCAM={castle:{m:1.4,wy:0},forest:{m:6,wy:0},pitch:{m:7,wy:0},hogsmeade:{m:4,wy:0},greathall:{m:1.4,wy:0},meadow:{m:8,wy:0},lake:{m:8,wy:0},ruins:{m:5,wy:0}};
 // วางสกิลแบบ Overwatch: กดครั้งแรก = เห็นเงาสีฟ้าตรงจุดที่จะวาง • กดซ้ำ/คลิกซ้าย = วาง • คลิกขวา = ยกเลิก
-const PLACE={slot:-1,g:null};const PLACE_SP={ringofembers:{r:170,range:600},triplestrike:{r:70,range:600}};
+const PLACE={slot:-1,g:null};const PLACE_SP={ringofembers:{r:170,range:400},triplestrike:{r:70,range:600}};
 function placeKey(a){
   const i='qerf'.indexOf(a);if(i<0)return false;
   const v=VIEW.cur,me=v&&v.P&&v.P.find(q=>q.id===NET.myId);if(!me||!me.al)return false;
@@ -8338,7 +8338,7 @@ function botBrain(p,dt){
     if(S.id==='cryoshell'&&(p.hp>p.maxHp*0.35||p.cryo>0))return;
     if(S.melee&&p.fmode===1)return;
     if(S.id==='glacialspike'&&!(tg.chl>0||tg.frz>0))return;
-    const r=({thunderline:560,speedsiphon:180,triplestrike:560,stormorbs:300,railgun:850,stormdome:560,frostforge:200,glacierrend:420,permafrost:240,cryoshell:9999,frostaura:200,dragonfall:560,ringofembers:520,blazeform:500,ignitionsnap:480,emberburst:170,frostnova:170,terror:210,frostarmor:500,overcharge:600,sporecloud:480,blinddust:500,scorchdash:330,arcblink:330,thornburst:170,soulsiphon:650})[S.id]||900;
+    const r=({thunderline:560,speedsiphon:180,triplestrike:560,stormorbs:300,railgun:850,stormdome:560,frostforge:200,glacierrend:420,permafrost:240,cryoshell:9999,frostaura:200,dragonfall:560,ringofembers:360,blazeform:500,ignitionsnap:480,emberburst:170,frostnova:170,terror:210,frostarmor:500,overcharge:600,sporecloud:480,blinddust:500,scorchdash:330,arcblink:330,thornburst:170,soulsiphon:650})[S.id]||900;
     const gap=S.id==='scorchdash'||S.id==='arcblink';
     if(gap?d>420&&d<800:d<r)press(k);
   });
