@@ -51,5 +51,8 @@
 "triplestrike": "lorc/lightning-trio",
 "stormorbs": "lorc/lightning-electron",
 "railgun": "lorc/beam-wake",
-"godlightning": "lorc/lightning-mask"
+"godlightning": "lorc/lightning-mask",
+"dsh_storm": "lorc/dodging",
+"dsh_pyro": "lorc/fire-dash",
+"dsh_frost": "delapouite/ice-skate"
 }
