@@ -1,13 +1,8 @@
 {
 "b_pyro": "lorc/fire-ray",
-"b_frost": "lorc/frozen-arrow",
-"b_storm": "lorc/lightning-helix",
-"zap": "willdabeast/chain-lightning",
+"b_frost": "lorc/ice-spear",
+"b_storm": "lorc/tesla-coil",
 "staticfield": "delapouite/lightning-dome",
-"thunderclap": "lorc/thunder-struck",
-"overcharge": "delapouite/charging",
-"arcblink": "lorc/lightning-arc",
-"tempest": "lorc/lightning-storm",
 "b_nature": "lorc/curling-vines",
 "poisondart": "lorc/thorned-arrow",
 "vinelash": "lorc/vine-whip",
@@ -49,5 +44,12 @@
 "cryoshell": "lorc/ice-cube",
 "frostaura": "lorc/icicles-aura",
 "mirrorlegion": "lorc/two-shadows",
-"wispheal": "delapouite/floating-ghost"
+"wispheal": "delapouite/floating-ghost",
+"sh_storm": "lorc/lightning-shield",
+"thunderline": "lorc/lightning-frequency",
+"speedsiphon": "lorc/sprint",
+"triplestrike": "lorc/lightning-trio",
+"stormorbs": "lorc/lightning-electron",
+"railgun": "lorc/beam-wake",
+"godlightning": "lorc/lightning-mask"
 }
