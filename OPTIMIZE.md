@@ -25,13 +25,14 @@ Normal in-game frame here ≈ 9–17 ms.
 
 - [x] **P1 Pre-compile shaders.** (done: `prewarmShaders()` after `buildWorld`, `gl.compileAsync` + hidden VFX group; first spell casts no longer compile — Permafrost still adds 1 program) Call `renderer.compileAsync(scene, cam)` right after `buildWorld` / during the 3-2-1 countdown, and once for the menu stage. Also pre-warm VFX materials (shield, colossus, boss) by adding them invisible once.
 - [x] **P2 Find the pyro +381 geometries / frost-ult spike** — obsolete: those placeholder spells were replaced by the user's Pyro/Frost designs; the new ones were measured after prewarm (≤ 20 ms).
-- [ ] **P2 Share geometry/material between characters.** `makeStudent` creates ~43 geometries per player; same-shape parts should reuse one geometry, same-colour parts one material.
+- [x] **P2 Share geometry/material between characters.** (done 2026-10-18: `sGeo/sMat/sStripe` caches, marked `userData.keep`; only the animated cloak geometry, the shield ShaderMaterial and the foot ring material stay per character. Ghost mode now swaps to transparent clones via `setGhost` instead of editing materials. Result in the heavy bench: 5 bots joining the lobby 66 → 26 ms and +195 → +35 geometries; heavy scene 892 → 512 geometries, 39 → 25 textures; match start 294 → 124 geometries. Draw calls unchanged — see C.)
 - [ ] **P3 Cache built maps** (or at least reuse geometry/material across rebuilds) instead of rebuilding the same map each match.
 - [ ] **P3 Pool enemies and projectiles** instead of create/dispose on spawn/death.
 - [ ] **P3 Time-slice heavy builds** (spread `buildWorld` over a few frames) — only if A/B fixes are not enough.
 
 ## C. Draw calls / render cost
-- [ ] **P2 Measure the heaviest scene** (boss + 8 players + max particles) with `gl.info.render.calls`, `info.autoReset=false`. Not done yet.
+- [x] **P2 Measure the heaviest scene** (done 2026-10-18, `tools/bench-heavy.js`: castle, solo + 5 bots — coop allows max 6 — wave 5 dragon + 7 adds, everyone casting every slot, ~7,900 particles). Baseline: **~1,280 draw calls (max ~1,400)**, 118 k triangles, 48 shader programs, frame median ≈ 30 ms in the hidden pane (vsync-quantised, use calls/geometries to compare, not ms). Each player is ~110 meshes (≈35 in the body + spell props), mostly drawn twice (shadow + main).
+- [ ] **P2 Merge the static body parts of each character** (torso, collar, tie, head, eyes, hair, scarf, hood → one mesh per material inside `o.b`; legs/arms/wand/scarf ends stay separate because they animate). Materials are shared now, so this should cut ~25 meshes per player (≈ −300 draw calls with shadows in the heavy bench). Must keep `flashModel`/`setGhost`/`makeMirrorClone` working (they swap materials per mesh).
 - [ ] **P3 Merge static parts of characters/enemies** (`mergeGeometries` already imported) and use `InstancedMesh` for many enemies of the same type (spiders, pixies).
 - Good already: particles = 2 point systems, 1 draw call each, max 5,000; forests/grass/candles use `InstancedMesh` (15 places); `batchStatic` merges map statics.
 
@@ -52,6 +53,9 @@ Goal: models, VFX and sounds become files that are easy to edit/replace with bet
 - [ ] Service Worker (D) stores everything after first download.
 - [ ] Asset manifest (one JSON listing files + versions) so the loader and Service Worker share one list.
 - [ ] Licences: repo is public — only CC0 / CC-BY / self-made assets, credits in guide.
+
+## Heavy-scene bench
+`tools/bench-heavy.js` (header says how to run it). Open the page with `?nosw` so the Service Worker does not serve an old copy of the script. Uses `WD.hostStep(dt)` (one host loop iteration: hostTick + snapshot + FX) because the hidden pane throttles `setInterval`.
 
 ## Measuring harness (paste in console)
 ```js

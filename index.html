@@ -3324,7 +3324,24 @@ function flashModel(o){
   o.g.traverse(m=>{if(m.isMesh&&!m.isInstancedMesh&&m.material&&!Array.isArray(m.material)&&!m.material.transparent){o.flashSaved.push([m,m.material]);m.material=FLASHM;}});
   FLASHING.add(o);
 }
-function tickFlash(dt){for(const o of FLASHING){o.flashT-=dt;if(o.flashT<=0){for(const [m,mat] of o.flashSaved)m.material=mat;o.flashSaved=null;FLASHING.delete(o);}}}
+function endFlash(o){if(!o.flashSaved)return;for(const [m,mat] of o.flashSaved)m.material=mat;o.flashSaved=null;o.flashT=0;FLASHING.delete(o);}
+function tickFlash(dt){for(const o of FLASHING){o.flashT-=dt;if(o.flashT<=0)endFlash(o);}}
+// ร่างผี: สลับเป็นวัสดุโปร่งแสง (ไม่แก้วัสดุเดิม เพราะวัสดุใช้ร่วมกันหลายตัวละคร) — วัสดุที่แชร์ได้ผีแบบแชร์ด้วย
+const GHOSTM=new WeakMap(),SOLIDM=new WeakMap();
+function ghostOf(mat){
+  if(mat.userData.keep&&GHOSTM.has(mat))return GHOSTM.get(mat);
+  const g=mat.clone();g.transparent=true;g.opacity=0.35*(mat.transparent?mat.opacity:1);
+  if(mat.userData.keep){g.userData.keep=true;GHOSTM.set(mat,g);}
+  return g;
+}
+function setGhost(o,on){
+  endFlash(o);
+  o.g.traverse(m=>{
+    if(!m.isMesh||!m.material||Array.isArray(m.material)||m.material.isShaderMaterial)return;
+    if(on){if(!SOLIDM.has(m)){SOLIDM.set(m,m.material);m.material=ghostOf(m.material);}}
+    else if(SOLIDM.has(m)){const gm=m.material;m.material=SOLIDM.get(m);SOLIDM.delete(m);if(!gm.userData.keep)gm.dispose();}
+  });
+}
 function hitSparks(x,y,h,n){const k=Math.min(2,0.6+(n||5)/25);burst(x,y,'#ffffff',Math.round(8*k),240,0.22,1.8,{h,g:5});burst(x,y,'#ffd9a0',Math.round(5*k),160,0.3,2.4,{h,g:4});FX.flashSprite(x,y,h,'#ffffff',0.2,1.1*k,0.08,1.6);}
 // ---------- Dragonfall (ภาพ) ----------
 // วงเตือนบนพื้น: วงส้มแดง + แผ่นจางๆ + ขีดอักขระไฟ 10 เส้นที่หุบเข้าหาศูนย์กลางใน 0.65 วิสุดท้ายก่อนกระแทก (ทุกคนเห็น)
@@ -4680,10 +4697,11 @@ function buildPitch(){
 }
 
 // ---------- ระบบผ้า (เสื้อคลุมพลิ้วตามการเคลื่อนที่) ----------
-function makeCloak(outerCol,innerCol,rTop,rBot,h,gap){
-  const geo=new THREE.CylinderGeometry(rTop,rBot,h,26,10,true,gap/2,Math.PI*2-gap);
-  const outer=new THREE.Mesh(geo,new THREE.MeshStandardMaterial({color:outerCol,roughness:0.92,side:THREE.FrontSide}));
-  const inner=new THREE.Mesh(geo,new THREE.MeshStandardMaterial({color:innerCol,roughness:0.8,side:THREE.BackSide}));
+function makeCloak(outerCol,innerCol,rTop,rBot,h,gap,shared){
+  const geo=new THREE.CylinderGeometry(rTop,rBot,h,26,10,true,gap/2,Math.PI*2-gap);   // geometry แยกต่อตัว (ผ้าขยับเอง)
+  const mk=o=>shared?sMat(o):new THREE.MeshStandardMaterial(o);
+  const outer=new THREE.Mesh(geo,mk({color:outerCol,roughness:0.92,side:THREE.FrontSide}));
+  const inner=new THREE.Mesh(geo,mk({color:innerCol,roughness:0.8,side:THREE.BackSide}));
   return {geo,outer,inner,rest:Float32Array.from(geo.attributes.position.array),h,dx:0,dz:0,vx:0,vz:0};
 }
 // lvx/lvz = ความเร็วในแกนของตัวละคร (หน่วย/วินาที) — ชายผ้าจะลากตามหลังแบบสปริง
@@ -4706,6 +4724,14 @@ function updateCloth(c,lvx,lvz,speed,now,dt){
 }
 
 // ---------- โมเดลนักเรียนเวทมนตร์ ----------
+// geometry/material/texture ที่ใช้ร่วมกันระหว่างตัวละคร: สร้างครั้งเดียวต่อรูปทรง/สี แล้วใช้ซ้ำ (userData.keep = disposeTree จะไม่ทิ้ง)
+const SHGEO=new Map(),SHMAT=new Map(),SHTEX=new Map();
+function sGeo(C,...a){const k=C.name+'('+a.join(',')+')';let g=SHGEO.get(k);if(!g){g=new C(...a);g.userData.keep=true;SHGEO.set(k,g);}return g;}
+function sMat(o){
+  const k=Object.keys(o).sort().map(n=>{const v=o[n];return n+'='+(v&&v.isTexture?v.uuid:(n==='color'||n==='emissive')?new THREE.Color(v).getHexString():String(v));}).join(';');
+  let m=SHMAT.get(k);if(!m){m=new THREE.MeshStandardMaterial(o);m.userData.keep=true;SHMAT.set(k,m);}return m;
+}
+function sStripe(c1,c2){const k=c1+'|'+c2;let t=SHTEX.get(k);if(!t){t=stripeTex(c1,c2);t.userData.keep=true;SHTEX.set(k,t);}return t;}
 function hashStr(s){let h=7;for(const ch of String(s))h=(h*31+ch.charCodeAt(0))|0;return Math.abs(h);}
 function stripeTex(c1,c2){const t=texCanvas(32,64,(g)=>{for(let i=0;i<8;i++){g.fillStyle=i%2?c2:c1;g.fillRect(0,i*8,32,8);}});t.wrapS=t.wrapT=THREE.RepeatWrapping;return t;}
 function shieldMat(){
@@ -4725,51 +4751,51 @@ function addStatus(g,h){
 function makeStudent(look,id){
   const g=new THREE.Group(),b=new THREE.Group();g.add(b);
   const H=HOUSES[look.h],house=new THREE.Color(H.c),cloakCol=CLOAKC[look.cl];
-  const M=(c,r,ex)=>new THREE.MeshStandardMaterial(Object.assign({color:c,roughness:r===undefined?0.85:r},ex||{}));
+  const M=(c,r,ex)=>sMat(Object.assign({color:c,roughness:r===undefined?0.85:r},ex||{}));   // วัสดุใช้ร่วมกันทุกตัวละคร (ห้ามแก้ค่าบนวัสดุโดยตรง ให้สลับวัสดุแทน)
   const blackM=M(cloakCol,0.92),skinM=M(SKINC[look.sk],0.7),hairM=M(HAIRC[look.hr],0.55,{side:THREE.DoubleSide});
   const add=(p,geo,mat,x,y,z)=>{const m=new THREE.Mesh(geo,mat);m.position.set(x,y,z);p.add(m);return m;};
   const legs=[];
   for(const s of [-1,1]){
     const L=new THREE.Group();L.position.set(s*0.12,0.86,0);b.add(L);
-    add(L,new THREE.CylinderGeometry(0.095,0.085,0.78,10),M('#222228'),0,-0.4,0);
-    add(L,new THREE.BoxGeometry(0.15,0.1,0.3),M('#0b0b0d',0.4),0,-0.8,0.05);
+    add(L,sGeo(THREE.CylinderGeometry,0.095,0.085,0.78,10),M('#222228'),0,-0.4,0);
+    add(L,sGeo(THREE.BoxGeometry,0.15,0.1,0.3),M('#0b0b0d',0.4),0,-0.8,0.05);
     legs.push(L);
   }
-  add(b,new THREE.CylinderGeometry(0.25,0.23,0.72,14),M('#3b3b44'),0,1.2,0);
-  add(b,new THREE.CylinderGeometry(0.13,0.16,0.08,12),M('#eeeeee'),0,1.57,0.02);
+  add(b,sGeo(THREE.CylinderGeometry,0.25,0.23,0.72,14),M('#3b3b44'),0,1.2,0);
+  add(b,sGeo(THREE.CylinderGeometry,0.13,0.16,0.08,12),M('#eeeeee'),0,1.57,0.02);
   // เนคไท (หัวเงื่อน + แถบห้อย) ตามสไตล์ที่เลือก
   if(look.ti!==3){
-    const tm=look.ti===0?new THREE.MeshStandardMaterial({map:stripeTex(H.c,H.c2),roughness:0.6}):M(look.ti===1?H.c:H.c2,0.6);
-    add(b,new THREE.BoxGeometry(0.085,0.07,0.05),M(look.ti===2?H.c2:H.c,0.6),0,1.51,0.243);
-    add(b,new THREE.BoxGeometry(0.095,0.3,0.026),tm,0,1.34,0.252);
+    const tm=look.ti===0?sMat({map:sStripe(H.c,H.c2),roughness:0.6}):M(look.ti===1?H.c:H.c2,0.6);
+    add(b,sGeo(THREE.BoxGeometry,0.085,0.07,0.05),M(look.ti===2?H.c2:H.c,0.6),0,1.51,0.243);
+    add(b,sGeo(THREE.BoxGeometry,0.095,0.3,0.026),tm,0,1.34,0.252);
   }
-  add(b,new THREE.CylinderGeometry(0.075,0.085,0.14,10),skinM,0,1.64,0);
-  add(b,new THREE.SphereGeometry(0.235,20,16),skinM,0,1.86,0).scale.set(1,1.08,1);
+  add(b,sGeo(THREE.CylinderGeometry,0.075,0.085,0.14,10),skinM,0,1.64,0);
+  add(b,sGeo(THREE.SphereGeometry,0.235,20,16),skinM,0,1.86,0).scale.set(1,1.08,1);
   // ตา: ตาขาว + ม่านตาสีที่เลือก + รูม่านตา
   const eyeWM=M('#f4f2ee',0.4),irisM=M(EYEC[look.ey],0.3),pupM=M('#0a0806',0.3);
   for(const s of [-1,1]){
-    add(b,new THREE.SphereGeometry(0.038,10,8),eyeWM,s*0.085,1.865,0.2);
-    add(b,new THREE.SphereGeometry(0.028,10,8),irisM,s*0.085,1.865,0.221);
-    add(b,new THREE.SphereGeometry(0.014,8,6),pupM,s*0.085,1.865,0.238);
+    add(b,sGeo(THREE.SphereGeometry,0.038,10,8),eyeWM,s*0.085,1.865,0.2);
+    add(b,sGeo(THREE.SphereGeometry,0.028,10,8),irisM,s*0.085,1.865,0.221);
+    add(b,sGeo(THREE.SphereGeometry,0.014,8,6),pupM,s*0.085,1.865,0.238);
   }
   // ผม: ฝาบนสุด + ครึ่งหลัง (เปิดหน้าไว้) แล้วต่อทรงตามที่เลือก
   {
     const hS=look.hs,HCt=new THREE.Vector3(0,1.88,-0.02),UP=new THREE.Vector3(0,1,0),tieM=M(H.c2,0.4);
     const backTh=[0.5,0.6,0.62,0.55,0.55,0.62,0.6,0.6,0.55,0.55,0.5][hS];
-    add(b,new THREE.SphereGeometry(0.255,24,12,0,Math.PI*2,0,Math.PI*0.34),hairM,0,1.88,-0.02);
-    add(b,new THREE.SphereGeometry(0.255,24,14,Math.PI,Math.PI,0,Math.PI*backTh),hairM,0,1.88,-0.02);
-    for(const sd of[-1,1]){const m=add(b,new THREE.SphereGeometry(0.1,12,10),hairM,sd*0.222,1.91,0.03);m.scale.set(0.5,1.2,0.95);}   // จอนผมข้างหู ไม่ให้ดูเป็นหมวก
-    const ball=(x,y,z,r,m)=>add(b,new THREE.SphereGeometry(r,12,10),m||hairM,x,y,z);
-    const caps=(r,l,x,y,z,rx,rz)=>{const m=add(b,new THREE.CapsuleGeometry(r,l,4,10),hairM,x,y,z);m.rotation.x=rx||0;m.rotation.z=rz||0;return m;};
-    const tuft=(dx,dy,dz,len,rad)=>{const d=new THREE.Vector3(dx,dy,dz).normalize(),m=new THREE.Mesh(new THREE.ConeGeometry(rad,len,6),hairM);
+    add(b,sGeo(THREE.SphereGeometry,0.255,24,12,0,Math.PI*2,0,Math.PI*0.34),hairM,0,1.88,-0.02);
+    add(b,sGeo(THREE.SphereGeometry,0.255,24,14,Math.PI,Math.PI,0,Math.PI*backTh),hairM,0,1.88,-0.02);
+    for(const sd of[-1,1]){const m=add(b,sGeo(THREE.SphereGeometry,0.1,12,10),hairM,sd*0.222,1.91,0.03);m.scale.set(0.5,1.2,0.95);}   // จอนผมข้างหู ไม่ให้ดูเป็นหมวก
+    const ball=(x,y,z,r,m)=>add(b,sGeo(THREE.SphereGeometry,r,12,10),m||hairM,x,y,z);
+    const caps=(r,l,x,y,z,rx,rz)=>{const m=add(b,sGeo(THREE.CapsuleGeometry,r,l,4,10),hairM,x,y,z);m.rotation.x=rx||0;m.rotation.z=rz||0;return m;};
+    const tuft=(dx,dy,dz,len,rad)=>{const d=new THREE.Vector3(dx,dy,dz).normalize(),m=new THREE.Mesh(sGeo(THREE.ConeGeometry,rad,len,6),hairM);
       m.quaternion.setFromUnitVectors(UP,d);m.position.copy(HCt).addScaledVector(d,0.23+len*0.35);b.add(m);};
-    const bangs=(w,y,z,k)=>{const m=add(b,new THREE.SphereGeometry(0.22,18,10),hairM,0,y,z);m.scale.set(w,k,0.62);return m;};
-    if(hS===0){const m=add(b,new THREE.SphereGeometry(0.17,14,8),hairM,-0.06,2.02,0.17);m.scale.set(1.05,0.42,0.6);m.rotation.z=0.28;const m2=add(b,new THREE.SphereGeometry(0.13,14,8),hairM,0.1,2.0,0.17);m2.scale.set(0.9,0.4,0.55);m2.rotation.z=-0.2;}
+    const bangs=(w,y,z,k)=>{const m=add(b,sGeo(THREE.SphereGeometry,0.22,18,10),hairM,0,y,z);m.scale.set(w,k,0.62);return m;};
+    if(hS===0){const m=add(b,sGeo(THREE.SphereGeometry,0.17,14,8),hairM,-0.06,2.02,0.17);m.scale.set(1.05,0.42,0.6);m.rotation.z=0.28;const m2=add(b,sGeo(THREE.SphereGeometry,0.13,14,8),hairM,0.1,2.0,0.17);m2.scale.set(0.9,0.4,0.55);m2.rotation.z=-0.2;}
     else if(hS===1){bangs(1.05,2.0,0.17,0.36);ball(-0.2,1.93,0.11,0.06);ball(0.2,1.93,0.11,0.06);}
     else if(hS===2){const m=caps(0.17,0.5,0,1.6,-0.17);m.scale.set(1.25,1,0.55);for(const s of[-1,1])caps(0.045,0.34,s*0.215,1.72,0.04);bangs(1.0,2.0,0.17,0.3);}
-    else if(hS===3){ball(0,2.14,-0.08,0.12);const r=add(b,new THREE.TorusGeometry(0.115,0.022,6,16),tieM,0,2.06,-0.08);r.rotation.x=Math.PI/2;}
+    else if(hS===3){ball(0,2.14,-0.08,0.12);const r=add(b,sGeo(THREE.TorusGeometry,0.115,0.022,6,16),tieM,0,2.06,-0.08);r.rotation.x=Math.PI/2;}
     else if(hS===4){for(const [x,y,z] of [[0.3,1,0.5],[-0.4,1,0.4],[0,1,0.75],[0.6,0.9,0],[-0.6,0.9,0.1],[0.2,1,-0.5],[-0.3,1,-0.4],[0.7,0.5,-0.3],[-0.7,0.5,-0.2]])tuft(x,y,z,0.2,0.075);}
-    else if(hS===5){add(b,new THREE.SphereGeometry(0.285,24,12,Math.PI*0.85,Math.PI*1.3,Math.PI*0.3,Math.PI*0.52),hairM,0,1.82,-0.04);bangs(1.0,2.0,0.17,0.32);}
+    else if(hS===5){add(b,sGeo(THREE.SphereGeometry,0.285,24,12,Math.PI*0.85,Math.PI*1.3,Math.PI*0.3,Math.PI*0.52),hairM,0,1.82,-0.04);bangs(1.0,2.0,0.17,0.32);}
     else if(hS===6){ball(0,1.93,-0.27,0.045,tieM);caps(0.075,0.42,0,1.7,-0.4,0.45);}
     else if(hS===7){for(let i=0;i<5;i++)ball(0,1.78-0.11*i,-0.29,0.085-0.009*i);ball(0,1.2,-0.29,0.04,tieM);}
     else if(hS===8){
@@ -4780,47 +4806,47 @@ function makeStudent(look,id){
     else if(hS===9){for(const s of[-1,1]){ball(s*0.26,1.94,-0.02,0.04,tieM);caps(0.07,0.36,s*0.3,1.74,-0.04,0,-s*0.3);}}
     else if(hS===10){for(const [x,y,z] of [[0,1,0],[0.5,1,0.2],[-0.5,1,0.2],[0.3,1,-0.5],[-0.3,1,-0.5],[0.85,0.7,0],[-0.85,0.7,0],[0,1,0.6]])tuft(x,y,z,0.3,0.09);}
   }
-  const scM=new THREE.MeshStandardMaterial({map:stripeTex(H.c,H.c2),roughness:0.9});
-  add(b,new THREE.TorusGeometry(0.17,0.075,8,18),scM,0,1.6,0).rotation.x=Math.PI/2;
+  const scM=sMat({map:sStripe(H.c,H.c2),roughness:0.9});
+  add(b,sGeo(THREE.TorusGeometry,0.17,0.075,8,18),scM,0,1.6,0).rotation.x=Math.PI/2;
   const ends=[];
   for(const [x,len] of [[0.08,0.5],[-0.04,0.42]]){
     const E=new THREE.Group();E.position.set(x,1.57,0.2);b.add(E);
-    add(E,new THREE.BoxGeometry(0.13,len,0.035),scM,0,-len/2,0);ends.push(E);
+    add(E,sGeo(THREE.BoxGeometry,0.13,len,0.035),scM,0,-len/2,0);ends.push(E);
   }
-  const cloak=makeCloak(cloakCol,house.clone().multiplyScalar(0.7),0.33,0.82,1.5,0.75);
+  const cloak=makeCloak(cloakCol,house.clone().multiplyScalar(0.7),0.33,0.82,1.5,0.75,true);
   cloak.outer.position.y=cloak.inner.position.y=0.83;b.add(cloak.outer,cloak.inner);
-  const hood=add(b,new THREE.SphereGeometry(0.3,14,10,0,Math.PI*2,0,Math.PI/2),blackM,0,1.52,-0.2);hood.rotation.x=-1.9;hood.scale.set(1,0.6,1);
+  const hood=add(b,sGeo(THREE.SphereGeometry,0.3,14,10,0,Math.PI*2,0,Math.PI/2),blackM,0,1.52,-0.2);hood.rotation.x=-1.9;hood.scale.set(1,0.6,1);
   const sleeveM=M(cloakCol,0.92,{side:THREE.DoubleSide});
   const mkArm=s=>{
     const A=new THREE.Group();A.position.set(s*0.33,1.5,0);b.add(A);
-    add(A,new THREE.CylinderGeometry(0.085,0.16,0.62,12,1,true),sleeveM,0,-0.3,0);
-    add(A,new THREE.SphereGeometry(0.075,10,8),skinM,0,-0.64,0);
+    add(A,sGeo(THREE.CylinderGeometry,0.085,0.16,0.62,12,1,true),sleeveM,0,-0.3,0);
+    add(A,sGeo(THREE.SphereGeometry,0.075,10,8),skinM,0,-0.64,0);
     return A;
   };
   const armR=mkArm(-1),armL=mkArm(1);
   const wandG=new THREE.Group();armR.add(wandG);
   {
-    const wC=WOODC[look.wd],wM=M(wC,0.5),dkM=M(new THREE.Color(wC).multiplyScalar(0.55),0.6),goldW=new THREE.MeshStandardMaterial({color:'#e8c060',metalness:0.85,roughness:0.3,emissive:'#2a1c04'});
-    add(wandG,new THREE.CylinderGeometry(0.014,0.026,0.46,8),wM,0,-0.87,0);
-    if(look.ws===0)add(wandG,new THREE.SphereGeometry(0.034,8,6),wM,0,-0.65,0);
-    else if(look.ws===1)for(let i=0;i<7;i++){const r=add(wandG,new THREE.TorusGeometry(0.024-i*0.0014,0.006,5,10),dkM,0,-0.7-i*0.055,0);r.rotation.x=Math.PI/2+0.35;}
-    else if(look.ws===2){add(wandG,new THREE.SphereGeometry(0.04,8,6),wM,0,-0.65,0);for(const [y,r] of [[-0.72,0.034],[-0.84,0.028],[-0.95,0.026]])add(wandG,new THREE.SphereGeometry(r,8,6),wM,0.007,y,0);}
-    else{add(wandG,new THREE.CylinderGeometry(0.031,0.031,0.13,10),goldW,0,-0.71,0);for(const y of[-0.79,-1.0]){const r=add(wandG,new THREE.TorusGeometry(0.024,0.007,6,12),goldW,0,y,0);r.rotation.x=Math.PI/2;}add(wandG,new THREE.SphereGeometry(0.02,8,6),goldW,0,-1.1,0);}
+    const wC=WOODC[look.wd],wM=M(wC,0.5),dkM=M(new THREE.Color(wC).multiplyScalar(0.55),0.6),goldW=sMat({color:'#e8c060',metalness:0.85,roughness:0.3,emissive:'#2a1c04'});
+    add(wandG,sGeo(THREE.CylinderGeometry,0.014,0.026,0.46,8),wM,0,-0.87,0);
+    if(look.ws===0)add(wandG,sGeo(THREE.SphereGeometry,0.034,8,6),wM,0,-0.65,0);
+    else if(look.ws===1)for(let i=0;i<7;i++){const r=add(wandG,sGeo(THREE.TorusGeometry,0.024-i*0.0014,0.006,5,10),dkM,0,-0.7-i*0.055,0);r.rotation.x=Math.PI/2+0.35;}
+    else if(look.ws===2){add(wandG,sGeo(THREE.SphereGeometry,0.04,8,6),wM,0,-0.65,0);for(const [y,r] of [[-0.72,0.034],[-0.84,0.028],[-0.95,0.026]])add(wandG,sGeo(THREE.SphereGeometry,r,8,6),wM,0.007,y,0);}
+    else{add(wandG,sGeo(THREE.CylinderGeometry,0.031,0.031,0.13,10),goldW,0,-0.71,0);for(const y of[-0.79,-1.0]){const r=add(wandG,sGeo(THREE.TorusGeometry,0.024,0.007,6,12),goldW,0,y,0);r.rotation.x=Math.PI/2;}add(wandG,sGeo(THREE.SphereGeometry,0.02,8,6),goldW,0,-1.1,0);}
   }
   const tip=new THREE.Sprite(glowMat(WCOREC[look.wc],2.2));tip.scale.setScalar(0.32);tip.position.set(0,-1.09,0);armR.add(tip);
   shadowAll(b);
-  const shield=new THREE.Mesh(new THREE.SphereGeometry(1.35,32,20),shieldMat());shield.position.y=1.1;shield.visible=false;g.add(shield);
-  const ring=new THREE.Mesh(new THREE.RingGeometry(0.85,1.05,32),new THREE.MeshBasicMaterial({color:'#ffffff',transparent:true,opacity:0.7,depthWrite:false}));
+  const shield=new THREE.Mesh(sGeo(THREE.SphereGeometry,1.35,32,20),shieldMat());shield.position.y=1.1;shield.visible=false;g.add(shield);
+  const ring=new THREE.Mesh(sGeo(THREE.RingGeometry,0.85,1.05,32),new THREE.MeshBasicMaterial({color:'#ffffff',transparent:true,opacity:0.7,depthWrite:false}));
   ring.rotation.x=-Math.PI/2;ring.position.y=0.04;g.add(ring);
   const stars=addStatus(g,2.55);
   // ไม้กวาด (โชว์ตอนบิน)
   const broom=new THREE.Group();
-  const handle=new THREE.Mesh(new THREE.CylinderGeometry(0.04,0.05,2.5,8),M('#5a3a1c',0.55));handle.rotation.x=Math.PI/2;handle.position.z=0.15;broom.add(handle);
-  const bristle=new THREE.Mesh(new THREE.ConeGeometry(0.26,0.9,10,1,true),M('#b08a50',1,{side:THREE.DoubleSide}));bristle.rotation.x=Math.PI/2;bristle.position.z=-1.35;broom.add(bristle);
-  const band=new THREE.Mesh(new THREE.TorusGeometry(0.075,0.025,6,12),new THREE.MeshStandardMaterial({color:'#e8c060',metalness:0.8,roughness:0.3}));band.position.z=-0.92;broom.add(band);
+  const handle=new THREE.Mesh(sGeo(THREE.CylinderGeometry,0.04,0.05,2.5,8),M('#5a3a1c',0.55));handle.rotation.x=Math.PI/2;handle.position.z=0.15;broom.add(handle);
+  const bristle=new THREE.Mesh(sGeo(THREE.ConeGeometry,0.26,0.9,10,1,true),M('#b08a50',1,{side:THREE.DoubleSide}));bristle.rotation.x=Math.PI/2;bristle.position.z=-1.35;broom.add(bristle);
+  const band=new THREE.Mesh(sGeo(THREE.TorusGeometry,0.075,0.025,6,12),sMat({color:'#e8c060',metalness:0.8,roughness:0.3}));band.position.z=-0.92;broom.add(band);
   broom.position.y=0.8;broom.visible=false;shadowAll(broom);g.add(broom);
   // ใยแมงมุมรัดตัว (ตอนโดนใย)
-  const cocoon=new THREE.Mesh(new THREE.IcosahedronGeometry(0.75,1),new THREE.MeshStandardMaterial({color:'#e8e8f0',transparent:true,opacity:0.55,roughness:1,wireframe:true}));
+  const cocoon=new THREE.Mesh(sGeo(THREE.IcosahedronGeometry,0.75,1),sMat({color:'#e8e8f0',transparent:true,opacity:0.55,roughness:1,wireframe:true}));
   cocoon.position.y=0.7;cocoon.scale.set(1,1.2,1);cocoon.visible=false;g.add(cocoon);
   scene.add(g);
   return {g,b,legs,armR,armL,wandG,ends,cloak,tip,shield,ring,stars,broom,cocoon,walk:0,castT:0,lx:null,lz:null,svx:0,svz:0};
@@ -5800,7 +5826,7 @@ function syncPlayers(P,mode,now,dt){
     if(p.gh&&!meGhost){g.visible=false;continue;}
     if(!!p.gh!==!!o.ghost){
       o.ghost=!!p.gh;
-      g.traverse(m=>{if(m.isMesh&&m.material&&!m.material.isShaderMaterial){m.material.transparent=o.ghost;m.material.opacity=o.ghost?0.35:1;m.material.needsUpdate=true;}});
+      setGhost(o,o.ghost);
     }
     const x=tx(p.x),z=tz(p.y);
     o.zs=o.zs===undefined?p.z:lerp(o.zs,(p.z||0)+(p.gh?0.6+Math.sin(now/500)*0.2:0),1-Math.exp(-20*dt));
@@ -7153,6 +7179,8 @@ async function swSetup(){
 }
 swSetup();
 window.WD.SW=SWK;
+// เทส/วัดผล: เดินลูปโฮสต์ 1 รอบด้วยมือ (hostTick + snapshot + เอฟเฟกต์) — ใช้ตอนหน้าต่างถูกซ่อนแล้ว setInterval ช้า
+window.WD.hostStep=dt=>{hostTick(dt);const b=makeSnap(),ev=EVL;EVL=[];EVN=[];onSnap(Object.assign({},b,{ev}));};
 </script>
 </body>
 </html>
