@@ -4716,7 +4716,7 @@ function updateCloth(c,lvx,lvz,speed,now,dt){
   const amp=0.018+Math.min(0.07,speed*0.005),disp=Math.hypot(c.dx,c.dz),flr=Math.min(0.3,speed*0.018);
   for(let i=0;i<pos.length;i+=3){
     const rx=rest[i],ry=rest[i+1],rz=rest[i+2];
-    const w=Math.pow((hh-ry)/c.h,1.5);
+    const w=Math.pow(Math.max(0,(hh-ry)/c.h),1.5);   // max(0): ry อาจเกิน hh นิดหน่อยจากทศนิยม → pow(ลบ) = NaN
     const fl=Math.sin(t+ry*4.5+Math.atan2(rx,rz)*3)*amp*w;
     const f=1+flr*w;
     pos[i]=rx*f+c.dx*w+fl*rz*2;
@@ -4732,9 +4732,12 @@ function updateCloth(c,lvx,lvz,speed,now,dt){
 const SHGEO=new Map(),SHMAT=new Map(),SHTEX=new Map();
 function sGeo(C,...a){const k=C.name+'('+a.join(',')+')';let g=SHGEO.get(k);if(!g){g=new C(...a);g.userData.keep=true;SHGEO.set(k,g);}return g;}
 function sMat(o){
-  const k=Object.keys(o).sort().map(n=>{const v=o[n];return n+'='+(v&&v.isTexture?v.uuid:(n==='color'||n==='emissive')?new THREE.Color(v).getHexString():String(v));}).join(';');
-  let m=SHMAT.get(k);if(!m){m=new THREE.MeshStandardMaterial(o);m.userData.keep=true;SHMAT.set(k,m);}return m;
+  const k='S|'+matKey(o);let m=SHMAT.get(k);if(!m){m=new THREE.MeshStandardMaterial(o);m.userData.keep=true;SHMAT.set(k,m);}return m;
 }
+function bMat(o){const k='B|'+matKey(o);let m=SHMAT.get(k);if(!m){m=new THREE.MeshBasicMaterial(o);m.userData.keep=true;SHMAT.set(k,m);}return m;}
+// คีย์ของวัสดุ: สีเก็บเป็นตัวเลขจริง (สี HDR เกิน 1 ไม่ถูกปัดรวมกัน)
+function matKey(o){return Object.keys(o).sort().map(n=>{const v=o[n];if(v&&v.isTexture)return n+'='+v.uuid;
+  if(n==='color'||n==='emissive'){const c=new THREE.Color(v);return n+'='+c.r.toFixed(4)+','+c.g.toFixed(4)+','+c.b.toFixed(4);}return n+'='+String(v);}).join(';');}
 // รวมชิ้นส่วนที่ไม่ขยับของตัวละครให้เหลือน้อย draw call ที่สุด:
 // ทุกชิ้นที่เป็นวัสดุสีล้วน (ไม่มี texture/โปร่งใส/เรืองแสง) ในกลุ่มเดียวกัน → mesh เดียว ใช้วัสดุกลาง BODYM
 // สี/ความด้าน/ความเป็นโลหะ เก็บต่อจุด (attribute color/aRough/aMetal) แทนการแยกวัสดุ
@@ -4752,7 +4755,7 @@ function bodyMat(side){
     m.onBeforeCompile=bodyPatch;m.customProgramCacheKey=()=>'wdBody';m.userData.keep=true;BODYM[side]=m;}
   return BODYM[side];
 }
-function plainMat(m){return m&&m.isMeshStandardMaterial&&m.userData.keep&&!m.map&&!m.transparent&&!m.vertexColors&&m.emissive.r+m.emissive.g+m.emissive.b===0&&m.side!==THREE.BackSide;}
+function plainMat(m){return m&&m.isMeshStandardMaterial&&m.userData.keep&&!m.map&&!m.transparent&&!m.vertexColors&&!m.flatShading&&!m.wireframe&&m.emissive.r+m.emissive.g+m.emissive.b===0&&m.side!==THREE.BackSide;}
 function mergeBody(root){
   const conts=[];root.traverse(o=>{if(!o.isMesh&&o.children.length)conts.push(o);});
   for(const C of conts){
@@ -4773,6 +4776,18 @@ function mergeBody(root){
       const g=mergeGeometries(geos,false);geos.forEach(x=>x.dispose());
       if(!g)continue;
       const mm=new THREE.Mesh(g,bodyMat(sd));mm.castShadow=L[0].castShadow;mm.receiveShadow=L[0].receiveShadow;
+      for(const m of L)C.remove(m);C.add(mm);
+    }
+    // รอบสอง: ชิ้นที่เหลือที่ใช้วัสดุแชร์ตัวเดียวกัน (เช่น ตาเรืองแสง) รวมกันตรงๆ
+    const byMat=new Map();
+    for(const m of C.children){if(!m.isMesh||m.userData.anim||!m.material.userData.keep||m.material.transparent||m.material===BODYM[m.material.side])continue;let L=byMat.get(m.material);if(!L)byMat.set(m.material,L=[]);L.push(m);}
+    for(const [mat,L] of byMat){
+      if(L.length<2)continue;
+      const geos=L.map(m=>{m.updateMatrix();const g=m.geometry.index?m.geometry.clone():m.geometry.toNonIndexed();g.applyMatrix4(m.matrix);for(const k of Object.keys(g.attributes))if(k!=='position'&&k!=='normal'&&k!=='uv')g.deleteAttribute(k);if(!g.attributes.uv)return null;return g;});
+      if(geos.includes(null)){geos.forEach(x=>x&&x.dispose());continue;}
+      const g=mergeGeometries(geos,false);geos.forEach(x=>x.dispose());
+      if(!g)continue;
+      const mm=new THREE.Mesh(g,mat);mm.castShadow=L[0].castShadow;mm.receiveShadow=L[0].receiveShadow;
       for(const m of L)C.remove(m);C.add(mm);
     }
   }
@@ -4900,41 +4915,41 @@ function makeStudent(look,id){
 function makeEnemy(t){
   const g=new THREE.Group(),b=new THREE.Group();g.add(b);
   const add=(geo,mat,x,y,z)=>{const m=new THREE.Mesh(geo,mat);m.position.set(x,y,z);b.add(m);return m;};
-  const eyeM=c=>new THREE.MeshBasicMaterial({color:hdr(c,2.5)});
+  const eyeM=c=>bMat({color:hdr(c,2.5)});
   let tele=null,club=null,cloak=null,h=2;
   if(t==='gob'){
-    const sk=new THREE.MeshStandardMaterial({color:'#6bbf4e',roughness:0.8}),cl=new THREE.MeshStandardMaterial({color:'#5a3d22',roughness:1});
-    add(new THREE.SphereGeometry(0.5,12,10),cl,0,0.6,0).scale.set(1,1.1,0.9);
-    add(new THREE.SphereGeometry(0.4,14,10),sk,0,1.25,0.05);
-    for(const s of [-1,1]){const e=add(new THREE.ConeGeometry(0.12,0.55,8),sk,s*0.45,1.35,0);e.rotation.z=-s*Math.PI/2.4;}
-    for(const s of [-1,1])add(new THREE.SphereGeometry(0.07,6,6),eyeM('#ffe600'),s*0.14,1.3,0.38);
-    add(new THREE.ConeGeometry(0.06,0.5,6),new THREE.MeshStandardMaterial({color:'#aaa',metalness:0.6,roughness:0.3}),-0.45,0.8,0.35).rotation.x=Math.PI/2;
+    const sk=sMat({color:'#6bbf4e',roughness:0.8}),cl=sMat({color:'#5a3d22',roughness:1});
+    add(sGeo(THREE.SphereGeometry,0.5,12,10),cl,0,0.6,0).scale.set(1,1.1,0.9);
+    add(sGeo(THREE.SphereGeometry,0.4,14,10),sk,0,1.25,0.05);
+    for(const s of [-1,1]){const e=add(sGeo(THREE.ConeGeometry,0.12,0.55,8),sk,s*0.45,1.35,0);e.rotation.z=-s*Math.PI/2.4;}
+    for(const s of [-1,1])add(sGeo(THREE.SphereGeometry,0.07,6,6),eyeM('#ffe600'),s*0.14,1.3,0.38);
+    add(sGeo(THREE.ConeGeometry,0.06,0.5,6),sMat({color:'#aaa',metalness:0.6,roughness:0.3}),-0.45,0.8,0.35).rotation.x=Math.PI/2;
     h=1.9;
   }else if(t==='wiz'){
-    const rm=new THREE.MeshStandardMaterial({color:'#1a0f26',roughness:0.9});
+    const rm=sMat({color:'#1a0f26',roughness:0.9});
     cloak=makeCloak('#1a0f26','#1f5a1a',0.32,0.85,1.7,0.3);
     cloak.outer.position.y=cloak.inner.position.y=0.85;b.add(cloak.outer,cloak.inner);
-    add(new THREE.SphereGeometry(0.42,14,10),rm,0,1.75,0).scale.set(1,0.7,0.85);
-    add(new THREE.ConeGeometry(0.42,0.95,14),rm,0,2.2,-0.05);
-    add(new THREE.SphereGeometry(0.24,10,8),new THREE.MeshBasicMaterial({color:'#05030a'}),0,1.92,0.18);
-    for(const s of [-1,1])add(new THREE.SphereGeometry(0.05,6,6),eyeM('#7dff6a'),s*0.09,1.95,0.4);
+    add(sGeo(THREE.SphereGeometry,0.42,14,10),rm,0,1.75,0).scale.set(1,0.7,0.85);
+    add(sGeo(THREE.ConeGeometry,0.42,0.95,14),rm,0,2.2,-0.05);
+    add(sGeo(THREE.SphereGeometry,0.24,10,8),bMat({color:'#05030a'}),0,1.92,0.18);
+    for(const s of [-1,1])add(sGeo(THREE.SphereGeometry,0.05,6,6),eyeM('#7dff6a'),s*0.09,1.95,0.4);
     const gl2=new THREE.Sprite(glowMat('#8dff5a',1.8));gl2.position.set(-0.45,1.3,0.5);gl2.scale.set(0.9,0.9,1);b.add(gl2);
     h=2.7;
   }else if(t==='spl'||t==='spider'||t==='queen'){
     // แมงมุม: ท้องใหญ่มีขน + ตา 8 ดวงเรืองแดง + ขา 8 ขาแบบ 2 ข้อ
     const sc=t==='spl'?0.5:t==='spider'?1.05:2.6;
-    const bodyM=new THREE.MeshStandardMaterial({color:t==='queen'?'#1d1410':'#2a1d18',roughness:0.7});
-    const hairM=new THREE.MeshStandardMaterial({color:t==='queen'?'#2e2018':'#4a3628',roughness:1,flatShading:true});
-    const M_fang=new THREE.MeshStandardMaterial({color:'#d8d0c0',roughness:0.4});
+    const bodyM=sMat({color:t==='queen'?'#1d1410':'#2a1d18',roughness:0.7});
+    const hairM=sMat({color:t==='queen'?'#2e2018':'#4a3628',roughness:1,flatShading:true});
+    const M_fang=sMat({color:'#d8d0c0',roughness:0.4});
     const sp=new THREE.Group();sp.scale.setScalar(sc);b.add(sp);
     const ad=(geo,mat,x,y,z)=>{const m=new THREE.Mesh(geo,mat);m.position.set(x,y,z);sp.add(m);return m;};
-    const seg=(par,a,c,r,mat)=>{const d=new THREE.Vector3().subVectors(c,a),len=d.length();const m=new THREE.Mesh(new THREE.CylinderGeometry(r*0.75,r,len,6),mat);m.position.copy(a).add(c).multiplyScalar(0.5);m.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),d.normalize());par.add(m);};
-    ad(new THREE.IcosahedronGeometry(0.62,2),hairM,0,0.78,-0.78).scale.set(1,0.85,1.25);
-    ad(new THREE.SphereGeometry(0.38,16,12),bodyM,0,0.62,0.05);
-    ad(new THREE.SphereGeometry(0.25,14,10),bodyM,0,0.6,0.45);
-    if(t!=='spl')ad(new THREE.OctahedronGeometry(0.16),eyeM('#b01010'),0,1.3,-0.82).scale.set(1,0.3,1.7);
-    for(const [x,y,r] of [[-0.07,0.7,0.06],[0.07,0.7,0.06],[-0.16,0.68,0.04],[0.16,0.68,0.04],[-0.11,0.63,0.035],[0.11,0.63,0.035],[-0.2,0.62,0.03],[0.2,0.62,0.03]])ad(new THREE.SphereGeometry(r,8,6),eyeM('#ff2020'),x,y,0.66);
-    for(const s of [-1,1]){const f=ad(new THREE.ConeGeometry(0.045,0.25,6),M_fang,s*0.07,0.46,0.66);f.rotation.x=Math.PI;}
+    const seg=(par,a,c,r,mat)=>{const d=new THREE.Vector3().subVectors(c,a),len=d.length();const m=new THREE.Mesh(sGeo(THREE.CylinderGeometry,r*0.75,r,len,6),mat);m.position.copy(a).add(c).multiplyScalar(0.5);m.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),d.normalize());par.add(m);};
+    ad(sGeo(THREE.IcosahedronGeometry,0.62,2),hairM,0,0.78,-0.78).scale.set(1,0.85,1.25);
+    ad(sGeo(THREE.SphereGeometry,0.38,16,12),bodyM,0,0.62,0.05);
+    ad(sGeo(THREE.SphereGeometry,0.25,14,10),bodyM,0,0.6,0.45);
+    if(t!=='spl')ad(sGeo(THREE.OctahedronGeometry,0.16),eyeM('#b01010'),0,1.3,-0.82).scale.set(1,0.3,1.7);
+    for(const [x,y,r] of [[-0.07,0.7,0.06],[0.07,0.7,0.06],[-0.16,0.68,0.04],[0.16,0.68,0.04],[-0.11,0.63,0.035],[0.11,0.63,0.035],[-0.2,0.62,0.03],[0.2,0.62,0.03]])ad(sGeo(THREE.SphereGeometry,r,8,6),eyeM('#ff2020'),x,y,0.66);
+    for(const s of [-1,1]){const f=ad(sGeo(THREE.ConeGeometry,0.045,0.25,6),M_fang,s*0.07,0.46,0.66);f.rotation.x=Math.PI;}
     var legs=[];
     for(const s of [-1,1])for(let i=0;i<4;i++){
       const L=new THREE.Group();L.position.set(s*0.25,0.62,0.25-i*0.15);sp.add(L);
@@ -4944,37 +4959,37 @@ function makeEnemy(t){
       legs.push({L,base,ph:i*Math.PI/2+(s>0?0:Math.PI),s});
     }
     if(t==='queen'){
-      tele=new THREE.Mesh(new THREE.CircleGeometry(150*S3,48),new THREE.MeshBasicMaterial({color:hdr('#ff3030',1.5),transparent:true,opacity:0.3,depthWrite:false}));
+      tele=new THREE.Mesh(sGeo(THREE.CircleGeometry,150*S3,48),new THREE.MeshBasicMaterial({color:hdr('#ff3030',1.5),transparent:true,opacity:0.3,depthWrite:false}));
       tele.rotation.x=-Math.PI/2;tele.position.y=0.05;tele.visible=false;g.add(tele);
     }
     h=t==='spl'?0.9:t==='spider'?1.7:3.9;
-    shadowAll(b);
+    shadowAll(b);mergeBody(b);
     const stars=addStatus(g,h+0.2);
     scene.add(g);
     return {g,b,tele,club,cloak,stars,h,legs,walk:0,lx:null,lz:null,svx:0,svz:0};
   }else if(t==='dragon'){
     // มังกร: ลำตัวยาว คอ หัวมีเขา ปีกใหญ่ หางยาว ตาเรืองแสง
-    const sk=new THREE.MeshStandardMaterial({color:'#6a1818',roughness:0.55,metalness:0.15});
-    const belly=new THREE.MeshStandardMaterial({color:'#c8964a',roughness:0.7});
-    const hornM=new THREE.MeshStandardMaterial({color:'#e8dcc0',roughness:0.4});
-    const wingM=new THREE.MeshStandardMaterial({color:'#4a1010',roughness:0.8,side:THREE.DoubleSide});
+    const sk=sMat({color:'#6a1818',roughness:0.55,metalness:0.15});
+    const belly=sMat({color:'#c8964a',roughness:0.7});
+    const hornM=sMat({color:'#e8dcc0',roughness:0.4});
+    const wingM=sMat({color:'#4a1010',roughness:0.8,side:THREE.DoubleSide});
     const Dg=new THREE.Group();Dg.scale.setScalar(1.55);b.add(Dg);
     const ad=(geo,mat,x,y,z)=>{const m=new THREE.Mesh(geo,mat);m.position.set(x,y,z);Dg.add(m);return m;};
-    const seg=(a,c,r,mat)=>{const d=new THREE.Vector3().subVectors(c,a),len=d.length();const m=new THREE.Mesh(new THREE.CylinderGeometry(r*0.8,r,len,10),mat);m.position.copy(a).add(c).multiplyScalar(0.5);m.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),d.normalize());Dg.add(m);return m;};
+    const seg=(a,c,r,mat)=>{const d=new THREE.Vector3().subVectors(c,a),len=d.length();const m=new THREE.Mesh(sGeo(THREE.CylinderGeometry,r*0.8,r,len,10),mat);m.position.copy(a).add(c).multiplyScalar(0.5);m.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),d.normalize());Dg.add(m);return m;};
     const V=(x,y,z)=>new THREE.Vector3(x,y,z);
-    ad(new THREE.SphereGeometry(1.2,20,14),sk,0,2.2,0).scale.set(1,0.85,1.8);
-    ad(new THREE.SphereGeometry(1.05,16,10),belly,0,1.9,0.1).scale.set(0.85,0.7,1.6);
+    ad(sGeo(THREE.SphereGeometry,1.2,20,14),sk,0,2.2,0).scale.set(1,0.85,1.8);
+    ad(sGeo(THREE.SphereGeometry,1.05,16,10),belly,0,1.9,0.1).scale.set(0.85,0.7,1.6);
     seg(V(0,2.6,1.6),V(0,3.7,2.8),0.5,sk);
-    const head=ad(new THREE.SphereGeometry(0.62,16,12),sk,0,3.95,3.25);head.scale.set(0.8,0.65,1.25);
-    ad(new THREE.BoxGeometry(0.55,0.25,0.9),sk,0,3.7,3.85);
+    const head=ad(sGeo(THREE.SphereGeometry,0.62,16,12),sk,0,3.95,3.25);head.scale.set(0.8,0.65,1.25);
+    ad(sGeo(THREE.BoxGeometry,0.55,0.25,0.9),sk,0,3.7,3.85);
     for(const s of [-1,1]){
-      const h=ad(new THREE.ConeGeometry(0.11,0.8,8),hornM,s*0.28,4.35,2.9);h.rotation.x=-0.9;
-      ad(new THREE.SphereGeometry(0.09,8,6),new THREE.MeshBasicMaterial({color:hdr('#ffcc33',3)}),s*0.27,4.05,3.65);
+      const h=ad(sGeo(THREE.ConeGeometry,0.11,0.8,8),hornM,s*0.28,4.35,2.9);h.rotation.x=-0.9;
+      ad(sGeo(THREE.SphereGeometry,0.09,8,6),bMat({color:hdr('#ffcc33',3)}),s*0.27,4.05,3.65);
       seg(V(s*0.7,1.6,1),V(s*0.9,0,1.1),0.32,sk);seg(V(s*0.7,1.6,-1),V(s*0.9,0,-1.2),0.36,sk);
     }
     seg(V(0,2,-2),V(0,1.5,-3.6),0.55,sk);seg(V(0,1.5,-3.6),V(0,1.05,-5),0.38,sk);seg(V(0,1.05,-5),V(0,0.8,-6.3),0.24,sk);
-    const tip=ad(new THREE.ConeGeometry(0.3,0.8,4),hornM,0,0.75,-6.8);tip.rotation.x=-Math.PI/2;
-    for(let i=0;i<5;i++){const sp=ad(new THREE.ConeGeometry(0.14,0.45,4),hornM,0,3.05-i*0.12,1.2-i*0.7);sp.rotation.x=-0.3;}
+    const tip=ad(sGeo(THREE.ConeGeometry,0.3,0.8,4),hornM,0,0.75,-6.8);tip.rotation.x=-Math.PI/2;
+    for(let i=0;i<5;i++){const sp=ad(sGeo(THREE.ConeGeometry,0.14,0.45,4),hornM,0,3.05-i*0.12,1.2-i*0.7);sp.rotation.x=-0.3;}
     var wings=[];
     for(const s of [-1,1]){
       const W2=new THREE.Group();W2.position.set(s*0.8,3,0.4);Dg.add(W2);
@@ -4982,54 +4997,54 @@ function makeEnemy(t){
       const v=[0,0,0, s*5,0.9,0.3, s*5.6,-0.4,-2.2, 0,0,0, s*5.6,-0.4,-2.2, s*1.6,0,-2.3];
       geo.setAttribute('position',new THREE.Float32BufferAttribute(v,3));geo.computeVertexNormals();
       W2.add(new THREE.Mesh(geo,wingM));
-      const bone=new THREE.Mesh(new THREE.CylinderGeometry(0.07,0.1,5.1,6),sk);bone.rotation.z=-s*Math.PI/2+s*0.18;bone.position.set(s*2.5,0.45,0.15);W2.add(bone);
+      const bone=new THREE.Mesh(sGeo(THREE.CylinderGeometry,0.07,0.1,5.1,6),sk);bone.rotation.z=-s*Math.PI/2+s*0.18;bone.position.set(s*2.5,0.45,0.15);W2.add(bone);
       wings.push({wg:W2,s});
     }
     h=7.2;
-    shadowAll(b);
+    shadowAll(b);mergeBody(b);
     const stars=addStatus(g,h);
     scene.add(g);
     return {g,b,tele,club,cloak,stars,h,wings,dragon:true,lx:null,lz:null,svx:0,svz:0};
   }else if(t==='dummy'){
     // หุ่นซ้อม: เสาไม้ + ตัวฟาง + เป้าบนหน้าอก
-    const wood=new THREE.MeshStandardMaterial({color:'#6a4a2a',roughness:0.9}),straw=new THREE.MeshStandardMaterial({color:'#c8a060',roughness:1});
-    add(new THREE.CylinderGeometry(0.08,0.1,2,8),wood,0,1,0);
-    add(new THREE.CylinderGeometry(0.4,0.34,1,12),straw,0,1.3,0);
-    add(new THREE.SphereGeometry(0.28,12,10),straw,0,2.05,0);
-    add(new THREE.CylinderGeometry(0.06,0.06,1.3,6),wood,0,1.55,0).rotation.z=Math.PI/2;
-    const tg=new THREE.Mesh(new THREE.CircleGeometry(0.26,24),new THREE.MeshBasicMaterial({color:'#ffffff'}));tg.position.set(0,1.35,0.36);b.add(tg);
-    const tr=new THREE.Mesh(new THREE.RingGeometry(0.1,0.18,24),new THREE.MeshBasicMaterial({color:hdr('#ff3030',1.4)}));tr.position.set(0,1.35,0.37);b.add(tr);
+    const wood=sMat({color:'#6a4a2a',roughness:0.9}),straw=sMat({color:'#c8a060',roughness:1});
+    add(sGeo(THREE.CylinderGeometry,0.08,0.1,2,8),wood,0,1,0);
+    add(sGeo(THREE.CylinderGeometry,0.4,0.34,1,12),straw,0,1.3,0);
+    add(sGeo(THREE.SphereGeometry,0.28,12,10),straw,0,2.05,0);
+    add(sGeo(THREE.CylinderGeometry,0.06,0.06,1.3,6),wood,0,1.55,0).rotation.z=Math.PI/2;
+    const tg=new THREE.Mesh(sGeo(THREE.CircleGeometry,0.26,24),bMat({color:'#ffffff'}));tg.position.set(0,1.35,0.36);b.add(tg);
+    const tr=new THREE.Mesh(sGeo(THREE.RingGeometry,0.1,0.18,24),bMat({color:hdr('#ff3030',1.4)}));tr.position.set(0,1.35,0.37);b.add(tr);
     h=2.4;
   }else if(t==='pixie'){
-    const bl=new THREE.MeshStandardMaterial({color:'#3a8aff',roughness:0.5,emissive:'#0a2a6a'});
-    add(new THREE.SphereGeometry(0.2,12,10),bl,0,0,0).scale.set(1,1.2,1);
-    add(new THREE.SphereGeometry(0.18,12,10),bl,0,0.3,0.03);
-    for(const s of [-1,1]){const e=add(new THREE.ConeGeometry(0.05,0.22,6),bl,s*0.17,0.4,0);e.rotation.z=-s*1.1;add(new THREE.SphereGeometry(0.035,6,6),eyeM('#ffffff'),s*0.07,0.33,0.17);}
+    const bl=sMat({color:'#3a8aff',roughness:0.5,emissive:'#0a2a6a'});
+    add(sGeo(THREE.SphereGeometry,0.2,12,10),bl,0,0,0).scale.set(1,1.2,1);
+    add(sGeo(THREE.SphereGeometry,0.18,12,10),bl,0,0.3,0.03);
+    for(const s of [-1,1]){const e=add(sGeo(THREE.ConeGeometry,0.05,0.22,6),bl,s*0.17,0.4,0);e.rotation.z=-s*1.1;add(sGeo(THREE.SphereGeometry,0.035,6,6),eyeM('#ffffff'),s*0.07,0.33,0.17);}
     var wings=[];
     for(const s of [-1,1]){
       const wg=new THREE.Group();wg.position.set(0,0.12,-0.12);b.add(wg);
-      const w=new THREE.Mesh(new THREE.PlaneGeometry(0.5,0.32),new THREE.MeshBasicMaterial({color:hdr('#cfe8ff',1.3),transparent:true,opacity:0.55,side:THREE.DoubleSide,depthWrite:false}));
+      const w=new THREE.Mesh(sGeo(THREE.PlaneGeometry,0.5,0.32),new THREE.MeshBasicMaterial({color:hdr('#cfe8ff',1.3),transparent:true,opacity:0.55,side:THREE.DoubleSide,depthWrite:false}));
       w.position.x=s*0.27;wg.add(w);wings.push({wg,s});
     }
     const gl3=new THREE.Sprite(glowMat('#4fa8ff',1.2));gl3.scale.setScalar(1.3);b.add(gl3);
     h=0.8;
-    shadowAll(b);
+    shadowAll(b);mergeBody(b);
     const stars=addStatus(g,h);
     scene.add(g);
     return {g,b,tele,club,cloak,stars,h,wings,lx:null,lz:null,svx:0,svz:0};
   }else{
-    const sk=new THREE.MeshStandardMaterial({color:'#7a5c42',roughness:0.95});
-    add(new THREE.SphereGeometry(1.6,18,14),sk,0,2.3,0).scale.set(1,1.15,0.9);
-    add(new THREE.SphereGeometry(0.75,14,10),sk,0,4.1,0.45);
-    for(const s of [-1,1]){add(new THREE.CylinderGeometry(0.45,0.55,1.6,10),sk,s*0.8,0.8,0);add(new THREE.CylinderGeometry(0.35,0.45,2.2,10),sk,s*1.8,2.3,0.2).rotation.z=s*0.3;}
-    for(const s of [-1,1])add(new THREE.SphereGeometry(0.1,6,6),eyeM('#ff3030'),s*0.25,4.2,1.1);
-    club=add(new THREE.CylinderGeometry(0.28,0.5,3,10),new THREE.MeshStandardMaterial({color:'#4a3220',roughness:1}),-2.1,2.4,1.1);
-    club.rotation.x=Math.PI/2.6;
-    tele=new THREE.Mesh(new THREE.CircleGeometry(135*S3,48),new THREE.MeshBasicMaterial({color:hdr('#ff3030',1.5),transparent:true,opacity:0.3,depthWrite:false}));
+    const sk=sMat({color:'#7a5c42',roughness:0.95});
+    add(sGeo(THREE.SphereGeometry,1.6,18,14),sk,0,2.3,0).scale.set(1,1.15,0.9);
+    add(sGeo(THREE.SphereGeometry,0.75,14,10),sk,0,4.1,0.45);
+    for(const s of [-1,1]){add(sGeo(THREE.CylinderGeometry,0.45,0.55,1.6,10),sk,s*0.8,0.8,0);add(sGeo(THREE.CylinderGeometry,0.35,0.45,2.2,10),sk,s*1.8,2.3,0.2).rotation.z=s*0.3;}
+    for(const s of [-1,1])add(sGeo(THREE.SphereGeometry,0.1,6,6),eyeM('#ff3030'),s*0.25,4.2,1.1);
+    club=add(sGeo(THREE.CylinderGeometry,0.28,0.5,3,10),sMat({color:'#4a3220',roughness:1}),-2.1,2.4,1.1);
+    club.rotation.x=Math.PI/2.6;club.userData.anim=true;
+    tele=new THREE.Mesh(sGeo(THREE.CircleGeometry,135*S3,48),new THREE.MeshBasicMaterial({color:hdr('#ff3030',1.5),transparent:true,opacity:0.3,depthWrite:false}));
     tele.rotation.x=-Math.PI/2;tele.position.y=0.05;tele.visible=false;g.add(tele);
     h=5.2;
   }
-  shadowAll(b);
+  shadowAll(b);mergeBody(b);
   const stars=addStatus(g,h+0.2);
   scene.add(g);
   return {g,b,tele,club,cloak,stars,h,lx:null,lz:null,svx:0,svz:0};
