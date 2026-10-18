@@ -7,20 +7,20 @@
 ---
 
 ## 0. START HERE
-> **🔴 PENDING USER REQUESTS (2026-10-18, session 3 ran low on weekly quota — continue these first; tick them off here as they land):**
+> **✅ USER REQUESTS 1-11 below were implemented on 2026-10-18 (session 3, protocol `v15`) — verify with the user by play-testing; only lightly tested (no console errors, numbers checked, frost stance screenshot). NEXT: Storm class interview.**
 > Fire (Pyro):
-> 1. [ ] Kindle: jump **higher** (so the big fireball can be shot down at the ground) and in the direction of the **WASD keys held** (not always backwards); **longer cooldown** (number not given — propose one).
-> 2. [ ] Blazeform aura: nerf — **shorter (6 s)** and **smaller radius**.
-> 3. [ ] Dragon's Breath: much more fire, look like a real flamethrower.
-> 4. [ ] Fire orbs (shield): nicer look — particles + a small fire aura per orb; also some fire FX when blocking.
-> 5. [ ] Fireballs (charged + Kindle big): better look. Charge **a bit faster** (now 2 s).
-> 6. [ ] Normal attack: should look like **fire sparks**, not a small ball.
-> 7. [ ] Ring of Embers: **placement preview like Overwatch (Mei wall / Rein shield)** — press = show a **cyan** ghost of the ring at the aim point (with the lingering effect look), click again = confirm/cast.
+> 1. [x] Kindle: jump **higher** (so the big fireball can be shot down at the ground) and in the direction of the **WASD keys held** (not always backwards); **longer cooldown** (number not given — propose one).
+> 2. [x] Blazeform aura: nerf — **shorter (6 s)** and **smaller radius**.
+> 3. [x] Dragon's Breath: much more fire, look like a real flamethrower.
+> 4. [x] Fire orbs (shield): nicer look — particles + a small fire aura per orb; also some fire FX when blocking.
+> 5. [x] Fireballs (charged + Kindle big): better look. Charge **a bit faster** (now 2 s).
+> 6. [x] Normal attack: should look like **fire sparks**, not a small ball.
+> 7. [x] Ring of Embers: **placement preview like Overwatch (Mei wall / Rein shield)** — press = show a **cyan** ghost of the ring at the aim point (with the lingering effect look), click again = confirm/cast.
 > Frost:
-> 8. [ ] Idle melee pose: holding sword/axe looks like pointing at the ground — hold it better.
-> 9. [ ] 3rd combo hit: **nerf** — slower overhead slam with more wind-up animation, better slam + explosion FX (sword and axe).
-> 10. [ ] Glacier Rend melee (sword wave): the wave itself must be **visible**, and its ice path **bigger**. During **Mirror Legion** the 2 clones shoot too → **3 waves**, but a target only takes damage from the waves whose hitbox it is in (stand in the middle = 1 wave, between two = 2).
-> 11. [ ] Cryo Shell: the player must **not blink** (invulnerability flicker) — just show the ice block.
+> 8. [x] Idle melee pose: holding sword/axe looks like pointing at the ground — hold it better.
+> 9. [x] 3rd combo hit: **nerf** — slower overhead slam with more wind-up animation, better slam + explosion FX (sword and axe).
+> 10. [x] Glacier Rend melee (sword wave): the wave itself must be **visible**, and its ice path **bigger**. During **Mirror Legion** the 2 clones shoot too → **3 waves**, but a target only takes damage from the waves whose hitbox it is in (stand in the middle = 1 wave, between two = 2).
+> 11. [x] Cryo Shell: the player must **not blink** (invulnerability flicker) — just show the ice block.
 > Then: **design the Storm (⚡) class with the user** (one-question interview, same as Pyro/Frost).
 
 > Session 2 (2026-10-17): the questions below were asked; the user skipped them and picked **minimap first** (done). Still unanswered: audio feel, performance, real online test, UI feedback, "เพลงของฉัน". Ask again briefly if relevant, then offer the next ideas in §10.
@@ -214,3 +214,4 @@ User asked about real Harry Potter music: told them not to put it in the public 
   - **UI polish:** button press/focus states, overlay card pop-in, pulsing start button, "มีอะไรใหม่" panel on the menu (top-right; hidden on small screens).
   - Verified in the browser pane: all 9 modes start and run with bots without console errors; settings/keybinds/crosshair/map picker/kit UI clicked through. Not verified: real online play with friends after the protocol bump (everyone must refresh).
 - 2026-10-18 (session 3) — **Kit selector redesigned as a full-screen "spellbook"** (user: still looked the same; wanted fantasy, per-class gimmicks, a new layout that uses the space; inspired by Hogwarts Legacy loadouts, Diablo IV skill bars and Hades cards). Creator step 3 now shows `#sbook` (the old `#crPanel` is step 1-2 only, class `cr12`): left = class medallions (`.sbP`, pulse on the selected one, "ใหม่" tag for `DESIGNED`), centre = the 3D character, middle-left = spell library (`.sbLib`: class tabs, 2-column rune cards `.sc` with role band/cooldown/⚔️/⇄/equipped key badge, 3D tilt + shine on hover, drag & drop) with the info box `#kdesc` under it, top-right = class hero (`#sbHero`: name, tagline, role chain builder→…→ult with hover info, combo text), bottom-right = **loadout diamond identical to the in-game HUD** (`#sbLoad`: Q left / E top / R right / F bottom, ult circle in the middle, key labels follow rebinding, base-kit chips LMB/RMB/Shift). Per-class theme `SB_THEME` (tint + animated canvas `#sbFx`): fire = rising embers, frost = snow, storm = sparks + lightning flashes, nature = falling leaves, hex = purple smoke + floating runes, summon = orbiting spirit wisps; switching class flashes the screen in its colour, equipping a spell flashes the slot with particles (`sbBurst`). While the creator is open the lobby panels are hidden (`body.crOpenB`).
+- 2026-10-18 (session 3) — **Fire/Frost feedback round** (protocol `v15`): Kindle cd 9, jumps higher (`vz 15`) toward the WASD direction (`p.inp.mx/my`, fallback backwards); Blazeform 6 s, aura r130; fireball charge 1.5 s; Cryo Shell no longer blinks (`g.visible` ignores `iv` while `fr[3]&2`); Frost 3rd hit is a delayed slam (`p.slam3`, 0.32 s wind-up, `frostSlam3` → efx `slam3` with ice floor + spikes, 0.85 s recovery; client swing 0.62 s with long wind-up), ready stance holds the blade up (`o.sword/axe.rotation.x` blends to -2.0 when idle, 0 while swinging); Glacier Rend sword wave is a visible travelling ice crescent (`WVV[].m`), path r72, and **3 waves during Mirror Legion** (from the clone positions, each wave has its own hit set so damage stacks only by hitbox). Fire visuals: spark basic = no ball, only a flame streak + sparks; fireballs have swirling flame trails (bigger for Kindle `pfireb`); flamethrower 16 particles/frame; orbs have a fire aura sprite + embers; blocking with the fire shield bursts fire (`fblock`). **Ring of Embers placement preview** like Overwatch: `PLACE` + `placeKey()` intercept the slot key — first press shows a cyan ghost ring at the crosshair ground point (clamped to 600, `updatePlaceGhost`), second press or LMB places it, RMB cancels (`PLACE_SP` lists spells that use it).
