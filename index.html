@@ -3318,9 +3318,9 @@ let FLASHM=null;
 const FLASHING=new Set();
 function flashModel(o){
   if(!o||!o.g)return;
-  if(o.flashT>0){o.flashT=0.05;return;}
+  if(o.flashT>0){o.flashT=0.1;return;}
   if(!FLASHM){FLASHM=new THREE.MeshBasicMaterial({color:hdr('#ffffff',1.7)});FLASHM.userData.keep=true;}
-  o.flashT=0.05;o.flashSaved=[];
+  o.flashT=0.1;o.flashSaved=[];
   o.g.traverse(m=>{if(m.isMesh&&!m.isInstancedMesh&&m.material&&!Array.isArray(m.material)&&!m.material.transparent){o.flashSaved.push([m,m.material]);m.material=FLASHM;}});
   FLASHING.add(o);
 }
@@ -3823,6 +3823,7 @@ function fx(ev){
       if(!ev.b){flashModel(ev.id!==undefined?PM3.get(ev.id):ev.e!==undefined?EM3.get(ev.e):ev.mn!==undefined?MM3.get(ev.mn):null);hitSparks(ev.x,ev.y,H-0.6,ev.n);}
       if(SET.dmg||mine){if(ev.b)floatText(ev.x,ev.y,ev.n,'#ff9a4a',12,H-0.3);else floatText(ev.x,ev.y,ev.n,mine?'#ff6b6b':ev.s===NET.myId?'#ffe27a':'#ffffff',ev.s===NET.myId?18:16,H);}
       if(mine&&!ev.b){shake(5);snd('hurt');if(ev.sx!==undefined)DIRI.push({a:Math.atan2(ev.sy-myPos().y,ev.sx-myPos().x),t:1});}
+      if(ev.s===NET.myId&&!mine&&!ev.b){if(ev.n>=10)shake(Math.min(6,ev.n/6));if(ev.n>=15)hitStop(ev.n>=40||ev.kl?0.08:0.055);}
       if(ev.s===NET.myId&&!mine&&!ev.b&&SET.hitm){HITM.t=0.18;HITM.kill=!!ev.kl;if(ev.kl)snd('kill');}
       break;}
     case 'parry':
@@ -6265,10 +6266,15 @@ $('#meet').addEventListener('click',e=>{const b=e.target.closest('[data-vote]');
 
 // ---------- ลูปเรนเดอร์ ----------
 let lastFrame=performance.now();
+// hit-stop / impact frame: เราตีโดนแรงๆ = ค้างภาพบนจอเราแว้บหนึ่ง (เกมจริงยังเดินต่อ ไม่หยุดของเพื่อน)
+const HSTOP={t:0,pend:0};
+function hitStop(d){if(screen==='game')HSTOP.pend=Math.max(HSTOP.pend,d);}
 function frame(now){
   const dt=Math.min(0.05,(now-lastFrame)/1000);lastFrame=now;
+  if(HSTOP.t>0){HSTOP.t-=dt;requestAnimationFrame(frame);return;}
   qualTick(dt);
-  render(dt,now);
+  try{render(dt,now);}catch(e){console.error(e);}
+  if(HSTOP.pend>0){HSTOP.t=HSTOP.pend;HSTOP.pend=0;}
   requestAnimationFrame(frame);
 }
 let _fpsAcc=0,_fpsN=0;
