@@ -970,10 +970,10 @@ function detonateHeat(p,t,per,mul){const n=takeHeat(t);if(n>0){damage(t,per*n*(m
 // ---------- ความสามารถพื้นฐาน (คลิกซ้าย) ของแต่ละสาย: สะสมสถานะตั้งต้นให้เองทุกๆ N ครั้งที่ยิงโดน ----------
 const PBASIC=[
   {id:'b_pyro',type:'spark',n:'ประกายไฟ / ลูกไฟชาร์จ',d:'คลิก = ยิงประกายไฟ (6 ดาเมจ ทุก 0.3 วิ ระยะ ~400) โดนเป้าเดียวครบ 3 นัด = +1 Burning • กดค้าง = รวบรวมลูกไฟที่ปลายไม้ (ไม่ยิง) ครบ 2 วิ แล้วปล่อย = ลูกไฟ (20 ดาเมจ ระยะ ~900 +1 Burning)',
-    shd:'โล่ไฟ: บล็อกปกติ • Parry = ได้ลูกไฟวิญญาณ 2 ลูก (ครั้งเดียวต่อการยกโล่) • บล็อกโดนครบ 3 ครั้ง = ได้ 2 ลูก • สะสมได้สูงสุด 6 ลูก หมุนรอบตัวไม่หายจนกว่าจะใช้ • ลูกไฟ (ชาร์จ/Kindle) โดนศัตรู = ลูกไฟวิญญาณทั้งหมดพุ่งใส่ ลูกละ 8 ทุก 2 ลูก = +1 Burning',dsd:'พุ่ง (Shift): กดค้างชาร์จ (สูงสุด 4 วิ ห้ามขยับ ยิ่งชาร์จยิ่งย่อตัวต่ำ) ปล่อย = ระเบิดดันตัวพุ่ง 150-1100 อมตะระหว่างพุ่ง คูลดาวน์ 3 วิ',
+    shd:'โล่ไฟ: บล็อกปกติ • Parry = ได้ลูกไฟวิญญาณ 2 ลูก (ครั้งเดียวต่อการยกโล่) • บล็อกโดนครบ 3 ครั้ง = ได้ 2 ลูก • สะสมได้สูงสุด 6 ลูก หมุนรอบตัวไม่หายจนกว่าจะใช้ • ลูกไฟ (ชาร์จ/Kindle) โดนศัตรู = ลูกไฟวิญญาณทั้งหมดพุ่งใส่ ลูกละ 10',dsd:'พุ่ง (Shift): กดค้างชาร์จ (สูงสุด 4 วิ ห้ามขยับ ยิ่งชาร์จยิ่งย่อตัวต่ำ) ปล่อย = ระเบิดดันตัวพุ่ง 150-1100 อมตะระหว่างพุ่ง คูลดาวน์ 3 วิ',
     hit(pr,t){damage(t,pr.dmg,pr.owner,'proj');if((t.spkN=(t.spkN|0)+1)>=3){t.spkN=0;addBurn(t,1,pr.owner);}},
     tick:pyroBasic,onParry:pyroParry,onBlock:pyroBlock,dash:pyroDash},
-  {id:'b_frost',type:'icicle',n:'ดาบน้ำแข็ง / แท่งน้ำแข็ง',d:'กด V สลับโหมด • ประชิด: ดาบน้ำแข็งคอมโบ 10/10/15 ระยะ ~120 จังหวะ 3 ฮีล 10 ทุกครั้งที่โดน = ช้าลง +5% (สูงสุด 30%) เดินได้ระหว่างฟัน • ไกล: แท่งน้ำแข็ง 7 ดาเมจ ทุก 0.3 วิ ระยะ ~700 ช้าลง +10% (สูงสุด 30%) • อยู่สูงกว่า ~4 เมตร + ฟัน = กระโดดฟาดลงพื้น 30',
+  {id:'b_frost',type:'icicle',n:'ดาบน้ำแข็ง / แท่งน้ำแข็ง',d:'กด V สลับโหมด • ประชิด: ดาบน้ำแข็งคอมโบ 10/10/15 ระยะ ~120 จังหวะ 3 ฮีล 10 เดินได้ระหว่างฟัน • ไกล: แท่งน้ำแข็ง 7 ดาเมจ ทุก 0.3 วิ ระยะ ~700 ช้าลง +10% (สูงสุด 30%) • อยู่สูงกว่า ~4 เมตร + ฟัน = กระโดดฟาดลงพื้น 30',
     shd:'โล่อัศวินน้ำแข็ง: กันเฉพาะด้านหน้า 120° ยกได้นานกว่าปกติ 2 เท่า ฟันดาบระหว่างยกโล่ได้ (ช้าลง) • Parry = ฟันครั้งต่อไปใน 1.5 วิ เป็นจังหวะ 3 ทันที',dsd:'ไถลน้ำแข็ง (Shift) 5 วิ เร็ว +80% (ลื่น หยุดทันทีไม่ได้) ทิ้งทางน้ำแข็ง 4 วิ: ศัตรูเดินทับช้า +10% และลื่น เราเดินทับเร็ว +20% • คูลดาวน์ 6 วิหลังไถลจบ',
     front:true,shDrain:0.5,shieldSwing:true,
     hit(pr,t){damage(t,pr.dmg,pr.owner,'proj');addFrostSlow(t,10);},
@@ -1021,7 +1021,7 @@ function frostBasic(p,inp,dt,setCd){
   let ci=p.cmbT>0?(p.cmbN|0):0;if(p.ripT>0){ci=2;p.ripT=0;}
   const D=ff?[20,20,40]:[10,10,15],R=ff?160:120;
   if(ci===2){p.slam3={t:0.32,R,dm:D[2],ff};}
-  else{meleeHit(p,p.x,p.y,R,D[ci],1.0,t=>addFrostSlow(t,5));
+  else{meleeHit(p,p.x,p.y,R,D[ci],1.0);
   if(p.mirror>0)for(const s of [-1,1]){const q=mirrorPos(p,s);meleeHit(p,q.x,q.y,R,D[ci]*0.5,1.0);}}
   p.cmbN=(ci+1)%3;p.cmbT=1;p.swN=((p.swN|0)+1)%250;p.swC=ci;
   emit({k:'efx',z:'swing',x:p.x,y:p.y,h:p.z+1.1,a:Math.round(p.ang*100)/100,c:ci,ax:ff?1:0,r:R,id:p.id,m:p.mirror>0?1:0});
@@ -1030,8 +1030,8 @@ function frostBasic(p,inp,dt,setCd){
 // จังหวะ 3: ง้างแล้วฟาดลงพื้นตรงหน้า (ดาเมจออกหลังง้าง 0.32 วิ) + ระเบิดน้ำแข็ง
 function frostSlam3(p){
   const q=p.slam3;p.slam3=null;if(!q||!p.alive||p.downed)return;
-  const n=meleeHit(p,p.x,p.y,q.R,q.dm,1.0,t=>addFrostSlow(t,5));
-  if(n>0)healT(p,p.mirror>0?(q.ff?45:30):(q.ff?15:10));
+  const n=meleeHit(p,p.x,p.y,q.R,q.dm,1.0);
+  if(n>0)healT(p,p.mirror>0?(q.ff?22:15):(q.ff?15:10));
   if(p.mirror>0)for(const s of [-1,1]){const m=mirrorPos(p,s);meleeHit(p,m.x,m.y,q.R,q.dm*0.5,1.0);}
   const fx=p.x+Math.cos(p.ang)*q.R*0.6,fy=p.y+Math.sin(p.ang)*q.R*0.6;
   emit({k:'efx',z:'slam3',x:fx,y:fy,h:p.z+0.1,r:q.R*0.75,ax:q.ff?1:0,m:p.mirror>0?1:0,a:Math.round(p.ang*100)/100});
@@ -1039,7 +1039,7 @@ function frostSlam3(p){
 function frostSlam(p){
   p.slam=false;const dm=p.ffT>0?50:30;
   emit({k:'efx',z:'slam',x:p.x,y:p.y,h:p.z+0.2,r:150});
-  for(const t of foesIn(p.team,p.x,p.y,150,p.z+3))aoeHit(p,t,dm,t=>addFrostSlow(t,5));
+  for(const t of foesIn(p.team,p.x,p.y,150,p.z+3))aoeHit(p,t,dm);
 }
 function frostDash(p,inp,pr,dt,setCd){
   if(pr.sp&&p.cd.dodge<=0&&!(p.slideT>0)&&!(p.cryo>0)){p.slideT=5;p.slX=p.x;p.slY=p.y;setCd('dodge',11*p.buffs.cdr);emit({k:'efx',z:'slide',x:p.x,y:p.y,h:p.z,id:p.id});}
@@ -1127,12 +1127,12 @@ function pyroBasic(p,inp,dt,setCd){
 function addOrbs(p,n){const was=p.orbs|0;p.orbs=Math.min(6,was+n);if(p.orbs>was)emit({k:'efx',z:'orbget',x:p.x,y:p.y,h:p.z+1.2,id:p.id,n:p.orbs});}
 function pyroParry(p){addOrbs(p,2);}
 function pyroBlock(p){emit({k:'efx',z:'fblock',x:p.x+Math.cos(p.ang)*26,y:p.y+Math.sin(p.ang)*26,h:p.z+1.2});p.orbBlk=(p.orbBlk|0)+1;if(p.orbBlk>=3){p.orbBlk=0;addOrbs(p,2);}}
-// ลูกไฟ (ชาร์จ/Kindle) โดนศัตรู = ปล่อยลูกไฟวิญญาณทั้งหมดพุ่งใส่เป้านั้น ลูกละ 8 • ทุก 2 ลูก = +1 Burning
+// ลูกไฟ (ชาร์จ/Kindle) โดนศัตรู = ปล่อยลูกไฟวิญญาณทั้งหมดพุ่งใส่เป้านั้น ลูกละ 10 • ทุก 2 ลูก = +1 Burning
 function launchOrbs(p,t){
   const n=p.orbs|0;if(!n||!t)return;p.orbs=0;
   const d=Math.hypot(t.x-p.x,t.y-p.y),tt=Math.max(0.15,d/1300);
   emit({k:'efx',z:'orbshot',x:p.x,y:p.y,h:p.z+1.3,x2:t.x,y2:t.y,h2:cH(t),n,t:Math.round(tt*100)/100});
-  G.strikes.push({t:tt,fn:()=>{if(t.dead||(!t.isE&&!t.isM&&(!t.alive||t.downed)))return;aoeHit(p,t,8*n,t=>{if(n>=2)addBurn(t,Math.floor(n/2),p.id);});emit({k:'efx',z:'orbhit',x:t.x,y:t.y,h:cH(t),n});}});
+  G.strikes.push({t:tt,fn:()=>{if(t.dead||(!t.isE&&!t.isM&&(!t.alive||t.downed)))return;aoeHit(p,t,10*n);emit({k:'efx',z:'orbhit',x:t.x,y:t.y,h:cH(t),n});}});
 }
 // คืนค่า true = กำลังชาร์จ (ขยับ/ยิง/ร่ายไม่ได้)
 function pyroDash(p,inp,pr,dt,setCd){
@@ -1160,7 +1160,7 @@ function pyroDash(p,inp,pr,dt,setCd){
 // =====================================================================
 defSpell(0,{id:'kindle',role:'builder',n:'Kindle',ic:'🔥',cd:9,d:'กระโดดสูงไปทางที่กด WASD (ไม่กด = ถอยหลัง) ขึ้นกลางอากาศ แล้วลอยตกช้าๆ 3 วิ (แบบฟาราห์/เฟรย่า) • ยิงปกติ 2 นัดกลายเป็นลูกไฟใหญ่ทันที (20 ดาเมจ ระเบิดวงกว้าง ~90 +1 Burning ทุกคนในวง)',fx:'ยิงครบ 2 ลูกหรือครบ 3 วิ = ตกลงพื้นตามปกติ • ไฟพุ่งจากใต้เท้าตอนลอย',
   cast(p,S){p.kindle=2;p.kindleT=3;p.hover=3;p.vz=15;{const i=p.inp||{};let dx=i.mx||0,dy=i.my||0;const l=Math.hypot(dx,dy);if(l>0.1){dx/=l;dy/=l;}else{dx=-Math.cos(p.ang);dy=-Math.sin(p.ang);}p.vx+=dx*1000;p.vy+=dy*1000;}p.shieldOn=false;emit({k:'efx',z:'kindle',x:p.x,y:p.y,h:p.z,id:p.id});}});
-defSpell(0,{id:'dragonbreath',role:'builder',n:"Dragon's Breath",ic:'🐉',cd:10,d:'ร่ายวงเวทเล็กด้านหน้า 0.4 วิ แล้วพ่นไฟ 2 วิ (กรวยแคบ ระยะ ~300) โดน 3 ครั้ง ครั้งละ 15 ดาเมจ คนโดนช้าลง 60%',fx:'โดนแต่ละครั้ง = +1 Burning (สูงสุด 3 ชั้นจากท่านี้) • ระหว่างพ่น: เดินช้าลงนิดหน่อย ยิงปกติไม่ได้ เล็งฝืดขึ้น',
+defSpell(0,{id:'dragonbreath',role:'builder',n:"Dragon's Breath",ic:'🐉',cd:10,d:'ร่ายวงเวทเล็กด้านหน้า 0.4 วิ แล้วพ่นไฟ 2 วิ (กรวยแคบ ระยะ ~300) โดน 3 ครั้ง ครั้งละ ~19 ดาเมจ (ไม่ใส่ Burning) คนโดนช้าลง 60%',fx:'ระหว่างพ่น: เดินช้าลงนิดหน่อย ยิงปกติไม่ได้ เล็งฝืดขึ้น',
   cast(p,S){
     if(p.breath>0)return false;
     p.breath=2.4;
@@ -1171,18 +1171,18 @@ defSpell(0,{id:'dragonbreath',role:'builder',n:"Dragon's Breath",ic:'🐉',cd:10
         const dx=t.x-p.x,dy=t.y-p.y,d=Math.hypot(dx,dy);
         if(d>300+(t.r||PR)||Math.abs(cH(t)-ph)>3)continue;
         if(Math.abs(angDiff(Math.atan2(dy,dx),p.ang))>0.24+Math.min(0.2,(t.r||PR)/Math.max(d,1)))continue;
-        aoeHit(p,t,15,t=>{addSlow(t,0.4,0.9);addBurn(t,1,p.id);});
+        aoeHit(p,t,18.75,t=>{addSlow(t,0.4,0.9);});
       }
     }});
   }});
-defSpell(0,{id:'ringofembers',role:'control',n:'Ring of Embers',ic:'⭕',cd:14,d:'วางวงเพลิงที่จุดเล็ง (ระยะ ~600 รัศมี ~170) นาน 3 วิ — คนข้างในเดินออกไม่ได้',fx:'พยายามเดินออก = 10 ดาเมจ + ผลักกลับเข้าวง + 1 Burning • ใครแตะขอบวงไฟ = ช้าลง 40% + 1 Burning ทุกวินาที • คนข้างนอกเดินเข้าได้',
+defSpell(0,{id:'ringofembers',role:'control',n:'Ring of Embers',ic:'⭕',cd:14,d:'วางวงเพลิงที่จุดเล็ง (ระยะ ~600 รัศมี ~170) นาน 3 วิ — คนข้างในเดินออกไม่ได้',fx:'พยายามเดินออก = 12.5 ดาเมจ + ผลักกลับเข้าวง • ใครแตะขอบวงไฟ = ช้าลง 40% • คนข้างนอกเดินเข้าได้',
   cast(p,S){
     const q=aimPoint(p,600);
     (G.erings||(G.erings=[])).push({x:q.x,y:q.y,r:170,t:3,owner:p.id,team:p.team,in:new Set(),cd:new Map(),ed:new Map()});
     emit({k:'efx',z:'ering',x:q.x,y:q.y,h:0.2,r:170,t:3});
   }});
-defSpell(0,{id:'blazeform',role:'utility',n:'Blazeform',ic:'🔥',cd:20,d:'กลายร่างเปลวไฟ 6 วิ: ดาเมจทุกสกิล (รวมเผา Burning) +30% • เดินเร็ว +25% • ออร่าไฟรอบตัว (รัศมี ~130) เผา 15/วิ + 1 Burning ทุกวินาที',fx:'ผลเสีย: เรารับดาเมจ +25% ระหว่างนั้น',
-  cast(p,S){p.blaze=6;p.blzTk=0;p.blzN=0;emit({k:'efx',z:'blaze',x:p.x,y:p.y,h:p.z+1,id:p.id});}});
+defSpell(0,{id:'blazeform',role:'utility',n:'Blazeform',ic:'🔥',cd:20,d:'กลายร่างเปลวไฟ 6 วิ: ดาเมจทุกสกิล (รวมเผา Burning) +30% • เดินเร็ว +25% • ออร่าไฟรอบตัว (รัศมี ~130) เผา ~19/วิ • ศัตรูที่โดนออร่าครั้งแรก +1 Burning (คนละ 1 ชั้นต่อการใช้ 1 ครั้ง)',fx:'ผลเสีย: เรารับดาเมจ +25% ระหว่างนั้น',
+  cast(p,S){p.blaze=6;p.blzTk=0;p.blzN=0;p.blzHit=new Set();emit({k:'efx',z:'blaze',x:p.x,y:p.y,h:p.z+1,id:p.id});}});
 defSpell(0,{id:'ignitionsnap',role:'finisher',n:'Ignition Snap',ic:'🫰',cd:5,d:'ท่าเตรียม 0.6 วิ แล้วดีดนิ้ว: ศัตรูทุกคนที่มี Burning ในระยะ 500 ระเบิดพร้อมกัน (ไม่ต้องเล็ง)',fx:'25 ดาเมจต่อ 1 ชั้น Burning (6 ชั้น = 150) และฮีลเรา 20 ต่อชั้น แล้วใช้ Burning หมด • ไม่มีใครติดไฟในระยะ = ไม่เสียคูลดาวน์',
   cast(p,S){
     if(!foesOf(p.team).some(t=>t.brn>0&&Math.hypot(t.x-p.x,t.y-p.y)<500))return false;
@@ -1223,13 +1223,13 @@ function updateERings(dt){
     R.t-=dt;
     for(const t of foesOf(R.team)){
       const dx=t.x-R.x,dy=t.y-R.y,d=Math.hypot(dx,dy)||1,tr=t.r||PR;
-      // แตะขอบวงไฟ: ช้าลง + Burning ทีละชั้นทุก 1 วิ
-      if(Math.abs(d-R.r)<26+tr*0.6&&!(!t.isE&&!t.isM&&t.inv>0)){addSlow(t,0.6,0.4);if(!(R.ed.get(t)>G.time)){R.ed.set(t,G.time+1);addBurn(t,1,R.owner);}}
+      // แตะขอบวงไฟ: ช้าลง (ไม่ใส่ Burning แล้ว — ผู้เล่นปรับ 2026-10-18)
+      if(Math.abs(d-R.r)<26+tr*0.6&&!(!t.isE&&!t.isM&&t.inv>0)){addSlow(t,0.6,0.4);}
       if(d<R.r-tr*0.5){R.in.add(t);continue;}
       if(!R.in.has(t))continue;
       // อยู่ข้างในแล้วพยายามออก: ผลักกลับเข้าวง
       const m=R.r-tr*0.5-4;t.x=R.x+dx/d*m;t.y=R.y+dy/d*m;t.vx=-dx/d*280;t.vy=-dy/d*280;if(t.dash>0)t.dash=0;
-      if(!(R.cd.get(t)>G.time)&&!(!t.isE&&!t.isM&&t.inv>0)){R.cd.set(t,G.time+0.5);damage(t,10,R.owner,'zone');addBurn(t,1,R.owner);emit({k:'efx',z:'eringhit',x:t.x,y:t.y,h:cH(t)});}
+      if(!(R.cd.get(t)>G.time)&&!(!t.isE&&!t.isM&&t.inv>0)){R.cd.set(t,G.time+0.5);damage(t,12.5,R.owner,'zone');emit({k:'efx',z:'eringhit',x:t.x,y:t.y,h:cH(t)});}
     }
   }
   G.erings=G.erings.filter(R=>R.t>0);
@@ -1256,9 +1256,9 @@ defSpell(1,{id:'cryoshell',role:'utility',melee:1,n:'Cryo Shell',ic:'🧊',cd:28
     p.cryo=5;p.cryoTk=0.5;p.inv=5;p.shieldOn=false;p.slideT=0;
     emit({k:'efx',z:'cryo',x:p.x,y:p.y,h:p.z+1,id:p.id});
   }});
-defSpell(1,{id:'frostaura',role:'control',melee:1,n:'Frostbite Aura',ic:'🌨️',cd:15,d:'ออร่าเยือกแข็งรอบตัว 5 วิ (รัศมี ~180): 20 ดาเมจ/วิ ศัตรูช้าลง 20% (ซ้อนกับสลอว์อื่นได้ รวมไม่เกิน 80%)',fx:'ใช้ได้แม้ตอนแช่แข็งตัวเอง • ใช้ได้เฉพาะโหมดประชิด',
+defSpell(1,{id:'frostaura',role:'control',melee:1,n:'Frostbite Aura',ic:'🌨️',cd:15,d:'ออร่าเยือกแข็งรอบตัว 5 วิ (รัศมี ~180): 20 ดาเมจ/วิ (ไม่สลอว์)',fx:'ใช้ได้แม้ตอนแช่แข็งตัวเอง • ใช้ได้เฉพาะโหมดประชิด',
   cast(p,S){p.auraT=5;p.auraTk=0;emit({k:'efx',z:'aura',x:p.x,y:p.y,h:p.z,id:p.id});}});
-defSpell(1,{id:'mirrorlegion',role:'ult',n:'Mirror Legion',ic:'👥',cd:0,ult:true,d:'เวทโบราณสายน้ำแข็ง: ร่างแยกน้ำแข็ง 2 ตัวโผล่ข้างตัว 10 วิ (ฟันตามเราทุกครั้ง ร่างละ 50%) + HP เสริม 100 • ดาเมจเรา ×2.5 • ฟันจังหวะ 3 ฮีล 30 (ขวาน 45)',fx:'ตอนเปิด: พุ่งไปข้างหน้า ~600 (อมตะ) พร้อมร่างแยก ฟันตลอดทาง 75 ดาเมจ + ช้าลง 80% 3 วิ',
+defSpell(1,{id:'mirrorlegion',role:'ult',n:'Mirror Legion',ic:'👥',cd:0,ult:true,d:'เวทโบราณสายน้ำแข็ง: ร่างแยกน้ำแข็ง 2 ตัวโผล่ข้างตัว 10 วิ (ฟันตามเราทุกครั้ง ร่างละ 50%) + HP เสริม 100 • ดาเมจเรา ×2.5 • ฟันจังหวะ 3 ฮีล 15 (ขวาน 22)',fx:'ตอนเปิด: พุ่งไปข้างหน้า ~600 (อมตะ) พร้อมร่างแยก ฟันตลอดทาง 75 ดาเมจ + ช้าลง 80% 3 วิ',
   cast(p,S){
     p.mirror=10;p.xhp=100;p.fmode=0;
     p.dash=600/2000;p.dashSp=2000;p.dashX=Math.cos(p.ang);p.dashY=Math.sin(p.ang);p.inv=Math.max(p.inv,0.36);p.shieldOn=false;p.slideT=0;
@@ -1763,8 +1763,8 @@ function updatePlayer(p,dt,acting){
   if(p.hover>0){p.hover-=dt;if(p.hover<=0||!(p.kindle>0))p.hover=0;}
   if(p.slideT>0)p.slideT-=dt;
   if(p.cryo>0){p.cryo-=dt;p.inv=Math.max(p.inv,0.05);p.cryoTk-=dt;if(p.cryoTk<=0){p.cryoTk=0.5;healT(p,3.75);}if(p.cryo<=0){p.inv=0;emit({k:'efx',z:'cryoend',x:p.x,y:p.y,h:p.z+1,id:p.id});}}
-  if(p.blaze>0&&p.alive&&!p.downed){p.blzTk=(p.blzTk||0)-dt;if(p.blzTk<=0){p.blzTk=0.5;p.blzN=(p.blzN|0)+1;for(const t of foesIn(p.team,p.x,p.y,130,p.z+3)){damage(t,7.5,p.id,'burn');if(p.blzN%2===0)addBurn(t,1,p.id);}}}
-  if(p.auraT>0&&p.alive&&!p.downed){p.auraT-=dt;p.auraTk-=dt;const tk=p.auraTk<=0;if(tk)p.auraTk=0.5;for(const t of foesIn(p.team,p.x,p.y,180,p.z+3)){t.fslA=0.6;if(tk)damage(t,10,p.id,'zone');}}
+  if(p.blaze>0&&p.alive&&!p.downed){p.blzTk=(p.blzTk||0)-dt;if(p.blzTk<=0){p.blzTk=0.5;p.blzN=(p.blzN|0)+1;for(const t of foesIn(p.team,p.x,p.y,130,p.z+3)){damage(t,9.375,p.id,'burn');if(!p.blzHit)p.blzHit=new Set();if(!p.blzHit.has(t)){p.blzHit.add(t);addBurn(t,1,p.id);}}}}
+  if(p.auraT>0&&p.alive&&!p.downed){p.auraT-=dt;p.auraTk-=dt;const tk=p.auraTk<=0;if(tk)p.auraTk=0.5;for(const t of foesIn(p.team,p.x,p.y,180,p.z+3)){if(tk)damage(t,10,p.id,'zone');}}
   if(p.mirror>0){p.mirror-=dt;if(p.mirror<=0){p.xhp=0;emit({k:'efx',z:'mirrorend',x:p.x,y:p.y,h:p.z+1,id:p.id});}}
   if(p.grT>0&&p.alive){p.grT-=dt;if(p.grT<=0){const c=Math.cos(p.ang),s=Math.sin(p.ang);for(const sd of (p.mirror>0?[0,-1,1]:[0])){const ox=p.x+c*30-s*55*sd,oy=p.y+s*30+c*55*sd;(G.waves||(G.waves=[])).push({x:ox,y:oy,dx:c,dy:s,left:600,acc:0,owner:p.id,team:p.team,hit:new Set()});emit({k:'efx',z:'gwave',x:ox,y:oy,h:p.z+1,a:Math.round(p.ang*1000)/1000,len:600,id:p.id,cl:sd?1:0});}}}
   p.flyCd=Math.max(0,p.flyCd-dt);p.root=Math.max(0,p.root-dt);
