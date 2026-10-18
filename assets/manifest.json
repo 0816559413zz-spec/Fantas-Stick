@@ -2,6 +2,7 @@
   "v": 1,
   "models": {
     "prop_crate": {"file": "props/crate.glb", "v": 1},
-    "prop_crate_broken": {"file": "props/crate_broken.glb", "v": 1}
+    "prop_crate_broken": {"file": "props/crate_broken.glb", "v": 1},
+    "enemy_gob": {"file": "enemies/goblin.glb", "v": 1}
   }
 }

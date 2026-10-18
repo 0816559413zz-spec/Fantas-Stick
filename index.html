@@ -1564,7 +1564,7 @@ function castUlt(p){const S=SPELLS[p.ultId];if(!S||p.ult<100||p.sil>0||p.cryo>0)
 // =====================================================================
 //  เครือข่าย (PeerJS / WebRTC)
 // =====================================================================
-const PREFIX='wizduel-th-v19-';
+const PREFIX='wizduel-th-v20-';
 const NET={peer:null,isHost:false,online:false,myId:'me',conns:new Map(),hostConn:null,code:''};
 let LOBBY=null;
 function genCode(){const c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let s='';for(let i=0;i<5;i++)s+=c[Math.floor(Math.random()*c.length)];return s;}
@@ -2262,7 +2262,7 @@ function updateEnemies(dt){
     const dx=t.x-e.x,dy=t.y-e.y,d=Math.hypot(dx,dy)||1,ux=dx/d,uy=dy/d,sp=e.spd*G.espd*moveMul(e)*(e.root>0?0:1);
     const reach=Math.abs(t.z-(e.h||0))<2.4;
     const move=(k)=>{e.x+=ux*sp*dt*(k||1);e.y+=uy*sp*dt*(k||1);};
-    const bite=(dmg,cd)=>{if(d<e.r+PR+6&&reach&&e.cd<=0){e.cd=cd;damage(t,dmg*G.escale,null,'melee');emit({k:'claw',x:t.x,y:t.y,h:t.z+1.1,t:e.type});}};
+    const bite=(dmg,cd)=>{if(d<e.r+PR+6&&reach&&e.cd<=0){e.cd=cd;damage(t,dmg*G.escale,null,'melee');emit({k:'claw',x:t.x,y:t.y,h:t.z+1.1,t:e.type,e:e.id});}};
     switch(e.type){
       case 'gob':if(d>e.r+PR+4)move();bite(D.dmg,0.9);break;
       case 'spl':{
@@ -2277,7 +2277,7 @@ function updateEnemies(dt){
       case 'spider':
         if(e.lunge>0){
           e.lunge-=dt;e.x+=e.lx*720*dt;e.y+=e.ly*720*dt;
-          if(!e.bit&&d<e.r+PR+12&&reach){e.bit=1;damage(t,D.dmg*G.escale,null,'melee');emit({k:'claw',x:t.x,y:t.y,h:t.z+1.1,t:'spider'});}
+          if(!e.bit&&d<e.r+PR+12&&reach){e.bit=1;damage(t,D.dmg*G.escale,null,'melee');emit({k:'claw',x:t.x,y:t.y,h:t.z+1.1,t:'spider',e:e.id});}
         }else{
           if(d>e.r+PR+4)move();
           if(d<320&&e.cd<=0&&reach){e.lunge=0.32;e.lx=ux;e.ly=uy;e.bit=0;e.cd=2.6;emit({k:'lunge',x:e.x,y:e.y});}
@@ -2342,7 +2342,7 @@ function updateEnemies(dt){
         e.h+=clamp(th-e.h,-1,1)*6*dt;
         const w=Math.sin(e.ph*4)*0.9;
         if(d>e.r+PR)e.x+=(ux-uy*w)*sp*dt,e.y+=(uy+ux*w)*sp*dt;
-        if(d<e.r+PR+10&&Math.abs(cH(t)-e.h)<1.6&&e.cd<=0){e.cd=0.8;damage(t,D.dmg*G.escale,null,'melee');emit({k:'claw',x:t.x,y:t.y,h:t.z+1.1,t:'pixie'});}
+        if(d<e.r+PR+10&&Math.abs(cH(t)-e.h)<1.6&&e.cd<=0){e.cd=0.8;damage(t,D.dmg*G.escale,null,'melee');emit({k:'claw',x:t.x,y:t.y,h:t.z+1.1,t:'pixie',e:e.id});}
         break;}
     }
   }
@@ -4140,6 +4140,7 @@ function fx(ev){
     case 'claw':
       burst(ev.x,ev.y,'#ff5050',10,160,0.25,2,{h:H});
       snd(ev.t==='pixie'?'pixie':'bite',ev);
+      if(ev.e!==undefined){const o=EM3.get(ev.e);if(o)o.atkT=0.3;}   // ศัตรูที่กัด/ฟัน → เล่นท่า attack (โมเดลไฟล์)
       break;
     case 'mount':
       for(let i=0;i<36;i++){const a=i/36*Math.PI*4;PARTS.push({x:ev.x+Math.cos(a)*30,y:ev.y+Math.sin(a)*30,h:H+i*0.04,vx:-Math.sin(a)*90,vy:Math.cos(a)*90,vh:2,life:0.7,max:0.7,col:i%2?'#ffe9a8':'#ffffff',size:2,g:0,drag:2});}
@@ -6219,8 +6220,8 @@ function syncEnemies(E,P,now,dt){
     o.hs=o.hs===undefined?(e.h||0):lerp(o.hs,e.h||0,1-Math.exp(-15*dt));
     o.g.position.set(x,o.hs,z);
     const v=localVel(o,x,z,dt,o.g.rotation.y);
-    o.hitT=Math.max(0,(o.hitT||0)-dt);
-    if(o.anim)animTick(o,{fly:o.hs>1,sp:v.sp,atk:!!(e.sl||e.lg),hitT:o.hitT},dt);
+    o.hitT=Math.max(0,(o.hitT||0)-dt);o.atkT=Math.max(0,(o.atkT||0)-dt);
+    if(o.anim)animTick(o,{fly:o.hs>1,sp:v.sp,atk:!!(e.sl||e.lg)||o.atkT>0,hitT:o.hitT},dt);
     if(o.legs){
       // ขาแมงมุมก้าวสลับ
       o.walk+=dt*Math.min(v.sp,20)*1.4;
