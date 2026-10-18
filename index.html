@@ -3968,20 +3968,23 @@ function drawStormHud(x,y,M){
   }
   // ยิงครั้งถัดไป = สายฟ้าสามเหลี่ยม
   if(M[1]){const tx0=x-3*gap-6,ty0=y0;cx.beginPath();cx.moveTo(tx0-6,ty0-6);cx.lineTo(tx0+6,ty0);cx.lineTo(tx0-6,ty0+6);cx.closePath();cx.shadowColor='#fff27a';cx.shadowBlur=8;cx.fillStyle='#fff27a';cx.fill();cx.shadowBlur=0;}
-  // ชาร์จ Dash แบบ Tracer: แถบโค้ง 3 ช่องรอบเป้าด้านขวา ธีมสายฟ้า (แถบเป็นกระแสไฟฟ้าซิกแซกเหลือง แลบ/มีประกาย) — ไม่ใช่รูปสายฟ้าแบบ stack
+  // ชาร์จ Dash แบบ Tracer: แถบโค้ง 3 ช่องรอบเป้าด้านขวา ธีมสายฟ้า (กระแสไฟซิกแซกเหลือง 2 เส้นพัน + กิ่ง + ประกาย) — ไม่ใช่รูปสายฟ้าแบบ stack
+  // ใช้ Dash แล้วหายจากบนลงล่าง (ชาร์จที่ i สูงอยู่บน) • ฟื้นจากล่างขึ้นบน
   const dc=M[2]||0,full=Math.floor(dc+1e-6);if(full>STHUD.dprev)for(let i=STHUD.dprev;i<full&&i<3;i++)STHUD.dfl[i]=0.3;STHUD.dprev=full;
-  const R=30,seg=0.46,gp=0.1,a0=-(seg*3+gp*2)/2;
-  const zig=(s0,len,amp)=>{const n=Math.max(2,Math.round(len/0.06));cx.beginPath();for(let j=0;j<=n;j++){const an=s0+len*j/n,rr=R+(j&&j<n?rnd(-amp,amp):0);const px=x+Math.cos(an)*rr,py=y+Math.sin(an)*rr;j?cx.lineTo(px,py):cx.moveTo(px,py);}};
+  const R=44,seg=0.5,gp=0.09,a0=-(seg*3+gp*2)/2;
+  const zig=(s0,len,amp,rr0)=>{const n=Math.max(3,Math.round(len/0.045));const P=[];cx.beginPath();for(let j=0;j<=n;j++){const an=s0+len*j/n,rr=(rr0||R)+(j&&j<n?rnd(-amp,amp):0);const px=x+Math.cos(an)*rr,py=y+Math.sin(an)*rr;P.push([px,py,an]);j?cx.lineTo(px,py):cx.moveTo(px,py);}return P;};
   cx.lineCap='round';cx.lineJoin='round';
-  for(let i=0;i<3;i++){const s0=a0+i*(seg+gp),k=clamp(dc-i,0,1),fl=STHUD.dfl[i]=Math.max(0,STHUD.dfl[i]-dt);
-    cx.beginPath();cx.arc(x,y,R,s0,s0+seg);cx.lineWidth=6;cx.strokeStyle='rgba(0,0,0,0.5)';cx.stroke();
-    cx.beginPath();cx.arc(x,y,R,s0,s0+seg);cx.lineWidth=3.5;cx.strokeStyle='rgba(58,40,24,0.85)';cx.stroke();
-    if(k>0){const len=seg*k,on=k>=1;
-      if(on){cx.shadowColor='#fff27a';cx.shadowBlur=8+fl*22;}
-      zig(s0,len,on?2.2:1.2);cx.lineWidth=(on?3.4:2.4)+fl*4;cx.strokeStyle=on?(fl>0?'#ffffff':'#ffd400'):'rgba(255,212,0,0.55)';cx.stroke();
-      if(on){zig(s0,len,1.4);cx.lineWidth=1.2;cx.strokeStyle='rgba(255,255,235,0.95)';cx.stroke();}
+  for(let i=0;i<3;i++){const pos=2-i,s0=a0+pos*(seg+gp),k=clamp(dc-i,0,1),fl=STHUD.dfl[i]=Math.max(0,STHUD.dfl[i]-dt);
+    cx.beginPath();cx.arc(x,y,R,s0,s0+seg);cx.lineWidth=9;cx.strokeStyle='rgba(0,0,0,0.5)';cx.stroke();
+    cx.beginPath();cx.arc(x,y,R,s0,s0+seg);cx.lineWidth=5.5;cx.strokeStyle='rgba(58,40,24,0.85)';cx.stroke();
+    if(k>0){const on=k>=1,st=on?s0:s0+seg*(1-k),len=seg*k;   // กำลังฟื้น = เติมจากปลายล่างขึ้น
+      if(on){cx.shadowColor='#fff27a';cx.shadowBlur=12+fl*26;}
+      const P=zig(st,len,on?3.6:1.8);cx.lineWidth=(on?4.6:3)+fl*5;cx.strokeStyle=on?(fl>0?'#ffffff':'#ffd400'):'rgba(255,212,0,0.55)';cx.stroke();
+      if(on){zig(st,len,3.2);cx.lineWidth=2.4;cx.strokeStyle='#ffe24a';cx.stroke();zig(st,len,1.6);cx.lineWidth=1.4;cx.strokeStyle='rgba(255,255,235,0.95)';cx.stroke();}
       cx.shadowBlur=0;
-      if(on&&Math.random()<0.25){const an=s0+rnd(0,len),px=x+Math.cos(an)*R,py=y+Math.sin(an)*R,o=rnd(0,6.283);cx.strokeStyle='rgba(255,250,200,0.9)';cx.lineWidth=1;cx.beginPath();cx.moveTo(px,py);cx.lineTo(px+Math.cos(o)*5+rnd(-2,2),py+Math.sin(o)*5);cx.lineTo(px+Math.cos(o)*9,py+Math.sin(o)*9+rnd(-2,2));cx.stroke();}}}
+      if(on){// กิ่งสายฟ้าแตกออกจากแถบ + ประกาย
+        for(let j=0;j<2;j++)if(Math.random()<0.45){const q=P[(Math.random()*P.length)|0],o=q[2]+rnd(-0.9,0.9)+(Math.random()<0.5?0:Math.PI);cx.strokeStyle='rgba(255,236,120,0.95)';cx.lineWidth=1.4;cx.beginPath();cx.moveTo(q[0],q[1]);cx.lineTo(q[0]+Math.cos(o)*6+rnd(-2,2),q[1]+Math.sin(o)*6+rnd(-2,2));cx.lineTo(q[0]+Math.cos(o)*11+rnd(-2,2),q[1]+Math.sin(o)*11+rnd(-2,2));cx.stroke();}
+        if(Math.random()<0.3){const q=P[(Math.random()*P.length)|0];cx.fillStyle='#ffffff';cx.beginPath();cx.arc(q[0]+rnd(-3,3),q[1]+rnd(-3,3),1.3,0,6.283);cx.fill();}}}}
   cx.restore();
 }
 // รอยฟันดาบ: เสี้ยววงเรืองแสงที่จางเร็ว (แนวนอน = ฟันกวาด / แนวตั้ง = ฟันจากบนลงล่าง)
