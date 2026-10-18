@@ -250,6 +250,21 @@ body[data-screen=lobby] #voice{top:84px;left:auto;right:24px;width:340px}
 #toast{position:fixed;left:50%;bottom:150px;transform:translateX(-50%);background:var(--corners),var(--fill);border:1px solid var(--line);padding:9px 20px;opacity:0;transition:opacity .3s;pointer-events:none;z-index:9}
 #toast.show{opacity:1}
 #trainEnd{position:fixed;right:12px;top:60px;z-index:5}
+#trOpen{position:fixed;left:12px;top:60px;z-index:5}
+#trPanel{position:fixed;left:12px;top:60px;z-index:6;width:310px;max-height:calc(100vh - 80px);overflow-y:auto;scrollbar-width:thin;padding:16px 18px;margin:0}
+#trPanel h2{font-size:18px;margin:0 0 6px;text-align:center}
+#trPanel .trs{font-size:12px;letter-spacing:2px;color:var(--gold);margin:12px 0 6px}
+#trPanel .trt{display:flex;justify-content:space-between;align-items:center;width:100%;margin:4px 0;padding:6px 10px;font-size:13px;text-align:left}
+#trPanel .trt b{font-size:11px;padding:1px 8px;border-radius:2px;background:#3a2a2a;color:#e99}
+#trPanel .trt.on b{background:#244a2c;color:#9f9}
+#trPanel .trg{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+#trPanel .trg button{padding:6px 4px;font-size:12px}
+#trPanel .trn{display:flex;gap:5px;margin-bottom:6px}
+#trPanel .trn button{flex:1;padding:4px;font-size:12px}
+#trPanel .trn button.on,#trPanel .trg button.boss{border-color:var(--gold)}
+#trPanel .trn button.on{background:rgba(217,180,90,.25)}
+#trPanel .trw{width:100%;margin-top:4px}
+#trPanel small{display:block;color:var(--mute);font-size:11px;margin-top:8px;text-align:center}
 #settings{z-index:20}
 .setcard{width:min(560px,100%);max-height:calc(100vh - 40px);overflow-y:auto;scrollbar-width:none}
 .setcard::-webkit-scrollbar{display:none}
@@ -353,6 +368,8 @@ body[data-screen=lobby] #voice{top:84px;left:auto;right:24px;width:340px}
 #creator.s3 .crBar.cr3{left:auto;right:30px;width:380px;bottom:22px}
 body.crOpenB #lobby .lp,body.crOpenB #lobby>*:not(canvas){visibility:hidden}
 body.crOpenB .mnews{display:none}
+body.crGame #cv,body.crGame #trOpen,body.crGame #trainEnd{visibility:hidden}
+body.crGame #creator{background:rgba(4,6,14,.86)}
 #creator.s3 .crShade{background:radial-gradient(ellipse at 60% 48%,transparent 18%,rgba(2,3,8,.55) 70%),linear-gradient(0deg,rgba(2,3,8,.6),transparent 30%)}
 .sbFlash{position:absolute;inset:0;pointer-events:none;z-index:1;opacity:0}
 .sbFlash.go{animation:sbFl .7s ease-out}
@@ -455,7 +472,7 @@ body.crOpenB .mnews{display:none}
     <h3>🎮 โหมดทั้งหมด (โฮสต์เลือกในล็อบบี้)</h3>
     <table>
       <tr><td><b>🗝️ ดันเจียน Co-op</b><br><small>1-6 คน</small></td><td>ช่วยกันฝ่าศัตรูทีละชั้น ผ่านชั้นแล้วเลือกพลังเสริม (กด 1/2/3) • ทุก 5 ชั้นเจอ<b>บอสเรด 3 เฟส</b>: มังกร (พ่นไฟ → บินทิ้งระเบิด → คลั่งปล่อยคลื่นไฟ) หรือราชินีแมงมุม • เห็นวงแดงที่พื้นให้รีบออก / ยกโล่ / ขึ้นไม้กวาด • เพื่อนล้มให้ไปยืนข้างๆ 2.5 วิเพื่อชุบ</td></tr>
-      <tr><td><b>🎯 ห้องฝึก</b><br><small>1-6 คน</small></td><td>หุ่นซ้อมยืนให้ลองคาถา และยิงเวทเขียวช้าๆ ให้ฝึก <b>Parry</b> (ยกโล่ตอนจะโดนพอดี) • มีคำแนะนำขึ้นเรื่อยๆ • โฮสต์กด "🏁 จบการฝึก" มุมขวาบนเพื่อกลับ</td></tr>
+      <tr><td><b>🎯 ห้องฝึก</b><br><small>1-6 คน</small></td><td>ด่าน <b>Test Place</b> โล่งๆ มีหุ่นซ้อม + <b>โซนเสกมอนสเตอร์</b> • กด <b>P</b> เปิดเมนูทดลอง: เปลี่ยนสาย/คาถาได้ทันที, เปิด/ปิดให้หุ่นโจมตี, มอนสเตอร์ขยับ/ยืนนิ่ง, ไม่มีคูลดาวน์, อัลติเต็มตลอด, อมตะ, เสกมอนสเตอร์ทุกชนิด (รวมบอส) • โฮสต์กด "🏁 จบการฝึก" มุมขวาบนเพื่อกลับ</td></tr>
       <tr><td><b>⚔️ ดวล 1v1</b></td><td>สู้ตัวต่อตัว ชนะ 2 ใน 3 รอบ</td></tr>
       <tr><td><b>💥 FFA</b><br><small>2-6 คน</small></td><td>ทุกคนเป็นศัตรูกันหมด ใครได้ 10 kill ก่อนชนะ (ตายแล้วเกิดใหม่)</td></tr>
       <tr><td><b>🛡️ ทีม 2v2/3v3</b></td><td>ทีมฟ้า vs ทีมแดง ทีมไหนได้ 15 kill ก่อนชนะ • สลับทีมได้ในล็อบบี้</td></tr>
@@ -507,6 +524,8 @@ body.crOpenB .mnews{display:none}
 <div id="over" class="overlay hidden"></div>
 <div id="meet" class="overlay hidden"></div>
 <button id="trainEnd" class="hidden">🏁 จบการฝึก</button>
+<button id="trOpen" class="hidden">🧪 เมนูทดลอง [P]</button>
+<div id="trPanel" class="card hidden"></div>
 <div id="settings" class="overlay hidden"><div class="card setcard"><h1 style="font-size:32px">ตั้งค่า</h1><div class="orn"></div><div id="setTabs" class="stabs"></div><div id="setBody"></div><div class="row" style="justify-content:flex-end"><button id="setReset">ค่าเริ่มต้น</button><button class="pri" id="setClose">เสร็จ</button></div></div></div>
 <div id="fps"></div>
 <div id="pause" class="overlay hidden"><div class="card" style="width:min(360px,100%);text-align:center"><h1 style="font-size:34px">หยุดพัก</h1><div class="orn"></div><p class="sub">เกมยังเดินต่อสำหรับคนอื่น</p><div class="row" style="justify-content:center"><button class="pri" id="pResume">เล่นต่อ</button></div><div class="row" style="justify-content:center"><button id="pSettings">ตั้งค่า</button><button id="pLobby">กลับล็อบบี้</button><button id="pLeave">ออกจากห้อง</button></div></div></div>
@@ -617,6 +636,10 @@ function genRuins(){
   for(const [dx,dy,a] of [[-260,-120,0.4],[260,130,-0.6]])obs.push({x:cx0+dx,y:cy0+dy,r:44,k:'fallen',hgt:1.8,s:R(),ry:a});
   return {W:FW,H:FH,obs};
 }
+// ----- Test Place (ห้องฝึก): พื้นโล่งไม่มีสิ่งกีดขวาง -----
+function genTest(){return {W:3200,H:2400,obs:[]};}
+// โซนเสกมอนสเตอร์ในห้องฝึก (พิกัดเกม) — ใช้ทั้งโฮสต์ (จุดเกิด) และจอ (วงบนพื้น)
+function trZone(){return {x:MW*0.78,y:MH*0.42,r:230};}
 function genGreatHall(){
   const FW=2400,FH=1500,obs=[],tables=[];
   // โต๊ะยาว 4 บ้านวางตามแนวยาว (ช่องกลางเป็นทางเดินพรม) + โต๊ะอาจารย์ที่ปลายห้อง
@@ -633,7 +656,8 @@ const MAPS={
   greathall:Object.assign({name:'🕯️ ห้องโถงใหญ่',d:'โต๊ะยาวสี่บ้าน เทียนลอย เพดานเวทมนตร์'},genGreatHall()),
   meadow:Object.assign({name:'🌄 ทุ่งหญ้าฮอกวอตส์',d:'ทุ่งกว้างยามเย็น หินตั้งไม่กี่ก้อน มองเห็นปราสาทไกลๆ'},genMeadow()),
   lake:Object.assign({name:'🧊 ทะเลสาบน้ำแข็ง',d:'ลานน้ำแข็งกว้างใต้แสงจันทร์ มีก้อนน้ำแข็งให้หลบนิดหน่อย'},genLake()),
-  ruins:Object.assign({name:'🏛️ ซากลานประลอง',d:'ลานประลองโบราณกลางทราย เสาหักรอบขอบ ตรงกลางโล่ง'},genRuins())
+  ruins:Object.assign({name:'🏛️ ซากลานประลอง',d:'ลานประลองโบราณกลางทราย เสาหักรอบขอบ ตรงกลางโล่ง'},genRuins()),
+  test:Object.assign({name:'🧪 Test Place',d:'พื้นโล่งสำหรับทดลองคาถา (ห้องฝึก)'},genTest())
 };
 // แผนที่ที่สุ่มได้ (ป่ามืดเอาออกจากการสุ่มตามที่ผู้ใช้ขอ — ยังเลือกเองในล็อบบี้ได้)
 const RANDOM_MAPS=['castle','pitch','hogsmeade','greathall','meadow','lake','ruins'];
@@ -653,7 +677,7 @@ const PROP_OFF_MODES=['quid','race','imp'];
 const PROP_USE={pchest(p,o){}};
 let PROPS=[],PROPON=false;
 function genProps(id){
-  const M=MAPS[id];if(!M)return [];
+  const M=MAPS[id];if(!M||id==='test')return [];
   const rng=mulberry(hashStr('props:'+id)),out=[],W=M.W,H=M.H,obs=M.obs||[];
   const n=Math.min(24,Math.round(W*H/200000)),kinds=Object.keys(PROPDEF),wsum=kinds.reduce((a,k)=>a+PROPDEF[k].w,0),cnt={};
   const spawns=SPAWNF.map(f=>[f[0]*W,f[1]*H]);
@@ -725,7 +749,7 @@ function houseColor(lk){return HOUSES[parseLook(lk).h].c;}
 const TEAMC=['#4da3ff','#ff5a5a'], TEAMN=['ทีมฟ้า','ทีมแดง'];
 const MODES={
   coop:{name:'🗝️ ดันเจียน Co-op',d:'1-6 คน ฝ่าทีละชั้น บอสเรดทุก 5 ชั้น',min:1,max:6},
-  train:{name:'🎯 ห้องฝึก',d:'1-6 คน ลองคาถากับหุ่นซ้อม ฝึก Parry',min:1,max:6},
+  train:{name:'🎯 ห้องฝึก',d:'1-6 คน Test Place: ลองคาถา เสกมอนสเตอร์ ปรับไม่มีคูลดาวน์ได้',min:1,max:6,map:'test'},
   duel:{name:'⚔️ ดวล 1v1',d:'2 คน ชนะ 2 ใน 3 รอบ',min:2,max:2},
   ffa:{name:'💥 FFA',d:'2-6 คน ใครได้ 10 kill ก่อนชนะ',min:2,max:6},
   tdm:{name:'🛡️ ทีม 2v2 / 3v3',d:'2-6 คน ทีมไหนได้ 15 kill ก่อนชนะ',min:2,max:6,team:true},
@@ -1564,7 +1588,7 @@ function castUlt(p){const S=SPELLS[p.ultId];if(!S||p.ult<100||p.sil>0||p.cryo>0)
 // =====================================================================
 //  เครือข่าย (PeerJS / WebRTC)
 // =====================================================================
-const PREFIX='wizduel-th-v20-';
+const PREFIX='wizduel-th-v21-';
 const NET={peer:null,isHost:false,online:false,myId:'me',conns:new Map(),hostConn:null,code:''};
 let LOBBY=null;
 function genCode(){const c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let s='';for(let i=0;i<5;i++)s+=c[Math.floor(Math.random()*c.length)];return s;}
@@ -1691,7 +1715,8 @@ function hostOnData(conn,d){
   const p=G.players[id];if(!p)return;
   if(d.t==='in'&&d.i&&d.i.c)p.inp=d.i;
   else if(d.t==='team'&&G.ph==='lobby'){p.lteam^=1;broadcastLobby();}
-  else if(d.t==='kit'&&G.ph==='lobby'){setKit(p,String(d.k||'').slice(0,24));broadcastLobby();}
+  else if(d.t==='kit'&&(G.ph==='lobby'||G.mode==='train')){setKit(p,String(d.k||'').slice(0,24));broadcastLobby();}
+  else if(d.t==='tr')trCmd(p,d);
   else if(d.t==='pick')hostPick(p,d.i|0);
   else if(d.t==='vote')hostVote(p,d.v);
 }
@@ -2039,6 +2064,7 @@ function gainUlt(p,v){p.ult=Math.min(100,p.ult+v*0.5*p.buffs.ult);}
 function lifesteal(p,amt){if(p.buffs.life&&p.alive&&!p.downed)healT(p,amt*p.buffs.life);}
 
 function damage(t,amt,srcId,kind){
+  if(G.mode==='train'&&G.tr&&G.tr.god&&G.players[t.id]===t)return;   // ห้องฝึก: อมตะ
   const src=srcId!=null?G.players[srcId]:null;
   if(src&&kind!=='burn')amt*=src.buffs.dmg;
   if(src&&src.blaze>0)amt*=1.3;
@@ -2257,6 +2283,7 @@ function updateEnemies(dt){
     for(const m of G.mins)if(!m.dead){const d=dist2(e,m)*1.6;if(d<bd){bd=d;t=m;}}
     if(D.fly&&(!t||e.stun>0))e.h=Math.max(1.5,e.h-(e.stun>0?3:0)*dt);
     if(!t||e.stun>0)continue;
+    if(G.mode==='train'&&G.tr&&!G.tr.mai&&e.type!=='dummy')continue;   // ห้องฝึก: มอนสเตอร์ยืนนิ่ง
     if(e.fear>0){const fa=Math.atan2(e.y-e.fearY,e.x-e.fearX),fs=e.spd*G.espd*1.1*dt;e.x+=Math.cos(fa)*fs;e.y+=Math.sin(fa)*fs;continue;}
     if(e.bld>0){const wa=e.ph*3+e.id;e.x+=Math.cos(wa)*e.spd*0.5*dt;e.y+=Math.sin(wa)*e.spd*0.5*dt;continue;}
     const dx=t.x-e.x,dy=t.y-e.y,d=Math.hypot(dx,dy)||1,ux=dx/d,uy=dy/d,sp=e.spd*G.espd*moveMul(e)*(e.root>0?0:1);
@@ -2331,7 +2358,7 @@ function updateEnemies(dt){
         // หุ่นซ้อม: ยิงเวทช้าๆ ให้ฝึก Parry, ฟื้นเลือดเอง
         e.hp=Math.min(e.maxHp,e.hp+12*dt);
         if(e.ax!==undefined){e.x+=(e.ax-e.x)*2*dt;e.y+=(e.ay-e.y)*2*dt;}
-        if(e.cd<=0&&d<700){e.cd=rnd(2.5,3.5);eShoot(e,'ebolt',t);}
+        if(e.cd<=0&&d<700&&!(G.tr&&!G.tr.datk)){e.cd=rnd(2.5,3.5);eShoot(e,'ebolt',t);}
         break;
       case 'troll':
         if(e.slam>0){e.slam-=dt;if(e.slam<=0)enemySlam(e,ps,135,D.dmg);}
@@ -2506,7 +2533,8 @@ function modeInit(){
     });
     banner(`🐍 ลอร์ดโวลเดอมอร์${ni>1?'และผู้เสพความตาย':''}แฝงตัวอยู่ในหมู่พวกเรา — ทำภารกิจ แล้วหาตัวให้เจอ!`,4);
   }else if(m==='train'){
-    // หุ่นซ้อมเรียงเป็นแถว + 1 ตัวไกลๆ ไว้ฝึกยิงระยะไกล
+    // Test Place: หุ่นซ้อมเรียงเป็นแถว + 1 ตัวไกลๆ ไว้ฝึกยิงระยะไกล • ค่าตั้ง G.tr คงอยู่ข้ามรอบ
+    G.tr=Object.assign({datk:1,mai:1,nocd:0,ult:0,god:0},G.tr||{});
     const cy=MH/2-260;
     for(let i=0;i<5;i++)spawnDummy(MW/2+(i-2)*170,cy);
     spawnDummy(MW/2,MH/2-620>80?MH/2-620:80);
@@ -2520,10 +2548,32 @@ function spawnDummy(x,y){
 }
 const TIPS=['💡 คลิกซ้ายค้าง = ยิงรัว • Q/E/R/F = คาถาที่คุณจัดไว้ (เปลี่ยนได้ที่ปุ่ม 🪄 ในล็อบบี้)','🛡️ ยกโล่ (คลิกขวา) ตอนเวทเขียวกำลังจะโดนพอดี = PARRY ปัดทิ้ง!','💨 R ผลักศัตรูและลบเวทที่พุ่งมา • 🌀 F ดึงศัตรูเข้ามาหา','💫 Shift หลบ (อมตะชั่วครู่) • Space กระโดด • 🌟 X เวทโบราณเมื่อเกจทองเต็ม','🧹 B ขึ้นไม้กวาด • Space บินขึ้น • C บินลง (บนไม้กวาดร่ายเวทไม่ได้)','🏁 โฮสต์กดปุ่ม "จบการฝึก" มุมขวาบนเพื่อกลับล็อบบี้'];
 function trainTick(dt){
-
   const n=G.en.filter(e=>e.type==='dummy').length;
   G.dummyT=(G.dummyT||0)-dt;
   if(n<6&&G.dummyT<=0){G.dummyT=2;spawnDummy(MW/2+rnd(-340,340),MH/2-260+rnd(-60,60));}
+  const T=G.tr||{};
+  for(const p of plist()){
+    if(T.nocd)for(const k of ['q','e','r','f'])p.cd[k]=0;
+    if(T.ult)p.ult=100;
+    if(T.god&&p.alive)p.hp=p.maxHp;
+  }
+}
+// คำสั่งจากเมนูทดลอง (ใครในห้องก็กดได้): ตั้งค่า / เสกมอนสเตอร์ในโซน / ล้างมอนสเตอร์
+const TR_KEYS=['datk','mai','nocd','ult','god'];
+function trCmd(p,d){
+  if(!G||G.mode!=='train'||G.ph==='over'||G.ph==='lobby')return;
+  G.tr=G.tr||{};
+  if(d.c==='set'&&TR_KEYS.includes(d.k)){G.tr[d.k]=d.v?1:0;if(d.k==='ult'&&!d.v)for(const q of plist())q.ult=0;}
+  else if(d.c==='spawn'&&(EDEF[d.e])){
+    const cnt=clamp(d.n|0||1,1,10),z=trZone();
+    for(let i=0;i<cnt&&G.en.length<40;i++){
+      const a=rnd(0,Math.PI*2),r=rnd(0,z.r*0.55);
+      if(d.e==='dummy'){spawnDummy(z.x+Math.cos(a)*r,z.y+Math.sin(a)*r);G.en[G.en.length-1].trz=1;}
+      else spawnEnemy(d.e,{x:z.x+Math.cos(a)*r,y:z.y+Math.sin(a)*r});
+    }
+    feed(`🧪 ${p.name} เสก ${EDEF[d.e].name}${cnt>1?' ×'+cnt:''}`);
+  }
+  else if(d.c==='clear'){for(const e of G.en)if(e.type!=='dummy'||e.trz){e.dead=true;}G.en=G.en.filter(e=>!e.dead);feed('🧹 ล้างมอนสเตอร์แล้ว');}
 }
 function hostEndTraining(){if(G&&G.mode==='train'&&G.ph!=='over')endMatch();}
 
@@ -2758,6 +2808,8 @@ function modeSnap(){
     const z=G.zone;M.zone={cx:Math.round(z.cx),cy:Math.round(z.cy),r:Math.round(z.r),sh:z.t>z.grace,tl:Math.max(0,Math.ceil(z.grace-z.t))};
     M.items=G.items.map(i=>[i.id,Math.round(i.x),Math.round(i.y),i.k]);
     M.al=plist().filter(p=>p.alive).length;
+  }else if(G.mode==='train'&&G.tr){
+    M.tr=G.tr;
   }else if(G.mode==='imp'){
     M.td=G.taskDone;M.tt=G.taskTotal;
     M.bodies=G.bodies.map(b=>[b.id,Math.round(b.x),Math.round(b.y),b.c]);
@@ -2901,7 +2953,7 @@ let mouseX=0,mouseY=0,showBoard=false;
 const SET_DEF={sens:100,inv:0,master:90,sfx:100,music:80,fov:62,fps:0,dmg:1,shake:1,hitm:1,dirm:1,mini:1,names:1,xh:0,xhc:0,xhs:100,keys:{}};
 const SET=Object.assign({},SET_DEF,(()=>{try{return JSON.parse(store('wd_set')||'{}');}catch(e){return {};}})());
 // ปุ่มกดตั้งเองได้ (หน้าตั้งค่า > ปุ่มกด) — KMAP = ปุ่มค้าง / PMAP = ปุ่มกดทีละครั้ง
-const KEYACT=[['up','เดินหน้า','KeyW'],['down','ถอยหลัง','KeyS'],['left','ไปซ้าย','KeyA'],['right','ไปขวา','KeyD'],['dash','พุ่ง/หลบ','ShiftLeft'],['jump','กระโดด / บินขึ้น','Space'],['q','คาถา 1','KeyQ'],['e','คาถา 2','KeyE'],['r','คาถา 3','KeyR'],['f','คาถา 4','KeyF'],['ult','เวทโบราณ','KeyX'],['mode','สลับโหมด (สายน้ำแข็ง)','KeyV'],['broom','ไม้กวาด','KeyB'],['use','ใช้ของ / โต้ตอบ','KeyG'],['down2','บินลง','KeyC'],['talk','พูดไมค์','KeyT'],['score','ตารางคะแนน','Tab'],['music','เปิด/ปิดเพลง','KeyM']];
+const KEYACT=[['up','เดินหน้า','KeyW'],['down','ถอยหลัง','KeyS'],['left','ไปซ้าย','KeyA'],['right','ไปขวา','KeyD'],['dash','พุ่ง/หลบ','ShiftLeft'],['jump','กระโดด / บินขึ้น','Space'],['q','คาถา 1','KeyQ'],['e','คาถา 2','KeyE'],['r','คาถา 3','KeyR'],['f','คาถา 4','KeyF'],['ult','เวทโบราณ','KeyX'],['mode','สลับโหมด (สายน้ำแข็ง)','KeyV'],['broom','ไม้กวาด','KeyB'],['use','ใช้ของ / โต้ตอบ','KeyG'],['down2','บินลง','KeyC'],['talk','พูดไมค์','KeyT'],['score','ตารางคะแนน','Tab'],['music','เปิด/ปิดเพลง','KeyM'],['test','เมนูทดลอง (ห้องฝึก)','KeyP']];
 const KMAP={},PMAP={};let KEYS={};
 function rebuildKeys(){
   KEYS={};for(const [a,,d] of KEYACT)KEYS[a]=(SET.keys&&SET.keys[a])||d;
@@ -2919,8 +2971,10 @@ addEventListener('keydown',e=>{
   if(e.target.tagName==='INPUT'||e.target.tagName==='SELECT')return;
   if(e.code===KEYS.score){e.preventDefault();showBoard=true;return;}
   if(e.code==='Space'||e.code==='Tab')e.preventDefault();
+  if(screen==='game'&&crOpen)return;   // หน้าเลือกคาถาเปิดอยู่กลางเกม (ห้องฝึก) → ไม่ส่งปุ่มเข้าเกม
   if(e.code===KEYS.talk)VOICE.talking=true;
   if(e.repeat)return;
+  if(e.code===KEYS.test&&screen==='game'&&VIEW.cur&&VIEW.cur.mode==='train'){trToggle();return;}
   if(KMAP[e.code])INPUT[KMAP[e.code]]=1;
   if(PMAP[e.code]&&screen==='game'){const a=PMAP[e.code];if(placeKey(a))return;INPUT.c[a]++;}
   if(/^Digit[123]$/.test(e.code)&&!$('#buff').classList.contains('hidden'))choosePick(+e.code[5]-1);
@@ -4463,7 +4517,7 @@ function buildWorld(id){
   }
   clearDyn();
   prefetchModels(FILE_MODELS());prefetchFx();
-  setSky(id==='pitch'||id==='meadow'||id==='ruins'?'sunset':'night');
+  setSky(id==='pitch'||id==='meadow'||id==='ruins'||id==='test'?'sunset':'night');
   const cached=WCACHE.get(id);
   if(cached){
     WCACHE.delete(id);
@@ -4472,7 +4526,7 @@ function buildWorld(id){
   }else{
     world=new THREE.Group();scene.add(world);
     builtMap=id;CANDLESYS=null;TORCHES=[];CANDLES=[];FIREFLIES=null;CRYSTAL=null;RUNE=null;SNITCH=null;BANNERS=[];SNOW=null;
-    if(id==='forest')buildForest();else if(id==='pitch')buildPitch();else if(id==='hogsmeade')buildHogsmeade();else if(id==='greathall')buildGreatHall();else if(id==='meadow')buildMeadow();else if(id==='lake')buildLake();else if(id==='ruins')buildRuins();else buildCastle();
+    if(id==='forest')buildForest();else if(id==='pitch')buildPitch();else if(id==='hogsmeade')buildHogsmeade();else if(id==='greathall')buildGreatHall();else if(id==='meadow')buildMeadow();else if(id==='lake')buildLake();else if(id==='ruins')buildRuins();else if(id==='test')buildTest();else buildCastle();
     batchStatic(world,new Set([RUNE,CRYSTAL,SNITCH,FIREFLIES&&FIREFLIES.pts,...CANDLES.map(c=>c.g),...BANNERS.map(b=>b.m)].filter(Boolean)));
     setTimeout(prewarmShaders,0);
   }
@@ -4930,6 +4984,30 @@ function buildLake(){
     for(let k=0;k<3;k++){const s=o.r*S3*(k?0.55:0.9),m=addW(new THREE.Mesh(new THREE.IcosahedronGeometry(s,0),iceM));m.position.set(x+(k?(R()-0.5)*s*1.6:0),s*0.55,z+(k?(R()-0.5)*s*1.6:0));m.scale.set(1,k?1.1:0.9,1);m.rotation.set(R(),R()*6,R());shadowAll(m);}}
 }
 // ----- ซากลานประลอง (เย็น ทราย) -----
+// ----- Test Place (ห้องฝึก): พื้นตารางเรียบๆ กลางวัน + วงโซนเสกมอนสเตอร์ -----
+function buildTest(){
+  scene.fog.color.set('#c9d6e2');scene.fog.near=160;scene.fog.far=620;
+  hemi.color.set('#ffffff');hemi.groundColor.set('#6a7078');hemi.intensity=0.85;moonL.intensity=1.35;moonL.color.set('#fff4e6');gl.toneMappingExposure=1;
+  const grid=(base,line,rep)=>{const t=texCanvas(256,256,g=>{g.fillStyle=base;g.fillRect(0,0,256,256);g.strokeStyle=line;g.lineWidth=3;g.strokeRect(1.5,1.5,253,253);g.lineWidth=1;g.globalAlpha=0.5;for(const p of [64,128,192]){g.beginPath();g.moveTo(p,0);g.lineTo(p,256);g.moveTo(0,p);g.lineTo(256,p);g.stroke();}});t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(rep[0],rep[1]);t.anisotropy=4;return t;};
+  const fw=MW*S3,fh=MH*S3;
+  const fl=addW(new THREE.Mesh(new THREE.PlaneGeometry(fw,fh),new THREE.MeshStandardMaterial({map:grid('#9aa1a8','#6e767e',[fw/8,fh/8]),roughness:0.9})));fl.rotation.x=-Math.PI/2;fl.receiveShadow=true;
+  const out=addW(new THREE.Mesh(new THREE.PlaneGeometry(900,900),new THREE.MeshStandardMaterial({map:grid('#6f767d','#5a6168',[900/8,900/8]),roughness:1})));out.rotation.x=-Math.PI/2;out.position.y=-0.03;out.receiveShadow=true;
+  // ขอบเขตด่าน = แถบเหลืองบนพื้น
+  const edgeM=new THREE.MeshBasicMaterial({color:'#e8c040'});
+  for(const [w,h,x,z] of [[fw,0.5,0,-fh/2],[fw,0.5,0,fh/2],[0.5,fh,-fw/2,0],[0.5,fh,fw/2,0]]){const m=addW(new THREE.Mesh(new THREE.PlaneGeometry(w,h),edgeM));m.rotation.x=-Math.PI/2;m.position.set(x,0.02,z);}
+  // วงโซนเสกมอนสเตอร์
+  const Z=trZone(),zs=Z.r*S3*2;
+  const zt=texCanvas(512,512,g=>{
+    g.translate(256,256);g.fillStyle='rgba(220,60,60,0.18)';g.beginPath();g.arc(0,0,250,0,7);g.fill();
+    g.strokeStyle='rgba(255,90,80,0.95)';g.lineWidth=10;g.setLineDash([34,18]);g.beginPath();g.arc(0,0,244,0,7);g.stroke();g.setLineDash([]);
+    g.lineWidth=4;g.beginPath();g.arc(0,0,190,0,7);g.stroke();
+    g.fillStyle='rgba(255,235,230,0.95)';g.textAlign='center';g.textBaseline='middle';g.font='bold 52px Kanit, sans-serif';g.fillText('โซนเสกมอนสเตอร์',0,-14);g.font='34px Kanit, sans-serif';g.fillText('กด P → เสกมอนสเตอร์',0,44);
+  });
+  const zm=addW(new THREE.Mesh(new THREE.PlaneGeometry(zs,zs),new THREE.MeshBasicMaterial({map:zt,transparent:true,depthWrite:false})));zm.rotation.x=-Math.PI/2;zm.position.set(tx(Z.x),0.04,tz(Z.y));
+  // ป้ายระยะ (ทุก 200 px) จากจุดเกิดไปทางหุ่นซ้อมไกล — ไว้ดูระยะคาถา
+  const tickM=new THREE.MeshBasicMaterial({color:'#ffffff',transparent:true,opacity:0.55});
+  for(let d=200;d<=800;d+=200){const m=addW(new THREE.Mesh(new THREE.PlaneGeometry(3,0.25),tickM));m.rotation.x=-Math.PI/2;m.position.set(0,0.03,tz(MH/2+160-d));}
+}
 function buildRuins(){
   scene.fog.color.set('#d09a6a');scene.fog.near=120;scene.fog.far=480;
   hemi.color.set('#ffdcb0');hemi.groundColor.set('#7a5a3a');hemi.intensity=0.75;moonL.intensity=1.5;
@@ -5554,7 +5632,7 @@ function applySettings(){
   const f=document.getElementById('fps');if(f)f.style.display=SET.fps?'block':'none';
 }
 const camPos=new THREE.Vector3(0,20,40),camLook=new THREE.Vector3();
-document.addEventListener('pointerlockchange',()=>{locked=document.pointerLockElement===cv;if(locked)hidePause();else if(screen==='game')showPause();});
+document.addEventListener('pointerlockchange',()=>{locked=document.pointerLockElement===cv;if(locked){hidePause();trToggle(false);}else if(screen==='game'&&!trOpenF&&!crOpen)showPause();});
 // เมนู Esc: ปล่อยเมาส์ (Esc) ระหว่างเล่น = เปิดเมนูหยุดพัก
 function overlayOpen(){return ['#over','#buff','#meet'].some(s=>{const el=document.querySelector(s);return el&&!el.classList.contains('hidden');});}
 function showPause(){if(overlayOpen())return;const el=$('#pause');el.classList.remove('hidden');$('#pLobby').style.display=NET.isHost?'':'none';INPUT.fire=INPUT.sh=INPUT.u=INPUT.d=INPUT.l=INPUT.r=INPUT.jh=INPUT.ch=0;}
@@ -6762,6 +6840,7 @@ function render(dt,now){
   syncModeObjs(v,P,me,now,dt);pf('projMode',t0);
   KC=Math.max(0,KC-dt);roleShowT=Math.max(0,roleShowT-dt);
   $('#trainEnd').classList.toggle('hidden',!(NET.isHost&&v.mode==='train'&&v.ph!=='over'));
+  trSync(v);
   tickFlash(dt);
   t0=performance.now();updateZV(dt);updateParticles(dt);updateShapes(dt);updateLights(dt);updateVfx(dt);pf('fx',t0);
   QUAL.frame++;gl.shadowMap.needsUpdate=QUAL.mode==='high'||QUAL.frame%2===0;
@@ -7273,13 +7352,13 @@ function crGo(n){
 function crSaveName(){const c=$('#cName');if(c){const n=cleanName(c.value);$('#nameIn').value=n;store('wd_name',n);}}
 function crSetHouse(i){if(i===myLook.h&&crStep===4)return;myLook.h=i;STAGE.switchT=0;renderMyHouse();crRenderHouse();}
 function openCreator(first,step){
-  crSaved=lookStr(myLook);crKitSaved=myKit;ac();crFirst=!!first;crOpen=true;crTab=0;crSlot=0;crLib=parseKit(myKit).path;crKitOnly=step===3&&!first&&screen==='lobby';
+  crSaved=lookStr(myLook);crKitSaved=myKit;ac();crFirst=!!first;crOpen=true;crTab=0;crSlot=0;crLib=parseKit(myKit).path;crKitOnly=step===3&&!first&&(screen==='lobby'||screen==='game');
   $('#crTitle').textContent=crKitOnly?'เลือกสายและคาถา':first?'สร้างตัวละครของคุณ':'แต่งตัวละคร';
   $('#crCancel').classList.toggle('hidden',!!first);
   $('#crSteps').classList.toggle('hidden',crKitOnly);
   $('#crNext3').classList.toggle('hidden',crKitOnly);$('#crBack3').classList.toggle('hidden',crKitOnly);$('#crKitOk').classList.toggle('hidden',!crKitOnly);
   if(screen==='menu'){document.querySelector('.mprof').classList.add('hidden');document.querySelector('.mleft').classList.add('hidden');}
-  document.body.classList.add('crOpenB');
+  document.body.classList.add('crOpenB');document.body.classList.toggle('crGame',screen==='game');
   $('#creator').classList.remove('hidden');crGo(step||1);
 }
 function closeCreator(save){
@@ -7287,7 +7366,7 @@ function closeCreator(save){
   else{myLook=parseLook(crSaved);myKit=crKitSaved;}
   crOpen=false;renderMyHouse();$('#creator').classList.add('hidden');
   if(screen==='menu'){document.querySelector('.mprof').classList.remove('hidden');document.querySelector('.mleft').classList.remove('hidden');}
-  document.body.classList.remove('crOpenB');
+  document.body.classList.remove('crOpenB','crGame');
 }
 function lobbyKitSend(){
   if(NET.isHost&&G&&G.players[NET.myId]){setKit(G.players[NET.myId],myKit);broadcastLobby();}
@@ -7341,10 +7420,52 @@ $('#pLobby').onclick=()=>{hidePause();if(NET.isHost)hostToLobby();};
 $('#pLeave').onclick=leave;
 $('#pSettings').onclick=openSettings;
 $('#btnLobbySet').onclick=()=>{ac();openSettings();};
-addEventListener('keydown',e=>{if(e.code==='Escape'&&!$('#settings').classList.contains('hidden')){closeSettings();return;}if(e.code==='Escape'&&screen==='game'&&!locked){const el=$('#pause');if(el.classList.contains('hidden'))showPause();else{hidePause();try{cvEl().requestPointerLock();}catch(err){}}}});
+addEventListener('keydown',e=>{if(e.code==='Escape'&&!$('#settings').classList.contains('hidden')){closeSettings();return;}if(e.code==='Escape'&&screen==='game'&&trOpenF){trToggle(false);return;}if(e.code==='Escape'&&screen==='game'&&!locked&&!crOpen){const el=$('#pause');if(el.classList.contains('hidden'))showPause();else{hidePause();try{cvEl().requestPointerLock();}catch(err){}}}});
 $('#btnGuide').onclick=()=>{ac();$('#guide').classList.remove('hidden');};
 $('#btnGuideClose').onclick=()=>$('#guide').classList.add('hidden');
 $('#trainEnd').onclick=()=>{if(NET.isHost)hostEndTraining();};
+// ---------- เมนูทดลอง (ห้องฝึก / Test Place) ----------
+let trOpenF=false,trKey='',trN=1;
+const TR_OPTS=[['datk','🎯 หุ่นซ้อมยิงเวทใส่เรา'],['mai','👹 มอนสเตอร์ขยับ + โจมตี'],['nocd','⏱️ ไม่มีคูลดาวน์ (Q/E/R/F)'],['ult','🌟 อัลติเมทเต็มตลอด'],['god','🛡️ อมตะ (เลือดไม่ลด)']];
+function trToggle(on){
+  const want=on===undefined?!trOpenF:!!on;if(want===trOpenF)return;
+  trOpenF=want;$('#trPanel').classList.toggle('hidden',!want);
+  if(want){trKey='';hidePause();if(document.pointerLockElement)document.exitPointerLock();INPUT.fire=INPUT.sh=0;if(VIEW.cur)trSync(VIEW.cur);}
+}
+function trSend(d){
+  d.t='tr';
+  if(NET.isHost){if(G&&G.players[NET.myId])trCmd(G.players[NET.myId],d);}
+  else if(NET.hostConn)try{NET.hostConn.send(d);}catch(e){}
+}
+function trSync(v){
+  const on=v.mode==='train'&&v.ph!=='over';
+  $('#trOpen').classList.toggle('hidden',!on||trOpenF);
+  if(!on){if(trOpenF)trToggle(false);return;}
+  if(!trOpenF)return;
+  const tr=(v.M&&v.M.tr)||{},k=JSON.stringify(tr)+'|'+trN;
+  if(k===trKey)return;trKey=k;
+  const mons=Object.keys(EDEF);
+  $('#trPanel').innerHTML=`<h2>🧪 Test Place</h2>
+    <button class="pri trw" data-tr="kit">🪄 เปลี่ยนสาย / คาถา</button>
+    <div class="trs">ตั้งค่า</div>
+    ${TR_OPTS.map(([k2,n])=>`<button class="trt ${tr[k2]?'on':''}" data-trk="${k2}">${n}<b>${tr[k2]?'เปิด':'ปิด'}</b></button>`).join('')}
+    <div class="trs">เสกมอนสเตอร์ (ที่วงสีแดง)</div>
+    <div class="trn">${[1,3,5].map(n=>`<button class="${trN===n?'on':''}" data-trn="${n}">×${n}</button>`).join('')}</div>
+    <div class="trg">${mons.map(m=>`<button class="${EDEF[m].boss?'boss':''}" data-tre="${m}">${EDEF[m].boss?'👑 ':''}${EDEF[m].name}</button>`).join('')}</div>
+    <button class="trw" data-tr="clear">🧹 ล้างมอนสเตอร์ที่เสก</button>
+    <small>P / Esc = ปิดเมนู • คลิกจอ = เล่นต่อ</small>`;
+}
+$('#trOpen').onclick=()=>trToggle(true);
+$('#trPanel').addEventListener('click',e=>{
+  const b=e.target.closest('button');if(!b)return;ac();
+  const v=VIEW.cur,tr=(v&&v.M&&v.M.tr)||{};
+  if(b.dataset.trk){const k=b.dataset.trk;trSend({c:'set',k,v:tr[k]?0:1});}
+  else if(b.dataset.trn){trN=+b.dataset.trn;trKey='';}
+  else if(b.dataset.tre)trSend({c:'spawn',e:b.dataset.tre,n:trN});
+  else if(b.dataset.tr==='clear')trSend({c:'clear'});
+  else if(b.dataset.tr==='kit'){trToggle(false);openCreator(false,3);}
+  if(v)trSync(v);
+});
 $('#guide').addEventListener('click',e=>{if(e.target.id==='guide')$('#guide').classList.add('hidden');});
 $('#btnMyMusic').onclick=()=>{ac();$('#myMusicIn').click();};
 $('#myMusicIn').onchange=async e=>{
