@@ -4153,14 +4153,9 @@ function updateGlacierVis(dt){
 function updateOrbShots(dt){
   for(let i=OBV.length-1;i>=0;i--){const b=OBV[i];b.t+=dt;if(b.t<0)continue;const k=Math.min(1,b.t/b.max),px=-(b.y2-b.y),py=(b.x2-b.x),pl=Math.hypot(px,py)||1,arc=Math.sin(k*Math.PI)*40*b.s;
     const x=lerp(b.x,b.x2,k)+px/pl*arc,y=lerp(b.y,b.y2,k)+py/pl*arc,H=lerp(b.h,b.h2,k)+Math.sin(k*Math.PI)*0.8;
-<<<<<<< Updated upstream
     if(b.sp){b.sp.visible=b.cr.visible=true;b.sp.position.set(tx(x),H+GY(x,y),tz(y));b.cr.position.copy(b.sp.position);const pu=1+0.15*Math.sin(b.t*40);b.sp.scale.setScalar(1.3*pu);}
-    for(let j=0;j<7;j++)PARTS.push({x:x+rnd(-6,6),y:y+rnd(-6,6),h:H+rnd(-0.15,0.15),vx:rnd(-25,25),vy:rnd(-25,25),vh:rnd(0,1.4),life:rnd(0.3,0.45),max:0.45,col:j<2?'#fff0b0':j<4?'#ffb347':'#ff6a1a',size:j<2?3:rnd(3.5,5),g:-1.5,grow:0.6});
-=======
-    if(b.sp){b.sp.visible=b.cr.visible=true;b.sp.position.set(tx(x),H,tz(y));b.cr.position.copy(b.sp.position);const pu=1+0.15*Math.sin(b.t*40);b.sp.scale.setScalar(1.3*pu);}
     for(let j=0;j<3;j++)flame(x+rnd(-5,5),y+rnd(-5,5),H-0.2+rnd(-0.1,0.1),{vx:rnd(-20,20),vy:rnd(-20,20),vh:rnd(0.5,1.5),life:rnd(0.2,0.32),size:rnd(5,7),g:-1.5});
     for(let j=0;j<3;j++)PARTS.push({x:x+rnd(-6,6),y:y+rnd(-6,6),h:H+rnd(-0.15,0.15),vx:rnd(-40,40),vy:rnd(-40,40),vh:rnd(0,1.4),life:rnd(0.2,0.35),max:0.35,col:j?'#ffb347':'#fff0b0',size:1.6,g:2});
->>>>>>> Stashed changes
     for(let j=0;j<2;j++)PARTS.push({x:x+rnd(-5,5),y:y+rnd(-5,5),h:H,vx:0,vy:0,vh:0.6,life:0.4,max:0.4,col:j?'#ff7a1a':'#d8401a',size:4.5,g:-1,smoke:true,grow:1});
     LREQ.push({x:tx(x),y:H,z:tz(y),col:'#ff8a3a',int:2.5,dist:9});
     if(k>=1){if(b.sp){scene.remove(b.sp);scene.remove(b.cr);}burst(x,y,'#ffb347',12,200,0.35,2.6,{h:H,vh:[0,3],g:1});OBV.splice(i,1);}}
@@ -6408,14 +6403,9 @@ function updateParticles(dt){
     if(p.grow)p.size*=1+p.grow*dt;
     const S=PSYS[p.fl?2:p.smoke?1:0];if(S.n>=PMAX)continue;
     const k=p.life/p.max,c=col3(p.col),j=S.n;
-<<<<<<< Updated upstream
     S.pos[j*3]=tx(p.x);S.pos[j*3+1]=p.h+GY(p.x,p.y);S.pos[j*3+2]=tz(p.y);
-    if(p.smoke){S.col[j*4]=c.r;S.col[j*4+1]=c.g;S.col[j*4+2]=c.b;S.col[j*4+3]=Math.min(1,k*1.5);}
-=======
-    S.pos[j*3]=tx(p.x);S.pos[j*3+1]=p.h;S.pos[j*3+2]=tz(p.y);
     if(p.fl){S.col[j*4]=c.r;S.col[j*4+1]=c.g;S.col[j*4+2]=c.b;S.col[j*4+3]=Math.min(1,(1-k)*7)*Math.min(1,k*1.8);}
     else if(p.smoke){S.col[j*4]=c.r;S.col[j*4+1]=c.g;S.col[j*4+2]=c.b;S.col[j*4+3]=Math.min(1,k*1.5);}
->>>>>>> Stashed changes
     else{const b=1.25;S.col[j*4]=c.r*b;S.col[j*4+1]=c.g*b;S.col[j*4+2]=c.b*b;S.col[j*4+3]=k;}
     S.size[j]=p.size*0.12;S.n++;
   }
@@ -7035,10 +7025,6 @@ function pyroFX(o,p,pz,now,dt){
   if(p.sn){
     o.armR.rotation.x=-2.7;o.armR.rotation.z=-0.2;o.armR.updateMatrixWorld(true);
     o.tip.getWorldPosition(_pw);const s=simOf(_pw);
-<<<<<<< Updated upstream
-    for(let i=0;i<3;i++){const an=rnd(0,6.283),r=rnd(30,60);PARTS.push({x:s.x+Math.cos(an)*r,y:s.y+Math.sin(an)*r,h:s.h+rnd(-1,1),vx:-Math.cos(an)*r*3,vy:-Math.sin(an)*r*3,vh:0,life:0.3,max:0.3,col:i?'#ffb347':'#fff0b0',size:2.4,g:0});}
-    LREQ.push({abs:1,x:_pw.x,y:_pw.y,z:_pw.z,col:'#ffb347',int:2.5,dist:9});
-=======
     for(let i=0;i<2;i++)flame(s.x+rnd(-4,4),s.y+rnd(-4,4),s.h-0.1,{vh:rnd(1,2.5),life:0.22,size:rnd(3,5),g:-1});
     // เปลวไฟจากศัตรูที่ติด Burning ไหลเป็นเส้นโค้งมารวมที่ปลายนิ้ว + สะเก็ดไฟรอบศัตรูบอกจำนวนชั้น
     const V=VIEW.cur,foes=V?[...(V.P||[]).filter(q=>q.id!==p.id&&q.al&&(q.br|0)>0&&(!(MODES[V.mode]&&MODES[V.mode].team)||q.tm!==p.tm)),...(V.E||[]).filter(e=>(e.br|0)>0)]:[];
@@ -7047,24 +7033,16 @@ function pyroFX(o,p,pz,now,dt){
       for(let i=0;i<3;i++){const u=Math.random(),iu=1-u,bx=iu*iu*t.x+2*iu*u*mx+u*u*s.x,by=iu*iu*t.y+2*iu*u*my+u*u*s.y,bh=iu*iu*th+2*iu*u*mh+u*u*s.h;
         const dx=2*iu*(mx-t.x)+2*u*(s.x-mx),dy=2*iu*(my-t.y)+2*u*(s.y-my),dh=2*iu*(mh-th)+2*u*(s.h-mh);flame(bx,by,bh-0.15,{vx:dx*1.6,vy:dy*1.6,vh:dh*1.6,life:0.14,size:4,g:0,drag:0});}
       const n=t.br|0;for(let i=0;i<n;i++){const an=now/220+i/n*6.283;PARTS.push({x:t.x+Math.cos(an)*26,y:t.y+Math.sin(an)*26,h:th+0.4,vx:0,vy:0,vh:0,life:0.06,max:0.06,col:'#ffd27a',size:3.2,g:0});}}
-    LREQ.push({x:_pw.x,y:_pw.y,z:_pw.z,col:'#ffb347',int:2.5,dist:9});
->>>>>>> Stashed changes
+    LREQ.push({abs:1,x:_pw.x,y:_pw.y,z:_pw.z,col:'#ffb347',int:2.5,dist:9});
   }
   // ลูกไฟวิญญาณ (จากโล่): อยู่ข้างตัวซ้าย/ขวา เยื้องหลังเล็กน้อย ชิดตัว • แกนสว่าง เปลวพุ่งขึ้นไหวเหมือนไฟจริง หางไฟและสะเก็ด
   {const n=p.ob|0;
-<<<<<<< Updated upstream
-    if(n>0&&!o.orbG){o.orbG=new THREE.Group();o.orbM=[];for(let i=0;i<6;i++){const s=new THREE.Sprite(glowMat('#ff5a10',1.15));s.scale.setScalar(0.5);const au=new THREE.Sprite(glowMat('#ff3a08',0.55));au.scale.setScalar(2.4);s.add(au);const c=new THREE.Mesh(new THREE.SphereGeometry(0.08,8,6),new THREE.MeshBasicMaterial({color:hdr('#ffa040',1.5)}));s.add(c);c.scale.setScalar(1/0.5);o.orbG.add(s);o.orbM.push(s);}scene.add(o.orbG);}
-    if(o.orbG){o.orbG.visible=n>0;if(n>0){o.orbG.position.set(tx(p.x),pz+1.25+GY(p.x,p.y),tz(p.y));
-      o.orbM.forEach((s,i)=>{s.visible=i<n;const a=now/420+i/n*Math.PI*2;s.position.set(Math.cos(a)*1.05,Math.sin(now/300+i)*0.18,Math.sin(a)*1.05);
-        if(i<n){s.getWorldPosition(_pw);const q=simOf(_pw);for(let k=0;k<2;k++)PARTS.push({x:q.x+rnd(-3,3),y:q.y+rnd(-3,3),h:q.h,vx:rnd(-10,10),vy:rnd(-10,10),vh:rnd(0.4,1.4),life:0.35,max:0.35,col:k?'#ff7a2a':'#ffd27a',size:k?2.6:1.8,g:-1.5});}});}}
-=======
     if(n>0&&!o.orbG){o.orbG=new THREE.Group();o.orbM=[];for(let i=0;i<6;i++){const s=new THREE.Sprite(glowMat('#ff8a2a',1.4));s.material.userData.keep=true;s.scale.setScalar(0.62);const c=new THREE.Sprite(glowMat('#fff2c0',3));c.material.userData.keep=true;c.scale.setScalar(0.42);s.add(c);o.orbG.add(s);o.orbM.push(s);}o.g.add(o.orbG);}
     if(o.orbG){o.orbG.visible=n>0;if(n>0){
       o.orbM.forEach((s,i)=>{s.visible=i<n;if(i>=n)return;const sd=i%2?1:-1,row=i>>1;s.position.set(sd*(0.72+row*0.12),1.15+row*0.42+Math.sin(now/260+i)*0.06,-0.32-row*0.12);
         s.getWorldPosition(_pw);const q=simOf(_pw);
         flame(q.x+rnd(-2,2),q.y+rnd(-2,2),q.h-0.18,{vh:rnd(1.5,3),life:rnd(0.18,0.3),size:rnd(4.5,6),g:-1.5});
         if(Math.random()<0.5)PARTS.push({x:q.x+rnd(-4,4),y:q.y+rnd(-4,4),h:q.h,vx:rnd(-20,20),vy:rnd(-20,20),vh:rnd(0.5,2),life:0.3,max:0.3,col:Math.random()<0.5?'#ffd27a':'#ff7a2a',size:1.4,g:-1});});}}
->>>>>>> Stashed changes
   }
   // Kindle ลอยเล็ง: ขาหน้าพับยกเข่าขึ้น (ชายผ้าหน้าเปิดตาม) ขาหลังเหยียดลง ยื่นไม้ไปข้างหน้า มือซ้ายประคอง (แบบ Freja) — ค่อยๆ เข้า/ออกท่า
   {const on=p.hv&&p.kd>0;o.kAimK=(o.kAimK||0)+((on?1:0)-(o.kAimK||0))*Math.min(1,dt*12);const k=o.kAimK;
