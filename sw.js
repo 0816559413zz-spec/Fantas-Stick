@@ -3,7 +3,8 @@
 // กลยุทธ์:
 //   หน้าเว็บ (index.html ฯลฯ)       → network-first (ได้โค้ดใหม่เสมอ ถ้าเน็ตหลุดใช้ของในแคช)
 //   unpkg (ระบุเวอร์ชันตายตัว), ฟอนต์ → cache-first (ไฟล์ไม่เปลี่ยน)
-//   ไฟล์ในเว็บเรา (audio/ icons/)      → stale-while-revalidate (ใช้ของในแคชทันที แล้วอัปเดตเบื้องหลัง)
+//   ไฟล์ในเว็บเรา (audio/ icons/ assets/) → stale-while-revalidate (ใช้ของในแคชทันที แล้วอัปเดตเบื้องหลัง)
+//   assets/manifest.json                → network-first (รู้ทันทีว่ามีโมเดลเวอร์ชันใหม่)
 //   คำขอแบบ Range (เพลงที่สตรีมผ่าน <audio>) / PeerJS / อื่นๆ → ไม่ยุ่ง ปล่อยให้เบราว์เซอร์จัดการ
 const VER = new URL(self.location).searchParams.get('v') || 'dev';
 const CACHE = 'wd-' + VER;
@@ -44,9 +45,9 @@ function kind(url) {
   return null;
 }
 function keyOf(url) {
-  // ?v=N ที่ใช้หลบแคชตอนทดสอบ ไม่ต้องแยกเก็บ
+  // ?v=N ที่ใช้หลบแคชตอนทดสอบ ไม่ต้องแยกเก็บ — ยกเว้นไฟล์ใน assets/ ที่ ?v= คือเวอร์ชันจริงจาก manifest
   const u = new URL(url.href);
-  if (u.origin === self.location.origin) u.search = '';
+  if (u.origin === self.location.origin && !u.pathname.includes('/assets/')) u.search = '';
   return u.href;
 }
 function storable(r) { return r && (r.ok || r.type === 'opaque') && r.status !== 206; }
@@ -56,7 +57,7 @@ self.addEventListener('fetch', e => {
   if (req.method !== 'GET' || req.headers.has('range')) return;
   const url = new URL(req.url);
   if (url.protocol !== 'https:' && url.protocol !== 'http:') return;
-  if (req.mode === 'navigate') { e.respondWith(networkFirst(req, url)); return; }
+  if (req.mode === 'navigate' || (url.origin === self.location.origin && url.pathname.endsWith('/assets/manifest.json'))) { e.respondWith(networkFirst(req, url)); return; }
   const k = kind(url);
   if (!k) return;
   if (k === 'immutable') e.respondWith(cacheFirst(req, url));

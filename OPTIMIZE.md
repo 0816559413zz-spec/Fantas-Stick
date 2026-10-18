@@ -35,7 +35,7 @@ Normal in-game frame here ≈ 9–17 ms.
 - [x] **P2 Measure the heaviest scene** (done 2026-10-18, `tools/bench-heavy.js`: castle, solo + 5 bots — coop allows max 6 — wave 5 dragon + 7 adds, everyone casting every slot, ~7,900 particles). Baseline: **~1,280 draw calls (max ~1,400)**, 118 k triangles, 48 shader programs, frame median ≈ 30 ms in the hidden pane (vsync-quantised, use calls/geometries to compare, not ms). Each player is ~110 meshes (≈35 in the body + spell props), mostly drawn twice (shadow + main).
 - [x] **P2 Merge the static body parts of each character** (done 2026-10-18, `mergeBody`): inside every group of a student (body, legs, arms, wand, scarf ends) all plain-colour parts become one mesh with the shared `BODYM` material (front/double side); colour/roughness/metalness are per-vertex attributes (`color`/`aRough`/`aMetal`, shader patch `bodyPatch`). Parts with a texture (striped tie/scarf), emissive (gold wand), transparency or `userData.anim` (cloak) stay separate. Body meshes per player ~35 → ~15. Heavy bench: **draw calls median 1,285 → 1,045 (−19 %), max 1,405 → 1,151**; +4 shader programs; 5-bot lobby join 26 → 42 ms (merge cost, still below the original 66 ms). Visual A/B at the lobby (same looks) shows no difference.
 - [x] **P3 Same merge for enemies** (done 2026-10-18): `makeEnemy` uses `sGeo/sMat/bMat` + `mergeBody` (a second pass also merges same shared-material siblings such as glowing eyes; flat-shaded spider hair and the troll club `userData.anim` stay separate). Heavy bench: **draw calls median 1,045 → 1,006, max 1,151 → 1,081; geometries 537 → 483**. Total for the whole track: **1,285 → 1,006 median (−22 %), 1,405 → 1,081 max (−23 %), 892 → 483 geometries**. Cost: building a character now merges meshes, so 5 bots joining the lobby takes ≈30–60 ms (noisy; 26 ms with sharing only, 66 ms originally). Visual A/B on the pitch: goblin, small/big spider, pixie, dummy, dragon identical; wizard/troll checked in the new build only.
-- [ ] **P3 Merge static parts of characters/enemies** (`mergeGeometries` already imported) and use `InstancedMesh` for many enemies of the same type (spiders, pixies).
+- [ ] **P3 `InstancedMesh` for many enemies of the same type** (spiders, pixies) — the merge part of this item is done (see above).
 - Good already: particles = 2 point systems, 1 draw call each, max 5,000; forests/grass/candles use `InstancedMesh` (15 places); `batchStatic` merges map statics.
 
 ## D. Loading
@@ -48,12 +48,12 @@ Page open today: `index.html` 538 KB (≈ 82 KB inline icon SVGs) + `three.modul
 
 ## E. Direction: streamed asset files (agreed with user 2026-10-17)
 Goal: models, VFX and sounds become files that are easy to edit/replace with better-looking made assets; code stays in `index.html`; the current code-built versions stay as fallback.
-- [ ] Asset loader: `GLTFLoader` (+ Draco or Meshopt) loading `.glb` on demand, with a promise cache.
-- [ ] Fallback rule: show the code-built model until the file arrives (or forever if it fails).
+- [x] Asset loader: `GLTFLoader` (+ Draco or Meshopt) loading `.glb` on demand, with a promise cache. (done 2026-10-18: `loadModel`, lazy import)
+- [x] Fallback rule: show the code-built model until the file arrives (or forever if it fails). (done: `modelOr`)
 - [ ] LOD: low-detail first, swap to high-detail when loaded / when close.
-- [ ] Prefetch next map/boss assets in lobby and buff screen.
-- [ ] Service Worker (D) stores everything after first download.
-- [ ] Asset manifest (one JSON listing files + versions) so the loader and Service Worker share one list.
+- [ ] Prefetch next map/boss assets in lobby and buff screen. (props of the current map are prefetched when the map is built; lobby prefetch not yet)
+- [x] Service Worker (D) stores everything after first download. (done: `assets/` cached with their `?v=`, manifest network-first)
+- [x] Asset manifest (one JSON listing files + versions) so the loader and Service Worker share one list. (done: `assets/manifest.json`; Blender conventions in `ASSETS.md`)
 - [ ] Licences: repo is public — only CC0 / CC-BY / self-made assets, credits in guide.
 
 ## Heavy-scene bench
