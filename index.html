@@ -3061,7 +3061,7 @@ function snd(n,o){
 }
 function sfx(n){snd(n);}
 
-// ---------- ไฟล์เสียงจริง (โฟลเดอร์ audio/) — โหลดตอนคลิกครั้งแรก ถ้าโหลดไม่ได้จะใช้เสียงสังเคราะห์ด้านบนแทน ----------
+// ---------- ไฟล์เสียงจริง (โฟลเดอร์ audio/) — เริ่มโหลดเมื่อ ac() ถูกเรียกครั้งแรก (ปกติตั้งแต่เปิดหน้า; AudioContext จะเล่นได้หลังคลิกแรก) ถ้าโหลดไม่ได้จะใช้เสียงสังเคราะห์ด้านบนแทน ----------
 // จำนวนไฟล์ต่อชื่อเสียง (ไฟล์ชื่อ audio/sfx/<ชื่อ>_<เลข>.ogg สุ่มเล่น 1 ไฟล์)
 const SFXN={cast_bolt:3,cast_fire:2,cast_stun:2,cast_pull:1,hit:3,hurt:3,zap:2,boom:3,slam:2,parry:2,block:2,break:2,die:4,spiderdie:3,push:1,nova:1,revive:1,buff:1,dash:3,whoosh:2,throw:1,dismount:1,thud:2,bite:2,splat:3,portal:1,tick:1,go:1,goal:1,pickup:2,kill:1,eject:1,task:1,roar:2,breath:1,imp:1,ui_click:1,ui_hover:1,step:6};
 const SFXV={cast_bolt:0.32,cast_fire:0.5,cast_stun:0.4,hit:0.55,hurt:0.45,zap:0.4,boom:0.85,slam:0.8,parry:0.6,block:0.5,die:0.55,spiderdie:0.5,dash:0.5,whoosh:0.45,step:0.5,ui_click:0.45,ui_hover:0.25,tick:0.6,goal:0.7,roar:0.9,breath:0.7,imp:0.8,kill:0.6,nova:0.8};
@@ -4290,16 +4290,30 @@ for(let i=0;i<6;i++){const L=new THREE.PointLight('#ffffff',0,12,2);L.position.s
 // ---------- สร้างแผนที่ ----------
 let CANDLESYS=null;
 let builtMap="",world=null,TORCHES=[],CANDLES=[],FIREFLIES=null,CRYSTAL=null,RUNE=null,SNITCH=null,BANNERS=[],SNOW=null;
+// แผนที่ที่สร้างแล้วเก็บไว้ใช้ซ้ำ (LRU) — กลับมาแผนที่เดิมไม่ต้องสร้าง/อัปโหลด GPU ใหม่ • ตัวแปรที่ผูกกับแผนที่ต้องอยู่ในรายการนี้ทั้งหมด
+const WCACHE=new Map(),WCACHE_MAX=3;
 function buildWorld(id){
-  if(world){scene.remove(world);disposeTree(world);}
-  world=new THREE.Group();scene.add(world);
-  builtMap=id;CANDLESYS=null;TORCHES=[];CANDLES=[];FIREFLIES=null;CRYSTAL=null;RUNE=null;SNITCH=null;BANNERS=[];SNOW=null;
+  if(world){
+    scene.remove(world);
+    if(PROPV.g){if(PROPV.g.parent)PROPV.g.parent.remove(PROPV.g);disposeTree(PROPV.g);PROPV.g=null;}   // prop สร้างใหม่ทุกเกมจาก snapshot
+    WCACHE.delete(builtMap);WCACHE.set(builtMap,{world,CANDLESYS,TORCHES,CANDLES,FIREFLIES,CRYSTAL,RUNE,SNITCH,BANNERS,SNOW});
+    for(const [k,v] of WCACHE){if(WCACHE.size<=WCACHE_MAX)break;if(k===id)continue;WCACHE.delete(k);disposeTree(v.world);}
+  }
   clearDyn();
   setSky(id==='pitch'||id==='meadow'||id==='ruins'?'sunset':'night');
-  if(id==='forest')buildForest();else if(id==='pitch')buildPitch();else if(id==='hogsmeade')buildHogsmeade();else if(id==='greathall')buildGreatHall();else if(id==='meadow')buildMeadow();else if(id==='lake')buildLake();else if(id==='ruins')buildRuins();else buildCastle();
-  batchStatic(world,new Set([RUNE,CRYSTAL,SNITCH,FIREFLIES&&FIREFLIES.pts,...CANDLES.map(c=>c.g),...BANNERS.map(b=>b.m)].filter(Boolean)));
+  const cached=WCACHE.get(id);
+  if(cached){
+    WCACHE.delete(id);
+    ({world,CANDLESYS,TORCHES,CANDLES,FIREFLIES,CRYSTAL,RUNE,SNITCH,BANNERS,SNOW}=cached);
+    scene.add(world);builtMap=id;
+  }else{
+    world=new THREE.Group();scene.add(world);
+    builtMap=id;CANDLESYS=null;TORCHES=[];CANDLES=[];FIREFLIES=null;CRYSTAL=null;RUNE=null;SNITCH=null;BANNERS=[];SNOW=null;
+    if(id==='forest')buildForest();else if(id==='pitch')buildPitch();else if(id==='hogsmeade')buildHogsmeade();else if(id==='greathall')buildGreatHall();else if(id==='meadow')buildMeadow();else if(id==='lake')buildLake();else if(id==='ruins')buildRuins();else buildCastle();
+    batchStatic(world,new Set([RUNE,CRYSTAL,SNITCH,FIREFLIES&&FIREFLIES.pts,...CANDLES.map(c=>c.g),...BANNERS.map(b=>b.m)].filter(Boolean)));
+    setTimeout(prewarmShaders,0);
+  }
   gl.shadowMap.needsUpdate=true;
-  setTimeout(prewarmShaders,0);
   const ext=Math.max(MW,MH)*S3/2+12;
   Object.assign(moonL.shadow.camera,{left:-ext,right:ext,top:ext,bottom:-ext,near:1,far:400});
   moonL.shadow.camera.updateProjectionMatrix();

@@ -9,7 +9,7 @@ Priority: **P1** = real bug or big win, **P2** = clear win, **P3** = nice to hav
 ## A. Bugs found while measuring
 - [x] **P1 Texture leak.** (fixed: `disposeTree`/`disposeMaterial`; textures stay ~30 across matches) Each `hostToLobby` → `hostStart` leaves 7–10 GPU textures behind (61 → 110 after 6 matches). `buildWorld()` (line ~3462) and `disposeObj()` (~4208) only call `geometry.dispose()`; materials and their `map` CanvasTextures are never disposed. Fix: dispose `material` (+ `material.map`) too, skipping shared ones (`glowTex`, `projGeo`/`tailGeo`-style shared assets).
 - [x] **P1 Cloak NaN** (found 2026-10-18 in the heavy bench): enemy wizard cloaks (height 1.7) had NaN in their top row of vertices every frame — the rest positions are Float32, so `0.85f` is a hair above `hh=0.85` and `Math.pow(negative,1.5)` = NaN (console `computeBoundingSphere(): Computed radius is NaN`). Fixed with `Math.max(0,…)` in `updateCloth`; also `updateCloth`/`localVel` now reset on non-finite state. Side finding: in the old build, a NaN mesh plus bloom could turn the whole screen black in a test (bloom off = picture back); the new build did not black out under the same test.
-- [ ] **P2 Doc/code mismatch.** Comment at line ~2616 says audio loads on first click; it actually loads at page open (`ac()` runs on load). Decide which is wanted and fix the comment or the trigger.
+- [x] **P2 Doc/code mismatch.** (done 2026-10-18: loading at page open is the better behaviour now that the SW caches the files, so the comment was fixed, not the trigger.) Comment at line ~2616 says audio loads on first click; it actually loads at page open (`ac()` runs on load). Decide which is wanted and fix the comment or the trigger.
 
 ## B. Hitches (frame spikes)
 Normal in-game frame here ≈ 9–17 ms.
@@ -27,8 +27,9 @@ Normal in-game frame here ≈ 9–17 ms.
 - [x] **P1 Pre-compile shaders.** (done: `prewarmShaders()` after `buildWorld`, `gl.compileAsync` + hidden VFX group; first spell casts no longer compile — Permafrost still adds 1 program) Call `renderer.compileAsync(scene, cam)` right after `buildWorld` / during the 3-2-1 countdown, and once for the menu stage. Also pre-warm VFX materials (shield, colossus, boss) by adding them invisible once.
 - [x] **P2 Find the pyro +381 geometries / frost-ult spike** — obsolete: those placeholder spells were replaced by the user's Pyro/Frost designs; the new ones were measured after prewarm (≤ 20 ms).
 - [x] **P2 Share geometry/material between characters.** (done 2026-10-18: `sGeo/sMat/sStripe` caches, marked `userData.keep`; only the animated cloak geometry, the shield ShaderMaterial and the foot ring material stay per character. Ghost mode now swaps to transparent clones via `setGhost` instead of editing materials. Result in the heavy bench: 5 bots joining the lobby 66 → 26 ms and +195 → +35 geometries; heavy scene 892 → 512 geometries, 39 → 25 textures; match start 294 → 124 geometries. Draw calls unchanged — see C.)
-- [ ] **P3 Cache built maps** (or at least reuse geometry/material across rebuilds) instead of rebuilding the same map each match.
-- [ ] **P3 Pool enemies and projectiles** instead of create/dispose on spawn/death.
+- [x] **P3 Cache built maps** (done 2026-10-18: `WCACHE`, LRU of 3 built worlds incl. their globals; props are rebuilt per match). `tools/bench-start.js` (solo co-op, maps castle→meadow→castle→meadow→castle→hogsmeade→castle): **returning to a cached map: `hostStart` 10–12 → 0.4 ms, worst frame 75–97 → 36–41 ms (= a normal frame in that run)**. First visit of a map is unchanged (meadow ≈134–206 ms, hogsmeade ≈100–120 ms, the very first match after the menu ≈600 ms) — this happens during the 3-2-1 countdown. Cost: up to 2 extra worlds kept on the GPU (≈ +50–80 geometries). Random maps never repeat back-to-back, so the cache hits about 1 match in 3 with 7 random maps.
+- [ ] **P3 First-visit map hitch** (≈100–200 ms, during the countdown). Tried `gl.compileAsync(world,cam,scene)` before adding the world → no measurable gain (so it is not only shader compile; likely geometry/texture upload + first shadow pass); reverted. Next idea if needed: build/upload maps in the background while in the lobby (`WCACHE` warm-up) or time-slice `buildWorld`.
+- [x] **P3 Pool enemies and projectiles** — measured, not worth it (2026-10-18): in the heavy bench `syncProj`+walls+minions+mode objects cost 0.02 ms/frame (`WD.PROF` `projMode`), particles/FX 1.7 ms, GPU submit 6.9 ms. Revisit only if a bullet-heavy mode appears.
 - [ ] **P3 Time-slice heavy builds** (spread `buildWorld` over a few frames) — only if A/B fixes are not enough.
 
 ## C. Draw calls / render cost
@@ -55,6 +56,9 @@ Goal: models, VFX and sounds become files that are easy to edit/replace with bet
 - [x] Service Worker (D) stores everything after first download. (done: `assets/` cached with their `?v=`, manifest network-first)
 - [x] Asset manifest (one JSON listing files + versions) so the loader and Service Worker share one list. (done: `assets/manifest.json`; Blender conventions in `ASSETS.md`)
 - [ ] Licences: repo is public — only CC0 / CC-BY / self-made assets, credits in guide.
+
+## Benchmarks
+`tools/bench-start.js` = match start / map switch hitch (see its header).
 
 ## Heavy-scene bench
 `tools/bench-heavy.js` (header says how to run it). Open the page with `?nosw` so the Service Worker does not serve an old copy of the script. Uses `WD.hostStep(dt)` (one host loop iteration: hostTick + snapshot + FX) because the hidden pane throttles `setInterval`.
