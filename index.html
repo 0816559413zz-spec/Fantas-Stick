@@ -3799,11 +3799,11 @@ const _tv=new THREE.Vector3(),_tt=new THREE.Vector3(),_ts=new THREE.Vector3(),_t
 function tbMesh(col,blend,op,ro){const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(new Float32Array(TBN*2*3),3));const idx=[];for(let i=0;i<TBN-1;i++){const a=i*2;idx.push(a,a+1,a+2,a+1,a+3,a+2);}g.setIndex(idx);
   const m=new THREE.Mesh(g,new THREE.MeshBasicMaterial({color:col,transparent:true,opacity:op,blending:blend,depthWrite:false,side:THREE.DoubleSide}));m.frustumCulled=false;m.renderOrder=ro;return m;}
 function tbGet(){let o=TBF.pop();if(!o){o={pts:Array.from({length:TBN},()=>new THREE.Vector3()),A:new THREE.Vector3(),B:new THREE.Vector3(),path:null,
-  glow:tbMesh(hdr('#ffb800',1.1),THREE.AdditiveBlending,0.3,1),body:tbMesh(new THREE.Color('#ffc400'),THREE.NormalBlending,0.95,2),core:tbMesh(hdr('#fffbe0',1.5),THREE.NormalBlending,1,3)};}
+  glow:tbMesh(hdr('#ffb800',1.3),THREE.AdditiveBlending,0.5,1),body:tbMesh(new THREE.Color('#ffc400'),THREE.NormalBlending,1,2),core:tbMesh(hdr('#fffbe0',1.8),THREE.NormalBlending,1,3)};}
   scene.add(o.glow,o.body,o.core);TBA.push(o);return o;}
 // จุด sim (x,y,h) — col ไม่ใช้ (เหลืองเสมอ) ยกเว้น '#9fd8ff' = สีรองฟ้า • w = ความหนา (หน่วยโลก) • br = จำนวนกิ่ง
 function tbolt(x1,y1,h1,x2,y2,h2,life,col,w,br){
-  const o=tbGet();o.A.set(tx(x1),h1,tz(y1));o.B.set(tx(x2),h2,tz(y2));o.path=null;o.life=o.max=life||0.12;o.w=w||0.14;o.rj=0;
+  const o=tbGet();o.A.set(tx(x1),h1,tz(y1));o.B.set(tx(x2),h2,tz(y2));o.path=null;o.life=o.max=life||0.12;o.w=(w||0.14)*1.2;o.rj=0;
   const L=o.A.distanceTo(o.B);o.amp=Math.min(0.55,L*0.11+0.03);
   o.body.material.color.set(col==='#9fd8ff'?'#7fd6ff':'#ffc400');
   if(br&&L>1.2)for(let i=0;i<br;i++){const k=rnd(0.25,0.75),bx=lerp(x1,x2,k)+rnd(-8,8),by=lerp(y1,y2,k)+rnd(-8,8),bh=lerp(h1,h2,k),an=rnd(0,6.283),bl=L/S3*rnd(0.2,0.4);
@@ -3812,13 +3812,13 @@ function tbolt(x1,y1,h1,x2,y2,h2,life,col,w,br){
 }
 // สายฟ้าตามเส้นทางที่กำหนด (จุดโลก) — ใช้กับหาง/กรงเล็บโค้ง/เกลียวรอบ Railgun
 function tboltP(P,life,w,amp,col){
-  const o=tbGet();o.path=P;o.life=o.max=life;o.w=w;o.rj=0;o.amp=amp;o.body.material.color.set(col==='#9fd8ff'?'#7fd6ff':'#ffc400');return o;
+  const o=tbGet();o.path=P;o.life=o.max=life;o.w=w*1.2;o.rj=0;o.amp=amp;o.body.material.color.set(col==='#9fd8ff'?'#7fd6ff':'#ffc400');return o;
 }
 function tbRibbon(m,pts,w,taper){
   const a=m.geometry.attributes.position.array,cp=cam.position;
   for(let i=0;i<TBN;i++){const P=pts[i],Pa=pts[Math.max(0,i-1)],Pb=pts[Math.min(TBN-1,i+1)];
     _tt.subVectors(Pb,Pa);_tv.subVectors(cp,P);_ts.crossVectors(_tt,_tv).normalize();
-    const t=i/(TBN-1),ww=w*0.5*(taper?(1-0.75*t):(0.55+0.45*Math.sin(Math.PI*Math.min(1,t*1.15+0.05))));
+    const t=i/(TBN-1),ww=w*0.5*(taper?(1-0.7*t):(0.7+0.3*Math.sin(Math.PI*Math.min(1,t*1.15+0.05))));
     a[i*6]=P.x-_ts.x*ww;a[i*6+1]=P.y-_ts.y*ww;a[i*6+2]=P.z-_ts.z*ww;a[i*6+3]=P.x+_ts.x*ww;a[i*6+4]=P.y+_ts.y*ww;a[i*6+5]=P.z+_ts.z*ww;}
   m.geometry.attributes.position.needsUpdate=true;
 }
@@ -3831,9 +3831,9 @@ function updateBolts(dt){
         if(o.path){const f=t*(o.path.length-1),k=Math.floor(f),u=f-k,Pa=o.path[k],Pb=o.path[Math.min(o.path.length-1,k+1)];o.pts[j].lerpVectors(Pa,Pb,u);}
         else o.pts[j].lerpVectors(o.A,o.B,t);
         o.pts[j].x+=rnd(-e,e);o.pts[j].y+=rnd(-e,e);o.pts[j].z+=rnd(-e,e);}}
-    const k=Math.min(1,o.life/o.max*1.6),tp=!!o.path;
-    o.glow.material.opacity=0.3*k;o.body.material.opacity=0.95*k;o.core.material.opacity=k;
-    tbRibbon(o.glow,o.pts,o.w*2.4,tp);tbRibbon(o.body,o.pts,o.w,tp);tbRibbon(o.core,o.pts,o.w*0.32,tp);
+    const k=Math.min(1,o.life/o.max*2.2),tp=!!o.path;
+    o.glow.material.opacity=0.5*k;o.body.material.opacity=k;o.core.material.opacity=k;
+    tbRibbon(o.glow,o.pts,o.w*2.6,tp);tbRibbon(o.body,o.pts,o.w,tp);tbRibbon(o.core,o.pts,o.w*0.32,tp);
   }
 }
 const LATER=[],STV=[],SBV=[],SDV=[],TSV=[];
@@ -3884,11 +3884,23 @@ function updateStormV(dt){
 }
 // ภาพเฉพาะตัวสายฟ้า + อาการ Shock ของทุกคน (โคลงตัว ไม่สั่นกล้อง)
 const _ev=new THREE.Vector3();
+// ร่างเทพสายฟ้า: สลับวัสดุทึบทั้งร่าง (ใน o.b) เป็นวัสดุเหลืองสว่างตัวเดียว (ไม่แก้วัสดุเดิมที่ใช้ร่วมกัน) + ซ่อนผ้าคลุม
+let GODM=null;
+function godBody(o,on){
+  if(on===!!o.godOn)return;if(o.flashSaved)endFlash(o);
+  if(on){if(!GODM){GODM=new THREE.MeshBasicMaterial({color:'#e8a800'});GODM.userData.keep=true;}o.godOn=1;o.godSaved=[];
+    o.b.traverse(m=>{if(m.isMesh&&m.material&&!Array.isArray(m.material)&&!m.material.transparent&&!m.userData.noGod){o.godSaved.push([m,m.material]);m.material=GODM;}});
+    if(o.cloak){o.cloak.outer.visible=o.cloak.inner.visible=false;}}
+  else{o.godOn=0;for(const [m,mat] of (o.godSaved||[]))m.material=mat;o.godSaved=null;if(o.cloak){o.cloak.outer.visible=o.cloak.inner.visible=true;}}
+}
+// จุดบนร่าง (พิกัดใน o.b) สำหรับสายฟ้าวิ่งทั่วตัว
+const GODPTS=[[0,1.95,0.05],[0.12,1.8,0.12],[-0.12,1.8,0.12],[0,1.5,0.18],[0.25,1.45,0],[-0.25,1.45,0],[0,1.2,0.2],[0.2,1.1,0],[-0.2,1.1,0],[0,0.9,0.15],[0.12,0.55,0.05],[-0.12,0.55,0.05],[0.12,0.1,0.08],[-0.12,0.1,0.08],[0,1.3,-0.2],[0.4,1.15,0.1],[-0.4,1.15,0.1]];
+
 function bWorld(o,x,y,z){_ev.set(x,y,z);o.b.localToWorld(_ev);return simOf(_ev);}
 function stormFX(o,p,pz,now,dt){
   if((p.fm|0)&16){o.b.rotation.z+=Math.sin(now/22)*0.2;o.b.rotation.x+=Math.sin(now/31)*0.08;}
   const M=p.sm;
-  if(!M){if(o.sOrbs)o.sOrbs.forEach(q=>q.visible=false);if(o.railC)o.railC.visible=false;if(o.godG)o.godG.visible=false;if(o.godEyes)o.godEyes.forEach(e=>e.visible=false);if(o.stG)o.stG.visible=false;if(o.claws)o.claws.forEach(c=>c.visible=false);return;}
+  if(!M){if(o.sOrbs)o.sOrbs.forEach(q=>q.visible=false);if(o.railC)o.railC.visible=false;godBody(o,false);if(o.godG)o.godG.visible=false;if(o.godEyes)o.godEyes.forEach(e=>e.visible=false);if(o.stG)o.stG.visible=false;if(o.claws)o.claws.forEach(c=>c.visible=false);return;}
   const f=M[3]|0,isMe=p.id===NET.myId,god=!!(f&4);
   // ลำสายฟ้า (กดค้าง): สายฟ้าหนาจากปลายไม้ไปทุกเป้าที่ล็อก
   if(f&1&&!god){
@@ -3919,13 +3931,16 @@ function stormFX(o,p,pz,now,dt){
   o.dPrev=[p.x,p.y];
   // ร่างเทพสายฟ้า
   if(god){
-    if(!o.godG){o.godG=new THREE.Sprite(glowMat('#ffd23a',1.3));o.godG.material.userData.keep=true;o.godG.position.y=1.2;o.g.add(o.godG);}
-    o.godG.visible=true;o.godG.scale.set(2.3+0.2*Math.sin(now/90),3.2+0.3*Math.sin(now/70),1);
+    if(!o.godG){o.godG=new THREE.Sprite(glowMat('#ffb800',0.7));o.godG.material.userData.keep=true;o.godG.position.y=1.2;o.g.add(o.godG);}
+    o.godG.visible=true;o.godG.scale.set(1.5+0.15*Math.sin(now/90),2.4+0.2*Math.sin(now/70),1);
+    godBody(o,true);if(GODM)GODM.color.set(Math.random()<0.12?'#ffe066':'#e8a800');
+    for(let j=0;j<4;j++){const A=GODPTS[(Math.random()*GODPTS.length)|0],B=GODPTS[(Math.random()*GODPTS.length)|0];if(A===B)continue;const a=bWorld(o,A[0]*1.15,A[1],A[2]*1.4),b=bWorld(o,B[0]*1.15,B[1],B[2]*1.4);tbolt(a.x,a.y,a.h,b.x,b.y,b.h,0.05,0,0.07);}
     if(o.godUp>0){o.godUp-=dt;o.armR.rotation.x=-3.05;o.armR.rotation.z=-0.1;}
     // ดวงตา: สายฟ้าเหลืองแลบสั่นออกด้านข้าง
     if(!o.godEyes){o.godEyes=[-1,1].map(sd=>{const e=new THREE.Sprite(glowMat('#fff2a0',3));e.material.userData.keep=true;e.scale.setScalar(0.16);e.position.set(sd*0.085,1.865,0.24);o.b.add(e);return e;});}
-    o.godEyes.forEach(e=>{e.visible=true;e.scale.setScalar(0.14+0.06*Math.random());});
-    for(const sd of [-1,1]){const e=bWorld(o,sd*0.085,1.865,0.24),e2=bWorld(o,sd*rnd(0.4,0.7),1.865+rnd(-0.06,0.14),rnd(-0.05,0.12));if(Math.random()<0.85)tbolt(e.x,e.y,e.h,e2.x,e2.y,e2.h,0.04,0,0.06);}
+    o.godEyes.forEach(e=>{e.visible=true;e.scale.setScalar(0.22+0.08*Math.random());});
+    for(const sd of [-1,1]){const e=bWorld(o,sd*0.085,1.865,0.24),e2=bWorld(o,sd*rnd(0.6,1.0),1.865+rnd(-0.05,0.18),rnd(-0.1,0.1)),e3=bWorld(o,sd*rnd(0.35,0.55),1.865+rnd(-0.12,0.1),rnd(0,0.15));
+      tbolt(e.x,e.y,e.h,e2.x,e2.y,e2.h,0.05,0,0.09);tbolt(e.x,e.y,e.h,e3.x,e3.y,e3.h,0.04,0,0.06);}
     // สายฟ้าด้านหลังชี้ขึ้นเฉียง 45°
     {const bk=bWorld(o,0,1.55,-0.28);for(const [sx,sy,sz] of [[-0.7,2.35,-0.95],[0.7,2.35,-0.95],[0,2.6,-1.05]]){const e=bWorld(o,sx+rnd(-0.08,0.08),sy+rnd(-0.08,0.08),sz);tbolt(bk.x,bk.y,bk.h,e.x,e.y,e.h,0.05,0,0.1,Math.random()<0.3?1:0);}}
     // หางสายฟ้า: ตามตำแหน่งย้อนหลัง พริ้ว/สั่น
@@ -3937,8 +3952,8 @@ function stormFX(o,p,pz,now,dt){
     // กรงเล็บสายฟ้า (ทรงคมกางออก) ที่มือทั้งสองข้าง แทนไม้กายสิทธิ์
     if(!o.claws){o.claws=[o.armR,o.armL].map(A=>{const g=new THREE.Group();g.position.set(0,-0.66,0.02);
         const bm=new THREE.MeshBasicMaterial({color:'#ffd000'}),cm=new THREE.MeshBasicMaterial({color:hdr('#ffffff',2)});
-        for(let i=0;i<3;i++){const bl=new THREE.Mesh(new THREE.ConeGeometry(0.05,0.85,4),bm);bl.position.set((i-1)*0.09,-0.4,0.08);bl.rotation.set(Math.PI+0.45,0,(i-1)*0.42);bl.scale.z=0.35;g.add(bl);
-          const cr=new THREE.Mesh(new THREE.ConeGeometry(0.02,0.7,4),cm);cr.position.copy(bl.position);cr.rotation.copy(bl.rotation);g.add(cr);}
+        for(let i=0;i<3;i++){const bl=new THREE.Mesh(new THREE.ConeGeometry(0.05,0.85,4),bm);bl.userData.noGod=true;bl.position.set((i-1)*0.09,-0.4,0.08);bl.rotation.set(Math.PI+0.45,0,(i-1)*0.42);bl.scale.z=0.35;g.add(bl);
+          const cr=new THREE.Mesh(new THREE.ConeGeometry(0.02,0.7,4),cm);cr.userData.noGod=true;cr.position.copy(bl.position);cr.rotation.copy(bl.rotation);g.add(cr);}
         A.add(g);return g;});}
     o.claws.forEach(c=>{c.visible=true;c.scale.setScalar(1+0.06*Math.sin(now/45));});
     if(o.wandG)o.wandG.visible=false;o.tip.visible=false;
@@ -3947,7 +3962,7 @@ function stormFX(o,p,pz,now,dt){
     const lp=o.gLast||[p.x,p.y];if(Math.hypot(p.x-lp[0],p.y-lp[1])>18){tbolt(lp[0],lp[1],pz+0.12,p.x,p.y,pz+0.12,0.35,0,0.1,1);o.gLast=[p.x,p.y];}else if(!o.gLast)o.gLast=[p.x,p.y];
     for(let i=0;i<2;i++)PARTS.push({x:p.x+rnd(-14,14),y:p.y+rnd(-14,14),h:pz+rnd(0,2.4),vx:rnd(-15,15),vy:rnd(-15,15),vh:rnd(1,3),life:rnd(0.3,0.5),max:0.5,col:i?'#ffd000':'#ffffff',size:rnd(2,3.2),g:-1.5});
     LREQ.push({x:tx(p.x),y:pz+1.5,z:tz(p.y),col:'#ffd23a',int:3,dist:11});
-  }else{if(o.godG)o.godG.visible=false;if(o.godEyes)o.godEyes.forEach(e=>e.visible=false);if(o.claws){o.claws.forEach(c=>c.visible=false);if(o.wandG&&!o.wandG.visible&&!p.fr)o.wandG.visible=true;o.tip.visible=true;}o.tailH=null;o.gLast=null;}
+  }else{godBody(o,false);if(o.godG)o.godG.visible=false;if(o.godEyes)o.godEyes.forEach(e=>e.visible=false);if(o.claws){o.claws.forEach(c=>c.visible=false);if(o.wandG&&!o.wandG.visible&&!p.fr)o.wandG.visible=true;o.tip.visible=true;}o.tailH=null;o.gLast=null;}
   // เส้นสายฟ้า: ชูไม้ขึ้น 0.3 วิ แล้วกดลง 0.2 วิ
   if(f&8){if(!o.slOn)o.slOn=now;const el=(now-o.slOn)/1000;o.armR.rotation.x=el<0.3?lerp(-0.4,-3.05,el/0.3):lerp(-3.05,-0.8,Math.min(1,(el-0.3)/0.2));o.armR.rotation.z=-0.1;
     o.tip.getWorldPosition(_pw);const q=simOf(_pw);for(let i=0;i<2;i++)PARTS.push({x:q.x+rnd(-5,5),y:q.y+rnd(-5,5),h:q.h,vx:rnd(-30,30),vy:rnd(-30,30),vh:rnd(-1,2),life:0.25,max:0.25,col:i?'#ffd000':'#ffffff',size:2.6,g:0});
