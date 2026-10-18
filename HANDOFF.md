@@ -7,6 +7,22 @@
 ---
 
 ## 0. START HERE
+> **🔴 PENDING USER REQUESTS (2026-10-18, session 3 ran low on weekly quota — continue these first; tick them off here as they land):**
+> Fire (Pyro):
+> 1. [ ] Kindle: jump **higher** (so the big fireball can be shot down at the ground) and in the direction of the **WASD keys held** (not always backwards); **longer cooldown** (number not given — propose one).
+> 2. [ ] Blazeform aura: nerf — **shorter (6 s)** and **smaller radius**.
+> 3. [ ] Dragon's Breath: much more fire, look like a real flamethrower.
+> 4. [ ] Fire orbs (shield): nicer look — particles + a small fire aura per orb; also some fire FX when blocking.
+> 5. [ ] Fireballs (charged + Kindle big): better look. Charge **a bit faster** (now 2 s).
+> 6. [ ] Normal attack: should look like **fire sparks**, not a small ball.
+> 7. [ ] Ring of Embers: **placement preview like Overwatch (Mei wall / Rein shield)** — press = show a **cyan** ghost of the ring at the aim point (with the lingering effect look), click again = confirm/cast.
+> Frost:
+> 8. [ ] Idle melee pose: holding sword/axe looks like pointing at the ground — hold it better.
+> 9. [ ] 3rd combo hit: **nerf** — slower overhead slam with more wind-up animation, better slam + explosion FX (sword and axe).
+> 10. [ ] Glacier Rend melee (sword wave): the wave itself must be **visible**, and its ice path **bigger**. During **Mirror Legion** the 2 clones shoot too → **3 waves**, but a target only takes damage from the waves whose hitbox it is in (stand in the middle = 1 wave, between two = 2).
+> 11. [ ] Cryo Shell: the player must **not blink** (invulnerability flicker) — just show the ice block.
+> Then: **design the Storm (⚡) class with the user** (one-question interview, same as Pyro/Frost).
+
 > Session 2 (2026-10-17): the questions below were asked; the user skipped them and picked **minimap first** (done). Still unanswered: audio feel, performance, real online test, UI feedback, "เพลงของฉัน". Ask again briefly if relevant, then offer the next ideas in §10.
 >
 > Tip: if port 8765 is already taken by a stale server, just use it (`http://localhost:8765/?v=N`). `WD.addPlayer` accumulates bots across calls — reload the page for a clean test.
