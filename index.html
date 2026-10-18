@@ -2074,7 +2074,7 @@ function damage(t,amt,srcId,kind){
     if(t.frz>0)amt*=1.15;
     if(t.shk>0&&kind!=='burn')amt*=1.08;
     if(t.mrk>0&&kind!=='burn')amt*=1.12;
-    t.hp-=amt;emit({k:'hit',x:t.x,y:t.y,h:(t.h||0)+1.4,n:Math.round(amt),mn:t.id,s:srcId||undefined,b:kind==='burn'?1:undefined,kl:t.hp<=0?1:undefined});
+    t.hp-=amt;emit({k:'hit',x:t.x,y:t.y,h:(t.h||0)+1.4,n:Math.round(amt),mn:t.id,s:srcId||undefined,b:kind==='burn'?1:undefined,kl:t.hp<=0?1:undefined,a:(kind==='aoe'||kind==='zone')?1:undefined});
     if(src&&src.alive)gainUlt(src,amt*0.3);
     if(t.hp<=0){t.dead=true;emit({k:'die',x:t.x,y:t.y,h:(t.h||0)+0.8,c:'#9fd0ff',t:'min'});}
     return;
@@ -2085,7 +2085,7 @@ function damage(t,amt,srcId,kind){
     if(t.shk>0&&kind!=='burn')amt*=1.08;
     if(t.mrk>0&&kind!=='burn')amt*=1.12;
     t.hp-=amt;
-    emit({k:'hit',x:t.x,y:t.y,h:cH(t)+vR(t)+0.4,n:Math.round(amt),e:t.id,s:srcId||undefined,b:kind==='burn'?1:undefined,kl:t.hp<=0?1:undefined});
+    emit({k:'hit',x:t.x,y:t.y,h:cH(t)+vR(t)+0.4,n:Math.round(amt),e:t.id,s:srcId||undefined,b:kind==='burn'?1:undefined,kl:t.hp<=0?1:undefined,a:(kind==='aoe'||kind==='zone')?1:undefined});
     if(src){gainUlt(src,amt);lifesteal(src,amt);src.dmgDealt+=amt;}
     if(t.hp<=0){t.dead=true;if(src)src.kills++;emit({k:'die',x:t.x,y:t.y,h:cH(t),c:EDEF[t.type].col,t:t.type});}
     return;
@@ -2116,7 +2116,7 @@ function damage(t,amt,srcId,kind){
   t.hp-=amt;t.lastHit=srcId;
   if(src&&src!==t){gainUlt(src,amt*0.7);lifesteal(src,amt);src.dmgDealt+=amt;}
   gainUlt(t,amt*0.25);
-  emit({k:'hit',x:t.x,y:t.y,h:t.z+2.4,n:Math.round(amt),id:t.id,s:srcId||undefined,b:kind==='burn'?1:undefined,kl:t.hp<=0?1:undefined,sx:src&&src!==t?Math.round(src.x):undefined,sy:src&&src!==t?Math.round(src.y):undefined});
+  emit({k:'hit',x:t.x,y:t.y,h:t.z+2.4,n:Math.round(amt),id:t.id,s:srcId||undefined,b:kind==='burn'?1:undefined,kl:t.hp<=0?1:undefined,sx:src&&src!==t?Math.round(src.x):undefined,sy:src&&src!==t?Math.round(src.y):undefined,a:(kind==='aoe'||kind==='zone')?1:undefined});
   if(t.hp<=0){t.hp=0;playerDown(t,srcId);}
 }
 function playerDown(t,srcId){
@@ -4205,7 +4205,7 @@ function fx(ev){
       if(!ev.b){flashModel(ev.id!==undefined?PM3.get(ev.id):ev.e!==undefined?EM3.get(ev.e):ev.mn!==undefined?MM3.get(ev.mn):null);hitSparks(ev.x,ev.y,H-0.6,ev.n);}
       if(SET.dmg||mine){if(ev.b)floatText(ev.x,ev.y,ev.n,'#ff9a4a',12,H-0.3);else floatText(ev.x,ev.y,ev.n,mine?'#ff6b6b':ev.s===NET.myId?'#ffe27a':'#ffffff',ev.s===NET.myId?18:16,H);}
       if(mine&&!ev.b){shake(5);snd('hurt');if(ev.sx!==undefined)DIRI.push({a:Math.atan2(ev.sy-myPos().y,ev.sx-myPos().x),t:1});}
-      if(ev.s===NET.myId&&!mine&&!ev.b){if(ev.n>=10)shake(Math.min(6,ev.n/6));if(ev.n>=15)hitStop(ev.n>=40||ev.kl?0.08:0.055);}
+      if(ev.s===NET.myId&&!mine&&!ev.b){if(ev.n>=10)shake(Math.min(6,ev.n/6));if(ev.n>=15&&!ev.a)hitStop(ev.n>=40||ev.kl?0.08:0.055);}   // AoE/zone (a=1) ไม่หยุดภาพ
       if(ev.s===NET.myId&&!mine&&!ev.b&&SET.hitm){HITM.t=HITM.max=ev.kl?0.7:0.45;HITM.at=performance.now();HITM.kill=!!ev.kl;if(ev.kl)snd('kill');}
       break;}
     case 'parry':
@@ -6787,14 +6787,15 @@ $('#meet').addEventListener('click',e=>{const b=e.target.closest('[data-vote]');
 // ---------- ลูปเรนเดอร์ ----------
 let lastFrame=performance.now();
 // hit-stop / impact frame: เราตีโดนแรงๆ = ค้างภาพบนจอเราแว้บหนึ่ง (เกมจริงยังเดินต่อ ไม่หยุดของเพื่อน)
-const HSTOP={t:0,pend:0};
-function hitStop(d){if(screen==='game')HSTOP.pend=Math.max(HSTOP.pend,d);}
+// หยุดภาพได้ครั้งละครั้ง แล้วพัก HSTOP.gap วินาที — กันตีถี่/โดนหลายตัวแล้วภาพหยุดๆ เดินๆ จนดูเหมือนกระตุก
+const HSTOP={t:0,pend:0,until:0,gap:0.3};
+function hitStop(d){if(screen==='game'&&performance.now()>=HSTOP.until)HSTOP.pend=Math.max(HSTOP.pend,d);}
 function frame(now){
   const dt=Math.min(0.05,(now-lastFrame)/1000);lastFrame=now;
   if(HSTOP.t>0){HSTOP.t-=dt;requestAnimationFrame(frame);return;}
   qualTick(dt);
   try{render(dt,now);}catch(e){console.error(e);}
-  if(HSTOP.pend>0){HSTOP.t=HSTOP.pend;HSTOP.pend=0;}
+  if(HSTOP.pend>0){HSTOP.t=HSTOP.pend;HSTOP.until=now+(HSTOP.pend+HSTOP.gap)*1000;HSTOP.pend=0;}
   requestAnimationFrame(frame);
 }
 let _fpsAcc=0,_fpsN=0;
@@ -7723,7 +7724,7 @@ swSetup();
 window.WD.SW=SWK;
 // เทส/วัดผล: เดินลูปโฮสต์ 1 รอบด้วยมือ (hostTick + snapshot + เอฟเฟกต์) — ใช้ตอนหน้าต่างถูกซ่อนแล้ว setInterval ช้า
 // prop / โมเดลจากไฟล์ (ดีบัก)
-Object.defineProperties(window.WD,{PROPS:{get:()=>PROPS},PROPON:{get:()=>PROPON}});Object.assign(window.WD,{PROPDEF,genProps,MODELS,loadModel,modelManifest,useProp,hitProp,PM3,EM3,animTick,playVfx,playFlip,fileFx,VFXL,FLIPL,fx});
+Object.defineProperties(window.WD,{PROPS:{get:()=>PROPS},PROPON:{get:()=>PROPON},HSTOP:{get:()=>HSTOP}});Object.assign(window.WD,{PROPDEF,genProps,MODELS,loadModel,modelManifest,useProp,hitProp,PM3,EM3,animTick,playVfx,playFlip,fileFx,VFXL,FLIPL,fx});
 window.WD.hostStep=dt=>{hostTick(dt);const b=makeSnap(),ev=EVL;EVL=[];EVN=[];onSnap(Object.assign({},b,{ev}));};
 </script>
 </body>
