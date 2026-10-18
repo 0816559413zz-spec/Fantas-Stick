@@ -1144,6 +1144,7 @@ function pyroBigBoom(pr){
 function pyroBall(p){shoot(p,'pfire',{sp:'pyroball',dmg:20});}
 function pyroBasic(p,inp,dt,setCd){
   const prev=p.bfPrev;p.bfPrev=inp.fire;
+  if(p.dfall){if(p.dfall.ph===2&&inp.fire&&!prev)dragonfallDive(p);p.chg=0;return;}
   if(p.breath>0||p.snapT>0){p.chg=0;return;}
   if(inp.fire&&!prev){
     // Kindle: คลิก = ลูกไฟชาร์จเต็มทันที
@@ -1194,7 +1195,7 @@ function pyroDash(p,inp,pr,dt,setCd){
 // =====================================================================
 defSpell(0,{id:'kindle',role:'builder',n:'Kindle',ic:'🔥',cd:9,d:'กระโดดสูงไปทางที่กด WASD (ไม่กด = ถอยหลัง) ขึ้นกลางอากาศ แล้วลอยตกช้าๆ 3 วิ (แบบฟาราห์/เฟรย่า) • ยิงปกติ 2 นัดกลายเป็นลูกไฟใหญ่ทันที (20 ดาเมจ ระเบิดวงกว้าง ~90 +1 Burning ทุกคนในวง)',fx:'ยิงครบ 2 ลูกหรือครบ 3 วิ = ตกลงพื้นตามปกติ • ไฟพุ่งจากใต้เท้าตอนลอย',
   cast(p,S){p.kindle=2;p.kindleT=3;p.hover=3;p.vz=15;{const i=p.inp||{};let dx=i.mx||0,dy=i.my||0;const l=Math.hypot(dx,dy);if(l>0.1){dx/=l;dy/=l;}else{dx=-Math.cos(p.ang);dy=-Math.sin(p.ang);}p.vx+=dx*1000;p.vy+=dy*1000;}p.shieldOn=false;emit({k:'efx',z:'kindle',x:p.x,y:p.y,h:p.z,id:p.id});}});
-defSpell(0,{id:'dragonfall',role:'builder',n:'Dragonfall',ic:'🐉',cd:13,d:'ทะยานขึ้นฟ้าด้วยเปลวไฟ แล้วบินควบคุมได้ 3 วิ (WASD เคลื่อนช้าๆ • Space ขึ้น / C ลง เล็กน้อย) — จุดที่เล็งคือจุดลง มีวงเตือนบนพื้นตามเป้าเล็งให้ทุกคนเห็น • ครบ 3 วิ = ดิ่งลงจุดเล็งล่าสุดอัตโนมัติ',fx:'กระแทกวงรัศมี 150: 28 ดาเมจ +1 Burning + ช้าลง 30% 1.2 วิ (โดนครั้งเดียวต่อคน) • ไม่อมตะระหว่างบิน • โดนสตัน/แช่แข็งระหว่างบิน = ร่วงลงเฉยๆ ไม่กระแทก • ระหว่างบิน: ยิงปกติได้ แต่ใช้โล่/พุ่ง/คาถาอื่นไม่ได้',
+defSpell(0,{id:'dragonfall',role:'builder',n:'Dragonfall',ic:'🐉',cd:13,d:'ทะยานขึ้นฟ้าด้วยเปลวไฟ แล้วบินควบคุมได้ 3 วิ (WASD เคลื่อนช้าๆ • Space ขึ้น / C ลง เล็กน้อย) — จุดที่เล็งคือจุดลง มีวงเตือนบนพื้นตามเป้าเล็งให้ทุกคนเห็น • คลิกยิง = ดิ่งกระแทกทันที • ครบ 3 วิ = ดิ่งลงจุดเล็งล่าสุดอัตโนมัติ',fx:'กระแทกวงรัศมี 120: 28 ดาเมจ +1 Burning + ช้าลง 30% 1.2 วิ (โดนครั้งเดียวต่อคน) • ไม่อมตะระหว่างบิน • โดนสตัน/แช่แข็งระหว่างบิน = ร่วงลงเฉยๆ ไม่กระแทก • ระหว่างบิน: ยิงปกติได้ แต่ใช้โล่/พุ่ง/คาถาอื่นไม่ได้',
   cast(p,S){
     if(p.dfall||p.colos>0)return false;
     const g0=groundH(p.x,p.y),q=aimPoint(p,600);
@@ -1202,7 +1203,9 @@ defSpell(0,{id:'dragonfall',role:'builder',n:'Dragonfall',ic:'🐉',cd:13,d:'ท
     p.shieldOn=false;p.dchgOn=false;p.hover=0;p.vz=0;
     emit({k:'efx',z:'dfrise',x:p.x,y:p.y,h:p.z,id:p.id});
   }});
-// Dragonfall: 1 ย่อตัว+ทะยาน (0.35 วิ) → 2 บินควบคุมได้ 3 วิ (วงเตือนตามเป้าเล็ง) → 3 ดิ่งลงจุดเล็งล่าสุด (0.45 วิ) → กระแทก
+// Dragonfall: 1 ย่อตัว+ทะยาน (0.35 วิ) → 2 บินควบคุมได้ 3 วิ (วงเตือนตามเป้าเล็ง • คลิกยิง = ดิ่งทันที) → 3 ดิ่งลงจุดเล็งล่าสุด (0.45 วิ) → กระแทก
+const DF_R=120;
+function dragonfallDive(p){const D=p.dfall;D.ph=3;D.t=0.45;D.sx=p.x;D.sy=p.y;D.sz=p.z;emit({k:'efx',z:'dfdive',x:p.x,y:p.y,h:p.z,x2:Math.round(D.tx),y2:Math.round(D.ty),id:p.id});}
 function dragonfallTick(p,inp,dt){
   const D=p.dfall;D.t-=dt;
   if(!p.alive||p.downed){p.dfall=null;return;}
@@ -1211,7 +1214,7 @@ function dragonfallTick(p,inp,dt){
   else if(D.ph===2){
     D.H=clamp(D.H+((inp.jh?1:0)-(inp.ch?1:0))*2.5*dt,D.g0+4.5,D.g0+7.5);p.z+=(D.H-p.z)*Math.min(1,6*dt);p.vz=0;
     const q=aimPoint(p,600);D.tx=q.x;D.ty=q.y;
-    if(D.t<=0){D.ph=3;D.t=0.45;D.sx=p.x;D.sy=p.y;D.sz=p.z;emit({k:'efx',z:'dfdive',x:p.x,y:p.y,h:p.z,x2:Math.round(D.tx),y2:Math.round(D.ty),id:p.id});}
+    if(D.t<=0)dragonfallDive(p);
   }else{
     const k=1-Math.max(0,D.t)/0.45,gh=groundH(D.tx,D.ty);
     p.x=lerp(D.sx,D.tx,k);p.y=lerp(D.sy,D.ty,k);p.z=lerp(D.sz,gh,k*k);p.vz=0;
@@ -1219,8 +1222,8 @@ function dragonfallTick(p,inp,dt){
   }
 }
 function dragonfallBoom(p,x,y,gh){
-  emit({k:'efx',z:'dfboom',x:Math.round(x),y:Math.round(y),h:gh+0.08,r:150});
-  for(const t of foesIn(p.team,x,y,150,gh+4))aoeHit(p,t,28,t=>{addBurn(t,1,p.id);addSlow(t,0.7,1.2);});
+  emit({k:'efx',z:'dfboom',x:Math.round(x),y:Math.round(y),h:gh+0.08,r:DF_R});
+  for(const t of foesIn(p.team,x,y,DF_R,gh+4))aoeHit(p,t,28,t=>{addBurn(t,1,p.id);addSlow(t,0.7,1.2);});
 }
 defSpell(0,{id:'ringofembers',role:'control',n:'Ring of Embers',ic:'⭕',cd:14,d:'วางวงเพลิงที่จุดเล็ง (ระยะ ~600 รัศมี ~170) นาน 3 วิ — คนข้างในเดินออกไม่ได้',fx:'พยายามเดินออก = 12.5 ดาเมจ + ผลักกลับเข้าวง • ใครแตะขอบวงไฟ = ช้าลง 40% • คนข้างนอกเดินเข้าได้',
   cast(p,S){
@@ -1308,7 +1311,7 @@ defSpell(1,{id:'cryoshell',role:'utility',melee:1,n:'Cryo Shell',ic:'🧊',cd:28
   }});
 defSpell(1,{id:'frostaura',role:'control',melee:1,n:'Frostbite Aura',ic:'🌨️',cd:15,d:'ออร่าเยือกแข็งรอบตัว 5 วิ (รัศมี ~180): 20 ดาเมจ/วิ (ไม่สลอว์)',fx:'ใช้ได้แม้ตอนแช่แข็งตัวเอง • ใช้ได้เฉพาะโหมดประชิด',
   cast(p,S){p.auraT=5;p.auraTk=0;emit({k:'efx',z:'aura',x:p.x,y:p.y,h:p.z,id:p.id});}});
-defSpell(1,{id:'mirrorlegion',role:'ult',n:'Mirror Legion',ic:'👥',cd:0,ult:true,d:'เวทโบราณสายน้ำแข็ง: ร่างแยกน้ำแข็ง 2 ตัวโผล่ข้างตัว 10 วิ (ฟันตามเราทุกครั้ง ร่างละ 50%) + HP เสริม 100 • ดาเมจเรา ×2.5 • ฟันจังหวะ 3 ฮีล 15 (ขวาน 22)',fx:'ตอนเปิด: พุ่งไปข้างหน้า ~600 (อมตะ) พร้อมร่างแยก ฟันตลอดทาง 75 ดาเมจ + ช้าลง 80% 3 วิ',
+defSpell(1,{id:'mirrorlegion',role:'ult',n:'Mirror Legion',ic:'👥',cd:0,ult:true,d:'เวทโบราณสายน้ำแข็ง: ร่างแยกน้ำแข็ง 2 ตัวโผล่ข้างตัว 10 วิ (ฟันตามเราทุกครั้ง ร่างละ 50%) + HP เสริม 100 • ดาเมจเรา ×2 • ฟันจังหวะ 3 ฮีล 15 (ขวาน 22)',fx:'ตอนเปิด: พุ่งไปข้างหน้า ~600 (อมตะ) พร้อมร่างแยก ฟันตลอดทาง 75 ดาเมจ + ช้าลง 80% 3 วิ',
   cast(p,S){
     p.mirror=10;p.xhp=100;p.fmode=0;
     p.dash=600/2000;p.dashSp=2000;p.dashX=Math.cos(p.ang);p.dashY=Math.sin(p.ang);p.inv=Math.max(p.inv,0.36);p.shieldOn=false;p.slideT=0;
@@ -1874,7 +1877,7 @@ function updatePlayer(p,dt,acting){
   const ml=Math.hypot(mx,my);if(ml){mx/=ml;my/=ml;}
   if(!canAct||p.root>0||p.dchgOn||p.cryo>0){mx=my=0;}
   else if(p.fear>0){const fa=Math.atan2(p.y-p.fearY,p.x-p.fearX);mx=Math.cos(fa);my=Math.sin(fa);}
-  const spd=(p.fly?540*p.buffs.spd:175*p.buffs.spd*(p.shieldOn?0.5:1))*(p.boost>0?1.45:1)*moveMul(p)*(p.dfall?(p.dfall.ph===2?0.45:0):p.breath>0?0.7:(p.snapT>0||p.colos>0||p.grT>0)?0.5:1)*(p.slideT>0?1.8:1+(p.iceB||0));
+  const spd=(p.fly?540*p.buffs.spd:175*p.buffs.spd*(p.shieldOn?0.5:1))*(p.boost>0?1.45:1)*moveMul(p)*(p.dfall?(p.dfall.ph===2?0.45:0):(p.kindle>0&&p.hover>0)?0.35:p.breath>0?0.7:(p.snapT>0||p.colos>0||p.grT>0)?0.5:1)*(p.slideT>0?1.8:1+(p.iceB||0));
   if(p.dash>0){
     p.dash-=dt;const ds=p.dashSp||900;p.x+=p.dashX*ds*dt;p.y+=p.dashY*ds*dt;
     if(p.trail){p.trail.acc-=dt;if(p.trail.acc<=0){p.trail.acc=0.045;addZone({x:p.x,y:p.y,r:44,t:2.5,tick:0.5,owner:p.id,team:p.team,kind:'fire',hit(t,z){damage(t,2,z.owner,'zone');ignite(t,z.owner,1);}});}}
@@ -2039,7 +2042,7 @@ function damage(t,amt,srcId,kind){
   const src=srcId!=null?G.players[srcId]:null;
   if(src&&kind!=='burn')amt*=src.buffs.dmg;
   if(src&&src.blaze>0)amt*=1.3;
-  if(src&&src.mirror>0&&!src.noMul)amt*=2.5;
+  if(src&&src.mirror>0&&!src.noMul)amt*=2;
   if(t.isM){
     if(t.dead)return;
     if(t.frz>0)amt*=1.15;
@@ -2932,7 +2935,7 @@ addEventListener('keyup',e=>{
 addEventListener('blur',()=>{INPUT.u=INPUT.d=INPUT.l=INPUT.r=INPUT.fire=INPUT.sh=INPUT.jh=INPUT.ch=INPUT.dh=0;VOICE.talking=false;showBoard=false;});
 addEventListener('mousemove',e=>{
   mouseX=e.clientX;mouseY=e.clientY;
-  if(locked&&screen==='game'){const v=VIEW.cur,me=v&&v.P&&v.P.find(q=>q.id===NET.myId),k=me&&me.bm===2?0.55:1;yaw+=e.movementX*SENS*k;pitch=clamp(pitch+e.movementY*SENS*k*(SET.inv?-1:1),-0.25,1.15);}
+  if(locked&&screen==='game'){const v=VIEW.cur,me=v&&v.P&&v.P.find(q=>q.id===NET.myId),k=(me&&me.bm===2?0.55:1)*(1-0.25*AIMZ);yaw+=e.movementX*SENS*k;pitch=clamp(pitch+e.movementY*SENS*k*(SET.inv?-1:1),-0.25,1.15);}
 });
 cvEl().addEventListener('mousedown',e=>{
   if(screen!=='game')return;
@@ -3429,7 +3432,7 @@ function dragonfallFX(o,p,pz,now,dt){
   if(!D){if(o.dfC)o.dfC.visible=false;o.dfPh=0;return;}
   const ph=D[0],left=ph===1?D[3]+3.45:ph===2?D[3]+0.45:D[3],ca=Math.cos(p.a||0),sa=Math.sin(p.a||0);
   if(!o.dfC){o.dfC=makeDfCircle();(o.g.userData.extra||(o.g.userData.extra=[])).push(o.dfC);}
-  const C=o.dfC,U=C.userData,R=150*S3;
+  const C=o.dfC,U=C.userData,R=DF_R*S3;
   if(!C.visible){C.visible=true;C.position.set(tx(D[1]),0.07,tz(D[2]));}
   C.position.x+=(tx(D[1])-C.position.x)*Math.min(1,dt*18);C.position.z+=(tz(D[2])-C.position.z)*Math.min(1,dt*18);
   C.scale.set(R,1,R);
@@ -3816,16 +3819,25 @@ function efxFX(ev){
       for(let i=0;i<60;i++){const an=rnd(0,6.283),r=rnd(4,30);PARTS.push({x:x+Math.cos(an)*r,y:y+Math.sin(an)*r,h:H+0.05,vx:Math.cos(an)*rnd(10,60),vy:Math.sin(an)*rnd(10,60),vh:rnd(7,13),life:rnd(0.35,0.55),max:0.55,col:i%3===0?'#fff0b0':i%3===1?'#ffb347':'#ff5a1a',size:rnd(2.6,4.4),g:-2,drag:2,grow:0.7});}
       for(let i=0;i<20;i++)PARTS.push({x:x+rnd(-10,10),y:y+rnd(-10,10),h:H+0.2,vx:rnd(-40,40),vy:rnd(-40,40),vh:rnd(9,15),life:rnd(0.4,0.7),max:0.7,col:'#fff0b0',size:1.4,g:4,drag:1});
       ring(x,y,'#ff8a2a',55,0.35,H+0.1);smoke(x,y,H+0.1,8,'#3a2a24',0.9,6,80);FX.flashLight(x,y,H+0.5,'#ff8a3a',4,12,0.3);if(near){snd('cast_fire',ev);snd('whoosh',{x,y,vol:0.6});}break;
-    case 'dfdive':if(near)snd('whoosh',ev);break;
+    case 'dfdive':burst(x,y,'#ffb347',24,160,0.3,2.6,{h:H+1,vh:[-2,2],g:0});FX.flashSprite(x,y,H+1,'#ffd27a',0.25,3,0.12,2);if(near)snd('whoosh',ev);break;
     case 'dfcancel':smoke(x,y,H,10,'#3a2a24',0.8,6,80);break;
     case 'dfboom':{
-      FX.flashSprite(x,y,H+0.4,'#fff6d0',0.5,5.5,0.14,3);FX.flashSprite(x,y,H+0.3,'#ffb347',0.6,8,0.3,2);
-      FX.flashLight(x,y,H+0.8,'#ffb347',7,20,0.4);
-      ring(x,y,'#ff8a2a',ev.r,0.45,H+0.05);ring(x,y,'#ffd27a',ev.r*0.6,0.3,H+0.05);
-      dfCracks(x,y,H+0.04,ev.r);
-      burst(x,y,'#ffb347',40,ev.r*2.4,0.45,2.4,{h:H+0.2,vh:[2,6],g:6});burst(x,y,'#fff0b0',16,ev.r*1.6,0.3,1.8,{h:H+0.2,vh:[3,7],g:5});
-      smoke(x,y,H+0.1,8,'#3a2a24',0.6,7,ev.r*0.8);
-      if(near){snd('boom',ev);shake(5);}break;}
+      const R=ev.r;
+      FX.flashSprite(x,y,H+0.5,'#ffffff',0.3,4.5,0.08,3);FX.flashSprite(x,y,H+0.4,'#fff6d0',0.4,6,0.16,2.5);FX.flashSprite(x,y,H+0.3,'#ff9a3a',0.45,8.5,0.32,1.8);
+      FX.flashLight(x,y,H+0.8,'#ffb347',8,24,0.45);
+      ring(x,y,'#ffffff',R*0.55,0.22,H+0.06);ring(x,y,'#ffd27a',R,0.35,H+0.05);ring(x,y,'#ff8a2a',R*1.5,0.5,H+0.05);
+      dfCracks(x,y,H+0.04,R*1.15);
+      // เสาไฟพุ่งขึ้นกลางจุดกระแทก
+      for(let i=0;i<46;i++){const an=rnd(0,6.283),r=rnd(0,R*0.3);PARTS.push({x:x+Math.cos(an)*r,y:y+Math.sin(an)*r,h:H+rnd(0,0.4),vx:Math.cos(an)*rnd(5,30),vy:Math.sin(an)*rnd(5,30),vh:rnd(9,18),life:rnd(0.35,0.6),max:0.6,col:i%3===0?'#fff4c8':i%3===1?'#ffb347':'#ff5a1a',size:rnd(3.5,6),g:-1,drag:2.5,grow:0.6});}
+      // คลื่นไฟแผ่ราบไปตามพื้น
+      for(let i=0;i<40;i++){const an=i/40*6.283+rnd(-0.08,0.08),v=R*rnd(2.6,3.4);PARTS.push({x:x+Math.cos(an)*12,y:y+Math.sin(an)*12,h:H+0.2,vx:Math.cos(an)*v,vy:Math.sin(an)*v,vh:rnd(0.5,2),life:0.4,max:0.4,col:i%2?'#ff7a1a':'#ffc04a',size:rnd(3.5,5),g:0,drag:4,grow:0.9});}
+      // เศษหินกระเด็น
+      for(let i=0;i<18;i++){const an=rnd(0,6.283),v=rnd(80,R*2);PARTS.push({x:x+Math.cos(an)*rnd(5,R*0.4),y:y+Math.sin(an)*rnd(5,R*0.4),h:H+0.1,vx:Math.cos(an)*v,vy:Math.sin(an)*v,vh:rnd(5,10),life:rnd(0.5,0.7),max:0.7,col:i%2?'#4a3a30':'#2a221c',size:rnd(2.4,3.6),g:22,drag:0.5});}
+      burst(x,y,'#ffb347',36,R*2.4,0.45,2.4,{h:H+0.2,vh:[2,7],g:6});burst(x,y,'#fff0b0',20,R*1.6,0.3,1.8,{h:H+0.2,vh:[4,9],g:5});
+      // ถ่านไฟค้างบนพื้นแป๊บหนึ่ง
+      for(let i=0;i<22;i++){const an=rnd(0,6.283),r=Math.sqrt(Math.random())*R;PARTS.push({x:x+Math.cos(an)*r,y:y+Math.sin(an)*r,h:H+0.06,vx:0,vy:0,vh:rnd(0.3,1.2),life:rnd(0.45,0.6),max:0.6,col:i%2?'#ff6a1a':'#ffd27a',size:rnd(1.8,2.8),g:-0.5});}
+      smoke(x,y,H+0.1,12,'#3a2a24',0.6,8,R);
+      if(near){snd('boom',ev);snd('boom',{x,y,vol:0.6});shake(8);}break;}
     case 'fblock':burst(x,y,'#ff8a2a',16,180,0.35,2.4,{h:H,vh:[0,2],g:-1});burst(x,y,'#ffd27a',6,120,0.25,2,{h:H,g:0});FX.flashLight(x,y,H,'#ff8a3a',2.5,8,0.15);break;
     case 'orbget':burst(x,y,'#ffb347',14,120,0.4,2.2,{h:H,g:-1});if(ev.id===NET.myId)snd('buff');break;
     case 'orbshot':{const n=ev.n||1;for(let i=0;i<n;i++){const sp=new THREE.Sprite(glowMat('#ffb347',3.2));sp.scale.setScalar(1.3);const cr=new THREE.Sprite(glowMat('#fff2c0',3.5));cr.scale.setScalar(0.55);sp.visible=cr.visible=false;scene.add(sp,cr);OBV.push({x,y,h:H,x2:ev.x2,y2:ev.y2,h2:ev.h2,t:-i*0.07,max:ev.t,s:rnd(-1,1),sp,cr});}if(near)snd('cast_fire',ev);break;}
@@ -3991,7 +4003,7 @@ function fx(ev){
       if(SET.dmg||mine){if(ev.b)floatText(ev.x,ev.y,ev.n,'#ff9a4a',12,H-0.3);else floatText(ev.x,ev.y,ev.n,mine?'#ff6b6b':ev.s===NET.myId?'#ffe27a':'#ffffff',ev.s===NET.myId?18:16,H);}
       if(mine&&!ev.b){shake(5);snd('hurt');if(ev.sx!==undefined)DIRI.push({a:Math.atan2(ev.sy-myPos().y,ev.sx-myPos().x),t:1});}
       if(ev.s===NET.myId&&!mine&&!ev.b){if(ev.n>=10)shake(Math.min(6,ev.n/6));if(ev.n>=15)hitStop(ev.n>=40||ev.kl?0.08:0.055);}
-      if(ev.s===NET.myId&&!mine&&!ev.b&&SET.hitm){HITM.t=0.18;HITM.kill=!!ev.kl;if(ev.kl)snd('kill');}
+      if(ev.s===NET.myId&&!mine&&!ev.b&&SET.hitm){HITM.t=HITM.max=ev.kl?0.7:0.45;HITM.at=performance.now();HITM.kill=!!ev.kl;if(ev.kl)snd('kill');}
       break;}
     case 'parry':
       FX.flashSprite(ev.x,ev.y,H,'#7ff6ff',0.5,7,0.3,3);
@@ -4884,7 +4896,7 @@ function updateCloth(c,lvx,lvz,speed,now,dt){
   c.vx+=((tX-c.dx)*55-c.vx*7)*dt;c.vz+=((tZ-c.dz)*55-c.vz*7)*dt;
   c.dx+=c.vx*dt;c.dz+=c.vz*dt;
   const pos=c.geo.attributes.position.array,rest=c.rest,hh=c.h/2,t=now*0.008;
-  const amp=0.018+Math.min(0.07,speed*0.005),disp=Math.hypot(c.dx,c.dz),flr=Math.min(0.3,speed*0.018);
+  const amp=0.018+Math.min(0.07,speed*0.005),disp=Math.hypot(c.dx,c.dz),flr=Math.min(0.3,speed*0.018),kk=c.kick||0;
   for(let i=0;i<pos.length;i+=3){
     const rx=rest[i],ry=rest[i+1],rz=rest[i+2];
     const w=Math.pow(Math.max(0,(hh-ry)/c.h),1.5);   // max(0): ry อาจเกิน hh นิดหน่อยจากทศนิยม → pow(ลบ) = NaN
@@ -4893,6 +4905,7 @@ function updateCloth(c,lvx,lvz,speed,now,dt){
     pos[i]=rx*f+c.dx*w+fl*rz*2;
     pos[i+1]=ry+disp*0.5*w*w;
     pos[i+2]=rz*f+c.dz*w-fl*rx*2;
+    if(kk>0){const fr=Math.pow(Math.max(0,rz/(Math.hypot(rx,rz)||1)),1.5)*w*kk;pos[i+1]+=fr*0.75;pos[i+2]+=fr*0.45;}
   }
   c.geo.attributes.position.needsUpdate=true;c.geo.computeVertexNormals();
   if(c.fixBS||!c.geo.boundingSphere||!Number.isFinite(c.geo.boundingSphere.radius)){c.geo.computeBoundingSphere();c.fixBS=false;}
@@ -5449,10 +5462,13 @@ function aimFromCrosshair(me,P,E){
   // จุดที่เป้ากลางจอชนพื้น (ใช้กับคาถาวางพื้น / หน้าไม้ของร่างยักษ์)
   if(_aimD.y<-0.01){const t=(o.y-0.05)/-_aimD.y;INPUT.gx=(o.x+_aimD.x*t)*20+MW/2;INPUT.gy=(o.z+_aimD.z*t)*20+MH/2;}else{INPUT.gx=INPUT.gy=-1;}
 }
+let AIMZ=0;
 function updateCamera(me,dt){
+  AIMZ+=(((me.kd>0&&me.hv)?1:0)-AIMZ)*Math.min(1,dt*10);if(AIMZ<0.001)AIMZ=0;
+  {const fv=SET.fov*(1-0.25*AIMZ);if(Math.abs(cam.fov-fv)>0.01){cam.fov=fv;cam.updateProjectionMatrix();}}
   const px=tx(me.x),pz=tz(me.y);
   const fx=Math.cos(yaw),fz=Math.sin(yaw),rx=-fz,rz=fx;
-  const big=me.co>0,dist=big?13:me.fl?7.4:5.6,cp=Math.cos(pitch),sp=Math.sin(pitch),side=big?4.2:0.85;
+  const big=me.co>0,dist=(big?13:me.fl?7.4:5.6)*(1-0.35*AIMZ),cp=Math.cos(pitch),sp=Math.sin(pitch),side=big?4.2:0.85+0.3*AIMZ;
   const focus=new THREE.Vector3(px+rx*side,(me.z||0)+(big?3.4:2.05),pz+rz*side);
   // กล้องอยู่หลังผู้เล่น: ถ้าหลังชนขอบแผนที่ ให้ "ร่นกล้องเข้าหาตัว + ยกสูงขึ้น" แทนการบีบพิกัดทีละแกน (เดิมกล้องไปทับหัวตัวละคร)
   // กล้องล้ำเข้าไปในตัวกำแพงได้ (กำแพงหนา ~1.6 หน่วย ฝั่งหลังกำแพงโปร่ง มองทะลุเห็นตัวละคร) เกินกว่านั้นให้ร่นกล้องเข้าหาตัว
@@ -5876,6 +5892,12 @@ function pyroFX(o,p,pz,now,dt){
       o.orbM.forEach((s,i)=>{s.visible=i<n;const a=now/420+i/n*Math.PI*2;s.position.set(Math.cos(a)*1.05,Math.sin(now/300+i)*0.18,Math.sin(a)*1.05);
         if(i<n){s.getWorldPosition(_pw);const q=simOf(_pw);for(let k=0;k<2;k++)PARTS.push({x:q.x+rnd(-3,3),y:q.y+rnd(-3,3),h:q.h,vx:rnd(-10,10),vy:rnd(-10,10),vh:rnd(0.4,1.4),life:0.35,max:0.35,col:k?'#ff7a2a':'#ffd27a',size:k?2.6:1.8,g:-1.5});}});}}
   }
+  // Kindle ลอยเล็ง: ขาหน้าพับยกเข่าขึ้น (ชายผ้าหน้าเปิดตาม) ขาหลังเหยียดลง ยื่นไม้ไปข้างหน้า มือซ้ายประคอง (แบบ Freja) — ค่อยๆ เข้า/ออกท่า
+  {const on=p.hv&&p.kd>0;o.kAimK=(o.kAimK||0)+((on?1:0)-(o.kAimK||0))*Math.min(1,dt*12);const k=o.kAimK;
+    if(o.cloak)o.cloak.kick=k>0.01?k:0;
+    if(k>0.01){o.legs[0].rotation.x=lerp(o.legs[0].rotation.x,-1.45,k);o.legs[0].scale.y=lerp(1,0.6,k);o.legs[1].rotation.x=lerp(o.legs[1].rotation.x,0.12,k);o.legs[1].scale.y=lerp(1,1.08,k);o.b.rotation.x=lerp(o.b.rotation.x,-0.12,k);
+      o.armR.rotation.x=lerp(o.armR.rotation.x,-1.55,k);o.armR.rotation.z=lerp(o.armR.rotation.z,-0.06,k);o.armL.rotation.x=lerp(o.armL.rotation.x,-1.3,k);o.armL.rotation.z=lerp(o.armL.rotation.z,0.55,k);}
+    else if(o.legs[0].scale.y!==1){o.legs[0].scale.y=o.legs[1].scale.y=1;}}
   // Kindle ลอยกลางอากาศ: ไฟพ่นลงจากใต้เท้า
   if(p.hv){for(let i=0;i<4;i++)PARTS.push({x:p.x+rnd(-8,8),y:p.y+rnd(-8,8),h:pz+rnd(-0.1,0.2),vx:rnd(-20,20),vy:rnd(-20,20),vh:rnd(-5,-2.5),life:rnd(0.25,0.4),max:0.4,col:i?'#ff8a2a':'#ffe08a',size:rnd(2.4,3.6),g:2,drag:2,smoke:i===3});LREQ.push({x:tx(p.x),y:pz,z:tz(p.y),col:'#ff8a3a',int:2,dist:8});}
   // Blazeform: ออร่าไฟรอบตัว + ขอบวงบอกระยะ (~180)
@@ -6328,7 +6350,7 @@ function drawTexts(dt){
   }
   cx.globalAlpha=1;
 }
-const HITM={t:0,kill:false},DIRI=[];
+const HITM={t:0,max:0.45,at:0,kill:false},DIRI=[];
 // เป้าเล็งตามที่ตั้งค่า: 0 กากบาท / 1 จุด / 2 วงกลม / 3 กากบาท+วง
 function drawXh(x,y,hot,g){
   g=g||cx;
@@ -6343,8 +6365,11 @@ function drawXh(x,y,hot,g){
 function drawCrosshair(){
   const x=SW/2,y=SH/2;
   // เครื่องหมายตอนยิงโดน (X รอบเป้า, แดง = ฆ่า)
-  if(HITM.t>0){HITM.t-=1/60;const a=Math.min(1,HITM.t/0.12);cx.strokeStyle=HITM.kill?`rgba(255,80,80,${a})`:`rgba(255,255,255,${a})`;cx.lineWidth=2.5;
-    for(const [dx,dy] of [[1,1],[-1,1],[1,-1],[-1,-1]]){cx.beginPath();cx.moveTo(x+dx*7,y+dy*7);cx.lineTo(x+dx*14,y+dy*14);cx.stroke();}}
+  if(HITM.t>0){const age=(performance.now()-HITM.at)/1000;HITM.t=HITM.max-age;
+    if(HITM.t>0){const a=Math.min(1,HITM.t/0.2),pop=1+0.45*Math.max(0,1-age/0.08),r0=7*pop,r1=(HITM.kill?17:15)*pop;
+      const X=()=>{for(const [dx,dy] of [[1,1],[-1,1],[1,-1],[-1,-1]]){cx.beginPath();cx.moveTo(x+dx*r0,y+dy*r0);cx.lineTo(x+dx*r1,y+dy*r1);cx.stroke();}};
+      cx.strokeStyle=`rgba(0,0,0,${0.6*a})`;cx.lineWidth=5;X();
+      cx.strokeStyle=HITM.kill?`rgba(255,70,70,${a})`:`rgba(255,255,255,${a})`;cx.lineWidth=2.8;X();}}
   // ทิศที่โดนยิง (โค้งแดงรอบเป้า ชี้ไปทางคนยิง)
   for(let i=DIRI.length-1;i>=0;i--){const d=DIRI[i];d.t-=1/60;if(d.t<=0||!SET.dirm){DIRI.splice(i,1);continue;}
     const rel=d.a-yaw-Math.PI/2;cx.strokeStyle=`rgba(255,60,60,${Math.min(0.85,d.t)})`;cx.lineWidth=6;cx.beginPath();cx.arc(x,y,96,rel-0.32,rel+0.32);cx.stroke();}
