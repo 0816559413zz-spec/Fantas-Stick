@@ -3375,6 +3375,7 @@ let FLASHM=null;
 const FLASHING=new Set();
 function flashModel(o){
   if(!o||!o.g)return;
+  o.hitT=0.25;
   if(o.flashT>0){o.flashT=0.1;return;}
   if(!FLASHM){FLASHM=new THREE.MeshBasicMaterial({color:hdr('#ffffff',1.7)});FLASHM.userData.keep=true;}
   o.flashT=0.1;o.flashSaved=[];
@@ -3638,6 +3639,76 @@ function modelOr(name,fallback){
   return holder;
 }
 function prefetchModels(names){modelManifest().then(m=>{for(const n of names)if(m.models[n])loadModel(n);});}
+
+// ---------- Animation จากไฟล์ (Blender Actions) + โมเดลตัวละคร/ศัตรูจากไฟล์ ----------
+// ชื่อท่า (ชื่อ Action ใน Blender, ไม่สนตัวพิมพ์ / ตัด "Armature|" ข้างหน้าออก): idle walk run fly cast attack hit down
+// ท่าไหนไม่มี → ใช้ท่าใกล้เคียงตาม ANIM_ALT • ไม่มีเลย → ยืนนิ่งตามท่าในไฟล์ • ไม่ต้องแก้ protocol: เลือกท่าจาก snapshot ที่มีอยู่แล้ว
+const ANIM_ALT={idle:['idle'],walk:['walk','run','idle'],run:['run','walk','idle'],fly:['fly','idle'],cast:['cast','attack'],attack:['attack','cast'],hit:['hit'],down:['down','die','idle']};
+function makeAnimator(root,clips){
+  const mixer=new THREE.AnimationMixer(root),acts={};
+  for(const c of clips){const n=c.name.split('|').pop().toLowerCase().trim();if(!acts[n])acts[n]=mixer.clipAction(c);}
+  return {mixer,acts,cur:null,curName:'',lockT:0,latch:{}};
+}
+function animResolve(A,name){for(const n of (ANIM_ALT[name]||[name]))if(A.acts[n])return n;return null;}
+function animPlay(A,name,opt){
+  opt=opt||{};const n=animResolve(A,name);if(!n)return null;
+  const a=A.acts[n];a.timeScale=opt.speed||1;
+  if(A.curName===n&&!opt.restart)return n;
+  a.reset();a.setLoop(opt.once?THREE.LoopOnce:THREE.LoopRepeat,Infinity);a.clampWhenFinished=!!opt.once;a.enabled=true;a.setEffectiveWeight(1);
+  if(A.cur&&A.cur!==a)a.crossFadeFrom(A.cur,opt.fade!==undefined?opt.fade:0.15,false);
+  a.play();A.cur=a;A.curName=n;return n;
+}
+// st: {down, fly, sp (หน่วย/วินาที), castT (>0 = เพิ่งร่าย), atk (ศัตรูกำลังโจมตี), hitT (>0 = เพิ่งโดน)}
+function animTick(o,st,dt){
+  const A=o.anim;if(!A)return;
+  A.lockT=Math.max(0,A.lockT-dt);
+  if(st.down){animPlay(A,'down',{once:true});A.lockT=0;A.mixer.update(dt);return;}
+  const shot=(k,on)=>{
+    if(on&&!A.latch[k]){A.latch[k]=1;const n=animPlay(A,k,{once:true,restart:true,fade:0.08});if(n)A.lockT=A.acts[n].getClip().duration*0.9;}
+    else if(!on)A.latch[k]=0;
+  };
+  shot('cast',st.castT>0);shot('attack',!!st.atk);shot('hit',st.hitT>0);
+  if(A.lockT<=0){
+    if(st.fly)animPlay(A,'fly');
+    else if(st.sp>4.5)animPlay(A,'run',{speed:clamp(st.sp/7,0.7,1.6)});
+    else if(st.sp>0.6)animPlay(A,'walk',{speed:clamp(st.sp/3.5,0.6,1.6)});
+    else animPlay(A,'idle');
+  }
+  A.mixer.update(dt);
+}
+// สีตามหน้าตาผู้เล่น: วัสดุใน Blender ชื่อ tint_<ช่อง> จะถูกใส่สีให้ (โคลนวัสดุเฉพาะตัวนั้น)
+function lookTint(look){
+  const H=HOUSES[look.h]||HOUSES[0];
+  return {house:H.c,house2:H.c2,hair:HAIRC[look.hr],skin:SKINC[look.sk],cloak:CLOAKC[look.cl],eyes:EYEC[look.ey],wand:WOODC[look.wd],core:WCOREC[look.wc]};
+}
+function tintModel(root,tint){
+  const done=new Map();
+  root.traverse(m=>{
+    if(!m.isMesh)return;
+    const one=mt=>{
+      const k=(mt.name||'').toLowerCase();if(!k.startsWith('tint_'))return mt;
+      const col=tint[k.slice(5)];if(!col)return mt;
+      if(!done.has(mt)){const c=mt.clone();c.userData={};c.color.set(col);done.set(mt,c);}   // ตัวโคลนไม่ keep → ทิ้งพร้อมตัวละคร
+      return done.get(mt);
+    };
+    m.material=Array.isArray(m.material)?m.material.map(one):one(m.material);
+  });
+}
+// ใส่โมเดลไฟล์ให้ตัวละคร/ศัตรูที่สร้างจากโค้ดแล้ว: ซ่อน mesh เดิมด้วย layer 31 (กล้อง/เงาไม่วาด — ไม่ใช้ visible เพราะโค้ดคาถาเปิดปิด visible เอง)
+// ของเอฟเฟกต์/อาวุธที่คาถาใส่ทีหลัง (เช่น ดาบน้ำแข็งในมือ) ยังโชว์ และยังติดกับแขนแบบโค้ด
+function useFileModel(o,name,tint){
+  loadModel(name).then(r=>{
+    if(!r||o.fileModel||!o.g.parent)return;
+    const inst=modelInst(name);if(!inst)return;
+    if(tint)tintModel(inst,tint);
+    o.b.traverse(m=>{if(m.isMesh||m.isSprite||m.isPoints||m.isLine)m.layers.set(31);});
+    o.g.add(inst);o.fileModel=inst;
+    if(r.animations.length)o.anim=makeAnimator(inst,r.animations);
+    if(o.ghost)setGhost(o,true);
+    gl.shadowMap.needsUpdate=true;
+  });
+}
+const FILE_MODELS=()=>['char_student',...Object.keys(EDEF).map(t=>'enemy_'+t)];
 
 // ---------- prop ฝั่งแสดงผล ----------
 const PROPV={g:null,map:null,list:[]};
@@ -4300,6 +4371,7 @@ function buildWorld(id){
     for(const [k,v] of WCACHE){if(WCACHE.size<=WCACHE_MAX)break;if(k===id)continue;WCACHE.delete(k);disposeTree(v.world);}
   }
   clearDyn();
+  prefetchModels(FILE_MODELS());
   setSky(id==='pitch'||id==='meadow'||id==='ruins'?'sunset':'night');
   const cached=WCACHE.get(id);
   if(cached){
@@ -6052,7 +6124,7 @@ function syncPlayers(P,mode,now,dt){
   for(const p of P){
     seen.add(p.id);
     let o=PM3.get(p.id);
-    if(!o){o=makeStudent(getLook(p.id),p.id);PM3.set(p.id,o);}
+    if(!o){o=makeStudent(getLook(p.id),p.id);PM3.set(p.id,o);useFileModel(o,'char_student',lookTint(getLook(p.id)));}
     const g=o.g;
     g.visible=p.al&&!(p.iv&&!p.ds&&!(p.fr&&(p.fr[3]&2))&&Math.floor(now/80)%2===0);
     // ผี (หาลอร์ดโวลเดอมอร์): คนเป็นมองไม่เห็นผี / ผีเห็นกันเป็นเงาจางๆ
@@ -6067,6 +6139,8 @@ function syncPlayers(P,mode,now,dt){
     g.rotation.y=Math.atan2(Math.cos(p.a),Math.sin(p.a));
     const v=localVel(o,x,z,dt,g.rotation.y);
     if(!p.al)continue;
+    o.hitT=Math.max(0,(o.hitT||0)-dt);
+    if(o.anim)animTick(o,{down:!!p.dn,fly:!!p.fl,sp:v.sp,castT:o.castT,hitT:o.hitT},dt);
     updateCloth(o.cloak,v.lvx,v.lvz,v.sp*(p.fl?1.4:1),now,dt);
     o.broom.visible=!!p.fl;o.cocoon.visible=!!p.rt;
     if(p.rt)o.cocoon.rotation.y=now/400;
@@ -6116,13 +6190,15 @@ function syncEnemies(E,P,now,dt){
   for(const e of E){
     seen.add(e.id);
     let o=EM3.get(e.id);
-    if(!o){o=makeEnemy(e.t);EM3.set(e.id,o);}
+    if(!o){o=makeEnemy(e.t);EM3.set(e.id,o);useFileModel(o,'enemy_'+e.t);}
     const x=tx(e.x),z=tz(e.y);
     let tgt=null,bd=1e12;for(const p of P)if(p.al&&!p.dn){const d=(p.x-e.x)**2+(p.y-e.y)**2;if(d<bd){bd=d;tgt=p;}}
     if(tgt)o.g.rotation.y=Math.atan2(tx(tgt.x)-x,tz(tgt.y)-z);
     o.hs=o.hs===undefined?(e.h||0):lerp(o.hs,e.h||0,1-Math.exp(-15*dt));
     o.g.position.set(x,o.hs,z);
     const v=localVel(o,x,z,dt,o.g.rotation.y);
+    o.hitT=Math.max(0,(o.hitT||0)-dt);
+    if(o.anim)animTick(o,{fly:o.hs>1,sp:v.sp,atk:!!(e.sl||e.lg),hitT:o.hitT},dt);
     if(o.legs){
       // ขาแมงมุมก้าวสลับ
       o.walk+=dt*Math.min(v.sp,20)*1.4;
@@ -7419,7 +7495,7 @@ swSetup();
 window.WD.SW=SWK;
 // เทส/วัดผล: เดินลูปโฮสต์ 1 รอบด้วยมือ (hostTick + snapshot + เอฟเฟกต์) — ใช้ตอนหน้าต่างถูกซ่อนแล้ว setInterval ช้า
 // prop / โมเดลจากไฟล์ (ดีบัก)
-Object.defineProperties(window.WD,{PROPS:{get:()=>PROPS},PROPON:{get:()=>PROPON}});Object.assign(window.WD,{PROPDEF,genProps,MODELS,loadModel,modelManifest,useProp,hitProp});
+Object.defineProperties(window.WD,{PROPS:{get:()=>PROPS},PROPON:{get:()=>PROPON}});Object.assign(window.WD,{PROPDEF,genProps,MODELS,loadModel,modelManifest,useProp,hitProp,PM3,EM3,animTick});
 window.WD.hostStep=dt=>{hostTick(dt);const b=makeSnap(),ev=EVL;EVL=[];EVN=[];onSnap(Object.assign({},b,{ev}));};
 </script>
 </body>
