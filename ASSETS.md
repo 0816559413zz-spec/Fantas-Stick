@@ -164,7 +164,7 @@
   ```
 
 ### ชื่อเอฟเฟกต์ที่มีในเกมตอนนี้
-`absz` `armor` `aura` `bark` `bcircle` `bigboom` `bind` `blaze` `blind` `blink` `brn` `chain` `colbolt` `colboom` `colend` `colossus` `conduct` `cryo` `cryoend` `curse` `detonate` `dfboom` `dfcancel` `dfdive` `dfrise` `ember` `ering` `eringhit` `fblock` `flare` `fnova` `forge` `freeze` `fswap` `glacier` `grcharge` `gwave` `heat` `ice` `iceboom` `icewall` `inferno` `infernocast` `jump` `kindle` `legion` `mark` `melt` `meteor` `mirror` `mirrorend` `orbget` `orbhit` `orbshot` `overc` `pboom` `perma` `pparry` `pshboom` `rally` `shatter` `silence` `siphon` `slam` `slam3` `slamgo` `slide` `snap` `snapboom` `snapwind` `soulburst` `spikehit` `summon` `swing` `swingwind` `tempest` `terror` `thorn` `thunder` `unsummon` `vine` `wallboost` `wallbreak` `wallcast` `wallhit` `wispheal` `worldtree` `zapt`
+`aura` `bigboom` `blaze` `blind` `brn` `colbolt` `colboom` `colend` `colossus` `cryo` `cryoend` `curse` `dfboom` `dfcancel` `dfdive` `dfrise` `ember` `ering` `eringhit` `fblock` `flare` `forge` `freeze` `fswap` `glacier` `grcharge` `gwave` `ice` `iceboom` `inferno` `jump` `kindle` `legion` `mark` `melt` `mirror` `mirrorend` `orbget` `orbhit` `orbshot` `pboom` `perma` `silence` `siphon` `slam` `slam3` `slamgo` `slide` `snap` `snapboom` `snapwind` `soulburst` `summon` `swing` `swingwind` `terror` `thorn` `unsummon` `vine` `wallbreak` `wallhit` `wispheal` `worldtree` 
 
 - `swing` = รอยฟันดาบ/ขวานน้ำแข็งจังหวะ 1–2 (origin = กลางตัวที่ความสูงอก, ใช้ `"radius": true`), `swingwind` = ตอนง้างจังหวะ 3 (รอยฟันลงพื้นของจังหวะ 3 คือ `slam3`)
 
