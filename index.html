@@ -637,7 +637,8 @@ function genRuins(){
   return {W:FW,H:FH,obs};
 }
 // ----- Test Place (ห้องฝึก): พื้นโล่งไม่มีสิ่งกีดขวาง -----
-function genTest(){return {W:3200,H:2400,obs:[]};}
+// บ้านทดสอบ 2 หลังฝั่งตะวันตก (หันหน้าเข้ากลาง) ไว้ลองคาถาพังบ้าน
+function genTest(){const W=3200,H=2400;return {W,H,obs:[[-260],[260]].map(([dy],i)=>({x:W*0.22,y:H/2+dy,r:84,k:'house',hgt:10,w:170,d:135,s:i*0.5,ry:Math.PI/2}))};}
 // โซนเสกมอนสเตอร์ในห้องฝึก (พิกัดเกม) — ใช้ทั้งโฮสต์ (จุดเกิด) และจอ (วงบนพื้น)
 function trZone(){return {x:MW*0.78,y:MH*0.42,r:230};}
 function genGreatHall(){
@@ -662,7 +663,7 @@ const MAPS={
 // แผนที่ที่สุ่มได้ (ป่ามืดเอาออกจากการสุ่มตามที่ผู้ใช้ขอ — ยังเลือกเองในล็อบบี้ได้)
 const RANDOM_MAPS=['castle','pitch','hogsmeade','greathall','meadow','lake','ruins'];
 let MAPID='castle',MW=W,MH=H,OBS=MAPS.castle.obs;
-function setMapVars(id){if(!MAPS[id])id='castle';MAPID=id;MW=MAPS[id].W;MH=MAPS[id].H;OBS=MAPS[id].obs;PROPS=genProps(id);}
+function setMapVars(id){if(!MAPS[id])id='castle';MAPID=id;MW=MAPS[id].W;MH=MAPS[id].H;OBS=MAPS[id].obs;PROPS=genProps(id);BLDG=genBldg(id);}
 // ---------- ของประกอบฉากที่พังได้ / ใช้ได้ (prop) ----------
 // ตำแหน่งสุ่มแบบ seed จากชื่อแผนที่ → ทุกเครื่องคำนวณได้ตรงกันเอง ส่งในเน็ตแค่สถานะ (snapshot PB: 1 ตัวต่อชิ้น 0=ปกติ 1=พัง 2=ใช้แล้ว)
 // ตัวเลข (hp/ขนาด/จำนวน/โหมดที่เปิด) เป็นค่าตั้งต้นให้ทีมเกมเพลย์ปรับ • model = ชื่อใน assets/manifest.json (ไม่มีไฟล์ = ใช้โมเดลจากโค้ด)
@@ -998,7 +999,7 @@ function updateChan(dt){
   for(const c of G.chan){c.t-=dt;c.tt-=dt;const p=G.players[c.owner];if(!p||!p.alive||p.downed||(c.stun&&p.stun>0)){c.t=0;if(p&&c.stun)p.breath=0;continue;}if(c.tt<=0){c.tt=c.tick;c.fn(c,p);}}
   G.chan=G.chan.filter(c=>c.t>0);
 }
-function updateSpells(dt){updateStorm(dt);updateZones(dt);updateStrikes(dt);updateWalls(dt);updateChan(dt);updateERings(dt);updateIces(dt);updateWaves(dt);updateGlaciers(dt);}
+function updateSpells(dt){updateStorm(dt);updateZones(dt);updateStrikes(dt);updateWalls(dt);updateChan(dt);updateERings(dt);updateIces(dt);updateWaves(dt);updateGlaciers(dt);updateBldg(dt);}
 // จุดเล็งของคาถาวางพื้น: ถ้ามีศัตรูอยู่ในแนวเล็งให้วางที่ตัวมัน ไม่งั้นวางที่ระยะ 75% ของพิสัย
 function aimPoint(p,range){
   // ผู้เล่นจริง: วางตรงจุดที่เป้ากลางจอชี้พื้น (ไม่เกินพิสัย)
@@ -1053,6 +1054,7 @@ function frostBoom(pr){
   emit({k:'efx',z:'iceboom',x:pr.x,y:pr.y,h:pr.h,r:100});
   const o=G.players[pr.owner];if(!o)return;
   for(const t of foesIn(pr.team,pr.x,pr.y,100,pr.h+3))aoeHit(o,t,20,t=>{t.fslBigT=2;});
+  damageEnv(pr.x,pr.y,100,30,pr.owner,'ice',pr.h);
 }
 // ฟันโดนทุกคนในกรวยหน้า (arc = ครึ่งมุม) จากจุด ox,oy
 function meleeHit(p,ox,oy,range,dmg,arc,fn){
@@ -1103,6 +1105,7 @@ function frostSlam(p){
   p.slam=false;const dm=p.ffT>0?50:30;
   emit({k:'efx',z:'slam',x:p.x,y:p.y,h:p.z+0.2,r:150});
   for(const t of foesIn(p.team,p.x,p.y,150,p.z+3))aoeHit(p,t,dm);
+  damageEnv(p.x,p.y,150,dm,p.id,'ice',p.z);
 }
 function frostDash(p,inp,pr,dt,setCd){
   if(pr.sp&&p.cd.dodge<=0&&!(p.slideT>0)&&!(p.cryo>0)){p.slideT=5;p.slX=p.x;p.slY=p.y;setCd('dodge',11*p.buffs.cdr);emit({k:'efx',z:'slide',x:p.x,y:p.y,h:p.z,id:p.id});}
@@ -1165,6 +1168,7 @@ SPELLS.pyroball={id:'pyroball',hit(pr,t){damage(t,pr.dmg,pr.owner,'proj');addBur
 SPELLS.pyrobig={id:'pyrobig',hit(pr,t){}};
 function pyroBigBoom(pr){
   emit({k:'efx',z:'bigboom',x:pr.x,y:pr.y,h:pr.h,r:90});
+  damageEnv(pr.x,pr.y,90,40,pr.owner,'fireblast',pr.h);
   const o=G.players[pr.owner];if(!o)return;
   let best=null,bd=1e9;
   for(const t of foesIn(pr.team,pr.x,pr.y,90,pr.h+3.5)){aoeHit(o,t,20,t=>addBurn(t,1,pr.owner));const d=Math.hypot(t.x-pr.x,t.y-pr.y);if(d<bd){bd=d;best=t;}}
@@ -1253,6 +1257,7 @@ function dragonfallTick(p,inp,dt){
 function dragonfallBoom(p,x,y,gh){
   emit({k:'efx',z:'dfboom',x:Math.round(x),y:Math.round(y),h:gh+0.08,r:DF_R});
   for(const t of foesIn(p.team,x,y,DF_R,gh+4))aoeHit(p,t,28,t=>{addBurn(t,1,p.id);addSlow(t,0.7,1.2);});
+  damageEnv(x,y,DF_R,60,p.id,'fireblast',gh);
 }
 defSpell(0,{id:'ringofembers',role:'control',n:'Ring of Embers',ic:'⭕',cd:14,d:'วางวงเพลิงที่จุดเล็ง (ระยะ ~600 รัศมี ~170) นาน 3 วิ — คนข้างในเดินออกไม่ได้',fx:'พยายามเดินออก = 12.5 ดาเมจ + ผลักกลับเข้าวง • ใครแตะขอบวงไฟ = ช้าลง 40% • คนข้างนอกเดินเข้าได้',
   cast(p,S){
@@ -1741,7 +1746,7 @@ function castUlt(p){const S=SPELLS[p.ultId];if(!S||p.ult<100||p.sil>0||p.cryo>0)
 // =====================================================================
 //  เครือข่าย (PeerJS / WebRTC)
 // =====================================================================
-const PREFIX='wizduel-th-v22-';
+const PREFIX='wizduel-th-v23-';
 const NET={peer:null,isHost:false,online:false,myId:'me',conns:new Map(),hostConn:null,code:''};
 let LOBBY=null;
 function genCode(){const c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let s='';for(let i=0;i<5;i++)s+=c[Math.floor(Math.random()*c.length)];return s;}
@@ -1907,7 +1912,7 @@ function hostStart(){
   else{const ks=RANDOM_MAPS.filter(k=>k!==G.lastMap);G.map=ks[Math.floor(Math.random()*ks.length)];}
   G.lastMap=G.map;
   setMapVars(G.map);
-  PROPON=!PROP_OFF_MODES.includes(G.mode);
+  PROPON=!PROP_OFF_MODES.includes(G.mode);BLDON=PROPON;
   Object.assign(G,{ph:'count',cdT:3,time:0,proj:[],en:[],feed:[],pid:0,eid:0,wave:0,round:1,rw:{},teamScore:[0,0],
     timer:(G.mode==='ffa'||G.mode==='tdm')?480:G.mode==='quid'?360:0,result:null,banner:null,queue:[],slines:[],sorbs:[],sballs:[],sdomes:[],impWin:null,snitchBy:null,raceEnd:undefined});
   plist().forEach((p,i)=>{
@@ -2125,6 +2130,95 @@ function useProp(p){
   o.st=2;emit({k:'prop',e:'u',i:o.i,x:Math.round(o.x),y:Math.round(o.y),h:PROPDEF[o.k].hgt,id:p.id});
   const f=PROP_USE[o.k];if(f)f(p,o);
 }
+// ---------- สิ่งปลูกสร้างที่พังเป็นชิ้น (บ้าน) ----------
+// บ้าน 1 หลัง (OBS k:'house') = ผนัง 4 ด้าน + หลังคา 2 ฝั่ง → ชิ้นไหนเลือดหมดพังแค่ชิ้นนั้น (พังตรงที่โดน) • ผนังพัง 3 ด้าน = หลังคาถล่มเอง
+// ชื่อชิ้น = ชื่อ object ในไฟล์ bld_house.glb (ดู ASSETS.md) • hp/ตัวคูณ = ค่าตั้งต้นให้ทีมเกมเพลย์ปรับ
+// ธาตุ el: 'fire' ติดไฟเผาต่อ + ไหม้ดำ • 'ice' เกาะน้ำแข็ง (ตีแรงซ้ำ ×2, ไฟละลาย) • 'blast' ×1.5 เศษกระเด็นแรง • 'fireblast' = ทั้งสองอย่าง
+// snapshot BD = ชิ้นละ 1 ตัว (ฐาน 16): 1 พัง | 2 ไหม้ดำ | 4 ติดไฟอยู่ | 8 เกาะน้ำแข็ง ('' = ทุกชิ้นปกติ) • เหตุการณ์ {k:'bld',e:'h'|'b',i,p,el,x,y,ox,oy}
+// ตำแหน่งชิ้นในบ้าน (หน่วย sim px, แกนของบ้านเอง): หน้าบ้าน (ประตู) = +y
+const BLDDEF={house:{model:'bld_house',bw:8,bd:6.5,wh:4.2,rh:3.4,th:14,hp:{wall:80,roof:60}}};
+const BLD_PIECES=['wall_front','wall_back','wall_left','wall_right','roof_left','roof_right'];
+const BLD_FIRE={burn:5,dps:6},BLD_ICE={frz:6};
+let BLDG=[],BLDON=false;
+function genBldg(id){
+  const M=MAPS[id],out=[];if(!M)return out;
+  for(const o of M.obs||[])if(o.k==='house'){
+    const D=BLDDEF.house;o.bi=out.length;
+    out.push({i:out.length,o,D,c:Math.cos(o.ry||0),s:Math.sin(o.ry||0),ht:0,pc:BLD_PIECES.map((n,j)=>{const mx=D.hp[j<4?'wall':'roof'];return {n,hp:mx,max:mx,fl:0,burnT:0,frzT:0};})});
+  }
+  return out;
+}
+function bldRect(b,j){const w=b.o.w/2,d=b.o.d/2,t=b.D.th/2;return j===0?[0,d,w,t]:j===1?[0,-d,w,t]:j===2?[-w,0,t,d]:j===3?[w,0,t,d]:j===4?[-w/2,0,w/2,d]:[w/2,0,w/2,d];}
+function bldLocal(b,x,y){const dx=x-b.o.x,dy=y-b.o.y;return [dx*b.c-dy*b.s,dx*b.s+dy*b.c];}
+function bldWorld(b,lx,ly){return [b.o.x+lx*b.c+ly*b.s,b.o.y-lx*b.s+ly*b.c];}
+function rectDist(R,lx,ly){return Math.hypot(Math.max(Math.abs(lx-R[0])-R[2],0),Math.max(Math.abs(ly-R[1])-R[3],0));}
+function bldNear(b,x,y,pad){return Math.abs(x-b.o.x)<b.o.w*0.75+pad&&Math.abs(y-b.o.y)<b.o.w*0.75+pad;}
+function hitBldPiece(b,j,dmg,el,ox,oy){
+  const q=b.pc[j];if(!BLDON||(q.fl&1))return;
+  el=el||'none';const fire=el.includes('fire'),ice=el==='ice',blast=el.includes('blast');
+  let m=blast?1.5:ice?0.7:1;
+  if(q.frzT>0&&!ice){if(fire){q.frzT=0;q.fl&=~8;}else m*=2;}       // น้ำแข็ง: ไฟละลาย / ตีแรงแตก ×2
+  q.hp-=dmg*m;
+  if(fire){q.burnT=BLD_FIRE.burn;q.fl|=6;}
+  if(ice){if(q.burnT>0){q.burnT=0;q.fl&=~4;}else{q.frzT=BLD_ICE.frz;q.fl|=8;}}   // น้ำแข็งดับไฟ
+  if(q.hp<=0){breakBldPiece(b,j,el,ox,oy);return;}
+  if(G.time-b.ht>0.15){b.ht=G.time;const R=bldRect(b,j),[x,y]=bldWorld(b,R[0],R[1]);emit({k:'bld',e:'h',i:b.i,p:j,el,x:Math.round(x),y:Math.round(y),h:j<4?b.D.wh*0.5:b.D.wh+1});}
+}
+function breakBldPiece(b,j,el,ox,oy){
+  const q=b.pc[j];if(q.fl&1)return;
+  q.fl=(q.fl|1)&3;q.hp=0;q.burnT=q.frzT=0;          // เหลือแค่ "พัง" + "ไหม้ดำ"
+  const R=bldRect(b,j),[x,y]=bldWorld(b,R[0],R[1]);
+  emit({k:'bld',e:'b',i:b.i,p:j,el:el||'none',x:Math.round(x),y:Math.round(y),ox:Math.round(ox==null?x:ox),oy:Math.round(oy==null?y:oy),h:j<4?b.D.wh*0.5:b.D.wh+1});
+  if(j<4&&b.pc.slice(0,4).filter(p=>p.fl&1).length>=3)for(const k of [4,5])breakBldPiece(b,k,'none',b.o.x,b.o.y);
+}
+// ให้คาถาวงกว้างพังสิ่งแวดล้อม: damageEnv(x,y,รัศมี,ดาเมจ,id,ธาตุ,ความสูงจุดระเบิด) = ลัง/ถัง (prop) + ชิ้นบ้านที่อยู่ในวง
+function damageEnv(x,y,rad,dmg,by,el,h){
+  damagePropsIn(x,y,rad,dmg,by);
+  if(!BLDON)return;h=h||0;
+  for(const b of BLDG){
+    if(!bldNear(b,x,y,rad))continue;
+    const [lx,ly]=bldLocal(b,x,y);
+    for(let j=0;j<6;j++){
+      if(b.pc[j].fl&1)continue;
+      if(j>=4&&h+rad/20<b.D.wh)continue;          // ระเบิดเตี้ย/เล็กไม่ถึงหลังคา
+      if(rectDist(bldRect(b,j),lx,ly)<rad)hitBldPiece(b,j,dmg,el,x,y);
+    }
+  }
+}
+// ชิ้นที่กระสุนชน (-1 = ไม่ชน): ต่ำกว่าผนัง = ผนังที่ใกล้สุด, สูงกว่า = หลังคา (ทรงปิรามิด)
+function bldPieceAt(b,x,y,h,r){
+  const [lx,ly]=bldLocal(b,x,y),D=b.D,hw=b.o.w/2,hd=b.o.d/2;
+  if(h<D.wh){let best=-1,bd=r;for(let j=0;j<4;j++){if(b.pc[j].fl&1)continue;const d=rectDist(bldRect(b,j),lx,ly);if(d<bd){bd=d;best=j;}}return best;}
+  if(h<D.wh+D.rh&&Math.abs(lx)<hw&&Math.abs(ly)<hd&&h<D.wh+D.rh*(1-Math.max(Math.abs(lx)/hw,Math.abs(ly)/hd))){const j=lx<0?4:5;if(!(b.pc[j].fl&1))return j;}
+  return -1;
+}
+function projEl(pr){
+  const t=pr.type||'';if(t.includes('fire'))return 'fire';if(t.includes('ice'))return 'ice';
+  const o=G.players[pr.owner];return o?(['fire','ice'][o.pathIdx|0]||'none'):'none';
+}
+// ชนผนัง/หลังคาที่ยังไม่พัง (สี่เหลี่ยมเอียงตามบ้าน) — ผนังพัง = เดินลอดเข้าไปในบ้านได้
+function collideBld(b,o,r,z){
+  const D=b.D;let [lx,ly]=bldLocal(b,o.x,o.y),moved=false;
+  for(let j=0;j<6;j++){
+    if(b.pc[j].fl&1)continue;
+    if(j<4?z>=D.wh:(z<D.wh-0.3||z>=D.wh+D.rh))continue;
+    const R=bldRect(b,j),ex=lx-R[0],ey=ly-R[1],ax=Math.abs(ex)-R[2],ay=Math.abs(ey)-R[3];
+    if(ax>=r||ay>=r)continue;
+    if(ax>0&&ay>0){const d=Math.hypot(ax,ay);if(d>=r)continue;const k=(r-d)/d;lx+=Math.sign(ex)*ax*k;ly+=Math.sign(ey)*ay*k;}
+    else if(ax>ay)lx=R[0]+(ex<0?-1:1)*(R[2]+r);else ly=R[1]+(ey<0?-1:1)*(R[3]+r);
+    moved=true;
+  }
+  if(moved){o.x=b.o.x+lx*b.c+ly*b.s;o.y=b.o.y-lx*b.s+ly*b.c;}
+}
+function updateBldg(dt){
+  if(!BLDON)return;
+  for(const b of BLDG)for(let j=0;j<6;j++){
+    const q=b.pc[j];if(q.fl&1)continue;
+    if(q.frzT>0){q.frzT-=dt;if(q.frzT<=0)q.fl&=~8;}
+    if(q.burnT>0){q.burnT-=dt;q.hp-=BLD_FIRE.dps*dt;if(q.hp<=0)breakBldPiece(b,j,'fire');else if(q.burnT<=0)q.fl&=~4;}
+  }
+}
+function bldSnap(){if(!BLDON)return '';let s='',any=false;for(const b of BLDG)for(const q of b.pc){s+=q.fl.toString(16);if(q.fl)any=true;}return any?s:'';}
 function collideWorld(o,r,z){
   z=z||0;
   o.x=clamp(o.x,r+20,MW-r-20);o.y=clamp(o.y,r+20,MH-r-20);
@@ -2134,8 +2228,9 @@ function collideWorld(o,r,z){
     const dx=o.x-c.x,dy=o.y-c.y,d=Math.hypot(dx,dy),m=c.r+r;
     if(d<m&&d>0.001){o.x=c.x+dx/d*m;o.y=c.y+dy/d*m;}
   }
+  for(const b of BLDG)if(bldNear(b,o.x,o.y,r))collideBld(b,o,r,z);
   for(const c of OBS){
-    if(c.hgt<=z)continue;
+    if(c.hgt<=z||c.bi!==undefined)continue;
     if(Math.abs(o.x-c.x)>c.r+r||Math.abs(o.y-c.y)>c.r+r)continue;
     const dx=o.x-c.x,dy=o.y-c.y,d=Math.hypot(dx,dy),m=c.r+r;
     if(d<m&&d>0.001){o.x=c.x+dx/d*m;o.y=c.y+dy/d*m;}
@@ -2299,6 +2394,7 @@ function killProj(pr){
 function explode(pr){
   emit({k:'boom',x:pr.x,y:pr.y,h:pr.h});
   const sr=pr.splash?pr.splash.r:80,sd=pr.splash?pr.splash.dmg:10;
+  damageEnv(pr.x,pr.y,sr,sd,pr.owner,'fire',pr.h);
   for(const t of foesOf(pr.team)){
     if(t.id===pr.owner)continue;
     if(Math.hypot(t.x-pr.x,t.y-pr.y)<sr+(t.r||PR)&&Math.abs(cH(t)-pr.h)<3){
@@ -2331,7 +2427,8 @@ function updateProjectiles(dt){
     if(pr.life<=0||pr.x<20||pr.x>MW-20||pr.y<20||pr.y>MH-20||pr.h>40){killProj(pr);continue;}
     if(pr.h<0.05){pr.h=0.1;killProj(pr);continue;}
     let hp=false;
-    for(const c of OBS)if(pr.h<c.hgt&&(pr.x-c.x)**2+(pr.y-c.y)**2<(c.r+pr.r)**2){hp=true;break;}
+    for(const c of OBS)if(c.bi===undefined&&pr.h<c.hgt&&(pr.x-c.x)**2+(pr.y-c.y)**2<(c.r+pr.r)**2){hp=true;break;}
+    if(!hp)for(const b of BLDG){if(!bldNear(b,pr.x,pr.y,pr.r))continue;const j=bldPieceAt(b,pr.x,pr.y,pr.h,pr.r);if(j>=0){hitBldPiece(b,j,pr.dmg||5,projEl(pr),pr.x-pr.vx*0.08,pr.y-pr.vy*0.08);hp=true;break;}}
     if(!hp&&PROPON)for(const c of PROPS)if(c.st!==1&&pr.h<c.hgt&&(pr.x-c.x)**2+(pr.y-c.y)**2<(c.r+pr.r)**2){hitProp(c,pr.dmg||5,pr.owner);hp=true;break;}
     if(!hp)for(const w of G.walls)if(pr.team!==w.team&&pr.h<w.hgt&&(pr.x-w.x)**2+(pr.y-w.y)**2<(w.r+pr.r)**2){w.hp-=pr.dmg||5;hp=true;emit({k:'efx',z:'wallhit',x:pr.x,y:pr.y,h:pr.h});break;}
     if(hp){killProj(pr);continue;}
@@ -2952,7 +3049,7 @@ function bombTick(dt){
   for(const b of G.bombs){
     b.t-=dt;
     if(b.t<=0){
-      b.done=1;emit({k:'fbomb',x:b.x,y:b.y,r:b.r});
+      b.done=1;emit({k:'fbomb',x:b.x,y:b.y,r:b.r});damageEnv(b.x,b.y,b.r,b.dmg*2,null,'blast',0);
       for(const p of plist())if(p.alive&&!p.downed&&p.z<b.low&&Math.hypot(p.x-b.x,p.y-b.y)<b.r+PR)damage(p,b.dmg*G.escale,null,'aoe');
     }
   }
@@ -2985,7 +3082,7 @@ function modeSnap(){
 // ---------- สร้าง snapshot ส่งให้ทุกเครื่อง ----------
 const r1=v=>Math.round(v*10)/10;
 function makeSnap(){
-  return {ph:G.ph,mode:G.mode,mp:G.map,PB:PROPON?PROPS.map(o=>o.st).join(''):'',tm:Math.max(0,Math.ceil(G.timer)),cd:G.cdT||0,wave:G.wave,round:G.round,rw:G.rw,ts:G.teamScore,
+  return {ph:G.ph,mode:G.mode,mp:G.map,PB:PROPON?PROPS.map(o=>o.st).join(''):'',BD:bldSnap(),tm:Math.max(0,Math.ceil(G.timer)),cd:G.cdT||0,wave:G.wave,round:G.round,rw:G.rw,ts:G.teamScore,
     bt:Math.ceil(G.buffT||0),ban:G.banner?G.banner.text:'',res:G.result,el:G.en.length+G.queue.length,
     feed:G.feed.filter(f=>G.time-f.t<6).slice(-5).map(f=>f.text),
     P:plist().map(p=>({id:p.id,n:p.name,c:p.color,tm:p.team,x:r1(p.x),y:r1(p.y),z:r1(p.z||0),fl:!!p.fly,rt:p.root>0,a:Math.round(p.ang*100)/100,
@@ -3499,6 +3596,7 @@ function onLobby(m){
 function onSnap(s){
   if(s.mp&&s.mp!==builtMap){setMapVars(s.mp);buildWorld(s.mp);}
   PROPON=!!s.PB;if(s.PB)for(let i=0;i<PROPS.length;i++)PROPS[i].st=+(s.PB[i]||0);
+  if(!NET.isHost){const bd=s.BD||'';let k=0;for(const b of BLDG)for(const q of b.pc)q.fl=parseInt(bd[k++]||'0',16);}
   VIEW.prev=VIEW.cur;VIEW.tPrev=VIEW.tCur;VIEW.cur=s;VIEW.tCur=performance.now();
   if(s.ev)for(const ev of s.ev)fx(ev);
   syncOverlays(s);
@@ -4308,6 +4406,156 @@ function syncProps(v){
     gl.shadowMap.needsUpdate=true;
   }
 }
+// ---------- บ้านพังเป็นชิ้น ฝั่งแสดงผล ----------
+// ทุกหลังสร้างจากสถานะชิ้น (BLDG[].pc[].fl) → สร้างใหม่เมื่อชิ้นพัง/ไหม้ดำ แล้วรวม mesh ต่อหลัง (batchStatic) • เกาะน้ำแข็ง/ติดไฟ = เอฟเฟกต์ซ้อนทับ ไม่สร้างใหม่
+// มีไฟล์ bld_house.glb = ใช้ชิ้นจากไฟล์ตามชื่อ (wall_front / wall_front_broken ...) ยืดตามขนาดบ้าน • ชิ้นไหนไม่มีในไฟล์ = ใช้ของจากโค้ด
+const BLDV={g:null,map:null,list:[]},CHARM=new Map(),DEBRIS=[];
+const BLD_WALLC=['#cbb89a','#b9a7a0','#c9c2a8','#a9b4c4'];
+let _bldIce=null,_halfRoof=null;
+function charMat(m){
+  let c=CHARM.get(m.uuid);if(c)return c;
+  c=m.clone();if(c.color)c.color.multiplyScalar(0.18);if(c.emissive)c.emissive.set('#000000');c.userData.keep=true;CHARM.set(m.uuid,c);return c;
+}
+function bldIceMat(){if(!_bldIce){_bldIce=iceMat(0.42);_bldIce.depthWrite=false;_bldIce.userData.keep=true;}return _bldIce;}
+// ครึ่งหลังคาทรงปิรามิด ฐาน 1×2 สูง 1 (side -1 = ซ้าย x<0, +1 = ขวา) → ยืดตามบ้านด้วย scale
+function halfRoofGeo(side){
+  _halfRoof=_halfRoof||{};if(_halfRoof[side])return _halfRoof[side];
+  const s=side,A=[0,1,0],P=[[s,0,-1],[s,0,1],[0,0,1],[0,0,-1]];
+  const tri=[[P[0],P[1],A],[P[1],P[2],A],[P[3],P[0],A],[P[2],P[3],A],[P[0],P[3],P[2]],[P[0],P[2],P[1]]];
+  const pos=[];for(const t of tri){const q=s<0?t:[t[0],t[2],t[1]];for(const v of q)pos.push(...v);}
+  const g=new THREE.BufferGeometry().setAttribute('position',new THREE.Float32BufferAttribute(pos,3));g.computeVertexNormals();g.userData.keep=true;
+  return _halfRoof[side]=g;
+}
+function bldMats(b){
+  return {wall:sMat({color:BLD_WALLC[Math.floor(b.o.s*4)%4],roughness:0.9}),beam:sMat({color:'#3a281a',roughness:0.9}),roof:sMat({color:'#4a3438',roughness:0.85}),
+    cap:sMat({color:'#eef3fb',roughness:1}),door:sMat({color:'#5a3a22',roughness:0.9}),stone:sMat({color:'#9a9fb0',roughness:0.95}),win:bMat({color:hdr('#ffc36b',1.6)})};
+}
+// ชิ้นจากโค้ด (ใช้เมื่อไม่มีไฟล์) — หน่วย 3D, แกนของบ้าน: หน้า (ประตู) = +z
+function bldFallback(b,j,br){
+  const g=new THREE.Group(),M=bldMats(b),w=b.o.w*S3,d=b.o.d*S3,wh=b.D.wh,T=b.D.th*S3,R=mulberry(b.i*37+j*7+1);
+  const box=(mat,sx,sy,sz,x,y,z,ry)=>{const m=new THREE.Mesh(sGeo(THREE.BoxGeometry,1,1,1),mat);m.scale.set(sx,sy,sz);m.position.set(x,y,z);if(ry)m.rotation.y=ry;g.add(m);return m;};
+  const pl=(mat,sx,sy,x,y,z,ry)=>{const m=new THREE.Mesh(sGeo(THREE.PlaneGeometry,1,1),mat);m.scale.set(sx,sy,1);m.position.set(x,y,z);m.rotation.y=ry||0;g.add(m);return m;};
+  if(j<4){
+    const fb=j<2,L=fb?w:d,sg=j===0||j===3?1:-1,cx=fb?0:sg*w/2,cz=fb?sg*d/2:0;
+    // ของบนผนัง วางตามแกนยาวของผนัง (u) — หน้า/หลัง u = x, ซ้าย/ขวา u = z
+    const at=(u,y)=>fb?[cx+u,y,cz]:[cx,y,cz+u];
+    if(!br){
+      box(M.wall,fb?L:T,wh,fb?T:L,cx,wh/2,cz);
+      if(!fb)for(const e of [-1,1])box(M.beam,0.28,wh,0.28,cx,wh/2,e*d/2);
+      if(fb){
+        for(const sx of [-1,1]){const p=at(sx*w*0.27,2.5);pl(M.win,0.95,1.2,p[0],p[1],p[2]+sg*(T/2+0.03),sg>0?0:Math.PI);}
+        if(j===0)pl(M.door,1.1,2.2,0,1.1,cz+T/2+0.03,0);
+      }
+    }else{
+      // ซากผนัง: ตอผนังสูงไม่เท่ากัน + เศษกองข้างล่าง
+      const n=4;for(let k=0;k<n;k++){const u=(k+0.5)/n*L-L/2,hh=0.35+R()*1.4,p=at(u,hh/2);box(M.wall,fb?L/n*0.95:T,hh,fb?T:L/n*0.95,p[0],p[1],p[2]);}
+      if(!fb)for(const e of [-1,1]){const hh=0.6+R()*1.6;box(M.beam,0.28,hh,0.28,cx,hh/2,e*d/2);}
+      for(let k=0;k<6;k++){const u=(R()-0.5)*L,o=(R()-0.5)*2.2,p=at(u,0.12);const m=box(k%3?M.wall:M.beam,0.4+R()*0.6,0.18+R()*0.2,0.3+R()*0.4,p[0]+(fb?0:o),0.1,p[2]+(fb?o:0),R()*3);m.rotation.z=(R()-0.5)*0.5;}
+    }
+  }else{
+    const s=j===4?-1:1,hx=w*0.55,hz=d*0.55,rh=b.D.rh;
+    if(!br){
+      const r=new THREE.Mesh(halfRoofGeo(s),M.roof);r.scale.set(hx,rh,hz);r.position.y=wh;g.add(r);
+      const c=new THREE.Mesh(halfRoofGeo(s),M.cap);c.scale.set(hx*0.9,rh,hz*0.9);c.position.y=wh+0.12;g.add(c);
+      if(s>0){box(M.stone,0.9,2.8,0.9,w*0.25,wh+2.2,-d*0.12);box(M.cap,1.05,0.3,1.05,w*0.25,wh+3.7,-d*0.12);}
+    }else{
+      // หลังคาถล่ม: คานหักเอียง + กองเศษในบ้าน
+      for(let k=0;k<3;k++){const m=box(M.beam,0.25,0.25,d*(0.5+R()*0.4),s*w*(0.12+R()*0.3),0.4+R()*0.8,(R()-0.5)*d*0.4);m.rotation.x=(R()-0.5)*0.9;m.rotation.z=(R()-0.5)*0.6;}
+      for(let k=0;k<7;k++){const m=box(k%2?M.roof:M.cap,0.6+R()*0.9,0.15+R()*0.3,0.5+R()*0.8,s*w*(0.05+R()*0.4),0.12,(R()-0.5)*d*0.8,R()*3);m.rotation.z=(R()-0.5)*0.6;}
+      if(s>0)box(M.stone,0.9,0.7+R()*0.6,0.9,w*0.25,0.5,-d*0.12);
+    }
+  }
+  return g;
+}
+function bldFilePiece(b,name){
+  const r=MODELS.ready.get(b.D.model);if(!r)return null;
+  const src=r.scene.getObjectByName(name);if(!src)return null;
+  r.scene.updateMatrixWorld(true);
+  const c=src.clone(true);src.matrixWorld.decompose(c.position,c.quaternion,c.scale);
+  const h=new THREE.Group();h.scale.set(b.o.w*S3/b.D.bw,1,b.o.d*S3/b.D.bd);h.add(c);return h;
+}
+function bldBuild(b,file){
+  const g=new THREE.Group();
+  for(let j=0;j<6;j++){
+    const f=b.pc[j].fl,br=f&1;
+    const m=(file&&bldFilePiece(b,BLD_PIECES[j]+(br?'_broken':'')))||bldFallback(b,j,br);
+    if(f&2)m.traverse(x=>{if(x.isMesh)x.material=Array.isArray(x.material)?x.material.map(charMat):charMat(x.material);});
+    g.add(m);
+  }
+  g.position.set(tx(b.o.x),0,tz(b.o.y));g.rotation.y=b.o.ry||0;shadowAll(g);
+  batchStatic(g,new Set());
+  // เปลือกน้ำแข็ง 1 ชิ้นต่อส่วน (ซ่อนไว้ โชว์เมื่อเกาะน้ำแข็ง)
+  const ice=[];
+  for(let j=0;j<6;j++){
+    const R=bldRect(b,j),m=new THREE.Mesh(sGeo(THREE.BoxGeometry,1,1,1),bldIceMat());
+    if(j<4){m.scale.set(R[2]*2*S3+0.25,b.D.wh+0.2,R[3]*2*S3+0.25);m.position.set(R[0]*S3,b.D.wh/2,R[1]*S3);}
+    else{m.scale.set(R[2]*2*S3+0.4,b.D.rh*0.55,R[3]*2*S3+0.4);m.position.set(R[0]*S3,b.D.wh+b.D.rh*0.25,R[1]*S3);}
+    m.visible=false;g.add(m);ice.push(m);
+  }
+  return {g,ice};
+}
+function syncBld(dt){
+  if(!BLDG.length){if(BLDV.g)BLDV.g.visible=false;return;}
+  if(!BLDV.g||BLDV.g.parent!==world||BLDV.map!==builtMap){
+    if(BLDV.g){if(BLDV.g.parent)BLDV.g.parent.remove(BLDV.g);disposeTree(BLDV.g);}
+    BLDV.g=new THREE.Group();world.add(BLDV.g);BLDV.map=builtMap;BLDV.list=BLDG.map(b=>({b,key:'',g:null,ice:[]}));
+    prefetchModels([BLDDEF.house.model,'debris_wood','debris_stone']);
+  }
+  BLDV.g.visible=true;
+  const file=MODELS.ready.has(BLDDEF.house.model);
+  for(const q of BLDV.list){
+    if(BLDG[q.b.i]&&q.b!==BLDG[q.b.i]){q.b=BLDG[q.b.i];q.key='';if(DEBRIS.length)clearDebris();}   // เริ่มเกมใหม่ แผนที่เดิม → สถานะชุดใหม่
+    let key=file?'F':'C';for(const p of q.b.pc)key+=p.fl&3;
+    if(key!==q.key){
+      q.key=key;if(q.g){BLDV.g.remove(q.g);disposeTree(q.g);}
+      const r=bldBuild(q.b,file);q.g=r.g;q.ice=r.ice;BLDV.g.add(q.g);gl.shadowMap.needsUpdate=true;
+    }
+    for(let j=0;j<6;j++){
+      const p=q.b.pc[j];q.ice[j].visible=(p.fl&9)===8;
+      if((p.fl&5)===4&&Math.random()<dt*16){
+        // ชิ้นที่ติดไฟ: เปลวไฟ + ควันลอยจากจุดสุ่มบนชิ้นนั้น
+        const R=bldRect(q.b,j),lx=R[0]+(Math.random()*2-1)*R[2],ly=R[1]+(Math.random()*2-1)*R[3],[x,y]=bldWorld(q.b,lx,ly);
+        const h=j<4?Math.random()*q.b.D.wh:q.b.D.wh+Math.random()*q.b.D.rh*0.6;
+        PARTS.push({x,y,h,vx:rnd(-10,10),vy:rnd(-10,10),vh:rnd(1.5,3.5),life:rnd(0.5,0.9),max:0.9,col:Math.random()<0.5?'#ff7a2a':'#ffc04a',size:rnd(6,10),g:-1.5,drag:3,grow:0.7});
+        if(Math.random()<0.35)PARTS.push({x,y,h:h+1,vx:0,vy:0,vh:rnd(0.8,1.6),life:1.8,max:1.8,col:'#2a2522',size:9,g:-0.3,smoke:true,grow:1.5,drag:2});
+        if(Math.random()<0.15)LREQ.push({x:tx(x),y:h+0.5,z:tz(y),col:'#ff6a2a',int:2.2,dist:12});
+      }
+    }
+  }
+}
+// เศษซาก (เฉพาะเครื่องนี้ ไม่ส่งในเน็ต): กระเด็นออกจากจุดที่โดน (ox,oy) แรง/แบบตามธาตุ
+function bldDebris(ev){
+  const b=BLDG[ev.i];if(!b)return;
+  const j=ev.p,R=bldRect(b,j),D=b.D,roof=j>=4,el=ev.el||'none',blast=el.includes('blast'),fire=el.includes('fire'),ice=el==='ice';
+  const M=bldMats(b),file=MODELS.ready.get(roof?'debris_wood':'debris_stone'),pool=[];
+  if(file)file.scene.traverse(o=>{if(o.isMesh)pool.push(o);});
+  const n=blast?22:ice?16:12;
+  for(let k=0;k<n;k++){
+    const lx=R[0]+(Math.random()*2-1)*R[2],ly=R[1]+(Math.random()*2-1)*R[3],[x,y]=bldWorld(b,lx,ly);
+    const h=roof?D.wh+Math.random()*D.rh*0.5:0.3+Math.random()*D.wh;
+    let m;
+    if(ice&&k%2===0)m=new THREE.Mesh(sGeo(THREE.OctahedronGeometry,0.35,0),bldIceMat());
+    else if(pool.length){const src=pool[k%pool.length];m=new THREE.Mesh(src.geometry,src.material);}
+    else{m=new THREE.Mesh(sGeo(THREE.BoxGeometry,1,1,1),roof?(k%2?M.roof:M.beam):(k%3?M.wall:M.beam));m.scale.set(0.25+Math.random()*0.55,0.15+Math.random()*0.35,0.25+Math.random()*0.5);}
+    if(fire&&m.material!==_bldIce)m.material=charMat(m.material);
+    m.castShadow=true;m.position.set(tx(x),h,tz(y));m.rotation.set(Math.random()*6,Math.random()*6,0);scene.add(m);
+    let dx=x-ev.ox,dy=y-ev.oy;const dl=Math.hypot(dx,dy)||1;dx/=dl;dy/=dl;
+    const sp=(blast?9:ice?5:3.5)*(0.6+Math.random()*0.8);
+    DEBRIS.push({m,vx:dx*sp+rnd(-1.5,1.5),vz:dy*sp+rnd(-1.5,1.5),vy:(blast?5:roof?0:2.5)+Math.random()*4,rx:rnd(-8,8),rz:rnd(-8,8),life:3+Math.random()*1.5,s0:m.scale.clone()});
+  }
+  while(DEBRIS.length>180)scene.remove(DEBRIS.shift().m);
+}
+function updateDebris(dt){
+  for(let i=DEBRIS.length-1;i>=0;i--){
+    const q=DEBRIS[i],m=q.m;q.life-=dt;
+    q.vy-=18*dt;m.position.x+=q.vx*dt;m.position.y+=q.vy*dt;m.position.z+=q.vz*dt;
+    if(m.position.y<0.1){m.position.y=0.1;q.vy=Math.abs(q.vy)*0.3;q.vx*=0.6;q.vz*=0.6;q.rx*=0.5;q.rz*=0.5;}
+    m.rotation.x+=q.rx*dt;m.rotation.z+=q.rz*dt;
+    if(q.life<0.6)m.scale.copy(q.s0).multiplyScalar(Math.max(0.01,q.life/0.6));
+    if(q.life<=0){scene.remove(m);DEBRIS.splice(i,1);}
+  }
+}
+function clearDebris(){for(const q of DEBRIS)scene.remove(q.m);DEBRIS.length=0;}
 function drawPropHint(me){
   const o=nearUseProp(me.x,me.y);if(!o)return;
   const t='['+keyName(KEYS.use)+']  '+PROPDEF[o.k].use;
@@ -4848,6 +5096,17 @@ function fx(ev){
       else if(ev.e==='u'){burst(ev.x,ev.y,'#ffd86b',22,120,0.9,2.4,{h:H,vh:[1,4],g:-0.5});FX.flashLight(ev.x,ev.y,H+0.5,'#ffd86b',3,8,0.4);if(near)snd('pickup',ev);}
       break;
     }
+    case 'bld':{
+      const el=ev.el||'none',fire=el.includes('fire'),ice=el==='ice',col=ice?'#dff6ff':fire?'#ff8a3a':'#c8b89a';
+      if(ev.e==='h'){burst(ev.x,ev.y,col,8,90,0.45,2.2,{h:H,vh:[0.5,3],g:6});smoke(ev.x,ev.y,H,2,'#8a7a68',0.8,5,40);if(near)snd('thud',{x:ev.x,y:ev.y,vol:0.5});}
+      else{
+        bldDebris(ev);
+        smoke(ev.x,ev.y,H,14,fire?'#2a2522':ice?'#e8f6ff':'#7a6a58',1.8,9,120);
+        burst(ev.x,ev.y,col,ice?40:26,200,0.8,3,{h:H,vh:[1,6],g:9});
+        if(fire){burst(ev.x,ev.y,'#ffb347',30,160,1.1,2.4,{h:H,vh:[2,6],g:-1});FX.flashLight(ev.x,ev.y,H+1,'#ff7a2a',5,16,0.4);}
+        if(near){snd('break',ev);if(el.includes('blast'))snd('boom',{x:ev.x,y:ev.y,vol:0.6});shake(el.includes('blast')?6:3);}
+      }
+      break;}
     case 'heal':floatText(ev.x,ev.y,'+'+ev.n,'#7dff9a',ev.id===NET.myId?20:15,ev.h);if(ev.id===NET.myId)burst(ev.x,ev.y,'#7dff9a',8,60,0.6,1.6,{h:ev.h-1,vh:[0.5,2],g:-0.5});break;
     case 'fbomb':
       explosionFX(ev.x,ev.y,0.6);
@@ -5029,10 +5288,11 @@ function buildWorld(id){
   if(world){
     scene.remove(world);
     if(PROPV.g){if(PROPV.g.parent)PROPV.g.parent.remove(PROPV.g);disposeTree(PROPV.g);PROPV.g=null;}   // prop สร้างใหม่ทุกเกมจาก snapshot
+    if(BLDV.g){if(BLDV.g.parent)BLDV.g.parent.remove(BLDV.g);disposeTree(BLDV.g);BLDV.g=null;}   // บ้านพังได้ก็เช่นกัน
     WCACHE.delete(builtMap);WCACHE.set(builtMap,{world,CANDLESYS,TORCHES,CANDLES,FIREFLIES,CRYSTAL,RUNE,SNITCH,BANNERS,SNOW});
     for(const [k,v] of WCACHE){if(WCACHE.size<=WCACHE_MAX)break;if(k===id)continue;WCACHE.delete(k);disposeTree(v.world);}
   }
-  clearDyn();
+  clearDyn();clearDebris();
   prefetchModels(FILE_MODELS());prefetchFx();
   setSky(id==='pitch'||id==='meadow'||id==='ruins'||id==='test'?'sunset':'night');
   const cached=WCACHE.get(id);
@@ -5212,6 +5472,7 @@ function buildHogsmeade(){
   const lampSpr=new THREE.SpriteMaterial({map:glowTex,color:hdr('#ffc870',2.4),blending:THREE.AdditiveBlending,depthWrite:false,transparent:true});
   for(const o of OBS){
     const x=tx(o.x),z=tz(o.y);
+    if(o.k==='house'&&o.bi!==undefined)continue;        // บ้านพังได้ สร้างใน syncBld
     if(o.k==='house'){
       const g=new THREE.Group(),w=o.w*S3,d=o.d*S3,wh=4.2;
       const wall=new THREE.Mesh(new THREE.BoxGeometry(w,wh,d),wallMs[Math.floor(o.s*4)%4]);wall.position.y=wh/2;g.add(wall);
@@ -6195,7 +6456,7 @@ function aimFromCrosshair(me,P,E){
     if(t<=tMin||t>=T)return;
     const y=o.y+dy*t;if(y>=y0&&y<=y1)T=t;
   };
-  for(const q of OBS)cyl(tx(q.x),tz(q.y),q.r*S3,0,q.hgt||9);
+  for(const q of OBS){if(q.bi!==undefined&&BLDG[q.bi]&&BLDG[q.bi].pc.some(p=>p.fl&1))continue;cyl(tx(q.x),tz(q.y),q.r*S3,0,q.hgt||9);}
   if(PROPON)for(const q of PROPS)if(q.st!==1)cyl(tx(q.x),tz(q.y),q.r*S3,0,q.hgt);
   for(const q of P||[])if(q.id!==me.id&&q.al&&!q.dn&&!q.gh)cyl(tx(q.x),tz(q.y),0.55,q.z||0,(q.z||0)+2);
   for(const e of E||[]){const D=EDEF[e.t];if(D)cyl(tx(e.x),tz(e.y),Math.max(0.4,D.r*S3),e.h||0,(e.h||0)+D.ch+0.8);}
@@ -7356,13 +7617,13 @@ function render(dt,now){
   syncPlayers(P,v.mode,now,dt);pf('players',t0);
   if(me&&me.al&&!me.fl&&!me.dn){const o=PM3.get(me.id);if(o){const k=Math.floor(o.walk/Math.PI);if(o.stepK!==undefined&&k!==o.stepK)snd('step',{vol:0.35,rev:0.1});o.stepK=k;}}t0=performance.now();
   syncEnemies(E,P,now,dt);pf('enemies',t0);t0=performance.now();
-  syncProj(v,now);syncWalls(v);syncProps(v);syncMins(v,now,dt);
+  syncProj(v,now);syncWalls(v);syncProps(v);syncBld(dt);syncMins(v,now,dt);
   syncModeObjs(v,P,me,now,dt);pf('projMode',t0);
   KC=Math.max(0,KC-dt);roleShowT=Math.max(0,roleShowT-dt);
   $('#trainEnd').classList.toggle('hidden',!(NET.isHost&&v.mode==='train'&&v.ph!=='over'));
   trSync(v);
   tickFlash(dt);
-  t0=performance.now();updateZV(dt);updateParticles(dt);updateShapes(dt);updateLights(dt);updateVfx(dt);pf('fx',t0);
+  t0=performance.now();updateZV(dt);updateParticles(dt);updateShapes(dt);updateLights(dt);updateVfx(dt);updateDebris(dt);pf('fx',t0);
   QUAL.frame++;gl.shadowMap.needsUpdate=QUAL.mode==='high'||QUAL.frame%2===0;
   t0=performance.now();composer.render();pf('gpuSubmit',t0);
   t0=performance.now();const spk=speakingIds();
@@ -8251,7 +8512,7 @@ swSetup();
 window.WD.SW=SWK;
 // เทส/วัดผล: เดินลูปโฮสต์ 1 รอบด้วยมือ (hostTick + snapshot + เอฟเฟกต์) — ใช้ตอนหน้าต่างถูกซ่อนแล้ว setInterval ช้า
 // prop / โมเดลจากไฟล์ (ดีบัก)
-Object.defineProperties(window.WD,{PROPS:{get:()=>PROPS},PROPON:{get:()=>PROPON},HSTOP:{get:()=>HSTOP}});Object.assign(window.WD,{PROPDEF,genProps,MODELS,loadModel,modelManifest,useProp,hitProp,PM3,EM3,animTick,playVfx,playFlip,fileFx,zoneFx,VFXL,FLIPL,FLIPS,fx});
+Object.defineProperties(window.WD,{PROPS:{get:()=>PROPS},PROPON:{get:()=>PROPON},BLDG:{get:()=>BLDG},BLDON:{get:()=>BLDON},HSTOP:{get:()=>HSTOP}});Object.assign(window.WD,{PROPDEF,genProps,MODELS,loadModel,modelManifest,useProp,hitProp,damageEnv,hitBldPiece,breakBldPiece,PM3,EM3,animTick,playVfx,playFlip,fileFx,zoneFx,VFXL,FLIPL,FLIPS,fx});
 window.WD.hostStep=dt=>{hostTick(dt);const b=makeSnap(),ev=EVL;EVL=[];EVN=[];onSnap(Object.assign({},b,{ev}));};
 </script>
 </body>
