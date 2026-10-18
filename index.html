@@ -3330,7 +3330,7 @@ function tickFlash(dt){for(const o of FLASHING){o.flashT-=dt;if(o.flashT<=0)endF
 const GHOSTM=new WeakMap(),SOLIDM=new WeakMap();
 function ghostOf(mat){
   if(mat.userData.keep&&GHOSTM.has(mat))return GHOSTM.get(mat);
-  const g=mat.clone();g.transparent=true;g.opacity=0.35*(mat.transparent?mat.opacity:1);
+  const g=mat.clone();g.transparent=true;g.opacity=0.35*(mat.transparent?mat.opacity:1);g.onBeforeCompile=mat.onBeforeCompile;g.customProgramCacheKey=mat.customProgramCacheKey;
   if(mat.userData.keep){g.userData.keep=true;GHOSTM.set(mat,g);}
   return g;
 }
@@ -4706,6 +4706,9 @@ function makeCloak(outerCol,innerCol,rTop,rBot,h,gap,shared){
 }
 // lvx/lvz = ความเร็วในแกนของตัวละคร (หน่วย/วินาที) — ชายผ้าจะลากตามหลังแบบสปริง
 function updateCloth(c,lvx,lvz,speed,now,dt){
+  // กัน NaN: ถ้าเคยพังครั้งเดียวผ้าจะหายไปถาวร (bounding sphere = NaN) — รีเซ็ตสปริงแทน
+  if(!Number.isFinite(lvx))lvx=0;if(!Number.isFinite(lvz))lvz=0;if(!Number.isFinite(speed))speed=0;if(!(dt>0))dt=0;else if(dt>0.05)dt=0.05;
+  if(!Number.isFinite(c.dx+c.dz+c.vx+c.vz)){c.dx=c.dz=c.vx=c.vz=0;c.fixBS=true;}
   const tX=clamp(-lvx*0.075,-0.9,0.9),tZ=clamp(-lvz*0.075,-0.9,0.9);
   c.vx+=((tX-c.dx)*55-c.vx*7)*dt;c.vz+=((tZ-c.dz)*55-c.vz*7)*dt;
   c.dx+=c.vx*dt;c.dz+=c.vz*dt;
@@ -4721,6 +4724,7 @@ function updateCloth(c,lvx,lvz,speed,now,dt){
     pos[i+2]=rz*f+c.dz*w-fl*rx*2;
   }
   c.geo.attributes.position.needsUpdate=true;c.geo.computeVertexNormals();
+  if(c.fixBS||!c.geo.boundingSphere||!Number.isFinite(c.geo.boundingSphere.radius)){c.geo.computeBoundingSphere();c.fixBS=false;}
 }
 
 // ---------- โมเดลนักเรียนเวทมนตร์ ----------
@@ -4730,6 +4734,48 @@ function sGeo(C,...a){const k=C.name+'('+a.join(',')+')';let g=SHGEO.get(k);if(!
 function sMat(o){
   const k=Object.keys(o).sort().map(n=>{const v=o[n];return n+'='+(v&&v.isTexture?v.uuid:(n==='color'||n==='emissive')?new THREE.Color(v).getHexString():String(v));}).join(';');
   let m=SHMAT.get(k);if(!m){m=new THREE.MeshStandardMaterial(o);m.userData.keep=true;SHMAT.set(k,m);}return m;
+}
+// รวมชิ้นส่วนที่ไม่ขยับของตัวละครให้เหลือน้อย draw call ที่สุด:
+// ทุกชิ้นที่เป็นวัสดุสีล้วน (ไม่มี texture/โปร่งใส/เรืองแสง) ในกลุ่มเดียวกัน → mesh เดียว ใช้วัสดุกลาง BODYM
+// สี/ความด้าน/ความเป็นโลหะ เก็บต่อจุด (attribute color/aRough/aMetal) แทนการแยกวัสดุ
+// แยกต่อกลุ่ม (b, ขา, แขน, ไม้, ปลายผ้าพันคอ) เพราะกลุ่มขยับเอง; ชิ้นที่มี userData.anim (ผ้าคลุม) ไม่รวม
+function bodyPatch(sh){
+  sh.vertexShader=sh.vertexShader.replace('#include <common>','#include <common>\nattribute float aRough;attribute float aMetal;varying float vRough;varying float vMetal;')
+    .replace('#include <begin_vertex>','#include <begin_vertex>\nvRough=aRough;vMetal=aMetal;');
+  sh.fragmentShader=sh.fragmentShader.replace('#include <common>','#include <common>\nvarying float vRough;varying float vMetal;')
+    .replace('#include <roughnessmap_fragment>','float roughnessFactor=roughness*vRough;')
+    .replace('#include <metalnessmap_fragment>','float metalnessFactor=metalness*vMetal;');
+}
+const BODYM={};
+function bodyMat(side){
+  if(!BODYM[side]){const m=new THREE.MeshStandardMaterial({vertexColors:true,roughness:1,metalness:1,side});
+    m.onBeforeCompile=bodyPatch;m.customProgramCacheKey=()=>'wdBody';m.userData.keep=true;BODYM[side]=m;}
+  return BODYM[side];
+}
+function plainMat(m){return m&&m.isMeshStandardMaterial&&m.userData.keep&&!m.map&&!m.transparent&&!m.vertexColors&&m.emissive.r+m.emissive.g+m.emissive.b===0&&m.side!==THREE.BackSide;}
+function mergeBody(root){
+  const conts=[];root.traverse(o=>{if(!o.isMesh&&o.children.length)conts.push(o);});
+  for(const C of conts){
+    const bySide=new Map();
+    for(const m of C.children){if(!m.isMesh||m.userData.anim||!plainMat(m.material))continue;const sd=m.material.side;let L=bySide.get(sd);if(!L)bySide.set(sd,L=[]);L.push(m);}
+    for(const [sd,L] of bySide){
+      if(L.length<2)continue;
+      const geos=L.map(m=>{
+        m.updateMatrix();
+        const g=m.geometry.index?m.geometry.clone():m.geometry.toNonIndexed();
+        g.applyMatrix4(m.matrix);
+        for(const k of Object.keys(g.attributes))if(k!=='position'&&k!=='normal')g.deleteAttribute(k);
+        const n=g.attributes.position.count,c=m.material.color,col=new Float32Array(n*3),r=new Float32Array(n),mt=new Float32Array(n);
+        for(let i=0;i<n;i++){col[i*3]=c.r;col[i*3+1]=c.g;col[i*3+2]=c.b;r[i]=m.material.roughness;mt[i]=m.material.metalness;}
+        g.setAttribute('color',new THREE.BufferAttribute(col,3));g.setAttribute('aRough',new THREE.BufferAttribute(r,1));g.setAttribute('aMetal',new THREE.BufferAttribute(mt,1));
+        return g;
+      });
+      const g=mergeGeometries(geos,false);geos.forEach(x=>x.dispose());
+      if(!g)continue;
+      const mm=new THREE.Mesh(g,bodyMat(sd));mm.castShadow=L[0].castShadow;mm.receiveShadow=L[0].receiveShadow;
+      for(const m of L)C.remove(m);C.add(mm);
+    }
+  }
 }
 function sStripe(c1,c2){const k=c1+'|'+c2;let t=SHTEX.get(k);if(!t){t=stripeTex(c1,c2);t.userData.keep=true;SHTEX.set(k,t);}return t;}
 function hashStr(s){let h=7;for(const ch of String(s))h=(h*31+ch.charCodeAt(0))|0;return Math.abs(h);}
@@ -4814,7 +4860,7 @@ function makeStudent(look,id){
     add(E,sGeo(THREE.BoxGeometry,0.13,len,0.035),scM,0,-len/2,0);ends.push(E);
   }
   const cloak=makeCloak(cloakCol,house.clone().multiplyScalar(0.7),0.33,0.82,1.5,0.75,true);
-  cloak.outer.position.y=cloak.inner.position.y=0.83;b.add(cloak.outer,cloak.inner);
+  cloak.outer.position.y=cloak.inner.position.y=0.83;b.add(cloak.outer,cloak.inner);cloak.outer.userData.anim=cloak.inner.userData.anim=true;
   const hood=add(b,sGeo(THREE.SphereGeometry,0.3,14,10,0,Math.PI*2,0,Math.PI/2),blackM,0,1.52,-0.2);hood.rotation.x=-1.9;hood.scale.set(1,0.6,1);
   const sleeveM=M(cloakCol,0.92,{side:THREE.DoubleSide});
   const mkArm=s=>{
@@ -4834,7 +4880,7 @@ function makeStudent(look,id){
     else{add(wandG,sGeo(THREE.CylinderGeometry,0.031,0.031,0.13,10),goldW,0,-0.71,0);for(const y of[-0.79,-1.0]){const r=add(wandG,sGeo(THREE.TorusGeometry,0.024,0.007,6,12),goldW,0,y,0);r.rotation.x=Math.PI/2;}add(wandG,sGeo(THREE.SphereGeometry,0.02,8,6),goldW,0,-1.1,0);}
   }
   const tip=new THREE.Sprite(glowMat(WCOREC[look.wc],2.2));tip.scale.setScalar(0.32);tip.position.set(0,-1.09,0);armR.add(tip);
-  shadowAll(b);
+  shadowAll(b);mergeBody(b);
   const shield=new THREE.Mesh(sGeo(THREE.SphereGeometry,1.35,32,20),shieldMat());shield.position.y=1.1;shield.visible=false;g.add(shield);
   const ring=new THREE.Mesh(sGeo(THREE.RingGeometry,0.85,1.05,32),new THREE.MeshBasicMaterial({color:'#ffffff',transparent:true,opacity:0.7,depthWrite:false}));
   ring.rotation.x=-Math.PI/2;ring.position.y=0.04;g.add(ring);
@@ -5509,7 +5555,7 @@ function drawStageLabels(rows,team){
 
 // ---------- sync ตัวละคร/ศัตรู/ลูกเวท กับ snapshot ----------
 function localVel(o,x,z,dt,rotY){
-  if(o.lx===null){o.lx=x;o.lz=z;}
+  if(o.lx===null||!Number.isFinite(o.lx+o.lz+o.svx+o.svz)){o.lx=x;o.lz=z;o.svx=o.svz=0;}
   const k=1-Math.exp(-12*dt),ivx=(x-o.lx)/Math.max(dt,0.001),ivz=(z-o.lz)/Math.max(dt,0.001);
   const big=Math.hypot(ivx,ivz)>60;
   o.svx+=((big?0:ivx)-o.svx)*k;o.svz+=((big?0:ivz)-o.svz)*k;o.lx=x;o.lz=z;
