@@ -3615,6 +3615,7 @@ function updateZV(dt){
   }
   for(let i=ZV.length-1;i>=0;i--){
     const z=ZV[i];z.t-=dt;if(z.t<=0){ZV.splice(i,1);continue;}
+    if(z.file)continue;   // ไฟล์ vfx_zone_* แทนที่ภาพจากโค้ดแล้ว (mode:"replace")
     if(z.kind==='icering'){
       if(Math.random()<0.2){const a=rnd(0,6.283),d=Math.sqrt(Math.random())*z.r;PARTS.push({x:z.x+Math.cos(a)*d,y:z.y+Math.sin(a)*d,h:0.1,vx:rnd(-6,6),vy:rnd(-6,6),vh:rnd(0.2,0.7),life:1,max:1,col:'#e8f6ff',size:4,g:-0.1,smoke:true,grow:0.6,drag:2});}
       if(Math.random()<0.6){const a=rnd(0,6.283);PARTS.push({x:z.x+Math.cos(a)*z.r,y:z.y+Math.sin(a)*z.r,h:0.15,vx:0,vy:0,vh:rnd(0.8,1.8),life:0.6,max:0.6,col:'#bfeaff',size:2.2,g:-0.5});}
@@ -3773,7 +3774,7 @@ const FILE_MODELS=()=>['char_student',...Object.keys(EDEF).map(t=>'enemy_'+t)];
 //   วัสดุ: ชื่อขึ้นต้น add_ = เรืองแสงแบบบวกแสง • มีคำว่า fade = จางตอนท้าย • ขึ้นต้น tint_ = ใช้สีของคาถา (ถ้า event มีสี)
 // flipbook (ภาพเรียงเป็นตาราง) ใน manifest "fx": {"vfx_x":{"file":"vfx/x.png","cols":4,"rows":4,"fps":24,"add":true,"size":2,"loop":false,"mode":"add"}} — ชื่อเดียวกับ .glb ได้ (เล่นทั้งคู่)
 // ยังโหลดไม่เสร็จ/ไม่มีไฟล์ = ใช้เอฟเฟกต์จากโค้ดตามเดิม (prefetchFx() โหลดล่วงหน้าตอนสร้างแผนที่)
-const VFXL=[],FLIPL=[],FLIPS=new Map();
+const VFXL=[],FLIPL=[],FLIPS=new Map();let FLIPGEO=null;
 function prefetchFx(){modelManifest().then(m=>{for(const k in m.models)if(k.startsWith('vfx_')||k.startsWith('proj_'))loadModel(k);for(const k in (m.fx||{}))flipTex(k);});}
 function playVfx(name,o){
   const r=MODELS.ready.get(name);if(!r)return false;
@@ -3796,12 +3797,35 @@ function playVfx(name,o){
   const g=new THREE.Group();g.add(inst);
   g.position.set(tx(o.x),o.h||0,tz(o.y));
   if(o.a!==undefined)g.rotation.y=Math.atan2(Math.cos(o.a),Math.sin(o.a));
-  g.scale.setScalar((e.scale||1)*(e.radius&&o.r?o.r*S3:1)*(o.scale||1));
-  let mixer=null,dur=0;
-  if(r.animations.length){mixer=new THREE.AnimationMixer(inst);for(const c of r.animations){const a=mixer.clipAction(c);a.setLoop(e.loop?THREE.LoopRepeat:THREE.LoopOnce,Infinity);a.clampWhenFinished=true;a.play();dur=Math.max(dur,c.duration);}}
-  const life=e.life||o.life||dur||1;
-  scene.add(g);VFXL.push({g,mixer,life,max:life,mats:[...mats.values()],fadeK:e.fade!==undefined?e.fade:0.35});
+  const rad=e.radius!==undefined?e.radius:o.zr;   // โซน (o.zr) ขยายตามรัศมีเป็นค่าเริ่ม
+  g.scale.setScalar((e.scale||1)*(rad&&o.r?o.r*S3:1)*(o.scale||1));
+  // ท่าชื่อ start / loop / end = เล่นเป็นช่วง: start ครั้งเดียว → loop วนจนใกล้หมดเวลา → end ครั้งเดียวตอนท้าย • ท่าชื่ออื่นเล่นพร้อมกันทั้งหมด
+  // o.hold = อยู่ค้างกี่วินาที (โซน/พื้นไฟ: เท่าเวลาของโซนจริง แทน life ในไฟล์)
+  let mixer=null,dur=0,seq=null;
+  if(r.animations.length){
+    mixer=new THREE.AnimationMixer(inst);const loop=e.loop||!!o.hold,ph={};
+    for(const c of r.animations){
+      const n=c.name.split('|').pop().toLowerCase().trim();
+      if(n==='start'||n==='loop'||n==='end'){ph[n]=mixer.clipAction(c);continue;}
+      const a=mixer.clipAction(c);a.setLoop(loop?THREE.LoopRepeat:THREE.LoopOnce,Infinity);a.clampWhenFinished=true;a.play();dur=Math.max(dur,c.duration);
+    }
+    if(ph.start||ph.loop||ph.end){
+      const d=k=>ph[k]?ph[k].getClip().duration:0;
+      seq={...ph,st:0,startD:d('start'),endD:d('end')};dur=Math.max(dur,d('start')+d('loop')+d('end'));
+      if(ph.start){ph.start.setLoop(THREE.LoopOnce,1);ph.start.clampWhenFinished=true;ph.start.play();}
+      else if(ph.loop){ph.loop.setLoop(THREE.LoopRepeat,Infinity);ph.loop.play();seq.st=1;}
+      else{ph.end.setLoop(THREE.LoopOnce,1);ph.end.clampWhenFinished=true;ph.end.play();seq.st=2;}
+    }
+  }
+  const life=o.hold||e.life||o.life||dur||1;
+  scene.add(g);VFXL.push({g,mixer,seq,age:0,life,max:life,mats:[...mats.values()],fadeK:e.fade!==undefined?e.fade:(seq&&seq.end?0:0.35)});
   return true;
+}
+// ช่วงต่อของ start → loop → end
+function vfxSeq(v){
+  const s=v.seq,sw=(from,to,once)=>{to.reset();to.setLoop(once?THREE.LoopOnce:THREE.LoopRepeat,once?1:Infinity);to.clampWhenFinished=!!once;to.play();if(from)to.crossFadeFrom(from,0.12,false);};
+  if(s.st===0&&v.age>=s.startD){s.st=1;if(s.loop)sw(s.start,s.loop,false);}
+  if(s.st<2&&s.end&&v.life<=s.endD){const from=s.st===1&&s.loop?s.loop:s.start;s.st=2;sw(from,s.end,true);}
 }
 function flipTex(name){
   const m=MODELS.man,e=m&&m.fx&&m.fx[name];if(!e)return null;
@@ -3814,11 +3838,15 @@ function flipTex(name){
 function playFlip(name,o){
   const F=flipTex(name);if(!F||F.fail||!F.t.image)return false;
   const e=F.e,tex=F.t.clone();tex.userData={};tex.repeat.set(1/e.cols,1/e.rows);tex.needsUpdate=true;
-  const mat=new THREE.SpriteMaterial({map:tex,transparent:true,depthWrite:false,blending:e.add?THREE.AdditiveBlending:THREE.NormalBlending,color:o.col?hdr(o.col,e.add?1.5:1):0xffffff});
-  const sp=new THREE.Sprite(mat);sp.position.set(tx(o.x),o.h!==undefined?o.h:1,tz(o.y));
-  sp.scale.setScalar((e.size||2)*(e.radius&&o.r?o.r*S3:1)*(o.scale||1));scene.add(sp);
-  const n=e.cols*e.rows,life=o.life||e.life||(e.loop?1:n/(e.fps||24));
-  FLIPL.push({sp,tex,e,n,t:0,life,max:life});
+  // flat:true = แผ่นราบบนพื้น (เช่นพื้นไฟ) แทนภาพที่หันหากล้อง • โซนเป็น flat เป็นค่าเริ่ม
+  const flat=e.flat!==undefined?e.flat:!!o.zr,rad=e.radius!==undefined?e.radius:o.zr;
+  const mo={map:tex,transparent:true,depthWrite:false,blending:e.add?THREE.AdditiveBlending:THREE.NormalBlending,color:o.col?hdr(o.col,e.add?1.5:1):0xffffff};
+  if(flat&&!FLIPGEO){FLIPGEO=new THREE.PlaneGeometry(1,1).rotateX(-Math.PI/2);FLIPGEO.userData.keep=true;}
+  const sp=flat?new THREE.Mesh(FLIPGEO,new THREE.MeshBasicMaterial(mo)):new THREE.Sprite(new THREE.SpriteMaterial(mo));
+  sp.position.set(tx(o.x),o.h!==undefined?o.h:(flat?0.06:1),tz(o.y));
+  sp.scale.setScalar((e.size||2)*(rad&&o.r?o.r*S3*(flat?2:1):1)*(o.scale||1));scene.add(sp);
+  const n=e.cols*e.rows,life=o.hold||o.life||e.life||(e.loop?1:n/(e.fps||24));
+  FLIPL.push({sp,tex,e,n,t:0,life,max:life,loop:e.loop||!!o.hold});
   return true;
 }
 // เล่นเอฟเฟกต์จากไฟล์ของ event นี้ (ถ้ามี) — คืนค่า true เมื่อไฟล์ขอแทนที่เอฟเฟกต์จากโค้ด (mode:"replace")
@@ -3828,16 +3856,19 @@ function fileFx(name,o){
   const a=em?playVfx(name,o):false,b=ef?playFlip(name,o):false;
   return (a&&em.mode==='replace')||(b&&ef.mode==='replace');
 }
+// พื้น/โซนที่อยู่ค้าง (พื้นไฟ ลาวา วงเพลิง ฯลฯ): ไฟล์ vfx_zone_<ชนิด> อยู่ค้างเท่าเวลาของโซนจริง และขยายตามรัศมีโซน
+function zoneFx(kind,x,y,r,t,col){return fileFx('vfx_zone_'+kind,{x,y,r,hold:t,zr:1,col});}
+function clearVfx(){for(const v of VFXL){scene.remove(v.g);disposeTree(v.g);}for(const q of FLIPL){scene.remove(q.sp);q.sp.material.dispose();q.tex.dispose();}VFXL.length=FLIPL.length=0;}
 function updateVfx(dt){
   for(let i=VFXL.length-1;i>=0;i--){
-    const v=VFXL[i];v.life-=dt;if(v.mixer)v.mixer.update(dt);
+    const v=VFXL[i];v.life-=dt;v.age+=dt;if(v.seq)vfxSeq(v);if(v.mixer)v.mixer.update(dt);
     const k=v.life/v.max,f=k<v.fadeK?Math.max(0,k/v.fadeK):1;
     for(const m of v.mats)if(m.userData.fade)m.opacity=m.userData.base*f;
     if(v.life<=0){scene.remove(v.g);disposeTree(v.g);VFXL.splice(i,1);}
   }
   for(let i=FLIPL.length-1;i>=0;i--){
     const q=FLIPL[i],e=q.e;q.t+=dt;q.life-=dt;
-    const fr=Math.floor(q.t*(e.fps||24)),f=e.loop?fr%q.n:Math.min(q.n-1,fr);
+    const fr=Math.floor(q.t*(e.fps||24)),f=q.loop?fr%q.n:Math.min(q.n-1,fr);
     q.tex.offset.set((f%e.cols)/e.cols,1-(Math.floor(f/e.cols)+1)/e.rows);
     const k=q.life/q.max;q.sp.material.opacity=k<0.2?Math.max(0,k/0.2):1;
     if(q.life<=0){scene.remove(q.sp);q.sp.material.dispose();q.tex.dispose();FLIPL.splice(i,1);}
@@ -4003,7 +4034,7 @@ function efxFX(ev){
     case 'slide':burst(x,y,'#dff6ff',24,200,0.4,2,{h:0.3,vh:[0.5,2],g:3});if(near)snd('whoosh',ev);break;
     case 'ice':
       ICEV.push(makeIceFloor(x,y,ev.r,ev.t,ev.c,ev.lx,ev.ly));
-      if(ev.c)ZV.push({x,y,r:ev.r,t:ev.t,kind:'icering',col:'#8fe0ff'});
+      if(ev.c)ZV.push({x,y,r:ev.r,t:ev.t,kind:'icering',col:'#8fe0ff',file:zoneFx('icering',x,y,ev.r,ev.t,'#8fe0ff')});
       else if(Math.random()<0.5)burst(x,y,'#ffffff',3,60,0.4,1.4,{h:0.2,g:0});
       break;
     case 'perma':ring(x,y,'#ffffff',ev.r,0.4,0.15);burst(x,y,'#dff6ff',70,ev.r*1.6,0.8,2.2,{h:0.3,vh:[0,2],g:1});FX.flashLight(x,y,1,'#8fe0ff',5,22,0.4);if(near)snd('nova',{x,y,vol:0.6});break;
@@ -4052,7 +4083,7 @@ function efxFX(ev){
       ring(x,y,'#ffb347',45,0.35,H+0.1);burst(x,y,'#ff7a2a',20,120,0.4,3,{h:H+0.2,vh:[3,6],g:-2});
       FX.flashLight(x,y,H+1,'#ff8a3a',5,12,0.35);if(near)snd('cast_fire',ev);if(ev.id===NET.myId)snd('buff');break;
     case 'bcircle':if(near)snd('cast_fire',ev);break;
-    case 'ering':ZV.push({x,y,r:ev.r,t:ev.t,kind:'ering',col:'#ff6a2a'});SHAPES_Q.push({k:'rune',x,y,col:'#ff7a2a',s1:ev.r*S3,life:ev.t,op:0.7});ring(x,y,'#ffb347',ev.r,0.4,0.2);if(near)snd('boom',{x,y,vol:0.5});break;
+    case 'ering':{const own=zoneFx('ering',x,y,ev.r,ev.t,'#ff6a2a');ZV.push({x,y,r:ev.r,t:ev.t,kind:'ering',col:'#ff6a2a',file:own});if(own){if(near)snd('boom',{x,y,vol:0.5});break;}}SHAPES_Q.push({k:'rune',x,y,col:'#ff7a2a',s1:ev.r*S3,life:ev.t,op:0.7});ring(x,y,'#ffb347',ev.r,0.4,0.2);if(near)snd('boom',{x,y,vol:0.5});break;
     case 'eringhit':burst(x,y,'#ffb347',22,220,0.4,2.2,{h:H,vh:[0,3],g:2});FX.flashLight(x,y,H,'#ff8a3a',3,10,0.2);if(near)snd('block',{x,y,vol:0.5});break;
     case 'blaze':burst(x,y,'#ff7a2a',50,200,0.8,3,{h:H,vh:[1,5],g:-1});ring(x,y,'#ffb347',80,0.4,0.2);FX.flashLight(x,y,H+1,'#ff8a3a',5,16,0.4);if(near)snd('cast_fire',ev);break;
     case 'snapwind':if(near)snd('cast_fire',{x,y,vol:0.5});break;
@@ -4319,7 +4350,9 @@ function fx(ev){
     case 'breath':BREATHS.push({x:ev.x,y:ev.y,a:ev.a,t:ev.t});snd('breath',ev);break;
     case 'zn':{
       const col={fire:'#ff7a2a',lava:'#ff5a1a',frost:'#8fe0ff',storm:'#ffe27a',bloom:'#ff9ad5',spore:'#b6e86a'}[ev.z]||'#ffffff';
-      ZV.push({x:ev.x,y:ev.y,r:ev.r,t:ev.t,kind:ev.z,col});
+      const own=zoneFx(ev.z,ev.x,ev.y,ev.r,ev.t,col);
+      ZV.push({x:ev.x,y:ev.y,r:ev.r,t:ev.t,kind:ev.z,col,file:own});
+      if(own)break;
       SHAPES_Q.push({k:'rune',x:ev.x,y:ev.y,col,s1:ev.r*S3,life:ev.t,op:ev.z==='lava'?0.85:0.6});
       if(ev.z==='lava'||ev.z==='fire')SHAPES_Q.push({k:'decal',x:ev.x,y:ev.y,col:'#000000',s1:ev.r/28,life:ev.t+2,op:0.45});
       break;}
@@ -5480,7 +5513,7 @@ function disposeTree(root){
 }
 function disposeObj(o){scene.remove(o);if(o.userData&&o.userData.extra)for(const e of o.userData.extra){scene.remove(e);disposeTree(e);}disposeTree(o);}
 const PM3=new Map(),EM3=new Map(),JM3=new Map();
-function clearDyn(){for(const M of [PM3,EM3,JM3,WM3,MM3]){for(const o of M.values())disposeObj(o.g);M.clear();}ZV.length=0;if(typeof MO!=='undefined')clearModeObjs();}
+function clearDyn(){for(const M of [PM3,EM3,JM3,WM3,MM3]){for(const o of M.values())disposeObj(o.g);M.clear();}ZV.length=0;clearVfx();if(typeof MO!=='undefined')clearModeObjs();}
 
 // ---------- อนุภาค 2 ชั้น: แสงเรือง (additive) + ควัน (normal) ----------
 const PMAX=5000;
@@ -7724,7 +7757,7 @@ swSetup();
 window.WD.SW=SWK;
 // เทส/วัดผล: เดินลูปโฮสต์ 1 รอบด้วยมือ (hostTick + snapshot + เอฟเฟกต์) — ใช้ตอนหน้าต่างถูกซ่อนแล้ว setInterval ช้า
 // prop / โมเดลจากไฟล์ (ดีบัก)
-Object.defineProperties(window.WD,{PROPS:{get:()=>PROPS},PROPON:{get:()=>PROPON},HSTOP:{get:()=>HSTOP}});Object.assign(window.WD,{PROPDEF,genProps,MODELS,loadModel,modelManifest,useProp,hitProp,PM3,EM3,animTick,playVfx,playFlip,fileFx,VFXL,FLIPL,fx});
+Object.defineProperties(window.WD,{PROPS:{get:()=>PROPS},PROPON:{get:()=>PROPON},HSTOP:{get:()=>HSTOP}});Object.assign(window.WD,{PROPDEF,genProps,MODELS,loadModel,modelManifest,useProp,hitProp,PM3,EM3,animTick,playVfx,playFlip,fileFx,zoneFx,VFXL,FLIPL,FLIPS,fx});
 window.WD.hostStep=dt=>{hostTick(dt);const b=makeSnap(),ev=EVL;EVL=[];EVN=[];onSnap(Object.assign({},b,{ev}));};
 </script>
 </body>

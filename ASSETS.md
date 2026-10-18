@@ -83,7 +83,7 @@
   - `vfx_cast_<ชนิดกระสุน>` เล่นที่ปลายไม้กายสิทธิ์ตอนยิงกระสุนชนิดนั้น (ชนิดที่มีตอนนี้: `bolt` `fire` `stun` `pull` `ebolt` `web` `ice` `zap` `vine` `dart` `hex` `ember` `spike` `spark` `icicle` `iceboulder` `pfire` `pfireb` `pb0`–`pb5`)
   - `proj_<ชนิดกระสุน>` ใช้เป็นหน้าตาของลูกกระสุนเอง ให้ปั้นหัวกระสุนชี้ไปทาง −Y ของ Blender ซึ่งเป็นทิศที่พุ่งไป (แสงรอบกระสุนจากโค้ดยังอยู่)
 - **จุด origin** อยู่ที่จุดเกิดเอฟเฟกต์ (ปกติคือพื้น) และด้านหน้า (−Y ของ Blender) จะหันไปตามทิศของคาถา
-- **animation:** ใช้ keyframe ขยับ/หมุน/ย่อขยาย ทุก Action ในไฟล์จะเล่นพร้อมกันครั้งเดียว
+- **animation:** ใช้ keyframe ขยับ/หมุน/ย่อขยาย ทุก Action ในไฟล์จะเล่นพร้อมกันครั้งเดียว (ยกเว้น Action ชื่อ `start` / `loop` / `end` จะเล่นเป็นช่วงต่อกัน ดูแบบ C)
 - **วัสดุ** (ตั้งชื่อตามนี้):
   - ขึ้นต้นด้วย `add_` = เรืองแสงแบบบวกแสง (เหมาะกับไฟ แสง พลังงาน) ไม่ควรตั้ง Emission Strength สูงเกินไป เพราะเกมมี bloom อยู่แล้ว ค่าประมาณ 1–2 กำลังดี
   - มีคำว่า `fade` ในชื่อ = ค่อยๆ จางหายในช่วงท้าย
@@ -104,6 +104,24 @@
   }
   ```
   `cols`/`rows` = จำนวนช่อง, `fps` = ความเร็ว, `add` = เรืองแสงแบบบวกแสง, `size` = ขนาดในเกม (หน่วย), มี `radius`, `life`, `loop`, `mode` เหมือนแบบ A
+
+### แบบ C — พื้น/โซนที่อยู่ค้าง (พื้นไฟ ลาวา วงเพลิง เมฆสปอร์ ฯลฯ)
+ใช้กับคาถาที่ทิ้งพื้นที่ไว้ให้โดนดาเมจต่อเนื่อง ทำแยกจากเอฟเฟกต์ตอนร่ายได้เลย
+- **ชื่อใน manifest:** `vfx_zone_<ชนิดโซน>` (ใส่ได้ทั้งแบบ A ส่วน `"models"` และแบบ B ส่วน `"fx"`)
+  - ชนิดที่มีตอนนี้: `fire` (ทางไฟตอนพุ่งตัว — เกิดถี่มาก ทีละหลายสิบวง **ต้องปั้นให้เบา**), `lava`, `frost`, `storm` (สนามไฟฟ้า), `spore` (เมฆสปอร์), `bloom` (ดอกไม้ฮีล), `ering` (Ring of Embers), `icering` (วงน้ำแข็ง)
+- **อยู่ค้างนานเท่าโซนจริงเสมอ** (เกมเป็นคนกำหนดเวลา ไม่ต้องใส่ `life`) และ**ขยายตามรัศมีโซนเป็นค่าเริ่ม** ให้ปั้นที่รัศมี 1 หน่วย origin กลางวงบนพื้น (ไม่อยากให้ขยาย ใส่ `"radius": false`)
+- **Animation แบ่งเป็นช่วง** ให้ตั้งชื่อ Action ตามนี้ (มีแค่บางช่วงก็ได้):
+  - `start` = ตอนเกิด เล่นครั้งเดียว (เช่น ไฟลุกขึ้นจากพื้น)
+  - `loop` = วนซ้ำไปเรื่อยๆ ระหว่างที่โซนยังอยู่ (เช่น เปลวไฟพลิ้ว) ทำให้เฟรมแรกกับเฟรมสุดท้ายเหมือนกันจะได้วนเนียน
+  - `end` = ตอนหมดเวลา เล่นครั้งเดียว เกมจะเริ่มเล่นก่อนหมดเวลาพอดีกับความยาวของมัน (เช่น ไฟยุบลงพื้น)
+  - Action ชื่ออื่นจะเล่นวนพร้อมกันตลอด
+  - ถ้ามี `end` เกมจะไม่ทำให้จางเอง (ใส่ `"fade"` ใน manifest ได้ถ้าอยากให้จางด้วย)
+- **Flipbook ของโซนจะวางราบบนพื้นเป็นค่าเริ่ม** (`"flat": false` = เป็นภาพหันหากล้องแทน) และวนซ้ำจนโซนหมด ขนาดเท่าเส้นผ่านศูนย์กลางโซน × `size`
+- `"mode": "replace"` = ปิดอนุภาค วงเวท และรอยไหม้จากโค้ดของโซนนั้น ส่วนดาเมจยังทำงานเหมือนเดิม
+- ตัวอย่าง:
+  ```json
+  "vfx_zone_fire": {"file": "vfx/zone_fire.glb", "v": 1, "mode": "replace"}
+  ```
 
 ### ชื่อเอฟเฟกต์ที่มีในเกมตอนนี้
 `absz` `armor` `aura` `bark` `bcircle` `bigboom` `bind` `blaze` `blind` `blink` `brn` `chain` `colbolt` `colboom` `colend` `colossus` `conduct` `cryo` `cryoend` `curse` `detonate` `dfboom` `dfcancel` `dfdive` `dfrise` `ember` `ering` `eringhit` `fblock` `flare` `fnova` `forge` `freeze` `fswap` `glacier` `grcharge` `gwave` `heat` `ice` `iceboom` `icewall` `inferno` `infernocast` `jump` `kindle` `legion` `mark` `melt` `meteor` `mirror` `mirrorend` `orbget` `orbhit` `orbshot` `overc` `pboom` `perma` `pparry` `pshboom` `rally` `shatter` `silence` `siphon` `slam` `slam3` `slamgo` `slide` `snap` `snapboom` `snapwind` `soulburst` `spikehit` `summon` `swing` `swingwind` `tempest` `terror` `thorn` `thunder` `unsummon` `vine` `wallboost` `wallbreak` `wallcast` `wallhit` `wispheal` `worldtree` `zapt`
