@@ -3933,12 +3933,12 @@ function stormFX(o,p,pz,now,dt){
   if(god){
     if(!o.godG){o.godG=new THREE.Sprite(glowMat('#ffb800',0.7));o.godG.material.userData.keep=true;o.godG.position.y=1.2;o.g.add(o.godG);}
     o.godG.visible=true;o.godG.scale.set(1.5+0.15*Math.sin(now/90),2.4+0.2*Math.sin(now/70),1);
-    godBody(o,true);if(GODM)GODM.color.set(Math.random()<0.12?'#ffe066':'#e8a800');
-    for(let j=0;j<4;j++){const A=GODPTS[(Math.random()*GODPTS.length)|0],B=GODPTS[(Math.random()*GODPTS.length)|0];if(A===B)continue;const a=bWorld(o,A[0]*1.15,A[1],A[2]*1.4),b=bWorld(o,B[0]*1.15,B[1],B[2]*1.4);tbolt(a.x,a.y,a.h,b.x,b.y,b.h,0.05,0,0.07);}
+    // ตัวละครยังเป็นตัวเดิม (ไม่เปลี่ยนสี/ไม่ถอดผ้าคลุม) — มีแค่สายฟ้าวิ่งรอบ/ทั่วร่าง
+    for(let j=0;j<4;j++){const A=GODPTS[(Math.random()*GODPTS.length)|0],B=GODPTS[(Math.random()*GODPTS.length)|0];if(A===B)continue;const wA=A[1]<1.4?2.4:1.5,wB=B[1]<1.4?2.4:1.5,a=bWorld(o,A[0]*wA,A[1],A[2]*wA+0.05),b=bWorld(o,B[0]*wB,B[1],B[2]*wB+0.05);tbolt(a.x,a.y,a.h,b.x,b.y,b.h,0.05,0,0.07);}
     if(o.godUp>0){o.godUp-=dt;o.armR.rotation.x=-3.05;o.armR.rotation.z=-0.1;}
     // ดวงตา: สายฟ้าเหลืองแลบสั่นออกด้านข้าง
     if(!o.godEyes){o.godEyes=[-1,1].map(sd=>{const e=new THREE.Sprite(glowMat('#fff2a0',3));e.material.userData.keep=true;e.scale.setScalar(0.16);e.position.set(sd*0.085,1.865,0.24);o.b.add(e);return e;});}
-    o.godEyes.forEach(e=>{e.visible=true;e.scale.setScalar(0.22+0.08*Math.random());});
+    o.godEyes.forEach(e=>{e.visible=true;e.scale.setScalar(0.13+0.05*Math.random());});
     for(const sd of [-1,1]){const e=bWorld(o,sd*0.085,1.865,0.24),e2=bWorld(o,sd*rnd(0.6,1.0),1.865+rnd(-0.05,0.18),rnd(-0.1,0.1)),e3=bWorld(o,sd*rnd(0.35,0.55),1.865+rnd(-0.12,0.1),rnd(0,0.15));
       tbolt(e.x,e.y,e.h,e2.x,e2.y,e2.h,0.05,0,0.09);tbolt(e.x,e.y,e.h,e3.x,e3.y,e3.h,0.04,0,0.06);}
     // สายฟ้าด้านหลังชี้ขึ้นเฉียง 45°
