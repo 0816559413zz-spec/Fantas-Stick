@@ -19,6 +19,18 @@
       "radius": true,
       "life": 0.34,
       "fade": 0.5
+    },
+    "bld_house": {
+      "file": "buildings/house.glb",
+      "v": 1
+    },
+    "debris_stone": {
+      "file": "buildings/debris_stone.glb",
+      "v": 1
+    },
+    "debris_wood": {
+      "file": "buildings/debris_wood.glb",
+      "v": 1
     }
   }
 }
