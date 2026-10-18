@@ -2,7 +2,7 @@
 
 > **For the next Claude Code session (any device): read this file first.**
 > **Rule: update this file at the end of every task** — the status, changelog, and known issues sections at minimum. Commit and push it together with the code.
-> Last updated: 2026-10-18 session 8 (Storm Ultimate balance update; protocol remains `v21`)
+> Last updated: 2026-10-18 session 8 (**destructible houses** — piece-by-piece, fire/ice/blast; Storm class merged; protocol `v23`)
 
 ---
 
@@ -99,6 +99,7 @@ Personal, non-commercial fan project made with/for the user and their friends. U
 | ~305 | `ค่าคงที่ของเกม` | `MAPS`, `MODES`, `PDEF`, `EDEF`, `POOLS`, `BUFFS` (icon `i`) |
 | ~397 | `เครือข่าย` | host/join, `hostOnData`, `clientOnData` |
 | ~469 | `ฝั่งโฮสต์` | lobby, `hostStart`, `hostTick`, `updatePlayer`, projectiles, damage, enemies + boss AI, `modeLogic`, `endMatch` |
+| (grep) | `สิ่งปลูกสร้างที่พังเป็นชิ้น` / `บ้านพังเป็นชิ้น ฝั่งแสดงผล` | host: `BLDDEF`, `genBldg`, `damageEnv`, `collideBld` (right before `collideWorld`) • client: `syncBld`, `bldFallback`, `bldDebris` (right before `drawPropHint`) — §5d |
 | ~1168 | `โหมดพิเศษ` | training, Quidditch, race, battle royale, Voldemort mode, `modeSnap` |
 | ~1478 | | `makeSnap`, `PROF`/`pf` profiler, host loop |
 | ~1513 | `ไมค์` | mesh voice chat |
@@ -116,6 +117,16 @@ Personal, non-commercial fan project made with/for the user and their friends. U
 | ~3960 | `เมนู / ล็อบบี้ (DOM)` | menu wiring (graphics button, my-music input, UI click sounds), lobby, `renderLobby`, `window.WD` |
 
 > **Old build removed (2026-10-18):** `v6.html` (the pre-skills-rework game) was deleted at the user's request; it is still in git history (e.g. `git show 4c7abc2:v6.html`).
+
+## 5d. Destructible buildings (houses) (2026-10-18, protocol `v23`)
+- **What:** every `OBS` entry with `k:'house'` (Hogsmeade 14 houses + 2 test houses in Test Place, west side) is split into 6 pieces `BLD_PIECES` = `wall_front` (door, local +y/+z) `wall_back` `wall_left` `wall_right` `roof_left` `roof_right`. Each piece has its own HP (`BLDDEF.house.hp` wall 80 / roof 60 — placeholders for the gameplay side). A piece at 0 HP breaks alone → the house breaks where it was hit; 3 walls broken = both roofs collapse.
+- **Host:** `genBldg(map)` (in `setMapVars`, sets `o.bi` on the OBS entry) → `BLDG[i]={o,D,c,s,pc:[{hp,fl,burnT,frzT}]}`; `BLDON` = same modes as props (off in quid/race/imp). Local frame helpers `bldLocal/bldWorld/bldRect/rectDist`. `hitBldPiece(b,j,dmg,el,ox,oy)`, `breakBldPiece`, **`damageEnv(x,y,r,dmg,by,el,h)`** = the one call for spells (props + house pieces in the circle; roofs only if `h+r/20 >= wall height`). Elements `el`: `fire` (burn 5 s at 6 HP/s, then charred), `ice` (×0.7, frozen 6 s → other hits ×2, ice puts fire out, fire melts ice), `blast` (×1.5), `fireblast`. Projectiles: `bldPieceAt` (below wall height = nearest wall, above = roof pyramid) → `hitBldPiece` with `projEl(pr)` (type name or owner path). Collision `collideBld` = oriented rectangles per intact piece (broken wall = walk inside; roofs block only flyers); house OBS circles are skipped in `collideWorld` / projectiles. `updateBldg` (in `updateSpells`) ticks burn/freeze.
+- **Wired spells:** `explode` (fire), `pyroBigBoom` + `dragonfallBoom` (fireblast), `frostBoom` + `frostSlam` (ice), boss `bombTick` (blast). This also means those AoE spells now break crates/barrels (the old open question "which AoE spells call damagePropsIn").
+- **Network:** snapshot `BD` = one hex char per piece (bits 1 broken, 2 charred, 4 burning, 8 frozen; `''` = all clean), clients copy it in `onSnap` (`!NET.isHost`). Events `{k:'bld',e:'h'|'b',i,p,el,x,y,ox,oy,h}` → `fx` case `'bld'` (dust/fire/ice bursts, sounds, shake) + `bldDebris` (local-only flying chunks away from `ox,oy`, max 180, `updateDebris`, `clearDebris` on map change/new round).
+- **Client:** `syncBld(dt)` (frame loop) keeps one group per house in `BLDV`, rebuilt only when broken/charred bits change (key string) and merged with `batchStatic` per house (~7 draw calls/house; before, all houses were merged map-wide). Frozen = hidden ice shell boxes shown per piece; burning = particles/lights per frame. Code-built pieces `bldFallback` (half-pyramid roof `halfRoofGeo`), charred = `charMat` (darkened cached clone). `buildHogsmeade` skips houses that have `o.bi`.
+- **Model file (optional):** manifest `bld_house` = one .glb with objects named like the pieces (+ `_broken`), nominal size 8 × 6.5 (`BLDDEF.bw/bd`), scaled per house in x/z (`bldFilePiece`). Missing piece → code piece. Debris files `debris_stone` (walls) / `debris_wood` (roofs). Rules for the modeler: `ASSETS.md` §3b. Skill designers: `SKILL-DESIGN.md` "การโต้ตอบกับสภาพแวดล้อม".
+- Debug: `WD.BLDG`, `WD.BLDON`, `WD.damageEnv`, `WD.hitBldPiece`, `WD.breakBldPiece`.
+- Verified 2026-10-18 in the browser pane (solo, Test Place + Hogsmeade FFA): fire/ice/blast pieces change state and look, debris flies, a player walks in through a broken wall and stops at the back wall, projectiles hit the nearest wall / the roof by height, new round on the same map restores houses, no console errors. **Not checked:** online client (BD over the network), frame cost on a weak PC, real Blender house file.
 
 ## 5c. Training / Test Place (2026-10-18, protocol `v21`)
 - Map `test` (`genTest`, `buildTest`, not in `RANDOM_MAPS`/picker; `genProps` returns none). `MODES.train.map='test'`.
@@ -196,9 +207,9 @@ Can't cast on a broom except in Quidditch/race. Stun or web knocks you off the b
 - `index.2d-backup.html` (old 2D version) is git-ignored and only exists on the original PC.
 
 ## 9a. Remaining work (non-model) — listed for the user 2026-10-18, priority order
-1. **Real tests (user's job):** online with 2+ real devices (protocol v21, props over the network, Voldemort voting/voice, quidditch/BR under latency) and a weak PC.
+1. **Real tests (user's job):** online with 2+ real devices (protocol v23, props + broken houses over the network, Voldemort voting/voice, quidditch/BR under latency) and a weak PC.
 2. **First-visit map hitch** 100–200 ms during the countdown → warm `WCACHE` in the lobby / time-slice `buildWorld` (OPTIMIZE §B).
-3. **Waiting for gameplay decisions:** which AoE spells call `damagePropsIn`; chest effect `PROP_USE`; whether to support phones (UI overlap <900 px, no touch controls).
+3. **Waiting for gameplay decisions:** house/prop HP and which other spells call `damageEnv` (element + damage); chest effect `PROP_USE`; whether to support phones (UI overlap <900 px, no touch controls).
 4. **Small P3 optimize:** `InstancedMesh` for many same-type enemies; audio load priority/sprites, prefetch map music in the lobby, offline music.
 5. **Waiting for models (paused by the user):** `hand_R` anchoring for spell weapons, death clips, LOD, menu/lobby/creator file characters, licence credits in the guide.
 
@@ -302,3 +313,4 @@ User asked about real Harry Potter music: told them not to put it in the public 
 - 2026-10-18 (session 6) — **Storm numbers, first set** (design only, no code): user approved Claude's proposed values for every open Storm stat (stack cap/expiry, BA, empowered BA, Dash, line skill, siphon, triple strike, Railgun, dome, orbs, shield, ult rules). Recorded at the end of `designs/storm.md`; tune after play-testing.
 - 2026-10-18 (session 6) — **⚡ Storm class implemented** (protocol `v22`): stacks (max 5) + UI under the crosshair, Winston beam BA, triangle strike, 3-charge pass-through Dash, absorb shield, 6 spells + God Lightning ult, Shock redefined (≤0.3 s, no Dash, no damage bonus). Details in §0 and `designs/storm.md`.
 - 2026-10-18 (session 6) — **Icons:** new game-icons.net (lorc, CC BY 3.0) icons for Storm — beam BA `b_storm` tesla-coil, shield `sh_storm` lightning-shield, `thunderline` lightning-frequency, `speedsiphon` sprint, `triplestrike` lightning-trio, `stormorbs` lightning-electron, `railgun` beam-wake, ult `godlightning` lightning-mask (`stormdome` aliases `staticfield` lightning-dome); Frost range basic `b_frost` frozen-arrow → **ice-spear**, and the kit menu's Frost basic button shows both the sword and the ice-spear. Removed the unused old Storm icons (zap, thunderclap, overcharge, arcblink, tempest) from `ICODATA`/`icons/`; `_map.json` + `CREDITS.md` + guide credit updated (Willdabeast no longer used).
+- 2026-10-18 (session 8) — **Destructible houses** (protocol `v23`, after the Storm merge took `v22`): houses break piece by piece where hit (4 walls + 2 roof halves), fire/ice/blast looks, local debris, walk in through broken walls, `damageEnv` hook for spells, 2 test houses in Test Place. Docs: `ASSETS.md` §3b (house file rules), `SKILL-DESIGN.md` environment section. See §5d.
