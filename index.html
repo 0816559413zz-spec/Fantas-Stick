@@ -1240,13 +1240,16 @@ function updateERings(dt){
 // =====================================================================
 defSpell(1,{id:'frostforge',role:'utility',dual:1,n:'Frostforge',ic:'🪓',cd:18,d:'6 วิ: ประชิด = ดาบกลายเป็นขวานศึกน้ำแข็ง 20/20/40 ระยะ 160 จังหวะ 3 ฮีล 15 • ไกล = ก้อนน้ำแข็งใหญ่ระเบิด (วง ~100) 20 ดาเมจ ช้าลง 60% 2 วิ',fx:'ใช้ได้ทั้ง 2 โหมด สลับโหมดระหว่างบัฟได้ • คูลดาวน์ 12 วิหลังบัฟหมด • ฟาดจากที่สูงด้วยขวาน = 50',
   cast(p,S){p.ffT=6;emit({k:'efx',z:'forge',x:p.x,y:p.y,h:p.z+1,id:p.id});}});
-defSpell(1,{id:'glacierrend',role:'control',dual:1,n:'Glacier Rend',ic:'🏔️',cd:10,d:'ประชิด: ชาร์จดาบ 1 วิ แล้วส่งคลื่นดาบ 30 ดาเมจ ไกล ~600 ทะลุหลายคน ทิ้งทางน้ำแข็ง • ไกล: ภูเขาน้ำแข็งแหลมพุ่งเป็นแนว ~700 สูงถึง ~8 เมตร 6 วิ เดินขึ้นไปได้',fx:'โดนภูเขาน้ำแข็ง = 15 ดาเมจ + แช่แข็ง 1 วิ + กระเด็นเล็กน้อย • อยู่บนที่สูงแล้วฟัน = กระโดดฟาดลงพื้น',
+defSpell(1,{id:'glacierrend',role:'control',dual:1,n:'Glacier Rend',ic:'🏔️',cd:10,d:'ประชิด: ชาร์จดาบ 1 วิ แล้วส่งคลื่นดาบ 30 ดาเมจ ไกล ~600 ทะลุหลายคน ทิ้งทางน้ำแข็ง • ไกล: ชาร์จ 1 วิ (ชี้มือไปที่เล็ง) แล้วยกมือขึ้น = ภูเขาน้ำแข็งแหลมพุ่งเป็นแนว ~700 สูงถึง ~8 เมตร 6 วิ เดินขึ้นไปได้',fx:'โดนภูเขาน้ำแข็ง = 15 ดาเมจ + แช่แข็ง 1 วิ + กระเด็นเล็กน้อย • อยู่บนที่สูงแล้วฟัน = กระโดดฟาดลงพื้น',
   cast(p,S){
-    if(p.fmode!==1){p.grT=1;emit({k:'efx',z:'grcharge',x:p.x,y:p.y,h:p.z+1,id:p.id});return;}
-    const a=p.ang,c=Math.cos(a),s=Math.sin(a),grp=new Set();
-    for(let d=70;d<=770;d+=45){const x=p.x+c*d,y=p.y+s*d;if(x<30||x>MW-30||y<30||y>MH-30)break;(G.glac||(G.glac=[])).push({x,y,r:52,a,H:1+7*(d-70)/700,h:0,age:0,delay:(d-70)/1400,t:6.3,team:p.team,owner:p.id,grp});}
-    emit({k:'efx',z:'glacier',x:p.x+c*70,y:p.y+s*70,h:0,a:Math.round(a*1000)/1000,len:700,t:6.3});
+    p.grT=1;p.grM=p.fmode===1?1:0;emit({k:'efx',z:'grcharge',x:p.x,y:p.y,h:p.z+1,id:p.id,m:p.grM});
   }});
+// Glacier Rend โหมดไกล (หลังชาร์จ 1 วิ): ภูเขาน้ำแข็งแหลมพุ่งเป็นแนวตามทิศที่เล็งตอนปล่อย
+function frostGlacier(p){
+  const a=p.ang,c=Math.cos(a),s=Math.sin(a),grp=new Set();
+  for(let d=70;d<=770;d+=45){const x=p.x+c*d,y=p.y+s*d;if(x<30||x>MW-30||y<30||y>MH-30)break;(G.glac||(G.glac=[])).push({x,y,r:52,a,H:1+7*(d-70)/700,h:0,age:0,delay:(d-70)/1400,t:6.3,team:p.team,owner:p.id,grp});}
+  emit({k:'efx',z:'glacier',x:p.x+c*70,y:p.y+s*70,h:0,a:Math.round(a*1000)/1000,len:700,t:6.3,id:p.id});
+}
 defSpell(1,{id:'permafrost',role:'control',melee:1,n:'Permafrost',ic:'❄️',cd:16,d:'พื้นน้ำแข็งวงใหญ่รอบตัว (รัศมี ~300) 6 วิ: ศัตรูในวงช้าลง 20% ทันที (ซ้อนกับสลอว์ยิงปกติ สูงสุด 60%)',fx:'เราเดินในวงเร็ว +30% (ไม่ซ้อนกับไถลน้ำแข็ง) • ใช้ได้เฉพาะโหมดประชิด',
   cast(p,S){addIce({x:p.x,y:p.y,r:300,t:6,team:p.team,owner:p.id,kind:'ring'});emit({k:'efx',z:'perma',x:p.x,y:p.y,h:0.1,r:300});}});
 defSpell(1,{id:'cryoshell',role:'utility',melee:1,n:'Cryo Shell',ic:'🧊',cd:28,d:'แช่แข็งตัวเอง 5 วิ: อมตะ ล้างดีบัฟทั้งหมด ฮีล 7.5/วิ (ขยับ/ตี/ร่ายไม่ได้ ยกเว้น Frostbite Aura)',fx:'กดซ้ำเพื่อออกก่อนได้ (ฮีลหยุด) • ใช้ได้เฉพาะโหมดประชิด',
@@ -1511,7 +1514,7 @@ function castUlt(p){const S=SPELLS[p.ultId];if(!S||p.ult<100||p.sil>0||p.cryo>0)
 // =====================================================================
 //  เครือข่าย (PeerJS / WebRTC)
 // =====================================================================
-const PREFIX='wizduel-th-v16-';
+const PREFIX='wizduel-th-v17-';
 const NET={peer:null,isHost:false,online:false,myId:'me',conns:new Map(),hostConn:null,code:''};
 let LOBBY=null;
 function genCode(){const c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let s='';for(let i=0;i<5;i++)s+=c[Math.floor(Math.random()*c.length)];return s;}
@@ -1766,7 +1769,8 @@ function updatePlayer(p,dt,acting){
   if(p.blaze>0&&p.alive&&!p.downed){p.blzTk=(p.blzTk||0)-dt;if(p.blzTk<=0){p.blzTk=0.5;p.blzN=(p.blzN|0)+1;for(const t of foesIn(p.team,p.x,p.y,130,p.z+3)){damage(t,9.375,p.id,'burn');if(!p.blzHit)p.blzHit=new Set();if(!p.blzHit.has(t)){p.blzHit.add(t);addBurn(t,1,p.id);}}}}
   if(p.auraT>0&&p.alive&&!p.downed){p.auraT-=dt;p.auraTk-=dt;const tk=p.auraTk<=0;if(tk)p.auraTk=0.5;for(const t of foesIn(p.team,p.x,p.y,180,p.z+3)){if(tk)damage(t,10,p.id,'zone');}}
   if(p.mirror>0){p.mirror-=dt;if(p.mirror<=0){p.xhp=0;emit({k:'efx',z:'mirrorend',x:p.x,y:p.y,h:p.z+1,id:p.id});}}
-  if(p.grT>0&&p.alive){p.grT-=dt;if(p.grT<=0){const c=Math.cos(p.ang),s=Math.sin(p.ang);for(const sd of (p.mirror>0?[0,-1,1]:[0])){const ox=p.x+c*30-s*55*sd,oy=p.y+s*30+c*55*sd;(G.waves||(G.waves=[])).push({x:ox,y:oy,dx:c,dy:s,left:600,acc:0,owner:p.id,team:p.team,hit:new Set()});emit({k:'efx',z:'gwave',x:ox,y:oy,h:p.z+1,a:Math.round(p.ang*1000)/1000,len:600,id:p.id,cl:sd?1:0});}}}
+  if(p.grT>0&&p.alive&&p.grM===1){p.grT-=dt;if(p.grT<=0)frostGlacier(p);}
+  else if(p.grT>0&&p.alive){p.grT-=dt;if(p.grT<=0){const c=Math.cos(p.ang),s=Math.sin(p.ang);for(const sd of (p.mirror>0?[0,-1,1]:[0])){const ox=p.x+c*30-s*55*sd,oy=p.y+s*30+c*55*sd;(G.waves||(G.waves=[])).push({x:ox,y:oy,dx:c,dy:s,left:600,acc:0,owner:p.id,team:p.team,hit:new Set()});emit({k:'efx',z:'gwave',x:ox,y:oy,h:p.z+1,a:Math.round(p.ang*1000)/1000,len:600,id:p.id,cl:sd?1:0});}}}
   p.flyCd=Math.max(0,p.flyCd-dt);p.root=Math.max(0,p.root-dt);
   if(!p.alive){
     if(['ffa','tdm','quid','race','train'].includes(G.mode)&&acting){p.respawn-=dt;if(p.respawn<=0)respawn(p);}
@@ -3568,7 +3572,7 @@ function efxFX(ev){
     case 'grcharge':if(near)snd('buff',ev);break;
     case 'gwave':{const m=makeWaveBlade();m.rotation.y=-ev.a;scene.add(m);WVV.push({x,y,a:ev.a,len:ev.len,d:0,m,gh:0});
       {const o=PM3.get(ev.id);if(o&&!ev.cl)o.grDown=0.3;const c=Math.cos(ev.a),sn=Math.sin(ev.a);makeSlash(x-c*20,y-sn*20,0.4,ev.a,85,true,0.1,'#cfefff');burst(x+c*40,y+sn*40,'#dff6ff',30,320,0.4,2.4,{h:0.6,vh:[1,5],g:6,a:ev.a,spread:0.7});FX.flashLight(x,y,1.2,'#8fe0ff',5,14,0.25);}}if(near){snd('whoosh',ev);snd('slam',{x,y,vol:0.4});}break;
-    case 'glacier':GLV.push(makeGlacier(x,y,ev.a,ev.len,ev.t));if(near){snd('break',ev);shake(5);}break;
+    case 'glacier':{const o=PM3.get(ev.id);if(o)o.grUp=0.5;}GLV.push(makeGlacier(x,y,ev.a,ev.len,ev.t));if(near){snd('break',ev);shake(5);}break;
     case 'mirror':ULTV.push({x,y,a:ev.a,d:0,acc:55});burst(x,y,'#dff6ff',50,260,0.5,2.4,{h:1,vh:[1,4],g:2});FX.flashLight(x,y,1.5,'#8fe0ff',6,16,0.4);if(near){snd('nova',{x,y,vol:0.7});shake(4);}break;
     case 'mirrorend':burst(x,y,'#dff6ff',40,200,0.5,2,{h:H,g:3});break;
     // ----- สายไฟ (ออกแบบโดยผู้เล่น) -----
@@ -5642,18 +5646,23 @@ function frostFX(o,p,pz,now,dt){
   }
   // Glacier Rend: ชาร์จ = ยกดาบสูงเหนือหัว / ปล่อย = ฟันลงทันที แล้วคลื่นพุ่งออกไป
   if(melee&&!p.fl&&(flags&32)){ax=-2.75;az=-0.08;bl=0;bx=-0.18;by=0;}
+  const rpose=!melee&&!p.fl&&((flags&32)||o.grUp>0);
+  if(!melee&&!p.fl&&(flags&32)){ax=-1.42;az=0.1;bx=0.12;by=-0.1;}
+  if(o.grUp>0){o.grUp-=dt;const k=1-Math.max(0,o.grUp)/0.5;const e=1-Math.pow(1-Math.min(1,k/0.45),3);ax=lerp(-1.42,-3.0,e);az=0.05;bx=lerp(0.12,-0.2,e);by=0;}
   if(o.grDown>0){o.grDown-=dt;const k=1-Math.max(0,o.grDown)/0.3;bl=0;az=-0.05;by=0;
     if(k<0.35){const e=Math.pow(k/0.35,2.2);ax=lerp(-2.85,0.35,e);bx=lerp(-0.2,0.45,e);}else{const e=1-Math.pow(1-(k-0.35)/0.65,3);ax=lerp(0.35,-1.05,e);bx=lerp(0.45,0,e);}}
-  const sm=(o.swT>0||o.grDown>0)?Math.min(1,dt*40):Math.min(1,dt*12);
+  const sm=(o.swT>0||o.grDown>0||o.grUp>0)?Math.min(1,dt*40):Math.min(1,dt*12);
   fa.ax+=(ax-fa.ax)*sm;fa.az+=(az-fa.az)*sm;fa.by+=(by-fa.by)*sm;fa.bx+=(bx-fa.bx)*sm;fa.bl=(fa.bl===undefined?bl:fa.bl)+(bl-(fa.bl===undefined?bl:fa.bl))*Math.min(1,dt*(bl===0?30:8));
-  if(o.sword)o.sword.rotation.x=melee?fa.bl:0;if(o.axe)o.axe.rotation.x=melee?fa.bl:0;
-  if(melee&&!p.fl){o.armR.rotation.x=fa.ax;o.armR.rotation.z=fa.az;o.b.rotation.y=fa.by;if(Math.abs(fa.bx)>0.01)o.b.rotation.x+=fa.bx;
-    if(!p.sh&&!(o.swT>0)&&!(o.grDown>0)&&!(flags&32)){o.armL.rotation.x=-0.45;o.armL.rotation.z=0.3;}}
+  {const tw=(o.swT>0&&o.swC!==2)?0:Math.PI/2;fa.tw=(fa.tw===undefined?tw:fa.tw)+(tw-(fa.tw===undefined?tw:fa.tw))*Math.min(1,dt*30);}
+  if(o.sword){o.sword.rotation.x=melee?fa.bl:0;o.sword.rotation.y=fa.tw;}if(o.axe){o.axe.rotation.x=melee?fa.bl:0;o.axe.rotation.y=fa.tw;}
+  if((melee||rpose)&&!p.fl){o.armR.rotation.x=fa.ax;o.armR.rotation.z=fa.az;o.b.rotation.y=fa.by;if(Math.abs(fa.bx)>0.01)o.b.rotation.x+=fa.bx;
+    if(rpose){o.armL.rotation.x=lerp(-0.2,-1.6,o.grUp>0?1:0.5);o.armL.rotation.z=0.25;}
+    if(melee&&!p.sh&&!(o.swT>0)&&!(o.grDown>0)&&!(flags&32)){o.armL.rotation.x=-0.45;o.armL.rotation.z=0.3;}}
   else o.b.rotation.y*=0.8;
   // ไอเย็นจางๆ ตามใบดาบ
   if(melee&&Math.random()<0.25){(ff?o.axe:o.sword).getWorldPosition(_pw);const s=simOf(_pw);PARTS.push({x:s.x+rnd(-8,8),y:s.y+rnd(-8,8),h:s.h-rnd(0.3,1.6),vx:0,vy:0,vh:-0.3,life:0.6,max:0.6,col:'#e8f6ff',size:1.4,g:0});}
   // Glacier Rend ชาร์จ: ดาบเรืองแสง ไอเย็นดูดเข้า
-  if(flags&32){(ff?o.axe:o.sword).getWorldPosition(_pw);const s=simOf(_pw);
+  if(flags&32){(melee?(ff?o.axe:o.sword):o.tip).getWorldPosition(_pw);const s=simOf(_pw);
     for(let i=0;i<3;i++){const an=rnd(0,6.283),r=rnd(30,55);PARTS.push({x:s.x+Math.cos(an)*r,y:s.y+Math.sin(an)*r,h:s.h-0.8+rnd(-0.8,0.8),vx:-Math.cos(an)*r/0.25,vy:-Math.sin(an)*r/0.25,vh:0,life:0.25,max:0.25,col:i?'#bfeaff':'#ffffff',size:2,g:0});}
     LREQ.push({x:_pw.x,y:_pw.y-0.8,z:_pw.z,col:'#8fe0ff',int:2.5,dist:9});}
   // โล่อัศวินน้ำแข็ง (แทนโล่ฟองสบู่)
