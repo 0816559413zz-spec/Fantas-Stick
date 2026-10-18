@@ -1243,7 +1243,7 @@ function pyroBasic(p,inp,dt,setCd){
 // โล่สายไฟ: เก็บ "ลูกไฟวิญญาณ" (orb) หมุนรอบตัว — Parry +2 / บล็อกครบ 3 ครั้ง +2 / สูงสุด 6 ไม่หายจนกว่าจะใช้
 function addOrbs(p,n){const was=p.orbs|0;p.orbs=Math.min(6,was+n);if(p.orbs>was)emit({k:'efx',z:'orbget',x:p.x,y:p.y,h:p.z+1.2,id:p.id,n:p.orbs});}
 function pyroParry(p){addOrbs(p,2);}
-function pyroBlock(p){emit({k:'efx',z:'fblock',x:p.x+Math.cos(p.ang)*26,y:p.y+Math.sin(p.ang)*26,h:p.z+1.2});p.orbBlk=(p.orbBlk|0)+1;if(p.orbBlk>=3){p.orbBlk=0;addOrbs(p,2);}}
+function pyroBlock(p){p.orbBlk=(p.orbBlk|0)+1;if(p.orbBlk>=3){p.orbBlk=0;addOrbs(p,2);}}
 // ลูกไฟ (ชาร์จ/Kindle) โดนศัตรู = ปล่อยลูกไฟวิญญาณทั้งหมดพุ่งใส่เป้านั้น ลูกละ 10 • ทุก 2 ลูก = +1 Burning
 function launchOrbs(p,t){
   const n=p.orbs|0;if(!n||!t)return;p.orbs=0;
@@ -4890,8 +4890,7 @@ function efxFX(ev){
       for(let i=0;i<22;i++){const an=rnd(0,6.283),r=Math.sqrt(Math.random())*R;PARTS.push({x:x+Math.cos(an)*r,y:y+Math.sin(an)*r,h:H+0.06,vx:0,vy:0,vh:rnd(0.3,1.2),life:rnd(0.45,0.6),max:0.6,col:i%2?'#ff6a1a':'#ffd27a',size:rnd(1.8,2.8),g:-0.5});}
       smoke(x,y,H+0.1,12,'#3a2a24',0.6,8,R);
       if(near){snd('boom',ev);snd('boom',{x,y,vol:0.6});shake(8);}break;}
-    case 'fblock':for(let i=0;i<10;i++){const an=rnd(0,6.283),r=rnd(18,30);flame(x+Math.cos(an)*r,y+Math.sin(an)*r,H-0.3+rnd(-0.4,0.4),{vx:-Math.cos(an)*r*6,vy:-Math.sin(an)*r*6,vh:0,life:0.15,size:5,g:0,drag:0});}
-      later(0.12,()=>{burst(x,y,'#ff8a2a',16,200,0.35,2.4,{h:H,vh:[0,2],g:2});burst(x,y,'#fff0b0',8,160,0.25,1.6,{h:H,g:3});});FX.flashLight(x,y,H,'#ff8a3a',2.5,8,0.15);break;
+    case 'fblock':break;
     case 'orbget':{const o=PM3.get(ev.id),a=o?-o.g.rotation.y+Math.PI/2:0;FX.flashSprite(x,y,H,'#ffd27a',0.4,3.5,0.15,2.4);burst(x,y,'#ffb347',14,120,0.4,2.2,{h:H,g:-1});
       // ลูกไฟ 2 ลูกก่อตัวจากโล่ (หน้าตัว) แล้วลอยไปประจำข้างตัว
       for(const sd of [-1,1]){const sx=x+Math.cos(a)*30,sy=y+Math.sin(a)*30,ex=x-Math.sin(a)*sd*36-Math.cos(a)*15,ey=y+Math.cos(a)*sd*36-Math.sin(a)*15;for(let k=0;k<6;k++)later(k*0.04,()=>{const t=k/5;flame(lerp(sx,ex,t),lerp(sy,ey,t),H-0.3,{vh:1,life:0.2,size:6,g:-1});});}
@@ -6376,18 +6375,36 @@ function makePointSys(additive){
   return {geo,pos,col,size,n:0};
 }
 // เปลวไฟรูปหยดน้ำ (ฐานเหลืองขาว → ส้ม → ปลายแดงจาง) ใช้กับอนุภาค fl:true — ผสมสีปกติ เห็นชัดแม้พื้นสว่าง
-const FLAMETEX=texCanvas(64,64,(g)=>{
+// ===== เปลวไฟ: FLAME_STYLE 2 = แบบใหม่ (ลิ้นไฟ 4 แบบ คมปลาย มีแกนสว่าง ไม่กลับหัว หดเล็กและเปลี่ยนสีเหลือง→ส้ม→แดงตามอายุ)
+//       FLAME_STYLE 1 = แบบแรก (เปลวหยดน้ำเบลอ) — ผู้ใช้ขอเก็บไว้เผื่อเปลี่ยนกลับ: แก้เลขบรรทัดนี้เป็น 1 =====
+const FLAME_STYLE=2;
+const FLAMETEX_V1=texCanvas(64,64,(g)=>{
   const drop=(w,h,col,bl)=>{g.save();g.filter='blur('+bl+'px)';g.beginPath();g.moveTo(32,58);g.bezierCurveTo(32+w,56-h*0.25,32+w*0.45,58-h*0.72,32,58-h);g.bezierCurveTo(32-w*0.45,58-h*0.72,32-w,56-h*0.25,32,58);g.fillStyle=col;g.fill();g.restore();};
   drop(20,54,'rgba(210,30,6,0.9)',3);drop(15,42,'rgba(255,90,10,0.97)',2.5);drop(10,28,'rgba(255,170,30,1)',2);drop(5,14,'rgba(255,240,190,1)',1.5);
 },false);
+// แบบใหม่: แผ่นภาพ 2x2 ช่อง แต่ละช่องเป็นลิ้นไฟคนละทรง (ลิ้นหลัก + ลิ้นเล็กข้าง ๆ เอนต่างกัน) ไล่สีจากฐานเหลืองขาว → ส้ม → ปลายแดงจาง
+const FLAMETEX_V2=texCanvas(128,128,(g)=>{
+  const tongue=(ox,oy,cx,base,w,h,lean,a)=>{const x0=ox+cx,y0=oy+base,tipx=x0+lean,tipy=y0-h;
+    const gr=g.createLinearGradient(0,y0,0,tipy);gr.addColorStop(0,`rgba(255,238,170,${a})`);gr.addColorStop(0.16,`rgba(255,185,50,${a})`);gr.addColorStop(0.42,`rgba(255,105,15,${a*0.95})`);gr.addColorStop(0.75,`rgba(215,40,8,${a*0.7})`);gr.addColorStop(1,'rgba(160,20,5,0)');
+    g.beginPath();g.moveTo(x0-w,y0-2);g.bezierCurveTo(x0-w*1.05,y0-h*0.45,tipx-w*0.25,y0-h*0.7,tipx,tipy);g.bezierCurveTo(tipx+w*0.2,y0-h*0.62,x0+w*1.05,y0-h*0.4,x0+w,y0-2);g.quadraticCurveTo(x0,y0+4,x0-w,y0-2);
+    g.save();g.shadowColor='rgba(255,120,30,0.8)';g.shadowBlur=5;g.fillStyle=gr;g.fill();g.restore();};
+  const cell=[[0,0],[64,0],[0,64],[64,64]],sh=[[[32,58,11,50,-4,1],[22,58,6,26,-6,0.8],[42,58,6,30,5,0.8]],[[32,58,12,54,5,1],[20,58,5,22,-3,0.75]],[[30,58,10,44,-8,1],[42,58,7,34,6,0.85],[24,58,5,20,-4,0.7]],[[32,58,13,56,2,1],[44,58,5,24,7,0.7]]];
+  cell.forEach(([ox,oy],i)=>{for(const t of sh[i])tongue(ox,oy,...t);
+    // แกนสว่างที่ฐาน
+    const rg=g.createRadialGradient(ox+32,oy+52,0,ox+32,oy+52,8);rg.addColorStop(0,'rgba(255,250,220,0.85)');rg.addColorStop(1,'rgba(255,220,120,0)');g.fillStyle=rg;g.fillRect(ox+20,oy+40,24,22);});
+},false);
 const PSYS=[makePointSys(true),makePointSys(false),makePointSys(false)];
-{const F=PSYS[2],pts=scene.children[scene.children.length-1];pts.renderOrder=4;pts.material=new THREE.ShaderMaterial({
-  uniforms:{map:{value:FLAMETEX},scale:{value:600}},
-  vertexShader:'attribute vec4 pcol;attribute float psize;uniform float scale;varying vec4 vC;void main(){vC=pcol;vec4 mv=modelViewMatrix*vec4(position,1.0);gl_PointSize=psize*scale/-mv.z;gl_Position=projectionMatrix*mv;}',
-  fragmentShader:'uniform sampler2D map;varying vec4 vC;void main(){vec4 t=texture2D(map,vec2(gl_PointCoord.x,gl_PointCoord.y));gl_FragColor=vec4(t.rgb*vC.rgb*1.05,t.a*vC.a);}',
+{const F=PSYS[2],pts=scene.children[scene.children.length-1];pts.renderOrder=4;
+  F.vari=new Float32Array(PMAX);F.geo.setAttribute('pvar',new THREE.BufferAttribute(F.vari,1));
+  pts.material=new THREE.ShaderMaterial({
+  uniforms:{map:{value:FLAME_STYLE===2?FLAMETEX_V2:FLAMETEX_V1},scale:{value:600}},
+  vertexShader:'attribute vec4 pcol;attribute float psize;attribute float pvar;uniform float scale;varying vec4 vC;varying float vV;void main(){vC=pcol;vV=pvar;vec4 mv=modelViewMatrix*vec4(position,1.0);gl_PointSize=psize*scale/-mv.z;gl_Position=projectionMatrix*mv;}',
+  fragmentShader:FLAME_STYLE===2
+    ?'uniform sampler2D map;varying vec4 vC;varying float vV;void main(){vec2 c=vec2(mod(vV,2.0),floor(vV/2.0));vec4 t=texture2D(map,vec2((c.x+gl_PointCoord.x)*0.5,1.0-(c.y+gl_PointCoord.y)*0.5));gl_FragColor=vec4(t.rgb*vC.rgb,t.a*vC.a);}'
+    :'uniform sampler2D map;varying vec4 vC;varying float vV;void main(){vec4 t=texture2D(map,vec2(gl_PointCoord.x,gl_PointCoord.y));gl_FragColor=vec4(t.rgb*vC.rgb*1.05,t.a*vC.a);}',
   blending:THREE.NormalBlending,depthWrite:false,transparent:true});F.mat=pts.material;}
 // เปลวไฟ 1 ดวง (fl:true) — col = สีย้อม ('#ffffff' = สีเปลวตามภาพ)
-function flame(x,y,h,o){o=o||{};PARTS.push({x,y,h,vx:o.vx||0,vy:o.vy||0,vh:o.vh===undefined?rnd(2,4):o.vh,life:o.life||0.45,max:o.life||0.45,col:o.col||'#ffffff',size:o.size||6,g:o.g===undefined?-1.5:o.g,drag:o.drag===undefined?2:o.drag,grow:o.grow===undefined?0.4:o.grow,fl:true});}
+function flame(x,y,h,o){o=o||{};PARTS.push({x,y,h,vx:o.vx||0,vy:o.vy||0,vh:o.vh===undefined?rnd(2,4):o.vh,life:o.life||0.45,max:o.life||0.45,col:o.col||'#ffffff',size:o.size||6,g:o.g===undefined?-1.5:o.g,drag:o.drag===undefined?2:o.drag,grow:o.grow===undefined?(FLAME_STYLE===2?0:0.4):o.grow,fl:true,v:(Math.random()*4)|0});}
 const colCache={};
 function col3(c){return colCache[c]||(colCache[c]=new THREE.Color(c));}
 function updateParticles(dt){
@@ -6404,12 +6421,12 @@ function updateParticles(dt){
     const S=PSYS[p.fl?2:p.smoke?1:0];if(S.n>=PMAX)continue;
     const k=p.life/p.max,c=col3(p.col),j=S.n;
     S.pos[j*3]=tx(p.x);S.pos[j*3+1]=p.h+GY(p.x,p.y);S.pos[j*3+2]=tz(p.y);
-    if(p.fl){S.col[j*4]=c.r;S.col[j*4+1]=c.g;S.col[j*4+2]=c.b;S.col[j*4+3]=Math.min(1,(1-k)*7)*Math.min(1,k*1.8);}
+    if(p.fl){const u=FLAME_STYLE===2?1-k:0;S.col[j*4]=c.r;S.col[j*4+1]=c.g*(1-0.45*u);S.col[j*4+2]=c.b*(1-0.75*u);S.col[j*4+3]=Math.min(1,(1-k)*7)*Math.min(1,k*1.8);S.vari[j]=p.v|0;}
     else if(p.smoke){S.col[j*4]=c.r;S.col[j*4+1]=c.g;S.col[j*4+2]=c.b;S.col[j*4+3]=Math.min(1,k*1.5);}
     else{const b=1.25;S.col[j*4]=c.r*b;S.col[j*4+1]=c.g*b;S.col[j*4+2]=c.b*b;S.col[j*4+3]=k;}
-    S.size[j]=p.size*0.12;S.n++;
+    S.size[j]=p.size*0.12*(p.fl&&FLAME_STYLE===2?0.45+0.55*k:1);S.n++;
   }
-  for(const S of PSYS){S.geo.setDrawRange(0,S.n);const a=S.geo.attributes;a.position.needsUpdate=a.pcol.needsUpdate=a.psize.needsUpdate=true;}
+  for(const S of PSYS){S.geo.setDrawRange(0,S.n);const a=S.geo.attributes;a.position.needsUpdate=a.pcol.needsUpdate=a.psize.needsUpdate=true;if(a.pvar)a.pvar.needsUpdate=true;}
 }
 
 // ---------- เอฟเฟกต์รูปทรง: แฟลช / วงแหวน / โดม / รอยไหม้ / สายฟ้า / แสงชั่วคราว ----------
@@ -7289,10 +7306,7 @@ function syncPlayers(P,mode,now,dt){
     o.shield.visible=!!p.sh||!!(p.fm&(128|16384));
     const fireSh=p.sh&&getKit(p.id).path===0;
     if(o.shield.visible){o.shield.material.uniforms.t.value=now/1000;o.shield.material.uniforms.c.value.set(fireSh?'#ff7a2a':p.sh?'#7ff0ff':(p.fm&128)?'#6fb8d8':'#9a7a3a');}
-    if(fireSh){o.shield.visible=false;o.armL.rotation.x=-1.3;o.armL.rotation.z=0.35;
-      // แผ่นโล่เปลวไฟโค้งคลุมแขนซ้าย ไหลพุ่งขึ้น
-      for(let i=0;i<5;i++){const u=rnd(-1,1);_ev.set(0.55+u*0.05,1.25+u*0.55,0.62-Math.abs(u)*0.25);_ev.x+=rnd(-0.05,0.05);o.b.localToWorld(_ev);const q=simOf(_ev);flame(q.x,q.y,q.h-0.25,{vh:rnd(1.5,3),life:rnd(0.18,0.28),size:rnd(5,7),g:-2});}
-      LREQ.push({x:tx(p.x),y:(o.zs||0)+1.3,z:tz(p.y),col:'#ff7a2a',int:1.8,dist:8});}
+    if(fireSh){o.shield.visible=false;o.armL.rotation.x=-1.3;o.armL.rotation.z=0.35;}
     statusFX(o,p.fm|0,p.x,p.y,o.zs||0,2.2,now);
     o.stars.visible=!!p.st;o.stars.rotation.y=now/250;
     const isMe=p.id===NET.myId;
