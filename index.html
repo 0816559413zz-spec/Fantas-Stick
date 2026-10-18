@@ -472,7 +472,7 @@ body.crGame #creator{background:rgba(4,6,14,.86)}
     <h3>🎮 โหมดทั้งหมด (โฮสต์เลือกในล็อบบี้)</h3>
     <table>
       <tr><td><b>🗝️ ดันเจียน Co-op</b><br><small>1-6 คน</small></td><td>ช่วยกันฝ่าศัตรูทีละชั้น ผ่านชั้นแล้วเลือกพลังเสริม (กด 1/2/3) • ทุก 5 ชั้นเจอ<b>บอสเรด 3 เฟส</b>: มังกร (พ่นไฟ → บินทิ้งระเบิด → คลั่งปล่อยคลื่นไฟ) หรือราชินีแมงมุม • เห็นวงแดงที่พื้นให้รีบออก / ยกโล่ / ขึ้นไม้กวาด • เพื่อนล้มให้ไปยืนข้างๆ 2.5 วิเพื่อชุบ</td></tr>
-      <tr><td><b>🎯 ห้องฝึก</b><br><small>1-6 คน</small></td><td>ด่าน <b>Test Place</b> โล่งๆ มีหุ่นซ้อม + <b>โซนเสกมอนสเตอร์</b> • กด <b>P</b> เปิดเมนูทดลอง: เปลี่ยนสาย/คาถาได้ทันที, เปิด/ปิดให้หุ่นโจมตี, มอนสเตอร์ขยับ/ยืนนิ่ง, ไม่มีคูลดาวน์, อัลติเต็มตลอด, อมตะ, เสกมอนสเตอร์ทุกชนิด (รวมบอส) • โฮสต์กด "🏁 จบการฝึก" มุมขวาบนเพื่อกลับ</td></tr>
+      <tr><td><b>🎯 ห้องฝึก</b><br><small>1-6 คน</small></td><td>ด่าน <b>Test Place</b> โล่งๆ มีหุ่นซ้อม + <b>โซนเสกมอนสเตอร์</b> • กด <b>P</b> เปิดเมนูทดลอง: เลือก 🤝 ทีมเดียวกัน / ⚔️ แบ่ง 2 ทีม / 💥 ตัวใครตัวมัน (สู้กับเพื่อนได้), เปลี่ยนสาย/คาถาได้ทันที, เปิด/ปิดให้หุ่นโจมตี, มอนสเตอร์ขยับ/ยืนนิ่ง, ไม่มีคูลดาวน์, อัลติเต็มตลอด, อมตะ, เสกมอนสเตอร์ทุกชนิด (รวมบอส) • โฮสต์กด "🏁 จบการฝึก" มุมขวาบนเพื่อกลับ</td></tr>
       <tr><td><b>⚔️ ดวล 1v1</b></td><td>สู้ตัวต่อตัว ชนะ 2 ใน 3 รอบ</td></tr>
       <tr><td><b>💥 FFA</b><br><small>2-6 คน</small></td><td>ทุกคนเป็นศัตรูกันหมด ใครได้ 10 kill ก่อนชนะ (ตายแล้วเกิดใหม่)</td></tr>
       <tr><td><b>🛡️ ทีม 2v2/3v3</b></td><td>ทีมฟ้า vs ทีมแดง ทีมไหนได้ 15 kill ก่อนชนะ • สลับทีมได้ในล็อบบี้</td></tr>
@@ -1794,7 +1794,7 @@ function respawn(p){
   let x,y;
   if(MODES[G.mode].team){x=MW*(p.team?0.9:0.1);y=MH/2+rnd(-170,170);}
   else if(G.mode==='race'){const n=G.rings.length,r=G.rings[(p.cp-1+n)%n];resetBody(p,r.x,r.y);p.fly=true;p.z=r.h;p.inv=1;p.ang=Math.atan2(G.rings[p.cp].y-r.y,G.rings[p.cp].x-r.x);emit({k:'revive',x:r.x,y:r.y});return;}
-  else if(G.mode==='train'){x=MW/2;y=MH/2+160;}
+  else if(G.mode==='train'){const pv=G.tr&&G.tr.pvp;if(pv===1){x=MW*(p.team?0.62:0.38);y=MH/2+160;}else if(pv===2){const a=rnd(0,Math.PI*2);x=MW/2+Math.cos(a)*420;y=MH/2+Math.sin(a)*300;}else{x=MW/2;y=MH/2+160;}}
   else{
     let best=-1;
     for(const s of spawnPts()){
@@ -2534,7 +2534,7 @@ function modeInit(){
     banner(`🐍 ลอร์ดโวลเดอมอร์${ni>1?'และผู้เสพความตาย':''}แฝงตัวอยู่ในหมู่พวกเรา — ทำภารกิจ แล้วหาตัวให้เจอ!`,4);
   }else if(m==='train'){
     // Test Place: หุ่นซ้อมเรียงเป็นแถว + 1 ตัวไกลๆ ไว้ฝึกยิงระยะไกล • ค่าตั้ง G.tr คงอยู่ข้ามรอบ
-    G.tr=Object.assign({datk:1,mai:1,nocd:0,ult:0,god:0},G.tr||{});
+    G.tr=Object.assign({datk:1,mai:1,nocd:0,ult:0,god:0,pvp:0},G.tr||{});trTeams();
     const cy=MH/2-260;
     for(let i=0;i<5;i++)spawnDummy(MW/2+(i-2)*170,cy);
     spawnDummy(MW/2,MH/2-620>80?MH/2-620:80);
@@ -2560,10 +2560,21 @@ function trainTick(dt){
 }
 // คำสั่งจากเมนูทดลอง (ใครในห้องก็กดได้): ตั้งค่า / เสกมอนสเตอร์ในโซน / ล้างมอนสเตอร์
 const TR_KEYS=['datk','mai','nocd','ult','god'];
+// ทีมในห้องฝึก: pvp 0 = ทีมเดียวกันหมด, 1 = แบ่ง 2 ทีม (ผู้เล่นเลือกเอง p.trT), 2 = ตัวใครตัวมัน
+function trTeams(){
+  const T=G.tr||{};
+  plist().forEach((p,i)=>{
+    if(p.trT===undefined)p.trT=i%2;
+    p.team=T.pvp===1?p.trT:T.pvp===2?10+i:0;
+  });
+  if(G.mins)for(const m of G.mins){const o=G.players[m.owner];if(o)m.team=o.team;}
+}
 function trCmd(p,d){
   if(!G||G.mode!=='train'||G.ph==='over'||G.ph==='lobby')return;
   G.tr=G.tr||{};
-  if(d.c==='set'&&TR_KEYS.includes(d.k)){G.tr[d.k]=d.v?1:0;if(d.k==='ult'&&!d.v)for(const q of plist())q.ult=0;}
+  if(d.c==='pvp'){const v=clamp(d.v|0,0,2);if(G.tr.pvp!==v){G.tr.pvp=v;trTeams();feed(['🤝 ทุกคนทีมเดียวกัน','⚔️ แบ่ง 2 ทีม','💥 ตัวใครตัวมัน'][v]);}}
+  else if(d.c==='team'){p.trT=d.v?1:0;trTeams();if(G.tr.pvp===1)feed(`${p.name} → ${TEAMN[p.trT]}`);}
+  else if(d.c==='set'&&TR_KEYS.includes(d.k)){G.tr[d.k]=d.v?1:0;if(d.k==='ult'&&!d.v)for(const q of plist())q.ult=0;}
   else if(d.c==='spawn'&&(EDEF[d.e])){
     const cnt=clamp(d.n|0||1,1,10),z=trZone();
     for(let i=0;i<cnt&&G.en.length<40;i++){
@@ -2892,6 +2903,7 @@ function voiceSync(){
   }
   applyVoiceGates();
 }
+function teamOn(v){v=v||VIEW.cur;return !!(v&&(MODES[v.mode]&&MODES[v.mode].team||v.mode==='train'&&v.M&&v.M.tr&&v.M.tr.pvp===1));}
 function teamOf(id){const v=VIEW.cur;if(!v)return null;const p=v.P.find(q=>q.id===id);return p?p.tm:null;}
 function applyVoiceGates(){
   if(!VOICE.on)return;
@@ -6383,7 +6395,7 @@ function syncPlayers(P,mode,now,dt){
     o.stars.visible=!!p.st;o.stars.rotation.y=now/250;
     const isMe=p.id===NET.myId;
     if(p.fl)o.ring.visible=false;
-    else if(MODES[mode]&&MODES[mode].team){o.ring.visible=true;o.ring.material.color.set(TEAMC[p.tm]);}
+    else if(teamOn()){o.ring.visible=true;o.ring.material.color.set(TEAMC[p.tm]);}
     else if(isMe){o.ring.visible=true;o.ring.material.color.set('#ffffff');}
     else o.ring.visible=false;
     o.tip.scale.setScalar(0.3+0.08*Math.sin(now/120)+(o.castT>0?0.4:0))*((p.cg||0)>0?0.4:1);
@@ -6575,7 +6587,7 @@ function burnNum(x,y,n){
   cx.fillStyle=g;cx.fillText(n,x,y);cx.restore();
 }
 function drawLabels(P,E,v,me,spk){
-  if(!SET.names){const team=MODES[v.mode]&&MODES[v.mode].team;P=P.filter(p=>team&&me&&p.tm===me.tm);}
+  if(!SET.names){const team=teamOn(v);P=P.filter(p=>team&&me&&p.tm===me.tm);}
   cx.textAlign='center';
   for(const e of E){if(!e.br)continue;const o=EM3.get(e.id);if(!o)continue;const s=toScreen(e.x,(o.hs||0)+(o.h||2)*0.5,e.y);if(s)burnNum(s[0],s[1],e.br);}
   for(const p of P){if(!p.br||!p.al||p.id===NET.myId)continue;const s=toScreen(p.x,(p.z||0)+1.2,p.y);if(s)burnNum(s[0],s[1],p.br);}
@@ -6596,7 +6608,7 @@ function drawLabels(P,E,v,me,spk){
     const s=toScreen(p.x,(p.z||0)+2.55,p.y);if(!s)continue;
     cx.font='600 13px Kanit,sans-serif';
     cx.fillStyle='rgba(0,0,0,0.65)';cx.fillText(p.n,s[0]+1,s[1]-7);
-    cx.fillStyle=MODES[v.mode]&&MODES[v.mode].team?TEAMC[p.tm]:mates.includes(p.id)?'#ff6b6b':'#ffffff';cx.fillText(p.n+(p.hb?' 🔴':''),s[0],s[1]-8);
+    cx.fillStyle=teamOn(v)?TEAMC[p.tm]:mates.includes(p.id)?'#ff6b6b':'#ffffff';cx.fillText(p.n+(p.hb?' 🔴':''),s[0],s[1]-8);
     if(v.mode==='imp')continue;
     if(spk.has(p.id)){cx.font='14px sans-serif';cx.fillText('🔊',s[0]+cx.measureText(p.n).width/2+16,s[1]-8);}
     const bw=50,hr=p.hp/p.mh;
@@ -7109,7 +7121,7 @@ function drawMinimap(v,me,P){
     cx.beginPath();cx.arc(q[0],q[1],boss?5:2.6,0,Math.PI*2);cx.fillStyle='#ff4040';cx.fill();
   }
   // ผู้เล่นคนอื่น (โหมดทีมใช้สีทีม)
-  const teamMode=v.mode==='tdm'||v.mode==='quid';
+  const teamMode=v.mode==='tdm'||v.mode==='quid'||teamOn(v);
   for(const p of P){
     if(p.id===me.id||!p.al)continue;
     const q=pt(p.x,p.y,false);if(!q)continue;
@@ -7223,7 +7235,7 @@ function drawBoard(v,P){
     const yy=hy+32+i*32,me=p.id===NET.myId;
     if(me){const g=cx.createLinearGradient(x,0,x+w,0);g.addColorStop(0,'rgba(217,180,90,0.2)');g.addColorStop(1,'rgba(217,180,90,0)');cx.fillStyle=g;cx.fillRect(x+16,yy-20,w-32,28);}
     diaPath(x+30,yy-6,6);cx.fillStyle=p.c;cx.fill();
-    cx.textAlign='left';cx.fillStyle=MODES[v.mode]&&MODES[v.mode].team?TEAMC[p.tm]:me?HG2:'#efe6cf';cx.font=(me?'600 ':'')+'15px Kanit,sans-serif';
+    cx.textAlign='left';cx.fillStyle=teamOn(v)?TEAMC[p.tm]:me?HG2:'#efe6cf';cx.font=(me?'600 ':'')+'15px Kanit,sans-serif';
     cx.fillText(p.n+(p.bf&&p.bf.length?'  ('+p.bf.length+' บัฟ)':''),x+46,yy);
     cx.textAlign='right';cx.fillStyle='#efe6cf';
     cx.fillText(p.k,x+w-170,yy);cx.fillText(p.d,x+w-100,yy);cx.fillText(p.dmg,x+w-24,yy);
@@ -7476,11 +7488,14 @@ function trSync(v){
   $('#trOpen').classList.toggle('hidden',!on||trOpenF);
   if(!on){if(trOpenF)trToggle(false);return;}
   if(!trOpenF)return;
-  const tr=(v.M&&v.M.tr)||{},k=JSON.stringify(tr)+'|'+trN;
+  const tr=(v.M&&v.M.tr)||{},me=v.P.find(q=>q.id===NET.myId),myT=me?me.tm:0,k=JSON.stringify(tr)+'|'+trN+'|'+myT;
   if(k===trKey)return;trKey=k;
   const mons=Object.keys(EDEF);
   $('#trPanel').innerHTML=`<h2>🧪 Test Place</h2>
     <button class="pri trw" data-tr="kit">🪄 เปลี่ยนสาย / คาถา</button>
+    <div class="trs">ผู้เล่น</div>
+    <div class="trn">${['🤝 ทีมเดียวกัน','⚔️ 2 ทีม','💥 ตัวใครตัวมัน'].map((n,i)=>`<button class="${(tr.pvp|0)===i?'on':''}" data-trp="${i}">${n}</button>`).join('')}</div>
+    ${tr.pvp===1?`<div class="trn">${TEAMN.map((n,i)=>`<button class="${myT===i?'on':''}" data-trteam="${i}" style="color:${TEAMC[i]}">${myT===i?'✔ ':''}${n}</button>`).join('')}</div>`:''}
     <div class="trs">ตั้งค่า</div>
     ${TR_OPTS.map(([k2,n])=>`<button class="trt ${tr[k2]?'on':''}" data-trk="${k2}">${n}<b>${tr[k2]?'เปิด':'ปิด'}</b></button>`).join('')}
     <div class="trs">เสกมอนสเตอร์ (ที่วงสีแดง)</div>
@@ -7494,6 +7509,8 @@ $('#trPanel').addEventListener('click',e=>{
   const b=e.target.closest('button');if(!b)return;ac();
   const v=VIEW.cur,tr=(v&&v.M&&v.M.tr)||{};
   if(b.dataset.trk){const k=b.dataset.trk;trSend({c:'set',k,v:tr[k]?0:1});}
+  else if(b.dataset.trp)trSend({c:'pvp',v:+b.dataset.trp});
+  else if(b.dataset.trteam)trSend({c:'team',v:+b.dataset.trteam});
   else if(b.dataset.trn){trN=+b.dataset.trn;trKey='';}
   else if(b.dataset.tre)trSend({c:'spawn',e:b.dataset.tre,n:trN});
   else if(b.dataset.tr==='clear')trSend({c:'clear'});
