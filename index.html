@@ -1669,7 +1669,7 @@ function cleanName(n){n=String(n||'').trim().slice(0,16);return n||'พ่อม
 function cleanColor(c){return /^#[0-9a-f]{6}$/i.test(c)?c:COLORS[0];}
 
 function freshStats(){
-  return {hp:100,maxHp:100,alive:true,downed:false,revive:0,respawn:0,vx:0,vy:0,ang:0,z:0,vz:0,fly:false,flyCd:0,root:0,
+  return {hp:200,maxHp:200,alive:true,downed:false,revive:0,respawn:0,vx:0,vy:0,ang:0,z:0,vz:0,fly:false,flyCd:0,root:0,
     cd:{basic:0,q:0,e:0,r:0,f:0,dodge:0},cdMax:{basic:1,q:1,e:1,r:1,f:1,dodge:1},
     shieldOn:false,shieldE:100,shieldT:0,shieldBroken:0,dash:0,dashX:0,dashY:0,inv:0,stun:0,burn:0,bt:0,burnSrc:null,
     ult:0,kills:0,deaths:0,dmgDealt:0,lastHit:null,bo:null,picked:true,taken:[],dfall:null,
@@ -1760,8 +1760,6 @@ function hostStart(){
   plist().forEach((p,i)=>{
     Object.assign(p,freshStats());
     p.team=(G.mode==='coop'||G.mode==='train')?0:MD.team?p.lteam:10+i;
-    // สู้กันเอง: เลือดเยอะขึ้น (140) ให้คาถา/คอมโบมีเวลาได้ทำงาน ไม่ใช่ใครยิงรัวชนะ
-    if(!['coop','train'].includes(G.mode)){p.maxHp=200;p.hp=200;}
   });
   placeAll();
   modeInit();
