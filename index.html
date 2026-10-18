@@ -1020,12 +1020,21 @@ function frostBasic(p,inp,dt,setCd){
   if(p.z>4){p.slam=true;p.vz=5;p.vx+=Math.cos(p.ang)*420;p.vy+=Math.sin(p.ang)*420;setCd('basic',0.6);emit({k:'efx',z:'slamgo',x:p.x,y:p.y,h:p.z+1,id:p.id});return;}
   let ci=p.cmbT>0?(p.cmbN|0):0;if(p.ripT>0){ci=2;p.ripT=0;}
   const D=ff?[20,20,40]:[10,10,15],R=ff?160:120;
-  const n=meleeHit(p,p.x,p.y,R,D[ci],1.0,t=>addFrostSlow(t,5));
-  if(ci===2&&n>0)healT(p,p.mirror>0?(ff?45:30):(ff?15:10));
-  if(p.mirror>0)for(const s of [-1,1]){const q=mirrorPos(p,s);meleeHit(p,q.x,q.y,R,D[ci]*0.5,1.0);}
+  if(ci===2){p.slam3={t:0.32,R,dm:D[2],ff};}
+  else{meleeHit(p,p.x,p.y,R,D[ci],1.0,t=>addFrostSlow(t,5));
+  if(p.mirror>0)for(const s of [-1,1]){const q=mirrorPos(p,s);meleeHit(p,q.x,q.y,R,D[ci]*0.5,1.0);}}
   p.cmbN=(ci+1)%3;p.cmbT=1;p.swN=((p.swN|0)+1)%250;p.swC=ci;
   emit({k:'efx',z:'swing',x:p.x,y:p.y,h:p.z+1.1,a:Math.round(p.ang*100)/100,c:ci,ax:ff?1:0,r:R,id:p.id,m:p.mirror>0?1:0});
-  setCd('basic',p.shieldOn?0.6:ff?0.5:0.4);
+  setCd('basic',ci===2?0.85:p.shieldOn?0.6:ff?0.5:0.4);
+}
+// จังหวะ 3: ง้างแล้วฟาดลงพื้นตรงหน้า (ดาเมจออกหลังง้าง 0.32 วิ) + ระเบิดน้ำแข็ง
+function frostSlam3(p){
+  const q=p.slam3;p.slam3=null;if(!q||!p.alive||p.downed)return;
+  const n=meleeHit(p,p.x,p.y,q.R,q.dm,1.0,t=>addFrostSlow(t,5));
+  if(n>0)healT(p,p.mirror>0?(q.ff?45:30):(q.ff?15:10));
+  if(p.mirror>0)for(const s of [-1,1]){const m=mirrorPos(p,s);meleeHit(p,m.x,m.y,q.R,q.dm*0.5,1.0);}
+  const fx=p.x+Math.cos(p.ang)*q.R*0.6,fy=p.y+Math.sin(p.ang)*q.R*0.6;
+  emit({k:'efx',z:'slam3',x:fx,y:fy,h:p.z+0.1,r:q.R*0.75,ax:q.ff?1:0,m:p.mirror>0?1:0,a:Math.round(p.ang*100)/100});
 }
 function frostSlam(p){
   p.slam=false;const dm=p.ffT>0?50:30;
@@ -1060,7 +1069,7 @@ function updateWaves(dt){
     const st=Math.min(w.left,1500*dt);w.x+=w.dx*st;w.y+=w.dy*st;w.left-=st;w.acc+=st;
     const o=G.players[w.owner];
     if(o)for(const t of foesOf(w.team)){if(w.hit.has(t))continue;if(Math.hypot(t.x-w.x,t.y-w.y)<40+(t.r||PR)&&cH(t)<4){w.hit.add(t);aoeHit(o,t,30,t=>addFrostSlow(t,5));}}
-    if(w.acc>=50){w.acc=0;addIce({x:w.x,y:w.y,r:46,t:4,team:w.team,kind:'path',lx:w.x-w.dx*50,ly:w.y-w.dy*50});}
+    if(w.acc>=50){w.acc=0;addIce({x:w.x,y:w.y,r:72,t:4,team:w.team,kind:'path',lx:w.x-w.dx*50,ly:w.y-w.dy*50});}
     if(w.x<30||w.x>MW-30||w.y<30||w.y>MH-30)w.left=0;
   }
   G.waves=G.waves.filter(w=>w.left>0);
@@ -1106,10 +1115,10 @@ function pyroBasic(p,inp,dt,setCd){
     // Kindle: คลิก = ลูกไฟชาร์จเต็มทันที
     if(p.kindle>0&&p.cd.basic<=0){p.kindle--;if(!p.kindle){p.kindleT=0;p.hover=0;}shoot(p,'pfireb',{sp:'pyrobig',dmg:20});setCd('basic',0.5);p.chg=-1;return;}
     p.chg=0;
-  }else if(inp.fire){if(p.chg>=0)p.chg=Math.min(2,p.chg+dt);}
+  }else if(inp.fire){if(p.chg>=0)p.chg=Math.min(1.5,p.chg+dt);}
   else if(prev){
     // ปล่อยคลิก: แตะสั้น = ประกายไฟ / ชาร์จครบ 3 วิ = ลูกไฟ / ระหว่างนั้น = ไม่ยิง
-    if(p.chg>=2){pyroBall(p);setCd('basic',0.5);}
+    if(p.chg>=1.5){pyroBall(p);setCd('basic',0.5);}
     else if(p.chg>=0&&p.chg<0.25&&p.cd.basic<=0){shoot(p,'spark',{sp:'b_pyro',dmg:6});setCd('basic',0.3);}
     p.chg=0;
   }
@@ -1149,8 +1158,8 @@ function pyroDash(p,inp,pr,dt,setCd){
 // =====================================================================
 //  สายไฟ — ความร้อน: สะสมด้วยลูกไฟ/กำแพง/พุ่งเพลิง แล้วจุดระเบิดด้วยระเบิดความร้อน/อุกกาบาต
 // =====================================================================
-defSpell(0,{id:'kindle',role:'builder',n:'Kindle',ic:'🔥',cd:6,d:'กระโดดถอยหลังขึ้นกลางอากาศ แล้วลอยตกช้าๆ 3 วิ (แบบฟาราห์/เฟรย่า) • ยิงปกติ 2 นัดกลายเป็นลูกไฟใหญ่ทันที (20 ดาเมจ ระเบิดวงกว้าง ~90 +1 Burning ทุกคนในวง)',fx:'ยิงครบ 2 ลูกหรือครบ 3 วิ = ตกลงพื้นตามปกติ • ไฟพุ่งจากใต้เท้าตอนลอย',
-  cast(p,S){p.kindle=2;p.kindleT=3;p.hover=3;p.vz=10;p.vx-=Math.cos(p.ang)*1000;p.vy-=Math.sin(p.ang)*1000;p.shieldOn=false;emit({k:'efx',z:'kindle',x:p.x,y:p.y,h:p.z,id:p.id});}});
+defSpell(0,{id:'kindle',role:'builder',n:'Kindle',ic:'🔥',cd:9,d:'กระโดดสูงไปทางที่กด WASD (ไม่กด = ถอยหลัง) ขึ้นกลางอากาศ แล้วลอยตกช้าๆ 3 วิ (แบบฟาราห์/เฟรย่า) • ยิงปกติ 2 นัดกลายเป็นลูกไฟใหญ่ทันที (20 ดาเมจ ระเบิดวงกว้าง ~90 +1 Burning ทุกคนในวง)',fx:'ยิงครบ 2 ลูกหรือครบ 3 วิ = ตกลงพื้นตามปกติ • ไฟพุ่งจากใต้เท้าตอนลอย',
+  cast(p,S){p.kindle=2;p.kindleT=3;p.hover=3;p.vz=15;{const i=p.inp||{};let dx=i.mx||0,dy=i.my||0;const l=Math.hypot(dx,dy);if(l>0.1){dx/=l;dy/=l;}else{dx=-Math.cos(p.ang);dy=-Math.sin(p.ang);}p.vx+=dx*1000;p.vy+=dy*1000;}p.shieldOn=false;emit({k:'efx',z:'kindle',x:p.x,y:p.y,h:p.z,id:p.id});}});
 defSpell(0,{id:'dragonbreath',role:'builder',n:"Dragon's Breath",ic:'🐉',cd:10,d:'ร่ายวงเวทเล็กด้านหน้า 0.4 วิ แล้วพ่นไฟ 2 วิ (กรวยแคบ ระยะ ~500) โดน 3 ครั้ง ครั้งละ 15 ดาเมจ คนโดนช้าลง 60%',fx:'โดนแต่ละครั้ง = +1 Burning (สูงสุด 3 ชั้นจากท่านี้) • ระหว่างพ่น: เดินช้าลงนิดหน่อย ยิงปกติไม่ได้ เล็งฝืดขึ้น',
   cast(p,S){
     if(p.breath>0)return false;
@@ -1172,8 +1181,8 @@ defSpell(0,{id:'ringofembers',role:'control',n:'Ring of Embers',ic:'⭕',cd:14,d
     (G.erings||(G.erings=[])).push({x:q.x,y:q.y,r:170,t:3,owner:p.id,team:p.team,in:new Set(),cd:new Map(),ed:new Map()});
     emit({k:'efx',z:'ering',x:q.x,y:q.y,h:0.2,r:170,t:3});
   }});
-defSpell(0,{id:'blazeform',role:'utility',n:'Blazeform',ic:'🔥',cd:20,d:'กลายร่างเปลวไฟ 12 วิ: ดาเมจทุกสกิล (รวมเผา Burning) +30% • เดินเร็ว +25% • ออร่าไฟรอบตัว (รัศมี ~180) เผา 15/วิ + 1 Burning ทุกวินาที',fx:'ผลเสีย: เรารับดาเมจ +25% ระหว่างนั้น',
-  cast(p,S){p.blaze=12;p.blzTk=0;p.blzN=0;emit({k:'efx',z:'blaze',x:p.x,y:p.y,h:p.z+1,id:p.id});}});
+defSpell(0,{id:'blazeform',role:'utility',n:'Blazeform',ic:'🔥',cd:20,d:'กลายร่างเปลวไฟ 6 วิ: ดาเมจทุกสกิล (รวมเผา Burning) +30% • เดินเร็ว +25% • ออร่าไฟรอบตัว (รัศมี ~130) เผา 15/วิ + 1 Burning ทุกวินาที',fx:'ผลเสีย: เรารับดาเมจ +25% ระหว่างนั้น',
+  cast(p,S){p.blaze=6;p.blzTk=0;p.blzN=0;emit({k:'efx',z:'blaze',x:p.x,y:p.y,h:p.z+1,id:p.id});}});
 defSpell(0,{id:'ignitionsnap',role:'finisher',n:'Ignition Snap',ic:'🫰',cd:5,d:'ท่าเตรียม 0.6 วิ แล้วดีดนิ้ว: ศัตรูทุกคนที่มี Burning ในระยะ 500 ระเบิดพร้อมกัน (ไม่ต้องเล็ง)',fx:'25 ดาเมจต่อ 1 ชั้น Burning (6 ชั้น = 150) และฮีลเรา 20 ต่อชั้น แล้วใช้ Burning หมด • ไม่มีใครติดไฟในระยะ = ไม่เสียคูลดาวน์',
   cast(p,S){
     if(!foesOf(p.team).some(t=>t.brn>0&&Math.hypot(t.x-p.x,t.y-p.y)<500))return false;
@@ -1502,7 +1511,7 @@ function castUlt(p){const S=SPELLS[p.ultId];if(!S||p.ult<100||p.sil>0||p.cryo>0)
 // =====================================================================
 //  เครือข่าย (PeerJS / WebRTC)
 // =====================================================================
-const PREFIX='wizduel-th-v14-';
+const PREFIX='wizduel-th-v15-';
 const NET={peer:null,isHost:false,online:false,myId:'me',conns:new Map(),hostConn:null,code:''};
 let LOBBY=null;
 function genCode(){const c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let s='';for(let i=0;i<5;i++)s+=c[Math.floor(Math.random()*c.length)];return s;}
@@ -1750,13 +1759,14 @@ function updatePlayer(p,dt,acting){
   if(p.snapT>0&&p.alive&&!p.downed){p.snapT-=dt;if(p.snapT<=0)pyroSnap(p);}
   if(p.colos>0){p.colos-=dt;if(p.colos<=0||!p.alive||p.downed){p.colos=0;emit({k:'efx',z:'colend',x:p.x,y:p.y,h:p.z+2,id:p.id});}}
   if(p.fmCd>0)p.fmCd-=dt;
+  if(p.slam3){p.slam3.t-=dt;if(p.slam3.t<=0)frostSlam3(p);}
   if(p.hover>0){p.hover-=dt;if(p.hover<=0||!(p.kindle>0))p.hover=0;}
   if(p.slideT>0)p.slideT-=dt;
   if(p.cryo>0){p.cryo-=dt;p.inv=Math.max(p.inv,0.05);p.cryoTk-=dt;if(p.cryoTk<=0){p.cryoTk=0.5;healT(p,3.75);}if(p.cryo<=0){p.inv=0;emit({k:'efx',z:'cryoend',x:p.x,y:p.y,h:p.z+1,id:p.id});}}
-  if(p.blaze>0&&p.alive&&!p.downed){p.blzTk=(p.blzTk||0)-dt;if(p.blzTk<=0){p.blzTk=0.5;p.blzN=(p.blzN|0)+1;for(const t of foesIn(p.team,p.x,p.y,180,p.z+3)){damage(t,7.5,p.id,'burn');if(p.blzN%2===0)addBurn(t,1,p.id);}}}
+  if(p.blaze>0&&p.alive&&!p.downed){p.blzTk=(p.blzTk||0)-dt;if(p.blzTk<=0){p.blzTk=0.5;p.blzN=(p.blzN|0)+1;for(const t of foesIn(p.team,p.x,p.y,130,p.z+3)){damage(t,7.5,p.id,'burn');if(p.blzN%2===0)addBurn(t,1,p.id);}}}
   if(p.auraT>0&&p.alive&&!p.downed){p.auraT-=dt;p.auraTk-=dt;const tk=p.auraTk<=0;if(tk)p.auraTk=0.5;for(const t of foesIn(p.team,p.x,p.y,180,p.z+3)){t.fslA=0.6;if(tk)damage(t,10,p.id,'zone');}}
   if(p.mirror>0){p.mirror-=dt;if(p.mirror<=0){p.xhp=0;emit({k:'efx',z:'mirrorend',x:p.x,y:p.y,h:p.z+1,id:p.id});}}
-  if(p.grT>0&&p.alive){p.grT-=dt;if(p.grT<=0){const c=Math.cos(p.ang),s=Math.sin(p.ang);(G.waves||(G.waves=[])).push({x:p.x+c*30,y:p.y+s*30,dx:c,dy:s,left:600,acc:0,owner:p.id,team:p.team,hit:new Set()});emit({k:'efx',z:'gwave',x:p.x,y:p.y,h:p.z+1,a:Math.round(p.ang*1000)/1000,len:600});}}
+  if(p.grT>0&&p.alive){p.grT-=dt;if(p.grT<=0){const c=Math.cos(p.ang),s=Math.sin(p.ang);for(const sd of (p.mirror>0?[0,-1,1]:[0])){const ox=p.x+c*30-s*55*sd,oy=p.y+s*30+c*55*sd;(G.waves||(G.waves=[])).push({x:ox,y:oy,dx:c,dy:s,left:600,acc:0,owner:p.id,team:p.team,hit:new Set()});emit({k:'efx',z:'gwave',x:ox,y:oy,h:p.z+1,a:Math.round(p.ang*1000)/1000,len:600});}}}
   p.flyCd=Math.max(0,p.flyCd-dt);p.root=Math.max(0,p.root-dt);
   if(!p.alive){
     if(['ffa','tdm','quid','race','train'].includes(G.mode)&&acting){p.respawn-=dt;if(p.respawn<=0)respawn(p);}
@@ -2688,7 +2698,7 @@ function makeSnap(){
       hp:Math.ceil(p.hp),mh:p.maxHp,al:p.alive,dn:p.downed,rv:r1(p.revive),sh:p.shieldOn,se:Math.round(p.shieldE),
       st:p.stun>0,ds:p.dash>0,iv:p.inv>0,bn:p.burn>0,u:Math.floor(p.ult),k:p.kills,d:p.deaths,rs:Math.ceil(p.respawn),
       cd:CDK.map(k=>r1(p.cd[k])),cm:CDK.map(k=>p.cdMax[k]||1),bo:p.bo,pk:p.picked,bf:p.taken,dmg:Math.round(p.dmgDealt),
-      fm:fxMask(p),gh:!!p.gh,hb:!!(G.ball&&G.ball.holder===p.id),lap:p.lap|0,cp:p.cp|0,fin:p.fin|0,bs:p.boost>0,br:p.brn|0,cg:p.chg>0.25?Math.round(Math.min(1,(p.chg-0.25)/1.75)*20)/20:0,dc:p.dchgOn?Math.round(p.dchg/4*20)/20+0.01:0,bm:p.breath>0?(p.breath>2?1:2):0,sn:p.snapT>0?1:0,co:p.colos>0?(p.colN|0)+1:0,kd:p.kindle|0,hv:p.hover>0?1:0,ob:p.orbs|0,fr:p.pathIdx===1?[p.fmode|0,p.swN|0,p.swC|0,(p.slideT>0?1:0)|(p.cryo>0?2:0)|(p.auraT>0?4:0)|(p.ffT>0?8:0)|(p.mirror>0?16:0)|(p.grT>0?32:0)]:0,xh:Math.ceil(p.xhp||0),ul:p.unl?Object.keys(p.unl).join(','):'',tk:p.doing?r1(p.doing.left):0})),
+      fm:fxMask(p),gh:!!p.gh,hb:!!(G.ball&&G.ball.holder===p.id),lap:p.lap|0,cp:p.cp|0,fin:p.fin|0,bs:p.boost>0,br:p.brn|0,cg:p.chg>0.25?Math.round(Math.min(1,(p.chg-0.25)/1.25)*20)/20:0,dc:p.dchgOn?Math.round(p.dchg/4*20)/20+0.01:0,bm:p.breath>0?(p.breath>2?1:2):0,sn:p.snapT>0?1:0,co:p.colos>0?(p.colN|0)+1:0,kd:p.kindle|0,hv:p.hover>0?1:0,ob:p.orbs|0,fr:p.pathIdx===1?[p.fmode|0,p.swN|0,p.swC|0,(p.slideT>0?1:0)|(p.cryo>0?2:0)|(p.auraT>0?4:0)|(p.ffT>0?8:0)|(p.mirror>0?16:0)|(p.grT>0?32:0)]:0,xh:Math.ceil(p.xhp||0),ul:p.unl?Object.keys(p.unl).join(','):'',tk:p.doing?r1(p.doing.left):0})),
     M:modeSnap(),
     E:G.en.map(e=>({id:e.id,t:e.type,x:r1(e.x),y:r1(e.y),h:r1(e.h||0),hp:Math.ceil(e.hp),mh:Math.ceil(e.maxHp),sl:e.slam>0,st:e.stun>0,bn:e.burn>0,br:e.brn|0,fm:fxMask(e),lg:e.lunge>0})),
     MN:(G.mins||[]).map(m=>[m.id,m.type,Math.round(m.x),Math.round(m.y),r1(m.h||0),Math.max(1,Math.round(m.hp/m.maxHp*100)),m.owner,m.team,fxMask(m)]),
@@ -5447,10 +5457,10 @@ function pyroFX(o,p,pz,now,dt){
   if(p.hv){for(let i=0;i<4;i++)PARTS.push({x:p.x+rnd(-8,8),y:p.y+rnd(-8,8),h:pz+rnd(-0.1,0.2),vx:rnd(-20,20),vy:rnd(-20,20),vh:rnd(-5,-2.5),life:rnd(0.25,0.4),max:0.4,col:i?'#ff8a2a':'#ffe08a',size:rnd(2.4,3.6),g:2,drag:2,smoke:i===3});LREQ.push({x:tx(p.x),y:pz,z:tz(p.y),col:'#ff8a3a',int:2,dist:8});}
   // Blazeform: ออร่าไฟรอบตัว + ขอบวงบอกระยะ (~180)
   if((p.fm|0)&131072){
-    if(!o.blzR){o.blzR=new THREE.Mesh(_iceEdge,new THREE.MeshBasicMaterial({color:hdr('#ff7a2a',1.5),transparent:true,opacity:0.8,blending:THREE.AdditiveBlending,depthWrite:false}));o.blzR.scale.setScalar(180*S3);o.g.add(o.blzR);
-      o.blzD=new THREE.Mesh(_iceDisc,new THREE.MeshBasicMaterial({color:hdr('#ff5a1a',1),transparent:true,opacity:0.1,blending:THREE.AdditiveBlending,depthWrite:false}));o.blzD.scale.setScalar(180*S3);o.g.add(o.blzD);}
+    if(!o.blzR){o.blzR=new THREE.Mesh(_iceEdge,new THREE.MeshBasicMaterial({color:hdr('#ff7a2a',1.5),transparent:true,opacity:0.8,blending:THREE.AdditiveBlending,depthWrite:false}));o.blzR.scale.setScalar(130*S3);o.g.add(o.blzR);
+      o.blzD=new THREE.Mesh(_iceDisc,new THREE.MeshBasicMaterial({color:hdr('#ff5a1a',1),transparent:true,opacity:0.1,blending:THREE.AdditiveBlending,depthWrite:false}));o.blzD.scale.setScalar(130*S3);o.g.add(o.blzD);}
     o.blzR.visible=o.blzD.visible=true;o.blzR.position.y=0.07;o.blzD.position.y=0.06;o.blzR.material.opacity=0.6+0.25*Math.sin(now/120);
-    for(let i=0;i<3;i++){const an=rnd(0,6.283);PARTS.push({x:p.x+Math.cos(an)*180,y:p.y+Math.sin(an)*180,h:pz+0.1,vx:0,vy:0,vh:rnd(1.5,3.5),life:rnd(0.35,0.6),max:0.6,col:i?'#ff7a2a':'#ffc04a',size:rnd(2.6,4),g:-1.5,drag:2});}
+    for(let i=0;i<3;i++){const an=rnd(0,6.283);PARTS.push({x:p.x+Math.cos(an)*130,y:p.y+Math.sin(an)*130,h:pz+0.1,vx:0,vy:0,vh:rnd(1.5,3.5),life:rnd(0.35,0.6),max:0.6,col:i?'#ff7a2a':'#ffc04a',size:rnd(2.6,4),g:-1.5,drag:2});}
   }else if(o.blzR)o.blzR.visible=o.blzD.visible=false;
   if((p.fm|0)&131072){
     for(let i=0;i<3;i++)PARTS.push({x:p.x+rnd(-12,12),y:p.y+rnd(-12,12),h:pz+rnd(0.1,2),vx:rnd(-10,10),vy:rnd(-10,10),vh:rnd(1.2,2.8),life:rnd(0.3,0.6),max:0.6,col:Math.random()<0.5?'#ff7a2a':'#ffc04a',size:rnd(2.5,4.5),g:-1.5,drag:2});
@@ -5606,7 +5616,7 @@ function syncPlayers(P,mode,now,dt){
     let o=PM3.get(p.id);
     if(!o){o=makeStudent(getLook(p.id),p.id);PM3.set(p.id,o);}
     const g=o.g;
-    g.visible=p.al&&!(p.iv&&!p.ds&&Math.floor(now/80)%2===0);
+    g.visible=p.al&&!(p.iv&&!p.ds&&!(p.fr&&(p.fr[3]&2))&&Math.floor(now/80)%2===0);
     // ผี (หาลอร์ดโวลเดอมอร์): คนเป็นมองไม่เห็นผี / ผีเห็นกันเป็นเงาจางๆ
     if(p.gh&&!meGhost){g.visible=false;continue;}
     if(!!p.gh!==!!o.ghost){
