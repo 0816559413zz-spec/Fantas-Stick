@@ -663,7 +663,36 @@ const MAPS={
 // แผนที่ที่สุ่มได้ (ป่ามืดเอาออกจากการสุ่มตามที่ผู้ใช้ขอ — ยังเลือกเองในล็อบบี้ได้)
 const RANDOM_MAPS=['castle','pitch','hogsmeade','greathall','meadow','lake','ruins'];
 let MAPID='castle',MW=W,MH=H,OBS=MAPS.castle.obs;
-function setMapVars(id){if(!MAPS[id])id='castle';MAPID=id;MW=MAPS[id].W;MH=MAPS[id].H;OBS=MAPS[id].obs;PROPS=genProps(id);BLDG=genBldg(id);}
+function setMapVars(id){if(!MAPS[id])id='castle';MAPID=id;MW=MAPS[id].W;MH=MAPS[id].H;OBS=MAPS[id].obs;TERR=MAPS[id].terr||null;PROPS=genProps(id);BLDG=genBldg(id);}
+// ---------- แผนที่จากไฟล์ (Blender → assets/maps/<id>.json + .glb, สคริปต์ assets/src/map_export.py, กติกา MAP-DESIGN.md) ----------
+// manifest "maps":{id:{file,data,v}} • ไฟล์ .json = ข้อมูลเกม (ทุกเครื่องโหลดไฟล์เดียวกัน → คำนวณตรงกัน) • .glb = หน้าตา (โหลดตอนสร้างฉาก)
+// id ซ้ำกับแผนที่จากโค้ด = แทนที่ของเดิม • โหลดไม่ได้ = ใช้แผนที่จากโค้ดตามเดิม
+const FMAPS={pend:new Map(),fail:new Set()};
+function b64i16(b){const bin=atob(b),u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);const v=new Int16Array(u.buffer),f=new Float32Array(v.length);for(let i=0;i<v.length;i++)f[i]=v[i]===-32768?NaN:v[i]/100;return f;}
+function regFileMap(id,e,d){
+  const obs=(d.obs||[]).map(o=>({x:o.x,y:o.y,r:o.r,hgt:o.hgt,k:o.k||'col',fm:1}));
+  (d.houses||[]).forEach((h,i)=>obs.push({x:h.x,y:h.y,r:Math.max(h.w,h.d)/2,k:'house',hgt:10,w:h.w,d:h.d,s:(i*0.37)%1,ry:h.ry||0}));
+  const terr={c:d.c,nx:d.nx,ny:d.ny,g:b64i16(d.g),fl:(d.fl||[]).map(f=>({x0:f.x0,y0:f.y0,nx:f.nx,ny:f.ny,top:b64i16(f.top),bot:b64i16(f.bot)}))};
+  {const keep=TERR;TERR=terr;for(const o of obs)if(o.fm)o.top=terrT(o.x,o.y)+o.hgt;TERR=keep;}   // ที่ชนจากไฟล์: เทียบความสูงจริง (พื้นใต้ตัวกับใต้ที่ชนสูงไม่เท่ากันได้)
+  MAPS[id]={name:d.name||id,d:d.desc||'',W:d.W,H:d.H,obs,terr,fm:{file:e.file,v:e.v||0,sky:d.sky||'night',fog:d.fog||null,music:d.music||'',modes:d.modes||null,
+    spawns:d.spawns||[],props:d.props,espawn:d.espawn||[],rings:d.rings||[],tasks:d.tasks||[],lights:d.lights||[],env:d.env||[],weather:d.weather||''}};
+  const ri=RANDOM_MAPS.indexOf(id);
+  if(d.random===0){if(ri>=0)RANDOM_MAPS.splice(ri,1);}else if(ri<0)RANDOM_MAPS.push(id);
+  if(window.WD)WD.MAPS=MAPS;
+}
+function loadMapData(id){
+  if(FMAPS.pend.has(id))return FMAPS.pend.get(id);
+  const pr=modelManifest().then(m=>{const e=m.maps&&m.maps[id];if(!e||!e.data){FMAPS.fail.add(id);return false;}
+    return fetch('assets/'+e.data+'?v='+(e.v||0)).then(r=>{if(!r.ok)throw new Error(r.status);return r.json();}).then(d=>{regFileMap(id,e,d);return true;});
+  }).catch(err=>{console.warn('map',id,err);FMAPS.fail.add(id);return false;});
+  FMAPS.pend.set(id,pr);return pr;
+}
+// ข้อมูลแผนที่ทุกอันใน manifest โหลดตั้งแต่เปิดหน้า (ไฟล์เล็ก) เพื่อให้เลือก/สุ่มได้และเครื่องลูกพร้อมก่อนโฮสต์เริ่มเกม
+function loadAllMapData(){return modelManifest().then(m=>Promise.all(Object.keys(m.maps||{}).map(loadMapData)));}
+// แผนที่ที่ใช้ได้กับโหมดนี้ (ไฟล์แผนที่บอกโหมดเองได้)
+// เครื่องลูก: ยังไม่มีข้อมูลแผนที่นี้ → สั่งโหลดแล้วรอ snapshot ถัดไป (โหลดไม่ได้ = ใช้แผนที่สำรอง)
+function mapReady(id){if(MAPS[id]||FMAPS.fail.has(id))return true;loadMapData(id);return false;}
+function mapOkFor(id,mode){const f=MAPS[id]&&MAPS[id].fm;return !f||!f.modes||f.modes.includes(mode);}
 // ---------- ของประกอบฉากที่พังได้ / ใช้ได้ (prop) ----------
 // ตำแหน่งสุ่มแบบ seed จากชื่อแผนที่ → ทุกเครื่องคำนวณได้ตรงกันเอง ส่งในเน็ตแค่สถานะ (snapshot PB: 1 ตัวต่อชิ้น 0=ปกติ 1=พัง 2=ใช้แล้ว)
 // ตัวเลข (hp/ขนาด/จำนวน/โหมดที่เปิด) เป็นค่าตั้งต้นให้ทีมเกมเพลย์ปรับ • model = ชื่อใน assets/manifest.json (ไม่มีไฟล์ = ใช้โมเดลจากโค้ด)
@@ -679,6 +708,7 @@ const PROP_USE={pchest(p,o){}};
 let PROPS=[],PROPON=false;
 function genProps(id){
   const M=MAPS[id];if(!M||id==='test')return [];
+  if(M.fm&&M.fm.props)return M.fm.props.filter(q=>PROPDEF[q.k]).map((q,i)=>{const D=PROPDEF[q.k];return {i,k:q.k,x:q.x,y:q.y,a:q.a||0,r:D.r,hgt:D.hgt,hp:D.hp||0,st:0,ht:0};});   // วางเองในไฟล์แผนที่
   const rng=mulberry(hashStr('props:'+id)),out=[],W=M.W,H=M.H,obs=M.obs||[];
   const n=Math.min(24,Math.round(W*H/200000)),kinds=Object.keys(PROPDEF),wsum=kinds.reduce((a,k)=>a+PROPDEF[k].w,0),cnt={};
   const spawns=SPAWNF.map(f=>[f[0]*W,f[1]*H]);
@@ -1129,10 +1159,41 @@ function updateWaves(dt){
   G.waves=G.waves.filter(w=>w.left>0);
 }
 // ภูเขาน้ำแข็ง (Glacier Rend โหมดไกล): แท่งน้ำแข็งแหลมต่อกันเป็นแนว สูงขึ้นเรื่อยๆ เดินขึ้นไปได้
-function groundH(x,y){
-  let g=0;if(!G||!G.glac)return 0;
-  for(const s of G.glac)if(s.h>0&&(x-s.x)**2+(y-s.y)**2<s.r*s.r&&s.h>g)g=s.h;
+// พื้นที่ยืนได้ตรง (x,y) วัดเป็น "ความสูงจากพื้นหลัก" (0 = พื้นหลัก/เนิน) • z = ความสูงปัจจุบันของตัวที่ถาม (นับพื้นชั้นบน เช่น สะพาน เฉพาะที่ก้าวขึ้นถึง)
+function groundH(x,y,z){
+  let g=0;
+  if(TERR&&TERR.fl.length){const t=terrT(x,y),a=t+(z||0)+TSTEP;for(const f of TERR.fl){const v=floorAt(f,x,y,'top');if(v<=a&&v-t>g)g=v-t;}}
+  if(G&&G.glac)for(const s of G.glac)if(s.h>0&&(x-s.x)**2+(y-s.y)**2<s.r*s.r&&s.h>g)g=s.h;
   return g;
+}
+// ---------- พื้นสูงต่ำ (แผนที่จากไฟล์ Blender — กติกาฝั่งคนปั้นใน MAP-DESIGN.md) ----------
+// ความสูงในระบบเกม (p.z, e.h, pr.h, h ของเอฟเฟกต์) ยังเป็น "สูงจากพื้นหลัก" เหมือนแผนที่เรียบ → คาถาเดิมไม่ต้องแก้
+// ความสูงจริงในโลก 3D = terrT(x,y) + z • กระสุนบินตรงในโลกจริง: ปรับ pr.h ตามพื้นที่เปลี่ยนไปทุกเฟรม
+// TERR = {c: ระยะห่างจุดตาราง (px), nx, ny, g: ความสูงพื้นหลัก (หน่วย 3D), fl:[{x0,y0,nx,ny,top,bot}] พื้นชั้นบน (NaN = ไม่มี)}
+let TERR=null;
+const TSTEP=1.1,TSLOPE=1.6;   // ค่าชั่วคราว: ก้าวขึ้นขอบพื้นชั้นบนได้สูงสุด 1.1 • ทางลาดชันสุด สูง/ระยะ = 1.6 (~58°) ชันกว่านี้ = หน้าผา
+function terrT(x,y){
+  if(!TERR)return 0;
+  const T=TERR,fx=clamp(x/T.c,0,T.nx-1.001),fy=clamp(y/T.c,0,T.ny-1.001),i=fx|0,j=fy|0,u=fx-i,v=fy-j,k=j*T.nx+i,a=T.g;
+  return (a[k]*(1-u)+a[k+1]*u)*(1-v)+(a[k+T.nx]*(1-u)+a[k+T.nx+1]*u)*v;
+}
+function floorAt(f,x,y,key){const i=Math.round((x-f.x0)/TERR.c),j=Math.round((y-f.y0)/TERR.c);if(i<0||j<0||i>=f.nx||j>=f.ny)return NaN;return f[key][j*f.nx+i];}
+// จุด (x,y) ที่ความสูง h (จากพื้นหลัก) อยู่ในเนื้อพื้นไหม — ใช้กับกระสุนชนเนิน/สะพาน
+function terrSolid(x,y,h){
+  if(h<0)return true;if(!TERR||!TERR.fl.length)return false;
+  const a=terrT(x,y)+h;for(const f of TERR.fl){const t=floorAt(f,x,y,'top');if(t>=a&&floorAt(f,x,y,'bot')<=a)return true;}
+  return false;
+}
+// เดินบนพื้นสูงต่ำ: เรียกหลังขยับ o จาก (ox,oy) • z = ความสูงจากพื้นก่อนขยับ • onG = ยืนอยู่บนพื้น • คืนค่า z ใหม่ (นับจากพื้นตรงจุดใหม่)
+// ทางชันเกิน/หน้าผา = ชนเหมือนกำแพง (ลองไถลตามแกน x หรือ y ก่อน) • ลงเนิน = ติดพื้นไปด้วย • เดินตกขอบหน้าผา = ร่วงลงตามแรงโน้มถ่วง
+function terrMove(o,ox,oy,z,onG){
+  if(!TERR)return z;
+  const t0=terrT(ox,oy),a=t0+z;
+  const ok=(x,y)=>{const t1=terrT(x,y);if(t1<=a+0.02)return true;if(!onG)return t1-a<=TSTEP*0.5;const run=Math.hypot(x-ox,y-oy)*S3;return run>1e-4&&(t1-t0)/run<=TSLOPE;};
+  if(!ok(o.x,o.y)){if(ok(o.x,oy))o.y=oy;else if(ok(ox,o.y))o.x=ox;else{o.x=ox;o.y=oy;}}
+  let nz=Math.max(0,a-terrT(o.x,o.y));
+  if(onG&&nz>0){const g=groundH(o.x,o.y,nz),run=Math.hypot(o.x-ox,o.y-oy)*S3;if(nz-g<0.6&&run>1e-4&&(nz-g)/run<=TSLOPE*1.5)nz=g;}
+  return nz;
 }
 function updateGlaciers(dt){
   if(!G.glac||!G.glac.length)return;
@@ -1627,7 +1688,7 @@ function minTarget(m){
   return b;
 }
 function minShoot(m,t,type,dmg){
-  const pd=PDEF[type],a=Math.atan2(t.y-m.y,t.x-m.x),dd=Math.hypot(t.x-m.x,t.y-m.y)||1,h=(m.h||0)+0.8,vh=(cH(t)-h)/(dd/pd.spd);
+  const pd=PDEF[type],a=Math.atan2(t.y-m.y,t.x-m.x),dd=Math.hypot(t.x-m.x,t.y-m.y)||1,h=(m.h||0)+0.8,vh=(cH(t)+terrT(t.x,t.y)-terrT(m.x,m.y)-h)/(dd/pd.spd);
   G.proj.push({id:++G.pid,type,x:m.x+Math.cos(a)*14,y:m.y+Math.sin(a)*14,h,vh,vx:Math.cos(a)*pd.spd,vy:Math.sin(a)*pd.spd,r:pd.r,dmg,life:pd.life,owner:m.owner,team:m.team,src:'p'});
   emit({k:'cast',t:type,x:m.x,y:m.y,h,a:Math.round(a*100)/100});
 }
@@ -1637,6 +1698,7 @@ function updateMins(dt){
     m.life-=dt;if(m.life<=0){m.dead=true;emit({k:'efx',z:'unsummon',x:m.x,y:m.y,h:(m.h||0)+0.6});continue;}
     tickStatus(m,dt);if(m.od>0)m.od-=dt;
     if(m.burn>0){m.burn-=dt;m.bt-=dt;if(m.bt<=0){m.bt=0.5;damage(m,4,m.burnSrc,'burn');if(m.dead)continue;}}
+    m.ox=m.x;m.oy=m.y;
     m.x+=m.vx*dt;m.y+=m.vy*dt;const fr=Math.exp(-5*dt);m.vx*=fr;m.vy*=fr;
     m.cd-=dt;
     if(m.stun>0){m.stun-=dt;continue;}
@@ -1666,6 +1728,7 @@ function updateMins(dt){
         m.h=2+Math.sin(G.time*2.4+m.id)*0.3;break;}
     }
     const q={x:m.x,y:m.y};collideWorld(q,m.r,m.h>1?5:0);m.x=q.x;m.y=q.y;m.z=m.h;
+    if(TERR&&!MIND[m.type].fly)terrMove(m,m.ox,m.oy,0,true);
   }
   G.mins=G.mins.filter(m=>!m.dead);
 }
@@ -1735,7 +1798,7 @@ function castUlt(p){const S=SPELLS[p.ultId];if(!S||p.ult<100||p.sil>0||p.cryo>0)
 // =====================================================================
 //  เครือข่าย (PeerJS / WebRTC)
 // =====================================================================
-const PREFIX='wizduel-th-v23-';
+const PREFIX='wizduel-th-v24-';
 const NET={peer:null,isHost:false,online:false,myId:'me',conns:new Map(),hostConn:null,code:''};
 let LOBBY=null;
 function genCode(){const c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let s='';for(let i=0;i<5;i++)s+=c[Math.floor(Math.random()*c.length)];return s;}
@@ -1897,7 +1960,7 @@ function hostStart(){
   const MD=MODES[G.mode];
   if(MD.map)G.map=MD.map;
   else if(G.mapPick&&MAPS[G.mapPick])G.map=G.mapPick;
-  else{const ks=RANDOM_MAPS.filter(k=>k!==G.lastMap);G.map=ks[Math.floor(Math.random()*ks.length)];}
+  else{let ks=RANDOM_MAPS.filter(k=>k!==G.lastMap&&MAPS[k]&&mapOkFor(k,G.mode));if(!ks.length)ks=['castle'];G.map=ks[Math.floor(Math.random()*ks.length)];}
   G.lastMap=G.map;
   setMapVars(G.map);
   PROPON=!PROP_OFF_MODES.includes(G.mode);BLDON=PROPON;
@@ -1924,10 +1987,16 @@ function resetBody(p,x,y){
   for(const k of CDK)p.cd[k]=0;clearStatus(p);p.trail=null;
   p.ang=Math.atan2(MH/2-y,MW/2-x);
 }
-function spawnPts(){return SPAWNF.map(f=>[f[0]*MW,f[1]*MH]);}
+function fmap(){const M=MAPS[MAPID];return M&&M.fm;}
+function spawnPts(){const f=fmap(),sp=f&&f.spawns.filter(s=>s.t===undefined);if(sp&&sp.length)return sp.map(s=>[s.x,s.y]);return SPAWNF.map(f=>[f[0]*MW,f[1]*MH]);}
+// จุดเกิดของทีม t จากไฟล์แผนที่ (ไม่มี = แบ่งจุดเกิดทั่วไปซ้าย/ขวา) — คืน null ถ้าแผนที่ไม่มีจุดเกิดจากไฟล์
+function teamPts(t){const f=fmap();if(!f||!f.spawns.length)return null;let a=f.spawns.filter(s=>s.t===t);if(!a.length){a=f.spawns.filter(s=>t?s.x>MW/2:s.x<=MW/2);if(!a.length)a=f.spawns;}return a.map(s=>[s.x,s.y]);}
 function placeAll(){
   const ps=plist(),cx0=MW/2,cy0=MH/2;
-  if(G.mode==='coop'||G.mode==='train')ps.forEach((p,i)=>{const a=i/ps.length*Math.PI*2+Math.PI;resetBody(p,cx0+Math.cos(a)*160,cy0+Math.sin(a)*160);collideWorld(p,PR);});
+  const f=fmap();
+  if(f&&f.spawns.length&&G.mode!=='train'&&!MODES[G.mode].team){const sp=spawnPts();ps.forEach((p,i)=>resetBody(p,sp[i%sp.length][0],sp[i%sp.length][1]));}
+  else if(f&&f.spawns.length&&MODES[G.mode].team){const k=[0,0];ps.forEach(p=>{const a=teamPts(p.team),q=a[k[p.team]++%a.length];resetBody(p,q[0],q[1]);});}
+  else if(G.mode==='coop'||G.mode==='train')ps.forEach((p,i)=>{const a=i/ps.length*Math.PI*2+Math.PI;resetBody(p,cx0+Math.cos(a)*160,cy0+Math.sin(a)*160);collideWorld(p,PR);});
   else if(G.mode==='duel')ps.forEach((p,i)=>resetBody(p,MW*(i?0.86:0.14),cy0));
   else if(MODES[G.mode].team){
     const k=[0,0];
@@ -1936,7 +2005,7 @@ function placeAll(){
 }
 function respawn(p){
   let x,y;
-  if(MODES[G.mode].team){x=MW*(p.team?0.9:0.1);y=MH/2+rnd(-170,170);}
+  if(MODES[G.mode].team){const a=teamPts(p.team);if(a){const q=a[Math.floor(Math.random()*a.length)];x=q[0];y=q[1];}else{x=MW*(p.team?0.9:0.1);y=MH/2+rnd(-170,170);}}
   else if(G.mode==='race'){const n=G.rings.length,r=G.rings[(p.cp-1+n)%n];resetBody(p,r.x,r.y);p.fly=true;p.z=r.h;p.inv=1;p.ang=Math.atan2(G.rings[p.cp].y-r.y,G.rings[p.cp].x-r.x);emit({k:'revive',x:r.x,y:r.y});return;}
   else if(G.mode==='train'){const pv=G.tr&&G.tr.pvp;if(pv===1){x=MW*(p.team?0.62:0.38);y=MH/2+160;}else if(pv===2){const a=rnd(0,Math.PI*2);x=MW/2+Math.cos(a)*420;y=MH/2+Math.sin(a)*300;}else{x=MW/2;y=MH/2+160;}}
   else{
@@ -1999,7 +2068,7 @@ function updatePlayer(p,dt,acting){
   }
   p.boost=Math.max(0,(p.boost||0)-dt);
   // ตกลงพื้นเมื่อไม่ได้บิน
-  const gravity=()=>{const gh=groundH(p.x,p.y);if(p.z>gh||p.vz>0){p.vz-=(p.slam?40:22)*dt;if(p.hover>0&&p.vz<-0.6)p.vz=-0.6;p.z+=p.vz*dt;if(p.z<=gh){if(p.vz<-12)emit({k:'land',x:p.x,y:p.y});p.z=gh;p.vz=0;if(p.slam)frostSlam(p);}}else p.z=gh;};
+  const gravity=()=>{const gh=groundH(p.x,p.y,p.z);if(p.z>gh||p.vz>0){p.vz-=(p.slam?40:22)*dt;if(p.hover>0&&p.vz<-0.6)p.vz=-0.6;p.z+=p.vz*dt;if(p.z<=gh){if(p.vz<-12)emit({k:'land',x:p.x,y:p.y});p.z=gh;p.vz=0;if(p.slam)frostSlam(p);}}else p.z=gh;};
   if(p.downed){
     p.vx=p.vy=0;p.fly=false;gravity();
     let helper=null;
@@ -2041,7 +2110,7 @@ function updatePlayer(p,dt,acting){
   if(p.pathIdx===2)stormTick(p,dt);
 
   // เคลื่อนที่
-  const ox0=p.x,oy0=p.y;
+  const ox0=p.x,oy0=p.y,oz0=p.z,onG0=!p.fly&&p.z<=groundH(p.x,p.y,p.z)+0.05;
   let mx,my;
   if(typeof inp.mx==='number'){mx=inp.mx;my=inp.my;}
   else{mx=(inp.r?1:0)-(inp.l?1:0);my=(inp.d?1:0)-(inp.u?1:0);}
@@ -2069,8 +2138,11 @@ function updatePlayer(p,dt,acting){
   p.x+=p.vx*dt;p.y+=p.vy*dt;
   const fr=Math.exp(-6*dt);p.vx*=fr;p.vy*=fr;
   if(!p.gh)collideWorld(p,PR,p.z);else{p.x=clamp(p.x,30,MW-30);p.y=clamp(p.y,30,MH-30);}
-  // ภูเขาน้ำแข็ง: ขั้นต่ำๆ เดินขึ้นได้ / สูงเกินไปเป็นกำแพง
-  if(!p.fly&&!(p.colos>0)&&G.glac&&G.glac.length){const gh=groundH(p.x,p.y);if(gh>p.z+1.1){p.x=ox0;p.y=oy0;}else if(gh>p.z){p.z=gh;p.vz=0;if(p.slam)frostSlam(p);}}
+  // พื้นสูงต่ำ (เนิน/หน้าผา) + ภูเขาน้ำแข็ง/พื้นชั้นบน: ขั้นต่ำๆ ก้าวขึ้นได้ / สูงเกินไปเป็นกำแพง
+  if(!p.fly&&!(p.colos>0)){
+    p.z=terrMove(p,ox0,oy0,p.z,onG0);
+    const gh=groundH(p.x,p.y,p.z);if(gh>p.z+TSTEP){p.x=ox0;p.y=oy0;p.z=oz0;}else if(gh>p.z){p.z=gh;p.vz=0;if(p.slam)frostSlam(p);}
+  }
   if(G.mode==='imp'){if(acting)impActions(p,pr,inp,dt);return;}
   // ควิดดิช: ถือบอลอยู่ = คลิกซ้ายเพื่อโยน (ร่ายเวทไม่ได้)
   if(G.ball&&G.ball.holder===p.id){if(canAct&&inp.fire&&!p.fireHeld)quidThrow(p);p.fireHeld=inp.fire;return;}
@@ -2085,7 +2157,7 @@ function updatePlayer(p,dt,acting){
   const B=PBASIC[p.pathIdx|0]||PBASIC[0];
   if(pr.v&&p.pathIdx===1&&!(p.fmCd>0)&&!(p.cryo>0)&&!(p.mirror>0)){p.fmode=p.fmode===1?0:1;p.fmCd=1;p.cmbT=0;emit({k:'efx',z:'fswap',x:p.x,y:p.y,h:p.z+1,id:p.id,m:p.fmode});}
   // กระโดด (Space) ทุกสาย
-  if(pr.jp&&!(p.cryo>0)&&!p.dchgOn&&p.z<=groundH(p.x,p.y)+0.05&&!(p.colos>0)){p.vz=8;emit({k:'efx',z:'jump',x:p.x,y:p.y,h:p.z,id:p.id});}
+  if(pr.jp&&!(p.cryo>0)&&!p.dchgOn&&p.z<=groundH(p.x,p.y,p.z)+0.05&&!(p.colos>0)){p.vz=8;emit({k:'efx',z:'jump',x:p.x,y:p.y,h:p.z,id:p.id});}
   if(p.cryo>0){if(pr.q)castSlot(p,0);if(pr.e)castSlot(p,1);if(pr.r)castSlot(p,2);if(pr.f)castSlot(p,3);return;}
   if(p.dfall||p.sdome||p.shk>0){}else if(B.dash){if(B.dash(p,inp,pr,dt,setCd))return;}
   else if(pr.sp&&p.cd.dodge<=0&&p.z<0.5){
@@ -2217,8 +2289,9 @@ function collideWorld(o,r,z){
     if(d<m&&d>0.001){o.x=c.x+dx/d*m;o.y=c.y+dy/d*m;}
   }
   for(const b of BLDG)if(bldNear(b,o.x,o.y,r))collideBld(b,o,r,z);
+  const za=TERR?terrT(o.x,o.y)+z:z;
   for(const c of OBS){
-    if(c.hgt<=z||c.bi!==undefined)continue;
+    if((c.top!==undefined?c.top<=za:c.hgt<=z)||c.bi!==undefined)continue;
     if(Math.abs(o.x-c.x)>c.r+r||Math.abs(o.y-c.y)>c.r+r)continue;
     const dx=o.x-c.x,dy=o.y-c.y,d=Math.hypot(dx,dy),m=c.r+r;
     if(d<m&&d>0.001){o.x=c.x+dx/d*m;o.y=c.y+dy/d*m;}
@@ -2242,7 +2315,7 @@ function shoot(p,type,o){
     if(da<0.3&&da+dd/5000<bs){bs=da+dd/5000;best=t;}
   }
   let vh;
-  if(best)vh=(cH(best)-h)/(Math.hypot(best.x-p.x,best.y-p.y)/SP);
+  if(best)vh=(cH(best)+terrT(best.x,best.y)-terrT(p.x,p.y)-h)/(Math.hypot(best.x-p.x,best.y-p.y)/SP);
   else if(p.inp&&typeof p.inp.ah==='number'&&!p.bot){const dd=Math.max(80,Math.hypot(p.inp.ax-p.x,p.inp.ay-p.y));vh=clamp((p.inp.ah-h)/(dd/SP),-30,30);}
   else vh=Math.tan(clamp((p.inp&&p.inp.ap)||0,-0.9,0.9))*SP/20;
   const pr={id:++G.pid,type,x:p.x+Math.cos(a)*26,y:p.y+Math.sin(a)*26,h,vh,vx:Math.cos(a)*SP,vy:Math.sin(a)*SP,
@@ -2254,7 +2327,7 @@ function shoot(p,type,o){
 }
 function eShoot(e,type,t,off){
   const pd=PDEF[type],a=Math.atan2(t.y-e.y,t.x-e.x)+(off||0),dd=Math.hypot(t.x-e.x,t.y-e.y)||1;
-  const h=(e.h||0)+EDEF[e.type].ch+0.3,vh=(cH(t)-h)/(dd/pd.spd);
+  const h=(e.h||0)+EDEF[e.type].ch+0.3,vh=(cH(t)+terrT(t.x,t.y)-terrT(e.x,e.y)-h)/(dd/pd.spd);
   G.proj.push({id:++G.pid,type,x:e.x+Math.cos(a)*(e.r+6),y:e.y+Math.sin(a)*(e.r+6),h,vh,vx:Math.cos(a)*pd.spd,vy:Math.sin(a)*pd.spd,
     r:pd.r,dmg:pd.dmg*G.escale,life:pd.life,owner:'E',team:-1,src:'e'});
   emit({k:'cast',t:type,x:e.x,y:e.y,h,a:Math.round(a*100)/100});
@@ -2391,11 +2464,11 @@ function updateProjectiles(dt){
   const ps=plist();
   for(const pr of G.proj){
     if(pr.dead)continue;
-    pr.x+=pr.vx*dt;pr.y+=pr.vy*dt;pr.h+=pr.vh*dt;pr.life-=dt;
+    {const t0=TERR?terrT(pr.x,pr.y):0;pr.x+=pr.vx*dt;pr.y+=pr.vy*dt;pr.h+=pr.vh*dt;if(TERR)pr.h-=terrT(pr.x,pr.y)-t0;}pr.life-=dt;
     if(pr.life<=0||pr.x<20||pr.x>MW-20||pr.y<20||pr.y>MH-20||pr.h>40){killProj(pr);continue;}
-    if(pr.h<0.05){pr.h=0.1;killProj(pr);continue;}
+    if(pr.h<0.05||(TERR&&terrSolid(pr.x,pr.y,pr.h))){pr.h=Math.max(pr.h,0.1);killProj(pr);continue;}
     let hp=false;
-    for(const c of OBS)if(c.bi===undefined&&pr.h<c.hgt&&(pr.x-c.x)**2+(pr.y-c.y)**2<(c.r+pr.r)**2){hp=true;break;}
+    for(const c of OBS)if(c.bi===undefined&&(c.top!==undefined?terrT(pr.x,pr.y)+pr.h<c.top:pr.h<c.hgt)&&(pr.x-c.x)**2+(pr.y-c.y)**2<(c.r+pr.r)**2){hp=true;break;}
     if(!hp)for(const b of BLDG){if(!bldNear(b,pr.x,pr.y,pr.r))continue;const j=bldPieceAt(b,pr.x,pr.y,pr.h,pr.r);if(j>=0){hitBldPiece(b,j,pr.dmg||5,projEl(pr),pr.x-pr.vx*0.08,pr.y-pr.vy*0.08);hp=true;break;}}
     if(!hp&&PROPON)for(const c of PROPS)if(c.st!==1&&pr.h<c.hgt&&(pr.x-c.x)**2+(pr.y-c.y)**2<(c.r+pr.r)**2){hitProp(c,pr.dmg||5,pr.owner);hp=true;break;}
     if(!hp)for(const w of G.walls)if(pr.team!==w.team&&pr.h<w.hgt&&(pr.x-w.x)**2+(pr.y-w.y)**2<(w.r+pr.r)**2){w.hp-=pr.dmg||5;hp=true;emit({k:'efx',z:'wallhit',x:pr.x,y:pr.y,h:pr.h});break;}
@@ -2442,8 +2515,9 @@ function spawnEnemy(type,at){
   else{
     // เกิดรอบๆ ผู้เล่นคนหนึ่งในระยะ 650-900 (แผนที่ใหญ่จะได้ไม่ต้องเดินไกล)
     const al=plist().filter(p=>p.alive&&!p.downed),t=al[Math.floor(Math.random()*al.length)]||{x:MW/2,y:MH/2};
-    const a=rnd(0,Math.PI*2),dd=rnd(650,900);
-    x=t.x+Math.cos(a)*dd;y=t.y+Math.sin(a)*dd;
+    const a=rnd(0,Math.PI*2),dd=rnd(650,900),fs=fmap()&&fmap().espawn;
+    if(fs&&fs.length&&type!=='dummy'){const q=fs[Math.floor(Math.random()*fs.length)];x=q.x+rnd(-50,50);y=q.y+rnd(-50,50);}   // จุดเกิดมอนสเตอร์จากไฟล์แผนที่
+    else{x=t.x+Math.cos(a)*dd;y=t.y+Math.sin(a)*dd;}
   }
   const tmp={x:clamp(x,60,MW-60),y:clamp(y,60,MH-60)};
   collideWorld(tmp,d.r);x=tmp.x;y=tmp.y;
@@ -2495,6 +2569,7 @@ function updateEnemies(dt){
     const D=EDEF[e.type];
     e.cd-=dt;e.cd2-=dt;e.cd3-=dt;e.stun=Math.max(0,e.stun-dt);e.ph+=dt;tickStatus(e,dt);if(e.dead)continue;
     if(e.burn>0){e.burn-=dt;e.bt-=dt;if(e.bt<=0){e.bt=0.5;damage(e,4,e.burnSrc,'burn');if(e.dead)continue;}}
+    e.ox=e.x;e.oy=e.y;
     e.x+=e.vx*dt;e.y+=e.vy*dt;const fr=Math.exp(-5*dt);e.vx*=fr;e.vy*=fr;
     let t=null,bd=1e12;
     for(const p of ps){const d=dist2(e,p)+((p.z-(e.h||0))*20)**2;if(d<bd){bd=d;t=p;}}
@@ -2598,7 +2673,7 @@ function updateEnemies(dt){
     const dx=b.x-a.x,dy=b.y-a.y,d=Math.hypot(dx,dy),m=a.r+b.r;
     if(d<m&&d>0.01){const o=(m-d)/2,ux=dx/d,uy=dy/d;a.x-=ux*o;a.y-=uy*o;b.x+=ux*o;b.y+=uy*o;}
   }
-  for(const e of en)collideWorld(e,e.r,e.h||0);
+  for(const e of en){collideWorld(e,e.r,e.h||0);if(TERR&&e.ox!==undefined&&!EDEF[e.type].fly&&(e.h||0)<0.05)terrMove(e,e.ox,e.oy,0,true);}   // ตัวเดินพื้น: ติดพื้น ขึ้นหน้าผาไม่ได้
   G.en=en.filter(e=>!e.dead);
 }
 
@@ -2711,8 +2786,9 @@ function sendPriv(id,m){
   const c=NET.conns.get(id);if(c&&c.open)try{c.send({t:'priv',m});}catch(e){}
 }
 const TASKF=[[.18,.2],[.5,.14],[.82,.2],[.12,.5],[.88,.5],[.18,.8],[.5,.86],[.82,.8],[.36,.38],[.64,.62]];
-function taskPts(){return TASKF.map(f=>{const o={x:f[0]*MW,y:f[1]*MH};collideWorld(o,34);return o;});}
+function taskPts(){const fm=fmap();if(fm&&fm.tasks.length)return fm.tasks.map(q=>({x:q.x,y:q.y}));return TASKF.map(f=>{const o={x:f[0]*MW,y:f[1]*MH};collideWorld(o,34);return o;});}
 function raceRings(){
+  {const f=fmap();if(f&&f.rings.length>=3)return f.rings.map(r=>({x:r.x,y:r.y,h:r.h}));}
   const n=10,rx=MW*0.36,ry=MH*0.33,R=mulberry(77+MW),out=[];
   for(let i=0;i<n;i++){const a=i/n*Math.PI*2;out.push({x:MW/2+Math.cos(a)*rx*(1+0.12*Math.sin(3*a)),y:MH/2+Math.sin(a)*ry*(1+0.12*Math.cos(2*a)),h:3.5+R()*7});}
   return out;
@@ -3555,12 +3631,12 @@ function setScreen(s){
 }
 function onLobby(m){
   LOBBY=m;for(const p of m.players){if(p.lk)LOOKS[p.id]=p.lk;if(p.kt!==undefined)KITS[p.id]=p.kt;}
-  if(m.map&&m.map!==builtMap){setMapVars(m.map);buildWorld(m.map);}
+  if(m.map&&m.map!==builtMap&&mapReady(m.map)){setMapVars(m.map);buildWorld(m.map);}
   if(m.ph==='lobby'){if(screen!=='lobby')setScreen('lobby');renderLobby();}
   voiceSync();updateVoiceUI();
 }
 function onSnap(s){
-  if(s.mp&&s.mp!==builtMap){setMapVars(s.mp);buildWorld(s.mp);}
+  if(s.mp&&s.mp!==builtMap&&mapReady(s.mp)){setMapVars(s.mp);buildWorld(s.mp);}
   PROPON=!!s.PB;if(s.PB)for(let i=0;i<PROPS.length;i++)PROPS[i].st=+(s.PB[i]||0);
   if(!NET.isHost){const bd=s.BD||'';let k=0;for(const b of BLDG)for(const q of b.pc)q.fl=parseInt(bd[k++]||'0',16);}
   VIEW.prev=VIEW.cur;VIEW.tPrev=VIEW.tCur;VIEW.cur=s;VIEW.tCur=performance.now();
@@ -3627,13 +3703,13 @@ function makeIceFloor(x,y,r,t,ring,lx,ly){
   if(!ring){
     // ทางน้ำแข็งเรียบๆ ต่อเนื่อง: วัสดุทึบ (ซ้อนกันไม่เป็นดวง) • ชิ้นยาวจากจุดก่อนหน้า + ข้อต่อกลม
     if(!_icePathMat){_icePathMat=new THREE.MeshStandardMaterial({color:'#a8d4ec',emissive:'#1f5f90',emissiveIntensity:0.18,roughness:0.03,metalness:0.4,polygonOffset:true,polygonOffsetFactor:-2,polygonOffsetUnits:-2});_icePathMat.userData.keep=true;}
-    const g=new THREE.Group();g.position.set(tx(x),0.03,tz(y));scene.add(g);
+    const g=new THREE.Group();g.position.set(tx(x),0.03+GY(x,y),tz(y));scene.add(g);
     const w=r*S3*1.6;
     const j=new THREE.Mesh(_iceDisc,_icePathMat);j.scale.setScalar(w/2);g.add(j);
     if(lx!==undefined){const dx=tx(lx)-tx(x),dz=tz(ly)-tz(y),L=Math.hypot(dx,dz);if(L>0.01&&L<6){const q=new THREE.Mesh(_icePlane,_icePathMat);q.scale.set(L,1,w);q.position.set(dx/2,0,dz/2);q.rotation.y=-Math.atan2(dz,dx);g.add(q);}}
     return {g,mats:[],spikes:[],age:0,t,path:true};
   }
-  const g=new THREE.Group();g.position.set(tx(x),0.035,tz(y));scene.add(g);
+  const g=new THREE.Group();g.position.set(tx(x),0.035+GY(x,y),tz(y));scene.add(g);
   const mats=[];
   const disc=new THREE.Mesh(_iceDisc,iceFloorMat(ring?0.32:0.55));disc.scale.setScalar(r*S3*(ring?1:rnd(0.95,1.2)));disc.rotation.y=rnd(0,6.28);g.add(disc);mats.push([disc.material,ring?0.32:0.55]);
   const sheen=new THREE.Mesh(_iceDisc,new THREE.MeshBasicMaterial({color:hdr('#e8f8ff',1),transparent:true,opacity:0.08,blending:THREE.AdditiveBlending,depthWrite:false}));sheen.scale.setScalar(r*S3*0.55);sheen.position.set(rnd(-0.2,0.2)*r*S3,0.01,rnd(-0.2,0.2)*r*S3);g.add(sheen);mats.push([sheen.material,0.08]);
@@ -3708,7 +3784,7 @@ function makeDfCircle(st){
 // รอยแตกไฟบนพื้น (เส้นหักสั้นๆ 8 เส้น) จางหายใน 0.5 วิ แล้วลบทิ้ง
 const DFV=[];
 function dfCracks(x,y,h,r){
-  const g=new THREE.Group();g.position.set(tx(x),h,tz(y));
+  const g=new THREE.Group();g.position.set(tx(x),h+GY(x,y),tz(y));
   const m=new THREE.MeshBasicMaterial({color:hdr('#ff7a1a',1.6),transparent:true,opacity:0.95,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide});
   for(let i=0;i<8;i++){let an=i/8*Math.PI*2+rnd(-0.25,0.25),px=0,pz=0;const segs=3,len=rnd(0.45,0.85)*r*S3/segs;
     for(let k=0;k<segs;k++){an+=rnd(-0.5,0.5);const w=0.16*(1-k/segs)+0.04;const sg=new THREE.Mesh(new THREE.PlaneGeometry(w,len),m);sg.rotation.x=-Math.PI/2;sg.rotation.z=-an+Math.PI/2;
@@ -3724,7 +3800,7 @@ function dragonfallFX(o,p,pz,now,dt){
   const c1=ST?'#ffffff':'#fff0b0',c2=ST?'#fff27a':'#ffb347',c3=ST?'#9fd8ff':'#ff5a1a';
   if(!o.dfC){o.dfC=makeDfCircle(ST);(o.g.userData.extra||(o.g.userData.extra=[])).push(o.dfC);}
   const C=o.dfC,U=C.userData,R=(ST?150:DF_R)*S3;
-  if(!C.visible){C.visible=true;C.position.set(tx(D[1]),0.07,tz(D[2]));}
+  if(!C.visible){C.visible=true;C.position.set(tx(D[1]),0.07+GY(D[1],D[2]),tz(D[2]));}
   C.position.x+=(tx(D[1])-C.position.x)*Math.min(1,dt*18);C.position.z+=(tz(D[2])-C.position.z)*Math.min(1,dt*18);
   C.scale.set(R,1,R);
   const conv=clamp(1-left/0.65,0,1),pulse=0.5+0.5*Math.sin(now/110);
@@ -3769,7 +3845,7 @@ function tbGet(){let o=TBF.pop();if(!o){o={pts:Array.from({length:TBN},()=>new T
   scene.add(o.glow,o.body,o.core);TBA.push(o);return o;}
 // จุด sim (x,y,h) — col ไม่ใช้ (เหลืองเสมอ) ยกเว้น '#9fd8ff' = สีรองฟ้า • w = ความหนา (หน่วยโลก) • br = จำนวนกิ่ง
 function tbolt(x1,y1,h1,x2,y2,h2,life,col,w,br){
-  const o=tbGet();o.A.set(tx(x1),h1,tz(y1));o.B.set(tx(x2),h2,tz(y2));o.path=null;o.life=o.max=life||0.12;o.w=(w||0.14)*1.2;o.rj=0;
+  const o=tbGet();o.A.set(tx(x1),h1+GY(x1,y1),tz(y1));o.B.set(tx(x2),h2+GY(x2,y2),tz(y2));o.path=null;o.life=o.max=life||0.12;o.w=(w||0.14)*1.2;o.rj=0;
   const L=o.A.distanceTo(o.B);o.amp=Math.min(0.55,L*0.11+0.03);
   o.body.material.color.set(col==='#9fd8ff'?'#7fd6ff':'#ffc400');
   if(br&&L>1.2)for(let i=0;i<br;i++){const k=rnd(0.25,0.75),bx=lerp(x1,x2,k)+rnd(-8,8),by=lerp(y1,y2,k)+rnd(-8,8),bh=lerp(h1,h2,k),an=rnd(0,6.283),bl=L/S3*rnd(0.2,0.4);
@@ -3807,7 +3883,7 @@ function later(d,fn){LATER.push({t:d,fn});}
 function stFade(m,life){scene.add(m);STV.push({m,age:0,life,op:m.material.opacity});}
 function stBeam(x,y,h,a,len,rad,col,op,nb){
   const m=new THREE.Mesh(new THREE.CylinderGeometry(rad,rad,len*S3,12,1,true),new THREE.MeshBasicMaterial({color:nb?col:hdr(col,2),transparent:true,opacity:op,blending:nb?THREE.NormalBlending:THREE.AdditiveBlending,depthWrite:false}));
-  m.rotation.order='YXZ';m.rotation.y=-a;m.rotation.z=Math.PI/2;m.position.set(tx(x+Math.cos(a)*len/2),h,tz(y+Math.sin(a)*len/2));return m;
+  m.rotation.order='YXZ';m.rotation.y=-a;m.rotation.z=Math.PI/2;m.position.set(tx(x+Math.cos(a)*len/2),h+GY(x,y),tz(y+Math.sin(a)*len/2));return m;
 }
 // จุดบนเปลือกทรงกลมรอบ (x,y,h) รัศมี R (หน่วย sim)
 function shellPt(x,y,h,R,a,e){return [x+Math.cos(a)*R*Math.cos(e),y+Math.sin(a)*R*Math.cos(e),h+R*S3*Math.sin(e)];}
@@ -3816,16 +3892,16 @@ function updateStormV(dt){
   updateBolts(dt);
   for(let i=STV.length-1;i>=0;i--){const v=STV[i];v.age+=dt;v.m.material.opacity=v.op*Math.max(0,1-v.age/v.life);if(v.grow)v.m.scale.multiplyScalar(1+v.grow*dt);if(v.age>=v.life){scene.remove(v.m);v.m.geometry.dispose();v.m.material.dispose();STV.splice(i,1);}}
   for(let i=SBV.length-1;i>=0;i--){const b=SBV[i];b.t+=dt;const k=Math.min(1,b.t/b.max),x=lerp(b.x,b.x2,k),y=lerp(b.y,b.y2,k),h=lerp(b.h,b.h2,k);
-    b.g.position.set(tx(x),h,tz(y));for(let j=0;j<3;j++)PARTS.push({x:x+rnd(-8,8),y:y+rnd(-8,8),h:h+rnd(-0.3,0.3),vx:0,vy:0,vh:rnd(-0.5,0.5),life:0.3,max:0.3,col:j?'#ffd000':'#ffffff',size:rnd(2.5,4),g:0});
+    b.g.position.set(tx(x),h+GY(x,y),tz(y));for(let j=0;j<3;j++)PARTS.push({x:x+rnd(-8,8),y:y+rnd(-8,8),h:h+rnd(-0.3,0.3),vx:0,vy:0,vh:rnd(-0.5,0.5),life:0.3,max:0.3,col:j?'#ffd000':'#ffffff',size:rnd(2.5,4),g:0});
     if(Math.random()<0.8){const a1=rnd(0,6.283),e1=rnd(-1,1),R=b.R||16,q=shellPt(x,y,h,R,a1,e1),q2=shellPt(x,y,h,R,a1+rnd(1,2.5),-e1);tbolt(q[0],q[1],q[2],q2[0],q2[1],q2[2],0.05,0,0.08);}
     if(k>=1){scene.remove(b.g);SBV.splice(i,1);}}
   for(let i=SDV.length-1;i>=0;i--){const d=SDV[i];d.t-=dt;d.m.material.opacity=0.16+0.1*Math.sin(performance.now()/60);d.w.material.opacity=0.45*Math.min(1,d.t*3);d.m.rotation.y+=dt*0.8;d.w.rotation.y-=dt*1.4;
     for(let j=0;j<2;j++){const a1=rnd(0,6.283),e1=rnd(0,1.3),q=shellPt(d.x,d.y,d.h,d.r,a1,e1),q2=shellPt(d.x,d.y,d.h,d.r,a1+rnd(0.5,1.6),rnd(0,1.3));tbolt(q[0],q[1],q[2],q2[0],q2[1],q2[2],0.08,0,0.13,1);}
     // อนุภาควนเป็นเกลียวเข้ากลาง + สายฟ้าโค้งวนเข้าหากลาง
     for(let j=0;j<4;j++){const an=rnd(0,6.283),r=d.r*rnd(0.85,1.05),tg=an+Math.PI/2;PARTS.push({x:d.x+Math.cos(an)*r,y:d.y+Math.sin(an)*r,h:d.h+rnd(0.1,0.8),vx:-Math.cos(an)*140+Math.cos(tg)*110,vy:-Math.sin(an)*140+Math.sin(tg)*110,vh:0,life:0.7,max:0.7,col:j%2?'#ffd000':'#ffffff',size:2.6,g:0,drag:0.6});}
-    if(Math.random()<0.5){const P=[],a0=rnd(0,6.283);for(let j=0;j<=8;j++){const an=a0+j*0.25,r=d.r*(1-j/9);_tw.set(tx(d.x+Math.cos(an)*r),d.h+0.2,tz(d.y+Math.sin(an)*r));P.push(_tw.clone());}tboltP(P,0.12,0.1,0.05);}
+    if(Math.random()<0.5){const P=[],a0=rnd(0,6.283);for(let j=0;j<=8;j++){const an=a0+j*0.25,r=d.r*(1-j/9);_tw.set(tx(d.x+Math.cos(an)*r),d.h+0.2+GY(d.x,d.y),tz(d.y+Math.sin(an)*r));P.push(_tw.clone());}tboltP(P,0.12,0.1,0.05);}
     // ลูกสายฟ้าค้างกลางโดม: สั่น + สายฟ้าพันรอบ + สายฟ้าลงพื้น
-    {const ob=d.orb;ob.position.set(tx(d.x)+rnd(-0.08,0.08),d.h+1.3+rnd(-0.08,0.08),tz(d.y)+rnd(-0.08,0.08));ob.scale.setScalar(0.9+0.15*Math.sin(performance.now()/40));
+    {const ob=d.orb;ob.position.set(tx(d.x)+rnd(-0.08,0.08),d.h+1.3+GY(d.x,d.y)+rnd(-0.08,0.08),tz(d.y)+rnd(-0.08,0.08));ob.scale.setScalar(0.9+0.15*Math.sin(performance.now()/40));
       for(let j=0;j<3;j++){const a1=rnd(0,6.283),e1=rnd(-1,1),q=shellPt(d.x,d.y,d.h+1.3,20,a1,e1),q2=shellPt(d.x,d.y,d.h+1.3,20,a1+rnd(1.2,2.8),-e1);tbolt(q[0],q[1],q[2],q2[0],q2[1],q2[2],0.05,0,0.08,j===0?1:0);}
       if(Math.random()<0.4){const an=rnd(0,6.283),r=rnd(30,d.r*0.8);tbolt(d.x,d.y,d.h+1.3,d.x+Math.cos(an)*r,d.y+Math.sin(an)*r,d.h+0.1,0.08,0,0.1);}
       LREQ.push({x:tx(d.x),y:d.h+1.3,z:tz(d.y),col:'#ffd23a',int:3,dist:12});}
@@ -3869,7 +3945,7 @@ function stormFX(o,p,pz,now,dt){
       if(T.length)for(const t of T){tbolt(q.x,q.y,q.h,t[0]+rnd(-5,5),t[1]+rnd(-5,5),t[2]+rnd(-0.2,0.3),0.07,0,0.1,Math.random()<0.4?1:0);
         for(let j=0;j<4;j++)PARTS.push({x:t[0]+rnd(-6,6),y:t[1]+rnd(-6,6),h:t[2]+rnd(-0.3,0.3),vx:rnd(-90,90),vy:rnd(-90,90),vh:rnd(0,4),life:0.22,max:0.22,col:j%2?'#ffd000':'#ffffff',size:rnd(1.8,2.8),g:6});}
       else for(let j=0;j<2;j++){const a=(p.a||0)+rnd(-0.55,0.55),d=rnd(55,100);tbolt(q.x,q.y,q.h,q.x+Math.cos(a)*d,q.y+Math.sin(a)*d,q.h+rnd(-0.6,0.4),0.06,0,0.1,1);}
-      LREQ.push({x:_pw.x,y:_pw.y,z:_pw.z,col:'#ffd23a',int:2.5,dist:8});}
+      LREQ.push({abs:1,x:_pw.x,y:_pw.y,z:_pw.z,col:'#ffd23a',int:2.5,dist:8});}
     o.bmS=(o.bmS||0)-dt;if(o.bmS<=0){o.bmS=0.4;snd('zap',{x:p.x,y:p.y,vol:isMe?0.35:0.2});}
   }
   // ยิงครั้งถัดไปเป็นสายฟ้าสามเหลี่ยม: ประกายเหลืองที่ปลายไม้
@@ -3932,11 +4008,11 @@ function stormFX(o,p,pz,now,dt){
   if(f&16&&R){
     if(!o.rlOn)o.rlOn=now;const el=(now-o.rlOn)/1000,a=R[0],len=R[2],k=1-Math.max(0,R[1])/(R[3]||0.8),g=Math.min(1,el/0.25);
     o.tip.getWorldPosition(_pw);const q=simOf(_pw),ex=q.x+Math.cos(a)*len*g,ey=q.y+Math.sin(a)*len*g,P=[];
-    for(let i=0;i<8;i++){const t=i/7;_tw.set(tx(lerp(q.x,ex,t)),q.h,tz(lerp(q.y,ey,t)));P.push(_tw.clone());}
+    for(let i=0;i<8;i++){const t=i/7;_tw.set(tx(lerp(q.x,ex,t)),q.h+GY(q.x,q.y),tz(lerp(q.y,ey,t)));P.push(_tw.clone());}
     tboltP(P,0.03,0.05+0.06*k,0.015);
     FX.flashSprite(ex,ey,q.h,'#fff7b0',0.9,0.6,0.05,2.2);
     if(!o.railC){o.railC=new THREE.Mesh(new THREE.RingGeometry(0.5,0.72,6),new THREE.MeshBasicMaterial({color:'#ffd000',transparent:true,opacity:0.9,depthWrite:false,side:THREE.DoubleSide}));scene.add(o.railC);(o.g.userData.extra||(o.g.userData.extra=[])).push(o.railC);}
-    o.railC.visible=true;o.railC.position.set(tx(p.x+Math.cos(a)*40),pz+1.25,tz(p.y+Math.sin(a)*40));o.railC.rotation.set(0,-a+Math.PI/2,now/120);o.railC.scale.setScalar(0.8+0.7*k);
+    o.railC.visible=true;o.railC.position.set(tx(p.x+Math.cos(a)*40),pz+1.25+GY(p.x,p.y),tz(p.y+Math.sin(a)*40));o.railC.rotation.set(0,-a+Math.PI/2,now/120);o.railC.scale.setScalar(0.8+0.7*k);
     if(Math.random()<0.6){const c=simOf(o.railC.position),an=rnd(0,6.283);tbolt(c.x+Math.cos(an)*rnd(8,16),c.y+Math.sin(an)*rnd(8,16),c.h+rnd(-0.6,0.6),c.x,c.y,c.h,0.05,0,0.06);}
     o.armR.rotation.x=-1.55;o.armL.rotation.x=-1.4;o.armL.rotation.z=0.4;
   }else{o.rlOn=0;if(o.railC)o.railC.visible=false;}
@@ -3992,7 +4068,7 @@ function makeSlash(x,y,h,a,R,vert,tilt,col){
   const half=vert?1.25:1.05,geo=new THREE.RingGeometry(R*S3*0.62,R*S3,32,1,vert?-0.7:-half,vert?2.5:half*2);
   if(!vert)geo.rotateX(-Math.PI/2);
   const m=new THREE.Mesh(geo,new THREE.MeshBasicMaterial({color:hdr(col||'#cfefff',1.8),transparent:true,opacity:0.85,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide}));
-  m.position.set(tx(x),h,tz(y));m.rotation.order='YXZ';m.rotation.y=-a;m.rotation.x=tilt||0;scene.add(m);
+  m.position.set(tx(x),h+GY(x,y),tz(y));m.rotation.order='YXZ';m.rotation.y=-a;m.rotation.x=tilt||0;scene.add(m);
   SLV.push({m,age:0,life:0.22});
 }
 // คลื่นดาบ Glacier Rend: เสี้ยวน้ำแข็งตั้งตรง (ตัวน้ำแข็งทึบให้เห็นชัดแม้บนหิมะ + ขอบขาวเรืองแสง + แสงฟุ้งรอบนอก)
@@ -4031,7 +4107,7 @@ function makeGlacier(x,y,a,len,t){
   if(!_glGeo){_glGeo=new THREE.ConeGeometry(1,1,5);_glGeo.translate(0,0.5,0);_glGeo.userData.keep=true;
     _glMat=new THREE.MeshStandardMaterial({color:'#cfefff',emissive:'#2a6fa0',emissiveIntensity:0.55,roughness:0.12,metalness:0.1,transparent:true,opacity:0.9,flatShading:true});
     _glMat2=new THREE.MeshStandardMaterial({color:'#e8f8ff',emissive:'#4a9ad0',emissiveIntensity:0.7,roughness:0.08,transparent:true,opacity:0.75,flatShading:true});_glMat.userData.keep=_glMat2.userData.keep=true;}
-  const g=new THREE.Group();g.position.set(tx(x),0,tz(y));g.rotation.y=-a;scene.add(g);
+  const g=new THREE.Group();g.position.set(tx(x),GY(x,y),tz(y));g.rotation.y=-a;scene.add(g);
   const spikes=[];
   for(let d=0;d<=len;d+=45){
     const H=1+7*d/len,dl=d/1400;
@@ -4060,7 +4136,7 @@ function updateGlacierVis(dt){
 function updateOrbShots(dt){
   for(let i=OBV.length-1;i>=0;i--){const b=OBV[i];b.t+=dt;if(b.t<0)continue;const k=Math.min(1,b.t/b.max),px=-(b.y2-b.y),py=(b.x2-b.x),pl=Math.hypot(px,py)||1,arc=Math.sin(k*Math.PI)*40*b.s;
     const x=lerp(b.x,b.x2,k)+px/pl*arc,y=lerp(b.y,b.y2,k)+py/pl*arc,H=lerp(b.h,b.h2,k)+Math.sin(k*Math.PI)*0.8;
-    if(b.sp){b.sp.visible=b.cr.visible=true;b.sp.position.set(tx(x),H,tz(y));b.cr.position.copy(b.sp.position);const pu=1+0.15*Math.sin(b.t*40);b.sp.scale.setScalar(1.3*pu);}
+    if(b.sp){b.sp.visible=b.cr.visible=true;b.sp.position.set(tx(x),H+GY(x,y),tz(y));b.cr.position.copy(b.sp.position);const pu=1+0.15*Math.sin(b.t*40);b.sp.scale.setScalar(1.3*pu);}
     for(let j=0;j<7;j++)PARTS.push({x:x+rnd(-6,6),y:y+rnd(-6,6),h:H+rnd(-0.15,0.15),vx:rnd(-25,25),vy:rnd(-25,25),vh:rnd(0,1.4),life:rnd(0.3,0.45),max:0.45,col:j<2?'#fff0b0':j<4?'#ffb347':'#ff6a1a',size:j<2?3:rnd(3.5,5),g:-1.5,grow:0.6});
     for(let j=0;j<2;j++)PARTS.push({x:x+rnd(-5,5),y:y+rnd(-5,5),h:H,vx:0,vy:0,vh:0.6,life:0.4,max:0.4,col:j?'#ff7a1a':'#d8401a',size:4.5,g:-1,smoke:true,grow:1});
     LREQ.push({x:tx(x),y:H,z:tz(y),col:'#ff8a3a',int:2.5,dist:9});
@@ -4073,7 +4149,7 @@ function updateZV(dt){
     const x=w.x+Math.cos(w.a)*w.d,y=w.y+Math.sin(w.a)*w.d,px=-Math.sin(w.a),py=Math.cos(w.a);
     for(let k=0;k<6;k++){const s=rnd(-40,40);PARTS.push({x:x+px*s,y:y+py*s,h:rnd(0.2,1.6),vx:Math.cos(w.a)*200,vy:Math.sin(w.a)*200,vh:rnd(0.5,3),life:0.4,max:0.4,col:k%2?'#ffffff':'#bfeaff',size:rnd(2,3.2),g:4,drag:3});}
     LREQ.push({x:tx(x),y:1,z:tz(y),col:'#8fe0ff',int:1.6,dist:10});
-    if(w.m){const k=w.d/w.len,grow=Math.min(1,w.d/90);w.m.position.set(tx(x),0,tz(y));w.m.scale.setScalar((0.35+0.65*grow)*(1+k*0.25));
+    if(w.m){const k=w.d/w.len,grow=Math.min(1,w.d/90);w.m.position.set(tx(x),GY(x,y),tz(y));w.m.scale.setScalar((0.35+0.65*grow)*(1+k*0.25));
       const fade=k>0.85?(1-k)/0.15:1;const M=w.m.userData.mats;M[0].opacity=0.9*fade;M[1].opacity=fade;M[2].opacity=0.3*fade;
       // ภาพติดตา (afterimage) ทิ้งไว้ด้านหลังเป็นระยะ
       w.gh+=st;if(w.gh>=38){w.gh=0;const gm=new THREE.Mesh(_wbGeo[0],new THREE.MeshBasicMaterial({color:hdr('#8fd8ff',0.8),transparent:true,opacity:0.35*fade,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide}));gm.position.copy(w.m.position);gm.position.y=1.55*w.m.scale.y;gm.rotation.y=w.m.rotation.y;gm.scale.set(1.5*w.m.scale.x,1.7*w.m.scale.y,1.5*w.m.scale.z);scene.add(gm);WGH.push({m:gm,age:0,op:0.35*fade});}
@@ -4270,7 +4346,7 @@ function playVfx(name,o){
     m.material=Array.isArray(m.material)?m.material.map(one):one(m.material);
   });
   const g=new THREE.Group();g.add(inst);
-  g.position.set(tx(o.x),o.h||0,tz(o.y));
+  g.position.set(tx(o.x),(o.h||0)+GY(o.x,o.y),tz(o.y));
   if(o.a!==undefined)g.rotation.y=Math.atan2(Math.cos(o.a),Math.sin(o.a));
   const rad=e.radius!==undefined?e.radius:o.zr;   // โซน (o.zr) ขยายตามรัศมีเป็นค่าเริ่ม
   g.scale.setScalar((e.scale||1)*(rad&&o.r?o.r*S3:1)*(o.scale||1));
@@ -4318,7 +4394,7 @@ function playFlip(name,o){
   const mo={map:tex,transparent:true,depthWrite:false,blending:e.add?THREE.AdditiveBlending:THREE.NormalBlending,color:o.col?hdr(o.col,e.add?1.5:1):0xffffff};
   if(flat&&!FLIPGEO){FLIPGEO=new THREE.PlaneGeometry(1,1).rotateX(-Math.PI/2);FLIPGEO.userData.keep=true;}
   const sp=flat?new THREE.Mesh(FLIPGEO,new THREE.MeshBasicMaterial(mo)):new THREE.Sprite(new THREE.SpriteMaterial(mo));
-  sp.position.set(tx(o.x),o.h!==undefined?o.h:(flat?0.06:1),tz(o.y));
+  sp.position.set(tx(o.x),(o.h!==undefined?o.h:(flat?0.06:1))+GY(o.x,o.y),tz(o.y));
   sp.scale.setScalar((e.size||2)*(rad&&o.r?o.r*S3*(flat?2:1):1)*(o.scale||1));scene.add(sp);
   const n=e.cols*e.rows,life=o.hold||o.life||e.life||(e.loop?1:n/(e.fps||24));
   FLIPL.push({sp,tex,e,n,t:0,life,max:life,loop:e.loop||!!o.hold});
@@ -4380,7 +4456,7 @@ function syncProps(v){
   if(!PROPV.g||PROPV.g.parent!==world||PROPV.map!==builtMap){
     PROPV.g=new THREE.Group();world.add(PROPV.g);PROPV.map=builtMap;PROPV.list=[];
     prefetchModels(Object.values(PROPDEF).flatMap(D=>[D.model,D.model+'_broken',D.model+'_used']));
-    for(const o of PROPS){const g=new THREE.Group();g.position.set(tx(o.x),0,tz(o.y));g.rotation.y=o.a;PROPV.g.add(g);PROPV.list.push({g,st:-1,o});}
+    for(const o of PROPS){const g=new THREE.Group();g.position.set(tx(o.x),GY(o.x,o.y),tz(o.y));g.rotation.y=o.a;PROPV.g.add(g);PROPV.list.push({g,st:-1,o});}
   }
   PROPV.g.visible=true;
   for(const q of PROPV.list){
@@ -4467,7 +4543,7 @@ function bldBuild(b,file){
     if(f&2)m.traverse(x=>{if(x.isMesh)x.material=Array.isArray(x.material)?x.material.map(charMat):charMat(x.material);});
     g.add(m);
   }
-  g.position.set(tx(b.o.x),0,tz(b.o.y));g.rotation.y=b.o.ry||0;shadowAll(g);
+  g.position.set(tx(b.o.x),GY(b.o.x,b.o.y),tz(b.o.y));g.rotation.y=b.o.ry||0;shadowAll(g);
   batchStatic(g,new Set());
   // เปลือกน้ำแข็ง 1 ชิ้นต่อส่วน (ซ่อนไว้ โชว์เมื่อเกาะน้ำแข็ง)
   const ice=[];
@@ -4523,7 +4599,7 @@ function bldDebris(ev){
     else if(pool.length){const src=pool[k%pool.length];m=new THREE.Mesh(src.geometry,src.material);}
     else{m=new THREE.Mesh(sGeo(THREE.BoxGeometry,1,1,1),roof?(k%2?M.roof:M.beam):(k%3?M.wall:M.beam));m.scale.set(0.25+Math.random()*0.55,0.15+Math.random()*0.35,0.25+Math.random()*0.5);}
     if(fire&&m.material!==_bldIce)m.material=charMat(m.material);
-    m.castShadow=true;m.position.set(tx(x),h,tz(y));m.rotation.set(Math.random()*6,Math.random()*6,0);scene.add(m);
+    m.castShadow=true;m.position.set(tx(x),h+GY(x,y),tz(y));m.rotation.set(Math.random()*6,Math.random()*6,0);scene.add(m);
     let dx=x-ev.ox,dy=y-ev.oy;const dl=Math.hypot(dx,dy)||1;dx/=dl;dy/=dl;
     const sp=(blast?9:ice?5:3.5)*(0.6+Math.random()*0.8);
     DEBRIS.push({m,vx:dx*sp+rnd(-1.5,1.5),vz:dy*sp+rnd(-1.5,1.5),vy:(blast?5:roof?0:2.5)+Math.random()*4,rx:rnd(-8,8),rz:rnd(-8,8),life:3+Math.random()*1.5,s0:m.scale.clone()});
@@ -4560,7 +4636,7 @@ function syncWalls(v){
       const gl2=new THREE.Sprite(glowMat('#8fe0ff',1.2));gl2.scale.set(5,4,1);gl2.position.y=2.2;g.add(gl2);
       scene.add(g);o={g,mat};WM3.set(w[0],o);
     }
-    o.g.position.set(tx(w[1]),0,tz(w[2]));
+    o.g.position.set(tx(w[1]),GY(w[1],w[2]),tz(w[2]));
     o.mat.opacity=0.5+0.4*clamp(w[4]/70,0,1);
     if(Math.random()<0.1)burst(w[1]+rnd(-30,30),w[2]+rnd(-30,30),'#cfeaff',1,20,0.8,1.6,{h:rnd(0.5,4),vh:[0,1],g:-0.2});
   }
@@ -4605,9 +4681,9 @@ function syncMins(v,now,dt){
   const seen=new Set(),me=v.P.find(q=>q.id===NET.myId);
   for(const m of (v.MN||[])){
     const [id,type,x,y,h,hp,owner,team,fm]=m;seen.add(id);
-    let o=MM3.get(id);if(!o){o=makeMinion(type);o.g.position.set(tx(x),h,tz(y));o.px=x;o.py=y;MM3.set(id,o);}
+    let o=MM3.get(id);if(!o){o=makeMinion(type);o.g.position.set(tx(x),h+GY(x,y),tz(y));o.px=x;o.py=y;MM3.set(id,o);}
     const X=tx(x),Z=tz(y),k=1-Math.exp(-14*dt);
-    o.g.position.x+=(X-o.g.position.x)*k;o.g.position.z+=(Z-o.g.position.z)*k;o.g.position.y+=(h-o.g.position.y)*k;
+    o.g.position.x+=(X-o.g.position.x)*k;o.g.position.z+=(Z-o.g.position.z)*k;o.g.position.y+=(h+GY(x,y)-o.g.position.y)*k;
     const vx=x-o.px,vy=y-o.py,mvd=Math.hypot(vx,vy);
     if(mvd>0.5){const a=Math.atan2(vx,vy);let d=a-o.g.rotation.y;while(d>Math.PI)d-=2*Math.PI;while(d<-Math.PI)d+=2*Math.PI;o.g.rotation.y+=d*Math.min(1,dt*12);}
     o.px=x;o.py=y;
@@ -4711,7 +4787,7 @@ function efxFX(ev){
       for(const t of T){tbolt(t[0],t[1],t[2],x,y,H,0.3,0,0.16,1);FX.flashSprite(t[0],t[1],t[2],'#ffd23a',0.9,0.2,0.3,1.6);
         for(let j=0;j<10;j++)PARTS.push({x:t[0]+rnd(-12,12),y:t[1]+rnd(-12,12),h:t[2]+rnd(-0.6,0.8),vx:(x-t[0])*rnd(1.5,2.5),vy:(y-t[1])*rnd(1.5,2.5),vh:rnd(-2,-0.5),life:0.4,max:0.4,col:j%2?'#ffd000':'#ffffff',size:rnd(2,3),g:0});}
       // สายฟ้าที่ดูดมาไหลวนรอบตัว 0.6 วิ
-      if(T.length)for(let k=0;k<8;k++)later(0.12+k*0.06,()=>{const P=[],a0=rnd(0,6.283),h0=H+rnd(-0.8,0.6);for(let i=0;i<=8;i++){const an=a0+i*0.32,r=24-i*0.6;_tw.set(tx(x+Math.cos(an)*r),h0+i*0.12,tz(y+Math.sin(an)*r));P.push(_tw.clone());}tboltP(P,0.14,0.11,0.04);});
+      if(T.length)for(let k=0;k<8;k++)later(0.12+k*0.06,()=>{const P=[],a0=rnd(0,6.283),h0=H+rnd(-0.8,0.6);for(let i=0;i<=8;i++){const an=a0+i*0.32,r=24-i*0.6;_tw.set(tx(x+Math.cos(an)*r),h0+i*0.12+GY(x,y),tz(y+Math.sin(an)*r));P.push(_tw.clone());}tboltP(P,0.14,0.11,0.04);});
       burst(x,y,'#ffd000',24,160,0.5,2.2,{h:H,vh:[0,3],g:-0.5});FX.flashLight(x,y,H+1,'#ffd23a',4,12,0.3);if(near)snd('zap',ev);if(ev.id===NET.myId&&T.length)snd('buff');break;}
     case 'sorbon':burst(x,y,'#ffd000',20,140,0.4,2.2,{h:H,g:0});FX.flashLight(x,y,H,'#ffd23a',3,10,0.25);if(ev.id===NET.myId)snd('buff');break;
     case 'sorbgo':for(let i=0;i<(ev.n||1);i++){const g=new THREE.Group(),a1=new THREE.Sprite(glowMat('#ffd23a',1.6)),a2=new THREE.Sprite(glowMat('#ffffff',3.2));a1.scale.setScalar(0.85);a2.scale.setScalar(0.32);g.add(a1,a2);scene.add(g);SBV.push({g,x:x+(i?40:-40),y,h:H,x2:ev.x2,y2:ev.y2,h2:0.6,t:0,max:0.18,R:8});}
@@ -4723,7 +4799,7 @@ function efxFX(ev){
     case 'srail':{const a=ev.a,c=Math.cos(a),sn=Math.sin(a),L=ev.len,ex=x+c*L,ey=y+sn*L;
       const b1=stBeam(x,y,H,a,L,0.2,'#ffffff',1,true);stFade(b1,0.28);const b2=stBeam(x,y,H,a,L,0.42,'#ffd000',0.85,true);stFade(b2,0.32);const b3=stBeam(x,y,H,a,L,0.8,'#ffc800',0.18);stFade(b3,0.35);STV[STV.length-1].grow=0.7;
       // สายฟ้าเกลียวพันรอบลำ
-      for(let k=0;k<3;k++){const P=[],ph=k*2.09;for(let i=0;i<=24;i++){const d=L*i/24,an=ph+i*0.9;_tw.set(tx(x+c*d-sn*Math.cos(an)*12),H+Math.sin(an)*0.6,tz(y+sn*d+c*Math.cos(an)*12));P.push(_tw.clone());}tboltP(P,0.3,0.1,0.06);}
+      for(let k=0;k<3;k++){const P=[],ph=k*2.09;for(let i=0;i<=24;i++){const d=L*i/24,an=ph+i*0.9;_tw.set(tx(x+c*d-sn*Math.cos(an)*12),H+Math.sin(an)*0.6+GY(x+c*d,y+sn*d),tz(y+sn*d+c*Math.cos(an)*12));P.push(_tw.clone());}tboltP(P,0.3,0.1,0.06);}
       for(let d=20;d<L;d+=20){PARTS.push({x:x+c*d+rnd(-10,10),y:y+sn*d+rnd(-10,10),h:H+rnd(-0.4,0.4),vx:rnd(-70,70),vy:rnd(-70,70),vh:rnd(-1,2),life:rnd(0.3,0.6),max:0.6,col:Math.random()<0.6?'#ffd000':Math.random()<0.5?'#ffffff':'#9fd8ff',size:rnd(2,3.4),g:1});}
       // แรงปะทะปลายลำ
       FX.flashSprite(ex,ey,H,'#ffffff',0.5,3.9,0.18,2.2);FX.flashSprite(ex,ey,H,'#ffd23a',0.6,5.5,0.32,2);FX.flashLight(ex,ey,H,'#ffd23a',5.2,20,0.35);
@@ -4731,7 +4807,7 @@ function efxFX(ev){
       burst(ex,ey,'#ffd000',36,360,0.45,2.6,{h:H,vh:[-1,6],g:4});burst(ex,ey,'#9fd8ff',12,260,0.35,2,{h:H,g:4});
       FX.flashSprite(x+c*45,y+sn*45,H,'#ffffff',0.3,2.2,0.1,2.5);FX.flashLight(x+c*60,y+sn*60,H,'#ffd23a',4,12,0.25);
       if(near){snd('boom',ev);snd('zap',ev);shake(5);}break;}
-    case 'tswarn':{const g=makeDfCircle(true),R=ev.r*S3;g.visible=true;g.position.set(tx(x),H+0.07,tz(y));g.scale.set(R,1,R);g.userData.mats[0].color.set('#ffd000');TSV.push({g,age:0});if(near)snd('cast_ebolt',ev);break;}
+    case 'tswarn':{const g=makeDfCircle(true),R=ev.r*S3;g.visible=true;g.position.set(tx(x),H+0.07+GY(x,y),tz(y));g.scale.set(R,1,R);g.userData.mats[0].color.set('#ffd000');TSV.push({g,age:0});if(near)snd('cast_ebolt',ev);break;}
     case 'tstrike':{const R=ev.r;for(let i=0;i<3;i++)tbolt(x+rnd(-14,14),y+rnd(-14,14),H+15,x+rnd(-6,6),y+rnd(-6,6),H+0.1,0.22,0,0.36,2);
       FX.flashSprite(x,y,H+1,'#ffffff',0.6,3.3,0.12,2.2);FX.flashSprite(x,y,H+0.6,'#ffd23a',0.8,4.4,0.28,2);FX.flashLight(x,y,H+3,'#ffd23a',5.2,24,0.3);
       ring(x,y,'#ffd000',R*1.3,0.3,H+0.1);ring(x,y,'#ffffff',R*0.7,0.2,H+0.1);
@@ -4745,10 +4821,10 @@ function efxFX(ev){
     case 'sdball':{const g=new THREE.Group(),a1=new THREE.Sprite(glowMat('#ffd23a',2)),a2=new THREE.Sprite(glowMat('#ffffff',3.5));a1.scale.setScalar(2);a2.scale.setScalar(0.9);g.add(a1,a2);scene.add(g);SBV.push({g,x,y,h:H,x2:ev.x2,y2:ev.y2,h2:0.8,t:0,max:0.3,R:22});tbolt(x,y,H,ev.x2,ev.y2,0.5,0.3,0,0.12,2);if(near)snd('whoosh',ev);break;}
     case 'sdome':{const R=ev.r*S3,m=new THREE.Mesh(new THREE.SphereGeometry(R,24,12,0,Math.PI*2,0,Math.PI/2),new THREE.MeshBasicMaterial({color:hdr('#ffd23a',1.2),transparent:true,opacity:0.2,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide}));
       const w=new THREE.Mesh(new THREE.SphereGeometry(R*1.01,14,6,0,Math.PI*2,0,Math.PI/2),new THREE.MeshBasicMaterial({color:'#ffd000',wireframe:true,transparent:true,opacity:0.45,depthWrite:false}));
-      m.position.set(tx(x),H,tz(y));w.position.copy(m.position);scene.add(m,w);
-      const rings=[0,1,2,3].map(i=>{const r=new THREE.Mesh(new THREE.RingGeometry(0.9,1,48),new THREE.MeshBasicMaterial({color:'#ffcc00',transparent:true,opacity:0.6,depthWrite:false,side:THREE.DoubleSide}));r.rotation.x=-Math.PI/2;r.position.set(tx(x),H+0.06,tz(y));r.userData.ph=i/4;scene.add(r);return r;});
-      const pit=new THREE.Mesh(new THREE.CircleGeometry(1,40),new THREE.MeshBasicMaterial({color:'#2a1a00',transparent:true,opacity:0.35,depthWrite:false}));pit.rotation.x=-Math.PI/2;pit.position.set(tx(x),H+0.05,tz(y));pit.scale.setScalar(R);scene.add(pit);
-      const orb=new THREE.Group(),o1=new THREE.Sprite(glowMat('#ffd23a',2)),o2=new THREE.Sprite(glowMat('#ffffff',3.5));o1.material.userData.keep=true;o2.material.userData.keep=true;o1.scale.setScalar(2.2);o2.scale.setScalar(0.95);orb.add(o1,o2);orb.position.set(tx(x),H+1.3,tz(y));scene.add(orb);
+      m.position.set(tx(x),H+GY(x,y),tz(y));w.position.copy(m.position);scene.add(m,w);
+      const rings=[0,1,2,3].map(i=>{const r=new THREE.Mesh(new THREE.RingGeometry(0.9,1,48),new THREE.MeshBasicMaterial({color:'#ffcc00',transparent:true,opacity:0.6,depthWrite:false,side:THREE.DoubleSide}));r.rotation.x=-Math.PI/2;r.position.set(tx(x),H+0.06+GY(x,y),tz(y));r.userData.ph=i/4;scene.add(r);return r;});
+      const pit=new THREE.Mesh(new THREE.CircleGeometry(1,40),new THREE.MeshBasicMaterial({color:'#2a1a00',transparent:true,opacity:0.35,depthWrite:false}));pit.rotation.x=-Math.PI/2;pit.position.set(tx(x),H+0.05+GY(x,y),tz(y));pit.scale.setScalar(R);scene.add(pit);
+      const orb=new THREE.Group(),o1=new THREE.Sprite(glowMat('#ffd23a',2)),o2=new THREE.Sprite(glowMat('#ffffff',3.5));o1.material.userData.keep=true;o2.material.userData.keep=true;o1.scale.setScalar(2.2);o2.scale.setScalar(0.95);orb.add(o1,o2);orb.position.set(tx(x),H+1.3+GY(x,y),tz(y));scene.add(orb);
       SDV.push({m,w,rings,pit,orb,x,y,h:H,r:ev.r,t:ev.t,max:ev.t});
       FX.flashSprite(x,y,H+0.5,'#ffffff',0.5,3.3,0.18,2.2);FX.flashLight(x,y,H+1,'#ffd23a',4.5,20,0.4);ring(x,y,'#ffd000',ev.r,0.4,H+0.1);burst(x,y,'#ffd000',40,ev.r*2,0.4,2.4,{h:H+0.3,vh:[2,6],g:5});if(near){snd('boom',ev);snd('zap',ev);shake(4);}break;}
     case 'sdboom':{const R=ev.r,g=!!ev.g;FX.flashSprite(x,y,H+0.5,'#ffffff',0.35,g?6:5,0.1,3);FX.flashSprite(x,y,H+0.4,'#ffd23a',0.5,g?10:8,0.3,2);FX.flashLight(x,y,H+1,'#ffd23a',5.9,26,0.45);
@@ -4765,7 +4841,7 @@ function efxFX(ev){
     case 'godoff':burst(x,y,'#ffd000',24,160,0.5,2,{h:H,vh:[0,2],g:0});break;
     case 'sclaw':{const a=ev.a,emp=ev.n===3,big=ev.n>=2,tl=ev.n===0?0.35:ev.n===1?-0.35:0;
       // กรงเล็บคมกางออก 3 เส้นโค้ง (สไตล์ Aoi) สีเหลืองแกนขาว
-      for(let k=-1;k<=1;k++){const P=[],R0=(emp?215:big?150:130)+k*(emp?22:16),hh=H+k*0.22+tl*0.6;for(let i=0;i<=10;i++){const t=i/10,an=a+(t-0.5)*(emp?2.3:big?1.5:1.2)*(ev.n===1?-1:1),r=R0*(0.55+0.45*Math.sin(Math.PI*t));_tw.set(tx(x+Math.cos(an)*r),hh+(t-0.5)*tl*2,tz(y+Math.sin(an)*r));P.push(_tw.clone());}
+      for(let k=-1;k<=1;k++){const P=[],R0=(emp?215:big?150:130)+k*(emp?22:16),hh=H+k*0.22+tl*0.6;for(let i=0;i<=10;i++){const t=i/10,an=a+(t-0.5)*(emp?2.3:big?1.5:1.2)*(ev.n===1?-1:1),r=R0*(0.55+0.45*Math.sin(Math.PI*t));_tw.set(tx(x+Math.cos(an)*r),hh+(t-0.5)*tl*2+GY(x,y),tz(y+Math.sin(an)*r));P.push(_tw.clone());}
         tboltP(P,big?0.22:0.16,emp?0.34:big?0.26:0.2,0.02);}
       if(emp){FX.flashSprite(x+Math.cos(a)*120,y+Math.sin(a)*120,H,'#fff7b0',0.4,3.5,0.15,2.2);FX.flashLight(x+Math.cos(a)*120,y+Math.sin(a)*120,H,'#ffd23a',5,14,0.25);burst(x+Math.cos(a)*150,y+Math.sin(a)*150,'#9fd8ff',14,260,0.3,2,{h:H,g:3});}
       for(let i=0;i<(big?6:3);i++){const an=a+rnd(-0.6,0.6),d=rnd(120,200);burst(x+Math.cos(an)*d,y+Math.sin(an)*d,i%2?'#ffd000':'#ffffff',4,160,0.25,2,{h:H,g:3});}
@@ -5099,6 +5175,8 @@ $('#over').addEventListener('click',e=>{
 //  โลก 3D (Three.js + Bloom) — 1 หน่วย 3D = 20 พิกเซลของระบบเกม
 // =====================================================================
 const S3=1/20,tx=x=>(x-MW/2)*S3,tz=y=>(y-MH/2)*S3;
+// ความสูงพื้นจริงในโลก 3D (แผนที่จากไฟล์มีเนิน) — ความสูงจากเกม (z/h) + GY(x,y) = ตำแหน่ง y ในฉาก • TW = แบบพิกัด 3D
+const GY=(x,y)=>TERR?terrT(x,y):0,TW=(X,Z)=>TERR?terrT(X*20+MW/2,Z*20+MH/2):0;
 const hdr=(c,k)=>new THREE.Color(c).multiplyScalar(k);
 // antialias ปิดไว้: ภาพผ่าน EffectComposer (render target) อยู่แล้ว MSAA ของ canvas จึงไม่ช่วยอะไร แค่กินแรง
 const gl=new THREE.WebGLRenderer({canvas:document.getElementById('gl'),antialias:false,powerPreference:'high-performance'});
@@ -5224,7 +5302,8 @@ function buildWorld(id){
   }
   clearDyn();clearDebris();
   prefetchModels(FILE_MODELS());prefetchFx();
-  setSky(id==='pitch'||id==='meadow'||id==='ruins'||id==='test'?'sunset':'night');
+  const FM=MAPS[id]&&MAPS[id].fm;
+  setSky(FM?(FM.sky==='sunset'||FM.sky==='day'?'sunset':'night'):id==='pitch'||id==='meadow'||id==='ruins'||id==='test'?'sunset':'night');
   const cached=WCACHE.get(id);
   if(cached){
     WCACHE.delete(id);
@@ -5233,7 +5312,7 @@ function buildWorld(id){
   }else{
     world=new THREE.Group();scene.add(world);
     builtMap=id;CANDLESYS=null;TORCHES=[];CANDLES=[];FIREFLIES=null;CRYSTAL=null;RUNE=null;SNITCH=null;BANNERS=[];SNOW=null;
-    if(id==='forest')buildForest();else if(id==='pitch')buildPitch();else if(id==='hogsmeade')buildHogsmeade();else if(id==='greathall')buildGreatHall();else if(id==='meadow')buildMeadow();else if(id==='lake')buildLake();else if(id==='ruins')buildRuins();else if(id==='test')buildTest();else buildCastle();
+    if(FM)buildFileMap(id);else if(id==='forest')buildForest();else if(id==='pitch')buildPitch();else if(id==='hogsmeade')buildHogsmeade();else if(id==='greathall')buildGreatHall();else if(id==='meadow')buildMeadow();else if(id==='lake')buildLake();else if(id==='ruins')buildRuins();else if(id==='test')buildTest();else buildCastle();
     batchStatic(world,new Set([RUNE,CRYSTAL,SNITCH,FIREFLIES&&FIREFLIES.pts,...CANDLES.map(c=>c.g),...BANNERS.map(b=>b.m)].filter(Boolean)));
     setTimeout(prewarmShaders,0);
   }
@@ -5693,6 +5772,49 @@ function buildLake(){
 }
 // ----- ซากลานประลอง (เย็น ทราย) -----
 // ----- Test Place (ห้องฝึก): พื้นตารางเรียบๆ กลางวัน + วงโซนเสกมอนสเตอร์ -----
+// ----- แผนที่จากไฟล์ Blender (MAP-DESIGN.md) -----
+// โชว์พื้นสำรองจากตารางความสูงทันที (เดิน/ทดสอบได้แม้ไม่มี .glb) แล้วสลับเป็นไฟล์ .glb เมื่อโหลดเสร็จ
+function terrGeo(get,nx,ny,c,step){
+  const cols=Math.floor((nx-1)/step)+1,rows=Math.floor((ny-1)/step)+1,pos=new Float32Array(cols*rows*3),uv=new Float32Array(cols*rows*2),idx=[];
+  for(let j=0;j<rows;j++)for(let i=0;i<cols;i++){const k=j*cols+i,gi=i*step,gj=j*step,h=get(gi,gj);
+    pos[k*3]=tx(gi*c);pos[k*3+1]=isNaN(h)?0:h;pos[k*3+2]=tz(gj*c);uv[k*2]=gi*c*S3/8;uv[k*2+1]=gj*c*S3/8;}
+  for(let j=0;j<rows-1;j++)for(let i=0;i<cols-1;i++){const a=j*cols+i,b=a+1,d=a+cols,e=d+1;
+    if([a,b,d,e].some(q=>isNaN(get((q%cols)*step,Math.floor(q/cols)*step))))continue;idx.push(a,d,b,b,d,e);}
+  const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(pos,3));g.setAttribute('uv',new THREE.BufferAttribute(uv,2));g.setIndex(idx);g.computeVertexNormals();return g;
+}
+function buildFileMap(id){
+  const F=MAPS[id].fm,T=TERR,night=F.sky!=='sunset'&&F.sky!=='day';
+  const fog=F.fog||(night?['#16223a',90,380]:['#d8a888',130,520]);
+  scene.fog.color.set(fog[0]);scene.fog.near=+fog[1];scene.fog.far=+fog[2];
+  if(night){hemi.color.set('#a8b8e8');hemi.groundColor.set('#2a3448');hemi.intensity=0.6;moonL.intensity=1.0;moonL.color.set('#c8d8ff');}
+  else{hemi.color.set('#ffe0b8');hemi.groundColor.set('#4a5a2a');hemi.intensity=0.75;moonL.intensity=1.5;moonL.color.set('#fff0dc');}
+  const W=world,fb=addW(new THREE.Group());
+  if(T){
+    const tex=t=>{t=t.clone();t.repeat.set(1,1);t.needsUpdate=true;return t;};
+    const gm=new THREE.MeshStandardMaterial({map:tex(grassTex(night?'#3d5a3a':'#4f8a38',11,1)),roughness:0.95,flatShading:false});
+    const gr=new THREE.Mesh(terrGeo((i,j)=>T.g[j*T.nx+i],T.nx,T.ny,T.c,Math.max(1,Math.ceil(Math.max(T.nx,T.ny)/240))),gm);gr.receiveShadow=true;fb.add(gr);
+    const sm=stoneMat(1,1,'#8a8478');
+    for(const f of T.fl){const m=new THREE.Mesh(terrGeo((i,j)=>f.top[j*f.nx+i],f.nx,f.ny,T.c,1),sm);m.position.set(f.x0*S3,0,f.y0*S3);m.castShadow=m.receiveShadow=true;fb.add(m);}
+  }
+  const cols=MAPS[id].obs.filter(o=>o.fm);
+  if(cols.length){
+    const im=new THREE.InstancedMesh(new THREE.CylinderGeometry(1,1,1,10),new THREE.MeshStandardMaterial({color:'#7d7468',roughness:0.95,flatShading:true}),cols.length),m4=new THREE.Matrix4();
+    cols.forEach((o,i)=>{const r=o.r*S3,b=GY(o.x,o.y);im.setMatrixAt(i,m4.makeScale(r,o.hgt,r).setPosition(tx(o.x),b+o.hgt/2,tz(o.y)));});
+    im.castShadow=im.receiveShadow=true;fb.add(im);
+  }
+  // ไฟประจำจุด (light_) → ใช้ชุดไฟรวมของเกม (เปิดจริงเฉพาะดวงที่ใกล้กล้อง)
+  W.userData.lights=(F.lights||[]).map(L=>({abs:1,x:tx(L.x),y:GY(L.x,L.y)+(L.h||2),z:tz(L.y),col:L.col||'#ffb060',int:L.int||2,dist:L.dist||14}));
+  if(!F.file)return;
+  gltfLoader().then(L=>L.loadAsync('assets/'+F.file+'?v='+(F.v||0))).then(gltf=>{
+    if(!fb.parent)return;                                       // ฉากถูกทิ้งไปแล้ว
+    const sc=gltf.scene,skip=new Set();
+    sc.traverse(o=>{if(/^anim_/i.test(o.name))skip.add(o);if(!o.isMesh)return;o.receiveShadow=true;o.castShadow=!(o.userData&&o.userData.ns);});
+    W.remove(fb);setTimeout(()=>disposeTree(fb),5000);W.add(sc);   // ทิ้งพื้นสำรองทีหลัง (กำลังอุ่นเชดเดอร์อยู่ได้)
+    batchStatic(sc,skip);
+    if(gltf.animations&&gltf.animations.length){const mx=new THREE.AnimationMixer(sc);for(const c of gltf.animations)mx.clipAction(c).play();W.userData.mixer=mx;}
+    gl.shadowMap.needsUpdate=true;setTimeout(prewarmShaders,0);
+  }).catch(err=>console.warn('map glb',id,err));
+}
 function buildTest(){
   scene.fog.color.set('#c9d6e2');scene.fog.near=160;scene.fog.far=620;
   hemi.color.set('#ffffff');hemi.groundColor.set('#6a7078');hemi.intensity=0.85;moonL.intensity=1.35;moonL.color.set('#fff4e6');gl.toneMappingExposure=1;
@@ -6224,7 +6346,7 @@ function updateParticles(dt){
     if(p.grow)p.size*=1+p.grow*dt;
     const S=PSYS[p.smoke?1:0];if(S.n>=PMAX)continue;
     const k=p.life/p.max,c=col3(p.col),j=S.n;
-    S.pos[j*3]=tx(p.x);S.pos[j*3+1]=p.h;S.pos[j*3+2]=tz(p.y);
+    S.pos[j*3]=tx(p.x);S.pos[j*3+1]=p.h+GY(p.x,p.y);S.pos[j*3+2]=tz(p.y);
     if(p.smoke){S.col[j*4]=c.r;S.col[j*4+1]=c.g;S.col[j*4+2]=c.b;S.col[j*4+3]=Math.min(1,k*1.5);}
     else{const b=1.25;S.col[j*4]=c.r*b;S.col[j*4+1]=c.g*b;S.col[j*4+2]=c.b*b;S.col[j*4+3]=k;}
     S.size[j]=p.size*0.12;S.n++;
@@ -6245,7 +6367,7 @@ const decalTex=texCanvas(128,128,(g)=>{const r=g.createRadialGradient(64,64,10,6
 const FX={
   flashSprite(x,y,h,col,s0,s1,life,k){
     const m=new THREE.Sprite(new THREE.SpriteMaterial({map:glowTex,color:hdr(col,k||2),blending:THREE.AdditiveBlending,depthWrite:false,transparent:true}));
-    m.position.set(tx(x),h,tz(y));m.scale.setScalar(s0);scene.add(m);
+    m.position.set(tx(x),h+GY(x,y),tz(y));m.scale.setScalar(s0);scene.add(m);
     SHAPES.push({m,life,max:life,s0,s1,op:1,sprite:true});
   },
   flashLight(x,y,h,col,int,dist,life){FLASHL.push({x:tx(x),y:h,z:tz(y),col,int,dist,life,max:life});},
@@ -6253,7 +6375,7 @@ const FX={
     const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.BufferAttribute(new Float32Array(10*3),3));
     const line=new THREE.Line(geo,new THREE.LineBasicMaterial({color:hdr(col||'#bff4ff',col?1.2:3),transparent:true,blending:THREE.AdditiveBlending,depthWrite:false}));
     scene.add(line);
-    LINES.push({line,a:new THREE.Vector3(tx(x1),h1,tz(y1)),b:new THREE.Vector3(tx(x2),h2,tz(y2)),life,max:life});
+    LINES.push({line,a:new THREE.Vector3(tx(x1),h1+GY(x1,y1),tz(y1)),b:new THREE.Vector3(tx(x2),h2+GY(x2,y2),tz(y2)),life,max:life});
   }
 };
 function jag(geo,a,b,amp){
@@ -6282,7 +6404,7 @@ function spawnShape(s){
   else if(s.k==='rune')mat=new THREE.MeshBasicMaterial({map:runeTex,color:col,transparent:true,depthWrite:false,blending:add});
   else mat=new THREE.MeshBasicMaterial({color:col,transparent:true,depthWrite:false,blending:add,side:THREE.DoubleSide});
   const m=new THREE.Mesh(geo,mat);
-  m.position.set(tx(s.x),s.h!==undefined?s.h:(s.k==='decal'?0.025:0.06),tz(s.y));
+  m.position.set(tx(s.x),(s.h!==undefined?s.h:(s.k==='decal'?0.025:0.06))+GY(s.x,s.y),tz(s.y));
   m.rotation.y=rotY;
   if(s.k==='ringv'){const me=VIEW.cur&&myPos();m.lookAt(cam.position);}
   m.visible=!s.delay;
@@ -6321,7 +6443,7 @@ function updateLights(dt){
   LREQ.sort((a,b)=>((a.x-_cp.x)**2+(a.z-_cp.z)**2)/(a.int+0.1)-((b.x-_cp.x)**2+(b.z-_cp.z)**2)/(b.int+0.1));
   for(let i=0;i<LPOOL.length;i++){
     const L=LPOOL[i],r=LREQ[i];
-    if(r){L.position.set(r.x,r.y,r.z);L.color.set(r.col);L.intensity=r.int;L.distance=r.dist;}
+    if(r){L.position.set(r.x,r.y+(r.abs?0:TW(r.x,r.z)),r.z);L.color.set(r.col);L.intensity=r.int;L.distance=r.dist;}
     else L.intensity=0;
   }
   LREQ=[];
@@ -6365,16 +6487,23 @@ function updatePlaceGhost(me){
     scene.add(g);PLACE.g=g;}
   let gx=INPUT.gx,gy=INPUT.gy;if(!(gx>=0)){gx=me.x+Math.cos(yaw)*D.range*0.75;gy=me.y+Math.sin(yaw)*D.range*0.75;}
   const dx=gx-me.x,dy=gy-me.y,d=Math.hypot(dx,dy)||1,k=Math.min(1,D.range/d);gx=me.x+dx*k;gy=me.y+dy*k;
-  const g=PLACE.g;g.visible=true;g.position.set(tx(gx),0.05,tz(gy));g.scale.set(D.r*S3,D.r*S3*(1+0.1*Math.sin(performance.now()/150)),D.r*S3);
+  const g=PLACE.g;g.visible=true;g.position.set(tx(gx),0.05+GY(gx,gy),tz(gy));g.scale.set(D.r*S3,D.r*S3*(1+0.1*Math.sin(performance.now()/150)),D.r*S3);
   g.children.forEach(c=>{if(c.userData.a!==undefined)c.scale.y=1+0.6*Math.abs(Math.sin(performance.now()/120+c.userData.a*3));});
 }
 // เล็งตามเป้ากลางจอ: ยิงเส้นจากกล้องผ่านกลางจอ หาสิ่งแรกที่เส้นชน (ศัตรู/ผู้เล่น/สิ่งกีดขวาง) แล้วส่งจุดนั้นเป็นเป้า (ax/ay) + ความสูง (ah)
 // กล้องอยู่ข้างไหล่ขวา ถ้าเล็งจุดไกลตายตัว เป้าใกล้ๆ จะเบี้ยวซ้าย/สูงต่ำผิด — ต้องเล็งไปที่จุดชนจริง
 const _aimD=new THREE.Vector3();
+// เส้นจากกล้อง (o + d*t) ชนพื้นสูงต่ำ/พื้นชั้นบนที่ t เท่าไหร่ (ไม่ชน = 1e9) — เดินทีละ 0.5 หน่วยแล้วแบ่งครึ่งหาจุดชน
+function rayTerr(o,d,t0,t1){
+  const solid=t=>{const X=o.x+d.x*t,Z=o.z+d.z*t,sx=X*20+MW/2,sy=Z*20+MH/2;return terrSolid(sx,sy,o.y+d.y*t-terrT(sx,sy));};
+  let a=Math.max(0,t0);if(solid(a))return 1e9;
+  for(let t=a+0.5;t<=t1;t+=0.5){if(solid(t)){let lo=t-0.5,hi=t;for(let i=0;i<6;i++){const m=(lo+hi)/2;if(solid(m))hi=m;else lo=m;}return hi;}}
+  return 1e9;
+}
 function aimFromCrosshair(me,P,E){
   cam.getWorldDirection(_aimD);
   const o=cam.position,dx=_aimD.x,dy=_aimD.y,dz=_aimD.z,hDir=dx*dx+dz*dz;
-  const px=tx(me.x),pz=tz(me.y),chest=(me.z||0)+1.3;
+  const px=tx(me.x),pz=tz(me.y),gm=GY(me.x,me.y),chest=gm+(me.z||0)+1.3;
   // ไม่นับสิ่งที่อยู่ระหว่างกล้องกับตัวผู้เล่น (กล้องล้ำเข้าไปในกำแพงได้)
   const tMin=Math.max(0.5,(px-o.x)*dx+(pz-o.z)*dz);
   let T=60;
@@ -6386,18 +6515,20 @@ function aimFromCrosshair(me,P,E){
     if(t<=tMin||t>=T)return;
     const y=o.y+dy*t;if(y>=y0&&y<=y1)T=t;
   };
-  for(const q of OBS){if(q.bi!==undefined&&BLDG[q.bi]&&BLDG[q.bi].pc.some(p=>p.fl&1))continue;cyl(tx(q.x),tz(q.y),q.r*S3,0,q.hgt||9);}
-  if(PROPON)for(const q of PROPS)if(q.st!==1)cyl(tx(q.x),tz(q.y),q.r*S3,0,q.hgt);
-  for(const q of P||[])if(q.id!==me.id&&q.al&&!q.dn&&!q.gh)cyl(tx(q.x),tz(q.y),0.55,q.z||0,(q.z||0)+2);
-  for(const e of E||[]){const D=EDEF[e.t];if(D)cyl(tx(e.x),tz(e.y),Math.max(0.4,D.r*S3),e.h||0,(e.h||0)+D.ch+0.8);}
+  for(const q of OBS){if(q.bi!==undefined&&BLDG[q.bi]&&BLDG[q.bi].pc.some(p=>p.fl&1))continue;{const g0=GY(q.x,q.y);cyl(tx(q.x),tz(q.y),q.r*S3,q.top!==undefined?-50:g0,q.top!==undefined?q.top:g0+(q.hgt||9));}}
+  if(PROPON)for(const q of PROPS)if(q.st!==1){const g0=GY(q.x,q.y);cyl(tx(q.x),tz(q.y),q.r*S3,g0,g0+q.hgt);}
+  for(const q of P||[])if(q.id!==me.id&&q.al&&!q.dn&&!q.gh){const g0=GY(q.x,q.y)+(q.z||0);cyl(tx(q.x),tz(q.y),0.55,g0,g0+2);}
+  for(const e of E||[]){const D=EDEF[e.t];if(D){const g0=GY(e.x,e.y)+(e.h||0);cyl(tx(e.x),tz(e.y),Math.max(0.4,D.r*S3),g0,g0+D.ch+0.8);}}
   // เส้นเล็งลงพื้นก่อนชนอะไร = ยิงไปจุดนั้นบนพื้นตรงเป้า (ล็อกเป้าอัตโนมัติใน shoot() ยังช่วยถ้าเล็งใกล้ศัตรู)
-  if(dy<-1e-4){const tg=-o.y/dy;if(tg>tMin&&tg<T)T=tg;}
-  let X=o.x+dx*T,Z=o.z+dz*T,Y=Math.max(0.1,o.y+dy*T);
+  const tg=TERR?rayTerr(o,_aimD,tMin,T):(dy<-1e-4?-o.y/dy:1e9);if(tg>tMin&&tg<T)T=tg;
+  let X=o.x+dx*T,Z=o.z+dz*T,Y=Math.max(TW(X,Z)+0.1,o.y+dy*T);
   // จุดเล็งอยู่ใกล้/ข้างหลังตัวเกินไป (ก้มมองเท้า) ให้ยิงตรงไปข้างหน้าระดับอกแทน
   if(Math.hypot(X-px,Z-pz)<1.5||(X-px)*dx+(Z-pz)*dz<=0){X=o.x+dx*60;Z=o.z+dz*60;Y=Math.max(chest,o.y+dy*60);}
-  INPUT.ax=X*20+MW/2;INPUT.ay=Z*20+MH/2;INPUT.ah=Y;
+  INPUT.ax=X*20+MW/2;INPUT.ay=Z*20+MH/2;INPUT.ah=Y-gm;   // ความสูงเล็ง นับจากพื้นใต้ตัวเรา (ระบบเกมใช้ความสูงจากพื้น)
   // จุดที่เป้ากลางจอชนพื้น (ใช้กับคาถาวางพื้น / หน้าไม้ของร่างยักษ์)
-  if(_aimD.y<-0.01){const t=(o.y-0.05)/-_aimD.y;INPUT.gx=(o.x+_aimD.x*t)*20+MW/2;INPUT.gy=(o.z+_aimD.z*t)*20+MH/2;}else{INPUT.gx=INPUT.gy=-1;}
+  const tgG=TERR?rayTerr(o,_aimD,0,90):1e9;
+  if(TERR&&tgG<90){INPUT.gx=(o.x+_aimD.x*tgG)*20+MW/2;INPUT.gy=(o.z+_aimD.z*tgG)*20+MH/2;}
+  else if(!TERR&&_aimD.y<-0.01){const t=(o.y-0.05)/-_aimD.y;INPUT.gx=(o.x+_aimD.x*t)*20+MW/2;INPUT.gy=(o.z+_aimD.z*t)*20+MH/2;}else{INPUT.gx=INPUT.gy=-1;}
 }
 let AIMZ=0;
 function updateCamera(me,dt){
@@ -6406,7 +6537,7 @@ function updateCamera(me,dt){
   const px=tx(me.x),pz=tz(me.y);
   const fx=Math.cos(yaw),fz=Math.sin(yaw),rx=-fz,rz=fx;
   const big=me.co>0,dist=(big?13:me.fl?7.4:5.6)*(1-0.35*AIMZ),cp=Math.cos(pitch),sp=Math.sin(pitch),side=big?4.2:0.85+0.3*AIMZ;
-  const focus=new THREE.Vector3(px+rx*side,(me.z||0)+(big?3.4:2.05),pz+rz*side);
+  const focus=new THREE.Vector3(px+rx*side,GY(me.x,me.y)+(me.z||0)+(big?3.4:2.05),pz+rz*side);
   // กล้องอยู่หลังผู้เล่น: ถ้าหลังชนขอบแผนที่ ให้ "ร่นกล้องเข้าหาตัว + ยกสูงขึ้น" แทนการบีบพิกัดทีละแกน (เดิมกล้องไปทับหัวตัวละคร)
   // กล้องล้ำเข้าไปในตัวกำแพงได้ (กำแพงหนา ~1.6 หน่วย ฝั่งหลังกำแพงโปร่ง มองทะลุเห็นตัวละคร) เกินกว่านั้นให้ร่นกล้องเข้าหาตัว
   const cfg=MAPCAM[MAPID]||MAPCAM.castle,hx=MW*S3/2,hz=MH*S3/2,bx=hx-1.2+cfg.m,bz=hz-1.2+cfg.m,ox=-fx*dist*cp,oz=-fz*dist*cp;
@@ -6414,7 +6545,10 @@ function updateCamera(me,dt){
   const k=Math.max(0.45,Math.min(1,lim(focus.x,ox,bx),lim(focus.z,oz,bz)));
   let x=focus.x+ox*k,z=focus.z+oz*k,y=focus.y+dist*sp+(1-k)*dist*0.5;
   x=clamp(x,-bx,bx);z=clamp(z,-bz,bz);
-  y=Math.max(0.5,y);
+  if(TERR){   // เนินบังกล้อง: ร่นกล้องเข้าหาตัวจนพ้นพื้น
+    for(let i=1;i<=10;i++){const f=i/10,X=focus.x+(x-focus.x)*f,Z=focus.z+(z-focus.z)*f,Y=focus.y+(y-focus.y)*f;if(Y<TW(X,Z)+0.4){const f2=Math.max(0.15,(i-1)/10);x=focus.x+(x-focus.x)*f2;z=focus.z+(z-focus.z)*f2;y=focus.y+(y-focus.y)*f2;break;}}
+    y=Math.max(TW(x,z)+0.5,y);
+  }else y=Math.max(0.5,y);
   camPos.lerp(new THREE.Vector3(x,y,z),1-Math.exp(-25*dt));
   cam.position.copy(camPos);
   if(shakeA>0)cam.position.add(new THREE.Vector3(rnd(-1,1),rnd(-1,1),rnd(-1,1)).multiplyScalar(shakeA*0.02));
@@ -6784,7 +6918,7 @@ function pyroFX(o,p,pz,now,dt){
       if(Math.floor(now/450)!==o.cgPulse){o.cgPulse=Math.floor(now/450);ring(p.x,p.y,'#ffb347',55,0.4,pz+0.12);}
     }
     if(full)for(let i=0;i<3;i++){const an=now/90+i*2.094;PARTS.push({x:s.x+Math.cos(an)*14,y:s.y+Math.sin(an)*14,h:s.h+Math.sin(an*1.3)*0.5,vx:0,vy:0,vh:rnd(0.5,1.5),life:0.3,max:0.3,col:i?'#ffd27a':'#fff4c8',size:2.8,g:-1});}
-    LREQ.push({x:_pw.x,y:_pw.y,z:_pw.z,col:'#ff8a3a',int:0.8+k*2,dist:8});
+    LREQ.push({abs:1,x:_pw.x,y:_pw.y,z:_pw.z,col:'#ff8a3a',int:0.8+k*2,dist:8});
   }else if(o.fball)o.fball.visible=false;
   // ชาร์จพุ่ง: ย่อตัวทำท่าพร้อมวิ่ง ไฟสะสมที่เท้า
   if(p.dc>0){
@@ -6820,12 +6954,12 @@ function pyroFX(o,p,pz,now,dt){
     o.armR.rotation.x=-2.7;o.armR.rotation.z=-0.2;
     o.tip.getWorldPosition(_pw);const s=simOf(_pw);
     for(let i=0;i<3;i++){const an=rnd(0,6.283),r=rnd(30,60);PARTS.push({x:s.x+Math.cos(an)*r,y:s.y+Math.sin(an)*r,h:s.h+rnd(-1,1),vx:-Math.cos(an)*r*3,vy:-Math.sin(an)*r*3,vh:0,life:0.3,max:0.3,col:i?'#ffb347':'#fff0b0',size:2.4,g:0});}
-    LREQ.push({x:_pw.x,y:_pw.y,z:_pw.z,col:'#ffb347',int:2.5,dist:9});
+    LREQ.push({abs:1,x:_pw.x,y:_pw.y,z:_pw.z,col:'#ffb347',int:2.5,dist:9});
   }
   // ลูกไฟวิญญาณ (จากโล่) หมุนรอบตัว
   {const n=p.ob|0;
     if(n>0&&!o.orbG){o.orbG=new THREE.Group();o.orbM=[];for(let i=0;i<6;i++){const s=new THREE.Sprite(glowMat('#ff5a10',1.15));s.scale.setScalar(0.5);const au=new THREE.Sprite(glowMat('#ff3a08',0.55));au.scale.setScalar(2.4);s.add(au);const c=new THREE.Mesh(new THREE.SphereGeometry(0.08,8,6),new THREE.MeshBasicMaterial({color:hdr('#ffa040',1.5)}));s.add(c);c.scale.setScalar(1/0.5);o.orbG.add(s);o.orbM.push(s);}scene.add(o.orbG);}
-    if(o.orbG){o.orbG.visible=n>0;if(n>0){o.orbG.position.set(tx(p.x),pz+1.25,tz(p.y));
+    if(o.orbG){o.orbG.visible=n>0;if(n>0){o.orbG.position.set(tx(p.x),pz+1.25+GY(p.x,p.y),tz(p.y));
       o.orbM.forEach((s,i)=>{s.visible=i<n;const a=now/420+i/n*Math.PI*2;s.position.set(Math.cos(a)*1.05,Math.sin(now/300+i)*0.18,Math.sin(a)*1.05);
         if(i<n){s.getWorldPosition(_pw);const q=simOf(_pw);for(let k=0;k<2;k++)PARTS.push({x:q.x+rnd(-3,3),y:q.y+rnd(-3,3),h:q.h,vx:rnd(-10,10),vy:rnd(-10,10),vh:rnd(0.4,1.4),life:0.35,max:0.35,col:k?'#ff7a2a':'#ffd27a',size:k?2.6:1.8,g:-1.5});}});}}
   }
@@ -7021,7 +7155,7 @@ function syncPlayers(P,mode,now,dt){
       setGhost(o,o.ghost);
     }
     const x=tx(p.x),z=tz(p.y);
-    o.zs=o.zs===undefined?p.z:lerp(o.zs,(p.z||0)+(p.gh?0.6+Math.sin(now/500)*0.2:0),1-Math.exp(-20*dt));
+    o.zs=o.zs===undefined?(p.z||0)+GY(p.x,p.y):lerp(o.zs,(p.z||0)+GY(p.x,p.y)+(p.gh?0.6+Math.sin(now/500)*0.2:0),1-Math.exp(-20*dt));
     g.position.set(x,o.zs,z);
     g.rotation.y=Math.atan2(Math.cos(p.a),Math.sin(p.a));
     const v=localVel(o,x,z,dt,g.rotation.y);
@@ -7082,7 +7216,7 @@ function syncEnemies(E,P,now,dt){
     const x=tx(e.x),z=tz(e.y);
     let tgt=null,bd=1e12;for(const p of P)if(p.al&&!p.dn){const d=(p.x-e.x)**2+(p.y-e.y)**2;if(d<bd){bd=d;tgt=p;}}
     if(tgt)o.g.rotation.y=Math.atan2(tx(tgt.x)-x,tz(tgt.y)-z);
-    o.hs=o.hs===undefined?(e.h||0):lerp(o.hs,e.h||0,1-Math.exp(-15*dt));
+    o.hs=o.hs===undefined?(e.h||0)+GY(e.x,e.y):lerp(o.hs,(e.h||0)+GY(e.x,e.y),1-Math.exp(-15*dt));
     o.g.position.set(x,o.hs,z);
     const v=localVel(o,x,z,dt,o.g.rotation.y);
     o.hitT=Math.max(0,(o.hitT||0)-dt);o.atkT=Math.max(0,(o.atkT||0)-dt);
@@ -7141,8 +7275,7 @@ function syncProj(v,now){
     if(!o){o=makeProj(col,j.t);JM3.set(j.id,o);}
     if(o.col!==col){o.halo.material=glowMat(col,0.9);o.inner.material.color.copy(hdr(col,2.2));o.tail.material.color.copy(hdr(col,1.6));o.col=col;}
     const x=j.x+j.vx*ex,y=j.y+j.vy*ex,X=tx(x),Z=tz(y),H=(j.h!==undefined?j.h:1.35)+(j.vh||0)*ex;
-    o.g.position.set(X,H,Z);
-    o.g.lookAt(_t1.set(X+j.vx*S3,H+(j.vh||0),Z+j.vy*S3));
+    {const Hw=H+GY(x,y);o.g.position.set(X,Hw,Z);o.g.lookAt(_t1.set(X+j.vx*S3,Hw+(j.vh||0),Z+j.vy*S3));}
     if(j.t==='web'){o.core.material.color.set('#f4f4ff');o.tail.visible=false;if(Math.random()<0.6)PARTS.push({x,y,h:H,vx:rnd(-30,30),vy:rnd(-30,30),vh:rnd(-0.5,0.5),life:0.5,max:0.5,col:'#e8e8f0',size:2.5,g:1,smoke:true});}
     const fl=1+0.15*Math.sin(now/30+j.id);
     o.core.scale.setScalar(r*0.6);o.inner.scale.setScalar(r*1.3*fl);
@@ -7196,7 +7329,11 @@ function syncProj(v,now){
   }
   for(const [id,o] of JM3)if(!seen.has(id)){scene.remove(o.g);o.g.traverse(m=>{if(m.material&&m.material!==o.halo.material)m.material.dispose();if(m.isLine)m.geometry.dispose();});JM3.delete(id);}
 }
+let _awT=0;
 function animateWorld(now){
+  {const dt=_awT?Math.min(0.1,(now-_awT)/1000):0;_awT=now;const U=world&&world.userData;
+    if(U&&U.mixer)U.mixer.update(dt);                         // ของขยับในไฟล์แผนที่ (anim_)
+    if(U&&U.lights)for(const L of U.lights)LREQ.push(L);}     // ไฟประจำจุดในไฟล์แผนที่ (light_)
   if(CANDLESYS)updateCandles(now);
   for(const c of CANDLES)c.g.position.y=c.y+Math.sin(now/900+c.ph)*0.3;
   for(const t of TORCHES){
@@ -7237,7 +7374,7 @@ function animateWorld(now){
 // ---------- ฉายตำแหน่ง 3D ลงจอ (ป้ายชื่อ / ตัวเลขดาเมจ) ----------
 const _v=new THREE.Vector3();
 function toScreen(x,h,y){
-  _v.set(tx(x),h,tz(y)).project(cam);
+  _v.set(tx(x),h+GY(x,y),tz(y)).project(cam);
   if(_v.z>1||_v.z<-1)return null;
   return [(_v.x+1)/2*SW,(1-_v.y)/2*SH];
 }
@@ -7388,7 +7525,7 @@ function syncModeObjs(v,P,me,now,dt){
       const g=new THREE.Group();
       const t=new THREE.Mesh(new THREE.TorusGeometry(2.4,0.17,10,48),new THREE.MeshBasicMaterial({color:hdr('#5fd8ff',1.5),transparent:true,opacity:0.8}));g.add(t);
       const disc=new THREE.Mesh(new THREE.CircleGeometry(2.3,40),new THREE.MeshBasicMaterial({color:'#5fd8ff',transparent:true,opacity:0.08,side:THREE.DoubleSide,depthWrite:false}));g.add(disc);
-      g.position.set(tx(r[0]),r[2],tz(r[1]));
+      g.position.set(tx(r[0]),r[2]+GY(r[0],r[1]),tz(r[1]));
       const nx=M.rings[(i+1)%M.rings.length],pv=M.rings[(i-1+M.rings.length)%M.rings.length];
       g.lookAt(tx(nx[0])+tx(r[0])-tx(pv[0]),r[2],tz(nx[1])+tz(r[1])-tz(pv[1]));
       scene.add(g);MO.rings.push({g,t,disc});
@@ -7419,7 +7556,7 @@ function syncModeObjs(v,P,me,now,dt){
   if(M.items)for(const [id,x,y,k] of M.items){
     seen.add(id);let o=MO.items.get(id);
     if(!o){o=makeItem(k);MO.items.set(id,o);}
-    o.position.set(tx(x),0.9+Math.sin(now/400+id)*0.2,tz(y));o.rotation.y=now/600+id;
+    o.position.set(tx(x),0.9+Math.sin(now/400+id)*0.2+GY(x,y),tz(y));o.rotation.y=now/600+id;
   }
   for(const [id,o] of MO.items)if(!seen.has(id)){scene.remove(o);MO.items.delete(id);}
   // ศพ (หาลอร์ดโวลเดอมอร์)
@@ -7428,7 +7565,7 @@ function syncModeObjs(v,P,me,now,dt){
     bs.add(id);
     if(!MO.bodies.has(id)){
       const o=makeStudent(getLook(id),id);
-      o.b.rotation.x=-1.45;o.b.position.y=0.35;o.g.rotation.y=hashStr(id)%6;o.g.position.set(tx(x),0,tz(y));o.ring.visible=false;
+      o.b.rotation.x=-1.45;o.b.position.y=0.35;o.g.rotation.y=hashStr(id)%6;o.g.position.set(tx(x),GY(x,y),tz(y));o.ring.visible=false;
       const pool=new THREE.Mesh(discGeo,new THREE.MeshBasicMaterial({color:'#5a0a0a',transparent:true,opacity:0.6,depthWrite:false}));pool.scale.setScalar(1.3);pool.position.y=0.03;o.g.add(pool);
       MO.bodies.set(id,o);
     }
@@ -7446,7 +7583,7 @@ function syncModeObjs(v,P,me,now,dt){
         const beam=new THREE.Mesh(new THREE.CylinderGeometry(0.5,0.9,14,16,1,true),new THREE.MeshBasicMaterial({color:hdr(col,1.2),transparent:true,opacity:0.16,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide}));
         beam.position.y=7;g.add(beam);
         const rg=new THREE.Mesh(ringGeo,new THREE.MeshBasicMaterial({color:hdr(col,1.6),transparent:true,depthWrite:false}));rg.scale.setScalar(1.6);rg.position.y=0.05;g.add(rg);
-        g.position.set(tx(p.x),0,tz(p.y));g.userData={ti,x:p.x,y:p.y};scene.add(g);MO.tasks.push(g);
+        g.position.set(tx(p.x),GY(p.x,p.y),tz(p.y));g.userData={ti,x:p.x,y:p.y};scene.add(g);MO.tasks.push(g);
       });
     }
     MO.tasks.forEach(g=>{g.children[1].rotation.y=now/800;});
@@ -8285,8 +8422,8 @@ function renderLobby(){
   $('#pcount').innerHTML=`ผู้เล่น <b>${L.players.length}</b> / 6`;
   $('#modes').innerHTML=Object.entries(MODES).map(([k,m])=>`<button class="mode ${L.mode===k?'on':''}" data-mode="${k}" ${host?'':'disabled'}><span class="ic"><span>${modeIcon(m)}</span></span><span><b>${modeTitle(m)}</b><small>${m.min===m.max?m.min:m.min+'-'+m.max} คน</small></span></button>`).join('');
   $('#mapNote').textContent='';
-  const mapTxt=M.map?MAPS[M.map].name:L.mpk&&MAPS[L.mpk]?MAPS[L.mpk].name:'🎲 สุ่ม';
-  const mapPick=M.map?'':`<div class="mpick">${['',...RANDOM_MAPS,'forest'].map(k=>`<button type="button" class="mchip ${(L.mpk||'')===k?'on':''}" data-mappick="${k}" ${host?'':'disabled'} title="${k?esc(MAPS[k].d):'สุ่มทุกรอบ'}">${k?MAPS[k].name:'🎲 สุ่ม'}</button>`).join('')}</div>`;
+  const mapTxt=M.map?(MAPS[M.map]||{name:M.map}).name:L.mpk&&MAPS[L.mpk]?MAPS[L.mpk].name:'🎲 สุ่ม';
+  const mapPick=M.map?'':`<div class="mpick">${['',...new Set([...RANDOM_MAPS,'forest',...Object.keys(MAPS).filter(k=>MAPS[k].fm)])].map(k=>`<button type="button" class="mchip ${(L.mpk||'')===k?'on':''}" data-mappick="${k}" ${host?'':'disabled'} title="${k?esc(MAPS[k].d):'สุ่มทุกรอบ'}">${k?MAPS[k].name:'🎲 สุ่ม'}</button>`).join('')}</div>`;
   $('#modeCard').innerHTML=`<div class="k">โหมดที่เลือก</div><div class="n">${modeIcon(M)} ${modeTitle(M)}</div><div class="d">${M.d}</div>
     <div class="meta"><span>👥 ${M.min===M.max?M.min:M.min+'-'+M.max} คน</span><span>🗺️ ${mapTxt}</span>${M.team?'<span>⚔️ 2 ทีม</span>':''}</div>
     ${mapPick}
@@ -8302,6 +8439,7 @@ function renderLobby(){
 resize();
 applyQuality();
 buildWorld('castle');
+loadAllMapData();   // ข้อมูลแผนที่จากไฟล์ (เล็ก) — พร้อมให้สุ่ม/เลือกก่อนเริ่มเกม
 setScreen('menu');
 requestAnimationFrame(frame);
 // ตัวช่วยทดสอบ/ดีบัก (เปิดคอนโซลแล้วพิมพ์ WD)
@@ -8442,7 +8580,7 @@ swSetup();
 window.WD.SW=SWK;
 // เทส/วัดผล: เดินลูปโฮสต์ 1 รอบด้วยมือ (hostTick + snapshot + เอฟเฟกต์) — ใช้ตอนหน้าต่างถูกซ่อนแล้ว setInterval ช้า
 // prop / โมเดลจากไฟล์ (ดีบัก)
-Object.defineProperties(window.WD,{PROPS:{get:()=>PROPS},PROPON:{get:()=>PROPON},BLDG:{get:()=>BLDG},BLDON:{get:()=>BLDON},HSTOP:{get:()=>HSTOP}});Object.assign(window.WD,{PROPDEF,genProps,MODELS,loadModel,modelManifest,useProp,hitProp,damageEnv,hitBldPiece,breakBldPiece,PM3,EM3,animTick,playVfx,playFlip,fileFx,zoneFx,VFXL,FLIPL,FLIPS,fx});
+Object.defineProperties(window.WD,{TERR:{get:()=>TERR},MAPID:{get:()=>MAPID},OBS:{get:()=>OBS},PROPS:{get:()=>PROPS},PROPON:{get:()=>PROPON},BLDG:{get:()=>BLDG},BLDON:{get:()=>BLDON},HSTOP:{get:()=>HSTOP}});Object.assign(window.WD,{MAPS,RANDOM_MAPS,FMAPS,loadMapData,terrT,groundH,terrSolid,setMapVars,buildWorld,PROPDEF,genProps,MODELS,loadModel,modelManifest,useProp,hitProp,damageEnv,hitBldPiece,breakBldPiece,PM3,EM3,animTick,playVfx,playFlip,fileFx,zoneFx,VFXL,FLIPL,FLIPS,fx});
 window.WD.hostStep=dt=>{hostTick(dt);const b=makeSnap(),ev=EVL;EVL=[];EVN=[];onSnap(Object.assign({},b,{ev}));};
 </script>
 </body>
