@@ -73,7 +73,44 @@
 - ผู้เล่นตายแล้วหายไปทันที และศัตรูตายแล้วถูกลบทันที ท่า `die` จึงยังไม่มีที่ใช้ นอกจากเป็นท่าสำรองของ `down`
 - ตัวละครในหน้าเมนู/ล็อบบี้/หน้าสร้างตัวละครยังเป็นโมเดลจากโค้ด
 
-## 6. ใส่ไฟล์เข้าเกม
+## 6. VFX (เอฟเฟกต์คาถา)
+มี 2 แบบ ใช้คู่กันได้ ถ้ายังไม่มีไฟล์ เกมจะใช้เอฟเฟกต์จากโค้ดเหมือนเดิม
+
+### แบบ A — โมเดล + animation (`.glb`)
+เช่น รอยฟัน คลื่นกระแทก แท่งน้ำแข็ง วงเวท
+- **ชื่อใน manifest** (ส่วน `"models"`):
+  - `vfx_<ชื่อเอฟเฟกต์>` เล่นตอนคาถานั้นเกิดเอฟเฟกต์ (รายชื่อเอฟเฟกต์อยู่ด้านล่าง)
+  - `vfx_cast_<ชนิดกระสุน>` เล่นที่ปลายไม้กายสิทธิ์ตอนยิงกระสุนชนิดนั้น (ชนิดที่มีตอนนี้: `bolt` `fire` `stun` `pull` `ebolt` `web` `ice` `zap` `vine` `dart` `hex` `ember` `spike` `spark` `icicle` `iceboulder` `pfire` `pfireb` `pb0`–`pb5`)
+  - `proj_<ชนิดกระสุน>` ใช้เป็นหน้าตาของลูกกระสุนเอง ให้ปั้นหัวกระสุนชี้ไปทาง −Y ของ Blender ซึ่งเป็นทิศที่พุ่งไป (แสงรอบกระสุนจากโค้ดยังอยู่)
+- **จุด origin** อยู่ที่จุดเกิดเอฟเฟกต์ (ปกติคือพื้น) และด้านหน้า (−Y ของ Blender) จะหันไปตามทิศของคาถา
+- **animation:** ใช้ keyframe ขยับ/หมุน/ย่อขยาย ทุก Action ในไฟล์จะเล่นพร้อมกันครั้งเดียว
+- **วัสดุ** (ตั้งชื่อตามนี้):
+  - ขึ้นต้นด้วย `add_` = เรืองแสงแบบบวกแสง (เหมาะกับไฟ แสง พลังงาน) ไม่ควรตั้ง Emission Strength สูงเกินไป เพราะเกมมี bloom อยู่แล้ว ค่าประมาณ 1–2 กำลังดี
+  - มีคำว่า `fade` ในชื่อ = ค่อยๆ จางหายในช่วงท้าย
+  - ขึ้นต้นด้วย `tint_` = ใช้สีของคาถานั้น (ถ้าคาถาส่งสีมา)
+  - ชื่อผสมกันได้ เช่น `add_fade_wave`
+- **ตัวเลือกเพิ่มใน manifest:**
+  - `"radius": true` = ปั้นที่รัศมี 1 หน่วยแล้วให้เกมขยายตามรัศมีจริงของคาถา
+  - `"scale"` ตัวคูณขนาด, `"life"` จำนวนวินาที (ไม่ใส่ = ความยาวของ animation), `"fade"` สัดส่วนช่วงท้ายที่จาง (ค่าเริ่ม 0.35), `"loop": true`
+  - `"mode": "replace"` = ไม่เล่นเอฟเฟกต์จากโค้ดของคาถานั้นแล้ว (ค่าเริ่มคือเล่นทับกัน) **ระวัง:** บางเอฟเฟกต์จากโค้ดมีของที่ค้างอยู่ต่อ เช่น พื้นน้ำแข็ง ถ้าใช้ replace ของพวกนั้นจะหายไปด้วย ให้ลองดูในเกมก่อนทุกครั้ง
+
+### แบบ B — Flipbook (ภาพเคลื่อนไหวเรียงเป็นตาราง, `.png`)
+เช่น ไฟระเบิด ควัน ประกายไฟฟ้า
+- ทำเป็น PNG พื้นหลังใส เรียงเฟรมจาก **ซ้ายไปขวา แล้วบนลงล่าง** ขนาดภาพควรเป็น 512 หรือ 1024 px
+- ใส่ใน manifest ส่วน `"fx"` (ชื่อซ้ำกับแบบ A ได้ เกมจะเล่นทั้งสองอย่าง):
+  ```json
+  "fx": {
+    "vfx_iceboom": {"file": "vfx/iceboom.png", "v": 1, "cols": 4, "rows": 4, "fps": 24, "add": true, "size": 3}
+  }
+  ```
+  `cols`/`rows` = จำนวนช่อง, `fps` = ความเร็ว, `add` = เรืองแสงแบบบวกแสง, `size` = ขนาดในเกม (หน่วย), มี `radius`, `life`, `loop`, `mode` เหมือนแบบ A
+
+### ชื่อเอฟเฟกต์ที่มีในเกมตอนนี้
+`absz` `armor` `aura` `bark` `bcircle` `bigboom` `bind` `blaze` `blind` `blink` `brn` `chain` `colbolt` `colboom` `colend` `colossus` `conduct` `cryo` `cryoend` `curse` `detonate` `dfboom` `dfcancel` `dfdive` `dfrise` `ember` `ering` `eringhit` `fblock` `flare` `fnova` `forge` `freeze` `fswap` `glacier` `grcharge` `gwave` `heat` `ice` `iceboom` `icewall` `inferno` `infernocast` `jump` `kindle` `legion` `mark` `melt` `meteor` `mirror` `mirrorend` `orbget` `orbhit` `orbshot` `overc` `pboom` `perma` `pparry` `pshboom` `rally` `shatter` `silence` `siphon` `slam` `slam3` `slamgo` `slide` `snap` `snapboom` `snapwind` `soulburst` `spikehit` `summon` `swing` `tempest` `terror` `thorn` `thunder` `unsummon` `vine` `wallboost` `wallbreak` `wallcast` `wallhit` `wispheal` `worldtree` `zapt`
+
+(ชื่อเหล่านี้มาจากคาถาที่ฝั่งเกมเพลย์ออกแบบไว้ ถ้ามีคาถาใหม่ ชื่อก็จะเพิ่มตาม จะดูรายชื่อล่าสุดได้จาก `efxFX` ใน `index.html` หรือถามฝั่งโค้ด)
+
+## 7. ใส่ไฟล์เข้าเกม
 1. วางไฟล์ไว้ใต้โฟลเดอร์ `assets/` เช่น `assets/props/crate.glb`
 2. เพิ่มรายการใน `assets/manifest.json`:
    ```json
@@ -89,5 +126,5 @@
    - console: `WD.MODELS.ready` = โมเดลที่โหลดสำเร็จ, `WD.MODELS.fail` = โมเดลที่โหลดไม่ได้
    - เปิดด้วย `?nosw` ต่อท้าย URL เพื่อปิด Service Worker ระหว่างทดลองไฟล์
 
-## 7. ลิขสิทธิ์
+## 8. ลิขสิทธิ์
 repo นี้เป็น **public** ใช้ได้เฉพาะโมเดลที่ปั้นเอง หรือที่เป็น CC0 / CC-BY (ใส่เครดิตในคู่มือในเกม) ห้ามใช้โมเดลจากเกมหรือหนัง Harry Potter

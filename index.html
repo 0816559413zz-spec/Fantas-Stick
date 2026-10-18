@@ -3713,6 +3713,83 @@ function useFileModel(o,name,tint){
 }
 const FILE_MODELS=()=>['char_student',...Object.keys(EDEF).map(t=>'enemy_'+t)];
 
+// ---------- VFX จากไฟล์ (รายละเอียดฝั่งคนทำอยู่ใน ASSETS.md) ----------
+// .glb ชื่อ vfx_<event> ใน manifest "models": vfx_<z> = เอฟเฟกต์ของ efx event z (เช่น vfx_swing), vfx_cast_<t> = ตอนร่ายกระสุนชนิด t, proj_<t> = หน้าตากระสุน t
+//   ตัวเลือก: life (วินาที; ไม่ใส่ = ความยาว animation หรือ 1), radius:true (ปั้นที่รัศมี 1 แล้วขยายตามรัศมีของเอฟเฟกต์), scale, loop, fade (สัดส่วนช่วงท้ายที่จาง, ค่าเริ่ม 0.35), mode:"replace" (ไม่เล่นเอฟเฟกต์จากโค้ด; ค่าเริ่ม "add" = เล่นทับกัน)
+//   วัสดุ: ชื่อขึ้นต้น add_ = เรืองแสงแบบบวกแสง • มีคำว่า fade = จางตอนท้าย • ขึ้นต้น tint_ = ใช้สีของคาถา (ถ้า event มีสี)
+// flipbook (ภาพเรียงเป็นตาราง) ใน manifest "fx": {"vfx_x":{"file":"vfx/x.png","cols":4,"rows":4,"fps":24,"add":true,"size":2,"loop":false,"mode":"add"}} — ชื่อเดียวกับ .glb ได้ (เล่นทั้งคู่)
+// ยังโหลดไม่เสร็จ/ไม่มีไฟล์ = ใช้เอฟเฟกต์จากโค้ดตามเดิม (prefetchFx() โหลดล่วงหน้าตอนสร้างแผนที่)
+const VFXL=[],FLIPL=[],FLIPS=new Map();
+function prefetchFx(){modelManifest().then(m=>{for(const k in m.models)if(k.startsWith('vfx_')||k.startsWith('proj_'))loadModel(k);for(const k in (m.fx||{}))flipTex(k);});}
+function playVfx(name,o){
+  const r=MODELS.ready.get(name);if(!r)return false;
+  const e=r.info||{},inst=modelInst(name),mats=new Map();
+  inst.traverse(m=>{
+    if(!m.isMesh)return;m.castShadow=false;
+    const one=mt=>{
+      const n=(mt.name||'').toLowerCase();if(!n.startsWith('add_')&&!n.includes('fade')&&!n.startsWith('tint_'))return mt;
+      if(!mats.has(mt)){
+        const c=mt.clone();c.userData={base:mt.opacity!==undefined?mt.opacity:1,fade:n.includes('fade')};
+        if(n.startsWith('add_')){c.blending=THREE.AdditiveBlending;c.transparent=true;c.depthWrite=false;}
+        if(c.userData.fade)c.transparent=true;
+        if(n.startsWith('tint_')&&o.col)c.color.set(o.col);
+        mats.set(mt,c);
+      }
+      return mats.get(mt);
+    };
+    m.material=Array.isArray(m.material)?m.material.map(one):one(m.material);
+  });
+  const g=new THREE.Group();g.add(inst);
+  g.position.set(tx(o.x),o.h||0,tz(o.y));
+  if(o.a!==undefined)g.rotation.y=Math.atan2(Math.cos(o.a),Math.sin(o.a));
+  g.scale.setScalar((e.scale||1)*(e.radius&&o.r?o.r*S3:1)*(o.scale||1));
+  let mixer=null,dur=0;
+  if(r.animations.length){mixer=new THREE.AnimationMixer(inst);for(const c of r.animations){const a=mixer.clipAction(c);a.setLoop(e.loop?THREE.LoopRepeat:THREE.LoopOnce,Infinity);a.clampWhenFinished=true;a.play();dur=Math.max(dur,c.duration);}}
+  const life=e.life||o.life||dur||1;
+  scene.add(g);VFXL.push({g,mixer,life,max:life,mats:[...mats.values()],fadeK:e.fade!==undefined?e.fade:0.35});
+  return true;
+}
+function flipTex(name){
+  const m=MODELS.man,e=m&&m.fx&&m.fx[name];if(!e)return null;
+  if(!FLIPS.has(name)){
+    const t=new THREE.TextureLoader().load('assets/'+e.file+'?v='+(e.v||m.v||0),undefined,undefined,()=>{FLIPS.get(name).fail=true;});
+    t.colorSpace=THREE.SRGBColorSpace;t.userData.keep=true;FLIPS.set(name,{t,e,fail:false});
+  }
+  return FLIPS.get(name);
+}
+function playFlip(name,o){
+  const F=flipTex(name);if(!F||F.fail||!F.t.image)return false;
+  const e=F.e,tex=F.t.clone();tex.userData={};tex.repeat.set(1/e.cols,1/e.rows);tex.needsUpdate=true;
+  const mat=new THREE.SpriteMaterial({map:tex,transparent:true,depthWrite:false,blending:e.add?THREE.AdditiveBlending:THREE.NormalBlending,color:o.col?hdr(o.col,e.add?1.5:1):0xffffff});
+  const sp=new THREE.Sprite(mat);sp.position.set(tx(o.x),o.h!==undefined?o.h:1,tz(o.y));
+  sp.scale.setScalar((e.size||2)*(e.radius&&o.r?o.r*S3:1)*(o.scale||1));scene.add(sp);
+  const n=e.cols*e.rows,life=o.life||e.life||(e.loop?1:n/(e.fps||24));
+  FLIPL.push({sp,tex,e,n,t:0,life,max:life});
+  return true;
+}
+// เล่นเอฟเฟกต์จากไฟล์ของ event นี้ (ถ้ามี) — คืนค่า true เมื่อไฟล์ขอแทนที่เอฟเฟกต์จากโค้ด (mode:"replace")
+function fileFx(name,o){
+  const m=MODELS.man;if(!m)return false;
+  const em=m.models[name],ef=m.fx&&m.fx[name];if(!em&&!ef)return false;
+  const a=em?playVfx(name,o):false,b=ef?playFlip(name,o):false;
+  return (a&&em.mode==='replace')||(b&&ef.mode==='replace');
+}
+function updateVfx(dt){
+  for(let i=VFXL.length-1;i>=0;i--){
+    const v=VFXL[i];v.life-=dt;if(v.mixer)v.mixer.update(dt);
+    const k=v.life/v.max,f=k<v.fadeK?Math.max(0,k/v.fadeK):1;
+    for(const m of v.mats)if(m.userData.fade)m.opacity=m.userData.base*f;
+    if(v.life<=0){scene.remove(v.g);disposeTree(v.g);VFXL.splice(i,1);}
+  }
+  for(let i=FLIPL.length-1;i>=0;i--){
+    const q=FLIPL[i],e=q.e;q.t+=dt;q.life-=dt;
+    const fr=Math.floor(q.t*(e.fps||24)),f=e.loop?fr%q.n:Math.min(q.n-1,fr);
+    q.tex.offset.set((f%e.cols)/e.cols,1-(Math.floor(f/e.cols)+1)/e.rows);
+    const k=q.life/q.max;q.sp.material.opacity=k<0.2?Math.max(0,k/0.2):1;
+    if(q.life<=0){scene.remove(q.sp);q.sp.material.dispose();q.tex.dispose();FLIPL.splice(i,1);}
+  }
+}
+
 // ---------- prop ฝั่งแสดงผล ----------
 const PROPV={g:null,map:null,list:[]};
 // โมเดลสำรองจากโค้ด (ใช้เมื่อยังไม่มี/โหลดไฟล์ไม่ได้) — st: 0 ปกติ, 1 พัง, 2 ใช้แล้ว
@@ -4059,6 +4136,7 @@ function fx(ev){
   switch(ev.k){
     case 'cast':{
       const [wx,wy]=wandPos(ev),col=PCOL[ev.t]||'#fff';
+      if(fileFx('vfx_cast_'+ev.t,{x:wx,y:wy,h:H,a:ev.a,col})){const o=ev.id&&PM3.get(ev.id);if(o)o.castT=0.3;break;}
       FX.flashSprite(wx,wy,H,col,0.3,ev.t==='fire'?2.2:1.5,0.15,1.4);
       FX.flashLight(wx,wy,H,col,ev.t==='fire'?3.5:2.2,10,0.2);
       burst(wx,wy,col,ev.t==='fire'?16:9,140,0.3,2,{h:H,a:ev.a,spread:0.9,g:2});
@@ -4191,7 +4269,7 @@ function fx(ev){
       SHAPES_Q.push({k:'rune',x:ev.x,y:ev.y,col,s1:ev.r*S3,life:ev.t,op:ev.z==='lava'?0.85:0.6});
       if(ev.z==='lava'||ev.z==='fire')SHAPES_Q.push({k:'decal',x:ev.x,y:ev.y,col:'#000000',s1:ev.r/28,life:ev.t+2,op:0.45});
       break;}
-    case 'efx':efxFX(ev);break;
+    case 'efx':if(!fileFx('vfx_'+ev.z,ev))efxFX(ev);break;
     case 'prop':{
       const D=PROPDEF[(PROPS[ev.i]||{}).k]||PROPDEF.pcrate;
       if(ev.e==='h'){burst(ev.x,ev.y,D.col,6,90,0.4,2,{h:H,g:6});if(near)snd('thud',{x:ev.x,y:ev.y,vol:0.5});}
@@ -4384,7 +4462,7 @@ function buildWorld(id){
     for(const [k,v] of WCACHE){if(WCACHE.size<=WCACHE_MAX)break;if(k===id)continue;WCACHE.delete(k);disposeTree(v.world);}
   }
   clearDyn();
-  prefetchModels(FILE_MODELS());
+  prefetchModels(FILE_MODELS());prefetchFx();
   setSky(id==='pitch'||id==='meadow'||id==='ruins'?'sunset':'night');
   const cached=WCACHE.get(id);
   if(cached){
@@ -6256,6 +6334,8 @@ function makeProj(col,t){
   const halo=new THREE.Sprite(glowMat(col,0.9));g.add(halo);
   const tail=new THREE.Mesh(tailGeo,new THREE.MeshBasicMaterial({color:hdr(col,1.6),transparent:true,opacity:0.5,blending:THREE.AdditiveBlending,depthWrite:false}));g.add(tail);
   const o={g,core,inner,halo,tail,col,lines:[]};
+  // หน้าตากระสุนจากไฟล์ proj_<ชนิด> (ปั้นให้ด้านหน้าพุ่งไปทาง −Y ของ Blender) — แสงรอบ (halo) ยังอยู่
+  const fm=modelInst('proj_'+t);if(fm){fm.traverse(m=>{if(m.isMesh)m.castShadow=false;});g.add(fm);o.fileModel=fm;}
   if(t==='stun'||t==='zap')for(let i=0;i<2;i++){
     const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.BufferAttribute(new Float32Array(9*3),3));
     const L=new THREE.Line(geo,new THREE.LineBasicMaterial({color:hdr('#c8f6ff',3),transparent:true,blending:THREE.AdditiveBlending,depthWrite:false}));
@@ -6281,6 +6361,7 @@ function syncProj(v,now){
     o.core.scale.setScalar(r*0.6);o.inner.scale.setScalar(r*1.3*fl);
     o.halo.scale.setScalar(r*(vt==='fire'?7:6.5)*fl);
     o.tail.scale.set(r*1.1,r*1.1,vt==='fire'?2.2:2.8);
+    if(o.fileModel){o.core.visible=o.inner.visible=o.tail.visible=false;}
     o.lines.forEach(L=>jag(L.geometry,_a.set(0,0,0),_b.set(0,0,-2.4),0.22));
     LREQ.push({x:X,y:H,z:Z,col,int:vt==='fire'?2.4:1.6,dist:vt==='fire'?11:8});
     switch(vt){
@@ -6682,7 +6763,7 @@ function render(dt,now){
   KC=Math.max(0,KC-dt);roleShowT=Math.max(0,roleShowT-dt);
   $('#trainEnd').classList.toggle('hidden',!(NET.isHost&&v.mode==='train'&&v.ph!=='over'));
   tickFlash(dt);
-  t0=performance.now();updateZV(dt);updateParticles(dt);updateShapes(dt);updateLights(dt);pf('fx',t0);
+  t0=performance.now();updateZV(dt);updateParticles(dt);updateShapes(dt);updateLights(dt);updateVfx(dt);pf('fx',t0);
   QUAL.frame++;gl.shadowMap.needsUpdate=QUAL.mode==='high'||QUAL.frame%2===0;
   t0=performance.now();composer.render();pf('gpuSubmit',t0);
   t0=performance.now();const spk=speakingIds();
@@ -7521,7 +7602,7 @@ swSetup();
 window.WD.SW=SWK;
 // เทส/วัดผล: เดินลูปโฮสต์ 1 รอบด้วยมือ (hostTick + snapshot + เอฟเฟกต์) — ใช้ตอนหน้าต่างถูกซ่อนแล้ว setInterval ช้า
 // prop / โมเดลจากไฟล์ (ดีบัก)
-Object.defineProperties(window.WD,{PROPS:{get:()=>PROPS},PROPON:{get:()=>PROPON}});Object.assign(window.WD,{PROPDEF,genProps,MODELS,loadModel,modelManifest,useProp,hitProp,PM3,EM3,animTick});
+Object.defineProperties(window.WD,{PROPS:{get:()=>PROPS},PROPON:{get:()=>PROPON}});Object.assign(window.WD,{PROPDEF,genProps,MODELS,loadModel,modelManifest,useProp,hitProp,PM3,EM3,animTick,playVfx,playFlip,fileFx,VFXL,FLIPL,fx});
 window.WD.hostStep=dt=>{hostTick(dt);const b=makeSnap(),ev=EVL;EVL=[];EVN=[];onSnap(Object.assign({},b,{ev}));};
 </script>
 </body>
