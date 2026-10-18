@@ -6,7 +6,7 @@
 <title>Wizard Duel</title>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Cinzel+Decorative:wght@700;900&family=Kanit:wght@300;400;600&family=Pirata+One&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
-<script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.160.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.160.0/examples/jsm/"}}</script>
+<script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.160.0/build/three.module.min.js","three/addons/":"https://unpkg.com/three@0.160.0/examples/jsm/"}}</script>
 <style>
 /* ธีม: คัมภีร์เวทมนตร์ — น้ำเงินเข้ม + ทอง (แนว Hogwarts Legacy) */
 :root{
@@ -7132,6 +7132,27 @@ function balSpellTest(){
   return out;
 }
 window.WD={coop:balCoop,fakeHello:(id,name,look,kit)=>hostOnData({peer:id,send(){},close(){}},{t:'hello',name,look,kit}),fakeMsg:(id,d)=>hostOnData({peer:id,send(){},close(){}},d),balArena,bal:balDuel,tour:balTour,dmgTest:balSpellTest,hostTick:dt=>hostTick(dt),castSlot:(p,i)=>castSlot(p,i),castUlt:p=>castUlt(p),setKit:(p,k)=>setKit(p,k),SPELLS,SPELL_LIST,PATHS,parseKit,foesOf,emitLog:()=>EVL,damage:(...a)=>damage(...a),get G(){return G;},get screen(){return screen;},get VIEW(){return VIEW;},INPUT,NET,render,choosePick,hostToLobby,hostStart,plist,broadcastLobby,setYaw:v=>{yaw=v;},setPitch:v=>{pitch=v;},cam,composer,PM3,tx,tz,addPlayer,hostVote,get ROLE(){return ROLE;},get MO(){return MO;},get PARTS(){return PARTS.length;},get AUDIO(){return {AC:AC&&AC.state,sfx:Object.keys(BUF).length,files:Object.values(BUF).reduce((a,b)=>a+b.length,0),music:MUSF.cur,mt:MUSF.els[MUSF.cur]?+MUSF.els[MUSF.cur].el.currentTime.toFixed(1):null,myT:MY.el?+MY.el.currentTime.toFixed(1):null,failed:MUSF.failed,amb:AMB.cur,wind:!!AMB.windBuf,my:MY.list.length};},PROF,gl,scene,bloom,moonL,LPOOL,stage};
+
+// ---------- Service Worker (sw.js): เก็บไฟล์เกมไว้ในเครื่อง เปิดครั้งต่อไปเร็วขึ้น — แคชผูกกับ PREFIX, ?nosw = ปิดและล้าง ----------
+const SWK={reg:null,warmed:false};
+async function swSetup(){
+  if(!('serviceWorker' in navigator)||!/^https?:$/.test(location.protocol))return;
+  try{
+    if(/[?&]nosw\b/.test(location.search)){
+      for(const r of await navigator.serviceWorker.getRegistrations())await r.unregister();
+      for(const k of await caches.keys())if(k.startsWith('wd-'))await caches.delete(k);
+      return;
+    }
+    SWK.reg=await navigator.serviceWorker.register('sw.js?v='+encodeURIComponent(PREFIX));
+    // ไฟล์ที่โหลดไปก่อน SW จะคุมหน้า (ครั้งแรกที่เปิด) — ส่งรายการไปให้ SW เก็บ
+    const warm=()=>{const sw=navigator.serviceWorker.controller||SWK.reg.active;if(!sw||SWK.warmed)return;SWK.warmed=true;
+      sw.postMessage({t:'warm',urls:[location.href,...performance.getEntriesByType('resource').map(e=>e.name)]});};
+    await navigator.serviceWorker.ready;
+    setTimeout(warm,8000);
+  }catch(e){console.warn('sw',e);}
+}
+swSetup();
+window.WD.SW=SWK;
 </script>
 </body>
 </html>

@@ -37,10 +37,11 @@ Normal in-game frame here ≈ 9–17 ms.
 
 ## D. Loading
 Page open today: `index.html` 538 KB (≈ 82 KB inline icon SVGs) + `three.module.js` 1.24 MB unminified + 9 addon modules + PeerJS 91 KB + fonts + 73 SFX (752 KB, 74 parallel requests) + menu music 1.7 MB (streamed). Match start: `amb/<map>.ogg` + `music/<map>.ogg` (~2 MB, streamed).
-- [ ] **P2 Use a minified / trimmed Three.js** (biggest single download).
-- [ ] **P2 Service Worker cache** for `index.html`, Three.js, PeerJS, audio, future models: fast repeat visits, works if unpkg is down, offline solo. Needs versioning so players never get stuck on an old build (tie to `PREFIX`).
+- [x] **P2 Use a minified / trimmed Three.js** (done 2026-10-18: `three.module.min.js`, 257→166 KB gzip, 1.27→0.67 MB to parse. Addons are still unminified `examples/jsm/` files — small; a custom tree-shaken build would need a build step.)
+- [x] **P2 Service Worker cache** (done 2026-10-18: `sw.js`, cache `wd-<PREFIX>`, network-first page / cache-first CDN / stale-while-revalidate same-origin; `?nosw` disables; details in HANDOFF §3. Not cached: streamed music (Range requests) — see new item below.) for `index.html`, Three.js, PeerJS, audio, future models: fast repeat visits, works if unpkg is down, offline solo. Needs versioning so players never get stuck on an old build (tie to `PREFIX`).
 - [ ] **P3 Audio priority / sprite.** Load common SFX (bolt, hit, step, UI) first, rest when idle — or pack all SFX into one audio sprite (1 request instead of 74).
 - [ ] **P3 Prefetch the chosen map's music/ambience in the lobby.**
+- [ ] **P3 Offline music.** The SW skips Range requests, so `<audio>` music is not cached (offline = synth music). Option: SW answers Range requests by slicing a full cached copy, filled when the track first plays.
 
 ## E. Direction: streamed asset files (agreed with user 2026-10-17)
 Goal: models, VFX and sounds become files that are easy to edit/replace with better-looking made assets; code stays in `index.html`; the current code-built versions stay as fallback.
