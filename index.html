@@ -6375,9 +6375,9 @@ function makePointSys(additive){
   return {geo,pos,col,size,n:0};
 }
 // เปลวไฟรูปหยดน้ำ (ฐานเหลืองขาว → ส้ม → ปลายแดงจาง) ใช้กับอนุภาค fl:true — ผสมสีปกติ เห็นชัดแม้พื้นสว่าง
-// ===== เปลวไฟ: FLAME_STYLE 2 = แบบใหม่ (ลิ้นไฟ 4 แบบ คมปลาย มีแกนสว่าง ไม่กลับหัว หดเล็กและเปลี่ยนสีเหลือง→ส้ม→แดงตามอายุ)
+// ===== เปลวไฟ: FLAME_STYLE 0 = อนุภาคกลมเรืองแสง (ไม่ใช้รูปเปลว) • 2 = แบบใหม่ (ลิ้นไฟ 4 แบบ คมปลาย มีแกนสว่าง ไม่กลับหัว หดเล็กและเปลี่ยนสีเหลือง→ส้ม→แดงตามอายุ)
 //       FLAME_STYLE 1 = แบบแรก (เปลวหยดน้ำเบลอ) — ผู้ใช้ขอเก็บไว้เผื่อเปลี่ยนกลับ: แก้เลขบรรทัดนี้เป็น 1 =====
-const FLAME_STYLE=2;
+const FLAME_STYLE=0;   // 0 = อนุภาคกลมเรืองแสงแบบเดิม (ผู้ใช้เลือก 2026-10-19) • 1 = เปลวหยดน้ำ • 2 = ลิ้นไฟ
 const FLAMETEX_V1=texCanvas(64,64,(g)=>{
   const drop=(w,h,col,bl)=>{g.save();g.filter='blur('+bl+'px)';g.beginPath();g.moveTo(32,58);g.bezierCurveTo(32+w,56-h*0.25,32+w*0.45,58-h*0.72,32,58-h);g.bezierCurveTo(32-w*0.45,58-h*0.72,32-w,56-h*0.25,32,58);g.fillStyle=col;g.fill();g.restore();};
   drop(20,54,'rgba(210,30,6,0.9)',3);drop(15,42,'rgba(255,90,10,0.97)',2.5);drop(10,28,'rgba(255,170,30,1)',2);drop(5,14,'rgba(255,240,190,1)',1.5);
@@ -6404,7 +6404,10 @@ const PSYS=[makePointSys(true),makePointSys(false),makePointSys(false)];
     :'uniform sampler2D map;varying vec4 vC;varying float vV;void main(){vec4 t=texture2D(map,vec2(gl_PointCoord.x,gl_PointCoord.y));gl_FragColor=vec4(t.rgb*vC.rgb*1.05,t.a*vC.a);}',
   blending:THREE.NormalBlending,depthWrite:false,transparent:true});F.mat=pts.material;}
 // เปลวไฟ 1 ดวง (fl:true) — col = สีย้อม ('#ffffff' = สีเปลวตามภาพ)
-function flame(x,y,h,o){o=o||{};PARTS.push({x,y,h,vx:o.vx||0,vy:o.vy||0,vh:o.vh===undefined?rnd(2,4):o.vh,life:o.life||0.45,max:o.life||0.45,col:o.col||'#ffffff',size:o.size||6,g:o.g===undefined?-1.5:o.g,drag:o.drag===undefined?2:o.drag,grow:o.grow===undefined?(FLAME_STYLE===2?0:0.4):o.grow,fl:true,v:(Math.random()*4)|0});}
+const FLAMECOL=['#fff0b0','#ffd27a','#ffb347','#ff8a2a','#ff6a1a','#ff5a14'];
+function flame(x,y,h,o){o=o||{};
+  if(FLAME_STYLE===0){PARTS.push({x,y,h:h+0.15,vx:o.vx||0,vy:o.vy||0,vh:o.vh===undefined?rnd(2,4):o.vh,life:o.life||0.45,max:o.life||0.45,col:(o.col&&o.col!=='#ffffff'&&o.col[1]!=='f'?o.col:FLAMECOL[(Math.random()*FLAMECOL.length)|0]),size:(o.size||6)*0.6,g:o.g===undefined?-1.5:o.g,drag:o.drag===undefined?2:o.drag,grow:o.grow===undefined?0.6:o.grow});return;}
+  PARTS.push({x,y,h,vx:o.vx||0,vy:o.vy||0,vh:o.vh===undefined?rnd(2,4):o.vh,life:o.life||0.45,max:o.life||0.45,col:o.col||'#ffffff',size:o.size||6,g:o.g===undefined?-1.5:o.g,drag:o.drag===undefined?2:o.drag,grow:o.grow===undefined?(FLAME_STYLE===2?0:0.4):o.grow,fl:true,v:(Math.random()*4)|0});}
 const colCache={};
 function col3(c){return colCache[c]||(colCache[c]=new THREE.Color(c));}
 function updateParticles(dt){
