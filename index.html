@@ -4269,7 +4269,7 @@ function fx(ev){
       SHAPES_Q.push({k:'rune',x:ev.x,y:ev.y,col,s1:ev.r*S3,life:ev.t,op:ev.z==='lava'?0.85:0.6});
       if(ev.z==='lava'||ev.z==='fire')SHAPES_Q.push({k:'decal',x:ev.x,y:ev.y,col:'#000000',s1:ev.r/28,life:ev.t+2,op:0.45});
       break;}
-    case 'efx':if(!fileFx('vfx_'+ev.z,ev))efxFX(ev);break;
+    case 'efx':if(!fileFx('vfx_'+(ev.z==='swing'&&ev.c===2?'swingwind':ev.z),ev))efxFX(ev);break;   // ดาบน้ำแข็งจังหวะ 3 = ง้าง (รอยฟันจริงคือ slam3) → ใช้ไฟล์ vfx_swingwind แยก
     case 'prop':{
       const D=PROPDEF[(PROPS[ev.i]||{}).k]||PROPDEF.pcrate;
       if(ev.e==='h'){burst(ev.x,ev.y,D.col,6,90,0.4,2,{h:H,g:6});if(near)snd('thud',{x:ev.x,y:ev.y,vol:0.5});}

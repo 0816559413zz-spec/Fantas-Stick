@@ -106,7 +106,9 @@
   `cols`/`rows` = จำนวนช่อง, `fps` = ความเร็ว, `add` = เรืองแสงแบบบวกแสง, `size` = ขนาดในเกม (หน่วย), มี `radius`, `life`, `loop`, `mode` เหมือนแบบ A
 
 ### ชื่อเอฟเฟกต์ที่มีในเกมตอนนี้
-`absz` `armor` `aura` `bark` `bcircle` `bigboom` `bind` `blaze` `blind` `blink` `brn` `chain` `colbolt` `colboom` `colend` `colossus` `conduct` `cryo` `cryoend` `curse` `detonate` `dfboom` `dfcancel` `dfdive` `dfrise` `ember` `ering` `eringhit` `fblock` `flare` `fnova` `forge` `freeze` `fswap` `glacier` `grcharge` `gwave` `heat` `ice` `iceboom` `icewall` `inferno` `infernocast` `jump` `kindle` `legion` `mark` `melt` `meteor` `mirror` `mirrorend` `orbget` `orbhit` `orbshot` `overc` `pboom` `perma` `pparry` `pshboom` `rally` `shatter` `silence` `siphon` `slam` `slam3` `slamgo` `slide` `snap` `snapboom` `snapwind` `soulburst` `spikehit` `summon` `swing` `tempest` `terror` `thorn` `thunder` `unsummon` `vine` `wallboost` `wallbreak` `wallcast` `wallhit` `wispheal` `worldtree` `zapt`
+`absz` `armor` `aura` `bark` `bcircle` `bigboom` `bind` `blaze` `blind` `blink` `brn` `chain` `colbolt` `colboom` `colend` `colossus` `conduct` `cryo` `cryoend` `curse` `detonate` `dfboom` `dfcancel` `dfdive` `dfrise` `ember` `ering` `eringhit` `fblock` `flare` `fnova` `forge` `freeze` `fswap` `glacier` `grcharge` `gwave` `heat` `ice` `iceboom` `icewall` `inferno` `infernocast` `jump` `kindle` `legion` `mark` `melt` `meteor` `mirror` `mirrorend` `orbget` `orbhit` `orbshot` `overc` `pboom` `perma` `pparry` `pshboom` `rally` `shatter` `silence` `siphon` `slam` `slam3` `slamgo` `slide` `snap` `snapboom` `snapwind` `soulburst` `spikehit` `summon` `swing` `swingwind` `tempest` `terror` `thorn` `thunder` `unsummon` `vine` `wallboost` `wallbreak` `wallcast` `wallhit` `wispheal` `worldtree` `zapt`
+
+- `swing` = รอยฟันดาบ/ขวานน้ำแข็งจังหวะ 1–2 (origin = กลางตัวที่ความสูงอก, ใช้ `"radius": true`), `swingwind` = ตอนง้างจังหวะ 3 (รอยฟันลงพื้นของจังหวะ 3 คือ `slam3`)
 
 (ชื่อเหล่านี้มาจากคาถาที่ฝั่งเกมเพลย์ออกแบบไว้ ถ้ามีคาถาใหม่ ชื่อก็จะเพิ่มตาม จะดูรายชื่อล่าสุดได้จาก `efxFX` ใน `index.html` หรือถามฝั่งโค้ด)
 
