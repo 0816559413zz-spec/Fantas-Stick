@@ -128,7 +128,7 @@ function updateOrbShots(dt){
     if(k>=1){if(b.sp){scene.remove(b.sp);scene.remove(b.cr);}burst(x,y,'#ffb347',12,200,0.35,2.6,{h:H,vh:[0,3],g:1});OBV.splice(i,1);}}
 }
 function updateZV(dt){
-  updateGlacierVis(dt);updateIceFloors(dt);updateSlashes(dt);updateOrbShots(dt);updateDfCracks(dt);updateStormV(dt);updateFRV(dt);updateFireV(dt);updateFrostV(dt);updateVfxKit(dt);
+  updateGlacierVis(dt);updateIceFloors(dt);updateSlashes(dt);updateOrbShots(dt);updateDfCracks(dt);updateStormV(dt);updateFRV(dt);updateFireV(dt);updateFrostV(dt);updateVfxKit(dt);updateFx(dt);
   for(let i=WVV.length-1;i>=0;i--){
     const w=WVV[i];const st=Math.min(w.len-w.d,1500*dt);w.d+=st;
     const x=w.x+Math.cos(w.a)*w.d,y=w.y+Math.sin(w.a)*w.d,px=-Math.sin(w.a),py=Math.cos(w.a);

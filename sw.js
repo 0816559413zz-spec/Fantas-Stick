@@ -5,6 +5,7 @@
 //   unpkg (ระบุเวอร์ชันตายตัว), ฟอนต์ → cache-first (ไฟล์ไม่เปลี่ยน)
 //   ไฟล์ในเว็บเรา (audio/ icons/ assets/) → stale-while-revalidate (ใช้ของในแคชทันที แล้วอัปเดตเบื้องหลัง)
 //   assets/manifest.json                → network-first (รู้ทันทีว่ามีโมเดลเวอร์ชันใหม่)
+//   assets/fx/ (ไฟล์เอฟเฟกต์ .fx.json), studio/ → network-first (แก้ในสตูดิโอแล้วเห็นทันที)
 //   คำขอแบบ Range (เพลงที่สตรีมผ่าน <audio>) / PeerJS / อื่นๆ → ไม่ยุ่ง ปล่อยให้เบราว์เซอร์จัดการ
 const VER = new URL(self.location).searchParams.get('v') || 'dev';
 const CACHE = 'wd-' + VER;
@@ -57,7 +58,7 @@ self.addEventListener('fetch', e => {
   if (req.method !== 'GET' || req.headers.has('range')) return;
   const url = new URL(req.url);
   if (url.protocol !== 'https:' && url.protocol !== 'http:') return;
-  if (req.mode === 'navigate' || (url.origin === self.location.origin && /\/(js|css)\/[^/]+$|\/assets\/manifest\.json$/.test(url.pathname))) { e.respondWith(networkFirst(req, url)); return; }
+  if (req.mode === 'navigate' || (url.origin === self.location.origin && /\/(js|css|studio)\/[^/]+$|\/assets\/manifest\.json$|\/assets\/fx\//.test(url.pathname))) { e.respondWith(networkFirst(req, url)); return; }
   const k = kind(url);
   if (!k) return;
   if (k === 'immutable') e.respondWith(cacheFirst(req, url));

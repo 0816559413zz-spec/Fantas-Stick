@@ -97,6 +97,7 @@ function palOf(name,col){if(name!=='col'&&VFXPAL[name])return VFXPAL[name];col=c
   return _palCache[col]={core:'#ffffff',hi:f(Math.min(0.9,hsl.l+0.25),0.8),main:col,deep:f(Math.max(0.25,hsl.l-0.22),1.2),light:col,sig:''};}
 function _pc(v,P){return typeof v==='string'&&v[0]==='$'?P[v.slice(1)]:v;}
 function playFx(name,x,y,h,o){o=o||{};if(x===undefined||y===undefined||isNaN(x))return;
+  if(fxTpl(name,x,y,h,o))return;   // แม่แบบเป็นไฟล์ assets/fx/tpl/ (แก้ในสตูดิโอได้) — ยังไม่โหลด = แบบโค้ดด้านล่าง
   let R=VFXR[name],P=VFXPAL.arcane,tpl=null;
   if(!R){const k=name.indexOf('_');tpl=name.slice(k+1);P=palOf(name.slice(0,k),o.col);R=VFXTPL[tpl];if(!R)return;}
   const s=o.s||1,ex=vfxExtra(),run=(L,m)=>{if(L.x&&!ex)return;if(L.dl)later(L.dl,()=>fxLayer(L,x,y,h,s,o,P,m));else vfxOnce(()=>fxLayer(L,x,y,h,s,o,P,m));};

@@ -1,0 +1,23 @@
+{
+  "v": 1,
+  "desc": "ระเบิดใหญ่ 3 มิติ: ลูกพลังงานขยายแล้วสลาย + วงกระแทก + ประกาย + ลายไหม้ + เศษหิน",
+  "tags": ["impact", "big"],
+  "pal": "fire",
+  "dur": 2.2,
+  "params": {"r": {"def": 4, "desc": "รัศมีระเบิด (ม.)"}},
+  "layers": [
+    {"id": "core", "t": "flash", "at": 0, "life": 0.08, "col": "$core", "size": "r*0.8"},
+    {"id": "glow", "t": "halo", "at": 0, "life": 0.35, "col": "$main", "size": "r*1.6", "k": 1.2},
+    {"id": "ball", "t": "mesh", "at": 0, "life": 0.7, "shape": "sphere", "mat": "fire", "mode": "ball", "disp": 0.3, "pos": [0, 0.6, 0],
+     "scale": {"0": 0.2, "0.35": 0.85, "1": 1.05, "ease": "out", "x": "r*0.6"}, "heat": {"0": 0.35, "1": 0}, "dis": {"0": 0, "0.3": 0, "1": 0.95}},
+    {"id": "shock", "t": "mesh", "at": 0, "life": 0.45, "shape": "ring", "inner": 0.82, "mat": "energy", "pos": [0, 0.08, 0], "scale": {"0": 0.2, "1": 1, "ease": "out", "x": "r*1.4"}, "op": {"0": 1, "1": 0}},
+    {"id": "ring", "t": "ring", "at": 0, "life": 0.5, "att": "ground", "pos": [0, 0.12, 0], "col": "$main", "r": "r*1.8", "op": 0.5},
+    {"id": "sparks", "t": "emit", "at": 0, "life": 0.1, "burst": 36, "from": "hemisphere", "fr": 0.4, "dir": "out", "speed": [6, 14], "plife": [0.4, 0.9], "look": "streak", "size": [2.4, 3.4], "col": "$core", "c2": "$deep", "gravity": 6, "drag": 2},
+    {"id": "embers", "t": "emit", "at": 0.05, "life": 0.1, "burst": 14, "from": "sphere", "fr": 0.6, "dir": "up", "spread": 0.8, "speed": [1, 3], "plife": [0.6, 1.2], "look": "fire", "size": [5, 8], "gravity": -1.5, "drag": 2},
+    {"id": "smoke", "t": "emit", "at": 0.15, "life": 0.1, "burst": 10, "from": "sphere", "fr": 0.8, "dir": "up", "spread": 1, "speed": [0.5, 1.5], "plife": [1.2, 1.8], "look": "smoke", "size": [7, 10], "col": "#2a2522", "c2": "#2a2522", "gravity": -0.6, "grow": 1.4, "drag": 2, "x": true},
+    {"id": "scorch", "t": "decal", "at": 0, "life": 2.2, "kind": "scorch", "r": "r*0.9"},
+    {"id": "rocks", "t": "debris", "at": 0, "life": 1.3, "kind": "rock", "n": 10, "speed": 8, "r": 1},
+    {"id": "light", "t": "light", "at": 0, "life": 0.45, "col": "$light", "int": 2.5, "dist": 20},
+    {"id": "cam", "t": "screen", "at": 0, "life": 0.3, "shake": 6, "kick": 0.3}
+  ]
+}

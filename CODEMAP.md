@@ -145,10 +145,10 @@ MM3:2 makeMinion:3 syncMins:36 drawMinBars:58
 ## js/25-efx.js (282) — efxFX: ภาพของ event "efx" ทุกคาถา (หนึ่ง case ต่อหนึ่งเอฟเฟกต์)
 efxFX:2
 
-## js/26-fx-events.js (236) — fx(ev): เอฟเฟกต์+เสียงของทุก event จากโฮสต์ • statusFX (สถานะบนตัว) •…
+## js/26-fx-events.js (237) — fx(ev): เอฟเฟกต์+เสียงของทุก event จากโฮสต์ • statusFX (สถานะบนตัว) •…
 statusFX:3 fx:26
-§189 overlay: เลือกบัฟ / สรุปผล
-choosePick:190 syncOverlays:195 showOver:217
+§190 overlay: เลือกบัฟ / สรุปผล
+choosePick:191 syncOverlays:196 showOver:218
 
 ## js/27-world.js (165) — 
 S3:4 tx:4 tz:4 GY:6 TW:6 hdr:7 gl:9 scene:15 cam:17 composer:18
@@ -207,8 +207,8 @@ ROLE:4 KC:4 roleShowT:4 onPriv:5 MO:10 BREATHS:11 clearModeObjs:12 ITEMC:21 make
 §133 หน้าประชุมโหวต (หาลอร์ดโวลเดอมอร์)
 meetKey:134 myVoted:134 castVote:135 syncMeeting:141
 
-## js/37-render-loop.js (72) — ลูปเรนเดอร์
-lastFrame:2 HSTOP:5 hitStop:6 frame:7 _fpsAcc:15 _fpsN:15 render:16 renderGame:53
+## js/37-render-loop.js (76) — ลูปเรนเดอร์
+lastFrame:2 HSTOP:5 hitStop:6 FXSTUDIO:8 frame:9 _fpsAcc:18 _fpsN:18 render:19 renderGame:56
 
 ## js/38-hud.js (343) — HUD
 rr:2 SLOTS:3 fmtTime:4
@@ -258,14 +258,43 @@ _wpM:107 fileWeapon:108
 §116 Ice circle (Permafrost): ริบบิ้นแสงวนเป็นก้นหอยบนพื้น + ผลึกลอยหมุนรอ…
 SWIRL_FS:117 ICIRC:121 iceCircle:122 updateIceCircles:133
 
-## js/44-vfx-kit.js (206) — 
+## js/44-vfx-kit.js (207) — 
 §8 1) หางแสง
 TRMAX:11 TRPTS:11 TRAILS:11 _trL:12 trailLayer:13 trailNew:22 trailPoint:24 trailStop:27 _tv1:28 _tv2:28 _tv3:28 updateTrails:29
 §52 2) สูตรเอฟเฟกต์ = จานสี (ธาตุ) × แม่แบบ (ขนาด/ชนิด)
-VFXPAL:56 VFXTPL:69 VFXSIG:81 VFXSIGK:89 VFXR:91 _palCache:94 palOf:95 _pc:98 playFx:99 nearMe:108 fxLayer:109
-§141 3) ผูกเอฟเฟกต์ซ้อนชั้นกับเหตุการณ์ของทุกสาย (เพิ่มทับของเดิม ไม่ลบหน้…
-EFXAUG:143 PJPAL:162 pjPal:164 ULTCOL:165 efxAug:166 VFXAUG_ON:170 fxAug:171
-§191 4) เอฟเฟกต์ทั้งจอ (ค่าไปที่ GradePass ใน js/27-world.js)
-SCR:192 screenFlash:193 screenRadial:194 screenKick:195 screenHurt:196 _scv:197 updateScreenFx:198 updateVfxKit:206
+VFXPAL:56 VFXTPL:69 VFXSIG:81 VFXSIGK:89 VFXR:91 _palCache:94 palOf:95 _pc:98 playFx:99 nearMe:109 fxLayer:110
+§142 3) ผูกเอฟเฟกต์ซ้อนชั้นกับเหตุการณ์ของทุกสาย (เพิ่มทับของเดิม ไม่ลบหน้…
+EFXAUG:144 PJPAL:163 pjPal:165 ULTCOL:166 efxAug:167 VFXAUG_ON:171 fxAug:172
+§192 4) เอฟเฟกต์ทั้งจอ (ค่าไปที่ GradePass ใน js/27-world.js)
+SCR:193 screenFlash:194 screenRadial:195 screenKick:196 screenHurt:197 _scv:198 updateScreenFx:199 updateVfxKit:207
 
-(44 files, 9236 lines)
+## js/45-fx-runtime.js (310) — 
+FXR:9 FXDEG:10
+§11 โหลด
+fxFetch:12 fxDefaults:13 fxBoot:14 fxOverrides:24 fxLoad:27 fxData:31
+§32 ค่า: ตัวเลข / สูตร / ช่วงสุ่ม / เส้นโค้ง / สี
+_fxExpr:33 fxExpr:34 fxEval:38 fxV:40 fxIsCurve:47 fxCurve:48 fxG:56 fxCol:57 fxPal:58
+§59 ตำแหน่ง: กรอบของเอฟเฟกต์ (+x ขวา, +y ขึ้น, +z ทิศเล็ง) → พิกัดแผนที่
+_fxw:60 fxAnchor:61 fxBase:64 fxLocal:67 fxDir:68 fxYawV:69 fxPos:70 fxPlace:71
+§72 เล่น / หยุด
+fxPlay:73 fxStart:74 fxStop:83 fxKill:84 fxClearAll:85 fxGate:87
+§89 ทุกเฟรม
+updateFx:90
+§106 สร้างชั้น
+fxN:107 fxSpawn:108 fxTick:137 fxEnd:146
+§151 อนุภาค
+_fxrnd:152 fxUnit:153 fxCone:154 fxEmit:156 fxPart:173
+§186 รูปทรง 3D
+FXGEO:187 fxMerge:188 fxRibbon:193 fxGeo:199 fxEnergyMat:219 fxMeshMake:230 fxMeshTick:245 fxFlipTex:257
+§261 หางแสง / รอยฟัน
+fxTrailTick:262
+§268 สายฟ้า
+fxBolt:269
+§275 ฟังก์ชันในโค้ดที่ไฟล์เรียกได้ (ชั้น t:"code")
+FXCODE:276
+§288 ผูกกับ event ของเกม (assets/fx/bind.json) — เรียกจาก fx(ev)
+fxBind:290
+§300 แม่แบบ playFx เป็นไฟล์ (assets/fx/tpl/*, sig/*, rec/*)
+fxTpl:302
+
+(45 files, 9552 lines)

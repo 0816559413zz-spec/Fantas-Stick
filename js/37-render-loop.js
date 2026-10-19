@@ -4,7 +4,10 @@ let lastFrame=performance.now();
 // หยุดภาพได้ครั้งละครั้ง แล้วพัก HSTOP.gap วินาที — กันตีถี่/โดนหลายตัวแล้วภาพหยุดๆ เดินๆ จนดูเหมือนกระตุก
 const HSTOP={t:0,pend:0,until:0,gap:0.3};
 function hitStop(d){if(screen==='game'&&performance.now()>=HSTOP.until)HSTOP.pend=Math.max(HSTOP.pend,d);}
+// สตูดิโอ VFX (studio/studio.js) ขับเฟรมเอง: own = หยุดลูปนี้ • noDraw = อัปเดตเอฟเฟกต์โดยไม่วาด (กรอเวลา) 
+const FXSTUDIO={own:false,noDraw:false};
 function frame(now){
+  if(FXSTUDIO.own)return;
   const dt=Math.min(0.05,(now-lastFrame)/1000);lastFrame=now;
   if(HSTOP.t>0){HSTOP.t-=dt;requestAnimationFrame(frame);return;}
   qualTick(dt);
@@ -63,6 +66,7 @@ function renderGame(v,P,E,me,dt,now){
   tickFlash(dt);
   t0=performance.now();updateZV(dt);updateParticles(dt);updateShapes(dt);updateLights(dt);updateVfx(dt);updateDebris(dt);pf('fx',t0);
   QUAL.frame++;gl.shadowMap.needsUpdate=QUAL.mode==='high'||QUAL.frame%2===0;
+  if(FXSTUDIO.noDraw)return;
   t0=performance.now();composer.render();pf('gpuSubmit',t0);
   t0=performance.now();const spk=speakingIds();
   drawLabels(P,E,v,me,spk);drawMinBars(v,me);

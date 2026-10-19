@@ -1,0 +1,105 @@
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap');
+/* VFX Studio — ธีมเดียวกับเกม (น้ำเงินเข้ม + ทอง) • เลย์เอาต์: แถบบน | ไลบรารีซ้าย | จอ 3D กลาง | แผงแก้ค่าขวา | ไทม์ไลน์ล่าง */
+body.studio{--sL:220px;--sR:330px;--sT:46px;--sB:228px;--sp:#0b1224;--sp2:#121b34;--sl:rgba(217,180,90,.22);--sl2:rgba(217,180,90,.45);--sok:#7fd9a0;--swarn:#ff9a5a;--serr:#ff6a6a;--fu:'JetBrains Mono',ui-monospace,Consolas,monospace}
+body.studio .screen,body.studio .overlay,body.studio #creator,body.studio #cv,body.studio #menu,body.studio #lobby,body.studio #trOpen,body.studio #trPanel,body.studio #trainEnd,body.studio #fps,body.studio #voice{display:none!important}
+body.studio #gl{left:var(--sL)!important;top:var(--sT)!important;width:calc(100vw - var(--sL) - var(--sR))!important;height:calc(100vh - var(--sT) - var(--sB))!important;cursor:grab}
+body.studio #gl:active{cursor:grabbing}
+#st *{box-sizing:border-box}
+#st{position:fixed;inset:0;pointer-events:none;z-index:20;font:13px/1.45 'Kanit',system-ui,sans-serif;color:var(--text)}
+#st>*{pointer-events:auto}
+#st button,#st select,#st input,#st textarea{font:inherit;color:var(--text);background:var(--sp2);border:1px solid var(--sl);border-radius:3px}
+#st button{padding:3px 9px;cursor:pointer;white-space:nowrap}
+#st button:hover{border-color:var(--sl2)}
+#st button.on{background:rgba(217,180,90,.16);border-color:var(--gold);color:var(--gold2)}
+#st button.gold{background:linear-gradient(180deg,#e3c06c,#a27a32);color:#1a1206;border-color:#e3c06c;font-weight:600}
+#st button:focus-visible,#st input:focus-visible,#st select:focus-visible,#st textarea:focus-visible{outline:2px solid var(--gold);outline-offset:1px}
+#st input,#st select{padding:2px 6px}
+#st input[type=number]{width:64px}
+#st input[type=range]{accent-color:var(--gold);padding:0;border:0;background:none}
+#st h3{margin:0;font:600 11px 'Cinzel','Kanit',serif;letter-spacing:2px;text-transform:uppercase;color:var(--gold)}
+#st .mono{font-family:var(--fu);font-size:11.5px}
+#st .mute{color:var(--mute)}
+/* แถบบน */
+#stTop{position:absolute;left:0;right:0;top:0;height:var(--sT);display:flex;gap:8px;align-items:center;padding:0 10px;background:var(--sp2);border-bottom:1px solid var(--sl);overflow-x:auto}
+#stTop .logo{font:700 16px 'Cinzel',serif;color:var(--gold2);letter-spacing:1px;margin-right:6px}
+#stTop .file{font-family:var(--fu);font-size:12px;color:var(--gold2);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:280px}
+#stTop .dirty{color:var(--swarn)}
+#stTop .sep{width:1px;height:24px;background:var(--sl);flex:none}
+#stTop label{display:flex;gap:4px;align-items:center;color:var(--mute);white-space:nowrap}
+/* ไลบรารี */
+#stLib{position:absolute;left:0;top:var(--sT);bottom:var(--sB);width:var(--sL);background:var(--sp);border-right:1px solid var(--sl);display:flex;flex-direction:column}
+#stLib .head{padding:8px;display:grid;gap:6px;border-bottom:1px solid var(--sl)}
+#stLib input{width:100%}
+#stLibList{overflow:auto;padding:6px;flex:1}
+#stLibList .grp{margin:8px 0 2px;font:600 10.5px var(--fu);color:var(--gold);letter-spacing:1px;text-transform:uppercase}
+#stLibList button{display:block;width:100%;text-align:left;background:none;border-color:transparent;padding:3px 6px;font-size:12.5px;overflow:hidden;text-overflow:ellipsis}
+#stLibList button.on{background:rgba(217,180,90,.14);border-color:var(--sl2);color:var(--gold2)}
+#stLibList button small{display:block;color:var(--mute);font-size:10.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* จอ */
+#stView{position:absolute;left:var(--sL);right:var(--sR);top:var(--sT);bottom:var(--sB);pointer-events:none}
+#stView>*{pointer-events:auto}
+#stCams{position:absolute;left:8px;top:8px;display:flex;gap:4px;flex-wrap:wrap}
+#stCams button{background:rgba(7,10,20,.75)}
+#stHud{position:absolute;left:8px;bottom:8px;right:8px;display:flex;gap:5px;flex-wrap:wrap;pointer-events:none}
+#stHud span{font:11px var(--fu);background:rgba(7,10,20,.75);border:1px solid var(--sl);padding:1px 7px;border-radius:2px;font-variant-numeric:tabular-nums}
+#stHud span.bad{color:var(--swarn);border-color:rgba(255,154,90,.5)}
+#stHud span.good{color:var(--sok)}
+#stBanner{position:absolute;left:50%;top:8px;transform:translateX(-50%);background:var(--sp2);border:1px solid var(--gold);padding:5px 10px;border-radius:3px;display:flex;gap:8px;align-items:center;max-width:90%}
+/* ไทม์ไลน์ */
+#stTl{position:absolute;left:0;right:var(--sR);bottom:0;height:var(--sB);background:var(--sp);border-top:1px solid var(--sl);display:flex;flex-direction:column}
+#stTl .bar{display:flex;gap:5px;align-items:center;padding:5px 8px;border-bottom:1px solid var(--sl);flex-wrap:wrap}
+#stTl .time{font:12px var(--fu);color:var(--gold2);min-width:104px;font-variant-numeric:tabular-nums}
+#stRows{overflow:auto;flex:1;display:grid;grid-template-columns:230px minmax(0,1fr);align-content:start;row-gap:2px;padding:4px 8px 8px;position:relative}
+.stName{display:flex;gap:2px;align-items:center;font-size:12px;white-space:nowrap;overflow:hidden;cursor:pointer;padding-right:4px}
+.stName.on{color:var(--gold2)}
+.stName button{padding:0 4px!important;font-size:11px!important;line-height:17px;background:none!important}
+.stName button.on{background:rgba(217,180,90,.16)!important}
+.stName .nm{overflow:hidden;text-overflow:ellipsis;flex:1;min-width:0}
+.stName .ty{font:10px var(--fu);color:var(--mute)}
+.stName .bad{color:var(--swarn)}
+.stTrack{position:relative;height:21px;background:rgba(255,255,255,.03);border-radius:2px;touch-action:none}
+.stTrack.ruler{height:18px;background:none;cursor:pointer}
+.stTick{position:absolute;top:0;font:10px var(--fu);color:var(--mute);transform:translateX(-50%);pointer-events:none}
+.stSeg{position:absolute;top:3px;bottom:3px;border-radius:2px;background:var(--c,#d9b45a);opacity:.75;cursor:grab;min-width:5px}
+.stSeg.loop{background:repeating-linear-gradient(90deg,var(--c,#d9b45a) 0 8px,transparent 8px 11px)}
+.stSeg.on{outline:2px solid var(--gold2);opacity:1}
+.stSeg.off{opacity:.2}
+.stSeg .rh{position:absolute;right:-3px;top:0;bottom:0;width:9px;cursor:ew-resize}
+.stPh{position:absolute;top:0;bottom:0;width:2px;background:var(--gold2);box-shadow:0 0 6px var(--gold);pointer-events:none}
+#stAdd{position:relative}
+#stAddMenu{position:absolute;bottom:100%;left:0;display:grid;grid-template-columns:repeat(2,minmax(140px,1fr));gap:3px;background:var(--sp2);border:1px solid var(--gold);padding:6px;border-radius:3px;z-index:5;width:340px}
+#stAddMenu button{text-align:left;font-size:12px}
+/* แผงแก้ค่า */
+#stInsp{position:absolute;right:0;top:var(--sT);bottom:0;width:var(--sR);background:var(--sp);border-left:1px solid var(--sl);overflow:auto;padding:8px 10px 20px;display:flex;flex-direction:column;gap:8px}
+#stInsp .hd{display:flex;justify-content:space-between;align-items:baseline;gap:6px}
+#stInsp .hd b{font:600 13px var(--fu);color:var(--gold2)}
+#stInsp details{border-top:1px solid var(--sl);padding-top:6px}
+#stInsp summary{cursor:pointer;color:var(--gold);font-size:12px}
+.stF{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 6px;align-items:center;margin:5px 0}
+.stF>label{grid-column:1/-1;display:flex;justify-content:space-between;gap:6px;font-size:12.5px}
+.stF>label small{font:10px var(--fu);color:var(--mute)}
+.stF .row{grid-column:1/-1;display:flex;gap:4px;align-items:center;min-width:0}
+.stF .row input[type=range]{flex:1;min-width:0}
+.stF .row input[type=text]{flex:1;min-width:0}
+.stF textarea{grid-column:1/-1;width:100%;min-height:70px;font:11px var(--fu)}
+.stF .tg{padding:0 5px!important;font-size:11px!important}
+.stChips{display:flex;gap:3px;flex-wrap:wrap;align-items:center}
+.stChip{width:24px;height:20px;padding:0!important;border-radius:2px}
+.stChip.on{outline:2px solid var(--gold2)}
+.stShapes{grid-column:1/-1;display:grid;grid-template-columns:repeat(5,1fr);gap:3px}
+.stShapes button{font-size:10.5px!important;padding:3px 1px!important;display:grid;justify-items:center;gap:1px}
+.stShapes svg{width:24px;height:18px}
+.stCurve{grid-column:1/-1;display:grid;gap:3px}
+.stCurve canvas{width:100%;height:84px;background:#05070f;border:1px solid var(--sl);border-radius:2px;cursor:crosshair;touch-action:none}
+.stLint{display:grid;gap:3px;font-size:12px}
+.stLint div{display:flex;gap:5px}
+.stLint .err{color:var(--serr)}.stLint .warn{color:var(--swarn)}.stLint .ok{color:var(--sok)}
+/* หน้าต่าง */
+.stModal{position:fixed;inset:0;background:rgba(2,3,8,.72);display:grid;place-items:center;z-index:30;pointer-events:auto}
+.stModal .box{background:var(--sp);border:1px solid var(--gold);border-radius:3px;padding:14px 16px;max-width:min(92vw,1300px);max-height:92vh;overflow:auto;display:grid;gap:10px}
+.stModal img{max-width:100%;height:auto;display:block;border:1px solid var(--sl)}
+.stModal .tpls{display:grid;grid-template-columns:repeat(3,minmax(150px,1fr));gap:6px}
+.stModal .tpls button{text-align:left;padding:6px 8px}
+.stModal .tpls button small{display:block;color:var(--mute);font-size:11px}
+#stToast{position:fixed;left:50%;bottom:calc(var(--sB) + 12px);transform:translateX(-50%);background:var(--sp2);border:1px solid var(--gold);padding:6px 12px;border-radius:3px;z-index:40;max-width:70vw;white-space:pre-wrap;pointer-events:none}
+@media (max-width:900px){body.studio{--sL:0px;--sR:0px}#stLib,#stInsp{display:none}}
