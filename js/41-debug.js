@@ -134,7 +134,7 @@ async function swSetup(){
 }
 swSetup();
 window.WD.SW=SWK;
-Object.assign(window.WD,{PFB,ptexUse,ptexLoad,CURL,PLIT,PSYS,flameCards});
+Object.assign(window.WD,{PFB,ptexUse,ptexLoad,CURL,PLIT,PSYS,fireVol});
 // เทส/วัดผล: เดินลูปโฮสต์ 1 รอบด้วยมือ (hostTick + snapshot + เอฟเฟกต์) — ใช้ตอนหน้าต่างถูกซ่อนแล้ว setInterval ช้า
 // prop / โมเดลจากไฟล์ (ดีบัก)
 Object.defineProperties(window.WD,{TERR:{get:()=>TERR},MAPID:{get:()=>MAPID},OBS:{get:()=>OBS},PROPS:{get:()=>PROPS},PROPON:{get:()=>PROPON},BLDG:{get:()=>BLDG},BLDON:{get:()=>BLDON},HSTOP:{get:()=>HSTOP}});Object.assign(window.WD,{MAPS,RANDOM_MAPS,FMAPS,loadMapData,terrT,groundH,terrSolid,setMapVars,buildWorld,PROPDEF,genProps,MODELS,loadModel,modelManifest,useProp,hitProp,damageEnv,hitBldPiece,breakBldPiece,PM3,EM3,JM3,animTick,playVfx,playFlip,fileFx,zoneFx,VFXL,FLIPL,FLIPS,fx});

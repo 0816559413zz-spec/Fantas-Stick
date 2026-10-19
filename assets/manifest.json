@@ -79,20 +79,6 @@
       "rand": 1,
       "size": 1.0,
       "occ": 0.35
-    },
-    "flame": {
-      "file": "vfx/tex_flame.png",
-      "v": 4,
-      "cols": 8,
-      "rows": 8,
-      "cards": true
-    },
-    "wall": {
-      "file": "vfx/tex_firewall.png",
-      "v": 1,
-      "cols": 8,
-      "rows": 8,
-      "cards": true
     }
   }
 }
