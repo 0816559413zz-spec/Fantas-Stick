@@ -108,12 +108,14 @@ MY:202 myDB:203 mySave:204 myLoad:207 myDecodeReady:213 myPlay:214 myNext:226 my
 §248 เพลงประกอบ (สร้างสดตามแผนที่)
 MUSIC:249 THEMES:250 padNote:255 musicTick:262 toggleMusic:291
 
-## js/19-client.js (159) — 
-cv:4 cx:4 DPR:5 SW:5 SH:5 resize:6 VIEW:12 screen:13 lastBuffKey:13 overShown:13 lastCount:13 PARTS:14 TEXTS:14 PCOL:15 setScreen:17 onLobby:26 onSnap:32 myPos:40
-§42 เอฟเฟกต์
-burst:44 smoke:53 ring:54 floatText:55 shake:56 wandPos:57 impactFX:59 explosionFX:75
-§87 เอฟเฟกต์คาถาใหม่
-ZV:88 COLB:88 WVV:88 GLV:88 ICEV:88 SLV:88 ULTV:88 OBV:88 _iceDisc:90 _iceEdge:91 _iceSpk:92 iceFloorMat:93 _icePlane:94 _icePathMat:95 makeIceFloor:96 updateIceFloors:119 FLASHM:130 FLASHING:131 flashModel:132 endFlash:141 tickFlash:142 GHOSTM:144 SOLIDM:144 ghostOf:145 setGhost:151 hitSparks:159
+## js/19-client.js (184) — ฝั่งแสดงผล (ทุกเครื่อง รวมโฮสต์ ใช้ snapshot เดียวกัน)
+cv:4 cx:4 DPR:5 SW:5 SH:5 resize:6 VIEW:12 screen:13 lastBuffKey:13 overShown:13 lastCount:13 PARTS:14 TEXTS:14
+§15 งบเอฟเฟกต์ (VFX budget)
+VFXB:20 _apush:21 vfxQual:29 vfxBegin:31 vfxEnd:34 vfxOnce:36 vfxExtra:38 PCOL:39 setScreen:41 onLobby:50 onSnap:56 myPos:64
+§66 เอฟเฟกต์
+burst:68 smoke:78 ring:79 floatText:80 shake:81 wandPos:82 impactFX:84 explosionFX:100
+§112 เอฟเฟกต์คาถาใหม่
+ZV:113 COLB:113 WVV:113 GLV:113 ICEV:113 SLV:113 ULTV:113 OBV:113 _iceDisc:115 _iceEdge:116 _iceSpk:117 iceFloorMat:118 _icePlane:119 _icePathMat:120 makeIceFloor:121 updateIceFloors:144 FLASHM:155 FLASHING:156 flashModel:157 endFlash:166 tickFlash:167 GHOSTM:169 SOLIDM:169 ghostOf:170 setGhost:176 hitSparks:184
 
 ## js/20-vfx-pyro-storm.js (370) — Dragonfall (ภาพ)
 makeDfCircle:3 DFV:20 dfCracks:21 updateDfCracks:31 dragonfallFX:32
@@ -203,8 +205,8 @@ ROLE:4 KC:4 roleShowT:4 onPriv:5 MO:10 BREATHS:11 clearModeObjs:12 ITEMC:21 make
 §133 หน้าประชุมโหวต (หาลอร์ดโวลเดอมอร์)
 meetKey:134 myVoted:134 castVote:135 syncMeeting:141
 
-## js/37-render-loop.js (68) — ลูปเรนเดอร์
-lastFrame:2 HSTOP:5 hitStop:6 frame:7 _fpsAcc:15 _fpsN:15 render:16
+## js/37-render-loop.js (72) — ลูปเรนเดอร์
+lastFrame:2 HSTOP:5 hitStop:6 frame:7 _fpsAcc:15 _fpsN:15 render:16 renderGame:53
 
 ## js/38-hud.js (343) — HUD
 rr:2 SLOTS:3 fmtTime:4
@@ -249,4 +251,4 @@ _wpM:98 fileWeapon:99
 §107 Ice circle (Permafrost): ริบบิ้นแสงวนเป็นก้นหอยบนพื้น + ผลึกลอยหมุนรอ…
 SWIRL_FS:108 ICIRC:112 iceCircle:113 updateIceCircles:124
 
-(43 files, 8581 lines)
+(43 files, 8610 lines)

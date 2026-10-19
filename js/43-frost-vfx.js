@@ -67,7 +67,7 @@ function mistMesh(){if(_mistIM)return _mistIM;
   mat.userData.keep=true;geo.userData.keep=true;
   _mistIM=new THREE.InstancedMesh(geo,mat,MISTMAX);_mistIM.count=0;_mistIM.frustumCulled=false;_mistIM.renderOrder=4;return _mistIM;}
 // ก้อนหมอก 1 ก้อน (พิกัดแผนที่ px) — vx/vy px/วิ, size = หน่วย 3D
-function mistPuff(x,y,h,o){if(MISTP.length>=MISTMAX)MISTP.shift();
+function mistPuff(x,y,h,o){if(VFXB.k<1&&Math.random()>=VFXB.k)return;const mx=VFXB.mul<1?MISTMAX>>1:MISTMAX;while(MISTP.length>=mx)MISTP.shift();
   MISTP.push({x,y,h,vx:o.vx||0,vy:o.vy||0,vh:o.vh||0,s:o.size||2,grow:o.grow||0.5,age:0,life:o.life||2,a:o.a||0.5,rot:rnd(0,6.283),vr:rnd(-0.4,0.4)});}
 // หมอกฟุ้งเป็นวง: n ก้อน รอบจุด x,y รัศมี r (px) ไหลออกด้านนอกช้า ๆ ต่ำติดพื้น
 function glacierMist(x,y,r,n,o){o=o||{};const h0=o.h||0;

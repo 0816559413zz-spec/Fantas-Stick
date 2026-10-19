@@ -12,6 +12,30 @@ addEventListener('resize',resize);
 const VIEW={prev:null,cur:null,tPrev:0,tCur:0};
 let screen='menu',lastBuffKey='',overShown=false,lastCount=0;
 const PARTS=[],TEXTS=[];let shakeA=0;
+// ---------- งบเอฟเฟกต์ (VFX budget) ----------
+// โค้ดเอฟเฟกต์ที่รันทุกเฟรม (sync/update ใน render) ปล่อยอนุภาค "ต่อเฟรม" → จอ 144 Hz ได้อนุภาคมากกว่าจอ 60 Hz 2.4 เท่า
+// แก้ที่จุดเดียว: ระหว่าง render ตั้ง VFXB.k = (dt×60) × ตัวคูณคุณภาพ × ตัวหน่วงเมื่อใกล้เต็ม แล้ว PARTS.push สุ่มเก็บตามสัดส่วนนั้น
+// (k>1 = เฟรมช้า → เพิ่มให้ได้ถึง VFXB.up เท่า เฉพาะกราฟิกสูง/อัตโนมัติที่ยังไม่ลดระดับ) • นอก render (อีเวนต์ fx จาก snapshot) k = 1 เสมอ
+// เอฟเฟกต์ครั้งเดียว: burst ≥ 6 ชิ้น และ later() ไม่ถูกหาร • ชั้นเสริม (ประกาย/ฝุ่นแสง/หมอกบาง ๆ) เช็ก vfxExtra() ก่อนสร้าง
+const VFXB={k:1,on:false,up:1,cap:8000,mul:1,stat:{in:0,kept:0}};
+const _apush=Array.prototype.push;
+PARTS.push=function(){
+  const k=VFXB.k;
+  for(let i=0;i<arguments.length;i++){const p=arguments[i];VFXB.stat.in++;
+    if(k<1){if(Math.random()>=k)continue;}
+    _apush.call(this,p);VFXB.stat.kept++;
+    if(k>1&&Math.random()<k-1){const q=Object.assign({},p);q.x+=rnd(-3,3);q.y+=rnd(-3,3);q.life*=rnd(0.6,1);_apush.call(this,q);VFXB.stat.kept++;}}
+  return this.length;};
+function vfxQual(){const m=QUAL.mode;return m==='low'?{mul:0.5,cap:3000,up:1}:m==='high'?{mul:1,cap:8000,up:2}:QUAL.lvl>=1||QUAL.scale<0.8?{mul:0.7,cap:5000,up:1}:{mul:1,cap:8000,up:1.5};}
+// เรียกต้น render ในเกม: ตั้งตัวคูณการปล่อยของเฟรมนี้
+function vfxBegin(dt){const q=vfxQual();VFXB.cap=q.cap;VFXB.mul=q.mul;VFXB.up=q.up;
+  const fill=PARTS.length/q.cap,soft=fill<0.6?1:Math.max(0.12,(1-fill)/0.4);
+  VFXB.k=Math.min(q.up,dt*60)*q.mul*soft;VFXB.on=true;}
+function vfxEnd(){VFXB.k=1;VFXB.on=false;}
+// ทำส่วนที่เป็น "ครั้งเดียว" ภายใน render โดยไม่โดนหาร
+function vfxOnce(fn){const k=VFXB.k;VFXB.k=1;try{fn();}finally{VFXB.k=k;}}
+// ชั้นเสริมสวยงาม — ข้ามเมื่อกราฟิกประหยัด หรืออัตโนมัติลดระดับแล้ว
+function vfxExtra(){return VFXB.mul>=1;}
 const PCOL={bolt:'#ffe27a',fire:'#ff6a2a',stun:'#5ad1ff',pull:'#c77dff',ebolt:'#7dff6a',web:'#e8e8f0',ice:'#9fe8ff',zap:'#fff27a',vine:'#6fd57f',dart:'#b6e86a',hex:'#b57dff',ember:'#ff9a4a',spike:'#d8f4ff',pb0:'#ff8a3a',pb1:'#9fe8ff',pb2:'#fff27a',pb3:'#8ef07a',pb4:'#b57dff',pb5:'#ff9ad5',spark:'#ffb347',pfire:'#ff6a2a',pfireb:'#ff5a1a',icicle:'#bfeaff',iceboulder:'#9fe0ff'};
 
 function setScreen(s){
@@ -43,6 +67,7 @@ function myPos(){const v=VIEW.cur;return v?v.P.find(p=>p.id===NET.myId):null;}
 // อนุภาค: x,y = พิกัดเกม (px), h = ความสูง (หน่วย 3D), g = แรงโน้มถ่วง (ติดลบ = ลอยขึ้น), smoke = ควัน (ไม่เรืองแสง)
 function burst(x,y,col,n,sp,life,size,o){
   o=o||{};
+  if(n>=6&&VFXB.k!==1){const k=VFXB.k;VFXB.k=1;try{burst(x,y,col,n,sp,life,size,o);}finally{VFXB.k=k;}return;}   // burst ใหญ่ = เอฟเฟกต์ครั้งเดียว ไม่หาร
   for(let i=0;i<n;i++){
     const a=o.a!==undefined?o.a+rnd(-(o.spread||0.5),o.spread||0.5):rnd(0,Math.PI*2),s=rnd(sp*0.2,sp);
     const vh=o.vh?rnd(o.vh[0],o.vh[1]):rnd(-1,3.5);

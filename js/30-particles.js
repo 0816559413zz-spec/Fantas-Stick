@@ -72,7 +72,7 @@ const colCache={};
 function col3(c){return colCache[c]||(colCache[c]=new THREE.Color(c));}
 function updateParticles(dt){
   PSYS[0].n=PSYS[1].n=PSYS[2].n=0;PTIME.value+=dt;
-  if(PARTS.length>PMAX*1.6)PARTS.splice(0,PARTS.length-PMAX*1.6);
+  const cap=Math.min(PMAX*1.6,VFXB.cap);if(PARTS.length>cap)PARTS.splice(0,PARTS.length-cap);   // เพดานตามระดับกราฟิก (ตัดอันเก่าสุดก่อน)
   for(let i=PARTS.length-1;i>=0;i--){
     const p=PARTS[i];p.life-=dt;
     if(p.life<=0){PARTS.splice(i,1);continue;}

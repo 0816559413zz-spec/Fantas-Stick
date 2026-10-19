@@ -176,7 +176,7 @@ function stBeam(x,y,h,a,len,rad,col,op,nb){
 // จุดบนเปลือกทรงกลมรอบ (x,y,h) รัศมี R (หน่วย sim)
 function shellPt(x,y,h,R,a,e){return [x+Math.cos(a)*R*Math.cos(e),y+Math.sin(a)*R*Math.cos(e),h+R*S3*Math.sin(e)];}
 function updateStormV(dt){
-  for(let i=LATER.length-1;i>=0;i--){const L=LATER[i];L.t-=dt;if(L.t<=0){LATER.splice(i,1);try{L.fn();}catch(e){}}}
+  for(let i=LATER.length-1;i>=0;i--){const L=LATER[i];L.t-=dt;if(L.t<=0){LATER.splice(i,1);try{vfxOnce(L.fn);}catch(e){}}}
   updateBolts(dt);updateClaws(dt);
   for(let i=STV.length-1;i>=0;i--){const v=STV[i];v.age+=dt;v.m.material.opacity=v.op*Math.max(0,1-v.age/v.life);if(v.grow)v.m.scale.multiplyScalar(1+v.grow*dt);if(v.age>=v.life){scene.remove(v.m);v.m.geometry.dispose();v.m.material.dispose();STV.splice(i,1);}}
   for(let i=SBV.length-1;i>=0;i--){const b=SBV[i];b.t+=dt;const k=Math.min(1,b.t/b.max),x=lerp(b.x,b.x2,k),y=lerp(b.y,b.y2,k),h=lerp(b.h,b.h2,k);

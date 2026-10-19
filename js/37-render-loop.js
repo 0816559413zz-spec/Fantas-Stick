@@ -47,6 +47,10 @@ function render(dt,now){
     const o=PM3.get(me.id);windUpdate(o?Math.hypot(o.svx,o.svz):0,!!me.fl);
   }else menuCamera(now);
   shakeA=Math.max(0,shakeA-dt*30);
+  vfxBegin(dt);try{renderGame(v,P,E,me,dt,now);}finally{vfxEnd();}
+}
+// ส่วนที่รันทุกเฟรมในเกม (อยู่ใต้งบเอฟเฟกต์ vfxBegin/vfxEnd)
+function renderGame(v,P,E,me,dt,now){
   let t0=performance.now();
   syncPlayers(P,v.mode,now,dt);pf('players',t0);
   if(me&&me.al&&!me.fl&&!me.dn){const o=PM3.get(me.id);if(o){const k=Math.floor(o.walk/Math.PI);if(o.stepK!==undefined&&k!==o.stepK)snd('step',{vol:0.35,rev:0.1});o.stepK=k;}}t0=performance.now();
