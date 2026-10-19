@@ -1,4 +1,4 @@
-# Map exporter for Wizard Duel (MAP-DESIGN.md). Run inside Blender with the map's .blend open:
+# Map exporter for Fantas Stick (MAP-DESIGN.md). Run inside Blender with the map's .blend open:
 #   MAP_ID = "valley"; exec(open(r"C:\AI Project\Fantas-Stick\assets\src\maps\map_export.py", encoding="utf-8").read())
 # (MAP_ID can be left out when the file has only one MAP_<id> collection.)
 # Writes  assets/maps/<id>.json  (gameplay data: height grid, floors, collision, spawns, props, houses, lights ...)

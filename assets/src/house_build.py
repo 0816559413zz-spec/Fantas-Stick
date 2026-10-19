@@ -1,4 +1,4 @@
-# House + debris generator for Wizard Duel (run inside Blender: exec(open(r"...house_build.py").read()))
+# House + debris generator for Fantas Stick (run inside Blender: exec(open(r"...house_build.py").read()))
 # Builds scene "house_build" with collections HOUSE (12 piece objects) / DEBRIS_STONE / DEBRIS_WOOD and exports
 #   assets/buildings/house.glb  (bld_house)     assets/buildings/debris_stone.glb / debris_wood.glb
 # Rules: ASSETS.md §3b — front (door) faces -Y, origin = house centre on the floor, base 8 x 6.5, walls 4.2 high,

@@ -1,8 +1,8 @@
-# HANDOFF — Wizard Duel (repo: Fantas-Stick)
+# HANDOFF — Fantas Stick (was "Wizard Duel") (repo: Fantas-Stick)
 
 > **For the next Claude Code session (any device): read this file first.**
 > **Rule: update this file at the end of every task** — the status, changelog, and known issues sections at minimum. Commit and push it together with the code.
-> Last updated: 2026-10-19 (overnight QA: white-out fixes, dead code removed, HANDOFF reorganised)
+> Last updated: 2026-10-19 (game renamed to **Fantas Stick**; magic title font Grenze Gotisch)
 
 ---
 
@@ -56,7 +56,9 @@ Personal, non-commercial fan project made with/for the user and their friends. U
 - **"เพลงของฉัน"** (menu): player picks local audio files → stored in IndexedDB `wd_music` → played via `<audio>` instead of game music, only on that PC (never uploaded). `N` = next song, "ล้าง" clears. This is the answer for "can we use Harry Potter music": players use their own files locally; never commit copyrighted music to the public repo.
 - **Load profile (measured 2026-10-17, for optimisation work):** page open = `index.html` 538 KB (icons were inline `ICODATA` until 2026-10-18; now `icons/<id>.svg` are fetched on first use and cached by the SW) + Three.js `three.module.js` 1.24 MB unminified (gzip) + 9 addon modules + PeerJS 91 KB + Google Fonts CSS + 73 SFX (752 KB) + wind + `music/menu.ogg` (1.7 MB, streamed). Match start = `amb/<map>.ogg` + `music/<map>.ogg` (~2 MB, streamed). Boss/imp/stingers load when they first play. Everything else (meshes, 5 CanvasTextures, crests) is generated in code; `hostStart()` ≈17 ms. Only persistent storage: `localStorage` keys `wd_best/wd_gfx/wd_kit2/wd_look/wd_music/wd_name` + IndexedDB `wd_music`. **Service Worker `sw.js`** (2026-10-18, see below) caches the page, Three.js, PeerJS, fonts and SFX/ambience.
 - **Service Worker `sw.js`** (the one extra code file next to `index.html`; registered at the end of the module script by `swSetup()`, state in `WD.SW`). Cache name `wd-<PREFIX>` (registered as `sw.js?v=<PREFIX>`) → **bumping `PREFIX` wipes all old caches**. Page navigations = network-first (always the newest `index.html`, cached copy only when offline); `unpkg.com`/`fonts.gstatic.com` = cache-first (versioned/immutable); same-origin files (`audio/`, `icons/`) + Google Fonts CSS = stale-while-revalidate (a replaced OGG with the same name shows up on the *second* visit). Range requests (streamed `<audio>` music) and PeerJS signaling are not touched, so **music is not available offline** (synth fallback plays). On the first visit the page posts `performance` resource URLs to the SW (`{t:'warm'}`, 8 s after load) so files loaded before the SW took control are cached too. `?nosw` in the URL unregisters the SW and deletes its caches. If you add a new CDN host, add it to `IMMUTABLE`/`REVALIDATE` in `sw.js`.
-- Google Fonts: **Cinzel** (Latin display — logo, headings, countdown; caps-only) + **Kanit** (all Thai text). Font stack `'Cinzel','Kanit'` lets Latin use Cinzel and Thai fall back to Kanit.
+- Google Fonts: **Cinzel** (Latin display — headings, countdown; caps-only) + **Kanit** (all Thai text). Font stack `'Cinzel','Kanit'` lets Latin use Cinzel and Thai fall back to Kanit.
+- **Magic title font `--fm` = Grenze Gotisch** (blackletter, user wanted a Harry-Potter-like title font, 2026-10-19; the real HP font is not used — licence). Used by: logo `.logo-en`, lobby `.brand`, creator `.crTop h2` / `.crInfo h1`, spell book `.sbHero h1` `.sbHead b` `.sbP b` `.sc b` `.kdh b` `.dslot .nm`. Latin only → Thai text in those spots falls back to Kanit. Swap the whole look by changing `--fm` + the Google Fonts link. Write Latin titles in mixed case (blackletter in ALL CAPS is unreadable).
+- **Game name: "Fantas Stick"** (renamed from "Wizard Duel" 2026-10-19; Thai tagline ดวลเวทมนตร์ kept). Internal ids (`PREFIX` `wizduel-…`, `localStorage wd_*`, `WD`, launch config `wizardduel`) were deliberately left unchanged.
 
 ## 4. Architecture (important)
 - **Host-authoritative.** The host runs the whole simulation in `hostTick()` (setInterval 60 Hz) in a **2D plane** (x,y in pixels) plus height (`p.z` / `e.h` / `pr.h` in 3D units). Clients only send input (`{t:'in',i:INPUT}` every 30 ms) and render snapshots.
@@ -318,6 +320,7 @@ The user asked that the next session **open by asking these questions** (one sho
 Then do the work, keep replying in Thai, and update this file at the end (CLAUDE.md rule).
 
 ## 11. Changelog
+- 2026-10-19 — Renamed the game to **Fantas Stick** (title, logo, lobby brand, README, file headers). New magic title font `--fm` (Grenze Gotisch) for the logo and class/spell names. Client only, no protocol change. Checked in the browser pane: menu logo, spell book cards, no console errors.
 - 2026-10-16 — v1 2D prototype → 3D third-person (Three.js) → bloom, cloth, student uniforms, forest map.
 - 2026-10-16 — Broom flying, spiders/pixies, Quidditch pitch map, random maps, guide button, synth sound + music; published to GitHub Pages.
 - 2026-10-16 — Modes: Quidditch, broom race, battle royale, impostor, training, dungeon co-op with 3-phase dragon/queen boss raids; protocol `v3`.

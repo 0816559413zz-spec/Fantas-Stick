@@ -1,4 +1,4 @@
-# ✦ Wizard Duel ✦
+# ✦ Fantas Stick ✦
 
 **▶ เล่นเลย: https://0816559413zz-spec.github.io/Fantas-Stick/**
 

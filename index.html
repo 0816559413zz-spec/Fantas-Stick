@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Wizard Duel</title>
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Cinzel+Decorative:wght@700;900&family=Kanit:wght@300;400;600&family=Pirata+One&display=swap" rel="stylesheet">
+<title>Fantas Stick</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Cinzel+Decorative:wght@700;900&family=Kanit:wght@300;400;600&family=Pirata+One&family=Grenze+Gotisch:wght@600;700;800&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
 <script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.160.0/build/three.module.min.js","three/addons/":"https://unpkg.com/three@0.160.0/examples/jsm/"}}</script>
 <style>
@@ -13,6 +13,7 @@
   --ink:#04060d;--navy:#0b1224;--panel:rgba(9,14,30,.9);--line:rgba(217,180,90,.32);
   --gold:#d9b45a;--gold2:#f3dc94;--goldD:#7a5c22;--text:#efe6cf;--mute:#98a2bb;--blue:#4da3ff;--red:#ff5a5a;
   --fd:'Cinzel','Kanit',serif;
+  --fm:'Grenze Gotisch','Kanit',serif;   /* ฟอนต์เวทมนตร์: ชื่อเกม ชื่อสาย ชื่อสกิล */
   --corners:
     linear-gradient(var(--gold),var(--gold)) 0 0/22px 2px no-repeat,linear-gradient(var(--gold),var(--gold)) 0 0/2px 22px no-repeat,
     linear-gradient(var(--gold),var(--gold)) 100% 0/22px 2px no-repeat,linear-gradient(var(--gold),var(--gold)) 100% 0/2px 22px no-repeat,
@@ -53,7 +54,7 @@ input[type=text]:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(217,18
 .crShade{background:linear-gradient(90deg,rgba(2,3,8,.86) 0,rgba(2,3,8,.55) 36%,transparent 64%),linear-gradient(0deg,rgba(2,3,8,.75),transparent 34%),linear-gradient(180deg,rgba(2,3,8,.55),transparent 18%)}
 .crTop{position:absolute;left:34px;top:20px}
 .crTop small{display:block;letter-spacing:7px;color:var(--gold);font-size:11px;font-family:var(--fd)}
-.crTop h2{margin:2px 0 0;font-size:30px;font-family:'Cinzel Decorative','Kanit',serif;font-weight:700}
+.crTop h2{margin:2px 0 0;font-size:34px;font-family:var(--fm);font-weight:700}
 .crSteps{position:absolute;left:50%;top:26px;transform:translateX(-50%);display:flex;align-items:center;gap:10px;font-size:14px;color:var(--mute)}
 .crSteps b{display:inline-flex;align-items:center;gap:8px;padding:6px 16px;border:1px solid var(--line);background:rgba(7,11,24,.8);font-weight:400}
 .crSteps b.on{border-color:var(--gold2);color:var(--gold2);box-shadow:0 0 14px rgba(243,220,148,.3)}
@@ -78,7 +79,7 @@ input[type=text]:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(217,18
 .s3 .crBar{left:50%;transform:translateX(-50%);width:min(620px,92vw)}
 .crInfo{position:absolute;left:44px;top:110px;width:min(400px,40vw)}
 .crInfo small{display:block;letter-spacing:6px;color:var(--gold);font-size:12px;font-family:var(--fd)}
-.crInfo h1{text-align:left;font-family:'Cinzel Decorative','Cinzel','Kanit',serif;font-weight:900;font-size:46px;letter-spacing:1px;margin:4px 0 2px;text-shadow:0 4px 24px var(--ht,#000);filter:none;color:#fff3c8;background:none;-webkit-text-fill-color:#fff3c8}
+.crInfo h1{text-align:left;font-family:var(--fm);font-weight:800;font-size:52px;letter-spacing:1px;margin:4px 0 2px;text-shadow:0 4px 24px var(--ht,#000);filter:none;color:#fff3c8;background:none;-webkit-text-fill-color:#fff3c8}
 .crInfo .th{font-size:20px;color:var(--text);margin:0 0 10px}
 .crInfo .ds{font-size:16px;color:var(--gold2);margin:0 0 4px}
 .crInfo .po{font-size:13px;color:var(--mute)}
@@ -111,7 +112,7 @@ input[type=text]:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(217,18
 .ksp:hover{transform:translateY(-2px);border-color:var(--gold)}
 .ksp .slotk{position:absolute;right:5px;top:4px;font-style:normal;font-size:10px;color:#05070f;background:var(--gold);padding:0 5px}
 .kdh{display:flex;gap:10px;align-items:center;margin-bottom:5px}
-.kdh b{font-size:16px}
+.kdh b{font-family:var(--fm);font-size:21px;font-weight:700;letter-spacing:.3px}
 .tgs{display:flex;gap:4px;flex-wrap:wrap;margin-top:3px}
 .tg{font-style:normal;font-size:10.5px;padding:1px 6px;border:1px solid var(--c,var(--line));color:var(--c,var(--mute));border-radius:2px}
 .tg.ult{--c:#ffe27a}.tg.mel{--c:#ff9a8a}.tg.dual{--c:#8fe0ff}
@@ -162,7 +163,7 @@ th{color:var(--gold);font-weight:400;font-size:12px;letter-spacing:2px}
 /* ===== เมนูหลัก ===== */
 #menu.screen{justify-content:flex-start;align-items:stretch;padding:0}
 .mleft{width:min(480px,100%);padding:40px 56px;display:flex;flex-direction:column;justify-content:center;background:linear-gradient(90deg,rgba(2,4,10,.94),rgba(2,4,10,.7) 65%,transparent)}
-.logo-en{font-family:'Cinzel',serif;font-weight:800;font-size:56px;line-height:1;letter-spacing:4px;background:linear-gradient(180deg,#fff4cc,#e2bd66 55%,#94692a);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 4px 22px rgba(217,180,90,.35))}
+.logo-en{font-family:var(--fm);font-weight:800;font-size:76px;line-height:.92;letter-spacing:1px;background:linear-gradient(180deg,#fff4cc,#e2bd66 55%,#94692a);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 4px 22px rgba(217,180,90,.35))}
 .logo-th{margin-top:8px;font-size:16px;letter-spacing:8px;color:var(--mute)}
 .mleft .orn{margin:22px 0 18px;width:100%;background-position:left center;background-size:100% 1px;background-image:linear-gradient(90deg,var(--gold),transparent)}
 .mleft .orn::after{left:0}
@@ -185,7 +186,7 @@ th{color:var(--gold);font-weight:400;font-size:12px;letter-spacing:2px}
 #lobby.screen{display:block;padding:0;pointer-events:none;overflow:hidden}
 #lobby .lp{pointer-events:auto}
 .ltop{position:absolute;left:0;right:0;top:0;height:70px;display:flex;align-items:center;gap:16px;padding:0 24px;background:linear-gradient(180deg,rgba(2,4,10,.92),transparent)}
-.brand{font-family:'Cinzel',serif;font-weight:800;font-size:22px;letter-spacing:3px;color:var(--gold2);flex:1}
+.brand{font-family:var(--fm);font-weight:800;font-size:30px;letter-spacing:1px;color:var(--gold2);flex:1}
 .roomchip{display:flex;align-items:center;gap:12px;padding:6px 8px 6px 18px;border:1px solid var(--line);background:var(--panel)}
 .roomchip span{font-size:12px;letter-spacing:2px;color:var(--mute)}
 .roomchip b{font-family:'Cinzel',serif;font-size:26px;letter-spacing:6px;color:var(--gold2);user-select:all}
@@ -303,7 +304,7 @@ body[data-screen=lobby] #voice{top:84px;left:auto;right:24px;width:340px}
 .sbPaths{position:absolute;left:22px;top:92px;width:150px;display:flex;flex-direction:column;gap:8px;z-index:2}
 .sbP{position:relative;display:flex;align-items:center;gap:10px;padding:6px 8px 6px 6px;background:linear-gradient(90deg,rgba(6,9,20,.92),rgba(6,9,20,.55));border:1px solid var(--line);text-align:left;font-size:13px;color:var(--mute);overflow:hidden}
 .sbP .med{width:46px;height:46px;flex:none;border-radius:50%;display:grid;place-items:center;border:2px solid color-mix(in srgb,var(--c) 60%,transparent);background:radial-gradient(circle,color-mix(in srgb,var(--c) 28%,transparent),rgba(0,0,0,.6) 70%);transition:transform .25s,box-shadow .25s}
-.sbP b{display:block;color:var(--text);font-weight:600;font-size:14px}.sbP small{display:block;font-size:10.5px;color:var(--mute)}
+.sbP b{display:block;color:var(--text);font-family:var(--fm);font-weight:600;font-size:15px}.sbP small{display:block;font-size:10.5px;color:var(--mute)}
 .sbP:hover .med{transform:scale(1.08) rotate(-6deg)}
 .sbP.on{border-color:var(--c);color:var(--text);background:linear-gradient(90deg,color-mix(in srgb,var(--c) 30%,rgba(6,9,20,.9)),rgba(6,9,20,.5));box-shadow:0 0 18px color-mix(in srgb,var(--c) 40%,transparent)}
 .sbP.on .med{box-shadow:0 0 18px var(--c),inset 0 0 12px var(--c);animation:medPulse 2s ease-in-out infinite}
@@ -313,7 +314,7 @@ body[data-screen=lobby] #voice{top:84px;left:auto;right:24px;width:340px}
 /* --- คลังคาถา --- */
 .sbLib{position:absolute;left:186px;top:92px;bottom:84px;width:min(410px,34vw);display:flex;flex-direction:column;z-index:2;background:linear-gradient(180deg,rgba(6,9,20,.94),rgba(6,9,20,.86));border:1px solid var(--line);box-shadow:inset 0 0 40px rgba(0,0,0,.6)}
 .sbLib::before{content:'';position:absolute;inset:4px;border:1px solid rgba(217,180,90,.14);pointer-events:none}
-.sbHead{padding:10px 14px 4px}.sbHead b{font-family:'Cinzel Decorative','Kanit',serif;color:var(--gold2);font-size:17px}.sbHead small{display:block;color:var(--mute);font-size:11px}
+.sbHead{padding:10px 14px 4px}.sbHead b{font-family:var(--fm);color:var(--gold2);font-size:21px}.sbHead small{display:block;color:var(--mute);font-size:11px}
 .sbTabs{display:flex;gap:4px;padding:6px 12px 8px;border-bottom:1px solid var(--line)}
 .sbT{width:38px;height:34px;padding:0;display:grid;place-items:center;background:rgba(7,11,24,.8);border:1px solid var(--line);opacity:.65}
 .sbT.on{opacity:1;border-color:var(--c);box-shadow:inset 0 -3px 0 var(--c)}
@@ -323,7 +324,7 @@ body[data-screen=lobby] #voice{top:84px;left:auto;right:24px;width:340px}
 .sc .rune{width:58px;height:58px;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle,color-mix(in srgb,var(--c) 30%,transparent),transparent 70%);border:1px dashed color-mix(in srgb,var(--c) 70%,transparent)}
 .sc:hover .rune{animation:spin 6s linear infinite}.sc:hover .rune .ico{animation:spinR 6s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}@keyframes spinR{to{transform:rotate(-360deg)}}
-.sc b{font-size:13.5px;color:var(--text);font-weight:600;line-height:1.15}
+.sc b{font-family:var(--fm);font-size:17px;color:var(--text);font-weight:700;line-height:1.1;letter-spacing:.3px}
 .sc .rb{font-size:10px;padding:0 6px;color:#05070f;background:var(--rc)}
 .sc .mt{font-size:10.5px;color:var(--mute)}
 .sc .eq{position:absolute;left:6px;top:6px;font-style:normal;font-size:11px;font-weight:700;color:#05070f;background:var(--gold);padding:0 6px}
@@ -338,7 +339,7 @@ body[data-screen=lobby] #voice{top:84px;left:auto;right:24px;width:340px}
 .sbHero .em{display:inline-grid;place-items:center;width:58px;height:58px;vertical-align:middle;margin-left:12px;border-radius:50%;position:relative;background:radial-gradient(circle,color-mix(in srgb,var(--pc) 35%,transparent),transparent 70%)}
 .sbHero .em::before{content:'';position:absolute;inset:-6px;border-radius:50%;border:2px dashed color-mix(in srgb,var(--pc) 70%,transparent);animation:spin 18s linear infinite}
 .sbHero .em::after{content:'';position:absolute;inset:4px;border-radius:50%;border:1px solid color-mix(in srgb,var(--pc) 50%,transparent);animation:spinR 11s linear infinite}
-.sbHero h1{display:inline-block;vertical-align:middle;margin:0;font-family:'Cinzel Decorative','Kanit',serif;font-size:32px;color:var(--pc);text-shadow:0 0 18px color-mix(in srgb,var(--pc) 60%,transparent),0 2px 0 #000}
+.sbHero h1{display:inline-block;vertical-align:middle;margin:0;font-family:var(--fm);font-size:32px;color:var(--pc);text-shadow:0 0 18px color-mix(in srgb,var(--pc) 60%,transparent),0 2px 0 #000}
 .sbHero .tl{color:var(--text);font-size:13.5px;margin:4px 0 8px;text-shadow:0 1px 2px #000}
 .chain{display:flex;justify-content:flex-end;align-items:center;gap:4px;flex-wrap:wrap}
 .chain .st{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:10px;color:var(--mute);padding:4px 6px;background:rgba(6,9,20,.75);border:1px solid var(--line);min-width:58px}
@@ -353,7 +354,7 @@ body[data-screen=lobby] #voice{top:84px;left:auto;right:24px;width:340px}
 .dslot .dm{position:absolute;inset:8px;transform:rotate(45deg);background:linear-gradient(135deg,color-mix(in srgb,var(--c) 22%,#121a36),#070b18);border:1.5px solid color-mix(in srgb,var(--c) 70%,var(--line));transition:box-shadow .2s,border-color .2s}
 .dslot .di{position:absolute;inset:0;display:grid;place-items:center}
 .dslot .k{position:absolute;left:50%;bottom:-6px;transform:translateX(-50%);font-size:10px;font-weight:700;color:#05070f;background:var(--gold);padding:0 6px;z-index:2}
-.dslot .nm{position:absolute;left:50%;top:84px;transform:translateX(-50%);white-space:nowrap;font-size:11px;color:var(--text);text-shadow:0 1px 2px #000}
+.dslot .nm{position:absolute;left:50%;top:84px;transform:translateX(-50%);white-space:nowrap;font-family:var(--fm);font-size:14px;color:var(--text);text-shadow:0 1px 2px #000}
 .dslot:hover .dm{border-color:var(--gold2)}
 .dslot.on .dm{border-color:var(--gold2);box-shadow:0 0 18px rgba(243,220,148,.6);animation:slotPulse 1.4s ease-in-out infinite}
 .dslot.drop .dm{box-shadow:0 0 0 3px var(--gold2),0 0 24px rgba(243,220,148,.8)}
@@ -385,7 +386,7 @@ body.crGame #creator{background:rgba(4,6,14,.86)}
 <!-- ===== MENU ===== -->
 <div id="menu" class="screen">
   <div class="mleft">
-    <div class="logo-en">WIZARD<br>DUEL</div>
+    <div class="logo-en">Fantas<br>Stick</div>
     <div class="logo-th">ดวลเวทมนตร์</div>
     <div class="orn"></div>
     <nav class="mnav">
@@ -499,7 +500,7 @@ body.crGame #creator{background:rgba(4,6,14,.86)}
 <!-- ===== LOBBY ===== -->
 <div id="lobby" class="screen hidden">
   <header class="ltop lp">
-    <div class="brand">WIZARD DUEL</div>
+    <div class="brand">Fantas Stick</div>
     <div class="roomchip" id="roomChip"><span>รหัสห้อง</span><b id="roomCode">-----</b><button id="btnCopy">คัดลอก</button></div>
     <div class="pcount" id="pcount"></div>
   </header>
