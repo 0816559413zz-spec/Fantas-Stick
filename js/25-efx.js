@@ -203,7 +203,7 @@ function efxFX(ev){
       fireRune(x,y,0,ev.r*0.9,ev.t+0.3);scorch(x,y,0,ev.r*1.02,ev.t+0.6);fireCrackWeb(x,y,0,ev.r*0.88,ev.t+0.5,{n:10,hot:ev.t});
       fireBlast(x,y,0.5,2.4,0.45);FX.flashSprite(x,y,0.8,'#ffb347',0.3,4,0.12,1.5);rockChunks(x,y,0,10,7,{r:15,s:0.8});smoke(x,y,0.3,8,'#3a2a24',0.9,7,70);if(near)shake(3);
       // กำแพงไฟปะทุขึ้นจากพื้นตอนวาง
-      for(let i=0;i<48;i++){const a=i/48*6.283;flame(x+Math.cos(a)*ev.r,y+Math.sin(a)*ev.r,0.05,{vh:rnd(9,13),life:rnd(0.35,0.5),size:rnd(10,13),g:-1});}
+      for(let i=0;i<48;i++){const a=i/48*6.283;flame(x+Math.cos(a)*ev.r,y+Math.sin(a)*ev.r,0.05,{vh:rnd(9,13),life:rnd(0.35,0.5),size:rnd(10,13),g:-1,fb:'-'});}
       FX.flashLight(x,y,2,'#ff8a3a',6,20,0.35);if(near)snd('boom',{x,y,vol:0.5});break;
     case 'eringhit':burst(x,y,'#ffb347',22,220,0.4,2.2,{h:H,vh:[0,3],g:2});for(let i=0;i<8;i++)flame(x+rnd(-12,12),y+rnd(-12,12),Math.max(0.1,H-1.2),{vx:rnd(-90,90),vy:rnd(-90,90),vh:rnd(4,8),life:0.3,size:rnd(9,12),drag:4});FX.flashLight(x,y,H,'#ff8a3a',3,10,0.2);if(near)snd('block',{x,y,vol:0.5});break;
     case 'blaze':{const o=PM3.get(ev.id);if(o)o.blzIn=0.6;}burst(x,y,'#ff7a2a',30,200,0.6,2.4,{h:H,vh:[1,5],g:-1});ring(x,y,'#ffb347',80,0.4,0.2);FX.flashLight(x,y,H+1,'#ff8a3a',5,16,0.4);if(near)snd('cast_fire',ev);break;

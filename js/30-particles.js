@@ -88,32 +88,35 @@ const PSYS=[makePointSys(true),makePointSys(false),makePointSys(false)];
 // สีไฟตามอายุ (ตาราง 64 ช่อง สีเชิงเส้น): ใหม่ = เหลืองขาว → เหลืองทอง → ส้ม → แดงส้ม → แดงเข้ม → ถ่านดำ
 const FLAMELUT=(()=>{const st=[[0,'#fff6dc'],[0.12,'#ffd56a'],[0.3,'#ff9a2a'],[0.5,'#f2561a'],[0.72,'#a8240c'],[0.9,'#3a1208'],[1,'#1a0a06']].map(([t,c])=>[t,new THREE.Color(c)]),L=[];
   for(let i=0;i<64;i++){const t=i/63;let k=0;while(k<st.length-2&&st[k+1][0]<t)k++;const [t0,c0]=st[k],[t1,c1]=st[k+1],u=Math.min(1,Math.max(0,(t-t0)/(t1-t0)));L.push(c0.clone().lerp(c1,u));}return L;})();
-// เปลวไฟ 1 ดวง (fl:true) — col = สีย้อม ('#ffffff' = สีเปลวตามภาพ)
+// เปลวไฟ 1 ดวง (fl:true) — col = สีย้อม ('#ffffff' = สีเปลวตามภาพ) • o.fb:'-' = ไม่ใช้ภาพ flipbook (เปลวกลมแบบเดิม เช่น Ring of Embers ที่ผู้เล่นอนุมัติแล้ว)
 const FLAMECOL=['#fff0b0','#ffd27a','#ffb347','#ff8a2a','#ff6a1a','#ff5a14'];
 function flame(x,y,h,o){o=o||{};
-  if(FLAME_STYLE===3){PARTS.push({x,y,h:h+0.1,vx:o.vx||0,vy:o.vy||0,vh:o.vh===undefined?rnd(2,4):o.vh,life:o.life||0.45,max:o.life||0.45,col:o.col||'#ffffff',size:(o.size||6)*0.78,g:o.g===undefined?-1.5:o.g,drag:o.drag===undefined?2:o.drag,grow:o.grow===undefined?0.5:o.grow,fl:true,sd:Math.random()*0.99});return;}
+  if(FLAME_STYLE===3){PARTS.push({x,y,h:h+0.1,vx:o.vx||0,vy:o.vy||0,vh:o.vh===undefined?rnd(2,4):o.vh,life:o.life||0.45,max:o.life||0.45,col:o.col||'#ffffff',size:(o.size||6)*0.78,g:o.g===undefined?-1.5:o.g,drag:o.drag===undefined?2:o.drag,grow:o.grow===undefined?0.5:o.grow,fl:true,sd:Math.random()*0.99,fb:o.fb});return;}
   if(FLAME_STYLE===0){PARTS.push({x,y,h:h+0.15,vx:o.vx||0,vy:o.vy||0,vh:o.vh===undefined?rnd(2,4):o.vh,life:o.life||0.45,max:o.life||0.45,col:(o.col&&o.col!=='#ffffff'&&o.col[1]!=='f'?o.col:FLAMECOL[(Math.random()*FLAMECOL.length)|0]),size:(o.size||6)*0.6,g:o.g===undefined?-1.5:o.g,drag:o.drag===undefined?2:o.drag,grow:o.grow===undefined?0.6:o.grow});return;}
   PARTS.push({x,y,h,vx:o.vx||0,vy:o.vy||0,vh:o.vh===undefined?rnd(2,4):o.vh,life:o.life||0.45,max:o.life||0.45,col:o.col||'#ffffff',size:o.size||6,g:o.g===undefined?-1.5:o.g,drag:o.drag===undefined?2:o.drag,grow:o.grow===undefined?(FLAME_STYLE===2?0:0.4):o.grow,fl:true,v:(Math.random()*4)|0});}
 // A) flipbook ต่ออนุภาค (VFX.md §1.6 ข้อ A / §5.1): แต่ละเม็ดเล่นภาพตารางเฟรมจาก Blender ตามอายุของมัน
 //    manifest "ptex": {"smoke":{"file":"vfx/tex_smoke.png","v":1,"cols":8,"rows":8}, "fire":{"file":"vfx/tex_fire.png","v":1,"cols":8,"rows":8,"add":true}}
 //    โหลดเสร็จแล้ว: ควันทุกเม็ด → แผ่น smoke, เปลวไฟ (fl) → แผ่น fire อัตโนมัติ • อนุภาคใส่ fb:'ชื่อแผ่น' เลือกเองได้ • ยังไม่มี/โหลดไม่เสร็จ = แบบโค้ดเดิม
-//    ตัวเลือก: add (ไฟ: บวกแสงแบบ premultiplied) • span (เล่นแผ่นกี่รอบตลอดอายุ ค่าเริ่ม 1) • rand (1 = สุ่มเฟรมเริ่มต่อเม็ด) • rot (สุ่มมุมเอียง ±rad/2: ค่าเริ่ม ควัน 0.6 ไฟ 0 = ตั้งตรง) • spin (หมุนเพิ่มตลอดอายุ rad) • size (ตัวคูณขนาด)
+//    "cards":true = แผ่นสำหรับการ์ดไฟ (flameCards ใน js/42) ไม่ใช่อนุภาค
+//    ตัวเลือก: add (ไฟ: บวกแสงแบบ premultiplied) • occ (add: บังฉากหลังเท่าไร 0..1 ค่าเริ่ม 0.6 — ไฟจริงใช้ต่ำ ไม่งั้นปลายเปลวแดงทับฟ้าสว่างจะเป็นควันเทา) • span (เล่นแผ่นกี่รอบตลอดอายุ ค่าเริ่ม 1) • rand (1 = สุ่มเฟรมเริ่มต่อเม็ด) • rot (สุ่มมุมเอียง ±rad/2: ค่าเริ่ม ควัน 0.6 ไฟ 0 = ตั้งตรง) • spin (หมุนเพิ่มตลอดอายุ rad) • size (ตัวคูณขนาด)
 const PFB={};
 function ptexUse(name,tex,e){
   e=Object.assign({cols:8,rows:8,span:1,rand:0,rot:e&&e.add?0:0.6,spin:0,size:1},e||{});
   const geo=new THREE.BufferGeometry(),pos=new Float32Array(PMAX*3),col=new Float32Array(PMAX*4),size=new Float32Array(PMAX),age=new Float32Array(PMAX*2);
   geo.setAttribute('position',new THREE.BufferAttribute(pos,3));geo.setAttribute('pcol',new THREE.BufferAttribute(col,4));geo.setAttribute('psize',new THREE.BufferAttribute(size,1));geo.setAttribute('page',new THREE.BufferAttribute(age,2));
   const mat=new THREE.ShaderMaterial({
-    uniforms:{map:{value:tex},grid:{value:new THREE.Vector2(e.cols,e.rows)},fp:{value:new THREE.Vector4(e.span,e.rand?1:0,e.rot,e.spin)},scale:{value:600},lit:PLIT},
-    vertexShader:'attribute vec4 pcol;attribute float psize;attribute vec2 page;uniform float scale;varying vec4 vC;varying vec2 vA;void main(){vC=pcol;vA=page;vec4 mv=modelViewMatrix*vec4(position,1.0);vC.a*=smoothstep(1.2,5.0,-mv.z);gl_PointSize=psize*scale/-mv.z;gl_Position=projectionMatrix*mv;}',
-    fragmentShader:'uniform sampler2D map;uniform vec2 grid;uniform vec4 fp;uniform vec3 lit;varying vec4 vC;varying vec2 vA;void main(){'+
+    uniforms:{map:{value:tex},grid:{value:new THREE.Vector2(e.cols,e.rows)},cell:{value:new THREE.Vector2(tex.image.width/e.cols,tex.image.height/e.rows)},fp:{value:new THREE.Vector4(e.span,e.rand?1:0,e.rot,e.spin)},scale:{value:600},lit:PLIT},
+    vertexShader:'attribute vec4 pcol;attribute float psize;attribute vec2 page;uniform float scale;varying vec4 vC;varying vec2 vA;varying float vPs;void main(){vC=pcol;vA=page;vec4 mv=modelViewMatrix*vec4(position,1.0);vC.a*=smoothstep(1.2,5.0,-mv.z);gl_PointSize=psize*scale/-mv.z;vPs=gl_PointSize;gl_Position=projectionMatrix*mv;}',
+    fragmentShader:'uniform sampler2D map;uniform vec2 grid,cell;uniform vec4 fp;uniform vec3 lit;varying vec4 vC;varying vec2 vA;varying float vPs;void main(){'+
+      'float LOD=clamp(log2(cell.x/max(vPs,1.0)),0.0,3.0);'+   // mip สูงจะปนเฟรมข้าง ๆ (ลายจุด) → จำกัด LOD เอง
+      
       'vec2 c=gl_PointCoord-0.5;float an=(vA.y-0.5)*fp.z+vA.x*fp.w,cs=cos(an),sn=sin(an);vec2 uv=vec2(cs*c.x-sn*c.y,sn*c.x+cs*c.y)+0.5;'+
       'if(uv.x<0.0||uv.x>1.0||uv.y<0.0||uv.y>1.0)discard;'+
       'float N=grid.x*grid.y,f=vA.x*fp.x*N*0.999+fp.y*floor(vA.y*N),f0=mod(floor(f),N),f1=mod(f0+1.0,N),u=fract(f);'+
       'vec2 c0=vec2(mod(f0,grid.x),floor(f0/grid.x)),c1=vec2(mod(f1,grid.x),floor(f1/grid.x));'+
-      'vec4 t=mix(texture2D(map,vec2((c0.x+uv.x)/grid.x,1.0-(c0.y+uv.y)/grid.y)),texture2D(map,vec2((c1.x+uv.x)/grid.x,1.0-(c1.y+uv.y)/grid.y)),u);'+
+      'vec4 t=mix(textureLod(map,vec2((c0.x+uv.x)/grid.x,1.0-(c0.y+uv.y)/grid.y),LOD),textureLod(map,vec2((c1.x+uv.x)/grid.x,1.0-(c1.y+uv.y)/grid.y),LOD),u);'+
       'float a=t.a*smoothstep(vA.x*0.6-0.1,vA.x*0.6+0.2,t.a)*vC.a;if(a<=0.002)discard;'+
-      (e.add?'gl_FragColor=vec4(t.rgb*vC.rgb*a,a*0.6);}':'gl_FragColor=vec4(t.rgb*vC.rgb*lit,a);}'),
+      (e.add?'gl_FragColor=vec4(t.rgb*vC.rgb*a,a*'+(e.occ===undefined?0.6:e.occ).toFixed(2)+');}':'gl_FragColor=vec4(t.rgb*vC.rgb*lit,a);}'),
     depthWrite:false,transparent:true,
     ...(e.add?{blending:THREE.CustomBlending,blendSrc:THREE.OneFactor,blendDst:THREE.OneMinusSrcAlphaFactor,blendSrcAlpha:THREE.OneFactor,blendDstAlpha:THREE.OneMinusSrcAlphaFactor}:{blending:THREE.NormalBlending})});
   softify(mat,e.add?0.5:0.8);
@@ -122,7 +125,7 @@ function ptexUse(name,tex,e){
   return PFB[name]={geo,pos,col,size,age,pts,e,fb:true,n:0};
 }
 function ptexLoad(){modelManifest().then(m=>{const P=m.ptex||{};for(const k in P){if(PFB[k])continue;PFB[k]={loading:true};const e=P[k];
-  new THREE.TextureLoader().load('assets/'+e.file+'?v='+(e.v||m.v||0),t=>{t.colorSpace=THREE.SRGBColorSpace;t.userData.keep=true;ptexUse(k,t,e);},undefined,()=>{PFB[k]={fail:true};});}});}
+  new THREE.TextureLoader().load('assets/'+e.file+'?v='+(e.v||m.v||0),t=>{t.colorSpace=THREE.SRGBColorSpace;t.userData.keep=true;if(e.cards){PFB[k]={tex:t,e,cards:true};return;}ptexUse(k,t,e);},undefined,()=>{PFB[k]={fail:true};});}});}
 const colCache={};
 function col3(c){return colCache[c]||(colCache[c]=new THREE.Color(c));}
 // C) ลมหมุนวน (curl noise): สนามความเร็วไม่มีจุดดูด/จุดพ่น ทำให้ควัน/ไฟ/ประกายลอย ม้วนไปด้วยกันเป็นเกลียว แทนการพุ่งตรง

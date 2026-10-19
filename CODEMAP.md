@@ -173,12 +173,12 @@ makeCloak:2 updateCloth:10
 §33 โมเดลนักเรียนเวทมนตร์
 SHGEO:35 SHMAT:35 SHTEX:35 sGeo:36 sMat:37 bMat:40 matKey:42 bodyPatch:48 BODYM:55 bodyMat:56 plainMat:61 mergeBody:62 sStripe:98 hashStr:99 stripeTex:100 shieldMat:101 addStatus:109 makeStudent:115 makeEnemy:218 keepTex:356 keepMatSet:357 disposeMaterial:358 disposeTree:364 disposeObj:371 PM3:372 EM3:372 JM3:372 clearDyn:373
 
-## js/30-particles.js (262) — อนุภาค 2 ชั้น: แสงเรือง (additive) + ควัน (normal)
+## js/30-particles.js (265) — อนุภาค 2 ชั้น: แสงเรือง (additive) + ควัน (normal)
 PMAX:2 PGLOW_OCC:6 PLIT:6 makePointSys:7
 §46 เปลวไฟ: FLAME_STYLE 0 = อนุภาคกลมเรืองแสง (ไม่ใช้รูปเปลว) • 2 = แบบให…
-FLAME_STYLE:48 PTIME:49 NOISETEX:51 FLAMETEX_V1:57 FLAMETEX_V2:62 PSYS:72 FLAMELUT:89 FLAMECOL:92 flame:93 PFB:101 ptexUse:102 ptexLoad:124 colCache:126 col3:127 CURL:130 curlAt:131 updateParticles:133
-§169 เอฟเฟกต์รูปทรง: แฟลช / วงแหวน / โดม / รอยไหม้ / สายฟ้า / แสงชั่วคราว
-SHAPES_Q:170 SHAPES:170 FLASHL:170 LINES:170 LREQ:171 ringGeo:172 ringVGeo:173 arcGeo:174 domeGeo:175 fullGeo:176 discGeo:177 decalTex:178 FX:179 jag:193 spawnShape:201 updateShapes:228 _cp:247 updateLights:248
+FLAME_STYLE:48 PTIME:49 NOISETEX:51 FLAMETEX_V1:57 FLAMETEX_V2:62 PSYS:72 FLAMELUT:89 FLAMECOL:92 flame:93 PFB:102 ptexUse:103 ptexLoad:127 colCache:129 col3:130 CURL:133 curlAt:134 updateParticles:136
+§172 เอฟเฟกต์รูปทรง: แฟลช / วงแหวน / โดม / รอยไหม้ / สายฟ้า / แสงชั่วคราว
+SHAPES_Q:173 SHAPES:173 FLASHL:173 LINES:173 LREQ:174 ringGeo:175 ringVGeo:176 arcGeo:177 domeGeo:178 fullGeo:179 discGeo:180 decalTex:181 FX:182 jag:196 spawnShape:204 updateShapes:231 _cp:250 updateLights:251
 
 ## js/31-camera.js (112) — กล้องมุมหลังไหล่ (แบบ Hogwarts Legacy)
 yaw:2 pitch:2 lastPh:2 locked:2 SENS:3 saveSet:4 applySettings:5 camPos:13 camLook:13 overlayOpen:16 showPause:17 hidePause:18 MAPCAM:19 PLACE:21 placeKey:22 updatePlaceGhost:30 _aimD:44 rayTerr:46 aimFromCrosshair:52 AIMZ:82 updateCamera:83 menuCamera:108
@@ -188,11 +188,11 @@ stage:2 STAGE:5 STAGE_Y:6 stageSpots:58 stageChar:74 POSES:81 stageIdle:87 _sv:1
 §108 ฉากประจำบ้าน (โผล่ตอนเลือกบ้านในหน้าสร้างตัวละคร)
 CRESTTEX:109 crestTex:110 crestBanner:118 buildHouseEnvs:126 TONE0:174 _tc:175 stageTone:176 stageScreen:189 renderStage:190 drawStageLabels:236
 
-## js/33-pyro-view.js (262) — ภาพของสายไฟ (pyroFX: ชาร์จ/พุ่ง/ดีดนิ้ว/กลายร่าง/Dragonfall/Colossus)…
+## js/33-pyro-view.js (270) — ภาพของสายไฟ (pyroFX: ชาร์จ/พุ่ง/ดีดนิ้ว/กลายร่าง/Dragonfall/Colossus)…
 §2 sync ตัวละคร/ศัตรู/ลูกเวท กับ snapshot
 localVel:3
 §11 ภาพของสายไฟ: ชาร์จลูกไฟ / ย่อตัวชาร์จพุ่ง / วงเวทพ่นไฟ / ดีดนิ้ว / กล…
-_pw:12 simOf:13 makeColossus:14 makeMagicCircle:67 _fsGeo:77 fireShieldFX:79 pyroFX:91
+_pw:12 simOf:13 makeColossus:14 makeMagicCircle:67 _fsGeo:77 fireShieldFX:79 pyroFX:95
 
 ## js/34-frost-view.js (208) — ภาพของสายน้ำแข็ง: ดาบ/ขวานน้ำแข็งที่ปลายไม้ ท่าฟัน โล่อัศวิน ไถล แช่แ…
 iceMat:2 iceRim:3 makeIceSword:4 makeIceAxe:23 makeKiteShield:39 _icyClone:47 MIRSKIP:50 mirrorNodes:51 makeMirrorClone:52 mirrorStale:59 mirrorPose:60 dropMirror:65 frostFX:66
@@ -227,21 +227,24 @@ trOpenF:2 trKey:2 trN:2 TR_OPTS:3 trToggle:4 trSend:9 trSync:14 hovEl:62
 §63 หน้าตั้งค่า
 setRow:64 setTog:65 setTab:66 XHC:67 XHN:67 setOpts:68 renderSettings:69 drawXhPrev:86 openSettings:87 closeSettings:88 modeIcon:140 modeTitle:141 renderLobby:142
 
-## js/41-debug.js (141) — 
+## js/41-debug.js (141) — เครื่องมือทดสอบสมดุล (ใช้ผ่านคอนโซล WD.bal / WD.dmgTest เท่านั้น ผู้เล่นปกติไม่เห็น)
+§5 บอทต่อสู้แบบง่ายๆ: เล็งนำเป้า เดินรักษาระยะ+ส่ายไปมา ร่ายคาถาทุกครั้ง…
 botBrain:6 _obsKeep:47 balArena:48 balReset:49 balDuel:53 balTour:68 balCoop:82 balSpellTest:98
 §117 Service Worker (sw.js): เก็บไฟล์เกมไว้ในเครื่อง เปิดครั้งต่อไปเร็วขึ้…
 SWK:118 swSetup:119
 
-## js/42-fire-vfx.js (222) — ไฟแบบใหม่ (2026-10-19): shader ไฟเคลื่อนไหวจริง (noise ไหล) ใช้กับลูก…
+## js/42-fire-vfx.js (258) — ไฟแบบใหม่ (2026-10-19): shader ไฟเคลื่อนไหวจริง (noise ไหล) ใช้กับลูก…
 FIRE_U:4 FIRE_GLSL:5 fireMat:24
 §55 ชิ้นงานสำเร็จรูป
 _fbGeo:56 _fbGeo2:56 makeFireBall:58 _ftGeo:66 makeFireTail:67 makeFireWall:70 FIREV:78 fireBlast:79 fireTemp:84 updateFireV:85
 §90 ปีกไฟ (Dragonfall) จากไฟล์ Blender mesh_fire_wing (assets/src/fx_mesh…
 makeFireWings:93 poseFireWings:100
 §101 ชิ้นงานพื้น/กระแทก (รอบ Pyro 2026-10-19): พื้นแตกเป็นใย (ดำ + ไฟลุกตา…
-_crackPaths:104 _crackGeo:113 _decM:117 _crackRibbon:119 fireCrackWeb:127 _charTex:143 charTex:144 _discGeo:147 scorch:148 _fruneTex:152 fruneTex:153 fireRune:161 _rockGeo:167 _rockM:168 rockChunks:169 fireGeyser:177 _mv1:185 _mv2:185 fireMeteor:186
-§198 อากาศร้อนบิดเบี้ยว (heat haze) — Blazeform "ออร่าความร้อน" (ผู้เล่น 2…
-HZM:201 hazeMat:202 _hzPlane:212 _hzRing:213 hazeOf:215 fireBurn:220
+_crackPaths:104 _crackGeo:113 _decM:117 _crackRibbon:119 fireCrackWeb:127 _charTex:150 charTex:151 _discGeo:154 scorch:155 _fruneTex:159 fruneTex:160 fireRune:168 _rockGeo:174 _rockM:175 rockChunks:176 fireGeyser:184 _mv1:192 _mv2:192 fireMeteor:193
+§205 อากาศร้อนบิดเบี้ยว (heat haze) — Blazeform "ออร่าความร้อน" (ผู้เล่น 2…
+HZM:208 hazeMat:209 _hzPlane:219 _hzRing:220 hazeOf:222 fireBurn:227
+§234 การ์ดไฟ flipbook (2026-10-19 รอบ 3, ผู้เล่น: "ใช้ Flipbook จาก Blende…
+FCARD_FPS:238 flameTexReady:239 flameCards:240
 
 ## js/43-frost-vfx.js (144) — 
 FROST_U:6
@@ -266,4 +269,4 @@ EFXAUG:143 PJPAL:162 pjPal:164 ULTCOL:165 efxAug:166 VFXAUG_ON:170 fxAug:171
 §191 4) เอฟเฟกต์ทั้งจอ (ค่าไปที่ GradePass ใน js/27-world.js)
 SCR:192 screenFlash:193 screenRadial:194 screenKick:195 screenHurt:196 _scv:197 updateScreenFx:198 updateVfxKit:206
 
-(44 files, 9160 lines)
+(44 files, 9207 lines)

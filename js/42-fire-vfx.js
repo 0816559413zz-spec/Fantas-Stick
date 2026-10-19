@@ -128,8 +128,13 @@ function fireCrackWeb(x,y,h,r,life,o){o=o||{};const R=r*S3,P=_crackPaths(R,o.n||
   const g=new THREE.Group();g.position.set(tx(x),h+GY(x,y),tz(y));g.rotation.y=rnd(0,6.283);
   const dk=_decM({color:'#1c1814',opacity:0}),cr=_decM({color:'#050302',opacity:0}),mats=[dk,cr];
   const m1=new THREE.Mesh(_crackGeo(P,w*1.25,0.012),dk),m2=new THREE.Mesh(_crackGeo(P,w*0.5,0.022),cr);m1.renderOrder=2;m2.renderOrder=3;g.add(m1,m2);
-  let fm=null,rb=null;const BT=Math.min(life-0.3,o.burnT||life*0.75);
-  if(o.burn>0){const {g:rg,len}=_crackRibbon(P,1);fm=fireMat({mode:'sheet',scale:[Math.max(12,Math.round(len*2.6)),2.0,1],speed:1.7,int:0.85,heat:-0.16});
+  let fm=null,rb=null,fc=null;const BT=Math.min(life-0.3,o.burnT||life*0.75);
+  // มีภาพ flipbook (Blender) แล้ว: ไฟจริงเป็นการ์ดยืนเรียงตามรอยแตก (ห่างกัน ~0.6 ม. กว้างพอให้ซ้อนกันเป็นไฟต่อเนื่อง สูงไม่เท่ากัน ใกล้ศูนย์กลางสูงกว่า) แทนม่าน shader
+  if(o.burn>0&&flameTexReady()){const C=[];for(const L of P){if(L.w<0.45)continue;const n=L.pts.length;
+      for(let k=0;k<n-1;k++){const [ax,az]=L.pts[k],[bx,bz]=L.pts[k+1],d=Math.hypot(bx-ax,bz-az),m=Math.max(1,Math.round(d/0.72));
+        for(let j=0;j<m;j++){const f=(j+Math.random()*0.6)/m,hh=o.burn*L.w*(1-(k+f)/n*0.55)*rnd(0.7,1.35);C.push({x:ax+(bx-ax)*f,z:az+(bz-az)*f,y:-0.22*hh,w:hh*rnd(0.85,1.15),h:hh*1.4});}}}
+    fc=flameCards(C,{int:1.0});if(fc){fc.userData.u.uH.value=0.01;g.add(fc);mats.push(...fc.userData.mats);}}
+  if(o.burn>0&&!fc){const {g:rg,len}=_crackRibbon(P,1);fm=fireMat({mode:'sheet',scale:[Math.max(12,Math.round(len*2.6)),2.0,1],speed:1.7,int:0.85,heat:-0.16});
     rb=new THREE.Mesh(rg,fm);rb.position.y=0.03;rb.scale.y=0.01;rb.renderOrder=4;g.add(rb);mats.push(fm);
     // กองไฟ 3 มิติ (กำแพงไฟวงเล็ก) ตามรอยแตกหลัก — มองมุมไหนก็เป็นไฟลุก ไม่แบน • ดับไม่พร้อมกัน
     const mains=P.filter(L=>L.w===1);for(let i=0;i<Math.min(o.cols||6,mains.length);i++){const L=mains[(i*Math.ceil(mains.length/(o.cols||6)))%mains.length],q=L.pts[1+(Math.random()*(L.pts.length-2)|0)];
@@ -137,6 +142,8 @@ function fireCrackWeb(x,y,h,r,life,o){o=o||{};const R=r*S3,P=_crackPaths(R,o.n||
       later(rnd(0,0.12),()=>fireBurn(x+wx/S3,y+wz/S3,h,rnd(0.35,0.6),o.burn*rnd(0.9,1.4),BT*rnd(0.7,1.05)));}}
   return fireTemp(g,mats,life,(v)=>{const t=v.age,grow=Math.min(1,t/0.12),out=t>life-0.4?Math.max(0,(life-t)/0.4):1;g.scale.x=g.scale.z=0.55+0.45*grow;
     dk.opacity=0.8*out;cr.opacity=0.95*out;
+    if(fc){const up=t<0.18?Math.sin(t/0.18*1.7)/Math.sin(1.7):1,k=Math.max(0,Math.min(1,(t-BT*0.3)/(BT*0.7))),u=fc.userData.u;   // k 0→1 = ไฟค่อย ๆ ดับ (เตี้ยลง + ภาพกัดกร่อนหาย)
+      u.uH.value=Math.max(0.01,up*(1-0.6*k));u.uDis.value=k;fc.visible=k<1;}
     if(rb){const up=t<0.18?Math.sin(t/0.18*1.7)/Math.sin(1.7):1,k=Math.max(0,Math.min(1,(t-BT*0.35)/(BT*0.65)));   // k 0→1 = ไฟค่อย ๆ ดับ
       rb.scale.y=Math.max(0.01,o.burn*up*(1-0.85*k)*(1+0.08*Math.sin(t*9)));fm.uniforms.uDis.value=k*0.85;fm.uniforms.uHeat.value=-0.16+(t<0.3?0.22*(1-t/0.3):0)-0.12*k;rb.visible=k<1;}});}
 // พื้นไหม้: แผ่นดำเป็นรอยด่าง ๆ + จุดถ่านแดง (ภาพวาดครั้งเดียว)
@@ -217,6 +224,35 @@ function hazeOf(o,key,make){let h=o[key];
     h.onBeforeRender=function(){if(performance.now()-this.userData.t>120)this.visible=false;};}
   h.userData.t=performance.now();h.visible=!!SOFTU.uSoftOn.value&&o.g.visible;return h;}
 // ไฟลุกห่อตัว/จุด (แบบกำแพง Ring of Embers ย่อส่วน): พุ่งขึ้นเร็ว → ลุกค้าง → เตี้ยลง + สลายจนดับ • r,H หน่วยโลก • ใช้กับระเบิด Ignition Snap บนตัวศัตรู
-function fireBurn(x,y,h,r,H,life){const W=makeFireWall(r,H),M=W.userData.mats;W.position.set(tx(x),h+GY(x,y),tz(y));W.scale.y=0.01;W.rotation.y=rnd(0,6.283);
+function fireBurn(x,y,h,r,H,life){
+  if(flameTexReady()){const C=[],n=Math.max(4,Math.round(r*9));for(let i=0;i<n;i++){const a=i/n*6.283+rnd(-0.2,0.2),rr=r*rnd(0.4,1);C.push({x:Math.cos(a)*rr,z:Math.sin(a)*rr,y:-0.1*H,w:H*0.6,h:H*1.2*rnd(0.8,1.15)});}
+    const fc=flameCards(C);if(fc){fc.position.set(tx(x),h+GY(x,y),tz(y));const u=fc.userData.u;
+      return fireTemp(fc,fc.userData.mats,life,(v,k)=>{const up=k<0.15?Math.sin(k/0.15*1.7)/Math.sin(1.7):1,dk=Math.max(0,(k-0.3)/0.7);u.uH.value=Math.max(0.01,up*(1-0.5*dk));u.uDis.value=dk;});}}
+  const W=makeFireWall(r,H),M=W.userData.mats;W.position.set(tx(x),h+GY(x,y),tz(y));W.scale.y=0.01;W.rotation.y=rnd(0,6.283);
   return fireTemp(W,M,life,(v,k,dt)=>{const up=k<0.15?Math.sin(k/0.15*1.7)/Math.sin(1.7):1,dk=Math.max(0,(k-0.35)/0.65);W.scale.y=Math.max(0.01,up*(1-0.7*dk));W.rotation.y+=dt*0.6;
     M.forEach(m=>{m.uniforms.uDis.value=dk*0.9;m.uniforms.uHeat.value=m.userData.h0+(k<0.2?0.25*(1-k/0.2):0);});});}
+// ---------- การ์ดไฟ flipbook (2026-10-19 รอบ 3, ผู้เล่น: "ใช้ Flipbook จาก Blender ให้สวยสุด") ----------
+// ไฟจริงจาก simulation ใน Blender (assets/src/fire_flipbook_build.py → tools/pack_flipbook.py → assets/vfx/tex_flame.png, manifest ptex "flame" cards:true)
+// การ์ด = แผ่นภาพไฟตั้งตรง หันหากล้องรอบแกนตั้ง (มองมุมไหนก็เห็นเปลวเต็ม ไม่แบน) • หลายใบรวมเป็น 1 mesh 1 draw call • แต่ละใบเริ่มเฟรมไม่ตรงกัน
+// cards = [{x,z (หน่วยโลกในกลุ่ม), y, w, h, ph (0..1)}] • คืน Mesh (userData.u = uniforms: uH ความสูง 0..1, uDis ไฟดับ 0..1, uOp, uInt) หรือ null ถ้าภาพยังไม่โหลด
+const FCARD_FPS=24;
+function flameTexReady(){const F=PFB.flame;return F&&F.cards?F:null;}
+function flameCards(cards,o){o=o||{};const F=flameTexReady();if(!F)return null;
+  const n=cards.length,pos=new Float32Array(n*4*3),uv=new Float32Array(n*4*2),ctr=new Float32Array(n*4*3),csz=new Float32Array(n*4*2),ph=new Float32Array(n*4),idx=[];
+  cards.forEach((c,i)=>{for(let k=0;k<4;k++){const j=i*4+k,u=k&1,v=k>>1;pos.set([c.x,c.y||0,c.z],j*3);ctr.set([c.x,c.y||0,c.z],j*3);uv.set([u,v],j*2);csz.set([c.w,c.h],j*2);ph[j]=c.ph===undefined?Math.random():c.ph;}
+    const q=i*4;idx.push(q,q+1,q+2,q+1,q+3,q+2);});
+  const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(pos,3));g.setAttribute('uv',new THREE.BufferAttribute(uv,2));g.setAttribute('ctr',new THREE.BufferAttribute(ctr,3));
+  g.setAttribute('csz',new THREE.BufferAttribute(csz,2));g.setAttribute('ph',new THREE.BufferAttribute(ph,1));g.setIndex(idx);g.boundingSphere=new THREE.Sphere(new THREE.Vector3(),1e4);
+  const e=F.e,U={map:{value:F.tex},grid:{value:new THREE.Vector2(e.cols||8,e.rows||8)},time:FIRE_U.time,uFps:{value:o.fps||FCARD_FPS},uH:{value:1},uDis:{value:0},uOp:{value:o.op===undefined?1:o.op},uInt:{value:o.int||0.9},uTint:{value:new THREE.Color(o.tint||'#ffffff')},uCell:{value:new THREE.Vector2(F.tex.image.width/(e.cols||8),F.tex.image.height/(e.rows||8))}};
+  const m=new THREE.ShaderMaterial({uniforms:U,transparent:true,depthWrite:false,side:THREE.DoubleSide,
+    blending:THREE.CustomBlending,blendSrc:THREE.OneFactor,blendDst:THREE.OneMinusSrcAlphaFactor,blendSrcAlpha:THREE.OneFactor,blendDstAlpha:THREE.OneMinusSrcAlphaFactor,
+    vertexShader:'attribute vec3 ctr;attribute vec2 csz;attribute float ph;uniform float uH;varying vec2 vUv;varying float vPh;'+
+      'void main(){vUv=uv;vPh=ph;vec4 wc=modelMatrix*vec4(ctr,1.0);vec3 tc=cameraPosition-wc.xyz;tc.y=0.0;vec3 rt=normalize(vec3(tc.z,0.0,-tc.x)+vec3(1e-5,0.0,0.0));'+
+      'vec3 p=wc.xyz+rt*(uv.x-0.5)*csz.x+vec3(0.0,uv.y*csz.y*uH,0.0);gl_Position=projectionMatrix*viewMatrix*vec4(p,1.0);}',
+    fragmentShader:'uniform sampler2D map;uniform vec2 grid,uCell;uniform float time,uFps,uDis,uOp,uInt;uniform vec3 uTint;varying vec2 vUv;varying float vPh;float LOD;'+
+      // mip ระดับสูงจะปนเฟรมข้าง ๆ ในตาราง (เห็นเป็นลายจุด) → คำนวณ LOD เองแล้วจำกัดไม่เกิน 3
+      'vec2 U;vec4 fr(float f){vec2 c=vec2(mod(f,grid.x),floor(f/grid.x));return textureLod(map,vec2((c.x+U.x)/grid.x,1.0-(c.y+1.0-U.y)/grid.y),LOD);}'+
+      'void main(){U=vec2(fract(vPh*13.7)>0.5?1.0-vUv.x:vUv.x,vUv.y);vec2 q=vUv*uCell;LOD=clamp(log2(max(length(dFdx(q)),length(dFdy(q)))),0.0,3.0);float N=grid.x*grid.y,f=time*uFps*(0.8+0.45*fract(vPh*7.31))+vPh*N,f0=mod(floor(f),N),u=fract(f);vec4 t=mix(fr(f0),fr(mod(f0+1.0,N)),u);'+
+      'float d=uDis*(1.15+0.3*vPh)-0.08;float a=t.a*smoothstep(d,d+0.18,t.a)*uOp;if(a<0.003)discard;'+
+      'gl_FragColor=vec4(t.rgb*uTint*uInt*a,a*0.75);}'});
+  const mesh=new THREE.Mesh(g,m);mesh.frustumCulled=false;mesh.renderOrder=o.ro||5;mesh.userData.u=U;mesh.userData.mats=[m];return mesh;}
