@@ -1,0 +1,14 @@
+{
+  "v": 1,
+  "desc": "กระสุนพลังงานบินไปข้างหน้า 16 ม. พร้อมหางแสงและเม็ดประกาย แล้วระเบิดเล็กที่ปลายทาง (ตัวอย่างการใช้ pos เป็นเส้นโค้ง)",
+  "tags": ["projectile"],
+  "pal": "hex",
+  "dur": 1.2,
+  "layers": [
+    {"id": "orb", "t": "mesh", "at": 0, "life": 0.5, "shape": "sphere", "mat": "energy", "pos": {"0": [0, 1.3, 0.8], "1": [0, 1.3, 16]}, "scale": 0.35, "spin": 360, "rim": 1.6, "fade": 0},
+    {"id": "glow", "t": "mesh", "at": 0, "life": 0.5, "shape": "sphere", "mat": "glow", "col": "$hi", "pos": {"0": [0, 1.3, 0.8], "1": [0, 1.3, 16]}, "scale": 0.18, "fade": 0},
+    {"id": "tail", "t": "trail", "at": 0, "life": 0.5, "of": "orb", "col": "$hi", "col2": "$deep", "w": 0.35, "tlife": 0.22},
+    {"id": "dust", "t": "emit", "at": 0, "life": 0.5, "rate": 70, "from": "mesh", "of": "orb", "dir": "random", "speed": [0.3, 1], "plife": [0.3, 0.5], "look": "spark", "size": [1.4, 2], "col": "$hi", "c2": "$deep", "gravity": 0},
+    {"id": "boom", "t": "use", "at": 0.5, "life": 0.7, "fx": "start/hit", "pos": [0, 1.3, 16], "s": 1.6}
+  ]
+}

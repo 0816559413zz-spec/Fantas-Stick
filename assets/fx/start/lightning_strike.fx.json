@@ -1,0 +1,19 @@
+{
+  "v": 1,
+  "desc": "ฟ้าผ่าลงจุด: วงเวทเตือน → สายฟ้าหนาจากฟ้า + แฟลช + วงกระแทก + ประกายกระเด็น",
+  "tags": ["storm", "strike"],
+  "pal": "storm",
+  "dur": 1.7,
+  "layers": [
+    {"id": "warn", "t": "decal", "at": 0, "life": 0.55, "att": "ground", "kind": "glyph", "r": 2.2, "col": "$main"},
+    {"id": "bolt", "t": "bolt", "at": 0.45, "life": 0.25, "att": "ground", "pos": [0, 16, 0], "to": [0, -16, 0], "jit": 0.4, "n": 3, "w": 0.32, "br": 2, "blife": 0.18, "rate": 14},
+    {"id": "core", "t": "flash", "at": 0.45, "life": 0.12, "att": "ground", "pos": [0, 1, 0], "col": "$core", "size": 4},
+    {"id": "glow", "t": "halo", "at": 0.45, "life": 0.35, "att": "ground", "pos": [0, 1, 0], "col": "$main", "size": 7, "k": 1.1},
+    {"id": "ring", "t": "ring", "at": 0.45, "life": 0.45, "att": "ground", "pos": [0, 0.12, 0], "col": "$main", "r": 4.5, "op": 0.55},
+    {"id": "sparks", "t": "emit", "at": 0.45, "life": 0.05, "burst": 30, "att": "ground", "from": "hemisphere", "fr": 0.3, "dir": "out", "speed": [5, 12], "plife": [0.3, 0.6], "look": "streak", "size": [2, 3], "col": "$core", "c2": "$deep", "gravity": 6, "drag": 2},
+    {"id": "crackle", "t": "bolt", "at": 0.47, "life": 0.3, "att": "ground", "pos": [0, 0.3, 0], "radial": [2, 4], "n": 4, "w": 0.1, "blife": 0.12, "rate": 10},
+    {"id": "scorch", "t": "decal", "at": 0.45, "life": 1.2, "att": "ground", "kind": "dark", "r": 2.2, "op": 0.5},
+    {"id": "light", "t": "light", "at": 0.45, "life": 0.35, "att": "ground", "pos": [0, 2, 0], "col": "$light", "int": 2.5, "dist": 18},
+    {"id": "cam", "t": "screen", "at": 0.45, "life": 0.25, "shake": 5, "kick": 0.25}
+  ]
+}

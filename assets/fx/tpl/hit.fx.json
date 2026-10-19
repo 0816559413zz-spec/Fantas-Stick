@@ -1,0 +1,14 @@
+{
+  "v": 1,
+  "desc": "แม่แบบ \"hit\" ของ playFx(\"<ธาตุ>_hit\") — โดนเป้า • สีมาจากธาตุที่เรียก • ชั้นเฉพาะธาตุอยู่ที่ sig/<ธาตุ> • แก้ที่นี่ = ทุกสกิลที่ใช้แม่แบบนี้เปลี่ยนตาม",
+  "tags": [
+    "tpl",
+    "hit"
+  ],
+  "pal": "arcane",
+  "layers": [
+    {"id": "flash0", "t": "flash", "life": 0.12, "col": "$core", "size": 1.26, "size0": 0.3, "k": 2.2},
+    {"id": "spark1", "t": "emit", "life": 0.05, "burst": 6, "speed": [3.2, 8.0], "plife": [0.28, 0.48], "look": "spark", "size": [1.68, 3.12], "col": "$core", "gravity": 1.5, "drag": 2.5, "spin": 4, "fin": 8, "c2": "$deep", "dir": "flat", "up": [-1, 3]},
+    {"id": "streak2", "t": "emit", "life": 0.05, "burst": 6, "speed": [6.4, 16.0], "plife": [0.154, 0.264], "look": "streak", "size": [1.82, 3.38], "col": "$hi", "gravity": 2, "drag": 4, "spin": 0, "fin": 8, "c2": "$deep", "dir": "flat", "up": [-1, 2.5]}
+  ]
+}

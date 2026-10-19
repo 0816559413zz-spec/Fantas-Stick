@@ -1,0 +1,17 @@
+{
+  "v": 1,
+  "desc": "หนามน้ำแข็งพุ่งจากพื้น: กรวยน้ำแข็ง shader + มงกุฎหนาม + หมอกเย็น + เศษผลึก + รอยร้าว",
+  "tags": ["ice", "ground", "impact"],
+  "pal": "ice",
+  "dur": 1.8,
+  "params": {"r": {"def": 2.2, "desc": "รัศมี (ม.)"}},
+  "layers": [
+    {"id": "spikes", "t": "mesh", "at": 0, "life": 1.3, "att": "ground", "shape": "spikes", "n": 11, "mat": "ice", "scale": {"0": [0.3, 0.01, 0.3], "0.12": [1.05, 1.3, 1.05], "0.2": [1, 1.1, 1], "0.8": [1, 1.1, 1], "1": [1, 0.01, 1], "x": "r"}},
+    {"id": "crown", "t": "crown", "at": 0.03, "life": 1.1, "att": "ground", "r": "r*0.7", "mist": 4},
+    {"id": "core", "t": "flash", "at": 0, "life": 0.12, "att": "ground", "pos": [0, 0.6, 0], "col": "$core", "size": 2.5},
+    {"id": "shards", "t": "debris", "at": 0, "life": 1, "att": "ground", "kind": "ice", "n": 12, "speed": 7},
+    {"id": "mist", "t": "mist", "at": 0.05, "life": 1, "att": "ground", "r": "r*1.2", "n": 10, "out": 1.6},
+    {"id": "cracks", "t": "decal", "at": 0, "life": 1.6, "att": "ground", "kind": "icecrack", "r": "r*1.6", "col": "$main"},
+    {"id": "ring", "t": "ring", "at": 0, "life": 0.4, "att": "ground", "pos": [0, 0.1, 0], "col": "$main", "r": "r*1.7", "op": 0.5}
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "v": 1,
+  "desc": "โดนเป้าเล็ก ๆ: แฟลช + ประกายพุ่ง + วงเล็ก (ใช้กับกระสุนโดน/ตีโดน)",
+  "tags": ["hit", "small"],
+  "pal": "arcane",
+  "dur": 0.8,
+  "layers": [
+    {"id": "core", "t": "flash", "at": 0, "life": 0.1, "col": "$core", "size": 1.4},
+    {"id": "glow", "t": "halo", "at": 0, "life": 0.25, "col": "$main", "size": 2.4, "k": 1},
+    {"id": "sparks", "t": "emit", "at": 0, "life": 0.05, "burst": 12, "from": "point", "dir": "out", "speed": [4, 9], "plife": [0.25, 0.45], "look": "streak", "size": [2, 2.8], "col": "$core", "c2": "$deep", "gravity": 3, "drag": 3},
+    {"id": "stars", "t": "emit", "at": 0, "life": 0.05, "burst": 6, "from": "sphere", "fr": 0.2, "dir": "out", "speed": [1.5, 4], "plife": [0.4, 0.7], "look": "spark", "size": [2.2, 3], "col": "$hi", "c2": "$main", "spin": 4, "gravity": 1, "drag": 2.5},
+    {"id": "ring", "t": "ring", "at": 0, "life": 0.25, "vert": true, "col": "$main", "r": 1.2, "op": 0.6}
+  ]
+}

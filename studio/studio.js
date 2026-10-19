@@ -7,7 +7,7 @@
 // =====================================================================
 const SQ=new URLSearchParams(location.search);
 const ST={fx:null,name:'',saved:'',mtime:0,dirty:false,t:0,play:!SQ.has('sheet'),speed:1,loop:true,seed:+(SQ.get('seed')||1),I:null,sel:null,
-  cam:SQ.get('cam')||'game',orb:{yaw:0.9,pitch:0.32,dist:16},at:SQ.get('at')||'front',map:SQ.get('map')||'test',undo:[],redo:[],acc:0,seekTo:null,
+  cam:SQ.get('cam')||'game',orb:{yaw:0.9,pitch:0.32,dist:12},at:SQ.get('at')||'front',map:SQ.get('map')||'test',undo:[],redo:[],acc:0,seekTo:null,
   met:{white:0,lum:0,parts:0,calls:0,ms:0,block:0},run:{white:0,parts:0,block:0},list:{},ready:false,tail:0.6,api:false,mute:{},solo:null,busy:false,lint:[]};
 const STD=1/60;let stVnow=performance.now(),stLast=performance.now(),stFr=0;
 const $st=id=>document.getElementById(id);
@@ -49,8 +49,8 @@ function stAnchor(){const me=G&&G.players&&G.players.me;if(!me)return null;const
 const _stv=new THREE.Vector3();
 function stCam(c){if(ST.cam==='game'||!ST.fx)return;const A=stAnchor();if(!A)return;const T=_stv.set(tx(A.x),GY(A.x,A.y)+1.1,tz(A.y));
   const f=[Math.cos(A.a),Math.sin(A.a)],r=[-Math.sin(A.a),Math.cos(A.a)];
-  if(ST.cam==='side')c.position.set(T.x+r[0]*13,T.y+2.5,T.z+r[1]*13);
-  else if(ST.cam==='front')c.position.set(T.x+f[0]*13,T.y+2.2,T.z+f[1]*13);
+  if(ST.cam==='side')c.position.set(T.x+r[0]*9,T.y+2.2,T.z+r[1]*9);
+  else if(ST.cam==='front')c.position.set(T.x+f[0]*9,T.y+2,T.z+f[1]*9);
   else if(ST.cam==='top')c.position.set(T.x+0.01,T.y+22,T.z+0.01);
   else{const o=ST.orb;c.position.set(T.x+Math.cos(o.yaw)*Math.cos(o.pitch)*o.dist,T.y+Math.sin(o.pitch)*o.dist,T.z+Math.sin(o.yaw)*Math.cos(o.pitch)*o.dist);}
   c.lookAt(T);}
@@ -109,10 +109,9 @@ function stShowImg(url){const m=h('div',{className:'stModal',on:{click:e=>{if(e.
 async function stRefreshList(){try{const r=await fetch('/api/fx-list',{cache:'no-cache'});if(r.ok){const j=await r.json();ST.list=j.fx||{};ST.api=true;ST.bindT=j.bind_t;stLibRender();return;}}catch(e){}
   try{const r=await fetch('assets/fx/index.json',{cache:'no-cache'});const j=await r.json();ST.list={};for(const k in j.fx)ST.list[k]=Object.assign({t:0},j.fx[k]);}catch(e){ST.list={};}ST.api=false;stLibRender();}
 async function stOpen(name,keepT){try{const r=await fetch('assets/fx/'+name+'.fx.json',{cache:'no-cache'});if(!r.ok)throw new Error(r.status);const txt=await r.text();const d=JSON.parse(txt);
-    ST.fx=d;ST.name=name;ST.saved=JSON.stringify(d);ST.mtime=(ST.list[name]||{}).t||0;ST.dirty=false;ST.undo=[];ST.redo=[];ST.mute={};ST.solo=null;FXR.db.set(name,{data:d,fail:false,p:Promise.resolve(d)});
-    if(!keepT)ST.sel=null;stAfterChange(true,keepT);stLibRender();return true;}catch(e){stToast('เปิดไม่ได้: '+name+' ('+e.message+')');return false;}}
-function stJson(){return JSON.stringify(ST.fx,null,2)
-  .replace(/\n {6,}([^\n]*)/g,' $1').replace(/\[\s+/g,'[').replace(/\s+\]/g,']')+'\n';}
+    ST.fx=d;ST.name=name;ST.saved=JSON.stringify(d);ST.mtime=(ST.list[name]||{}).t||0;ST.dirty=false;ST.undo=[];ST.redo=[];ST.mute={};ST.solo=null;FXR.db.set(name,{data:JSON.parse(txt),fail:false,p:Promise.resolve(null)});
+    if(!keepT){ST.sel=null;if(!SQ.has('at')){const tg=d.tags||[];ST.at=tg.some(t=>['self','aura','shield','buff','slash','beam','projectile','melee'].includes(t))?'self':'front';const el=$st('stAt');if(el)el.value=ST.at;}}
+    stAfterChange(true,keepT);stLibRender();return true;}catch(e){stToast('เปิดไม่ได้: '+name+' ('+e.message+')');return false;}}
 function stPretty(){// ชั้นละบรรทัด อ่านง่ายใน git diff
   const F=Object.assign({},ST.fx),L=F.layers||[];delete F.layers;const head=JSON.stringify(F,null,2).replace(/\n}$/,'');
   return head+(Object.keys(F).length?',':'')+'\n  "layers": [\n'+L.map(l=>'    '+JSON.stringify(l)).join(',\n')+'\n  ]\n}\n';}
@@ -142,7 +141,7 @@ function stChanged(rebuild){ST.dirty=JSON.stringify(ST.fx)!==ST.saved;clearTimeo
 function stAfterChange(rebuild,keepT){stLintRun();stSync();stTlRender();if(rebuild!==false)stInspRender();
   if(!VIEW.cur)return;if(keepT&&!ST.play)ST.seekTo=ST.t;else stRestart();}
 function stLintRun(){if(!window.FXLINT||!FXR.schema||!ST.fx){ST.lint=[];return;}
-  const man=MODELS.man||{},ctx={names:new Set(Object.keys(ST.list)),models:new Set(Object.keys(man.models||{})),flips:new Set([...Object.keys(man.fx||{}),...Object.keys(man.ptex||{})]),sounds:new Set(Object.keys(SFXN))};
+  const man=MODELS.man||{},ctx={names:new Set(Object.keys(ST.list)),models:new Set(Object.keys(man.models||{})),flips:new Set([...Object.keys(man.fx||{}),...Object.keys(man.ptex||{})]),sounds:new Set(Object.keys(SFXN)),self:ST.name};
   try{ST.lint=FXLINT.fxLint(ST.fx,FXR.schema,ctx);}catch(e){ST.lint=[{lv:'err',at:'',msg:String(e)}];}}
 async function stPoll(){if(!ST.api||ST.busy)return;try{const r=await fetch('/api/fx-list',{cache:'no-cache'});const j=await r.json();const old=ST.list;ST.list=j.fx||{};
   if(Object.keys(old).join()!==Object.keys(ST.list).join())stLibRender();
@@ -356,5 +355,6 @@ function stHelp(){const m=h('div',{className:'stModal',on:{click:e=>{if(e.target
 window.STUDIO={load:n=>stOpen(n),data:()=>ST.fx,name:()=>ST.name,
   set(path,v){const [id,...ks]=path.split('.');const L=id==='file'?ST.fx:ST.fx.layers.find(x=>x.id===id);if(!L)return false;let o=L;for(let i=0;i<ks.length-1;i++)o=o[ks[i]];stPush();o[ks[ks.length-1]]=v;stChanged(true);return true;},
   play(){ST.play=true;stRestart();stSync();},pause(){ST.play=false;stSync();},seek:t=>{ST.play=false;stSeek(t);stSync();return ST.met;},sheet:(ts,save)=>stSheet(ts,save),
+  add:t=>(stAddLayer(t),ST.sel),select:id=>{ST.sel=id;stTlRender();stInspRender();},del:id=>stDelLayer(id),undo:()=>stUndo(false),redo:()=>stUndo(true),newFx:(n,tpl,pal)=>stNew(n,tpl,pal),
   metrics:()=>Object.assign({},ST.met,{run:ST.run,lint:ST.lint}),save:as=>stSave(as),shot:n=>stShot(n),cam:c=>{ST.cam=c;stSync();},at:a=>{ST.at=a;stRestart();},lint:()=>(stLintRun(),ST.lint),state:ST};
 stBoot();

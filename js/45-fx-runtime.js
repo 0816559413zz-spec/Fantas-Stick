@@ -51,7 +51,7 @@ function fxCurve(c,k,I){const E=Object.keys(c).filter(q=>q.trim()!==''&&!isNaN(+
   else{let i=0;while(i<E.length-2&&k>E[i+1][0])i++;let t=(k-E[i][0])/((E[i+1][0]-E[i][0])||1);const e=c.ease;
     t=e==='in'?t*t:e==='out'?1-(1-t)*(1-t):e==='inout'?t*t*(3-2*t):e==='step'?0:t;
     const a=val(E[i][1]),b=val(E[i+1][1]);out=Array.isArray(a)?a.map((q,j)=>q+((Array.isArray(b)?b[j]:b)-q)*t):a+((Array.isArray(b)?b[0]:b)-a)*t;}
-  if(c.x!==undefined){const m=fxV(c.x,I,k);out=Array.isArray(out)?out.map(q=>q*m):out*m;}
+  if(c.x!==undefined){const m=fxV(c.x,I,k);out=Array.isArray(out)?out.map((q,j)=>q*(Array.isArray(m)?m[j]:m)):out*(Array.isArray(m)?m[0]:m);}
   return out;}
 function fxG(L,k){return L[k]!==undefined?L[k]:(FXR.def[L.t]||{})[k];}
 function fxCol(c,I){if(typeof c!=='string')return '#ffffff';if(c[0]==='$')return I.pal[c.slice(1)]||I.pal.main||'#ffffff';return c;}
@@ -130,7 +130,8 @@ function fxSpawn(S,I,w){const L=S.d,g=k=>fxG(L,k),V=(k,q)=>fxV(g(k),I,q||0),C=k=
     case 'crown':iceBurst(w[0],w[1],V('r')*I.s,{life:S.life,hy:g('hy'),h:w[2],mist:g('mist')||undefined});S.oneshot=1;break;
     case 'geyser':fireGeyser(w[0],w[1],w[2],V('hgt')*I.s,V('w')*I.s,S.life,0);S.oneshot=1;break;
     case 'use':{const nm=g('fx');if(!nm)break;const p={};const P=g('p')||{};for(const q in P)p[q]=typeof P[q]==='string'?fxEval(P[q],I):P[q];
-      const c=fxPlay(nm,{x:w[0],y:w[1],h:w[2],a:I.a+V('yaw')*FXDEG,s:I.s*V('s'),pal:g('pal')||I.palName,col:I.o.col,p,own:I.own,n:I.cnt});if(c){I.kids.push(c);S.kid=c;}S.oneshot=!c;break;}
+      if((I.o.depth||0)>=4){console.warn('fx: ใส่เอฟเฟกต์ซ้อนลึกเกิน 4 ชั้น (วนเรียกตัวเอง?)',nm);break;}
+      const c=fxPlay(nm,{x:w[0],y:w[1],h:w[2],a:I.a+V('yaw')*FXDEG,s:I.s*V('s'),pal:g('pal')||I.palName,col:I.o.col,p,own:I.own,n:I.cnt,depth:(I.o.depth||0)+1});if(c){I.kids.push(c);S.kid=c;}S.oneshot=!c;break;}
     case 'code':{const f=FXCODE[g('fn')];if(f)f(w[0],w[1],w[2],g('args')||{},I,S);else console.warn('fx: ไม่มีฟังก์ชัน',g('fn'));S.oneshot=1;break;}
   }}
 // ชั้นแบบยิงครั้งเดียว (helper ของเกมจัดการอายุเอง) — ถือว่ามีชีวิตจนครบ life เพื่อให้ไทม์ไลน์/ตัวนับตรง
@@ -180,7 +181,7 @@ function fxPart(S,I,w,p,nr,dir,sp,look,col,c2,k,world,yw){const L=S.d,g=q=>fxG(L
   const q={x:pos[0],y:pos[1],h:pos[2],vx:v[0],vy:v[1],vh:v[2],life,max:life,col,c2:c2!==col?c2:undefined,size,g:g('gravity'),drag:g('drag'),grow:g('grow'),rot:_fxrnd(0,6.283),vr:g('spin')?_fxrnd(-g('spin'),g('spin')):0,fin:g('fin')||undefined,nc:!g('curl')};
   switch(look){case 'spark':q.sh=1;break;case 'streak':q.sh=2;break;case 'ring':q.sh=3;break;case 'flake':q.sh=4;break;
     case 'smoke':q.smoke=true;delete q.fin;if(g('fb'))q.fb=g('fb');break;
-    case 'fire':flame(q.x,q.y,q.h,{vx:q.vx,vy:q.vy,vh:q.vh,life,size:size*1.3,g:q.g,drag:q.drag,grow:q.grow,col:fxG(L,'col')!=='$core'&&L.col?col:undefined,fb:g('fb')||undefined});return;
+    case 'fire':flame(q.x,q.y,q.h,{vx:q.vx,vy:q.vy,vh:q.vh,life,size,g:q.g,drag:q.drag,grow:q.grow,col:fxG(L,'col')!=='$core'&&L.col?col:undefined,fb:g('fb')||undefined});return;
     case 'ember':q.sh=2;q.size=size*0.5;break;}
   PARTS.push(q);}
 // ---------- รูปทรง 3D ----------
@@ -225,14 +226,14 @@ function fxEnergyMat(c1,c2,c3){const U={time:FIRE_U.time,uC1:{value:new THREE.Co
       'float n=texture2D(uNz,vUv*vec2(2.0,1.0)+vec2(t*0.05,-t*0.35)).r*0.65+texture2D(uNz,vUv*vec2(4.0,2.0)+vec2(-t*0.13,-t*0.6)).r*0.35;'+
       'if(n<uDis)discard;float edge=uDis>0.001?1.0-smoothstep(uDis,uDis+0.07,n):0.0;'+
       'float body=clamp(0.3+0.7*n,0.0,1.0)*(0.35+0.65*min(1.0,fr*uRim+0.25));'+
-      'vec3 c=mix(uC3,uC2,smoothstep(0.15,0.65,n+fr*0.25));c=mix(c,uC1,smoothstep(0.7,1.0,n*0.55+fr*uRim*0.6));c+=uC1*edge*1.4;'+
-      'float a=clamp(body+edge,0.0,1.0)*uOp;gl_FragColor=vec4(c*uInt*a,a*0.62);}'});}
+      'vec3 c=mix(uC3,uC2,smoothstep(0.2,0.75,n+fr*0.3));c=mix(c,uC1,smoothstep(0.82,1.12,n*0.5+fr*uRim*0.55));c+=uC1*edge*1.4;'+
+      'float a=clamp(body+edge,0.0,1.0)*uOp;gl_FragColor=vec4(c*uInt*a,a*0.82);}'});}
 function fxMeshMake(S,I,w){const L=S.d,g=k=>fxG(L,k),sh=g('shape'),mt=g('mat'),C=k=>fxCol(g(k),I);let obj,mats=[];
   const mkMat=()=>{switch(mt){
     case 'fire':{const ball=g('mode')==='ball'||(g('mode')==='auto'&&['sphere','dome','torus','glb','spikes'].includes(sh));
       const m=fireMat({mode:ball?'ball':'sheet',flow:g('flow'),speed:(ball?1.2:1.4)*g('scroll'),int:1.15,disp:g('disp'),tint:L.col?C('col'):undefined,side:sh==='plane'});return m;}
     case 'ice':return iceShaderMat({glow:1,rim:g('rim')});
-    case 'glow':return new THREE.MeshBasicMaterial({color:hdr(C('col'),1.6),transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide});
+    case 'glow':return new THREE.MeshBasicMaterial({color:hdr(C('col'),1.15),transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide});
     case 'solid':return new THREE.MeshStandardMaterial({color:C('col'),emissive:C('col2'),emissiveIntensity:0.35,roughness:0.85,metalness:0,flatShading:true,transparent:true});
     case 'flip':{const t=fxFlipTex(g('tex'));const m=new THREE.MeshBasicMaterial({map:t?t.map:null,color:hdr(C('col'),1.2),transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide});if(t)S.flip=t;return m;}
     default:{const m=fxEnergyMat(fxCol('$core',I),C('col'),C('col2'));m.uniforms.uScroll.value=g('scroll');m.uniforms.uRim.value=g('rim');return m;}}};
@@ -283,7 +284,7 @@ const FXCODE={
   mistWave:(x,y,h,a)=>mistWave(x,y,(a.r||3)*20,a.n||16),
   claws:(x,y,h,a,I)=>clawRakes(x,y,h,I.a,a.r||100,a.rot||0,!!a.big),
   slash:(x,y,h,a,I)=>makeSlash(x,y,h,I.a+(a.yaw||0)*FXDEG,(a.r||3)*20,!!a.vert,(a.tilt||0)*FXDEG,a.col||'#cfefff',a.br||1.8,a.wk||1),
-  dfCircle:()=>{},
+  playFx:(x,y,h,a,I)=>playFx(a.name||'arcane_impact',x,y,h,{s:a.s||1,a:I.a}),   // เทียบแม่แบบไฟล์กับแบบโค้ดเดิม (สตูดิโอ)
 };
 // ---------- ผูกกับ event ของเกม (assets/fx/bind.json) — เรียกจาก fx(ev) ----------
 // คืน true = "replace" → ข้ามภาพจากโค้ดเดิมของ event นี้
@@ -300,11 +301,11 @@ function fxBind(ev,H){if(!FXR.ready||!FXR.on||ev.x===undefined)return false;
 // ---------- แม่แบบ playFx เป็นไฟล์ (assets/fx/tpl/*, sig/*, rec/*) ----------
 // playFx('fire_impact') → tpl/impact (จานสี fire) + sig/fire (คูณจำนวนตาม VFXSIGK) • ไฟล์ยังไม่มา = playFx แบบโค้ดเดิม
 function fxTpl(name,x,y,h,o){if(!FXR.ready||!FXR.on||!FXR.tpl)return false;
-  if(VFXR[name]){const d=fxData('rec/'+name);if(!d)return false;fxStart(d,{x,y,h,a:o.a||0,s:o.s||1,gh:o.gh},'rec/'+name);return true;}
+  if(VFXR[name]){const d=fxData('rec/'+name);if(!d)return false;fxStart(d,{x,y,h,a:o.a||0,s:o.s||1,gh:o.gh!==undefined?o.gh-0.15:undefined},'rec/'+name);return true;}
   const k=name.indexOf('_');if(k<0)return false;const el=name.slice(0,k),tpl=name.slice(k+1),d=fxData('tpl/'+tpl);if(!d)return false;
-  const P=palOf(el,o.col),base={x,y,h,a:o.a||0,s:o.s||1,gh:o.gh,pal:el==='col'?'col':el,col:o.col};
+  const P=palOf(el,o.col),base={x,y,h,a:o.a||0,s:o.s||1,gh:o.gh!==undefined?o.gh-0.15:undefined,pal:el==='col'?'col':el,col:o.col};
   fxStart(d,base,'tpl/'+tpl);
   if(P.sig){const sd=fxData('sig/'+P.sig);if(sd)fxStart(sd,Object.assign({},base,{n:VFXSIGK[tpl]||1}),'sig/'+P.sig);}
   return true;}
 fxBoot();
-if(window.WD)window.WD.fx={play:fxPlay,start:fxStart,stop:fxStop,kill:fxKill,load:fxLoad,clear:fxClearAll,R:FXR,update:updateFx};
+if(window.WD)window.WD.fx={bind:fxBind,playFx:(...a)=>playFx(...a),play:fxPlay,start:fxStart,stop:fxStop,kill:fxKill,load:fxLoad,clear:fxClearAll,R:FXR,update:updateFx};

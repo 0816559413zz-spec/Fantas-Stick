@@ -25,7 +25,7 @@ const say = (lv, file, at, msg) => { if (lv === 'err') errs++; else warns++; con
 for (const p of files) {
   const n = nameOf(p), txt = fs.readFileSync(p, 'utf8');
   let fx; try { fx = JSON.parse(txt); } catch (e) { say('err', n, '', 'JSON ผิดรูปแบบ — ' + e.message); continue; }
-  for (const r of fxLint(fx, schema, ctx)) say(r.lv, n, r.at, r.msg);
+  for (const r of fxLint(fx, schema, Object.assign({}, ctx, { self: n }))) say(r.lv, n, r.at, r.msg);
   index.fx[n] = { v: crypto.createHash('md5').update(txt).digest('hex').slice(0, 8), desc: fx.desc || '', pal: fx.pal || '', tags: fx.tags || [], dur: fx.dur || 0, n: (fx.layers || []).length };
 }
 let bind = {}; try { bind = JSON.parse(fs.readFileSync(path.join(FXD, 'bind.json'), 'utf8')); } catch (e) { say('err', 'bind.json', '', 'อ่านไม่ได้ — ' + e.message); }

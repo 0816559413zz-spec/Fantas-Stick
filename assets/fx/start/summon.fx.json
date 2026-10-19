@@ -1,0 +1,15 @@
+{
+  "v": 1,
+  "desc": "เปิดบัฟ / อัญเชิญ: วงเวทบนพื้น + เสาแสงขึ้นฟ้า + ประกายลอยวน",
+  "tags": ["summon", "buff"],
+  "pal": "arcane",
+  "dur": 1.8,
+  "layers": [
+    {"id": "glyph", "t": "decal", "at": 0, "life": 1.6, "att": "ground", "kind": "glyph", "r": 2.6, "col": "$main"},
+    {"id": "column", "t": "mesh", "at": 0.1, "life": 0.8, "att": "ground", "shape": "cylinder", "mat": "energy", "col": "$hi", "col2": "$deep", "scale": {"0": [0.4, 0.01, 0.4], "0.25": [1.2, 7, 1.2], "1": [1.6, 8, 1.6], "ease": "out"}, "op": {"0": 1, "0.6": 0.7, "1": 0}, "scroll": 2},
+    {"id": "swirl", "t": "emit", "at": 0.05, "life": 0.9, "rate": 50, "att": "ground", "from": "ring", "fr": 2, "dir": "tangent", "speed": [1.5, 3], "up": [1, 3], "plife": [0.6, 1], "look": "spark", "size": [1.8, 2.6], "col": "$hi", "c2": "$deep", "gravity": -0.5, "spin": 4},
+    {"id": "core", "t": "flash", "at": 0.1, "life": 0.15, "att": "chest", "col": "$core", "size": 2.6},
+    {"id": "ring", "t": "ring", "at": 0.1, "life": 0.5, "att": "ground", "pos": [0, 0.12, 0], "col": "$main", "r": 3.5, "op": 0.5},
+    {"id": "light", "t": "light", "at": 0.1, "life": 0.7, "att": "chest", "col": "$light", "int": 1.8, "dist": 10}
+  ]
+}

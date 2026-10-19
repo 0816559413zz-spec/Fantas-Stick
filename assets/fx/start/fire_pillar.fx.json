@@ -1,0 +1,15 @@
+{
+  "v": 1,
+  "desc": "เสาไฟ 3 มิติจริง (volumetric) พุ่งจากพื้น + รอยไหม้ + ถ่านไฟลอย",
+  "tags": ["fire", "pillar", "ground"],
+  "pal": "fire",
+  "dur": 2.4,
+  "params": {"r": {"def": 1.2, "desc": "รัศมีเสา (ม.)"}, "h": {"def": 5, "desc": "สูง (ม.)"}},
+  "layers": [
+    {"id": "vol", "t": "firevol", "at": 0, "life": 1.9, "att": "ground", "kind": "pillar", "hx": "r", "hz": "r", "h": "h"},
+    {"id": "burst", "t": "flash", "at": 0, "life": 0.12, "att": "ground", "pos": [0, 0.8, 0], "col": "$core", "size": 3},
+    {"id": "embers", "t": "emit", "at": 0.05, "life": 1.4, "rate": 30, "att": "ground", "from": "disc", "fr": "r", "dir": "up", "spread": 0.3, "speed": [2, 5], "up": 1, "plife": [0.6, 1.1], "look": "ember", "size": [1.4, 2], "col": "#fff0b0", "c2": "#ff3a10", "gravity": -1},
+    {"id": "scorch", "t": "decal", "at": 0, "life": 2.4, "att": "ground", "kind": "scorch", "r": "r*1.8"},
+    {"id": "light", "t": "light", "at": 0, "life": 1.8, "att": "ground", "pos": [0, 1.5, 0], "col": "$light", "int": {"0": 2.4, "0.7": 1.8, "1": 0}, "dist": 14}
+  ]
+}

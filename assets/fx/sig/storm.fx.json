@@ -1,0 +1,13 @@
+{
+  "v": 1,
+  "desc": "ชั้นเฉพาะธาตุ \"storm\" — ต่อท้ายแม่แบบ tpl/* อัตโนมัติ (จำนวนคูณตามแม่แบบ: pop 0.3 hit 0.5 charge 0.4 summon/heal 0.8 impact 1 big 1.6)",
+  "tags": [
+    "sig",
+    "storm"
+  ],
+  "pal": "storm",
+  "layers": [
+    {"id": "crackle0", "t": "bolt", "life": 0.16, "radial": [2, 5.5], "n": 4, "w": 0.09, "br": 1, "blife": 0.12},
+    {"id": "streak1", "t": "emit", "life": 0.05, "burst": 6, "speed": [12.0, 30.0], "plife": [0.112, 0.192], "look": "streak", "size": [1.68, 3.12], "col": "#ffffff", "gravity": 2, "drag": 4, "spin": 0, "fin": 8, "c2": "$main", "dir": "flat", "up": [-1, 2.5]}
+  ]
+}

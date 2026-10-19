@@ -57,7 +57,7 @@
       if (L.t === 'mesh') { const sh = g('shape'); if (sh === 'glb' && ctx.models && !ctx.models.has(g('glb'))) out.push({ lv: 'err', at: at + '.glb', msg: `ไม่มีโมเดล "${g('glb')}" ใน assets/manifest.json` });
         if (g('mat') === 'flip' && ctx.flips && !ctx.flips.has(g('tex'))) out.push({ lv: 'err', at: at + '.tex', msg: `ไม่มีภาพ flipbook "${g('tex')}" (manifest fx / ptex)` });
         if (num(g('scale'), 1) > 15 && ['energy', 'glow', 'fire'].includes(g('mat'))) W('รูปทรงเรืองแสงใหญ่เกิน 15 ม. — เสี่ยงบังจอ'); }
-      if (L.t === 'use') { if (!g('fx')) out.push({ lv: 'err', at: at + '.fx', msg: 'ต้องใส่ชื่อเอฟเฟกต์' }); else if (ctx.names && !ctx.names.has(g('fx'))) out.push({ lv: 'err', at: at + '.fx', msg: `ไม่มีไฟล์ assets/fx/${g('fx')}.fx.json` }); }
+      if (L.t === 'use') { if (!g('fx')) out.push({ lv: 'err', at: at + '.fx', msg: 'ต้องใส่ชื่อเอฟเฟกต์' }); else if (ctx.self && g('fx') === ctx.self) out.push({ lv: 'err', at: at + '.fx', msg: 'ใส่เอฟเฟกต์ตัวเองซ้อนในตัวเองไม่ได้ (วนไม่จบ)' }); else if (ctx.names && !ctx.names.has(g('fx'))) out.push({ lv: 'err', at: at + '.fx', msg: `ไม่มีไฟล์ assets/fx/${g('fx')}.fx.json` }); }
       if (L.t === 'trail' && g('of') && !fx.layers.some(q => q.id === g('of'))) out.push({ lv: 'err', at: at + '.of', msg: `ไม่มีชั้น "${g('of')}"` });
       if (L.t === 'sound' && ctx.sounds && !ctx.sounds.has(g('name'))) W(`ไม่มีเสียงชื่อ "${g('name')}" (ดู SFXN ใน js/18-audio.js)`);
     });

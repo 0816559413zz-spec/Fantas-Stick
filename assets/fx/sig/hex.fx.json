@@ -1,0 +1,13 @@
+{
+  "v": 1,
+  "desc": "ชั้นเฉพาะธาตุ \"hex\" — ต่อท้ายแม่แบบ tpl/* อัตโนมัติ (จำนวนคูณตามแม่แบบ: pop 0.3 hit 0.5 charge 0.4 summon/heal 0.8 impact 1 big 1.6)",
+  "tags": [
+    "sig",
+    "hex"
+  ],
+  "pal": "hex",
+  "layers": [
+    {"id": "swirl0", "t": "emit", "life": 0.05, "burst": 8, "dir": "tangent", "speed": [6, 11], "up": [0, 1], "plife": [0.5, 0.8], "look": "spark", "size": [2, 3], "col": "$hi", "c2": "$deep", "gravity": 0, "drag": 1.5, "spin": 6, "fin": 6, "pos": [0, 0.15, 0], "from": "disc", "fr": 3.2},
+    {"id": "smoke1", "t": "emit", "life": 0.05, "burst": 3, "dir": "flat", "speed": [0.7, 3.5], "up": [0.3, 1.4], "plife": [0.84, 1.44], "look": "smoke", "size": [3.6, 8.4], "col": "#2a1a3a", "c2": "#2a1a3a", "gravity": -0.6, "grow": 1.6, "drag": 2, "pos": [0, -0.4, 0], "x": true}
+  ]
+}

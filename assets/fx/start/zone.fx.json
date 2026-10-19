@@ -1,0 +1,15 @@
+{
+  "v": 1,
+  "desc": "โซนบนพื้น (วนจนสั่งหยุด): จานพลังงานลายไหล + ขอบเรือง + ผนังจาง + หมอกต่ำ + ประกายลอย — สำหรับพื้นที่อันตราย/พื้นที่บัฟ",
+  "tags": ["zone", "loop", "ground"],
+  "pal": "hex",
+  "dur": 4,
+  "params": {"r": {"def": 4, "desc": "รัศมีโซน (ม.)"}},
+  "layers": [
+    {"id": "disc", "t": "mesh", "loop": true, "at": 0, "life": 3, "att": "ground", "shape": "disc", "mat": "energy", "col": "$deep", "col2": "$deep", "pos": [0, 0.04, 0], "scale": "r", "op": 0.45, "scroll": 0.4, "spin": 10},
+    {"id": "edge", "t": "mesh", "loop": true, "at": 0, "life": 1.2, "att": "ground", "shape": "ring", "inner": 0.93, "mat": "glow", "col": "$main", "pos": [0, 0.06, 0], "scale": "r", "op": {"0": 0.6, "0.5": 0.95, "1": 0.6}},
+    {"id": "wall", "t": "mesh", "loop": true, "at": 0, "life": 2, "att": "ground", "shape": "cylinder", "mat": "energy", "col": "$main", "col2": "$deep", "scale": ["r", 1.2, "r"], "op": 0.35, "scroll": 1.2, "rim": 0.4, "x": true},
+    {"id": "motes", "t": "emit", "loop": true, "at": 0, "life": 1, "att": "ground", "rate": 22, "from": "disc", "fr": "r", "dir": "up", "spread": 0.2, "speed": [0.6, 1.4], "plife": [1, 1.6], "look": "spark", "size": [1.4, 2.2], "col": "$hi", "c2": "$deep", "gravity": -0.2},
+    {"id": "fog", "t": "emit", "loop": true, "at": 0, "life": 1, "att": "ground", "rate": 5, "from": "disc", "fr": "r", "dir": "flat", "speed": [0.2, 0.5], "plife": [1.4, 2], "look": "smoke", "size": [8, 11], "col": "$deep", "c2": "$deep", "gravity": -0.1, "grow": 0.6, "x": true}
+  ]
+}

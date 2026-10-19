@@ -1,0 +1,14 @@
+{
+  "v": 1,
+  "desc": "รอยฟันแนวนอน: เสี้ยวพลังงาน 3 มิติ + หางรอยฟัน + ประกายตามแนว",
+  "tags": ["slash", "melee"],
+  "pal": "ice",
+  "dur": 0.7,
+  "params": {"r": {"def": 2.4, "desc": "ระยะฟัน (ม.)"}},
+  "layers": [
+    {"id": "arc", "t": "mesh", "at": 0, "life": 0.28, "shape": "crescent", "wk": 0.5, "mat": "energy", "rot": [0, 0, 90], "pos": [0, 1.1, 0.4], "scale": {"0": [0.6, 0.6, 0.6], "1": [1.1, 1.1, 1.1], "ease": "out", "x": "r"}, "op": {"0": 1, "0.5": 0.9, "1": 0}, "dis": {"0": 0, "0.5": 0, "1": 0.7}, "rim": 1.6},
+    {"id": "sweep", "t": "trail", "at": 0, "life": 0.16, "sweep": true, "a0": -75, "a1": 75, "r": "r*1.05", "r0": "r*0.55", "pos": [0, 1.1, 0], "col": "$hi", "col2": "$deep", "tlife": 0.18, "k": 1.4},
+    {"id": "sparks", "t": "emit", "at": 0.04, "life": 0.12, "rate": 160, "from": "ring", "fr": "r*0.9", "dir": "tangent", "speed": [2, 5], "plife": [0.25, 0.45], "look": "streak", "size": [1.8, 2.6], "col": "$core", "c2": "$main", "gravity": 1, "drag": 3, "pos": [0, 1.1, 0]},
+    {"id": "flakes", "t": "emit", "at": 0.05, "life": 0.05, "burst": 8, "from": "disc", "fr": "r*0.8", "dir": "up", "spread": 0.9, "speed": [0.5, 1.5], "plife": [0.5, 0.9], "look": "spark", "size": [1.6, 2.4], "col": "$hi", "c2": "$deep", "spin": 5, "gravity": 1.5, "pos": [0, 1, 0.6], "x": true}
+  ]
+}
