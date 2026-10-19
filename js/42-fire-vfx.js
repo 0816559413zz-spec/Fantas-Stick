@@ -224,6 +224,8 @@ function hazeOf(o,key,make,always){let h=o[key];
   h.userData.t=performance.now();h.visible=(always||!!SOFTU.uSoftOn.value)&&o.g.visible;return h;}   // always = ไม่ต้องพึ่ง soft (ไฟ 3 มิติ)
 // ไฟลุกห่อตัว/จุด (แบบกำแพง Ring of Embers ย่อส่วน): พุ่งขึ้นเร็ว → ลุกค้าง → เตี้ยลง + สลายจนดับ • r,H หน่วยโลก • ใช้กับระเบิด Ignition Snap บนตัวศัตรู
 function fireBurn(x,y,h,r,H,life){
+  // เสาไฟ bake จาก Blender (วิธี 1) ห่อตัวศัตรู • ยังไม่โหลด = ไฟ 3 มิติคำนวณในเกม (วิธี 2)
+  if(fireSeqAt('fire_column',x,y,h-0.15,{loop:true,hx:H*0.5,hz:H*0.5,h:H*1.7,life:life*1.3,int:1.2,den:1.3}))return;
   // ไฟ 3 มิติจริง: เสาไฟปริมาตรห่อตัว พุ่งขึ้น → ลุกค้าง → เตี้ยลงและดับ
   {const vm=fireVol([{c:[0,0,0],ax:[1,0],hx:r*1.3,h:H,hz:r*1.3,md:2}],{int:1.05,fq:0.32,spd:0.8});vm.position.set(tx(x),h+GY(x,y)-0.1,tz(y));
     return fireVolTemp(vm,life,(u,k)=>{const up=k<0.15?Math.sin(k/0.15*1.7)/Math.sin(1.7):1,dk=Math.max(0,(k-0.3)/0.7);u.uH.value=Math.max(0.01,up*(1-0.4*dk));u.uDis.value=dk;});}
@@ -242,6 +244,13 @@ const NOISE3D=(()=>{const N=32,d=new Uint8Array(N*N*N);let sd=4711;const rr=()=>
       const l=(j,k)=>G(ix,j,k)+(G(ix+1,j,k)-G(ix,j,k))*ux,m=k=>l(iy,k)+(l(iy+1,k)-l(iy,k))*uy;v+=a*(m(iz)+(m(iz+1)-m(iz))*uz);t+=a;a*=0.5;}
     d[(z*N+y)*N+x]=Math.round(Math.min(1,Math.max(0,(v/t-0.5)*1.9+0.5))*255);}
   const t=new THREE.Data3DTexture(d,N,N,N);t.format=THREE.RedFormat;t.minFilter=t.magFilter=THREE.LinearFilter;t.wrapS=t.wrapT=t.wrapR=THREE.RepeatWrapping;t.unpackAlignment=1;t.needsUpdate=true;return t;})();
+// ลายไฟจาก simulation จริงใน Blender (assets/src/fire_noise3d_build.py → tools/pack_noise3d.py → assets/vfx/fire3d.bin, 56³ ต่อกันได้ไม่เห็นรอย)
+// โหลดเสร็จ = ไฟ 3 มิติใช้ลายนี้แทนลายสุ่ม 2 ชั้นแรก (เกลียว/เส้นสายเปลวแบบของไหลจริง) • FIRE3D.on.value 0 = กลับไปใช้ลายสุ่ม (ไว้เทียบ)
+const FIRE3D={tex:{value:NOISE3D},on:{value:0}};
+fetch('assets/vfx/fire3d.bin?v=1').then(r=>r.ok?r.arrayBuffer():null).then(b=>{if(!b)return;const N=Math.round(Math.cbrt(b.byteLength));if(N*N*N!==b.byteLength)return;
+  const t=new THREE.Data3DTexture(new Uint8Array(b),N,N,N);t.format=THREE.RedFormat;t.minFilter=t.magFilter=THREE.LinearFilter;t.wrapS=t.wrapT=t.wrapR=THREE.RepeatWrapping;t.unpackAlignment=1;t.needsUpdate=true;
+  FIRE3D.tex.value=t;FIRE3D.on.value=1;}).catch(()=>{});
+if(window.WD)window.WD.FIRE3D=FIRE3D;   // ดีบัก/เทียบภาพ (ประกาศในไฟล์นี้ — ห้ามอ้างจาก 41-debug ที่โหลดก่อน)
 const _fvIdx=[0,2,1,1,2,3, 4,5,6,5,7,6, 0,1,4,1,5,4, 2,6,3,3,6,7, 0,4,2,2,4,6, 1,3,5,3,7,5];
 function fireVol(boxes,o){o=o||{};const n=boxes.length,pos=new Float32Array(n*24),bc=new Float32Array(n*24),bax=new Float32Array(n*24),bsz=new Float32Array(n*24),bmd=new Float32Array(n*16),idx=[];
   boxes.forEach((b,i)=>{const [cx,cy,cz]=b.c,l=Math.hypot(b.ax[0],b.ax[1])||1,X=[b.ax[0]/l,0,b.ax[1]/l],Z=[-X[2],0,X[0]],seed=b.seed===undefined?Math.random()*7:b.seed;
@@ -250,14 +259,14 @@ function fireVol(boxes,o){o=o||{};const n=boxes.length,pos=new Float32Array(n*24
     for(const q of _fvIdx)idx.push(i*8+q);});
   const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(pos,3));g.setAttribute('bc',new THREE.BufferAttribute(bc,3));g.setAttribute('bax',new THREE.BufferAttribute(bax,3));
   g.setAttribute('bsz',new THREE.BufferAttribute(bsz,3));g.setAttribute('bmd',new THREE.BufferAttribute(bmd,2));g.setIndex(idx);g.boundingSphere=new THREE.Sphere(new THREE.Vector3(),1e4);
-  const U={uN:{value:NOISE3D},time:FIRE_U.time,uH:{value:1},uDis:{value:0},uInt:{value:o.int||1.0},uOcc:{value:o.occ===undefined?0.92:o.occ},uSpd:{value:o.spd||0.55},uFq:{value:o.fq||0.42},uB:{value:o.bias||0},uDen:{value:o.den||1}};
+  const U={uN:{value:NOISE3D},uS:FIRE3D.tex,uSim:FIRE3D.on,time:FIRE_U.time,uH:{value:1},uDis:{value:0},uInt:{value:o.int||1.0},uOcc:{value:o.occ===undefined?0.92:o.occ},uSpd:{value:o.spd||0.55},uFq:{value:o.fq||0.42},uB:{value:o.bias||0},uDen:{value:o.den||1}};
   const m=new THREE.ShaderMaterial({uniforms:U,transparent:true,depthWrite:false,side:THREE.BackSide,
     blending:THREE.CustomBlending,blendSrc:THREE.OneFactor,blendDst:THREE.OneMinusSrcAlphaFactor,blendSrcAlpha:THREE.OneFactor,blendDstAlpha:THREE.OneMinusSrcAlphaFactor,
     vertexShader:'attribute vec3 bc,bax,bsz;attribute vec2 bmd;varying vec3 vW,vC,vX,vSz;varying vec2 vMd;varying float vVZ;'+
       'void main(){vec4 w=modelMatrix*vec4(position,1.0);vW=w.xyz;vC=(modelMatrix*vec4(bc,1.0)).xyz;vec3 X=mat3(modelMatrix)*bax;float sx=length(X);vX=X/sx;'+
       'float sy=length(mat3(modelMatrix)*vec3(0.0,1.0,0.0));vSz=bsz*vec3(sx,sy,sx);vMd=bmd;vec4 mv=viewMatrix*w;vVZ=-mv.z;gl_Position=projectionMatrix*mv;}',
-    fragmentShader:'precision highp sampler3D;'+SOFT_GLSL+FIRE_GLSL+'uniform sampler3D uN;uniform float time,uH,uDis,uInt,uOcc,uSpd,uFq,uB,uDen;varying vec3 vW,vC,vX,vSz;varying vec2 vMd;'+
-      'float n3(vec3 p){return texture(uN,p).r;}'+
+    fragmentShader:'precision highp sampler3D;'+SOFT_GLSL+FIRE_GLSL+'uniform sampler3D uN;uniform sampler3D uS;uniform float uSim,time,uH,uDis,uInt,uOcc,uSpd,uFq,uB,uDen;varying vec3 vW,vC,vX,vSz;varying vec2 vMd;'+
+      'float n3(vec3 p){return texture(uN,p).r;}float s3(vec3 p){return texture(uS,p.xzy).r;}'+
       'void main(){vec3 ro=cameraPosition,rd=normalize(vW-ro);vec3 X=vX,Y=vec3(0.0,1.0,0.0),Z=normalize(cross(X,Y));'+
       'vec3 o=ro-vC;vec3 lo=vec3(dot(o,X),dot(o,Y),dot(o,Z)),ld=vec3(dot(rd,X),dot(rd,Y),dot(rd,Z));'+
       'float H=max(vSz.y*uH,1e-3);vec3 bmin=vec3(-vSz.x,0.0,-vSz.z),bmax=vec3(vSz.x,H,vSz.z);'+
@@ -269,7 +278,7 @@ function fireVol(boxes,o){o=o||{};const n=boxes.length,pos=new Float32Array(n*24
       'for(int i=0;i<24;i++){vec3 p=lo+ld*(tn+(float(i)+jt)*st);float v=p.y/H,sh;'+
         // noise ไหลขึ้น 3 ชั้น → บิดความสูง (ลิ้นไฟ) + ridged (เส้นสายเปลว) + บิดขอบหนา (ไม่เป็นกล่อง)
         'vec3 q=vec3(p.x,p.y*0.45,p.z)*uFq-vec3(0.0,time*uSpd,0.0)+vec3(sd);'+
-        'float n1=n3(q),n2=n3(q*2.1+vec3(0.31,-time*uSpd*0.8,0.17)),n4=n3(q*4.3+vec3(0.6,-time*uSpd*1.9,0.4));'+
+        'vec3 q2=q*2.1+vec3(0.31,-time*uSpd*0.8,0.17);float n1=mix(n3(q),s3(q*0.6),uSim),n2=mix(n3(q2),s3(q2*0.55+vec3(0.5)),uSim),n4=n3(q*4.3+vec3(0.6,-time*uSpd*1.9,0.4));'+
         'float nA=(n1*0.55+n2*0.3+n4*0.15-0.5)*1.6+0.5;'+
         'if(md<0.5){float u=p.x/vSz.x,w=p.z/vSz.z+(n1-0.5)*0.7;sh=(1.0-w*w)*smoothstep(1.0,0.72,abs(u));}'+
         'else if(md<1.5){vec3 q2=vec3(p.x/vSz.x,v*2.0-1.0,p.z/vSz.z);sh=1.0-abs(length(q2)-0.8+(n1-0.5)*0.25)/0.24;}'+
@@ -288,3 +297,39 @@ function fireVol(boxes,o){o=o||{};const n=boxes.length,pos=new Float32Array(n*24
   const mesh=new THREE.Mesh(g,m);mesh.frustumCulled=false;mesh.renderOrder=3;mesh.userData.u=U;mesh.userData.mats=[m];return mesh;}
 // ไฟ 3 มิติชั่วคราว (ลบเองเมื่อหมดอายุ) วางในชั้นเอฟเฟกต์ • fn(u,k,dt) ปรับ uH/uDis ตามเวลา
 function fireVolTemp(mesh,life,fn){fireTemp(mesh,mesh.userData.mats,life,(v,k,dt)=>fn(mesh.userData.u,k,dt));fxScene.add(mesh);return mesh;}
+// ---------- ไฟ 3 มิติที่ bake จาก Blender ทั้งก้อน (วิธี 1 — ผู้เล่นเลือก 2026-10-20: ใช้กับไฟก้อนทรงตายตัว) ----------
+// assets/src/fire_volseq_build.py (column = เสาไฟวน / burst = ระเบิดไฟพุ่งครั้งเดียว) → tools/pack_volseq.py → assets/vfx/fire_column|fire_burst.bin + .json
+// ไฟล์ = เฟรมเรียงตามแกน X • เล่นแบบ raymarch ในกล่อง hx×h×hz (เมตร) ยืดภาพ simulation ให้เต็มกล่อง • u.uFr = เฟรม (ผสมระหว่างเฟรม), u.uDis = ดับ 0..1, u.uH = ตัดความสูง 0..1
+// แนวไฟ/วง/โล่ ใช้ fireVol (วิธี 2: คำนวณในเกม + ลายจาก Blender) เพราะรูปทรงต้องยืดหยุ่น
+const FSEQ={};
+function fireSeqLoad(name){if(FSEQ[name])return FSEQ[name].p;const S=FSEQ[name]={v:null};
+  S.p=Promise.all([fetch('assets/vfx/'+name+'.json?v=1').then(r=>r.json()),fetch('assets/vfx/'+name+'.bin?v=1').then(r=>r.arrayBuffer())]).then(([m,b])=>{
+    const t=new THREE.Data3DTexture(new Uint8Array(b),m.nx*m.frames,m.ny,m.nz);t.format=THREE.RedFormat;t.minFilter=t.magFilter=THREE.LinearFilter;t.wrapS=t.wrapT=t.wrapR=THREE.ClampToEdgeWrapping;t.unpackAlignment=1;t.needsUpdate=true;
+    return S.v={tex:t,m};}).catch(()=>null);return S.p;}
+const fireSeqReady=n=>FSEQ[n]&&FSEQ[n].v;
+function fireSeqVol(S,o){o=o||{};const g=new THREE.BoxGeometry(2*o.hx,o.h,2*o.hz);g.translate(0,o.h/2,0);
+  const U={uT:{value:S.tex},uG:{value:new THREE.Vector2(S.m.nx,S.m.frames)},uFr:{value:0},uDis:{value:0},uH:{value:1},uSz:{value:new THREE.Vector3(o.hx,o.h,o.hz)},uInt:{value:o.int||1},uDen:{value:o.den||1},uOcc:{value:0.92}};
+  const m=new THREE.ShaderMaterial({uniforms:U,transparent:true,depthWrite:false,side:THREE.BackSide,
+    blending:THREE.CustomBlending,blendSrc:THREE.OneFactor,blendDst:THREE.OneMinusSrcAlphaFactor,blendSrcAlpha:THREE.OneFactor,blendDstAlpha:THREE.OneMinusSrcAlphaFactor,
+    vertexShader:'varying vec3 vW,vC;varying float vVZ;void main(){vec4 w=modelMatrix*vec4(position,1.0);vW=w.xyz;vC=(modelMatrix*vec4(0.0,0.0,0.0,1.0)).xyz;vec4 mv=viewMatrix*w;vVZ=-mv.z;gl_Position=projectionMatrix*mv;}',
+    fragmentShader:'precision highp sampler3D;'+SOFT_GLSL+FIRE_GLSL+'uniform sampler3D uT;uniform vec2 uG;uniform vec3 uSz;uniform float uFr,uDis,uH,uInt,uDen,uOcc;varying vec3 vW,vC;'+
+      'float sv(vec3 u,float f){float x=(f*uG.x+clamp(u.x*uG.x,0.5,uG.x-0.5))/(uG.x*uG.y);return texture(uT,vec3(x,u.z,u.y)).r;}'+
+      'void main(){vec3 ro=cameraPosition-vC,rd=normalize(vW-cameraPosition);'+
+      'vec3 bmin=vec3(-uSz.x,0.0,-uSz.z),bmax=vec3(uSz.x,uSz.y,uSz.z);vec3 iv=1.0/(rd+vec3(1e-6));vec3 t0=(bmin-ro)*iv,t1=(bmax-ro)*iv,a=min(t0,t1),b=max(t0,t1);'+
+      'float tn=max(max(a.x,a.y),max(a.z,0.0)),tf=min(min(b.x,b.y),b.z);if(tf<=tn)discard;'+
+      'if(uSoftOn>0.5){float dz=texture2D(uDepth,gl_FragCoord.xy/uRes).x;float sz=(uNear*uFar)/(uFar-dz*(uFar-uNear));vec3 fw=-vec3(viewMatrix[0][2],viewMatrix[1][2],viewMatrix[2][2]);tf=min(tf,sz/max(dot(rd,fw),1e-3));if(tf<=tn)discard;}'+
+      'float f0=mod(floor(uFr),uG.y),f1=min(f0+1.0,uG.y-1.0),fu=fract(uFr);'+
+      'float st=(tf-tn)/32.0,jt=fract(sin(dot(gl_FragCoord.xy,vec2(12.9898,78.233)))*43758.5453);vec3 col=vec3(0.0);float A=0.0;'+
+      'for(int i=0;i<32;i++){vec3 p=ro+rd*(tn+(float(i)+jt)*st);vec3 u=(p-bmin)/(bmax-bmin);if(u.y>uH)continue;'+
+        'float v=mix(sv(u,f0),sv(u,f1),fu);float heat=v*1.15-uDis*1.1;if(heat<=0.03)continue;'+
+        'float al=1.0-exp(-smoothstep(0.03,0.4,heat)*6.0*uDen*st);col+=(1.0-A)*al*fireRamp(min(heat,1.1))*uInt;A+=(1.0-A)*al;if(A>0.97)break;}'+
+      'float nf=smoothstep(0.8,3.0,tn);col*=nf;A*=nf;if(A<0.004)discard;gl_FragColor=vec4(col,A*uOcc);}'});
+  fxMat(m);m.userData.keep=false;FXMATS.delete(m);m.depthTest=false;
+  const mesh=new THREE.Mesh(g,m);mesh.frustumCulled=false;mesh.renderOrder=3;mesh.userData.u=U;mesh.userData.mats=[m];return mesh;}
+// เล่นไฟ bake ชั่วคราวที่จุด (x,y px): loop = เสาไฟวน (เริ่มเฟรมสุ่ม) / ไม่ loop = เล่นครั้งเดียวตามอายุ • fps 24 • ดับช่วงท้าย
+function fireSeqAt(name,x,y,h,o){const S=!(window.WD&&WD.noSeq)&&fireSeqReady(name);if(!S)return null;   // WD.noSeq = ปิดไว้เทียบภาพ
+  const vm=fireSeqVol(S,o),u=vm.userData.u,N=S.m.frames,fps=o.fps||24,f0=o.loop?Math.random()*N:0;
+  vm.position.set(tx(x),h+GY(x,y),tz(y));vm.rotation.y=rnd(0,6.283);
+  return fireVolTemp(vm,o.life,(uu,k)=>{const t=k*o.life;u.uFr.value=o.loop?(f0+t*fps)%N:Math.min(N-1.001,t*fps*(o.speed||1));
+    const up=o.loop?(k<0.15?Math.sin(k/0.15*1.7)/Math.sin(1.7):1):1;u.uH.value=Math.max(0.02,up);u.uDis.value=o.loop?Math.max(0,(k-0.55)/0.45):Math.max(0,(k-0.75)/0.25)*0.6;});}
+if(window.WD)Object.assign(window.WD,{fireSeqLoad,fireSeqVol,fireSeqAt,fxScene});

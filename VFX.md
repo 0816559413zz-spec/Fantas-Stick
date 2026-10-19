@@ -125,6 +125,7 @@
 | เศษผลึก 3D | `iceChips(x,y,h,n,sp,up)` | `js/21-vfx-frost.js` |
 | ไฟ shader (ลูกไฟ กำแพงไฟ ระเบิด ปีก) | `fireMat`, `makeFireBall`, `fireBlast`, `makeFireWall` | `js/42-fire-vfx.js` |
 | **ไฟ 3 มิติจริง (volumetric)** — แนวไฟ / เปลือกหุ้มตัว / เสาไฟ | `fireVol([{c,ax,hx,h,hz,md}],{int,bias,den})`, `fireVolTemp(mesh,life,fn)` | `js/42-fire-vfx.js` |
+| **ไฟ 3 มิติ bake จาก Blender ทั้งก้อน** (ทรงตายตัว เช่น เสาไฟ) | `fireSeqAt('fire_column',x,y,h,{loop,hx,h,hz,life})` — ไฟล์จาก `assets/src/fire_volseq_build.py` + `tools/pack_volseq.py` | `js/42-fire-vfx.js` |
 | สายฟ้า | `tbolt(...)` | `js/20-vfx-pyro-storm.js` |
 | รอยร้าวบนพื้น | `dfCracks(...)` | `js/20-vfx-pyro-storm.js` |
 | เล่นซ้ำหลังหน่วงเวลา | `later(วินาที, ()=>{...})` | `js/20-vfx-pyro-storm.js` |
