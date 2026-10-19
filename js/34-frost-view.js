@@ -1,5 +1,5 @@
 // ---------- ภาพของสายน้ำแข็ง: ดาบ/ขวานน้ำแข็งที่ปลายไม้ ท่าฟัน โล่อัศวิน ไถล แช่แข็งตัวเอง ออร่า ร่างแยก ----------
-function iceMat(op,em){return new THREE.MeshStandardMaterial({color:'#d8f4ff',emissive:em||'#3a8ac0',emissiveIntensity:0.6,roughness:0.08,metalness:0.2,transparent:true,opacity:op,flatShading:true});}
+function iceMat(op,em){return new THREE.MeshStandardMaterial({color:'#c4e6fa',emissive:em||'#3a8ac0',emissiveIntensity:0.45,roughness:0.5,metalness:0,transparent:true,opacity:op,flatShading:true});}
 function iceRim(geo,s){return new THREE.Mesh(geo,new THREE.MeshBasicMaterial({color:hdr('#9fe0ff',1.4),transparent:true,opacity:0.35,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.BackSide}));}
 function makeIceSword(){
   {const f=fileWeapon('mesh_ice_sword',-0.66,0.5);if(f)return f;}
@@ -10,7 +10,7 @@ function makeIceSword(){
   const s=new THREE.Shape(),P=[[0.05,0],[0.15,-0.1],[0.11,-0.32],[0.17,-0.46],[0.12,-0.72],[0.16,-0.98],[0.1,-1.28],[0.13,-1.5],[0,-2.0]];
   s.moveTo(-P[0][0],P[0][1]);for(const [px,py] of P)s.lineTo(-px,py);for(let i=P.length-2;i>=0;i--)s.lineTo(P[i][0],P[i][1]);
   const geo=new THREE.ExtrudeGeometry(s,{depth:0.03,bevelEnabled:true,bevelThickness:0.03,bevelSize:0.022,bevelSegments:1});geo.translate(0,0,-0.015);
-  const blade=new THREE.Mesh(geo,new THREE.MeshStandardMaterial({color:'#e6f8ff',emissive:'#3a90d0',emissiveIntensity:0.55,roughness:0.04,metalness:0.4,transparent:true,opacity:0.86,flatShading:true}));blade0.add(blade);
+  const blade=new THREE.Mesh(geo,new THREE.MeshStandardMaterial({color:'#e6f8ff',emissive:'#3a90d0',emissiveIntensity:0.45,roughness:0.45,metalness:0,transparent:true,opacity:0.86,flatShading:true}));blade0.add(blade);
   const rim=iceRim(geo);rim.scale.set(1.12,1.03,1.6);blade0.add(rim);
   const core=new THREE.Mesh(new THREE.BoxGeometry(0.02,1.75,0.075),new THREE.MeshBasicMaterial({color:hdr('#cfefff',2),transparent:true,opacity:0.8,blending:THREE.AdditiveBlending,depthWrite:false}));core.position.y=-0.92;blade0.add(core);
   const gm=iceMat(0.95,'#5ab8f0');
@@ -29,7 +29,7 @@ function makeIceAxe(){
   for(let i=0;i<4;i++){const w=new THREE.Mesh(new THREE.TorusGeometry(0.05,0.014,5,10),iceMat(0.95,'#6ac0f0'));w.rotation.x=Math.PI/2;w.position.y=-0.1-i*0.09;g.add(w);}
   const s=new THREE.Shape();s.moveTo(0.04,0.2);s.quadraticCurveTo(0.32,0.42,0.66,0.62);s.quadraticCurveTo(0.48,0.18,0.52,0);s.quadraticCurveTo(0.48,-0.18,0.66,-0.62);s.quadraticCurveTo(0.32,-0.42,0.04,-0.2);s.lineTo(0.04,0.2);
   const geo=new THREE.ExtrudeGeometry(s,{depth:0.04,bevelEnabled:true,bevelThickness:0.03,bevelSize:0.03,bevelSegments:1});geo.translate(0,0,-0.02);
-  const bm=new THREE.MeshStandardMaterial({color:'#e6f8ff',emissive:'#3a90d0',emissiveIntensity:0.55,roughness:0.04,metalness:0.45,transparent:true,opacity:0.88,flatShading:true});
+  const bm=new THREE.MeshStandardMaterial({color:'#d0ecfc',emissive:'#3a90d0',emissiveIntensity:0.45,roughness:0.45,metalness:0,transparent:true,opacity:0.88,flatShading:true});
   for(const sd of [1,-1]){const b=new THREE.Mesh(geo,bm);b.position.y=-1.55;b.scale.x=sd;g.add(b);const r=iceRim(geo);r.position.y=-1.55;r.scale.set(sd*1.06,1.06,1.5);g.add(r);}
   const top=new THREE.Mesh(new THREE.ConeGeometry(0.07,0.45,5),hm);top.position.y=-2.05;top.rotation.x=Math.PI;g.add(top);
   const gem=new THREE.Mesh(new THREE.OctahedronGeometry(0.09),new THREE.MeshBasicMaterial({color:hdr('#7fe0ff',2.4)}));gem.position.set(0,-1.55,0.05);g.add(gem);
@@ -44,7 +44,7 @@ function makeKiteShield(){
   const boss=new THREE.Mesh(new THREE.OctahedronGeometry(0.11),iceMat(1,'#6ac0f0'));boss.position.z=0.08;g.add(boss);
   return g;
 }
-const _icyClone=new THREE.MeshStandardMaterial({color:'#bfe8ff',emissive:'#3a8ac0',emissiveIntensity:0.7,roughness:0.1,transparent:true,opacity:0.55,depthWrite:false});_icyClone.userData.keep=true;
+const _icyClone=new THREE.MeshStandardMaterial({color:'#bfe8ff',emissive:'#3a8ac0',emissiveIntensity:0.55,roughness:0.5,transparent:true,opacity:0.55,depthWrite:false});_icyClone.userData.keep=true;
 // ร่างแยก = ก๊อปเฉพาะตัว (o.b: ลำตัว แขน ขา ผ้าคลุม ดาบ/ขวาน/ไม้) เป็นน้ำแข็งใส แล้วคัดลอกท่าทุกชิ้นตามตัวจริงทุกเฟรม (mirrorPose)
 // ของที่ห้อยอยู่กับ o.g (วงใต้เท้า ออร่า โล่ ฯลฯ) ไม่ติดมา • ดาบ/ขวานเปลี่ยนเป็นโมเดลไฟล์ หรือโครงตัวเปลี่ยน → สร้างร่างแยกใหม่เอง
 const MIRSKIP=['shield','ring','broom','cocoon','stars','colo','mcirc','ishield','cryoM'];
@@ -80,6 +80,7 @@ function frostFX(o,p,pz,now,dt){
   else if(o.ffBall)o.ffBall.visible=false;
   // Frostforge โหมดประชิด: หัวขวานงอกจากผลึกน้ำแข็งตามใบ (ตอนเพิ่งเปิด)
   if(ff&&!o.ffWas){o.ffGrow=0.45;}o.ffWas=!!ff;
+  if(ff&&!p.fl)forgeAura(p.x,p.y,pz);   // บัฟ Frostforge ยังอยู่: ผลึก/หมอกลอยขึ้นเบา ๆ
   if(o.ffGrow>0){o.ffGrow-=dt;const k=1-Math.max(0,o.ffGrow)/0.45;if(melee&&o.axe){o.axe.scale.setScalar(0.35+0.65*k);o.axe.getWorldPosition(_pw);const q=simOf(_pw);for(let i=0;i<3;i++)PARTS.push({x:q.x+rnd(-14,14),y:q.y+rnd(-14,14),h:q.h-rnd(0.2,1.2),vx:rnd(-30,30),vy:rnd(-30,30),vh:rnd(0,1.5),life:0.25,max:0.25,col:i?'#bfeaff':'#ffffff',size:1.8,g:0});}}
   else if(o.axe&&o.axe.scale.x!==1)o.axe.scale.setScalar(1);
   // ท่าฟัน: ง้าง → ฟัน → คืนท่า (ลื่นๆ มีบิดตัว) — ค่าทำให้นุ่มด้วยการไล่ค่าแบบ exponential
@@ -123,7 +124,9 @@ function frostFX(o,p,pz,now,dt){
   {const W=ff?o.axe:o.sword,sw=melee&&!p.fl&&W&&(o.swT>0||o.grDown>0);
     if(sw){if(!o.wtr)o.wtr=trailNew({sweep:true,col:ff?'#e8f8ff':'#f0fbff',col2:'#2f86ff',life:ff?0.2:0.15,k:1.9});
       W.updateWorldMatrix(true,false);_tv1.set(0,ff?-1.0:-0.3,0).applyMatrix4(W.matrixWorld);_tv2.set(0,ff?-2.05:-2.05,0).applyMatrix4(W.matrixWorld);
-      trailPoint(o.wtr,_tv1.x,_tv1.y,_tv1.z,_tv2.x,_tv2.y,_tv2.z);}
+      trailPoint(o.wtr,_tv1.x,_tv1.y,_tv1.z,_tv2.x,_tv2.y,_tv2.z);
+      // หมอกเย็นไหลตามปลายใบ (ขวานหนากว่า)
+      if(Math.random()<(ff?0.5:0.25)){const q=simOf(_tv2);mistPuff(q.x,q.y,Math.max(0.05,q.h-GY(q.x,q.y)-0.3),{vx:rnd(-20,20),vy:rnd(-20,20),vh:-0.2,size:ff?1.5:1,grow:0.5,life:rnd(0.5,0.8),a:ff?0.28:0.2});}}
     else if(o.wtr){trailStop(o.wtr);o.wtr=null;}}
   // รอยเท้าผลึกบาง ๆ ใต้ทุกก้าว แล้วแตก/จางไป (ไม่ทิ้งทางยาวแบบไถล)
   if(!p.fl&&!(flags&1)&&pz<0.3){const st=Math.sin(o.walk||0)>0;if(o.stepS!==undefined&&st!==o.stepS){const L=o.legs[st?0:1];_ev.set(0,-0.82,0.05);L.localToWorld(_ev);const q=simOf(_ev);

@@ -7,7 +7,7 @@ const FROST_U={time:{value:0}};
 // ---------- shader น้ำแข็ง: ฐานน้ำเงินเข้ม → ปลายขาว • ขอบสว่าง (fresnel) • รอยร้าวข้างใน • ประกายวิบวับ ----------
 const ICE_VS=`varying vec3 vW;varying vec3 vO;varying float vH;
 void main(){vH=uv.y;vO=position;vec4 w=modelMatrix*vec4(position,1.0);vW=w.xyz;gl_Position=projectionMatrix*viewMatrix*w;}`;
-const ICE_FS=`uniform float uT;uniform float uFade;uniform float uGlow;uniform sampler2D uNz;varying vec3 vW;varying vec3 vO;varying float vH;
+const ICE_FS=`uniform float uT;uniform float uFade;uniform float uGlow;uniform float uRim;uniform sampler2D uNz;varying vec3 vW;varying vec3 vO;varying float vH;
 void main(){
   vec3 n=normalize(cross(dFdx(vW),dFdy(vW)));vec3 v=normalize(cameraPosition-vW);if(dot(n,v)<0.0)n=-n;
   float fr=pow(1.0-abs(dot(n,v)),2.0);
@@ -16,14 +16,14 @@ void main(){
   float facet=0.5+0.5*dot(n,normalize(vec3(0.35,1.0,0.25)));
   vec3 deep=vec3(0.03,0.16,0.45),mid=vec3(0.18,0.58,1.0),hi=vec3(0.8,0.95,1.0);
   vec3 c=mix(deep,mid,smoothstep(0.0,0.55,vH));c=mix(c,hi,smoothstep(0.5,1.0,vH)*0.55);
-  c*=0.5+0.65*facet;c+=vec3(0.55,0.88,1.0)*fr*0.95;c+=vec3(0.6,0.92,1.0)*cr*(0.5+0.5*vH);
-  float sp=texture2D(uNz,vO.xy*3.0+vec2(uT*0.05,-uT*0.03)).r;c+=vec3(1.0)*smoothstep(0.86,0.95,sp)*(0.6+fr);
+  c*=0.45+0.6*facet;c+=vec3(0.4,0.78,1.0)*fr*0.55*uRim;c+=vec3(0.6,0.92,1.0)*cr*(0.35+0.35*vH);
+  float sp=texture2D(uNz,vO.xy*3.0+vec2(uT*0.05,-uT*0.03)).r;c+=vec3(0.85,0.95,1.0)*smoothstep(0.9,0.97,sp)*(0.4+fr*0.6);
   c*=uGlow;float a=clamp((0.72+0.28*fr+0.2*cr)*uFade,0.0,1.0);
   gl_FragColor=vec4(c,a);}`;
 let _iceShM=null;
 function iceShaderMat(o){o=o||{};
-  if(!_iceShM){_iceShM=new THREE.ShaderMaterial({uniforms:{uT:FROST_U.time,uFade:{value:1},uGlow:{value:1},uNz:{value:NOISETEX}},vertexShader:ICE_VS,fragmentShader:ICE_FS,transparent:true,depthWrite:true,side:THREE.FrontSide});_iceShM.userData.keep=true;}
-  const m=_iceShM.clone();m.uniforms.uT=FROST_U.time;m.uniforms.uNz.value=NOISETEX;m.uniforms.uGlow.value=o.glow||1.15;return m;}
+  if(!_iceShM){_iceShM=new THREE.ShaderMaterial({uniforms:{uT:FROST_U.time,uFade:{value:1},uGlow:{value:1},uRim:{value:1},uNz:{value:NOISETEX}},vertexShader:ICE_VS,fragmentShader:ICE_FS,transparent:true,depthWrite:true,side:THREE.FrontSide});_iceShM.userData.keep=true;}
+  const m=_iceShM.clone();m.uniforms.uT=FROST_U.time;m.uniforms.uNz.value=NOISETEX;m.uniforms.uGlow.value=o.glow||0.95;m.uniforms.uRim.value=o.rim===undefined?1:o.rim;return m;}
 // อินสแตนซ์ของโมเดลน้ำแข็งจากไฟล์ (null ถ้ายังไม่โหลด → เริ่มโหลด แล้วผู้เรียกใช้ภาพเดิมแทน)
 function iceModel(name,mat){
   if(!MODELS.ready.get(name)){if(!MODELS.fail.has(name))loadModel(name);return null;}
@@ -91,6 +91,15 @@ function updateMist(dt){
     _im4.compose(_ip.set(tx(p.x),p.h+GY(p.x,p.y)+p.s*0.25,tz(p.y)),_iq.identity(),_is.set(p.s,p.s,p.s));IM.setMatrixAt(n,_im4);D[n*2]=al;D[n*2+1]=p.rot;n++;}
   IM.count=n;IM.instanceMatrix.needsUpdate=true;_mistA.needsUpdate=true;
 }
+// คลื่นหมอกต่ำแผ่ออกจากจุดกระแทก (ฟาดพื้น)
+function mistWave(x,y,r,n){for(let i=0;i<n;i++){const an=i/n*6.283+rnd(-0.15,0.15);mistPuff(x+Math.cos(an)*r,y+Math.sin(an)*r,0.02,{vx:Math.cos(an)*rnd(200,280),vy:Math.sin(an)*rnd(200,280),vh:0,size:rnd(1.3,1.9),grow:0.6,life:rnd(0.8,1.1),a:0.35});}}   // ต่ำติดพื้น วิ่งออกเร็ว ไม่บังตัวละคร
+// Frostforge เปิด: ผลึกน้ำแข็ง + หมอกเย็นลอยขึ้นรอบตัว (รู้สึกว่าเพิ่งเพิ่มพลัง)
+function forgeRise(x,y){vfxOnce(()=>{for(let i=0;i<16;i++){const an=rnd(0,6.283),d=rnd(14,34);PARTS.push({x:x+Math.cos(an)*d,y:y+Math.sin(an)*d,h:rnd(0.1,0.6),vx:Math.cos(an)*rnd(5,20),vy:Math.sin(an)*rnd(5,20),vh:rnd(2,4.5),life:rnd(0.8,1.3),max:1.2,col:'#eaf8ff',c2:'#3a8cff',size:rnd(2.6,3.8),g:-0.4,drag:1.5,sh:4,rot:rnd(0,6.283),vr:rnd(-5,5),fin:8});}
+  for(let i=0;i<8;i++){const an=i/8*6.283;mistPuff(x+Math.cos(an)*22,y+Math.sin(an)*22,0.1,{vx:Math.cos(an)*30,vy:Math.sin(an)*30,vh:rnd(0.6,1.2),size:rnd(1.4,2),grow:0.6,life:rnd(1,1.5),a:0.4});}
+  for(let i=0;i<6;i++){const an=rnd(0,6.283),d=rnd(16,30);iceBit(_cryG,x+Math.cos(an)*d,y+Math.sin(an)*d,0.05,0.07,0.16,0.07,{life:0.9,up:0.05,down:0.3,v:[Math.cos(an)*20,Math.sin(an)*20,rnd(5,8)],spin:rnd(-8,8)});}});}
+// ระหว่างบัฟ Frostforge 6 วิ: เบา ๆ ต่อเนื่อง (ผลึกลอยขึ้นไม่กี่ชิ้น + หมอกบาง) — เรียกทุกเฟรมจาก frostFX
+function forgeAura(x,y,h){if(Math.random()<0.35){const an=rnd(0,6.283),d=rnd(12,26);PARTS.push({x:x+Math.cos(an)*d,y:y+Math.sin(an)*d,h:h+rnd(0.1,0.8),vx:0,vy:0,vh:rnd(1,2),life:rnd(0.7,1.1),max:1,col:'#eaf8ff',c2:'#3a8cff',size:rnd(1.8,2.6),g:-0.3,drag:1,sh:4,rot:rnd(0,6.283),vr:rnd(-4,4),fin:6});}
+  if(Math.random()<0.08){const an=rnd(0,6.283);mistPuff(x+Math.cos(an)*18,y+Math.sin(an)*18,h+0.1,{vx:0,vy:0,vh:0.5,size:1.3,grow:0.5,life:1.2,a:0.25});}}
 function updateFrostV(dt){FROST_U.time.value+=dt;updateIceMeshes(dt);updateIceCircles(dt);updateMist(dt);}
 
 // ---------- ดาบ/ขวานน้ำแข็งจากไฟล์ Blender (mesh_ice_sword / mesh_ice_axe) ----------
@@ -98,11 +107,11 @@ function updateFrostV(dt){FROST_U.time.value+=dt;updateIceMeshes(dt);updateIceCi
 let _wpM=null;
 function fileWeapon(name,py,glow,gy){
   if(!MODELS.ready.get(name)){if(!MODELS.fail.has(name))loadModel(name);return null;}
-  if(!_wpM){_wpM={ice:iceShaderMat({glow:1.3}),core:new THREE.MeshBasicMaterial({color:hdr('#bff0ff',2.2),transparent:true,opacity:0.9,blending:THREE.AdditiveBlending,depthWrite:false}),gem:new THREE.MeshBasicMaterial({color:hdr('#7fe0ff',2.4)})};
+  if(!_wpM){_wpM={ice:iceShaderMat({glow:1.0,rim:0.35}),core:new THREE.MeshBasicMaterial({color:hdr('#8fd8ff',1.1),transparent:true,opacity:0.5,blending:THREE.AdditiveBlending,depthWrite:false}),gem:new THREE.MeshBasicMaterial({color:hdr('#7fe0ff',1.6)})};
     _wpM.ice.side=THREE.DoubleSide;for(const k in _wpM)_wpM[k].userData.keep=true;}
   const g=new THREE.Group();g.position.set(0,py,0.02);g.userData.file=1;const inst=modelInst(name);
   inst.traverse(m=>{if(!m.isMesh)return;m.castShadow=true;m.receiveShadow=false;const n=(m.material.name||'').replace(/\.\d+$/,'');if(_wpM[n]){m.material=_wpM[n];if(n!=='ice')m.castShadow=false;}});
-  g.add(inst);const gl=new THREE.Sprite(glowMat('#8fe0ff',1.2));gl.scale.setScalar(glow);if(gy)gl.position.y=gy;g.add(gl);return g;}
+  g.add(inst);const gl=new THREE.Sprite(glowMat('#8fe0ff',0.8));gl.scale.setScalar(glow*0.8);if(gy)gl.position.y=gy;g.add(gl);return g;}
 
 // ---------- Ice circle (Permafrost): ริบบิ้นแสงวนเป็นก้นหอยบนพื้น + ผลึกลอยหมุนรอบ + หมอก ----------
 const SWIRL_FS=`uniform float uT;uniform float uFade;uniform float uSp;varying vec2 vUv;

@@ -181,7 +181,7 @@ function fxAug(ev,H){if(!VFXAUG_ON&&ev.k!=='hit')return;
     case 'die':playFx('col_impact',ev.x,ev.y,H,{col:ev.c||'#ffffff',s:1.1});break;
     case 'nova':playFx('col_big',ev.x,ev.y,H,{col:'#ffd86b'});break;
     case 'kill':if(nearMe(ev.x,ev.y,1000))playFx('heal_big',ev.x,ev.y,1.3);break;
-    case 'revive':playFx('heal_summon',ev.x,ev.y,1,{s:1.2});break;
+    case 'revive':if(nearMe(ev.x,ev.y,700))playFx('heal_summon',ev.x,ev.y,1,{s:0.8});break;
     case 'buff':if(ev.x!==undefined)playFx('arcane_summon',ev.x,ev.y,H,{s:0.8});break;
     case 'land':playFx('earth_pop',ev.x,ev.y,0.3,{s:1.2});break;
     case 'hit':if(ev.id===NET.myId&&!ev.b)screenHurt(Math.min(1,0.3+(ev.n||5)/40));break;

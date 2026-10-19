@@ -49,11 +49,11 @@ function frostSlam3(p){
   if(n>0)healT(p,p.mirror>0?(q.ff?22:15):(q.ff?15:10));
   if(p.mirror>0)for(const s of [-1,1]){const m=mirrorPos(p,s);meleeHit(p,m.x,m.y,q.R,q.dm*0.5,1.0);}
   const fx=p.x+Math.cos(p.ang)*q.R*0.6,fy=p.y+Math.sin(p.ang)*q.R*0.6;
-  emit({k:'efx',z:'slam3',x:fx,y:fy,h:p.z+0.1,r:q.R*0.75,ax:q.ff?1:0,m:p.mirror>0?1:0,a:Math.round(p.ang*100)/100});
+  emit({k:'efx',z:'slam3',x:fx,y:fy,h:p.z+0.1,r:q.R*0.75,ax:q.ff?1:0,m:p.mirror>0?1:0,a:Math.round(p.ang*100)/100,id:p.id});
 }
 function frostSlam(p){
   p.slam=false;const dm=p.ffT>0?50:30;
-  emit({k:'efx',z:'slam',x:p.x,y:p.y,h:p.z+0.2,r:150});
+  emit({k:'efx',z:'slam',x:p.x,y:p.y,h:p.z+0.2,r:150,id:p.id,ax:p.ffT>0?1:0});
   for(const t of foesIn(p.team,p.x,p.y,150,p.z+3))aoeHit(p,t,dm);
   damageEnv(p.x,p.y,150,dm,p.id,'ice',p.z);
 }

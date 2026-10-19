@@ -3,7 +3,7 @@
 function statusFX(o,fm,x,y,z,sz,now){
   if(!fm)return;
   if(fm&8){
-    if(!o.ice){o.ice=new THREE.Mesh(new THREE.IcosahedronGeometry(1,0),new THREE.MeshStandardMaterial({color:'#bfeaff',transparent:true,opacity:0.5,roughness:0.15,emissive:'#2f6a9a',flatShading:true}));o.g.add(o.ice);}
+    if(!o.ice){o.ice=new THREE.Mesh(new THREE.IcosahedronGeometry(1,0),new THREE.MeshStandardMaterial({color:'#bfeaff',transparent:true,opacity:0.5,roughness:0.5,emissive:'#2f6a9a',flatShading:true}));o.g.add(o.ice);}
     o.ice.visible=true;o.ice.scale.set(sz*0.5,sz*0.9,sz*0.5);o.ice.position.y=sz*0.85;
     if(Math.random()<0.2)burst(x,y,'#dff6ff',1,30,0.6,1.6,{h:z+rnd(0.2,sz*1.5),vh:[0,0.5],g:0});
   }else if(o.ice)o.ice.visible=false;

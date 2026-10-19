@@ -2,7 +2,7 @@
 const FRV=[];
 const _cryG=new THREE.OctahedronGeometry(1,0),_spkG=new THREE.ConeGeometry(1,1,5),_plateG=new THREE.BoxGeometry(1,0.14,0.75),_hexG=new THREE.CircleGeometry(1,6);
 let _iceFxM=null,_frostM=null;
-function iceFxM(){return _iceFxM||(_iceFxM=new THREE.MeshStandardMaterial({color:'#dff4ff',emissive:'#4aa0d8',emissiveIntensity:0.7,roughness:0.1,metalness:0.2,transparent:true,opacity:0.88,flatShading:true}));}
+function iceFxM(){return _iceFxM||(_iceFxM=new THREE.MeshStandardMaterial({color:'#cfeaff',emissive:'#3a8ac8',emissiveIntensity:0.5,roughness:0.5,metalness:0,transparent:true,opacity:0.88,flatShading:true}));}
 function frostM(){return _frostM||(_frostM=new THREE.MeshBasicMaterial({color:'#e8f8ff',transparent:true,opacity:0.7,depthWrite:false,side:THREE.DoubleSide}));}
 // ชิ้นน้ำแข็งทั้งหมดวาดด้วย InstancedMesh (1 draw call ต่อรูปทรง/วัสดุ) — เดิมเป็น mesh แยกทีละชิ้น ทำให้ draw call พุ่งเป็นพัน
 const ICEP=new Map(),_im4=new THREE.Matrix4(),_iq=new THREE.Quaternion(),_ie=new THREE.Euler(),_ip=new THREE.Vector3(),_is=new THREE.Vector3();
@@ -37,10 +37,11 @@ function chillFX(o,p,pz,now,dt){
     for(let i=0;i<14;i++)PARTS.push({x:p.x+rnd(-10,10),y:p.y+rnd(-10,10),h:pz+rnd(0.05,0.6),vx:rnd(-50,50),vy:rnd(-50,50),vh:rnd(0.5,2),life:0.45,max:0.45,col:i%2?'#ffffff':'#bfeaff',size:1.4,g:5});}
 }
 // รอยฟันดาบ: เสี้ยววงเรืองแสงที่จางเร็ว (แนวนอน = ฟันกวาด / แนวตั้ง = ฟันจากบนลงล่าง)
-function makeSlash(x,y,h,a,R,vert,tilt,col,br){
-  const half=vert?1.25:1.05,geo=new THREE.RingGeometry(R*S3*0.62,R*S3,32,1,vert?-0.7:-half,vert?2.5:half*2);
+// wk = ความหนาของรอย (1 = เดิม 38% ของรัศมี, น้อย = รอยบางคม, มาก = รอยหนา) • norm = ผสมสีปกติ (เห็นบนพื้นสว่าง/หิมะ — แบบบวกแสงจะหายบนพื้นขาว)
+function makeSlash(x,y,h,a,R,vert,tilt,col,br,wk,norm){
+  const half=vert?1.25:1.05,geo=new THREE.RingGeometry(R*S3*(1-0.38*(wk||1)),R*S3,32,1,vert?-0.7:-half,vert?2.5:half*2);
   if(!vert)geo.rotateX(-Math.PI/2);
-  const m=new THREE.Mesh(geo,new THREE.MeshBasicMaterial({color:hdr(col||'#cfefff',br||1.8),transparent:true,opacity:0.85,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide}));
+  const m=new THREE.Mesh(geo,new THREE.MeshBasicMaterial({color:norm?new THREE.Color(col):hdr(col||'#cfefff',br||1.8),transparent:true,opacity:norm?0.75:0.85,blending:norm?THREE.NormalBlending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide}));
   m.position.set(tx(x),h+GY(x,y),tz(y));m.rotation.order='YXZ';m.rotation.y=-a;m.rotation.x=tilt||0;scene.add(m);
   SLV.push({m,age:0,life:0.22,r:br?R*S3:0});
 }
@@ -54,7 +55,7 @@ function makeWaveBlade(){
   if(!_wbGeo){_wbGeo=[crescentGeo(0.62,0),crescentGeo(0.2,0.04),crescentGeo(1.1,-0.05)];_wbGeo.forEach(g=>g.userData.keep=true);}
   const g=new THREE.Group(),inner=new THREE.Group();g.add(inner);
   // หมุนให้แกน x ของรูปเสี้ยว = ทิศที่พุ่ง, แนวตั้ง = แกน y, ความหนา = ด้านข้าง
-  const body=new THREE.Mesh(_wbGeo[0],new THREE.MeshStandardMaterial({color:'#bfe6ff',emissive:'#2a78c0',emissiveIntensity:0.55,roughness:0.08,metalness:0.2,transparent:true,opacity:0.9,side:THREE.DoubleSide,depthWrite:false}));
+  const body=new THREE.Mesh(_wbGeo[0],new THREE.MeshStandardMaterial({color:'#b4dcf8',emissive:'#2a78c0',emissiveIntensity:0.45,roughness:0.5,metalness:0,transparent:true,opacity:0.9,side:THREE.DoubleSide,depthWrite:false}));
   const edge=new THREE.Mesh(_wbGeo[1],new THREE.MeshBasicMaterial({color:hdr('#e8f8ff',1.25),transparent:true,opacity:1,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide}));
   const glow=new THREE.Mesh(_wbGeo[2],new THREE.MeshBasicMaterial({color:hdr('#5fc8ff',0.9),transparent:true,opacity:0.3,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide}));glow.scale.set(1.12,1.1,1);
   inner.add(body,edge,glow);inner.scale.set(1.5,1.7,1.5);inner.position.y=1.55;
@@ -78,8 +79,8 @@ function updateSlashes(dt){
 let _glGeo=null,_glMat=null,_glMat2=null;
 function makeGlacier(x,y,a,len,t){
   if(!_glGeo){_glGeo=new THREE.ConeGeometry(1,1,5);_glGeo.translate(0,0.5,0);_glGeo.userData.keep=true;
-    _glMat=new THREE.MeshStandardMaterial({color:'#cfefff',emissive:'#2a6fa0',emissiveIntensity:0.55,roughness:0.12,metalness:0.1,transparent:true,opacity:0.9,flatShading:true});
-    _glMat2=new THREE.MeshStandardMaterial({color:'#e8f8ff',emissive:'#4a9ad0',emissiveIntensity:0.7,roughness:0.08,transparent:true,opacity:0.75,flatShading:true});_glMat.userData.keep=_glMat2.userData.keep=true;}
+    _glMat=new THREE.MeshStandardMaterial({color:'#bfe4fa',emissive:'#2a6fa0',emissiveIntensity:0.45,roughness:0.5,metalness:0,transparent:true,opacity:0.9,flatShading:true});
+    _glMat2=new THREE.MeshStandardMaterial({color:'#d4effc',emissive:'#4a9ad0',emissiveIntensity:0.5,roughness:0.5,transparent:true,opacity:0.75,flatShading:true});_glMat.userData.keep=_glMat2.userData.keep=true;}
   const g=new THREE.Group();g.position.set(tx(x),GY(x,y),tz(y));g.rotation.y=-a;scene.add(g);
   const spikes=[];
   mistLine(x,y,a,len,t,{rate:9,delay:len/1400});
