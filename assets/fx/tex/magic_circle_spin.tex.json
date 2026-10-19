@@ -1,0 +1,14 @@
+{
+  "v": 1,
+  "desc": "วงเวทหมุน (วน 16 เฟรม)",
+  "gen": "circle",
+  "seed": 2,
+  "px": 256,
+  "cols": 4,
+  "rows": 4,
+  "kind": "loop",
+  "fps": 16,
+  "ramp": "arcane",
+  "add": true,
+  "p": {"spin":1,"points":5}
+}

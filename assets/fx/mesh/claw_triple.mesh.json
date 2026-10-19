@@ -1,0 +1,13 @@
+{
+  "v": 1,
+  "desc": "กรงเล็บ 3 เล่มเรียงกัน (ข่วน) — ใบโค้งตั้งตรง",
+  "mat": "energy",
+  "pal": "storm",
+  "tags": [
+    "slash",
+    "claw"
+  ],
+  "parts": [
+    {"id":"claws","k":"blade","arc":75,"r":1.1,"w":0.2,"thick":0.04,"taper":0.7,"skew":-0.3,"pos":[-0.3,1,0.3],"rot":[0,0,90],"arr":3,"arrMode":"line","arrStep":[0.3,0,0]}
+  ]
+}

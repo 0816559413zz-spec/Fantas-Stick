@@ -1,0 +1,14 @@
+{
+  "v": 1,
+  "desc": "หอกพลังงานชี้ไปข้างหน้า (+z) — กระสุน / ท่าแทง",
+  "mat": "energy",
+  "pal": "storm",
+  "tags": [
+    "projectile"
+  ],
+  "parts": [
+    {"id":"shaft","k":"cyl","r0":0.07,"r1":0.07,"h":1.6,"sides":10,"rot":[90,0,0],"pos":[0,1.2,-0.6]},
+    {"id":"tip","k":"shard","h":0.7,"w":0.26,"sides":4,"rot":[90,0,0],"pos":[0,1.2,1]},
+    {"id":"rings","k":"torus","r":0.16,"tube":0.025,"seg":32,"rot":[90,0,0],"pos":[0,1.2,-0.3],"arr":3,"arrMode":"line","arrStep":[0,0,0.45],"arrScale":0.85}
+  ]
+}

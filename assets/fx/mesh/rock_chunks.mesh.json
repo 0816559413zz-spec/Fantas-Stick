@@ -1,0 +1,13 @@
+{
+  "v": 1,
+  "desc": "ก้อนหินขรุขระ 7 ก้อนเป็นวง (ดินแตก / หินลอย)",
+  "mat": "solid",
+  "pal": "earth",
+  "tags": [
+    "earth",
+    "debris"
+  ],
+  "parts": [
+    {"id":"rock","k":"sphere","r":0.32,"seg":5,"noise":0.12,"nfreq":2.5,"flat":true,"pos":[0,0.2,0],"arr":7,"arrR":1.1,"arrJit":0.6,"seed":9}
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "v": 1,
+  "desc": "แสงนุ่มกลม (เม็ดเรือง / ลูกแก้ว)",
+  "gen": "glow",
+  "seed": 1,
+  "px": 128,
+  "cols": 1,
+  "rows": 1,
+  "kind": "loop",
+  "ramp": "white",
+  "add": true,
+  "p": {}
+}

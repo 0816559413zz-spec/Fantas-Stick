@@ -1,0 +1,14 @@
+{
+  "v": 1,
+  "desc": "พายุหมุน: แถบเกลียวตั้ง 4 รอบ + กรวยลม",
+  "mat": "energy",
+  "pal": "storm",
+  "tags": [
+    "storm",
+    "zone"
+  ],
+  "parts": [
+    {"id":"band","k":"spiral","turns":4,"r0":0.3,"r1":1.6,"rise":3,"w":0.55,"wall":true,"seg":220},
+    {"id":"funnel","k":"lathe","prof":[[0.25,0],[0.5,1],[1,2.2],[1.7,3.4]],"seg":32,"twist":40}
+  ]
+}

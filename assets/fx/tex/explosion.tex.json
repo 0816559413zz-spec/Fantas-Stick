@@ -1,0 +1,15 @@
+{
+  "v": 1,
+  "desc": "ลูกไฟระเบิด ร้อนขาว → ควันมืด",
+  "gen": "explosion",
+  "seed": 1,
+  "px": 128,
+  "cols": 8,
+  "rows": 8,
+  "kind": "life",
+  "fps": 24,
+  "ramp": "fire",
+  "add": true,
+  "occ": 0.55,
+  "p": {}
+}

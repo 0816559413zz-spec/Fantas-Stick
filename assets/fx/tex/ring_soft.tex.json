@@ -1,0 +1,13 @@
+{
+  "v": 1,
+  "desc": "วงแหวนนุ่ม (ฮาโล)",
+  "gen": "ring",
+  "seed": 1,
+  "px": 256,
+  "cols": 1,
+  "rows": 1,
+  "kind": "loop",
+  "ramp": "white",
+  "add": true,
+  "p": {}
+}

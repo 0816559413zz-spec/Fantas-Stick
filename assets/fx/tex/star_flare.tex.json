@@ -1,0 +1,13 @@
+{
+  "v": 1,
+  "desc": "ดาวประกาย 4 แฉก",
+  "gen": "flare",
+  "seed": 1,
+  "px": 256,
+  "cols": 1,
+  "rows": 1,
+  "kind": "loop",
+  "ramp": "white",
+  "add": true,
+  "p": {}
+}

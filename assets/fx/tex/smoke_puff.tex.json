@@ -1,0 +1,15 @@
+{
+  "v": 1,
+  "desc": "ควันพวย ขยายแล้วจาง (ตามอายุเม็ด)",
+  "gen": "smoke",
+  "seed": 2,
+  "px": 128,
+  "cols": 6,
+  "rows": 6,
+  "kind": "life",
+  "fps": 24,
+  "ramp": "smoke",
+  "add": false,
+  "rot": 0.8,
+  "p": {}
+}

@@ -1,0 +1,14 @@
+{
+  "v": 1,
+  "desc": "รอยฟันกวาดแล้วจาง (ตามอายุ)",
+  "gen": "slash",
+  "seed": 1,
+  "px": 128,
+  "cols": 4,
+  "rows": 4,
+  "kind": "life",
+  "fps": 24,
+  "ramp": "white",
+  "add": true,
+  "p": {}
+}

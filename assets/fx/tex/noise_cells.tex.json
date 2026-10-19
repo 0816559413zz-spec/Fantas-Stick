@@ -1,0 +1,13 @@
+{
+  "v": 1,
+  "desc": "ลายเซลล์ / เกล็ด / รอยแตก ต่อขอบได้",
+  "gen": "noise",
+  "seed": 3,
+  "px": 256,
+  "cols": 1,
+  "rows": 1,
+  "kind": "loop",
+  "ramp": "white",
+  "add": true,
+  "p": {"mode":2,"scale":6}
+}

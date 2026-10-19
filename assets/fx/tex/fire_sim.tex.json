@@ -1,0 +1,15 @@
+{
+  "v": 1,
+  "desc": "ไฟจากการจำลองของไหลจริง (วน)",
+  "gen": "sim",
+  "seed": 3,
+  "px": 128,
+  "cols": 8,
+  "rows": 8,
+  "kind": "loop",
+  "fps": 24,
+  "ramp": "fire",
+  "add": true,
+  "rand": true,
+  "p": {"mode":0,"emit":0.55,"buoy":1.1,"vort":0.8,"cool":0.6}
+}

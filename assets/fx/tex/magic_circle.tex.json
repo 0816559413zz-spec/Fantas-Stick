@@ -1,0 +1,13 @@
+{
+  "v": 1,
+  "desc": "วงเวท 3 วง + ดาว 6 แฉก + อักษรเวท",
+  "gen": "circle",
+  "seed": 1,
+  "px": 256,
+  "cols": 1,
+  "rows": 1,
+  "kind": "loop",
+  "ramp": "gold",
+  "add": true,
+  "p": {}
+}

@@ -11,8 +11,8 @@ const missing = files.filter(f => !onDisk.includes(f)), extra = onDisk.filter(f 
 if (missing.length || extra.length) { console.error('FILES ไม่ตรงกับ js/ — ขาด:', missing, 'เกิน:', extra); process.exit(1); }
 let code = '', starts = [];
 for (const f of files) { let t = fs.readFileSync(path.join(ROOT, 'js', f + '.js'), 'utf8'); if (!t.endsWith('\n')) t += '\n'; starts.push([code.split('\n').length, f]); code += t; }
-// VFX Studio (index.html?studio) ต่อท้ายด้วย tools/fx-lint.js + studio/studio.js — ตรวจไวยากรณ์รวมกันด้วย
-for (const f of ['tools/fx-lint.js', 'studio/studio.js']) { if (!fs.existsSync(path.join(ROOT, f))) continue; let t = fs.readFileSync(path.join(ROOT, f), 'utf8'); if (!t.endsWith('\n')) t += '\n'; starts.push([code.split('\n').length, '../' + f.replace(/\.js$/, '')]); code += t; }
+// VFX Studio (index.html?studio) ต่อท้ายด้วย tools/fx-lint.js + studio/studio.js + texgen.js + maker.js — ตรวจไวยากรณ์รวมกันด้วย
+for (const f of ['tools/fx-lint.js', 'studio/studio.js', 'studio/texgen.js', 'studio/maker.js']) { if (!fs.existsSync(path.join(ROOT, f))) continue; let t = fs.readFileSync(path.join(ROOT, f), 'utf8'); if (!t.endsWith('\n')) t += '\n'; starts.push([code.split('\n').length, '../' + f.replace(/\.js$/, '')]); code += t; }
 const tmp = path.join(os.tmpdir(), 'fantas-stick-check.mjs');
 fs.writeFileSync(tmp, code);
 try { execFileSync(process.execPath, ['--check', tmp], { stdio: 'pipe' }); console.log('OK —', files.length, 'files,', code.split('\n').length - 1, 'lines'); }

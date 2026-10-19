@@ -1,0 +1,15 @@
+{
+  "v": 1,
+  "desc": "กระแสไฟกระตุก 3 เส้น (วน)",
+  "gen": "electric",
+  "seed": 1,
+  "px": 128,
+  "cols": 4,
+  "rows": 4,
+  "kind": "loop",
+  "fps": 24,
+  "ramp": "storm",
+  "add": true,
+  "rand": true,
+  "p": {}
+}

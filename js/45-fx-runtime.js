@@ -26,7 +26,7 @@ function fxOverrides(){FXR.over={};
   try{const j=JSON.parse(localStorage.getItem('wd_fxbind')||'null');if(j&&typeof j==='object')Object.assign(FXR.over,j);}catch(e){}}
 function fxLoad(name){let e=FXR.db.get(name);if(e)return e.p;
   const v=(FXR.index.fx[name]||{}).v||'';e={data:null,fail:false};FXR.db.set(name,e);
-  e.p=fxFetch('assets/fx/'+name+'.fx.json'+(v?'?v='+v:'')).then(d=>{e.data=d;return d;}).catch(err=>{e.fail=true;console.warn('fx: โหลดไม่ได้',name,err.message);return null;});
+  e.p=fxFetch('assets/fx/'+name+'.fx.json'+(v?'?v='+v:'')).then(d=>{e.data=d;fxPreAssets(d);return d;}).catch(err=>{e.fail=true;console.warn('fx: โหลดไม่ได้',name,err.message);return null;});
   return e.p;}
 function fxData(name){const e=FXR.db.get(name);if(!e){fxLoad(name);return null;}return e.data;}
 // ---------- ค่า: ตัวเลข / สูตร / ช่วงสุ่ม / เส้นโค้ง / สี ----------
@@ -183,6 +183,7 @@ function fxPart(S,I,w,p,nr,dir,sp,look,col,c2,k,world,yw){const L=S.d,g=q=>fxG(L
     case 'smoke':q.smoke=true;delete q.fin;if(g('fb'))q.fb=g('fb');break;
     case 'fire':flame(q.x,q.y,q.h,{vx:q.vx,vy:q.vy,vh:q.vh,life,size,g:q.g,drag:q.drag,grow:q.grow,col:fxG(L,'col')!=='$core'&&L.col?col:undefined,fb:g('fb')||undefined});return;
     case 'ember':q.sh=2;q.size=size*0.5;break;}
+  {const fb=g('fb');if(fb&&fb.startsWith('tex/')){fxTexNeed(fb);q.fb=fb;}}   // ภาพที่สร้างเอง (tex/…) ใช้ได้กับทุก look — ยังโหลดไม่เสร็จ = เม็ดแบบเดิม
   PARTS.push(q);}
 // ---------- รูปทรง 3D ----------
 const FXGEO=new Map();
@@ -230,15 +231,16 @@ function fxEnergyMat(c1,c2,c3){const U={time:FIRE_U.time,uC1:{value:new THREE.Co
       'float a=clamp(body+edge,0.0,1.0)*uOp;gl_FragColor=vec4(c*uInt*a,a*0.82);}'});}
 function fxMeshMake(S,I,w){const L=S.d,g=k=>fxG(L,k),sh=g('shape'),mt=g('mat'),C=k=>fxCol(g(k),I);let obj,mats=[];
   const mkMat=()=>{switch(mt){
-    case 'fire':{const ball=g('mode')==='ball'||(g('mode')==='auto'&&['sphere','dome','torus','glb','spikes'].includes(sh));
+    case 'fire':{const ball=g('mode')==='ball'||(g('mode')==='auto'&&['sphere','dome','torus','glb','spikes','model'].includes(sh));
       const m=fireMat({mode:ball?'ball':'sheet',flow:g('flow'),speed:(ball?1.2:1.4)*g('scroll'),int:1.15,disp:g('disp'),tint:L.col?C('col'):undefined,side:sh==='plane'});return m;}
     case 'ice':return iceShaderMat({glow:1,rim:g('rim')});
     case 'glow':return new THREE.MeshBasicMaterial({color:hdr(C('col'),1.15),transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide});
     case 'solid':return new THREE.MeshStandardMaterial({color:C('col'),emissive:C('col2'),emissiveIntensity:0.35,roughness:0.85,metalness:0,flatShading:true,transparent:true});
-    case 'flip':{const t=fxFlipTex(g('tex'));const m=new THREE.MeshBasicMaterial({map:t?t.map:null,color:hdr(C('col'),1.2),transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide});if(t)S.flip=t;return m;}
+    case 'flip':{const t=fxFlipTex(g('tex')),add=!t||t.add!==false;const m=new THREE.MeshBasicMaterial({map:t?t.map:null,color:add?hdr(C('col'),1.2):C('col'),transparent:true,depthWrite:false,blending:add?THREE.AdditiveBlending:THREE.NormalBlending,side:THREE.DoubleSide});if(t)S.flip=t;return m;}
     default:{const m=fxEnergyMat(fxCol('$core',I),C('col'),C('col2'));m.uniforms.uScroll.value=g('scroll');m.uniforms.uRim.value=g('rim');return m;}}};
   if(sh==='glb'){const nm=g('glb');if(!MODELS.ready.get(nm)){if(nm&&!MODELS.fail.has(nm))loadModel(nm);S.oneshot=1;return;}
     obj=modelInst(nm);const m=mkMat();mats.push(m);obj.traverse(q=>{if(q.isMesh){q.material=m;q.castShadow=false;q.renderOrder=3;}});}
+  else if(sh==='model'){const geo=fxMeshGeo(g('model'));if(!geo){S.oneshot=1;return;}const m=mkMat();mats.push(m);obj=new THREE.Mesh(geo,m);obj.renderOrder=3;S.geo=geo;}   // โมเดลที่ปั้นในสตูดิโอ (assets/fx/mesh)
   else{const geo=fxGeo(L),m=mkMat();mats.push(m);obj=new THREE.Mesh(geo,m);obj.renderOrder=3;S.geo=geo;}
   const root=new THREE.Group();root.add(obj);S.inner=obj;
   const r=g('rot')||[0,0,0];obj.rotation.order='YXZ';obj.rotation.set(-(r[0]||0)*FXDEG,-(r[1]||0)*FXDEG,(r[2]||0)*FXDEG);
@@ -254,8 +256,9 @@ function fxMeshTick(S,I,k,dt){const L=S.d,g=q=>fxG(L,q),V=q=>fxV(g(q),I,k);if(!S
     else if(u&&u.uC1){u.uOp.value=op;u.uDis.value=dis;u.uInt.value=it;}
     else if(u&&u.uFade){u.uFade.value=op*(1-dis);u.uGlow.value=0.95*it;}
     else m.opacity=op*Math.min(1,it);}
-  if(S.flip){const F=S.flip,n=F.cols*F.rows,f=Math.min(n-1,Math.floor(k*n*(F.span||1))%n);F.map.offset.set((f%F.cols)/F.cols,1-(Math.floor(f/F.cols)+1)/F.rows);}}
+  if(S.flip){const F=S.flip,n=F.cols*F.rows,f=F.fps?Math.floor(S.age*F.fps)%n:Math.min(n-1,Math.floor(k*n*(F.span||1))%n);F.map.offset.set((f%F.cols)/F.cols,1-(Math.floor(f/F.cols)+1)/F.rows);}}
 function fxFlipTex(name){if(!name)return null;let e=null,t=null;const ff=MODELS.man&&MODELS.man.fx&&MODELS.man.fx[name];
+  if(name.startsWith('tex/')){const X=FXMK.tex.get(name);if(!X)fxTexLoad(name);if(!X||!X.tex)return null;t=X.tex.clone();t.userData={};t.repeat.set(1/X.o.cols,1/X.o.rows);t.needsUpdate=true;return {map:t,cols:X.o.cols,rows:X.o.rows,span:X.o.span,add:X.o.add,fps:X.meta.kind==='loop'?(X.meta.fps||24):0};}
   if(ff){const F=flipTex(name);if(F&&F.t&&F.t.image){t=F.t.clone();e=F.e;}}
   else if(PFB[name]&&(PFB[name].tex||(PFB[name].pts&&PFB[name].pts.material.uniforms.map))){const src=PFB[name].tex||PFB[name].pts.material.uniforms.map.value;t=src.clone();e=PFB[name].e;}
   if(!t)return null;t.userData={};t.repeat.set(1/(e.cols||8),1/(e.rows||8));t.needsUpdate=true;return {map:t,cols:e.cols||8,rows:e.rows||8,span:1};}

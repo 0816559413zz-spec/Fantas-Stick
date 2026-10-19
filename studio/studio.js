@@ -17,7 +17,7 @@ function stToast(m,ms){const t=$st('stToast');t.textContent=m;t.hidden=false;cle
 const stWait=(f,ms)=>new Promise(r=>{const t0=performance.now();const k=setInterval(()=>{let ok=false;try{ok=f();}catch(e){}if(ok||performance.now()-t0>ms){clearInterval(k);r(ok);}},50);});
 function stRng(seed){let a=seed>>>0;return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
 const TYPEC={flash:'#f3dc94',halo:'#e3a94a',ring:'#7fb8ff',light:'#ffb070',screen:'#c08aff',sound:'#8f9ab3',emit:'#ffd56a',mesh:'#ff8a3a',firevol:'#ff5a2a',trail:'#9fe8ff',bolt:'#ffe27a',decal:'#8a7a6a',debris:'#a08060',mist:'#cfe8ff',crown:'#9fd8ff',geyser:'#ff7a2a',use:'#b57dff',code:'#7d8aa8'};
-const SHAPE_SVG={sphere:'<circle cx="12" cy="9" r="7"/>',dome:'<path d="M3 15a9 9 0 0 1 18 0Z"/>',disc:'<ellipse cx="12" cy="11" rx="10" ry="4"/>',ring:'<ellipse cx="12" cy="11" rx="10" ry="4" fill="none" stroke-width="2.5"/>',cylinder:'<path d="M4 4h16v12H4z" opacity=".8"/>',cone:'<path d="M12 1L20 17H4Z"/>',torus:'<ellipse cx="12" cy="10" rx="10" ry="5" fill="none" stroke-width="3.5"/>',crescent:'<path d="M5 16Q12-2 20 9Q12 3 5 16Z"/>',spikes:'<path d="M2 17L6 6L9 17L12 1L15 17L18 7L22 17Z"/>',beam:'<rect x="1" y="6" width="22" height="7" rx="3.5"/>',plane:'<rect x="5" y="2" width="14" height="14"/>',lathe:'<path d="M8 17C2 10 8 6 10 2h4c2 4 8 8 2 15Z"/>',ribbon:'<path d="M1 13Q7 1 12 9T23 5" fill="none" stroke-width="3"/>',glb:'<path d="M12 1L21 6v8l-9 5-9-5V6Z" fill="none" stroke-width="2"/>'};
+const SHAPE_SVG={sphere:'<circle cx="12" cy="9" r="7"/>',dome:'<path d="M3 15a9 9 0 0 1 18 0Z"/>',disc:'<ellipse cx="12" cy="11" rx="10" ry="4"/>',ring:'<ellipse cx="12" cy="11" rx="10" ry="4" fill="none" stroke-width="2.5"/>',cylinder:'<path d="M4 4h16v12H4z" opacity=".8"/>',cone:'<path d="M12 1L20 17H4Z"/>',torus:'<ellipse cx="12" cy="10" rx="10" ry="5" fill="none" stroke-width="3.5"/>',crescent:'<path d="M5 16Q12-2 20 9Q12 3 5 16Z"/>',spikes:'<path d="M2 17L6 6L9 17L12 1L15 17L18 7L22 17Z"/>',beam:'<rect x="1" y="6" width="22" height="7" rx="3.5"/>',plane:'<rect x="5" y="2" width="14" height="14"/>',lathe:'<path d="M8 17C2 10 8 6 10 2h4c2 4 8 8 2 15Z"/>',ribbon:'<path d="M1 13Q7 1 12 9T23 5" fill="none" stroke-width="3"/>',glb:'<path d="M12 1L21 6v8l-9 5-9-5V6Z" fill="none" stroke-width="2"/>',model:'<path d="M12 1L21 6V13L12 18L3 13V6Z" opacity=".35"/><path d="M12 1L21 6L12 11L3 6Z"/>'};
 // ---------- เริ่ม ----------
 async function stBoot(){
   document.body.classList.add('studio');stBuildUI();
@@ -32,6 +32,7 @@ async function stBoot(){
   const first=SQ.get('fx')||(ST.list['start/explosion']?'start/explosion':Object.keys(ST.list)[0]);
   if(first)await stOpen(first);else stNew('start/ใหม่','');
   ST.ready=true;requestAnimationFrame(stFrame);setInterval(stPoll,1000);
+  await mkInit();   // แท็บ 🧊 โมเดล + 🎞 ภาพ (studio/maker.js)
   if(SQ.has('sheet')){const ts=SQ.get('sheet').split(',').map(Number).filter(x=>!isNaN(x));await stSheet(ts.length?ts:null,SQ.get('save'));}
   else if(SQ.has('t')){ST.play=false;stSeek(+SQ.get('t'));}
 }
@@ -60,7 +61,7 @@ function stIsLoop(){return (ST.fx&&ST.fx.layers||[]).some(L=>L.loop);}
 function stRender(dt,draw){stVnow+=dt*1000;FXSTUDIO.noDraw=!draw;try{render(dt,stVnow);}catch(e){console.error(e);}finally{FXSTUDIO.noDraw=false;}}
 function stFlush(){if(ST.I){fxKill(ST.I);ST.I=null;}fxClearAll();for(let i=0;i<34;i++)stRender(0.15,false);PARTS.length=0;SCR.fl.length=0;SCR.rad=null;SCR.chr=0;shakeA=0;}
 function stLayers(){const F=ST.fx;return Object.assign({},F,{layers:(F.layers||[]).filter(L=>!ST.mute[L.id]&&(!ST.solo||ST.solo===L.id))});}
-function stRestart(){if(!ST.fx||!VIEW.cur)return;stFlush();Math.random=stRng(ST.seed*7919+13);ST.t=0;ST.acc=0;ST.run={white:0,parts:0,block:0};
+function stRestart(){if(!ST.fx||!VIEW.cur||MK.ws!=='fx')return;stFlush();Math.random=stRng(ST.seed*7919+13);ST.t=0;ST.acc=0;ST.run={white:0,parts:0,block:0};
   const A=stAnchor();if(!A)return;ST.I=fxStart(stLayers(),{x:A.x,y:A.y,h:A.h,a:A.a,follow:A.follow,own:true},ST.name);}
 function stStep(){ST.t+=STD;if(ST.I&&stIsLoop()&&!ST.I.stop&&ST.t>=stDur())fxStop(ST.I);stRender(STD,false);}
 function stSeek(t){t=Math.max(0,Math.min(t,stDur()+ST.tail));stRestart();let n=0;while(ST.t+STD*0.5<t&&n<900){stStep();n++;}stDraw(true);}
@@ -79,12 +80,13 @@ function stMeasure(){const W=_stc.width,H=_stc.height;_stx.drawImage(gl.domEleme
   ST.met.block=blk;ST.run.white=Math.max(ST.run.white,ST.met.white);ST.run.parts=Math.max(ST.run.parts,ST.met.parts);if(blk>35)ST.run.block+=STD*5;}
 function stFrame(now){requestAnimationFrame(stFrame);const rdt=Math.min(0.1,(now-stLast)/1000);stLast=now;stFr++;
   if(!ST.ready||ST.busy||screen!=='game'||!VIEW.cur)return;
+  if(MK.ws!=='fx'){mkFrame(rdt);return;}   // แท็บโมเดล / ภาพ วาดจอเอง
   if(ST.seekTo!==null){const t=ST.seekTo;ST.seekTo=null;stSeek(t);stTlTime();return;}
   if(ST.play){ST.acc+=rdt*ST.speed;let n=0;while(ST.acc>=STD&&n<6){ST.acc-=STD;stStep();n++;}if(ST.acc>STD)ST.acc=0;
     if(ST.t>=stDur()+ST.tail){if(ST.loop)stRestart();else{ST.play=false;stSync();}}}
   stDraw(false);stTlTime();}
 // ---------- แผ่นภาพสรุปทั้งไทม์ไลน์ (สำหรับ Claude: ภาพเดียวเห็นทั้ง ง้าง → กระแทก → สลาย) ----------
-async function stSheet(times,save){if(!ST.fx)return null;ST.busy=true;const was=ST.play;ST.play=false;
+async function stSheet(times,save){if(!ST.fx)return null;ST.busy=true;try{await fxAssetsWait(ST.fx);}catch(e){}const was=ST.play;ST.play=false;
   const D=stDur();times=(times&&times.length?times:[0.03,0.08,0.15,0.25,0.4,0.6,0.9,Math.max(1.2,D*0.8)]).filter(t=>t<=D+ST.tail).sort((a,b)=>a-b);
   const cols=Math.min(4,times.length),rows=Math.ceil(times.length/cols),cw=400,ch=225,cap=22,head=64,sh=document.createElement('canvas');sh.width=cols*cw;sh.height=head+rows*(ch+cap);
   const x=sh.getContext('2d');x.fillStyle='#070a14';x.fillRect(0,0,sh.width,sh.height);
@@ -138,10 +140,10 @@ function stUndo(r){const A=r?ST.redo:ST.undo,B=r?ST.undo:ST.redo;if(!A.length)re
 // หลังแก้ไฟล์: ตรวจ + วาดแผงใหม่ + เล่นใหม่ที่เวลาเดิม
 let _stChT=0;
 function stChanged(rebuild){ST.dirty=JSON.stringify(ST.fx)!==ST.saved;clearTimeout(_stChT);_stChT=setTimeout(()=>stAfterChange(rebuild,true),110);}
-function stAfterChange(rebuild,keepT){stLintRun();stSync();stTlRender();if(rebuild!==false)stInspRender();
+function stAfterChange(rebuild,keepT){if(ST.fx)fxPreAssets(ST.fx);stLintRun();stSync();stTlRender();if(rebuild!==false)stInspRender();
   if(!VIEW.cur)return;if(keepT&&!ST.play)ST.seekTo=ST.t;else stRestart();}
 function stLintRun(){if(!window.FXLINT||!FXR.schema||!ST.fx){ST.lint=[];return;}
-  const man=MODELS.man||{},ctx={names:new Set(Object.keys(ST.list)),models:new Set(Object.keys(man.models||{})),flips:new Set([...Object.keys(man.fx||{}),...Object.keys(man.ptex||{})]),sounds:new Set(Object.keys(SFXN)),self:ST.name};
+  const man=MODELS.man||{},ctx={names:new Set(Object.keys(ST.list)),models:new Set(Object.keys(man.models||{})),flips:new Set([...Object.keys(man.fx||{}),...Object.keys(man.ptex||{})]),sounds:new Set(Object.keys(SFXN)),self:ST.name,meshes:new Set(Object.keys(MK.list.mesh)),texs:new Set(Object.keys(MK.list.tex))};
   try{ST.lint=FXLINT.fxLint(ST.fx,FXR.schema,ctx);}catch(e){ST.lint=[{lv:'err',at:'',msg:String(e)}];}}
 async function stPoll(){if(!ST.api||ST.busy)return;try{const r=await fetch('/api/fx-list',{cache:'no-cache'});const j=await r.json();const old=ST.list;ST.list=j.fx||{};
   if(Object.keys(old).join()!==Object.keys(ST.list).join())stLibRender();
@@ -182,12 +184,13 @@ function stBuildUI(){
   const am=$st('stAddMenu');for(const [t,T] of Object.entries(FXR.schema?FXR.schema.types:{}))am.append(h('button',{on:{click:()=>{am.hidden=true;stAddLayer(t);}}},(T.icon||'')+' '+T.th,h('small',{className:'mute'},' '+t)));
   // กล้องหมุนเอง: ลากบนจอ / ล้อเมาส์ซูม
   const cv=gl.domElement;let drag=null;
-  cv.addEventListener('pointerdown',e=>{drag={x:e.clientX,y:e.clientY};cv.setPointerCapture(e.pointerId);if(ST.cam!=='orbit'){ST.cam='orbit';stSync();}});
+  cv.addEventListener('pointerdown',e=>{if(mkGizmoHot())return;drag={x:e.clientX,y:e.clientY};cv.setPointerCapture(e.pointerId);if(ST.cam!=='orbit'){ST.cam='orbit';stSync();}});
   cv.addEventListener('pointermove',e=>{if(!drag)return;ST.orb.yaw+=(e.clientX-drag.x)*0.008;ST.orb.pitch=Math.max(-0.2,Math.min(1.45,ST.orb.pitch+(e.clientY-drag.y)*0.006));drag={x:e.clientX,y:e.clientY};if(!ST.play)ST.seekTo=ST.t;});
   cv.addEventListener('pointerup',()=>drag=null);
   cv.addEventListener('wheel',e=>{e.preventDefault();ST.orb.dist=Math.max(3,Math.min(60,ST.orb.dist*(e.deltaY>0?1.1:0.9)));if(ST.cam!=='orbit'){ST.cam='orbit';stSync();}if(!ST.play)ST.seekTo=ST.t;},{passive:false});
   // ปุ่มลัด (กันไม่ให้ปุ่มไหลเข้าเกม)
   addEventListener('keydown',e=>{if(!document.body.classList.contains('studio'))return;const tg=e.target.tagName;const typing=tg==='INPUT'||tg==='TEXTAREA'||tg==='SELECT';
+    if(MK.ws!=='fx'){mkKey(e,typing);e.stopImmediatePropagation();return;}
     if((e.ctrlKey||e.metaKey)&&e.code==='KeyS'){e.preventDefault();e.stopImmediatePropagation();stSave(false);return;}
     if(typing){e.stopImmediatePropagation();return;}
     if((e.ctrlKey||e.metaKey)&&e.code==='KeyZ'){e.preventDefault();stUndo(e.shiftKey);}
@@ -262,9 +265,9 @@ function stInspRender(){const P=$st('stInsp');if(!P||!ST.fx)return;P.innerHTML='
   P.append(h('details',null,h('summary',null,'JSON ของชั้นนี้'),stJsonBox(L)));}
 // ซ่อนฟิลด์ที่ไม่เกี่ยวกับรูปทรง/วัสดุที่เลือก (ให้แผงสั้น อ่านง่าย)
 function stShowField(L,k){if(L.t!=='mesh'&&L.t!=='emit'&&L.t!=='trail')return true;const g=q=>L[q]!==undefined?L[q]:stDef(L,q);
-  if(L.t==='mesh'){const sh=g('shape'),mt=g('mat');if(k==='glb')return sh==='glb';if(k==='inner')return sh==='ring'||sh==='torus';if(k==='n')return sh==='spikes';if(k==='wk')return sh==='crescent'||sh==='ribbon';
+  if(L.t==='mesh'){const sh=g('shape'),mt=g('mat');if(k==='glb')return sh==='glb';if(k==='model')return sh==='model';if(k==='inner')return sh==='ring'||sh==='torus';if(k==='n')return sh==='spikes';if(k==='wk')return sh==='crescent'||sh==='ribbon';
     if(k==='prof')return sh==='lathe';if(k==='path')return sh==='ribbon';if(['heat','disp','flow','mode'].includes(k))return mt==='fire';if(k==='tex')return mt==='flip';if(['scroll','rim'].includes(k))return mt==='energy'||mt==='fire'||mt==='ice';if(k==='col2')return mt==='energy'||mt==='solid';}
-  if(L.t==='emit'){if(k==='of')return g('from')==='mesh';if(k==='fh')return ['cone','box','line'].includes(g('from'));if(k==='spread')return ['up','down','aim'].includes(g('dir'))||g('from')==='cone';if(k==='fb')return ['smoke','fire'].includes(g('look'));}
+  if(L.t==='emit'){if(k==='of')return g('from')==='mesh';if(k==='fh')return ['cone','box','line'].includes(g('from'));if(k==='spread')return ['up','down','aim'].includes(g('dir'))||g('from')==='cone';}
   if(L.t==='trail'){if(['a0','a1','r','r0','tilt'].includes(k))return !!g('sweep');if(k==='of')return !g('sweep');}
   return true;}
 function stShapePicker(L){const cur=L.shape||'sphere';return h('div',{className:'stF'},h('label',null,'รูปทรง',h('small',null,'shape')),h('div',{className:'stShapes'},...FXR.schema.shapes.map(k=>{const b=h('button',{className:k===cur?'on':'',title:k,on:{click:()=>{stPush();L.shape=k;stChanged(true);}}});b.innerHTML='<svg viewBox="0 0 24 18" fill="currentColor" stroke="currentColor">'+(SHAPE_SVG[k]||'')+'</svg>'+k;return b;})));}
@@ -302,7 +305,7 @@ function stField(L,obj,k,sp){if(!sp)return h('span');const cur=obj[k],v=cur!==un
         const ta=h('textarea',{value:JSON.stringify(v),on:{focus:stPush,change:e=>{try{set(JSON.parse(e.target.value),true);}catch(er){stToast('JSON ผิด');}}}});box.append(ta,h('div',{className:'row'},reset));break;}
       const row=h('div',{className:'row'});['x','y','z'].forEach((ax,i)=>row.append(h('span',{className:'mute'},ax),h('input',{type:'number',step:0.1,value:v[i],style:'width:56px',on:{focus:stPush,input:e=>{const nv=v.slice();nv[i]=+e.target.value;set(nv,false);}}})));
       if(sp.curve)row.append(h('button',{className:'tg',title:'เคลื่อนที่ตามเวลา',on:{click:()=>{stPush();set({'0':v,'1':[v[0],v[1],v[2]+2]},true);}}},'∿'));if(cur!==undefined)row.append(reset);box.append(row);break;}
-    case 'str':{const dl='stDL_'+k;const inp=h('input',{type:'text',value:v||'',list:dl,on:{focus:stPush,change:e=>set(e.target.value,true)}});const opts=k==='fx'?Object.keys(ST.list):k==='glb'?Object.keys((MODELS.man||{}).models||{}).filter(n=>n.startsWith('mesh_')||n.startsWith('vfx_')):k==='name'?Object.keys(SFXN):k==='tex'?[...Object.keys((MODELS.man||{}).fx||{}),...Object.keys((MODELS.man||{}).ptex||{})]:k==='fn'?Object.keys(FXCODE):k==='of'?ST.fx.layers.map(x=>x.id):[];
+    case 'str':{const dl='stDL_'+k;const inp=h('input',{type:'text',value:v||'',list:dl,on:{focus:stPush,change:e=>set(e.target.value,true)}});const opts=k==='fx'?Object.keys(ST.list):k==='glb'?Object.keys((MODELS.man||{}).models||{}).filter(n=>n.startsWith('mesh_')||n.startsWith('vfx_')):k==='name'?Object.keys(SFXN):k==='tex'?[...Object.keys(MK.list.tex).map(n=>'tex/'+n),...Object.keys((MODELS.man||{}).fx||{}),...Object.keys((MODELS.man||{}).ptex||{})]:k==='fb'?[...Object.keys(MK.list.tex).map(n=>'tex/'+n),'smoke','fire']:k==='model'?Object.keys(MK.list.mesh):k==='fn'?Object.keys(FXCODE):k==='of'?ST.fx.layers.map(x=>x.id):[];
       box.append(h('div',{className:'row'},inp,cur!==undefined&&k!=='id'?reset:null),h('datalist',{id:dl},...opts.map(o=>h('option',{value:o}))));
       if(k==='id')inp.onchange=e=>{const n=e.target.value.trim();if(!n||ST.fx.layers.some(x=>x.id===n&&x!==obj)){stToast('id ซ้ำหรือว่าง');e.target.value=obj.id;return;}obj.id=n;ST.sel=n;stChanged(true);};break;}
     default:{const ta=h('textarea',{value:JSON.stringify(v,null,1),spellcheck:false,on:{focus:stPush,change:e=>{try{set(JSON.parse(e.target.value),true);}catch(er){stToast('JSON ผิด: '+er.message);}}}});box.append(ta);}}
@@ -350,6 +353,7 @@ function stHelp(){const m=h('div',{className:'stModal',on:{click:e=>{if(e.target
     'จอ: ลากเมาส์ = หมุนกล้อง • ล้อเมาส์ = ซูม • ปุ่มมุมกล้อง • ตัวเลขล่างจอ: ขาวจ้า ≤ 8%, บังตัว ≤ 35% (แดง = เกิน)',
     'ปุ่มลัด: Space เล่น/หยุด • R เล่นใหม่ • ← → ทีละเฟรม (Shift = 0.1 วิ) • Ctrl+S บันทึก • Ctrl+Z / Ctrl+Y • Delete ลบชั้น',
     '🖼 แผ่นภาพ = ภาพสรุปทั้งไทม์ไลน์ + ตัวเลข • 🎮 ลองในเกม = เปิดห้องฝึกโดยผูกเอฟเฟกต์กับท่าที่เลือก • ผูกถาวร: ⚙ ตั้งค่าไฟล์ → ผูกกับท่าในเกม',
+    'แท็บ 🧊 โมเดล = ปั้นโมเดลของเอฟเฟกต์เอง • แท็บ 🎞 ภาพ = วาดภาพ/flipbook เอง (กด ? ในแท็บนั้นดูวิธีใช้)',
     'บันทึกตรงลงโปรเจกต์ต้องเปิดผ่าน python tools/serve.py • รูปแบบไฟล์ทั้งหมด: FX-FORMAT.md'].map(t=>h('p',{style:'margin:0'},'• '+t))),h('button',{on:{click:()=>m.remove()}},'ปิด')));$st('st').append(m);}
 // ---------- API สำหรับ Claude / console ----------
 window.STUDIO={load:n=>stOpen(n),data:()=>ST.fx,name:()=>ST.name,

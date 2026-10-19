@@ -1,0 +1,14 @@
+{
+  "v": 1,
+  "desc": "ควันจากการจำลองจริง ลอยขึ้นแล้วจาง (ตามอายุ)",
+  "gen": "sim",
+  "seed": 4,
+  "px": 128,
+  "cols": 6,
+  "rows": 6,
+  "kind": "life",
+  "fps": 24,
+  "ramp": "smoke",
+  "add": false,
+  "p": {"mode":1,"emit":0.6,"buoy":0.9,"vort":1.2,"cool":0.3,"steps":3}
+}

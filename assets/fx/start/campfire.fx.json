@@ -1,0 +1,13 @@
+{
+  "v": 1,
+  "desc": "ตัวอย่างใช้ภาพที่สร้างเอง: กองไฟวนต่อเนื่อง (ภาพ fire_sim จากการจำลองของไหล) + ควันลอย (smoke_sim) + ถ่านแดง",
+  "tags": ["fire", "loop", "made"],
+  "pal": "fire",
+  "dur": 3,
+  "layers": [
+    {"id": "flames", "t": "emit", "at": 0, "life": 3, "loop": true, "rate": 22, "att": "ground", "from": "disc", "fr": 0.35, "dir": "up", "spread": 0.25, "speed": [0.2, 0.6], "up": 0.8, "plife": [0.6, 1], "look": "glow", "fb": "tex/fire_sim", "size": [16, 24], "col": "#ffffff", "c2": "#ffffff", "gravity": -0.5, "drag": 1.5, "curl": false},
+    {"id": "smoke", "t": "emit", "at": 0.3, "life": 2.7, "loop": true, "rate": 3, "att": "ground", "pos": [0, 1.4, 0], "from": "point", "dir": "up", "spread": 0.3, "speed": [0.3, 0.6], "up": 0.6, "plife": [1.6, 2.4], "look": "smoke", "fb": "tex/smoke_sim", "size": [18, 26], "col": "#e0d8d0", "c2": "#a8a098", "gravity": -0.4, "drag": 0.8},
+    {"id": "embers", "t": "emit", "at": 0, "life": 3, "loop": true, "rate": 10, "att": "ground", "from": "disc", "fr": 0.3, "dir": "up", "spread": 0.5, "speed": [1, 2.5], "plife": [0.8, 1.5], "look": "ember", "size": [1.5, 2.5], "col": "$hi", "c2": "$deep", "gravity": -1.5, "drag": 1},
+    {"id": "glow", "t": "light", "at": 0, "life": 3, "loop": true, "att": "ground", "pos": [0, 1, 0], "col": "$light", "int": {"0": 1.1, "0.3": 1.4, "0.6": 1.0, "1": 1.2}, "dist": 9}
+  ]
+}

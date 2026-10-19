@@ -1,0 +1,13 @@
+{
+  "v": 1,
+  "desc": "ลายเส้นเลือด / ใยสายฟ้า ต่อขอบได้",
+  "gen": "noise",
+  "seed": 2,
+  "px": 256,
+  "cols": 1,
+  "rows": 1,
+  "kind": "loop",
+  "ramp": "white",
+  "add": true,
+  "p": {"mode":1,"contrast":1.6}
+}

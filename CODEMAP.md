@@ -270,7 +270,7 @@ EFXAUG:144 PJPAL:163 pjPal:165 ULTCOL:166 efxAug:167 VFXAUG_ON:171 fxAug:172
 §192 4) เอฟเฟกต์ทั้งจอ (ค่าไปที่ GradePass ใน js/27-world.js)
 SCR:193 screenFlash:194 screenRadial:195 screenKick:196 screenHurt:197 _scv:198 updateScreenFx:199 updateVfxKit:207
 
-## js/45-fx-runtime.js (311) — 
+## js/45-fx-runtime.js (314) — 
 FXR:9 FXDEG:10
 §11 โหลด
 fxFetch:12 fxDefaults:13 fxBoot:14 fxOverrides:24 fxLoad:27 fxData:31
@@ -286,17 +286,28 @@ updateFx:90
 fxN:107 fxSpawn:108 fxTick:138 fxEnd:147
 §152 อนุภาค
 _fxrnd:153 fxUnit:154 fxCone:155 fxEmit:157 fxPart:174
-§187 รูปทรง 3D
-FXGEO:188 fxMerge:189 fxRibbon:194 fxGeo:200 fxEnergyMat:220 fxMeshMake:231 fxMeshTick:246 fxFlipTex:258
-§262 หางแสง / รอยฟัน
-fxTrailTick:263
-§269 สายฟ้า
-fxBolt:270
-§276 ฟังก์ชันในโค้ดที่ไฟล์เรียกได้ (ชั้น t:"code")
-FXCODE:277
-§289 ผูกกับ event ของเกม (assets/fx/bind.json) — เรียกจาก fx(ev)
-fxBind:291
-§301 แม่แบบ playFx เป็นไฟล์ (assets/fx/tpl/*, sig/*, rec/*)
-fxTpl:303
+§188 รูปทรง 3D
+FXGEO:189 fxMerge:190 fxRibbon:195 fxGeo:201 fxEnergyMat:221 fxMeshMake:232 fxMeshTick:248 fxFlipTex:260
+§265 หางแสง / รอยฟัน
+fxTrailTick:266
+§272 สายฟ้า
+fxBolt:273
+§279 ฟังก์ชันในโค้ดที่ไฟล์เรียกได้ (ชั้น t:"code")
+FXCODE:280
+§292 ผูกกับ event ของเกม (assets/fx/bind.json) — เรียกจาก fx(ev)
+fxBind:294
+§304 แม่แบบ playFx เป็นไฟล์ (assets/fx/tpl/*, sig/*, rec/*)
+fxTpl:306
 
-(45 files, 9614 lines)
+## js/46-fx-make.js (141) — 
+FXMK:10 MKD:11 mkRng:12 mkHash:13 mkNoise:15 mkL:17 mkR2:18
+§19 ที่เก็บจุด/สามเหลี่ยม
+mkG:20 mkV:21 mkQ:22 mkAppend:23 mkCopy:24 mkFlat:25 _mkv:26 mkXf:27 mkThree:29 mkTRS:31 mkGrid:34
+§35 ชิ้นส่วน (k) — พิกัด: ฐานอยู่ที่ y=0 (ยกเว้น sphere/box อยู่กลาง)
+MKGEN:36
+§92 ตัวแต่ง (ทำตามลำดับ): เรียว → บิด → โค้ง → ขรุขระ → แบน(เหลี่ยม) → ขน…
+mkDeform:93 mkOpts:104 mkPart:105 fxMeshBuild:118
+§123 โหลด
+fxMeshLoad:124 fxMeshGeo:126 fxMeshSet:128 fxTexLoad:130 fxTexUse:133 fxTexNeed:136 fxPreAssets:138 fxAssetsWait:140
+
+(46 files, 9758 lines)

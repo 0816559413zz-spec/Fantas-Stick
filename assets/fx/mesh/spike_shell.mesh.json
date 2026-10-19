@@ -1,0 +1,14 @@
+{
+  "v": 1,
+  "desc": "เปลือกหนามครึ่งทรงกลม (เม่น) — โล่หนาม / ระเบิดผลึก",
+  "mat": "energy",
+  "pal": "hex",
+  "tags": [
+    "shell",
+    "spikes"
+  ],
+  "parts": [
+    {"id":"spikes","k":"burst","n":40,"r":0.5,"h":[0.35,0.85],"w":0.13,"hemi":true,"jit":0.4,"seed":4},
+    {"id":"shell","k":"sphere","r":0.55,"seg":10,"hemi":true,"noise":0.05,"nfreq":3,"flat":true}
+  ]
+}

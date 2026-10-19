@@ -1,7 +1,7 @@
 # เซิร์ฟเวอร์ทดสอบในเครื่อง (ใช้แทน python -m http.server ได้เลย): python tools/serve.py [พอร์ต=8765]
 # เสิร์ฟไฟล์ทั้งโฟลเดอร์เหมือนเดิม + ช่องทางสำหรับ VFX Studio (studio.html):
-#   GET  /api/fx-list               → รายชื่อไฟล์เอฟเฟกต์ทั้งหมด + เวลาแก้ล่าสุด (ไลบรารี / โหลดใหม่อัตโนมัติเมื่อไฟล์เปลี่ยน)
-#   POST /api/save?path=<ไฟล์>      → บันทึกไฟล์ (อนุญาตเฉพาะ assets/fx/**.fx.json, assets/fx/bind.json, assets/vfx/<ชื่อ>.glb|.png) แล้วรัน fx-check
+#   GET  /api/fx-list               → รายชื่อเอฟเฟกต์ + โมเดล (mesh) + ภาพ (tex) ทั้งหมด + เวลาแก้ล่าสุด (ไลบรารี / โหลดใหม่อัตโนมัติเมื่อไฟล์เปลี่ยน)
+#   POST /api/save?path=<ไฟล์>      → บันทึกไฟล์ (อนุญาตเฉพาะ assets/fx/**.fx.json, bind.json, mesh/<ชื่อ>.mesh.json, tex/<ชื่อ>.tex.json|.png, assets/vfx/<ชื่อ>.glb|.png) แล้วรัน fx-check
 #   POST /api/shot?name=<ชื่อ>      → เก็บภาพ (data URL หรือไบต์ PNG/JPEG) ลง shots/<ชื่อ>.png|.jpg (git-ignore) ให้ Claude เปิดดูด้วย Read
 # ฟังเฉพาะ 127.0.0.1 (เครื่องตัวเองเท่านั้น)
 import base64, json, os, re, subprocess, sys, time
@@ -10,7 +10,30 @@ from urllib.parse import urlparse, parse_qs
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 FXD = os.path.join(ROOT, 'assets', 'fx')
-SAVE_OK = [re.compile(r'^assets/fx/[a-z0-9_\-/]+\.fx\.json$'), re.compile(r'^assets/fx/bind\.json$'), re.compile(r'^assets/vfx/[a-z0-9_\-]+\.(glb|png)$')]
+SAVE_OK = [re.compile(r'^assets/fx/[a-z0-9_\-/]+\.fx\.json$'), re.compile(r'^assets/fx/bind\.json$'), re.compile(r'^assets/vfx/[a-z0-9_\-]+\.(glb|png)$'),
+           re.compile(r'^assets/fx/mesh/[a-z0-9_\-]+\.mesh\.json$'), re.compile(r'^assets/fx/tex/[a-z0-9_\-]+\.(tex\.json|png)$')]
+
+def asset_list(sub, ext):
+    out = {}
+    d = os.path.join(FXD, sub)
+    if not os.path.isdir(d):
+        return out
+    for f in os.listdir(d):
+        if not f.endswith(ext):
+            continue
+        p = os.path.join(d, f); n = f[:-len(ext)]
+        try:
+            j = json.load(open(p, encoding='utf-8'))
+            e = {'t': os.path.getmtime(p), 'desc': j.get('desc', '')}
+            if sub == 'tex':
+                png = os.path.join(d, n + '.png')
+                e.update({'gen': j.get('gen', ''), 'kind': j.get('kind', ''), 'png_t': os.path.getmtime(png) if os.path.exists(png) else 0})
+            else:
+                e.update({'mat': j.get('mat', ''), 'n': len(j.get('parts', []))})
+            out[n] = e
+        except Exception as ex:
+            out[n] = {'t': os.path.getmtime(p), 'err': str(ex)}
+    return out
 
 def fx_list():
     out = {}
@@ -25,7 +48,7 @@ def fx_list():
                 except Exception as e:
                     out[n] = {'t': os.path.getmtime(p), 'err': str(e)}
     b = os.path.join(FXD, 'bind.json')
-    return {'fx': out, 'bind_t': os.path.getmtime(b) if os.path.exists(b) else 0, 'now': time.time()}
+    return {'fx': out, 'mesh': asset_list('mesh', '.mesh.json'), 'tex': asset_list('tex', '.tex.json'), 'bind_t': os.path.getmtime(b) if os.path.exists(b) else 0, 'now': time.time()}
 
 class H(SimpleHTTPRequestHandler):
     def __init__(self, *a, **k):

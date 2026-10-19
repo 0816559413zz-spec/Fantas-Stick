@@ -1,0 +1,13 @@
+{
+  "v": 1,
+  "desc": "ลายเมฆ ต่อขอบได้ (หน้ากาก / หมอก)",
+  "gen": "noise",
+  "seed": 1,
+  "px": 256,
+  "cols": 1,
+  "rows": 1,
+  "kind": "loop",
+  "ramp": "white",
+  "add": true,
+  "p": {"mode":0}
+}

@@ -103,3 +103,70 @@ body.studio #gl:active{cursor:grabbing}
 .stModal .tpls button small{display:block;color:var(--mute);font-size:11px}
 #stToast{position:fixed;left:50%;bottom:calc(var(--sB) + 12px);transform:translateX(-50%);background:var(--sp2);border:1px solid var(--gold);padding:6px 12px;border-radius:3px;z-index:40;max-width:70vw;white-space:pre-wrap;pointer-events:none}
 @media (max-width:900px){body.studio{--sL:0px;--sR:0px}#stLib,#stInsp{display:none}}
+/* ---------- แท็บ 🧊 โมเดล / 🎞 ภาพ (studio/maker.js) ---------- */
+#mkTabs{display:flex;gap:2px;flex:none}
+#mkTabs button{padding:5px 11px;font-size:13px}
+body.studio:not(.ws-fx) .fxOnly,body.studio:not(.ws-fx) #stLib,body.studio:not(.ws-fx) #stTl,body.studio:not(.ws-fx) #stInsp,body.studio:not(.ws-fx) #stHud{display:none!important}
+#mkLib,#mkBot,#mkInsp,#mkTexView{display:none}
+body.ws-mesh #mkLib,body.ws-tex #mkLib,body.ws-mesh #mkBot,body.ws-tex #mkBot,body.ws-mesh #mkInsp,body.ws-tex #mkInsp{display:flex}
+body.ws-tex:not(.tex3d) #mkTexView{display:grid}
+#mkLib{position:absolute;left:0;top:var(--sT);bottom:var(--sB);width:var(--sL);background:var(--sp);border-right:1px solid var(--sl);flex-direction:column}
+#mkLib .head{padding:8px;display:grid;gap:6px;border-bottom:1px solid var(--sl)}
+#mkLib input{width:100%}
+#mkLibList{overflow:auto;padding:6px;flex:1}
+#mkLibList>button{display:block;width:100%;text-align:left;background:none;border-color:transparent;padding:3px 6px;font-size:12.5px;overflow:hidden;text-overflow:ellipsis}
+#mkLibList>button.on{background:rgba(217,180,90,.14);border-color:var(--sl2);color:var(--gold2)}
+#mkLibList>button small{display:block;color:var(--mute);font-size:10.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mkThumbs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px}
+.mkThumbs button{display:grid;gap:2px;padding:3px!important;background:#070a14!important;font-size:11px;overflow:hidden}
+.mkThumbs button.on{border-color:var(--gold)!important}
+.mkThumbs img{width:100%;aspect-ratio:1;object-fit:cover;display:block;background:repeating-conic-gradient(#2a2e38 0 25%,#1e212a 0 50%) 0 0/16px 16px}
+.mkThumbs span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text)}
+#mkBot{position:absolute;left:0;right:var(--sR);bottom:0;height:var(--sB);background:var(--sp);border-top:1px solid var(--sl);flex-direction:column}
+#mkBot .bar{display:flex;gap:5px;align-items:center;padding:5px 8px;border-bottom:1px solid var(--sl);flex-wrap:wrap}
+#mkBot .file{font-family:var(--fu);font-size:12px;color:var(--gold2);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#mkBot .file.dirty{color:var(--swarn)}
+#mkBot .sep{width:1px;height:20px;background:var(--sl);flex:none}
+#mkBot .bad{color:var(--swarn)}#mkBot .good{color:var(--sok)}
+#mkRows{overflow:auto;flex:1;padding:4px 8px 8px;display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));align-content:start;gap:2px 10px}
+.mkRow{display:flex;gap:3px;align-items:center;font-size:12.5px;white-space:nowrap;overflow:hidden;cursor:pointer;padding:1px 4px;border-radius:2px;border:1px solid transparent}
+.mkRow:first-child{grid-column:1/-1}
+.mkRow.on{color:var(--gold2);border-color:var(--sl2);background:rgba(217,180,90,.08)}
+.mkRow.off .nm{opacity:.45}
+.mkRow button{padding:0 4px!important;font-size:11px!important;line-height:17px;background:none!important}
+.mkRow .nm{overflow:hidden;text-overflow:ellipsis;flex:1;min-width:0}
+.mkRow .ty{font:10px var(--fu);color:var(--mute)}
+#mkAddMenu{position:absolute;bottom:100%;left:0;display:grid;grid-template-columns:repeat(2,minmax(170px,1fr));gap:3px;background:var(--sp2);border:1px solid var(--gold);padding:6px;border-radius:3px;z-index:6;width:400px}
+#mkAddMenu button{text-align:left;font-size:12px}
+#mkAddMenu b,.mkKinds b,#mkGens b{color:var(--gold2);font-weight:600}
+#mkGens{overflow:auto;flex:1;padding:6px 8px;display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:5px;align-content:start}
+#mkGens button{display:grid;grid-template-columns:auto 1fr;gap:0 6px;text-align:left;padding:4px 8px;align-items:center}
+#mkGens button b{grid-row:span 2;font-size:18px}
+#mkGens button small{color:var(--mute);font-size:10.5px}
+#mkInsp{position:absolute;right:0;top:var(--sT);bottom:0;width:var(--sR);background:var(--sp);border-left:1px solid var(--sl);overflow:auto;padding:8px 10px 20px;flex-direction:column;gap:8px}
+#mkInsp .hd{display:flex;justify-content:space-between;align-items:baseline;gap:6px}
+#mkInsp .hd b{font:600 13px var(--fu);color:var(--gold2)}
+#mkInsp details{border-top:1px solid var(--sl);padding-top:6px}
+#mkInsp summary{cursor:pointer;color:var(--gold);font-size:12px}
+.mkKinds{grid-template-columns:repeat(4,1fr)!important}
+.mkKinds button{font-size:10.5px!important}
+.mkKinds b{font-size:15px}
+.mkPts{width:100%;height:150px;background:#05070f;border:1px solid var(--sl);border-radius:2px;cursor:crosshair;touch-action:none}
+.mkRamp{grid-column:1/-1;display:grid;gap:5px}
+.mkRampBar{height:16px;border-radius:2px;border:1px solid var(--sl)}
+.mkRampChips{display:grid;grid-template-columns:repeat(5,1fr);gap:3px}
+.mkRampChips button{height:22px;padding:0!important;position:relative;overflow:hidden}
+.mkRampChips button span{position:absolute;inset:auto 0 0 0;font-size:9px;background:rgba(7,10,20,.65);line-height:11px}
+.mkRampChips button.on{outline:2px solid var(--gold2)}
+.mkStops{display:grid;gap:3px;margin-top:4px}
+#mkTexView{position:absolute;left:var(--sL);right:var(--sR);top:var(--sT);bottom:var(--sB);background:#05070f;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);grid-template-rows:minmax(0,1fr) auto;gap:10px;padding:10px;z-index:1}
+#mkTexView .pv{display:grid;place-items:center;min-height:0}
+#mkTexView .pv canvas{max-width:100%;max-height:100%;aspect-ratio:1;border:1px solid var(--sl)}
+#mkTexView .atlas{display:grid;place-items:center;min-height:0;overflow:hidden}
+#mkTexView .atlas canvas{max-width:100%;max-height:100%;border:1px solid var(--sl);background:repeating-conic-gradient(#2a2e38 0 25%,#1e212a 0 50%) 0 0/16px 16px;image-rendering:auto}
+#mkTexView .info{grid-column:1/-1;font:12px var(--fu);color:var(--gold2)}
+#mkAddMenu[hidden]{display:none}
+@media (max-width:900px){#mkLib,#mkInsp{display:none!important}}
+#mkTexView canvas,.mkPts{position:relative!important;inset:auto!important;left:auto!important;top:auto!important;display:block}
+#mkTexView .pv canvas{width:100%!important;height:100%!important;object-fit:contain;border:0}
+#mkTexView .atlas canvas{width:auto!important;height:auto!important;max-width:100%;max-height:100%}

@@ -1,5 +1,6 @@
 // ตรวจไฟล์เอฟเฟกต์ .fx.json + bind.json (ใช้ร่วมกัน: node tools/fx-check.js และหน้าสตูดิโอ studio/)
 // fxLint(fx, schema, ctx) → [{lv:'err'|'warn', at:'layer.field', msg}] • ctx: {names:Set, models:Set, flips:Set, sounds:Set}
+// fxLintMesh(mesh, schema) / fxLintTex(tex, schema, ctx) → ตรวจโมเดล .mesh.json / ภาพ .tex.json ที่สร้างในสตูดิโอ • ctx.meshes / ctx.texs = Set ชื่อที่มี (ไม่มี tex/ นำหน้า)
 // fxLintBind(bind, schema, ctx) → เหมือนกัน • ctx.events = Set ชื่อ efx ที่มีในโค้ด (ว่าง = ไม่ตรวจชื่อ)
 (function (root) {
   const EXPR = /^[\w\s.+\-*/(),]*$/, COL = /^(#[0-9a-fA-F]{6}|\$(core|hi|main|deep|light))$/;
@@ -38,6 +39,7 @@
     if (fx.v !== undefined && fx.v !== 1) out.push({ lv: 'err', at: 'v', msg: 'รองรับเฉพาะ v: 1' });
     if (!Array.isArray(fx.layers) || !fx.layers.length) { out.push({ lv: 'err', at: 'layers', msg: 'ต้องมีชั้นอย่างน้อย 1 ชั้น' }); return out; }
     const ids = new Set(); let lights = 0, end = 0;
+    const texRef = (v, at) => { if (typeof v === 'string' && v.startsWith('tex/') && ctx.texs && !ctx.texs.has(v.slice(4))) out.push({ lv: 'err', at, msg: `ไม่มีภาพ assets/fx/tex/${v.slice(4)}.png (+ .tex.json)` }); };
     fx.layers.forEach((L, i) => {
       const at = (L && L.id) || '#' + i, T = L && S.types[L.t];
       if (!L || typeof L !== 'object') return out.push({ lv: 'err', at, msg: 'ชั้นต้องเป็น object' });
@@ -49,13 +51,16 @@
       if (tEnd > 10 && !g('loop')) out.push({ lv: 'warn', at, msg: `จบที่ ${tEnd.toFixed(2)} วิ — ยาวเกิน 10 วิ (ใช้ loop:true ถ้าเป็นออร่า)` });
       // งบ / ความอ่านออก (VFX.md §1.4–1.5, §6)
       const W = m => out.push({ lv: 'warn', at, msg: m });
-      if (L.t === 'emit') { const b = num(g('burst'), 0) * (fx.k || 1); if (b > 80) W(`burst ${Math.round(b)} เม็ด เกินงบ (≤ 80 ต่อครั้ง)`); if (num(g('rate'), 0) > 200) W('rate เกิน 200 เม็ด/วิ'); if (g('from') === 'mesh' && !fx.layers.some(q => q.id === g('of') && q.t === 'mesh')) out.push({ lv: 'err', at: at + '.of', msg: 'from:"mesh" ต้องชี้ไปที่ชั้น mesh (of)' }); }
+      if (L.t === 'emit') { const b = num(g('burst'), 0) * (fx.k || 1); if (b > 80) W(`burst ${Math.round(b)} เม็ด เกินงบ (≤ 80 ต่อครั้ง)`); if (num(g('rate'), 0) > 200) W('rate เกิน 200 เม็ด/วิ'); if (g('from') === 'mesh' && !fx.layers.some(q => q.id === g('of') && q.t === 'mesh')) out.push({ lv: 'err', at: at + '.of', msg: 'from:"mesh" ต้องชี้ไปที่ชั้น mesh (of)' });
+        texRef(g('fb'), at + '.fb'); }
       if (L.t === 'light') { lights++; if (num(g('int'), 2) > 2.5) W(`ไฟจุด int ${num(g('int'), 2)} แรงเกิน (≤ 2.5) — พื้นจะสว่างจ้า`); }
       if (L.t === 'flash' && num(g('size'), 2.5) > 6) W('แฟลชใหญ่เกิน 6 ม. — เสี่ยงจอขาว');
       if (L.t === 'halo' && num(g('size'), 5) > 14) W('ฮาโลใหญ่เกิน 14 ม. — เสี่ยงจอขาว');
       if (L.t === 'screen') { if (num(g('flash'), 0) > 0.06) W('แฟลชทั้งจอเกิน 0.06 — สว่างทั้งจอเร็วมาก'); if (num(g('shake'), 0) > 10) W('จอสั่นเกิน 10'); if (num(g('radial'), 0) > 0 && !g('own')) W('เบลอพุ่งเข้าจุด (radial) ควรใส่ own:true (เฉพาะของเรา)'); }
       if (L.t === 'mesh') { const sh = g('shape'); if (sh === 'glb' && ctx.models && !ctx.models.has(g('glb'))) out.push({ lv: 'err', at: at + '.glb', msg: `ไม่มีโมเดล "${g('glb')}" ใน assets/manifest.json` });
-        if (g('mat') === 'flip' && ctx.flips && !ctx.flips.has(g('tex'))) out.push({ lv: 'err', at: at + '.tex', msg: `ไม่มีภาพ flipbook "${g('tex')}" (manifest fx / ptex)` });
+        if (sh === 'model' && ctx.meshes && !ctx.meshes.has(g('model'))) out.push({ lv: 'err', at: at + '.model', msg: g('model') ? `ไม่มีโมเดล assets/fx/mesh/${g('model')}.mesh.json` : 'shape:"model" ต้องใส่ชื่อโมเดล (model)' });
+        if (g('mat') === 'flip' && String(g('tex')).startsWith('tex/')) texRef(g('tex'), at + '.tex');
+        else if (g('mat') === 'flip' && ctx.flips && !ctx.flips.has(g('tex'))) out.push({ lv: 'err', at: at + '.tex', msg: `ไม่มีภาพ flipbook "${g('tex')}" (manifest fx / ptex)` });
         if (num(g('scale'), 1) > 15 && ['energy', 'glow', 'fire'].includes(g('mat'))) W('รูปทรงเรืองแสงใหญ่เกิน 15 ม. — เสี่ยงบังจอ'); }
       if (L.t === 'use') { if (!g('fx')) out.push({ lv: 'err', at: at + '.fx', msg: 'ต้องใส่ชื่อเอฟเฟกต์' }); else if (ctx.self && g('fx') === ctx.self) out.push({ lv: 'err', at: at + '.fx', msg: 'ใส่เอฟเฟกต์ตัวเองซ้อนในตัวเองไม่ได้ (วนไม่จบ)' }); else if (ctx.names && !ctx.names.has(g('fx'))) out.push({ lv: 'err', at: at + '.fx', msg: `ไม่มีไฟล์ assets/fx/${g('fx')}.fx.json` }); }
       if (L.t === 'trail' && g('of') && !fx.layers.some(q => q.id === g('of'))) out.push({ lv: 'err', at: at + '.of', msg: `ไม่มีชั้น "${g('of')}"` });
@@ -79,6 +84,38 @@
     }
     return out;
   }
-  const api = { fxLint, fxLintBind };
+  function fileKeys(d, spec, out, S) { for (const k of Object.keys(d)) { if (!spec[k]) { if (!EXTRA.has(k)) out.push({ lv: 'warn', at: k, msg: 'ฟิลด์ระดับไฟล์ที่ไม่รู้จัก (สะกดผิด?)' }); continue; } if (spec[k].type !== 'ramp') checkVal(spec[k], d[k], k, out, S); } }
+  function fxLintMesh(m, schema) {
+    const out = [], S = schema, M = S.mk; if (!m || typeof m !== 'object') return [{ lv: 'err', at: '', msg: 'ไฟล์ต้องเป็น JSON object' }];
+    fileKeys(m, M.file, out, S);
+    if (!Array.isArray(m.parts) || !m.parts.length) { out.push({ lv: 'err', at: 'parts', msg: 'ต้องมีชิ้นส่วนอย่างน้อย 1 ชิ้น' }); return out; }
+    const ids = new Set(); let est = 0;
+    m.parts.forEach((P, i) => {
+      const at = (P && P.id) || '#' + i, T = P && M.parts[P.k];
+      if (!P || typeof P !== 'object') return out.push({ lv: 'err', at, msg: 'ชิ้นส่วนต้องเป็น object' });
+      if (!P.id) out.push({ lv: 'err', at, msg: 'ชิ้นส่วนต้องมี id' }); else if (ids.has(P.id)) out.push({ lv: 'err', at, msg: 'id ซ้ำ' }); else ids.add(P.id);
+      if (!T) return out.push({ lv: 'err', at: at + '.k', msg: `แบบชิ้นส่วน "${P.k}" ไม่มี — ใช้: ${Object.keys(M.parts).join(', ')}` });
+      for (const k of Object.keys(P)) { const sp = T.fields[k] || M.common[k]; if (!sp) { if (!EXTRA.has(k)) out.push({ lv: 'warn', at: at + '.' + k, msg: `ชิ้น ${P.k} ไม่มีฟิลด์นี้ (สะกดผิด?)` }); continue; } checkVal(sp, P[k], at + '.' + k, out, S); }
+      const g = k => P[k] !== undefined ? P[k] : (T.fields[k] || M.common[k] || {}).def;
+      if (['tube', 'ribbon'].includes(P.k) && (!Array.isArray(g('path')) || g('path').length < 2)) out.push({ lv: 'err', at: at + '.path', msg: 'ต้องมีจุดอย่างน้อย 2 จุด [[x,y,z],...]' });
+      if (P.k === 'lathe' && (!Array.isArray(g('prof')) || g('prof').length < 2)) out.push({ lv: 'err', at: at + '.prof', msg: 'ต้องมีจุดอย่างน้อย 2 จุด [[รัศมี,สูง],...]' });
+      const n = num(g('n'), 1), base = { shard: 12, crown: 14 * n * num(g('rings'), 1), cluster: 14 * n, burst: 10 * n, blade: 8 * num(g('seg'), 40), fan: 2 * n * num(g('seg'), 12), spiral: 2 * num(g('seg'), 96), tube: 2 * num(g('sides'), 8) * num(g('seg'), 24), ribbon: 2 * num(g('seg'), 32), lathe: 2 * 6 * num(g('seg'), 32), sphere: 4 * num(g('seg'), 12) ** 2, cyl: 2 * num(g('sides'), 16) * num(g('segs'), 1), torus: 2 * num(g('sides'), 10) * num(g('seg'), 40), disc: 2 * num(g('seg'), 48), star: 4 * n, box: 12 }[P.k] || 50;
+      est += base * Math.max(1, num(g('arr'), 1)) * (g('mir') ? 2 : 1);
+    });
+    if (est > 30000) out.push({ lv: 'warn', at: 'parts', msg: `ประมาณ ${Math.round(est)} สามเหลี่ยม — หนักเกิน (≤ 30000; ลด seg / จำนวน / ทำซ้ำ)` });
+    return out;
+  }
+  function fxLintTex(t, schema, ctx) {
+    ctx = ctx || {}; const out = [], S = schema, X = S.tx; if (!t || typeof t !== 'object') return [{ lv: 'err', at: '', msg: 'ไฟล์ต้องเป็น JSON object' }];
+    fileKeys(t, X.file, out, S);
+    const G = X.gens[t.gen]; if (!G) out.push({ lv: 'err', at: 'gen', msg: `ตัววาด "${t.gen}" ไม่มี — ใช้: ${Object.keys(X.gens).join(', ')}` });
+    else for (const k of Object.keys(t.p || {})) { if (!G.fields[k]) out.push({ lv: 'warn', at: 'p.' + k, msg: `ตัววาด ${t.gen} ไม่มีค่านี้` }); else checkVal(G.fields[k], t.p[k], 'p.' + k, out, S); }
+    const r = t.ramp; if (r !== undefined) { if (typeof r === 'string') { if (!X.ramps[r]) out.push({ lv: 'err', at: 'ramp', msg: `ไม่มีจานสี "${r}" — ใช้: ${Object.keys(X.ramps).join(', ')}` }); }
+      else if (!Array.isArray(r) || r.length < 2 || r.some(q => !Array.isArray(q) || typeof q[0] !== 'number' || !/^#[0-9a-fA-F]{6}$/.test(q[1]))) out.push({ lv: 'err', at: 'ramp', msg: 'ramp ต้องเป็นชื่อจาน หรือ [[0,"#rrggbb"],[1,"#rrggbb"],...]' }); }
+    const px = t.px || 128, c = t.cols || 1, rw = t.rows || 1; if (px * Math.max(c, rw) > 2048) out.push({ lv: 'warn', at: 'px', msg: `ภาพรวม ${px * c}×${px * rw} ใหญ่เกิน 2048 — ลด px หรือจำนวนเฟรม` });
+    if (ctx.png === false) out.push({ lv: 'err', at: '', msg: 'ไม่มีไฟล์ภาพ .png คู่กับ .tex.json (บันทึกจากสตูดิโอใหม่)' });
+    return out;
+  }
+  const api = { fxLint, fxLintBind, fxLintMesh, fxLintTex };
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else root.FXLINT = api;
 })(typeof window !== 'undefined' ? window : globalThis);

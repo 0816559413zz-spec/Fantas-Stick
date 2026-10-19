@@ -1,0 +1,14 @@
+{
+  "v": 1,
+  "desc": "วังวนหมุน 3 แขน (ประตูมิติ / ชาร์จพลัง)",
+  "gen": "vortex",
+  "seed": 1,
+  "px": 256,
+  "cols": 4,
+  "rows": 4,
+  "kind": "loop",
+  "fps": 24,
+  "ramp": "arcane",
+  "add": true,
+  "p": {}
+}

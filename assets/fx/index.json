@@ -101,6 +101,30 @@
    "dur": 1.2,
    "n": 8
   },
+  "start/campfire": {
+   "v": "34f05685",
+   "desc": "ตัวอย่างใช้ภาพที่สร้างเอง: กองไฟวนต่อเนื่อง (ภาพ fire_sim จากการจำลองของไหล) + ควันลอย (smoke_sim) + ถ่านแดง",
+   "pal": "fire",
+   "tags": [
+    "fire",
+    "loop",
+    "made"
+   ],
+   "dur": 3,
+   "n": 4
+  },
+  "start/crystal_nova": {
+   "v": "671d0b0f",
+   "desc": "ตัวอย่างใช้ asset ที่สร้างเอง: มงกุฎผลึก (โมเดล crystal_crown) พุ่งจากพื้น + คลื่นกระแทก (ภาพ shockwave) + ประกายดาว (ภาพ star_flare)",
+   "pal": "ice",
+   "tags": [
+    "ice",
+    "ground",
+    "made"
+   ],
+   "dur": 1.8,
+   "n": 7
+  },
   "start/explosion": {
    "v": "9d5e5232",
    "desc": "ระเบิดใหญ่ 3 มิติ: ลูกพลังงานขยายแล้วสลาย + วงกระแทก + ประกาย + ลายไหม้ + เศษหิน",
@@ -289,6 +313,232 @@
    ],
    "dur": 0,
    "n": 5
+  }
+ },
+ "mesh": {
+  "claw_triple": {
+   "v": "cc5b86c5",
+   "desc": "กรงเล็บ 3 เล่มเรียงกัน (ข่วน) — ใบโค้งตั้งตรง",
+   "mat": "energy",
+   "n": 1
+  },
+  "crystal_cluster": {
+   "v": "57a4863b",
+   "desc": "กลุ่มผลึกก้อนเดียว (แท่งกลางสูง + แท่งเอียงรอบ)",
+   "mat": "ice",
+   "n": 1
+  },
+  "crystal_crown": {
+   "v": "68cb61fd",
+   "desc": "มงกุฎหนามผลึก 2 วง + กลุ่มผลึกกลาง (น้ำแข็งพุ่งจากพื้น)",
+   "mat": "ice",
+   "n": 2
+  },
+  "energy_spear": {
+   "v": "68bcb62a",
+   "desc": "หอกพลังงานชี้ไปข้างหน้า (+z) — กระสุน / ท่าแทง",
+   "mat": "energy",
+   "n": 3
+  },
+  "flame_wing": {
+   "v": "bc200515",
+   "desc": "ปีก 2 ข้าง (ขนนกเรียงเป็นพัด) — ใส่ไฟ/พลังงาน",
+   "mat": "fire",
+   "n": 1
+  },
+  "horn_pair": {
+   "v": "10c3e8ab",
+   "desc": "เขาโค้ง 1 คู่ (ร่างปีศาจ / ออร่ามืด)",
+   "mat": "solid",
+   "n": 1
+  },
+  "rock_chunks": {
+   "v": "29908f92",
+   "desc": "ก้อนหินขรุขระ 7 ก้อนเป็นวง (ดินแตก / หินลอย)",
+   "mat": "solid",
+   "n": 1
+  },
+  "rune_swirl": {
+   "v": "16a70467",
+   "desc": "วงเวทบนพื้น: เกลียวแบน + วงขอบ + ดาว 6 แฉก",
+   "mat": "glow",
+   "n": 3
+  },
+  "shield_dome": {
+   "v": "6bec9b06",
+   "desc": "โดมโล่ครึ่งทรงกลม + ห่วงฐาน + ซี่โครงโค้ง",
+   "mat": "energy",
+   "n": 3
+  },
+  "slash_arc": {
+   "v": "913a08ee",
+   "desc": "ใบฟันเสี้ยวจันทร์ (รอยฟันดาบ) — หัวกว้าง ปลายแหลม",
+   "mat": "energy",
+   "n": 1
+  },
+  "spike_shell": {
+   "v": "38dd06bf",
+   "desc": "เปลือกหนามครึ่งทรงกลม (เม่น) — โล่หนาม / ระเบิดผลึก",
+   "mat": "energy",
+   "n": 2
+  },
+  "star_burst": {
+   "v": "7cef7252",
+   "desc": "ดาวแฉกบนพื้น + หนามแสงพุ่งรอบทิศ (กระแทกแสง)",
+   "mat": "glow",
+   "n": 2
+  },
+  "tornado": {
+   "v": "06af1a5c",
+   "desc": "พายุหมุน: แถบเกลียวตั้ง 4 รอบ + กรวยลม",
+   "mat": "energy",
+   "n": 2
+  }
+ },
+ "tex": {
+  "electric_arc": {
+   "v": "4b01bed2",
+   "desc": "กระแสไฟกระตุก 3 เส้น (วน)",
+   "gen": "electric",
+   "kind": "loop",
+   "cols": 4,
+   "rows": 4
+  },
+  "explosion": {
+   "v": "4fe5c4de",
+   "desc": "ลูกไฟระเบิด ร้อนขาว → ควันมืด",
+   "gen": "explosion",
+   "kind": "life",
+   "cols": 8,
+   "rows": 8
+  },
+  "fire_loop": {
+   "v": "bc3102e8",
+   "desc": "เปลวไฟวนต่อเนื่อง (เม็ดไฟ / การ์ดเปลว)",
+   "gen": "fire",
+   "kind": "loop",
+   "cols": 8,
+   "rows": 8
+  },
+  "fire_sim": {
+   "v": "7153452e",
+   "desc": "ไฟจากการจำลองของไหลจริง (วน)",
+   "gen": "sim",
+   "kind": "loop",
+   "cols": 8,
+   "rows": 8
+  },
+  "hit_burst": {
+   "v": "c724efe6",
+   "desc": "ประกายแตกตอนโดน (ตามอายุ)",
+   "gen": "burst",
+   "kind": "life",
+   "cols": 4,
+   "rows": 4
+  },
+  "magic_circle": {
+   "v": "2428adee",
+   "desc": "วงเวท 3 วง + ดาว 6 แฉก + อักษรเวท",
+   "gen": "circle",
+   "kind": "loop",
+   "cols": 1,
+   "rows": 1
+  },
+  "magic_circle_spin": {
+   "v": "e8e8bb08",
+   "desc": "วงเวทหมุน (วน 16 เฟรม)",
+   "gen": "circle",
+   "kind": "loop",
+   "cols": 4,
+   "rows": 4
+  },
+  "noise_cells": {
+   "v": "124870d4",
+   "desc": "ลายเซลล์ / เกล็ด / รอยแตก ต่อขอบได้",
+   "gen": "noise",
+   "kind": "loop",
+   "cols": 1,
+   "rows": 1
+  },
+  "noise_clouds": {
+   "v": "f630cd25",
+   "desc": "ลายเมฆ ต่อขอบได้ (หน้ากาก / หมอก)",
+   "gen": "noise",
+   "kind": "loop",
+   "cols": 1,
+   "rows": 1
+  },
+  "noise_veins": {
+   "v": "88397775",
+   "desc": "ลายเส้นเลือด / ใยสายฟ้า ต่อขอบได้",
+   "gen": "noise",
+   "kind": "loop",
+   "cols": 1,
+   "rows": 1
+  },
+  "ring_soft": {
+   "v": "7d821f3b",
+   "desc": "วงแหวนนุ่ม (ฮาโล)",
+   "gen": "ring",
+   "kind": "loop",
+   "cols": 1,
+   "rows": 1
+  },
+  "shockwave": {
+   "v": "442c90c4",
+   "desc": "คลื่นกระแทกวงขยาย (ตามอายุ)",
+   "gen": "shock",
+   "kind": "life",
+   "cols": 4,
+   "rows": 4
+  },
+  "slash_sweep": {
+   "v": "244a7022",
+   "desc": "รอยฟันกวาดแล้วจาง (ตามอายุ)",
+   "gen": "slash",
+   "kind": "life",
+   "cols": 4,
+   "rows": 4
+  },
+  "smoke_puff": {
+   "v": "7a471cc6",
+   "desc": "ควันพวย ขยายแล้วจาง (ตามอายุเม็ด)",
+   "gen": "smoke",
+   "kind": "life",
+   "cols": 6,
+   "rows": 6
+  },
+  "smoke_sim": {
+   "v": "b58d484d",
+   "desc": "ควันจากการจำลองจริง ลอยขึ้นแล้วจาง (ตามอายุ)",
+   "gen": "sim",
+   "kind": "life",
+   "cols": 6,
+   "rows": 6
+  },
+  "soft_glow": {
+   "v": "9c520e16",
+   "desc": "แสงนุ่มกลม (เม็ดเรือง / ลูกแก้ว)",
+   "gen": "glow",
+   "kind": "loop",
+   "cols": 1,
+   "rows": 1
+  },
+  "star_flare": {
+   "v": "1446a25c",
+   "desc": "ดาวประกาย 4 แฉก",
+   "gen": "flare",
+   "kind": "loop",
+   "cols": 1,
+   "rows": 1
+  },
+  "vortex_portal": {
+   "v": "9b824e29",
+   "desc": "วังวนหมุน 3 แขน (ประตูมิติ / ชาร์จพลัง)",
+   "gen": "vortex",
+   "kind": "loop",
+   "cols": 4,
+   "rows": 4
   }
  }
 }

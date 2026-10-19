@@ -126,15 +126,16 @@ Play a game sound (names from SFXN in js/18-audio.js).
 | `spin` | num | `0` | 0–20 |  | หมุน (เรเดียน/วิ) |
 | `fin` | num | `8` | 0–40 |  | จางเข้าตอนเกิด |
 | `curl` | bool | `true` |  |  | ลมหมุนวน |
-| `fb` | str | `` |  |  | flipbook (smoke/fire) |
+| `fb` | str | `` |  |  | ภาพของเม็ด: tex/<ชื่อ> (ทุก look) หรือ smoke/fire (manifest) |
 
 ### `mesh` ⬢ รูปทรง 3D
 3D shape with a shader material — fireballs, shells, domes, cones, crescents, spikes, beams, Blender models.
 
 | ฟิลด์ | ชนิด | ค่าเริ่ม | ช่วง | รับ | ความหมาย |
 |---|---|---|---|---|---|
-| `shape` | enum (sphere/dome/disc/ring/cylinder/cone/torus/crescent/spikes/beam/plane/lathe/ribbon/glb) | `sphere` |  |  | รูปทรง |
+| `shape` | enum (sphere/dome/disc/ring/cylinder/cone/torus/crescent/spikes/beam/plane/lathe/ribbon/glb/model) | `sphere` |  |  | รูปทรง |
 | `glb` | str | `` |  |  | โมเดล (ชื่อใน manifest) |
+| `model` | str | `` |  |  | โมเดลที่ปั้นในสตูดิโอ (assets/fx/mesh/<ชื่อ>) — shape:"model" — name of a .mesh.json made in the studio Model tab |
 | `inner` | num | `0.7` | 0–0.98 |  | รูใน (วง) |
 | `n` | int | `10` | 3–40 |  | จำนวน (หนาม) |
 | `wk` | num | `0.6` | 0.05–2 |  | ความกว้าง (เสี้ยว/ริบบิ้น) |
@@ -157,7 +158,7 @@ Play a game sound (names from SFXN in js/18-audio.js).
 | `flow` | vec3 | `[0,1,0]` |  |  | ทิศไฟไหล |
 | `mode` | enum (auto/ball/sheet) | `auto` |  |  | แบบไฟ |
 | `bill` | bool | `false` |  |  | หันหากล้อง |
-| `tex` | str | `` |  |  | ภาพ flipbook (mat=flip) |
+| `tex` | str | `` |  |  | ภาพ (mat=flip): tex/<ชื่อ> = ภาพที่วาดในสตูดิโอ หรือชื่อใน manifest |
 
 ### `firevol` 🔥 ไฟ 3 มิติจริง
 Volumetric raymarched fire (fireVol): pillars, walls of fire, shells around a body.
@@ -276,12 +277,456 @@ Escape hatch: call a registered helper (FXCODE in js/45-fx-runtime.js) with args
 | `args` | obj | `{}` |  |  | ค่าที่ส่ง |
 
 ## ตัวเลือกของ enum
-- รูปทรง (shape): sphere, dome, disc, ring, cylinder, cone, torus, crescent, spikes, beam, plane, lathe, ribbon, glb
+- รูปทรง (shape): sphere, dome, disc, ring, cylinder, cone, torus, crescent, spikes, beam, plane, lathe, ribbon, glb, model
 - วัสดุ (mat): energy, fire, ice, glow, solid, flip — energy = ขอบเรือง+ลายไหล (สีจากจาน) • fire = shader ไฟของเกม • ice = shader น้ำแข็ง • glow = สีเรียบบวกแสง • solid = ทึบ • flip = ภาพ flipbook
 - ปล่อยจาก (from): point, sphere, hemisphere, ring, disc, cone, box, line, mesh
 - ทิศ (dir): out, flat, up, down, in, aim, tangent, random — flat = กระจายแนวนอน (ความเร็วขึ้นจาก up)
 - หน้าตาเม็ด (look): glow, spark, streak, ring, flake, smoke, fire, ember
 - ยึดกับ (att): point, ground, feet, chest, head, wand
+
+## โมเดลที่ปั้นเอง — `assets/fx/mesh/<ชื่อ>.mesh.json` (แท็บ 🧊 โมเดล ในสตูดิโอ)
+โมเดลที่ปั้นในสตูดิโอ assets/fx/mesh/<ชื่อ>.mesh.json = รายการชิ้นส่วน (parts) — เกมปั้นเองตอนโหลด • ใช้: ชั้น mesh {"shape": "model","model": "<ชื่อ>"} • หน่วยเมตร +x ขวา +y บน +z หน้า • uv v: 0 โคน/ใน → 1 ปลาย/นอก (ไฟ/พลังงานไหลตาม v)
+
+### ไฟล์
+| ฟิลด์ | ชนิด | ค่าเริ่ม | ช่วง | รับ | ความหมาย |
+|---|---|---|---|---|---|
+| `v` | int | `1` |  |  | เวอร์ชันรูปแบบไฟล์ |
+| `desc` | str | `` |  |  | คำอธิบาย |
+| `mat` | enum (energy/fire/ice/glow/solid) | `energy` |  |  | วัสดุที่แนะนำ (ใช้ตอนดูในสตูดิโอ / ตอนกดใช้ในเอฟเฟกต์) |
+| `pal` | enum (fire/ice/storm/nature/hex/summon/earth/arcane/shield/heal/col) | `arcane` |  |  | ธาตุที่ใช้ดูในสตูดิโอ |
+| `tags` | list | `[]` |  |  | แท็ก |
+| `parts` | list | `[]` |  |  | ชิ้นส่วน |
+### ทุกชิ้นส่วนมีฟิลด์เหล่านี้ (ลำดับตัวแต่ง: เรียว → บิด → โค้ง → ขรุขระ → ขนาด/หมุน/ตำแหน่ง → ทำซ้ำ → กระจก)
+| ฟิลด์ | ชนิด | ค่าเริ่ม | ช่วง | รับ | ความหมาย |
+|---|---|---|---|---|---|
+| `id` | str | `` |  |  | ชื่อชิ้น (ไม่ซ้ำ) |
+| `k` | enum (shard/crown/cluster/burst/blade/fan/spiral/tube/ribbon/lathe/sphere/cyl/torus/disc/star/box) | `shard` |  |  | แบบชิ้นส่วน |
+| `off` | bool | `false` |  |  | ซ่อน (ไม่ใส่ในโมเดล) |
+| `pos` | vec3 | `[0,0,0]` |  |  | ตำแหน่ง [x,y,z] ม. |
+| `rot` | vec3 | `[0,0,0]` |  |  | หมุน [x,y,z] องศา |
+| `scale` | vec3 | `1` |  |  | ขนาด (ตัวเลข หรือ [x,y,z]) |
+| `topScale` | num | `1` | 0–3 |  | เรียว: ขนาดด้านบน (1 = ไม่เรียว) |
+| `twist` | num | `0` | -720–720 |  | บิดตามความสูง (องศา) |
+| `bend` | num | `0` | -180–180 |  | โค้งไปข้างหน้าตามความสูง (องศา) |
+| `noise` | num | `0` | 0–1 |  | ผิวขรุขระ (ม.) |
+| `nfreq` | num | `2` | 0.2–12 |  | ความถี่ขรุขระ |
+| `seed` | int | `1` | 1–9999 |  | เลขสุ่ม |
+| `flat` | bool | `false` |  |  | ผิวเหลี่ยม (ผลึก/หิน) |
+| `arr` | int | `1` | 1–64 |  | ทำซ้ำกี่ชิ้น |
+| `arrMode` | enum (ring/line) | `ring` |  |  | ทำซ้ำแบบ: วงรอบแกนตั้ง / แถว |
+| `arrR` | num | `0` | 0–20 |  | รัศมีวง (ทำซ้ำแบบ ring) ม. |
+| `arrStep` | vec3 | `[0,0,1]` |  |  | ระยะต่อชิ้น (ทำซ้ำแบบ line) ม. |
+| `arrScale` | num | `1` | 0.3–2 |  | ขนาดชิ้นถัดไป (×) |
+| `arrJit` | num | `0` | 0–1 |  | สุ่มมุม/ขนาดของชิ้นซ้ำ |
+| `mir` | bool | `false` |  |  | กระจกซ้าย-ขวา (เพิ่มอีกข้าง) |
+
+#### `shard` ◆ แท่งผลึก / หนาม
+One crystal spike / horn tip. Base at y=0, tip at h.
+
+| ฟิลด์ | ชนิด | ค่าเริ่ม | ช่วง | รับ | ความหมาย |
+|---|---|---|---|---|---|
+| `h` | num | `1.2` | 0.05–20 |  | สูง ม. |
+| `w` | num | `0.3` | 0.01–5 |  | กว้างฐาน ม. |
+| `sides` | int | `5` | 3–12 |  | จำนวนเหลี่ยม |
+| `tip` | num | `0` | 0–1 |  | ปลาย (0 = แหลม) |
+| `mid` | num | `0.35` | 0.05–0.95 |  | ตำแหน่งส่วนป่อง |
+| `flat` | bool | `true` |  |  | ผิวเหลี่ยม |
+
+#### `crown` ♛ มงกุฎหนาม (วงหนาม)
+Ring of spikes leaning outward (ice burst, earth crown). rings>1 adds inner taller rings.
+
+| ฟิลด์ | ชนิด | ค่าเริ่ม | ช่วง | รับ | ความหมาย |
+|---|---|---|---|---|---|
+| `n` | int | `10` | 1–60 |  | จำนวนหนาม |
+| `r` | num | `0.8` | 0–20 |  | รัศมีวง ม. |
+| `h` | num | `[0.7,1.3]` | 0.05–20 | สุ่มช่วง | สูง ม. (สุ่มช่วง) |
+| `w` | num | `0.28` | 0.01–5 |  | กว้างหนาม ม. |
+| `tilt` | num | `25` | -80–80 |  | เอียงออก (องศา) |
+| `sides` | int | `5` | 3–10 |  | เหลี่ยม |
+| `tip` | num | `0` | 0–1 |  | ปลาย |
+| `mid` | num | `0.3` | 0.05–0.95 |  | ส่วนป่อง |
+| `jit` | num | `0.4` | 0–1 |  | สุ่มระยะห่าง |
+| `rings` | int | `1` | 1–3 |  | จำนวนวง |
+| `flat` | bool | `true` |  |  | ผิวเหลี่ยม |
+
+#### `cluster` ⟁ กลุ่มผลึก
+Crystal cluster: one tall centre spike + shorter tilted ones around it.
+
+| ฟิลด์ | ชนิด | ค่าเริ่ม | ช่วง | รับ | ความหมาย |
+|---|---|---|---|---|---|
+| `n` | int | `7` | 1–40 |  | จำนวน |
+| `spread` | num | `0.5` | 0–10 |  | กระจายรัศมี ม. |
+| `h` | num | `[0.5,1.4]` | 0.05–20 | สุ่มช่วง | สูง ม. (ขอบ → กลาง) |
+| `tilt` | num | `[5,35]` | -80–80 | สุ่มช่วง | เอียง องศา (กลาง → ขอบ) |
+| `w` | num | `0.3` | 0.01–5 |  | กว้าง ม. |
+| `sides` | int | `5` | 3–10 |  | เหลี่ยม |
+| `tip` | num | `0` | 0–1 |  | ปลาย |
+| `mid` | num | `0.35` | 0.05–0.95 |  | ส่วนป่อง |
+| `flat` | bool | `true` |  |  | ผิวเหลี่ยม |
+
+#### `burst` ✹ หนามรอบทิศ (เม่น)
+Spikes pointing out in all directions from a sphere (spiky shell, explosion crystals). hemi = only the upper half.
+
+| ฟิลด์ | ชนิด | ค่าเริ่ม | ช่วง | รับ | ความหมาย |
+|---|---|---|---|---|---|
+| `n` | int | `24` | 1–120 |  | จำนวนหนาม |
+| `r` | num | `0.3` | 0–10 |  | รัศมีแกนใน ม. |
+| `h` | num | `[0.5,1]` | 0.05–20 | สุ่มช่วง | ยาวหนาม ม. |
+| `w` | num | `0.14` | 0.01–3 |  | กว้าง ม. |
+| `sides` | int | `4` | 3–8 |  | เหลี่ยม |
+| `tip` | num | `0` | 0–1 |  | ปลาย |
+| `mid` | num | `0.25` | 0.05–0.95 |  | ส่วนป่อง |
+| `jit` | num | `0.3` | 0–3 |  | สุ่มทิศ |
+| `hemi` | bool | `false` |  |  | ครึ่งบนเท่านั้น |
+| `flat` | bool | `true` |  |  | ผิวเหลี่ยม |
+
+#### `blade` ☾ ใบฟัน / เสี้ยว
+Crescent blade on the ground plane facing +z (slash arcs, claws, scythe). v: 0 inner → 1 outer edge.
+
+| ฟิลด์ | ชนิด | ค่าเริ่ม | ช่วง | รับ | ความหมาย |
+|---|---|---|---|---|---|
+| `arc` | num | `140` | 10–360 |  | มุมโค้ง องศา |
+| `r` | num | `1.2` | 0.05–20 |  | รัศมี ม. |
+| `w` | num | `0.35` | 0.01–10 |  | กว้างตรงกลาง ม. |
+| `thick` | num | `0.06` | 0–2 |  | หนา ม. (0 = แผ่นบาง) |
+| `taper` | num | `0.8` | 0.15–4 |  | ปลายแหลม |
+| `skew` | num | `0` | -2–2 |  | ส่วนกว้างเอียงไปหัว/ท้าย |
+| `seg` | int | `40` | 4–160 |  | ความละเอียด |
+
+#### `fan` ❦ พัด / ปีก
+Feathers fanned out in the x-y plane (wings, peacock tail, flame fan). v: 0 root → 1 tip.
+
+| ฟิลด์ | ชนิด | ค่าเริ่ม | ช่วง | รับ | ความหมาย |
+|---|---|---|---|---|---|
+| `n` | int | `7` | 1–30 |  | จำนวนขน |
+| `spread` | num | `100` | 0–360 |  | กางกว้าง องศา |
+| `len` | num | `1.4` | 0.05–20 |  | ยาว ม. |
+| `lvar` | num | `0.35` | 0–1 |  | ขนริมสั้นลง |
+| `w` | num | `0.22` | 0.01–5 |  | กว้างขน ม. |
+| `tipw` | num | `0.2` | 0–1 |  | ปลายขนกว้าง (สัดส่วน) |
+| `curve` | num | `25` | -120–120 |  | โค้งไปข้างหลัง องศา |
+| `seg` | int | `12` | 3–48 |  | ความละเอียด |
+
+#### `spiral` @ เกลียว (วนพื้น / พายุหมุน)
+Spiral ribbon: flat on the ground (rune swirl) or wall=true for a vertical band (tornado). u along, v across.
+
+| ฟิลด์ | ชนิด | ค่าเริ่ม | ช่วง | รับ | ความหมาย |
+|---|---|---|---|---|---|
+| `turns` | num | `1.5` | 0.1–10 |  | จำนวนรอบ |
+| `r0` | num | `0.3` | 0–20 |  | รัศมีเริ่ม ม. |
+| `r1` | num | `1.2` | 0–20 |  | รัศมีจบ ม. |
+| `rise` | num | `0` | -20–20 |  | สูงขึ้น ม. |
+| `w` | num | `0.25` | 0.01–10 |  | กว้างแถบ ม. |
+| `taper` | num | `0` | 0–1 |  | แถบเรียวลง |
+| `wall` | bool | `false` |  |  | แถบตั้ง (พายุหมุน) |
+| `seg` | int | `96` | 8–400 |  | ความละเอียด |
+
+#### `tube` 〰 ท่อตามเส้น (เขา / หนวด)
+Tube along a smooth path (horn, tentacle, claw, root). r1 = 0 gives a sharp tip. v along the path.
+
+| ฟิลด์ | ชนิด | ค่าเริ่ม | ช่วง | รับ | ความหมาย |
+|---|---|---|---|---|---|
+| `path` | list | `[[0,0,0],[0,0.6,0.2],[0,1.1,0.6]]` |  |  | จุดเส้นทาง [x,y,z] ม. |
+| `r0` | num | `0.12` | 0–5 |  | รัศมีต้น ม. |
+| `r1` | num | `0` | 0–5 |  | รัศมีปลาย ม. |
+| `curve` | num | `1` | 0.2–4 |  | เรียวเร็ว/ช้า |
+| `sides` | int | `8` | 3–24 |  | เหลี่ยม |
+| `seg` | int | `24` | 2–160 |  | ความละเอียด |
+
+#### `ribbon` ∿ ริบบิ้นตามเส้น
+Flat strip along a smooth path (trails, swooshes). wall=true = width points up.
+
+| ฟิลด์ | ชนิด | ค่าเริ่ม | ช่วง | รับ | ความหมาย |
+|---|---|---|---|---|---|
+| `path` | list | `[[-1,0,0],[0,0.3,1],[1,0,0]]` |  |  | จุดเส้นทาง [x,y,z] ม. |
+| `w` | num | `0.4` | 0.01–10 |  | กว้าง ม. |
+| `taper` | num | `0` | 0–1 |  | เรียวไปปลาย |
+| `wall` | bool | `false` |  |  | แถบตั้ง |
+| `seg` | int | `32` | 2–200 |  | ความละเอียด |
+
+#### `lathe` ⏚ หมุนเส้นโปรไฟล์ (โดม / แจกัน / เปลือก)
+Profile [radius, height] points spun around the vertical axis (domes, cups, shells, vortex funnels).
+
+| ฟิลด์ | ชนิด | ค่าเริ่ม | ช่วง | รับ | ความหมาย |
+|---|---|---|---|---|---|
+| `prof` | list | `[[0.3,0],[0.8,0.4],[0.5,1],[0,1.3]]` |  |  | โปรไฟล์ [รัศมี, สูง] ม. |
+| `seg` | int | `32` | 3–96 |  | ความละเอียดรอบ |
+
+#### `sphere` ● ทรงกลม
+Sphere centred at the origin (hemi = dome sitting on y=0).
+
+| ฟิลด์ | ชนิด | ค่าเริ่ม | ช่วง | รับ | ความหมาย |
+|---|---|---|---|---|---|
+| `r` | num | `0.5` | 0.02–20 |  | รัศมี ม. |
+| `seg` | int | `12` | 3–48 |  | ความละเอียด |
+| `hemi` | bool | `false` |  |  | ครึ่งทรงกลม (โดม) |
+
+#### `cyl` ▮ ทรงกระบอก / กรวย
+Cylinder or cone standing on y=0 (r1 = 0 → cone). Open (no caps) unless caps=true.
+
+| ฟิลด์ | ชนิด | ค่าเริ่ม | ช่วง | รับ | ความหมาย |
+|---|---|---|---|---|---|
+| `r0` | num | `0.4` | 0–20 |  | รัศมีล่าง ม. |
+| `r1` | num | `0.4` | 0–20 |  | รัศมีบน ม. |
+| `h` | num | `1` | 0.01–30 |  | สูง ม. |
+| `sides` | int | `16` | 3–64 |  | เหลี่ยม |
+| `segs` | int | `1` | 1–32 |  | แบ่งชั้น (ใช้กับ บิด/โค้ง) |
+| `caps` | bool | `false` |  |  | ปิดหัวท้าย |
+
+#### `torus` ◎ โดนัท / ห่วงหนา
+Torus lying flat (arc < 360 = partial ring).
+
+| ฟิลด์ | ชนิด | ค่าเริ่ม | ช่วง | รับ | ความหมาย |
+|---|---|---|---|---|---|
+| `r` | num | `0.6` | 0.02–20 |  | รัศมี ม. |
+| `tube` | num | `0.12` | 0.005–5 |  | หนาท่อ ม. |
+| `arc` | num | `360` | 10–360 |  | มุม องศา |
+| `sides` | int | `10` | 3–32 |  | เหลี่ยมท่อ |
+| `seg` | int | `40` | 3–128 |  | ความละเอียดรอบ |
+
+#### `disc` ◯ แผ่นวง / พัดแผ่น
+Flat disc or ring on the ground (inner > 0 = ring, arc < 360 = fan slice facing +z). v: 0 inner → 1 outer.
+
+| ฟิลด์ | ชนิด | ค่าเริ่ม | ช่วง | รับ | ความหมาย |
+|---|---|---|---|---|---|
+| `r` | num | `1` | 0.02–30 |  | รัศมี ม. |
+| `inner` | num | `0` | 0–30 |  | รัศมีรูใน ม. |
+| `arc` | num | `360` | 5–360 |  | มุม องศา |
+| `seg` | int | `48` | 3–160 |  | ความละเอียด |
+
+#### `star` ✶ ดาว / แฉก
+Flat star on the ground (h > 0 raises the centre into a low pyramid).
+
+| ฟิลด์ | ชนิด | ค่าเริ่ม | ช่วง | รับ | ความหมาย |
+|---|---|---|---|---|---|
+| `n` | int | `6` | 2–32 |  | จำนวนแฉก |
+| `r` | num | `1` | 0.02–30 |  | รัศมี ม. |
+| `inner` | num | `0.35` | 0.02–1 |  | ร่องใน (สัดส่วน) |
+| `h` | num | `0` | -5–5 |  | ยกกลาง ม. |
+
+#### `box` ■ กล่อง
+Box centred at the origin.
+
+| ฟิลด์ | ชนิด | ค่าเริ่ม | ช่วง | รับ | ความหมาย |
+|---|---|---|---|---|---|
+| `w` | num | `0.5` | 0.01–20 |  | กว้าง ม. |
+| `h` | num | `0.5` | 0.01–20 |  | สูง ม. |
+| `d` | num | `0.5` | 0.01–20 |  | ลึก ม. |
+
+ตัวอย่าง (มงกุฎหนามน้ำแข็ง 2 วง + กลุ่มผลึกกลาง):
+```json
+{"v":1,"desc":"มงกุฎน้ำแข็ง","mat":"ice","pal":"ice","parts":[
+  {"id":"ring","k":"crown","n":12,"r":0.9,"h":[0.6,1.2],"tilt":30,"rings":2},
+  {"id":"core","k":"cluster","n":5,"spread":0.25,"h":[0.8,1.8]}
+]}
+```
+ใช้ในเอฟเฟกต์: `{"id":"crown","t":"mesh","shape":"model","model":"ice_crown","mat":"ice","scale":{"0":[1,0.05,1],"0.2":1,"ease":"out"}}`
+
+## ภาพที่วาดเอง — `assets/fx/tex/<ชื่อ>.png` + `.tex.json` (แท็บ 🎞 ภาพ ในสตูดิโอ)
+ภาพที่วาดในสตูดิโอ assets/fx/tex/<ชื่อ>.png + <ชื่อ>.tex.json (สูตรวาด + วิธีเล่น) • ใช้: emit {"fb": "tex/<ชื่อ>"} (ทุก look) หรือ mesh {"mat": "flip","tex": "tex/<ชื่อ>"} • ภาพมีสีในตัว → ตั้ง col เป็น #ffffff ในเอฟเฟกต์ (สีอื่น = ย้อมทับ)
+
+### ไฟล์ .tex.json
+| ฟิลด์ | ชนิด | ค่าเริ่ม | ช่วง | รับ | ความหมาย |
+|---|---|---|---|---|---|
+| `v` | int | `1` |  |  | เวอร์ชันรูปแบบไฟล์ |
+| `desc` | str | `` |  |  | คำอธิบาย |
+| `gen` | enum (fire/smoke/explosion/electric/vortex/shock/burst/slash/flare/glow/ring/circle/noise/sim) | `fire` |  |  | ตัววาด |
+| `p` | obj | `{}` |  |  | ค่าของตัววาด (ดู gens) |
+| `seed` | int | `1` | 1–9999 |  | เลขสุ่ม |
+| `px` | enum (32/64/128/256) | `128` |  |  | ความละเอียดต่อเฟรม (px) |
+| `cols` | int | `8` | 1–8 |  | จำนวนคอลัมน์ |
+| `rows` | int | `8` | 1–8 |  | จำนวนแถว |
+| `kind` | enum (loop/life) | `loop` |  |  | loop = เล่นวนต่อเนื่อง • life = เล่นครั้งเดียวตามอายุเม็ด |
+| `fps` | int | `24` | 4–60 |  | เฟรม/วิ (loop บนการ์ดภาพ) |
+| `ramp` | ramp | `fire` |  |  | สี: ชื่อจาน (ramps) หรือ [[ตำแหน่ง 0-1,"#rrggbb"],...] |
+| `add` | bool | `true` |  |  | เรืองแสง (บวกแสง) — ปิด = ทึบแบบควัน |
+| `span` | num | `1` | 0.25–8 |  | เล่นกี่รอบตลอดอายุเม็ด |
+| `rand` | bool | `false` |  |  | สุ่มเฟรมเริ่มต่อเม็ด |
+| `rot` | num | `0` | 0–6.28 |  | สุ่มเอียงเม็ด (เรเดียน) |
+| `spin` | num | `0` | -12–12 |  | หมุนตลอดอายุ (เรเดียน) |
+| `size` | num | `1` | 0.2–4 |  | ตัวคูณขนาดเม็ด |
+| `occ` | num | `0.6` | 0–1 |  | บังฉากหลัง (เฉพาะเรืองแสง) |
+| `tags` | list | `[]` |  |  | แท็ก |
+### จานสี (ramp)
+- `fire`: #1a0f0a → #7a1c06 → #e0520f → #ffae2e → #fff6d0
+- `ice`: #0a1a3a → #2a6fd0 → #8fd8ff → #ffffff
+- `storm`: #1a0a40 → #5a3ae0 → #9fd0ff → #ffffff
+- `nature`: #0a2010 → #2f9a3a → #b8f070 → #f8ffe0
+- `hex`: #14001e → #7a1aa8 → #e070ff → #ffe8ff
+- `arcane`: #100828 → #4a40d0 → #c0a0ff → #ffffff
+- `gold`: #2a1404 → #b07818 → #ffd870 → #fffbe8
+- `blood`: #1a0204 → #8a0a14 → #ff4a3a → #ffd0c0
+- `smoke`: #1e1e24 → #6a6a72 → #d4d4dc
+- `white`: #5a5a5a → #ffffff
+
+### ตัววาด (gen) — ค่าใส่ใน `p`
+
+#### `fire` 🔥 เปลวไฟ (วน) — kind `loop` • ตาราง 8×8 • จานสี `fire` • เรืองแสง
+Rising flame that loops seamlessly (periodic noise). For fire particles and flame cards.
+
+| ฟิลด์ | ชนิด | ค่าเริ่ม | ช่วง | รับ | ความหมาย |
+|---|---|---|---|---|---|
+| `speed` | int | `1` | 1–4 |  | ความเร็วไหลขึ้น |
+| `scale` | int | `3` | 1–8 |  | ขนาดลาย |
+| `detail` | int | `4` | 1–6 |  | รายละเอียด |
+| `width` | num | `0.75` | 0.1–1 |  | กว้างเปลว |
+| `height` | num | `0.9` | 0.2–1.2 |  | สูงเปลว |
+| `turb` | num | `0.6` | 0–1.5 |  | ปั่นป่วน |
+| `sharp` | num | `1.2` | 0.4–3 |  | คม (ขอบชัด) |
+
+#### `smoke` ☁ ควันพวย (ตามอายุ) — kind `life` • ตาราง 6×6 • จานสี `smoke` • ทึบ
+Billowing smoke puff that grows and fades over the particle life (lit from above).
+
+| ฟิลด์ | ชนิด | ค่าเริ่ม | ช่วง | รับ | ความหมาย |
+|---|---|---|---|---|---|
+| `scale` | num | `3` | 0.5–10 |  | ขนาดลาย |
+| `detail` | int | `4` | 1–6 |  | รายละเอียด |
+| `grow` | num | `0.6` | 0–1 |  | ขยายตัว |
+| `soft` | num | `0.5` | 0–1 |  | ขอบนุ่ม |
+| `turb` | num | `0.6` | 0–2 |  | ม้วนตัว |
+| `dark` | num | `0.5` | 0–1.5 |  | เงา (แสงจากบน) |
+| `dens` | num | `1` | 0.2–2 |  | ความหนาแน่น |
+
+#### `explosion` 💥 ระเบิด (ตามอายุ) — kind `life` • ตาราง 8×8 • จานสี `fire` • เรืองแสง
+Fireball that expands, cools from white-hot to dark smoke and breaks up.
+
+| ฟิลด์ | ชนิด | ค่าเริ่ม | ช่วง | รับ | ความหมาย |
+|---|---|---|---|---|---|
+| `scale` | num | `3` | 0.5–10 |  | ขนาดลาย |
+| `detail` | int | `5` | 1–6 |  | รายละเอียด |
+| `grow` | num | `0.8` | 0–1.5 |  | พองเร็ว |
+| `heat` | num | `1` | 0.3–2 |  | ร้อน |
+| `cool` | num | `0.6` | 0–1.2 |  | เย็นลงเร็ว |
+| `rough` | num | `0.55` | 0–1.2 |  | ขอบขรุขระ |
+
+#### `electric` ⚡ สายฟ้า / กระแสไฟ (วน) — kind `loop` • ตาราง 4×4 • จานสี `storm` • เรืองแสง
+Crackling arcs pinned at both ends, jittering in a seamless loop.
+
+| ฟิลด์ | ชนิด | ค่าเริ่ม | ช่วง | รับ | ความหมาย |
+|---|---|---|---|---|---|
+| `arcs` | int | `3` | 1–6 |  | จำนวนเส้น |
+| `jag` | num | `1.2` | 0.3–3 |  | หยัก |
+| `amp` | num | `1` | 0.2–2 |  | แกว่งกว้าง |
+| `width` | num | `0.02` | 0.004–0.1 |  | หนาแกน |
+| `glow` | num | `0.4` | 0–2 |  | เรือง |
+
+#### `vortex` 🌀 วังวน / เวทหมุน (วน) — kind `loop` • ตาราง 4×4 • จานสี `arcane` • เรืองแสง
+Spiral arms rotating in a seamless loop (portals, charge-ups, vortex ground marks).
+
+| ฟิลด์ | ชนิด | ค่าเริ่ม | ช่วง | รับ | ความหมาย |
+|---|---|---|---|---|---|
+| `arms` | int | `3` | 1–8 |  | จำนวนแขน |
+| `twist` | num | `1.5` | -4–4 |  | บิดเกลียว |
+| `speed` | int | `1` | 1–4 |  | ความเร็วหมุน |
+| `inner` | num | `0.12` | 0–0.8 |  | รูกลาง |
+| `outer` | num | `0.95` | 0.3–1 |  | ขอบนอก |
+| `noise` | num | `0.4` | 0–1.5 |  | ลายปั่นป่วน |
+| `scale` | num | `4` | 0.5–12 |  | ขนาดลาย |
+| `sharp` | num | `1.5` | 0.3–5 |  | แขนคม |
+| `core` | num | `0.3` | 0–1.5 |  | แกนกลางสว่าง |
+
+#### `shock` ◌ คลื่นกระแทก (ตามอายุ) — kind `life` • ตาราง 4×4 • จานสี `white` • เรืองแสง
+Expanding shockwave ring with a faint fill behind the front.
+
+| ฟิลด์ | ชนิด | ค่าเริ่ม | ช่วง | รับ | ความหมาย |
+|---|---|---|---|---|---|
+| `start` | num | `0.1` | 0–0.9 |  | รัศมีเริ่ม |
+| `end` | num | `0.92` | 0.2–1 |  | รัศมีจบ |
+| `width` | num | `0.08` | 0.005–0.4 |  | หนา |
+| `noise` | num | `0.4` | 0–1 |  | ขาดเป็นช่วง |
+| `scale` | num | `6` | 0.5–20 |  | ขนาดลาย |
+| `fill` | num | `0.35` | 0–1 |  | แสงด้านใน |
+
+#### `burst` ✺ ประกายแตก (ตามอายุ) — kind `life` • ตาราง 4×4 • จานสี `gold` • เรืองแสง
+Radial streaks shooting out from the centre (hit sparks, impact star).
+
+| ฟิลด์ | ชนิด | ค่าเริ่ม | ช่วง | รับ | ความหมาย |
+|---|---|---|---|---|---|
+| `rays` | int | `16` | 3–48 |  | จำนวนเส้น |
+| `len` | num | `0.45` | 0.05–1 |  | ยาว |
+| `width` | num | `0.25` | 0.02–1 |  | หนา |
+| `core` | num | `0.8` | 0–2 |  | แสงกลาง |
+
+#### `slash` ☾ รอยฟัน (ตามอายุ) — kind `life` • ตาราง 4×4 • จานสี `white` • เรืองแสง
+Crescent slash that sweeps in then fades (1 frame = the full arc).
+
+| ฟิลด์ | ชนิด | ค่าเริ่ม | ช่วง | รับ | ความหมาย |
+|---|---|---|---|---|---|
+| `arc` | num | `130` | 20–300 |  | มุมโค้ง องศา |
+| `radius` | num | `0.42` | 0.1–0.5 |  | รัศมี |
+| `width` | num | `0.14` | 0.01–0.4 |  | กว้าง |
+| `streak` | num | `0.6` | 0–1 |  | เส้นลาย |
+| `scale` | num | `6` | 1–20 |  | ความถี่เส้นลาย |
+
+#### `flare` ✦ ดาวประกาย — kind `loop` • ตาราง 1×1 • จานสี `white` • เรืองแสง
+Star flare: glow + long rays + short rays (grid > 1 + twinkle = twinkling loop).
+
+| ฟิลด์ | ชนิด | ค่าเริ่ม | ช่วง | รับ | ความหมาย |
+|---|---|---|---|---|---|
+| `rays` | int | `4` | 2–16 |  | จำนวนแฉก |
+| `len` | num | `0.95` | 0.1–1 |  | ยาวแฉก |
+| `thin` | num | `40` | 2–200 |  | แฉกบาง |
+| `rays2` | num | `0.5` | 0–1 |  | แฉกรอง |
+| `glow` | num | `0.3` | 0.02–1 |  | เรือง |
+| `core` | num | `0.08` | 0.01–0.4 |  | แกน |
+| `twinkle` | num | `0` | 0–1 |  | กะพริบ (ต้องหลายเฟรม) |
+
+#### `glow` ◉ แสงนุ่ม — kind `loop` • ตาราง 1×1 • จานสี `white` • เรืองแสง
+Soft radial glow (sprite for orbs, lights, soft particles).
+
+| ฟิลด์ | ชนิด | ค่าเริ่ม | ช่วง | รับ | ความหมาย |
+|---|---|---|---|---|---|
+| `radius` | num | `1` | 0.1–1 |  | รัศมี |
+| `power` | num | `2.2` | 0.3–8 |  | ความนุ่ม |
+| `core` | num | `0.12` | 0–0.5 |  | แกนสว่าง |
+
+#### `ring` ○ วงแหวน — kind `loop` • ตาราง 1×1 • จานสี `white` • เรืองแสง
+Soft ring (halo, rune ring sprite).
+
+| ฟิลด์ | ชนิด | ค่าเริ่ม | ช่วง | รับ | ความหมาย |
+|---|---|---|---|---|---|
+| `radius` | num | `0.75` | 0.05–1 |  | รัศมี |
+| `width` | num | `0.08` | 0.005–0.5 |  | หนา |
+| `fill` | num | `0.15` | 0–1 |  | แสงด้านใน |
+| `noise` | num | `0` | 0–1 |  | ขาดเป็นช่วง |
+| `scale` | num | `6` | 0.5–20 |  | ขนาดลาย |
+
+#### `circle` ⛤ วงเวท — kind `loop` • ตาราง 1×1 • จานสี `gold` • เรืองแสง
+Magic circle: rings, star polygon, tick marks and a band of runes (spin > 0 + several frames = rotating loop).
+
+| ฟิลด์ | ชนิด | ค่าเริ่ม | ช่วง | รับ | ความหมาย |
+|---|---|---|---|---|---|
+| `rings` | int | `3` | 1–5 |  | จำนวนวง |
+| `points` | int | `6` | 0–12 |  | ดาว (จำนวนแฉก, 0 = ไม่มี) |
+| `runes` | int | `24` | 0–64 |  | อักษรเวท |
+| `width` | num | `0.012` | 0.003–0.05 |  | หนาเส้น |
+| `spin` | int | `0` | 0–3 |  | หมุน (รอบต่อวง loop) |
+
+#### `noise` ▒ ลายนอยส์ (ต่อขอบได้) — kind `loop` • ตาราง 1×1 • จานสี `white` • เรืองแสง
+Tileable noise mask: 0 = cloudy, 1 = ridged (veins/lightning web), 2 = cells (scales/cracks).
+
+| ฟิลด์ | ชนิด | ค่าเริ่ม | ช่วง | รับ | ความหมาย |
+|---|---|---|---|---|---|
+| `mode` | int | `0` | 0–2 |  | แบบ: 0 เมฆ / 1 เส้นเลือด / 2 เซลล์ |
+| `scale` | int | `4` | 1–16 |  | ขนาดลาย |
+| `detail` | int | `5` | 1–6 |  | รายละเอียด |
+| `contrast` | num | `1.2` | 0.3–4 |  | คมชัด |
+
+#### `sim` ♨ จำลองของไหลจริง (ไฟ / ควัน) — kind `loop` • ตาราง 8×8 • จานสี `fire` • เรืองแสง
+Real 2D fluid simulation (stable fluids with buoyancy + vorticity) — like Blender Mantaflow but in seconds. mode 0 = fire, 1 = smoke. loop crossfades the end into the start.
+
+| ฟิลด์ | ชนิด | ค่าเริ่ม | ช่วง | รับ | ความหมาย |
+|---|---|---|---|---|---|
+| `mode` | int | `0` | 0–1 |  | แบบ: 0 ไฟ / 1 ควัน |
+| `emit` | num | `0.5` | 0.1–1 |  | ขนาดต้นไฟ |
+| `buoy` | num | `1` | 0–3 |  | ลอยขึ้น |
+| `vort` | num | `0.6` | 0–3 |  | ม้วนตัว |
+| `cool` | num | `0.6` | 0–2 |  | ดับเร็ว |
+| `wind` | num | `0` | -2–2 |  | ลมข้าง |
+| `flick` | num | `0.5` | 0–1 |  | สั่นไหว |
+| `steps` | int | `2` | 1–4 |  | ช่วงเวลาต่อเฟรม |
+
+ภาพ (.png) ต้องวาดในสตูดิโอ (GPU / จำลองของไหล): แก้ `.tex.json` แล้วเปิด `studio.html?tex=<ชื่อ>&bake=1` = วาดใหม่ + บันทึก .png ให้เอง (ต้องเปิดผ่าน `python tools/serve.py`) • ใช้ในเอฟเฟกต์: `{"t":"emit","fb":"tex/<ชื่อ>","col":"#ffffff",...}` หรือการ์ดภาพ `{"t":"mesh","shape":"plane","bill":true,"mat":"flip","tex":"tex/<ชื่อ>","col":"#ffffff"}`
 
 ## ผูกกับเกม — `assets/fx/bind.json`
 assets/fx/bind.json — ผูกเหตุการณ์ของเกมกับเอฟเฟกต์ โดยไม่แก้โค้ดสกิล

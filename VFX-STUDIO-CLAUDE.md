@@ -11,6 +11,7 @@
 - One runtime, `js/45-fx-runtime.js`, plays these files with the game's own systems: particles, fire shader, volumetric fire, ice shader, lightning, trails, rings, lights and screen effects. So **what the studio shows is what the game shows**.
 - `assets/fx/bind.json` binds game events to effects. You don't need to edit skill code.
 - **`studio.html`** is the editor. It is the real game in studio mode (`index.html?studio`) with a timeline, an inspector, contact sheets and metrics.
+- The same app also **makes the assets** effects need: 🧊 models (spikes, crowns, blades, wings, swirls, domes…) and 🎞 textures/flipbooks (fire, smoke, explosions, lightning, magic circles, real fluid sims). See §6b.
 - Client side only. Effect files never change the network protocol, so there's no `PREFIX` bump.
 
 ## 2. Start it
@@ -26,13 +27,17 @@
 | Path | What |
 |---|---|
 | `assets/fx/schema.json` | **Single source of truth**: every layer type and field, with defaults, ranges, Thai labels and descriptions. The runtime, studio, checker and docs all read it. |
-| `assets/fx/start/*.fx.json` | 11 starter templates: `explosion` `hit` `slash` `beam` `aura` `shield` `ice_spikes` `lightning_strike` `fire_pillar` `projectile` `summon` `zone`. **Copy one; don't start from zero.** |
+| `assets/fx/start/*.fx.json` | Starter templates: `explosion` `hit` `slash` `beam` `aura` `shield` `ice_spikes` `lightning_strike` `fire_pillar` `projectile` `summon` `zone`, plus `crystal_nova` / `campfire` (use studio-made models/textures). **Copy one; don't start from zero.** |
 | `assets/fx/tpl/*`, `sig/*`, `rec/parry` | The old `playFx('fire_impact')` templates, now files (palette × template + element layers). Editing them changes every skill that uses them (`EFXAUG`/`fxAug` in `js/44-vfx-kit.js`). |
 | `assets/fx/bind.json` | Event → effect table. |
 | `assets/fx/index.json` | Generated list and versions. **Don't hand-edit.** |
 | `FX-FORMAT.md` | Generated field docs. **Don't hand-edit.** |
 | `js/45-fx-runtime.js` | Runtime: `fxPlay`, `fxStart`, `fxStop`, `fxKill`, `fxBind`, `fxTpl`, `FXCODE` |
+| `assets/fx/mesh/*.mesh.json` | Models made in the 🧊 tab (recipes; the game builds them) — §6b |
+| `assets/fx/tex/*.png` + `*.tex.json` | Textures / flipbooks made in the 🎞 tab — §6b |
+| `js/46-fx-make.js` | Builds models from recipes + loads textures (`fxMeshBuild`, `fxTexLoad`, `MKGEN` part generators) |
 | `studio/studio.js`, `studio/studio.css` | Studio, loaded only with `?studio` |
+| `studio/maker.js`, `studio/texgen.js` | 🧊 Model tab + 🎞 Texture tab (texture generators: GLSL shaders + fluid sim + png writer) |
 | `tools/fx-lint.js`, `tools/fx-check.js` | Checker (shared by node and the studio) |
 | `tools/serve.py` | Local server + save/shot API |
 
@@ -124,6 +129,33 @@ http://localhost:8765/studio.html?fx=storm/railgun&sheet=0.03,0.1,0.2,0.35,0.6,1
   - **Find what whites out:** solo each layer with `STUDIO.state.solo='id'; STUDIO.seek(t)` and compare `white`. Set `solo=null` when done.
 - When the file changes on disk, the studio reloads it by itself. So you edit JSON and the user sees it live.
 
+## 6b. Make your own assets: 🧊 Model tab and 🎞 Texture tab (no Blender needed)
+The studio has 3 tabs in the top bar: **✨ เอฟเฟกต์** (effects, sections above), **🧊 โมเดล** (models), **🎞 ภาพ** (textures / flipbooks). Same app, same renderer as the game.
+
+**Models: `assets/fx/mesh/<name>.mesh.json`.**
+- A model is a **recipe**: a list of `parts` + modifiers. The game builds the 3D mesh itself when it loads (`js/46-fx-make.js`, same code in game and studio). Files are tiny and stay editable.
+- Part kinds (`k`): `shard` (crystal spike), `crown` (ring of spikes), `cluster` (crystal cluster), `burst` (spikes in all directions), `blade` (crescent / slash / claw), `fan` (wing / feathers), `spiral` (ground swirl / tornado band), `tube` (horn / tentacle along a path), `ribbon`, `lathe` (profile spun around: domes, cups, funnels), `sphere`, `cyl`, `torus`, `disc`, `star`, `box`.
+- Every part also has `pos` `rot` `scale`, shape modifiers `topScale` (taper) `twist` `bend` `noise` `nfreq` `seed` `flat`, and repeats `arr` (+ `arrMode` ring/line, `arrR`, `arrStep`, `arrScale`, `arrJit`) and `mir` (mirror left/right).
+- Units are metres, base at y = 0, +x right +y up +z forward. uv v goes 0 at the root/inside → 1 at the tip/outside, so fire and energy flow outward.
+- Use it in an effect: `{"t":"mesh","shape":"model","model":"<name>","mat":"ice", ...}` (all normal mesh fields work: `scale` curves, `dis`, `op`, `spin`, `bill`).
+- 13 samples to copy: `crystal_crown` `crystal_cluster` `spike_shell` `slash_arc` `claw_triple` `flame_wing` `tornado` `rune_swirl` `horn_pair` `star_burst` `rock_chunks` `shield_dome` `energy_spear`.
+- In the studio: ＋ ชิ้นส่วน adds a part; click a part on screen to select it; drag the gizmo; **G** move / **R** rotate / **S** scale (like Blender); Delete, Ctrl+D duplicate, H hide, W wireframe; "ดู: ดินปั้น/วัสดุจริง" = clay or real game material; ⬇ .glb exports for Blender.
+
+**Textures: `assets/fx/tex/<name>.png` + `<name>.tex.json`.**
+- The `.tex.json` is the recipe (generator `gen` + values `p` + `ramp` colours + frame grid `cols`×`rows`, `px` per frame, `kind` loop/life, playback `add span rand rot spin size occ`). The `.png` is the baked frame sheet. **Only the studio can bake the png** (GPU shaders + a CPU fluid sim).
+- Generators: `fire` (looping flame), `smoke` (puff over the particle's life), `explosion`, `electric`, `vortex`, `shock` (shockwave ring), `burst` (hit sparks), `slash`, `flare` (star), `glow`, `ring`, `circle` (magic circle), `noise` (tileable mask: clouds / veins / cells), `sim` (**real 2D fluid simulation**, fire or smoke, like Blender Mantaflow but in under a second).
+- `loop` textures loop seamlessly (periodic noise; sim crossfades). `life` textures play once over each particle's life.
+- Use it in an effect: particles `{"t":"emit","fb":"tex/<name>","col":"#ffffff", ...}` (works with every `look`; `#ffffff` = the image's own colours, other colours tint it) or a card `{"t":"mesh","shape":"plane","bill":true,"mat":"flip","tex":"tex/<name>","col":"#ffffff"}` (flat on the ground: `"rot":[90,0,0]`, drop `bill`).
+- 18 samples: `fire_loop` `fire_sim` `smoke_puff` `smoke_sim` `explosion` `electric_arc` `vortex_portal` `shockwave` `hit_burst` `slash_sweep` `star_flare` `soft_glow` `ring_soft` `magic_circle` `magic_circle_spin` `noise_clouds` `noise_veins` `noise_cells`.
+- Demo effects that use them: `start/crystal_nova` (model + shockwave card + star particles), `start/campfire` (sim fire + sim smoke particles).
+
+**Claude workflow for assets (all from the JS tool on the studio tab, needs serve.py):**
+- Open a tab directly: `studio.html?mesh=<name>` or `studio.html?tex=<name>`.
+- Models: write/edit the `.mesh.json` by hand (fields in `FX-FORMAT.md` → "โมเดลที่ปั้นเอง"), run `node tools/fx-check.js`, then look: `STUDIO.mesh.open(n)`, `STUDIO.mesh.view('mat'|'clay')`, `STUDIO.mesh.shot(name)` → `shots/<name>.jpg`, or `STUDIO.mesh.sheetAll(name)` = every model on one sheet. Edit live: `STUDIO.mesh.set('partId.field', v)`, `STUDIO.mesh.add(kind)`, `STUDIO.mesh.save(name)`. `STUDIO.mesh.tris()` (keep ≤ 30000), `STUDIO.mesh.lint()`.
+- Textures: write the `.tex.json`, then bake: open `studio.html?tex=<name>&bake=1` (renders + saves the png) or `studio.html?bakeall=1` (re-bakes every texture). Look: `STUDIO.tex.sheetAll(name)` → frames of every texture on dark + checker backgrounds; `STUDIO.tex.sheet(name)` = one texture's full sheet. Edit live: `STUDIO.tex.set('p.scale', 4)`, `STUDIO.tex.gen('vortex')`, `STUDIO.tex.save(name)`.
+- If the browser pane is hidden, animation frames don't run: use `STUDIO.tick(n)` to step the model/texture tab by hand before `shot`.
+- After saving, fx-check runs by itself (via serve.py); still run `node tools/fx-check.js` before committing. Texture pngs are ~50 KB–1 MB; prefer `px` 128 and the smallest grid that looks right.
+
 ## 7. bind.json
 ```json
 {
@@ -152,8 +184,10 @@ http://localhost:8765/studio.html?fx=storm/railgun&sheet=0.03,0.1,0.2,0.35,0.6,1
 - `x` and `own` are gates. Use `own` for anything that hits the whole screen.
 - Don't touch `index.json` or `FX-FORMAT.md` by hand. Run `node tools/fx-check.js`.
 - The repo is **public**: only use self-made or CC0 images and models.
-- A Blender model (`mesh_*` in `assets/manifest.json`) can be a shape: `"shape":"glb","glb":"mesh_fire_wing"`.
-- Flipbooks: `mat:"flip"` with `tex` = a name from manifest `fx`/`ptex`.
+- **Need a new 3D shape or texture? Make it in the 🧊 / 🎞 tab first** (§6b). Blender is only for things the part kinds can't build (characters, detailed props).
+- A Blender model (`mesh_*` in `assets/manifest.json`) can still be a shape: `"shape":"glb","glb":"mesh_fire_wing"`.
+- Flipbooks: `mat:"flip"` with `tex` = `tex/<name>` (made in the studio) or a name from manifest `fx`/`ptex`.
+- New part kinds or texture generators: add the fields to `schema.json` (`mk.parts` / `tx.gens`) first, then the code (`MKGEN` in `js/46-fx-make.js` / `TX_GLSL` in `studio/texgen.js`).
 - New layer types or fields: add them to `schema.json` first, then `js/45-fx-runtime.js` (`fxSpawn`/`fxTick`/`fxEnd`), then `tools/fx-lint.js` if they need checks. Run fx-check to regenerate the docs.
 - A friend (another Claude) also works on VFX, mostly fire/Pyro. **Pull often**, and don't rewrite their files without being asked.
 
@@ -165,3 +199,6 @@ http://localhost:8765/studio.html?fx=storm/railgun&sheet=0.03,0.1,0.2,0.35,0.6,1
 | Screenshot tool times out (browser pane hidden) | Use `&save=` sheets and Read `shots/…` instead. |
 | Effect is in the studio but not in the game | Not bound (`bind.json`), the event name is wrong (check `z:'…'` in host js), or the file isn't loaded yet (bound files are prefetched at load). |
 | In-game look differs from the studio | Check `att` (`ground` vs `point`) and the event's `h`/`a`; studio `at=self` vs `front`. |
+| `shape:"model"` layer shows nothing | Model name wrong (fx-check says so) or still loading — the first play after load can skip it; sheets wait for loading. |
+| Particles with `fb:"tex/…"` look like plain dots | The png is missing or not baked: open `studio.html?tex=<name>&bake=1`. |
+| Texture looks too dark / tinted | Set the layer `col` (and `c2`) to `#ffffff` so the image keeps its own colours. |

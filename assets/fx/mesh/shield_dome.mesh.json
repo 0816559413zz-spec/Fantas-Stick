@@ -1,0 +1,15 @@
+{
+  "v": 1,
+  "desc": "โดมโล่ครึ่งทรงกลม + ห่วงฐาน + ซี่โครงโค้ง",
+  "mat": "energy",
+  "pal": "shield",
+  "tags": [
+    "shield",
+    "aura"
+  ],
+  "parts": [
+    {"id":"dome","k":"sphere","r":1.6,"seg":24,"hemi":true},
+    {"id":"base","k":"torus","r":1.6,"tube":0.05,"seg":64},
+    {"id":"ribs","k":"torus","r":1.6,"tube":0.025,"arc":180,"seg":40,"rot":[90,0,0],"arr":4}
+  ]
+}
