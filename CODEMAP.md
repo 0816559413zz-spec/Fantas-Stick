@@ -19,17 +19,17 @@ PROPDEF:134 PROP_OFF_MODES:139 PROP_USE:141 PROPS:142 PROPON:142 genProps:143
 §163 ตัวละคร: บ้านฮอกวอตส์ + หน้าตา
 HOUSES:165 HAIRC:170 HAIRSTY:172 WOODC:174 WOODN:175 WCOREC:176 WCOREN:177 WANDSTY:178 EYEC:179 SKINC:180 CLOAKC:181 TIESTY:182 LOOKK:183 LOOKN:183 lookStr:184 parseLook:185 randLook:186 LOOKS:187 LOOKP:187 KITS:187 getKit:188 getLook:189 CREST_SH:190 CREST_PAT:191 starPts:196 CREST_ANI:198 crestSVG:204 houseColor:212 TEAMC:213 TEAMN:213 MODES:214 PDEF:225 EDEF:252 POOLS:264 CDK:274 BUFFS:275
 
-## js/03-spells-core.js (216) — ระบบคาถาใหม่: สาย (path) × คาถา (spell) + สถานะ (status effects)
+## js/03-spells-core.js (218) — ระบบคาถาใหม่: สาย (path) × คาถา (spell) + สถานะ (status effects)
 §6 ไอคอนคาถา: จาก game-icons.net (CC BY 3.0, เครดิตใน "คู่มือ" และ icons…
-ICONS:8 ICOALIAS:9 hasIco:10 icoURL:11 ICO:12 icoTint:13 icoHTML:22 PATHS:23 SPELL_LIST:31 SPELLS:31 defSpell:32 SLOTK:33 BRMAP:33 KITP:34 parseKit:35 cleanKit:51 setKit:52
-§54 สถานะ (ใช้ได้ทั้งผู้เล่นและศัตรู)
-isBig:55 ccScale:57 ccTouch:58 addStun:59 addRoot:60 addFreeze:61 addSlow:66 addChill:67 ignite:72 shock:80 knock:81 addWard:82 addFrostSlow:84 frostSlow:85 moveMul:92 BRN_MAX:94 addBurn:95 addXBurn:97 addPoison:98 addSil:99 addFear:100 addBlind:101 addMark:102 healT:104 tickStatus:109 clearStatus:129 fxMask:130
-§132 วัตถุในสนามที่คาถาสร้าง: โซน / ฟ้าผ่าหน่วงเวลา / กำแพง / ช่องร่ายต่อเ…
-foesIn:133 shieldFaces:140 aoeHit:146 addZone:152 updateZones:157 addStrike:168 updateStrikes:169 addWall:170 updateWalls:171 updateChan:175 updateSpells:179 aimPoint:181
-§193 ตัวช่วยคอมโบ (ทุกสายใช้หลักเดียวกัน: ตั้งต้น → ต่อยอด → ปิดจบ)
-ROLE_N:195 takePoison:196
-§198 ความสามารถพื้นฐาน (คลิกซ้าย) ของแต่ละสาย: สะสมสถานะตั้งต้นให้เองทุกๆ …
-PBASIC:199
+ICONS:8 ICOALIAS:9 hasIco:10 ICOBASE:12 icoURL:13 ICO:14 icoTint:15 icoHTML:24 PATHS:25 SPELL_LIST:33 SPELLS:33 defSpell:34 SLOTK:35 BRMAP:35 KITP:36 parseKit:37 cleanKit:53 setKit:54
+§56 สถานะ (ใช้ได้ทั้งผู้เล่นและศัตรู)
+isBig:57 ccScale:59 ccTouch:60 addStun:61 addRoot:62 addFreeze:63 addSlow:68 addChill:69 ignite:74 shock:82 knock:83 addWard:84 addFrostSlow:86 frostSlow:87 moveMul:94 BRN_MAX:96 addBurn:97 addXBurn:99 addPoison:100 addSil:101 addFear:102 addBlind:103 addMark:104 healT:106 tickStatus:111 clearStatus:131 fxMask:132
+§134 วัตถุในสนามที่คาถาสร้าง: โซน / ฟ้าผ่าหน่วงเวลา / กำแพง / ช่องร่ายต่อเ…
+foesIn:135 shieldFaces:142 aoeHit:148 addZone:154 updateZones:159 addStrike:170 updateStrikes:171 addWall:172 updateWalls:173 updateChan:177 updateSpells:181 aimPoint:183
+§195 ตัวช่วยคอมโบ (ทุกสายใช้หลักเดียวกัน: ตั้งต้น → ต่อยอด → ปิดจบ)
+ROLE_N:197 takePoison:198
+§200 ความสามารถพื้นฐาน (คลิกซ้าย) ของแต่ละสาย: สะสมสถานะตั้งต้นให้เองทุกๆ …
+PBASIC:201
 
 ## js/04-frost-mech.js (100) — สายน้ำแข็ง: ประชิด/ไกล (V) • ฟันดาบ/ขวาน • ไถลน้ำแข็ง • พื้นน้ำแข็ง/ภ…
 frostBoom:3 meleeHit:10 mirrorPos:21 frostBasic:22 frostSlam3:46 frostSlam:54 frostDash:60 addIce:65 updateIces:66 updateWaves:82 groundH:95
@@ -185,10 +185,10 @@ SHAPES_Q:78 SHAPES:78 FLASHL:78 LINES:78 LREQ:79 ringGeo:80 ringVGeo:81 arcGeo:8
 ## js/31-camera.js (112) — กล้องมุมหลังไหล่ (แบบ Hogwarts Legacy)
 yaw:2 pitch:2 lastPh:2 locked:2 SENS:3 saveSet:4 applySettings:5 camPos:13 camLook:13 overlayOpen:16 showPause:17 hidePause:18 MAPCAM:19 PLACE:21 placeKey:22 updatePlaceGhost:30 _aimD:44 rayTerr:46 aimFromCrosshair:52 AIMZ:82 updateCamera:83 menuCamera:108
 
-## js/32-stage.js (264) — เวทีเมนู/ล็อบบี้: ห้องโถงมืด แท่นวงเวททอง เทียนลอย (ฉากแยกจากแผนที่)
+## js/32-stage.js (265) — เวทีเมนู/ล็อบบี้: ห้องโถงมืด แท่นวงเวททอง เทียนลอย (ฉากแยกจากแผนที่)
 stage:2 STAGE:5 STAGE_Y:6 stageSpots:58 stageChar:74 POSES:81 stageIdle:87 _sv:107
 §108 ฉากประจำบ้าน (โผล่ตอนเลือกบ้านในหน้าสร้างตัวละคร)
-CRESTTEX:109 crestTex:110 crestBanner:118 buildHouseEnvs:126 TONE0:174 _tc:175 stageTone:176 stageScreen:189 renderStage:190 drawStageLabels:235
+CRESTTEX:109 crestTex:110 crestBanner:118 buildHouseEnvs:126 TONE0:174 _tc:175 stageTone:176 stageScreen:189 renderStage:190 drawStageLabels:236
 
 ## js/33-pyro-view.js (218) — ภาพของสายไฟ (pyroFX: ชาร์จ/พุ่ง/ดีดนิ้ว/กลายร่าง/Dragonfall/Colossus)…
 §2 sync ตัวละคร/ศัตรู/ลูกเวท กับ snapshot
@@ -217,13 +217,13 @@ rr:2 SLOTS:3 fmtTime:4
 §5 ชิ้นส่วน HUD ธีมทอง-น้ำเงิน
 HG:6 HG2:6 HN:6 diaPath:7 plate:9 frameBox:15 bossTrail:23 drawBossBar:24 spellDia:42 thinBar:67 drawHUD:72 raceRankClient:128 drawModeHUD:132 MM:169 drawMinimap:170 slotKey:243 mySlots:244 drawUlt:249 STATUS_ICO:268 SLOTS_IMP:269 BR_LOCK:270 CLUSTER:272 slotState:273 drawBottom:286 drawBoard:326
 
-## js/39-menu.js (228) — เมนู / ล็อบบี้ (DOM)
+## js/39-menu.js (234) — เมนู / ล็อบบี้ (DOM)
 §4 ตัวละครของฉัน (เก็บในเครื่อง: wd_look) — ครั้งแรกที่เข้าเกมจะเปิดหน้า…
 myLook:5 myColor:5 myKit:5 myName:6 renderMyHouse:9
 §11 หน้าสร้าง/แต่งตัวละคร (2 ขั้น: 1 หน้าตา → 2 เลือกบ้าน)
 crLib:12 crSaved:12 crKitSaved:12 crOpen:12 crStep:12 crTab:12 crFirst:12 crKitOnly:12 crSlot:12 CRTABS:13 sw_:14 bt_:15 nameBox_:16 crPanelSet:17 crRenderStep1:22 crRenderWand:33
 §36 ขั้น 3: สาย + ชุดคาถา
-ROLE_COL:37 roleTag:38 DESIGNED:39 spellTags:40 spellDescHTML:47 baseDescHTML:51 SB_THEME:59 ROLE_ORDER:67 sbFxRun:68 sbFxT:68 sbParts:68 crRenderKit:69 sbStartFx:98 sbFxTick:99 sbBurst:126 crAssign:132 crRenderHouse:141 crGo:148 crSaveName:154 crSetHouse:155 openCreator:156 closeCreator:166 lobbyKitSend:173
+ROLE_COL:37 roleTag:38 DESIGNED:39 spellTags:40 spellDescHTML:47 baseDescHTML:51 SB_THEME:59 ROLE_ORDER:67 sbFxRun:68 sbFxT:68 sbParts:68 crRenderKit:69 sbStartFx:98 sbFxTick:99 sbBurst:126 crAssign:132 crRenderHouse:141 crGo:148 crSaveName:160 crSetHouse:161 openCreator:162 closeCreator:172 lobbyKitSend:179
 
 ## js/40-train-settings.js (170) — เมนูทดลอง (ห้องฝึก / Test Place)
 trOpenF:2 trKey:2 trN:2 TR_OPTS:3 trToggle:4 trSend:9 trSync:14 hovEl:62
@@ -236,4 +236,4 @@ botBrain:6 _obsKeep:47 balArena:48 balReset:49 balDuel:53 balTour:68 balCoop:82 
 §117 Service Worker (sw.js): เก็บไฟล์เกมไว้ในเครื่อง เปิดครั้งต่อไปเร็วขึ้…
 SWK:118 swSetup:119
 
-(41 files, 8243 lines)
+(41 files, 8252 lines)

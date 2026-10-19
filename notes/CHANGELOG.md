@@ -1,6 +1,7 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
 > Moved out of HANDOFF.md on 2026-10-19 to save tokens. Function/variable names are still valid; find them with `CODEMAP.md` (old `index.html` line numbers no longer apply — the code now lives in `js/`).
 
+- 2026-10-19 — Creator: face/wand panel (`.cr12`) is now hidden on steps 3-4 (it overlapped the house info — old bug); step tabs move under the title below 900 px wide; **drag to rotate the character** in the creator (`STAGE.rotY/rotV` with inertia, handler in `js/39-menu.js`, cursor grab). Fixed a split regression: spell/path icons in DOM were 404 because `--u:url(icons/…)` resolved against `css/` — `icoURL` now returns an absolute URL (`ICOBASE`).
 - 2026-10-19 — Code split into `css/` + 41 `js/` files (loader joins them into one module), CODEMAP.md, tools/check.js + tools/codemap.js, dead code removed, HANDOFF slimmed (notes/).
 - 2026-10-19 — Overnight QA fixes:
   - Permafrost / Frost ice floors were mirror-glossy (`roughness 0.04`) → the low sunset sun reflected into a full-screen white-out on meadow/pitch. Now matte (`iceFloorMat` roughness 0.9, metalness 0; path material 0.85).

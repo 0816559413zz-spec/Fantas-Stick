@@ -18,6 +18,7 @@
 > **Testing tips learned the hard way:**
 > - The pane is often hidden → rAF stops. Drive frames yourself: `requestAnimationFrame=()=>0`, then loop `WD.hostStep(dt)`+`WD.render(dt,now)`. If screenshots time out or come out empty, `resize_window` 1280×720 and dispatch a `resize` event.
 > - **Don't "freeze" time by rendering with a tiny dt for screenshots** — many emitters spawn a fixed count per *rendered frame*, so particles pile up (8000 cap) and you'll chase fake white-outs. Measure brightness deterministically instead (render once, `readPixels` with/without `Points` hidden).
+> - CSS `var(--x)` holding `url(...)` resolves against `css/game.css`, not the page — always put absolute URLs in such variables (see `ICOBASE`).
 > - `WD.setKit` on the host doesn't update the client's `KITS[id]` — also set `p.kt=p.kit` and call `WD.broadcastLobby()`.
 > - Before every push: `node tools/check.js` (syntax of all js files joined) and load the page once (`typeof WD`) to catch load-order/TDZ errors. Errors say `game.js:N` → run `srcAt(N)` in the console for file:line (DevTools also shows real files via the source map).
 > - Perf: `tools/bench-vfx.js` (read `window.__vfx` after ~45 s).
@@ -143,5 +144,6 @@ Phase 1 (maps from Blender files) is done — `notes/systems.md` §5e. Work in t
 
 ## 11. Changelog
 Latest only — full history in `notes/CHANGELOG.md` (add new entries there too).
+- 2026-10-19 — Creator: face/wand panel (`.cr12`) is now hidden on steps 3-4 (it overlapped the house info — old bug); step tabs move under the title below 900 px wide; **drag to rotate the character** in the creator (`STAGE.rotY/rotV` with inertia, handler in `js/39-menu.js`, cursor grab). Fixed a split regression: spell/path icons in DOM were 404 because `--u:url(icons/…)` resolved against `css/` — `icoURL` now returns an absolute URL (`ICOBASE`).
 - 2026-10-19 — Code split: `index.html` (one 780 KB file) → `index.html` + `css/game.css` + 41 `js/` files loaded as one module; `CODEMAP.md` + `tools/codemap.js` + `tools/check.js`; SW network-first for js/css; removed dead code (old kit-UI CSS, `kitSpells`, `ovc`, `RINGS`, unused `ur`); HANDOFF slimmed (feature notes → `notes/`). No gameplay change, no protocol change. Tested: all 9 modes 200 ticks + every path's 4 spells and ult in training, no console errors.
 - 2026-10-19 — Renamed the game to **Fantas Stick**; magic title font `--fm` (Grenze Gotisch).

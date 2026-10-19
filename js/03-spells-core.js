@@ -8,7 +8,9 @@
 const ICONS=new Set(['b_frost','b_frost_m','b_hex','b_nature','b_pyro','b_storm','b_summon','blazeform','blinddust','bloom','colossus','cryoshell','darkness','dragonbreath','dsh_frost','dsh_pyro','dsh_storm','firesprite','frostaura','frostforge','glacierrend','godlightning','hexmark','ignitionsnap','kindle','legion','mirrorlegion','p_frost','p_hex','p_nature','p_pyro','p_storm','p_summon','permafrost','poisondart','railgun','ringofembers','sh_frost','sh_pyro','sh_storm','silencecurse','soulburst','soulsiphon','speedsiphon','spiritwolf','sporecloud','staticfield','stonegolem','stormorbs','terror','thornburst','thunderline','triplestrike','vinelash','wispheal','worldtree']);
 const ICOALIAS={dragonfall:'dragonbreath',stormdome:'staticfield'};   // Dragonfall ใช้ไอคอนมังกรเดิม • ลูกสายฟ้าโดมใช้ไอคอนโดมสายฟ้า
 const hasIco=id=>ICONS.has(ICOALIAS[id]||id);
-function icoURL(id){id=ICOALIAS[id]||id;return ICONS.has(id)?'icons/'+id+'.svg':'';}
+// URL เต็ม: ค่านี้ไปอยู่ใน CSS var(--u) ซึ่งเบราว์เซอร์จะอ่าน url() เทียบกับไฟล์ css/game.css ถ้าเป็นที่อยู่แบบสั้น
+const ICOBASE=new URL('icons/',location.href).href;
+function icoURL(id){id=ICOALIAS[id]||id;return ICONS.has(id)?ICOBASE+id+'.svg':'';}
 const ICO={};
 function icoTint(id,col,size){
   let o=ICO[id];

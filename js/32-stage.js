@@ -2,7 +2,7 @@
 const stage=new THREE.Scene();
 stage.background=new THREE.Color('#04060d');
 stage.fog=new THREE.Fog('#04060d',16,46);
-const STAGE={chars:new Map(),env:[],wins:[],candles:[],rune:null,slotRings:[],plates:[],dust:null,banners:[],switchT:-1,k:0,tg:null,tb:null};
+const STAGE={chars:new Map(),env:[],wins:[],candles:[],rune:null,slotRings:[],plates:[],dust:null,banners:[],switchT:-1,k:0,tg:null,tb:null,rotY:0,rotV:0,drag:false};
 const STAGE_Y=0.36;
 (function(){
   STAGE.hemi=new THREE.HemisphereLight('#7f95e6','#1a1410',0.45);stage.add(STAGE.hemi);
@@ -210,11 +210,12 @@ function renderStage(dt,now){
   if(STAGE.switchT>=0){STAGE.switchT+=dt/0.8;const u=Math.min(1,STAGE.switchT),e=1-Math.pow(1-u,3);spin=e*Math.PI*2;
     STAGE.burst.visible=true;STAGE.burst.scale.setScalar(1+u*8);STAGE.burst.material.opacity=(1-u)*0.9;STAGE.burst.material.color.copy(STAGE.tg).multiplyScalar(2);
     if(u>=1){STAGE.switchT=-1;STAGE.burst.visible=false;}}
+  if(!STAGE.drag&&STAGE.rotV){STAGE.rotY+=STAGE.rotV*dt;STAGE.rotV*=Math.exp(-4*dt);if(Math.abs(STAGE.rotV)<0.02)STAGE.rotV=0;}
   const team=lob&&MODES[LOBBY.mode]&&MODES[LOBBY.mode].team;
   rows.forEach(({o,s,p},i)=>{
     o.x=o.x===null?s.x:lerp(o.x,s.x,1-Math.exp(-8*dt));
     o.g.position.set(o.x,STAGE_Y,s.z);
-    o.g.rotation.y=(lob?-o.x*0.06:-0.22+((mouseX||SW*0.6)/Math.max(1,SW)-0.6)*0.5)+(p?0:spin)+(window.__rotY||0);
+    o.g.rotation.y=(lob?-o.x*0.06:-0.22+((mouseX||SW*0.6)/Math.max(1,SW)-0.6)*0.5)+(p?0:spin+STAGE.rotY)+(window.__rotY||0);
     stageIdle(o,now,dt,i);
     const mine=p?p.id===NET.myId:true;
     o.ring.visible=true;o.ring.material.color.set(team?TEAMC[p.tm]:mine?'#f3dc94':'#8a94b8');o.ring.material.opacity=mine||team?0.85:0.4;

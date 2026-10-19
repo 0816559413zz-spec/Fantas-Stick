@@ -148,9 +148,15 @@ function crRenderHouse(){
 function crGo(n){
   if(crStep===1||crStep===2)crSaveName();
   crStep=n;const el=$('#creator');for(const k of [1,2,3,4]){el.classList.toggle('s'+k,n===k);$('#crSt'+k).classList.toggle('on',n===k);}
+  document.body.classList.toggle('crRot',n!==3);
   if(n===4){crRenderHouse();STAGE.switchT=0;}else crRenderStep1();
   [...document.querySelectorAll('.crTints i')].forEach((e,i)=>e.classList.toggle('on',n===4&&myLook.h===i));
 }
+// ลากเมาส์/นิ้วบนฉากในหน้าสร้างตัวละคร = หมุนตัวละคร (ปล่อยแล้วหมุนต่ออีกนิดตามแรงเหวี่ยง)
+{let lx=0,lt=0;
+ addEventListener('pointerdown',e=>{if(!crOpen||crStep===3||e.button>0||e.target.closest('button,input,select,textarea,label,a,.card,.crTabs,.crSteps,.crCrests,.crBar,.crInfo'))return;STAGE.drag=true;STAGE.rotV=0;lx=e.clientX;lt=performance.now();document.body.classList.add('crDrag');});
+ addEventListener('pointermove',e=>{if(!STAGE.drag)return;const dx=e.clientX-lx,t=performance.now(),d=Math.max(16,t-lt)/1000;STAGE.rotY+=dx*0.012;STAGE.rotV=clamp(lerp(STAGE.rotV,dx*0.012/d,0.5),-9,9);lx=e.clientX;lt=t;});
+ addEventListener('pointerup',()=>{if(!STAGE.drag)return;STAGE.drag=false;document.body.classList.remove('crDrag');if(performance.now()-lt>80)STAGE.rotV=0;});}
 function crSaveName(){const c=$('#cName');if(c){const n=cleanName(c.value);$('#nameIn').value=n;store('wd_name',n);}}
 function crSetHouse(i){if(i===myLook.h&&crStep===4)return;myLook.h=i;STAGE.switchT=0;renderMyHouse();crRenderHouse();}
 function openCreator(first,step){
@@ -166,7 +172,7 @@ function openCreator(first,step){
 function closeCreator(save){
   if(save){crSaveName();store('wd_look',lookStr(myLook));store('wd_kit2',myKit);}
   else{myLook=parseLook(crSaved);myKit=crKitSaved;}
-  crOpen=false;renderMyHouse();$('#creator').classList.add('hidden');
+  crOpen=false;STAGE.rotY=STAGE.rotV=0;document.body.classList.remove('crRot');renderMyHouse();$('#creator').classList.add('hidden');
   if(screen==='menu'){document.querySelector('.mprof').classList.remove('hidden');document.querySelector('.mleft').classList.remove('hidden');}
   document.body.classList.remove('crOpenB','crGame');
 }
