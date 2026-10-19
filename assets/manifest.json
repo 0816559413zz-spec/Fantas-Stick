@@ -86,6 +86,13 @@
       "cols": 8,
       "rows": 8,
       "cards": true
+    },
+    "wall": {
+      "file": "vfx/tex_firewall.png",
+      "v": 1,
+      "cols": 8,
+      "rows": 8,
+      "cards": true
     }
   }
 }

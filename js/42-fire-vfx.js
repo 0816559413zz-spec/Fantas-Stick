@@ -129,11 +129,11 @@ function fireCrackWeb(x,y,h,r,life,o){o=o||{};const R=r*S3,P=_crackPaths(R,o.n||
   const dk=_decM({color:'#1c1814',opacity:0}),cr=_decM({color:'#050302',opacity:0}),mats=[dk,cr];
   const m1=new THREE.Mesh(_crackGeo(P,w*1.25,0.012),dk),m2=new THREE.Mesh(_crackGeo(P,w*0.5,0.022),cr);m1.renderOrder=2;m2.renderOrder=3;g.add(m1,m2);
   let fm=null,rb=null,fc=null;const BT=Math.min(life-0.3,o.burnT||life*0.75);
-  // มีภาพ flipbook (Blender) แล้ว: ไฟจริงเป็นการ์ดยืนเรียงตามรอยแตก (ห่างกัน ~0.6 ม. กว้างพอให้ซ้อนกันเป็นไฟต่อเนื่อง สูงไม่เท่ากัน ใกล้ศูนย์กลางสูงกว่า) แทนม่าน shader
-  if(o.burn>0&&flameTexReady()){const C=[];for(const L of P){if(L.w<0.45)continue;const n=L.pts.length;
-      for(let k=0;k<n-1;k++){const [ax,az]=L.pts[k],[bx,bz]=L.pts[k+1],d=Math.hypot(bx-ax,bz-az),m=Math.max(1,Math.round(d/0.72));
-        for(let j=0;j<m;j++){const f=(j+Math.random()*0.6)/m,hh=o.burn*L.w*(1-(k+f)/n*0.55)*rnd(0.7,1.35);C.push({x:ax+(bx-ax)*f,z:az+(bz-az)*f,y:-0.22*hh,w:hh*rnd(0.85,1.15),h:hh*1.4});}}}
-    fc=flameCards(C,{int:1.0});if(fc){fc.userData.u.uH.value=0.01;g.add(fc);mats.push(...fc.userData.mats);}}
+  // มีภาพ flipbook 'wall' (แนวไฟยาวจาก Blender) แล้ว: แผ่นไฟกว้างหันตามแนวรอยแตก ซ้อนเหลื่อมกันจนเป็นไฟเส้นเดียวต่อเนื่อง (ไม่ใช่เปลวเล็กเรียงแถว)
+  if(o.burn>0&&flameTexReady('wall')){const C=[];for(const L of P){if(L.w<0.45)continue;const n=L.pts.length;
+      for(let k=0;k<n-1;k++){const [ax,az]=L.pts[k],[bx,bz]=L.pts[k+1],d=Math.hypot(bx-ax,bz-az)||1,m=Math.max(1,Math.round(d/0.9));
+        for(let j=0;j<m;j++){const f=(j+0.5)/m,hh=o.burn*L.w*(1-(k+f)/n*0.55)*rnd(0.85,1.15);C.push({x:ax+(bx-ax)*f,z:az+(bz-az)*f,y:-0.2*hh,w:2.2*Math.max(0.6,L.w),h:hh*1.6,dx:(bx-ax)/d,dz:(bz-az)/d});}}}
+    fc=flameCards(C,{tex:'wall',int:0.95});if(fc){fc.userData.u.uH.value=0.01;g.add(fc);mats.push(...fc.userData.mats);}}
   if(o.burn>0&&!fc){const {g:rg,len}=_crackRibbon(P,1);fm=fireMat({mode:'sheet',scale:[Math.max(12,Math.round(len*2.6)),2.0,1],speed:1.7,int:0.85,heat:-0.16});
     rb=new THREE.Mesh(rg,fm);rb.position.y=0.03;rb.scale.y=0.01;rb.renderOrder=4;g.add(rb);mats.push(fm);
     // กองไฟ 3 มิติ (กำแพงไฟวงเล็ก) ตามรอยแตกหลัก — มองมุมไหนก็เป็นไฟลุก ไม่แบน • ดับไม่พร้อมกัน
@@ -234,20 +234,24 @@ function fireBurn(x,y,h,r,H,life){
 // ---------- การ์ดไฟ flipbook (2026-10-19 รอบ 3, ผู้เล่น: "ใช้ Flipbook จาก Blender ให้สวยสุด") ----------
 // ไฟจริงจาก simulation ใน Blender (assets/src/fire_flipbook_build.py → tools/pack_flipbook.py → assets/vfx/tex_flame.png, manifest ptex "flame" cards:true)
 // การ์ด = แผ่นภาพไฟตั้งตรง หันหากล้องรอบแกนตั้ง (มองมุมไหนก็เห็นเปลวเต็ม ไม่แบน) • หลายใบรวมเป็น 1 mesh 1 draw call • แต่ละใบเริ่มเฟรมไม่ตรงกัน
+// o.tex = ชื่อแผ่นใน ptex ('flame' เปลวเดี่ยว / 'wall' แนวไฟยาวต่อเนื่อง ขอบซ้ายขวานุ่ม — ใช้เรียงซ้อนกันเป็นไฟเส้นเดียว)
+// card.dx,dz = ทิศแนวนอนของแผ่น (ไม่ใส่ = หันหากล้องรอบแกนตั้ง) — แนวไฟตามขอบ/รอยแตกใช้ทิศตามเส้น เหมือนกำแพง Ring of Embers
+// ห้ามใช้เปลวเล็ก ๆ หลายดวงเรียงกันเป็นแถว (ผู้เล่นไม่เอาเด็ดขาด ดูไม่ต่อเนื่อง) → แนวไฟใช้ 'wall' ซ้อนเหลื่อมกัน
 // cards = [{x,z (หน่วยโลกในกลุ่ม), y, w, h, ph (0..1)}] • คืน Mesh (userData.u = uniforms: uH ความสูง 0..1, uDis ไฟดับ 0..1, uOp, uInt) หรือ null ถ้าภาพยังไม่โหลด
 const FCARD_FPS=24;
-function flameTexReady(){const F=PFB.flame;return F&&F.cards?F:null;}
-function flameCards(cards,o){o=o||{};const F=flameTexReady();if(!F)return null;
-  const n=cards.length,pos=new Float32Array(n*4*3),uv=new Float32Array(n*4*2),ctr=new Float32Array(n*4*3),csz=new Float32Array(n*4*2),ph=new Float32Array(n*4),idx=[];
-  cards.forEach((c,i)=>{for(let k=0;k<4;k++){const j=i*4+k,u=k&1,v=k>>1;pos.set([c.x,c.y||0,c.z],j*3);ctr.set([c.x,c.y||0,c.z],j*3);uv.set([u,v],j*2);csz.set([c.w,c.h],j*2);ph[j]=c.ph===undefined?Math.random():c.ph;}
+function flameTexReady(n){const F=PFB[n||'flame'];return F&&F.cards?F:null;}
+function flameCards(cards,o){o=o||{};const F=flameTexReady(o.tex);if(!F)return null;
+  const n=cards.length,pos=new Float32Array(n*4*3),uv=new Float32Array(n*4*2),ctr=new Float32Array(n*4*3),csz=new Float32Array(n*4*2),ph=new Float32Array(n*4),dir=new Float32Array(n*4*3),idx=[];
+  cards.forEach((c,i)=>{for(let k=0;k<4;k++){const j=i*4+k,u=k&1,v=k>>1;pos.set([c.x,c.y||0,c.z],j*3);ctr.set([c.x,c.y||0,c.z],j*3);uv.set([u,v],j*2);csz.set([c.w,c.h],j*2);ph[j]=c.ph===undefined?Math.random():c.ph;dir.set(c.dx===undefined?[0,0,0]:[c.dx,0,c.dz],j*3);}
     const q=i*4;idx.push(q,q+1,q+2,q+1,q+3,q+2);});
   const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(pos,3));g.setAttribute('uv',new THREE.BufferAttribute(uv,2));g.setAttribute('ctr',new THREE.BufferAttribute(ctr,3));
-  g.setAttribute('csz',new THREE.BufferAttribute(csz,2));g.setAttribute('ph',new THREE.BufferAttribute(ph,1));g.setIndex(idx);g.boundingSphere=new THREE.Sphere(new THREE.Vector3(),1e4);
+  g.setAttribute('csz',new THREE.BufferAttribute(csz,2));g.setAttribute('ph',new THREE.BufferAttribute(ph,1));g.setAttribute('cdir',new THREE.BufferAttribute(dir,3));g.setIndex(idx);g.boundingSphere=new THREE.Sphere(new THREE.Vector3(),1e4);
   const e=F.e,U={map:{value:F.tex},grid:{value:new THREE.Vector2(e.cols||8,e.rows||8)},time:FIRE_U.time,uFps:{value:o.fps||FCARD_FPS},uH:{value:1},uDis:{value:0},uOp:{value:o.op===undefined?1:o.op},uInt:{value:o.int||0.9},uTint:{value:new THREE.Color(o.tint||'#ffffff')},uCell:{value:new THREE.Vector2(F.tex.image.width/(e.cols||8),F.tex.image.height/(e.rows||8))}};
   const m=new THREE.ShaderMaterial({uniforms:U,transparent:true,depthWrite:false,side:THREE.DoubleSide,
     blending:THREE.CustomBlending,blendSrc:THREE.OneFactor,blendDst:THREE.OneMinusSrcAlphaFactor,blendSrcAlpha:THREE.OneFactor,blendDstAlpha:THREE.OneMinusSrcAlphaFactor,
-    vertexShader:'attribute vec3 ctr;attribute vec2 csz;attribute float ph;uniform float uH;varying vec2 vUv;varying float vPh;'+
+    vertexShader:'attribute vec3 ctr;attribute vec2 csz;attribute float ph;attribute vec3 cdir;uniform float uH;varying vec2 vUv;varying float vPh;'+
       'void main(){vUv=uv;vPh=ph;vec4 wc=modelMatrix*vec4(ctr,1.0);vec3 tc=cameraPosition-wc.xyz;tc.y=0.0;vec3 rt=normalize(vec3(tc.z,0.0,-tc.x)+vec3(1e-5,0.0,0.0));'+
+      'if(dot(cdir,cdir)>0.0)rt=normalize(mat3(modelMatrix)*cdir);'+
       'vec3 p=wc.xyz+rt*(uv.x-0.5)*csz.x+vec3(0.0,uv.y*csz.y*uH,0.0);gl_Position=projectionMatrix*viewMatrix*vec4(p,1.0);}',
     fragmentShader:'uniform sampler2D map;uniform vec2 grid,uCell;uniform float time,uFps,uDis,uOp,uInt;uniform vec3 uTint;varying vec2 vUv;varying float vPh;float LOD;'+
       // mip ระดับสูงจะปนเฟรมข้าง ๆ ในตาราง (เห็นเป็นลายจุด) → คำนวณ LOD เองแล้วจำกัดไม่เกิน 3

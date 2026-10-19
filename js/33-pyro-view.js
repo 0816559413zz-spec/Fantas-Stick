@@ -203,9 +203,10 @@ function pyroFX(o,p,pz,now,dt){
       o.blzW=makeFireWall(130*S3,0.42);o.blzW.userData.mats.forEach(m=>{m.uniforms.uInt.value=0.62;m.uniforms.uHeat.value-=0.16;});o.g.add(o.blzW);}
     o.blzR.visible=o.blzD.visible=o.blzW.visible=true;o.blzD.material.opacity=0.06;o.blzR.position.y=0.07;o.blzD.position.y=0.06;o.blzR.material.opacity=0.3+0.12*Math.sin(now/120);
     o.blzW.rotation.y=-o.g.rotation.y+now/900;o.blzW.scale.y=1+0.15*Math.sin(now/140);
-    // ไฟจริงจาก flipbook เรียงรอบขอบออร่า (เตี้ย ๆ หรี่ ๆ) แทนกำแพง shader
-    if(!o.blzC&&flameTexReady()){const C=[],R=130*S3;for(let i=0;i<64;i++){const a=i/64*6.283;C.push({x:Math.cos(a)*R,z:Math.sin(a)*R,y:-0.1,w:rnd(1.1,1.5),h:rnd(0.7,1.25)});}
-      o.blzC=flameCards(C,{int:0.8,op:0.85});if(o.blzC)o.g.add(o.blzC);}
+    // ขอบออร่า = แนวไฟจริงต่อเนื่อง (flipbook 'wall' จาก Blender) แผ่นกว้างหันตามแนววงซ้อนเหลื่อมกัน เหมือนกำแพง Ring of Embers แต่เตี้ย
+    // (ห้ามเปลวเล็ก ๆ เรียงแถว — ผู้เล่นไม่เอา ดูไม่ต่อเนื่อง) • ยังไม่โหลดภาพ = กำแพง shader เดิม
+    if(!o.blzC&&flameTexReady('wall')){const C=[],R=130*S3,N=24;for(let i=0;i<N;i++){const a=(i+rnd(-0.15,0.15))/N*6.283;C.push({x:Math.cos(a)*R,z:Math.sin(a)*R,y:-0.15,w:3.4,h:rnd(1.2,1.5),dx:-Math.sin(a),dz:Math.cos(a)});}
+      o.blzC=flameCards(C,{tex:'wall',int:0.85,op:0.9});if(o.blzC)o.g.add(o.blzC);}
     if(o.blzC){o.blzC.visible=true;o.blzW.visible=false;o.blzC.rotation.y=-o.g.rotation.y;}
     {const h=hazeOf(o,'blzHzE',()=>new THREE.Mesh(_hzRing,hazeMat(1)));h.position.set(o.g.position.x,o.g.position.y,o.g.position.z);}
     for(let i=0;i<1;i++){const an=rnd(0,6.283);PARTS.push({x:p.x+Math.cos(an)*130,y:p.y+Math.sin(an)*130,h:pz+0.1,vx:0,vy:0,vh:rnd(1.5,3.5),life:rnd(0.35,0.6),max:0.6,col:i?'#ff7a2a':'#ffc04a',size:rnd(2.6,4),g:-1.5,drag:2});}

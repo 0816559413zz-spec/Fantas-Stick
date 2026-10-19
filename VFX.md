@@ -286,7 +286,10 @@ trailStop(o.tr);                                                        // ต�
    blender -b -P assets/src/fire_flipbook_build.py -- fire <โฟลเดอร์> 128 140 51
    python tools/pack_flipbook.py <โฟลเดอร์> fire_ 67 assets/vfx/tex_flame.png 128 192 fire 8 8 16 0.6
    python tools/pack_flipbook.py <โฟลเดอร์> fire_sq_ 67 assets/vfx/tex_fire.png 128 128 fire 8 8 16 0.92
+   blender -b -P assets/src/fire_flipbook_build.py -- wall <โฟลเดอร์2> 160 140 51        (แนวไฟยาวต่อเนื่อง)
+   python tools/pack_flipbook.py <โฟลเดอร์2> wall_ 67 assets/vfx/tex_firewall.png 256 80 fire 8 8 16 0.6 0.2
    ```
+   **ห้ามทำไฟเป็นเปลวเล็ก ๆ หลายดวงเรียงกัน** (ผู้เล่นไม่เอาเด็ดขาด) — ไฟตามเส้น/ขอบ/รอยแตก ใช้แผ่น `wall` กว้าง ๆ ซ้อนเหลื่อมกัน หันตามแนวเส้น (`dx,dz`)
    (เลข 51 = เริ่ม render เฟรม 51 หลังไฟลุกเต็ม • 67 = เฟรมแรกในตาราง ที่เหลือ 16 เฟรมก่อนหน้าใช้ทำรอยต่อวน) — แก้ `"v"` ใน manifest ทุกครั้งที่เปลี่ยนภาพ
    **การ์ดไฟ** (`"cards":true` ใน ptex): `flameCards([{x,z,y,w,h,ph}],{int,op,tint})` ใน `js/42-fire-vfx.js` — แผ่นไฟตั้งตรงหันหากล้อง เล่นภาพวน • `u.uH` ความสูง • `u.uDis` ไฟดับ 0→1 • ภาพตารางต้องคุม mip เอง (ไม่งั้นไกล ๆ จะเห็นเฟรมข้าง ๆ ปนเป็นลายจุด)
 8. ส่งไฟล์ `.blend` ต้นฉบับไว้ใน `assets/src/` ด้วย จะได้แก้ทีหลังได้
