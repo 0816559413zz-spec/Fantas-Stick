@@ -2,11 +2,10 @@
 Game = `index.html` (HTML only + loader) + `css/game.css` + `js/NN-*.js`. The loader fetches the js files **in number order and joins them into ONE module** → every file sees every other file's top-level names (no import/export). Code that runs at load time may only use things from earlier files. New file = add its name to `FILES` in index.html.
 Format: `name:line` = top-level function/const/let in that file. `§line title` = section header comment. Errors show `game.js:N` → `srcAt(N)` in the console gives file:line.
 
-## js/01-core.js (21) — พื้นฐาน
-§1 แกนกลาง: import Three.js + ฟังก์ชันพื้นฐาน ($ rnd clamp lerp store to…
+## js/01-core.js (21) — แกนกลาง: import Three.js + ฟังก์ชันพื้นฐาน ($ rnd clamp lerp store to…
 $:11 rnd:12 clamp:13 lerp:14 dist2:15 lerpAng:16 esc:17 shuffle:18 store:19 toastT:20 toast:21
 
-## js/02-data.js (283) — ค่าคงที่ของเกม
+## js/02-data.js (283) — 
 W:4 H:4 PR:4 PILLARS:6 SPAWNF:7 mulberry:9 genForest:10 genPitch:27 genHogsmeade:36
 §54 แผนที่โล่ง 3 แบบ (ผู้ใช้: ป่ามืดไม่สนุก อยากได้ที่โล่งๆ)
 genMeadow:55 genLake:61 genRuins:66
@@ -19,8 +18,7 @@ PROPDEF:134 PROP_OFF_MODES:139 PROP_USE:141 PROPS:142 PROPON:142 genProps:143
 §163 ตัวละคร: บ้านฮอกวอตส์ + หน้าตา
 HOUSES:165 HAIRC:170 HAIRSTY:172 WOODC:174 WOODN:175 WCOREC:176 WCOREN:177 WANDSTY:178 EYEC:179 SKINC:180 CLOAKC:181 TIESTY:182 LOOKK:183 LOOKN:183 lookStr:184 parseLook:185 randLook:186 LOOKS:187 LOOKP:187 KITS:187 getKit:188 getLook:189 CREST_SH:190 CREST_PAT:191 starPts:196 CREST_ANI:198 crestSVG:204 houseColor:212 TEAMC:213 TEAMN:213 MODES:214 PDEF:225 EDEF:252 POOLS:264 CDK:274 BUFFS:275
 
-## js/03-spells-core.js (218) — ระบบคาถาใหม่: สาย (path) × คาถา (spell) + สถานะ (status effects)
-§6 ไอคอนคาถา: จาก game-icons.net (CC BY 3.0, เครดิตใน "คู่มือ" และ icons…
+## js/03-spells-core.js (218) — 
 ICONS:8 ICOALIAS:9 hasIco:10 ICOBASE:12 icoURL:13 ICO:14 icoTint:15 icoHTML:24 PATHS:25 SPELL_LIST:33 SPELLS:33 defSpell:34 SLOTK:35 BRMAP:35 KITP:36 parseKit:37 cleanKit:53 setKit:54
 §56 สถานะ (ใช้ได้ทั้งผู้เล่นและศัตรู)
 isBig:57 ccScale:59 ccTouch:60 addStun:61 addRoot:62 addFreeze:63 addSlow:68 addChill:69 ignite:74 shock:82 knock:83 addWard:84 addFrostSlow:86 frostSlow:87 moveMul:94 BRN_MAX:96 addBurn:97 addXBurn:99 addPoison:100 addSil:101 addFear:102 addBlind:103 addMark:104 healT:106 tickStatus:111 clearStatus:131 fxMask:132
@@ -37,14 +35,13 @@ frostBoom:3 meleeHit:10 mirrorPos:21 frostBasic:22 frostSlam3:46 frostSlam:54 fr
 ## js/05-terrain.js (44) — พื้นสูงต่ำ (แผนที่จากไฟล์ Blender — กติกาฝั่งคนปั้นใน MAP-DESIGN.md)
 TERR:5 TSTEP:6 TSLOPE:6 terrT:7 floorAt:12 terrSolid:14 terrMove:21 updateGlaciers:30
 
-## js/06-pyro.js (156) — สายไฟ — ความร้อน: สะสมด้วยลูกไฟ/กำแพง/พุ่งเพลิง แล้วจุดระเบิดด้วยระเบิดความร้อน/อุกกาบาต
-§1 สายไฟ: ยิงปกติ 2 โหมด / โล่ระเบิด / พุ่งชาร์จ
+## js/06-pyro.js (156) — สายไฟ: ยิงปกติ 2 โหมด / โล่ระเบิด / พุ่งชาร์จ
 pyroBigBoom:5 pyroBall:13 pyroBasic:14 addOrbs:31 pyroParry:32 pyroBlock:33 launchOrbs:35 pyroDash:42 DF_R:76 dragonfallDive:77 dragonfallTick:78 dragonfallBoom:93 pyroSnap:113 colossusTick:123 updateERings:140
 
-## js/07-frost-spells.js (33) — สายน้ำแข็ง — ความเย็น: สะสม 3 ชั้น = แข็ง • ปิดจบด้วยหอกน้ำแข็ง (ยิ่งเย็นยิ่งแรง ถ้าแข็ง …
+## js/07-frost-spells.js (33) — 
 frostGlacier:11
 
-## js/08-storm.js (197) — สายสายฟ้า (ผู้เล่นออกแบบทั้งหมด — designs/storm.md)
+## js/08-storm.js (197) — 
 ST_MAX:5 stGain:6 stSpend:7 stormCone:9 stormLineFoes:14 stormBasic:18 stormTri:41 stormDash:48 stormDashTick:61 stormShieldBlast:69 stormTick:78
 §87 สกิล 1 (ฟรี): เส้นสายฟ้า — ชี้ขึ้นแล้วกดลง 0.5 วิ จากนั้นสายฟ้าผ่าเป็…
 stormLine:90
@@ -58,18 +55,16 @@ stormRailFire:131
 §140 สกิล 6 (3 stacks): ลูกสายฟ้าโดม — ทะยานขึ้น บินเล็ง 3 วิ คลิกยิงลูกสา…
 stormDomeTick:141 stormDomeFire:156 stormDomeSlam:164 updateStorm:168
 
-## js/09-other-paths.js (194) — สายธรรมชาติ — พิษ: สะสมพิษ → ปิดจบด้วยหนามระเบิด (ชั้นละ 9 + ฟื้นเลือดเรา) • รากมัดทำให้พ…
-§33 สายคำสาป — ตรามรณะ: ตีตรา (ดาเมจ +25%) → คำสาปทุกชนิดแรงขึ้นกับคนมีตร…
+## js/09-other-paths.js (194) — 
 §65 สัตว์เวท (minion): AI ฝั่งโฮสต์
 MIND:66 summonMin:72 minTarget:81 minShoot:88 updateMins:93 aimTarget:133
-§143 สายอัญเชิญ — สัตว์เวท: เรียกกองทัพ → วิญญาณเสริมพลัง → ระเบิดวิญญาณปิ…
 §180 ร่ายคาถา
 castSlot:181 castUlt:194
 
-## js/10-net.js (71) — เครือข่าย (PeerJS / WebRTC)
+## js/10-net.js (71) — 
 PREFIX:4 NET:5 LOBBY:6 genCode:7 sendAll:8 setStatus:9 hostGame:11 joinGame:34 clientOnData:59 leave:71
 
-## js/11-host.js (323) — ฝั่งโฮสต์: สถานะเกมทั้งหมดคำนวณที่นี่ (server-authoritative)
+## js/11-host.js (323) — 
 G:4 EVL:4 EVN:4 hostLast:4 tickN:4 emit:5 feed:6 banner:7 plist:8 cleanName:9 freshStats:11 newPlayer:18 emptyInput:21 addPlayer:22 initHostLobby:31 lobbyMsg:38 broadcastLobby:39 hostOnData:41 hostDrop:63 validate:77 hostStart:88 hostToLobby:113 resetBody:115 fmap:121 spawnPts:122 teamPts:124 placeAll:125 respawn:137
 §154 ลูปหลักฝั่งโฮสต์
 hostTick:155 angDiff:167 cH:169 vR:170 updatePlayer:172 hitProp:310 damagePropsIn:317 nearUseProp:318 useProp:319
@@ -83,8 +78,7 @@ spawnEnemy:2 setupWave:19 bossPhase:36 enemySlam:44 updateEnemies:55
 ## js/14-mode-rules.js (99) — กติกาของแต่ละโหมด
 hostPick:2 modeLogic:8 endMatch:76
 
-## js/15-modes.js (381) — โหมดพิเศษ: ควิดดิช / แข่งไม้กวาด / แบทเทิลรอยัล / หาลอร์ดโวลเดอมอร์ / ห้องฝึก
-§4 ส่งข้อความลับถึงผู้เล่นคนเดียว (เช่น บทบาทในโหมดหาลอร์ดโวลเดอมอร์)
+## js/15-modes.js (381) — 
 sendPriv:5 TASKF:9 taskPts:10 raceRings:11 modeInit:17 spawnDummy:58 trainTick:63 TR_KEYS:75 trTeams:77 trCmd:85 hostEndTraining:102
 §104 ควิดดิช
 quidThrow:105 quidDrop:111 quidTick:116 snitchTick:151
@@ -99,13 +93,13 @@ bombTick:310 modeSnap:323
 §345 สร้าง snapshot ส่งให้ทุกเครื่อง
 r1:346 makeSnap:347 PROF:364 pf:365
 
-## js/16-voice.js (89) — ไมค์ (WebRTC audio แบบ mesh: ทุกคนโทรหากันตรงๆ)
+## js/16-voice.js (89) — 
 VOICE:4 rosterIds:5 toggleMic:6 voiceSync:20 teamOn:37 teamOf:38 applyVoiceGates:39 VAC:49 onIncomingCall:50 voiceLevels:62 speakingIds:70 updateVoiceUI:76
 
-## js/17-input.js (55) — การควบคุม
+## js/17-input.js (55) — 
 INPUT:4 mouseX:5 mouseY:5 showBoard:5 SET_DEF:6 SET:7 KEYACT:9 KMAP:10 PMAP:10 rebuildKeys:11 keyName:19 _rebind:21 cvEl:55
 
-## js/18-audio.js (298) — เสียง: สังเคราะห์ทั้งหมดด้วย WebAudio (ไม่ต้องใช้ไฟล์) + reverb + เสียงรอบทิศ + เพลงประกอบ
+## js/18-audio.js (298) — 
 AC:4 MASTER:4 SFXBUS:4 REVERB:4 NB:4 WIND:4 sfxLast:5 ac:6 outNode:27 tone:42 noiz:48 snd:55 sfx:116
 §118 ไฟล์เสียงจริง (โฟลเดอร์ audio/) — เริ่มโหลดเมื่อ ac() ถูกเรียกครั้งแร…
 SFXN:120 SFXV:121 SFXR:122 SFXSYN:123 BUF:124 AUD:124 loadBuf:125 loadSfx:126 playBuf:131 AMB:139 ambTick:140 MUSF:151 MUSF_VOL:152 STINGERS:152 musicEl:153 fadeMusic:161 stopFileMusic:165 isWin:166 wantTrack:174 fileMusicTick:184
@@ -114,14 +108,14 @@ MY:202 myDB:203 mySave:204 myLoad:207 myDecodeReady:213 myPlay:214 myNext:226 my
 §248 เพลงประกอบ (สร้างสดตามแผนที่)
 MUSIC:249 THEMES:250 padNote:255 musicTick:262 toggleMusic:291
 
-## js/19-client.js (184) — 
+## js/19-client.js (185) — 
 cv:4 cx:4 DPR:5 SW:5 SH:5 resize:6 VIEW:12 screen:13 lastBuffKey:13 overShown:13 lastCount:13 PARTS:14 TEXTS:14
 §15 งบเอฟเฟกต์ (VFX budget)
 VFXB:20 _apush:21 vfxQual:29 vfxBegin:31 vfxEnd:34 vfxOnce:36 vfxExtra:38 PCOL:39 setScreen:41 onLobby:50 onSnap:56 myPos:64
 §66 เอฟเฟกต์
-burst:68 smoke:78 ring:79 floatText:80 shake:81 wandPos:82 impactFX:84 explosionFX:100
-§112 เอฟเฟกต์คาถาใหม่
-ZV:113 COLB:113 WVV:113 GLV:113 ICEV:113 SLV:113 ULTV:113 OBV:113 _iceDisc:115 _iceEdge:116 _iceSpk:117 iceFloorMat:118 _icePlane:119 _icePathMat:120 makeIceFloor:121 updateIceFloors:144 FLASHM:155 FLASHING:156 flashModel:157 endFlash:166 tickFlash:167 GHOSTM:169 SOLIDM:169 ghostOf:170 setGhost:176 hitSparks:184
+burst:68 smoke:79 ring:80 floatText:81 shake:82 wandPos:83 impactFX:85 explosionFX:101
+§113 เอฟเฟกต์คาถาใหม่
+ZV:114 COLB:114 WVV:114 GLV:114 ICEV:114 SLV:114 ULTV:114 OBV:114 _iceDisc:116 _iceEdge:117 _iceSpk:118 iceFloorMat:119 _icePlane:120 _icePathMat:121 makeIceFloor:122 updateIceFloors:145 FLASHM:156 FLASHING:157 flashModel:158 endFlash:167 tickFlash:168 GHOSTM:170 SOLIDM:170 ghostOf:171 setGhost:177 hitSparks:185
 
 ## js/20-vfx-pyro-storm.js (370) — Dragonfall (ภาพ)
 makeDfCircle:3 DFV:20 dfCracks:21 updateDfCracks:31 dragonfallFX:32
@@ -156,7 +150,7 @@ statusFX:3 fx:26
 §188 overlay: เลือกบัฟ / สรุปผล
 choosePick:189 syncOverlays:194 showOver:216
 
-## js/27-world.js (115) — โลก 3D (Three.js + Bloom) — 1 หน่วย 3D = 20 พิกเซลของระบบเกม
+## js/27-world.js (115) — 
 S3:4 tx:4 tz:4 GY:6 TW:6 hdr:7 gl:9 scene:15 cam:17 composer:18 rpass:19 bloom:20
 §26 คุณภาพกราฟิก: auto = ปรับความละเอียดเองตาม FPS / high = สวยสุด / low …
 QUAL:27 QUAL_NAME:28 qualPR:29 applyQuality:35 qualTick:46 texCanvas:57 glowTex:58 stoneTex:59 runeTex:65 glowMats:73 glowMat:74 STONEM:76 stoneMat:77 shadowAll:78 SKY:81 hemi:101 moonL:103 setSky:106 LPOOL:114
@@ -177,12 +171,12 @@ makeCloak:2 updateCloth:10
 §33 โมเดลนักเรียนเวทมนตร์
 SHGEO:35 SHMAT:35 SHTEX:35 sGeo:36 sMat:37 bMat:40 matKey:42 bodyPatch:48 BODYM:55 bodyMat:56 plainMat:61 mergeBody:62 sStripe:98 hashStr:99 stripeTex:100 shieldMat:101 addStatus:109 makeStudent:115 makeEnemy:218 keepTex:356 keepMatSet:357 disposeMaterial:358 disposeTree:364 disposeObj:371 PM3:372 EM3:372 JM3:372 clearDyn:373
 
-## js/30-particles.js (190) — อนุภาค 2 ชั้น: แสงเรือง (additive) + ควัน (normal)
+## js/30-particles.js (204) — อนุภาค 2 ชั้น: แสงเรือง (additive) + ควัน (normal)
 PMAX:2 makePointSys:3
-§20 เปลวไฟ: FLAME_STYLE 0 = อนุภาคกลมเรืองแสง (ไม่ใช้รูปเปลว) • 2 = แบบให…
-FLAME_STYLE:22 PTIME:23 NOISETEX:25 FLAMETEX_V1:31 FLAMETEX_V2:36 PSYS:46 FLAMELUT:63 FLAMECOL:66 flame:67 colCache:71 col3:72 updateParticles:73
-§97 เอฟเฟกต์รูปทรง: แฟลช / วงแหวน / โดม / รอยไหม้ / สายฟ้า / แสงชั่วคราว
-SHAPES_Q:98 SHAPES:98 FLASHL:98 LINES:98 LREQ:99 ringGeo:100 ringVGeo:101 arcGeo:102 domeGeo:103 fullGeo:104 discGeo:105 decalTex:106 FX:107 jag:121 spawnShape:129 updateShapes:156 _cp:175 updateLights:176
+§32 เปลวไฟ: FLAME_STYLE 0 = อนุภาคกลมเรืองแสง (ไม่ใช้รูปเปลว) • 2 = แบบให…
+FLAME_STYLE:34 PTIME:35 NOISETEX:37 FLAMETEX_V1:43 FLAMETEX_V2:48 PSYS:58 FLAMELUT:75 FLAMECOL:78 flame:79 colCache:83 col3:84 updateParticles:85
+§111 เอฟเฟกต์รูปทรง: แฟลช / วงแหวน / โดม / รอยไหม้ / สายฟ้า / แสงชั่วคราว
+SHAPES_Q:112 SHAPES:112 FLASHL:112 LINES:112 LREQ:113 ringGeo:114 ringVGeo:115 arcGeo:116 domeGeo:117 fullGeo:118 discGeo:119 decalTex:120 FX:121 jag:135 spawnShape:143 updateShapes:170 _cp:189 updateLights:190
 
 ## js/31-camera.js (112) — กล้องมุมหลังไหล่ (แบบ Hogwarts Legacy)
 yaw:2 pitch:2 lastPh:2 locked:2 SENS:3 saveSet:4 applySettings:5 camPos:13 camLook:13 overlayOpen:16 showPause:17 hidePause:18 MAPCAM:19 PLACE:21 placeKey:22 updatePlaceGhost:30 _aimD:44 rayTerr:46 aimFromCrosshair:52 AIMZ:82 updateCamera:83 menuCamera:108
@@ -198,15 +192,15 @@ localVel:3
 §11 ภาพของสายไฟ: ชาร์จลูกไฟ / ย่อตัวชาร์จพุ่ง / วงเวทพ่นไฟ / ดีดนิ้ว / กล…
 _pw:12 simOf:13 makeColossus:14 makeMagicCircle:67 pyroFX:74
 
-## js/34-frost-view.js (199) — ภาพของสายน้ำแข็ง: ดาบ/ขวานน้ำแข็งที่ปลายไม้ ท่าฟัน โล่อัศวิน ไถล แช่แ…
+## js/34-frost-view.js (205) — ภาพของสายน้ำแข็ง: ดาบ/ขวานน้ำแข็งที่ปลายไม้ ท่าฟัน โล่อัศวิน ไถล แช่แ…
 iceMat:2 iceRim:3 makeIceSword:4 makeIceAxe:23 makeKiteShield:39 _icyClone:47 MIRSKIP:50 mirrorNodes:51 makeMirrorClone:52 mirrorStale:59 mirrorPose:60 dropMirror:65 frostFX:66
 
-## js/35-sync.js (345) — ซิงก์ผู้เล่น/ศัตรู/ลูกเวทจาก snapshot + ฉายตำแหน่งลงจอ (ป้ายชื่อ/ตัวเ…
-syncPlayers:2 syncEnemies:74 projGeo:112 tailGeo:113 _t1:114 makeProj:115 _a:134 _b:134 syncProj:135 _awT:210 animateWorld:211
-§252 ฉายตำแหน่ง 3D ลงจอ (ป้ายชื่อ / ตัวเลขดาเมจ)
-_v:253 toScreen:254 burnNum:261 drawLabels:268 drawTexts:299 HITM:313 DIRI:313 drawXh:315 drawCrosshair:325
+## js/35-sync.js (347) — ซิงก์ผู้เล่น/ศัตรู/ลูกเวทจาก snapshot + ฉายตำแหน่งลงจอ (ป้ายชื่อ/ตัวเ…
+syncPlayers:2 syncEnemies:74 projGeo:112 tailGeo:113 _t1:114 makeProj:115 _a:134 _b:134 syncProj:135 _awT:212 animateWorld:213
+§254 ฉายตำแหน่ง 3D ลงจอ (ป้ายชื่อ / ตัวเลขดาเมจ)
+_v:255 toScreen:256 burnNum:263 drawLabels:270 drawTexts:301 HITM:315 DIRI:315 drawXh:317 drawCrosshair:327
 
-## js/36-modes-view.js (164) — ฝั่งแสดงผลของโหมดพิเศษ (บอล / ห่วงแข่ง / วงหด / ไอเทม / ศพ / จุดภารกิจ / ลมหายใจมังกร)
+## js/36-modes-view.js (164) — 
 ROLE:4 KC:4 roleShowT:4 onPriv:5 MO:10 BREATHS:11 clearModeObjs:12 ITEMC:21 makeItem:22 syncModeObjs:34
 §133 หน้าประชุมโหวต (หาลอร์ดโวลเดอมอร์)
 meetKey:134 myVoted:134 castVote:135 syncMeeting:141
@@ -219,8 +213,7 @@ rr:2 SLOTS:3 fmtTime:4
 §5 ชิ้นส่วน HUD ธีมทอง-น้ำเงิน
 HG:6 HG2:6 HN:6 diaPath:7 plate:9 frameBox:15 bossTrail:23 drawBossBar:24 spellDia:42 thinBar:67 drawHUD:72 raceRankClient:128 drawModeHUD:132 MM:169 drawMinimap:170 slotKey:243 mySlots:244 drawUlt:249 STATUS_ICO:268 SLOTS_IMP:269 BR_LOCK:270 CLUSTER:272 slotState:273 drawBottom:286 drawBoard:326
 
-## js/39-menu.js (234) — เมนู / ล็อบบี้ (DOM)
-§4 ตัวละครของฉัน (เก็บในเครื่อง: wd_look) — ครั้งแรกที่เข้าเกมจะเปิดหน้า…
+## js/39-menu.js (234) — 
 myLook:5 myColor:5 myKit:5 myName:6 renderMyHouse:9
 §11 หน้าสร้าง/แต่งตัวละคร (2 ขั้น: 1 หน้าตา → 2 เลือกบ้าน)
 crLib:12 crSaved:12 crKitSaved:12 crOpen:12 crStep:12 crTab:12 crFirst:12 crKitOnly:12 crSlot:12 CRTABS:13 sw_:14 bt_:15 nameBox_:16 crPanelSet:17 crRenderStep1:22 crRenderWand:33
@@ -232,7 +225,8 @@ trOpenF:2 trKey:2 trN:2 TR_OPTS:3 trToggle:4 trSend:9 trSync:14 hovEl:62
 §63 หน้าตั้งค่า
 setRow:64 setTog:65 setTab:66 XHC:67 XHN:67 setOpts:68 renderSettings:69 drawXhPrev:86 openSettings:87 closeSettings:88 modeIcon:140 modeTitle:141 renderLobby:142
 
-## js/41-debug.js (140) — 
+## js/41-debug.js (140) — เครื่องมือทดสอบสมดุล (ใช้ผ่านคอนโซล WD.bal / WD.dmgTest เท่านั้น ผู้เล่นปกติไม่เห็น)
+§5 บอทต่อสู้แบบง่ายๆ: เล็งนำเป้า เดินรักษาระยะ+ส่ายไปมา ร่ายคาถาทุกครั้ง…
 botBrain:6 _obsKeep:47 balArena:48 balReset:49 balDuel:53 balTour:68 balCoop:82 balSpellTest:98
 §117 Service Worker (sw.js): เก็บไฟล์เกมไว้ในเครื่อง เปิดครั้งต่อไปเร็วขึ้…
 SWK:118 swSetup:119
@@ -244,7 +238,7 @@ _fbGeo:56 _fbGeo2:56 makeFireBall:58 _ftGeo:66 makeFireTail:67 makeFireWall:70 F
 §88 ปีกไฟ (Dragonfall) จากไฟล์ Blender mesh_fire_wing (assets/src/fx_mesh…
 makeFireWings:91 poseFireWings:98
 
-## js/43-frost-vfx.js (135) — 
+## js/43-frost-vfx.js (135) — น้ำแข็ง VFX จาก Blender + Glacier Mist (หมอกเย็นตอนน้ำแข็งโผล่)
 FROST_U:6
 §7 shader น้ำแข็ง: ฐานน้ำเงินเข้ม → ปลายขาว • ขอบสว่าง (fresnel) • รอยร้…
 ICE_VS:8 ICE_FS:10 _iceShM:23 iceShaderMat:24 iceModel:28
@@ -257,4 +251,10 @@ _wpM:98 fileWeapon:99
 §107 Ice circle (Permafrost): ริบบิ้นแสงวนเป็นก้นหอยบนพื้น + ผลึกลอยหมุนรอ…
 SWIRL_FS:108 ICIRC:112 iceCircle:113 updateIceCircles:124
 
-(43 files, 8622 lines)
+## js/44-vfx-kit.js (90) — 
+§8 1) หางแสง
+TRMAX:11 TRPTS:11 TRAILS:11 _trL:12 trailLayer:13 trailNew:22 trailPoint:24 trailStop:27 _tv1:28 _tv2:28 _tv3:28 updateTrails:29
+§52 2) สูตรเอฟเฟกต์ (ข้อมูล)
+VFXR:57 playFx:66 fxLayer:70 updateVfxKit:90
+
+(44 files, 8735 lines)

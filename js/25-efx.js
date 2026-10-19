@@ -12,35 +12,35 @@ function efxFX(ev){
         for(let j=0;j<(i?8:22);j++){const an=a+rnd(-1.05,1.05),rr=R*rnd(0.55,1.05);PARTS.push({x:px+Math.cos(an)*rr,y:py+Math.sin(an)*rr,h:H+(big?rnd(-0.6,1.4):rnd(-0.3,0.5)),vx:Math.cos(an)*rnd(40,140),vy:Math.sin(an)*rnd(40,140),vh:rnd(-0.5,1.5),life:rnd(0.25,0.5),max:0.5,col:j%4===0?'#ffffff':j%4===1?'#e8f8ff':col,size:rnd(1.2,2.4),g:2.5,drag:2.5});}
       });
       if(near&&!big)snd('whoosh',{x,y,vol:0.5});break;}
-    case 'iceboom':burst(x,y,'#dff6ff',40,ev.r*2.6,0.6,2.4,{h:H,vh:[0,5],g:6});iceChips(x,y,H,12,ev.r*2.4,4);ring(x,y,'#8fe0ff',ev.r,0.35,Math.max(0.2,H-1));smoke(x,y,H,10,'#e8f6ff',1.4,7,ev.r);FX.flashLight(x,y,H,'#8fe0ff',4,12,0.25);if(H<1.5)iceBurst(x,y,ev.r*S3*0.85,{life:0.9,hy:0.8});else glacierMist(x,y,ev.r*0.6,8,{h:H-0.5,out:1.5});if(near)snd('break',ev);break;
+    case 'iceboom':playFx('ice_impact',x,y,H,{s:ev.r/90,gh:Math.max(0.15,H-1)});smoke(x,y,H,6,'#e8f6ff',1.4,7,ev.r);if(H<1.5)iceBurst(x,y,ev.r*S3*0.85,{life:0.9,hy:0.8});else glacierMist(x,y,ev.r*0.6,8,{h:H-0.5,out:1.5});if(near)snd('break',ev);break;
     case 'slam3':{{const c=Math.cos(ev.a),sn=Math.sin(ev.a),bx=x-c*ev.r*0.8,by=y-sn*ev.r*0.8,col=ev.ax?'#e8f8ff':'#cfefff';const sp=[[bx,by]];if(ev.m)for(const k of [-1,1])sp.push([bx-sn*55*k,by+c*55*k]);
-      sp.forEach(([px,py],i)=>{iceBurst(px+c*ev.r*0.8,py+sn*ev.r*0.8,(ev.ax?1.9:1.5)*(i?0.7:1),{life:0.95,hy:ev.ax?1.25:1,mist:i?4:10});makeSlash(px,py,0.5,ev.a,(ev.r/0.75)*1.15,true,0.12,col);if(!i)makeSlash(px,py,0.5,ev.a,(ev.r/0.75)*0.9,true,0.12,'#ffffff');});if(near)snd('whoosh',{x,y,vol:0.6});}
+      sp.forEach(([px,py],i)=>{if(!i)playFx('ice_impact',px+c*ev.r*0.8,py+sn*ev.r*0.8,0.5,{s:ev.ax?1.25:0.95});iceBurst(px+c*ev.r*0.8,py+sn*ev.r*0.8,(ev.ax?1.9:1.5)*(i?0.7:1),{life:0.95,hy:ev.ax?1.25:1,mist:i?4:10});makeSlash(px,py,0.5,ev.a,(ev.r/0.75)*1.15,true,0.12,col);if(!i)makeSlash(px,py,0.5,ev.a,(ev.r/0.75)*0.9,true,0.12,'#ffffff');});if(near)snd('whoosh',{x,y,vol:0.6});}
       ICEV.push(makeIceFloor(x,y,ev.r,1.4,1));ring(x,y,'#ffffff',ev.r*1.2,0.35,0.15);burst(x,y,'#dff6ff',50,ev.r*3,0.7,2.8,{h:0.4,vh:[3,9],g:10});burst(x,y,'#8fe0ff',24,ev.r*1.6,0.5,4,{h:0.3,vh:[0.5,2],g:1,smoke:true});SHAPES_Q.push({k:'decal',x,y,col:'#e8f6ff',s1:ev.r/24,life:3,op:0.6});FX.flashLight(x,y,1.5,'#8fe0ff',6,16,0.3);if(near){snd('slam',ev);snd('break',{x,y,vol:0.6});shake(7);}
       if(ev.m){const c=Math.cos(ev.a),s=Math.sin(ev.a);for(const k of [-1,1]){const mx=x-s*55*k,my=y+c*55*k;burst(mx,my,'#dff6ff',20,ev.r*2,0.5,2.4,{h:0.4,vh:[2,6],g:9});ring(mx,my,'#bfeaff',ev.r*0.8,0.3,0.15);}}break;}
     case 'slamgo':{const o=PM3.get(ev.id);if(o)o.slamT=1.5;}burst(x,y,'#dff6ff',16,160,0.4,2,{h:H,g:2});if(near)snd('whoosh',ev);break;
     case 'slam':dfCracks(x,y,0.06,ev.r*0.9,'#bfeaff',0.7);iceRing(x,y,ev.r*0.55,12,0.7,0.45,{up:0.06,down:0.25});for(let i=0;i<14;i++){const an=i/14*6.283;PARTS.push({x,y,h:0.12,vx:Math.cos(an)*ev.r*3,vy:Math.sin(an)*ev.r*3,vh:0.3,life:0.35,max:0.35,col:i%2?'#ffffff':'#bfeaff',size:2,g:1,drag:3});}
       {for(const [id,o] of PM3)if(o.slamT>0)o.slamT=0;}ring(x,y,'#bfeaff',ev.r,0.45,0.2);ring(x,y,'#ffffff',ev.r*0.6,0.35,0.2);burst(x,y,'#dff6ff',60,ev.r*3,0.7,2.6,{h:0.4,vh:[2,8],g:9});SHAPES_Q.push({k:'decal',x,y,col:'#e8f6ff',s1:ev.r/30,life:3,op:0.5});FX.flashLight(x,y,1.5,'#8fe0ff',6,18,0.35);if(near){snd('slam',ev);shake(6);}break;
-    case 'forge':burst(x,y,'#dff6ff',16,90,0.5,2,{h:H,vh:[0.5,2],g:-0.5});ring(x,y,'#8fe0ff',45,0.3,0.15);FX.flashLight(x,y,H,'#8fe0ff',4,10,0.3);if(near)snd('parry',{x,y,vol:0.5});break;
+    case 'forge':playFx('ice_summon',x,y,H,{s:0.9});if(near)snd('parry',{x,y,vol:0.5});break;
     case 'fswap':{const o=PM3.get(ev.id);FX.flashSprite(x,y,H,'#dff6ff',0.3,2.2,0.12,2);if(o){o.tip.getWorldPosition(_pw);const t=simOf(_pw);_ev.set(0,-0.66,0);o.armR.localToWorld(_ev);const h=simOf(_ev);
       for(let i=0;i<14;i++){const sx=ev.m?h.x+rnd(-20,20):t.x,sy=ev.m?h.y+rnd(-20,20):t.y,sh=ev.m?h.h+rnd(-0.2,1):t.h,ex=ev.m?t.x:h.x+rnd(-14,14),ey=ev.m?t.y:h.y+rnd(-14,14),eh=ev.m?t.h:h.h+rnd(0,1.1);PARTS.push({x:sx,y:sy,h:sh,vx:(ex-sx)/0.25,vy:(ey-sy)/0.25,vh:(eh-sh)/0.25,life:0.25,max:0.25,col:i%2?'#ffffff':'#bfeaff',size:2,g:0,drag:0});}}
       burst(x,y,ev.m?'#bfeaff':'#ffffff',10,120,0.35,1.8,{h:H,g:0});if(ev.id===NET.myId)snd('ui_click');break;}
-    case 'slide':burst(x,y,'#dff6ff',24,200,0.4,2,{h:0.3,vh:[0.5,2],g:3});for(let i=0;i<7;i++){const an=i/7*6.283+rnd(-0.2,0.2),r=rnd(12,26);iceBit(_plateG,x+Math.cos(an)*r,y+Math.sin(an)*r,0.1,rnd(0.35,0.55),0.5,rnd(0.35,0.5),{rx:rnd(-0.6,-0.3),ry:-an,life:0.6,up:0.06,down:0.3});}iceChips(x,y,0.3,8,180,4);if(near)snd('whoosh',ev);break;
+    case 'slide':burst(x,y,'#dff6ff',16,200,0.4,2,{h:0.3,vh:[0.5,2],g:3,sh:4,vr:5,c2:'#5ab8ff'});for(let i=0;i<7;i++){const an=i/7*6.283+rnd(-0.2,0.2),r=rnd(12,26);iceBit(_plateG,x+Math.cos(an)*r,y+Math.sin(an)*r,0.1,rnd(0.35,0.55),0.5,rnd(0.35,0.5),{rx:rnd(-0.6,-0.3),ry:-an,life:0.6,up:0.06,down:0.3});}iceChips(x,y,0.3,8,180,4);if(near)snd('whoosh',ev);break;
     case 'ice':
       ICEV.push(makeIceFloor(x,y,ev.r,ev.t,ev.c,ev.lx,ev.ly));
       if(ev.c)ZV.push({x,y,r:ev.r,t:ev.t,kind:'icering',col:'#8fe0ff',file:zoneFx('icering',x,y,ev.r,ev.t,'#8fe0ff')});
       else if(Math.random()<0.5)burst(x,y,'#ffffff',3,60,0.4,1.4,{h:0.2,g:0});
       break;
-    case 'perma':for(let k=0;k<5;k++)later(k*0.07,()=>ring(x,y,k%2?'#ffffff':'#bfeaff',ev.r*(0.25+k*0.19),0.45,0.12));burst(x,y,'#dff6ff',40,ev.r*1.6,0.8,2.2,{h:0.3,vh:[0,2],g:1});iceChips(x,y,0.5,10,260,4);iceBurst(x,y,2.6,{life:1.5,hy:0.9,mist:24});mistArea(x,y,ev.r*0.9,6,{rate:6});iceCircle(x,y,ev.r*S3,6);
+    case 'perma':for(let k=0;k<5;k++)later(k*0.07,()=>ring(x,y,k%2?'#ffffff':'#bfeaff',ev.r*(0.25+k*0.19),0.45,0.12));playFx('ice_big',x,y,0.6,{s:1.3});iceBurst(x,y,2.6,{life:1.5,hy:0.9,mist:24});mistArea(x,y,ev.r*0.9,6,{rate:6});iceCircle(x,y,ev.r*S3,6);
       later(0.15,()=>{dfCracks(x,y,0.06,ev.r*0.9,'#bfeaff',1.6);});later(0.3,()=>iceRing(x,y,ev.r,22,0.55,5.6,{up:0.25,down:0.4}));FX.flashLight(x,y,1,'#8fe0ff',5,22,0.4);if(near)snd('nova',{x,y,vol:0.6});break;
-    case 'cryo':burst(x,y,'#dff6ff',20,140,0.6,2.4,{h:H,vh:[0,3],g:2});iceBurst(x,y,1.4,{h:Math.max(0,H-1),life:0.9,hy:1.1,mist:12});iceRing(x,y,24,8,0.6,0.5,{up:0.2,down:0.25});FX.flashLight(x,y,H,'#8fe0ff',4,10,0.3);if(near)snd('break',ev);break;
-    case 'cryoend':burst(x,y,'#dff6ff',30,260,0.6,2.4,{h:H,vh:[1,5],g:8});iceChips(x,y,H,14,200,5);smoke(x,y,H,10,'#eef8ff',1,7,60);if(near)snd('break',ev);break;
+    case 'cryo':playFx('ice_summon',x,y,H,{s:1.1});iceBurst(x,y,1.4,{h:Math.max(0,H-1),life:0.9,hy:1.1,mist:12});iceRing(x,y,24,8,0.6,0.5,{up:0.2,down:0.25});if(near)snd('break',ev);break;
+    case 'cryoend':playFx('ice_big',x,y,H,{s:0.8});smoke(x,y,H,10,'#eef8ff',1,7,60);if(near)snd('break',ev);break;
     case 'auhit':burst(x,y,'#dff6ff',5,90,0.3,1.4,{h:H,vh:[0,2],g:5});if(Math.random()<0.5)iceChips(x,y,H,2,70,2);break;
     case 'aura':ring(x,y,'#bfeaff',180,0.4,0.2);smoke(x,y,H+0.6,14,'#eef8ff',0.9,8,140);for(let i=0;i<20;i++){const an=i/20*6.283;PARTS.push({x,y,h:H+rnd(0.3,1.8),vx:Math.cos(an)*200-Math.sin(an)*120,vy:Math.sin(an)*200+Math.cos(an)*120,vh:rnd(0,1),life:0.5,max:0.5,col:i%2?'#ffffff':'#cfefff',size:2,g:0,drag:2});}if(near)snd('push',{x,y,vol:0.4});break;
-    case 'grcharge':if(near)snd('buff',ev);break;
+    case 'grcharge':playFx('ice_charge',x,y,H);if(near)snd('buff',ev);break;
     case 'gwave':{const m=makeWaveBlade();m.rotation.y=-ev.a;scene.add(m);WVV.push({x,y,a:ev.a,len:ev.len,d:0,m,gh:0});
       {const o=PM3.get(ev.id);if(o&&!ev.cl)o.grDown=0.3;const c=Math.cos(ev.a),sn=Math.sin(ev.a);makeSlash(x-c*20,y-sn*20,0.4,ev.a,85,true,0.1,'#cfefff');burst(x+c*40,y+sn*40,'#dff6ff',30,320,0.4,2.4,{h:0.6,vh:[1,5],g:6,a:ev.a,spread:0.7});FX.flashLight(x,y,1.2,'#8fe0ff',5,14,0.25);}}if(near){snd('whoosh',ev);snd('slam',{x,y,vol:0.4});}break;
-    case 'glacier':{const o=PM3.get(ev.id);if(o)o.grUp=0.5;}GLV.push(makeGlacier(x,y,ev.a,ev.len,ev.t));if(near){snd('break',ev);shake(5);}break;
-    case 'mirror':ULTV.push({x,y,a:ev.a,d:0,acc:100});burst(x,y,'#dff6ff',50,260,0.5,2.4,{h:1,vh:[1,4],g:2});FX.flashLight(x,y,1.5,'#8fe0ff',6,16,0.4);if(near){snd('nova',{x,y,vol:0.7});shake(4);}break;
+    case 'glacier':{const o=PM3.get(ev.id);if(o)o.grUp=0.5;}GLV.push(makeGlacier(x,y,ev.a,ev.len,ev.t));playFx('ice_impact',x,y,0.8,{s:1});if(near){snd('break',ev);shake(5);}break;
+    case 'mirror':ULTV.push({x,y,a:ev.a,d:0,acc:100});playFx('ice_big',x,y,1,{s:1.2});if(near){snd('nova',{x,y,vol:0.7});shake(4);}break;
     case 'mirrorend':burst(x,y,'#dff6ff',40,200,0.5,2,{h:H,g:3});break;
     // ----- สายไฟ (ออกแบบโดยผู้เล่น) -----
     case 'dfrise':

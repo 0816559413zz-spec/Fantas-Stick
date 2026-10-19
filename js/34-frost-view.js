@@ -119,6 +119,12 @@ function frostFX(o,p,pz,now,dt){
     if(rpose){o.armL.rotation.x=lerp(-0.2,-1.6,o.grUp>0?1:0.5);o.armL.rotation.z=0.25;}
     if(melee&&!p.sh&&!(o.swT>0)&&!(o.grDown>0)&&!(flags&32)){o.armL.rotation.x=-0.45;o.armL.rotation.z=0.3;}}
   else o.b.rotation.y*=0.8;
+  // รอยฟันแบบริบบิ้น (trail กลาง): ระหว่างโคนใบ-ปลายใบ ทุกเฟรมที่กำลังฟัน
+  {const W=ff?o.axe:o.sword,sw=melee&&!p.fl&&W&&(o.swT>0||o.grDown>0);
+    if(sw){if(!o.wtr)o.wtr=trailNew({sweep:true,col:ff?'#e8f8ff':'#f0fbff',col2:'#2f86ff',life:ff?0.2:0.15,k:1.9});
+      W.updateWorldMatrix(true,false);_tv1.set(0,ff?-1.0:-0.3,0).applyMatrix4(W.matrixWorld);_tv2.set(0,ff?-2.05:-2.05,0).applyMatrix4(W.matrixWorld);
+      trailPoint(o.wtr,_tv1.x,_tv1.y,_tv1.z,_tv2.x,_tv2.y,_tv2.z);}
+    else if(o.wtr){trailStop(o.wtr);o.wtr=null;}}
   // รอยเท้าผลึกบาง ๆ ใต้ทุกก้าว แล้วแตก/จางไป (ไม่ทิ้งทางยาวแบบไถล)
   if(!p.fl&&!(flags&1)&&pz<0.3){const st=Math.sin(o.walk||0)>0;if(o.stepS!==undefined&&st!==o.stepS){const L=o.legs[st?0:1];_ev.set(0,-0.82,0.05);L.localToWorld(_ev);const q=simOf(_ev);
       iceBit(_hexG,q.x,q.y,0.03,0.17,0.24,1,{rx:-Math.PI/2,mat:frostM(),life:0.9,up:0.04,down:0.5});PARTS.push({x:q.x,y:q.y,h:0.15,vx:rnd(-8,8),vy:rnd(-8,8),vh:0.3,life:0.6,max:0.6,col:'#eef8ff',size:3,g:0,smoke:true,grow:0.8});

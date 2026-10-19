@@ -6,15 +6,27 @@ function makePointSys(additive){
   geo.setAttribute('position',new THREE.BufferAttribute(pos,3));
   geo.setAttribute('pcol',new THREE.BufferAttribute(col,4));
   geo.setAttribute('psize',new THREE.BufferAttribute(size,1));
+  // ชั้นแสงเรือง: รูปทรงต่ออนุภาค pshp = (รูป, มุม) • 0 กลมเรือง 1 ดาวประกาย 4 แฉก 2 เส้นยืดตามทิศพุ่ง (pvel) 3 วงแหวน 4 เกล็ดผลึก 6 เหลี่ยม
+  let shp=null,vel=null;
+  if(additive){shp=new Float32Array(PMAX*2);vel=new Float32Array(PMAX*3);geo.setAttribute('pshp',new THREE.BufferAttribute(shp,2));geo.setAttribute('pvel',new THREE.BufferAttribute(vel,3));}
   const mat=new THREE.ShaderMaterial({
     uniforms:{map:{value:glowTex},scale:{value:600}},
-    vertexShader:'attribute vec4 pcol;attribute float psize;uniform float scale;varying vec4 vC;void main(){vC=pcol;vec4 mv=modelViewMatrix*vec4(position,1.0);vC.a*=smoothstep(1.2,5.0,-mv.z);gl_PointSize=psize*scale/-mv.z;gl_Position=projectionMatrix*mv;}',
-    fragmentShader:additive?'uniform sampler2D map;varying vec4 vC;void main(){vec4 t=texture2D(map,gl_PointCoord);gl_FragColor=vec4(vC.rgb*t.a*vC.a,t.a*vC.a);}'
+    vertexShader:additive
+      ?'attribute vec4 pcol;attribute float psize;attribute vec2 pshp;attribute vec3 pvel;uniform float scale;varying vec4 vC;varying vec2 vS;void main(){vC=pcol;vS=pshp;vec4 mv=modelViewMatrix*vec4(position,1.0);vC.a*=smoothstep(1.2,5.0,-mv.z);gl_PointSize=psize*scale/-mv.z;gl_Position=projectionMatrix*mv;'+
+        'if(pshp.x>1.5&&pshp.x<2.5){vec4 p2=projectionMatrix*modelViewMatrix*vec4(position+pvel*0.05,1.0);vec2 d=p2.xy/p2.w-gl_Position.xy/gl_Position.w;d.x*=projectionMatrix[1][1]/projectionMatrix[0][0];vS.y=atan(d.y,d.x);}}'
+      :'attribute vec4 pcol;attribute float psize;uniform float scale;varying vec4 vC;void main(){vC=pcol;vec4 mv=modelViewMatrix*vec4(position,1.0);vC.a*=smoothstep(1.2,5.0,-mv.z);gl_PointSize=psize*scale/-mv.z;gl_Position=projectionMatrix*mv;}',
+    fragmentShader:additive?'uniform sampler2D map;varying vec4 vC;varying vec2 vS;void main(){float a;int s=int(vS.x+0.5);'+
+        'if(s==0){a=texture2D(map,gl_PointCoord).a;}else{vec2 c=gl_PointCoord*2.0-1.0;c.y=-c.y;float cs=cos(vS.y),sn=sin(vS.y);vec2 r=vec2(cs*c.x+sn*c.y,-sn*c.x+cs*c.y);float d=length(r);'+
+        'if(s==1){vec2 q=abs(r);a=max(0.0,1.0-q.x*7.0)*(1.0-q.y)+max(0.0,1.0-q.y*7.0)*(1.0-q.x)+(1.0-smoothstep(0.0,0.3,d));}'+
+        'else if(s==2){a=max(0.0,1.0-abs(r.y)*6.0)*(1.0-smoothstep(0.55,1.0,abs(r.x)))*(1.15-0.3*r.x);}'+
+        'else if(s==3){a=smoothstep(0.55,0.78,d)*(1.0-smoothstep(0.82,1.0,d))*1.4;}'+
+        'else{vec2 q=abs(r);float h=max(q.x*0.866+q.y*0.5,q.y);a=(1.0-smoothstep(0.62,0.72,h))*(0.45+0.55*smoothstep(0.35,0.7,h))+max(0.0,1.0-abs(r.x)*12.0)*(1.0-smoothstep(0.6,0.7,h))*0.6;}'+
+        'a=clamp(a,0.0,1.6);}gl_FragColor=vec4(vC.rgb*a*vC.a,min(1.0,a)*vC.a);}'
       :'uniform sampler2D map;varying vec4 vC;void main(){vec4 t=texture2D(map,gl_PointCoord);gl_FragColor=vec4(vC.rgb,t.a*vC.a*0.8);}',
     blending:additive?THREE.AdditiveBlending:THREE.NormalBlending,depthWrite:false,transparent:true
   });
   const pts=new THREE.Points(geo,mat);pts.frustumCulled=false;pts.renderOrder=additive?3:2;scene.add(pts);
-  return {geo,pos,col,size,n:0};
+  return {geo,pos,col,size,shp,vel,n:0};
 }
 // เปลวไฟรูปหยดน้ำ (ฐานเหลืองขาว → ส้ม → ปลายแดงจาง) ใช้กับอนุภาค fl:true — ผสมสีปกติ เห็นชัดแม้พื้นสว่าง
 // ===== เปลวไฟ: FLAME_STYLE 0 = อนุภาคกลมเรืองแสง (ไม่ใช้รูปเปลว) • 2 = แบบใหม่ (ลิ้นไฟ 4 แบบ คมปลาย มีแกนสว่าง ไม่กลับหัว หดเล็กและเปลี่ยนสีเหลือง→ส้ม→แดงตามอายุ)
@@ -87,11 +99,13 @@ function updateParticles(dt){
     if(p.fl&&FLAME_STYLE===3){const t=1-k,L=FLAMELUT[Math.min(63,(t*63)|0)];S.col[j*4]=L.r*c.r;S.col[j*4+1]=L.g*c.g;S.col[j*4+2]=L.b*c.b;S.col[j*4+3]=Math.min(1,t*16)*Math.min(1,k*2.2)*(1-0.5*Math.min(1,Math.max(0,(t-0.4)/0.5)));
       S.vari[j]=Math.round(8*(1-Math.min(1,Math.max(0,(t-0.22)/0.45))))+p.sd;}
     else if(p.fl){const u=FLAME_STYLE===2?1-k:0;S.col[j*4]=c.r;S.col[j*4+1]=c.g*(1-0.45*u);S.col[j*4+2]=c.b*(1-0.75*u);S.col[j*4+3]=Math.min(1,(1-k)*7)*Math.min(1,k*1.8);S.vari[j]=p.v|0;}
-    else if(p.smoke){S.col[j*4]=c.r;S.col[j*4+1]=c.g;S.col[j*4+2]=c.b;S.col[j*4+3]=Math.min(1,k*1.5);}
-    else{const b=1.25;S.col[j*4]=c.r*b;S.col[j*4+1]=c.g*b;S.col[j*4+2]=c.b*b;S.col[j*4+3]=k;}
+    else if(p.smoke){S.col[j*4]=c.r;S.col[j*4+1]=c.g;S.col[j*4+2]=c.b;S.col[j*4+3]=Math.min(1,k*1.5)*Math.min(1,p.h/(p.size*0.05+0.01));}   // ควันจางลงตอนแตะพื้น (soft particle แบบถูก: ไม่เห็นรอยตัดกับพื้น)
+    else{const b=1.25;let r=c.r,g=c.g,bb=c.b;if(p.c2){const c2=col3(p.c2),u=1-k;r+=(c2.r-r)*u;g+=(c2.g-g)*u;bb+=(c2.b-bb)*u;}   // c2 = สีตอนท้ายอายุ (ไล่สี)
+      S.col[j*4]=r*b;S.col[j*4+1]=g*b;S.col[j*4+2]=bb*b;S.col[j*4+3]=p.fin?Math.min(1,(1-k)*p.fin)*k:k;
+      if(p.sh){if(p.vr)p.rot=(p.rot||0)+p.vr*dt;S.shp[j*2]=p.sh;S.shp[j*2+1]=p.rot||0;if(p.sh===2){S.vel[j*3]=p.vx*S3;S.vel[j*3+1]=p.vh;S.vel[j*3+2]=p.vy*S3;}}else S.shp[j*2]=0;}
     S.size[j]=p.size*0.12*(p.fl&&FLAME_STYLE===2?0.45+0.55*k:p.fl&&FLAME_STYLE===3?(0.55+0.45*Math.min(1,(1-k)*5))*(1-0.3*(1-k)*(1-k)):1);S.n++;
   }
-  for(const S of PSYS){S.geo.setDrawRange(0,S.n);const a=S.geo.attributes;a.position.needsUpdate=a.pcol.needsUpdate=a.psize.needsUpdate=true;if(a.pvar)a.pvar.needsUpdate=true;}
+  for(const S of PSYS){S.geo.setDrawRange(0,S.n);const a=S.geo.attributes;a.position.needsUpdate=a.pcol.needsUpdate=a.psize.needsUpdate=true;if(a.pvar)a.pvar.needsUpdate=true;if(a.pshp){a.pshp.needsUpdate=a.pvel.needsUpdate=true;}}
 }
 
 // ---------- เอฟเฟกต์รูปทรง: แฟลช / วงแหวน / โดม / รอยไหม้ / สายฟ้า / แสงชั่วคราว ----------

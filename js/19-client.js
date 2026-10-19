@@ -72,7 +72,8 @@ function burst(x,y,col,n,sp,life,size,o){
     const a=o.a!==undefined?o.a+rnd(-(o.spread||0.5),o.spread||0.5):rnd(0,Math.PI*2),s=rnd(sp*0.2,sp);
     const vh=o.vh?rnd(o.vh[0],o.vh[1]):rnd(-1,3.5);
     PARTS.push({x,y,h:(o.h!==undefined?o.h:1.2)+rnd(-0.1,0.1),vx:Math.cos(a)*s,vy:Math.sin(a)*s,vh,
-      life:life*rnd(0.7,1.2),max:life,col,size:size*rnd(0.6,1.4),g:o.g!==undefined?o.g:4,smoke:!!o.smoke,grow:o.grow||0,drag:o.drag||3});
+      life:life*rnd(0.7,1.2),max:life,col,size:size*rnd(0.6,1.4),g:o.g!==undefined?o.g:4,smoke:!!o.smoke,grow:o.grow||0,drag:o.drag||3,
+      sh:o.sh||0,c2:o.c2,rot:rnd(0,6.283),vr:o.vr?rnd(-o.vr,o.vr):0,fin:o.fin});
   }
 }
 function smoke(x,y,h,n,col,life,size,sp){burst(x,y,col||'#3a3640',n,sp||60,life||1.4,size||6,{h,vh:[0.3,1.4],g:-0.6,smoke:true,grow:1.6,drag:2});}
