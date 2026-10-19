@@ -7,9 +7,9 @@ function statusFX(o,fm,x,y,z,sz,now){
     o.ice.visible=true;o.ice.scale.set(sz*0.5,sz*0.9,sz*0.5);o.ice.position.y=sz*0.85;
     if(Math.random()<0.2)burst(x,y,'#dff6ff',1,30,0.6,1.6,{h:z+rnd(0.2,sz*1.5),vh:[0,0.5],g:0});
   }else if(o.ice)o.ice.visible=false;
-  if((fm&4)&&!(fm&8)&&Math.random()<0.25)PARTS.push({x:x+rnd(-14,14),y:y+rnd(-14,14),h:z+rnd(0.1,sz*1.6),vx:rnd(-10,10),vy:rnd(-10,10),vh:rnd(-1,-0.2),life:0.7,max:0.7,col:Math.random()<0.5?'#ffffff':'#9fe8ff',size:1.6,g:0});
+  if((fm&4)&&!(fm&8)&&Math.random()<0.25)PARTS.push({x:x+rnd(-14,14),y:y+rnd(-14,14),h:z+rnd(0.1,sz*1.6),vx:rnd(-10,10),vy:rnd(-10,10),vh:rnd(-1,-0.2),life:0.7,max:0.7,col:Math.random()<0.5?'#ffffff':'#9fe8ff',size:2.2,g:0,sh:4,rot:rnd(0,6.283),vr:rnd(-3,3),c2:'#5ab8ff'});
   if(fm&16){
-    if(Math.random()<0.5)PARTS.push({x:x+rnd(-14,14),y:y+rnd(-14,14),h:z+rnd(0.1,sz*1.7),vx:rnd(-60,60),vy:rnd(-60,60),vh:rnd(-1,1),life:0.2,max:0.2,col:'#fff27a',size:1.8,g:0});
+    if(Math.random()<0.5)PARTS.push({x:x+rnd(-14,14),y:y+rnd(-14,14),h:z+rnd(0.1,sz*1.7),vx:rnd(-60,60),vy:rnd(-60,60),vh:rnd(-1,1),life:0.2,max:0.2,col:'#fff27a',size:2.2,g:0,sh:2});
     if(Math.random()<0.35)tbolt(x+rnd(-8,8),y+rnd(-8,8),z+sz*rnd(0.6,1.6),x+rnd(-26,26),y+rnd(-26,26),z+rnd(0,sz*1.4),0.06,0,0.07);   // Shock: สายฟ้าเหลืองแลบรอบตัว
   }
   if(fm&262144)for(let i=0;i<2;i++)PARTS.push({x:x+rnd(-12,12),y:y+rnd(-12,12),h:z+rnd(0.1,sz*1.6),vx:rnd(-10,10),vy:rnd(-10,10),vh:rnd(1.5,3),life:0.5,max:0.5,col:Math.random()<0.5?'#ff3a10':'#ffd27a',size:rnd(3,5),g:-1.5});
@@ -25,6 +25,7 @@ function statusFX(o,fm,x,y,z,sz,now){
 
 function fx(ev){
   const me=myPos(),near=!me||Math.hypot(ev.x-me.x,ev.y-me.y)<1000,H=ev.h!==undefined?ev.h:1.3;
+  try{fxAug(ev,H);}catch(e){console.error(e);}   // ชั้นเอฟเฟกต์ซ้อน + เอฟเฟกต์ทั้งจอ (js/44-vfx-kit.js)
   switch(ev.k){
     case 'cast':{
       const [wx,wy]=wandPos(ev),col=PCOL[ev.t]||'#fff';

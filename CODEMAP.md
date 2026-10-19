@@ -2,8 +2,8 @@
 Game = `index.html` (HTML only + loader) + `css/game.css` + `js/NN-*.js`. The loader fetches the js files **in number order and joins them into ONE module** → every file sees every other file's top-level names (no import/export). Code that runs at load time may only use things from earlier files. New file = add its name to `FILES` in index.html.
 Format: `name:line` = top-level function/const/let in that file. `§line title` = section header comment. Errors show `game.js:N` → `srcAt(N)` in the console gives file:line.
 
-## js/01-core.js (21) — แกนกลาง: import Three.js + ฟังก์ชันพื้นฐาน ($ rnd clamp lerp store to…
-$:11 rnd:12 clamp:13 lerp:14 dist2:15 lerpAng:16 esc:17 shuffle:18 store:19 toastT:20 toast:21
+## js/01-core.js (22) — แกนกลาง: import Three.js + ฟังก์ชันพื้นฐาน ($ rnd clamp lerp store to…
+$:12 rnd:13 clamp:14 lerp:15 dist2:16 lerpAng:17 esc:18 shuffle:19 store:20 toastT:21 toast:22
 
 ## js/02-data.js (283) — 
 W:4 H:4 PR:4 PILLARS:6 SPAWNF:7 mulberry:9 genForest:10 genPitch:27 genHogsmeade:36
@@ -108,7 +108,7 @@ MY:202 myDB:203 mySave:204 myLoad:207 myDecodeReady:213 myPlay:214 myNext:226 my
 §248 เพลงประกอบ (สร้างสดตามแผนที่)
 MUSIC:249 THEMES:250 padNote:255 musicTick:262 toggleMusic:291
 
-## js/19-client.js (185) — 
+## js/19-client.js (185) — ฝั่งแสดงผล (ทุกเครื่อง รวมโฮสต์ ใช้ snapshot เดียวกัน)
 cv:4 cx:4 DPR:5 SW:5 SH:5 resize:6 VIEW:12 screen:13 lastBuffKey:13 overShown:13 lastCount:13 PARTS:14 TEXTS:14
 §15 งบเอฟเฟกต์ (VFX budget)
 VFXB:20 _apush:21 vfxQual:29 vfxBegin:31 vfxEnd:34 vfxOnce:36 vfxExtra:38 PCOL:39 setScreen:41 onLobby:50 onSnap:56 myPos:64
@@ -145,15 +145,17 @@ MM3:2 makeMinion:3 syncMins:36 drawMinBars:58
 ## js/25-efx.js (258) — efxFX: ภาพของ event "efx" ทุกคาถา (หนึ่ง case ต่อหนึ่งเอฟเฟกต์)
 efxFX:2
 
-## js/26-fx-events.js (235) — fx(ev): เอฟเฟกต์+เสียงของทุก event จากโฮสต์ • statusFX (สถานะบนตัว) •…
+## js/26-fx-events.js (236) — fx(ev): เอฟเฟกต์+เสียงของทุก event จากโฮสต์ • statusFX (สถานะบนตัว) •…
 statusFX:3 fx:26
-§188 overlay: เลือกบัฟ / สรุปผล
-choosePick:189 syncOverlays:194 showOver:216
+§189 overlay: เลือกบัฟ / สรุปผล
+choosePick:190 syncOverlays:195 showOver:217
 
-## js/27-world.js (115) — 
-S3:4 tx:4 tz:4 GY:6 TW:6 hdr:7 gl:9 scene:15 cam:17 composer:18 rpass:19 bloom:20
-§26 คุณภาพกราฟิก: auto = ปรับความละเอียดเองตาม FPS / high = สวยสุด / low …
-QUAL:27 QUAL_NAME:28 qualPR:29 applyQuality:35 qualTick:46 texCanvas:57 glowTex:58 stoneTex:59 runeTex:65 glowMats:73 glowMat:74 STONEM:76 stoneMat:77 shadowAll:78 SKY:81 hemi:101 moonL:103 setSky:106 LPOOL:114
+## js/27-world.js (163) — โลก 3D (Three.js + Bloom) — 1 หน่วย 3D = 20 พิกเซลของระบบเกม
+S3:4 tx:4 tz:4 GY:6 TW:6 hdr:7 gl:9 scene:15 cam:17 composer:18
+§19 ท่อภาพ (post-processing): ฉาก → ชั้นเอฟเฟกต์นุ่ม (FXPass) → แสงฟุ้ง →…
+rpass:22 fxScene:24 SOFTU:26 SOFT_GLSL:27 FXMATS:29 fxMat:30 softify:32 fxPass:45 bloom:46 GRADEU:51 gradePass:67
+§70 คุณภาพกราฟิก: auto = ปรับความละเอียดเองตาม FPS / high = สวยสุด / low …
+QUAL:71 QUAL_NAME:72 qualPR:73 applyQuality:79 qualTick:94 texCanvas:105 glowTex:106 stoneTex:107 runeTex:113 glowMats:121 glowMat:122 STONEM:124 stoneMat:125 shadowAll:126 SKY:129 hemi:149 moonL:151 setSky:154 LPOOL:162
 
 ## js/28-maps-build.js (650) — สร้างแผนที่
 CANDLESYS:2 builtMap:3 world:3 TORCHES:3 CANDLES:3 FIREFLIES:3 CRYSTAL:3 RUNE:3 SNITCH:3 BANNERS:3 SNOW:3 WCACHE:5 WCACHE_MAX:5 buildWorld:6 addW:37 _prewarmed:39 prewarmShaders:40 batchStatic:58 makeCandles:83 updateCandles:92 buildCastle:101 buildHogsmeade:167 buildGreatHall:260 buildForest:330
@@ -171,12 +173,12 @@ makeCloak:2 updateCloth:10
 §33 โมเดลนักเรียนเวทมนตร์
 SHGEO:35 SHMAT:35 SHTEX:35 sGeo:36 sMat:37 bMat:40 matKey:42 bodyPatch:48 BODYM:55 bodyMat:56 plainMat:61 mergeBody:62 sStripe:98 hashStr:99 stripeTex:100 shieldMat:101 addStatus:109 makeStudent:115 makeEnemy:218 keepTex:356 keepMatSet:357 disposeMaterial:358 disposeTree:364 disposeObj:371 PM3:372 EM3:372 JM3:372 clearDyn:373
 
-## js/30-particles.js (204) — อนุภาค 2 ชั้น: แสงเรือง (additive) + ควัน (normal)
+## js/30-particles.js (205) — อนุภาค 2 ชั้น: แสงเรือง (additive) + ควัน (normal)
 PMAX:2 makePointSys:3
-§32 เปลวไฟ: FLAME_STYLE 0 = อนุภาคกลมเรืองแสง (ไม่ใช้รูปเปลว) • 2 = แบบให…
-FLAME_STYLE:34 PTIME:35 NOISETEX:37 FLAMETEX_V1:43 FLAMETEX_V2:48 PSYS:58 FLAMELUT:75 FLAMECOL:78 flame:79 colCache:83 col3:84 updateParticles:85
-§111 เอฟเฟกต์รูปทรง: แฟลช / วงแหวน / โดม / รอยไหม้ / สายฟ้า / แสงชั่วคราว
-SHAPES_Q:112 SHAPES:112 FLASHL:112 LINES:112 LREQ:113 ringGeo:114 ringVGeo:115 arcGeo:116 domeGeo:117 fullGeo:118 discGeo:119 decalTex:120 FX:121 jag:135 spawnShape:143 updateShapes:170 _cp:189 updateLights:190
+§33 เปลวไฟ: FLAME_STYLE 0 = อนุภาคกลมเรืองแสง (ไม่ใช้รูปเปลว) • 2 = แบบให…
+FLAME_STYLE:35 PTIME:36 NOISETEX:38 FLAMETEX_V1:44 FLAMETEX_V2:49 PSYS:59 FLAMELUT:76 FLAMECOL:79 flame:80 colCache:84 col3:85 updateParticles:86
+§112 เอฟเฟกต์รูปทรง: แฟลช / วงแหวน / โดม / รอยไหม้ / สายฟ้า / แสงชั่วคราว
+SHAPES_Q:113 SHAPES:113 FLASHL:113 LINES:113 LREQ:114 ringGeo:115 ringVGeo:116 arcGeo:117 domeGeo:118 fullGeo:119 discGeo:120 decalTex:121 FX:122 jag:136 spawnShape:144 updateShapes:171 _cp:190 updateLights:191
 
 ## js/31-camera.js (112) — กล้องมุมหลังไหล่ (แบบ Hogwarts Legacy)
 yaw:2 pitch:2 lastPh:2 locked:2 SENS:3 saveSet:4 applySettings:5 camPos:13 camLook:13 overlayOpen:16 showPause:17 hidePause:18 MAPCAM:19 PLACE:21 placeKey:22 updatePlaceGhost:30 _aimD:44 rayTerr:46 aimFromCrosshair:52 AIMZ:82 updateCamera:83 menuCamera:108
@@ -238,7 +240,7 @@ _fbGeo:56 _fbGeo2:56 makeFireBall:58 _ftGeo:66 makeFireTail:67 makeFireWall:70 F
 §88 ปีกไฟ (Dragonfall) จากไฟล์ Blender mesh_fire_wing (assets/src/fx_mesh…
 makeFireWings:91 poseFireWings:98
 
-## js/43-frost-vfx.js (135) — น้ำแข็ง VFX จาก Blender + Glacier Mist (หมอกเย็นตอนน้ำแข็งโผล่)
+## js/43-frost-vfx.js (135) — 
 FROST_U:6
 §7 shader น้ำแข็ง: ฐานน้ำเงินเข้ม → ปลายขาว • ขอบสว่าง (fresnel) • รอยร้…
 ICE_VS:8 ICE_FS:10 _iceShM:23 iceShaderMat:24 iceModel:28
@@ -251,10 +253,14 @@ _wpM:98 fileWeapon:99
 §107 Ice circle (Permafrost): ริบบิ้นแสงวนเป็นก้นหอยบนพื้น + ผลึกลอยหมุนรอ…
 SWIRL_FS:108 ICIRC:112 iceCircle:113 updateIceCircles:124
 
-## js/44-vfx-kit.js (90) — 
+## js/44-vfx-kit.js (206) — ชุดเครื่องมือ VFX กลาง (ขั้น 2 ของแผนอัปเกรด VFX)
 §8 1) หางแสง
 TRMAX:11 TRPTS:11 TRAILS:11 _trL:12 trailLayer:13 trailNew:22 trailPoint:24 trailStop:27 _tv1:28 _tv2:28 _tv3:28 updateTrails:29
-§52 2) สูตรเอฟเฟกต์ (ข้อมูล)
-VFXR:57 playFx:66 fxLayer:70 updateVfxKit:90
+§52 2) สูตรเอฟเฟกต์ = จานสี (ธาตุ) × แม่แบบ (ขนาด/ชนิด)
+VFXPAL:56 VFXTPL:69 VFXSIG:81 VFXSIGK:89 VFXR:91 _palCache:94 palOf:95 _pc:98 playFx:99 nearMe:108 fxLayer:109
+§141 3) ผูกเอฟเฟกต์ซ้อนชั้นกับเหตุการณ์ของทุกสาย (เพิ่มทับของเดิม ไม่ลบหน้…
+EFXAUG:143 PJPAL:162 pjPal:164 ULTCOL:165 efxAug:166 VFXAUG_ON:170 fxAug:171
+§191 4) เอฟเฟกต์ทั้งจอ (ค่าไปที่ GradePass ใน js/27-world.js)
+SCR:192 screenFlash:193 screenRadial:194 screenKick:195 screenHurt:196 _scv:197 updateScreenFx:198 updateVfxKit:206
 
-(44 files, 8735 lines)
+(44 files, 8902 lines)

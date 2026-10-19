@@ -182,4 +182,4 @@ function setGhost(o,on){
     else if(SOLIDM.has(m)){const gm=m.material;m.material=SOLIDM.get(m);SOLIDM.delete(m);if(!gm.userData.keep)gm.dispose();}
   });
 }
-function hitSparks(x,y,h,n){const k=Math.min(2,0.6+(n||5)/25);burst(x,y,'#ffffff',Math.round(8*k),240,0.22,1.8,{h,g:5});burst(x,y,'#ffd9a0',Math.round(5*k),160,0.3,2.4,{h,g:4});FX.flashSprite(x,y,h,'#ffffff',0.2,1.1*k,0.08,1.6);}
+function hitSparks(x,y,h,n){const k=Math.min(2,0.6+(n||5)/25);burst(x,y,'#ffffff',Math.round(8*k),260,0.22,2.4,{h,g:5,sh:2,c2:'#ffb060'});burst(x,y,'#ffd9a0',Math.round(5*k),160,0.3,2.6,{h,g:4,sh:1,vr:4,c2:'#ff8a3a'});FX.flashSprite(x,y,h,'#ffffff',0.2,1.1*k,0.08,1.6);}

@@ -58,12 +58,12 @@ const MISTMAX=220,MISTP=[],MISTSRC=[];let _mistIM=null,_mistA=null;
 function mistMesh(){if(_mistIM)return _mistIM;
   const geo=new THREE.PlaneGeometry(1,1);_mistA=new THREE.InstancedBufferAttribute(new Float32Array(MISTMAX*2),2);geo.setAttribute('iData',_mistA);
   const mat=new THREE.ShaderMaterial({uniforms:{uTex:{value:MISTTEX},uCol:{value:new THREE.Color('#a8c3dc')}},transparent:true,depthWrite:false,
-    vertexShader:`attribute vec2 iData;varying vec2 vUv;varying float vA;
+    vertexShader:`attribute vec2 iData;varying vec2 vUv;varying float vA;varying float vVZ;
       void main(){vA=iData.x;float c=cos(iData.y),s=sin(iData.y);vUv=vec2(c*(uv.x-0.5)-s*(uv.y-0.5),s*(uv.x-0.5)+c*(uv.y-0.5))+0.5;
         vec4 ctr=modelViewMatrix*instanceMatrix*vec4(0.0,0.0,0.0,1.0);float sc=length(instanceMatrix[0].xyz);
-        ctr.xy+=position.xy*sc*vec2(1.5,0.85);gl_Position=projectionMatrix*ctr;}`,
-    fragmentShader:`uniform sampler2D uTex;uniform vec3 uCol;varying vec2 vUv;varying float vA;
-      void main(){vec4 t=texture2D(uTex,vUv);float a=t.a*vA;if(a<0.004)discard;gl_FragColor=vec4(uCol*(0.72+0.4*t.r),a);}`});
+        ctr.xy+=position.xy*sc*vec2(1.5,0.85);vVZ=-ctr.z;gl_Position=projectionMatrix*ctr;}`,
+    fragmentShader:SOFT_GLSL+`uniform sampler2D uTex;uniform vec3 uCol;varying vec2 vUv;varying float vA;
+      void main(){vec4 t=texture2D(uTex,vUv);float a=t.a*vA;if(a<0.004)discard;gl_FragColor=vec4(uCol*(0.72+0.4*t.r),a*softK(1.2));}`});fxMat(mat);
   mat.userData.keep=true;geo.userData.keep=true;
   _mistIM=new THREE.InstancedMesh(geo,mat,MISTMAX);_mistIM.count=0;_mistIM.frustumCulled=false;_mistIM.renderOrder=4;return _mistIM;}
 // ก้อนหมอก 1 ก้อน (พิกัดแผนที่ px) — vx/vy px/วิ, size = หน่วย 3D
@@ -84,7 +84,7 @@ function updateMist(dt){
         mistPuff(S.x+Math.cos(S.a)*d+px*w,S.y+Math.sin(S.a)*d+py*w,rnd(0.1,0.5),{vx:px*Math.sign(w)*rnd(15,40),vy:py*Math.sign(w)*rnd(15,40),vh:rnd(0.02,0.2),size:rnd(1.8,3.2),grow:0.3,life:rnd(2,3),a:rnd(0.25,0.42)});}
       else{const an=rnd(0,6.283),d=Math.sqrt(Math.random())*S.r;mistPuff(S.x+Math.cos(an)*d,S.y+Math.sin(an)*d,rnd(0.05,0.35),{vx:Math.cos(an)*rnd(5,20),vy:Math.sin(an)*rnd(5,20),vh:0.05,size:rnd(2,3.5),grow:0.25,life:rnd(2.2,3.2),a:rnd(0.2,0.34)});}}}
   if(!MISTP.length){if(_mistIM)_mistIM.visible=false;return;}
-  const IM=mistMesh();if(IM.parent!==scene)scene.add(IM);IM.visible=true;let n=0;const D=_mistA.array;
+  const IM=mistMesh();if(IM.parent!==fxScene)fxScene.add(IM);IM.visible=true;let n=0;const D=_mistA.array;
   for(let i=MISTP.length-1;i>=0;i--){const p=MISTP[i];p.age+=dt;if(p.age>=p.life){MISTP.splice(i,1);continue;}
     const dr=Math.exp(-1.2*dt);p.x+=p.vx*dt;p.y+=p.vy*dt;p.h+=p.vh*dt;p.vx*=dr;p.vy*=dr;p.vh*=dr;p.s*=1+p.grow*dt;p.rot+=p.vr*dt;
     const k=p.age/p.life,al=p.a*Math.min(1,k*5)*(1-k)*(1-k)*1.35;

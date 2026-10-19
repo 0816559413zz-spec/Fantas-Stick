@@ -139,7 +139,7 @@ function syncProj(v,now){
     const vt=(j.t==='pfire'||j.t==='pfireb')?'fire':j.t,col=j.rf?'#7ff6ff':PCOL[j.t],r=PDEF[j.t].r*S3*(vt==='fire'?1.4:1);
     let o=JM3.get(j.id);
     if(!o){o=makeProj(col,j.t);o.pt=j.t;JM3.set(j.id,o);
-      if(j.t==='icicle'||j.t==='iceboulder'||j.t==='ice')o.tr=trailNew({col:'#e8f8ff',col2:'#2f86ff',w:j.t==='iceboulder'?0.32:0.1,life:j.t==='iceboulder'?0.28:0.16,k:1.7});}
+      {const P=palOf(pjPal(j.t),col),big=j.t==='iceboulder'||j.t==='pfireb';o.tr=trailNew({col:P.hi,col2:P.deep,w:big?0.32:vt==='fire'?0.2:0.11,life:big?0.28:0.17,k:1.7});}}   // หางแสงทุกกระสุน (สีตามธาตุ)
     if(o.col!==col){o.halo.material=glowMat(col,0.9);o.inner.material.color.copy(hdr(col,2.2));o.tail.material.color.copy(hdr(col,1.6));o.col=col;}
     const x=j.x+j.vx*ex,y=j.y+j.vy*ex,X=tx(x),Z=tz(y),H=(j.h!==undefined?j.h:1.35)+(j.vh||0)*ex;
     {const Hw=H+GY(x,y);o.g.position.set(X,Hw,Z);if(o.tr)trailPoint(o.tr,X,Hw,Z);o.g.lookAt(_t1.set(X+j.vx*S3,Hw+(j.vh||0),Z+j.vy*S3));}

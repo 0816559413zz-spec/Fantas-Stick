@@ -16,11 +16,55 @@ const scene=new THREE.Scene();
 scene.fog=new THREE.Fog('#151a33',50,170);
 const cam=new THREE.PerspectiveCamera(62,1,0.1,700);
 const composer=new EffectComposer(gl);
+// ===== ท่อภาพ (post-processing): ฉาก → ชั้นเอฟเฟกต์นุ่ม (FXPass) → แสงฟุ้ง → โทนสี/เอฟเฟกต์ทั้งจอ (GradePass) → จอ =====
+// ความลึกของฉากเก็บเป็นภาพ (depthTexture) ให้อนุภาค/หมอก/หางแสงอ่านได้ → จางลงนุ่ม ๆ ตรงที่แตะพื้น/กำแพง (soft particles)
+for(const rt of [composer.renderTarget1,composer.renderTarget2]){rt.depthTexture=new THREE.DepthTexture(rt.width,rt.height);rt.depthTexture.type=THREE.UnsignedIntType;}
 const rpass=new RenderPass(scene,cam);composer.addPass(rpass);
-const bloom=new UnrealBloomPass(new THREE.Vector2(512,512),0.65,0.45,0.88);
+// ฉากแยกของเอฟเฟกต์โปร่งใส (อนุภาค หมอก หางแสง) — วาดหลังฉากหลัก
+const fxScene=new THREE.Scene();
+// ค่ากลางของ soft particles (shader ของอนุภาคอ่านจากที่นี่) • on=0 → วาดแบบเดิม (ทดสอบความลึกปกติ ไม่นุ่ม)
+const SOFTU={uDepth:{value:null},uRes:{value:new THREE.Vector2(1,1)},uNear:{value:0.1},uFar:{value:700},uSoftOn:{value:1}};
+const SOFT_GLSL='uniform sampler2D uDepth;uniform vec2 uRes;uniform float uNear;uniform float uFar;uniform float uSoftOn;varying float vVZ;'+
+  'float softK(float range){if(uSoftOn<0.5)return 1.0;float d=texture2D(uDepth,gl_FragCoord.xy/uRes).x;float sz=(uNear*uFar)/(uFar-d*(uFar-uNear));float k=(sz-vVZ)/range;if(k<0.0)discard;return clamp(k,0.0,1.0);}';
+const FXMATS=new Set();   // วัสดุในชั้นเอฟเฟกต์ — สลับ depthTest ตามโหมดนุ่ม/ไม่นุ่ม
+function fxMat(m){m.uniforms=Object.assign(m.uniforms||{},SOFTU);m.depthTest=!SOFTU.uSoftOn.value;FXMATS.add(m);m.userData.keep=true;return m;}
+// ใส่ soft particles ให้ ShaderMaterial ที่มี "vec4 mv=modelViewMatrix*..." ใน vertex shader (อนุภาค) — range = ระยะจางเป็นหน่วย 3D
+function softify(m,range){
+  m.vertexShader='varying float vVZ;'+m.vertexShader.replace('vec4 mv=modelViewMatrix*vec4(position,1.0);','vec4 mv=modelViewMatrix*vec4(position,1.0);vVZ=-mv.z;');
+  const f=m.fragmentShader,i=f.lastIndexOf('}');m.fragmentShader=SOFT_GLSL+f.slice(0,i)+'gl_FragColor*=softK('+range.toFixed(2)+');}';
+  return fxMat(m);}
+class FXPass extends Pass{
+  constructor(){super();this.needsSwap=true;
+    this.cp=new FullScreenQuad(new THREE.ShaderMaterial({uniforms:{t:{value:null}},vertexShader:'varying vec2 vUv;void main(){vUv=uv;gl_Position=vec4(position.xy,0.0,1.0);}',fragmentShader:'uniform sampler2D t;varying vec2 vUv;void main(){gl_FragColor=texture2D(t,vUv);}',depthTest:false,depthWrite:false}));}
+  render(r,write,read){const ac=r.autoClear;r.autoClear=false;
+    if(!SOFTU.uSoftOn.value){this.needsSwap=false;r.setRenderTarget(read);r.render(fxScene,cam);r.autoClear=ac;return;}
+    // นุ่ม: ก๊อปภาพฉากไปอีกแผ่น แล้ววาดเอฟเฟกต์ทับโดยอ่านความลึกจากแผ่นเดิม (อ่าน+เขียนแผ่นเดียวกันไม่ได้)
+    this.needsSwap=true;SOFTU.uDepth.value=read.depthTexture;SOFTU.uRes.value.set(read.width,read.height);SOFTU.uNear.value=cam.near;SOFTU.uFar.value=cam.far;
+    this.cp.material.uniforms.t.value=read.texture;r.setRenderTarget(write);this.cp.render(r);r.render(fxScene,cam);r.autoClear=ac;}
+}
+const fxPass=new FXPass();composer.addPass(fxPass);
+const bloom=new UnrealBloomPass(new THREE.Vector2(512,512),0.72,0.5,0.86);
 // เรนเดอร์แสงฟุ้งที่ครึ่งความละเอียด (ดูแทบไม่ต่าง แต่เร็วขึ้นมาก)
 {const bs=bloom.setSize.bind(bloom);bloom.setSize=(w,h)=>bs(Math.max(1,Math.round(w/2)),Math.max(1,Math.round(h/2)));}
 composer.addPass(bloom);
+// โทนสีทั้งจอ + เอฟเฟกต์ทั้งจอ: แฟลชสี, เบลอพุ่งเข้าหาจุด (radial blur ตอนอัลติ), สีเหลื่อม (chromatic) ตอนกระแทก, ขอบจอมืด/แดงตอนโดนตี
+const GRADEU={tDiffuse:{value:null},uFlash:{value:new THREE.Color(0,0,0)},uRad:{value:0},uCtr:{value:new THREE.Vector2(0.5,0.5)},uChr:{value:0},uVig:{value:0.28},uHurt:{value:0},uSat:{value:1.1},uOn:{value:1}};
+class GradePass extends Pass{
+  constructor(){super();this.needsSwap=true;
+    this.q=new FullScreenQuad(new THREE.ShaderMaterial({uniforms:GRADEU,depthTest:false,depthWrite:false,
+      vertexShader:'varying vec2 vUv;void main(){vUv=uv;gl_Position=vec4(position.xy,0.0,1.0);}',
+      fragmentShader:'uniform sampler2D tDiffuse;uniform vec3 uFlash;uniform float uRad;uniform vec2 uCtr;uniform float uChr;uniform float uVig;uniform float uHurt;uniform float uSat;varying vec2 vUv;'+
+        'void main(){vec2 uv=vUv;vec3 c;'+
+        'if(uRad>0.001){vec2 d=uv-uCtr;c=vec3(0.0);for(int i=0;i<10;i++){float t=float(i)/9.0;c+=texture2D(tDiffuse,uCtr+d*(1.0-uRad*0.16*t)).rgb;}c/=10.0;}else c=texture2D(tDiffuse,uv).rgb;'+
+        'if(uChr>0.001){vec2 o=(uv-0.5)*uChr*0.006;c.r=mix(c.r,texture2D(tDiffuse,uv+o).r,0.85);c.b=mix(c.b,texture2D(tDiffuse,uv-o).b,0.85);}'+
+        'float l=dot(c,vec3(0.2126,0.7152,0.0722));c=max(mix(vec3(l),c,uSat),0.0);'+
+        'c=mix(c*vec3(0.9,0.95,1.12),c,smoothstep(0.0,0.35,l));'+   // เงาอมฟ้าเล็กน้อย
+        'vec2 q=(uv-0.5)*vec2(1.0,0.82);float v=smoothstep(0.78,0.22,length(q));c*=mix(1.0-uVig,1.0,v);'+
+        'c=mix(c,c*0.35+vec3(0.9,0.05,0.05)*0.6,uHurt*(1.0-v));'+
+        'c+=uFlash;gl_FragColor=vec4(c,1.0);}'}));}
+  render(r,write,read){GRADEU.tDiffuse.value=read.texture;r.setRenderTarget(this.renderToScreen?null:write);this.q.render(r);}
+}
+const gradePass=new GradePass();composer.addPass(gradePass);
 composer.addPass(new OutputPass());
 
 // ---------- คุณภาพกราฟิก: auto = ปรับความละเอียดเองตาม FPS / high = สวยสุด / low = เครื่องช้า ----------
@@ -40,6 +84,10 @@ function applyQuality(){
     for(const sc of [scene,typeof stage!=='undefined'?stage:null])if(sc)sc.traverse(o=>{if(o.material)[].concat(o.material).forEach(m=>m.needsUpdate=true);});
   }
   bloom.enabled=QUAL.mode!=='low'&&!(QUAL.mode==='auto'&&QUAL.lvl>=1);
+  gradePass.enabled=QUAL.mode!=='low';
+  // soft particles: ปิดเมื่อกราฟิกประหยัด หรืออัตโนมัติลดถึงขั้นปิดเงา (ประหยัดการก๊อปภาพเต็มจอ 1 ครั้ง)
+  const soft=QUAL.mode!=='low'&&!(QUAL.mode==='auto'&&QUAL.lvl>=2)?1:0;
+  if(SOFTU.uSoftOn.value!==soft){SOFTU.uSoftOn.value=soft;for(const m of FXMATS)m.depthTest=!soft;}
   if(typeof resize==='function'&&SW)resize();
 }
 // ปรับความละเอียดอัตโนมัติ: เฟรมช้า (<~40fps) ลดลงทีละขั้น / ลื่นต่อเนื่องค่อยเพิ่มกลับ
