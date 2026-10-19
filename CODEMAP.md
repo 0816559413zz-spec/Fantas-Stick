@@ -173,12 +173,12 @@ makeCloak:2 updateCloth:10
 §33 โมเดลนักเรียนเวทมนตร์
 SHGEO:35 SHMAT:35 SHTEX:35 sGeo:36 sMat:37 bMat:40 matKey:42 bodyPatch:48 BODYM:55 bodyMat:56 plainMat:61 mergeBody:62 sStripe:98 hashStr:99 stripeTex:100 shieldMat:101 addStatus:109 makeStudent:115 makeEnemy:218 keepTex:356 keepMatSet:357 disposeMaterial:358 disposeTree:364 disposeObj:371 PM3:372 EM3:372 JM3:372 clearDyn:373
 
-## js/30-particles.js (205) — อนุภาค 2 ชั้น: แสงเรือง (additive) + ควัน (normal)
-PMAX:2 makePointSys:3
-§33 เปลวไฟ: FLAME_STYLE 0 = อนุภาคกลมเรืองแสง (ไม่ใช้รูปเปลว) • 2 = แบบให…
-FLAME_STYLE:35 PTIME:36 NOISETEX:38 FLAMETEX_V1:44 FLAMETEX_V2:49 PSYS:59 FLAMELUT:76 FLAMECOL:79 flame:80 colCache:84 col3:85 updateParticles:86
-§112 เอฟเฟกต์รูปทรง: แฟลช / วงแหวน / โดม / รอยไหม้ / สายฟ้า / แสงชั่วคราว
-SHAPES_Q:113 SHAPES:113 FLASHL:113 LINES:113 LREQ:114 ringGeo:115 ringVGeo:116 arcGeo:117 domeGeo:118 fullGeo:119 discGeo:120 decalTex:121 FX:122 jag:136 spawnShape:144 updateShapes:171 _cp:190 updateLights:191
+## js/30-particles.js (262) — อนุภาค 2 ชั้น: แสงเรือง (additive) + ควัน (normal)
+PMAX:2 PGLOW_OCC:6 PLIT:6 makePointSys:7
+§46 เปลวไฟ: FLAME_STYLE 0 = อนุภาคกลมเรืองแสง (ไม่ใช้รูปเปลว) • 2 = แบบให…
+FLAME_STYLE:48 PTIME:49 NOISETEX:51 FLAMETEX_V1:57 FLAMETEX_V2:62 PSYS:72 FLAMELUT:89 FLAMECOL:92 flame:93 PFB:101 ptexUse:102 ptexLoad:124 colCache:126 col3:127 CURL:130 curlAt:131 updateParticles:133
+§169 เอฟเฟกต์รูปทรง: แฟลช / วงแหวน / โดม / รอยไหม้ / สายฟ้า / แสงชั่วคราว
+SHAPES_Q:170 SHAPES:170 FLASHL:170 LINES:170 LREQ:171 ringGeo:172 ringVGeo:173 arcGeo:174 domeGeo:175 fullGeo:176 discGeo:177 decalTex:178 FX:179 jag:193 spawnShape:201 updateShapes:228 _cp:247 updateLights:248
 
 ## js/31-camera.js (112) — กล้องมุมหลังไหล่ (แบบ Hogwarts Legacy)
 yaw:2 pitch:2 lastPh:2 locked:2 SENS:3 saveSet:4 applySettings:5 camPos:13 camLook:13 overlayOpen:16 showPause:17 hidePause:18 MAPCAM:19 PLACE:21 placeKey:22 updatePlaceGhost:30 _aimD:44 rayTerr:46 aimFromCrosshair:52 AIMZ:82 updateCamera:83 menuCamera:108
@@ -227,7 +227,7 @@ trOpenF:2 trKey:2 trN:2 TR_OPTS:3 trToggle:4 trSend:9 trSync:14 hovEl:62
 §63 หน้าตั้งค่า
 setRow:64 setTog:65 setTab:66 XHC:67 XHN:67 setOpts:68 renderSettings:69 drawXhPrev:86 openSettings:87 closeSettings:88 modeIcon:140 modeTitle:141 renderLobby:142
 
-## js/41-debug.js (140) — 
+## js/41-debug.js (141) — 
 botBrain:6 _obsKeep:47 balArena:48 balReset:49 balDuel:53 balTour:68 balCoop:82 balSpellTest:98
 §117 Service Worker (sw.js): เก็บไฟล์เกมไว้ในเครื่อง เปิดครั้งต่อไปเร็วขึ้…
 SWK:118 swSetup:119
@@ -266,4 +266,4 @@ EFXAUG:143 PJPAL:162 pjPal:164 ULTCOL:165 efxAug:166 VFXAUG_ON:170 fxAug:171
 §191 4) เอฟเฟกต์ทั้งจอ (ค่าไปที่ GradePass ใน js/27-world.js)
 SCR:192 screenFlash:193 screenRadial:194 screenKick:195 screenHurt:196 _scv:197 updateScreenFx:198 updateVfxKit:206
 
-(44 files, 9102 lines)
+(44 files, 9160 lines)

@@ -119,7 +119,7 @@ const FILE_MODELS=()=>['char_student',...Object.keys(EDEF).map(t=>'enemy_'+t)];
 // flipbook (ภาพเรียงเป็นตาราง) ใน manifest "fx": {"vfx_x":{"file":"vfx/x.png","cols":4,"rows":4,"fps":24,"add":true,"size":2,"loop":false,"mode":"add"}} — ชื่อเดียวกับ .glb ได้ (เล่นทั้งคู่)
 // ยังโหลดไม่เสร็จ/ไม่มีไฟล์ = ใช้เอฟเฟกต์จากโค้ดตามเดิม (prefetchFx() โหลดล่วงหน้าตอนสร้างแผนที่)
 const VFXL=[],FLIPL=[],FLIPS=new Map();let FLIPGEO=null;
-function prefetchFx(){modelManifest().then(m=>{for(const k in m.models)if(k.startsWith('vfx_')||k.startsWith('proj_'))loadModel(k);for(const k in (m.fx||{}))flipTex(k);});}
+function prefetchFx(){modelManifest().then(m=>{for(const k in m.models)if(k.startsWith('vfx_')||k.startsWith('proj_'))loadModel(k);for(const k in (m.fx||{}))flipTex(k);});ptexLoad();}
 function playVfx(name,o){
   const r=MODELS.ready.get(name);if(!r)return false;
   const e=r.info||{},inst=modelInst(name),mats=new Map();
