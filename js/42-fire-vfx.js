@@ -311,13 +311,13 @@ function fireSeqVol(S,o){o=o||{};const g=new THREE.BoxGeometry(2*o.hx,o.h,2*o.hz
   const U={uT:{value:S.tex},uG:{value:new THREE.Vector2(S.m.nx,S.m.frames)},uFr:{value:0},uDis:{value:0},uH:{value:1},uSz:{value:new THREE.Vector3(o.hx,o.h,o.hz)},uInt:{value:o.int||1},uDen:{value:o.den||1},uOcc:{value:0.92}};
   const m=new THREE.ShaderMaterial({uniforms:U,transparent:true,depthWrite:false,side:THREE.BackSide,
     blending:THREE.CustomBlending,blendSrc:THREE.OneFactor,blendDst:THREE.OneMinusSrcAlphaFactor,blendSrcAlpha:THREE.OneFactor,blendDstAlpha:THREE.OneMinusSrcAlphaFactor,
-    vertexShader:'varying vec3 vW,vC;varying float vVZ;void main(){vec4 w=modelMatrix*vec4(position,1.0);vW=w.xyz;vC=(modelMatrix*vec4(0.0,0.0,0.0,1.0)).xyz;vec4 mv=viewMatrix*w;vVZ=-mv.z;gl_Position=projectionMatrix*mv;}',
-    fragmentShader:'precision highp sampler3D;'+SOFT_GLSL+FIRE_GLSL+'uniform sampler3D uT;uniform vec2 uG;uniform vec3 uSz;uniform float uFr,uDis,uH,uInt,uDen,uOcc;varying vec3 vW,vC;'+
+    vertexShader:'varying vec3 vW,vL,vCL;varying float vVZ;void main(){vec4 w=modelMatrix*vec4(position,1.0);vW=w.xyz;vL=position;vCL=(inverse(modelMatrix)*vec4(cameraPosition,1.0)).xyz;vec4 mv=viewMatrix*w;vVZ=-mv.z;gl_Position=projectionMatrix*mv;}',
+    fragmentShader:'precision highp sampler3D;'+SOFT_GLSL+FIRE_GLSL+'uniform sampler3D uT;uniform vec2 uG;uniform vec3 uSz;uniform float uFr,uDis,uH,uInt,uDen,uOcc;varying vec3 vW,vL,vCL;'+
       'float sv(vec3 u,float f){float x=(f*uG.x+clamp(u.x*uG.x,0.5,uG.x-0.5))/(uG.x*uG.y);return texture(uT,vec3(x,u.z,u.y)).r;}'+
-      'void main(){vec3 ro=cameraPosition-vC,rd=normalize(vW-cameraPosition);'+
+      'void main(){vec3 ro=vCL,rd=normalize(vL-vCL),rw=normalize(vW-cameraPosition);'+
       'vec3 bmin=vec3(-uSz.x,0.0,-uSz.z),bmax=vec3(uSz.x,uSz.y,uSz.z);vec3 iv=1.0/(rd+vec3(1e-6));vec3 t0=(bmin-ro)*iv,t1=(bmax-ro)*iv,a=min(t0,t1),b=max(t0,t1);'+
       'float tn=max(max(a.x,a.y),max(a.z,0.0)),tf=min(min(b.x,b.y),b.z);if(tf<=tn)discard;'+
-      'if(uSoftOn>0.5){float dz=texture2D(uDepth,gl_FragCoord.xy/uRes).x;float sz=(uNear*uFar)/(uFar-dz*(uFar-uNear));vec3 fw=-vec3(viewMatrix[0][2],viewMatrix[1][2],viewMatrix[2][2]);tf=min(tf,sz/max(dot(rd,fw),1e-3));if(tf<=tn)discard;}'+
+      'if(uSoftOn>0.5){float dz=texture2D(uDepth,gl_FragCoord.xy/uRes).x;float sz=(uNear*uFar)/(uFar-dz*(uFar-uNear));vec3 fw=-vec3(viewMatrix[0][2],viewMatrix[1][2],viewMatrix[2][2]);tf=min(tf,sz/max(dot(rw,fw),1e-3));if(tf<=tn)discard;}'+
       'float f0=mod(floor(uFr),uG.y),f1=min(f0+1.0,uG.y-1.0),fu=fract(uFr);'+
       'float st=(tf-tn)/32.0,jt=fract(sin(dot(gl_FragCoord.xy,vec2(12.9898,78.233)))*43758.5453);vec3 col=vec3(0.0);float A=0.0;'+
       'for(int i=0;i<32;i++){vec3 p=ro+rd*(tn+(float(i)+jt)*st);vec3 u=(p-bmin)/(bmax-bmin);if(u.y>uH)continue;'+
@@ -326,10 +326,20 @@ function fireSeqVol(S,o){o=o||{};const g=new THREE.BoxGeometry(2*o.hx,o.h,2*o.hz
       'float nf=smoothstep(0.8,3.0,tn);col*=nf;A*=nf;if(A<0.004)discard;gl_FragColor=vec4(col,A*uOcc);}'});
   fxMat(m);m.userData.keep=false;FXMATS.delete(m);m.depthTest=false;
   const mesh=new THREE.Mesh(g,m);mesh.frustumCulled=false;mesh.renderOrder=3;mesh.userData.u=U;mesh.userData.mats=[m];return mesh;}
+// (ray เดินในพิกัดของกล่องเอง → หมุนกล่องได้ทุกแกน • อย่า scale กล่อง ใช้ hx/h/hz แทน)
 // เล่นไฟ bake ชั่วคราวที่จุด (x,y px): loop = เสาไฟวน (เริ่มเฟรมสุ่ม) / ไม่ loop = เล่นครั้งเดียวตามอายุ • fps 24 • ดับช่วงท้าย
 function fireSeqAt(name,x,y,h,o){const S=!(window.WD&&WD.noSeq)&&fireSeqReady(name);if(!S)return null;   // WD.noSeq = ปิดไว้เทียบภาพ
   const vm=fireSeqVol(S,o),u=vm.userData.u,N=S.m.frames,fps=o.fps||24,f0=o.loop?Math.random()*N:0;
   vm.position.set(tx(x),h+GY(x,y),tz(y));vm.rotation.y=rnd(0,6.283);
   return fireVolTemp(vm,o.life,(uu,k)=>{const t=k*o.life;u.uFr.value=o.loop?(f0+t*fps)%N:Math.min(N-1.001,t*fps*(o.speed||1));
     const up=o.loop?(k<0.15?Math.sin(k/0.15*1.7)/Math.sin(1.7):1):1;u.uH.value=Math.max(0.02,up);u.uDis.value=o.loop?Math.max(0,(k-0.55)/0.45):Math.max(0,(k-0.75)/0.25)*0.6;});}
-if(window.WD)Object.assign(window.WD,{fireSeqLoad,fireSeqVol,fireSeqAt,fxScene});
+// ไฟ bake วางตามเส้นจาก A ไป B (ดาวหางไฟตอน Dragonfall ดิ่ง): แกน x ของ sim = ทิศ A→B, แกนสูงของ sim ตั้งฉากเส้นใกล้ทิศขึ้นที่สุด
+// o.head = สัดส่วนช่วงที่หัวไฟวิ่งในกล่อง (sim วิ่ง -2.6..2.6 จาก -3..3 = 0.867) → กล่องยาว = ระยะ A-B / head • o.w = หนาของกล่อง (เมตร)
+const _sqA=new THREE.Vector3(),_sqB=new THREE.Vector3(),_sqX=new THREE.Vector3(),_sqY=new THREE.Vector3(),_sqZ=new THREE.Vector3(),_sqM=new THREE.Matrix4();
+function fireSeqLine(name,x,y,h,x2,y2,h2,o){const S=!(window.WD&&WD.noSeq)&&fireSeqReady(name);if(!S)return null;
+  _sqA.set(tx(x),h+GY(x,y),tz(y));_sqB.set(tx(x2),h2+GY(x2,y2),tz(y2));_sqX.subVectors(_sqB,_sqA);const len=_sqX.length();if(len<0.5)return null;_sqX.divideScalar(len);
+  _sqY.set(0,1,0).addScaledVector(_sqX,-_sqX.y);if(_sqY.lengthSq()<1e-4)_sqY.set(1,0,0);_sqY.normalize();_sqZ.crossVectors(_sqX,_sqY);
+  const L=len/(o.head||0.867),w=o.w||2.4,vm=fireSeqVol(S,{hx:L/2,h:w,hz:w/2,int:o.int,den:o.den}),u=vm.userData.u,N=S.m.frames,fps=o.fps||24;
+  vm.quaternion.setFromRotationMatrix(_sqM.makeBasis(_sqX,_sqY,_sqZ));vm.position.copy(_sqA).add(_sqB).multiplyScalar(0.5).addScaledVector(_sqY,-w/2);
+  return fireVolTemp(vm,o.life,(uu,k)=>{u.uFr.value=Math.min(N-1.001,k*o.life*fps);u.uDis.value=Math.max(0,(k-0.6)/0.4)*0.7;});}
+if(window.WD)Object.assign(window.WD,{fireSeqLoad,fireSeqVol,fireSeqAt,fireSeqLine,fxScene});

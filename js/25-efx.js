@@ -151,26 +151,31 @@ function efxFX(ev){
         FX.flashSprite(x+c*95,y+sn*95,H,'#fff7b0',0.4,3,0.12,2.2);burst(x+c*230,y+sn*230,'#ffd000',16,240,0.3,2.2,{h:H,g:3});burst(x+c*230,y+sn*230,'#9fd8ff',8,200,0.3,1.8,{h:H,g:3});}
       for(let i=0;i<(big?6:3);i++){const an=a+rnd(-0.5,0.5),d=rnd(D-20,D+40);burst(x+Math.cos(an)*d,y+Math.sin(an)*d,i%2?'#ffd000':'#ffffff',4,160,0.25,2,{h:H,g:3});}
       if(near)snd(big?'zap':'whoosh',ev);break;}
-    case 'dfdive':burst(x,y,'#ffb347',24,160,0.3,2.6,{h:H+1,vh:[-2,2],g:0});FX.flashSprite(x,y,H+1,'#ffd27a',0.25,3,0.12,2);if(near)snd('whoosh',ev);break;
+    case 'dfdive':// ดาวหางไฟพุ่งเฉียงลงจุดกระแทก (bake จาก Blender: assets/src/dragonfall_dive_build.py — ตามภาพที่ผู้เล่นวาด 2026-10-20)
+      if(ev.x2!==undefined&&getKit(ev.id).path===0)fireSeqLine('df_dive',x,y,H+1,ev.x2,ev.y2,groundH(ev.x2,ev.y2,H)+0.6,{life:0.75,w:2.6,int:1.3,den:1.2});
+      burst(x,y,'#ffb347',24,160,0.3,2.6,{h:H+1,vh:[-2,2],g:0});FX.flashSprite(x,y,H+1,'#ffd27a',0.25,3,0.12,2);if(near)snd('whoosh',ev);break;
     case 'dfcancel':smoke(x,y,H,10,'#3a2a24',0.8,6,80);break;
     case 'dfboom':{
       const R=ev.r;
-      FX.flashSprite(x,y,H+0.5,'#fff2d0',0.3,3,0.07,1.8);FX.flashSprite(x,y,H+0.3,'#ff9a3a',0.45,6,0.28,1.3);fireBlast(x,y,H+0.6,R*S3*0.75,0.6);
+      FX.flashSprite(x,y,H+0.5,'#fff2d0',0.3,3,0.07,1.8);FX.flashSprite(x,y,H+0.3,'#ff9a3a',0.45,6,0.28,1.3);
+      // ไฟกระแทกทั้งก้อนจาก Blender (assets/src/dragonfall_impact_build.py — ผู้เล่นวาดภาพให้ 2026-10-20): เสาไฟกลาง + วงไฟกลิ้งออกตามพื้น + ไฟลุกขอบวง • โหลดไม่ทันใช้แบบเดิม
+      const sq=fireSeqAt('df_impact',x,y,H-0.1,{hx:R*S3*1.1875,hz:R*S3*1.1875,h:R*S3*2,life:2.25,fps:12,int:1.25,den:1.2});
+      if(!sq)fireBlast(x,y,H+0.6,R*S3*0.75,0.6);
       FX.flashLight(x,y,H+0.8,'#ffb347',8,24,0.45);
       ring(x,y,'#ffffff',R*0.55,0.22,H+0.06);ring(x,y,'#ffd27a',R,0.35,H+0.05);ring(x,y,'#ff8a2a',R*1.5,0.5,H+0.05);
       // พื้นแตกเป็นใยกว้าง (ร่องดำ + ไฟลุกตามรอยแล้วค่อย ๆ ดับ) + พื้นไหม้ + ก้อนหินกระเด็น 3 มิติ + เสาไฟพุ่งจากพื้นหลายต้น (รอบ Pyro 2026-10-19)
-      fireCrackWeb(x,y,0.02,R*1.7,3.4,{n:12,w:0.16,burn:1.7,burnT:2.6});scorch(x,y,0.02,R*1.15,2.8);
+      fireCrackWeb(x,y,0.02,R*1.7,3.4,sq?{n:12,w:0.16}:{n:12,w:0.16,burn:1.7,burnT:2.6});   // ไฟ Blender มีวงไฟแล้ว → รอยแตกดำเฉย ๆscorch(x,y,0.02,R*1.15,2.8);
       rockChunks(x,y,0.02,18,11,{r:R*0.35,s:1.5,life:1.5});
-      fireGeyser(x,y,0.02,8.5,1.2,0.75,0);
-      for(let i=0;i<4;i++){const an=i/4*6.283+rnd(-0.3,0.3),d=R*rnd(0.45,0.95);fireGeyser(x+Math.cos(an)*d,y+Math.sin(an)*d,0.02,rnd(4,6.5),rnd(0.65,0.9),rnd(0.55,0.7),0.05+i*0.035);}
+      if(!sq)fireGeyser(x,y,0.02,8.5,1.2,0.75,0);
+      if(!sq)for(let i=0;i<4;i++){const an=i/4*6.283+rnd(-0.3,0.3),d=R*rnd(0.45,0.95);fireGeyser(x+Math.cos(an)*d,y+Math.sin(an)*d,0.02,rnd(4,6.5),rnd(0.65,0.9),rnd(0.55,0.7),0.05+i*0.035);}
       // สะบัดปีกไฟออกตอนกระแทก: ปีก shader กางพรึ่บออกกว้างแล้วจางหาย
       {const o=PM3.get(ev.id),W=makeFireWings();if(W){W.position.set(tx(x),H+GY(x,y)+1.2,tz(y));W.rotation.y=o?o.g.rotation.y:0;W.scale.setScalar(1.0);
         fireTemp(W,[W.userData.mat],0.5,(v,k)=>{poseFireWings(W,1,-0.25+0.5*k,0);W.scale.setScalar(1+k*0.8);W.userData.mat.uniforms.uOp.value=1-k;W.userData.mat.uniforms.uHeat.value=0.25-0.4*k;});}}
       {const o=PM3.get(ev.id),fa=o?-o.g.rotation.y+Math.PI/2:0;for(const sd of [-1,1])for(let i=0;i<14;i++){const an=fa+sd*Math.PI/2+rnd(-0.5,0.5);flame(x,y,H+rnd(0.5,1.8),{vx:Math.cos(an)*rnd(250,420),vy:Math.sin(an)*rnd(250,420),vh:rnd(1,4),life:0.35,size:rnd(10,14),drag:4});}}
       // เสาไฟพุ่งขึ้นกลางจุดกระแทก
-      for(let i=0;i<46;i++){const an=rnd(0,6.283),r=rnd(0,R*0.3);PARTS.push({x:x+Math.cos(an)*r,y:y+Math.sin(an)*r,h:H+rnd(0,0.4),vx:Math.cos(an)*rnd(5,30),vy:Math.sin(an)*rnd(5,30),vh:rnd(9,18),life:rnd(0.35,0.6),max:0.6,col:i%3===0?'#fff4c8':i%3===1?'#ffb347':'#ff5a1a',size:rnd(3.5,6),g:-1,drag:2.5,grow:0.6});}
+      if(!sq)for(let i=0;i<46;i++){const an=rnd(0,6.283),r=rnd(0,R*0.3);PARTS.push({x:x+Math.cos(an)*r,y:y+Math.sin(an)*r,h:H+rnd(0,0.4),vx:Math.cos(an)*rnd(5,30),vy:Math.sin(an)*rnd(5,30),vh:rnd(9,18),life:rnd(0.35,0.6),max:0.6,col:i%3===0?'#fff4c8':i%3===1?'#ffb347':'#ff5a1a',size:rnd(3.5,6),g:-1,drag:2.5,grow:0.6});}
       // คลื่นไฟแผ่ราบไปตามพื้น
-      for(let i=0;i<40;i++){const an=i/40*6.283+rnd(-0.08,0.08),v=R*rnd(2.6,3.4);PARTS.push({x:x+Math.cos(an)*12,y:y+Math.sin(an)*12,h:H+0.2,vx:Math.cos(an)*v,vy:Math.sin(an)*v,vh:rnd(0.5,2),life:0.4,max:0.4,col:i%2?'#ff7a1a':'#ffc04a',size:rnd(3.5,5),g:0,drag:4,grow:0.9});}
+      if(!sq)for(let i=0;i<40;i++){const an=i/40*6.283+rnd(-0.08,0.08),v=R*rnd(2.6,3.4);PARTS.push({x:x+Math.cos(an)*12,y:y+Math.sin(an)*12,h:H+0.2,vx:Math.cos(an)*v,vy:Math.sin(an)*v,vh:rnd(0.5,2),life:0.4,max:0.4,col:i%2?'#ff7a1a':'#ffc04a',size:rnd(3.5,5),g:0,drag:4,grow:0.9});}
       // เศษหินกระเด็น
       for(let i=0;i<18;i++){const an=rnd(0,6.283),v=rnd(80,R*2);PARTS.push({x:x+Math.cos(an)*rnd(5,R*0.4),y:y+Math.sin(an)*rnd(5,R*0.4),h:H+0.1,vx:Math.cos(an)*v,vy:Math.sin(an)*v,vh:rnd(5,10),life:rnd(0.5,0.7),max:0.7,col:i%2?'#4a3a30':'#2a221c',size:rnd(2.4,3.6),g:22,drag:0.5});}
       burst(x,y,'#ffb347',36,R*2.4,0.45,2.4,{h:H+0.2,vh:[2,7],g:6});burst(x,y,'#fff0b0',20,R*1.6,0.3,1.8,{h:H+0.2,vh:[4,9],g:5});

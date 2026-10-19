@@ -88,3 +88,4 @@ The user asked that the next session **open by asking these questions** (one sho
 6. **อยากทำอะไรต่อ?** ตัวเลือกที่เคยคุยไว้: แผนที่ย่อมุมซ้ายล่าง • เลือกตราบ้าน (กริฟฟินดอร์ ฯลฯ) ในหน้าแรก • บอสใหม่ (บาซิลิสก์) • แผนที่ใหม่ (ฮอกส์มี้ด / ห้องโถงใหญ่) • ช่องลับ+มินิเกมภารกิจในโหมดโวลเดอมอร์ • ชุดแต่งตัว • เล่นบนมือถือ
 
 Then do the work, keep replying in Thai, and update this file at the end (CLAUDE.md rule).
+> **🔥 Dragonfall from the user's sketch (2026-10-20):** impact = baked `df_impact` (column + rolling ring + edge fire) — user approved the Blender shape; dive = baked comet `df_dive` along the dive line via `fireSeqLine`. In-game look waiting for the user's play-test. Take-off/flight still the old look.

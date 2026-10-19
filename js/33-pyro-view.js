@@ -93,7 +93,7 @@ function fireShieldFX(o,p,on,dt){
 function pyroFX(o,p,pz,now,dt){
   const a=p.a||0,ca=Math.cos(a),sa=Math.sin(a);
   o.pyroOn=getKit(p.id).path===0;
-  if(o.pyroOn&&!FSEQ.fire_column)fireSeqLoad('fire_column');   // เสาไฟ bake (2.8 MB) โหลดเมื่อมีสาย Pyro ในเกมเท่านั้น
+  if(o.pyroOn&&!FSEQ.fire_column){fireSeqLoad('fire_column');fireSeqLoad('df_impact');fireSeqLoad('df_dive');}   // เสาไฟ bake (2.8 MB) โหลดเมื่อมีสาย Pyro ในเกมเท่านั้น
   dragonfallFX(o,p,pz,now,dt);
   // ชาร์จลูกไฟ (กดค้าง): อนุภาคไฟถูกดูดเข้ามารวมเป็นลูกไฟที่ปลายไม้ / Kindle พร้อม: ไฟลุกที่ปลายไม้
   // ชาร์จเต็ม: แฟลชครั้งเดียว + วงไฟ บอกว่าเต็มแล้ว

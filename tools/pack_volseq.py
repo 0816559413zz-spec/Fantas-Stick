@@ -1,6 +1,6 @@
 # Pack a baked fire volume sequence (assets/src/fire_volseq_build.py) into one looping 3D texture file.
-#   python tools/pack_volseq.py <dumpdir> <out.bin> [frames=48] [xfade=12] [scale=1]
-#   xfade 0 = one-shot (plays once) • scale < 1 shrinks the grid (smaller file)
+#   python tools/pack_volseq.py <dumpdir> <out.bin> [frames=48] [xfade=12] [scale=1] [step=1]
+#   xfade 0 = one-shot (plays once) • scale < 1 shrinks the grid (smaller file) • step 2 = every 2nd sim frame (play at fps/2)
 # Layout: frames side by side along X -> texture (W = nx*frames, H = ny, D = nz), uint8, x fastest then y then z (z = up).
 # A .json next to the .bin holds {nx,ny,nz,frames}.
 import sys, os, json
@@ -9,9 +9,10 @@ d, out = sys.argv[1], sys.argv[2]
 N = int(sys.argv[3]) if len(sys.argv) > 3 else 48
 XF = int(sys.argv[4]) if len(sys.argv) > 4 else 12
 SC = float(sys.argv[5]) if len(sys.argv) > 5 else 1.0
+ST = int(sys.argv[6]) if len(sys.argv) > 6 else 1
 m = json.load(open(os.path.join(d, 'seq.json')))
 nx, ny, nz = m['res']; f0 = m['first']
-load = lambda i: np.fromfile(os.path.join(d, 'f%04d.f32' % (f0 + i)), dtype=np.float32).reshape(nz, ny, nx)
+load = lambda i: np.fromfile(os.path.join(d, 'f%04d.f32' % (f0 + i * ST)), dtype=np.float32).reshape(nz, ny, nx)
 F = [load(XF + k) for k in range(N)]
 for k in range(N - XF, N):          # loop: the last frames fade into the ones just before the first
     w = (k - (N - XF) + 1) / (XF + 1)
