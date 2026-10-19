@@ -116,7 +116,7 @@ Play a game sound (names from SFXN in js/18-audio.js).
 | `speed` | num | `[3,8]` | 0–60 | สุ่มช่วง · สูตร | ความเร็ว (ม./วิ) |
 | `up` | num | `0` | -20–30 | สุ่มช่วง | ความเร็วขึ้น (ม./วิ) |
 | `plife` | num | `[0.4,0.8]` | 0.05–6 | สุ่มช่วง | อายุเม็ด (วิ) |
-| `look` | enum (glow/spark/streak/ring/flake/smoke/fire/ember) | `spark` |  |  | หน้าตาเม็ด |
+| `look` | enum (glow/spark/streak/ring/flake/smoke/fire/ember/model) | `spark` |  |  | หน้าตาเม็ด |
 | `size` | num | `[2,3]` | 0.3–30 | สุ่มช่วง · สูตร | ขนาดเม็ด (8 ≈ 1 ม.) |
 | `grow` | num | `0` | -2–4 |  | โตขึ้นต่อวินาที |
 | `col` | col | `$core` |  |  | สีตอนเกิด |
@@ -127,6 +127,11 @@ Play a game sound (names from SFXN in js/18-audio.js).
 | `fin` | num | `8` | 0–40 |  | จางเข้าตอนเกิด |
 | `curl` | bool | `true` |  |  | ลมหมุนวน |
 | `fb` | str | `` |  |  | ภาพของเม็ด: tex/<ชื่อ> (ทุก look) หรือ smoke/fire (manifest) |
+| `model` | str | `` |  |  | โมเดล (look=model) — look "model":  each particle is a studio model (assets/fx/mesh) — rocks, shards, feathers |
+| `mmat` | enum (solid/ice/glow) | `solid` |  |  | วัสดุเศษ (look=model) |
+| `msize` | num | `[0.25,0.5]` | 0.02–5 | สุ่มช่วง | ขนาดเศษ ม. (look=model) |
+| `bounce` | num | `0.35` | 0–1 |  | เด้งพื้น (look=model, 0 = ไม่เด้ง) |
+| `mspin` | num | `360` | 0–1440 |  | หมุน องศา/วิ (look=model) |
 
 ### `mesh` ⬢ รูปทรง 3D
 3D shape with a shader material — fireballs, shells, domes, cones, crescents, spikes, beams, Blender models.
@@ -141,7 +146,7 @@ Play a game sound (names from SFXN in js/18-audio.js).
 | `wk` | num | `0.6` | 0.05–2 |  | ความกว้าง (เสี้ยว/ริบบิ้น) |
 | `prof` | list | `[[0.2,0],[1,0.4],[0.6,1],[0,1.3]]` |  |  | เส้นโปรไฟล์ [รัศมี,สูง] (lathe) |
 | `path` | list | `[[0,0,0],[0,1,2],[0,0,4]]` |  |  | เส้นทาง [x,y,z] (ribbon) |
-| `mat` | enum (energy/fire/ice/glow/solid/flip) | `energy` |  |  | วัสดุ |
+| `mat` | enum (energy/fire/ice/glow/solid/flip/tex) | `energy` |  |  | วัสดุ |
 | `col` | col | `$main` |  |  | สีหลัก |
 | `col2` | col | `$deep` |  |  | สีขอบ/ท้าย |
 | `scale` | vec3 | `1` | 0–30 | เส้นโค้ง · สูตร | ขนาด (ม. หรือ [x,y,z]) |
@@ -159,6 +164,11 @@ Play a game sound (names from SFXN in js/18-audio.js).
 | `mode` | enum (auto/ball/sheet) | `auto` |  |  | แบบไฟ |
 | `bill` | bool | `false` |  |  | หันหากล้อง |
 | `tex` | str | `` |  |  | ภาพ (mat=flip): tex/<ชื่อ> = ภาพที่วาดในสตูดิโอ หรือชื่อใน manifest |
+| `uvTile` | list | `[1,1]` |  |  | ปูภาพกี่ซ้ำ [u,v] (mat=tex) |
+| `uvScroll` | list | `[0,0]` |  |  | ภาพไหลกี่รอบ/วิ [u,v] (mat=tex) |
+| `grow` | num | `1` | 0–1 | เส้นโค้ง | งอก 0→1 (โมเดล: ทีละชิ้น) — shape model only: each piece (spike, copy, feather) grows from its own base; use a curve {"0": 0,"0.4": 1} |
+| `stagger` | num | `0.7` | 0–0.98 |  | ไล่ทีละชิ้น (0 = พร้อมกัน) |
+| `growBy` | enum (center/order/random/height) | `center` |  |  | ลำดับงอก: จากกลางออก / ตามลำดับ / สุ่ม / ล่างขึ้นบน |
 
 ### `firevol` 🔥 ไฟ 3 มิติจริง
 Volumetric raymarched fire (fireVol): pillars, walls of fire, shells around a body.
@@ -258,6 +268,37 @@ Fire geyser column from the ground (fireGeyser).
 | `hgt` | num | `8` | 1–30 | สูตร | สูง (ม.) |
 | `w` | num | `1.2` | 0.2–6 | สูตร | กว้าง (ม.) |
 
+### `vol` 🔥 ไฟ 3 มิติจากการจำลอง
+Baked 3D fire volume played with the game's raymarcher (fireSeqVol): studio-made (🔥 tab, src vol/<name>) or Blender-baked files in assets/vfx (fire_column, df_impact). loop = endless column; one-shot volumes play over the layer life (set life = frames / fps).
+
+| ฟิลด์ | ชนิด | ค่าเริ่ม | ช่วง | รับ | ความหมาย |
+|---|---|---|---|---|---|
+| `src` | str | `` |  |  | ไฟ 3D: vol/<ชื่อ> (ทำในสตูดิโอ) หรือชื่อไฟล์ bake จาก Blender (fire_column, df_impact) |
+| `hx` | num | `1` | 0.05–20 | สูตร | กว้างครึ่ง (ม.) |
+| `hz` | num | `1` | 0.05–20 | สูตร | หนาครึ่ง (ม.) |
+| `h` | num | `3` | 0.1–40 | สูตร | สูง (ม.) |
+| `fps` | int | `24` | 4–60 |  | เฟรม/วิ |
+| `speed` | num | `1` | 0.1–4 |  | ความเร็วเล่น |
+| `int` | num | `1.15` | 0.2–2.5 | เส้นโค้ง | ความสว่าง |
+| `den` | num | `1.2` | 0.2–3 |  | ความหนาแน่น |
+| `dis` | num | `{"0":0,"1":1,"0.75":0}` | 0–1 | เส้นโค้ง | ดับ (0–1) |
+| `hgt` | num | `{"0":0.05,"0.12":1}` | 0–1 | เส้นโค้ง | ตัดความสูง (0–1) |
+| `rand` | bool | `true` |  |  | เริ่มเฟรมสุ่ม (วนเฟรม) |
+| `once` | bool | `false` |  |  | เล่นครั้งเดียว (ระเบิด) — ปิด = วนเฟรม (เสาไฟ) |
+
+### `warp` ≋ อากาศบิดเบี้ยว
+Screen-space distortion: rising heat haze, an expanding shockwave that bends the image, or a lens bulge. Needs medium/high graphics (hidden on low), like the game's heat haze.
+
+| ฟิลด์ | ชนิด | ค่าเริ่ม | ช่วง | รับ | ความหมาย |
+|---|---|---|---|---|---|
+| `kind` | enum (haze/shock/bulge) | `haze` |  |  | แบบ: ไอร้อน / คลื่นกระแทก / เลนส์โป่ง |
+| `size` | num | `2.5` | 0.2–40 | เส้นโค้ง · สูตร | ขนาด (ม.) |
+| `str` | num | `1` | 0–4 | เส้นโค้ง | ความแรงการบิด |
+| `op` | num | `1` | 0–1 | เส้นโค้ง | ความเข้ม (จางเข้า/ออก) |
+| `col` | col | `#ff7a3a` |  |  | สีอมเล็กน้อย |
+| `glow` | num | `0.06` | 0–1 |  | สีอม (0 = ใส) |
+| `flat` | bool | `false` |  |  | นอนบนพื้น (shock) |
+
 ### `use` ⧉ ใส่เอฟเฟกต์อื่น
 Play another .fx.json inside this one (prefab), with its own params/scale/palette.
 
@@ -278,10 +319,10 @@ Escape hatch: call a registered helper (FXCODE in js/45-fx-runtime.js) with args
 
 ## ตัวเลือกของ enum
 - รูปทรง (shape): sphere, dome, disc, ring, cylinder, cone, torus, crescent, spikes, beam, plane, lathe, ribbon, glb, model
-- วัสดุ (mat): energy, fire, ice, glow, solid, flip — energy = ขอบเรือง+ลายไหล (สีจากจาน) • fire = shader ไฟของเกม • ice = shader น้ำแข็ง • glow = สีเรียบบวกแสง • solid = ทึบ • flip = ภาพ flipbook
+- วัสดุ (mat): energy, fire, ice, glow, solid, flip, tex — energy = ขอบเรือง+ลายไหล (สีจากจาน) • fire = shader ไฟของเกม • ice = shader น้ำแข็ง • glow = สีเรียบบวกแสง • solid = ทึบ • flip = ภาพ flipbook
 - ปล่อยจาก (from): point, sphere, hemisphere, ring, disc, cone, box, line, mesh
 - ทิศ (dir): out, flat, up, down, in, aim, tangent, random — flat = กระจายแนวนอน (ความเร็วขึ้นจาก up)
-- หน้าตาเม็ด (look): glow, spark, streak, ring, flake, smoke, fire, ember
+- หน้าตาเม็ด (look): glow, spark, streak, ring, flake, smoke, fire, ember, model
 - ยึดกับ (att): point, ground, feet, chest, head, wand
 
 ## โมเดลที่ปั้นเอง — `assets/fx/mesh/<ชื่อ>.mesh.json` (แท็บ 🧊 โมเดล ในสตูดิโอ)
@@ -530,7 +571,7 @@ Box centred at the origin.
 |---|---|---|---|---|---|
 | `v` | int | `1` |  |  | เวอร์ชันรูปแบบไฟล์ |
 | `desc` | str | `` |  |  | คำอธิบาย |
-| `gen` | enum (fire/smoke/explosion/electric/vortex/shock/burst/slash/flare/glow/ring/circle/noise/sim) | `fire` |  |  | ตัววาด |
+| `gen` | enum (image/fire/smoke/explosion/electric/vortex/shock/burst/slash/flare/glow/ring/circle/noise/sim) | `fire` |  |  | ตัววาด |
 | `p` | obj | `{}` |  |  | ค่าของตัววาด (ดู gens) |
 | `seed` | int | `1` | 1–9999 |  | เลขสุ่ม |
 | `px` | enum (32/64/128/256) | `128` |  |  | ความละเอียดต่อเฟรม (px) |
@@ -712,6 +753,13 @@ Tileable noise mask: 0 = cloudy, 1 = ridged (veins/lightning web), 2 = cells (sc
 | `detail` | int | `5` | 1–6 |  | รายละเอียด |
 | `contrast` | num | `1.2` | 0.3–4 |  | คมชัด |
 
+#### `image` 🖼 ภาพที่นำเข้าเอง — kind `loop` • ตาราง 1×1 • จานสี `white` • เรืองแสง
+Your own picture or sprite sheet (PNG/JPG, drawn anywhere). One file = set cols × rows to its frame grid; several files = packed into frames in name order. The .png is the source (no generator).
+
+| ฟิลด์ | ชนิด | ค่าเริ่ม | ช่วง | รับ | ความหมาย |
+|---|---|---|---|---|---|
+
+
 #### `sim` ♨ จำลองของไหลจริง (ไฟ / ควัน) — kind `loop` • ตาราง 8×8 • จานสี `fire` • เรืองแสง
 Real 2D fluid simulation (stable fluids with buoyancy + vorticity) — like Blender Mantaflow but in seconds. mode 0 = fire, 1 = smoke. loop crossfades the end into the start.
 
@@ -727,6 +775,43 @@ Real 2D fluid simulation (stable fluids with buoyancy + vorticity) — like Blen
 | `steps` | int | `2` | 1–4 |  | ช่วงเวลาต่อเฟรม |
 
 ภาพ (.png) ต้องวาดในสตูดิโอ (GPU / จำลองของไหล): แก้ `.tex.json` แล้วเปิด `studio.html?tex=<ชื่อ>&bake=1` = วาดใหม่ + บันทึก .png ให้เอง (ต้องเปิดผ่าน `python tools/serve.py`) • ใช้ในเอฟเฟกต์: `{"t":"emit","fb":"tex/<ชื่อ>","col":"#ffffff",...}` หรือการ์ดภาพ `{"t":"mesh","shape":"plane","bill":true,"mat":"flip","tex":"tex/<ชื่อ>","col":"#ffffff"}`
+
+## ไฟ 3 มิติที่จำลองเอง — `assets/fx/vol/<ชื่อ>.vol.json` + `.bin` (แท็บ 🔥 ไฟ 3D ในสตูดิโอ)
+ไฟ 3 มิติที่จำลองในสตูดิโอ (แท็บ 🔥 ไฟ 3D) assets/fx/vol/<ชื่อ>.vol.json (สูตร + nx ny nz frames) + <ชื่อ>.bin (ข้อมูลไฟ uint8 รูปแบบเดียวกับ tools/pack_volseq.py) • ใช้: ชั้น vol {"src":"vol/<ชื่อ>"}
+
+### ไฟล์ .vol.json
+| ฟิลด์ | ชนิด | ค่าเริ่ม | ช่วง | รับ | ความหมาย |
+|---|---|---|---|---|---|
+| `v` | int | `1` |  |  | เวอร์ชัน |
+| `desc` | str | `` |  |  | คำอธิบาย |
+| `mode` | enum (column/burst) | `column` |  |  | column = ไฟลุกวนต่อเนื่อง • burst = ระเบิดไฟครั้งเดียว |
+| `res` | int | `24` | 16–40 |  | ความละเอียด (กว้าง; สูง = ×2) |
+| `frames` | int | `32` | 8–64 |  | จำนวนเฟรม |
+| `xfade` | int | `10` | 0–24 |  | เฟดต่อวน (column) |
+| `seed` | int | `1` | 1–9999 |  | เลขสุ่ม |
+| `p` | obj | `{}` |  |  | ค่าการจำลอง (ดู params) |
+| `nx` | int | `0` |  |  | (เขียนเองตอนบันทึก) |
+| `ny` | int | `0` |  |  | (เขียนเองตอนบันทึก) |
+| `nz` | int | `0` |  |  | (เขียนเองตอนบันทึก) |
+| `tags` | list | `[]` |  |  | แท็ก |
+### ค่าการจำลอง (ใส่ใน `p`)
+| ฟิลด์ | ชนิด | ค่าเริ่ม | ช่วง | รับ | ความหมาย |
+|---|---|---|---|---|---|
+| `shape` | enum (ball/disc/ring/line) | `ball` |  |  | รูปต้นไฟ: ก้อน / แผ่น / วงแหวน / แนวยาว |
+| `size` | num | `0.32` | 0.05–0.45 |  | ขนาดต้นไฟ (สัดส่วนความกว้าง) |
+| `buoy` | num | `1` | 0–3 |  | ลอยขึ้น |
+| `vort` | num | `1.2` | 0–4 |  | ม้วนตัว |
+| `turb` | num | `0.8` | 0–3 |  | ปั่นป่วน |
+| `cool` | num | `0.7` | 0.1–2 |  | ดับเร็ว (เปลวสั้น) |
+| `burst` | num | `0` | 0–4 |  | แรงระเบิดออก (burst) |
+| `emitT` | num | `0.25` | 0.02–1 |  | ต้นไฟติดนานแค่ไหน (burst, สัดส่วน) |
+| `wind` | num | `0` | -2–2 |  | ลมข้าง |
+| `detail` | num | `0.8` | 0–1.6 |  | รายละเอียดลิ้นเปลว |
+| `flick` | num | `0.5` | 0–1 |  | สั่นไหว |
+| `steps` | int | `2` | 1–4 |  | ช่วงเวลาต่อเฟรม |
+| `warm` | int | `40` | 0–150 |  | อุ่นเครื่องก่อนเก็บ (column) |
+
+ข้อมูล .bin ต้องจำลองในสตูดิโอ: `studio.html?vol=<ชื่อ>` แล้ว `STUDIO.vol.bake()` + `STUDIO.vol.save()` • ใช้ในเอฟเฟกต์: `{"t":"vol","src":"vol/<ชื่อ>","hx":0.9,"hz":0.9,"h":3.6}` (ระเบิด: `"once":true`) • ไฟล์ bake จาก Blender ใน assets/vfx ก็ใช้ชั้นเดียวกัน: `"src":"fire_column"`
 
 ## ผูกกับเกม — `assets/fx/bind.json`
 assets/fx/bind.json — ผูกเหตุการณ์ของเกมกับเอฟเฟกต์ โดยไม่แก้โค้ดสกิล

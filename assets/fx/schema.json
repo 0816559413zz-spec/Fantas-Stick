@@ -85,7 +85,12 @@
       "spin": {"type": "num", "def": 0, "min": 0, "max": 20, "step": 0.5, "th": "หมุน (เรเดียน/วิ)"},
       "fin": {"type": "num", "def": 8, "min": 0, "max": 40, "step": 1, "th": "จางเข้าตอนเกิด"},
       "curl": {"type": "bool", "def": true, "th": "ลมหมุนวน"},
-      "fb": {"type": "str", "def": "", "th": "ภาพของเม็ด: tex/<ชื่อ> (ทุก look) หรือ smoke/fire (manifest)"}}},
+      "fb": {"type": "str", "def": "", "th": "ภาพของเม็ด: tex/<ชื่อ> (ทุก look) หรือ smoke/fire (manifest)"},
+      "model": {"type": "str", "def": "", "th": "โมเดล (look=model)", "desc": "look \"model\":  each particle is a studio model (assets/fx/mesh) — rocks, shards, feathers"},
+      "mmat": {"type": "enum", "of": ["solid", "ice", "glow"], "def": "solid", "th": "วัสดุเศษ (look=model)"},
+      "msize": {"type": "num", "def": [0.25,0.5], "min": 0.02, "max": 5, "step": 0.01, "range": true, "th": "ขนาดเศษ ม. (look=model)"},
+      "bounce": {"type": "num", "def": 0.35, "min": 0, "max": 1, "step": 0.01, "th": "เด้งพื้น (look=model, 0 = ไม่เด้ง)"},
+      "mspin": {"type": "num", "def": 360, "min": 0, "max": 1440, "step": 10, "th": "หมุน องศา/วิ (look=model)"}}},
     "mesh": {"th": "รูปทรง 3D", "desc": "3D shape with a shader material — fireballs, shells, domes, cones, crescents, spikes, beams, Blender models.", "icon": "⬢", "fields": {
       "shape": {"type": "enum", "of": "shapes", "def": "sphere", "th": "รูปทรง"},
       "glb": {"type": "str", "def": "", "th": "โมเดล (ชื่อใน manifest)"},
@@ -112,7 +117,12 @@
       "flow": {"type": "vec3", "def": [0, 1, 0], "th": "ทิศไฟไหล"},
       "mode": {"type": "enum", "of": ["auto", "ball", "sheet"], "def": "auto", "th": "แบบไฟ"},
       "bill": {"type": "bool", "def": false, "th": "หันหากล้อง"},
-      "tex": {"type": "str", "def": "", "th": "ภาพ (mat=flip): tex/<ชื่อ> = ภาพที่วาดในสตูดิโอ หรือชื่อใน manifest"}}},
+      "tex": {"type": "str", "def": "", "th": "ภาพ (mat=flip): tex/<ชื่อ> = ภาพที่วาดในสตูดิโอ หรือชื่อใน manifest"},
+      "uvTile": {"type": "list", "def": [1,1], "th": "ปูภาพกี่ซ้ำ [u,v] (mat=tex)"},
+      "uvScroll": {"type": "list", "def": [0,0], "th": "ภาพไหลกี่รอบ/วิ [u,v] (mat=tex)"},
+      "grow": {"type": "num", "def": 1, "min": 0, "max": 1, "step": 0.01, "curve": true, "th": "งอก 0→1 (โมเดล: ทีละชิ้น)", "desc": "shape model only: each piece (spike, copy, feather) grows from its own base; use a curve {\"0\": 0,\"0.4\": 1}"},
+      "stagger": {"type": "num", "def": 0.7, "min": 0, "max": 0.98, "step": 0.01, "th": "ไล่ทีละชิ้น (0 = พร้อมกัน)"},
+      "growBy": {"type": "enum", "of": ["center", "order", "random", "height"], "def": "center", "th": "ลำดับงอก: จากกลางออก / ตามลำดับ / สุ่ม / ล่างขึ้นบน"}}},
     "firevol": {"th": "ไฟ 3 มิติจริง", "desc": "Volumetric raymarched fire (fireVol): pillars, walls of fire, shells around a body.", "icon": "🔥", "fields": {
       "kind": {"type": "enum", "of": ["pillar", "wall", "shell"], "def": "pillar", "th": "แบบ"},
       "hx": {"type": "num", "def": 0.8, "min": 0.1, "max": 20, "step": 0.05, "expr": true, "th": "กว้างครึ่ง (ม.)"},
@@ -171,6 +181,27 @@
     "geyser": {"th": "เสาไฟพุ่ง", "desc": "Fire geyser column from the ground (fireGeyser).", "icon": "⇧", "fields": {
       "hgt": {"type": "num", "def": 8, "min": 1, "max": 30, "step": 0.1, "expr": true, "th": "สูง (ม.)"},
       "w": {"type": "num", "def": 1.2, "min": 0.2, "max": 6, "step": 0.05, "expr": true, "th": "กว้าง (ม.)"}}},
+    "vol": {"th": "ไฟ 3 มิติจากการจำลอง", "desc": "Baked 3D fire volume played with the game's raymarcher (fireSeqVol): studio-made (🔥 tab, src vol/<name>) or Blender-baked files in assets/vfx (fire_column, df_impact). loop = endless column; one-shot volumes play over the layer life (set life = frames / fps).", "icon": "🔥", "fields": {
+      "src": {"type": "str", "def": "", "th": "ไฟ 3D: vol/<ชื่อ> (ทำในสตูดิโอ) หรือชื่อไฟล์ bake จาก Blender (fire_column, df_impact)"},
+      "hx": {"type": "num", "def": 1, "min": 0.05, "max": 20, "step": 0.05, "expr": true, "th": "กว้างครึ่ง (ม.)"},
+      "hz": {"type": "num", "def": 1, "min": 0.05, "max": 20, "step": 0.05, "expr": true, "th": "หนาครึ่ง (ม.)"},
+      "h": {"type": "num", "def": 3, "min": 0.1, "max": 40, "step": 0.1, "expr": true, "th": "สูง (ม.)"},
+      "fps": {"type": "int", "def": 24, "min": 4, "max": 60, "step": 1, "th": "เฟรม/วิ"},
+      "speed": {"type": "num", "def": 1, "min": 0.1, "max": 4, "step": 0.05, "th": "ความเร็วเล่น"},
+      "int": {"type": "num", "def": 1.15, "min": 0.2, "max": 2.5, "step": 0.05, "curve": true, "th": "ความสว่าง"},
+      "den": {"type": "num", "def": 1.2, "min": 0.2, "max": 3, "step": 0.05, "th": "ความหนาแน่น"},
+      "dis": {"type": "num", "def": {"0": 0, "1": 1, "0.75": 0}, "min": 0, "max": 1, "step": 0.01, "curve": true, "th": "ดับ (0–1)"},
+      "hgt": {"type": "num", "def": {"0": 0.05, "0.12": 1}, "min": 0, "max": 1, "step": 0.01, "curve": true, "th": "ตัดความสูง (0–1)"},
+      "rand": {"type": "bool", "def": true, "th": "เริ่มเฟรมสุ่ม (วนเฟรม)"},
+      "once": {"type": "bool", "def": false, "th": "เล่นครั้งเดียว (ระเบิด) — ปิด = วนเฟรม (เสาไฟ)"}}},
+    "warp": {"th": "อากาศบิดเบี้ยว", "desc": "Screen-space distortion: rising heat haze, an expanding shockwave that bends the image, or a lens bulge. Needs medium/high graphics (hidden on low), like the game's heat haze.", "icon": "≋", "fields": {
+      "kind": {"type": "enum", "of": ["haze", "shock", "bulge"], "def": "haze", "th": "แบบ: ไอร้อน / คลื่นกระแทก / เลนส์โป่ง"},
+      "size": {"type": "num", "def": 2.5, "min": 0.2, "max": 40, "step": 0.1, "curve": true, "expr": true, "th": "ขนาด (ม.)"},
+      "str": {"type": "num", "def": 1, "min": 0, "max": 4, "step": 0.05, "curve": true, "th": "ความแรงการบิด"},
+      "op": {"type": "num", "def": 1, "min": 0, "max": 1, "step": 0.01, "curve": true, "th": "ความเข้ม (จางเข้า/ออก)"},
+      "col": {"type": "col", "def": "#ff7a3a", "th": "สีอมเล็กน้อย"},
+      "glow": {"type": "num", "def": 0.06, "min": 0, "max": 1, "step": 0.01, "th": "สีอม (0 = ใส)"},
+      "flat": {"type": "bool", "def": false, "th": "นอนบนพื้น (shock)"}}},
     "use": {"th": "ใส่เอฟเฟกต์อื่น", "desc": "Play another .fx.json inside this one (prefab), with its own params/scale/palette.", "icon": "⧉", "fields": {
       "fx": {"type": "str", "def": "", "th": "ชื่อเอฟเฟกต์"},
       "s": {"type": "num", "def": 1, "min": 0.1, "max": 5, "step": 0.05, "expr": true, "th": "ขนาด"},
@@ -181,12 +212,12 @@
       "args": {"type": "obj", "def": {}, "th": "ค่าที่ส่ง"}}}
   },
   "shapes": ["sphere", "dome", "disc", "ring", "cylinder", "cone", "torus", "crescent", "spikes", "beam", "plane", "lathe", "ribbon", "glb", "model"],
-  "mats": ["energy", "fire", "ice", "glow", "solid", "flip"],
+  "mats": ["energy", "fire", "ice", "glow", "solid", "flip", "tex"],
   "froms": ["point", "sphere", "hemisphere", "ring", "disc", "cone", "box", "line", "mesh"],
   "dirs": ["out", "flat", "up", "down", "in", "aim", "tangent", "random"],
-  "looks": ["glow", "spark", "streak", "ring", "flake", "smoke", "fire", "ember"],
+  "looks": ["glow", "spark", "streak", "ring", "flake", "smoke", "fire", "ember", "model"],
   "mkparts": ["shard", "crown", "cluster", "burst", "blade", "fan", "spiral", "tube", "ribbon", "lathe", "sphere", "cyl", "torus", "disc", "star", "box"],
-  "txgens": ["fire", "smoke", "explosion", "electric", "vortex", "shock", "burst", "slash", "flare", "glow", "ring", "circle", "noise", "sim"],
+  "txgens": ["image", "fire", "smoke", "explosion", "electric", "vortex", "shock", "burst", "slash", "flare", "glow", "ring", "circle", "noise", "sim"],
   "mk": {
     "about": "โมเดลที่ปั้นในสตูดิโอ assets/fx/mesh/<ชื่อ>.mesh.json = รายการชิ้นส่วน (parts) — เกมปั้นเองตอนโหลด • ใช้: ชั้น mesh {\"shape\": \"model\",\"model\": \"<ชื่อ>\"} • หน่วยเมตร +x ขวา +y บน +z หน้า • uv v: 0 โคน/ใน → 1 ปลาย/นอก (ไฟ/พลังงานไหลตาม v)",
     "file": {
@@ -287,7 +318,40 @@
       "ring": {"th": "วงแหวน", "icon": "○", "kind": "loop", "grid": 1, "ramp": "white", "add": true, "desc": "Soft ring (halo, rune ring sprite).", "fields": {"radius": {"type": "num", "def": 0.75, "min": 0.05, "max": 1, "step": 0.01, "th": "รัศมี"}, "width": {"type": "num", "def": 0.08, "min": 0.005, "max": 0.5, "step": 0.005, "th": "หนา"}, "fill": {"type": "num", "def": 0.15, "min": 0, "max": 1, "step": 0.01, "th": "แสงด้านใน"}, "noise": {"type": "num", "def": 0, "min": 0, "max": 1, "step": 0.01, "th": "ขาดเป็นช่วง"}, "scale": {"type": "num", "def": 6, "min": 0.5, "max": 20, "step": 0.1, "th": "ขนาดลาย"}}},
       "circle": {"th": "วงเวท", "icon": "⛤", "kind": "loop", "grid": 1, "ramp": "gold", "add": true, "desc": "Magic circle: rings, star polygon, tick marks and a band of runes (spin > 0 + several frames = rotating loop).", "fields": {"rings": {"type": "int", "def": 3, "min": 1, "max": 5, "step": 1, "th": "จำนวนวง"}, "points": {"type": "int", "def": 6, "min": 0, "max": 12, "step": 1, "th": "ดาว (จำนวนแฉก, 0 = ไม่มี)"}, "runes": {"type": "int", "def": 24, "min": 0, "max": 64, "step": 1, "th": "อักษรเวท"}, "width": {"type": "num", "def": 0.012, "min": 0.003, "max": 0.05, "step": 0.001, "th": "หนาเส้น"}, "spin": {"type": "int", "def": 0, "min": 0, "max": 3, "step": 1, "th": "หมุน (รอบต่อวง loop)"}}},
       "noise": {"th": "ลายนอยส์ (ต่อขอบได้)", "icon": "▒", "kind": "loop", "grid": 1, "ramp": "white", "add": true, "desc": "Tileable noise mask: 0 = cloudy, 1 = ridged (veins/lightning web), 2 = cells (scales/cracks).", "fields": {"mode": {"type": "int", "def": 0, "min": 0, "max": 2, "step": 1, "th": "แบบ: 0 เมฆ / 1 เส้นเลือด / 2 เซลล์"}, "scale": {"type": "int", "def": 4, "min": 1, "max": 16, "step": 1, "th": "ขนาดลาย"}, "detail": {"type": "int", "def": 5, "min": 1, "max": 6, "step": 1, "th": "รายละเอียด"}, "contrast": {"type": "num", "def": 1.2, "min": 0.3, "max": 4, "step": 0.05, "th": "คมชัด"}}},
+      "image": {"th": "ภาพที่นำเข้าเอง", "icon": "🖼", "kind": "loop", "grid": 1, "ramp": "white", "add": true, "desc": "Your own picture or sprite sheet (PNG/JPG, drawn anywhere). One file = set cols × rows to its frame grid; several files = packed into frames in name order. The .png is the source (no generator).", "fields": {}},
       "sim": {"th": "จำลองของไหลจริง (ไฟ / ควัน)", "icon": "♨", "kind": "loop", "grid": 8, "ramp": "fire", "add": true, "desc": "Real 2D fluid simulation (stable fluids with buoyancy + vorticity) — like Blender Mantaflow but in seconds. mode 0 = fire, 1 = smoke. loop crossfades the end into the start.", "fields": {"mode": {"type": "int", "def": 0, "min": 0, "max": 1, "step": 1, "th": "แบบ: 0 ไฟ / 1 ควัน"}, "emit": {"type": "num", "def": 0.5, "min": 0.1, "max": 1, "step": 0.01, "th": "ขนาดต้นไฟ"}, "buoy": {"type": "num", "def": 1, "min": 0, "max": 3, "step": 0.05, "th": "ลอยขึ้น"}, "vort": {"type": "num", "def": 0.6, "min": 0, "max": 3, "step": 0.05, "th": "ม้วนตัว"}, "cool": {"type": "num", "def": 0.6, "min": 0, "max": 2, "step": 0.05, "th": "ดับเร็ว"}, "wind": {"type": "num", "def": 0, "min": -2, "max": 2, "step": 0.05, "th": "ลมข้าง"}, "flick": {"type": "num", "def": 0.5, "min": 0, "max": 1, "step": 0.01, "th": "สั่นไหว"}, "steps": {"type": "int", "def": 2, "min": 1, "max": 4, "step": 1, "th": "ช่วงเวลาต่อเฟรม"}}}
+    }
+  },
+  "vx": {
+    "about": "ไฟ 3 มิติที่จำลองในสตูดิโอ (แท็บ 🔥 ไฟ 3D) assets/fx/vol/<ชื่อ>.vol.json (สูตร + nx ny nz frames) + <ชื่อ>.bin (ข้อมูลไฟ uint8 รูปแบบเดียวกับ tools/pack_volseq.py) • ใช้: ชั้น vol {\"src\":\"vol/<ชื่อ>\"}",
+    "file": {
+      "v": {"type": "int", "def": 1, "th": "เวอร์ชัน"},
+      "desc": {"type": "str", "def": "", "th": "คำอธิบาย"},
+      "mode": {"type": "enum", "of": ["column", "burst"], "def": "column", "th": "column = ไฟลุกวนต่อเนื่อง • burst = ระเบิดไฟครั้งเดียว"},
+      "res": {"type": "int", "def": 24, "min": 16, "max": 40, "step": 2, "th": "ความละเอียด (กว้าง; สูง = ×2)"},
+      "frames": {"type": "int", "def": 32, "min": 8, "max": 64, "step": 1, "th": "จำนวนเฟรม"},
+      "xfade": {"type": "int", "def": 10, "min": 0, "max": 24, "step": 1, "th": "เฟดต่อวน (column)"},
+      "seed": {"type": "int", "def": 1, "min": 1, "max": 9999, "step": 1, "th": "เลขสุ่ม"},
+      "p": {"type": "obj", "def": {}, "th": "ค่าการจำลอง (ดู params)"},
+      "nx": {"type": "int", "def": 0, "th": "(เขียนเองตอนบันทึก)"},
+      "ny": {"type": "int", "def": 0, "th": "(เขียนเองตอนบันทึก)"},
+      "nz": {"type": "int", "def": 0, "th": "(เขียนเองตอนบันทึก)"},
+      "tags": {"type": "list", "def": [], "th": "แท็ก"}
+    },
+    "params": {
+      "shape": {"type": "enum", "of": ["ball", "disc", "ring", "line"], "def": "ball", "th": "รูปต้นไฟ: ก้อน / แผ่น / วงแหวน / แนวยาว"},
+      "size": {"type": "num", "def": 0.32, "min": 0.05, "max": 0.45, "step": 0.01, "th": "ขนาดต้นไฟ (สัดส่วนความกว้าง)"},
+      "buoy": {"type": "num", "def": 1, "min": 0, "max": 3, "step": 0.05, "th": "ลอยขึ้น"},
+      "vort": {"type": "num", "def": 1.2, "min": 0, "max": 4, "step": 0.05, "th": "ม้วนตัว"},
+      "turb": {"type": "num", "def": 0.8, "min": 0, "max": 3, "step": 0.05, "th": "ปั่นป่วน"},
+      "cool": {"type": "num", "def": 0.7, "min": 0.1, "max": 2, "step": 0.05, "th": "ดับเร็ว (เปลวสั้น)"},
+      "burst": {"type": "num", "def": 0, "min": 0, "max": 4, "step": 0.05, "th": "แรงระเบิดออก (burst)"},
+      "emitT": {"type": "num", "def": 0.25, "min": 0.02, "max": 1, "step": 0.01, "th": "ต้นไฟติดนานแค่ไหน (burst, สัดส่วน)"},
+      "wind": {"type": "num", "def": 0, "min": -2, "max": 2, "step": 0.05, "th": "ลมข้าง"},
+      "detail": {"type": "num", "def": 0.8, "min": 0, "max": 1.6, "step": 0.05, "th": "รายละเอียดลิ้นเปลว"},
+      "flick": {"type": "num", "def": 0.5, "min": 0, "max": 1, "step": 0.01, "th": "สั่นไหว"},
+      "steps": {"type": "int", "def": 2, "min": 1, "max": 4, "step": 1, "th": "ช่วงเวลาต่อเฟรม"},
+      "warm": {"type": "int", "def": 40, "min": 0, "max": 150, "step": 5, "th": "อุ่นเครื่องก่อนเก็บ (column)"}
     }
   },
   "bind": {

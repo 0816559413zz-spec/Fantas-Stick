@@ -1,0 +1,10 @@
+{
+  "v": 1,
+  "desc": "ก้อนหินขรุขระก้อนเดียว (ขนาด ~1 ม.) — ใช้เป็นเศษหินกระเด็น (emit look:model)",
+  "mat": "solid",
+  "pal": "earth",
+  "tags": ["earth", "debris"],
+  "parts": [
+    {"id": "rock", "k": "sphere", "r": 0.5, "seg": 4, "noise": 0.14, "nfreq": 2.2, "flat": true, "scale": [1, 0.8, 1.1], "seed": 3}
+  ]
+}

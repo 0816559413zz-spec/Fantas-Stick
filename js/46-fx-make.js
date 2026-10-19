@@ -17,14 +17,17 @@ function mkNoise(x,y,z,s){const xi=Math.floor(x),yi=Math.floor(y),zi=Math.floor(
 const mkL=(a,b,t)=>a+(b-a)*t;
 const mkR2=v=>Array.isArray(v)?[+v[0]||0,+v[1]||0]:[+v||0,+v||0];
 // ---------- ที่เก็บจุด/สามเหลี่ยม ----------
-function mkG(){return {p:[],u:[],i:[]};}
+// G = {p ตำแหน่ง, u uv, i สามเหลี่ยม, k ชิ้นย่อยของแต่ละจุด, piv จุดหมุนของแต่ละชิ้นย่อย} — ชิ้นย่อย (หนามแต่ละแท่ง / ชิ้นที่ทำซ้ำ) ใช้ทำ "งอกทีละชิ้น" (grow)
+function mkG(){return {p:[],u:[],i:[],k:[],piv:[]};}
+function mkPc(G){const n=G.p.length/3;if(!G.k||G.k.length!==n){G.k=new Array(n).fill(0);G.piv=[[0,0,0]];}return G;}   // ยังไม่แบ่งชิ้น = ทั้งก้อนเป็นชิ้นเดียว หมุนที่จุดกำเนิด (ฐาน)
 function mkV(G,x,y,z,u,v){G.p.push(x,y,z);G.u.push(u,v);return G.p.length/3-1;}
 function mkQ(G,a,b,c,d){G.i.push(a,b,c,a,c,d);}
-function mkAppend(G,H){const o=G.p.length/3;for(const x of H.p)G.p.push(x);for(const x of H.u)G.u.push(x);for(const x of H.i)G.i.push(x+o);return G;}
-function mkCopy(G){return {p:G.p.slice(),u:G.u.slice(),i:G.i.slice()};}
-function mkFlat(G){const H=mkG();for(let k=0;k<G.i.length;k++){const j=G.i[k];H.p.push(G.p[j*3],G.p[j*3+1],G.p[j*3+2]);H.u.push(G.u[j*2],G.u[j*2+1]);H.i.push(k);}return H;}
+function mkAppend(G,H){mkPc(G);mkPc(H);const o=G.p.length/3,po=G.piv.length;for(const x of H.p)G.p.push(x);for(const x of H.u)G.u.push(x);for(const x of H.i)G.i.push(x+o);for(const x of H.k)G.k.push(x+po);for(const q of H.piv)G.piv.push(q.slice());return G;}
+function mkCopy(G){mkPc(G);return {p:G.p.slice(),u:G.u.slice(),i:G.i.slice(),k:G.k.slice(),piv:G.piv.map(q=>q.slice())};}
+function mkFlat(G){mkPc(G);const H=mkG();for(let k=0;k<G.i.length;k++){const j=G.i[k];H.p.push(G.p[j*3],G.p[j*3+1],G.p[j*3+2]);H.u.push(G.u[j*2],G.u[j*2+1]);H.k.push(G.k[j]);H.i.push(k);}H.piv=G.piv.map(q=>q.slice());return H;}
 const _mkv=new THREE.Vector3();
-function mkXf(G,m){for(let k=0;k<G.p.length;k+=3){_mkv.set(G.p[k],G.p[k+1],G.p[k+2]).applyMatrix4(m);G.p[k]=_mkv.x;G.p[k+1]=_mkv.y;G.p[k+2]=_mkv.z;}
+function mkXf(G,m){mkPc(G);for(let k=0;k<G.p.length;k+=3){_mkv.set(G.p[k],G.p[k+1],G.p[k+2]).applyMatrix4(m);G.p[k]=_mkv.x;G.p[k+1]=_mkv.y;G.p[k+2]=_mkv.z;}
+  for(const q of G.piv){_mkv.set(q[0],q[1],q[2]).applyMatrix4(m);q[0]=_mkv.x;q[1]=_mkv.y;q[2]=_mkv.z;}
   if(m.determinant()<0)for(let k=0;k<G.i.length;k+=3){const t=G.i[k+1];G.i[k+1]=G.i[k+2];G.i[k+2]=t;}return G;}
 function mkThree(geo){const P=geo.attributes.position.array,U=geo.attributes.uv?geo.attributes.uv.array:null,G=mkG();G.p=Array.from(P);G.u=U?Array.from(U):new Array(P.length/3*2).fill(0);
   G.i=geo.index?Array.from(geo.index.array):Array.from({length:P.length/3},(_,k)=>k);geo.dispose();return G;}
@@ -80,10 +83,10 @@ const MKGEN={
       R[0].push(mkV(G,c*ri,0,s*ri,t,0));R[2].push(mkV(G,c*o.r,0,s*o.r,t,1));if(o.thick>0){R[1].push(mkV(G,c*rm,th,s*rm,t,0.5));R[3].push(mkV(G,c*rm,-th,s*rm,t,0.5));}}
     if(o.thick>0)mkGrid(G,[R[0],R[1],R[2],R[3],R[0]]);else mkGrid(G,[R[0],R[2]]);return G;},
   fan(o){const G=mkG(),n=Math.max(1,o.n|0),N=Math.max(3,o.seg|0);
-    for(let i=0;i<n;i++){const f=n>1?i/(n-1):0.5,ph=(f-0.5)*o.spread*MKD,len=o.len*(1-o.lvar*Math.abs(f*2-1)),d=[Math.sin(ph),Math.cos(ph)],sd=[Math.cos(ph),-Math.sin(ph)],rows=[[],[]];
+    for(let i=0;i<n;i++){const F=mkG(),f=n>1?i/(n-1):0.5,ph=(f-0.5)*o.spread*MKD,len=o.len*(1-o.lvar*Math.abs(f*2-1)),d=[Math.sin(ph),Math.cos(ph)],sd=[Math.cos(ph),-Math.sin(ph)],rows=[[],[]];   // ขนแต่ละเส้น = ชิ้นย่อย
       for(let j=0;j<=N;j++){const t=j/N,cb=o.curve*MKD*t,L=len*t,cx=d[0]*L*Math.cos(cb),cy=d[1]*L*Math.cos(cb),cz=-L*Math.sin(cb),w=o.w*Math.pow(Math.max(0,Math.sin(Math.PI*Math.min(1,t*1.15+0.02))),0.55)*(1-(1-o.tipw)*t)*0.5;
-        rows[0].push(mkV(G,cx-sd[0]*w,cy-sd[1]*w,cz,0,t));rows[1].push(mkV(G,cx+sd[0]*w,cy+sd[1]*w,cz,1,t));}
-      mkGrid(G,rows);}
+        rows[0].push(mkV(F,cx-sd[0]*w,cy-sd[1]*w,cz,0,t));rows[1].push(mkV(F,cx+sd[0]*w,cy+sd[1]*w,cz,1,t));}
+      mkGrid(F,rows);mkAppend(G,F);}
     return G;},
   star(o){const G=mkG(),n=Math.max(2,o.n|0),c=mkV(G,0,o.h,0,0.5,0),ring=[];
     for(let i=0;i<=n*2;i++){const a=i/(n*2)*Math.PI*2,r=i%2?o.r*o.inner:o.r;ring.push(mkV(G,Math.sin(a)*r,0,Math.cos(a)*r,i/(n*2),i%2?o.inner:1));}
@@ -116,9 +119,15 @@ function mkPart(P){const o=mkOpts(P),gen=MKGEN[o.k];if(!gen)return mkG();const R
 // สูตร .mesh.json → BufferGeometry (แกน three ของชั้น mesh: x กลับด้านเหมือน fxRibbon)
 // rec (สตูดิโอ): เก็บช่วงสามเหลี่ยมของแต่ละชิ้น [id, จาก, ถึง] ไว้คลิกเลือกชิ้นบนจอ
 function fxMeshBuild(d,rec){const G=mkG();for(const P of (d&&d.parts)||[]){if(!P||P.off)continue;try{const H=mkPart(P),t0=G.i.length/3;mkAppend(G,H);if(rec)rec.push([P.id,t0,G.i.length/3]);}catch(e){console.warn('mesh part',P.id,e);}}
-  if(!G.p.length){mkV(G,0,0,0,0,0);mkV(G,0,0,0,0,0);mkV(G,0,0,0,0,0);G.i.push(0,1,2);}
+  if(!G.p.length){mkV(G,0,0,0,0,0);mkV(G,0,0,0,0,0);mkV(G,0,0,0,0,0);G.i.push(0,1,2);}mkPc(G);
   for(let k=0;k<G.p.length;k+=3)G.p[k]=-G.p[k];for(let k=0;k<G.i.length;k+=3){const t=G.i[k+1];G.i[k+1]=G.i[k+2];G.i[k+2]=t;}
   const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(G.p,3));g.setAttribute('uv',new THREE.Float32BufferAttribute(G.u,2));
+  // ชิ้นย่อย: aPiv = จุดหมุน (ฐานของชิ้น) • aOrd = ลำดับ [ตามลำดับสร้าง, ระยะจากกลาง, สุ่ม, ความสูง] 0..1 → ชั้น mesh ใช้ทำ grow (งอกทีละชิ้น)
+  {const n=G.p.length/3,np=G.piv.length,piv=new Float32Array(n*3),ord=new Float32Array(n*4);let rMax=1e-4,y0=Infinity,y1=-Infinity;
+    for(const q of G.piv){rMax=Math.max(rMax,Math.hypot(q[0],q[2]));y0=Math.min(y0,q[1]);y1=Math.max(y1,q[1]);}
+    for(let v=0;v<n;v++){const pi=G.k[v],q=G.piv[pi];piv[v*3]=-q[0];piv[v*3+1]=q[1];piv[v*3+2]=q[2];
+      ord[v*4]=np>1?pi/(np-1):0;ord[v*4+1]=Math.hypot(q[0],q[2])/rMax;ord[v*4+2]=mkHash(pi,7,3,11);ord[v*4+3]=y1>y0?(q[1]-y0)/(y1-y0):0;}
+    g.setAttribute('aPiv',new THREE.BufferAttribute(piv,3));g.setAttribute('aOrd',new THREE.BufferAttribute(ord,4));g.userData.pieces=np;}
   g.setIndex(G.p.length/3>65535?new THREE.Uint32BufferAttribute(G.i,1):new THREE.Uint16BufferAttribute(G.i,1));g.computeVertexNormals();g.computeBoundingSphere();g.computeBoundingBox();g.userData.tris=G.i.length/3;return g;}
 // ---------- โหลด ----------
 function fxMeshLoad(name){let e=FXMK.mesh.get(name);if(e)return e.p;e={data:null,geo:null,fail:false};FXMK.mesh.set(name,e);const v=((FXR.index.mesh||{})[name]||{}).v||'';
@@ -134,8 +143,102 @@ function fxTexUse(key,m,t){const e=FXMK.tex.get(key)||{};t.colorSpace=THREE.SRGB
   const add=m.add!==false,o={cols:m.cols||1,rows:m.rows||1,add,span:m.span||1,rand:m.rand?1:0,rot:m.rot!==undefined?m.rot:(add?0:0.6),spin:m.spin||0,size:m.size||1,occ:m.occ};
   if(e.tex&&e.tex!==t){e.tex.userData.keep=false;}ptexUse(key,t,o);Object.assign(e,{meta:m,tex:t,o,fail:false,p:e.p||Promise.resolve(e)});FXMK.tex.set(key,e);return e;}
 function fxTexNeed(n){if(typeof n==='string'&&n.startsWith('tex/')&&!FXMK.tex.has(n))fxTexLoad(n);}
+// ---------- โมเดลงอกทีละชิ้น (ชั้น mesh: grow 0..1 เส้นโค้งได้, stagger, growBy) ----------
+// แต่ละชิ้นย่อย (หนามแต่ละแท่ง / ชิ้นที่ทำซ้ำ / ขนแต่ละเส้น) ขยายจากฐานของมันเอง 0 → 1 ตามลำดับ • stagger 0 = ขึ้นพร้อมกัน, 0.9 = ไล่ทีละชิ้น
+const FXGROWBY={order:0,center:1,random:2,height:3};
+function fxGrowInit(S,geo){const P=geo.attributes.position,piv=geo.attributes.aPiv,ord=geo.attributes.aOrd;if(!piv||!ord)return geo;
+  const g=geo.clone();g.userData={tris:geo.userData.tris};S.gp={base:Float32Array.from(P.array),piv:piv.array,ord:ord.array,last:-1};g.computeBoundingSphere();return g;}
+function fxGrowTick(S,gv,st,by){const G=S.gp;if(!G)return;const key=gv*1000+st*7+by;if(key===G.last)return;G.last=key;
+  const P=S.geo.attributes.position.array,B=G.base,V=G.piv,O=G.ord,n=B.length/3,d=Math.max(0.001,1-st);
+  for(let v=0;v<n;v++){let s=Math.min(1,Math.max(0,(gv-O[v*4+by]*st)/d));if(s<1){const u=s-1;s=1+2.7*u*u*u+1.7*u*u;}   // ease out-back (เด้งเกินนิดแล้วเข้าที่)
+    const i=v*3;P[i]=V[i]+(B[i]-V[i])*s;P[i+1]=V[i+1]+(B[i+1]-V[i+1])*s;P[i+2]=V[i+2]+(B[i+2]-V[i+2])*s;}
+  S.geo.attributes.position.needsUpdate=true;}
+// ---------- วัสดุภาพบนรูปทรง (mat:"tex") — ภาพที่วาดในสตูดิโอ (tex/…) ไหลบนผิว + ขอบเรือง + สลายตัว ----------
+// uvTile [u,v] = ปูกี่ซ้ำ • uvScroll [u,v] = ไหลกี่รอบ/วิ • col = ย้อมสี (#ffffff = สีตามภาพ) • col2 + rim = ขอบเรือง • dis = สลายตัวแบบขอบไหม้
+function fxTexMat(name,o){const X=FXMK.tex.get(name);if(!X)fxTexNeed(name);
+  const U={uMap:{value:null},uGrid:{value:new THREE.Vector2(1,1)},uFr:{value:0},uRep:{value:new THREE.Vector2(...(o.tile||[1,1]))},uScr:{value:new THREE.Vector2(...(o.scroll||[0,0]))},time:FIRE_U.time,
+    uC1:{value:new THREE.Color(o.col)},uC2:{value:new THREE.Color(o.col2)},uRim:{value:o.rim},uOp:{value:1},uInt:{value:1},uDis:{value:0},uAdd:{value:1},uNz:{value:NOISETEX},uHas:{value:0}};
+  const m=new THREE.ShaderMaterial({uniforms:U,transparent:true,depthWrite:false,side:THREE.DoubleSide,
+    blending:THREE.CustomBlending,blendSrc:THREE.OneFactor,blendDst:THREE.OneMinusSrcAlphaFactor,blendSrcAlpha:THREE.OneFactor,blendDstAlpha:THREE.OneMinusSrcAlphaFactor,
+    vertexShader:'varying vec2 vUv;varying vec3 vN;varying vec3 vV;void main(){vUv=uv;vec4 mv=modelViewMatrix*vec4(position,1.0);vN=normalize(normalMatrix*normal);vV=normalize(-mv.xyz);gl_Position=projectionMatrix*mv;}',
+    fragmentShader:'uniform sampler2D uMap,uNz;uniform vec2 uGrid,uRep,uScr;uniform vec3 uC1,uC2;uniform float uFr,time,uRim,uOp,uInt,uDis,uAdd,uHas;varying vec2 vUv;varying vec3 vN;varying vec3 vV;'+
+      'void main(){vec2 uv=vUv*uRep+uScr*time;float N=uGrid.x*uGrid.y;vec4 t=vec4(1.0);'+
+      'if(uHas>0.5){if(N>1.5){uv=fract(uv);float f0=mod(floor(uFr),N);uv=vec2((mod(f0,uGrid.x)+uv.x)/uGrid.x,1.0-(floor(f0/uGrid.x)+1.0-uv.y)/uGrid.y);}t=texture2D(uMap,uv);}'+
+      'float fr=1.0-abs(dot(normalize(vN),normalize(vV))),rim=pow(fr,2.0)*uRim;float n=texture2D(uNz,vUv*vec2(2.0,1.0)).r;if(n<uDis)discard;float edge=uDis>0.001?1.0-smoothstep(uDis,uDis+0.06,n):0.0;'+
+      'vec3 c=t.rgb*uC1*uInt+uC2*(rim+edge*1.5);float a=clamp(t.a+rim*0.5+edge,0.0,1.0)*uOp;gl_FragColor=vec4(c*a,a*(uAdd>0.5?0.35:1.0));}'});
+  m.userData.tex=name;fxTexMatBind(m);return m;}
+function fxTexMatBind(m){const u=m.uniforms;if(u.uHas.value)return;const X=FXMK.tex.get(m.userData.tex);if(!X||!X.tex)return;
+  u.uMap.value=X.tex;u.uGrid.value.set(X.o.cols,X.o.rows);u.uAdd.value=X.o.add?1:0;u.uHas.value=1;m.userData.fps=X.meta.kind==='loop'?(X.meta.fps||24):0;m.userData.span=X.o.span||1;
+  if(X.o.cols*X.o.rows===1&&X.tex.wrapS!==THREE.RepeatWrapping){X.tex.wrapS=X.tex.wrapT=THREE.RepeatWrapping;X.tex.needsUpdate=true;}}
+function fxTexMatTick(m,S,k){fxTexMatBind(m);const u=m.uniforms,N=u.uGrid.value.x*u.uGrid.value.y;if(N<=1)return;u.uFr.value=m.userData.fps?S.age*m.userData.fps:Math.min(N-1,k*N*(m.userData.span||1));}
+// ---------- เศษโมเดลกระเด็น (emit look:"model") — หิน ผลึก ขนนก เศษดาบ: หมุน ตกตามแรงโน้มถ่วง เด้งพื้น ย่อหายตอนท้าย ----------
+// ทุกเม็ดของโมเดล+วัสดุ+สีเดียวกันวาดรวมเป็น InstancedMesh ก้อนเดียว (เบา) • อยู่ต่อได้หลังชั้นจบ (เหมือนอนุภาค)
+const FXMP={groups:new Map()};
+function fxMPMat(mat,col,col2){switch(mat){
+  case 'glow':return new THREE.MeshBasicMaterial({color:hdr(col,1.1),transparent:true,depthWrite:false,blending:THREE.AdditiveBlending});
+  case 'ice':return new THREE.MeshStandardMaterial({color:col,emissive:col2,emissiveIntensity:0.45,roughness:0.15,metalness:0.1,transparent:true,opacity:0.88,flatShading:true});
+  default:return new THREE.MeshStandardMaterial({color:col,emissive:col2,emissiveIntensity:0.12,roughness:0.92,metalness:0,flatShading:true});}}
+function fxMPGroup(model,mat,col,col2){const key=model+'|'+mat+'|'+col+'|'+col2;let G=FXMP.groups.get(key);if(G)return G;const geo=fxMeshGeo(model);if(!geo)return null;
+  const N=256,m=new THREE.InstancedMesh(geo,fxMPMat(mat,col,col2),N);m.count=0;m.frustumCulled=false;m.castShadow=mat==='solid';m.renderOrder=2;m.instanceMatrix.setUsage(THREE.DynamicDrawUsage);m.userData.keep=true;
+  scene.add(m);G={mesh:m,list:[],N};FXMP.groups.set(key,G);return G;}
+const _mpM=new THREE.Matrix4(),_mpQ=new THREE.Quaternion(),_mpE=new THREE.Euler(),_mpP=new THREE.Vector3(),_mpS=new THREE.Vector3();
+function fxMPUpdate(dt){if(!FXMP.groups.size)return;
+  for(const G of FXMP.groups.values()){const L=G.list;let n=0;if(!L.length&&!G.mesh.count)continue;
+    for(let i=L.length-1;i>=0;i--){const p=L[i];p.age+=dt;if(p.age>=p.life)L.splice(i,1);}
+    for(const p of L){p.x+=p.vx*dt;p.y+=p.vy*dt;p.h+=p.vh*dt;p.vh-=p.g*dt;const dr=Math.exp(-p.drag*dt);p.vx*=dr;p.vy*=dr;
+      if(p.h<p.r0){p.h=p.r0;if(p.bounce>0&&p.vh<-1){p.vh=-p.vh*p.bounce;p.vx*=0.7;p.vy*=0.7;p.spin*=0.6;}else{p.vh=0;const f=Math.exp(-7*dt);p.vx*=f;p.vy*=f;p.spin*=Math.exp(-6*dt);}}
+      p.rx+=p.spin*p.ax*dt;p.ry+=p.spin*p.ay*dt;p.rz+=p.spin*p.az*dt;
+      const k=p.age/p.life,sc=p.s*Math.min(1,p.age/0.05+0.35)*(k>0.75?Math.max(0,(1-k)/0.25):1);
+      _mpP.set(tx(p.x),p.h+GY(p.x,p.y),tz(p.y));_mpQ.setFromEuler(_mpE.set(p.rx,p.ry,p.rz));_mpS.setScalar(Math.max(1e-3,sc));G.mesh.setMatrixAt(n++,_mpM.compose(_mpP,_mpQ,_mpS));}
+    G.mesh.count=n;G.mesh.instanceMatrix.needsUpdate=true;if(!G.mesh.parent)scene.add(G.mesh);}}
+function fxMPClear(){for(const G of FXMP.groups.values()){G.list.length=0;G.mesh.count=0;}}
+// q = เม็ดที่ fxPart เตรียมไว้ (ตำแหน่ง/ความเร็วแบบอนุภาค) • คืน false = โมเดลยังไม่โหลด (ใช้เม็ดธรรมดาแทน)
+function fxMPSpawn(L,q,col,c2,V,g){const G=fxMPGroup(g('model'),g('mmat'),col,c2||col);if(!G)return false;const ms=V('msize'),sp=g('mspin')*MKD,R=Math.random;
+  const ax=R()-0.5,ay=R()-0.5,az=R()-0.5,al=Math.hypot(ax,ay,az)||1;
+  G.list.length>=G.N&&G.list.shift();G.list.push({x:q.x,y:q.y,h:Math.max(q.h,0.05),vx:q.vx,vy:q.vy,vh:q.vh,g:q.g,drag:q.drag,life:q.life,age:0,s:ms,r0:ms*0.25,bounce:g('bounce'),
+    spin:(R()*2-1)*sp,ax:ax/al,ay:ay/al,az:az/al,rx:R()*6.283,ry:R()*6.283,rz:R()*6.283});return true;}
+// ---------- อากาศบิดเบี้ยว (ชั้น warp) — ไอร้อน / คลื่นกระแทกบิดภาพ / เลนส์โป่ง • อ่านภาพฉากจาก FXPass (ใช้ได้ตอนกราฟิกกลาง-สูง เหมือน heat haze ของเกม) ----------
+// kind: haze = อากาศร้อนสั่นไหวขึ้น (แผ่นหันหากล้อง) • shock = วงคลื่นขยายบิดภาพ (flat = นอนบนพื้น) • bulge = เลนส์โป่งดันภาพออก
+function fxWarpMake(S,I,w,g,V,C){const kind={haze:0,shock:1,bulge:2}[g('kind')]||0;
+  const U={uScene:HAZE_U.uScene,uNz:{value:NOISETEX},time:FIRE_U.time,uStr:{value:0},uK:{value:kind},uR:{value:0.5},uTint:{value:new THREE.Color(C('col'))},uGlow:{value:g('glow')},uOp:{value:1}};
+  const m=new THREE.ShaderMaterial({uniforms:U,transparent:true,depthWrite:false,side:THREE.DoubleSide,
+    vertexShader:'varying vec2 vUv;varying float vVZ;void main(){vUv=uv;vec4 mv=modelViewMatrix*vec4(position,1.0);vVZ=-mv.z;gl_Position=projectionMatrix*mv;}',
+    fragmentShader:SOFT_GLSL+'uniform sampler2D uScene,uNz;uniform float time,uStr,uK,uR,uGlow,uOp;uniform vec3 uTint;varying vec2 vUv;'+
+      'void main(){vec2 c=vUv-0.5;float r=length(c)*2.0;vec2 dir=r>1e-4?c/(r*0.5):vec2(0.0);vec2 off;float m;'+
+      'if(uK<0.5){m=smoothstep(1.0,0.3,r)*smoothstep(0.0,0.25,vUv.y+0.1);float a=texture2D(uNz,vUv*vec2(1.6,2.2)*0.5+vec2(0.0,-time*0.55)).r,b=texture2D(uNz,vUv*1.8+vec2(0.37,-time*1.0)).r;off=(vec2(a,b)-0.5)*2.0*0.018;}'+
+      'else if(uK<1.5){float d=r-uR,w=0.07+0.08*(1.0-uR);m=exp(-d*d/(w*w))*smoothstep(1.0,0.9,r);off=dir*0.025*(d<0.0?1.0:-0.6);}'+
+      'else{m=smoothstep(1.0,0.0,r);off=-dir*0.03*(1.0-r*r);}'+
+      'm*=uOp;if(m<0.004)discard;m*=softK(0.3);vec2 su=gl_FragCoord.xy/uRes+off*uStr*m;vec3 col=texture2D(uScene,su).rgb+uTint*uGlow*m;gl_FragColor=vec4(col,clamp(m*2.0,0.0,1.0));}'});
+  fxMat(m);m.renderOrder=-1;const geo=new THREE.PlaneGeometry(1,1);const obj=new THREE.Mesh(geo,m);obj.frustumCulled=false;obj.renderOrder=-1;
+  const root=new THREE.Group();root.add(obj);S.obj=root;S.inner=obj;S.mats=[m];fxScene.add(root);}
+function fxWarpTick(S,I,k,g,V){if(!S.obj)return;const m=S.mats[0],u=m.uniforms,w=fxPos(I,S,k),sz=Math.max(0.01,V('size')*I.s);
+  fxPlace(S.obj,I,S,w,V('yaw')*FXDEG);S.obj.visible=!!SOFTU.uSoftOn.value;
+  if(g('flat')){S.inner.rotation.set(-Math.PI/2,0,0);S.obj.rotation.set(0,0,0);}else{S.obj.rotation.set(0,0,0);S.obj.lookAt(cam.position);S.inner.rotation.set(0,0,0);}
+  S.inner.scale.set(sz,g('kind')==='haze'?sz*1.4:sz,1);if(g('kind')==='haze')S.inner.position.y=sz*0.55;
+  u.uStr.value=V('str');u.uR.value=g('kind')==='shock'?Math.min(0.95,0.05+k*0.9):0.5;
+  let op;if(S.d.op!==undefined)op=V('op');else{const fd=0.3;op=Math.min(1,S.age/0.05);if(!g('loop')&&k>1-fd)op*=Math.max(0,(1-k)/fd);if(I.stop&&g('loop'))op=0;}u.uOp.value=op;}
+// ---------- ไฟ 3 มิติจากการจำลอง (ชั้น vol) — ไฟล์รูปแบบเดียวกับที่เพื่อน bake จาก Blender (tools/pack_volseq.py) ----------
+// src: "vol/<ชื่อ>" = ทำในแท็บ 🔥 ไฟ 3D ของสตูดิโอ (assets/fx/vol/<ชื่อ>.bin + .vol.json) • "<ชื่อ>" = ไฟล์ bake จาก Blender ใน assets/vfx (เช่น fire_column, df_impact)
+// เล่นด้วย fireSeqVol (js/42: raymarch ในกล่อง hx×h×hz เมตร) • once:false = วนเฟรม (เสาไฟ เริ่มเฟรมสุ่ม) / once:true = เล่นครั้งเดียว (ระเบิด)
+const FXVOL=new Map();
+function fxVolLoad(src){if(!src.startsWith('vol/'))return fireSeqLoad(src);let e=FXVOL.get(src);if(e)return e.p;e={v:null,fail:false};FXVOL.set(src,e);
+  const name=src.slice(4),ver=((FXR.index.vol||{})[name]||{}).v||'',q=ver?'?v='+ver:'';
+  e.p=Promise.all([fxFetch('assets/fx/vol/'+name+'.vol.json'+q),fetch('assets/fx/vol/'+name+'.bin'+q).then(r=>{if(!r.ok)throw new Error(r.status);return r.arrayBuffer();})])
+    .then(([m,b])=>{e.v=fxVolTex(new Uint8Array(b),m);return e.v;}).catch(err=>{e.fail=true;console.warn('fx: โหลดไฟ 3D ไม่ได้',src,err.message);return null;});return e.p;}
+function fxVolTex(data,m){const t=new THREE.Data3DTexture(data,m.nx*m.frames,m.ny,m.nz);t.format=THREE.RedFormat;t.minFilter=t.magFilter=THREE.LinearFilter;t.wrapS=t.wrapT=t.wrapR=THREE.ClampToEdgeWrapping;t.unpackAlignment=1;t.needsUpdate=true;t.userData.keep=true;
+  return {tex:t,m:{nx:m.nx,ny:m.ny,nz:m.nz,frames:m.frames}};}
+// สตูดิโอ: ใช้ผลจำลองใหม่ทันที
+function fxVolSet(src,data,m){const e=FXVOL.get(src)||{};if(e.v&&e.v.tex)e.v.tex.dispose();e.v=fxVolTex(data,m);e.fail=false;e.p=Promise.resolve(e.v);FXVOL.set(src,e);return e.v;}
+function fxVolReady(src){if(!src)return null;if(!src.startsWith('vol/'))return fireSeqReady(src)||(fireSeqLoad(src),null);const e=FXVOL.get(src);if(!e){fxVolLoad(src);return null;}return e.v;}
+function fxVolMake(S,I,w,g,V){const SQ=fxVolReady(g('src'));if(!SQ){S.oneshot=1;return;}
+  const mesh=fireSeqVol(SQ,{hx:Math.max(0.05,V('hx')*I.s),hz:Math.max(0.05,V('hz')*I.s),h:Math.max(0.1,V('h')*I.s),int:V('int')*I.k,den:g('den')});
+  S.obj=mesh;S.sq=SQ;S.f0=!g('once')&&g('rand')?Math.random()*SQ.m.frames:0;fxPlace(mesh,I,S,w,V('yaw')*FXDEG);fxScene.add(mesh);fxVolTick(S,I,0,g,V);}
+function fxVolTick(S,I,k,g,V){if(!S.obj)return;const u=S.obj.userData.u,N=S.sq.m.frames,f=S.age*g('fps')*g('speed');
+  u.uFr.value=g('once')?Math.min(N-1.001,f):(S.f0+f)%N;u.uDis.value=V('dis');u.uH.value=Math.max(0.01,V('hgt'));u.uInt.value=V('int')*I.k;
+  if(I.stop&&g('loop'))u.uDis.value=Math.max(u.uDis.value,Math.min(1,(I.t-I.stopT)*2));
+  fxPlace(S.obj,I,S,fxPos(I,S,k),V('yaw')*FXDEG);}
 // โหลดโมเดล/ภาพที่เอฟเฟกต์ใช้ไว้ก่อน (เรียกตอนโหลดไฟล์ .fx.json)
-function fxPreAssets(d){for(const L of (d&&d.layers)||[]){if(!L)continue;if(L.t==='mesh'&&L.shape==='model'&&L.model&&!FXMK.mesh.has(L.model))fxMeshLoad(L.model);fxTexNeed(L.tex);fxTexNeed(L.fb);}}
+function fxPreAssets(d){for(const L of (d&&d.layers)||[]){if(!L)continue;if(((L.t==='mesh'&&L.shape==='model')||(L.t==='emit'&&L.look==='model'))&&L.model&&!FXMK.mesh.has(L.model))fxMeshLoad(L.model);fxTexNeed(L.tex);fxTexNeed(L.fb);if(L.t==='vol'&&L.src)fxVolReady(L.src);}}
 // รอให้โมเดล/ภาพที่เอฟเฟกต์ใช้โหลดเสร็จ (สตูดิโอใช้ก่อนทำแผ่นภาพสรุป)
-function fxAssetsWait(d){fxPreAssets(d);const ps=[];for(const L of (d&&d.layers)||[]){if(!L)continue;if(L.shape==='model'&&FXMK.mesh.has(L.model))ps.push(FXMK.mesh.get(L.model).p);for(const n of [L.tex,L.fb])if(typeof n==='string'&&FXMK.tex.has(n))ps.push(FXMK.tex.get(n).p);}return Promise.all(ps);}
+function fxAssetsWait(d){fxPreAssets(d);const ps=[];for(const L of (d&&d.layers)||[]){if(!L)continue;if(L.shape==='model'&&FXMK.mesh.has(L.model))ps.push(FXMK.mesh.get(L.model).p);for(const n of [L.tex,L.fb])if(typeof n==='string'&&FXMK.tex.has(n))ps.push(FXMK.tex.get(n).p);if(L.t==='vol'&&L.src)ps.push(fxVolLoad(L.src));}return Promise.all(ps);}
 Object.assign(window.WD||(window.WD={}),{mk:{build:fxMeshBuild,part:mkPart,gen:MKGEN,mesh:FXMK.mesh,tex:FXMK.tex,meshSet:fxMeshSet,texUse:fxTexUse,texLoad:fxTexLoad}});

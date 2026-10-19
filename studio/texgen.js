@@ -233,3 +233,69 @@ async function txPng(cv){const px=cv._rgba;if(!px||typeof CompressionStream==='u
   const chunk=(type,data)=>{const len=new Uint8Array(4),crc=new Uint8Array(4),t=new TextEncoder().encode(type);new DataView(len.buffer).setUint32(0,data.length);new DataView(crc.buffer).setUint32(0,txCrc([t,data]));return [len,t,data,crc];};
   const ih=new Uint8Array(13),dv=new DataView(ih.buffer);dv.setUint32(0,W);dv.setUint32(4,H);ih[8]=8;ih[9]=6;
   return new Blob([new Uint8Array([137,80,78,71,13,10,26,10]),...chunk('IHDR',ih),...chunk('IDAT',z),...chunk('IEND',new Uint8Array(0))],{type:'image/png'});}
+// ---------- ไฟ 3 มิติ: จำลองของไหล 3D (stable fluids: ลอยตัว + ม้วนตัว + ปั่นป่วน + ดับ) ใน Web Worker → ข้อมูลรูปแบบ tools/pack_volseq.py ----------
+// ผลลัพธ์: Uint8Array ยาว nx*frames × ny × nz (x เร็วสุด, แล้ว y, แล้ว z = ขึ้น) • เฟรมเรียงต่อกันตามแกน X • column = วนได้ (เฟดท้ายเข้าต้น) / burst = เล่นครั้งเดียว
+function vxWorkerMain(){self.onmessage=e=>{const o=e.data,P=o.p,t0=Date.now();
+  const N=Math.max(12,o.res|0),NX=N,NY=N,NZ=N*2,SX=NX+2,SXY=SX*(NY+2),S=SXY*(NZ+2),IX=(i,j,k)=>i+SX*j+SXY*k;
+  const F=()=>new Float32Array(S);let u=F(),v=F(),w=F(),T=F(),u0=F(),v0=F(),w0=F(),T0=F();const p=F(),dv=F(),cx=F(),cy=F(),cz=F(),mg=F();
+  let sd=((o.seed|0)*9973+7)%2147483647||1;const R=()=>(sd=(sd*16807)%2147483647)/2147483647;
+  const hs=(x,y,z,s)=>{let h=Math.imul(x|0,374761393)^Math.imul(y|0,668265263)^Math.imul(z|0,1274126177)^Math.imul(s|0,144269);h=Math.imul(h^(h>>>13),1274126177);return((h^(h>>>16))>>>0)/4294967296;};
+  const vn=(x,y,z,s)=>{const xi=Math.floor(x),yi=Math.floor(y),zi=Math.floor(z),f=t=>t*t*(3-2*t),a=f(x-xi),b=f(y-yi),c=f(z-zi),H=(i,j,k)=>hs(xi+i,yi+j,zi+k,s),l=(p,q,t)=>p+(q-p)*t;
+    return l(l(l(H(0,0,0),H(1,0,0),a),l(H(0,1,0),H(1,1,0),a),b),l(l(H(0,0,1),H(1,0,1),a),l(H(0,1,1),H(1,1,1),a),b),c)*2-1;};
+  const dt=0.08,h=1/N,ss=o.seed|0;
+  const bnd=(b,x)=>{for(let k=1;k<=NZ;k++)for(let j=1;j<=NY;j++){x[IX(0,j,k)]=b===1?-x[IX(1,j,k)]:x[IX(1,j,k)];x[IX(NX+1,j,k)]=b===1?-x[IX(NX,j,k)]:x[IX(NX,j,k)];}
+    for(let k=1;k<=NZ;k++)for(let i=1;i<=NX;i++){x[IX(i,0,k)]=b===2?-x[IX(i,1,k)]:x[IX(i,1,k)];x[IX(i,NY+1,k)]=b===2?-x[IX(i,NY,k)]:x[IX(i,NY,k)];}
+    for(let j=1;j<=NY;j++)for(let i=1;i<=NX;i++){x[IX(i,j,0)]=b===3?-x[IX(i,j,1)]:x[IX(i,j,1)];x[IX(i,j,NZ+1)]=x[IX(i,j,NZ)];}};
+  const adv=(b,D,D0)=>{const k0=dt*N;for(let k=1;k<=NZ;k++)for(let j=1;j<=NY;j++)for(let i=1;i<=NX;i++){const q=IX(i,j,k);
+      let x=i-k0*u[q],y=j-k0*v[q],z=k-k0*w[q];x=x<0.5?0.5:x>NX+0.5?NX+0.5:x;y=y<0.5?0.5:y>NY+0.5?NY+0.5:y;z=z<0.5?0.5:z>NZ+0.5?NZ+0.5:z;
+      const i0=x|0,j0=y|0,k1=z|0,a=x-i0,c=y-j0,d=z-k1,r=IX(i0,j0,k1);
+      const e0=D0[r]+(D0[r+1]-D0[r])*a,e1=D0[r+SX]+(D0[r+SX+1]-D0[r+SX])*a,e2=D0[r+SXY]+(D0[r+SXY+1]-D0[r+SXY])*a,e3=D0[r+SXY+SX]+(D0[r+SXY+SX+1]-D0[r+SXY+SX])*a;
+      const f0=e0+(e1-e0)*c,f1=e2+(e3-e2)*c;D[q]=f0+(f1-f0)*d;}bnd(b,D);};
+  const proj=()=>{for(let k=1;k<=NZ;k++)for(let j=1;j<=NY;j++)for(let i=1;i<=NX;i++){const q=IX(i,j,k);dv[q]=-0.5*h*(u[q+1]-u[q-1]+v[q+SX]-v[q-SX]+w[q+SXY]-w[q-SXY]);p[q]=0;}bnd(0,dv);bnd(0,p);
+    for(let it=0;it<14;it++){for(let k=1;k<=NZ;k++)for(let j=1;j<=NY;j++)for(let i=1;i<=NX;i++){const q=IX(i,j,k);p[q]=(dv[q]+p[q-1]+p[q+1]+p[q-SX]+p[q+SX]+p[q-SXY]+p[q+SXY])/6;}bnd(0,p);}
+    for(let k=1;k<=NZ;k++)for(let j=1;j<=NY;j++)for(let i=1;i<=NX;i++){const q=IX(i,j,k);u[q]-=0.5*(p[q+1]-p[q-1])/h;v[q]-=0.5*(p[q+SX]-p[q-SX])/h;w[q]-=0.5*(p[q+SXY]-p[q-SXY])/h;}bnd(1,u);bnd(2,v);bnd(3,w);};
+  // ต้นไฟ
+  const ccx=(NX+1)/2,ccy=(NY+1)/2,r=Math.max(1.5,P.size*NX),z0=P.shape==='ball'?2+r*0.8:2.5;
+  const emit=(st,tt)=>{const rx=P.shape==='line'?r*2.2:P.shape==='ring'?r*1.3:r,ry=P.shape==='line'?1.6:rx,rz=P.shape==='ball'?r:1.6;
+    for(let k=Math.max(1,Math.floor(z0-rz-1));k<=Math.min(NZ,Math.ceil(z0+rz+1));k++)for(let j=Math.max(1,Math.floor(ccy-ry-1));j<=Math.min(NY,Math.ceil(ccy+ry+1));j++)for(let i=Math.max(1,Math.floor(ccx-rx-1));i<=Math.min(NX,Math.ceil(ccx+rx+1));i++){
+      const dx=i-ccx,dy=j-ccy,dz=k-z0;let e;
+      if(P.shape==='ring'){const d=Math.hypot(dx,dy);e=1-Math.hypot(d-r,dz*1.2)/(r*0.35+1);}
+      else if(P.shape==='line')e=Math.min(1-Math.abs(dx)/rx,1-Math.hypot(dy,dz)/1.6);
+      else if(P.shape==='disc')e=Math.min(1-Math.hypot(dx,dy)/r,1-Math.abs(dz)/1.6);
+      else e=1-Math.hypot(dx,dy,dz)/r;
+      if(e<=0)continue;e=Math.pow(e,0.7)*(1-P.flick*0.8*(0.5+0.5*vn(i*0.25,j*0.25,k*0.25+tt*0.6,ss)));const q=IX(i,j,k);
+      if(T[q]<e)T[q]=e;w[q]+=0.9*e*dt;
+      if(P.burst>0&&st){const d=Math.hypot(dx,dy,dz*0.6)||1;u[q]+=P.burst*0.5*e*dx/d;v[q]+=P.burst*0.5*e*dy/d;w[q]+=P.burst*0.25*e*Math.max(0,dz/d);}}};
+  let step=0;
+  const sim=on=>{const tt=step*dt;if(on)emit(step<3,tt);
+    for(let k=1;k<=NZ;k++)for(let j=1;j<=NY;j++)for(let i=1;i<=NX;i++){const q=IX(i,j,k),t=T[q];if(t<0.002)continue;
+      w[q]+=dt*P.buoy*0.85*t;u[q]+=dt*P.wind*0.35*t;
+      if(P.turb>0){const s=P.turb*2.2*t,X=i*0.15,Y=j*0.15,Z=k*0.12-tt*0.9;u[q]+=dt*s*vn(X,Y,Z,ss+1);v[q]+=dt*s*vn(X+31,Y,Z,ss+2);w[q]+=dt*s*0.6*vn(X,Y+17,Z,ss+3);}}
+    if(P.vort>0){for(let k=1;k<=NZ;k++)for(let j=1;j<=NY;j++)for(let i=1;i<=NX;i++){const q=IX(i,j,k),a=(w[q+SX]-w[q-SX])-(v[q+SXY]-v[q-SXY]),b=(u[q+SXY]-u[q-SXY])-(w[q+1]-w[q-1]),c=(v[q+1]-v[q-1])-(u[q+SX]-u[q-SX]);
+        cx[q]=a*0.5/h;cy[q]=b*0.5/h;cz[q]=c*0.5/h;mg[q]=Math.hypot(cx[q],cy[q],cz[q]);}
+      const eps=P.vort*0.9*h*dt;for(let k=2;k<NZ;k++)for(let j=2;j<NY;j++)for(let i=2;i<NX;i++){const q=IX(i,j,k);let nx=mg[q+1]-mg[q-1],ny=mg[q+SX]-mg[q-SX],nz=mg[q+SXY]-mg[q-SXY];const l=Math.hypot(nx,ny,nz)+1e-5;nx/=l;ny/=l;nz/=l;
+        u[q]+=eps*(ny*cz[q]-nz*cy[q]);v[q]+=eps*(nz*cx[q]-nx*cz[q]);w[q]+=eps*(nx*cy[q]-ny*cx[q]);}}
+    proj();u0.set(u);v0.set(v);w0.set(w);adv(1,u,u0);adv(2,v,v0);adv(3,w,w0);proj();T0.set(T);adv(0,T,T0);
+    const ck=1-P.cool*0.06;T0.set(T);for(let k=1;k<=NZ;k++)for(let j=1;j<=NY;j++)for(let i=1;i<=NX;i++){const q=IX(i,j,k);T[q]=(T0[q]*0.7+(T0[q-1]+T0[q+1]+T0[q-SX]+T0[q+SX]+T0[q-SXY]+T0[q+SXY])*0.05)*ck;}
+    step++;};
+  // เก็บเฟรม + รายละเอียดเล็ก (เหมือนขั้น noise/upres ของ Mantaflow): noise ไหลขึ้นแตกไฟเป็นลิ้นเปลว
+  const shot=()=>{const out=new Float32Array(NX*NY*NZ),tt=step*dt,dk=P.detail||0;let n=0;for(let k=1;k<=NZ;k++)for(let j=1;j<=NY;j++)for(let i=1;i<=NX;i++){let t=T[IX(i,j,k)];
+      if(t>0.004&&dk>0){const X=i*0.33,Y=j*0.33,Z=k*0.26-tt*2.2,nz=vn(X,Y,Z,ss+11)*0.65+vn(X*2.1,Y*2.1,Z*2.1,ss+12)*0.35;t*=Math.max(0,1+dk*nz*1.2);}out[n++]=t;}return out;};
+  const FR=o.frames|0,spf=Math.max(1,P.steps|0),burst=o.mode==='burst',XF=burst?0:Math.min(o.xfade|0,FR-1),rec=[],total=burst?FR*spf:(P.warm|0)+(FR+XF)*spf;let done=0;
+  const prog=()=>{done++;if(done%4===0)self.postMessage({prog:done/total});};
+  if(burst){const onSteps=Math.max(2,Math.round(total*P.emitT));for(let f=0;f<FR;f++){for(let s=0;s<spf;s++){sim(step<onSteps);prog();}rec.push(shot());}}
+  else{for(let s=0;s<(P.warm|0);s++){sim(true);prog();}for(let f=0;f<FR+XF;f++){for(let s=0;s<spf;s++){sim(true);prog();}rec.push(shot());}}
+  // วน: เฟรมท้ายค่อย ๆ กลายเป็นเฟรมก่อนเฟรมแรก (เหมือน pack_volseq.py)
+  let fr=rec;if(!burst&&XF>0){fr=[];for(let k=0;k<FR;k++){const A=rec[XF+k];if(k<FR-XF){fr.push(A);continue;}const wv=(k-(FR-XF)+1)/(XF+1),B=rec[k-(FR-XF)],C=new Float32Array(A.length);for(let q=0;q<A.length;q++)C[q]=A[q]*(1-wv)+B[q]*wv;fr.push(C);}}
+  // ทำให้ค่า 99.6% = 1 แล้วแปลงเป็น 0..255 • จัดเรียง z, y, (เฟรม, x)
+  const hist=new Uint32Array(1024);let mx=1e-6;for(const A of fr)for(let q=0;q<A.length;q++)if(A[q]>mx)mx=A[q];let cnt=0;
+  for(const A of fr)for(let q=0;q<A.length;q++){const v2=A[q];if(v2>0.002){hist[Math.min(1023,(v2/mx*1023)|0)]++;cnt++;}}
+  let acc=0,ref=mx;for(let b=1023;b>=0;b--){acc+=hist[b];if(acc>cnt*0.012){ref=(b+1)/1024*mx;break;}}
+  const W=NX*FR,data=new Uint8Array(W*NY*NZ);
+  fr.forEach((A,f)=>{let n=0;for(let k=0;k<NZ;k++)for(let j=0;j<NY;j++)for(let i=0;i<NX;i++){const v2=A[n++]/ref;data[i+f*NX+W*(j+NY*k)]=v2>=1?255:v2<=0?0:Math.round(Math.pow(v2,0.85)*255);}});
+  self.postMessage({done:true,data,nx:NX,ny:NY,nz:NZ,frames:FR,ms:Date.now()-t0},[data.buffer]);};}
+// เริ่มจำลองใน Worker • onProg(0..1) • คืน Promise<{data,nx,ny,nz,frames,ms}>
+function vxRun(d,onProg){const X=FXR.schema.vx,o={mode:'column',res:24,frames:32,xfade:10,seed:1},p={};for(const k in X.file)if(X.file[k].def!==undefined&&k!=='p')o[k]=X.file[k].def;for(const k in X.params)p[k]=X.params[k].def;
+  Object.assign(o,d);o.p=Object.assign(p,d.p||{});
+  const url=URL.createObjectURL(new Blob(['('+vxWorkerMain.toString()+')()'],{type:'text/javascript'})),wk=new Worker(url);
+  return new Promise((res,rej)=>{wk.onmessage=e=>{const m=e.data;if(m.prog!==undefined){onProg&&onProg(m.prog);return;}wk.terminate();URL.revokeObjectURL(url);res(m);};wk.onerror=e=>{wk.terminate();URL.revokeObjectURL(url);rej(new Error(e.message||'worker'));};wk.postMessage({mode:o.mode,res:o.res,frames:o.frames,xfade:o.xfade,seed:o.seed,p:o.p});});}

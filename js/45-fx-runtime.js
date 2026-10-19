@@ -82,12 +82,12 @@ function fxStart(F,o,name){o=o||{};if(!FXR.ready||!F||!Array.isArray(F.layers))r
   FXR.inst.push(I);FXR.stat.play++;return I;}
 function fxStop(I){if(!I||I.stop)return;I.stop=true;I.stopT=I.t;for(const c of I.kids)fxStop(c);}
 function fxKill(I){if(!I)return;for(const S of I.L)if(S.st===1)fxEnd(S,I,true);I.L.length=0;for(const c of I.kids)fxKill(c);const j=FXR.inst.indexOf(I);if(j>=0)FXR.inst.splice(j,1);}
-function fxClearAll(){for(const I of FXR.inst.slice())fxKill(I);FXR.inst.length=0;}
+function fxClearAll(){fxMPClear();for(const I of FXR.inst.slice())fxKill(I);FXR.inst.length=0;}
 // เช็กประตู (ชั้นเสริม / ระยะ / ของเรา) ตอนเริ่มชั้น
 function fxGate(L,I,w){if(fxG(L,'x')&&(!vfxExtra()||I.far))return false;if(fxG(L,'own')&&!I.own)return false;
   const nr=fxG(L,'near');if(nr>0&&cam.position.distanceTo(_fxw.set(tx(w[0]),w[2]+GY(w[0],w[1]),tz(w[1])))>nr)return false;return true;}
 // ---------- ทุกเฟรม ----------
-function updateFx(dt){if(!FXR.inst.length)return;
+function updateFx(dt){fxMPUpdate(dt);if(!FXR.inst.length)return;
   for(let i=FXR.inst.length-1;i>=0;i--){const I=FXR.inst[i];I.t+=dt;if(I.o.follow!=null)fxAnchor(I);
     I.far=cam.position.distanceTo(_fxw.set(tx(I.x),I.h+GY(I.x,I.y),tz(I.y)))>60;
     let alive=false;
@@ -115,6 +115,8 @@ function fxSpawn(S,I,w){const L=S.d,g=k=>fxG(L,k),V=(k,q)=>fxV(g(k),I,q||0),C=k=
     case 'sound':if(nearMe(w[0],w[1],1000))snd(g('name'),{x:w[0],y:w[1],vol:g('vol')});S.oneshot=1;break;
     case 'emit':S.acc=0;{const n=fxN(I,V('burst'));if(n>0)vfxOnce(()=>fxEmit(S,I,n,w,0));}break;
     case 'mesh':fxMeshMake(S,I,w);break;
+    case 'warp':fxWarpMake(S,I,w,g,V,C);break;
+    case 'vol':fxVolMake(S,I,w,g,V);break;
     case 'firevol':{const kd={wall:0,shell:1,pillar:2}[g('kind')]||0,m=fireVol([{c:[0,0,0],ax:[1,0],hx:V('hx')*I.s,h:V('h')*I.s,hz:V('hz')*I.s,md:kd}],{int:V('int'),den:g('den'),spd:g('spd')});
       fxPlace(m,I,S,w,V('yaw')*FXDEG);fxScene.add(m);S.obj=m;break;}
     case 'trail':S.obj=trailNew({col:C('col'),col2:C('col2'),w:g('w')*I.s,life:g('tlife'),k:g('k')*I.k,sweep:!!g('sweep')});break;
@@ -140,6 +142,8 @@ function fxTick(S,I,k,dt){const L=S.d;if(S.oneshot)return;const g=q=>fxG(L,q),V=
     case 'light':{const w=fxPos(I,S,k);LREQ.push({x:tx(w[0]),y:w[2],z:tz(w[1]),col:fxCol(g('col'),I),int:V('int')*I.k,dist:V('dist')*Math.sqrt(I.s)});break;}
     case 'emit':{const rate=V('rate');if(rate>0){S.acc+=rate*dt*I.cnt*I.k*(I.far?0.5:1);const n=Math.floor(S.acc);if(n>0){S.acc-=n;const w=fxPos(I,S,k),kq=VFXB.k;VFXB.k=VFXB.on?VFXB.mul:1;try{fxEmit(S,I,n,w,k);}finally{VFXB.k=kq;}}}break;}
     case 'mesh':fxMeshTick(S,I,k,dt);break;
+    case 'warp':fxWarpTick(S,I,k,g,V);break;
+    case 'vol':fxVolTick(S,I,k,g,V);break;
     case 'firevol':{const u=S.obj.userData.u,w=fxPos(I,S,k);fxPlace(S.obj,I,S,w,fxV(g('yaw'),I,k)*FXDEG);u.uH.value=Math.max(0.01,fxV(g('hgt'),I,k));u.uDis.value=fxV(g('dis'),I,k);u.uInt.value=fxV(g('int'),I,k)*I.k;break;}
     case 'trail':fxTrailTick(S,I,k);break;
     case 'bolt':{const r=g('rate');if(r>0){S.acc+=r*dt;while(S.acc>=1){S.acc-=1;fxBolt(S,I,fxPos(I,S,k));}}break;}
@@ -148,6 +152,8 @@ function fxEnd(S,I,kill){const L=S.d;
   if(L.t==='mesh'&&S.obj){(S.obj.parent||scene).remove(S.obj);if(S.mats)S.mats.forEach(m=>m.dispose());if(S.geo&&!S.geo.userData.keep)S.geo.dispose();S.obj=null;}
   else if(L.t==='firevol'&&S.obj){fxScene.remove(S.obj);S.obj.geometry.dispose();S.obj.material.dispose();S.obj=null;}
   else if(L.t==='trail'&&S.obj){trailStop(S.obj);S.obj=null;}
+  else if(L.t==='vol'&&S.obj){fxScene.remove(S.obj);S.obj.geometry.dispose();S.obj.material.dispose();S.obj=null;}
+  else if(L.t==='warp'&&S.obj){fxScene.remove(S.obj);S.inner.geometry.dispose();S.mats.forEach(m=>{FXMATS.delete(m);m.dispose();});S.obj=null;}
   if(kill&&S.kid)fxKill(S.kid);}
 // ---------- อนุภาค ----------
 const _fxrnd=(a,b)=>a+(b-a)*Math.random();
@@ -179,6 +185,7 @@ function fxPart(S,I,w,p,nr,dir,sp,look,col,c2,k,world,yw){const L=S.d,g=q=>fxG(L
   if(dir==='in'){const r=Math.max(0.3,spd*life*0.7);p=[p[0]+nr[0]*r,p[1]+nr[1]*r,p[2]+nr[2]*r];}
   const pos=world?w:fxLocal(I,w,p),v=fxDir(I,[d[0]*spd,d[1]*spd+up,d[2]*spd]),size=V('size')*Math.sqrt(I.s);
   const q={x:pos[0],y:pos[1],h:pos[2],vx:v[0],vy:v[1],vh:v[2],life,max:life,col,c2:c2!==col?c2:undefined,size,g:g('gravity'),drag:g('drag'),grow:g('grow'),rot:_fxrnd(0,6.283),vr:g('spin')?_fxrnd(-g('spin'),g('spin')):0,fin:g('fin')||undefined,nc:!g('curl')};
+  if(look==='model'&&fxMPSpawn(L,q,col,c2,V,g))return;   // เศษโมเดลกระเด็น (js/46) — โมเดลยังไม่โหลด = เม็ดธรรมดา
   switch(look){case 'spark':q.sh=1;break;case 'streak':q.sh=2;break;case 'ring':q.sh=3;break;case 'flake':q.sh=4;break;
     case 'smoke':q.smoke=true;delete q.fin;if(g('fb'))q.fb=g('fb');break;
     case 'fire':flame(q.x,q.y,q.h,{vx:q.vx,vy:q.vy,vh:q.vh,life,size,g:q.g,drag:q.drag,grow:q.grow,col:fxG(L,'col')!=='$core'&&L.col?col:undefined,fb:g('fb')||undefined});return;
@@ -236,11 +243,12 @@ function fxMeshMake(S,I,w){const L=S.d,g=k=>fxG(L,k),sh=g('shape'),mt=g('mat'),C
     case 'ice':return iceShaderMat({glow:1,rim:g('rim')});
     case 'glow':return new THREE.MeshBasicMaterial({color:hdr(C('col'),1.15),transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide});
     case 'solid':return new THREE.MeshStandardMaterial({color:C('col'),emissive:C('col2'),emissiveIntensity:0.35,roughness:0.85,metalness:0,flatShading:true,transparent:true});
+    case 'tex':return fxTexMat(g('tex'),{col:C('col'),col2:C('col2'),rim:g('rim'),tile:g('uvTile'),scroll:g('uvScroll')});   // ภาพจากสตูดิโอบนผิวรูปทรง (js/46)
     case 'flip':{const t=fxFlipTex(g('tex')),add=!t||t.add!==false;const m=new THREE.MeshBasicMaterial({map:t?t.map:null,color:add?hdr(C('col'),1.2):C('col'),transparent:true,depthWrite:false,blending:add?THREE.AdditiveBlending:THREE.NormalBlending,side:THREE.DoubleSide});if(t)S.flip=t;return m;}
     default:{const m=fxEnergyMat(fxCol('$core',I),C('col'),C('col2'));m.uniforms.uScroll.value=g('scroll');m.uniforms.uRim.value=g('rim');return m;}}};
   if(sh==='glb'){const nm=g('glb');if(!MODELS.ready.get(nm)){if(nm&&!MODELS.fail.has(nm))loadModel(nm);S.oneshot=1;return;}
     obj=modelInst(nm);const m=mkMat();mats.push(m);obj.traverse(q=>{if(q.isMesh){q.material=m;q.castShadow=false;q.renderOrder=3;}});}
-  else if(sh==='model'){const geo=fxMeshGeo(g('model'));if(!geo){S.oneshot=1;return;}const m=mkMat();mats.push(m);obj=new THREE.Mesh(geo,m);obj.renderOrder=3;S.geo=geo;}   // โมเดลที่ปั้นในสตูดิโอ (assets/fx/mesh)
+  else if(sh==='model'){let geo=fxMeshGeo(g('model'));if(!geo){S.oneshot=1;return;}if(L.grow!==undefined)geo=fxGrowInit(S,geo);const m=mkMat();mats.push(m);obj=new THREE.Mesh(geo,m);obj.renderOrder=3;S.geo=geo;}   // โมเดลที่ปั้นในสตูดิโอ (assets/fx/mesh)
   else{const geo=fxGeo(L),m=mkMat();mats.push(m);obj=new THREE.Mesh(geo,m);obj.renderOrder=3;S.geo=geo;}
   const root=new THREE.Group();root.add(obj);S.inner=obj;
   const r=g('rot')||[0,0,0];obj.rotation.order='YXZ';obj.rotation.set(-(r[0]||0)*FXDEG,-(r[1]||0)*FXDEG,(r[2]||0)*FXDEG);
@@ -256,6 +264,8 @@ function fxMeshTick(S,I,k,dt){const L=S.d,g=q=>fxG(L,q),V=q=>fxV(g(q),I,k);if(!S
     else if(u&&u.uC1){u.uOp.value=op;u.uDis.value=dis;u.uInt.value=it;}
     else if(u&&u.uFade){u.uFade.value=op*(1-dis);u.uGlow.value=0.95*it;}
     else m.opacity=op*Math.min(1,it);}
+  if(S.gp)fxGrowTick(S,Math.max(0,Math.min(1,V('grow'))),g('stagger'),FXGROWBY[g('growBy')]||0);   // โมเดลงอกทีละชิ้น (js/46)
+  for(const m of S.mats)if(m.uniforms&&m.uniforms.uHas)fxTexMatTick(m,S,k);
   if(S.flip){const F=S.flip,n=F.cols*F.rows,f=F.fps?Math.floor(S.age*F.fps)%n:Math.min(n-1,Math.floor(k*n*(F.span||1))%n);F.map.offset.set((f%F.cols)/F.cols,1-(Math.floor(f/F.cols)+1)/F.rows);}}
 function fxFlipTex(name){if(!name)return null;let e=null,t=null;const ff=MODELS.man&&MODELS.man.fx&&MODELS.man.fx[name];
   if(name.startsWith('tex/')){const X=FXMK.tex.get(name);if(!X)fxTexLoad(name);if(!X||!X.tex)return null;t=X.tex.clone();t.userData={};t.repeat.set(1/X.o.cols,1/X.o.rows);t.needsUpdate=true;return {map:t,cols:X.o.cols,rows:X.o.rows,span:X.o.span,add:X.o.add,fps:X.meta.kind==='loop'?(X.meta.fps||24):0};}

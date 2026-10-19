@@ -108,7 +108,7 @@ body.studio #gl:active{cursor:grabbing}
 #mkTabs button{padding:5px 11px;font-size:13px}
 body.studio:not(.ws-fx) .fxOnly,body.studio:not(.ws-fx) #stLib,body.studio:not(.ws-fx) #stTl,body.studio:not(.ws-fx) #stInsp,body.studio:not(.ws-fx) #stHud{display:none!important}
 #mkLib,#mkBot,#mkInsp,#mkTexView{display:none}
-body.ws-mesh #mkLib,body.ws-tex #mkLib,body.ws-mesh #mkBot,body.ws-tex #mkBot,body.ws-mesh #mkInsp,body.ws-tex #mkInsp{display:flex}
+body.ws-mesh #mkLib,body.ws-tex #mkLib,body.ws-vol #mkLib,body.ws-mesh #mkBot,body.ws-tex #mkBot,body.ws-vol #mkBot,body.ws-mesh #mkInsp,body.ws-tex #mkInsp,body.ws-vol #mkInsp{display:flex}
 body.ws-tex:not(.tex3d) #mkTexView{display:grid}
 #mkLib{position:absolute;left:0;top:var(--sT);bottom:var(--sB);width:var(--sL);background:var(--sp);border-right:1px solid var(--sl);flex-direction:column}
 #mkLib .head{padding:8px;display:grid;gap:6px;border-bottom:1px solid var(--sl)}

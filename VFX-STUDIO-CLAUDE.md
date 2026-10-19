@@ -37,7 +37,8 @@
 | `assets/fx/tex/*.png` + `*.tex.json` | Textures / flipbooks made in the 🎞 tab — §6b |
 | `js/46-fx-make.js` | Builds models from recipes + loads textures (`fxMeshBuild`, `fxTexLoad`, `MKGEN` part generators) |
 | `studio/studio.js`, `studio/studio.css` | Studio, loaded only with `?studio` |
-| `studio/maker.js`, `studio/texgen.js` | 🧊 Model tab + 🎞 Texture tab (texture generators: GLSL shaders + fluid sim + png writer) |
+| `studio/maker.js`, `studio/texgen.js` | 🧊 Model / 🎞 Texture / 🔥 Fire 3D tabs (texture generators: GLSL shaders + 2D fluid sim + png writer; 3D fire sim worker `vxWorkerMain`) |
+| `assets/fx/vol/*.vol.json` + `*.bin` | Fire 3D volumes made in the 🔥 tab — §6b |
 | `tools/fx-lint.js`, `tools/fx-check.js` | Checker (shared by node and the studio) |
 | `tools/serve.py` | Local server + save/shot API |
 
@@ -130,7 +131,7 @@ http://localhost:8765/studio.html?fx=storm/railgun&sheet=0.03,0.1,0.2,0.35,0.6,1
 - When the file changes on disk, the studio reloads it by itself. So you edit JSON and the user sees it live.
 
 ## 6b. Make your own assets: 🧊 Model tab and 🎞 Texture tab (no Blender needed)
-The studio has 3 tabs in the top bar: **✨ เอฟเฟกต์** (effects, sections above), **🧊 โมเดล** (models), **🎞 ภาพ** (textures / flipbooks). Same app, same renderer as the game.
+The studio has 4 tabs in the top bar: **✨ เอฟเฟกต์** (effects, sections above), **🧊 โมเดล** (models), **🎞 ภาพ** (textures / flipbooks), **🔥 ไฟ 3D** (simulated 3D fire volumes). Same app, same renderer as the game.
 
 **Models: `assets/fx/mesh/<name>.mesh.json`.**
 - A model is a **recipe**: a list of `parts` + modifiers. The game builds the 3D mesh itself when it loads (`js/46-fx-make.js`, same code in game and studio). Files are tiny and stay editable.
@@ -149,10 +150,22 @@ The studio has 3 tabs in the top bar: **✨ เอฟเฟกต์** (effects,
 - 18 samples: `fire_loop` `fire_sim` `smoke_puff` `smoke_sim` `explosion` `electric_arc` `vortex_portal` `shockwave` `hit_burst` `slash_sweep` `star_flare` `soft_glow` `ring_soft` `magic_circle` `magic_circle_spin` `noise_clouds` `noise_veins` `noise_cells`.
 - Demo effects that use them: `start/crystal_nova` (model + shockwave card + star particles), `start/campfire` (sim fire + sim smoke particles).
 
+**Imported images:** 🎞 tab → 📥 นำเข้าภาพ (or drop PNG/JPG files on the preview). One file = a picture or sprite sheet (set `cols` × `rows` to its grid); several files = packed into frames in name order. Saved as `gen:"image"` (the .png is the source). `STUDIO.tex.import(files)`.
+
+**🔥 Fire 3D: `assets/fx/vol/<name>.vol.json` + `<name>.bin`.** A real 3D fluid simulation (buoyancy, vorticity, turbulence, flame-tongue detail) run in a Web Worker in ~1–3 s — the same job as the friend's Blender Mantaflow → `tools/pack_volseq.py` pipeline, and the **same .bin format**. Presets: `column` (looping pillar), `wall` (line), `ring`, `bonfire`, `burst` (one-shot explosion). Play it with the **`vol`** layer: `{"t":"vol","src":"vol/<name>","hx":0.9,"hz":0.9,"h":3.6}` (box half-width/half-depth/height in m; `"once":true` for bursts; `dis`/`hgt` curves). The same layer plays the friend's Blender bakes in `assets/vfx`: `"src":"fire_column"` / `"df_impact"`. Fire colours only (uses the game's fire ramp). Samples: `fire3d_column`, `fire3d_burst` (demo fx `start/fire3d_burst`). Files are ~1 MB at res 24 × 32 frames — keep it small.
+
+**New effect features (any effect):**
+- `mesh` **`mat:"tex"`** — a studio texture on any shape/model: `tex:"tex/<name>"`, `uvTile:[u,v]`, `uvScroll:[u,v]` (flows), `col` tint, `col2`+`rim` glowing edge, `dis` burn-away. E.g. lava/rune/cell shields, energy blades.
+- `mesh` **`grow`** (shape `model` only) — each piece (spike, copy, feather) rises from its own base: `"grow":{"0":0,"0.3":1}`, `stagger` (0 = all at once … 0.9 = one by one), `growBy` `center`/`order`/`random`/`height`. Walls, pillar rings and spike waves erupting.
+- `emit` **`look:"model"`** — every particle is a studio model (`model`, `mmat` solid/ice/glow, `msize` m, `bounce`, `mspin`): flying rocks, crystal shards, feathers that tumble, fall and bounce on the ground.
+- **`warp`** layer — air distortion: `kind` `haze` (rising heat) / `shock` (expanding ring that bends the image; `flat` = on the ground) / `bulge` (lens). Medium/high graphics only.
+- Demo fx: `start/stone_eruption` (grow + rock debris + shock warp), `start/hex_dome` (tex material), `start/fire3d_burst` (vol + haze).
+
 **Claude workflow for assets (all from the JS tool on the studio tab, needs serve.py):**
 - Open a tab directly: `studio.html?mesh=<name>` or `studio.html?tex=<name>`.
 - Models: write/edit the `.mesh.json` by hand (fields in `FX-FORMAT.md` → "โมเดลที่ปั้นเอง"), run `node tools/fx-check.js`, then look: `STUDIO.mesh.open(n)`, `STUDIO.mesh.view('mat'|'clay')`, `STUDIO.mesh.shot(name)` → `shots/<name>.jpg`, or `STUDIO.mesh.sheetAll(name)` = every model on one sheet. Edit live: `STUDIO.mesh.set('partId.field', v)`, `STUDIO.mesh.add(kind)`, `STUDIO.mesh.save(name)`. `STUDIO.mesh.tris()` (keep ≤ 30000), `STUDIO.mesh.lint()`.
 - Textures: write the `.tex.json`, then bake: open `studio.html?tex=<name>&bake=1` (renders + saves the png) or `studio.html?bakeall=1` (re-bakes every texture). Look: `STUDIO.tex.sheetAll(name)` → frames of every texture on dark + checker backgrounds; `STUDIO.tex.sheet(name)` = one texture's full sheet. Edit live: `STUDIO.tex.set('p.scale', 4)`, `STUDIO.tex.gen('vortex')`, `STUDIO.tex.save(name)`.
+- Fire 3D: `studio.html?vol=<name>` • `STUDIO.vol.newFrom(name,'column'|'wall'|'ring'|'bonfire'|'burst')`, `STUDIO.vol.set('p.size',0.3)`, `await STUDIO.vol.bake()`, `STUDIO.vol.save(name)`, `STUDIO.vol.shot(name)` (call `STUDIO.tick(30)` first so the preview plays).
 - If the browser pane is hidden, animation frames don't run: use `STUDIO.tick(n)` to step the model/texture tab by hand before `shot`.
 - After saving, fx-check runs by itself (via serve.py); still run `node tools/fx-check.js` before committing. Texture pngs are ~50 KB–1 MB; prefer `px` 128 and the smallest grid that looks right.
 

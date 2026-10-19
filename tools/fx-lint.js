@@ -52,17 +52,22 @@
       // งบ / ความอ่านออก (VFX.md §1.4–1.5, §6)
       const W = m => out.push({ lv: 'warn', at, msg: m });
       if (L.t === 'emit') { const b = num(g('burst'), 0) * (fx.k || 1); if (b > 80) W(`burst ${Math.round(b)} เม็ด เกินงบ (≤ 80 ต่อครั้ง)`); if (num(g('rate'), 0) > 200) W('rate เกิน 200 เม็ด/วิ'); if (g('from') === 'mesh' && !fx.layers.some(q => q.id === g('of') && q.t === 'mesh')) out.push({ lv: 'err', at: at + '.of', msg: 'from:"mesh" ต้องชี้ไปที่ชั้น mesh (of)' });
-        texRef(g('fb'), at + '.fb'); }
+        texRef(g('fb'), at + '.fb');
+        if (g('look') === 'model' && ctx.meshes && !ctx.meshes.has(g('model'))) out.push({ lv: 'err', at: at + '.model', msg: g('model') ? `ไม่มีโมเดล assets/fx/mesh/${g('model')}.mesh.json` : 'look:"model" ต้องใส่ชื่อโมเดล (model)' }); }
       if (L.t === 'light') { lights++; if (num(g('int'), 2) > 2.5) W(`ไฟจุด int ${num(g('int'), 2)} แรงเกิน (≤ 2.5) — พื้นจะสว่างจ้า`); }
       if (L.t === 'flash' && num(g('size'), 2.5) > 6) W('แฟลชใหญ่เกิน 6 ม. — เสี่ยงจอขาว');
       if (L.t === 'halo' && num(g('size'), 5) > 14) W('ฮาโลใหญ่เกิน 14 ม. — เสี่ยงจอขาว');
       if (L.t === 'screen') { if (num(g('flash'), 0) > 0.06) W('แฟลชทั้งจอเกิน 0.06 — สว่างทั้งจอเร็วมาก'); if (num(g('shake'), 0) > 10) W('จอสั่นเกิน 10'); if (num(g('radial'), 0) > 0 && !g('own')) W('เบลอพุ่งเข้าจุด (radial) ควรใส่ own:true (เฉพาะของเรา)'); }
       if (L.t === 'mesh') { const sh = g('shape'); if (sh === 'glb' && ctx.models && !ctx.models.has(g('glb'))) out.push({ lv: 'err', at: at + '.glb', msg: `ไม่มีโมเดล "${g('glb')}" ใน assets/manifest.json` });
         if (sh === 'model' && ctx.meshes && !ctx.meshes.has(g('model'))) out.push({ lv: 'err', at: at + '.model', msg: g('model') ? `ไม่มีโมเดล assets/fx/mesh/${g('model')}.mesh.json` : 'shape:"model" ต้องใส่ชื่อโมเดล (model)' });
-        if (g('mat') === 'flip' && String(g('tex')).startsWith('tex/')) texRef(g('tex'), at + '.tex');
+        if (g('mat') === 'tex' && !String(g('tex')).startsWith('tex/')) out.push({ lv: 'err', at: at + '.tex', msg: 'mat:"tex" ต้องใส่ภาพที่วาดในสตูดิโอ tex/<ชื่อ>' });
+        if (L.grow !== undefined && sh !== 'model') W('grow ใช้ได้กับ shape:"model" เท่านั้น');
+        if ((g('mat') === 'flip' || g('mat') === 'tex') && String(g('tex')).startsWith('tex/')) texRef(g('tex'), at + '.tex');
         else if (g('mat') === 'flip' && ctx.flips && !ctx.flips.has(g('tex'))) out.push({ lv: 'err', at: at + '.tex', msg: `ไม่มีภาพ flipbook "${g('tex')}" (manifest fx / ptex)` });
         if (num(g('scale'), 1) > 15 && ['energy', 'glow', 'fire'].includes(g('mat'))) W('รูปทรงเรืองแสงใหญ่เกิน 15 ม. — เสี่ยงบังจอ'); }
       if (L.t === 'use') { if (!g('fx')) out.push({ lv: 'err', at: at + '.fx', msg: 'ต้องใส่ชื่อเอฟเฟกต์' }); else if (ctx.self && g('fx') === ctx.self) out.push({ lv: 'err', at: at + '.fx', msg: 'ใส่เอฟเฟกต์ตัวเองซ้อนในตัวเองไม่ได้ (วนไม่จบ)' }); else if (ctx.names && !ctx.names.has(g('fx'))) out.push({ lv: 'err', at: at + '.fx', msg: `ไม่มีไฟล์ assets/fx/${g('fx')}.fx.json` }); }
+      if (L.t === 'vol') { const v = String(g('src') || ''); if (!v) out.push({ lv: 'err', at: at + '.src', msg: 'ต้องใส่ src (vol/<ชื่อ> หรือชื่อไฟล์ bake จาก Blender)' });
+        else if (v.startsWith('vol/') ? (ctx.vols && !ctx.vols.has(v.slice(4))) : (ctx.vseq && !ctx.vseq.has(v))) out.push({ lv: 'err', at: at + '.src', msg: v.startsWith('vol/') ? `ไม่มี assets/fx/vol/${v.slice(4)}.vol.json + .bin` : `ไม่มี assets/vfx/${v}.bin + .json (ไฟล์ bake จาก Blender)` }); }
       if (L.t === 'trail' && g('of') && !fx.layers.some(q => q.id === g('of'))) out.push({ lv: 'err', at: at + '.of', msg: `ไม่มีชั้น "${g('of')}"` });
       if (L.t === 'sound' && ctx.sounds && !ctx.sounds.has(g('name'))) W(`ไม่มีเสียงชื่อ "${g('name')}" (ดู SFXN ใน js/18-audio.js)`);
     });
@@ -108,6 +113,7 @@
   function fxLintTex(t, schema, ctx) {
     ctx = ctx || {}; const out = [], S = schema, X = S.tx; if (!t || typeof t !== 'object') return [{ lv: 'err', at: '', msg: 'ไฟล์ต้องเป็น JSON object' }];
     fileKeys(t, X.file, out, S);
+    if (t.gen === 'image') for (let i = out.length - 1; i >= 0; i--) if (out[i].at === 'px') out.splice(i, 1);   // ภาพนำเข้า: px = ขนาดจริงของภาพ ไม่ต้องอยู่ในตัวเลือก
     const G = X.gens[t.gen]; if (!G) out.push({ lv: 'err', at: 'gen', msg: `ตัววาด "${t.gen}" ไม่มี — ใช้: ${Object.keys(X.gens).join(', ')}` });
     else for (const k of Object.keys(t.p || {})) { if (!G.fields[k]) out.push({ lv: 'warn', at: 'p.' + k, msg: `ตัววาด ${t.gen} ไม่มีค่านี้` }); else checkVal(G.fields[k], t.p[k], 'p.' + k, out, S); }
     const r = t.ramp; if (r !== undefined) { if (typeof r === 'string') { if (!X.ramps[r]) out.push({ lv: 'err', at: 'ramp', msg: `ไม่มีจานสี "${r}" — ใช้: ${Object.keys(X.ramps).join(', ')}` }); }
@@ -116,6 +122,14 @@
     if (ctx.png === false) out.push({ lv: 'err', at: '', msg: 'ไม่มีไฟล์ภาพ .png คู่กับ .tex.json (บันทึกจากสตูดิโอใหม่)' });
     return out;
   }
-  const api = { fxLint, fxLintBind, fxLintMesh, fxLintTex };
+  function fxLintVol(d, schema, ctx) {
+    ctx = ctx || {}; const out = [], S = schema, X = S.vx; if (!d || typeof d !== 'object') return [{ lv: 'err', at: '', msg: 'ไฟล์ต้องเป็น JSON object' }];
+    fileKeys(d, X.file, out, S);
+    for (const k of Object.keys(d.p || {})) { if (!X.params[k]) out.push({ lv: 'warn', at: 'p.' + k, msg: 'ค่าการจำลองที่ไม่รู้จัก' }); else checkVal(X.params[k], d.p[k], 'p.' + k, out, S); }
+    if (ctx.bytes !== undefined) { const need = (d.nx || 0) * (d.ny || 0) * (d.nz || 0) * (d.frames || 0); if (!ctx.bytes) out.push({ lv: 'err', at: '', msg: 'ไม่มีไฟล์ .bin คู่กับ .vol.json (กด ▶ จำลอง แล้วบันทึกใหม่ในสตูดิโอ)' }); else if (need && need !== ctx.bytes) out.push({ lv: 'err', at: '', msg: `.bin ขนาด ${ctx.bytes} ไม่ตรงกับ nx×ny×nz×frames = ${need}` }); }
+    const mb = (d.res || 24) ** 3 * 2 * (d.frames || 32) / 1048576; if (mb > 3) out.push({ lv: 'warn', at: 'res', msg: `ไฟล์จะใหญ่ ~${mb.toFixed(1)} MB — ลด res หรือจำนวนเฟรม (แนะนำ ≤ 3 MB)` });
+    return out;
+  }
+  const api = { fxLint, fxLintBind, fxLintMesh, fxLintTex, fxLintVol };
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else root.FXLINT = api;
 })(typeof window !== 'undefined' ? window : globalThis);

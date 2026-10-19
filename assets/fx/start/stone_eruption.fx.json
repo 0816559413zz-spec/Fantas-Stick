@@ -1,0 +1,14 @@
+{
+  "v": 1,
+  "desc": "ตัวอย่างฟีเจอร์ใหม่: หนามหินพุ่งจากพื้นทีละแท่งจากกลางออก (grow) + เศษหินกระเด็นเด้งพื้น (emit look:model) + คลื่นกระแทกบิดภาพบนพื้น (warp)",
+  "tags": ["earth", "ground", "made"],
+  "pal": "earth",
+  "dur": 2,
+  "layers": [
+    {"id": "spikes", "t": "mesh", "at": 0, "life": 1.8, "att": "ground", "shape": "model", "model": "rock_spikes", "mat": "solid", "col": "#8a7255", "col2": "#3a2c20", "grow": {"0": 0, "0.3": 1, "0.8": 1, "1": 0}, "stagger": 0.75, "growBy": "center"},
+    {"id": "rocks", "t": "emit", "at": 0.02, "life": 0.05, "burst": 16, "att": "ground", "from": "ring", "fr": 0.8, "dir": "out", "speed": [3, 7], "up": 6, "plife": [1.2, 1.8], "look": "model", "model": "rock_chunk", "mmat": "solid", "msize": [0.15, 0.35], "bounce": 0.4, "mspin": 400, "col": "#7a6448", "c2": "#2e241a", "gravity": 14, "drag": 0.5},
+    {"id": "dust", "t": "emit", "at": 0.02, "life": 0.05, "burst": 10, "att": "ground", "from": "ring", "fr": 1.4, "dir": "flat", "speed": [1.5, 3], "plife": [0.9, 1.4], "look": "smoke", "fb": "tex/smoke_puff", "size": [16, 24], "col": "#b8a080", "c2": "#806850", "gravity": -0.3, "drag": 2},
+    {"id": "shock", "t": "warp", "at": 0, "life": 0.5, "att": "ground", "kind": "shock", "flat": true, "size": 9, "str": 1.5, "pos": [0, 0.1, 0]},
+    {"id": "cam", "t": "screen", "at": 0, "life": 0.25, "shake": 4}
+  ]
+}

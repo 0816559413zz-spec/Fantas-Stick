@@ -1,0 +1,11 @@
+{
+  "v": 1,
+  "desc": "หนามหินพุ่งจากพื้น 2 วง (ขรุขระ เหลี่ยม) — ใช้กับ grow ให้พุ่งขึ้นทีละแท่ง",
+  "mat": "solid",
+  "pal": "earth",
+  "tags": ["earth", "ground"],
+  "parts": [
+    {"id": "ring", "k": "crown", "n": 14, "r": 1.3, "h": [0.6, 1.4], "w": 0.45, "tilt": 22, "sides": 5, "rings": 2, "jit": 0.6, "noise": 0.06, "nfreq": 3, "seed": 4},
+    {"id": "core", "k": "cluster", "n": 4, "spread": 0.3, "h": [1, 1.9], "w": 0.55, "tilt": [5, 25], "sides": 5, "noise": 0.05, "seed": 8}
+  ]
+}

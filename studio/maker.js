@@ -13,50 +13,53 @@ const mkS=()=>FXR.schema.mk,txS=()=>FXR.schema.tx;
 // ---------- เริ่ม ----------
 async function mkInit(){
   const top=$st('stTop'),logo=top.querySelector('.logo');
-  logo.after(h('span',{id:'mkTabs'},...[['fx','✨ เอฟเฟกต์','แก้/สร้างเอฟเฟกต์ (ไทม์ไลน์ของชั้น)'],['mesh','🧊 โมเดล','ปั้นโมเดล 3D ของเอฟเฟกต์ (แทน Blender)'],['tex','🎞 ภาพ','วาดภาพ / flipbook: ไฟ ควัน ระเบิด สายฟ้า วงเวท …']].map(([k,t,ti])=>h('button',{'data-ws':k,title:ti,className:k==='fx'?'on':'',on:{click:()=>mkWs(k)}},t))));
+  logo.after(h('span',{id:'mkTabs'},...[['fx','✨ เอฟเฟกต์','แก้/สร้างเอฟเฟกต์ (ไทม์ไลน์ของชั้น)'],['mesh','🧊 โมเดล','ปั้นโมเดล 3D ของเอฟเฟกต์ (แทน Blender)'],['tex','🎞 ภาพ','วาดภาพ / flipbook: ไฟ ควัน ระเบิด สายฟ้า วงเวท …'],['vol','🔥 ไฟ 3D','จำลองไฟเป็นก้อน 3 มิติจริง (แทน Blender Mantaflow)']].map(([k,t,ti])=>h('button',{'data-ws':k,title:ti,className:k==='fx'?'on':'',on:{click:()=>mkWs(k)}},t))));
   for(const id of ['stFile','stBNew','stBSave','stBSaveAs','stBUndo','stBRedo','stBSheet','stBShot','stBGame']){const e=$st(id);if(e)e.classList.add('fxOnly');}
   for(const id of ['stPal','stK']){const e=$st(id);if(e&&e.parentElement)e.parentElement.classList.add('fxOnly');}
   const st=$st('st');
-  st.append(h('div',{id:'mkLib'},h('div',{className:'head'},h('div',{style:'display:flex;justify-content:space-between;align-items:center'},h('h3',{id:'mkLibT'},'โมเดล'),h('button',{id:'mkBNew',on:{click:()=>MK.ws==='mesh'?mkMeshNewAsk():mkTexNewAsk()}},'＋ ใหม่')),
+  st.append(h('div',{id:'mkLib'},h('div',{className:'head'},h('div',{style:'display:flex;justify-content:space-between;align-items:center'},h('h3',{id:'mkLibT'},'โมเดล'),h('button',{id:'mkBNew',on:{click:()=>MK.ws==='mesh'?mkMeshNewAsk():MK.ws==='tex'?mkTexNewAsk():mkVolNewAsk()}},'＋ ใหม่')),
     h('input',{type:'text',id:'mkSearch',placeholder:'ค้นหา…',on:{input:mkLibRender}})),h('div',{id:'mkLibList'})));
   st.append(h('div',{id:'mkBot'}),h('div',{id:'mkInsp'}),h('div',{id:'mkTexView'},h('div',{className:'pv'},h('canvas',{id:'mkPv',width:512,height:512})),h('div',{className:'atlas',id:'mkAtlas'}),h('div',{className:'info',id:'mkTexInfo'})));
   document.body.classList.add('ws-fx');
+  const tv=$st('mkTexView');tv.addEventListener('dragover',e=>{e.preventDefault();});tv.addEventListener('drop',e=>{e.preventDefault();if(MK.ws==='tex')mkTexImport(e.dataTransfer.files);});
   const cv=gl.domElement;
   cv.addEventListener('pointerdown',e=>{MK.m.down={x:e.clientX,y:e.clientY};});
   cv.addEventListener('pointerup',e=>{const D=MK.m.down;MK.m.down=null;if(MK.ws!=='mesh'||!D||MK.m.drag||Math.hypot(e.clientX-D.x,e.clientY-D.y)>5||mkGizmoHot())return;mkPick(e);});
   await mkRefresh();stLintRun();
   if(SQ.has('mesh')){await mkWs('mesh');await mkMeshOpen(SQ.get('mesh'));}
+  else if(SQ.has('vol')){await mkWs('vol');await mkVolOpen(SQ.get('vol'));}
   else if(SQ.has('tex')||SQ.has('bakeall')){await mkWs('tex');if(SQ.has('tex'))await mkTexOpen(SQ.get('tex'));
     if(SQ.has('bakeall')){for(const n of Object.keys(MK.list.tex)){await mkTexOpen(n);await mkTexSave(n);}stToast('วาดใหม่ + บันทึกครบ '+Object.keys(MK.list.tex).length+' ภาพ',5000);window.__bakeDone=true;}
     else if(SQ.has('bake')&&MK.t.name){await mkTexSave(MK.t.name);window.__bakeDone=true;}}
 }
-async function mkRefresh(){try{const r=await fetch('/api/fx-list',{cache:'no-cache'});if(r.ok){const j=await r.json();MK.list.mesh=j.mesh||{};MK.list.tex=j.tex||{};MK.api=true;mkLibRender();return;}}catch(e){}
-  try{const j=await (await fetch('assets/fx/index.json',{cache:'no-cache'})).json();MK.list.mesh=j.mesh||{};MK.list.tex=j.tex||{};}catch(e){}MK.api=false;mkLibRender();}
+async function mkRefresh(){try{const r=await fetch('/api/fx-list',{cache:'no-cache'});if(r.ok){const j=await r.json();MK.list.mesh=j.mesh||{};MK.list.tex=j.tex||{};MK.list.vol=j.vol||{};MK.api=true;mkLibRender();return;}}catch(e){}
+  try{const j=await (await fetch('assets/fx/index.json',{cache:'no-cache'})).json();MK.list.mesh=j.mesh||{};MK.list.tex=j.tex||{};MK.list.vol=j.vol||{};}catch(e){}MK.api=false;mkLibRender();}
 // ยังไม่โหลด maker.js (ไฟล์อื่นเรียกได้ปลอดภัย)
 function mkGizmoHot(){const tc=MK.m.tc;return MK.ws==='mesh'&&!!tc&&tc.visible&&!!tc.object&&tc.axis!==null;}
 async function mkWs(w){if(MK.ws===w)return;const prev=MK.ws;MK.ws=w;
-  document.body.classList.remove('ws-fx','ws-mesh','ws-tex');document.body.classList.add('ws-'+w);
+  document.body.classList.remove('ws-fx','ws-mesh','ws-tex','ws-vol');document.body.classList.add('ws-'+w);
   document.querySelectorAll('#mkTabs button').forEach(b=>b.classList.toggle('on',b.dataset.ws===w));
   if(prev==='fx'){if(ST.I){fxKill(ST.I);ST.I=null;}fxClearAll();}
-  if(prev==='mesh')mkMeshHide();if(prev==='tex')mkTexDemoStop();
-  $st('mkLibT').textContent=w==='mesh'?'โมเดล':'ภาพ';$st('mkSearch').value='';
+  if(prev==='mesh')mkMeshHide();if(prev==='tex')mkTexDemoStop();if(prev==='vol')mkVolHide();
+  $st('mkLibT').textContent=w==='mesh'?'โมเดล':w==='tex'?'ภาพ':'ไฟ 3D';$st('mkSearch').value='';
   if(w!=='fx'&&ST.cam==='game'){ST.cam='orbit';ST.orb.dist=w==='mesh'?4.5:8;ST.orb.pitch=0.35;stSync();}
   if(w==='fx'){stResize();stRestart();stLibRender();stTlRender();stInspRender();return;}
   mkLibRender();
-  if(w==='mesh'){await mkMeshShow();}else{await mkTexShow();}
+  if(w==='mesh')await mkMeshShow();else if(w==='tex')await mkTexShow();else await mkVolShow();
   stResize();}
 function mkFrame(rdt){
   if(MK.ws==='mesh'){const M=MK.m;if(M.root){if(!M.root.parent)scene.add(M.root);mkPlace(M.root);}if(M.tc&&!M.tc.parent)scene.add(M.tc);stRender(rdt,true);}
-  else if(MK.ws==='tex'){const T=MK.t;if(T.view==='3d'){mkTexDemoTick(rdt);stRender(rdt,true);}else mkTexAnim(rdt);}}
+  else if(MK.ws==='tex'){const T=MK.t;if(T.view==='3d'){mkTexDemoTick(rdt);stRender(rdt,true);}else mkTexAnim(rdt);}
+  else if(MK.ws==='vol'){mkVolTick(rdt);stRender(rdt,true);}}
 function mkPlace(o){const A=stAnchor();if(!A)return;o.position.set(tx(A.x),GY(A.x,A.y),tz(A.y));o.rotation.set(0,Math.atan2(Math.cos(A.a),Math.sin(A.a)),0);}
 // ---------- ไลบรารี ----------
-function mkLibRender(){const box=$st('mkLibList');if(!box||MK.ws==='fx')return;const q=($st('mkSearch').value||'').toLowerCase(),L=MK.ws==='mesh'?MK.list.mesh:MK.list.tex,cur=MK.ws==='mesh'?MK.m.name:MK.t.name;box.innerHTML='';
+function mkLibRender(){const box=$st('mkLibList');if(!box||MK.ws==='fx')return;const q=($st('mkSearch').value||'').toLowerCase(),L=MK.ws==='mesh'?MK.list.mesh:MK.ws==='tex'?MK.list.tex:(MK.list.vol||{}),cur=MK.ws==='mesh'?MK.m.name:MK.ws==='tex'?MK.t.name:MK.v.name;box.innerHTML='';
   const names=Object.keys(L).sort().filter(n=>!q||(n+' '+(L[n].desc||'')).toLowerCase().includes(q));
   if(MK.ws==='tex'){const g=h('div',{className:'mkThumbs'});for(const n of names){const e=L[n];g.append(h('button',{className:n===cur?'on':'',title:(e.desc||n)+(e.gen?' • '+e.gen:''),on:{click:()=>mkAskOpen(n)}},
       h('img',{src:'assets/fx/tex/'+n+'.png?t='+(e.png_t||e.t||0),alt:'',loading:'lazy'}),h('span',null,n)));}box.append(g);}
   else for(const n of names){const e=L[n];box.append(h('button',{className:n===cur?'on':'',title:e.desc||n,on:{click:()=>mkAskOpen(n)}},n,h('small',null,e.err?'⚠ '+e.err:(e.desc||'')+(e.mat?' • '+e.mat:''))));}
   if(!names.length)box.append(h('p',{className:'mute'},Object.keys(L).length?'ไม่พบ':'ยังไม่มี — กด ＋ ใหม่'));}
-function mkAskOpen(n){const X=MK.ws==='mesh'?MK.m:MK.t,open=MK.ws==='mesh'?mkMeshOpen:mkTexOpen,save=MK.ws==='mesh'?mkMeshSave:mkTexSave;if(n===X.name)return;
+function mkAskOpen(n){const X=MK.ws==='mesh'?MK.m:MK.ws==='tex'?MK.t:MK.v,open=MK.ws==='mesh'?mkMeshOpen:MK.ws==='tex'?mkTexOpen:mkVolOpen,save=MK.ws==='mesh'?mkMeshSave:MK.ws==='tex'?mkTexSave:mkVolSave;if(n===X.name)return;
   if(X.dirty)stBanner('ยังไม่ได้บันทึก '+(X.name||'(ใหม่)'),[['ทิ้งแล้วเปิด '+n,()=>open(n)],['บันทึกก่อน',async()=>{if(await save())open(n);}]]);else open(n);}
 // ---------- ช่องแก้ค่าตาม schema (ใช้ทั้งโมเดลและภาพ) ----------
 // ctx: {push(), set(obj,k,v,rebuildUI), pal}
@@ -186,7 +189,7 @@ function mkDelPart(id){const M=MK.m;mkMPush();M.d.parts=M.d.parts.filter(p=>p.id
 function mkDupPart(id){const M=MK.m,i=M.d.parts.findIndex(p=>p.id===id);if(i<0)return;mkMPush();const c=JSON.parse(JSON.stringify(M.d.parts[i]));c.id=mkUid(id.replace(/\d+$/,'')||id);M.d.parts.splice(i+1,0,c);M.sel=c.id;mkMChanged(true);mkHi();}
 function mkMovePart(i,d){const A=MK.m.d.parts,j=i+d;if(j<0||j>=A.length)return;mkMPush();[A[i],A[j]]=[A[j],A[i]];mkMChanged(false);mkMeshBotRows();}
 function mkMeshStat(){const e=$st('mkMStat');if(e){const t=MK.m.tris;e.textContent=MK.m.d.parts.length+' ชิ้น • '+t.toLocaleString()+' สามเหลี่ยม';e.className='mono '+(t>30000?'bad':'good');}mkSyncTitle();}
-function mkSyncTitle(){const e=$st('mkTitle');if(!e)return;const X=MK.ws==='mesh'?MK.m:MK.t;e.textContent=(X.name||'(ใหม่)')+(X.dirty?' ●':'');e.classList.toggle('dirty',X.dirty);}
+function mkSyncTitle(){const e=$st('mkTitle');if(!e)return;const X=MK.ws==='mesh'?MK.m:MK.ws==='tex'?MK.t:MK.v;e.textContent=(X.name||'(ใหม่)')+(X.dirty?' ●':'');e.classList.toggle('dirty',X.dirty);}
 function mkMeshBot(){const B=$st('mkBot');if(!B||MK.ws!=='mesh')return;B.innerHTML='';const M=MK.m,S=mkS(),d=M.d;
   const menu=h('div',{id:'mkAddMenu',hidden:true},...Object.entries(S.parts).map(([k,T])=>h('button',{title:T.desc,on:{click:()=>{menu.hidden=true;mkAddPart(k);}}},h('b',null,T.icon||'·'),' '+T.th,h('small',{className:'mute'},' '+k))));
   const sel=(opts,val,fn,title)=>h('select',{title,on:{change:e=>fn(e.target.value)}},...opts.map(([v,t])=>h('option',{value:v,selected:v===val},t)));
@@ -238,7 +241,7 @@ async function mkMeshGlb(){const M=MK.m;try{const {GLTFExporter}=await import('t
 //  🎞 ภาพ
 // =====================================================================
 async function mkTexShow(){const T=MK.t;if(!T.d){const first=Object.keys(MK.list.tex).sort()[0];if(first)await mkTexOpen(first);else mkTexNew('my_fire','fire');}else mkTexAll();mkTexView(T.view);}
-async function mkTexOpen(n){try{const d=await fxFetch('assets/fx/tex/'+n+'.tex.json?t='+Date.now());Object.assign(MK.t,{name:n,d,saved:JSON.stringify(d),dirty:false,undo:[],redo:[]});mkTexAll();mkTexRenderNow();mkLibRender();return true;}
+async function mkTexOpen(n){try{const d=await fxFetch('assets/fx/tex/'+n+'.tex.json?t='+Date.now());MK.t.src=d.gen==='image'?await mkImgToCanvas(await mkImgLoad('assets/fx/tex/'+n+'.png?t='+Date.now())):null;Object.assign(MK.t,{name:n,d,saved:JSON.stringify(d),dirty:false,undo:[],redo:[]});mkTexAll();mkTexRenderNow();mkLibRender();return true;}
   catch(e){stToast('เปิดภาพไม่ได้: '+n+' ('+e.message+')');return false;}}
 function mkTexDefaults(gen){const G=txS().gens[gen];return {v:1,desc:'',gen,seed:1,px:G.grid>=8?128:G.grid>1?128:256,cols:G.grid,rows:G.grid,kind:G.kind,fps:24,ramp:G.ramp,add:G.add,rand:G.kind==='loop'&&G.grid>1,p:{}};}
 function mkTexNew(name,gen,tpl){const d=tpl?JSON.parse(JSON.stringify(tpl)):mkTexDefaults(gen||'fire');Object.assign(MK.t,{name,d,saved:'',dirty:true,undo:[],redo:[]});mkTexAll();mkTexRenderNow();mkLibRender();stToast('ยังไม่ได้บันทึก — กด 💾 (Ctrl+S)');}
@@ -257,7 +260,7 @@ function mkTexRenderSoon(){const T=MK.t;clearTimeout(T.timer);T.timer=setTimeout
 function mkTexKey(){return 'tex/'+(MK.t.name||'_draft');}
 function mkTexMeta(o){return {cols:o.cols,rows:o.rows,add:o.add,span:o.span,rand:o.rand,rot:o.rot,spin:o.spin,size:o.size,occ:o.occ,kind:o.kind,fps:o.fps};}
 function mkTexRenderNow(){const T=MK.t;if(!T.d)return;const t0=performance.now();
-  try{T.cv=txRender(T.d);T.err='';}catch(e){T.err=String(e.message||e);console.error(e);stToast('วาดไม่ได้: '+T.err);return;}
+  try{T.cv=T.d.gen==='image'?mkImgCv():txRender(T.d);T.err='';}catch(e){T.err=String(e.message||e);console.error(e);stToast('วาดไม่ได้: '+T.err);return;}
   T.ms=performance.now()-t0;T.ver++;T.f=0;T.acc=0;const o=txOpts(T.d);
   const ct=new THREE.CanvasTexture(T.cv);fxTexUse(mkTexKey(),mkTexMeta(o),ct);T.demoK='';   // ใช้ได้ทันทีในเอฟเฟกต์ (ก่อนบันทึก)
   const A=$st('mkAtlas');if(A){A.innerHTML='';T.cv.title='ภาพทั้งแผ่น '+T.cv.width+'×'+T.cv.height;A.append(T.cv);}
@@ -286,15 +289,16 @@ function mkTexBot(){const B=$st('mkBot');if(!B||MK.ws!=='tex')return;B.innerHTML
     h('span',{className:'sep'}),h('button',{'data-tv':'2d',className:T.view==='2d'?'on':'',title:'ดูภาพ (1)',on:{click:()=>mkTexView('2d')}},'🖼 ภาพ'),h('button',{'data-tv':'3d',className:T.view==='3d'?'on':'',title:'ลองในฉาก 3D (2)',on:{click:()=>mkTexView('3d')}},'🧪 ลองใน 3D'),
     h('select',{title:'พื้นหลัง',on:{change:e=>{T.bg=e.target.value;}}},...[['dark','พื้นมืด'],['light','พื้นสว่าง'],['checker','ตาราง']].map(([v,t])=>h('option',{value:v,selected:T.bg===v},t))),
     h('button',{title:'เล่น/หยุด (Space)',on:{click:e=>{T.play=!T.play;e.target.textContent=T.play?'⏸':'▶';}}},T.play?'⏸':'▶'),h('button',{title:'สุ่มลายใหม่',on:{click:()=>{mkTPush();T.d.seed=((T.d.seed||1)%9999)+1;mkTChanged(true);}}},'🎲 seed'),
-    h('span',{id:'mkTStat',className:'mono'}),h('span',{className:'sep'}),
+    h('span',{id:'mkTStat',className:'mono'}),h('span',{className:'sep'}),h('button',{title:'นำเข้าภาพ PNG/JPG ที่วาดเอง (ภาพเดียว = sprite sheet, หลายภาพ = เรียงเป็นเฟรม) — หรือลากไฟล์มาวางบนจอ',on:{click:mkTexImportAsk}},'📥 นำเข้าภาพ'),
     h('button',{title:'เพิ่มชั้นอนุภาคที่ใช้ภาพนี้ในเอฟเฟกต์ที่เปิดอยู่',on:{click:()=>mkTexUseInFx('emit')}},'➕ เป็นเม็ดในเอฟเฟกต์'),h('button',{title:'เพิ่มการ์ดภาพ (แผ่นหันหากล้อง)',on:{click:()=>mkTexUseInFx('card')}},'➕ เป็นการ์ดภาพ'),h('button',{on:{click:mkHelp}},'?')),
     h('div',{id:'mkGens'},...Object.entries(X.gens).map(([g,G])=>h('button',{className:T.d&&T.d.gen===g?'on':'',title:G.desc,on:{click:()=>mkTexGen(g)}},h('b',null,G.icon||'·'),h('span',null,G.th),h('small',null,(G.kind==='loop'?'วน':'ตามอายุ')+' • '+G.grid+'×'+G.grid)))));
   mkSyncTitle();}
-function mkTexGen(g){const T=MK.t;if(!T.d||T.d.gen===g)return;mkTPush();const D=mkTexDefaults(g);Object.assign(T.d,{gen:g,p:{},cols:D.cols,rows:D.rows,kind:D.kind,ramp:D.ramp,add:D.add,rand:D.rand,px:D.px});mkTChanged(true);mkTexBot();}
+function mkTexGen(g){const T=MK.t;if(g==='image'){mkTexImportAsk();return;}if(!T.d||T.d.gen===g)return;mkTPush();const D=mkTexDefaults(g);Object.assign(T.d,{gen:g,p:{},cols:D.cols,rows:D.rows,kind:D.kind,ramp:D.ramp,add:D.add,rand:D.rand,px:D.px});mkTChanged(true);mkTexBot();}
 function mkTexInsp(){const I=$st('mkInsp');if(!I||MK.ws!=='tex')return;I.innerHTML='';const T=MK.t,X=txS(),d=T.d,G=X.gens[d.gen]||{fields:{}},ctx={push:mkTPush,set:mkTSet};
   I.append(h('div',{className:'hd'},h('b',null,(G.icon||'')+' '+(T.name||'(ใหม่)')),h('span',{className:'mute'},G.th+' · '+d.gen)),h('p',{className:'mute',style:'margin:0;font-size:12px'},G.desc),mkLintBox(FXLINT.fxLintTex(d,FXR.schema,{})));
   if(!d.p)d.p={};for(const k in G.fields)I.append(mkField(G.fields[k],d.p,k,ctx));
-  I.append(h('h3',{style:'margin-top:6px'},'สี'),mkField(X.file.ramp,d,'ramp',ctx));
+  if(d.gen==='image')I.append(h('div',{className:'stF'},h('button',{on:{click:mkTexImportAsk}},'📥 นำเข้าภาพใหม่ (แทนภาพนี้)'),h('p',{className:'mute',style:'font-size:12px;margin:4px 0 0'},'ภาพเป็น sprite sheet? ตั้ง cols × rows ให้ตรงกับจำนวนช่องในภาพ • ภาพ '+(T.src?T.src.width+'×'+T.src.height:'-')+' px')));
+  else I.append(h('h3',{style:'margin-top:6px'},'สี'),mkField(X.file.ramp,d,'ramp',ctx));
   const grp=(t,keys,open)=>{const g=h('details',{open},h('summary',null,t));for(const k of keys)g.append(mkField(X.file[k],d,k,ctx));I.append(g);};
   grp('ภาพ / เฟรม',['px','cols','rows','kind','fps','seed','desc'],true);grp('วิธีเล่นในเกม',['add','span','rand','rot','spin','size','occ'],false);
   I.append(h('p',{className:'mute',style:'font-size:12px'},'ใช้ในเอฟเฟกต์: emit → fb: tex/'+(T.name||'<ชื่อ>')+' (col #ffffff = สีตามภาพ) • การ์ดภาพ: mesh → plane + bill + mat flip + tex'));
@@ -334,12 +338,96 @@ async function mkTexSheetAll(name,only){const names=(only||Object.keys(MK.list.t
       x.globalCompositeOperation=o.add&&k<cols-1?'lighter':'source-over';x.drawImage(cv,(f%o.cols)*px,Math.floor(f/o.cols)*px,px,px,X,Y,cell,cell);x.globalCompositeOperation='source-over';}
     x.fillStyle='#f3dc94';x.font='12px monospace';x.fillText(names[r]+'  '+d.gen+' '+o.cols+'x'+o.rows+' '+(o.add?'เรือง':'ทึบ')+' • เฟรมเรียงซ้าย→ขวา • ช่องขวาสุด = บนพื้นตาราง',4,r*(cell+18)+13);}
   return stShot(name||'tex_all',C.toDataURL('image/jpeg',0.85));}
+// =====================================================================
+//  🔥 ไฟ 3D — จำลองไฟเป็นก้อน 3 มิติจริง (แทน Blender Mantaflow) → assets/fx/vol/<ชื่อ>.bin + .vol.json • เล่นด้วยชั้น vol
+// =====================================================================
+MK.v={name:'',d:null,saved:'',dirty:false,undo:[],redo:[],res:null,mesh:null,busy:false,stale:false,t:0};
+const VX_PRE={
+  column:{desc:'เสาไฟลุกวนต่อเนื่อง',mode:'column',res:24,frames:32,xfade:10,p:{shape:'ball',size:0.32}},
+  wall:{desc:'แนวไฟยาว (กำแพงไฟ / ขอบไฟ)',mode:'column',res:28,frames:32,xfade:10,p:{shape:'line',size:0.16,cool:0.8}},
+  ring:{desc:'วงไฟลุกเป็นวง',mode:'column',res:28,frames:32,xfade:10,p:{shape:'ring',size:0.26,cool:0.9}},
+  bonfire:{desc:'กองไฟใหญ่ ปั่นป่วนมาก',mode:'column',res:28,frames:40,xfade:12,p:{shape:'disc',size:0.3,turb:1.4,vort:1.8}},
+  burst:{desc:'ระเบิดไฟพุ่งครั้งเดียว',mode:'burst',res:28,frames:36,xfade:0,p:{shape:'ball',size:0.16,burst:2.2,emitT:0.12,cool:1,buoy:1.4}}};
+function mkVolKey(){return 'vol/'+(MK.v.name||'_draft');}
+async function mkVolShow(){const V=MK.v;if(!V.d){const first=Object.keys(MK.list.vol||{}).sort()[0];if(first)await mkVolOpen(first);else mkVolNew('my_fire3d','column');}else{mkVolAll();mkVolPreview();}}
+function mkVolHide(){const V=MK.v;if(V.mesh){fxScene.remove(V.mesh);V.mesh=null;}}
+async function mkVolOpen(n){try{const d=await fxFetch('assets/fx/vol/'+n+'.vol.json?t='+Date.now());const V=MK.v;Object.assign(V,{name:n,d,saved:JSON.stringify(d),dirty:false,undo:[],redo:[],res:null,stale:false});
+    try{const b=await fetch('assets/fx/vol/'+n+'.bin?t='+Date.now());if(b.ok){V.res={data:new Uint8Array(await b.arrayBuffer()),nx:d.nx,ny:d.ny,nz:d.nz,frames:d.frames,ms:0};fxVolSet('vol/'+n,V.res.data,V.res);}else V.stale=true;}catch(e){V.stale=true;}
+    mkVolAll();mkVolPreview();mkLibRender();return true;}catch(e){stToast('เปิดไฟ 3D ไม่ได้: '+n+' ('+e.message+')');return false;}}
+function mkVolNew(name,pre,tpl){const d=tpl?JSON.parse(JSON.stringify(tpl)):Object.assign({v:1,seed:1},JSON.parse(JSON.stringify(VX_PRE[pre]||VX_PRE.column)));delete d.nx;delete d.ny;delete d.nz;
+  Object.assign(MK.v,{name,d,saved:'',dirty:true,undo:[],redo:[],res:null,stale:true});mkVolAll();mkVolHide();mkLibRender();mkVolBake();}
+function mkVolNewAsk(){const m=h('div',{className:'stModal'}),nm=h('input',{type:'text',value:'my_fire3d',style:'width:220px'});
+  const ok=()=>{const n=nm.value.trim();if(!MKN.test(n)){stToast('ชื่อใช้ได้เฉพาะ a-z 0-9 _ -');return null;}m.remove();return n;};
+  m.append(h('div',{className:'box'},h('h3',null,'ไฟ 3D ใหม่ — เลือกแบบเริ่มต้น'),h('label',null,'ชื่อไฟล์ ',nm),
+    h('div',{className:'tpls'},...Object.entries(VX_PRE).map(([k,P])=>h('button',{on:{click:()=>{const n=ok();if(n)mkVolNew(n,k);}}},k,h('small',null,P.desc)))),
+    h('div',null,h('button',{on:{click:()=>m.remove()}},'ยกเลิก'))));$st('st').append(m);nm.focus();nm.select();}
+function mkVPush(){const V=MK.v;V.undo.push(JSON.stringify(V.d));if(V.undo.length>80)V.undo.shift();V.redo.length=0;}
+function mkVUndo(r){const V=MK.v,A=r?V.redo:V.undo,B=r?V.undo:V.redo;if(!A.length)return;B.push(JSON.stringify(V.d));V.d=JSON.parse(A.pop());V.dirty=JSON.stringify(V.d)!==V.saved;V.stale=true;mkVolAll();}
+const mkVSet=(o,k,v,ui)=>{if(v===undefined)delete o[k];else o[k]=v;const V=MK.v;V.dirty=JSON.stringify(V.d)!==V.saved;V.stale=true;mkSyncTitle();mkVolStat();if(ui)mkVolInsp();};
+function mkVolAll(){mkVolBot();mkVolInsp();}
+function mkVolStat(){const e=$st('mkVStat');if(!e)return;const V=MK.v;
+  e.textContent=V.busy?'กำลังจำลอง… '+Math.round((V.prog||0)*100)+'%':V.res?(V.res.nx+'×'+V.res.ny+'×'+V.res.nz+' • '+V.res.frames+' เฟรม • '+(V.res.data.length/1048576).toFixed(2)+' MB'+(V.res.ms?' • '+(V.res.ms/1000).toFixed(1)+' วิ':'')+(V.stale?' • ⚠ ยังไม่จำลองค่าล่าสุด (กด ▶)':'')):'ยังไม่ได้จำลอง — กด ▶ จำลอง';
+  e.className='mono '+(V.stale&&!V.busy?'bad':'good');}
+async function mkVolBake(){const V=MK.v;if(V.busy)return V.res;V.busy=true;V.prog=0;mkVolStat();const b=$st('mkVRun');if(b)b.disabled=true;
+  try{const r=await vxRun(V.d,p=>{V.prog=p;mkVolStat();});V.res=r;V.stale=false;fxVolSet(mkVolKey(),r.data,r);mkVolPreview();}
+  catch(e){stToast('จำลองไม่ได้: '+e.message);}finally{V.busy=false;if(b)b.disabled=false;mkVolStat();}return V.res;}
+// ดูผลในฉาก: กล่องสัดส่วนเดียวกับการจำลอง (กว้าง 1 : สูง 2) ที่จุดเล่น
+function mkVolPreview(){const V=MK.v;mkVolHide();if(!V.res||MK.ws!=='vol')return;const SQ=fxVolReady(mkVolKey());if(!SQ)return;
+  V.mesh=fireSeqVol(SQ,{hx:0.9,hz:0.9,h:3.6,int:1.15,den:1.2});V.t=0;fxScene.add(V.mesh);mkVolTick(0);}
+function mkVolTick(rdt){const V=MK.v;if(!V.mesh)return;V.t+=rdt;const A=stAnchor();if(A){V.mesh.position.set(tx(A.x),GY(A.x,A.y),tz(A.y));}
+  const u=V.mesh.userData.u,N=V.res.frames;if(V.d.mode==='burst'){const L=N/24+0.6,t=V.t%L;u.uFr.value=Math.min(N-1.001,t*24);u.uDis.value=t>N/24?1:Math.max(0,(t*24/N-0.8)/0.2)*0.6;}else{u.uFr.value=(V.t*24)%N;u.uDis.value=0;}u.uH.value=1;}
+function mkVolBot(){const B=$st('mkBot');if(!B||MK.ws!=='vol')return;B.innerHTML='';const V=MK.v;
+  B.append(h('div',{className:'bar'},h('span',{className:'file',id:'mkTitle'}),
+    h('button',{className:'gold',title:'บันทึก .bin + .vol.json (Ctrl+S)',on:{click:()=>mkVolSave()}},'💾 บันทึก'),h('button',{on:{click:()=>mkVolSave(true)}},'บันทึกเป็น…'),h('button',{title:'ย้อน (Ctrl+Z)',on:{click:()=>mkVUndo(false)}},'↶'),h('button',{title:'ทำซ้ำ (Ctrl+Y)',on:{click:()=>mkVUndo(true)}},'↷'),
+    h('span',{className:'sep'}),h('button',{id:'mkVRun',className:'gold',title:'จำลองใหม่ด้วยค่าปัจจุบัน (Enter) — ใช้เวลาไม่กี่วินาที',on:{click:mkVolBake}},'▶ จำลอง'),
+    h('button',{title:'สุ่มลายใหม่แล้วจำลอง',on:{click:()=>{mkVPush();V.d.seed=((V.d.seed||1)%9999)+1;mkVSet(V.d,'seed',V.d.seed,true);mkVolBake();}}},'🎲 seed'),h('span',{id:'mkVStat',className:'mono'}),h('span',{className:'sep'}),
+    h('button',{title:'เพิ่มชั้น vol ที่ใช้ไฟนี้ในเอฟเฟกต์ที่เปิดอยู่',on:{click:mkVolUseInFx}},'➕ ใส่ในเอฟเฟกต์'),h('button',{on:{click:mkHelp}},'?')),
+    h('div',{id:'mkGens'},...Object.entries(VX_PRE).map(([k,P])=>h('button',{title:P.desc,on:{click:()=>{mkVPush();const D=JSON.parse(JSON.stringify(P));delete D.desc;Object.assign(V.d,D,{p:Object.assign({},D.p)});mkVSet(V.d,'mode',V.d.mode,true);mkVolBake();}}},h('b',null,k==='burst'?'💥':'🔥'),h('span',null,k),h('small',null,P.desc)))));
+  mkSyncTitle();mkVolStat();}
+function mkVolInsp(){const I=$st('mkInsp');if(!I||MK.ws!=='vol')return;I.innerHTML='';const V=MK.v,X=FXR.schema.vx,d=V.d,ctx={push:mkVPush,set:mkVSet};if(!d.p)d.p={};
+  I.append(h('div',{className:'hd'},h('b',null,'🔥 '+(V.name||'(ใหม่)')),h('span',{className:'mute'},'ไฟ 3D · '+(d.mode||'column'))),h('p',{className:'mute',style:'margin:0;font-size:12px'},'จำลองไฟเป็นก้อน 3 มิติจริง (แบบ Blender Mantaflow) — ปรับค่าแล้วกด ▶ จำลอง • ดูในฉากได้ทันที'),
+    mkLintBox(FXLINT.fxLintVol?FXLINT.fxLintVol(d,FXR.schema,{}):[]));
+  for(const k of ['mode'])I.append(mkField(X.file[k],d,k,ctx));
+  for(const k in X.params){if(k==='burst'||k==='emitT'){if(d.mode!=='burst')continue;}if(k==='warm'&&d.mode==='burst')continue;I.append(mkField(X.params[k],d.p,k,ctx));}
+  const g=h('details',{open:true},h('summary',null,'ความละเอียด / เฟรม'));for(const k of ['res','frames',d.mode==='burst'?null:'xfade','seed','desc'])if(k)g.append(mkField(X.file[k],d,k,ctx));I.append(g);
+  I.append(h('p',{className:'mute',style:'font-size:12px'},'ใช้ในเอฟเฟกต์: ชั้น vol → src: vol/'+(V.name||'<ชื่อ>')+' (กล่อง hx × h × hz เมตร) • ไฟล์ bake จาก Blender ก็ใช้ชั้นเดียวกันได้: src: fire_column • ความละเอียด 24 × 32 เฟรม ≈ 0.9 MB'));}
+function mkVolPretty(){const d=MK.v.d,ks=Object.keys(d);return '{\n'+ks.map(k=>'  '+JSON.stringify(k)+': '+JSON.stringify(d[k])).join(',\n')+'\n}\n';}
+async function mkVolSave(as,force){const V=MK.v;let name=typeof as==='string'?as:force||V.name;if(as===true){const n=prompt('ชื่อไฟ 3D (a-z 0-9 _ -)',name||'my_fire3d');if(!n)return false;name=n.trim();}
+  if(!MKN.test(name||'')){stToast('ชื่อใช้ได้เฉพาะ a-z 0-9 _ - (ภาษาอังกฤษตัวเล็ก)');return false;}
+  if(!V.res||V.stale){await mkVolBake();if(!V.res)return false;}
+  const oldKey=mkVolKey();V.name=name;Object.assign(V.d,{nx:V.res.nx,ny:V.res.ny,nz:V.res.nz,frames:V.res.frames});const txt=mkVolPretty();
+  try{await mkPost('assets/fx/vol/'+name+'.bin',V.res.data);const j=await mkPost('assets/fx/vol/'+name+'.vol.json',txt);V.saved=JSON.stringify(V.d);V.dirty=false;fxVolSet(mkVolKey(),V.res.data,V.res);if(oldKey!==mkVolKey())FXVOL.delete(oldKey);
+    await mkRefresh();mkSyncTitle();stToast('บันทึกแล้ว → assets/fx/vol/'+name+'.bin + .vol.json\n'+(j.check||''),4000);return true;}
+  catch(e){if(MK.api){stToast('บันทึกไม่ได้: '+e.message);return false;}}
+  mkDownload(name+'.bin',new Blob([V.res.data]));mkDownload(name+'.vol.json',new Blob([txt],{type:'application/json'}));stToast('ดาวน์โหลดแล้ว — วางทั้ง 2 ไฟล์ไว้ที่ assets/fx/vol/',5000);return true;}
+function mkVolUseInFx(){const V=MK.v;if(!V.name||V.dirty){stToast('บันทึกไฟ 3D ก่อน แล้วค่อยใส่ในเอฟเฟกต์');return;}const burst=V.d.mode==='burst',fr=(V.res&&V.res.frames)||V.d.frames||32;
+  mkWs('fx').then(()=>{if(!ST.fx)return;stPush();const L={id:stUid('fire3d'),t:'vol',at:+Math.min(ST.t,stDur()).toFixed(2),life:burst?+(fr/24).toFixed(2):2.5,src:mkVolKey(),hx:0.9,hz:0.9,h:3.6,att:'ground'};
+    if(burst){L.once=true;L.dis={'0':0,'0.8':0,'1':0.6};L.hgt=1;}ST.fx.layers.push(L);ST.sel=L.id;stChanged(true);stToast('เพิ่มชั้น '+L.id+' (ไฟ 3D '+V.name+') แล้ว');});}
+// ---------- นำเข้าภาพเอง (PNG/JPG จากโปรแกรมวาดไหนก็ได้) ----------
+function mkImgLoad(src){return new Promise((res,rej)=>{const im=new Image();im.onload=()=>res(im);im.onerror=()=>rej(new Error('โหลดภาพไม่ได้'));im.src=src;});}
+function mkImgToCanvas(im,w,h){const c=document.createElement('canvas');c.width=w||im.width;c.height=h||im.height;c.getContext('2d').drawImage(im,0,0,c.width,c.height);return c;}
+// ภาพต้นฉบับ (MK.t.src) → แผ่นที่ใช้บันทึก/แสดง (ค่าสีตรงจาก getImageData) • px = ความกว้างต่อเฟรม
+function mkImgCv(){const T=MK.t,S=T.src;if(!S){const c=document.createElement('canvas');c.width=c.height=64;return c;}
+  T.d.px=Math.max(1,Math.round(S.width/(T.d.cols||1)));const c=mkImgToCanvas(S);c._rgba=c.getContext('2d').getImageData(0,0,c.width,c.height).data;return c;}
+function mkTexImportAsk(){const inp=h('input',{type:'file',accept:'image/png,image/jpeg,image/webp,image/gif',multiple:true,style:'display:none',on:{change:e=>{mkTexImport(e.target.files);inp.remove();}}});document.body.append(inp);inp.click();}
+async function mkTexImport(files){files=[...(files||[])].filter(f=>/^image\//.test(f.type));if(!files.length){stToast('เลือกไฟล์ภาพ PNG/JPG');return;}
+  files.sort((a,b)=>a.name.localeCompare(b.name,undefined,{numeric:true}));let ims;try{ims=await Promise.all(files.map(f=>mkImgLoad(URL.createObjectURL(f))));}catch(e){stToast(e.message);return;}
+  let cv,cols=1,rows=1;const n=ims.length;
+  if(n===1){const im=ims[0],sc=Math.min(1,2048/Math.max(im.width,im.height));cv=mkImgToCanvas(im,Math.round(im.width*sc),Math.round(im.height*sc));}
+  else{cols=Math.ceil(Math.sqrt(n));rows=Math.ceil(n/cols);const S=Math.min(256,Math.floor(2048/Math.max(cols,rows)),Math.max(...ims.map(i=>Math.max(i.width,i.height))));
+    cv=document.createElement('canvas');cv.width=S*cols;cv.height=S*rows;const x=cv.getContext('2d');
+    ims.forEach((im,i)=>{const k=Math.min(S/im.width,S/im.height),w=im.width*k,hh=im.height*k;x.drawImage(im,(i%cols)*S+(S-w)/2,Math.floor(i/cols)*S+(S-hh)/2,w,hh);});}
+  let name=files[0].name.replace(/\.[^.]+$/,'').toLowerCase().replace(/[^a-z0-9_\-]+/g,'_').replace(/^_+|_+$/g,'')||'my_image';if(MK.list.tex[name])name+='_2';
+  MK.t.src=cv;mkTexNew(name,null,{v:1,desc:'ภาพที่นำเข้า: '+files[0].name+(n>1?' (+'+(n-1)+' ภาพ)':''),gen:'image',seed:1,px:Math.round(cv.width/cols),cols,rows,kind:'loop',fps:24,add:true,rand:false,p:{}});
+  stToast('นำเข้าแล้ว '+cv.width+'×'+cv.height+(n>1?' • '+n+' เฟรม':' • ถ้าเป็น sprite sheet ให้ตั้ง cols × rows ทางขวา')+'\nกด 💾 บันทึก',5000);}
 // ---------- ปุ่มลัด / ช่วยเหลือ ----------
 function mkKey(e,typing){const c=e.ctrlKey||e.metaKey,M=MK.m,T=MK.t;
-  if(c&&e.code==='KeyS'){e.preventDefault();MK.ws==='mesh'?mkMeshSave():mkTexSave();return;}
+  if(c&&e.code==='KeyS'){e.preventDefault();MK.ws==='mesh'?mkMeshSave():MK.ws==='tex'?mkTexSave():mkVolSave();return;}
   if(typing)return;
-  if(c&&e.code==='KeyZ'){e.preventDefault();MK.ws==='mesh'?mkMUndo(e.shiftKey):mkTUndo(e.shiftKey);return;}
-  if(c&&e.code==='KeyY'){e.preventDefault();MK.ws==='mesh'?mkMUndo(true):mkTUndo(true);return;}
+  const U=MK.ws==='mesh'?mkMUndo:MK.ws==='tex'?mkTUndo:mkVUndo;
+  if(c&&e.code==='KeyZ'){e.preventDefault();U(e.shiftKey);return;}
+  if(c&&e.code==='KeyY'){e.preventDefault();U(true);return;}
+  if(MK.ws==='vol'&&e.code==='Enter'){e.preventDefault();mkVolBake();return;}
   if(MK.ws==='mesh'){if(c&&e.code==='KeyD'&&M.sel){e.preventDefault();mkDupPart(M.sel);}else if(c)return;
     else if(e.code==='KeyG')mkGizmoMode('translate');else if(e.code==='KeyR')mkGizmoMode('rotate');else if(e.code==='KeyS')mkGizmoMode('scale');
     else if(e.code==='Delete'&&M.sel)mkDelPart(M.sel);else if(e.code==='Escape')mkSel(null);
@@ -353,12 +441,16 @@ function mkHelp(){const m=h('div',{className:'stModal',on:{click:e=>{if(e.target
     'ดู: ดินปั้น (เห็นรูปทรงชัด) / วัสดุจริง (ไฟ น้ำแข็ง พลังงาน ตามธาตุ) • ➕ ใส่ในเอฟเฟกต์ = เพิ่มชั้น mesh ที่ใช้โมเดลนี้ • ⬇ .glb = ส่งออกไปเปิดใน Blender',
     '🎞 ภาพ: เลือกตัววาดด้านล่าง (ไฟ ควัน ระเบิด สายฟ้า วังวน คลื่นกระแทก ประกาย รอยฟัน ดาว วงเวท ลายนอยส์ จำลองของไหลจริง) → ปรับค่า → เลือกจานสี',
     'loop = ภาพวนต่อกันไม่มีรอยต่อ • ตามอายุ = เล่นครั้งเดียวตามอายุของเม็ด • 🧪 ลองใน 3D = ดูเป็นเม็ดอนุภาค + การ์ดภาพในฉากจริง • 🎲 = สุ่มลายใหม่',
-    'บันทึก = .png + .tex.json ใน assets/fx/tex/ • ใช้ในเอฟเฟกต์: emit fb "tex/<ชื่อ>" หรือการ์ดภาพ (➕ ปุ่มด้านล่าง) • ภาพมีสีในตัว: ใส่ col #ffffff'].map(t=>h('p',{style:'margin:0'},'• '+t))),h('button',{on:{click:()=>m.remove()}},'ปิด')));$st('st').append(m);}
+    'บันทึก = .png + .tex.json ใน assets/fx/tex/ • ใช้ในเอฟเฟกต์: emit fb "tex/<ชื่อ>" หรือการ์ดภาพ (➕ ปุ่มด้านล่าง) • ภาพมีสีในตัว: ใส่ col #ffffff • 📥 นำเข้าภาพที่วาดเอง (หรือลากไฟล์มาวาง)',
+    '🔥 ไฟ 3D: เลือกแบบ (เสาไฟ แนวไฟ วงไฟ กองไฟ ระเบิด) → ปรับค่า → ▶ จำลอง (ไม่กี่วินาที) → 💾 • ใช้ในเอฟเฟกต์: ชั้น vol src "vol/<ชื่อ>" (ไฟล์ bake จาก Blender ก็ใช้ได้: fire_column)',
+    'ในเอฟเฟกต์: mesh mat "tex" = ภาพไหลบนโมเดล • mesh grow = โมเดลงอกทีละชิ้น • emit look "model" = เศษโมเดลกระเด็น/เด้งพื้น • ชั้น warp = อากาศบิดเบี้ยว (ไอร้อน / คลื่นกระแทก)'].map(t=>h('p',{style:'margin:0'},'• '+t))),h('button',{on:{click:()=>m.remove()}},'ปิด')));$st('st').append(m);}
 // ---------- API สำหรับ Claude / console ----------
-Object.assign(window.STUDIO,{ws:w=>mkWs(w),mk:MK,tick:(n,dt)=>{for(let i=0;i<(n||1);i++)mkFrame(dt||1/60);},
+Object.assign(window.STUDIO,{vol:{open:n=>mkVolOpen(n),data:()=>MK.v.d,name:()=>MK.v.name,newFrom:(n,pre)=>mkVolNew(n,pre),bake:()=>mkVolBake(),save:n=>mkVolSave(n||false),
+    set(path,v){const ks=path.split('.');let o=MK.v.d;for(let i=0;i<ks.length-1;i++)o=o[ks[i]]=o[ks[i]]||{};mkVPush();mkVSet(o,ks[ks.length-1],v,true);return true;},shot:n=>stShot(n||('vol_'+(MK.v.name||'draft'))),res:()=>MK.v.res&&{nx:MK.v.res.nx,ny:MK.v.res.ny,nz:MK.v.res.nz,frames:MK.v.res.frames,bytes:MK.v.res.data.length,ms:MK.v.res.ms}},
+  ws:w=>mkWs(w),mk:MK,tick:(n,dt)=>{for(let i=0;i<(n||1);i++)mkFrame(dt||1/60);},
   mesh:{open:n=>mkMeshOpen(n),data:()=>MK.m.d,name:()=>MK.m.name,newFrom:(n,tpl)=>mkMeshNew(n,tpl||null),
     set(path,v){const [id,...ks]=path.split('.');const o0=id==='file'?MK.m.d:MK.m.d.parts.find(p=>p.id===id);if(!o0)return false;let o=o0;for(let i=0;i<ks.length-1;i++)o=o[ks[i]];mkMPush();o[ks[ks.length-1]]=v;mkMChanged(true);return true;},
     add:k=>(mkAddPart(k),MK.m.sel),select:id=>mkSel(id),del:id=>mkDelPart(id),save:n=>mkMeshSave(false,n),view:v=>{MK.m.view=v;MK.m.matK='';mkMeshMat();},shot:n=>stShot(n||('mesh_'+(MK.m.name||'draft'))),sheetAll:(n,only)=>mkMeshSheetAll(n,only),tris:()=>MK.m.tris,lint:()=>FXLINT.fxLintMesh(MK.m.d,FXR.schema)},
   tex:{open:n=>mkTexOpen(n),data:()=>MK.t.d,name:()=>MK.t.name,newFrom:(n,gen,tpl)=>mkTexNew(n,gen,tpl||null),gen:g=>mkTexGen(g),
     set(path,v){const ks=path.split('.');let o=MK.t.d;for(let i=0;i<ks.length-1;i++)o=o[ks[i]]=o[ks[i]]||{};mkTPush();o[ks[ks.length-1]]=v;mkTChanged(true);return true;},
-    render:()=>(mkTexRenderNow(),{ms:MK.t.ms,w:MK.t.cv&&MK.t.cv.width,h:MK.t.cv&&MK.t.cv.height}),save:n=>mkTexSave(n||false),bake:async n=>{if(n)await mkTexOpen(n);return mkTexSave(MK.t.name);},sheet:n=>mkTexSheet(n),sheetAll:(n,only)=>mkTexSheetAll(n,only),view:v=>mkTexView(v),lint:()=>FXLINT.fxLintTex(MK.t.d,FXR.schema,{})}});
+    render:()=>(mkTexRenderNow(),{ms:MK.t.ms,w:MK.t.cv&&MK.t.cv.width,h:MK.t.cv&&MK.t.cv.height}),save:n=>mkTexSave(n||false),bake:async n=>{if(n)await mkTexOpen(n);return mkTexSave(MK.t.name);},sheet:n=>mkTexSheet(n),sheetAll:(n,only)=>mkTexSheetAll(n,only),import:files=>mkTexImport(files),view:v=>mkTexView(v),lint:()=>FXLINT.fxLintTex(MK.t.d,FXR.schema,{})}});

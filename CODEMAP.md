@@ -270,7 +270,7 @@ EFXAUG:144 PJPAL:163 pjPal:165 ULTCOL:166 efxAug:167 VFXAUG_ON:171 fxAug:172
 §192 4) เอฟเฟกต์ทั้งจอ (ค่าไปที่ GradePass ใน js/27-world.js)
 SCR:193 screenFlash:194 screenRadial:195 screenKick:196 screenHurt:197 _scv:198 updateScreenFx:199 updateVfxKit:207
 
-## js/45-fx-runtime.js (314) — 
+## js/45-fx-runtime.js (324) — 
 FXR:9 FXDEG:10
 §11 โหลด
 fxFetch:12 fxDefaults:13 fxBoot:14 fxOverrides:24 fxLoad:27 fxData:31
@@ -283,31 +283,41 @@ fxPlay:73 fxStart:74 fxStop:83 fxKill:84 fxClearAll:85 fxGate:87
 §89 ทุกเฟรม
 updateFx:90
 §106 สร้างชั้น
-fxN:107 fxSpawn:108 fxTick:138 fxEnd:147
-§152 อนุภาค
-_fxrnd:153 fxUnit:154 fxCone:155 fxEmit:157 fxPart:174
-§188 รูปทรง 3D
-FXGEO:189 fxMerge:190 fxRibbon:195 fxGeo:201 fxEnergyMat:221 fxMeshMake:232 fxMeshTick:248 fxFlipTex:260
-§265 หางแสง / รอยฟัน
-fxTrailTick:266
-§272 สายฟ้า
-fxBolt:273
-§279 ฟังก์ชันในโค้ดที่ไฟล์เรียกได้ (ชั้น t:"code")
-FXCODE:280
-§292 ผูกกับ event ของเกม (assets/fx/bind.json) — เรียกจาก fx(ev)
-fxBind:294
-§304 แม่แบบ playFx เป็นไฟล์ (assets/fx/tpl/*, sig/*, rec/*)
-fxTpl:306
+fxN:107 fxSpawn:108 fxTick:140 fxEnd:151
+§158 อนุภาค
+_fxrnd:159 fxUnit:160 fxCone:161 fxEmit:163 fxPart:180
+§195 รูปทรง 3D
+FXGEO:196 fxMerge:197 fxRibbon:202 fxGeo:208 fxEnergyMat:228 fxMeshMake:239 fxMeshTick:256 fxFlipTex:270
+§275 หางแสง / รอยฟัน
+fxTrailTick:276
+§282 สายฟ้า
+fxBolt:283
+§289 ฟังก์ชันในโค้ดที่ไฟล์เรียกได้ (ชั้น t:"code")
+FXCODE:290
+§302 ผูกกับ event ของเกม (assets/fx/bind.json) — เรียกจาก fx(ev)
+fxBind:304
+§314 แม่แบบ playFx เป็นไฟล์ (assets/fx/tpl/*, sig/*, rec/*)
+fxTpl:316
 
-## js/46-fx-make.js (141) — 
+## js/46-fx-make.js (244) — 
 FXMK:10 MKD:11 mkRng:12 mkHash:13 mkNoise:15 mkL:17 mkR2:18
 §19 ที่เก็บจุด/สามเหลี่ยม
-mkG:20 mkV:21 mkQ:22 mkAppend:23 mkCopy:24 mkFlat:25 _mkv:26 mkXf:27 mkThree:29 mkTRS:31 mkGrid:34
-§35 ชิ้นส่วน (k) — พิกัด: ฐานอยู่ที่ y=0 (ยกเว้น sphere/box อยู่กลาง)
-MKGEN:36
-§92 ตัวแต่ง (ทำตามลำดับ): เรียว → บิด → โค้ง → ขรุขระ → แบน(เหลี่ยม) → ขน…
-mkDeform:93 mkOpts:104 mkPart:105 fxMeshBuild:118
-§123 โหลด
-fxMeshLoad:124 fxMeshGeo:126 fxMeshSet:128 fxTexLoad:130 fxTexUse:133 fxTexNeed:136 fxPreAssets:138 fxAssetsWait:140
+mkG:21 mkPc:22 mkV:23 mkQ:24 mkAppend:25 mkCopy:26 mkFlat:27 _mkv:28 mkXf:29 mkThree:32 mkTRS:34 mkGrid:37
+§38 ชิ้นส่วน (k) — พิกัด: ฐานอยู่ที่ y=0 (ยกเว้น sphere/box อยู่กลาง)
+MKGEN:39
+§95 ตัวแต่ง (ทำตามลำดับ): เรียว → บิด → โค้ง → ขรุขระ → แบน(เหลี่ยม) → ขน…
+mkDeform:96 mkOpts:107 mkPart:108 fxMeshBuild:121
+§132 โหลด
+fxMeshLoad:133 fxMeshGeo:135 fxMeshSet:137 fxTexLoad:139 fxTexUse:142 fxTexNeed:145
+§146 โมเดลงอกทีละชิ้น (ชั้น mesh: grow 0..1 เส้นโค้งได้, stagger, growBy)
+FXGROWBY:148 fxGrowInit:149 fxGrowTick:151
+§156 วัสดุภาพบนรูปทรง (mat:"tex") — ภาพที่วาดในสตูดิโอ (tex/…) ไหลบนผิว + …
+fxTexMat:158 fxTexMatBind:170 fxTexMatTick:173
+§174 เศษโมเดลกระเด็น (emit look:"model") — หิน ผลึก ขนนก เศษดาบ: หมุน ตกตา…
+FXMP:176 fxMPMat:177 fxMPGroup:181 _mpM:184 _mpQ:184 _mpE:184 _mpP:184 _mpS:184 fxMPUpdate:185 fxMPClear:194 fxMPSpawn:196
+§200 อากาศบิดเบี้ยว (ชั้น warp) — ไอร้อน / คลื่นกระแทกบิดภาพ / เลนส์โป่ง •…
+fxWarpMake:202 fxWarpTick:214
+§220 ไฟ 3 มิติจากการจำลอง (ชั้น vol) — ไฟล์รูปแบบเดียวกับที่เพื่อน bake จา…
+FXVOL:223 fxVolLoad:224 fxVolTex:228 fxVolSet:231 fxVolReady:232 fxVolMake:233 fxVolTick:236 fxPreAssets:241 fxAssetsWait:243
 
-(46 files, 9758 lines)
+(46 files, 9871 lines)

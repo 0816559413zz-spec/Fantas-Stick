@@ -6,7 +6,7 @@
 // ตัวเลือก: --quiet (พิมพ์เฉพาะปัญหา) • ออกด้วยรหัส 1 ถ้ามี err
 const fs = require('fs'), path = require('path'), crypto = require('crypto');
 const ROOT = path.join(__dirname, '..'), FXD = path.join(ROOT, 'assets', 'fx');
-const { fxLint, fxLintBind, fxLintMesh, fxLintTex } = require('./fx-lint.js');
+const { fxLint, fxLintBind, fxLintMesh, fxLintTex, fxLintVol } = require('./fx-lint.js');
 const quiet = process.argv.includes('--quiet');
 const schema = JSON.parse(fs.readFileSync(path.join(FXD, 'schema.json'), 'utf8'));
 // ไฟล์เอฟเฟกต์ทั้งหมด
@@ -24,8 +24,10 @@ const events = new Set([...js.matchAll(/z:'([a-z0-9_]+)'/g)].map(m => m[1]));
 const listDir = (d, ext) => { try { return fs.readdirSync(d).filter(f => f.endsWith(ext)).map(f => f.slice(0, -ext.length)); } catch (e) { return []; } };
 const MD = path.join(FXD, 'mesh'), TD = path.join(FXD, 'tex');
 const meshes = new Set(listDir(MD, '.mesh.json')), texs = new Set(listDir(TD, '.tex.json'));
-const ctx = { names, models, flips, sounds, events, meshes, texs };
-let errs = 0, warns = 0; const index = { v: 1, fx: {}, mesh: {}, tex: {} };
+const VD = path.join(FXD, 'vol'), vols = new Set(listDir(VD, '.vol.json'));
+const vseq = new Set(listDir(path.join(ROOT, 'assets', 'vfx'), '.bin').filter(n => fs.existsSync(path.join(ROOT, 'assets', 'vfx', n + '.json'))));   // ไฟ 3D ที่ bake จาก Blender
+const ctx = { names, models, flips, sounds, events, meshes, texs, vols, vseq };
+let errs = 0, warns = 0; const index = { v: 1, fx: {}, mesh: {}, tex: {}, vol: {} };
 const say = (lv, file, at, msg) => { if (lv === 'err') errs++; else warns++; console.log(`${lv === 'err' ? '✗' : '⚠'} ${file}${at ? ' › ' + at : ''}: ${msg}`); };
 for (const n of [...meshes].sort()) {
   const txt = fs.readFileSync(path.join(MD, n + '.mesh.json'), 'utf8'); let m;
@@ -39,6 +41,13 @@ for (const n of [...texs].sort()) {
   const has = fs.existsSync(png);
   for (const r of fxLintTex(t, schema, { png: has })) say(r.lv, 'tex/' + n, r.at, r.msg);
   index.tex[n] = { v: crypto.createHash('md5').update(txt).update(has ? fs.readFileSync(png) : '').digest('hex').slice(0, 8), desc: t.desc || '', gen: t.gen || '', kind: t.kind || '', cols: t.cols || 1, rows: t.rows || 1 };
+}
+for (const n of [...vols].sort()) {
+  const txt = fs.readFileSync(path.join(VD, n + '.vol.json'), 'utf8'), bin = path.join(VD, n + '.bin'); let d;
+  try { d = JSON.parse(txt); } catch (e) { say('err', 'vol/' + n, '', 'JSON ผิดรูปแบบ — ' + e.message); continue; }
+  const bytes = fs.existsSync(bin) ? fs.statSync(bin).size : 0;
+  for (const r of fxLintVol(d, schema, { bytes })) say(r.lv, 'vol/' + n, r.at, r.msg);
+  index.vol[n] = { v: crypto.createHash('md5').update(txt).update(String(bytes)).digest('hex').slice(0, 8), desc: d.desc || '', mode: d.mode || '', frames: d.frames || 0 };
 }
 for (const p of files) {
   const n = nameOf(p), txt = fs.readFileSync(p, 'utf8');
@@ -83,9 +92,12 @@ md += '\nตัวอย่าง (มงกุฎหนามน้ำแข็
 md += `\n## ภาพที่วาดเอง — \`assets/fx/tex/<ชื่อ>.png\` + \`.tex.json\` (แท็บ 🎞 ภาพ ในสตูดิโอ)\n${TX.about}\n\n### ไฟล์ .tex.json\n${table(TX.file)}\n### จานสี (ramp)\n${Object.entries(TX.ramps).map(([k, v]) => '- `' + k + '`: ' + v.map(q => q[1]).join(' → ')).join('\n')}\n\n### ตัววาด (gen) — ค่าใส่ใน \`p\`\n`;
 for (const [k, G] of Object.entries(TX.gens)) md += `\n#### \`${k}\` ${G.icon || ''} ${G.th} — kind \`${G.kind}\` • ตาราง ${G.grid}×${G.grid} • จานสี \`${G.ramp}\` • ${G.add ? 'เรืองแสง' : 'ทึบ'}\n${G.desc}\n\n${table(G.fields)}\n`;
 md += '\nภาพ (.png) ต้องวาดในสตูดิโอ (GPU / จำลองของไหล): แก้ `.tex.json` แล้วเปิด `studio.html?tex=<ชื่อ>&bake=1` = วาดใหม่ + บันทึก .png ให้เอง (ต้องเปิดผ่าน `python tools/serve.py`) • ใช้ในเอฟเฟกต์: `{"t":"emit","fb":"tex/<ชื่อ>","col":"#ffffff",...}` หรือการ์ดภาพ `{"t":"mesh","shape":"plane","bill":true,"mat":"flip","tex":"tex/<ชื่อ>","col":"#ffffff"}`\n';
+const VXS = schema.vx;
+md += `\n## ไฟ 3 มิติที่จำลองเอง — \`assets/fx/vol/<ชื่อ>.vol.json\` + \`.bin\` (แท็บ 🔥 ไฟ 3D ในสตูดิโอ)\n${VXS.about}\n\n### ไฟล์ .vol.json\n${table(VXS.file)}\n### ค่าการจำลอง (ใส่ใน \`p\`)\n${table(VXS.params)}\n`;
+md += '\nข้อมูล .bin ต้องจำลองในสตูดิโอ: `studio.html?vol=<ชื่อ>` แล้ว `STUDIO.vol.bake()` + `STUDIO.vol.save()` • ใช้ในเอฟเฟกต์: `{"t":"vol","src":"vol/<ชื่อ>","hx":0.9,"hz":0.9,"h":3.6}` (ระเบิด: `"once":true`) • ไฟล์ bake จาก Blender ใน assets/vfx ก็ใช้ชั้นเดียวกัน: `"src":"fire_column"`\n';
 md += `\n## ผูกกับเกม — \`assets/fx/bind.json\`\n${schema.bind.about}\n- คีย์: ${schema.bind.key}\n${Object.entries(schema.bind.fields).map(([k, v]) => `- \`${k}\`: ${v}`).join('\n')}\n\nตัวอย่าง:\n\`\`\`json\n{\n  "efx:dfboom": {"fx": "fire/dfboom", "mode": "add", "p": {"r": "ev.r/20"}},\n  "imp:fire":   {"fx": "fire/spark_hit"},\n  "efx:blaze":  {"fx": "fire/blaze_aura", "follow": "ev.id"}\n}\n\`\`\`\n`;
 md += `\n## เรียกจากโค้ด\n\`\`\`js\nconst h=fxPlay('fire/dfboom',{x,y,h,a,s:1,pal:'ice',col:'#ff00aa',p:{r:6},follow:playerId,own:true});  // คืน handle (null = ไฟล์ยังไม่โหลด)\nfxStop(h);   // ชั้น loop หยุด + ชั้น end:true เริ่มเล่น\n\`\`\`\n`;
 md += `\n## งาน Claude (เร็วที่สุด)\n1. คัดลอกไฟล์ใกล้เคียงจาก \`assets/fx/start/\` (แม่แบบ) หรือสร้างในสตูดิโอ → แก้ JSON\n2. \`node tools/fx-check.js\` — ต้องไม่มี ✗\n3. ดูผลไม่ต้องเข้าเกม: เปิด \`studio.html?fx=<ชื่อ>&sheet=0.05,0.15,0.3,0.6,1.2\` (แผ่นภาพสรุปทั้งไทม์ไลน์ + ตัวเลขจอขาว/บังตัวละคร) • รันผ่าน \`python tools/serve.py\` แล้วเติม \`&save=ชื่อ\` = เซฟภาพลง \`shots/ชื่อ.png\` ให้ Read ดูได้\n4. ผูกกับท่าใน \`bind.json\` (mode add ก่อน แล้วค่อย replace เมื่อผู้ใช้ชอบ)\n`;
 fs.writeFileSync(path.join(ROOT, 'FX-FORMAT.md'), md);
-if (!quiet || errs || warns) console.log(`fx-check: ${files.length} ไฟล์ + โมเดล ${meshes.size} + ภาพ ${texs.size} • ✗ ${errs} • ⚠ ${warns} • เขียน assets/fx/index.json + FX-FORMAT.md แล้ว`);
+if (!quiet || errs || warns) console.log(`fx-check: ${files.length} ไฟล์ + โมเดล ${meshes.size} + ภาพ ${texs.size} + ไฟ 3D ${vols.size} • ✗ ${errs} • ⚠ ${warns} • เขียน assets/fx/index.json + FX-FORMAT.md แล้ว`);
 process.exit(errs ? 1 : 0);
