@@ -368,6 +368,6 @@ function disposeTree(root){
     if(o.material)for(const m of [].concat(o.material))if(!seen.has(m)){seen.add(m);disposeMaterial(m,keep);}
   });
 }
-function disposeObj(o){scene.remove(o);if(o.userData&&o.userData.extra)for(const e of o.userData.extra){scene.remove(e);disposeTree(e);}disposeTree(o);}
+function disposeObj(o){scene.remove(o);if(o.userData&&o.userData.extra)for(const e of o.userData.extra){(e.parent||scene).remove(e);disposeTree(e);}disposeTree(o);}
 const PM3=new Map(),EM3=new Map(),JM3=new Map();
 function clearDyn(){for(const M of [PM3,EM3,JM3,WM3,MM3]){for(const o of M.values())disposeObj(o.g);M.clear();}ZV.length=0;clearVfx();if(typeof MO!=='undefined')clearModeObjs();}

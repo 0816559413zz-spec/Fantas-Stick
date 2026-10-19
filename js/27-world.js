@@ -33,6 +33,8 @@ function softify(m,range){
   m.vertexShader='varying float vVZ;'+m.vertexShader.replace('vec4 mv=modelViewMatrix*vec4(position,1.0);','vec4 mv=modelViewMatrix*vec4(position,1.0);vVZ=-mv.z;');
   const f=m.fragmentShader,i=f.lastIndexOf('}');m.fragmentShader=SOFT_GLSL+f.slice(0,i)+'gl_FragColor*=softK('+range.toFixed(2)+');}';
   return fxMat(m);}
+// ภาพฉากหลัก (ก่อนวาดชั้นเอฟเฟกต์) ให้ shader อากาศร้อนบิดเบี้ยว (heat haze, js/42) อ่าน — มีค่าเฉพาะตอนเปิด soft
+const HAZE_U={uScene:{value:null}};
 class FXPass extends Pass{
   constructor(){super();this.needsSwap=true;
     this.cp=new FullScreenQuad(new THREE.ShaderMaterial({uniforms:{t:{value:null}},vertexShader:'varying vec2 vUv;void main(){vUv=uv;gl_Position=vec4(position.xy,0.0,1.0);}',fragmentShader:'uniform sampler2D t;varying vec2 vUv;void main(){gl_FragColor=texture2D(t,vUv);}',depthTest:false,depthWrite:false}));}
@@ -40,7 +42,7 @@ class FXPass extends Pass{
     if(!SOFTU.uSoftOn.value){this.needsSwap=false;r.setRenderTarget(read);r.render(fxScene,cam);r.autoClear=ac;return;}
     // นุ่ม: ก๊อปภาพฉากไปอีกแผ่น แล้ววาดเอฟเฟกต์ทับโดยอ่านความลึกจากแผ่นเดิม (อ่าน+เขียนแผ่นเดียวกันไม่ได้)
     this.needsSwap=true;SOFTU.uDepth.value=read.depthTexture;SOFTU.uRes.value.set(read.width,read.height);SOFTU.uNear.value=cam.near;SOFTU.uFar.value=cam.far;
-    this.cp.material.uniforms.t.value=read.texture;r.setRenderTarget(write);this.cp.render(r);r.render(fxScene,cam);r.autoClear=ac;}
+    this.cp.material.uniforms.t.value=read.texture;HAZE_U.uScene.value=read.texture;r.setRenderTarget(write);this.cp.render(r);r.render(fxScene,cam);r.autoClear=ac;}
 }
 const fxPass=new FXPass();composer.addPass(fxPass);
 const bloom=new UnrealBloomPass(new THREE.Vector2(512,512),0.72,0.5,0.86);

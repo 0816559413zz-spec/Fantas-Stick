@@ -71,27 +71,22 @@ function makeMagicCircle(){
   const rn=new THREE.Mesh(new THREE.CircleGeometry(0.7,48),new THREE.MeshBasicMaterial({map:runeTex,color:hdr('#ff8a3a',1.6),transparent:true,opacity:0.85,blending:A,depthWrite:false,side:THREE.DoubleSide}));g.add(rn);
   g.userData={r2,rn};return g;
 }
-// โล่ไฟ (คลิกขวาค้าง, รอบ Pyro 2026-10-19): ลิ้นไฟเลียขึ้นตามขอบวงกลมของโล่ (วงที่หันหากล้อง) ตลอดเวลา + เปลวอนุภาคไหลขึ้นตามขอบ • กลางโล่โล่ง เห็นตัว
+// โล่ไฟ (คลิกขวาค้าง) — ผู้เล่น 2026-10-19 รอบ 2: "อยากได้โล่ไฟหุ้มรอบตัว" แบบไฟลุกเหมือนกำแพง Ring of Embers
+// = เปลือกทรงไข่เปิดยอด (LatheGeometry: uv.y 0 ที่ฐาน → 1 ที่ปากบน — ปลายเปลวเลียพ้นหัว) 2 ชั้น ใช้ shader sheet เดียวกับกำแพงไฟ → เปลวเลียขึ้นรอบตัวจากพื้นถึงหัว ยอดเปลวเป็นลิ้นไฟ
 // ไม่ใช่ไฟพ่นขึ้นตามแขน และไม่ใช่ลูกไฟโคจร (ผู้เล่นเคยไม่เอาทั้งสองแบบ)
-let _fsGeo=null;   // กรวยไฟ ฐานที่ 0 ปลายชี้ +y (สร้างตอนใช้ครั้งแรก: _ftGeo อยู่ในไฟล์ 42 ที่โหลดทีหลัง)
-const _fsQ=new THREE.Quaternion(),_fsV=new THREE.Vector3(),_fsW=new THREE.Vector3(),FSN=20,FSR=1.38;
-function _fsDir(th){const c=Math.cos(th),s=Math.sin(th);let dx=c>=0?-s:s,dy=c>=0?c:-c;dx=dx*0.75+c*0.15;dy=dy*0.75+0.25+s*0.15;const l=Math.hypot(dx,dy)||1;return [dx/l,dy/l];}
+const _fsGeo=(()=>{const P=[[0.95,0],[1.22,0.35],[1.38,0.9],[1.36,1.45],[1.2,1.95],[0.95,2.4],[0.7,2.9],[0.5,3.3]].map(([r,y])=>new THREE.Vector2(r,y));
+  const g=new THREE.LatheGeometry(P,48);g.userData.keep=true;return g;})();
 function fireShieldFX(o,p,on,dt){
   if(!on){if(o.fshR)o.fshR.visible=false;return;}
-  if(!_fsGeo){_fsGeo=_ftGeo.clone().rotateX(Math.PI/2);_fsGeo.userData.keep=true;}
-  if(!o.fshR){const g=new THREE.Group(),m=fireMat({mode:'sheet',scale:[5,2.4,1],speed:3.6,int:0.95,heat:-0.12}),cs=[];
-    for(let i=0;i<FSN;i++){const th=i/FSN*6.283,[dx,dy]=_fsDir(th),t=new THREE.Mesh(_fsGeo,m);t.position.set(Math.cos(th)*FSR*0.97,Math.sin(th)*FSR*0.97,0);t.rotation.z=Math.atan2(-dx,dy);
-      t.userData.L=0.3+0.42*(Math.sin(th)+1)/2;t.renderOrder=3;g.add(t);cs.push(t);}
-    g.position.y=1.1;g.userData={m,cs};o.g.add(g);o.fshR=g;}
-  const g=o.fshR,now=performance.now();g.visible=true;
-  // หันวงหากล้อง (หมุนแกนตั้งอย่างเดียว เปลวจึงชี้ขึ้นจริงเสมอ)
-  g.rotation.y=Math.atan2(cam.position.x-o.g.position.x,cam.position.z-o.g.position.z)-o.g.rotation.y;
-  g.userData.cs.forEach((t,i)=>{const L=t.userData.L*(1+0.22*Math.sin(now/70+i*1.7)+0.12*Math.sin(now/37+i*3.1));t.scale.set(0.2,L*1.15,0.2);});
-  // เปลวอนุภาคไหลขึ้นตามขอบ (ทิศสัมผัสขอบวง ชี้ขึ้น) แล้วพุ่งต่อจากด้านบน
-  g.updateMatrixWorld(true);g.getWorldQuaternion(_fsQ);
-  for(let i=0;i<3;i++){const th=rnd(-1.4,4.55),[dx,dy]=_fsDir(th);_fsV.set(Math.cos(th)*FSR,Math.sin(th)*FSR,0);g.localToWorld(_fsV);const q=simOf(_fsV);
-    _fsW.set(dx,dy,0).applyQuaternion(_fsQ);const sp=rnd(2,3.2);
-    flame(q.x,q.y,q.h-0.1,{vx:_fsW.x*sp*20,vy:_fsW.z*sp*20,vh:_fsW.y*sp,life:rnd(0.22,0.32),size:rnd(4,6),g:-1,drag:1});}
+  if(!o.fshR){const g=new THREE.Group();
+    const m1=fireMat({mode:'sheet',scale:[14,2.8,1],speed:1.8,int:0.82,heat:-0.08,op:0.85}),m2=fireMat({mode:'sheet',scale:[19,2.5,1],speed:2.3,int:0.8,heat:-0.18,op:0.7});
+    const outer=new THREE.Mesh(_fsGeo,m1),inner=new THREE.Mesh(_fsGeo,m2);inner.scale.set(0.9,0.95,0.9);outer.renderOrder=inner.renderOrder=3;
+    g.add(inner,outer);g.userData={outer,inner,m1,m2,age:0};o.g.add(g);o.fshR=g;}
+  const g=o.fshR,u=g.userData;if(!g.visible)u.age=0;g.visible=true;u.age+=dt;
+  // ตอนเพิ่งยกโล่: ไฟพุ่งขึ้นจากพื้นห่อตัว (0.2 วิ) • ระหว่างถือ: หมุนสวนกัน + หายใจเบา ๆ
+  const up=Math.min(1,u.age/0.2),now=performance.now();g.scale.set(1,Math.max(0.05,up*(1+0.04*Math.sin(now/130))),1);
+  u.outer.rotation.y+=dt*0.5;u.inner.rotation.y-=dt*0.8;u.m1.uniforms.uHeat.value=-0.08+(u.age<0.3?0.2*(1-u.age/0.3):0);
+  if(Math.random()<0.5){const an=rnd(0,6.283);PARTS.push({x:p.x+Math.cos(an)*26,y:p.y+Math.sin(an)*26,h:(o.zs||0)+rnd(1.6,2.6),vx:Math.cos(an)*rnd(5,20),vy:Math.sin(an)*rnd(5,20),vh:rnd(1.5,3),life:0.5,max:0.5,col:'#ffc04a',size:1.3,g:-0.6});}
 }
 function pyroFX(o,p,pz,now,dt){
   const a=p.a||0,ca=Math.cos(a),sa=Math.sin(a);
@@ -198,14 +193,14 @@ function pyroFX(o,p,pz,now,dt){
   if(p.hv){for(let i=0;i<4;i++)PARTS.push({x:p.x+rnd(-8,8),y:p.y+rnd(-8,8),h:pz+rnd(-0.1,0.2),vx:rnd(-20,20),vy:rnd(-20,20),vh:rnd(-5,-2.5),life:rnd(0.25,0.4),max:0.4,col:i?'#ff8a2a':'#ffe08a',size:rnd(2.4,3.6),g:2,drag:2,smoke:i===3});LREQ.push({x:tx(p.x),y:pz,z:tz(p.y),col:'#ff8a3a',int:2,dist:8});}
   // Blazeform: ออร่าไฟรอบตัว + ขอบวงบอกระยะ (~180)
   if((p.fm|0)&131072){
-    // ขอบออร่า (รอบ Pyro 2026-10-19): กำแพงไฟเตี้ย shader ตามขอบวง (ผสมแบบทึบ เห็นบนพื้นขาว) + เส้นขอบส้ม + ไฟ 4 ก้อนวิ่งวนรอบขอบทิ้งเปลวเป็นทาง → เห็นรัศมีชัด
+    // ขอบออร่า = "ออร่าความร้อน" (ผู้เล่น 2026-10-19 รอบ 2): ไฟลุกเตี้ย ๆ หรี่ ๆ แบบกำแพง Ring of Embers + ม่านอากาศร้อนบิดเบี้ยวเหนือขอบ + เส้นขอบส้มจาง → เห็นรัศมีโดยไม่ขาวจ้า
     if(!o.blzR){o.blzR=new THREE.Mesh(_iceEdge,new THREE.MeshBasicMaterial({color:hdr('#ff5a14',1.3),transparent:true,opacity:0.6,depthWrite:false}));o.blzR.scale.setScalar(130*S3);o.g.add(o.blzR);
       o.blzD=new THREE.Mesh(_iceDisc,new THREE.MeshBasicMaterial({color:'#ff4a10',transparent:true,opacity:0.08,depthWrite:false}));o.blzD.scale.setScalar(130*S3);o.g.add(o.blzD);
-      o.blzW=makeFireWall(130*S3,0.75);o.blzW.userData.mats.forEach(m=>{m.uniforms.uInt.value=0.75;m.uniforms.uHeat.value-=0.12;});o.g.add(o.blzW);}   // หรี่ลง: ใกล้กล้องแล้วเป็นแถบขาว
-    o.blzR.visible=o.blzD.visible=o.blzW.visible=true;o.blzR.position.y=0.07;o.blzD.position.y=0.06;o.blzR.material.opacity=0.45+0.2*Math.sin(now/120);
+      o.blzW=makeFireWall(130*S3,0.42);o.blzW.userData.mats.forEach(m=>{m.uniforms.uInt.value=0.62;m.uniforms.uHeat.value-=0.16;});o.g.add(o.blzW);}
+    o.blzR.visible=o.blzD.visible=o.blzW.visible=true;o.blzD.material.opacity=0.06;o.blzR.position.y=0.07;o.blzD.position.y=0.06;o.blzR.material.opacity=0.3+0.12*Math.sin(now/120);
     o.blzW.rotation.y=-o.g.rotation.y+now/900;o.blzW.scale.y=1+0.15*Math.sin(now/140);
-    for(let i=0;i<4;i++){const an=now/420+i*Math.PI/2,ta=an+Math.PI/2;for(let j=0;j<2;j++){const a2=an-j*0.06;flame(p.x+Math.cos(a2)*130,p.y+Math.sin(a2)*130,pz+0.05,{vx:Math.cos(ta)*60,vy:Math.sin(ta)*60,vh:rnd(3,5),life:rnd(0.3,0.42),size:rnd(9,12),g:-1.5,drag:2});}}
-    for(let i=0;i<2;i++){const an=rnd(0,6.283);PARTS.push({x:p.x+Math.cos(an)*130,y:p.y+Math.sin(an)*130,h:pz+0.1,vx:0,vy:0,vh:rnd(1.5,3.5),life:rnd(0.35,0.6),max:0.6,col:i?'#ff7a2a':'#ffc04a',size:rnd(2.6,4),g:-1.5,drag:2});}
+    {const h=hazeOf(o,'blzHzE',()=>new THREE.Mesh(_hzRing,hazeMat(1)));h.position.set(o.g.position.x,o.g.position.y,o.g.position.z);}
+    for(let i=0;i<1;i++){const an=rnd(0,6.283);PARTS.push({x:p.x+Math.cos(an)*130,y:p.y+Math.sin(an)*130,h:pz+0.1,vx:0,vy:0,vh:rnd(1.5,3.5),life:rnd(0.35,0.6),max:0.6,col:i?'#ff7a2a':'#ffc04a',size:rnd(2.6,4),g:-1.5,drag:2});}
   }else if(o.blzR)o.blzR.visible=o.blzD.visible=o.blzW.visible=false;
   if((p.fm|0)&131072){
     const hp=[[o.armR,0,-0.66,0],[o.armL,0,-0.66,0],[o.legs[0],0,-0.8,0.05],[o.legs[1],0,-0.8,0.05]];
@@ -213,19 +208,21 @@ function pyroFX(o,p,pz,now,dt){
     if(!o.blzF){o.blzF=hp.map((_,i)=>{const t=makeFireTail({speed:3.8,heat:0.12});t.rotation.x=Math.PI/2;o.g.add(t);return t;});}
     hp.forEach(([P,lx,ly,lz],i)=>{const t=o.blzF[i];_ev.set(lx,ly+(i<2?0.08:0.12),lz);P.localToWorld(_ev);o.g.worldToLocal(_ev);t.position.copy(_ev);t.visible=true;const sz=i<2?0.16:0.26;t.scale.set(sz,sz,(i<2?0.72:1.05)*(1+0.15*Math.sin(now/70+i*2)));});
     // ไฟเด่นที่มือและเท้า + หางไฟบาง ๆ
-    hp.forEach(([P,lx,ly,lz],hi)=>{_ev.set(lx,ly,lz);P.localToWorld(_ev);const q=simOf(_ev),ft=hi>=2;for(let k=0;k<(ft?3:1);k++)flame(q.x+rnd(-3,3),q.y+rnd(-3,3),q.h-0.12,{vx:-(o.svx||0)*0.3,vy:-(o.svz||0)*0.3,vh:rnd(1.2,2.4)*(ft?1.5:1),life:rnd(0.2,0.3)*(ft?1.25:1),size:rnd(4,5.5)*(ft?1.35:1),g:-1.5});
+    hp.forEach(([P,lx,ly,lz],hi)=>{_ev.set(lx,ly,lz);P.localToWorld(_ev);const q=simOf(_ev),ft=hi>=2;for(let k=0;k<(ft?0:1);k++)flame(q.x+rnd(-3,3),q.y+rnd(-3,3),q.h-0.12,{vx:-(o.svx||0)*0.3,vy:-(o.svz||0)*0.3,vh:rnd(1.2,2.4)*(ft?1.5:1),life:rnd(0.2,0.3)*(ft?1.25:1),size:rnd(4,5.5)*(ft?1.35:1),g:-1.5});
       if(Math.random()<0.3)PARTS.push({x:q.x,y:q.y,h:q.h,vx:rnd(-30,30),vy:rnd(-30,30),vh:rnd(0.5,2),life:0.35,max:0.35,col:'#ffd27a',size:1.3,g:-0.5});});
     // ไฟแรงที่เท้า: ขาอยู่ในเสื้อคลุม → จุดไฟรอบชายเสื้อที่พื้นแทน (เห็นชัดว่าเท้าลุกไฟ)
-    for(let i=0;i<3;i++){const an=rnd(0,6.283),rr=rnd(7,13);flame(p.x+Math.cos(an)*rr,p.y+Math.sin(an)*rr,pz+0.05,{vx:Math.cos(an)*15-(o.svx||0)*0.3,vy:Math.sin(an)*15-(o.svz||0)*0.3,vh:rnd(2.5,4),life:rnd(0.25,0.35),size:rnd(6,9),g:-1.5,drag:2});}
+    if(Math.random()<0.6){const an=rnd(0,6.283),rr=rnd(7,12);flame(p.x+Math.cos(an)*rr,p.y+Math.sin(an)*rr,pz+0.05,{vx:Math.cos(an)*12-(o.svx||0)*0.3,vy:Math.sin(an)*12-(o.svz||0)*0.3,vh:rnd(2,3),life:rnd(0.22,0.3),size:rnd(5,7),g:-1.5,drag:2,col:'#ffb070'});}
+    // ออร่าความร้อนรอบตัว: อากาศเหนือ/รอบตัวสั่นไหวบิดเบี้ยว (แผ่นหันหากล้อง)
+    {const h=hazeOf(o,'blzHzB',()=>{const m=new THREE.Mesh(_hzPlane,hazeMat(0));m.scale.set(2.6,3.8,1);return m;});h.position.set(o.g.position.x,o.g.position.y+1.55,o.g.position.z);h.quaternion.copy(cam.quaternion);}
     // เปลวตามลำตัว (มากขึ้น รอบ Pyro 2026-10-19 แต่ยังไม่ห่อทั้งตัว): ไหล่ หลัง สีข้าง
-    for(let i=0;i<3;i++){const sd=i===2?0:(i?1:-1);_ev.set(sd*rnd(0.18,0.3)+rnd(-0.06,0.06),rnd(0.8,1.75),i===2?rnd(-0.3,-0.15):rnd(-0.1,0.25));o.b.localToWorld(_ev);const q=simOf(_ev);flame(q.x,q.y,q.h-0.1,{vx:-(o.svx||0)*0.3,vy:-(o.svz||0)*0.3,vh:rnd(1.2,2.4),life:rnd(0.2,0.28),size:rnd(3.5,5),g:-1.2,col:'#ffe0c0'});}
+    for(let i=0;i<1;i++){const sd=[1,-1,0][Math.random()*3|0];_ev.set(sd*rnd(0.18,0.3)+rnd(-0.06,0.06),rnd(0.8,1.75),i===2?rnd(-0.3,-0.15):rnd(-0.1,0.25));o.b.localToWorld(_ev);const q=simOf(_ev);flame(q.x,q.y,q.h-0.1,{vx:-(o.svx||0)*0.3,vy:-(o.svz||0)*0.3,vh:rnd(1.2,2.4),life:rnd(0.2,0.28),size:rnd(3.5,5),g:-1.2,col:'#ffb070'});}
     // วงแหวนไฟหลังศีรษะ (เอกลักษณ์ Blazeform): แกนวงร้อน + เปลวเลียออกรอบวง (หมุนช้า) + เปลวอนุภาคไหวรอบวง
     if(!o.blzH){const g=new THREE.Group();
-      const core=new THREE.Mesh(new THREE.TorusGeometry(0.5,0.06,10,56),fireMat({mode:'ball',flow:[0,1,0],scale:[3,3,3],speed:2.2,int:1.1,heat:0.3,rim:0}));
-      const mk=(r0,r1,sx,sp,ht)=>{const geo=new THREE.CylinderGeometry(r1,r0,0.001,72,1,true);geo.rotateX(Math.PI/2);const m=new THREE.Mesh(geo,fireMat({mode:'sheet',scale:[sx,1.5,1],speed:sp,int:1.0,heat:ht}));return m;};
+      const core=new THREE.Mesh(new THREE.TorusGeometry(0.5,0.06,10,56),fireMat({mode:'ball',flow:[0,1,0],scale:[3,3,3],speed:2.2,int:0.85,heat:0.12,rim:0}));
+      const mk=(r0,r1,sx,sp,ht)=>{const geo=new THREE.CylinderGeometry(r1,r0,0.001,72,1,true);geo.rotateX(Math.PI/2);const m=new THREE.Mesh(geo,fireMat({mode:'sheet',scale:[sx,1.5,1],speed:sp,int:0.8,heat:ht-0.1}));return m;};
       const f1=mk(0.47,0.98,16,2.6,0.08),f2=mk(0.5,1.2,11,2.0,-0.12);f1.renderOrder=f2.renderOrder=3;g.add(f2,f1,core);g.userData={core,f1,f2};g.position.set(0,1.9,-0.42);o.b.add(g);o.blzH=g;}
     {const g=o.blzH,u=g.userData;g.visible=true;u.f1.rotation.z+=dt*0.9;u.f2.rotation.z-=dt*0.6;const pul=1+0.05*Math.sin(now/90);g.scale.setScalar(pul*(o.blzIn>0?Math.min(1,1.2-o.blzIn/0.6):1));
-      for(let i=0;i<2;i++){const an=rnd(0,6.283);_ev.set(Math.cos(an)*0.55,Math.sin(an)*0.55,0);g.localToWorld(_ev);const q=simOf(_ev);flame(q.x,q.y,q.h-0.1,{vh:rnd(1,2),life:0.22,size:rnd(3.5,5),g:-1});}
+      for(let i=0;i<(Math.random()<0.5?1:0);i++){const an=rnd(0,6.283);_ev.set(Math.cos(an)*0.55,Math.sin(an)*0.55,0);g.localToWorld(_ev);const q=simOf(_ev);flame(q.x,q.y,q.h-0.1,{vh:rnd(1,2),life:0.22,size:rnd(3.5,5),g:-1});}
       if(Math.random()<0.4){const an=rnd(0,6.283);_ev.set(Math.cos(an)*0.6,Math.sin(an)*0.6,0);g.localToWorld(_ev);const q=simOf(_ev);PARTS.push({x:q.x,y:q.y,h:q.h,vx:rnd(-30,30),vy:rnd(-30,30),vh:rnd(1,2.5),life:0.4,max:0.4,col:'#ffd27a',size:1.4,g:-0.5});}}
     // ไฟไต่เป็นเกลียวขึ้นตามแขน และไล่จากเท้าขึ้นขา (ตอนเพิ่งแปลงร่าง)
     if(o.blzIn>0){o.blzIn-=dt;const t=1-o.blzIn/0.6;for(const [P,lx,ly,lz] of hp){for(let i=0;i<2;i++){const u=t*(0.8+0.2*i),an=u*12+i*3;_ev.set(lx+Math.cos(an)*0.12,ly*(1-u),lz+Math.sin(an)*0.12);P.localToWorld(_ev);const q=simOf(_ev);flame(q.x,q.y,q.h-0.1,{vh:1,life:0.25,size:5,g:-1});}}}

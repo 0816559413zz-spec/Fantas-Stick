@@ -34,7 +34,7 @@ function efxFX(ev){
     case 'fswap':{const o=PM3.get(ev.id);FX.flashSprite(x,y,H,'#dff6ff',0.3,2.2,0.12,2);if(o){o.tip.getWorldPosition(_pw);const t=simOf(_pw);_ev.set(0,-0.66,0);o.armR.localToWorld(_ev);const h=simOf(_ev);
       for(let i=0;i<14;i++){const sx=ev.m?h.x+rnd(-20,20):t.x,sy=ev.m?h.y+rnd(-20,20):t.y,sh=ev.m?h.h+rnd(-0.2,1):t.h,ex=ev.m?t.x:h.x+rnd(-14,14),ey=ev.m?t.y:h.y+rnd(-14,14),eh=ev.m?t.h:h.h+rnd(0,1.1);PARTS.push({x:sx,y:sy,h:sh,vx:(ex-sx)/0.25,vy:(ey-sy)/0.25,vh:(eh-sh)/0.25,life:0.25,max:0.25,col:i%2?'#ffffff':'#bfeaff',size:2,g:0,drag:0});}}
       burst(x,y,ev.m?'#bfeaff':'#ffffff',10,120,0.35,1.8,{h:H,g:0});if(ev.id===NET.myId)snd('ui_click');break;}
-    case 'slide':burst(x,y,'#dff6ff',16,200,0.4,2,{h:0.3,vh:[0.5,2],g:3,sh:4,vr:5,c2:'#5ab8ff'});for(let i=0;i<7;i++){const an=i/7*6.283+rnd(-0.2,0.2),r=rnd(12,26);iceBit(_plateG,x+Math.cos(an)*r,y+Math.sin(an)*r,0.1,rnd(0.35,0.55),0.5,rnd(0.35,0.5),{rx:rnd(-0.6,-0.3),ry:-an,life:0.6,up:0.06,down:0.3});}iceChips(x,y,0.3,8,180,4);if(near)snd('whoosh',ev);break;
+    case 'slide':burst(x,y,'#dff6ff',16,200,0.4,2,{h:0.3,vh:[0.5,2],g:3,sh:4,vr:5,c2:'#5ab8ff'});for(let i=0;i<4;i++){const an=i/4*6.283+rnd(-0.2,0.2),r=rnd(12,26);iceBit(_plateG,x+Math.cos(an)*r,y+Math.sin(an)*r,0.1,rnd(0.35,0.55),0.5,rnd(0.35,0.5),{rx:rnd(-0.6,-0.3),ry:-an,life:0.6,up:0.06,down:0.3});}iceChips(x,y,0.3,8,180,4);if(near)snd('whoosh',ev);break;
     case 'ice':
       ICEV.push(makeIceFloor(x,y,ev.r,ev.t,ev.c,ev.lx,ev.ly));
       if(ev.c)ZV.push({x,y,r:ev.r,t:ev.t,kind:'icering',col:'#8fe0ff',file:zoneFx('icering',x,y,ev.r,ev.t,'#8fe0ff')});
@@ -158,11 +158,11 @@ function efxFX(ev){
       FX.flashSprite(x,y,H+0.5,'#fff2d0',0.3,3,0.07,1.8);FX.flashSprite(x,y,H+0.3,'#ff9a3a',0.45,6,0.28,1.3);fireBlast(x,y,H+0.6,R*S3*0.75,0.6);
       FX.flashLight(x,y,H+0.8,'#ffb347',8,24,0.45);
       ring(x,y,'#ffffff',R*0.55,0.22,H+0.06);ring(x,y,'#ffd27a',R,0.35,H+0.05);ring(x,y,'#ff8a2a',R*1.5,0.5,H+0.05);
-      // พื้นแตกเป็นใยกว้าง (ร่องดำ + ลาวาเรือง) + พื้นไหม้ + ก้อนหินกระเด็น 3 มิติ + เสาไฟพุ่งจากพื้นหลายต้น (รอบ Pyro 2026-10-19)
-      fireCrackWeb(x,y,0.02,R*1.7,2.6,{n:12,w:0.2,hot:1.6});scorch(x,y,0.02,R*1.15,2.8);
+      // พื้นแตกเป็นใยกว้าง (ร่องดำ + ไฟลุกตามรอยแล้วค่อย ๆ ดับ) + พื้นไหม้ + ก้อนหินกระเด็น 3 มิติ + เสาไฟพุ่งจากพื้นหลายต้น (รอบ Pyro 2026-10-19)
+      fireCrackWeb(x,y,0.02,R*1.7,3.4,{n:12,w:0.16,burn:1.7,burnT:2.6});scorch(x,y,0.02,R*1.15,2.8);
       rockChunks(x,y,0.02,18,11,{r:R*0.35,s:1.5,life:1.5});
       fireGeyser(x,y,0.02,8.5,1.2,0.75,0);
-      for(let i=0;i<7;i++){const an=i/7*6.283+rnd(-0.3,0.3),d=R*rnd(0.45,0.95);fireGeyser(x+Math.cos(an)*d,y+Math.sin(an)*d,0.02,rnd(4,6.5),rnd(0.65,0.9),rnd(0.55,0.7),0.05+i*0.035);}
+      for(let i=0;i<4;i++){const an=i/4*6.283+rnd(-0.3,0.3),d=R*rnd(0.45,0.95);fireGeyser(x+Math.cos(an)*d,y+Math.sin(an)*d,0.02,rnd(4,6.5),rnd(0.65,0.9),rnd(0.55,0.7),0.05+i*0.035);}
       // สะบัดปีกไฟออกตอนกระแทก: ปีก shader กางพรึ่บออกกว้างแล้วจางหาย
       {const o=PM3.get(ev.id),W=makeFireWings();if(W){W.position.set(tx(x),H+GY(x,y)+1.2,tz(y));W.rotation.y=o?o.g.rotation.y:0;W.scale.setScalar(1.0);
         fireTemp(W,[W.userData.mat],0.5,(v,k)=>{poseFireWings(W,1,-0.25+0.5*k,0);W.scale.setScalar(1+k*0.8);W.userData.mat.uniforms.uOp.value=1-k;W.userData.mat.uniforms.uHeat.value=0.25-0.4*k;});}}
@@ -215,6 +215,7 @@ function efxFX(ev){
       // ระเบิดไฟชัด ๆ บนตัวศัตรู ใหญ่ขึ้นตามจำนวน Burning (รอบ Pyro 2026-10-19): ลูกไฟ shader + แฟลชส้ม + วงกระแทก • 4 ชั้นขึ้นไป = เสาไฟพุ่ง
       {const R=1.1+0.42*n,gh=GY(x,y);fireBlast(x,y,Math.max(0.5,H-gh-0.2),R,0.5+0.05*n,{up:0.9});later(0.08,()=>fireBlast(x,y,Math.max(0.6,H-gh+0.2),R*0.7,0.45,{up:1.4}));
         ring(x,y,'#ff8a2a',30+n*14,0.35,Math.max(0.1,H-gh-1));
+        fireBurn(x,y,0.02,0.5+0.07*Math.min(5,n),1.5+0.25*Math.min(5,n),0.75+0.07*Math.min(5,n));   // ไฟลุกห่อตัวแบบ Ring of Embers แล้วดับ
         if(n>=4)fireGeyser(x,y,0.02,3+n*0.5,0.35+n*0.04,0.6,0.05);FX.flashLight(x,y,H,'#ff8a3a',3+n,10+n*2,0.3);}
       // ปะทุเป็นเปลวหลายชั้นตามจำนวน stack + สะเก็ดกระเด็น แล้วเหลือควันกับถ่านไฟ
       for(let L=0;L<n;L++)later(L*0.07,()=>{for(let i=0;i<10;i++){const an=rnd(0,6.283);flame(x+Math.cos(an)*10,y+Math.sin(an)*10,Math.max(0.1,H-1.1)+L*0.35,{vx:Math.cos(an)*rnd(80,170),vy:Math.sin(an)*rnd(80,170),vh:rnd(3,7),life:0.4,size:rnd(9,13)+L,drag:4});}});
