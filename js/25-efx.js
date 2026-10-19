@@ -160,9 +160,9 @@ function efxFX(ev){
       ring(x,y,'#ffffff',R*0.55,0.22,H+0.06);ring(x,y,'#ffd27a',R,0.35,H+0.05);ring(x,y,'#ff8a2a',R*1.5,0.5,H+0.05);
       // พื้นแตกเป็นใยกว้าง (ร่องดำ + ลาวาเรือง) + พื้นไหม้ + ก้อนหินกระเด็น 3 มิติ + เสาไฟพุ่งจากพื้นหลายต้น (รอบ Pyro 2026-10-19)
       fireCrackWeb(x,y,0.02,R*1.7,2.6,{n:12,w:0.2,hot:1.6});scorch(x,y,0.02,R*1.15,2.8);
-      rockChunks(x,y,0.02,18,11,{r:R*0.35,s:1.1,life:1.5});
-      fireGeyser(x,y,0.02,8.5,0.85,0.75,0);
-      for(let i=0;i<7;i++){const an=i/7*6.283+rnd(-0.3,0.3),d=R*rnd(0.45,0.95);fireGeyser(x+Math.cos(an)*d,y+Math.sin(an)*d,0.02,rnd(4,6.5),rnd(0.4,0.6),rnd(0.55,0.7),0.05+i*0.035);}
+      rockChunks(x,y,0.02,18,11,{r:R*0.35,s:1.5,life:1.5});
+      fireGeyser(x,y,0.02,8.5,1.2,0.75,0);
+      for(let i=0;i<7;i++){const an=i/7*6.283+rnd(-0.3,0.3),d=R*rnd(0.45,0.95);fireGeyser(x+Math.cos(an)*d,y+Math.sin(an)*d,0.02,rnd(4,6.5),rnd(0.65,0.9),rnd(0.55,0.7),0.05+i*0.035);}
       // สะบัดปีกไฟออกตอนกระแทก: ปีก shader กางพรึ่บออกกว้างแล้วจางหาย
       {const o=PM3.get(ev.id),W=makeFireWings();if(W){W.position.set(tx(x),H+GY(x,y)+1.2,tz(y));W.rotation.y=o?o.g.rotation.y:0;W.scale.setScalar(1.0);
         fireTemp(W,[W.userData.mat],0.5,(v,k)=>{poseFireWings(W,1,-0.25+0.5*k,0);W.scale.setScalar(1+k*0.8);W.userData.mat.uniforms.uOp.value=1-k;W.userData.mat.uniforms.uHeat.value=0.25-0.4*k;});}}
@@ -203,18 +203,18 @@ function efxFX(ev){
       fireRune(x,y,0,ev.r*0.9,ev.t+0.3);scorch(x,y,0,ev.r*1.02,ev.t+0.6);fireCrackWeb(x,y,0,ev.r*0.88,ev.t+0.5,{n:10,hot:ev.t});
       fireBlast(x,y,0.5,2.4,0.45);FX.flashSprite(x,y,0.8,'#ffb347',0.3,4,0.12,1.5);rockChunks(x,y,0,10,7,{r:15,s:0.8});smoke(x,y,0.3,8,'#3a2a24',0.9,7,70);if(near)shake(3);
       // กำแพงไฟปะทุขึ้นจากพื้นตอนวาง
-      for(let i=0;i<48;i++){const a=i/48*6.283;flame(x+Math.cos(a)*ev.r,y+Math.sin(a)*ev.r,0.05,{vh:rnd(9,13),life:rnd(0.35,0.5),size:rnd(12,16),g:-1});}
+      for(let i=0;i<48;i++){const a=i/48*6.283;flame(x+Math.cos(a)*ev.r,y+Math.sin(a)*ev.r,0.05,{vh:rnd(9,13),life:rnd(0.35,0.5),size:rnd(10,13),g:-1});}
       FX.flashLight(x,y,2,'#ff8a3a',6,20,0.35);if(near)snd('boom',{x,y,vol:0.5});break;
     case 'eringhit':burst(x,y,'#ffb347',22,220,0.4,2.2,{h:H,vh:[0,3],g:2});for(let i=0;i<8;i++)flame(x+rnd(-12,12),y+rnd(-12,12),Math.max(0.1,H-1.2),{vx:rnd(-90,90),vy:rnd(-90,90),vh:rnd(4,8),life:0.3,size:rnd(9,12),drag:4});FX.flashLight(x,y,H,'#ff8a3a',3,10,0.2);if(near)snd('block',{x,y,vol:0.5});break;
     case 'blaze':{const o=PM3.get(ev.id);if(o)o.blzIn=0.6;}burst(x,y,'#ff7a2a',30,200,0.6,2.4,{h:H,vh:[1,5],g:-1});ring(x,y,'#ffb347',80,0.4,0.2);FX.flashLight(x,y,H+1,'#ff8a3a',5,16,0.4);if(near)snd('cast_fire',ev);break;
     case 'snapwind':if(near)snd('cast_fire',{x,y,vol:0.5});break;
     case 'snap':{const o=PM3.get(ev.id);let hx=x,hy=y,hh=H+1.2;if(o){o.tip.getWorldPosition(_pw);const q=simOf(_pw);hx=q.x;hy=q.y;hh=q.h;}
-      FX.flashSprite(hx,hy,hh,'#fff6d0',0.3,3.2,0.12,2.6);for(let i=0;i<10;i++){const an=rnd(0,6.283);flame(hx,hy,hh-0.2,{vx:Math.cos(an)*rnd(60,140),vy:Math.sin(an)*rnd(60,140),vh:rnd(1,4),life:0.25,size:rnd(4,7),drag:5});}}
+      FX.flashSprite(hx,hy,hh,'#fff6d0',0.3,1.6,0.12,1.8);/* เล็กลง: ดีดนิ้วอยู่หน้ากล้อง (เคยขาวทั้งจอ) */for(let i=0;i<10;i++){const an=rnd(0,6.283);flame(hx,hy,hh-0.2,{vx:Math.cos(an)*rnd(60,140),vy:Math.sin(an)*rnd(60,140),vh:rnd(1,4),life:0.25,size:rnd(4,7),drag:5});}}
       ring(x,y,'#ffd27a',500,0.35,0.3);FX.flashLight(x,y,H,'#ffb347',5,16,0.25);if(near)snd('parry',{x,y,vol:0.5});break;
-    case 'snapboom':{const n=Math.max(1,ev.n|0);explosionFX(x,y,H);
+    case 'snapboom':{const n=Math.max(1,ev.n|0);explosionFX(x,y,H,0.45+0.16*Math.min(5,n));   // 1 ชั้น = เล็ก, 5 ชั้น = ใหญ่กว่าระเบิดปกติ
       // ระเบิดไฟชัด ๆ บนตัวศัตรู ใหญ่ขึ้นตามจำนวน Burning (รอบ Pyro 2026-10-19): ลูกไฟ shader + แฟลชส้ม + วงกระแทก • 4 ชั้นขึ้นไป = เสาไฟพุ่ง
       {const R=1.1+0.42*n,gh=GY(x,y);fireBlast(x,y,Math.max(0.5,H-gh-0.2),R,0.5+0.05*n,{up:0.9});later(0.08,()=>fireBlast(x,y,Math.max(0.6,H-gh+0.2),R*0.7,0.45,{up:1.4}));
-        FX.flashSprite(x,y,H,'#ffb347',0.3,2.5+n*0.6,0.12,1.4);ring(x,y,'#ff8a2a',30+n*14,0.35,Math.max(0.1,H-gh-1));
+        ring(x,y,'#ff8a2a',30+n*14,0.35,Math.max(0.1,H-gh-1));
         if(n>=4)fireGeyser(x,y,0.02,3+n*0.5,0.35+n*0.04,0.6,0.05);FX.flashLight(x,y,H,'#ff8a3a',3+n,10+n*2,0.3);}
       // ปะทุเป็นเปลวหลายชั้นตามจำนวน stack + สะเก็ดกระเด็น แล้วเหลือควันกับถ่านไฟ
       for(let L=0;L<n;L++)later(L*0.07,()=>{for(let i=0;i<10;i++){const an=rnd(0,6.283);flame(x+Math.cos(an)*10,y+Math.sin(an)*10,Math.max(0.1,H-1.1)+L*0.35,{vx:Math.cos(an)*rnd(80,170),vy:Math.sin(an)*rnd(80,170),vh:rnd(3,7),life:0.4,size:rnd(9,13)+L,drag:4});}});

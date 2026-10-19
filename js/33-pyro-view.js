@@ -79,14 +79,14 @@ function _fsDir(th){const c=Math.cos(th),s=Math.sin(th);let dx=c>=0?-s:s,dy=c>=0
 function fireShieldFX(o,p,on,dt){
   if(!on){if(o.fshR)o.fshR.visible=false;return;}
   if(!_fsGeo){_fsGeo=_ftGeo.clone().rotateX(Math.PI/2);_fsGeo.userData.keep=true;}
-  if(!o.fshR){const g=new THREE.Group(),m=fireMat({mode:'sheet',scale:[5,2.4,1],speed:3.6,int:1.05,heat:0.04}),cs=[];
+  if(!o.fshR){const g=new THREE.Group(),m=fireMat({mode:'sheet',scale:[5,2.4,1],speed:3.6,int:0.95,heat:-0.12}),cs=[];
     for(let i=0;i<FSN;i++){const th=i/FSN*6.283,[dx,dy]=_fsDir(th),t=new THREE.Mesh(_fsGeo,m);t.position.set(Math.cos(th)*FSR*0.97,Math.sin(th)*FSR*0.97,0);t.rotation.z=Math.atan2(-dx,dy);
       t.userData.L=0.3+0.42*(Math.sin(th)+1)/2;t.renderOrder=3;g.add(t);cs.push(t);}
     g.position.y=1.1;g.userData={m,cs};o.g.add(g);o.fshR=g;}
   const g=o.fshR,now=performance.now();g.visible=true;
   // หันวงหากล้อง (หมุนแกนตั้งอย่างเดียว เปลวจึงชี้ขึ้นจริงเสมอ)
   g.rotation.y=Math.atan2(cam.position.x-o.g.position.x,cam.position.z-o.g.position.z)-o.g.rotation.y;
-  g.userData.cs.forEach((t,i)=>{const L=t.userData.L*(1+0.22*Math.sin(now/70+i*1.7)+0.12*Math.sin(now/37+i*3.1));t.scale.set(0.12,L,0.12);});
+  g.userData.cs.forEach((t,i)=>{const L=t.userData.L*(1+0.22*Math.sin(now/70+i*1.7)+0.12*Math.sin(now/37+i*3.1));t.scale.set(0.2,L*1.15,0.2);});
   // เปลวอนุภาคไหลขึ้นตามขอบ (ทิศสัมผัสขอบวง ชี้ขึ้น) แล้วพุ่งต่อจากด้านบน
   g.updateMatrixWorld(true);g.getWorldQuaternion(_fsQ);
   for(let i=0;i<3;i++){const th=rnd(-1.4,4.55),[dx,dy]=_fsDir(th);_fsV.set(Math.cos(th)*FSR,Math.sin(th)*FSR,0);g.localToWorld(_fsV);const q=simOf(_fsV);
@@ -201,7 +201,7 @@ function pyroFX(o,p,pz,now,dt){
     // ขอบออร่า (รอบ Pyro 2026-10-19): กำแพงไฟเตี้ย shader ตามขอบวง (ผสมแบบทึบ เห็นบนพื้นขาว) + เส้นขอบส้ม + ไฟ 4 ก้อนวิ่งวนรอบขอบทิ้งเปลวเป็นทาง → เห็นรัศมีชัด
     if(!o.blzR){o.blzR=new THREE.Mesh(_iceEdge,new THREE.MeshBasicMaterial({color:hdr('#ff5a14',1.3),transparent:true,opacity:0.6,depthWrite:false}));o.blzR.scale.setScalar(130*S3);o.g.add(o.blzR);
       o.blzD=new THREE.Mesh(_iceDisc,new THREE.MeshBasicMaterial({color:'#ff4a10',transparent:true,opacity:0.08,depthWrite:false}));o.blzD.scale.setScalar(130*S3);o.g.add(o.blzD);
-      o.blzW=makeFireWall(130*S3,0.75);o.g.add(o.blzW);}
+      o.blzW=makeFireWall(130*S3,0.75);o.blzW.userData.mats.forEach(m=>{m.uniforms.uInt.value=0.75;m.uniforms.uHeat.value-=0.12;});o.g.add(o.blzW);}   // หรี่ลง: ใกล้กล้องแล้วเป็นแถบขาว
     o.blzR.visible=o.blzD.visible=o.blzW.visible=true;o.blzR.position.y=0.07;o.blzD.position.y=0.06;o.blzR.material.opacity=0.45+0.2*Math.sin(now/120);
     o.blzW.rotation.y=-o.g.rotation.y+now/900;o.blzW.scale.y=1+0.15*Math.sin(now/140);
     for(let i=0;i<4;i++){const an=now/420+i*Math.PI/2,ta=an+Math.PI/2;for(let j=0;j<2;j++){const a2=an-j*0.06;flame(p.x+Math.cos(a2)*130,p.y+Math.sin(a2)*130,pz+0.05,{vx:Math.cos(ta)*60,vy:Math.sin(ta)*60,vh:rnd(3,5),life:rnd(0.3,0.42),size:rnd(9,12),g:-1.5,drag:2});}}
@@ -215,6 +215,8 @@ function pyroFX(o,p,pz,now,dt){
     // ไฟเด่นที่มือและเท้า + หางไฟบาง ๆ
     hp.forEach(([P,lx,ly,lz],hi)=>{_ev.set(lx,ly,lz);P.localToWorld(_ev);const q=simOf(_ev),ft=hi>=2;for(let k=0;k<(ft?3:1);k++)flame(q.x+rnd(-3,3),q.y+rnd(-3,3),q.h-0.12,{vx:-(o.svx||0)*0.3,vy:-(o.svz||0)*0.3,vh:rnd(1.2,2.4)*(ft?1.5:1),life:rnd(0.2,0.3)*(ft?1.25:1),size:rnd(4,5.5)*(ft?1.35:1),g:-1.5});
       if(Math.random()<0.3)PARTS.push({x:q.x,y:q.y,h:q.h,vx:rnd(-30,30),vy:rnd(-30,30),vh:rnd(0.5,2),life:0.35,max:0.35,col:'#ffd27a',size:1.3,g:-0.5});});
+    // ไฟแรงที่เท้า: ขาอยู่ในเสื้อคลุม → จุดไฟรอบชายเสื้อที่พื้นแทน (เห็นชัดว่าเท้าลุกไฟ)
+    for(let i=0;i<3;i++){const an=rnd(0,6.283),rr=rnd(7,13);flame(p.x+Math.cos(an)*rr,p.y+Math.sin(an)*rr,pz+0.05,{vx:Math.cos(an)*15-(o.svx||0)*0.3,vy:Math.sin(an)*15-(o.svz||0)*0.3,vh:rnd(2.5,4),life:rnd(0.25,0.35),size:rnd(6,9),g:-1.5,drag:2});}
     // เปลวตามลำตัว (มากขึ้น รอบ Pyro 2026-10-19 แต่ยังไม่ห่อทั้งตัว): ไหล่ หลัง สีข้าง
     for(let i=0;i<3;i++){const sd=i===2?0:(i?1:-1);_ev.set(sd*rnd(0.18,0.3)+rnd(-0.06,0.06),rnd(0.8,1.75),i===2?rnd(-0.3,-0.15):rnd(-0.1,0.25));o.b.localToWorld(_ev);const q=simOf(_ev);flame(q.x,q.y,q.h-0.1,{vx:-(o.svx||0)*0.3,vy:-(o.svz||0)*0.3,vh:rnd(1.2,2.4),life:rnd(0.2,0.28),size:rnd(3.5,5),g:-1.2,col:'#ffe0c0'});}
     // วงแหวนไฟหลังศีรษะ (เอกลักษณ์ Blazeform): แกนวงร้อน + เปลวเลียออกรอบวง (หมุนช้า) + เปลวอนุภาคไหวรอบวง

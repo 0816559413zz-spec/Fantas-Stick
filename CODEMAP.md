@@ -35,8 +35,7 @@ frostBoom:3 meleeHit:10 mirrorPos:21 frostBasic:22 frostSlam3:46 frostSlam:54 fr
 ## js/05-terrain.js (44) — พื้นสูงต่ำ (แผนที่จากไฟล์ Blender — กติกาฝั่งคนปั้นใน MAP-DESIGN.md)
 TERR:5 TSTEP:6 TSLOPE:6 terrT:7 floorAt:12 terrSolid:14 terrMove:21 updateGlaciers:30
 
-## js/06-pyro.js (160) — สายไฟ — ความร้อน: สะสมด้วยลูกไฟ/กำแพง/พุ่งเพลิง แล้วจุดระเบิดด้วยระเบิดความร้อน/อุกกาบาต
-§1 สายไฟ: ยิงปกติ 2 โหมด / โล่ระเบิด / พุ่งชาร์จ
+## js/06-pyro.js (160) — สายไฟ: ยิงปกติ 2 โหมด / โล่ระเบิด / พุ่งชาร์จ
 pyroBigBoom:5 pyroBall:13 pyroBasic:14 addOrbs:31 pyroParry:32 pyroBlock:33 launchOrbs:35 pyroDash:42 DF_R:76 dragonfallDive:77 dragonfallTick:78 dragonfallBoom:93 pyroSnap:114 colossusTick:124 updateERings:141
 
 ## js/07-frost-spells.js (33) — 
@@ -62,7 +61,7 @@ MIND:66 summonMin:72 minTarget:81 minShoot:88 updateMins:93 aimTarget:133
 §180 ร่ายคาถา
 castSlot:181 castUlt:194
 
-## js/10-net.js (71) — เครือข่าย (PeerJS / WebRTC)
+## js/10-net.js (71) — 
 PREFIX:4 NET:5 LOBBY:6 genCode:7 sendAll:8 setStatus:9 hostGame:11 joinGame:34 clientOnData:59 leave:71
 
 ## js/11-host.js (323) — 
@@ -109,14 +108,14 @@ MY:202 myDB:203 mySave:204 myLoad:207 myDecodeReady:213 myPlay:214 myNext:226 my
 §248 เพลงประกอบ (สร้างสดตามแผนที่)
 MUSIC:249 THEMES:250 padNote:255 musicTick:262 toggleMusic:291
 
-## js/19-client.js (185) — ฝั่งแสดงผล (ทุกเครื่อง รวมโฮสต์ ใช้ snapshot เดียวกัน)
+## js/19-client.js (186) — 
 cv:4 cx:4 DPR:5 SW:5 SH:5 resize:6 VIEW:12 screen:13 lastBuffKey:13 overShown:13 lastCount:13 PARTS:14 TEXTS:14
 §15 งบเอฟเฟกต์ (VFX budget)
 VFXB:20 _apush:21 vfxQual:29 vfxBegin:31 vfxEnd:34 vfxOnce:36 vfxExtra:38 PCOL:39 setScreen:41 onLobby:50 onSnap:56 myPos:64
 §66 เอฟเฟกต์
-burst:68 smoke:79 ring:80 floatText:81 shake:82 wandPos:83 impactFX:85 explosionFX:101
-§113 เอฟเฟกต์คาถาใหม่
-ZV:114 COLB:114 WVV:114 GLV:114 ICEV:114 SLV:114 ULTV:114 OBV:114 _iceDisc:116 _iceEdge:117 _iceSpk:118 iceFloorMat:119 _icePlane:120 _icePathMat:121 makeIceFloor:122 updateIceFloors:145 FLASHM:156 FLASHING:157 flashModel:158 endFlash:167 tickFlash:168 GHOSTM:170 SOLIDM:170 ghostOf:171 setGhost:177 hitSparks:185
+burst:68 smoke:79 ring:80 floatText:81 shake:82 wandPos:83 impactFX:85 explosionFX:102
+§114 เอฟเฟกต์คาถาใหม่
+ZV:115 COLB:115 WVV:115 GLV:115 ICEV:115 SLV:115 ULTV:115 OBV:115 _iceDisc:117 _iceEdge:118 _iceSpk:119 iceFloorMat:120 _icePlane:121 _icePathMat:122 makeIceFloor:123 updateIceFloors:146 FLASHM:157 FLASHING:158 flashModel:159 endFlash:168 tickFlash:169 GHOSTM:171 SOLIDM:171 ghostOf:172 setGhost:178 hitSparks:186
 
 ## js/20-vfx-pyro-storm.js (370) — Dragonfall (ภาพ)
 makeDfCircle:3 DFV:20 dfCracks:21 updateDfCracks:31 dragonfallFX:32
@@ -151,7 +150,7 @@ statusFX:3 fx:26
 §189 overlay: เลือกบัฟ / สรุปผล
 choosePick:190 syncOverlays:195 showOver:217
 
-## js/27-world.js (163) — โลก 3D (Three.js + Bloom) — 1 หน่วย 3D = 20 พิกเซลของระบบเกม
+## js/27-world.js (163) — 
 S3:4 tx:4 tz:4 GY:6 TW:6 hdr:7 gl:9 scene:15 cam:17 composer:18
 §19 ท่อภาพ (post-processing): ฉาก → ชั้นเอฟเฟกต์นุ่ม (FXPass) → แสงฟุ้ง →…
 rpass:22 fxScene:24 SOFTU:26 SOFT_GLSL:27 FXMATS:29 fxMat:30 softify:32 fxPass:45 bloom:46 GRADEU:51 gradePass:67
@@ -189,7 +188,7 @@ stage:2 STAGE:5 STAGE_Y:6 stageSpots:58 stageChar:74 POSES:81 stageIdle:87 _sv:1
 §108 ฉากประจำบ้าน (โผล่ตอนเลือกบ้านในหน้าสร้างตัวละคร)
 CRESTTEX:109 crestTex:110 crestBanner:118 buildHouseEnvs:126 TONE0:174 _tc:175 stageTone:176 stageScreen:189 renderStage:190 drawStageLabels:236
 
-## js/33-pyro-view.js (263) — ภาพของสายไฟ (pyroFX: ชาร์จ/พุ่ง/ดีดนิ้ว/กลายร่าง/Dragonfall/Colossus)…
+## js/33-pyro-view.js (265) — ภาพของสายไฟ (pyroFX: ชาร์จ/พุ่ง/ดีดนิ้ว/กลายร่าง/Dragonfall/Colossus)…
 §2 sync ตัวละคร/ศัตรู/ลูกเวท กับ snapshot
 localVel:3
 §11 ภาพของสายไฟ: ชาร์จลูกไฟ / ย่อตัวชาร์จพุ่ง / วงเวทพ่นไฟ / ดีดนิ้ว / กล…
@@ -228,13 +227,12 @@ trOpenF:2 trKey:2 trN:2 TR_OPTS:3 trToggle:4 trSend:9 trSync:14 hovEl:62
 §63 หน้าตั้งค่า
 setRow:64 setTog:65 setTab:66 XHC:67 XHN:67 setOpts:68 renderSettings:69 drawXhPrev:86 openSettings:87 closeSettings:88 modeIcon:140 modeTitle:141 renderLobby:142
 
-## js/41-debug.js (140) — เครื่องมือทดสอบสมดุล (ใช้ผ่านคอนโซล WD.bal / WD.dmgTest เท่านั้น ผู้เล่นปกติไม่เห็น)
-§5 บอทต่อสู้แบบง่ายๆ: เล็งนำเป้า เดินรักษาระยะ+ส่ายไปมา ร่ายคาถาทุกครั้ง…
+## js/41-debug.js (140) — 
 botBrain:6 _obsKeep:47 balArena:48 balReset:49 balDuel:53 balTour:68 balCoop:82 balSpellTest:98
 §117 Service Worker (sw.js): เก็บไฟล์เกมไว้ในเครื่อง เปิดครั้งต่อไปเร็วขึ้…
 SWK:118 swSetup:119
 
-## js/42-fire-vfx.js (181) — ไฟแบบใหม่ (2026-10-19): shader ไฟเคลื่อนไหวจริง (noise ไหล) ใช้กับลูก…
+## js/42-fire-vfx.js (182) — ไฟแบบใหม่ (2026-10-19): shader ไฟเคลื่อนไหวจริง (noise ไหล) ใช้กับลูก…
 FIRE_U:4 FIRE_GLSL:5 fireMat:24
 §55 ชิ้นงานสำเร็จรูป
 _fbGeo:56 _fbGeo2:56 makeFireBall:58 _ftGeo:66 makeFireTail:67 makeFireWall:70 FIREV:78 fireBlast:79 fireTemp:84 updateFireV:85
@@ -243,7 +241,7 @@ makeFireWings:93 poseFireWings:100
 §101 ชิ้นงานพื้น/กระแทก (รอบ Pyro 2026-10-19): พื้นแตกเป็นใย + ลาวาเรืองใน…
 _crackPaths:104 _crackGeo:113 _decM:117 _ccA:119 _ccB:119 fireCrackWeb:120 _charTex:128 charTex:129 _discGeo:132 scorch:133 _fruneTex:137 fruneTex:138 fireRune:146 _rockGeo:152 _rockM:153 rockChunks:154 fireGeyser:162 _mv1:170 _mv2:170 fireMeteor:171
 
-## js/43-frost-vfx.js (144) — น้ำแข็ง VFX จาก Blender + Glacier Mist (หมอกเย็นตอนน้ำแข็งโผล่)
+## js/43-frost-vfx.js (144) — 
 FROST_U:6
 §7 shader น้ำแข็ง: ฐานน้ำเงินเข้ม → ปลายขาว • ขอบสว่าง (fresnel) • รอยร้…
 ICE_VS:8 ICE_FS:10 _iceShM:23 iceShaderMat:24 iceModel:28
@@ -256,7 +254,7 @@ _wpM:107 fileWeapon:108
 §116 Ice circle (Permafrost): ริบบิ้นแสงวนเป็นก้นหอยบนพื้น + ผลึกลอยหมุนรอ…
 SWIRL_FS:117 ICIRC:121 iceCircle:122 updateIceCircles:133
 
-## js/44-vfx-kit.js (206) — ชุดเครื่องมือ VFX กลาง (ขั้น 2 ของแผนอัปเกรด VFX)
+## js/44-vfx-kit.js (206) — 
 §8 1) หางแสง
 TRMAX:11 TRPTS:11 TRAILS:11 _trL:12 trailLayer:13 trailNew:22 trailPoint:24 trailStop:27 _tv1:28 _tv2:28 _tv3:28 updateTrails:29
 §52 2) สูตรเอฟเฟกต์ = จานสี (ธาตุ) × แม่แบบ (ขนาด/ชนิด)
@@ -266,4 +264,4 @@ EFXAUG:143 PJPAL:162 pjPal:164 ULTCOL:165 efxAug:166 VFXAUG_ON:170 fxAug:171
 §191 4) เอฟเฟกต์ทั้งจอ (ค่าไปที่ GradePass ใน js/27-world.js)
 SCR:192 screenFlash:193 screenRadial:194 screenKick:195 screenHurt:196 _scv:197 updateScreenFx:198 updateVfxKit:206
 
-(44 files, 9061 lines)
+(44 files, 9065 lines)

@@ -151,7 +151,7 @@ function fireRune(x,y,h,r,life){const g=new THREE.Group(),m=_decM({map:fruneTex(
 // เศษหินกระเด็น 3 มิติ (หินดำขอบไฟ) — ตกกระดอนบนพื้นแล้วหดหาย • มีไฟติดตามช่วงแรก
 const _rockGeo=new THREE.DodecahedronGeometry(1,0);_rockGeo.userData.keep=true;
 let _rockM=null;
-function rockChunks(x,y,h,n,spd,o){o=o||{};_rockM=_rockM||new THREE.MeshStandardMaterial({color:'#3a2c24',roughness:1,flatShading:true,emissive:new THREE.Color('#ff4a10'),emissiveIntensity:0.45});
+function rockChunks(x,y,h,n,spd,o){o=o||{};_rockM=_rockM||new THREE.MeshStandardMaterial({color:'#3a2c24',roughness:1,flatShading:true,emissive:new THREE.Color('#ff4a10'),emissiveIntensity:0.2});
   const g=new THREE.Group(),gy=GY(x,y),R=[],X=tx(x),Z=tz(y),life=o.life||1.3;
   for(let i=0;i<n;i++){const m=new THREE.Mesh(_rockGeo,_rockM),an=rnd(0,6.283),sp=rnd(0.4,1)*spd,s=rnd(0.12,0.3)*(o.s||1);m.scale.set(s*rnd(0.8,1.3),s*rnd(0.6,1),s*rnd(0.8,1.3));
     const r0=rnd(0,(o.r||20))*S3;m.position.set(X+Math.cos(an)*r0,gy+h+0.2,Z+Math.sin(an)*r0);g.add(m);R.push({m,v:new THREE.Vector3(Math.cos(an)*sp,rnd(6,12)*(o.up||1),Math.sin(an)*sp),w:new THREE.Vector3(rnd(-9,9),rnd(-9,9),rnd(-9,9)),s});}
@@ -169,10 +169,11 @@ function fireGeyser(x,y,h,H,W,life,dl){if(dl>0){later(dl,()=>fireGeyser(x,y,h,H,
 // อุกกาบาตไฟ (Ring of Embers): ตกจากฟ้าเฉียง ๆ ลงจุด (x,y) ใน T วิ • ลูกไฟ + หางไฟ + ควัน/ถ่าน • เงาบนพื้นโตขึ้นจนกระแทก (ระเบิดอยู่ที่ efx 'ering')
 const _mv1=new THREE.Vector3(),_mv2=new THREE.Vector3();
 function fireMeteor(x,y,T,fromX,fromY){const gy=GY(x,y),E=new THREE.Vector3(tx(x),gy+0.4,tz(y));let dx=x-fromX,dy=y-fromY;const d=Math.hypot(dx,dy)||1;dx/=d;dy/=d;
-  const S=new THREE.Vector3(E.x-dx*6,gy+17,E.z-dy*6),g=new THREE.Group(),ball=makeFireBall({flow:[0,1,0]}),tail=makeFireTail({speed:5,heat:0.05,int:1.1});
+  // ตกเฉียงจากฝั่งผู้ร่าย (ไม่ใช่ตรงลงจากหัว) → กล้องหลังผู้ร่ายเห็นอุกกาบาตพุ่งข้ามหัวลงจุด
+  const S=new THREE.Vector3(E.x-dx*13,gy+9.5,E.z-dy*13),g=new THREE.Group(),ball=makeFireBall({flow:[0,1,0]}),tail=makeFireTail({speed:5,heat:0.05,int:1.1});
   ball.userData.core.geometry.userData.keep=true;ball.scale.setScalar(0.75);tail.scale.set(0.7,0.7,4.2);g.add(ball,tail);g.position.copy(S);
   const sm=_decM({color:'#1a0a04',opacity:0}),sh=new THREE.Mesh(_discGeo,sm);sh.position.set(E.x,gy+0.02,E.z);sh.scale.setScalar(0.4);g.userData.sh=sh;scene.add(sh);
-  fireTemp(g,[...ball.userData.mats,tail.userData.mat,sm],T,(v,k,dt)=>{const e=k*k*(0.6+0.4*k);_mv1.copy(g.position);g.position.lerpVectors(S,E,e);_mv2.subVectors(g.position,_mv1);
+  fireTemp(g,[...ball.userData.mats,tail.userData.mat,sm],T,(v,k,dt)=>{const e=k*(0.45+0.55*k);_mv1.copy(g.position);g.position.lerpVectors(S,E,e);_mv2.subVectors(g.position,_mv1);
     if(_mv2.lengthSq()>1e-6)tail.lookAt(_mv2.add(g.position));ball.userData.shell.rotation.y+=dt*6;
     sh.scale.setScalar(0.4+2.2*k);sm.opacity=0.55*k;if(v.age+dt>=T)scene.remove(sh);
     const q=simOf(g.position);for(let i=0;i<3;i++)flame(q.x+rnd(-6,6),q.y+rnd(-6,6),q.h+rnd(-0.3,0.3),{vh:rnd(0.5,2),life:rnd(0.2,0.35),size:rnd(8,12),g:0,drag:3});

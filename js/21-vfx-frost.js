@@ -166,7 +166,7 @@ function updateZV(dt){
       const age=(z.age=(z.age||0)+dt),up=Math.min(1,age/0.25),now2=performance.now(),wv=now2/450,nf=z.r*(z.wall?6:9.6)*dt,nn=Math.floor(nf)+(Math.random()<nf%1?1:0);
       // กำแพง shader: พุ่งขึ้นเร็ว (เด้งเกินนิด) → ระลอกสูงต่ำ → ยุบลงพื้น 0.3 วิสุดท้าย
       if(z.wall){const e=age<0.25?Math.sin(age/0.25*1.9)/Math.sin(1.9)*1.12:1,end=Math.min(1,z.t/0.3);z.wall.scale.y=Math.max(0.01,e*end*(1+0.06*Math.sin(now2/160)));z.wall.rotation.y+=dt*0.25;
-        z.wall.userData.mats.forEach((m,j)=>{m.uniforms.uHeat.value=(m.userData.h0||0)+(age<0.35?0.35*(1-age/0.35):0);});}
+        z.wall.userData.mats.forEach((m,j)=>{m.uniforms.uHeat.value=(m.userData.h0||0)+(age<0.35?0.18*(1-age/0.35):0);});}
       for(let k=0;k<nn;k++){const a=rnd(0,6.283),rr=z.r+rnd(-6,6),px=z.x+Math.cos(a)*rr,py=z.y+Math.sin(a)*rr;
         const d1=Math.abs(angDiff(a,wv)),d2=Math.abs(angDiff(a,wv+Math.PI)),boost=1+0.9*Math.max(0,1-Math.min(d1,d2)/0.6);
         flame(px,py,0.05,{vx:-Math.sin(a)*45,vy:Math.cos(a)*45,vh:rnd(4,7)*boost*up,life:rnd(0.5,0.75),size:rnd(12,18)*(0.6+0.4*up)*Math.min(1.5,boost),g:-2,drag:2.5,grow:0.25,col:Math.random()<0.6?'#ffffff':'#ffd8b0'});}
