@@ -35,8 +35,9 @@ frostBoom:3 meleeHit:10 mirrorPos:21 frostBasic:22 frostSlam3:46 frostSlam:54 fr
 ## js/05-terrain.js (44) — พื้นสูงต่ำ (แผนที่จากไฟล์ Blender — กติกาฝั่งคนปั้นใน MAP-DESIGN.md)
 TERR:5 TSTEP:6 TSLOPE:6 terrT:7 floorAt:12 terrSolid:14 terrMove:21 updateGlaciers:30
 
-## js/06-pyro.js (156) — สายไฟ: ยิงปกติ 2 โหมด / โล่ระเบิด / พุ่งชาร์จ
-pyroBigBoom:5 pyroBall:13 pyroBasic:14 addOrbs:31 pyroParry:32 pyroBlock:33 launchOrbs:35 pyroDash:42 DF_R:76 dragonfallDive:77 dragonfallTick:78 dragonfallBoom:93 pyroSnap:113 colossusTick:123 updateERings:140
+## js/06-pyro.js (160) — สายไฟ — ความร้อน: สะสมด้วยลูกไฟ/กำแพง/พุ่งเพลิง แล้วจุดระเบิดด้วยระเบิดความร้อน/อุกกาบาต
+§1 สายไฟ: ยิงปกติ 2 โหมด / โล่ระเบิด / พุ่งชาร์จ
+pyroBigBoom:5 pyroBall:13 pyroBasic:14 addOrbs:31 pyroParry:32 pyroBlock:33 launchOrbs:35 pyroDash:42 DF_R:76 dragonfallDive:77 dragonfallTick:78 dragonfallBoom:93 pyroSnap:114 colossusTick:124 updateERings:141
 
 ## js/07-frost-spells.js (33) — 
 frostGlacier:11
@@ -61,7 +62,7 @@ MIND:66 summonMin:72 minTarget:81 minShoot:88 updateMins:93 aimTarget:133
 §180 ร่ายคาถา
 castSlot:181 castUlt:194
 
-## js/10-net.js (71) — 
+## js/10-net.js (71) — เครือข่าย (PeerJS / WebRTC)
 PREFIX:4 NET:5 LOBBY:6 genCode:7 sendAll:8 setStatus:9 hostGame:11 joinGame:34 clientOnData:59 leave:71
 
 ## js/11-host.js (323) — 
@@ -142,7 +143,7 @@ BLDV:45 CHARM:45 DEBRIS:45 BLD_WALLC:46 _bldIce:47 _halfRoof:47 charMat:48 bldIc
 ## js/24-minions-view.js (68) — สัตว์เวท: โมเดลโปร่งแสง + ซิงก์จาก snapshot (MN)
 MM3:2 makeMinion:3 syncMins:36 drawMinBars:58
 
-## js/25-efx.js (268) — efxFX: ภาพของ event "efx" ทุกคาถา (หนึ่ง case ต่อหนึ่งเอฟเฟกต์)
+## js/25-efx.js (281) — efxFX: ภาพของ event "efx" ทุกคาถา (หนึ่ง case ต่อหนึ่งเอฟเฟกต์)
 efxFX:2
 
 ## js/26-fx-events.js (236) — fx(ev): เอฟเฟกต์+เสียงของทุก event จากโฮสต์ • statusFX (สถานะบนตัว) •…
@@ -188,19 +189,19 @@ stage:2 STAGE:5 STAGE_Y:6 stageSpots:58 stageChar:74 POSES:81 stageIdle:87 _sv:1
 §108 ฉากประจำบ้าน (โผล่ตอนเลือกบ้านในหน้าสร้างตัวละคร)
 CRESTTEX:109 crestTex:110 crestBanner:118 buildHouseEnvs:126 TONE0:174 _tc:175 stageTone:176 stageScreen:189 renderStage:190 drawStageLabels:236
 
-## js/33-pyro-view.js (228) — ภาพของสายไฟ (pyroFX: ชาร์จ/พุ่ง/ดีดนิ้ว/กลายร่าง/Dragonfall/Colossus)…
+## js/33-pyro-view.js (263) — ภาพของสายไฟ (pyroFX: ชาร์จ/พุ่ง/ดีดนิ้ว/กลายร่าง/Dragonfall/Colossus)…
 §2 sync ตัวละคร/ศัตรู/ลูกเวท กับ snapshot
 localVel:3
 §11 ภาพของสายไฟ: ชาร์จลูกไฟ / ย่อตัวชาร์จพุ่ง / วงเวทพ่นไฟ / ดีดนิ้ว / กล…
-_pw:12 simOf:13 makeColossus:14 makeMagicCircle:67 pyroFX:74
+_pw:12 simOf:13 makeColossus:14 makeMagicCircle:67 _fsGeo:76 _fsQ:77 _fsV:77 _fsW:77 FSN:77 FSR:77 _fsDir:78 fireShieldFX:79 pyroFX:96
 
 ## js/34-frost-view.js (208) — ภาพของสายน้ำแข็ง: ดาบ/ขวานน้ำแข็งที่ปลายไม้ ท่าฟัน โล่อัศวิน ไถล แช่แ…
 iceMat:2 iceRim:3 makeIceSword:4 makeIceAxe:23 makeKiteShield:39 _icyClone:47 MIRSKIP:50 mirrorNodes:51 makeMirrorClone:52 mirrorStale:59 mirrorPose:60 dropMirror:65 frostFX:66
 
-## js/35-sync.js (347) — ซิงก์ผู้เล่น/ศัตรู/ลูกเวทจาก snapshot + ฉายตำแหน่งลงจอ (ป้ายชื่อ/ตัวเ…
-syncPlayers:2 syncEnemies:74 projGeo:112 tailGeo:113 _t1:114 makeProj:115 _a:134 _b:134 syncProj:135 _awT:212 animateWorld:213
-§254 ฉายตำแหน่ง 3D ลงจอ (ป้ายชื่อ / ตัวเลขดาเมจ)
-_v:255 toScreen:256 burnNum:263 drawLabels:270 drawTexts:301 HITM:315 DIRI:315 drawXh:317 drawCrosshair:327
+## js/35-sync.js (348) — ซิงก์ผู้เล่น/ศัตรู/ลูกเวทจาก snapshot + ฉายตำแหน่งลงจอ (ป้ายชื่อ/ตัวเ…
+syncPlayers:2 syncEnemies:75 projGeo:113 tailGeo:114 _t1:115 makeProj:116 _a:135 _b:135 syncProj:136 _awT:213 animateWorld:214
+§255 ฉายตำแหน่ง 3D ลงจอ (ป้ายชื่อ / ตัวเลขดาเมจ)
+_v:256 toScreen:257 burnNum:264 drawLabels:271 drawTexts:302 HITM:316 DIRI:316 drawXh:318 drawCrosshair:328
 
 ## js/36-modes-view.js (164) — 
 ROLE:4 KC:4 roleShowT:4 onPriv:5 MO:10 BREATHS:11 clearModeObjs:12 ITEMC:21 makeItem:22 syncModeObjs:34
@@ -233,12 +234,14 @@ botBrain:6 _obsKeep:47 balArena:48 balReset:49 balDuel:53 balTour:68 balCoop:82 
 §117 Service Worker (sw.js): เก็บไฟล์เกมไว้ในเครื่อง เปิดครั้งต่อไปเร็วขึ้…
 SWK:118 swSetup:119
 
-## js/42-fire-vfx.js (98) — ไฟแบบใหม่ (2026-10-19): shader ไฟเคลื่อนไหวจริง (noise ไหล) ใช้กับลูก…
+## js/42-fire-vfx.js (181) — ไฟแบบใหม่ (2026-10-19): shader ไฟเคลื่อนไหวจริง (noise ไหล) ใช้กับลูก…
 FIRE_U:4 FIRE_GLSL:5 fireMat:24
 §55 ชิ้นงานสำเร็จรูป
-_fbGeo:56 _fbGeo2:56 makeFireBall:58 _ftGeo:66 makeFireTail:67 makeFireWall:70 FIREV:76 fireBlast:77 fireTemp:82 updateFireV:83
-§88 ปีกไฟ (Dragonfall) จากไฟล์ Blender mesh_fire_wing (assets/src/fx_mesh…
-makeFireWings:91 poseFireWings:98
+_fbGeo:56 _fbGeo2:56 makeFireBall:58 _ftGeo:66 makeFireTail:67 makeFireWall:70 FIREV:78 fireBlast:79 fireTemp:84 updateFireV:85
+§90 ปีกไฟ (Dragonfall) จากไฟล์ Blender mesh_fire_wing (assets/src/fx_mesh…
+makeFireWings:93 poseFireWings:100
+§101 ชิ้นงานพื้น/กระแทก (รอบ Pyro 2026-10-19): พื้นแตกเป็นใย + ลาวาเรืองใน…
+_crackPaths:104 _crackGeo:113 _decM:117 _ccA:119 _ccB:119 fireCrackWeb:120 _charTex:128 charTex:129 _discGeo:132 scorch:133 _fruneTex:137 fruneTex:138 fireRune:146 _rockGeo:152 _rockM:153 rockChunks:154 fireGeyser:162 _mv1:170 _mv2:170 fireMeteor:171
 
 ## js/43-frost-vfx.js (144) — น้ำแข็ง VFX จาก Blender + Glacier Mist (หมอกเย็นตอนน้ำแข็งโผล่)
 FROST_U:6
@@ -263,4 +266,4 @@ EFXAUG:143 PJPAL:162 pjPal:164 ULTCOL:165 efxAug:166 VFXAUG_ON:170 fxAug:171
 §191 4) เอฟเฟกต์ทั้งจอ (ค่าไปที่ GradePass ใน js/27-world.js)
 SCR:192 screenFlash:193 screenRadial:194 screenKick:195 screenHurt:196 _scv:197 updateScreenFx:198 updateVfxKit:206
 
-(44 files, 8925 lines)
+(44 files, 9061 lines)

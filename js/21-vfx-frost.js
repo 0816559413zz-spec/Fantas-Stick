@@ -163,13 +163,13 @@ function updateZV(dt){
     }
     if(z.kind==='ering'){
       // วงเพลิงกักขัง: กำแพงไฟ 3 มิติสูงรอบขอบ — เปลวหลายชั้นพุ่งขึ้นบิดวน ฐานเหลืองขาว ปลายส้มแดง • ระลอกไฟวิ่งวนรอบกำแพง • ประกาย/ถ่านพุ่งออก
-      const age=(z.age=(z.age||0)+dt),up=Math.min(1,age/0.25),now2=performance.now(),wv=now2/450,nf=z.r*(z.wall?4.2:9.6)*dt,nn=Math.floor(nf)+(Math.random()<nf%1?1:0);
+      const age=(z.age=(z.age||0)+dt),up=Math.min(1,age/0.25),now2=performance.now(),wv=now2/450,nf=z.r*(z.wall?6:9.6)*dt,nn=Math.floor(nf)+(Math.random()<nf%1?1:0);
       // กำแพง shader: พุ่งขึ้นเร็ว (เด้งเกินนิด) → ระลอกสูงต่ำ → ยุบลงพื้น 0.3 วิสุดท้าย
       if(z.wall){const e=age<0.25?Math.sin(age/0.25*1.9)/Math.sin(1.9)*1.12:1,end=Math.min(1,z.t/0.3);z.wall.scale.y=Math.max(0.01,e*end*(1+0.06*Math.sin(now2/160)));z.wall.rotation.y+=dt*0.25;
-        z.wall.userData.mats.forEach((m,j)=>{m.uniforms.uHeat.value=[-0.02,-0.18][j]+(age<0.35?0.35*(1-age/0.35):0);});}
+        z.wall.userData.mats.forEach((m,j)=>{m.uniforms.uHeat.value=(m.userData.h0||0)+(age<0.35?0.35*(1-age/0.35):0);});}
       for(let k=0;k<nn;k++){const a=rnd(0,6.283),rr=z.r+rnd(-6,6),px=z.x+Math.cos(a)*rr,py=z.y+Math.sin(a)*rr;
         const d1=Math.abs(angDiff(a,wv)),d2=Math.abs(angDiff(a,wv+Math.PI)),boost=1+0.9*Math.max(0,1-Math.min(d1,d2)/0.6);
-        flame(px,py,0.05,{vx:-Math.sin(a)*45,vy:Math.cos(a)*45,vh:rnd(4,7)*boost*up,life:rnd(0.45,0.7),size:rnd(10,15)*(0.6+0.4*up)*Math.min(1.5,boost),g:-2,drag:2.5,grow:0.25,col:Math.random()<0.6?'#ffffff':'#ffd8b0'});}
+        flame(px,py,0.05,{vx:-Math.sin(a)*45,vy:Math.cos(a)*45,vh:rnd(4,7)*boost*up,life:rnd(0.5,0.75),size:rnd(12,18)*(0.6+0.4*up)*Math.min(1.5,boost),g:-2,drag:2.5,grow:0.25,col:Math.random()<0.6?'#ffffff':'#ffd8b0'});}
       for(let k=0;k<Math.round(nn*0.4);k++){const a=rnd(0,6.283);flame(z.x+Math.cos(a)*z.r,z.y+Math.sin(a)*z.r,0.03,{vh:rnd(1.5,2.5),life:0.3,size:rnd(6,8),g:-1,col:'#fff2d0'});}
       for(let k=0;k<(Math.random()<dt*120?2:0);k++){const a=rnd(0,6.283),out=Math.random()<0.5?1:-1;PARTS.push({x:z.x+Math.cos(a)*z.r,y:z.y+Math.sin(a)*z.r,h:rnd(0.5,2.5),vx:Math.cos(a)*out*rnd(60,140),vy:Math.sin(a)*out*rnd(60,140),vh:rnd(2,5),life:rnd(0.4,0.7),max:0.7,col:Math.random()<0.5?'#ffd27a':'#ff7a2a',size:1.5,g:5,drag:1.5});}
       // ไอร้อนลอยขึ้น

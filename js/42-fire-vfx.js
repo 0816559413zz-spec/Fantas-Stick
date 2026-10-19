@@ -66,11 +66,13 @@ function makeFireBall(o){o=o||{};const g=new THREE.Group(),flow=o.flow||[0,0,-1]
 const _ftGeo=(()=>{const g=new THREE.CylinderGeometry(0,1,1,20,8,true);g.rotateX(-Math.PI/2);g.translate(0,0,-0.5);return g;})();
 function makeFireTail(o){o=o||{};const m=fireMat({mode:'sheet',scale:[5,2.4,1],speed:o.speed||3.2,int:o.int||1.15,heat:o.heat===undefined?0.0:o.heat,op:o.op,keep:o.keep});
   const t=new THREE.Mesh(_ftGeo,m);t.userData.mat=m;return t;}
-// กำแพงไฟวงกลม (Ring of Embers): แถบทรงกระบอกเปิด 2 ชั้น เปลวเลียขึ้นด้านบน — r,h หน่วยโลก
-function makeFireWall(r,h){const g=new THREE.Group(),mats=[];
-  for(const [rr,hh,sx,sp,ht] of [[r,h,Math.round(r*3.2),1.5,-0.02],[r*1.02,h*1.2,Math.round(r*2.3),1.2,-0.18]]){
+// กำแพงไฟวงกลม (Ring of Embers): แถบทรงกระบอกเปิดซ้อนกัน เปลวเลียขึ้นด้านบน — r,h หน่วยโลก • o.thick = 4 ชั้น (หนา แน่น — รอบ Pyro 2026-10-19) • m.userData.h0 = ค่าความร้อนตั้งต้น
+function makeFireWall(r,h,o){o=o||{};const g=new THREE.Group(),mats=[];
+  const L=o.thick?[[r*0.975,h*0.8,Math.round(r*4.2),1.8,0.08],[r,h,Math.round(r*3.2),1.5,-0.02],[r*1.02,h*1.2,Math.round(r*2.3),1.2,-0.18],[r*1.045,h*1.05,Math.round(r*2.8),1.35,-0.1]]
+    :[[r,h,Math.round(r*3.2),1.5,-0.02],[r*1.02,h*1.2,Math.round(r*2.3),1.2,-0.18]];
+  for(const [rr,hh,sx,sp,ht] of L){
     const geo=new THREE.CylinderGeometry(rr,rr,hh,96,6,true);geo.translate(0,hh/2,0);
-    const m=fireMat({mode:'sheet',scale:[sx,1.6,1],speed:sp,int:0.92,heat:ht});mats.push(m);g.add(new THREE.Mesh(geo,m));}
+    const m=fireMat({mode:'sheet',scale:[sx,1.6,1],speed:sp,int:0.92,heat:ht});m.userData.h0=ht;mats.push(m);g.add(new THREE.Mesh(geo,m));}
   g.userData.mats=mats;return g;}
 // ระเบิดลูกไฟ: ทรงกลมไฟขยายตัวแล้วสลายเป็นเปลวแดงเข้ม (uDis) — R หน่วยโลก
 const FIREV=[];
@@ -96,3 +98,84 @@ function makeFireWings(){
   g.userData={wings,mat};return g;}
 // ท่าปีก: open 0..1 (กาง) • flap = ยกขึ้นลง (เรเดียน) • fold 0..1 (พับไปหลัง)
 function poseFireWings(W,open,flap,fold){for(const {piv,sd} of W.userData.wings){piv.rotation.set(0,sd*(fold*1.45+(1-open)*1.2+0.25),sd*(-0.3+flap)+sd*fold*0.3);piv.scale.setScalar(0.35+0.65*open*(1-fold*0.35));}}
+// ---------- ชิ้นงานพื้น/กระแทก (รอบ Pyro 2026-10-19): พื้นแตกเป็นใย + ลาวาเรืองในรอย • พื้นไหม้ • วงเวทไฟ • เศษหินกระเด็น • เสาไฟพุ่ง • อุกกาบาต ----------
+// ทุกชิ้นผสมแบบทึบ (Normal) → เห็นชัดบนพื้นขาว ไม่ขาวโพลน • สร้างครั้งเดียวต่อเหตุการณ์ (ไม่สร้างใหม่ทุกเฟรม) ลบเองเมื่อหมดอายุผ่าน fireTemp
+// x,y,r = พิกเซลระบบเกม • h = ความสูงจากพื้น (หน่วยโลก)
+function _crackPaths(R,n){const P=[],main=[];
+  for(let i=0;i<n;i++){let an=i/n*6.283+rnd(-0.25,0.25),x=0,z=0;const segs=4+(Math.random()*3|0),len=R*rnd(0.72,1.05)/segs,pts=[[x,z]];main.push(an);
+    for(let k=0;k<segs;k++){an+=rnd(-0.45,0.45);x+=Math.cos(an)*len;z+=Math.sin(an)*len;pts.push([x,z]);
+      if(k>0&&k<segs-1&&Math.random()<0.55){let ba=an+(Math.random()<0.5?1:-1)*rnd(0.5,1.0),bx=x,bz=z;const bp=[[bx,bz]];for(let j=0;j<2;j++){ba+=rnd(-0.4,0.4);bx+=Math.cos(ba)*len*0.6;bz+=Math.sin(ba)*len*0.6;bp.push([bx,bz]);}P.push({pts:bp,w:0.45});}}
+    P.push({pts,w:1});}
+  // ใยวงรอบ: เส้นโค้งหยัก ๆ เชื่อมระหว่างรอยแตกหลัก 2 ระยะ
+  for(const f of [0.38,0.7])for(let i=0;i<n;i++){if(Math.random()<0.35)continue;const a0=main[i],a1=main[(i+1)%n]+(i===n-1?6.283:0),pts=[];
+    for(let k=0;k<=3;k++){const a=lerp(a0,a1,k/3),rr=R*f*rnd(0.9,1.1);pts.push([Math.cos(a)*rr,Math.sin(a)*rr]);}P.push({pts,w:0.35});}
+  return P;}
+function _crackGeo(P,w,y){const pos=[],idx=[];
+  for(const L of P){const n=L.pts.length;for(let k=0;k<n-1;k++){const [ax,az]=L.pts[k],[bx,bz]=L.pts[k+1],dx=bx-ax,dz=bz-az,d=Math.hypot(dx,dz)||1,w0=w*L.w*(1-k/n*0.75),w1=w*L.w*(1-(k+1)/n*0.75);
+    const nx=-dz/d,nz=dx/d,q=pos.length/3;pos.push(ax+nx*w0,y,az+nz*w0, ax-nx*w0,y,az-nz*w0, bx+nx*w1,y,bz+nz*w1, bx-nx*w1,y,bz-nz*w1);idx.push(q,q+1,q+2,q+1,q+3,q+2);}}
+  const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));g.setIndex(idx);return g;}
+const _decM=o=>new THREE.MeshBasicMaterial(Object.assign({transparent:true,depthWrite:false,side:THREE.DoubleSide,polygonOffset:true,polygonOffsetFactor:-2,polygonOffsetUnits:-2},o));
+// พื้นแตกเป็นใย: ร่องดำ + ลาวาเรืองข้างใน (ร้อนเหลืองตอนแรก → เย็นลงเป็นแดงเข้ม → จาง) • o.n จำนวนรอยหลัก, o.w ความกว้าง, o.hot เวลาที่ยังร้อน
+const _ccA=new THREE.Color(),_ccB=new THREE.Color();
+function fireCrackWeb(x,y,h,r,life,o){o=o||{};const R=r*S3,P=_crackPaths(R,o.n||9),w=(o.w||0.14)*Math.max(0.6,Math.min(1.6,R/6));
+  const g=new THREE.Group();g.position.set(tx(x),h+GY(x,y),tz(y));g.rotation.y=rnd(0,6.283);
+  const dk=_decM({color:'#160b06',opacity:0}),lv=_decM({color:hdr('#ffb040',2.2),opacity:0});
+  const m1=new THREE.Mesh(_crackGeo(P,w*1.9,0.012),dk),m2=new THREE.Mesh(_crackGeo(P,w*0.75,0.022),lv);m1.renderOrder=2;m2.renderOrder=3;g.add(m1,m2);
+  const hot=o.hot||life*0.6,C1=new THREE.Color(hdr('#ffc050',2.4)),C2=new THREE.Color(hdr('#ff4a0a',1.6)),C3=new THREE.Color('#5a1404');
+  return fireTemp(g,[dk,lv],life,(v)=>{const t=v.age,grow=Math.min(1,t/0.12),out=t>life-0.4?Math.max(0,(life-t)/0.4):1;g.scale.setScalar(0.55+0.45*grow);
+    dk.opacity=0.88*out;const c=Math.min(1,t/hot);lv.color.copy(c<0.3?_ccA.copy(C1).lerp(C2,c/0.3):_ccB.copy(C2).lerp(C3,(c-0.3)/0.7));lv.opacity=out*(c<0.3?1:1-0.35*(c-0.3));});}
+// พื้นไหม้: แผ่นดำเป็นรอยด่าง ๆ + จุดถ่านแดง (ภาพวาดครั้งเดียว)
+let _charTex=null;
+function charTex(){return _charTex||(_charTex=texCanvas(256,256,(c,w)=>{const m=w/2;const gr=c.createRadialGradient(m,m,0,m,m,m);gr.addColorStop(0,'rgba(18,10,6,0.95)');gr.addColorStop(0.55,'rgba(28,16,10,0.8)');gr.addColorStop(0.85,'rgba(40,24,14,0.35)');gr.addColorStop(1,'rgba(40,24,14,0)');c.fillStyle=gr;c.fillRect(0,0,w,w);
+  for(let i=0;i<90;i++){const a=Math.random()*6.283,d=Math.sqrt(Math.random())*m*0.95,s=rnd(6,26);c.fillStyle='rgba('+(Math.random()<0.5?10:48)+','+(Math.random()<0.5?6:28)+',4,'+rnd(0.15,0.45)+')';c.beginPath();c.arc(m+Math.cos(a)*d,m+Math.sin(a)*d,s,0,6.283);c.fill();}
+  for(let i=0;i<60;i++){const a=Math.random()*6.283,d=Math.sqrt(Math.random())*m*0.8;c.fillStyle='rgba(255,'+(80+Math.random()*90|0)+',20,'+rnd(0.25,0.7)+')';c.fillRect(m+Math.cos(a)*d,m+Math.sin(a)*d,rnd(1,3),rnd(1,3));}}));}
+const _discGeo=new THREE.CircleGeometry(1,40).rotateX(-Math.PI/2);_discGeo.userData.keep=true;
+function scorch(x,y,h,r,life){const m=_decM({map:charTex(),opacity:0}),d=new THREE.Mesh(_discGeo,m);d.renderOrder=1;d.rotation.y=rnd(0,6.283);
+  d.position.set(tx(x),h+0.006+GY(x,y),tz(y));const R=r*S3;
+  return fireTemp(d,[m],life,(v)=>{const t=v.age;d.scale.setScalar(R*(0.6+0.4*Math.min(1,t/0.15)));m.opacity=0.85*Math.min(1,t/0.1)*(t>life-0.5?Math.max(0,(life-t)/0.5):1);});}
+// วงเวทไฟบนพื้น: วงซ้อน + ตัวอักษรรูนรอบวง + ดาวหกแฉก (วาดครั้งเดียว) หมุนช้า ๆ เต้นเบา ๆ • มีเงาเข้มรองใต้ให้อ่านออกบนพื้นขาว
+let _fruneTex=null;
+function fruneTex(){return _fruneTex||(_fruneTex=texCanvas(512,512,(c,w)=>{const m=w/2;c.strokeStyle='#fff';c.fillStyle='#fff';c.lineCap='round';
+  const circ=(r,lw)=>{c.lineWidth=lw;c.beginPath();c.arc(m,m,r,0,6.283);c.stroke();};
+  circ(m*0.97,7);circ(m*0.9,3);circ(m*0.72,4);circ(m*0.66,2);circ(m*0.3,4);
+  for(let i=0;i<24;i++){c.save();c.translate(m,m);c.rotate(i/24*6.283);c.translate(0,-m*0.81);c.lineWidth=4;c.beginPath();
+    const s=m*0.06;for(let j=0;j<3;j++){c.moveTo(rnd(-1,1)*s,rnd(-1,1)*s);c.lineTo(rnd(-1,1)*s,rnd(-1,1)*s);}c.moveTo(0,-s);c.lineTo(0,s);c.stroke();c.restore();}
+  c.lineWidth=4;for(const off of [0,Math.PI]){c.beginPath();for(let i=0;i<=3;i++){const a=off+i/3*6.283-Math.PI/2,px=m+Math.cos(a)*m*0.66,py=m+Math.sin(a)*m*0.66;i?c.lineTo(px,py):c.moveTo(px,py);}c.stroke();}
+  for(let i=0;i<12;i++){const a=i/12*6.283;c.lineWidth=3;c.beginPath();c.moveTo(m+Math.cos(a)*m*0.3,m+Math.sin(a)*m*0.3);c.lineTo(m+Math.cos(a)*m*0.42,m+Math.sin(a)*m*0.42);c.stroke();}
+  c.beginPath();c.arc(m,m,m*0.08,0,6.283);c.fill();}));}
+function fireRune(x,y,h,r,life){const g=new THREE.Group(),m=_decM({map:fruneTex(),color:hdr('#ff7a1a',1.7),opacity:0}),m2=_decM({map:fruneTex(),color:'#3a0c02',opacity:0});
+  const a=new THREE.Mesh(_discGeo,m),b=new THREE.Mesh(_discGeo,m2);b.scale.setScalar(1.015);b.position.y=-0.004;a.renderOrder=4;b.renderOrder=3;g.add(b,a);
+  g.position.set(tx(x),h+0.03+GY(x,y),tz(y));const R=r*S3;
+  return fireTemp(g,[m,m2],life,(v,k,dt)=>{const t=v.age,inn=Math.min(1,t/0.3),out=t>life-0.4?Math.max(0,(life-t)/0.4):1;g.scale.setScalar(R*(0.85+0.15*inn));g.rotation.y+=dt*0.35;
+    m.opacity=inn*out*(0.8+0.2*Math.sin(t*9));m2.opacity=0.45*inn*out;});}
+// เศษหินกระเด็น 3 มิติ (หินดำขอบไฟ) — ตกกระดอนบนพื้นแล้วหดหาย • มีไฟติดตามช่วงแรก
+const _rockGeo=new THREE.DodecahedronGeometry(1,0);_rockGeo.userData.keep=true;
+let _rockM=null;
+function rockChunks(x,y,h,n,spd,o){o=o||{};_rockM=_rockM||new THREE.MeshStandardMaterial({color:'#3a2c24',roughness:1,flatShading:true,emissive:new THREE.Color('#ff4a10'),emissiveIntensity:0.45});
+  const g=new THREE.Group(),gy=GY(x,y),R=[],X=tx(x),Z=tz(y),life=o.life||1.3;
+  for(let i=0;i<n;i++){const m=new THREE.Mesh(_rockGeo,_rockM),an=rnd(0,6.283),sp=rnd(0.4,1)*spd,s=rnd(0.12,0.3)*(o.s||1);m.scale.set(s*rnd(0.8,1.3),s*rnd(0.6,1),s*rnd(0.8,1.3));
+    const r0=rnd(0,(o.r||20))*S3;m.position.set(X+Math.cos(an)*r0,gy+h+0.2,Z+Math.sin(an)*r0);g.add(m);R.push({m,v:new THREE.Vector3(Math.cos(an)*sp,rnd(6,12)*(o.up||1),Math.sin(an)*sp),w:new THREE.Vector3(rnd(-9,9),rnd(-9,9),rnd(-9,9)),s});}
+  return fireTemp(g,[],life,(v,k,dt)=>{const t=v.age;for(const c of R){c.v.y-=26*dt;c.m.position.addScaledVector(c.v,dt);if(c.m.position.y<gy+c.s*0.5){c.m.position.y=gy+c.s*0.5;c.v.y=Math.abs(c.v.y)*0.3;c.v.x*=0.55;c.v.z*=0.55;c.w.multiplyScalar(0.6);}
+      c.m.rotation.x+=c.w.x*dt;c.m.rotation.y+=c.w.y*dt;c.m.rotation.z+=c.w.z*dt;if(t>life-0.3)c.m.scale.multiplyScalar(Math.max(0,1-dt*3.5));
+      if(t<0.45&&Math.random()<0.5){const q=simOf(c.m.position);flame(q.x,q.y,q.h-0.1,{vh:0.5,life:0.18,size:rnd(3,5),g:0});}}});}
+// เสาไฟพุ่งจากพื้น (กรวย shader 2 ชั้น ชี้ขึ้น): พุ่งเร็ว → ค้างแป๊บ → สลาย • H สูง (หน่วยโลก) W รัศมีฐาน • dl หน่วงเวลา
+function fireGeyser(x,y,h,H,W,life,dl){if(dl>0){later(dl,()=>fireGeyser(x,y,h,H,W,life,0));return;}
+  const g=new THREE.Group(),a=makeFireTail({speed:4.2,heat:0.18,int:1.05}),b=makeFireTail({speed:3.2,heat:-0.1,int:0.95});
+  for(const t of [a,b])t.rotation.x=Math.PI/2;b.scale.set(1.5,1.5,0.75);g.add(b,a);g.position.set(tx(x),h+GY(x,y),tz(y));g.rotation.y=rnd(0,6.283);
+  const ma=a.userData.mat,mb=b.userData.mat;
+  fireTemp(g,[ma,mb],life,(v,k)=>{const e=k<0.2?1-Math.pow(1-k/0.2,3):1,w=W*(k<0.2?0.6+0.4*e:1+0.3*(k-0.2));g.scale.set(w,Math.max(0.01,H*e*(k>0.7?1-0.4*(k-0.7)/0.3:1)),w);
+    const dis=k>0.55?(k-0.55)/0.45:0;ma.uniforms.uDis.value=dis*0.9;mb.uniforms.uDis.value=dis*0.8;ma.uniforms.uHeat.value=0.18+(k<0.15?0.3*(1-k/0.15):0);});
+  for(let i=0;i<6;i++)flame(x+rnd(-8,8),y+rnd(-8,8),h+0.1,{vh:rnd(H*1.6,H*2.4),life:rnd(0.35,0.5),size:rnd(7,11)*Math.min(1.6,W*2.5),g:-1,drag:1.5});}
+// อุกกาบาตไฟ (Ring of Embers): ตกจากฟ้าเฉียง ๆ ลงจุด (x,y) ใน T วิ • ลูกไฟ + หางไฟ + ควัน/ถ่าน • เงาบนพื้นโตขึ้นจนกระแทก (ระเบิดอยู่ที่ efx 'ering')
+const _mv1=new THREE.Vector3(),_mv2=new THREE.Vector3();
+function fireMeteor(x,y,T,fromX,fromY){const gy=GY(x,y),E=new THREE.Vector3(tx(x),gy+0.4,tz(y));let dx=x-fromX,dy=y-fromY;const d=Math.hypot(dx,dy)||1;dx/=d;dy/=d;
+  const S=new THREE.Vector3(E.x-dx*6,gy+17,E.z-dy*6),g=new THREE.Group(),ball=makeFireBall({flow:[0,1,0]}),tail=makeFireTail({speed:5,heat:0.05,int:1.1});
+  ball.userData.core.geometry.userData.keep=true;ball.scale.setScalar(0.75);tail.scale.set(0.7,0.7,4.2);g.add(ball,tail);g.position.copy(S);
+  const sm=_decM({color:'#1a0a04',opacity:0}),sh=new THREE.Mesh(_discGeo,sm);sh.position.set(E.x,gy+0.02,E.z);sh.scale.setScalar(0.4);g.userData.sh=sh;scene.add(sh);
+  fireTemp(g,[...ball.userData.mats,tail.userData.mat,sm],T,(v,k,dt)=>{const e=k*k*(0.6+0.4*k);_mv1.copy(g.position);g.position.lerpVectors(S,E,e);_mv2.subVectors(g.position,_mv1);
+    if(_mv2.lengthSq()>1e-6)tail.lookAt(_mv2.add(g.position));ball.userData.shell.rotation.y+=dt*6;
+    sh.scale.setScalar(0.4+2.2*k);sm.opacity=0.55*k;if(v.age+dt>=T)scene.remove(sh);
+    const q=simOf(g.position);for(let i=0;i<3;i++)flame(q.x+rnd(-6,6),q.y+rnd(-6,6),q.h+rnd(-0.3,0.3),{vh:rnd(0.5,2),life:rnd(0.2,0.35),size:rnd(8,12),g:0,drag:3});
+    if(Math.random()<0.6)PARTS.push({x:q.x,y:q.y,h:q.h+0.3,vx:rnd(-20,20),vy:rnd(-20,20),vh:rnd(0.5,1.5),life:0.8,max:0.8,col:'#2e2420',size:8,g:-0.3,smoke:true,grow:1.2,drag:2});
+    LREQ.push({abs:1,x:g.position.x,y:g.position.y,z:g.position.z,col:'#ff8a3a',int:4,dist:14});});
+  later(T+0.1,()=>scene.remove(sh));}

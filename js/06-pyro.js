@@ -95,11 +95,12 @@ function dragonfallBoom(p,x,y,gh){
   for(const t of foesIn(p.team,x,y,DF_R,gh+4))aoeHit(p,t,28,t=>{addBurn(t,1,p.id);addSlow(t,0.7,1.2);});
   damageEnv(x,y,DF_R,60,p.id,'fireblast',gh);
 }
-defSpell(0,{id:'ringofembers',role:'control',n:'Ring of Embers',ic:'⭕',cd:14,d:'วางวงเพลิงที่จุดเล็ง (ระยะ ~400 รัศมี ~170) นาน 3 วิ — คนข้างในเดินออกไม่ได้',fx:'พยายามเดินออก = 12.5 ดาเมจ + ผลักกลับเข้าวง • ใครแตะขอบวงไฟ = ช้าลง 40% • คนข้างนอกเดินเข้าได้',
+defSpell(0,{id:'ringofembers',role:'control',n:'Ring of Embers',ic:'⭕',cd:14,d:'อุกกาบาตไฟตกลงที่จุดเล็ง (ระยะ ~400) โดนคนในวง 10 ดาเมจ แล้วกลายเป็นวงเพลิง (รัศมี ~170) นาน 3 วิ — คนข้างในเดินออกไม่ได้',fx:'พยายามเดินออก = 12.5 ดาเมจ + ผลักกลับเข้าวง • ใครแตะขอบวงไฟ = ช้าลง 40% • คนข้างนอกเดินเข้าได้',
   cast(p,S){
     const q=aimPoint(p,400);
-    (G.erings||(G.erings=[])).push({x:q.x,y:q.y,r:170,t:3,owner:p.id,team:p.team,in:new Set(),cd:new Map(),ed:new Map()});
-    emit({k:'efx',z:'ering',x:q.x,y:q.y,h:0.2,r:170,t:3});
+    // อุกกาบาตไฟตกลงจุดที่วาง ~0.3 วิ → ตกถึงพื้น = 10 ดาเมจครั้งเดียว (ผู้เล่นสั่ง 2026-10-19) แล้ววงไฟค่อยเริ่ม (กับดักเริ่มช้าลง 0.3 วิ)
+    (G.erings||(G.erings=[])).push({x:q.x,y:q.y,r:170,t:3,del:0.3,owner:p.id,team:p.team,in:new Set(),cd:new Map(),ed:new Map()});
+    emit({k:'efx',z:'ermet',x:q.x,y:q.y,h:0.2,r:170,t:0.3,id:p.id});
   }});
 defSpell(0,{id:'blazeform',role:'utility',n:'Blazeform',ic:'🔥',cd:20,d:'กลายร่างเปลวไฟ 6 วิ: ดาเมจทุกสกิล (รวมเผา Burning) +30% • เดินเร็ว +25% • ออร่าไฟรอบตัว (รัศมี ~130) เผา ~19/วิ • ศัตรูที่โดนออร่าครั้งแรก +1 Burning (คนละ 1 ชั้นต่อการใช้ 1 ครั้ง)',fx:'ผลเสีย: เรารับดาเมจ +25% ระหว่างนั้น',
   cast(p,S){p.blaze=6;p.blzTk=0;p.blzN=0;p.blzHit=new Set();emit({k:'efx',z:'blaze',x:p.x,y:p.y,h:p.z+1,id:p.id});}});
@@ -140,6 +141,9 @@ function colossusTick(p,inp,dt){
 function updateERings(dt){
   if(!G.erings||!G.erings.length)return;
   for(const R of G.erings){
+    if(R.del>0){R.del-=dt;if(R.del>0)continue;
+      for(const t of foesIn(R.team,R.x,R.y,R.r,6))aoeHit({id:R.owner,x:R.x,y:R.y},t,10);
+      emit({k:'efx',z:'ering',x:R.x,y:R.y,h:0.2,r:R.r,t:R.t});continue;}
     R.t-=dt;
     for(const t of foesOf(R.team)){
       const dx=t.x-R.x,dy=t.y-R.y,d=Math.hypot(dx,dy)||1,tr=t.r||PR;
