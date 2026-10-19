@@ -2,6 +2,7 @@
 function iceMat(op,em){return new THREE.MeshStandardMaterial({color:'#d8f4ff',emissive:em||'#3a8ac0',emissiveIntensity:0.6,roughness:0.08,metalness:0.2,transparent:true,opacity:op,flatShading:true});}
 function iceRim(geo,s){return new THREE.Mesh(geo,new THREE.MeshBasicMaterial({color:hdr('#9fe0ff',1.4),transparent:true,opacity:0.35,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.BackSide}));}
 function makeIceSword(){
+  {const f=fileWeapon('mesh_ice_sword',-0.66,0.5);if(f)return f;}
   // ดาบคริสตัลน้ำแข็ง: ใบดาบหยักเป็นผลึก สันกลางเรืองแสง การ์ดเป็นผลึกเฉียงขึ้น อัญมณีกลาง (จุดหมุน = ในกำมือ)
   const g=new THREE.Group();g.position.set(0,-0.66,0.02);
   {const grip=new THREE.Mesh(new THREE.CylinderGeometry(0.032,0.036,0.3,7),iceMat(0.95,'#2a6a9a'));grip.position.y=0.17;g.add(grip);const pm=new THREE.Mesh(new THREE.OctahedronGeometry(0.06),iceMat(0.95,'#6ac0f0'));pm.position.y=0.34;g.add(pm);}
@@ -20,6 +21,7 @@ function makeIceSword(){
   return g;
 }
 function makeIceAxe(){
+  {const f=fileWeapon('mesh_ice_axe',-0.45,0.9,-1.55);if(f)return f;}
   // ขวานศึกน้ำแข็งสองคม: ด้ามยาวพันคาด ใบขวานพระจันทร์เสี้ยวสองข้าง หนามบน/ล่าง อัญมณีกลางหัว (จุดหมุน = ในกำมือ ด้ามยื่นเลยมือนิดหน่อย)
   const g=new THREE.Group();g.position.set(0,-0.45,0.02);
   const hm=iceMat(0.92,'#2a6a9a');
@@ -55,6 +57,8 @@ function frostFX(o,p,pz,now,dt){
   if(!F){if(o.sword)o.sword.visible=false;if(o.axe)o.axe.visible=false;if(o.ishield)o.ishield.visible=false;if(o.cryoM)o.cryoM.visible=false;if(o.clones)o.clones.forEach(c=>c.g.visible=false);return;}
   const melee=F[0]===0,flags=F[3]|0,ff=flags&8;
   if(!o.sword){o.sword=makeIceSword();o.armR.add(o.sword);o.axe=makeIceAxe();o.armR.add(o.axe);}
+  else if(!o.sword.userData.file&&MODELS.ready.get('mesh_ice_sword')&&MODELS.ready.get('mesh_ice_axe')){   // โมเดลไฟล์โหลดเสร็จทีหลัง → สลับเป็นแบบไฟล์
+    for(const k of ['sword','axe']){const old=o[k],nw=k==='sword'?makeIceSword():makeIceAxe();nw.scale.copy(old.scale);nw.rotation.copy(old.rotation);old.parent.add(nw);old.parent.remove(old);o[k]=nw;}}
   o.sword.visible=melee&&!ff;o.axe.visible=melee&&!!ff;
   if(o.wandG)o.wandG.visible=!melee;o.tip.visible=!melee;
   if(!melee&&!p.fl){o.tip.getWorldPosition(_pw);const q=simOf(_pw);

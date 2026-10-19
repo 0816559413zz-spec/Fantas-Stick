@@ -82,6 +82,16 @@ function makeGlacier(x,y,a,len,t){
     _glMat2=new THREE.MeshStandardMaterial({color:'#e8f8ff',emissive:'#4a9ad0',emissiveIntensity:0.7,roughness:0.08,transparent:true,opacity:0.75,flatShading:true});_glMat.userData.keep=_glMat2.userData.keep=true;}
   const g=new THREE.Group();g.position.set(tx(x),GY(x,y),tz(y));g.rotation.y=-a;scene.add(g);
   const spikes=[];
+  mistLine(x,y,a,len,t,{rate:9,delay:len/1400});
+  // กลุ่มหนามจากไฟล์ Blender (mesh_ice_spire) + shader น้ำแข็ง — ถ้ายังไม่โหลดใช้กรวยเดิมด้านล่าง
+  const mat=MODELS.ready.get('mesh_ice_spire')?iceShaderMat({glow:1.1}):null;
+  if(mat){for(let d=0;d<=len;d+=45){const H=1+7*d/len,dl=d/1400,wd=1.3+H*0.25;
+      for(let i=0;i<4;i++){const m=iceModel('mesh_ice_spire',mat),big=i<2,hh=big?H*rnd(1.0,1.25)+0.5:H*rnd(0.4,0.75)+0.3,rr=(big?0.55+H*0.1:0.35+H*0.06)*2.2;
+        m.position.set(d*S3+rnd(-0.8,0.8),-0.05,(big?rnd(-0.4,0.4):(i===2?-1:1)*rnd(0.5,1))*wd);
+        m.rotation.set(rnd(-0.25,0.25),rnd(0,6.28),(big?-0.25:-0.1)+rnd(-0.2,0.2)+(i===3?0.35:i===2?-0.35:0));
+        m.userData={hh,rr,dl};m.scale.setScalar(0.001);g.add(m);spikes.push(m);}
+      spikes[spikes.length-1].userData.seg={d,dl,done:false};}
+    return {g,spikes,age:0,t,mat};}
   for(let d=0;d<=len;d+=45){
     const H=1+7*d/len,dl=d/1400;
     const n=6+Math.floor(H*0.9),wd=1.4+H*0.28;
@@ -100,10 +110,10 @@ function makeGlacier(x,y,a,len,t){
 function updateGlacierVis(dt){
   for(let i=GLV.length-1;i>=0;i--){
     const G2=GLV[i];G2.age+=dt;
-    const fade=Math.min(1,Math.max(0,(G2.t-G2.age)/0.35));
+    const fade=Math.min(1,Math.max(0,(G2.t-G2.age)/0.35));if(G2.mat)G2.mat.uniforms.uFade.value=Math.min(1,0.4+fade);
     for(const s of G2.spikes){const u=s.userData,k=clamp((G2.age-u.dl)/0.22,0,1)*fade;s.scale.set(u.rr*k+0.001,u.hh*k+0.001,u.rr*k+0.001);
-      if(u.seg&&!u.seg.done&&k>0){u.seg.done=true;const p=new THREE.Vector3();s.getWorldPosition(p);const sx=p.x*20+MW/2,sy=p.z*20+MH/2;burst(sx,sy,'#dff6ff',10,180,0.5,2.2,{h:0.5,vh:[2,7],g:8});if(Math.random()<0.5)dfCracks(sx,sy,0.06,40,'#bfeaff',0.8);iceChips(sx,sy,0.4,2,140,4);}}
-    if(G2.age>=G2.t){scene.remove(G2.g);GLV.splice(i,1);}
+      if(u.seg&&!u.seg.done&&k>0){u.seg.done=true;const p=new THREE.Vector3();s.getWorldPosition(p);const sx=p.x*20+MW/2,sy=p.z*20+MH/2;burst(sx,sy,'#dff6ff',10,180,0.5,2.2,{h:0.5,vh:[2,7],g:8});glacierMist(sx,sy,50,4,{out:1.5,sz:1.2});if(Math.random()<0.5)dfCracks(sx,sy,0.06,40,'#bfeaff',0.8);iceChips(sx,sy,0.4,2,140,4);}}
+    if(G2.age>=G2.t){scene.remove(G2.g);if(G2.mat)G2.mat.dispose();GLV.splice(i,1);}
   }
 }
 function updateOrbShots(dt){
@@ -117,7 +127,7 @@ function updateOrbShots(dt){
     if(k>=1){if(b.sp){scene.remove(b.sp);scene.remove(b.cr);}burst(x,y,'#ffb347',12,200,0.35,2.6,{h:H,vh:[0,3],g:1});OBV.splice(i,1);}}
 }
 function updateZV(dt){
-  updateGlacierVis(dt);updateIceFloors(dt);updateSlashes(dt);updateOrbShots(dt);updateDfCracks(dt);updateStormV(dt);updateFRV(dt);updateFireV(dt);
+  updateGlacierVis(dt);updateIceFloors(dt);updateSlashes(dt);updateOrbShots(dt);updateDfCracks(dt);updateStormV(dt);updateFRV(dt);updateFireV(dt);updateFrostV(dt);
   for(let i=WVV.length-1;i>=0;i--){
     const w=WVV[i];const st=Math.min(w.len-w.d,1500*dt);w.d+=st;
     const x=w.x+Math.cos(w.a)*w.d,y=w.y+Math.sin(w.a)*w.d,px=-Math.sin(w.a),py=Math.cos(w.a);
@@ -131,7 +141,7 @@ function updateZV(dt){
       for(let j=0;j<4;j++)PARTS.push({x:x+px*rnd(-30,30),y:y+py*rnd(-30,30),h:rnd(0.3,3),vx:-Math.cos(w.a)*rnd(60,180)+px*rnd(-80,80),vy:-Math.sin(w.a)*rnd(60,180)+py*rnd(-80,80),vh:rnd(0,2),life:0.45,max:0.45,col:j%2?'#ffffff':'#9fe0ff',size:rnd(1.8,3),g:3,drag:2});
       if(Math.random()<0.7)PARTS.push({x:x-Math.cos(w.a)*20+px*rnd(-30,30),y:y-Math.sin(w.a)*20+py*rnd(-30,30),h:rnd(0.2,2.4),vx:0,vy:0,vh:0.3,life:0.7,max:0.7,col:'#e8f6ff',size:7,g:0,smoke:true,grow:1.2});}
     w.cr=(w.cr||0)+st;if(w.cr>=70){w.cr=0;dfCracks(x,y,0.06,45,'#bfeaff',0.8);}
-    if(w.d>=w.len){if(w.m){burst(x,y,'#dff6ff',16,200,0.4,2.2,{h:1.2,vh:[0,3],g:5});iceRing(x,y,30,8,0.9,0.5,{up:0.06,down:0.25});iceChips(x,y,1,8,200,4);smoke(x,y,0.6,8,'#eef8ff',1,7,50);scene.remove(w.m);w.m.userData.mats.forEach(m=>m.dispose());}WVV.splice(i,1);}
+    if(w.d>=w.len){if(w.m){burst(x,y,'#dff6ff',16,200,0.4,2.2,{h:1.2,vh:[0,3],g:5});iceRing(x,y,30,8,0.9,0.5,{up:0.06,down:0.25});iceChips(x,y,1,8,200,4);smoke(x,y,0.6,8,'#eef8ff',1,7,50);iceBurst(x,y,1.1,{life:0.8,hy:0.9,mist:6});scene.remove(w.m);w.m.userData.mats.forEach(m=>m.dispose());}WVV.splice(i,1);}
   }
   for(let i=COLB.length-1;i>=0;i--){
     const b=COLB[i];b.t+=dt;const k=Math.min(1,b.t/b.max),x=lerp(b.x,b.x2,k),y=lerp(b.y,b.y2,k),H=lerp(b.h,0.2,k);

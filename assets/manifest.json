@@ -39,6 +39,26 @@
     "mesh_storm_claw": {
       "file": "vfx/storm_claw.glb",
       "v": 1
+    },
+    "mesh_ice_burst": {
+      "file": "vfx/ice_burst.glb",
+      "v": 1
+    },
+    "mesh_ice_spire": {
+      "file": "vfx/ice_spire.glb",
+      "v": 1
+    },
+    "mesh_ice_sword": {
+      "file": "vfx/ice_sword.glb",
+      "v": 1
+    },
+    "mesh_ice_axe": {
+      "file": "vfx/ice_axe.glb",
+      "v": 1
+    },
+    "mesh_ice_circle": {
+      "file": "vfx/ice_circle.glb",
+      "v": 1
     }
   },
   "maps": {

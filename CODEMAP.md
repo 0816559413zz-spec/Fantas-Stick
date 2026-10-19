@@ -122,8 +122,8 @@ TBN:87 TBA:87 TBF:87 TBMAX:87 _tv:88 _tt:88 _ts:88 _tw:88 tbLayer:90 TBL:95 TBC:
 §140 รอยกรงเล็บ (อัลติสายฟ้า): รอยข่วน 3 เส้นโค้งปลายแหลมขนานกัน ตั้งขวางห…
 clawGeo:143 clawRakes:148 updateClaws:162 later:170 stFade:171 stBeam:172 shellPt:177 updateStormV:178 _ev:209 GODPTS:211 bWorld:213 stormFX:214 STHUD:325 drawStormHud:326
 
-## js/21-vfx-frost.js (191) — น้ำแข็ง (ภาพ): ชิ้นผลึก/หนาม/แผ่นน้ำแข็งชั่วคราว (โผล่ → ค้าง → หด) •…
-FRV:2 _cryG:3 _spkG:3 _plateG:3 _hexG:3 _iceFxM:4 _frostM:4 iceFxM:5 frostM:6 ICEP:8 _im4:8 _iq:8 _ie:8 _ip:8 _is:8 icePool:9 iceBit:10 iceChips:13 updateFRV:14 iceRing:24 chillFX:25 makeSlash:40 _wbGeo:48 crescentGeo:50 makeWaveBlade:53 WGH:64 updateSlashes:65 _glGeo:78 _glMat:78 _glMat2:78 makeGlacier:79 updateGlacierVis:100 updateOrbShots:109 updateZV:119 WM3:191
+## js/21-vfx-frost.js (201) — น้ำแข็ง (ภาพ): ชิ้นผลึก/หนาม/แผ่นน้ำแข็งชั่วคราว (โผล่ → ค้าง → หด) •…
+FRV:2 _cryG:3 _spkG:3 _plateG:3 _hexG:3 _iceFxM:4 _frostM:4 iceFxM:5 frostM:6 ICEP:8 _im4:8 _iq:8 _ie:8 _ip:8 _is:8 icePool:9 iceBit:10 iceChips:13 updateFRV:14 iceRing:24 chillFX:25 makeSlash:40 _wbGeo:48 crescentGeo:50 makeWaveBlade:53 WGH:64 updateSlashes:65 _glGeo:78 _glMat:78 _glMat2:78 makeGlacier:79 updateGlacierVis:110 updateOrbShots:119 updateZV:129 WM3:201
 
 ## js/22-models.js (220) — โมเดลจากไฟล์ (.glb จาก Blender) — ข้อตกลงฝั่งคนปั้นอยู่ใน ASSETS.md
 MODELS:5 modelManifest:6 gltfLoader:11 loadModel:16 modelInst:30 modelOr:31 prefetchModels:43
@@ -190,8 +190,8 @@ localVel:3
 §11 ภาพของสายไฟ: ชาร์จลูกไฟ / ย่อตัวชาร์จพุ่ง / วงเวทพ่นไฟ / ดีดนิ้ว / กล…
 _pw:12 simOf:13 makeColossus:14 makeMagicCircle:67 pyroFX:74
 
-## js/34-frost-view.js (183) — ภาพของสายน้ำแข็ง: ดาบ/ขวานน้ำแข็งที่ปลายไม้ ท่าฟัน โล่อัศวิน ไถล แช่แ…
-iceMat:2 iceRim:3 makeIceSword:4 makeIceAxe:22 makeKiteShield:37 _icyClone:45 makeMirrorClone:46 frostFX:53
+## js/34-frost-view.js (187) — ภาพของสายน้ำแข็ง: ดาบ/ขวานน้ำแข็งที่ปลายไม้ ท่าฟัน โล่อัศวิน ไถล แช่แ…
+iceMat:2 iceRim:3 makeIceSword:4 makeIceAxe:23 makeKiteShield:39 _icyClone:47 makeMirrorClone:48 frostFX:55
 
 ## js/35-sync.js (345) — ซิงก์ผู้เล่น/ศัตรู/ลูกเวทจาก snapshot + ฉายตำแหน่งลงจอ (ป้ายชื่อ/ตัวเ…
 syncPlayers:2 syncEnemies:74 projGeo:112 tailGeo:113 _t1:114 makeProj:115 _a:134 _b:134 syncProj:135 _awT:210 animateWorld:211
@@ -236,4 +236,17 @@ _fbGeo:56 _fbGeo2:56 makeFireBall:58 _ftGeo:66 makeFireTail:67 makeFireWall:70 F
 §88 ปีกไฟ (Dragonfall) จากไฟล์ Blender mesh_fire_wing (assets/src/fx_mesh…
 makeFireWings:91 poseFireWings:98
 
-(42 files, 8432 lines)
+## js/43-frost-vfx.js (135) — น้ำแข็ง VFX จาก Blender + Glacier Mist (หมอกเย็นตอนน้ำแข็งโผล่)
+FROST_U:6
+§7 shader น้ำแข็ง: ฐานน้ำเงินเข้ม → ปลายขาว • ขอบสว่าง (fresnel) • รอยร้…
+ICE_VS:8 ICE_FS:10 _iceShM:23 iceShaderMat:24 iceModel:28
+§32 มงกุฎหนามน้ำแข็งพุ่งจากพื้น (ภาพอ้างอิงจากผู้ใช้)
+ICEM:34 iceBurst:35 updateIceMeshes:42
+§49 Glacier Mist: หมอกเย็นลอยต่ำ ฟุ้งออกจากน้ำแข็ง (InstancedMesh 1 draw …
+MISTTEX:50 MISTMAX:57 MISTP:57 MISTSRC:57 mistMesh:58 mistPuff:70 glacierMist:73 mistLine:77 mistArea:78 updateMist:79 updateFrostV:94
+§96 ดาบ/ขวานน้ำแข็งจากไฟล์ Blender (mesh_ice_sword / mesh_ice_axe)
+_wpM:98 fileWeapon:99
+§107 Ice circle (Permafrost): ริบบิ้นแสงวนเป็นก้นหอยบนพื้น + ผลึกลอยหมุนรอ…
+SWIRL_FS:108 ICIRC:112 iceCircle:113 updateIceCircles:124
+
+(43 files, 8581 lines)
