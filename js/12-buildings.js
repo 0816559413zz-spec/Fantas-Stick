@@ -1,0 +1,307 @@
+// ---------- สิ่งปลูกสร้างที่พังเป็นชิ้น (บ้าน) ----------
+// บ้าน 1 หลัง (OBS k:'house') = ผนัง 4 ด้าน + หลังคา 2 ฝั่ง → ชิ้นไหนเลือดหมดพังแค่ชิ้นนั้น (พังตรงที่โดน) • ผนังพัง 3 ด้าน = หลังคาถล่มเอง
+// ชื่อชิ้น = ชื่อ object ในไฟล์ bld_house.glb (ดู ASSETS.md) • hp/ตัวคูณ = ค่าตั้งต้นให้ทีมเกมเพลย์ปรับ
+// ธาตุ el: 'fire' ติดไฟเผาต่อ + ไหม้ดำ • 'ice' เกาะน้ำแข็ง (ตีแรงซ้ำ ×2, ไฟละลาย) • 'blast' ×1.5 เศษกระเด็นแรง • 'fireblast' = ทั้งสองอย่าง
+// snapshot BD = ชิ้นละ 1 ตัว (ฐาน 16): 1 พัง | 2 ไหม้ดำ | 4 ติดไฟอยู่ | 8 เกาะน้ำแข็ง ('' = ทุกชิ้นปกติ) • เหตุการณ์ {k:'bld',e:'h'|'b',i,p,el,x,y,ox,oy}
+// ตำแหน่งชิ้นในบ้าน (หน่วย sim px, แกนของบ้านเอง): หน้าบ้าน (ประตู) = +y
+const BLDDEF={house:{model:'bld_house',bw:8,bd:6.5,wh:4.2,rh:3.4,th:14,hp:{wall:80,roof:60}}};
+const BLD_PIECES=['wall_front','wall_back','wall_left','wall_right','roof_left','roof_right'];
+const BLD_FIRE={burn:5,dps:6},BLD_ICE={frz:6};
+let BLDG=[],BLDON=false;
+function genBldg(id){
+  const M=MAPS[id],out=[];if(!M)return out;
+  for(const o of M.obs||[])if(o.k==='house'){
+    const D=BLDDEF.house;o.bi=out.length;
+    out.push({i:out.length,o,D,c:Math.cos(o.ry||0),s:Math.sin(o.ry||0),ht:0,pc:BLD_PIECES.map((n,j)=>{const mx=D.hp[j<4?'wall':'roof'];return {n,hp:mx,max:mx,fl:0,burnT:0,frzT:0};})});
+  }
+  return out;
+}
+function bldRect(b,j){const w=b.o.w/2,d=b.o.d/2,t=b.D.th/2;return j===0?[0,d,w,t]:j===1?[0,-d,w,t]:j===2?[-w,0,t,d]:j===3?[w,0,t,d]:j===4?[-w/2,0,w/2,d]:[w/2,0,w/2,d];}
+function bldLocal(b,x,y){const dx=x-b.o.x,dy=y-b.o.y;return [dx*b.c-dy*b.s,dx*b.s+dy*b.c];}
+function bldWorld(b,lx,ly){return [b.o.x+lx*b.c+ly*b.s,b.o.y-lx*b.s+ly*b.c];}
+function rectDist(R,lx,ly){return Math.hypot(Math.max(Math.abs(lx-R[0])-R[2],0),Math.max(Math.abs(ly-R[1])-R[3],0));}
+function bldNear(b,x,y,pad){return Math.abs(x-b.o.x)<b.o.w*0.75+pad&&Math.abs(y-b.o.y)<b.o.w*0.75+pad;}
+function hitBldPiece(b,j,dmg,el,ox,oy){
+  const q=b.pc[j];if(!BLDON||(q.fl&1))return;
+  el=el||'none';const fire=el.includes('fire'),ice=el==='ice',blast=el.includes('blast');
+  let m=blast?1.5:ice?0.7:1;
+  if(q.frzT>0&&!ice){if(fire){q.frzT=0;q.fl&=~8;}else m*=2;}       // น้ำแข็ง: ไฟละลาย / ตีแรงแตก ×2
+  q.hp-=dmg*m;
+  if(fire){q.burnT=BLD_FIRE.burn;q.fl|=6;}
+  if(ice){if(q.burnT>0){q.burnT=0;q.fl&=~4;}else{q.frzT=BLD_ICE.frz;q.fl|=8;}}   // น้ำแข็งดับไฟ
+  if(q.hp<=0){breakBldPiece(b,j,el,ox,oy);return;}
+  if(G.time-b.ht>0.15){b.ht=G.time;const R=bldRect(b,j),[x,y]=bldWorld(b,R[0],R[1]);emit({k:'bld',e:'h',i:b.i,p:j,el,x:Math.round(x),y:Math.round(y),h:j<4?b.D.wh*0.5:b.D.wh+1});}
+}
+function breakBldPiece(b,j,el,ox,oy){
+  const q=b.pc[j];if(q.fl&1)return;
+  q.fl=(q.fl|1)&3;q.hp=0;q.burnT=q.frzT=0;          // เหลือแค่ "พัง" + "ไหม้ดำ"
+  const R=bldRect(b,j),[x,y]=bldWorld(b,R[0],R[1]);
+  emit({k:'bld',e:'b',i:b.i,p:j,el:el||'none',x:Math.round(x),y:Math.round(y),ox:Math.round(ox==null?x:ox),oy:Math.round(oy==null?y:oy),h:j<4?b.D.wh*0.5:b.D.wh+1});
+  if(j<4&&b.pc.slice(0,4).filter(p=>p.fl&1).length>=3)for(const k of [4,5])breakBldPiece(b,k,'none',b.o.x,b.o.y);
+}
+// ให้คาถาวงกว้างพังสิ่งแวดล้อม: damageEnv(x,y,รัศมี,ดาเมจ,id,ธาตุ,ความสูงจุดระเบิด) = ลัง/ถัง (prop) + ชิ้นบ้านที่อยู่ในวง
+function damageEnv(x,y,rad,dmg,by,el,h){
+  damagePropsIn(x,y,rad,dmg,by);
+  if(!BLDON)return;h=h||0;
+  for(const b of BLDG){
+    if(!bldNear(b,x,y,rad))continue;
+    const [lx,ly]=bldLocal(b,x,y);
+    for(let j=0;j<6;j++){
+      if(b.pc[j].fl&1)continue;
+      if(j>=4&&h+rad/20<b.D.wh)continue;          // ระเบิดเตี้ย/เล็กไม่ถึงหลังคา
+      if(rectDist(bldRect(b,j),lx,ly)<rad)hitBldPiece(b,j,dmg,el,x,y);
+    }
+  }
+}
+// ชิ้นที่กระสุนชน (-1 = ไม่ชน): ต่ำกว่าผนัง = ผนังที่ใกล้สุด, สูงกว่า = หลังคา (ทรงปิรามิด)
+function bldPieceAt(b,x,y,h,r){
+  const [lx,ly]=bldLocal(b,x,y),D=b.D,hw=b.o.w/2,hd=b.o.d/2;
+  if(h<D.wh){let best=-1,bd=r;for(let j=0;j<4;j++){if(b.pc[j].fl&1)continue;const d=rectDist(bldRect(b,j),lx,ly);if(d<bd){bd=d;best=j;}}return best;}
+  if(h<D.wh+D.rh&&Math.abs(lx)<hw&&Math.abs(ly)<hd&&h<D.wh+D.rh*(1-Math.max(Math.abs(lx)/hw,Math.abs(ly)/hd))){const j=lx<0?4:5;if(!(b.pc[j].fl&1))return j;}
+  return -1;
+}
+function projEl(pr){
+  const t=pr.type||'';if(t.includes('fire'))return 'fire';if(t.includes('ice'))return 'ice';
+  const o=G.players[pr.owner];return o?(['fire','ice'][o.pathIdx|0]||'none'):'none';
+}
+// ชนผนัง/หลังคาที่ยังไม่พัง (สี่เหลี่ยมเอียงตามบ้าน) — ผนังพัง = เดินลอดเข้าไปในบ้านได้
+function collideBld(b,o,r,z){
+  const D=b.D;let [lx,ly]=bldLocal(b,o.x,o.y),moved=false;
+  for(let j=0;j<6;j++){
+    if(b.pc[j].fl&1)continue;
+    if(j<4?z>=D.wh:(z<D.wh-0.3||z>=D.wh+D.rh))continue;
+    const R=bldRect(b,j),ex=lx-R[0],ey=ly-R[1],ax=Math.abs(ex)-R[2],ay=Math.abs(ey)-R[3];
+    if(ax>=r||ay>=r)continue;
+    if(ax>0&&ay>0){const d=Math.hypot(ax,ay);if(d>=r)continue;const k=(r-d)/d;lx+=Math.sign(ex)*ax*k;ly+=Math.sign(ey)*ay*k;}
+    else if(ax>ay)lx=R[0]+(ex<0?-1:1)*(R[2]+r);else ly=R[1]+(ey<0?-1:1)*(R[3]+r);
+    moved=true;
+  }
+  if(moved){o.x=b.o.x+lx*b.c+ly*b.s;o.y=b.o.y-lx*b.s+ly*b.c;}
+}
+function updateBldg(dt){
+  if(!BLDON)return;
+  for(const b of BLDG)for(let j=0;j<6;j++){
+    const q=b.pc[j];if(q.fl&1)continue;
+    if(q.frzT>0){q.frzT-=dt;if(q.frzT<=0)q.fl&=~8;}
+    if(q.burnT>0){q.burnT-=dt;q.hp-=BLD_FIRE.dps*dt;if(q.hp<=0)breakBldPiece(b,j,'fire');else if(q.burnT<=0)q.fl&=~4;}
+  }
+}
+function bldSnap(){if(!BLDON)return '';let s='',any=false;for(const b of BLDG)for(const q of b.pc){s+=q.fl.toString(16);if(q.fl)any=true;}return any?s:'';}
+function collideWorld(o,r,z){
+  z=z||0;
+  o.x=clamp(o.x,r+20,MW-r-20);o.y=clamp(o.y,r+20,MH-r-20);
+  if(PROPON)for(const c of PROPS){
+    if(c.st===1||c.hgt<=z)continue;
+    if(Math.abs(o.x-c.x)>c.r+r||Math.abs(o.y-c.y)>c.r+r)continue;
+    const dx=o.x-c.x,dy=o.y-c.y,d=Math.hypot(dx,dy),m=c.r+r;
+    if(d<m&&d>0.001){o.x=c.x+dx/d*m;o.y=c.y+dy/d*m;}
+  }
+  for(const b of BLDG)if(bldNear(b,o.x,o.y,r))collideBld(b,o,r,z);
+  const za=TERR?terrT(o.x,o.y)+z:z;
+  for(const c of OBS){
+    if((c.top!==undefined?c.top<=za:c.hgt<=z)||c.bi!==undefined)continue;
+    if(Math.abs(o.x-c.x)>c.r+r||Math.abs(o.y-c.y)>c.r+r)continue;
+    const dx=o.x-c.x,dy=o.y-c.y,d=Math.hypot(dx,dy),m=c.r+r;
+    if(d<m&&d>0.001){o.x=c.x+dx/d*m;o.y=c.y+dy/d*m;}
+  }
+  if(G&&G.walls)for(const c of G.walls){
+    if(c.hgt<=z)continue;
+    if(Math.abs(o.x-c.x)>c.r+r||Math.abs(o.y-c.y)>c.r+r)continue;
+    const dx=o.x-c.x,dy=o.y-c.y,d=Math.hypot(dx,dy),m=c.r+r;
+    if(d<m&&d>0.001){o.x=c.x+dx/d*m;o.y=c.y+dy/d*m;}
+  }
+}
+
+function shoot(p,type,o){
+  const d=PDEF[type],a=p.ang,h=p.z+1.35,SP=(o&&o.spd)||d.spd;
+  // ล็อกเป้าแนวตั้งอัตโนมัติ: ถ้ามีศัตรูอยู่ในแนวเล็ง คาถาจะเชิดขึ้น/ลงไปหาเอง
+  let best=null,bs=1e9;
+  for(const t of foesOf(p.team)){
+    const dx=t.x-p.x,dy=t.y-p.y,dd=Math.hypot(dx,dy);
+    if(dd>1300||dd<1)continue;
+    const da=Math.abs(angDiff(Math.atan2(dy,dx),a));
+    if(da<0.3&&da+dd/5000<bs){bs=da+dd/5000;best=t;}
+  }
+  let vh;
+  if(best)vh=(cH(best)+terrT(best.x,best.y)-terrT(p.x,p.y)-h)/(Math.hypot(best.x-p.x,best.y-p.y)/SP);
+  else if(p.inp&&typeof p.inp.ah==='number'&&!p.bot){const dd=Math.max(80,Math.hypot(p.inp.ax-p.x,p.inp.ay-p.y));vh=clamp((p.inp.ah-h)/(dd/SP),-30,30);}
+  else vh=Math.tan(clamp((p.inp&&p.inp.ap)||0,-0.9,0.9))*SP/20;
+  const pr={id:++G.pid,type,x:p.x+Math.cos(a)*26,y:p.y+Math.sin(a)*26,h,vh,vx:Math.cos(a)*SP,vy:Math.sin(a)*SP,
+    r:d.r,dmg:d.dmg,life:d.life,owner:p.id,team:p.team,src:'p'};
+  if(o)Object.assign(pr,o);
+  G.proj.push(pr);
+  emit({k:'cast',t:type,x:p.x,y:p.y,h:h+0.05,a:Math.round(a*100)/100,id:p.id});
+  return pr;
+}
+function eShoot(e,type,t,off){
+  const pd=PDEF[type],a=Math.atan2(t.y-e.y,t.x-e.x)+(off||0),dd=Math.hypot(t.x-e.x,t.y-e.y)||1;
+  const h=(e.h||0)+EDEF[e.type].ch+0.3,vh=(cH(t)+terrT(t.x,t.y)-terrT(e.x,e.y)-h)/(dd/pd.spd);
+  G.proj.push({id:++G.pid,type,x:e.x+Math.cos(a)*(e.r+6),y:e.y+Math.sin(a)*(e.r+6),h,vh,vx:Math.cos(a)*pd.spd,vy:Math.sin(a)*pd.spd,
+    r:pd.r,dmg:pd.dmg*G.escale,life:pd.life,owner:'E',team:-1,src:'e'});
+  emit({k:'cast',t:type,x:e.x,y:e.y,h,a:Math.round(a*100)/100});
+}
+function foesOf(team){
+  const out=[];
+  for(const q of plist())if(q.alive&&!q.downed&&q.team!==team)out.push(q);
+  for(const e of G.en)if(!e.dead)out.push(e);
+  if(G.mins)for(const m of G.mins)if(!m.dead&&m.team!==team)out.push(m);
+  return out;
+}
+function breakShield(p){p.shieldOn=false;p.shieldE=0;p.shieldBroken=1.5;emit({k:'sbreak',x:p.x,y:p.y,h:p.z+1.3});}
+function gainUlt(p,v){p.ult=Math.min(100,p.ult+v*0.5*p.buffs.ult);}
+function lifesteal(p,amt){if(p.buffs.life&&p.alive&&!p.downed)healT(p,amt*p.buffs.life);}
+
+function damage(t,amt,srcId,kind){
+  if(G.mode==='train'&&G.tr&&G.tr.god&&G.players[t.id]===t)return;   // ห้องฝึก: อมตะ
+  const src=srcId!=null?G.players[srcId]:null;
+  if(src&&kind!=='burn')amt*=src.buffs.dmg;
+  if(src&&src.blaze>0)amt*=1.3;
+  if(src&&src.mirror>0&&!src.noMul)amt*=2;
+  if(t.isM){
+    if(t.dead)return;
+    if(t.frz>0)amt*=1.15;
+    if(t.mrk>0&&kind!=='burn')amt*=1.12;
+    t.hp-=amt;emit({k:'hit',x:t.x,y:t.y,h:(t.h||0)+1.4,n:Math.round(amt),mn:t.id,s:srcId||undefined,ns:src&&src.baHit?1:undefined,b:kind==='burn'?1:undefined,kl:t.hp<=0?1:undefined,a:(kind==='aoe'||kind==='zone')?1:undefined});
+    if(src&&src.alive)gainUlt(src,amt*0.3);
+    if(t.hp<=0){t.dead=true;emit({k:'die',x:t.x,y:t.y,h:(t.h||0)+0.8,c:'#9fd0ff',t:'min'});}
+    return;
+  }
+  if(t.isE){
+    if(t.dead)return;
+    if(t.frz>0)amt*=1.15;
+    if(t.mrk>0&&kind!=='burn')amt*=1.12;
+    t.hp-=amt;
+    emit({k:'hit',x:t.x,y:t.y,h:cH(t)+vR(t)+0.4,n:Math.round(amt),e:t.id,s:srcId||undefined,ns:src&&src.baHit?1:undefined,b:kind==='burn'?1:undefined,kl:t.hp<=0?1:undefined,a:(kind==='aoe'||kind==='zone')?1:undefined});
+    if(src){gainUlt(src,amt);lifesteal(src,amt);src.dmgDealt+=amt;}
+    if(t.hp<=0){t.dead=true;if(src)src.kills++;emit({k:'die',x:t.x,y:t.y,h:cH(t),c:EDEF[t.type].col,t:t.type});}
+    return;
+  }
+  if(!t.alive||t.downed)return;
+  if(t.inv>0&&kind!=='burn')return;
+  if(G.ball&&G.ball.holder===t.id&&kind!=='burn'&&kind!=='zone')quidDrop(t);
+  if(t.stS&&kind!=='burn'){t.stS.abs+=amt;emit({k:'efx',z:'sthit',x:Math.round(t.x),y:Math.round(t.y),h:t.z+1.2,sx:src?Math.round(src.x):undefined,sy:src?Math.round(src.y):undefined,n:Math.round(amt),id:t.id});if(t.stS.abs>90)stormShieldBlast(t);return;}
+  if(t.shieldOn&&(kind==='melee'||kind==='aoe')&&shieldFaces(t,src?src.x:null,src?src.y:null)){
+    t.shieldE-=amt*1.5;t.shBlk=(t.shBlk|0)+1;emit({k:'block',x:t.x,y:t.y,h:t.z+1.2});
+    {const B=PBASIC[t.pathIdx|0];if(B&&B.onBlock)B.onBlock(t);}
+    if(t.shieldE<=0)breakShield(t);
+    return;
+  }
+  if(t.frz>0)amt*=1.15;
+  if(t.ovc>0)amt*=1.15;
+  if(t.blaze>0)amt*=1.25;
+  if(t.mrk>0&&kind!=='burn')amt*=1.12;
+  if(t.dr){amt*=t.dr.f;if(src&&src!==t&&kind!=='burn'&&kind!=='zone'&&!(t.drCd>0)){addPoison(src,t.id,1);t.drCd=1;}}
+  if(t.xhp>0){const ab=Math.min(t.xhp,amt);t.xhp-=ab;amt-=ab;if(amt<=0.01){emit({k:'block',x:t.x,y:t.y,h:t.z+1.2});return;}}
+  if(t.ward&&t.ward.t>0){
+    const ab=Math.min(t.ward.abs,amt);t.ward.abs-=ab;amt-=ab;
+    emit({k:'block',x:t.x,y:t.y,h:t.z+1.2});
+    if(t.ward.thorns&&src&&src!==t&&kind!=='burn'&&kind!=='zone')addChill(src,1);
+    if(t.ward.abs<=0)t.ward=null;
+    if(amt<=0.01)return;
+  }
+  t.hp-=amt;t.lastHit=srcId;
+  if(src&&src!==t){gainUlt(src,amt*0.7);lifesteal(src,amt);src.dmgDealt+=amt;}
+  gainUlt(t,amt*0.25);
+  emit({k:'hit',x:t.x,y:t.y,h:t.z+2.4,n:Math.round(amt),id:t.id,s:srcId||undefined,ns:src&&src.baHit?1:undefined,b:kind==='burn'?1:undefined,kl:t.hp<=0?1:undefined,sx:src&&src!==t?Math.round(src.x):undefined,sy:src&&src!==t?Math.round(src.y):undefined,a:(kind==='aoe'||kind==='zone')?1:undefined});
+  if(t.hp<=0){t.hp=0;playerDown(t,srcId);}
+}
+function playerDown(t,srcId){
+  t.shieldOn=false;t.burn=0;t.fly=false;
+  t.stS=null;t.sdome=null;t.rail=null;t.slnT=0;t.beam=0;t.sdHit=null;if(t.god>0){t.god=0;t.xhp=0;}
+  if(G.mode==='coop'){
+    t.downed=true;t.revive=0;t.deaths++;
+    feed(`💀 ${t.name} ล้ม! ไปยืนข้างๆ เพื่อชุบ`);
+    emit({k:'die',x:t.x,y:t.y,h:t.z+1,c:t.color});
+    return;
+  }
+  t.alive=false;t.deaths++;t.respawn=G.mode==='race'||G.mode==='train'?2:G.mode==='br'?1e9:3;
+  if(G.mode==='br')emit({k:'brout',x:t.x,y:t.y});
+  const k=G.players[srcId]||G.players[t.lastHit];
+  if(k&&k!==t){k.kills++;if(G.mode==='tdm')G.teamScore[k.team]++;feed(`${k.name} ⚡ ${t.name}`);}
+  else feed(`💀 ${t.name}`);
+  emit({k:'die',x:t.x,y:t.y,h:t.z+1,c:t.color});
+}
+
+function killProj(pr){
+  if(pr.dead)return;
+  pr.dead=true;
+  if(pr.type==='fire')explode(pr);
+  else if(pr.type==='iceboulder')frostBoom(pr);
+  else if(pr.type==='pfireb')pyroBigBoom(pr);
+  else emit({k:'pop',x:pr.x,y:pr.y,h:pr.h,t:pr.type});
+}
+function explode(pr){
+  emit({k:'boom',x:pr.x,y:pr.y,h:pr.h});
+  const sr=pr.splash?pr.splash.r:80,sd=pr.splash?pr.splash.dmg:10;
+  damageEnv(pr.x,pr.y,sr,sd,pr.owner,'fire',pr.h);
+  for(const t of foesOf(pr.team)){
+    if(t.id===pr.owner)continue;
+    if(Math.hypot(t.x-pr.x,t.y-pr.y)<sr+(t.r||PR)&&Math.abs(cH(t)-pr.h)<3){
+      const own=G.players[pr.owner];
+      if(pr.sp&&own)aoeHit(own,t,sd,t=>ignite(t,pr.owner,1.5));else damage(t,sd,pr.owner,'aoe');
+    }
+  }
+}
+function hitTarget(pr,t){
+  if(pr.sp&&SPELLS[pr.sp]&&SPELLS[pr.sp].hit){SPELLS[pr.sp].hit(pr,t);if(pr.type!=='fire')emit({k:'imp',x:t.x,y:t.y,h:pr.h,t:pr.type});return;}
+  damage(t,pr.dmg,pr.owner,'proj');
+  if(pr.type!=='fire')emit({k:'imp',x:t.x,y:t.y,h:pr.h,t:pr.type});
+  const big=t.type==='troll'||t.type==='queen';
+  switch(pr.type){
+    case 'stun':t.stun=Math.max(t.stun,t.isE?(big?0.4:1.4):0.8);break;
+    case 'pull':{
+      const o=G.players[pr.owner];
+      if(o){const a=Math.atan2(o.y-t.y,o.x-t.x),f=big?200:620;t.vx+=Math.cos(a)*f;t.vy+=Math.sin(a)*f;t.stun=Math.max(t.stun,0.3);}
+      break;}
+    case 'fire':t.burn=2;t.bt=0.5;t.burnSrc=pr.owner;break;
+    case 'bolt':{const a=Math.atan2(pr.vy,pr.vx),f=big?20:90;t.vx+=Math.cos(a)*f;t.vy+=Math.sin(a)*f;break;}
+    case 'web':if(!t.isE){t.root=Math.max(t.root||0,1.3);}break;
+  }
+}
+function updateProjectiles(dt){
+  const ps=plist();
+  for(const pr of G.proj){
+    if(pr.dead)continue;
+    {const t0=TERR?terrT(pr.x,pr.y):0;pr.x+=pr.vx*dt;pr.y+=pr.vy*dt;pr.h+=pr.vh*dt;if(TERR)pr.h-=terrT(pr.x,pr.y)-t0;}pr.life-=dt;
+    if(pr.life<=0||pr.x<20||pr.x>MW-20||pr.y<20||pr.y>MH-20||pr.h>40){killProj(pr);continue;}
+    if(pr.h<0.05||(TERR&&terrSolid(pr.x,pr.y,pr.h))){pr.h=Math.max(pr.h,0.1);killProj(pr);continue;}
+    let hp=false;
+    for(const c of OBS)if(c.bi===undefined&&(c.top!==undefined?terrT(pr.x,pr.y)+pr.h<c.top:pr.h<c.hgt)&&(pr.x-c.x)**2+(pr.y-c.y)**2<(c.r+pr.r)**2){hp=true;break;}
+    if(!hp)for(const b of BLDG){if(!bldNear(b,pr.x,pr.y,pr.r))continue;const j=bldPieceAt(b,pr.x,pr.y,pr.h,pr.r);if(j>=0){hitBldPiece(b,j,pr.dmg||5,projEl(pr),pr.x-pr.vx*0.08,pr.y-pr.vy*0.08);hp=true;break;}}
+    if(!hp&&PROPON)for(const c of PROPS)if(c.st!==1&&pr.h<c.hgt&&(pr.x-c.x)**2+(pr.y-c.y)**2<(c.r+pr.r)**2){hitProp(c,pr.dmg||5,pr.owner);hp=true;break;}
+    if(!hp)for(const w of G.walls)if(pr.team!==w.team&&pr.h<w.hgt&&(pr.x-w.x)**2+(pr.y-w.y)**2<(w.r+pr.r)**2){w.hp-=pr.dmg||5;hp=true;emit({k:'efx',z:'wallhit',x:pr.x,y:pr.y,h:pr.h});break;}
+    if(hp){killProj(pr);continue;}
+    for(const p of ps){
+      if(!p.alive||p.downed||p.id===pr.owner||p.team===pr.team)continue;
+      if((p.x-pr.x)**2+(p.y-pr.y)**2>(PR+pr.r)**2)continue;
+      if(Math.abs(pr.h-cH(p))>vR(p)+pr.r/20)continue;
+      if(p.inv>0)continue;
+      if(p.shieldOn&&shieldFaces(p,pr.x-pr.vx*0.05,pr.y-pr.vy*0.05)){
+        if(G.time-p.shieldT<0.28){
+          // Perfect Parry: ปัดกระสุนทิ้ง (ไม่สะท้อนกลับแล้ว) ไม่เสียพลังโล่ + ผลพิเศษของแต่ละสาย
+          pr.dead=true;
+          p.ult=Math.min(100,p.ult+12);
+          emit({k:'parry',x:p.x,y:p.y,h:p.z+1.3});
+          {const B=PBASIC[p.pathIdx|0];if(B&&B.onParry&&!p.shPar){p.shPar=1;B.onParry(p);}}
+        }else{
+          p.shieldE-=pr.dmg*1.6;pr.dead=true;p.shBlk=(p.shBlk|0)+1;emit({k:'block',x:pr.x,y:pr.y,h:pr.h});
+          {const B=PBASIC[p.pathIdx|0];if(B&&B.onBlock)B.onBlock(p);}
+          if(p.shieldE<=0)breakShield(p);
+        }
+        break;
+      }
+      hitTarget(pr,p);killProj(pr);break;
+    }
+    if(!pr.dead)for(const m of G.mins){
+      if(m.dead||m.team===pr.team)continue;
+      const hc=m.type==='golem'?1.6:m.type==='wolf'?0.8:(m.h||0),tol=(m.type==='golem'?1.7:m.type==='wolf'?0.8:0.55)+pr.r/20;
+      if((m.x-pr.x)**2+(m.y-pr.y)**2<(m.r+pr.r)**2&&Math.abs(pr.h-hc)<tol){hitTarget(pr,m);killProj(pr);break;}
+    }
+    if(pr.dead||pr.src!=='p')continue;
+    for(const e of G.en){
+      if(e.dead)continue;
+      if((e.x-pr.x)**2+(e.y-pr.y)**2<(e.r+pr.r)**2&&Math.abs(pr.h-cH(e))<vR(e)+pr.r/20+0.2){hitTarget(pr,e);killProj(pr);break;}
+    }
+  }
+  G.proj=G.proj.filter(p=>!p.dead);
+}

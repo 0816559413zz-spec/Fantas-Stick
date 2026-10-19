@@ -50,7 +50,7 @@ Page open today: `index.html` 538 KB (≈ 82 KB inline icon SVGs — moved to `i
 - [ ] **P3 Offline music.** The SW skips Range requests, so `<audio>` music is not cached (offline = synth music). Option: SW answers Range requests by slicing a full cached copy, filled when the track first plays.
 
 ## E. Direction: streamed asset files (agreed with user 2026-10-17)
-Goal: models, VFX and sounds become files that are easy to edit/replace with better-looking made assets; code stays in `index.html`; the current code-built versions stay as fallback.
+Goal: models, VFX and sounds become files that are easy to edit/replace with better-looking made assets; code stays in `js/`; the current code-built versions stay as fallback.
 - [x] Asset loader: `GLTFLoader` (+ Draco or Meshopt) loading `.glb` on demand, with a promise cache. (done 2026-10-18: `loadModel`, lazy import)
 - [x] Fallback rule: show the code-built model until the file arrives (or forever if it fails). (done: `modelOr`)
 - [ ] LOD: low-detail first, swap to high-detail when loaded / when close.

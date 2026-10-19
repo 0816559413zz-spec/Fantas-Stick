@@ -1,0 +1,99 @@
+// ---------- กติกาของแต่ละโหมด ----------
+function hostPick(p,i){
+  if(G.ph!=='buff'||p.picked||!p.bo)return;
+  const b=BUFFS[p.bo[i]];if(!b)return;
+  b.ap(p);p.picked=true;p.taken.push(b.n);
+  emit({k:'buff',id:p.id});
+}
+function modeLogic(dt){
+  if(G.banner){G.banner.t-=dt;if(G.banner.t<=0)G.banner=null;}
+  const ps=plist();
+  if(G.ph==='over'||!ps.length)return;
+  switch(G.mode){
+    case 'coop':
+      if(G.ph==='play'){
+        bombTick(dt);
+        G.spawnT-=dt;
+        if(G.queue.length&&G.spawnT<=0&&G.en.length<16){spawnEnemy(G.queue.shift());G.spawnT=Math.max(0.3,1.1-G.wave*0.04);}
+        if(ps.every(p=>p.downed||!p.alive)){endMatch();return;}
+        if(!G.queue.length&&!G.en.length){
+          G.ph='buff';G.buffT=20;G.proj=[];
+          ps.forEach(p=>{
+            if(p.downed){p.downed=false;p.hp=Math.round(p.maxHp*0.5);}
+            else p.hp=Math.min(p.maxHp,p.hp+p.maxHp*0.3);
+            p.bo=shuffle(BUFFS.map((_,i)=>i)).slice(0,3);p.picked=false;p.stun=0;p.burn=0;p.revive=0;p.root=0;
+          });
+          banner(`ผ่านชั้น ${G.wave}! เลือกพลังเสริม`,3);G.bombs=[];
+          emit({k:'wave',x:0,y:0});
+        }
+      }else if(G.ph==='buff'){
+        G.buffT-=dt;
+        if(G.buffT<=0||ps.every(p=>p.picked)){
+          ps.forEach(p=>{if(!p.picked)hostPick(p,Math.floor(Math.random()*3));});
+          G.wave++;setupWave();G.ph='count';G.cdT=3;
+        }
+      }
+      break;
+    case 'duel':
+      if(G.ph==='play'){
+        const al=ps.filter(p=>p.alive);
+        if(al.length<=1){
+          const w=al[0];
+          if(w){G.rw[w.id]=(G.rw[w.id]||0)+1;banner(`${w.name} ชนะรอบที่ ${G.round}!`,3);}else banner('เสมอ!',3);
+          G.ph='rend';G.rendT=3;G.proj=[];
+        }
+      }else if(G.ph==='rend'){
+        G.rendT-=dt;
+        if(G.rendT<=0){
+          if(ps.some(p=>(G.rw[p.id]||0)>=2))endMatch();
+          else{G.round++;placeAll();G.ph='count';G.cdT=3;banner(`รอบที่ ${G.round}`,2);}
+        }
+      }
+      break;
+    case 'ffa':case 'tdm':
+      if(G.ph==='play'){
+        G.timer-=dt;
+        const done=G.timer<=0||(G.mode==='ffa'?ps.some(p=>p.kills>=10):G.teamScore.some(s=>s>=15));
+        if(done)endMatch();
+      }
+      break;
+    case 'quid':
+      if(G.ph==='play'){G.timer-=dt;quidTick(dt);if(G.ph==='play')snitchTick(dt);if(G.ph==='play'&&G.timer<=0)endMatch();}
+      break;
+    case 'race':if(G.ph==='play')raceTick(dt);break;
+    case 'br':if(G.ph==='play')brTick(dt);break;
+    case 'imp':
+      if(G.ph==='play')impCheck();
+      else if(G.ph==='meet')meetTick(dt);
+      break;
+    case 'train':
+      if(G.ph==='play'){
+        trainTick(dt);
+      }
+      break;
+  }
+}
+function endMatch(){
+  const ps=plist();let title='จบเกม',sub='';
+  const byK=[...ps].sort((a,b)=>b.kills-a.kills);
+  if(G.mode==='coop'){title='จบการผจญภัยในดันเจียน';sub=`ทีมของคุณไปถึงชั้น ${G.wave}`;}
+  else if(G.mode==='train'){title='จบการฝึก';sub='ไปลองฝีมือจริงในโหมดอื่นกันเลย!';}
+  else if(G.mode==='quid'){const [a,b]=G.qs;title=a===b?'เสมอ!':`🏆 ${TEAMN[a>b?0:1]} ชนะควิดดิช!`;sub=`${TEAMN[0]} ${a} — ${b} ${TEAMN[1]}`+(G.snitchBy?`  •  ✨ ${G.snitchBy} จับลูกบอลทองได้`:'');}
+  else if(G.mode==='race'){const r=raceRank();title=r[0]?`🏆 ${r[0].name} ชนะการแข่ง!`:'จบการแข่ง';sub=r.map((p,i)=>`${i+1}. ${p.name}${p.fin?` (${p.finT.toFixed(1)} วิ)`:''}`).join('   ');}
+  else if(G.mode==='br'){const w=ps.find(p=>p.alive);title=w?`🏆 ${w.name} รอดเป็นคนสุดท้าย!`:'ไม่มีผู้รอดชีวิต';sub='🌀 แบทเทิลรอยัล';}
+  else if(G.mode==='imp'){title=G.impWin==='imp'?'🐍 ฝ่ายโวลเดอมอร์ชนะ! ความมืดครองฮอกวอตส์':'⚡ ฝ่ายนักเรียนฮอกวอตส์ชนะ!';sub='ฝ่ายโวลเดอมอร์คือ: '+ps.filter(p=>p.role==='imp').map(p=>p.name).join(', ');}
+  else if(G.mode==='duel'){
+    const s=[...ps].sort((a,b)=>(G.rw[b.id]||0)-(G.rw[a.id]||0));
+    title=s[0]?`🏆 ${s[0].name} ชนะการดวล!`:'จบเกม';
+    sub=ps.map(p=>`${p.name} ${G.rw[p.id]||0}`).join('  —  ');
+  }else if(G.mode==='ffa'){title=byK[0]?`🏆 ${byK[0].name} ชนะ FFA!`:'จบเกม';sub=byK[0]?`${byK[0].kills} kills`:'';}
+  else{
+    const [a,b]=G.teamScore;
+    title=a===b?'เสมอ!':`🏆 ${TEAMN[a>b?0:1]} ชนะ!`;
+    sub=`${TEAMN[0]} ${a} — ${b} ${TEAMN[1]}`;
+  }
+  G.result={title,sub,mode:G.mode,wave:G.wave,
+    rows:(G.mode==='race'?raceRank():byK).map(p=>({n:p.name+(G.mode==='imp'?(p.role==='imp'?' 🐍':' ⚡'):''),c:p.color,k:p.kills,d:p.deaths,dmg:Math.round(p.dmgDealt),tm:MODES[G.mode].team?p.team:-1}))};
+  G.ph='over';G.proj=[];
+  emit({k:'over',x:0,y:0});
+}

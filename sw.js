@@ -1,7 +1,7 @@
 // Service Worker ของ Fantas Stick — เก็บไฟล์ไว้ในเครื่อง ให้เปิดครั้งต่อไปเร็วขึ้น / เล่นคนเดียวได้แม้เน็ตหลุด
 // เวอร์ชันแคชมาจาก ?v=<PREFIX> ตอน register (index.html) — เปลี่ยน PREFIX = ล้างแคชเก่าทั้งหมด
 // กลยุทธ์:
-//   หน้าเว็บ (index.html ฯลฯ)       → network-first (ได้โค้ดใหม่เสมอ ถ้าเน็ตหลุดใช้ของในแคช)
+//   หน้าเว็บ + โค้ดเกม (index.html, js/, css/) → network-first (ได้โค้ดใหม่เสมอ ถ้าเน็ตหลุดใช้ของในแคช)
 //   unpkg (ระบุเวอร์ชันตายตัว), ฟอนต์ → cache-first (ไฟล์ไม่เปลี่ยน)
 //   ไฟล์ในเว็บเรา (audio/ icons/ assets/) → stale-while-revalidate (ใช้ของในแคชทันที แล้วอัปเดตเบื้องหลัง)
 //   assets/manifest.json                → network-first (รู้ทันทีว่ามีโมเดลเวอร์ชันใหม่)
@@ -57,7 +57,7 @@ self.addEventListener('fetch', e => {
   if (req.method !== 'GET' || req.headers.has('range')) return;
   const url = new URL(req.url);
   if (url.protocol !== 'https:' && url.protocol !== 'http:') return;
-  if (req.mode === 'navigate' || (url.origin === self.location.origin && url.pathname.endsWith('/assets/manifest.json'))) { e.respondWith(networkFirst(req, url)); return; }
+  if (req.mode === 'navigate' || (url.origin === self.location.origin && /\/(js|css)\/[^/]+$|\/assets\/manifest\.json$/.test(url.pathname))) { e.respondWith(networkFirst(req, url)); return; }
   const k = kind(url);
   if (!k) return;
   if (k === 'immutable') e.respondWith(cacheFirst(req, url));
@@ -71,7 +71,7 @@ async function networkFirst(req, url) {
     if (storable(r)) c.put(key, r.clone());
     return r;
   } catch (err) {
-    return (await c.match(key)) || (await c.match(new URL('./', self.location).href)) || Response.error();
+    return (await c.match(key)) || (req.mode === 'navigate' && await c.match(new URL('./', self.location).href)) || Response.error();
   }
 }
 async function cacheFirst(req, url) {
