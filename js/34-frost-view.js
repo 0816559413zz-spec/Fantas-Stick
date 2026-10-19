@@ -45,13 +45,24 @@ function makeKiteShield(){
   return g;
 }
 const _icyClone=new THREE.MeshStandardMaterial({color:'#bfe8ff',emissive:'#3a8ac0',emissiveIntensity:0.7,roughness:0.1,transparent:true,opacity:0.55,depthWrite:false});_icyClone.userData.keep=true;
+// ร่างแยก = ก๊อปเฉพาะตัว (o.b: ลำตัว แขน ขา ผ้าคลุม ดาบ/ขวาน/ไม้) เป็นน้ำแข็งใส แล้วคัดลอกท่าทุกชิ้นตามตัวจริงทุกเฟรม (mirrorPose)
+// ของที่ห้อยอยู่กับ o.g (วงใต้เท้า ออร่า โล่ ฯลฯ) ไม่ติดมา • ดาบ/ขวานเปลี่ยนเป็นโมเดลไฟล์ หรือโครงตัวเปลี่ยน → สร้างร่างแยกใหม่เอง
+const MIRSKIP=['shield','ring','broom','cocoon','stars','colo','mcirc','ishield','cryoM'];
+function mirrorNodes(root){const a=[];root.traverse(n=>a.push(n));return a;}
 function makeMirrorClone(o){
-  for(const k of ['shield','ring','broom','cocoon','stars','colo','mcirc','ishield','cryoM','axe'])if(o[k])o[k].name='skip';
-  o.armR.name='armR';o.armL.name='armL';o.b.name='body';
-  const c=o.g.clone(true);
-  c.traverse(m=>{if(m.name==='skip')m.visible=false;if(m.isMesh)m.material=_icyClone;if(m.isSprite&&m.name!=='skip')m.visible=false;});
-  scene.add(c);return {g:c,armR:c.getObjectByName('armR'),armL:c.getObjectByName('armL'),b:c.getObjectByName('body'),born:0};
+  const skip=new Set(MIRSKIP.map(k=>o[k]).filter(Boolean));
+  const g=new THREE.Group(),b=o.b.clone(true);g.add(b);
+  const src=mirrorNodes(o.b),dst=mirrorNodes(b);
+  dst.forEach((m,i)=>{if(m.isMesh)m.material=_icyClone;m.userData.mirOff=skip.has(src[i])||m.isSprite||m.isPoints||m.isLight;});
+  scene.add(g);return {g,b,src,dst,sword:o.sword,axe:o.axe,born:0};
 }
+function mirrorStale(o,c){return c.sword!==o.sword||c.axe!==o.axe||mirrorNodes(o.b).length!==c.src.length;}
+function mirrorPose(c){
+  for(let i=0;i<c.src.length;i++){const s=c.src[i],d=c.dst[i];
+    d.position.copy(s.position);d.quaternion.copy(s.quaternion);d.scale.copy(s.scale);
+    let v=s.visible&&!d.userData.mirOff;if(v&&s.isMesh&&!s.layers.isEnabled(0))v=false;d.visible=v;}
+}
+function dropMirror(c){scene.remove(c.g);c.g.traverse(m=>{if(m.isMesh&&m.material===_icyClone)m.material=null;});}
 function frostFX(o,p,pz,now,dt){
   const F=p.fr;
   if(!F){if(o.sword)o.sword.visible=false;if(o.axe)o.axe.visible=false;if(o.ishield)o.ishield.visible=false;if(o.cryoM)o.cryoM.visible=false;if(o.clones)o.clones.forEach(c=>c.g.visible=false);return;}
@@ -169,14 +180,15 @@ for(let i=0;i<5;i++){const an=rnd(0,6.283),r=rnd(40,180);PARTS.push({x:p.x+Math.
   // ร่างแยก
   if(flags&16){
     if(!o.clones)o.clones=[makeMirrorClone(o),makeMirrorClone(o)];
+    else if(mirrorStale(o,o.clones[0]))o.clones=o.clones.map(c=>{const n=makeMirrorClone(o);n.born=c.born;n.g.visible=c.g.visible;dropMirror(c);return n;});
     o.clones.forEach((c,i)=>{const s=i?1:-1,a=p.a||0,X=p.x+Math.cos(a)*30-Math.sin(a)*55*s,Y=p.y+Math.sin(a)*30+Math.cos(a)*55*s;
       if(!c.g.visible){c.g.visible=true;c.born=0;burst(X,Y,'#dff6ff',10,160,0.4,2,{h:1,vh:[1,4],g:2});
         // เศษกระจกน้ำแข็งพุ่งเข้ามาประกอบเป็นร่าง
         for(let j=0;j<14;j++){const an=rnd(0,6.283),r=rnd(60,110),sx=X+Math.cos(an)*r,sy=Y+Math.sin(an)*r,hh=rnd(0.3,2.4);iceBit(_plateG,sx,sy,hh,0.18,0.18,0.12,{life:0.3,up:0.03,down:0.08,v:[(X-sx)/0.28,(Y-sy)/0.28,(1.2-hh)/0.28+2],spin:rnd(-8,8)});}}
       c.born=Math.min(1,c.born+dt*5);c.g.scale.setScalar(0.3+0.7*c.born);
-      let fa2=a;{let gx=p.x+Math.cos(a)*400,gy=p.y+Math.sin(a)*400;if(p.id===NET.myId&&INPUT.gx>=0){const dd=Math.hypot(INPUT.gx-p.x,INPUT.gy-p.y);if(dd>60){gx=INPUT.gx;gy=INPUT.gy;}}fa2=Math.atan2(gy-Y,gx-X);}
-      c.g.position.set(tx(X),o.g.position.y,tz(Y));c.g.rotation.y=Math.atan2(Math.cos(fa2),Math.sin(fa2));
-      c.armR.rotation.copy(o.armR.rotation);c.armL.rotation.copy(o.armL.rotation);c.b.rotation.copy(o.b.rotation);c.b.position.copy(o.b.position);});
+      // หันทางเดียวกับตัวเราเป๊ะ (ขนานกัน) + ท่าทุกชิ้นตามตัวจริง
+      c.g.position.set(tx(X),o.g.position.y,tz(Y));c.g.rotation.y=o.g.rotation.y;
+      mirrorPose(c);});
   }else if(o.clones){o.clones.forEach(c=>{if(c.g.visible&&!c.endT){c.endT=0.35;c.endP=[c.g.position.x*20+MW/2,c.g.position.z*20+MH/2,c.g.position.y];}
       if(c.endT>0){c.endT-=dt;const [X,Y,H0]=c.endP;
         // รอยร้าวแผ่ออกจากกลางร่าง
