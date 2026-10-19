@@ -2,7 +2,7 @@
 
 > **For the next Claude Code session (any device): read this file first.**
 > **Rule: update this file at the end of every task** — status, known issues, latest changelog line (+ `notes/CHANGELOG.md`), and run `node tools/codemap.js` if code moved. Commit and push it together with the code.
-> Last updated: 2026-10-19 (code split into `css/` + `js/`, CODEMAP.md, notes/ — HANDOFF slimmed)
+> Last updated: 2026-10-19 (fire VFX overhaul — `js/42-fire-vfx.js`; Storm ult claws/eyes from Blender meshes)
 
 ---
 
@@ -12,7 +12,7 @@
 > **Current state (2026-10-19):** 🔥 **Pyro**, ❄️ **Frost**, ⚡ **Storm** are the user's designs and fully implemented with VFX (`designs/*.md`). Nature / hex / summoner are still placeholders waiting for the user's designs. Protocol `PREFIX='wizduel-th-v25-'`. Game renamed **Fantas Stick**; code split from one `index.html` into `css/` + `js/` (2026-10-19, see §5).
 >
 > **Waiting on the user (ask in Thai):**
-> 1. Play-test the latest changes — Storm ult claws, Frost ult clones facing the crosshair, Permafrost floor look, new title font.
+> 1. Play-test the latest changes — **new fire look on every Pyro skill** (shader fire, flame wings, fire wall, fire shield) and the **Storm ult** (dark claws with lightning, Deku eyes, dark claw rakes). If a fire effect is too bright on a weak PC: lower `int`/`heat` in `fireMat` calls; old round-glow flames = `FLAME_STYLE=0` in `js/30-particles.js`.
 > 2. Next class to design (nature / hex / summoner) — interview one question at a time with recommended options (`SKILL-DESIGN.md` template).
 >
 > **Testing tips learned the hard way:**
@@ -22,12 +22,13 @@
 > - `WD.setKit` on the host doesn't update the client's `KITS[id]` — also set `p.kt=p.kit` and call `WD.broadcastLobby()`.
 > - Before every push: `node tools/check.js` (syntax of all js files joined) and load the page once (`typeof WD`) to catch load-order/TDZ errors. Errors say `game.js:N` → run `srcAt(N)` in the console for file:line (DevTools also shows real files via the source map).
 > - Perf: `tools/bench-vfx.js` (read `window.__vfx` after ~45 s).
+> - Inputs in the harness: the local player's `p.inp` is overwritten from `WD.INPUT` every tick — drive `WD.INPUT` (or set host fields like `p.dchgOn`) instead. Training dummies shoot by default (`WD.G.tr.datk=0` to stop them washing screenshots with impact sparks). `setInterval` host ticks keep running in real time → timed buffs (god form, Blazeform) run out between calls.
 
 ---
 
 ## 1. What this is
 A 3D third-person (over-the-shoulder, Hogwarts Legacy style) wizard dueling browser game.
-Files: `index.html` (HTML + small loader) • `css/game.css` • `js/01-core.js … js/41-debug.js` (one shared scope, see §5) • `sw.js` • static assets in `audio/ icons/ assets/`.
+Files: `index.html` (HTML + small loader) • `css/game.css` • `js/01-core.js … js/42-fire-vfx.js` (one shared scope, see §5) • `sw.js` • static assets in `audio/ icons/ assets/`.
 Personal, non-commercial fan project made with/for the user and their friends. UI text is **Thai**; code comments are Thai.
 
 - Live (GitHub Pages): https://0816559413zz-spec.github.io/Fantas-Stick/
@@ -69,7 +70,7 @@ Personal, non-commercial fan project made with/for the user and their friends. U
 ## 5. Code layout (2026-10-19)
 - **`CODEMAP.md`** = every top-level function/const per file with line numbers + section headers (auto-generated). **Regenerate after editing js: `node tools/codemap.js`.**
 - **How loading works:** the `<script type="module">` loader in `index.html` fetches `js/*.js` in the order of its `FILES` list, joins them and imports the result as ONE module (blob URL + source map). So files share all top-level names like the old single file — no import/export. Rules: keep file order (code that *runs at load* may only use things from earlier files; functions called later can live anywhere); a new file = create `js/NN-name.js` + add it to `FILES`; `node tools/check.js` verifies the list and syntax. Opening `index.html` via `file://` no longer works (fetch) — always use a local server or the live site.
-- File groups: 01-09 data + spell/path logic (host) • 10 net • 11-15 host sim, buildings, enemies, modes • 16-18 voice/input/audio • 19-26 client effects (`fx`, `efxFX`, path VFX, models, props) • 27-35 3D world, maps, characters, particles, camera, menu stage, per-path visuals, sync • 36-38 mode visuals, render loop, HUD • 39-41 menu/creator/spell book, training menu + settings, debug/`WD`/balance/SW.
+- File groups: 01-09 data + spell/path logic (host) • 10 net • 11-15 host sim, buildings, enemies, modes • 16-18 voice/input/audio • 19-26 client effects (`fx`, `efxFX`, path VFX, models, props) • 27-35 3D world, maps, characters, particles, camera, menu stage, per-path visuals, sync • 36-38 mode visuals, render loop, HUD • 39-41 menu/creator/spell book, training menu + settings, debug/`WD`/balance/SW • 42 fire shader + fire meshes (loaded last: only definitions, `FIRE_U`/`FIREV` must not be touched by code that runs at load in earlier files).
 - Feature notes (moved out of this file to save tokens): **`notes/systems.md`** (file maps + terrain heights, destructible houses, Test Place, props + Blender models/animation/VFX files, skills system "paths × spells" incl. how to add a spell and the Pyro/Storm mechanics map, audio research) • **`notes/vfx-notes.md`** (every approved VFX request per skill — read before touching a skill's visuals) • **`notes/CHANGELOG.md`**.
 
 ## 6. Game content (current)
@@ -144,6 +145,7 @@ Phase 1 (maps from Blender files) is done — `notes/systems.md` §5e. Work in t
 
 ## 11. Changelog
 Latest only — full history in `notes/CHANGELOG.md` (add new entries there too).
+- 2026-10-19 — **Fire VFX overhaul + Storm ult rework** (client only, no protocol change): new `js/42-fire-vfx.js` = animated fire shader `fireMat` (noise from the 128px tileable `NOISETEX` for sheets, simplex for balls; hot parts additive, cooled parts opaque via ONE/ONE_MINUS_SRC_ALPHA) + `makeFireBall` (displaced flame tongues) / `makeFireTail` / `makeFireWall` / `fireBlast` / `fireTemp` / `makeFireWings`+`poseFireWings`, updated by `updateFireV` (from `updateZV`). Flame particles `FLAME_STYLE=3`: noisy round puffs, colour over life (white-yellow → orange → deep red → ember, `FLAMELUT`). Used by: charged/Kindle fireballs + tails, wand charge ball, soul orbs, fire shield (`o.fsh` flaming shell, clear centre), dash tail cone + rear blast, Blazeform hand/foot flames, Ring of Embers 3D wall (2 shader bands), Colossus burning armour edges (fewer body particles), `explosionFX`/dfboom/fireball impacts (`fireBlast`), Dragonfall **flame wings from Blender** (`mesh_fire_wing`, fold on dive, flare on impact). Storm god form: dark **Blender claws** (`mesh_storm_claw`, `STCLAW` materials) with lightning crawling along the blades, Deku-style eyes (sharp core + lightning trail from each eye `o.eyeH`), less glow (`tbolt(...).gk` glow factor, dimmer core), BA claw rakes dark body + thin yellow edge + lightning running along each rake. Blender source: `assets/src/fx_meshes_build.py` + `fx_meshes.blend`. Ring wall cost measured ~0.3 ms after switching to the noise texture (was ~15 ms with live simplex).
 - 2026-10-19 — Creator: face/wand panel (`.cr12`) is now hidden on steps 3-4 (it overlapped the house info — old bug); step tabs move under the title below 900 px wide; **drag to rotate the character** in the creator (`STAGE.rotY/rotV` with inertia, handler in `js/39-menu.js`, cursor grab). Fixed a split regression: spell/path icons in DOM were 404 because `--u:url(icons/…)` resolved against `css/` — `icoURL` now returns an absolute URL (`ICOBASE`).
 - 2026-10-19 — Code split: `index.html` (one 780 KB file) → `index.html` + `css/game.css` + 41 `js/` files loaded as one module; `CODEMAP.md` + `tools/codemap.js` + `tools/check.js`; SW network-first for js/css; removed dead code (old kit-UI CSS, `kitSpells`, `ovc`, `RINGS`, unused `ur`); HANDOFF slimmed (feature notes → `notes/`). No gameplay change, no protocol change. Tested: all 9 modes 200 ticks + every path's 4 spells and ult in training, no console errors.
 - 2026-10-19 — Renamed the game to **Fantas Stick**; magic title font `--fm` (Grenze Gotisch).

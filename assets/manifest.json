@@ -31,6 +31,14 @@
     "debris_wood": {
       "file": "buildings/debris_wood.glb",
       "v": 1
+    },
+    "mesh_fire_wing": {
+      "file": "vfx/fire_wing.glb",
+      "v": 2
+    },
+    "mesh_storm_claw": {
+      "file": "vfx/storm_claw.glb",
+      "v": 1
     }
   },
   "maps": {

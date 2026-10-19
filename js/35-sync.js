@@ -47,6 +47,9 @@ function syncPlayers(P,mode,now,dt){
     const fireSh=p.sh&&getKit(p.id).path===0;
     if(o.shield.visible){o.shield.material.uniforms.t.value=now/1000;o.shield.material.uniforms.c.value.set(fireSh?'#ff7a2a':p.sh?'#7ff0ff':(p.fm&128)?'#6fb8d8':'#9a7a3a');}
     // โล่ไฟ: กลับมาใช้โล่ทรงกลมสีส้มแบบเดิม + ประกายไฟลอยรอบ (ผู้เล่นถามหาโล่หลังเอาเอฟเฟกต์โล่แบบใหม่ออก)
+    // โล่ไฟ: ทรงกลมเปลวไฟ shader (ขอบลุกเป็นเปลวเลียขึ้น กลางใส มองเห็นตัว) แทนฟองสีส้มเรียบ
+    if(fireSh){if(!o.fsh){o.fsh=new THREE.Mesh(_fbGeo,fireMat({mode:'ball',shell:1,flow:[0,1,0],scale:[1.4,1.4,1.4],speed:1.4,heat:-0.12,op:0.85,int:1.0}));o.fsh.scale.setScalar(1.38);o.fsh.position.y=1.1;o.g.add(o.fsh);}
+      o.fsh.visible=true;o.shield.visible=false;o.fsh.rotation.y+=dt*0.6;}else if(o.fsh)o.fsh.visible=false;
     if(fireSh)for(let i=0;i<3;i++){const an=rnd(0,6.283),r=rnd(26,34);PARTS.push({x:p.x+Math.cos(an)*r,y:p.y+Math.sin(an)*r,h:(o.zs||0)+rnd(0.2,2.2),vx:0,vy:0,vh:rnd(1.2,2.6),life:0.4,max:0.4,col:i?'#ff7a2a':'#ffc04a',size:rnd(2.4,3.6),g:-1.5});}
     statusFX(o,p.fm|0,p.x,p.y,o.zs||0,2.2,now);
     o.stars.visible=!!p.st;o.stars.rotation.y=now/250;
@@ -118,6 +121,8 @@ function makeProj(col,t){
   const o={g,core,inner,halo,tail,col,lines:[]};
   // หน้าตากระสุนจากไฟล์ proj_<ชนิด> (ปั้นให้ด้านหน้าพุ่งไปทาง −Y ของ Blender) — แสงรอบ (halo) ยังอยู่
   const fm=modelInst('proj_'+t);if(fm){fm.traverse(m=>{if(m.isMesh)m.castShadow=false;});g.add(fm);o.fileModel=fm;}
+  // ลูกไฟชาร์จ / Kindle: ลูกไฟ shader (เปลวไหลไปด้านหลัง) + กรวยหางไฟ
+  if(t==='pfire'||t==='pfireb'){o.fb=makeFireBall({flow:[0,0,-1]});g.add(o.fb);o.ft=makeFireTail({speed:3.6});g.add(o.ft);}
   if(t==='stun'||t==='zap')for(let i=0;i<2;i++){
     const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.BufferAttribute(new Float32Array(9*3),3));
     const L=new THREE.Line(geo,new THREE.LineBasicMaterial({color:hdr('#c8f6ff',3),transparent:true,blending:THREE.AdditiveBlending,depthWrite:false}));
@@ -163,10 +168,12 @@ function syncProj(v,now){
         PARTS.push({x,y,h:H,vx:0,vy:0,vh:0,life:0.05,max:0.05,col:'#fff6c0',size:3.4,g:0});
         for(let k=1;k<7;k++)PARTS.push({x:x-j.vx*0.005*k,y:y-j.vy*0.005*k,h:H+rnd(-0.03,0.03),vx:rnd(-15,15),vy:rnd(-15,15),vh:rnd(-0.1,0.3),life:0.1,max:0.1,col:k<3?'#ffc04a':k<5?'#ff6a1a':'#d83a10',size:2.6-k*0.25,g:0});
         for(let i=0;i<3;i++)PARTS.push({x:x+rnd(-4,4),y:y+rnd(-4,4),h:H+rnd(-0.1,0.1),vx:-j.vx*0.1+rnd(-60,60),vy:-j.vy*0.1+rnd(-60,60),vh:rnd(-0.3,1.5),life:rnd(0.18,0.35),max:0.35,col:['#fff2b0','#ffb347','#ff6a1a'][i],size:rnd(0.9,1.4),g:5,drag:2});
+        flame(x-j.vx*0.01,y-j.vy*0.01,H-0.12,{vx:-j.vx*0.08+rnd(-20,20),vy:-j.vy*0.08+rnd(-20,20),vh:rnd(0.4,1.2),life:rnd(0.14,0.22),size:rnd(3,4.2),g:-1,drag:3});
         o.lp=[x,y,H];break;
       case 'fire':{
-        // ลูกไฟชาร์จ/Kindle: แกนเหลืองขาว เปลวไฟจริงเป็นหางยาว • Kindle ใหญ่และหนักกว่า มีเปลววนรอบแกน
-        const big=j.t==='pfireb';o.halo.scale.setScalar(r*(big?11:7.5)*fl);o.inner.scale.setScalar(r*(big?2:1.4)*fl);
+        // ลูกไฟชาร์จ/Kindle: ลูกไฟ shader แกนเหลืองขาว เปลวไหลไปด้านหลัง + กรวยหางไฟ + เปลวอนุภาค • Kindle ใหญ่และหนักกว่า มีเปลววนรอบแกน
+        const big=j.t==='pfireb';o.halo.scale.setScalar(r*(big?5:3.6)*fl);o.inner.visible=o.core.visible=o.tail.visible=false;
+        if(o.fb){o.fb.scale.setScalar(r*(big?0.95:0.72)*fl);o.fb.userData.shell.rotation.z+=0.15;o.ft.scale.set(r*(big?0.9:0.68),r*(big?0.9:0.68),big?4.2:3.2);}
         for(let i=0;i<(big?5:3);i++)flame(x-j.vx*0.012*i+rnd(-5,5),y-j.vy*0.012*i+rnd(-5,5),H-0.25+rnd(-0.1,0.1),{vx:-j.vx*0.15+rnd(-20,20),vy:-j.vy*0.15+rnd(-20,20),vh:rnd(0.5,2),life:rnd(0.25,0.4),size:big?rnd(9,13):rnd(6,9),g:-2,drag:3});
         if(big)for(let i=0;i<4;i++){const a=now/55+i*1.57;flame(x+Math.cos(a)*r*16,y+Math.sin(a)*r*16,H-0.2+Math.sin(a*1.3)*0.2,{vx:-j.vx*0.05,vy:-j.vy*0.05,vh:rnd(0.5,1.5),life:0.22,size:6,g:-1});}
         for(let i=0;i<2;i++)PARTS.push({x:x+rnd(-6,6),y:y+rnd(-6,6),h:H+rnd(-0.15,0.15),vx:-j.vx*0.08+rnd(-50,50),vy:-j.vy*0.08+rnd(-50,50),vh:rnd(0.5,2),life:0.35,max:0.35,col:Math.random()<0.5?'#fff0b0':'#ffc04a',size:1.6,g:3,drag:2});
@@ -196,7 +203,9 @@ function syncProj(v,now){
     if(o.lp&&o.pt==='spark'){const [x,y,H]=o.lp;for(let i=0;i<9;i++){const an=rnd(0,6.283),sp=rnd(120,260);PARTS.push({x,y,h:H,vx:Math.cos(an)*sp,vy:Math.sin(an)*sp,vh:rnd(-1,3),life:rnd(0.12,0.22),max:0.22,col:i%3?'#ffc04a':'#fff6c0',size:1.3,g:6,drag:5});}}
     if(o.lp&&o.pt==='pfire'){const [x,y,H]=o.lp;ring(x,y,'#ff9a3a',70,0.28,Math.max(0.15,H-1));for(let i=0;i<14;i++){const an=i/14*6.283;flame(x+Math.cos(an)*10,y+Math.sin(an)*10,Math.max(0.1,H-0.5),{vx:Math.cos(an)*260,vy:Math.sin(an)*260,vh:rnd(1,3),life:0.3,size:rnd(6,9),drag:5});}
       for(let i=0;i<14;i++){const an=rnd(0,6.283),sp=rnd(150,340);PARTS.push({x,y,h:H,vx:Math.cos(an)*sp,vy:Math.sin(an)*sp,vh:rnd(0,5),life:rnd(0.2,0.4),max:0.4,col:i%2?'#ffb347':'#fff0b0',size:1.6,g:7,drag:3});}}
-    scene.remove(o.g);o.g.traverse(m=>{if(m.material&&m.material!==o.halo.material)m.material.dispose();if(m.isLine)m.geometry.dispose();});JM3.delete(id);}
+    if(o.lp&&o.pt==='pfireb'){const [x,y,H]=o.lp;fireBlast(x,y,Math.max(0.3,H),2.4,0.55);}
+    if(o.lp&&o.pt==='pfire'){const [x,y,H]=o.lp;fireBlast(x,y,Math.max(0.3,H),1.3,0.4);}
+    scene.remove(o.g);o.g.traverse(m=>{if(m.material&&m.material!==o.halo.material&&!m.material.userData.keep)m.material.dispose();if(m.isLine)m.geometry.dispose();});JM3.delete(id);}
 }
 let _awT=0;
 function animateWorld(now){

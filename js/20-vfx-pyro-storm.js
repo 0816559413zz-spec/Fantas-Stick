@@ -32,7 +32,7 @@ function updateDfCracks(dt){for(let i=DFV.length-1;i>=0;i--){const d=DFV[i];d.ag
 function dragonfallFX(o,p,pz,now,dt){
   const D=p.df;
   if(o.sdBall&&(!D||D[4]!==1||D[0]===3))o.sdBall.visible=false;
-  if(!D){if(o.dfC)o.dfC.visible=false;o.dfPh=0;return;}
+  if(!D){if(o.dfC)o.dfC.visible=false;if(o.fWings)o.fWings.visible=false;o.dfPh=0;return;}
   const ph=D[0],left=ph===1?D[3]+3.45:ph===2?D[3]+0.45:D[3],ca=Math.cos(p.a||0),sa=Math.sin(p.a||0),ST=D[4]===1;
   const c1=ST?'#ffffff':'#fff0b0',c2=ST?'#fff27a':'#ffb347',c3=ST?'#9fd8ff':'#ff5a1a';
   if(!o.dfC){o.dfC=makeDfCircle(ST);(o.g.userData.extra||(o.g.userData.extra=[])).push(o.dfC);}
@@ -52,8 +52,11 @@ function dragonfallFX(o,p,pz,now,dt){
     if(ST){o.armR.rotation.x=-3.0;o.armR.rotation.z=-0.1;}
     else{// ปีกไฟกางออก กระพือ และทิ้งสะเก็ดไฟ
       const fl2=Math.sin(now/170)*0.35,open=ph===1?Math.min(1,(0.35-D[3])/0.3+0.2):1;
+      // ปีกไฟจากไฟล์ (shader เปลวไหลจากโคนขนไปปลาย) กระพือช้า ๆ
+      if(!o.fWings){o.fWings=makeFireWings();if(o.fWings){o.fWings.position.set(0,1.5,-0.22);o.fWings.scale.setScalar(1.05);o.b.add(o.fWings);}}
+      if(o.fWings){o.fWings.visible=true;poseFireWings(o.fWings,open,fl2*0.75,0);}
       for(const sd of [-1,1]){const bones=[[0.15,1.55,-0.25],[0.9*open,1.95+fl2*0.6,-0.55],[1.9*open,1.75+fl2*1.4,-0.85],[1.5*open,1.05+fl2,-0.75],[0.8*open,0.95+fl2*0.4,-0.5]];
-        for(let i=0;i<7;i++){const b=(Math.random()*4)|0,u=Math.random(),A=bones[b],B=bones[b+1];_ev.set(sd*lerp(A[0],B[0],u),lerp(A[1],B[1],u),lerp(A[2],B[2],u));o.b.localToWorld(_ev);const q=simOf(_ev);
+        for(let i=0;i<(o.fWings?2:7);i++){const b=(Math.random()*4)|0,u=Math.random(),A=bones[b],B=bones[b+1];_ev.set(sd*lerp(A[0],B[0],u),lerp(A[1],B[1],u),lerp(A[2],B[2],u));o.b.localToWorld(_ev);const q=simOf(_ev);
           flame(q.x,q.y,q.h-0.2,{vh:rnd(0.5,1.8),life:rnd(0.12,0.2),size:rnd(6,9),g:-1});}
         if(Math.random()<0.5){_ev.set(sd*1.9*open,1.75+fl2*1.4,-0.85);o.b.localToWorld(_ev);const q=simOf(_ev);PARTS.push({x:q.x,y:q.y,h:q.h,vx:rnd(-40,40),vy:rnd(-40,40),vh:rnd(-2,0),life:0.5,max:0.5,col:'#ffd27a',size:1.5,g:3});}}}
     for(let i=0;i<5;i++)PARTS.push({x:p.x+rnd(-10,10),y:p.y+rnd(-10,10),h:pz+rnd(-0.1,0.3),vx:rnd(-30,30),vy:rnd(-30,30),vh:rnd(-6,-3),life:rnd(0.3,0.45),max:0.45,col:i<2?c1:i<4?c2:c3,size:rnd(2.5,4),g:2,grow:0.8});
@@ -70,7 +73,7 @@ function dragonfallFX(o,p,pz,now,dt){
     LREQ.push({x:tx(p.x),y:pz+0.5,z:tz(p.y),col:ST?'#ffe27a':'#ff7a2a',int:2.5,dist:10});
   }else{
     // ห่อตัวดิ่งลง: พับปีกเข้าหาตัว + หมุนตัวหนึ่งรอบ (เฉพาะสายไฟ)
-    if(!ST){const k=1-Math.max(0,D[3])/0.45;o.b.rotation.y=k*Math.PI*2;
+    if(!ST){const k=1-Math.max(0,D[3])/0.45;o.b.rotation.y=k*Math.PI*2;if(o.fWings){o.fWings.visible=true;poseFireWings(o.fWings,1,0,Math.min(1,k*3));}
       for(const sd of [-1,1])for(let i=0;i<4;i++){const u=Math.random();_ev.set(sd*lerp(0.2,0.55,u),lerp(1.6,0.9,u),-0.45);o.b.localToWorld(_ev);const q=simOf(_ev);flame(q.x,q.y,q.h-0.2,{vh:2,life:0.15,size:7,g:-1});}}
     o.b.rotation.x=1.05;o.legs[0].rotation.x=-1.4;o.legs[1].rotation.x=-1.2;o.armL.rotation.x=-2.2;o.armR.rotation.x=-2.2;o.armL.rotation.z=0.3;o.armR.rotation.z=-0.3;
     for(let i=0;i<9;i++)PARTS.push({x:p.x+rnd(-8,8),y:p.y+rnd(-8,8),h:pz+rnd(0.3,1.6),vx:rnd(-20,20),vy:rnd(-20,20),vh:rnd(0,1),life:rnd(0.25,0.4),max:0.4,col:i<3?'#fff0b0':i<6?'#ffb347':'#ff5a1a',size:rnd(3,5),g:-1,grow:0.6});
@@ -91,17 +94,18 @@ function tbLayer(blend,ro){const V=TBMAX*TBN*2,g=new THREE.BufferGeometry();g.se
   const m=new THREE.Mesh(g,new THREE.MeshBasicMaterial({vertexColors:true,transparent:true,blending:blend,depthWrite:false,side:THREE.DoubleSide}));m.frustumCulled=false;m.renderOrder=ro;scene.add(m);return m;}
 let TBL=null;   // สร้างตอนใช้ครั้งแรก (ตอนโหลดไฟล์ scene ยังไม่ถูกสร้าง)
 const TBC={glow:new THREE.Color('#ffb800').multiplyScalar(1.3),body:new THREE.Color('#ffc400'),acc:new THREE.Color('#7fd6ff'),core:new THREE.Color('#fffbe0').multiplyScalar(1.8)};
+const _tcc=new THREE.Color();
 function tbGet(){if(TBA.length>=TBMAX){const old=TBA.shift();TBF.push(old);}let o=TBF.pop();if(!o){o={pts:Array.from({length:TBN},()=>new THREE.Vector3()),A:new THREE.Vector3(),B:new THREE.Vector3(),path:null};}TBA.push(o);return o;}
 // จุด sim (x,y,h) — col ไม่ใช้ (เหลืองเสมอ) ยกเว้น '#9fd8ff' = สีรองฟ้า • w = ความหนา (หน่วยโลก) • br = จำนวนกิ่ง
 function tbolt(x1,y1,h1,x2,y2,h2,life,col,w,br){
-  const o=tbGet();o.A.set(tx(x1),h1+GY(x1,y1),tz(y1));o.B.set(tx(x2),h2+GY(x2,y2),tz(y2));o.path=null;o.life=o.max=life||0.12;o.w=(w||0.14)*1.2;o.rj=0;
+  const o=tbGet();o.A.set(tx(x1),h1+GY(x1,y1),tz(y1));o.B.set(tx(x2),h2+GY(x2,y2),tz(y2));o.path=null;o.life=o.max=life||0.12;o.w=(w||0.14)*1.2;o.rj=0;o.gk=1;
   const L=o.A.distanceTo(o.B);o.amp=Math.min(0.55,L*0.11+0.03);o.acc=col==='#9fd8ff';
   if(br&&L>1.2)for(let i=0;i<br;i++){const k=rnd(0.25,0.75),bx=lerp(x1,x2,k)+rnd(-8,8),by=lerp(y1,y2,k)+rnd(-8,8),bh=lerp(h1,h2,k),an=rnd(0,6.283),bl=L/S3*rnd(0.2,0.4);
     tbolt(bx,by,bh,bx+Math.cos(an)*bl,by+Math.sin(an)*bl,bh+rnd(-0.6,0.6)*L*0.3,life,col,o.w*0.55,0);}
   return o;
 }
 // สายฟ้าตามเส้นทางที่กำหนด (จุดโลก) — ใช้กับหาง/เกลียวรอบ Railgun
-function tboltP(P,life,w,amp,col){const o=tbGet();o.path=P;o.life=o.max=life;o.w=w*1.2;o.rj=0;o.amp=amp;o.acc=col==='#9fd8ff';return o;}
+function tboltP(P,life,w,amp,col){const o=tbGet();o.path=P;o.life=o.max=life;o.w=w*1.2;o.rj=0;o.amp=amp;o.acc=col==='#9fd8ff';o.gk=1;return o;}
 function tbWrite(L,slot,pts,w,taper,c,a){
   const g=L.geometry,P0=g.attributes.position.array,C0=g.attributes.color.array,cp=cam.position,base=slot*TBN*2;
   for(let i=0;i<TBN;i++){const P=pts[i],Pa=pts[Math.max(0,i-1)],Pb=pts[Math.min(TBN-1,i+1)];
@@ -122,31 +126,46 @@ function updateBolts(dt){
         else o.pts[j].lerpVectors(o.A,o.B,t);
         o.pts[j].x+=rnd(-e,e);o.pts[j].y+=rnd(-e,e);o.pts[j].z+=rnd(-e,e);}}
     const k=Math.min(1,o.life/o.max*2.2),tp=!!o.path;
-    tbWrite(TBL.glow,n,o.pts,o.w*2.6,tp,TBC.glow,0.5*k);tbWrite(TBL.body,n,o.pts,o.w,tp,o.acc?TBC.acc:TBC.body,k);tbWrite(TBL.core,n,o.pts,o.w*0.32,tp,TBC.core,k);n++;
+    tbWrite(TBL.glow,n,o.pts,o.w*2.6,tp,TBC.glow,0.5*k*o.gk);tbWrite(TBL.body,n,o.pts,o.w,tp,o.acc?TBC.acc:TBC.body,k);tbWrite(TBL.core,n,o.pts,o.w*0.32,tp,o.gk<1?_tcc.copy(TBC.core).multiplyScalar(0.36+0.64*o.gk):TBC.core,k);n++;
   }
   for(const L of Object.values(TBL)){const g=L.geometry;g.setDrawRange(0,n*(TBN-1)*6);g.attributes.position.needsUpdate=true;g.attributes.color.needsUpdate=true;L.visible=n>0;}
 }
 const LATER=[],STV=[],SBV=[],SDV=[],TSV=[],CLV=[];
-// ---------- รอยกรงเล็บ (อัลติสายฟ้า): รอยข่วน 3 เส้นโค้งปลายแหลมขนานกัน ตั้งขวางหน้าเรา • ขอบเหลืองทึบ + แกนขาว • ปาดออกเร็วแล้วจาง ----------
+// วัสดุกรงเล็บอัลติ (ใช้ร่วมกันทุกคน): ใบมีดเข้มเหลือบโลหะ • คมเหลืองไม่เรืองจัด • สนับมือโลหะเข้ม
+// blades = จุดโคน/กลาง/ปลายของใบมีด 3 เล่มในพิกัดของไฟล์ (glTF: x, y=บน, z=หน้า) — ตรงกับ assets/src/fx_meshes_build.py
+const STCLAW={dark:new THREE.MeshStandardMaterial({color:'#17140f',metalness:0.85,roughness:0.32,emissive:'#3a2a00',emissiveIntensity:0.35}),
+  edge:new THREE.MeshBasicMaterial({color:'#ffc81e'}),metal:new THREE.MeshStandardMaterial({color:'#2a2621',metalness:0.9,roughness:0.4}),
+  blades:[0,1,2].map(i=>{const x0=(i-1)*0.09,L=i===1?0.82:0.74,sp=(i-1)*0.16,P=t=>[x0+sp*t,-0.06-L*t*(1-0.18*t),0.02+0.55*t*t*L];return [P(0.04),P(0.5),P(0.97)];})};
+for(const k of ['dark','edge','metal'])STCLAW[k].userData.keep=true;
+// ---------- รอยกรงเล็บ (อัลติสายฟ้า): รอยข่วน 3 เส้นโค้งปลายแหลมขนานกัน ตั้งขวางหน้าเรา ----------
+// รอบปรับ 2026-10-19 (ผู้เล่นขอ "เข้มและมีเอฟเฟกต์สายฟ้า ไม่เรืองแสงเกิน"): ตัวรอยสีเข้มเกือบดำ + ขอบคมเหลืองบาง + แสงเรืองจางลง
+// + สายฟ้าบางวิ่งไล่ตามแต่ละรอยระหว่างปาด และแลบออกปลายรอย • ปาดออกเร็วแล้วจาง
 function clawGeo(R,arc,W,off){const N=18,pos=[],idx=[];
   for(let i=0;i<=N;i++){const t=i/N,th=-arc/2+arc*t,w=W*Math.pow(Math.sin(Math.PI*t),0.75)+0.004,cx=Math.cos(th),cy=Math.sin(th);
     pos.push(cx*(R+off)-cx*0,cy*(R+off),0, cx*(R+off-w),cy*(R+off-w),0);if(i){const q=i*2;idx.push(q-2,q-1,q,q-1,q+1,q);}}
   const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));g.setIndex(idx);return g;}
 // x,y,h = จุดศูนย์กลางรอย (sim) • a = ทิศหันหน้า • R = ขนาดรอย (โลก) • rot = เอียงรอย (เรเดียน) • big = ใหญ่/หนา
 function clawRakes(x,y,h,a,R,rot,big){
-  const g=new THREE.Group();g.position.set(tx(x),h+GY(x,y),tz(y));g.rotation.order='YXZ';g.rotation.y=-a+Math.PI/2;g.rotation.z=rot;scene.add(g);
-  const arc=big?1.5:1.25,W=(big?0.34:0.24)*R/2,gap=(big?0.42:0.32)*R/2,parts=[];
+  const g=new THREE.Group();g.position.set(tx(x),h+GY(x,y),tz(y));g.rotation.order='YXZ';g.rotation.y=-a+Math.PI/2;g.rotation.z=rot;scene.add(g);g.updateMatrixWorld(true);
+  const arc=big?1.5:1.25,W=(big?0.34:0.26)*R/2,gap=(big?0.42:0.32)*R/2,parts=[],paths=[];
   for(let k=-1;k<=1;k++){const off=k*gap,Rk=R*(1-Math.abs(k)*0.06);
-    const body=new THREE.Mesh(clawGeo(Rk,arc,W,off),new THREE.MeshBasicMaterial({color:'#ffc400',transparent:true,opacity:1,depthWrite:false,side:THREE.DoubleSide}));
-    const core=new THREE.Mesh(clawGeo(Rk,arc,W*0.42,off-W*0.18),new THREE.MeshBasicMaterial({color:hdr('#fffbe0',1.8),transparent:true,opacity:1,depthWrite:false,side:THREE.DoubleSide}));
-    const glow=new THREE.Mesh(clawGeo(Rk,arc,W*2.2,off+W*0.55),new THREE.MeshBasicMaterial({color:hdr('#ffb800',1.2),transparent:true,opacity:0.35,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide}));
-    for(const m of [glow,body,core])m.position.set(-R*0.86,0,0.01*k);g.add(glow,body,core);parts.push(glow,body,core);}
+    const glow=new THREE.Mesh(clawGeo(Rk,arc,W*1.8,off+W*0.4),new THREE.MeshBasicMaterial({color:hdr('#ffb800',0.8),transparent:true,opacity:0.1,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide}));
+    const body=new THREE.Mesh(clawGeo(Rk,arc,W,off),new THREE.MeshBasicMaterial({color:'#100c04',transparent:true,opacity:0.95,depthWrite:false,side:THREE.DoubleSide}));
+    const mid=new THREE.Mesh(clawGeo(Rk,arc,W*0.55,off-W*0.12),new THREE.MeshBasicMaterial({color:'#2c2006',transparent:true,opacity:0.92,depthWrite:false,side:THREE.DoubleSide}));
+    const edge=new THREE.Mesh(clawGeo(Rk,arc,W*0.16,off+0.004),new THREE.MeshBasicMaterial({color:'#ffd23a',transparent:true,opacity:1,depthWrite:false,side:THREE.DoubleSide}));
+    for(const m of [glow,body,mid,edge])m.position.set(-R*0.86,0,0.01*k);g.add(glow,body,mid,edge);parts.push(glow,body,mid,edge);
+    // เส้นทางสายฟ้าตามรอยนี้ (จุดโลก 12 จุด ตามแนวกลางรอย)
+    const P=[];for(let i=0;i<=11;i++){const th=-arc/2+arc*i/11,r=Rk+off-W*0.35;P.push(new THREE.Vector3(Math.cos(th)*r-R*0.86,Math.sin(th)*r,0.02*k).applyMatrix4(g.matrixWorld));}paths.push(P);}
   parts.forEach(m=>m.geometry.setDrawRange(0,0));
-  CLV.push({g,parts,age:0,rev:big?0.09:0.06,life:big?0.42:0.32});
+  CLV.push({g,parts,paths,age:0,rev:big?0.09:0.06,life:big?0.42:0.32,bt:0,big});
 }
 function updateClaws(dt){for(let i=CLV.length-1;i>=0;i--){const c=CLV[i];c.age+=dt;const k=Math.min(1,c.age/c.rev),n=Math.ceil(18*k)*6;
-  c.parts.forEach((m,j)=>{m.geometry.setDrawRange(0,n);const base=j%3===0?0.35:1;m.material.opacity=base*Math.max(0,1-Math.max(0,c.age-c.rev)/(c.life-c.rev));});
+  const fade=Math.max(0,1-Math.max(0,c.age-c.rev)/(c.life-c.rev));
+  c.parts.forEach((m,j)=>{m.geometry.setDrawRange(0,n);const base=j%4===0?0.1:j%4===3?1:0.94;m.material.opacity=base*fade;});
   c.g.scale.setScalar(1+0.12*Math.min(1,c.age/c.life));
+  // สายฟ้าวิ่งตามรอย (เฉพาะส่วนที่ปาดถึงแล้ว) + แลบออกที่ปลายรอย
+  c.bt-=dt;if(c.bt<=0&&fade>0.25){c.bt=0.03;for(const P of c.paths){const m=Math.max(3,Math.round(12*k)),Q=P.slice(0,m);tboltP(Q,0.045,c.big?0.06:0.05,0.035).gk=0.3;
+      if(Math.random()<0.35){const e=simOf(Q[Q.length-1]);tbolt(e.x,e.y,e.h,e.x+rnd(-16,16),e.y+rnd(-16,16),e.h+rnd(-0.5,0.3),0.05,0,0.035).gk=0.3;}}}
   if(c.age>=c.life){scene.remove(c.g);c.parts.forEach(m=>{m.geometry.dispose();m.material.dispose();});CLV.splice(i,1);}}}
 function later(d,fn){LATER.push({t:d,fn});}
 function stFade(m,life){scene.add(m);STV.push({m,age:0,life,op:m.material.opacity});}
@@ -224,40 +243,57 @@ function stormFX(o,p,pz,now,dt){
     FX.flashSprite(p.x,p.y,pz+1.1,'#ffd23a',1.9,1.3,0.16,1.4);
     LREQ.push({x:tx(p.x),y:pz+1,z:tz(p.y),col:'#ffd23a',int:3,dist:9});}
   o.dPrev=[p.x,p.y];
-  // ร่างเทพสายฟ้า
+  // ร่างเทพสายฟ้า (รอบปรับ 2026-10-19: กรงเล็บเข้มจากไฟล์ Blender + สายฟ้าวิ่งตามใบมีดตลอด • ตาแบบเดกุ: ตาสว่าง + สายฟ้าลากเป็นหางออกด้านข้าง/หลัง • ลดแสงเรือง)
   if(god){
-    if(!o.godG){o.godG=new THREE.Sprite(glowMat('#ffb800',0.45));o.godG.material.userData.keep=true;o.godG.position.y=1.2;o.g.add(o.godG);}
-    o.godG.visible=true;o.godG.scale.set(1.5+0.15*Math.sin(now/90),2.4+0.2*Math.sin(now/70),1);
+    if(!o.godG){o.godG=new THREE.Sprite(glowMat('#ffb800',0.22));o.godG.material.userData.keep=true;o.godG.position.y=1.2;o.g.add(o.godG);}
+    o.godG.visible=true;o.godG.scale.set(1.3+0.1*Math.sin(now/90),2.1+0.15*Math.sin(now/70),1);
     // ตัวละครยังเป็นตัวเดิม (ไม่เปลี่ยนสี/ไม่ถอดผ้าคลุม) — มีแค่สายฟ้าวิ่งรอบ/ทั่วร่าง
-    for(let j=0;j<4;j++){const A=GODPTS[(Math.random()*GODPTS.length)|0],B=GODPTS[(Math.random()*GODPTS.length)|0];if(A===B)continue;const wA=A[1]<1.4?2.4:1.5,wB=B[1]<1.4?2.4:1.5,a=bWorld(o,A[0]*wA,A[1],A[2]*wA+0.05),b=bWorld(o,B[0]*wB,B[1],B[2]*wB+0.05);tbolt(a.x,a.y,a.h,b.x,b.y,b.h,0.05,0,0.07);}
+    for(let j=0;j<2;j++){const A=GODPTS[(Math.random()*GODPTS.length)|0],B=GODPTS[(Math.random()*GODPTS.length)|0];if(A===B)continue;const wA=A[1]<1.4?2.4:1.5,wB=B[1]<1.4?2.4:1.5,a=bWorld(o,A[0]*wA,A[1],A[2]*wA+0.05),b=bWorld(o,B[0]*wB,B[1],B[2]*wB+0.05);tbolt(a.x,a.y,a.h,b.x,b.y,b.h,0.05,0,0.07).gk=0.5;}
     if(o.godUp>0){o.godUp-=dt;o.armR.rotation.x=-3.05;o.armR.rotation.z=-0.1;}
-    // ดวงตา: สายฟ้าเหลืองแลบสั่นออกด้านข้าง
-    if(!o.godEyes){o.godEyes=[-1,1].map(sd=>{const e=new THREE.Sprite(glowMat('#fff2a0',3));e.material.userData.keep=true;e.scale.setScalar(0.16);e.position.set(sd*0.085,1.865,0.24);o.b.add(e);return e;});}
-    o.godEyes.forEach(e=>{e.visible=true;e.scale.setScalar(0.13+0.05*Math.random());});
-    for(const sd of [-1,1]){const e=bWorld(o,sd*0.085,1.865,0.24),e2=bWorld(o,sd*rnd(0.6,1.0),1.865+rnd(-0.05,0.18),rnd(-0.1,0.1)),e3=bWorld(o,sd*rnd(0.35,0.55),1.865+rnd(-0.12,0.1),rnd(0,0.15));
-      tbolt(e.x,e.y,e.h,e2.x,e2.y,e2.h,0.05,0,0.09);tbolt(e.x,e.y,e.h,e3.x,e3.y,e3.h,0.04,0,0.06);}
+    // ดวงตาแบบเดกุ: แกนตาขาวเหลืองเล็กคม + หางสายฟ้าลากจากหางตาออกไปด้านข้าง-หลัง (ตามตำแหน่งย้อนหลังของตา ยิ่งขยับยิ่งยาว) + สายฟ้าแลบสั้นจากตา
+    if(!o.godEyes){o.godEyes=[-1,1].map(sd=>{const e=new THREE.Sprite(glowMat('#fff2a0',1.6));e.material.userData.keep=true;e.scale.setScalar(0.11);e.position.set(sd*0.085,1.865,0.24);o.b.add(e);
+        const c=new THREE.Mesh(new THREE.SphereGeometry(0.03,8,6),new THREE.MeshBasicMaterial({color:'#fffbe0'}));c.scale.set(1.5,0.8,0.6);e.userData.core=c;c.position.set(sd*0.085,1.865,0.245);o.b.add(c);return e;});o.eyeH=[[],[]];}
+    o.godEyes.forEach(e=>{e.visible=e.userData.core.visible=true;e.scale.setScalar(0.1+0.03*Math.random());});
+    [-1,1].forEach((sd,i)=>{const e=bWorld(o,sd*0.085,1.865,0.24),H=o.eyeH[i];_tw.set(tx(e.x),e.h+GY(e.x,e.y),tz(e.y));H.unshift(_tw.clone());if(H.length>9)H.length=9;
+      // หางตา: เริ่มที่ตา แล้วโค้งออกข้างและไปด้านหลัง (ต่อให้ยืนนิ่งก็ยังเห็น) — หนา ทึบ แสงเรืองน้อย
+      const side=_tt.set(sd,0,0).applyQuaternion(o.g.quaternion).clone(),back=_tv.set(0,0,-1).applyQuaternion(o.g.quaternion).clone(),P=[];
+      for(let k=0;k<H.length;k++){const u=k/8,q=H[k].clone().addScaledVector(side,0.07+u*0.38+0.03*Math.sin(now/45+k)).addScaledVector(back,u*0.55);q.y+=u*0.12+0.025*Math.sin(now/30+k*1.7);P.push(q);}
+      if(P.length>=3)tboltP(P,0.035,0.085,0.035).gk=0.35;
+      // แลบซิกแซกจากตาออกด้านข้าง (ยาวขึ้น ชัดขึ้น)
+      if(Math.random()<0.7){const e2=bWorld(o,sd*rnd(0.7,1.15),1.865+rnd(-0.06,0.2),rnd(-0.35,0.05));tbolt(e.x,e.y,e.h,e2.x,e2.y,e2.h,0.05,0,0.075,Math.random()<0.3?1:0).gk=0.35;}});
     // สายฟ้าด้านหลังชี้ขึ้นเฉียง 45°
-    {const bk=bWorld(o,0,1.55,-0.28);for(const [sx,sy,sz] of [[-0.7,2.35,-0.95],[0.7,2.35,-0.95],[0,2.6,-1.05]]){const e=bWorld(o,sx+rnd(-0.08,0.08),sy+rnd(-0.08,0.08),sz);tbolt(bk.x,bk.y,bk.h,e.x,e.y,e.h,0.05,0,0.1,Math.random()<0.3?1:0);}}
+    if(Math.random()<0.5){const bk=bWorld(o,0,1.55,-0.28);for(const [sx,sy,sz] of [[-0.7,2.35,-0.95],[0.7,2.35,-0.95],[0,2.6,-1.05]]){const e=bWorld(o,sx+rnd(-0.08,0.08),sy+rnd(-0.08,0.08),sz);tbolt(bk.x,bk.y,bk.h,e.x,e.y,e.h,0.05,0,0.1,Math.random()<0.3?1:0).gk=0.6;}}
     // หางสายฟ้า: ตามตำแหน่งย้อนหลัง พริ้ว/สั่น
     {_tw.set(0,0.95,-0.3);o.b.localToWorld(_tw);const H=o.tailH||(o.tailH=[]);H.unshift(_tw.clone());if(H.length>14)H.length=14;
       if(H.length>=4){const P=H.map((v,i)=>v.clone().add(_tv.set(Math.sin(now/70+i*0.9)*0.06*i,Math.sin(now/90+i)*0.05*i-0.03*i,Math.cos(now/80+i*0.7)*0.06*i)));
         // หางยื่นออกไปด้านหลังเสมอแม้ยืนนิ่ง
         const back=_tt.set(0,0,-1).applyQuaternion(o.g.quaternion);for(let i=0;i<P.length;i++)P[i].addScaledVector(back,0.09*i);
-        tboltP(P,0.04,0.2,0.05);}}
-    // กรงเล็บสายฟ้า (ทรงคมกางออก) ที่มือทั้งสองข้าง แทนไม้กายสิทธิ์
-    if(!o.claws){o.claws=[o.armR,o.armL].map(A=>{const g=new THREE.Group();g.position.set(0,-0.66,0.02);
-        const bm=new THREE.MeshBasicMaterial({color:'#ffd000'}),cm=new THREE.MeshBasicMaterial({color:hdr('#ffffff',2)});
-        for(let i=0;i<3;i++){const bl=new THREE.Mesh(new THREE.ConeGeometry(0.05,0.85,4),bm);bl.userData.noGod=true;bl.position.set((i-1)*0.09,-0.4,0.08);bl.rotation.set(Math.PI+0.45,0,(i-1)*0.42);bl.scale.z=0.35;g.add(bl);
-          const cr=new THREE.Mesh(new THREE.ConeGeometry(0.02,0.7,4),cm);cr.userData.noGod=true;cr.position.copy(bl.position);cr.rotation.copy(bl.rotation);g.add(cr);}
-        A.add(g);return g;});}
-    o.claws.forEach(c=>{c.visible=true;c.scale.setScalar(1+0.06*Math.sin(now/45));});
+        tboltP(P,0.04,0.2,0.05).gk=0.6;}}
+    // กรงเล็บ: สนับมือ + ใบมีดโค้ง 3 เล่มสีเข้ม คมเหลือง (ไฟล์ mesh_storm_claw) — ไฟล์ยังไม่มา = กรงเล็บกรวยจากโค้ดชั่วคราว
+    if(o.claws&&o.claws.fb&&MODELS.ready.get('mesh_storm_claw')){o.claws.forEach(c=>{c.parent.remove(c);disposeTree(c);});o.claws=null;}
+    if(!o.claws){const file=!!MODELS.ready.get('mesh_storm_claw');if(!file&&!MODELS.fail.has('mesh_storm_claw'))loadModel('mesh_storm_claw');
+      o.claws=[o.armR,o.armL].map((A,ai)=>{const g=new THREE.Group();g.position.set(0,-0.66,0.02);
+        if(file){const m=modelInst('mesh_storm_claw');m.traverse(q=>{if(!q.isMesh)return;q.castShadow=true;q.receiveShadow=false;const nm=(q.material&&q.material.name)||'';
+            q.material=nm.includes('edge')?STCLAW.edge:nm.includes('metal')?STCLAW.metal:STCLAW.dark;});
+          m.scale.setScalar(0.95);g.add(m);}
+        else{const bm=new THREE.MeshBasicMaterial({color:'#2a2418'}),cm=new THREE.MeshBasicMaterial({color:'#ffc400'});
+          for(let i=0;i<3;i++){const bl=new THREE.Mesh(new THREE.ConeGeometry(0.05,0.85,4),bm);bl.position.set((i-1)*0.09,-0.4,0.08);bl.rotation.set(Math.PI+0.45,0,(i-1)*0.42);bl.scale.z=0.35;g.add(bl);
+            const cr=new THREE.Mesh(new THREE.ConeGeometry(0.02,0.7,4),cm);cr.position.copy(bl.position);cr.rotation.copy(bl.rotation);g.add(cr);}}
+        A.add(g);return g;});o.claws.fb=!file;}
+    o.claws.forEach(c=>{c.visible=true;});
     if(o.wandG)o.wandG.visible=false;o.tip.visible=false;
-    if(Math.random()<0.6){const c=o.claws[Math.random()<0.5?0:1];c.getWorldPosition(_tw);const q=simOf(_tw);tbolt(q.x,q.y,q.h-0.2,q.x+rnd(-14,14),q.y+rnd(-14,14),q.h-rnd(0.3,0.7),0.05,0,0.06);}
+    // สายฟ้าวิ่งไปตามใบมีดตลอดเวลา (โคน → กลาง → ปลาย) + ประกายกระโดดข้ามปลายใบมีด — บาง ทึบ แสงเรืองน้อย
+    o.clawT=(o.clawT||0)-dt;
+    if(o.clawT<=0){o.clawT=0.03;
+      for(const c of o.claws){const B=STCLAW.blades,mir=1,cw=(q)=>{_tw.set(q[0]*mir*0.95,q[1]*0.95,q[2]*0.95);c.localToWorld(_tw);return _tw;};
+        for(let j=0;j<2;j++){const b=B[(Math.random()*3)|0],P=b.map(q=>cw(q).clone());tboltP(P,0.05,0.035,0.02).gk=0.3;}
+        if(Math.random()<0.35){const i1=(Math.random()*3)|0,i2=(i1+1+((Math.random()*2)|0))%3,q1=simOf(cw(B[i1][2])),q2=simOf(cw(B[i2][2]));tbolt(q1.x,q1.y,q1.h,q2.x,q2.y,q2.h,0.05,0,0.03).gk=0.3;}
+        if(Math.random()<0.25){const q=simOf(cw(B[(Math.random()*3)|0][2]));tbolt(q.x,q.y,q.h,q.x+rnd(-12,12),q.y+rnd(-12,12),q.h-rnd(0.2,0.6),0.05,0,0.04).gk=0.3;}}}
     // ร่องรอยสายฟ้าตามทางเดิน
-    const lp=o.gLast||[p.x,p.y];if(Math.hypot(p.x-lp[0],p.y-lp[1])>18){tbolt(lp[0],lp[1],pz+0.12,p.x,p.y,pz+0.12,0.35,0,0.1,1);o.gLast=[p.x,p.y];}else if(!o.gLast)o.gLast=[p.x,p.y];
-    for(let i=0;i<2;i++)PARTS.push({x:p.x+rnd(-14,14),y:p.y+rnd(-14,14),h:pz+rnd(0,2.4),vx:rnd(-15,15),vy:rnd(-15,15),vh:rnd(1,3),life:rnd(0.3,0.5),max:0.5,col:i?'#ffd000':'#ffffff',size:rnd(2,3.2),g:-1.5});
-    LREQ.push({x:tx(p.x),y:pz+1.5,z:tz(p.y),col:'#ffd23a',int:3,dist:11});
-  }else{if(o.godG)o.godG.visible=false;if(o.godEyes)o.godEyes.forEach(e=>e.visible=false);if(o.claws){o.claws.forEach(c=>c.visible=false);if(o.wandG&&!o.wandG.visible&&!p.fr)o.wandG.visible=true;o.tip.visible=true;}o.tailH=null;o.gLast=null;}
+    const lp=o.gLast||[p.x,p.y];if(Math.hypot(p.x-lp[0],p.y-lp[1])>18){tbolt(lp[0],lp[1],pz+0.12,p.x,p.y,pz+0.12,0.35,0,0.1,1).gk=0.6;o.gLast=[p.x,p.y];}else if(!o.gLast)o.gLast=[p.x,p.y];
+    for(let i=0;i<2;i++)PARTS.push({x:p.x+rnd(-14,14),y:p.y+rnd(-14,14),h:pz+rnd(0,2.4),vx:rnd(-15,15),vy:rnd(-15,15),vh:rnd(1,3),life:rnd(0.3,0.5),max:0.5,col:i?'#ffd000':'#ffffff',size:rnd(1.6,2.6),g:-1.5});
+    LREQ.push({x:tx(p.x),y:pz+1.5,z:tz(p.y),col:'#ffd23a',int:2.2,dist:10});
+  }else{if(o.godG)o.godG.visible=false;if(o.godEyes)o.godEyes.forEach(e=>{e.visible=false;e.userData.core.visible=false;});if(o.eyeH)o.eyeH=[[],[]];if(o.claws){o.claws.forEach(c=>c.visible=false);if(o.wandG&&!o.wandG.visible&&!p.fr)o.wandG.visible=true;o.tip.visible=true;}o.tailH=null;o.gLast=null;}
   // เส้นสายฟ้า: ชูไม้ขึ้น 0.3 วิ แล้วกดลง 0.2 วิ
   if(f&8){if(!o.slOn)o.slOn=now;const el=(now-o.slOn)/1000;o.armR.rotation.x=el<0.3?lerp(-0.4,-3.05,el/0.3):lerp(-3.05,-0.8,Math.min(1,(el-0.3)/0.2));o.armR.rotation.z=-0.1;
     o.tip.getWorldPosition(_pw);const q=simOf(_pw);for(let i=0;i<2;i++)PARTS.push({x:q.x+rnd(-5,5),y:q.y+rnd(-5,5),h:q.h,vx:rnd(-30,30),vy:rnd(-30,30),vh:rnd(-1,2),life:0.25,max:0.25,col:i?'#ffd000':'#ffffff',size:2.6,g:0});

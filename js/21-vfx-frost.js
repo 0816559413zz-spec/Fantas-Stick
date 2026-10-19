@@ -117,7 +117,7 @@ function updateOrbShots(dt){
     if(k>=1){if(b.sp){scene.remove(b.sp);scene.remove(b.cr);}burst(x,y,'#ffb347',12,200,0.35,2.6,{h:H,vh:[0,3],g:1});OBV.splice(i,1);}}
 }
 function updateZV(dt){
-  updateGlacierVis(dt);updateIceFloors(dt);updateSlashes(dt);updateOrbShots(dt);updateDfCracks(dt);updateStormV(dt);updateFRV(dt);
+  updateGlacierVis(dt);updateIceFloors(dt);updateSlashes(dt);updateOrbShots(dt);updateDfCracks(dt);updateStormV(dt);updateFRV(dt);updateFireV(dt);
   for(let i=WVV.length-1;i>=0;i--){
     const w=WVV[i];const st=Math.min(w.len-w.d,1500*dt);w.d+=st;
     const x=w.x+Math.cos(w.a)*w.d,y=w.y+Math.sin(w.a)*w.d,px=-Math.sin(w.a),py=Math.cos(w.a);
@@ -141,7 +141,7 @@ function updateZV(dt){
     if(k>=1)COLB.splice(i,1);
   }
   for(let i=ZV.length-1;i>=0;i--){
-    const z=ZV[i];z.t-=dt;if(z.t<=0){ZV.splice(i,1);continue;}
+    const z=ZV[i];z.t-=dt;if(z.t<=0){if(z.wall){scene.remove(z.wall);z.wall.traverse(m=>{if(m.geometry)m.geometry.dispose();});z.wall.userData.mats.forEach(m=>m.dispose());}ZV.splice(i,1);continue;}
     if(z.file)continue;   // ไฟล์ vfx_zone_* แทนที่ภาพจากโค้ดแล้ว (mode:"replace")
     if(z.kind==='icering'){
       if(Math.random()<0.35){const a=rnd(0,6.283),d=Math.sqrt(Math.random())*z.r;PARTS.push({x:z.x+Math.cos(a)*d,y:z.y+Math.sin(a)*d,h:rnd(0.3,1.5),vx:-Math.sin(a)*30,vy:Math.cos(a)*30,vh:-0.1,life:1.2,max:1.2,col:'#ffffff',size:1.3,g:0,drag:0.2});}
@@ -152,7 +152,10 @@ function updateZV(dt){
     }
     if(z.kind==='ering'){
       // วงเพลิงกักขัง: กำแพงไฟ 3 มิติสูงรอบขอบ — เปลวหลายชั้นพุ่งขึ้นบิดวน ฐานเหลืองขาว ปลายส้มแดง • ระลอกไฟวิ่งวนรอบกำแพง • ประกาย/ถ่านพุ่งออก
-      const age=(z.age=(z.age||0)+dt),up=Math.min(1,age/0.25),now2=performance.now(),wv=now2/450,nf=z.r*9.6*dt,nn=Math.floor(nf)+(Math.random()<nf%1?1:0);
+      const age=(z.age=(z.age||0)+dt),up=Math.min(1,age/0.25),now2=performance.now(),wv=now2/450,nf=z.r*(z.wall?4.2:9.6)*dt,nn=Math.floor(nf)+(Math.random()<nf%1?1:0);
+      // กำแพง shader: พุ่งขึ้นเร็ว (เด้งเกินนิด) → ระลอกสูงต่ำ → ยุบลงพื้น 0.3 วิสุดท้าย
+      if(z.wall){const e=age<0.25?Math.sin(age/0.25*1.9)/Math.sin(1.9)*1.12:1,end=Math.min(1,z.t/0.3);z.wall.scale.y=Math.max(0.01,e*end*(1+0.06*Math.sin(now2/160)));z.wall.rotation.y+=dt*0.25;
+        z.wall.userData.mats.forEach((m,j)=>{m.uniforms.uHeat.value=[-0.02,-0.18][j]+(age<0.35?0.35*(1-age/0.35):0);});}
       for(let k=0;k<nn;k++){const a=rnd(0,6.283),rr=z.r+rnd(-6,6),px=z.x+Math.cos(a)*rr,py=z.y+Math.sin(a)*rr;
         const d1=Math.abs(angDiff(a,wv)),d2=Math.abs(angDiff(a,wv+Math.PI)),boost=1+0.9*Math.max(0,1-Math.min(d1,d2)/0.6);
         flame(px,py,0.05,{vx:-Math.sin(a)*45,vy:Math.cos(a)*45,vh:rnd(4,7)*boost*up,life:rnd(0.45,0.7),size:rnd(10,15)*(0.6+0.4*up)*Math.min(1.5,boost),g:-2,drag:2.5,grow:0.25,col:Math.random()<0.6?'#ffffff':'#ffd8b0'});}

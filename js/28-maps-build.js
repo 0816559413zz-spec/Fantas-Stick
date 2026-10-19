@@ -12,7 +12,7 @@ function buildWorld(id){
     for(const [k,v] of WCACHE){if(WCACHE.size<=WCACHE_MAX)break;if(k===id)continue;WCACHE.delete(k);disposeTree(v.world);}
   }
   clearDyn();clearDebris();
-  prefetchModels(FILE_MODELS());prefetchFx();
+  prefetchModels([...FILE_MODELS(),"mesh_fire_wing","mesh_storm_claw"]);prefetchFx();
   const FM=MAPS[id]&&MAPS[id].fm;
   setSky(FM?(FM.sky==='sunset'||FM.sky==='day'?'sunset':'night'):id==='pitch'||id==='meadow'||id==='ruins'||id==='test'?'sunset':'night');
   const cached=WCACHE.get(id);

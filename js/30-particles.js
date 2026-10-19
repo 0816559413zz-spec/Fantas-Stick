@@ -19,7 +19,15 @@ function makePointSys(additive){
 // เปลวไฟรูปหยดน้ำ (ฐานเหลืองขาว → ส้ม → ปลายแดงจาง) ใช้กับอนุภาค fl:true — ผสมสีปกติ เห็นชัดแม้พื้นสว่าง
 // ===== เปลวไฟ: FLAME_STYLE 0 = อนุภาคกลมเรืองแสง (ไม่ใช้รูปเปลว) • 2 = แบบใหม่ (ลิ้นไฟ 4 แบบ คมปลาย มีแกนสว่าง ไม่กลับหัว หดเล็กและเปลี่ยนสีเหลือง→ส้ม→แดงตามอายุ)
 //       FLAME_STYLE 1 = แบบแรก (เปลวหยดน้ำเบลอ) — ผู้ใช้ขอเก็บไว้เผื่อเปลี่ยนกลับ: แก้เลขบรรทัดนี้เป็น 1 =====
-const FLAME_STYLE=0;   // 0 = อนุภาคกลมเรืองแสงแบบเดิม (ผู้ใช้เลือก 2026-10-19) • 1 = เปลวหยดน้ำ • 2 = ลิ้นไฟ
+const FLAME_STYLE=3;   // 3 = ก้อนไฟกลมขอบไหว เปลี่ยนสีตามอายุ เหลืองขาว→ส้ม→แดงเข้ม (2026-10-19 รอบอัปเกรดไฟ) • 0 = อนุภาคกลมเรืองแสงแบบเดิม • 1 = เปลวหยดน้ำ • 2 = ลิ้นไฟ
+const PTIME={value:0};
+// ภาพ noise ต่อกันไร้รอยต่อ 128×128 (fbm 4 ชั้น, ตาราง 4 ช่องต่อภาพ) — ใช้แทนการคำนวณ noise สดใน shader ไฟ (เร็วกว่ามาก)
+const NOISETEX=(()=>{const N=128,d=new Uint8Array(N*N*4);let sd=1337;const rr=()=>((sd=(sd*16807)%2147483647)/2147483647);
+  const oct=[];for(let o=0;o<4;o++){const L=4<<o,g=[];for(let i=0;i<L*L;i++)g.push(rr());oct.push({L,g});}
+  for(let y=0;y<N;y++)for(let x=0;x<N;x++){let v=0,a=0.5,t=0;for(const {L,g} of oct){const fx=x/N*L,fy=y/N*L,ix=Math.floor(fx),iy=Math.floor(fy),ux=fx-ix,uy=fy-iy,sx=ux*ux*(3-2*ux),sy=uy*uy*(3-2*uy);
+      const G=(i,j)=>g[((j+L)%L)*L+((i+L)%L)],a0=G(ix,iy)+(G(ix+1,iy)-G(ix,iy))*sx,a1=G(ix,iy+1)+(G(ix+1,iy+1)-G(ix,iy+1))*sx;v+=a*(a0+(a1-a0)*sy);t+=a;a*=0.5;}
+    v/=t;v=Math.min(1,Math.max(0,(v-0.5)*1.9+0.5));const k=(y*N+x)*4;d[k]=d[k+1]=d[k+2]=Math.round(v*255);d[k+3]=255;}
+  const T=new THREE.DataTexture(d,N,N,THREE.RGBAFormat);T.wrapS=T.wrapT=THREE.RepeatWrapping;T.magFilter=THREE.LinearFilter;T.minFilter=THREE.LinearMipmapLinearFilter;T.generateMipmaps=true;T.needsUpdate=true;T.userData.keep=true;return T;})();
 const FLAMETEX_V1=texCanvas(64,64,(g)=>{
   const drop=(w,h,col,bl)=>{g.save();g.filter='blur('+bl+'px)';g.beginPath();g.moveTo(32,58);g.bezierCurveTo(32+w,56-h*0.25,32+w*0.45,58-h*0.72,32,58-h);g.bezierCurveTo(32-w*0.45,58-h*0.72,32-w,56-h*0.25,32,58);g.fillStyle=col;g.fill();g.restore();};
   drop(20,54,'rgba(210,30,6,0.9)',3);drop(15,42,'rgba(255,90,10,0.97)',2.5);drop(10,28,'rgba(255,170,30,1)',2);drop(5,14,'rgba(255,240,190,1)',1.5);
@@ -39,21 +47,31 @@ const PSYS=[makePointSys(true),makePointSys(false),makePointSys(false)];
 {const F=PSYS[2],pts=scene.children[scene.children.length-1];pts.renderOrder=4;
   F.vari=new Float32Array(PMAX);F.geo.setAttribute('pvar',new THREE.BufferAttribute(F.vari,1));
   pts.material=new THREE.ShaderMaterial({
-  uniforms:{map:{value:FLAME_STYLE===2?FLAMETEX_V2:FLAMETEX_V1},scale:{value:600}},
+  uniforms:{map:{value:FLAME_STYLE===2?FLAMETEX_V2:FLAMETEX_V1},scale:{value:600},time:PTIME,nz:{value:NOISETEX}},
   vertexShader:'attribute vec4 pcol;attribute float psize;attribute float pvar;uniform float scale;varying vec4 vC;varying float vV;void main(){vC=pcol;vV=pvar;vec4 mv=modelViewMatrix*vec4(position,1.0);vC.a*=smoothstep(1.2,5.0,-mv.z);gl_PointSize=psize*scale/-mv.z;gl_Position=projectionMatrix*mv;}',
-  fragmentShader:FLAME_STYLE===2
+  fragmentShader:FLAME_STYLE===3
+    // ก้อนไฟ: ขอบเป็น noise ไหลขึ้น + แกนสว่าง • vV = seed (เศษ) + ระดับบวกแสง (จำนวนเต็ม 0-8) — ไฟใหม่บวกแสง ไฟเก่าทึบ (บังฉากหลัง)
+    ?'uniform float time;uniform sampler2D nz;varying vec4 vC;varying float vV;'+
+      'void main(){vec2 c=gl_PointCoord*2.0-1.0;float sd=fract(vV),ad=floor(vV)/8.0;float n=texture2D(nz,c*0.28+vec2(sd*7.31,sd*3.17+time*0.33)).r;'+
+      'float r=length(vec2(c.x,c.y*0.9-0.06));float m=1.0-smoothstep(0.32,1.0,r+(n-0.5)*0.6);if(m<=0.0)discard;float core=1.0-smoothstep(0.0,0.62,r+(n-0.5)*0.35);'+
+      'float a=m*vC.a;vec3 col=vC.rgb*(0.72+0.5*core);gl_FragColor=vec4(col*a,a*(1.0-ad*0.85));}'
+    :FLAME_STYLE===2
     ?'uniform sampler2D map;varying vec4 vC;varying float vV;void main(){vec2 c=vec2(mod(vV,2.0),floor(vV/2.0));vec4 t=texture2D(map,vec2((c.x+gl_PointCoord.x)*0.5,1.0-(c.y+gl_PointCoord.y)*0.5));gl_FragColor=vec4(t.rgb*vC.rgb,t.a*vC.a);}'
     :'uniform sampler2D map;varying vec4 vC;varying float vV;void main(){vec4 t=texture2D(map,vec2(gl_PointCoord.x,gl_PointCoord.y));gl_FragColor=vec4(t.rgb*vC.rgb*1.05,t.a*vC.a);}',
-  blending:THREE.NormalBlending,depthWrite:false,transparent:true});F.mat=pts.material;}
+  depthWrite:false,transparent:true,...(FLAME_STYLE===3?{blending:THREE.CustomBlending,blendSrc:THREE.OneFactor,blendDst:THREE.OneMinusSrcAlphaFactor,blendSrcAlpha:THREE.OneFactor,blendDstAlpha:THREE.OneMinusSrcAlphaFactor}:{blending:THREE.NormalBlending})});F.mat=pts.material;}
+// สีไฟตามอายุ (ตาราง 64 ช่อง สีเชิงเส้น): ใหม่ = เหลืองขาว → เหลืองทอง → ส้ม → แดงส้ม → แดงเข้ม → ถ่านดำ
+const FLAMELUT=(()=>{const st=[[0,'#fff6dc'],[0.12,'#ffd56a'],[0.3,'#ff9a2a'],[0.5,'#f2561a'],[0.72,'#a8240c'],[0.9,'#3a1208'],[1,'#1a0a06']].map(([t,c])=>[t,new THREE.Color(c)]),L=[];
+  for(let i=0;i<64;i++){const t=i/63;let k=0;while(k<st.length-2&&st[k+1][0]<t)k++;const [t0,c0]=st[k],[t1,c1]=st[k+1],u=Math.min(1,Math.max(0,(t-t0)/(t1-t0)));L.push(c0.clone().lerp(c1,u));}return L;})();
 // เปลวไฟ 1 ดวง (fl:true) — col = สีย้อม ('#ffffff' = สีเปลวตามภาพ)
 const FLAMECOL=['#fff0b0','#ffd27a','#ffb347','#ff8a2a','#ff6a1a','#ff5a14'];
 function flame(x,y,h,o){o=o||{};
+  if(FLAME_STYLE===3){PARTS.push({x,y,h:h+0.1,vx:o.vx||0,vy:o.vy||0,vh:o.vh===undefined?rnd(2,4):o.vh,life:o.life||0.45,max:o.life||0.45,col:o.col||'#ffffff',size:(o.size||6)*0.78,g:o.g===undefined?-1.5:o.g,drag:o.drag===undefined?2:o.drag,grow:o.grow===undefined?0.5:o.grow,fl:true,sd:Math.random()*0.99});return;}
   if(FLAME_STYLE===0){PARTS.push({x,y,h:h+0.15,vx:o.vx||0,vy:o.vy||0,vh:o.vh===undefined?rnd(2,4):o.vh,life:o.life||0.45,max:o.life||0.45,col:(o.col&&o.col!=='#ffffff'&&o.col[1]!=='f'?o.col:FLAMECOL[(Math.random()*FLAMECOL.length)|0]),size:(o.size||6)*0.6,g:o.g===undefined?-1.5:o.g,drag:o.drag===undefined?2:o.drag,grow:o.grow===undefined?0.6:o.grow});return;}
   PARTS.push({x,y,h,vx:o.vx||0,vy:o.vy||0,vh:o.vh===undefined?rnd(2,4):o.vh,life:o.life||0.45,max:o.life||0.45,col:o.col||'#ffffff',size:o.size||6,g:o.g===undefined?-1.5:o.g,drag:o.drag===undefined?2:o.drag,grow:o.grow===undefined?(FLAME_STYLE===2?0:0.4):o.grow,fl:true,v:(Math.random()*4)|0});}
 const colCache={};
 function col3(c){return colCache[c]||(colCache[c]=new THREE.Color(c));}
 function updateParticles(dt){
-  PSYS[0].n=PSYS[1].n=PSYS[2].n=0;
+  PSYS[0].n=PSYS[1].n=PSYS[2].n=0;PTIME.value+=dt;
   if(PARTS.length>PMAX*1.6)PARTS.splice(0,PARTS.length-PMAX*1.6);
   for(let i=PARTS.length-1;i>=0;i--){
     const p=PARTS[i];p.life-=dt;
@@ -66,10 +84,12 @@ function updateParticles(dt){
     const S=PSYS[p.fl?2:p.smoke?1:0];if(S.n>=PMAX)continue;
     const k=p.life/p.max,c=col3(p.col),j=S.n;
     S.pos[j*3]=tx(p.x);S.pos[j*3+1]=p.h+GY(p.x,p.y);S.pos[j*3+2]=tz(p.y);
-    if(p.fl){const u=FLAME_STYLE===2?1-k:0;S.col[j*4]=c.r;S.col[j*4+1]=c.g*(1-0.45*u);S.col[j*4+2]=c.b*(1-0.75*u);S.col[j*4+3]=Math.min(1,(1-k)*7)*Math.min(1,k*1.8);S.vari[j]=p.v|0;}
+    if(p.fl&&FLAME_STYLE===3){const t=1-k,L=FLAMELUT[Math.min(63,(t*63)|0)];S.col[j*4]=L.r*c.r;S.col[j*4+1]=L.g*c.g;S.col[j*4+2]=L.b*c.b;S.col[j*4+3]=Math.min(1,t*16)*Math.min(1,k*2.2)*(1-0.5*Math.min(1,Math.max(0,(t-0.4)/0.5)));
+      S.vari[j]=Math.round(8*(1-Math.min(1,Math.max(0,(t-0.22)/0.45))))+p.sd;}
+    else if(p.fl){const u=FLAME_STYLE===2?1-k:0;S.col[j*4]=c.r;S.col[j*4+1]=c.g*(1-0.45*u);S.col[j*4+2]=c.b*(1-0.75*u);S.col[j*4+3]=Math.min(1,(1-k)*7)*Math.min(1,k*1.8);S.vari[j]=p.v|0;}
     else if(p.smoke){S.col[j*4]=c.r;S.col[j*4+1]=c.g;S.col[j*4+2]=c.b;S.col[j*4+3]=Math.min(1,k*1.5);}
     else{const b=1.25;S.col[j*4]=c.r*b;S.col[j*4+1]=c.g*b;S.col[j*4+2]=c.b*b;S.col[j*4+3]=k;}
-    S.size[j]=p.size*0.12*(p.fl&&FLAME_STYLE===2?0.45+0.55*k:1);S.n++;
+    S.size[j]=p.size*0.12*(p.fl&&FLAME_STYLE===2?0.45+0.55*k:p.fl&&FLAME_STYLE===3?(0.55+0.45*Math.min(1,(1-k)*5))*(1-0.3*(1-k)*(1-k)):1);S.n++;
   }
   for(const S of PSYS){S.geo.setDrawRange(0,S.n);const a=S.geo.attributes;a.position.needsUpdate=a.pcol.needsUpdate=a.psize.needsUpdate=true;if(a.pvar)a.pvar.needsUpdate=true;}
 }

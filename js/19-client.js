@@ -75,9 +75,9 @@ function impactFX(x,y,t,onTarget,H){
 function explosionFX(x,y,H){
   const low=H<3;
   FX.flashLight(x,y,H+0.2,'#ff8a3a',7,22,0.45);
-  FX.flashSprite(x,y,H,'#ff7a2a',0.6,8,0.35,2.2);
+  FX.flashSprite(x,y,H,'#ff7a2a',0.6,6,0.3,1.6);
   FX.flashSprite(x,y,H,'#fff0b0',0.3,4,0.18,3);
-  SHAPES_Q.push({k:'dome',x,y,h:low?0:H,col:'#ff7a2a',s0:0.4,s1:4.2,life:0.35,op:0.45,full:1});
+  fireBlast(x,y,low?Math.max(0.4,H):H,3.2,0.6);
   if(low){ring(x,y,'#ffb36a',95,0.4);SHAPES_Q.push({k:'decal',x,y,col:'#000000',s1:3.2,life:6,op:0.55});}
   burst(x,y,'#ffb347',50,420,0.9,2,{h:H,vh:[1,7],g:9});
   burst(x,y,'#ff5a1a',30,220,0.45,5,{h:H,vh:[0,3],g:-2});

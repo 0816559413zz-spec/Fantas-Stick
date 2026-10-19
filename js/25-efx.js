@@ -145,11 +145,13 @@ function efxFX(ev){
     case 'dfcancel':smoke(x,y,H,10,'#3a2a24',0.8,6,80);break;
     case 'dfboom':{
       const R=ev.r;
-      FX.flashSprite(x,y,H+0.5,'#ffffff',0.3,4.5,0.08,3);FX.flashSprite(x,y,H+0.4,'#fff6d0',0.4,6,0.16,2.5);FX.flashSprite(x,y,H+0.3,'#ff9a3a',0.45,8.5,0.32,1.8);
+      FX.flashSprite(x,y,H+0.5,'#fff2d0',0.3,3,0.07,1.8);FX.flashSprite(x,y,H+0.3,'#ff9a3a',0.45,6,0.28,1.3);fireBlast(x,y,H+0.6,R*S3*0.75,0.6);
       FX.flashLight(x,y,H+0.8,'#ffb347',8,24,0.45);
       ring(x,y,'#ffffff',R*0.55,0.22,H+0.06);ring(x,y,'#ffd27a',R,0.35,H+0.05);ring(x,y,'#ff8a2a',R*1.5,0.5,H+0.05);
       dfCracks(x,y,H+0.04,R*1.15);
-      // สะบัดปีกไฟออกตอนกระแทก
+      // สะบัดปีกไฟออกตอนกระแทก: ปีก shader กางพรึ่บออกกว้างแล้วจางหาย
+      {const o=PM3.get(ev.id),W=makeFireWings();if(W){W.position.set(tx(x),H+GY(x,y)+1.2,tz(y));W.rotation.y=o?o.g.rotation.y:0;W.scale.setScalar(1.0);
+        fireTemp(W,[W.userData.mat],0.5,(v,k)=>{poseFireWings(W,1,-0.25+0.5*k,0);W.scale.setScalar(1+k*0.8);W.userData.mat.uniforms.uOp.value=1-k;W.userData.mat.uniforms.uHeat.value=0.25-0.4*k;});}}
       {const o=PM3.get(ev.id),fa=o?-o.g.rotation.y+Math.PI/2:0;for(const sd of [-1,1])for(let i=0;i<14;i++){const an=fa+sd*Math.PI/2+rnd(-0.5,0.5);flame(x,y,H+rnd(0.5,1.8),{vx:Math.cos(an)*rnd(250,420),vy:Math.sin(an)*rnd(250,420),vh:rnd(1,4),life:0.35,size:rnd(10,14),drag:4});}}
       // เสาไฟพุ่งขึ้นกลางจุดกระแทก
       for(let i=0;i<46;i++){const an=rnd(0,6.283),r=rnd(0,R*0.3);PARTS.push({x:x+Math.cos(an)*r,y:y+Math.sin(an)*r,h:H+rnd(0,0.4),vx:Math.cos(an)*rnd(5,30),vy:Math.sin(an)*rnd(5,30),vh:rnd(9,18),life:rnd(0.35,0.6),max:0.6,col:i%3===0?'#fff4c8':i%3===1?'#ffb347':'#ff5a1a',size:rnd(3.5,6),g:-1,drag:2.5,grow:0.6});}
@@ -178,7 +180,9 @@ function efxFX(ev){
       for(let i=0;i<70;i++){const a=rnd(0,6.283),r=rnd(4,26);PARTS.push({x:x+Math.cos(a)*r,y:y+Math.sin(a)*r,h:H+0.05,vx:Math.cos(a)*rnd(5,30),vy:Math.sin(a)*rnd(5,30),vh:rnd(6,12),life:rnd(0.35,0.6),max:0.6,col:i%3===0?'#fff0b0':i%3===1?'#ffb347':'#ff5a1a',size:rnd(2.4,4.2),g:-2,drag:2,grow:0.8});}
       ring(x,y,'#ffb347',45,0.35,H+0.1);for(let i=0;i<14;i++){const an=rnd(0,6.283),r=rnd(4,22);flame(x+Math.cos(an)*r,y+Math.sin(an)*r,H+0.05,{vh:rnd(7,11),life:rnd(0.35,0.5),size:rnd(8,12),g:-1.5});}
       FX.flashLight(x,y,H+1,'#ff8a3a',5,12,0.35);if(near)snd('cast_fire',ev);if(ev.id===NET.myId)snd('buff');break;
-    case 'ering':{const own=zoneFx('ering',x,y,ev.r,ev.t,'#ff6a2a');ZV.push({x,y,r:ev.r,t:ev.t,kind:'ering',col:'#ff6a2a',file:own});if(own){if(near)snd('boom',{x,y,vol:0.5});break;}}SHAPES_Q.push({k:'rune',x,y,col:'#ff7a2a',s1:ev.r*S3,life:ev.t,op:0.7});ring(x,y,'#ffb347',ev.r,0.4,0.2);
+    case 'ering':{const own=zoneFx('ering',x,y,ev.r,ev.t,'#ff6a2a'),zv={x,y,r:ev.r,t:ev.t,kind:'ering',col:'#ff6a2a',file:own};ZV.push(zv);if(own){if(near)snd('boom',{x,y,vol:0.5});break;}
+      // กำแพงไฟ 3 มิติ (shader เปลวเลียขึ้น 3 ชั้น) ปะทุขึ้นจากพื้น
+      zv.wall=makeFireWall(ev.r*S3,3.3);zv.wall.position.set(tx(x),GY(x,y),tz(y));zv.wall.scale.y=0.01;scene.add(zv.wall);}SHAPES_Q.push({k:'rune',x,y,col:'#ff7a2a',s1:ev.r*S3,life:ev.t,op:0.7});ring(x,y,'#ffb347',ev.r,0.4,0.2);
       // กำแพงไฟปะทุขึ้นจากพื้นตอนวาง
       for(let i=0;i<48;i++){const a=i/48*6.283;flame(x+Math.cos(a)*ev.r,y+Math.sin(a)*ev.r,0.05,{vh:rnd(9,13),life:rnd(0.35,0.5),size:rnd(12,16),g:-1});}
       FX.flashLight(x,y,2,'#ff8a3a',6,20,0.35);if(near)snd('boom',{x,y,vol:0.5});break;

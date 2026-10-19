@@ -172,6 +172,14 @@
 
 (ชื่อเหล่านี้มาจากคาถาที่ฝั่งเกมเพลย์ออกแบบไว้ ถ้ามีคาถาใหม่ ชื่อก็จะเพิ่มตาม จะดูรายชื่อล่าสุดได้จาก `efxFX` ใน `index.html` หรือถามฝั่งโค้ด)
 
+### โมเดลประกอบเอฟเฟกต์ (เกมใส่ shader เอง)
+| ชื่อใน manifest | ไฟล์ | ใช้กับ |
+|---|---|---|
+| `mesh_fire_wing` | `vfx/fire_wing.glb` | ปีกไฟ Dragonfall (ข้างเดียว เกมกลับด้านเอง) — uv v = 0 ที่โคนขนนก → 1 ที่ปลาย เกมใส่ไฟ shader แทนวัสดุ |
+| `mesh_storm_claw` | `vfx/storm_claw.glb` | กรงเล็บร่างอัลติสายฟ้า (ติดที่มือ) — วัสดุ `claw_dark` / `claw_edge` / `claw_metal` เกมเปลี่ยนเป็นวัสดุของเกมตามชื่อ |
+
+แก้ได้ที่ `assets/src/fx_meshes_build.py` (รันใน Blender แล้ว export ให้เอง) หรือ `assets/src/fx_meshes.blend` • แก้แล้วเพิ่มเลข `"v"` ใน manifest • ชื่อขึ้นต้น `mesh_` = ไม่เล่นอัตโนมัติแบบ `vfx_`
+
 ## 7. ใส่ไฟล์เข้าเกม
 1. วางไฟล์ไว้ใต้โฟลเดอร์ `assets/` เช่น `assets/props/crate.glb`
 2. เพิ่มรายการใน `assets/manifest.json`:
