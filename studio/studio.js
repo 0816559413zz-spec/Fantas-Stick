@@ -175,13 +175,13 @@ function stBuildUI(){
   root.append(h('div',{id:'stTl'},h('div',{className:'bar'},h('button',{id:'stPlay',title:'เล่น/หยุด (Space)',on:{click:()=>{ST.play=!ST.play;if(ST.play&&ST.t>=stDur()+ST.tail)stRestart();stSync();}}},'⏸'),
     h('button',{id:'stRe',title:'เล่นใหม่ (R)',on:{click:()=>{ST.play=true;stRestart();stSync();}}},'⟲'),...[0.1,0.25,0.5,1].map(s=>h('button',{'data-sp':s,id:'stSp'+s,on:{click:()=>{ST.speed=s;stSync();}}},s+'×')),
     h('button',{id:'stLoop',title:'วนเล่น',on:{click:()=>{ST.loop=!ST.loop;stSync();}}},'🔁'),h('span',{className:'time',id:'stTime'},'0.00'),
-    h('span',{id:'stAdd'},h('button',{id:'stAddB',on:{click:()=>{const m=$st('stAddMenu');m.hidden=!m.hidden;}}},'＋ ชั้น'),h('div',{id:'stAddMenu',hidden:true})),
+    h('span',{id:'stAdd'},h('button',{id:'stAddB',on:{click:()=>{const m=$st('stAddMenu');if(!m.children.length)stAddMenuFill();m.hidden=!m.hidden;}}},'＋ ชั้น'),h('div',{id:'stAddMenu',hidden:true})),
     h('label',{title:'เลขสุ่ม — เปลี่ยนเพื่อดูแบบสุ่มอื่น'},'seed',h('input',{type:'number',id:'stSeed',value:ST.seed,min:1,max:9999,style:'width:58px',on:{change:e=>{ST.seed=+e.target.value||1;stRestart();}}})),
     h('span',{className:'mute',style:'font-size:11.5px'},'ลากแถบ = เลื่อนจังหวะ • ลากขอบขวา = ยืดอายุ • คลิกแถวเวลา = กระโดด • 👁 ซ่อน • S เดี่ยว')),h('div',{id:'stRows'})));
   root.append(h('div',{id:'stInsp'}));
   root.append(h('div',{id:'stToast',hidden:true}));
   // เมนูเพิ่มชั้น
-  const am=$st('stAddMenu');for(const [t,T] of Object.entries(FXR.schema?FXR.schema.types:{}))am.append(h('button',{on:{click:()=>{am.hidden=true;stAddLayer(t);}}},(T.icon||'')+' '+T.th,h('small',{className:'mute'},' '+t)));
+  stAddMenuFill();   // เติมอีกครั้งตอนกดปุ่ม ถ้าตอนนี้ schema ยังโหลดไม่เสร็จ
   // กล้องหมุนเอง: ลากบนจอ / ล้อเมาส์ซูม
   const cv=gl.domElement;let drag=null;
   cv.addEventListener('pointerdown',e=>{if(mkGizmoHot())return;drag={x:e.clientX,y:e.clientY};cv.setPointerCapture(e.pointerId);if(ST.cam!=='orbit'){ST.cam='orbit';stSync();}});
@@ -345,7 +345,7 @@ function stTryGame(){if(!ST.name){stToast('บันทึกไฟล์ก่�
   try{const o=JSON.parse(localStorage.getItem('wd_fxbind')||'{}');o[k]={fx:ST.name,mode};localStorage.setItem('wd_fxbind',JSON.stringify(o));}catch(e){}
   if(ST.dirty)stToast('ไฟล์ยังไม่ได้บันทึก — เกมจะใช้เวอร์ชันที่บันทึกล่าสุด');window.open('index.html','_blank');
   stToast('เปิดเกมแล้ว: '+k+' → '+ST.name+' ('+mode+')\nล้างการผูกทดลอง: console → localStorage.removeItem("wd_fxbind")',5000);}
-function stHelp(){const m=h('div',{className:'stModal',on:{click:e=>{if(e.target===m)m.remove();}}});m.append(h('div',{className:'box',style:'max-width:640px'},h('h3',null,'วิธีใช้ VFX Studio'),
+function stHelp(){const m=h('div',{className:'stModal',on:{click:e=>{if(e.target===m)m.remove();}}});m.append(h('div',{className:'box',style:'max-width:640px'},h('h3',null,'วิธีใช้ VFX Studio'),h('p',{style:'margin:0 0 8px'},h('a',{href:'manual/index.html',target:'_blank',style:'color:var(--gold2);font-size:15px'},'📖 เปิดคู่มือแบบมีรูป (ภาษาไทย)')),
   h('div',{style:'display:grid;gap:6px;font-size:13px'},...[
     'เลือกเอฟเฟกต์ทางซ้าย หรือ ＋ ใหม่ (เริ่มจากแม่แบบ) • ธาตุ = เปลี่ยนสีทั้งเอฟเฟกต์ในคลิกเดียว • ความแรง = คูณจำนวน/ขนาด/ความสว่างทั้งหมด',
     'ไทม์ไลน์: ลากแถบ = เลื่อนเวลาเริ่ม • ลากขอบขวา = ยืดอายุ • คลิกแถวเวลา = ไปเวลานั้น (ภาพจำลองแบบแน่นอน เหมือนเดิมทุกครั้ง) • 👁 ซ่อน • S เล่นชั้นเดียว',
@@ -356,6 +356,7 @@ function stHelp(){const m=h('div',{className:'stModal',on:{click:e=>{if(e.target
     'แท็บ 🧊 โมเดล = ปั้นโมเดลของเอฟเฟกต์เอง • แท็บ 🎞 ภาพ = วาดภาพ/flipbook เอง (กด ? ในแท็บนั้นดูวิธีใช้)',
     'บันทึกตรงลงโปรเจกต์ต้องเปิดผ่าน python tools/serve.py • รูปแบบไฟล์ทั้งหมด: FX-FORMAT.md'].map(t=>h('p',{style:'margin:0'},'• '+t))),h('button',{on:{click:()=>m.remove()}},'ปิด')));$st('st').append(m);}
 // ---------- API สำหรับ Claude / console ----------
+function stAddMenuFill(){const am=$st('stAddMenu');if(!am||am.children.length)return;for(const [t,T] of Object.entries(FXR.schema?FXR.schema.types:{}))am.append(h('button',{on:{click:()=>{am.hidden=true;stAddLayer(t);}}},(T.icon||'')+' '+T.th,h('small',{className:'mute'},' '+t)));}
 window.STUDIO={load:n=>stOpen(n),data:()=>ST.fx,name:()=>ST.name,
   set(path,v){const [id,...ks]=path.split('.');const L=id==='file'?ST.fx:ST.fx.layers.find(x=>x.id===id);if(!L)return false;let o=L;for(let i=0;i<ks.length-1;i++)o=o[ks[i]];stPush();o[ks[ks.length-1]]=v;stChanged(true);return true;},
   play(){ST.play=true;stRestart();stSync();},pause(){ST.play=false;stSync();},seek:t=>{ST.play=false;stSeek(t);stSync();return ST.met;},sheet:(ts,save)=>stSheet(ts,save),
