@@ -32,10 +32,10 @@ function fxData(name){const e=FXR.db.get(name);if(!e){fxLoad(name);return null;}
 // ---------- ค่า: ตัวเลข / สูตร / ช่วงสุ่ม / เส้นโค้ง / สี ----------
 const _fxExpr=new Map();
 function fxExpr(src){let f=_fxExpr.get(src);if(f)return f;
-  if(!/^[\w\s.+\-*/(),]*$/.test(src)){console.warn('fx: สูตรมีตัวอักษรที่ไม่อนุญาต',src);f=()=>0;}
+  if(!/^[\w\s.+\-*/(),<>=!&|?:]*$/.test(src)||/(^|[^=!<>])=(?!=)|\+\+|--/.test(src)){console.warn('fx: สูตรมีตัวอักษรที่ไม่อนุญาต',src);f=()=>0;}   // เทียบได้ (== != < > && || ?:) แต่ห้ามกำหนดค่า (= ++ --)
   else{try{f=new Function('P','const {min,max,abs,sqrt,floor,round,sin,cos,PI}=Math;with(P){return ('+src+');}');}catch(e){console.warn('fx: สูตรผิด',src);f=()=>0;}}
   _fxExpr.set(src,f);return f;}
-function fxEval(src,I){try{const v=fxExpr(src)(I.P);return typeof v==='number'&&isFinite(v)?v:0;}catch(e){return 0;}}
+function fxEval(src,I){try{const v=fxExpr(src)(I.P);if(typeof v==='boolean')return +v;return typeof v==='number'&&isFinite(v)?v:0;}catch(e){return 0;}}
 // v: ค่าจากไฟล์ • k: อายุชั้น 0..1 (สำหรับเส้นโค้ง)
 function fxV(v,I,k){
   if(typeof v==='number')return v;
@@ -84,7 +84,7 @@ function fxStop(I){if(!I||I.stop)return;I.stop=true;I.stopT=I.t;for(const c of I
 function fxKill(I){if(!I)return;for(const S of I.L)if(S.st===1)fxEnd(S,I,true);I.L.length=0;for(const c of I.kids)fxKill(c);const j=FXR.inst.indexOf(I);if(j>=0)FXR.inst.splice(j,1);}
 function fxClearAll(){fxMPClear();for(const I of FXR.inst.slice())fxKill(I);FXR.inst.length=0;}
 // เช็กประตู (ชั้นเสริม / ระยะ / ของเรา) ตอนเริ่มชั้น
-function fxGate(L,I,w){if(fxG(L,'x')&&(!vfxExtra()||I.far))return false;if(fxG(L,'own')&&!I.own)return false;
+function fxGate(L,I,w){if(fxG(L,'x')&&(!vfxExtra()||I.far))return false;if(fxG(L,'own')&&!I.own)return false;if(fxG(L,'other')&&I.own)return false;
   const nr=fxG(L,'near');if(nr>0&&cam.position.distanceTo(_fxw.set(tx(w[0]),w[2]+GY(w[0],w[1]),tz(w[1])))>nr)return false;return true;}
 // ---------- ทุกเฟรม ----------
 function updateFx(dt){fxMPUpdate(dt);if(!FXR.inst.length)return;
@@ -294,6 +294,7 @@ const FXCODE={
   meteor:(x,y,h,a,I)=>fireMeteor(x,y,a.t||0.3,x-Math.cos(I.a)*260,y-Math.sin(I.a)*260),
   iceRing:(x,y,h,a)=>iceRing(x,y,(a.r||3)*20,a.n||14,a.h||0.6,a.life||1.2,{}),
   iceCircle:(x,y,h,a)=>iceCircle(x,y,a.r||5,a.t||3),
+  ev:(x,y,h,a,I)=>{if(FXCODE._evOn)return;FXCODE._evOn=1;try{fx(Object.assign({x,y,h,a:I.a},a),true);}finally{FXCODE._evOn=0;}},   // เล่น event ของเกมแบบภาพเดิมในโค้ด (ข้าม bind.json, ไม่ซ้อนตัวเอง) เช่น {"k":"efx","z":"swing"} — สตูดิโอใช้เทียบก่อน-หลัง
   mistWave:(x,y,h,a)=>mistWave(x,y,(a.r||3)*20,a.n||16),
   claws:(x,y,h,a,I)=>clawRakes(x,y,h,I.a,a.r||100,a.rot||0,!!a.big),
   slash:(x,y,h,a,I)=>makeSlash(x,y,h,I.a+(a.yaw||0)*FXDEG,(a.r||3)*20,!!a.vert,(a.tilt||0)*FXDEG,a.col||'#cfefff',a.br||1.8,a.wk||1),
@@ -305,7 +306,8 @@ function fxBind(ev,H){if(!FXR.ready||!FXR.on||ev.x===undefined)return false;
   const keys=ev.k==='efx'?['efx:'+ev.z]:(ev.t!==undefined?[ev.k+':'+ev.t,ev.k]:[ev.k]);let rep=false;
   for(const key of keys){const e=FXR.over[key]||FXR.bind[key];if(!e)continue;
     for(const b of [].concat(e)){if(!b||!b.fx)continue;const d=fxData(b.fx);if(!d)continue;
-      const ctx={P:{ev,s:1,k:1}},ev2=v=>typeof v==='string'?fxEval(v,ctx):v,p={};if(b.p)for(const q in b.p)p[q]=ev2(b.p[q]);
+      const ctx={P:{ev,s:1,k:1}},ev2=v=>typeof v==='string'?fxEval(v,ctx):v,p={};if(b.if!==undefined&&!ev2(b.if))continue;   // if: เล่นเมื่อสูตรไม่เป็น 0 เช่น "ev.ax*1" (ขวาน), "1-ev.ax*1" (ดาบ)
+      if(b.p)for(const q in b.p)p[q]=ev2(b.p[q]);
       const fol=b.follow?(b.follow==='ev.id'?ev.id:ev2(b.follow)):undefined;
       const I=fxStart(d,{x:ev.x,y:ev.y,h:H,a:ev.a||0,col:ev.col||ev.c,pal:b.pal,s:b.s!==undefined?ev2(b.s):1,p,follow:fol,own:ev.id!==undefined&&ev.id===NET.myId,ev},b.fx);
       if(I&&b.mode==='replace')rep=true;}

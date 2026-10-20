@@ -1,0 +1,175 @@
+{
+ "v": 1,
+ "desc": "Frostbite Aura เปิด: หมอกเย็นระเบิดออกแล้วหมุนเป็นเกลียว + เกล็ด/ผลึกโคจรรอบตัว + คลื่นพื้น",
+ "tags": [
+  "frost",
+  "aura",
+  "self"
+ ],
+ "pal": "ice",
+ "dur": 1.5,
+ "params": {},
+ "layers": [
+  {
+   "id": "spiral",
+   "t": "emit",
+   "at": 0,
+   "life": 0.25,
+   "rate": 120,
+   "att": "ground",
+   "from": "ring",
+   "fr": 1.3,
+   "pos": [
+    0,
+    0.5,
+    0
+   ],
+   "dir": "tangent",
+   "speed": [
+    6,
+    8
+   ],
+   "up": [
+    0.5,
+    1.5
+   ],
+   "plife": [
+    0.35,
+    0.55
+   ],
+   "look": "streak",
+   "size": [
+    1.4,
+    2
+   ],
+   "col": "#e6f7ff",
+   "c2": "#2f7fe0",
+   "gravity": -0.5,
+   "drag": 0.5
+  },
+  {
+   "id": "mist",
+   "t": "mist",
+   "at": 0,
+   "life": 1,
+   "att": "ground",
+   "r": 1.4,
+   "n": 6,
+   "out": 1.2
+  },
+  {
+   "id": "orbit",
+   "t": "emit",
+   "at": 0,
+   "life": 0.05,
+   "burst": 24,
+   "att": "ground",
+   "from": "ring",
+   "fr": 1.4,
+   "pos": [
+    0,
+    1,
+    0
+   ],
+   "dir": "tangent",
+   "speed": [
+    5,
+    7
+   ],
+   "up": [
+    0,
+    1
+   ],
+   "plife": [
+    0.5,
+    0.8
+   ],
+   "look": "flake",
+   "size": [
+    2,
+    3
+   ],
+   "col": "#ffffff",
+   "c2": "#9fdcff",
+   "gravity": 0,
+   "drag": 1.5,
+   "spin": 6
+  },
+  {
+   "id": "crys",
+   "t": "emit",
+   "at": 0,
+   "life": 0.05,
+   "burst": 8,
+   "from": "ring",
+   "fr": 1.2,
+   "dir": "tangent",
+   "spread": 1,
+   "speed": [
+    4,
+    6
+   ],
+   "up": [
+    1,
+    2
+   ],
+   "plife": [
+    0.6,
+    1.1
+   ],
+   "look": "model",
+   "model": "frost_shard",
+   "mmat": "ice",
+   "msize": [
+    0.08,
+    0.16
+   ],
+   "bounce": 0.3,
+   "mspin": 540,
+   "gravity": 6,
+   "drag": 1.2,
+   "col": "#e6f7ff",
+   "c2": "#2f7fe0",
+   "att": "ground",
+   "pos": [
+    0,
+    1,
+    0
+   ]
+  },
+  {
+   "id": "pulse",
+   "t": "ring",
+   "at": 0,
+   "life": 0.5,
+   "att": "ground",
+   "pos": [
+    0,
+    0.1,
+    0
+   ],
+   "col": "#2f7fe0",
+   "r": 9,
+   "op": 0.4
+  },
+  {
+   "id": "frost",
+   "t": "decal",
+   "at": 0,
+   "life": 1.4,
+   "att": "ground",
+   "kind": "icecrack",
+   "r": 2.4,
+   "n": 10,
+   "col": "#2f7fe0"
+  },
+  {
+   "id": "snd",
+   "t": "sound",
+   "at": 0,
+   "life": 0.05,
+   "name": "push",
+   "vol": 0.4
+  }
+ ]
+}

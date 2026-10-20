@@ -1,0 +1,260 @@
+{
+ "v": 1,
+ "desc": "ลงพื้นจากที่สูง: วงร้าวน้ำแข็งเตี้ย + ผลึกเตี้ยรอบวงงอกแล้วยุบเร็ว + เศษเลียดพื้น + หมอกคลื่น",
+ "tags": [
+  "frost",
+  "melee",
+  "ground",
+  "impact"
+ ],
+ "pal": "ice",
+ "dur": 2,
+ "params": {
+  "r": {
+   "def": 7.5,
+   "desc": "รัศมี (ม.) = ev.r/20"
+  }
+ },
+ "layers": [
+  {
+   "id": "core",
+   "t": "flash",
+   "at": 0,
+   "life": 0.1,
+   "att": "ground",
+   "pos": [
+    0,
+    0.3,
+    0
+   ],
+   "col": "#e6f7ff",
+   "size": 2.2
+  },
+  {
+   "id": "cracks",
+   "t": "decal",
+   "at": 0,
+   "life": 2,
+   "att": "ground",
+   "kind": "icecrack",
+   "r": "r*0.85",
+   "n": 14,
+   "col": "#2f7fe0"
+  },
+  {
+   "id": "rim",
+   "t": "mesh",
+   "at": 0.02,
+   "life": 0.75,
+   "att": "ground",
+   "shape": "model",
+   "model": "frost_rim",
+   "mat": "ice",
+   "col": "#9fdcff",
+   "col2": "#2f7fe0",
+   "scale": [
+    "r*0.6",
+    3.2,
+    "r*0.6"
+   ],
+   "grow": {
+    "0": 0,
+    "1": 0,
+    "0.2": 1,
+    "0.55": 1
+   },
+   "stagger": 0.35,
+   "growBy": "center"
+  },
+  {
+   "id": "spires",
+   "t": "mesh",
+   "at": 0.02,
+   "life": 0.7,
+   "att": "ground",
+   "shape": "model",
+   "model": "frost_spires",
+   "mat": "ice",
+   "col": "#9fdcff",
+   "col2": "#2f7fe0",
+   "scale": {
+    "0": [
+     1,
+     0.55,
+     1
+    ],
+    "1": [
+     1,
+     0.55,
+     1
+    ],
+    "x": "r*0.16"
+   },
+   "grow": {
+    "0": 0,
+    "1": 0,
+    "0.15": 1,
+    "0.6": 1
+   },
+   "stagger": 0.4
+  },
+  {
+   "id": "skim",
+   "t": "emit",
+   "at": 0,
+   "life": 0.05,
+   "burst": 22,
+   "att": "ground",
+   "from": "ring",
+   "fr": 0.6,
+   "pos": [
+    0,
+    0.15,
+    0
+   ],
+   "dir": "flat",
+   "speed": [
+    "r*1.6",
+    "r*2.4"
+   ],
+   "plife": [
+    0.3,
+    0.45
+   ],
+   "look": "streak",
+   "size": [
+    1.8,
+    2.6
+   ],
+   "col": "#ffffff",
+   "c2": "#9fdcff",
+   "gravity": 0,
+   "drag": 3
+  },
+  {
+   "id": "shards",
+   "t": "emit",
+   "at": 0,
+   "life": 0.05,
+   "burst": 10,
+   "from": "ring",
+   "fr": 0.8,
+   "dir": "flat",
+   "spread": 1,
+   "speed": [
+    6,
+    11
+   ],
+   "up": [
+    1.5,
+    3
+   ],
+   "plife": [
+    0.6,
+    1.1
+   ],
+   "look": "model",
+   "model": "frost_shard",
+   "mmat": "ice",
+   "msize": [
+    0.12,
+    0.26
+   ],
+   "bounce": 0.3,
+   "mspin": 540,
+   "gravity": 12,
+   "drag": 1.2,
+   "col": "#e6f7ff",
+   "c2": "#2f7fe0",
+   "att": "ground",
+   "pos": [
+    0,
+    0.2,
+    0
+   ]
+  },
+  {
+   "id": "mist",
+   "t": "mist",
+   "at": 0.04,
+   "life": 1,
+   "att": "ground",
+   "r": "r*0.25",
+   "n": 14,
+   "out": 1.4
+  },
+  {
+   "id": "shock",
+   "t": "ring",
+   "at": 0,
+   "life": 0.45,
+   "att": "ground",
+   "pos": [
+    0,
+    0.12,
+    0
+   ],
+   "col": "#2f7fe0",
+   "r": "r",
+   "op": 0.45
+  },
+  {
+   "id": "warp",
+   "t": "warp",
+   "at": 0,
+   "life": 0.45,
+   "att": "ground",
+   "kind": "shock",
+   "flat": true,
+   "size": {
+    "0": 1,
+    "1": 1,
+    "x": "r*2.2"
+   },
+   "str": 0.7,
+   "col": "#9fdcff",
+   "glow": 0.04,
+   "x": true
+  },
+  {
+   "id": "light",
+   "t": "light",
+   "at": 0,
+   "life": 0.35,
+   "att": "ground",
+   "pos": [
+    0,
+    1.2,
+    0
+   ],
+   "col": "#9fdcff",
+   "int": 1.5,
+   "dist": 16
+  },
+  {
+   "id": "cam",
+   "t": "screen",
+   "at": 0,
+   "life": 0.2,
+   "shake": 6,
+   "own": true
+  },
+  {
+   "id": "cam2",
+   "t": "screen",
+   "at": 0,
+   "life": 0.2,
+   "shake": 2,
+   "near": 50,
+   "other": true
+  },
+  {
+   "id": "snd",
+   "t": "sound",
+   "at": 0,
+   "life": 0.05,
+   "name": "slam",
+   "vol": 0.9
+  }
+ ]
+}

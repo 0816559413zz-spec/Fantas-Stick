@@ -1,0 +1,119 @@
+{
+ "v": 1,
+ "desc": "Glacier Rend ชาร์จ: แสงเย็นดูดเข้าหาตัว/อาวุธ + เกล็ดวน (ชาร์จ 1 วิ)",
+ "tags": [
+  "frost",
+  "charge"
+ ],
+ "pal": "ice",
+ "dur": 1.3,
+ "params": {},
+ "layers": [
+  {
+   "id": "pull",
+   "t": "emit",
+   "at": 0,
+   "life": 0.95,
+   "rate": 45,
+   "from": "sphere",
+   "fr": 1.8,
+   "pos": [
+    0,
+    0.2,
+    0.3
+   ],
+   "dir": "in",
+   "speed": [
+    2.5,
+    4
+   ],
+   "plife": [
+    0.3,
+    0.45
+   ],
+   "look": "streak",
+   "size": [
+    1.4,
+    2.2
+   ],
+   "col": "#ffffff",
+   "c2": "#9fdcff",
+   "gravity": 0,
+   "drag": 0,
+   "curl": false
+  },
+  {
+   "id": "swirl",
+   "t": "emit",
+   "at": 0,
+   "life": 0.95,
+   "rate": 18,
+   "att": "ground",
+   "from": "ring",
+   "fr": 1.3,
+   "pos": [
+    0,
+    0.2,
+    0
+   ],
+   "dir": "tangent",
+   "speed": [
+    2,
+    3
+   ],
+   "up": [
+    0.6,
+    1.2
+   ],
+   "plife": [
+    0.6,
+    0.9
+   ],
+   "look": "flake",
+   "size": [
+    1.8,
+    2.6
+   ],
+   "col": "#ffffff",
+   "c2": "#9fdcff",
+   "gravity": -0.2,
+   "drag": 0.6,
+   "spin": 5,
+   "x": true
+  },
+  {
+   "id": "halo",
+   "t": "halo",
+   "at": 0.6,
+   "life": 0.45,
+   "pos": [
+    0,
+    0.2,
+    0.3
+   ],
+   "col": "#9fdcff",
+   "size": 1.6,
+   "size0": 0.5,
+   "k": 0.6
+  },
+  {
+   "id": "frost",
+   "t": "decal",
+   "at": 0,
+   "life": 1.3,
+   "att": "ground",
+   "kind": "icecrack",
+   "r": 1.4,
+   "n": 8,
+   "col": "#2f7fe0"
+  },
+  {
+   "id": "snd",
+   "t": "sound",
+   "at": 0,
+   "life": 0.05,
+   "name": "buff",
+   "vol": 0.6
+  }
+ ]
+}

@@ -164,13 +164,13 @@ BLDV:51 CHARM:51 DEBRIS:51 BLD_WALLC:52 _bldIce:53 _halfRoof:53 charMat:54 bldIc
 ## js/24-minions-view.js (68) — สัตว์เวท: โมเดลโปร่งแสง + ซิงก์จาก snapshot (MN)
 MM3:2 makeMinion:3 syncMins:36 drawMinBars:58
 
-## js/25-efx.js (288) — efxFX: ภาพของ event "efx" ทุกคาถา (หนึ่ง case ต่อหนึ่งเอฟเฟกต์)
-efxFX:2
+## js/25-efx.js (298) — efxFX: ภาพของ event "efx" ทุกคาถา (หนึ่ง case ต่อหนึ่งเอฟเฟกต์)
+efxState:4 efxFX:13
 
-## js/26-fx-events.js (240) — fx(ev): เอฟเฟกต์+เสียงของทุก event จากโฮสต์ • statusFX (สถานะบนตัว) •…
+## js/26-fx-events.js (241) — fx(ev): เอฟเฟกต์+เสียงของทุก event จากโฮสต์ • statusFX (สถานะบนตัว) •…
 statusFX:3 fx:27
-§193 overlay: เลือกบัฟ / สรุปผล
-choosePick:194 syncOverlays:199 showOver:221
+§194 overlay: เลือกบัฟ / สรุปผล
+choosePick:195 syncOverlays:200 showOver:222
 
 ## js/27-world.js (217) — 
 S3:4 tx:4 tz:4 GY:6 TW:6 hdr:7 gl:9 scene:15 cam:17 composer:18
@@ -300,7 +300,7 @@ EFXAUG:144 PJPAL:163 pjPal:165 ULTCOL:166 efxAug:167 VFXAUG_ON:171 fxAug:172
 §192 4) เอฟเฟกต์ทั้งจอ (ค่าไปที่ GradePass ใน js/27-world.js)
 SCR:193 screenFlash:194 screenRadial:195 screenKick:196 screenHurt:197 _scv:198 updateScreenFx:199 updateVfxKit:207
 
-## js/45-fx-runtime.js (324) — 
+## js/45-fx-runtime.js (326) — 
 FXR:9 FXDEG:10
 §11 โหลด
 fxFetch:12 fxDefaults:13 fxBoot:14 fxOverrides:24 fxLoad:27 fxData:31
@@ -324,10 +324,10 @@ fxTrailTick:276
 fxBolt:283
 §289 ฟังก์ชันในโค้ดที่ไฟล์เรียกได้ (ชั้น t:"code")
 FXCODE:290
-§302 ผูกกับ event ของเกม (assets/fx/bind.json) — เรียกจาก fx(ev)
-fxBind:304
-§314 แม่แบบ playFx เป็นไฟล์ (assets/fx/tpl/*, sig/*, rec/*)
-fxTpl:316
+§303 ผูกกับ event ของเกม (assets/fx/bind.json) — เรียกจาก fx(ev)
+fxBind:305
+§316 แม่แบบ playFx เป็นไฟล์ (assets/fx/tpl/*, sig/*, rec/*)
+fxTpl:318
 
 ## js/46-fx-make.js (261) — 
 FXMK:10 MKD:11 mkRng:12 mkHash:13 mkNoise:15 mkL:17 mkR2:18
@@ -366,4 +366,4 @@ earthEfx:122 earthMudZone:168 earthMudSink:171
 §172 HUD ใต้เป้าเล็ง
 drawEarthHud:173
 
-(48 files, 10679 lines)
+(48 files, 10692 lines)

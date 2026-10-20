@@ -38,6 +38,7 @@
 | `x` | bool | `false` |  |  | ชั้นเสริม — Optional pretty layer: skipped on low graphics and far away. |
 | `near` | num | `0` | 0–100 |  | เล่นเมื่อใกล้ (ม.) — Only play when the camera is within this many metres (0 = always). |
 | `own` | bool | `false` |  |  | เฉพาะของเรา — Only when the effect belongs to my own player (screen effects, big flashes). |
+| `other` | bool | `false` |  |  | เฉพาะของคนอื่น — Only when the effect belongs to someone else (e.g. a smaller shake for players nearby). |
 
 ## ชนิดชั้น
 
@@ -831,6 +832,7 @@ assets/fx/bind.json — ผูกเหตุการณ์ของเกม�
 - `s`: ขนาด (ตัวเลขหรือสูตร)
 - `pal`: บังคับธาตุ
 - `follow`: "ev.id" = ติดตามผู้เล่นคนนั้น
+- `if`: เล่นเฉพาะเมื่อสูตรเป็นจริง/ไม่เป็น 0 เช่น "ev.ax==1" (ขวาน) / "ev.ax==0&&ev.c<2" (ดาบ จังหวะ 1-2) — ใช้ == != < > && || ได้ (ห้าม = ตัวเดียว) • คีย์เดียวใส่เป็นรายการ [ ] ได้หลายอัน
 
 ตัวอย่าง:
 ```json

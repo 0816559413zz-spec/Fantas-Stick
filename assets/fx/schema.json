@@ -30,7 +30,8 @@
     "yaw": {"type": "num", "def": 0, "min": -180, "max": 180, "step": 1, "expr": true, "th": "หมุนซ้าย-ขวา (องศา)", "desc": "Turn the layer's forward direction (positive = to the right)."},
     "x": {"type": "bool", "def": false, "th": "ชั้นเสริม", "desc": "Optional pretty layer: skipped on low graphics and far away."},
     "near": {"type": "num", "def": 0, "min": 0, "max": 100, "step": 1, "th": "เล่นเมื่อใกล้ (ม.)", "desc": "Only play when the camera is within this many metres (0 = always)."},
-    "own": {"type": "bool", "def": false, "th": "เฉพาะของเรา", "desc": "Only when the effect belongs to my own player (screen effects, big flashes)."}
+    "own": {"type": "bool", "def": false, "th": "เฉพาะของเรา", "desc": "Only when the effect belongs to my own player (screen effects, big flashes)."},
+    "other": {"type": "bool", "def": false, "th": "เฉพาะของคนอื่น", "desc": "Only when the effect belongs to someone else (e.g. a smaller shake for players nearby)."}
   },
   "atts": ["point", "ground", "feet", "chest", "head", "wand"],
   "types": {
@@ -364,7 +365,8 @@
       "p": "params เป็นสูตรจาก ev ได้ เช่น {\"r\":\"ev.r/20\"}",
       "s": "ขนาด (ตัวเลขหรือสูตร)",
       "pal": "บังคับธาตุ",
-      "follow": "\"ev.id\" = ติดตามผู้เล่นคนนั้น"
+      "follow": "\"ev.id\" = ติดตามผู้เล่นคนนั้น",
+      "if": "เล่นเฉพาะเมื่อสูตรเป็นจริง/ไม่เป็น 0 เช่น \"ev.ax==1\" (ขวาน) / \"ev.ax==0&&ev.c<2\" (ดาบ จังหวะ 1-2) — ใช้ == != < > && || ได้ (ห้าม = ตัวเดียว) • คีย์เดียวใส่เป็นรายการ [ ] ได้หลายอัน"
     }
   }
 }

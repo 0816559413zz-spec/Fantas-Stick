@@ -183,6 +183,8 @@ The studio has 4 tabs in the top bar: **✨ เอฟเฟกต์** (effects,
 - Keys:
   - `efx:<z>` for spell events
   - `<k>:<t>` or `<k>` for generic events (`cast`, `imp`, `pop`, `boom`, `parry`, `block`, `sbreak`, `die`, `kill`, `revive`, `buff`, `land`)
+- `if` = only play when the expression is true / non-zero (e.g. `"ev.ax==1&&ev.c<2"`; `== != < > && || ?:` allowed, a single `=` is rejected); a key can hold a list `[ ]` of entries (see `efx:swing`).
+- Event state that must survive `replace` (poses, persistent objects) lives in `efxState(ev)` (js/25-efx.js), not in the visual case.
 - `p` maps event fields into params. **`ev.r` is in px: divide by 20 for metres.**
 - `replace` skips the old code visuals **and** sounds for that event. Add a `sound` layer if needed.
 - **Persistent effects** (auras, buffs) need code: `const h=fxPlay('x/y',{x,y,h,a,follow:id,own})` when it starts and `fxStop(h)` when it ends. Put that in the path's view code (`pyroFX`, `frostFX`, `stormFX`), or bind the start event with `follow` and stop it from code.
@@ -197,7 +199,8 @@ The studio has 4 tabs in the top bar: **✨ เอฟเฟกต์** (effects,
 - **Big recognisable shapes** (balls, walls, beams, shells, wings) → `mesh`/`firevol`. Use particles only for small scattered bits (VFX.md §1.6).
 - **Budget:** one-shot `burst` ≤ 80 per layer, `rate` ≤ 200/s, ≤ 2–3 lights per effect. The runtime already scales particles by FPS and graphics level.
 - `use` must not nest itself; the checker flags it, and the runtime stops at depth 4.
-- `x` and `own` are gates. Use `own` for anything that hits the whole screen.
+- `x`, `own` and `other` are gates. Use `own` for anything that hits the whole screen; `other` + `near` for a smaller shake on players nearby.
+- Code layer `{fn:"ev",args:{k:"efx",z:"…"}}` plays the OLD code visuals of a game event (skips bind.json, cannot nest) — for before/after comparison.
 - Don't touch `index.json` or `FX-FORMAT.md` by hand. Run `node tools/fx-check.js`.
 - The repo is **public**: only use self-made or CC0 images and models.
 - **Need a new 3D shape or texture? Make it in the 🧊 / 🎞 tab first** (§6b). Blender is only for things the part kinds can't build (characters, detailed props).

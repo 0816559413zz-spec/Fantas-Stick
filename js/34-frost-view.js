@@ -183,8 +183,8 @@ function frostFX(o,p,pz,now,dt){
   if(!(flags&4)&&o.auraR)o.auraR.visible=o.auraD.visible=false;
   if(flags&4){
     for(let i=0;i<4;i++){const an=now/260+i*1.571,r=24+6*Math.sin(now/300+i),hh=pz+0.3+((now/600+i*0.25)%1)*2.2;PARTS.push({x:p.x+Math.cos(an)*r,y:p.y+Math.sin(an)*r,h:hh,vx:-Math.sin(an)*r*4,vy:Math.cos(an)*r*4,vh:0.6,life:0.25,max:0.25,col:i%2?'#ffffff':'#cfefff',size:i%2?1.6:2.4,g:0});}
-    if(Math.random()<0.5){const an=rnd(0,6.283);PARTS.push({x:p.x+Math.cos(an)*20,y:p.y+Math.sin(an)*20,h:pz+rnd(0.2,1.8),vx:-Math.sin(an)*90,vy:Math.cos(an)*90,vh:0.8,life:0.6,max:0.6,col:'#eef8ff',size:6,g:0,smoke:true,grow:0.8,drag:1});}
-    if(Math.floor(now/600)!==o.auP){o.auP=Math.floor(now/600);ring(p.x,p.y,'#dff6ff',120,0.5,pz+0.08);}
+    if(Math.random()<0.12){const an=rnd(0,6.283);PARTS.push({x:p.x+Math.cos(an)*26,y:p.y+Math.sin(an)*26,h:pz+rnd(0.1,0.5),vx:-Math.sin(an)*90,vy:Math.cos(an)*90,vh:0.2,life:0.6,max:0.6,col:'#cfe6fa',size:4,g:0,smoke:true,grow:0.6,drag:1});}   // หมอกต่ำแค่ข้อเท้า (เดิมสูงถึงอก บังกล้องจนขาว)
+    if(Math.floor(now/600)!==o.auP){o.auP=Math.floor(now/600);ring(p.x,p.y,'#7cc4ff',120,0.5,pz+0.08);}
     o.auOn=1;}
   else if(o.auOn){o.auOn=0;for(let i=0;i<24;i++){const an=rnd(0,6.283),r=rnd(60,140);PARTS.push({x:p.x+Math.cos(an)*r,y:p.y+Math.sin(an)*r,h:pz+rnd(0.3,2),vx:-Math.cos(an)*r*2.2,vy:-Math.sin(an)*r*2.2,vh:0,life:0.45,max:0.45,col:i%2?'#ffffff':'#bfeaff',size:2,g:0,drag:0});}
     smoke(p.x,p.y,pz+0.8,10,'#eef8ff',1,7,40);}
@@ -198,7 +198,7 @@ function frostFX(o,p,pz,now,dt){
       o.auraD={visible:false};}
     o.auraR.visible=o.auraD.visible=true;o.auraR.position.y=0.07;o.auraR.rotation.y=-o.g.rotation.y+now/900;
 for(let i=0;i<5;i++){const an=rnd(0,6.283),r=rnd(40,180);PARTS.push({x:p.x+Math.cos(an)*r,y:p.y+Math.sin(an)*r,h:pz+rnd(0.1,2.2),vx:-Math.sin(an)*120,vy:Math.cos(an)*120,vh:rnd(-0.6,0.2),life:0.6,max:0.6,col:i%2?'#ffffff':'#bfeaff',size:rnd(1.6,2.6),g:0,drag:1});}
-    if(Math.random()<0.4){const an=rnd(0,6.283);PARTS.push({x:p.x+Math.cos(an)*rnd(0,170),y:p.y+Math.sin(an)*rnd(0,170),h:pz+0.15,vx:0,vy:0,vh:0.2,life:1,max:1,col:'#e8f6ff',size:6,g:0,smoke:true,grow:0.7});}}
+    if(Math.random()<0.15){const an=rnd(0,6.283),rr=rnd(60,170);PARTS.push({x:p.x+Math.cos(an)*rr,y:p.y+Math.sin(an)*rr,h:pz+0.15,vx:0,vy:0,vh:0.1,life:1,max:1,col:'#d6ecff',size:5,g:0,smoke:true,grow:0.6});}}
   // ร่างแยก
   if(flags&16){
     if(!o.clones)o.clones=[makeMirrorClone(o),makeMirrorClone(o)];
