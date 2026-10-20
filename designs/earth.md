@@ -8,12 +8,83 @@
 **Purpose:** Give another AI the detailed design decisions and open questions without making up missing mechanics.  
 **Design authority:** **The user decides all mechanics and numbers. Do not silently finalize, rebalance, or implement unapproved ideas.**
 
+> **2026-10-20: ALL abilities are now LOCKED with numbers — read §0 FINAL SPEC first. OPEN/DRAFT notes below are history.**
+>
 > **IMPORTANT STATE LABELS**  
 > - **LOCKED:** User explicitly accepted/locked the design (individual tuning values may still be subject to playtesting).  
 > - **CONFIRMED IN DISCUSSION:** User clearly chose or said something, but has not necessarily formally locked the whole skill.  
 > - **DRAFT / PROPOSED:** In progress or being explored; not a final commitment.  
 > - **OPEN:** Unknown, uncertain, or expressly postponed.
 >
+---
+
+## ✅ 0. FINAL SPEC — everything locked (user interview 2026-10-20)
+
+> The user answered every OPEN item below in one interview ("ask me until sure, I confirm all now"). **This section wins over any OPEN / DRAFT / "not locked" note further down.** Units: game units (1 m = 20), seconds, damage vs 200 HP players. Numbers can still change after playtesting, but only when the user says so.
+
+### Basic Attack
+- **Stand active:** the Stand **locks onto a target**, fades in at a **random spot around the target**, throws **one punch**, bounces back a little and **fades out** at once (no combo, no lingering Stand).
+  - **10 damage per punch** (always), **one punch every 0.8 s**, lock range **300**, **no special effect** (no knockback/stun).
+  - Target = the enemy **nearest the mouse / aim direction** within 300.
+  - **Dodgeable:** a short fade-in (~0.2 s) before the hit; an enemy who dashes away in time is missed.
+  - **No enemy in range:** the Stand punches **a little in front of the player**.
+- **Stand broken:** one small rock projectile, **5 damage every 0.35 s**, fired straight where you aim (must aim yourself).
+
+### Shield — Stand Barrier
+- 300 HP frontal shield (unchanged). **Regen: after 3 s unused, +20 HP/s.**
+- Stand returns after 15 s with **full 300** shield.
+
+### Dash
+- **Stand Rampage:** runs up to **1.2 s (~600)**, **CD 8 s**, Shift again stops early. Hitting an enemy: **15 dmg + 0.5 s stun** (+ knockback). End slam: **20 dmg + 0.8 s stun, radius 150**. Passes **through Earth's own walls/pillars without breaking them** (only breaks enemy constructs).
+- **Rock Boost Escape:** boost **~400** forward, enemies near the start point (**radius 120**) are knocked away, **no damage**, **CD 6 s**.
+
+### Skill 1 — Stonebreaker
+- **25 dmg**, knockback **~300**, range **700**, **CD 8 s**.
+- Knocked into a solid: **+20 dmg + 2 s stun**. Solids = map walls, Tectonic Crush walls, **Wrath pillars and the Wrath domain wall**. **Not** Mud Swamp, **not** the Terra Auger mound.
+
+### Skill 2 — Mud Swamp
+- Aim range **600**, radius **120**, **CD 12 s** (rest unchanged: 0.5 s telegraph, 5 s, enemies only, −50% speed, no Dash, no damage, works with Stand broken).
+
+### Skill 3 — Tectonic Crush
+- Each wall **300 long**, walls **240 apart**, **200 HP each**.
+- Crush: both walls **80 dmg**, one wall **40 dmg + knockback**, wind-up **0.8 s**.
+- **CD 14 s** = the recast window (no recast before CD is ready → walls stay as permanent cover until destroyed or replaced).
+
+### Skill 4 — **Dust Burst**
+- **Sequence:** Earth **casts a rock up** at the aimed spot → the **Stand punches it** → it **explodes into dust**.
+- Aimed at a ground point, range **~500**.
+- **Effect:** reduces vision, **not** blindness: an enemy inside sees clearly only **~150 around them**; further away fades into dust colour (shapes still faintly visible).
+- **Enemies only** (Earth and allies see normally, with a light dust haze).
+- **No damage.** Targets can walk out freely and use skills.
+- **Stand active:** radius **350**, lasts **8 s**. **CD 20 s.**
+- **Stand broken:** still usable; Earth breaks the rock himself (weaker): radius **200**, lasts **5 s**, same CD.
+
+### Skill 5 — **Terra Auger**
+- A spinning stone drill forms **above Earth's head**; on release it **plunges down onto the aimed point**. Aim range **600**.
+- Hold to charge: **tap = tier 1**, **2 s = tier 2**, **4.5 s = tier 3**; release at any time.
+- Damage **20 / 50 / 120**, impact radius **80 / 110 / 150**. **CD 14 s**, starts on release.
+- While charging: walk at **−50% speed**, **no** BA / other skills / Dash; pressing shield cancels the charge.
+- Knockback does **not** cancel. Stun / freeze **cancels** and the CD becomes **7 s** (half).
+- **Usable with Stand broken** (normal, all tiers).
+- Tier 2: small visual mound only. **Tier 3:** real mound, **low (half a character tall), ~150 wide**, **blocks walking and low projectiles, can be jumped over**, **150 HP**, stays until destroyed, **one at a time** (a new tier 3 replaces the old one). It does **not** count as a wall for Stonebreaker's collision stun.
+
+### Ultimate — **Wrath**
+- Earth rises high into the sky and aims each of **10 pillars** by hand. **8 s** limit in the sky; pillars not fired by then **drop randomly by themselves**. Direct pillar hit: **20 dmg + knockback** (no landing AoE).
+- **Domain:** after **at least 4** pillars are placed, a button raises the faint yellow wall **instantly** through the pillars placed so far (later pillars can go inside or outside and are only resources).
+  - **Nobody can go in or out** — enemies, Earth **and Earth's teammates**; outside players cannot enter.
+  - The wall stays when its boundary pillars are used up.
+  - Ends when **all pillars are used or 20 s** have passed (from casting the ult), whichever comes first.
+- **Landing:** Earth lands in the **centre of the domain**; if no domain was made, at the take-off point.
+- **Transformed mode:** ends with the domain rule (**pillars gone or 20 s**); leftover pillars crumble. **Skills 1–5 stay the same; only BA changes:** the giant Stand pulls the pillar **nearest the aim point within 400** and slams it into the ground at the aimed spot: **30 dmg, radius 150**, consumes that pillar.
+- Pillars: **enemies can destroy them, 150 HP each** (the domain wall does not open).
+- **Castable with Stand broken** — the Stand comes back **at once with full shield**.
+- **Shield usable** in the ult; if it breaks, the **ult does not end** (normal Stand-broken rules apply to Stand-based skills for 15 s; the giant Stand pillar slam still works).
+
+### Changes vs the older text below
+- Skill 4 is now **cast rock → Stand punches it** (not "Stand squeezes it").
+- Terra Auger tier 3 mound gives **no** collision stun (the older text said it would).
+- Pillar-moving/recall skill: **not in the design** (still not approved).
+
 ---
 
 ## 1. Overall class vision
@@ -29,16 +100,16 @@
 
 | Ability | Name / concept | Status |
 |---|---|---|
-| Basic Attack | Stand-based basic; fallback small rock shots | Core concept agreed; exact attack pattern OPEN |
+| Basic Attack | Stand lock-on single punch; fallback small rock shots | **LOCKED 2026-10-20 (§0)** |
 | Shield | Stand Barrier, frontal shield | **LOCKED** |
 | Dash (Stand active) | Stand Rampage | **LOCKED** |
 | Dash (Stand broken) | Rock Boost Escape | **LOCKED** |
 | Skill 1 | Stonebreaker | **LOCKED** |
 | Skill 2 | Mud Swamp | **LOCKED** |
 | Skill 3 | Tectonic Crush | **LOCKED — user explicitly confirmed** |
-| Skill 4 | Compressed rock → dust cloud (vision reduction) | **DRAFT; multiple mechanics confirmed** |
-| Skill 5 | Chargeable earth drill, three charge stages | **DRAFT; multiple mechanics confirmed** |
-| Ultimate | Manually place 10 pillars → optional enclosed domain → pillar-resource transformation mode | **DRAFT; direction liked, not fully locked** |
+| Skill 4 | **Dust Burst** — rock cast up, Stand punches it into dust (vision reduction) | **LOCKED 2026-10-20 (§0)** |
+| Skill 5 | **Terra Auger** — chargeable drill, three charge stages | **LOCKED 2026-10-20 (§0)** |
+| Ultimate | **Wrath** — manually place 10 pillars → optional enclosed domain → pillar-resource transformation mode | **LOCKED 2026-10-20 (§0)** |
 
 ---
 
