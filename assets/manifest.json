@@ -94,6 +94,46 @@
       "file": "maps/valley.glb",
       "data": "maps/valley.json",
       "v": 1
+    },
+    "castle": {
+      "file": "maps/castle.glb",
+      "data": "maps/castle.json",
+      "v": 2
+    },
+    "forest": {
+      "file": "maps/forest.glb",
+      "data": "maps/forest.json",
+      "v": 2
+    },
+    "pitch": {
+      "file": "maps/pitch.glb",
+      "data": "maps/pitch.json",
+      "v": 3
+    },
+    "hogsmeade": {
+      "file": "maps/hogsmeade.glb",
+      "data": "maps/hogsmeade.json",
+      "v": 1
+    },
+    "greathall": {
+      "file": "maps/greathall.glb",
+      "data": "maps/greathall.json",
+      "v": 3
+    },
+    "meadow": {
+      "file": "maps/meadow.glb",
+      "data": "maps/meadow.json",
+      "v": 3
+    },
+    "lake": {
+      "file": "maps/lake.glb",
+      "data": "maps/lake.json",
+      "v": 1
+    },
+    "ruins": {
+      "file": "maps/ruins.glb",
+      "data": "maps/ruins.json",
+      "v": 3
     }
   },
   "ptex": {

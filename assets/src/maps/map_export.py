@@ -125,10 +125,12 @@ for o in pre("floor_"):
 
 # ---------------------------------------------------------------- collision: col_ / colv_ -> circles (boxes become a chain of circles)
 obs = []
-def add_circle(bx, by, r, top, k):
+def add_circle(bx, by, r, top, k, extra=None):
     x, y = to_sim(bx, by); hg = top - gB(bx, by)
     if hg <= 0.05: return
-    obs.append({"x": r1(x), "y": r1(y), "r": r1(r * 20), "hgt": round(hg, 2), "k": k})
+    c = {"x": r1(x), "y": r1(y), "r": r1(r * 20), "hgt": round(hg, 2), "k": k}
+    if extra: c.update(extra)
+    obs.append(c)
 for o in pre("col_", "colv_"):
     if o.type != 'MESH': continue
     rot = o.matrix_world.to_euler()
@@ -140,16 +142,18 @@ for o in pre("col_", "colv_"):
     cen = M @ Vector(((lx0 + lx1) / 2, (ly0 + ly1) / 2, 0))
     top = max((M @ v).z for v in bb)
     k = "colv" if low(o).startswith("colv_") else "col"
+    if "k" in o.keys(): k = str(o["k"])                     # custom property k (e.g. "hoop" = Quidditch goal)
+    ex_ = {"ring": round(float(o["ring"]), 2)} if "ring" in o.keys() else None   # hoop ring height above ground
     nv = len(o.data.vertices)
     if nv > 8 and abs(ex - ey) < 0.15 * max(ex, ey):
-        add_circle(cen.x, cen.y, max(ex, ey), top, k); continue
+        add_circle(cen.x, cen.y, max(ex, ey), top, k, ex_); continue
     rz = rot.z; ax = Vector((math.cos(rz), math.sin(rz))); ay = Vector((-math.sin(rz), math.cos(rz)))
     if ey > ex: ax, ay, ex, ey = ay, ax, ey, ex          # ax = long axis
     r = ey; L = ex - r
     n = max(1, int(math.ceil(L / (r * 1.1)))) if L > 0.01 else 0
     for t in range(n + 1):
         d = -L + 2 * L * t / n if n else 0.0
-        add_circle(cen.x + ax.x * d, cen.y + ax.y * d, r, top, k)
+        add_circle(cen.x + ax.x * d, cen.y + ax.y * d, r, top, k, ex_)
 if len(obs) > 2000: problems.append("collision circles: %d (heavy, simplify col_)" % len(obs))
 info["col_circles"] = len(obs)
 
@@ -209,7 +213,8 @@ modes = prop("modes"); modes = [m.strip() for m in modes.split(',') if m.strip()
 data = {"fmt": 1, "id": MAP_ID, "name": prop("name", MAP_ID), "desc": prop("desc", ""), "sky": prop("sky", "night"), "fog": fog,
         "modes": modes, "random": int(prop("random", 1)), "weather": prop("weather", ""), "music": prop("music", ""),
         "W": W, "H": H, "c": C, "nx": NX, "ny": NY, "g": b64(g), "fl": floors, "obs": obs, "spawns": spawns, "espawn": espawn,
-        "rings": rings, "tasks": tasks, "houses": houses, "lights": lights, "env": env}
+        "rings": rings, "tasks": tasks, "houses": houses, "lights": lights, "env": env,
+        "fx": [t.strip() for t in str(prop("fx", "")).split(',') if t.strip()]}
 if pre("prop_") or int(prop("props", 1)) == 0: data["props"] = props      # no prop_ empties = game places crates/barrels itself
 
 out_dir = os.path.join(ROOT_DIR, "maps"); os.makedirs(out_dir, exist_ok=True)

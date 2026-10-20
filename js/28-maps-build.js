@@ -1,28 +1,31 @@
 // ---------- สร้างแผนที่ ----------
 let CANDLESYS=null;
-let builtMap="",world=null,TORCHES=[],CANDLES=[],FIREFLIES=null,CRYSTAL=null,RUNE=null,SNITCH=null,BANNERS=[],SNOW=null;
+let builtMap="",builtKey="",world=null,TORCHES=[],CANDLES=[],FIREFLIES=null,CRYSTAL=null,RUNE=null,SNITCH=null,BANNERS=[],SNOW=null;
 // แผนที่ที่สร้างแล้วเก็บไว้ใช้ซ้ำ (LRU) — กลับมาแผนที่เดิมไม่ต้องสร้าง/อัปโหลด GPU ใหม่ • ตัวแปรที่ผูกกับแผนที่ต้องอยู่ในรายการนี้ทั้งหมด
 const WCACHE=new Map(),WCACHE_MAX=3;
+// key ของแคช = id + เวอร์ชันไฟล์ (เมนูสร้างแผนที่จากโค้ดไว้ก่อนไฟล์แผนที่ id เดียวกันโหลดเสร็จ → ห้ามเอาของเก่ามาใช้)
+function wkey(id){const f=MAPS[id]&&MAPS[id].fm;return f?id+'#'+(f.v||0):id;}
 function buildWorld(id){
   if(world){
     scene.remove(world);
     if(PROPV.g){if(PROPV.g.parent)PROPV.g.parent.remove(PROPV.g);disposeTree(PROPV.g);PROPV.g=null;}   // prop สร้างใหม่ทุกเกมจาก snapshot
     if(BLDV.g){if(BLDV.g.parent)BLDV.g.parent.remove(BLDV.g);disposeTree(BLDV.g);BLDV.g=null;}   // บ้านพังได้ก็เช่นกัน
-    WCACHE.delete(builtMap);WCACHE.set(builtMap,{world,CANDLESYS,TORCHES,CANDLES,FIREFLIES,CRYSTAL,RUNE,SNITCH,BANNERS,SNOW});
-    for(const [k,v] of WCACHE){if(WCACHE.size<=WCACHE_MAX)break;if(k===id)continue;WCACHE.delete(k);disposeTree(v.world);}
+    WCACHE.delete(builtKey);WCACHE.set(builtKey,{world,CANDLESYS,TORCHES,CANDLES,FIREFLIES,CRYSTAL,RUNE,SNITCH,BANNERS,SNOW});
+    const key=wkey(id);
+    for(const [k,v] of WCACHE){if(WCACHE.size<=WCACHE_MAX)break;if(k===key)continue;WCACHE.delete(k);disposeTree(v.world);}
   }
   clearDyn();clearDebris();
   prefetchModels([...FILE_MODELS(),"mesh_fire_wing","mesh_storm_claw","mesh_ice_burst","mesh_ice_spire","mesh_ice_sword","mesh_ice_axe","mesh_ice_circle"]);prefetchFx();
   const FM=MAPS[id]&&MAPS[id].fm;
   setSky(FM?(FM.sky==='sunset'||FM.sky==='day'?'sunset':'night'):id==='pitch'||id==='meadow'||id==='ruins'||id==='test'?'sunset':'night');
-  const cached=WCACHE.get(id);
+  const cached=WCACHE.get(wkey(id));
   if(cached){
-    WCACHE.delete(id);
+    WCACHE.delete(wkey(id));
     ({world,CANDLESYS,TORCHES,CANDLES,FIREFLIES,CRYSTAL,RUNE,SNITCH,BANNERS,SNOW}=cached);
-    scene.add(world);builtMap=id;
+    scene.add(world);builtMap=id;builtKey=wkey(id);
   }else{
     world=new THREE.Group();scene.add(world);
-    builtMap=id;CANDLESYS=null;TORCHES=[];CANDLES=[];FIREFLIES=null;CRYSTAL=null;RUNE=null;SNITCH=null;BANNERS=[];SNOW=null;
+    builtMap=id;builtKey=wkey(id);CANDLESYS=null;TORCHES=[];CANDLES=[];FIREFLIES=null;CRYSTAL=null;RUNE=null;SNITCH=null;BANNERS=[];SNOW=null;
     if(FM)buildFileMap(id);else if(id==='forest')buildForest();else if(id==='pitch')buildPitch();else if(id==='hogsmeade')buildHogsmeade();else if(id==='greathall')buildGreatHall();else if(id==='meadow')buildMeadow();else if(id==='lake')buildLake();else if(id==='ruins')buildRuins();else if(id==='test')buildTest();else buildCastle();
     batchStatic(world,new Set([RUNE,CRYSTAL,SNITCH,FIREFLIES&&FIREFLIES.pts,...CANDLES.map(c=>c.g),...BANNERS.map(b=>b.m)].filter(Boolean)));
     setTimeout(prewarmShaders,0);
@@ -249,12 +252,7 @@ function buildHogsmeade(){
   {const kp=new THREE.Mesh(new THREE.BoxGeometry(150,50,30),cm);kp.position.set(0,25,0);cas.add(kp);}
   [[-55,6,10,95],[-28,10,8,120],[8,12,12,140],[42,8,9,105],[68,4,10,85],[-80,0,7,70]].forEach(a=>tower(...a));
   cas.position.set(-60,0,-340);addW(cas);
-  // หิมะตก
-  const NS=1500,sp=new Float32Array(NS*3),sv=new Float32Array(NS);
-  for(let i=0;i<NS;i++){sp[i*3]=rnd(-hw-15,hw+15);sp[i*3+1]=rnd(0,26);sp[i*3+2]=rnd(-hh-15,hh+15);sv[i]=rnd(1.6,3.6);}
-  const sg=new THREE.BufferGeometry();sg.setAttribute('position',new THREE.BufferAttribute(sp,3));
-  const pts=addW(new THREE.Points(sg,new THREE.PointsMaterial({map:glowTex,color:'#ffffff',size:0.34,transparent:true,opacity:0.9,depthWrite:false})));pts.frustumCulled=false;
-  SNOW={pts,sp,sv,hw,hh,t:performance.now()};
+  makeSnow(hw,hh);
 }
 
 function buildGreatHall(){
@@ -421,12 +419,7 @@ function buildForest(){
     cap.setColorAt(i,R()<0.5?hdr('#4fe8d0',1.8):hdr('#b77dff',1.8));
   }
   addW(stem);addW(cap);
-  // หิ่งห้อย
-  const NF=350,fp=new Float32Array(NF*3);
-  const fseed=[];for(let i=0;i<NF;i++){fseed.push([rnd(-hw,hw),rnd(0.5,5),rnd(-hh,hh),R()*10]);}
-  const fg=new THREE.BufferGeometry();fg.setAttribute('position',new THREE.BufferAttribute(fp,3));
-  FIREFLIES={pts:addW(new THREE.Points(fg,new THREE.PointsMaterial({map:glowTex,color:hdr('#d8ff6a',2),size:0.5,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending}))),fp,fseed};
-  FIREFLIES.pts.frustumCulled=false;
+  makeFireflies(hw,hh,350,R);
 }
 
 // ----- ทุ่งหญ้าฮอกวอตส์ (เย็น) -----
@@ -483,6 +476,38 @@ function buildLake(){
 }
 // ----- ซากลานประลอง (เย็น ทราย) -----
 // ----- Test Place (ห้องฝึก): พื้นตารางเรียบๆ กลางวัน + วงโซนเสกมอนสเตอร์ -----
+// ----- บรรยากาศที่ใช้ร่วมกัน (แผนที่จากโค้ด + แผนที่จากไฟล์ผ่าน fx ใน MAP-DESIGN.md) -----
+function makeSnow(hw,hh){
+  const NS=1500,sp=new Float32Array(NS*3),sv=new Float32Array(NS);
+  for(let i=0;i<NS;i++){sp[i*3]=rnd(-hw-15,hw+15);sp[i*3+1]=rnd(0,26);sp[i*3+2]=rnd(-hh-15,hh+15);sv[i]=rnd(1.6,3.6);}
+  const sg=new THREE.BufferGeometry();sg.setAttribute('position',new THREE.BufferAttribute(sp,3));
+  const pts=addW(new THREE.Points(sg,new THREE.PointsMaterial({map:glowTex,color:'#ffffff',size:0.34,transparent:true,opacity:0.9,depthWrite:false})));pts.frustumCulled=false;
+  SNOW={pts,sp,sv,hw,hh,t:performance.now()};
+}
+function makeFireflies(hw,hh,n,R){
+  const NF=n,fp=new Float32Array(NF*3);
+  const fseed=[];for(let i=0;i<NF;i++){fseed.push([rnd(-hw,hw),rnd(0.5,5),rnd(-hh,hh),R()*10]);}
+  const fg=new THREE.BufferGeometry();fg.setAttribute('position',new THREE.BufferAttribute(fp,3));
+  FIREFLIES={pts:addW(new THREE.Points(fg,new THREE.PointsMaterial({map:glowTex,color:hdr('#d8ff6a',2),size:0.5,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending}))),fp,fseed};
+  FIREFLIES.pts.frustumCulled=false;
+}
+function makeSnitch(){
+  SNITCH=addW(new THREE.Group());
+  SNITCH.add(new THREE.Mesh(new THREE.SphereGeometry(0.22,16,12),new THREE.MeshStandardMaterial({color:'#ffd860',metalness:0.9,roughness:0.2,emissive:hdr('#7a5a10',1)})));
+  for(const s of [-1,1]){const w=new THREE.Mesh(new THREE.PlaneGeometry(0.7,0.25),new THREE.MeshBasicMaterial({color:hdr('#fff8e0',1.4),side:THREE.DoubleSide,transparent:true,opacity:0.85}));w.position.x=s*0.42;SNITCH.add(w);}
+  const sgl=new THREE.Sprite(glowMat('#ffd860',1.2));sgl.scale.setScalar(1.6);SNITCH.add(sgl);
+}
+// fx ของแผนที่จากไฟล์ (custom property "fx" ของ collection MAP_<id>): snow | fireflies[:จำนวน] | candles[:จำนวน:สูงต่ำสุด:สูงสุด] | snitch | rune[:สี:ขนาด]
+function fileMapFx(list){
+  const hw=MW*S3/2,hh=MH*S3/2;
+  for(const t of list||[]){const [k,...a]=String(t).trim().split(':');
+    if(k==='snow')makeSnow(hw,hh);
+    else if(k==='fireflies')makeFireflies(hw,hh,+a[0]||350,Math.random);
+    else if(k==='candles')makeCandles(+a[0]||80,-hw+3,hw-3,-hh+3,hh-3,+a[1]||8,+a[2]||13);
+    else if(k==='snitch')makeSnitch();
+    else if(k==='rune'){const z=+a[1]||19;RUNE=addW(new THREE.Mesh(new THREE.PlaneGeometry(z,z),new THREE.MeshBasicMaterial({map:runeTex,color:hdr(a[0]||'#b58cff',1.3),transparent:true,blending:THREE.AdditiveBlending,depthWrite:false})));RUNE.rotation.x=-Math.PI/2;RUNE.position.y=GY(MW/2,MH/2)+0.05;}
+  }
+}
 // ----- แผนที่จากไฟล์ Blender (MAP-DESIGN.md) -----
 // โชว์พื้นสำรองจากตารางความสูงทันที (เดิน/ทดสอบได้แม้ไม่มี .glb) แล้วสลับเป็นไฟล์ .glb เมื่อโหลดเสร็จ
 function terrGeo(get,nx,ny,c,step){
@@ -514,6 +539,7 @@ function buildFileMap(id){
     im.castShadow=im.receiveShadow=true;fb.add(im);
   }
   // ไฟประจำจุด (light_) → ใช้ชุดไฟรวมของเกม (เปิดจริงเฉพาะดวงที่ใกล้กล้อง)
+  fileMapFx(F.fx);
   W.userData.lights=(F.lights||[]).map(L=>({abs:1,x:tx(L.x),y:GY(L.x,L.y)+(L.h||2),z:tz(L.y),col:L.col||'#ffb060',int:L.int||2,dist:L.dist||14}));
   if(!F.file)return;
   gltfLoader().then(L=>L.loadAsync('assets/'+F.file+'?v='+(F.v||0))).then(gltf=>{
@@ -642,9 +668,5 @@ function buildPitch(){
   }
   const cloudM=new THREE.SpriteMaterial({map:glowTex,color:'#ffd6c0',transparent:true,opacity:0.35,depthWrite:false,fog:false});
   for(let i=0;i<22;i++){const c=addW(new THREE.Sprite(cloudM));const a=rnd(0,Math.PI*2),r=rnd(200,400);c.position.set(Math.cos(a)*r,rnd(70,140),Math.sin(a)*r);c.scale.set(rnd(80,160),rnd(25,45),1);}
-  // ลูกบอลทองติดปีก บินวนรอบสนาม (ตกแต่ง)
-  SNITCH=addW(new THREE.Group());
-  SNITCH.add(new THREE.Mesh(new THREE.SphereGeometry(0.22,16,12),new THREE.MeshStandardMaterial({color:'#ffd860',metalness:0.9,roughness:0.2,emissive:hdr('#7a5a10',1)})));
-  for(const s of [-1,1]){const w=new THREE.Mesh(new THREE.PlaneGeometry(0.7,0.25),new THREE.MeshBasicMaterial({color:hdr('#fff8e0',1.4),side:THREE.DoubleSide,transparent:true,opacity:0.85}));w.position.x=s*0.42;SNITCH.add(w);}
-  const sgl=new THREE.Sprite(glowMat('#ffd860',1.2));sgl.scale.setScalar(1.6);SNITCH.add(sgl);
+  makeSnitch();
 }
