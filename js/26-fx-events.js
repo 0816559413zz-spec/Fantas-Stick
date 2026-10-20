@@ -44,6 +44,7 @@ function fx(ev,raw){   // raw = ภาพเดิมในโค้ดเท่
     case 'boom':explosionFX(ev.x,ev.y,H);if(near){snd('boom',ev);shake(7);}break;
     case 'hit':{
       const mine=ev.id===NET.myId;
+      if(ev.id!==undefined){const po=PM3.get(ev.id);if(po)po.lhit={sx:ev.sx,sy:ev.sy,t:performance.now()};}   // ทิศที่โดนตี → ragdoll (js/48)
       if(!ev.b){flashModel(ev.id!==undefined?PM3.get(ev.id):ev.e!==undefined?EM3.get(ev.e):ev.mn!==undefined?MM3.get(ev.mn):null);hitSparks(ev.x,ev.y,H-0.6,ev.n);}
       if(SET.dmg||mine){if(ev.b)floatText(ev.x,ev.y,ev.n,'#ff9a4a',12,H-0.3);else floatText(ev.x,ev.y,ev.n,mine?'#ff6b6b':ev.s===NET.myId?'#ffe27a':'#ffffff',ev.s===NET.myId?18:16,H);}
       if(mine&&!ev.b){shake(5);snd('hurt');if(ev.sx!==undefined)DIRI.push({a:Math.atan2(ev.sy-myPos().y,ev.sx-myPos().x),t:1});}

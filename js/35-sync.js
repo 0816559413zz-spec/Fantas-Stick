@@ -18,7 +18,7 @@ function syncPlayers(P,mode,now,dt){
     g.position.set(x,o.zs,z);
     g.rotation.y=Math.atan2(Math.cos(p.a),Math.sin(p.a));
     const v=localVel(o,x,z,dt,g.rotation.y);
-    if(!p.al)continue;
+    if(!p.al){if(ragTick(o,p,v,dt,now))ragHideDead(o,p,now);continue;}   // ตาย = ragdoll ค้างจนเกิดใหม่ (js/48)
     o.hitT=Math.max(0,(o.hitT||0)-dt);
     if(o.anim)animTick(o,{down:!!p.dn,fly:!!p.fl,sp:v.sp,castT:o.castT,hitT:o.hitT},dt);
     updateCloth(o.cloak,v.lvx,v.lvz,v.sp*(p.fl?1.4:1),now,dt);
@@ -70,6 +70,7 @@ function syncPlayers(P,mode,now,dt){
     frostFX(o,p,pz,now,dt);
     earthFX(o,p,pz,now,dt);
     if(o.rig)rigSync(o,dt);
+    if(ragTick(o,p,v,dt,now))o.tip.scale.setScalar(0.001);   // ล้ม/กระแทกแรง = ragdoll (js/48)
     if(p.bn&&Math.random()<0.7)burst(p.x,p.y,'#ff6a2a',1,30,0.45,3.5,{h:pz+rnd(0.3,1.8),vh:[1,2.5],g:-1});
     if(p.u>=100&&Math.random()<0.35)burst(p.x+rnd(-18,18),p.y+rnd(-18,18),'#ffd86b',1,10,0.9,1.8,{h:pz+rnd(0,0.4),vh:[1.5,3],g:-0.3});
     if(p.sh&&!fireSh&&!p.ea&&Math.random()<0.3)burst(p.x,p.y,'#7ff6ff',1,40,0.4,1.4,{h:pz+rnd(0.3,2)});
