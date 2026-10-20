@@ -36,6 +36,18 @@ function mkTRS(pos,rot,sc){const r=rot||[0,0,0],s=typeof sc==='number'?[sc,sc,sc
 // แถบจุดเป็นตาราง rows×cols → สี่เหลี่ยม (ใช้กับ ribbon/blade/fan/tube)
 function mkGrid(G,rows){for(let j=0;j+1<rows.length;j++)for(let i=0;i+1<rows[j].length;i++)mkQ(G,rows[j][i],rows[j+1][i],rows[j+1][i+1],rows[j][i+1]);}
 // ---------- ชิ้นส่วน (k) — พิกัด: ฐานอยู่ที่ y=0 (ยกเว้น sphere/box อยู่กลาง) ----------
+// ---------- ปั้นเอง (k:"poly"): จุด v + หน้า f (เลขจุด ทวนเข็มเมื่อมองจากด้านนอก) • sub = ทำให้เนียนแบบ Catmull-Clark ----------
+function mkCC(V,F){const ek=(a,b)=>a<b?a+'_'+b:b+'_'+a,fp=F.map(f=>{const c=[0,0,0];for(const i of f)for(let a=0;a<3;a++)c[a]+=V[i][a]/f.length;return c;}),E=new Map();
+  F.forEach((f,fi)=>f.forEach((a,j)=>{const b=f[(j+1)%f.length],k=ek(a,b);let e=E.get(k);if(!e)E.set(k,e={a,b,f:[]});e.f.push(fi);}));
+  const NV=V.map(p=>p.slice()),ep=new Map(),vf=V.map(()=>[]),ve=V.map(()=>[]);
+  for(const [k,e] of E){const A=V[e.a],B=V[e.b];ep.set(k,NV.length);NV.push(e.f.length===2?[0,1,2].map(i=>(A[i]+B[i]+fp[e.f[0]][i]+fp[e.f[1]][i])/4):[0,1,2].map(i=>(A[i]+B[i])/2));ve[e.a].push(e);ve[e.b].push(e);}
+  F.forEach((f,fi)=>f.forEach(i=>vf[i].push(fi)));
+  V.forEach((P,i)=>{const es=ve[i];if(!es.length)return;const bd=es.filter(e=>e.f.length<2);
+    if(bd.length){if(bd.length===2){const o=bd.map(e=>V[e.a===i?e.b:e.a]);NV[i]=[0,1,2].map(a=>P[a]*0.75+(o[0][a]+o[1][a])*0.125);}return;}   // ขอบเปิด: เนียนตามขอบ
+    const n=es.length,Fa=[0,0,0],Ra=[0,0,0];for(const fi of vf[i])for(let a=0;a<3;a++)Fa[a]+=fp[fi][a]/vf[i].length;for(const e of es){const A=V[e.a],B=V[e.b];for(let a=0;a<3;a++)Ra[a]+=(A[a]+B[a])/2/n;}
+    NV[i]=[0,1,2].map(a=>(Fa[a]+2*Ra[a]+(n-3)*P[a])/n);});
+  const FO=[];F.forEach((f,fi)=>{const c=NV.length;NV.push(fp[fi]);f.forEach((a,j)=>{const b=f[(j+1)%f.length],q=f[(j+f.length-1)%f.length];FO.push([a,ep.get(ek(a,b)),c,ep.get(ek(q,a))]);});});
+  return [NV,FO];}
 const MKGEN={
   sphere(o){return mkThree(new THREE.SphereGeometry(o.r,Math.max(6,o.seg*2|0),Math.max(3,o.seg|0),0,Math.PI*2,0,o.hemi?Math.PI/2:Math.PI));},
   box(o){return mkThree(new THREE.BoxGeometry(o.w,o.h,o.d));},
@@ -91,6 +103,11 @@ const MKGEN={
   star(o){const G=mkG(),n=Math.max(2,o.n|0),c=mkV(G,0,o.h,0,0.5,0),ring=[];
     for(let i=0;i<=n*2;i++){const a=i/(n*2)*Math.PI*2,r=i%2?o.r*o.inner:o.r;ring.push(mkV(G,Math.sin(a)*r,0,Math.cos(a)*r,i/(n*2),i%2?o.inner:1));}
     for(let i=0;i<n*2;i++)G.i.push(c,ring[i],ring[i+1]);return G;},
+  poly(o){let V=(o.v||[]).filter(p=>Array.isArray(p)&&p.length===3),F=(o.f||[]).filter(f=>Array.isArray(f)&&f.length>=3&&f.every(i=>i>=0&&i<V.length));
+    for(let i=0;i<Math.min(3,o.sub|0);i++)[V,F]=mkCC(V,F);
+    const G=mkG();let y0=Infinity,y1=-Infinity;for(const p of V){y0=Math.min(y0,p[1]);y1=Math.max(y1,p[1]);}const H=Math.max(1e-4,y1-y0);
+    for(const p of V)mkV(G,p[0],p[1],p[2],Math.atan2(p[0],p[2])/(Math.PI*2)+0.5,(p[1]-y0)/H);
+    for(const f of F)for(let i=1;i+1<f.length;i++)G.i.push(f[0],f[i],f[i+1]);return G;},
 };
 // ---------- ตัวแต่ง (ทำตามลำดับ): เรียว → บิด → โค้ง → ขรุขระ → แบน(เหลี่ยม) → ขนาด/หมุน/ตำแหน่ง → ทำซ้ำ (วง/แถว) → กระจกซ้ายขวา ----------
 function mkDeform(G,o){const P=G.p;let y0=Infinity,y1=-Infinity;for(let k=1;k<P.length;k+=3){y0=Math.min(y0,P[k]);y1=Math.max(y1,P[k]);}const H=Math.max(1e-4,y1-y0);

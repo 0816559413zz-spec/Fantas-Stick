@@ -234,8 +234,9 @@ const stWs=()=>{try{return MK.ws;}catch(e){return 'fx';}};
 function stSetCam(k){ST.cam=k;stSync();if(!ST.play)ST.seekTo=ST.t;}
 // ---------- แถบสถานะ + คำใบ้ ----------
 const ST_HINT={fx:'ลากแถบสี = เลื่อนเวลา • ลากขอบขวา = ยืดอายุ • คลิกขวาที่ชั้น = เมนู • Shift+A เพิ่มชั้น • Space เล่น/หยุด • ? ดูปุ่มลัดทั้งหมด',
-  mesh:'คลิกชิ้นบนจอ = เลือก • G ย้าย / R หมุน / S ย่อขยาย • ลากจอ = หมุนกล้อง • ล้อเมาส์ = ซูม',tex:'ปรับค่าทางขวา ภาพจะวาดใหม่เอง • ลากไฟล์ PNG/JPG มาวางบนจอเพื่อนำเข้า',vol:'ตั้งค่าทางขวา แล้วกดจำลอง • ลากจอ = หมุนกล้อง'};
-function stHint(s){const e=$st('stHint');if(e)e.textContent=s||ST_HINT[stWs()]||'';}
+  mesh:'คลิกชิ้นบนจอ = เลือก • G ย้าย / R หมุน / S ย่อขยาย • ลากจอ = หมุนกล้อง • ล้อเมาส์ = ซูม',edit:'โหมดแก้จุด: 1 จุด / 2 ขอบ / 3 หน้า • คลิก = เลือก (Shift เพิ่ม) • A ทั้งหมด • ลากลูกศร G/R/S • E ดึงออก • I หดใน • F เติมหน้า • M รวมจุด • X ลบ • Tab ออก',
+  tex:'ปรับค่าทางขวา ภาพจะวาดใหม่เอง • ลากไฟล์ PNG/JPG มาวางบนจอเพื่อนำเข้า',vol:'ตั้งค่าทางขวา แล้วกดจำลอง • ลากจอ = หมุนกล้อง'};
+function stHint(s){const e=$st('stHint');if(!e)return;let w=stWs();try{if(w==='mesh'&&ME.on)w='edit';}catch(er){}e.textContent=s||ST_HINT[w]||'';}
 function stStatus(){const l=$st('stSLint');if(!l)return;const fx=stWs()==='fx';
   const e=ST.lint.filter(r=>r.lv==='err').length,w=ST.lint.filter(r=>r.lv==='warn').length;l.className=e?'err':w?'warn':'ok';l.textContent=e?'✗ ผิด '+e+(w?' • ⚠ '+w:''):w?'⚠ เตือน '+w:'✓ ตรวจผ่าน';l.style.display=fx?'':'none';
   const s=$st('stSSave');s.className=ST.dirty?'warn':'ok';s.textContent=ST.dirty?'● ยังไม่บันทึก':'✓ บันทึกแล้ว';s.style.display=fx?'':'none';
@@ -373,7 +374,7 @@ function stInspRender(){const P=$st('stInsp');if(!P||!ST.fx)return;const same=P.
     if(same)P.scrollTop=sc;return;}
   const L=ST.fx.layers.find(x=>x.id===ST.sel);if(!L){ST.sel=null;return stInspRender();}const T=S.types[L.t];
   const n=v=>typeof v==='number'?v.toFixed(2):Array.isArray(v)?v.join('–'):'สูตร',at=L.at!==undefined?L.at:stDef(L,'at'),life=L.life!==undefined?L.life:stDef(L,'life');
-  P.append(h('div',{className:'stCard',style:'--c:'+(TYPEC[L.t]||'#e2ad52')},h('i',null,T.icon||'•'),h('b',null,L.id),h('span',null,T.th+' · '+L.t+' • เริ่ม '+n(at)+' วิ • อายุ '+(L.loop?'วนเรื่อย ๆ':n(life)+' วิ'))),h('p',{className:'desc'},T.desc),stFind(P));
+  P.append(h('div',{className:'stCard',style:'--c:'+(TYPEC[L.t]||'#4a8cff')},h('i',null,T.icon||'•'),h('b',null,L.id),h('span',null,T.th+' · '+L.t+' • เริ่ม '+n(at)+' วิ • อายุ '+(L.loop?'วนเรื่อย ๆ':n(life)+' วิ'))),h('p',{className:'desc'},T.desc),stFind(P));
   for(const r of ST.lint.filter(r=>String(r.at).split('.')[0]===L.id))lint.append(h('div',{className:r.lv},h('span',null,r.lv==='err'?'✗':'⚠'),h('span',null,r.msg+(String(r.at).includes('.')?' ('+String(r.at).split('.')[1]+')':''))));
   if(lint.childNodes.length)P.append(h('div',{className:'pad'},lint));
   const main=[stField(L,L,'id',S.common.id)];if(L.t==='mesh')main.push(stShapePicker(L));

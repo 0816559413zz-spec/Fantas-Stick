@@ -2,9 +2,9 @@
 /* VFX Studio — หน้าตาแบบโปรแกรมสตูดิโอ (โทนเทาเข้มแบบ Unreal / Blender + ทองของเกมเป็นสีเน้น)
    เลย์เอาต์: แถบบน | ไลบรารีซ้าย | จอ 3D กลาง | แผงแก้ค่าขวา | ไทม์ไลน์ล่าง | แถบสถานะล่างสุด • ลากเส้นแบ่งเพื่อปรับขนาด (ดับเบิลคลิก = พับ) */
 body.studio{--sL:240px;--sR:340px;--sT:44px;--sB:236px;--sS:24px;
-  --bg0:#141518;--bg1:#1b1d21;--bg2:#24262b;--bg3:#2e3137;--bg4:#3a3e46;--ln:#2f3238;--ln2:#464a53;
-  --tx:#d9dce2;--tx2:#8e939d;--tx3:#646a75;--acc:#e2ad52;--acc2:#f5cf86;--accBg:rgba(226,173,82,.16);--hov:rgba(255,255,255,.05);
-  --sok:#6fcf97;--swarn:#f2a35e;--serr:#f06a6a;--fu:'JetBrains Mono',ui-monospace,Consolas,monospace;
+  --bg0:#161616;--bg1:#1f1f1f;--bg2:#282828;--bg3:#333333;--bg4:#3f3f3f;--ln:#2d2d2d;--ln2:#474747;
+  --tx:#dedede;--tx2:#9b9b9b;--tx3:#6c6c6c;--acc:#4a8cff;--acc2:#8fb9ff;--accBg:rgba(74,140,255,.18);--hov:rgba(255,255,255,.05);
+  --sok:#6fcf97;--swarn:#f2a35e;--serr:#f06a6a;--ui:'Segoe UI','Noto Sans Thai','Leelawadee UI',Tahoma,system-ui,sans-serif;--fu:'JetBrains Mono',ui-monospace,Consolas,monospace;
   /* ชื่อเก่าที่ maker.js / ส่วนอื่นยังใช้ */
   --sp:var(--bg1);--sp2:var(--bg2);--sl:var(--ln);--sl2:var(--ln2);--gold:var(--acc);--gold2:var(--acc2);--mute:var(--tx2);--text:var(--tx);
   background:var(--bg0)}
@@ -12,7 +12,7 @@ body.studio .screen,body.studio .overlay,body.studio #creator,body.studio #cv,bo
 body.studio #gl{left:var(--sL)!important;top:var(--sT)!important;width:calc(100vw - var(--sL) - var(--sR))!important;height:calc(100vh - var(--sT) - var(--sB) - var(--sS))!important;cursor:grab}
 body.studio #gl:active{cursor:grabbing}
 #st *{box-sizing:border-box}
-#st{position:fixed;inset:0;pointer-events:none;z-index:20;font:12.5px/1.45 'Kanit',system-ui,sans-serif;color:var(--tx)}
+#st{position:fixed;inset:0;pointer-events:none;z-index:20;font:12.5px/1.45 var(--ui);color:var(--tx)}
 #st>*{pointer-events:auto}
 #st ::-webkit-scrollbar{width:10px;height:10px}
 #st ::-webkit-scrollbar-thumb{background:var(--bg4);border:3px solid transparent;background-clip:padding-box;border-radius:6px}
@@ -24,7 +24,7 @@ body.studio #gl:active{cursor:grabbing}
 #st button:active{background:var(--bg4)}
 #st button:disabled{opacity:.45;cursor:default}
 #st button.on{background:var(--accBg);border-color:var(--acc);color:var(--acc2)}
-#st button.gold{background:linear-gradient(180deg,#eab95e,#b98632);color:#1a1206;border-color:#eab95e;font-weight:600}
+#st button.gold{background:linear-gradient(180deg,#4f90ff,#2f6fe0);color:#fff;border-color:#5a97ff;font-weight:600}
 #st button.gold:hover{filter:brightness(1.08)}
 #st button.ghost{background:none;border-color:transparent}
 #st button.ghost:hover{background:var(--hov);border-color:var(--ln2)}
@@ -36,7 +36,7 @@ body.studio #gl:active{cursor:grabbing}
 #st input[type=checkbox]{height:auto;accent-color:var(--acc)}
 #st input[type=range]{accent-color:var(--acc);padding:0;border:0;background:none;height:18px}
 #st input[type=color]{padding:1px;width:28px;height:22px}
-#st h3{margin:0;font:600 11px 'Kanit',sans-serif;letter-spacing:.6px;color:var(--tx2);text-transform:uppercase}
+#st h3{margin:0;font:600 11px var(--ui);letter-spacing:.6px;color:var(--tx2);text-transform:uppercase}
 #st .mono{font-family:var(--fu);font-size:11.5px}
 #st .mute{color:var(--tx2)}
 #st kbd{font:10.5px var(--fu);background:var(--bg3);border:1px solid var(--ln2);border-bottom-width:2px;border-radius:3px;padding:0 4px;color:var(--tx)}
@@ -47,8 +47,8 @@ body.studio #gl:active{cursor:grabbing}
 /* แถบบน */
 #stTop{position:absolute;left:0;right:0;top:0;height:var(--sT);display:flex;gap:6px;align-items:center;padding:0 8px;background:var(--bg2);border-bottom:1px solid var(--ln);overflow-x:auto;overflow-y:hidden;scrollbar-width:none}
 #stTop::-webkit-scrollbar{display:none}
-#stTop .logo{display:flex;align-items:center;gap:6px;font:700 14px 'Cinzel',serif;color:var(--acc2);letter-spacing:.5px;margin-right:4px;white-space:nowrap}
-#stTop .logo i{font-style:normal;display:grid;place-items:center;width:24px;height:24px;border-radius:6px;background:linear-gradient(135deg,#f5cf86,#c0762a);color:#1a1206;font-size:14px}
+#stTop .logo{display:flex;align-items:center;gap:6px;font:700 14px var(--ui);color:var(--acc2);letter-spacing:.2px;margin-right:4px;white-space:nowrap}
+#stTop .logo i{font-style:normal;display:grid;place-items:center;width:24px;height:24px;border-radius:6px;background:linear-gradient(135deg,#6aa2ff,#2f6fe0);color:#fff;font-size:14px}
 #stTop .file{font-family:var(--fu);font-size:12px;color:var(--tx);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:240px;padding:3px 8px;background:var(--bg1);border:1px solid var(--ln);border-radius:4px}
 #stTop .dirty{color:var(--swarn)}
 #stTop .sep{width:1px;height:22px;background:var(--ln2);flex:none;margin:0 2px}
@@ -70,7 +70,7 @@ body.studio #gl:active{cursor:grabbing}
 #stLib .head{padding:6px 8px;display:grid;gap:6px;border-bottom:1px solid var(--ln)}
 #stLib input{width:100%}
 #stLibList{overflow:auto;padding:4px 4px 10px;flex:1}
-#stLibList .grp{display:flex;align-items:center;gap:6px;width:100%;margin:6px 0 1px;padding:3px 6px!important;font:600 11px 'Kanit',sans-serif;color:var(--tx2);background:none!important;border:0!important;text-align:left;letter-spacing:.3px}
+#stLibList .grp{display:flex;align-items:center;gap:6px;width:100%;margin:6px 0 1px;padding:3px 6px!important;font:600 11px var(--ui);color:var(--tx2);background:none!important;border:0!important;text-align:left;letter-spacing:.3px}
 #stLibList .grp:hover{color:var(--tx)}
 #stLibList .grp .car{display:inline-block;width:10px;transition:transform .12s;color:var(--tx3)}
 #stLibList .grp.shut .car{transform:rotate(-90deg)}
@@ -80,7 +80,7 @@ body.studio #gl:active{cursor:grabbing}
 #stLibList .it .ic{grid-row:span 2;display:grid;place-items:center;width:24px;height:24px;border-radius:5px;background:var(--bg2);border:1px solid var(--ln);font-size:13px;color:var(--acc2)}
 #stLibList .it .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 #stLibList .it small{display:block;color:var(--tx3);font-size:10.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-#stLibList .it.on{background:var(--accBg);border-color:rgba(226,173,82,.45);color:var(--acc2)}
+#stLibList .it.on{background:var(--accBg);border-color:rgba(74,140,255,.45);color:var(--acc2)}
 #stLibList .it.on .ic{border-color:var(--acc)}
 #stLibList .it.bad small{color:var(--swarn)}
 /* จอ */
@@ -101,7 +101,7 @@ body.studio #gl:active{cursor:grabbing}
 #stTl{position:absolute;left:0;right:var(--sR);bottom:var(--sS);height:var(--sB);background:var(--bg1);border-top:1px solid var(--ln);display:flex;flex-direction:column}
 #stTl .bar{display:flex;gap:6px;align-items:center;padding:4px 8px;background:var(--bg2);border-bottom:1px solid var(--ln);flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;flex:none}
 #stTl .bar::-webkit-scrollbar{display:none}
-#stTl .bar .ttl{font:600 11px 'Kanit',sans-serif;color:var(--tx2);letter-spacing:.6px;margin-right:4px}
+#stTl .bar .ttl{font:600 11px var(--ui);color:var(--tx2);letter-spacing:.6px;margin-right:4px}
 #stTl .time{font:600 13px var(--fu);color:var(--acc2);min-width:118px;text-align:center;font-variant-numeric:tabular-nums;background:var(--bg0);border:1px solid var(--ln);border-radius:4px;padding:2px 8px}
 #stPlay{min-width:38px;font-size:13px}
 #stRows{overflow:auto;flex:1;display:grid;grid-template-columns:240px minmax(0,1fr);align-content:start;row-gap:1px;padding:0 8px 10px 0;position:relative}
@@ -137,14 +137,14 @@ body.studio #gl:active{cursor:grabbing}
 .stSeg .rh{position:absolute;right:0;top:0;bottom:0;width:8px;cursor:ew-resize;background:linear-gradient(90deg,transparent,rgba(0,0,0,.25))}
 .stPh{position:absolute;top:0;bottom:0;width:2px;margin-left:-1px;background:var(--acc2);pointer-events:none;z-index:3}
 .stPh::before{content:'';position:absolute;top:0;left:-5px;border:6px solid transparent;border-top:8px solid var(--acc2)}
-#stPhAll{position:absolute;top:0;bottom:0;width:1px;background:rgba(245,207,134,.55);pointer-events:none;z-index:1}
+#stPhAll{position:absolute;top:0;bottom:0;width:1px;background:rgba(143,185,255,.55);pointer-events:none;z-index:1}
 #stAdd{position:relative}
 /* เมนูเพิ่มชั้น (แบ่งหมวด + ค้นหา) */
 .stPop{position:fixed;z-index:35;background:var(--bg2);border:1px solid var(--ln2);border-radius:8px;box-shadow:0 14px 40px rgba(0,0,0,.55);padding:6px;display:flex;flex-direction:column;gap:6px;pointer-events:auto}
 .stPop input{width:100%}
 #stAddMenu{width:min(560px,92vw);max-height:min(520px,70vh)}
 #stAddMenu .cats{overflow:auto;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;padding:2px}
-#stAddMenu .cat h4{margin:2px 4px 4px;font:600 11px 'Kanit',sans-serif;color:var(--tx3);letter-spacing:.5px}
+#stAddMenu .cat h4{margin:2px 4px 4px;font:600 11px var(--ui);color:var(--tx3);letter-spacing:.5px}
 #stAddMenu .opt{display:grid;grid-template-columns:28px minmax(0,1fr);gap:0 8px;align-items:center;width:100%;text-align:left;background:none;border-color:transparent;padding:4px 6px;margin-bottom:2px}
 #stAddMenu .opt:hover,#stAddMenu .opt.hi{background:var(--bg3);border-color:var(--ln2)}
 #stAddMenu .opt i{grid-row:span 2;font-style:normal;display:grid;place-items:center;width:28px;height:28px;border-radius:6px;background:color-mix(in srgb,var(--c) 22%,var(--bg1));color:var(--c);font-size:15px;border:1px solid color-mix(in srgb,var(--c) 45%,transparent)}
@@ -161,14 +161,14 @@ body.studio #gl:active{cursor:grabbing}
 #stInsp{position:absolute;right:0;top:var(--sT);bottom:var(--sS);width:var(--sR);background:var(--bg1);border-left:1px solid var(--ln);overflow:auto;padding:0 0 20px;display:flex;flex-direction:column}
 #stInsp>.pad{padding:8px 10px;display:flex;flex-direction:column;gap:6px}
 #stInsp .stCard{display:grid;grid-template-columns:34px minmax(0,1fr);gap:0 9px;align-items:center;padding:10px;border-bottom:1px solid var(--ln);background:linear-gradient(180deg,var(--bg2),var(--bg1))}
-#stInsp .stCard i{grid-row:span 2;font-style:normal;display:grid;place-items:center;width:34px;height:34px;border-radius:8px;background:color-mix(in srgb,var(--c,#e2ad52) 22%,var(--bg1));border:1px solid color-mix(in srgb,var(--c,#e2ad52) 50%,transparent);color:var(--c,#e2ad52);font-size:18px}
+#stInsp .stCard i{grid-row:span 2;font-style:normal;display:grid;place-items:center;width:34px;height:34px;border-radius:8px;background:color-mix(in srgb,var(--c,#4a8cff) 22%,var(--bg1));border:1px solid color-mix(in srgb,var(--c,#4a8cff) 50%,transparent);color:var(--c,#4a8cff);font-size:18px}
 #stInsp .stCard b{font:600 13.5px var(--fu);color:var(--tx);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 #stInsp .stCard span{font-size:11.5px;color:var(--tx2)}
 #stInsp .desc{margin:0;font-size:11.5px;color:var(--tx2);padding:6px 10px 0}
 #stInsp .find{position:sticky;top:0;z-index:2;background:var(--bg1);padding:8px 10px 6px;border-bottom:1px solid var(--ln)}
 #stInsp .find input{width:100%}
 #stInsp details{border-bottom:1px solid var(--ln)}
-#stInsp summary{cursor:pointer;color:var(--tx);font:600 12px 'Kanit',sans-serif;padding:7px 10px;background:var(--bg2);list-style:none;display:flex;align-items:center;gap:6px;user-select:none}
+#stInsp summary{cursor:pointer;color:var(--tx);font:600 12px var(--ui);padding:7px 10px;background:var(--bg2);list-style:none;display:flex;align-items:center;gap:6px;user-select:none}
 #stInsp summary::-webkit-details-marker{display:none}
 #stInsp summary::before{content:'▾';color:var(--tx3);transition:transform .12s;display:inline-block}
 #stInsp details:not([open]) summary::before{transform:rotate(-90deg)}
@@ -212,7 +212,7 @@ body.studio #gl:active{cursor:grabbing}
 #stStat button:hover{background:var(--bg3)}
 /* เส้นแบ่งปรับขนาด */
 .stSplit{position:absolute;z-index:4;background:transparent;transition:background .12s}
-.stSplit:hover,.stSplit.on{background:rgba(226,173,82,.55)}
+.stSplit:hover,.stSplit.on{background:rgba(74,140,255,.55)}
 #stSpL{top:var(--sT);bottom:var(--sS);left:calc(var(--sL) - 3px);width:6px;cursor:col-resize}
 #stSpR{top:var(--sT);bottom:var(--sS);right:calc(var(--sR) - 3px);width:6px;cursor:col-resize}
 #stSpB{left:0;right:var(--sR);bottom:calc(var(--sB) + var(--sS) - 3px);height:6px;cursor:row-resize}
@@ -227,7 +227,7 @@ body.studio.noL #stLib,body.studio.noL #mkLib,body.studio.noR #stInsp,body.studi
 .stModal .tpls button small{display:block;color:var(--tx3);font-size:11px;white-space:normal}
 .stKeys{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px 22px;font-size:12.5px}
 .stKeys div{display:flex;justify-content:space-between;gap:10px;padding:3px 0;border-bottom:1px solid var(--ln)}
-.stKeys h4{grid-column:1/-1;margin:8px 0 2px;font:600 11.5px 'Kanit',sans-serif;color:var(--acc2)}
+.stKeys h4{grid-column:1/-1;margin:8px 0 2px;font:600 11.5px var(--ui);color:var(--acc2)}
 #stToast{position:fixed;left:50%;bottom:calc(var(--sB) + var(--sS) + 12px);transform:translateX(-50%);background:var(--bg3);border:1px solid var(--ln2);border-left:3px solid var(--acc);padding:7px 14px;border-radius:6px;z-index:40;max-width:70vw;white-space:pre-wrap;pointer-events:none;box-shadow:0 10px 30px rgba(0,0,0,.5)}
 @media (max-width:900px){body.studio{--sL:0px;--sR:0px}#stLib,#stInsp,#stSpL,#stSpR{display:none}}
 body.studio:not(.ws-fx) .fxOnly,body.studio:not(.ws-fx) #stLib,body.studio:not(.ws-fx) #stTl,body.studio:not(.ws-fx) #stInsp,body.studio:not(.ws-fx) #stHud{display:none!important}
@@ -239,7 +239,7 @@ body.ws-tex:not(.tex3d) #mkTexView{display:grid}
 #mkLib input{width:100%}
 #mkLibList{overflow:auto;padding:6px;flex:1}
 #mkLibList>button{display:block;width:100%;text-align:left;background:none;border-color:transparent;padding:3px 6px;font-size:12.5px;overflow:hidden;text-overflow:ellipsis}
-#mkLibList>button.on{background:rgba(217,180,90,.14);border-color:var(--sl2);color:var(--gold2)}
+#mkLibList>button.on{background:rgba(74,140,255,.14);border-color:var(--sl2);color:var(--gold2)}
 #mkLibList>button small{display:block;color:var(--mute);font-size:10.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .mkThumbs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px}
 .mkThumbs button{display:grid;gap:2px;padding:3px!important;background:#070a14!important;font-size:11px;overflow:hidden}
@@ -255,7 +255,7 @@ body.ws-tex:not(.tex3d) #mkTexView{display:grid}
 #mkRows{overflow:auto;flex:1;padding:4px 8px 8px;display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));align-content:start;gap:2px 10px}
 .mkRow{display:flex;gap:3px;align-items:center;font-size:12.5px;white-space:nowrap;overflow:hidden;cursor:pointer;padding:1px 4px;border-radius:2px;border:1px solid transparent}
 .mkRow:first-child{grid-column:1/-1}
-.mkRow.on{color:var(--gold2);border-color:var(--sl2);background:rgba(217,180,90,.08)}
+.mkRow.on{color:var(--gold2);border-color:var(--sl2);background:rgba(74,140,255,.08)}
 .mkRow.off .nm{opacity:.45}
 .mkRow button{padding:0 4px!important;font-size:11px!important;line-height:17px;background:none!important}
 .mkRow .nm{overflow:hidden;text-overflow:ellipsis;flex:1;min-width:0}
@@ -306,3 +306,6 @@ body.ws-tex:not(.tex3d) #mkTexView{display:grid}
 #st .stChips>button.stChip{width:26px;height:22px}
 #stBanner[hidden]{display:none}
 body.studio:not(.ws-fx) #stTop .sep{display:none}
+/* ---------- เมนูเพิ่มชิ้น + โหมดแก้จุด (studio/meshedit.js) ---------- */
+#mkAddMenu .mkMenuH{grid-column:1/-1;font:600 11px var(--ui);color:var(--tx3);padding:4px 4px 2px;letter-spacing:.3px}
+#mkAddMenu{width:440px}

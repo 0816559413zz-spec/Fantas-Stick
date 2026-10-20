@@ -78,7 +78,7 @@ function mkField(sp,obj,k,ctx){if(!sp)return h('span');const cur=obj[k],v=cur!==
       box.append(h('div',{className:'row'},h('select',{on:{change:e=>{push();const o=list.find(x=>String(x)===e.target.value);set(o!==undefined?o:e.target.value,true);}}},...list.map(o=>h('option',{value:o,selected:o===v},String(o)))),reset));break;}
     case 'vec3':{if(typeof v==='number'){box.append(h('div',{className:'row'},numIn(v,x=>set(x,true),70),h('button',{className:'tg',title:'แยก x y z',on:{click:()=>{push();set([v,v,v],true);}}},'xyz'),reset));break;}
       const a=Array.isArray(v)?v:[0,0,0],row=h('div',{className:'row'});['x','y','z'].forEach((ax,i)=>row.append(h('span',{className:'mute'},ax),h('input',{type:'number',step:k==='rot'?5:0.05,value:a[i],style:'width:58px',on:{focus:push,input:e=>{const nv=a.slice();nv[i]=+e.target.value;set(nv,false);}}})));
-      if(k==='scale')row.append(h('button',{className:'tg',title:'ขนาดเท่ากันทุกด้าน',on:{click:()=>{push();set(a[1],true);}}},'1'));row.append(reset);box.append(row);break;}
+      if(k==='scale')row.append(h('button',{className:'tg',title:'ขนาดเท่ากันทุกด้าน',on:{click:()=>{push();set(a[1],true);}}},'1'));if(reset)row.append(reset);box.append(row);break;}
     case 'list':{if(k==='path'||k==='prof'){box.append(mkPtsEd(k,v,nv=>set(nv,false),push));}
       const ta=h('textarea',{value:JSON.stringify(v),spellcheck:false,on:{focus:push,change:e=>{try{set(JSON.parse(e.target.value),true);}catch(er){stToast('JSON ผิด: '+er.message);}}}});box.append(ta);if(reset)box.append(h('div',{className:'row'},reset));break;}
     case 'ramp':box.append(mkRampEd(v,nv=>set(nv,true),push));break;
@@ -134,7 +134,7 @@ async function mkMeshEnsure(){const M=MK.m;if(M.root)return;
   M.grid=new THREE.GridHelper(6,12,0xd9b45a,0x5a5030);M.grid.material.transparent=true;M.grid.material.opacity=0.35;M.grid.material.depthWrite=false;M.grid.position.y=0.02;
   M.helper=new THREE.Object3D();M.root.add(M.obj,M.wire,M.hi,M.grid,M.helper);
   try{const {TransformControls}=await import('three/addons/controls/TransformControls.js');const tc=new TransformControls(cam,gl.domElement);tc.setSize(0.85);tc.setSpace('local');
-    tc.addEventListener('dragging-changed',e=>{M.drag=e.value;if(e.value)mkMPush();else{mkMeshInsp();mkMeshBotRows();}});
+    tc.addEventListener('dragging-changed',e=>{M.drag=e.value;if(e.value){mkMPush();if(ME.on)meSnap();}else{if(ME.on)meDragEnd();mkMeshInsp();mkMeshBotRows();}});
     tc.addEventListener('objectChange',mkGizmoChange);tc.traverse(o=>{o.renderOrder=30;});M.tc=tc;}catch(e){console.warn('TransformControls',e);}}
 async function mkMeshShow(){await mkMeshEnsure();const M=MK.m;scene.add(M.root);if(M.tc){scene.add(M.tc);M.tc.visible=true;}
   if(!M.d){const first=Object.keys(MK.list.mesh).sort()[0];if(first)await mkMeshOpen(first);else mkMeshNew('my_model','');}else{mkMeshAll();}}
@@ -167,22 +167,22 @@ function mkMeshMat(){const M=MK.m,d=M.d,key=M.view+':'+(d.mat||'energy')+':'+(d.
     case 'solid':m=new THREE.MeshStandardMaterial({color:P.main,emissive:P.deep,emissiveIntensity:0.35,roughness:0.85,metalness:0,flatShading:true});break;
     default:m=fxEnergyMat(P.core,P.main,P.deep);m.uniforms.uOp.value=1;m.uniforms.uInt.value=1;}
   M.obj.material=m;if(old&&old.dispose)old.dispose();}
-function mkHi(){const M=MK.m,P=M.sel&&M.d.parts.find(p=>p.id===M.sel);if(M.hi.geometry)M.hi.geometry.dispose();
+function mkHi(){if(meHi())return;const M=MK.m,P=M.sel&&M.d.parts.find(p=>p.id===M.sel);if(M.hi.geometry)M.hi.geometry.dispose();
   if(P&&!P.off){M.hi.geometry=fxMeshBuild({parts:[P]});M.hi.visible=true;}else{M.hi.geometry=new THREE.BufferGeometry();M.hi.visible=false;}
   if(M.tc){if(P&&!M.drag){mkHelperFrom(P);M.tc.attach(M.helper);}else if(!P)M.tc.detach();}}
 // ชิ้นส่วน (+x ขวา) ↔ ลูกศรจับ (แกน three ของโมเดล: x กลับด้าน — เหมือน fxMeshBuild)
 function mkHelperFrom(P){const o=mkOpts(P),p=o.pos||[0,0,0],r=o.rot||[0,0,0],s=o.scale,H=MK.m.helper;H.position.set(-(p[0]||0),p[1]||0,p[2]||0);H.rotation.set((r[0]||0)*MKD,-(r[1]||0)*MKD,-(r[2]||0)*MKD,'YXZ');
   if(typeof s==='number')H.scale.setScalar(s||1e-3);else if(Array.isArray(s))H.scale.set(s[0]||1e-3,s[1]||1e-3,s[2]||1e-3);else H.scale.setScalar(1);}
-function mkGizmoChange(){const M=MK.m,P=M.sel&&M.d.parts.find(p=>p.id===M.sel);if(!P)return;const H=M.helper,r3=v=>+v.toFixed(3);
+function mkGizmoChange(){if(ME.on){meGizmo();return;}const M=MK.m,P=M.sel&&M.d.parts.find(p=>p.id===M.sel);if(!P)return;const H=M.helper,r3=v=>+v.toFixed(3);
   if(M.mode==='translate')P.pos=[r3(-H.position.x),r3(H.position.y),r3(H.position.z)];
   else if(M.mode==='rotate'){const e=new THREE.Euler().setFromQuaternion(H.quaternion,'YXZ');P.rot=[+(e.x/MKD).toFixed(1),+(-e.y/MKD).toFixed(1),+(-e.z/MKD).toFixed(1)];}
   else{const s=H.scale;P.scale=Math.abs(s.x-s.y)<1e-4&&Math.abs(s.y-s.z)<1e-4?r3(s.x):[r3(s.x),r3(s.y),r3(s.z)];}
   M.dirty=true;if(!M.rb){M.rb=true;requestAnimationFrame(()=>{M.rb=false;mkMeshRebuild();mkSyncTitle();});}}
 function mkGizmoMode(m){const M=MK.m;M.mode=m;if(M.tc){M.tc.setMode(m);M.tc.setSpace('local');}document.querySelectorAll('#mkBot [data-gm]').forEach(b=>b.classList.toggle('on',b.dataset.gm===m));}
 const _mkRay=new THREE.Raycaster();
-function mkPick(e){const M=MK.m;if(!M.obj)return;const r=gl.domElement.getBoundingClientRect();_mkRay.setFromCamera(new THREE.Vector2((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1),cam);
+function mkPick(e){if(ME.on){mePick(e,e.shiftKey);return;}const M=MK.m;if(!M.obj)return;const r=gl.domElement.getBoundingClientRect();_mkRay.setFromCamera(new THREE.Vector2((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1),cam);
   const hit=_mkRay.intersectObject(M.obj,false)[0];let id=null;if(hit&&hit.faceIndex!=null){const g=M.ranges.find(q=>hit.faceIndex>=q[1]&&hit.faceIndex<q[2]);if(g)id=g[0];}mkSel(id);}
-function mkSel(id){const M=MK.m;M.sel=id;mkHi();mkMeshBotRows();mkMeshInsp();}
+function mkSel(id){const M=MK.m;if(id!==M.sel)ME.sel=[];M.sel=id;mkHi();mkMeshBotRows();mkMeshInsp();}
 function mkUid(base){let i=1,id=base;const has=x=>MK.m.d.parts.some(p=>p.id===x);while(has(id))id=base+(++i);return id;}
 function mkAddPart(k){const M=MK.m;mkMPush();const P={id:mkUid(k),k};const S=M.d.parts.find(p=>p.id===M.sel);if(S&&S.pos)P.pos=S.pos.slice();M.d.parts.push(P);M.sel=P.id;mkMChanged(true);mkHi();}
 function mkDelPart(id){const M=MK.m;mkMPush();M.d.parts=M.d.parts.filter(p=>p.id!==id);if(M.sel===id)M.sel=null;mkMChanged(true);mkHi();}
@@ -191,13 +191,14 @@ function mkMovePart(i,d){const A=MK.m.d.parts,j=i+d;if(j<0||j>=A.length)return;m
 function mkMeshStat(){const e=$st('mkMStat');if(e){const t=MK.m.tris;e.textContent=MK.m.d.parts.length+' ชิ้น • '+t.toLocaleString()+' สามเหลี่ยม';e.className='mono '+(t>30000?'bad':'good');}mkSyncTitle();}
 function mkSyncTitle(){const e=$st('mkTitle');if(!e)return;const X=MK.ws==='mesh'?MK.m:MK.ws==='tex'?MK.t:MK.v;e.textContent=(X.name||'(ใหม่)')+(X.dirty?' ●':'');e.classList.toggle('dirty',X.dirty);}
 function mkMeshBot(){const B=$st('mkBot');if(!B||MK.ws!=='mesh')return;B.innerHTML='';const M=MK.m,S=mkS(),d=M.d;
-  const menu=h('div',{id:'mkAddMenu',hidden:true},...Object.entries(S.parts).map(([k,T])=>h('button',{title:T.desc,on:{click:()=>{menu.hidden=true;mkAddPart(k);}}},h('b',null,T.icon||'·'),' '+T.th,h('small',{className:'mute'},' '+k))));
+  const menu=h('div',{id:'mkAddMenu',hidden:true},h('div',{className:'mkMenuH'},'✎ ปั้นเอง (แก้จุดได้แบบ Blender — กด Tab)'),...Object.entries(MEPRIM).map(([k,T])=>h('button',{title:'เริ่มจาก'+T.th+' แล้วเข้าโหมดแก้จุด',on:{click:()=>{menu.hidden=true;meAddPrim(k);}}},h('b',null,T.icon),' '+T.th,h('small',{className:'mute'},' poly'))),
+    h('div',{className:'mkMenuH'},'ชิ้นสำเร็จรูป (ปรับด้วยแถบเลื่อน)'),...Object.entries(S.parts).filter(([k])=>k!=='poly').map(([k,T])=>h('button',{title:T.desc,on:{click:()=>{menu.hidden=true;mkAddPart(k);}}},h('b',null,T.icon||'·'),' '+T.th,h('small',{className:'mute'},' '+k))));
   const sel=(opts,val,fn,title)=>h('select',{title,on:{change:e=>fn(e.target.value)}},...opts.map(([v,t])=>h('option',{value:v,selected:v===val},t)));
   B.append(h('div',{className:'bar'},h('span',{className:'file',id:'mkTitle'}),
     h('button',{className:'gold',title:'บันทึก (Ctrl+S)',on:{click:()=>mkMeshSave()}},'💾 บันทึก'),h('button',{on:{click:()=>mkMeshSave(true)}},'บันทึกเป็น…'),h('button',{title:'ย้อน (Ctrl+Z)',on:{click:()=>mkMUndo(false)}},'↶'),h('button',{title:'ทำซ้ำ (Ctrl+Y)',on:{click:()=>mkMUndo(true)}},'↷'),
     h('span',{className:'sep'}),h('span',{style:'position:relative'},h('button',{on:{click:()=>{menu.hidden=!menu.hidden;}}},'＋ ชิ้นส่วน'),menu),
     ...[['translate','✥ ย้าย','G'],['rotate','⟳ หมุน','R'],['scale','⤢ ขนาด','S']].map(([m,t,kk])=>h('button',{'data-gm':m,className:M.mode===m?'on':'',title:t+' ('+kk+')',on:{click:()=>mkGizmoMode(m)}},t+' '+kk)),
-    h('button',{className:M.wireOn?'on':'',title:'โครงลวด (W)',on:{click:e=>{M.wireOn=!M.wireOn;M.wire.visible=M.wireOn;e.target.classList.toggle('on',M.wireOn);}}},'▦ โครงลวด'),
+    ...meBotButtons(),h('span',{className:'sep'}),h('button',{className:M.wireOn?'on':'',title:'โครงลวด (W)',on:{click:e=>{M.wireOn=!M.wireOn;M.wire.visible=M.wireOn;e.target.classList.toggle('on',M.wireOn);}}},'▦ โครงลวด'),
     sel([['clay','ดู: ดินปั้น'],['mat','ดู: วัสดุจริง']],M.view,v=>{M.view=v;M.matK='';mkMeshMat();},'ดูรูปทรงล้วน / วัสดุในเกม'),
     sel(S.file.mat.of.map(x=>[x,'วัสดุ '+x]),d.mat||'energy',v=>{mkMPush();d.mat=v;M.view='mat';mkMChanged(true);mkMeshBot();},'วัสดุที่แนะนำ (บันทึกในไฟล์)'),
     sel(FXR.schema.pals.filter(p=>p!=='col').map(x=>[x,'ธาตุ '+x]),d.pal||'arcane',v=>{mkMPush();d.pal=v;mkMChanged(true);},'สีตอนดู'),
@@ -220,7 +221,9 @@ function mkMeshInsp(){const I=$st('mkInsp');if(!I||MK.ws!=='mesh')return;I.inner
   const idIn=h('input',{type:'text',value:P.id,on:{change:e=>{const n=e.target.value.trim();if(!n||d.parts.some(x=>x.id===n&&x!==P)){stToast('id ซ้ำหรือว่าง');e.target.value=P.id;return;}mkMPush();P.id=n;M.sel=n;mkMChanged(true);}}});
   I.append(h('div',{className:'stF'},h('label',null,'ชื่อชิ้น',h('small',null,'id')),h('div',{className:'row'},idIn)));
   I.append(h('div',{className:'stF'},h('label',null,'แบบชิ้นส่วน',h('small',null,'k')),h('div',{className:'stShapes mkKinds'},...Object.entries(S.parts).map(([k,TT])=>h('button',{className:k===P.k?'on':'',title:TT.th,on:{click:()=>{if(k===P.k)return;mkMPush();for(const f in T.fields)if(!S.common[f])delete P[f];P.k=k;mkMChanged(true);mkHi();}}},h('b',null,TT.icon||'·'),k)))));
-  for(const k in T.fields)I.append(mkField(T.fields[k],P,k,ctx));
+  if(P.k==='poly')I.append(h('div',{className:'stF'},h('label',null,'รูปทรงที่ปั้นเอง',h('small',null,'v · f')),h('div',{className:'row'},h('span',{className:'mute',style:'flex:1'},(P.v||[]).length+' จุด • '+(P.f||[]).length+' หน้า'),h('button',{className:ME.on?'on':'',on:{click:()=>meToggle()}},ME.on?'ออกจากโหมดแก้จุด (Tab)':'✎ แก้จุด (Tab)'))),
+    h('p',{className:'mute',style:'grid-column:1/-1;margin:2px 0 0;font-size:11.5px'},'อยากให้โค้งมน: ตั้ง “ทำให้เนียน” 1–2 และปิด “ผิวเหลี่ยม” • อยากได้ซ้ายขวาเท่ากัน: เปิด “กระจก” แล้วปั้นแค่ครึ่งเดียว'));
+  for(const k in T.fields){if(P.k==='poly'&&(k==='v'||k==='f'))continue;I.append(mkField(T.fields[k],P,k,ctx));}
   const grp=(t,keys,open)=>{const g=h('details',{open},h('summary',null,t));for(const k of keys)if(!T.fields[k])g.append(mkField(S.common[k],P,k,ctx));I.append(g);};
   grp('ตำแหน่ง / หมุน / ขนาด',['pos','rot','scale'],true);grp('ตัวแต่งรูปทรง (เรียว บิด โค้ง ขรุขระ)',['topScale','twist','bend','noise','nfreq','seed','flat'],true);
   const am=P.arrMode||'ring';grp('ทำซ้ำ / กระจก',['arr','arrMode',am==='line'?'arrStep':'arrR','arrScale','arrJit','mir'],(P.arr||1)>1||!!P.mir);
@@ -428,7 +431,7 @@ function mkKey(e,typing){const c=e.ctrlKey||e.metaKey,M=MK.m,T=MK.t;
   if(c&&e.code==='KeyZ'){e.preventDefault();U(e.shiftKey);return;}
   if(c&&e.code==='KeyY'){e.preventDefault();U(true);return;}
   if(MK.ws==='vol'&&e.code==='Enter'){e.preventDefault();mkVolBake();return;}
-  if(MK.ws==='mesh'){if(c&&e.code==='KeyD'&&M.sel){e.preventDefault();mkDupPart(M.sel);}else if(c)return;
+  if(MK.ws==='mesh'){if(meKey(e))return;if(c&&e.code==='KeyD'&&M.sel){e.preventDefault();mkDupPart(M.sel);}else if(c)return;
     else if(e.code==='KeyG')mkGizmoMode('translate');else if(e.code==='KeyR')mkGizmoMode('rotate');else if(e.code==='KeyS')mkGizmoMode('scale');
     else if(e.code==='Delete'&&M.sel)mkDelPart(M.sel);else if(e.code==='Escape')mkSel(null);
     else if(e.code==='KeyH'&&M.sel){const P=M.d.parts.find(p=>p.id===M.sel);if(P){mkMPush();if(P.off)delete P.off;else P.off=true;mkMChanged(false);mkMeshBotRows();}}
@@ -437,6 +440,7 @@ function mkKey(e,typing){const c=e.ctrlKey||e.metaKey,M=MK.m,T=MK.t;
 function mkHelp(){const m=h('div',{className:'stModal',on:{click:e=>{if(e.target===m)m.remove();}}});m.append(h('div',{className:'box',style:'max-width:680px'},h('h3',null,'วิธีใช้ — สร้าง asset ของเอฟเฟกต์'),h('p',{style:'margin:0 0 8px'},h('a',{href:'manual/index.html#'+(MK.ws==='mesh'?'mesh':MK.ws==='tex'?'tex':'vol'),target:'_blank',style:'color:var(--gold2);font-size:15px'},'📖 เปิดคู่มือแบบมีรูป (ภาษาไทย)')),
   h('div',{style:'display:grid;gap:6px;font-size:13px'},...[
     '🧊 โมเดล: ＋ ชิ้นส่วน = เลือกแบบ (หนามผลึก มงกุฎหนาม กลุ่มผลึก เม่น ใบฟัน ปีก เกลียว ท่อ ริบบิ้น โดม …) แล้วปรับแถบเลื่อนทางขวา — ไม่ต้องจับทีละจุดแบบ Blender',
+    '✎ ปั้นเอง (แบบ Blender): ＋ ชิ้นส่วน → ลูกบาศก์ / แผ่น / ทรงกระบอก / ทรงกลม / กรวย → Tab เข้าโหมดแก้จุด • 1 จุด / 2 ขอบ / 3 หน้า • คลิกเลือก (Shift = หลายอัน, A = ทั้งหมด) • ลากลูกศร G ย้าย / R หมุน / S ขนาด • E ดึงออก • I หดหน้าเข้า • F เติมหน้า • M รวมจุด • X ลบ • “ทำให้เนียน” = โค้งมน • “กระจก” = ปั้นครึ่งเดียว',
     'คลิกชิ้นบนจอ = เลือก • ลากลูกศร: G ย้าย / R หมุน / S ขนาด • ตัวแต่ง: เรียว บิด โค้ง ขรุขระ • ทำซ้ำเป็นวง/แถว • กระจกซ้าย-ขวา • Delete ลบ • Ctrl+D ทำซ้ำ • H ซ่อน • W โครงลวด',
     'ดู: ดินปั้น (เห็นรูปทรงชัด) / วัสดุจริง (ไฟ น้ำแข็ง พลังงาน ตามธาตุ) • ➕ ใส่ในเอฟเฟกต์ = เพิ่มชั้น mesh ที่ใช้โมเดลนี้ • ⬇ .glb = ส่งออกไปเปิดใน Blender',
     '🎞 ภาพ: เลือกตัววาดด้านล่าง (ไฟ ควัน ระเบิด สายฟ้า วังวน คลื่นกระแทก ประกาย รอยฟัน ดาว วงเวท ลายนอยส์ จำลองของไหลจริง) → ปรับค่า → เลือกจานสี',
@@ -448,7 +452,7 @@ function mkHelp(){const m=h('div',{className:'stModal',on:{click:e=>{if(e.target
 Object.assign(window.STUDIO,{vol:{open:n=>mkVolOpen(n),data:()=>MK.v.d,name:()=>MK.v.name,newFrom:(n,pre)=>mkVolNew(n,pre),bake:()=>mkVolBake(),save:n=>mkVolSave(n||false),
     set(path,v){const ks=path.split('.');let o=MK.v.d;for(let i=0;i<ks.length-1;i++)o=o[ks[i]]=o[ks[i]]||{};mkVPush();mkVSet(o,ks[ks.length-1],v,true);return true;},shot:n=>stShot(n||('vol_'+(MK.v.name||'draft'))),res:()=>MK.v.res&&{nx:MK.v.res.nx,ny:MK.v.res.ny,nz:MK.v.res.nz,frames:MK.v.res.frames,bytes:MK.v.res.data.length,ms:MK.v.res.ms}},
   ws:w=>mkWs(w),mk:MK,tick:(n,dt)=>{for(let i=0;i<(n||1);i++)mkFrame(dt||1/60);},
-  mesh:{open:n=>mkMeshOpen(n),data:()=>MK.m.d,name:()=>MK.m.name,newFrom:(n,tpl)=>mkMeshNew(n,tpl||null),
+  mesh:{edit:on=>meToggle(on),prim:k=>meAddPrim(k),esel:(m,s)=>{ME.mode=m;ME.sel=s;meAfterSel();mkMeshBot();},op:o=>meOp(o),get me(){return ME;},open:n=>mkMeshOpen(n),data:()=>MK.m.d,name:()=>MK.m.name,newFrom:(n,tpl)=>mkMeshNew(n,tpl||null),
     set(path,v){const [id,...ks]=path.split('.');const o0=id==='file'?MK.m.d:MK.m.d.parts.find(p=>p.id===id);if(!o0)return false;let o=o0;for(let i=0;i<ks.length-1;i++)o=o[ks[i]];mkMPush();o[ks[ks.length-1]]=v;mkMChanged(true);return true;},
     add:k=>(mkAddPart(k),MK.m.sel),select:id=>mkSel(id),del:id=>mkDelPart(id),save:n=>mkMeshSave(false,n),view:v=>{MK.m.view=v;MK.m.matK='';mkMeshMat();},shot:n=>stShot(n||('mesh_'+(MK.m.name||'draft'))),sheetAll:(n,only)=>mkMeshSheetAll(n,only),tris:()=>MK.m.tris,lint:()=>FXLINT.fxLintMesh(MK.m.d,FXR.schema)},
   tex:{open:n=>mkTexOpen(n),data:()=>MK.t.d,name:()=>MK.t.name,newFrom:(n,gen,tpl)=>mkTexNew(n,gen,tpl||null),gen:g=>mkTexGen(g),

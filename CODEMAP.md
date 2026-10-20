@@ -299,25 +299,26 @@ fxBind:304
 §314 แม่แบบ playFx เป็นไฟล์ (assets/fx/tpl/*, sig/*, rec/*)
 fxTpl:316
 
-## js/46-fx-make.js (244) — 
+## js/46-fx-make.js (261) — ของที่สร้างเองใน VFX Studio (asset ของเอฟเฟกต์) — ใช้ทั้งในเกมและในสตูดิโอ (สตูดิโอเรียกฟ…
 FXMK:10 MKD:11 mkRng:12 mkHash:13 mkNoise:15 mkL:17 mkR2:18
 §19 ที่เก็บจุด/สามเหลี่ยม
 mkG:21 mkPc:22 mkV:23 mkQ:24 mkAppend:25 mkCopy:26 mkFlat:27 _mkv:28 mkXf:29 mkThree:32 mkTRS:34 mkGrid:37
 §38 ชิ้นส่วน (k) — พิกัด: ฐานอยู่ที่ y=0 (ยกเว้น sphere/box อยู่กลาง)
-MKGEN:39
-§95 ตัวแต่ง (ทำตามลำดับ): เรียว → บิด → โค้ง → ขรุขระ → แบน(เหลี่ยม) → ขน…
-mkDeform:96 mkOpts:107 mkPart:108 fxMeshBuild:121
-§132 โหลด
-fxMeshLoad:133 fxMeshGeo:135 fxMeshSet:137 fxTexLoad:139 fxTexUse:142 fxTexNeed:145
-§146 โมเดลงอกทีละชิ้น (ชั้น mesh: grow 0..1 เส้นโค้งได้, stagger, growBy)
-FXGROWBY:148 fxGrowInit:149 fxGrowTick:151
-§156 วัสดุภาพบนรูปทรง (mat:"tex") — ภาพที่วาดในสตูดิโอ (tex/…) ไหลบนผิว + …
-fxTexMat:158 fxTexMatBind:170 fxTexMatTick:173
-§174 เศษโมเดลกระเด็น (emit look:"model") — หิน ผลึก ขนนก เศษดาบ: หมุน ตกตา…
-FXMP:176 fxMPMat:177 fxMPGroup:181 _mpM:184 _mpQ:184 _mpE:184 _mpP:184 _mpS:184 fxMPUpdate:185 fxMPClear:194 fxMPSpawn:196
-§200 อากาศบิดเบี้ยว (ชั้น warp) — ไอร้อน / คลื่นกระแทกบิดภาพ / เลนส์โป่ง •…
-fxWarpMake:202 fxWarpTick:214
-§220 ไฟ 3 มิติจากการจำลอง (ชั้น vol) — ไฟล์รูปแบบเดียวกับที่เพื่อน bake จา…
-FXVOL:223 fxVolLoad:224 fxVolTex:228 fxVolSet:231 fxVolReady:232 fxVolMake:233 fxVolTick:236 fxPreAssets:241 fxAssetsWait:243
+§39 ปั้นเอง (k:"poly"): จุด v + หน้า f (เลขจุด ทวนเข็มเมื่อมองจากด้านนอก)…
+mkCC:40 MKGEN:51
+§112 ตัวแต่ง (ทำตามลำดับ): เรียว → บิด → โค้ง → ขรุขระ → แบน(เหลี่ยม) → ขน…
+mkDeform:113 mkOpts:124 mkPart:125 fxMeshBuild:138
+§149 โหลด
+fxMeshLoad:150 fxMeshGeo:152 fxMeshSet:154 fxTexLoad:156 fxTexUse:159 fxTexNeed:162
+§163 โมเดลงอกทีละชิ้น (ชั้น mesh: grow 0..1 เส้นโค้งได้, stagger, growBy)
+FXGROWBY:165 fxGrowInit:166 fxGrowTick:168
+§173 วัสดุภาพบนรูปทรง (mat:"tex") — ภาพที่วาดในสตูดิโอ (tex/…) ไหลบนผิว + …
+fxTexMat:175 fxTexMatBind:187 fxTexMatTick:190
+§191 เศษโมเดลกระเด็น (emit look:"model") — หิน ผลึก ขนนก เศษดาบ: หมุน ตกตา…
+FXMP:193 fxMPMat:194 fxMPGroup:198 _mpM:201 _mpQ:201 _mpE:201 _mpP:201 _mpS:201 fxMPUpdate:202 fxMPClear:211 fxMPSpawn:213
+§217 อากาศบิดเบี้ยว (ชั้น warp) — ไอร้อน / คลื่นกระแทกบิดภาพ / เลนส์โป่ง •…
+fxWarpMake:219 fxWarpTick:231
+§237 ไฟ 3 มิติจากการจำลอง (ชั้น vol) — ไฟล์รูปแบบเดียวกับที่เพื่อน bake จา…
+FXVOL:240 fxVolLoad:241 fxVolTex:245 fxVolSet:248 fxVolReady:249 fxVolMake:250 fxVolTick:253 fxPreAssets:258 fxAssetsWait:260
 
-(46 files, 9871 lines)
+(46 files, 9888 lines)

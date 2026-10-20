@@ -38,7 +38,7 @@
 | `assets/fx/tex/*.png` + `*.tex.json` | Textures / flipbooks made in the 🎞 tab — §6b |
 | `js/46-fx-make.js` | Builds models from recipes + loads textures (`fxMeshBuild`, `fxTexLoad`, `MKGEN` part generators) |
 | `studio/studio.js`, `studio/studio.css` | Studio, loaded only with `?studio` |
-| `studio/maker.js`, `studio/texgen.js` | 🧊 Model / 🎞 Texture / 🔥 Fire 3D tabs (texture generators: GLSL shaders + 2D fluid sim + png writer; 3D fire sim worker `vxWorkerMain`) |
+| `studio/maker.js`, `studio/texgen.js`, `studio/meshedit.js` | 🧊 Model / 🎞 Texture / 🔥 Fire 3D tabs (texture generators: GLSL shaders + 2D fluid sim + png writer; 3D fire sim worker `vxWorkerMain`) |
 | `assets/fx/vol/*.vol.json` + `*.bin` | Fire 3D volumes made in the 🔥 tab — §6b |
 | `tools/fx-lint.js`, `tools/fx-check.js` | Checker (shared by node and the studio) |
 | `tools/serve.py` | Local server + save/shot API |
@@ -138,10 +138,11 @@ The studio has 4 tabs in the top bar: **✨ เอฟเฟกต์** (effects,
 **Models: `assets/fx/mesh/<name>.mesh.json`.**
 - A model is a **recipe**: a list of `parts` + modifiers. The game builds the 3D mesh itself when it loads (`js/46-fx-make.js`, same code in game and studio). Files are tiny and stay editable.
 - Part kinds (`k`): `shard` (crystal spike), `crown` (ring of spikes), `cluster` (crystal cluster), `burst` (spikes in all directions), `blade` (crescent / slash / claw), `fan` (wing / feathers), `spiral` (ground swirl / tornado band), `tube` (horn / tentacle along a path), `ribbon`, `lathe` (profile spun around: domes, cups, funnels), `sphere`, `cyl`, `torus`, `disc`, `star`, `box`.
+- **`poly` = free-form mesh, edited like Blender (simplified)** (`studio/meshedit.js`): `v` = points `[x,y,z]` m (part space), `f` = faces = lists of 3+ point indexes, **counter-clockwise seen from outside**, `sub` 0–3 = Catmull-Clark smoothing (`mkCC` in js/46; use with `flat:false`). All common fields still apply (`pos/rot/scale`, taper/twist/bend/noise, `arr`, `mir` = model one half). Studio: ＋ ชิ้นส่วน → ✎ cube/plane/cyl/sphere/cone → **Tab** edit mode: `1/2/3` point/edge/face select, click (Shift adds), `A` all, gizmo G/R/S moves the selection, `E` extrude, `I` inset, `F` fill (3–4 points or 2 edges), `M` merge, `X` delete, ÷ subdivide all, ⇅ flip. Console: `STUDIO.mesh.prim('cube')`, `STUDIO.mesh.edit(true)`, `STUDIO.mesh.esel('f',[1])`, `STUDIO.mesh.op('extrude'|'inset'|'fill'|'merge'|'del'|'subdiv'|'flip')`. For Claude it is usually easier to write `v`/`f` directly (start from `assets/fx/mesh/poly_horn.mesh.json`).
 - Every part also has `pos` `rot` `scale`, shape modifiers `topScale` (taper) `twist` `bend` `noise` `nfreq` `seed` `flat`, and repeats `arr` (+ `arrMode` ring/line, `arrR`, `arrStep`, `arrScale`, `arrJit`) and `mir` (mirror left/right).
 - Units are metres, base at y = 0, +x right +y up +z forward. uv v goes 0 at the root/inside → 1 at the tip/outside, so fire and energy flow outward.
 - Use it in an effect: `{"t":"mesh","shape":"model","model":"<name>","mat":"ice", ...}` (all normal mesh fields work: `scale` curves, `dis`, `op`, `spin`, `bill`).
-- 13 samples to copy: `crystal_crown` `crystal_cluster` `spike_shell` `slash_arc` `claw_triple` `flame_wing` `tornado` `rune_swirl` `horn_pair` `star_burst` `rock_chunks` `shield_dome` `energy_spear`.
+- Samples to copy: `poly_horn` (free-form poly, smoothed), `crystal_crown` `crystal_cluster` `spike_shell` `slash_arc` `claw_triple` `flame_wing` `tornado` `rune_swirl` `horn_pair` `star_burst` `rock_chunks` `shield_dome` `energy_spear`.
 - In the studio: ＋ ชิ้นส่วน adds a part; click a part on screen to select it; drag the gizmo; **G** move / **R** rotate / **S** scale (like Blender); Delete, Ctrl+D duplicate, H hide, W wireframe; "ดู: ดินปั้น/วัสดุจริง" = clay or real game material; ⬇ .glb exports for Blender.
 
 **Textures: `assets/fx/tex/<name>.png` + `<name>.tex.json`.**

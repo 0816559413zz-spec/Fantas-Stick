@@ -341,7 +341,7 @@ Escape hatch: call a registered helper (FXCODE in js/45-fx-runtime.js) with args
 | ฟิลด์ | ชนิด | ค่าเริ่ม | ช่วง | รับ | ความหมาย |
 |---|---|---|---|---|---|
 | `id` | str | `` |  |  | ชื่อชิ้น (ไม่ซ้ำ) |
-| `k` | enum (shard/crown/cluster/burst/blade/fan/spiral/tube/ribbon/lathe/sphere/cyl/torus/disc/star/box) | `shard` |  |  | แบบชิ้นส่วน |
+| `k` | enum (shard/crown/cluster/burst/blade/fan/spiral/tube/ribbon/lathe/sphere/cyl/torus/disc/star/box/poly) | `shard` |  |  | แบบชิ้นส่วน |
 | `off` | bool | `false` |  |  | ซ่อน (ไม่ใส่ในโมเดล) |
 | `pos` | vec3 | `[0,0,0]` |  |  | ตำแหน่ง [x,y,z] ม. |
 | `rot` | vec3 | `[0,0,0]` |  |  | หมุน [x,y,z] องศา |
@@ -553,6 +553,15 @@ Box centred at the origin.
 | `w` | num | `0.5` | 0.01–20 |  | กว้าง ม. |
 | `h` | num | `0.5` | 0.01–20 |  | สูง ม. |
 | `d` | num | `0.5` | 0.01–20 |  | ลึก ม. |
+
+#### `poly` ✎ ปั้นเอง (แก้จุดแบบ Blender)
+Free-form polygon mesh you shape point by point in the studio (select the part, press Tab = edit mode: points / edges / faces, move, extrude, inset, fill, merge, delete). v = points [x,y,z] m, f = faces as lists of 3+ point numbers, counter-clockwise seen from outside. sub = smooth subdivision (Catmull-Clark) levels — use with flat off for round shapes.
+
+| ฟิลด์ | ชนิด | ค่าเริ่ม | ช่วง | รับ | ความหมาย |
+|---|---|---|---|---|---|
+| `v` | list | `[[-0.25,0,-0.25],[0.25,0,-0.25],[0.25,0,0.25],[-0.25,0,0.25],[-0.25,0.5,-0.25],[0.25,0.5,-0.25],[0.25,0.5,0.25],[-0.25,0.5,0.25]]` |  |  | จุด [x,y,z] ม. |
+| `f` | list | `[[0,1,2,3],[4,7,6,5],[3,2,6,7],[1,0,4,5],[2,1,5,6],[0,3,7,4]]` |  |  | หน้า (เลขจุด 3 ตัวขึ้นไป ทวนเข็มเมื่อมองจากด้านนอก) |
+| `sub` | int | `0` | 0–3 |  | ทำให้เนียน (แบ่งหน้าโค้งมน) กี่รอบ |
 
 ตัวอย่าง (มงกุฎหนามน้ำแข็ง 2 วง + กลุ่มผลึกกลาง):
 ```json
