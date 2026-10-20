@@ -294,6 +294,7 @@ const FXCODE={
   meteor:(x,y,h,a,I)=>fireMeteor(x,y,a.t||0.3,x-Math.cos(I.a)*260,y-Math.sin(I.a)*260),
   iceRing:(x,y,h,a)=>iceRing(x,y,(a.r||3)*20,a.n||14,a.h||0.6,a.life||1.2,{}),
   iceCircle:(x,y,h,a)=>iceCircle(x,y,a.r||5,a.t||3),
+  ev:(x,y,h,a,I)=>fx(Object.assign({x,y,h,a:I.a},a)),   // เล่น event ของเกมตรง ๆ (เช่น {"k":"efx","z":"swing"}) — สตูดิโอใช้ดูภาพเดิม/เทียบก่อน-หลัง
   mistWave:(x,y,h,a)=>mistWave(x,y,(a.r||3)*20,a.n||16),
   claws:(x,y,h,a,I)=>clawRakes(x,y,h,I.a,a.r||100,a.rot||0,!!a.big),
   slash:(x,y,h,a,I)=>makeSlash(x,y,h,I.a+(a.yaw||0)*FXDEG,(a.r||3)*20,!!a.vert,(a.tilt||0)*FXDEG,a.col||'#cfefff',a.br||1.8,a.wk||1),
@@ -305,7 +306,8 @@ function fxBind(ev,H){if(!FXR.ready||!FXR.on||ev.x===undefined)return false;
   const keys=ev.k==='efx'?['efx:'+ev.z]:(ev.t!==undefined?[ev.k+':'+ev.t,ev.k]:[ev.k]);let rep=false;
   for(const key of keys){const e=FXR.over[key]||FXR.bind[key];if(!e)continue;
     for(const b of [].concat(e)){if(!b||!b.fx)continue;const d=fxData(b.fx);if(!d)continue;
-      const ctx={P:{ev,s:1,k:1}},ev2=v=>typeof v==='string'?fxEval(v,ctx):v,p={};if(b.p)for(const q in b.p)p[q]=ev2(b.p[q]);
+      const ctx={P:{ev,s:1,k:1}},ev2=v=>typeof v==='string'?fxEval(v,ctx):v,p={};if(b.if!==undefined&&!ev2(b.if))continue;   // if: เล่นเมื่อสูตรไม่เป็น 0 เช่น "ev.ax*1" (ขวาน), "1-ev.ax*1" (ดาบ)
+      if(b.p)for(const q in b.p)p[q]=ev2(b.p[q]);
       const fol=b.follow?(b.follow==='ev.id'?ev.id:ev2(b.follow)):undefined;
       const I=fxStart(d,{x:ev.x,y:ev.y,h:H,a:ev.a||0,col:ev.col||ev.c,pal:b.pal,s:b.s!==undefined?ev2(b.s):1,p,follow:fol,own:ev.id!==undefined&&ev.id===NET.myId,ev},b.fx);
       if(I&&b.mode==='replace')rep=true;}

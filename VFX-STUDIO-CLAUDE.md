@@ -183,6 +183,8 @@ The studio has 4 tabs in the top bar: **✨ เอฟเฟกต์** (effects,
 - Keys:
   - `efx:<z>` for spell events
   - `<k>:<t>` or `<k>` for generic events (`cast`, `imp`, `pop`, `boom`, `parry`, `block`, `sbreak`, `die`, `kill`, `revive`, `buff`, `land`)
+- `if` = only play when the expression is non-zero (e.g. `"ev.ax*1"`); a key can hold a list `[ ]` of entries (see `efx:swing`).
+- Event state that must survive `replace` (poses, persistent objects) lives in `efxState(ev)` (js/25-efx.js), not in the visual case.
 - `p` maps event fields into params. **`ev.r` is in px: divide by 20 for metres.**
 - `replace` skips the old code visuals **and** sounds for that event. Add a `sound` layer if needed.
 - **Persistent effects** (auras, buffs) need code: `const h=fxPlay('x/y',{x,y,h,a,follow:id,own})` when it starts and `fxStop(h)` when it ends. Put that in the path's view code (`pyroFX`, `frostFX`, `stormFX`), or bind the start event with `follow` and stop it from code.

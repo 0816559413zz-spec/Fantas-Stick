@@ -1,0 +1,11 @@
+{
+  "v": 1,
+  "desc": "รอยฟันขวานน้ำแข็ง: เสี้ยวกว้างหนัก ขอบขรุขระเป็นผลึก (รัศมี 1 ม.)",
+  "mat": "ice",
+  "pal": "ice",
+  "tags": ["slash", "melee", "frost"],
+  "parts": [
+    {"id":"blade","k":"blade","arc":165,"r":1,"w":0.34,"thick":0.05,"taper":0.9,"skew":0.25,"seg":48,"noise":0.035,"nfreq":7,"seed":4},
+    {"id":"inner","k":"blade","arc":120,"r":0.8,"w":0.12,"thick":0.03,"taper":1.2,"skew":0.2,"seg":32}
+  ]
+}

@@ -26,6 +26,7 @@ function statusFX(o,fm,x,y,z,sz,now){
 
 function fx(ev){
   const me=myPos(),near=!me||Math.hypot(ev.x-me.x,ev.y-me.y)<1000,H=ev.h!==undefined?ev.h:1.3;
+  if(ev.k==='efx')try{efxState(ev);}catch(e){console.error(e);}   // ท่า/วัตถุที่อยู่นาน (ไม่ขึ้นกับ bind.json)
   try{if(fxBind(ev,H))return;}catch(e){console.error(e);}   // เอฟเฟกต์จากไฟล์ที่ผูกไว้ใน assets/fx/bind.json (replace = ข้ามภาพเดิม)
   try{fxAug(ev,H);}catch(e){console.error(e);}   // ชั้นเอฟเฟกต์ซ้อน + เอฟเฟกต์ทั้งจอ (js/44-vfx-kit.js)
   switch(ev.k){

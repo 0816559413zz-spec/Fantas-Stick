@@ -1,0 +1,70 @@
+{
+ "v": 1,
+ "desc": "ง้างอาวุธจังหวะ 3: เกล็ด/ประกายเย็นดูดเข้าหาอาวุธเหนือหัว",
+ "tags": [
+  "frost",
+  "melee",
+  "charge"
+ ],
+ "pal": "ice",
+ "dur": 0.5,
+ "params": {},
+ "layers": [
+  {
+   "id": "pull",
+   "t": "emit",
+   "at": 0,
+   "life": 0.18,
+   "rate": 70,
+   "from": "sphere",
+   "fr": 1.3,
+   "pos": [
+    0.2,
+    0.9,
+    0.1
+   ],
+   "dir": "in",
+   "speed": [
+    3,
+    5
+   ],
+   "plife": [
+    0.2,
+    0.3
+   ],
+   "look": "streak",
+   "size": [
+    1.4,
+    2.2
+   ],
+   "col": "#ffffff",
+   "c2": "#9fdcff",
+   "gravity": 0,
+   "drag": 0,
+   "curl": false
+  },
+  {
+   "id": "halo",
+   "t": "halo",
+   "at": 0,
+   "life": 0.3,
+   "pos": [
+    0.2,
+    0.9,
+    0.1
+   ],
+   "col": "#9fdcff",
+   "size": 1.2,
+   "size0": 0.3,
+   "k": 0.6
+  },
+  {
+   "id": "snd",
+   "t": "sound",
+   "at": 0,
+   "life": 0.05,
+   "name": "whoosh",
+   "vol": 0.35
+  }
+ ]
+}

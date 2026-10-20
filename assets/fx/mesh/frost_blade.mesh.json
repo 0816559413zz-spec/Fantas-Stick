@@ -1,0 +1,10 @@
+{
+  "v": 1,
+  "desc": "รอยฟันดาบน้ำแข็ง: เสี้ยวแคบคม ปลายแหลมยาว (รัศมี 1 ม. — ขยายด้วย scale)",
+  "mat": "ice",
+  "pal": "ice",
+  "tags": ["slash", "melee", "frost"],
+  "parts": [
+    {"id":"blade","k":"blade","arc":150,"r":1,"w":0.16,"thick":0.02,"taper":1.4,"skew":0.5,"seg":48}
+  ]
+}

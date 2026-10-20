@@ -1,4 +1,15 @@
 // ---------- efxFX: ภาพของ event "efx" ทุกคาถา (หนึ่ง case ต่อหนึ่งเอฟเฟกต์) ----------
+// efxState: ส่วนที่ไม่ใช่ภาพชั่วคราว (ท่าทาง, ของที่อยู่นาน: สันน้ำแข็ง/คลื่นดาบ/ร่างเงา) — รันทุกครั้งก่อน bind.json
+// เพื่อให้ไฟล์เอฟเฟกต์ (assets/fx/frost/*) แทนภาพเดิมได้ทั้งหมดโดยไม่ทำท่า/วัตถุพัง
+function efxState(ev){
+  const x=ev.x,y=ev.y,o=ev.id!==undefined?PM3.get(ev.id):null;
+  switch(ev.z){
+    case 'slamgo':if(o)o.slamT=1.5;break;
+    case 'slam':for(const [id,q] of PM3)if(q.slamT>0)q.slamT=0;break;
+    case 'gwave':{const m=makeWaveBlade();m.rotation.y=-ev.a;scene.add(m);WVV.push({x,y,a:ev.a,len:ev.len,d:0,m,gh:0});if(o&&!ev.cl)o.grDown=0.3;break;}
+    case 'glacier':if(o)o.grUp=0.5;GLV.push(makeGlacier(x,y,ev.a,ev.len,ev.t));break;
+    case 'mirror':ULTV.push({x,y,a:ev.a,d:0,acc:100});break;
+  }}
 function efxFX(ev){
   if(ev.z&&ev.z[0]==='e'&&earthEfx(ev))return;   // สายดิน (js/47-earth-view.js)
   const x=ev.x,y=ev.y,H=ev.h!==undefined?ev.h:1,me=myPos(),near=!me||Math.hypot(x-me.x,y-me.y)<1000;
@@ -28,9 +39,9 @@ function efxFX(ev){
       if(ev.ax){dfCracks(x,y,0.06,ev.r*1.3,'#bfeaff',1.2);mistWave(x,y,ev.r*0.5,18);}
       ICEV.push(makeIceFloor(x,y,ev.r,1.4,1));SHAPES_Q.push({k:'ring',x,y,h:0.15,col:'#bfeaff',s1:ev.r*1.2*S3,life:0.35,op:0.5});burst(x,y,'#dff6ff',36,ev.r*3,0.7,2.8,{h:0.4,vh:[3,9],g:10,sh:4,vr:6,c2:'#4a9ef0'});burst(x,y,'#8fe0ff',10,ev.r*1.6,0.45,4,{h:0.3,vh:[0.5,2],g:1,smoke:true});SHAPES_Q.push({k:'decal',x,y,col:'#e8f6ff',s1:ev.r/24,life:3,op:0.6});FX.flashLight(x,y,1.5,'#8fe0ff',4,16,0.3);if(near){snd('slam',ev);snd('break',{x,y,vol:0.6});shake(ev.id===NET.myId?(ev.ax?7:5):2);}
       if(ev.m){const c=Math.cos(ev.a),s=Math.sin(ev.a);for(const k of [-1,1]){const mx=x-s*55*k,my=y+c*55*k;burst(mx,my,'#dff6ff',20,ev.r*2,0.5,2.4,{h:0.4,vh:[2,6],g:9});ring(mx,my,'#bfeaff',ev.r*0.8,0.3,0.15);}}break;}
-    case 'slamgo':{const o=PM3.get(ev.id);if(o)o.slamT=1.5;}burst(x,y,'#dff6ff',16,160,0.4,2,{h:H,g:2});if(near)snd('whoosh',ev);break;
+    case 'slamgo':burst(x,y,'#dff6ff',16,160,0.4,2,{h:H,g:2});if(near)snd('whoosh',ev);break;
     case 'slam':dfCracks(x,y,0.06,ev.r*(ev.ax?1.3:0.9),'#bfeaff',ev.ax?1.2:0.7);if(ev.ax){iceBurst(x,y,2.2,{life:1.1,hy:1.2,mist:12});playFx('ice_impact',x,y,0.6,{s:1.3});}mistWave(x,y,ev.r*0.4,ev.ax?20:12);iceRing(x,y,ev.r*0.55,12,0.7,0.45,{up:0.06,down:0.25});for(let i=0;i<14;i++){const an=i/14*6.283;PARTS.push({x,y,h:0.12,vx:Math.cos(an)*ev.r*3,vy:Math.sin(an)*ev.r*3,vh:0.3,life:0.35,max:0.35,col:i%2?'#ffffff':'#bfeaff',size:2,g:1,drag:3});}
-      {for(const [id,o] of PM3)if(o.slamT>0)o.slamT=0;}ring(x,y,'#bfeaff',ev.r,0.45,0.2);ring(x,y,'#ffffff',ev.r*0.6,0.35,0.2);burst(x,y,'#dff6ff',60,ev.r*3,0.7,2.6,{h:0.4,vh:[2,8],g:9});SHAPES_Q.push({k:'decal',x,y,col:'#e8f6ff',s1:ev.r/30,life:3,op:0.5});FX.flashLight(x,y,1.5,'#8fe0ff',4,18,0.35);if(near){snd('slam',ev);shake(ev.id===NET.myId?(ev.ax?8:6):2);}break;
+      ring(x,y,'#bfeaff',ev.r,0.45,0.2);ring(x,y,'#ffffff',ev.r*0.6,0.35,0.2);burst(x,y,'#dff6ff',60,ev.r*3,0.7,2.6,{h:0.4,vh:[2,8],g:9});SHAPES_Q.push({k:'decal',x,y,col:'#e8f6ff',s1:ev.r/30,life:3,op:0.5});FX.flashLight(x,y,1.5,'#8fe0ff',4,18,0.35);if(near){snd('slam',ev);shake(ev.id===NET.myId?(ev.ax?8:6):2);}break;
     case 'forge':playFx('ice_summon',x,y,H,{s:0.9});forgeRise(x,y);if(near)snd('parry',{x,y,vol:0.5});break;
     case 'fswap':{const o=PM3.get(ev.id);FX.flashSprite(x,y,H,'#dff6ff',0.3,2.2,0.12,2);if(o){o.tip.getWorldPosition(_pw);const t=simOf(_pw);_ev.set(0,-0.66,0);o.armR.localToWorld(_ev);const h=simOf(_ev);
       for(let i=0;i<14;i++){const sx=ev.m?h.x+rnd(-20,20):t.x,sy=ev.m?h.y+rnd(-20,20):t.y,sh=ev.m?h.h+rnd(-0.2,1):t.h,ex=ev.m?t.x:h.x+rnd(-14,14),ey=ev.m?t.y:h.y+rnd(-14,14),eh=ev.m?t.h:h.h+rnd(0,1.1);PARTS.push({x:sx,y:sy,h:sh,vx:(ex-sx)/0.25,vy:(ey-sy)/0.25,vh:(eh-sh)/0.25,life:0.25,max:0.25,col:i%2?'#ffffff':'#bfeaff',size:2,g:0,drag:0});}}
@@ -48,10 +59,10 @@ function efxFX(ev){
     case 'auhit':burst(x,y,'#dff6ff',5,90,0.3,1.4,{h:H,vh:[0,2],g:5});if(Math.random()<0.5)iceChips(x,y,H,2,70,2);break;
     case 'aura':ring(x,y,'#bfeaff',180,0.4,0.2);smoke(x,y,H+0.6,14,'#eef8ff',0.9,8,140);for(let i=0;i<20;i++){const an=i/20*6.283;PARTS.push({x,y,h:H+rnd(0.3,1.8),vx:Math.cos(an)*200-Math.sin(an)*120,vy:Math.sin(an)*200+Math.cos(an)*120,vh:rnd(0,1),life:0.5,max:0.5,col:i%2?'#ffffff':'#cfefff',size:2,g:0,drag:2});}if(near)snd('push',{x,y,vol:0.4});break;
     case 'grcharge':playFx('ice_charge',x,y,H);if(near)snd('buff',ev);break;
-    case 'gwave':{const m=makeWaveBlade();m.rotation.y=-ev.a;scene.add(m);WVV.push({x,y,a:ev.a,len:ev.len,d:0,m,gh:0});
-      {const o=PM3.get(ev.id);if(o&&!ev.cl)o.grDown=0.3;const c=Math.cos(ev.a),sn=Math.sin(ev.a);makeSlash(x-c*20,y-sn*20,0.4,ev.a,85,true,0.1,'#cfefff');burst(x+c*40,y+sn*40,'#dff6ff',30,320,0.4,2.4,{h:0.6,vh:[1,5],g:6,a:ev.a,spread:0.7});FX.flashLight(x,y,1.2,'#8fe0ff',5,14,0.25);}}if(near){snd('whoosh',ev);snd('slam',{x,y,vol:0.4});}break;
-    case 'glacier':{const o=PM3.get(ev.id);if(o)o.grUp=0.5;}GLV.push(makeGlacier(x,y,ev.a,ev.len,ev.t));playFx('ice_impact',x,y,0.8,{s:1});if(near){snd('break',ev);shake(5);}break;
-    case 'mirror':ULTV.push({x,y,a:ev.a,d:0,acc:100});playFx('ice_big',x,y,1,{s:1.2});if(near){snd('nova',{x,y,vol:0.7});shake(4);}break;
+    case 'gwave':{
+      {const c=Math.cos(ev.a),sn=Math.sin(ev.a);makeSlash(x-c*20,y-sn*20,0.4,ev.a,85,true,0.1,'#cfefff');burst(x+c*40,y+sn*40,'#dff6ff',30,320,0.4,2.4,{h:0.6,vh:[1,5],g:6,a:ev.a,spread:0.7});FX.flashLight(x,y,1.2,'#8fe0ff',5,14,0.25);}}if(near){snd('whoosh',ev);snd('slam',{x,y,vol:0.4});}break;
+    case 'glacier':playFx('ice_impact',x,y,0.8,{s:1});if(near){snd('break',ev);shake(5);}break;
+    case 'mirror':playFx('ice_big',x,y,1,{s:1.2});if(near){snd('nova',{x,y,vol:0.7});shake(4);}break;
     case 'mirrorend':burst(x,y,'#dff6ff',40,200,0.5,2,{h:H,g:3});break;
     // ----- สายไฟ (ออกแบบโดยผู้เล่น) -----
     case 'dfrise':

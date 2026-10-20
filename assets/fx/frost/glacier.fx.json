@@ -1,0 +1,235 @@
+{
+ "v": 1,
+ "desc": "Glacier Rend โหมดไกล: น้ำแข็งระเบิดที่ต้นทาง + รอยร้าว/เศษผลึก/หมอกวิ่งไปตามแนวสัน (สันยังเป็นโค้ด)",
+ "tags": [
+  "frost",
+  "ground",
+  "ridge"
+ ],
+ "pal": "ice",
+ "dur": 2.2,
+ "params": {
+  "len": {
+   "def": 35,
+   "desc": "ยาวสัน (ม.) = ev.len/20"
+  }
+ },
+ "layers": [
+  {
+   "id": "spires",
+   "t": "mesh",
+   "at": 0,
+   "life": 1,
+   "att": "ground",
+   "shape": "model",
+   "model": "frost_spires",
+   "mat": "ice",
+   "col": "#9fdcff",
+   "col2": "#2f7fe0",
+   "scale": {
+    "0": 1.4,
+    "1": 1.4
+   },
+   "grow": {
+    "0": 0,
+    "1": 0,
+    "0.12": 1,
+    "0.7": 1
+   },
+   "stagger": 0.5
+  },
+  {
+   "id": "cracks",
+   "t": "decal",
+   "at": 0,
+   "life": 2,
+   "att": "ground",
+   "kind": "icecrack",
+   "r": 2.6,
+   "n": 10,
+   "col": "#2f7fe0"
+  },
+  {
+   "id": "shards",
+   "t": "emit",
+   "at": 0,
+   "life": 0.05,
+   "burst": 12,
+   "from": "sphere",
+   "fr": 0.6,
+   "dir": "out",
+   "spread": 1,
+   "speed": [
+    5,
+    9
+   ],
+   "up": [
+    2,
+    4
+   ],
+   "plife": [
+    0.6,
+    1.1
+   ],
+   "look": "model",
+   "model": "frost_shard",
+   "mmat": "ice",
+   "msize": [
+    0.12,
+    0.26
+   ],
+   "bounce": 0.3,
+   "mspin": 540,
+   "gravity": 12,
+   "drag": 1.2,
+   "col": "#e6f7ff",
+   "c2": "#2f7fe0",
+   "att": "ground",
+   "pos": [
+    0,
+    0.4,
+    0
+   ]
+  },
+  {
+   "id": "run",
+   "t": "emit",
+   "at": 0.05,
+   "life": 0.6,
+   "rate": 60,
+   "att": "ground",
+   "from": "line",
+   "fh": "len",
+   "pos": [
+    0,
+    0.2,
+    0
+   ],
+   "dir": "up",
+   "spread": 0.5,
+   "speed": [
+    2,
+    4
+   ],
+   "plife": [
+    0.4,
+    0.7
+   ],
+   "look": "flake",
+   "size": [
+    2,
+    3
+   ],
+   "col": "#ffffff",
+   "c2": "#9fdcff",
+   "gravity": 3,
+   "drag": 1.5,
+   "spin": 5
+  },
+  {
+   "id": "runmist0",
+   "t": "mist",
+   "at": 0.1,
+   "life": 1,
+   "att": "ground",
+   "r": 1.2,
+   "n": 6,
+   "out": 0.6,
+   "pos": [
+    0,
+    0,
+    6
+   ],
+   "x": true
+  },
+  {
+   "id": "runmist1",
+   "t": "mist",
+   "at": 0.22,
+   "life": 1,
+   "att": "ground",
+   "r": 1.2,
+   "n": 6,
+   "out": 0.6,
+   "pos": [
+    0,
+    0,
+    14
+   ],
+   "x": true
+  },
+  {
+   "id": "runmist2",
+   "t": "mist",
+   "at": 0.33999999999999997,
+   "life": 1,
+   "att": "ground",
+   "r": 1.2,
+   "n": 6,
+   "out": 0.6,
+   "pos": [
+    0,
+    0,
+    22
+   ],
+   "x": true
+  },
+  {
+   "id": "runmist3",
+   "t": "mist",
+   "at": 0.45999999999999996,
+   "life": 1,
+   "att": "ground",
+   "r": 1.2,
+   "n": 6,
+   "out": 0.6,
+   "pos": [
+    0,
+    0,
+    30
+   ],
+   "x": true
+  },
+  {
+   "id": "mist",
+   "t": "mist",
+   "at": 0,
+   "life": 1,
+   "att": "ground",
+   "r": 1.4,
+   "n": 8,
+   "out": 1.4
+  },
+  {
+   "id": "light",
+   "t": "light",
+   "at": 0,
+   "life": 0.35,
+   "att": "ground",
+   "pos": [
+    0,
+    1.5,
+    0
+   ],
+   "col": "#9fdcff",
+   "int": 1.5,
+   "dist": 14
+  },
+  {
+   "id": "cam",
+   "t": "screen",
+   "at": 0,
+   "life": 0.2,
+   "shake": 5,
+   "own": true
+  },
+  {
+   "id": "snd",
+   "t": "sound",
+   "at": 0,
+   "life": 0.05,
+   "name": "break",
+   "vol": 0.8
+  }
+ ]
+}

@@ -90,3 +90,4 @@ The user asked that the next session **open by asking these questions** (one sho
 
 Then do the work, keep replying in Thai, and update this file at the end (CLAUDE.md rule).
 > **🔥 Dragonfall from the user's sketch (2026-10-20):** impact = baked `df_impact` (column + rolling ring + edge fire) — user approved the Blender shape; dive = baked comet `df_dive` along the dive line via `fireSeqLine`. In-game look waiting for the user's play-test. Take-off/flight still the old look.
+> **Frost VFX overhaul (2026-10-20, waiting for user play-test):** all Frost burst effects moved to VFX Studio files `assets/fx/frost/*` (generator `tools/frost-fx-gen.js`), bound `replace`. Rules kept: Permafrost = broad ground field, only low perimeter crystals (no tall walls); no grey smoke puffs — cold mist uses the game `mist` layer; rings in deep blue, not white glow (white-outs).

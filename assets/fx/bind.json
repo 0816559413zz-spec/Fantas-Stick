@@ -1,1 +1,144 @@
-{}
+{
+  "efx:swing": [
+    {
+      "fx": "frost/swing_sword_a",
+      "mode": "replace",
+      "p": {
+        "r": "ev.r/20"
+      },
+      "if": "(1-ev.ax*1)*(1-ev.c)*(2-ev.c)"
+    },
+    {
+      "fx": "frost/swing_sword_b",
+      "mode": "replace",
+      "p": {
+        "r": "ev.r/20"
+      },
+      "if": "(1-ev.ax*1)*ev.c*(2-ev.c)"
+    },
+    {
+      "fx": "frost/swing_axe_a",
+      "mode": "replace",
+      "p": {
+        "r": "ev.r/20"
+      },
+      "if": "ev.ax*(1-ev.c)*(2-ev.c)"
+    },
+    {
+      "fx": "frost/swing_axe_b",
+      "mode": "replace",
+      "p": {
+        "r": "ev.r/20"
+      },
+      "if": "ev.ax*ev.c*(2-ev.c)"
+    },
+    {
+      "fx": "frost/swing_windup",
+      "mode": "replace",
+      "if": "ev.c*(ev.c-1)"
+    },
+    {
+      "fx": "frost/swing_echo",
+      "mode": "replace",
+      "p": {
+        "r": "ev.r/20"
+      },
+      "if": "ev.m*(2-ev.c)"
+    }
+  ],
+  "efx:slam3": [
+    {
+      "fx": "frost/slam3",
+      "mode": "replace",
+      "p": {
+        "r": "ev.r/20"
+      },
+      "s": "1+ev.ax*0.2"
+    },
+    {
+      "fx": "frost/slam3_echo",
+      "mode": "replace",
+      "p": {
+        "r": "ev.r/20"
+      },
+      "if": "ev.m*1"
+    }
+  ],
+  "efx:slamgo": {
+    "fx": "frost/slamgo",
+    "mode": "replace"
+  },
+  "efx:slam": {
+    "fx": "frost/slam",
+    "mode": "replace",
+    "p": {
+      "r": "ev.r/20"
+    },
+    "s": "1+ev.ax*0.25"
+  },
+  "efx:slide": {
+    "fx": "frost/slide",
+    "mode": "replace"
+  },
+  "efx:iceboom": {
+    "fx": "frost/iceboom",
+    "mode": "replace",
+    "p": {
+      "r": "ev.r/20"
+    }
+  },
+  "efx:perma": {
+    "fx": "frost/perma",
+    "mode": "replace",
+    "p": {
+      "r": "ev.r/20"
+    }
+  },
+  "efx:cryo": {
+    "fx": "frost/cryo",
+    "mode": "replace"
+  },
+  "efx:cryoend": {
+    "fx": "frost/cryoend",
+    "mode": "replace"
+  },
+  "efx:aura": {
+    "fx": "frost/aura",
+    "mode": "replace"
+  },
+  "efx:auhit": {
+    "fx": "frost/auhit",
+    "mode": "replace"
+  },
+  "efx:grcharge": {
+    "fx": "frost/grcharge",
+    "mode": "replace"
+  },
+  "efx:gwave": {
+    "fx": "frost/gwave",
+    "mode": "replace"
+  },
+  "efx:glacier": {
+    "fx": "frost/glacier",
+    "mode": "replace",
+    "p": {
+      "len": "ev.len/20"
+    }
+  },
+  "efx:mirror": {
+    "fx": "frost/mirror",
+    "mode": "replace"
+  },
+  "efx:mirrorend": {
+    "fx": "frost/mirrorend",
+    "mode": "replace"
+  },
+  "efx:forge": {
+    "fx": "frost/forge",
+    "mode": "replace"
+  },
+  "imp:icicle": {
+    "fx": "frost/icicle_hit",
+    "mode": "add"
+  }
+}

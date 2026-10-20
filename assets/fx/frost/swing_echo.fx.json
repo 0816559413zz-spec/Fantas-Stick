@@ -1,0 +1,144 @@
+{
+ "v": 1,
+ "desc": "ร่างเงา Mirror Legion ฟันตาม: รอยกระจกน้ำแข็งสะท้อน 2 ข้าง ช้ากว่า 0.12 วิ",
+ "tags": [
+  "frost",
+  "slash",
+  "melee",
+  "mirror"
+ ],
+ "pal": "ice",
+ "dur": 0.7,
+ "params": {
+  "r": {
+   "def": 6,
+   "desc": "ระยะฟัน (ม.)"
+  }
+ },
+ "layers": [
+  {
+   "id": "echoL",
+   "t": "trail",
+   "at": 0.12,
+   "life": 0.12,
+   "sweep": true,
+   "a0": -80,
+   "a1": 80,
+   "r": "r*0.9",
+   "r0": "r*0.6",
+   "tilt": -14,
+   "pos": [
+    -2.75,
+    0.15,
+    1.5
+   ],
+   "col": "#e6f7ff",
+   "col2": "#2f7fe0",
+   "tlife": 0.2,
+   "k": 1.3,
+   "w": 0.3
+  },
+  {
+   "id": "flL",
+   "t": "emit",
+   "at": 0.14,
+   "life": 0.05,
+   "burst": 6,
+   "from": "sphere",
+   "fr": 0.4,
+   "dir": "aim",
+   "spread": 1.2,
+   "speed": [
+    1.5,
+    3
+   ],
+   "up": [
+    0.5,
+    2
+   ],
+   "plife": [
+    0.7,
+    1.3
+   ],
+   "look": "flake",
+   "size": [
+    2,
+    3.4
+   ],
+   "col": "#ffffff",
+   "c2": "#9fdcff",
+   "gravity": 1.2,
+   "drag": 2.2,
+   "spin": 6,
+   "fin": 6,
+   "x": true,
+   "pos": [
+    -2.75,
+    0,
+    2.6
+   ]
+  },
+  {
+   "id": "echoR",
+   "t": "trail",
+   "at": 0.12,
+   "life": 0.12,
+   "sweep": true,
+   "a0": -80,
+   "a1": 80,
+   "r": "r*0.9",
+   "r0": "r*0.6",
+   "tilt": -14,
+   "pos": [
+    2.75,
+    0.15,
+    1.5
+   ],
+   "col": "#e6f7ff",
+   "col2": "#2f7fe0",
+   "tlife": 0.2,
+   "k": 1.3,
+   "w": 0.3
+  },
+  {
+   "id": "flR",
+   "t": "emit",
+   "at": 0.14,
+   "life": 0.05,
+   "burst": 6,
+   "from": "sphere",
+   "fr": 0.4,
+   "dir": "aim",
+   "spread": 1.2,
+   "speed": [
+    1.5,
+    3
+   ],
+   "up": [
+    0.5,
+    2
+   ],
+   "plife": [
+    0.7,
+    1.3
+   ],
+   "look": "flake",
+   "size": [
+    2,
+    3.4
+   ],
+   "col": "#ffffff",
+   "c2": "#9fdcff",
+   "gravity": 1.2,
+   "drag": 2.2,
+   "spin": 6,
+   "fin": 6,
+   "x": true,
+   "pos": [
+    2.75,
+    0,
+    2.6
+   ]
+  }
+ ]
+}
