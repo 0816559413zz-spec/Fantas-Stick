@@ -22,7 +22,7 @@
     },
     "bld_house": {
       "file": "buildings/house.glb",
-      "v": 1
+      "v": 2
     },
     "debris_stone": {
       "file": "buildings/debris_stone.glb",

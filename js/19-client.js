@@ -56,7 +56,7 @@ function onLobby(m){
 function onSnap(s){
   if(s.mp&&s.mp!==builtMap&&mapReady(s.mp)){setMapVars(s.mp);buildWorld(s.mp);}
   PROPON=!!s.PB;if(s.PB)for(let i=0;i<PROPS.length;i++)PROPS[i].st=+(s.PB[i]||0);
-  if(!NET.isHost){const bd=s.BD||'';let k=0;for(const b of BLDG)for(const q of b.pc)q.fl=parseInt(bd[k++]||'0',16);}
+  if(!NET.isHost)bldParse(s.BD);
   VIEW.prev=VIEW.cur;VIEW.tPrev=VIEW.tCur;VIEW.cur=s;VIEW.tCur=performance.now();
   if(s.ev)for(const ev of s.ev)fx(ev);
   syncOverlays(s);

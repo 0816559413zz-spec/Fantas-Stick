@@ -1,92 +1,151 @@
-// ---------- สิ่งปลูกสร้างที่พังเป็นชิ้น (บ้าน) ----------
-// บ้าน 1 หลัง (OBS k:'house') = ผนัง 4 ด้าน + หลังคา 2 ฝั่ง → ชิ้นไหนเลือดหมดพังแค่ชิ้นนั้น (พังตรงที่โดน) • ผนังพัง 3 ด้าน = หลังคาถล่มเอง
-// ชื่อชิ้น = ชื่อ object ในไฟล์ bld_house.glb (ดู ASSETS.md) • hp/ตัวคูณ = ค่าตั้งต้นให้ทีมเกมเพลย์ปรับ
-// ธาตุ el: 'fire' ติดไฟเผาต่อ + ไหม้ดำ • 'ice' เกาะน้ำแข็ง (ตีแรงซ้ำ ×2, ไฟละลาย) • 'blast' ×1.5 เศษกระเด็นแรง • 'fireblast' = ทั้งสองอย่าง
-// snapshot BD = ชิ้นละ 1 ตัว (ฐาน 16): 1 พัง | 2 ไหม้ดำ | 4 ติดไฟอยู่ | 8 เกาะน้ำแข็ง ('' = ทุกชิ้นปกติ) • เหตุการณ์ {k:'bld',e:'h'|'b',i,p,el,x,y,ox,oy}
-// ตำแหน่งชิ้นในบ้าน (หน่วย sim px, แกนของบ้านเอง): หน้าบ้าน (ประตู) = +y
-const BLDDEF={house:{model:'bld_house',bw:8,bd:6.5,wh:4.2,rh:3.4,th:14,hp:{wall:80,roof:60}}};
+// ---------- สิ่งปลูกสร้างที่พังเป็นชิ้นย่อย (บ้าน) แบบ Battlefield — คู่มือเต็ม: Destruction.md ----------
+// บ้าน 1 หลัง (OBS k:'house') = 6 ส่วน (ผนัง 4 ด้าน + หลังคา 2 ซีก) • แต่ละส่วนแบ่งเป็นตาราง BLD_GRID (รวม 54 ชิ้นย่อย)
+// โดนตรงไหนพังเฉพาะชิ้นย่อยนั้น → เป็นรู เดิน/ยิงลอดได้ • ชิ้นที่ไม่มีอะไรรองรับร่วงตาม (bldSupport) • ผนังรอบหลังคาเหลือน้อย = หลังคาซีกนั้นถล่ม
+// ชื่อชิ้นในไฟล์ bld_house.glb: <ส่วน>_c<เลข> (assets/src/house_chunks.py) • hp/ตัวคูณ = ค่าตั้งต้นให้ทีมเกมเพลย์ปรับ
+// ธาตุ el: 'fire' ติดไฟเผาต่อ + ไหม้ดำ • 'ice' เกาะน้ำแข็ง (ตีแรงซ้ำ ×2, ไฟละลาย) • 'blast' ×1.5 เศษกระเด็นแรง • 'fireblast' = ทั้งสองอย่าง • 'fall' = ร่วงเพราะไม่มีที่รองรับ
+// snapshot BD = บ้านคั่นด้วย '|' ('' = บ้านนั้นปกติ): 6 ตัวแรก = สถานะส่วน (ฐาน 16: 1 พังหมด | 2 ไหม้ดำ | 4 ติดไฟ | 8 เกาะน้ำแข็ง) + ส่วนละ 3 ตัว = บิตชิ้นย่อยที่พัง
+// เหตุการณ์ {k:'bld',e:'h'|'b',i,p,c,el,x,y,ox,oy,h} (c = เลขชิ้นย่อย) • ตำแหน่งในบ้าน = หน่วย sim px แกนของบ้านเอง หน้าบ้าน (ประตู) = +y
+const BLDDEF={house:{model:'bld_house',bw:8,bd:6.5,wh:4.2,rh:3.4,th:14,hp:{wall:35,roof:30}}};
 const BLD_PIECES=['wall_front','wall_back','wall_left','wall_right','roof_left','roof_right'];
-const BLD_FIRE={burn:5,dps:6},BLD_ICE={frz:6};
+const BLD_GRID=[[4,3],[4,3],[3,3],[3,3],[3,2],[3,2]];      // [คอลัมน์, แถว] ต่อส่วน — ต้องตรงกับ house_chunks.py
+const BLD_FIRE={burn:5,dps:6},BLD_ICE={frz:6},BLD_ROOF_MIN=0.35;   // หลังคาถล่มเมื่อผนังแถวบนที่รองรับเหลือน้อยกว่า 35%
 let BLDG=[],BLDON=false;
 function genBldg(id){
   const M=MAPS[id],out=[];if(!M)return out;
   for(const o of M.obs||[])if(o.k==='house'){
     const D=BLDDEF.house;o.bi=out.length;
-    out.push({i:out.length,o,D,c:Math.cos(o.ry||0),s:Math.sin(o.ry||0),ht:0,pc:BLD_PIECES.map((n,j)=>{const mx=D.hp[j<4?'wall':'roof'];return {n,hp:mx,max:mx,fl:0,burnT:0,frzT:0};})});
+    out.push({i:out.length,o,D,c:Math.cos(o.ry||0),s:Math.sin(o.ry||0),ht:0,dirty:false,pc:BLD_PIECES.map((n,j)=>{const mx=D.hp[j<4?'wall':'roof'],[nc,nr]=BLD_GRID[j];
+      return {n,fl:0,burnT:0,frzT:0,nc,nr,cb:0,max:mx,ch:new Array(nc*nr).fill(mx)};})});
   }
   return out;
 }
+// สี่เหลี่ยมของทั้งส่วน (ใช้กับเอฟเฟกต์ไฟ/น้ำแข็ง)
 function bldRect(b,j){const w=b.o.w/2,d=b.o.d/2,t=b.D.th/2;return j===0?[0,d,w,t]:j===1?[0,-d,w,t]:j===2?[-w,0,t,d]:j===3?[w,0,t,d]:j===4?[-w/2,0,w/2,d]:[w/2,0,w/2,d];}
+// ชิ้นย่อย k ของส่วน j → [cx,cy,hx,hy (px), z0,z1 (หน่วย 3D จากพื้น)]
+function bldChunk(b,j,k){
+  const w=b.o.w/2,d=b.o.d/2,t=b.D.th/2,D=b.D,[nc]=BLD_GRID[j],c=k%nc,r=Math.floor(k/nc);
+  if(j<2){const hx=w/nc;return [-w+(2*c+1)*hx,j?-d:d,hx,t,r*D.wh/3,(r+1)*D.wh/3];}
+  const hy=d/nc,cy=-d+(2*c+1)*hy;
+  if(j<4)return [j===2?-w:w,cy,t,hy,r*D.wh/3,(r+1)*D.wh/3];
+  const s=j===4?-1:1;return [s*w*(r?0.25:0.75),cy,w/4,hy,D.wh+(r?0.5:0)*D.rh,D.wh+(r?1:0.5)*D.rh];
+}
+const bldAlive=(q,k)=>!((q.cb>>k)&1);
 function bldLocal(b,x,y){const dx=x-b.o.x,dy=y-b.o.y;return [dx*b.c-dy*b.s,dx*b.s+dy*b.c];}
 function bldWorld(b,lx,ly){return [b.o.x+lx*b.c+ly*b.s,b.o.y-lx*b.s+ly*b.c];}
 function rectDist(R,lx,ly){return Math.hypot(Math.max(Math.abs(lx-R[0])-R[2],0),Math.max(Math.abs(ly-R[1])-R[3],0));}
 function bldNear(b,x,y,pad){return Math.abs(x-b.o.x)<b.o.w*0.75+pad&&Math.abs(y-b.o.y)<b.o.w*0.75+pad;}
-function hitBldPiece(b,j,dmg,el,ox,oy){
-  const q=b.pc[j];if(!BLDON||(q.fl&1))return;
+// โดนชิ้นย่อย: code = ส่วน*100 + ชิ้นย่อย (ค่าจาก bldPieceAt)
+function hitBldPiece(b,code,dmg,el,ox,oy){
+  const j=Math.floor(code/100),k=code%100,q=b.pc[j];if(!BLDON||!q||!bldAlive(q,k))return;
   el=el||'none';const fire=el.includes('fire'),ice=el==='ice',blast=el.includes('blast');
   let m=blast?1.5:ice?0.7:1;
   if(q.frzT>0&&!ice){if(fire){q.frzT=0;q.fl&=~8;}else m*=2;}       // น้ำแข็ง: ไฟละลาย / ตีแรงแตก ×2
-  q.hp-=dmg*m;
+  q.ch[k]-=dmg*m;
   if(fire){q.burnT=BLD_FIRE.burn;q.fl|=6;}
   if(ice){if(q.burnT>0){q.burnT=0;q.fl&=~4;}else{q.frzT=BLD_ICE.frz;q.fl|=8;}}   // น้ำแข็งดับไฟ
-  if(q.hp<=0){breakBldPiece(b,j,el,ox,oy);return;}
-  if(G.time-b.ht>0.15){b.ht=G.time;const R=bldRect(b,j),[x,y]=bldWorld(b,R[0],R[1]);emit({k:'bld',e:'h',i:b.i,p:j,el,x:Math.round(x),y:Math.round(y),h:j<4?b.D.wh*0.5:b.D.wh+1});}
+  if(q.ch[k]<=0){breakBldChunk(b,j,k,el,ox,oy);bldSupport(b);return;}
+  if(G.time-b.ht>0.12){b.ht=G.time;const C=bldChunk(b,j,k),[x,y]=bldWorld(b,C[0],C[1]);emit({k:'bld',e:'h',i:b.i,p:j,c:k,el,x:Math.round(x),y:Math.round(y),h:Math.round((C[4]+C[5])*5)/10});}
 }
-function breakBldPiece(b,j,el,ox,oy){
-  const q=b.pc[j];if(q.fl&1)return;
-  q.fl=(q.fl|1)&3;q.hp=0;q.burnT=q.frzT=0;          // เหลือแค่ "พัง" + "ไหม้ดำ"
-  const R=bldRect(b,j),[x,y]=bldWorld(b,R[0],R[1]);
-  emit({k:'bld',e:'b',i:b.i,p:j,el:el||'none',x:Math.round(x),y:Math.round(y),ox:Math.round(ox==null?x:ox),oy:Math.round(oy==null?y:oy),h:j<4?b.D.wh*0.5:b.D.wh+1});
-  if(j<4&&b.pc.slice(0,4).filter(p=>p.fl&1).length>=3)for(const k of [4,5])breakBldPiece(b,k,'none',b.o.x,b.o.y);
+function breakBldChunk(b,j,k,el,ox,oy){
+  const q=b.pc[j];if(!bldAlive(q,k))return;
+  q.cb|=1<<k;q.ch[k]=0;b.dirty=true;
+  if(q.cb===(1<<(q.nc*q.nr))-1){q.fl=(q.fl|1)&3;q.burnT=q.frzT=0;}      // พังหมดทั้งส่วน: เหลือแค่ "พัง" + "ไหม้ดำ"
+  const C=bldChunk(b,j,k),[x,y]=bldWorld(b,C[0],C[1]);
+  emit({k:'bld',e:'b',i:b.i,p:j,c:k,el:el||'none',x:Math.round(x),y:Math.round(y),ox:Math.round(ox==null?x:ox),oy:Math.round(oy==null?y:oy),h:Math.round((C[4]+C[5])*5)/10});
 }
-// ให้คาถาวงกว้างพังสิ่งแวดล้อม: damageEnv(x,y,รัศมี,ดาเมจ,id,ธาตุ,ความสูงจุดระเบิด) = ลัง/ถัง (prop) + ชิ้นบ้านที่อยู่ในวง
-function damageEnv(x,y,rad,dmg,by,el,h){
-  damagePropsIn(x,y,rad,dmg,by);
-  if(!BLDON)return;h=h||0;
-  for(const b of BLDG){
-    if(!bldNear(b,x,y,rad))continue;
-    const [lx,ly]=bldLocal(b,x,y);
-    for(let j=0;j<6;j++){
-      if(b.pc[j].fl&1)continue;
-      if(j>=4&&h+rad/20<b.D.wh)continue;          // ระเบิดเตี้ย/เล็กไม่ถึงหลังคา
-      if(rectDist(bldRect(b,j),lx,ly)<rad)hitBldPiece(b,j,dmg,el,x,y);
+// โครงสร้างรองรับ: ผนังชิ้นบน ต้องมีชิ้นข้างล่าง หรือชิ้นข้างๆ ที่มีชิ้นล่างของตัวเอง (สะพานข้ามรู 1 ช่อง) • หลังคาซีกไหนผนังแถวบนรอบๆ เหลือน้อย = ถล่มทั้งซีก
+function bldSupport(b){
+  for(let pass=0;pass<4;pass++){
+    let ch=false;
+    for(let j=0;j<4;j++){const q=b.pc[j],nc=q.nc,A=(r,c)=>c>=0&&c<nc&&bldAlive(q,r*nc+c);
+      for(let r=1;r<q.nr;r++)for(let c=0;c<nc;c++){
+        if(!A(r,c))continue;
+        if(A(r-1,c)||(A(r,c-1)&&A(r-1,c-1))||(A(r,c+1)&&A(r-1,c+1)))continue;
+        breakBldChunk(b,j,r*nc+c,'fall',b.o.x,b.o.y);ch=true;
+      }}
+    for(const j of [4,5]){
+      const q=b.pc[j];if(q.fl&1)continue;
+      const side=b.pc[j===4?2:3],fb=j===4?[0,1]:[2,3];let n=0,a=0;
+      for(let c=0;c<3;c++){n++;if(bldAlive(side,6+c))a++;}
+      for(const w of [0,1])for(const c of fb){n++;if(bldAlive(b.pc[w],8+c))a++;}
+      if(a/n<BLD_ROOF_MIN){for(let k=0;k<q.nc*q.nr;k++)breakBldChunk(b,j,k,'fall',b.o.x,b.o.y);ch=true;}
     }
+    if(!ch)break;
   }
 }
-// ชิ้นที่กระสุนชน (-1 = ไม่ชน): ต่ำกว่าผนัง = ผนังที่ใกล้สุด, สูงกว่า = หลังคา (ทรงปิรามิด)
+// ให้คาถาวงกว้างพังสิ่งแวดล้อม: damageEnv(x,y,รัศมี px,ดาเมจ,id,ธาตุ,ความสูงจุดระเบิด) = ลัง/ถัง (prop) + ชิ้นย่อยบ้านในวง (ขอบวง = เหลือ 30%)
+function damageEnv(x,y,rad,dmg,by,el,h){
+  damagePropsIn(x,y,rad,dmg,by);
+  if(!BLDON)return;h=h||0;const R=rad/20;
+  for(const b of BLDG){
+    if(!bldNear(b,x,y,rad))continue;
+    const [lx,ly]=bldLocal(b,x,y),hits=[];
+    for(let j=0;j<6;j++){const q=b.pc[j];if(q.fl&1)continue;
+      for(let k=0;k<q.nc*q.nr;k++){if(!bldAlive(q,k))continue;
+        const C=bldChunk(b,j,k),dv=Math.max(0,C[4]-h,h-C[5]),d=Math.hypot(rectDist(C,lx,ly)/20,dv);
+        if(d<R)hits.push([j*100+k,dmg*(1-0.7*d/R)]);}}
+    for(const [code,dd] of hits)hitBldPiece(b,code,dd,el,x,y);
+  }
+}
+// ชิ้นที่กระสุนชน (-1 = ไม่ชน / ลอดรู): ต่ำกว่าผนัง = ชิ้นผนังแถวนั้นที่ใกล้สุด, สูงกว่า = ชิ้นหลังคาใต้กระสุน (ทรงปิรามิด)
 function bldPieceAt(b,x,y,h,r){
   const [lx,ly]=bldLocal(b,x,y),D=b.D,hw=b.o.w/2,hd=b.o.d/2;
-  if(h<D.wh){let best=-1,bd=r;for(let j=0;j<4;j++){if(b.pc[j].fl&1)continue;const d=rectDist(bldRect(b,j),lx,ly);if(d<bd){bd=d;best=j;}}return best;}
-  if(h<D.wh+D.rh&&Math.abs(lx)<hw&&Math.abs(ly)<hd&&h<D.wh+D.rh*(1-Math.max(Math.abs(lx)/hw,Math.abs(ly)/hd))){const j=lx<0?4:5;if(!(b.pc[j].fl&1))return j;}
+  if(h<D.wh){const row=clamp(Math.floor(h/(D.wh/3)),0,2);let best=-1,bd=r;
+    for(let j=0;j<4;j++){const q=b.pc[j];if(q.fl&1)continue;for(let c=0;c<q.nc;c++){const k=row*q.nc+c;if(!bldAlive(q,k))continue;const d=rectDist(bldChunk(b,j,k),lx,ly);if(d<bd){bd=d;best=j*100+k;}}}
+    return best;}
+  if(h<D.wh+D.rh&&Math.abs(lx)<hw&&Math.abs(ly)<hd&&h<D.wh+D.rh*(1-Math.max(Math.abs(lx)/hw,Math.abs(ly)/hd))){
+    const j=lx<0?4:5,q=b.pc[j],c=clamp(Math.floor((ly+hd)/(2*hd)*3),0,2),k=(Math.abs(lx)<hw/2?3:0)+c;
+    if(bldAlive(q,k))return j*100+k;}
   return -1;
 }
 function projEl(pr){
   const t=pr.type||'';if(t.includes('fire'))return 'fire';if(t.includes('ice'))return 'ice';
   const o=G.players[pr.owner];return o?(['fire','ice'][o.pathIdx|0]||'none'):'none';
 }
-// ชนผนัง/หลังคาที่ยังไม่พัง (สี่เหลี่ยมเอียงตามบ้าน) — ผนังพัง = เดินลอดเข้าไปในบ้านได้
+// ชนผนัง: แต่ละผนังรวมคอลัมน์ที่ยังบังช่วงตัว (เท้า z ถึงหัว z+1.9) ติดกันเป็นแผ่นเดียว → รูที่โล่งทั้งช่วงตัว = เดินลอดได้ • หลังคา = ชนทีละชิ้น
+function bldPush(lx,ly,R,r){
+  const ex=lx-R[0],ey=ly-R[1],ax=Math.abs(ex)-R[2],ay=Math.abs(ey)-R[3];
+  if(ax>=r||ay>=r)return null;
+  if(ax>0&&ay>0){const d=Math.hypot(ax,ay);if(d>=r)return null;const k=(r-d)/d;return [lx+Math.sign(ex)*ax*k,ly+Math.sign(ey)*ay*k];}
+  if(ax>ay)return [R[0]+(ex<0?-1:1)*(R[2]+r),ly];return [lx,R[1]+(ey<0?-1:1)*(R[3]+r)];
+}
 function collideBld(b,o,r,z){
   const D=b.D;let [lx,ly]=bldLocal(b,o.x,o.y),moved=false;
-  for(let j=0;j<6;j++){
-    if(b.pc[j].fl&1)continue;
-    if(j<4?z>=D.wh:(z<D.wh-0.3||z>=D.wh+D.rh))continue;
-    const R=bldRect(b,j),ex=lx-R[0],ey=ly-R[1],ax=Math.abs(ex)-R[2],ay=Math.abs(ey)-R[3];
-    if(ax>=r||ay>=r)continue;
-    if(ax>0&&ay>0){const d=Math.hypot(ax,ay);if(d>=r)continue;const k=(r-d)/d;lx+=Math.sign(ex)*ax*k;ly+=Math.sign(ey)*ay*k;}
-    else if(ax>ay)lx=R[0]+(ex<0?-1:1)*(R[2]+r);else ly=R[1]+(ey<0?-1:1)*(R[3]+r);
-    moved=true;
+  const push=R=>{const p=bldPush(lx,ly,R,r);if(p){lx=p[0];ly=p[1];moved=true;}};
+  if(z<D.wh)for(let j=0;j<4;j++){
+    const q=b.pc[j];if(q.fl&1)continue;
+    let run=-1;
+    for(let c=0;c<=q.nc;c++){
+      let bl=false;if(c<q.nc)for(let rr=0;rr<q.nr;rr++){const z0=rr*D.wh/3,z1=z0+D.wh/3;if(z1>z&&z0<z+1.9&&bldAlive(q,rr*q.nc+c)){bl=true;break;}}
+      if(bl&&run<0)run=c;
+      if(!bl&&run>=0){const A=bldChunk(b,j,run),B=bldChunk(b,j,c-1);push(j<2?[(A[0]+B[0])/2,A[1],(B[0]-A[0])/2+A[2],A[3]]:[A[0],(A[1]+B[1])/2,A[2],(B[1]-A[1])/2+A[3]]);run=-1;}
+    }
   }
+  if(z>=D.wh-0.3&&z<D.wh+D.rh)for(const j of [4,5]){const q=b.pc[j];if(q.fl&1)continue;for(let k=0;k<q.nc*q.nr;k++)if(bldAlive(q,k))push(bldChunk(b,j,k));}
   if(moved){o.x=b.o.x+lx*b.c+ly*b.s;o.y=b.o.y-lx*b.s+ly*b.c;}
 }
 function updateBldg(dt){
   if(!BLDON)return;
-  for(const b of BLDG)for(let j=0;j<6;j++){
-    const q=b.pc[j];if(q.fl&1)continue;
-    if(q.frzT>0){q.frzT-=dt;if(q.frzT<=0)q.fl&=~8;}
-    if(q.burnT>0){q.burnT-=dt;q.hp-=BLD_FIRE.dps*dt;if(q.hp<=0)breakBldPiece(b,j,'fire');else if(q.burnT<=0)q.fl&=~4;}
-  }
+  for(const b of BLDG){let br=false;
+    for(let j=0;j<6;j++){
+      const q=b.pc[j];if(q.fl&1)continue;
+      if(q.frzT>0){q.frzT-=dt;if(q.frzT<=0)q.fl&=~8;}
+      if(q.burnT>0){q.burnT-=dt;
+        for(let k=0;k<q.ch.length;k++)if(bldAlive(q,k)){q.ch[k]-=BLD_FIRE.dps*dt;if(q.ch[k]<=0){breakBldChunk(b,j,k,'fire');br=true;}}
+        if(q.burnT<=0)q.fl&=~4;}
+    }
+    if(br)bldSupport(b);}
 }
-function bldSnap(){if(!BLDON)return '';let s='',any=false;for(const b of BLDG)for(const q of b.pc){s+=q.fl.toString(16);if(q.fl)any=true;}return any?s:'';}
+function bldSnap(){
+  if(!BLDON)return '';let any=false;
+  const s=BLDG.map(b=>{if(!b.pc.some(q=>q.fl||q.cb))return '';any=true;return b.pc.map(q=>q.fl.toString(16)).join('')+b.pc.map(q=>q.cb.toString(16).padStart(3,'0')).join('');}).join('|');
+  return any?s:'';
+}
+// เครื่องลูก: อ่าน BD จาก snapshot
+function bldParse(bd){
+  const H=(bd||'').split('|');
+  BLDG.forEach((b,i)=>{const t=H[i]||'';b.pc.forEach((q,j)=>{q.fl=t?parseInt(t[j]||'0',16):0;const cb=t?parseInt(t.substr(6+j*3,3)||'0',16):0;if(cb!==q.cb){q.cb=cb;b.dirty=true;}});});
+}
 function collideWorld(o,r,z){
   z=z||0;
   o.x=clamp(o.x,r+20,MW-r-20);o.y=clamp(o.y,r+20,MH-r-20);

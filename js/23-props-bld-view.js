@@ -107,11 +107,30 @@ function bldFilePiece(b,name){
   const c=src.clone(true);src.matrixWorld.decompose(c.position,c.quaternion,c.scale);
   const h=new THREE.Group();h.scale.set(b.o.w*S3/b.D.bw,1,b.o.d*S3/b.D.bd);h.add(c);return h;
 }
+// ชิ้นย่อยจากไฟล์ (<ส่วน>_c<เลข>) มีครบไหม — ไฟล์รุ่นเก่า (ไม่มีชิ้นย่อย) = ใช้ทั้งส่วนแบบเดิม
+function bldHasChunks(){const r=MODELS.ready.get(BLDDEF.house.model);return !!(r&&r.scene.getObjectByName('wall_front_c0'));}
+// ส่วนจากโค้ด (ไม่มีไฟล์) แบบชิ้นย่อย: ผนัง = กล่องต่อชิ้น, หลังคา = ปิรามิดครึ่งซีกถ้ายังเหลือ ≥ ครึ่ง
+function bldFallbackChunks(b,j,q){
+  if(j>=4)return bldFallback(b,j,q.cb&&(q.cb.toString(2).split('1').length-1)*2>q.nc*q.nr);
+  const g=new THREE.Group(),M=bldMats(b);
+  for(let k=0;k<q.nc*q.nr;k++){if(!bldAlive(q,k))continue;const C=bldChunk(b,j,k),m=new THREE.Mesh(sGeo(THREE.BoxGeometry,1,1,1),M.wall);
+    m.scale.set(C[2]*2*S3,C[5]-C[4],C[3]*2*S3);m.position.set(C[0]*S3,(C[4]+C[5])/2,C[1]*S3);g.add(m);}
+  return g;
+}
+// เศษกองที่โคนผนังตรงชิ้นที่พัง (ติดกับบ้าน รวม mesh ไปด้วย)
+function bldRubble(b,j,k,g,M){
+  const C=bldChunk(b,j,k),R=mulberry(b.i*131+j*17+k*7+3),n=C[4]<0.1?3:1;
+  for(let i=0;i<n;i++){const m=new THREE.Mesh(sGeo(THREE.BoxGeometry,1,1,1),i%2?M.beam:M.stone);
+    m.scale.set(0.3+R()*0.5,0.15+R()*0.25,0.3+R()*0.45);m.position.set((C[0]+(R()*2-1)*C[2])*S3+(j===2?-1:j===3?1:0)*R()*0.8,0.1,(C[1]+(R()*2-1)*C[3])*S3+(j===0?1:j===1?-1:0)*R()*0.8);m.rotation.set(R()*0.6,R()*3,R()*0.6);g.add(m);}
+}
 function bldBuild(b,file){
-  const g=new THREE.Group();
+  const g=new THREE.Group(),chunks=file&&bldHasChunks(),M=bldMats(b);
   for(let j=0;j<6;j++){
-    const f=b.pc[j].fl,br=f&1;
-    const m=(file&&bldFilePiece(b,BLD_PIECES[j]+(br?'_broken':'')))||bldFallback(b,j,br);
+    const q=b.pc[j],f=q.fl,br=f&1;let m;
+    if(br)m=(file&&bldFilePiece(b,BLD_PIECES[j]+'_broken'))||bldFallback(b,j,true);
+    else if(!q.cb)m=(file&&bldFilePiece(b,BLD_PIECES[j]))||bldFallback(b,j,false);
+    else if(chunks){m=new THREE.Group();for(let k=0;k<q.nc*q.nr;k++){if(bldAlive(q,k)){const c=bldFilePiece(b,BLD_PIECES[j]+'_c'+k);if(c)m.add(c);}else if(j<4)bldRubble(b,j,k,m,M);}}
+    else m=bldFallbackChunks(b,j,q);
     if(f&2)m.traverse(x=>{if(x.isMesh)x.material=Array.isArray(x.material)?x.material.map(charMat):charMat(x.material);});
     g.add(m);
   }
@@ -138,7 +157,7 @@ function syncBld(dt){
   const file=MODELS.ready.has(BLDDEF.house.model);
   for(const q of BLDV.list){
     if(BLDG[q.b.i]&&q.b!==BLDG[q.b.i]){q.b=BLDG[q.b.i];q.key='';if(DEBRIS.length)clearDebris();}   // เริ่มเกมใหม่ แผนที่เดิม → สถานะชุดใหม่
-    let key=file?'F':'C';for(const p of q.b.pc)key+=p.fl&3;
+    let key=file?'F':'C';for(const p of q.b.pc)key+=(p.fl&3)+'.'+p.cb+',';
     if(key!==q.key){
       q.key=key;if(q.g){BLDV.g.remove(q.g);disposeTree(q.g);}
       const r=bldBuild(q.b,file);q.g=r.g;q.ice=r.ice;BLDV.g.add(q.g);gl.shadowMap.needsUpdate=true;
@@ -159,13 +178,14 @@ function syncBld(dt){
 // เศษซาก (เฉพาะเครื่องนี้ ไม่ส่งในเน็ต): กระเด็นออกจากจุดที่โดน (ox,oy) แรง/แบบตามธาตุ
 function bldDebris(ev){
   const b=BLDG[ev.i];if(!b)return;
-  const j=ev.p,R=bldRect(b,j),D=b.D,roof=j>=4,el=ev.el||'none',blast=el.includes('blast'),fire=el.includes('fire'),ice=el==='ice';
+  const j=ev.p,ck=ev.c!=null&&ev.c>=0,C=ck?bldChunk(b,j,ev.c):null,R=ck?C:bldRect(b,j),D=b.D,roof=j>=4,el=ev.el||'none',blast=el.includes('blast'),fire=el.includes('fire'),ice=el==='ice',fall=el==='fall';
+  if(ck)bldChunkFall(b,j,ev.c,C,ev,fire,blast,fall);
   const M=bldMats(b),file=MODELS.ready.get(roof?'debris_wood':'debris_stone'),pool=[];
   if(file)file.scene.traverse(o=>{if(o.isMesh)pool.push(o);});
-  const n=blast?22:ice?16:12;
+  const n=ck?(blast?9:fall?3:6):blast?22:ice?16:12;
   for(let k=0;k<n;k++){
     const lx=R[0]+(Math.random()*2-1)*R[2],ly=R[1]+(Math.random()*2-1)*R[3],[x,y]=bldWorld(b,lx,ly);
-    const h=roof?D.wh+Math.random()*D.rh*0.5:0.3+Math.random()*D.wh;
+    const h=ck?C[4]+Math.random()*(C[5]-C[4]):roof?D.wh+Math.random()*D.rh*0.5:0.3+Math.random()*D.wh;
     let m;
     if(ice&&k%2===0)m=new THREE.Mesh(sGeo(THREE.OctahedronGeometry,0.35,0),bldIceMat());
     else if(pool.length){const src=pool[k%pool.length];m=new THREE.Mesh(src.geometry,src.material);}
@@ -178,11 +198,24 @@ function bldDebris(ev){
   }
   while(DEBRIS.length>180)scene.remove(DEBRIS.shift().m);
 }
+// ชิ้นย่อยที่พัง: ก๊อปชิ้นจริงจากไฟล์ (หรือกล่องสีผนัง) แล้วให้ร่วง/กระเด็นหมุนลงพื้น — เฉพาะเครื่องนี้
+function bldChunkFall(b,j,k,C,ev,fire,blast,fall){
+  const piv=new THREE.Group(),[x,y]=bldWorld(b,C[0],C[1]),zc=(C[4]+C[5])/2;
+  let src=bldHasChunks()?bldFilePiece(b,BLD_PIECES[j]+'_c'+k):null;
+  if(!src){src=new THREE.Mesh(sGeo(THREE.BoxGeometry,1,1,1),j<4?bldMats(b).wall:bldMats(b).roof);src.scale.set(C[2]*2*S3,C[5]-C[4],C[3]*2*S3);src.position.set(C[0]*S3,zc,C[1]*S3);}
+  src.position.x-=C[0]*S3;src.position.y-=zc;src.position.z-=C[1]*S3;     // หมุนรอบกลางชิ้น
+  piv.add(src);if(fire)piv.traverse(m=>{if(m.isMesh)m.material=Array.isArray(m.material)?m.material.map(charMat):charMat(m.material);});
+  piv.traverse(m=>{if(m.isMesh)m.castShadow=true;});
+  piv.position.set(tx(x),zc+GY(x,y),tz(y));piv.rotation.y=b.o.ry||0;scene.add(piv);
+  let dx=x-ev.ox,dy=y-ev.oy;const dl=Math.hypot(dx,dy)||1;dx/=dl;dy/=dl;
+  const sp=fall?0.6:blast?7:3;
+  DEBRIS.push({m:piv,vx:dx*sp+rnd(-0.6,0.6),vz:dy*sp+rnd(-0.6,0.6),vy:fall?0:blast?4:1.5,rx:rnd(-3,3)*(fall?0.5:1),rz:rnd(-3,3)*(fall?0.5:1),life:2.6+Math.random(),s0:piv.scale.clone(),big:1});
+}
 function updateDebris(dt){
   for(let i=DEBRIS.length-1;i>=0;i--){
     const q=DEBRIS[i],m=q.m;q.life-=dt;
     q.vy-=18*dt;m.position.x+=q.vx*dt;m.position.y+=q.vy*dt;m.position.z+=q.vz*dt;
-    if(m.position.y<0.1){m.position.y=0.1;q.vy=Math.abs(q.vy)*0.3;q.vx*=0.6;q.vz*=0.6;q.rx*=0.5;q.rz*=0.5;}
+    const fy=q.big?0.35:0.1;if(m.position.y<fy){m.position.y=fy;q.vy=Math.abs(q.vy)*0.3;q.vx*=0.6;q.vz*=0.6;q.rx*=0.5;q.rz*=0.5;}
     m.rotation.x+=q.rx*dt;m.rotation.z+=q.rz*dt;
     if(q.life<0.6)m.scale.copy(q.s0).multiplyScalar(Math.max(0.01,q.life/0.6));
     if(q.life<=0){scene.remove(m);DEBRIS.splice(i,1);}

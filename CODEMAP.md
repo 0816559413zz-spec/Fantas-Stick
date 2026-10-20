@@ -61,7 +61,7 @@ MIND:66 summonMin:72 minTarget:81 minShoot:88 updateMins:93 aimTarget:133
 §180 ร่ายคาถา
 castSlot:181 castUlt:194
 
-## js/10-net.js (71) — 
+## js/10-net.js (71) — เครือข่าย (PeerJS / WebRTC)
 PREFIX:4 NET:5 LOBBY:6 genCode:7 sendAll:8 setStatus:9 hostGame:11 joinGame:34 clientOnData:59 leave:71
 
 ## js/11-host.js (323) — 
@@ -69,8 +69,8 @@ G:4 EVL:4 EVN:4 hostLast:4 tickN:4 emit:5 feed:6 banner:7 plist:8 cleanName:9 fr
 §154 ลูปหลักฝั่งโฮสต์
 hostTick:155 angDiff:167 cH:169 vR:170 updatePlayer:172 hitProp:310 damagePropsIn:317 nearUseProp:318 useProp:319
 
-## js/12-buildings.js (307) — สิ่งปลูกสร้างที่พังเป็นชิ้น (บ้าน)
-BLDDEF:7 BLD_PIECES:8 BLD_FIRE:9 BLD_ICE:9 BLDG:10 BLDON:10 genBldg:11 bldRect:19 bldLocal:20 bldWorld:21 rectDist:22 bldNear:23 hitBldPiece:24 breakBldPiece:35 damageEnv:43 bldPieceAt:57 projEl:63 collideBld:68 updateBldg:81 bldSnap:89 collideWorld:90 shoot:115 eShoot:136 foesOf:143 breakShield:150 gainUlt:151 lifesteal:152 damage:154 playerDown:208 killProj:225 explode:233 hitTarget:245 updateProjectiles:261
+## js/12-buildings.js (366) — สิ่งปลูกสร้างที่พังเป็นชิ้นย่อย (บ้าน) แบบ Battlefield — คู่มือเต็ม: …
+BLDDEF:8 BLD_PIECES:9 BLD_GRID:10 BLD_FIRE:11 BLD_ICE:11 BLD_ROOF_MIN:11 BLDG:12 BLDON:12 genBldg:13 bldRect:23 bldChunk:25 bldAlive:32 bldLocal:33 bldWorld:34 rectDist:35 bldNear:36 hitBldPiece:38 breakBldChunk:49 bldSupport:57 damageEnv:77 bldPieceAt:91 projEl:101 bldPush:106 collideBld:112 updateBldg:127 bldSnap:139 bldParse:145 collideWorld:149 shoot:174 eShoot:195 foesOf:202 breakShield:209 gainUlt:210 lifesteal:211 damage:213 playerDown:267 killProj:284 explode:292 hitTarget:304 updateProjectiles:320
 
 ## js/13-enemies.js (168) — ศัตรู (โหมด Co-op)
 spawnEnemy:2 setupWave:19 bossPhase:36 enemySlam:44 updateEnemies:55
@@ -134,10 +134,10 @@ ANIM_ALT:48 makeAnimator:49 animResolve:54 animPlay:55 animTick:64 lookTint:82 t
 §148 VFX จากไฟล์ (รายละเอียดฝั่งคนทำอยู่ใน ASSETS.md)
 VFXL:154 FLIPL:154 FLIPS:154 prefetchFx:155 playVfx:156 vfxSeq:202 flipTex:207 playFlip:215 fileFx:230 zoneFx:237 clearVfx:238 updateVfx:239
 
-## js/23-props-bld-view.js (216) — prop ฝั่งแสดงผล
+## js/23-props-bld-view.js (249) — prop ฝั่งแสดงผล
 PROPV:2 propFallback:4 syncProps:26
 §42 บ้านพังเป็นชิ้น ฝั่งแสดงผล
-BLDV:45 CHARM:45 DEBRIS:45 BLD_WALLC:46 _bldIce:47 _halfRoof:47 charMat:48 bldIceMat:52 halfRoofGeo:54 bldMats:62 bldFallback:67 bldFilePiece:103 bldBuild:110 syncBld:130 bldDebris:160 updateDebris:181 clearDebris:191 drawPropHint:192 syncWalls:200
+BLDV:45 CHARM:45 DEBRIS:45 BLD_WALLC:46 _bldIce:47 _halfRoof:47 charMat:48 bldIceMat:52 halfRoofGeo:54 bldMats:62 bldFallback:67 bldFilePiece:103 bldHasChunks:111 bldFallbackChunks:113 bldRubble:121 bldBuild:126 syncBld:149 bldDebris:179 bldChunkFall:202 updateDebris:214 clearDebris:224 drawPropHint:225 syncWalls:233
 
 ## js/24-minions-view.js (68) — สัตว์เวท: โมเดลโปร่งแสง + ซิงก์จาก snapshot (MN)
 MM3:2 makeMinion:3 syncMins:36 drawMinBars:58
@@ -233,7 +233,8 @@ trOpenF:2 trKey:2 trN:2 TR_OPTS:3 trToggle:4 trSend:9 trSync:14 hovEl:62
 §63 หน้าตั้งค่า
 setRow:64 setTog:65 setTab:66 XHC:67 XHN:67 setOpts:68 renderSettings:69 drawXhPrev:86 openSettings:87 closeSettings:88 modeIcon:140 modeTitle:141 renderLobby:142
 
-## js/41-debug.js (141) — 
+## js/41-debug.js (141) — เครื่องมือทดสอบสมดุล (ใช้ผ่านคอนโซล WD.bal / WD.dmgTest เท่านั้น ผู้เล่นปกติไม่เห็น)
+§5 บอทต่อสู้แบบง่ายๆ: เล็งนำเป้า เดินรักษาระยะ+ส่ายไปมา ร่ายคาถาทุกครั้ง…
 botBrain:6 _obsKeep:47 balArena:48 balReset:49 balDuel:53 balTour:68 balCoop:82 balSpellTest:98
 §117 Service Worker (sw.js): เก็บไฟล์เกมไว้ในเครื่อง เปิดครั้งต่อไปเร็วขึ้…
 SWK:118 swSetup:119
@@ -327,4 +328,4 @@ fxWarpMake:219 fxWarpTick:231
 §237 ไฟ 3 มิติจากการจำลอง (ชั้น vol) — ไฟล์รูปแบบเดียวกับที่เพื่อน bake จา…
 FXVOL:240 fxVolLoad:241 fxVolTex:245 fxVolSet:248 fxVolReady:249 fxVolMake:250 fxVolTick:253 fxPreAssets:258 fxAssetsWait:260
 
-(46 files, 10028 lines)
+(46 files, 10120 lines)
