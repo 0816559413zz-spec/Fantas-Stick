@@ -8,7 +8,7 @@
 **Purpose:** Give another AI the detailed design decisions and open questions without making up missing mechanics.  
 **Design authority:** **The user decides all mechanics and numbers. Do not silently finalize, rebalance, or implement unapproved ideas.**
 
-> **2026-10-20: ALL abilities are now LOCKED with numbers — read §0 FINAL SPEC first. OPEN/DRAFT notes below are history.**
+> **2026-10-20 (later): read §0 FINAL SPEC v2 first — the user corrected the looks/animations of every ability, reworked Skill 5 and replaced the Ultimate (one giant pillar + mud swamp + 5 drills). v1 and everything below is history.**
 >
 > **IMPORTANT STATE LABELS**  
 > - **LOCKED:** User explicitly accepted/locked the design (individual tuning values may still be subject to playtesting).  
@@ -18,7 +18,83 @@
 >
 ---
 
-## ✅ 0. FINAL SPEC — everything locked (user interview 2026-10-20)
+## ✅ 0. FINAL SPEC v2 — user review 2026-10-20 (look + animation + reworked Skill 5 and Ultimate)
+
+> The user went through every ability of the built Earth and corrected it ("in md file rn earth is wrong, some skills still wrong"). **This section wins over everything below** (the v1 spec and the older OPEN/DRAFT notes are history). Units: game units (1 m = 20), seconds, damage vs 200 HP players. The user's own Thai words are kept under each item (“ผู้ใช้:”) — when in doubt, follow those. ⚠ = Claude's interpretation, confirm with the user if it matters.
+
+### The Stand — how it looks (all abilities)
+- **Blocky sand/rock figure like a Roblox character**, only the **upper half of the body**; the lower half **fades away downward** (dissolves into sand). A few **rock/sand bits** appear when it forms.
+- It only shows up for the moment it acts, then fades away (no lingering Stand).
+- ผู้ใช้: “make it like roblox block sand rock half body and at the half down make it fade down … and some rock sand asset at the first”
+
+### Basic Attack — numbers unchanged (correct)
+- **Stand active:** the Stand locks onto the target, appears at a random spot around it, throws **one punch**, bounces back a little and fades out. **10 dmg**, **every 0.8 s**, lock range **300**, target = enemy nearest the mouse/aim, dodgeable (~0.2 s fade-in), no enemy in range = punches a little in front of the player. No knockback/stun.
+- **Stand broken:** small rock projectile, **5 dmg every 0.35 s**, aimed manually.
+
+### Shield — Stand Barrier (numbers unchanged, LOOK changed)
+- **300 HP**, regen after 3 s unused at +20 HP/s, breaks → Stand gone 15 s, comes back with full 300.
+- **Look:** the **big Stand stands right behind the player** (its head and body very close behind us) and **holds its hands in front of us** as the shield. **Shield HP is visible.**
+- ผู้ใช้: “shield is the big stand will use hand and protect u he will be like his head and body is very near at the back of us and he use hand to protect infront of us we can see health of the shield”
+
+### Dash
+- **Stand Rampage** — numbers correct (1.2 s ~600, hit 15 + 0.5 s stun, end slam 20 + 0.8 s stun r150, CD 8). **Needs stronger visuals:** more running-forward / charging effect (like The Thing) and a better slam effect.
+  - ผู้ใช้: “make it has more effect of running forward too like the thing better slam effect”
+- **Rock Boost Escape** — correct as is (~400, enemies near start knocked away, no damage, CD 6).
+
+### Skill 1 — Stonebreaker (numbers correct, ANIMATION changed)
+- 25 dmg, knockback ~300, range 700, CD 8; knocked into a solid = +20 dmg + 2 s stun.
+- **Animation, in order:** (1) Earth **pries a square rock slab up out of the ground** — the Stand is NOT there yet. (2) Then the **Stand comes out and punches it** (only appears to punch, then fades). (3) The slab gets **cracks where it was punched** and flies straight forward up to 700; past that range it breaks apart.
+- **On hit:** the slab **explodes/shatters** and the target is knocked back. Make it look **much more powerful** on the hit and on the punch — add an **impact wave** etc.
+- ผู้ใช้: “เราจะงัดหินเหลี่ยมขึ้นมาจากพื้นก่อน แล้ว stand จะมาต่อยอีกที ยังไม่ต้องให้ stand โผล่ step แรก … หินจะมีรอยร้าวที่โดนต่อย แล้วก็พุ่งไปด้านหน้าระยะ 700 ถ้าเกินก็จะแตกออก ถ้าโดนเอฟเฟกจะระเบิดแตกออกแล้วคนจะ knockback ไป ให้มันดูทรงพลังมากกว่านี้ตอนโดนคน หรือตอนต่อย มี impact wave”
+
+### Skill 2 — Mud Swamp (numbers correct, LOOK changed)
+- Range 600, 0.5 s telegraph, radius 120, 5 s, enemies only, −50% speed, no Dash, no damage, CD 12, usable with Stand broken.
+- **Look:** the **ground itself turns into mud** (not a magic circle of mud). Animation: **ripples/waves spread out from the centre to the edge**, then the area becomes a **muddy swamp**.
+- ผู้ใช้: “ให้มันเป็นพื้นโคลนเลยไม่ใช่วงเวทโคลน อยากให้มี animation ที่พื้นกลายเป็นโคลน … มีคลื่นกระจายออกถึงขอบระยะแล้วกลายเป็นโคลนบึง”
+
+### Skill 3 — Tectonic Crush (numbers correct, ANIMATION changed)
+- Walls 300 long, 240 apart, 200 HP each; crush 80 (both) / 40 + knockback (one); wind-up 0.8 s; CD 14 = recast window, otherwise walls stay as cover.
+- **Rising:** walls come **straight up out of the ground**, with **much more dirt flying** and **a little dust cloud** where the earth comes up.
+- **Crush (second press):** the **big Stand appears behind the walls, centred between them** (not on either side), **hands ready to squeeze**. It first **pushes slowly with effort** → the rocks **shake hard, dust comes out, the ground moves** → after a moment it **slams them together fast — one big BOOM** → **impact wave**, dirt scattering.
+- ผู้ใช้: “ขึ้นจากพื้นตรงๆเลย ตอนขึ้นให้มีเอฟเฟกดินกระจายมากกว่านี้มีฝุ่นคลุ้งนิดหน่อย … แสตนตัวใหญ่จะโผล่มาตรงหลังหินแต่ไม่อยู่ฝั่งไหนฝั่งหนึ่งอยู่ระหว่างหิน แต่อยู่ข้างหลังเอามือเตรียมบีบ พอเริ่มบีบให้มันเหมือนออกแรงมาค่อยๆก่อน แล้วหินขยับสั่นแรงมีฝุ่นออกมามีเอฟเฟกดินขยับ สักพักนึงแล้วบีบเข้าหาเร็วเลยแบบบึ้มทีเดียว สร้าง impact wave effect ดินกระจาย”
+
+### Skill 4 — Dust Burst (numbers correct, ANIMATION changed)
+- Range ~500, enemies inside see clearly only ~150, no damage, radius 350 / 8 s (Stand broken 200 / 5 s), CD 20.
+- **Animation (Stand active):** a rock is **pulled up from the ground to the height of Earth's head**, made of **chunky, angular rocks clumped together**. The **Stand squeezes it** — while squeezed the rock **shrinks a little** and **gives off a little light** — then it **bursts out into a billowing dust cloud**.
+- **Stand broken:** same rock, but **Earth squeezes it with a spell**; the rock moves slightly, a little light, then the dust bursts out **weaker**. Effects must be **clear/readable**.
+- ⚠ The v1 text said the rock is cast at the aimed spot; the user now says it is pulled up “to the height of our head” — Claude reads this as: the rock forms at the aimed spot at head height (confirm if it should form next to Earth instead).
+- ผู้ใช้: “ลากขึ้นมาระยะเดียวกับหัวตัวเรา จากพื้นเป็นหินทรงแบบก้อนๆมารวมๆกันเหลี่ยมๆ แล้วสแตนจะมาบีบ ระหว่างบีบหินจะเล็กลงตามที่บีบนิดนึงแล้วมีแสงออกนิดหน่อย ค่อยฟุ้งระเบิดออกมา ไม่มีแสตนจะเอาหินมาเหมือนเดิมแล้วบีบด้วยคาถาเอง หินจะขยับเล็กน้อยมีแสงออกนิดหน่อยเหมือนกันแล้วฟุ้งออกมาแต่เบากว่า effect ทำให้ชัด”
+
+### Skill 5 — Terra Auger (REWORKED)
+- Damage **20 / 50 / 120**, charge tap / 2 s / 4.5 s, impact radius 80 / 110 / 150, aim range 600, CD 14, stun/freeze cancels (CD 7), knockback doesn't cancel, usable with Stand broken — unchanged.
+- **Aim:** the drill points **at the cursor** and comes **diagonally down from above** onto the aimed spot (not straight down onto Earth's own head area).
+- **Charge pose:** one **leg back**, **arm pointing toward the mouse**, the **whole body turns** with the aim. The **drill stays in place (above/beside Earth) but rotates to follow the aim**.
+- **Movement while charging:** can walk but **very slow — 85% slower** (was −50%).
+- **Drill look:** **smaller, slim, sharp, spiral**, **silvery** colour (not brown like earth). It **spins faster with each charge tier**, with **more swirling wind** effect, and **same-colour rock bits keep flying off** (“rudues” = debris). **Heat:** the higher the tier the hotter it looks — **yellow-red glow on the drill**; at max tier clearly **red with yellow inside**.
+- **Release:** when fully charged Earth **raises the wand**; on release **brings it down at once** and the drill follows.
+- **Impact:** explosion + impact effect; the ground there **breaks into a small crater**.
+- **Tier 3 mound:** earth rises into a mound **as tall as Earth, like a wall** (was “half height, can be jumped”). It **counts as a solid wall for Stonebreaker's collision stun** (changed). Still 150 HP, one at a time (a new tier 3 replaces the old one).
+- ผู้ใช้: “ให้มันหมุนตาม cursor เล็งไปที่ cursor แบบเฉียง ลงจากด้านบนไม่ใช่เล็งหัวตัวเอง มีตั้งท่าตอน charge ด้วยขาไปข้างหลังแขนชี้ไปทางเม้าหันแล้วตัวจะไปทั้งตัว สว่านจะหันตามแต่อยู่ที่เดิม เดินได้แต่ช้ามาก 85% สว่านจะหมุนเร็วขึ้นตามขั้นมีเอฟเฟกลมหมุนวนเยอะขึ้น … ยิ่งขั้นสูงยิ่งมีความร้อนในตัวจะมีสีเหลืองแดง … ขั้นสุดแดงชัดเจนมีเหลืองไปในตัว สว่านเล็กกว่านี้อีก เล็กเลียวแหลม สีออกเงินๆ … มีเอฟเฟกลม หินสีเดียวกันที่หลุดออกมาเรื่อยๆ กับความร้อนชัดเจน ตัวเราถ้าชาจเสร็จจะชูไม้เวทขึ้นพอปล่อยก็จะเอาลงทันทีสว่านก็จะไปตาม พอกระแทกให้มันมีเอฟเฟกระเบิด มี impact และพื้นตรงนั้นพังเป็นหลุมหน่อยๆ ดินขึ้นมาเป็นเนินสูงเท่าตัวเราเหมือนเปนกำแพงเลย”
+
+### Ultimate — Wrath (REPLACED: one giant pillar + mud swamp + 5 drills)
+- **Sky phase:** Earth rises into the sky; can **move left/right only** (not up/down). **Max 5 s** in the sky (if not thrown by then, it is thrown at the current aim point ⚠ Claude's reading of “auto-throw”).
+- **One single giant pillar** (the user will send a **reference picture of the pillar** and of the **throw pose**).
+- **Aim:** pick the spot; a **ground target marker like the fire circle** shows where it will land. Earth **raises the pillar ready to throw**, and the **big Stand behind Earth holds the pillar and aims with us** in a ready-to-throw pose.
+- **Throw:** Earth **swings the wand down**, the big Stand **hurls it down very fast**, with an **impact wave in the air** at the throw so it looks extremely powerful.
+- **Landing:** the pillar **sticks into the ground at the angle it came in**. **Pillar HP 300**, stays until destroyed. Direct hit **50 dmg + knockback**. Landing = **explosion + impact + ground ripple wave**, lots of **dust (visual only, not Dust Burst)** drifting away and slowly fading.
+- **Mud swamp:** the landing turns a wide area into a **mud swamp — radius 400, 8 s, same effect as Mud Swamp** (enemies: −50% speed, no Dash); everyone inside gets the swamp status. Same **ground-turns-to-mud ripple animation** as Skill 2.
+- **After landing:** **5 fully-charged drills float behind Earth and follow for 10 s**, **turning with Earth**. Earth is **not slowed** (no −85%). **Left click fires them one at a time, right to left**, until all are used. Each = a full-charge Terra Auger: **120 dmg** and **each one makes a mound** (wall-height).
+  - ⚠ Not said: whether the ult's 5 mounds also follow the normal “one mound at a time” rule. Claude's default: ult mounds don't remove each other (confirm).
+- The old “10 pillars / domain / transformed mode” ult is **removed**.
+- ผู้ใช้: “เปลี่ยนเป็นเราขึ้นไปฟ้า ขยับได้ซ้ายขวาแต่ขึ้นลงไม่ได้ มีเสาเดียวใหญ่ๆเลย เดี๋ยวมี reference เสาให้ เลือกจุดปาทำท่าชูเสาขึ้นพร้อมยิง และมีแสตนตัวใหญ่อยู่ด้านหลัง จับเสาเล็งตามเราทำท่าพร้อมปา เดี๋ยวมี ref ท่าให้ ที่พื้นจะมีเหมือนจุดเล็งที่พื้นให้ เหมือน fire circle พอปาก็ตวัดไม้ลง stand ใหญ่ก็ปาลงแบบเร็วๆเลย ให้มันมี impact wave กลางอากาศที่ปาด้วย … พอลงพื้นก็จะปักเป็นเสาตามองศาที่ลงมาเลย มีเลือด 300 พอลงมามันจะทำให้รอบๆ ระยะค่อนข้างกว้างกลายเป็นบึงโคลน … effect ตอนลงมาให้มันระเบิดมี impact พร้อมคลื่นกระเพื่อมเลย และมีฝุ่นค่อนข้างเยอะ … พอเราลงมาก็จะมีกระสุนสว่านที่ชาจเต็มแล้ว 5 อันลอยอยู่ที่หลังตามเราตลอด 10 วิ สว่านต้องหันตามเราด้วย เราจะไม่โดนสโล 85% … ปล่อยไปทีละลูกจากขวาไปซ้าย จนหมด ดาเมจเดียวกับท่าชาจเต็มสว่านปกติ”
+- Numbers the user picked in the same review: sky max 5 s • pillar hit 50 + knockback • pillar stays until destroyed • swamp r400 / 8 s • drills on left click, 120 each, mound each.
+
+### Waiting on the user
+- Reference pictures: the giant pillar, the throw pose.
+
+---
+
+## 0-old. FINAL SPEC v1 (superseded by v2 above) — user interview 2026-10-20
 
 > The user answered every OPEN item below in one interview ("ask me until sure, I confirm all now"). **This section wins over any OPEN / DRAFT / "not locked" note further down.** Units: game units (1 m = 20), seconds, damage vs 200 HP players. Numbers can still change after playtesting, but only when the user says so.
 
@@ -108,8 +184,8 @@
 | Skill 2 | Mud Swamp | **LOCKED** |
 | Skill 3 | Tectonic Crush | **LOCKED — user explicitly confirmed** |
 | Skill 4 | **Dust Burst** — rock cast up, Stand punches it into dust (vision reduction) | **LOCKED 2026-10-20 (§0)** |
-| Skill 5 | **Terra Auger** — chargeable drill, three charge stages | **LOCKED 2026-10-20 (§0)** |
-| Ultimate | **Wrath** — manually place 10 pillars → optional enclosed domain → pillar-resource transformation mode | **LOCKED 2026-10-20 (§0)** |
+| Skill 5 | **Terra Auger** — chargeable drill from above toward the cursor, three charge stages | **v2 2026-10-20 (§0)** |
+| Ultimate | **Wrath** — one giant pillar thrown from the sky → mud swamp r400 → 5 charged drills for 10 s | **v2 2026-10-20 (§0)** |
 
 ---
 
