@@ -2,6 +2,7 @@
 // สถานะบนตัวละคร (ผู้เล่น/ศัตรู): fm = บิตมาสก์จาก host
 function statusFX(o,fm,x,y,z,sz,now){
   if(!fm)return;
+  earthMudSink(o,fm,x,y);
   if(fm&8){
     if(!o.ice){o.ice=new THREE.Mesh(new THREE.IcosahedronGeometry(1,0),new THREE.MeshStandardMaterial({color:'#bfeaff',transparent:true,opacity:0.5,roughness:0.5,emissive:'#2f6a9a',flatShading:true}));o.g.add(o.ice);}
     o.ice.visible=true;o.ice.scale.set(sz*0.5,sz*0.9,sz*0.5);o.ice.position.y=sz*0.85;
@@ -153,6 +154,7 @@ function fx(ev){
     case 'breath':BREATHS.push({x:ev.x,y:ev.y,a:ev.a,t:ev.t});snd('breath',ev);break;
     case 'zn':{
       const col={fire:'#ff7a2a',lava:'#ff5a1a',frost:'#8fe0ff',storm:'#ffe27a',bloom:'#ff9ad5',spore:'#b6e86a'}[ev.z]||'#ffffff';
+      if(ev.z==='mud'){earthMudZone(ev);ZV.push({x:ev.x,y:ev.y,r:ev.r,t:ev.t,kind:'mud',col:'#6b4c2c',file:true});break;}
       const own=zoneFx(ev.z,ev.x,ev.y,ev.r,ev.t,col);
       ZV.push({x:ev.x,y:ev.y,r:ev.r,t:ev.t,kind:ev.z,col,file:own});
       if(own)break;

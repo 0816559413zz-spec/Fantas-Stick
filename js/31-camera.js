@@ -18,7 +18,7 @@ function showPause(){if(overlayOpen())return;const el=$('#pause');el.classList.r
 function hidePause(){$('#pause').classList.add('hidden');}
 const MAPCAM={castle:{m:1.4,wy:0},forest:{m:6,wy:0},pitch:{m:7,wy:0},hogsmeade:{m:4,wy:0},greathall:{m:1.4,wy:0},meadow:{m:8,wy:0},lake:{m:8,wy:0},ruins:{m:5,wy:0}};
 // วางสกิลแบบ Overwatch: กดครั้งแรก = เห็นเงาสีฟ้าตรงจุดที่จะวาง • กดซ้ำ/คลิกซ้าย = วาง • คลิกขวา = ยกเลิก
-const PLACE={slot:-1,g:null};const PLACE_SP={ringofembers:{r:170,range:400},triplestrike:{r:70,range:600}};
+const PLACE={slot:-1,g:null};const PLACE_SP={mudswamp:{r:120,range:600},dustburst:{r:350,range:500},ringofembers:{r:170,range:400},triplestrike:{r:70,range:600}};
 function placeKey(a){
   const i='qerf'.indexOf(a);if(i<0)return false;
   const v=VIEW.cur,me=v&&v.P&&v.P.find(q=>q.id===NET.myId);if(!me||!me.al)return false;

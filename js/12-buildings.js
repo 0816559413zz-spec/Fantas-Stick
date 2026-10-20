@@ -147,21 +147,21 @@ function bldParse(bd){
   BLDG.forEach((b,i)=>{const t=H[i]||'';b.pc.forEach((q,j)=>{q.fl=t?parseInt(t[j]||'0',16):0;const cb=t?parseInt(t.substr(6+j*3,3)||'0',16):0;if(cb!==q.cb){q.cb=cb;b.dirty=true;}});});
 }
 function collideWorld(o,r,z){
-  z=z||0;
-  o.x=clamp(o.x,r+20,MW-r-20);o.y=clamp(o.y,r+20,MH-r-20);
+  z=z||0;const sx=o.x,sy=o.y;let sol=0;
+  o.x=clamp(o.x,r+20,MW-r-20);o.y=clamp(o.y,r+20,MH-r-20);if(o.x!==sx||o.y!==sy)sol++;
   if(PROPON)for(const c of PROPS){
     if(c.st===1||c.hgt<=z)continue;
     if(Math.abs(o.x-c.x)>c.r+r||Math.abs(o.y-c.y)>c.r+r)continue;
     const dx=o.x-c.x,dy=o.y-c.y,d=Math.hypot(dx,dy),m=c.r+r;
     if(d<m&&d>0.001){o.x=c.x+dx/d*m;o.y=c.y+dy/d*m;}
   }
-  for(const b of BLDG)if(bldNear(b,o.x,o.y,r))collideBld(b,o,r,z);
+  for(const b of BLDG)if(bldNear(b,o.x,o.y,r)){const bx=o.x,by=o.y;collideBld(b,o,r,z);if(o.x!==bx||o.y!==by)sol++;}
   const za=TERR?terrT(o.x,o.y)+z:z;
   for(const c of OBS){
     if((c.top!==undefined?c.top<=za:c.hgt<=z)||c.bi!==undefined)continue;
     if(Math.abs(o.x-c.x)>c.r+r||Math.abs(o.y-c.y)>c.r+r)continue;
     const dx=o.x-c.x,dy=o.y-c.y,d=Math.hypot(dx,dy),m=c.r+r;
-    if(d<m&&d>0.001){o.x=c.x+dx/d*m;o.y=c.y+dy/d*m;}
+    if(d<m&&d>0.001){o.x=c.x+dx/d*m;o.y=c.y+dy/d*m;sol++;}
   }
   if(G&&G.walls)for(const c of G.walls){
     if(c.hgt<=z)continue;
@@ -169,6 +169,8 @@ function collideWorld(o,r,z){
     const dx=o.x-c.x,dy=o.y-c.y,d=Math.hypot(dx,dy),m=c.r+r;
     if(d<m&&d>0.001){o.x=c.x+dx/d*m;o.y=c.y+dy/d*m;}
   }
+  sol+=eCollide(o,r,z);   // สิ่งก่อสร้างสายดิน
+  if(sol)o.solN=(o.solN|0)+1;   // ชนของแข็ง (Stonebreaker ใช้ทำคอมโบชนกำแพง)
 }
 
 function shoot(p,type,o){
@@ -206,7 +208,7 @@ function foesOf(team){
   if(G.mins)for(const m of G.mins)if(!m.dead&&m.team!==team)out.push(m);
   return out;
 }
-function breakShield(p){p.shieldOn=false;p.shieldE=0;p.shieldBroken=1.5;emit({k:'sbreak',x:p.x,y:p.y,h:p.z+1.3});}
+function breakShield(p){if(p.pathIdx===EARTH){if(!(p.stdB>0))earthBreak(p);return;}p.shieldOn=false;p.shieldE=0;p.shieldBroken=1.5;emit({k:'sbreak',x:p.x,y:p.y,h:p.z+1.3});}
 function gainUlt(p,v){p.ult=Math.min(100,p.ult+v*0.5*p.buffs.ult);}
 function lifesteal(p,amt){if(p.buffs.life&&p.alive&&!p.downed)healT(p,amt*p.buffs.life);}
 
@@ -240,7 +242,7 @@ function damage(t,amt,srcId,kind){
   if(G.ball&&G.ball.holder===t.id&&kind!=='burn'&&kind!=='zone')quidDrop(t);
   if(t.stS&&kind!=='burn'){t.stS.abs+=amt;emit({k:'efx',z:'sthit',x:Math.round(t.x),y:Math.round(t.y),h:t.z+1.2,sx:src?Math.round(src.x):undefined,sy:src?Math.round(src.y):undefined,n:Math.round(amt),id:t.id});if(t.stS.abs>90)stormShieldBlast(t);return;}
   if(t.shieldOn&&(kind==='melee'||kind==='aoe')&&shieldFaces(t,src?src.x:null,src?src.y:null)){
-    t.shieldE-=amt*1.5;t.shBlk=(t.shBlk|0)+1;emit({k:'block',x:t.x,y:t.y,h:t.z+1.2});
+    if(t.pathIdx===EARTH)earthShHit(t,amt);else{t.shieldE-=amt*1.5;t.shBlk=(t.shBlk|0)+1;}emit({k:'block',x:t.x,y:t.y,h:t.z+1.2});
     {const B=PBASIC[t.pathIdx|0];if(B&&B.onBlock)B.onBlock(t);}
     if(t.shieldE<=0)breakShield(t);
     return;
@@ -266,7 +268,7 @@ function damage(t,amt,srcId,kind){
 }
 function playerDown(t,srcId){
   t.shieldOn=false;t.burn=0;t.fly=false;
-  t.stS=null;t.sdome=null;t.rail=null;t.slnT=0;t.beam=0;t.sdHit=null;if(t.god>0){t.god=0;t.xhp=0;}
+  t.stS=null;t.sdome=null;t.rail=null;t.slnT=0;t.beam=0;t.sdHit=null;earthReset(t);if(t.god>0){t.god=0;t.xhp=0;}
   if(G.mode==='coop'){
     t.downed=true;t.revive=0;t.deaths++;
     feed(`💀 ${t.name} ล้ม! ไปยืนข้างๆ เพื่อชุบ`);
@@ -329,6 +331,7 @@ function updateProjectiles(dt){
     if(!hp)for(const b of BLDG){if(!bldNear(b,pr.x,pr.y,pr.r))continue;const j=bldPieceAt(b,pr.x,pr.y,pr.h,pr.r);if(j>=0){hitBldPiece(b,j,pr.dmg||5,projEl(pr),pr.x-pr.vx*0.08,pr.y-pr.vy*0.08);hp=true;break;}}
     if(!hp&&PROPON)for(const c of PROPS)if(c.st!==1&&pr.h<c.hgt&&(pr.x-c.x)**2+(pr.y-c.y)**2<(c.r+pr.r)**2){hitProp(c,pr.dmg||5,pr.owner);hp=true;break;}
     if(!hp)for(const w of G.walls)if(pr.team!==w.team&&pr.h<w.hgt&&(pr.x-w.x)**2+(pr.y-w.y)**2<(w.r+pr.r)**2){w.hp-=pr.dmg||5;hp=true;emit({k:'efx',z:'wallhit',x:pr.x,y:pr.y,h:pr.h});break;}
+    if(!hp&&eProjHit(pr))hp=true;
     if(hp){killProj(pr);continue;}
     for(const p of ps){
       if(!p.alive||p.downed||p.id===pr.owner||p.team===pr.team)continue;
@@ -343,7 +346,7 @@ function updateProjectiles(dt){
           emit({k:'parry',x:p.x,y:p.y,h:p.z+1.3});
           {const B=PBASIC[p.pathIdx|0];if(B&&B.onParry&&!p.shPar){p.shPar=1;B.onParry(p);}}
         }else{
-          p.shieldE-=pr.dmg*1.6;pr.dead=true;p.shBlk=(p.shBlk|0)+1;emit({k:'block',x:pr.x,y:pr.y,h:pr.h});
+          if(p.pathIdx===EARTH)earthShHit(p,pr.dmg);else{p.shieldE-=pr.dmg*1.6;p.shBlk=(p.shBlk|0)+1;}pr.dead=true;emit({k:'block',x:pr.x,y:pr.y,h:pr.h});
           {const B=PBASIC[p.pathIdx|0];if(B&&B.onBlock)B.onBlock(p);}
           if(p.shieldE<=0)breakShield(p);
         }

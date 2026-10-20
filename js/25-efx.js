@@ -1,5 +1,6 @@
 // ---------- efxFX: ภาพของ event "efx" ทุกคาถา (หนึ่ง case ต่อหนึ่งเอฟเฟกต์) ----------
 function efxFX(ev){
+  if(ev.z&&ev.z[0]==='e'&&earthEfx(ev))return;   // สายดิน (js/47-earth-view.js)
   const x=ev.x,y=ev.y,H=ev.h!==undefined?ev.h:1,me=myPos(),near=!me||Math.hypot(x-me.x,y-me.y)<1000;
   switch(ev.z){
     // ----- สายน้ำแข็ง (ออกแบบโดยผู้เล่น) -----

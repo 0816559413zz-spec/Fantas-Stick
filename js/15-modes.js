@@ -16,7 +16,7 @@ function raceRings(){
 }
 function modeInit(){
   const ps=plist(),m=G.mode;
-  Object.assign(G,{ball:null,snitch:null,rings:null,zone:null,items:null,bodies:[],meet:null,bombs:[],zones:[],strikes:[],walls:[],chan:[],mins:[],erings:[],ices:[],waves:[],glac:[],mid:0,zid:0,fin:0,qs:[0,0],tp:null,taskDone:0,taskTotal:0});
+  Object.assign(G,{ball:null,snitch:null,rings:null,zone:null,items:null,bodies:[],meet:null,bombs:[],zones:[],strikes:[],walls:[],chan:[],mins:[],erings:[],ices:[],waves:[],glac:[],eso:[],edust:[],mid:0,zid:0,fin:0,qs:[0,0],tp:null,taskDone:0,taskTotal:0});
   ps.forEach(p=>{p.gh=false;p.role=null;p.unl=null;p.doing=null;p.lap=0;p.cp=0;p.fin=0;p.boost=0;});
   if(m==='quid'){
     G.ball={x:MW/2,y:MH/2,h:6,vx:0,vy:0,vh:0,holder:null,cool:1,thrower:null};
@@ -224,7 +224,7 @@ function brPick(p,it){
   const k=it.k;
   if(['fire','stun','push','pull'].includes(k))p.unl[k]=1;
   else if(k==='hp')p.hp=Math.min(p.maxHp,p.hp+40);
-  else if(k==='sh'){p.shieldE=100;p.shieldBroken=0;}
+  else if(k==='sh'){p.shieldE=100;p.shieldBroken=0;p.ehp=E_SH;p.stdB=0;}
   else if(k==='ult')p.ult=Math.min(100,p.ult+50);
   emit({k:'pick',x:it.x,y:it.y,t:k,id:p.id});
 }
@@ -352,11 +352,12 @@ function makeSnap(){
       hp:Math.ceil(p.hp),mh:p.maxHp,al:p.alive,dn:p.downed,rv:r1(p.revive),sh:p.shieldOn,se:Math.round(p.shieldE),
       st:p.stun>0,ds:p.dash>0,iv:p.inv>0,bn:p.burn>0,u:Math.floor(p.ult),k:p.kills,d:p.deaths,rs:Math.ceil(p.respawn),
       cd:CDK.map(k=>r1(p.cd[k])),cm:CDK.map(k=>p.cdMax[k]||1),bo:p.bo,pk:p.picked,bf:p.taken,dmg:Math.round(p.dmgDealt),
-      fm:fxMask(p),gh:!!p.gh,hb:!!(G.ball&&G.ball.holder===p.id),lap:p.lap|0,cp:p.cp|0,fin:p.fin|0,bs:p.boost>0,br:p.brn|0,cg:p.chg>0.25?Math.round(Math.min(1,(p.chg-0.25)/1.25)*20)/20:0,dc:p.dchgOn?Math.round(p.dchg/4*20)/20+0.01:0,bm:p.breath>0?(p.breath>2?1:2):0,sn:p.snapT>0?1:0,co:p.colos>0?(p.colN|0)+1:0,kd:p.kindle|0,hv:p.hover>0?1:0,df:p.dfall?[p.dfall.ph,Math.round(p.dfall.tx),Math.round(p.dfall.ty),Math.round(Math.max(0,p.dfall.t)*100)/100]:p.sdome?[p.sdome.ph,Math.round(p.sdome.tx),Math.round(p.sdome.ty),Math.round(Math.max(0,p.sdome.t)*100)/100,1]:0,sm:p.pathIdx===2?[p.lst|0,(p.god>0?p.cEmp:p.emp)?1:0,Math.round((p.dch===undefined?3:p.dch)*10)/10,(p.beam?1:0)|(p.stS?2:0)|(p.god>0?4:0)|(p.slnT>0?8:0)|(p.rail?16:0),p.stS?Math.round(p.stS.abs):0,p.sorb?p.sorb.n:0,p.rail?[Math.round(p.rail.a*100)/100,Math.round(p.rail.t*100)/100,p.rail.len,p.rail.max]:0,p.bTg||0]:0,ob:p.orbs|0,fr:p.pathIdx===1?[p.fmode|0,p.swN|0,p.swC|0,(p.slideT>0?1:0)|(p.cryo>0?2:0)|(p.auraT>0?4:0)|(p.ffT>0?8:0)|(p.mirror>0?16:0)|(p.grT>0?32:0)]:0,xh:Math.ceil(p.xhp||0),fs:Math.round(frostSlow(p))||0,ul:p.unl?Object.keys(p.unl).join(','):'',tk:p.doing?r1(p.doing.left):0})),
+      fm:fxMask(p),ea:earthSnapP(p),gh:!!p.gh,hb:!!(G.ball&&G.ball.holder===p.id),lap:p.lap|0,cp:p.cp|0,fin:p.fin|0,bs:p.boost>0,br:p.brn|0,cg:p.chg>0.25?Math.round(Math.min(1,(p.chg-0.25)/1.25)*20)/20:0,dc:p.dchgOn?Math.round(p.dchg/4*20)/20+0.01:0,bm:p.breath>0?(p.breath>2?1:2):0,sn:p.snapT>0?1:0,co:p.colos>0?(p.colN|0)+1:0,kd:p.kindle|0,hv:p.hover>0?1:0,df:p.dfall?[p.dfall.ph,Math.round(p.dfall.tx),Math.round(p.dfall.ty),Math.round(Math.max(0,p.dfall.t)*100)/100]:p.sdome?[p.sdome.ph,Math.round(p.sdome.tx),Math.round(p.sdome.ty),Math.round(Math.max(0,p.sdome.t)*100)/100,1]:0,sm:p.pathIdx===2?[p.lst|0,(p.god>0?p.cEmp:p.emp)?1:0,Math.round((p.dch===undefined?3:p.dch)*10)/10,(p.beam?1:0)|(p.stS?2:0)|(p.god>0?4:0)|(p.slnT>0?8:0)|(p.rail?16:0),p.stS?Math.round(p.stS.abs):0,p.sorb?p.sorb.n:0,p.rail?[Math.round(p.rail.a*100)/100,Math.round(p.rail.t*100)/100,p.rail.len,p.rail.max]:0,p.bTg||0]:0,ob:p.orbs|0,fr:p.pathIdx===1?[p.fmode|0,p.swN|0,p.swC|0,(p.slideT>0?1:0)|(p.cryo>0?2:0)|(p.auraT>0?4:0)|(p.ffT>0?8:0)|(p.mirror>0?16:0)|(p.grT>0?32:0)]:0,xh:Math.ceil(p.xhp||0),fs:Math.round(frostSlow(p))||0,ul:p.unl?Object.keys(p.unl).join(','):'',tk:p.doing?r1(p.doing.left):0})),
     M:modeSnap(),
     E:G.en.map(e=>({id:e.id,t:e.type,x:r1(e.x),y:r1(e.y),h:r1(e.h||0),hp:Math.ceil(e.hp),mh:Math.ceil(e.maxHp),sl:e.slam>0,st:e.stun>0,bn:e.burn>0,br:e.brn|0,fm:fxMask(e),lg:e.lunge>0})),
     MN:(G.mins||[]).map(m=>[m.id,m.type,Math.round(m.x),Math.round(m.y),r1(m.h||0),Math.max(1,Math.round(m.hp/m.maxHp*100)),m.owner,m.team,fxMask(m)]),
     WL:(G.walls||[]).map(w=>[w.id,Math.round(w.x),Math.round(w.y),w.r,Math.round(w.hp),Math.round(w.t*10)/10]),
+    ...earthSnapW(),
     J:G.proj.map(p=>({id:p.id,t:p.type,x:r1(p.x),y:r1(p.y),h:r1(p.h),vx:Math.round(p.vx),vy:Math.round(p.vy),vh:r1(p.vh),rf:p.dmg>(PDEF[p.type].dmg*1.2)?1:0}))
   };
 }

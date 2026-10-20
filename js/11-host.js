@@ -115,7 +115,7 @@ function hostToLobby(){G.ph='lobby';G.proj=[];G.en=[];broadcastLobby();}
 function resetBody(p,x,y){
   Object.assign(p,{x,y,z:0,vz:0,fly:false,flyCd:0,root:0,vx:0,vy:0,hp:p.maxHp,alive:true,downed:false,revive:0,stun:0,burn:0,dash:0,inv:0,
     shieldOn:false,shieldE:100,shieldBroken:0,respawn:0});
-  for(const k of CDK)p.cd[k]=0;clearStatus(p);p.trail=null;
+  for(const k of CDK)p.cd[k]=0;clearStatus(p);p.trail=null;earthReset(p);
   p.ang=Math.atan2(MH/2-y,MW/2-x);
 }
 function fmap(){const M=MAPS[MAPID];return M&&M.fm;}
@@ -228,10 +228,11 @@ function updatePlayer(p,dt,acting){
   }else if(p.colos>0){p.colH=clamp((p.colH||9)+((inp.jh?1:0)-(inp.ch?1:0))*6*dt,5,15);p.z+=(p.colH-p.z)*Math.min(1,9*dt);p.vz=0;}
   else if(p.dfall)dragonfallTick(p,inp,dt);
   else if(p.sdome)stormDomeTick(p,inp,dt);
+  else if(p.wr&&p.wr.ph!=='trans'){}   // Wrath: ลอยบนฟ้า (earthWrathTick คุมความสูง)
   else gravity();
 
   // โล่
-  const wantSh=canAct&&!p.fly&&G.mode!=='imp'&&!(G.ball&&G.ball.holder===p.id)&&inp.sh&&p.shieldBroken<=0&&p.shieldE>5&&p.dash<=0&&!p.dchgOn&&!(p.colos>0)&&!(p.cryo>0)&&!p.dfall&&p.pathIdx!==2;
+  const wantSh=canAct&&!p.fly&&G.mode!=='imp'&&!(G.ball&&G.ball.holder===p.id)&&inp.sh&&p.shieldBroken<=0&&p.shieldE>5&&p.dash<=0&&!p.dchgOn&&!(p.colos>0)&&!(p.cryo>0)&&!p.dfall&&p.pathIdx!==2&&!p.aug&&!p.ramp&&!(p.wr&&p.wr.ph!=='trans');
   if(wantSh&&!p.shieldOn){p.shieldOn=true;p.shieldT=G.time;p.shBlk=0;p.shPar=0;}
   if(!wantSh)p.shieldOn=false;
   if(p.shieldOn){p.shieldE-=12*dt*((PBASIC[p.pathIdx|0]||{}).shDrain||1);if(p.shieldE<=0)breakShield(p);}
@@ -239,6 +240,7 @@ function updatePlayer(p,dt,acting){
   if(p.shWas&&!p.shieldOn){const B=PBASIC[p.pathIdx|0];if(B&&B.shDrop)B.shDrop(p);}
   p.shWas=p.shieldOn;
   if(p.pathIdx===2)stormTick(p,dt);
+  if(p.pathIdx===EARTH)earthTick(p,dt);
 
   // เคลื่อนที่
   const ox0=p.x,oy0=p.y,oz0=p.z,onG0=!p.fly&&p.z<=groundH(p.x,p.y,p.z)+0.05;
@@ -248,7 +250,7 @@ function updatePlayer(p,dt,acting){
   const ml=Math.hypot(mx,my);if(ml){mx/=ml;my/=ml;}
   if(!canAct||p.root>0||p.dchgOn||p.cryo>0){mx=my=0;}
   else if(p.fear>0){const fa=Math.atan2(p.y-p.fearY,p.x-p.fearX);mx=Math.cos(fa);my=Math.sin(fa);}
-  const spd=(p.fly?540*p.buffs.spd:175*p.buffs.spd*(p.shieldOn?0.5:1))*(p.boost>0?1.45:1)*moveMul(p)*(p.dfall?(p.dfall.ph===2?0.45:0):p.sdome?(p.sdome.ph===2?0.45:0):p.rail?0:(p.kindle>0&&p.hover>0)?0.35:p.breath>0?0.7:(p.snapT>0||p.colos>0||p.grT>0)?0.5:1)*(p.slideT>0?1.8:1+(p.iceB||0));
+  const spd=(p.fly?540*p.buffs.spd:175*p.buffs.spd*(p.shieldOn?0.5:1))*(p.boost>0?1.45:1)*moveMul(p)*(p.wr||p.aug?earthSpd(p):1)*(p.dfall?(p.dfall.ph===2?0.45:0):p.sdome?(p.sdome.ph===2?0.45:0):p.rail?0:(p.kindle>0&&p.hover>0)?0.35:p.breath>0?0.7:(p.snapT>0||p.colos>0||p.grT>0)?0.5:1)*(p.slideT>0?1.8:1+(p.iceB||0));
   if(p.dash>0){
     p.dash-=dt;const ds=p.dashSp||900;p.x+=p.dashX*ds*dt;p.y+=p.dashY*ds*dt;
     if(p.trail){p.trail.acc-=dt;if(p.trail.acc<=0){p.trail.acc=0.045;addZone({x:p.x,y:p.y,r:44,t:2.5,tick:0.5,owner:p.id,team:p.team,kind:'fire',hit(t,z){damage(t,2,z.owner,'zone');ignite(t,z.owner,1);}});}}
@@ -288,9 +290,9 @@ function updatePlayer(p,dt,acting){
   const B=PBASIC[p.pathIdx|0]||PBASIC[0];
   if(pr.v&&p.pathIdx===1&&!(p.fmCd>0)&&!(p.cryo>0)&&!(p.mirror>0)){p.fmode=p.fmode===1?0:1;p.fmCd=1;p.cmbT=0;emit({k:'efx',z:'fswap',x:p.x,y:p.y,h:p.z+1,id:p.id,m:p.fmode});}
   // กระโดด (Space) ทุกสาย
-  if(pr.jp&&!(p.cryo>0)&&!p.dchgOn&&p.z<=groundH(p.x,p.y,p.z)+0.05&&!(p.colos>0)){p.vz=8;emit({k:'efx',z:'jump',x:p.x,y:p.y,h:p.z,id:p.id});}
+  if(pr.jp&&!(p.cryo>0)&&!(p.mudT>0)&&!(p.wr&&p.wr.ph!=='trans')&&!p.dchgOn&&p.z<=groundH(p.x,p.y,p.z)+0.05&&!(p.colos>0)){p.vz=8;emit({k:'efx',z:'jump',x:p.x,y:p.y,h:p.z,id:p.id});}
   if(p.cryo>0){if(pr.q)castSlot(p,0);if(pr.e)castSlot(p,1);if(pr.r)castSlot(p,2);if(pr.f)castSlot(p,3);return;}
-  if(p.dfall||p.sdome||p.shk>0){}else if(B.dash){if(B.dash(p,inp,pr,dt,setCd))return;}
+  if(p.dfall||p.sdome||p.shk>0||(p.mudT>0&&!p.ramp)){}else if(B.dash){if(B.dash(p,inp,pr,dt,setCd))return;}
   else if(pr.sp&&p.cd.dodge<=0&&p.z<0.5){
     let dx=mx,dy=my;if(!dx&&!dy){dx=Math.cos(p.ang);dy=Math.sin(p.ang);}
     p.dash=0.18;p.dashX=dx;p.dashY=dy;p.inv=0.24;p.shieldOn=false;setCd('dodge',2.5*cdr);

@@ -14,6 +14,7 @@ function rebuildKeys(){
   const K=(code,v)=>{KMAP[code]=v;},Pp=(code,v)=>{PMAP[code]=v;};
   K(KEYS.up,'u');K(KEYS.down,'d');K(KEYS.left,'l');K(KEYS.right,'r');K('ArrowUp','u');K('ArrowDown','d');K('ArrowLeft','l');K('ArrowRight','r');
   K(KEYS.jump,'jh');K(KEYS.down2,'ch');K('ControlLeft','ch');K(KEYS.dash,'dh');if(KEYS.dash==='ShiftLeft')K('ShiftRight','dh');
+  K(KEYS.q,'hq');K(KEYS.e,'he');K(KEYS.r,'hr');K(KEYS.f,'hf');   // ปุ่มสกิลกดค้าง (Terra Auger ชาร์จ)
   Pp(KEYS.q,'q');Pp(KEYS.e,'e');Pp(KEYS.r,'r');Pp(KEYS.f,'f');Pp(KEYS.dash,'sp');if(KEYS.dash==='ShiftLeft')Pp('ShiftRight','sp');Pp(KEYS.jump,'jp');Pp(KEYS.ult,'x');Pp(KEYS.broom,'b');Pp(KEYS.use,'g');Pp(KEYS.mode,'v');
 }
 function keyName(c){return ({Space:'Space',ShiftLeft:'Shift',ShiftRight:'Shift R',ControlLeft:'Ctrl',Tab:'Tab',Escape:'Esc'})[c]||c.replace(/^Key|^Digit/,'');}
@@ -39,7 +40,7 @@ addEventListener('keyup',e=>{
   if(e.code===KEYS.talk)VOICE.talking=false;
   if(KMAP[e.code])INPUT[KMAP[e.code]]=0;
 });
-addEventListener('blur',()=>{INPUT.u=INPUT.d=INPUT.l=INPUT.r=INPUT.fire=INPUT.sh=INPUT.jh=INPUT.ch=INPUT.dh=0;VOICE.talking=false;showBoard=false;});
+addEventListener('blur',()=>{INPUT.hq=INPUT.he=INPUT.hr=INPUT.hf=0;INPUT.u=INPUT.d=INPUT.l=INPUT.r=INPUT.fire=INPUT.sh=INPUT.jh=INPUT.ch=INPUT.dh=0;VOICE.talking=false;showBoard=false;});
 addEventListener('mousemove',e=>{
   mouseX=e.clientX;mouseY=e.clientY;
   if(locked&&screen==='game'){const v=VIEW.cur,me=v&&v.P&&v.P.find(q=>q.id===NET.myId),k=(me&&me.bm===2?0.55:1)*(1-0.25*AIMZ);if(!(me&&me.sm&&(me.sm[3]&16))){yaw+=e.movementX*SENS*k;pitch=clamp(pitch+e.movementY*SENS*k*(SET.inv?-1:1),-0.25,1.15);}}

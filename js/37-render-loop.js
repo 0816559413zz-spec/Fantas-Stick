@@ -58,14 +58,14 @@ function renderGame(v,P,E,me,dt,now){
   syncPlayers(P,v.mode,now,dt);pf('players',t0);
   if(me&&me.al&&!me.fl&&!me.dn){const o=PM3.get(me.id);if(o){const k=Math.floor(o.walk/Math.PI);if(o.stepK!==undefined&&k!==o.stepK)snd('step',{vol:0.35,rev:0.1});o.stepK=k;}}t0=performance.now();
   syncEnemies(E,P,now,dt);pf('enemies',t0);t0=performance.now();
-  syncProj(v,now);syncWalls(v);syncProps(v);syncBld(dt);syncMins(v,now,dt);
+  syncProj(v,now);syncWalls(v);syncEarth(v,dt,now);syncProps(v);syncBld(dt);syncMins(v,now,dt);
   syncModeObjs(v,P,me,now,dt);pf('projMode',t0);
   KC=Math.max(0,KC-dt);roleShowT=Math.max(0,roleShowT-dt);
   $('#trainEnd').classList.toggle('hidden',!(NET.isHost&&v.mode==='train'&&v.ph!=='over'));
   trSync(v);
   tickFlash(dt);
   t0=performance.now();updateZV(dt);updateParticles(dt);updateShapes(dt);updateLights(dt);updateVfx(dt);updateDebris(dt);pf('fx',t0);
-  QUAL.frame++;gl.shadowMap.needsUpdate=QUAL.mode==='high'||QUAL.frame%2===0;
+  QUAL.frame++;gl.shadowMap.needsUpdate=QUAL.mode==='high'||QUAL.frame%2===0;if(gl.shadowMap.needsUpdate)shadowFollow();
   if(FXSTUDIO.noDraw)return;
   t0=performance.now();composer.render();pf('gpuSubmit',t0);
   t0=performance.now();const spk=speakingIds();

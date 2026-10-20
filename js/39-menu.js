@@ -36,7 +36,7 @@ function crRenderWand(){
 // ----- ขั้น 3: สาย + ชุดคาถา -----
 const ROLE_COL={builder:'#ffb066',control:'#8fe0ff',finisher:'#ff7a8a',utility:'#9ad7a0',summon:'#ff9ad5',ult:'#ffe27a'};
 function roleTag(S){return `<i class="rtag" style="--rc:${ROLE_COL[S.role]||'#fff'}">${ROLE_N[S.role]||''}</i>`;}
-const DESIGNED=['pyro','frost'];
+const DESIGNED=['pyro','frost','earth'];
 function spellTags(S){
   const t=[];
   if(S.ult)t.push('<i class="tg ult">เวทโบราณ X</i>');else t.push(`<i class="tg">⏱ ${S.cd} วิ</i>`);
@@ -62,7 +62,8 @@ const SB_THEME={
   storm:{fx:'spark',tint:'radial-gradient(ellipse at 62% 45%,rgba(255,230,90,.22),rgba(18,16,4,.6) 70%)',tag:'ว่องไว เก็บสายฟ้าแล้วปล่อย'},
   nature:{fx:'leaf',tint:'radial-gradient(ellipse at 62% 55%,rgba(90,210,110,.24),rgba(4,22,10,.6) 70%)',tag:'พิษสะสม หนามระเบิด'},
   hex:{fx:'smoke',tint:'radial-gradient(ellipse at 62% 50%,rgba(170,90,255,.26),rgba(14,4,26,.62) 70%)',tag:'ตีตรา สาปแช่ง ควบคุม'},
-  summon:{fx:'wisp',tint:'radial-gradient(ellipse at 62% 50%,rgba(255,140,210,.24),rgba(26,6,20,.6) 70%)',tag:'อัญเชิญสัตว์เวทมาสู้แทน'}
+  summon:{fx:'wisp',tint:'radial-gradient(ellipse at 62% 50%,rgba(255,140,210,.24),rgba(26,6,20,.6) 70%)',tag:'อัญเชิญสัตว์เวทมาสู้แทน'},
+  earth:{fx:'smoke',tint:'radial-gradient(ellipse at 62% 55%,rgba(200,160,100,.26),rgba(24,16,6,.62) 70%)',tag:'Stand หินต่อยแทน สร้างกำแพง ผลักชนของแข็ง'}
 };
 const ROLE_ORDER=['builder','control','utility','summon','finisher'];
 let sbFxRun=false,sbFxT=0,sbParts=[];

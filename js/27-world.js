@@ -9,7 +9,7 @@ const hdr=(c,k)=>new THREE.Color(c).multiplyScalar(k);
 const gl=new THREE.WebGLRenderer({canvas:document.getElementById('gl'),antialias:false,powerPreference:'high-performance'});
 gl.setPixelRatio(Math.min(1,window.devicePixelRatio||1));
 gl.useLegacyLights=true;
-gl.shadowMap.enabled=true;gl.shadowMap.type=THREE.PCFShadowMap;
+gl.shadowMap.enabled=true;gl.shadowMap.type=THREE.PCFSoftShadowMap; // ขอบเงานุ่ม (เงาตามผู้เล่น shadowFollow ทำให้คมพอจะนุ่มได้)
 gl.shadowMap.autoUpdate=false; // อัปเดตเงาเองใน render() (โหมดอัตโนมัติ = ทุก 2 เฟรม)
 gl.toneMapping=THREE.ACESFilmicToneMapping;gl.toneMappingExposure=1.1;
 const scene=new THREE.Scene();
@@ -35,14 +35,37 @@ function softify(m,range){
   return fxMat(m);}
 // ภาพฉากหลัก (ก่อนวาดชั้นเอฟเฟกต์) ให้ shader อากาศร้อนบิดเบี้ยว (heat haze, js/42) อ่าน — มีค่าเฉพาะตอนเปิด soft
 const HAZE_U={uScene:{value:null}};
+// เงาตามซอกมุม (SSAO) — คำนวณจากภาพความลึกอย่างเดียว ตอนก๊อปภาพฉากใน FXPass (ไม่ต้องวาดฉากซ้ำ) → อนุภาคไม่โดนทำให้มืด
+// uAO = ความเข้ม (0 = ปิด) • uR = รัศมีที่มองหาซอก (หน่วย 3D) • uFade = ระยะที่เริ่มจาง/หายหมด (ไกลกว่านั้นหมอกบังอยู่แล้ว)
+const AOU={uAO:{value:0},uR:{value:0.9},uFade:{value:new THREE.Vector2(35,70)},uTan:{value:new THREE.Vector2(1,1)}};
+const AO_ON={strength:1.1};
+const AO_FRAG='uniform sampler2D t;uniform sampler2D tD;uniform vec2 uRes;uniform float uNear;uniform float uFar;uniform float uAO;uniform float uR;uniform vec2 uFade;uniform vec2 uTan;varying vec2 vUv;'+
+  'float lz(vec2 uv){float d=texture2D(tD,uv).x;return (uNear*uFar)/(uFar-d*(uFar-uNear));}'+
+  'vec3 vp(vec2 uv){float z=lz(uv);return vec3((uv*2.0-1.0)*uTan*z,-z);}'+
+  'void main(){vec4 c=texture2D(t,vUv);'+
+  'if(uAO>0.001&&texture2D(tD,vUv).x<0.99999){'+
+    'vec3 P=vp(vUv);float z=-P.z;'+
+    'if(z<uFade.y){vec2 px=1.0/uRes;'+
+      'vec3 pr=vp(vUv+vec2(px.x,0.0))-P,pl=P-vp(vUv-vec2(px.x,0.0)),pu=vp(vUv+vec2(0.0,px.y))-P,pd=P-vp(vUv-vec2(0.0,px.y));'+
+      'vec3 N=normalize(cross(abs(pr.z)<abs(pl.z)?pr:pl,abs(pu.z)<abs(pd.z)?pu:pd));'+
+      'vec2 rad=min(vec2(uR)/(2.0*uTan*z),vec2(0.12));'+
+      'float ang=6.2832*fract(52.9829189*fract(dot(gl_FragCoord.xy,vec2(0.06711056,0.00583715))));'+
+      'float occ=0.0;'+
+      'for(int i=0;i<12;i++){float f=(float(i)+0.5)/12.0;float a=ang+float(i)*2.39996;'+
+        'vec3 v=vp(vUv+vec2(cos(a),sin(a))*rad*sqrt(f))-P;float L=length(v);'+
+        'occ+=max(0.0,dot(N,v)/(L+1e-4)-0.12)*(1.0-smoothstep(uR*0.6,uR*1.6,L));}'+
+      'float ao=1.0-uAO*occ/12.0;ao=mix(clamp(ao,0.0,1.0),1.0,smoothstep(uFade.x,uFade.y,z));'+
+      'c.rgb*=ao;}}'+
+  'gl_FragColor=c;}';
 class FXPass extends Pass{
   constructor(){super();this.needsSwap=true;
-    this.cp=new FullScreenQuad(new THREE.ShaderMaterial({uniforms:{t:{value:null}},vertexShader:'varying vec2 vUv;void main(){vUv=uv;gl_Position=vec4(position.xy,0.0,1.0);}',fragmentShader:'uniform sampler2D t;varying vec2 vUv;void main(){gl_FragColor=texture2D(t,vUv);}',depthTest:false,depthWrite:false}));}
+    this.cp=new FullScreenQuad(new THREE.ShaderMaterial({uniforms:Object.assign({t:{value:null},tD:{value:null}},SOFTU,AOU),vertexShader:'varying vec2 vUv;void main(){vUv=uv;gl_Position=vec4(position.xy,0.0,1.0);}',fragmentShader:AO_FRAG,depthTest:false,depthWrite:false}));}
   render(r,write,read){const ac=r.autoClear;r.autoClear=false;
     if(!SOFTU.uSoftOn.value){this.needsSwap=false;r.setRenderTarget(read);r.render(fxScene,cam);r.autoClear=ac;return;}
     // นุ่ม: ก๊อปภาพฉากไปอีกแผ่น แล้ววาดเอฟเฟกต์ทับโดยอ่านความลึกจากแผ่นเดิม (อ่าน+เขียนแผ่นเดียวกันไม่ได้)
     this.needsSwap=true;SOFTU.uDepth.value=read.depthTexture;SOFTU.uRes.value.set(read.width,read.height);SOFTU.uNear.value=cam.near;SOFTU.uFar.value=cam.far;
-    this.cp.material.uniforms.t.value=read.texture;HAZE_U.uScene.value=read.texture;r.setRenderTarget(write);this.cp.render(r);r.render(fxScene,cam);r.autoClear=ac;}
+    const u=this.cp.material.uniforms,th=Math.tan(cam.fov*Math.PI/360);u.tD.value=read.depthTexture;AOU.uTan.value.set(th*cam.aspect,th);
+    u.t.value=read.texture;HAZE_U.uScene.value=read.texture;r.setRenderTarget(write);this.cp.render(r);r.render(fxScene,cam);r.autoClear=ac;}
 }
 const fxPass=new FXPass();composer.addPass(fxPass);
 const bloom=new UnrealBloomPass(new THREE.Vector2(512,512),0.72,0.5,0.86);
@@ -90,6 +113,8 @@ function applyQuality(){
   // soft particles: ปิดเมื่อกราฟิกประหยัด หรืออัตโนมัติลดถึงขั้นปิดเงา (ประหยัดการก๊อปภาพเต็มจอ 1 ครั้ง)
   const soft=QUAL.mode!=='low'&&!(QUAL.mode==='auto'&&QUAL.lvl>=2)?1:0;
   if(SOFTU.uSoftOn.value!==soft){SOFTU.uSoftOn.value=soft;for(const m of FXMATS)m.depthTest=!soft;}
+  // เงาตามซอกมุม: สูง = เปิด / อัตโนมัติ = เปิดจนกว่าเครื่องเริ่มช้า (lvl≥1) / ประหยัด = ปิด (ทำงานเฉพาะตอน soft เปิด)
+  AOU.uAO.value=soft&&(QUAL.mode==='high'||QUAL.lvl<1)?AO_ON.strength:0;
   if(typeof resize==='function'&&SW)resize();
 }
 // ปรับความละเอียดอัตโนมัติ: เฟรมช้า (<~40fps) ลดลงทีละขั้น / ลื่นต่อเนื่องค่อยเพิ่มกลับ
@@ -151,14 +176,41 @@ const SKY={};
 const hemi=new THREE.HemisphereLight('#8fa6ff','#2a1f1a',0.55);scene.add(hemi);
 scene.add(new THREE.AmbientLight('#404060',0.3));
 const moonL=new THREE.DirectionalLight('#c4d2ff',1.0);
-moonL.position.set(-55,95,-70);moonL.castShadow=true;moonL.shadow.bias=-0.0006;
-scene.add(moonL);
+moonL.position.set(-55,95,-70);moonL.castShadow=true;moonL.shadow.bias=-0.0004;moonL.shadow.normalBias=0.03;
+scene.add(moonL);scene.add(moonL.target);
+// ทิศจากพื้นไปหาแสงหลัก (setSky ตั้ง) — shadowFollow ใช้วางแสงตามผู้เล่น
+const LDIR=new THREE.Vector3(-55,95,-70).normalize();
 function setSky(mode){
   const day=mode==='sunset';
   SKY.mesh.material.map=day?SKY.sunset:SKY.night;SKY.mesh.material.needsUpdate=true;
   SKY.stars.visible=!day;SKY.moon.visible=!day;SKY.sun.visible=day;
   if(day){moonL.color.set('#ffbe8a');moonL.position.set(80,45,-110);gl.toneMappingExposure=1.05;}
   else{moonL.color.set('#c4d2ff');moonL.position.set(-55,95,-70);gl.toneMappingExposure=1.1;}
+  LDIR.copy(moonL.position).normalize();
+}
+// ---------- เงาตามผู้เล่น ----------
+// กล้องเงาครอบแค่พื้นที่รอบ ๆ ที่กล้องมอง (ไม่ใช่ทั้งแผนที่) → เงาคมขึ้นหลายเท่า โดยภาพเงาขนาดเท่าเดิม
+// r = ครึ่งความกว้างพื้นที่เงา (หน่วย 3D, ไม่เกินขนาดแผนที่) • ahead = ดันจุดกลางไปข้างหน้ากล้อง (สัดส่วนของ r)
+// ขยับเป็นขั้นเท่าพิกเซลเงาพอดี กันขอบเงาสั่นยิบ ๆ ตอนเดิน/หันกล้อง • on=false → กลับไปแบบคลุมทั้งแผนที่ (ตั้งใน buildWorld)
+const SHD={on:true,r:36,rHigh:48,ahead:0.5};
+const _shF=new THREE.Vector3(),_shR=new THREE.Vector3(),_shU=new THREE.Vector3(),_shC=new THREE.Vector3(),_shY=new THREE.Vector3(0,1,0);
+function shadowFollow(){
+  if(!gl.shadowMap.enabled)return;
+  const c=moonL.shadow.camera,ext=Math.max(MW,MH)*S3/2+12;
+  if(!SHD.on){   // แบบเดิม: คลุมทั้งแผนที่ แสงมองไปที่กลางแผนที่
+    if(c.right!==ext){Object.assign(c,{left:-ext,right:ext,top:ext,bottom:-ext,near:1,far:400});c.updateProjectionMatrix();}
+    moonL.target.position.set(0,0,0);moonL.position.copy(LDIR).multiplyScalar(133);moonL.target.updateMatrixWorld();return;}
+  const r=Math.min(ext,QUAL.mode==='high'?SHD.rHigh:SHD.r);
+  if(c.right!==r){Object.assign(c,{left:-r,right:r,top:r,bottom:-r,near:1,far:420});c.updateProjectionMatrix();}
+  _shF.set(0,0,-1).applyQuaternion(cam.quaternion);_shF.y=0;if(_shF.lengthSq()<1e-6)_shF.set(0,0,-1);_shF.normalize();
+  const x=cam.position.x+_shF.x*r*SHD.ahead,z=cam.position.z+_shF.z*r*SHD.ahead;
+  _shC.set(x,TW(x,z),z);
+  // ปัดจุดกลางให้ตรงตารางพิกเซลเงา (แกนขวา/บนของกล้องเงา)
+  _shF.copy(LDIR).negate();_shR.crossVectors(_shF,_shY).normalize();_shU.crossVectors(_shR,_shF);
+  const tex=2*r/moonL.shadow.mapSize.x,a=_shC.dot(_shR),b=_shC.dot(_shU);
+  _shC.addScaledVector(_shR,Math.round(a/tex)*tex-a).addScaledVector(_shU,Math.round(b/tex)*tex-b);
+  moonL.target.position.copy(_shC);moonL.position.copy(_shC).addScaledVector(LDIR,200);
+  moonL.target.updateMatrixWorld();
 }
 // ไฟชั่วคราวสำหรับคาถา (pool คงที่ ไม่ต้อง compile shader ใหม่)
 const LPOOL=[];

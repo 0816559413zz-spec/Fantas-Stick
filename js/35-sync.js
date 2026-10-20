@@ -63,10 +63,11 @@ function syncPlayers(P,mode,now,dt){
     stormFX(o,p,pz,now,dt);
     chillFX(o,p,pz,now,dt);
     frostFX(o,p,pz,now,dt);
+    earthFX(o,p,pz,now,dt);
     if(o.rig)rigSync(o,dt);
     if(p.bn&&Math.random()<0.7)burst(p.x,p.y,'#ff6a2a',1,30,0.45,3.5,{h:pz+rnd(0.3,1.8),vh:[1,2.5],g:-1});
     if(p.u>=100&&Math.random()<0.35)burst(p.x+rnd(-18,18),p.y+rnd(-18,18),'#ffd86b',1,10,0.9,1.8,{h:pz+rnd(0,0.4),vh:[1.5,3],g:-0.3});
-    if(p.sh&&!fireSh&&Math.random()<0.3)burst(p.x,p.y,'#7ff6ff',1,40,0.4,1.4,{h:pz+rnd(0.3,2)});
+    if(p.sh&&!fireSh&&!p.ea&&Math.random()<0.3)burst(p.x,p.y,'#7ff6ff',1,40,0.4,1.4,{h:pz+rnd(0.3,2)});
     if(p.ds)burst(p.x,p.y,'#bfefff',2,30,0.3,2,{h:pz+rnd(0.4,1.6),g:0});
   }
   for(const [id,o] of PM3)if(!seen.has(id)){if(o.fball)scene.remove(o.fball);if(o.orbG)scene.remove(o.orbG);if(o.clones)o.clones.forEach(c=>scene.remove(c.g));disposeObj(o.g);PM3.delete(id);}
@@ -122,6 +123,7 @@ function makeProj(col,t){
   // หน้าตากระสุนจากไฟล์ proj_<ชนิด> (ปั้นให้ด้านหน้าพุ่งไปทาง −Y ของ Blender) — แสงรอบ (halo) ยังอยู่
   const fm=modelInst('proj_'+t);if(fm){fm.traverse(m=>{if(m.isMesh)m.castShadow=false;});g.add(fm);o.fileModel=fm;}
   // ลูกไฟชาร์จ / Kindle: ลูกไฟ shader (เปลวไหลไปด้านหลัง) + กรวยหางไฟ
+  if(t==='erock'||t==='eslab')earthProjMesh(o,t);
   if(t==='pfire'||t==='pfireb'){o.fb=makeFireBall({flow:[0,0,-1]});g.add(o.fb);o.ft=makeFireTail({speed:3.6});g.add(o.ft);}
   if(t==='stun'||t==='zap')for(let i=0;i<2;i++){
     const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.BufferAttribute(new Float32Array(9*3),3));
@@ -338,6 +340,7 @@ function drawCrosshair(){
   const _v=VIEW.cur,_me=_v&&_v.P&&_v.P.find(q=>q.id===NET.myId),hot=_me&&(_me.cg>=1||_me.dc>=1);
   drawXh(x,y,hot);
   if(_me&&_me.sm&&_me.al)drawStormHud(x,y,_me.sm);
+  if(_me&&_me.ea&&_me.al)drawEarthHud(x,y,_me.ea);
   if(!locked){
     cx.font='600 17px Kanit,sans-serif';cx.textAlign='center';
     const t='🖱️ คลิกที่จอเพื่อบังคับกล้อง (Esc = ปล่อยเมาส์)',w=cx.measureText(t).width+48;
