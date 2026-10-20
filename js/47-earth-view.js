@@ -71,11 +71,13 @@ function standOp(S,op,lop){S.op=op;S.g.visible=op>0.02;for(const m of S.mats){m.
   const lo=op*(lop===undefined?1:lop);for(const m of S.lmats){m.transparent=true;m.opacity=lo;m.depthWrite=lo>0.6;}}
 // k: {punch 0-1, hold, raise, slam 0-1, squeeze, spread 0-1 (1 = กางสุด, 0 = หนีบ), throwK (-1 ง้างสุด → 1 ปาออก), lean, run, t}
 function standPose(S,k){const R=S.R,L=S.L;
-  R.up.rotation.set(0,0,0);L.up.rotation.set(0,0,0);R.fo.rotation.set(0,0,0);L.fo.rotation.set(0,0,0);S.body.rotation.set(k.lean||0,k.twist||0,0);
-  if(k.punch!==undefined){const p=k.punch||0;   // ต่อยแบบบิดตัว: ง้างไหล่ขวาไปหลัง → หมุนตัวส่งหมัด ข้อศอกงอ → เหยียด • แขนซ้ายดึงกลับ
-    S.body.rotation.y=lerp(0.6,-0.55,p);S.body.rotation.z=lerp(0.1,-0.12,p);S.body.rotation.x=0.08+0.22*p;
-    R.up.rotation.x=lerp(-0.85,-1.45,p);R.up.rotation.z=lerp(0.3,-0.2,p);R.fo.rotation.x=lerp(-1.35,-0.05,p);
-    L.up.rotation.x=lerp(-1.1,-0.3,p);L.up.rotation.z=lerp(0,0.3,p);L.fo.rotation.x=-1.15;}
+  R.up.rotation.set(0,0,0);L.up.rotation.set(0,0,0);R.fo.rotation.set(0,0,0);L.fo.rotation.set(0,0,0);S.body.rotation.set(k.lean||0,k.twist||0,0);S.head.rotation.set(0,0,0);let dip=0;
+  // ต่อยแบบธรรมชาติ: w = ง้าง (บิดสะโพก/ไหล่ขวาไปหลัง ข้อศอกพับ แขนซ้ายยกกันหน้า) • punch = หมุนตัวส่งหมัดเร็ว ๆ (ไหล่เข้า ตัวโน้ม ย่อตัว) • rec = ผ่อนกลับ
+  if(k.punch!==undefined){const w=k.punchW===undefined?1:k.punchW,p=k.punch||0,rc=k.rec||0,keep=1-0.55*rc;
+    const tw=lerp(0.6*w,-0.55,p)*keep;S.body.rotation.y=tw;S.body.rotation.z=lerp(0.08*w,-0.16,p)*keep;S.body.rotation.x=(0.04+0.06*w+0.22*p)*keep;dip=(0.06*w+0.16*p)*keep;
+    S.head.rotation.y=-tw*0.6;   // หัวยังมองเป้า
+    R.up.rotation.x=lerp(lerp(-0.45,-0.85,w),-1.42,p)*(1-0.35*rc);R.up.rotation.z=lerp(0.4*w,-0.18,p)*keep;R.fo.rotation.x=lerp(lerp(-0.5,-1.55,w),-0.08,p)+(-0.7*rc);
+    L.up.rotation.x=lerp(lerp(-0.35,-1.15,w),-0.45,p)*keep;L.up.rotation.z=lerp(-0.2*w,0.35,p)*keep;L.fo.rotation.x=lerp(lerp(-0.6,-1.35,w),-1.0,p);}
   if(k.guard){   // ท่ากัน: Stand ใหญ่โน้มตัวลงจากข้างหลัง เอาแขนขวาลงมาบังหน้าเป็นแนวตั้ง (แขนซ้ายจาง)
     S.body.rotation.x=0.42;R.up.rotation.x=-1.5;R.up.rotation.z=-1.0;R.fo.rotation.x=1.5;L.up.rotation.x=-0.7;L.up.rotation.z=0.3;L.fo.rotation.x=-0.6;}
   if(k.hold){for(const [A,s] of [[R,1],[L,-1]]){A.up.rotation.x=-1.4;A.up.rotation.z=-s*0.3;A.fo.rotation.x=-0.35;}}
@@ -85,7 +87,7 @@ function standPose(S,k){const R=S.R,L=S.L;
   if(k.spread!==undefined){const r=k.spread;for(const [A,s] of [[R,1],[L,-1]]){A.up.rotation.x=-1.25;A.up.rotation.z=s*lerp(-0.25,1.05,r);A.fo.rotation.x=-0.25;}}
   if(k.throwK!==undefined){const r=k.throwK;   // ท่าพุ่งแหลน: แขนขวาเหยียดไปหลังสุด → ปาออก • แขนซ้ายยื่นไปหน้า
     R.up.rotation.x=r<0?2.5:lerp(2.5,-1.7,r);R.up.rotation.z=-0.25;R.fo.rotation.x=0;L.up.rotation.x=-1.7;L.up.rotation.z=0.5;L.fo.rotation.x=-0.15;S.body.rotation.y=r<0?0.5:lerp(0.5,-0.3,r);S.body.rotation.x=r<0?-0.2:lerp(-0.2,0.25,r);}
-  S.body.position.y=Math.sin((k.t||0)*3)*0.08;
+  S.body.position.y=Math.sin((k.t||0)*3)*0.08-dip;
   if(k.run){const r=Math.sin(k.t*14)*0.8;R.up.rotation.x=-0.6+r;L.up.rotation.x=-0.6-r;}}
 function eState(id){let s=EV.st.get(id);if(!s){s={stand:null,giant:null,cgiant:null,drill:null,pn:null,lift:0,ugT:-1,gSlam:0,spin:0,drills:[]};EV.st.set(id,s);}return s;}
 function eStandOf(s){if(!s.stand)s.stand=makeStand(1,false);return s.stand;}
@@ -111,9 +113,11 @@ function earthFX(o,p,pz,now,dt){
   let op=0,pose={t};
   if(s.pn&&!broken){const P=s.pn;P.t+=dt;const k=P.t;
     if(!P.fx){P.fx=1;eAppear(P.x,P.y,P.h,1);}
-    op=k<0.2?k/0.2:k<0.45?1:Math.max(0,1-(k-0.45)/0.25);const pu=k<0.2?0:k<0.3?(k-0.2)/0.1:k<0.45?1-(k-0.3)/0.15*0.7:0.3;
-    const bx=P.x+(P.x2-P.x)*0.25*pu,by=P.y+(P.y2-P.y)*0.25*pu;S.g.position.copy(eW(bx,by,P.h+0.15));S.g.rotation.y=eYaw(P.x,P.y,P.x2,P.y2);pose={t,punch:pu};
-    if(k>0.7)s.pn=null;}
+    // 0–0.18 โผล่ + ง้าง • 0.18–0.29 ส่งหมัด (เร็ว ออกแรงตอนท้าย) • 0.29–0.65 ค้างแล้วผ่อนกลับ • จางหายถึง 0.75
+    const ez=x=>x*x*(3-2*x),w=ez(Math.min(1,k/0.18)),pu=k<0.18?0:1-Math.pow(1-Math.min(1,(k-0.18)/0.11),3),rc=k<0.29?0:ez(Math.min(1,(k-0.29)/0.36));
+    op=k<0.15?k/0.15:k<0.5?1:Math.max(0,1-(k-0.5)/0.25);
+    const lu=0.22*pu*(1-0.5*rc)-0.06*w*(1-pu),bx=P.x+(P.x2-P.x)*lu,by=P.y+(P.y2-P.y)*lu;S.g.position.copy(eW(bx,by,P.h+0.15));S.g.rotation.y=eYaw(P.x,P.y,P.x2,P.y2);pose={t,punchW:w,punch:pu,rec:rc};
+    if(k>0.76)s.pn=null;}
   else if(A[1]){op=1;S.g.position.copy(eW(p.x,p.y,z0));S.g.rotation.y=Math.atan2(fx,fy);pose={t,lean:0.5,run:1};}
   else op=Math.max(0,S.op-dt*5);
   standOp(S,op);if(op>0){standPose(S,pose);eSandFall(S,(S.g.position.x/S3)+MW/2,(S.g.position.z/S3)+MH/2,S.g.position.y-GY(p.x,p.y)+0.6,1);}
@@ -178,10 +182,11 @@ function earthFX(o,p,pz,now,dt){
 }
 // ---------- สว่าน (ref: designs/earth_ref/drill_ref.png): หินแหลมเรียวเป็นตัวหลัก (เด่นสุด) + เส้นเกลียวลมบาง ๆ รอบ ๆ เป็นเอฟเฟกต์ • ร้อนที่ตัวหิน (เหลือง → แดงตามระดับ) • ปลายชี้ +z ----------
 function makeDrill(){const g=new THREE.Group(),m=new THREE.MeshStandardMaterial({map:eTex('fist'),color:'#d8d4cc',metalness:0.35,roughness:0.5,emissive:'#000000',emissiveIntensity:1,flatShading:true});
-  const sp=new THREE.Mesh(new THREE.ConeGeometry(0.3,2.3,6,3),m);sp.rotation.x=Math.PI/2;sp.position.z=0.35;sp.castShadow=true;g.add(sp);
-  const cap=new THREE.Mesh(new THREE.CylinderGeometry(0.3,0.22,0.35,6),m);cap.rotation.x=Math.PI/2;cap.position.z=-0.95;g.add(cap);
+  // เรียวแหลม: ฐานแคบ (ไม่บาน) ยาว ปลายแหลมมาก
+  const sp=new THREE.Mesh(new THREE.ConeGeometry(0.17,2.7,6,4,true),m);sp.rotation.x=Math.PI/2;sp.position.z=0.45;sp.castShadow=true;g.add(sp);
+  const cap=new THREE.Mesh(new THREE.CylinderGeometry(0.17,0.12,0.22,6),new THREE.MeshStandardMaterial({map:eTex('fist'),color:'#8a8478',roughness:0.7,flatShading:true}));   // ตูดสว่านไม่ร้อน (ร้อนแค่ตัวแหลม)cap.rotation.x=Math.PI/2;cap.position.z=-1.01;g.add(cap);
   const wm=new THREE.MeshBasicMaterial({color:hdr('#f4efe4',1.1),transparent:true,opacity:0.28,blending:THREE.AdditiveBlending,depthWrite:false});
-  for(const ph of [0,Math.PI]){const pts=[];for(let i=0;i<=40;i++){const k=i/40,a=ph+k*Math.PI*2*2.5,r=0.42*(1-k)+0.06;pts.push(new THREE.Vector3(Math.cos(a)*r,Math.sin(a)*r,k*2.3-0.8));}
+  for(const ph of [0,Math.PI]){const pts=[];for(let i=0;i<=40;i++){const k=i/40,a=ph+k*Math.PI*2*2.5,r=0.27*(1-k)+0.04;pts.push(new THREE.Vector3(Math.cos(a)*r,Math.sin(a)*r,k*2.6-0.85));}
     g.add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts),60,0.012,3,false),wm));}
   g.userData={m,wm};return g;}
 function drillHeat(d,tier,t){const U=d.userData;

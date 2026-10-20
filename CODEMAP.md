@@ -355,32 +355,32 @@ fxWarpMake:219 fxWarpTick:231
 §237 ไฟ 3 มิติจากการจำลอง (ชั้น vol) — ไฟล์รูปแบบเดียวกับที่เพื่อน bake จา…
 FXVOL:240 fxVolLoad:241 fxVolTex:245 fxVolSet:248 fxVolReady:249 fxVolMake:250 fxVolTick:253 fxPreAssets:258 fxAssetsWait:260
 
-## js/47-earth-view.js (377) — สายดิน ⛰️ — ภาพฝั่งเครื่องเล่น (Stand / Stand ใหญ่ / กำแพง / เสา / เนิน / ฝุ่น / สว่าน / …
+## js/47-earth-view.js (382) — สายดิน ⛰️ — ภาพฝั่งเครื่องเล่น (Stand / Stand ใหญ่ / กำแพง / เสา / เนิน / ฝุ่น / สว่าน / …
 ECOL:9 EV:10 eW:11 eYaw:12
 §13 ลายผิว (วาดเองบน canvas: หิน/ทราย + รอยร้าว + ขอบบล็อกแบบ Roblox)
 ETEX:14 eTex:15 eFadeTex:27 eMat:29 eTMat:30 rockGeo:31 _eChunkM:35 eChunks:36
 §38 Stand (บล็อกหิน/ทรายครึ่งตัวบน)
-makeStand:40 standOp:70 standPose:73 eState:90 eStandOf:91 eGiantOf:92 eSandFall:94 eAppear:95 eAim:97
-§98 วงเตือนบนพื้น (BA ชาร์จ / จุดปาเสา): วงเข้มก่อน แล้วสีอ่อนค่อย ๆ เติม…
-makeWarn:99 eWarnAt:104
-§105 ทุกเฟรม: ผู้เล่นสายดิน (เรียกจาก syncPlayers)
-earthFX:106
-§179 สว่าน (ref: designs/earth_ref/drill_ref.png): หินแหลมเรียวเป็นตัวหลัก…
-makeDrill:180 drillHeat:187
-§192 เสายักษ์ (ref: designs/earth_ref/pillar_ref.png): เสาเหลี่ยมยาว ปลายห…
-makePillar:193
-§199 กระสุนหิน
-earthProjMesh:200 makeSlab:205
-§208 สิ่งก่อสร้าง + ฝุ่น (เรียกจาก render loop)
-earthClear:209 eMakeSO:214 syncEarth:226 earthFog:259 _eCamT:262 eAnim:263 eDebris:264 eWave:266 eAirWave:268
-§270 event "efx" ของสายดิน (เรียกจากต้น efxFX) — คืน true = จัดการแล้ว
-earthEfx:271 eDrillFly:349
-§352 บึงโคลน (Mud Swamp + บึงจากเสาอัลติ): คลื่นกระเพื่อมจากกลางไปขอบ แล้ว…
-earthMudZone:353 earthMudSink:360
-§361 HUD ใต้เป้าเล็ง
-drawEarthHud:362
+makeStand:40 standOp:70 standPose:73 eState:92 eStandOf:93 eGiantOf:94 eSandFall:96 eAppear:97 eAim:99
+§100 วงเตือนบนพื้น (BA ชาร์จ / จุดปาเสา): วงเข้มก่อน แล้วสีอ่อนค่อย ๆ เติม…
+makeWarn:101 eWarnAt:106
+§107 ทุกเฟรม: ผู้เล่นสายดิน (เรียกจาก syncPlayers)
+earthFX:108
+§183 สว่าน (ref: designs/earth_ref/drill_ref.png): หินแหลมเรียวเป็นตัวหลัก…
+makeDrill:184 drillHeat:192
+§197 เสายักษ์ (ref: designs/earth_ref/pillar_ref.png): เสาเหลี่ยมยาว ปลายห…
+makePillar:198
+§204 กระสุนหิน
+earthProjMesh:205 makeSlab:210
+§213 สิ่งก่อสร้าง + ฝุ่น (เรียกจาก render loop)
+earthClear:214 eMakeSO:219 syncEarth:231 earthFog:264 _eCamT:267 eAnim:268 eDebris:269 eWave:271 eAirWave:273
+§275 event "efx" ของสายดิน (เรียกจากต้น efxFX) — คืน true = จัดการแล้ว
+earthEfx:276 eDrillFly:354
+§357 บึงโคลน (Mud Swamp + บึงจากเสาอัลติ): คลื่นกระเพื่อมจากกลางไปขอบ แล้ว…
+earthMudZone:358 earthMudSink:365
+§366 HUD ใต้เป้าเล็ง
+drawEarthHud:367
 
 ## js/48-ragdoll.js (227) — 
 RAG:10 RAGJ:23 RAGB:29 RAGS:33 RAGMIN:37 RAGHINGE:39 _rv1:40 _rv2:40 _rv3:40 _rqa:40 _rqb:40 _rm:40 ragBones:41 ragBasis:48 ragTargets:56 ragStart:62 ragBack:88 ragFloor:89 ragStep:90 ragPose:155 ragWrite:170 ragRestore:182 ragEnd:186 ragTick:188 ragHideDead:222
 
-(49 files, 11260 lines)
+(49 files, 11265 lines)
