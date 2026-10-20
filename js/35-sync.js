@@ -50,6 +50,11 @@ function syncPlayers(P,mode,now,dt){
     // โล่ไฟ = เปลือกไฟลุกหุ้มรอบตัว (fireShieldFX ใน js/33) แทนโล่ฟอง
     if(fireSh)o.shield.visible=false;
     fireShieldFX(o,p,fireSh,dt);
+    // + ลูกแก้วไฟหุ้มตัว + เม็ดไฟลอยรอบ (แบบ 19 ต.ค. เช้า — ผู้ใช้เลือก "A + ตอนนี้" 2026-10-20)
+    if(fireSh){if(!o.fsh){o.fsh=new THREE.Mesh(_fbGeo,fireMat({mode:'ball',shell:1,flow:[0,1,0],scale:[1.4,1.4,1.4],speed:1.4,heat:-0.12,op:0.85,int:1.0}));o.fsh.scale.setScalar(1.38);o.fsh.position.y=1.1;o.g.add(o.fsh);}
+      o.fsh.visible=true;o.fsh.rotation.y+=dt*0.6;
+      for(let i=0;i<3;i++){const an=rnd(0,6.283),r=rnd(26,34);PARTS.push({x:p.x+Math.cos(an)*r,y:p.y+Math.sin(an)*r,h:(o.zs||0)+rnd(0.2,2.2),vx:0,vy:0,vh:rnd(1.2,2.6),life:0.4,max:0.4,col:i?'#ff7a2a':'#ffc04a',size:rnd(2.4,3.6),g:-1.5});}}
+    else if(o.fsh)o.fsh.visible=false;
     statusFX(o,p.fm|0,p.x,p.y,o.zs||0,2.2,now);
     o.stars.visible=!!p.st;o.stars.rotation.y=now/250;
     const isMe=p.id===NET.myId;

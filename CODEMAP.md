@@ -41,7 +41,7 @@ pyroBigBoom:5 pyroBall:13 pyroBasic:14 addOrbs:31 pyroParry:32 pyroBlock:33 laun
 ## js/07-frost-spells.js (33) — 
 frostGlacier:11
 
-## js/08-storm.js (200) — สายสายฟ้า (ผู้เล่นออกแบบทั้งหมด — designs/storm.md)
+## js/08-storm.js (200) — 
 ST_MAX:5 stGain:6 stSpend:7 stormCone:9 stormLineFoes:14 stormBasic:18 stormTri:41 stormDash:48 stormDashTick:61 stormShieldBlast:69 stormTick:78
 §87 สกิล 1 (ฟรี): เส้นสายฟ้า — ชี้ขึ้นแล้วกดลง 0.5 วิ จากนั้นสายฟ้าผ่าเป็…
 stormLine:90
@@ -225,10 +225,10 @@ _pw:12 simOf:13 makeColossus:14 makeMagicCircle:67 _fsGeo:77 fireShieldFX:79 pyr
 ## js/34-frost-view.js (208) — ภาพของสายน้ำแข็ง: ดาบ/ขวานน้ำแข็งที่ปลายไม้ ท่าฟัน โล่อัศวิน ไถล แช่แ…
 iceMat:2 iceRim:3 makeIceSword:4 makeIceAxe:23 makeKiteShield:39 _icyClone:47 MIRSKIP:50 mirrorNodes:51 makeMirrorClone:52 mirrorStale:59 mirrorPose:60 dropMirror:65 frostFX:66
 
-## js/35-sync.js (350) — ซิงก์ผู้เล่น/ศัตรู/ลูกเวทจาก snapshot + ฉายตำแหน่งลงจอ (ป้ายชื่อ/ตัวเ…
-syncPlayers:2 syncEnemies:75 projGeo:113 tailGeo:114 _t1:115 makeProj:116 _a:136 _b:136 syncProj:137 _awT:214 animateWorld:215
-§256 ฉายตำแหน่ง 3D ลงจอ (ป้ายชื่อ / ตัวเลขดาเมจ)
-_v:257 toScreen:258 burnNum:265 drawLabels:272 drawTexts:303 HITM:317 DIRI:317 drawXh:319 drawCrosshair:329
+## js/35-sync.js (355) — ซิงก์ผู้เล่น/ศัตรู/ลูกเวทจาก snapshot + ฉายตำแหน่งลงจอ (ป้ายชื่อ/ตัวเ…
+syncPlayers:2 syncEnemies:80 projGeo:118 tailGeo:119 _t1:120 makeProj:121 _a:141 _b:141 syncProj:142 _awT:219 animateWorld:220
+§261 ฉายตำแหน่ง 3D ลงจอ (ป้ายชื่อ / ตัวเลขดาเมจ)
+_v:262 toScreen:263 burnNum:270 drawLabels:277 drawTexts:308 HITM:322 DIRI:322 drawXh:324 drawCrosshair:334
 
 ## js/36-modes-view.js (164) — 
 ROLE:4 KC:4 roleShowT:4 onPriv:5 MO:10 BREATHS:11 clearModeObjs:12 ITEMC:21 makeItem:22 syncModeObjs:34
@@ -277,7 +277,7 @@ NOISE3D:240 FIRE3D:249 _fvIdx:254 fireVol:255 fireVolTemp:299
 §300 ไฟ 3 มิติที่ bake จาก Blender ทั้งก้อน (วิธี 1 — ผู้เล่นเลือก 2026-10…
 FSEQ:304 fireSeqLoad:305 fireSeqReady:309 fireSeqVol:310 fireSeqAt:331 _sqA:338 _sqB:338 _sqX:338 _sqY:338 _sqZ:338 _sqM:338 fireSeqLine:339
 
-## js/43-frost-vfx.js (144) — น้ำแข็ง VFX จาก Blender + Glacier Mist (หมอกเย็นตอนน้ำแข็งโผล่)
+## js/43-frost-vfx.js (144) — 
 FROST_U:6
 §7 shader น้ำแข็ง: ฐานน้ำเงินเข้ม → ปลายขาว • ขอบสว่าง (fresnel) • รอยร้…
 ICE_VS:8 ICE_FS:10 _iceShM:23 iceShaderMat:24 iceModel:28
@@ -329,7 +329,7 @@ fxBind:304
 §314 แม่แบบ playFx เป็นไฟล์ (assets/fx/tpl/*, sig/*, rec/*)
 fxTpl:316
 
-## js/46-fx-make.js (261) — ของที่สร้างเองใน VFX Studio (asset ของเอฟเฟกต์) — ใช้ทั้งในเกมและในสตูดิโอ (สตูดิโอเรียกฟ…
+## js/46-fx-make.js (261) — 
 FXMK:10 MKD:11 mkRng:12 mkHash:13 mkNoise:15 mkL:17 mkR2:18
 §19 ที่เก็บจุด/สามเหลี่ยม
 mkG:21 mkPc:22 mkV:23 mkQ:24 mkAppend:25 mkCopy:26 mkFlat:27 _mkv:28 mkXf:29 mkThree:32 mkTRS:34 mkGrid:37
@@ -366,4 +366,4 @@ earthEfx:122 earthMudZone:168 earthMudSink:171
 §172 HUD ใต้เป้าเล็ง
 drawEarthHud:173
 
-(48 files, 10641 lines)
+(48 files, 10646 lines)
