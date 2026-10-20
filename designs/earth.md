@@ -38,7 +38,7 @@
 - **Area:** circle in front of Earth, **radius 180**, with a **warning circle**. Ring animation = timer: a **dark ring first**, then a **lighter colour fills the circle gradually** during the charge; full = slam.
 - **Hit:** **50 dmg + 0.7 s stun**. Floor gets **a bit wrecked**, explosion, **dust cloud**.
 - **Earth's own pose:** **wand up** while charging, **wand down** on the slam.
-- **CD 6 s.** Can **walk slowly** while charging (⚠ how slow not given). Stun/freeze does **not** cancel the charge. **Not usable with Stand broken.**
+- **CD 6 s.** Can walk while charging at **−40% speed**. Stun/freeze does **not** cancel the charge. **Not usable with Stand broken.**
 - Same big Stand model as Tectonic Crush and the ult.
 - ผู้ใช้: “big stand will show up behind u and 2 hand up charging his slam in 2 sec and slam down make floor abit wrecked with explode and ฝุ่นคลุ้ง damage 50 ติด stun 0.7 วิ ระยะ 180 วงกลมด้านหน้ามีวงเตือนบอก วงมี animation คือมีวงเข้มก่อนพอชาจไปก็จะมีสีอ่อนวงกลมค่อยๆเติมวงกลมแรก เป็นเหมือนการบอกเวลาก่อนทุบ big stand same with clapping rock or ulting” • “dont forget own character do the wand up and down animation too”
 
@@ -97,11 +97,14 @@
 - **After landing:** **5 fully-charged drills float behind Earth and follow for 10 s**, **turning with Earth**. Earth is **not slowed** (no −85%). **Left click fires them one at a time, right to left**, until all are used. Each = a full-charge Terra Auger: **120 dmg** and **each one makes a mound** (wall-height).
   - ⚠ Not said: whether the ult's 5 mounds also follow the normal “one mound at a time” rule. Claude's default: ult mounds don't remove each other (confirm).
 - The old “10 pillars / domain / transformed mode” ult is **removed**.
+- **Pillar look** (ref `designs/earth_ref/pillar_ref.png`): long squarish stone column like the reference; re-texture it but keep the same overall look. The **square end becomes a sharp point** (not blocky). The **other end has rocks stuck to it** (clustered rock chunks). Colours **dark brown, yellow-black** following the texture.
+- **Throw pose** (ref `designs/earth_ref/throw_pose_ref.png`, javelin-throw pose — look only at the arms): the **big Stand** takes this pose; the **hand holding the pillar is stretched back as far as it goes**, ready to throw with full force; the other arm reaches forward.
+- ผู้ใช้: “second pic is pose u just focus on his hand that how stand will be pose but hand that hold pillar make it ยืดให้สุดเตรียมใส่สุดแรง and pillar u can re texture inside but still doesnt look different and the ปลายฝั่งเหลี่ยมๆ make it more sharp not เหลี่ยม the other side is rock that stick to pillar make it color น้ำตาลเข้ม เหลืองดำ ตาม texture”
 - ผู้ใช้: “เปลี่ยนเป็นเราขึ้นไปฟ้า ขยับได้ซ้ายขวาแต่ขึ้นลงไม่ได้ มีเสาเดียวใหญ่ๆเลย เดี๋ยวมี reference เสาให้ เลือกจุดปาทำท่าชูเสาขึ้นพร้อมยิง และมีแสตนตัวใหญ่อยู่ด้านหลัง จับเสาเล็งตามเราทำท่าพร้อมปา เดี๋ยวมี ref ท่าให้ ที่พื้นจะมีเหมือนจุดเล็งที่พื้นให้ เหมือน fire circle พอปาก็ตวัดไม้ลง stand ใหญ่ก็ปาลงแบบเร็วๆเลย ให้มันมี impact wave กลางอากาศที่ปาด้วย … พอลงพื้นก็จะปักเป็นเสาตามองศาที่ลงมาเลย มีเลือด 300 พอลงมามันจะทำให้รอบๆ ระยะค่อนข้างกว้างกลายเป็นบึงโคลน … effect ตอนลงมาให้มันระเบิดมี impact พร้อมคลื่นกระเพื่อมเลย และมีฝุ่นค่อนข้างเยอะ … พอเราลงมาก็จะมีกระสุนสว่านที่ชาจเต็มแล้ว 5 อันลอยอยู่ที่หลังตามเราตลอด 10 วิ สว่านต้องหันตามเราด้วย เราจะไม่โดนสโล 85% … ปล่อยไปทีละลูกจากขวาไปซ้าย จนหมด ดาเมจเดียวกับท่าชาจเต็มสว่านปกติ”
 - Numbers the user picked in the same review: sky max 5 s • pillar hit 50 + knockback • pillar stays until destroyed • swamp r400 / 8 s • drills on left click, 120 each, mound each.
 
 ### Waiting on the user
-- Reference pictures: the giant pillar, the throw pose.
+- (received 2026-10-20 — see Ultimate)
 
 ---
 
