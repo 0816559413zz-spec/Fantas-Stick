@@ -112,7 +112,7 @@ function syncEarth(v,dt,now){
 }
 // ศัตรูอยู่ในฝุ่น: มองชัดแค่ ~150 รอบตัว ไกลกว่านั้นจางเป็นสีฝุ่น (ใช้ fog ของฉาก)
 function earthFog(on){const F=scene.fog;if(!F)return;
-  if(on){if(!EV.fog)EV.fog={c:F.color.clone(),n:F.near,f:F.far};const cd=cam.position.distanceTo(_eCamT())||6;F.color.set('#9c8664');F.near=cd+3;F.far=cd+26;}
+  if(on){if(!EV.fog)EV.fog={c:F.color.clone(),n:F.near,f:F.far};const cd=cam.position.distanceTo(_eCamT())||6;F.color.set('#9c8664');F.near=cd+7.5;F.far=cd+30;}
   else if(EV.fog){F.color.copy(EV.fog.c);F.near=EV.fog.n;F.far=EV.fog.f;EV.fog=null;}}
 function _eCamT(){const me=myPos();return me?eW(me.x,me.y,(me.z||0)+1.2):new THREE.Vector3();}
 function eAnim(o){EV.anims.push(Object.assign({t:0},o));}
