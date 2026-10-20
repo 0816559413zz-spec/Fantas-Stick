@@ -41,8 +41,7 @@ async function stStartMap(id){ST.map=id;MODES.train.map=id;G.mapPick=id;G.mode='
   await stWait(()=>screen==='game'&&VIEW.cur&&G.players.me,6000);
   if(G.tr){G.tr.datk=0;G.tr.mai=0;G.tr.god=1;G.tr.nocd=1;}
   yaw=0;pitch=0.2;}
-function stResize(){const w=Math.max(200,innerWidth-parseFloat(getComputedStyle(document.body).getPropertyValue('--sL'))-parseFloat(getComputedStyle(document.body).getPropertyValue('--sR'))),
-  hh=Math.max(150,innerHeight-parseFloat(getComputedStyle(document.body).getPropertyValue('--sT'))-parseFloat(getComputedStyle(document.body).getPropertyValue('--sB')));
+function stResize(){const w=Math.max(200,innerWidth-stVar('--sL')-stVar('--sR')),hh=Math.max(150,innerHeight-stVar('--sT')-stVar('--sB')-stVar('--sS'));
   gl.setSize(w,hh,false);composer.setSize(w,hh);cam.aspect=w/hh;cam.updateProjectionMatrix();}
 addEventListener('resize',()=>{if(document.body.classList.contains('studio'))setTimeout(stResize,0);});
 // ---------- จุดที่เล่นเอฟเฟกต์ + กล้อง ----------
@@ -157,31 +156,46 @@ function stSet(L,k,v,rebuild){if(v===undefined){delete L[k];}else L[k]=v;stChang
 function stBuildUI(){
   const root=h('div',{id:'st'});document.body.append(root);
   const sel=(id,opts,val,fn)=>h('select',{id,on:{change:e=>fn(e.target.value)}},...opts.map(([v,t])=>h('option',{value:v,selected:v===val},t)));
-  root.append(h('div',{id:'stTop'},h('span',{className:'logo'},'VFX Studio'),h('span',{className:'file',id:'stFile'},'—'),h('span',{className:'sep'}),
-    h('button',{id:'stBNew',title:'เอฟเฟกต์ใหม่จากแม่แบบ',on:{click:stNewFrom}},'＋ ใหม่'),h('button',{id:'stBSave',className:'gold',title:'บันทึก (Ctrl+S)',on:{click:()=>stSave(false)}},'💾 บันทึก'),
-    h('button',{id:'stBSaveAs',title:'บันทึกเป็นชื่อใหม่',on:{click:()=>stSave(true)}},'บันทึกเป็น…'),h('button',{id:'stBUndo',title:'ย้อน (Ctrl+Z)',on:{click:()=>stUndo(false)}},'↶'),h('button',{id:'stBRedo',title:'ทำซ้ำ (Ctrl+Y)',on:{click:()=>stUndo(true)}},'↷'),
-    h('span',{className:'sep'}),h('label',null,'ธาตุ',sel('stPal',[],'',v=>{stPush();ST.fx.pal=v;stChanged(true);})),
-    h('label',{title:'ความแรงรวมของทั้งเอฟเฟกต์ (k)'},'ความแรง',h('input',{type:'range',id:'stK',min:0.3,max:2,step:0.05,value:1,style:'width:80px',on:{pointerdown:stPush,input:e=>{ST.fx.k=+e.target.value;if(ST.fx.k===1)delete ST.fx.k;stChanged(false);}}})),
-    h('span',{className:'sep'}),h('label',null,'แผนที่',sel('stMap',[['test','ห้องฝึก (สว่าง)'],['castle','ปราสาท (มืด)'],['greathall','ห้องโถง (มืด)'],['meadow','ทุ่งหญ้า (เย็น)'],['lake','ทะเลสาบ (คืน)']],ST.map,async v=>{ST.busy=true;await stStartMap(v);ST.busy=false;stResize();stRestart();})),
-    h('label',null,'จุดเล่น',sel('stAt',[['front','หน้าเรา 12 ม.'],['self','ที่ตัวเรา (ติดตาม)'],['far','ไกล 30 ม.']],ST.at,v=>{ST.at=v;stRestart();})),
-    h('label',null,'กราฟิก',sel('stQ',[['auto','อัตโนมัติ'],['high','สูง'],['low','ประหยัด']],QUAL.mode,v=>{QUAL.mode=v;applyQuality();stResize();stRestart();})),
-    h('span',{className:'sep'}),h('button',{id:'stBSheet',title:'แผ่นภาพสรุปทั้งไทม์ไลน์ + ตัวเลขตรวจ',on:{click:()=>stSheet(null,null)}},'🖼 แผ่นภาพ'),
-    h('button',{id:'stBShot',title:'เก็บภาพจอนี้ลง shots/',on:{click:()=>stShot((ST.name||'fx').replace(/\//g,'_')+'_'+ST.t.toFixed(2).replace('.','s'))}},'📷'),
-    h('button',{id:'stBGame',title:'เปิดเกม (ห้องฝึก) โดยผูกเอฟเฟกต์นี้กับท่าที่เลือก',on:{click:stTryGame}},'🎮 ลองในเกม'),
-    h('button',{id:'stBHelp',on:{click:stHelp}},'?')));
-  root.append(h('div',{id:'stLib'},h('div',{className:'head'},h('h3',null,'ไลบรารี'),h('input',{type:'text',id:'stSearch',placeholder:'ค้นหา…',on:{input:stLibRender}})),h('div',{id:'stLibList'})));
-  root.append(h('div',{id:'stView'},h('div',{id:'stCams'},...[['game','กล้องเกม'],['side','ข้าง'],['front','หน้า'],['top','บน'],['orbit','หมุนเอง']].map(([k,t])=>h('button',{id:'stCam_'+k,'data-cam':k,on:{click:()=>{ST.cam=k;stSync();if(!ST.play)ST.seekTo=ST.t;}}},t))),
-    h('div',{id:'stHud'},h('span',{id:'stHParts'}),h('span',{id:'stHWhite'}),h('span',{id:'stHBlock'}),h('span',{id:'stHCalls'}),h('span',{id:'stHMs'})),h('div',{id:'stBanner',hidden:true})));
-  root.append(h('div',{id:'stTl'},h('div',{className:'bar'},h('button',{id:'stPlay',title:'เล่น/หยุด (Space)',on:{click:()=>{ST.play=!ST.play;if(ST.play&&ST.t>=stDur()+ST.tail)stRestart();stSync();}}},'⏸'),
-    h('button',{id:'stRe',title:'เล่นใหม่ (R)',on:{click:()=>{ST.play=true;stRestart();stSync();}}},'⟲'),...[0.1,0.25,0.5,1].map(s=>h('button',{'data-sp':s,id:'stSp'+s,on:{click:()=>{ST.speed=s;stSync();}}},s+'×')),
-    h('button',{id:'stLoop',title:'วนเล่น',on:{click:()=>{ST.loop=!ST.loop;stSync();}}},'🔁'),h('span',{className:'time',id:'stTime'},'0.00'),
-    h('span',{id:'stAdd'},h('button',{id:'stAddB',on:{click:()=>{const m=$st('stAddMenu');m.hidden=!m.hidden;}}},'＋ ชั้น'),h('div',{id:'stAddMenu',hidden:true})),
-    h('label',{title:'เลขสุ่ม — เปลี่ยนเพื่อดูแบบสุ่มอื่น'},'seed',h('input',{type:'number',id:'stSeed',value:ST.seed,min:1,max:9999,style:'width:58px',on:{change:e=>{ST.seed=+e.target.value||1;stRestart();}}})),
-    h('span',{className:'mute',style:'font-size:11.5px'},'ลากแถบ = เลื่อนจังหวะ • ลากขอบขวา = ยืดอายุ • คลิกแถวเวลา = กระโดด • 👁 ซ่อน • S เดี่ยว')),h('div',{id:'stRows'})));
+  const seg=(...k)=>h('span',{className:'stSeg2'},...k);
+  root.append(h('div',{id:'stTop'},h('span',{className:'logo'},h('i',null,'✦'),'VFX Studio'),h('span',{className:'sep'}),
+    h('span',{className:'file',id:'stFile',title:'ไฟล์ที่เปิดอยู่ (● สีส้ม = ยังไม่ได้บันทึก)'},'—'),
+    seg(h('button',{id:'stBNew',title:'สร้างเอฟเฟกต์ใหม่ โดยเริ่มจากแม่แบบ',on:{click:stNewFrom}},'＋ ใหม่'),h('button',{id:'stBSave',className:'gold',title:'บันทึกลงโปรเจกต์ (Ctrl+S)',on:{click:()=>stSave(false)}},'💾 บันทึก'),
+      h('button',{id:'stBSaveAs',title:'บันทึกเป็นชื่อใหม่ (Ctrl+Shift+S)',on:{click:()=>stSave(true)}},'เป็น…')),
+    seg(h('button',{id:'stBUndo',title:'ย้อนกลับ (Ctrl+Z)',on:{click:()=>stUndo(false)}},'↶'),h('button',{id:'stBRedo',title:'ทำซ้ำ (Ctrl+Y)',on:{click:()=>stUndo(true)}},'↷')),
+    h('span',{className:'sep'}),h('label',{title:'ธาตุ = เปลี่ยนสีทั้งเอฟเฟกต์ในคลิกเดียว (สี $core $main … ตามธาตุ)'},'ธาตุ',sel('stPal',[],'',v=>{stPush();ST.fx.pal=v;stChanged(true);})),
+    h('label',{title:'ความแรงรวมของทั้งเอฟเฟกต์ (k): คูณจำนวน / ขนาด / ความสว่างทั้งหมด'},'ความแรง',h('input',{type:'range',id:'stK',min:0.3,max:2,step:0.05,value:1,style:'width:80px',on:{pointerdown:stPush,input:e=>{ST.fx.k=+e.target.value;if(ST.fx.k===1)delete ST.fx.k;stChanged(false);}}})),
+    h('span',{className:'grow'}),
+    h('label',{title:'ฉากที่ใช้ดู — ลองทั้งฉากสว่างและฉากมืด'},'🗺',sel('stMap',[['test','ห้องฝึก (สว่าง)'],['castle','ปราสาท (มืด)'],['greathall','ห้องโถง (มืด)'],['meadow','ทุ่งหญ้า (เย็น)'],['lake','ทะเลสาบ (คืน)']],ST.map,async v=>{ST.busy=true;await stStartMap(v);ST.busy=false;stResize();stRestart();})),
+    h('label',{title:'จุดที่เล่นเอฟเฟกต์: หน้าตัวเรา / ที่ตัวเรา (ออร่า โล่ ฟัน) / ไกล'},'📍',sel('stAt',[['front','หน้าเรา 12 ม.'],['self','ที่ตัวเรา (ติดตาม)'],['far','ไกล 30 ม.']],ST.at,v=>{ST.at=v;stRestart();})),
+    h('label',{title:'ระดับกราฟิก — ลอง "ประหยัด" ด้วย เพื่อดูว่าเครื่องช้ายังสวยไหม'},'⚙',sel('stQ',[['auto','กราฟิกอัตโนมัติ'],['high','กราฟิกสูง'],['low','กราฟิกประหยัด']],QUAL.mode,v=>{QUAL.mode=v;applyQuality();stResize();stRestart();})),
+    h('span',{className:'sep'}),
+    seg(h('button',{id:'stBSheet',title:'แผ่นภาพสรุปทั้งไทม์ไลน์ + ตัวเลขตรวจ (ขาวจ้า / บังตัว)',on:{click:()=>stSheet(null,null)}},'🖼 แผ่นภาพ'),
+      h('button',{id:'stBShot',title:'เก็บภาพจอนี้ลงโฟลเดอร์ shots/',on:{click:()=>stShot((ST.name||'fx').replace(/\//g,'_')+'_'+ST.t.toFixed(2).replace('.','s'))}},'📷')),
+    h('button',{id:'stBGame',title:'เปิดเกม (ห้องฝึก) แล้วผูกเอฟเฟกต์นี้กับท่าที่เลือก เพื่อลองของจริง',on:{click:stTryGame}},'🎮 ลองในเกม'),
+    h('button',{id:'stBHelp',className:'ghost',title:'วิธีใช้ + ปุ่มลัดทั้งหมด (?)',on:{click:stHelp}},'❔')));
+  root.append(h('div',{id:'stLib'},h('div',{className:'stPH'},h('h3',null,'ไลบรารีเอฟเฟกต์'),h('button',{className:'ghost',title:'สร้างเอฟเฟกต์ใหม่จากแม่แบบ',on:{click:stNewFrom}},'＋')),
+    h('div',{className:'head'},h('input',{type:'search',id:'stSearch',placeholder:'🔍 ค้นหาชื่อ / คำอธิบาย / แท็ก',on:{input:stLibRender}})),h('div',{id:'stLibList'})));
+  root.append(h('div',{id:'stView'},h('div',{id:'stCams'},h('span',{className:'lab',title:'มุมกล้อง (ปุ่ม 1–5) • ลากบนจอ = หมุน • ล้อเมาส์ = ซูม'},'🎥'),
+      ...[['game','กล้องเกม'],['side','ข้าง'],['front','หน้า'],['top','บน'],['orbit','หมุนเอง']].map(([k,t],i)=>h('button',{id:'stCam_'+k,'data-cam':k,title:t+' ('+(i+1)+')',on:{click:()=>stSetCam(k)}},t))),
+    h('div',{id:'stHud'},h('span',{id:'stHParts',title:'จำนวนอนุภาคตอนนี้ (ควรต่ำกว่า 3000)'}),h('span',{id:'stHWhite',title:'ขาวจ้า: % ของจอที่ขาวเกือบทั้งหมด (ต้อง ≤ 8%)'}),h('span',{id:'stHBlock',title:'บังตัว: % ของตัวละครเราที่ถูกแสงกลบ (ต้อง ≤ 35%)'}),h('span',{id:'stHCalls',title:'draw calls (ยิ่งน้อยยิ่งเร็ว)'}),h('span',{id:'stHMs',title:'เวลาวาดต่อเฟรม (ควรต่ำกว่า 16 ms)'})),h('div',{id:'stBanner',hidden:true})));
+  root.append(h('div',{id:'stTl'},h('div',{className:'bar'},h('span',{className:'ttl'},'ไทม์ไลน์'),
+    seg(h('button',{id:'stToStart',title:'กลับไปจุดเริ่ม (Home)',on:{click:()=>{ST.play=false;ST.seekTo=0;stSync();}}},'⏮'),
+      h('button',{id:'stPlay',title:'เล่น / หยุด (Space)',on:{click:()=>{ST.play=!ST.play;if(ST.play&&ST.t>=stDur()+ST.tail)stRestart();stSync();}}},'⏸'),
+      h('button',{id:'stRe',title:'เล่นใหม่ตั้งแต่ต้น (R)',on:{click:()=>{ST.play=true;stRestart();stSync();}}},'⟲'),
+      h('button',{id:'stLoop',title:'วนเล่นซ้ำ (L)',on:{click:()=>{ST.loop=!ST.loop;stSync();}}},'🔁')),
+    h('span',{className:'time',id:'stTime',title:'เวลาตอนนี้ / ความยาวเอฟเฟกต์ • ← → ทีละเฟรม (Shift = ทีละ 0.1 วิ)'},'0.00'),
+    h('span',{className:'mute',style:'font-size:11.5px'},'ความเร็ว'),seg(...[0.1,0.25,0.5,1].map(s=>h('button',{'data-sp':s,id:'stSp'+s,title:'เล่นช้าลงเพื่อดูรายละเอียด',on:{click:()=>{ST.speed=s;stSync();}}},s+'×'))),
+    h('span',{className:'sep'}),h('span',{id:'stAdd'},h('button',{id:'stAddB',className:'gold',title:'เพิ่มชั้นใหม่ที่ตำแหน่งหัวเล่น (Shift+A)',on:{click:e=>stAddMenu(e.currentTarget)}},'＋ เพิ่มชั้น')),
+    h('span',{className:'grow',style:'flex:1'}),
+    h('label',{className:'mute',style:'display:flex;gap:5px;align-items:center;font-size:11.5px',title:'เลขสุ่ม — เปลี่ยนเพื่อดูการสุ่มแบบอื่น (ภาพเดิมทุกครั้งถ้าเลขเดิม)'},'🎲 seed',h('input',{type:'number',id:'stSeed',value:ST.seed,min:1,max:9999,style:'width:62px',on:{change:e=>{ST.seed=+e.target.value||1;stRestart();}}}))),h('div',{id:'stRows'})));
   root.append(h('div',{id:'stInsp'}));
+  root.append(h('div',{id:'stStat'},h('span',{className:'hint',id:'stHint'}),h('span',{id:'stSLint',title:'ผลตรวจไฟล์ (fx-check) — คลิกเพื่อดูรายละเอียด',style:'cursor:pointer',on:{click:()=>{if(stWs()!=='fx')return;ST.sel=null;stTlRender();stInspRender();}}}),
+    h('span',{id:'stSSave'}),h('span',{id:'stSApi'}),h('span',null,h('button',{title:'วิธีใช้ + ปุ่มลัดทั้งหมด (?)',on:{click:stHelp}},'⌨ ปุ่มลัด'))));
+  for(const s of ['L','R','B'])root.append(h('div',{className:'stSplit',id:'stSp'+s,title:'ลากเพื่อปรับขนาดแผง • ดับเบิลคลิก = พับ / กาง'}));
   root.append(h('div',{id:'stToast',hidden:true}));
-  // เมนูเพิ่มชั้น
-  const am=$st('stAddMenu');for(const [t,T] of Object.entries(FXR.schema?FXR.schema.types:{}))am.append(h('button',{on:{click:()=>{am.hidden=true;stAddLayer(t);}}},(T.icon||'')+' '+T.th,h('small',{className:'mute'},' '+t)));
+  stSplitInit();
+  // แถบสถานะบอกว่าปุ่ม/ช่องที่ชี้อยู่ทำอะไร (แบบ Blender)
+  root.addEventListener('mouseover',e=>{const t=e.target.closest&&e.target.closest('[title]');stHint(t?t.title:'');});
   // กล้องหมุนเอง: ลากบนจอ / ล้อเมาส์ซูม
   const cv=gl.domElement;let drag=null;
   cv.addEventListener('pointerdown',e=>{if(mkGizmoHot())return;drag={x:e.clientX,y:e.clientY};cv.setPointerCapture(e.pointerId);if(ST.cam!=='orbit'){ST.cam='orbit';stSync();}});
@@ -190,53 +204,144 @@ function stBuildUI(){
   cv.addEventListener('wheel',e=>{e.preventDefault();ST.orb.dist=Math.max(3,Math.min(60,ST.orb.dist*(e.deltaY>0?1.1:0.9)));if(ST.cam!=='orbit'){ST.cam='orbit';stSync();}if(!ST.play)ST.seekTo=ST.t;},{passive:false});
   // ปุ่มลัด (กันไม่ให้ปุ่มไหลเข้าเกม)
   addEventListener('keydown',e=>{if(!document.body.classList.contains('studio'))return;const tg=e.target.tagName;const typing=tg==='INPUT'||tg==='TEXTAREA'||tg==='SELECT';
+    if(typing&&e.target._key){e.target._key(e);e.stopImmediatePropagation();return;}
+    if(e.key==='Escape'&&document.querySelector('#st .stPop,#st .stModal')){stPopClose();document.querySelectorAll('#st .stModal').forEach(x=>x.remove());e.stopImmediatePropagation();return;}
     if(MK.ws!=='fx'){mkKey(e,typing);e.stopImmediatePropagation();return;}
-    if((e.ctrlKey||e.metaKey)&&e.code==='KeyS'){e.preventDefault();e.stopImmediatePropagation();stSave(false);return;}
+    const C=e.ctrlKey||e.metaKey;
+    if(C&&e.code==='KeyS'){e.preventDefault();e.stopImmediatePropagation();stSave(e.shiftKey);return;}
     if(typing){e.stopImmediatePropagation();return;}
-    if((e.ctrlKey||e.metaKey)&&e.code==='KeyZ'){e.preventDefault();stUndo(e.shiftKey);}
-    else if((e.ctrlKey||e.metaKey)&&e.code==='KeyY'){e.preventDefault();stUndo(true);}
+    if(C&&e.code==='KeyZ'){e.preventDefault();stUndo(e.shiftKey);}
+    else if(C&&e.code==='KeyY'){e.preventDefault();stUndo(true);}
+    else if(C&&e.code==='KeyD'){e.preventDefault();if(ST.sel)stDupLayer(ST.sel);}
+    else if(e.shiftKey&&e.code==='KeyA'){e.preventDefault();stAddMenu($st('stAddB'));}
+    else if(e.key==='?'||(e.shiftKey&&e.code==='Slash')){stHelp();}
     else if(e.code==='Space'){e.preventDefault();$st('stPlay').click();}
-    else if(e.code==='KeyR')$st('stRe').click();
-    else if(e.code==='Delete'&&ST.sel){stDelLayer(ST.sel);}
+    else if(e.code==='KeyR'&&!C)$st('stRe').click();
+    else if(e.code==='KeyL'&&!C)$st('stLoop').click();
+    else if(e.code==='KeyH'&&!C&&ST.sel)stMuteT(ST.sel);
+    else if(e.code==='F2'&&ST.sel){e.preventDefault();stRename(ST.sel);}
+    else if(e.code==='Home'){ST.play=false;ST.seekTo=0;stSync();}
+    else if(e.code==='Escape'){if(ST.sel){ST.sel=null;stTlRender();stInspRender();}}
+    else if(/^Digit[1-5]$/.test(e.code)&&!C){stSetCam(['game','side','front','top','orbit'][+e.code.slice(5)-1]);}
+    else if((e.code==='Delete'||e.code==='Backspace')&&ST.sel){stDelLayer(ST.sel);}
     else if(e.code==='ArrowRight'||e.code==='ArrowLeft'){ST.play=false;ST.seekTo=Math.max(0,ST.t+(e.code==='ArrowRight'?1:-1)*(e.shiftKey?0.1:STD));stSync();}
+    else if((e.code==='ArrowUp'||e.code==='ArrowDown')&&ST.fx){e.preventDefault();const A=ST.fx.layers,i=A.findIndex(L=>L.id===ST.sel),j=Math.max(-1,Math.min(A.length-1,i+(e.code==='ArrowDown'?1:-1)));ST.sel=j<0?null:A[j].id;stTlRender();stInspRender();}
     e.stopImmediatePropagation();},true);
   addEventListener('keyup',e=>{if(document.body.classList.contains('studio'))e.stopImmediatePropagation();},true);
   addEventListener('beforeunload',e=>{if(ST.dirty){e.preventDefault();e.returnValue='';}});
 }
+const stWs=()=>{try{return MK.ws;}catch(e){return 'fx';}};
+function stSetCam(k){ST.cam=k;stSync();if(!ST.play)ST.seekTo=ST.t;}
+// ---------- แถบสถานะ + คำใบ้ ----------
+const ST_HINT={fx:'ลากแถบสี = เลื่อนเวลา • ลากขอบขวา = ยืดอายุ • คลิกขวาที่ชั้น = เมนู • Shift+A เพิ่มชั้น • Space เล่น/หยุด • ? ดูปุ่มลัดทั้งหมด',
+  mesh:'คลิกชิ้นบนจอ = เลือก • G ย้าย / R หมุน / S ย่อขยาย • ลากจอ = หมุนกล้อง • ล้อเมาส์ = ซูม',tex:'ปรับค่าทางขวา ภาพจะวาดใหม่เอง • ลากไฟล์ PNG/JPG มาวางบนจอเพื่อนำเข้า',vol:'ตั้งค่าทางขวา แล้วกดจำลอง • ลากจอ = หมุนกล้อง'};
+function stHint(s){const e=$st('stHint');if(e)e.textContent=s||ST_HINT[stWs()]||'';}
+function stStatus(){const l=$st('stSLint');if(!l)return;const fx=stWs()==='fx';
+  const e=ST.lint.filter(r=>r.lv==='err').length,w=ST.lint.filter(r=>r.lv==='warn').length;l.className=e?'err':w?'warn':'ok';l.textContent=e?'✗ ผิด '+e+(w?' • ⚠ '+w:''):w?'⚠ เตือน '+w:'✓ ตรวจผ่าน';l.style.display=fx?'':'none';
+  const s=$st('stSSave');s.className=ST.dirty?'warn':'ok';s.textContent=ST.dirty?'● ยังไม่บันทึก':'✓ บันทึกแล้ว';s.style.display=fx?'':'none';
+  const a=$st('stSApi');a.className=ST.api?'ok':'warn';a.textContent=ST.api?'🔌 บันทึกลงโปรเจกต์ได้':'⚠ บันทึกตรงไม่ได้';
+  a.title=ST.api?'เชื่อมกับ tools/serve.py แล้ว — กดบันทึก ไฟล์ลงโปรเจกต์ทันที':'ไม่ได้เปิดผ่าน VFX Studio.bat (serve.py) — บันทึกจะเป็นการดาวน์โหลดไฟล์แทน';
+  if(!$st('stHint').textContent)stHint('');}
+// ---------- เส้นแบ่งปรับขนาดแผง (จำขนาดไว้ในเครื่อง) ----------
+function stLoad(k,d){try{return JSON.parse(localStorage.getItem(k))||d;}catch(e){return d;}}
+function stStore(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
+function stVar(n){return parseFloat(getComputedStyle(document.body).getPropertyValue(n))||0;}
+function stSplitInit(){const lay=stLoad('wd_studio_lay',{}),B=document.body.style,lim={L:[150,520],R:[250,640],B:[110,()=>innerHeight*0.62]};
+  const apply=()=>{for(const k of ['L','R','B']){if(lay['c'+k])B.setProperty('--s'+k,'0px');else if(lay[k])B.setProperty('--s'+k,lay[k]+'px');else B.removeProperty('--s'+k);document.body.classList.toggle('no'+k,!!lay['c'+k]);}try{stResize();}catch(e){}};
+  for(const k of ['L','R','B']){const el=$st('stSp'+k);
+    el.addEventListener('pointerdown',e=>{if(e.button!==0)return;e.preventDefault();el.setPointerCapture(e.pointerId);el.classList.add('on');const x0=e.clientX,y0=e.clientY,v0=lay['c'+k]?0:stVar('--s'+k);
+      const mv=ev=>{const v=k==='L'?v0+(ev.clientX-x0):k==='R'?v0-(ev.clientX-x0):v0-(ev.clientY-y0),[a,b]=lim[k],mx=typeof b==='function'?b():b;
+        if(v<a*0.5)lay['c'+k]=true;else{lay['c'+k]=false;lay[k]=Math.round(Math.max(a,Math.min(mx,v)));}apply();};
+      const up=()=>{el.classList.remove('on');el.removeEventListener('pointermove',mv);el.removeEventListener('pointerup',up);stStore('wd_studio_lay',lay);};
+      el.addEventListener('pointermove',mv);el.addEventListener('pointerup',up);});
+    el.addEventListener('dblclick',()=>{lay['c'+k]=!lay['c'+k];apply();stStore('wd_studio_lay',lay);});}
+  apply();}
+// ---------- หน้าต่างลอย (เมนูเพิ่มชั้น / คลิกขวา) ----------
+function stPopClose(){document.querySelectorAll('#st .stPop').forEach(p=>p.remove());}
+function stPop(box,x,y,up){stPopClose();box.classList.add('stPop');$st('st').append(box);const r=box.getBoundingClientRect();if(up)y-=r.height+6;
+  box.style.left=Math.max(6,Math.min(innerWidth-r.width-6,x))+'px';box.style.top=Math.max(6,Math.min(innerHeight-r.height-6,y))+'px';
+  setTimeout(()=>{const off=e=>{if(!box.isConnected||!box.contains(e.target)){box.remove();removeEventListener('pointerdown',off,true);}};addEventListener('pointerdown',off,true);},0);return box;}
+const ST_CATS=[['แสงและแฟลช',['flash','halo','ring','light']],['รูปทรง 3D และไฟ',['mesh','firevol','vol','geyser','crown']],['อนุภาคและเศษ',['emit','debris','mist','trail']],['ธาตุพิเศษ',['bolt','decal','warp']],['ทั้งจอและเสียง',['screen','sound']],['ขั้นสูง',['use','code']]];
+function stAddMenu(anchor){const T=FXR.schema&&FXR.schema.types;if(!T||!ST.fx)return;
+  const q=h('input',{type:'search',placeholder:'🔍 พิมพ์หาชนิดชั้น เช่น ไฟ, อนุภาค, ring … แล้วกด Enter'}),cats=h('div',{className:'cats'}),box=h('div',{id:'stAddMenu'},q,cats);
+  const seen=new Set(ST_CATS.flatMap(c=>c[1])),groups=ST_CATS.map(([n,ks])=>[n,ks.filter(k=>T[k])]),rest=Object.keys(T).filter(k=>!seen.has(k));if(rest.length)groups.push(['อื่น ๆ',rest]);
+  let first=null;const pick=t=>{box.remove();stAddLayer(t);stToast('เพิ่มชั้น "'+(T[t].th||t)+'" ที่เวลา '+Math.min(ST.t,stDur()).toFixed(2)+' วิ แล้ว — แก้ค่าได้ที่แผงขวา');};
+  const draw=()=>{const s=q.value.trim().toLowerCase();cats.innerHTML='';first=null;
+    for(const [n,ks] of groups){const opts=ks.filter(k=>!s||(k+' '+T[k].th+' '+(T[k].desc||'')+' '+n).toLowerCase().includes(s));if(!opts.length)continue;
+      cats.append(h('div',{className:'cat'},h('h4',null,n),...opts.map(k=>{const b=h('button',{className:'opt'+(first?'':' hi'),title:(T[k].th||k)+' — '+(T[k].desc||''),style:'--c:'+(TYPEC[k]||'#d9b45a'),on:{click:()=>pick(k)}},h('i',null,T[k].icon||'•'),h('b',null,T[k].th||k),h('small',null,k+' · '+(T[k].desc||'')));if(!first)first=k;return b;})));}
+    if(!first)cats.append(h('p',{className:'mute'},'ไม่พบชนิดที่ค้นหา'));};
+  q._key=e=>{if(e.key==='Enter'&&first)pick(first);else if(e.key==='Escape')box.remove();};q.addEventListener('input',draw);draw();
+  const r=anchor?anchor.getBoundingClientRect():{left:innerWidth/2-280,top:innerHeight/2};stPop(box,r.left,r.top,true);q.focus();}
+function stLayerMenu(L,i,x,y){if(ST.sel!==L.id){ST.sel=L.id;stTlRender();stInspRender();}
+  const it=(t,k,f,cls)=>h('button',{className:cls||'',on:{click:()=>{stPopClose();f();}}},h('span',null,t),k?h('kbd',null,k):null);
+  stPop(h('div',{className:'stCtx'},it('✎ เปลี่ยนชื่อ','F2',()=>stRename(L.id)),it('⧉ ทำซ้ำชั้นนี้','Ctrl+D',()=>stDupLayer(L.id)),h('hr'),
+    it(ST.mute[L.id]?'👁 แสดงชั้นนี้':'◌ ซ่อนชั่วคราว','H',()=>stMuteT(L.id)),it(ST.solo===L.id?'◉ เลิกเล่นเดี่ยว':'◉ เล่นชั้นนี้ชั้นเดียว','',()=>stSoloT(L.id)),h('hr'),
+    it('↑ ย้ายขึ้น','',()=>stMove(i,-1)),it('↓ ย้ายลง','',()=>stMove(i,1)),it('⏱ ให้เริ่มที่หัวเล่น ('+ST.t.toFixed(2)+' วิ)','',()=>{stPush();L.at=+Math.min(ST.t,stDur()).toFixed(2);stChanged(true);}),h('hr'),
+    it('✕ ลบชั้น','Delete',()=>stDelLayer(L.id),'danger')),x,y);}
+function stMuteT(id){ST.mute[id]=!ST.mute[id];stTlRender();stRestart();}
+function stSoloT(id){ST.solo=ST.solo===id?null:id;stTlRender();stRestart();}
+function stRename(id){const el=document.querySelector('#stRows .stName[data-id="'+CSS.escape(id)+'"] .nm'),L=ST.fx.layers.find(x=>x.id===id);if(!el||!L)return;
+  const inp=h('input',{type:'text',value:id,spellcheck:false});el.innerHTML='';el.append(inp);inp.focus();inp.select();let done=false;
+  const fin=ok=>{if(done)return;done=true;const n=inp.value.trim().replace(/\s+/g,'_');
+    if(ok&&n&&n!==id){if(ST.fx.layers.some(x=>x.id===n))stToast('มีชั้นชื่อ '+n+' แล้ว');else{stPush();for(const X of ST.fx.layers)if(X.of===id)X.of=n;L.id=n;if(ST.sel===id)ST.sel=n;if(ST.mute[id]){ST.mute[n]=1;delete ST.mute[id];}if(ST.solo===id)ST.solo=n;stChanged(true);return;}}
+    stTlRender();};
+  inp._key=e=>{if(e.key==='Enter')fin(true);else if(e.key==='Escape')fin(false);};inp.addEventListener('blur',()=>fin(true));}
 function stSync(){if(!$st('stTop'))return;const F=ST.fx;$st('stFile').textContent=(ST.name||'(ใหม่)')+(ST.dirty?' ●':'');$st('stFile').classList.toggle('dirty',ST.dirty);
   const ps=$st('stPal');if(FXR.schema&&ps.options.length<2)for(const p of FXR.schema.pals)ps.append(h('option',{value:p},p));if(F)ps.value=F.pal||'arcane';
-  if(F)$st('stK').value=F.k||1;$st('stPlay').textContent=ST.play?'⏸':'▶';$st('stLoop').classList.toggle('on',ST.loop);
-  document.querySelectorAll('#stTl [data-sp]').forEach(b=>b.classList.toggle('on',+b.dataset.sp===ST.speed));document.querySelectorAll('#stCams [data-cam]').forEach(b=>b.classList.toggle('on',b.dataset.cam===ST.cam));}
+  if(F)$st('stK').value=F.k||1;$st('stPlay').textContent=ST.play?'⏸':'▶';$st('stPlay').classList.toggle('on',ST.play);$st('stLoop').classList.toggle('on',ST.loop);
+  $st('stBUndo').disabled=!ST.undo.length;$st('stBRedo').disabled=!ST.redo.length;
+  document.querySelectorAll('#stTl [data-sp]').forEach(b=>b.classList.toggle('on',+b.dataset.sp===ST.speed));document.querySelectorAll('#stCams [data-cam]').forEach(b=>b.classList.toggle('on',b.dataset.cam===ST.cam));stStatus();}
 function stHudUpdate(){if(stFr%3)return;const M=ST.met,s=(id,t,bad)=>{const e=$st(id);e.textContent=t;e.className=bad?'bad':'good';};
   s('stHParts','อนุภาค '+M.parts,M.parts>3000);s('stHWhite','ขาวจ้า '+M.white.toFixed(1)+'%',M.white>8);s('stHBlock','บังตัว '+M.block.toFixed(0)+'%',M.block>35);s('stHCalls','draw '+M.calls,M.calls>900);s('stHMs',M.ms.toFixed(1)+' ms',M.ms>16);}
 // ---------- ไลบรารี ----------
+const ST_GRP={start:['✨','แม่แบบเริ่มต้น'],tpl:['◈','แม่แบบในเกม'],sig:['◆','ลายเซ็นธาตุ'],rec:['↺','ท่าตอบโต้'],fire:['🔥','ไฟ'],pyro:['🔥','ไฟ (Pyro)'],ice:['❄','น้ำแข็ง'],frost:['❄','น้ำแข็ง (Frost)'],storm:['ϟ','สายฟ้า'],earth:['⛰','ดิน'],nature:['❦','ธรรมชาติ'],hex:['☠','คำสาป'],summon:['✺','อัญเชิญ']};
 function stLibRender(){const box=$st('stLibList');if(!box)return;const q=($st('stSearch').value||'').toLowerCase();box.innerHTML='';const groups={};
   for(const n of Object.keys(ST.list).sort()){const e=ST.list[n];if(q&&!(n+' '+(e.desc||'')+' '+(e.tags||[]).join(' ')).toLowerCase().includes(q))continue;const g=n.includes('/')?n.slice(0,n.lastIndexOf('/')):'(ราก)';(groups[g]=groups[g]||[]).push(n);}
-  for(const g of Object.keys(groups)){box.append(h('div',{className:'grp'},g));for(const n of groups[g]){const e=ST.list[n];box.append(h('button',{className:n===ST.name?'on':'',title:e.desc||n,on:{click:()=>stAskOpen(n)}},n.slice(n.lastIndexOf('/')+1),h('small',null,e.err?'⚠ '+e.err:(e.desc||''))));}}
-  if(!Object.keys(groups).length)box.append(h('p',{className:'mute'},'ไม่พบ'));}
+  const shut=ST.shut||(ST.shut=stLoad('wd_studio_shut',{})),order=Object.keys(groups).sort((a,b)=>a==='start'?-1:b==='start'?1:a.localeCompare(b));
+  for(const g of order){const [ic,lab]=ST_GRP[g]||['✦',g],closed=!q&&shut[g]&&!groups[g].includes(ST.name);
+    box.append(h('button',{className:'grp'+(closed?' shut':''),title:'คลิกเพื่อพับ / กางกลุ่ม '+g,on:{click:()=>{shut[g]=!closed;stStore('wd_studio_shut',shut);stLibRender();}}},h('span',{className:'car'},'▾'),lab+(lab!==g?' · '+g:''),h('span',{className:'cnt'},groups[g].length)));
+    if(closed)continue;
+    for(const n of groups[g]){const e=ST.list[n];box.append(h('button',{className:'it'+(n===ST.name?' on':'')+(e.err?' bad':''),title:n+' — '+(e.desc||'(ไม่มีคำอธิบาย)'),on:{click:()=>stAskOpen(n)}},
+      h('span',{className:'ic'},ic),h('span',{className:'nm'},n.slice(n.lastIndexOf('/')+1)),h('small',null,e.err?'⚠ '+e.err:(e.desc||'—'))));}}
+  if(!order.length)box.append(h('p',{className:'mute',style:'padding:8px'},'ไม่พบ "'+q+'"'));}
 function stAskOpen(n){if(n===ST.name)return;if(ST.dirty)stBanner('ยังไม่ได้บันทึก '+(ST.name||'(ใหม่)'),[['ทิ้งแล้วเปิด '+n,()=>stOpen(n)],['บันทึกก่อน',async()=>{if(await stSave(false))stOpen(n);}]]);else stOpen(n);}
 // ---------- ไทม์ไลน์ ----------
-function stTlTime(){const D=stDur()+ST.tail;$st('stTime').textContent=ST.t.toFixed(2)+' / '+stDur().toFixed(2)+' s';const ph=$st('stPh');if(ph)ph.style.left=Math.min(100,ST.t/D*100)+'%';}
-function stTlRender(){const R=$st('stRows');if(!R||!ST.fx)return;R.innerHTML='';const D=stDur()+ST.tail,F=ST.fx;
-  R.append(h('div',{className:'stName',on:{click:()=>{ST.sel=null;stTlRender();stInspRender();}}},h('span',{className:'nm'+(ST.sel===null?' on':'')},'⚙ ตั้งค่าไฟล์')));
-  const ru=h('div',{className:'stTrack ruler',id:'stRuler'});for(let s=0;s<=D+1e-6;s+=D>4?1:0.5)ru.append(h('span',{className:'stTick',style:'left:'+(s/D*100)+'%'},s.toFixed(1)));ru.append(h('div',{className:'stPh',id:'stPh'}));
-  const seek=e=>{const b=ru.getBoundingClientRect();ST.play=false;ST.seekTo=Math.max(0,Math.min(D,(e.clientX-b.left)/b.width*D));stSync();};
-  ru.addEventListener('pointerdown',e=>{seek(e);ru.setPointerCapture(e.pointerId);const mv=ev=>seek(ev),up=()=>{ru.removeEventListener('pointermove',mv);ru.removeEventListener('pointerup',up);};ru.addEventListener('pointermove',mv);ru.addEventListener('pointerup',up);});R.append(ru);
+function stTlTime(){const D=stDur()+ST.tail;$st('stTime').textContent=ST.t.toFixed(2)+' / '+stDur().toFixed(2)+' วิ';const f=Math.min(1,ST.t/D),ph=$st('stPh');if(ph)ph.style.left=f*100+'%';
+  const pa=$st('stPhAll'),ru=$st('stRuler');if(pa&&ru)pa.style.left=(ru.offsetLeft+ru.offsetWidth*f)+'px';}
+function stTlRender(){const R=$st('stRows');if(!R||!ST.fx)return;const sc=R.scrollTop;R.innerHTML='';const D=stDur()+ST.tail,F=ST.fx,step=D>6?1:D>2.5?0.5:D>1.2?0.25:0.1,gs='--gs:'+(step/D*100)+'%';
+  R.append(h('div',{className:'stName head'+(ST.sel===null?' on':''),title:'ตั้งค่าทั้งไฟล์: คำอธิบาย ธาตุ ความยาว ผลตรวจ และผูกกับท่าในเกม',on:{click:()=>{ST.sel=null;stTlRender();stInspRender();}}},h('span',{className:'nm'},'⚙ ตั้งค่าไฟล์ / ผูกกับท่า'),h('span',{className:'ty'},F.layers.length+' ชั้น')));
+  const ru=h('div',{className:'stTrack ruler',id:'stRuler',title:'คลิกหรือลาก = เลื่อนหัวเล่นไปเวลานั้น'});
+  for(let s=0;s<=D+1e-6;s+=step)ru.append(h('span',{className:'stTick',style:'left:'+(s/D*100)+'%'},String(+s.toFixed(2))));
+  ru.append(h('div',{className:'end',style:'left:'+(stDur()/D*100)+'%'}),h('div',{className:'stPh',id:'stPh'}));
+  const seekAt=(e,el)=>{const b=el.getBoundingClientRect();ST.play=false;ST.seekTo=Math.max(0,Math.min(D,(e.clientX-b.left)/b.width*D));stSync();};
+  const scrub=el=>el.addEventListener('pointerdown',e=>{if(e.button!==0||e.target.closest('.stSeg'))return;seekAt(e,el);el.setPointerCapture(e.pointerId);const mv=ev=>seekAt(ev,el),up=()=>{el.removeEventListener('pointermove',mv);el.removeEventListener('pointerup',up);};el.addEventListener('pointermove',mv);el.addEventListener('pointerup',up);});
+  scrub(ru);R.append(ru);
   const errAt=new Set(ST.lint.filter(r=>r.lv==='err'||r.lv==='warn').map(r=>String(r.at).split('.')[0]));
-  F.layers.forEach((L,i)=>{const g=k=>L[k]!==undefined?L[k]:stDef(L,k),num=v=>typeof v==='number'?v:Array.isArray(v)?+v[1]||0:0,T=FXR.schema.types[L.t]||{};
-    const nm=h('div',{className:'stName'+(ST.sel===L.id?' on':''),on:{click:e=>{if(e.target.closest('button'))return;ST.sel=L.id;stTlRender();stInspRender();}}},
-      h('button',{title:'ซ่อน/แสดง',className:ST.mute[L.id]?'on':'',on:{click:()=>{ST.mute[L.id]=!ST.mute[L.id];stTlRender();stRestart();}}},ST.mute[L.id]?'◌':'👁'),
-      h('button',{title:'เล่นชั้นนี้ชั้นเดียว',className:ST.solo===L.id?'on':'',on:{click:()=>{ST.solo=ST.solo===L.id?null:L.id;stTlRender();stRestart();}}},'S'),
-      h('span',{className:'nm'+(errAt.has(L.id)?' bad':'')},(T.icon||'')+' '+L.id),h('span',{className:'ty'},L.t+(L.shape?':'+L.shape:'')),
-      h('button',{title:'ขึ้น',on:{click:()=>stMove(i,-1)}},'↑'),h('button',{title:'ลง',on:{click:()=>stMove(i,1)}},'↓'),h('button',{title:'ทำซ้ำชั้น',on:{click:()=>stDupLayer(L.id)}},'⧉'),h('button',{title:'ลบชั้น (Delete)',on:{click:()=>stDelLayer(L.id)}},'✕'));
-    const tr=h('div',{className:'stTrack'}),sg=h('div',{className:'stSeg'+(ST.sel===L.id?' on':'')+(g('loop')?' loop':'')+(ST.mute[L.id]||(ST.solo&&ST.solo!==L.id)?' off':''),style:'--c:'+(TYPEC[L.t]||'#d9b45a')}),rh=h('span',{className:'rh'});
-    const place=()=>{sg.style.left=(num(g('at'))/D*100)+'%';sg.style.width=(Math.max(0.02,g('loop')?D-num(g('at')):num(g('life')))/D*100)+'%';};place();sg.append(rh);tr.append(sg);
+  F.layers.forEach((L,i)=>{const g=k=>L[k]!==undefined?L[k]:stDef(L,k),num=v=>typeof v==='number'?v:Array.isArray(v)?+v[1]||0:0,T=FXR.schema.types[L.t]||{},col=TYPEC[L.t]||'#d9b45a',muted=!!ST.mute[L.id],solo=ST.solo===L.id;
+    const grip=h('span',{className:'grip',title:'ลากขึ้น/ลงเพื่อเรียงลำดับชั้น'},'⋮⋮');
+    const nm=h('div',{className:'stName'+(ST.sel===L.id?' on':''),'data-id':L.id,'data-i':i,style:'--c:'+col,title:(T.th||L.t)+' — ดับเบิลคลิกชื่อ = เปลี่ยนชื่อ • คลิกขวา = เมนู',
+        on:{click:e=>{if(e.target.closest('button,input'))return;ST.sel=L.id;stTlRender();stInspRender();},contextmenu:e=>{e.preventDefault();stLayerMenu(L,i,e.clientX,e.clientY);},dblclick:e=>{if(e.target.closest('.nm')&&!e.target.closest('input'))stRename(L.id);}}},
+      grip,h('span',{className:'nm'+(errAt.has(L.id)?' bad':'')},(T.icon||'')+' '+L.id),h('span',{className:'ty'},L.t+(L.shape?':'+L.shape:'')),
+      h('span',{className:'act'+(muted||solo?' pin':'')},
+        h('button',{title:muted?'แสดงชั้นนี้ (H)':'ซ่อนชั้นนี้ชั่วคราว (H)',className:muted?'on':'',on:{click:()=>stMuteT(L.id)}},muted?'◌':'👁'),
+        h('button',{title:'เล่นชั้นนี้ชั้นเดียว (solo)',className:solo?'on':'',on:{click:()=>stSoloT(L.id)}},'S'),
+        h('button',{title:'เมนูของชั้น (หรือคลิกขวาที่แถว)',on:{click:e=>{const b=e.currentTarget.getBoundingClientRect();stLayerMenu(L,i,b.left,b.bottom+2);}}},'⋯')));
+    stGripDrag(grip,i);
+    const tr=h('div',{className:'stTrack',style:gs}),sg=h('div',{className:'stSeg'+(ST.sel===L.id?' on':'')+(g('loop')?' loop':'')+(muted||(ST.solo&&!solo)?' off':''),style:'--c:'+col,title:L.id+' — ลาก = เลื่อนเวลาเริ่ม • ลากขอบขวา = ยืดอายุ'},h('span',{className:'lb'},L.id)),rh=h('span',{className:'rh',title:'ลากเพื่อยืด / หดอายุของชั้น'});
+    const place=()=>{sg.style.left=(num(g('at'))/D*100)+'%';sg.style.width=(Math.max(0.02,g('loop')?D-num(g('at')):num(g('life')))/D*100)+'%';};place();sg.append(rh);tr.append(sg);scrub(tr);
+    sg.addEventListener('contextmenu',e=>{e.preventDefault();stLayerMenu(L,i,e.clientX,e.clientY);});
     const editable=typeof g('at')==='number'&&typeof g('life')==='number';
-    sg.addEventListener('pointerdown',e=>{e.preventDefault();ST.sel=L.id;if(!editable){stInspRender();return;}stPush();const b=tr.getBoundingClientRect(),x0=e.clientX,at0=g('at'),lf0=g('life'),rs=e.target===rh;sg.setPointerCapture(e.pointerId);
-      const mv=ev=>{const d=(ev.clientX-x0)/b.width*D;if(rs)L.life=+Math.max(0.02,lf0+d).toFixed(2);else L.at=+Math.max(0,at0+d).toFixed(2);place();ST.dirty=true;};
-      const up=()=>{sg.removeEventListener('pointermove',mv);sg.removeEventListener('pointerup',up);stChanged(true);};sg.addEventListener('pointermove',mv);sg.addEventListener('pointerup',up);});
+    sg.addEventListener('pointerdown',e=>{if(e.button!==0)return;e.preventDefault();const was=ST.sel;ST.sel=L.id;if(!editable){stTlRender();stInspRender();return;}const b=tr.getBoundingClientRect(),x0=e.clientX,at0=g('at'),lf0=g('life'),rs=e.target===rh;let moved=false;sg.setPointerCapture(e.pointerId);
+      const mv=ev=>{if(!moved&&Math.abs(ev.clientX-x0)<3)return;if(!moved){moved=true;stPush();}const d=(ev.clientX-x0)/b.width*D;if(rs)L.life=+Math.max(0.02,lf0+d).toFixed(2);else L.at=+Math.max(0,at0+d).toFixed(2);place();ST.dirty=true;stHint((rs?'อายุ ':'เริ่ม ')+(rs?L.life:L.at).toFixed(2)+' วิ');};
+      const up=()=>{sg.removeEventListener('pointermove',mv);sg.removeEventListener('pointerup',up);if(moved)stChanged(true);else if(was!==L.id){stTlRender();stInspRender();}};sg.addEventListener('pointermove',mv);sg.addEventListener('pointerup',up);});
     R.append(nm,tr);});
+  if(!F.layers.length)R.append(h('div',{className:'mute',style:'grid-column:1/-1;padding:18px;text-align:center'},'ยังไม่มีชั้น — กด ',h('b',null,'＋ เพิ่มชั้น'),' (หรือ Shift+A) เพื่อเริ่ม'));
+  R.append(h('div',{id:'stPhAll',style:'height:'+R.scrollHeight+'px'}));R.scrollTop=sc;
   stTlTime();}
+function stGripDrag(g,i){g.addEventListener('pointerdown',e=>{if(e.button!==0)return;e.preventDefault();e.stopPropagation();g.setPointerCapture(e.pointerId);const rows=[...document.querySelectorAll('#stRows .stName[data-i]')];rows[i].classList.add('drag');let to=i;
+  const mv=ev=>{rows.forEach(r=>r.classList.remove('dropA','dropB'));const r=rows.find(r=>{const b=r.getBoundingClientRect();return ev.clientY>=b.top&&ev.clientY<b.bottom;});if(!r)return;const b=r.getBoundingClientRect(),j=+r.dataset.i,below=ev.clientY>b.top+b.height/2;r.classList.add(below?'dropB':'dropA');to=below?j+1:j;};
+  const up=()=>{g.removeEventListener('pointermove',mv);g.removeEventListener('pointerup',up);rows.forEach(r=>r.classList.remove('dropA','dropB','drag'));const j=to>i?to-1:to;if(j!==i){stPush();const A=ST.fx.layers,[x]=A.splice(i,1);A.splice(j,0,x);stChanged(true);}};
+  g.addEventListener('pointermove',mv);g.addEventListener('pointerup',up);});}
 function stUid(base){let i=1,id=base;const has=x=>ST.fx.layers.some(L=>L.id===x);while(has(id))id=base+(++i);return id;}
 function stAddLayer(t){stPush();const L={id:stUid(t),t,at:+Math.min(ST.t,stDur()).toFixed(2)};const T=FXR.schema.types[t];
   // ค่าเริ่มที่ดูเห็นผลทันที
@@ -248,21 +353,35 @@ function stDelLayer(id){stPush();ST.fx.layers=ST.fx.layers.filter(L=>L.id!==id);
 function stDupLayer(id){stPush();const i=ST.fx.layers.findIndex(L=>L.id===id),c=JSON.parse(JSON.stringify(ST.fx.layers[i]));c.id=stUid(id);ST.fx.layers.splice(i+1,0,c);ST.sel=c.id;stChanged(true);}
 function stMove(i,d){const j=i+d,A=ST.fx.layers;if(j<0||j>=A.length)return;stPush();[A[i],A[j]]=[A[j],A[i]];stChanged(true);}
 // ---------- แผงแก้ค่า ----------
-function stInspRender(){const P=$st('stInsp');if(!P||!ST.fx)return;P.innerHTML='';const S=FXR.schema;
+// ส่วนพับได้ (จำว่าเปิด/ปิดไว้) + ช่องค้นหาค่า
+function stSec(key,title,kids,sub,defOpen){const o=ST.open||(ST.open=stLoad('wd_studio_open',{}));
+  const d=h('details',{open:o[key]!==undefined?o[key]:defOpen!==false},h('summary',null,title,sub?h('small',null,sub):null),h('div',{className:'in'},...kids));
+  d.addEventListener('toggle',()=>{if(ST.finding)return;o[key]=d.open;stStore('wd_studio_open',o);});return d;}
+function stFind(P){const flt=()=>{const s=(ST.find||'').trim().toLowerCase();P.querySelectorAll('.stF').forEach(f=>f.classList.toggle('hide',!!s&&!(f.dataset.q||'').toLowerCase().includes(s)));
+    if(s){ST.finding=true;P.querySelectorAll('details').forEach(d=>d.open=true);setTimeout(()=>ST.finding=false,0);}};
+  const inp=h('input',{type:'search',placeholder:'🔍 หาค่าที่จะแก้ เช่น ขนาด, สี, size',value:ST.find||'',title:'พิมพ์ชื่อค่า (ไทยหรืออังกฤษ) เพื่อกรองเฉพาะค่าที่ต้องการ',on:{input:e=>{ST.find=e.target.value;flt();}}});
+  inp._key=e=>{if(e.key==='Escape'){inp.value='';ST.find='';flt();}};setTimeout(flt,0);return h('div',{className:'find'},inp);}
+function stInspRender(){const P=$st('stInsp');if(!P||!ST.fx)return;const same=P._sel===ST.sel,sc=P.scrollTop;P._sel=ST.sel;P.innerHTML='';const S=FXR.schema;
   const lint=h('div',{className:'stLint'});
-  if(ST.sel===null){const F=ST.fx;P.append(h('div',{className:'hd'},h('b',null,ST.name||'(ใหม่)'),h('span',{className:'mute'},'ตั้งค่าไฟล์')));
-    for(const k of ['desc','pal','dur','k','seed','tags','params'])P.append(stField(null,F,k,S.file[k]));
-    for(const r of ST.lint)lint.append(h('div',{className:r.lv},h('span',null,r.lv==='err'?'✗':'⚠'),h('span',null,(r.at?r.at+': ':'')+r.msg)));if(!ST.lint.length)lint.append(h('div',{className:'ok'},'✓ fx-check ผ่าน'));
-    P.append(h('h3',null,'ตรวจ (fx-check)'),lint,stBindPanel());return;}
+  if(ST.sel===null){const F=ST.fx;
+    P.append(h('div',{className:'card'},h('i',null,'⚙'),h('b',null,ST.name||'(ใหม่ ยังไม่บันทึก)'),h('span',null,'ตั้งค่าทั้งไฟล์ • '+F.layers.length+' ชั้น • ยาว '+stDur().toFixed(2)+' วิ')),stFind(P));
+    for(const r of ST.lint)lint.append(h('div',{className:r.lv},h('span',null,r.lv==='err'?'✗':'⚠'),h('span',null,(r.at?r.at+': ':'')+r.msg)));if(!ST.lint.length)lint.append(h('div',{className:'ok'},'✓ fx-check ผ่าน ไม่มีปัญหา'));
+    P.append(stSec('f:main','ข้อมูลเอฟเฟกต์',['desc','pal','dur','k','seed'].map(k=>stField(null,F,k,S.file[k]))),
+      stSec('f:lint','ตรวจไฟล์ (fx-check)',[lint],ST.lint.length?ST.lint.length+' เรื่อง':'ผ่าน'),
+      stSec('f:bind','ผูกกับท่าในเกม (bind.json)',[stBindPanel()]),
+      stSec('f:more','แท็ก / ค่าที่เกมส่งมา (params)',['tags','params'].map(k=>stField(null,F,k,S.file[k])),'ขั้นสูง',false));
+    if(same)P.scrollTop=sc;return;}
   const L=ST.fx.layers.find(x=>x.id===ST.sel);if(!L){ST.sel=null;return stInspRender();}const T=S.types[L.t];
-  P.append(h('div',{className:'hd'},h('b',null,(T.icon||'')+' '+L.id),h('span',{className:'mute'},T.th+' · '+L.t)),h('p',{className:'mute',style:'margin:0;font-size:12px'},T.desc));
+  const n=v=>typeof v==='number'?v.toFixed(2):Array.isArray(v)?v.join('–'):'สูตร',at=L.at!==undefined?L.at:stDef(L,'at'),life=L.life!==undefined?L.life:stDef(L,'life');
+  P.append(h('div',{className:'card',style:'--c:'+(TYPEC[L.t]||'#e2ad52')},h('i',null,T.icon||'•'),h('b',null,L.id),h('span',null,T.th+' · '+L.t+' • เริ่ม '+n(at)+' วิ • อายุ '+(L.loop?'วนเรื่อย ๆ':n(life)+' วิ'))),h('p',{className:'desc'},T.desc),stFind(P));
   for(const r of ST.lint.filter(r=>String(r.at).split('.')[0]===L.id))lint.append(h('div',{className:r.lv},h('span',null,r.lv==='err'?'✗':'⚠'),h('span',null,r.msg+(String(r.at).includes('.')?' ('+String(r.at).split('.')[1]+')':''))));
-  P.append(lint);
-  P.append(stField(L,L,'id',S.common.id));
-  if(L.t==='mesh')P.append(stShapePicker(L));
-  for(const k in T.fields){if(L.t==='mesh'&&k==='shape')continue;if(!stShowField(L,k))continue;P.append(stField(L,L,k,T.fields[k]));}
-  const com=h('details',{open:true},h('summary',null,'เวลา / ตำแหน่ง / เงื่อนไข'));for(const k of ['at','life','loop','end','att','pos','yaw','x','near','own'])com.append(stField(L,L,k,S.common[k]));P.append(com);
-  P.append(h('details',null,h('summary',null,'JSON ของชั้นนี้'),stJsonBox(L)));}
+  if(lint.childNodes.length)P.append(h('div',{className:'pad'},lint));
+  const main=[stField(L,L,'id',S.common.id)];if(L.t==='mesh')main.push(stShapePicker(L));
+  for(const k in T.fields){if(L.t==='mesh'&&k==='shape')continue;if(!stShowField(L,k))continue;main.push(stField(L,L,k,T.fields[k]));}
+  P.append(stSec('l:main','ค่าของ'+T.th,main,L.t),
+    stSec('l:com','เวลา / ตำแหน่ง / เงื่อนไข',['at','life','loop','end','att','pos','yaw','x','near','own'].map(k=>stField(L,L,k,S.common[k]))),
+    stSec('l:json','JSON ของชั้นนี้',[stJsonBox(L)],'ขั้นสูง',false));
+  if(same)P.scrollTop=sc;}
 // ซ่อนฟิลด์ที่ไม่เกี่ยวกับรูปทรง/วัสดุที่เลือก (ให้แผงสั้น อ่านง่าย)
 function stShowField(L,k){if(L.t!=='mesh'&&L.t!=='emit'&&L.t!=='trail')return true;const g=q=>L[q]!==undefined?L[q]:stDef(L,q);
   if(L.t==='mesh'){const sh=g('shape'),mt=g('mat');if(k==='glb')return sh==='glb';if(k==='model')return sh==='model';if(k==='inner')return sh==='ring'||sh==='torus';if(k==='n')return sh==='spikes';if(k==='wk')return sh==='crescent'||sh==='ribbon';
@@ -274,7 +393,7 @@ function stShapePicker(L){const cur=L.shape||'sphere';return h('div',{className:
 function stJsonBox(L){const ta=h('textarea',{value:JSON.stringify(L,null,1),spellcheck:false,style:'width:100%;min-height:120px;font:11px var(--fu)'});
   return h('div',{className:'stF'},ta,h('button',{on:{click:()=>{try{const v=JSON.parse(ta.value);stPush();Object.keys(L).forEach(k=>delete L[k]);Object.assign(L,v);ST.sel=L.id;stChanged(true);}catch(e){stToast('JSON ผิด: '+e.message);}}}},'ใช้ JSON นี้'));}
 const isCurveV=v=>v&&typeof v==='object'&&!Array.isArray(v)&&Object.keys(v).some(k=>k.trim()!==''&&!isNaN(+k));
-function stField(L,obj,k,sp){if(!sp)return h('span');const cur=obj[k],v=cur!==undefined?cur:sp.def,lab=h('label',{title:sp.desc||''},sp.th||k,h('small',null,k+(cur===undefined?' · ค่าเริ่ม':'')));const box=h('div',{className:'stF'},lab);
+function stField(L,obj,k,sp){if(!sp)return h('span');const cur=obj[k],v=cur!==undefined?cur:sp.def,lab=h('label',{title:sp.desc||''},sp.th||k,h('small',null,k+(cur===undefined?' · ค่าเริ่ม':'')));const box=h('div',{className:'stF'+(cur!==undefined?' set':''),'data-q':(sp.th||'')+' '+k+' '+(sp.desc||'')},lab);
   const set=(val,rebuild)=>{if(obj===ST.fx&&L===null){if(val===undefined||val===''||(Array.isArray(val)&&!val.length&&k==='tags'))delete obj[k];else obj[k]=val;stChanged(rebuild);}else stSet(obj,k,val,rebuild);};
   const reset=h('button',{className:'tg',title:'กลับเป็นค่าเริ่ม',on:{click:()=>{stPush();set(undefined,true);}}},'↺');
   switch(sp.type){
@@ -331,7 +450,7 @@ function stCurveEd(sp,c,onChange){const cvs=h('canvas',{width:300,height:90}),ea
   cvs.addEventListener('contextmenu',e=>{e.preventDefault();const [x,y]=pos(e);const ps=pts();if(ps.length<=2)return;for(const p of ps){if(Math.hypot(X(p.t)-x,Y(p.v)-y)<9){stPush();delete c[p.k];onChange(c);draw();break;}}});
   draw();return h('div',{className:'stCurve'},cvs,h('div',{className:'row',style:'display:flex;gap:4px;align-items:center'},h('span',{className:'mute',style:'font-size:11px'},'ลากจุด • ดับเบิลคลิกเพิ่ม • คลิกขวาลบ'),ease,xin));}
 // ---------- ผูกกับเกม (bind.json) ----------
-function stBindPanel(){const box=h('div',null,h('h3',{style:'margin-top:8px'},'ผูกกับท่าในเกม (bind.json)'));let bind=null;
+function stBindPanel(){const box=h('div');let bind=null;
   const list=h('div',{className:'stLint'}),key=h('input',{type:'text',placeholder:'efx:dfboom',list:'stDLev',style:'width:130px'}),mode=h('select',null,h('option',{value:'add'},'เพิ่มทับ (add)'),h('option',{value:'replace'},'แทนที่ (replace)'));
   const evs=new Set([...Object.keys(EFXAUG).map(k=>'efx:'+k),'cast','pop','imp','boom','parry','block','sbreak','die','kill','revive','buff','land']);
   const load=async()=>{try{bind=await (await fetch('assets/fx/bind.json',{cache:'no-cache'})).json();}catch(e){bind={};}list.innerHTML='';const mine=Object.entries(bind).filter(([k,v])=>[].concat(v).some(b=>b&&b.fx===ST.name));
@@ -345,16 +464,22 @@ function stTryGame(){if(!ST.name){stToast('บันทึกไฟล์ก่�
   try{const o=JSON.parse(localStorage.getItem('wd_fxbind')||'{}');o[k]={fx:ST.name,mode};localStorage.setItem('wd_fxbind',JSON.stringify(o));}catch(e){}
   if(ST.dirty)stToast('ไฟล์ยังไม่ได้บันทึก — เกมจะใช้เวอร์ชันที่บันทึกล่าสุด');window.open('index.html','_blank');
   stToast('เปิดเกมแล้ว: '+k+' → '+ST.name+' ('+mode+')\nล้างการผูกทดลอง: console → localStorage.removeItem("wd_fxbind")',5000);}
-function stHelp(){const m=h('div',{className:'stModal',on:{click:e=>{if(e.target===m)m.remove();}}});m.append(h('div',{className:'box',style:'max-width:640px'},h('h3',null,'วิธีใช้ VFX Studio'),
-  h('div',{style:'display:grid;gap:6px;font-size:13px'},...[
-    'เลือกเอฟเฟกต์ทางซ้าย หรือ ＋ ใหม่ (เริ่มจากแม่แบบ) • ธาตุ = เปลี่ยนสีทั้งเอฟเฟกต์ในคลิกเดียว • ความแรง = คูณจำนวน/ขนาด/ความสว่างทั้งหมด',
-    'ไทม์ไลน์: ลากแถบ = เลื่อนเวลาเริ่ม • ลากขอบขวา = ยืดอายุ • คลิกแถวเวลา = ไปเวลานั้น (ภาพจำลองแบบแน่นอน เหมือนเดิมทุกครั้ง) • 👁 ซ่อน • S เล่นชั้นเดียว',
-    'แผงขวา: ค่าของชั้นที่เลือก • ∿ = เปลี่ยนค่าตามเวลา (เส้นโค้ง: ลากจุด ดับเบิลคลิกเพิ่ม คลิกขวาลบ) • ↔ = สุ่มในช่วง • ↺ = กลับค่าเริ่ม • ช่องตัวเลขพิมพ์สูตรได้ เช่น r*0.5',
-    'จอ: ลากเมาส์ = หมุนกล้อง • ล้อเมาส์ = ซูม • ปุ่มมุมกล้อง • ตัวเลขล่างจอ: ขาวจ้า ≤ 8%, บังตัว ≤ 35% (แดง = เกิน)',
-    'ปุ่มลัด: Space เล่น/หยุด • R เล่นใหม่ • ← → ทีละเฟรม (Shift = 0.1 วิ) • Ctrl+S บันทึก • Ctrl+Z / Ctrl+Y • Delete ลบชั้น',
-    '🖼 แผ่นภาพ = ภาพสรุปทั้งไทม์ไลน์ + ตัวเลข • 🎮 ลองในเกม = เปิดห้องฝึกโดยผูกเอฟเฟกต์กับท่าที่เลือก • ผูกถาวร: ⚙ ตั้งค่าไฟล์ → ผูกกับท่าในเกม',
-    'แท็บ 🧊 โมเดล = ปั้นโมเดลของเอฟเฟกต์เอง • แท็บ 🎞 ภาพ = วาดภาพ/flipbook เอง (กด ? ในแท็บนั้นดูวิธีใช้)',
-    'บันทึกตรงลงโปรเจกต์ต้องเปิดผ่าน python tools/serve.py • รูปแบบไฟล์ทั้งหมด: FX-FORMAT.md'].map(t=>h('p',{style:'margin:0'},'• '+t))),h('button',{on:{click:()=>m.remove()}},'ปิด')));$st('st').append(m);}
+function stHelp(){if(document.querySelector('#st .stModal.help'))return;const m=h('div',{className:'stModal help',on:{click:e=>{if(e.target===m)m.remove();}}});
+  const K=(...ks)=>h('span',null,...ks.flatMap((k,i)=>i?[' ',h('kbd',null,k)]:[h('kbd',null,k)])),row=(t,...ks)=>h('div',null,h('span',null,t),K(...ks));
+  m.append(h('div',{className:'box',style:'max-width:760px'},h('div',{style:'display:flex;justify-content:space-between;align-items:center;gap:8px'},h('h3',null,'วิธีใช้ VFX Studio'),h('button',{on:{click:()=>m.remove()}},'ปิด (Esc)')),
+    h('div',{style:'display:grid;gap:5px;font-size:12.5px;color:var(--tx2)'},...[
+      '1. เลือกเอฟเฟกต์ทางซ้าย หรือกด ＋ ใหม่ เพื่อเริ่มจากแม่แบบ',
+      '2. ไทม์ไลน์ด้านล่าง: แต่ละแถว = 1 ชั้น • ลากแถบสี = เลื่อนเวลาเริ่ม • ลากขอบขวา = ยืดอายุ • ลาก ⋮⋮ = เรียงลำดับ • คลิกขวา = เมนู',
+      '3. แผงขวา: แก้ค่าของชั้นที่เลือก • ∿ = เปลี่ยนตามเวลา • ↔ = สุ่มในช่วง • ↺ = กลับค่าเริ่ม • จุดส้มหน้าชื่อ = ค่าที่แก้ไปแล้ว • ช่อง 🔍 หาค่าได้',
+      '4. ตัวเลขมุมขวาบนของจอ: ขาวจ้า ≤ 8%, บังตัว ≤ 35% (สีส้ม = เกิน ต้องลดความสว่าง)',
+      '5. 💾 บันทึก → 🎮 ลองในเกม • ผูกถาวรที่ ⚙ ตั้งค่าไฟล์ → ผูกกับท่าในเกม',
+      '• ลากเส้นขอบแผงเพื่อปรับขนาด ดับเบิลคลิกเส้นขอบ = พับแผงเก็บ • ชี้เมาส์ที่ปุ่มไหนก็ได้ แถบล่างสุดจะบอกว่าปุ่มนั้นทำอะไร'].map(t=>h('p',{style:'margin:0'},t))),
+    h('div',{className:'stKeys'},h('h4',null,'เล่น / ดู'),row('เล่น / หยุด','Space'),row('เล่นใหม่ตั้งแต่ต้น','R'),row('ทีละเฟรม','←','→'),row('ทีละ 0.1 วิ','Shift','←'),row('กลับจุดเริ่ม','Home'),row('วนเล่น','L'),
+      row('มุมกล้อง: เกม / ข้าง / หน้า / บน / หมุนเอง','1','–','5'),row('หมุนกล้อง / ซูม','ลากจอ','ล้อเมาส์'),
+      h('h4',null,'แก้ชั้น'),row('เพิ่มชั้น','Shift','A'),row('เลือกชั้นบน / ล่าง','↑','↓'),row('เปลี่ยนชื่อชั้น','F2'),row('ทำซ้ำชั้น','Ctrl','D'),row('ซ่อนชั้นชั่วคราว','H'),row('ลบชั้น','Delete'),row('เลิกเลือก / ปิดเมนู','Esc'),
+      h('h4',null,'ไฟล์'),row('บันทึก','Ctrl','S'),row('บันทึกเป็นชื่อใหม่','Ctrl','Shift','S'),row('ย้อนกลับ','Ctrl','Z'),row('ทำซ้ำ','Ctrl','Y'),row('หน้านี้','?')),
+    h('p',{className:'mute',style:'margin:0;font-size:11.5px'},'แท็บ 🧊 โมเดล = ปั้นโมเดลของเอฟเฟกต์ • 🎞 ภาพ = วาดภาพ/flipbook • 🔥 ไฟ 3D = จำลองไฟ (กด ? ในแท็บนั้นดูวิธีใช้) • บันทึกตรงลงโปรเจกต์ต้องเปิดผ่าน VFX Studio.bat')));
+  $st('st').append(m);m.tabIndex=-1;m.focus();m.addEventListener('keydown',e=>{if(e.key==='Escape')m.remove();});}
 // ---------- API สำหรับ Claude / console ----------
 window.STUDIO={load:n=>stOpen(n),data:()=>ST.fx,name:()=>ST.name,
   set(path,v){const [id,...ks]=path.split('.');const L=id==='file'?ST.fx:ST.fx.layers.find(x=>x.id===id);if(!L)return false;let o=L;for(let i=0;i<ks.length-1;i++)o=o[ks[i]];stPush();o[ks[ks.length-1]]=v;stChanged(true);return true;},

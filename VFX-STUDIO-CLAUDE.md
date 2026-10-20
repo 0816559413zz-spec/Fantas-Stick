@@ -11,6 +11,7 @@
 - One runtime, `js/45-fx-runtime.js`, plays these files with the game's own systems: particles, fire shader, volumetric fire, ice shader, lightning, trails, rings, lights and screen effects. So **what the studio shows is what the game shows**.
 - `assets/fx/bind.json` binds game events to effects. You don't need to edit skill code.
 - **`studio.html`** is the editor. It is the real game in studio mode (`index.html?studio`) with a timeline, an inspector, contact sheets and metrics.
+  - UI (2026-10-20): library left, 3D view centre, inspector right, timeline bottom, status bar at the very bottom (hover a button → its tip shows there). Panels resize by dragging their edges (double-click = collapse; saved in `localStorage wd_studio_lay` — clear it if a panel seems missing). Layers: right-click = menu, drag ⋮⋮ = reorder, double-click/F2 = rename, Shift+A = add (grouped + search). `?` = all shortcuts.
 - The same app also **makes the assets** effects need: 🧊 models (spikes, crowns, blades, wings, swirls, domes…) and 🎞 textures/flipbooks (fire, smoke, explosions, lightning, magic circles, real fluid sims). See §6b.
 - Client side only. Effect files never change the network protocol, so there's no `PREFIX` bump.
 

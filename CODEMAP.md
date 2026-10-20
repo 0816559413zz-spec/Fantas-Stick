@@ -247,7 +247,7 @@ NOISE3D:240 FIRE3D:249 _fvIdx:254 fireVol:255 fireVolTemp:299
 §300 ไฟ 3 มิติที่ bake จาก Blender ทั้งก้อน (วิธี 1 — ผู้เล่นเลือก 2026-10…
 FSEQ:304 fireSeqLoad:305 fireSeqReady:309 fireSeqVol:310 fireSeqAt:331 _sqA:338 _sqB:338 _sqX:338 _sqY:338 _sqZ:338 _sqM:338 fireSeqLine:339
 
-## js/43-frost-vfx.js (144) — 
+## js/43-frost-vfx.js (144) — น้ำแข็ง VFX จาก Blender + Glacier Mist (หมอกเย็นตอนน้ำแข็งโผล่)
 FROST_U:6
 §7 shader น้ำแข็ง: ฐานน้ำเงินเข้ม → ปลายขาว • ขอบสว่าง (fresnel) • รอยร้…
 ICE_VS:8 ICE_FS:10 _iceShM:23 iceShaderMat:24 iceModel:28

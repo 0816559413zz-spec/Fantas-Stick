@@ -38,7 +38,7 @@ async function mkRefresh(){try{const r=await fetch('/api/fx-list',{cache:'no-cac
 function mkGizmoHot(){const tc=MK.m.tc;return MK.ws==='mesh'&&!!tc&&tc.visible&&!!tc.object&&tc.axis!==null;}
 async function mkWs(w){if(MK.ws===w)return;const prev=MK.ws;MK.ws=w;
   document.body.classList.remove('ws-fx','ws-mesh','ws-tex','ws-vol');document.body.classList.add('ws-'+w);
-  document.querySelectorAll('#mkTabs button').forEach(b=>b.classList.toggle('on',b.dataset.ws===w));
+  document.querySelectorAll('#mkTabs button').forEach(b=>b.classList.toggle('on',b.dataset.ws===w));stPopClose();stStatus();stHint('');
   if(prev==='fx'){if(ST.I){fxKill(ST.I);ST.I=null;}fxClearAll();}
   if(prev==='mesh')mkMeshHide();if(prev==='tex')mkTexDemoStop();if(prev==='vol')mkVolHide();
   $st('mkLibT').textContent=w==='mesh'?'โมเดล':w==='tex'?'ภาพ':'ไฟ 3D';$st('mkSearch').value='';
