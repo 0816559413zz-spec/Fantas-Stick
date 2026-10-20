@@ -97,20 +97,50 @@ function tintModel(root,tint){
   });
 }
 // ใส่โมเดลไฟล์ให้ตัวละคร/ศัตรูที่สร้างจากโค้ดแล้ว: ซ่อน mesh เดิมด้วย layer 31 (กล้อง/เงาไม่วาด — ไม่ใช้ visible เพราะโค้ดคาถาเปิดปิด visible เอง)
-// ของเอฟเฟกต์/อาวุธที่คาถาใส่ทีหลัง (เช่น ดาบน้ำแข็งในมือ) ยังโชว์ และยังติดกับแขนแบบโค้ด
-function useFileModel(o,name,tint){
+// look (ผู้เล่น) = เลือกชิ้น hair_N/tie_N/wand_N ตามหน้าตา + ใส่ไว้ใน o.b (ตัวเอน/ล้มตามโค้ด) + ผูกแขนขาโค้ดกับกระดูก (rigBind) + ไม้กวาดจากไฟล์
+function useFileModel(o,name,tint,look){
   loadModel(name).then(r=>{
     if(!r||o.fileModel||!o.g.parent)return;
     const inst=modelInst(name);if(!inst)return;
     if(tint)tintModel(inst,tint);
+    if(look)fileVariants(inst,look);
     o.b.traverse(m=>{if(m.isMesh||m.isSprite||m.isPoints||m.isLine)m.layers.set(31);});
-    o.g.add(inst);o.fileModel=inst;
+    if(look&&o.tip)o.tip.layers.set(0);                       // แสงปลายไม้ยังโชว์ (อยู่ที่แขนโค้ดซึ่งตามแขนโมเดล)
+    (look?o.b:o.g).add(inst);o.fileModel=inst;
     if(r.animations.length)o.anim=makeAnimator(inst,r.animations);
+    if(look){rigBind(o,inst);fileBroom(o);}
     if(o.ghost)setGhost(o,true);
     gl.shadowMap.needsUpdate=true;
   });
 }
-const FILE_MODELS=()=>['char_student',...Object.keys(EDEF).map(t=>'enemy_'+t)];
+// ชิ้นที่ผู้เล่นเลือกได้: object ชื่อ hair_<ทรงผม> tie_<เนคไท> wand_<ไม้> → โชว์เฉพาะเลขที่ตรงกับหน้าตา
+function fileVariants(inst,look){const K={hair:'hs',tie:'ti',wand:'ws'};inst.traverse(m=>{const r=/^(hair|tie|wand)_(\d+)$/.exec(m.name);if(r)m.visible=+r[2]===look[K[r[1]]];});}
+function fileBroom(o){loadModel('char_broom').then(r=>{if(!r||!o.g.parent||!o.broom)return;const m=modelInst('char_broom');if(!m)return;for(const c of [...o.broom.children])o.broom.remove(c);o.broom.add(m);});}
+// แขนขาโค้ด (o.armR/armL/legs ที่คาถาต่างๆ จัดท่า) ↔ กระดูกโมเดลไฟล์
+//  • แขนขวา (ถือไม้) = ตามโค้ดเสมอ → ปลายไม้/ดาบน้ำแข็งที่ติดแขนโค้ดตรงกับมือโมเดล
+//  • แขนซ้าย/ขา = ท่าจากไฟล์ แต่ถ้าคาถาจัดท่าต่างจากท่าเดินปกติ (rigStd) จะค่อยๆ เปลี่ยนไปตามโค้ด แล้วคัดลอกท่ากลับให้แขนขาโค้ด (ของที่ติดอยู่ตามไป)
+const _rq=new THREE.Quaternion(),_rq2=new THREE.Quaternion(),_rq3=new THREE.Quaternion();
+function rigBind(o,inst){
+  const qbi=o.b.getWorldQuaternion(new THREE.Quaternion()).invert();
+  o.rig=[[o.armR,'upper_arm_R',1],[o.armL,'upper_arm_L',0],[o.legs[0],'thigh_R',0],[o.legs[1],'thigh_L',0]].map(([c,n,al])=>{
+    const bone=inst.getObjectByName(n);if(!c||!bone)return null;
+    const rel=qbi.clone().multiply(bone.getWorldQuaternion(new THREE.Quaternion()));   // แกนกระดูกตอนยืนตรง เทียบ o.b (แขนขาโค้ดหมุน 0 = แกน o.b)
+    return {c,bone,al,rel,irel:rel.clone().invert(),w:al,sx:0,sz:0,leg:n[0]==='t'};
+  }).filter(Boolean);
+}
+function rigStd(o){for(const k of o.rig){if(k.al)continue;const r=k.c.rotation;r.y=0;if(k.leg)r.z=0;k.sx=r.x;k.sz=r.z;}}
+function rigSync(o,dt){
+  const qbi=o.b.getWorldQuaternion(_rq).invert();
+  for(const k of o.rig){
+    if(!k.al){const dev=Math.abs(k.c.rotation.x-k.sx)+Math.abs(k.c.rotation.z-k.sz);k.w=dev>0.02?Math.min(1,k.w+dt*12):Math.max(0,k.w-dt*6);}
+    if(k.w>0){
+      const pB=_rq2.copy(qbi).multiply(k.bone.parent.getWorldQuaternion(_rq3)).invert();
+      k.bone.quaternion.slerp(_rq3.copy(k.c.quaternion).multiply(k.rel).premultiply(pB),k.w);
+    }
+    if(!k.al)k.c.quaternion.copy(_rq2.copy(qbi).multiply(k.bone.getWorldQuaternion(_rq3))).multiply(k.irel);
+  }
+}
+const FILE_MODELS=()=>['char_student','char_broom',...Object.keys(EDEF).map(t=>'enemy_'+t)];
 
 // ---------- VFX จากไฟล์ (รายละเอียดฝั่งคนทำอยู่ใน ASSETS.md) ----------
 // .glb ชื่อ vfx_<event> ใน manifest "models": vfx_<z> = เอฟเฟกต์ของ efx event z (เช่น vfx_swing), vfx_cast_<t> = ตอนร่ายกระสุนชนิด t, proj_<t> = หน้าตากระสุน t

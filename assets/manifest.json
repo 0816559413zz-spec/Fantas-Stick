@@ -59,6 +59,34 @@
     "mesh_ice_circle": {
       "file": "vfx/ice_circle.glb",
       "v": 1
+    },
+    "char_student": {
+      "file": "chars/student.glb",
+      "v": 1
+    },
+    "char_broom": {
+      "file": "chars/broom.glb",
+      "v": 1
+    },
+    "enemy_dummy": {
+      "file": "enemies/dummy.glb",
+      "v": 1
+    },
+    "prop_barrel": {
+      "file": "props/barrel.glb",
+      "v": 1
+    },
+    "prop_barrel_broken": {
+      "file": "props/barrel_broken.glb",
+      "v": 1
+    },
+    "prop_chest": {
+      "file": "props/chest.glb",
+      "v": 1
+    },
+    "prop_chest_used": {
+      "file": "props/chest_used.glb",
+      "v": 1
     }
   },
   "maps": {

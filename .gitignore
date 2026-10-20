@@ -2,3 +2,4 @@ index.2d-backup.html
 .claude/
 *.blend1
 shots/
+assets/src/__pycache__/

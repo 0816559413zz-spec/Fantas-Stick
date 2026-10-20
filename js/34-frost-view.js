@@ -51,7 +51,7 @@ const MIRSKIP=['shield','ring','broom','cocoon','stars','colo','mcirc','ishield'
 function mirrorNodes(root){const a=[];root.traverse(n=>a.push(n));return a;}
 function makeMirrorClone(o){
   const skip=new Set(MIRSKIP.map(k=>o[k]).filter(Boolean));
-  const g=new THREE.Group(),b=o.b.clone(true);g.add(b);
+  const g=new THREE.Group(),b=o.fileModel&&o.fileModel.parent===o.b&&MODELS.lib?MODELS.lib.SU.clone(o.b):o.b.clone(true);g.add(b);   // โมเดลไฟล์มีกระดูก → SkeletonUtils
   const src=mirrorNodes(o.b),dst=mirrorNodes(b);
   dst.forEach((m,i)=>{if(m.isMesh)m.material=_icyClone;m.userData.mirOff=skip.has(src[i])||m.isSprite||m.isPoints||m.isLight;});
   scene.add(g);return {g,b,src,dst,sword:o.sword,axe:o.axe,born:0};

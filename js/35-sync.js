@@ -4,7 +4,7 @@ function syncPlayers(P,mode,now,dt){
   for(const p of P){
     seen.add(p.id);
     let o=PM3.get(p.id);
-    if(!o){o=makeStudent(getLook(p.id),p.id);PM3.set(p.id,o);useFileModel(o,'char_student',lookTint(getLook(p.id)));}
+    if(!o){o=makeStudent(getLook(p.id),p.id);PM3.set(p.id,o);{const L=getLook(p.id);useFileModel(o,'char_student',lookTint(L),L);}}
     const g=o.g;
     g.visible=p.al&&!(p.iv&&!p.ds&&!(p.fr&&(p.fr[3]&2))&&Math.floor(now/80)%2===0);
     // ผี (หาลอร์ดโวลเดอมอร์): คนเป็นมองไม่เห็นผี / ผีเห็นกันเป็นเงาจางๆ
@@ -42,6 +42,7 @@ function syncPlayers(P,mode,now,dt){
       o.armL.rotation.x=-sw*0.55;o.armL.rotation.z=0.15;
       o.armR.rotation.x=lerp(-0.35+sw*0.4,-1.55,ck);o.armR.rotation.z=-0.12;
     }
+    if(o.rig)rigStd(o);
     o.ends.forEach((E,i)=>{E.rotation.x=-clamp(v.lvz*0.07,0,1.2)+Math.sin(now*0.012+i*1.7)*0.08*(1+v.sp*0.15);E.rotation.z=clamp(v.lvx*0.04,-0.6,0.6);});
     o.shield.visible=!!p.sh||!!(p.fm&(128|16384));
     const fireSh=p.sh&&getKit(p.id).path===0;
@@ -62,6 +63,7 @@ function syncPlayers(P,mode,now,dt){
     stormFX(o,p,pz,now,dt);
     chillFX(o,p,pz,now,dt);
     frostFX(o,p,pz,now,dt);
+    if(o.rig)rigSync(o,dt);
     if(p.bn&&Math.random()<0.7)burst(p.x,p.y,'#ff6a2a',1,30,0.45,3.5,{h:pz+rnd(0.3,1.8),vh:[1,2.5],g:-1});
     if(p.u>=100&&Math.random()<0.35)burst(p.x+rnd(-18,18),p.y+rnd(-18,18),'#ffd86b',1,10,0.9,1.8,{h:pz+rnd(0,0.4),vh:[1.5,3],g:-0.3});
     if(p.sh&&!fireSh&&Math.random()<0.3)burst(p.x,p.y,'#7ff6ff',1,40,0.4,1.4,{h:pz+rnd(0.3,2)});
