@@ -113,6 +113,7 @@ defSpell(2,{id:'triplestrike',role:'control',n:'ฟ้าผ่าสามค�
       for(const tt of [0.6,1.1,1.6])G.strikes.push({x,y,r,t:tt,fn:s=>{
         emit({k:'efx',z:'tstrike',x:Math.round(s.x),y:Math.round(s.y),h:groundH(s.x,s.y),r:s.r});
         for(const t of foesIn(p.team,s.x,s.y,s.r,5))aoeHit(p,t,30);
+        damageEnv(s.x,s.y,s.r,30,p.id,'lightning',0.5);   // พังบ้าน/ลัง
       }});
     }
   }});
@@ -132,6 +133,7 @@ function stormRailFire(p){
   const R=p.rail;p.rail=null;const c=Math.cos(R.a),sn=Math.sin(R.a);let len=R.len;
   for(let d=40;d<=R.len;d+=25){const x=p.x+c*d,y=p.y+sn*d;if(x<20||x>MW-20||y<20||y>MH-20){len=d;break;}}
   for(const t of stormLineFoes(p,p.x,p.y,R.a,len,15,0))aoeHit(p,t,45);
+  for(let d=40;d<=len;d+=40)damageEnv(p.x+c*d,p.y+sn*d,30,45,p.id,'lightning',p.z+1.2);   // ลำทะลุบ้าน/ลัง
   emit({k:'efx',z:'srail',x:Math.round(p.x),y:Math.round(p.y),h:p.z+1.2,a:Math.round(R.a*1000)/1000,len:Math.round(len),id:p.id});
 }
 // ----- อัลติ: ร่างเทพสายฟ้า 10 วิ -----
@@ -164,6 +166,7 @@ function stormDomeFire(p){
 function stormDomeSlam(p,x,y,gh){
   emit({k:'efx',z:'sdboom',x:Math.round(x),y:Math.round(y),h:gh+0.08,r:150,g:1});
   for(const t of foesIn(p.team,x,y,150,gh+4)){if(!t.isE&&!t.isM){const a=Math.atan2(y-t.y,x-t.x),d=Math.hypot(x-t.x,y-t.y);t.vx=(t.vx||0)+Math.cos(a)*Math.min(600,d*5);t.vy=(t.vy||0)+Math.sin(a)*Math.min(600,d*5);}aoeHit(p,t,80,t=>shock(t,p.id,0.3));}
+  damageEnv(x,y,150,80,p.id,'lightning',gh);
 }
 function updateStorm(dt){
   if(G.slines&&G.slines.length){
@@ -190,7 +193,7 @@ function updateStorm(dt){
         if(d>8&&!(t.isE&&isBig(t))){const st=Math.min(d-4,120*dt);t.x+=dx/d*st;t.y+=dy/d*st;}
         if(tick&&o)aoeHit(o,t,5);
       }
-      if(D.t<=0){D.done=1;emit({k:'efx',z:'sdboom',x:Math.round(D.x),y:Math.round(D.y),h:groundH(D.x,D.y)+0.08,r:150});if(o)for(const t of foesIn(D.team,D.x,D.y,150,5))aoeHit(o,t,50,t=>shock(t,o.id,0.3));}
+      if(D.t<=0){D.done=1;emit({k:'efx',z:'sdboom',x:Math.round(D.x),y:Math.round(D.y),h:groundH(D.x,D.y)+0.08,r:150});if(o)for(const t of foesIn(D.team,D.x,D.y,150,5))aoeHit(o,t,50,t=>shock(t,o.id,0.3));damageEnv(D.x,D.y,150,50,D.owner,'lightning',0.5);}
     }
     G.sdomes=G.sdomes.filter(D=>!D.done);
   }

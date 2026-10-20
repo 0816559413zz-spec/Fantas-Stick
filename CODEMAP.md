@@ -41,19 +41,19 @@ pyroBigBoom:5 pyroBall:13 pyroBasic:14 addOrbs:31 pyroParry:32 pyroBlock:33 laun
 ## js/07-frost-spells.js (33) — 
 frostGlacier:11
 
-## js/08-storm.js (197) — 
+## js/08-storm.js (200) — สายสายฟ้า (ผู้เล่นออกแบบทั้งหมด — designs/storm.md)
 ST_MAX:5 stGain:6 stSpend:7 stormCone:9 stormLineFoes:14 stormBasic:18 stormTri:41 stormDash:48 stormDashTick:61 stormShieldBlast:69 stormTick:78
 §87 สกิล 1 (ฟรี): เส้นสายฟ้า — ชี้ขึ้นแล้วกดลง 0.5 วิ จากนั้นสายฟ้าผ่าเป็…
 stormLine:90
 §96 สกิล 2 (1 stack): ดูดความเร็ว
 §105 สกิล 3 (2 stacks): ฟ้าผ่าสามครั้ง — วางจุดครั้งเดียว ฟ้าผ่าจุดเดิม 3 …
-§119 สกิล 4 (1 stack): ออร์บสายฟ้าคู่ — ลอยหลังเรา Dash โดนศัตรู = ออร์บพุ…
-stormOrbLaunch:122
-§128 สกิล 5 (2 stacks): Railgun — เส้นเตือนเหลือง 0.8 วิ (อัลติ 0.5) แล้วล…
-stormRailFire:131
-§137 อัลติ: ร่างเทพสายฟ้า 10 วิ
-§140 สกิล 6 (3 stacks): ลูกสายฟ้าโดม — ทะยานขึ้น บินเล็ง 3 วิ คลิกยิงลูกสา…
-stormDomeTick:141 stormDomeFire:156 stormDomeSlam:164 updateStorm:168
+§120 สกิล 4 (1 stack): ออร์บสายฟ้าคู่ — ลอยหลังเรา Dash โดนศัตรู = ออร์บพุ…
+stormOrbLaunch:123
+§129 สกิล 5 (2 stacks): Railgun — เส้นเตือนเหลือง 0.8 วิ (อัลติ 0.5) แล้วล…
+stormRailFire:132
+§139 อัลติ: ร่างเทพสายฟ้า 10 วิ
+§142 สกิล 6 (3 stacks): ลูกสายฟ้าโดม — ทะยานขึ้น บินเล็ง 3 วิ คลิกยิงลูกสา…
+stormDomeTick:143 stormDomeFire:158 stormDomeSlam:166 updateStorm:171
 
 ## js/09-earth.js (226) — 
 EARTH:7 E_SH:7
@@ -366,4 +366,4 @@ earthEfx:122 earthMudZone:168 earthMudSink:171
 §172 HUD ใต้เป้าเล็ง
 drawEarthHud:173
 
-(48 files, 10638 lines)
+(48 files, 10641 lines)
