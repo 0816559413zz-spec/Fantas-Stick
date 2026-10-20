@@ -160,10 +160,10 @@ body.studio #gl:active{cursor:grabbing}
 /* แผงแก้ค่า */
 #stInsp{position:absolute;right:0;top:var(--sT);bottom:var(--sS);width:var(--sR);background:var(--bg1);border-left:1px solid var(--ln);overflow:auto;padding:0 0 20px;display:flex;flex-direction:column}
 #stInsp>.pad{padding:8px 10px;display:flex;flex-direction:column;gap:6px}
-#stInsp .card{display:grid;grid-template-columns:34px minmax(0,1fr);gap:0 9px;align-items:center;padding:10px;border-bottom:1px solid var(--ln);background:linear-gradient(180deg,var(--bg2),var(--bg1))}
-#stInsp .card i{grid-row:span 2;font-style:normal;display:grid;place-items:center;width:34px;height:34px;border-radius:8px;background:color-mix(in srgb,var(--c,#e2ad52) 22%,var(--bg1));border:1px solid color-mix(in srgb,var(--c,#e2ad52) 50%,transparent);color:var(--c,#e2ad52);font-size:18px}
-#stInsp .card b{font:600 13.5px var(--fu);color:var(--tx);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-#stInsp .card span{font-size:11.5px;color:var(--tx2)}
+#stInsp .stCard{display:grid;grid-template-columns:34px minmax(0,1fr);gap:0 9px;align-items:center;padding:10px;border-bottom:1px solid var(--ln);background:linear-gradient(180deg,var(--bg2),var(--bg1))}
+#stInsp .stCard i{grid-row:span 2;font-style:normal;display:grid;place-items:center;width:34px;height:34px;border-radius:8px;background:color-mix(in srgb,var(--c,#e2ad52) 22%,var(--bg1));border:1px solid color-mix(in srgb,var(--c,#e2ad52) 50%,transparent);color:var(--c,#e2ad52);font-size:18px}
+#stInsp .stCard b{font:600 13.5px var(--fu);color:var(--tx);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#stInsp .stCard span{font-size:11.5px;color:var(--tx2)}
 #stInsp .desc{margin:0;font-size:11.5px;color:var(--tx2);padding:6px 10px 0}
 #stInsp .find{position:sticky;top:0;z-index:2;background:var(--bg1);padding:8px 10px 6px;border-bottom:1px solid var(--ln)}
 #stInsp .find input{width:100%}
@@ -303,3 +303,6 @@ body.ws-tex:not(.tex3d) #mkTexView{display:grid}
 #st button:hover,#st button:active{box-shadow:none;transform:none;filter:none}
 #st button.gold:hover{filter:brightness(1.08)}
 #mkInsp:empty::before,#mkBot:empty::before{content:'👈 เลือกไฟล์จากรายการทางซ้าย หรือกด ＋ ใหม่';color:var(--tx3);padding:18px;text-align:center;display:block}
+#st .stChips>button.stChip{width:26px;height:22px}
+#stBanner[hidden]{display:none}
+body.studio:not(.ws-fx) #stTop .sep{display:none}

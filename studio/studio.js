@@ -364,7 +364,7 @@ function stFind(P){const flt=()=>{const s=(ST.find||'').trim().toLowerCase();P.q
 function stInspRender(){const P=$st('stInsp');if(!P||!ST.fx)return;const same=P._sel===ST.sel,sc=P.scrollTop;P._sel=ST.sel;P.innerHTML='';const S=FXR.schema;
   const lint=h('div',{className:'stLint'});
   if(ST.sel===null){const F=ST.fx;
-    P.append(h('div',{className:'card'},h('i',null,'⚙'),h('b',null,ST.name||'(ใหม่ ยังไม่บันทึก)'),h('span',null,'ตั้งค่าทั้งไฟล์ • '+F.layers.length+' ชั้น • ยาว '+stDur().toFixed(2)+' วิ')),stFind(P));
+    P.append(h('div',{className:'stCard'},h('i',null,'⚙'),h('b',null,ST.name||'(ใหม่ ยังไม่บันทึก)'),h('span',null,'ตั้งค่าทั้งไฟล์ • '+F.layers.length+' ชั้น • ยาว '+stDur().toFixed(2)+' วิ')),stFind(P));
     for(const r of ST.lint)lint.append(h('div',{className:r.lv},h('span',null,r.lv==='err'?'✗':'⚠'),h('span',null,(r.at?r.at+': ':'')+r.msg)));if(!ST.lint.length)lint.append(h('div',{className:'ok'},'✓ fx-check ผ่าน ไม่มีปัญหา'));
     P.append(stSec('f:main','ข้อมูลเอฟเฟกต์',['desc','pal','dur','k','seed'].map(k=>stField(null,F,k,S.file[k]))),
       stSec('f:lint','ตรวจไฟล์ (fx-check)',[lint],ST.lint.length?ST.lint.length+' เรื่อง':'ผ่าน'),
@@ -373,7 +373,7 @@ function stInspRender(){const P=$st('stInsp');if(!P||!ST.fx)return;const same=P.
     if(same)P.scrollTop=sc;return;}
   const L=ST.fx.layers.find(x=>x.id===ST.sel);if(!L){ST.sel=null;return stInspRender();}const T=S.types[L.t];
   const n=v=>typeof v==='number'?v.toFixed(2):Array.isArray(v)?v.join('–'):'สูตร',at=L.at!==undefined?L.at:stDef(L,'at'),life=L.life!==undefined?L.life:stDef(L,'life');
-  P.append(h('div',{className:'card',style:'--c:'+(TYPEC[L.t]||'#e2ad52')},h('i',null,T.icon||'•'),h('b',null,L.id),h('span',null,T.th+' · '+L.t+' • เริ่ม '+n(at)+' วิ • อายุ '+(L.loop?'วนเรื่อย ๆ':n(life)+' วิ'))),h('p',{className:'desc'},T.desc),stFind(P));
+  P.append(h('div',{className:'stCard',style:'--c:'+(TYPEC[L.t]||'#e2ad52')},h('i',null,T.icon||'•'),h('b',null,L.id),h('span',null,T.th+' · '+L.t+' • เริ่ม '+n(at)+' วิ • อายุ '+(L.loop?'วนเรื่อย ๆ':n(life)+' วิ'))),h('p',{className:'desc'},T.desc),stFind(P));
   for(const r of ST.lint.filter(r=>String(r.at).split('.')[0]===L.id))lint.append(h('div',{className:r.lv},h('span',null,r.lv==='err'?'✗':'⚠'),h('span',null,r.msg+(String(r.at).includes('.')?' ('+String(r.at).split('.')[1]+')':''))));
   if(lint.childNodes.length)P.append(h('div',{className:'pad'},lint));
   const main=[stField(L,L,'id',S.common.id)];if(L.t==='mesh')main.push(stShapePicker(L));

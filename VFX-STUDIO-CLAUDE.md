@@ -42,6 +42,7 @@
 | `assets/fx/vol/*.vol.json` + `*.bin` | Fire 3D volumes made in the 🔥 tab — §6b |
 | `tools/fx-lint.js`, `tools/fx-check.js` | Checker (shared by node and the studio) |
 | `tools/serve.py` | Local server + save/shot API |
+| `manual/index.html`, `tools/manual-shots.js` | Thai picture manual for the user; after a UI change run `node tools/manual-shots.js` (serve.py running) to retake the pictures + number marks, then fix the legend text |
 
 ## 4. The workflow (do it in this order)
 1. **Read the request.**
