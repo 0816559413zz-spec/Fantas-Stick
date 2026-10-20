@@ -26,10 +26,21 @@
 - **Blocky sand/rock figure like a Roblox character**, only the **upper half of the body**; the lower half **fades away downward** (dissolves into sand). A few **rock/sand bits** appear when it forms.
 - It only shows up for the moment it acts, then fades away (no lingering Stand).
 - ผู้ใช้: “make it like roblox block sand rock half body and at the half down make it fade down … and some rock sand asset at the first”
+- **Not flat colour blocks:** the whole Stand body has **texture/detail** (rock/sand surface), the **fists have extra detail/assets** too, and the **big Stand** (shield, Crush, charged BA, ult) has **even more detail on its body**.
+- ผู้ใช้: “stand fists make it has something too like texture or asset something and whole stand body has texture too not just color block and the big one has the more asset in his body”
 
 ### Basic Attack — numbers unchanged (correct)
 - **Stand active:** the Stand locks onto the target, appears at a random spot around it, throws **one punch**, bounces back a little and fades out. **10 dmg**, **every 0.8 s**, lock range **300**, target = enemy nearest the mouse/aim, dodgeable (~0.2 s fade-in), no enemy in range = punches a little in front of the player. No knockback/stun.
 - **Stand broken:** small rock projectile, **5 dmg every 0.35 s**, aimed manually.
+
+### Charged Basic Attack — big Stand slam (NEW)
+- **Hold left click** (tap = normal Stand punch). The **big Stand appears behind Earth with both hands raised**, charging for **2 s**, then **slams down**.
+- **Area:** circle in front of Earth, **radius 180**, with a **warning circle**. Ring animation = timer: a **dark ring first**, then a **lighter colour fills the circle gradually** during the charge; full = slam.
+- **Hit:** **50 dmg + 0.7 s stun**. Floor gets **a bit wrecked**, explosion, **dust cloud**.
+- **Earth's own pose:** **wand up** while charging, **wand down** on the slam.
+- **CD 6 s.** Can **walk slowly** while charging (⚠ how slow not given). Stun/freeze does **not** cancel the charge. **Not usable with Stand broken.**
+- Same big Stand model as Tectonic Crush and the ult.
+- ผู้ใช้: “big stand will show up behind u and 2 hand up charging his slam in 2 sec and slam down make floor abit wrecked with explode and ฝุ่นคลุ้ง damage 50 ติด stun 0.7 วิ ระยะ 180 วงกลมด้านหน้ามีวงเตือนบอก วงมี animation คือมีวงเข้มก่อนพอชาจไปก็จะมีสีอ่อนวงกลมค่อยๆเติมวงกลมแรก เป็นเหมือนการบอกเวลาก่อนทุบ big stand same with clapping rock or ulting” • “dont forget own character do the wand up and down animation too”
 
 ### Shield — Stand Barrier (numbers unchanged, LOOK changed)
 - **300 HP**, regen after 3 s unused at +20 HP/s, breaks → Stand gone 15 s, comes back with full 300.
