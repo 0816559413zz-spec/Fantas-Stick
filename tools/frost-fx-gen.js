@@ -21,6 +21,8 @@ const mistPuffs = (id, o) => { const m = { id, t: 'mist', at: o.at || 0, life: 1
   if (o.pos) m.pos = o.pos; if (o.x) m.x = true; return m; };
 const snd = (id, name, vol, at) => ({ id, t: 'sound', at: at || 0, life: 0.05, name, vol });
 const shake = (id, n, at) => ({ id, t: 'screen', at: at || 0, life: 0.2, shake: n, own: true });
+// สั่นจอคนอื่นที่อยู่ใกล้ (≤50 ม. = 1000 px เหมือนโค้ดเดิม) • all = ทุกคนใกล้ ๆ รวมคนร่าย
+const shakeNear = (id, n, at, all) => Object.assign({ id, t: 'screen', at: at || 0, life: 0.2, shake: n, near: 50 }, all ? {} : { other: true });
 
 // ---------- 1) ฟันดาบ / ขวาน (event swing) ----------
 // dir +1 = ฟันขวา→ซ้าย (จังหวะ 1), -1 = ซ้าย→ขวา (จังหวะ 2) • r = ระยะฟัน (ม.)
@@ -75,7 +77,7 @@ fx('slam3', 'จังหวะ 3 ฟาดพื้น: รอยฟันแ�
   { id: 'shock', t: 'ring', at: 0.05, life: 0.4, att: 'ground', pos: [0, 0.12, 0], col: C.main, r: 'r*1.4', op: 0.6 },
   { id: 'warp', t: 'warp', at: 0.05, life: 0.4, att: 'ground', kind: 'shock', flat: true, size: { '0': 1, '1': 1, x: 'r*3' }, str: 0.6, col: C.main, glow: 0.04, x: true },
   { id: 'light', t: 'light', at: 0.05, life: 0.35, att: 'ground', pos: [0, 1.2, 0], col: C.main, int: 1.4, dist: 12 },
-  shake('cam', 5, 0.05), snd('snd', 'slam', 0.8, 0.04), snd('snd2', 'break', 0.6, 0.06)
+  shake('cam', 5, 0.05), shakeNear('cam2', 2, 0.05), snd('snd', 'slam', 0.8, 0.04), snd('snd2', 'break', 0.6, 0.06)
 ]);
 fx('slam3_echo', 'ร่างเงา Mirror Legion ฟาดพื้นตาม: หนามน้ำแข็งเล็ก 2 ข้าง', ['melee', 'ground', 'mirror'], 1.4, { r: { def: 3.4, desc: 'รัศมี (ม.)' } },
   [-1, 1].flatMap(k => [
@@ -105,7 +107,7 @@ fx('slam', 'ลงพื้นจากที่สูง: วงร้าวน
   { id: 'shock', t: 'ring', at: 0, life: 0.45, att: 'ground', pos: [0, 0.12, 0], col: C.deep, r: 'r', op: 0.45 },
   { id: 'warp', t: 'warp', at: 0, life: 0.45, att: 'ground', kind: 'shock', flat: true, size: { '0': 1, '1': 1, x: 'r*2.2' }, str: 0.7, col: C.main, glow: 0.04, x: true },
   { id: 'light', t: 'light', at: 0, life: 0.35, att: 'ground', pos: [0, 1.2, 0], col: C.main, int: 1.5, dist: 16 },
-  shake('cam', 6), snd('snd', 'slam', 0.9)
+  shake('cam', 6), shakeNear('cam2', 2), snd('snd', 'slam', 0.9)
 ]);
 
 // ---------- 4) ไถลน้ำแข็ง (slide) ----------
@@ -224,7 +226,7 @@ fx('glacier', 'Glacier Rend โหมดไกล: น้ำแข็งระ�
   ...[6, 14, 22, 30].map((z, i) => mistPuffs('runmist' + i, { at: 0.1 + i * 0.12, burst: 6, fr: 1.2, pos: [0, 0, z], out: 0.6, x: true })),
   mistPuffs('mist', { burst: 8, fr: 1.4, speed: [1.5, 3] }),
   { id: 'light', t: 'light', at: 0, life: 0.35, att: 'ground', pos: [0, 1.5, 0], col: C.main, int: 1.5, dist: 14 },
-  shake('cam', 5), snd('snd', 'break', 0.8)
+  shakeNear('cam', 5, 0, true), snd('snd', 'break', 0.8)
 ]);
 
 // ---------- 10) Mirror Legion (mirror / mirrorend) — ร่างเงายังเป็นโค้ด (ULTV) ----------
@@ -240,7 +242,7 @@ fx('mirror', 'Mirror Legion: แผ่นกระจกน้ำแข็งพ
   { id: 'spires', t: 'mesh', at: 0, life: 1, att: 'ground', shape: 'model', model: 'frost_spires', mat: 'ice', col: C.main, col2: C.deep, scale: { '0': 1.3, '1': 1.3 }, grow: { '0': 0, '0.12': 1, '0.7': 1, '1': 0 }, stagger: 0.5 },
   flakes('flakes', { burst: 24, att: 'ground', pos: [0, 1, 0], fr: 1 }),
   { id: 'light', t: 'light', at: 0, life: 0.5, att: 'ground', pos: [0, 2, 0], col: C.main, int: 1.5, dist: 14 },
-  shake('cam', 4), snd('snd', 'nova', 0.7)
+  shakeNear('cam', 4, 0, true), snd('snd', 'nova', 0.7)
 ]);
 fx('mirrorend', 'Mirror Legion หมด: รอยร้าววิ่งออก แล้วร่างกระจกแตกเป็นเกล็ดสะท้อนแสงจางหาย', ['ult', 'break'], 1.6, {}, [
   { id: 'cracks', t: 'decal', at: 0, life: 1.5, att: 'ground', kind: 'icecrack', r: 2.4, n: 12, col: C.deep },
@@ -275,12 +277,12 @@ const bind = JSON.parse(fs.readFileSync(BP, 'utf8') || '{}');
 const R = 'replace', rr = { r: 'ev.r/20' };
 Object.assign(bind, {
   'efx:swing': [
-    { fx: 'frost/swing_sword_a', mode: R, p: rr, if: '(1-ev.ax*1)*(1-ev.c)*(2-ev.c)' },
-    { fx: 'frost/swing_sword_b', mode: R, p: rr, if: '(1-ev.ax*1)*ev.c*(2-ev.c)' },
-    { fx: 'frost/swing_axe_a', mode: R, p: rr, if: 'ev.ax*(1-ev.c)*(2-ev.c)' },
-    { fx: 'frost/swing_axe_b', mode: R, p: rr, if: 'ev.ax*ev.c*(2-ev.c)' },
-    { fx: 'frost/swing_windup', mode: R, if: 'ev.c*(ev.c-1)' },
-    { fx: 'frost/swing_echo', mode: R, p: rr, if: 'ev.m*(2-ev.c)' }],
+    { fx: 'frost/swing_sword_a', mode: R, p: rr, if: 'ev.ax==0&&ev.c==0' },
+    { fx: 'frost/swing_sword_b', mode: R, p: rr, if: 'ev.ax==0&&ev.c==1' },
+    { fx: 'frost/swing_axe_a', mode: R, p: rr, if: 'ev.ax==1&&ev.c==0' },
+    { fx: 'frost/swing_axe_b', mode: R, p: rr, if: 'ev.ax==1&&ev.c==1' },
+    { fx: 'frost/swing_windup', mode: R, if: 'ev.c==2' },
+    { fx: 'frost/swing_echo', mode: R, p: rr, if: 'ev.m==1&&ev.c<2' }],
   'efx:slam3': [{ fx: 'frost/slam3', mode: R, p: rr, s: '1+ev.ax*0.2' }, { fx: 'frost/slam3_echo', mode: R, p: rr, if: 'ev.m*1' }],
   'efx:slamgo': { fx: 'frost/slamgo', mode: R },
   'efx:slam': { fx: 'frost/slam', mode: R, p: rr, s: '1+ev.ax*0.25' },

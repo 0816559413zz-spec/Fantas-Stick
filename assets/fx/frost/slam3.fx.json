@@ -284,6 +284,15 @@
    "own": true
   },
   {
+   "id": "cam2",
+   "t": "screen",
+   "at": 0.05,
+   "life": 0.2,
+   "shake": 2,
+   "near": 50,
+   "other": true
+  },
+  {
    "id": "snd",
    "t": "sound",
    "at": 0.04,

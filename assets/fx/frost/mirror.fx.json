@@ -302,7 +302,7 @@
    "at": 0,
    "life": 0.2,
    "shake": 4,
-   "own": true
+   "near": 50
   },
   {
    "id": "snd",
