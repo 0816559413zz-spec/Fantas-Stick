@@ -5,7 +5,7 @@ Format: `name:line` = top-level function/const/let in that file. `§line title` 
 ## js/01-core.js (22) — แกนกลาง: import Three.js + ฟังก์ชันพื้นฐาน ($ rnd clamp lerp store to…
 $:12 rnd:13 clamp:14 lerp:15 dist2:16 lerpAng:17 esc:18 shuffle:19 store:20 toastT:21 toast:22
 
-## js/02-data.js (305) — 
+## js/02-data.js (305) — ค่าคงที่ของเกม
 W:4 H:4 PR:4 PILLARS:6 SPAWNF:7 mulberry:9 genForest:10 genPitch:27 genHogsmeade:36
 §54 แผนที่โล่ง 3 แบบ (ผู้ใช้: ป่ามืดไม่สนุก อยากได้ที่โล่งๆ)
 genMeadow:55 genLake:61 genRuins:66
@@ -83,7 +83,7 @@ MIND:66 summonMin:72 minTarget:81 minShoot:88 updateMins:93 aimTarget:133
 §180 ร่ายคาถา
 castSlot:181 castUlt:195
 
-## js/10-net.js (71) — 
+## js/10-net.js (71) — เครือข่าย (PeerJS / WebRTC)
 PREFIX:4 NET:5 LOBBY:6 genCode:7 sendAll:8 setStatus:9 hostGame:11 joinGame:34 clientOnData:59 leave:71
 
 ## js/11-host.js (328) — 
@@ -91,8 +91,10 @@ G:4 EVL:4 EVN:4 hostLast:4 tickN:4 emit:5 feed:6 banner:7 plist:8 cleanName:9 fr
 §154 ลูปหลักฝั่งโฮสต์
 hostTick:155 angDiff:167 cH:169 vR:170 updatePlayer:172 hitProp:315 damagePropsIn:322 nearUseProp:323 useProp:324
 
-## js/12-buildings.js (369) — สิ่งปลูกสร้างที่พังเป็นชิ้นย่อย (บ้าน) แบบ Battlefield — คู่มือเต็ม: …
-BLDDEF:8 BLD_PIECES:9 BLD_GRID:10 BLD_FIRE:11 BLD_ICE:11 BLD_ROOF_MIN:11 BLDG:12 BLDON:12 genBldg:13 bldRect:23 bldChunk:25 bldAlive:32 bldLocal:33 bldWorld:34 rectDist:35 bldNear:36 hitBldPiece:38 breakBldChunk:49 bldSupport:57 damageEnv:77 bldPieceAt:91 projEl:101 bldPush:106 collideBld:112 updateBldg:127 bldSnap:139 bldParse:145 collideWorld:149 shoot:176 eShoot:197 foesOf:204 breakShield:211 gainUlt:212 lifesteal:213 damage:215 playerDown:269 killProj:286 explode:294 hitTarget:306 updateProjectiles:322
+## js/12-buildings.js (403) — สิ่งปลูกสร้างที่พังเป็นชิ้นย่อย (บ้าน) แบบ Battlefield — คู่มือเต็ม: …
+BLDDEF:8 BLD_PIECES:9 BLD_GRID:10 BLD_FIRE:11 BLD_ICE:11 BLD_ROOF_MIN:11 BLDG:12 BLDON:12 genBldg:13 bldRect:23 bldChunk:25 bldAlive:32 bldLocal:33 bldWorld:34 rectDist:35 bldNear:36 hitBldPiece:38 breakBldChunk:49 bldSupport:57 damageEnv:77 bldPieceAt:91 projEl:101 bldPush:106 collideBld:112 updateBldg:127 bldSnap:139 bldParse:145
+§149 ของบังในแผนที่ไฟล์ที่พังได้ (หิน เสา รูปปั้น ต้นไม้ โคมไฟ ลัง ...) — …
+BRKDEF:153 BRK_M:153 BRK_MCOL:153 BRK:154 genBrk:155 brkApply:162 brkStage:166 hitBrk:167 damageBrkIn:175 brkSnap:181 brkParse:182 collideWorld:183 shoot:210 eShoot:231 foesOf:238 breakShield:245 gainUlt:246 lifesteal:247 damage:249 playerDown:303 killProj:320 explode:328 hitTarget:340 updateProjectiles:356
 
 ## js/13-enemies.js (168) — ศัตรู (โหมด Co-op)
 spawnEnemy:2 setupWave:19 bossPhase:36 enemySlam:44 updateEnemies:55
@@ -100,7 +102,8 @@ spawnEnemy:2 setupWave:19 bossPhase:36 enemySlam:44 updateEnemies:55
 ## js/14-mode-rules.js (99) — กติกาของแต่ละโหมด
 hostPick:2 modeLogic:8 endMatch:76
 
-## js/15-modes.js (382) — 
+## js/15-modes.js (382) — โหมดพิเศษ: ควิดดิช / แข่งไม้กวาด / แบทเทิลรอยัล / หาลอร์ดโวลเดอมอร์ / ห้องฝึก
+§4 ส่งข้อความลับถึงผู้เล่นคนเดียว (เช่น บทบาทในโหมดหาลอร์ดโวลเดอมอร์)
 sendPriv:5 TASKF:9 taskPts:10 raceRings:11 modeInit:17 spawnDummy:58 trainTick:63 TR_KEYS:75 trTeams:77 trCmd:85 hostEndTraining:102
 §104 ควิดดิช
 quidThrow:105 quidDrop:111 quidTick:116 snitchTick:151
@@ -130,7 +133,7 @@ MY:202 myDB:203 mySave:204 myLoad:207 myDecodeReady:213 myPlay:214 myNext:226 my
 §248 เพลงประกอบ (สร้างสดตามแผนที่)
 MUSIC:249 THEMES:250 padNote:255 musicTick:262 toggleMusic:291
 
-## js/19-client.js (186) — 
+## js/19-client.js (186) — ฝั่งแสดงผล (ทุกเครื่อง รวมโฮสต์ ใช้ snapshot เดียวกัน)
 cv:4 cx:4 DPR:5 SW:5 SH:5 resize:6 VIEW:12 screen:13 lastBuffKey:13 overShown:13 lastCount:13 PARTS:14 TEXTS:14
 §15 งบเอฟเฟกต์ (VFX budget)
 VFXB:20 _apush:21 vfxQual:29 vfxBegin:31 vfxEnd:34 vfxOnce:36 vfxExtra:38 PCOL:39 setScreen:41 onLobby:50 onSnap:56 myPos:64
@@ -156,10 +159,12 @@ ANIM_ALT:48 makeAnimator:49 animResolve:54 animPlay:55 animTick:64 lookTint:82 t
 §148 VFX จากไฟล์ (รายละเอียดฝั่งคนทำอยู่ใน ASSETS.md)
 VFXL:154 FLIPL:154 FLIPS:154 prefetchFx:155 playVfx:156 vfxSeq:202 flipTex:207 playFlip:215 fileFx:230 zoneFx:237 clearVfx:238 updateVfx:239
 
-## js/23-props-bld-view.js (255) — prop ฝั่งแสดงผล
+## js/23-props-bld-view.js (352) — prop ฝั่งแสดงผล
 PROPV:2 propFallback:4 syncProps:32
 §48 บ้านพังเป็นชิ้น ฝั่งแสดงผล
 BLDV:51 CHARM:51 DEBRIS:51 BLD_WALLC:52 _bldIce:53 _halfRoof:53 charMat:54 bldIceMat:58 halfRoofGeo:60 bldMats:68 bldFallback:73 bldFilePiece:109 bldHasChunks:117 bldFallbackChunks:119 bldRubble:127 bldBuild:132 syncBld:155 bldDebris:185 bldChunkFall:208 updateDebris:220 clearDebris:230 drawPropHint:231 syncWalls:239
+§257 ของบังในแผนที่ไฟล์ที่พังได้ ฝั่งแสดงผล (สถานะจาก BRK[].st — host js/1…
+BRKV:260 BRK_COL:260 brkSetup:261 BRK_CM:279 brkCrackMat:280 brkClip:296 brkYc:311 brkStump:313 brkSync:323 BRK_ZERO:341 brkFall:343
 
 ## js/24-minions-view.js (68) — สัตว์เวท: โมเดลโปร่งแสง + ซิงก์จาก snapshot (MN)
 MM3:2 makeMinion:3 syncMins:36 drawMinBars:58
@@ -167,10 +172,10 @@ MM3:2 makeMinion:3 syncMins:36 drawMinBars:58
 ## js/25-efx.js (298) — efxFX: ภาพของ event "efx" ทุกคาถา (หนึ่ง case ต่อหนึ่งเอฟเฟกต์)
 efxState:4 efxFX:13
 
-## js/26-fx-events.js (241) — fx(ev): เอฟเฟกต์+เสียงของทุก event จากโฮสต์ • statusFX (สถานะบนตัว) •…
+## js/26-fx-events.js (242) — fx(ev): เอฟเฟกต์+เสียงของทุก event จากโฮสต์ • statusFX (สถานะบนตัว) •…
 statusFX:3 fx:27
-§194 overlay: เลือกบัฟ / สรุปผล
-choosePick:195 syncOverlays:200 showOver:222
+§195 overlay: เลือกบัฟ / สรุปผล
+choosePick:196 syncOverlays:201 showOver:223
 
 ## js/27-world.js (217) — 
 S3:4 tx:4 tz:4 GY:6 TW:6 hdr:7 gl:9 scene:15 cam:17 composer:18
@@ -181,7 +186,7 @@ QUAL:96 QUAL_NAME:97 qualPR:98 applyQuality:104 qualTick:121 texCanvas:132 glowT
 §191 เงาตามผู้เล่น
 SHD:195 _shF:196 _shR:196 _shU:196 _shC:196 _shY:196 shadowFollow:197 LPOOL:216
 
-## js/28-maps-build.js (681) — สร้างแผนที่
+## js/28-maps-build.js (682) — สร้างแผนที่
 CANDLESYS:2 builtMap:3 builtKey:3 world:3 TORCHES:3 CANDLES:3 FIREFLIES:3 CRYSTAL:3 RUNE:3 SNITCH:3 BANNERS:3 SNOW:3 WCACHE:5 WCACHE_MAX:5 wkey:7 buildWorld:8 addW:40 _prewarmed:42 prewarmShaders:43 batchStatic:61 makeCandles:86 updateCandles:95 buildCastle:104 buildHogsmeade:170 buildGreatHall:258 buildForest:328
 §425 ทุ่งหญ้าฮอกวอตส์ (เย็น)
 ringTrees:426 grassTex:435 buildMeadow:436
@@ -192,7 +197,7 @@ buildLake:456
 §479 บรรยากาศที่ใช้ร่วมกัน (แผนที่จากโค้ด + แผนที่จากไฟล์ผ่าน fx ใน MAP-DE…
 makeSnow:480 makeFireflies:487 makeSnitch:494 fileMapFx:501
 §511 แผนที่จากไฟล์ Blender (MAP-DESIGN.md)
-terrGeo:513 buildFileMap:521 buildTest:555 buildRuins:587 buildPitch:612
+terrGeo:513 buildFileMap:521 buildTest:556 buildRuins:588 buildPitch:613
 
 ## js/29-characters.js (373) — ระบบผ้า (เสื้อคลุมพลิ้วตามการเคลื่อนที่)
 makeCloak:2 updateCloth:10
@@ -257,7 +262,8 @@ trOpenF:2 trKey:2 trN:2 TR_OPTS:3 trToggle:4 trSend:9 trSync:14 hovEl:62
 §63 หน้าตั้งค่า
 setRow:64 setTog:65 setTab:66 XHC:67 XHN:67 setOpts:68 renderSettings:69 drawXhPrev:86 openSettings:87 closeSettings:88 modeIcon:140 modeTitle:141 renderLobby:142
 
-## js/41-debug.js (141) — 
+## js/41-debug.js (141) — เครื่องมือทดสอบสมดุล (ใช้ผ่านคอนโซล WD.bal / WD.dmgTest เท่านั้น ผู้เล่นปกติไม่เห็น)
+§5 บอทต่อสู้แบบง่ายๆ: เล็งนำเป้า เดินรักษาระยะ+ส่ายไปมา ร่ายคาถาทุกครั้ง…
 botBrain:6 _obsKeep:47 balArena:48 balReset:49 balDuel:53 balTour:68 balCoop:82 balSpellTest:98
 §117 Service Worker (sw.js): เก็บไฟล์เกมไว้ในเครื่อง เปิดครั้งต่อไปเร็วขึ้…
 SWK:118 swSetup:119
@@ -366,4 +372,4 @@ earthEfx:122 earthMudZone:168 earthMudSink:171
 §172 HUD ใต้เป้าเล็ง
 drawEarthHud:173
 
-(48 files, 10659 lines)
+(48 files, 10792 lines)

@@ -345,7 +345,7 @@ function modeSnap(){
 // ---------- สร้าง snapshot ส่งให้ทุกเครื่อง ----------
 const r1=v=>Math.round(v*10)/10;
 function makeSnap(){
-  return {ph:G.ph,mode:G.mode,mp:G.map,PB:PROPON?PROPS.map(o=>o.st).join(''):'',BD:bldSnap(),tm:Math.max(0,Math.ceil(G.timer)),cd:G.cdT||0,wave:G.wave,round:G.round,rw:G.rw,ts:G.teamScore,
+  return {ph:G.ph,mode:G.mode,mp:G.map,PB:PROPON?PROPS.map(o=>o.st).join(''):'',BD:bldSnap(),BK:brkSnap(),tm:Math.max(0,Math.ceil(G.timer)),cd:G.cdT||0,wave:G.wave,round:G.round,rw:G.rw,ts:G.teamScore,
     bt:Math.ceil(G.buffT||0),ban:G.banner?G.banner.text:'',res:G.result,el:G.en.length+G.queue.length,
     feed:G.feed.filter(f=>G.time-f.t<6).slice(-5).map(f=>f.text),
     P:plist().map(p=>({id:p.id,n:p.name,c:p.color,tm:p.team,x:r1(p.x),y:r1(p.y),z:r1(p.z||0),fl:!!p.fly,rt:p.root>0,a:Math.round(p.ang*100)/100,

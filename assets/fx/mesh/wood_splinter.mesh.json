@@ -1,0 +1,10 @@
+{
+  "v": 1,
+  "desc": "เสี้ยนไม้แตก (ยาว ~1 ม.) — เศษไม้กระเด็นตอนต้นไม้/ของไม้พัง (emit look:model)",
+  "mat": "solid",
+  "pal": "col",
+  "tags": ["debris", "wood"],
+  "parts": [
+    {"id": "plank", "k": "box", "w": 0.18, "h": 0.12, "d": 1, "topScale": 0.35, "noise": 0.05, "nfreq": 3, "flat": true, "seed": 5}
+  ]
+}

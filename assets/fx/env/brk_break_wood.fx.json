@@ -1,0 +1,12 @@
+{
+  "v": 1,
+  "desc": "ของไม้พัง (ต้นไม้ ขอนไม้ แผงร้าน ลัง): เสี้ยนไม้กระเด็น + ใบไม้ปลิว — เล่นซ้อนบน env/brk_break",
+  "tags": ["env", "destruction", "wood"],
+  "pal": "col",
+  "dur": 2.4,
+  "params": {"r": {"def": 1, "desc": "รัศมีของบัง ม."}, "hh": {"def": 3, "desc": "ความสูงของบัง ม."}},
+  "layers": [
+    {"id": "splinters", "t": "emit", "at": 0, "life": 0.05, "burst": 12, "from": "sphere", "fr": "r", "dir": "out", "speed": [3, 6], "up": 4, "plife": [1.1, 1.7], "look": "model", "model": "wood_splinter", "mmat": "solid", "msize": [0.3, 0.6], "bounce": 0.3, "mspin": 600, "col": "#8a6440", "c2": "#4a3220", "gravity": 14, "drag": 0.5},
+    {"id": "leaves", "t": "emit", "at": 0.02, "life": 0.05, "burst": 30, "from": "sphere", "fr": "r+1", "pos": [0, "hh*0.5", 0], "dir": "out", "speed": [1, 3], "plife": [1.6, 2.4], "look": "flake", "size": [3, 5], "col": "#5f9a3c", "c2": "#3c6a28", "gravity": 1.5, "drag": 1.8, "x": true}
+  ]
+}

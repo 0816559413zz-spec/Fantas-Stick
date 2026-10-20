@@ -547,6 +547,7 @@ function buildFileMap(id){
     const sc=gltf.scene,skip=new Set();
     sc.traverse(o=>{if(/^anim_/i.test(o.name))skip.add(o);if(!o.isMesh)return;o.receiveShadow=true;o.castShadow=!(o.userData&&o.userData.ns);});
     W.remove(fb);setTimeout(()=>disposeTree(fb),5000);W.add(sc);   // ทิ้งพื้นสำรองทีหลัง (กำลังอุ่นเชดเดอร์อยู่ได้)
+    brkSetup(sc,skip);   // ของบังที่พังได้: แยกออกจาก batch (js/23)
     batchStatic(sc,skip);
     if(gltf.animations&&gltf.animations.length){const mx=new THREE.AnimationMixer(sc);for(const c of gltf.animations)mx.clipAction(c).play();W.userData.mixer=mx;}
     gl.shadowMap.needsUpdate=true;setTimeout(prewarmShaders,0);

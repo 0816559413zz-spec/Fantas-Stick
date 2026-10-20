@@ -75,7 +75,7 @@ function bldSupport(b){
 }
 // ให้คาถาวงกว้างพังสิ่งแวดล้อม: damageEnv(x,y,รัศมี px,ดาเมจ,id,ธาตุ,ความสูงจุดระเบิด) = ลัง/ถัง (prop) + ชิ้นย่อยบ้านในวง (ขอบวง = เหลือ 30%)
 function damageEnv(x,y,rad,dmg,by,el,h){
-  damagePropsIn(x,y,rad,dmg,by);
+  damagePropsIn(x,y,rad,dmg,by);damageBrkIn(x,y,rad,dmg,h);
   if(!BLDON)return;h=h||0;const R=rad/20;
   for(const b of BLDG){
     if(!bldNear(b,x,y,rad))continue;
@@ -146,6 +146,40 @@ function bldParse(bd){
   const H=(bd||'').split('|');
   BLDG.forEach((b,i)=>{const t=H[i]||'';b.pc.forEach((q,j)=>{q.fl=t?parseInt(t[j]||'0',16):0;const cb=t?parseInt(t.substr(6+j*3,3)||'0',16):0;if(cb!==q.cb){q.cb=cb;b.dirty=true;}});});
 }
+// ---------- ของบังในแผนที่ไฟล์ที่พังได้ (หิน เสา รูปปั้น ต้นไม้ โคมไฟ ลัง ...) — คู่มือ Destruction.md §9 ----------
+// กลุ่ม = ที่ชน col_ 1 อัน (วงกลม OBS ที่มี b เดียวกัน) + โมเดลของมัน (map_export.py ผูกให้ → MAPS[id].fm.brk) • กำแพงใหญ่/ขอบแผนที่ไม่มีโมเดลแยก = ไม่พัง
+// เลือดตามขนาด (ปริมาตร ม³ ของโมเดล < vol[0] เล็ก / < vol[1] กลาง / ใหญ่) • โดนเฉพาะ damageEnv (สกิลแรง) ไม่โดนกระสุนธรรมดา
+// st: 0 ปกติ 1 ร้าว (เลือด < 66%) 2 ร้าวหนัก (< 33%) 3 พัง = ซากสูง 1/3 ของเดิม ยังชน/บังกระสุนได้ • กลับมาครบตอนเริ่มเกมใหม่ • snapshot BK = st ต่อกลุ่ม
+const BRKDEF={vol:[15,60],hp:[100,200,400],crack:[0.66,0.33],rub:1/3},BRK_M=['stone','wood','ice'],BRK_MCOL=['#9a9080','#7a5a3a','#cfeefa'];   // ชนิดวัสดุ (map_export) → สีเศษ
+let BRK=[];
+function genBrk(id){
+  const M=MAPS[id],L=(M&&M.fm&&M.fm.brk)||[];
+  const out=L.map((d,i)=>{const sz=d.v<BRKDEF.vol[0]?0:d.v<BRKDEF.vol[1]?1:2;return {i,d,sz,max:BRKDEF.hp[sz],hp:BRKDEF.hp[sz],st:0,cs:[],x:0,y:0};});
+  for(const o of (M&&M.obs)||[])if(o.b!=null&&out[o.b]){if(o.h0===undefined){o.h0=o.hgt;o.t0=o.top;}o.hgt=o.h0;o.top=o.t0;out[o.b].cs.push(o);}
+  for(const g of out){if(!g.cs.length)continue;g.x=g.cs.reduce((a,o)=>a+o.x,0)/g.cs.length;g.y=g.cs.reduce((a,o)=>a+o.y,0)/g.cs.length;}
+  return out;
+}
+function brkApply(g,st){
+  g.st=st;const vh=g.d.vh||g.d.h;   // vh = ความสูงโมเดล (ต้นไม้: ที่ชนสูงกว่าตัวต้น)
+  for(const o of g.cs){o.hgt=st>=3?Math.min(o.h0,vh*BRKDEF.rub):o.h0;if(o.t0!==undefined)o.top=o.t0-o.h0+o.hgt;}
+}
+function brkStage(g){const f=g.hp/g.max;return g.hp<=0?3:f<BRKDEF.crack[1]?2:f<BRKDEF.crack[0]?1:0;}
+function hitBrk(g,dmg,ox,oy){
+  if(g.st>=3)return;g.hp-=dmg;const st=brkStage(g);if(st<=g.st)return;
+  brkApply(g,st);const b=st>=3;
+  const mi=Math.max(0,BRK_M.indexOf(g.d.m));
+  emit({k:'brk',t:b?'b':'c',i:g.i,st,mi,col:BRK_MCOL[mi],sz:g.sz,x:Math.round(g.x),y:Math.round(g.y),h:Math.round((g.d.vh||g.d.h)*(b?BRKDEF.rub:0.5)*10)/10,hh:g.d.vh||g.d.h,r:Math.round(Math.max(...g.cs.map(o=>o.r))),
+    ox:Math.round(ox==null?g.x:ox),oy:Math.round(oy==null?g.y:oy)});
+}
+// วงระเบิด: ระยะถึงขอบที่ชน (3 มิติ เทียบความสูงจุดระเบิดกับยอด) ขอบวงเหลือ 30% เหมือนบ้าน
+function damageBrkIn(x,y,rad,dmg,h){
+  if(!PROPON||!BRK.length)return;h=h||0;const R=rad/20;
+  for(const g of BRK){if(g.st>=3||!g.cs.length)continue;
+    let d=1e9;for(const o of g.cs)d=Math.min(d,Math.max(0,Math.hypot(o.x-x,o.y-y)-o.r));
+    if(d>rad)continue;const dm=Math.hypot(d/20,Math.max(0,h-g.d.h));if(dm<R)hitBrk(g,dmg*(1-0.7*dm/R),x,y);}
+}
+function brkSnap(){return PROPON&&BRK.some(g=>g.st)?BRK.map(g=>g.st).join(''):'';}
+function brkParse(s){s=s||'';for(const g of BRK){const st=+(s[g.i]||0);if(st!==g.st)brkApply(g,st);}}
 function collideWorld(o,r,z){
   z=z||0;const sx=o.x,sy=o.y;let sol=0;
   o.x=clamp(o.x,r+20,MW-r-20);o.y=clamp(o.y,r+20,MH-r-20);if(o.x!==sx||o.y!==sy)sol++;

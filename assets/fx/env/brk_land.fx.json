@@ -1,0 +1,14 @@
+{
+  "v": 1,
+  "desc": "ส่วนบนของบังที่ล้มกระแทกพื้น: ฝุ่นฟุ้งเป็นแนว + เสียงตุ้บ + จอสั่นเบาๆ คนใกล้ • สีตามวัสดุ (ev.col)",
+  "tags": ["env", "destruction"],
+  "pal": "col",
+  "dur": 1.8,
+  "params": {"r": {"def": 1, "desc": "รัศมีของบัง ม."}, "hh": {"def": 3, "desc": "ความสูงของบัง ม."}},
+  "layers": [
+    {"id": "dust", "t": "emit", "at": 0, "life": 0.05, "burst": 12, "att": "ground", "from": "disc", "fr": "max(1,hh*0.35)", "dir": "flat", "speed": [1.2, 2.6], "plife": [1.0, 1.5], "look": "smoke", "fb": "tex/smoke_puff", "size": [16, 26], "col": "$light", "c2": "$main", "gravity": -0.2, "drag": 1.8},
+    {"id": "bits", "t": "emit", "at": 0, "life": 0.05, "burst": 8, "att": "ground", "from": "disc", "fr": "max(1,hh*0.3)", "dir": "up", "speed": [2, 4], "plife": [0.6, 1.0], "look": "model", "model": "rock_chunk", "mmat": "solid", "msize": [0.1, 0.22], "bounce": 0.3, "mspin": 400, "col": "$main", "c2": "$deep", "gravity": 14, "x": true},
+    {"id": "cam", "t": "screen", "at": 0, "life": 0.2, "shake": 2, "near": 20},
+    {"id": "snd", "t": "sound", "at": 0, "life": 0.1, "name": "thud", "vol": 0.8, "near": 50}
+  ]
+}

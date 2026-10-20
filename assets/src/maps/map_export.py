@@ -131,6 +131,33 @@ def add_circle(bx, by, r, top, k, extra=None):
     c = {"x": r1(x), "y": r1(y), "r": r1(r * 20), "hgt": round(hg, 2), "k": k}
     if extra: c.update(extra)
     obs.append(c)
+# breakable cover: a col_ whose footprint holds the origin of a visual object (rock, pillar, tree, lamp ...) is linked to it.
+# The visual gets custom property brk = group index (glb extras -> userData.brk), its circles get "b", brk[] = per-group data.
+# Big walls / border / tables have no own visual object -> stay unbreakable. A col_ with custom property nobrk = 1 opts out.
+BRK_SKIP = ("tuft", "flower", "drift", "grass", "mush", "rubble", "fence", "_far", "bounds", "firefly", "web", "windmill")   # windmill = big building, stays
+for o in bpy.data.objects:
+    if "brk" in o.keys(): del o["brk"]
+brk_cand = []
+for name, (o, fl) in OBJ.items():
+    n = low(o)
+    if o.type != 'MESH' or o.parent or o.children or o.hide_render or "far" in fl: continue
+    if n.startswith(MARK) or n.startswith(("ground", "floor_", "env_", "anim_")) or any(s in n for s in BRK_SKIP): continue
+    bb = [o.matrix_world @ Vector(c) for c in o.bound_box]
+    brk_cand.append((o, o.matrix_world.translation, max(v.x for v in bb) - min(v.x for v in bb), max(v.y for v in bb) - min(v.y for v in bb), max(v.z for v in bb)))
+brk, brk_used = [], set()
+def brk_link(o, x0, x1, y0, y1, top, cen):
+    if "k" in o.keys() or int(o.get("nobrk", 0)) or low(o).startswith("colv_"): return None
+    ext = max(x1 - x0, y1 - y0); lim = max(8.0, ext * 4)
+    vis = [v for v, t, w, d, z in brk_cand if v.name not in brk_used and x0 - 0.3 <= t.x <= x1 + 0.3 and y0 - 0.3 <= t.y <= y1 + 0.3 and max(w, d) <= lim]
+    if not vis: return None
+    gi = len(brk); names = " ".join(low(v) for v in vis)
+    for v in vis: v["brk"] = gi; brk_used.add(v.name)
+    m = "wood" if any(s in names for s in ("tree", "log", "bush", "stall", "crate", "hay", "tent", "banner", "cart")) else \
+        "ice" if any(s in names for s in ("chunk", "ice", "snowman", "crystal")) else "stone"
+    h = top - gB(cen.x, cen.y); vn = set(q.name for q in vis)
+    vh = min(h, max(z for v, t, w, d, z in brk_cand if v.name in vn) - gB(cen.x, cen.y))   # model height (tree collision is taller than the tree)
+    brk.append({"h": round(h, 2), "vh": round(vh, 2), "v": round((x1 - x0) * (y1 - y0) * vh, 1), "m": m, "n": vis[0].name})
+    return gi
 for o in pre("col_", "colv_"):
     if o.type != 'MESH': continue
     rot = o.matrix_world.to_euler()
@@ -144,6 +171,9 @@ for o in pre("col_", "colv_"):
     k = "colv" if low(o).startswith("colv_") else "col"
     if "k" in o.keys(): k = str(o["k"])                     # custom property k (e.g. "hoop" = Quidditch goal)
     ex_ = {"ring": round(float(o["ring"]), 2)} if "ring" in o.keys() else None   # hoop ring height above ground
+    wb = [M @ v for v in bb]
+    gi = brk_link(o, min(v.x for v in wb), max(v.x for v in wb), min(v.y for v in wb), max(v.y for v in wb), top, cen)
+    if gi is not None: ex_ = dict(ex_ or {}, b=gi)
     nv = len(o.data.vertices)
     if nv > 8 and abs(ex - ey) < 0.15 * max(ex, ey):
         add_circle(cen.x, cen.y, max(ex, ey), top, k, ex_); continue
@@ -213,7 +243,7 @@ modes = prop("modes"); modes = [m.strip() for m in modes.split(',') if m.strip()
 data = {"fmt": 1, "id": MAP_ID, "name": prop("name", MAP_ID), "desc": prop("desc", ""), "sky": prop("sky", "night"), "fog": fog,
         "modes": modes, "random": int(prop("random", 1)), "weather": prop("weather", ""), "music": prop("music", ""),
         "W": W, "H": H, "c": C, "nx": NX, "ny": NY, "g": b64(g), "fl": floors, "obs": obs, "spawns": spawns, "espawn": espawn,
-        "rings": rings, "tasks": tasks, "houses": houses, "lights": lights, "env": env,
+        "rings": rings, "tasks": tasks, "houses": houses, "lights": lights, "env": env, "brk": brk,
         "fx": [t.strip() for t in str(prop("fx", "")).split(',') if t.strip()]}
 if pre("prop_") or int(prop("props", 1)) == 0: data["props"] = props      # no prop_ empties = game places crates/barrels itself
 
@@ -265,7 +295,7 @@ if os.path.exists(chk):
         exec(open(chk, encoding="utf-8").read(), ns); problems += ns["result"]["problems"]
     except Exception as e: problems.append("map_check failed: %s" % e)
 
-info.update({"W": W, "H": H, "grid": (NX, NY), "spawns": len(spawns), "props": len(props), "houses": len(houses), "lights": len(lights),
+info.update({"brk": len(brk), "W": W, "H": H, "grid": (NX, NY), "spawns": len(spawns), "props": len(props), "houses": len(houses), "lights": len(lights),
              "env": [e["k"] for e in env], "glb_objects": len(keep), "json_kb": round(os.path.getsize(jpath) / 1024, 1),
              "glb_kb": round(os.path.getsize(gpath) / 1024, 1), "manifest_v": mp[MAP_ID]["v"]})
 result = {"problems": problems, "info": info}

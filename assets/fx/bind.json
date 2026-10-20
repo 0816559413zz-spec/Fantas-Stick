@@ -140,5 +140,49 @@
   "imp:icicle": {
     "fx": "frost/icicle_hit",
     "mode": "add"
+  },
+  "brk:c": {
+    "fx": "env/brk_crack",
+    "mode": "add",
+    "p": {
+      "r": "ev.r/20",
+      "hh": "ev.hh"
+    }
+  },
+  "brk:b": [
+    {
+      "fx": "env/brk_break",
+      "mode": "add",
+      "p": {
+        "r": "ev.r/20",
+        "hh": "ev.hh"
+      }
+    },
+    {
+      "fx": "env/brk_break_wood",
+      "mode": "add",
+      "p": {
+        "r": "ev.r/20",
+        "hh": "ev.hh"
+      },
+      "if": "ev.mi==1"
+    },
+    {
+      "fx": "env/brk_break_ice",
+      "mode": "add",
+      "p": {
+        "r": "ev.r/20",
+        "hh": "ev.hh"
+      },
+      "if": "ev.mi==2"
+    }
+  ],
+  "brk:land": {
+    "fx": "env/brk_land",
+    "mode": "add",
+    "p": {
+      "r": "ev.r/20",
+      "hh": "ev.hh"
+    }
   }
 }

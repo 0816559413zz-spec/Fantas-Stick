@@ -253,3 +253,100 @@ function syncWalls(v){
   }
   for(const [id,o] of WM3)if(!seen.has(id)){disposeObj(o.g);o.mat.dispose();WM3.delete(id);}
 }
+
+// ---------- ของบังในแผนที่ไฟล์ที่พังได้ ฝั่งแสดงผล (สถานะจาก BRK[].st — host js/12-buildings.js) ----------
+// โมเดลที่ map_export.py ติด userData.brk ไว้: ไม่รวม batch → รวมเป็น InstancedMesh ต่อ (geometry, วัสดุ) • ร้าว = ดึงออกมาเป็น mesh วัสดุรอยร้าว
+// พัง = ตัดโมเดลเหลือส่วนล่าง 1/3 (ขอบหยัก) + กองหินบนรอยตัด • ตอนพัง (event brk:b) ส่วนบนล้มออกจากจุดระเบิดแล้วจมหาย (เฉพาะเครื่องนี้)
+const BRKV={sc:null,grp:[],fall:[]},BRK_COL={stone:'#7d776d',wood:'#6a4a30',ice:'#bfe6f5'};
+function brkSetup(sc,skip){
+  BRKV.sc=null;BRKV.grp=[];BRKV.fall.length=0;
+  const objs=[];sc.traverse(o=>{const b=o.userData&&o.userData.brk;if(b!=null&&o!==sc){(objs[b]=objs[b]||[]).push(o);skip.add(o);}});
+  if(!objs.length)return;
+  sc.updateMatrixWorld(true);const inv=new THREE.Matrix4().copy(sc.matrixWorld).invert(),ims=new Map();
+  objs.forEach((L,i)=>{if(!L)return;const q={i,parts:[],key:-1,dmg:null,cut:null};BRKV.grp[i]=q;
+    for(const o of L){o.traverse(m=>{if(!m.isMesh||Array.isArray(m.material))return;
+      const M=new THREE.Matrix4().multiplyMatrices(inv,m.matrixWorld),k=m.geometry.uuid+'|'+m.material.uuid;
+      let e=ims.get(k);if(!e)ims.set(k,e={geo:m.geometry,mat:m.material,list:[],cs:m.castShadow});
+      const p={geo:m.geometry,mat:m.material,M,e,idx:e.list.length};e.list.push(p);q.parts.push(p);});
+      if(o.parent)o.parent.remove(o);}
+  });
+  for(const e of ims.values()){
+    const im=new THREE.InstancedMesh(e.geo,e.mat,e.list.length);e.list.forEach((p,j)=>im.setMatrixAt(j,p.M));
+    im.castShadow=e.cs;im.receiveShadow=true;im.computeBoundingSphere();sc.add(im);e.im=im;}
+  BRKV.sc=sc;
+}
+// วัสดุรอยร้าว: เส้นร้าวจากลาย voronoi ในพิกัดโลก (ไม่ต้องมี uv) • lv 1 = ร้าวบาง, 2 = ร้าวหนา + มืดลง
+const BRK_CM=new Map();
+function brkCrackMat(mat,lv){
+  const k=mat.uuid+'|'+lv;let m=BRK_CM.get(k);if(m)return m;
+  m=mat.clone();const w=lv>1?0.07:0.04,dk=lv>1?0.85:0.97,dn=lv>1?'0.85':'0.4';   // dn = สัดส่วนเส้นร้าวที่โผล่
+  m.onBeforeCompile=s=>{
+    s.vertexShader=s.vertexShader.replace('#include <common>','#include <common>\nvarying vec3 vBrkW;').replace('#include <project_vertex>','#include <project_vertex>\nvBrkW=(modelMatrix*vec4(transformed,1.0)).xyz;');
+    s.fragmentShader=s.fragmentShader.replace('#include <common>',`#include <common>
+varying vec3 vBrkW;
+vec3 brkH(vec3 p){p=vec3(dot(p,vec3(127.1,311.7,74.7)),dot(p,vec3(269.5,183.3,246.1)),dot(p,vec3(113.5,271.9,124.6)));return fract(sin(p)*43758.5453);}
+vec2 brkCell(vec3 x){vec3 n=floor(x),f=fract(x);float d1=8.0,d2=8.0,id=0.0,id2=0.0;
+  for(int k=-1;k<=1;k++)for(int j=-1;j<=1;j++)for(int i=-1;i<=1;i++){vec3 g=vec3(float(i),float(j),float(k)),h=brkH(n+g),r=g+h-f;float d=dot(r,r);if(d<d1){d2=d1;id2=id;d1=d;id=h.y;}else if(d<d2){d2=d;id2=h.y;}}
+  return vec2(sqrt(d2)-sqrt(d1),min(id,id2));}`).replace('#include <map_fragment>',`#include <map_fragment>
+{vec2 e=brkCell(vBrkW*1.6);diffuseColor.rgb*=${dk.toFixed(2)}*mix(0.18,1.0,max(smoothstep(${(w*0.5).toFixed(3)},${w.toFixed(3)},e.x),step(${dn},e.y)));}`);
+  };
+  m.customProgramCacheKey=()=>'brk'+lv;BRK_CM.set(k,m);return m;
+}
+// ตัด geometry (พิกัดฉาก) ด้วยระนาบหยัก y = yc(x,z): below = เก็บส่วนล่าง ไม่งั้นเก็บส่วนบน
+function brkClip(geo,M,yc,below){
+  const g=(geo.index?geo.toNonIndexed():geo.clone()).applyMatrix4(M),names=Object.keys(g.attributes).filter(n=>g.attributes[n].itemSize<=4),A=names.map(n=>g.attributes[n]),pi=names.indexOf('position'),out=names.map(()=>[]);
+  const P=g.attributes.position,get=['getX','getY','getZ','getW'];
+  const vert=i=>A.map(a=>{const r=[];for(let k=0;k<a.itemSize;k++)r.push(a[get[k]](i));return r;});
+  const lerpV=(u,v,t)=>u.map((arr,j)=>arr.map((x,k)=>x+(v[j][k]-x)*t));
+  for(let i=0;i+2<P.count;i+=3){
+    const vs=[vert(i),vert(i+1),vert(i+2)],sd=vs.map(v=>{const p=v[pi],y=yc(p[0],p[2]);return below?y-p[1]:p[1]-y;});
+    if(sd.every(d=>d>=0)){vs.forEach(v=>v.forEach((a,j)=>out[j].push(...a)));continue;}
+    if(sd.every(d=>d<0))continue;
+    const poly=[];for(let e=0;e<3;e++){const a=vs[e],b=vs[(e+1)%3],da=sd[e],db=sd[(e+1)%3];if(da>=0)poly.push(a);if((da>=0)!==(db>=0))poly.push(lerpV(a,b,da/(da-db)));}
+    for(let t=1;t+1<poly.length;t++)for(const v of [poly[0],poly[t],poly[t+1]])v.forEach((a,j)=>out[j].push(...a));
+  }
+  const r=new THREE.BufferGeometry();names.forEach((n,j)=>r.setAttribute(n,new THREE.BufferAttribute(new Float32Array(out[j]),A[j].itemSize)));
+  g.dispose();if(r.attributes.normal)r.normalizeNormals();return r;
+}
+function brkYc(q){const g=BRK[q.i],b=GY(g.x,g.y)+(g.d.vh||g.d.h)*BRKDEF.rub,s=q.i*1.7;return (x,z)=>b+0.22*Math.sin(x*2.3+s)*Math.cos(z*1.9-s)+0.12*Math.sin((x+z)*5.1+s);}
+// ซาก: ส่วนล่างของทุกชิ้น + ก้อนหิน/ไม้บนรอยตัด
+function brkStump(q){
+  if(q.cut)return q.cut;const g=BRK[q.i],yc=brkYc(q),G3=new THREE.Group();
+  for(const p of q.parts){const m=new THREE.Mesh(brkClip(p.geo,p.M,yc,true),brkCrackMat(p.mat,2));m.castShadow=m.receiveShadow=true;G3.add(m);}
+  const R=Math.max(...g.cs.map(o=>o.r))*S3*(g.d.m==='wood'?0.45:1),cx=tx(g.x),cz=tz(g.y),y=GY(g.x,g.y)+(g.d.vh||g.d.h)*BRKDEF.rub,mat=new THREE.MeshStandardMaterial({color:BRK_COL[g.d.m]||BRK_COL.stone,roughness:0.95,flatShading:true});
+  const disc=new THREE.Mesh(new THREE.CircleGeometry(R*0.95,9),new THREE.MeshStandardMaterial({color:'#2a2622',roughness:1}));disc.rotation.x=-Math.PI/2;disc.position.set(cx,y-0.06,cz);G3.add(disc);
+  const n=3+Math.min(5,Math.round(R*2));
+  for(let k=0;k<n;k++){const a=k/n*6.283+q.i,d=R*(0.15+0.55*((k*0.37+q.i*0.11)%1)),s=R*(0.3+0.25*((k*0.53)%1));
+    const m=new THREE.Mesh(sGeo(THREE.DodecahedronGeometry,1,0),mat);m.scale.set(s,s*0.7,s);m.position.set(cx+Math.cos(a)*d,y-s*0.2,cz+Math.sin(a)*d);m.rotation.set(k,k*2.1,k*0.7);m.castShadow=true;G3.add(m);}
+  return q.cut=G3;
+}
+function brkSync(dt){
+  if(!BRKV.sc)return;
+  if(BRKV.sc.parent!==world){BRKV.sc=null;BRKV.grp=[];BRKV.fall.length=0;return;}
+  let ch=false;
+  for(const q of BRKV.grp){if(!q)continue;const g=BRK[q.i],st=g?g.st:0;if(st===q.key)continue;
+    q.key=st;ch=true;
+    if(q.dmg){BRKV.sc.remove(q.dmg);q.dmg=null;}
+    for(const p of q.parts){p.e.im.setMatrixAt(p.idx,st?BRK_ZERO:p.M);p.e.im.instanceMatrix.needsUpdate=true;}
+    if(st>=3)q.dmg=brkStump(q);
+    else if(st){q.dmg=new THREE.Group();for(const p of q.parts){const m=new THREE.Mesh(p.geo,brkCrackMat(p.mat,st));m.matrixAutoUpdate=false;m.matrix.copy(p.M);m.castShadow=p.e.cs;m.receiveShadow=true;q.dmg.add(m);}}
+    if(q.dmg)BRKV.sc.add(q.dmg);
+  }
+  if(ch)gl.shadowMap.needsUpdate=true;
+  for(let i=BRKV.fall.length-1;i>=0;i--){const f=BRKV.fall[i];f.t+=dt;
+    if(f.t<f.T){f.w+=f.acc*dt;f.ang=Math.min(f.max,f.ang+f.w*dt);f.piv.quaternion.setFromAxisAngle(f.ax,f.ang);if(f.ang>=f.max&&!f.hit){f.hit=1;f.T=f.t;if(f.onHit)f.onHit();}}
+    else{f.piv.position.y-=dt*0.8;if(f.t>f.T+1.6){BRKV.sc.remove(f.piv);f.piv.traverse(m=>{if(m.isMesh)m.geometry.dispose();});BRKV.fall.splice(i,1);}}
+    gl.shadowMap.needsUpdate=true;}
+}
+const BRK_ZERO=new THREE.Matrix4().makeScale(0,0,0);
+// ตอนพัง: ส่วนบนเหนือรอยตัดล้มออกจากจุดระเบิด (ox,oy) แล้วจมลงดิน
+function brkFall(ev){
+  const q=BRKV.grp[ev.i],g=BRK[ev.i];if(!q||!g||!BRKV.sc)return;
+  const yc=brkYc(q),cx=tx(g.x),cz=tz(g.y),y=GY(g.x,g.y)+(g.d.vh||g.d.h)*BRKDEF.rub,piv=new THREE.Group();piv.position.set(cx,y,cz);
+  for(const p of q.parts){const m=new THREE.Mesh(brkClip(p.geo,p.M,yc,false),brkCrackMat(p.mat,2));m.position.set(-cx,-y,-cz);m.castShadow=true;piv.add(m);}
+  let dx=g.x-ev.ox,dy=g.y-ev.oy;const dl=Math.hypot(dx,dy);if(dl<1){const a=ev.i*2.4;dx=Math.cos(a);dy=Math.sin(a);}else{dx/=dl;dy/=dl;}
+  BRKV.sc.add(piv);
+  const tall=(g.d.vh||g.d.h)*(1-BRKDEF.rub);
+  BRKV.fall.push({piv,ax:new THREE.Vector3(dy,0,-dx).normalize(),ang:0,w:0.6,acc:Math.max(3,14/Math.max(1,tall*0.5)),max:Math.PI*0.48,t:0,T:3,
+    onHit(){const lx=g.x+dx*tall*12,ly=g.y+dy*tall*12;fx({k:'brk',t:'land',i:ev.i,mi:ev.mi,col:ev.col,sz:ev.sz,hh:ev.hh,x:Math.round(lx),y:Math.round(ly),h:0.2,r:ev.r});}});
+}

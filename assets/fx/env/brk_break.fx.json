@@ -1,0 +1,16 @@
+{
+  "v": 1,
+  "desc": "ของบังพัง (เลือดหมด): ก้อนเศษใหญ่กระเด็น + ฝุ่นฟุ้งรอบโคน + ควันลอย + จอสั่นคนใกล้ • ส่วนบนล้มเป็นโค้ด (brkFall) • สีตามวัสดุ (ev.col)",
+  "tags": ["env", "destruction"],
+  "pal": "col",
+  "dur": 2.4,
+  "params": {"r": {"def": 1, "desc": "รัศมีของบัง ม."}, "hh": {"def": 3, "desc": "ความสูงของบัง ม."}},
+  "layers": [
+    {"id": "chunks", "t": "emit", "at": 0, "life": 0.05, "burst": "min(28,10+r*8)", "from": "sphere", "fr": "r", "dir": "out", "speed": [3, 7], "up": 5, "plife": [1.2, 1.9], "look": "model", "model": "rock_chunk", "mmat": "solid", "msize": [0.15, 0.4], "bounce": 0.4, "mspin": 450, "col": "$main", "c2": "$deep", "gravity": 15, "drag": 0.4},
+    {"id": "dust", "t": "emit", "at": 0, "life": 0.05, "burst": 14, "att": "ground", "from": "ring", "fr": "r+0.5", "dir": "flat", "speed": [1.5, 3.2], "plife": [1.1, 1.7], "look": "smoke", "fb": "tex/smoke_puff", "size": [18, 28], "col": "$light", "c2": "$main", "gravity": -0.25, "drag": 1.8},
+    {"id": "puff", "t": "emit", "at": 0.05, "life": 0.05, "burst": 6, "from": "sphere", "fr": "r", "dir": "up", "speed": [0.6, 1.4], "plife": [1.4, 2.0], "look": "smoke", "fb": "tex/smoke_puff", "size": [20, 30], "col": "$light", "c2": "$deep", "gravity": -0.4, "drag": 1.5, "x": true},
+    {"id": "crack", "t": "decal", "at": 0, "life": 2.2, "att": "ground", "kind": "crack", "r": "r*1.5+0.6", "n": 7, "burn": 0, "col": "$deep"},
+    {"id": "cam", "t": "screen", "at": 0, "life": 0.25, "shake": 3, "near": 25},
+    {"id": "snd", "t": "sound", "at": 0, "life": 0.1, "name": "break", "vol": 0.8, "near": 60}
+  ]
+}
