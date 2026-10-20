@@ -172,7 +172,7 @@ if sum(1 for s in spawns if "t" not in s) < 6: problems.append("spawn_: need 6")
 espawn = [{"x": r1(p[0]), "y": r1(p[1])} for p in (pos(o) for o in pre("enemy_spawn_"))]
 rings = [{"x": r1(p[0]), "y": r1(p[1]), "h": round(max(1.0, p[2]), 2)} for p in (pos(o) for o in sorted(pre("ring_"), key=num))]
 tasks = [{"x": r1(p[0]), "y": r1(p[1])} for p in (pos(o) for o in pre("task_"))]
-PK = {"prop_crate_": "pcrate", "prop_barrel_": "pbarrel", "prop_chest_": "pchest"}
+PK = {"prop_crate_": "pcrate", "prop_barrel_": "pbarrel", "prop_chest_": "pchest", "prop_tree_": "ptree", "prop_pine_": "ppine"}
 props = []
 for o in pre("prop_"):
     k = next((v for p, v in PK.items() if low(o).startswith(p)), None)

@@ -571,6 +571,15 @@ function buildTest(){
     g.fillStyle='rgba(255,235,230,0.95)';g.textAlign='center';g.textBaseline='middle';g.font='bold 52px Kanit, sans-serif';g.fillText('โซนเสกมอนสเตอร์',0,-14);g.font='34px Kanit, sans-serif';g.fillText('กด P → เสกมอนสเตอร์',0,44);
   });
   const zm=addW(new THREE.Mesh(new THREE.PlaneGeometry(zs,zs),new THREE.MeshBasicMaterial({map:zt,transparent:true,depthWrite:false})));zm.rotation.x=-Math.PI/2;zm.position.set(tx(Z.x),0.04,tz(Z.y));
+  // หมู่บ้านทดสอบทำลาย (ฝั่งตะวันตก): ลานหญ้า + ถนนดิน + ป้าย — บ้าน/ต้นไม้/ลังมาจากระบบพังได้ (syncBld / syncProps)
+  {const V=TEST_VIL,gm=new THREE.MeshStandardMaterial({map:grassTex('#5f8f45',11,1),roughness:0.95}),dm=new THREE.MeshStandardMaterial({color:'#8a7456',roughness:1});
+    const gr=addW(new THREE.Mesh(new THREE.PlaneGeometry(1900*S3,2900*S3),gm));gr.rotation.x=-Math.PI/2;gr.position.set(tx(V.x+150),0.01,tz(V.y));gr.receiveShadow=true;
+    const rd=addW(new THREE.Mesh(new THREE.PlaneGeometry(1800*S3,180*S3),dm));rd.rotation.x=-Math.PI/2;rd.position.set(tx(V.x+100),0.02,tz(V.y));rd.receiveShadow=true;
+    const st=texCanvas(512,160,g=>{g.fillStyle='#5a3a22';g.fillRect(0,0,512,160);g.strokeStyle='#e8c060';g.lineWidth=8;g.strokeRect(6,6,500,148);g.fillStyle='#f3dc94';g.textAlign='center';g.textBaseline='middle';g.font='bold 54px Kanit, sans-serif';g.fillText('หมู่บ้านทดสอบทำลาย',256,62);g.font='30px Kanit, sans-serif';g.fillText('บ้าน · ต้นไม้ · ลัง พังได้ทั้งหมด',256,118);});
+    const sg=addW(new THREE.Group()),post=new THREE.MeshStandardMaterial({color:'#4e3420',roughness:0.9});
+    for(const s of [-1,1]){const p=new THREE.Mesh(new THREE.CylinderGeometry(0.12,0.12,3.2,6),post);p.position.set(s*2.2,1.6,0);sg.add(p);}
+    const bd=new THREE.Mesh(new THREE.PlaneGeometry(5,1.56),new THREE.MeshStandardMaterial({map:st,roughness:0.8,side:THREE.DoubleSide}));bd.position.y=2.6;sg.add(bd);
+    sg.position.set(tx(V.x+1050),0,tz(V.y-150));sg.rotation.y=Math.PI/2;}
   // ป้ายระยะ (ทุก 200 px) จากจุดเกิดไปทางหุ่นซ้อมไกล — ไว้ดูระยะคาถา
   const tickM=new THREE.MeshBasicMaterial({color:'#ffffff',transparent:true,opacity:0.55});
   for(let d=200;d<=800;d+=200){const m=addW(new THREE.Mesh(new THREE.PlaneGeometry(3,0.25),tickM));m.rotation.x=-Math.PI/2;m.position.set(0,0.03,tz(MH/2+160-d));}

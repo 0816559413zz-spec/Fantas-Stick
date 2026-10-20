@@ -165,6 +165,7 @@ function fx(ev){
     case 'prop':{
       const D=PROPDEF[(PROPS[ev.i]||{}).k]||PROPDEF.pcrate;
       if(ev.e==='h'){burst(ev.x,ev.y,D.col,6,90,0.4,2,{h:H,g:6});if(near)snd('thud',{x:ev.x,y:ev.y,vol:0.5});}
+      else if(ev.e==='b'&&D.hgt>4){burst(ev.x,ev.y,D.col,60,260,1.6,3.4,{h:H,vh:[0,4],g:3});burst(ev.x,ev.y,'#7a5230',18,160,0.8,2.4,{h:1,vh:[1,4],g:9});smoke(ev.x,ev.y,0.5,8,'#7a6a50',1.2,6,60);if(near){snd('break',ev);snd('thud',{x:ev.x,y:ev.y,vol:0.9});shake(4);}}
       else if(ev.e==='b'){burst(ev.x,ev.y,D.col,26,180,0.8,3,{h:H,vh:[1,5],g:9});smoke(ev.x,ev.y,0.5,6,'#6a5a48',1.0,5,60);if(near){snd('break',ev);shake(3);}}
       else if(ev.e==='u'){burst(ev.x,ev.y,'#ffd86b',22,120,0.9,2.4,{h:H,vh:[1,4],g:-0.5});FX.flashLight(ev.x,ev.y,H+0.5,'#ffd86b',3,8,0.4);if(near)snd('pickup',ev);}
       break;

@@ -87,6 +87,22 @@
     "prop_chest_used": {
       "file": "props/chest_used.glb",
       "v": 1
+    },
+    "prop_tree": {
+      "file": "props/tree.glb",
+      "v": 1
+    },
+    "prop_tree_broken": {
+      "file": "props/tree_broken.glb",
+      "v": 1
+    },
+    "prop_pine": {
+      "file": "props/pine.glb",
+      "v": 1
+    },
+    "prop_pine_broken": {
+      "file": "props/pine_broken.glb",
+      "v": 1
     }
   },
   "maps": {

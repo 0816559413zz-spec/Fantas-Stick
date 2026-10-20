@@ -13,6 +13,12 @@ function propFallback(k,st){
     const wd=M(D.col,0.85),ir=M('#3a3a40',0.5,{metalness:0.6});
     if(st!==1){add(g,sGeo(THREE.CylinderGeometry,s*0.9,s*0.9,D.hgt,14),wd,0,D.hgt/2,0);for(const y of [0.25,D.hgt-0.25])add(g,sGeo(THREE.CylinderGeometry,s*0.94,s*0.94,0.08,14),ir,0,y,0);}
     else{add(g,sGeo(THREE.CylinderGeometry,s*0.9,s*0.9,0.25,14),wd,0,0.125,0);for(let i=0;i<5;i++){const m=add(g,sGeo(THREE.BoxGeometry,0.18,0.06,D.hgt*0.8),wd,Math.cos(i*1.26)*s*1.4,0.04,Math.sin(i*1.26)*s*1.4);m.rotation.y=-i*1.26;}}
+  }else if(k==='ptree'||k==='ppine'){
+    const bark=M('#5a3a1c',0.9),leaf=M(D.col,0.85),pine=k==='ppine';
+    if(st!==1){add(g,sGeo(THREE.CylinderGeometry,0.25,0.4,pine?2:3.4,8),bark,0,pine?1:1.7,0);
+      if(pine)for(const [y,r,h] of [[1.6,1.9,2.6],[3,1.5,2.3],[4.3,1.05,2]])add(g,sGeo(THREE.ConeGeometry,r,h,8),leaf,0,y+h/2,0);
+      else{add(g,sGeo(THREE.SphereGeometry,1.8,10,8),leaf,0,4.5,0);add(g,sGeo(THREE.SphereGeometry,1.2,10,8),leaf,1,4,0.4);}}
+    else{add(g,sGeo(THREE.CylinderGeometry,0.32,0.42,0.7,8),bark,0,0.35,0);const t=add(g,sGeo(THREE.CylinderGeometry,0.28,0.36,2.8,8),bark,2,0.36,0);t.rotation.z=Math.PI/2;add(g,sGeo(THREE.SphereGeometry,1.3,8,6),leaf,4.2,1,0);}
   }else if(k==='pchest'){
     const w=s*1.6,d=s*1.1,wd=M('#6a4422',0.8),gold=M(D.col,0.35,{metalness:0.8});
     add(g,sGeo(THREE.BoxGeometry,w,0.55,d),wd,0,0.275,0);

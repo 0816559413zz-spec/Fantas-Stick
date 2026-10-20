@@ -72,7 +72,26 @@ function genRuins(){
 }
 // ----- Test Place (ห้องฝึก): พื้นโล่งไม่มีสิ่งกีดขวาง -----
 // บ้านทดสอบ 2 หลังฝั่งตะวันตก (หันหน้าเข้ากลาง) ไว้ลองคาถาพังบ้าน
-function genTest(){const W=3200,H=2400;return {W,H,obs:[[-260],[260]].map(([dy],i)=>({x:W*0.22,y:H/2+dy,r:84,k:'house',hgt:10,w:170,d:135,s:i*0.5,ry:Math.PI/2}))};}
+// ห้องฝึก 240 × 180 หน่วย: กลางแผนที่ = ที่ฝึกเหมือนเดิม • ฝั่งตะวันตก = หมู่บ้านทดสอบทำลาย (บ้านพังเป็นชิ้น 10 หลัง + ต้นไม้/ลัง/ถัง/หีบใน testProps)
+const TEST_VIL={x:900,y:1800};
+function genTest(){
+  const W=4800,H=3600,V=TEST_VIL,obs=[];
+  for(let i=0;i<4;i++){obs.push({x:V.x-600+i*360,y:V.y-330,ry:0});obs.push({x:V.x-600+i*360,y:V.y+330,ry:Math.PI});}   // 2 แถวหันหน้าเข้าถนน
+  obs.push({x:V.x+620,y:V.y-170,ry:Math.PI/2},{x:V.x+620,y:V.y+170,ry:Math.PI/2});                                          // ท้ายถนนหันไปทางลานฝึก
+  return {W,H,obs:obs.map((o,i)=>Object.assign({r:84,k:'house',hgt:10,w:[170,150,185,160,175,155,190,165,170,170][i],d:[135,125,145,130,140,120,150,128,135,135][i],s:(i*0.37)%1},o))};
+}
+// ของพังได้ในห้องฝึก (เหมือนกันทุกเครื่อง): ป่าเล็กเหนือ/ใต้หมู่บ้าน + ต้นไม้ริมถนน + ลัง/ถังหน้าบ้าน + หีบ 2 ใบ
+function testProps(){
+  const V=TEST_VIL,R=mulberry(4242),out=[],add=(k,x,y)=>out.push({i:out.length,k,x:Math.round(x),y:Math.round(y),a:R()*6.283,r:PROPDEF[k].r,hgt:PROPDEF[k].hgt,hp:PROPDEF[k].hp||0,st:0,ht:0});
+  const free=(x,y,r)=>!MAPS.test.obs.some(o=>Math.abs(x-o.x)<o.w/2+r+40&&Math.abs(y-o.y)<o.w/2+r+40)&&!out.some(o=>Math.hypot(o.x-x,o.y-y)<o.r+r+30);
+  for(const [cx,cy,n] of [[V.x,V.y-900,26],[V.x,V.y+900,26],[V.x+1300,V.y-1250,10],[V.x+1300,V.y+1250,10]])
+    for(let t=0,k=0;k<n&&t<400;t++){const x=cx+(R()-0.5)*1300,y=cy+(R()-0.5)*520;if(!free(x,y,24))continue;add(R()<0.5?'ptree':'ppine',x,y);k++;}
+  for(let i=0;i<5;i++){add('ptree',V.x-760+i*360,V.y-130);add('ppine',V.x-580+i*360,V.y+130);}                         // ต้นไม้ริมถนน
+  for(let i=0;i<4;i++)for(const s of [-1,1]){const x=V.x-600+i*360+(R()-0.5)*80,y=V.y+s*190;if(free(x,y,20))add(R()<0.5?'pcrate':'pbarrel',x,y);}
+  add('pchest',V.x-820,V.y);add('pchest',V.x+900,V.y-420);
+  for(let i=0;i<8;i++){const x=V.x+900+(i%4)*55,y=V.y+380+Math.floor(i/4)*55;add(i%2?'pbarrel':'pcrate',x,y);}            // กองลังไว้ทดสอบระเบิด
+  return out;
+}
 // โซนเสกมอนสเตอร์ในห้องฝึก (พิกัดเกม) — ใช้ทั้งโฮสต์ (จุดเกิด) และจอ (วงบนพื้น)
 function trZone(){return {x:MW*0.78,y:MH*0.42,r:230};}
 function genGreatHall(){
@@ -136,13 +155,15 @@ const PROPDEF={
   pcrate:{n:'ลังไม้',r:18,hgt:1.4,hp:30,model:'prop_crate',w:5,col:'#a07a46'},
   pbarrel:{n:'ถังไม้',r:15,hgt:1.6,hp:45,model:'prop_barrel',w:4,col:'#8a5a32'},
   pchest:{n:'หีบสมบัติ',r:18,hgt:1.0,use:'เปิดหีบ',model:'prop_chest',w:1,max:2,col:'#e8c060'},
+  ptree:{n:'ต้นโอ๊ก',r:22,hgt:7.5,hp:70,model:'prop_tree',w:0,col:'#4f8f3c'},     // w:0 = ไม่สุ่มลงแผนที่ทั่วไป (ห้องฝึก / วางเองในไฟล์แผนที่ prop_tree_)
+  ppine:{n:'ต้นสน',r:20,hgt:7,hp:55,model:'prop_pine',w:0,col:'#2f6a30'},
 };
 const PROP_OFF_MODES=['quid','race','imp'];
 // ผลตอนผู้เล่นกดใช้ (ฝั่งโฮสต์) — ว่างไว้ให้ทีมเกมเพลย์ใส่ เช่น ให้บัฟ/ของ
 const PROP_USE={pchest(p,o){}};
 let PROPS=[],PROPON=false;
 function genProps(id){
-  const M=MAPS[id];if(!M||id==='test')return [];
+  const M=MAPS[id];if(!M)return [];if(id==='test')return testProps();
   if(M.fm&&M.fm.props)return M.fm.props.filter(q=>PROPDEF[q.k]).map((q,i)=>{const D=PROPDEF[q.k];return {i,k:q.k,x:q.x,y:q.y,a:q.a||0,r:D.r,hgt:D.hgt,hp:D.hp||0,st:0,ht:0};});   // วางเองในไฟล์แผนที่
   const rng=mulberry(hashStr('props:'+id)),out=[],W=M.W,H=M.H,obs=M.obs||[];
   const n=Math.min(24,Math.round(W*H/200000)),kinds=Object.keys(PROPDEF),wsum=kinds.reduce((a,k)=>a+PROPDEF[k].w,0),cnt={};

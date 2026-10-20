@@ -5,18 +5,18 @@ Format: `name:line` = top-level function/const/let in that file. `§line title` 
 ## js/01-core.js (22) — แกนกลาง: import Three.js + ฟังก์ชันพื้นฐาน ($ rnd clamp lerp store to…
 $:12 rnd:13 clamp:14 lerp:15 dist2:16 lerpAng:17 esc:18 shuffle:19 store:20 toastT:21 toast:22
 
-## js/02-data.js (284) — 
+## js/02-data.js (305) — 
 W:4 H:4 PR:4 PILLARS:6 SPAWNF:7 mulberry:9 genForest:10 genPitch:27 genHogsmeade:36
 §54 แผนที่โล่ง 3 แบบ (ผู้ใช้: ป่ามืดไม่สนุก อยากได้ที่โล่งๆ)
 genMeadow:55 genLake:61 genRuins:66
 §73 Test Place (ห้องฝึก): พื้นโล่งไม่มีสิ่งกีดขวาง
-genTest:75 trZone:77 genGreatHall:78 MAPS:86 RANDOM_MAPS:98 MAPID:99 MW:99 MH:99 OBS:99 setMapVars:100
-§101 แผนที่จากไฟล์ (Blender → assets/maps/<id>.json + .glb, สคริปต์ assets…
-FMAPS:104 b64i16:105 regFileMap:106 loadMapData:118 loadAllMapData:126 mapReady:129 mapOkFor:130
-§131 ของประกอบฉากที่พังได้ / ใช้ได้ (prop)
-PROPDEF:135 PROP_OFF_MODES:140 PROP_USE:142 PROPS:143 PROPON:143 genProps:144
-§164 ตัวละคร: บ้านฮอกวอตส์ + หน้าตา
-HOUSES:166 HAIRC:171 HAIRSTY:173 WOODC:175 WOODN:176 WCOREC:177 WCOREN:178 WANDSTY:179 EYEC:180 SKINC:181 CLOAKC:182 TIESTY:183 LOOKK:184 LOOKN:184 lookStr:185 parseLook:186 randLook:187 LOOKS:188 LOOKP:188 KITS:188 getKit:189 getLook:190 CREST_SH:191 CREST_PAT:192 starPts:197 CREST_ANI:199 crestSVG:205 houseColor:213 TEAMC:214 TEAMN:214 MODES:215 PDEF:226 EDEF:253 POOLS:265 CDK:275 BUFFS:276
+TEST_VIL:76 genTest:77 testProps:84 trZone:96 genGreatHall:97 MAPS:105 RANDOM_MAPS:117 MAPID:118 MW:118 MH:118 OBS:118 setMapVars:119
+§120 แผนที่จากไฟล์ (Blender → assets/maps/<id>.json + .glb, สคริปต์ assets…
+FMAPS:123 b64i16:124 regFileMap:125 loadMapData:137 loadAllMapData:145 mapReady:148 mapOkFor:149
+§150 ของประกอบฉากที่พังได้ / ใช้ได้ (prop)
+PROPDEF:154 PROP_OFF_MODES:161 PROP_USE:163 PROPS:164 PROPON:164 genProps:165
+§185 ตัวละคร: บ้านฮอกวอตส์ + หน้าตา
+HOUSES:187 HAIRC:192 HAIRSTY:194 WOODC:196 WOODN:197 WCOREC:198 WCOREN:199 WANDSTY:200 EYEC:201 SKINC:202 CLOAKC:203 TIESTY:204 LOOKK:205 LOOKN:205 lookStr:206 parseLook:207 randLook:208 LOOKS:209 LOOKP:209 KITS:209 getKit:210 getLook:211 CREST_SH:212 CREST_PAT:213 starPts:218 CREST_ANI:220 crestSVG:226 houseColor:234 TEAMC:235 TEAMN:235 MODES:236 PDEF:247 EDEF:274 POOLS:286 CDK:296 BUFFS:297
 
 ## js/03-spells-core.js (218) — 
 ICONS:8 ICOALIAS:9 hasIco:10 ICOBASE:12 icoURL:13 ICO:14 icoTint:15 icoHTML:24 PATHS:25 SPELL_LIST:33 SPELLS:33 defSpell:34 SLOTK:35 BRMAP:35 KITP:36 parseKit:37 cleanKit:53 setKit:54
@@ -83,7 +83,7 @@ MIND:66 summonMin:72 minTarget:81 minShoot:88 updateMins:93 aimTarget:133
 §180 ร่ายคาถา
 castSlot:181 castUlt:195
 
-## js/10-net.js (71) — เครือข่าย (PeerJS / WebRTC)
+## js/10-net.js (71) — 
 PREFIX:4 NET:5 LOBBY:6 genCode:7 sendAll:8 setStatus:9 hostGame:11 joinGame:34 clientOnData:59 leave:71
 
 ## js/11-host.js (325) — 
@@ -156,10 +156,10 @@ ANIM_ALT:48 makeAnimator:49 animResolve:54 animPlay:55 animTick:64 lookTint:82 t
 §148 VFX จากไฟล์ (รายละเอียดฝั่งคนทำอยู่ใน ASSETS.md)
 VFXL:154 FLIPL:154 FLIPS:154 prefetchFx:155 playVfx:156 vfxSeq:202 flipTex:207 playFlip:215 fileFx:230 zoneFx:237 clearVfx:238 updateVfx:239
 
-## js/23-props-bld-view.js (249) — prop ฝั่งแสดงผล
-PROPV:2 propFallback:4 syncProps:26
-§42 บ้านพังเป็นชิ้น ฝั่งแสดงผล
-BLDV:45 CHARM:45 DEBRIS:45 BLD_WALLC:46 _bldIce:47 _halfRoof:47 charMat:48 bldIceMat:52 halfRoofGeo:54 bldMats:62 bldFallback:67 bldFilePiece:103 bldHasChunks:111 bldFallbackChunks:113 bldRubble:121 bldBuild:126 syncBld:149 bldDebris:179 bldChunkFall:202 updateDebris:214 clearDebris:224 drawPropHint:225 syncWalls:233
+## js/23-props-bld-view.js (255) — prop ฝั่งแสดงผล
+PROPV:2 propFallback:4 syncProps:32
+§48 บ้านพังเป็นชิ้น ฝั่งแสดงผล
+BLDV:51 CHARM:51 DEBRIS:51 BLD_WALLC:52 _bldIce:53 _halfRoof:53 charMat:54 bldIceMat:58 halfRoofGeo:60 bldMats:68 bldFallback:73 bldFilePiece:109 bldHasChunks:117 bldFallbackChunks:119 bldRubble:127 bldBuild:132 syncBld:155 bldDebris:185 bldChunkFall:208 updateDebris:220 clearDebris:230 drawPropHint:231 syncWalls:239
 
 ## js/24-minions-view.js (68) — สัตว์เวท: โมเดลโปร่งแสง + ซิงก์จาก snapshot (MN)
 MM3:2 makeMinion:3 syncMins:36 drawMinBars:58
@@ -167,10 +167,10 @@ MM3:2 makeMinion:3 syncMins:36 drawMinBars:58
 ## js/25-efx.js (288) — efxFX: ภาพของ event "efx" ทุกคาถา (หนึ่ง case ต่อหนึ่งเอฟเฟกต์)
 efxFX:2
 
-## js/26-fx-events.js (239) — fx(ev): เอฟเฟกต์+เสียงของทุก event จากโฮสต์ • statusFX (สถานะบนตัว) •…
+## js/26-fx-events.js (240) — fx(ev): เอฟเฟกต์+เสียงของทุก event จากโฮสต์ • statusFX (สถานะบนตัว) •…
 statusFX:3 fx:27
-§192 overlay: เลือกบัฟ / สรุปผล
-choosePick:193 syncOverlays:198 showOver:220
+§193 overlay: เลือกบัฟ / สรุปผล
+choosePick:194 syncOverlays:199 showOver:221
 
 ## js/27-world.js (217) — 
 S3:4 tx:4 tz:4 GY:6 TW:6 hdr:7 gl:9 scene:15 cam:17 composer:18
@@ -181,7 +181,7 @@ QUAL:96 QUAL_NAME:97 qualPR:98 applyQuality:104 qualTick:121 texCanvas:132 glowT
 §191 เงาตามผู้เล่น
 SHD:195 _shF:196 _shR:196 _shU:196 _shC:196 _shY:196 shadowFollow:197 LPOOL:216
 
-## js/28-maps-build.js (672) — สร้างแผนที่
+## js/28-maps-build.js (681) — สร้างแผนที่
 CANDLESYS:2 builtMap:3 builtKey:3 world:3 TORCHES:3 CANDLES:3 FIREFLIES:3 CRYSTAL:3 RUNE:3 SNITCH:3 BANNERS:3 SNOW:3 WCACHE:5 WCACHE_MAX:5 wkey:7 buildWorld:8 addW:40 _prewarmed:42 prewarmShaders:43 batchStatic:61 makeCandles:86 updateCandles:95 buildCastle:104 buildHogsmeade:170 buildGreatHall:258 buildForest:328
 §425 ทุ่งหญ้าฮอกวอตส์ (เย็น)
 ringTrees:426 grassTex:435 buildMeadow:436
@@ -192,7 +192,7 @@ buildLake:456
 §479 บรรยากาศที่ใช้ร่วมกัน (แผนที่จากโค้ด + แผนที่จากไฟล์ผ่าน fx ใน MAP-DE…
 makeSnow:480 makeFireflies:487 makeSnitch:494 fileMapFx:501
 §511 แผนที่จากไฟล์ Blender (MAP-DESIGN.md)
-terrGeo:513 buildFileMap:521 buildTest:555 buildRuins:578 buildPitch:603
+terrGeo:513 buildFileMap:521 buildTest:555 buildRuins:587 buildPitch:612
 
 ## js/29-characters.js (373) — ระบบผ้า (เสื้อคลุมพลิ้วตามการเคลื่อนที่)
 makeCloak:2 updateCloth:10
@@ -366,4 +366,4 @@ earthEfx:122 earthMudZone:168 earthMudSink:171
 §172 HUD ใต้เป้าเล็ง
 drawEarthHud:173
 
-(48 files, 10597 lines)
+(48 files, 10634 lines)

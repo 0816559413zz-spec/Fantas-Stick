@@ -140,10 +140,50 @@ for i in range(26):                                            # เหรีย
 m.grid(g_sphere(0.09, 10, 8), trs3((0.25, CH + 0.1, -0.1)), pal, 7)                        # อัญมณีแดง
 o_chu = m.build('prop_chest_used')
 
+# ---------- ต้นไม้ที่พังได้ (ห้องฝึก): ต้นโอ๊ก / ต้นสน + ตอไม้กับลำต้นล้ม ----------
+TP = ['#5a3a1c', '#3d2614', '#4f8f3c', '#3d7a35', '#2f6a30', '#24572a', '#c9a26a', '#e8dcc0']   # 0 เปลือก 1 เปลือกเข้ม 2-5 ใบ 6 เนื้อไม้ 7 วงปี
+tpal = mat('tree_pal', img=palette('tree_pal', TP + ['#ffffff'] * (16 - len(TP)), noise={0: 0.15, 1: 0.12, 2: 0.1, 3: 0.1, 4: 0.1, 5: 0.1}), rough=0.9)
+
+
+def trunk(m, h, r0, r1, sw=0, tilt=None):
+    m.grid(g_cyl(r1, r0, h, 9, 3), trs3((0, h / 2, 0)), tpal, sw)
+
+
+def oak_crown(m, y, s=1.0, x0=0.0):
+    for k, (dx, dy, dz, r) in enumerate(((0, 0, 0, 1.7), (1.0, -0.4, 0.4, 1.1), (-0.9, -0.3, -0.5, 1.15), (0.2, 0.7, -0.9, 1.0), (-0.3, 0.5, 0.9, 1.05))):
+        m.grid(g_sphere(r * s, 10, 7), trs3((x0 + dx * s, y + dy * s, dz * s), scale=(1, 0.85, 1)), tpal, 2 + k % 3)
+
+
+def pine_crown(m, y, s=1.0):
+    for k, (yy, r, h) in enumerate(((0.0, 1.9, 2.6), (1.4, 1.5, 2.3), (2.7, 1.05, 2.0))):
+        m.grid(g_cyl(0.05, r * s, h * s, 8), trs3((0, y + (yy + h / 2) * s, 0)), tpal, 4 + k % 2)
+
+
+m = MB([tpal]); trunk(m, 3.4, 0.42, 0.3); oak_crown(m, 4.2)
+for a in (0.4, 2.5, 4.4):                                                              # รากโผล่
+    m.grid(g_cyl(0.02, 0.16, 0.9, 5), trs3((math.cos(a) * 0.45, 0.1, math.sin(a) * 0.45), rot=(0, -a, 1.25)), tpal, 1)
+o_tree = m.build('prop_tree')
+m = MB([tpal])
+m.grid(g_cyl(0.3, 0.42, 0.7, 9), trs3((0, 0.35, 0)), tpal, 0)
+m.grid(g_cyl(0.3, 0.3, 0.02, 9), trs3((0, 0.71, 0)), tpal, 7)                           # วงปีบนตอ
+for k in range(5):                                                                     # เสี้ยนไม้แตก
+    a = k / 5 * math.tau; m.grid(g_cyl(0.0, 0.08, 0.35, 4), trs3((math.cos(a) * 0.24, 0.85, math.sin(a) * 0.24)), tpal, 6)
+m.grid(g_cyl(0.28, 0.36, 2.8, 9, 2), trs3((2.1, 0.38, 0), rot=(0, 0, -math.pi / 2 + 0.06)), tpal, 0)   # ลำต้นล้มไปทาง +x
+oak_crown(m, 1.1, 0.8, x0=4.4)                                                         # พุ่มใบนอนอยู่ปลายลำต้น
+o_treeb = m.build('prop_tree_broken')
+m = MB([tpal]); trunk(m, 2.0, 0.34, 0.24, 1); pine_crown(m, 1.0, 1.2)
+o_pine = m.build('prop_pine')
+m = MB([tpal])
+m.grid(g_cyl(0.24, 0.34, 0.6, 8), trs3((0, 0.3, 0)), tpal, 1)
+m.grid(g_cyl(0.24, 0.24, 0.02, 8), trs3((0, 0.61, 0)), tpal, 7)
+m.grid(g_cyl(0.2, 0.3, 2.4, 8), trs3((1.6, 0.32, 0), rot=(0, 0, -math.pi / 2 + 0.05)), tpal, 1)
+for k, (x, r, h) in enumerate(((3.2, 1.6, 2.2), (4.6, 1.2, 2.0))):
+    m.grid(g_cyl(0.05, r, h, 8), trs3((x + h / 2, r * 0.75, 0), rot=(0, 0, -math.pi / 2)), tpal, 4 + k)
+o_pineb = m.build('prop_pine_broken')
 out = {}
-for o, f in ((o_bar, 'barrel'), (o_barb, 'barrel_broken'), (o_ch, 'chest'), (o_chu, 'chest_used')):
+for o, f in ((o_bar, 'barrel'), (o_barb, 'barrel_broken'), (o_ch, 'chest'), (o_chu, 'chest_used'), (o_tree, 'tree'), (o_treeb, 'tree_broken'), (o_pine, 'pine'), (o_pineb, 'pine_broken')):
     out[f] = (tris(o), export([o], 'assets/props/%s.glb' % f))
-for i, o in enumerate((o_bar, o_barb, o_ch, o_chu)):
-    o.location.x = (i - 1.5) * 2.4
+for i, o in enumerate((o_bar, o_barb, o_ch, o_chu, o_tree, o_treeb, o_pine, o_pineb)):
+    o.location.x = (i - 3.5) * 5
 save_blend('assets/src/props.blend')
 print('RESULT', out)
