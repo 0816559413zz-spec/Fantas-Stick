@@ -120,14 +120,27 @@ function frostFX(o,p,pz,now,dt){
     if(rpose){o.armL.rotation.x=lerp(-0.2,-1.6,o.grUp>0?1:0.5);o.armL.rotation.z=0.25;}
     if(melee&&!p.sh&&!(o.swT>0)&&!(o.grDown>0)&&!(flags&32)){o.armL.rotation.x=-0.45;o.armL.rotation.z=0.3;}}
   else o.b.rotation.y*=0.8;
-  // รอยฟันแบบริบบิ้น (trail กลาง): ระหว่างโคนใบ-ปลายใบ ทุกเฟรมที่กำลังฟัน
+  // รอยฟัน = ริบบิ้นติดใบดาบ/ขวาน ทุกเฟรมที่กำลังฟัน (ผู้ใช้ 2026-10-20: รอยต้องตามดาบ • ขวานต้องดูหนักและต่างจากดาบ ไม่ใช่แค่หนากว่า)
+  //   ดาบ = ปาดสว่างคม: ริบบิ้นขาว-ฟ้าตามใบ + คลื่นฟ้าจางยื่นเลยปลายใบ + ประกายจากปลาย
+  //   ขวาน = ปาดหนัก: ริบบิ้นน้ำเงินเข้ม + ทิ้งแนวผลึกน้ำแข็งตามทางที่หัวขวานผ่าน (ค้างแล้วร่วงแตก) + หมอกหนา + จบท่าแล้วพื้นร้าว/เศษน้ำแข็ง
   {const W=ff?o.axe:o.sword,sw=melee&&!p.fl&&W&&(o.swT>0||o.grDown>0);
-    if(sw){if(!o.wtr)o.wtr=trailNew({sweep:true,col:ff?'#e8f8ff':'#f0fbff',col2:'#2f86ff',life:ff?0.2:0.15,k:1.9});
-      W.updateWorldMatrix(true,false);_tv1.set(0,ff?-1.0:-0.3,0).applyMatrix4(W.matrixWorld);_tv2.set(0,ff?-2.05:-2.05,0).applyMatrix4(W.matrixWorld);
+    if(sw){if(!o.wtr){o.wtr=trailNew({sweep:true,col:ff?'#d8ecff':'#ffffff',col2:ff?'#1a52c8':'#54c2ff',life:ff?0.3:0.2,k:ff?1.3:1.7});
+        o.wtr2=trailNew({sweep:true,col:ff?'#5e9cff':'#a8e6ff',col2:ff?'#0b2f8a':'#2f86ff',life:ff?0.36:0.24,k:ff?0.9:1.0});o.wAx=!!ff;}
+      W.updateWorldMatrix(true,false);_tv1.set(0,ff?-1.0:-0.3,0).applyMatrix4(W.matrixWorld);_tv2.set(0,-2.05,0).applyMatrix4(W.matrixWorld);
       trailPoint(o.wtr,_tv1.x,_tv1.y,_tv1.z,_tv2.x,_tv2.y,_tv2.z);
-      // หมอกเย็นไหลตามปลายใบ (ขวานหนากว่า)
-      if(Math.random()<(ff?0.5:0.25)){const q=simOf(_tv2);mistPuff(q.x,q.y,Math.max(0.05,q.h-GY(q.x,q.y)-0.3),{vx:rnd(-20,20),vy:rnd(-20,20),vh:-0.2,size:ff?1.5:1,grow:0.5,life:rnd(0.5,0.8),a:ff?0.28:0.2});}}
-    else if(o.wtr){trailStop(o.wtr);o.wtr=null;}}
+      _tv3.set(0,ff?-1.5:-1.3,0).applyMatrix4(W.matrixWorld);_ev.set(0,ff?-2.75:-2.9,0).applyMatrix4(W.matrixWorld);
+      trailPoint(o.wtr2,_tv3.x,_tv3.y,_tv3.z,_ev.x,_ev.y,_ev.z,0.75);
+      const q=simOf(_tv2);o.wTip=[q.x,q.y];
+      if(ff){// แนวผลึกน้ำแข็งตามทางหัวขวาน
+        for(let i=0;i<2;i++){const c=rnd(0.07,0.13);iceBit(_cryG,q.x+rnd(-6,6),q.y+rnd(-6,6),Math.max(0.05,q.h-GY(q.x,q.y)+rnd(-0.25,0.25)),c,c*rnd(2,3.2),c,{life:rnd(0.45,0.7),up:0.03,down:0.3,rx:rnd(-1,1),rz:rnd(-1,1),v:[rnd(-25,25),rnd(-25,25),rnd(-1.5,0.3)],spin:rnd(-4,4)});}
+        if(Math.random()<0.6)mistPuff(q.x,q.y,Math.max(0.05,q.h-GY(q.x,q.y)-0.4),{vx:rnd(-25,25),vy:rnd(-25,25),vh:-0.3,size:1.8,grow:0.6,life:rnd(0.7,1),a:0.32});}
+      else{PARTS.push({x:q.x,y:q.y,h:q.h,vx:rnd(-40,40),vy:rnd(-40,40),vh:rnd(-0.5,1),life:0.25,max:0.25,col:Math.random()<0.5?'#ffffff':'#bfeaff',size:rnd(1.4,2.2),g:1});
+        if(Math.random()<0.25)mistPuff(q.x,q.y,Math.max(0.05,q.h-GY(q.x,q.y)-0.3),{vx:rnd(-20,20),vy:rnd(-20,20),vh:-0.2,size:1,grow:0.5,life:rnd(0.5,0.8),a:0.2});}}
+    else if(o.wtr){trailStop(o.wtr);trailStop(o.wtr2);o.wtr=o.wtr2=null;
+      if(o.wAx&&o.wTip){// ขวานจบท่า: พื้นตรงปลายทางร้าวเป็นน้ำแข็ง + เศษผลึกกระเด็น + ฝุ่นหิมะ
+        const [x,y]=o.wTip;dfCracks(x,y,0.06,70,'#bfeaff',1);iceChips(x,y,0.2,8,200,4);burst(x,y,'#eaf8ff',14,160,0.5,2.4,{h:0.3,vh:[1,4],g:6,c2:'#5ab8ff'});
+        SHAPES_Q.push({k:'decal',x,y,col:'#e8f6ff',s1:2.4,life:2,op:0.5});if(p.id===NET.myId)shake(2.5);}
+      o.wTip=null;}}
   // รอยเท้าผลึกบาง ๆ ใต้ทุกก้าว แล้วแตก/จางไป (ไม่ทิ้งทางยาวแบบไถล)
   if(!p.fl&&!(flags&1)&&pz<0.3){const st=Math.sin(o.walk||0)>0;if(o.stepS!==undefined&&st!==o.stepS){const L=o.legs[st?0:1];_ev.set(0,-0.82,0.05);L.localToWorld(_ev);const q=simOf(_ev);
       iceBit(_hexG,q.x,q.y,0.03,0.17,0.24,1,{rx:-Math.PI/2,mat:frostM(),life:0.9,up:0.04,down:0.5});PARTS.push({x:q.x,y:q.y,h:0.15,vx:rnd(-8,8),vy:rnd(-8,8),vh:0.3,life:0.6,max:0.6,col:'#eef8ff',size:3,g:0,smoke:true,grow:0.8});

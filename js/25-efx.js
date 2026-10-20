@@ -9,17 +9,12 @@ function efxFX(ev){
       const pts=[[x,y]];if(ev.m){const c=Math.cos(a),s=Math.sin(a);for(const k of [-1,1])pts.push([x+c*30-s*55*k,y+s*30+c*55*k]);}
       pts.forEach(([px,py],i)=>{
         if(big)return;
-        const tl=(ev.c===1?-0.25:0.25);
-        if(ev.ax){// ขวาน: รอยกว้างหนา 2 ชั้น + เศษผลึกเยอะ (หนักกว่าดาบชัด ๆ)
-          makeSlash(px,py,H+0.05,a,R*1.12,false,tl,'#3d8fe0',1,1.25,true);makeSlash(px,py,H+0.08,a,R*1.13,false,tl,'#7fc8ff',1.5,0.9);makeSlash(px,py,H+0.12,a,R*1.15,false,tl,'#ffffff',2,0.16);
-          if(!i){for(let j=0;j<7;j++){const an=a+rnd(-0.9,0.9),rr=R*rnd(0.7,1.1);iceChips(px+Math.cos(an)*rr,py+Math.sin(an)*rr,H,2,180,3);}
-            burst(px,py,'#eaf8ff',10,R*1.6,0.9,3,{h:H,vh:[0.5,2.5],g:2.4,sh:4,vr:5,c2:'#5ab8ff',a,spread:1});}}
-        else{// ดาบ: รอยแคบคม ขอบขาวสว่าง ตัวฟ้าเย็น
-          makeSlash(px,py,H+0.1,a,R,false,tl,'#4a9ef0',1,0.45,true);makeSlash(px,py,H+0.13,a,R*1.02,false,tl,'#ffffff',2.2,0.1);}
-        if(i)later(0.12,()=>makeSlash(px,py,H+0.25,a,R*0.92,false,-tl,'#9fe0ff',1.5,ev.ax?0.9:0.45));
+        // รอยฟันหลัก = ริบบิ้นติดใบดาบ/ขวาน (js/34-frost-view.js) — ไม่มีรอยโค้งนิ่งแล้ว (ผู้ใช้ 2026-10-20: "ต้องตามดาบ")
+        if(ev.ax&&!i){for(let j=0;j<7;j++){const an=a+rnd(-0.9,0.9),rr=R*rnd(0.7,1.1);iceChips(px+Math.cos(an)*rr,py+Math.sin(an)*rr,H,2,180,3);}
+          burst(px,py,'#eaf8ff',10,R*1.6,0.9,3,{h:H,vh:[0.5,2.5],g:2.4,sh:4,vr:5,c2:'#5ab8ff',a,spread:1});}
         // หมอกเย็นตามแนวฟัน
         if(!i)for(let j=0;j<(ev.ax?6:3);j++){const an=a+rnd(-1,1),rr=R*rnd(0.6,1);mistPuff(px+Math.cos(an)*rr,py+Math.sin(an)*rr,Math.max(0.1,H-0.6),{vx:-Math.sin(an)*60,vy:Math.cos(an)*60,vh:0.1,size:ev.ax?2.2:1.5,grow:0.5,life:rnd(0.9,1.4),a:ev.ax?0.4:0.3});}
-        for(let j=0;j<(i?8:22);j++){const an=a+rnd(-1.05,1.05),rr=R*rnd(0.55,1.05);PARTS.push({x:px+Math.cos(an)*rr,y:py+Math.sin(an)*rr,h:H+(big?rnd(-0.6,1.4):rnd(-0.3,0.5)),vx:Math.cos(an)*rnd(40,140),vy:Math.sin(an)*rnd(40,140),vh:rnd(-0.5,1.5),life:rnd(0.25,0.5),max:0.5,col:j%4===0?'#ffffff':j%4===1?'#e8f8ff':col,size:rnd(1.2,2.4),g:2.5,drag:2.5});}
+        for(let j=0;j<(i?5:ev.ax?14:10);j++){const an=a+rnd(-1.05,1.05),rr=R*rnd(0.55,1.05);PARTS.push({x:px+Math.cos(an)*rr,y:py+Math.sin(an)*rr,h:H+(big?rnd(-0.6,1.4):rnd(-0.3,0.5)),vx:Math.cos(an)*rnd(40,140),vy:Math.sin(an)*rnd(40,140),vh:rnd(-0.5,1.5),life:rnd(0.25,0.5),max:0.5,col:j%4===0?'#ffffff':j%4===1?'#e8f8ff':col,size:rnd(1.2,2.4),g:2.5,drag:2.5});}
       });
       if(near&&!big)snd('whoosh',{x,y,vol:0.5});break;}
     case 'iceboom':playFx('ice_impact',x,y,H,{s:ev.r/90,gh:Math.max(0.15,H-1)});smoke(x,y,H,6,'#e8f6ff',1.4,7,ev.r);if(H<1.5)iceBurst(x,y,ev.r*S3*0.85,{life:0.9,hy:0.8});else glacierMist(x,y,ev.r*0.6,8,{h:H-0.5,out:1.5});if(near)snd('break',ev);break;
@@ -147,7 +142,12 @@ function efxFX(ev){
     case 'sclaw':{const a=ev.a,emp=ev.n===3,big=ev.n>=2,c=Math.cos(a),sn=Math.sin(a);
       // รอยกรงเล็บตั้งขวางหน้าเรา: ท่า 1 ปาดเฉียงลงขวา / ท่า 2 ปาดเฉียงลงซ้าย / ท่า 3 ฟาดลงจากบน / เสริม = รอยใหญ่ 3 เส้นขนาน + ประกายพุ่งไปถึงระยะ 280
       const rot=emp?-0.75:ev.n===0?-0.6:ev.n===1?0.6:-1.45,D=emp?135:105;
-      clawRakes(x+c*D,y+sn*D,H+0.55,a,emp?3.3:big?2.7:2.3,rot,emp||big);
+      // รอยกรงเล็บ = ริบบิ้นตามปลายใบมีด 3 เล่มระหว่างแขนปาด (stormClawSwipe ใน js/20) • ไม่มีโมเดล = รอยนิ่งแบบเดิม
+      {const o=PM3.get(ev.id);if(o&&o.claws)o.clSw={t:0,n:ev.n,dur:emp?0.3:ev.n===2?0.24:0.2,tr:null};else clawRakes(x+c*D,y+sn*D,H+0.55,a,emp?3.3:big?2.7:2.3,rot,emp||big);}
+      if(emp){// เสริมหลัง Dash: รอยปาดกว้างเหลืองสว่าง + สายฟ้าเยอะตามแนวรอย
+        later(0.12,()=>{makeSlash(x,y,H-0.2,a,170,false,0,'#ffd23a',1.5,0.55);makeSlash(x,y,H-0.15,a,176,false,0,'#fff6c8',1.8,0.12);
+          for(let i=0;i<9;i++){const an=a+(i/8-0.5)*2.1,an2=an+rnd(0.12,0.3);tbolt(x+Math.cos(an)*160,y+Math.sin(an)*160,H+rnd(-0.6,0.6),x+Math.cos(an2)*rnd(140,200),y+Math.sin(an2)*rnd(140,200),H+rnd(-0.8,0.6),0.16,0,0.09,2);}
+          FX.flashLight(x+c*120,y+sn*120,H,'#ffd23a',5,18,0.25);});}
       if(emp){for(let i=0;i<3;i++){const off=(i-1)*24;for(let j=0;j<8;j++){const f=110+j*22;PARTS.push({x:x+c*f-sn*off,y:y+sn*f+c*off,h:H+0.6-j*0.12,vx:c*200,vy:sn*200,vh:0,life:0.18+j*0.015,max:0.3,col:j%2?'#ffd000':'#ffffff',size:2.4,g:0});}}
         FX.flashSprite(x+c*95,y+sn*95,H,'#fff7b0',0.4,3,0.12,2.2);burst(x+c*230,y+sn*230,'#ffd000',16,240,0.3,2.2,{h:H,g:3});burst(x+c*230,y+sn*230,'#9fd8ff',8,200,0.3,1.8,{h:H,g:3});}
       for(let i=0;i<(big?6:3);i++){const an=a+rnd(-0.5,0.5),d=rnd(D-20,D+40);burst(x+Math.cos(an)*d,y+Math.sin(an)*d,i%2?'#ffd000':'#ffffff',4,160,0.25,2,{h:H,g:3});}
