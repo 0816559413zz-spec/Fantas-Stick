@@ -467,6 +467,7 @@ function stTryGame(){if(!ST.name){stToast('บันทึกไฟล์ก่�
 function stHelp(){if(document.querySelector('#st .stModal.help'))return;const m=h('div',{className:'stModal help',on:{click:e=>{if(e.target===m)m.remove();}}});
   const K=(...ks)=>h('span',null,...ks.flatMap((k,i)=>i?[' ',h('kbd',null,k)]:[h('kbd',null,k)])),row=(t,...ks)=>h('div',null,h('span',null,t),K(...ks));
   m.append(h('div',{className:'box',style:'max-width:760px'},h('div',{style:'display:flex;justify-content:space-between;align-items:center;gap:8px'},h('h3',null,'วิธีใช้ VFX Studio'),h('button',{on:{click:()=>m.remove()}},'ปิด (Esc)')),
+    h('p',{style:'margin:0'},h('a',{href:'manual/index.html',target:'_blank',style:'color:var(--acc2);font-size:14px'},'📖 เปิดคู่มือแบบมีรูป (ภาษาไทย)')),
     h('div',{style:'display:grid;gap:5px;font-size:12.5px;color:var(--tx2)'},...[
       '1. เลือกเอฟเฟกต์ทางซ้าย หรือกด ＋ ใหม่ เพื่อเริ่มจากแม่แบบ',
       '2. ไทม์ไลน์ด้านล่าง: แต่ละแถว = 1 ชั้น • ลากแถบสี = เลื่อนเวลาเริ่ม • ลากขอบขวา = ยืดอายุ • ลาก ⋮⋮ = เรียงลำดับ • คลิกขวา = เมนู',

@@ -25,7 +25,7 @@ async function mkInit(){
   const cv=gl.domElement;
   cv.addEventListener('pointerdown',e=>{MK.m.down={x:e.clientX,y:e.clientY};});
   cv.addEventListener('pointerup',e=>{const D=MK.m.down;MK.m.down=null;if(MK.ws!=='mesh'||!D||MK.m.drag||Math.hypot(e.clientX-D.x,e.clientY-D.y)>5||mkGizmoHot())return;mkPick(e);});
-  await mkRefresh();stLintRun();
+  await mkRefresh();stLintRun();if(ST.fx)stInspRender();   // วาดช่องตรวจใหม่หลังรู้รายชื่อโมเดล/ภาพ (ไม่งั้นขึ้น ✗ ปลอม)
   if(SQ.has('mesh')){await mkWs('mesh');await mkMeshOpen(SQ.get('mesh'));}
   else if(SQ.has('vol')){await mkWs('vol');await mkVolOpen(SQ.get('vol'));}
   else if(SQ.has('tex')||SQ.has('bakeall')){await mkWs('tex');if(SQ.has('tex'))await mkTexOpen(SQ.get('tex'));
@@ -434,7 +434,7 @@ function mkKey(e,typing){const c=e.ctrlKey||e.metaKey,M=MK.m,T=MK.t;
     else if(e.code==='KeyH'&&M.sel){const P=M.d.parts.find(p=>p.id===M.sel);if(P){mkMPush();if(P.off)delete P.off;else P.off=true;mkMChanged(false);mkMeshBotRows();}}
     else if(e.code==='KeyW'){M.wireOn=!M.wireOn;if(M.wire)M.wire.visible=M.wireOn;mkMeshBot();}}
   else if(MK.ws==='tex'){if(e.code==='Space'){e.preventDefault();T.play=!T.play;mkTexBot();}else if(e.code==='Digit1')mkTexView('2d');else if(e.code==='Digit2')mkTexView('3d');}}
-function mkHelp(){const m=h('div',{className:'stModal',on:{click:e=>{if(e.target===m)m.remove();}}});m.append(h('div',{className:'box',style:'max-width:680px'},h('h3',null,'วิธีใช้ — สร้าง asset ของเอฟเฟกต์'),
+function mkHelp(){const m=h('div',{className:'stModal',on:{click:e=>{if(e.target===m)m.remove();}}});m.append(h('div',{className:'box',style:'max-width:680px'},h('h3',null,'วิธีใช้ — สร้าง asset ของเอฟเฟกต์'),h('p',{style:'margin:0 0 8px'},h('a',{href:'manual/index.html#'+(MK.ws==='mesh'?'mesh':MK.ws==='tex'?'tex':'vol'),target:'_blank',style:'color:var(--gold2);font-size:15px'},'📖 เปิดคู่มือแบบมีรูป (ภาษาไทย)')),
   h('div',{style:'display:grid;gap:6px;font-size:13px'},...[
     '🧊 โมเดล: ＋ ชิ้นส่วน = เลือกแบบ (หนามผลึก มงกุฎหนาม กลุ่มผลึก เม่น ใบฟัน ปีก เกลียว ท่อ ริบบิ้น โดม …) แล้วปรับแถบเลื่อนทางขวา — ไม่ต้องจับทีละจุดแบบ Blender',
     'คลิกชิ้นบนจอ = เลือก • ลากลูกศร: G ย้าย / R หมุน / S ขนาด • ตัวแต่ง: เรียว บิด โค้ง ขรุขระ • ทำซ้ำเป็นวง/แถว • กระจกซ้าย-ขวา • Delete ลบ • Ctrl+D ทำซ้ำ • H ซ่อน • W โครงลวด',

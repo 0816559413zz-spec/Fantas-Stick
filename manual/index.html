@@ -1,0 +1,454 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>คู่มือ VFX Studio</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Mitr:wght@400;500;600&family=Sarabun:wght@400;600&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* คู่มือ VFX Studio (ภาษาไทย) • รูปทั้งหมดอยู่ใน manual/img • ตัวเลขบนรูปมาจาก MARKS ด้านล่าง (ถ่ายด้วย Chrome headless ที่ 1760×1000) */
+:root{
+  --bg:#070a14;--panel:#0d1428;--panel2:#121b34;--line:rgba(217,180,90,.22);--line2:rgba(217,180,90,.5);
+  --fg:#ece4cf;--mute:#a59f90;--gold:#d9b45a;--gold2:#f3dc94;--ok:#7fd9a0;--bad:#ff7a6a;--ice:#8fd8ff;--fire:#ff9a4a;
+  --mark:#ffd84a;--markInk:#1a1203;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.65 'Sarabun',system-ui,sans-serif;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:1180px;margin:0 auto;padding-block:28px 80px}
+h1,h2,h3{font-family:'Mitr','Sarabun',sans-serif;font-weight:500;line-height:1.3;text-wrap:balance;margin:0}
+h1{font-size:clamp(28px,5vw,44px);color:var(--gold2)}
+h2{font-size:clamp(22px,3.4vw,30px);color:var(--gold2);display:flex;align-items:center;gap:12px}
+h2 .no{flex:none;width:40px;height:40px;border-radius:50%;background:var(--gold);color:var(--markInk);display:grid;place-items:center;font:600 20px 'Sarabun',sans-serif}
+h3{font-size:19px;color:var(--fg)}
+p{margin:0}
+a{color:var(--gold2)}
+kbd,.k{font:500 13px 'JetBrains Mono',monospace;background:var(--panel2);border:1px solid var(--line2);border-bottom-width:2px;border-radius:5px;padding:1px 7px;color:var(--gold2);white-space:nowrap}
+.mute{color:var(--mute)}
+.hero{display:grid;gap:14px;padding-bottom:22px;border-bottom:1px solid var(--line)}
+.hero .tag{font:500 12px 'JetBrains Mono',monospace;letter-spacing:.14em;text-transform:uppercase;color:var(--gold)}
+.hero p{max-width:62ch;font-size:18px}
+.toc{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+.toc a{text-decoration:none;color:var(--fg);background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:5px 13px;font-size:14px}
+.toc a:hover{border-color:var(--gold)}
+section{padding-top:46px;display:grid;gap:16px;scroll-margin-top:10px}
+section > p{max-width:70ch}
+.tip{background:var(--panel);border-left:4px solid var(--gold);border-radius:4px;padding:10px 14px;max-width:80ch}
+.tip.warn{border-left-color:var(--bad)}
+.tip.ok{border-left-color:var(--ok)}
+
+/* รูป + ตัวเลข */
+.shotbox{display:grid;gap:14px}
+.shotbox.side{grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:start}
+.shotbox.side.narrow{grid-template-columns:minmax(0,360px) minmax(0,1fr)}
+figure{margin:0;position:relative;border:1px solid var(--line2);border-radius:8px;overflow:hidden;background:#000;line-height:0}
+figure img{width:100%;height:auto;display:block}
+figure .zoom{position:absolute;right:8px;bottom:8px;z-index:3;font:500 13px 'Mitr',sans-serif;line-height:1;background:rgba(7,10,20,.82);color:var(--gold2);border:1px solid var(--line2);border-radius:6px;padding:7px 10px;cursor:pointer}
+.ov{position:absolute;inset:0;pointer-events:none}
+.mk{position:absolute;border:2px solid var(--mark);border-radius:5px;box-shadow:0 0 0 1px rgba(0,0,0,.6);opacity:.85;transition:opacity .15s,box-shadow .15s}
+.mk.c{border-style:dashed;border-width:2px;opacity:.6}
+.ov.dim .mk{opacity:.12}
+.ov .mk.on{opacity:1;box-shadow:0 0 0 3px rgba(255,216,74,.35),0 0 0 9999px rgba(0,0,0,.45);border-style:solid;z-index:2}
+.bd{position:absolute;pointer-events:auto;cursor:pointer;width:26px;height:26px;margin:-13px 0 0 -13px;border-radius:50%;background:var(--mark);color:var(--markInk);
+  font:600 15px/26px 'Mitr',sans-serif;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,.7),0 0 0 2px rgba(0,0,0,.55);z-index:2}
+.bd.on{transform:scale(1.25)}
+figure.big{position:fixed;inset:0;z-index:50;border-radius:0;border:0;overflow:auto;background:rgba(3,5,10,.96);line-height:0;
+  padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px)}
+figure.big .inner{position:relative;width:max(100%,1300px)}
+figure.big .zoom{position:fixed;top:calc(12px + env(safe-area-inset-top,0px));right:calc(12px + env(safe-area-inset-right,0px));bottom:auto;font-size:15px}
+figure .inner{position:relative}
+.small figure .inner{width:100%}
+figure.big.small-src .inner{width:min(100%,900px);margin:auto}
+
+ol.lg{list-style:none;margin:0;padding:0;display:grid;gap:6px;counter-reset:n}
+ol.lg.cols{grid-template-columns:repeat(auto-fill,minmax(min(100%,330px),1fr))}
+ol.lg li{display:grid;grid-template-columns:30px minmax(0,1fr);gap:10px;align-items:start;background:var(--panel);border:1px solid var(--line);border-radius:7px;padding:9px 11px;cursor:pointer;transition:border-color .15s,background .15s}
+ol.lg li::before{content:attr(data-n);width:28px;height:28px;border-radius:50%;background:var(--mark);color:var(--markInk);font:600 15px/28px 'Mitr',sans-serif;text-align:center}
+ol.lg li.on{border-color:var(--mark);background:var(--panel2)}
+ol.lg li b{font-family:'Mitr',sans-serif;font-weight:500;color:var(--gold2)}
+ol.lg li span{display:block}
+
+.steps{counter-reset:s;display:grid;gap:8px;margin:0;padding:0;list-style:none}
+.steps li{counter-increment:s;display:grid;grid-template-columns:34px minmax(0,1fr);gap:10px;align-items:start}
+.steps li::before{content:counter(s);width:30px;height:30px;border-radius:8px;background:var(--panel2);border:1px solid var(--gold);color:var(--gold2);display:grid;place-items:center;font:500 15px 'Mitr',sans-serif}
+.recipes{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,340px),1fr));gap:12px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px;display:grid;gap:10px;align-content:start}
+.card h3{display:flex;gap:8px;align-items:center}
+.card .em{font-size:24px;line-height:1}
+
+/* ภาพจำลองไฟล์ .bat */
+.start{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:14px}
+.win{background:#f3f3f3;color:#1b1b1b;border-radius:8px;overflow:hidden;border:1px solid #888;font:14px 'Sarabun',sans-serif;line-height:1.4}
+.win .bar{background:#dfe3ea;padding:6px 10px;font-size:13px;color:#333;display:flex;gap:8px;align-items:center}
+.win .bar i{width:10px;height:10px;border-radius:50%;background:#c9ced8;display:inline-block}
+.win .files{padding:10px;display:grid;gap:3px}
+.win .f{display:flex;align-items:center;gap:8px;padding:4px 8px;border-radius:4px}
+.win .f .ic{width:20px;height:20px;border-radius:3px;background:#f2c94c;flex:none}
+.win .f .ic.doc{background:#fff;border:1px solid #aaa}
+.win .f .ic.gear{background:#3a3f4b;position:relative}
+.win .f .ic.gear::after{content:'';position:absolute;inset:5px;border-radius:50%;border:2px solid #e8e8e8}
+.win .f.hl{background:#cfe6ff;outline:2px solid #2a7bd6;position:relative}
+.win .f.hl::after{content:'ดับเบิลคลิก!';position:absolute;right:8px;font:600 12px 'Mitr',sans-serif;color:#fff;background:#d43;padding:2px 8px;border-radius:999px}
+.con{background:#0c0c0c;color:#d9d9d9;border-radius:8px;border:1px solid #555;overflow:hidden;font:13px/1.6 'JetBrains Mono',monospace}
+.con .bar{background:#222;color:#bbb;padding:6px 10px;font:13px 'Sarabun',sans-serif}
+.con pre{margin:0;padding:12px;white-space:pre-wrap;word-break:break-word}
+.con .note{font:600 13px 'Mitr',sans-serif;color:#ffcc66;padding:0 12px 12px}
+
+table{border-collapse:collapse;width:100%;font-size:15px}
+.tbl{overflow-x:auto;border:1px solid var(--line);border-radius:8px}
+th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font:500 14px 'Mitr',sans-serif;color:var(--gold);background:var(--panel)}
+tr:last-child td{border-bottom:0}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chips span{background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:3px 9px;font-size:14px}
+footer{margin-top:60px;padding-top:18px;border-top:1px solid var(--line);color:var(--mute);font-size:14px}
+@media (max-width:820px){
+  .shotbox.side,.shotbox.side.narrow{grid-template-columns:minmax(0,1fr)}
+  .bd{width:22px;height:22px;margin:-11px 0 0 -11px;font-size:13px;line-height:22px}
+  body{font-size:15.5px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="hero">
+  <div class="tag">Fantas Stick · VFX Studio</div>
+  <h1>คู่มือ VFX Studio แบบดูรูปแล้วทำตาม</h1>
+  <p>โปรแกรมทำเอฟเฟกต์เวทมนตร์ของเกม ดูรูป หาเลขสีเหลือง แล้วอ่านคำอธิบายเลขเดียวกันข้างล่าง <b>แตะเลข</b> หรือ <b>แตะข้อความ</b> เพื่อไฮไลต์จุดนั้นบนรูป ส่วนปุ่ม <b>🔍 ขยาย</b> ใช้ดูรูปเต็มจอ</p>
+  <nav class="toc" aria-label="สารบัญ">
+    <a href="#open">0 · เปิดโปรแกรม</a><a href="#main">1 · หน้าจอหลัก</a><a href="#play">2 · เล่น / ไทม์ไลน์</a><a href="#edit">3 · ปรับค่า</a>
+    <a href="#add">4 · เพิ่มชั้น</a><a href="#new">5 · ทำเอฟเฟกต์ใหม่</a><a href="#save">6 · บันทึก + ใส่ในเกม</a>
+    <a href="#mesh">7 · 🧊 ปั้นโมเดล</a><a href="#tex">8 · 🎞 ทำภาพ</a><a href="#vol">9 · 🔥 ไฟ 3D</a>
+    <a href="#recipes">10 · สูตรลัด</a><a href="#keys">11 · ปุ่มลัด</a><a href="#help">12 · มีปัญหา?</a>
+  </nav>
+</header>
+
+<!-- 0 -->
+<section id="open">
+  <h2><span class="no">0</span>เปิดโปรแกรม</h2>
+  <div class="start">
+    <div class="win" role="img" aria-label="โฟลเดอร์เกม มีไฟล์ VFX Studio.bat">
+      <div class="bar"><i></i><i></i><i></i>&nbsp; D:\Fantas-Stick</div>
+      <div class="files">
+        <div class="f"><span class="ic"></span>assets</div>
+        <div class="f"><span class="ic"></span>studio</div>
+        <div class="f"><span class="ic"></span>tools</div>
+        <div class="f"><span class="ic doc"></span>index.html</div>
+        <div class="f"><span class="ic doc"></span>studio.html</div>
+        <div class="f hl"><span class="ic gear"></span>VFX Studio.bat</div>
+      </div>
+    </div>
+    <div class="con" role="img" aria-label="หน้าต่างดำของเซิร์ฟเวอร์">
+      <div class="bar">VFX Studio - Fantas Stick</div>
+      <pre>VFX Studio: http://localhost:8765/studio.html
+เกม:       http://localhost:8765/
+ปิดหน้าต่างนี้เมื่อเลิกใช้</pre>
+      <div class="note">⚠ หน้าต่างดำนี้ต้องเปิดค้างไว้ตลอด ถ้าปิด = บันทึกงานไม่ได้</div>
+    </div>
+  </div>
+  <ol class="steps">
+    <li><span>เปิดโฟลเดอร์เกม แล้ว<b>ดับเบิลคลิก</b>ไฟล์ <span class="k">VFX Studio.bat</span></span></li>
+    <li><span>จะมีหน้าต่างดำขึ้นมา ปล่อยเปิดไว้ (ย่อเก็บได้)</span></li>
+    <li><span>เบราว์เซอร์จะเปิดหน้า VFX Studio ให้เอง ถ้าไม่เปิด ให้พิมพ์ <span class="k">localhost:8765/studio.html</span> ในช่องที่อยู่เว็บ</span></li>
+  </ol>
+  <p class="tip warn">อย่าเปิด <span class="k">studio.html</span> โดยดับเบิลคลิกตรง ๆ เพราะจะดูได้อย่างเดียวแต่<b>บันทึกไม่ได้</b> ให้เปิดผ่าน <span class="k">VFX Studio.bat</span> ทุกครั้ง ถ้าขึ้นว่าไม่พบ Python ให้ติดตั้งจาก python.org และติ๊ก “Add python.exe to PATH”</p>
+</section>
+
+<!-- 1 -->
+<section id="main">
+  <h2><span class="no">1</span>หน้าจอหลัก (แท็บ ✨ เอฟเฟกต์)</h2>
+  <p>เอฟเฟกต์ 1 ไฟล์ประกอบจากหลาย<b>ชั้น</b> (เช่น แสงวาบ + หนามน้ำแข็ง + ประกาย + เสียง) แต่ละชั้นเล่นตามเวลาบนไทม์ไลน์ ภาพในจอตรงกลางคือ<b>ของจริงในเกม</b> ไม่ใช่ภาพจำลอง</p>
+  <div class="shotbox">
+    <figure data-k="fx_main"><div class="inner"><img src="img/fx_main.jpg" alt="หน้าจอหลักของ VFX Studio แท็บเอฟเฟกต์" width="1760" height="1000"></div></figure>
+    <ol class="lg cols" data-k="fx_main">
+      <li data-n="1"><span><b>4 แท็บ</b>: ✨ เอฟเฟกต์ (ประกอบเอฟเฟกต์) · 🧊 โมเดล (ปั้นรูปทรง 3D) · 🎞 ภาพ (วาดภาพเคลื่อนไหว) · 🔥 ไฟ 3D (จำลองไฟจริง)</span></li>
+      <li data-n="2"><span><b>ไฟล์</b>: ＋ ใหม่ · 💾 บันทึก <kbd>Ctrl+S</kbd> · บันทึกเป็น… (ตั้งชื่อใหม่) · ↶ ย้อน <kbd>Ctrl+Z</kbd> · ↷ ทำซ้ำ <kbd>Ctrl+Y</kbd></span></li>
+      <li data-n="3"><span><b>ตั้งค่าฉาก</b>: ธาตุ (เปลี่ยนชุดสีทั้งเอฟเฟกต์) · ความแรง · แผนที่ (ลองฉากสว่างและฉากมืด) · จุดเล่น (ใกล้/ไกล) · กราฟิก</span></li>
+      <li data-n="4"><span><b>ตรวจงาน</b>: 🖼 แผ่นภาพ (ถ่ายหลายจังหวะไว้ในรูปเดียว) · 📷 ถ่ายรูป · 🎮 ลองในเกม (เปิดเกมจริงแล้วกดท่าดู)</span></li>
+      <li data-n="5"><span><b>คลังเอฟเฟกต์</b>: คลิกชื่อเพื่อเปิด หมวด <b>START</b> คือแม่แบบสำหรับเริ่มงาน</span></li>
+      <li data-n="6"><span><b>จอดูผล</b>: <b>ลากเมาส์</b> = หมุนกล้อง · <b>ล้อเมาส์</b> = ซูม</span></li>
+      <li data-n="7"><span><b>มุมกล้อง</b>: กล้องเกม · ข้าง · หน้า · บน · หมุนเอง</span></li>
+      <li data-n="8"><span><b>ปุ่มเล่น</b>: เล่น/หยุด ความเร็ว และเพิ่มชั้น (ดูข้อ 2)</span></li>
+      <li data-n="9"><span><b>ไทม์ไลน์</b>: 1 แถว = 1 ชั้น แถบสียาวแค่ไหน = ชั้นนั้นเล่นนานแค่นั้น</span></li>
+      <li data-n="10"><span><b>ช่องปรับค่า</b>: ค่าของชั้นที่เลือกอยู่ ถ้ากด “⚙ ตั้งค่าไฟล์” จะเป็นค่าของทั้งไฟล์</span></li>
+      <li data-n="11"><span><b>ตัวเลขสุขภาพ</b>: อนุภาค · ขาวจ้า % (จอสว่างจนขาวไหม) · บังตัว % (บังตัวละครไหม) · draw · ms ถ้าเป็นสีเขียวแปลว่าดี</span></li>
+    </ol>
+  </div>
+</section>
+
+<!-- 2 -->
+<section id="play">
+  <h2><span class="no">2</span>เล่นดู + ไทม์ไลน์</h2>
+  <div class="shotbox">
+    <figure data-k="fx_timeline" class="small-src"><div class="inner"><img src="img/fx_timeline.jpg" alt="แถบปุ่มเล่นและไทม์ไลน์" width="1000" height="230"></div></figure>
+    <ol class="lg cols" data-k="fx_timeline">
+      <li data-n="1"><span><b>▶ / ⏸</b> เล่นหรือหยุด <kbd>Space</kbd></span></li>
+      <li data-n="2"><span><b>⟲</b> เล่นใหม่ตั้งแต่ต้น <kbd>R</kbd></span></li>
+      <li data-n="3"><span><b>ความเร็ว</b>: 0.1× = ช้ามาก (ใช้ดูรายละเอียด) … 1× = ปกติ</span></li>
+      <li data-n="4"><span><b>🔁 วนซ้ำ</b>: เล่นจบแล้วเริ่มใหม่เอง</span></li>
+      <li data-n="5"><span><b>เวลา</b>: ตอนนี้อยู่วินาทีที่เท่าไร / ยาวทั้งหมดกี่วินาที กด <kbd>←</kbd> <kbd>→</kbd> เพื่อเลื่อนทีละนิด</span></li>
+      <li data-n="6"><span><b>＋ ชั้น</b>: เพิ่มชิ้นส่วนเอฟเฟกต์ (ดูข้อ 4)</span></li>
+      <li data-n="7"><span><b>👁</b> ซ่อนหรือแสดงชั้นนี้</span></li>
+      <li data-n="8"><span><b>S</b> ดูชั้นนี้ชั้นเดียว (ชั้นอื่นหายไปชั่วคราว)</span></li>
+      <li data-n="9"><span><b>↑ ↓</b> เลื่อนลำดับ · <b>⧉</b> ก๊อปปี้ · <b>✕</b> ลบ <kbd>Delete</kbd></span></li>
+      <li data-n="10"><span><b>แถบสี</b>: คลิกเพื่อเลือกชั้น · <b>ลากทั้งแถบ</b> = เลื่อนให้เริ่มเร็วหรือช้าลง · <b>ลากขอบขวา</b> = ยืดหรือหดเวลา</span></li>
+      <li data-n="11"><span><b>ไม้บรรทัดเวลา</b>: คลิกหรือลาก = กระโดดไปเวลานั้น เส้นทองคือเวลาปัจจุบัน</span></li>
+    </ol>
+  </div>
+</section>
+
+<!-- 3 -->
+<section id="edit">
+  <h2><span class="no">3</span>ปรับค่าของชั้น (สี ขนาด รูปทรง)</h2>
+  <p>คลิกชั้นในไทม์ไลน์ ช่องขวามือจะแสดงค่าของชั้นนั้น เปลี่ยนแล้วจอจะเปลี่ยนตามทันที ปุ่ม <b>↺</b> ข้าง ๆ แต่ละช่องใช้คืนค่าเดิม</p>
+  <div class="shotbox side narrow">
+    <figure data-k="fx_insp"><div class="inner"><img src="img/fx_insp.jpg" alt="ช่องปรับค่าของชั้น crown" width="330" height="700"></div></figure>
+    <div style="display:grid;gap:14px;align-content:start">
+      <ol class="lg" data-k="fx_insp">
+        <li data-n="1"><span><b>รูปทรง</b>: กดเลือกรูปได้เลย เช่น ลูกกลม โดม วงแหวน กรวย หนาม ลำแสง ส่วน <b>model</b> = โมเดลที่ปั้นเองในแท็บ 🧊</span></li>
+        <li data-n="2"><span><b>ชื่อโมเดล</b> (เมื่อเลือก model) พิมพ์ชื่อหรือเลือกจากรายการ</span></li>
+        <li data-n="3"><span><b>วัสดุ</b> = เนื้อของสิ่งนั้น: ice (น้ำแข็ง) · fire (ไฟ) · energy (พลังงาน) · tex (ใช้ภาพจากแท็บ 🎞) ฯลฯ</span></li>
+        <li data-n="4"><span><b>สี</b>: กดจุดสีสำเร็จรูป หรือกดช่องสียาวเพื่อเลือกสีเอง</span></li>
+        <li data-n="5"><span><b>ขนาด</b>: ใส่ตัวเลข (หน่วยเมตร) หรือใช้ <b>เส้นโค้ง</b> เพื่อให้ขนาดเปลี่ยนไปตามเวลา</span></li>
+      </ol>
+      <figure data-k="fx_curve" class="small-src"><div class="inner"><img src="img/fx_curve.jpg" alt="ตัวแก้เส้นโค้ง" width="409" height="231"></div></figure>
+      <ol class="lg" data-k="fx_curve">
+        <li data-n="1"><span><b>เส้นโค้ง</b>: แกนซ้าย→ขวา = เวลา แกนล่าง→บน = ค่า · <b>ลากจุด</b> ได้ · <b>ดับเบิลคลิก</b> = เพิ่มจุด · <b>คลิกขวา</b> = ลบจุด</span></li>
+        <li data-n="2"><span><b>ความนุ่มของเส้น</b>: linear (ตรง) · in (เริ่มช้า) · out (จบช้า) · inout · step (กระโดด)</span></li>
+      </ol>
+    </div>
+  </div>
+  <p class="tip">ตัวเลื่อนทุกอันลากได้ หรือจะพิมพ์ตัวเลขลงในช่องข้าง ๆ ก็ได้ ชื่อภาษาอังกฤษตัวเล็กมุมขวา (เช่น <span class="k">scale</span>) คือชื่อจริงในไฟล์ ใช้ตอนบอก Claude ว่าจะให้แก้ช่องไหน</p>
+</section>
+
+<!-- 4 -->
+<section id="add">
+  <h2><span class="no">4</span>เพิ่มชั้นใหม่ (＋ ชั้น)</h2>
+  <div class="shotbox side narrow">
+    <figure data-k="fx_add" class="small-src"><div class="inner"><img src="img/fx_add.jpg" alt="เมนูเพิ่มชั้น" width="360" height="342"></div></figure>
+    <div class="tbl"><table>
+      <thead><tr><th>อยากได้…</th><th>เลือกชั้น</th></tr></thead>
+      <tbody>
+        <tr><td>แสงวาบตอนกระทบ</td><td>✦ แฟลชแกน · ☀ ไฟจุด</td></tr>
+        <tr><td>วงคลื่นกระจายออก</td><td>◯ วงกระแทก · ≋ อากาศบิดเบี้ยว</td></tr>
+        <tr><td>ประกาย ฝุ่น ควัน เศษหิน</td><td>⁂ ตัวปล่อยอนุภาค · • ชิ้นส่วนกระเด็น · ☁ หมอกต่ำ</td></tr>
+        <tr><td>ลูกบอล โดม หนาม โมเดล 3D</td><td>⬢ รูปทรง 3D · ♛ มงกุฎหนามน้ำแข็ง</td></tr>
+        <tr><td>ไฟลุกสมจริง</td><td>🔥 ไฟ 3 มิติจริง · 🔥 ไฟ 3 มิติจากการจำลอง</td></tr>
+        <tr><td>สายฟ้า</td><td>ϟ สายฟ้า</td></tr>
+        <tr><td>หางแสงตามอาวุธ</td><td>〰 หางแสง / รอยฟัน</td></tr>
+        <tr><td>วงเวทบนพื้น · เสาไฟพุ่ง</td><td>▦ ลายบนพื้น · ⇧ เสาไฟพุ่ง</td></tr>
+        <tr><td>จอสั่น · จอแดง</td><td>▣ เอฟเฟกต์ทั้งจอ</td></tr>
+        <tr><td>เสียง</td><td>♪ เสียง</td></tr>
+        <tr><td>ใช้เอฟเฟกต์อื่นซ้อนเข้ามา</td><td>⧉ ใส่เอฟเฟกต์อื่น</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+  <p class="tip">ชั้นใหม่จะโผล่เป็นแถวใหม่ในไทม์ไลน์ แล้วค่อยลากแถบสีไปวางในจังหวะที่ต้องการ (ข้อ 2 เลข 10)</p>
+</section>
+
+<!-- 5 -->
+<section id="new">
+  <h2><span class="no">5</span>ทำเอฟเฟกต์ใหม่ (＋ ใหม่)</h2>
+  <figure data-k="fx_new"><div class="inner"><img src="img/fx_new.jpg" alt="หน้าต่างเอฟเฟกต์ใหม่ เลือกแม่แบบ" width="1312" height="429"></div></figure>
+  <ol class="steps">
+    <li><span><b>ชื่อไฟล์</b>: ใส่เป็น <span class="k">ธาตุ/ชื่อท่า</span> เช่น <span class="k">ice/frost_nova</span> (ใช้ตัวอังกฤษเล็ก ตัวเลข และ _ เท่านั้น)</span></li>
+    <li><span><b>ธาตุ</b>: เลือกชุดสี เช่น fire ice storm</span></li>
+    <li><span><b>กดแม่แบบที่ใกล้ที่สุด</b> เช่น explosion (ระเบิด) · beam (ลำแสง) · slash (ฟัน) · shield (โล่) · ice_spikes (หนามน้ำแข็ง) · projectile (ลูกยิง)</span></li>
+    <li><span>ปรับต่อตามข้อ 3–4 แล้วกด 💾 บันทึก</span></li>
+  </ol>
+  <p class="tip ok">ควรเริ่มจากแม่แบบเสมอ เพราะเร็วกว่าเริ่มจาก “ว่างเปล่า” มาก</p>
+</section>
+
+<!-- 6 -->
+<section id="save">
+  <h2><span class="no">6</span>บันทึก ตรวจ และใส่ในเกม</h2>
+  <div class="shotbox side narrow">
+    <figure data-k="fx_bind" class="small-src"><div class="inner"><img src="img/fx_bind.jpg" alt="ช่องตรวจและช่องผูกกับท่าในเกม" width="330" height="400"></div></figure>
+    <div style="display:grid;gap:12px;align-content:start">
+      <ol class="lg" data-k="fx_bind">
+        <li data-n="1"><span><b>ตรวจ</b>: ถ้าขึ้น <b style="color:var(--ok)">✓ ผ่าน</b> แปลว่าใช้ได้ ถ้าขึ้น <b style="color:var(--bad)">✗ สีแดง</b> แปลว่ามีจุดต้องแก้ ข้อความจะบอกว่าผิดตรงไหน (คลิกที่ ⚙ ตั้งค่าไฟล์ เพื่อดูช่องนี้)</span></li>
+        <li data-n="2"><span><b>ผูกกับท่าในเกม</b>: พิมพ์หรือเลือกชื่อท่า → เลือก <b>เพิ่มทับ</b> (เล่นซ้อนกับภาพเดิม) หรือ <b>แทนที่</b> (ใช้ภาพใหม่แทนทั้งหมด) → กด <b>ผูก</b></span></li>
+      </ol>
+      <ol class="steps">
+        <li><span>กด <b>💾 บันทึก</b> (<kbd>Ctrl+S</kbd>) แล้วจะมีกล่องแจ้งที่ด้านล่างจอ</span></li>
+        <li><span>กด <b>🎮 ลองในเกม</b> เพื่อเปิดเกมจริงแล้วกดท่าดูว่าสวยไหม</span></li>
+        <li><span>ถ้าพอใจ ให้บอก Claude ว่า <b>“push”</b> งานจะขึ้น GitHub แล้วเพื่อนก็จะได้ด้วย</span></li>
+      </ol>
+      <p class="tip">ชื่อท่าในเกมดูยาก ถ้าไม่แน่ใจ บอก Claude ได้เลยว่า “ผูกเอฟเฟกต์นี้กับท่า … ให้หน่อย”</p>
+    </div>
+  </div>
+</section>
+
+<!-- 7 -->
+<section id="mesh">
+  <h2><span class="no">7</span>🧊 ปั้นโมเดล (หนาม ผลึก ปีก ใบมีด โดม…)</h2>
+  <p>ปั้นรูปทรงจากชิ้นสำเร็จรูป ไม่ต้องใช้ Blender โมเดล 1 ตัวประกอบจากหลาย<b>ชิ้นส่วน</b> แต่ละชิ้นปรับจำนวน ขนาด เอียง บิด งอ และทำซ้ำเป็นวงได้</p>
+  <div class="shotbox">
+    <figure data-k="mesh_main"><div class="inner"><img src="img/mesh_main.jpg" alt="แท็บโมเดล กำลังเลือกชิ้น outer" width="1760" height="1000"></div></figure>
+    <ol class="lg cols" data-k="mesh_main">
+      <li data-n="1"><span><b>คลังโมเดล</b>: คลิกเพื่อเปิด มีตัวอย่างให้ 15 แบบ</span></li>
+      <li data-n="2"><span><b>＋ ใหม่</b>: เริ่มจากว่างเปล่าหรือก๊อปจากตัวอย่าง</span></li>
+      <li data-n="3"><span><b>จอ</b>: <b>คลิกที่ชิ้น</b> = เลือก · ลาก<b>ลูกศรสี</b> = ขยับ (แดง = ซ้ายขวา · เขียว = ขึ้นลง · น้ำเงิน = หน้าหลัง)</span></li>
+      <li data-n="4"><span><b>＋ ชิ้นส่วน</b>: เพิ่มชิ้นใหม่ (ดูรูปถัดไป)</span></li>
+      <li data-n="5"><span><b>ย้าย <kbd>G</kbd> · หมุน <kbd>R</kbd> · ขนาด <kbd>S</kbd></b> ใช้เปลี่ยนโหมดของลูกศรบนจอ (เหมือน Blender)</span></li>
+      <li data-n="6"><span><b>มุมมอง</b>: โครงลวด <kbd>W</kbd> · ดู: ดินปั้น (สีเรียบ ดูทรงง่าย) / วัสดุจริง · เลือกวัสดุ · เลือกธาตุ</span></li>
+      <li data-n="7"><span><b>➕ ใส่ในเอฟเฟกต์</b>: ส่งโมเดลนี้ไปเป็นชั้นใหม่ในแท็บ ✨ ทันที</span></li>
+      <li data-n="8"><span><b>⬇ .glb</b>: ส่งออกไฟล์ไปเปิดใน Blender</span></li>
+      <li data-n="9"><span><b>รายการชิ้นส่วน</b>: 👁 ซ่อน <kbd>H</kbd> · ↑↓ ลำดับ · ⧉ ก๊อป <kbd>Ctrl+D</kbd> · ✕ ลบ <kbd>Delete</kbd></span></li>
+      <li data-n="10"><span><b>ค่าของชิ้นที่เลือก</b>: แบบชิ้นส่วน · จำนวนหนาม · รัศมี · สูง · กว้าง · เอียง · บิด · งอ · ทำซ้ำเป็นวง · กระจก ซ้าย/ขวา</span></li>
+      <li data-n="11"><span><b>💾 บันทึก</b> <kbd>Ctrl+S</kbd></span></li>
+    </ol>
+  </div>
+  <div class="shotbox side narrow">
+    <figure data-k="mesh_add" class="small-src"><div class="inner"><img src="img/mesh_add.jpg" alt="เมนูเพิ่มชิ้นส่วน 16 แบบ" width="416" height="254"></div></figure>
+    <div style="display:grid;gap:10px;align-content:start">
+      <h3>ชิ้นส่วน 16 แบบ</h3>
+      <div class="chips"><span>💎 แท่งผลึก</span><span>♛ มงกุฎหนาม</span><span>⚠ กลุ่มผลึก</span><span>✹ หนามรอบทิศ</span><span>☾ ใบฟัน / เคียว</span><span>🪶 พัด / ปีก</span><span>🌀 เกลียว / พายุ</span><span>〰 ท่อ (เขา หนวด)</span><span>🎀 ริบบิ้น</span><span>🏺 หมุนเส้น (โดม แจกัน)</span><span>● ทรงกลม</span><span>▮ กระบอก</span><span>◎ โดนัท</span><span>○ แผ่นวง</span><span>★ ดาว</span><span>■ กล่อง</span></div>
+      <p class="mute">ชี้เมาส์ค้างไว้บนปุ่มเพื่อดูคำอธิบาย ถ้าเป็นเอฟเฟกต์โผล่จากพื้น ให้ใช้ช่อง <b>grow</b> ในแท็บ ✨ จะทำให้หนามแต่ละอันงอกขึ้นทีละอัน</p>
+    </div>
+  </div>
+</section>
+
+<!-- 8 -->
+<section id="tex">
+  <h2><span class="no">8</span>🎞 ทำภาพ / ภาพเคลื่อนไหว (ไฟ ควัน ระเบิด วงเวท…)</h2>
+  <p>วาดภาพสำหรับเม็ดอนุภาคหรือการ์ดภาพ เลือกชนิด ปรับตัวเลื่อน และเลือกสี โปรแกรมจะวาดเป็นหลายเฟรมต่อกันเพื่อให้ขยับได้ หรือจะ<b>นำเข้ารูปของตัวเอง</b>ก็ได้</p>
+  <div class="shotbox">
+    <figure data-k="tex_main"><div class="inner"><img src="img/tex_main.jpg" alt="แท็บภาพ กำลังเปิด fire_sim" width="1760" height="1000"></div></figure>
+    <ol class="lg cols" data-k="tex_main">
+      <li data-n="1"><span><b>คลังภาพ</b>: มีรูปตัวอย่างเล็กให้ คลิกเพื่อเปิด</span></li>
+      <li data-n="2"><span><b>ดูภาพขยับ</b>: เล่นวนให้ดู</span></li>
+      <li data-n="3"><span><b>แผ่นเฟรมทั้งหมด</b>: นี่คือไฟล์ภาพที่เกมใช้จริง</span></li>
+      <li data-n="4"><span><b>ชนิดภาพ</b>: เปลวไฟ · ควัน · ระเบิด · สายฟ้า · วังวน · คลื่นกระแทก · ประกายแตก · รอยฟัน · ดาว · แสงนุ่ม · วงแหวน · วงเวท · ลายนอยส์ · ภาพที่นำเข้าเอง · <b>จำลองของไหลจริง</b></span></li>
+      <li data-n="5"><span><b>ชุดสี</b>: กดเลือกได้เลย (fire ice storm nature hex arcane gold blood smoke white) หรือกด “กำหนดสีเอง”</span></li>
+      <li data-n="6"><span><b>📥 นำเข้าภาพ</b>: เลือกไฟล์ PNG/JPG หรือ<b>ลากไฟล์มาวางบนภาพ</b>ก็ได้ ถ้าเลือกหลายไฟล์จะเรียงเป็นเฟรมตามชื่อไฟล์</span></li>
+      <li data-n="7"><span><b>➕ เป็นเม็ดในเอฟเฟกต์</b> (อนุภาคหลายเม็ด) · <b>➕ เป็นการ์ดภาพ</b> (ภาพแผ่นเดียวหันหาจอ)</span></li>
+      <li data-n="8"><span><b>🧪 ลองใน 3D</b>: ดูภาพบนฉากจริง <kbd>1</kbd> = ภาพ · <kbd>2</kbd> = 3D</span></li>
+      <li data-n="9"><span><b>💾 บันทึก</b>: วาดไฟล์ภาพ .png ให้เอง</span></li>
+      <li data-n="10"><span><b>ตัวเลื่อน</b>: ปรับขนาด ความเร็ว ความปั่นป่วน ฯลฯ ภาพจะวาดใหม่ทันที</span></li>
+    </ol>
+  </div>
+</section>
+
+<!-- 9 -->
+<section id="vol">
+  <h2><span class="no">9</span>🔥 ไฟ 3D (จำลองไฟจริง)</h2>
+  <p>คอมพิวเตอร์จะจำลองไฟเป็นก้อน 3 มิติจริง ๆ แบบเดียวกับ Blender แต่ใช้เวลาแค่ 1–3 วินาที ใช้ทำเสาไฟ กำแพงไฟ วงไฟ กองไฟ หรือระเบิด</p>
+  <div class="shotbox">
+    <figure data-k="vol_main"><div class="inner"><img src="img/vol_main.jpg" alt="แท็บไฟ 3D กำลังเปิด fire3d_column" width="1760" height="1000"></div></figure>
+    <ol class="lg cols" data-k="vol_main">
+      <li data-n="1"><span><b>แบบสำเร็จรูป</b>: column (เสาไฟ) · wall (กำแพงไฟ) · ring (วงไฟ) · bonfire (กองไฟ) · burst (ระเบิดครั้งเดียว)</span></li>
+      <li data-n="2"><span><b>▶ จำลอง</b> <kbd>Enter</kbd>: <b>กดทุกครั้งหลังเปลี่ยนค่า</b> แล้วรอสักครู่</span></li>
+      <li data-n="3"><span><b>ข้อมูล</b>: ความละเอียด · จำนวนเฟรม · ขนาดไฟล์ (ควรไม่เกินประมาณ 1–2 MB)</span></li>
+      <li data-n="4"><span><b>ไฟในฉากจริง</b> หมุนกล้องดูได้</span></li>
+      <li data-n="5"><span><b>ปรับไฟ</b>: ขนาดต้นไฟ · ลอยขึ้น · ม้วนตัว · ปั่นป่วน · ดับเร็ว (เปลวสั้น) · ลมข้าง · รายละเอียดลิ้นเปลว · สั่นไหว</span></li>
+      <li data-n="6"><span><b>➕ ใส่ในเอฟเฟกต์</b>: ส่งไฟนี้ไปเป็นชั้นในแท็บ ✨</span></li>
+      <li data-n="7"><span><b>💾 บันทึก</b></span></li>
+      <li data-n="8"><span><b>คลังไฟ 3D</b> ที่ทำไว้</span></li>
+    </ol>
+  </div>
+  <p class="tip">ไฟ 3D ใช้ได้เฉพาะสีไฟ (ส้ม แดง เหลือง) ถ้าอยากได้ไฟสีอื่น ให้ใช้แท็บ 🎞 ภาพ → “จำลองของไหลจริง” แล้วเลือกชุดสีแทน</p>
+</section>
+
+<!-- 10 -->
+<section id="recipes">
+  <h2><span class="no">10</span>สูตรลัด: อยากทำ… ต้องกดอะไร</h2>
+  <div class="recipes">
+    <div class="card"><h3><span class="em">🎨</span>เปลี่ยนสีเอฟเฟกต์ที่มีอยู่</h3>
+      <ol class="steps"><li><span>คลิกชื่อในคลังซ้าย</span></li><li><span>เปลี่ยน <b>ธาตุ</b> ที่แถบบน (เปลี่ยนสีทั้งชุด) หรือคลิกชั้นแล้วแก้ <b>สี</b></span></li><li><span>💾 บันทึก</span></li></ol></div>
+    <div class="card"><h3><span class="em">💥</span>ทำท่าใหม่จากแม่แบบ</h3>
+      <ol class="steps"><li><span>＋ ใหม่ → ตั้งชื่อ → กดแม่แบบ</span></li><li><span>▶ ดู แล้วคลิกชั้นที่อยากแก้</span></li><li><span>＋ ชั้น เพิ่มของที่ขาด เช่น ประกายหรือเสียง</span></li><li><span>💾 → 🎮 ลองในเกม</span></li></ol></div>
+    <div class="card"><h3><span class="em">🧊</span>หนามน้ำแข็งงอกจากพื้น</h3>
+      <ol class="steps"><li><span>แท็บ 🧊 → ＋ ใหม่ → ใส่ชิ้น ♛ มงกุฎหนาม</span></li><li><span>ปรับจำนวน/สูง → 💾</span></li><li><span>➕ ใส่ในเอฟเฟกต์</span></li><li><span>ในแท็บ ✨ ตั้งวัสดุ ice และเปิดช่อง <b>grow</b></span></li></ol></div>
+    <div class="card"><h3><span class="em">🖼</span>ใช้รูปที่วาดเอง</h3>
+      <ol class="steps"><li><span>แท็บ 🎞 → 📥 นำเข้าภาพ (หรือลากไฟล์มาวาง)</span></li><li><span>ถ้าเป็นภาพหลายช่อง ให้ใส่จำนวน คอลัมน์ × แถว</span></li><li><span>💾 → ➕ เป็นเม็ด หรือ ➕ เป็นการ์ดภาพ</span></li></ol></div>
+    <div class="card"><h3><span class="em">🔥</span>เสาไฟหรือระเบิดไฟสมจริง</h3>
+      <ol class="steps"><li><span>แท็บ 🔥 → ＋ ใหม่ → column หรือ burst</span></li><li><span>ปรับค่า → ▶ จำลอง (ทำซ้ำจนชอบ)</span></li><li><span>💾 → ➕ ใส่ในเอฟเฟกต์</span></li></ol></div>
+    <div class="card"><h3><span class="em">💬</span>ให้ Claude ทำให้</h3>
+      <p>พิมพ์บอกเป็นภาษาไทยได้เลย เช่น <i>“ทำเอฟเฟกต์ระเบิดน้ำแข็งให้ท่า … ให้สีฟ้าเข้มขึ้น แล้วมีหนามงอกจากพื้น”</i> Claude ก็ใช้โปรแกรมเดียวกันนี้ทำ แล้วเปิดดูผลได้ในสตูดิโอ</p></div>
+  </div>
+</section>
+
+<!-- 11 -->
+<section id="keys">
+  <h2><span class="no">11</span>ปุ่มลัด</h2>
+  <div class="tbl"><table>
+    <thead><tr><th>ปุ่ม</th><th>ทำอะไร</th><th>ใช้ในแท็บ</th></tr></thead>
+    <tbody>
+      <tr><td><kbd>Ctrl+S</kbd></td><td>บันทึก</td><td>ทุกแท็บ</td></tr>
+      <tr><td><kbd>Ctrl+Z</kbd> / <kbd>Ctrl+Y</kbd></td><td>ย้อน / ทำซ้ำ</td><td>ทุกแท็บ</td></tr>
+      <tr><td><kbd>Space</kbd></td><td>เล่น / หยุด</td><td>✨ เอฟเฟกต์ · 🎞 ภาพ</td></tr>
+      <tr><td><kbd>R</kbd></td><td>เล่นใหม่ตั้งแต่ต้น</td><td>✨ เอฟเฟกต์</td></tr>
+      <tr><td><kbd>←</kbd> <kbd>→</kbd> (กด <kbd>Shift</kbd> ค้าง = ก้าวยาว)</td><td>เลื่อนเวลาทีละนิด</td><td>✨ เอฟเฟกต์</td></tr>
+      <tr><td><kbd>Delete</kbd></td><td>ลบชั้นหรือชิ้นที่เลือก</td><td>✨ · 🧊</td></tr>
+      <tr><td><kbd>G</kbd> <kbd>R</kbd> <kbd>S</kbd></td><td>ย้าย / หมุน / ขนาด</td><td>🧊 โมเดล</td></tr>
+      <tr><td><kbd>Ctrl+D</kbd></td><td>ก๊อปชิ้นส่วน</td><td>🧊 โมเดล</td></tr>
+      <tr><td><kbd>H</kbd> · <kbd>W</kbd> · <kbd>Esc</kbd></td><td>ซ่อนชิ้น · โครงลวด · เลิกเลือก</td><td>🧊 โมเดล</td></tr>
+      <tr><td><kbd>1</kbd> / <kbd>2</kbd></td><td>ดูแบบภาพ / แบบ 3D</td><td>🎞 ภาพ</td></tr>
+      <tr><td><kbd>Enter</kbd></td><td>เริ่มจำลอง</td><td>🔥 ไฟ 3D</td></tr>
+      <tr><td>ลากเมาส์ · ล้อเมาส์</td><td>หมุนกล้อง · ซูม</td><td>ทุกจอ 3D</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- 12 -->
+<section id="help">
+  <h2><span class="no">12</span>มีปัญหา? ลองดูตรงนี้</h2>
+  <div class="tbl"><table>
+    <thead><tr><th>อาการ</th><th>แก้ยังไง</th></tr></thead>
+    <tbody>
+      <tr><td>กดบันทึกแล้วขึ้นว่า “บันทึกไม่ได้”</td><td>ต้องเปิดผ่าน <span class="k">VFX Studio.bat</span> และหน้าต่างดำต้องยังเปิดอยู่</td></tr>
+      <tr><td>มี ✗ สีแดงในช่องตรวจ</td><td>อ่านข้อความว่าช่องไหนผิด แล้วแก้ช่องนั้น ถ้าไม่เข้าใจ ให้ก๊อปข้อความไปถาม Claude</td></tr>
+      <tr><td>จอดำหรือภาพไม่ขยับ</td><td>กด ⟲ หรือ <kbd>F5</kbd> เพื่อโหลดหน้าใหม่ (งานที่บันทึกแล้วไม่หาย)</td></tr>
+      <tr><td>เอฟเฟกต์ไม่โผล่ในเกม</td><td>ต้อง<b>ผูกกับท่า</b> (ข้อ 6) และบันทึกก่อน ถ้าอยากให้เพื่อนเห็น ให้บอก Claude ว่า “push”</td></tr>
+      <tr><td>จอขาวจ้าเกินไป (ขาวจ้า % เป็นสีแดง)</td><td>ลดความสว่างหรือขนาดของแฟลช/แสง หรือลดความแรง</td></tr>
+      <tr><td>เกมกระตุกตอนเล่นเอฟเฟกต์</td><td>ลดจำนวนอนุภาค ลดความละเอียดไฟ 3D แล้วดูตัวเลข ms ให้ต่ำไว้</td></tr>
+      <tr><td>แก้ผิดไปแล้ว</td><td><kbd>Ctrl+Z</kbd> ย้อนกลับได้หลายครั้ง หรือกด ↺ ข้างช่องนั้นเพื่อคืนค่าเดิม</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<footer>คู่มือ VFX Studio · Fantas Stick · รูปทั้งหมดถ่ายจากโปรแกรมจริง (ต.ค. 2026) ถ้าโปรแกรมเปลี่ยน ให้บอก Claude ว่า “อัปเดตคู่มือ”</footer>
+</div>
+
+<script>
+const MARKS = {"fx_main":{"marks":[{"n":1,"pos":"tl","x":5.11,"y":0.7,"w":18.07,"h":3.1},{"n":2,"pos":"tl","x":24.6,"y":0.9,"w":17.16,"h":2.7},{"n":3,"pos":"tl","x":42.5,"y":0.9,"w":41.14,"h":2.7},{"n":4,"pos":"tl","x":84.55,"y":0.9,"w":13.18,"h":2.7},{"n":5,"pos":"c","x":0,"y":4.6,"w":12.5,"h":72.6},{"n":6,"pos":"c","x":29.55,"y":20,"w":36.36,"h":42},{"n":7,"pos":"tl","x":12.95,"y":5.4,"w":15.17,"h":2.7},{"n":8,"pos":"tl","x":0,"y":77.3,"w":81.25,"h":3.8},{"n":9,"pos":"c","x":0,"y":81.1,"w":81.25,"h":18.9},{"n":10,"pos":"c","x":81.25,"y":4.6,"w":18.75,"h":95.4},{"n":11,"pos":"tl","x":12.95,"y":74.6,"w":67.84,"h":1.8}]},"fx_timeline":{"marks":[{"n":1,"pos":"tl","x":0.8,"y":3.48,"w":3.1,"h":11.74},{"n":2,"pos":"tl","x":4.4,"y":3.48,"w":3.2,"h":11.74},{"n":3,"pos":"tl","x":8.1,"y":3.48,"w":17.7,"h":11.74},{"n":4,"pos":"tl","x":26.3,"y":3.48,"w":3.8,"h":11.74},{"n":5,"pos":"tl","x":30.6,"y":5.65,"w":10.4,"h":6.96},{"n":6,"pos":"tl","x":41.5,"y":3.48,"w":5.1,"h":11.74},{"n":7,"pos":"tl","x":0.8,"y":38.7,"w":2.1,"h":7.83},{"n":8,"pos":"tl","x":3.1,"y":38.7,"w":1.6,"h":7.83},{"n":9,"pos":"tl","x":15.7,"y":38.7,"w":7.7,"h":7.83},{"n":10,"pos":"c","x":24.8,"y":39.57,"w":74,"h":6.52},{"n":11,"pos":"tl","x":23.8,"y":19.57,"w":118.4,"h":7.83}]},"fx_insp":{"marks":[{"n":1,"pos":"tl","x":3.33,"y":23.86,"w":93.64,"h":21.86},{"n":2,"pos":"tl","x":3.33,"y":48.14,"w":93.64,"h":8.14},{"n":3,"pos":"tl","x":3.33,"y":58.86,"w":93.64,"h":8.43},{"n":4,"pos":"tl","x":3.33,"y":69.86,"w":93.64,"h":8.43},{"n":5,"pos":"tl","x":3.33,"y":81,"w":93.64,"h":17.43}]},"fx_curve":{"marks":[{"n":1,"pos":"c","x":12.22,"y":21.65,"w":75.55,"h":36.36},{"n":2,"pos":"tl","x":35.45,"y":65.37,"w":25.67,"h":11.69}]},"fx_add":{"marks":[]},"fx_new":{"marks":[]},"fx_bind":{"marks":[{"n":1,"pos":"tl","x":3.33,"y":24.5,"w":93.64,"h":4.25},{"n":2,"pos":"tl","x":3.33,"y":42.25,"w":39.39,"h":6.75}]},"mesh_main":{"marks":[{"n":1,"pos":"c","x":0,"y":4.6,"w":12.5,"h":72.6},{"n":2,"pos":"tl","x":8.81,"y":5.4,"w":3.18,"h":2.7},{"n":3,"pos":"c","x":31.82,"y":28,"w":29.55,"h":38},{"n":4,"pos":"tl","x":19.72,"y":77.8,"w":4.2,"h":2.7},{"n":5,"pos":"tl","x":24.2,"y":77.8,"w":12.44,"h":2.7},{"n":6,"pos":"tl","x":36.93,"y":77.8,"w":22.73,"h":2.7},{"n":7,"pos":"tl","x":67.84,"y":77.8,"w":6.53,"h":2.7},{"n":8,"pos":"tl","x":74.66,"y":77.8,"w":2.9,"h":2.7},{"n":9,"pos":"c","x":0,"y":81.1,"w":81.25,"h":18.9},{"n":10,"pos":"c","x":81.25,"y":4.6,"w":18.75,"h":95.4},{"n":11,"pos":"tl","x":6.08,"y":77.8,"w":4.15,"h":2.7}]},"mesh_add":{"marks":[]},"tex_main":{"marks":[{"n":1,"pos":"c","x":0,"y":4.6,"w":12.5,"h":72.6},{"n":2,"pos":"c","x":13.07,"y":5.6,"w":35.11,"h":68},{"n":3,"pos":"c","x":48.75,"y":5.6,"w":31.93,"h":68},{"n":4,"pos":"c","x":0,"y":81.1,"w":81.25,"h":18.9},{"n":5,"pos":"tl","x":81.88,"y":84.3,"w":17.56,"h":4.7},{"n":6,"pos":"tl","x":42.44,"y":77.8,"w":5.4,"h":2.7},{"n":7,"pos":"tl","x":48.13,"y":77.8,"w":14.83,"h":2.7},{"n":8,"pos":"tl","x":21.36,"y":77.8,"w":5.28,"h":2.7},{"n":9,"pos":"tl","x":4.03,"y":77.8,"w":4.15,"h":2.7},{"n":10,"pos":"tl","x":81.88,"y":17.2,"w":17.56,"h":5.7}]},"vol_main":{"marks":[{"n":1,"pos":"c","x":0,"y":81.1,"w":81.25,"h":18.9},{"n":2,"pos":"tl","x":19.72,"y":77.8,"w":3.98,"h":2.7},{"n":3,"pos":"tl","x":28.13,"y":78.3,"w":10.74,"h":1.7},{"n":4,"pos":"c","x":39.77,"y":20,"w":15.91,"h":30},{"n":5,"pos":"c","x":81.25,"y":4.6,"w":18.75,"h":95.4},{"n":6,"pos":"tl","x":39.55,"y":77.8,"w":6.53,"h":2.7},{"n":7,"pos":"tl","x":6.08,"y":77.8,"w":4.15,"h":2.7},{"n":8,"pos":"c","x":0,"y":4.6,"w":12.5,"h":72.6}]}};
+document.querySelectorAll('figure[data-k]').forEach(fig => {
+  const k = fig.dataset.k, M = MARKS[k], inner = fig.querySelector('.inner');
+  const lg = document.querySelector('ol.lg[data-k="' + k + '"]');
+  if (M && M.marks.length) {
+    const ov = document.createElement('div'); ov.className = 'ov'; inner.appendChild(ov);
+    for (const m of M.marks) {
+      const b = document.createElement('div'); b.className = 'mk' + (m.pos === 'c' ? ' c' : ''); b.dataset.n = m.n;
+      Object.assign(b.style, { left: m.x + '%', top: m.y + '%', width: m.w + '%', height: m.h + '%' }); ov.appendChild(b);
+      const d = document.createElement('button'); d.className = 'bd'; d.type = 'button'; d.textContent = m.n; d.dataset.n = m.n; d.setAttribute('aria-label', 'ดูข้อ ' + m.n);
+      const bx = m.pos === 'c' ? m.x + m.w / 2 : m.x, by = m.pos === 'c' ? m.y + m.h / 2 : m.y;
+      Object.assign(d.style, { left: 'clamp(13px,' + bx + '%,calc(100% - 13px))', top: 'clamp(13px,' + by + '%,calc(100% - 13px))' });
+      ov.appendChild(d);
+    }
+    const pick = (n, scroll) => {
+      const on = n != null;
+      ov.classList.toggle('dim', on);
+      ov.querySelectorAll('.mk,.bd').forEach(e => e.classList.toggle('on', on && e.dataset.n == n));
+      if (lg) lg.querySelectorAll('li').forEach(li => { const hit = on && li.dataset.n == n; li.classList.toggle('on', hit); if (hit && scroll) li.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); });
+    };
+    ov.addEventListener('click', e => { const t = e.target.closest('.bd'); if (!t) return; e.stopPropagation(); pick(t.classList.contains('on') ? null : t.dataset.n, !fig.classList.contains('big')); });
+    if (lg) lg.querySelectorAll('li').forEach(li => {
+      li.addEventListener('mouseenter', () => pick(li.dataset.n));
+      li.addEventListener('mouseleave', () => pick(null));
+      li.addEventListener('click', () => { pick(li.dataset.n); fig.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); });
+    });
+  }
+  const z = document.createElement('button'); z.className = 'zoom'; z.type = 'button'; z.textContent = '🔍 ขยาย';
+  z.addEventListener('click', () => { const big = fig.classList.toggle('big'); z.textContent = big ? '✕ ปิด' : '🔍 ขยาย'; document.body.style.overflow = big ? 'hidden' : ''; });
+  fig.appendChild(z);
+});
+document.addEventListener('keydown', e => { if (e.key === 'Escape') document.querySelectorAll('figure.big .zoom').forEach(z => z.click()); });
+</script>
+</body>
+</html>

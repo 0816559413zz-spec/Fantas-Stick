@@ -289,9 +289,9 @@ body.ws-tex:not(.tex3d) #mkTexView{display:grid}
 #mkTexView .atlas{display:grid;place-items:center;min-height:0;overflow:hidden}
 #mkTexView .atlas canvas{max-width:100%;max-height:100%;border:1px solid var(--sl);background:repeating-conic-gradient(#2a2e38 0 25%,#1e212a 0 50%) 0 0/16px 16px;image-rendering:auto}
 #mkTexView .info{grid-column:1/-1;font:12px var(--fu);color:var(--gold2)}
-#mkAddMenu[hidden]{display:none}
+#mkAddMenu[hidden],#stAddMenu[hidden]{display:none}
 @media (max-width:900px){#mkLib,#mkInsp{display:none!important}}
-#mkTexView canvas,.mkPts{position:relative!important;inset:auto!important;left:auto!important;top:auto!important;display:block}
+#mkTexView canvas,.mkPts,.stCurve canvas{position:relative!important;inset:auto!important;left:auto!important;top:auto!important;display:block}
 #mkTexView .pv canvas{width:100%!important;height:100%!important;object-fit:contain;border:0}
 #mkTexView .atlas canvas{width:auto!important;height:auto!important;max-width:100%;max-height:100%}
 /* ---------- แก้ปุ่ม/ช่องที่โดน CSS ของเกม ---------- */
