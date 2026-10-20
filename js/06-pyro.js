@@ -135,6 +135,7 @@ function colossusTick(p,inp,dt){
   G.strikes.push({x:q.x,y:q.y,r:200,t:tt,fn:s=>{
     emit({k:'efx',z:'colboom',x:s.x,y:s.y,h:0.3,r:200});
     for(const t of foesIn(p.team,s.x,s.y,200,6))aoeHit(p,t,100,t=>{addBurn(t,3,p.id);addXBurn(t,p.id);});
+    damageEnv(s.x,s.y,200,100,p.id,'fireblast',0.5);   // พังบ้าน/ลัง
   }});
   if(p.colN<=0)p.colos=Math.min(p.colos,0.5);
 }

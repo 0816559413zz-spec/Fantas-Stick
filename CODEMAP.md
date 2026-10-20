@@ -35,8 +35,8 @@ frostBoom:3 meleeHit:10 mirrorPos:21 frostBasic:22 frostSlam3:46 frostSlam:54 fr
 ## js/05-terrain.js (44) — พื้นสูงต่ำ (แผนที่จากไฟล์ Blender — กติกาฝั่งคนปั้นใน MAP-DESIGN.md)
 TERR:5 TSTEP:6 TSLOPE:6 terrT:7 floorAt:12 terrSolid:14 terrMove:21 updateGlaciers:30
 
-## js/06-pyro.js (160) — สายไฟ: ยิงปกติ 2 โหมด / โล่ระเบิด / พุ่งชาร์จ
-pyroBigBoom:5 pyroBall:13 pyroBasic:14 addOrbs:31 pyroParry:32 pyroBlock:33 launchOrbs:35 pyroDash:42 DF_R:76 dragonfallDive:77 dragonfallTick:78 dragonfallBoom:93 pyroSnap:114 colossusTick:124 updateERings:141
+## js/06-pyro.js (161) — สายไฟ: ยิงปกติ 2 โหมด / โล่ระเบิด / พุ่งชาร์จ
+pyroBigBoom:5 pyroBall:13 pyroBasic:14 addOrbs:31 pyroParry:32 pyroBlock:33 launchOrbs:35 pyroDash:42 DF_R:76 dragonfallDive:77 dragonfallTick:78 dragonfallBoom:93 pyroSnap:114 colossusTick:124 updateERings:142
 
 ## js/07-frost-spells.js (33) — 
 frostGlacier:11
@@ -86,10 +86,10 @@ castSlot:181 castUlt:195
 ## js/10-net.js (71) — 
 PREFIX:4 NET:5 LOBBY:6 genCode:7 sendAll:8 setStatus:9 hostGame:11 joinGame:34 clientOnData:59 leave:71
 
-## js/11-host.js (325) — 
+## js/11-host.js (328) — 
 G:4 EVL:4 EVN:4 hostLast:4 tickN:4 emit:5 feed:6 banner:7 plist:8 cleanName:9 freshStats:11 newPlayer:18 emptyInput:21 addPlayer:22 initHostLobby:31 lobbyMsg:38 broadcastLobby:39 hostOnData:41 hostDrop:63 validate:77 hostStart:88 hostToLobby:113 resetBody:115 fmap:121 spawnPts:122 teamPts:124 placeAll:125 respawn:137
 §154 ลูปหลักฝั่งโฮสต์
-hostTick:155 angDiff:167 cH:169 vR:170 updatePlayer:172 hitProp:312 damagePropsIn:319 nearUseProp:320 useProp:321
+hostTick:155 angDiff:167 cH:169 vR:170 updatePlayer:172 hitProp:315 damagePropsIn:322 nearUseProp:323 useProp:324
 
 ## js/12-buildings.js (369) — สิ่งปลูกสร้างที่พังเป็นชิ้นย่อย (บ้าน) แบบ Battlefield — คู่มือเต็ม: …
 BLDDEF:8 BLD_PIECES:9 BLD_GRID:10 BLD_FIRE:11 BLD_ICE:11 BLD_ROOF_MIN:11 BLDG:12 BLDON:12 genBldg:13 bldRect:23 bldChunk:25 bldAlive:32 bldLocal:33 bldWorld:34 rectDist:35 bldNear:36 hitBldPiece:38 breakBldChunk:49 bldSupport:57 damageEnv:77 bldPieceAt:91 projEl:101 bldPush:106 collideBld:112 updateBldg:127 bldSnap:139 bldParse:145 collideWorld:149 shoot:176 eShoot:197 foesOf:204 breakShield:211 gainUlt:212 lifesteal:213 damage:215 playerDown:269 killProj:286 explode:294 hitTarget:306 updateProjectiles:322
@@ -366,4 +366,4 @@ earthEfx:122 earthMudZone:168 earthMudSink:171
 §172 HUD ใต้เป้าเล็ง
 drawEarthHud:173
 
-(48 files, 10634 lines)
+(48 files, 10638 lines)
