@@ -80,13 +80,16 @@ function aimFromCrosshair(me,P,E){
   else if(!TERR&&_aimD.y<-0.01){const t=(o.y-0.05)/-_aimD.y;INPUT.gx=(o.x+_aimD.x*t)*20+MW/2;INPUT.gy=(o.z+_aimD.z*t)*20+MH/2;}else{INPUT.gx=INPUT.gy=-1;}
 }
 let AIMZ=0;
+// สายดิน: ซูมออก + เลื่อนกล้องไปซ้ายตอนกดค้าง BA ชาร์จ / ตอนรอปาเสาอัลติบนฟ้า (Stand ใหญ่ไม่บังจอ) — ผู้ใช้ 2026-10-21
+let EZC=0;
 function updateCamera(me,dt){
   AIMZ+=(((me.kd>0&&me.hv)?1:0)-AIMZ)*Math.min(1,dt*10);if(AIMZ<0.001)AIMZ=0;
   {const fv=SET.fov*(1-0.25*AIMZ);if(Math.abs(cam.fov-fv)>0.01){cam.fov=fv;cam.updateProjectionMatrix();}}
   const px=tx(me.x),pz=tz(me.y);
   const fx=Math.cos(yaw),fz=Math.sin(yaw),rx=-fz,rz=fx;
-  const big=me.co>0,dist=(big?13:me.fl?7.4:5.6)*(1-0.35*AIMZ),cp=Math.cos(pitch),sp=Math.sin(pitch),side=big?4.2:0.85+0.3*AIMZ;
-  const focus=new THREE.Vector3(px+rx*side,GY(me.x,me.y)+(me.z||0)+(big?3.4:2.05),pz+rz*side);
+  const eu=me.ea&&me.al?(me.ea[3]===1?1:me.ea[9]>0?0.45:0):0;EZC+=(eu-EZC)*Math.min(1,dt*(eu>EZC?4:2.5));
+  const big=me.co>0,dist=(big?13:me.fl?7.4:5.6)*(1-0.35*AIMZ)+EZC*9,cp=Math.cos(pitch),sp=Math.sin(pitch),side=(big?4.2:0.85+0.3*AIMZ)-EZC*3;
+  const focus=new THREE.Vector3(px+rx*side,GY(me.x,me.y)+(me.z||0)+(big?3.4:2.05)+EZC*1.5,pz+rz*side);
   // กล้องอยู่หลังผู้เล่น: ถ้าหลังชนขอบแผนที่ ให้ "ร่นกล้องเข้าหาตัว + ยกสูงขึ้น" แทนการบีบพิกัดทีละแกน (เดิมกล้องไปทับหัวตัวละคร)
   // กล้องล้ำเข้าไปในตัวกำแพงได้ (กำแพงหนา ~1.6 หน่วย ฝั่งหลังกำแพงโปร่ง มองทะลุเห็นตัวละคร) เกินกว่านั้นให้ร่นกล้องเข้าหาตัว
   const cfg=MAPCAM[MAPID]||MAPCAM.castle,hx=MW*S3/2,hz=MH*S3/2,bx=hx-1.2+cfg.m,bz=hz-1.2+cfg.m,ox=-fx*dist*cp,oz=-fz*dist*cp;

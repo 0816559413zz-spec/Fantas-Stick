@@ -22,6 +22,16 @@
 
 > The user went through every ability of the built Earth and corrected it ("in md file rn earth is wrong, some skills still wrong"). **This section wins over everything below** (the v1 spec and the older OPEN/DRAFT notes are history). Units: game units (1 m = 20), seconds, damage vs 200 HP players. The user's own Thai words are kept under each item (“ผู้ใช้:”) — when in doubt, follow those. ⚠ = Claude's interpretation, confirm with the user if it matters.
 
+### Review 2 (2026-10-21, after playing the build) — these win over the items below
+- **Camera:** zoom out (and shift left) while holding the charged BA and while aiming the ult pillar in the sky, so the big Stand never blocks the view; back to normal on the slam / throw.
+- **Terra Auger drill look** (ref `designs/earth_ref/drill_ref.png`): a **sharp stone spike** is the main, most visible part — not a spiral. A few **thin spiral lines** around it as an effect only. The **heat glows on the stone spike**, not on the spiral.
+- **Ult drills:** **rise up out of the ground** when they appear after the pillar lands, and **sink back down** when the ult ends.
+- **Stand punch:** **twist the body** into the punch (more natural, not just pushing the arm out); hit the **upper body** of the target, not low.
+- **Stonebreaker:** the Stand also twists when punching; the slab **rises higher** (not stuck to the ground) and is **longer and flatter** (bigger).
+- **Dust Burst:** squeeze **a bit slower** — the Stand **squeezes hard first**, then the dust bursts (burst at 1.1 s instead of 0.75 s).
+- **Shield** (ref `designs/earth_ref/shield_ref.png`, Susanoo-style): the big Stand **leans down over the player from behind** and brings **one arm down in front as a vertical bar**; the **other arm fades** (barely visible). Focus on the shielding arm.
+- ผู้ใช้: “for earth ult when waiting to shoot the pillar change the cam side too or make it further … hold left click too it blocking the view … do zoom out for hold click and back when slam • for drill attack make it has animation appear up when ulted the pillar and come down too • change the drill not just เกลียว ให้มันเป็นแหลมๆเลย … ตัวตรงกลางต้องเด่นสุด … มีเกลียวรอบๆบางๆนิดหน่อย … ต้องร้อนที่ตัวหินแหลมๆไม่ใช่เกลียว • stand ให้มันบิดตัวสำหรับการตีมากกว่านี้ … ต่อยระยะที่บนๆคนหน่อย • ท่าต่อยหิน ให้บิดตัวตอนต่อยด้วย หินที่ขึ้นมาให้สูงกว่านี้หน่อย … ยาวแบนกว่านี้ • ท่าบีบหินให้ช้าลงนิด stand จะบีบแรงๆก่อน • ท่ากัน … stand ตัวใหญ่เอามือมาบังจากด้านหลัง ประมาณรูปที่ 2 แต่จะยื่นตัวลงมาและเอามือ 1 ข้างมาบัง อีกข้าง fade จางไป … แนวตั้งฉาก”
+
 ### The Stand — how it looks (all abilities)
 - **Blocky sand/rock figure like a Roblox character**, only the **upper half of the body**; the lower half **fades away downward** (dissolves into sand). A few **rock/sand bits** appear when it forms.
 - It only shows up for the moment it acts, then fades away (no lingering Stand).

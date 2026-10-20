@@ -210,8 +210,8 @@ FLAME_STYLE:48 PTIME:49 NOISETEX:51 FLAMETEX_V1:57 FLAMETEX_V2:62 PSYS:72 FLAMEL
 §172 เอฟเฟกต์รูปทรง: แฟลช / วงแหวน / โดม / รอยไหม้ / สายฟ้า / แสงชั่วคราว
 SHAPES_Q:173 SHAPES:173 FLASHL:173 LINES:173 LREQ:174 ringGeo:175 ringVGeo:176 arcGeo:177 domeGeo:178 fullGeo:179 discGeo:180 decalTex:181 FX:182 jag:196 spawnShape:204 updateShapes:231 _cp:250 updateLights:251
 
-## js/31-camera.js (112) — กล้องมุมหลังไหล่ (แบบ Hogwarts Legacy)
-yaw:2 pitch:2 lastPh:2 locked:2 SENS:3 saveSet:4 applySettings:5 camPos:13 camLook:13 overlayOpen:16 showPause:17 hidePause:18 MAPCAM:19 PLACE:21 placeKey:22 updatePlaceGhost:30 _aimD:44 rayTerr:46 aimFromCrosshair:52 AIMZ:82 updateCamera:83 menuCamera:108
+## js/31-camera.js (115) — กล้องมุมหลังไหล่ (แบบ Hogwarts Legacy)
+yaw:2 pitch:2 lastPh:2 locked:2 SENS:3 saveSet:4 applySettings:5 camPos:13 camLook:13 overlayOpen:16 showPause:17 hidePause:18 MAPCAM:19 PLACE:21 placeKey:22 updatePlaceGhost:30 _aimD:44 rayTerr:46 aimFromCrosshair:52 AIMZ:82 EZC:84 updateCamera:85 menuCamera:111
 
 ## js/32-stage.js (311) — เวทีเมนู/ล็อบบี้: ห้องโถงมืด แท่นวงเวททอง เทียนลอย (ฉากแยกจากแผนที่)
 stage:2 STAGE:5 STAGE_Y:6 stageSpots:58 stageChar:74 POSES:81 stageIdle:87
@@ -355,32 +355,32 @@ fxWarpMake:219 fxWarpTick:231
 §237 ไฟ 3 มิติจากการจำลอง (ชั้น vol) — ไฟล์รูปแบบเดียวกับที่เพื่อน bake จา…
 FXVOL:240 fxVolLoad:241 fxVolTex:245 fxVolSet:248 fxVolReady:249 fxVolMake:250 fxVolTick:253 fxPreAssets:258 fxAssetsWait:260
 
-## js/47-earth-view.js (361) — สายดิน ⛰️ — ภาพฝั่งเครื่องเล่น (Stand / Stand ใหญ่ / กำแพง / เสา / เนิน / ฝุ่น / สว่าน / …
+## js/47-earth-view.js (377) — สายดิน ⛰️ — ภาพฝั่งเครื่องเล่น (Stand / Stand ใหญ่ / กำแพง / เสา / เนิน / ฝุ่น / สว่าน / …
 ECOL:9 EV:10 eW:11 eYaw:12
 §13 ลายผิว (วาดเองบน canvas: หิน/ทราย + รอยร้าว + ขอบบล็อกแบบ Roblox)
 ETEX:14 eTex:15 eFadeTex:27 eMat:29 eTMat:30 rockGeo:31 _eChunkM:35 eChunks:36
 §38 Stand (บล็อกหิน/ทรายครึ่งตัวบน)
-makeStand:40 standOp:67 standPose:69 eState:81 eStandOf:82 eGiantOf:83 eSandFall:85 eAppear:86 eAim:88
-§89 วงเตือนบนพื้น (BA ชาร์จ / จุดปาเสา): วงเข้มก่อน แล้วสีอ่อนค่อย ๆ เติม…
-makeWarn:90 eWarnAt:95
-§96 ทุกเฟรม: ผู้เล่นสายดิน (เรียกจาก syncPlayers)
-earthFX:97
-§166 สว่าน: เรียว แหลม เกลียว สีเงิน + แกนร้อน (เหลือง → แดง ตามระดับ) • ป…
-makeDrill:167 drillHeat:174
-§178 เสายักษ์ (ref: designs/earth_ref/pillar_ref.png): เสาเหลี่ยมยาว ปลายห…
-makePillar:179
-§185 กระสุนหิน
-earthProjMesh:186 makeSlab:191
-§194 สิ่งก่อสร้าง + ฝุ่น (เรียกจาก render loop)
-earthClear:195 eMakeSO:200 syncEarth:212 earthFog:245 _eCamT:248 eAnim:249 eDebris:250 eWave:252 eAirWave:254
-§256 event "efx" ของสายดิน (เรียกจากต้น efxFX) — คืน true = จัดการแล้ว
-earthEfx:257 eDrillFly:333
-§336 บึงโคลน (Mud Swamp + บึงจากเสาอัลติ): คลื่นกระเพื่อมจากกลางไปขอบ แล้ว…
-earthMudZone:337 earthMudSink:344
-§345 HUD ใต้เป้าเล็ง
-drawEarthHud:346
+makeStand:40 standOp:70 standPose:73 eState:90 eStandOf:91 eGiantOf:92 eSandFall:94 eAppear:95 eAim:97
+§98 วงเตือนบนพื้น (BA ชาร์จ / จุดปาเสา): วงเข้มก่อน แล้วสีอ่อนค่อย ๆ เติม…
+makeWarn:99 eWarnAt:104
+§105 ทุกเฟรม: ผู้เล่นสายดิน (เรียกจาก syncPlayers)
+earthFX:106
+§179 สว่าน (ref: designs/earth_ref/drill_ref.png): หินแหลมเรียวเป็นตัวหลัก…
+makeDrill:180 drillHeat:187
+§192 เสายักษ์ (ref: designs/earth_ref/pillar_ref.png): เสาเหลี่ยมยาว ปลายห…
+makePillar:193
+§199 กระสุนหิน
+earthProjMesh:200 makeSlab:205
+§208 สิ่งก่อสร้าง + ฝุ่น (เรียกจาก render loop)
+earthClear:209 eMakeSO:214 syncEarth:226 earthFog:259 _eCamT:262 eAnim:263 eDebris:264 eWave:266 eAirWave:268
+§270 event "efx" ของสายดิน (เรียกจากต้น efxFX) — คืน true = จัดการแล้ว
+earthEfx:271 eDrillFly:349
+§352 บึงโคลน (Mud Swamp + บึงจากเสาอัลติ): คลื่นกระเพื่อมจากกลางไปขอบ แล้ว…
+earthMudZone:353 earthMudSink:360
+§361 HUD ใต้เป้าเล็ง
+drawEarthHud:362
 
 ## js/48-ragdoll.js (227) — 
 RAG:10 RAGJ:23 RAGB:29 RAGS:33 RAGMIN:37 RAGHINGE:39 _rv1:40 _rv2:40 _rv3:40 _rqa:40 _rqb:40 _rm:40 ragBones:41 ragBasis:48 ragTargets:56 ragStart:62 ragBack:88 ragFloor:89 ragStep:90 ragPose:155 ragWrite:170 ragRestore:182 ragEnd:186 ragTick:188 ragHideDead:222
 
-(49 files, 11241 lines)
+(49 files, 11260 lines)

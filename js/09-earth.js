@@ -156,7 +156,7 @@ function earthCrush(p){const T=p.tec;p.crush=null;if(!T)return;
 defSpell(EARTH,{id:'dustburst',role:'utility',n:'Dust Burst',ic:'🌫️',cd:20,d:'เล็งพื้นระยะ ~500: โยนหินขึ้น Stand ต่อยแตกเป็นฝุ่น (Stand แตก = เราทุบเองแบบอ่อนกว่า)',fx:'ศัตรูในฝุ่นมองชัดแค่ ~150 รอบตัว ไกลกว่านั้นจางเป็นสีฝุ่น (ไม่มืดบอด) • ไม่มีดาเมจ เดินออกได้ • Stand: รัศมี 350 นาน 8 วิ • Stand แตก: 200 นาน 5 วิ',
   cast(p){if(p.aug||p.ramp)return false;const o=aimPoint(p,500),st=eStand(p),r=st?350:200,t=st?8:5;
     emit({k:'efx',z:'edustup',x:Math.round(o.x),y:Math.round(o.y),h:0,x2:Math.round(p.x),y2:Math.round(p.y),n:st?1:0,id:p.id});
-    G.strikes.push({x:o.x,y:o.y,t:0.75,fn(){(G.edust||(G.edust=[])).push({id:++G.zid,x:o.x,y:o.y,r,t,max:t,team:p.team});emit({k:'efx',z:'edust',x:Math.round(o.x),y:Math.round(o.y),h:0,r,n:st?1:0});}});}});
+    G.strikes.push({x:o.x,y:o.y,t:1.1,fn(){(G.edust||(G.edust=[])).push({id:++G.zid,x:o.x,y:o.y,r,t,max:t,team:p.team});emit({k:'efx',z:'edust',x:Math.round(o.x),y:Math.round(o.y),h:0,r,n:st?1:0});}});}});
 
 // ---------- สกิล 5: Terra Auger ----------
 // กดค้างชาร์จ: แตะ = ระดับ 1 • 2 วิ = 2 • 4.5 วิ = 3 • ปล่อยแล้วสว่านพุ่งลงจุดเล็ง (600) • คูลดาวน์เริ่มตอนปล่อย
