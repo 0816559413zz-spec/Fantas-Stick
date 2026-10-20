@@ -5,18 +5,18 @@ Format: `name:line` = top-level function/const/let in that file. `§line title` 
 ## js/01-core.js (22) — แกนกลาง: import Three.js + ฟังก์ชันพื้นฐาน ($ rnd clamp lerp store to…
 $:12 rnd:13 clamp:14 lerp:15 dist2:16 lerpAng:17 esc:18 shuffle:19 store:20 toastT:21 toast:22
 
-## js/02-data.js (283) — 
+## js/02-data.js (284) — 
 W:4 H:4 PR:4 PILLARS:6 SPAWNF:7 mulberry:9 genForest:10 genPitch:27 genHogsmeade:36
 §54 แผนที่โล่ง 3 แบบ (ผู้ใช้: ป่ามืดไม่สนุก อยากได้ที่โล่งๆ)
 genMeadow:55 genLake:61 genRuins:66
 §73 Test Place (ห้องฝึก): พื้นโล่งไม่มีสิ่งกีดขวาง
 genTest:75 trZone:77 genGreatHall:78 MAPS:86 RANDOM_MAPS:98 MAPID:99 MW:99 MH:99 OBS:99 setMapVars:100
 §101 แผนที่จากไฟล์ (Blender → assets/maps/<id>.json + .glb, สคริปต์ assets…
-FMAPS:104 b64i16:105 regFileMap:106 loadMapData:117 loadAllMapData:125 mapReady:128 mapOkFor:129
-§130 ของประกอบฉากที่พังได้ / ใช้ได้ (prop)
-PROPDEF:134 PROP_OFF_MODES:139 PROP_USE:141 PROPS:142 PROPON:142 genProps:143
-§163 ตัวละคร: บ้านฮอกวอตส์ + หน้าตา
-HOUSES:165 HAIRC:170 HAIRSTY:172 WOODC:174 WOODN:175 WCOREC:176 WCOREN:177 WANDSTY:178 EYEC:179 SKINC:180 CLOAKC:181 TIESTY:182 LOOKK:183 LOOKN:183 lookStr:184 parseLook:185 randLook:186 LOOKS:187 LOOKP:187 KITS:187 getKit:188 getLook:189 CREST_SH:190 CREST_PAT:191 starPts:196 CREST_ANI:198 crestSVG:204 houseColor:212 TEAMC:213 TEAMN:213 MODES:214 PDEF:225 EDEF:252 POOLS:264 CDK:274 BUFFS:275
+FMAPS:104 b64i16:105 regFileMap:106 loadMapData:118 loadAllMapData:126 mapReady:129 mapOkFor:130
+§131 ของประกอบฉากที่พังได้ / ใช้ได้ (prop)
+PROPDEF:135 PROP_OFF_MODES:140 PROP_USE:142 PROPS:143 PROPON:143 genProps:144
+§164 ตัวละคร: บ้านฮอกวอตส์ + หน้าตา
+HOUSES:166 HAIRC:171 HAIRSTY:173 WOODC:175 WOODN:176 WCOREC:177 WCOREN:178 WANDSTY:179 EYEC:180 SKINC:181 CLOAKC:182 TIESTY:183 LOOKK:184 LOOKN:184 lookStr:185 parseLook:186 randLook:187 LOOKS:188 LOOKP:188 KITS:188 getKit:189 getLook:190 CREST_SH:191 CREST_PAT:192 starPts:197 CREST_ANI:199 crestSVG:205 houseColor:213 TEAMC:214 TEAMN:214 MODES:215 PDEF:226 EDEF:253 POOLS:265 CDK:275 BUFFS:276
 
 ## js/03-spells-core.js (218) — 
 ICONS:8 ICOALIAS:9 hasIco:10 ICOBASE:12 icoURL:13 ICO:14 icoTint:15 icoHTML:24 PATHS:25 SPELL_LIST:33 SPELLS:33 defSpell:34 SLOTK:35 BRMAP:35 KITP:36 parseKit:37 cleanKit:53 setKit:54
@@ -157,16 +157,18 @@ rpass:22 fxScene:24 SOFTU:26 SOFT_GLSL:27 FXMATS:29 fxMat:30 softify:32 HAZE_U:3
 §72 คุณภาพกราฟิก: auto = ปรับความละเอียดเองตาม FPS / high = สวยสุด / low …
 QUAL:73 QUAL_NAME:74 qualPR:75 applyQuality:81 qualTick:96 texCanvas:107 glowTex:108 stoneTex:109 runeTex:115 glowMats:123 glowMat:124 STONEM:126 stoneMat:127 shadowAll:128 SKY:131 hemi:151 moonL:153 setSky:156 LPOOL:164
 
-## js/28-maps-build.js (650) — สร้างแผนที่
-CANDLESYS:2 builtMap:3 world:3 TORCHES:3 CANDLES:3 FIREFLIES:3 CRYSTAL:3 RUNE:3 SNITCH:3 BANNERS:3 SNOW:3 WCACHE:5 WCACHE_MAX:5 buildWorld:6 addW:37 _prewarmed:39 prewarmShaders:40 batchStatic:58 makeCandles:83 updateCandles:92 buildCastle:101 buildHogsmeade:167 buildGreatHall:260 buildForest:330
-§432 ทุ่งหญ้าฮอกวอตส์ (เย็น)
-ringTrees:433 grassTex:442 buildMeadow:443
-§462 ทะเลสาบน้ำแข็ง (กลางคืน)
-buildLake:463
-§484 ซากลานประลอง (เย็น ทราย)
-§485 Test Place (ห้องฝึก): พื้นตารางเรียบๆ กลางวัน + วงโซนเสกมอนสเตอร์
-§486 แผนที่จากไฟล์ Blender (MAP-DESIGN.md)
-terrGeo:488 buildFileMap:496 buildTest:529 buildRuins:552 buildPitch:577
+## js/28-maps-build.js (672) — สร้างแผนที่
+CANDLESYS:2 builtMap:3 builtKey:3 world:3 TORCHES:3 CANDLES:3 FIREFLIES:3 CRYSTAL:3 RUNE:3 SNITCH:3 BANNERS:3 SNOW:3 WCACHE:5 WCACHE_MAX:5 wkey:7 buildWorld:8 addW:40 _prewarmed:42 prewarmShaders:43 batchStatic:61 makeCandles:86 updateCandles:95 buildCastle:104 buildHogsmeade:170 buildGreatHall:258 buildForest:328
+§425 ทุ่งหญ้าฮอกวอตส์ (เย็น)
+ringTrees:426 grassTex:435 buildMeadow:436
+§455 ทะเลสาบน้ำแข็ง (กลางคืน)
+buildLake:456
+§477 ซากลานประลอง (เย็น ทราย)
+§478 Test Place (ห้องฝึก): พื้นตารางเรียบๆ กลางวัน + วงโซนเสกมอนสเตอร์
+§479 บรรยากาศที่ใช้ร่วมกัน (แผนที่จากโค้ด + แผนที่จากไฟล์ผ่าน fx ใน MAP-DE…
+makeSnow:480 makeFireflies:487 makeSnitch:494 fileMapFx:501
+§511 แผนที่จากไฟล์ Blender (MAP-DESIGN.md)
+terrGeo:513 buildFileMap:521 buildTest:555 buildRuins:578 buildPitch:603
 
 ## js/29-characters.js (373) — ระบบผ้า (เสื้อคลุมพลิ้วตามการเคลื่อนที่)
 makeCloak:2 updateCloth:10
@@ -321,4 +323,4 @@ fxWarpMake:219 fxWarpTick:231
 §237 ไฟ 3 มิติจากการจำลอง (ชั้น vol) — ไฟล์รูปแบบเดียวกับที่เพื่อน bake จา…
 FXVOL:240 fxVolLoad:241 fxVolTex:245 fxVolSet:248 fxVolReady:249 fxVolMake:250 fxVolTick:253 fxPreAssets:258 fxAssetsWait:260
 
-(46 files, 9920 lines)
+(46 files, 9943 lines)

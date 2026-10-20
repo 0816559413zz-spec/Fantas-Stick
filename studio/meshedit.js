@@ -2,11 +2,12 @@
 //  VFX Studio — ปั้นเองแบบ Blender (ชิ้นส่วน k:"poly") ในแท็บ 🧊 โมเดล • ง่ายกว่า Blender: ไม่มี modal / วงลูป / ตัวแต่งซับซ้อน
 //  ＋ ชิ้นส่วน → ✎ ปั้นเอง (ลูกบาศก์ แผ่น ทรงกระบอก ทรงกลม กรวย) • Tab = เข้า/ออกโหมดแก้จุด
 //  1 จุด / 2 ขอบ / 3 หน้า • คลิก = เลือก (Shift = เพิ่ม/เอาออก) • A = เลือกทั้งหมด/ไม่เลือก • ลูกศรจับ G ย้าย / R หมุน / S ขนาด
+//  Alt+คลิกขอบ / L = เลือกวง (โหมดหน้า = แถบหน้า) • Ctrl+R = ตัดวง (ผ่าแถบหน้าสี่เหลี่ยม) • B = ลากกรอบเลือก (Shift เพิ่ม / Ctrl เอาออก)
 //  E ดึงออก • I หดหน้าเข้า • F เติมหน้า • M รวมจุด • X / Delete ลบ • ÷ แบ่งหน้าทั้งชิ้น • ⇅ กลับด้านหน้า • sub = ทำให้เนียน
 //  ข้อมูล: P.v = [[x,y,z]…] (ม., แกนของชิ้น ก่อน pos/rot/scale) • P.f = [[เลขจุด…]…] ทวนเข็มเมื่อมองจากด้านนอก — สร้างโดย MKGEN.poly (js/46)
-//  console: STUDIO.mesh.edit(true|false) • STUDIO.mesh.prim('cube') • STUDIO.mesh.esel('f',[0,1]) • STUDIO.mesh.op('extrude'|'inset'|'fill'|'merge'|'del'|'subdiv'|'flip')
+//  console: STUDIO.mesh.edit(true|false) • STUDIO.mesh.prim('cube') • STUDIO.mesh.esel('f',[0,1]) • STUDIO.mesh.op('extrude'|'inset'|'fill'|'merge'|'del'|'subdiv'|'flip') • STUDIO.mesh.cut('3_7') • STUDIO.mesh.loop('3_7') • STUDIO.mesh.box(x0,y0,x1,y1,'set'|'add'|'sub') (พิกเซลหน้าต่าง)
 // =====================================================================
-const ME={on:false,mode:'v',sel:[],grp:null,pts:null,lines:null,fill:null,pick:null,pivot:null,snap:null,triF:[]};
+const ME={on:false,mode:'v',sel:[],pend:null,boxArm:false,grp:null,pts:null,lines:null,fill:null,pick:null,pivot:null,snap:null,triF:[]};
 const _meV=new THREE.Vector3(),meR=x=>Math.round(x*1e4)/1e4,meK=(a,b)=>a<b?a+'_'+b:b+'_'+a;
 // ---------- รูปทรงเริ่มต้น (ฐานที่ y = 0, หน้าทวนเข็มเมื่อมองจากด้านนอก) ----------
 function meRing(n,r,y){const o=[];for(let i=0;i<n;i++){const a=i/n*Math.PI*2;o.push([meR(Math.sin(a)*r),meR(y),meR(Math.cos(a)*r)]);}return o;}
@@ -65,14 +66,62 @@ function meGizmo(){const P=mePart(),S=ME.snap;if(!P||!S)return;ME.pivot.updateMa
 function meDragEnd(){ME.snap=null;if(ME.on)meAttach();meStat();}
 // ---------- คลิกเลือกบนจอ ----------
 function meSegD(x,y,A,B){const dx=B[0]-A[0],dy=B[1]-A[1],L=dx*dx+dy*dy;let t=L?((x-A[0])*dx+(y-A[1])*dy)/L:0;t=Math.max(0,Math.min(1,t));return Math.hypot(A[0]+dx*t-x,A[1]+dy*t-y);}
-function mePick(e,add){const P=mePart();if(!P)return;const r=gl.domElement.getBoundingClientRect(),mx=e.clientX-r.left,my=e.clientY-r.top;ME.grp.updateMatrixWorld(true);
-  const W=ME.grp.matrixWorld,scr=p=>{_meV.set(p[0],p[1],p[2]).applyMatrix4(W).project(cam);return [(_meV.x+1)/2*r.width,(1-_meV.y)/2*r.height,_meV.z];};let hit=null;
+// จุดบนจอ: scr(p) = [x, y, z] พิกเซลในกรอบจอ 3D (z > 1 = อยู่หลังกล้อง)
+function meScr(){const r=gl.domElement.getBoundingClientRect();ME.grp.updateMatrixWorld(true);const W=ME.grp.matrixWorld;
+  return {r,scr:p=>{_meV.set(p[0],p[1],p[2]).applyMatrix4(W).project(cam);return [(_meV.x+1)/2*r.width,(1-_meV.y)/2*r.height,_meV.z];}};}
+function meNearEdge(P,mx,my,scr,lim){let best=lim||12,hit=null;for(const [k,[a,b]] of meEdges(P)){const A=scr(P.v[a]),B=scr(P.v[b]);if(A[2]>1||B[2]>1)continue;const d=meSegD(mx,my,A,B);if(d<best){best=d;hit=k;}}return hit;}
+function mePick(e,add){const P=mePart();if(!P)return;const {r,scr}=meScr(),mx=e.clientX-r.left,my=e.clientY-r.top;let hit=null;
+  // Alt+คลิก = เลือกวง • รอคลิกขอบหลังกด ✂ ตัดวง / ◎ เลือกวง
+  if(e.altKey||ME.pend){const k=meNearEdge(P,mx,my,scr,16),pend=ME.pend||'loop';ME.pend=null;meBar();
+    if(!k){stToast('ไม่โดนขอบ — คลิกให้ใกล้เส้นขอบมากขึ้น');return;}return pend==='cut'?meCut(k):meLoopSel(k,add||e.shiftKey);}
   if(ME.mode==='v'){let best=14;P.v.forEach((p,i)=>{const s=scr(p);if(s[2]>1)return;const d=Math.hypot(s[0]-mx,s[1]-my);if(d<best){best=d;hit=i;}});}
-  else if(ME.mode==='e'){let best=10;for(const [k,[a,b]] of meEdges(P)){const A=scr(P.v[a]),B=scr(P.v[b]);if(A[2]>1||B[2]>1)continue;const d=meSegD(mx,my,A,B);if(d<best){best=d;hit=k;}}}
+  else if(ME.mode==='e')hit=meNearEdge(P,mx,my,scr,10);
   else{_mkRay.setFromCamera(new THREE.Vector2(mx/r.width*2-1,-my/r.height*2+1),cam);const h0=_mkRay.intersectObject(ME.pick,false)[0];if(h0&&h0.faceIndex!=null)hit=ME.triF[h0.faceIndex];}
   if(hit===null||hit===undefined){if(!add)ME.sel=[];}
   else{const i=ME.sel.indexOf(hit);if(add){if(i>=0)ME.sel.splice(i,1);else ME.sel.push(hit);}else ME.sel=[hit];}
   meAfterSel();}
+// ---------- ลากกรอบเลือก (B แล้วลากบนจอ • Shift = เพิ่ม • Ctrl = เอาออก) ----------
+function meBoxArm(on){ME.boxArm=on===undefined?!ME.boxArm:on;if(ME.boxArm)ME.pend=null;document.body.classList.toggle('meBox',!!ME.boxArm);meBar();if(ME.boxArm)stHint('ลากบนจอเพื่อตีกรอบเลือก (Shift = เพิ่ม • Ctrl = เอาออก) • Esc ยกเลิก');}
+// เรียกจาก pointerdown ของจอ (studio.js) — คืน true = ใช้เมาส์นี้ตีกรอบ ไม่หมุนกล้อง
+function meBoxDown(e){if(MK.ws!=='mesh'||!ME.on||!ME.boxArm||e.button!==0)return false;e.preventDefault();e.stopImmediatePropagation();
+  const x0=e.clientX,y0=e.clientY,mode=e.ctrlKey||e.metaKey?'sub':e.shiftKey?'add':'set',box=h('div',{id:'meBoxR'});$st('st').append(box);
+  const place=(x,y)=>{box.style.cssText=`left:${Math.min(x,x0)}px;top:${Math.min(y,y0)}px;width:${Math.abs(x-x0)}px;height:${Math.abs(y-y0)}px`;};place(x0,y0);
+  const mv=ev=>place(ev.clientX,ev.clientY),up=ev=>{removeEventListener('pointermove',mv,true);removeEventListener('pointerup',up,true);box.remove();ev.stopImmediatePropagation();MK.m.down=null;
+    meBoxArm(false);meBoxSel(Math.min(x0,ev.clientX),Math.min(y0,ev.clientY),Math.max(x0,ev.clientX),Math.max(y0,ev.clientY),mode);};
+  addEventListener('pointermove',mv,true);addEventListener('pointerup',up,true);return true;}
+function meBoxSel(x0,y0,x1,y1,mode){const P=mePart();if(!P)return;const {r,scr}=meScr(),S=P.v.map(p=>scr(p)),inn=i=>{const s=S[i];if(!s||s[2]>1)return false;const x=s[0]+r.left,y=s[1]+r.top;return x>=x0&&x<=x1&&y>=y0&&y<=y1;};
+  let got=ME.mode==='v'?P.v.map((p,i)=>i).filter(inn):ME.mode==='e'?[...meEdges(P)].filter(([k,[a,b]])=>inn(a)&&inn(b)).map(([k])=>k):P.f.map((f,i)=>f.every(inn)?i:-1).filter(i=>i>=0);
+  if(mode==='set')ME.sel=got;else if(mode==='add')ME.sel=[...new Set([...ME.sel,...got])];else{const g=new Set(got);ME.sel=ME.sel.filter(x=>!g.has(x));}
+  meAfterSel();stToast('ตีกรอบเลือก '+got.length+' '+(ME.mode==='v'?'จุด':ME.mode==='e'?'ขอบ':'หน้า'));}
+// ---------- วง (loop) / แถบ (ring) บนตาข่ายสี่เหลี่ยม ----------
+function meEdgeFaces(P){const m=new Map();P.f.forEach((f,fi)=>f.forEach((a,j)=>{const k=meK(a,f[(j+1)%f.length]);if(!m.has(k))m.set(k,[]);m.get(k).push([fi,j]);}));return m;}
+// แถบขอบขนาน (edge ring): ข้ามหน้าสี่เหลี่ยมไปขอบฝั่งตรงข้าม → ใช้ตัดวง และเลือกวงของหน้า
+function meRingOf(P,key){const EF=meEdgeFaces(P),edges=[key],seen=new Set([key]),faces=[],seenF=new Set();
+  const walk=k0=>{let k=k0;for(;;){const nx=(EF.get(k)||[]).find(([fi])=>!seenF.has(fi)&&P.f[fi].length===4);if(!nx)return;const [fi,j]=nx,f=P.f[fi];seenF.add(fi);faces.push(fi);
+      const o=meK(f[(j+2)%4],f[(j+3)%4]);if(seen.has(o))return;seen.add(o);edges.push(o);k=o;}};
+  walk(key);walk(key);return {edges,faces};}
+// วงขอบ (edge loop): เดินต่อผ่านจุดที่มี 3–4 ขอบ ไปขอบที่ไม่อยู่หน้าสี่เหลี่ยมเดียวกัน (ขอบติดฝาหลายเหลี่ยมก็เดินรอบได้)
+function meLoopOf(P,key){const N=new Map(),add=(a,b)=>{if(!N.has(a))N.set(a,new Set());N.get(a).add(b);};for(const [k,[a,b]] of meEdges(P)){add(a,b);add(b,a);}
+  const [a0,b0]=key.split('_').map(Number),out=[key],seen=new Set([key]);
+  const walk=(prev,v)=>{for(let n=0;n<999;n++){const nb=N.get(v);if(!nb||nb.size<3||nb.size>4)return;const side=new Set();for(const f of P.f)if(f.length===4&&f.includes(prev)&&f.includes(v))for(const x of f)side.add(x);
+      const nx=[...nb].filter(x=>x!==prev&&!side.has(x));if(nx.length!==1)return;const k=meK(v,nx[0]);if(seen.has(k))return;seen.add(k);out.push(k);prev=v;v=nx[0];}};
+  walk(a0,b0);walk(b0,a0);return out;}
+function meLoopSel(key,add){const P=mePart();if(!P)return;let ns;
+  if(ME.mode==='f')ns=meRingOf(P,key).faces;else{const L=meLoopOf(P,key);ns=ME.mode==='e'?L:[...new Set(L.flatMap(k=>k.split('_').map(Number)))];}
+  ME.sel=add?[...new Set([...ME.sel,...ns])]:ns;meAfterSel();stToast('เลือกวงแล้ว '+ns.length+' '+(ME.mode==='v'?'จุด':ME.mode==='e'?'ขอบ':'หน้า'));}
+// ตัดวง (loop cut): ใส่จุดกลางทุกขอบในแถบ แล้วผ่าหน้าสี่เหลี่ยมในแถบเป็น 2 • หน้าข้างเคียงได้จุดเพิ่ม (ไม่มีรอยแยก)
+function meCut(key){const P=mePart();if(!P)return;const {edges,faces}=meRingOf(P,key);if(!faces.length)return stToast('ตัดวงได้เฉพาะหน้าสี่เหลี่ยม — ขอบนี้ไม่ติดหน้าสี่เหลี่ยม');mkMPush();
+  const V=P.v,mid=new Map();for(const k of edges){const [a,b]=k.split('_').map(Number);mid.set(k,V.length);V.push(V[a].map((x,i)=>meR((x+V[b][i])/2)));}
+  const fs=new Set(faces),NF=[],newE=[];
+  P.f.forEach((f,fi)=>{if(fs.has(fi)){let j=f.findIndex((a,q)=>mid.has(meK(a,f[(q+1)%4]))&&mid.has(meK(f[(q+2)%4],f[(q+3)%4])));if(j<0){NF.push(f);return;}
+      const [a,b,c,d]=[0,1,2,3].map(q=>f[(j+q)%4]),m1=mid.get(meK(a,b)),m2=mid.get(meK(c,d));NF.push([a,m1,m2,d],[m1,b,c,m2]);newE.push(meK(m1,m2));return;}
+    const o=[];f.forEach((a,q)=>{o.push(a);const k=meK(a,f[(q+1)%f.length]);if(mid.has(k))o.push(mid.get(k));});NF.push(o);});
+  P.f=NF;const nv=[...mid.values()];meDone(P,ME.mode==='e'||ME.mode==='f'?newE:nv,ME.mode==='f'?'e':null,'ตัดวงแล้ว ('+nv.length+' จุดใหม่) — ลากลูกศรเพื่อเลื่อนวง');}
+function mePendAsk(kind){const P=mePart();if(!P)return;let k=null;
+  if(ME.mode==='e'&&ME.sel.length)k=ME.sel[ME.sel.length-1];else if(ME.mode==='v'&&ME.sel.length>=2){const a=ME.sel[ME.sel.length-2],b=ME.sel[ME.sel.length-1];if(meEdges(P).has(meK(a,b)))k=meK(a,b);}
+  if(k)return kind==='cut'?meCut(k):meLoopSel(k,false);
+  ME.pend=kind;ME.boxArm=false;document.body.classList.remove('meBox');meBar();stHint(kind==='cut'?'คลิกที่ขอบที่จะตัดขวาง (วงใหม่จะวิ่งตั้งฉากกับขอบนั้น) • Esc ยกเลิก':'คลิกที่ขอบเพื่อเลือกทั้งวง • Esc ยกเลิก');}
+function meBar(){if(MK.ws==='mesh')mkMeshBot();}
 function meAll(){const P=mePart();if(!P)return;ME.sel=ME.sel.length?[]:ME.mode==='v'?P.v.map((p,i)=>i):ME.mode==='e'?[...meEdges(P).keys()]:P.f.map((f,i)=>i);meAfterSel();}
 // ---------- เครื่องมือ ----------
 function meCompact(P){const used=new Set();for(const f of P.f)for(const i of f)used.add(i);const map=new Map(),V=[];P.v.forEach((p,i)=>{if(used.has(i)){map.set(i,V.length);V.push(p);}});P.v=V;P.f=P.f.map(f=>f.map(i=>map.get(i)));return map;}
@@ -126,13 +175,17 @@ function meAddPrim(k){const M=MK.m,T=MEPRIM[k];if(!T||!M.d)return;mkMPush();cons
 function meBotButtons(){const M=MK.m,P=M.d&&M.d.parts.find(p=>p.id===M.sel),can=P&&P.k==='poly';
   const b=[h('span',{className:'sep'}),h('button',{className:ME.on?'on':'',disabled:!can&&!ME.on,title:can?'เข้า/ออกโหมดแก้จุด (Tab)':'เลือกชิ้นแบบ ✎ ปั้นเอง ก่อน — ＋ ชิ้นส่วน → ✎ ลูกบาศก์ ฯลฯ',on:{click:()=>meToggle()}},'✎ แก้จุด Tab')];
   if(!ME.on)return b;
-  b.push(h('span',{className:'stSeg2'},...[['v','● จุด','1'],['e','╱ ขอบ','2'],['f','■ หน้า','3']].map(([m,t,k])=>h('button',{className:ME.mode===m?'on':'',title:'เลือกทีละ'+t.slice(2)+' ('+k+')',on:{click:()=>meSetMode(m)}},t+' '+k))),
+  b.push(h('span',{className:'stSeg2'},h('button',{className:ME.boxArm?'on':'',title:'ลากกรอบเลือกหลายอัน: กดแล้วลากบนจอ (B) • Shift = เพิ่ม • Ctrl = เอาออก',on:{click:()=>meBoxArm()}},'▭ กรอบ B'),
+      h('button',{className:ME.pend==='loop'?'on':'',title:'เลือกทั้งวง: คลิกขอบ (หรือ Alt+คลิกขอบบนจอ) — โหมดหน้า = เลือกแถบหน้า (L)',on:{click:()=>mePendAsk('loop')}},'◎ เลือกวง L'),
+      h('button',{className:ME.pend==='cut'?'on':'',title:'ตัดวง: เพิ่มเส้นขอบวงใหม่ตัดขวางรอบชิ้น — เลือก/คลิกขอบที่จะตัดขวาง (Ctrl+R)',on:{click:()=>mePendAsk('cut')}},'✂ ตัดวง Ctrl+R')),
+    h('span',{className:'stSeg2'},...[['v','● จุด','1'],['e','╱ ขอบ','2'],['f','■ หน้า','3']].map(([m,t,k])=>h('button',{className:ME.mode===m?'on':'',title:'เลือกทีละ'+t.slice(2)+' ('+k+')',on:{click:()=>meSetMode(m)}},t+' '+k))),
     ...[['extrude','⇑ ดึงออก','E','ดึงหน้า/ขอบที่เลือกออกมาเป็นเนื้อใหม่ (แบบ Blender E)'],['inset','▣ หดใน','I','สร้างหน้าเล็กซ้อนข้างในหน้าที่เลือก (ใช้คู่กับดึงออก)'],['fill','◆ เติมหน้า','F','สร้างหน้าใหม่จากจุด 3–4 จุด หรือขอบ 2 เส้นที่เลือก'],
       ['merge','⊕ รวมจุด','M','รวมจุดที่เลือกเป็นจุดเดียวตรงกลาง'],['subdiv','÷ แบ่งหน้า','','แบ่งทุกหน้าของชิ้นนี้เป็น 4 (ได้จุดเพิ่มไว้ปั้นละเอียด)'],['flip','⇅ กลับหน้า','','กลับด้านหน้าที่เลือก (ถ้าหน้าดูทะลุ/มืด)'],['del','✕ ลบ','X','ลบจุด/ขอบ/หน้าที่เลือก']]
       .map(([op,t,k,ti])=>h('button',{title:ti+(k?' ('+k+')':''),on:{click:()=>meOp(op)}},t+(k?' '+k:''))),h('span',{id:'meStat',className:'mono'}));
   setTimeout(meStat,0);return b;}
 // ปุ่มลัดในโหมดแก้จุด (คืน true = ใช้ปุ่มนี้แล้ว)
-function meKey(e){if(e.code==='Tab'){e.preventDefault();meToggle();return true;}if(!ME.on||e.ctrlKey||e.metaKey||e.altKey)return false;
-  const k=e.code,A={Digit1:()=>meSetMode('v'),Digit2:()=>meSetMode('e'),Digit3:()=>meSetMode('f'),KeyA:meAll,KeyE:()=>meOp('extrude'),KeyI:()=>meOp('inset'),KeyF:()=>meOp('fill'),KeyM:()=>meOp('merge'),KeyX:()=>meOp('del'),Delete:()=>meOp('del'),
-    Escape:()=>{if(ME.sel.length){ME.sel=[];meAfterSel();}else meToggle(false);}}[k];
+function meKey(e){if(e.code==='Tab'){e.preventDefault();meToggle();return true;}
+  if(ME.on&&(e.ctrlKey||e.metaKey)&&e.code==='KeyR'){e.preventDefault();mePendAsk('cut');return true;}if(!ME.on||e.ctrlKey||e.metaKey||e.altKey)return false;
+  const k=e.code,A={Digit1:()=>meSetMode('v'),Digit2:()=>meSetMode('e'),Digit3:()=>meSetMode('f'),KeyA:meAll,KeyB:()=>meBoxArm(),KeyL:()=>mePendAsk('loop'),KeyE:()=>meOp('extrude'),KeyI:()=>meOp('inset'),KeyF:()=>meOp('fill'),KeyM:()=>meOp('merge'),KeyX:()=>meOp('del'),Delete:()=>meOp('del'),
+    Escape:()=>{if(ME.pend||ME.boxArm){ME.pend=null;meBoxArm(false);stHint('');}else if(ME.sel.length){ME.sel=[];meAfterSel();}else meToggle(false);}}[k];
   if(A){e.preventDefault();A();return true;}return false;}

@@ -198,7 +198,7 @@ function stBuildUI(){
   root.addEventListener('mouseover',e=>{const t=e.target.closest&&e.target.closest('[title]');stHint(t?t.title:'');});
   // กล้องหมุนเอง: ลากบนจอ / ล้อเมาส์ซูม
   const cv=gl.domElement;let drag=null;
-  cv.addEventListener('pointerdown',e=>{if(mkGizmoHot())return;drag={x:e.clientX,y:e.clientY};cv.setPointerCapture(e.pointerId);if(ST.cam!=='orbit'){ST.cam='orbit';stSync();}});
+  cv.addEventListener('pointerdown',e=>{if(mkGizmoHot()||meBoxDown(e))return;drag={x:e.clientX,y:e.clientY};cv.setPointerCapture(e.pointerId);if(ST.cam!=='orbit'){ST.cam='orbit';stSync();}});
   cv.addEventListener('pointermove',e=>{if(!drag)return;ST.orb.yaw+=(e.clientX-drag.x)*0.008;ST.orb.pitch=Math.max(-0.2,Math.min(1.45,ST.orb.pitch+(e.clientY-drag.y)*0.006));drag={x:e.clientX,y:e.clientY};if(!ST.play)ST.seekTo=ST.t;});
   cv.addEventListener('pointerup',()=>drag=null);
   cv.addEventListener('wheel',e=>{e.preventDefault();ST.orb.dist=Math.max(3,Math.min(60,ST.orb.dist*(e.deltaY>0?1.1:0.9)));if(ST.cam!=='orbit'){ST.cam='orbit';stSync();}if(!ST.play)ST.seekTo=ST.t;},{passive:false});
@@ -234,7 +234,7 @@ const stWs=()=>{try{return MK.ws;}catch(e){return 'fx';}};
 function stSetCam(k){ST.cam=k;stSync();if(!ST.play)ST.seekTo=ST.t;}
 // ---------- แถบสถานะ + คำใบ้ ----------
 const ST_HINT={fx:'ลากแถบสี = เลื่อนเวลา • ลากขอบขวา = ยืดอายุ • คลิกขวาที่ชั้น = เมนู • Shift+A เพิ่มชั้น • Space เล่น/หยุด • ? ดูปุ่มลัดทั้งหมด',
-  mesh:'คลิกชิ้นบนจอ = เลือก • G ย้าย / R หมุน / S ย่อขยาย • ลากจอ = หมุนกล้อง • ล้อเมาส์ = ซูม',edit:'โหมดแก้จุด: 1 จุด / 2 ขอบ / 3 หน้า • คลิก = เลือก (Shift เพิ่ม) • A ทั้งหมด • ลากลูกศร G/R/S • E ดึงออก • I หดใน • F เติมหน้า • M รวมจุด • X ลบ • Tab ออก',
+  mesh:'คลิกชิ้นบนจอ = เลือก • G ย้าย / R หมุน / S ย่อขยาย • ลากจอ = หมุนกล้อง • ล้อเมาส์ = ซูม',edit:'โหมดแก้จุด: 1 จุด / 2 ขอบ / 3 หน้า • คลิก = เลือก (Shift เพิ่ม) • Alt+คลิกขอบ = เลือกวง • B ลากกรอบ • Ctrl+R ตัดวง • A ทั้งหมด • ลากลูกศร G/R/S • E ดึงออก • I หดใน • F เติมหน้า • M รวมจุด • X ลบ • Tab ออก',
   tex:'ปรับค่าทางขวา ภาพจะวาดใหม่เอง • ลากไฟล์ PNG/JPG มาวางบนจอเพื่อนำเข้า',vol:'ตั้งค่าทางขวา แล้วกดจำลอง • ลากจอ = หมุนกล้อง'};
 function stHint(s){const e=$st('stHint');if(!e)return;let w=stWs();try{if(w==='mesh'&&ME.on)w='edit';}catch(er){}e.textContent=s||ST_HINT[w]||'';}
 function stStatus(){const l=$st('stSLint');if(!l)return;const fx=stWs()==='fx';

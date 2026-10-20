@@ -309,3 +309,5 @@ body.studio:not(.ws-fx) #stTop .sep{display:none}
 /* ---------- เมนูเพิ่มชิ้น + โหมดแก้จุด (studio/meshedit.js) ---------- */
 #mkAddMenu .mkMenuH{grid-column:1/-1;font:600 11px var(--ui);color:var(--tx3);padding:4px 4px 2px;letter-spacing:.3px}
 #mkAddMenu{width:440px}
+#meBoxR{position:fixed;z-index:40;border:1px dashed var(--acc2);background:rgba(74,140,255,.12);pointer-events:none}
+body.meBox #gl{cursor:crosshair!important}
