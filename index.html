@@ -13,10 +13,34 @@
 <canvas id="gl"></canvas>
 <canvas id="cv"></canvas>
 
+<!-- ===== ฉากเปิด (โชว์ครั้งแรกที่เปิดหน้าเว็บ — คลิก/กดปุ่มเพื่อเข้าเมนู) ===== -->
+<div id="intro">
+  <canvas id="introFx"></canvas>
+  <div class="inRays"></div>
+  <div class="inCore">
+    <svg class="inSigil" viewBox="0 0 400 400" aria-hidden="true">
+      <circle cx="200" cy="200" r="190"/><circle cx="200" cy="200" r="172"/><circle cx="200" cy="200" r="118"/>
+      <polygon points="200,28 349,286 51,286"/><polygon points="200,372 51,114 349,114"/>
+      <g class="ticks"><path d="M200 10v24M200 366v24M10 200h24M366 200h24M66 66l17 17M317 317l17 17M66 334l17-17M317 83l17-17"/></g>
+      <text><textPath href="#inRing" startOffset="0">ᚠ ᚨ ᚾ ᛏ ᚨ ᛊ · ᛊ ᛏ ᛁ ᚲ ᚲ · ᛞ ᚢ ᛖ ᛚ · ᛗ ᚨ ᚷ ᛁ ᚲ · ᚠ ᛁ ᚱ ᛖ · ᛁ ᚲ ᛖ · ᛊ ᛏ ᛟ ᚱ ᛗ ·</textPath></text>
+      <path id="inRing" d="M200 19a181 181 0 1 1 -0.1 0" fill="none" stroke="none"/>
+    </svg>
+    <div class="inLogo"><span class="w1">Fantas</span><span class="w2">Stick</span></div>
+    <div class="inSub">ดวลเวทมนตร์</div>
+    <div class="inTag">CO-OP · DUEL · QUIDDITCH · BATTLE ROYALE</div>
+    <div class="inPress">✦ คลิกเพื่อเริ่มการผจญภัย ✦</div>
+  </div>
+  <div class="inFlash"></div>
+</div>
+
 <!-- ===== MENU ===== -->
 <div id="menu" class="screen">
+  <canvas id="menuFx"></canvas>
+  <div class="mRays"></div>
+  <div class="mVig"></div>
   <div class="mleft">
-    <div class="logo-en">Fantas<br>Stick</div>
+    <svg class="mSigil" viewBox="0 0 400 400" aria-hidden="true"><circle cx="200" cy="200" r="190"/><circle cx="200" cy="200" r="172"/><circle cx="200" cy="200" r="118"/><polygon points="200,28 349,286 51,286"/><polygon points="200,372 51,114 349,114"/></svg>
+    <div class="logo-en"><span>Fantas</span><span>Stick</span></div>
     <div class="logo-th">ดวลเวทมนตร์</div>
     <div class="orn"></div>
     <nav class="mnav">
@@ -36,7 +60,7 @@
     <div class="myhouse" id="myHouse"></div>
     <button id="btnLook" style="width:100%">🧙 แต่งตัวละคร / เลือกบ้าน</button>
   </div>
-  <div class="mnews"><b>✨ มีอะไรใหม่</b>• สายไฟ 🔥 และสายน้ำแข็ง ❄️ ออกแบบใหม่ทั้งหมด<br>• แผนที่โล่งใหม่ 3 แบบ: ทุ่งหญ้า / ทะเลสาบน้ำแข็ง / ซากลานประลอง (เลือกแผนที่ได้ในล็อบบี้)<br>• หน้าตั้งค่า: ความไวเมาส์ เป้าเล็ง เสียง กราฟิก ตั้งปุ่มเองได้<br>• Shift = พุ่ง • Space = กระโดด • Esc = เมนูหยุดพัก</div>
+  <div class="mnews"><b>✨ มีอะไรใหม่</b>• ตัวละครใหม่จาก Blender พร้อมท่าทาง 7 ท่า<br>• แผนที่ทั้ง 8 แบบปั้นใหม่หมด มีที่สูง ลำธาร ลานน้ำแข็ง<br>• หุ่นซ้อม ถังไม้ หีบสมบัติ หน้าตาใหม่<br>• Shift = พุ่ง • Space = กระโดด • Esc = เมนูหยุดพัก</div>
   <div class="mver">CO-OP · DUEL · QUIDDITCH · BATTLE ROYALE</div>
 </div>
 

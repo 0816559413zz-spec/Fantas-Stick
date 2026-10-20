@@ -74,7 +74,7 @@ function stageSpots(L){
 function stageChar(id,lk){
   let o=STAGE.chars.get(id),px=null,had=false,pp=null;
   if(o&&o.lk!==lk){px=o.x;pp=o.pp;had=true;stage.remove(o.g);disposeObj(o.g);STAGE.chars.delete(id);o=null;}
-  if(!o){const re=had&&id==='me-preview';o=makeStudent(parseLook(lk),id);stage.add(o.g);o.lk=lk;o.house=parseLook(lk).h;o.pid=id;o.joinT=re?0:1.6;o.x=re?px:null;if(pp)o.pp=pp;STAGE.chars.set(id,o);}
+  if(!o){const re=had&&id==='me-preview';o=makeStudent(parseLook(lk),id);stage.add(o.g);{const L=parseLook(lk);useFileModel(o,'char_student',lookTint(L),L);}o.lk=lk;o.house=parseLook(lk).h;o.pid=id;o.joinT=re?0:1.6;o.x=re?px:null;if(pp)o.pp=pp;STAGE.chars.set(id,o);}
   return o;
 }
 // ท่าประจำบ้าน [แขนขวา rx,rz | แขนซ้าย rx,rz | ลำตัว rx,rz] — ปรับนุ่มๆ เวลาเปลี่ยนบ้าน
@@ -103,6 +103,45 @@ function stageIdle(o,now,dt,i){
   o.ends.forEach((E,k)=>{E.rotation.x=Math.sin(now*0.0015+k+i)*0.05;E.rotation.z=0;});
   o.tip.scale.setScalar(0.3+0.08*Math.sin(now/120+i)+lift*0.6+(h===0||h===4?0.15:0));
   o.broom.visible=o.cocoon.visible=o.shield.visible=o.stars.visible=false;
+  if(o.anim)animTick(o,{sp:0},dt);
+  if(o.rig){rigStage(o);rigSync(o,dt);}
+}
+// ---------- เอฟเฟกต์หน้าเมนู (โชว์เฉพาะหน้าแรก ไม่โชว์ในล็อบบี้/หน้าสร้างตัวละคร): ลำแสงจากหน้าต่าง เสาแสง วงเวทลอยรอบตัว ประกายหมุนขึ้น ----------
+(function(){
+  const G=new THREE.Group();stage.add(G);STAGE.mfx=G;STAGE.introT=-1;
+  const vgrad=texCanvas(4,128,(g)=>{const r=g.createLinearGradient(0,0,0,128);r.addColorStop(0,'rgba(255,255,255,0)');r.addColorStop(0.35,'rgba(255,255,255,0.55)');r.addColorStop(1,'rgba(255,255,255,1)');g.fillStyle=r;g.fillRect(0,0,4,128);});
+  const add=(c,o)=>new THREE.MeshBasicMaterial(Object.assign({map:vgrad,color:hdr(c,1),transparent:true,opacity:0.2,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide,fog:false},o||{}));
+  // ลำแสงจันทร์จากหน้าต่าง 3 บาน ส่องลงแท่น
+  STAGE.rays=[];
+  for(const [x,z,w] of [[0,-15,4.2],[-10,-13,2.8],[10,-13,2.8]]){
+    const m=new THREE.Mesh(new THREE.PlaneGeometry(w,22),add('#9fb4ff',{opacity:x?0.05:0.07}));
+    m.position.set(x*0.55,6,(z+1)*0.5);m.lookAt(0,6,8);m.rotateX(-0.75);G.add(m);STAGE.rays.push(m);
+  }
+  // เสาแสงทองบนตัวละคร
+  STAGE.pillar=new THREE.Mesh(new THREE.CylinderGeometry(1.15,1.35,12,32,1,true),add('#ffd27a',{opacity:0.13}));STAGE.pillar.position.y=STAGE_Y+6;STAGE.pillar.rotation.x=Math.PI;G.add(STAGE.pillar);
+  // วงเวทลอยรอบตัว 3 ชั้น
+  STAGE.halos=[[0.75,1.6,'#ffd27a',0.55],[1.55,1.25,'#9fd0ff',0.4],[2.35,1.85,'#e8c66a',0.35]].map(([y,r,c,op],i)=>{
+    const m=new THREE.Mesh(new THREE.CircleGeometry(r,64),new THREE.MeshBasicMaterial({map:runeTex,color:hdr(c,1.4),transparent:true,opacity:op,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide,fog:false}));
+    m.rotation.x=-Math.PI/2;m.position.y=STAGE_Y+y;m.userData={y:STAGE_Y+y,op,s:i%2?-1:1,tilt:[0.28,-0.34,0.42][i]};G.add(m);return m;});
+  // ประกายหมุนเป็นเกลียวขึ้นรอบตัว
+  const n=160,pos=new Float32Array(n*3),seed=[];for(let i=0;i<n;i++)seed.push([Math.random(),Math.random()*6.283,0.7+Math.random()*1.0,Math.random()]);
+  const pg=new THREE.BufferGeometry();pg.setAttribute('position',new THREE.BufferAttribute(pos,3));
+  STAGE.spiral={pts:new THREE.Points(pg,new THREE.PointsMaterial({map:glowTex,color:hdr('#ffe2a0',2),size:0.09,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,fog:false})),pos,seed};
+  STAGE.spiral.pts.frustumCulled=false;G.add(STAGE.spiral.pts);
+  // วงเวทยักษ์จางๆ บนผนังหลัง
+  STAGE.sigil=new THREE.Mesh(new THREE.CircleGeometry(9,96),new THREE.MeshBasicMaterial({map:runeTex,color:hdr('#7f95e6',1),transparent:true,opacity:0.16,depthWrite:false,blending:THREE.AdditiveBlending,fog:false}));
+  STAGE.sigil.position.set(0,8.5,-16.5);G.add(STAGE.sigil);
+})();
+function stageMenuFx(now,on){
+  const G=STAGE.mfx;G.visible=on;if(!on)return;
+  const t=now/1000;
+  STAGE.halos.forEach((m,i)=>{const u=m.userData;m.rotation.z=t*0.35*u.s;m.rotation.x=-Math.PI/2+u.tilt+Math.sin(t*0.6+i)*0.06;m.position.y=u.y+Math.sin(t*0.9+i*2)*0.08;m.material.opacity=u.op*(0.75+0.25*Math.sin(t*1.7+i));});
+  STAGE.pillar.material.opacity=0.1+0.04*Math.sin(t*1.3);STAGE.pillar.rotation.y=t*0.2;
+  STAGE.rays.forEach((m,i)=>m.material.opacity=(i?0.045:0.065)*(0.8+0.2*Math.sin(t*0.5+i)));
+  STAGE.sigil.rotation.z=-t*0.04;
+  const S=STAGE.spiral;for(let i=0;i<S.seed.length;i++){const s=S.seed[i],h=(s[0]+t*0.12*(0.6+s[3]))%1,a=s[1]+t*(1.2+s[3])+h*6,r=s[2]*(1-h*0.45);
+    S.pos[i*3]=Math.cos(a)*r;S.pos[i*3+1]=STAGE_Y+0.1+h*3.4;S.pos[i*3+2]=Math.sin(a)*r;}
+  S.pts.geometry.attributes.position.needsUpdate=true;S.pts.material.opacity=0.85;
 }
 const _sv=new THREE.Vector3();
 // ---------- ฉากประจำบ้าน (โผล่ตอนเลือกบ้านในหน้าสร้างตัวละคร) ----------
@@ -223,11 +262,18 @@ function renderStage(dt,now){
   for(const c of STAGE.candles)c.g.position.y=c.y+Math.sin(now/900+c.ph)*0.25;
   STAGE.rune.rotation.z=now/9000;STAGE.rune.material.opacity=0.32+0.12*Math.sin(now/700);
   STAGE.dust.rotation.y=now/40000;
+  stageMenuFx(now,!lob&&!crOpen);
   // กล้อง: เมนู = ตัวเราอยู่ฝั่งขวา / ล็อบบี้ = มองทั้งแท่น
   const sway=Math.sin(now/5200)*0.15;
   if(lob){const mx=Math.max(0,...rows.map(r=>Math.abs(r.s.x)),...STAGE.empty.map(e=>Math.abs(e.x))),dist=clamp((mx+1.1)/(0.3*cam.aspect),6.5,13);cam.position.set(sway,1.5+dist*0.1,dist);cam.lookAt(0,1.45,0);}
   else if(crOpen){const s3=crStep===4,sw=crStep===2||crStep===3;cam.position.set(-0.45+sway*0.4,s3?1.95:sw?1.85:1.8,s3?4.5:sw?3.2:3.9);cam.lookAt(-0.45,s3?1.2:sw?1.55:1.5,0);}
-  else{cam.position.set(-0.85+sway*0.5,1.55,5.6);cam.lookAt(-0.85,1.12,0);}
+  else{
+    // หน้าแรก: กล้องโฉบจากมุมสูงไกลลงมาหาตัวละครตอนกดผ่านฉากเปิด (STAGE.introT 0→1) แล้วลอยช้าๆ
+    const u=STAGE.introT<0?0:Math.min(1,STAGE.introT),e=1-Math.pow(1-u,3);
+    if(STAGE.introT>=0&&STAGE.introT<1)STAGE.introT+=dt/2.8;
+    const drift=Math.sin(now/7000)*0.25;
+    cam.position.set(lerp(1.5,-0.85+sway*0.5+drift,e),lerp(8.5,1.55,e),lerp(17,5.6,e));cam.lookAt(lerp(0,-0.85,e),lerp(3.2,1.12,e),0);
+  }
   if(window.__stageCam)window.__stageCam(cam);
   rpass.scene=stage;gl.shadowMap.needsUpdate=true;composer.render();rpass.scene=scene;
   if(lob)drawStageLabels(rows,team);

@@ -99,7 +99,7 @@ function tintModel(root,tint){
 // ใส่โมเดลไฟล์ให้ตัวละคร/ศัตรูที่สร้างจากโค้ดแล้ว: ซ่อน mesh เดิมด้วย layer 31 (กล้อง/เงาไม่วาด — ไม่ใช้ visible เพราะโค้ดคาถาเปิดปิด visible เอง)
 // look (ผู้เล่น) = เลือกชิ้น hair_N/tie_N/wand_N ตามหน้าตา + ใส่ไว้ใน o.b (ตัวเอน/ล้มตามโค้ด) + ผูกแขนขาโค้ดกับกระดูก (rigBind) + ไม้กวาดจากไฟล์
 function useFileModel(o,name,tint,look){
-  loadModel(name).then(r=>{
+  const apply=r=>{
     if(!r||o.fileModel||!o.g.parent)return;
     const inst=modelInst(name);if(!inst)return;
     if(tint)tintModel(inst,tint);
@@ -111,8 +111,11 @@ function useFileModel(o,name,tint,look){
     if(look){rigBind(o,inst);fileBroom(o);}
     if(o.ghost)setGhost(o,true);
     gl.shadowMap.needsUpdate=true;
-  });
+  };
+  const ready=MODELS.ready.get(name);if(ready)apply(ready);else loadModel(name).then(apply);   // โหลดไว้แล้ว = ใส่ทันที
 }
+// เวที/เมนู: ท่าจากโค้ด (POSES) ไม่มีท่าเดินปกติให้เทียบ → ล้างแกน y แล้วใช้ 0 เป็นท่าปกติ
+function rigStage(o){for(const k of o.rig){if(k.al)continue;const r=k.c.rotation;r.y=0;if(k.leg)r.z=0;k.sx=k.sz=0;}}
 // ชิ้นที่ผู้เล่นเลือกได้: object ชื่อ hair_<ทรงผม> tie_<เนคไท> wand_<ไม้> → โชว์เฉพาะเลขที่ตรงกับหน้าตา
 function fileVariants(inst,look){const K={hair:'hs',tie:'ti',wand:'ws'};inst.traverse(m=>{const r=/^(hair|tie|wand)_(\d+)$/.exec(m.name);if(r)m.visible=+r[2]===look[K[r[1]]];});}
 function fileBroom(o){loadModel('char_broom').then(r=>{if(!r||!o.g.parent||!o.broom)return;const m=modelInst('char_broom');if(!m)return;for(const c of [...o.broom.children])o.broom.remove(c);o.broom.add(m);});}
