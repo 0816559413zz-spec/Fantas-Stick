@@ -5,7 +5,7 @@ Format: `name:line` = top-level function/const/let in that file. `§line title` 
 ## js/01-core.js (22) — แกนกลาง: import Three.js + ฟังก์ชันพื้นฐาน ($ rnd clamp lerp store to…
 $:12 rnd:13 clamp:14 lerp:15 dist2:16 lerpAng:17 esc:18 shuffle:19 store:20 toastT:21 toast:22
 
-## js/02-data.js (305) — ค่าคงที่ของเกม
+## js/02-data.js (305) — 
 W:4 H:4 PR:4 PILLARS:6 SPAWNF:7 mulberry:9 genForest:10 genPitch:27 genHogsmeade:36
 §54 แผนที่โล่ง 3 แบบ (ผู้ใช้: ป่ามืดไม่สนุก อยากได้ที่โล่งๆ)
 genMeadow:55 genLake:61 genRuins:66
@@ -41,7 +41,7 @@ pyroBigBoom:5 pyroBall:13 pyroBasic:14 addOrbs:31 pyroParry:32 pyroBlock:33 laun
 ## js/07-frost-spells.js (33) — 
 frostGlacier:11
 
-## js/08-storm.js (200) — สายสายฟ้า (ผู้เล่นออกแบบทั้งหมด — designs/storm.md)
+## js/08-storm.js (200) — 
 ST_MAX:5 stGain:6 stSpend:7 stormCone:9 stormLineFoes:14 stormBasic:18 stormTri:41 stormDash:48 stormDashTick:61 stormShieldBlast:69 stormTick:78
 §87 สกิล 1 (ฟรี): เส้นสายฟ้า — ชี้ขึ้นแล้วกดลง 0.5 วิ จากนั้นสายฟ้าผ่าเป็…
 stormLine:90
@@ -55,27 +55,27 @@ stormRailFire:132
 §142 สกิล 6 (3 stacks): ลูกสายฟ้าโดม — ทะยานขึ้น บินเล็ง 3 วิ คลิกยิงลูกสา…
 stormDomeTick:143 stormDomeFire:158 stormDomeSlam:166 updateStorm:171
 
-## js/09-earth.js (226) — 
-EARTH:7 E_SH:7
-§11 ตัวช่วย
-eOn:12 eStand:13 eNoStand:14 eSegD:16 eAdd:17 eCollide:19 eProjHit:26 eKill:29
-§31 ทุกเฟรมของผู้เล่นสายดิน (เรียกจาก updatePlayer หลังส่วนโล่)
-earthTick:32 earthSpd:55 earthShHit:57 earthBreak:58 earthReset:60
-§62 ท่าพื้นฐาน (คลิกซ้าย)
-earthBATarget:63 earthBasic:67
-§80 Dash: Stand Rampage / Rock Boost Escape
-earthDash:81 earthRampEnd:99
-§104 สกิล 1: Stonebreaker
-§113 สกิล 2: Mud Swamp
-§118 สกิล 3: Tectonic Crush
-earthCrush:132
-§142 สกิล 4: Dust Burst
-§148 สกิล 5: Terra Auger
-earthAugFire:152
-§161 อัลติ: Wrath
-earthPillarAim:169 earthPillarDrop:173 earthPils:179 earthDomain:181 earthWrathTick:190 earthWrathEnd:197 earthPillarSlam:201
-§207 ทั้งสนาม: สิ่งก่อสร้างพัง / ฝุ่นหมดเวลา / Stonebreaker ชนกำแพง
-updateEarth:208 earthSnapP:216 earthSnapW:218
+## js/09-earth.js (236) — 
+EARTH:8 E_SH:8
+§12 ตัวช่วย
+eOn:13 eStand:14 eNoStand:15 eSegD:17 eAdd:18 eCollide:20 eProjHit:27 eKill:30
+§32 ทุกเฟรมของผู้เล่นสายดิน (เรียกจาก updatePlayer หลังส่วนโล่)
+earthTick:33 earthSpd:59 earthShHit:61 earthBreak:62 earthReset:64
+§66 ท่าพื้นฐาน (คลิกซ้าย)
+earthBATarget:67 earthBasic:71 earthPunch:80 earthCBStart:86 earthCBSlam:87
+§91 Dash: Stand Rampage / Rock Boost Escape
+earthDash:92 earthRampEnd:110
+§115 สกิล 1: Stonebreaker
+§126 สกิล 2: Mud Swamp
+§131 สกิล 3: Tectonic Crush
+earthCrush:145
+§155 สกิล 4: Dust Burst
+§161 สกิล 5: Terra Auger
+earthAugFire:165 earthMound:175
+§178 อัลติ: Wrath (v2)
+earthPillarThrow:186 earthWrathTick:197 earthWrathDrill:208 earthWrathEnd:213
+§216 ทั้งสนาม: สิ่งก่อสร้างพัง / ฝุ่นหมดเวลา / Stonebreaker ชนกำแพง
+updateEarth:217 earthSnapP:226 earthSnapW:228
 
 ## js/09-other-paths.js (195) — 
 §65 สัตว์เวท (minion): AI ฝั่งโฮสต์
@@ -83,7 +83,7 @@ MIND:66 summonMin:72 minTarget:81 minShoot:88 updateMins:93 aimTarget:133
 §180 ร่ายคาถา
 castSlot:181 castUlt:195
 
-## js/10-net.js (71) — เครือข่าย (PeerJS / WebRTC)
+## js/10-net.js (71) — 
 PREFIX:4 NET:5 LOBBY:6 genCode:7 sendAll:8 setStatus:9 hostGame:11 joinGame:34 clientOnData:59 leave:71
 
 ## js/11-host.js (328) — 
@@ -102,8 +102,7 @@ spawnEnemy:2 setupWave:19 bossPhase:36 enemySlam:44 updateEnemies:55
 ## js/14-mode-rules.js (99) — กติกาของแต่ละโหมด
 hostPick:2 modeLogic:8 endMatch:76
 
-## js/15-modes.js (382) — โหมดพิเศษ: ควิดดิช / แข่งไม้กวาด / แบทเทิลรอยัล / หาลอร์ดโวลเดอมอร์ / ห้องฝึก
-§4 ส่งข้อความลับถึงผู้เล่นคนเดียว (เช่น บทบาทในโหมดหาลอร์ดโวลเดอมอร์)
+## js/15-modes.js (382) — 
 sendPriv:5 TASKF:9 taskPts:10 raceRings:11 modeInit:17 spawnDummy:58 trainTick:63 TR_KEYS:75 trTeams:77 trCmd:85 hostEndTraining:102
 §104 ควิดดิช
 quidThrow:105 quidDrop:111 quidTick:116 snitchTick:151
@@ -133,7 +132,7 @@ MY:202 myDB:203 mySave:204 myLoad:207 myDecodeReady:213 myPlay:214 myNext:226 my
 §248 เพลงประกอบ (สร้างสดตามแผนที่)
 MUSIC:249 THEMES:250 padNote:255 musicTick:262 toggleMusic:291
 
-## js/19-client.js (186) — ฝั่งแสดงผล (ทุกเครื่อง รวมโฮสต์ ใช้ snapshot เดียวกัน)
+## js/19-client.js (186) — 
 cv:4 cx:4 DPR:5 SW:5 SH:5 resize:6 VIEW:12 screen:13 lastBuffKey:13 overShown:13 lastCount:13 PARTS:14 TEXTS:14
 §15 งบเอฟเฟกต์ (VFX budget)
 VFXB:20 _apush:21 vfxQual:29 vfxBegin:31 vfxEnd:34 vfxOnce:36 vfxExtra:38 PCOL:39 setScreen:41 onLobby:50 onSnap:56 myPos:64
@@ -262,8 +261,7 @@ trOpenF:2 trKey:2 trN:2 TR_OPTS:3 trToggle:4 trSend:9 trSync:14 hovEl:62
 §63 หน้าตั้งค่า
 setRow:64 setTog:65 setTab:66 XHC:67 XHN:67 setOpts:68 renderSettings:69 drawXhPrev:86 openSettings:87 closeSettings:88 modeIcon:140 modeTitle:141 renderLobby:142
 
-## js/41-debug.js (141) — เครื่องมือทดสอบสมดุล (ใช้ผ่านคอนโซล WD.bal / WD.dmgTest เท่านั้น ผู้เล่นปกติไม่เห็น)
-§5 บอทต่อสู้แบบง่ายๆ: เล็งนำเป้า เดินรักษาระยะ+ส่ายไปมา ร่ายคาถาทุกครั้ง…
+## js/41-debug.js (141) — 
 botBrain:6 _obsKeep:47 balArena:48 balReset:49 balDuel:53 balTour:68 balCoop:82 balSpellTest:98
 §117 Service Worker (sw.js): เก็บไฟล์เกมไว้ในเครื่อง เปิดครั้งต่อไปเร็วขึ้…
 SWK:118 swSetup:119
@@ -283,7 +281,7 @@ NOISE3D:240 FIRE3D:249 _fvIdx:254 fireVol:255 fireVolTemp:299
 §300 ไฟ 3 มิติที่ bake จาก Blender ทั้งก้อน (วิธี 1 — ผู้เล่นเลือก 2026-10…
 FSEQ:304 fireSeqLoad:305 fireSeqReady:309 fireSeqVol:310 fireSeqAt:331 _sqA:338 _sqB:338 _sqX:338 _sqY:338 _sqZ:338 _sqM:338 fireSeqLine:339
 
-## js/43-frost-vfx.js (144) — น้ำแข็ง VFX จาก Blender + Glacier Mist (หมอกเย็นตอนน้ำแข็งโผล่)
+## js/43-frost-vfx.js (144) — 
 FROST_U:6
 §7 shader น้ำแข็ง: ฐานน้ำเงินเข้ม → ปลายขาว • ขอบสว่าง (fresnel) • รอยร้…
 ICE_VS:8 ICE_FS:10 _iceShM:23 iceShaderMat:24 iceModel:28
@@ -335,7 +333,7 @@ fxBind:305
 §316 แม่แบบ playFx เป็นไฟล์ (assets/fx/tpl/*, sig/*, rec/*)
 fxTpl:318
 
-## js/46-fx-make.js (261) — ของที่สร้างเองใน VFX Studio (asset ของเอฟเฟกต์) — ใช้ทั้งในเกมและในสตูดิโอ (สตูดิโอเรียกฟ…
+## js/46-fx-make.js (261) — 
 FXMK:10 MKD:11 mkRng:12 mkHash:13 mkNoise:15 mkL:17 mkR2:18
 §19 ที่เก็บจุด/สามเหลี่ยม
 mkG:21 mkPc:22 mkV:23 mkQ:24 mkAppend:25 mkCopy:26 mkFlat:27 _mkv:28 mkXf:29 mkThree:32 mkTRS:34 mkGrid:37
@@ -357,22 +355,32 @@ fxWarpMake:219 fxWarpTick:231
 §237 ไฟ 3 มิติจากการจำลอง (ชั้น vol) — ไฟล์รูปแบบเดียวกับที่เพื่อน bake จา…
 FXVOL:240 fxVolLoad:241 fxVolTex:245 fxVolSet:248 fxVolReady:249 fxVolMake:250 fxVolTick:253 fxPreAssets:258 fxAssetsWait:260
 
-## js/47-earth-view.js (184) — สายดิน ⛰️ — ภาพฝั่งเครื่องเล่น (Stand หิน / กำแพง / เสา / เนิน / โดเมน / ฝุ่น / สว่าน / H…
-ECOL:8 EV:9 eW:10 eYaw:11 eMat:13 rockGeo:14
-§17 Stand หิน (คนหินลอยตัว แขนยาว หมัดใหญ่ ตาเรืองทอง)
-makeStand:18 standOp:32 standPose:33 eState:38 eStandOf:39
-§40 ทุกเฟรม: ผู้เล่นสายดิน (เรียกจาก syncPlayers)
-earthFX:41 makeDrill:73
-§77 กระสุนหิน
-earthProjMesh:78
-§83 สิ่งก่อสร้าง + ฝุ่น (เรียกจาก render loop)
-earthClear:84 eMakeSO:87 syncEarth:95 earthFog:114 _eCamT:117 eAnim:118 eRock:119 eDebris:120
-§121 event "efx" ของสายดิน (เรียกจากต้น efxFX) — คืน true = จัดการแล้ว
-earthEfx:122 earthMudZone:168 earthMudSink:171
-§172 HUD ใต้เป้าเล็ง
-drawEarthHud:173
+## js/47-earth-view.js (361) — สายดิน ⛰️ — ภาพฝั่งเครื่องเล่น (Stand / Stand ใหญ่ / กำแพง / เสา / เนิน / ฝุ่น / สว่าน / …
+ECOL:9 EV:10 eW:11 eYaw:12
+§13 ลายผิว (วาดเองบน canvas: หิน/ทราย + รอยร้าว + ขอบบล็อกแบบ Roblox)
+ETEX:14 eTex:15 eFadeTex:27 eMat:29 eTMat:30 rockGeo:31 _eChunkM:35 eChunks:36
+§38 Stand (บล็อกหิน/ทรายครึ่งตัวบน)
+makeStand:40 standOp:67 standPose:69 eState:81 eStandOf:82 eGiantOf:83 eSandFall:85 eAppear:86 eAim:88
+§89 วงเตือนบนพื้น (BA ชาร์จ / จุดปาเสา): วงเข้มก่อน แล้วสีอ่อนค่อย ๆ เติม…
+makeWarn:90 eWarnAt:95
+§96 ทุกเฟรม: ผู้เล่นสายดิน (เรียกจาก syncPlayers)
+earthFX:97
+§166 สว่าน: เรียว แหลม เกลียว สีเงิน + แกนร้อน (เหลือง → แดง ตามระดับ) • ป…
+makeDrill:167 drillHeat:174
+§178 เสายักษ์ (ref: designs/earth_ref/pillar_ref.png): เสาเหลี่ยมยาว ปลายห…
+makePillar:179
+§185 กระสุนหิน
+earthProjMesh:186 makeSlab:191
+§194 สิ่งก่อสร้าง + ฝุ่น (เรียกจาก render loop)
+earthClear:195 eMakeSO:200 syncEarth:212 earthFog:245 _eCamT:248 eAnim:249 eDebris:250 eWave:252 eAirWave:254
+§256 event "efx" ของสายดิน (เรียกจากต้น efxFX) — คืน true = จัดการแล้ว
+earthEfx:257 eDrillFly:333
+§336 บึงโคลน (Mud Swamp + บึงจากเสาอัลติ): คลื่นกระเพื่อมจากกลางไปขอบ แล้ว…
+earthMudZone:337 earthMudSink:344
+§345 HUD ใต้เป้าเล็ง
+drawEarthHud:346
 
 ## js/48-ragdoll.js (227) — 
 RAG:10 RAGJ:23 RAGB:29 RAGS:33 RAGMIN:37 RAGHINGE:39 _rv1:40 _rv2:40 _rv3:40 _rqa:40 _rqb:40 _rm:40 ragBones:41 ragBasis:48 ragTargets:56 ragStart:62 ragBack:88 ragFloor:89 ragStep:90 ragPose:155 ragWrite:170 ragRestore:182 ragEnd:186 ragTick:188 ragHideDead:222
 
-(49 files, 11054 lines)
+(49 files, 11241 lines)

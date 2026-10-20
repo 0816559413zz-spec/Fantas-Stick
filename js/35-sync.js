@@ -346,7 +346,7 @@ function drawCrosshair(){
   const _v=VIEW.cur,_me=_v&&_v.P&&_v.P.find(q=>q.id===NET.myId),hot=_me&&(_me.cg>=1||_me.dc>=1);
   drawXh(x,y,hot);
   if(_me&&_me.sm&&_me.al)drawStormHud(x,y,_me.sm);
-  if(_me&&_me.ea&&_me.al)drawEarthHud(x,y,_me.ea);
+  if(_me&&_me.ea&&_me.al)drawEarthHud(x,y,_me.ea,_me);
   if(!locked){
     cx.font='600 17px Kanit,sans-serif';cx.textAlign='center';
     const t='🖱️ คลิกที่จอเพื่อบังคับกล้อง (Esc = ปล่อยเมาส์)',w=cx.measureText(t).width+48;

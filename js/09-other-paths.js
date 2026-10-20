@@ -180,7 +180,7 @@ defSpell(2,{id:'stormdome',role:'control',n:'ลูกสายฟ้าโด�
 // ---------- ร่ายคาถา ----------
 function castSlot(p,i){
   const S=SPELLS[p.kitIds[i]];if(!S)return false;
-  if(p.aug||p.ramp||(p.wr&&p.wr.ph!=='trans'))return false;   // สายดิน: ชาร์จ Auger / Rampage / อยู่บนฟ้า (Wrath)
+  if(p.aug||p.ramp||p.ecb||(p.wr&&p.wr.ph!=='trans'))return false;   // สายดิน: ชาร์จ Auger / Rampage / อยู่บนฟ้า (Wrath)
   const k=SLOTK[i];
   if(S.toggle&&S.toggle(p))return true;
   if(S.melee&&p.fmode===1)return false;
@@ -192,4 +192,4 @@ function castSlot(p,i){
   const cd=S.cd*p.buffs.cdr;p.cd[k]=cd;p.cdMax[k]=cd;
   return true;
 }
-function castUlt(p){if(p.wr){earthDomain(p);return false;}const S=SPELLS[p.ultId];if(!S||p.ult<100||p.sil>0||p.cryo>0)return false;S.cast(p,S);p.ult=0;return true;}
+function castUlt(p){if(p.wr)return false;const S=SPELLS[p.ultId];if(!S||p.ult<100||p.sil>0||p.cryo>0)return false;S.cast(p,S);p.ult=0;return true;}
