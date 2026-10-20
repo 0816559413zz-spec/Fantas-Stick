@@ -1,0 +1,32 @@
+{
+ "v": 1,
+ "desc": "เปลวเกลียวตั้งเลียขึ้น 3 แขน รอบวงไฟ (Blazeform)",
+ "mat": "fire",
+ "pal": "fire",
+ "tags": [
+  "fire",
+  "aura"
+ ],
+ "parts": [
+  {
+   "id": "licks",
+   "k": "spiral",
+   "turns": 0.3,
+   "r0": 2.0,
+   "r1": 2.3,
+   "rise": 1.6,
+   "w": 0.7,
+   "taper": 0.9,
+   "wall": true,
+   "seg": 70,
+   "pos": [
+    0,
+    0,
+    0
+   ],
+   "arr": 3,
+   "arrMode": "ring",
+   "arrR": 0
+  }
+ ]
+}
