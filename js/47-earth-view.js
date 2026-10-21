@@ -599,63 +599,46 @@ function earthMudSink(o,fm,x,y){if(!(fm&524288))return;o.g.position.y-=0.45;if(M
 // ค่าเวลาใน snapshot ปัดขึ้นเป็นวินาที → นับถอยเองบนเครื่องให้แถบลื่น (อยู่ในช่วง v-1..v เสมอ)
 const ESM={};
 function eSmooth(k,v){const n=performance.now()/1000;let o=ESM[k];if(!o||v!==o.v||n-o.n>0.3)o=ESM[k]={v,t:v,n};else{o.t=Math.max(v-1,o.t-(n-o.n));o.n=n;}return v>0?Math.max(0,o.t):0;}
-// เท็กซ์เจอร์หินของแถบโล่ (รูปหินที่ผู้เล่นส่งมา) • ปกติ = สีหินจริงยกสว่าง / HP ต่ำ = ส้มแดง / หินมืด = กรอบหลัง → pattern ย่อลง • ยังไม่โหลด = สีเรียบแทน
-const EROCK={im:null,p:{}};
-function eRock(kind){if(!EROCK.im){EROCK.im=new Image();EROCK.im.src='assets/ui/rock_bar.jpg';}const im=EROCK.im;if(!im.complete||!im.naturalWidth)return null;
-  if(EROCK.p[kind])return EROCK.p[kind];const c=document.createElement('canvas');c.width=c.height=256;const g=c.getContext('2d'),m=Math.min(im.naturalWidth,im.naturalHeight);
-  g.drawImage(im,(im.naturalWidth-m)/2,(im.naturalHeight-m)/2,m,m,0,0,256,256);
-  const T={gold:['#fff0c8','rgba(70,55,25,0.55)'],low:['#ff8a5a','rgba(90,28,8,0.5)'],dark:['#4a3c2a','']}[kind];
-  g.globalCompositeOperation='multiply';g.fillStyle=T[0];g.fillRect(0,0,256,256);if(T[1]){g.globalCompositeOperation='lighter';g.fillStyle=T[1];g.fillRect(0,0,256,256);}
-  const p=cx.createPattern(c,'repeat');if(p.setTransform)p.setTransform(new DOMMatrix().scale(0.3));return EROCK.p[kind]=p;}
 // เอฟเฟกต์แถบโล่ (ใช้ร่วมทั้งแถบล่าง + โค้งกลาง): HP ลด = ช่องที่หายแฟลชขาว + เศษหินกระเด็น + สั่น • ต่ำ ≤30% = รอยร้าว + สั่นยิบ ๆ + ฝุ่นร่วง
 // เศษหินเก็บตำแหน่งเป็น "สัดส่วน HP" q (+ ฝั่ง sd ของโค้ง) → แต่ละแถบแปลงเป็นพิกัดเอง
 const ESF={v:-1,t:-9,a:0,b:0,ch:[],tk:0};
 function eShieldFx(v){const n=performance.now()/1000;
-  if(ESF.v>=0&&v<ESF.v){ESF.t=n;ESF.a=v/300;ESF.b=ESF.v/300;const m=Math.min(14,4+Math.round((ESF.v-v)/10));
-    for(let i=0;i<m&&ESF.ch.length<40;i++)ESF.ch.push({q:ESF.a+(ESF.b-ESF.a)*Math.random(),sd:Math.random()<0.5?-1:1,vx:rnd(-70,70),vy:rnd(-150,-40),t0:n,l:rnd(0.4,0.7),z:rnd(1.6,3.4),dk:0});}
+  if(ESF.v>=0&&v<ESF.v){ESF.t=n;ESF.a=v/300;ESF.b=ESF.v/300;}
   ESF.v=v;
-  if(v>0&&v/300<=0.3&&n-ESF.tk>0.12){ESF.tk=n;if(Math.random()<0.5&&ESF.ch.length<40)ESF.ch.push({q:Math.random()*v/300,sd:Math.random()<0.5?-1:1,vx:rnd(-8,8),vy:rnd(8,26),t0:n,l:rnd(0.5,0.9),z:rnd(1,2),dk:1});}
   for(let i=ESF.ch.length-1;i>=0;i--)if(n-ESF.ch[i].t0>ESF.ch[i].l)ESF.ch.splice(i,1);
-  const ag=n-ESF.t;return {n,sh:ag<0.3?Math.sin(ag*70)*3.5*(1-ag/0.3):0,fl:ag<0.35?1-ag/0.35:0,a:ESF.a,b:ESF.b};}
+  const ag=n-ESF.t;return {n,sh:0,fl:ag<0.35?1-ag/0.35:0,a:ESF.a,b:ESF.b};}
 function eChips(F,pos,sc){for(const c of ESF.ch){const t=F.n-c.t0,[px,py]=pos(c.q,c.sd);cx.globalAlpha=clamp(1-t/c.l,0,1);
   diaPath(px+c.vx*t*sc,py+(c.vy*t+(c.dk?0:320)*t*t)*sc,c.z*sc);cx.fillStyle=c.dk?'#5a4630':'#d2a46a';cx.fill();}cx.globalAlpha=1;}
 // แถบโล่ Stand มุมซ้ายล่าง แบบ Reinhardt: ช่องหินเอียงติดกัน 15 ช่อง (ช่องละ 20 HP) บนกรอบหินมืด • แตก = ช่องว่าง + แดงจาง ๆ ไล่เติมตามเวลาที่ Stand กลับมา
 function eShieldSegs(x,y,w,A){const n=15,g=2,sk=3,h=10,sw=(w-sk-g*(n-1))/n,brk=A[0]>0,k=brk?0:clamp(A[7]/300,0,1)*n,rc=brk?(1-eSmooth('stb',A[0])/15)*n:0,
-    lo=k/n<=0.3,rk=eRock(lo?'low':'gold'),rd=eRock('dark'),F=eShieldFx(brk?0:A[7]|0);
+    lo=k/n<=0.3,F=eShieldFx(brk?0:A[7]|0);
   cx.save();cx.translate(F.sh,0);
   cx.beginPath();cx.moveTo(x+sk-3,y-3);cx.lineTo(x+w+3,y-3);cx.lineTo(x+w-sk+3,y+h+3);cx.lineTo(x-3,y+h+3);cx.closePath();   // กรอบหิน
-  cx.fillStyle=rd||'#3a3024';cx.fill();cx.fillStyle='rgba(0,0,0,0.35)';cx.fill();cx.strokeStyle='rgba(217,180,90,0.4)';cx.lineWidth=1;cx.stroke();
-  for(let i=0;i<n;i++){const f=clamp((brk?rc:k)-i,0,1),fw=(sw+sk)*f,jt=lo&&f>0&&!brk,jx=jt?Math.sin(F.n*31+i*7.3)*0.8:0,jy=jt?Math.cos(F.n*27+i*3.1)*0.6:0,sx=x+i*(sw+g)+jx,yy=y+jy,
+  cx.fillStyle='rgba(0,0,0,0.35)';cx.fill();
+  for(let i=0;i<n;i++){const f=clamp((brk?rc:k)-i,0,1),fw=(sw+sk)*f,jt=false,jx=jt?Math.sin(F.n*31+i*7.3)*0.8:0,jy=jt?Math.cos(F.n*27+i*3.1)*0.6:0,sx=x+i*(sw+g)+jx,yy=y+jy,
       pg=()=>{cx.beginPath();cx.moveTo(sx+sk,yy);cx.lineTo(sx+sw+sk,yy);cx.lineTo(sx+sw,yy+h);cx.lineTo(sx,yy+h);cx.closePath();};
-    pg();cx.fillStyle='rgba(5,7,15,0.85)';cx.fill();
-    if(f>0){cx.save();pg();cx.clip();cx.fillStyle=brk?'rgba(255,110,80,0.4)':rk||(lo?'#ff8a5a':'#f2dc98');cx.fillRect(sx,yy,fw,h);
-      if(!brk){cx.fillStyle='rgba(255,240,200,0.75)';cx.fillRect(sx,yy,fw,1.5);cx.fillStyle='rgba(0,0,0,0.35)';cx.fillRect(sx,yy+h-2,fw,2);   // ขอบบนสว่าง + เงาล่าง = ก้อนหินนูน
-        if(lo){const o=(i%3-1)*sw*0.15;cx.beginPath();cx.moveTo(sx+sw*0.6+sk+o,yy);cx.lineTo(sx+sw*0.35+o,yy+h*0.45);cx.lineTo(sx+sw*0.62,yy+h*0.7);cx.lineTo(sx+sw*0.45,yy+h);cx.strokeStyle='rgba(30,12,4,0.9)';cx.lineWidth=1;cx.stroke();}}   // รอยร้าว
+    pg();cx.fillStyle='rgba(0,0,0,0.45)';cx.fill();
+    if(f>0){cx.save();pg();cx.clip();cx.fillStyle=brk?'rgba(255,110,80,0.4)':lo?'#ff8a5a':'#f4f1ea';cx.fillRect(sx,yy,fw,h);
       cx.restore();}
     if(F.fl>0&&!brk&&i/n<F.b&&(i+1)/n>F.a){pg();cx.fillStyle='rgba(255,246,220,'+(0.85*F.fl)+')';cx.fill();}   // ช่องที่เพิ่งหายแฟลช
-    pg();cx.strokeStyle=brk?'rgba(255,110,80,0.5)':f>0?'rgba(30,20,8,0.9)':'rgba(217,180,90,0.3)';cx.lineWidth=1;cx.stroke();}
+    if(f<=0||brk){pg();cx.strokeStyle=brk?'rgba(255,110,80,0.5)':'rgba(255,255,255,0.18)';cx.lineWidth=1;cx.stroke();}}
   eChips(F,q=>[x+q*w,y+h/2],1);cx.restore();}
 // ตัวเลข HP โล่เหนือแถบ: ตัวใหญ่ = ที่เหลือ • ตัวเล็ก = /300 (แตก = 0 สีแดง)
-function eShieldNum(x,y,A){const v=A[0]>0?0:A[7]|0,col=A[0]>0?'#ff8a6a':v/300>0.3?'#f6e6b0':'#ff8a5a';cx.textAlign='left';cx.lineWidth=3;cx.strokeStyle='rgba(0,0,0,0.75)';
-  cx.font='italic 700 18px Kanit,sans-serif';cx.strokeText(String(v),x,y);cx.fillStyle=col;cx.fillText(String(v),x,y);const w=cx.measureText(String(v)).width;
-  cx.font='italic 600 11px Kanit,sans-serif';cx.strokeText('/300',x+w+3,y);cx.fillStyle='rgba(246,230,176,0.75)';cx.fillText('/300',x+w+3,y);}
+function eShieldNum(x,y,A){const v=A[0]>0?0:A[7]|0,col=A[0]>0?'#ff8a6a':v/300>0.3?'#ffffff':'#ff8a5a';cx.textAlign='left';cx.lineWidth=3;cx.strokeStyle='rgba(0,0,0,0.75)';
+  cx.font='600 17px Kanit,sans-serif';cx.strokeText(String(v),x,y);cx.fillStyle=col;cx.fillText(String(v),x,y);const w=cx.measureText(String(v)).width;
+  cx.font='500 11px Kanit,sans-serif';cx.strokeText('/300',x+w+3,y);cx.fillStyle='rgba(246,230,176,0.75)';cx.fillText('/300',x+w+3,y);}
 // โค้งโล่กลางจอ แบบ Reinhardt: ช่องหินเอียง 15 ช่องบนแถบหินมืด เรียงเป็นโค้งเหนือเป้าเล็ง (หดจากสองปลายเข้ากลาง) + ตัวเลข HP ใต้ยอดโค้ง • ขนาดตามความสูงจอ
 function eShieldArc(x,y,v){const s=Math.max(0.72,SH/1080),R=250*s,cy=y-205*s+R,sp=0.62,n=15,ga=0.012,th=Math.max(8,12*s),sk=0.012,k=clamp(v/300,0,1),half=k*n/2,
-    lo=k<=0.3,col=lo?'#ff8a5a':'#f6e6b0',rk=eRock(lo?'low':'gold'),rd=eRock('dark'),da=(2*sp-ga*(n-1))/n,F=eShieldFx(v);
+    lo=k<=0.3,col=lo?'#ff8a5a':'#f4f1ea',da=(2*sp-ga*(n-1))/n,F=eShieldFx(v);
   cx.save();cx.translate(F.sh*1.4,0);
-  cx.lineWidth=th+6;cx.beginPath();cx.arc(x,cy,R,-Math.PI/2-sp-0.012,-Math.PI/2+sp+sk+0.012);cx.strokeStyle=rd||'#3a3024';cx.globalAlpha=0.8;cx.stroke();cx.strokeStyle='rgba(0,0,0,0.35)';cx.stroke();cx.globalAlpha=1;   // แถบหินมืดด้านหลัง
-  for(let i=0;i<n;i++){const a0=-Math.PI/2-sp+i*(da+ga),a1=a0+da,d=Math.abs(i-(n-1)/2),f=d?clamp(half-(d-0.5),0,1):clamp(half*2,0,1),jt=lo&&f>0,
+    for(let i=0;i<n;i++){const a0=-Math.PI/2-sp+i*(da+ga),a1=a0+da,d=Math.abs(i-(n-1)/2),f=d?clamp(half-(d-0.5),0,1):clamp(half*2,0,1),jt=false,
       ox=x+(jt?Math.sin(F.n*31+i*7.3)*0.9:0),oy=cy+(jt?Math.cos(F.n*27+i*3.1)*0.7:0),r0=R-th/2,r1=R+th/2,pg=()=>{cx.beginPath();cx.arc(ox,oy,r1,a0+sk,a1+sk);cx.arc(ox,oy,r0,a1,a0,true);cx.closePath();};
-    pg();cx.fillStyle='rgba(5,7,15,0.7)';cx.fill();
-    if(f>0){cx.globalAlpha=0.35+0.65*f;cx.fillStyle=rk||col;cx.fill();cx.strokeStyle='rgba(20,14,6,0.85)';cx.lineWidth=1;cx.stroke();
-      cx.beginPath();cx.arc(ox,oy,r1-1,a0+sk+0.004,a1+sk-0.004);cx.strokeStyle='rgba(255,240,200,0.8)';cx.lineWidth=1.5;cx.stroke();   // ขอบนอกสว่าง
-      if(lo){const am=(a0+a1)/2+(i%3-1)*da*0.15,P=(r,a)=>[ox+Math.cos(a)*r,oy+Math.sin(a)*r];cx.beginPath();cx.moveTo(...P(r1,am+da*0.1));cx.lineTo(...P(R+th*0.05,am-da*0.18));cx.lineTo(...P(R-th*0.2,am+da*0.12));cx.lineTo(...P(r0,am-da*0.05));
-        cx.strokeStyle='rgba(30,12,4,0.9)';cx.lineWidth=1.2;cx.stroke();}   // รอยร้าว
-      cx.globalAlpha=1;}
-    else{cx.strokeStyle='rgba(217,180,90,0.3)';cx.lineWidth=1;cx.stroke();}
+    pg();cx.fillStyle='rgba(0,0,0,0.35)';cx.fill();
+    if(f>0){cx.globalAlpha=0.35+0.65*f;cx.fillStyle=col;cx.fill();cx.globalAlpha=1;}
+    else{cx.strokeStyle='rgba(255,255,255,0.18)';cx.lineWidth=1;cx.stroke();}
     if(F.fl>0&&F.b>Math.max(0,(2*d-1)/n)&&F.a<(2*d+1)/n){pg();cx.fillStyle='rgba(255,246,220,'+(0.85*F.fl)+')';cx.fill();}}   // ช่องที่เพิ่งหายแฟลช
   eChips(F,(q,sd)=>{const a=-Math.PI/2+sd*q*sp;return [x+Math.cos(a)*R,cy+Math.sin(a)*R];},s*1.4);cx.restore();
-  const fz=Math.round(Math.max(20,28*s)),ty=y-205*s+th/2+fz+4;cx.textAlign="center";cx.font="italic 700 "+fz+'px Kanit,sans-serif';cx.lineWidth=4;cx.strokeStyle='rgba(0,0,0,0.7)';
+  const fz=Math.round(Math.max(20,28*s)),ty=y-205*s+th/2+fz+4;cx.textAlign="center";cx.font="600 "+fz+'px Kanit,sans-serif';cx.lineWidth=4;cx.strokeStyle='rgba(0,0,0,0.7)';
   cx.strokeText(String(v),x,ty);cx.fillStyle=k>0.3?'#ffffff':'#ff8a5a';cx.fillText(String(v),x,ty);
   cx.fillStyle='rgba(255,255,255,0.85)';cx.fillRect(x-1.5,y-1.5,3,3);}   // จุดกลางเล็ก ๆ แทนเป้าเล็งที่ซ่อน
 function drawEarthHud(x,y,A,me){
