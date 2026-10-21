@@ -171,9 +171,10 @@ function earthFX(o,p,pz,now,dt){
   if(A[2]>0){if(!s.drill){s.drill=makeDrill();scene.add(s.drill);}const tier=A[2]>=4.5?3:A[2]>=2?2:1,am=eAim(p,600),D=s.drill;
     if(p.id===NET.myId){if(!s.augW)s.augW=makeWarn();eWarnAt(s.augW,am.x,am.y,[80,110,150][tier-1],Math.min(1,A[2]/4.5));}
     D.visible=true;D.scale.setScalar(1.3);D.position.copy(eW(p.x-fx*10+rx*18,p.y-fy*10+ry*18,z0+3.3));D.lookAt(eW(am.x,am.y,0));s.spin+=dt*(10+tier*16);D.rotateZ(s.spin);drillHeat(D,tier,t);
-    // ลมหมุนวน + เศษหินสีเดียวกันหลุดออก
-    const q=simOf(D.position);for(let i=0;i<tier;i++){const a=rnd(0,6.283),rr=rnd(14,26);PARTS.push({x:q.x+Math.cos(a)*rr,y:q.y+Math.sin(a)*rr,h:q.h+rnd(-0.6,0.6),vx:-Math.sin(a)*160*tier,vy:Math.cos(a)*160*tier,vh:rnd(-0.5,0.5),life:0.22,max:0.22,col:'#e8e4dc',size:rnd(1.2,2),g:0,sh:2});}
-    if(Math.random()<0.35*tier)eChunks(q.x,q.y,q.h-GY(q.x,q.y),1,120,2,0.06);
+    // ลมดูดเข้า: เส้นลม/ฝุ่นจากรอบ ๆ หมุนวนเข้าหาตัวสว่าน (แรงขึ้นตามระดับ) • ฝุ่นพื้นใต้ตัวถูกดูดขึ้น
+    const q=simOf(D.position);for(let i=0;i<1+tier;i++){const a=rnd(0,6.283),rr=rnd(45,80),dh=rnd(-1.2,1.2),lf=rnd(0.22,0.32),sw=40+40*tier;
+      PARTS.push({x:q.x+Math.cos(a)*rr,y:q.y+Math.sin(a)*rr,h:q.h+dh,vx:-Math.cos(a)*rr/lf-Math.sin(a)*sw,vy:-Math.sin(a)*rr/lf+Math.cos(a)*sw,vh:-dh/lf,life:lf,max:lf,col:i%2?'#f2f4f6':'#dcd6ca',size:rnd(1.1,1.8),g:0,drag:0,sh:2});}
+    if(Math.random()<0.25*tier){const a=rnd(0,6.283),rr=rnd(20,50),gx=q.x+Math.cos(a)*rr,gy=q.y+Math.sin(a)*rr,gh=GY(gx,gy)+0.1,lf=0.5;PARTS.push({x:gx,y:gy,h:gh,vx:(q.x-gx)/lf,vy:(q.y-gy)/lf,vh:(q.h-gh)/lf,life:lf,max:lf,col:ECOL.dust,size:rnd(2.5,4),g:0,smoke:true,grow:-0.5});}
     if(tier>=2&&Math.random()<0.4)burst(q.x,q.y,tier===3?'#ff5a1a':'#ffa040',1,30,0.35,1.6,{h:q.h,g:-1});
     if(s.lastTier&&tier>s.lastTier){burst(q.x,q.y,tier===3?'#ff6a2a':'#ffb04a',16,140,0.5,2.4,{h:q.h,g:0});FX.flashLight(q.x,q.y,q.h,tier===3?'#ff6a2a':'#ffb04a',3,8,0.25);if(p.id===NET.myId)snd('buff',{x:p.x,y:p.y,vol:0.6});}s.lastTier=tier;
     // ท่าตอนชาร์จ: ขาไปหลัง แขนชี้ไปทางเป้า • ระดับสูงสุด = ชูไม้
@@ -197,26 +198,31 @@ function earthFX(o,p,pz,now,dt){
   else if(p.id===NET.myId&&EV.mark)EV.mark.visible=false;
 }
 // ---------- สว่าน (ref: designs/earth_ref/drill_ref.png): หินแหลมเรียวเป็นตัวหลัก (เด่นสุด) + เส้นเกลียวลมบาง ๆ รอบ ๆ เป็นเอฟเฟกต์ • ร้อนที่ตัวหิน (เหลือง → แดงตามระดับ) • ปลายชี้ +z ----------
-// ลายเหล็ก: ไล่เงินสว่าง → เทาเข้ม + ร่องเกลียวเฉียง (เห็นตอนหมุน)
-function eDrillTex(){if(ETEX.drill)return ETEX.drill;const c=document.createElement('canvas');c.width=64;c.height=128;const x=c.getContext('2d'),g=x.createLinearGradient(0,0,0,128);
-  g.addColorStop(0,'#d4d8dd');g.addColorStop(1,'#8c9299');x.fillStyle=g;x.fillRect(0,0,64,128);
-  x.globalAlpha=0.5;x.strokeStyle='#4f555c';x.lineWidth=3;for(let i=-4;i<8;i++){x.beginPath();x.moveTo(i*16,128);x.lineTo(i*16+64,0);x.stroke();}
-  x.globalAlpha=0.4;x.strokeStyle='#f2f5f8';x.lineWidth=1;for(let i=-4;i<8;i++){x.beginPath();x.moveTo(i*16+3,128);x.lineTo(i*16+67,0);x.stroke();}
-  const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;t.userData.keep=true;ETEX.drill=t;return t;}
-// ความร้อน (emissiveMap): ปลายเหลืองขาว → ส้ม → แดง → ดับที่กลางตัว (uv.y = 1 ที่ปลายกรวย = บนสุดของภาพ)
-function eHeatTex(){if(ETEX.heat)return ETEX.heat;const c=document.createElement('canvas');c.width=4;c.height=128;const x=c.getContext('2d'),g=x.createLinearGradient(0,0,0,128);
-  g.addColorStop(0,'#fff4c0');g.addColorStop(0.1,'#ffc040');g.addColorStop(0.26,'#ff5a12');g.addColorStop(0.42,'#a01400');g.addColorStop(0.55,'#000000');g.addColorStop(1,'#000000');x.fillStyle=g;x.fillRect(0,0,4,128);
-  const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;t.userData.keep=true;ETEX.heat=t;return t;}
-// สว่าน (ผู้ใช้ 2026-10-21): กรวยเหล็ก ท้ายตัดเรียบ (ฝาฐานกรวย) • ความร้อนไล่เฉดจากปลายถึงกลาง • เส้นเกลียวลมบาง ๆ รอบ ๆ เป็นเอฟเฟกต์ • ปลายชี้ +z
-function makeDrill(){const g=new THREE.Group(),m=new THREE.MeshStandardMaterial({map:eDrillTex(),color:'#f2f4f7',metalness:0.3,roughness:0.32,emissive:'#ffffff',emissiveMap:eHeatTex(),emissiveIntensity:0});
-  const sp=new THREE.Mesh(new THREE.ConeGeometry(0.3,2.6,20,1,false),m);sp.rotation.x=Math.PI/2;sp.position.z=0.35;sp.castShadow=true;g.add(sp);
+// ภาพสะท้อนปลอมของเหล็ก (equirect): ฟ้าสว่างบน ขอบฟ้าขาวจ้า พื้นเข้ม + แถบไฟสว่าง → เหล็กดูเงาวาวแม้ฉากไม่มี envMap
+function eSteelEnv(){if(ETEX.env)return ETEX.env;const c=document.createElement('canvas');c.width=256;c.height=128;const x=c.getContext('2d'),g=x.createLinearGradient(0,0,0,128);
+  g.addColorStop(0,'#c8d6e6');g.addColorStop(0.42,'#f4f8fc');g.addColorStop(0.5,'#ffffff');g.addColorStop(0.56,'#6c727a');g.addColorStop(1,'#2a2e33');x.fillStyle=g;x.fillRect(0,0,256,128);
+  x.fillStyle='#ffffff';for(const [px,w] of [[30,14],[110,6],[170,20],[220,8]]){x.globalAlpha=0.9;x.fillRect(px,18,w,34);}
+  const t=new THREE.CanvasTexture(c);t.mapping=THREE.EquirectangularReflectionMapping;t.colorSpace=THREE.SRGBColorSpace;t.userData.keep=true;ETEX.env=t;return t;}
+// ความร้อน (emissiveMap): ปลายเหลืองขาว → ส้ม → แดง → ค่อย ๆ เฟดหายเกือบถึงกลาง-ค่อนท้าย (uv.y = 1 ที่ปลายกรวย = บนสุดของภาพ)
+function eHeatTex(){if(ETEX.heat)return ETEX.heat;const c=document.createElement('canvas');c.width=4;c.height=256;const x=c.getContext('2d'),g=x.createLinearGradient(0,0,0,256);
+  g.addColorStop(0,'#fff3c8');g.addColorStop(0.07,'#ffd060');g.addColorStop(0.18,'#ff8a26');g.addColorStop(0.32,'#f0400e');g.addColorStop(0.46,'#a81a04');g.addColorStop(0.6,'#4a0a02');g.addColorStop(0.72,'#140200');g.addColorStop(0.8,'#000000');g.addColorStop(1,'#000000');
+  x.fillStyle=g;x.fillRect(0,0,4,256);const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;t.userData.keep=true;ETEX.heat=t;return t;}
+// กรวยมีร่องเกลียว 3 ร่อง (บิดตามความยาว) ท้ายตัดเรียบ • uv.y = 0 ท้าย → 1 ปลาย (ใช้กับความร้อน) • ปลายชี้ +y (หมุนทีหลัง)
+function eDrillGeo(){if(EV.drGeo)return EV.drGeo;const R=0.32,L=2.6,NS=40,NR=48,pos=[],uv=[],idx=[];
+  for(let j=0;j<=NS;j++){const t=j/NS;for(let i=0;i<=NR;i++){const th=i/NR*Math.PI*2,fl=1-0.16*Math.pow(0.5+0.5*Math.cos(3*(th-t*Math.PI*2.2)),3),r=R*(1-t)*fl;pos.push(Math.cos(th)*r,t*L-L/2,Math.sin(th)*r);uv.push(i/NR,t);}}
+  for(let j=0;j<NS;j++)for(let i=0;i<NR;i++){const a=j*(NR+1)+i,b=a+NR+1;idx.push(a,a+1,b,b,a+1,b+1);}
+  const c0=pos.length/3;pos.push(0,-L/2,0);uv.push(0.5,0);for(let i=0;i<NR;i++)idx.push(c0,i+1,i);   // ฝาท้ายเรียบ
+  const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));g.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));g.setIndex(idx);g.computeVertexNormals();g.userData.keep=true;EV.drGeo=g;return g;}
+// สว่าน (ผู้ใช้ 2026-10-21): กรวยเหล็กเงา ร่องเกลียว ท้ายตัดเรียบ • ความร้อนเฟดจากปลายถึงกลาง-ค่อนท้าย • เส้นเกลียวลมบาง ๆ รอบ ๆ • ปลายชี้ +z
+function makeDrill(){const g=new THREE.Group(),m=new THREE.MeshStandardMaterial({color:'#dfe3e8',metalness:0.92,roughness:0.16,envMap:eSteelEnv(),envMapIntensity:1.35,emissive:'#ffffff',emissiveMap:eHeatTex(),emissiveIntensity:0});
+  const sp=new THREE.Mesh(eDrillGeo(),m);sp.rotation.x=Math.PI/2;sp.position.z=0.35;sp.castShadow=true;g.add(sp);
   const wm=new THREE.MeshBasicMaterial({color:hdr('#f4efe4',1.1),transparent:true,opacity:0.28,blending:THREE.AdditiveBlending,depthWrite:false});
-  for(const ph of [0,Math.PI]){const pts=[];for(let i=0;i<=40;i++){const k=i/40,a=ph+k*Math.PI*2*2.5,r=0.4*(1-k)+0.05;pts.push(new THREE.Vector3(Math.cos(a)*r,Math.sin(a)*r,k*2.6-0.95));}
+  for(const ph of [0,Math.PI]){const pts=[];for(let i=0;i<=40;i++){const k=i/40,a=ph+k*Math.PI*2*2.5,r=0.42*(1-k)+0.05;pts.push(new THREE.Vector3(Math.cos(a)*r,Math.sin(a)*r,k*2.6-0.95));}
     g.add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts),60,0.012,3,false),wm));}
   g.userData={m,wm};return g;}
-// ระดับ 1 = เหล็กเย็น • 2 = ปลายร้อนส้ม • 3 = ร้อนจัด (แดง เหลืองข้างใน) — ไล่เฉดจาก eHeatTex เสมอ
+// ระดับ 1 = เหล็กเย็น • 2 = ปลายร้อนส้ม • 3 = ร้อนจัด — ไล่เฉดจาก eHeatTex เสมอ
 function drillHeat(d,tier,t){const U=d.userData;
-  U.m.emissiveIntensity=tier<=1?0:tier===2?0.9+0.12*Math.sin(t*20):2.1+0.3*Math.sin(t*25);U.wm.opacity=tier<=1?0.2:tier===2?0.28:0.35;}
+  U.m.emissiveIntensity=tier<=1?0:tier===2?0.85+0.1*Math.sin(t*20):1.9+0.25*Math.sin(t*25);U.wm.opacity=tier<=1?0.2:tier===2?0.28:0.35;}
 // ---------- เสายักษ์ (ref: designs/earth_ref/pillar_ref.png): เสาเหลี่ยมยาว ปลายหนึ่งแหลม อีกปลายมีก้อนหินเกาะ • น้ำตาลเข้ม เหลือง-ดำ • ปลายแหลมชี้ +z ----------
 function makePillar(){const g=new THREE.Group(),m=eTMat('pillar');m.userData.keep=false;
   const col=new THREE.Mesh(new THREE.CylinderGeometry(0.85,0.95,7,4,1),m);col.rotation.x=Math.PI/2;col.rotation.y=Math.PI/4;col.castShadow=true;g.add(col);
@@ -384,14 +390,19 @@ function earthEfx(ev){
   return false;}
 // สว่านพุ่งเฉียงลงจากจุดลอยไปที่เป้า (หมุน + ความร้อนตามระดับ + ลมตามทาง)
 // ลมออกตอนปล่อย: วงคลื่นลม 2 ชั้นตามทิศยิง + ลมพุ่งออกรอบตัวสว่าน + ฝุ่นเบา ๆ (แรงขึ้นตามระดับ)
-function eWindOut(from,to,tier){const dir=to.clone().sub(from).normalize(),w=simOf(from),n=tier||1;
+// แหวกอากาศ: วงคลื่นจาง ๆ ตามทิศยิง + เส้นลมแตกออกด้านข้างตลอดแนวทางสั้น ๆ หน้าสว่าน
+function eWindOut(from,to,tier){const dir=to.clone().sub(from).normalize(),w=simOf(from),n=tier||1,f2=simOf(from.clone().addScaledVector(dir,1)),dx=f2.x-w.x,dy=f2.y-w.y,dl=Math.hypot(dx,dy)||1,ux=dx/dl,uy=dy/dl;
+  for(let i=0;i<12+n*6;i++){const k=rnd(0.3,4),px=w.x+ux*k*20,py=w.y+uy*k*20,sd=Math.random()<0.5?-1:1,sp=rnd(120,220);
+    PARTS.push({x:px,y:py,h:w.h+rnd(-0.4,0.4)-(w.h-0.5)*k/6,vx:-uy*sd*sp+ux*60,vy:ux*sd*sp+uy*60,vh:rnd(-0.3,1.2),life:0.28,max:0.28,col:i%3?'#eef2f6':'#ffffff',size:rnd(1.3,2),g:0,drag:3,sh:2});}
   eAirWave(from.clone().addScaledVector(dir,1.6),dir,0.22+0.08*n,'#dfe6ee',0.35);later(0.05,()=>eAirWave(from.clone().addScaledVector(dir,3.4),dir,0.16+0.06*n,'#eef2f6',0.3));
-  for(let i=0;i<10+n*8;i++){const an=rnd(0,6.283),sp=rnd(140,260)*(0.8+0.2*n);PARTS.push({x:w.x,y:w.y,h:w.h+rnd(-0.3,0.3),vx:Math.cos(an)*sp,vy:Math.sin(an)*sp,vh:rnd(-1.5,1.5),life:0.3,max:0.3,col:i%3?'#eef2f6':'#ffffff',size:rnd(1.3,2.2),g:0,drag:3,sh:2});}
   smoke(w.x,w.y,w.h,1+n,'#ece6da',0.7,4,40);}
-function eDrillFly(from,x,y,tier){const d=makeDrill(),to=eW(x,y,0);d.position.copy(from);scene.add(d);
-  eAnim({g:d,life:0.33,fn(a){const k=Math.min(1,a.t/0.32);d.position.copy(from).lerp(to,k*k);d.lookAt(to);d.rotateZ(a.t*80);drillHeat(d,tier,a.t);const w=simOf(d.position);
+// กรวยคลื่นอากาศครอบหัวสว่าน (แหวกอากาศตอนพุ่ง): กรวยเปิดโปร่งแสงชี้ไปข้างหน้า ปลายติดหัวสว่าน บานออกด้านหลัง
+function eAirCone(){const m=new THREE.MeshBasicMaterial({color:hdr('#eef4fa',1.2),transparent:true,opacity:0.0,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide}),
+  c=new THREE.Mesh(new THREE.ConeGeometry(1.1,2.2,24,1,true),m);c.rotation.x=-Math.PI/2;c.position.z=0.9;c.userData.m=m;return c;}
+function eDrillFly(from,x,y,tier){const d=makeDrill(),to=eW(x,y,0),ac=eAirCone();d.position.copy(from);d.add(ac);scene.add(d);
+  eAnim({g:d,life:0.33,fn(a){const k=Math.min(1,a.t/0.32);d.position.copy(from).lerp(to,k*k);d.lookAt(to);ac.rotation.z=0;ac.userData.m.opacity=0.22*Math.min(1,a.t/0.06)*(1-k*0.5);ac.scale.set(1,1+k*0.6,1);d.children[0].rotation.y=a.t*80;drillHeat(d,tier,a.t);const w=simOf(d.position);
     burst(w.x,w.y,tier===3?'#ff6a2a':'#e8e4dc',1,30,0.25,tier===3?2.2:1.6,{h:w.h,g:0});
-    for(let i=0;i<2;i++){const an=rnd(0,6.283);PARTS.push({x:w.x+Math.cos(an)*10,y:w.y+Math.sin(an)*10,h:w.h+rnd(-0.3,0.3),vx:Math.cos(an)*90,vy:Math.sin(an)*90,vh:rnd(-0.5,0.5),life:0.22,max:0.22,col:'#f4f6f8',size:1.5,g:0,drag:2,sh:2});}}});}   // ลมหมุนตามทาง
+    for(let i=0;i<3;i++){const an=rnd(0,6.283);PARTS.push({x:w.x+Math.cos(an)*12,y:w.y+Math.sin(an)*12,h:w.h+rnd(-0.3,0.3),vx:Math.cos(an)*140,vy:Math.sin(an)*140,vh:rnd(-0.3,0.8),life:0.2,max:0.2,col:'#f4f6f8',size:1.5,g:0,drag:2,sh:2});}}});}   // อากาศแตกออกรอบตัวตามทาง
 // ---------- บึงโคลน (Mud Swamp + บึงจากเสาอัลติ): คลื่นกระเพื่อมจากกลางไปขอบ แล้วพื้นกลายเป็นโคลน (ไม่ใช่วงเวท) ----------
 function earthMudZone(ev){const x=ev.x,y=ev.y,r=ev.r,life=ev.t,R=r*S3;
   for(let i=0;i<3;i++)later(i*0.12,()=>ring(x,y,i?'#6b4c2c':'#a07a50',r*(0.6+i*0.25),0.55,0.08));
