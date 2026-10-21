@@ -7,6 +7,8 @@
 // =====================================================================
 Object.assign(PCOL,{erock:'#c9a36a',eslab:'#d8b47a'});
 const ECOL={stone:'#8f7a5c',dark:'#5e4d38',dust:'#b39a74',glow:'#ffcf6a',mud:'#5b4128',sand:'#c9a878'};
+// โล่ Stand ใหญ่: แบบใหม่ = ตัวใหญ่เท่า Stand ตอน BA ชาร์จ • แบบเดิม (ตัวเล็กกว่า) ยังเก็บไว้: เปิดเกมด้วย ?eshield=old
+const EGUARD_OLD=/[?&]eshield=old/.test(location.search),EGUARD=EGUARD_OLD?{sc:1.3,back:10,side:4,z:0.2}:{sc:1.55,back:12,side:5,z:0.1};
 var EV={st:new Map(),es:new Map(),anims:[],fog:null,crush:[],mark:null};
 const eW=(x,y,h)=>new THREE.Vector3(tx(x),(h||0)+GY(x,y),tz(y));
 const eYaw=(x1,y1,x2,y2)=>Math.atan2(x2-x1,y2-y1);
@@ -143,7 +145,7 @@ function earthFX(o,p,pz,now,dt){
       G2.g.scale.setScalar(1.55);G2.g.position.copy(eW(p.x-fx*24,p.y-fy*24,z0-0.3));G2.g.rotation.y=Math.atan2(fx,fy);gop=1;
       if(s.gSlam>0){s.gSlam-=dt;gp.slam=clamp(1-(s.gSlam-0.33)/0.12,0,1);if(s.gSlam<=0.2)gop=Math.max(0,s.gSlam/0.2);}else{gp.raise=Math.min(1,A[9]/0.4);gp.lean=-0.15;G2.g.position.y+=Math.sin(t*40)*0.02*Math.min(1,A[9]);}}
     else if(p.sh&&!broken){   // โล่: Stand ใหญ่ชิดหลังเรา เอามือมาบังข้างหน้า
-      G2.g.scale.setScalar(1.3);G2.g.position.copy(eW(p.x-fx*10+rx*4,p.y-fy*10+ry*4,z0+0.2));G2.g.rotation.y=Math.atan2(fx,fy);gp.guard=1;gop=Math.min(1,(s.gopL||0)+dt*8);}}
+      G2.g.scale.setScalar(EGUARD.sc);G2.g.position.copy(eW(p.x-fx*EGUARD.back+rx*EGUARD.side,p.y-fy*EGUARD.back+ry*EGUARD.side,z0+EGUARD.z));G2.g.rotation.y=Math.atan2(fx,fy);gp.guard=1;gop=Math.min(1,(s.gopL||0)+dt*8);}}
   if(!gop)gop=Math.max(0,(s.gopL||0)-dt*4);
   if(gop>0.02&&(s.gopL||0)<=0.02)eAppear(p.x-fx*20,p.y-fy*20,z0,1.6);
   // Stand ใหญ่อยู่ระหว่างกล้องกับตัวเรา → ของเราเองให้โปร่งครึ่งหนึ่ง (ไม่บังจอ) ยกเว้นตอนอัลติบนฟ้า
