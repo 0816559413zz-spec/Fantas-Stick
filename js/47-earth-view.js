@@ -120,15 +120,18 @@ function eArmIK(A,T,pole){A.up.rotation.set(0,0,0);A.fo.rotation.set(0,0,0);A.up
   const n=pole.clone().addScaledVector(dir,-pole.dot(dir)).normalize(),E=S.clone().addScaledVector(dir,Math.cos(al)*a).addScaledVector(n,Math.sin(al)*a),H=S.clone().addScaledVector(dir,d);
   A.up.quaternion.setFromUnitVectors(_ikDn,E.clone().sub(S).normalize().applyQuaternion(A.up.parent.getWorldQuaternion(new THREE.Quaternion()).invert()));A.up.updateMatrixWorld(true);
   A.fo.quaternion.setFromUnitVectors(_ikDn,H.sub(E).normalize().applyQuaternion(A.up.getWorldQuaternion(new THREE.Quaternion()).invert()));}
-// k: {punch 0-1, hold, raise, slam 0-1, squeeze, spread 0-1 (1 = กางสุด, 0 = หนีบ), throwK (-1 ง้างสุด → 1 ปาออก), lean, run, t}
+// ปรับท่าต่อยเต็มแรง (Stonebreaker) — tw0/tw1 = บิดเพิ่มตอนง้าง/ตอนต่อย • ln = โน้มตัว • ux/uz/uy = แขนขวา • lu = พุ่งตัวเข้าหาแผ่นหิน • hs = ค้างหมัดตอนโดน (วิ)
+const PK={tw0:0.45,tw1:0.5,ln:0.06,ux:0.4,uz:0.1,uy:0.35,lu:0.03,hs:0.07};
+// k: {punch 0-1, pk = ต่อยเต็มแรง 0/1, hold, raise, slam 0-1, squeeze, spread 0-1 (1 = กางสุด, 0 = หนีบ), throwK (-1 ง้างสุด → 1 ปาออก), lean, run, t}
 function standPose(S,k){const R=S.R,L=S.L;
   R.up.rotation.set(0,0,0);L.up.rotation.set(0,0,0);R.fo.rotation.set(0,0,0);L.fo.rotation.set(0,0,0);S.body.rotation.set(k.lean||0,k.twist||0,0);S.head.rotation.set(0,0,0);let dip=0;
   // ต่อยแบบธรรมชาติ: w = ง้าง (บิดสะโพก/ไหล่ขวาไปหลัง ข้อศอกพับ แขนซ้ายยกกันหน้า) • punch = หมุนตัวส่งหมัดเร็ว ๆ (ไหล่เข้า ตัวโน้ม ย่อตัว) • rec = ผ่อนกลับ
-  if(k.punch!==undefined){const w=k.punchW===undefined?1:k.punchW,p=k.punch||0,rc=k.rec||0,keep=1-0.55*rc;
-    const tw=lerp(0.6*w,-0.55,p)*keep;S.body.rotation.y=tw;S.body.rotation.z=lerp(0.08*w,-0.16,p)*keep;S.body.rotation.x=(0.04+0.06*w+0.22*p)*keep;dip=(0.06*w+0.16*p)*keep;
+  // G = ต่อยเต็มแรง (Stonebreaker): บิดตัวมากขึ้น แขนเหยียดตรงสุด ไหล่ดันไปหน้า แขนซ้ายดึงกลับเอว
+  if(k.punch!==undefined){const w=k.punchW===undefined?1:k.punchW,p=k.punch||0,rc=k.rec||0,keep=1-0.55*rc,G=k.pk||0;
+    const tw=lerp((0.6+PK.tw0*G)*w,-0.55-PK.tw1*G,p)*keep;S.body.rotation.y=tw;S.body.rotation.z=lerp((0.08+0.06*G)*w,-0.16-0.08*G,p)*keep;S.body.rotation.x=(0.04+(0.06-0.1*G)*w+(0.22+PK.ln*G)*p)*keep;dip=(0.06*w+(0.16+0.1*G)*p)*keep;
     S.head.rotation.y=-tw*0.6;   // หัวยังมองเป้า
-    R.up.rotation.x=lerp(lerp(-0.45,-0.85,w),-1.42,p)*(1-0.35*rc);R.up.rotation.z=lerp(0.4*w,-0.18,p)*keep;R.fo.rotation.x=lerp(lerp(-0.5,-1.55,w),-0.08,p)+(-0.7*rc);
-    L.up.rotation.x=lerp(lerp(-0.35,-1.15,w),-0.45,p)*keep;L.up.rotation.z=lerp(-0.2*w,0.35,p)*keep;L.fo.rotation.x=lerp(lerp(-0.6,-1.35,w),-1.0,p);}
+    R.up.rotation.x=lerp(lerp(-0.45,-0.85+0.5*G,w),-1.42-PK.ux*G,p)*(1-0.35*rc);R.up.rotation.z=lerp((0.4+0.3*G)*w,-0.18+PK.uz*G,p)*keep;R.up.rotation.y=PK.uy*G*p*keep;R.fo.rotation.x=lerp(lerp(-0.5,-1.55-0.4*G,w),-0.08+0.08*G,p)+(-0.7*rc);
+    L.up.rotation.x=lerp(lerp(-0.35,-1.15,w),-0.45+0.7*G,p)*keep;L.up.rotation.z=lerp(-0.2*w,0.35-0.15*G,p)*keep;L.fo.rotation.x=lerp(lerp(-0.6,-1.35,w),-1.0-0.7*G,p);}
   if(S.big){const q=k.guard&&EGUARD.lo;S.lo.scale.y=q?q[0]:1;S.lo.position.y=q?q[1]:1.15;S.mats[2].alphaMap=eFadeTex(q?1:0);}   // ท่อนล่างจาง: ท่ากันจางแรงกว่า
   if(k.guard){   // ท่ากัน: Stand ใหญ่ก้มตัวลงคลุมเราจากข้างหลัง • แขน R พับมาบังหน้า (IK ใน earthFX) • แขน L (จางครึ่ง) ง้างหมัดเก็บข้างเอว
     const la=EGUARD.larm;S.body.rotation.x=k.gLean||0.62;L.up.rotation.x=la[0];L.up.rotation.z=la[1];L.fo.rotation.x=la[2];}
@@ -188,12 +191,12 @@ function earthFX(o,p,pz,now,dt){
   if(o.shield)o.shield.visible=false;   // โล่ = Stand ใหญ่ เอามือบังหน้า (ไม่ใช้โล่ฟอง)
   // ----- Stand เล็ก: หมัด / ขี่ตอน Rampage -----
   let op=0,pose={t};
-  if(s.pn&&!broken){const P=s.pn;P.t+=dt;const k=P.t;
+  if(s.pn&&!broken){const P=s.pn;if(P.pk&&P.t>=0.29&&(P.hs||0)<PK.hs)P.hs=(P.hs||0)+dt;else P.t+=dt;const k=P.t;   // pk: ค้างหมัดตอนโดนแผ่นหิน (hit-stop)
     if(!P.fx){P.fx=1;eAppear(P.x,P.y,P.h,1);}
     // 0–0.18 โผล่ + ง้าง • 0.18–0.29 ส่งหมัด (เร็ว ออกแรงตอนท้าย) • 0.29–0.65 ค้างแล้วผ่อนกลับ • จางหายถึง 0.75
     const ez=x=>x*x*(3-2*x),w=ez(Math.min(1,k/0.18)),pu=k<0.18?0:1-Math.pow(1-Math.min(1,(k-0.18)/0.11),3),rc=k<0.29?0:ez(Math.min(1,(k-0.29)/0.36));
     op=k<0.15?k/0.15:k<0.5?1:Math.max(0,1-(k-0.5)/0.25);
-    const lu=0.22*pu*(1-0.5*rc)-0.06*w*(1-pu),bx=P.x+(P.x2-P.x)*lu,by=P.y+(P.y2-P.y)*lu;S.g.position.copy(eW(bx,by,P.h+0.15));S.g.rotation.y=eYaw(P.x,P.y,P.x2,P.y2);pose={t,punchW:w,punch:pu,rec:rc};
+    const lu=(0.22+PK.lu*(P.pk||0))*pu*(1-0.5*rc)-0.06*w*(1-pu),bx=P.x+(P.x2-P.x)*lu,by=P.y+(P.y2-P.y)*lu;S.g.position.copy(eW(bx,by,P.h+0.15));S.g.rotation.y=eYaw(P.x,P.y,P.x2,P.y2);pose={t,punchW:w,punch:pu,rec:rc,pk:P.pk||0};
     if(k>0.76)s.pn=null;}
   else if(A[1]||s.rs>=0){   // Rampage: วิ่ง (ท่าใน standRun) • จบ = ชูสองหมัดแล้วทุบพื้น (s.rs เริ่มจาก event eslam)
     const sm=s.rs>=0;if(!sm){s.rT=(s.rT||0)+dt;s.ra=p.a;}else{s.rs+=dt;if(s.rs>0.55)s.rs=-1;}const a=s.ra===undefined?p.a:s.ra;
@@ -313,9 +316,15 @@ function earthProjMesh(o,t){let m;
   else{m=new THREE.Mesh(new THREE.DodecahedronGeometry(0.3,0),eTMat('wall'));}
   o.g.add(m);o.fileModel=m;o.halo.material=glowMat(ECOL.dust,0.4);}
 // แผ่นหินเหลี่ยม Stonebreaker (cr = มีรอยร้าวเรืองจากหมัด)
-function makeSlab(cr){const m=new THREE.Group();const b=new THREE.Mesh(rockGeo(3.7,1.7,0.42,0.05,3),eTMat('wall','#c8b08a'));b.castShadow=true;m.add(b);
-  if(cr){const cm=new THREE.MeshBasicMaterial({color:hdr(ECOL.glow,1.8)});for(const [x,y,r] of [[0,0,0],[0.3,0.25,1.1],[-0.35,-0.2,2.2],[0.1,-0.35,0.5]]){const c=new THREE.Mesh(new THREE.BoxGeometry(0.95,0.05,0.6),cm);c.position.set(x,y,0);c.rotation.z=r;m.add(c);}}
+// SLAB = ขนาดแผ่น (กว้าง สูง หนา) — แบนใหญ่ • ชนจริงใช้รัศมีบน host (PDEF.eslab.r) ไม่ได้ขึ้นกับ mesh
+const SLAB={w:5.2,h:2.7,d:0.3};
+function makeSlab(cr){const m=new THREE.Group();const b=new THREE.Mesh(rockGeo(SLAB.w,SLAB.h,SLAB.d,0.05,3),eTMat('wall','#c8b08a'));b.castShadow=true;m.add(b);
+  if(cr)slabCracks(m);
   return m;}
+// รอยร้าวเรืองแตกออกจากกลางแผ่น (จุดที่หมัดโดน)
+function slabCracks(m){const cm=new THREE.MeshBasicMaterial({color:hdr(ECOL.glow,1.8)});
+  for(let i=0;i<7;i++){const a=i/7*6.283+0.3,L=i%2?1.1:1.6,c=new THREE.Mesh(new THREE.BoxGeometry(L,0.07,SLAB.d+0.08),cm);c.position.set(Math.cos(a)*L*0.5,Math.sin(a)*L*0.5,0);c.rotation.z=a;m.add(c);}
+  const o=new THREE.Mesh(new THREE.BoxGeometry(0.5,0.5,SLAB.d+0.1),cm);o.rotation.z=0.8;m.add(o);}
 // ---------- สิ่งก่อสร้าง + ฝุ่น (เรียกจาก render loop) ----------
 function earthClear(){if(!EV)return;   // clearDyn ถูกเรียกตอนโหลด (ก่อนไฟล์นี้) — var จึงยังเป็น undefined
   for(const o of EV.es.values())disposeObj(o.g);EV.es.clear();
@@ -387,6 +396,14 @@ function eWave(x,y,h,r,col){ring(x,y,col||'#ffe0a0',r,0.35,h||0.2);later(0.06,()
 // คลื่นกระแทกกลางอากาศ (แผ่นวงหันตามทิศปา)
 function eAirWave(pos,dir,sc,col,op){const O=op||0.6,m=new THREE.Mesh(new THREE.RingGeometry(0.6,1,48),new THREE.MeshBasicMaterial({color:hdr(col||'#ffe2a0',1.1),transparent:true,opacity:O,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide}));
   m.position.copy(pos);m.lookAt(pos.clone().add(dir));scene.add(m);eAnim({g:m,life:0.3,fn(a){const k=a.t/0.3;m.scale.setScalar((0.5+k*3.5)*(sc||1));m.material.opacity=O*(1-k);}});}
+// ระเบิดตอนหมัดโดนกลางแผ่นหิน: แฟลชขาว + ลูกไฟส้ม + คลื่นกระแทกวงใหญ่ (หน้า/หลังแผ่น) + ประกายพุ่งรอบ + เศษหินกระเด็นจากขอบแผ่น + จอสั่น
+function esbImpact(P,c,sn,a,mine,ox,oy){const q=simOf(P),h=q.h,d=new THREE.Vector3(c,0,sn);
+  FX.flashSprite(q.x,q.y,h,'#ffffff',0.5,3,0.09,2.4);FX.flashSprite(q.x,q.y,h,'#ffb04a',0.8,4.2,0.24,1.8);FX.flashLight(q.x,q.y,h,'#ffcf6a',4.5,16,0.22);
+  eAirWave(P.clone().addScaledVector(d,0.3),d,0.9,'#fff0c8',0.85);later(0.05,()=>eAirWave(P.clone().addScaledVector(d,0.9),d,1.25,'#ffd890',0.5));eAirWave(P.clone().addScaledVector(d,-0.3),d.clone().negate(),0.55,'#ffe2a0',0.45);
+  burst(q.x,q.y,'#fff4d0',34,420,0.3,2.4,{h,vh:[-3,3],g:2,sh:2,c2:'#ffb060'});burst(q.x,q.y,ECOL.glow,18,240,0.45,2.8,{h,vh:[-2,4],g:3,c2:'#ff8a3a'});
+  burst(q.x,q.y,ECOL.dust,20,300,0.6,3.4,{h,a,spread:1.2,g:4});smoke(q.x,q.y,h-0.5,8,ECOL.dust,1.1,9,140);
+  eChunks(q.x,q.y,h,16,360,7,0.26);eWave(q.x,q.y,0.3,75);
+  const me=myPos(),D=me?Math.hypot(me.x-ox,me.y-oy):1e9;shake(mine?1.6:D<400?1:D<800?0.4:0);if(mine)hitStop(0.06);}
 // ---------- event "efx" ของสายดิน (เรียกจากต้น efxFX) — คืน true = จัดการแล้ว ----------
 function earthEfx(ev){
   const z=ev.z,x=ev.x,y=ev.y,H=ev.h!==undefined?ev.h:0,me=myPos(),near=!me||Math.hypot(x-me.x,y-me.y)<1100,mine=ev.id===NET.myId;
@@ -415,10 +432,10 @@ function earthEfx(ev){
     // ----- Stonebreaker: งัดแผ่นหิน → Stand ต่อย (รอยร้าว + คลื่นกระแทก) → แผ่นพุ่ง -----
     case 'esbcast':{const a=ev.a,c=Math.cos(a),sn=Math.sin(a),sx=x+c*60,sy=y+sn*60,s=eState(ev.id),sl=makeSlab(false);sl.position.copy(eW(sx,sy,H-1.5));sl.rotation.y=Math.atan2(c,sn);scene.add(sl);
       eDebris(sx,sy,0.2,14,120);
-      later(0.12,()=>{s.pn={t:0,x:x-c*12,y:y-sn*12,h:H,x2:sx,y2:sy};});
+      later(0.07,()=>{s.pn={t:0,x:x-c*12,y:y-sn*12,h:H,x2:sx,y2:sy,pk:1};});   // หมัดโดนกลางแผ่นตอน 0.07+0.29 = 0.36 วิ
       eAnim({g:sl,life:0.46,fn(an){const k=Math.min(1,an.t/0.2);sl.position.copy(eW(sx,sy,lerp(H-1.5,H+2.0,1-Math.pow(1-k,3))));
-        if(an.t>=0.36&&!an.cr){an.cr=1;const cm=new THREE.MeshBasicMaterial({color:hdr(ECOL.glow,1.8)});for(const [px,py,r] of [[0,0,0],[0.3,0.25,1.1],[-0.35,-0.2,2.2]]){const q=new THREE.Mesh(new THREE.BoxGeometry(0.95,0.05,0.6),cm);q.position.set(px,py,0);q.rotation.z=r;sl.add(q);}
-          eAirWave(sl.position.clone(),new THREE.Vector3(c,0,sn),0.9);burst(sx,sy,ECOL.glow,14,160,0.4,2.4,{h:H+1.3,g:1});burst(sx,sy,ECOL.dust,16,220,0.5,3,{h:H+1.3,a,spread:0.9});shake(mine?0.35:0.1);if(near)snd('boom',{x,y,vol:0.6});}}});
+        if(an.cr)sl.position.add(new THREE.Vector3(rnd(-1,1),rnd(-1,1),rnd(-1,1)).multiplyScalar(0.07*Math.max(0,1-(an.t-0.36)/0.1)));   // แผ่นสั่นตอนโดน
+        if(an.t>=0.36&&!an.cr){an.cr=1;slabCracks(sl);esbImpact(sl.position.clone(),c,sn,a,mine,x,y);if(near){snd('boom',{x,y,vol:0.9});snd('break',{x,y,vol:0.7});}}}});
       return true;}
     case 'esbhit':eDebris(x,y,H,34,260);eWave(x,y,H,90);playFx('earth_impact',x,y,H,{s:1.3});eChunks(x,y,H+1,12,320,6,0.32);FX.flashLight(x,y,H+1,'#ffcf6a',3,12,0.2);shake(0.4);if(near)snd('break',ev);return true;
     case 'esbwall':eDebris(x,y,H,26,240);ring(x,y,'#ffd86b',70,0.4,H);burst(x,y,'#ffe7a0',12,120,0.6,2.2,{h:H+0.8,g:0});shake(0.4);if(near)snd('boom',ev);return true;
