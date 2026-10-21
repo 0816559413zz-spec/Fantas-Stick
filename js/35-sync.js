@@ -344,7 +344,7 @@ function drawCrosshair(){
   for(let i=DIRI.length-1;i>=0;i--){const d=DIRI[i];d.t-=1/60;if(d.t<=0||!SET.dirm){DIRI.splice(i,1);continue;}
     const rel=d.a-yaw-Math.PI/2;cx.strokeStyle=`rgba(255,60,60,${Math.min(0.85,d.t)})`;cx.lineWidth=6;cx.beginPath();cx.arc(x,y,96,rel-0.32,rel+0.32);cx.stroke();}
   const _v=VIEW.cur,_me=_v&&_v.P&&_v.P.find(q=>q.id===NET.myId),hot=_me&&(_me.cg>=1||_me.dc>=1);
-  drawXh(x,y,hot);
+  if(!(_me&&_me.ea&&_me.al&&_me.sh&&!(_me.ea[0]>0)))drawXh(x,y,hot);   // สายดินถือโล่: ซ่อนเป้าเล็ง (โชว์โค้ง HP โล่ + ตัวเลขแทน ใน drawEarthHud)
   if(_me&&_me.sm&&_me.al)drawStormHud(x,y,_me.sm);
   if(_me&&_me.ea&&_me.al)drawEarthHud(x,y,_me.ea,_me);
   if(!locked){

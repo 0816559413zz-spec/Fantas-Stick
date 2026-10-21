@@ -584,19 +584,37 @@ function earthMudZone(ev){const x=ev.x,y=ev.y,r=ev.r,life=ev.t,R=r*S3;
 // ขาจมโคลน (สถานะ bit 524288)
 function earthMudSink(o,fm,x,y){if(!(fm&524288))return;o.g.position.y-=0.45;if(Math.random()<0.15)burst(x+rnd(-12,12),y+rnd(-12,12),'#6b4c2c',1,25,0.5,2,{h:0.15,vh:[0.5,1.5],g:5});}
 // ---------- HUD ใต้เป้าเล็ง ----------
+// ค่าเวลาใน snapshot ปัดขึ้นเป็นวินาที → นับถอยเองบนเครื่องให้แถบลื่น (อยู่ในช่วง v-1..v เสมอ)
+const ESM={};
+function eSmooth(k,v){const n=performance.now()/1000;let o=ESM[k];if(!o||v!==o.v||n-o.n>0.3)o=ESM[k]={v,t:v,n};else{o.t=Math.max(v-1,o.t-(n-o.n));o.n=n;}return v>0?Math.max(0,o.t):0;}
+// แถบโล่ Stand มุมซ้ายล่าง แบบ Reinhardt: ช่องเล็กเอียงติดกัน 15 ช่อง (ช่องละ 20 HP) ไม่มีตัวหนังสือ • แตก = ช่องว่าง + แดงจาง ๆ ไล่เติมตามเวลาที่ Stand กลับมา
+function eShieldSegs(x,y,w,A){const n=15,g=2,sk=3,h=8,sw=(w-sk-g*(n-1))/n,brk=A[0]>0,k=brk?0:clamp(A[7]/300,0,1)*n,rc=brk?(1-eSmooth('stb',A[0])/15)*n:0;
+  for(let i=0;i<n;i++){const sx=x+i*(sw+g),pg=()=>{cx.beginPath();cx.moveTo(sx+sk,y);cx.lineTo(sx+sw+sk,y);cx.lineTo(sx+sw,y+h);cx.lineTo(sx,y+h);cx.closePath();};
+    pg();cx.fillStyle='rgba(5,7,15,0.85)';cx.fill();const f=clamp((brk?rc:k)-i,0,1);
+    if(f>0){cx.save();pg();cx.clip();cx.fillStyle=brk?'rgba(255,110,80,0.4)':k/n>0.35?'#f2dc98':'#ff8a5a';cx.fillRect(sx,y,(sw+sk)*f,h);if(!brk){cx.fillStyle='rgba(255,255,255,0.45)';cx.fillRect(sx,y,(sw+sk)*f,2);}cx.restore();}
+    pg();cx.strokeStyle=brk?'rgba(255,110,80,0.5)':'rgba(217,180,90,0.45)';cx.lineWidth=1;cx.stroke();}}
 function drawEarthHud(x,y,A,me){
   const y0=y+70;cx.textAlign='center';cx.font='600 15px Kanit,sans-serif';let row=0;
   const txt=(s,col)=>{const yy=y0+row*22;row++;cx.lineWidth=4;cx.strokeStyle='rgba(0,0,0,0.75)';cx.strokeText(s,x,yy);cx.fillStyle=col;cx.fillText(s,x,yy);};
   const arc=(k,col,r)=>{cx.lineWidth=6;cx.strokeStyle='rgba(0,0,0,0.6)';cx.beginPath();cx.arc(x,y,r,-Math.PI/2,Math.PI*1.5);cx.stroke();cx.strokeStyle=col;cx.beginPath();cx.arc(x,y,r,-Math.PI/2,-Math.PI/2+k*Math.PI*2);cx.stroke();};
+  // แถบเวลาไหลลด (แทนตัวเลขวินาที)
+  const bar=(k,col)=>{const w=190,h=8,yy=y0+row*22-12;row++;cx.fillStyle='rgba(0,0,0,0.6)';cx.fillRect(x-w/2-2,yy-2,w+4,h+4);
+    const g=cx.createLinearGradient(0,yy,0,yy+h);g.addColorStop(0,'#fff0b0');g.addColorStop(1,col);cx.fillStyle=g;cx.fillRect(x-w/2,yy,w*clamp(k,0,1),h);
+    cx.strokeStyle='rgba(217,180,90,0.7)';cx.lineWidth=1;cx.strokeRect(x-w/2-0.5,yy-0.5,w+1,h+1);};
   if(A[0]>0)txt('🪨 Stand แตก — กลับมาใน '+A[0]+' วิ','#ffb07a');
-  if(me&&me.sh&&!A[0]){const w=150,k=Math.max(0,Math.min(1,A[7]/300)),yy=y0+row*22-10;row++;   // HP โล่ Stand
-    cx.fillStyle='rgba(0,0,0,0.6)';cx.fillRect(x-w/2-2,yy-2,w+4,14);cx.fillStyle=k>0.35?'#e8c070':'#ff8a5a';cx.fillRect(x-w/2,yy,w*k,10);
-    cx.font='600 12px Kanit,sans-serif';cx.lineWidth=3;cx.strokeStyle='rgba(0,0,0,0.8)';cx.strokeText('โล่ Stand '+A[7]+' / 300',x,yy+9);cx.fillStyle='#fff';cx.fillText('โล่ Stand '+A[7]+' / 300',x,yy+9);cx.font='600 15px Kanit,sans-serif';}
+  // ถือโล่: เป้าเล็งซ่อน → โค้ง HP โล่เหนือกลางจอ (หดจากสองข้างเข้ากลาง) + ตัวเลข HP แบบ Reinhardt
+  if(me&&me.sh&&!A[0]){const k=clamp(A[7]/300,0,1),R=130,cy=y+108,sp=0.48,col=k>0.35?'#ffffff':'#ff8a5a';
+    cx.lineCap='round';cx.lineWidth=8;cx.strokeStyle='rgba(0,0,0,0.35)';cx.beginPath();cx.arc(x,cy,R,-Math.PI/2-sp,-Math.PI/2+sp);cx.stroke();
+    if(k>0){cx.lineWidth=4;cx.strokeStyle=col;cx.beginPath();cx.arc(x,cy,R,-Math.PI/2-sp*k,-Math.PI/2+sp*k);cx.stroke();}cx.lineCap='butt';
+    cx.font='italic 700 21px Kanit,sans-serif';cx.lineWidth=4;cx.strokeStyle='rgba(0,0,0,0.7)';cx.strokeText(String(A[7]),x,y+9);cx.fillStyle=col;cx.fillText(String(A[7]),x,y+9);cx.font='600 15px Kanit,sans-serif';}
   if(A[9]>0){arc(Math.min(1,A[9]/2),'#ffcf6a',46);txt('Stand ใหญ่ชาร์จทุบ…','#ffcf6a');}
   if(A[2]>0){const t=A[2],tier=t>=4.5?3:t>=2?2:1;arc(Math.min(1,t/4.5),['#c9ccd2','#ffb24a','#ff5a2a'][tier-1],40);
     for(const m of [2/4.5,1]){const a=-Math.PI/2+m*Math.PI*2;cx.fillStyle='#fff';cx.fillRect(x+Math.cos(a)*40-2,y+Math.sin(a)*40-2,4,4);}
     txt('Terra Auger ระดับ '+tier,'#ffd86b');}
-  if(A[3]===1)txt('🗿 Wrath: คลิก = ปาเสา • ขยับได้แค่ซ้าย/ขวา • เหลือ '+A[5]+' วิ','#ffd86b');
-  else if(A[3]===3)txt('🗿 สว่าน '+A[4]+'/5 • คลิกซ้ายยิง • เหลือ '+A[6]+' วิ','#ffd86b');
+  // อัลติ Wrath: เวลาเหลือเป็นแถบ (บนฟ้า 5 วิ / สว่าน 10 วิ) • สว่านเหลือ = เม็ดเพชร 5 เม็ด
+  if(A[3]===1){txt('🗿 คลิก = ปาเสา • ขยับได้แค่ซ้าย/ขวา','#ffd86b');bar(eSmooth('wsky',A[5])/5,'#e8a040');}
+  else if(A[3]===3){txt('🗿 คลิกซ้าย = ยิงสว่าน','#ffd86b');const yy=y0+row*22-8;row++;
+    for(let i=0;i<5;i++){const px=x+(i-2)*22;diaPath(px,yy,7);cx.fillStyle=i<A[4]?'#ffcf6a':'rgba(0,0,0,0.55)';cx.fill();cx.strokeStyle=i<A[4]?'#fff4c0':'rgba(217,180,90,0.5)';cx.lineWidth=1.2;cx.stroke();}
+    bar(eSmooth('wdr',A[6])/10,'#e8a040');}
   if(A[8])txt('Tectonic: กดอีกครั้ง = Crush!','#ff9a4a');
 }
