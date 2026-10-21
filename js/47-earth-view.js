@@ -318,7 +318,7 @@ function earthProjMesh(o,t){let m;
   o.g.add(m);o.fileModel=m;o.halo.material=glowMat(ECOL.dust,0.4);}
 // แผ่นหินเหลี่ยม Stonebreaker (cr = มีรอยร้าวเรืองจากหมัด)
 // SLAB = ขนาดแผ่น (กว้าง สูง หนา) — แบนใหญ่ • ชนจริงใช้รัศมีบน host (PDEF.eslab.r) ไม่ได้ขึ้นกับ mesh
-const SLAB={w:5.2,h:2.7,d:0.3};
+const SLAB={w:5.2,h:2.7,d:0.36};   // ความหนา: ผู้ใช้ "บางไป แต่ไม่หนาเท่าอันแรก (0.42)"
 function makeSlab(cr){const m=new THREE.Group();const b=new THREE.Mesh(rockGeo(SLAB.w,SLAB.h,SLAB.d,0.05,3),eTMat('wall','#c8b08a'));b.castShadow=true;m.add(b);
   if(cr)slabCracks(m);
   return m;}
