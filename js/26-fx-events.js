@@ -32,11 +32,11 @@ function fx(ev,raw){   // raw = ภาพเดิมในโค้ดเท่
   switch(ev.k){
     case 'cast':{
       const [wx,wy]=wandPos(ev),col=PCOL[ev.t]||'#fff';
-      if(fileFx('vfx_cast_'+ev.t,{x:wx,y:wy,h:H,a:ev.a,col})){const o=ev.id&&PM3.get(ev.id);if(o)o.castT=0.3;break;}
+      if(fileFx('vfx_cast_'+ev.t,{x:wx,y:wy,h:H,a:ev.a,col})){const o=ev.id&&PM3.get(ev.id);if(o){o.castT=0.3;castStart(o,ev.t);}break;}
       FX.flashSprite(wx,wy,H,col,0.3,ev.t==='fire'?2.2:1.5,0.15,1.4);
       FX.flashLight(wx,wy,H,col,ev.t==='fire'?3.5:2.2,10,0.2);
       burst(wx,wy,col,ev.t==='fire'?16:9,140,0.3,2,{h:H,a:ev.a,spread:0.9,g:2});
-      const o=ev.id&&PM3.get(ev.id);if(o)o.castT=0.3;
+      const o=ev.id&&PM3.get(ev.id);if(o){o.castT=0.3;castStart(o,ev.t);}   // ท่าร่ายแบบนักเวท (js/35 castPose)
       if(near)snd('cast_'+({ice:'stun',zap:'stun',vine:'pull',dart:'bolt',hex:'pull',spike:'stun',pb0:'bolt',pb1:'bolt',pb2:'bolt',pb3:'bolt',pb4:'bolt',pb5:'bolt',ember:'bolt',spark:'bolt',pfire:'fire',pfireb:'fire',icicle:'stun',iceboulder:'stun'}[ev.t]||ev.t),ev);
       break;}
     case 'pop':impactFX(ev.x,ev.y,ev.t,false,H);break;

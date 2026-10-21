@@ -1,4 +1,49 @@
 // ---------- ซิงก์ผู้เล่น/ศัตรู/ลูกเวทจาก snapshot + ฉายตำแหน่งลงจอ (ป้ายชื่อ/ตัวเลข/เป้าเล็ง) ----------
+// ---------- ท่าร่ายคาถาแบบนักเวทในหนัง Harry Potter (ผู้ใช้ 2026-10-22: "ยิงปกติทุกสายให้ดูเหมือนนักเวทกำลังร่าย") ----------
+// o.cpT นับถอยหลัง (ตั้งจาก event cast / stri / epunch) • o.cpS = ท่า: 0 ฟันเฉียงจากบนขวา 1 วนข้อมือแล้วสะบัด (swish & flick) 2 แทงตรง
+//   3 พุ่งแทงแรง (ปล่อยลูกไฟชาร์จ / ก้อนน้ำแข็ง) 4 ฟาดจากเหนือหัว (สายฟ้าสามเหลี่ยม) 5 ชี้สั่ง (สายดินสั่ง Stand ต่อย)
+// จังหวะ: ง้าง 25% → ฟาดเร็ว 30% → ตามแรง/คืนท่า • แขนขวาถือไม้ ตัวบิดหันไหล่ขวาเข้าหาเป้า เอนตัว มือซ้ายกางทรงตัว • ยืนนิ่ง = ก้าวขาเล็กน้อย
+// ภาพอย่างเดียว (ดาเมจ/จังหวะยิงของ host ไม่เปลี่ยน) • ทำงานกับโมเดลไฟล์: เรียกหลัง rigStd → แขนซ้าย/ขาตามโค้ด
+const CPOSE_T=0.38,_ce=t=>1-Math.pow(1-t,3),_cs=t=>t*t*(3-2*t);
+//          [แขนขวา x, แขนขวา z, บิดตัว, เอนตัว, แขนซ้าย x, แขนซ้าย z] ของ ง้าง / ฟาด / ตามแรง
+const CPOSE=[
+  [[-2.7,-0.75,-0.4,-0.06,-0.5,0.45],[-1.3,0.3,0.3,0.12,0.3,0.7],[-1.45,0.05,0.12,0.05,0.1,0.5]],
+  [[-1.75,-0.35,-0.15,0,-0.35,0.35],[-1.4,-0.05,0.15,0.08,0.15,0.55],[-1.5,-0.1,0.05,0.03,0,0.4]],
+  [[-1.15,-0.5,-0.5,-0.08,-0.6,0.3],[-1.62,-0.02,0.22,0.18,0.4,0.6],[-1.55,-0.08,0.08,0.08,0.15,0.45]],
+  [[-1.0,-0.6,-0.6,-0.12,-0.8,0.35],[-1.65,0,0.32,0.3,0.6,0.75],[-1.6,-0.05,0.12,0.15,0.3,0.55]],
+  [[-3.05,-0.15,-0.15,-0.15,-0.3,0.4],[-0.9,0.05,0.1,0.25,0.3,0.6],[-1.2,-0.05,0.05,0.1,0.1,0.45]],
+  [[-1.2,-0.7,-0.5,-0.05,-0.4,0.4],[-1.7,-0.1,0.35,0.15,0.4,0.7],[-1.6,-0.15,0.15,0.08,0.2,0.5]]];
+const _cpT=[0,0,0,0,0,0],_cpR=[0,0,0,0,0,0],CGUARD=[-1.05,-0.3,0.18,0.04,-0.35,0.45];   // ท่าการ์ด: แขนขวา x/z บิดตัว เอนตัว แขนซ้าย x/z
+const CP_STEP=[0,0,0.7,1,0.4,0.8];   // ก้าวขา (ยืนนิ่ง) ของแต่ละท่า
+const CPCOL=['#ffb347','#bfeaff','#ffe27a','#c9a46a','#c9a46a','#c9a46a','#d8b46a'];   // สีหางแสงปลายไม้ตามสาย (pyro frost storm … earth)
+function castStyle(t,n){if(t==='pfire'||t==='pfireb'||t==='iceboulder')return 3;if(t==='icicle'||t==='b_frost')return n%2?2:0;return n%3;}
+function castStart(o,t,style){o.castN=(o.castN|0)+1;o.cpS=style===undefined?castStyle(t,o.castN):style;o.cpT=CPOSE_T;o.cgd=2;}
+function castPose(o,p,v,dt,now){
+  const R=o.armR.rotation,L=o.armL.rotation,c=o.cpa||(o.cpa=[R.x,R.z,0,0,L.x,L.z]);o.vsp=v.sp;
+  if(p.fl||p.dn){o.cpT=0;o.cgd=0;o.gw=0;if(o.ctr){trailStop(o.ctr);o.ctr=null;}return;}
+  // ท่าตั้งการ์ด (ดวลในหนัง): หลังร่าย 2 วิ ถือไม้ยกไว้หน้าไหล่ขวา ตัวเฉียงข้าง มือซ้ายกางออก • ค่อย ๆ เข้า/ออก
+  if(o.cgd>0)o.cgd-=dt;o.gw=(o.gw||0)+((o.cgd>0?1:0)-(o.gw||0))*Math.min(1,dt*(o.cgd>0?8:3));const gw=o.gw,G=CGUARD;
+  if(gw>0.005){R.x=lerp(R.x,G[0],gw);R.z=lerp(R.z,G[1],gw);o.b.rotation.y+=G[2]*gw;o.b.rotation.x+=G[3]*gw;L.x=lerp(L.x,G[4],gw);L.z=lerp(L.z,G[5],gw);}
+  if(!(o.cpT>0)){c[0]=R.x;c[1]=R.z;c[2]=o.b.rotation.y;c[3]=0;c[4]=L.x;c[5]=L.z;if(o.ctr){trailStop(o.ctr);o.ctr=null;}return;}
+  o.cpT-=dt;const k=1-Math.max(0,o.cpT)/CPOSE_T,K=CPOSE[o.cpS|0]||CPOSE[0];
+  // host ปล่อยลูกเวททันทีที่กด → ง้างสั้นมาก (0.06 วิ) แล้วฟาดทันที (0.1 วิ) ให้ลูกเวทออกตอนไม้ฟาด • ตามแรงยาว
+  const k0=0.15,k1=0.42,w=Math.min(1,k/0.05)*(k<0.6?1:1-_cs((k-0.6)/0.4));
+  const T=_cpT,rest=_cpR;rest[0]=R.x;rest[1]=R.z;rest[2]=o.b.rotation.y;rest[3]=0;rest[4]=L.x;rest[5]=L.z;
+  for(let i=0;i<6;i++){let a;
+    if(k<k0)a=lerp(rest[i],K[0][i],_ce(k/k0));
+    else if(k<k1)a=lerp(K[0][i],K[1][i],_cs((k-k0)/(k1-k0)));
+    else a=lerp(K[1][i],K[2][i],_ce((k-k1)/(1-k1)));
+    T[i]=lerp(rest[i],a,w);}
+  if((o.cpS|0)===1){if(k<k1){const u=k/k1*Math.PI*2;T[0]+=0.3*Math.sin(u)*w;T[1]+=0.3*(Math.cos(u)-1)*w;}}   // วนข้อมือเป็นวงแล้วสะบัด
+  const r=Math.min(1,dt*32);for(let i=0;i<6;i++)c[i]+=(T[i]-c[i])*r;   // ลื่นเวลาร่ายรัว ๆ (ท่าใหม่เริ่มก่อนท่าเก่าจบ)
+  R.x=c[0];R.z=c[1];o.b.rotation.y=c[2];o.b.rotation.x+=c[3];L.x=c[4];L.z=c[5];
+  const st=CP_STEP[o.cpS|0]*w*(k<k0?0:k<k1?_cs((k-k0)/(k1-k0)):1);
+  if(st>0.01&&v.sp<0.6){o.legs[1].rotation.x=-0.42*st;o.legs[0].rotation.x=0.3*st;}
+  // หางแสงบาง ๆ จากปลายไม้ตอนฟาด
+  if(k>0.08&&k<0.55){if(!o.ctr){const col=CPCOL[getKit(p.id).path]||'#ffffff';o.ctr=trailNew({col:'#ffffff',col2:col,w:0.05,life:0.16,k:1.3});}
+    o.tip.updateWorldMatrix(true,false);o.tip.getWorldPosition(_tv1);trailPoint(o.ctr,_tv1.x,_tv1.y,_tv1.z);}
+  else if(o.ctr){trailStop(o.ctr);o.ctr=null;}
+}
 function syncPlayers(P,mode,now,dt){
   const seen=new Set(),myP=P.find(q=>q.id===NET.myId),meGhost=!!(myP&&myP.gh);
   for(const p of P){
@@ -40,9 +85,10 @@ function syncPlayers(P,mode,now,dt){
       else{o.b.rotation.x=p.ds?0.4:Math.min(0.12,v.sp*0.01);o.b.position.y=Math.abs(Math.cos(o.walk))*0.05*Math.min(1,v.sp/5);}
       o.legs[0].rotation.x=sw*0.75;o.legs[1].rotation.x=-sw*0.75;
       o.armL.rotation.x=-sw*0.55;o.armL.rotation.z=0.15;
-      o.armR.rotation.x=lerp(-0.35+sw*0.4,-1.55,ck);o.armR.rotation.z=-0.12;
+      o.armR.rotation.x=o.cpT>0?-0.35+sw*0.4:lerp(-0.35+sw*0.4,-1.55,ck);o.armR.rotation.z=-0.12;o.b.rotation.y=0;
     }
     if(o.rig)rigStd(o);
+    castPose(o,p,v,dt,now);
     o.ends.forEach((E,i)=>{E.rotation.x=-clamp(v.lvz*0.07,0,1.2)+Math.sin(now*0.012+i*1.7)*0.08*(1+v.sp*0.15);E.rotation.z=clamp(v.lvx*0.04,-0.6,0.6);});
     o.shield.visible=!!p.sh||!!(p.fm&(128|16384));
     const fireSh=p.sh&&getKit(p.id).path===0;

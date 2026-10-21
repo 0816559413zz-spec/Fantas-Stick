@@ -141,12 +141,12 @@ burst:68 smoke:79 ring:80 floatText:81 shake:82 wandPos:83 impactFX:85 explosion
 §114 เอฟเฟกต์คาถาใหม่
 ZV:115 COLB:115 WVV:115 GLV:115 ICEV:115 SLV:115 ULTV:115 OBV:115 _iceDisc:117 _iceEdge:118 _iceSpk:119 iceFloorMat:120 _icePlane:121 _icePathMat:122 makeIceFloor:123 updateIceFloors:146 FLASHM:157 FLASHING:158 flashModel:159 endFlash:168 tickFlash:169 GHOSTM:171 SOLIDM:171 ghostOf:172 setGhost:178 hitSparks:186
 
-## js/20-vfx-pyro-storm.js (395) — Dragonfall (ภาพ)
+## js/20-vfx-pyro-storm.js (397) — Dragonfall (ภาพ)
 makeDfCircle:3 DFV:20 dfCracks:21 updateDfCracks:31 dragonfallFX:32
 §84 สายฟ้า (ภาพ)
 TBN:87 TBA:87 TBF:87 TBMAX:87 _tv:88 _tt:88 _ts:88 _tw:88 tbLayer:90 TBL:95 TBC:96 _tcc:97 tbGet:98 tbolt:100 tboltP:108 tbWrite:109 updateBolts:117 LATER:133 STV:133 SBV:133 SDV:133 TSV:133 CLV:133 STCLAW:136
 §140 รอยกรงเล็บ (อัลติสายฟ้า): รอยข่วน 3 เส้นโค้งปลายแหลมขนานกัน ตั้งขวางห…
-clawGeo:143 clawRakes:148 updateClaws:162 later:170 stFade:171 stBeam:172 shellPt:177 updateStormV:178 _ev:209 GODPTS:211 bWorld:213 stormClawSwipe:217 stormFX:238 STHUD:350 drawStormHud:351
+clawGeo:143 clawRakes:148 updateClaws:162 later:170 stFade:171 stBeam:172 shellPt:177 updateStormV:178 _ev:209 GODPTS:211 bWorld:213 stormClawSwipe:217 stormFX:238 STHUD:352 drawStormHud:353
 
 ## js/21-vfx-frost.js (202) — น้ำแข็ง (ภาพ): ชิ้นผลึก/หนาม/แผ่นน้ำแข็งชั่วคราว (โผล่ → ค้าง → หด) •…
 FRV:2 _cryG:3 _spkG:3 _plateG:3 _hexG:3 _iceFxM:4 _frostM:4 iceFxM:5 frostM:6 ICEP:8 _im4:8 _iq:8 _ie:8 _ip:8 _is:8 icePool:9 iceBit:10 iceChips:13 updateFRV:14 iceRing:24 chillFX:25 makeSlash:41 _wbGeo:49 crescentGeo:51 makeWaveBlade:54 WGH:65 updateSlashes:66 _glGeo:79 _glMat:79 _glMat2:79 makeGlacier:80 updateGlacierVis:111 updateOrbShots:120 updateZV:130 WM3:202
@@ -168,8 +168,8 @@ BRKV:286 BRK_COL:286 brkSetup:287 BRK_CM:305 brkCrackMat:306 brkClip:322 brkYc:3
 ## js/24-minions-view.js (68) — สัตว์เวท: โมเดลโปร่งแสง + ซิงก์จาก snapshot (MN)
 MM3:2 makeMinion:3 syncMins:36 drawMinBars:58
 
-## js/25-efx.js (295) — efxFX: ภาพของ event "efx" ทุกคาถา (หนึ่ง case ต่อหนึ่งเอฟเฟกต์)
-efxState:4 efxFX:13
+## js/25-efx.js (297) — efxFX: ภาพของ event "efx" ทุกคาถา (หนึ่ง case ต่อหนึ่งเอฟเฟกต์)
+efxState:4 efxFX:15
 
 ## js/26-fx-events.js (243) — fx(ev): เอฟเฟกต์+เสียงของทุก event จากโฮสต์ • statusFX (สถานะบนตัว) •…
 statusFX:3 fx:27
@@ -220,7 +220,7 @@ stageMenuFx:135 _sv:146
 §147 ฉากประจำบ้าน (โผล่ตอนเลือกบ้านในหน้าสร้างตัวละคร)
 CRESTTEX:148 crestTex:149 crestBanner:157 buildHouseEnvs:165 TONE0:213 _tc:214 stageTone:215 stageScreen:228 renderStage:229 drawStageLabels:282
 
-## js/33-pyro-view.js (268) — ภาพของสายไฟ (pyroFX: ชาร์จ/พุ่ง/ดีดนิ้ว/กลายร่าง/Dragonfall/Colossus)…
+## js/33-pyro-view.js (269) — ภาพของสายไฟ (pyroFX: ชาร์จ/พุ่ง/ดีดนิ้ว/กลายร่าง/Dragonfall/Colossus)…
 §2 sync ตัวละคร/ศัตรู/ลูกเวท กับ snapshot
 localVel:3
 §11 ภาพของสายไฟ: ชาร์จลูกไฟ / ย่อตัวชาร์จพุ่ง / วงเวทพ่นไฟ / ดีดนิ้ว / กล…
@@ -231,10 +231,11 @@ iceMat:2 iceRim:3 makeIceSword:4 makeIceAxe:23 makeKiteShield:39
 §47 อาวุธน้ำแข็งลอย (ผู้ใช้ 2026-10-22: "ร่ายคาถาให้ดาบฟันเอง ระยะเท่าเดิ…
 FWS:50 FWA:50 _fwM:51 _fwM2:51 _fwX:51 _fwY:51 _fwZ:51 _fwP:51 _fwS:51 _fwQ:51 _eo:52 _ei:52 _ss:52 fwAim:54 fwWeapons:55 FWP:57 FWT:57 fwChop:58 fwSweep:59 fwIdle:60 fwSwing:63 FWL_N:75 fwLink:76 fwMat:79 frostFX:80
 
-## js/35-sync.js (356) — ซิงก์ผู้เล่น/ศัตรู/ลูกเวทจาก snapshot + ฉายตำแหน่งลงจอ (ป้ายชื่อ/ตัวเ…
-syncPlayers:2 syncEnemies:81 projGeo:119 tailGeo:120 _t1:121 makeProj:122 _a:142 _b:142 syncProj:143 _awT:220 animateWorld:221
-§262 ฉายตำแหน่ง 3D ลงจอ (ป้ายชื่อ / ตัวเลขดาเมจ)
-_v:263 toScreen:264 burnNum:271 drawLabels:278 drawTexts:309 HITM:323 DIRI:323 drawXh:325 drawCrosshair:335
+## js/35-sync.js (402) — ซิงก์ผู้เล่น/ศัตรู/ลูกเวทจาก snapshot + ฉายตำแหน่งลงจอ (ป้ายชื่อ/ตัวเ…
+§2 ท่าร่ายคาถาแบบนักเวทในหนัง Harry Potter (ผู้ใช้ 2026-10-22: "ยิงปกติท…
+CPOSE_T:7 _ce:7 _cs:7 CPOSE:9 _cpT:16 _cpR:16 CGUARD:16 CP_STEP:17 CPCOL:18 castStyle:19 castStart:20 castPose:21 syncPlayers:47 syncEnemies:127 projGeo:165 tailGeo:166 _t1:167 makeProj:168 _a:188 _b:188 syncProj:189 _awT:266 animateWorld:267
+§308 ฉายตำแหน่ง 3D ลงจอ (ป้ายชื่อ / ตัวเลขดาเมจ)
+_v:309 toScreen:310 burnNum:317 drawLabels:324 drawTexts:355 HITM:369 DIRI:369 drawXh:371 drawCrosshair:381
 
 ## js/36-modes-view.js (164) — 
 ROLE:4 KC:4 roleShowT:4 onPriv:5 MO:10 BREATHS:11 clearModeObjs:12 ITEMC:21 makeItem:22 syncModeObjs:34
@@ -401,4 +402,4 @@ GRASS:52 GR_GLSL_V:53 GR_BEGIN:55 grassMat:79 grassBuild:93 _grBasic:107 grassBa
 WARM:11 WARM_FXDIR:12 WARM_COMMON:12 WARM_X:13 WARM_Y:13 warmKeep:15 warmCompile:21 WARM_SKIP:24 warmFx:25 warmFxEnd:33 warmGather:35 warmPaths:37 warmStep:39 warmTick:54
 §63 ภาพจากโค้ดของแต่ละสาย (เฟรมละฟังก์ชัน)
 
-(52 files, 12077 lines)
+(52 files, 12128 lines)
