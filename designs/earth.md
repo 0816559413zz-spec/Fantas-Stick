@@ -57,6 +57,7 @@
 
 ### Shield — Stand Barrier (numbers unchanged, LOOK changed)
 - **300 HP**, regen after 3 s unused at +20 HP/s, breaks → Stand gone 15 s, comes back with full 300.
+- **Blocks from every direction** (2026-10-21, not only the front) — same 300 HP bar, still breaks at 0. Pose/animation unchanged for now. ผู้ใช้: “block all around too not just infront but dont change pose or animation yet just make it block all direction … it weakness is can be break” (asked: shield bar stays as before).
 - **Look:** the **big Stand stands right behind the player** (its head and body very close behind us) and **holds its hands in front of us** as the shield. **Shield HP is visible.**
 - ผู้ใช้: “shield is the big stand will use hand and protect u he will be like his head and body is very near at the back of us and he use hand to protect infront of us we can see health of the shield”
 

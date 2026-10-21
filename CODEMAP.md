@@ -41,7 +41,7 @@ pyroBigBoom:5 pyroBall:13 pyroBasic:14 addOrbs:31 pyroParry:32 pyroBlock:33 laun
 ## js/07-frost-spells.js (33) — 
 frostGlacier:11
 
-## js/08-storm.js (200) — สายสายฟ้า (ผู้เล่นออกแบบทั้งหมด — designs/storm.md)
+## js/08-storm.js (200) — 
 ST_MAX:5 stGain:6 stSpend:7 stormCone:9 stormLineFoes:14 stormBasic:18 stormTri:41 stormDash:48 stormDashTick:61 stormShieldBlast:69 stormTick:78
 §87 สกิล 1 (ฟรี): เส้นสายฟ้า — ชี้ขึ้นแล้วกดลง 0.5 วิ จากนั้นสายฟ้าผ่าเป็…
 stormLine:90
@@ -55,7 +55,7 @@ stormRailFire:132
 §142 สกิล 6 (3 stacks): ลูกสายฟ้าโดม — ทะยานขึ้น บินเล็ง 3 วิ คลิกยิงลูกสา…
 stormDomeTick:143 stormDomeFire:158 stormDomeSlam:166 updateStorm:171
 
-## js/09-earth.js (238) — สายดิน ⛰️ (ผู้ใช้ออกแบบทั้งหมด — designs/earth.md §0 FINAL SPEC) • ฝั่งโฮสต์
+## js/09-earth.js (238) — 
 EARTH:8 E_SH:8 E_CRUSH:8
 §12 ตัวช่วย
 eOn:13 eStand:14 eNoStand:15 eSegD:17 eAdd:18 eCollide:20 eProjHit:27 eKill:30
@@ -132,7 +132,7 @@ MY:202 myDB:203 mySave:204 myLoad:207 myDecodeReady:213 myPlay:214 myNext:226 my
 §248 เพลงประกอบ (สร้างสดตามแผนที่)
 MUSIC:249 THEMES:250 padNote:255 musicTick:262 toggleMusic:291
 
-## js/19-client.js (186) — ฝั่งแสดงผล (ทุกเครื่อง รวมโฮสต์ ใช้ snapshot เดียวกัน)
+## js/19-client.js (186) — 
 cv:4 cx:4 DPR:5 SW:5 SH:5 resize:6 VIEW:12 screen:13 lastBuffKey:13 overShown:13 lastCount:13 PARTS:14 TEXTS:14
 §15 งบเอฟเฟกต์ (VFX budget)
 VFXB:20 _apush:21 vfxQual:29 vfxBegin:31 vfxEnd:34 vfxOnce:36 vfxExtra:38 PCOL:39 setScreen:41 onLobby:50 onSnap:56 myPos:64
@@ -261,8 +261,7 @@ trOpenF:2 trKey:2 trN:2 TR_OPTS:3 trToggle:4 trSend:9 trSync:14 hovEl:62
 §63 หน้าตั้งค่า
 setRow:64 setTog:65 setTab:66 XHC:67 XHN:67 setOpts:68 renderSettings:69 drawXhPrev:86 openSettings:87 closeSettings:88 modeIcon:140 modeTitle:141 renderLobby:142
 
-## js/41-debug.js (141) — เครื่องมือทดสอบสมดุล (ใช้ผ่านคอนโซล WD.bal / WD.dmgTest เท่านั้น ผู้เล่นปกติไม่เห็น)
-§5 บอทต่อสู้แบบง่ายๆ: เล็งนำเป้า เดินรักษาระยะ+ส่ายไปมา ร่ายคาถาทุกครั้ง…
+## js/41-debug.js (141) — 
 botBrain:6 _obsKeep:47 balArena:48 balReset:49 balDuel:53 balTour:68 balCoop:82 balSpellTest:98
 §117 Service Worker (sw.js): เก็บไฟล์เกมไว้ในเครื่อง เปิดครั้งต่อไปเร็วขึ้…
 SWK:118 swSetup:119
@@ -282,7 +281,7 @@ NOISE3D:240 FIRE3D:249 _fvIdx:254 fireVol:255 fireVolTemp:299
 §300 ไฟ 3 มิติที่ bake จาก Blender ทั้งก้อน (วิธี 1 — ผู้เล่นเลือก 2026-10…
 FSEQ:304 fireSeqLoad:305 fireSeqReady:309 fireSeqVol:310 fireSeqAt:331 _sqA:338 _sqB:338 _sqX:338 _sqY:338 _sqZ:338 _sqM:338 fireSeqLine:339
 
-## js/43-frost-vfx.js (144) — น้ำแข็ง VFX จาก Blender + Glacier Mist (หมอกเย็นตอนน้ำแข็งโผล่)
+## js/43-frost-vfx.js (144) — 
 FROST_U:6
 §7 shader น้ำแข็ง: ฐานน้ำเงินเข้ม → ปลายขาว • ขอบสว่าง (fresnel) • รอยร้…
 ICE_VS:8 ICE_FS:10 _iceShM:23 iceShaderMat:24 iceModel:28
@@ -334,7 +333,7 @@ fxBind:305
 §316 แม่แบบ playFx เป็นไฟล์ (assets/fx/tpl/*, sig/*, rec/*)
 fxTpl:318
 
-## js/46-fx-make.js (261) — ของที่สร้างเองใน VFX Studio (asset ของเอฟเฟกต์) — ใช้ทั้งในเกมและในสตูดิโอ (สตูดิโอเรียกฟ…
+## js/46-fx-make.js (261) — 
 FXMK:10 MKD:11 mkRng:12 mkHash:13 mkNoise:15 mkL:17 mkR2:18
 §19 ที่เก็บจุด/สามเหลี่ยม
 mkG:21 mkPc:22 mkV:23 mkQ:24 mkAppend:25 mkCopy:26 mkFlat:27 _mkv:28 mkXf:29 mkThree:32 mkTRS:34 mkGrid:37
@@ -356,7 +355,7 @@ fxWarpMake:219 fxWarpTick:231
 §237 ไฟ 3 มิติจากการจำลอง (ชั้น vol) — ไฟล์รูปแบบเดียวกับที่เพื่อน bake จา…
 FXVOL:240 fxVolLoad:241 fxVolTex:245 fxVolSet:248 fxVolReady:249 fxVolMake:250 fxVolTick:253 fxPreAssets:258 fxAssetsWait:260
 
-## js/47-earth-view.js (420) — สายดิน ⛰️ — ภาพฝั่งเครื่องเล่น (Stand / Stand ใหญ่ / กำแพง / เสา / เนิน / ฝุ่น / สว่าน / …
+## js/47-earth-view.js (420) — 
 ECOL:9 EGUARD_BIG:11 EGUARD:11 EV:12 eW:13 eYaw:14
 §15 ลายผิว (วาดเองบน canvas: หิน/ทราย + รอยร้าว + ขอบบล็อกแบบ Roblox)
 ETEX:16 eTex:17 eFadeTex:31 eMat:33 eTMat:34 rockGeo:35 _eChunkM:39 eChunks:40
