@@ -55,7 +55,7 @@ stormRailFire:132
 §142 สกิล 6 (3 stacks): ลูกสายฟ้าโดม — ทะยานขึ้น บินเล็ง 3 วิ คลิกยิงลูกสา…
 stormDomeTick:143 stormDomeFire:158 stormDomeSlam:166 updateStorm:171
 
-## js/09-earth.js (238) — สายดิน ⛰️ (ผู้ใช้ออกแบบทั้งหมด — designs/earth.md §0 FINAL SPEC) • ฝั่งโฮสต์
+## js/09-earth.js (238) — 
 EARTH:8 E_SH:8 E_CRUSH:8
 §12 ตัวช่วย
 eOn:13 eStand:14 eNoStand:15 eSegD:17 eAdd:18 eCollide:20 eProjHit:27 eKill:30
