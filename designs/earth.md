@@ -78,6 +78,7 @@
 
 ### Skill 3 — Tectonic Crush (numbers correct, ANIMATION changed)
 - Walls 300 long, 240 apart, 200 HP each; crush 80 (both) / 40 + knockback (one); wind-up **0.5 s** (was 0.8 s — 2026-10-21 ผู้ใช้: “ตอบกำแพงประกบให้ประกบเร็วขึ้น”); CD 14 = recast window, otherwise walls stay as cover.
+- **Crush push (2026-10-21 ผู้ใช้: “ตอนเวลาเลื่อนกำแพงมาชนกันให้เป็นท่า สแตนเอามือดันกำแพงมาประกบ”):** the big Stand (behind the far end, between the walls) puts **one hand on the outside of each wall** and **pushes them together**; the hands follow the walls as they slide in.
 - **Wall look (2026-10-21 ผู้ใช้: “อยากให้ปรับกำแพงใหม่ให้สวยขึ้น”):** rugged cliff made of rock columns of uneven height, jagged pointed top, layered-stone texture, rubble piled at the base on both sides.
 - **Rising:** walls come **straight up out of the ground**, with **much more dirt flying** and **a little dust cloud** where the earth comes up.
 - **Crush (second press):** the **big Stand appears behind the walls, centred between them** (not on either side), **hands ready to squeeze**. It first **pushes slowly with effort** → the rocks **shake hard, dust comes out, the ground moves** → after a moment it **slams them together fast — one big BOOM** → **impact wave**, dirt scattering.
@@ -97,6 +98,7 @@
 - **Charge pose:** one **leg back**, **arm pointing toward the mouse**, the **whole body turns** with the aim. The **drill stays in place (above/beside Earth) but rotates to follow the aim**.
 - **Movement while charging:** can walk but **very slow — 85% slower** (was −50%).
 - **Drill look:** **smaller, slim, sharp, spiral**, **silvery** colour (not brown like earth). It **spins faster with each charge tier**, with **more swirling wind** effect, and **same-colour rock bits keep flying off** (“rudues” = debris). **Heat:** the higher the tier the hotter it looks — **yellow-red glow on the drill**; at max tier clearly **red with yellow inside**.
+- **Drill look v3 (2026-10-21 ผู้ใช้: “ให้เป็นทรงกรวย ตัดท้ายเรียบๆ สีความร้อนให้ไล่เฉดจากปลายถึงกลางๆ … สว่านเอาเป็นสีเหมือนเหล็กไปเลย เพิ่มเหมือนลมออกมาตอนปล่อย”):** a **steel cone with a flat back**, silver/steel colour with spiral grooves; **heat glows as a gradient from the tip to about the middle** (none at tier 1, orange at tier 2, red-hot with yellow at the tip at tier 3). **On release a gust of wind bursts out** (air rings along the shot + wind streaks around the drill), plus thin wind spirals behind the flying drill. (Replaces the silvery slim spike look above.)
 - **Release:** when fully charged Earth **raises the wand**; on release **brings it down at once** and the drill follows.
 - **Impact:** explosion + impact effect; the ground there **breaks into a small crater**.
 - **Tier 3 mound:** earth rises into a mound **as tall as Earth, like a wall** (was “half height, can be jumped”). It **counts as a solid wall for Stonebreaker's collision stun** (changed). Still 150 HP, one at a time (a new tier 3 replaces the old one).
