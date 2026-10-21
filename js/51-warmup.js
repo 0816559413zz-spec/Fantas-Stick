@@ -66,6 +66,7 @@ WARM.reg.earth=[
   ()=>{const S=makeStand(1,true);standOp(S,0.5);return S.g;},
   ()=>[makeDrill(),makePillar(),makeWarn(),eAirCone()],
   ()=>[makeSlab(true),makeSlab(false)],
+  ()=>{eChunks(WARM_X,WARM_Y,0.3,2,10,1,0.1);},   // เศษหิน (InstancedMesh + ลายหิน) — เดิมไม่ได้อุ่น → กด Dash ครั้งแรก compile shader ใหม่ เกมค้าง
   ()=>{for(const k of [0,1,2,3])eMakeSO([0,k,WARM_X,WARM_Y,WARM_X+200,WARM_Y,30,100]);earthMudZone({x:WARM_X,y:WARM_Y,r:100,t:0.2});},
 ];
 if(window.WD)window.WD.warm=WARM;
