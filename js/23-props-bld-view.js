@@ -129,11 +129,13 @@ function bldRubble(b,j,k,g,M){
   for(let i=0;i<n;i++){const m=new THREE.Mesh(sGeo(THREE.BoxGeometry,1,1,1),i%2?M.beam:M.stone);
     m.scale.set(0.3+R()*0.5,0.15+R()*0.25,0.3+R()*0.45);m.position.set((C[0]+(R()*2-1)*C[2])*S3+(j===2?-1:j===3?1:0)*R()*0.8,0.1,(C[1]+(R()*2-1)*C[3])*S3+(j===0?1:j===1?-1:0)*R()*0.8);m.rotation.set(R()*0.6,R()*3,R()*0.6);g.add(m);}
 }
+// ความสูงซากเมื่อส่วนนั้นพังหมด (คูณแกนตั้งของโมเดล _broken) — ซากไม่มีการชน เลยให้เตี้ยระดับเข่า
+const BLD_RUBBLE_H=0.28;
 function bldBuild(b,file){
   const g=new THREE.Group(),chunks=file&&bldHasChunks(),M=bldMats(b);
   for(let j=0;j<6;j++){
     const q=b.pc[j],f=q.fl,br=f&1;let m;
-    if(br)m=(file&&bldFilePiece(b,BLD_PIECES[j]+'_broken'))||bldFallback(b,j,true);
+    if(br){m=(file&&bldFilePiece(b,BLD_PIECES[j]+'_broken'))||bldFallback(b,j,true);m.scale.y*=BLD_RUBBLE_H;}   // ซากทั้งส่วน: กดให้เตี้ย (เดินทะลุได้ ไม่ควรสูงบังตัว)
     else if(!q.cb)m=(file&&bldFilePiece(b,BLD_PIECES[j]))||bldFallback(b,j,false);
     else if(chunks){m=new THREE.Group();for(let k=0;k<q.nc*q.nr;k++){if(bldAlive(q,k)){const c=bldFilePiece(b,BLD_PIECES[j]+'_c'+k);if(c)m.add(c);}else if(j<4)bldRubble(b,j,k,m,M);}}
     else m=bldFallbackChunks(b,j,q);

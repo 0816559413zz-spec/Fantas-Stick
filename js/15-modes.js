@@ -52,6 +52,7 @@ function modeInit(){
     const cy=MH/2-260;
     for(let i=0;i<5;i++)spawnDummy(MW/2+(i-2)*170,cy);
     spawnDummy(MW/2,MH/2-620>80?MH/2-620:80);
+    testDummySpots().forEach(([x,y],i)=>{spawnDummy(x,y);G.en[G.en.length-1].spot=i;});G.spotT=[];   // หุ่นประจำจุดทดสอบ (ลานยิงไกล / วงวัดรัศมี)
     G.tipT=0;G.tipI=0;
   }
 }
@@ -61,9 +62,12 @@ function spawnDummy(x,y){
   emit({k:'spawn',x:o.x,y:o.y,t:'dummy'});
 }
 function trainTick(dt){
-  const n=G.en.filter(e=>e.type==='dummy').length;
+  const n=G.en.filter(e=>e.type==='dummy'&&e.spot===undefined).length;
   G.dummyT=(G.dummyT||0)-dt;
   if(n<6&&G.dummyT<=0){G.dummyT=2;spawnDummy(MW/2+rnd(-340,340),MH/2-260+rnd(-60,60));}
+  // หุ่นประจำจุดทดสอบ: ตายแล้วฟื้นที่เดิมหลัง 3 วิ
+  const ST=G.spotT||(G.spotT=[]);
+  testDummySpots().forEach(([x,y],i)=>{if(G.en.some(e=>e.spot===i))return;ST[i]=(ST[i]===undefined?3:ST[i])-dt;if(ST[i]<=0){ST[i]=undefined;spawnDummy(x,y);G.en[G.en.length-1].spot=i;}});
   const T=G.tr||{};
   for(const p of plist()){
     if(T.nocd)for(const k of ['q','e','r','f'])p.cd[k]=0;

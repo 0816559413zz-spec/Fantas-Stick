@@ -5,18 +5,18 @@ Format: `name:line` = top-level function/const/let in that file. `§line title` 
 ## js/01-core.js (22) — แกนกลาง: import Three.js + ฟังก์ชันพื้นฐาน ($ rnd clamp lerp store to…
 $:12 rnd:13 clamp:14 lerp:15 dist2:16 lerpAng:17 esc:18 shuffle:19 store:20 toastT:21 toast:22
 
-## js/02-data.js (305) — 
+## js/02-data.js (315) — 
 W:4 H:4 PR:4 PILLARS:6 SPAWNF:7 mulberry:9 genForest:10 genPitch:27 genHogsmeade:36
 §54 แผนที่โล่ง 3 แบบ (ผู้ใช้: ป่ามืดไม่สนุก อยากได้ที่โล่งๆ)
 genMeadow:55 genLake:61 genRuins:66
 §73 Test Place (ห้องฝึก): พื้นโล่งไม่มีสิ่งกีดขวาง
-TEST_VIL:76 genTest:77 testProps:84 trZone:96 genGreatHall:97 MAPS:105 RANDOM_MAPS:117 MAPID:118 MW:118 MH:118 OBS:118 setMapVars:119
-§120 แผนที่จากไฟล์ (Blender → assets/maps/<id>.json + .glb, สคริปต์ assets…
-FMAPS:123 b64i16:124 regFileMap:125 loadMapData:137 loadAllMapData:145 mapReady:148 mapOkFor:149
-§150 ของประกอบฉากที่พังได้ / ใช้ได้ (prop)
-PROPDEF:154 PROP_OFF_MODES:161 PROP_USE:163 PROPS:164 PROPON:164 genProps:165
-§185 ตัวละคร: บ้านฮอกวอตส์ + หน้าตา
-HOUSES:187 HAIRC:192 HAIRSTY:194 WOODC:196 WOODN:197 WCOREC:198 WCOREN:199 WANDSTY:200 EYEC:201 SKINC:202 CLOAKC:203 TIESTY:204 LOOKK:205 LOOKN:205 lookStr:206 parseLook:207 randLook:208 LOOKS:209 LOOKP:209 KITS:209 getKit:210 getLook:211 CREST_SH:212 CREST_PAT:213 starPts:218 CREST_ANI:220 crestSVG:226 houseColor:234 TEAMC:235 TEAMN:235 MODES:236 PDEF:247 EDEF:274 POOLS:286 CDK:296 BUFFS:297
+TEST_W:75 TEST_H:75 TEST_C:75 TEST_VIL:75 TEST_ST:77 TEST_PH:78 testWalls:80 testDummySpots:82 genTest:83 testProps:94 trZone:106 genGreatHall:107 MAPS:115 RANDOM_MAPS:127 MAPID:128 MW:128 MH:128 OBS:128 setMapVars:129
+§130 แผนที่จากไฟล์ (Blender → assets/maps/<id>.json + .glb, สคริปต์ assets…
+FMAPS:133 b64i16:134 regFileMap:135 loadMapData:147 loadAllMapData:155 mapReady:158 mapOkFor:159
+§160 ของประกอบฉากที่พังได้ / ใช้ได้ (prop)
+PROPDEF:164 PROP_OFF_MODES:171 PROP_USE:173 PROPS:174 PROPON:174 genProps:175
+§195 ตัวละคร: บ้านฮอกวอตส์ + หน้าตา
+HOUSES:197 HAIRC:202 HAIRSTY:204 WOODC:206 WOODN:207 WCOREC:208 WCOREN:209 WANDSTY:210 EYEC:211 SKINC:212 CLOAKC:213 TIESTY:214 LOOKK:215 LOOKN:215 lookStr:216 parseLook:217 randLook:218 LOOKS:219 LOOKP:219 KITS:219 getKit:220 getLook:221 CREST_SH:222 CREST_PAT:223 starPts:228 CREST_ANI:230 crestSVG:236 houseColor:244 TEAMC:245 TEAMN:245 MODES:246 PDEF:257 EDEF:284 POOLS:296 CDK:306 BUFFS:307
 
 ## js/03-spells-core.js (218) — 
 ICONS:8 ICOALIAS:9 hasIco:10 ICOBASE:12 icoURL:13 ICO:14 icoTint:15 icoHTML:24 PATHS:25 SPELL_LIST:33 SPELLS:33 defSpell:34 SLOTK:35 BRMAP:35 KITP:36 parseKit:37 cleanKit:53 setKit:54
@@ -41,7 +41,7 @@ pyroBigBoom:5 pyroBall:13 pyroBasic:14 addOrbs:31 pyroParry:32 pyroBlock:33 laun
 ## js/07-frost-spells.js (33) — 
 frostGlacier:11
 
-## js/08-storm.js (200) — 
+## js/08-storm.js (200) — สายสายฟ้า (ผู้เล่นออกแบบทั้งหมด — designs/storm.md)
 ST_MAX:5 stGain:6 stSpend:7 stormCone:9 stormLineFoes:14 stormBasic:18 stormTri:41 stormDash:48 stormDashTick:61 stormShieldBlast:69 stormTick:78
 §87 สกิล 1 (ฟรี): เส้นสายฟ้า — ชี้ขึ้นแล้วกดลง 0.5 วิ จากนั้นสายฟ้าผ่าเป็…
 stormLine:90
@@ -55,7 +55,7 @@ stormRailFire:132
 §142 สกิล 6 (3 stacks): ลูกสายฟ้าโดม — ทะยานขึ้น บินเล็ง 3 วิ คลิกยิงลูกสา…
 stormDomeTick:143 stormDomeFire:158 stormDomeSlam:166 updateStorm:171
 
-## js/09-earth.js (238) — 
+## js/09-earth.js (238) — สายดิน ⛰️ (ผู้ใช้ออกแบบทั้งหมด — designs/earth.md §0 FINAL SPEC) • ฝั่งโฮสต์
 EARTH:8 E_SH:8 E_CRUSH:8
 §12 ตัวช่วย
 eOn:13 eStand:14 eNoStand:15 eSegD:17 eAdd:18 eCollide:20 eProjHit:27 eKill:30
@@ -102,20 +102,20 @@ spawnEnemy:2 setupWave:19 bossPhase:36 enemySlam:44 updateEnemies:55
 ## js/14-mode-rules.js (99) — กติกาของแต่ละโหมด
 hostPick:2 modeLogic:8 endMatch:76
 
-## js/15-modes.js (382) — 
-sendPriv:5 TASKF:9 taskPts:10 raceRings:11 modeInit:17 spawnDummy:58 trainTick:63 TR_KEYS:75 trTeams:77 trCmd:85 hostEndTraining:102
-§104 ควิดดิช
-quidThrow:105 quidDrop:111 quidTick:116 snitchTick:151
-§174 แข่งไม้กวาด
-raceTick:175 raceRank:197
-§207 แบทเทิลรอยัล
-brTick:208 ITEMN:222 brPick:223
-§232 หาลอร์ดโวลเดอมอร์
-impActions:233 startMeeting:271 hostVote:278 meetTick:283 impCheck:301
-§309 ระเบิดที่ตั้งเวลาไว้ (ลูกไฟมังกร / คลื่นไฟ)
-bombTick:310 modeSnap:323
-§345 สร้าง snapshot ส่งให้ทุกเครื่อง
-r1:346 makeSnap:347 PROF:365 pf:366
+## js/15-modes.js (386) — 
+sendPriv:5 TASKF:9 taskPts:10 raceRings:11 modeInit:17 spawnDummy:59 trainTick:64 TR_KEYS:79 trTeams:81 trCmd:89 hostEndTraining:106
+§108 ควิดดิช
+quidThrow:109 quidDrop:115 quidTick:120 snitchTick:155
+§178 แข่งไม้กวาด
+raceTick:179 raceRank:201
+§211 แบทเทิลรอยัล
+brTick:212 ITEMN:226 brPick:227
+§236 หาลอร์ดโวลเดอมอร์
+impActions:237 startMeeting:275 hostVote:282 meetTick:287 impCheck:305
+§313 ระเบิดที่ตั้งเวลาไว้ (ลูกไฟมังกร / คลื่นไฟ)
+bombTick:314 modeSnap:327
+§349 สร้าง snapshot ส่งให้ทุกเครื่อง
+r1:350 makeSnap:351 PROF:369 pf:370
 
 ## js/16-voice.js (89) — 
 VOICE:4 rosterIds:5 toggleMic:6 voiceSync:20 teamOn:37 teamOf:38 applyVoiceGates:39 VAC:49 onIncomingCall:50 voiceLevels:62 speakingIds:70 updateVoiceUI:76
@@ -132,7 +132,7 @@ MY:202 myDB:203 mySave:204 myLoad:207 myDecodeReady:213 myPlay:214 myNext:226 my
 §248 เพลงประกอบ (สร้างสดตามแผนที่)
 MUSIC:249 THEMES:250 padNote:255 musicTick:262 toggleMusic:291
 
-## js/19-client.js (186) — 
+## js/19-client.js (186) — ฝั่งแสดงผล (ทุกเครื่อง รวมโฮสต์ ใช้ snapshot เดียวกัน)
 cv:4 cx:4 DPR:5 SW:5 SH:5 resize:6 VIEW:12 screen:13 lastBuffKey:13 overShown:13 lastCount:13 PARTS:14 TEXTS:14
 §15 งบเอฟเฟกต์ (VFX budget)
 VFXB:20 _apush:21 vfxQual:29 vfxBegin:31 vfxEnd:34 vfxOnce:36 vfxExtra:38 PCOL:39 setScreen:41 onLobby:50 onSnap:56 myPos:64
@@ -158,12 +158,12 @@ ANIM_ALT:48 makeAnimator:49 animResolve:54 animPlay:55 animTick:64 lookTint:82 t
 §148 VFX จากไฟล์ (รายละเอียดฝั่งคนทำอยู่ใน ASSETS.md)
 VFXL:154 FLIPL:154 FLIPS:154 prefetchFx:155 playVfx:156 vfxSeq:202 flipTex:207 playFlip:215 fileFx:230 zoneFx:237 clearVfx:238 updateVfx:239
 
-## js/23-props-bld-view.js (352) — prop ฝั่งแสดงผล
+## js/23-props-bld-view.js (354) — prop ฝั่งแสดงผล
 PROPV:2 propFallback:4 syncProps:32
 §48 บ้านพังเป็นชิ้น ฝั่งแสดงผล
-BLDV:51 CHARM:51 DEBRIS:51 BLD_WALLC:52 _bldIce:53 _halfRoof:53 charMat:54 bldIceMat:58 halfRoofGeo:60 bldMats:68 bldFallback:73 bldFilePiece:109 bldHasChunks:117 bldFallbackChunks:119 bldRubble:127 bldBuild:132 syncBld:155 bldDebris:185 bldChunkFall:208 updateDebris:220 clearDebris:230 drawPropHint:231 syncWalls:239
-§257 ของบังในแผนที่ไฟล์ที่พังได้ ฝั่งแสดงผล (สถานะจาก BRK[].st — host js/1…
-BRKV:260 BRK_COL:260 brkSetup:261 BRK_CM:279 brkCrackMat:280 brkClip:296 brkYc:311 brkStump:313 brkSync:323 BRK_ZERO:341 brkFall:343
+BLDV:51 CHARM:51 DEBRIS:51 BLD_WALLC:52 _bldIce:53 _halfRoof:53 charMat:54 bldIceMat:58 halfRoofGeo:60 bldMats:68 bldFallback:73 bldFilePiece:109 bldHasChunks:117 bldFallbackChunks:119 bldRubble:127 BLD_RUBBLE_H:133 bldBuild:134 syncBld:157 bldDebris:187 bldChunkFall:210 updateDebris:222 clearDebris:232 drawPropHint:233 syncWalls:241
+§259 ของบังในแผนที่ไฟล์ที่พังได้ ฝั่งแสดงผล (สถานะจาก BRK[].st — host js/1…
+BRKV:262 BRK_COL:262 brkSetup:263 BRK_CM:281 brkCrackMat:282 brkClip:298 brkYc:313 brkStump:315 brkSync:325 BRK_ZERO:343 brkFall:345
 
 ## js/24-minions-view.js (68) — สัตว์เวท: โมเดลโปร่งแสง + ซิงก์จาก snapshot (MN)
 MM3:2 makeMinion:3 syncMins:36 drawMinBars:58
@@ -185,7 +185,7 @@ QUAL:96 QUAL_NAME:97 qualPR:98 applyQuality:104 qualTick:121 texCanvas:132 glowT
 §191 เงาตามผู้เล่น
 SHD:195 _shF:196 _shR:196 _shU:196 _shC:196 _shY:196 shadowFollow:197 LPOOL:216
 
-## js/28-maps-build.js (682) — สร้างแผนที่
+## js/28-maps-build.js (716) — สร้างแผนที่
 CANDLESYS:2 builtMap:3 builtKey:3 world:3 TORCHES:3 CANDLES:3 FIREFLIES:3 CRYSTAL:3 RUNE:3 SNITCH:3 BANNERS:3 SNOW:3 WCACHE:5 WCACHE_MAX:5 wkey:7 buildWorld:8 addW:40 _prewarmed:42 prewarmShaders:43 batchStatic:61 makeCandles:86 updateCandles:95 buildCastle:104 buildHogsmeade:170 buildGreatHall:258 buildForest:328
 §425 ทุ่งหญ้าฮอกวอตส์ (เย็น)
 ringTrees:426 grassTex:435 buildMeadow:436
@@ -196,7 +196,7 @@ buildLake:456
 §479 บรรยากาศที่ใช้ร่วมกัน (แผนที่จากโค้ด + แผนที่จากไฟล์ผ่าน fx ใน MAP-DE…
 makeSnow:480 makeFireflies:487 makeSnitch:494 fileMapFx:501
 §511 แผนที่จากไฟล์ Blender (MAP-DESIGN.md)
-terrGeo:513 buildFileMap:521 buildTest:556 buildRuins:588 buildPitch:613
+terrGeo:513 buildFileMap:521 tickM:557 testSign:558 buildTest:565 buildRuins:622 buildPitch:647
 
 ## js/29-characters.js (373) — ระบบผ้า (เสื้อคลุมพลิ้วตามการเคลื่อนที่)
 makeCloak:2 updateCloth:10
@@ -261,7 +261,8 @@ trOpenF:2 trKey:2 trN:2 TR_OPTS:3 trToggle:4 trSend:9 trSync:14 hovEl:62
 §63 หน้าตั้งค่า
 setRow:64 setTog:65 setTab:66 XHC:67 XHN:67 setOpts:68 renderSettings:69 drawXhPrev:86 openSettings:87 closeSettings:88 modeIcon:140 modeTitle:141 renderLobby:142
 
-## js/41-debug.js (141) — 
+## js/41-debug.js (141) — เครื่องมือทดสอบสมดุล (ใช้ผ่านคอนโซล WD.bal / WD.dmgTest เท่านั้น ผู้เล่นปกติไม่เห็น)
+§5 บอทต่อสู้แบบง่ายๆ: เล็งนำเป้า เดินรักษาระยะ+ส่ายไปมา ร่ายคาถาทุกครั้ง…
 botBrain:6 _obsKeep:47 balArena:48 balReset:49 balDuel:53 balTour:68 balCoop:82 balSpellTest:98
 §117 Service Worker (sw.js): เก็บไฟล์เกมไว้ในเครื่อง เปิดครั้งต่อไปเร็วขึ้…
 SWK:118 swSetup:119
@@ -281,7 +282,7 @@ NOISE3D:240 FIRE3D:249 _fvIdx:254 fireVol:255 fireVolTemp:299
 §300 ไฟ 3 มิติที่ bake จาก Blender ทั้งก้อน (วิธี 1 — ผู้เล่นเลือก 2026-10…
 FSEQ:304 fireSeqLoad:305 fireSeqReady:309 fireSeqVol:310 fireSeqAt:331 _sqA:338 _sqB:338 _sqX:338 _sqY:338 _sqZ:338 _sqM:338 fireSeqLine:339
 
-## js/43-frost-vfx.js (144) — 
+## js/43-frost-vfx.js (144) — น้ำแข็ง VFX จาก Blender + Glacier Mist (หมอกเย็นตอนน้ำแข็งโผล่)
 FROST_U:6
 §7 shader น้ำแข็ง: ฐานน้ำเงินเข้ม → ปลายขาว • ขอบสว่าง (fresnel) • รอยร้…
 ICE_VS:8 ICE_FS:10 _iceShM:23 iceShaderMat:24 iceModel:28
@@ -333,7 +334,7 @@ fxBind:305
 §316 แม่แบบ playFx เป็นไฟล์ (assets/fx/tpl/*, sig/*, rec/*)
 fxTpl:318
 
-## js/46-fx-make.js (261) — 
+## js/46-fx-make.js (261) — ของที่สร้างเองใน VFX Studio (asset ของเอฟเฟกต์) — ใช้ทั้งในเกมและในสตูดิโอ (สตูดิโอเรียกฟ…
 FXMK:10 MKD:11 mkRng:12 mkHash:13 mkNoise:15 mkL:17 mkR2:18
 §19 ที่เก็บจุด/สามเหลี่ยม
 mkG:21 mkPc:22 mkV:23 mkQ:24 mkAppend:25 mkCopy:26 mkFlat:27 _mkv:28 mkXf:29 mkThree:32 mkTRS:34 mkGrid:37
@@ -383,4 +384,4 @@ drawEarthHud:379
 ## js/48-ragdoll.js (227) — 
 RAG:10 RAGJ:23 RAGB:29 RAGS:33 RAGMIN:37 RAGHINGE:39 _rv1:40 _rv2:40 _rv3:40 _rqa:40 _rqb:40 _rm:40 ragBones:41 ragBasis:48 ragTargets:56 ragStart:62 ragBack:88 ragFloor:89 ragStep:90 ragPose:155 ragWrite:170 ragRestore:182 ragEnd:186 ragTick:188 ragHideDead:222
 
-(49 files, 11279 lines)
+(49 files, 11329 lines)
