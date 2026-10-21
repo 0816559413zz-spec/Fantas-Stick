@@ -356,7 +356,7 @@ fxWarpMake:219 fxWarpTick:231
 §237 ไฟ 3 มิติจากการจำลอง (ชั้น vol) — ไฟล์รูปแบบเดียวกับที่เพื่อน bake จา…
 FXVOL:240 fxVolLoad:241 fxVolTex:245 fxVolSet:248 fxVolReady:249 fxVolMake:250 fxVolTick:253 fxPreAssets:258 fxAssetsWait:260
 
-## js/47-earth-view.js (431) — สายดิน ⛰️ — ภาพฝั่งเครื่องเล่น (Stand / Stand ใหญ่ / กำแพง / เสา / เนิน / ฝุ่น / สว่าน / …
+## js/47-earth-view.js (433) — สายดิน ⛰️ — ภาพฝั่งเครื่องเล่น (Stand / Stand ใหญ่ / กำแพง / เสา / เนิน / ฝุ่น / สว่าน / …
 ECOL:9 EGUARD_BIG:11 EGUARD:11 EV:12 eW:13 eYaw:14
 §15 ลายผิว (วาดเองบน canvas: หิน/ทราย + รอยร้าว + ขอบบล็อกแบบ Roblox)
 ETEX:16 eTex:17 eFadeTex:31 eMat:33 eTMat:34 rockGeo:35 _eChunkM:39 eChunks:40
@@ -367,21 +367,21 @@ makeWarn:115 eWarnAt:120
 §121 ทุกเฟรม: ผู้เล่นสายดิน (เรียกจาก syncPlayers)
 earthFX:122
 §200 สว่าน (ref: designs/earth_ref/drill_ref.png): หินแหลมเรียวเป็นตัวหลัก…
-eSteelEnv:202 eHeatTex:207 eDrillGeo:211 makeDrill:217 drillHeat:224
-§226 เสายักษ์ (ref: designs/earth_ref/pillar_ref.png): เสาเหลี่ยมยาว ปลายห…
-makePillar:227
-§233 กระสุนหิน
-earthProjMesh:234 makeSlab:239
-§242 สิ่งก่อสร้าง + ฝุ่น (เรียกจาก render loop)
-earthClear:243 eMakeSO:248 syncEarth:264 earthFog:302 _eCamT:305 eAnim:306 eDebris:307 eWave:309 eAirWave:311
-§313 event "efx" ของสายดิน (เรียกจากต้น efxFX) — คืน true = จัดการแล้ว
-earthEfx:314 eWindOut:394 eAirCone:400 eDrillFly:402
-§406 บึงโคลน (Mud Swamp + บึงจากเสาอัลติ): คลื่นกระเพื่อมจากกลางไปขอบ แล้ว…
-earthMudZone:407 earthMudSink:414
-§415 HUD ใต้เป้าเล็ง
-drawEarthHud:416
+eSteelEnv:202 eHeatTex:207 EDR:212 eDrillGeo:213 makeDrill:219 drillHeat:226
+§228 เสายักษ์ (ref: designs/earth_ref/pillar_ref.png): เสาเหลี่ยมยาว ปลายห…
+makePillar:229
+§235 กระสุนหิน
+earthProjMesh:236 makeSlab:241
+§244 สิ่งก่อสร้าง + ฝุ่น (เรียกจาก render loop)
+earthClear:245 eMakeSO:250 syncEarth:266 earthFog:304 _eCamT:307 eAnim:308 eDebris:309 eWave:311 eAirWave:313
+§315 event "efx" ของสายดิน (เรียกจากต้น efxFX) — คืน true = จัดการแล้ว
+earthEfx:316 eWindOut:396 eAirCone:402 eDrillFly:404
+§408 บึงโคลน (Mud Swamp + บึงจากเสาอัลติ): คลื่นกระเพื่อมจากกลางไปขอบ แล้ว…
+earthMudZone:409 earthMudSink:416
+§417 HUD ใต้เป้าเล็ง
+drawEarthHud:418
 
 ## js/48-ragdoll.js (227) — 
 RAG:10 RAGJ:23 RAGB:29 RAGS:33 RAGMIN:37 RAGHINGE:39 _rv1:40 _rv2:40 _rv3:40 _rqa:40 _rqb:40 _rm:40 ragBones:41 ragBasis:48 ragTargets:56 ragStart:62 ragBack:88 ragFloor:89 ragStep:90 ragPose:155 ragWrite:170 ragRestore:182 ragEnd:186 ragTick:188 ragHideDead:222
 
-(49 files, 11366 lines)
+(49 files, 11368 lines)

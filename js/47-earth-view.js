@@ -170,7 +170,7 @@ function earthFX(o,p,pz,now,dt){
   // ----- Terra Auger: สว่านเงินเรียวแหลมลอยเฉียงเหนือไหล่ หันตามเป้า หมุนเร็วขึ้น/ร้อนขึ้นตามระดับ -----
   if(A[2]>0){if(!s.drill){s.drill=makeDrill();scene.add(s.drill);}const tier=A[2]>=4.5?3:A[2]>=2?2:1,am=eAim(p,600),D=s.drill;
     if(p.id===NET.myId){if(!s.augW)s.augW=makeWarn();eWarnAt(s.augW,am.x,am.y,[80,110,150][tier-1],Math.min(1,A[2]/4.5));}
-    D.visible=true;D.scale.setScalar(1.3);D.position.copy(eW(p.x-fx*10+rx*18,p.y-fy*10+ry*18,z0+3.3));D.lookAt(eW(am.x,am.y,0));s.spin+=dt*(10+tier*16);D.rotateZ(s.spin);drillHeat(D,tier,t);
+    D.visible=true;D.scale.setScalar(EDR.sc);D.position.copy(eW(p.x+fx*EDR.fw+rx*EDR.side,p.y+fy*EDR.fw+ry*EDR.side,z0+EDR.h));D.lookAt(eW(am.x,am.y,0));s.spin+=dt*(10+tier*16);D.rotateZ(s.spin);drillHeat(D,tier,t);
     // ลมดูดเข้า: เส้นลม/ฝุ่นจากรอบ ๆ หมุนวนเข้าหาตัวสว่าน (แรงขึ้นตามระดับ) • ฝุ่นพื้นใต้ตัวถูกดูดขึ้น
     const q=simOf(D.position);for(let i=0;i<1+tier;i++){const a=rnd(0,6.283),rr=rnd(45,80),dh=rnd(-1.2,1.2),lf=rnd(0.22,0.32),sw=40+40*tier;
       PARTS.push({x:q.x+Math.cos(a)*rr,y:q.y+Math.sin(a)*rr,h:q.h+dh,vx:-Math.cos(a)*rr/lf-Math.sin(a)*sw,vy:-Math.sin(a)*rr/lf+Math.cos(a)*sw,vh:-dh/lf,life:lf,max:lf,col:i%2?'#f2f4f6':'#dcd6ca',size:rnd(1.1,1.8),g:0,drag:0,sh:2});}
@@ -208,16 +208,18 @@ function eHeatTex(){if(ETEX.heat)return ETEX.heat;const c=document.createElement
   g.addColorStop(0,'#fff3c8');g.addColorStop(0.07,'#ffd060');g.addColorStop(0.18,'#ff8a26');g.addColorStop(0.32,'#f0400e');g.addColorStop(0.46,'#a81a04');g.addColorStop(0.6,'#4a0a02');g.addColorStop(0.72,'#140200');g.addColorStop(0.8,'#000000');g.addColorStop(1,'#000000');
   x.fillStyle=g;x.fillRect(0,0,4,256);const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;t.userData.keep=true;ETEX.heat=t;return t;}
 // กรวยมีร่องเกลียว 3 ร่อง (บิดตามความยาว) ท้ายตัดเรียบ • uv.y = 0 ท้าย → 1 ปลาย (ใช้กับความร้อน) • ปลายชี้ +y (หมุนทีหลัง)
-function eDrillGeo(){if(EV.drGeo)return EV.drGeo;const R=0.32,L=2.6,NS=40,NR=48,pos=[],uv=[],idx=[];
+// ตำแหน่ง/ขนาดสว่านตอนชาร์จ (ผู้ใช้ 2026-10-21: เล็กลง เรียวขึ้น ลอยข้างตัวห่างออกมา เห็นทรงชัด) • side = ไปทางขวา (px) • fw = ไปหน้า (px) • h = สูงจากพื้น (ม.)
+const EDR={side:46,fw:4,h:2.8,sc:1};
+function eDrillGeo(){if(EV.drGeo)return EV.drGeo;const R=0.19,L=2.5,NS=40,NR=48,pos=[],uv=[],idx=[];
   for(let j=0;j<=NS;j++){const t=j/NS;for(let i=0;i<=NR;i++){const th=i/NR*Math.PI*2,fl=1-0.16*Math.pow(0.5+0.5*Math.cos(3*(th-t*Math.PI*2.2)),3),r=R*(1-t)*fl;pos.push(Math.cos(th)*r,t*L-L/2,Math.sin(th)*r);uv.push(i/NR,t);}}
   for(let j=0;j<NS;j++)for(let i=0;i<NR;i++){const a=j*(NR+1)+i,b=a+NR+1;idx.push(a,a+1,b,b,a+1,b+1);}
   const c0=pos.length/3;pos.push(0,-L/2,0);uv.push(0.5,0);for(let i=0;i<NR;i++)idx.push(c0,i+1,i);   // ฝาท้ายเรียบ
   const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));g.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));g.setIndex(idx);g.computeVertexNormals();g.userData.keep=true;EV.drGeo=g;return g;}
 // สว่าน (ผู้ใช้ 2026-10-21): กรวยเหล็กเงา ร่องเกลียว ท้ายตัดเรียบ • ความร้อนเฟดจากปลายถึงกลาง-ค่อนท้าย • เส้นเกลียวลมบาง ๆ รอบ ๆ • ปลายชี้ +z
-function makeDrill(){const g=new THREE.Group(),m=new THREE.MeshStandardMaterial({color:'#dfe3e8',metalness:0.92,roughness:0.16,envMap:eSteelEnv(),envMapIntensity:1.35,emissive:'#ffffff',emissiveMap:eHeatTex(),emissiveIntensity:0});
+function makeDrill(){const g=new THREE.Group(),m=new THREE.MeshStandardMaterial({color:'#c6ccd3',metalness:0.92,roughness:0.2,envMap:eSteelEnv(),envMapIntensity:0.95,emissive:'#ffffff',emissiveMap:eHeatTex(),emissiveIntensity:0});
   const sp=new THREE.Mesh(eDrillGeo(),m);sp.rotation.x=Math.PI/2;sp.position.z=0.35;sp.castShadow=true;g.add(sp);
   const wm=new THREE.MeshBasicMaterial({color:hdr('#f4efe4',1.1),transparent:true,opacity:0.28,blending:THREE.AdditiveBlending,depthWrite:false});
-  for(const ph of [0,Math.PI]){const pts=[];for(let i=0;i<=40;i++){const k=i/40,a=ph+k*Math.PI*2*2.5,r=0.42*(1-k)+0.05;pts.push(new THREE.Vector3(Math.cos(a)*r,Math.sin(a)*r,k*2.6-0.95));}
+  for(const ph of [0,Math.PI]){const pts=[];for(let i=0;i<=40;i++){const k=i/40,a=ph+k*Math.PI*2*2.5,r=0.27*(1-k)+0.04;pts.push(new THREE.Vector3(Math.cos(a)*r,Math.sin(a)*r,k*2.5-0.9));}
     g.add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts),60,0.012,3,false),wm));}
   g.userData={m,wm};return g;}
 // ระดับ 1 = เหล็กเย็น • 2 = ปลายร้อนส้ม • 3 = ร้อนจัด — ไล่เฉดจาก eHeatTex เสมอ
@@ -398,7 +400,7 @@ function eWindOut(from,to,tier){const dir=to.clone().sub(from).normalize(),w=sim
   smoke(w.x,w.y,w.h,1+n,'#ece6da',0.7,4,40);}
 // กรวยคลื่นอากาศครอบหัวสว่าน (แหวกอากาศตอนพุ่ง): กรวยเปิดโปร่งแสงชี้ไปข้างหน้า ปลายติดหัวสว่าน บานออกด้านหลัง
 function eAirCone(){const m=new THREE.MeshBasicMaterial({color:hdr('#eef4fa',1.2),transparent:true,opacity:0.0,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide}),
-  c=new THREE.Mesh(new THREE.ConeGeometry(1.1,2.2,24,1,true),m);c.rotation.x=-Math.PI/2;c.position.z=0.9;c.userData.m=m;return c;}
+  c=new THREE.Mesh(new THREE.ConeGeometry(0.75,2,24,1,true),m);c.rotation.x=-Math.PI/2;c.position.z=0.9;c.userData.m=m;return c;}
 function eDrillFly(from,x,y,tier){const d=makeDrill(),to=eW(x,y,0),ac=eAirCone();d.position.copy(from);d.add(ac);scene.add(d);
   eAnim({g:d,life:0.33,fn(a){const k=Math.min(1,a.t/0.32);d.position.copy(from).lerp(to,k*k);d.lookAt(to);ac.rotation.z=0;ac.userData.m.opacity=0.22*Math.min(1,a.t/0.06)*(1-k*0.5);ac.scale.set(1,1+k*0.6,1);d.children[0].rotation.y=a.t*80;drillHeat(d,tier,a.t);const w=simOf(d.position);
     burst(w.x,w.y,tier===3?'#ff6a2a':'#e8e4dc',1,30,0.25,tier===3?2.2:1.6,{h:w.h,g:0});
