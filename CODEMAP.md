@@ -41,7 +41,7 @@ pyroBigBoom:5 pyroBall:13 pyroBasic:14 addOrbs:31 pyroParry:32 pyroBlock:33 laun
 ## js/07-frost-spells.js (33) — 
 frostGlacier:11
 
-## js/08-storm.js (200) — สายสายฟ้า (ผู้เล่นออกแบบทั้งหมด — designs/storm.md)
+## js/08-storm.js (200) — 
 ST_MAX:5 stGain:6 stSpend:7 stormCone:9 stormLineFoes:14 stormBasic:18 stormTri:41 stormDash:48 stormDashTick:61 stormShieldBlast:69 stormTick:78
 §87 สกิล 1 (ฟรี): เส้นสายฟ้า — ชี้ขึ้นแล้วกดลง 0.5 วิ จากนั้นสายฟ้าผ่าเป็…
 stormLine:90
@@ -55,8 +55,9 @@ stormRailFire:132
 §142 สกิล 6 (3 stacks): ลูกสายฟ้าโดม — ทะยานขึ้น บินเล็ง 3 วิ คลิกยิงลูกสา…
 stormDomeTick:143 stormDomeFire:158 stormDomeSlam:166 updateStorm:171
 
-## js/09-earth.js (244) — 
-EARTH:10 E_SH:10 E_CRUSH_PUSH:10 E_CRUSH_SLIDE:10 E_CRUSH:10 E_ENV:10
+## js/09-earth.js (244) — สายดิน ⛰️ (ผู้ใช้ออกแบบทั้งหมด — designs/earth.md §0 FINAL SPEC) • ฝั่งโฮสต์
+§8 E_CRUSH = เวลาก่อนหนีบ Tectonic Crush = ช่วง Stand ออกแรงดัน (ช้า) + …
+EARTH:10 E_SH:10 E_CRUSH_PUSH:10 E_CRUSH_SLIDE:10 E_ENV:10
 §14 ตัวช่วย
 eOn:15 eStand:16 eNoStand:17 eSegD:19 eAdd:20 eCollide:22 eProjHit:29 eKill:32
 §34 ทุกเฟรมของผู้เล่นสายดิน (เรียกจาก updatePlayer หลังส่วนโล่)
@@ -132,7 +133,7 @@ MY:202 myDB:203 mySave:204 myLoad:207 myDecodeReady:213 myPlay:214 myNext:226 my
 §248 เพลงประกอบ (สร้างสดตามแผนที่)
 MUSIC:249 THEMES:250 padNote:255 musicTick:262 toggleMusic:291
 
-## js/19-client.js (186) — ฝั่งแสดงผล (ทุกเครื่อง รวมโฮสต์ ใช้ snapshot เดียวกัน)
+## js/19-client.js (186) — 
 cv:4 cx:4 DPR:5 SW:5 SH:5 resize:6 VIEW:12 screen:13 lastBuffKey:13 overShown:13 lastCount:13 PARTS:14 TEXTS:14
 §15 งบเอฟเฟกต์ (VFX budget)
 VFXB:20 _apush:21 vfxQual:29 vfxBegin:31 vfxEnd:34 vfxOnce:36 vfxExtra:38 PCOL:39 setScreen:41 onLobby:50 onSnap:56 myPos:64
@@ -242,10 +243,10 @@ meetKey:134 myVoted:134 castVote:135 syncMeeting:141
 ## js/37-render-loop.js (76) — ลูปเรนเดอร์
 lastFrame:2 HSTOP:5 hitStop:6 FXSTUDIO:8 frame:9 _fpsAcc:18 _fpsN:18 render:19 renderGame:56
 
-## js/38-hud.js (353) — HUD
+## js/38-hud.js (356) — HUD
 rr:2 SLOTS:3 fmtTime:4
 §5 ชิ้นส่วน HUD ธีมทอง-น้ำเงิน
-HG:6 HG2:6 HN:6 diaPath:7 plate:9 frameBox:15 bossTrail:23 drawBossBar:24 spellDia:42 thinBar:68 drawHUD:73 raceRankClient:129 drawModeHUD:133 MM:170 drawMinimap:171 slotKey:244 mySlots:245 drawUlt:254 STATUS_ICO:273 SLOTS_IMP:274 BR_LOCK:275 CLUSTER:277 slotState:278 drawBottom:295 drawBoard:336
+HG:6 HG2:6 HN:6 diaPath:7 plate:9 frameBox:15 bossTrail:23 drawBossBar:24 spellDia:42 thinBar:71 drawHUD:76 raceRankClient:132 drawModeHUD:136 MM:173 drawMinimap:174 slotKey:247 mySlots:248 drawUlt:257 STATUS_ICO:276 SLOTS_IMP:277 BR_LOCK:278 CLUSTER:280 slotState:281 drawBottom:298 drawBoard:339
 
 ## js/39-menu.js (271) — 
 myLook:5 myColor:5 myKit:5 myName:6 renderMyHouse:9
@@ -281,7 +282,7 @@ NOISE3D:240 FIRE3D:249 _fvIdx:254 fireVol:255 fireVolTemp:299
 §300 ไฟ 3 มิติที่ bake จาก Blender ทั้งก้อน (วิธี 1 — ผู้เล่นเลือก 2026-10…
 FSEQ:304 fireSeqLoad:305 fireSeqReady:309 fireSeqVol:310 fireSeqAt:331 _sqA:338 _sqB:338 _sqX:338 _sqY:338 _sqZ:338 _sqM:338 fireSeqLine:339
 
-## js/43-frost-vfx.js (144) — น้ำแข็ง VFX จาก Blender + Glacier Mist (หมอกเย็นตอนน้ำแข็งโผล่)
+## js/43-frost-vfx.js (144) — 
 FROST_U:6
 §7 shader น้ำแข็ง: ฐานน้ำเงินเข้ม → ปลายขาว • ขอบสว่าง (fresnel) • รอยร้…
 ICE_VS:8 ICE_FS:10 _iceShM:23 iceShaderMat:24 iceModel:28
@@ -333,7 +334,7 @@ fxBind:305
 §316 แม่แบบ playFx เป็นไฟล์ (assets/fx/tpl/*, sig/*, rec/*)
 fxTpl:318
 
-## js/46-fx-make.js (261) — ของที่สร้างเองใน VFX Studio (asset ของเอฟเฟกต์) — ใช้ทั้งในเกมและในสตูดิโอ (สตูดิโอเรียกฟ…
+## js/46-fx-make.js (261) — 
 FXMK:10 MKD:11 mkRng:12 mkHash:13 mkNoise:15 mkL:17 mkR2:18
 §19 ที่เก็บจุด/สามเหลี่ยม
 mkG:21 mkPc:22 mkV:23 mkQ:24 mkAppend:25 mkCopy:26 mkFlat:27 _mkv:28 mkXf:29 mkThree:32 mkTRS:34 mkGrid:37
@@ -355,7 +356,7 @@ fxWarpMake:219 fxWarpTick:231
 §237 ไฟ 3 มิติจากการจำลอง (ชั้น vol) — ไฟล์รูปแบบเดียวกับที่เพื่อน bake จา…
 FXVOL:240 fxVolLoad:241 fxVolTex:245 fxVolSet:248 fxVolReady:249 fxVolMake:250 fxVolTick:253 fxPreAssets:258 fxAssetsWait:260
 
-## js/47-earth-view.js (620) — 
+## js/47-earth-view.js (680) — 
 ECOL:9 EGUARD_BIG:14 EGUARD:14 CB:15 EV:16 eW:17 eYaw:18
 §19 ลายผิว (วาดเองบน canvas: หิน/ทราย + รอยร้าว + ขอบบล็อกแบบ Roblox)
 ETEX:20 eTex:21 eFadeTex:35 eMat:37 eTMat:38 rockGeo:39 _eChunkM:43 eChunks:44
@@ -372,15 +373,15 @@ eSteelEnv:283 eHeatTex:288 EDR:293 eDrillGeo:294 makeDrill:300 drillHeat:307
 §309 เสายักษ์ (ref: designs/earth_ref/pillar_ref.png): เสาเหลี่ยมยาว ปลายห…
 makePillar:310
 §316 กระสุนหิน
-earthProjMesh:317 SLAB:323 makeSlab:324 eSlabGeo:329 eSlabMats:340 slabCracks:396
-§399 สิ่งก่อสร้าง + ฝุ่น (เรียกจาก render loop)
-earthClear:400 eMakeSO:405 syncEarth:421 earthFog:459 _eCamT:462 eAnim:463 eDebris:464 eWave:466 eAirWave:468 esbImpact:471
-§478 event "efx" ของสายดิน (เรียกจากต้น efxFX) — คืน true = จัดการแล้ว
-earthEfx:479 eWindOut:565 eAirCone:571 eDrillFly:573
-§577 บึงโคลน (Mud Swamp + บึงจากเสาอัลติ): คลื่นกระเพื่อมจากกลางไปขอบ แล้ว…
-earthMudZone:578 earthMudSink:585
-§586 HUD ใต้เป้าเล็ง
-ESM:588 eSmooth:589 eShieldSegs:591 drawEarthHud:596
+earthProjMesh:317 SLAB:323 makeSlab:324 eSlabGeo:329 eSlabMats:340 slabCracks:407
+§410 สิ่งก่อสร้าง + ฝุ่น (เรียกจาก render loop)
+earthClear:411 eMakeSO:416 syncEarth:432 earthFog:470 _eCamT:473 eAnim:474 eDebris:475 eWave:477 eAirWave:479 esbImpact:482
+§489 event "efx" ของสายดิน (เรียกจากต้น efxFX) — คืน true = จัดการแล้ว
+earthEfx:490 eWindOut:576 eAirCone:582 eDrillFly:584
+§588 บึงโคลน (Mud Swamp + บึงจากเสาอัลติ): คลื่นกระเพื่อมจากกลางไปขอบ แล้ว…
+earthMudZone:589 earthMudSink:596
+§597 HUD ใต้เป้าเล็ง
+ESM:599 eSmooth:600 EROCK:602 eRock:603 ESF:611 eShieldFx:612 eChips:619 eShieldSegs:622 eShieldNum:638 eShieldArc:642 drawEarthHud:660
 
 ## js/48-ragdoll.js (227) — 
 RAG:10 RAGJ:23 RAGB:29 RAGS:33 RAGMIN:37 RAGHINGE:39 _rv1:40 _rv2:40 _rv3:40 _rqa:40 _rqb:40 _rm:40 ragBones:41 ragBasis:48 ragTargets:56 ragStart:62 ragBack:88 ragFloor:89 ragStep:90 ragPose:155 ragWrite:170 ragRestore:182 ragEnd:186 ragTick:188 ragHideDead:222
@@ -388,11 +389,11 @@ RAG:10 RAGJ:23 RAGB:29 RAGS:33 RAGMIN:37 RAGHINGE:39 _rv1:40 _rv2:40 _rv3:40 _rq
 ## js/49-cloth.js (120) — 
 CLOTH:10 CL_ROWS:22 CL_NC:22 CL_GAP:22 CL_IN:22 _clV:23 _clA:23 _clB:23 clPinK:25 clBind:27 clothSetup:30 clTargets:63 clReset:67 clCapsule:69 _clO:73 clWorld:74 clWorldHit:83 clStep:88 clDraw:100 clothTick:107
 
-## js/50-grass.js (186) — ลม + หญ้า 3D (ภาพบนเครื่องตัวเองล้วน ไม่แตะโฮสต์/โปรโตคอล)
+## js/50-grass.js (186) — 
 AIR:9 AIR_MAP:16 airGust:18 airGs:21 airMark:23 airForMap:26 _airV:27 airAt:28 airGv:34 airTick:35
 §38 ต่อเข้ากับเอฟเฟกต์เดิม (ไม่ต้องแก้ทุกสกิล): แสงวาบ = ลมกระโชก • วงคลื…
 CLW:48
 §50 หญ้า
 GRASS:52 GR_GLSL_V:53 GR_BEGIN:55 grassMat:79 grassBuild:93 _grBasic:107 grassBake:108 grassCount:158 grassTick:163
 
-(51 files, 11895 lines)
+(51 files, 11958 lines)

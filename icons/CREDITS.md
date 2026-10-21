@@ -8,3 +8,5 @@ Cropped (background removed) and recoloured white; otherwise unmodified.
 - **sbed**: poison-cloud
 
 - **Fantas Stick (self-made, 2026-10-20, same licence as the game)**: p_earth, b_earth, sh_earth, dsh_earth, stonebreaker, mudswamp, tectoniccrush, dustburst, terraauger, wrath, cb_earth, tectoniccrush_sq — simple shapes drawn for the Earth path.
+
+- `assets/ui/rock_bar.jpg` — rock photo supplied by the user (2026-10-21) for the Earth shield bar.
