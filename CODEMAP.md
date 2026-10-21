@@ -29,7 +29,7 @@ ROLE_N:198 takePoison:199
 §201 ความสามารถพื้นฐาน (คลิกซ้าย) ของแต่ละสาย: สะสมสถานะตั้งต้นให้เองทุกๆ …
 PBASIC:202
 
-## js/04-frost-mech.js (100) — สายน้ำแข็ง: ประชิด/ไกล (V) • ฟันดาบ/ขวาน • ไถลน้ำแข็ง • พื้นน้ำแข็ง/ภ…
+## js/04-frost-mech.js (101) — สายน้ำแข็ง: ประชิด/ไกล (V) • ฟันดาบ/ขวาน • ไถลน้ำแข็ง • พื้นน้ำแข็ง/ภ…
 frostBoom:3 meleeHit:10 mirrorPos:21 frostBasic:22 frostSlam3:46 frostSlam:54 frostDash:60 addIce:65 updateIces:66 updateWaves:82 groundH:95
 
 ## js/05-terrain.js (44) — พื้นสูงต่ำ (แผนที่จากไฟล์ Blender — กติกาฝั่งคนปั้นใน MAP-DESIGN.md)
@@ -55,27 +55,27 @@ stormRailFire:132
 §142 สกิล 6 (3 stacks): ลูกสายฟ้าโดม — ทะยานขึ้น บินเล็ง 3 วิ คลิกยิงลูกสา…
 stormDomeTick:143 stormDomeFire:158 stormDomeSlam:166 updateStorm:171
 
-## js/09-earth.js (238) — 
-EARTH:8 E_SH:8 E_CRUSH:8
-§12 ตัวช่วย
-eOn:13 eStand:14 eNoStand:15 eSegD:17 eAdd:18 eCollide:20 eProjHit:27 eKill:30
-§32 ทุกเฟรมของผู้เล่นสายดิน (เรียกจาก updatePlayer หลังส่วนโล่)
-earthTick:33 earthSpd:59 earthShHit:61 earthBreak:62 earthReset:64
-§66 ท่าพื้นฐาน (คลิกซ้าย)
-earthBATarget:67 earthBasic:71 earthPunch:80 earthCBStart:86 earthCBSlam:87
-§91 Dash: Stand Rampage / Rock Boost Escape
-earthDash:92 earthRampEnd:110
-§115 สกิล 1: Stonebreaker
-§126 สกิล 2: Mud Swamp
-§131 สกิล 3: Tectonic Crush
-earthCrush:145
-§155 สกิล 4: Dust Burst
-§161 สกิล 5: Terra Auger
-eAugAim:166 earthAugFire:167 earthMound:177
-§180 อัลติ: Wrath (v2)
-earthPillarThrow:188 earthWrathTick:199 earthWrathDrill:210 earthWrathEnd:215
-§218 ทั้งสนาม: สิ่งก่อสร้างพัง / ฝุ่นหมดเวลา / Stonebreaker ชนกำแพง
-updateEarth:219 earthSnapP:228 earthSnapW:230
+## js/09-earth.js (244) — 
+EARTH:10 E_SH:10 E_CRUSH_PUSH:10 E_CRUSH_SLIDE:10 E_CRUSH:10 E_ENV:10
+§14 ตัวช่วย
+eOn:15 eStand:16 eNoStand:17 eSegD:19 eAdd:20 eCollide:22 eProjHit:29 eKill:32
+§34 ทุกเฟรมของผู้เล่นสายดิน (เรียกจาก updatePlayer หลังส่วนโล่)
+earthTick:35 earthSpd:61 earthShHit:63 earthBreak:64 earthReset:66
+§68 ท่าพื้นฐาน (คลิกซ้าย)
+earthBATarget:69 earthBasic:73 earthPunch:82 earthCBStart:88 earthCBSlam:89
+§93 Dash: Stand Rampage / Rock Boost Escape
+earthDash:94 earthRampEnd:113
+§118 สกิล 1: Stonebreaker
+§129 สกิล 2: Mud Swamp
+§134 สกิล 3: Tectonic Crush
+earthCrush:149
+§160 สกิล 4: Dust Burst
+§166 สกิล 5: Terra Auger
+eAugAim:171 earthAugFire:172 earthMound:183
+§186 อัลติ: Wrath (v2)
+earthPillarThrow:194 earthWrathTick:205 earthWrathDrill:216 earthWrathEnd:221
+§224 ทั้งสนาม: สิ่งก่อสร้างพัง / ฝุ่นหมดเวลา / Stonebreaker ชนกำแพง
+updateEarth:225 earthSnapP:234 earthSnapW:236
 
 ## js/09-other-paths.js (195) — 
 §65 สัตว์เวท (minion): AI ฝั่งโฮสต์
@@ -91,10 +91,10 @@ G:4 EVL:4 EVN:4 hostLast:4 tickN:4 emit:5 feed:6 banner:7 plist:8 cleanName:9 fr
 §154 ลูปหลักฝั่งโฮสต์
 hostTick:155 angDiff:167 cH:169 vR:170 updatePlayer:172 hitProp:315 damagePropsIn:322 nearUseProp:323 useProp:324
 
-## js/12-buildings.js (403) — สิ่งปลูกสร้างที่พังเป็นชิ้นย่อย (บ้าน) แบบ Battlefield — คู่มือเต็ม: …
+## js/12-buildings.js (404) — สิ่งปลูกสร้างที่พังเป็นชิ้นย่อย (บ้าน) แบบ Battlefield — คู่มือเต็ม: …
 BLDDEF:8 BLD_PIECES:9 BLD_GRID:10 BLD_FIRE:11 BLD_ICE:11 BLD_ROOF_MIN:11 BLDG:12 BLDON:12 genBldg:13 bldRect:23 bldChunk:25 bldAlive:32 bldLocal:33 bldWorld:34 rectDist:35 bldNear:36 hitBldPiece:38 breakBldChunk:49 bldSupport:57 damageEnv:77 bldPieceAt:91 projEl:101 bldPush:106 collideBld:112 updateBldg:127 bldSnap:139 bldParse:145
 §149 ของบังในแผนที่ไฟล์ที่พังได้ (หิน เสา รูปปั้น ต้นไม้ โคมไฟ ลัง ...) — …
-BRKDEF:153 BRK_M:153 BRK_MCOL:153 BRK:154 genBrk:155 brkApply:162 brkStage:166 hitBrk:167 damageBrkIn:175 brkSnap:181 brkParse:182 collideWorld:183 shoot:210 eShoot:231 foesOf:238 breakShield:245 gainUlt:246 lifesteal:247 damage:249 playerDown:303 killProj:320 explode:328 hitTarget:340 updateProjectiles:356
+BRKDEF:153 BRK_M:153 BRK_MCOL:153 BRK:154 genBrk:155 brkApply:162 brkStage:166 hitBrk:167 damageBrkIn:175 brkSnap:181 brkParse:182 collideWorld:183 shoot:210 eShoot:231 foesOf:238 breakShield:245 gainUlt:246 lifesteal:247 damage:249 playerDown:303 killProj:320 explode:329 hitTarget:341 updateProjectiles:357
 
 ## js/13-enemies.js (168) — ศัตรู (โหมด Co-op)
 spawnEnemy:2 setupWave:19 bossPhase:36 enemySlam:44 updateEnemies:55
@@ -355,7 +355,7 @@ fxWarpMake:219 fxWarpTick:231
 §237 ไฟ 3 มิติจากการจำลอง (ชั้น vol) — ไฟล์รูปแบบเดียวกับที่เพื่อน bake จา…
 FXVOL:240 fxVolLoad:241 fxVolTex:245 fxVolSet:248 fxVolReady:249 fxVolMake:250 fxVolTick:253 fxPreAssets:258 fxAssetsWait:260
 
-## js/47-earth-view.js (531) — 
+## js/47-earth-view.js (532) — 
 ECOL:9 EGUARD_BIG:14 EGUARD:14 CB:15 EV:16 eW:17 eYaw:18
 §19 ลายผิว (วาดเองบน canvas: หิน/ทราย + รอยร้าว + ขอบบล็อกแบบ Roblox)
 ETEX:20 eTex:21 eFadeTex:35 eMat:37 eTMat:38 rockGeo:39 _eChunkM:43 eChunks:44
@@ -367,25 +367,25 @@ makeBow:86 EBOW:95 _RIM:95 eRampWind:96 eSpikes:108 standOp:113 _ikDn:116 eArmIK
 makeWarn:181 eWarnAt:186
 §187 ทุกเฟรม: ผู้เล่นสายดิน (เรียกจาก syncPlayers)
 earthFX:188
-§278 สว่าน (ref: designs/earth_ref/drill_ref.png): หินแหลมเรียวเป็นตัวหลัก…
-eSteelEnv:280 eHeatTex:285 EDR:290 eDrillGeo:291 makeDrill:297 drillHeat:304
-§306 เสายักษ์ (ref: designs/earth_ref/pillar_ref.png): เสาเหลี่ยมยาว ปลายห…
-makePillar:307
-§313 กระสุนหิน
-earthProjMesh:314 SLAB:320 makeSlab:321 slabCracks:325
-§328 สิ่งก่อสร้าง + ฝุ่น (เรียกจาก render loop)
-earthClear:329 eMakeSO:334 syncEarth:350 earthFog:388 _eCamT:391 eAnim:392 eDebris:393 eWave:395 eAirWave:397 esbImpact:400
-§407 event "efx" ของสายดิน (เรียกจากต้น efxFX) — คืน true = จัดการแล้ว
-earthEfx:408 eWindOut:494 eAirCone:500 eDrillFly:502
-§506 บึงโคลน (Mud Swamp + บึงจากเสาอัลติ): คลื่นกระเพื่อมจากกลางไปขอบ แล้ว…
-earthMudZone:507 earthMudSink:514
-§515 HUD ใต้เป้าเล็ง
-drawEarthHud:516
+§279 สว่าน (ref: designs/earth_ref/drill_ref.png): หินแหลมเรียวเป็นตัวหลัก…
+eSteelEnv:281 eHeatTex:286 EDR:291 eDrillGeo:292 makeDrill:298 drillHeat:305
+§307 เสายักษ์ (ref: designs/earth_ref/pillar_ref.png): เสาเหลี่ยมยาว ปลายห…
+makePillar:308
+§314 กระสุนหิน
+earthProjMesh:315 SLAB:321 makeSlab:322 slabCracks:326
+§329 สิ่งก่อสร้าง + ฝุ่น (เรียกจาก render loop)
+earthClear:330 eMakeSO:335 syncEarth:351 earthFog:389 _eCamT:392 eAnim:393 eDebris:394 eWave:396 eAirWave:398 esbImpact:401
+§408 event "efx" ของสายดิน (เรียกจากต้น efxFX) — คืน true = จัดการแล้ว
+earthEfx:409 eWindOut:495 eAirCone:501 eDrillFly:503
+§507 บึงโคลน (Mud Swamp + บึงจากเสาอัลติ): คลื่นกระเพื่อมจากกลางไปขอบ แล้ว…
+earthMudZone:508 earthMudSink:515
+§516 HUD ใต้เป้าเล็ง
+drawEarthHud:517
 
 ## js/48-ragdoll.js (227) — 
 RAG:10 RAGJ:23 RAGB:29 RAGS:33 RAGMIN:37 RAGHINGE:39 _rv1:40 _rv2:40 _rv3:40 _rqa:40 _rqb:40 _rm:40 ragBones:41 ragBasis:48 ragTargets:56 ragStart:62 ragBack:88 ragFloor:89 ragStep:90 ragPose:155 ragWrite:170 ragRestore:182 ragEnd:186 ragTick:188 ragHideDead:222
 
-## js/49-cloth.js (101) — 
-CLOTH:10 CL_ROWS:22 CL_NC:22 CL_GAP:22 CL_IN:22 _clV:23 _clA:23 _clB:23 clPinK:25 clBind:27 clothSetup:30 clTargets:63 clReset:67 clCapsule:69 clStep:72 clDraw:84 clothTick:91
+## js/49-cloth.js (120) — 
+CLOTH:10 CL_ROWS:22 CL_NC:22 CL_GAP:22 CL_IN:22 _clV:23 _clA:23 _clB:23 clPinK:25 clBind:27 clothSetup:30 clTargets:63 clReset:67 clCapsule:69 _clO:73 clWorld:74 clWorldHit:83 clStep:88 clDraw:100 clothTick:107
 
-(50 files, 11569 lines)
+(50 files, 11597 lines)

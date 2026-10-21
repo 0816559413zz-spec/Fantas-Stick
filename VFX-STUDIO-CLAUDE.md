@@ -65,6 +65,14 @@
    - **Pull first**, check there are no `<<<<<<<` markers, then commit and push.
    - Pushing to `main` deploys the live site. If the push hangs, the user must log in to GitHub.
 
+## 4b. When the user gives a storyboard (`storyboard/sb-<id>.md`)
+The user plans a skill's look in **`storyboard.html`** (double-click `Storyboard.bat`, or `http://localhost:8765/storyboard.html` with serve.py running). It splits the skill into **shots** in time order (⏳ charge → ✋ cast → ➜ travel → 💥 impact → 🌫 linger → ✨ fade), each with: start–end seconds, where (hand / at target / ground…), size in **character heights**, strength 1–5, shape / motion / camera chips, colours, a **sketch** (drawn over a stick-figure stage: white caster on the left facing right, red target ~5 characters away, ground ticks = 1 character) and reference pictures. Data: `storyboard/boards.json`; you read the generated `storyboard/sb-<id>.md`.
+1. Read `sb-<id>.md`, then **Read every sketch and reference image**. The sketch is the main intent; chips + text fill in the details. Don't invent extra stages the user didn't draw.
+2. Build one fx file: **one shot ≈ one group of layers**, with the shot's start as `at` and its length as `life` (prefix layer ids with the shot number, e.g. `s4_ring`). Size: 1 character ≈ the player's height in the studio — check it on the contact sheet, don't guess. Colours: use the hex values given (palette `$` only if they match).
+3. Contact sheet with one frame **in the middle of each shot** (`sheet=` = the mid times ÷ `dur`), `cam=side` so it matches the sketch's view. Compare shot by shot with the sketch and fix before showing.
+4. If the user asked for options, make 2–3 variants (`<name>_a/_b/_c`).
+5. Write back in `storyboard/boards.json`: board `fx` (e.g. `"earth/tectonic"`), `reply` (short simple Thai), `status:"review"`; per shot `result` (copy the matching contact-sheet crop/frame from `shots/` into `storyboard/img/` and give its path) + `note` (Thai, what you did / what you couldn't do). Then run `python tools/serve.py --sb-md`. The page shows the result next to the sketch.
+
 ## 5. Format essentials (details in `FX-FORMAT.md`)
 ```json
 {

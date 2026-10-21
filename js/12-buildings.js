@@ -323,6 +323,7 @@ function killProj(pr){
   if(pr.type==='fire')explode(pr);
   else if(pr.type==='iceboulder')frostBoom(pr);
   else if(pr.type==='pfireb')pyroBigBoom(pr);
+  if(pr.type==='eslab')damageEnv(pr.x,pr.y,80,40*E_ENV,pr.owner,'rock',pr.h);   // แผ่นหิน Stonebreaker แตก = พังบ้าน/ของ
   else emit({k:'pop',x:pr.x,y:pr.y,h:pr.h,t:pr.type});
 }
 function explode(pr){
