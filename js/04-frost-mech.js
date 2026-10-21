@@ -96,5 +96,6 @@ function groundH(x,y,z){
   let g=0;
   if(TERR&&TERR.fl.length){const t=terrT(x,y),a=t+(z||0)+TSTEP;for(const f of TERR.fl){const v=floorAt(f,x,y,'top');if(v<=a&&v-t>g)g=v-t;}}
   if(G&&G.glac)for(const s of G.glac)if(s.h>0&&(x-s.x)**2+(y-s.y)**2<s.r*s.r&&s.h>g)g=s.h;
+  if(G&&G.eso)for(const w of G.eso)if(w.k==='mound'&&!w.dead){const d2=(x-w.x1)**2+(y-w.y1)**2,r2=w.r*w.r;if(d2<r2){const v=w.hgt*(1-d2/r2);if(v>g)g=v;}}   // เนินสายดิน = พื้นโดมเดินขึ้นได้
   return g;
 }

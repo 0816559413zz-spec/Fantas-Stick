@@ -258,7 +258,8 @@ function earthFX(o,p,pz,now,dt){
   // ขึ้นจากพื้นตอนเริ่ม (ไล่ทีละอัน) • จมลงพื้นตอนจบอัลติ
   if(A[3]===3){s.drN=A[4];s.drA=Math.min(1,(s.drA||0)+dt/0.9);}else s.drA=Math.max(0,(s.drA||0)-dt/0.5);
   if(s.drA>0){const am=eAim(p);while(s.drills.length<5){const d=makeDrill();scene.add(d);s.drills.push(d);}
-    for(let i=0;i<5;i++){const d=s.drills[i],on=i<(s.drN|0);d.visible=on;if(!on)continue;const lat=(i-2)*28,hh=3.4+Math.cos((i-2)*0.7)*0.8,
+    for(let i=0;i<5;i++){const d=s.drills[i],on=i<(s.drN|0);d.visible=on;if(!on)continue;d.scale.setScalar(0.75);   // สว่านอัลติเล็กลง 25% (ผู้ใช้ 2026-10-21)
+     const lat=(i-2)*28,hh=3.4+Math.cos((i-2)*0.7)*0.8,
         e=A[3]===3?Math.min(1,Math.max(0,(s.drA*0.9-i*0.08)/0.55)):s.drA,k=1-Math.pow(1-e,3),hx=p.x-fx*26+rx*lat,hy=p.y-fy*26+ry*lat;
       d.position.copy(eW(hx,hy,lerp(-2.4,z0+hh+Math.sin(t*3+i)*0.12,k)));d.lookAt(eW(am.x,am.y,0));d.rotateZ(t*60+i);drillHeat(d,3,t);
       if(e>0&&e<1&&Math.random()<0.6){burst(hx,hy,ECOL.dust,2,60,0.6,2.4,{h:0.2,vh:[1,3],g:4});if(Math.random()<0.3)eChunks(hx,hy,0.2,1,90,4,0.12);}
@@ -329,9 +330,9 @@ function eMakeSO(w){const k=w[1],x1=w[2],y1=w[3],x2=w[4],y2=w[5],r=w[6],g=new TH
   else if(k===1){   // เสาอัลติ: ปักเอียงตามทิศที่ตก (ทิศเก็บใน x1,y1 → x2,y2)
     mat=null;const P=makePillar(),a=Math.atan2(y2-y1,x2-x1),d=new THREE.Vector3(Math.cos(a),-1.15,Math.sin(a)).normalize();
     P.position.copy(d.clone().multiplyScalar(-2.4));P.lookAt(P.position.clone().add(d));g.add(P);P.traverse(q=>{if(q.isMesh)q.castShadow=true;});h=7;}
-  else if(k===2){   // เนินดิน Terra Auger: สูงเท่าตัว กว้าง ~150 เหมือนกำแพง
-    mat=eTMat('wall','#9a8262');h=2.4;const R=r*S3;const c=new THREE.Mesh(rockGeo(R*1.3,h,R*1.3,0.12,3),mat);c.position.y=h/2-0.1;c.castShadow=c.receiveShadow=true;g.add(c);
-    for(let i=0;i<7;i++){const a=i/7*Math.PI*2,b=new THREE.Mesh(rockGeo(rnd(1,1.6),rnd(1,1.9),rnd(1,1.6),0.18),mat);b.position.set(Math.cos(a)*R*0.75,rnd(0.4,0.9),Math.sin(a)*R*0.75);b.rotation.y=rnd(0,3);b.castShadow=true;g.add(b);}}
+  else if(k===2){   // เนินดิน Terra Auger: โดมดินเตี้ย ๆ เดินข้ามได้ (สูง = รัศมี × 0.032 ตรงกับ groundH) + ก้อนหินเล็กรอบ ๆ
+    mat=eTMat('wall','#9a8262');const R=r*S3;h=r*0.032;const d=new THREE.Mesh(new THREE.SphereGeometry(R,18,6,0,Math.PI*2,0,Math.PI/2),mat);d.scale.y=h/R;d.castShadow=d.receiveShadow=true;g.add(d);
+    for(let i=0;i<6;i++){const a=i/6*Math.PI*2+rnd(-0.3,0.3),rr=R*rnd(0.55,0.85),s=R*rnd(0.13,0.2),b=new THREE.Mesh(rockGeo(s*1.4,s,s*1.3,0.2),mat);b.position.set(Math.cos(a)*rr,h*(1-(rr/R)**2)*0.9,Math.sin(a)*rr);b.rotation.y=rnd(0,3);b.castShadow=true;g.add(b);}}
   else{mat=new THREE.MeshBasicMaterial({color:hdr('#ffd86b',1.2),transparent:true,opacity:0.18,side:THREE.DoubleSide,depthWrite:false,blending:THREE.AdditiveBlending});const L=Math.hypot(x2-x1,y2-y1)*S3;h=12;const b=new THREE.Mesh(new THREE.PlaneGeometry(L,h),mat);b.position.y=h/2;b.rotation.y=Math.PI/2;g.add(b);g.rotation.y=eYaw(x1,y1,x2,y2);}
   g.position.copy(eW(k===1?x1:(x1+x2)/2,k===1?y1:(y1+y2)/2,0));scene.add(g);return {g,mat,mats:mats||(mat?[mat]:[]),k,h,born:performance.now(),x:k===1?x1:(x1+x2)/2,y:k===1?y1:(y1+y2)/2,hp:w[7],x1,y1,x2,y2,base:g.position.clone()};}
 function syncEarth(v,dt,now){
@@ -340,7 +341,7 @@ function syncEarth(v,dt,now){
     if(!o){o=eMakeSO(w);EV.es.set(w[0],o);
       if(o.k===0){const L=Math.hypot(o.x2-o.x1,o.y2-o.y1);for(let i=0;i<=5;i++){const px=lerp(o.x1,o.x2,i/5),py=lerp(o.y1,o.y2,i/5);burst(px,py,ECOL.dust,6,140,0.9,3.6,{h:0.3,vh:[2,6],g:6});eChunks(px,py,0.3,2,150,7,0.22);}
         for(let i=0;i<3;i++)smoke(lerp(o.x1,o.x2,rnd(0,1)),lerp(o.y1,o.y2,rnd(0,1)),0.2,3,ECOL.dust,1.6,9,L*0.15);shake(0.15);}
-      else if(o.k===2){eChunks(o.x,o.y,0.3,10,200,7,0.25);smoke(o.x,o.y,0.3,8,ECOL.dust,1.4,9,70);}
+      else if(o.k===2){eChunks(o.x,o.y,0.3,5,120,5,0.14);smoke(o.x,o.y,0.3,4,ECOL.dust,1.1,7,40);}
       else if(o.k!==3){burst(o.x,o.y,ECOL.dust,14,140,0.9,4,{h:0.3,vh:[1,4],g:3,smoke:true,grow:1.5});}}
     const age=(now-o.born)/1000;
     if(o.k===0||o.k===2)o.g.scale.y=Math.min(1,0.05+age/(o.k===0?0.22:0.3));
@@ -348,10 +349,10 @@ function syncEarth(v,dt,now){
     else if(w[7]!==o.hp&&o.mat){o.hp=w[7];for(const m of o.mats){if(!m.userData.c0)m.userData.c0=m.color.clone();m.color.copy(m.userData.c0).lerp(new THREE.Color('#5a4632'),1-w[7]/100);}burst(o.x,o.y,ECOL.dust,4,60,0.5,2,{h:rnd(0.5,o.h),g:4});}}
   for(const [id,o] of EV.es)if(!seen.has(id)){disposeObj(o.g);for(const m of o.mats)m.dispose();EV.es.delete(id);}
   // Tectonic Crush: Stand ใหญ่หลังกำแพง ออกแรงช้า ๆ (หินสั่น ฝุ่นออก) แล้วหนีบปังทีเดียว
-  for(let i=EV.crush.length-1;i>=0;i--){const C=EV.crush[i];C.t+=dt;const k=C.t/E_CRUSH,c=Math.cos(C.a),sn=Math.sin(C.a),nx=-sn,ny=c;
+  for(let i=EV.crush.length-1;i>=0;i--){const C=EV.crush[i];C.t+=dt;c=Math.cos(C.a),sn=Math.sin(C.a),nx=-sn,ny=c;
     const G=C.G;G.g.position.copy(eW(C.x+c*178,C.y+sn*178,-0.6));G.g.rotation.y=Math.atan2(-c,-sn);
     standOp(G,C.boom?Math.max(0,1-(C.t-C.boom)/0.5):Math.min(1,C.t/0.15));
-    const strain=Math.min(1,k/0.7),close=k<0.7?0:Math.min(1,(k-0.7)/0.3);
+    const strain=Math.min(1,C.t/E_CRUSH_PUSH),close=C.t<E_CRUSH_PUSH?0:Math.min(1,(C.t-E_CRUSH_PUSH)/E_CRUSH_SLIDE);
     standPose(G,{t:now/1000,lean:0.22*strain+0.12*close});if(!C.boom)G.g.position.y+=Math.sin(now/22)*0.03*strain;
     // มือแปะด้านนอกกำแพงแต่ละข้าง (ใกล้ปลายฝั่ง Stand) แล้วดันตามกำแพงที่เลื่อนเข้าหากัน • หลังปัง = ค้างมือที่จุดสุดท้าย
     if(!C.tg)C.tg={};if(!C.boom)for(const o of EV.es.values()){if(o.k!==0||Math.hypot(o.x-C.x,o.y-C.y)>260)continue;const sd=Math.sign((o.x-C.x)*nx+(o.y-C.y)*ny)||1;
@@ -463,7 +464,7 @@ function earthEfx(ev){
       for(let i=0;i<26;i++){const a=rnd(0,6.283),r=rnd(40,260);smoke(x+Math.cos(a)*r,y+Math.sin(a)*r,rnd(0.3,3),1,i%2?ECOL.dust:'#c9b38c',rnd(3,5),rnd(12,20),30);}
       shake(near?1:0.3);if(near){snd('boom',ev);snd('break',ev);}return true;}
     case 'ewland':eDebris(x,y,0.3,30,260);playFx('earth_impact',x,y,0.4,{s:1.2});shake(0.5);if(near)snd('boom',ev);return true;
-    case 'ewdrill':{const s=EV.st.get(ev.id);let from=null;if(s&&s.drills[ev.n])from=s.drills[ev.n].position.clone();eDrillFly(from||eW(ev.x2,ev.y2,4),x,y,3);ring(x,y,'#ff9a4a',150,0.4,0.15);if(near)snd('whoosh',ev);return true;}
+    case 'ewdrill':{const s=EV.st.get(ev.id);let from=null;if(s&&s.drills[ev.n])from=s.drills[ev.n].position.clone();eDrillFly(from||eW(ev.x2,ev.y2,4),x,y,3,0.75);ring(x,y,'#ff9a4a',150,0.4,0.15);if(near)snd('whoosh',ev);return true;}
     case 'ewend':smoke(x,y,0.5,8,ECOL.dust,1.2,8,80);return true;
   }
   return false;}
@@ -478,7 +479,7 @@ function eWindOut(from,to,tier){const dir=to.clone().sub(from).normalize(),w=sim
 // กรวยคลื่นอากาศครอบหัวสว่าน (แหวกอากาศตอนพุ่ง): กรวยเปิดโปร่งแสงชี้ไปข้างหน้า ปลายติดหัวสว่าน บานออกด้านหลัง
 function eAirCone(){const m=new THREE.MeshBasicMaterial({color:hdr('#eef4fa',1.2),transparent:true,opacity:0.0,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide}),
   c=new THREE.Mesh(new THREE.ConeGeometry(0.75,2,24,1,true),m);c.rotation.x=-Math.PI/2;c.position.z=0.9;c.userData.m=m;return c;}
-function eDrillFly(from,x,y,tier){const d=makeDrill(),to=eW(x,y,0),ac=eAirCone();d.position.copy(from);d.add(ac);scene.add(d);
+function eDrillFly(from,x,y,tier,sc){const d=makeDrill(),to=eW(x,y,0),ac=eAirCone();d.scale.setScalar(sc||1);d.position.copy(from);d.add(ac);scene.add(d);
   eAnim({g:d,life:0.33,fn(a){const k=Math.min(1,a.t/0.32);d.position.copy(from).lerp(to,k*k);d.lookAt(to);ac.rotation.z=0;ac.userData.m.opacity=0.22*Math.min(1,a.t/0.06)*(1-k*0.5);ac.scale.set(1,1+k*0.6,1);d.children[0].rotation.y=a.t*80;drillHeat(d,tier,a.t);const w=simOf(d.position);
     burst(w.x,w.y,tier===3?'#ff6a2a':'#e8e4dc',1,30,0.25,tier===3?2.2:1.6,{h:w.h,g:0});
     for(let i=0;i<3;i++){const an=rnd(0,6.283);PARTS.push({x:w.x+Math.cos(an)*12,y:w.y+Math.sin(an)*12,h:w.h+rnd(-0.3,0.3),vx:Math.cos(an)*140,vy:Math.sin(an)*140,vh:rnd(-0.3,0.8),life:0.2,max:0.2,col:'#f4f6f8',size:1.5,g:0,drag:2,sh:2});}}});}   // อากาศแตกออกรอบตัวตามทาง

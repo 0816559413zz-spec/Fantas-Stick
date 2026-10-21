@@ -3,7 +3,7 @@
 //  แผงเสื้อคลุมของโมเดลไฟล์ char_student = ตาราง 7 แถว × 29 คอลัมน์ (ด้านนอก tint_cloak + ซับใน tint_house,
 //  ดู assets/src/student_build.py CL/GAP) → ตัดออกจากโมเดลของเรา แล้วจำลองเป็นจุดต่อกันด้วยแท่ง (verlet แบบ position-based)
 //  • แถวบนติดตัว (ตามตำแหน่งจริงของโมเดลที่ขยับตามกระดูก = ตามท่าเดิน/คาถา/ragdoll) • ชายผ้าห้อยอิสระ
-//  • ชนลำตัว / ขา / ต้นแขน / พื้น → ตอน ragdoll ล้ม ผ้ากองลงพื้นตามตัว
+//  • ชนลำตัว / ขา / ต้นแขน / พื้น + ของในโลก (ลัง/หิน/ต้นไม้/บ้าน/กำแพงสายดิน/กำแพงน้ำแข็ง) → ตอน ragdoll ล้ม ผ้ากองลงพื้นตามตัว
 //  • คนอื่นยังใช้แอนิเมชันกระดูกผ้าเดิม (ประหยัดเครื่อง)
 //  เรียกจาก render loop หลัง syncPlayers (js/37) • ตัวเลขข้างล่างเป็นค่าภาพล้วน ปรับได้ตามชอบ
 // =====================================================================
@@ -69,7 +69,23 @@ function clReset(C){C.P.set(C.T);C.Q.set(C.T);C.init=true;}
 function clCapsule(P,Q,i,a,b,rad){const ax=a.x,ay=a.y,az=a.z,bx=b.x-ax,by=b.y-ay,bz=b.z-az,px=P[i]-ax,py=P[i+1]-ay,pz=P[i+2]-az,L=bx*bx+by*by+bz*bz||1;
   const t=clamp((px*bx+py*by+pz*bz)/L,0,1),dx=px-bx*t,dy=py-by*t,dz=pz-bz*t,d=Math.hypot(dx,dy,dz);
   if(d<rad&&d>1e-5){const k=(rad-d)/d;P[i]+=dx*k;P[i+1]+=dy*k;P[i+2]+=dz*k;Q[i]+=dx*k;Q[i+1]+=dy*k;Q[i+2]+=dz*k;}}   // เลื่อน Q ตามด้วย = ดันออกแต่ไม่เพิ่มความเร็ว (ขาแกว่งไม่ดีดผ้าปลิว)
-function clStep(C,h,gy,caps,bv){const P=C.P,Q=C.Q,T=C.T,pk=C.pk,E=C.E,N=C.N,g=CLOTH.G*h*h,D=CLOTH.DAMP;C.t+=h;
+// ของในโลกใกล้ตัว (รวบทีละเฟรม): วงกลม [x,y,r,สูง,abs] (px / ม.) • บ้านใกล้ ๆ • กำแพง/เสาสายดิน (เส้น) — ผ้าชนแล้วไม่ทะลุ (ผู้ใช้ 2026-10-21)
+const _clO={x:0,y:0};
+function clWorld(cx,cy){const R=140,c=[],b=[],s=[],near=q=>Math.abs(q.x-cx)<R+q.r&&Math.abs(q.y-cy)<R+q.r;
+  if(PROPON)for(const q of PROPS)if(q.st!==1&&near(q))c.push([q.x,q.y,q.r,q.hgt,0]);
+  for(const q of OBS)if(q.bi===undefined&&near(q))c.push(q.top!==undefined?[q.x,q.y,q.r,q.top,1]:[q.x,q.y,q.r,q.hgt,0]);
+  for(const q of BLDG)if(bldNear(q,cx,cy,R))b.push(q);
+  if(G&&G.walls)for(const q of G.walls)if(near(q))c.push([q.x,q.y,q.r,q.hgt,0]);
+  if(G&&G.eso){for(const w of G.eso)if(!w.dead&&w.k!=='mound'&&w.k!=='dom')s.push([w.x1,w.y1,w.x2,w.y2,w.r,w.hgt]);}
+  else for(const o of EV.es.values())if(o.k===0||o.k===1)s.push([o.x1,o.y1,o.x2,o.y2,o.k?35:18,o.k?9:6]);
+  return c.length||b.length||s.length?{c,b,s}:null;}
+// ดันจุดผ้าออกจากของในโลก (แนวนอน) • เลื่อน Q ตาม = ไม่เด้ง
+function clWorldHit(P,Q,i,W){const sx=P[i]/S3+MW/2,sy=P[i+2]/S3+MH/2,zh=P[i+1]-GY(sx,sy),r=4;let x=sx,y=sy;
+  for(const c of W.c){if(zh>=(c[4]?c[3]-(TERR?terrT(x,y):0):c[3]))continue;const dx=x-c[0],dy=y-c[1],d=Math.hypot(dx,dy),m=c[2]+r;if(d<m&&d>0.001){x=c[0]+dx/d*m;y=c[1]+dy/d*m;}}
+  for(const q of W.s){if(zh>=q[5])continue;const e=eSegD(x,y,{x1:q[0],y1:q[1],x2:q[2],y2:q[3]}),m=q[4]+r;if(e.d<m&&e.d>0.001){x=e.qx+(x-e.qx)/e.d*m;y=e.qy+(y-e.qy)/e.d*m;}}
+  if(W.b.length){_clO.x=x;_clO.y=y;for(const b of W.b)collideBld(b,_clO,r,Math.max(0,zh));x=_clO.x;y=_clO.y;}
+  if(x!==sx||y!==sy){const ax=(x-sx)*S3,az=(y-sy)*S3;P[i]+=ax;P[i+2]+=az;Q[i]+=ax;Q[i+2]+=az;}}
+function clStep(C,h,gy,caps,bv,W){const P=C.P,Q=C.Q,T=C.T,pk=C.pk,E=C.E,N=C.N,g=CLOTH.G*h*h,D=CLOTH.DAMP;C.t+=h;
   for(let n=0;n<N;n++){const i=n*3,k=pk[n];
     if(k>=1){P[i]=Q[i]=T[i];P[i+1]=Q[i+1]=T[i+1];P[i+2]=Q[i+2]=T[i+2];continue;}
     const fl=(1-k)*CLOTH.FLUT*h*h*Math.sin(C.t*7+n*0.37);
@@ -80,7 +96,7 @@ function clStep(C,h,gy,caps,bv){const P=C.P,Q=C.Q,T=C.T,pk=C.pk,E=C.E,N=C.N,g=CL
     for(let e=0;e<E.length;e+=4){const a=E[e]*3,b=E[e+1]*3,wa=pk[E[e]]>=1?0:1,wb=pk[E[e+1]]>=1?0:1;if(!(wa+wb))continue;
       const dx=P[b]-P[a],dy=P[b+1]-P[a+1],dz=P[b+2]-P[a+2],d=Math.hypot(dx,dy,dz)||1e-6,s=(d-E[e+2])/d*E[e+3]/(wa+wb);
       P[a]+=dx*s*wa;P[a+1]+=dy*s*wa;P[a+2]+=dz*s*wa;P[b]-=dx*s*wb;P[b+1]-=dy*s*wb;P[b+2]-=dz*s*wb;}
-    for(let n=0;n<N;n++){if(pk[n]>=1)continue;const i=n*3;for(const c of caps)clCapsule(P,Q,i,c[0],c[1],c[2]);if(P[i+1]<gy){P[i+1]=gy;Q[i]=lerp(Q[i],P[i],0.6);Q[i+2]=lerp(Q[i+2],P[i+2],0.6);}}}}
+    for(let n=0;n<N;n++){if(pk[n]>=1)continue;const i=n*3;for(const c of caps)clCapsule(P,Q,i,c[0],c[1],c[2]);if(P[i+1]<gy){P[i+1]=gy;Q[i]=lerp(Q[i],P[i],0.6);Q[i+2]=lerp(Q[i+2],P[i+2],0.6);}if(W&&it===CLOTH.IT-1)clWorldHit(P,Q,i,W);}}}
 function clDraw(C){const po=C.mo.geometry.attributes.position,pi=C.mi.geometry.attributes.position;po.array.set(C.P);po.needsUpdate=true;C.mo.geometry.computeVertexNormals();
   // ครั้งแรก: ให้ด้านนอกหันออกจากตัว (กลับลำดับสามเหลี่ยมถ้ากลับด้าน)
   if(!C.flip){C.flip=true;const nm=C.mo.geometry.attributes.normal,n=Math.floor(C.N/2)+3*CL_NC,i=n*3;_clA.set(C.P[i],0,C.P[i+2]);C.o.g.getWorldPosition(_clB);_clA.x-=_clB.x;_clA.z-=_clB.z;
@@ -96,6 +112,9 @@ function clothTick(dt){if(!CLOTH.ON||typeof NET==='undefined')return;const o=PM3
   if(!C.init)clReset(C);
   else{const i=0;if(Math.hypot(C.T[i]-C.P[i],C.T[i+1]-C.P[i+1],C.T[i+2]-C.P[i+2])>CLOTH.SNAP)clReset(C);}
   const caps=C.caps.map(([a,b,k])=>[a.getWorldPosition(new THREE.Vector3()),b.getWorldPosition(new THREE.Vector3()),CLOTH[k]]);
-  _clV.setFromMatrixPosition(C.o.g.matrixWorld);if(!C.lp)C.lp=_clV.clone();const bv=_clV.clone().sub(C.lp).divideScalar(Math.max(dt,1e-3));C.lp.copy(_clV);if(bv.length()>60)bv.set(0,0,0);const gy=GY(_clV.x/S3+MW/2,_clV.z/S3+MH/2)+0.02;
-  C.acc=Math.min(C.acc+Math.min(dt,0.1),CLOTH.STEP*4);while(C.acc>=CLOTH.STEP){clStep(C,CLOTH.STEP,gy,caps,bv);C.acc-=CLOTH.STEP;}
+  _clV.setFromMatrixPosition(C.o.g.matrixWorld);if(!C.lp)C.lp=_clV.clone();const dl=_clV.clone().sub(C.lp);C.lp.copy(_clV);
+  // ตัวพุ่งเร็วมาก (ลอยขึ้นฟ้าอัลติ / พุ่ง / ตกเร็ว) > 0.5 ม. ต่อเฟรม = ยกผ้าทั้งผืนไปด้วยส่วนที่เกิน (ผ้าไม่ยืดค้าง/พันกัน)
+  const dm=dl.length();if(dm>0.5){const k=(dm-0.5)/dm;for(let i=0;i<C.N*3;i+=3){C.P[i]+=dl.x*k;C.P[i+1]+=dl.y*k;C.P[i+2]+=dl.z*k;C.Q[i]+=dl.x*k;C.Q[i+1]+=dl.y*k;C.Q[i+2]+=dl.z*k;}dl.multiplyScalar(0.5/dm);}
+  const bv=dl.divideScalar(Math.max(dt,1e-3));const psx=_clV.x/S3+MW/2,psy=_clV.z/S3+MH/2,gy=GY(psx,psy)+0.02,W=clWorld(psx,psy);
+  C.acc=Math.min(C.acc+Math.min(dt,0.1),CLOTH.STEP*4);while(C.acc>=CLOTH.STEP){clStep(C,CLOTH.STEP,gy,caps,bv,W);C.acc-=CLOTH.STEP;}
   clDraw(C);}
