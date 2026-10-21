@@ -36,7 +36,7 @@ function render(dt,now){
   const E=v.E.map(e=>{const q=em[e.id];if(!q)return e;return Object.assign({},e,{x:lerp(q.x,e.x,a),y:lerp(q.y,e.y,a)});});
   const me=P.find(p=>p.id===NET.myId);
   if(v.ph==='count'&&lastPh!=='count'&&me){yaw=me.a;pitch=0.3;}
-  lastPh=v.ph;
+  lastPh=v.ph;warmTick(v);
   if(me){
     if(me.al&&!me.dn)me.a=yaw;
     const f=(INPUT.u?1:0)-(INPUT.d?1:0),s=(INPUT.r?1:0)-(INPUT.l?1:0);

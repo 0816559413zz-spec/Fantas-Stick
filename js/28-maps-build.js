@@ -53,8 +53,8 @@ function prewarmShaders(){
       add(new THREE.Mesh(new THREE.IcosahedronGeometry(1,1),iceMat(0.6,'#4aa0d8')));
     }
     scene.add(grp);
-    const done=()=>{scene.remove(grp);if(!_prewarmed){disposeTree(grp);_prewarmed=true;}};
-    if(gl.compileAsync)gl.compileAsync(scene,cam).then(done,done);else{gl.compile(scene,cam);done();}
+    const done=()=>{scene.remove(grp);if(!_prewarmed){warmKeep(grp);_prewarmed=true;}};   // วัสดุไม่ dispose: ไม่งั้น three.js ลบ program ทิ้ง (js/51)
+    Promise.all(warmCompile([scene])).then(done,done);   // ลง RT ของ composer (js/51) — เดิม compile ลงจอ ได้ program คนละแบบกับที่เกมใช้
   }catch(e){console.warn('prewarm',e);}
 }
 // รวมชิ้นส่วนฉากที่ไม่ขยับและใช้วัสดุเดียวกันเป็น mesh เดียว (ลด draw call จากหลายร้อยเหลือไม่กี่สิบ)

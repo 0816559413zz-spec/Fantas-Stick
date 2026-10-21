@@ -201,7 +201,8 @@ function earthFX(o,p,pz,now,dt){
     const lu=(0.22+PK.lu*(P.pk||0))*pu*(1-0.5*rc)-0.06*w*(1-pu),bx=P.x+(P.x2-P.x)*lu,by=P.y+(P.y2-P.y)*lu;S.g.position.copy(eW(bx,by,P.h+0.15));S.g.rotation.y=eYaw(P.x,P.y,P.x2,P.y2);pose={t,punchW:w,punch:pu,rec:rc,pk:P.pk||0,mir:!!P.mir};
     if(k>0.76)s.pn=null;}
   else if(A[1]||s.rs>=0){   // Rampage: วิ่ง (ท่าใน standRun) • จบ = ชูสองหมัดแล้วทุบพื้น (s.rs เริ่มจาก event eslam)
-    const sm=s.rs>=0;let rs=0;if(!sm){s.rT=(s.rT||0)+dt;s.ra=p.a;}else{s.rs+=dt;rs=Math.min(0.55,s.rs);if(s.rs>0.55)s.rs=-1;}   // rs = ค่าก่อนรีเซ็ต (เดิมเฟรมสุดท้ายใช้ -1 → op=1 + ท่ายืน = 'ลุกขึ้น 1 เฟรม')const a=s.ra===undefined?p.a:s.ra;
+    const sm=s.rs>=0;let rs=0;if(!sm){s.rT=(s.rT||0)+dt;s.ra=p.a;}else{s.rs+=dt;rs=Math.min(0.55,s.rs);if(s.rs>0.55)s.rs=-1;}   // rs = ค่าก่อนรีเซ็ต (เดิมเฟรมสุดท้ายใช้ -1 → op=1 + ท่ายืน = 'ลุกขึ้น 1 เฟรม')
+    const a=s.ra===undefined?p.a:s.ra;
     op=sm?clamp((0.55-rs)/0.2,0,1):1;S.g.position.copy(eW(p.x,p.y,z0));S.g.rotation.y=Math.atan2(Math.cos(a),Math.sin(a));
     pose={t,run:1,rt:s.rT||0,rise:sm?1:clamp(((s.rT||0)-1.0)/0.16,0,1),sl:sm?Math.max(0.001,clamp(rs/0.07,0,1)):0};s.rLP=pose;}
   // Rampage จบแต่ event ทุบยังไม่มา (หรือจบแบบเงียบ) → ค้างท่าเดิมแล้วจางไปเลย ไม่ยืดตัวลุกขึ้นยืน

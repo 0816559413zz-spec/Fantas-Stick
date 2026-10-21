@@ -356,7 +356,7 @@ fxWarpMake:219 fxWarpTick:231
 §237 ไฟ 3 มิติจากการจำลอง (ชั้น vol) — ไฟล์รูปแบบเดียวกับที่เพื่อน bake จา…
 FXVOL:240 fxVolLoad:241 fxVolTex:245 fxVolSet:248 fxVolReady:249 fxVolMake:250 fxVolTick:253 fxPreAssets:258 fxAssetsWait:260
 
-## js/47-earth-view.js (680) — 
+## js/47-earth-view.js (681) — 
 ECOL:9 EGUARD_BIG:14 EGUARD:14 CB:15 EV:16 eW:17 eYaw:18
 §19 ลายผิว (วาดเองบน canvas: หิน/ทราย + รอยร้าว + ขอบบล็อกแบบ Roblox)
 ETEX:20 eTex:21 eFadeTex:35 eMat:37 eTMat:38 rockGeo:39 _eChunkM:43 eChunks:44
@@ -368,20 +368,20 @@ makeBow:86 EBOW:95 _RIM:95 eRampWind:96 eSpikes:108 standOp:113 _ikDn:116 eArmIK
 makeWarn:182 eWarnAt:187
 §188 ทุกเฟรม: ผู้เล่นสายดิน (เรียกจาก syncPlayers)
 earthFX:189
-§281 สว่าน (ref: designs/earth_ref/drill_ref.png): หินแหลมเรียวเป็นตัวหลัก…
-eSteelEnv:283 eHeatTex:288 EDR:293 eDrillGeo:294 makeDrill:300 drillHeat:307
-§309 เสายักษ์ (ref: designs/earth_ref/pillar_ref.png): เสาเหลี่ยมยาว ปลายห…
-makePillar:310
-§316 กระสุนหิน
-earthProjMesh:317 SLAB:323 makeSlab:324 eSlabGeo:329 eSlabMats:340 slabCracks:407
-§410 สิ่งก่อสร้าง + ฝุ่น (เรียกจาก render loop)
-earthClear:411 eMakeSO:416 syncEarth:432 earthFog:470 _eCamT:473 eAnim:474 eDebris:475 eWave:477 eAirWave:479 esbImpact:482
-§489 event "efx" ของสายดิน (เรียกจากต้น efxFX) — คืน true = จัดการแล้ว
-earthEfx:490 eWindOut:576 eAirCone:582 eDrillFly:584
-§588 บึงโคลน (Mud Swamp + บึงจากเสาอัลติ): คลื่นกระเพื่อมจากกลางไปขอบ แล้ว…
-earthMudZone:589 earthMudSink:596
-§597 HUD ใต้เป้าเล็ง
-ESM:599 eSmooth:600 EROCK:602 eRock:603 ESF:611 eShieldFx:612 eChips:619 eShieldSegs:622 eShieldNum:638 eShieldArc:642 drawEarthHud:660
+§282 สว่าน (ref: designs/earth_ref/drill_ref.png): หินแหลมเรียวเป็นตัวหลัก…
+eSteelEnv:284 eHeatTex:289 EDR:294 eDrillGeo:295 makeDrill:301 drillHeat:308
+§310 เสายักษ์ (ref: designs/earth_ref/pillar_ref.png): เสาเหลี่ยมยาว ปลายห…
+makePillar:311
+§317 กระสุนหิน
+earthProjMesh:318 SLAB:324 makeSlab:325 eSlabGeo:330 eSlabMats:341 slabCracks:408
+§411 สิ่งก่อสร้าง + ฝุ่น (เรียกจาก render loop)
+earthClear:412 eMakeSO:417 syncEarth:433 earthFog:471 _eCamT:474 eAnim:475 eDebris:476 eWave:478 eAirWave:480 esbImpact:483
+§490 event "efx" ของสายดิน (เรียกจากต้น efxFX) — คืน true = จัดการแล้ว
+earthEfx:491 eWindOut:577 eAirCone:583 eDrillFly:585
+§589 บึงโคลน (Mud Swamp + บึงจากเสาอัลติ): คลื่นกระเพื่อมจากกลางไปขอบ แล้ว…
+earthMudZone:590 earthMudSink:597
+§598 HUD ใต้เป้าเล็ง
+ESM:600 eSmooth:601 EROCK:603 eRock:604 ESF:612 eShieldFx:613 eChips:620 eShieldSegs:623 eShieldNum:639 eShieldArc:643 drawEarthHud:661
 
 ## js/48-ragdoll.js (227) — 
 RAG:10 RAGJ:23 RAGB:29 RAGS:33 RAGMIN:37 RAGHINGE:39 _rv1:40 _rv2:40 _rv3:40 _rqa:40 _rqb:40 _rm:40 ragBones:41 ragBasis:48 ragTargets:56 ragStart:62 ragBack:88 ragFloor:89 ragStep:90 ragPose:155 ragWrite:170 ragRestore:182 ragEnd:186 ragTick:188 ragHideDead:222
@@ -396,4 +396,8 @@ CLW:48
 §50 หญ้า
 GRASS:52 GR_GLSL_V:53 GR_BEGIN:55 grassMat:79 grassBuild:93 _grBasic:107 grassBake:108 grassCount:158 grassTick:163
 
-(51 files, 11958 lines)
+## js/51-warmup.js (71) — 
+WARM:11 WARM_FXDIR:12 WARM_COMMON:12 WARM_X:13 WARM_Y:13 warmKeep:15 warmCompile:21 WARM_SKIP:24 warmFx:25 warmFxEnd:33 warmGather:35 warmPaths:37 warmStep:39 warmTick:54
+§63 ภาพจากโค้ดของแต่ละสาย (เฟรมละฟังก์ชัน)
+
+(52 files, 12030 lines)
