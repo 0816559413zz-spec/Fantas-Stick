@@ -53,8 +53,8 @@ fx('swing_windup', 'ง้างอาวุธจังหวะ 3: เกล�
   { id: 'halo', t: 'halo', at: 0, life: 0.3, pos: [0.2, 0.9, 0.1], col: C.main, size: 1.2, size0: 0.3, k: 0.6 },
   snd('snd', 'whoosh', 0.35)
 ]);
-// ร่างเงา Mirror Legion ฟันตาม (ช้ากว่า 0.12 วิ, กลับทิศ) — ซ้าย/ขวา ห่าง 2.75 ม. หน้า 1.5 ม.
-fx('swing_echo', 'ร่างเงา Mirror Legion ฟันตาม: รอยกระจกน้ำแข็งสะท้อน 2 ข้าง ช้ากว่า 0.12 วิ', ['slash', 'melee', 'mirror'], 0.7, { r: { def: 6, desc: 'ระยะฟัน (ม.)' } },
+// อาวุธลอย 2 เล่มของ Mirror Legion ฟันตาม (ช้ากว่า 0.12 วิ, กลับทิศ) — ซ้าย/ขวา ห่าง 2.75 ม. หน้า 1.5 ม.
+fx('swing_echo', 'อาวุธลอย 2 เล่มของ Mirror Legion ฟันตาม: รอยกระจกน้ำแข็งสะท้อน 2 ข้าง ช้ากว่า 0.12 วิ', ['slash', 'melee', 'mirror'], 0.7, { r: { def: 6, desc: 'ระยะฟัน (ม.)' } },
   [-1, 1].flatMap(k => [
     { id: 'echo' + (k > 0 ? 'R' : 'L'), t: 'trail', at: 0.12, life: 0.12, sweep: true, a0: -80, a1: 80, r: 'r*0.9', r0: 'r*0.6', tilt: -14, pos: [2.75 * k, 0.15, 1.5], col: C.hi, col2: C.deep, tlife: 0.2, k: 1.3, w: 0.3 },
     flakes('fl' + (k > 0 ? 'R' : 'L'), { at: 0.14, burst: 6, pos: [2.75 * k, 0, 2.6], dir: 'aim', speed: [1.5, 3] })
@@ -79,7 +79,7 @@ fx('slam3', 'จังหวะ 3 ฟาดพื้น: รอยฟันแ�
   { id: 'light', t: 'light', at: 0.05, life: 0.35, att: 'ground', pos: [0, 1.2, 0], col: C.main, int: 1.4, dist: 12 },
   shake('cam', 5, 0.05), shakeNear('cam2', 2, 0.05), snd('snd', 'slam', 0.8, 0.04), snd('snd2', 'break', 0.6, 0.06)
 ]);
-fx('slam3_echo', 'ร่างเงา Mirror Legion ฟาดพื้นตาม: หนามน้ำแข็งเล็ก 2 ข้าง', ['melee', 'ground', 'mirror'], 1.4, { r: { def: 3.4, desc: 'รัศมี (ม.)' } },
+fx('slam3_echo', 'อาวุธลอย 2 เล่มของ Mirror Legion ฟาดพื้นตาม: หนามน้ำแข็งเล็ก 2 ข้าง', ['melee', 'ground', 'mirror'], 1.4, { r: { def: 3.4, desc: 'รัศมี (ม.)' } },
   [-1, 1].flatMap(k => [
     { id: 'sp' + k, t: 'mesh', at: 0.1, life: 0.9, att: 'ground', pos: [2.75 * k, 0, 0], shape: 'model', model: 'frost_spires', mat: 'ice', col: C.main, col2: C.deep,
       scale: { '0': 1, '1': 1, x: 'r*0.35' }, grow: { '0': 0, '0.15': 1, '0.7': 1, '1': 0 }, stagger: 0.5 },
@@ -229,8 +229,8 @@ fx('glacier', 'Glacier Rend โหมดไกล: น้ำแข็งระ�
   shakeNear('cam', 5, 0, true), snd('snd', 'break', 0.8)
 ]);
 
-// ---------- 10) Mirror Legion (mirror / mirrorend) — ร่างเงายังเป็นโค้ด (ULTV) ----------
-fx('mirror', 'Mirror Legion: แผ่นกระจกน้ำแข็งพุ่งเข้าประกอบเป็นร่างเงา 2 ข้าง + วงกระแทก + แสงเย็น', ['ult', 'summon'], 1.7, {}, [
+// ---------- 10) Mirror Legion (mirror / mirrorend) — อาวุธลอยเป็นโค้ด (js/34 frostFX) + รอยฟันตอนพุ่ง (ULTV) ----------
+fx('mirror', 'Mirror Legion: แผ่นกระจกน้ำแข็งพุ่งเข้าประกอบเป็นดาบ/ขวานน้ำแข็งลอย 2 เล่มข้างตัว + วงกระแทก + แสงเย็น', ['ult', 'summon'], 1.7, {}, [
   { id: 'core', t: 'flash', at: 0, life: 0.14, att: 'ground', pos: [0, 1.1, 0], col: C.main, size: 2.6 },
   ...[-1, 1].flatMap(k => [
     { id: 'gather' + k, t: 'emit', at: 0, life: 0.3, rate: 80, att: 'ground', from: 'sphere', fr: 1.6, pos: [2.75 * k, 1.1, 0], dir: 'in', speed: [4, 6], plife: [0.25, 0.35],

@@ -76,7 +76,7 @@ function syncPlayers(P,mode,now,dt){
     if(p.sh&&!fireSh&&!p.ea&&Math.random()<0.3)burst(p.x,p.y,'#7ff6ff',1,40,0.4,1.4,{h:pz+rnd(0.3,2)});
     if(p.ds)burst(p.x,p.y,'#bfefff',2,30,0.3,2,{h:pz+rnd(0.4,1.6),g:0});
   }
-  for(const [id,o] of PM3)if(!seen.has(id)){if(o.fball)scene.remove(o.fball);if(o.orbG)scene.remove(o.orbG);if(o.clones)o.clones.forEach(c=>scene.remove(c.g));disposeObj(o.g);PM3.delete(id);}
+  for(const [id,o] of PM3)if(!seen.has(id)){if(o.fball)scene.remove(o.fball);if(o.orbG)scene.remove(o.orbG);disposeObj(o.g);PM3.delete(id);}
 }
 function syncEnemies(E,P,now,dt){
   const seen=new Set();

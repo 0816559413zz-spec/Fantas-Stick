@@ -3,11 +3,11 @@
 //  1) ตรวจทุก assets/fx/**/*.fx.json + assets/fx/bind.json (รูปแบบ ช่วงค่า งบ ชื่อที่อ้างถึง) — ใช้ tools/fx-lint.js ตัวเดียวกับหน้าสตูดิโอ
 //  2) เขียน assets/fx/index.json ใหม่ (รายชื่อ + เวอร์ชันของทุกไฟล์ — เกมใช้โหลดล่วงหน้า/หลบแคช)
 //  3) เขียน FX-FORMAT.md ใหม่จาก assets/fx/schema.json (เอกสารรูปแบบไฟล์ อย่าแก้ด้วยมือ)
-// ตัวเลือก: --quiet (พิมพ์เฉพาะปัญหา) • ออกด้วยรหัส 1 ถ้ามี err
+// ตัวเลือก: --quiet (พิมพ์เฉพาะปัญหา) • --nowrite (ตรวจอย่างเดียว ไม่เขียน index.json / FX-FORMAT.md — ใช้ตอนหลายคนทำพร้อมกัน) • ออกด้วยรหัส 1 ถ้ามี err
 const fs = require('fs'), path = require('path'), crypto = require('crypto');
 const ROOT = path.join(__dirname, '..'), FXD = path.join(ROOT, 'assets', 'fx');
 const { fxLint, fxLintBind, fxLintMesh, fxLintTex, fxLintVol } = require('./fx-lint.js');
-const quiet = process.argv.includes('--quiet');
+const quiet = process.argv.includes('--quiet'), nowrite = process.argv.includes('--nowrite');
 const schema = JSON.parse(fs.readFileSync(path.join(FXD, 'schema.json'), 'utf8'));
 // ไฟล์เอฟเฟกต์ทั้งหมด
 const files = [];
@@ -57,7 +57,7 @@ for (const p of files) {
 }
 let bind = {}; try { bind = JSON.parse(fs.readFileSync(path.join(FXD, 'bind.json'), 'utf8')); } catch (e) { say('err', 'bind.json', '', 'อ่านไม่ได้ — ' + e.message); }
 for (const r of fxLintBind(bind, schema, ctx)) say(r.lv, 'bind.json', r.at, r.msg);
-fs.writeFileSync(path.join(FXD, 'index.json'), JSON.stringify(index, null, 1) + '\n');
+if (!nowrite) fs.writeFileSync(path.join(FXD, 'index.json'), JSON.stringify(index, null, 1) + '\n');
 // ---------- FX-FORMAT.md (สร้างจาก schema) ----------
 const fmt = v => v === undefined ? '' : typeof v === 'object' ? '`' + JSON.stringify(v) + '`' : '`' + v + '`';
 const rng = s => s.min !== undefined ? `${s.min}–${s.max}` : '';
@@ -98,6 +98,6 @@ md += '\nข้อมูล .bin ต้องจำลองในสตูด�
 md += `\n## ผูกกับเกม — \`assets/fx/bind.json\`\n${schema.bind.about}\n- คีย์: ${schema.bind.key}\n${Object.entries(schema.bind.fields).map(([k, v]) => `- \`${k}\`: ${v}`).join('\n')}\n\nตัวอย่าง:\n\`\`\`json\n{\n  "efx:dfboom": {"fx": "fire/dfboom", "mode": "add", "p": {"r": "ev.r/20"}},\n  "imp:fire":   {"fx": "fire/spark_hit"},\n  "efx:blaze":  {"fx": "fire/blaze_aura", "follow": "ev.id"}\n}\n\`\`\`\n`;
 md += `\n## เรียกจากโค้ด\n\`\`\`js\nconst h=fxPlay('fire/dfboom',{x,y,h,a,s:1,pal:'ice',col:'#ff00aa',p:{r:6},follow:playerId,own:true});  // คืน handle (null = ไฟล์ยังไม่โหลด)\nfxStop(h);   // ชั้น loop หยุด + ชั้น end:true เริ่มเล่น\n\`\`\`\n`;
 md += `\n## งาน Claude (เร็วที่สุด)\n1. คัดลอกไฟล์ใกล้เคียงจาก \`assets/fx/start/\` (แม่แบบ) หรือสร้างในสตูดิโอ → แก้ JSON\n2. \`node tools/fx-check.js\` — ต้องไม่มี ✗\n3. ดูผลไม่ต้องเข้าเกม: เปิด \`studio.html?fx=<ชื่อ>&sheet=0.05,0.15,0.3,0.6,1.2\` (แผ่นภาพสรุปทั้งไทม์ไลน์ + ตัวเลขจอขาว/บังตัวละคร) • รันผ่าน \`python tools/serve.py\` แล้วเติม \`&save=ชื่อ\` = เซฟภาพลง \`shots/ชื่อ.png\` ให้ Read ดูได้\n4. ผูกกับท่าใน \`bind.json\` (mode add ก่อน แล้วค่อย replace เมื่อผู้ใช้ชอบ)\n`;
-fs.writeFileSync(path.join(ROOT, 'FX-FORMAT.md'), md);
+if (!nowrite) fs.writeFileSync(path.join(ROOT, 'FX-FORMAT.md'), md);
 if (!quiet || errs || warns) console.log(`fx-check: ${files.length} ไฟล์ + โมเดล ${meshes.size} + ภาพ ${texs.size} + ไฟ 3D ${vols.size} • ✗ ${errs} • ⚠ ${warns} • เขียน assets/fx/index.json + FX-FORMAT.md แล้ว`);
 process.exit(errs ? 1 : 0);

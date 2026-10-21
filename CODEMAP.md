@@ -226,8 +226,10 @@ localVel:3
 §11 ภาพของสายไฟ: ชาร์จลูกไฟ / ย่อตัวชาร์จพุ่ง / วงเวทพ่นไฟ / ดีดนิ้ว / กล…
 _pw:12 simOf:13 makeColossus:14 makeMagicCircle:67 _fsGeo:77 fireShieldFX:79 pyroFX:93
 
-## js/34-frost-view.js (221) — ภาพของสายน้ำแข็ง: ดาบ/ขวานน้ำแข็งที่ปลายไม้ ท่าฟัน โล่อัศวิน ไถล แช่แ…
-iceMat:2 iceRim:3 makeIceSword:4 makeIceAxe:23 makeKiteShield:39 _icyClone:47 MIRSKIP:50 mirrorNodes:51 makeMirrorClone:52 mirrorStale:59 mirrorPose:60 dropMirror:65 frostFX:66
+## js/34-frost-view.js (247) — ภาพของสายน้ำแข็ง: ดาบ/ขวานน้ำแข็งที่ปลายไม้ ท่าฟัน โล่อัศวิน ไถล แช่แ…
+iceMat:2 iceRim:3 makeIceSword:4 makeIceAxe:23 makeKiteShield:39
+§47 อาวุธน้ำแข็งลอย (ผู้ใช้ 2026-10-22: "ร่ายคาถาให้ดาบฟันเอง ระยะเท่าเดิ…
+FWS:50 FWA:50 _fwM:51 _fwM2:51 _fwX:51 _fwY:51 _fwZ:51 _fwP:51 _fwS:51 _fwQ:51 _eo:52 _ei:52 _ss:52 fwAim:54 fwWeapons:55 FWP:57 FWT:57 fwChop:58 fwSweep:59 fwIdle:60 fwSwing:63 FWL_N:75 fwLink:76 fwMat:79 frostFX:80
 
 ## js/35-sync.js (356) — ซิงก์ผู้เล่น/ศัตรู/ลูกเวทจาก snapshot + ฉายตำแหน่งลงจอ (ป้ายชื่อ/ตัวเ…
 syncPlayers:2 syncEnemies:81 projGeo:119 tailGeo:120 _t1:121 makeProj:122 _a:142 _b:142 syncProj:143 _awT:220 animateWorld:221
@@ -399,4 +401,4 @@ GRASS:52 GR_GLSL_V:53 GR_BEGIN:55 grassMat:79 grassBuild:93 _grBasic:107 grassBa
 WARM:11 WARM_FXDIR:12 WARM_COMMON:12 WARM_X:13 WARM_Y:13 warmKeep:15 warmCompile:21 WARM_SKIP:24 warmFx:25 warmFxEnd:33 warmGather:35 warmPaths:37 warmStep:39 warmTick:54
 §63 ภาพจากโค้ดของแต่ละสาย (เฟรมละฟังก์ชัน)
 
-(52 files, 12051 lines)
+(52 files, 12077 lines)

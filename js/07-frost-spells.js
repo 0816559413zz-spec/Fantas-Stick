@@ -24,7 +24,7 @@ defSpell(1,{id:'cryoshell',role:'utility',melee:1,n:'Cryo Shell',ic:'🧊',cd:28
   }});
 defSpell(1,{id:'frostaura',role:'control',melee:1,n:'Frostbite Aura',ic:'🌨️',cd:15,d:'ออร่าเยือกแข็งรอบตัว 5 วิ (รัศมี ~180): 20 ดาเมจ/วิ (ไม่สลอว์)',fx:'ใช้ได้แม้ตอนแช่แข็งตัวเอง • ใช้ได้เฉพาะโหมดประชิด',
   cast(p,S){p.auraT=5;p.auraTk=0;emit({k:'efx',z:'aura',x:p.x,y:p.y,h:p.z,id:p.id});}});
-defSpell(1,{id:'mirrorlegion',role:'ult',n:'Mirror Legion',ic:'👥',cd:0,ult:true,d:'เวทโบราณสายน้ำแข็ง: ร่างแยกน้ำแข็ง 2 ตัวโผล่ข้างตัว 10 วิ (ฟันตามเราทุกครั้ง ร่างละ 50%) + HP เสริม 100 • ดาเมจเรา ×2 • ฟันจังหวะ 3 ฮีล 15 (ขวาน 22)',fx:'ตอนเปิด: พุ่งไปข้างหน้า ~600 (อมตะ) พร้อมร่างแยก ฟันตลอดทาง 75 ดาเมจ + ช้าลง 80% 3 วิ',
+defSpell(1,{id:'mirrorlegion',role:'ult',n:'Mirror Legion',ic:'⚔️',cd:0,ult:true,d:'เวทโบราณสายน้ำแข็ง: เสกดาบ/ขวานน้ำแข็งลอยเพิ่ม 2 เล่มข้างตัว (รวม 3 เล่ม) 10 วิ (ฟันตามเราทุกครั้ง เล่มละ 50%) + HP เสริม 100 • ดาเมจเรา ×2 • ฟันจังหวะ 3 ฮีล 15 (ขวาน 22)',fx:'ตอนเปิด: พุ่งไปข้างหน้า ~600 (อมตะ) พร้อมอาวุธลอยทั้ง 3 เล่ม ฟันตลอดทาง 75 ดาเมจ + ช้าลง 80% 3 วิ',
   cast(p,S){
     p.mirror=10;p.xhp=100;p.fmode=0;
     p.dash=600/2000;p.dashSp=2000;p.dashX=Math.cos(p.ang);p.dashY=Math.sin(p.ang);p.inv=Math.max(p.inv,0.36);p.shieldOn=false;p.slideT=0;

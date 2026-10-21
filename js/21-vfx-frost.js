@@ -69,7 +69,7 @@ function updateSlashes(dt){
   for(let i=ULTV.length-1;i>=0;i--){
     const u=ULTV[i];const st=Math.min(600-u.d,2000*dt);u.d+=st;u.acc+=st;
     const c=Math.cos(u.a),sn=Math.sin(u.a),x=u.x+c*u.d,y=u.y+sn*u.d;
-    if(u.acc>=100){u.acc=0;for(const s of [-1,1]){const px=x-sn*75*s+c*30,py=y+c*75*s+sn*30;makeSlash(px,py,0.5,u.a+rnd(-0.15,0.15),rnd(60,80),true,rnd(-0.25,0.25),s>0?'#bfeaff':'#ffffff',0.9);}
+    if(u.acc>=100){u.acc=0;   // (2026-10-22) ไม่มีเสี้ยวตั้งตรง 2 ข้างแล้ว — อาวุธลอย 3 เล่ม (js/34) ฟันให้เห็นเอง • เสี้ยวเดิมใหญ่ 3-4 ม. ลอยรอบกล้องตอนพุ่ง = จอขาวทั้งจอ
       burst(x,y,'#dff6ff',12,200,0.35,2,{h:1,g:2});for(let j=0;j<4;j++)iceBit(_plateG,x+rnd(-40,40),y+rnd(-40,40),rnd(0.6,1.8),0.22,0.22,0.12,{life:0.55,up:0.02,down:0.3,v:[rnd(-120,120),rnd(-120,120),rnd(1,4)],spin:rnd(-10,10)});}
     if(u.d>=600)ULTV.splice(i,1);
   }
