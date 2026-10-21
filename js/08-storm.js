@@ -62,7 +62,7 @@ function stormDashTick(p){
   if(!p.sdHit)return;
   if(p.dash>0){
     for(const t of foesOf(p.team)){if(p.sdHit.has(t))continue;if(Math.hypot(t.x-p.x,t.y-p.y)>PR+(t.r||PR)+15||Math.abs(cH(t)-(p.z+1.1))>3)continue;
-      p.sdHit.add(t);aoeHit(p,t,p.god>0?15:10);emit({k:'efx',z:'sdhit',x:Math.round(t.x),y:Math.round(t.y),h:cH(t),a:Math.round(Math.atan2(p.dashY,p.dashX)*100)/100});
+      p.sdHit.add(t);aoeHit(p,t,p.god>0?15:10);emit({k:'efx',z:'sdhit',x:Math.round(t.x),y:Math.round(t.y),h:cH(t),a:Math.round(Math.atan2(p.dashY,p.dashX)*100)/100,g:p.god>0?1:0});
       if(!p.sdAny){p.sdAny=true;stGain(p);stormOrbLaunch(p,t.x,t.y);if(p.god>0)p.cEmp=1;}}
   }else{emit({k:'efx',z:'sdashe',x:Math.round(p.sdX),y:Math.round(p.sdY),h:p.z+1,x2:Math.round(p.x),y2:Math.round(p.y),id:p.id});p.sdHit=null;}
 }

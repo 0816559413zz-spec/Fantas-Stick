@@ -184,5 +184,23 @@
       "r": "ev.r/20",
       "hh": "ev.hh"
     }
+  },
+  "efx:sclaw": {
+    "fx": "storm/claw_sweep",
+    "mode": "add",
+    "p": {
+      "r": "6.5"
+    },
+    "if": "ev.n==3"
+  },
+  "efx:sdhit": {
+    "fx": "storm/claw_sweep",
+    "mode": "add",
+    "p": {
+      "r": "2.6",
+      "z0": "1.4"
+    },
+    "s": "0.8",
+    "if": "ev.g==1"
   }
 }

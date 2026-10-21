@@ -211,25 +211,30 @@ const _ev=new THREE.Vector3();
 const GODPTS=[[0,1.95,0.05],[0.12,1.8,0.12],[-0.12,1.8,0.12],[0,1.5,0.18],[0.25,1.45,0],[-0.25,1.45,0],[0,1.2,0.2],[0.2,1.1,0],[-0.2,1.1,0],[0,0.9,0.15],[0.12,0.55,0.05],[-0.12,0.55,0.05],[0.12,0.1,0.08],[-0.12,0.1,0.08],[0,1.3,-0.2],[0.4,1.15,0.1],[-0.4,1.15,0.1]];
 
 function bWorld(o,x,y,z){_ev.set(x,y,z);o.b.localToWorld(_ev);return simOf(_ev);}
-// แขนปาดกรงเล็บ + ริบบิ้นตามปลายใบมีด 3 เล่ม (ผู้ใช้ 2026-10-20: "รอยต้องตามกรงเล็บตอนปาด" • ท่าเสริมหลัง Dash = กว้าง เหลืองสว่าง สายฟ้าเยอะ)
-// n 0 = แขนขวาปาดเฉียงลง • 1 = แขนซ้าย • 2 = สองแขนฟาดลงจากบน • 3 = สองแขนกวาดออกกว้าง (ท่าเสริม)
+// แขนปาดกรงเล็บ + รอยข่วนตามปลายใบมีด 3 เล่ม (ผู้ใช้ 2026-10-20: "รอยต้องตามกรงเล็บตอนปาด")
+// รอบ 2026-10-21 (ผู้ใช้ส่งรูปตัวอย่าง): รอยข่วน = เส้นเรืองบางเรียวหัวท้าย ขนานกัน 3 เส้น (แกนขาว + ฟุ้งเหลือง) + ประกายเม็ดเล็กโปรยตามรอย
+// n 0 = แขนขวาปาดเฉียงลง • 1 = แขนซ้าย • 2 = สองแขนฟาดลงจากบน • 3 = สองแขนกวาดแนวนอนขวา→ซ้าย (ท่าเสริม; รอยกวาดใหญ่ = storm/claw_sweep ใน bind.json)
 function stormClawSwipe(o,dt){const S=o.clSw,n=S.n,emp=n===3;S.t+=dt;const k=Math.min(1,S.t/S.dur),e=1-Math.pow(1-k,2.2),R=o.armR,L=o.armL;
   if(n===0){R.rotation.x=lerp(-2.8,-0.45,e);R.rotation.z=lerp(-1.0,0.95,e);}
   else if(n===1){L.rotation.x=lerp(-2.8,-0.45,e);L.rotation.z=lerp(1.0,-0.95,e);}
   else if(n===2){R.rotation.x=L.rotation.x=lerp(-3.05,-0.25,e);R.rotation.z=-0.2;L.rotation.z=0.2;}
-  else{R.rotation.x=L.rotation.x=-1.45;R.rotation.z=lerp(-1.7,1.1,e);L.rotation.z=lerp(1.7,-1.1,e);}
+  else{R.rotation.x=L.rotation.x=-1.45;R.rotation.z=lerp(-1.7,1.1,e);L.rotation.z=lerp(-0.9,1.7,e);}
   const act=n===0?[o.claws[0]]:n===1?[o.claws[1]]:o.claws,B=STCLAW.blades;
-  if(!S.tr){S.tr=[];for(const c of act)for(let b=0;b<3;b++)S.tr.push({c,b,h:trailNew({sweep:true,col:emp?'#fff2a0':'#ffe066',col2:emp?'#ffa000':'#ff9c00',life:emp?0.3:0.2,k:emp?1.25:1.0})});}
+  if(!S.tr){S.tr=[];for(const c of act)for(let b=0;b<3;b++)S.tr.push({c,b,
+    g:trailNew({col:'#ffd23a',col2:'#ff9000',w:emp?0.2:0.15,life:emp?0.36:0.32,k:emp?1.1:0.9}),
+    h:trailNew({col:'#ffffff',col2:'#fff0a0',w:emp?0.065:0.05,life:emp?0.32:0.28,k:emp?2.2:1.9})});}
   if(k<1){o.g.updateMatrixWorld(true);
-    for(const T of S.tr){const q0=B[T.b][1],q1=B[T.b][2],u=emp?0.25:0.6;_tw.set((q0[0]+(q1[0]-q0[0])*u)*0.95,(q0[1]+(q1[1]-q0[1])*u)*0.95,(q0[2]+(q1[2]-q0[2])*u)*0.95);T.c.localToWorld(_tw);const ax=_tw.x,ay=_tw.y,az=_tw.z;
-      _tw.set(q1[0]*0.95,q1[1]*0.95,q1[2]*0.95);T.c.localToWorld(_tw);const ex=emp?1.6:0.9;
-      trailPoint(T.h,ax,ay,az,_tw.x+(_tw.x-ax)*ex,_tw.y+(_tw.y-ay)*ex,_tw.z+(_tw.z-az)*ex);}
-    // สายฟ้าวิ่งตามแนวปลายใบที่เพิ่งปาดผ่าน + ประกายจากปลาย
-    S.bt=(S.bt||0)-dt;if(S.bt<=0){S.bt=emp?0.025:0.04;const pick=emp?S.tr:[S.tr[(Math.random()*S.tr.length)|0]];
-      for(const T of pick){const P=T.h.pts.slice(-7).map(p=>new THREE.Vector3(p.x2,p.y2,p.z2));if(P.length>=3)tboltP(P,emp?0.08:0.06,emp?0.07:0.045,emp?0.06:0.035).gk=emp?0.45:0.3;
-        const L2=T.h.pts[T.h.pts.length-1];if(L2){const q=simOf(_tw.set(L2.x2,L2.y2,L2.z2));PARTS.push({x:q.x,y:q.y,h:q.h,vx:rnd(-60,60),vy:rnd(-60,60),vh:rnd(-1,2),life:0.22,max:0.22,col:Math.random()<0.5?'#ffffff':'#ffd000',size:rnd(1.6,emp?3:2.2),g:2});
-          if(emp&&Math.random()<0.5)tbolt(q.x,q.y,q.h,q.x+rnd(-30,30),q.y+rnd(-30,30),q.h+rnd(-0.8,0.4),0.07,0,0.05).gk=0.4;}}}}
-  if(S.t>=S.dur+0.04){for(const T of S.tr||[])trailStop(T.h);o.clSw=null;}}
+    // จุดปลายใบ (ยื่นเลยปลายไปตามแนวใบ + กางห่างกันขึ้นให้เห็นเป็นเส้นขนาน)
+    for(const T of S.tr){const q0=B[T.b][1],q1=B[T.b][2],ex=emp?0.7:0.45,sp=1.7;
+      _tw.set((q1[0]+(q1[0]-q0[0])*ex)*sp,q1[1]+(q1[1]-q0[1])*ex,q1[2]+(q1[2]-q0[2])*ex);T.c.localToWorld(_tw);
+      trailPoint(T.g,_tw.x,_tw.y,_tw.z);trailPoint(T.h,_tw.x,_tw.y,_tw.z);}
+    // ประกายเม็ดเล็กโปรยตามรอยที่เพิ่งปาดผ่าน (ลอยออกช้า ๆ)
+    for(const T of S.tr){const P=T.h.pts;if(P.length<2)continue;for(let j=0;j<(emp?2:1);j++){const p=P[Math.max(0,P.length-1-((Math.random()*6)|0))],q=simOf(_tw.set(p.x,p.y,p.z));
+      PARTS.push({x:q.x+rnd(-5,5),y:q.y+rnd(-5,5),h:q.h+rnd(-0.12,0.12),vx:rnd(-35,35),vy:rnd(-35,35),vh:rnd(-0.3,1.2),life:rnd(0.25,0.5),max:0.5,col:Math.random()<0.45?'#ffffff':Math.random()<0.5?'#ffe066':'#ffb000',size:rnd(1,emp?2:1.6),g:0.6});}}
+    // สายฟ้าเส้นเล็กแลบตามรอยเป็นครั้งคราว
+    S.bt=(S.bt||0)-dt;if(S.bt<=0){S.bt=emp?0.05:0.08;const T=S.tr[(Math.random()*S.tr.length)|0],P=T.h.pts.slice(-6).map(p=>new THREE.Vector3(p.x,p.y,p.z));
+      if(P.length>=3)tboltP(P,0.035,emp?0.05:0.035,0.03).gk=0.3;}}
+  if(S.t>=S.dur+0.04){for(const T of S.tr||[]){trailStop(T.h);trailStop(T.g);}o.clSw=null;}}
 function stormFX(o,p,pz,now,dt){
   if((p.fm|0)&16){o.b.rotation.z+=Math.sin(now/22)*0.2;o.b.rotation.x+=Math.sin(now/31)*0.08;}
   const M=p.sm;

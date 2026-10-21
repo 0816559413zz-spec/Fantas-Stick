@@ -1,0 +1,16 @@
+{
+  "v": 1,
+  "desc": "รอยกวาดแนวนอนยาว (อัลติสายฟ้า): เสี้ยวหลักหัวหนาปลายเรียว + ลิ้นแหลมแตกออกด้านนอก (รัศมี 1 ม. — ขยายด้วย scale)",
+  "mat": "energy",
+  "pal": "storm",
+  "tags": ["slash", "melee", "storm"],
+  "parts": [
+    {"id":"body","k":"blade","arc":165,"r":1,"w":0.2,"thick":0,"taper":1.1,"skew":0.7,"seg":72},
+    {"id":"core","k":"blade","arc":150,"r":0.985,"w":0.06,"thick":0,"taper":1.4,"skew":0.7,"seg":64,"pos":[0,0.01,0]},
+    {"id":"t1","k":"blade","arc":34,"r":1.1,"w":0.07,"thick":0,"taper":1.6,"skew":0.9,"seg":16,"rot":[0,58,0]},
+    {"id":"t2","k":"blade","arc":26,"r":1.16,"w":0.055,"thick":0,"taper":1.8,"skew":0.9,"seg":14,"rot":[0,22,0]},
+    {"id":"t3","k":"blade","arc":30,"r":1.12,"w":0.06,"thick":0,"taper":1.7,"skew":0.9,"seg":14,"rot":[0,-14,0]},
+    {"id":"t4","k":"blade","arc":24,"r":1.08,"w":0.05,"thick":0,"taper":1.8,"skew":0.9,"seg":12,"rot":[0,-46,0]},
+    {"id":"t5","k":"blade","arc":36,"r":0.86,"w":0.05,"thick":0,"taper":1.7,"skew":0.9,"seg":14,"rot":[0,-62,0]}
+  ]
+}

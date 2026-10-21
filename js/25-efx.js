@@ -154,11 +154,8 @@ function efxFX(ev){
       const rot=emp?-0.75:ev.n===0?-0.6:ev.n===1?0.6:-1.45,D=emp?135:105;
       // รอยกรงเล็บ = ริบบิ้นตามปลายใบมีด 3 เล่มระหว่างแขนปาด (stormClawSwipe ใน js/20) • ไม่มีโมเดล = รอยนิ่งแบบเดิม
       {const o=PM3.get(ev.id);if(o&&o.claws)o.clSw={t:0,n:ev.n,dur:emp?0.3:ev.n===2?0.24:0.2,tr:null};else clawRakes(x+c*D,y+sn*D,H+0.55,a,emp?3.3:big?2.7:2.3,rot,emp||big);}
-      if(emp){// เสริมหลัง Dash: รอยปาดกว้างเหลืองสว่าง + สายฟ้าเยอะตามแนวรอย
-        later(0.12,()=>{makeSlash(x,y,H-0.2,a,170,false,0,'#ffd23a',1.5,0.55);makeSlash(x,y,H-0.15,a,176,false,0,'#fff6c8',1.8,0.12);
-          for(let i=0;i<9;i++){const an=a+(i/8-0.5)*2.1,an2=an+rnd(0.12,0.3);tbolt(x+Math.cos(an)*160,y+Math.sin(an)*160,H+rnd(-0.6,0.6),x+Math.cos(an2)*rnd(140,200),y+Math.sin(an2)*rnd(140,200),H+rnd(-0.8,0.6),0.16,0,0.09,2);}
-          FX.flashLight(x+c*120,y+sn*120,H,'#ffd23a',5,18,0.25);});}
-      if(emp){for(let i=0;i<3;i++){const off=(i-1)*24;for(let j=0;j<8;j++){const f=110+j*22;PARTS.push({x:x+c*f-sn*off,y:y+sn*f+c*off,h:H+0.6-j*0.12,vx:c*200,vy:sn*200,vh:0,life:0.18+j*0.015,max:0.3,col:j%2?'#ffd000':'#ffffff',size:2.4,g:0});}}
+      // เสริมหลัง Dash: รอยกวาดแนวนอนยาว + สายฟ้า = assets/fx/storm/claw_sweep.fx.json (bind.json efx:sclaw ถ้า n==3)
+      if(emp){
         FX.flashSprite(x+c*95,y+sn*95,H,'#fff7b0',0.4,3,0.12,2.2);burst(x+c*230,y+sn*230,'#ffd000',16,240,0.3,2.2,{h:H,g:3});burst(x+c*230,y+sn*230,'#9fd8ff',8,200,0.3,1.8,{h:H,g:3});}
       for(let i=0;i<(big?6:3);i++){const an=a+rnd(-0.5,0.5),d=rnd(D-20,D+40);burst(x+Math.cos(an)*d,y+Math.sin(an)*d,i%2?'#ffd000':'#ffffff',4,160,0.25,2,{h:H,g:3});}
       if(near)snd(big?'zap':'whoosh',ev);break;}
