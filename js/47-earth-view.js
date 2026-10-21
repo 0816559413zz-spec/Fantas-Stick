@@ -49,7 +49,7 @@ function makeStand(sc,big){
     cry=new THREE.MeshStandardMaterial({color:'#e8c066',emissive:'#b0701a',emissiveIntensity:0.9,roughness:0.3,metalness:0.2,flatShading:true,transparent:true});
   const Bx=(w,h,d,x,y,z,par,m)=>{const o=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m||mat);o.position.set(x,y,z);o.castShadow=m!==fade&&m!==glow;(par||g).add(o);return o;};
   const body=new THREE.Group();g.add(body);
-  Bx(1.5,1.15,0.85,0,2.2,0,body);Bx(1.32,1.0,0.78,0,1.15,0,body,fade);
+  Bx(1.5,1.15,0.85,0,2.2,0,body);const lo=Bx(1.32,1.0,0.78,0,1.15,0,body,fade),ab=Bx(1.36,0.7,0.8,0,1.5,0,body);ab.visible=false;   // ab = ท้องทึบ (โชว์แทนส่วนจางตอนมีขา)
   for(const [x,y,r] of [[0.2,2.35,0.6],[-0.3,2.1,-0.4],[0.05,1.75,1.2]]){const c=Bx(0.5,0.04,0.02,x,y,0.44,body,glow);c.rotation.z=r;}
   const head=Bx(0.78,0.78,0.78,0,3.2,0.02,body);Bx(0.84,0.16,0.3,0,3.45,0.3,body,fm);
   for(const s of [-1,1])Bx(0.14,0.08,0.04,s*0.17,3.24,0.41,body,glow);
@@ -68,8 +68,43 @@ function makeStand(sc,big){
   const L=arm(-1),R=arm(1);
   if(big){Bx(1.05,0.6,0.16,0,2.35,0.48,body,fm);for(let i=0;i<4;i++){const c=new THREE.Mesh(new THREE.OctahedronGeometry(0.28,0),cry);c.position.set(rnd(-0.6,0.6),rnd(2.4,3.2),-0.5);c.scale.y=1.8;c.rotation.z=rnd(-0.6,0.6);body.add(c);}
     for(const s of [-1,1])Bx(0.12,0.9,0.05,s*0.45,2.15,0.44,body,glow);}
+  // ขา (เฉพาะ Stand เล็ก) — โชว์แค่ตอนวิ่ง Rampage • up = สะโพก, fo = เข่า, fist = ข้อเท้า (โครงเดียวกับแขน ใช้ eArmIK ได้)
+  let legs=null,bow=null;if(!big){legs=new THREE.Group();legs.visible=false;g.add(legs);Bx(1.3,0.5,0.78,0,1.42,0,legs);
+    const leg=s=>{const up=new THREE.Group();up.position.set(s*0.42,1.4,0);legs.add(up);Bx(0.58,0.84,0.62,0,-0.38,0,up);
+      const fo=new THREE.Group();fo.position.set(0,-0.78,0);up.add(fo);Bx(0.64,0.2,0.68,0,0,0.02,fo,fm);Bx(0.52,0.74,0.56,0,-0.36,0,fo,fm);Bx(0.54,0.06,0.06,0,-0.3,0.29,fo,glow);
+      const fist=new THREE.Group();fist.position.set(0,-0.72,0);fo.add(fist);Bx(0.68,0.28,0.98,0,-0.1,0.16,fist,fm);for(let i=0;i<3;i++)Bx(0.17,0.15,0.15,-0.21+i*0.21,-0.15,0.68,fist,mat);
+      return {up,fo,fist};};
+    legs.L=leg(-1);legs.R=leg(1);bow=makeBow();g.add(bow);}
   g.scale.setScalar(sc||1);g.visible=false;scene.add(g);
-  return {g,body,head,L,R,mats:[mat,fm,fade,glow,cry],lmats:[LM.mat,LM.fm,LM.glow],op:0,big:!!big};}
+  return {g,body,head,L,R,lo,ab,legs,bow,mats:[mat,fm,fade,glow,cry],lmats:[LM.mat,LM.fm,LM.glow],op:0,big:!!big};}
+// ---------- Rampage: เกราะลมหน้า Stand (ผู้ใช้: เหมือนอุกกาบาตตกโลก ต้านลม — เปลือกแรงดันด้านหน้า + เส้นลมไหลจากปลายออกข้าง ๆ) ----------
+// เปลือกพาราโบลา: u รอบตัว, v ปลาย(0) → ขอบ(1) • เส้นลมวิ่งจากปลายไปขอบ • ปลายร้อนส้ม • ขอบเรืองตามมุมมอง (fresnel)
+function makeBow(){const m=new THREE.ShaderMaterial({uniforms:{uT:{value:0},uA:{value:0},uC:{value:hdr('#fff1d8',1.25)},uH:{value:hdr('#ffb45a',2.4)}},transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide,
+    vertexShader:'varying vec2 vU;varying float vF;void main(){vU=uv;vec4 mv=modelViewMatrix*vec4(position,1.0);vec3 n=normalize(normalMatrix*normal);vF=1.0-abs(dot(n,normalize(-mv.xyz)));gl_Position=projectionMatrix*mv;}',
+    fragmentShader:'uniform float uT,uA;uniform vec3 uC,uH;varying vec2 vU;varying float vF;float h1(float x){return fract(sin(x*127.1)*43758.5453);}'+
+      'void main(){float a=vU.x*60.0,id=floor(a),r=h1(id+3.0),w=smoothstep(0.5,0.08,abs(fract(a)-0.5));float s=fract(vU.y*1.2-uT*(2.4+2.6*r)+r*9.0);'+
+      'float ln=w*smoothstep(0.0,0.08,s)*smoothstep(0.75,0.3,s)*step(0.28,r);float tip=exp(-vU.y*vU.y*26.0);float fd=smoothstep(1.0,0.5,vU.y)*smoothstep(0.0,0.05,vU.y+0.02);'+
+      'float al=(0.03+0.24*vF*vF*vF+0.65*ln*(0.4+0.6*vU.y)+0.6*tip)*fd*uA;gl_FragColor=vec4(mix(uC,uH,tip),al);}'});
+  const pts=[];for(let i=0;i<=18;i++){const v=i/18;pts.push(new THREE.Vector2(Math.max(0.002,v),-v*v));}
+  const sh=new THREE.Mesh(new THREE.LatheGeometry(pts,44),m);sh.rotation.x=Math.PI/2;sh.renderOrder=6;const g=new THREE.Group();g.add(sh);g.visible=false;g.userData.m=m;return g;}
+// ทุกเฟรม (on = กำลังวิ่ง): เปลือกลม + เส้นลมไหลจากขอบออกไปหลัง (trail) + ประกายลมหลุดจากขอบ + วงลมหลุดจากปลายทิ้งไว้ข้างหลัง • หยุดวิ่ง/ทุบ = เปลือกขยายแตกแล้วจาง
+const EBOW={w:1.8,h:1.5,d:3.0,y:1.8,z:2.9},_RIM=[0.12,0.7,1.25,Math.PI-1.25,Math.PI-0.7,Math.PI-0.12,-0.45,Math.PI+0.45];
+function eRampWind(s,S,p,on,t,dt,fx,fy,rx,ry){const B=S.bow;if(!B)return;const U=B.userData.m.uniforms;
+  if(on){s.bowA=clamp(((s.rT||0)-0.12)/0.18,0,1);B.scale.set(EBOW.w,EBOW.h,EBOW.d);}
+  else if(s.bowA>0){s.bowA=Math.max(0,s.bowA-dt*6);B.scale.multiplyScalar(1+dt*4);}
+  B.visible=s.bowA>0.01&&S.g.visible;B.position.set(0,EBOW.y,EBOW.z);U.uA.value=(s.bowA||0)*(0.85+0.15*Math.sin(t*40));U.uT.value=t;
+  if(!on||s.bowA<0.3){if(!on&&s.wl){for(const h of s.wl)trailStop(h);s.wl=null;}return;}
+  const P=(th,r,dz)=>S.g.localToWorld(new THREE.Vector3(EBOW.w*r*Math.cos(th),EBOW.y+EBOW.h*r*Math.sin(th),EBOW.z-EBOW.d*r*r+(dz||0)));
+  if(!s.wl)s.wl=_RIM.map(()=>trailNew({col:'#fff4de',col2:'#d8b888',w:0.1,life:0.24,k:1.5}));
+  _RIM.forEach((th,i)=>{const v=P(th,0.86);trailPoint(s.wl[i],v.x,v.y,v.z);});
+  for(let i=0;i<4;i++){const th=rnd(-0.5,Math.PI+0.5),q=simOf(P(th,rnd(0.6,0.95))),c=Math.cos(th),v=rnd(180,320);
+    PARTS.push({x:q.x,y:q.y,h:q.h-GY(q.x,q.y),vx:-fx*v+rx*c*70,vy:-fy*v+ry*c*70,vh:Math.sin(th)*1.5,life:rnd(0.14,0.24),max:0.24,col:i%2?'#e8d4a8':'#fff6e4',size:rnd(1.2,2),g:0,sh:2});}
+  s.awT=(s.awT||0)-dt;if(s.awT<=0){s.awT=0.16;eAirWave(P(0,0,0.15),new THREE.Vector3(fx,0,fy),0.5,'#fff0d0',0.25);}}
+// วงหินแหลมพุ่งขึ้นรอบจุดทุบ (เอียงออกนอก) แล้วจมกลับ — Rampage ตอนทุบ
+function eSpikes(x,y,r,n){const g=new THREE.Group(),m=eTMat('wall','#c8b08a'),L=[];g.position.copy(eW(x,y,0));scene.add(g);
+  for(let i=0;i<n;i++){const a=i/n*6.283+rnd(-0.2,0.2),d=r*S3*rnd(0.45,0.75),h=rnd(1.3,2.4),pv=new THREE.Group(),o=new THREE.Mesh(rockGeo(rnd(0.5,0.75),h,rnd(0.5,0.75),0.2),m);
+    o.position.y=h/2;o.castShadow=true;pv.add(o);pv.position.set(Math.cos(a)*d,-h,Math.sin(a)*d);pv.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),new THREE.Vector3(Math.cos(a)*0.6,1,Math.sin(a)*0.6).normalize());pv.userData.h=h;pv.userData.d=rnd(0,0.06);g.add(pv);L.push(pv);}
+  eAnim({g,life:1.5,fn(a){for(const pv of L){const h=pv.userData.h,k=a.t-pv.userData.d;pv.position.y=k<0?-h:k<0.1?-h+h*1.05*(1-Math.pow(1-k/0.1,3)):k<1.0?-0.05*h:lerp(-0.05*h,-h,Math.min(1,(k-1.0)/0.45));}}});}
 // lop = ความทึบแขนซ้าย (คูณกับ op) — ท่ากันให้แขนซ้ายจางจนแทบมองไม่เห็น
 function standOp(S,op,lop){S.op=op;S.g.visible=op>0.02;for(const m of S.mats){m.transparent=true;m.opacity=op;m.depthWrite=op>0.6&&!m.alphaMap;}
   const lo=op*(lop===undefined?1:lop);for(const m of S.lmats){m.transparent=true;m.opacity=lo;m.depthWrite=lo>0.6;}}
@@ -99,8 +134,30 @@ function standPose(S,k){const R=S.R,L=S.L;
   if(k.spread!==undefined){const r=k.spread;for(const [A,s] of [[R,1],[L,-1]]){A.up.rotation.x=-1.25;A.up.rotation.z=s*lerp(-0.25,1.05,r);A.fo.rotation.x=-0.25;}}
   if(k.throwK!==undefined){const r=k.throwK;   // ท่าพุ่งแหลน: แขนขวาเหยียดไปหลังสุด → ปาออก • แขนซ้ายยื่นไปหน้า
     R.up.rotation.x=r<0?2.5:lerp(2.5,-1.7,r);R.up.rotation.z=-0.25;R.fo.rotation.x=0;L.up.rotation.x=-1.7;L.up.rotation.z=0.5;L.fo.rotation.x=-0.15;S.body.rotation.y=r<0?0.5:lerp(0.5,-0.3,r);S.body.rotation.x=r<0?-0.2:lerp(-0.2,0.25,r);}
-  S.body.position.y=Math.sin((k.t||0)*3)*0.08-dip;
-  if(k.run){const r=Math.sin(k.t*14)*0.8;R.up.rotation.x=-0.6+r;L.up.rotation.x=-0.6-r;}}
+  S.body.position.y=Math.sin((k.t||0)*3)*0.08-dip;S.body.position.z=0;
+  if(S.legs){const on=!!k.run;S.legs.visible=on;S.ab.visible=on;S.lo.visible=!on;}
+  if(k.run)standRun(S,k);}
+// ท่า Rampage (ผู้ใช้): ยื่นสองมือไปหน้า → พับเข้ามาไขว้บังหน้า ค้างไว้ตลอด • ตัวก้มพุ่งตรง ๆ แบบ The Thing (Marvel Rivals) • ขาก้าวยาว หนัก ไม่สับถี่
+// k: rt = วินาทีตั้งแต่เริ่มวิ่ง • rise 0-1 = ชูสองหมัดขึ้นเหนือหัว (ช่วงท้าย) • sl 0-1 = ทุบลงพื้น (ขาหยุดกางยืนมั่น)
+const _eRq=new THREE.Quaternion(),_eRq2=new THREE.Quaternion(),_eRx=new THREE.Vector3(1,0,0);
+function standRun(S,k){const ez=x=>{x=clamp(x,0,1);return x*x*(3-2*x);},rt=k.rt||0,ph=rt*10.5,ri=ez(k.rise||0),sl=ez(k.sl||0),mv=!k.sl,HY=1.4,go=ez(rt/0.2);
+  const ln=sl>0?lerp(-0.15,0.95,sl):lerp(lerp(0.1,0.8,ez(rt/0.24)),-0.15,ri),bob=mv?-0.14*Math.cos(2*ph)*go:-0.32*sl,tw=mv?0.13*Math.sin(ph)*go*(1-ri):0;
+  S.body.rotation.set(ln,tw,tw*0.4);S.body.position.set(0,HY-HY*Math.cos(ln)+bob,-HY*Math.sin(ln));S.legs.position.y=bob;S.head.rotation.x=-0.5*Math.max(0,ln);
+  S.g.updateMatrixWorld(true);const bq=S.body.getWorldQuaternion(_eRq),B=v=>S.body.localToWorld(v),Gw=v=>S.g.localToWorld(v);
+  const push=ez(rt/0.12),fold=ez((rt-0.13)/0.15);
+  for(const [A,s] of [[S.R,1],[S.L,-1]]){
+    const T=new THREE.Vector3(s*1.05,0.8,0.3).lerp(new THREE.Vector3(s*0.7,2.7,1.95),push)   // ห้อย → ยื่นตรงไปหน้า
+      .lerp(s>0?new THREE.Vector3(-0.05,3.05,1.0):new THREE.Vector3(0.12,2.8,0.78),fold)   // พับไขว้บังหน้า (ขวาหน้า-สูง ซ้ายหลัง-ต่ำ)
+      .lerp(new THREE.Vector3(s*0.5,4.5,0.45),ri);B(T);   // ชูขึ้นเหนือหัว
+    if(sl>0)T.lerp(Gw(new THREE.Vector3(s*0.42,0.35,2.2)),sl);   // ทุบลงพื้นข้างหน้า
+    eArmIK(A,T,new THREE.Vector3(s,-0.55*(1-ri),-0.35*ri).applyQuaternion(bq).normalize());}
+  // ขา: ช่วงยืนเท้าแตะพื้นไถลไปหลัง • ช่วงยกเท้าเหวี่ยงไปหน้าสูง ๆ (ก้าวยาว)
+  const gq=S.g.getWorldQuaternion(_eRq2),fw=new THREE.Vector3(0,0,1).applyQuaternion(gq);
+  for(const [A,s] of [[S.legs.R,1],[S.legs.L,-1]]){let z,y=0.23,pt=0;
+    if(mv){const u=((ph/6.2832+(s<0?0.5:0))%1+1)%1;if(u<0.5)z=0.9*(1-4*u);else{const v=(u-0.5)*2;z=-0.9+1.8*ez(v);y+=0.62*Math.sin(Math.PI*v);pt=0.4*Math.sin(Math.PI*v);}z=lerp(s*0.12,z+0.1,go);}
+    else{z=s>0?0.8:-0.6;}
+    eArmIK(A,Gw(new THREE.Vector3(s*0.5,y,z)),fw.clone().addScaledVector(new THREE.Vector3(s,0,0).applyQuaternion(gq),0.15));
+    A.fist.quaternion.copy(A.fo.getWorldQuaternion(new THREE.Quaternion()).invert().multiply(gq).multiply(new THREE.Quaternion().setFromAxisAngle(_eRx,pt)));}}
 function eState(id){let s=EV.st.get(id);if(!s){s={stand:null,giant:null,cgiant:null,drill:null,pn:null,lift:0,ugT:-1,gSlam:0,spin:0,drills:[]};EV.st.set(id,s);}return s;}
 function eStandOf(s){if(!s.stand)s.stand=makeStand(1,false);return s.stand;}
 function eGiantOf(s){if(!s.giant)s.giant=makeStand(1,true);return s.giant;}
@@ -132,16 +189,21 @@ function earthFX(o,p,pz,now,dt){
     op=k<0.15?k/0.15:k<0.5?1:Math.max(0,1-(k-0.5)/0.25);
     const lu=0.22*pu*(1-0.5*rc)-0.06*w*(1-pu),bx=P.x+(P.x2-P.x)*lu,by=P.y+(P.y2-P.y)*lu;S.g.position.copy(eW(bx,by,P.h+0.15));S.g.rotation.y=eYaw(P.x,P.y,P.x2,P.y2);pose={t,punchW:w,punch:pu,rec:rc};
     if(k>0.76)s.pn=null;}
-  else if(A[1]){op=1;S.g.position.copy(eW(p.x,p.y,z0));S.g.rotation.y=Math.atan2(fx,fy);pose={t,lean:0.5,run:1};}
-  else op=Math.max(0,S.op-dt*5);
+  else if(A[1]||s.rs>=0){   // Rampage: วิ่ง (ท่าใน standRun) • จบ = ชูสองหมัดแล้วทุบพื้น (s.rs เริ่มจาก event eslam)
+    const sm=s.rs>=0;if(!sm){s.rT=(s.rT||0)+dt;s.ra=p.a;}else{s.rs+=dt;if(s.rs>0.55)s.rs=-1;}const a=s.ra===undefined?p.a:s.ra;
+    op=sm?clamp((0.55-s.rs)/0.2,0,1):1;S.g.position.copy(eW(p.x,p.y,z0));S.g.rotation.y=Math.atan2(Math.cos(a),Math.sin(a));
+    pose={t,run:1,rt:s.rT||0,rise:sm?1:clamp(((s.rT||0)-1.0)/0.16,0,1),sl:sm?Math.max(0.001,clamp(s.rs/0.07,0,1)):0};}
+  else{op=Math.max(0,S.op-dt*5);s.rT=0;}
   standOp(S,op);if(op>0){standPose(S,pose);eSandFall(S,(S.g.position.x/S3)+MW/2,(S.g.position.z/S3)+MH/2,S.g.position.y-GY(p.x,p.y)+0.6,1);}
-  // ขี่ Stand ตอน Rampage: ยกตัว + ฝุ่นตลบ + หินกระเด็นหลัง + รอยพื้นแตก + เส้นความเร็ว
-  s.lift=lerp(s.lift,A[1]?1.9:0,1-Math.exp(-12*dt));if(s.lift>0.01)o.g.position.y+=s.lift;
-  if(A[1]){for(let i=0;i<2;i++)burst(p.x-fx*rnd(10,40)+rnd(-20,20),p.y-fy*rnd(10,40)+rnd(-20,20),ECOL.dust,1,60,1.1,5,{h:0.3,vh:[0.5,2],g:-0.2,smoke:true,grow:1.8});
+  // ขี่ Stand ตอน Rampage: ยกตัว + ฝุ่นตลบ + หินกระเด็นหลัง + รอยพื้นแตก + เกราะลม/เส้นลม (eRampWind) + เท้ากระแทกพื้น
+  s.lift=lerp(s.lift,A[1]||s.rs>=0&&s.rs<0.3?1.9:0,1-Math.exp(-12*dt));if(s.lift>0.01)o.g.position.y+=s.lift;
+  eRampWind(s,S,p,A[1]&&!(s.rs>=0)&&op>0,t,dt,fx,fy,rx,ry);
+  if(A[1]&&!(s.rs>=0)){for(let i=0;i<2;i++)burst(p.x-fx*rnd(10,40)+rnd(-20,20),p.y-fy*rnd(10,40)+rnd(-20,20),ECOL.dust,1,60,1.1,5,{h:0.3,vh:[0.5,2],g:-0.2,smoke:true,grow:1.8});
     if(Math.random()<0.5)eChunks(p.x-fx*15,p.y-fy*15,0.2,1,160,5,0.16);
     s.crk=(s.crk||0)-dt;if(s.crk<=0){s.crk=0.07;SHAPES_Q.push({k:'decal',x:p.x+rnd(-8,8),y:p.y+rnd(-8,8),col:'#000000',s1:0.9,life:1.6,op:0.55});}
-    for(let i=0;i<3;i++)PARTS.push({x:p.x+rx*rnd(-30,30)+fx*20,y:p.y+ry*rnd(-30,30)+fy*20,h:z0+rnd(0.5,3.2),vx:-fx*520,vy:-fy*520,vh:0,life:0.16,max:0.16,col:i?'#e8d4a8':'#ffffff',size:rnd(1.4,2.2),g:0,sh:2});
-    if(p.id===NET.myId&&Math.random()<0.3)shake(0.06);}
+    const si=Math.floor((s.rT||0)*10.5/Math.PI);if(si!==s.stp){s.stp=si;if(si>0){const sd=si%2?-1:1,X=p.x+fx*20+rx*10*sd,Y=p.y+fy*20+ry*10*sd;   // เท้ากระแทกพื้น (หนัก ๆ แบบ The Thing)
+      burst(X,Y,ECOL.dust,6,90,0.6,3.4,{h:0.2,vh:[0.3,1.5],g:-0.2,smoke:true,grow:1.6});ring(X,Y,'#e8d4a8',34,0.25,0.1);eChunks(X,Y,0.2,3,140,4,0.14);SHAPES_Q.push({k:'decal',x:X,y:Y,col:'#000000',s1:0.8,life:1.8,op:0.6});
+      if(p.id===NET.myId)shake(2.5);}}}
   if(broken&&Math.random()<0.08)burst(p.x+rnd(-15,15),p.y+rnd(-15,15),ECOL.dust,1,15,0.8,1.6,{h:pz+rnd(0.5,2),g:3});
   // ----- Stand ใหญ่: อัลติบนฟ้า > BA ชาร์จ > โล่ -----
   let gop=0;const gp={t};
@@ -319,9 +381,15 @@ function earthEfx(ev){
     case 'epunch':{const s=eState(ev.id);s.pn={t:0,x,y,h:H,x2:ev.x2,y2:ev.y2};later(0.22,()=>{burst(ev.x2,ev.y2,ECOL.dust,8,120,0.4,2.5,{h:H+1.3,g:2});ring(ev.x2,ev.y2,'#ffe0a0',40,0.2,H+1.2);if(near)snd('hit',{x:ev.x2,y:ev.y2,vol:0.5});});if(near)snd('whoosh',{x,y,vol:0.35});return true;}
     case 'estdbreak':eDebris(x,y,H,30,260);shake(0.3);if(near)snd('break',ev);return true;
     case 'estdon':burst(x,y,ECOL.glow,20,140,0.8,2.6,{h:H+1.5,g:-0.5});ring(x,y,ECOL.glow,80,0.5,H+0.2);if(near)snd('buff',{x,y,vol:0.5});return true;
-    case 'erampon':smoke(x,y,0.3,10,ECOL.dust,1.2,9,100);eChunks(x,y,0.3,6,180,5,0.2);if(near)snd('whoosh',ev);return true;
+    case 'erampon':{const s=eState(ev.id);s.rT=0;s.rs=-1;s.stp=0;}smoke(x,y,0.3,10,ECOL.dust,1.2,9,100);eChunks(x,y,0.3,6,180,5,0.2);if(near)snd('whoosh',ev);return true;
     case 'erampoff':smoke(x,y,0.3,6,ECOL.dust,1,7,60);return true;
-    case 'eslam':eDebris(x,y,0.3,46,ev.r*1.8);eWave(x,y,0.2,ev.r*1.1);fxPlay('start/stone_eruption',{x,y,h:0,s:1.1});SHAPES_Q.push({k:'decal',x,y,col:'#000000',s1:ev.r/24,life:3,op:0.6});smoke(x,y,0.4,14,ECOL.dust,2,12,ev.r*0.8);shake(0.6);if(near)snd('boom',ev);return true;
+    // จบ Rampage: Stand ทุบสองหมัดลงพื้น (ท่าใน standRun) → หมัดถึงพื้น 0.06 วิ: ฝุ่น/เศษหินใหญ่ คลื่น 2 ชั้น หินแหลมพุ่งรอบวง รอยร้าวเรือง แสงวาบ จอสั่นตามระยะ
+    case 'eslam':{const s=eState(ev.id);s.rs=0;
+      later(0.06,()=>{eDebris(x,y,0.3,64,ev.r*2.2);ring(x,y,'#ffe0a0',ev.r*1.25,0.35,0.2);ring(x,y,ECOL.glow,ev.r*0.7,0.25,0.25);SHAPES_Q.push({k:'ringv',x,y,h:1.2,col:'#ffe6b8',s1:ev.r*S3*0.4,life:0.22,op:0.35});later(0.07,()=>{ring(x,y,ECOL.dust,ev.r*2,0.6,0.3);smoke(x,y,0.4,16,ECOL.dust,2.6,15,ev.r*1.4);});
+        fxPlay('start/stone_eruption',{x,y,h:0,s:1.45});dfCracks(x,y,0.06,ev.r*1.6,ECOL.glow,1.2);eSpikes(x,y,ev.r,11);
+        SHAPES_Q.push({k:'decal',x,y,col:'#000000',s1:ev.r/18,life:4,op:0.7});smoke(x,y,0.4,18,ECOL.dust,2.2,13,ev.r*0.9);eChunks(x,y,0.4,16,340,10,0.3);
+        burst(x,y,'#ffe6b0',14,ev.r*3.2,0.3,2,{h:0.8,vh:[0.5,3],g:1,sh:2,c2:'#b39a74'});FX.flashLight(x,y,1.5,'#ffcf6a',3.5,20,0.3);
+        const d=me?Math.hypot(me.x-x,me.y-y):1e9;shake(mine?9:d<300?7:d<700?3.5:d<1100?1.2:0);if(near){snd('boom',ev);snd('break',ev);}});return true;}
     case 'erhit':eDebris(x,y,H,12,170);ring(x,y,'#ffe0a0',60,0.25,H+0.8);shake(0.25);if(near)snd('hit',ev);return true;
     case 'eboost':{const r=new THREE.Mesh(rockGeo(1.6,1.4,1.6,0.15),eTMat('wall'));r.position.copy(eW(x,y,-1));r.castShadow=true;scene.add(r);eAnim({g:r,life:0.6,fn(a){const k=a.t/0.6;r.position.y=GY(x,y)-1+Math.sin(Math.min(1,k*2)*Math.PI/2)*1.6;r.rotation.y+=0.1;if(k>0.6)r.scale.setScalar(1-(k-0.6)/0.4);}});
       eDebris(x,y,0.3,18,150);if(near)snd('boom',{x,y,vol:0.5});return true;}

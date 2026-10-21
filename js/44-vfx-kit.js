@@ -35,7 +35,7 @@ function updateTrails(dt){
     if(!P.length){if(T.stop)TRAILS.splice(i,1);continue;}}
   for(let t=0;t<TRAILS.length&&t<TRMAX;t++){const T=TRAILS[t],P=T.pts,base=t*TRPTS*2;
     for(let j=0;j<TRPTS;j++){const v=base+j*2;
-      if(j>=P.length||P.length<2){for(const q of [v,v+1]){col[q*4+3]=0;pos[q*3]=pos[q*3+1]=pos[q*3+2]=0;}continue;}
+      if(j>=P.length||P.length<2){const e=P[P.length-1];for(const q of [v,v+1]){col[q*4+3]=0;pos[q*3]=e?e.x:0;pos[q*3+1]=e?e.y:0;pos[q*3+2]=e?e.z:0;}continue;}   // จุดว่างยุบไว้ที่ปลายหาง (เดิมไป (0,0,0) → เส้นจาง ๆ ลากไปกลางแมพ)
       const p=P[j],u=1-p.age/T.life,c=T.c1,c2=T.c2,a=u*u*p.wk*(j===P.length-1?0.4:1);
       let ax,ay,az,bx,by,bz;
       if(T.sweep){ax=p.x;ay=p.y;az=p.z;bx=p.x2;by=p.y2;bz=p.z2;}
