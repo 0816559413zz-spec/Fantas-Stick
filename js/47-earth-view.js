@@ -362,7 +362,7 @@ function syncEarth(v,dt,now){
     else if(w[7]!==o.hp&&o.mat){o.hp=w[7];for(const m of o.mats){if(!m.userData.c0)m.userData.c0=m.color.clone();m.color.copy(m.userData.c0).lerp(new THREE.Color('#5a4632'),1-w[7]/100);}burst(o.x,o.y,ECOL.dust,4,60,0.5,2,{h:rnd(0.5,o.h),g:4});}}
   for(const [id,o] of EV.es)if(!seen.has(id)){disposeObj(o.g);for(const m of o.mats)m.dispose();EV.es.delete(id);}
   // Tectonic Crush: Stand ใหญ่หลังกำแพง ออกแรงช้า ๆ (หินสั่น ฝุ่นออก) แล้วหนีบปังทีเดียว
-  for(let i=EV.crush.length-1;i>=0;i--){const C=EV.crush[i];C.t+=dt;c=Math.cos(C.a),sn=Math.sin(C.a),nx=-sn,ny=c;
+  for(let i=EV.crush.length-1;i>=0;i--){const C=EV.crush[i];C.t+=dt;const c=Math.cos(C.a),sn=Math.sin(C.a),nx=-sn,ny=c;
     const G=C.G;G.g.position.copy(eW(C.x+c*178,C.y+sn*178,-0.6));G.g.rotation.y=Math.atan2(-c,-sn);
     standOp(G,C.boom?Math.max(0,1-(C.t-C.boom)/0.5):Math.min(1,C.t/0.15));
     const strain=Math.min(1,C.t/E_CRUSH_PUSH),close=C.t<E_CRUSH_PUSH?0:Math.min(1,(C.t-E_CRUSH_PUSH)/E_CRUSH_SLIDE);
