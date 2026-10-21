@@ -59,7 +59,11 @@
    - Start with `"mode": "add"`, which plays on top of the old look.
    - Use `"replace"` only when the old code look should disappear and the user agrees.
 8. **Try it in the real game:** training mode, cast the skill. Or use the studio's 🎮 button, which sets a temporary `localStorage wd_fxbind` override.
-9. **Finish:**
+9. **Show the user in VFX Studio (required — user's standing request).** Contact sheets are for *you*; the user wants to *see* it too.
+   - Open the effect live in the Claude browser pane: `preview_start {name:"wizardduel"}`, then navigate to `http://localhost:8765/studio.html?fx=<group>/<name>` so it plays in the studio.
+   - Also send the best contact sheet (`shots/…png`) in chat, and tell the user (in Thai) how to open it themselves: double-click `VFX Studio.bat`, pick the effect in the list.
+   - Do this every time a look is new or changed, before asking for approval.
+10. **Finish:**
    - Run `node tools/check.js`, `node tools/fx-check.js` and `node tools/codemap.js`.
    - Update `HANDOFF.md` (latest changelog line) and `notes/CHANGELOG.md`, plus `notes/vfx-notes.md` when the user approves a look.
    - **Pull first**, check there are no `<<<<<<<` markers, then commit and push.
@@ -72,6 +76,7 @@ The user plans a skill's look in **`storyboard.html`** (double-click `Storyboard
 3. Contact sheet with one frame **in the middle of each shot** (`sheet=` = the mid times ÷ `dur`), `cam=side` so it matches the sketch's view. Compare shot by shot with the sketch and fix before showing.
 4. If the user asked for options, make 2–3 variants (`<name>_a/_b/_c`).
 5. Write back in `storyboard/boards.json`: board `fx` (e.g. `"earth/tectonic"`), `reply` (short simple Thai), `status:"review"`; per shot `result` (copy the matching contact-sheet crop/frame from `shots/` into `storyboard/img/` and give its path) + `note` (Thai, what you did / what you couldn't do). Then run `python tools/serve.py --sb-md`. The page shows the result next to the sketch.
+6. **Also open the result live in VFX Studio** for the user (§4 step 9) — the storyboard shows still frames, the studio shows how it really moves.
 
 ## 5. Format essentials (details in `FX-FORMAT.md`)
 ```json
