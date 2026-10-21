@@ -216,8 +216,8 @@ function earthWrathTick(p,dt){const W=p.wr;W.t+=dt;
 function earthWrathDrill(p){const W=p.wr;if(!W||W.nd<=0)return;W.nd--;const o=aimPoint(p,700),i=W.nd;
   emit({k:'efx',z:'ewdrill',x:Math.round(o.x),y:Math.round(o.y),h:0,x2:Math.round(p.x),y2:Math.round(p.y),n:i,id:p.id});
   G.strikes.push({x:o.x,y:o.y,t:0.35,fn(){
-    for(const t of foesIn(p.team,o.x,o.y,150,5))aoeHit(p,t,120);damageEnv(o.x,o.y,150,120*E_ENV,p.id,'rock',0.5);
-    earthMound(p,o.x,o.y,true);emit({k:'efx',z:'eaugboom',x:Math.round(o.x),y:Math.round(o.y),h:0,n:3,r:150});}});}
+    for(const t of foesIn(p.team,o.x,o.y,80,5))aoeHit(p,t,120);damageEnv(o.x,o.y,80,120*E_ENV,p.id,'rock',0.5);
+    earthMound(p,o.x,o.y,true);emit({k:'efx',z:'eaugboom',x:Math.round(o.x),y:Math.round(o.y),h:0,n:3,r:80});}});}   // รัศมีระเบิดสว่าน 150 → 80 (ผู้ใช้ 2026-10-21)
 function earthWrathEnd(p){const W=p.wr;p.wr=null;if(!W)return;
   emit({k:'efx',z:'ewend',x:Math.round(p.x),y:Math.round(p.y),h:p.z,id:p.id});}
 
