@@ -243,10 +243,10 @@ meetKey:134 myVoted:134 castVote:135 syncMeeting:141
 ## js/37-render-loop.js (76) — ลูปเรนเดอร์
 lastFrame:2 HSTOP:5 hitStop:6 FXSTUDIO:8 frame:9 _fpsAcc:18 _fpsN:18 render:19 renderGame:56
 
-## js/38-hud.js (356) — HUD
+## js/38-hud.js (360) — HUD
 rr:2 SLOTS:3 fmtTime:4
 §5 ชิ้นส่วน HUD ธีมทอง-น้ำเงิน
-HG:6 HG2:6 HN:6 diaPath:7 plate:9 frameBox:15 bossTrail:23 drawBossBar:24 spellDia:42 thinBar:71 drawHUD:76 raceRankClient:132 drawModeHUD:136 MM:173 drawMinimap:174 slotKey:247 mySlots:248 drawUlt:257 STATUS_ICO:276 SLOTS_IMP:277 BR_LOCK:278 CLUSTER:280 slotState:281 drawBottom:298 drawBoard:339
+HG:6 HG2:6 HN:6 diaPath:7 plate:9 frameBox:15 bossTrail:23 drawBossBar:24 spellDia:42 thinBar:71 drawHUD:76 raceRankClient:132 drawModeHUD:136 MM:173 drawMinimap:174 slotKey:247 mySlots:248 drawUlt:258 STATUS_ICO:277 SLOTS_IMP:278 BR_LOCK:279 CLUSTER:281 E_NEEDSTAND:282 slotState:283 drawBottom:302 drawBoard:343
 
 ## js/39-menu.js (271) — 
 myLook:5 myColor:5 myKit:5 myName:6 renderMyHouse:9
@@ -400,4 +400,4 @@ GRASS:52 GR_GLSL_V:53 GR_BEGIN:55 grassMat:79 grassBuild:93 _grBasic:107 grassBa
 WARM:11 WARM_FXDIR:12 WARM_COMMON:12 WARM_X:13 WARM_Y:13 warmKeep:15 warmCompile:21 WARM_SKIP:24 warmFx:25 warmFxEnd:33 warmGather:35 warmPaths:37 warmStep:39 warmTick:54
 §63 ภาพจากโค้ดของแต่ละสาย (เฟรมละฟังก์ชัน)
 
-(52 files, 12047 lines)
+(52 files, 12051 lines)

@@ -250,7 +250,8 @@ function mySlots(me){
   const L=SLOTS.map(s0=>{const s=[slotKey(s0[0]),...s0.slice(1)];return (s[3]>=1&&s[3]<=4?[s[0],{id:sp[s[3]-1].id,c:P.col},sp[s[3]-1].n,s[3]]:s[3]===-2?[s[0],{id:ult.id,c:P.col},ult.n,-2]:s[3]===0?[s[0],{id:'b_'+P.id+(P.id==='frost'&&me.fr&&me.fr[0]===0?'_m':''),c:P.col},PBASIC[k.path].n,0]:s[3]===-1&&hasIco('sh_'+P.id)?[s[0],{id:'sh_'+P.id,c:P.col},s[2],-1]:s[3]===5&&hasIco('dsh_'+P.id)?[s[0],{id:'dsh_'+P.id,c:P.col},s[2],5]:s);});
   // สายดิน: ช่อง BA ชาร์จ (กดค้างคลิกซ้าย) ต่อจากช่องยิง • Tectonic รอบหนีบได้ = ไอคอนบีบกำแพง
   if(P.id==='earth'){L.splice(1,0,['กดค้าง',{id:'cb_earth',c:P.col},'ทุบชาร์จ',-4]);
-    if(me.ea&&me.ea[8])for(const s of L)if(s[1]&&s[1].id==='tectoniccrush')s[1]={id:'tectoniccrush_sq',c:'#ffc27a'};}
+    if(me.ea&&me.ea[8])for(const s of L)if(s[1]&&s[1].id==='tectoniccrush')s[1]={id:'tectoniccrush_sq',c:'#ffc27a'};
+    if(me.ea&&me.ea[0]>0)for(const s of L)if(s[1]&&s[1].id==='b_earth')s[1]={id:'p_earth',c:P.col};}   // Stand แตก: คลิกซ้าย = ยิงหินเล็ก
   return L;
 }
 // เวทโบราณ (X) ตรงกลางล่างจอ แบบ Overwatch: วงกลมใหญ่ มีไอคอน เกจรอบวง เปอร์เซ็นต์ และเรืองแสงเมื่อพร้อม
@@ -278,6 +279,7 @@ const SLOTS_IMP=[['E','📜','ภารกิจ',-10],['R','📢','รายง
 const BR_LOCK={1:'fire',2:'stun',3:'push',4:'pull'};
 // ตำแหน่งช่องคาถา: เพชร 4 ทิศ (Q ซ้าย / E บน / R ขวา / F ล่าง) + แถวเล็ก (ยิง / โล่ / หลบ / เวทโบราณ / ไม้กวาด)
 const CLUSTER={1:[-1,0],2:[0,-1],3:[1,0],4:[0,1]};
+const E_NEEDSTAND={stonebreaker:1,tectoniccrush:1};
 function slotState(me,v,ci){
   const st={ratio:0,txt:'',ready:true,hl:false,dim:false};
   const locked=v&&v.mode==='br'&&BR_LOCK[ci]&&!(me.ul||'').split(',').includes(BR_LOCK[ci]);
@@ -292,6 +294,8 @@ function slotState(me,v,ci){
   if(ci>=1&&ci<=4&&me.fr&&me.fr[0]===1){const S=SPELL_LIST[getKit(me.id).ids[ci-1]];if(S&&S.melee){st.ratio=1;st.txt='🔒';st.ready=false;st.hl=false;}}
   // Tectonic Crush: กำแพงตั้งอยู่ กดซ้ำหนีบได้ → ช่องใช้ได้ + ไอคอนส้ม + เส้นบางรอบขอบ = เวลาที่ยังหนีบได้ (= คูลดาวน์ที่เหลือ)
   if(ci>=1&&ci<=4&&me.ea&&me.ea[8]&&!st.dim){const S=SPELL_LIST[getKit(me.id).ids[ci-1]];if(S&&S.id==='tectoniccrush'){st.ready=true;st.hl=false;st.ratio=0;st.txt='';st.bar=me.cd[ci]/me.cm[ci];}}
+  // สายดิน Stand แตก: สกิลที่ต้องมี Stand (Stonebreaker / Tectonic Crush) ล็อคจนกว่า Stand กลับ
+  if(ci>=1&&ci<=4&&me.ea&&me.ea[0]>0){const S=SPELL_LIST[getKit(me.id).ids[ci-1]];if(S&&E_NEEDSTAND[S.id]){st.ratio=1;st.txt='🔒';st.ready=false;st.hl=false;st.bar=0;}}
   if(locked){st.ratio=1;st.txt='🔒';st.ready=false;st.hl=false;}
   return st;
 }
