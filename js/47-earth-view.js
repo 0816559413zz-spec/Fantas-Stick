@@ -7,10 +7,11 @@
 // =====================================================================
 Object.assign(PCOL,{erock:'#c9a36a',eslab:'#d8b47a'});
 const ECOL={stone:'#8f7a5c',dark:'#5e4d38',dust:'#b39a74',glow:'#ffcf6a',mud:'#5b4128',sand:'#c9a878'};
-// โล่ Stand ใหญ่: ค่าเริ่มต้น = แบบเดิม (ผู้ใช้เลือก) • แบบตัวใหญ่เท่า Stand ตอน BA ชาร์จ ยังเก็บไว้: เปิดเกมด้วย ?eshield=big
+// โล่ Stand ใหญ่: ค่าเริ่มต้น = ตัวใหญ่เท่า Stand ตอน BA ชาร์จ (ผู้ใช้ 2026-10-21: ตัวเล็กไป) • ใหญ่ขึ้นอีกขั้น: เปิดเกมด้วย ?eshield=big
 // ท่ากัน (ผู้ใช้ 2026-10-21): อยู่หลังเรา ก้มตัวลงมาคลุม ไหล่/หัวสูงกว่าเราหน่อย • back = ฐานอยู่หลังเรากี่ px • side = เลื่อนไปขวา px • z = ฐานลอย(+)/จม(-) • lean = ก้ม (rad)
 // แขนกัน (R) พับศอกบังหน้า: fist = จุดกำปั้น [หน้า px, ขวา px, สูง] • elbow = ทิศศอก [ซ้าย, หน้า, ลง]
-const EGUARD_BIG=/[?&]eshield=big/.test(location.search),EGUARD=EGUARD_BIG?{sc:1.55,back:69,side:12,z:0.2,lean:0.8,fist:[14,12,1.85],elbow:[0.8,1,0.3]}:{sc:1.3,back:58,side:10,z:0.49,lean:0.8,fist:[14,12,1.75],elbow:[0.8,1,0.3]};
+// larm = แขน L (จาง) ง้างหมัดเก็บไว้ข้างเอว แบบนักสู้ [ต้นแขน x (+ = ศอกไปหลัง), กาง z, ศอก x] • lo = ท่อนล่างจางเป็นทราย [สูง (คูณ), ตำแหน่ง y] ให้หายเร็วขึ้น
+const EGUARD_BIG=/[?&]eshield=big/.test(location.search),EGUARD=EGUARD_BIG?{sc:1.8,back:80,side:14,z:0.05,lean:0.8,fist:[14,12,1.95],elbow:[0.8,1,0.3],larm:[-0.4,0.1,-1.97],lo:[0.5,1.37]}:{sc:1.55,back:69,side:12,z:0.2,lean:0.8,fist:[14,12,1.85],elbow:[0.8,1,0.3],larm:[-0.4,0.1,-1.97],lo:[0.5,1.37]};
 const CB={upX:-3.05,upC:-0.3,clasp:0.38,foC:-1.15,lnB:-0.32,sUp:-1.05,sCl:0.22,sFo:-0.15,sLn:1.0,lunge:16};   // ท่า BA ชาร์จ (ง้าง → ทุบ)
 var EV={st:new Map(),es:new Map(),anims:[],fog:null,crush:[],mark:null};
 const eW=(x,y,h)=>new THREE.Vector3(tx(x),(h||0)+GY(x,y),tz(y));
@@ -30,9 +31,9 @@ function eTex(kind){if(ETEX[kind])return ETEX[kind];const c=document.createEleme
   x.globalAlpha=0.85;x.strokeStyle=P[3];x.lineWidth=1.4;for(let i=0;i<(kind==='mud'?0:4);i++){x.beginPath();let px=rnd(10,118),py=rnd(10,118);x.moveTo(px,py);for(let j=0;j<5;j++){px+=rnd(-18,18);py+=rnd(-18,18);x.lineTo(px,py);}x.stroke();}
   if(kind!=='pillar'&&kind!=='mud'&&kind!=='cliff'){x.globalAlpha=0.55;x.strokeStyle=P[3];x.lineWidth=7;x.strokeRect(0,0,128,128);x.globalAlpha=0.3;x.strokeStyle=P[2];x.lineWidth=2;x.strokeRect(6,6,116,116);}
   x.globalAlpha=1;const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;t.userData.keep=true;ETEX[kind]=t;return t;}
-// ไล่ความโปร่ง: บนทึบ → ล่างใส (ส่วนล่างของ Stand จางเป็นทราย)
-function eFadeTex(){if(ETEX.fade)return ETEX.fade;const c=document.createElement('canvas');c.width=4;c.height=64;const x=c.getContext('2d'),g=x.createLinearGradient(0,0,0,64);
-  g.addColorStop(0,'#ffffff');g.addColorStop(0.35,'#ffffff');g.addColorStop(1,'#000000');x.fillStyle=g;x.fillRect(0,0,4,64);const t=new THREE.CanvasTexture(c);t.userData.keep=true;ETEX.fade=t;return t;}
+// ไล่ความโปร่ง: บนทึบ → ล่างใส (ส่วนล่างของ Stand จางเป็นทราย) • k = แบบจางแรง (ท่ากันโล่: เริ่มจางทันที หายก่อนถึงล่าง)
+function eFadeTex(k){const n=k?'fade2':'fade';if(ETEX[n])return ETEX[n];const c=document.createElement('canvas');c.width=4;c.height=64;const x=c.getContext('2d'),g=x.createLinearGradient(0,0,0,64);
+  if(k){g.addColorStop(0,'#c8c8c8');g.addColorStop(0.2,'#808080');g.addColorStop(0.65,'#000000');}else{g.addColorStop(0,'#ffffff');g.addColorStop(0.35,'#ffffff');}g.addColorStop(1,'#000000');x.fillStyle=g;x.fillRect(0,0,4,64);const t=new THREE.CanvasTexture(c);t.userData.keep=true;ETEX[n]=t;return t;}
 function eMat(col,op){return new THREE.MeshStandardMaterial({color:col||ECOL.stone,roughness:0.95,metalness:0,flatShading:true,emissive:'#24180a',emissiveIntensity:0.45,transparent:op!==undefined,opacity:op===undefined?1:op});}
 function eTMat(kind,col){return new THREE.MeshStandardMaterial({map:eTex(kind),color:col||'#ffffff',roughness:0.92,metalness:0,flatShading:true});}
 function rockGeo(w,h,d,j,seg){const g=new THREE.BoxGeometry(w,h,d,seg||2,seg||2,seg||2),P=g.attributes.position,k=j===undefined?0.12:j,m=new Map();
@@ -128,8 +129,9 @@ function standPose(S,k){const R=S.R,L=S.L;
     S.head.rotation.y=-tw*0.6;   // หัวยังมองเป้า
     R.up.rotation.x=lerp(lerp(-0.45,-0.85,w),-1.42,p)*(1-0.35*rc);R.up.rotation.z=lerp(0.4*w,-0.18,p)*keep;R.fo.rotation.x=lerp(lerp(-0.5,-1.55,w),-0.08,p)+(-0.7*rc);
     L.up.rotation.x=lerp(lerp(-0.35,-1.15,w),-0.45,p)*keep;L.up.rotation.z=lerp(-0.2*w,0.35,p)*keep;L.fo.rotation.x=lerp(lerp(-0.6,-1.35,w),-1.0,p);}
-  if(k.guard){   // ท่ากัน: Stand ใหญ่ก้มตัวลงคลุมเราจากข้างหลัง • แขน R พับมาบังหน้า (IK ใน earthFX) • แขน L ห้อยข้างตัว จางครึ่งหนึ่ง
-    S.body.rotation.x=k.gLean||0.62;L.up.rotation.x=-0.55;L.up.rotation.z=-0.3;L.fo.rotation.x=-0.75;}
+  if(S.big){const q=k.guard&&EGUARD.lo;S.lo.scale.y=q?q[0]:1;S.lo.position.y=q?q[1]:1.15;S.mats[2].alphaMap=eFadeTex(q?1:0);}   // ท่อนล่างจาง: ท่ากันจางแรงกว่า
+  if(k.guard){   // ท่ากัน: Stand ใหญ่ก้มตัวลงคลุมเราจากข้างหลัง • แขน R พับมาบังหน้า (IK ใน earthFX) • แขน L (จางครึ่ง) ง้างหมัดเก็บข้างเอว
+    const la=EGUARD.larm;S.body.rotation.x=k.gLean||0.62;L.up.rotation.x=la[0];L.up.rotation.z=la[1];L.fo.rotation.x=la[2];}
   if(k.hold){for(const [A,s] of [[R,1],[L,-1]]){A.up.rotation.x=-1.4;A.up.rotation.z=-s*0.3;A.fo.rotation.x=-0.35;}}
   // BA ชาร์จ: raise = ยกสองมือขึ้นเหนือหัว (กำปั้นชิดกัน) • cock = ง้างไปหลังหัว + เอนหลัง • slam = ฟาดลงพื้น ตัวโน้มไปหน้า
   if(k.slam!==undefined){const v=k.slam,e=v*v;for(const [A,s] of [[R,1],[L,-1]]){A.up.rotation.x=lerp(CB.upX+CB.upC,CB.sUp,e);A.up.rotation.z=-s*lerp(CB.clasp,CB.sCl,e);A.fo.rotation.x=lerp(CB.foC,CB.sFo,e);}S.body.rotation.x=lerp(CB.lnB,CB.sLn,e);S.head.rotation.x=lerp(-0.35,0.25,e);}
