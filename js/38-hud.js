@@ -56,7 +56,10 @@ function spellDia(x,y,r,ic,key,name,st){
     cx.save();diaPath(x,y,r);cx.clip();
     cx.fillStyle='rgba(0,0,0,0.62)';cx.beginPath();cx.moveTo(x,y);cx.arc(x,y,r*1.5,-Math.PI/2,-Math.PI/2+Math.PI*2*st.ratio);cx.closePath();cx.fill();cx.restore();
   }
-  if(st.bar>0){const w=r*1.1,by=y+r*0.34;cx.fillStyle='rgba(0,0,0,0.78)';cx.fillRect(x-w/2-1.5,by-1.5,w+3,8);cx.fillStyle='#ffb46a';cx.fillRect(x-w/2,by,w*Math.min(1,st.bar),5);}   // แถบเวลา (เช่น Tectonic รอหนีบ)
+  if(st.bar>0){const R=r+5,k=Math.min(1,st.bar),P=[[0,-R],[R,0],[0,R],[-R,0],[0,-R]];   // เวลาที่เหลือ (เช่น Tectonic รอหนีบ) = เส้นบางวิ่งรอบขอบช่อง เริ่มจากมุมบน หมุนตามเข็ม
+    cx.lineWidth=2;cx.strokeStyle='rgba(255,194,122,0.18)';diaPath(x,y,R);cx.stroke();
+    cx.save();cx.lineWidth=3;cx.lineCap='round';cx.lineJoin='round';cx.strokeStyle='#ffc27a';cx.shadowColor='#ff9a4a';cx.shadowBlur=6;cx.beginPath();cx.moveTo(x,y-R);
+    let q=k*4;for(let i=0;i<4&&q>0;i++){const f=Math.min(1,q);q-=1;cx.lineTo(x+P[i][0]+(P[i+1][0]-P[i][0])*f,y+P[i][1]+(P[i+1][1]-P[i][1])*f);}cx.stroke();cx.restore();}
   if(st.txt){cx.font='600 16px Kanit,sans-serif';cx.fillStyle='rgba(0,0,0,0.7)';cx.fillText(st.txt,x+1,y+7);cx.fillStyle='#fff';cx.fillText(st.txt,x,y+6);}
   cx.font='600 10px Kanit,sans-serif';
   const kw=Math.max(18,cx.measureText(key).width+10),ky=y+r-4;
@@ -287,8 +290,8 @@ function slotState(me,v,ci){
   const flyOk=v&&(v.mode==='quid'||v.mode==='race');
   if(me.fl&&ci!==-3&&!flyOk){st.dim=true;st.txt=st.txt||'🚫';}
   if(ci>=1&&ci<=4&&me.fr&&me.fr[0]===1){const S=SPELL_LIST[getKit(me.id).ids[ci-1]];if(S&&S.melee){st.ratio=1;st.txt='🔒';st.ready=false;st.hl=false;}}
-  // Tectonic Crush: กำแพงตั้งอยู่ กดซ้ำหนีบได้ → ช่องสว่าง (ใช้ได้) + แถบเวลาที่ยังหนีบได้ (= คูลดาวน์ที่เหลือ)
-  if(ci>=1&&ci<=4&&me.ea&&me.ea[8]&&!st.dim){const S=SPELL_LIST[getKit(me.id).ids[ci-1]];if(S&&S.id==='tectoniccrush'){st.ready=true;st.hl=true;st.ratio=0;st.txt='';st.bar=me.cd[ci]/me.cm[ci];}}
+  // Tectonic Crush: กำแพงตั้งอยู่ กดซ้ำหนีบได้ → ช่องใช้ได้ + ไอคอนส้ม + เส้นบางรอบขอบ = เวลาที่ยังหนีบได้ (= คูลดาวน์ที่เหลือ)
+  if(ci>=1&&ci<=4&&me.ea&&me.ea[8]&&!st.dim){const S=SPELL_LIST[getKit(me.id).ids[ci-1]];if(S&&S.id==='tectoniccrush'){st.ready=true;st.hl=false;st.ratio=0;st.txt='';st.bar=me.cd[ci]/me.cm[ci];}}
   if(locked){st.ratio=1;st.txt='🔒';st.ready=false;st.hl=false;}
   return st;
 }
@@ -318,8 +321,8 @@ function drawBottom(me,v){
   const hr=me.hp/me.mh;
   thinBar(bx,ey-12,bw,12,hr,hr>0.3?'#6fd57f':'#ff6a6a',hr>0.3?'#2c8a45':'#a51e1e');
   cx.textAlign='right';cx.font='600 11px Kanit,sans-serif';cx.fillStyle='#fff';cx.fillText(`${me.hp} / ${me.mh}`,bx+bw-5,ey-2.5);
-  if(me.ea)eShieldSegs(bx,ey+5,bw*0.72,me.ea);else thinBar(bx,ey+6,bw*0.72,5,me.se/100,'#9ff0ff','#2d8fc0');   // สายดิน: แถบโล่แบบช่องเล็กติดกัน ไม่มีตัวหนังสือ
-  {let sx=bx;cx.textAlign='left';cx.font='15px sans-serif';for(const [bit,ic] of STATUS_ICO)if((me.fm|0)&bit){cx.fillText(ic,sx,ey+30);sx+=20;}}
+  if(me.ea){eShieldNum(bx,ey+21,me.ea);eShieldSegs(bx,ey+26,bw*0.72,me.ea);}else thinBar(bx,ey+6,bw*0.72,5,me.se/100,'#9ff0ff','#2d8fc0');   // สายดิน: ตัวเลข HP โล่ (เหนือแถบ) + แถบช่องเล็กติดกัน แบบ Reinhardt
+  {let sx=bx;cx.textAlign='left';cx.font='15px sans-serif';for(const [bit,ic] of STATUS_ICO)if((me.fm|0)&bit){cx.fillText(ic,sx,me.ea?ey+53:ey+30);sx+=20;}}
   if(!me.ea){cx.textAlign='left';cx.font='10px Kanit,sans-serif';cx.fillStyle='#7f8aa6';cx.fillText('โล่',bx+bw*0.72+8,ey+12);}
   // มุมขวาล่าง: กลุ่มเพชรคาถา
   const c0x=SW-128,c0y=SH-122,d=47,r=31;
