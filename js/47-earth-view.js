@@ -127,11 +127,12 @@ function standPose(S,k){const R=S.R,L=S.L;
   R.up.rotation.set(0,0,0);L.up.rotation.set(0,0,0);R.fo.rotation.set(0,0,0);L.fo.rotation.set(0,0,0);S.body.rotation.set(k.lean||0,k.twist||0,0);S.head.rotation.set(0,0,0);let dip=0;
   // ต่อยแบบธรรมชาติ: w = ง้าง (บิดสะโพก/ไหล่ขวาไปหลัง ข้อศอกพับ แขนซ้ายยกกันหน้า) • punch = หมุนตัวส่งหมัดเร็ว ๆ (ไหล่เข้า ตัวโน้ม ย่อตัว) • rec = ผ่อนกลับ
   // G = ต่อยเต็มแรง (Stonebreaker): บิดตัวมากขึ้น แขนเหยียดตรงสุด ไหล่ดันไปหน้า แขนซ้ายดึงกลับเอว
-  if(k.punch!==undefined){const w=k.punchW===undefined?1:k.punchW,p=k.punch||0,rc=k.rec||0,keep=1-0.55*rc,G=k.pk||0;
-    const tw=lerp((0.6+PK.tw0*G)*w,-0.55-PK.tw1*G,p)*keep;S.body.rotation.y=tw;S.body.rotation.z=lerp((0.08+0.06*G)*w,-0.16-0.08*G,p)*keep;S.body.rotation.x=(0.04+(0.06-0.1*G)*w+(0.22+PK.ln*G)*p)*keep;dip=(0.06*w+(0.16+0.1*G)*p)*keep;
+  // mir = ต่อยมือซ้าย: สลับบทแขน + กลับด้านซ้าย-ขวา (หมุนแกน y/z กลับเครื่องหมาย) — BA สลับมือขวา/ซ้ายทุกหมัด
+  if(k.punch!==undefined){const w=k.punchW===undefined?1:k.punchW,p=k.punch||0,rc=k.rec||0,keep=1-0.55*rc,G=k.pk||0,M=k.mir?-1:1,R=k.mir?S.L:S.R,L=k.mir?S.R:S.L;
+    const tw=lerp((0.6+PK.tw0*G)*w,-0.55-PK.tw1*G,p)*keep*M;S.body.rotation.y=tw;S.body.rotation.z=lerp((0.08+0.06*G)*w,-0.16-0.08*G,p)*keep*M;S.body.rotation.x=(0.04+(0.06-0.1*G)*w+(0.22+PK.ln*G)*p)*keep;dip=(0.06*w+(0.16+0.1*G)*p)*keep;
     S.head.rotation.y=-tw*0.6;   // หัวยังมองเป้า
-    R.up.rotation.x=lerp(lerp(-0.45,-0.85+0.5*G,w),-1.42-PK.ux*G,p)*(1-0.35*rc);R.up.rotation.z=lerp((0.4+0.3*G)*w,-0.18+PK.uz*G,p)*keep;R.up.rotation.y=PK.uy*G*p*keep;R.fo.rotation.x=lerp(lerp(-0.5,-1.55-0.4*G,w),-0.08+0.08*G,p)+(-0.7*rc);
-    L.up.rotation.x=lerp(lerp(-0.35,-1.15,w),-0.45+0.7*G,p)*keep;L.up.rotation.z=lerp(-0.2*w,0.35-0.15*G,p)*keep;L.fo.rotation.x=lerp(lerp(-0.6,-1.35,w),-1.0-0.7*G,p);}
+    R.up.rotation.x=lerp(lerp(-0.45,-0.85+0.5*G,w),-1.42-PK.ux*G,p)*(1-0.35*rc);R.up.rotation.z=lerp((0.4+0.3*G)*w,-0.18+PK.uz*G,p)*keep*M;R.up.rotation.y=PK.uy*G*p*keep*M;R.fo.rotation.x=lerp(lerp(-0.5,-1.55-0.4*G,w),-0.08+0.08*G,p)+(-0.7*rc);
+    L.up.rotation.x=lerp(lerp(-0.35,-1.15,w),-0.45+0.7*G,p)*keep;L.up.rotation.z=lerp(-0.2*w,0.35-0.15*G,p)*keep*M;L.fo.rotation.x=lerp(lerp(-0.6,-1.35,w),-1.0-0.7*G,p);}
   if(S.big){const q=k.guard&&EGUARD.lo;S.lo.scale.y=q?q[0]:1;S.lo.position.y=q?q[1]:1.15;S.mats[2].alphaMap=eFadeTex(q?1:0);}   // ท่อนล่างจาง: ท่ากันจางแรงกว่า
   if(k.guard){   // ท่ากัน: Stand ใหญ่ก้มตัวลงคลุมเราจากข้างหลัง • แขน R พับมาบังหน้า (IK ใน earthFX) • แขน L (จางครึ่ง) ง้างหมัดเก็บข้างเอว
     const la=EGUARD.larm;S.body.rotation.x=k.gLean||0.62;L.up.rotation.x=la[0];L.up.rotation.z=la[1];L.fo.rotation.x=la[2];}
@@ -188,6 +189,7 @@ function eWarnAt(g,x,y,r,k){g.visible=true;g.position.copy(eW(x,y,0));g.scale.se
 function earthFX(o,p,pz,now,dt){
   const A=p.ea;if(!A){if(EV.st.has(p.id)){const s=EV.st.get(p.id);for(const k of ['stand','giant','cgiant'])if(s[k])standOp(s[k],0);if(s.drill)s.drill.visible=false;for(const d of s.drills)d.visible=false;if(s.warn)s.warn.visible=false;if(s.augW)s.augW.visible=false;if(s.pil)s.pil.visible=false;}return;}
   const s=eState(p.id),S=eStandOf(s),G2=eGiantOf(s),t=now/1000,fx=Math.cos(p.a),fy=Math.sin(p.a),rx=-fy,ry=fx,broken=A[0]>0,z0=(pz||0)-GY(p.x,p.y);   // ความสูงที่วาดจริงเหนือพื้น (snapshot ไม่มี p.z)
+  if(!ETEX.slabM&&!EV.sw){EV.sw=1;setTimeout(()=>{const M=eSlabMats();if(typeof gl!=='undefined'&&gl.initTexture)for(const t of [M.face.map,M.face.normalMap,M.face.emissiveMap])gl.initTexture(t);},300);}   // สร้างลายแผ่นหินไว้ก่อน (ไม่กระตุกตอนใช้ท่า)
   if(o.shield)o.shield.visible=false;   // โล่ = Stand ใหญ่ เอามือบังหน้า (ไม่ใช้โล่ฟอง)
   // ----- Stand เล็ก: หมัด / ขี่ตอน Rampage -----
   let op=0,pose={t};
@@ -196,7 +198,7 @@ function earthFX(o,p,pz,now,dt){
     // 0–0.18 โผล่ + ง้าง • 0.18–0.29 ส่งหมัด (เร็ว ออกแรงตอนท้าย) • 0.29–0.65 ค้างแล้วผ่อนกลับ • จางหายถึง 0.75
     const ez=x=>x*x*(3-2*x),w=ez(Math.min(1,k/0.18)),pu=k<0.18?0:1-Math.pow(1-Math.min(1,(k-0.18)/0.11),3),rc=k<0.29?0:ez(Math.min(1,(k-0.29)/0.36));
     op=k<0.15?k/0.15:k<0.5?1:Math.max(0,1-(k-0.5)/0.25);
-    const lu=(0.22+PK.lu*(P.pk||0))*pu*(1-0.5*rc)-0.06*w*(1-pu),bx=P.x+(P.x2-P.x)*lu,by=P.y+(P.y2-P.y)*lu;S.g.position.copy(eW(bx,by,P.h+0.15));S.g.rotation.y=eYaw(P.x,P.y,P.x2,P.y2);pose={t,punchW:w,punch:pu,rec:rc,pk:P.pk||0};
+    const lu=(0.22+PK.lu*(P.pk||0))*pu*(1-0.5*rc)-0.06*w*(1-pu),bx=P.x+(P.x2-P.x)*lu,by=P.y+(P.y2-P.y)*lu;S.g.position.copy(eW(bx,by,P.h+0.15));S.g.rotation.y=eYaw(P.x,P.y,P.x2,P.y2);pose={t,punchW:w,punch:pu,rec:rc,pk:P.pk||0,mir:!!P.mir};
     if(k>0.76)s.pn=null;}
   else if(A[1]||s.rs>=0){   // Rampage: วิ่ง (ท่าใน standRun) • จบ = ชูสองหมัดแล้วทุบพื้น (s.rs เริ่มจาก event eslam)
     const sm=s.rs>=0;if(!sm){s.rT=(s.rT||0)+dt;s.ra=p.a;}else{s.rs+=dt;if(s.rs>0.55)s.rs=-1;}const a=s.ra===undefined?p.a:s.ra;
@@ -318,14 +320,82 @@ function earthProjMesh(o,t){let m;
   o.g.add(m);o.fileModel=m;o.halo.material=glowMat(ECOL.dust,0.4);}
 // แผ่นหินเหลี่ยม Stonebreaker (cr = มีรอยร้าวเรืองจากหมัด)
 // SLAB = ขนาดแผ่น (กว้าง สูง หนา) — แบนใหญ่ • ชนจริงใช้รัศมีบน host (PDEF.eslab.r) ไม่ได้ขึ้นกับ mesh
-const SLAB={w:5.2,h:2.7,d:0.36};   // ความหนา: ผู้ใช้ "บางไป แต่ไม่หนาเท่าอันแรก (0.42)"
-function makeSlab(cr){const m=new THREE.Group();const b=new THREE.Mesh(rockGeo(SLAB.w,SLAB.h,SLAB.d,0.05,3),eTMat('wall','#c8b08a'));b.castShadow=true;m.add(b);
+const SLAB={w:5.2,h:2.7,d:0.58};   // ความหนา: 0.42 → 0.3 (บางไป) → 0.36 → ผู้ใช้ขอหนาขึ้นอีก = 0.58
+function makeSlab(cr){const m=new THREE.Group(),M=eSlabMats(),g=eSlabGeo(),G=g.groups,g2=g.clone();g.clearGroups();g2.clearGroups();   // 2 mesh (หน้า/ขอบ) แทน material array — โค้ดลบ projectile อ่าน material.userData ตรง ๆ
+  g.setDrawRange(G[4].start,G[4].count+G[5].count);g2.setDrawRange(0,G[4].start);for(const [q,mt] of [[g,M.face],[g2,M.side]]){const b=new THREE.Mesh(q,mt);b.castShadow=b.receiveShadow=true;m.add(b);}
   if(cr)slabCracks(m);
   return m;}
+// ทรงแผ่น: กล่องแบ่งถี่ใกล้ขอบ → ลบมุมขอบ (บิ่นลึกบางจุด) + หน้านูนกลางนิด ๆ + ผิวขรุขระ • uv คิดจากตำแหน่งจริง (ลายไม่ยืด) ขอบข้างใช้ uv หน่วยโลก (ลายซ้ำ)
+function eSlabGeo(){const {w,h,d}=SLAB,g=new THREE.BoxGeometry(w,h,d,12,7,4),P=g.attributes.position,N=g.attributes.normal,U=g.attributes.uv,m=new Map(),hw=w/2,hh=h/2,hd=d/2,f=t=>Math.sin(t*Math.PI/2);
+  for(let i=0;i<P.count;i++){const X=P.getX(i)/hw,Y=P.getY(i)/hh,Z=P.getZ(i)/hd,key=[X,Y,Z].map(v=>v.toFixed(3)).join();let o=m.get(key);
+    if(!o){const ex=Math.abs(X)>0.999,ey=Math.abs(Y)>0.999,ez=Math.abs(Z)>0.999;let x=f(X)*hw,y=f(Y)*hh,z=f(Z)*hd;
+      if(ex+ey+ez>=2){const b=rnd(0.035,0.065)*(Math.random()<0.2?1.3:1);if(ex)x-=Math.sign(X)*b;if(ey)y-=Math.sign(Y)*b;if(ez)z-=Math.sign(Z)*b*0.85;}   // ลบมุม/บิ่น
+      if(ez)z+=Math.sign(Z)*(0.05*(1-X*X)*(1-Y*Y)+rnd(-0.012,0.012));   // หน้านูน + ขรุขระ
+      if(ex)x+=rnd(-0.03,0.03);if(ey)y+=rnd(-0.03,0.03);   // ขอบไม่ตรงเป๊ะ
+      o=[x,y,z];m.set(key,o);}
+    P.setXYZ(i,o[0],o[1],o[2]);const nx=N.getX(i),ny=N.getY(i),nz=N.getZ(i);
+    if(nz)U.setXY(i,0.5+nz*o[0]/w,0.5+o[1]/h);else if(nx)U.setXY(i,-nx*o[2]/1.4,o[1]/1.4);else U.setXY(i,o[0]/1.4,-ny*o[2]/1.4);}
+  g.computeVertexNormals();return g;}
+// ลายแผ่นหิน ความละเอียดสูง (สี 2048×1024 • นูน/เรือง 1024×512) — ชั้นตะกอน + เม็ดหิน + หลุม + รอยบิ่น + รอยร้าว (บางเส้นมีแร่เรืองทอง ECOL.glow) + ขอบเข้ม → normalMap จากความสูง
+function eSlabMats(){if(ETEX.slabM)return ETEX.slabM;
+  const W=2048,H=1024,w=1024,h=512,cv=(a,b)=>{const c=document.createElement('canvas');c.width=a;c.height=b;return c;};
+  const hs=(i,j)=>{let n=(Math.imul(i,374761393)+Math.imul(j,668265263))|0;n=Math.imul(n^(n>>>13),1274126177);return ((n^(n>>>16))>>>0)/4294967296;};
+  const vn=(x,y)=>{const i=Math.floor(x),j=Math.floor(y),fx=x-i,fy=y-j,u=fx*fx*(3-2*fx),v=fy*fy*(3-2*fy),a=hs(i,j),b=hs(i+1,j),c=hs(i,j+1),e=hs(i+1,j+1);return a+(b-a)*u+(c-a)*v+(a-b-c+e)*u*v;};
+  const fbm=(x,y,o)=>{let s=0,a=0.5;for(let k=0;k<o;k++){s+=a*vn(x,y);a*=0.5;x*=2.03;y*=2.03;}return s;};
+  // 1) ฐาน: noise + ชั้นหิน (ทีละพิกเซล ที่ 1024×512)
+  const cb=cv(w,h),xb=cb.getContext('2d'),ib=xb.createImageData(w,h),Hf=new Float32Array(w*h),D=[[58,44,30],[112,92,66],[150,126,92],[196,172,132],[222,202,160]];
+  const sd=rnd(0,500);
+  for(let py=0;py<h;py++)for(let px=0;px<w;px++){const nx=px/h*3+sd,ny=py/h*3,wp=fbm(nx*0.6,ny*0.6,3),yy=py/h*8+wp*2.6+fbm(nx*0.25,7,2)*2,bi=Math.floor(yy),bf=yy-bi;
+    const bt=hs(bi,91)-0.5,gr=fbm(nx*7,ny*7,4),lo=fbm(nx*1.4+9,ny*1.4,4),lip=bf<0.08?bf/0.08:1;   // lip = ขอบชั้น (สันเล็ก ๆ)
+    let t=0.22+0.55*lo+0.28*bt+0.22*(gr-0.5);t=clamp(t*(0.82+0.18*lip),0,0.999);const k=t*4,ki=Math.floor(k),kf=k-ki,A=D[ki],B=D[ki+1];
+    const ex=Math.min(px,w-1-px)/h,ey=Math.min(py,h-1-py)/h,ed=Math.min(1,Math.min(ex,ey)/0.05),dk=0.6+0.4*ed*ed*(3-2*ed),q=(py*w+px)*4;   // ขอบเข้ม
+    for(let c=0;c<3;c++)ib.data[q+c]=(A[c]+(B[c]-A[c])*kf)*dk;ib.data[q+3]=255;
+    Hf[py*w+px]=0.5*gr+0.35*lo+0.25*lip+0.1*bt;}
+  xb.putImageData(ib,0,0);
+  const cc=cv(W,H),x=cc.getContext('2d'),cbm=cv(w,h),xh=cbm.getContext('2d'),ce=cv(w,h),xe=ce.getContext('2d');
+  x.drawImage(cb,0,0,W,H);xe.fillStyle='#000';xe.fillRect(0,0,w,h);
+  const ih=xh.createImageData(w,h);for(let i=0;i<w*h;i++){const v=clamp(Hf[i]*170,0,255);ih.data[i*4]=ih.data[i*4+1]=ih.data[i*4+2]=v;ih.data[i*4+3]=255;}xh.putImageData(ih,0,0);
+  // 2) เม็ดหิน + หลุมเล็ก
+  for(let i=0;i<22000;i++){x.globalAlpha=rnd(0.08,0.32);x.fillStyle=Math.random()<0.5?'#2e2216':'#e6d2a8';const s=rnd(1,3.2);x.fillRect(rnd(0,W),rnd(0,H),s,s);}
+  for(let i=0;i<520;i++){const u=rnd(0,1),v=rnd(0,1),r=rnd(1.5,5);x.globalAlpha=rnd(0.35,0.6);x.fillStyle='#24190e';x.beginPath();x.ellipse(u*W,v*H,r,r*rnd(0.5,0.9),rnd(0,3),0,6.283);x.fill();
+    x.globalAlpha=0.25;x.fillStyle='#f0dcb0';x.beginPath();x.ellipse(u*W+r*0.5,v*H+r*0.7,r*0.7,r*0.35,0,0,6.283);x.fill();xh.globalAlpha=0.7;xh.fillStyle='#000';xh.beginPath();xh.arc(u*w,v*h,r/2,0,6.283);xh.fill();}
+  // 3) รอยบิ่น (เน้นใกล้ขอบ): เนื้อหินใหม่สีอ่อน + เงาเข้มขอบบน • ในแผนที่นูน = บุ๋ม
+  for(let i=0;i<70;i++){const nr=Math.random()<0.65,s=Math.floor(rnd(0,4));let u=rnd(0.03,0.97),v=rnd(0.05,0.95);if(nr){if(s===0)u=rnd(0.005,0.05);else if(s===1)u=rnd(0.95,0.995);else if(s===2)v=rnd(0.01,0.08);else v=rnd(0.92,0.99);}
+    const r=rnd(0.008,nr?0.03:0.018),n=Math.floor(rnd(5,8)),pt=[];for(let k=0;k<n;k++){const a=k/n*6.283+rnd(-0.3,0.3),rr=r*rnd(0.55,1.25);pt.push([u+Math.cos(a)*rr*0.52,v+Math.sin(a)*rr]);}
+    const poly=(c,sx,sy)=>{c.beginPath();pt.forEach((p,k)=>k?c.lineTo(p[0]*sx,p[1]*sy):c.moveTo(p[0]*sx,p[1]*sy));c.closePath();};
+    x.globalAlpha=rnd(0.4,0.7);x.fillStyle=Math.random()<0.5?'#cbb38a':'#a88e68';poly(x,W,H);x.fill();x.globalAlpha=0.7;x.strokeStyle='#2a1d10';x.lineWidth=2;x.stroke();
+    xh.globalAlpha=0.55;xh.fillStyle='#202020';poly(xh,w,h);xh.fill();}
+  // 4) รอยร้าวแตกกิ่ง (ร่อง + ขอบล่างรับแสง) • ~40% มีแร่ทองเรืองอยู่ในร่อง
+  const crack=(u,v,a,L,wd,dp,gl)=>{const pt=[[u,v]];let cu=u,cv2=v;const n=Math.floor(rnd(5,10));for(let k=0;k<n;k++){a+=rnd(-0.6,0.6);cu+=Math.cos(a)*L/n*0.52;cv2+=Math.sin(a)*L/n;pt.push([cu,cv2]);
+      if(dp<2&&Math.random()<0.22)crack(cu,cv2,a+rnd(-1.2,1.2),L*rnd(0.3,0.55),wd*0.6,dp+1,gl);}
+    const ln=(c,sx,sy,ox,oy)=>{c.beginPath();pt.forEach((p,k)=>k?c.lineTo(p[0]*sx+ox,p[1]*sy+oy):c.moveTo(p[0]*sx+ox,p[1]*sy+oy));c.stroke();};
+    x.lineJoin=xh.lineJoin=xe.lineJoin='round';x.globalAlpha=0.3;x.strokeStyle='#f2deb4';x.lineWidth=wd*W*0.6;ln(x,W,H,1.5,2);
+    x.globalAlpha=0.9;x.strokeStyle='#1c130a';x.lineWidth=wd*W;ln(x,W,H,0,0);xh.globalAlpha=0.9;xh.strokeStyle='#000';xh.lineWidth=wd*w*1.4;ln(xh,w,h,0,0);
+    if(gl){x.globalAlpha=0.55;x.strokeStyle='#ffc45a';x.lineWidth=wd*W*0.35;ln(x,W,H,0,0);xe.globalAlpha=0.9;xe.shadowColor=ECOL.glow;xe.shadowBlur=9;xe.strokeStyle=ECOL.glow;xe.lineWidth=Math.max(1,wd*w*0.5);ln(xe,w,h,0,0);xe.shadowBlur=0;}};
+  for(let i=0;i<16;i++)crack(rnd(0,1),rnd(0,1),rnd(0,6.283),rnd(0.12,0.4),rnd(0.0016,0.0032),0,Math.random()<0.4);
+  // สายแร่บาง ๆ วิ่งตามแนวชั้น (เรืองจาง)
+  for(let i=0;i<5;i++){let u=rnd(-0.05,0.2),v=rnd(0.1,0.9);x.beginPath();xe.beginPath();x.moveTo(u*W,v*H);xe.moveTo(u*w,v*h);while(u<1.05){u+=rnd(0.02,0.05);v+=rnd(-0.012,0.012);x.lineTo(u*W,v*H);xe.lineTo(u*w,v*h);}
+    x.globalAlpha=0.22;x.strokeStyle='#ffd27a';x.lineWidth=rnd(1.5,3);x.stroke();xe.globalAlpha=0.45;xe.strokeStyle=ECOL.glow;xe.lineWidth=1;xe.stroke();}
+  // ขอบเข้ม (ทั้ง 4 ด้าน)
+  x.globalAlpha=1;for(const [x0,y0,x1,y1] of [[0,0,90,0],[W,0,W-90,0],[0,0,0,90],[0,H,0,H-90]]){const g=x.createLinearGradient(x0,y0,x1,y1);g.addColorStop(0,'rgba(22,15,8,0.7)');g.addColorStop(1,'rgba(22,15,8,0)');x.fillStyle=g;x.fillRect(0,0,W,H);}
+  // 5) normal map จากความสูง (Sobel)
+  const hd=xh.getImageData(0,0,w,h).data,cn=cv(w,h),xn=cn.getContext('2d'),inm=xn.createImageData(w,h),gH=(a,b)=>hd[(clamp(b,0,h-1)*w+clamp(a,0,w-1))*4]/255;
+  for(let py=0;py<h;py++)for(let px=0;px<w;px++){const dx=(gH(px+1,py-1)+2*gH(px+1,py)+gH(px+1,py+1))-(gH(px-1,py-1)+2*gH(px-1,py)+gH(px-1,py+1)),dy=(gH(px-1,py+1)+2*gH(px,py+1)+gH(px+1,py+1))-(gH(px-1,py-1)+2*gH(px,py-1)+gH(px+1,py-1));
+    const s=2.2,nx=-dx*s,ny=dy*s,l=Math.hypot(nx,ny,1),q=(py*w+px)*4;inm.data[q]=(nx/l*0.5+0.5)*255;inm.data[q+1]=(ny/l*0.5+0.5)*255;inm.data[q+2]=(1/l*0.5+0.5)*255;inm.data[q+3]=255;}
+  xn.putImageData(inm,0,0);
+  // ขอบข้าง: ชั้นตะกอนแนวนอน (ลายซ้ำทุก 1.4 หน่วย)
+  const cs=cv(512,512),xs=cs.getContext('2d');xs.fillStyle='#6e5a42';xs.fillRect(0,0,512,512);
+  for(let y=0;y<512;){const bh=rnd(10,40);xs.globalAlpha=rnd(0.2,0.45);xs.fillStyle=Math.random()<0.5?'#4a3a28':'#9a8262';xs.fillRect(0,y,512,bh);y+=bh;xs.globalAlpha=0.5;xs.fillStyle='#2a1d10';xs.fillRect(0,y-1,512,1.5);}
+  for(let i=0;i<5000;i++){xs.globalAlpha=rnd(0.1,0.35);xs.fillStyle=Math.random()<0.5?'#22180d':'#c8b08a';const s=rnd(1,3);xs.fillRect(rnd(0,512),rnd(0,512),s,s);}
+  const mk=(c,srgb)=>{const t=new THREE.CanvasTexture(c);if(srgb)t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=typeof gl!=='undefined'&&gl.capabilities?Math.min(8,gl.capabilities.getMaxAnisotropy()):1;t.userData.keep=true;return t;};
+  const ts=mk(cs,1);ts.wrapS=ts.wrapT=THREE.RepeatWrapping;
+  const face=new THREE.MeshStandardMaterial({map:mk(cc,1),normalMap:mk(cn),normalScale:new THREE.Vector2(1.3,1.3),emissive:ECOL.glow,emissiveMap:mk(ce,1),emissiveIntensity:1.4,roughness:0.86,metalness:0,flatShading:true});
+  const side=new THREE.MeshStandardMaterial({map:ts,bumpMap:ts,bumpScale:2,roughness:0.95,metalness:0,flatShading:true});
+  face.userData.keep=side.userData.keep=true;ETEX.slabM={face,side};return ETEX.slabM;}
 // รอยร้าวเรืองแตกออกจากกลางแผ่น (จุดที่หมัดโดน)
 function slabCracks(m){const cm=new THREE.MeshBasicMaterial({color:hdr(ECOL.glow,1.8)});
-  for(let i=0;i<7;i++){const a=i/7*6.283+0.3,L=i%2?1.1:1.6,c=new THREE.Mesh(new THREE.BoxGeometry(L,0.07,SLAB.d+0.08),cm);c.position.set(Math.cos(a)*L*0.5,Math.sin(a)*L*0.5,0);c.rotation.z=a;m.add(c);}
-  const o=new THREE.Mesh(new THREE.BoxGeometry(0.5,0.5,SLAB.d+0.1),cm);o.rotation.z=0.8;m.add(o);}
+  for(let i=0;i<7;i++){const a=i/7*6.283+0.3,L=i%2?1.1:1.6,c=new THREE.Mesh(new THREE.BoxGeometry(L,0.07,SLAB.d+0.16),cm);c.position.set(Math.cos(a)*L*0.5,Math.sin(a)*L*0.5,0);c.rotation.z=a;m.add(c);}
+  const o=new THREE.Mesh(new THREE.BoxGeometry(0.5,0.5,SLAB.d+0.2),cm);o.rotation.z=0.8;m.add(o);}
 // ---------- สิ่งก่อสร้าง + ฝุ่น (เรียกจาก render loop) ----------
 function earthClear(){if(!EV)return;   // clearDyn ถูกเรียกตอนโหลด (ก่อนไฟล์นี้) — var จึงยังเป็น undefined
   for(const o of EV.es.values())disposeObj(o.g);EV.es.clear();
@@ -409,7 +479,7 @@ function esbImpact(P,c,sn,a,mine,ox,oy){const q=simOf(P),h=q.h,d=new THREE.Vecto
 function earthEfx(ev){
   const z=ev.z,x=ev.x,y=ev.y,H=ev.h!==undefined?ev.h:0,me=myPos(),near=!me||Math.hypot(x-me.x,y-me.y)<1100,mine=ev.id===NET.myId;
   switch(z){
-    case 'epunch':{const s=eState(ev.id);s.pn={t:0,x,y,h:H,x2:ev.x2,y2:ev.y2};later(0.22,()=>{burst(ev.x2,ev.y2,ECOL.dust,8,120,0.4,2.5,{h:H+1.3,g:2});ring(ev.x2,ev.y2,'#ffe0a0',40,0.2,H+1.2);if(near)snd('hit',{x:ev.x2,y:ev.y2,vol:0.5});});if(near)snd('whoosh',{x,y,vol:0.35});return true;}
+    case 'epunch':{const s=eState(ev.id);s.pc=(s.pc||0)+1;s.pn={t:0,x,y,h:H,x2:ev.x2,y2:ev.y2,mir:s.pc%2===0};later(0.22,()=>{burst(ev.x2,ev.y2,ECOL.dust,8,120,0.4,2.5,{h:H+1.3,g:2});ring(ev.x2,ev.y2,'#ffe0a0',40,0.2,H+1.2);if(near)snd('hit',{x:ev.x2,y:ev.y2,vol:0.5});});if(near)snd('whoosh',{x,y,vol:0.35});return true;}   // pc = นับหมัด: คี่ = มือขวา • คู่ = มือซ้าย
     case 'estdbreak':eDebris(x,y,H,30,260);shake(0.3);if(near)snd('break',ev);return true;
     case 'estdon':burst(x,y,ECOL.glow,20,140,0.8,2.6,{h:H+1.5,g:-0.5});ring(x,y,ECOL.glow,80,0.5,H+0.2);if(near)snd('buff',{x,y,vol:0.5});return true;
     case 'erampon':{const s=eState(ev.id);s.rT=0;s.rs=-1;s.stp=0;}smoke(x,y,0.3,10,ECOL.dust,1.2,9,100);eChunks(x,y,0.3,6,180,5,0.2);if(near)snd('whoosh',ev);return true;
