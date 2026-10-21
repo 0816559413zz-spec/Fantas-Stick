@@ -5,7 +5,7 @@
 //  v2 (designs/earth.md §0 FINAL SPEC v2): BA ชาร์จ = Stand ใหญ่ทุบ (คลิกซ้ายค้าง) • Terra Auger เดินช้า 85% เนินสูงเท่าตัว (นับเป็นกำแพง) • Wrath = ปาเสาใหญ่ 1 ต้นจากฟ้า → บึงโคลน r400 → สว่าน 5 อัน 10 วิ
 //  ฝุ่น Dust Burst G.edust: ศัตรูข้างในมองเห็นชัดแค่ ~150 รอบตัว (ฝั่งภาพทำใน js/47-earth-view.js)
 // =====================================================================
-const EARTH=6,E_SH=300;
+const EARTH=6,E_SH=300,E_CRUSH=0.5;   // E_CRUSH = เวลาออกแรงก่อนหนีบ Tectonic Crush (ผู้ใช้ 2026-10-21: ประกบเร็วขึ้น 0.8 → 0.5 วิ)
 PATHS.push({id:'earth',n:'สายดิน',ic:'⛰️',col:'#c9a36a',d:'สถาปนิกสนามรบ — Stand หินต่อยแทนเรา ถือโล่ 300 สร้างกำแพง/เสา/เนิน แล้วผลักศัตรูให้ชนของแข็ง',
   combo:'Stonebreaker ผลักศัตรูชนกำแพง (กำแพงแผนที่ / Tectonic Crush / เสา Wrath / กำแพงโดเมน) = +20 ดาเมจ สตัน 2 วิ • Mud Swamp ช้า 50% ห้าม Dash แล้ว Crush กำแพงหนีบ 80 • Dust Burst บังสายตาศัตรู • Terra Auger ชาร์จ 3 ระดับ • โล่แตก = Stand หาย 15 วิ'});
 Object.assign(PDEF,{erock:{spd:1100,r:6,dmg:5,life:0.55,col:'#c9a36a'},eslab:{spd:1800,r:24,dmg:25,life:0.39,col:'#d8b47a'}});
@@ -46,7 +46,7 @@ function earthTick(p,dt){
     else if(shP){p.aug=null;p.cd[k]=0.5;p.cdMax[k]=0.5;emit({k:'efx',z:'eaugoff',x:p.x,y:p.y,h:p.z,id:p.id});}
     else if(!inp['h'+k])earthAugFire(p);}
   p.eShPrv=inp.sh;
-  // Tectonic Crush: หมดสิทธิ์ Crush เมื่อคูลดาวน์ครบ / Stand แตก • ง้าง 0.8 วิ
+  // Tectonic Crush: หมดสิทธิ์ Crush เมื่อคูลดาวน์ครบ / Stand แตก • ง้าง E_CRUSH (0.5 วิ)
   if(p.tec){if(p.tec.ok&&(p.cd[p.tec.k]<=0||p.stdB>0))p.tec.ok=false;}
   if(p.crush){if(p.stdB>0||!p.alive){p.crush=null;}else{p.crush.t-=dt;if(p.crush.t<=0)earthCrush(p);}}
   if(p.ramp&&(p.stun>0||!p.alive))earthRampEnd(p,true);
@@ -129,10 +129,10 @@ defSpell(EARTH,{id:'mudswamp',role:'control',n:'Mud Swamp',ic:'🟤',cd:12,d:'�
     addStrike({x:o.x,y:o.y,r:120,t:0.5,col:'#8a6a3a',fn(){addZone({x:o.x,y:o.y,r:120,t:5,tick:0.15,owner:p.id,team:p.team,kind:'mud',hit(t){addSlow(t,0.5,0.3);t.mudT=Math.max(t.mudT||0,0.3);}});}});}});
 
 // ---------- สกิล 3: Tectonic Crush ----------
-// กำแพงหินคู่ขนานหน้าตัวเรา (ยาว 300 ห่างกัน 240 HP 200) • กดซ้ำก่อนคูลดาวน์ครบ = Crush (ง้าง 0.8 วิ) • ไม่กดทัน = กำแพงอยู่ต่อเป็นที่กำบังจนพัง/ร่ายคู่ใหม่
-defSpell(EARTH,{id:'tectoniccrush',role:'control',n:'Tectonic Crush',ic:'🪨',cd:14,d:'Stand ดึงพื้นขึ้นเป็นกำแพงหินคู่ขนานหันหน้าเข้าหากันตรงหน้าเรา (ยาว 300 ห่าง 240 HP 200 เปิดหัวท้าย) • กดอีกครั้งก่อนคูลดาวน์ครบ = Crush (ง้าง 0.8 วิ)',fx:'Crush: กำแพงครบ 2 = 80 ดาเมจคนตรงกลาง • เหลือ 1 = 40 + กระเด็น • ไม่กด Crush ทัน = กำแพงอยู่ต่อเป็นที่กำบัง • ต้องมี Stand',
+// กำแพงหินคู่ขนานหน้าตัวเรา (ยาว 300 ห่างกัน 240 HP 200) • กดซ้ำก่อนคูลดาวน์ครบ = Crush (ง้าง 0.5 วิ) • ไม่กดทัน = กำแพงอยู่ต่อเป็นที่กำบังจนพัง/ร่ายคู่ใหม่
+defSpell(EARTH,{id:'tectoniccrush',role:'control',n:'Tectonic Crush',ic:'🪨',cd:14,d:'Stand ดึงพื้นขึ้นเป็นกำแพงหินคู่ขนานหันหน้าเข้าหากันตรงหน้าเรา (ยาว 300 ห่าง 240 HP 200 เปิดหัวท้าย) • กดอีกครั้งก่อนคูลดาวน์ครบ = Crush (ง้าง 0.5 วิ)',fx:'Crush: กำแพงครบ 2 = 80 ดาเมจคนตรงกลาง • เหลือ 1 = 40 + กระเด็น • ไม่กด Crush ทัน = กำแพงอยู่ต่อเป็นที่กำบัง • ต้องมี Stand',
   toggle(p){const T=p.tec;if(!T||!T.ok||p.crush)return false;if(!(p.cd[T.k]>0))return false;if(!eStand(p)){eNoStand(p);return true;}
-    p.crush={t:0.8};T.ok=false;emit({k:'efx',z:'ecrushw',x:Math.round(T.cx),y:Math.round(T.cy),h:p.z,a:Math.round(T.a*100)/100,id:p.id});return true;},
+    p.crush={t:E_CRUSH};T.ok=false;emit({k:'efx',z:'ecrushw',x:Math.round(T.cx),y:Math.round(T.cy),h:p.z,a:Math.round(T.a*100)/100,id:p.id});return true;},
   cast(p,S,i){if(!eStand(p))return eNoStand(p);if(p.aug||p.ramp)return false;
     if(p.tec)for(const id of p.tec.ids){const w=(G.eso||[]).find(q=>q.id===id);if(w)eKill(w);}
     const a=p.ang,c=Math.cos(a),s=Math.sin(a),ids=[];
@@ -162,7 +162,9 @@ defSpell(EARTH,{id:'dustburst',role:'utility',n:'Dust Burst',ic:'🌫️',cd:20,
 // กดค้างชาร์จ: แตะ = ระดับ 1 • 2 วิ = 2 • 4.5 วิ = 3 • ปล่อยแล้วสว่านพุ่งลงจุดเล็ง (600) • คูลดาวน์เริ่มตอนปล่อย
 defSpell(EARTH,{id:'terraauger',role:'finisher',n:'Terra Auger',ic:'🌀',cd:14,d:'กดค้างชาร์จสว่านหินหมุนเหนือหัว แตะ = ระดับ 1 • ค้าง 2 วิ = 2 • 4.5 วิ = 3 ปล่อยแล้วพุ่งลงจุดเล็ง (ระยะ 600) • ระหว่างชาร์จเดินช้า 85% ใช้ท่าอื่นไม่ได้ กดโล่ = ยกเลิก • สว่านพุ่งเฉียงลงจากข้างบนไปที่เป้า',fx:'ดาเมจ 20 / 50 / 120 รัศมี 80 / 110 / 150 • ระดับ 3 พื้นแตกเป็นหลุม + เนินดินสูงเท่าตัว (กว้าง ~150 HP 150 เป็นกำแพง ชนแล้วติดคอมโบ Stonebreaker) • โดนสตัน/แช่แข็ง = ยกเลิก คูลดาวน์ 7 วิ • ใช้ได้แม้ Stand แตก',
   cast(p,S,i){if(p.aug||p.ramp||p.ecb)return false;p.aug={t:0,k:SLOTK[i]};emit({k:'efx',z:'eaugon',x:p.x,y:p.y,h:p.z,id:p.id});return false;}});
-function earthAugFire(p){const A=p.aug;p.aug=null;const tier=A.t>=4.5?3:A.t>=2?2:1,o=aimPoint(p,600),dm=[20,50,120][tier-1],r=[80,110,150][tier-1];
+// จุดลงของสว่าน: ตามเป้าเมาส์เสมอ • เล็งเหนือขอบฟ้า (ไม่โดนพื้น) = ไกลสุด 600 ตามทิศที่หัน (ไม่ดูดเข้าศัตรูใกล้ ๆ)
+function eAugAim(p){if(!p.inp||p.bot||p.inp.gx>=0)return aimPoint(p,600);return {x:clamp(p.x+Math.cos(p.ang)*600,40,MW-40),y:clamp(p.y+Math.sin(p.ang)*600,40,MH-40)};}
+function earthAugFire(p){const A=p.aug;p.aug=null;const tier=A.t>=4.5?3:A.t>=2?2:1,o=eAugAim(p),dm=[20,50,120][tier-1],r=[80,110,150][tier-1];
   p.cd[A.k]=14*p.buffs.cdr;p.cdMax[A.k]=p.cd[A.k];
   emit({k:'efx',z:'eaugfire',x:Math.round(o.x),y:Math.round(o.y),h:0,x2:Math.round(p.x),y2:Math.round(p.y),n:tier,r,id:p.id});
   G.strikes.push({x:o.x,y:o.y,t:0.35,fn(){
