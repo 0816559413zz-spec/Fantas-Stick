@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>สตอรี่บอร์ด VFX — Fantas Stick</title>
+<script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.160.0/build/three.module.min.js","three/addons/":"https://unpkg.com/three@0.160.0/examples/jsm/"}}</script>
 <!-- สตอรี่บอร์ด VFX: แบ่งสกิลเป็นช่วง (ชาร์จ → ปล่อย → พุ่ง → กระทบ → ค้าง → จาง) แต่ละช่วงมีเวลา ขนาด รูปทรง สี ภาพร่าง รูปตัวอย่าง
      เก็บใน storyboard/boards.json + storyboard/img/ แล้ว serve.py เขียน storyboard/sb-<id>.md (+ STORYBOARDS.md) ให้ Claude อ่าน
      ต้องเปิดผ่าน tools/serve.py (ดับเบิลคลิก "Storyboard.bat") • Claude: อ่าน storyboard/sb-<id>.md -->
@@ -59,6 +60,15 @@ main{flex:1;display:flex;min-height:0}
 .shot .pic{flex:none;width:340px}
 .shot .pic .frame{position:relative;width:340px;height:191px;background:#111 center/contain no-repeat;border:1px solid var(--ln);border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--mu);font-size:14px;text-align:center}
 .shot .pic .frame:hover{border-color:var(--ac)}
+.shot .pic .tools{display:flex;gap:6px;margin-top:6px}
+.shot .pic .tools button{flex:1;font-size:13px;padding:4px 6px}
+.th{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.th .t{position:relative;width:78px;height:44px;background:#111 center/cover no-repeat;border:2px solid var(--ln);border-radius:5px;cursor:pointer}
+.th .t.on{border-color:var(--ac)}
+.th .t span{position:absolute;left:0;bottom:0;font-size:10px;background:#000b;padding:0 3px;border-radius:0 3px 0 0}
+.th .t .bt{position:absolute;top:1px;right:1px;display:none;gap:2px}
+.th .t:hover .bt{display:flex}
+.th .t .bt button{padding:0 4px;font-size:10px;background:#000c;border-radius:3px}
 .shot .pic .res{margin-top:8px}
 .shot .pic .res .frame{cursor:zoom-in;height:150px}
 .shot .fl{flex:1;min-width:0}
@@ -74,6 +84,19 @@ main{flex:1;display:flex;min-height:0}
 #reply{background:#1f2c24;border:1px solid #2f5a3d;border-radius:6px;padding:10px 12px;margin:12px 0;white-space:pre-wrap}
 #reply b{color:var(--ok)}
 #add{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:6px}
+/* หน้าต่างฉาก 3D */
+#d3{position:fixed;inset:0;background:#000e;display:none;z-index:9;flex-direction:column;align-items:center;justify-content:center}
+#d3 .bar{display:flex;gap:6px;padding:8px;align-items:center;flex-wrap:wrap;justify-content:center}
+#d3 .mid{display:flex;gap:10px;height:76vh;max-width:98vw}
+#d3 .vp{position:relative;height:100%;aspect-ratio:16/9;max-width:calc(98vw - 250px)}
+#d3 .vp canvas{width:100%;height:100%;display:block;border-radius:6px}
+#d3 .vp .lbl{position:absolute;left:8px;top:6px;color:var(--mu);font-size:12px;pointer-events:none}
+#d3 .side{width:240px;background:var(--pn);border:1px solid var(--ln);border-radius:8px;padding:10px;overflow:auto;font-size:13px}
+#d3 .side h4{margin:4px 0 6px;font-size:13px;color:var(--mu)}
+#d3 .side .add{display:grid;grid-template-columns:1fr 1fr;gap:4px}
+#d3 .side .add button{font-size:12px;padding:4px}
+#d3 .side .pr label{display:flex;gap:6px;align-items:center;margin:4px 0}
+#d3 .side input[type=text]{width:100%}
 /* หน้าต่างวาด */
 #zoom,#dr{position:fixed;inset:0;background:#000e;display:none;z-index:9;align-items:center;justify-content:center;flex-direction:column}
 #zoom img{max-width:96vw;max-height:94vh}
@@ -95,6 +118,20 @@ main{flex:1;display:flex;min-height:0}
   <div id="ed"></div>
 </main>
 <div id="zoom"><img alt=""></div>
+<div id="d3">
+  <div class="bar">
+    <span class="lb">มุมกล้อง</span><span class="seg" id="d3View"></span>
+    <span style="width:8px"></span>
+    <span class="seg" id="d3Mode"><button data-m="translate" class="on" title="W">✥ ย้าย</button><button data-m="rotate" title="E">⟳ หมุน</button><button data-m="scale" title="R">⤢ ย่อ/ขยาย</button></span>
+    <span style="width:8px"></span>
+    <button id="d3Shot" class="pri">📸 ถ่ายมุมนี้</button><button id="d3Shot4">📸 ถ่าย 4 มุม</button>
+    <span style="width:8px"></span>
+    <button id="d3Done">✔ เสร็จ</button>
+  </div>
+  <div class="mid"><div class="vp"><canvas id="d3c"></canvas><div class="lbl">ลากซ้าย = หมุนกล้อง • ลากขวา = เลื่อน • ล้อ = ซูม • คลิกชิ้น = เลือก • Delete = ลบ • Ctrl+D = ทำสำเนา</div></div>
+    <div class="side"><h4>＋ เพิ่มรูปทรง</h4><div class="add" id="d3Add"></div><h4 style="margin-top:12px">ชิ้นที่เลือก</h4><div class="pr" id="d3Pr"><span class="hint">คลิกชิ้นในฉากเพื่อแก้</span></div></div></div>
+  <div class="hint" style="margin-top:6px">ตัวขาว = ผู้ร่าย (หันไปทางเป้า) • ตัวแดง = เป้า ห่าง 5 ตัว • ตารางพื้น 1 ช่อง = 1 เมตร (ตัวละครสูง ~2.1 ม.) • ภาพที่ถ่ายจะไปอยู่ในภาพร่างของช่วงนี้</div>
+</div>
 <div id="dr">
   <div class="bar">
     <span class="seg" id="drBg"><button data-bg="side" class="on">ด้านข้าง</button><button data-bg="top">มองจากบน</button><button data-bg="blank">ว่าง</button></span>
@@ -135,7 +172,7 @@ function stat(t,err){const s=$('#stat');s.textContent=t;s.className=err?'err':''
 function esc(s){return String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
 function nowISO(){const d=new Date();return new Date(d-d.getTimezoneOffset()*6e4).toISOString().slice(0,19);}
 async function load(){
-  try{const r=await fetch('/api/sb',{cache:'no-store'});if(!r.ok)throw 0;const j=await r.json();online=true;if(dirty)return;db=j;stat('พร้อม • บันทึกอัตโนมัติ');} // แก้อะไรไประหว่างโหลด → ไม่ทับ
+  try{const r=await fetch('/api/sb',{cache:'no-store'});if(!r.ok)throw 0;const j=await r.json();online=true;if(dirty)return;db=j;fixShots();stat('พร้อม • บันทึกอัตโนมัติ');} // แก้อะไรไประหว่างโหลด → ไม่ทับ
   catch(e){online=false;stat('⚠ ต้องเปิดผ่าน "Storyboard.bat" (tools/serve.py) ถึงจะบันทึกได้',1);}
   if(cur)cur=db.items.find(b=>b.id===cur.id)||null;
   renderList();renderEd();
@@ -143,13 +180,15 @@ async function load(){
 function save(now){
   dirty=true;stat('กำลังบันทึก…');clearTimeout(saveT);
   saveT=setTimeout(async()=>{
-    try{const r=await fetch('/api/sb',{method:'POST',body:JSON.stringify(db)});const j=await r.json();if(!j.ok)throw j.err;dirty=false;stat('บันทึกแล้ว ✓ '+new Date().toLocaleTimeString('th-TH'));}
+    try{const r=await fetch('/api/sb',{method:'POST',body:JSON.stringify(db,(k,v)=>k[0]==='_'?undefined:v)});const j=await r.json();if(!j.ok)throw j.err;dirty=false;stat('บันทึกแล้ว ✓ '+new Date().toLocaleTimeString('th-TH'));}
     catch(e){stat('⚠ บันทึกไม่ได้ — เปิดผ่าน "Storyboard.bat" หรือยัง?',1);}
   },now?0:600);
 }
 function touch(re){cur.updated=nowISO();renderList();if(re)renderEd();save();}
 let sid=1;const newId=()=>Date.now().toString(36)+(sid++);
-function newShot(kind){return {id:newId(),kind,name:'',dur:kind==='charge'?0.5:kind==='impact'?0.4:kind==='linger'?1.5:0.3,overlap:0,where:'',size:1,power:3,shapes:[],motion:[],camera:[],colors:[],text:'',sketch:'',refs:[],result:'',note:''};}
+function newShot(kind){return {id:newId(),kind,name:'',dur:kind==='charge'?0.5:kind==='impact'?0.4:kind==='linger'?1.5:0.3,overlap:0,where:'',size:1,power:3,shapes:[],motion:[],camera:[],colors:[],text:'',sketches:[],scene3d:null,refs:[],result:'',note:''};}
+// ข้อมูลเก่า: sketch (รูปเดียว) → sketches[]
+function fixShots(){for(const b of db.items)for(const s of b.shots){if(!s.sketches)s.sketches=s.sketch?[{img:s.sketch,kind:'2d'}]:[];delete s.sketch;}}
 function newBoard(){
   const b={id:db.next++,title:'',who:'',skill:'',status:'draft',created:nowISO(),updated:nowISO(),overview:'',mood:[],colors:['#ff7a1a','#ffd27a'],refs:[],fx:'',reply:'',
     shots:['charge','cast','travel','impact','fade'].map(newShot)};
@@ -202,7 +241,10 @@ function shotHTML(s,i,T){
   const K=KIND[s.kind]||KIND.other;
   return `<div class="shot ${selShot===s.id?'sel':''}" id="s_${s.id}" data-sid="${s.id}" style="--k:${K.c}">
    <div class="pic">
-    <div class="frame" data-draw="1" style="${s.sketch?`background-image:url('${s.sketch}')`:''}">${s.sketch?'':'✏️ คลิกเพื่อวาดภาพร่าง<br><small>(มีตัวละครให้วาดทับ)</small>'}</div>
+    ${(()=>{const k=Math.min(s._sel||0,s.sketches.length-1),m=s.sketches[k];
+      return `<div class="frame" data-main="${k}" style="${m?`background-image:url('${m.img}')`:''}">${m?'':'ยังไม่มีภาพร่าง<br><small>✏️ วาดเอง หรือ 🧊 จัดฉาก 3D แล้วถ่ายหลายมุม</small>'}</div>
+      ${s.sketches.length>1||m?`<div class="th">${s.sketches.map((x,j)=>`<div class="t ${j===k?'on':''}" data-sk="${j}" style="background-image:url('${x.img}')"><span>${j+1}${x.view?' '+esc(x.view):x.kind==='3d'?' 3D':''}${x.over&&x.kind==='3d'?' ✏️':''}</span><div class="bt"><button data-skdraw="${j}" title="วาดทับภาพนี้">✏️</button><button data-skdel="${j}" title="ลบภาพนี้">✕</button></div></div>`).join('')}</div>`:''}`;})()}
+    <div class="tools"><button data-draw="1">✏️ วาดภาพใหม่</button><button data-d3="1">🧊 ฉาก 3D${s.scene3d&&s.scene3d.objs.length?` (${s.scene3d.objs.length} ชิ้น)`:''}</button></div>
     <div class="imgs drop" data-refs="1" style="margin-top:6px">${s.refs.map((p,k)=>`<div class="im" style="width:105px;height:66px"><img src="${p}" data-z="1"><button class="x" data-del="${k}" data-k="shot">✕</button></div>`).join('')}<button class="sm" data-pick="shot">📎 รูปตัวอย่าง</button></div>
     ${s.result?`<div class="res"><div class="lb">🖼 ผลที่ Claude ทำ (เทียบกับภาพร่าง)</div><div class="frame" style="background-image:url('${s.result}')" data-zs="${s.result}"></div></div>`:''}
    </div>
@@ -254,7 +296,14 @@ function bindEd(){
     el.querySelector('[data-one]').onclick=e=>{const v=e.target.dataset.v;if(!v)return;s.where=s.where===v?'':v;el.querySelectorAll('[data-one] button').forEach(x=>x.classList.toggle('on',x.dataset.v===s.where));touch();};
     el.querySelectorAll('[data-many]').forEach(c=>c.onclick=e=>{const v=e.target.dataset.v;if(!v)return;tog(s[c.dataset.many],v);e.target.classList.toggle('on');touch();});
     bindSw(el.querySelector('[data-cols]'),s.colors);
-    el.querySelector('[data-draw]').onclick=()=>draw(s);
+    el.querySelector('[data-draw]').onclick=()=>draw(s,-1);
+    el.querySelector('[data-d3]').onclick=()=>open3D(s);
+    el.querySelector('.pic').addEventListener('click',e=>{const t=e.target.closest('[data-sk],[data-skdraw],[data-skdel],[data-main]');if(!t)return;
+      if(t.dataset.skdel!=null){if(!confirm('ลบภาพร่างนี้?'))return;s.sketches.splice(+t.dataset.skdel,1);s._sel=0;touch(1);}
+      else if(t.dataset.skdraw!=null)draw(s,+t.dataset.skdraw);
+      else if(t.dataset.sk!=null){s._sel=+t.dataset.sk;reRender();}
+      else if(t.dataset.main!=null&&s.sketches[+t.dataset.main])zoom(s.sketches[+t.dataset.main].img);
+      else if(t.dataset.main!=null)draw(s,-1);});
     const rz=el.querySelector('[data-zs]');if(rz)rz.onclick=()=>zoom(s.result);
     bindDrop(el.querySelector('[data-refs]'),f=>addImgs(f,s.refs));
     el.querySelector('[data-refs]').addEventListener('click',e=>{if(e.target.dataset.del!=null){s.refs.splice(+e.target.dataset.del,1);touch(1);}else if(e.target.dataset.pick)pick(f=>addImgs(f,s.refs));});
@@ -343,10 +392,11 @@ function drawInk(){
     g.restore();
   }
 }
-function draw(s){
-  DR.s=s;DR.ops=[];DR.bgImg=null;DR.base=null;
+function draw(s,idx){ // idx -1 = ภาพใหม่, อื่น ๆ = วาดทับภาพร่างที่ idx (รวมภาพจากฉาก 3D)
+  DR.s=s;DR.idx=idx;DR.ops=[];DR.bgImg=null;DR.base=null;
   const show=()=>{drawBg();drawInk();$('#dr').style.display='flex';};
-  if(s.sketch){const im=new Image();im.onload=()=>{DR.base=im;show();};im.onerror=show;im.src=s.sketch+'?v='+Date.now();}else show();
+  const sk=s.sketches[idx];
+  if(sk){const im=new Image();im.onload=()=>{DR.base=im;show();};im.onerror=show;im.src=sk.img+'?v='+Date.now();}else show();
 }
 function drBgImage(f){fileToCanvas(f).then(c=>{DR.bgImg=c;DR.base=null;drawBg();});}
 function pt(e){const r=cvI.getBoundingClientRect();return [(e.clientX-r.left)*W/r.width,(e.clientY-r.top)*H/r.height];}
@@ -367,7 +417,9 @@ $('#dr .bar').onclick=async e=>{const t=e.target;
   if(t.id==='drCancel')$('#dr').style.display='none';
   if(t.id==='drSave'){
     const c=document.createElement('canvas');c.width=W;c.height=H;const g=c.getContext('2d');g.drawImage(cvB,0,0);g.drawImage(cvI,0,0);
-    try{DR.s.sketch=await upload(c.toDataURL('image/jpeg',0.9),'sk');touch(1);$('#dr').style.display='none';}catch(err){stat('⚠ เก็บภาพไม่ได้ — เปิดผ่าน "Storyboard.bat" หรือยัง? '+err,1);}
+    try{const img=await upload(c.toDataURL('image/jpeg',0.9),'sk'),old=DR.s.sketches[DR.idx];
+      if(old){old.img=img;old.over=1;}else{DR.s.sketches.push({img,kind:'2d'});DR.s._sel=DR.s.sketches.length-1;}
+      touch(1);$('#dr').style.display='none';}catch(err){stat('⚠ เก็บภาพไม่ได้ — เปิดผ่าน "Storyboard.bat" หรือยัง? '+err,1);}
   }
 };
 $('#drPick').oninput=e=>{DR.col=e.target.value;document.querySelectorAll('#drCols .col').forEach(x=>x.classList.remove('on'));};
@@ -388,5 +440,169 @@ document.addEventListener('keydown',e=>{
 });
 window.addEventListener('focus',()=>{if(!dirty&&$('#dr').style.display!=='flex'&&!document.activeElement.matches('input,textarea'))load();}); // Claude อาจตอบ/แปะผลมาแล้ว
 load();
+Object.assign(window,{SB:{upload,touch,stat,reRender,get cur(){return cur;}}});
+</script>
+<script type="module">
+// ===== ฉาก 3D แบบร่าง (Basic Draft): วางรูปทรงง่าย ๆ รอบผู้ร่าย/เป้า แล้วถ่ายภาพหลายมุมเป็นภาพร่างของช่วง =====
+// พิกัดในฉาก: x = ไปทางเป้า (หน้า), y = สูง, z = ขวาของผู้ร่าย — หน่วยเมตร (เอฟเฟกต์ใช้ pos [ขวา, สูง, หน้า])
+import * as THREE from 'three';
+import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+import {TransformControls} from 'three/addons/controls/TransformControls.js';
+import {mergeGeometries} from 'three/addons/utils/BufferGeometryUtils.js';
+const $=s=>document.querySelector(s);
+const CH=2.1,TX=CH*5,PI=Math.PI; // ตัวละครสูง ~2.1 ม. (char_student), เป้าห่าง 5 ตัว
+const arrowGeo=()=>mergeGeometries([new THREE.CylinderGeometry(0.06,0.06,0.75,12).rotateZ(-PI/2).translate(0.375,0,0),new THREE.ConeGeometry(0.16,0.25,16).rotateZ(-PI/2).translate(0.875,0,0)]);
+// รูปทรง: th = ชื่อไทย, g = geometry ขนาดฐาน 1 ม., y = ความสูงเริ่มต้น
+const SH={
+  ball:{th:'⚪ ลูกบอล',g:()=>new THREE.SphereGeometry(0.5,28,18),y:1},
+  ring:{th:'⭕ วงแหวน',g:()=>new THREE.TorusGeometry(0.5,0.04,10,56).rotateX(-PI/2),y:0.05},
+  disc:{th:'🔘 วงบนพื้น',g:()=>new THREE.CircleGeometry(0.5,48).rotateX(-PI/2),y:0.03},
+  dome:{th:'◓ โดม',g:()=>new THREE.SphereGeometry(0.5,28,12,0,PI*2,0,PI/2),y:0},
+  spike:{th:'🔺 หนาม/กรวย',g:()=>new THREE.ConeGeometry(0.25,1,18).translate(0,0.5,0),y:0},
+  pillar:{th:'▮ เสา',g:()=>new THREE.CylinderGeometry(0.25,0.25,1,24).translate(0,0.5,0),y:0},
+  beam:{th:'━ ลำแสง',g:()=>new THREE.CylinderGeometry(0.15,0.15,1,18).rotateZ(-PI/2).translate(0.5,0,0),y:1.2},
+  slash:{th:'☾ รอยฟัน',g:()=>new THREE.TorusGeometry(0.5,0.035,8,40,PI).rotateX(-PI/2),y:1.2},
+  box:{th:'■ กล่อง/หิน',g:()=>new THREE.BoxGeometry(1,1,1).translate(0,0.5,0),y:0},
+  wall:{th:'▯ กำแพง',g:()=>new THREE.BoxGeometry(0.15,1,1).translate(0,0.5,0),y:0},
+  arrow:{th:'➜ ลูกศรทิศ',g:arrowGeo,y:1.2},
+  fig:{th:'🧍 ตัวละคร',y:0}};
+const VIEWS={side:{th:'ด้านข้าง',p:[TX/2,1.6,14],t:[TX/2,1.2,0]},game:{th:'มุมเกม',p:[-4.5,3.4,1.7],t:[6,1.2,0]},
+  top:{th:'มองจากบน',p:[TX/2,20,0.001],t:[TX/2,0,0]},q:{th:'เฉียง',p:[-2.5,7,11],t:[TX/2,1,0]},back:{th:'จากฝั่งเป้า',p:[TX+6,3,1],t:[2,1.2,0]}};
+let R,scene,cam,orbit,tc,shot=null,objs=[],sel=null,raf=0,saveT=0,view='side';
+const geoC={};
+const r2=v=>Math.round(v*100)/100;
+const f2=v=>(+v).toFixed(2).replace(/\.?0+$/,'')||'0';
+
+function figure(col){ // หุ่นตัวละคร สูง 2.1 หันไป +x
+  const g=new THREE.Group(),m=new THREE.MeshStandardMaterial({color:col,roughness:0.7});
+  const cyl=(r,h,x,y,z,rz=0,rx=0)=>{const c=new THREE.Mesh(new THREE.CylinderGeometry(r,r,h,10),m);c.position.set(x,y,z);c.rotation.set(rx,0,rz);g.add(c);};
+  cyl(0.09,0.85,0,0.43,0.12);cyl(0.09,0.85,0,0.43,-0.12);cyl(0.22,0.8,0,1.22,0);
+  cyl(0.07,0.65,0.3,1.4,0.3,-1.2);cyl(0.07,0.6,0,1.15,-0.3,0,0.25);
+  const h=new THREE.Mesh(new THREE.SphereGeometry(0.25,16,12),m);h.position.set(0,1.86,0);g.add(h);
+  const n=new THREE.Mesh(new THREE.SphereGeometry(0.05,8,6),new THREE.MeshBasicMaterial({color:0x111111}));n.position.set(0.24,1.88,0);g.add(n);
+  return g;
+}
+function txtSprite(t,col,size){
+  const c=document.createElement('canvas'),g=c.getContext('2d'),F='600 64px Segoe UI, Leelawadee UI, sans-serif';g.font=F;
+  c.width=Math.ceil(g.measureText(t).width)+24;c.height=88;g.font=F;
+  g.fillStyle='#000a';g.fillRect(0,0,c.width,c.height);g.fillStyle=col;g.fillText(t,12,66);
+  const s=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(c),depthTest:false}));s.scale.set(size*c.width/c.height,size,1);s.renderOrder=20;return s;
+}
+function init(){
+  const cv=$('#d3c');R=new THREE.WebGLRenderer({canvas:cv,antialias:true});R.setPixelRatio(Math.min(2,devicePixelRatio));
+  scene=new THREE.Scene();scene.background=new THREE.Color(0x16181c);
+  cam=new THREE.PerspectiveCamera(45,16/9,0.05,200);
+  scene.add(new THREE.HemisphereLight(0xdfe8ff,0x303030,1.6));const d=new THREE.DirectionalLight(0xffffff,1.8);d.position.set(4,10,6);scene.add(d);
+  const gr=new THREE.Mesh(new THREE.PlaneGeometry(44,26),new THREE.MeshStandardMaterial({color:0x22262c,roughness:1}));gr.rotation.x=-PI/2;gr.position.set(TX/2,-0.001,0);scene.add(gr);
+  const grid=new THREE.GridHelper(44,44,0x3a3f49,0x2c3038);grid.position.set(TX/2,0.002,0);scene.add(grid);
+  for(let k=0;k<=5;k++){const t=new THREE.Mesh(new THREE.BoxGeometry(0.05,0.01,1.2),new THREE.MeshBasicMaterial({color:0x6a707b}));t.position.set(k*CH,0.01,1.6);scene.add(t);
+    const s=txtSprite(k+' ตัว','#9aa0ab',0.35);s.position.set(k*CH,0.3,2.5);scene.add(s);}
+  const a=figure(0xe6e8ec);scene.add(a);const b=figure(0xe5534b);b.position.x=TX;b.rotation.y=PI;scene.add(b);
+  const la=txtSprite('ผู้ร่าย','#e6e8ec',0.4);la.position.set(0,2.5,0);scene.add(la);const lb=txtSprite('เป้า','#ff8a80',0.4);lb.position.set(TX,2.5,0);scene.add(lb);
+  orbit=new OrbitControls(cam,cv);orbit.enableDamping=true;
+  tc=new TransformControls(cam,cv);tc.setSize(0.8);scene.add(tc);
+  tc.addEventListener('dragging-changed',e=>{orbit.enabled=!e.value;});
+  tc.addEventListener('objectChange',()=>{if(sel){readBack(sel);showPr();}});
+  let down=null;
+  cv.addEventListener('pointerdown',e=>{down=[e.clientX,e.clientY];});
+  cv.addEventListener('pointerup',e=>{if(!down||tc.dragging)return;if(Math.hypot(e.clientX-down[0],e.clientY-down[1])>4)return;
+    const r=cv.getBoundingClientRect(),ray=new THREE.Raycaster();ray.setFromCamera(new THREE.Vector2((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1),cam);
+    const hit=ray.intersectObjects(objs.map(o=>o.m),true)[0];let m=hit&&hit.object;while(m&&!m.userData.o)m=m.parent;select(m?m.userData.o:null);});
+  $('#d3View').innerHTML=Object.keys(VIEWS).map(k=>`<button data-v="${k}">${VIEWS[k].th}</button>`).join('');
+  $('#d3View').onclick=e=>{if(e.target.dataset.v)setView(e.target.dataset.v);};
+  $('#d3Mode').onclick=e=>{if(e.target.dataset.m)setMode(e.target.dataset.m);};
+  $('#d3Add').innerHTML=Object.keys(SH).map(k=>`<button data-t="${k}">${SH[k].th}</button>`).join('');
+  $('#d3Add').onclick=e=>{if(e.target.dataset.t)addObj(e.target.dataset.t);};
+  $('#d3Shot').onclick=()=>snap([view]);
+  $('#d3Shot4').onclick=()=>snap(['side','game','top','q']);
+  $('#d3Done').onclick=close;
+  addEventListener('resize',fit);
+  document.addEventListener('keydown',e=>{if($('#d3').style.display!=='flex'||e.target.closest&&e.target.closest('input,textarea'))return;
+    const k=e.key.toLowerCase(),ctl=e.ctrlKey||e.metaKey;
+    if(k==='d'&&ctl){e.preventDefault();if(sel)dupObj(sel);}
+    else if(ctl)return;
+    else if(k==='w'||k==='g')setMode('translate');else if(k==='e')setMode('rotate');else if(k==='r'||k==='s')setMode('scale');
+    else if((k==='delete'||k==='backspace')&&sel)delObj(sel);
+    else if(k==='escape'){if(sel)select(null);else close();}});
+}
+function setMode(m){tc.setMode(m);document.querySelectorAll('#d3Mode button').forEach(b=>b.classList.toggle('on',b.dataset.m===m));}
+function setView(k){view=k;const v=VIEWS[k];cam.position.set(...v.p);orbit.target.set(...v.t);orbit.update();document.querySelectorAll('#d3View button').forEach(b=>b.classList.toggle('on',b.dataset.v===k));}
+function fit(){if(!R)return;const c=$('#d3c');R.setSize(c.clientWidth,c.clientHeight,false);cam.aspect=c.clientWidth/Math.max(1,c.clientHeight);cam.updateProjectionMatrix();}
+function build(o){
+  let m;
+  if(o.t==='fig')m=figure(o.col);
+  else{geoC[o.t]=geoC[o.t]||SH[o.t].g();m=new THREE.Mesh(geoC[o.t],new THREE.MeshStandardMaterial({color:o.col,roughness:0.5,side:THREE.DoubleSide}));}
+  m.userData.o=o;scene.add(m);o.m=m;style(o);place(o);return o;
+}
+function style(o){
+  o.m.traverse(c=>{if(!c.isMesh||c.material.isMeshBasicMaterial)return;const mt=c.material;
+    mt.color.set(o.col);mt.transparent=o.op<1;mt.opacity=o.op;mt.depthWrite=o.op>=0.99;
+    mt.emissive.set(o.glow?o.col:0x000000);mt.emissiveIntensity=o.glow?0.9:0;mt.needsUpdate=true;});
+  if(o.lab){o.m.remove(o.lab);o.lab.material.map.dispose();o.lab=null;}
+  if(o.label){o.lab=txtSprite(o.label,'#ffd27a',0.35);o.lab.userData.base=o.lab.scale.clone();o.m.add(o.lab);}
+  posLabel(o);
+}
+function posLabel(o){ // ป้ายชื่อขนาดคงที่ อยู่เหนือชิ้น ไม่ยืดตาม scale
+  if(!o.lab)return;const s=o.m.scale,b=o.lab.userData.base,sx=Math.max(0.05,Math.abs(s.x)),sy=Math.max(0.05,Math.abs(s.y));
+  o.lab.scale.set(b.x/sx,b.y/sy,1);o.lab.position.set(0,(o.t==='fig'?CH:1)+0.35/sy,0);
+}
+function place(o){o.m.position.set(...o.p);o.m.rotation.set(...o.r.map(v=>v*PI/180));o.m.scale.set(...o.s);measure(o);posLabel(o);}
+function measure(o){o.m.updateMatrixWorld(true);const b=new THREE.Box3();o.m.traverse(c=>{if(c.isMesh)b.expandByObject(c);});const z=b.getSize(new THREE.Vector3());o.size=[r2(z.x),r2(z.y),r2(z.z)];}
+function readBack(o){const m=o.m;o.p=m.position.toArray().map(r2);o.r=[m.rotation.x,m.rotation.y,m.rotation.z].map(v=>Math.round(v*180/PI));o.s=m.scale.toArray().map(r2);measure(o);posLabel(o);dirty();}
+function data(o){const {m,lab,...d}=o;return d;}
+function dirty(){shot.scene3d={v:1,objs:objs.map(data)};clearTimeout(saveT);saveT=setTimeout(()=>SB.touch(),400);}
+function addObj(t,from){
+  const tg=orbit.target,id=Date.now().toString(36)+Math.random().toString(36).slice(2,5);
+  const o=from?{...data(from),id,p:from.p.map((v,i)=>i===2?r2(v+0.6):v)}
+    :{id,t,label:'',col:(SB.cur.colors&&SB.cur.colors[0])||'#ff7a1a',op:t==='disc'||t==='dome'?0.6:1,glow:!['box','wall','fig'].includes(t),
+      p:[t==='beam'?0.6:r2(Math.max(0.5,Math.min(TX,tg.x))),SH[t].y,0],r:[0,0,0],s:t==='beam'?[TX-1.2,1,1]:[1,1,1]};
+  objs.push(build(o));select(o);dirty();
+}
+function delObj(o){scene.remove(o.m);objs=objs.filter(x=>x!==o);select(null);dirty();}
+function dupObj(o){addObj(o.t,o);}
+function select(o){sel=o;if(o)tc.attach(o.m);else tc.detach();showPr();}
+function showPr(){
+  const P=$('#d3Pr');if(!sel){P.dataset.id='';P.innerHTML='<span class="hint">คลิกชิ้นในฉากเพื่อแก้</span>';return;}
+  const o=sel;
+  if(P.dataset.id!==o.id){P.dataset.id=o.id;
+    P.innerHTML=`<b>${SH[o.t].th}</b>
+    <label>ชื่อ/ป้าย <input type="text" data-k="label" placeholder="เช่น ระเบิดหลัก"></label>
+    <label>สี <input type="color" data-k="col"></label>
+    <label>ความทึบ <input type="range" min="0.1" max="1" step="0.05" data-k="op"></label>
+    <label><input type="checkbox" data-k="glow"> เรืองแสง</label>
+    <div class="hint" id="d3Info"></div>
+    <div style="display:flex;gap:4px;margin-top:8px;flex-wrap:wrap"><button class="sm" data-a="ground">⬇ วางบนพื้น</button><button class="sm" data-a="dup">⧉ สำเนา</button><button class="sm" data-a="del" style="color:var(--red)">🗑 ลบ</button></div>`;
+    P.querySelector('[data-k=label]').value=o.label||'';P.querySelector('[data-k=col]').value=o.col;P.querySelector('[data-k=op]').value=o.op;P.querySelector('[data-k=glow]').checked=!!o.glow;
+    P.oninput=e=>{const k=e.target.dataset.k;if(!k)return;o[k]=k==='glow'?e.target.checked:k==='op'?+e.target.value:e.target.value;style(o);dirty();};
+    P.onclick=e=>{const a=e.target.dataset.a;if(a==='del')delObj(o);if(a==='dup')dupObj(o);if(a==='ground'){o.m.position.y=SH[o.t].y;readBack(o);showPr();}};}
+  $('#d3Info').innerHTML=`ตำแหน่ง: หน้า ${f2(o.p[0])} • สูง ${f2(o.p[1])} • ขวา ${f2(o.p[2])} ม.<br>ขนาด: ${f2(o.size[0])} × ${f2(o.size[1])} × ${f2(o.size[2])} ม.<br>(สูง ≈ ${f2(o.size[1]/CH)} ตัวละคร)`;
+}
+async function snap(list){
+  const keep=view,keepP=cam.position.clone(),keepT=orbit.target.clone();
+  tc.visible=false;SB.stat('กำลังถ่ายภาพ…');
+  try{
+    for(const k of list){
+      if(list.length>1)setView(k);
+      R.setPixelRatio(1);R.setSize(1280,720,false);cam.aspect=16/9;cam.updateProjectionMatrix();R.render(scene,cam);
+      const o=document.createElement('canvas');o.width=1280;o.height=720;const g=o.getContext('2d');g.drawImage(R.domElement,0,0);
+      const t='3D • '+VIEWS[k].th;g.font='600 26px Segoe UI, Leelawadee UI, sans-serif';g.fillStyle='#000a';g.fillRect(0,0,g.measureText(t).width+28,44);g.fillStyle='#e8b84a';g.fillText(t,14,31);
+      const img=await SB.upload(o.toDataURL('image/jpeg',0.9),'3d');
+      shot.sketches.push({img,kind:'3d',view:VIEWS[k].th});shot._sel=shot.sketches.length-1;
+    }
+    SB.touch();SB.stat('ถ่ายแล้ว '+list.length+' ภาพ ✓ (อยู่ในภาพร่างของช่วงนี้)');
+  }catch(e){SB.stat('⚠ เก็บภาพไม่ได้ — เปิดผ่าน "Storyboard.bat" หรือยัง? '+e,1);}
+  tc.visible=true;R.setPixelRatio(Math.min(2,devicePixelRatio));fit();
+  if(list.length>1){cam.position.copy(keepP);orbit.target.copy(keepT);orbit.update();view=keep;document.querySelectorAll('#d3View button').forEach(b=>b.classList.toggle('on',b.dataset.v===keep));}
+}
+function loop(){raf=requestAnimationFrame(loop);orbit.update();R.render(scene,cam);}
+function open3D(s){
+  $('#d3').style.display='flex';
+  if(!R)init();
+  for(const o of objs)scene.remove(o.m);
+  shot=s;objs=((s.scene3d&&s.scene3d.objs)||[]).map(d=>build({...d,s:d.s||[1,1,1],r:d.r||[0,0,0]}));select(null);
+  fit();setView('side');setMode('translate');cancelAnimationFrame(raf);loop();
+}
+function close(){cancelAnimationFrame(raf);clearTimeout(saveT);select(null);$('#d3').style.display='none';if(shot)SB.touch(1);}
+window.open3D=open3D;
 </script>
 </body></html>

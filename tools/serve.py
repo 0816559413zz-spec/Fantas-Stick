@@ -92,6 +92,12 @@ SB_KIND = {'charge': 'ชาร์จ / เตรียม (anticipation)', 'cas
 SB_ST = {'draft': '✏️ กำลังร่าง', 'ready': '📤 พร้อมให้ Claude ทำ', 'wip': '🔧 Claude กำลังทำ', 'review': '👀 รอผู้ใช้ดูผล', 'done': '✅ ผ่านแล้ว'}
 SB_POW = ['', 'เบามาก', 'เบา', 'ปานกลาง', 'แรง', 'สุดพลัง']
 
+SB_3D = {'ball': 'ลูกบอล', 'ring': 'วงแหวน', 'disc': 'วงบนพื้น', 'dome': 'โดม', 'spike': 'หนาม/กรวย', 'pillar': 'เสา', 'beam': 'ลำแสง',
+         'slash': 'รอยฟัน', 'box': 'กล่อง/หิน', 'wall': 'กำแพง', 'arrow': 'ลูกศรทิศ', 'fig': 'ตัวละคร'}
+
+def sb_sketches(s):  # ข้อมูลเก่ามี sketch รูปเดียว
+    return s.get('sketches') or ([{'img': s['sketch'], 'kind': '2d'}] if s.get('sketch') else [])
+
 def sb_load():
     p = os.path.join(SBD, 'boards.json')
     if not os.path.exists(p):
@@ -110,7 +116,7 @@ def sb_md(b):
     T = sb_times(b); tot = max([e for _, e in T] or [0])
     L = [f"# สตอรี่บอร์ด VFX #{b.get('id')} — {b.get('title') or '(ไม่มีชื่อ)'}", '',
          '> เขียนอัตโนมัติจาก `storyboard.html` — อย่าแก้ไฟล์นี้ตรง ๆ, แก้ `storyboard/boards.json` แล้วรัน `python tools/serve.py --sb-md`.',
-         '> **Claude:** ทำตาม `VFX-STUDIO-CLAUDE.md` §4b. เปิดภาพร่าง + รูปตัวอย่างทุกรูปด้วย Read ก่อนเริ่ม (ภาพร่าง = ความตั้งใจหลัก; ตัวขาวซ้าย = ผู้ร่ายหันขวา, ตัวแดงขวา = เป้า ห่าง ~5 ตัว, ขีดบนพื้น = 1 ตัวละคร).', '',
+         '> **Claude:** ทำตาม `VFX-STUDIO-CLAUDE.md` §4b. เปิดภาพร่าง + รูปตัวอย่างทุกรูปด้วย Read ก่อนเริ่ม (ภาพร่าง = ความตั้งใจหลัก; ตัวขาวซ้าย = ผู้ร่ายหันขวา, ตัวแดงขวา = เป้า ห่าง ~5 ตัว, ขีดบนพื้น = 1 ตัวละคร ≈ 2.1 ม.; ภาพ 3D = ถ่ายจากฉากแบบร่าง ใช้ตาราง \"ฉาก 3D\" เป็นตำแหน่ง/ขนาดจริง).', '',
          f"- สาย: {b.get('who') or '-'} • ปุ่ม/ชื่อในเกม: {b.get('skill') or '-'} • สถานะ: {SB_ST.get(b.get('status'), b.get('status'))}",
          f"- ความยาวรวม: **{f(tot)} วินาที** • {len(T)} ช่วง",
          f"- ความรู้สึก: {', '.join(b.get('mood') or []) or '-'}",
@@ -136,8 +142,15 @@ def sb_md(b):
                 L.append(f"- {th}: {', '.join(s[k])}")
         if s.get('colors'):
             L.append(f"- สี: {' '.join('`' + c + '`' for c in s['colors'])}")
-        if s.get('sketch'):
-            L.append(f"- ภาพร่าง: `{s['sketch']}`")
+        for k, sk in enumerate(sb_sketches(s)):
+            L.append(f"- ภาพร่าง {k+1}{' (3D ' + sk['view'] + ')' if sk.get('view') else ' (3D)' if sk.get('kind') == '3d' else ''}{' + วาดทับ' if sk.get('over') and sk.get('kind') == '3d' else ''}: `{sk['img']}`")
+        objs = (s.get('scene3d') or {}).get('objs') or []
+        if objs:
+            L += ['', 'ฉาก 3D (เมตร; หน้า = ไปทางเป้า, ขวา = ขวาของผู้ร่าย → fx `pos` = [ขวา, สูง, หน้า]; ขนาด = กล่องรอบชิ้น หน้า×สูง×ข้าง):', '',
+                  '| ชิ้น | ป้าย | หน้า | สูง | ขวา | ขนาด (ม.) | หมุน (องศา) | สี | ทึบ | เรือง |', '|---|---|---|---|---|---|---|---|---|---|']
+            for o in objs:
+                p_ = o.get('p') or [0, 0, 0]; z = o.get('size') or [0, 0, 0]
+                L.append(f"| {SB_3D.get(o.get('t'), o.get('t'))} | {o.get('label') or '-'} | {f(p_[0])} | {f(p_[1])} | {f(p_[2])} | {f(z[0])}×{f(z[1])}×{f(z[2])} | {', '.join(str(v) for v in o.get('r') or [0, 0, 0])} | `{o.get('col')}` | {f(o.get('op', 1))} | {'ใช่' if o.get('glow') else '-'} |")
         for r in s.get('refs', []):
             L.append(f"- รูปตัวอย่าง: `{r}`")
         if s.get('result'):
@@ -172,7 +185,7 @@ def sb_save(db):
     for b in db.get('items', []):
         used |= {os.path.basename(i) for i in b.get('refs', [])}
         for s in b.get('shots', []):
-            used |= {os.path.basename(i) for i in s.get('refs', []) + [s.get('sketch') or '', s.get('result') or ''] if i}
+            used |= {os.path.basename(i) for i in s.get('refs', []) + [k['img'] for k in sb_sketches(s)] + [s.get('result') or ''] if i}
     d = os.path.join(SBD, 'img')
     for fn in os.listdir(d):
         if fn not in used and time.time() - os.path.getmtime(os.path.join(d, fn)) > 120:
