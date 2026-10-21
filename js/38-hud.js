@@ -56,6 +56,7 @@ function spellDia(x,y,r,ic,key,name,st){
     cx.save();diaPath(x,y,r);cx.clip();
     cx.fillStyle='rgba(0,0,0,0.62)';cx.beginPath();cx.moveTo(x,y);cx.arc(x,y,r*1.5,-Math.PI/2,-Math.PI/2+Math.PI*2*st.ratio);cx.closePath();cx.fill();cx.restore();
   }
+  if(st.bar>0){const w=r*1.1,by=y+r*0.34;cx.fillStyle='rgba(0,0,0,0.78)';cx.fillRect(x-w/2-1.5,by-1.5,w+3,8);cx.fillStyle='#ffb46a';cx.fillRect(x-w/2,by,w*Math.min(1,st.bar),5);}   // แถบเวลา (เช่น Tectonic รอหนีบ)
   if(st.txt){cx.font='600 16px Kanit,sans-serif';cx.fillStyle='rgba(0,0,0,0.7)';cx.fillText(st.txt,x+1,y+7);cx.fillStyle='#fff';cx.fillText(st.txt,x,y+6);}
   cx.font='600 10px Kanit,sans-serif';
   const kw=Math.max(18,cx.measureText(key).width+10),ky=y+r-4;
@@ -243,7 +244,11 @@ function drawMinimap(v,me,P){
 function slotKey(s){const m={Q:'q',E:'e',R:'r',F:'f',Shift:'dash',X:'ult',B:'broom'}[s];return m&&KEYS[m]?keyName(KEYS[m]):s;}
 function mySlots(me){
   const k=getKit(me.id),sp=k.ids.map(i=>SPELL_LIST[i]),P=PATHS[k.path],ult=SPELL_LIST[k.ult];
-  return SLOTS.map(s0=>{const s=[slotKey(s0[0]),...s0.slice(1)];return (s[3]>=1&&s[3]<=4?[s[0],{id:sp[s[3]-1].id,c:P.col},sp[s[3]-1].n,s[3]]:s[3]===-2?[s[0],{id:ult.id,c:P.col},ult.n,-2]:s[3]===0?[s[0],{id:'b_'+P.id+(P.id==='frost'&&me.fr&&me.fr[0]===0?'_m':''),c:P.col},PBASIC[k.path].n,0]:s[3]===-1&&hasIco('sh_'+P.id)?[s[0],{id:'sh_'+P.id,c:P.col},s[2],-1]:s[3]===5&&hasIco('dsh_'+P.id)?[s[0],{id:'dsh_'+P.id,c:P.col},s[2],5]:s);});
+  const L=SLOTS.map(s0=>{const s=[slotKey(s0[0]),...s0.slice(1)];return (s[3]>=1&&s[3]<=4?[s[0],{id:sp[s[3]-1].id,c:P.col},sp[s[3]-1].n,s[3]]:s[3]===-2?[s[0],{id:ult.id,c:P.col},ult.n,-2]:s[3]===0?[s[0],{id:'b_'+P.id+(P.id==='frost'&&me.fr&&me.fr[0]===0?'_m':''),c:P.col},PBASIC[k.path].n,0]:s[3]===-1&&hasIco('sh_'+P.id)?[s[0],{id:'sh_'+P.id,c:P.col},s[2],-1]:s[3]===5&&hasIco('dsh_'+P.id)?[s[0],{id:'dsh_'+P.id,c:P.col},s[2],5]:s);});
+  // สายดิน: ช่อง BA ชาร์จ (กดค้างคลิกซ้าย) ต่อจากช่องยิง • Tectonic รอบหนีบได้ = ไอคอนบีบกำแพง
+  if(P.id==='earth'){L.splice(1,0,['กดค้าง',{id:'cb_earth',c:P.col},'ทุบชาร์จ',-4]);
+    if(me.ea&&me.ea[8])for(const s of L)if(s[1]&&s[1].id==='tectoniccrush')s[1]={id:'tectoniccrush_sq',c:'#ffc27a'};}
+  return L;
 }
 // เวทโบราณ (X) ตรงกลางล่างจอ แบบ Overwatch: วงกลมใหญ่ มีไอคอน เกจรอบวง เปอร์เซ็นต์ และเรืองแสงเมื่อพร้อม
 function drawUlt(me){
@@ -276,10 +281,14 @@ function slotState(me,v,ci){
   if(ci>=0){st.ratio=me.cd[ci]/me.cm[ci];if(me.cd[ci]>0){st.ready=false;st.txt=me.cd[ci]<1?me.cd[ci].toFixed(1):String(Math.ceil(me.cd[ci]));}}
   else if(ci===-1)st.ready=me.se>5;
   else if(ci===-3){st.ready=true;st.hl=!!me.fl;}
+  else if(ci===-4){const A=me.ea||[],c=eSmooth('cb',A[10]|0);   // BA ชาร์จสายดิน: ชาร์จอยู่ = เรือง • คูลดาวน์ 6 วิ (ค่าปัดขึ้นจาก snapshot → นับถอยเองให้ลื่น)
+    if(A[9]>0)st.hl=true;else if(A[0]>0){st.ready=false;st.ratio=1;}else if(c>0){st.ready=false;st.ratio=c/6;st.txt=c<1?c.toFixed(1):String(Math.ceil(c));}}
   else{st.ready=me.u>=100;st.hl=st.ready;if(!st.ready){st.ratio=1-me.u/100;st.txt=me.u+'%';}}
   const flyOk=v&&(v.mode==='quid'||v.mode==='race');
   if(me.fl&&ci!==-3&&!flyOk){st.dim=true;st.txt=st.txt||'🚫';}
   if(ci>=1&&ci<=4&&me.fr&&me.fr[0]===1){const S=SPELL_LIST[getKit(me.id).ids[ci-1]];if(S&&S.melee){st.ratio=1;st.txt='🔒';st.ready=false;st.hl=false;}}
+  // Tectonic Crush: กำแพงตั้งอยู่ กดซ้ำหนีบได้ → ช่องสว่าง (ใช้ได้) + แถบเวลาที่ยังหนีบได้ (= คูลดาวน์ที่เหลือ)
+  if(ci>=1&&ci<=4&&me.ea&&me.ea[8]&&!st.dim){const S=SPELL_LIST[getKit(me.id).ids[ci-1]];if(S&&S.id==='tectoniccrush'){st.ready=true;st.hl=true;st.ratio=0;st.txt='';st.bar=me.cd[ci]/me.cm[ci];}}
   if(locked){st.ratio=1;st.txt='🔒';st.ready=false;st.hl=false;}
   return st;
 }
@@ -309,9 +318,9 @@ function drawBottom(me,v){
   const hr=me.hp/me.mh;
   thinBar(bx,ey-12,bw,12,hr,hr>0.3?'#6fd57f':'#ff6a6a',hr>0.3?'#2c8a45':'#a51e1e');
   cx.textAlign='right';cx.font='600 11px Kanit,sans-serif';cx.fillStyle='#fff';cx.fillText(`${me.hp} / ${me.mh}`,bx+bw-5,ey-2.5);
-  thinBar(bx,ey+6,bw*0.72,5,me.se/100,'#9ff0ff','#2d8fc0');
+  if(me.ea)eShieldSegs(bx,ey+5,bw*0.72,me.ea);else thinBar(bx,ey+6,bw*0.72,5,me.se/100,'#9ff0ff','#2d8fc0');   // สายดิน: แถบโล่แบบช่องเล็กติดกัน ไม่มีตัวหนังสือ
   {let sx=bx;cx.textAlign='left';cx.font='15px sans-serif';for(const [bit,ic] of STATUS_ICO)if((me.fm|0)&bit){cx.fillText(ic,sx,ey+30);sx+=20;}}
-  cx.textAlign='left';cx.font='10px Kanit,sans-serif';cx.fillStyle='#7f8aa6';cx.fillText('โล่',bx+bw*0.72+8,ey+12);
+  if(!me.ea){cx.textAlign='left';cx.font='10px Kanit,sans-serif';cx.fillStyle='#7f8aa6';cx.fillText('โล่',bx+bw*0.72+8,ey+12);}
   // มุมขวาล่าง: กลุ่มเพชรคาถา
   const c0x=SW-128,c0y=SH-122,d=47,r=31;
   const MYS=mySlots(me);
@@ -319,9 +328,10 @@ function drawBottom(me,v){
     if(CLUSTER[ci]){const [ox,oy]=CLUSTER[ci];spellDia(c0x+ox*d,c0y+oy*d,r,ic,key,'',slotState(me,v,ci));}
   }
   diaPath(c0x,c0y,6);cx.fillStyle=HG;cx.fill();
-  const small=MYS.filter(s=>(s[3]<=0&&s[3]!==-2)||s[3]===5);
+  const small=MYS.filter(s=>(s[3]<=0&&s[3]!==-2&&s[3]!==-4)||s[3]===5),cb=MYS.find(s=>s[3]===-4);
   drawUlt(me);
   small.forEach(([key,ic,name,ci],i)=>spellDia(SW-266-(small.length-1-i)*66,SH-78,25,ic,key,'',slotState(me,v,ci)));
+  if(cb)spellDia(SW-266-(small.length-1)*66,SH-138,22,cb[1],cb[0],'',slotState(me,v,-4));   // BA ชาร์จ: วางเหนือช่องยิง (คลิกซ้าย)
 }
 function drawBoard(v,P){
   const rows=[...P].sort((a,b)=>b.k-a.k),w=Math.min(540,SW-32),h=96+rows.length*32,x=SW/2-w/2,y=SH/2-h/2;
