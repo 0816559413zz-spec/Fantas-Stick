@@ -34,6 +34,12 @@ function bldLocal(b,x,y){const dx=x-b.o.x,dy=y-b.o.y;return [dx*b.c-dy*b.s,dx*b.
 function bldWorld(b,lx,ly){return [b.o.x+lx*b.c+ly*b.s,b.o.y-lx*b.s+ly*b.c];}
 function rectDist(R,lx,ly){return Math.hypot(Math.max(Math.abs(lx-R[0])-R[2],0),Math.max(Math.abs(ly-R[1])-R[3],0));}
 function bldNear(b,x,y,pad){return Math.abs(x-b.o.x)<b.o.w*0.75+pad&&Math.abs(y-b.o.y)<b.o.w*0.75+pad;}
+// บ้านพังครบทั้งหลัง (ทั้ง 6 ส่วน) → เนินกองซาก: เป็น "พื้นเพิ่ม" ใน groundH (เดินปีนขึ้นยืนบนยอดได้) + กระสุนที่ต่ำกว่าผิวเนินชนเนิน
+// ผู้ใช้เลือก 2026-10-21: สูง ~1.5 ม. • เป็นเนินเมื่อพังครบทั้งหลังเท่านั้น • ทรงวงรีคลุมตัวบ้าน + pad ต่อด้าน (px), ยอดแบนกลางเนิน
+const BLD_MOUND={h:1.5,pad:30};
+function bldGone(b){return b.pc.every(q=>q.fl&1);}
+function bldMoundAt(b,x,y){const [lx,ly]=bldLocal(b,x,y),e=(lx/(b.o.w/2+BLD_MOUND.pad))**2+(ly/(b.o.d/2+BLD_MOUND.pad))**2;return e<1?BLD_MOUND.h*Math.min(1,1.6*(1-e)):0;}
+function bldMoundH(x,y){let g=0;for(const b of BLDG)if(bldNear(b,x,y,BLD_MOUND.pad)&&bldGone(b)){const v=bldMoundAt(b,x,y);if(v>g)g=v;}return g;}
 // โดนชิ้นย่อย: code = ส่วน*100 + ชิ้นย่อย (ค่าจาก bldPieceAt)
 function hitBldPiece(b,code,dmg,el,ox,oy){
   const j=Math.floor(code/100),k=code%100,q=b.pc[j];if(!BLDON||!q||!bldAlive(q,k))return;
@@ -360,7 +366,7 @@ function updateProjectiles(dt){
     if(pr.dead)continue;
     {const t0=TERR?terrT(pr.x,pr.y):0;pr.x+=pr.vx*dt;pr.y+=pr.vy*dt;pr.h+=pr.vh*dt;if(TERR)pr.h-=terrT(pr.x,pr.y)-t0;}pr.life-=dt;
     if(pr.life<=0||pr.x<20||pr.x>MW-20||pr.y<20||pr.y>MH-20||pr.h>40){killProj(pr);continue;}
-    if(pr.h<0.05||(TERR&&terrSolid(pr.x,pr.y,pr.h))){pr.h=Math.max(pr.h,0.1);killProj(pr);continue;}
+    if(pr.h<0.05||(TERR&&terrSolid(pr.x,pr.y,pr.h))||(BLDG.length&&pr.h<bldMoundH(pr.x,pr.y))){pr.h=Math.max(pr.h,0.1);killProj(pr);continue;}   // + ชนเนินซากบ้าน
     let hp=false;
     for(const c of OBS)if(c.bi===undefined&&(c.top!==undefined?terrT(pr.x,pr.y)+pr.h<c.top:pr.h<c.hgt)&&(pr.x-c.x)**2+(pr.y-c.y)**2<(c.r+pr.r)**2){hp=true;break;}
     if(!hp)for(const b of BLDG){if(!bldNear(b,pr.x,pr.y,pr.r))continue;const j=bldPieceAt(b,pr.x,pr.y,pr.h,pr.r);if(j>=0){hitBldPiece(b,j,pr.dmg||5,projEl(pr),pr.x-pr.vx*0.08,pr.y-pr.vy*0.08);hp=true;break;}}

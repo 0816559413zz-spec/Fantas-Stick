@@ -129,11 +129,35 @@ function bldRubble(b,j,k,g,M){
   for(let i=0;i<n;i++){const m=new THREE.Mesh(sGeo(THREE.BoxGeometry,1,1,1),i%2?M.beam:M.stone);
     m.scale.set(0.3+R()*0.5,0.15+R()*0.25,0.3+R()*0.45);m.position.set((C[0]+(R()*2-1)*C[2])*S3+(j===2?-1:j===3?1:0)*R()*0.8,0.1,(C[1]+(R()*2-1)*C[3])*S3+(j===0?1:j===1?-1:0)*R()*0.8);m.rotation.set(R()*0.6,R()*3,R()*0.6);g.add(m);}
 }
+// เนินกองซาก: ผิวเนินตามสูตรเดียวกับฝั่งโฮสต์ (bldMoundAt) + ผิวขรุขระนิดหน่อย + ไม้คาน/ก้อนหิน/ชิ้นผนัง/แผ่นหลังคาโผล่บนผิว
+let _moundMat=null;
+function bldMound(b,M,charred){
+  const G3=new THREE.Group(),R=mulberry(b.i*977+5),A=(b.o.w/2+BLD_MOUND.pad)*S3,C=(b.o.d/2+BLD_MOUND.pad)*S3,H=BLD_MOUND.h;
+  const hAt=r=>r>=1?-0.12:H*Math.min(1,1.6*(1-r*r));
+  const NR=10,NA=32,pos=[],col=[],idx=[],cs=[new THREE.Color('#6e6458'),new THREE.Color('#7d7367'),new THREE.Color('#62584d'),new THREE.Color(M.wall.color).multiplyScalar(0.75)];
+  pos.push(0,hAt(0),0);col.push(...cs[0].toArray());
+  for(let i=1;i<=NR;i++)for(let k=0;k<NA;k++){const r=i/NR,a=k/NA*Math.PI*2,n=i<NR?(R()-0.5)*0.35+0.12*Math.sin(a*5+i):0,c=cs[Math.floor(R()*cs.length)].clone().multiplyScalar(charred?0.35:0.92+R()*0.12);
+    pos.push(Math.cos(a)*A*r,hAt(r)+n,Math.sin(a)*C*r);col.push(c.r,c.g,c.b);}
+  for(let k=0;k<NA;k++)idx.push(0,1+(k+1)%NA,1+k);
+  for(let i=1;i<NR;i++)for(let k=0;k<NA;k++){const a=1+(i-1)*NA+k,b2=1+(i-1)*NA+(k+1)%NA,c=a+NA,d=b2+NA;idx.push(a,b2,c,b2,d,c);}
+  const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));geo.setAttribute('color',new THREE.Float32BufferAttribute(col,3));geo.setIndex(idx);geo.computeVertexNormals();
+  if(!_moundMat)_moundMat=new THREE.MeshStandardMaterial({vertexColors:true,roughness:0.95,flatShading:true});
+  G3.add(new THREE.Mesh(geo,_moundMat));
+  const mats=[M.beam,M.beam,M.stone,M.stone,M.wall,M.roof].map(m=>charred?charMat(m):m);
+  for(let k=0;k<56;k++){const r=Math.sqrt(R())*0.9,a=R()*Math.PI*2,x=Math.cos(a)*A*r,z=Math.sin(a)*C*r,t=k%6,m=new THREE.Mesh(sGeo(THREE.BoxGeometry,1,1,1),mats[t]);
+    let tilt=0.9;
+    if(t<2){m.scale.set(0.22,0.22,1.6+R()*2.6);if(k%4===0)tilt=2.2;}            // คาน (บางอันเสียบเอียงขึ้นฟ้า)
+    else if(t<4)m.scale.set(0.35+R()*0.6,0.25+R()*0.4,0.35+R()*0.6);              // ก้อนหิน
+    else{m.scale.set(1+R()*1.4,0.18,0.7+R()*1.1);tilt=1.3;}                        // ชิ้นผนัง / แผ่นหลังคา
+    m.position.set(x,hAt(r)-0.05+R()*0.15,z);m.rotation.set((R()-0.5)*tilt,R()*6.3,(R()-0.5)*tilt);G3.add(m);}
+  return G3;
+}
 // ความสูงซากเมื่อส่วนนั้นพังหมด (คูณแกนตั้งของโมเดล _broken) — ซากไม่มีการชน เลยให้เตี้ยระดับเข่า
 const BLD_RUBBLE_H=0.28;
 function bldBuild(b,file){
-  const g=new THREE.Group(),chunks=file&&bldHasChunks(),M=bldMats(b);
-  for(let j=0;j<6;j++){
+  const g=new THREE.Group(),chunks=file&&bldHasChunks(),M=bldMats(b),gone=bldGone(b);
+  if(gone)g.add(bldMound(b,M,b.pc.some(q=>q.fl&2)));   // พังครบทั้งหลัง = เนินกองซาก (เดินปีนได้ — host groundH)
+  for(let j=0;j<6&&!gone;j++){
     const q=b.pc[j],f=q.fl,br=f&1;let m;
     if(br){m=(file&&bldFilePiece(b,BLD_PIECES[j]+'_broken'))||bldFallback(b,j,true);m.scale.y*=BLD_RUBBLE_H;}   // ซากทั้งส่วน: กดให้เตี้ย (เดินทะลุได้ ไม่ควรสูงบังตัว)
     else if(!q.cb)m=(file&&bldFilePiece(b,BLD_PIECES[j]))||bldFallback(b,j,false);

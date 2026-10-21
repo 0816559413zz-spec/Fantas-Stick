@@ -29,7 +29,7 @@ ROLE_N:198 takePoison:199
 §201 ความสามารถพื้นฐาน (คลิกซ้าย) ของแต่ละสาย: สะสมสถานะตั้งต้นให้เองทุกๆ …
 PBASIC:202
 
-## js/04-frost-mech.js (101) — สายน้ำแข็ง: ประชิด/ไกล (V) • ฟันดาบ/ขวาน • ไถลน้ำแข็ง • พื้นน้ำแข็ง/ภ…
+## js/04-frost-mech.js (102) — สายน้ำแข็ง: ประชิด/ไกล (V) • ฟันดาบ/ขวาน • ไถลน้ำแข็ง • พื้นน้ำแข็ง/ภ…
 frostBoom:3 meleeHit:10 mirrorPos:21 frostBasic:22 frostSlam3:46 frostSlam:54 frostDash:60 addIce:65 updateIces:66 updateWaves:82 groundH:95
 
 ## js/05-terrain.js (44) — พื้นสูงต่ำ (แผนที่จากไฟล์ Blender — กติกาฝั่งคนปั้นใน MAP-DESIGN.md)
@@ -41,7 +41,7 @@ pyroBigBoom:5 pyroBall:13 pyroBasic:14 addOrbs:31 pyroParry:32 pyroBlock:33 laun
 ## js/07-frost-spells.js (33) — 
 frostGlacier:11
 
-## js/08-storm.js (200) — 
+## js/08-storm.js (200) — สายสายฟ้า (ผู้เล่นออกแบบทั้งหมด — designs/storm.md)
 ST_MAX:5 stGain:6 stSpend:7 stormCone:9 stormLineFoes:14 stormBasic:18 stormTri:41 stormDash:48 stormDashTick:61 stormShieldBlast:69 stormTick:78
 §87 สกิล 1 (ฟรี): เส้นสายฟ้า — ชี้ขึ้นแล้วกดลง 0.5 วิ จากนั้นสายฟ้าผ่าเป็…
 stormLine:90
@@ -55,8 +55,7 @@ stormRailFire:132
 §142 สกิล 6 (3 stacks): ลูกสายฟ้าโดม — ทะยานขึ้น บินเล็ง 3 วิ คลิกยิงลูกสา…
 stormDomeTick:143 stormDomeFire:158 stormDomeSlam:166 updateStorm:171
 
-## js/09-earth.js (244) — สายดิน ⛰️ (ผู้ใช้ออกแบบทั้งหมด — designs/earth.md §0 FINAL SPEC) • ฝั่งโฮสต์
-§8 E_CRUSH = เวลาก่อนหนีบ Tectonic Crush = ช่วง Stand ออกแรงดัน (ช้า) + …
+## js/09-earth.js (244) — 
 EARTH:10 E_SH:10 E_CRUSH_PUSH:10 E_CRUSH_SLIDE:10 E_ENV:10
 §14 ตัวช่วย
 eOn:15 eStand:16 eNoStand:17 eSegD:19 eAdd:20 eCollide:22 eProjHit:29 eKill:32
@@ -92,10 +91,10 @@ G:4 EVL:4 EVN:4 hostLast:4 tickN:4 emit:5 feed:6 banner:7 plist:8 cleanName:9 fr
 §154 ลูปหลักฝั่งโฮสต์
 hostTick:155 angDiff:167 cH:169 vR:170 updatePlayer:172 hitProp:315 damagePropsIn:322 nearUseProp:323 useProp:324
 
-## js/12-buildings.js (404) — สิ่งปลูกสร้างที่พังเป็นชิ้นย่อย (บ้าน) แบบ Battlefield — คู่มือเต็ม: …
-BLDDEF:8 BLD_PIECES:9 BLD_GRID:10 BLD_FIRE:11 BLD_ICE:11 BLD_ROOF_MIN:11 BLDG:12 BLDON:12 genBldg:13 bldRect:23 bldChunk:25 bldAlive:32 bldLocal:33 bldWorld:34 rectDist:35 bldNear:36 hitBldPiece:38 breakBldChunk:49 bldSupport:57 damageEnv:77 bldPieceAt:91 projEl:101 bldPush:106 collideBld:112 updateBldg:127 bldSnap:139 bldParse:145
-§149 ของบังในแผนที่ไฟล์ที่พังได้ (หิน เสา รูปปั้น ต้นไม้ โคมไฟ ลัง ...) — …
-BRKDEF:153 BRK_M:153 BRK_MCOL:153 BRK:154 genBrk:155 brkApply:162 brkStage:166 hitBrk:167 damageBrkIn:175 brkSnap:181 brkParse:182 collideWorld:183 shoot:210 eShoot:231 foesOf:238 breakShield:245 gainUlt:246 lifesteal:247 damage:249 playerDown:303 killProj:320 explode:329 hitTarget:341 updateProjectiles:357
+## js/12-buildings.js (410) — สิ่งปลูกสร้างที่พังเป็นชิ้นย่อย (บ้าน) แบบ Battlefield — คู่มือเต็ม: …
+BLDDEF:8 BLD_PIECES:9 BLD_GRID:10 BLD_FIRE:11 BLD_ICE:11 BLD_ROOF_MIN:11 BLDG:12 BLDON:12 genBldg:13 bldRect:23 bldChunk:25 bldAlive:32 bldLocal:33 bldWorld:34 rectDist:35 bldNear:36 BLD_MOUND:39 bldGone:40 bldMoundAt:41 bldMoundH:42 hitBldPiece:44 breakBldChunk:55 bldSupport:63 damageEnv:83 bldPieceAt:97 projEl:107 bldPush:112 collideBld:118 updateBldg:133 bldSnap:145 bldParse:151
+§155 ของบังในแผนที่ไฟล์ที่พังได้ (หิน เสา รูปปั้น ต้นไม้ โคมไฟ ลัง ...) — …
+BRKDEF:159 BRK_M:159 BRK_MCOL:159 BRK:160 genBrk:161 brkApply:168 brkStage:172 hitBrk:173 damageBrkIn:181 brkSnap:187 brkParse:188 collideWorld:189 shoot:216 eShoot:237 foesOf:244 breakShield:251 gainUlt:252 lifesteal:253 damage:255 playerDown:309 killProj:326 explode:335 hitTarget:347 updateProjectiles:363
 
 ## js/13-enemies.js (168) — ศัตรู (โหมด Co-op)
 spawnEnemy:2 setupWave:19 bossPhase:36 enemySlam:44 updateEnemies:55
@@ -133,7 +132,7 @@ MY:202 myDB:203 mySave:204 myLoad:207 myDecodeReady:213 myPlay:214 myNext:226 my
 §248 เพลงประกอบ (สร้างสดตามแผนที่)
 MUSIC:249 THEMES:250 padNote:255 musicTick:262 toggleMusic:291
 
-## js/19-client.js (186) — 
+## js/19-client.js (186) — ฝั่งแสดงผล (ทุกเครื่อง รวมโฮสต์ ใช้ snapshot เดียวกัน)
 cv:4 cx:4 DPR:5 SW:5 SH:5 resize:6 VIEW:12 screen:13 lastBuffKey:13 overShown:13 lastCount:13 PARTS:14 TEXTS:14
 §15 งบเอฟเฟกต์ (VFX budget)
 VFXB:20 _apush:21 vfxQual:29 vfxBegin:31 vfxEnd:34 vfxOnce:36 vfxExtra:38 PCOL:39 setScreen:41 onLobby:50 onSnap:56 myPos:64
@@ -159,12 +158,12 @@ ANIM_ALT:48 makeAnimator:49 animResolve:54 animPlay:55 animTick:64 lookTint:82 t
 §148 VFX จากไฟล์ (รายละเอียดฝั่งคนทำอยู่ใน ASSETS.md)
 VFXL:154 FLIPL:154 FLIPS:154 prefetchFx:155 playVfx:156 vfxSeq:202 flipTex:207 playFlip:215 fileFx:230 zoneFx:237 clearVfx:238 updateVfx:239
 
-## js/23-props-bld-view.js (354) — prop ฝั่งแสดงผล
+## js/23-props-bld-view.js (378) — prop ฝั่งแสดงผล
 PROPV:2 propFallback:4 syncProps:32
 §48 บ้านพังเป็นชิ้น ฝั่งแสดงผล
-BLDV:51 CHARM:51 DEBRIS:51 BLD_WALLC:52 _bldIce:53 _halfRoof:53 charMat:54 bldIceMat:58 halfRoofGeo:60 bldMats:68 bldFallback:73 bldFilePiece:109 bldHasChunks:117 bldFallbackChunks:119 bldRubble:127 BLD_RUBBLE_H:133 bldBuild:134 syncBld:157 bldDebris:187 bldChunkFall:210 updateDebris:222 clearDebris:232 drawPropHint:233 syncWalls:241
-§259 ของบังในแผนที่ไฟล์ที่พังได้ ฝั่งแสดงผล (สถานะจาก BRK[].st — host js/1…
-BRKV:262 BRK_COL:262 brkSetup:263 BRK_CM:281 brkCrackMat:282 brkClip:298 brkYc:313 brkStump:315 brkSync:325 BRK_ZERO:343 brkFall:345
+BLDV:51 CHARM:51 DEBRIS:51 BLD_WALLC:52 _bldIce:53 _halfRoof:53 charMat:54 bldIceMat:58 halfRoofGeo:60 bldMats:68 bldFallback:73 bldFilePiece:109 bldHasChunks:117 bldFallbackChunks:119 bldRubble:127 _moundMat:133 bldMound:134 BLD_RUBBLE_H:156 bldBuild:157 syncBld:181 bldDebris:211 bldChunkFall:234 updateDebris:246 clearDebris:256 drawPropHint:257 syncWalls:265
+§283 ของบังในแผนที่ไฟล์ที่พังได้ ฝั่งแสดงผล (สถานะจาก BRK[].st — host js/1…
+BRKV:286 BRK_COL:286 brkSetup:287 BRK_CM:305 brkCrackMat:306 brkClip:322 brkYc:337 brkStump:339 brkSync:349 BRK_ZERO:367 brkFall:369
 
 ## js/24-minions-view.js (68) — สัตว์เวท: โมเดลโปร่งแสง + ซิงก์จาก snapshot (MN)
 MM3:2 makeMinion:3 syncMins:36 drawMinBars:58
@@ -282,7 +281,7 @@ NOISE3D:240 FIRE3D:249 _fvIdx:254 fireVol:255 fireVolTemp:299
 §300 ไฟ 3 มิติที่ bake จาก Blender ทั้งก้อน (วิธี 1 — ผู้เล่นเลือก 2026-10…
 FSEQ:304 fireSeqLoad:305 fireSeqReady:309 fireSeqVol:310 fireSeqAt:331 _sqA:338 _sqB:338 _sqX:338 _sqY:338 _sqZ:338 _sqM:338 fireSeqLine:339
 
-## js/43-frost-vfx.js (144) — 
+## js/43-frost-vfx.js (144) — น้ำแข็ง VFX จาก Blender + Glacier Mist (หมอกเย็นตอนน้ำแข็งโผล่)
 FROST_U:6
 §7 shader น้ำแข็ง: ฐานน้ำเงินเข้ม → ปลายขาว • ขอบสว่าง (fresnel) • รอยร้…
 ICE_VS:8 ICE_FS:10 _iceShM:23 iceShaderMat:24 iceModel:28
@@ -334,7 +333,7 @@ fxBind:305
 §316 แม่แบบ playFx เป็นไฟล์ (assets/fx/tpl/*, sig/*, rec/*)
 fxTpl:318
 
-## js/46-fx-make.js (261) — 
+## js/46-fx-make.js (261) — ของที่สร้างเองใน VFX Studio (asset ของเอฟเฟกต์) — ใช้ทั้งในเกมและในสตูดิโอ (สตูดิโอเรียกฟ…
 FXMK:10 MKD:11 mkRng:12 mkHash:13 mkNoise:15 mkL:17 mkR2:18
 §19 ที่เก็บจุด/สามเหลี่ยม
 mkG:21 mkPc:22 mkV:23 mkQ:24 mkAppend:25 mkCopy:26 mkFlat:27 _mkv:28 mkXf:29 mkThree:32 mkTRS:34 mkGrid:37
@@ -389,15 +388,15 @@ RAG:10 RAGJ:23 RAGB:29 RAGS:33 RAGMIN:37 RAGHINGE:39 _rv1:40 _rv2:40 _rv3:40 _rq
 ## js/49-cloth.js (120) — 
 CLOTH:10 CL_ROWS:22 CL_NC:22 CL_GAP:22 CL_IN:22 _clV:23 _clA:23 _clB:23 clPinK:25 clBind:27 clothSetup:30 clTargets:63 clReset:67 clCapsule:69 _clO:73 clWorld:74 clWorldHit:83 clStep:88 clDraw:100 clothTick:107
 
-## js/50-grass.js (186) — 
+## js/50-grass.js (186) — ลม + หญ้า 3D (ภาพบนเครื่องตัวเองล้วน ไม่แตะโฮสต์/โปรโตคอล)
 AIR:9 AIR_MAP:16 airGust:18 airGs:21 airMark:23 airForMap:26 _airV:27 airAt:28 airGv:34 airTick:35
 §38 ต่อเข้ากับเอฟเฟกต์เดิม (ไม่ต้องแก้ทุกสกิล): แสงวาบ = ลมกระโชก • วงคลื…
 CLW:48
 §50 หญ้า
 GRASS:52 GR_GLSL_V:53 GR_BEGIN:55 grassMat:79 grassBuild:93 _grBasic:107 grassBake:108 grassCount:158 grassTick:163
 
-## js/51-warmup.js (71) — 
+## js/51-warmup.js (71) — อุ่นเครื่องช่วงนับถอยหลัง (ผู้ใช้ 2026-10-21: "ช่วงนับถอยหลังให้โหลดสิ่งที่ต้องใช้ — กดสก…
 WARM:11 WARM_FXDIR:12 WARM_COMMON:12 WARM_X:13 WARM_Y:13 warmKeep:15 warmCompile:21 WARM_SKIP:24 warmFx:25 warmFxEnd:33 warmGather:35 warmPaths:37 warmStep:39 warmTick:54
 §63 ภาพจากโค้ดของแต่ละสาย (เฟรมละฟังก์ชัน)
 
-(52 files, 12030 lines)
+(52 files, 12061 lines)
