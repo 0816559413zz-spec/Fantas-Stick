@@ -8,7 +8,9 @@
 Object.assign(PCOL,{erock:'#c9a36a',eslab:'#d8b47a'});
 const ECOL={stone:'#8f7a5c',dark:'#5e4d38',dust:'#b39a74',glow:'#ffcf6a',mud:'#5b4128',sand:'#c9a878'};
 // โล่ Stand ใหญ่: ค่าเริ่มต้น = แบบเดิม (ผู้ใช้เลือก) • แบบตัวใหญ่เท่า Stand ตอน BA ชาร์จ ยังเก็บไว้: เปิดเกมด้วย ?eshield=big
-const EGUARD_BIG=/[?&]eshield=big/.test(location.search),EGUARD=EGUARD_BIG?{sc:1.55,back:12,side:5,z:0.1}:{sc:1.3,back:10,side:4,z:0.2};
+// ท่ากัน (ผู้ใช้ 2026-10-21): อยู่หลังเรา ก้มตัวลงมาคลุม ไหล่/หัวสูงกว่าเราหน่อย • back = ฐานอยู่หลังเรากี่ px • side = เลื่อนไปขวา px • z = ฐานลอย(+)/จม(-) • lean = ก้ม (rad)
+// แขนกัน (R) พับศอกบังหน้า: fist = จุดกำปั้น [หน้า px, ขวา px, สูง] • elbow = ทิศศอก [ซ้าย, หน้า, ลง]
+const EGUARD_BIG=/[?&]eshield=big/.test(location.search),EGUARD=EGUARD_BIG?{sc:1.55,back:69,side:12,z:0.2,lean:0.8,fist:[14,12,1.85],elbow:[0.8,1,0.3]}:{sc:1.3,back:58,side:10,z:0.49,lean:0.8,fist:[14,12,1.75],elbow:[0.8,1,0.3]};
 var EV={st:new Map(),es:new Map(),anims:[],fog:null,crush:[],mark:null};
 const eW=(x,y,h)=>new THREE.Vector3(tx(x),(h||0)+GY(x,y),tz(y));
 const eYaw=(x1,y1,x2,y2)=>Math.atan2(x2-x1,y2-y1);
@@ -125,8 +127,8 @@ function standPose(S,k){const R=S.R,L=S.L;
     S.head.rotation.y=-tw*0.6;   // หัวยังมองเป้า
     R.up.rotation.x=lerp(lerp(-0.45,-0.85,w),-1.42,p)*(1-0.35*rc);R.up.rotation.z=lerp(0.4*w,-0.18,p)*keep;R.fo.rotation.x=lerp(lerp(-0.5,-1.55,w),-0.08,p)+(-0.7*rc);
     L.up.rotation.x=lerp(lerp(-0.35,-1.15,w),-0.45,p)*keep;L.up.rotation.z=lerp(-0.2*w,0.35,p)*keep;L.fo.rotation.x=lerp(lerp(-0.6,-1.35,w),-1.0,p);}
-  if(k.guard){   // ท่ากัน: Stand ใหญ่โน้มตัวลงจากข้างหลัง เอาแขนขวาลงมาบังหน้าเป็นแนวตั้ง (แขนซ้ายจาง)
-    S.body.rotation.x=0.42;R.up.rotation.x=-1.5;R.up.rotation.z=-1.0;R.fo.rotation.x=1.5;L.up.rotation.x=-0.7;L.up.rotation.z=0.3;L.fo.rotation.x=-0.6;}
+  if(k.guard){   // ท่ากัน: Stand ใหญ่ก้มตัวลงคลุมเราจากข้างหลัง • แขน R พับมาบังหน้า (IK ใน earthFX) • แขน L ห้อยข้างตัว จางครึ่งหนึ่ง
+    S.body.rotation.x=k.gLean||0.62;L.up.rotation.x=-0.55;L.up.rotation.z=-0.3;L.fo.rotation.x=-0.75;}
   if(k.hold){for(const [A,s] of [[R,1],[L,-1]]){A.up.rotation.x=-1.4;A.up.rotation.z=-s*0.3;A.fo.rotation.x=-0.35;}}
   if(k.raise!==undefined){const r=k.raise;for(const [A,s] of [[R,1],[L,-1]]){A.up.rotation.x=lerp(-0.6,-2.95,r);A.up.rotation.z=-s*0.15*r;A.fo.rotation.x=-0.3*r;}}
   if(k.slam!==undefined){const r=k.slam;for(const [A,s] of [[R,1],[L,-1]]){A.up.rotation.x=lerp(-2.95,-0.75,r);A.up.rotation.z=-s*0.2;A.fo.rotation.x=-0.2;}S.body.rotation.x=0.45*r;}
@@ -219,11 +221,12 @@ function earthFX(o,p,pz,now,dt){
       G2.g.scale.setScalar(1.55);G2.g.position.copy(eW(p.x-fx*24,p.y-fy*24,z0-0.3));G2.g.rotation.y=Math.atan2(fx,fy);gop=1;
       if(s.gSlam>0){s.gSlam-=dt;gp.slam=clamp(1-(s.gSlam-0.33)/0.12,0,1);if(s.gSlam<=0.2)gop=Math.max(0,s.gSlam/0.2);}else{gp.raise=Math.min(1,A[9]/0.4);gp.lean=-0.15;G2.g.position.y+=Math.sin(t*40)*0.02*Math.min(1,A[9]);}}
     else if(p.sh&&!broken){   // โล่: Stand ใหญ่ชิดหลังเรา เอามือมาบังข้างหน้า
-      G2.g.scale.setScalar(EGUARD.sc);G2.g.position.copy(eW(p.x-fx*EGUARD.back+rx*EGUARD.side,p.y-fy*EGUARD.back+ry*EGUARD.side,z0+EGUARD.z));G2.g.rotation.y=Math.atan2(fx,fy);gp.guard=1;gop=Math.min(1,(s.gopL||0)+dt*8);}}
+      G2.g.scale.setScalar(EGUARD.sc);G2.g.position.copy(eW(p.x-fx*EGUARD.back+rx*EGUARD.side,p.y-fy*EGUARD.back+ry*EGUARD.side,z0+EGUARD.z));G2.g.rotation.y=Math.atan2(fx,fy);gp.guard=1;gp.gLean=EGUARD.lean;gop=Math.min(1,(s.gopL||0)+dt*8);}}
   if(!gop)gop=Math.max(0,(s.gopL||0)-dt*4);
   if(gop>0.02&&(s.gopL||0)<=0.02)eAppear(p.x-fx*20,p.y-fy*20,z0,1.6);
-  // Stand ใหญ่อยู่ระหว่างกล้องกับตัวเรา → ของเราเองให้โปร่งครึ่งหนึ่ง (ไม่บังจอ) ยกเว้นตอนอัลติบนฟ้า
-  s.gopL=gop;standOp(G2,gop*(p.id===NET.myId?(A[3]===1||s.ugT>=0?0.75:0.5):1),gp.guard?0.12:1);if(gop>0){standPose(G2,gp);if(Math.random()<0.6)eSandFall(G2,p.x-fx*20,p.y-fy*20,z0+1.3,1);}
+  // Stand ใหญ่อยู่ระหว่างกล้องกับตัวเรา → ของเราเองให้โปร่ง (ไม่บังจอ) ตอน BA ชาร์จ 0.5 / อัลติ 0.75 • ท่ากันโล่ = ทึบชัด (ผู้ใช้ 2026-10-21) แขน L จางครึ่ง
+  s.gopL=gop;standOp(G2,gop*(p.id===NET.myId&&!gp.guard?(A[3]===1||s.ugT>=0?0.75:0.5):1),gp.guard?0.5:1);if(gop>0){standPose(G2,gp);if(Math.random()<0.6)eSandFall(G2,p.x-fx*20,p.y-fy*20,z0+1.3,1);
+    if(gp.guard){const F=EGUARD.fist,E=EGUARD.elbow;G2.g.updateMatrixWorld(true);eArmIK(G2.R,eW(p.x+fx*F[0]+rx*F[1],p.y+fy*F[0]+ry*F[1],z0+F[2]),new THREE.Vector3(-rx*E[0]+fx*E[1],-E[2],-ry*E[0]+fy*E[1]).normalize());}}
   // วงเตือน BA ชาร์จ (ทุกคนเห็น)
   if(A[9]>0){if(!s.warn)s.warn=makeWarn();eWarnAt(s.warn,p.x+fx*170,p.y+fy*170,180,Math.min(1,A[9]/2));}else if(s.warn)s.warn.visible=false;
   // ท่าตัวเรา: ชูไม้ตอนชาร์จ BA / Auger ระดับสูงสุด / ถือเสา • ฟาดไม้ลงตอนปล่อย
