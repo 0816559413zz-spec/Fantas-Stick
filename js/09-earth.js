@@ -85,8 +85,8 @@ function earthPunch(p){const t=earthBATarget(p);let x,y,tx2,ty2;
 // BA ชาร์จ: วงเตือนรัศมี 180 หน้าเรา (ศูนย์กลางห่าง 170) ⚠ ระยะศูนย์กลางเป็นการตีความ • 2 วิ แล้วทุบ 50 + สตัน 0.7 วิ • คูลดาวน์ 6 วิ
 function earthCBStart(p){p.ecb={t:0};p.shieldOn=false;emit({k:'efx',z:'ecbon',x:Math.round(p.x),y:Math.round(p.y),h:p.z,id:p.id});}
 function earthCBSlam(p){p.ecb=null;p.ecbCd=6;const x=p.x+Math.cos(p.ang)*170,y=p.y+Math.sin(p.ang)*170;
-  for(const t of foesIn(p.team,x,y,180,p.z+5))aoeHit(p,t,50,t=>addStun(t,0.7));damageEnv(x,y,180,50,p.id,'rock',0.6);
-  emit({k:'efx',z:'ecbslam',x:Math.round(x),y:Math.round(y),h:0,r:180,a:Math.round(p.ang*100)/100,id:p.id});}
+  emit({k:'efx',z:'ecbslam',x:Math.round(x),y:Math.round(y),h:0,r:180,a:Math.round(p.ang*100)/100,id:p.id});   // ภาพทุบก่อนเสมอ (ถ้าดาเมจ/ทำลายของสะดุด effect ยังขึ้น)
+  for(const t of foesIn(p.team,x,y,180,p.z+5))aoeHit(p,t,50,t=>addStun(t,0.7));damageEnv(x,y,180,50,p.id,'rock',0.6);}
 
 // ---------- Dash: Stand Rampage / Rock Boost Escape ----------
 function earthDash(p,inp,pr,dt,setCd){

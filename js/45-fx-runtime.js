@@ -17,7 +17,7 @@ function fxBoot(){
     // โหลดล่วงหน้า: ทุกเอฟเฟกต์ที่ผูกกับ event + แม่แบบ (playFx)
     const need=new Set();for(const k in FXR.bind)for(const e of [].concat(FXR.bind[k]))if(e&&e.fx)need.add(e.fx);
     for(const k in FXR.over)for(const e of [].concat(FXR.over[k]))if(e&&e.fx)need.add(e.fx);
-    for(const n in FXR.index.fx)if(n.startsWith('tpl/')||n.startsWith('sig/'))need.add(n);
+    for(const n in FXR.index.fx)need.add(n);   // โหลดทุกไฟล์ (รวม ~130KB) — เดิมโหลดแค่ tpl/sig → fxPlay ที่โค้ดเรียกตรง ๆ (earth/cbslam ฯลฯ) ครั้งแรกไม่ขึ้น
     need.forEach(n=>fxLoad(n));
   }).catch(e=>console.warn('fx runtime: โหลด schema ไม่ได้ — ใช้ภาพจากโค้ดเดิม',e));}
 // ผูกชั่วคราวเพื่อทดลอง (ปุ่ม "ลองในเกม" ของสตูดิโอ): URL ?fxbind=efx:dfboom=fire/dfboom:replace,... หรือ localStorage wd_fxbind (JSON แบบ bind.json)

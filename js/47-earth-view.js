@@ -196,11 +196,13 @@ function earthFX(o,p,pz,now,dt){
   else if(A[1]||s.rs>=0){   // Rampage: วิ่ง (ท่าใน standRun) • จบ = ชูสองหมัดแล้วทุบพื้น (s.rs เริ่มจาก event eslam)
     const sm=s.rs>=0;if(!sm){s.rT=(s.rT||0)+dt;s.ra=p.a;}else{s.rs+=dt;if(s.rs>0.55)s.rs=-1;}const a=s.ra===undefined?p.a:s.ra;
     op=sm?clamp((0.55-s.rs)/0.2,0,1):1;S.g.position.copy(eW(p.x,p.y,z0));S.g.rotation.y=Math.atan2(Math.cos(a),Math.sin(a));
-    pose={t,run:1,rt:s.rT||0,rise:sm?1:clamp(((s.rT||0)-1.0)/0.16,0,1),sl:sm?Math.max(0.001,clamp(s.rs/0.07,0,1)):0};}
-  else{op=Math.max(0,S.op-dt*5);s.rT=0;}
+    pose={t,run:1,rt:s.rT||0,rise:sm?1:clamp(((s.rT||0)-1.0)/0.16,0,1),sl:sm?Math.max(0.001,clamp(s.rs/0.07,0,1)):0};s.rLP=pose;}
+  // Rampage จบแต่ event ทุบยังไม่มา (หรือจบแบบเงียบ) → ค้างท่าเดิมแล้วจางไปเลย ไม่ยืดตัวลุกขึ้นยืน
+  else if(s.rLP&&S.op>0.02){op=Math.max(0,S.op-dt*5);pose=s.rLP;pose.t=t;S.g.position.copy(eW(p.x,p.y,z0));if(op<=0.02)s.rLP=null;}
+  else{op=Math.max(0,S.op-dt*5);s.rT=0;s.rLP=null;}
   standOp(S,op);if(op>0){standPose(S,pose);eSandFall(S,(S.g.position.x/S3)+MW/2,(S.g.position.z/S3)+MH/2,S.g.position.y-GY(p.x,p.y)+0.6,1);}
   // ขี่ Stand ตอน Rampage: ยกตัว + ฝุ่นตลบ + หินกระเด็นหลัง + รอยพื้นแตก + เกราะลม/เส้นลม (eRampWind) + เท้ากระแทกพื้น
-  s.lift=lerp(s.lift,A[1]||s.rs>=0&&s.rs<0.3?1.9:0,1-Math.exp(-12*dt));if(s.lift>0.01)o.g.position.y+=s.lift;
+  s.lift=lerp(s.lift,A[1]||s.rs>=0&&s.rs<0.3||s.rLP&&S.op>0.5?1.9:0,1-Math.exp(-12*dt));if(s.lift>0.01)o.g.position.y+=s.lift;
   eRampWind(s,S,p,A[1]&&!(s.rs>=0)&&op>0,t,dt,fx,fy,rx,ry);
   if(A[1]&&!(s.rs>=0)){for(let i=0;i<2;i++)burst(p.x-fx*rnd(10,40)+rnd(-20,20),p.y-fy*rnd(10,40)+rnd(-20,20),ECOL.dust,1,60,1.1,5,{h:0.3,vh:[0.5,2],g:-0.2,smoke:true,grow:1.8});
     if(Math.random()<0.5)eChunks(p.x-fx*15,p.y-fy*15,0.2,1,160,5,0.16);
