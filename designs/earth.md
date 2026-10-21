@@ -55,6 +55,11 @@
 - **Slam rocks (2026-10-21 ผู้ใช้: “เอฟเฟคมันคือหินขึ้นมา แต่ว่ามันอันเล็กเกินไป อยากจะทำให้มันใหญ่เท่าวงทุ่ม”):** the rocks bursting up now fill the **whole slam circle (r180)**, rising from the centre outward fast, then sinking back (VFX `assets/fx/earth/cbslam.fx.json`).
 - ผู้ใช้: “big stand will show up behind u and 2 hand up charging his slam in 2 sec and slam down make floor abit wrecked with explode and ฝุ่นคลุ้ง damage 50 ติด stun 0.7 วิ ระยะ 180 วงกลมด้านหน้ามีวงเตือนบอก วงมี animation คือมีวงเข้มก่อนพอชาจไปก็จะมีสีอ่อนวงกลมค่อยๆเติมวงกลมแรก เป็นเหมือนการบอกเวลาก่อนทุบ big stand same with clapping rock or ulting” • “dont forget own character do the wand up and down animation too”
 
+### Review 4 (2026-10-21) — Rampage / shield / charged BA look
+- **Rampage:** Stand pushes arms forward then folds them to guard its face and keeps them there while ramming; hunched like The Thing (Marvel Rivals); has legs with long heavy strides; meteor-like wind (air shell, lines off the sides and the tip); end slam ("ทุ่ม") much bigger.
+- **Shield:** big Stand behind, leaning down over us, a bit taller than us, ONE folded arm guarding, other arm faded (half visible), body solid/clear.
+- **Charged BA:** Stand raises its hands (ง้าง) then smashes down.
+
 ### Shield — Stand Barrier (numbers unchanged, LOOK changed)
 - **300 HP**, regen after 3 s unused at +20 HP/s, breaks → Stand gone 15 s, comes back with full 300.
 - **Blocks from every direction** (2026-10-21, not only the front) — same 300 HP bar, still breaks at 0. Pose/animation unchanged for now. ผู้ใช้: “block all around too not just infront but dont change pose or animation yet just make it block all direction … it weakness is can be break” (asked: shield bar stays as before).

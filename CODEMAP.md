@@ -18,16 +18,16 @@ PROPDEF:164 PROP_OFF_MODES:171 PROP_USE:173 PROPS:174 PROPON:174 genProps:175
 §195 ตัวละคร: บ้านฮอกวอตส์ + หน้าตา
 HOUSES:197 HAIRC:202 HAIRSTY:204 WOODC:206 WOODN:207 WCOREC:208 WCOREN:209 WANDSTY:210 EYEC:211 SKINC:212 CLOAKC:213 TIESTY:214 LOOKK:215 LOOKN:215 lookStr:216 parseLook:217 randLook:218 LOOKS:219 LOOKP:219 KITS:219 getKit:220 getLook:221 CREST_SH:222 CREST_PAT:223 starPts:228 CREST_ANI:230 crestSVG:236 houseColor:244 TEAMC:245 TEAMN:245 MODES:246 PDEF:257 EDEF:284 POOLS:296 CDK:306 BUFFS:307
 
-## js/03-spells-core.js (218) — 
-ICONS:8 ICOALIAS:9 hasIco:10 ICOBASE:12 icoURL:13 ICO:14 icoTint:15 icoHTML:24 PATHS:25 SPELL_LIST:33 SPELLS:33 defSpell:34 SLOTK:35 BRMAP:35 KITP:36 parseKit:37 cleanKit:53 setKit:54
-§56 สถานะ (ใช้ได้ทั้งผู้เล่นและศัตรู)
-isBig:57 ccScale:59 ccTouch:60 addStun:61 addRoot:62 addFreeze:63 addSlow:68 addChill:69 ignite:74 shock:82 knock:83 addWard:84 addFrostSlow:86 frostSlow:87 moveMul:94 BRN_MAX:96 addBurn:97 addXBurn:99 addPoison:100 addSil:101 addFear:102 addBlind:103 addMark:104 healT:106 tickStatus:111 clearStatus:131 fxMask:132
-§134 วัตถุในสนามที่คาถาสร้าง: โซน / ฟ้าผ่าหน่วงเวลา / กำแพง / ช่องร่ายต่อเ…
-foesIn:135 shieldFaces:142 aoeHit:148 addZone:154 updateZones:159 addStrike:170 updateStrikes:171 addWall:172 updateWalls:173 updateChan:177 updateSpells:181 aimPoint:183
-§195 ตัวช่วยคอมโบ (ทุกสายใช้หลักเดียวกัน: ตั้งต้น → ต่อยอด → ปิดจบ)
-ROLE_N:197 takePoison:198
-§200 ความสามารถพื้นฐาน (คลิกซ้าย) ของแต่ละสาย: สะสมสถานะตั้งต้นให้เองทุกๆ …
-PBASIC:201
+## js/03-spells-core.js (219) — 
+ICONS:8 ICOALIAS:9 hasIco:10 ICOBASE:12 icoURL:13 ICO:14 icoTint:15 icoHTML:24 PATHS:25 SPELL_LIST:34 SPELLS:34 defSpell:35 SLOTK:36 BRMAP:36 KITP:37 parseKit:38 cleanKit:54 setKit:55
+§57 สถานะ (ใช้ได้ทั้งผู้เล่นและศัตรู)
+isBig:58 ccScale:60 ccTouch:61 addStun:62 addRoot:63 addFreeze:64 addSlow:69 addChill:70 ignite:75 shock:83 knock:84 addWard:85 addFrostSlow:87 frostSlow:88 moveMul:95 BRN_MAX:97 addBurn:98 addXBurn:100 addPoison:101 addSil:102 addFear:103 addBlind:104 addMark:105 healT:107 tickStatus:112 clearStatus:132 fxMask:133
+§135 วัตถุในสนามที่คาถาสร้าง: โซน / ฟ้าผ่าหน่วงเวลา / กำแพง / ช่องร่ายต่อเ…
+foesIn:136 shieldFaces:143 aoeHit:149 addZone:155 updateZones:160 addStrike:171 updateStrikes:172 addWall:173 updateWalls:174 updateChan:178 updateSpells:182 aimPoint:184
+§196 ตัวช่วยคอมโบ (ทุกสายใช้หลักเดียวกัน: ตั้งต้น → ต่อยอด → ปิดจบ)
+ROLE_N:198 takePoison:199
+§201 ความสามารถพื้นฐาน (คลิกซ้าย) ของแต่ละสาย: สะสมสถานะตั้งต้นให้เองทุกๆ …
+PBASIC:202
 
 ## js/04-frost-mech.js (100) — สายน้ำแข็ง: ประชิด/ไกล (V) • ฟันดาบ/ขวาน • ไถลน้ำแข็ง • พื้นน้ำแข็ง/ภ…
 frostBoom:3 meleeHit:10 mirrorPos:21 frostBasic:22 frostSlam3:46 frostSlam:54 frostDash:60 addIce:65 updateIces:66 updateWaves:82 groundH:95
@@ -41,7 +41,7 @@ pyroBigBoom:5 pyroBall:13 pyroBasic:14 addOrbs:31 pyroParry:32 pyroBlock:33 laun
 ## js/07-frost-spells.js (33) — 
 frostGlacier:11
 
-## js/08-storm.js (200) — สายสายฟ้า (ผู้เล่นออกแบบทั้งหมด — designs/storm.md)
+## js/08-storm.js (200) — 
 ST_MAX:5 stGain:6 stSpend:7 stormCone:9 stormLineFoes:14 stormBasic:18 stormTri:41 stormDash:48 stormDashTick:61 stormShieldBlast:69 stormTick:78
 §87 สกิล 1 (ฟรี): เส้นสายฟ้า — ชี้ขึ้นแล้วกดลง 0.5 วิ จากนั้นสายฟ้าผ่าเป็…
 stormLine:90
@@ -132,7 +132,7 @@ MY:202 myDB:203 mySave:204 myLoad:207 myDecodeReady:213 myPlay:214 myNext:226 my
 §248 เพลงประกอบ (สร้างสดตามแผนที่)
 MUSIC:249 THEMES:250 padNote:255 musicTick:262 toggleMusic:291
 
-## js/19-client.js (186) — ฝั่งแสดงผล (ทุกเครื่อง รวมโฮสต์ ใช้ snapshot เดียวกัน)
+## js/19-client.js (186) — 
 cv:4 cx:4 DPR:5 SW:5 SH:5 resize:6 VIEW:12 screen:13 lastBuffKey:13 overShown:13 lastCount:13 PARTS:14 TEXTS:14
 §15 งบเอฟเฟกต์ (VFX budget)
 VFXB:20 _apush:21 vfxQual:29 vfxBegin:31 vfxEnd:34 vfxOnce:36 vfxExtra:38 PCOL:39 setScreen:41 onLobby:50 onSnap:56 myPos:64
@@ -261,8 +261,7 @@ trOpenF:2 trKey:2 trN:2 TR_OPTS:3 trToggle:4 trSend:9 trSync:14 hovEl:62
 §63 หน้าตั้งค่า
 setRow:64 setTog:65 setTab:66 XHC:67 XHN:67 setOpts:68 renderSettings:69 drawXhPrev:86 openSettings:87 closeSettings:88 modeIcon:140 modeTitle:141 renderLobby:142
 
-## js/41-debug.js (141) — เครื่องมือทดสอบสมดุล (ใช้ผ่านคอนโซล WD.bal / WD.dmgTest เท่านั้น ผู้เล่นปกติไม่เห็น)
-§5 บอทต่อสู้แบบง่ายๆ: เล็งนำเป้า เดินรักษาระยะ+ส่ายไปมา ร่ายคาถาทุกครั้ง…
+## js/41-debug.js (141) — 
 botBrain:6 _obsKeep:47 balArena:48 balReset:49 balDuel:53 balTour:68 balCoop:82 balSpellTest:98
 §117 Service Worker (sw.js): เก็บไฟล์เกมไว้ในเครื่อง เปิดครั้งต่อไปเร็วขึ้…
 SWK:118 swSetup:119
@@ -282,7 +281,7 @@ NOISE3D:240 FIRE3D:249 _fvIdx:254 fireVol:255 fireVolTemp:299
 §300 ไฟ 3 มิติที่ bake จาก Blender ทั้งก้อน (วิธี 1 — ผู้เล่นเลือก 2026-10…
 FSEQ:304 fireSeqLoad:305 fireSeqReady:309 fireSeqVol:310 fireSeqAt:331 _sqA:338 _sqB:338 _sqX:338 _sqY:338 _sqZ:338 _sqM:338 fireSeqLine:339
 
-## js/43-frost-vfx.js (144) — น้ำแข็ง VFX จาก Blender + Glacier Mist (หมอกเย็นตอนน้ำแข็งโผล่)
+## js/43-frost-vfx.js (144) — 
 FROST_U:6
 §7 shader น้ำแข็ง: ฐานน้ำเงินเข้ม → ปลายขาว • ขอบสว่าง (fresnel) • รอยร้…
 ICE_VS:8 ICE_FS:10 _iceShM:23 iceShaderMat:24 iceModel:28
@@ -334,7 +333,7 @@ fxBind:305
 §316 แม่แบบ playFx เป็นไฟล์ (assets/fx/tpl/*, sig/*, rec/*)
 fxTpl:318
 
-## js/46-fx-make.js (261) — ของที่สร้างเองใน VFX Studio (asset ของเอฟเฟกต์) — ใช้ทั้งในเกมและในสตูดิโอ (สตูดิโอเรียกฟ…
+## js/46-fx-make.js (261) — 
 FXMK:10 MKD:11 mkRng:12 mkHash:13 mkNoise:15 mkL:17 mkR2:18
 §19 ที่เก็บจุด/สามเหลี่ยม
 mkG:21 mkPc:22 mkV:23 mkQ:24 mkAppend:25 mkCopy:26 mkFlat:27 _mkv:28 mkXf:29 mkThree:32 mkTRS:34 mkGrid:37
@@ -356,35 +355,37 @@ fxWarpMake:219 fxWarpTick:231
 §237 ไฟ 3 มิติจากการจำลอง (ชั้น vol) — ไฟล์รูปแบบเดียวกับที่เพื่อน bake จา…
 FXVOL:240 fxVolLoad:241 fxVolTex:245 fxVolSet:248 fxVolReady:249 fxVolMake:250 fxVolTick:253 fxPreAssets:258 fxAssetsWait:260
 
-## js/47-earth-view.js (433) — สายดิน ⛰️ — ภาพฝั่งเครื่องเล่น (Stand / Stand ใหญ่ / กำแพง / เสา / เนิน / ฝุ่น / สว่าน / …
-ECOL:9 EGUARD_BIG:11 EGUARD:11 EV:12 eW:13 eYaw:14
-§15 ลายผิว (วาดเองบน canvas: หิน/ทราย + รอยร้าว + ขอบบล็อกแบบ Roblox)
-ETEX:16 eTex:17 eFadeTex:31 eMat:33 eTMat:34 rockGeo:35 _eChunkM:39 eChunks:40
-§42 Stand (บล็อกหิน/ทรายครึ่งตัวบน)
-makeStand:44 standOp:74 _ikDn:77 eArmIK:78 standPose:85 eState:104 eStandOf:105 eGiantOf:106 eSandFall:108 eAppear:109 eAim:111
-§114 วงเตือนบนพื้น (BA ชาร์จ / จุดปาเสา): วงเข้มก่อน แล้วสีอ่อนค่อย ๆ เติม…
-makeWarn:115 eWarnAt:120
-§121 ทุกเฟรม: ผู้เล่นสายดิน (เรียกจาก syncPlayers)
-earthFX:122
-§200 สว่าน (ref: designs/earth_ref/drill_ref.png): หินแหลมเรียวเป็นตัวหลัก…
-eSteelEnv:202 eHeatTex:207 EDR:212 eDrillGeo:213 makeDrill:219 drillHeat:226
-§228 เสายักษ์ (ref: designs/earth_ref/pillar_ref.png): เสาเหลี่ยมยาว ปลายห…
-makePillar:229
-§235 กระสุนหิน
-earthProjMesh:236 makeSlab:241
-§244 สิ่งก่อสร้าง + ฝุ่น (เรียกจาก render loop)
-earthClear:245 eMakeSO:250 syncEarth:266 earthFog:304 _eCamT:307 eAnim:308 eDebris:309 eWave:311 eAirWave:313
-§315 event "efx" ของสายดิน (เรียกจากต้น efxFX) — คืน true = จัดการแล้ว
-earthEfx:316 eWindOut:396 eAirCone:402 eDrillFly:404
-§408 บึงโคลน (Mud Swamp + บึงจากเสาอัลติ): คลื่นกระเพื่อมจากกลางไปขอบ แล้ว…
-earthMudZone:409 earthMudSink:416
-§417 HUD ใต้เป้าเล็ง
-drawEarthHud:418
+## js/47-earth-view.js (510) — สายดิน ⛰️ — ภาพฝั่งเครื่องเล่น (Stand / Stand ใหญ่ / กำแพง / เสา / เนิน / ฝุ่น / สว่าน / …
+ECOL:9 EGUARD_BIG:13 EGUARD:13 CB:14 EV:15 eW:16 eYaw:17
+§18 ลายผิว (วาดเองบน canvas: หิน/ทราย + รอยร้าว + ขอบบล็อกแบบ Roblox)
+ETEX:19 eTex:20 eFadeTex:34 eMat:36 eTMat:37 rockGeo:38 _eChunkM:42 eChunks:43
+§45 Stand (บล็อกหิน/ทรายครึ่งตัวบน)
+makeStand:47
+§83 Rampage: เกราะลมหน้า Stand (ผู้ใช้: เหมือนอุกกาบาตตกโลก ต้านลม — เปลื…
+makeBow:85 EBOW:94 _RIM:94 eRampWind:95 eSpikes:107 standOp:112 _ikDn:115 eArmIK:116 standPose:123 _eRq:146 _eRq2:146 _eRx:146 standRun:147 eState:165 eStandOf:166 eGiantOf:167 eSandFall:169 eAppear:170 eAim:172
+§175 วงเตือนบนพื้น (BA ชาร์จ / จุดปาเสา): วงเข้มก่อน แล้วสีอ่อนค่อย ๆ เติม…
+makeWarn:176 eWarnAt:181
+§182 ทุกเฟรม: ผู้เล่นสายดิน (เรียกจาก syncPlayers)
+earthFX:183
+§271 สว่าน (ref: designs/earth_ref/drill_ref.png): หินแหลมเรียวเป็นตัวหลัก…
+eSteelEnv:273 eHeatTex:278 EDR:283 eDrillGeo:284 makeDrill:290 drillHeat:297
+§299 เสายักษ์ (ref: designs/earth_ref/pillar_ref.png): เสาเหลี่ยมยาว ปลายห…
+makePillar:300
+§306 กระสุนหิน
+earthProjMesh:307 makeSlab:312
+§315 สิ่งก่อสร้าง + ฝุ่น (เรียกจาก render loop)
+earthClear:316 eMakeSO:321 syncEarth:337 earthFog:375 _eCamT:378 eAnim:379 eDebris:380 eWave:382 eAirWave:384
+§386 event "efx" ของสายดิน (เรียกจากต้น efxFX) — คืน true = จัดการแล้ว
+earthEfx:387 eWindOut:473 eAirCone:479 eDrillFly:481
+§485 บึงโคลน (Mud Swamp + บึงจากเสาอัลติ): คลื่นกระเพื่อมจากกลางไปขอบ แล้ว…
+earthMudZone:486 earthMudSink:493
+§494 HUD ใต้เป้าเล็ง
+drawEarthHud:495
 
 ## js/48-ragdoll.js (227) — 
 RAG:10 RAGJ:23 RAGB:29 RAGS:33 RAGMIN:37 RAGHINGE:39 _rv1:40 _rv2:40 _rv3:40 _rqa:40 _rqb:40 _rm:40 ragBones:41 ragBasis:48 ragTargets:56 ragStart:62 ragBack:88 ragFloor:89 ragStep:90 ragPose:155 ragWrite:170 ragRestore:182 ragEnd:186 ragTick:188 ragHideDead:222
 
-## js/49-cloth.js (101) — ผ้าคลุมจริง (cloth sim) — เฉพาะตัวละครของเราเอง • ภาพบนเครื่องตัวเองล้วน ไม่แตะ sim / hit…
+## js/49-cloth.js (101) — 
 CLOTH:10 CL_ROWS:22 CL_NC:22 CL_GAP:22 CL_IN:22 _clV:23 _clA:23 _clB:23 clPinK:25 clBind:27 clothSetup:30 clTargets:63 clReset:67 clCapsule:69 clStep:72 clDraw:84 clothTick:91
 
-(50 files, 11469 lines)
+(50 files, 11547 lines)

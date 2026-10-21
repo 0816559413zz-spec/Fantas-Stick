@@ -26,9 +26,10 @@ const PATHS=[
   {id:'pyro',n:'สายไฟ',ic:'🔥',col:'#ff6a2a',d:'สะสม Burning (สูงสุด 5 ชั้น) แล้วดีดนิ้วระเบิด — ไม่ว่องไว เน้นระเบิดดาเมจ',combo:'ประกายไฟ/ลูกไฟ/Kindle/Dragon\'s Breath/Ring of Embers/โล่ ใส่ Burning (เผา 0.5/วิ/ชั้น) → Ignition Snap ระเบิดทุกคนที่ติดไฟ ชั้นละ 15 • Blazeform +30% ทุกดาเมจ'},
   {id:'frost',n:'สายน้ำแข็ง',ic:'❄️',col:'#8fe0ff',d:'นักดาบน้ำแข็ง สลับประชิด/ไกลด้วย V — ดาเมจหลักจากดาบ ไกลไว้ติดสลอว์ เน้นคลุกวงใน ทนทาน ดาเมจต่อเนื่อง',combo:'ยิงปกติสะสมสลอว์ (สูงสุด 30%) → Permafrost/Frostbite Aura ซ้อนสลอว์ได้ถึง 80% → ฟันคอมโบจังหวะ 3 ฮีลตัวเอง • Frostforge อัปเกรดอาวุธ • Glacier Rend สร้างทางน้ำแข็ง/ภูเขาน้ำแข็งแล้วกระโดดฟาดลงมา'},
   {id:'storm',n:'สายสายฟ้า',ic:'⚡',col:'#ffe27a',d:'นักสู้ว่องไวแบบ Tracer — ลำสายฟ้าระยะประชิด Dash 3 ชาร์จทะลุศัตรู เก็บ Lightning stack (สูงสุด 5) ไปจ่ายสกิล',combo:'Dash ทะลุศัตรู / เส้นสายฟ้า / ระเบิดโล่ = +1 stack (และยิงครั้งถัดไปเป็นสายฟ้าสามเหลี่ยม) → ใช้ stack ร่ายสกิล: ดูดความเร็ว/ออร์บ 1 • ฟาดสามครั้ง/Railgun 2 • ลูกสายฟ้าโดม 3 • Shock = โคลงสั้นๆ ใช้ Dash ไม่ได้'},
-  {id:'nature',n:'สายธรรมชาติ',ic:'🌿',col:'#6fd57f',d:'วางพิษให้สะสม แล้วระเบิดหนาม — ทนทานและยื้อเกม',combo:'ลูกดอกพิษ/เมฆสปอร์สะสมพิษ 3 ชั้น • เถาวัลย์มัดคนมีพิษนานขึ้น (ลูกดอกใส่ 2 ชั้นทันที) → หนามระเบิดกินพิษเป็นดาเมจและฟื้นเลือดเรา'},
-  {id:'hex',n:'สายคำสาป',ic:'🌑',col:'#b57dff',d:'ตีตราแล้วคำสาปแรงขึ้น — ควบคุมฝูงชนตัวจริง',combo:'ตรามรณะก่อน → ปิดปาก/มืดบอด/หวาดกลัวนานขึ้นกับคนมีตรา → ดูดวิญญาณกินตราเป็นดาเมจ + ฟื้นเลือดเรา'},
-  {id:'summon',n:'สายอัญเชิญ',ic:'🔮',col:'#ff9ad5',d:'เรียกสัตว์เวทมาช่วยสู้ แล้วจุดระเบิดวิญญาณ',combo:'เรียกหมาป่า/สไปรท์/ยักษ์ → วิญญาณพิทักษ์เสริมพลังสัตว์ที่อยู่ใกล้ • ยิงปกติโดนเป้าไหน สัตว์เวทพุ่งใส่เป้านั้น → ระเบิดวิญญาณจุดสัตว์ทั้งหมดเป็นระเบิดและฟื้นเลือด'}
+  // off:1 = ซ่อนไว้ก่อน (ผู้ใช้ 2026-10-21 "remove nature curse and summon for now") — โค้ดยังอยู่ เอากลับได้โดยลบ off:1
+  {id:'nature',off:1,n:'สายธรรมชาติ',ic:'🌿',col:'#6fd57f',d:'วางพิษให้สะสม แล้วระเบิดหนาม — ทนทานและยื้อเกม',combo:'ลูกดอกพิษ/เมฆสปอร์สะสมพิษ 3 ชั้น • เถาวัลย์มัดคนมีพิษนานขึ้น (ลูกดอกใส่ 2 ชั้นทันที) → หนามระเบิดกินพิษเป็นดาเมจและฟื้นเลือดเรา'},
+  {id:'hex',off:1,n:'สายคำสาป',ic:'🌑',col:'#b57dff',d:'ตีตราแล้วคำสาปแรงขึ้น — ควบคุมฝูงชนตัวจริง',combo:'ตรามรณะก่อน → ปิดปาก/มืดบอด/หวาดกลัวนานขึ้นกับคนมีตรา → ดูดวิญญาณกินตราเป็นดาเมจ + ฟื้นเลือดเรา'},
+  {id:'summon',off:1,n:'สายอัญเชิญ',ic:'🔮',col:'#ff9ad5',d:'เรียกสัตว์เวทมาช่วยสู้ แล้วจุดระเบิดวิญญาณ',combo:'เรียกหมาป่า/สไปรท์/ยักษ์ → วิญญาณพิทักษ์เสริมพลังสัตว์ที่อยู่ใกล้ • ยิงปกติโดนเป้าไหน สัตว์เวทพุ่งใส่เป้านั้น → ระเบิดวิญญาณจุดสัตว์ทั้งหมดเป็นระเบิดและฟื้นเลือด'}
 ];
 const SPELL_LIST=[],SPELLS={};
 function defSpell(path,o){o.path=path;o.i=SPELL_LIST.length;SPELL_LIST.push(o);SPELLS[o.id]=o;return o;}
@@ -38,14 +39,14 @@ function parseKit(str){
   if(KITP[str])return KITP[str];
   const a=String(str===undefined||str===null?'':str).split('.').map(Number);
   let path=Number.isInteger(a[0])&&a[0]>=0&&a[0]<PATHS.length?a[0]:0;
-  if(!SPELL_LIST.some(x=>x.path===path&&!x.ult))path=0;
+  if(!SPELL_LIST.some(x=>x.path===path&&!x.ult)||PATHS[path].off)path=0;
   const ids=[];let off=0;
   const main=SPELL_LIST.filter(x=>x.path===path&&!x.ult).map(x=>x.i);
   for(let k=1;k<=4;k++){
     const i=a[k],S=Number.isInteger(i)&&SPELL_LIST[i];
-    if(S&&!S.ult&&!ids.includes(i)&&(S.path===path||off<2)){if(S.path!==path)off++;ids.push(i);}else ids.push(null);
+    if(S&&!S.ult&&!PATHS[S.path].off&&!ids.includes(i)&&(S.path===path||off<2)){if(S.path!==path)off++;ids.push(i);}else ids.push(null);
   }
-  for(let k=0;k<4;k++)if(ids[k]===null){const c=main.find(i=>!ids.includes(i));ids[k]=c!==undefined?c:SPELL_LIST.find(x=>!x.ult&&!ids.includes(x.i)).i;}
+  for(let k=0;k<4;k++)if(ids[k]===null){const c=main.find(i=>!ids.includes(i));ids[k]=c!==undefined?c:SPELL_LIST.find(x=>!x.ult&&!PATHS[x.path].off&&!ids.includes(x.i)).i;}
   const k={path,ids,ult:SPELL_LIST.find(x=>x.path===path&&x.ult).i};
   k.str=[path,...ids].join('.');
   return KITP[str]=k;
