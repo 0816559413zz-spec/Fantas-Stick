@@ -90,7 +90,7 @@ function clStep(C,h,gy,caps,bv,W){const P=C.P,Q=C.Q,T=C.T,pk=C.pk,E=C.E,N=C.N,g=
     if(k>=1){P[i]=Q[i]=T[i];P[i+1]=Q[i+1]=T[i+1];P[i+2]=Q[i+2]=T[i+2];continue;}
     const fl=(1-k)*CLOTH.FLUT*h*h*Math.sin(C.t*7+n*0.37);
     let vx=(P[i]-Q[i])*D,vy=(P[i+1]-Q[i+1])*D,vz=(P[i+2]-Q[i+2])*D;const bx=bv.x*h,by=bv.y*h,bz=bv.z*h,rx=vx-bx,ry=vy-by,rz=vz-bz,vm=Math.hypot(rx,ry,rz),mx=CLOTH.VMAX*h;if(vm>mx){const s=mx/vm;vx=bx+rx*s;vy=by+ry*s;vz=bz+rz*s;}   // จำกัดความเร็วผ้าเทียบกับตัว (วิ่ง/พุ่งเร็วแค่ไหนผ้าก็ตามทัน)
-    Q[i]=P[i];Q[i+1]=P[i+1];Q[i+2]=P[i+2];P[i]+=vx+fl;P[i+1]+=vy+g;P[i+2]+=vz+fl;
+    const wk=(1-k)*h*h;Q[i]=P[i];Q[i+1]=P[i+1];Q[i+2]=P[i+2];P[i]+=vx+fl+CLW.x*wk;P[i+1]+=vy+g;P[i+2]+=vz+fl+CLW.z*wk;   // CLW = ลม ณ ตัวเรา (js/50)
     if(k>0)for(let q=0;q<3;q++)P[i+q]+=(T[i+q]-P[i+q])*k;}
   for(let it=0;it<CLOTH.IT;it++){
     for(let e=0;e<E.length;e+=4){const a=E[e]*3,b=E[e+1]*3,wa=pk[E[e]]>=1?0:1,wb=pk[E[e+1]]>=1?0:1;if(!(wa+wb))continue;
