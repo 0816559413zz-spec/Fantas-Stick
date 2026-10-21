@@ -189,7 +189,7 @@ function eWarnAt(g,x,y,r,k){g.visible=true;g.position.copy(eW(x,y,0));g.scale.se
 function earthFX(o,p,pz,now,dt){
   const A=p.ea;if(!A){if(EV.st.has(p.id)){const s=EV.st.get(p.id);for(const k of ['stand','giant','cgiant'])if(s[k])standOp(s[k],0);if(s.drill)s.drill.visible=false;for(const d of s.drills)d.visible=false;if(s.warn)s.warn.visible=false;if(s.augW)s.augW.visible=false;if(s.pil)s.pil.visible=false;}return;}
   const s=eState(p.id),S=eStandOf(s),G2=eGiantOf(s),t=now/1000,fx=Math.cos(p.a),fy=Math.sin(p.a),rx=-fy,ry=fx,broken=A[0]>0,z0=(pz||0)-GY(p.x,p.y);   // ความสูงที่วาดจริงเหนือพื้น (snapshot ไม่มี p.z)
-  if(!ETEX.slabM&&!EV.sw){EV.sw=1;setTimeout(()=>{const M=eSlabMats();if(typeof gl!=='undefined'&&gl.initTexture)for(const t of [M.face.map,M.face.normalMap,M.face.emissiveMap])gl.initTexture(t);},300);}   // สร้างลายแผ่นหินไว้ก่อน (ไม่กระตุกตอนใช้ท่า)
+  if(!ETEX.slabM&&!EV.sw){EV.sw=1;setTimeout(()=>{const M=eSlabMats();if(typeof gl!=='undefined'&&gl.initTexture)for(const t of [M.face.map,M.face.normalMap,M.face.emissiveMap,M.side.map,M.side.normalMap])gl.initTexture(t);},300);}   // สร้างลายแผ่นหินไว้ก่อน (ไม่กระตุกตอนใช้ท่า)
   if(o.shield)o.shield.visible=false;   // โล่ = Stand ใหญ่ เอามือบังหน้า (ไม่ใช้โล่ฟอง)
   // ----- Stand เล็ก: หมัด / ขี่ตอน Rampage -----
   let op=0,pose={t};
@@ -336,61 +336,72 @@ function eSlabGeo(){const {w,h,d}=SLAB,g=new THREE.BoxGeometry(w,h,d,12,7,4),P=g
     P.setXYZ(i,o[0],o[1],o[2]);const nx=N.getX(i),ny=N.getY(i),nz=N.getZ(i);
     if(nz)U.setXY(i,0.5+nz*o[0]/w,0.5+o[1]/h);else if(nx)U.setXY(i,-nx*o[2]/1.4,o[1]/1.4);else U.setXY(i,o[0]/1.4,-ny*o[2]/1.4);}
   g.computeVertexNormals();return g;}
-// ลายแผ่นหิน ความละเอียดสูง (สี 2048×1024 • นูน/เรือง 1024×512) — ชั้นตะกอน + เม็ดหิน + หลุม + รอยบิ่น + รอยร้าว (บางเส้นมีแร่เรืองทอง ECOL.glow) + ขอบเข้ม → normalMap จากความสูง
+// ลายแผ่นหิน (หินแกรนิต ไม่ใช่ไม้) สี 2048×1024 • นูน/เรือง 1024×512 — noise เป็นด่าง ๆ (fbm บิดโดเมน ไม่มีแนวนอน) + ผลึกเหลี่ยม (worley) + เม็ดแร่อ่อน/เข้ม + ร่องสึกเข้ม + รอยร้าวหักมุม (บางเส้นมีแร่ทองเรือง) + รอยบิ่น → normalMap จากความสูง
 function eSlabMats(){if(ETEX.slabM)return ETEX.slabM;
-  const W=2048,H=1024,w=1024,h=512,cv=(a,b)=>{const c=document.createElement('canvas');c.width=a;c.height=b;return c;};
+  const W=2048,H=1024,w=1024,h=512,cv=(a,b)=>{const c=document.createElement('canvas');c.width=a;c.height=b;return c;},ss=(a,b,t)=>{t=clamp((t-a)/(b-a),0,1);return t*t*(3-2*t);};
   const hs=(i,j)=>{let n=(Math.imul(i,374761393)+Math.imul(j,668265263))|0;n=Math.imul(n^(n>>>13),1274126177);return ((n^(n>>>16))>>>0)/4294967296;};
-  const vn=(x,y)=>{const i=Math.floor(x),j=Math.floor(y),fx=x-i,fy=y-j,u=fx*fx*(3-2*fx),v=fy*fy*(3-2*fy),a=hs(i,j),b=hs(i+1,j),c=hs(i,j+1),e=hs(i+1,j+1);return a+(b-a)*u+(c-a)*v+(a-b-c+e)*u*v;};
-  const fbm=(x,y,o)=>{let s=0,a=0.5;for(let k=0;k<o;k++){s+=a*vn(x,y);a*=0.5;x*=2.03;y*=2.03;}return s;};
-  // 1) ฐาน: noise + ชั้นหิน (ทีละพิกเซล ที่ 1024×512)
-  const cb=cv(w,h),xb=cb.getContext('2d'),ib=xb.createImageData(w,h),Hf=new Float32Array(w*h),D=[[58,44,30],[112,92,66],[150,126,92],[196,172,132],[222,202,160]];
-  const sd=rnd(0,500);
-  for(let py=0;py<h;py++)for(let px=0;px<w;px++){const nx=px/h*3+sd,ny=py/h*3,wp=fbm(nx*0.6,ny*0.6,3),yy=py/h*8+wp*2.6+fbm(nx*0.25,7,2)*2,bi=Math.floor(yy),bf=yy-bi;
-    const bt=hs(bi,91)-0.5,gr=fbm(nx*7,ny*7,4),lo=fbm(nx*1.4+9,ny*1.4,4),lip=bf<0.08?bf/0.08:1;   // lip = ขอบชั้น (สันเล็ก ๆ)
-    let t=0.22+0.55*lo+0.28*bt+0.22*(gr-0.5);t=clamp(t*(0.82+0.18*lip),0,0.999);const k=t*4,ki=Math.floor(k),kf=k-ki,A=D[ki],B=D[ki+1];
-    const ex=Math.min(px,w-1-px)/h,ey=Math.min(py,h-1-py)/h,ed=Math.min(1,Math.min(ex,ey)/0.05),dk=0.6+0.4*ed*ed*(3-2*ed),q=(py*w+px)*4;   // ขอบเข้ม
-    for(let c=0;c<3;c++)ib.data[q+c]=(A[c]+(B[c]-A[c])*kf)*dk;ib.data[q+3]=255;
-    Hf[py*w+px]=0.5*gr+0.35*lo+0.25*lip+0.1*bt;}
-  xb.putImageData(ib,0,0);
-  const cc=cv(W,H),x=cc.getContext('2d'),cbm=cv(w,h),xh=cbm.getContext('2d'),ce=cv(w,h),xe=ce.getContext('2d');
+  const md=(i,P)=>P?((i%P)+P)%P:i,vn=(x,y,P)=>{const i=Math.floor(x),j=Math.floor(y),fx=x-i,fy=y-j,u=fx*fx*(3-2*fx),v=fy*fy*(3-2*fy),i0=md(i,P),i1=md(i+1,P),j0=md(j,P),j1=md(j+1,P),a=hs(i0,j0),b=hs(i1,j0),c=hs(i0,j1),e=hs(i1,j1);return a+(b-a)*u+(c-a)*v+(a-b-c+e)*u*v;};
+  const fbm=(x,y,o,P)=>{let s=0,a=0.5,n=0;for(let k=0;k<o;k++){s+=a*vn(x,y,P);n+=a;a*=0.5;x*=2;y*=2;if(P)P*=2;}return s/n;};   // P = คาบ (ลายต่อกันไร้รอยต่อ)
+  let F1=0,F2=0,CI=0;const wor=(x,y,P)=>{const i=Math.floor(x),j=Math.floor(y);F1=F2=9;for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++){const ci=md(i+a,P),cj=md(j+b,P),dx=i+a+hs(ci,cj+17)-x,dy=j+b+hs(ci+31,cj)-y,d=dx*dx+dy*dy;if(d<F1){F2=F1;F1=d;CI=hs(ci+7,cj+3);}else if(d<F2)F2=d;}F1=Math.sqrt(F1);F2=Math.sqrt(F2);};   // ผลึก/เหลี่ยม
+  const D=[[34,31,29],[70,64,58],[108,100,90],[146,136,120],[188,178,160],[214,206,190]];   // เทาอมน้ำตาล (เย็นกว่า ECOL.stone)
+  // สีหิน 1 จุด → [r,g,b,สูง] • nx,ny = พิกัด noise (สเกลเท่ากันสองแกน = ไม่ยืดเป็นเส้น) • P = คาบ (ขอบข้าง)
+  const lowF=(nx,ny,P,o)=>{const qx=fbm(nx*0.5,ny*0.5,3,P*0.5),qy=fbm(nx*0.5+5.2,ny*0.5+1.3,3,P*0.5),wx=nx+qx*2.4,wy=ny+qy*2.4;   // ส่วนความถี่ต่ำ (บิดโดเมน/ด่างใหญ่/ร่อง/โทนอุ่น) — หน้าแผ่นคิดทุก 4 px แล้วเกลี่ย (เร็วขึ้น)
+    o[0]=qx;o[1]=qy;o[2]=fbm(wx*0.75,wy*0.75,5,P*0.75);o[3]=1-Math.abs(2*fbm(wx*1.25+11,wy*1.25,4,P*1.25)-1);o[4]=fbm(nx*0.25+40,ny*0.25,2,P*0.25);return o;};
+  const L0=new Float32Array(5);
+  const px1=(nx,ny,P,Lq)=>{const Q=Lq||lowF(nx,ny,P,L0),qx=Q[0],qy=Q[1],lo=Q[2],rg=Q[3],tw0=Q[4],mi=fbm(nx*3+qy*2,ny*3+qx*2,3,P*3),cr=ss(0.84,0.97,rg)*ss(0.35,0.6,lo+0.15*mi);   // cr = ร่องสึก
+    wor(nx*5,ny*5,P*5);const fa=CI,fe=ss(0.0,0.09,F2-F1);wor(nx*16+3,ny*16,P*16);const gi=CI,ge=F2-F1;   // fa=หน้าเหลี่ยมใหญ่ gi=เม็ดแร่
+    let t=0.1+0.62*lo+0.22*(mi-0.5)+0.1*(fa-0.5)+0.08*(gi-0.5)-0.32*cr-0.06*(1-fe);t=clamp(t,0,0.999);const k=t*5,ki=Math.floor(k),kf=k-ki,A=D[ki],B=D[ki+1];
+    let r=A[0]+(B[0]-A[0])*kf,g=A[1]+(B[1]-A[1])*kf,b=A[2]+(B[2]-A[2])*kf;const tw=ss(0.45,0.75,tw0)*0.9;r*=1+0.1*tw;b*=1-0.14*tw;   // ด่างอุ่นจาง ๆ
+    if(gi>0.93&&ge>0.04){r*=0.42;g*=0.42;b*=0.44;}else if(gi<0.07&&ge>0.04){r=r*0.45+118;g=g*0.45+112;b=b*0.45+100;}else if(gi<0.11){r=r*0.6+60;g=g*0.6+50;b=b*0.6+38;}   // แร่ดำ / แร่ขาว / เฟลด์สปาร์
+    return [r,g,b,0.42*lo+0.18*mi+0.22*fa+0.08*gi+0.12*fe-0.5*cr+0.04];};
+  // ฐาน a×b ทีละพิกเซล (สเกล sc px/หน่วย noise • P คาบ • eg = ขอบเข้ม) → canvas สี + canvas ความสูง • ส่วนความถี่ต่ำคิดทุก 4 px แล้วเกลี่ย
+  const base=(a,b,sc,P,sd,eg)=>{const cb=cv(a,b),ib=cb.getContext('2d').createImageData(a,b),ch=cv(a,b),ih=ch.getContext('2d').createImageData(a,b),gw=a/4+1,LG=new Float32Array(gw*(b/4+1)*5),Lt=new Float32Array(5);
+    for(let j=0;j<=b/4;j++)for(let i=0;i<gw;i++)LG.set(lowF(i*4/sc+sd,j*4/sc,P,L0),(j*gw+i)*5);
+    for(let py=0;py<b;py++)for(let px=0;px<a;px++){const i=px>>2,j=py>>2,fx=(px&3)/4,fy=(py&3)/4,g0=(j*gw+i)*5,g1=g0+gw*5;for(let k=0;k<5;k++){const t0=LG[g0+k]+(LG[g0+5+k]-LG[g0+k])*fx,t1=LG[g1+k]+(LG[g1+5+k]-LG[g1+k])*fx;Lt[k]=t0+(t1-t0)*fy;}
+      const o=px1(px/sc+sd,py/sc,P,Lt),q=(py*a+px)*4;let dk=0.88;if(eg){const ed=Math.min(1,Math.min(px,a-1-px,py,b-1-py)/b/0.05);dk=0.62+0.38*ed*ed*(3-2*ed);}   // ขอบเข้ม
+      ib.data[q]=o[0]*dk;ib.data[q+1]=o[1]*dk;ib.data[q+2]=o[2]*dk;ih.data[q]=ih.data[q+1]=ih.data[q+2]=clamp(o[3]*230,0,255);ib.data[q+3]=ih.data[q+3]=255;}
+    cb.getContext('2d').putImageData(ib,0,0);ch.getContext('2d').putImageData(ih,0,0);return [cb,ch];};
+  // 1) ฐานหน้าแผ่น 1024×512 → ขยายเป็น 2048×1024
+  const [cb,cbm]=base(w,h,h/4,0,rnd(0,500),1),cc=cv(W,H),x=cc.getContext('2d'),xh=cbm.getContext('2d'),ce=cv(w,h),xe=ce.getContext('2d');
   x.drawImage(cb,0,0,W,H);xe.fillStyle='#000';xe.fillRect(0,0,w,h);
-  const ih=xh.createImageData(w,h);for(let i=0;i<w*h;i++){const v=clamp(Hf[i]*170,0,255);ih.data[i*4]=ih.data[i*4+1]=ih.data[i*4+2]=v;ih.data[i*4+3]=255;}xh.putImageData(ih,0,0);
-  // 2) เม็ดหิน + หลุมเล็ก
-  for(let i=0;i<22000;i++){x.globalAlpha=rnd(0.08,0.32);x.fillStyle=Math.random()<0.5?'#2e2216':'#e6d2a8';const s=rnd(1,3.2);x.fillRect(rnd(0,W),rnd(0,H),s,s);}
-  for(let i=0;i<520;i++){const u=rnd(0,1),v=rnd(0,1),r=rnd(1.5,5);x.globalAlpha=rnd(0.35,0.6);x.fillStyle='#24190e';x.beginPath();x.ellipse(u*W,v*H,r,r*rnd(0.5,0.9),rnd(0,3),0,6.283);x.fill();
-    x.globalAlpha=0.25;x.fillStyle='#f0dcb0';x.beginPath();x.ellipse(u*W+r*0.5,v*H+r*0.7,r*0.7,r*0.35,0,0,6.283);x.fill();xh.globalAlpha=0.7;xh.fillStyle='#000';xh.beginPath();xh.arc(u*w,v*h,r/2,0,6.283);xh.fill();}
-  // 3) รอยบิ่น (เน้นใกล้ขอบ): เนื้อหินใหม่สีอ่อน + เงาเข้มขอบบน • ในแผนที่นูน = บุ๋ม
-  for(let i=0;i<70;i++){const nr=Math.random()<0.65,s=Math.floor(rnd(0,4));let u=rnd(0.03,0.97),v=rnd(0.05,0.95);if(nr){if(s===0)u=rnd(0.005,0.05);else if(s===1)u=rnd(0.95,0.995);else if(s===2)v=rnd(0.01,0.08);else v=rnd(0.92,0.99);}
-    const r=rnd(0.008,nr?0.03:0.018),n=Math.floor(rnd(5,8)),pt=[];for(let k=0;k<n;k++){const a=k/n*6.283+rnd(-0.3,0.3),rr=r*rnd(0.55,1.25);pt.push([u+Math.cos(a)*rr*0.52,v+Math.sin(a)*rr]);}
+  // 2) เม็ดแร่เล็ก (สามเหลี่ยม อ่อน/เข้ม — วาดรวมทีละชุดสีเดียวกัน = เร็ว) + หลุม
+  const tri=(c,X,Y,s)=>{c.beginPath();c.moveTo(X+rnd(-s,s),Y+rnd(-s,s));c.lineTo(X+rnd(-s,s),Y+rnd(-s,s));c.lineTo(X+rnd(-s,s),Y+rnd(-s,s));c.fill();};
+  const spk=(c,n,a,b,s0,s1,cols)=>{for(let k=0;k<40;k++){c.globalAlpha=rnd(0.25,0.7);c.fillStyle=cols[k%cols.length];c.beginPath();for(let i=0;i<n/40;i++){const X=rnd(2,a-2),Y=rnd(2,b-2),s=rnd(s0,s1);c.moveTo(X+rnd(-s,s),Y+rnd(-s,s));c.lineTo(X+rnd(-s,s),Y+rnd(-s,s));c.lineTo(X+rnd(-s,s),Y+rnd(-s,s));c.closePath();}c.fill();}};
+  spk(x,34000,W,H,0.8,2.6,['#1a1714','#d8d0c0','#1a1714','#d8d0c0','#9c8e7c','#1a1714','#d8d0c0','#c9b08c']);
+  for(let i=0;i<620;i++){const u=rnd(0,1),v=rnd(0,1),r=rnd(1.5,4.5);x.globalAlpha=rnd(0.4,0.65);x.fillStyle='#17130f';tri(x,u*W,v*H,r);
+    x.globalAlpha=0.22;x.fillStyle='#e4dccb';tri(x,u*W+r*0.6,v*H+r*0.8,r*0.6);xh.globalAlpha=0.7;xh.fillStyle='#000';xh.beginPath();xh.arc(u*w,v*h,r/2,0,6.283);xh.fill();}
+  // 3) รอยบิ่น (เน้นใกล้ขอบ): เนื้อหินใหม่สีอ่อน + ขอบเงาเข้ม • ในแผนที่นูน = บุ๋ม
+  for(let i=0;i<85;i++){const nr=Math.random()<0.6,s=Math.floor(rnd(0,4));let u=rnd(0.03,0.97),v=rnd(0.05,0.95);if(nr){if(s===0)u=rnd(0.005,0.05);else if(s===1)u=rnd(0.95,0.995);else if(s===2)v=rnd(0.01,0.08);else v=rnd(0.92,0.99);}
+    const r=rnd(0.008,nr?0.032:0.02),n=Math.floor(rnd(4,7)),pt=[];for(let k=0;k<n;k++){const a=k/n*6.283+rnd(-0.4,0.4),rr=r*rnd(0.45,1.3);pt.push([u+Math.cos(a)*rr*0.52,v+Math.sin(a)*rr]);}
     const poly=(c,sx,sy)=>{c.beginPath();pt.forEach((p,k)=>k?c.lineTo(p[0]*sx,p[1]*sy):c.moveTo(p[0]*sx,p[1]*sy));c.closePath();};
-    x.globalAlpha=rnd(0.4,0.7);x.fillStyle=Math.random()<0.5?'#cbb38a':'#a88e68';poly(x,W,H);x.fill();x.globalAlpha=0.7;x.strokeStyle='#2a1d10';x.lineWidth=2;x.stroke();
-    xh.globalAlpha=0.55;xh.fillStyle='#202020';poly(xh,w,h);xh.fill();}
-  // 4) รอยร้าวแตกกิ่ง (ร่อง + ขอบล่างรับแสง) • ~40% มีแร่ทองเรืองอยู่ในร่อง
-  const crack=(u,v,a,L,wd,dp,gl)=>{const pt=[[u,v]];let cu=u,cv2=v;const n=Math.floor(rnd(5,10));for(let k=0;k<n;k++){a+=rnd(-0.6,0.6);cu+=Math.cos(a)*L/n*0.52;cv2+=Math.sin(a)*L/n;pt.push([cu,cv2]);
-      if(dp<2&&Math.random()<0.22)crack(cu,cv2,a+rnd(-1.2,1.2),L*rnd(0.3,0.55),wd*0.6,dp+1,gl);}
+    x.globalAlpha=rnd(0.45,0.75);x.fillStyle=Math.random()<0.5?'#b9b0a0':'#8e8474';poly(x,W,H);x.fill();x.globalAlpha=0.75;x.strokeStyle='#1c1814';x.lineWidth=2.5;x.stroke();
+    xh.globalAlpha=0.6;xh.fillStyle='#1a1a1a';poly(xh,w,h);xh.fill();}
+  // 4) รอยร้าวหักมุม (ร่องสึกกว้างเข้มจาง + ร่องคม + ขอบรับแสง) • ~40% มีแร่ทองเรืองในร่อง
+  const crack=(u,v,a,L,wd,dp,gl)=>{const pt=[[u,v]];let cu=u,cv2=v;const n=Math.floor(rnd(4,8));for(let k=0;k<n;k++){a+=Math.random()<0.3?rnd(-1.1,1.1):rnd(-0.35,0.35);const sl=L/n*rnd(0.6,1.4);cu+=Math.cos(a)*sl*0.52;cv2+=Math.sin(a)*sl;pt.push([cu,cv2]);
+      if(dp<2&&Math.random()<0.28)crack(cu,cv2,a+rnd(0.7,1.4)*(Math.random()<0.5?-1:1),L*rnd(0.25,0.5),wd*0.6,dp+1,gl);}
     const ln=(c,sx,sy,ox,oy)=>{c.beginPath();pt.forEach((p,k)=>k?c.lineTo(p[0]*sx+ox,p[1]*sy+oy):c.moveTo(p[0]*sx+ox,p[1]*sy+oy));c.stroke();};
-    x.lineJoin=xh.lineJoin=xe.lineJoin='round';x.globalAlpha=0.3;x.strokeStyle='#f2deb4';x.lineWidth=wd*W*0.6;ln(x,W,H,1.5,2);
-    x.globalAlpha=0.9;x.strokeStyle='#1c130a';x.lineWidth=wd*W;ln(x,W,H,0,0);xh.globalAlpha=0.9;xh.strokeStyle='#000';xh.lineWidth=wd*w*1.4;ln(xh,w,h,0,0);
+    x.lineJoin=xh.lineJoin=xe.lineJoin='miter';x.globalAlpha=0.28;x.strokeStyle='#211c17';x.lineWidth=wd*W*4;ln(x,W,H,0,0);xh.globalAlpha=0.3;xh.strokeStyle='#000';xh.lineWidth=wd*w*4;ln(xh,w,h,0,0);   // ร่องสึก
+    x.globalAlpha=0.35;x.strokeStyle='#e2dacb';x.lineWidth=wd*W*0.5;ln(x,W,H,1.5,2);
+    x.globalAlpha=0.92;x.strokeStyle='#120f0c';x.lineWidth=wd*W;ln(x,W,H,0,0);xh.globalAlpha=0.95;xh.strokeStyle='#000';xh.lineWidth=wd*w*1.5;ln(xh,w,h,0,0);
     if(gl){x.globalAlpha=0.55;x.strokeStyle='#ffc45a';x.lineWidth=wd*W*0.35;ln(x,W,H,0,0);xe.globalAlpha=0.9;xe.shadowColor=ECOL.glow;xe.shadowBlur=9;xe.strokeStyle=ECOL.glow;xe.lineWidth=Math.max(1,wd*w*0.5);ln(xe,w,h,0,0);xe.shadowBlur=0;}};
-  for(let i=0;i<16;i++)crack(rnd(0,1),rnd(0,1),rnd(0,6.283),rnd(0.12,0.4),rnd(0.0016,0.0032),0,Math.random()<0.4);
-  // สายแร่บาง ๆ วิ่งตามแนวชั้น (เรืองจาง)
-  for(let i=0;i<5;i++){let u=rnd(-0.05,0.2),v=rnd(0.1,0.9);x.beginPath();xe.beginPath();x.moveTo(u*W,v*H);xe.moveTo(u*w,v*h);while(u<1.05){u+=rnd(0.02,0.05);v+=rnd(-0.012,0.012);x.lineTo(u*W,v*H);xe.lineTo(u*w,v*h);}
-    x.globalAlpha=0.22;x.strokeStyle='#ffd27a';x.lineWidth=rnd(1.5,3);x.stroke();xe.globalAlpha=0.45;xe.strokeStyle=ECOL.glow;xe.lineWidth=1;xe.stroke();}
+  for(let i=0;i<18;i++)crack(rnd(0,1),rnd(0,1),rnd(0,6.283),rnd(0.12,0.4),rnd(0.0015,0.0032),0,Math.random()<0.4);
+  // สายแร่ทองบาง ๆ (คดเคี้ยว ทิศสุ่ม — ไม่ขนานกัน)
+  for(let i=0;i<4;i++){let u=rnd(0.1,0.9),v=rnd(0.1,0.9),a=rnd(0,6.283);const n=rnd(8,16);x.beginPath();xe.beginPath();x.moveTo(u*W,v*H);xe.moveTo(u*w,v*h);for(let k=0;k<n;k++){a+=rnd(-0.7,0.7);u+=Math.cos(a)*0.02;v+=Math.sin(a)*0.038;x.lineTo(u*W,v*H);xe.lineTo(u*w,v*h);}
+    x.globalAlpha=0.25;x.strokeStyle='#ffd27a';x.lineWidth=rnd(1.5,3);x.stroke();xe.globalAlpha=0.5;xe.strokeStyle=ECOL.glow;xe.lineWidth=1;xe.stroke();}
   // ขอบเข้ม (ทั้ง 4 ด้าน)
-  x.globalAlpha=1;for(const [x0,y0,x1,y1] of [[0,0,90,0],[W,0,W-90,0],[0,0,0,90],[0,H,0,H-90]]){const g=x.createLinearGradient(x0,y0,x1,y1);g.addColorStop(0,'rgba(22,15,8,0.7)');g.addColorStop(1,'rgba(22,15,8,0)');x.fillStyle=g;x.fillRect(0,0,W,H);}
-  // 5) normal map จากความสูง (Sobel)
-  const hd=xh.getImageData(0,0,w,h).data,cn=cv(w,h),xn=cn.getContext('2d'),inm=xn.createImageData(w,h),gH=(a,b)=>hd[(clamp(b,0,h-1)*w+clamp(a,0,w-1))*4]/255;
-  for(let py=0;py<h;py++)for(let px=0;px<w;px++){const dx=(gH(px+1,py-1)+2*gH(px+1,py)+gH(px+1,py+1))-(gH(px-1,py-1)+2*gH(px-1,py)+gH(px-1,py+1)),dy=(gH(px-1,py+1)+2*gH(px,py+1)+gH(px+1,py+1))-(gH(px-1,py-1)+2*gH(px,py-1)+gH(px+1,py-1));
-    const s=2.2,nx=-dx*s,ny=dy*s,l=Math.hypot(nx,ny,1),q=(py*w+px)*4;inm.data[q]=(nx/l*0.5+0.5)*255;inm.data[q+1]=(ny/l*0.5+0.5)*255;inm.data[q+2]=(1/l*0.5+0.5)*255;inm.data[q+3]=255;}
-  xn.putImageData(inm,0,0);
-  // ขอบข้าง: ชั้นตะกอนแนวนอน (ลายซ้ำทุก 1.4 หน่วย)
-  const cs=cv(512,512),xs=cs.getContext('2d');xs.fillStyle='#6e5a42';xs.fillRect(0,0,512,512);
-  for(let y=0;y<512;){const bh=rnd(10,40);xs.globalAlpha=rnd(0.2,0.45);xs.fillStyle=Math.random()<0.5?'#4a3a28':'#9a8262';xs.fillRect(0,y,512,bh);y+=bh;xs.globalAlpha=0.5;xs.fillStyle='#2a1d10';xs.fillRect(0,y-1,512,1.5);}
-  for(let i=0;i<5000;i++){xs.globalAlpha=rnd(0.1,0.35);xs.fillStyle=Math.random()<0.5?'#22180d':'#c8b08a';const s=rnd(1,3);xs.fillRect(rnd(0,512),rnd(0,512),s,s);}
+  x.globalAlpha=1;for(const [x0,y0,x1,y1] of [[0,0,90,0],[W,0,W-90,0],[0,0,0,90],[0,H,0,H-90]]){const g=x.createLinearGradient(x0,y0,x1,y1);g.addColorStop(0,'rgba(18,15,12,0.7)');g.addColorStop(1,'rgba(18,15,12,0)');x.fillStyle=g;x.fillRect(0,0,W,H);}
+  // 5) normal map จากความสูง (Sobel, ขอบวนรอบ) — แรงขึ้น = ผิวขรุขระเป็นเหลี่ยม
+  const nmap=(cHt,a,b,s)=>{const hd=cHt.getContext('2d').getImageData(0,0,a,b).data,cn=cv(a,b),xn=cn.getContext('2d'),inm=xn.createImageData(a,b),gH=(i,j)=>hd[(md(j,b)*a+md(i,a))*4]/255;
+    for(let py=0;py<b;py++)for(let px=0;px<a;px++){const dx=(gH(px+1,py-1)+2*gH(px+1,py)+gH(px+1,py+1))-(gH(px-1,py-1)+2*gH(px-1,py)+gH(px-1,py+1)),dy=(gH(px-1,py+1)+2*gH(px,py+1)+gH(px+1,py+1))-(gH(px-1,py-1)+2*gH(px,py-1)+gH(px+1,py-1));
+      const nx=-dx*s,ny=dy*s,l=Math.hypot(nx,ny,1),q=(py*a+px)*4;inm.data[q]=(nx/l*0.5+0.5)*255;inm.data[q+1]=(ny/l*0.5+0.5)*255;inm.data[q+2]=(1/l*0.5+0.5)*255;inm.data[q+3]=255;}
+    xn.putImageData(inm,0,0);return cn;};
+  const cn=nmap(cbm,w,h,3.2);
+  // ขอบข้าง: หินเดียวกัน (noise มีคาบ → ซ้ำทุก 1.4 หน่วยไร้รอยต่อ) + เม็ดแร่
+  const S=256,[cs,csh]=base(S,S,S/4,4,0,0);spk(cs.getContext('2d'),1600,S,S,0.6,1.6,['#1a1714','#d0c8b8']);
   const mk=(c,srgb)=>{const t=new THREE.CanvasTexture(c);if(srgb)t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=typeof gl!=='undefined'&&gl.capabilities?Math.min(8,gl.capabilities.getMaxAnisotropy()):1;t.userData.keep=true;return t;};
-  const ts=mk(cs,1);ts.wrapS=ts.wrapT=THREE.RepeatWrapping;
-  const face=new THREE.MeshStandardMaterial({map:mk(cc,1),normalMap:mk(cn),normalScale:new THREE.Vector2(1.3,1.3),emissive:ECOL.glow,emissiveMap:mk(ce,1),emissiveIntensity:1.4,roughness:0.86,metalness:0,flatShading:true});
-  const side=new THREE.MeshStandardMaterial({map:ts,bumpMap:ts,bumpScale:2,roughness:0.95,metalness:0,flatShading:true});
+  const ts=mk(cs,1),tn=mk(nmap(csh,S,S,2.6));for(const t of [ts,tn])t.wrapS=t.wrapT=THREE.RepeatWrapping;
+  const face=new THREE.MeshStandardMaterial({map:mk(cc,1),normalMap:mk(cn),normalScale:new THREE.Vector2(1.7,1.7),emissive:ECOL.glow,emissiveMap:mk(ce,1),emissiveIntensity:1.4,roughness:0.92,metalness:0,flatShading:true});
+  const side=new THREE.MeshStandardMaterial({map:ts,normalMap:tn,normalScale:new THREE.Vector2(1.5,1.5),roughness:0.95,metalness:0,flatShading:true});
   face.userData.keep=side.userData.keep=true;ETEX.slabM={face,side};return ETEX.slabM;}
 // รอยร้าวเรืองแตกออกจากกลางแผ่น (จุดที่หมัดโดน)
 function slabCracks(m){const cm=new THREE.MeshBasicMaterial({color:hdr(ECOL.glow,1.8)});
