@@ -453,7 +453,7 @@ function syncEarth(v,dt,now){
       C.tg[sd]=o.g.position.clone().add(new THREE.Vector3(c*112*S3+sd*nx*24*S3,3.3,sn*112*S3+sd*ny*24*S3));}
     G.g.updateMatrixWorld(true);for(const A of [G.R,G.L]){const sh=A.up.getWorldPosition(new THREE.Vector3()),sd=Math.sign((sh.x-G.g.position.x)*nx+(sh.z-G.g.position.z)*ny)||1,T=C.tg[sd];
       if(T)eArmIK(A,T,new THREE.Vector3(sd*nx,-0.7,sd*ny).normalize());}
-    if(!C.boom){for(const o of EV.es.values()){if(o.k!==0||Math.hypot(o.x-C.x,o.y-C.y)>260)continue;const sd=Math.sign((o.x-C.x)*nx+(o.y-C.y)*ny)||1,off=close*close*100;
+    if(!C.boom){for(const o of EV.es.values()){if(o.k!==0||Math.hypot(o.x-C.x,o.y-C.y)>260)continue;const sd=Math.sign((o.x-C.x)*nx+(o.y-C.y)*ny)||1,cr=14*strain+3*Math.max(0,Math.sin(C.t*17))*strain,off=lerp(cr,100,close*close);   // ช่วงดัน: กำแพงฝืนขยับเข้ามาทีละนิด (กระตุก ๆ) • ล็อคแล้วปิดปัง
         o.g.position.copy(o.base).add(new THREE.Vector3(-sd*nx*off*S3+rnd(-1,1)*0.06*strain,0,-sd*ny*off*S3+rnd(-1,1)*0.06*strain));
         if(Math.random()<0.35*strain){const q=lerp(-1,1,Math.random());burst(o.x+c*q*130,o.y+sn*q*130,ECOL.dust,2,60,0.7,3,{h:rnd(0.5,5),vh:[0,1],g:2,smoke:true,grow:1.4});}}
       if(Math.random()<0.4*strain)eChunks(C.x+rnd(-80,80),C.y+rnd(-80,80),0.2,1,80,3,0.12);}
@@ -526,7 +526,7 @@ function earthEfx(ev){
     case 'ecrushw':{const G=makeStand(3.2,true);EV.crush.push({t:0,x,y,a:ev.a,id:ev.id,G});eAppear(x+Math.cos(ev.a)*190,y+Math.sin(ev.a)*190,0,2.4);if(near)snd('buff',{x,y,vol:0.5});return true;}
     case 'ecrush':{const C=EV.crush.find(q=>!q.boom&&Math.hypot(q.x-x,q.y-y)<80);if(C)C.boom=C.t;
       const c=Math.cos(ev.a),s=Math.sin(ev.a);for(let i=-3;i<=3;i++)eDebris(x+c*i*45,y+s*i*45,1+rnd(0,3),10,200);eWave(x,y,0.3,240);eChunks(x,y,2,22,360,8,0.35);
-      smoke(x,y,0.5,24,ECOL.dust,2.2,13,180);fxPlay('start/stone_eruption',{x,y,h:0,s:1.1});FX.flashLight(x,y,2,'#ffcf6a',4,18,0.25);shake(ev.n>=2?0.8:0.5);if(near){snd('boom',ev);snd('break',ev);}return true;}
+      smoke(x,y,0.5,32,ECOL.dust,2.6,15,220);fxPlay('start/stone_eruption',{x,y,h:0,s:1.4});FX.flashLight(x,y,2,'#ffcf6a',6,22,0.3);ring(x,y,'#ffe7a0',260,0.35,0.3);eWave(x,y,1.5,180);shake(ev.n>=2?1.2:0.8);if(ev.id===NET.myId)hitStop(0.06);if(near){snd('boom',ev);snd('break',ev);}return true;}
     case 'ecrushno':case 'enostand':floatText(x,y,z==='enostand'?'Stand แตกอยู่!':'กำแพงพังหมดแล้ว','#ffcf6a',15,H);return true;
     case 'ehitw':burst(x,y,ECOL.dust,4,80,0.4,2,{h:H,g:5});return true;
     case 'ebreakw':{const n=ev.n===1?30:ev.n===2?20:30;if(ev.n===0){for(let i=0;i<=4;i++)eDebris(lerp(ev.x1,ev.x2,i/4),lerp(ev.y1,ev.y2,i/4),rnd(1,4),8,160);}else eDebris(x,y,ev.n===1?3:0.8,n,220);if(near)snd('break',ev);return true;}

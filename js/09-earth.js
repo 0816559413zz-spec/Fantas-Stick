@@ -7,7 +7,7 @@
 // =====================================================================
 // E_CRUSH = เวลาก่อนหนีบ Tectonic Crush = ช่วง Stand ออกแรงดัน (ช้า) + ช่วงกำแพงเลื่อนเข้าหากัน (เร็ว) • ผู้ใช้ 2026-10-21: ดันช้าลง เลื่อนเร็วขึ้น
 // E_ENV = ตัวคูณความแรงพังบ้าน/ของในแผนที่ของสกิลสายดิน (ผู้ใช้ 2026-10-21: หลายสกิลพังบ้านได้แรงขึ้น)
-const EARTH=6,E_SH=300,E_CRUSH_PUSH=0.5,E_CRUSH_SLIDE=0.08,E_CRUSH=E_CRUSH_PUSH+E_CRUSH_SLIDE,E_ENV=2.5;
+const EARTH=6,E_SH=300,E_CRUSH_PUSH=1.0,E_CRUSH_SLIDE=0.06,   /* ผู้ใช้: ดัน 1 วิ (กำแพงขยับเข้านิด ๆ) → ล็อคแล้วปิดปัง 0.06 วิ */E_CRUSH=E_CRUSH_PUSH+E_CRUSH_SLIDE,E_ENV=2.5;
 PATHS.push({id:'earth',n:'สายดิน',ic:'⛰️',col:'#c9a36a',d:'สถาปนิกสนามรบ — Stand หินต่อยแทนเรา ถือโล่ 300 สร้างกำแพง/เสา/เนิน แล้วผลักศัตรูให้ชนของแข็ง',
   combo:'Stonebreaker ผลักศัตรูชนกำแพง (กำแพงแผนที่ / Tectonic Crush / เสา Wrath / กำแพงโดเมน) = +20 ดาเมจ สตัน 2 วิ • Mud Swamp ช้า 50% ห้าม Dash แล้ว Crush กำแพงหนีบ 80 • Dust Burst บังสายตาศัตรู • Terra Auger ชาร์จ 3 ระดับ • โล่แตก = Stand หาย 15 วิ'});
 Object.assign(PDEF,{erock:{spd:1100,r:6,dmg:5,life:0.55,col:'#c9a36a'},eslab:{spd:1800,r:24,dmg:25,life:0.39,col:'#d8b47a'}});
