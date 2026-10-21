@@ -384,4 +384,7 @@ drawEarthHud:418
 ## js/48-ragdoll.js (227) — 
 RAG:10 RAGJ:23 RAGB:29 RAGS:33 RAGMIN:37 RAGHINGE:39 _rv1:40 _rv2:40 _rv3:40 _rqa:40 _rqb:40 _rm:40 ragBones:41 ragBasis:48 ragTargets:56 ragStart:62 ragBack:88 ragFloor:89 ragStep:90 ragPose:155 ragWrite:170 ragRestore:182 ragEnd:186 ragTick:188 ragHideDead:222
 
-(49 files, 11368 lines)
+## js/49-cloth.js (101) — ผ้าคลุมจริง (cloth sim) — เฉพาะตัวละครของเราเอง • ภาพบนเครื่องตัวเองล้วน ไม่แตะ sim / hit…
+CLOTH:10 CL_ROWS:22 CL_NC:22 CL_GAP:22 CL_IN:22 _clV:23 _clA:23 _clB:23 clPinK:25 clBind:27 clothSetup:30 clTargets:63 clReset:67 clCapsule:69 clStep:72 clDraw:84 clothTick:91
+
+(50 files, 11469 lines)

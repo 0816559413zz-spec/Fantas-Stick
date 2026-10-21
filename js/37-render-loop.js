@@ -55,7 +55,7 @@ function render(dt,now){
 // ส่วนที่รันทุกเฟรมในเกม (อยู่ใต้งบเอฟเฟกต์ vfxBegin/vfxEnd)
 function renderGame(v,P,E,me,dt,now){
   let t0=performance.now();
-  syncPlayers(P,v.mode,now,dt);pf('players',t0);
+  syncPlayers(P,v.mode,now,dt);clothTick(dt);pf('players',t0);   // clothTick = ผ้าคลุมจริงของเรา (js/49)
   if(me&&me.al&&!me.fl&&!me.dn){const o=PM3.get(me.id);if(o){const k=Math.floor(o.walk/Math.PI);if(o.stepK!==undefined&&k!==o.stepK)snd('step',{vol:0.35,rev:0.1});o.stepK=k;}}t0=performance.now();
   syncEnemies(E,P,now,dt);pf('enemies',t0);t0=performance.now();
   syncProj(v,now);syncWalls(v);syncEarth(v,dt,now);syncProps(v);syncBld(dt);brkSync(dt);syncMins(v,now,dt);
