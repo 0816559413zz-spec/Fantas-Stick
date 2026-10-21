@@ -7,8 +7,8 @@
 // =====================================================================
 Object.assign(PCOL,{erock:'#c9a36a',eslab:'#d8b47a'});
 const ECOL={stone:'#8f7a5c',dark:'#5e4d38',dust:'#b39a74',glow:'#ffcf6a',mud:'#5b4128',sand:'#c9a878'};
-// โล่ Stand ใหญ่: แบบใหม่ = ตัวใหญ่เท่า Stand ตอน BA ชาร์จ • แบบเดิม (ตัวเล็กกว่า) ยังเก็บไว้: เปิดเกมด้วย ?eshield=old
-const EGUARD_OLD=/[?&]eshield=old/.test(location.search),EGUARD=EGUARD_OLD?{sc:1.3,back:10,side:4,z:0.2}:{sc:1.55,back:12,side:5,z:0.1};
+// โล่ Stand ใหญ่: ค่าเริ่มต้น = แบบเดิม (ผู้ใช้เลือก) • แบบตัวใหญ่เท่า Stand ตอน BA ชาร์จ ยังเก็บไว้: เปิดเกมด้วย ?eshield=big
+const EGUARD_BIG=/[?&]eshield=big/.test(location.search),EGUARD=EGUARD_BIG?{sc:1.55,back:12,side:5,z:0.1}:{sc:1.3,back:10,side:4,z:0.2};
 var EV={st:new Map(),es:new Map(),anims:[],fog:null,crush:[],mark:null};
 const eW=(x,y,h)=>new THREE.Vector3(tx(x),(h||0)+GY(x,y),tz(y));
 const eYaw=(x1,y1,x2,y2)=>Math.atan2(x2-x1,y2-y1);
