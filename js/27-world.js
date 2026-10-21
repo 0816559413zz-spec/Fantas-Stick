@@ -35,37 +35,51 @@ function softify(m,range){
   return fxMat(m);}
 // ภาพฉากหลัก (ก่อนวาดชั้นเอฟเฟกต์) ให้ shader อากาศร้อนบิดเบี้ยว (heat haze, js/42) อ่าน — มีค่าเฉพาะตอนเปิด soft
 const HAZE_U={uScene:{value:null}};
-// เงาตามซอกมุม (SSAO) — คำนวณจากภาพความลึกอย่างเดียว ตอนก๊อปภาพฉากใน FXPass (ไม่ต้องวาดฉากซ้ำ) → อนุภาคไม่โดนทำให้มืด
+// เงาตามซอกมุม (SSAO) — คำนวณจากภาพความลึกอย่างเดียว (ไม่ต้องวาดฉากซ้ำ) ที่ครึ่งความละเอียด ลงแผ่น aoRT
+// แล้วตอนก๊อปภาพฉากใน FXPass เบลอ 4×4 (ไม่เบลอข้ามขอบวัตถุ) คูณเข้าภาพ → อนุภาค/เอฟเฟกต์ที่วาดทีหลังไม่โดนทำให้มืด
 // uAO = ความเข้ม (0 = ปิด) • uR = รัศมีที่มองหาซอก (หน่วย 3D) • uFade = ระยะที่เริ่มจาง/หายหมด (ไกลกว่านั้นหมอกบังอยู่แล้ว)
-const AOU={uAO:{value:0},uR:{value:0.9},uFade:{value:new THREE.Vector2(35,70)},uTan:{value:new THREE.Vector2(1,1)}};
-const AO_ON={strength:1.1};
-const AO_FRAG='uniform sampler2D t;uniform sampler2D tD;uniform vec2 uRes;uniform float uNear;uniform float uFar;uniform float uAO;uniform float uR;uniform vec2 uFade;uniform vec2 uTan;varying vec2 vUv;'+
+const AOU={uAO:{value:0},uR:{value:1.4},uFade:{value:new THREE.Vector2(35,70)},uTan:{value:new THREE.Vector2(1,1)},tAO:{value:null},uAORes:{value:new THREE.Vector2(1,1)}};
+const AO_ON={strength:2.2};
+const AO_HEAD='uniform sampler2D tD;uniform vec2 uRes;uniform float uNear;uniform float uFar;uniform float uAO;uniform float uR;uniform vec2 uFade;uniform vec2 uTan;varying vec2 vUv;'+
   'float lz(vec2 uv){float d=texture2D(tD,uv).x;return (uNear*uFar)/(uFar-d*(uFar-uNear));}'+
-  'vec3 vp(vec2 uv){float z=lz(uv);return vec3((uv*2.0-1.0)*uTan*z,-z);}'+
-  'void main(){vec4 c=texture2D(t,vUv);'+
-  'if(uAO>0.001&&texture2D(tD,vUv).x<0.99999){'+
-    'vec3 P=vp(vUv);float z=-P.z;'+
+  'vec3 vp(vec2 uv){float z=lz(uv);return vec3((uv*2.0-1.0)*uTan*z,-z);}';
+// ขั้น 1: ค่า AO (1 = สว่าง, 0 = มืด) • มุมสุ่มตามตาราง 4×4 พิกเซล → เบลอ 4×4 แล้วเรียบพอดี
+const AO_CALC=AO_HEAD+'void main(){float ao=1.0;'+
+  'if(texture2D(tD,vUv).x<0.99999){vec3 P=vp(vUv);float z=-P.z;'+
     'if(z<uFade.y){vec2 px=1.0/uRes;'+
       'vec3 pr=vp(vUv+vec2(px.x,0.0))-P,pl=P-vp(vUv-vec2(px.x,0.0)),pu=vp(vUv+vec2(0.0,px.y))-P,pd=P-vp(vUv-vec2(0.0,px.y));'+
       'vec3 N=normalize(cross(abs(pr.z)<abs(pl.z)?pr:pl,abs(pu.z)<abs(pd.z)?pu:pd));'+
-      'vec2 rad=min(vec2(uR)/(2.0*uTan*z),vec2(0.12));'+
-      'float ang=6.2832*fract(52.9829189*fract(dot(gl_FragCoord.xy,vec2(0.06711056,0.00583715))));'+
+      'vec2 rad=min(vec2(uR)/(2.0*uTan*z),vec2(0.15));'+
+      'vec2 q=mod(floor(gl_FragCoord.xy),4.0);float ang=6.2832*(q.x*4.0+q.y+0.5)/16.0;float j=fract((q.x+q.y*4.0)*0.618);'+
       'float occ=0.0;'+
-      'for(int i=0;i<12;i++){float f=(float(i)+0.5)/12.0;float a=ang+float(i)*2.39996;'+
+      'for(int i=0;i<12;i++){float f=(float(i)+j)/12.0;float a=ang+float(i)*2.39996;'+
         'vec3 v=vp(vUv+vec2(cos(a),sin(a))*rad*sqrt(f))-P;float L=length(v);'+
-        'occ+=max(0.0,dot(N,v)/(L+1e-4)-0.12)*(1.0-smoothstep(uR*0.6,uR*1.6,L));}'+
-      'float ao=1.0-uAO*occ/12.0;ao=mix(clamp(ao,0.0,1.0),1.0,smoothstep(uFade.x,uFade.y,z));'+
-      'c.rgb*=ao;}}'+
+        'occ+=max(0.0,dot(N,v)/(L+1e-4)-0.2)*(1.0-smoothstep(uR*0.5,uR*1.5,L));}'+
+      'ao=clamp(1.0-uAO*occ/12.0,0.0,1.0);ao=mix(ao,1.0,smoothstep(uFade.x,uFade.y,z));}}'+
+  'gl_FragColor=vec4(ao,ao,ao,1.0);}';
+// ขั้น 2: ก๊อปภาพฉาก × AO ที่เบลอแล้ว (ถ่วงน้ำหนักตามความลึกใกล้เคียง กันเงาเลอะข้ามขอบ)
+const AO_COPY=AO_HEAD+'uniform sampler2D t;uniform sampler2D tAO;uniform vec2 uAORes;'+
+  'void main(){vec4 c=texture2D(t,vUv);'+
+  'if(uAO>0.001){float z=lz(vUv),s=0.0,w=0.0;vec2 px=1.0/uAORes;'+
+    'for(int x=0;x<4;x++)for(int y=0;y<4;y++){vec2 uv=vUv+(vec2(float(x),float(y))-1.5)*px;'+
+      'float k=1.0/(1.0+abs(lz(uv)-z)*8.0/z);s+=texture2D(tAO,uv).r*k;w+=k;}'+
+    'c.rgb*=s/max(w,1e-4);}'+
   'gl_FragColor=c;}';
+const AO_RT=new THREE.WebGLRenderTarget(1,1,{depthBuffer:false});
 class FXPass extends Pass{
   constructor(){super();this.needsSwap=true;
-    this.cp=new FullScreenQuad(new THREE.ShaderMaterial({uniforms:Object.assign({t:{value:null},tD:{value:null}},SOFTU,AOU),vertexShader:'varying vec2 vUv;void main(){vUv=uv;gl_Position=vec4(position.xy,0.0,1.0);}',fragmentShader:AO_FRAG,depthTest:false,depthWrite:false}));}
+    const vs='varying vec2 vUv;void main(){vUv=uv;gl_Position=vec4(position.xy,0.0,1.0);}';
+    this.ao=new FullScreenQuad(new THREE.ShaderMaterial({uniforms:Object.assign({tD:{value:null}},SOFTU,AOU),vertexShader:vs,fragmentShader:AO_CALC,depthTest:false,depthWrite:false}));
+    this.cp=new FullScreenQuad(new THREE.ShaderMaterial({uniforms:Object.assign({t:{value:null},tD:{value:null}},SOFTU,AOU),vertexShader:vs,fragmentShader:AO_COPY,depthTest:false,depthWrite:false}));}
+  setSize(w,h){AO_RT.setSize(Math.max(1,w>>1),Math.max(1,h>>1));AOU.uAORes.value.set(AO_RT.width,AO_RT.height);}
   render(r,write,read){const ac=r.autoClear;r.autoClear=false;
     if(!SOFTU.uSoftOn.value){this.needsSwap=false;r.setRenderTarget(read);r.render(fxScene,cam);r.autoClear=ac;return;}
     // นุ่ม: ก๊อปภาพฉากไปอีกแผ่น แล้ววาดเอฟเฟกต์ทับโดยอ่านความลึกจากแผ่นเดิม (อ่าน+เขียนแผ่นเดียวกันไม่ได้)
     this.needsSwap=true;SOFTU.uDepth.value=read.depthTexture;SOFTU.uRes.value.set(read.width,read.height);SOFTU.uNear.value=cam.near;SOFTU.uFar.value=cam.far;
-    const u=this.cp.material.uniforms,th=Math.tan(cam.fov*Math.PI/360);u.tD.value=read.depthTexture;AOU.uTan.value.set(th*cam.aspect,th);
-    u.t.value=read.texture;HAZE_U.uScene.value=read.texture;r.setRenderTarget(write);this.cp.render(r);r.render(fxScene,cam);r.autoClear=ac;}
+    const th=Math.tan(cam.fov*Math.PI/360);AOU.uTan.value.set(th*cam.aspect,th);
+    this.ao.material.uniforms.tD.value=this.cp.material.uniforms.tD.value=read.depthTexture;
+    if(AOU.uAO.value>0.001){r.setRenderTarget(AO_RT);this.ao.render(r);AOU.tAO.value=AO_RT.texture;}
+    this.cp.material.uniforms.t.value=read.texture;HAZE_U.uScene.value=read.texture;r.setRenderTarget(write);this.cp.render(r);r.render(fxScene,cam);r.autoClear=ac;}
 }
 const fxPass=new FXPass();composer.addPass(fxPass);
 const bloom=new UnrealBloomPass(new THREE.Vector2(512,512),0.72,0.5,0.86);
