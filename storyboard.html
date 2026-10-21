@@ -1,0 +1,392 @@
+<!doctype html>
+<html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>สตอรี่บอร์ด VFX — Fantas Stick</title>
+<!-- สตอรี่บอร์ด VFX: แบ่งสกิลเป็นช่วง (ชาร์จ → ปล่อย → พุ่ง → กระทบ → ค้าง → จาง) แต่ละช่วงมีเวลา ขนาด รูปทรง สี ภาพร่าง รูปตัวอย่าง
+     เก็บใน storyboard/boards.json + storyboard/img/ แล้ว serve.py เขียน storyboard/sb-<id>.md (+ STORYBOARDS.md) ให้ Claude อ่าน
+     ต้องเปิดผ่าน tools/serve.py (ดับเบิลคลิก "Storyboard.bat") • Claude: อ่าน storyboard/sb-<id>.md -->
+<style>
+:root{--bg:#1b1d22;--pn:#24272e;--pn2:#2c3038;--ln:#3a3f49;--tx:#e6e8ec;--mu:#9aa0ab;--ac:#e8b84a;--red:#e5534b;--ok:#4fb477}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.45 "Segoe UI","Leelawadee UI",Tahoma,sans-serif;height:100vh;display:flex;flex-direction:column}
+button,input,select,textarea{font:inherit;color:inherit}
+button{background:var(--pn2);border:1px solid var(--ln);border-radius:6px;padding:6px 12px;cursor:pointer}
+button:hover{border-color:var(--ac)}
+button.pri{background:var(--ac);color:#1b1d22;border-color:var(--ac);font-weight:600}
+button.on{background:var(--ac);color:#1b1d22;border-color:var(--ac)}
+button.sm{padding:2px 8px;font-size:13px}
+input,select,textarea{background:var(--pn);border:1px solid var(--ln);border-radius:6px;padding:6px 8px}
+textarea{width:100%;resize:vertical}
+header{display:flex;align-items:center;gap:10px;padding:8px 14px;background:var(--pn);border-bottom:1px solid var(--ln)}
+header h1{font-size:17px;margin:0 8px 0 0}
+#stat{margin-left:auto;color:var(--mu);font-size:13px}
+#stat.err{color:var(--red)}
+main{flex:1;display:flex;min-height:0}
+#side{width:270px;border-right:1px solid var(--ln);display:flex;flex-direction:column;background:var(--pn)}
+#list{flex:1;overflow:auto}
+.it{padding:9px 12px;border-bottom:1px solid var(--ln);cursor:pointer}
+.it:hover{background:var(--pn2)}
+.it.sel{background:#3a3424;box-shadow:inset 3px 0 var(--ac)}
+.it b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.it small{color:var(--mu)}
+#ed{flex:1;overflow:auto;padding:16px 22px 60px}
+#empty{color:var(--mu);text-align:center;margin-top:12vh;font-size:17px;line-height:2}
+.row{display:flex;gap:10px;align-items:center;margin-bottom:10px;flex-wrap:wrap}
+.lb{color:var(--mu);font-size:13px}
+#fTitle{flex:1;min-width:240px;font-size:19px;font-weight:600}
+.seg{display:flex;flex-wrap:wrap}.seg button{border-radius:0;padding:4px 10px;font-size:13px}.seg button:first-child{border-radius:6px 0 0 6px}.seg button:last-child{border-radius:0 6px 6px 0}
+.chips{display:flex;flex-wrap:wrap;gap:4px}
+.chips button{padding:2px 9px;font-size:13px;border-radius:12px}
+.sw{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.sw .c{position:relative;width:30px;height:30px;border-radius:50%;border:2px solid #fff3;overflow:hidden;cursor:pointer}
+.sw .c input{opacity:0;position:absolute;inset:0;width:100%;height:100%;cursor:pointer}
+.sw .c i{position:absolute;top:-2px;right:0;font-style:normal;font-size:11px;background:#000a;border-radius:50%;padding:0 3px;display:none}
+.sw .c:hover i{display:block}
+.box{background:var(--pn);border:1px solid var(--ln);border-radius:8px;padding:12px 14px;margin:12px 0}
+.box h3{margin:0 0 8px;font-size:15px}
+.imgs{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.im{position:relative;width:150px;height:96px;background:#111;border:1px solid var(--ln);border-radius:6px;overflow:hidden}
+.im img{width:100%;height:100%;object-fit:contain;cursor:zoom-in}
+.im .x{position:absolute;top:3px;right:3px;padding:0 6px;font-size:12px;background:#000a}
+.drop.over{outline:2px dashed var(--ac);outline-offset:4px}
+.hint{color:var(--mu);font-size:13px}
+/* แถบเวลา */
+#tl{position:relative;height:58px;background:var(--pn);border:1px solid var(--ln);border-radius:8px;margin:14px 0 4px;overflow:hidden}
+#tl .blk{position:absolute;height:22px;border-radius:4px;font-size:12px;padding:2px 6px;white-space:nowrap;overflow:hidden;cursor:pointer;color:#111;font-weight:600}
+#tl .tk{position:absolute;bottom:0;font-size:11px;color:var(--mu);border-left:1px solid var(--ln);padding-left:3px;height:14px}
+/* ช่วง (shot) */
+.shot{display:flex;gap:14px;background:var(--pn);border:1px solid var(--ln);border-left:6px solid var(--k);border-radius:8px;padding:12px;margin:12px 0}
+.shot.sel{box-shadow:0 0 0 2px var(--ac)}
+.shot .pic{flex:none;width:340px}
+.shot .pic .frame{position:relative;width:340px;height:191px;background:#111 center/contain no-repeat;border:1px solid var(--ln);border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--mu);font-size:14px;text-align:center}
+.shot .pic .frame:hover{border-color:var(--ac)}
+.shot .pic .res{margin-top:8px}
+.shot .pic .res .frame{cursor:zoom-in;height:150px}
+.shot .fl{flex:1;min-width:0}
+.shot .hd{display:flex;gap:8px;align-items:center;margin-bottom:8px}
+.shot .hd .no{font-weight:700;font-size:18px;color:var(--k)}
+.shot .hd input.nm{flex:1;font-weight:600}
+.shot .hd .tm{color:var(--mu);font-size:13px;white-space:nowrap}
+.g2{display:grid;grid-template-columns:auto 1fr;gap:6px 10px;align-items:center;margin-bottom:8px}
+.g2 .lb{text-align:right}
+.rng{display:flex;align-items:center;gap:8px}.rng input[type=range]{flex:1}.rng b{min-width:96px;font-size:13px}
+.note{background:#1f2c24;border:1px solid #2f5a3d;border-radius:6px;padding:8px 10px;margin-top:8px;white-space:pre-wrap;font-size:14px}
+.note b{color:var(--ok)}
+#reply{background:#1f2c24;border:1px solid #2f5a3d;border-radius:6px;padding:10px 12px;margin:12px 0;white-space:pre-wrap}
+#reply b{color:var(--ok)}
+#add{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:6px}
+/* หน้าต่างวาด */
+#zoom,#dr{position:fixed;inset:0;background:#000e;display:none;z-index:9;align-items:center;justify-content:center;flex-direction:column}
+#zoom img{max-width:96vw;max-height:94vh}
+#dr .bar{display:flex;gap:6px;padding:8px;align-items:center;flex-wrap:wrap;justify-content:center}
+#dr .wrap{position:relative;max-width:96vw;max-height:80vh;aspect-ratio:16/9;height:80vh}
+#dr canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none}
+#dr canvas#ink{cursor:crosshair}
+.col{width:24px;height:24px;border-radius:50%;border:2px solid #fff3;padding:0}
+.col.on{border-color:#fff}
+</style></head><body>
+<header>
+  <h1>🎬 สตอรี่บอร์ด VFX</h1>
+  <button class="pri" id="bNew">＋ สกิลใหม่</button>
+  <button id="bCopy" title="คัดลอกข้อความไปวางในแชท Claude">📋 คัดลอกข้อความส่ง Claude</button>
+  <span id="stat">กำลังโหลด…</span>
+</header>
+<main>
+  <div id="side"><div id="list"></div></div>
+  <div id="ed"></div>
+</main>
+<div id="zoom"><img alt=""></div>
+<div id="dr">
+  <div class="bar">
+    <span class="seg" id="drBg"><button data-bg="side" class="on">ด้านข้าง</button><button data-bg="top">มองจากบน</button><button data-bg="blank">ว่าง</button></span>
+    <span style="width:8px"></span>
+    <span class="seg" id="drTool"><button data-t="pen" class="on">✏️ ปากกา</button><button data-t="glow">✨ เรืองแสง</button><button data-t="fill">🎨 ป้ายสี</button><button data-t="arrow">➜ ทิศทาง</button><button data-t="text">T ข้อความ</button><button data-t="erase">🧽 ยางลบ</button></span>
+    <span style="width:8px"></span>
+    <span id="drCols"></span><input type="color" id="drPick" value="#ffffff" title="เลือกสีเอง" style="width:34px;height:28px;padding:0">
+    <span class="seg" id="drSize"><button data-s="3">เล็ก</button><button data-s="7" class="on">กลาง</button><button data-s="16">ใหญ่</button></span>
+    <span style="width:8px"></span>
+    <button id="drUndo">↶ ย้อน</button><button id="drClr">ล้างภาพวาด</button><button id="drCancel">ยกเลิก</button><button id="drSave" class="pri">✔ ใช้ภาพนี้</button>
+  </div>
+  <div class="wrap"><canvas id="bg"></canvas><canvas id="ink"></canvas></div>
+  <div class="hint" style="margin-top:6px">ตัวสีขาวซ้าย = ผู้ร่าย (หันขวา) • ตัวแดงขวา = เป้า • ขีดบนพื้น = 1 ตัวละคร • <kbd>Ctrl</kbd>+<kbd>V</kbd> = ใช้รูปที่ก๊อปมาเป็นพื้นหลัง (เช่นภาพจากในเกม) แล้ววาดทับ</div>
+</div>
+<script>
+const $=s=>document.querySelector(s);
+// ชนิดของช่วง: สี + คำใบ้ (ช่วยให้คิดเป็นจังหวะ ก่อน → ระหว่าง → หลัง)
+const KIND={
+  charge:{th:'⏳ ชาร์จ / เตรียม',c:'#7fb2ff',ph:'ก่อนปล่อยสกิล: พลังรวมตัวยังไง เช่น แสงถูกดูดเข้ามือ, หินลอยขึ้นรอบตัว, พื้นสั่น'},
+  cast:{th:'✋ ปล่อย / ร่าย',c:'#e8b84a',ph:'จังหวะปล่อย: แฟลช, วงเวท, แรงระเบิดที่มือ, ท่าทาง'},
+  travel:{th:'➜ พุ่ง / เคลื่อนที่',c:'#c48cff',ph:'ตัวสกิลที่วิ่งไป: ลูกบอล, ลำแสง, คลื่น, หาง/รอยที่ทิ้งไว้ข้างหลัง'},
+  impact:{th:'💥 กระทบ',c:'#ff6a4d',ph:'ตอนโดน: ระเบิด, คลื่นกระแทก, เศษกระเด็น, จอสั่น'},
+  linger:{th:'🌫 ค้าง / พื้นที่',c:'#5fd39a',ph:'สิ่งที่อยู่ต่อ: ไฟลุกบนพื้น, น้ำแข็งค้าง, ควัน, พื้นที่อันตราย'},
+  fade:{th:'✨ จางหาย',c:'#a0a6b0',ph:'หายไปยังไง: แตกเป็นประกาย, ละลาย, ควันลอยขึ้น, หดหาย'},
+  other:{th:'• อื่น ๆ',c:'#e6e8ec',ph:'อธิบายช่วงนี้'}};
+const WHERE=['มือ / อาวุธ','รอบตัวผู้ร่าย','ใต้เท้า / พื้นรอบตัว','ระหว่างทาง','ที่เป้า','พื้นรอบเป้า','บนฟ้า (ตกลงมา)','ทั้งจอ'];
+const SHAPES=['ลูกบอล','วงแหวน','คลื่นกระแทก','ลำแสง','เส้น / รอยฟัน','หนาม / เสา','ผลึก','ประกาย','ควัน / ฝุ่น','ไฟ','สายฟ้า','น้ำ','เศษหิน / เศษน้ำแข็ง','วงเวท / สัญลักษณ์','รอยแตกบนพื้น','โดม / เกราะ','ปีก / ร่างพลัง','แสงเรือง'];
+const MOTION=['พุ่งออก','ดูดเข้า','หมุนวน','ลอยขึ้น','ตกลง','ขยายออก','หดเข้า','กระพริบ','สั่น','ตามตัวผู้ร่าย','แตกกระจาย','ไหลตามพื้น'];
+const CAM=['จอสั่นเบา','จอสั่นแรง','หยุดค้างเฟรม (hitstop)','จอแฟลช','ซูมเข้า','สโลว์โมชัน','จอมืดลง'];
+const MOOD=['หนัก / ทรงพลัง','เร็ว / คม','ลื่นไหล / สวยงาม','น่ากลัว / มืด','ศักดิ์สิทธิ์ / สว่าง','ระเบิด / วุ่นวาย','เย็นชา / นิ่ง','ป่าเถื่อน / ดิบ'];
+const STATUS={draft:'✏️ กำลังร่าง',ready:'📤 พร้อมให้ Claude ทำ',wip:'🔧 Claude กำลังทำ',review:'👀 รอดูผล',done:'✅ ผ่านแล้ว'};
+const WHO=['Pyro (ไฟ)','Frost (น้ำแข็ง)','Storm (สายฟ้า)','Earth (ดิน)','อื่น ๆ'];
+const SIZE_TH=v=>v<0.6?'เล็กกว่าตัว':v<1.3?'เท่าตัว':v<3?'ใหญ่':v<6?'ใหญ่มาก':'ใหญ่สุด ๆ';
+const POW=['','เบามาก','เบา','ปานกลาง','แรง','สุดพลัง'];
+let db={next:1,items:[]},cur=null,selShot=null,saveT=0,dirty=false,online=false;
+
+function stat(t,err){const s=$('#stat');s.textContent=t;s.className=err?'err':'';}
+function esc(s){return String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+function nowISO(){const d=new Date();return new Date(d-d.getTimezoneOffset()*6e4).toISOString().slice(0,19);}
+async function load(){
+  try{const r=await fetch('/api/sb',{cache:'no-store'});if(!r.ok)throw 0;const j=await r.json();online=true;if(dirty)return;db=j;stat('พร้อม • บันทึกอัตโนมัติ');} // แก้อะไรไประหว่างโหลด → ไม่ทับ
+  catch(e){online=false;stat('⚠ ต้องเปิดผ่าน "Storyboard.bat" (tools/serve.py) ถึงจะบันทึกได้',1);}
+  if(cur)cur=db.items.find(b=>b.id===cur.id)||null;
+  renderList();renderEd();
+}
+function save(now){
+  dirty=true;stat('กำลังบันทึก…');clearTimeout(saveT);
+  saveT=setTimeout(async()=>{
+    try{const r=await fetch('/api/sb',{method:'POST',body:JSON.stringify(db)});const j=await r.json();if(!j.ok)throw j.err;dirty=false;stat('บันทึกแล้ว ✓ '+new Date().toLocaleTimeString('th-TH'));}
+    catch(e){stat('⚠ บันทึกไม่ได้ — เปิดผ่าน "Storyboard.bat" หรือยัง?',1);}
+  },now?0:600);
+}
+function touch(re){cur.updated=nowISO();renderList();if(re)renderEd();save();}
+let sid=1;const newId=()=>Date.now().toString(36)+(sid++);
+function newShot(kind){return {id:newId(),kind,name:'',dur:kind==='charge'?0.5:kind==='impact'?0.4:kind==='linger'?1.5:0.3,overlap:0,where:'',size:1,power:3,shapes:[],motion:[],camera:[],colors:[],text:'',sketch:'',refs:[],result:'',note:''};}
+function newBoard(){
+  const b={id:db.next++,title:'',who:'',skill:'',status:'draft',created:nowISO(),updated:nowISO(),overview:'',mood:[],colors:['#ff7a1a','#ffd27a'],refs:[],fx:'',reply:'',
+    shots:['charge','cast','travel','impact','fade'].map(newShot)};
+  db.items.push(b);cur=b;renderList();renderEd();save();
+  setTimeout(()=>$('#fTitle')&&$('#fTitle').focus(),0);
+}
+// เวลาเริ่มของแต่ละช่วง = ต่อจากช่วงก่อน ลบด้วย "ซ้อน"
+function times(b){let t=0;return b.shots.map(s=>{const st=Math.max(0,t-(+s.overlap||0));t=st+(+s.dur||0);return [st,t];});}
+const f2=v=>(+v).toFixed(2).replace(/\.?0+$/,'')||'0';
+
+function renderList(){
+  const L=[...db.items].sort((a,b)=>b.updated<a.updated?-1:1);
+  $('#list').innerHTML=L.length?L.map(b=>`<div class="it ${cur&&cur.id===b.id?'sel':''}" data-id="${b.id}"><b>#${b.id} ${esc(b.title||'(ยังไม่ตั้งชื่อ)')}</b>
+    <small>${esc(b.who)} • ${b.shots.length} ช่วง • ${STATUS[b.status]||''}${b.reply?' • 💬':''}</small></div>`).join('')
+    :`<div style="padding:16px;color:var(--mu)">ยังไม่มีสตอรี่บอร์ด<br>กด ＋ สกิลใหม่</div>`;
+}
+function chips(attr,opts,sel){return `<div class="chips" ${attr}>${opts.map(o=>`<button data-v="${esc(o)}" class="${sel.includes(o)?'on':''}">${esc(o)}</button>`).join('')}</div>`;}
+function swatches(attr,cols){return `<div class="sw" ${attr}>${cols.map((c,i)=>`<label class="c" style="background:${c}"><input type="color" value="${c}" data-i="${i}"><i data-del="${i}">✕</i></label>`).join('')}<button class="sm" data-add="1">＋ สี</button></div>`;}
+function imgs(list,key){return list.map((p,i)=>`<div class="im"><img src="${p}" data-z="1"><button class="x" data-del="${i}" data-k="${key}">✕</button></div>`).join('');}
+
+function renderEd(){
+  const E=$('#ed');
+  if(!cur){E.innerHTML=`<div id="empty">🎬 วางแผน VFX ของสกิลทีละช่วง<br>ชาร์จ → ปล่อย → พุ่ง → กระทบ → ค้าง → จาง<br>แต่ละช่วงวาดภาพร่าง แปะรูปตัวอย่าง เลือกขนาด/สี/รูปทรง<br>แล้วกด <b>📋 คัดลอกข้อความส่ง Claude</b><br><br>กด <b>＋ สกิลใหม่</b> เพื่อเริ่ม</div>`;return;}
+  const b=cur,T=times(b),tot=Math.max(0.1,...T.map(t=>t[1]));
+  E.innerHTML=`
+  <div class="row"><input id="fTitle" placeholder="ชื่อสกิล เช่น 'Earth — Tectonic Slam'" value="${esc(b.title)}"></div>
+  <div class="row"><span class="lb">สาย</span><input id="fWho" list="wl" value="${esc(b.who)}" style="width:170px"><datalist id="wl">${WHO.map(w=>`<option value="${w}">`).join('')}</datalist>
+    <span class="lb">ปุ่ม / ชื่อในเกม</span><input id="fSkill" placeholder="เช่น Q, ult, ตีครั้งที่ 3" value="${esc(b.skill)}" style="width:190px">
+    <span class="lb">สถานะ</span><select id="fSt">${Object.keys(STATUS).map(k=>`<option value="${k}" ${b.status===k?'selected':''}>${STATUS[k]}</option>`).join('')}</select></div>
+  <div class="box"><h3>ภาพรวม</h3>
+    <textarea id="fOv" rows="3" placeholder="สกิลนี้ทำอะไร และอยากให้รู้สึกยังไง เช่น 'ทุบพื้นแล้วหินพุ่งเป็นแนวไปข้างหน้า อยากให้รู้สึกหนักเหมือนแผ่นดินไหว'">${esc(b.overview)}</textarea>
+    <div class="row" style="margin-top:8px"><span class="lb">ความรู้สึก</span>${chips('id="fMood"',MOOD,b.mood)}</div>
+    <div class="row"><span class="lb">สีหลักของสกิล</span>${swatches('id="fCols"',b.colors)}</div>
+    <div class="drop" id="dRefs"><span class="lb">รูป / คลิปตัวอย่างที่ชอบ (จากเกมอื่นก็ได้)</span>
+      <div class="imgs" style="margin-top:6px">${imgs(b.refs,'refs')}<button class="sm" data-pick="refs">📎 เพิ่มรูป…</button></div>
+      <div class="hint" style="margin-top:4px">วางรูป <kbd>Ctrl</kbd>+<kbd>V</kbd> หรือลากไฟล์มาวางในกล่องนี้ • ลิงก์คลิป YouTube ใส่ในช่องภาพรวมได้</div></div>
+  </div>
+  <div id="tl">${b.shots.map((s,i)=>`<div class="blk" data-go="${s.id}" style="left:${T[i][0]/tot*100}%;width:calc(${(T[i][1]-T[i][0])/tot*100}% - 2px);top:${4+(i%2)*14}px;background:${(KIND[s.kind]||KIND.other).c}" title="${esc(s.name||KIND[s.kind]?.th)}">${i+1}. ${esc(s.name||KIND[s.kind]?.th)}</div>`).join('')}
+    ${Array.from({length:Math.floor(tot/0.25)+1},(_,k)=>k*0.25).filter(t=>t<=tot).map(t=>`<span class="tk" style="left:${t/tot*100}%">${f2(t)}s</span>`).join('')}</div>
+  <div class="hint">แถบเวลา: รวม ${f2(tot)} วินาที • คลิกแถบเพื่อไปที่ช่วงนั้น</div>
+  <div id="shots">${b.shots.map((s,i)=>shotHTML(s,i,T[i])).join('')}</div>
+  <div id="add"><span class="lb">＋ เพิ่มช่วง:</span>${Object.keys(KIND).map(k=>`<button class="sm" data-addk="${k}">${KIND[k].th}</button>`).join('')}</div>
+  ${b.reply?`<div id="reply"><b>💬 Claude ตอบ:</b>\n${esc(b.reply)}</div>`:''}
+  <div class="row" style="margin-top:16px">${b.fx?`<span class="lb">ไฟล์เอฟเฟกต์:</span> <code>${esc(b.fx)}</code> <a href="studio.html?fx=${encodeURIComponent(b.fx)}" target="_blank"><button class="sm">เปิดใน VFX Studio</button></a>`:''}
+    <span style="flex:1"></span><button id="bDel" style="color:var(--red)">🗑 ลบสตอรี่บอร์ดนี้</button></div>
+  <div class="hint">สตอรี่บอร์ด #${b.id} • Claude อ่านไฟล์ <code>storyboard/sb-${b.id}.md</code></div>`;
+  bindEd();
+}
+function shotHTML(s,i,T){
+  const K=KIND[s.kind]||KIND.other;
+  return `<div class="shot ${selShot===s.id?'sel':''}" id="s_${s.id}" data-sid="${s.id}" style="--k:${K.c}">
+   <div class="pic">
+    <div class="frame" data-draw="1" style="${s.sketch?`background-image:url('${s.sketch}')`:''}">${s.sketch?'':'✏️ คลิกเพื่อวาดภาพร่าง<br><small>(มีตัวละครให้วาดทับ)</small>'}</div>
+    <div class="imgs drop" data-refs="1" style="margin-top:6px">${s.refs.map((p,k)=>`<div class="im" style="width:105px;height:66px"><img src="${p}" data-z="1"><button class="x" data-del="${k}" data-k="shot">✕</button></div>`).join('')}<button class="sm" data-pick="shot">📎 รูปตัวอย่าง</button></div>
+    ${s.result?`<div class="res"><div class="lb">🖼 ผลที่ Claude ทำ (เทียบกับภาพร่าง)</div><div class="frame" style="background-image:url('${s.result}')" data-zs="${s.result}"></div></div>`:''}
+   </div>
+   <div class="fl">
+    <div class="hd"><span class="no">${i+1}</span>
+      <select data-f="kind">${Object.keys(KIND).map(k=>`<option value="${k}" ${s.kind===k?'selected':''}>${KIND[k].th}</option>`).join('')}</select>
+      <input class="nm" data-f="name" placeholder="ชื่อช่วง (ไม่ใส่ก็ได้)" value="${esc(s.name)}">
+      <span class="tm">${f2(T[0])}–${f2(T[1])} วิ</span>
+      <button class="sm" data-mv="-1" title="เลื่อนขึ้น">↑</button><button class="sm" data-mv="1" title="เลื่อนลง">↓</button><button class="sm" data-dup="1" title="ทำสำเนา">⧉</button><button class="sm" data-rm="1" title="ลบช่วงนี้" style="color:var(--red)">✕</button></div>
+    <div class="g2">
+      <span class="lb">นานแค่ไหน</span><div class="rng"><input type="range" min="0.05" max="3" step="0.05" value="${s.dur}" data-f="dur" data-n="1"><b>${f2(s.dur)} วินาที</b>
+        <span class="lb">เริ่มก่อนช่วงที่แล้วจบ</span><input type="number" min="0" max="3" step="0.05" value="${s.overlap||0}" data-f="overlap" data-n="1" style="width:70px"><span class="lb">วิ</span></div>
+      <span class="lb">เกิดที่ไหน</span><div class="chips" data-one="where">${WHERE.map(w=>`<button data-v="${w}" class="${s.where===w?'on':''}">${w}</button>`).join('')}</div>
+      <span class="lb">ขนาด</span><div class="rng"><input type="range" min="0.2" max="10" step="0.1" value="${s.size}" data-f="size" data-n="1"><b>${f2(s.size)} เท่าตัวละคร<br><small class="lb">${SIZE_TH(s.size)}</small></b></div>
+      <span class="lb">ความแรง</span><div class="rng"><input type="range" min="1" max="5" step="1" value="${s.power}" data-f="power" data-n="1"><b>${POW[s.power]}</b></div>
+      <span class="lb">รูปทรง</span>${chips('data-many="shapes"',SHAPES,s.shapes)}
+      <span class="lb">การเคลื่อนไหว</span>${chips('data-many="motion"',MOTION,s.motion)}
+      <span class="lb">กล้อง / จอ</span>${chips('data-many="camera"',CAM,s.camera)}
+      <span class="lb">สีช่วงนี้</span>${swatches('data-cols="1"',s.colors)}
+    </div>
+    <textarea data-f="text" rows="2" placeholder="${esc(K.ph)}">${esc(s.text)}</textarea>
+    ${s.note?`<div class="note"><b>💬 Claude:</b> ${esc(s.note)}</div>`:''}
+   </div></div>`;
+}
+function bindEd(){
+  const b=cur;
+  $('#fTitle').oninput=e=>{b.title=e.target.value;touch();};
+  $('#fWho').oninput=e=>{b.who=e.target.value;touch();};
+  $('#fSkill').oninput=e=>{b.skill=e.target.value;touch();};
+  $('#fSt').onchange=e=>{b.status=e.target.value;touch();};
+  $('#fOv').oninput=e=>{b.overview=e.target.value;touch();};
+  $('#fMood').onclick=e=>{const v=e.target.dataset.v;if(!v)return;tog(b.mood,v);e.target.classList.toggle('on');touch();};
+  bindSw($('#fCols'),b.colors);
+  bindDrop($('#dRefs'),f=>addImgs(f,b.refs));
+  $('#bDel').onclick=()=>{if(!confirm('ลบสตอรี่บอร์ด #'+b.id+' ทั้งรูป?'))return;db.items=db.items.filter(x=>x!==b);cur=null;renderList();renderEd();save(1);};
+  $('#tl').onclick=e=>{const id=e.target.dataset.go;if(!id)return;selShot=id;document.querySelectorAll('.shot').forEach(x=>x.classList.toggle('sel',x.dataset.sid===id));$('#s_'+id).scrollIntoView({behavior:'smooth',block:'center'});};
+  $('#add').onclick=e=>{const k=e.target.dataset.addk;if(!k)return;const s=newShot(k);b.shots.push(s);selShot=s.id;touch(1);setTimeout(()=>$('#s_'+s.id)?.scrollIntoView({behavior:'smooth',block:'center'}),0);};
+  document.querySelectorAll('.shot').forEach(el=>{
+    const s=b.shots.find(x=>x.id===el.dataset.sid),i=b.shots.indexOf(s);
+    el.addEventListener('pointerdown',()=>{selShot=s.id;});
+    el.querySelectorAll('[data-f]').forEach(inp=>{
+      const f=inp.dataset.f,num=inp.dataset.n;
+      inp[inp.tagName==='SELECT'?'onchange':'oninput']=()=>{s[f]=num?+inp.value:inp.value;
+        if(inp.type==='range'||f==='overlap'||f==='kind'){clearTimeout(inp._t);touch();inp._t=setTimeout(()=>{if(document.activeElement!==inp||inp.type!=='range')reRender();},inp.type==='range'?400:0);
+          if(inp.type==='range'){const lbl=inp.nextElementSibling;if(f==='dur')lbl.innerHTML=f2(s.dur)+' วินาที';if(f==='size')lbl.innerHTML=`${f2(s.size)} เท่าตัวละคร<br><small class="lb">${SIZE_TH(s.size)}</small>`;if(f==='power')lbl.innerHTML=POW[s.power];}}
+        else touch();};
+      if(inp.type==='range')inp.onchange=()=>reRender();
+    });
+    el.querySelector('[data-one]').onclick=e=>{const v=e.target.dataset.v;if(!v)return;s.where=s.where===v?'':v;el.querySelectorAll('[data-one] button').forEach(x=>x.classList.toggle('on',x.dataset.v===s.where));touch();};
+    el.querySelectorAll('[data-many]').forEach(c=>c.onclick=e=>{const v=e.target.dataset.v;if(!v)return;tog(s[c.dataset.many],v);e.target.classList.toggle('on');touch();});
+    bindSw(el.querySelector('[data-cols]'),s.colors);
+    el.querySelector('[data-draw]').onclick=()=>draw(s);
+    const rz=el.querySelector('[data-zs]');if(rz)rz.onclick=()=>zoom(s.result);
+    bindDrop(el.querySelector('[data-refs]'),f=>addImgs(f,s.refs));
+    el.querySelector('[data-refs]').addEventListener('click',e=>{if(e.target.dataset.del!=null){s.refs.splice(+e.target.dataset.del,1);touch(1);}else if(e.target.dataset.pick)pick(f=>addImgs(f,s.refs));});
+    el.querySelector('[data-mv="-1"]').onclick=()=>{if(i>0){b.shots.splice(i-1,0,b.shots.splice(i,1)[0]);touch(1);}};
+    el.querySelector('[data-mv="1"]').onclick=()=>{if(i<b.shots.length-1){b.shots.splice(i+1,0,b.shots.splice(i,1)[0]);touch(1);}};
+    el.querySelector('[data-dup]').onclick=()=>{const c=JSON.parse(JSON.stringify(s));c.id=newId();c.result='';c.note='';b.shots.splice(i+1,0,c);touch(1);};
+    el.querySelector('[data-rm]').onclick=()=>{if(!confirm('ลบช่วงที่ '+(i+1)+'?'))return;b.shots.splice(i,1);touch(1);};
+  });
+  $('#dRefs').addEventListener('click',e=>{if(e.target.dataset.del!=null&&e.target.dataset.k==='refs'){b.refs.splice(+e.target.dataset.del,1);touch(1);}else if(e.target.dataset.pick==='refs')pick(f=>addImgs(f,b.refs));});
+  $('#ed').onclick=e=>{if(e.target.dataset.z)zoom(e.target.src);};
+}
+function reRender(){const y=$('#ed').scrollTop;renderEd();$('#ed').scrollTop=y;}
+function tog(a,v){const k=a.indexOf(v);k<0?a.push(v):a.splice(k,1);}
+function bindSw(el,cols){
+  el.oninput=e=>{const i=e.target.dataset.i;if(i==null)return;cols[+i]=e.target.value;e.target.parentNode.style.background=e.target.value;touch();};
+  el.onclick=e=>{const d=e.target.dataset.del;if(d!=null){e.preventDefault();cols.splice(+d,1);touch(1);}else if(e.target.dataset.add){cols.push(cols[cols.length-1]||'#ffffff');touch(1);}};
+}
+function bindDrop(el,fn){
+  el.ondragover=e=>{e.preventDefault();el.classList.add('over');};el.ondragleave=()=>el.classList.remove('over');
+  el.ondrop=e=>{e.preventDefault();el.classList.remove('over');fn(e.dataTransfer.files);};
+}
+function pick(fn){const i=document.createElement('input');i.type='file';i.accept='image/*';i.multiple=true;i.onchange=()=>fn(i.files);i.click();}
+function zoom(src){$('#zoom img').src=src;$('#zoom').style.display='flex';}
+
+// รูป: ย่อให้กว้างไม่เกิน 1600 → serve.py เก็บใน storyboard/img/
+function fileToCanvas(f){return new Promise((ok,no)=>{const u=URL.createObjectURL(f),im=new Image();im.onload=()=>{const s=Math.min(1,1600/im.width),c=document.createElement('canvas');c.width=Math.round(im.width*s);c.height=Math.round(im.height*s);c.getContext('2d').drawImage(im,0,0,c.width,c.height);URL.revokeObjectURL(u);ok(c);};im.onerror=no;im.src=u;});}
+function canvasData(c){let d=c.toDataURL('image/png');if(d.length>1.4e6)d=c.toDataURL('image/jpeg',0.86);return d;}
+async function upload(data,tag){const r=await fetch('/api/sb-img?name=s'+cur.id+'_'+tag+'_'+Date.now().toString(36),{method:'POST',body:data});const j=await r.json();if(!j.ok)throw j.err;return j.path;}
+async function addImgs(fl,arr){
+  const fs=[...fl].filter(f=>f.type.startsWith('image/'));if(!fs.length)return;
+  if(!online){stat('⚠ ยังแปะรูปไม่ได้ — เปิดผ่าน "Storyboard.bat" ก่อน',1);return;}
+  stat('กำลังเก็บรูป…');
+  try{for(const f of fs)arr.push(await upload(canvasData(await fileToCanvas(f)),'ref'));touch(1);}
+  catch(e){stat('⚠ เก็บรูปไม่ได้: '+e,1);}
+}
+document.addEventListener('paste',e=>{
+  const fs=[...(e.clipboardData?.items||[])].filter(i=>i.kind==='file').map(i=>i.getAsFile());
+  if(!fs.length)return;e.preventDefault();
+  if($('#dr').style.display==='flex'){drBgImage(fs[0]);return;}
+  if(!cur)return;
+  const s=cur.shots.find(x=>x.id===selShot);addImgs(fs,s?s.refs:cur.refs);
+});
+
+// ===== หน้าวาดภาพร่าง: พื้นหลัง (ตัวละคร/รูป) + ชั้นหมึก =====
+const W=1280,H=720,GY=560,U=150; // พื้นอยู่ที่ y=560, ตัวละครสูง 150px = "1 ตัว"
+const DR={s:null,bg:'side',bgImg:null,tool:'pen',col:'#ff7a1a',size:7,ops:[],base:null};
+const cvB=$('#bg'),cvI=$('#ink');[cvB,cvI].forEach(c=>{c.width=W;c.height=H;});
+function stick(g,x,col,face){ // ตัวละครแท่งไม้ สูง U
+  g.strokeStyle=col;g.lineWidth=6;g.lineCap='round';const top=GY-U;
+  g.beginPath();g.arc(x,top+20,18,0,7);g.stroke();
+  g.beginPath();g.moveTo(x,top+38);g.lineTo(x,GY-55);g.lineTo(x-20,GY);g.moveTo(x,GY-55);g.lineTo(x+20,GY);
+  g.moveTo(x,top+60);g.lineTo(x+face*42,top+70);g.moveTo(x,top+60);g.lineTo(x-face*24,top+88);g.stroke();
+  g.fillStyle=col;g.beginPath();g.arc(x+face*8,top+18,3.5,0,7);g.fill();
+}
+function drawBg(){
+  const g=cvB.getContext('2d');g.fillStyle='#16181c';g.fillRect(0,0,W,H);
+  if(DR.bgImg){const im=DR.bgImg,s=Math.min(W/im.width,H/im.height);g.drawImage(im,(W-im.width*s)/2,(H-im.height*s)/2,im.width*s,im.height*s);return;}
+  if(DR.base){g.drawImage(DR.base,0,0,W,H);return;}
+  g.fillStyle='#8a90996b';g.font='22px Segoe UI, Leelawadee UI, sans-serif';
+  if(DR.bg==='side'){
+    g.fillStyle='#22262c';g.fillRect(0,GY,W,H-GY);g.strokeStyle='#5a606b';g.lineWidth=3;g.beginPath();g.moveTo(0,GY);g.lineTo(W,GY);g.stroke();
+    g.fillStyle='#6a707b';for(let x=260,k=0;x<W;x+=U,k++){g.fillRect(x,GY+4,2,14);g.fillText(k,x+5,GY+26);}
+    stick(g,260,'#e6e8ec',1);stick(g,1020,'#e5534b',-1);
+    g.fillStyle='#8a9099';g.fillText('ผู้ร่าย',225,GY+60);g.fillText('เป้า (ห่าง ~5 ตัว)',950,GY+60);
+  }else if(DR.bg==='top'){
+    g.strokeStyle='#2c3038';g.lineWidth=1;for(let x=0;x<W;x+=U/2){g.beginPath();g.moveTo(x,0);g.lineTo(x,H);g.stroke();}for(let y=0;y<H;y+=U/2){g.beginPath();g.moveTo(0,y);g.lineTo(W,y);g.stroke();}
+    g.fillStyle='#e6e8ec';g.beginPath();g.arc(300,H/2,22,0,7);g.fill();
+    g.strokeStyle='#e6e8ec';g.lineWidth=4;g.setLineDash([10,10]);g.beginPath();g.moveTo(330,H/2);g.lineTo(950,H/2);g.stroke();g.setLineDash([]);
+    g.fillStyle='#e5534b';g.beginPath();g.arc(1000,H/2,22,0,7);g.fill();
+    g.fillStyle='#8a9099';g.fillText('ผู้ร่าย (มองจากด้านบน, เล็งไปทางขวา)',190,H/2+60);g.fillText('เป้า',985,H/2+60);g.fillText('1 ช่องตาราง = ครึ่งตัวละคร',20,30);
+  }
+}
+function drawInk(){
+  const g=cvI.getContext('2d');g.clearRect(0,0,W,H);g.lineCap=g.lineJoin='round';
+  for(const o of DR.ops){
+    const [a,b]=[o.p[0],o.p[o.p.length-1]];
+    g.save();g.globalCompositeOperation=o.t==='erase'?'destination-out':'source-over';
+    g.strokeStyle=g.fillStyle=o.c;g.lineWidth=o.w;
+    if(o.t==='glow'){g.shadowColor=o.c;g.shadowBlur=o.w*3;g.globalAlpha=0.9;}
+    if(o.t==='fill'){g.globalAlpha=0.35;g.lineWidth=o.w*4;}
+    if(o.t==='arrow'){g.beginPath();g.moveTo(a[0],a[1]);g.lineTo(b[0],b[1]);g.stroke();const an=Math.atan2(b[1]-a[1],b[0]-a[0]),h=o.w*4+10;
+      g.beginPath();g.moveTo(b[0],b[1]);g.lineTo(b[0]-h*Math.cos(an-0.45),b[1]-h*Math.sin(an-0.45));g.lineTo(b[0]-h*Math.cos(an+0.45),b[1]-h*Math.sin(an+0.45));g.fill();}
+    else if(o.t==='text'){g.font=`600 ${14+o.w*2.5}px Segoe UI, Leelawadee UI, sans-serif`;g.shadowColor='#000';g.shadowBlur=4;g.fillText(o.s,a[0],a[1]);}
+    else{g.beginPath();o.p.forEach((p,k)=>k?g.lineTo(p[0],p[1]):g.moveTo(p[0],p[1]));if(o.p.length===1)g.lineTo(a[0]+0.1,a[1]);g.stroke();
+      if(o.t==='glow'){g.shadowBlur=0;g.strokeStyle='#ffffffcc';g.lineWidth=Math.max(1.5,o.w*0.35);g.stroke();}}
+    g.restore();
+  }
+}
+function draw(s){
+  DR.s=s;DR.ops=[];DR.bgImg=null;DR.base=null;
+  const show=()=>{drawBg();drawInk();$('#dr').style.display='flex';};
+  if(s.sketch){const im=new Image();im.onload=()=>{DR.base=im;show();};im.onerror=show;im.src=s.sketch+'?v='+Date.now();}else show();
+}
+function drBgImage(f){fileToCanvas(f).then(c=>{DR.bgImg=c;DR.base=null;drawBg();});}
+function pt(e){const r=cvI.getBoundingClientRect();return [(e.clientX-r.left)*W/r.width,(e.clientY-r.top)*H/r.height];}
+cvI.onpointerdown=e=>{
+  if(DR.tool==='text'){const t=prompt('พิมพ์ข้อความ (เช่น "ระเบิดตรงนี้", "0.3 วิ")');if(t)DR.ops.push({t:'text',c:DR.col,w:DR.size,p:[pt(e)],s:t});drawInk();return;}
+  cvI.setPointerCapture(e.pointerId);DR.ops.push({t:DR.tool,c:DR.col,w:DR.size,p:[pt(e)]});drawInk();
+};
+cvI.onpointermove=e=>{if(!e.buttons||!DR.ops.length)return;const o=DR.ops[DR.ops.length-1];if(o.t==='text')return;if(o.t==='arrow')o.p[1]=pt(e);else o.p.push(pt(e));drawInk();};
+const DCOL=['#ffffff','#ffd27a','#ff7a1a','#e5302b','#7fd6ff','#2f7bff','#b06bff','#5fd39a','#8a6a48','#222222'];
+$('#drCols').innerHTML=DCOL.map(c=>`<button class="col ${c===DR.col?'on':''}" data-c="${c}" style="background:${c}"></button>`).join('');
+$('#dr .bar').onclick=async e=>{const t=e.target;
+  if(t.dataset.bg){if(DR.base&&!confirm('เปลี่ยนพื้นหลัง = ภาพเดิมที่บันทึกไว้จะหาย (ยังวาดใหม่ได้) ตกลง?'))return;DR.bg=t.dataset.bg;DR.base=null;DR.bgImg=null;document.querySelectorAll('#drBg button').forEach(x=>x.classList.toggle('on',x===t));drawBg();}
+  if(t.dataset.t){DR.tool=t.dataset.t;document.querySelectorAll('#drTool button').forEach(x=>x.classList.toggle('on',x===t));}
+  if(t.dataset.s){DR.size=+t.dataset.s;document.querySelectorAll('#drSize button').forEach(x=>x.classList.toggle('on',x===t));}
+  if(t.dataset.c){DR.col=t.dataset.c;document.querySelectorAll('#drCols .col').forEach(x=>x.classList.toggle('on',x===t));if(DR.tool==='erase')$('#drTool [data-t=pen]').click();}
+  if(t.id==='drUndo'){DR.ops.pop();drawInk();}
+  if(t.id==='drClr'){DR.ops=[];drawInk();}
+  if(t.id==='drCancel')$('#dr').style.display='none';
+  if(t.id==='drSave'){
+    const c=document.createElement('canvas');c.width=W;c.height=H;const g=c.getContext('2d');g.drawImage(cvB,0,0);g.drawImage(cvI,0,0);
+    try{DR.s.sketch=await upload(c.toDataURL('image/jpeg',0.9),'sk');touch(1);$('#dr').style.display='none';}catch(err){stat('⚠ เก็บภาพไม่ได้ — เปิดผ่าน "Storyboard.bat" หรือยัง? '+err,1);}
+  }
+};
+$('#drPick').oninput=e=>{DR.col=e.target.value;document.querySelectorAll('#drCols .col').forEach(x=>x.classList.remove('on'));};
+
+$('#zoom').onclick=()=>$('#zoom').style.display='none';
+$('#bNew').onclick=newBoard;
+$('#list').onclick=e=>{const it=e.target.closest('.it');if(!it)return;cur=db.items.find(b=>b.id===+it.dataset.id);selShot=null;renderList();renderEd();$('#ed').scrollTop=0;};
+$('#bCopy').onclick=async()=>{
+  if(!cur){stat('เลือกสตอรี่บอร์ดก่อน',1);return;}
+  const msg=cur.reply||cur.fx?`ดูสตอรี่บอร์ด VFX #${cur.id} (${cur.title||'ไม่มีชื่อ'}) ใน storyboard/sb-${cur.id}.md อีกครั้ง ผมแก้/เพิ่มรายละเอียดแล้ว ปรับเอฟเฟกต์ให้ตรงตามนี้`
+    :`ทำ VFX ตามสตอรี่บอร์ด #${cur.id} (${cur.title||'ไม่มีชื่อ'}) ใน storyboard/sb-${cur.id}.md — ทำ 2-3 แบบให้เลือก แล้วแปะภาพผลลัพธ์กลับมาในแต่ละช่วง`;
+  if(cur.status==='draft'){cur.status='ready';touch(1);}
+  try{await navigator.clipboard.writeText(msg);stat('คัดลอกแล้ว — ไปวางในแชท Claude ได้เลย ✓');}catch(e){prompt('คัดลอกข้อความนี้:',msg);}
+};
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){$('#zoom').style.display='none';}
+  if($('#dr').style.display==='flex'&&(e.ctrlKey||e.metaKey)&&e.key==='z'){e.preventDefault();DR.ops.pop();drawInk();}
+});
+window.addEventListener('focus',()=>{if(!dirty&&$('#dr').style.display!=='flex'&&!document.activeElement.matches('input,textarea'))load();}); // Claude อาจตอบ/แปะผลมาแล้ว
+load();
+</script>
+</body></html>
