@@ -219,6 +219,12 @@ function stormClawSwipe(o,dt){const S=o.clSw,n=S.n,emp=n===3;S.t+=dt;const k=Mat
   else if(n===1){L.rotation.x=lerp(-2.8,-0.45,e);L.rotation.z=lerp(1.0,-0.95,e);}
   else if(n===2){R.rotation.x=L.rotation.x=lerp(-3.05,-0.25,e);R.rotation.z=-0.2;L.rotation.z=0.2;}
   else{R.rotation.x=L.rotation.x=-1.45;R.rotation.z=lerp(-1.7,1.1,e);L.rotation.z=lerp(-0.9,1.7,e);}
+  // ตัวบิดตามแรงปาด (ผู้ใช้ 2026-10-22: "claw … not even move the body make it บิดตัวไปมาเพิ่มขึ้น") — ง้าง → ฟาดเลย → คืน
+  // [บิดตอนง้าง, บิดตอนตามแรง, โน้มหน้าสุด, เอียงข้าง, ย่อ, ก้าวขา] ของท่า 0 ขวา / 1 ซ้าย / 2 สองแขนฟาดลง / 3 กวาดแนวนอน
+  {const P=[[-0.65,0.75,0.32,0.16,0.14,0.9],[0.65,-0.75,0.32,-0.16,0.14,0.9],[0,0,0.55,0,0.26,1],[0.95,-1.05,0.22,-0.1,0.16,0.7]][n],
+    w=k<0.08?k/0.08:k>0.8?1-(k-0.8)/0.2:1,bell=Math.sin(Math.min(1,e*1.15)*Math.PI);
+    o.b.rotation.y=lerp(P[0],P[1],e)*w;o.b.rotation.x+=(n===2?lerp(-0.22,P[2],e):P[2]*bell)*w;o.b.rotation.z=P[3]*bell*w;o.bz=1;o.b.position.y-=P[4]*bell*w;
+    if((o.vsp||0)<0.6){o.legs[1].rotation.x=-0.5*P[5]*bell*w;o.legs[0].rotation.x=0.35*P[5]*bell*w;}}
   const act=n===0?[o.claws[0]]:n===1?[o.claws[1]]:o.claws,B=STCLAW.blades;
   if(!S.tr){S.tr=[];for(const c of act)for(let b=0;b<3;b++)S.tr.push({c,b,
     g:trailNew({col:'#ffd23a',col2:'#ff9000',w:emp?0.2:0.15,life:emp?0.36:0.32,k:emp?1.1:0.9}),
@@ -309,6 +315,7 @@ function stormFX(o,p,pz,now,dt){
         A.add(g);return g;});o.claws.fb=!file;}
     o.claws.forEach(c=>{c.visible=true;});
     if(o.clSw)stormClawSwipe(o,dt);
+    else{o.b.rotation.x+=0.14+Math.sin(now/280)*0.035;o.b.rotation.y=Math.sin(now/520)*0.16;o.b.position.y-=0.05;o.armR.rotation.z-=0.18+Math.sin(now/240)*0.05;o.armL.rotation.z+=0.18+Math.sin(now/260)*0.05;}   // ร่างเทพ: ยืนหลังค่อมแบบสัตว์ล่า โยกตัวไปมา กางกรงเล็บ
     if(o.wandG)o.wandG.visible=false;o.tip.visible=false;
     // สายฟ้าวิ่งไปตามใบมีดตลอดเวลา (โคน → กลาง → ปลาย) + ประกายกระโดดข้ามปลายใบมีด — บาง ทึบ แสงเรืองน้อย
     o.clawT=(o.clawT||0)-dt;
