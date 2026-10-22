@@ -452,11 +452,13 @@ DCAM_T1:10 DCAM_T2:10 DCAM_FADE:10 DCAM:11 dcamDie:12 _dcP:19 _dcL:19 dcamCam:20
 ## js/59-podroom.js (151) — ห้องโถงใหญ่ฮอกวอตส์สำหรับโพเดียม (ผู้ใช้ 2026-10-22 "design me a new lobby for background…
 PODS:9 PODR:11 podRoomBuild:12 podRoomTick:142
 
-## js/60-menu3d.js (230) — เมนูแรกแบบ "ลานดวลเวทใต้ดาว" (ผู้ใช้ 2026-10-22: "make the first lobby more unique … inte…
-MENUS:9 MN:11 _mv:12 mnCrest:13 mnBuild:16 MNPOP:134 mnFocus:145 mnClose:149
-§150 เมาส์: เลื่อน = เรืองแสง • คลิก = เข้าหาของ
-mnPick:151 mnHot:159
-§163 เรนเดอร์ (เรียกจาก renderStage js/32 — คืน true = จัดการให้แล้ว)
-MN_FOV:164 mnLayout:165 mnRestore:170 mnMenuRender:176 _mcp:230 _mcl:230
+## js/60-menu3d.js (396) — เมนูแรก = ลานดวลเวทใต้ดาว ที่ "เดินได้" (ผู้ใช้ 2026-10-22, รอบ 2: "redesign the menu by …
+MENUS:14 MN:16 MN_FOV:18 MN_R:18 _mv:19 _mcp:19 _mcl:19 mnCrest:20 mnTone:24 mnHit:29 mnBuild:31 MNPOP:222 mnToast:242
+§243 สั่งพ่อมด
+mnGo:244 mnWalkTo:247 mnUse:248 mnClose:253
+§257 เมาส์ / คีย์บอร์ด
+MN_BLOCK:258 mnRay:259 mnPick:260 mnHot:266 mnToy:284
+§289 เรนเดอร์ (เรียกจาก renderStage js/32 — คืน true = จัดการแล้ว)
+mnRestore:290 mnMenuRender:296
 
-(61 files, 13670 lines)
+(61 files, 13836 lines)
