@@ -84,7 +84,7 @@ MIND:66 summonMin:72 minTarget:81 minShoot:88 updateMins:93 aimTarget:133
 §180 ร่ายคาถา
 castSlot:181 castUlt:196
 
-## js/10-net.js (97) — 
+## js/10-net.js (97) — เครือข่าย (PeerJS / WebRTC)
 PREFIX:4 NET:5 RC:9 LAG:11 lagDo:12 hostSend:13 LOBBY:14 genCode:15 sendAll:16 setStatus:17 hostGame:19 netConnect:42 netLost:50 joinGame:65 clientOnData:83 leave:97
 
 ## js/11-host.js (381) — 
@@ -257,14 +257,14 @@ rr:2 SLOTS:3 fmtTime:4
 §5 ชิ้นส่วน HUD ธีมทอง-น้ำเงิน
 HG:6 HG2:6 HN:6 HUDF:8 hudTick:9 readyPulse:11 diaPath:13 plate:15 frameBox:21 bossTrail:29 drawBossBar:30 spellDia:50 thinBar:79 drawHUD:84 raceRankClient:164 drawModeHUD:168 MM:205 drawMinimap:206 slotKey:285 mySlots:286 drawUlt:296 STATUS_ICO:321 SLOTS_IMP:322 BR_LOCK:323 CLUSTER:325 E_NEEDSTAND:326 slotState:327 drawBottom:346 drawBoard:398
 
-## js/39-menu.js (283) — 
+## js/39-menu.js (284) — 
 myLook:5 myColor:5 myKit:5 myName:6 renderMyHouse:9
 §11 หน้าสร้าง/แต่งตัวละคร (2 ขั้น: 1 หน้าตา → 2 เลือกบ้าน)
 crLib:12 crSaved:12 crKitSaved:12 crOpen:12 crStep:12 crTab:12 crFirst:12 crKitOnly:12 crSlot:12 CRTABS:13 sw_:14 bt_:15 nameBox_:16 crPanelSet:17 crRenderStep1:22 crRenderWand:33
 §36 ขั้น 3: สาย + ชุดคาถา
 ROLE_COL:37 roleTag:38 DESIGNED:39 spellTags:40 spellDescHTML:47 baseDescHTML:51 SB_THEME:59 ROLE_ORDER:68 sbFxRun:69 sbFxT:69 sbParts:69 crRenderKit:70 sbStartFx:99 sbFxTick:100 sbBurst:127 crAssign:133 crRenderHouse:142 crGo:149 crSaveName:161 crSetHouse:162 openCreator:163 closeCreator:173 lobbyKitSend:180
-§221 ฉากเปิด (#intro) + ประกายบนหน้าเมนู (#menuFx)
-TITLE:224 titleSpark:225 titleDraw:226 titleLoop:237 titleGo:248 JOINQ:256 ovResult:276
+§222 ฉากเปิด (#intro) + ประกายบนหน้าเมนู (#menuFx)
+TITLE:225 titleSpark:226 titleDraw:227 titleLoop:238 titleGo:249 JOINQ:257 ovResult:277
 
 ## js/40-train-settings.js (173) — เมนูทดลอง (ห้องฝึก / Test Place)
 trOpenF:2 trKey:2 trN:2 TR_OPTS:3 trToggle:4 trSend:9 trSync:14 hovEl:62
@@ -439,7 +439,11 @@ FFAV:104 MULTI:105 MULTI_TH:105 STREAK:106 pName:107 ffaKf:108 kfSound:123 KINDN
 ## js/55-podium.js (84) — โพเดียมธีมฮอกวอตส์ (ผู้ใช้ 2026-10-22 "podium but make it magician theme hogwart theme")
 POD:6 POD_X:7 POD_H:7 POD_C:7 podStart:8 podStop:29 podPose:37 renderPodium:49
 
-## js/56-progress.js (71) — เลเวล + สถิติ + ของปลดล็อค (ผู้ใช้ 2026-10-22: "more skin wand cloak unlock as lvl" → เลื…
-LV_MAX:7 lvNeed:8 UNLOCKS:9 PROG:15 progSave:16 lvOf:17 lookLock:18 lookClampLocks:19 progXP:21 progAward:22 progBox:33 progOpen:41 progChip:53
+## js/56-progress.js (72) — เลเวล + สถิติ + ของปลดล็อค (ผู้ใช้ 2026-10-22: "more skin wand cloak unlock as lvl" → เลื…
+§7 var/function (ไม่ใช่ const): หน้าสร้างตัวละครอาจเปิดตอนโหลด (?nointro…
+LV_MAX:8 lvNeed:9 UNLOCKS:10 PROG:16 progSave:17 lvOf:18 lookLock:19 lookClampLocks:20 progXP:22 progAward:23 progBox:34 progOpen:42 progChip:54
 
-(57 files, 13158 lines)
+## js/57-tutorial.js (44) — วิธีเล่นแต่ละสาย (ผู้ใช้ 2026-10-22 "สอนเล่นแต่ละสาย") — ปุ่ม "📖 วิธีเล่นสายนี้" ในหน้าเ…
+TUTTIPS:7 tutOpen:12 tutTry:31
+
+(58 files, 13204 lines)

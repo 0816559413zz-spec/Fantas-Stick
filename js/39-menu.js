@@ -79,7 +79,7 @@ function crRenderKit(){
   const mine=SPELL_LIST.filter(x=>x.path===k.path&&!x.ult).sort((a,b)=>ROLE_ORDER.indexOf(a.role)-ROLE_ORDER.indexOf(b.role));
   $('#sbHero').innerHTML=`<h1>${P.n}</h1><span class="em">${icoHTML('p_'+P.id,P.col,36)}</span><div class="tl">${P.d}</div>
     <div class="chain">${mine.map((S,i)=>`${i?'<span class="ar">➜</span>':''}<span class="st" style="--rc:${ROLE_COL[S.role]||'#fff'}" data-ksp-info="${S.i}">${icoHTML(S.id,P.col,22)}<b>${ROLE_N[S.role]||''}</b></span>`).join('')}<span class="ar">➜</span><span class="st" style="--rc:#ffe27a" data-kult="1">${icoHTML(ult.id,P.col,22)}<b>เวทโบราณ</b></span></div>
-    <div class="cb">✦ ${P.combo}</div>`;
+    <div class="cb">✦ ${P.combo}</div><button type="button" class="tutBtn" id="tutOpen">📖 วิธีเล่นสายนี้</button>`;   // js/57
   // ชุดคาถารูปเพชร
   const POS=[[22,50],[50,18],[78,50],[50,82]];
   $('#sbLoad').innerHTML=`<div class="ring"></div>${k.ids.map((id,i)=>{const S=SPELL_LIST[id],c=PATHS[S.path].col;return `<button class="dslot ${crSlot===i?'on':''}" data-ks="${i}" style="left:${POS[i][0]}%;top:${POS[i][1]}%;--c:${c}"><span class="dm"></span><span class="di">${icoHTML(S.id,c,34)}</span><span class="k">${keyName(KEYS[SLOTK[i]]||'Key'+'QERF'[i])}</span><span class="nm">${S.n}</span></button>`;}).join('')}
@@ -171,7 +171,7 @@ function openCreator(first,step){
   $('#creator').classList.remove('hidden');crGo(step||1);
 }
 function closeCreator(save){
-  if(save){crSaveName();store('wd_look',lookStr(myLook));store('wd_kit2',myKit);if(JOINQ){const c=JOINQ;JOINQ='';setTimeout(()=>joinGame(c),300);}}
+  if(save){crSaveName();lookClampLocks(myLook);store('wd_look',lookStr(myLook));store('wd_kit2',myKit);if(JOINQ){const c=JOINQ;JOINQ='';setTimeout(()=>joinGame(c),300);}}
   else{myLook=parseLook(crSaved);myKit=crKitSaved;}
   crOpen=false;STAGE.rotY=STAGE.rotV=0;document.body.classList.remove('crRot');renderMyHouse();$('#creator').classList.add('hidden');
   if(screen==='menu'){document.querySelector('.mprof').classList.remove('hidden');document.querySelector('.mleft').classList.remove('hidden');}
@@ -182,6 +182,7 @@ function lobbyKitSend(){
   else if(NET.hostConn)try{NET.hostConn.send({t:'kit',k:myKit});}catch(e){}
 }
 $('#creator').addEventListener('click',e=>{
+  if(e.target.closest('#tutOpen')){tutOpen(parseKit(myKit).path);return;}
   const tab=e.target.closest('[data-tab]');if(tab){crSaveName();crTab=+tab.dataset.tab;crRenderStep1();return;}
   const hs=e.target.closest('[data-house]');if(hs){crSetHouse(+hs.dataset.house);return;}
   const kp=e.target.closest('[data-kp]');if(kp){myKit=cleanKit(String(+kp.dataset.kp));crSlot=0;crLib=+kp.dataset.kp;crRenderKit();const f=document.querySelector('.sbFlash');if(f){f.style.background=`radial-gradient(circle at 62% 50%,${PATHS[+kp.dataset.kp].col},transparent 60%)`;f.classList.remove('go');void f.offsetWidth;f.classList.add('go');}sbParts=[];snd('buff');return;}

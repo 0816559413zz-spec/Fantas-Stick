@@ -4,18 +4,19 @@
 //  หน้าสร้างตัวละคร: ของที่ยังไม่ถึงเลเวล = ล็อก (เทาๆ + เลขเลเวล) • เมนู: ปุ่ม "เลเวล & สถิติ"
 //  ⚠ สูตร XP + ค่า XP ต่อเลเวล + รายการของ Claude เลือกเอง
 // =====================================================================
-const LV_MAX=30;
-const lvNeed=L=>150+30*(L-1);   // XP ที่ต้องใช้จากเลเวล L ไป L+1
-const UNLOCKS=[
+// var/function (ไม่ใช่ const): หน้าสร้างตัวละครอาจเปิดตอนโหลด (?nointro / ?join) ก่อนไฟล์นี้รัน — const จะพังทั้งเกม
+var LV_MAX=30;
+function lvNeed(L){return 150+30*(L-1);}   // XP ที่ต้องใช้จากเลเวล L ไป L+1
+var UNLOCKS=[
   {lv:2,k:'cl',v:8,n:'ผ้าคลุมเขียวมรกต'},{lv:4,k:'wc',v:6,n:'แกนเวท: ขนเทสตรัล'},{lv:6,k:'cl',v:9,n:'ผ้าคลุมแดงเลือดนก'},
   {lv:8,k:'wc',v:7,n:'แกนเวท: ขนนกแสงจันทร์'},{lv:10,k:'cl',v:10,n:'ผ้าคลุมกรมท่าราตรี'},{lv:12,k:'wd',v:8,n:'ไม้: เงาจันทร์'},
   {lv:14,k:'cl',v:11,n:'ผ้าคลุมทองหม่น'},{lv:16,k:'ws',v:4,n:'ทรงด้าม: กระดูก'},{lv:18,k:'cl',v:12,n:'ผ้าคลุมดำสนิท'},
   {lv:20,k:'wc',v:8,n:'แกนเวท: ประกายดาวตก'},{lv:22,k:'cl',v:13,n:'ผ้าคลุมเงินจันทรา'},{lv:24,k:'ws',v:5,n:'ทรงด้าม: เอลเดอร์วอนด์'},
   {lv:26,k:'cl',v:14,n:'ผ้าคลุมทองแชมป์'},{lv:28,k:'ws',v:6,n:'ทรงด้าม: คริสตัล'},{lv:30,k:'cl',v:15,n:'ผ้าคลุมจอมเวทสูงสุด'}];
-const PROG=(()=>{const d={xp:0,games:0,wins:0,losses:0,draws:0,kills:0,deaths:0,assists:0,dmg:0,bestK:0,bestD:0,paths:{},modes:{}};try{return Object.assign(d,JSON.parse(store('wd_prog')||'{}'));}catch(e){return d;}})();
+var PROG=(()=>{const d={xp:0,games:0,wins:0,losses:0,draws:0,kills:0,deaths:0,assists:0,dmg:0,bestK:0,bestD:0,paths:{},modes:{}};try{return Object.assign(d,JSON.parse(store('wd_prog')||'{}'));}catch(e){return d;}})();
 function progSave(){try{store('wd_prog',JSON.stringify(PROG));}catch(e){}}
 function lvOf(xp){let L=1;while(L<LV_MAX&&xp>=lvNeed(L)){xp-=lvNeed(L);L++;}return {L,cur:xp,need:L<LV_MAX?lvNeed(L):0};}
-function lookLock(k,i){const u=UNLOCKS.find(q=>q.k===k&&q.v===i);return u&&lvOf(PROG.xp).L<u.lv?u.lv:0;}
+function lookLock(k,i){if(!UNLOCKS||!PROG)return 0;const u=UNLOCKS.find(q=>q.k===k&&q.v===i);return u&&lvOf(PROG.xp).L<u.lv?u.lv:0;}
 function lookClampLocks(l){for(const u of UNLOCKS)if(l[u.k]===u.v&&lookLock(u.k,u.v))l[u.k]=0;return l;}
 // XP ของตานี้: จบเกม 40 + ชนะ 100 / เสมอ 25 + ฆ่า×15 + ช่วย×5 + ดาเมจ/20 (+ co-op ชั้น×15)
 function progXP(r,me,kind){if(!me)return 0;let x=40+(kind==='win'?100:kind==='draw'?25:0)+(me.k||0)*15+(me.as||0)*5+Math.round((me.dmg||0)/20);if(r.mode==='coop')x+=(r.wave||0)*15;return x;}
@@ -67,5 +68,5 @@ function progChip(){const el=$('#myLvl');if(el)el.textContent='Lv '+lvOf(PROG.xp
   if(nav&&g){const b=document.createElement('button');b.className='mi';b.id='btnProg';b.innerHTML='เลเวล & สถิติ<small>XP / ชนะ-แพ้ / ของปลดล็อค</small>';nav.insertBefore(b,g);b.onclick=()=>{ac();progOpen();};}
   const h=document.querySelector('.mprof h3');if(h&&!$('#myLvl')){const s=document.createElement('span');s.id='myLvl';h.appendChild(s);}
   progChip();
-  lookClampLocks(myLook);
+  lookClampLocks(myLook);if(crOpen)crRenderStep1();   // หน้าสร้างตัวละครเปิดก่อนไฟล์นี้โหลด → วาดใหม่ให้เห็นของล็อก
 })();
