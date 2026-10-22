@@ -98,11 +98,12 @@ function efxFX(ev){
     case 'ssiph':{const T=ev.tg||[];
       for(const t of T){tbolt(t[0],t[1],t[2],x,y,H,0.3,0,0.16,1);FX.flashSprite(t[0],t[1],t[2],'#ffd23a',0.9,0.2,0.3,1.6);
         for(let j=0;j<10;j++)PARTS.push({x:t[0]+rnd(-12,12),y:t[1]+rnd(-12,12),h:t[2]+rnd(-0.6,0.8),vx:(x-t[0])*rnd(1.5,2.5),vy:(y-t[1])*rnd(1.5,2.5),vh:rnd(-2,-0.5),life:0.4,max:0.4,col:j%2?'#ffd000':'#ffffff',size:rnd(2,3),g:0});}
-      // สายฟ้าที่ดูดมาไหลวนรอบตัว 0.6 วิ
-      if(T.length)for(let k=0;k<8;k++)later(0.12+k*0.06,()=>{const P=[],a0=rnd(0,6.283),h0=H+rnd(-0.8,0.6);for(let i=0;i<=8;i++){const an=a0+i*0.32,r=24-i*0.6;_tw.set(tx(x+Math.cos(an)*r),h0+i*0.12+GY(x,y),tz(y+Math.sin(an)*r));P.push(_tw.clone());}tboltP(P,0.14,0.11,0.04);});
-      burst(x,y,'#ffd000',24,160,0.5,2.2,{h:H,vh:[0,3],g:-0.5});FX.flashLight(x,y,H+1,'#ffd23a',4,12,0.3);if(near)snd('zap',ev);if(ev.id===NET.myId&&T.length)snd('buff');break;}
+      for(const t of T){const d=Math.hypot(x-t[0],y-t[1]);if(d>20)fxPlay('storm/siphon_c',{x:t[0],y:t[1],h:t[2],a:Math.atan2(y-t[1],x-t[0]),p:{len:d/20}});}
+      if(near)snd('zap',ev);if(ev.id===NET.myId&&T.length)snd('buff');break;}
     case 'sorbon':burst(x,y,'#ffd000',20,140,0.4,2.2,{h:H,g:0});FX.flashLight(x,y,H,'#ffd23a',3,10,0.25);if(ev.id===NET.myId)snd('buff');break;
-    case 'sorbgo':for(let i=0;i<(ev.n||1);i++){const g=new THREE.Group(),a1=new THREE.Sprite(glowMat('#ffd23a',1.6)),a2=new THREE.Sprite(glowMat('#ffffff',3.2));a1.scale.setScalar(0.85);a2.scale.setScalar(0.32);g.add(a1,a2);scene.add(g);SBV.push({g,x:x+(i?40:-40),y,h:H,x2:ev.x2,y2:ev.y2,h2:0.6,t:0,max:0.18,R:8});}
+    case 'sorbgo':if(ev.T){const o=PM3.get(ev.id);for(let i=0;i<(ev.n||1);i++){let s=[x+(i%2?40:-40),y,H];const sl=o&&o.sOrbs&&o.sOrbs[i%2];if(sl&&sl.parent){sl.getWorldPosition(_tw);const q=simOf(_tw);s=[q.x,q.y,q.h];}
+        const fx=fxPlay('storm/orb_fly',{x:s[0],y:s[1],h:s[2]});SBV.push({fx,s,tg:ev.tg,x2:ev.x2,y2:ev.y2,t:0,max:ev.T+i*0.08});}if(near)snd('whoosh',ev);break;}
+      for(let i=0;i<(ev.n||1);i++){const g=new THREE.Group(),a1=new THREE.Sprite(glowMat('#ffd23a',1.6)),a2=new THREE.Sprite(glowMat('#ffffff',3.2));a1.scale.setScalar(0.85);a2.scale.setScalar(0.32);g.add(a1,a2);scene.add(g);SBV.push({g,x:x+(i?40:-40),y,h:H,x2:ev.x2,y2:ev.y2,h2:0.6,t:0,max:0.18,R:8});}
       if(near)snd('whoosh',ev);break;
     case 'sorbhit':ring(x,y,'#ffd000',60,0.3,0.15);for(let i=0;i<5;i++){const an=rnd(0,6.283);tbolt(x,y,H,x+Math.cos(an)*rnd(40,65),y+Math.sin(an)*rnd(40,65),H+rnd(-0.4,0.8),0.18,0,0.13);}
       burst(x,y,'#ffd000',22,240,0.35,2.4,{h:H,vh:[1,5],g:5});burst(x,y,'#ffffff',8,180,0.25,1.8,{h:H,g:5});FX.flashSprite(x,y,H,'#ffffff',0.4,2.2,0.12,2.2);FX.flashLight(x,y,H+1,'#ffd23a',5,14,0.25);if(near){snd('zap',ev);shake(2);}break;
@@ -119,7 +120,8 @@ function efxFX(ev){
       burst(ex,ey,'#ffd000',36,360,0.45,2.6,{h:H,vh:[-1,6],g:4});burst(ex,ey,'#9fd8ff',12,260,0.35,2,{h:H,g:4});
       FX.flashSprite(x+c*45,y+sn*45,H,'#ffffff',0.3,2.2,0.1,2.5);FX.flashLight(x+c*60,y+sn*60,H,'#ffd23a',4,12,0.25);
       if(near){snd('boom',ev);snd('zap',ev);shake(5);}break;}
-    case 'tswarn':{const g=makeDfCircle(true),R=ev.r*S3;g.visible=true;g.position.set(tx(x),H+0.07+GY(x,y),tz(y));g.scale.set(R,1,R);g.userData.mats[0].color.set('#ffd000');TSV.push({g,age:0});if(near)snd('cast_ebolt',ev);break;}
+    case 'tswarn':{const g=makeDfCircle(true),R=ev.r*S3;g.visible=true;g.position.set(tx(x),H+0.07+GY(x,y),tz(y));g.scale.set(R,1,R);g.userData.mats[0].color.set('#ffd000');TSV.push({g,age:0,i:ev.i,tgt:null});if(near)snd('cast_ebolt',ev);break;}
+    case 'tsmv':{const v=TSV.find(q=>q.i===ev.i);if(v)v.tgt=[x,y,H];break;}
     case 'tstrike':{const R=ev.r;for(let i=0;i<3;i++)tbolt(x+rnd(-14,14),y+rnd(-14,14),H+15,x+rnd(-6,6),y+rnd(-6,6),H+0.1,0.22,0,0.36,2);
       FX.flashSprite(x,y,H+1,'#ffffff',0.6,3.3,0.12,2.2);FX.flashSprite(x,y,H+0.6,'#ffd23a',0.8,4.4,0.28,2);FX.flashLight(x,y,H+3,'#ffd23a',5.2,24,0.3);
       ring(x,y,'#ffd000',R*1.3,0.3,H+0.1);ring(x,y,'#ffffff',R*0.7,0.2,H+0.1);

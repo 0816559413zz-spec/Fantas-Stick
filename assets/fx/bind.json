@@ -275,5 +275,59 @@
   "cast:icicle": {
     "fx": "frost/icicle_cast",
     "mode": "add"
+  },
+  "efx:sdash": [
+    {
+      "fx": "storm/dash_go",
+      "mode": "add",
+      "follow": "ev.id"
+    },
+    {
+      "fx": "storm/dash_tail",
+      "mode": "add",
+      "follow": "ev.id"
+    }
+  ],
+  "efx:sdashe": {
+    "fx": "storm/dash_end",
+    "mode": "add",
+    "p": {
+      "len": "ev.len/20"
+    },
+    "if": "ev.len>0"
+  },
+  "efx:srailc": {
+    "fx": "storm/rail_charge",
+    "mode": "add",
+    "follow": "ev.id"
+  },
+  "efx:srail": {
+    "fx": "storm/rail_fire",
+    "mode": "add",
+    "p": {
+      "len": "ev.len/20"
+    }
+  },
+  "efx:sorbhit": {
+    "fx": "storm/orb_hit",
+    "mode": "replace"
+  },
+  "efx:sline": {
+    "fx": "storm/line_mix",
+    "mode": "add",
+    "p": {
+      "len": "ev.len/20"
+    }
+  },
+  "efx:stri": {
+    "fx": "storm/tri_mix",
+    "mode": "replace"
+  },
+  "efx:tstrike": {
+    "fx": "storm/tstrike_mix",
+    "mode": "add",
+    "p": {
+      "r": "ev.r/20"
+    }
   }
 }

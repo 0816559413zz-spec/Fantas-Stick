@@ -131,6 +131,9 @@ function updateBolts(dt){
   for(const L of Object.values(TBL)){const g=L.geometry;g.setDrawRange(0,n*(TBN-1)*6);g.attributes.position.needsUpdate=true;g.attributes.color.needsUpdate=true;L.visible=n>0;}
 }
 const LATER=[],STV=[],SBV=[],SDV=[],TSV=[],CLV=[];
+// ตำแหน่งตัวเป้าในภาพตอนนี้ ('e12' = มอน/หุ่น, อื่น ๆ = ผู้เล่น) → [x,y,h อก] หรือ null
+function stTgPos(tg){const v=VIEW.cur;if(!v||tg==null)return null;if(typeof tg==='string'&&tg[0]==='e'){const id=+tg.slice(1),e=v.E.find(q=>q.id===id);return e?[e.x,e.y,(e.h||0)+groundH(e.x,e.y)+1]:null;}
+  const p=v.P.find(q=>q.id===tg);return p&&p.al!==false?[p.x,p.y,(p.z||0)+1.1]:null;}
 // วัสดุกรงเล็บอัลติ (ใช้ร่วมกันทุกคน): ใบมีดเข้มเหลือบโลหะ • คมเหลืองไม่เรืองจัด • สนับมือโลหะเข้ม
 // blades = จุดโคน/กลาง/ปลายของใบมีด 3 เล่มในพิกัดของไฟล์ (glTF: x, y=บน, z=หน้า) — ตรงกับ assets/src/fx_meshes_build.py
 const STCLAW={dark:new THREE.MeshStandardMaterial({color:'#17140f',metalness:0.85,roughness:0.32,emissive:'#3a2a00',emissiveIntensity:0.35}),
@@ -179,7 +182,11 @@ function updateStormV(dt){
   for(let i=LATER.length-1;i>=0;i--){const L=LATER[i];L.t-=dt;if(L.t<=0){LATER.splice(i,1);try{vfxOnce(L.fn);}catch(e){}}}
   updateBolts(dt);updateClaws(dt);
   for(let i=STV.length-1;i>=0;i--){const v=STV[i];v.age+=dt;v.m.material.opacity=v.op*Math.max(0,1-v.age/v.life);if(v.grow)v.m.scale.multiplyScalar(1+v.grow*dt);if(v.age>=v.life){scene.remove(v.m);v.m.geometry.dispose();v.m.material.dispose();STV.splice(i,1);}}
-  for(let i=SBV.length-1;i>=0;i--){const b=SBV[i];b.t+=dt;const k=Math.min(1,b.t/b.max),x=lerp(b.x,b.x2,k),y=lerp(b.y,b.y2,k),h=lerp(b.h,b.h2,k);
+  for(let i=SBV.length-1;i>=0;i--){const b=SBV[i];if(b.s){b.t+=dt;const T=stTgPos(b.tg)||[b.x2,b.y2,groundH(b.x2,b.y2)+1],k=Math.min(1,b.t/b.max),u=0.2/b.max,dl=Math.hypot(T[0]-b.s[0],T[1]-b.s[1])||1,fw=Math.min(36,dl*0.3),A=[b.s[0]+(T[0]-b.s[0])/dl*fw,b.s[1]+(T[1]-b.s[1])/dl*fw,b.s[2]+1.8];let q;
+      if(k<u){const e=1-Math.pow(1-k/u,2);q=[lerp(b.s[0],A[0],e),lerp(b.s[1],A[1],e),lerp(b.s[2],A[2],e)];}   // ลอยขึ้น + เลื่อนออกหน้า (ไม่ลอยค้างหน้ากล้อง)
+      else{const e=(k-u)/(1-u),C=[lerp(A[0],T[0],0.35),lerp(A[1],T[1],0.35),A[2]+1.4],w=1-e;q=[w*w*A[0]+2*w*e*C[0]+e*e*T[0],w*w*A[1]+2*w*e*C[1]+e*e*T[1],w*w*A[2]+2*w*e*C[2]+e*e*T[2]];}   // โค้งลงไล่ตัวเป้า
+      if(b.fx){b.fx.x=q[0];b.fx.y=q[1];b.fx.h=q[2];}if(k>=1){if(b.fx)fxStop(b.fx);SBV.splice(i,1);}continue;}
+    b.t+=dt;const k=Math.min(1,b.t/b.max),x=lerp(b.x,b.x2,k),y=lerp(b.y,b.y2,k),h=lerp(b.h,b.h2,k);
     b.g.position.set(tx(x),h+GY(x,y),tz(y));for(let j=0;j<3;j++)PARTS.push({x:x+rnd(-8,8),y:y+rnd(-8,8),h:h+rnd(-0.3,0.3),vx:0,vy:0,vh:rnd(-0.5,0.5),life:0.3,max:0.3,col:j?'#ffd000':'#ffffff',size:rnd(2.5,4),g:0});
     if(Math.random()<0.8){const a1=rnd(0,6.283),e1=rnd(-1,1),R=b.R||16,q=shellPt(x,y,h,R,a1,e1),q2=shellPt(x,y,h,R,a1+rnd(1,2.5),-e1);tbolt(q[0],q[1],q[2],q2[0],q2[1],q2[2],0.05,0,0.08);}
     if(k>=1){scene.remove(b.g);SBV.splice(i,1);}}
@@ -198,7 +205,8 @@ function updateStormV(dt){
       d.pit.scale.setScalar(d.r*S3*(0.15+0.25*Math.min(1,tt/d.max)));d.pit.material.opacity=0.35*Math.min(1,d.t*3);d.m.scale.set(1,1-0.25*Math.min(1,tt/d.max),1);}
     if(d.t<=0){for(const m of [d.m,d.w,d.pit,...d.rings]){scene.remove(m);m.geometry.dispose();m.material.dispose();}scene.remove(d.orb);SDV.splice(i,1);}}
   // วงรูนเตือนฟ้าผ่าสามครั้ง: หมุน + ขีดรูนหุบเข้ากลางก่อนแต่ละครั้ง + วาบตอนฟ้าผ่า
-  for(let i=TSV.length-1;i>=0;i--){const v=TSV[i];v.age+=dt;const U=v.g.userData,T=[0.6,1.1,1.6];let nx=T.find(t=>t>v.age),prev=[0,...T].filter(t=>t<=v.age).pop()||0;
+  for(let i=TSV.length-1;i>=0;i--){const v=TSV[i];v.age+=dt;if(v.tgt){const k=Math.min(1,dt*10),p=v.g.position;p.x+=(tx(v.tgt[0])-p.x)*k;p.z+=(tz(v.tgt[1])-p.z)*k;p.y+=(v.tgt[2]+0.07+GY(v.tgt[0],v.tgt[1])-p.y)*k;}
+    /* วงเลื่อนหาศัตรู (host ส่ง tsmv) */const U=v.g.userData,T=[0.6,1.1,1.6];let nx=T.find(t=>t>v.age),prev=[0,...T].filter(t=>t<=v.age).pop()||0;
     if(nx===undefined){v.g.visible=v.age<1.85;if(v.age>=1.85){scene.remove(v.g);v.g.traverse(o=>{if(o.geometry)o.geometry.dispose();});U.mats.forEach(m=>m.dispose());TSV.splice(i,1);}continue;}
     const conv=clamp((v.age-prev)/(nx-prev),0,1),now=performance.now();
     v.g.rotation.y=v.age*1.6;U.mats[0].opacity=0.75+0.25*Math.sin(now/60);U.mats[1].opacity=0.12+0.2*conv;
@@ -247,6 +255,7 @@ function stormFX(o,p,pz,now,dt){
   if(!M){if(o.sOrbs)o.sOrbs.forEach(q=>q.visible=false);if(o.railC)o.railC.visible=false;if(o.godG)o.godG.visible=false;if(o.godEyes)o.godEyes.forEach(e=>e.visible=false);if(o.stG)o.stG.visible=false;if(o.claws)o.claws.forEach(c=>c.visible=false);return;}
   const f=M[3]|0,isMe=p.id===NET.myId,god=!!(f&4);
   // ลำสายฟ้า (กดค้าง): สายฟ้าหนาจากปลายไม้ไปทุกเป้าที่ล็อก
+  if(f&1&&!god){if(!o.bmFx)o.bmFx=fxPlay('storm/beam_b',{x:p.x,y:p.y,h:pz,follow:p.id});}else if(o.bmFx){fxStop(o.bmFx);o.bmFx=null;}
   if(f&1&&!god){
     // ท่ายิงลำแสงแบบดวลในหนัง (Priori Incantatem): แขนขวายื่นตรงเกร็ง มือซ้ายจับข้อมือประคอง ตัวเอนหลังต้านแรง ไหล่ขวาออก ขากาง • สั่นตลอด
     {const tr=Math.sin(now/31)*0.06+Math.sin(now/53)*0.035;o.armR.rotation.x=-1.5+tr;o.armR.rotation.z=-0.05+tr*0.5;o.armL.rotation.x=-1.3+tr;o.armL.rotation.z=-0.42;

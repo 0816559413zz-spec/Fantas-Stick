@@ -1,0 +1,133 @@
+{
+ "v": 1,
+ "desc": "Storm Dash ระหว่างพุ่ง (ตามตัว): หางสายฟ้าซิกแซกลากหลัง (ผู้ใช้ขอ \"lightning tail\") + หางแสงขาว (B) + หางทอง (A) + เส้นความเร็ว",
+ "tags": [
+  "storm",
+  "dash",
+  "trail"
+ ],
+ "pal": "storm",
+ "dur": 0.6,
+ "layers": [
+  {
+   "id": "runner",
+   "t": "mesh",
+   "at": 0,
+   "life": 0.24,
+   "att": "feet",
+   "shape": "sphere",
+   "mat": "glow",
+   "col": "$hi",
+   "pos": [
+    0,
+    1,
+    0
+   ],
+   "scale": 0.3,
+   "fade": 0
+  },
+  {
+   "id": "trW",
+   "t": "trail",
+   "at": 0,
+   "life": 0.24,
+   "of": "runner",
+   "col": "#ffffff",
+   "col2": "$deep",
+   "w": 0.55,
+   "tlife": 0.16,
+   "k": 1.6
+  },
+  {
+   "id": "trA",
+   "t": "trail",
+   "at": 0,
+   "life": 0.24,
+   "of": "runner",
+   "col": "$hi",
+   "col2": "$deep",
+   "w": 0.45,
+   "tlife": 0.35,
+   "k": 1.2
+  },
+  {
+   "id": "tail",
+   "t": "bolt",
+   "at": 0,
+   "life": 0.26,
+   "att": "feet",
+   "pos": [
+    0,
+    1,
+    -0.3
+   ],
+   "to": [
+    0,
+    0.3,
+    -2
+   ],
+   "jit": 0.5,
+   "n": 1,
+   "w": 0.07,
+   "br": 1,
+   "blife": 0.05,
+   "rate": 26
+  },
+  {
+   "id": "tailacc",
+   "t": "bolt",
+   "at": 0.01,
+   "life": 0.26,
+   "att": "feet",
+   "pos": [
+    0,
+    1.2,
+    -0.3
+   ],
+   "to": [
+    0,
+    -0.2,
+    -1.7
+   ],
+   "jit": 0.6,
+   "n": 1,
+   "w": 0.045,
+   "br": 1,
+   "blife": 0.05,
+   "rate": 20,
+   "acc": true
+  },
+  {
+   "id": "lines",
+   "t": "emit",
+   "at": 0,
+   "life": 0.24,
+   "rate": 110,
+   "att": "feet",
+   "from": "sphere",
+   "fr": 0.5,
+   "dir": "flat",
+   "speed": [
+    0.2,
+    0.6
+   ],
+   "plife": [
+    0.16,
+    0.24
+   ],
+   "look": "streak",
+   "size": [
+    2,
+    3
+   ],
+   "col": "#ffffff",
+   "c2": "$main",
+   "gravity": 0,
+   "pos": [
+    0,
+    1,
+    0
+   ]
+  }
+ ]
+}

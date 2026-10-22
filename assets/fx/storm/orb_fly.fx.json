@@ -1,0 +1,78 @@
+{
+ "v": 1,
+ "desc": "ออร์บสายฟ้า ระหว่างบิน (แบบ B): ลูกแสงขาวแกนทอง + หางคม + สายฟ้าฟ้าแลบรอบ • ตำแหน่งตั้งจากโค้ด (js/20 SBV: ลอยขึ้น 0.2 วิ แล้วโค้งไล่ตัวเป้า)",
+ "tags": [
+  "storm",
+  "projectile"
+ ],
+ "pal": "storm",
+ "dur": 1,
+ "layers": [
+  {
+   "id": "orb",
+   "t": "mesh",
+   "at": 0,
+   "life": 1,
+   "loop": true,
+   "shape": "sphere",
+   "mat": "energy",
+   "col": "$hi",
+   "col2": "$deep",
+   "scale": 0.26,
+   "rim": 2,
+   "spin": 300,
+   "fade": 0
+  },
+  {
+   "id": "core",
+   "t": "mesh",
+   "at": 0,
+   "life": 1,
+   "loop": true,
+   "shape": "sphere",
+   "mat": "glow",
+   "col": "#ffffff",
+   "scale": 0.1,
+   "fade": 0
+  },
+  {
+   "id": "tr",
+   "t": "trail",
+   "at": 0,
+   "life": 1,
+   "loop": true,
+   "of": "orb",
+   "col": "#ffffff",
+   "col2": "$deep",
+   "w": 0.2,
+   "tlife": 0.2,
+   "k": 1.5
+  },
+  {
+   "id": "arcs",
+   "t": "bolt",
+   "at": 0,
+   "life": 1,
+   "loop": true,
+   "radial": [
+    0.3,
+    0.7
+   ],
+   "n": 1,
+   "w": 0.05,
+   "blife": 0.06,
+   "rate": 12,
+   "acc": true
+  },
+  {
+   "id": "light",
+   "t": "light",
+   "at": 0,
+   "life": 1,
+   "loop": true,
+   "col": "$light",
+   "int": 0.8,
+   "dist": 5
+  }
+ ]
+}

@@ -1,0 +1,146 @@
+{
+ "v": 1,
+ "desc": "Railgun ชาร์จ (รวม A+B): วงแหวนขาวหดเข้าปลายไม้เป็นจังหวะ + ประกายถูกดูดเข้า + สายฟ้าฟ้าแตกรอบปลายไม้ + วงรูนทองใต้เท้า",
+ "tags": [
+  "storm",
+  "charge"
+ ],
+ "pal": "storm",
+ "dur": 1,
+ "layers": [
+  {
+   "id": "hoop0",
+   "t": "mesh",
+   "at": 0,
+   "life": 0.27,
+   "att": "wand",
+   "shape": "ring",
+   "inner": 0.88,
+   "mat": "glow",
+   "col": "#ffffff",
+   "bill": true,
+   "scale": {
+    "0": 1.6,
+    "1": 0.1,
+    "ease": "in"
+   },
+   "op": {
+    "0": 0,
+    "1": 0,
+    "0.3": 0.85
+   },
+   "fade": 0
+  },
+  {
+   "id": "hoop1",
+   "t": "mesh",
+   "at": 0.27,
+   "life": 0.27,
+   "att": "wand",
+   "shape": "ring",
+   "inner": 0.88,
+   "mat": "glow",
+   "col": "#ffffff",
+   "bill": true,
+   "scale": {
+    "0": 1.6,
+    "1": 0.1,
+    "ease": "in"
+   },
+   "op": {
+    "0": 0,
+    "1": 0,
+    "0.3": 0.85
+   },
+   "fade": 0
+  },
+  {
+   "id": "hoop2",
+   "t": "mesh",
+   "at": 0.54,
+   "life": 0.27,
+   "att": "wand",
+   "shape": "ring",
+   "inner": 0.88,
+   "mat": "glow",
+   "col": "#ffffff",
+   "bill": true,
+   "scale": {
+    "0": 1.6,
+    "1": 0.1,
+    "ease": "in"
+   },
+   "op": {
+    "0": 0,
+    "1": 0,
+    "0.3": 0.85
+   },
+   "fade": 0
+  },
+  {
+   "id": "pull",
+   "t": "emit",
+   "at": 0,
+   "life": 0.8,
+   "rate": 70,
+   "att": "wand",
+   "from": "sphere",
+   "fr": 1.5,
+   "dir": "in",
+   "speed": [
+    3,
+    5
+   ],
+   "plife": [
+    0.22,
+    0.3
+   ],
+   "look": "streak",
+   "size": [
+    1.6,
+    2.4
+   ],
+   "col": "$hi",
+   "c2": "$main",
+   "gravity": 0,
+   "drag": 0
+  },
+  {
+   "id": "arcs",
+   "t": "bolt",
+   "at": 0,
+   "life": 0.8,
+   "att": "wand",
+   "radial": [
+    0.3,
+    0.8
+   ],
+   "n": 2,
+   "w": 0.05,
+   "blife": 0.06,
+   "rate": 16,
+   "acc": true
+  },
+  {
+   "id": "glyph",
+   "t": "decal",
+   "at": 0,
+   "life": 0.9,
+   "att": "feet",
+   "kind": "glyph",
+   "r": 1.6,
+   "col": "$main"
+  },
+  {
+   "id": "glow",
+   "t": "halo",
+   "at": 0,
+   "life": 0.8,
+   "att": "wand",
+   "col": "$main",
+   "size": 2,
+   "size0": 0.6,
+   "k": 0.9
+  }
+ ]
+}

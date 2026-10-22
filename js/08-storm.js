@@ -63,8 +63,8 @@ function stormDashTick(p){
   if(p.dash>0){
     for(const t of foesOf(p.team)){if(p.sdHit.has(t))continue;if(Math.hypot(t.x-p.x,t.y-p.y)>PR+(t.r||PR)+15||Math.abs(cH(t)-(p.z+1.1))>3)continue;
       p.sdHit.add(t);aoeHit(p,t,p.god>0?15:10);emit({k:'efx',z:'sdhit',x:Math.round(t.x),y:Math.round(t.y),h:cH(t),a:Math.round(Math.atan2(p.dashY,p.dashX)*100)/100,g:p.god>0?1:0});
-      if(!p.sdAny){p.sdAny=true;stGain(p);stormOrbLaunch(p,t.x,t.y);if(p.god>0)p.cEmp=1;}}
-  }else{emit({k:'efx',z:'sdashe',x:Math.round(p.sdX),y:Math.round(p.sdY),h:p.z+1,x2:Math.round(p.x),y2:Math.round(p.y),id:p.id});p.sdHit=null;}
+      if(!p.sdAny){p.sdAny=true;stGain(p);stormOrbLaunch(p,t.x,t.y,t);if(p.god>0)p.cEmp=1;}}
+  }else{emit({k:'efx',z:'sdashe',x:Math.round(p.sdX),y:Math.round(p.sdY),h:p.z+1,x2:Math.round(p.x),y2:Math.round(p.y),a:Math.round(Math.atan2(p.y-p.sdY,p.x-p.sdX)*100)/100,len:Math.round(Math.hypot(p.x-p.sdX,p.y-p.sdY)),id:p.id});p.sdHit=null;}
 }
 function stormShieldBlast(p){
   const S=p.stS;p.stS=null;p.stCd=10;
@@ -91,7 +91,7 @@ function stormLine(p){
   const a=p.ang,c=Math.cos(a),sn=Math.sin(a);let len=600;
   for(let d=40;d<=600;d+=20){const x=p.x+c*d,y=p.y+sn*d;if(x<30||x>MW-30||y<30||y>MH-30){len=d-20;break;}}
   (G.slines||(G.slines=[])).push({x:p.x,y:p.y,a,len,d:0,hit:new Set(),owner:p.id,team:p.team,any:false});
-  emit({k:'efx',z:'sline',x:Math.round(p.x),y:Math.round(p.y),h:p.z,a:Math.round(a*1000)/1000,len:Math.round(len)});
+  emit({k:'efx',z:'sline',x:Math.round(p.x),y:Math.round(p.y),h:p.z,a:Math.round(a*1000)/1000,len:Math.round(len),id:p.id});
 }
 // ----- สกิล 2 (1 stack): ดูดความเร็ว -----
 defSpell(2,{id:'speedsiphon',role:'utility',n:'ดูดความเร็ว',ic:'💨',cd:10,d:'ใช้ 1 stack: ดูดสายฟ้าจากศัตรูรอบตัว (รัศมี 200) คนละ 15 ดาเมจ และขโมยความเร็ว 20% นาน 3 วิ',fx:'เราเร็วขึ้น 20% ต่อคนที่โดน (สูงสุด 60%) นาน 3 วิ • ระหว่างอัลติ: รัศมี 280 + Shock',
@@ -106,25 +106,38 @@ defSpell(2,{id:'speedsiphon',role:'utility',n:'ดูดความเร็ว
 defSpell(2,{id:'triplestrike',role:'control',n:'ฟ้าผ่าสามครั้ง',ic:'🌩️',cd:12,d:'ใช้ 2 stacks: กดแล้วเลือกจุด (เห็นวงก่อนวาง) กดซ้ำ/คลิกซ้าย = ยืนยัน • ระยะ 600 รัศมี 70 มีวงรูนเตือน แล้วฟ้าผ่าจุดเดิม 3 ครั้ง (0.6 วิ แล้วห่างกัน 0.5 วิ)',fx:'ครั้งละ 30 ดาเมจ (โดนครบ 3 = 90) • ระหว่างอัลติ: มีวงเล็กผ่าซ้าย/ขวาเพิ่มด้วย',
   cast(p,S){
     if(!stSpend(p,2))return false;
-    const q=aimPoint(p,600),a=Math.atan2(q.y-p.y,q.x-p.x),pts=[[q.x,q.y,70]];
+    const q=aimPoint(p,600),a=Math.atan2(q.y-p.y,q.x-p.x),pts=[[q.x,q.y,TS_R]];
     if(p.god>0)for(const sd of [-1,1])pts.push([clamp(q.x-Math.sin(a)*110*sd,40,MW-40),clamp(q.y+Math.cos(a)*110*sd,40,MH-40),45]);
     for(const [x,y,r] of pts){
-      emit({k:'efx',z:'tswarn',x:Math.round(x),y:Math.round(y),h:groundH(x,y),r});
-      for(const tt of [0.6,1.1,1.6])G.strikes.push({x,y,r,t:tt,fn:s=>{
-        emit({k:'efx',z:'tstrike',x:Math.round(s.x),y:Math.round(s.y),h:groundH(s.x,s.y),r:s.r});
-        for(const t of foesIn(p.team,s.x,s.y,s.r,5))aoeHit(p,t,30);
-        damageEnv(s.x,s.y,s.r,30,p.id,'lightning',0.5);   // พังบ้าน/ลัง
+      const c={x,y,r,i:(G.tsid=(G.tsid|0)+1),team:p.team,t:1.65,mt:0};(G.tcells||(G.tcells=[])).push(c);
+      emit({k:'efx',z:'tswarn',x:Math.round(x),y:Math.round(y),h:groundH(x,y),r,i:c.i});
+      for(const tt of [0.6,1.1,1.6])G.strikes.push({c,r,t:tt,fn:s=>{const C=s.c;
+        emit({k:'efx',z:'tstrike',x:Math.round(C.x),y:Math.round(C.y),h:groundH(C.x,C.y),r:s.r,i:C.i,id:p.id});
+        for(const t of foesIn(p.team,C.x,C.y,s.r,5))aoeHit(p,t,30);
+        damageEnv(C.x,C.y,s.r,30,p.id,'lightning',0.5);   // พังบ้าน/ลัง
       }});
     }
   }});
+// วงฟ้าผ่าเลื่อนช้า ๆ หาศัตรูที่ใกล้ที่สุด (ผู้ใช้ 2026-10-22) • ⚠ Claude: 40 px/วิ (2 ม./วิ) มองหาในระยะ 300 จากวง • ส่งตำแหน่งใหม่ทุก 0.1 วิ (efx tsmv)
+const TS_R=100,TS_SPD=40,TS_SEEK=300;
+function updateTCells(dt){
+  if(!G.tcells||!G.tcells.length)return;
+  for(const c of G.tcells){c.t-=dt;let best=null,bd=TS_SEEK;
+    for(const t of foesOf(c.team)){const d=Math.hypot(t.x-c.x,t.y-c.y);if(d<bd){bd=d;best=t;}}
+    if(best&&bd>8){const st=Math.min(bd-8,TS_SPD*dt);c.x+=(best.x-c.x)/bd*st;c.y+=(best.y-c.y)/bd*st;c.mv=1;}
+    c.mt-=dt;if(c.mv&&c.mt<=0){c.mt=0.1;c.mv=0;emit({k:'efx',z:'tsmv',i:c.i,x:Math.round(c.x),y:Math.round(c.y),h:groundH(c.x,c.y)});}}
+  G.tcells=G.tcells.filter(c=>c.t>0);
+}
 // ----- สกิล 4 (1 stack): ออร์บสายฟ้าคู่ — ลอยหลังเรา Dash โดนศัตรู = ออร์บพุ่งกระแทกจุดนั้น -----
 defSpell(2,{id:'stormorbs',role:'builder',n:'ออร์บสายฟ้าคู่',ic:'🔮',cd:8,d:'ใช้ 1 stack: ออร์บสายฟ้า 2 ลูกลอยหลังเรา 8 วิ • Dash โดนศัตรู = ยิงออร์บ 1 ลูก (ต่อ Dash) กระแทกจุดที่ Dash โดน',fx:'ลูกละ 15 ดาเมจ รัศมี 60 • ระหว่างอัลติ: Dash โดน = ออร์บที่เหลือพุ่งพร้อมกันหมด',
   cast(p,S){if(!stSpend(p,1))return false;p.sorb={n:2,t:8};emit({k:'efx',z:'sorbon',x:p.x,y:p.y,h:p.z+1.8,id:p.id});}});
-function stormOrbLaunch(p,x,y){
+// ⚠ Claude: บิน 0.55 วิ (ลอยขึ้น 0.2 + โค้งลง 0.35) ตามตัวคนที่ Dash โดน • คนนั้นตาย/หาย = ไปจุดเดิม
+const SORB_T=0.55;
+function stormOrbLaunch(p,x,y,tg){
   if(!p.sorb||p.sorb.n<=0)return;
   const k=p.god>0?p.sorb.n:1;p.sorb.n-=k;
-  for(let i=0;i<k;i++){(G.sorbs||(G.sorbs=[])).push({x:x+(i?rnd(-20,20):0),y:y+(i?rnd(-20,20):0),t:0.18,owner:p.id,team:p.team});}
-  emit({k:'efx',z:'sorbgo',x:p.x,y:p.y,h:p.z+1.8,x2:Math.round(x),y2:Math.round(y),n:k,id:p.id});
+  for(let i=0;i<k;i++){(G.sorbs||(G.sorbs=[])).push({x:x+(i?rnd(-20,20):0),y:y+(i?rnd(-20,20):0),ox:i?rnd(-20,20):0,oy:i?rnd(-20,20):0,tg:tg||null,t:SORB_T+i*0.08,owner:p.id,team:p.team});}
+  emit({k:'efx',z:'sorbgo',x:p.x,y:p.y,h:p.z+1.8,x2:Math.round(x),y2:Math.round(y),n:k,id:p.id,T:SORB_T,tg:tg?(tg.isE?'e'+tg.id:tg.id):undefined});
 }
 // ----- สกิล 5 (2 stacks): Railgun — เส้นเตือนเหลือง 0.8 วิ (อัลติ 0.5) แล้วลำสายฟ้าทะลุทุกคน -----
 defSpell(2,{id:'railgun',role:'finisher',n:'Railgun',ic:'🔱',cd:10,d:'ใช้ 2 stacks: ร่ายวงเวท เส้นนำทางเหลืองแกนขาวลอยกลางอากาศ 0.8 วิ (ยืนนิ่ง กล้องล็อกทิศ) แล้วยิงลำสายฟ้ายาว 900 กว้าง 30 ทะลุทุกคน',fx:'45 ดาเมจ • ระหว่างอัลติ: เตือนแค่ 0.5 วิ ระยะ 1400',
@@ -169,6 +182,7 @@ function stormDomeSlam(p,x,y,gh){
   damageEnv(x,y,150,80,p.id,'lightning',gh);
 }
 function updateStorm(dt){
+  updateTCells(dt);
   if(G.slines&&G.slines.length){
     for(const L of G.slines){
       const d0=L.d;L.d=Math.min(L.len,L.d+L.len/0.3*dt);const o=G.players[L.owner];
@@ -178,7 +192,7 @@ function updateStorm(dt){
     G.slines=G.slines.filter(L=>!L.done);
   }
   if(G.sorbs&&G.sorbs.length){
-    for(const b of G.sorbs){b.t-=dt;if(b.t<=0){b.done=1;const o=G.players[b.owner];emit({k:'efx',z:'sorbhit',x:Math.round(b.x),y:Math.round(b.y),h:groundH(b.x,b.y)+0.5});if(o)for(const t of foesIn(b.team,b.x,b.y,60,5))aoeHit(o,t,15);}}
+    for(const b of G.sorbs){b.t-=dt;if(b.tg&&!b.tg.dead&&b.tg.alive!==false){b.x=b.tg.x+b.ox;b.y=b.tg.y+b.oy;}if(b.t<=0){b.done=1;const o=G.players[b.owner];emit({k:'efx',z:'sorbhit',x:Math.round(b.x),y:Math.round(b.y),h:groundH(b.x,b.y)+0.5,id:b.owner});if(o)for(const t of foesIn(b.team,b.x,b.y,60,5))aoeHit(o,t,15);}}
     G.sorbs=G.sorbs.filter(b=>!b.done);
   }
   if(G.sballs&&G.sballs.length){

@@ -1,0 +1,239 @@
+{
+ "v": 1,
+ "desc": "Railgun ยิง (รวม A+B+C): แฟลชปากไม้ + วงขาวตั้ง + คลื่นอากาศบิด • แกนลำพลังงาน (A) + วงพัลส์วิ่งตามลำ (B) + ควัน/รอยไหม้ตามแนว (C) • ปลายลำ = กระแทกรวม (hit_mix) • จอกระตุก • len = ยาว (ม.)",
+ "tags": [
+  "storm",
+  "beam",
+  "impact"
+ ],
+ "pal": "storm",
+ "dur": 2.4,
+ "params": {
+  "len": {
+   "def": 45,
+   "desc": "ความยาวลำ (ม.)"
+  }
+ },
+ "layers": [
+  {
+   "id": "muzzle",
+   "t": "flash",
+   "at": 0,
+   "life": 0.1,
+   "col": "#ffffff",
+   "size": 2.4,
+   "pos": [
+    0,
+    0,
+    0.8
+   ]
+  },
+  {
+   "id": "mring",
+   "t": "ring",
+   "at": 0,
+   "life": 0.22,
+   "pos": [
+    0,
+    0,
+    1
+   ],
+   "vert": true,
+   "col": "#ffffff",
+   "r": 2.2,
+   "op": 0.85
+  },
+  {
+   "id": "mwarp",
+   "t": "warp",
+   "at": 0,
+   "life": 0.35,
+   "pos": [
+    0,
+    0,
+    1
+   ],
+   "kind": "bulge",
+   "size": {
+    "0": 0.5,
+    "1": 3
+   },
+   "str": 1,
+   "op": {
+    "0": 1,
+    "1": 0
+   },
+   "col": "#ffe27a",
+   "x": true
+  },
+  {
+   "id": "core",
+   "t": "mesh",
+   "at": 0,
+   "life": 0.32,
+   "shape": "beam",
+   "mat": "energy",
+   "col": "$hi",
+   "col2": "$deep",
+   "pos": [
+    0,
+    0,
+    0.5
+   ],
+   "scale": {
+    "0": [
+     0.5,
+     0.5,
+     1
+    ],
+    "1": [
+     0.04,
+     0.04,
+     1
+    ],
+    "0.3": [
+     0.32,
+     0.32,
+     1
+    ],
+    "x": [
+     1,
+     1,
+     "len"
+    ]
+   },
+   "rim": 2.4,
+   "scroll": 6,
+   "int": 1.6,
+   "fade": 0.3
+  },
+  {
+   "id": "pulse",
+   "t": "emit",
+   "at": 0,
+   "life": 0.22,
+   "rate": 40,
+   "from": "point",
+   "dir": "aim",
+   "spread": 0,
+   "speed": [
+    60,
+    70
+   ],
+   "plife": [
+    "len/65",
+    "len/65"
+   ],
+   "look": "ring",
+   "size": [
+    5,
+    6
+   ],
+   "grow": 0.6,
+   "col": "#ffffff",
+   "c2": "$main",
+   "gravity": 0,
+   "drag": 0,
+   "curl": false,
+   "fin": 0,
+   "pos": [
+    0,
+    0,
+    1
+   ]
+  },
+  {
+   "id": "smoke",
+   "t": "emit",
+   "at": 0.05,
+   "life": 0.08,
+   "burst": "min(30,len*0.6)",
+   "from": "line",
+   "fh": "len",
+   "dir": "up",
+   "spread": 1,
+   "speed": [
+    0.3,
+    1
+   ],
+   "plife": [
+    0.9,
+    1.5
+   ],
+   "look": "smoke",
+   "size": [
+    6,
+    10
+   ],
+   "col": "#3a3c48",
+   "c2": "#3a3c48",
+   "gravity": -0.3,
+   "grow": 1,
+   "x": true
+  },
+  {
+   "id": "sc1",
+   "t": "decal",
+   "at": 0,
+   "life": 2.2,
+   "att": "ground",
+   "kind": "dark",
+   "r": 0.9,
+   "op": 0.4,
+   "pos": [
+    0,
+    0,
+    "len*0.3"
+   ]
+  },
+  {
+   "id": "sc2",
+   "t": "decal",
+   "at": 0,
+   "life": 2.2,
+   "att": "ground",
+   "kind": "dark",
+   "r": 0.9,
+   "op": 0.4,
+   "pos": [
+    0,
+    0,
+    "len*0.6"
+   ]
+  },
+  {
+   "id": "end",
+   "t": "use",
+   "at": 0.04,
+   "fx": "storm/hit_mix",
+   "pos": [
+    0,
+    0,
+    "len"
+   ],
+   "p": {
+    "r": 2.4,
+    "b": 1
+   }
+  },
+  {
+   "id": "cam",
+   "t": "screen",
+   "at": 0,
+   "life": 0.3,
+   "shake": 4,
+   "kick": 0.4,
+   "flash": 0.03,
+   "own": true
+  },
+  {
+   "id": "camo",
+   "t": "screen",
+   "at": 0,
+   "life": 0.25,
+   "shake": 2,
+   "other": true,
+   "near": 25
+  }
+ ]
+}

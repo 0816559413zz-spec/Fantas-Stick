@@ -113,7 +113,7 @@ function hostStart(){
   setMapVars(G.map);
   PROPON=!PROP_OFF_MODES.includes(G.mode);BLDON=PROPON;
   Object.assign(G,{ph:'count',cdT:3,time:0,proj:[],en:[],feed:[],pid:0,eid:0,wave:0,round:1,rw:{},teamScore:[0,0],
-    timer:(G.mode==='ffa'||G.mode==='tdm')?480:G.mode==='quid'?360:0,result:null,banner:null,queue:[],slines:[],sorbs:[],fpaths:[],sballs:[],sdomes:[],impWin:null,snitchBy:null,raceEnd:undefined});
+    timer:(G.mode==='ffa'||G.mode==='tdm')?480:G.mode==='quid'?360:0,result:null,banner:null,queue:[],slines:[],sorbs:[],fpaths:[],tcells:[],sballs:[],sdomes:[],impWin:null,snitchBy:null,raceEnd:undefined});
   plist().forEach((p,i)=>{
     Object.assign(p,freshStats());
     p.team=(G.mode==='coop'||G.mode==='train')?0:MD.team?p.lteam:10+i;

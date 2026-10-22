@@ -1,0 +1,340 @@
+{
+ "v": 1,
+ "desc": "สายฟ้ากระแทก — รวม 3 แบบให้เข้ากัน (ผู้ใช้ 2026-10-22 \"combine แต่อย่าให้แปลก\"): A แกนสว่าง+ฮาโล+โดม+วงพื้น • B วงขาวคม+วงพลังงาน+หนาม+เส้นความเร็ว • C คลื่นอากาศบิด+เศษหิน+ควัน+รอยไหม้ดำ+สายฟ้าฟ้าแตกรอบ • r = รัศมี (ม.), b = ความบึ้ม 0–1",
+ "tags": [
+  "storm",
+  "impact",
+  "prefab"
+ ],
+ "pal": "storm",
+ "dur": 2.4,
+ "params": {
+  "r": {
+   "def": 2,
+   "desc": "รัศมี (ม.)"
+  },
+  "b": {
+   "def": 1,
+   "desc": "ความบึ้ม 0–1"
+  }
+ },
+ "layers": [
+  {
+   "id": "core",
+   "t": "flash",
+   "at": 0,
+   "life": 0.08,
+   "col": "#ffffff",
+   "size": "r*0.75",
+   "pos": [
+    0,
+    0.8,
+    0
+   ]
+  },
+  {
+   "id": "halo",
+   "t": "halo",
+   "at": 0,
+   "life": 0.3,
+   "col": "$main",
+   "size": "r*(0.6+0.8*b)",
+   "k": 0.9,
+   "pos": [
+    0,
+    0.8,
+    0
+   ]
+  },
+  {
+   "id": "dome",
+   "t": "mesh",
+   "at": 0,
+   "life": 0.4,
+   "att": "ground",
+   "shape": "dome",
+   "mat": "energy",
+   "col": "$main",
+   "col2": "$deep",
+   "scale": {
+    "0": 0.2,
+    "1": 1,
+    "0.4": 0.85,
+    "ease": "out",
+    "x": "max(0.3,r*0.8*b)"
+   },
+   "op": {
+    "0": 0.8,
+    "1": 0
+   },
+   "rim": 1.6,
+   "dis": {
+    "0": 0,
+    "1": 0.8,
+    "0.5": 0
+   }
+  },
+  {
+   "id": "ringA",
+   "t": "ring",
+   "at": 0,
+   "life": 0.4,
+   "att": "ground",
+   "pos": [
+    0,
+    0.1,
+    0
+   ],
+   "col": "$main",
+   "r": "r*1.4",
+   "op": 0.45
+  },
+  {
+   "id": "ringW",
+   "t": "mesh",
+   "at": 0,
+   "life": 0.2,
+   "att": "ground",
+   "shape": "ring",
+   "inner": 0.9,
+   "mat": "glow",
+   "col": "#ffffff",
+   "pos": [
+    0,
+    0.12,
+    0
+   ],
+   "scale": {
+    "0": 0.3,
+    "1": 1,
+    "ease": "out",
+    "x": "r*1.6"
+   },
+   "op": {
+    "0": 1,
+    "1": 0
+   }
+  },
+  {
+   "id": "ringE",
+   "t": "mesh",
+   "at": 0.05,
+   "life": 0.3,
+   "att": "ground",
+   "shape": "ring",
+   "inner": 0.8,
+   "mat": "energy",
+   "col": "$main",
+   "col2": "$deep",
+   "pos": [
+    0,
+    0.1,
+    0
+   ],
+   "scale": {
+    "0": 0.2,
+    "1": 1,
+    "ease": "out",
+    "x": "r*1.15"
+   },
+   "op": {
+    "0": 1,
+    "1": 0
+   },
+   "rim": 2
+  },
+  {
+   "id": "spikes",
+   "t": "mesh",
+   "at": 0,
+   "life": 0.32,
+   "att": "ground",
+   "shape": "spikes",
+   "n": 10,
+   "mat": "energy",
+   "col": "$hi",
+   "col2": "$deep",
+   "scale": {
+    "0": [
+     0.2,
+     0.1,
+     0.2
+    ],
+    "1": [
+     1,
+     0.05,
+     1
+    ],
+    "0.3": [
+     0.9,
+     1.1,
+     0.9
+    ],
+    "x": "max(0.2,r*0.45*b)"
+   },
+   "op": {
+    "0": 1,
+    "1": 0
+   }
+  },
+  {
+   "id": "lines",
+   "t": "emit",
+   "at": 0,
+   "life": 0.05,
+   "burst": "14+r*5",
+   "from": "disc",
+   "fr": "r*0.2",
+   "dir": "flat",
+   "speed": [
+    "r*2",
+    "r*3.5"
+   ],
+   "plife": [
+    0.16,
+    0.3
+   ],
+   "look": "streak",
+   "size": [
+    2.4,
+    3.4
+   ],
+   "col": "#ffffff",
+   "c2": "$main",
+   "gravity": 0,
+   "drag": 4,
+   "pos": [
+    0,
+    0.3,
+    0
+   ]
+  },
+  {
+   "id": "warp",
+   "t": "warp",
+   "at": 0,
+   "life": 0.4,
+   "att": "ground",
+   "pos": [
+    0,
+    0.2,
+    0
+   ],
+   "kind": "shock",
+   "flat": true,
+   "size": {
+    "0": 0.5,
+    "1": 1,
+    "x": "max(1,r*2.2*b)"
+   },
+   "op": {
+    "0": 1,
+    "1": 0
+   },
+   "str": 1.1,
+   "col": "#ffe27a",
+   "x": true
+  },
+  {
+   "id": "rocks",
+   "t": "debris",
+   "at": 0,
+   "life": 1.2,
+   "att": "ground",
+   "pos": [
+    0,
+    0.3,
+    0
+   ],
+   "kind": "rock",
+   "n": "2+r*2*b",
+   "speed": "r*1.6+2",
+   "r": "r*0.25",
+   "size": 0.8,
+   "x": true
+  },
+  {
+   "id": "smoke",
+   "t": "emit",
+   "at": 0.05,
+   "life": 0.08,
+   "burst": "3+r*2*b",
+   "from": "disc",
+   "fr": "r*0.4",
+   "dir": "up",
+   "spread": 1.2,
+   "speed": [
+    0.6,
+    1.6
+   ],
+   "plife": [
+    1,
+    1.6
+   ],
+   "look": "smoke",
+   "size": [
+    7,
+    12
+   ],
+   "col": "#3a3c48",
+   "c2": "#3a3c48",
+   "gravity": -0.4,
+   "grow": 1.1,
+   "drag": 2,
+   "pos": [
+    0,
+    0.3,
+    0
+   ],
+   "x": true
+  },
+  {
+   "id": "scorch",
+   "t": "decal",
+   "at": 0,
+   "life": 2.2,
+   "att": "ground",
+   "kind": "dark",
+   "r": "r*0.75",
+   "op": 0.45
+  },
+  {
+   "id": "arcs",
+   "t": "bolt",
+   "at": 0,
+   "life": 0.3,
+   "pos": [
+    0,
+    0.3,
+    0
+   ],
+   "radial": [
+    "r*0.4",
+    "r*1.1"
+   ],
+   "n": 4,
+   "w": 0.07,
+   "br": 1,
+   "blife": 0.09,
+   "rate": 14,
+   "acc": true
+  },
+  {
+   "id": "light",
+   "t": "light",
+   "at": 0,
+   "life": 0.3,
+   "col": "$light",
+   "int": {
+    "0": 2,
+    "1": 0
+   },
+   "dist": "r*4+6",
+   "pos": [
+    0,
+    1.4,
+    0
+   ]
+  }
+ ]
+}

@@ -151,7 +151,7 @@ const EFXAUG={
   colboom:['fire_impact',1.2],colend:['fire_impact',1],pboom:['fire_impact',1],ember:['fire_pop',1],inferno:['fire_big',1],melt:['fire_hit',0.8],flare:['fire_impact',1],
   // สายฟ้า
   stgain:['storm_pop',0.8],stri:['storm_hit',1],sdash:['storm_charge',1],sdashe:['storm_hit',1],sdhit:['storm_hit',1],ston:['storm_summon',1],sthit:['storm_pop',1],
-  stoff:['storm_pop',1],stblast:['storm_impact',1.1],slup:['storm_summon',0.9],sline:['storm_impact',1],ssiph:['storm_hit',0.8],sorbon:['storm_summon',0.8],
+  stoff:['storm_pop',1],stblast:['storm_impact',1.1],slup:['storm_summon',0.9],sline:['storm_impact',1],sorbon:['storm_summon',0.8],
   sorbgo:['storm_pop',1],sorbhit:['storm_hit',1],sorboff:['storm_pop',1],srailc:['storm_charge',1.2],srail:['storm_impact',1.3],tstrike:['storm_impact',1.1],
   sdrise:['storm_charge',1.4,1],sdball:['storm_summon',1.2],sdome:['storm_big',1.2],sdboom:['storm_big',1.2],godon:['storm_big',1,1],godoff:['storm_impact',1],
   // สายอื่น (ยังเป็นแบบชั่วคราว)

@@ -7,7 +7,7 @@ function hostPick(p,i){
 }
 // ล้างของในสนามที่มีเวลาจำกัด (วง/ฟ้าผ่าหน่วง/คลื่น/พื้นน้ำแข็ง ...) ตอนขึ้นชั้นใหม่ (co-op) / รอบใหม่ (ดวล)
 // เดิมค้างนิ่งไว้ช่วงเลือกบัฟ/นับถอยหลัง แล้วกลับมาทำดาเมจต่อทั้งที่ภาพบนจอหายไปแล้ว (ภาพนับเวลาเอง)
-function clearField(){Object.assign(G,{proj:[],bombs:[],zones:[],strikes:[],chan:[],waves:[],ices:[],glac:[],erings:[],slines:[],sorbs:[],fpaths:[],sballs:[],sdomes:[]});for(const p of plist())p.iceB=0;}
+function clearField(){Object.assign(G,{proj:[],bombs:[],zones:[],strikes:[],chan:[],waves:[],ices:[],glac:[],erings:[],slines:[],sorbs:[],fpaths:[],tcells:[],sballs:[],sdomes:[]});for(const p of plist())p.iceB=0;}
 function modeLogic(dt){
   if(G.banner){G.banner.t-=dt;if(G.banner.t<=0)G.banner=null;}
   const ps=plist();

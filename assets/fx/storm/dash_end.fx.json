@@ -1,0 +1,84 @@
+{
+ "v": 1,
+ "desc": "Storm Dash จบ: สายฟ้าฟ้าค้างตามทางที่พุ่ง (หางสายฟ้า) + วงขาวตั้ง/แฟลชที่จุดจบ (B) + วงพื้นทอง (A) • len = ระยะพุ่ง (ม.)",
+ "tags": [
+  "storm",
+  "dash"
+ ],
+ "pal": "storm",
+ "dur": 0.8,
+ "params": {
+  "len": {
+   "def": 11,
+   "desc": "ระยะพุ่ง (ม.)"
+  }
+ },
+ "layers": [
+  {
+   "id": "path",
+   "t": "bolt",
+   "at": 0,
+   "life": 0.35,
+   "pos": [
+    0,
+    0,
+    0
+   ],
+   "to": [
+    0,
+    0,
+    "len"
+   ],
+   "jit": 0.5,
+   "n": 1,
+   "w": 0.09,
+   "br": 2,
+   "blife": 0.07,
+   "rate": 18,
+   "acc": true
+  },
+  {
+   "id": "endring",
+   "t": "ring",
+   "at": 0,
+   "life": 0.2,
+   "pos": [
+    0,
+    0,
+    "len"
+   ],
+   "vert": true,
+   "col": "#ffffff",
+   "r": 2,
+   "op": 0.8
+  },
+  {
+   "id": "endflash",
+   "t": "flash",
+   "at": 0,
+   "life": 0.1,
+   "col": "$core",
+   "size": 2.2,
+   "pos": [
+    0,
+    0,
+    "len"
+   ]
+  },
+  {
+   "id": "ground",
+   "t": "ring",
+   "at": 0,
+   "life": 0.4,
+   "att": "ground",
+   "pos": [
+    0,
+    0.1,
+    "len"
+   ],
+   "col": "$main",
+   "r": 2.5,
+   "op": 0.5
+  }
+ ]
+}
