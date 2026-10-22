@@ -1,0 +1,23 @@
+{
+  "v": 1,
+  "desc": "แบบ A (ลำสายฟ้าพรีเมียม): ลำพลังงานเหลืองแกนขาวจากไม้ + สายฟ้าหนา 2 เส้นพันไปตามลำ + ประกายแตกที่ปลาย + ไฟสว่างตามลำ",
+  "tags": ["storm","beam","basic","loop","variant"],
+  "pal": "storm",
+  "dur": 1.6,
+  "params": {"len":{"def":12,"desc":"ความยาวลำ (ม.) — ระยะเกม 300 = 15 ม."}},
+  "layers": [
+    {"id":"sheath","t":"mesh","at":0,"life":0.3,"loop":true,"att":"wand","shape":"beam","mat":"energy","col":"$main","col2":"$deep","pos":[0,0,0.2],"scale":{"0":[0.24,0.24,1],"1":[0.24,0.24,1],"0.5":[0.3,0.3,1],"x":[1,1,"len"]},"op":1,"rim":2,"scroll":5,"int":1.6,"fade":0},
+    {"id":"outer","t":"mesh","at":0,"life":0.4,"loop":true,"att":"wand","shape":"beam","mat":"energy","col":"$deep","col2":"#ff6a00","pos":[0,0,0.2],"scale":{"0":[0.42,0.42,1],"1":[0.42,0.42,1],"0.5":[0.5,0.5,1],"x":[1,1,"len"]},"op":0.45,"rim":2.4,"scroll":-3,"int":1.2,"fade":0},
+    {"id":"core","t":"mesh","at":0,"life":0.12,"loop":true,"att":"wand","shape":"beam","mat":"glow","col":"$hi","pos":[0,0,0.2],"scale":{"0":[0.06,0.06,1],"1":[0.06,0.06,1],"0.5":[0.09,0.09,1],"x":[1,1,"len"]},"op":0.9,"fade":0},
+    {"id":"arc1","t":"bolt","at":0,"life":0.5,"loop":true,"att":"wand","pos":[0,0,0.3],"to":[0,0,"len"],"jit":0.55,"n":2,"w":0.13,"br":2,"blife":0.09,"rate":22},
+    {"id":"arc2","t":"bolt","at":0.03,"life":0.5,"loop":true,"att":"wand","pos":[0,0,0.3],"to":[0,0,"len*0.7"],"jit":0.9,"n":1,"w":0.07,"br":1,"blife":0.07,"rate":14,"acc":true},
+    {"id":"muzzle","t":"halo","at":0,"life":0.2,"loop":true,"att":"wand","col":"$main","size":1.4,"size0":1,"k":1},
+    {"id":"mflash","t":"flash","at":0,"life":0.1,"loop":true,"att":"wand","col":"$core","size":0.7,"size0":0.4,"k":1.6},
+    {"id":"tip","t":"halo","at":0,"life":0.16,"loop":true,"att":"wand","pos":[0,0,"len"],"col":"$main","size":3,"size0":1.6,"k":1.1},
+    {"id":"tipspk","t":"emit","at":0,"life":0.5,"loop":true,"att":"wand","pos":[0,0,"len"],"rate":70,"burst":0,"from":"sphere","fr":0.3,"dir":"out","spread":1.4,"speed":[3,8],"plife":[0.15,0.35],"look":"streak","size":[1.2,2],"col":"$core","c2":"$main","gravity":3,"drag":3},
+    {"id":"runspk","t":"emit","at":0,"life":0.5,"loop":true,"att":"wand","pos":[0,0,0.5],"rate":50,"burst":0,"from":"line","fh":"len","fr":0.15,"dir":"out","spread":1.5,"speed":[1,3],"plife":[0.15,0.3],"look":"spark","size":[0.8,1.4],"col":"$hi","c2":"$deep","gravity":0,"drag":3,"x":true},
+    {"id":"light","t":"light","at":0,"life":0.2,"loop":true,"att":"wand","pos":[0,0,"len*0.5"],"col":"$light","int":{"0":1.1,"1":1.1,"0.5":1.5},"dist":"len"},
+    {"id":"endflash","t":"flash","at":0,"life":0.12,"end":true,"att":"wand","col":"$hi","size":1.2,"k":1.4},
+    {"id":"endspk","t":"emit","at":0,"life":0.05,"end":true,"att":"wand","burst":14,"from":"sphere","fr":0.2,"dir":"out","speed":[2,5],"plife":[0.2,0.4],"look":"spark","size":[1,1.6],"col":"$core","c2":"$main","gravity":2,"drag":3}
+  ]
+}

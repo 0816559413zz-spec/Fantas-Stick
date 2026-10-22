@@ -1,0 +1,15 @@
+{"v":1,"desc":"แบบ C (ขวานหิมะถล่ม): สมจริง หนักแน่น — รอยฟันทึบไม่เรือง + คลื่นแรงลมบิดอากาศ + ก้อนน้ำแข็งกระเด็น + ฝุ่นหิมะฟุ้ง + พื้นแตก + หนามเตี้ยงอกปลายรอย","tags":["frost","slash","melee","variant"],"pal":"ice","dur":1.8,"params":{"r":{"def":8,"desc":"ระยะฟัน (ม.) = ev.r/20"}},
+"layers":[
+{"id":"blade","t":"mesh","at":0,"life":0.34,"shape":"model","model":"frost_axeblade","mat":"energy","col":"#bfe6ff","col2":"#5d7fa8","rim":0.8,"scroll":1.5,"rot":[0,0,22],"scale":{"0":[0.7,1,0.7],"1":[1.04,1,1.04],"ease":"out","x":"r*0.98"},"op":{"0":0.8,"1":0,"0.5":0.6},"dis":{"0":0.1,"1":0.9}},
+{"id":"air","t":"trail","at":0,"life":0.17,"sweep":true,"a0":85,"a1":-85,"r":"r*1.0","r0":"r*0.5","tilt":22,"col":"#bfe6ff","col2":"#5d7fa8","tlife":0.34,"k":0.85,"w":0.3},
+{"id":"edge","t":"trail","at":0,"life":0.17,"sweep":true,"a0":85,"a1":-85,"r":"r*1.02","r0":"r*0.95","tilt":22,"col":"#e6f7ff","col2":"#8fb4d8","tlife":0.2,"k":1.2,"w":0.3},
+{"id":"push","t":"warp","at":0.06,"life":0.4,"att":"point","kind":"shock","flat":false,"size":{"0":1,"1":1,"x":"r*0.9"},"str":0.8,"col":"#9fdcff","glow":0.04,"x":true,"pos":[0,0,"r*0.5"]},
+{"id":"chunks","t":"debris","at":0.1,"life":1.1,"att":"ground","kind":"ice","n":10,"speed":8,"r":"r*0.2","size":1.2,"pos":["-r*0.3",0,"r*0.55"]},
+{"id":"snow","t":"emit","at":0.08,"life":0.05,"burst":14,"from":"ring","fr":"r*0.3","dir":"out","spread":0.6,"speed":[1,3],"plife":[0.9,1.5],"look":"smoke","fb":"tex/smoke_puff","size":[14,22],"col":"#d6ecff","c2":"#8fb4d8","gravity":-0.3,"drag":1.6,"x":true,"pos":["-r*0.3",0.2,"r*0.55"]},
+{"id":"spikes","t":"mesh","at":0.1,"life":1,"shape":"model","model":"frost_spires","mat":"ice","col":"#9fdcff","col2":"#2f7fe0","att":"ground","pos":["-r*0.4",0,"r*0.55"],"scale":{"0":[1,0.6,1],"1":[1,0.6,1],"x":"r*0.16"},"grow":{"0":0,"1":0,"0.12":1,"0.7":1},"stagger":0.5},
+{"id":"crack","t":"decal","at":0.1,"life":1.6,"att":"ground","kind":"icecrack","r":"r*0.35","n":10,"col":"#1d4f9e","pos":["-r*0.4",0,"r*0.55"]},
+{"id":"cam","t":"screen","at":0.1,"life":0.2,"shake":3,"own":true},
+{"id":"cam2","t":"screen","at":0.1,"life":0.2,"shake":1.5,"near":50,"other":true},
+{"id":"snd","t":"sound","at":0,"life":0.05,"name":"whoosh","vol":0.6},
+{"id":"snd2","t":"sound","at":0.1,"life":0.05,"name":"slam","vol":0.5}
+]}

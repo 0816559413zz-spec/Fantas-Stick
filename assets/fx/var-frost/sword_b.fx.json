@@ -1,0 +1,14 @@
+{"v":1,"desc":"แบบ B (อนิเมะ ไอไอ): ฟันแวบเดียวเป็นเส้นบางขาว-ไซยาน + เฟรมกระแทก + เส้นความเร็ว → ดาวกากบาทกลางรอย แล้ว \"รอยตัดโผล่ทีหลัง\" แตกเป็นเศษ","tags":["frost","slash","melee","variant"],"pal":"ice","dur":1,"params":{"r":{"def":6,"desc":"ระยะฟัน (ม.) = ev.r/20"}},
+"layers":[
+{"id":"cutm","t":"mesh","at":0,"life":0.16,"shape":"model","model":"frost_blade","mat":"energy","col":"#5fe8ff","col2":"#1f6fff","rot":[0,0,22],"scale":{"0":[1,3,1],"1":[1.05,3,1.05],"x":"r"},"op":{"0":1,"1":0,"0.5":0.9},"rim":2.2,"scroll":3},
+{"id":"cut","t":"trail","at":0,"life":0.08,"sweep":true,"a0":100,"a1":-100,"r":"r*1.04","r0":"r*0.97","tilt":22,"col":"#ffffff","col2":"#5fe8ff","tlife":0.3,"k":2.4,"w":0.3},
+{"id":"band","t":"trail","at":0,"life":0.08,"sweep":true,"a0":100,"a1":-100,"r":"r*0.98","r0":"r*0.8","tilt":22,"col":"#5fe8ff","col2":"#1f6fff","tlife":0.16,"k":1.5,"w":0.3},
+{"id":"frame","t":"screen","at":0.03,"life":0.08,"kick":0.3,"flash":0.04,"fcol":"#5fe8ff","own":true},
+{"id":"speed","t":"emit","at":0.02,"life":0.05,"burst":18,"from":"disc","fr":"r*0.35","dir":"aim","spread":0.2,"speed":[26,40],"plife":[0.12,0.22],"look":"streak","size":[1.8,2.8],"col":"#ffffff","c2":"#5fe8ff","gravity":0,"drag":0.5,"pos":[0,0,"r*0.2"]},
+{"id":"xstar","t":"emit","at":0.1,"life":0.05,"burst":1,"from":"point","fr":0.5,"dir":"out","spread":1.2,"speed":[0,0.1],"plife":[0.3,0.3],"look":"glow","fb":"tex/star_flare","size":[30,30],"col":"#ffffff","c2":"#9fdcff","gravity":0,"drag":3,"x":false,"pos":[0,0.1,"r*0.97"]},
+{"id":"recut","t":"mesh","at":0.18,"life":0.22,"shape":"plane","mat":"energy","col":"#5fe8ff","col2":"#1f6fff","pos":[0,0.15,"r*0.9"],"rot":[0,0,-8],"scale":{"0":["r*0.3",0.22,1],"1":["r*1.8",0.04,1],"0.2":["r*1.7",0.28,1],"ease":"out"},"op":{"0":1,"1":0,"0.6":0.9},"rim":2},
+{"id":"split","t":"emit","at":0.2,"life":0.05,"burst":9,"from":"disc","fr":"r*0.4","dir":"aim","spread":0.9,"speed":[3,7],"up":[1,3],"plife":[0.6,1.1],"look":"model","model":"frost_shard","mmat":"ice","msize":[0.08,0.16],"bounce":0.3,"mspin":540,"gravity":12,"drag":1.2,"col":"#e6f7ff","c2":"#2f7fe0","pos":[0,0,"r*0.9"]},
+{"id":"sparks","t":"emit","at":0.2,"life":0.05,"burst":6,"from":"disc","fr":"r*0.4","dir":"out","spread":1.2,"speed":[3,7],"plife":[0.25,0.5],"look":"glow","fb":"tex/star_flare","size":[3,5],"col":"#ffffff","c2":"#9fdcff","gravity":0,"drag":3,"x":true,"pos":[0,0,"r*0.9"]},
+{"id":"snd","t":"sound","at":0,"life":0.05,"name":"whoosh","vol":0.6},
+{"id":"snd2","t":"sound","at":0.18,"life":0.05,"name":"parry","vol":0.35}
+]}

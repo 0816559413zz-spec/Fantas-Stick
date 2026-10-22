@@ -1,0 +1,15 @@
+{"v":1,"desc":"แบบ C (ไถพื้นหิมะ): สมจริง — แผ่นน้ำแข็งแตกใต้เท้า + ฝุ่นหิมะพัฟ → ระหว่างไถลเท้าไถหิมะพ่นเป็นพัดไปข้างหลัง + เศษน้ำแข็ง + ไอเย็นตามหลัง → หยุด = ไถลเบรกหิมะสาดไปข้างหน้า + ก้อนน้ำแข็ง","tags":["frost","dash","ground","loop","variant"],"pal":"ice","dur":2.4,"params":{},
+"layers":[
+{"id":"plates","t":"mesh","at":0,"life":0.7,"shape":"model","model":"frost_spires","mat":"ice","col":"#9fdcff","col2":"#2f7fe0","att":"ground","scale":{"0":[1.3,0.25,1.3],"1":[1.3,0.25,1.3]},"grow":{"0":0,"1":0,"0.1":1,"0.6":1},"stagger":0.5,"growBy":"random"},
+{"id":"cracks","t":"decal","at":0,"life":1.6,"att":"ground","kind":"icecrack","r":1.8,"n":10,"col":"#1d4f9e"},
+{"id":"puff","t":"emit","at":0,"life":0.05,"burst":10,"from":"ring","fr":0.6,"dir":"flat","spread":0.6,"speed":[1.5,3],"plife":[0.9,1.5],"look":"smoke","fb":"tex/smoke_puff","size":[12,18],"col":"#d6ecff","c2":"#8fb4d8","gravity":-0.3,"drag":1.6,"x":true,"att":"ground","pos":[0,0.3,0]},
+{"id":"chips","t":"debris","at":0,"life":1.1,"att":"ground","kind":"ice","n":5,"speed":4,"r":0.4,"size":0.6},
+{"id":"spray","t":"emit","at":0.1,"life":1,"burst":0,"from":"disc","fr":0.3,"dir":"aim","spread":0.7,"speed":[2,4],"plife":[0.6,1],"look":"smoke","fb":"tex/smoke_puff","size":[9,15],"col":"#d6ecff","c2":"#8fb4d8","gravity":0.6,"drag":1.6,"x":true,"loop":true,"rate":10,"att":"feet","pos":[0,0.2,-0.2],"yaw":180,"up":[0.6,1.4]},
+{"id":"chips2","t":"emit","at":0.1,"life":1,"burst":0,"from":"disc","fr":0.3,"dir":"aim","spread":0.7,"speed":[2,5],"up":[1,2.5],"plife":[0.5,0.8],"look":"model","model":"frost_shard","mmat":"ice","msize":[0.06,0.14],"bounce":0.3,"mspin":540,"gravity":10,"drag":1.2,"col":"#e6f7ff","c2":"#2f7fe0","loop":true,"rate":10,"att":"feet","pos":[0,0.15,-0.2],"yaw":180},
+{"id":"path","t":"emit","at":0.1,"life":1,"burst":0,"from":"disc","fr":0.6,"dir":"up","spread":1,"speed":[0,0],"up":[0,0],"plife":[2.5,3.5],"look":"model","model":"frost_shard","mmat":"ice","msize":[0.14,0.3],"bounce":0,"mspin":0,"gravity":0,"drag":0,"col":"#bfe6ff","c2":"#5d7fa8","loop":true,"rate":6,"att":"feet","pos":[0,0.05,0]},
+{"id":"trailmist","t":"mist","at":0.1,"life":1,"att":"feet","r":0.7,"n":4,"out":0.6,"loop":true},
+{"id":"end_spray","t":"emit","at":0,"life":0.05,"burst":12,"from":"disc","fr":0.4,"dir":"aim","spread":0.8,"speed":[2.5,5],"plife":[0.9,1.5],"look":"smoke","fb":"tex/smoke_puff","size":[12,20],"col":"#d6ecff","c2":"#8fb4d8","gravity":-0.3,"drag":1.6,"x":true,"end":true,"att":"feet","pos":[0,0.3,0.4],"up":[0.5,1.5]},
+{"id":"end_chunks","t":"debris","end":true,"life":1.2,"att":"feet","kind":"ice","n":6,"speed":5,"r":0.4,"size":0.7,"pos":[0,0.2,0.5]},
+{"id":"snd","t":"sound","at":0,"life":0.05,"name":"dash","vol":0.6},
+{"id":"end_snd","t":"sound","at":0,"life":0.05,"name":"break","vol":0.4,"end":true}
+]}

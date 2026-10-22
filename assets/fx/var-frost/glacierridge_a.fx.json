@@ -1,0 +1,20 @@
+{"v":1,"desc":"แบบ A (สันหนามผลึก): ต่อยอดลุคเดิม — กลุ่มหนามน้ำแข็งพุ่งต่อกันเป็นแนวสูงขึ้นเรื่อย ๆ (1→8 ม.) + ร้าว/หมอก/เกล็ดวิ่งตามสัน • หมดเวลา = ยุบลงทีละท่อน","tags":["frost","ground","ridge","variant"],"pal":"ice","dur":6.9,"params":{"len":{"def":35,"desc":"ยาวสัน (ม.) = ev.len/20"}},
+"layers":[
+{"id":"sp0","t":"mesh","at":0,"life":6.3,"shape":"model","model":"frost_spires","mat":"ice","col":"#9fdcff","col2":"#2f7fe0","att":"ground","pos":[0,0,3.5],"yaw":-90,"scale":[1.5,0.85,1.5],"grow":{"0":0,"1":0,"0.03":1,"0.9":1},"stagger":0.5},
+{"id":"sp1","t":"mesh","at":0.071,"life":6.3,"shape":"model","model":"frost_spires","mat":"ice","col":"#9fdcff","col2":"#2f7fe0","att":"ground","pos":[0,0,8.5],"yaw":-49,"scale":[1.62,1.7,1.62],"grow":{"0":0,"1":0,"0.03":1,"0.9":1},"stagger":0.5},
+{"id":"sp2","t":"mesh","at":0.143,"life":6.3,"shape":"model","model":"frost_spires","mat":"ice","col":"#9fdcff","col2":"#2f7fe0","att":"ground","pos":[0,0,13.5],"yaw":-8,"scale":[1.74,2.55,1.74],"grow":{"0":0,"1":0,"0.03":1,"0.9":1},"stagger":0.5},
+{"id":"sp3","t":"mesh","at":0.214,"life":6.3,"shape":"model","model":"frost_spires","mat":"ice","col":"#9fdcff","col2":"#2f7fe0","att":"ground","pos":[0,0,18.5],"yaw":33,"scale":[1.8599999999999999,3.4,1.8599999999999999],"grow":{"0":0,"1":0,"0.03":1,"0.9":1},"stagger":0.5},
+{"id":"sp4","t":"mesh","at":0.286,"life":6.3,"shape":"model","model":"frost_spires","mat":"ice","col":"#9fdcff","col2":"#2f7fe0","att":"ground","pos":[0,0,23.5],"yaw":74,"scale":[1.98,4.25,1.98],"grow":{"0":0,"1":0,"0.03":1,"0.9":1},"stagger":0.5},
+{"id":"sp5","t":"mesh","at":0.357,"life":6.3,"shape":"model","model":"frost_spires","mat":"ice","col":"#9fdcff","col2":"#2f7fe0","att":"ground","pos":[0,0,28.5],"yaw":-65,"scale":[2.1,5.1,2.1],"grow":{"0":0,"1":0,"0.03":1,"0.9":1},"stagger":0.5},
+{"id":"sp6","t":"mesh","at":0.428,"life":6.3,"shape":"model","model":"frost_spires","mat":"ice","col":"#9fdcff","col2":"#2f7fe0","att":"ground","pos":[0,0,33.5],"yaw":-24,"scale":[2.2199999999999998,5.95,2.2199999999999998],"grow":{"0":0,"1":0,"0.03":1,"0.9":1},"stagger":0.5},
+{"id":"sp7","t":"mesh","at":0.5,"life":6.3,"shape":"model","model":"frost_spires","mat":"ice","col":"#9fdcff","col2":"#2f7fe0","att":"ground","pos":[0,0,38.5],"yaw":17,"scale":[2.34,6.8,2.34],"grow":{"0":0,"1":0,"0.03":1,"0.9":1},"stagger":0.5},
+{"id":"cracks","t":"decal","at":0,"life":2,"att":"ground","kind":"icecrack","r":2.6,"n":10,"col":"#2f7fe0"},
+{"id":"shards","t":"emit","at":0,"life":0.05,"burst":12,"from":"sphere","fr":0.6,"dir":"out","spread":1,"speed":[5,9],"up":[2,4],"plife":[0.6,1.1],"look":"model","model":"frost_shard","mmat":"ice","msize":[0.12,0.26],"bounce":0.3,"mspin":540,"gravity":12,"drag":1.2,"col":"#e6f7ff","c2":"#2f7fe0","att":"ground","pos":[0,0.4,0]},
+{"id":"run","t":"emit","at":0,"life":0.6,"burst":0,"from":"line","fr":0.4,"dir":"up","spread":0.5,"speed":[2,4],"up":[0.5,2],"plife":[0.4,0.7],"look":"flake","size":[2,3],"col":"#ffffff","c2":"#9fdcff","gravity":3,"drag":1.5,"spin":6,"fin":6,"x":true,"rate":60,"att":"ground","fh":"len","pos":[0,0.2,0]},
+{"id":"m0","t":"mist","at":0.1,"life":1,"att":"ground","r":1.4,"n":6,"out":0.6,"pos":[0,0,8]},
+{"id":"m1","t":"mist","at":0.25,"life":1,"att":"ground","r":1.6,"n":6,"out":0.6,"pos":[0,0,20]},
+{"id":"m2","t":"mist","at":0.4,"life":1,"att":"ground","r":1.8,"n":6,"out":0.6,"pos":[0,0,32]},
+{"id":"light","t":"light","at":0,"life":0.35,"pos":[0,1.5,0],"col":"#9fdcff","int":1.5,"dist":14,"att":"ground"},
+{"id":"cam","t":"screen","at":0,"life":0.2,"shake":5,"near":50},
+{"id":"snd","t":"sound","at":0,"life":0.05,"name":"break","vol":0.8}
+]}

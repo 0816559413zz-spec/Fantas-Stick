@@ -1,0 +1,16 @@
+{"v":1,"desc":"แบบ C (กำแพงธารน้ำแข็ง): สมจริง — แผ่นน้ำแข็งหนาทึบผิวด้าน ขอบมีผลึกเกาะ + ไอเย็นไหลลงจากโล่ + เกล็ดหิมะร่วง • parry = ก้อนน้ำแข็งแตกกระเด็น + พัฟหิมะ • ปล่อย = ร่วงแตกลงพื้น","tags":["frost","shield","self","block","loop","variant"],"pal":"ice","dur":2,"params":{},
+"layers":[
+{"id":"raise","t":"mesh","at":0,"life":0.18,"shape":"lathe","mat":"solid","col":"#bfe6ff","col2":"#2f7fe0","prof":[[0,-0.78],[0.3,-0.35],[0.44,0.1],[0.46,0.42],[0.4,0.58],[0,0.62]],"att":"feet","pos":[0.2,1.15,0.75],"scale":{"0":[0.3,0.3,0.05],"1":[1,1.3,0.12],"ease":"out"},"op":{"0":0.3,"1":0.85}},
+{"id":"plate","t":"mesh","at":0.18,"life":1.2,"shape":"lathe","mat":"solid","col":"#bfe6ff","col2":"#2f7fe0","prof":[[0,-0.78],[0.3,-0.35],[0.44,0.1],[0.46,0.42],[0.4,0.58],[0,0.62]],"att":"feet","pos":[0.2,1.15,0.75],"loop":true,"scale":[1,1.3,0.12],"op":0.82},
+{"id":"frosting","t":"mesh","at":0.18,"life":1.2,"shape":"lathe","mat":"ice","col":"#9fdcff","col2":"#2f7fe0","prof":[[0,-0.78],[0.3,-0.35],[0.44,0.1],[0.46,0.42],[0.4,0.58],[0,0.62]],"att":"feet","pos":[0.2,1.15,0.77],"loop":true,"scale":[0.92,1.2,0.1],"op":0.55},
+{"id":"crust","t":"mesh","at":0.12,"life":1.2,"shape":"model","model":"crystal_cluster","mat":"ice","col":"#9fdcff","col2":"#2f7fe0","loop":true,"att":"feet","pos":[0.2,0.35,0.8],"rot":[180,0,0],"scale":0.32,"op":0.9},
+{"id":"vapor","t":"emit","at":0.2,"life":1,"burst":0,"from":"sphere","fr":0.4,"dir":"down","spread":0.4,"speed":[0.2,0.5],"plife":[0.9,1.3],"look":"smoke","fb":"tex/smoke_puff","size":[8,12],"col":"#d6ecff","c2":"#8fb4d8","gravity":0.4,"drag":1.6,"x":true,"loop":true,"rate":5,"att":"feet","pos":[0.2,1.3,0.8]},
+{"id":"snow","t":"emit","at":0.2,"life":1,"burst":0,"from":"sphere","fr":0.45,"dir":"down","spread":1.2,"speed":[0.1,0.4],"up":[0.5,2],"plife":[0.7,1.3],"look":"flake","size":[1.4,2.2],"col":"#ffffff","c2":"#9fdcff","gravity":1,"drag":2.2,"spin":6,"fin":6,"x":true,"loop":true,"rate":8,"att":"feet","pos":[0.2,1.15,0.75]},
+{"id":"parry_chunks","t":"debris","at":1,"life":1,"att":"feet","kind":"ice","n":7,"speed":6,"r":0.3,"size":0.7,"pos":[0.2,1.15,1]},
+{"id":"parry_puff","t":"emit","at":1,"life":0.05,"burst":8,"from":"sphere","fr":0.3,"dir":"aim","spread":0.7,"speed":[2,4],"plife":[0.6,1],"look":"smoke","fb":"tex/smoke_puff","size":[10,16],"col":"#d6ecff","c2":"#8fb4d8","gravity":-0.3,"drag":1.6,"x":true,"att":"feet","pos":[0.2,1.15,1]},
+{"id":"parry_cam","t":"screen","at":1,"life":0.2,"shake":2,"own":true},
+{"id":"end_fall","t":"debris","end":true,"life":1.2,"att":"feet","kind":"ice","n":9,"speed":2.5,"r":0.4,"size":0.8,"pos":[0.2,1.15,0.75]},
+{"id":"end_mist","t":"emit","at":0,"life":0.05,"burst":8,"from":"sphere","fr":0.5,"dir":"down","spread":0.6,"speed":[0.5,1.2],"plife":[0.9,1.5],"look":"smoke","fb":"tex/smoke_puff","size":[10,16],"col":"#d6ecff","c2":"#8fb4d8","gravity":-0.3,"drag":1.6,"x":true,"end":true,"att":"feet","pos":[0.2,0.8,0.8]},
+{"id":"snd","t":"sound","at":0,"life":0.05,"name":"block","vol":0.5},
+{"id":"parry_snd","t":"sound","at":1,"life":0.05,"name":"break","vol":0.6}
+]}

@@ -1,0 +1,16 @@
+{"v":1,"desc":"แบบ A (ประกายไฟพรีเมียม): ปลายไม้แวบ → ลูกประกายแกนเหลืองขาว หางส้มแดง โปรยถ่านไฟตามทาง → โดนแล้วแตกเป็นประกายพุ่งรอบ + ไฟวูบสั้น","tags":["fire","projectile","pyro","basic","variant"],"pal":"fire","dur":0.8,
+"layers":[
+{"id":"castFlash","t":"flash","at":0,"life":0.09,"att":"wand","col":"$core","size":1,"size0":0.2,"k":2},
+{"id":"castHalo","t":"halo","at":0,"life":0.2,"att":"wand","col":"$main","size":1.8,"size0":0.4,"k":1.1},
+{"id":"castSpray","t":"emit","at":0,"life":0.04,"burst":12,"att":"wand","from":"point","dir":"aim","spread":0.5,"speed":[4,7],"plife":[0.12,0.25],"look":"streak","size":[1.4,2],"col":"$core","c2":"$main","gravity":2,"drag":3},
+{"id":"core","t":"mesh","at":0.03,"life":0.2,"shape":"sphere","mat":"glow","col":"$core","pos":{"0":[0.3,1.35,0.9],"1":[0,1.35,7]},"scale":0.13,"fade":0},
+{"id":"ball","t":"mesh","at":0.03,"life":0.2,"shape":"sphere","mat":"fire","mode":"ball","disp":0.4,"flow":[0,0,-1],"pos":{"0":[0.3,1.35,0.9],"1":[0,1.35,7]},"scale":[0.26,0.26,0.46],"heat":0.3,"fade":0},
+{"id":"glowB","t":"halo","at":0.03,"life":0.2,"pos":{"0":[0.3,1.35,0.9],"1":[0,1.35,7]},"col":"$main","size":1.3,"size0":1.2,"k":0.9},
+{"id":"tail","t":"trail","at":0.03,"life":0.2,"of":"core","col":"$hi","col2":"$deep","w":0.3,"tlife":0.16,"k":1.8},
+{"id":"embers","t":"emit","at":0.03,"life":0.2,"rate":180,"from":"mesh","of":"core","dir":"random","speed":[0.4,1.6],"plife":[0.2,0.45],"look":"ember","size":[1.2,1.8],"col":"$hi","c2":"$deep","gravity":1.5,"drag":2},
+{"id":"hitFlash","t":"flash","at":0.23,"life":0.08,"pos":[0,1.35,7],"col":"$core","size":1.4,"k":2},
+{"id":"hitSparks","t":"emit","at":0.23,"life":0.04,"burst":30,"pos":[0,1.35,7],"from":"sphere","fr":0.1,"dir":"out","speed":[5,12],"plife":[0.15,0.35],"look":"streak","size":[1.6,2.4],"col":"$core","c2":"$deep","gravity":5,"drag":2.5},
+{"id":"hitFlame","t":"emit","at":0.23,"life":0.04,"burst":7,"pos":[0,1.35,7],"from":"sphere","fr":0.15,"dir":"out","speed":[1,2.5],"up":[0.5,1.2],"plife":[0.25,0.4],"look":"fire","size":[5,7],"gravity":-1,"drag":3},
+{"id":"hitSmoke","t":"emit","at":0.28,"life":0.04,"burst":3,"x":true,"pos":[0,1.4,7],"from":"sphere","fr":0.2,"dir":"up","speed":[0.3,0.8],"plife":[0.6,0.9],"look":"smoke","size":[4,6],"col":"#2e2a2a","c2":"#2e2a2a","gravity":-0.5,"grow":1.2,"drag":2},
+{"id":"light","t":"light","at":0.23,"life":0.22,"pos":[0,1.4,6.6],"col":"$light","int":{"0":1.8,"1":0},"dist":6}
+]}

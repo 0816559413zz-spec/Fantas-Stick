@@ -1,0 +1,14 @@
+{"v":1,"desc":"แบบ B (อนิเมะ กิโยตินน้ำแข็ง): แถบฟันหนาไซยาน-น้ำเงินจัด + ขอบขาวหนา + เฟรมกระแทก/จอสั่น + มงกุฎหนามแตกกลางอากาศ + เส้นความเร็วกระจาย","tags":["frost","slash","melee","variant"],"pal":"ice","dur":1.1,"params":{"r":{"def":8,"desc":"ระยะฟัน (ม.) = ev.r/20"}},
+"layers":[
+{"id":"bandm","t":"mesh","at":0,"life":0.2,"shape":"model","model":"frost_axeblade","mat":"energy","col":"#5fe8ff","col2":"#1f6fff","rot":[0,0,22],"scale":{"0":[0.8,1,0.8],"1":[1.05,1,1.05],"0.3":[1,1,1],"ease":"out","x":"r"},"op":{"0":1,"1":0,"0.5":0.9},"rim":2.2,"scroll":3},
+{"id":"edge","t":"trail","at":0,"life":0.1,"sweep":true,"a0":95,"a1":-95,"r":"r*1.06","r0":"r*0.96","tilt":22,"col":"#ffffff","col2":"#5fe8ff","tlife":0.26,"k":2.3,"w":0.3},
+{"id":"band","t":"trail","at":0,"life":0.1,"sweep":true,"a0":95,"a1":-95,"r":"r*0.98","r0":"r*0.5","tilt":22,"col":"#5fe8ff","col2":"#1f6fff","tlife":0.2,"k":1.5,"w":0.3},
+{"id":"deep","t":"trail","at":0.02,"life":0.1,"sweep":true,"a0":95,"a1":-95,"r":"r*0.55","r0":"r*0.35","tilt":22,"col":"#1f6fff","col2":"#163a8c","tlife":0.22,"k":1.2,"w":0.3},
+{"id":"frame","t":"screen","at":0.05,"life":0.08,"kick":0.4,"flash":0.05,"fcol":"#5fe8ff","own":true,"shake":3},
+{"id":"crown","t":"mesh","at":0.06,"life":0.32,"shape":"spikes","mat":"ice","col":"#9fdcff","col2":"#2f7fe0","n":9,"pos":[0,0,"r*0.62"],"rot":[90,0,0],"scale":{"0":0.3,"1":1.1,"0.3":1,"ease":"out","x":"r*0.22"},"op":{"0":1,"1":0,"0.6":0.9}},
+{"id":"fan","t":"emit","at":0.06,"life":0.05,"burst":20,"from":"point","fr":0.4,"dir":"out","spread":1.4,"speed":[18,30],"plife":[0.12,0.22],"look":"streak","size":[2,3],"col":"#ffffff","c2":"#5fe8ff","gravity":0,"drag":0.5,"pos":[0,0,"r*0.62"]},
+{"id":"star","t":"emit","at":0.07,"life":0.05,"burst":1,"from":"point","fr":0.5,"dir":"out","spread":1.2,"speed":[0,0.1],"plife":[0.32,0.32],"look":"glow","fb":"tex/star_flare","size":[22,22],"col":"#ffffff","c2":"#9fdcff","gravity":0,"drag":3,"x":false,"pos":[0,0.1,"r*0.62"]},
+{"id":"shards","t":"emit","at":0.08,"life":0.05,"burst":12,"from":"point","fr":0.3,"dir":"out","spread":1.4,"speed":[6,12],"up":[1,3],"plife":[0.6,1.1],"look":"model","model":"frost_shard","mmat":"ice","msize":[0.12,0.26],"bounce":0.3,"mspin":540,"gravity":12,"drag":1.2,"col":"#e6f7ff","c2":"#2f7fe0","pos":[0,0,"r*0.62"]},
+{"id":"snd","t":"sound","at":0,"life":0.05,"name":"whoosh","vol":0.7},
+{"id":"snd2","t":"sound","at":0.06,"life":0.05,"name":"slam","vol":0.4}
+]}

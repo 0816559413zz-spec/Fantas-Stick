@@ -1,0 +1,12 @@
+{"v":1,"desc":"แบบ C (ลมหายใจน้ำค้างแข็ง): สมจริง ไม่เรือง — รอยฟันเป็นอากาศเยือกแข็ง ไอเย็นตามแนวฟัน + ผลึกน้ำแข็งก่อตัวกลางอากาศแล้วร่วง + พื้นตรงหน้าเกาะน้ำแข็ง","tags":["frost","slash","melee","variant"],"pal":"ice","dur":1.7,"params":{"r":{"def":6,"desc":"ระยะฟัน (ม.) = ev.r/20"}},
+"layers":[
+{"id":"blade","t":"mesh","at":0,"life":0.3,"shape":"model","model":"frost_blade","mat":"energy","col":"#bfe6ff","col2":"#5d7fa8","rim":0.8,"scroll":1.5,"rot":[0,0,22],"scale":{"0":[0.7,1,0.7],"1":[1.04,1,1.04],"ease":"out","x":"r*0.92"},"op":{"0":0.7,"1":0,"0.5":0.5},"dis":{"0":0.1,"1":0.9}},
+{"id":"air","t":"trail","at":0,"life":0.13,"sweep":true,"a0":85,"a1":-85,"r":"r*0.96","r0":"r*0.66","tilt":22,"col":"#bfe6ff","col2":"#5d7fa8","tlife":0.38,"k":0.8,"w":0.3},
+{"id":"edge","t":"trail","at":0,"life":0.13,"sweep":true,"a0":85,"a1":-85,"r":"r*0.98","r0":"r*0.93","tilt":22,"col":"#e6f7ff","col2":"#8fb4d8","tlife":0.2,"k":1.2,"w":0.3},
+{"id":"vapor","t":"emit","at":0.03,"life":0.05,"burst":16,"from":"ring","fr":"r*0.78","dir":"tangent","spread":0.4,"speed":[0.4,1.4],"plife":[0.9,1.5],"look":"smoke","fb":"tex/smoke_puff","size":[14,22],"col":"#d6ecff","c2":"#5d7fa8","gravity":-0.3,"drag":1.6,"x":true},
+{"id":"freeze","t":"emit","at":0.05,"life":0.05,"burst":14,"from":"ring","fr":"r*0.8","dir":"tangent","spread":0.5,"speed":[0.2,0.6],"up":[0,0.3],"plife":[0.9,1.4],"look":"model","model":"frost_shard","mmat":"ice","msize":[0.1,0.22],"bounce":0.2,"mspin":200,"gravity":5,"drag":1.5,"col":"#e6f7ff","c2":"#2f7fe0"},
+{"id":"dust","t":"emit","at":0.06,"life":0.05,"burst":18,"from":"disc","fr":"r*0.6","dir":"aim","spread":1.2,"speed":[0.5,2],"up":[0.5,2],"plife":[1,1.6],"look":"flake","size":[1.6,2.6],"col":"#ffffff","c2":"#9fdcff","gravity":0.8,"drag":2.2,"spin":6,"fin":6,"x":true,"pos":[0,0,"r*0.5"]},
+{"id":"rime","t":"decal","at":0.08,"life":1.6,"att":"ground","kind":"icecrack","r":"r*0.35","n":7,"col":"#1d4f9e","pos":[0,0,"r*0.55"]},
+{"id":"mist","t":"mist","at":0.08,"life":1,"att":"ground","r":"r*0.45","n":5,"out":0.9,"pos":[0,0,"r*0.55"]},
+{"id":"snd","t":"sound","at":0,"life":0.05,"name":"whoosh","vol":0.45}
+]}
