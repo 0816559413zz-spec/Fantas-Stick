@@ -8,7 +8,7 @@
 // =====================================================================
 const MENUS=new THREE.Scene();
 MENUS.background=new THREE.Color('#04050d');MENUS.fog=new THREE.Fog('#070a1c',24,80);
-const MN={built:false,enabled:true,hits:[],hot:null,focus:null,fT:0,popFor:'',cam:{p:new THREE.Vector3(),l:new THREE.Vector3(),init:false},fx:{},ray:new THREE.Raycaster(),nav:false,shoot:{t:-1,x:0,y:0,z:0},rp:null};
+const MN={built:false,enabled:true,hits:[],hot:null,lay:[],asp:0,focus:null,fT:0,popFor:'',cam:{p:new THREE.Vector3(),l:new THREE.Vector3(),init:false},fx:{},ray:new THREE.Raycaster(),nav:false,shoot:{t:-1,x:0,y:0,z:0},rp:null};
 const _mv=new THREE.Vector3();
 function mnCrest(c,e){return texCanvas(128,320,g=>{g.fillStyle=c;g.fillRect(0,0,128,320);g.fillStyle='#d9b45a';g.fillRect(0,0,128,7);g.fillRect(0,0,7,320);g.fillRect(121,0,7,320);
   g.beginPath();g.moveTo(14,110);g.lineTo(114,110);g.lineTo(114,190);g.quadraticCurveTo(114,250,64,276);g.quadraticCurveTo(14,250,14,190);g.closePath();g.fillStyle='rgba(0,0,0,.3)';g.fill();g.lineWidth=5;g.strokeStyle='#d9b45a';g.stroke();
@@ -76,7 +76,7 @@ function mnBuild(){
     const gl=new THREE.Sprite(glowMat('#9a8cff',1.8));gl.scale.set(7,9,1);gl.position.set(0,3.4,0.3);g.add(gl);MN.fx.pGlow=gl;
     const L=new THREE.PointLight('#8a9cff',2.4,16,2);L.position.set(0,3.2,2);g.add(L);MN.fx.pLight=L;
     g.position.set(-7.4,0,-2.0);g.rotation.y=0.5;S.add(g);
-    const h=hit(4.6,7.4,2.2,-7.4,3.7,-2.0);h.rotation.y=0.5;S.add(h);MN.hits.push({id:'play',mesh:h,icon:'🌀',name:'ประตูเวท',sub:'เล่น',anchor:new V(-7.4,8.0,-2.0),glow:[gl],base:7,cam:[-6.2,3.3,4.6],look:[-4.0,3.3,-2.0]});}
+    const h=hit(4.6,7.4,2.2,-7.4,3.7,-2.0);h.rotation.y=0.5;S.add(h);MN.hits.push({id:'play',mesh:h,icon:'🌀',name:'ประตูเวท',sub:'เล่น',anchor:new V(-7.4,8.0,-2.0),glow:[gl],base:7,cam:[1.2,3.3,4.6],look:[3.4,3.3,-2.0]});MN.lay.push({hit:MN.hits[MN.hits.length-1],objs:[g,h],ndc:-0.5,z:-2.0});}
   // 2) หนังสือเวทบนแท่นอ่าน (คู่มือ/สถิติ/เพลง) — หน้าซ้าย
   {const g=new THREE.Group(),wood=new THREE.MeshStandardMaterial({color:'#4a2e1a',roughness:0.8});
     const post=new THREE.Mesh(new THREE.CylinderGeometry(0.32,0.5,1.25,4),wood);post.position.y=0.62;post.rotation.y=Math.PI/4;g.add(post);
@@ -90,7 +90,7 @@ function mnBuild(){
     const gl=new THREE.Sprite(glowMat('#ffd98a',1.7));gl.scale.set(3.8,3.0,1);gl.position.set(0,2.1,0.1);g.add(gl);MN.fx.bGlow=gl;
     MN.fx.runes=[];for(let i=0;i<6;i++){const r=new THREE.Sprite(glowMat(i%2?'#9fe8ff':'#ffd98a',2.2));r.scale.setScalar(0.22);g.add(r);MN.fx.runes.push({r,ph:i/6*6.283});}
     g.position.set(-3.3,0,3.0);g.rotation.y=0.25;S.add(g);
-    const h=hit(2.0,2.4,1.6,-3.3,1.6,3.0);S.add(h);MN.hits.push({id:'book',mesh:h,icon:'📖',name:'หนังสือเวท',sub:'คู่มือ • สถิติ • เพลง',anchor:new V(-3.3,3.5,3.0),glow:[gl],base:3.8,cam:[-2.4,2.7,7.4],look:[-0.6,2.1,3.0]});}
+    const h=hit(2.0,2.4,1.6,-3.3,1.6,3.0);S.add(h);MN.hits.push({id:'book',mesh:h,icon:'📖',name:'หนังสือเวท',sub:'คู่มือ • สถิติ • เพลง',anchor:new V(-3.3,3.5,3.0),glow:[gl],base:3.8,cam:[0.9,2.7,7.4],look:[2.7,2.1,3.0]});MN.lay.push({hit:MN.hits[MN.hits.length-1],objs:[g,h],ndc:-0.22,z:3.0});}
   // 3) ลูกแก้วดาราศาสตร์ (ตั้งค่า) — ขวาด้านหลัง
   {const g=new THREE.Group();
     const ped=new THREE.Mesh(new THREE.CylinderGeometry(0.55,0.85,1.3,10),stone);ped.position.y=0.65;g.add(ped);const pc=new THREE.Mesh(new THREE.CylinderGeometry(0.75,0.55,0.18,10),gold);pc.position.y=1.38;g.add(pc);
@@ -100,7 +100,7 @@ function mnBuild(){
     const gl=new THREE.Sprite(glowMat('#7ff0e0',1.8));gl.scale.set(3.6,3.6,1);sph.add(gl);MN.fx.aGlow=gl;
     MN.fx.moons=[];for(let i=0;i<3;i++){const m=new THREE.Mesh(new THREE.SphereGeometry(0.09,10,8),gold);sph.add(m);MN.fx.moons.push({m,ph:i*2.1,r:0.8+i*0.18});}
     g.position.set(6.4,0,-2.6);S.add(g);MN.fx.sph=sph;
-    const h=hit(2.8,4.2,2.8,6.4,2.1,-2.6);S.add(h);MN.hits.push({id:'settings',mesh:h,icon:'🔮',name:'ลูกแก้วดาราศาสตร์',sub:'ตั้งค่า',anchor:new V(6.4,4.9,-2.6),glow:[gl],base:3.6,cam:[4.6,3.0,4.0],look:[8.8,2.7,-2.6]});}
+    const h=hit(2.8,4.2,2.8,6.4,2.1,-2.6);S.add(h);MN.hits.push({id:'settings',mesh:h,icon:'🔮',name:'ลูกแก้วดาราศาสตร์',sub:'ตั้งค่า',anchor:new V(6.4,4.9,-2.6),glow:[gl],base:3.6,cam:[-1.8,3.0,4.0],look:[2.4,2.7,-2.6]});MN.lay.push({hit:MN.hits[MN.hits.length-1],objs:[g,h],ndc:0.55,z:-2.6});}
   // 4) ตัวละคร (แต่งตัว)
   {const h=hit(2.2,3.6,2.2,0,2.0,0);S.add(h);MN.hits.push({id:'char',mesh:h,icon:'🎭',name:'พ่อมดของคุณ',sub:'แต่งตัว',anchor:new V(0,4.3,0),glow:[],base:0});}
   // ---- ป๊อปอัปเมนู + ปุ่มเมนูปกติ + สไตล์ ----
@@ -109,7 +109,8 @@ function mnBuild(){
   const lg=document.querySelector('.mleft .logo-th');if(lg)lg.insertAdjacentElement('afterend',tog);
   const hint=document.createElement('div');hint.id='mnHint';hint.textContent='✦ คลิกที่ประตูเวท หนังสือ หรือลูกแก้วในลาน ✦';if(lg)lg.insertAdjacentElement('afterend',hint);
   const st=document.createElement('style');st.textContent=`
-body.menu3d .mnav,body.menu3d .mleft .orn{display:none}body.menu3d.navOpen .mnav{display:flex}body.menu3d.navOpen .mleft .orn{display:block}
+body.menu3d .mnav,body.menu3d .mleft .orn{display:none}
+body.menu3d:not(.navOpen) .mleft{pointer-events:none;background:none;width:auto;padding:30px 44px}body.menu3d:not(.navOpen) .mleft::after{display:none}body.menu3d .mleft button,body.menu3d .mleft input,body.menu3d .mleft .mnav{pointer-events:auto}body.menu3d.navOpen .mnav{display:flex}body.menu3d.navOpen .mleft .orn{display:block}
 #mnNavTog{margin:10px 0 0;padding:5px 12px;font:600 12px Kanit,sans-serif;color:rgba(255,255,255,.7);background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.18);border-radius:6px;cursor:pointer;display:none;align-self:flex-start}
 body.menu3d #mnNavTog{display:block}#mnNavTog:hover{color:#fff;border-color:rgba(243,220,148,.6)}
 #mnHint{display:none;margin-top:14px;font:500 13px Kanit,sans-serif;color:#e8c468;letter-spacing:.5px;animation:mnPulse 2.4s ease-in-out infinite}body.menu3d #mnHint{display:block}body.menu3d.navOpen #mnHint{display:none}
@@ -161,6 +162,11 @@ addEventListener('click',e=>{if(!MN.rp||MN.focus)return;mnPick(e);if(MN.hot&&!(e
 addEventListener('keydown',e=>{if(e.key==='Escape'&&MN.focus)mnClose();});
 // ---- เรนเดอร์ (เรียกจาก renderStage js/32 — คืน true = จัดการให้แล้ว) ----
 const MN_FOV=48;
+function mnLayout(){
+  const a=cam.aspect;if(Math.abs(a-MN.asp)<0.01)return;MN.asp=a;
+  for(const q of MN.lay){const d=9.4-q.z,hw=Math.tan(MN_FOV*Math.PI/360)*a*d,x=-0.2+q.ndc*hw,dx=x-q.hit.mesh.position.x;
+    for(const o of q.objs)o.position.x+=dx;q.hit.anchor.x+=dx;}
+}
 function mnRestore(){
   if(cam.fov!==SET.fov){cam.fov=SET.fov;cam.updateProjectionMatrix();}   // ออกจากหน้าเมนู (ล็อบบี้/หน้าสร้างตัวละคร): คืนตัวละคร + เอฟเฟกต์เมนูให้ฉากห้องโถง
   if(STAGE.mfx&&STAGE.mfx.parent!==stage)stage.add(STAGE.mfx);
@@ -200,9 +206,10 @@ function mnMenuRender(dt,now){
   const foc=MN.focus&&MN.hits.find(h=>h.id===MN.focus);
   const u=STAGE.introT<0?0:Math.min(1,STAGE.introT),e=1-Math.pow(1-u,3);if(STAGE.introT>=0&&STAGE.introT<1)STAGE.introT+=dt/2.8;
   const sway=Math.sin(t/5.2)*0.25,drift=Math.sin(t/7)*0.2;
-  if(cam.fov!==MN_FOV){cam.fov=MN_FOV;cam.updateProjectionMatrix();}   // เมนูใช้มุมแคบ (ของดูใหญ่ขึ้น)
+  if(cam.fov!==MN_FOV){cam.fov=MN_FOV;cam.updateProjectionMatrix();}
+  mnLayout();   // เมนูใช้มุมแคบ (ของดูใหญ่ขึ้น)
   let pp=_mcp.set(lerp(2.4,-0.2+sway*0.6+drift,e),lerp(9,2.3,e),lerp(20,9.4,e)),ll=_mcl.set(lerp(0,0.4,e),lerp(3.2,2.1,e),lerp(0,-0.4,e));
-  if(foc){MN.fT+=dt;pp=_mcp.set(...foc.cam);ll=_mcl.set(...foc.look);}
+  if(foc){MN.fT+=dt;pp=_mcp.set(foc.anchor.x+foc.cam[0],foc.cam[1],foc.cam[2]);ll=_mcl.set(foc.anchor.x+foc.look[0],foc.look[1],foc.look[2]);}
   const C=MN.cam;if(!C.init){C.p.copy(pp);C.l.copy(ll);C.init=true;}const k=1-Math.exp(-(foc?3.4:2.6)*dt);C.p.lerp(pp,k);C.l.lerp(ll,k);
   cam.position.copy(C.p);cam.lookAt(C.l);if(window.__stageCam)window.__stageCam(cam);
   // ป๊อปอัปเปิดเมื่อกล้องใกล้ถึง
