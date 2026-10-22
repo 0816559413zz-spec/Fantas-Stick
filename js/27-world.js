@@ -38,7 +38,12 @@ const HAZE_U={uScene:{value:null}};
 // เงาตามซอกมุม (SSAO) — คำนวณจากภาพความลึกอย่างเดียว (ไม่ต้องวาดฉากซ้ำ) ที่ครึ่งความละเอียด ลงแผ่น aoRT
 // แล้วตอนก๊อปภาพฉากใน FXPass เบลอ 4×4 (ไม่เบลอข้ามขอบวัตถุ) คูณเข้าภาพ → อนุภาค/เอฟเฟกต์ที่วาดทีหลังไม่โดนทำให้มืด
 // uAO = ความเข้ม (0 = ปิด) • uR = รัศมีที่มองหาซอก (หน่วย 3D) • uFade = ระยะที่เริ่มจาง/หายหมด (ไกลกว่านั้นหมอกบังอยู่แล้ว)
-const AOU={uAO:{value:0},uR:{value:1.4},uFade:{value:new THREE.Vector2(35,70)},uTan:{value:new THREE.Vector2(1,1)},tAO:{value:null},uAORes:{value:new THREE.Vector2(1,1)}};
+const AOU={uAO:{value:0},uR:{value:1.4},uFade:{value:new THREE.Vector2(35,70)},uTan:{value:new THREE.Vector2(1,1)},tAO:{value:null},uAORes:{value:new THREE.Vector2(1,1)},
+  uRim:{value:0},uRimCol:{value:new THREE.Color()},uHaze:{value:0},uHazeCol:{value:new THREE.Color()},uHazeD:{value:new THREE.Vector3(0,0.06,22)},uCamY:{value:new THREE.Vector4()}};
+// ภาพสวยขึ้น (ทำในขั้นก๊อปภาพของ FXPass เลย แทบไม่กินแรงเพิ่ม • ทำงานเมื่อเปิด soft = ไม่ใช่โหมดประหยัด):
+//  rim = ไฟขอบ: ขอบวัตถุใกล้ ๆ ที่ข้างหลังไกลกว่ามาก (เช่นตัวละครบนพื้น) สว่างขึ้นเหมือนโดนแสงจันทร์/แดดจากด้านหลัง → ตัวละครเด่น (สีตามแสงหลัก) • rimZ = ไกลสุดที่มีไฟขอบ
+//  haze = หมอกบาง ๆ ตามระยะ (ของไกลจางเข้าหาสีหมอกของแผนที่ → ฉากมีมิติ) • hazeK = ความหนา (เทียบกับ fog.far ของแผนที่) • aa = ลบขอบหยัก (FXAA)
+const GFX={rim:0.17,rimZ:22,haze:0.55,hazeK:1.4,aa:true};
 const AO_ON={strength:2.2};
 const AO_HEAD='uniform sampler2D tD;uniform vec2 uRes;uniform float uNear;uniform float uFar;uniform float uAO;uniform float uR;uniform vec2 uFade;uniform vec2 uTan;varying vec2 vUv;'+
   'float lz(vec2 uv){float d=texture2D(tD,uv).x;return (uNear*uFar)/(uFar-d*(uFar-uNear));}'+
@@ -58,12 +63,21 @@ const AO_CALC=AO_HEAD+'void main(){float ao=1.0;'+
       'ao=clamp(1.0-uAO*occ/12.0,0.0,1.0);ao=mix(ao,1.0,smoothstep(uFade.x,uFade.y,z));}}'+
   'gl_FragColor=vec4(ao,ao,ao,1.0);}';
 // ขั้น 2: ก๊อปภาพฉาก × AO ที่เบลอแล้ว (ถ่วงน้ำหนักตามความลึกใกล้เคียง กันเงาเลอะข้ามขอบ)
-const AO_COPY=AO_HEAD+'uniform sampler2D t;uniform sampler2D tAO;uniform vec2 uAORes;'+
+const AO_COPY=AO_HEAD+'uniform sampler2D t;uniform sampler2D tAO;uniform vec2 uAORes;uniform float uRim;uniform vec3 uRimCol;uniform float uHaze;uniform vec3 uHazeCol;uniform vec3 uHazeD;uniform vec4 uCamY;'+
   'void main(){vec4 c=texture2D(t,vUv);'+
-  'if(uAO>0.001){float z=lz(vUv),s=0.0,w=0.0;vec2 px=1.0/uAORes;'+
+  'if(texture2D(tD,vUv).x<0.99999){float z=lz(vUv);'+   // ท้องฟ้าไม่ต้องทำ
+  'if(uAO>0.001){float s=0.0,w=0.0;vec2 px=1.0/uAORes;'+
     'for(int x=0;x<4;x++)for(int y=0;y<4;y++){vec2 uv=vUv+(vec2(float(x),float(y))-1.5)*px;'+
       'float k=1.0/(1.0+abs(lz(uv)-z)*8.0/z);s+=texture2D(tAO,uv).r*k;w+=k;}'+
     'c.rgb*=s/max(w,1e-4);}'+
+  // ไฟขอบ: มองหาพิกเซลข้างบน/ข้าง ๆ (5 ทิศ × 2 ระยะ) ที่ลึกกว่าเรามาก → เราอยู่ที่ขอบ (ทิศบนแรงสุด = แสงจากด้านหลังบน)
+  'if(uRim>0.001&&z<uHazeD.z){vec2 px=1.0/uRes;float r=0.0;'+
+    'for(int i=0;i<5;i++){float a=float(i)*0.7854;vec2 o=vec2(cos(a),sin(a));float wt=0.45+0.55*o.y;'+
+      'for(int j=1;j<3;j++){float d=lz(vUv+o*px*1.6*float(j))-z;r=max(r,wt*(j==1?1.0:0.55)*smoothstep(0.12*z+0.25,0.4*z+0.8,d));}}'+
+    'c.rgb+=uRimCol*r*smoothstep(1.5,4.5,z)*(1.0-smoothstep(uHazeD.z*0.55,uHazeD.z,z));}'+
+  // หมอกตามระยะ (จางเข้าหาสีหมอกแผนที่) • ที่ต่ำหนากว่าที่สูงนิดหน่อย
+  'if(uHaze>0.001){vec3 P=vec3((vUv*2.0-1.0)*uTan*z,-z);float wy=dot(uCamY.xyz,P)+uCamY.w;'+
+    'float f=(1.0-exp(-length(P)*uHazeD.x))*(0.65+0.35*exp(-max(wy,0.0)*uHazeD.y));c.rgb=mix(c.rgb,uHazeCol,f*uHaze);}}'+
   'gl_FragColor=c;}';
 const AO_RT=new THREE.WebGLRenderTarget(1,1,{depthBuffer:false});
 class FXPass extends Pass{
@@ -79,6 +93,9 @@ class FXPass extends Pass{
     const th=Math.tan(cam.fov*Math.PI/360);AOU.uTan.value.set(th*cam.aspect,th);
     this.ao.material.uniforms.tD.value=this.cp.material.uniforms.tD.value=read.depthTexture;
     if(AOU.uAO.value>0.001){r.setRenderTarget(AO_RT);this.ao.render(r);AOU.tAO.value=AO_RT.texture;}
+    const F=rpass.scene.fog,e=cam.matrixWorld.elements;AOU.uCamY.value.set(e[1],e[5],e[9],e[13]);
+    AOU.uHaze.value=F&&F.isFog?GFX.haze:0;if(F){AOU.uHazeCol.value.copy(F.color);AOU.uHazeD.value.x=GFX.hazeK/Math.max(F.far||1,1);}
+    AOU.uRim.value=GFX.rim;AOU.uRimCol.value.copy(moonL.color).multiplyScalar(GFX.rim);AOU.uHazeD.value.z=GFX.rimZ;
     this.cp.material.uniforms.t.value=read.texture;HAZE_U.uScene.value=read.texture;r.setRenderTarget(write);this.cp.render(r);r.render(fxScene,cam);r.autoClear=ac;}
 }
 const fxPass=new FXPass();composer.addPass(fxPass);
@@ -105,6 +122,22 @@ class GradePass extends Pass{
 }
 const gradePass=new GradePass();composer.addPass(gradePass);
 composer.addPass(new OutputPass());
+// ลบขอบหยัก (FXAA) — ทำหลังแปลงสีจอแล้ว (ภาพ sRGB) ตรงที่สีต่างกันมากเท่านั้น • ปิดในโหมดประหยัด / GFX.aa=false
+class AAPass extends Pass{
+  constructor(){super();this.needsSwap=true;
+    this.q=new FullScreenQuad(new THREE.ShaderMaterial({uniforms:{t:{value:null},uPx:{value:new THREE.Vector2(1,1)}},depthTest:false,depthWrite:false,
+      vertexShader:'varying vec2 vUv;void main(){vUv=uv;gl_Position=vec4(position.xy,0.0,1.0);}',
+      fragmentShader:'uniform sampler2D t;uniform vec2 uPx;varying vec2 vUv;vec3 L=vec3(0.299,0.587,0.114);float lu(vec2 o){return dot(texture2D(t,vUv+o*uPx).rgb,L);}'+
+        'void main(){vec4 cm=texture2D(t,vUv);float nw=lu(vec2(-1.0,-1.0)),ne=lu(vec2(1.0,-1.0)),sw=lu(vec2(-1.0,1.0)),se=lu(vec2(1.0,1.0)),m=dot(cm.rgb,L);'+
+        'float lo=min(m,min(min(nw,ne),min(sw,se))),hi=max(m,max(max(nw,ne),max(sw,se)));'+
+        'if(hi-lo<max(0.04,hi*0.125)){gl_FragColor=vec4(cm.rgb,1.0);return;}'+
+        'vec2 d=vec2(-((nw+ne)-(sw+se)),(nw+sw)-(ne+se));float rd=max((nw+ne+sw+se)*0.03125,0.0078125);'+
+        'd=clamp(d/(min(abs(d.x),abs(d.y))+rd),-8.0,8.0)*uPx;'+
+        'vec3 a=0.5*(texture2D(t,vUv-d/6.0).rgb+texture2D(t,vUv+d/6.0).rgb),b=a*0.5+0.25*(texture2D(t,vUv-d*0.5).rgb+texture2D(t,vUv+d*0.5).rgb);'+
+        'float lb=dot(b,L);gl_FragColor=vec4((lb<lo||lb>hi)?a:b,1.0);}'}));}
+  render(r,write,read){const u=this.q.material.uniforms;u.t.value=read.texture;u.uPx.value.set(1/read.width,1/read.height);r.setRenderTarget(this.renderToScreen?null:write);this.q.render(r);}
+}
+const aaPass=new AAPass();composer.addPass(aaPass);fxPass.gfx=GFX;
 
 // ---------- คุณภาพกราฟิก: auto = ปรับความละเอียดเองตาม FPS / high = สวยสุด / low = เครื่องช้า ----------
 const QUAL={mode:['auto','high','low'].includes(store('wd_gfx'))?store('wd_gfx'):'auto',scale:1,acc:0,n:0,good:0,frame:0,lvl:0};
@@ -124,6 +157,7 @@ function applyQuality(){
   }
   bloom.enabled=QUAL.mode!=='low'&&!(QUAL.mode==='auto'&&QUAL.lvl>=1);
   gradePass.enabled=QUAL.mode!=='low';
+  aaPass.enabled=GFX.aa&&QUAL.mode!=='low'&&!(QUAL.mode==='auto'&&QUAL.lvl>=2);
   // soft particles: ปิดเมื่อกราฟิกประหยัด หรืออัตโนมัติลดถึงขั้นปิดเงา (ประหยัดการก๊อปภาพเต็มจอ 1 ครั้ง)
   const soft=QUAL.mode!=='low'&&!(QUAL.mode==='auto'&&QUAL.lvl>=2)?1:0;
   if(SOFTU.uSoftOn.value!==soft){SOFTU.uSoftOn.value=soft;for(const m of FXMATS)m.depthTest=!soft;}

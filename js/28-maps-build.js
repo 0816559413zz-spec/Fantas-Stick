@@ -565,7 +565,15 @@ function testSign(t1,t2,x,y,ry){
 function buildTest(){
   scene.fog.color.set('#c9d6e2');scene.fog.near=160;scene.fog.far=620;
   hemi.color.set('#ffffff');hemi.groundColor.set('#6a7078');hemi.intensity=0.85;moonL.intensity=1.35;moonL.color.set('#fff4e6');gl.toneMappingExposure=1;
-  const grid=(base,line,rep)=>{const t=texCanvas(256,256,g=>{g.fillStyle=base;g.fillRect(0,0,256,256);g.strokeStyle=line;g.lineWidth=3;g.strokeRect(1.5,1.5,253,253);g.lineWidth=1;g.globalAlpha=0.5;for(const p of [64,128,192]){g.beginPath();g.moveTo(p,0);g.lineTo(p,256);g.moveTo(0,p);g.lineTo(256,p);g.stroke();}});t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(rep[0],rep[1]);t.anisotropy=4;return t;};
+  // พื้นตาราง: กระเบื้องปูน 4×4 แผ่น/ช่อง สีต่างกันนิด ๆ + เม็ดลาย + ร่องขอบมีแสง/เงา (ไม่แบนจืด) — ต้นทุนเท่าเดิม (ภาพเดียว)
+  const grid=(base,line,rep)=>{const t=texCanvas(512,512,g=>{g.fillStyle=base;g.fillRect(0,0,512,512);
+    for(let i=0;i<4;i++)for(let j=0;j<4;j++){const v=Math.random();g.fillStyle=v<0.5?`rgba(0,0,0,${(0.5-v)*0.1})`:`rgba(255,255,255,${(v-0.5)*0.08})`;g.fillRect(i*128,j*128,128,128);}
+    for(let i=0;i<4000;i++){const k=Math.random();g.fillStyle=k<0.5?`rgba(0,0,0,${0.03+k*0.08})`:`rgba(255,255,255,${0.02+(k-0.5)*0.06})`;g.fillRect(Math.random()*512,Math.random()*512,1+(k*3|0),1+(k*3|0));}
+    for(let i=0;i<14;i++){g.strokeStyle=`rgba(0,0,0,${0.03+Math.random()*0.04})`;g.lineWidth=2+Math.random()*5;g.beginPath();const x=Math.random()*512,y=Math.random()*512,a=Math.random()*6.3,L=20+Math.random()*60;g.moveTo(x,y);g.quadraticCurveTo(x+Math.cos(a)*L*0.6+10,y+Math.sin(a)*L*0.6,x+Math.cos(a)*L,y+Math.sin(a)*L);g.stroke();}
+    g.globalAlpha=0.55;g.strokeStyle=line;g.lineWidth=2;for(const p of [128,256,384]){g.beginPath();g.moveTo(p,0);g.lineTo(p,512);g.moveTo(0,p);g.lineTo(512,p);g.stroke();}
+    g.globalAlpha=0.18;g.strokeStyle='#ffffff';g.lineWidth=1;for(const p of [130.5,258.5,386.5,6.5]){g.beginPath();g.moveTo(p,0);g.lineTo(p,512);g.moveTo(0,p);g.lineTo(512,p);g.stroke();}
+    g.globalAlpha=1;g.strokeStyle=line;g.lineWidth=5;g.strokeRect(2.5,2.5,507,507);});
+    t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(rep[0],rep[1]);t.anisotropy=8;return t;};
   const fw=MW*S3,fh=MH*S3;
   const fl=addW(new THREE.Mesh(new THREE.PlaneGeometry(fw,fh),new THREE.MeshStandardMaterial({map:grid('#9aa1a8','#6e767e',[fw/8,fh/8]),roughness:0.9})));fl.rotation.x=-Math.PI/2;fl.receiveShadow=true;
   const out=addW(new THREE.Mesh(new THREE.PlaneGeometry(1400,1400),new THREE.MeshStandardMaterial({map:grid('#6f767d','#5a6168',[1400/8,1400/8]),roughness:1})));out.rotation.x=-Math.PI/2;out.position.y=-0.03;out.receiveShadow=true;
@@ -587,7 +595,8 @@ function buildTest(){
     const rd=addW(new THREE.Mesh(new THREE.PlaneGeometry(1800*S3,180*S3),dm));rd.rotation.x=-Math.PI/2;rd.position.set(tx(V.x+100),0.02,tz(V.y));rd.receiveShadow=true;
     testSign('หมู่บ้านทดสอบทำลาย','บ้าน · ต้นไม้ · ลัง พังได้ทั้งหมด',V.x+1050,V.y-150,Math.PI/2);}
   // จุดทดสอบรอบลานฝึก (TEST_ST ใน js/02) — พื้นสีแยกโซน + ป้าย
-  const pad=(x,y,w,h,col)=>{const m=addW(new THREE.Mesh(new THREE.PlaneGeometry(w*S3,h*S3),new THREE.MeshStandardMaterial({color:col,roughness:0.95})));m.rotation.x=-Math.PI/2;m.position.set(tx(x),0.012,tz(y));m.receiveShadow=true;};
+  const padT=grid('#ffffff','#b4b9be',[1,1]);   // ลายพื้นเดียวกัน (สีขาว คูณสีของแผ่นเอง)
+  const pad=(x,y,w,h,col)=>{const t=padT.clone();t.needsUpdate=true;t.repeat.set(w*S3/8,h*S3/8);const m=addW(new THREE.Mesh(new THREE.PlaneGeometry(w*S3,h*S3),new THREE.MeshStandardMaterial({map:t,color:col,roughness:0.95})));m.rotation.x=-Math.PI/2;m.position.set(tx(x),0.012,tz(y));m.receiveShadow=true;};
   const lbl=(t,x,y,sz,col)=>{const c=texCanvas(256,96,g=>{g.fillStyle=col||'#ffffff';g.textAlign='center';g.textBaseline='middle';g.font='bold 60px Kanit, sans-serif';g.fillText(t,128,48);});
     const m=addW(new THREE.Mesh(new THREE.PlaneGeometry(sz,sz*0.375),new THREE.MeshBasicMaterial({map:c,transparent:true,depthWrite:false})));m.rotation.x=-Math.PI/2;m.position.set(tx(x),0.05,tz(y));};
   {// ลานยิงไกล: ทางเดินยาวไปทางเหนือ + เลขระยะจากจุดเกิด (เมตร) ทุก 200 px ถึง 2000
