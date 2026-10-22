@@ -14,7 +14,7 @@ function hostSend(m){if(LAG.ms||LAG.jit)m=JSON.parse(JSON.stringify(m));lagDo(1,
 let LOBBY=null;
 function genCode(){const c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let s='';for(let i=0;i<5;i++)s+=c[Math.floor(Math.random()*c.length)];return s;}
 function sendAll(m){for(const c of NET.conns.values()){try{if(c.open)c.send(m);}catch(e){}}}
-function setStatus(t){$('#status').textContent=t;}
+function setStatus(t){$('#status').textContent=t;const h=document.getElementById('hStatus');if(h)h.textContent=t;}
 
 function hostGame(online){
   ac();

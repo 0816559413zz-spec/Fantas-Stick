@@ -13,7 +13,8 @@
 // =====================================================================
 const MENUS=new THREE.Scene();
 MENUS.background=new THREE.Color('#04050d');MENUS.fog=new THREE.Fog('#070a1c',26,85);
-const MN={built:false,enabled:true,hits:[],hot:null,focus:null,fT:0,popFor:'',cam:{p:new THREE.Vector3(),l:new THREE.Vector3(),init:false},fx:{},ray:new THREE.Raycaster(),nav:false,shoot:{t:-1,x:0,y:0,z:0},rp:null,
+// enabled:false = ปิดลานเดินได้ (ผู้ใช้ 2026-10-22 ขอเมนูแบบใหม่ → js/61-62) • เปิดกลับ = true
+const MN={built:false,enabled:false,hits:[],hot:null,focus:null,fT:0,popFor:'',cam:{p:new THREE.Vector3(),l:new THREE.Vector3(),init:false},fx:{},ray:new THREE.Raycaster(),nav:false,shoot:{t:-1,x:0,y:0,z:0},rp:null,
   w:{x:0,z:0.6,a:0,tx:null,tz:null,go:null,sp:0,keys:{},act:null,actT:0},toys:[],near:null,ground:null};
 const MN_FOV=48,MN_R=11.5;   // มุมกล้องเมนู • เดินได้ในรัศมีนี้
 const _mv=new THREE.Vector3(),_mcp=new THREE.Vector3(),_mcl=new THREE.Vector3();

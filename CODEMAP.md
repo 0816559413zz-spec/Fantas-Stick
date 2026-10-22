@@ -85,7 +85,7 @@ MIND:66 summonMin:72 minTarget:81 minShoot:88 updateMins:93 aimTarget:133
 §180 ร่ายคาถา
 castSlot:181 castUlt:196
 
-## js/10-net.js (97) — เครือข่าย (PeerJS / WebRTC)
+## js/10-net.js (97) — 
 PREFIX:4 NET:5 RC:9 LAG:11 lagDo:12 hostSend:13 LOBBY:14 genCode:15 sendAll:16 setStatus:17 hostGame:19 netConnect:42 netLost:50 joinGame:65 clientOnData:83 leave:97
 
 ## js/11-host.js (382) — 
@@ -134,18 +134,18 @@ MY:202 myDB:203 mySave:204 myLoad:207 myDecodeReady:213 myPlay:214 myNext:226 my
 §248 เพลงประกอบ (สร้างสดตามแผนที่)
 MUSIC:249 THEMES:250 padNote:255 musicTick:262 toggleMusic:291
 
-## js/19-client.js (244) — ฝั่งแสดงผล (ทุกเครื่อง รวมโฮสต์ ใช้ snapshot เดียวกัน)
+## js/19-client.js (245) — ฝั่งแสดงผล (ทุกเครื่อง รวมโฮสต์ ใช้ snapshot เดียวกัน)
 cv:4 cx:4 DPR:5 SW:5 SH:5 resize:6 VIEW:12 screen:13 lastBuffKey:13 overShown:13 lastCount:13 PARTS:14 TEXTS:14
 §15 งบเอฟเฟกต์ (VFX budget)
-VFXB:20 _apush:21 vfxQual:29 vfxBegin:31 vfxEnd:34 vfxOnce:36 vfxExtra:38 PCOL:39 setScreen:41 onLobby:50 onSnap:56 snapApply:60
-§68 บัฟเฟอร์ snapshot (ลูกข่าย, ผู้ใช้ 2026-10-22 "เล่นออนไลน์ให้ลื่น")
-SBUF:71 NETOLD:72 sbufReset:73 sbufPush:74 sbufAdvance:84
-§96 ทำนายตัวเอง (ลูกข่าย): ตัวเราขยับทันทีที่กด ไม่ต้องรอโฮสต์ตอบ
-PRED:99 predictMe:100 myPos:121
-§123 เอฟเฟกต์
-burst:125 smoke:136 ring:137 floatText:138 shake:139 wandPos:140 impactFX:142 explosionFX:159
-§171 เอฟเฟกต์คาถาใหม่
-ZV:172 COLB:172 WVV:172 GLV:172 ICEV:172 SLV:172 ULTV:172 OBV:172 _iceDisc:174 _iceEdge:175 _iceSpk:176 iceFloorMat:177 _icePlane:178 _icePathMat:179 makeIceFloor:180 updateIceFloors:204 FLASHM:215 FLASHING:216 flashModel:217 endFlash:226 tickFlash:227 GHOSTM:229 SOLIDM:229 ghostOf:230 setGhost:236 hitSparks:244
+VFXB:20 _apush:21 vfxQual:29 vfxBegin:31 vfxEnd:34 vfxOnce:36 vfxExtra:38 PCOL:39 setScreen:41 onLobby:51 onSnap:57 snapApply:61
+§69 บัฟเฟอร์ snapshot (ลูกข่าย, ผู้ใช้ 2026-10-22 "เล่นออนไลน์ให้ลื่น")
+SBUF:72 NETOLD:73 sbufReset:74 sbufPush:75 sbufAdvance:85
+§97 ทำนายตัวเอง (ลูกข่าย): ตัวเราขยับทันทีที่กด ไม่ต้องรอโฮสต์ตอบ
+PRED:100 predictMe:101 myPos:122
+§124 เอฟเฟกต์
+burst:126 smoke:137 ring:138 floatText:139 shake:140 wandPos:141 impactFX:143 explosionFX:160
+§172 เอฟเฟกต์คาถาใหม่
+ZV:173 COLB:173 WVV:173 GLV:173 ICEV:173 SLV:173 ULTV:173 OBV:173 _iceDisc:175 _iceEdge:176 _iceSpk:177 iceFloorMat:178 _icePlane:179 _icePathMat:180 makeIceFloor:181 updateIceFloors:205 FLASHM:216 FLASHING:217 flashModel:218 endFlash:227 tickFlash:228 GHOSTM:230 SOLIDM:230 ghostOf:231 setGhost:237 hitSparks:245
 
 ## js/20-vfx-pyro-storm.js (414) — Dragonfall (ภาพ)
 makeDfCircle:3 DFV:20 dfCracks:21 updateDfCracks:31 dragonfallFX:32
@@ -219,12 +219,12 @@ SHAPES_Q:173 SHAPES:173 FLASHL:173 LINES:173 LREQ:174 ringGeo:175 ringVGeo:176 a
 ## js/31-camera.js (116) — กล้องมุมหลังไหล่ (แบบ Hogwarts Legacy)
 yaw:2 pitch:2 lastPh:2 locked:2 SENS:3 saveSet:4 applySettings:5 camPos:13 camLook:13 overlayOpen:16 showPause:17 hidePause:18 MAPCAM:19 PLACE:21 placeKey:22 updatePlaceGhost:30 _aimD:44 rayTerr:46 aimFromCrosshair:52 AIMZ:82 EZC:84 ESC:84 updateCamera:85 menuCamera:112
 
-## js/32-stage.js (312) — เวทีเมนู/ล็อบบี้: ห้องโถงมืด แท่นวงเวททอง เทียนลอย (ฉากแยกจากแผนที่)
+## js/32-stage.js (313) — เวทีเมนู/ล็อบบี้: ห้องโถงมืด แท่นวงเวททอง เทียนลอย (ฉากแยกจากแผนที่)
 stage:2 STAGE:5 STAGE_Y:6 stageSpots:58 stageChar:74 POSES:81 stageIdle:87
 §109 เอฟเฟกต์หน้าเมนู (โชว์เฉพาะหน้าแรก ไม่โชว์ในล็อบบี้/หน้าสร้างตัวละคร)…
 stageMenuFx:135 _sv:146
 §147 ฉากประจำบ้าน (โผล่ตอนเลือกบ้านในหน้าสร้างตัวละคร)
-CRESTTEX:148 crestTex:149 crestBanner:157 buildHouseEnvs:165 TONE0:213 _tc:214 stageTone:215 stageScreen:228 renderStage:229 drawStageLabels:283
+CRESTTEX:148 crestTex:149 crestBanner:157 buildHouseEnvs:165 TONE0:213 _tc:214 stageTone:215 stageScreen:228 renderStage:229 drawStageLabels:284
 
 ## js/33-pyro-view.js (272) — ภาพของสายไฟ (pyroFX: ชาร์จ/พุ่ง/ดีดนิ้ว/กลายร่าง/Dragonfall/Colossus)…
 §2 sync ตัวละคร/ศัตรู/ลูกเวท กับ snapshot
@@ -267,7 +267,7 @@ ROLE_COL:37 roleTag:38 DESIGNED:39 spellTags:40 spellDescHTML:47 baseDescHTML:51
 §222 ฉากเปิด (#intro) + ประกายบนหน้าเมนู (#menuFx)
 TITLE:225 titleSpark:226 titleDraw:227 titleLoop:238 titleGo:249 JOINQ:257 ovResult:277
 
-## js/40-train-settings.js (173) — เมนูทดลอง (ห้องฝึก / Test Place)
+## js/40-train-settings.js (174) — เมนูทดลอง (ห้องฝึก / Test Place)
 trOpenF:2 trKey:2 trN:2 TR_OPTS:3 trToggle:4 trSend:9 trSync:14 hovEl:62
 §63 หน้าตั้งค่า
 setRow:64 setTog:65 setTab:66 XHC:67 XHN:67 setOpts:68 renderSettings:69 drawXhPrev:86 openSettings:87 closeSettings:88 modeIcon:143 modeTitle:144 renderLobby:145
@@ -453,13 +453,68 @@ DCAM_T1:10 DCAM_T2:10 DCAM_FADE:10 DCAM:11 dcamDie:12 _dcP:19 _dcL:19 dcamCam:20
 ## js/59-podroom.js (151) — ห้องโถงใหญ่ฮอกวอตส์สำหรับโพเดียม (ผู้ใช้ 2026-10-22 "design me a new lobby for background…
 PODS:9 PODR:11 podRoomBuild:12 podRoomTick:142
 
-## js/60-menu3d.js (396) — เมนูแรก = ลานดวลเวทใต้ดาว ที่ "เดินได้" (ผู้ใช้ 2026-10-22, รอบ 2: "redesign the menu by …
-MENUS:14 MN:16 MN_FOV:18 MN_R:18 _mv:19 _mcp:19 _mcl:19 mnCrest:20 mnTone:24 mnHit:29 mnBuild:31 MNPOP:222 mnToast:242
-§243 สั่งพ่อมด
-mnGo:244 mnWalkTo:247 mnUse:248 mnClose:253
-§257 เมาส์ / คีย์บอร์ด
-MN_BLOCK:258 mnRay:259 mnPick:260 mnHot:266 mnToy:284
-§289 เรนเดอร์ (เรียกจาก renderStage js/32 — คืน true = จัดการแล้ว)
-mnRestore:290 mnMenuRender:296
+## js/60-menu3d.js (397) — เมนูแรก = ลานดวลเวทใต้ดาว ที่ "เดินได้" (ผู้ใช้ 2026-10-22, รอบ 2: "redesign the menu by …
+MENUS:14 MN:17 MN_FOV:19 MN_R:19 _mv:20 _mcp:20 _mcl:20 mnCrest:21 mnTone:25 mnHit:30 mnBuild:32 MNPOP:223 mnToast:243
+§244 สั่งพ่อมด
+mnGo:245 mnWalkTo:248 mnUse:249 mnClose:254
+§258 เมาส์ / คีย์บอร์ด
+MN_BLOCK:259 mnRay:260 mnPick:261 mnHot:267 mnToy:285
+§290 เรนเดอร์ (เรียกจาก renderStage js/32 — คืน true = จัดการแล้ว)
+mnRestore:291 mnMenuRender:297
 
-(61 files, 13912 lines)
+## js/61-hub.js (598) — 
+HUBS:9 HUBL:9 HUB:12 HB:15 _hq:17 _hq2:17 _hq3:17 _hv:17 _hv2:17 _hv3:17 _hY:17 hEase:18 hSm:19
+§21 อนุภาคเรืองแสงของเมนู (ขนาด/สี/ความจางต่อเม็ด)
+hubPS:22 hCol:48 H_SPARK:49
+§51 ผิว/ลาย (วาดด้วย canvas)
+hubTexCloth:52 hubTexFloor:77 hubTexWindow:83 hubTexPage:90 hubTexCard:96 hubStarTex:101 hubStar:103 hubShaftTex:104
+§107 ของบนโต๊ะ
+hubLathe:108 hubCloth:110 hubBuildStudy:126
+§233 ล็อบบี้รอเริ่ม: แท่นวงเวท + ม่าน + หน้าต่างโค้ง + ลำแสงลงแต่ละที่ยืน
+hubBuildLobby:234
+§271 ตัวละคร (โมเดลไฟล์ + จัดท่าเอง)
+HPOSE:273 HPK:284 HBN:284 LOBBY_POSES:285 hubMakeChar:286 hubSetPose:305 hbAim:307 hbRot:313 _hcq:318 _hax:318 _hd:318 _ht:318 hubCharTick:319
+§371 ลูกแก้วเวท (เล่นในมือ)
+hubMakeOrb:372 hubOrbTick:386 hubBurst:402
+§405 สร้างฉาก (ครั้งแรกที่เปิดเมนู)
+hubBuild:406 hubPlaceWand:413 hubMenuChar:425 hubResetMenu:432
+§441 กล้อง
+_hf0:443 _hf1:443 _hf2:443 _hf3:443 hubFrame:444 _hcA:453 _hcB:453 hubCamMenu:454 hubCamPose:455 hubCamRoom:456
+§458 ลำดับตอนกด "เล่น"
+hubGo:459 hubBack:463 hubFadeDo:466 hubSeq:467 hubSnapModes:489
+§497 ล็อบบี้: ใครยืนตรงไหน ท่าอะไร
+HL_SPOTS:498 HL_TEAM:499 hubLobbyLayout:500 hubLobbyTick:507 hubLabels:533
+§547 เรนเดอร์ (เรียกจาก renderStage — คืน true = วาดแล้ว)
+hubRender:548
+
+## js/62-hub-ui.js (248) — 
+HMODES:8 HUI:13 HICO:15 hSvg:29 hHex:30 H_STAR:31
+§76 สถานะหน้าจอ: menu / modes / room / off
+hubUiState:77 hubMeChip:85 hubOnScreen:91
+§100 เมนูแรก
+hubJoinGo:103
+§114 การ์ดโหมด
+hubPickMode:124 hubFlipKill:137 hubRoomRect:138 hubFlip:139 hubFlipEnd:153
+§160 แผงห้อง (การ์ดที่ขยายแล้ว)
+HUI_MAPN:161 hubLobby:162 hubKitChanged:240
+§242 เริ่มต้น
+
+## js/63-skillwheel.js (270) — วงเลือกคาถา (ผู้ใช้ 2026-10-22, designs/ui-menu.md "วงคาถา + ห้าเหลี่ยม 4 ช่อง") • สไตล์ม…
+SKW:9 SKW_PO:10 SKW_PI:10 SKW_RUNE:11 skwPaths:12 skwKey:13 skwOffN:14 skwChanged:15 skwSnd:16
+§17 โครง DOM (สร้างครั้งแรกที่เปิด)
+skwSvg:18 skwBuild:28
+§44 วาด
+skwRender:45 skwRow:50 skwPos:58 skwArcs:59 skwRing:72 skwSwap:93 skwSlots:99 skwInd:114 skwIndApply:120
+§121 ข้อความกลางวง
+skwSetInfo:122 skwSpellInfo:126 skwBaseInfo:133 skwClassInfo:140 skwLibInfo:144 skwInfoDef:148 skwSpellHover:149 skwOver:155
+§167 การกระทำ
+skwClick:168 skwSetSlot:177 skwSetPath:178 skwSetLib:185 skwAssign:186 skwGhost:202 skwFlashSlot:210
+§211 พื้นหลัง: ฝุ่นดาว + ประกายตอนใส่คาถา (canvas เดียว หลังเนื้อหา)
+skwBurst:212 skwFxStart:216 skwFxTick:221
+§241 เปิด/ปิด
+skwOpen:242 skwClose:252
+
+## js/64-mappick.js (154) — 
+MPK_TXT:7 MPK_SKY:19 MPK_I:21 MPK_DICE:31 MPK:36 mpkE:37 mpkC:37 mpkSnd:38 mpkCut:39 mpkName:40 mpkCardHTML:41 mpkBuild:51 mpkUp:89 mpkMeasure:101 mpkIdx:102 mpkStep:103 mpkTo:104 mpkPick:105 mpkOpen:111 mpkClose:125 mpkLoop:129 mpkTick:131
+
+(65 files, 15186 lines)

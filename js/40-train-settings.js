@@ -163,6 +163,7 @@ function renderLobby(){
   const err=host?validate():'';
   $('#btnStart').disabled=!!err;
   $('#lobbyStatus').textContent=err||'';
+  if(typeof hubLobby==='function')hubLobby();   // แผงห้องแบบใหม่ (js/62)
 }
 
 resize();

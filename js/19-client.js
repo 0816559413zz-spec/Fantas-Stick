@@ -46,6 +46,7 @@ function setScreen(s){
   $('#voice').classList.toggle('hidden',!(NET.online&&s!=='menu'));
   if(s!=='game'){$('#buff').classList.add('hidden');$('#over').classList.add('hidden');lastBuffKey='';overShown=false;}
   cv.style.cursor=s==='game'?'crosshair':'default';
+  try{hubOnScreen(s);}catch(e){}   // เมนูใหม่ (js/62) • ตอนโหลดไฟล์ js/61 ยังไม่พร้อม = ข้าม
 }
 function onLobby(m){
   LOBBY=m;for(const p of m.players){if(p.lk)LOOKS[p.id]=p.lk;if(p.kt!==undefined)KITS[p.id]=p.kt;}

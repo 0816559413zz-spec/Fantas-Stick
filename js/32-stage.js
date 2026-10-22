@@ -227,6 +227,7 @@ function stageTone(dt,H){
 }
 function stageScreen(x,y,z){_sv.set(x,y,z).project(cam);if(_sv.z>1)return null;return [(_sv.x+1)/2*SW,(1-_sv.y)/2*SH];}
 function renderStage(dt,now){
+  if(hubRender(dt,now))return;     // เมนูใหม่ (js/61): ห้องโต๊ะนักเวท → ท่าโพส → การ์ดโหมด → ล็อบบี้แท่นวงเวท
   if(mnMenuRender(dt,now))return;   // หน้าเมนู = ลานดวลเวทใต้ดาว (js/60) • ล็อบบี้/หน้าสร้างตัวละครใช้ห้องโถงนี้ต่อ
   const lob=screen==='lobby'&&LOBBY;
   const want=new Set(),rows=[];
