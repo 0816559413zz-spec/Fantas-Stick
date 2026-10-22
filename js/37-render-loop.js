@@ -44,11 +44,11 @@ function render(dt,now){
     INPUT.mx=fx*f-fy*s;INPUT.my=fy*f+fx*s;
     INPUT.ax=me.x+fx*2000;INPUT.ay=me.y+fy*2000;
     INPUT.ap=clamp((0.3-pitch)*1.2,-0.9,0.9);
-    updateCamera(me,dt);
+    updateCamera(specTarget(P,me,dt)||me,dt);   // ตายนาน ≥2 วิ = ดูคนอื่น (js/52)
     aimFromCrosshair(me,P,E);
     updatePlaceGhost(me);
     const o=PM3.get(me.id);windUpdate(o?Math.hypot(o.svx,o.svz):0,!!me.fl);
-  }else menuCamera(now);
+  }else{const sv=specTarget(P,null,dt);if(sv)updateCamera(sv,dt);else menuCamera(now);}   // คนดู (ไม่มีตัวในเกม)
   shakeA=Math.max(0,shakeA-dt*30);
   vfxBegin(dt);try{renderGame(v,P,E,me,dt,now);}finally{vfxEnd();}
 }
@@ -72,5 +72,5 @@ function renderGame(v,P,E,me,dt,now){
   drawLabels(P,E,v,me,spk);drawMinBars(v,me);
   drawTexts(dt);
   if(me&&me.al&&!me.dn)drawCrosshair();
-  drawHUD(v,me,P);if(PROPON&&me&&me.al&&!me.dn&&!showBoard)drawPropHint(me);pf('hud2d',t0);
+  drawHUD(v,me,P);drawSocial(P,me,dt,now);if(PROPON&&me&&me.al&&!me.dn&&!showBoard)drawPropHint(me);pf('hud2d',t0);
 }

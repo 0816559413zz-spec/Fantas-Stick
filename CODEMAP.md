@@ -84,13 +84,13 @@ MIND:66 summonMin:72 minTarget:81 minShoot:88 updateMins:93 aimTarget:133
 §180 ร่ายคาถา
 castSlot:181 castUlt:196
 
-## js/10-net.js (71) — 
-PREFIX:4 NET:5 LOBBY:6 genCode:7 sendAll:8 setStatus:9 hostGame:11 joinGame:34 clientOnData:59 leave:71
+## js/10-net.js (92) — เครือข่าย (PeerJS / WebRTC)
+PREFIX:4 NET:5 RC:9 LOBBY:10 genCode:11 sendAll:12 setStatus:13 hostGame:15 netConnect:38 netLost:46 joinGame:61 clientOnData:79 leave:92
 
-## js/11-host.js (330) — 
-G:4 EVL:4 EVN:4 hostLast:4 tickN:4 emit:5 feed:6 banner:7 plist:8 cleanName:9 freshStats:11 newPlayer:18 emptyInput:21 addPlayer:22 initHostLobby:31 lobbyMsg:38 broadcastLobby:39 INPN:41 hostOnData:42 hostDrop:65 validate:79 hostStart:90 hostToLobby:115 resetBody:117 fmap:123 spawnPts:124 teamPts:126 placeAll:127 respawn:139
-§156 ลูปหลักฝั่งโฮสต์
-hostTick:157 angDiff:169 cH:171 vR:172 updatePlayer:174 hitProp:317 damagePropsIn:324 nearUseProp:325 useProp:326
+## js/11-host.js (377) — 
+G:4 EVL:4 EVN:4 hostLast:4 tickN:4 emit:5 feed:6 banner:7 plist:8 cleanName:9 freshStats:11 newPlayer:18 emptyInput:21 addPlayer:22 initHostLobby:31 lobbyMsg:38 broadcastLobby:39 INPN:41 hostOnData:42 hostDrop:71 hostRemove:80 validate:93 hostStart:104 hostToLobby:129 MIDJOIN:135 midJoin:136 CHATT:152 chatRelay:153 emoHost:161 resetBody:163 fmap:169 spawnPts:170 teamPts:172 placeAll:173 respawn:185
+§202 ลูปหลักฝั่งโฮสต์
+hostTick:203 angDiff:215 cH:217 vR:218 updatePlayer:220 hitProp:364 damagePropsIn:371 nearUseProp:372 useProp:373
 
 ## js/12-buildings.js (412) — สิ่งปลูกสร้างที่พังเป็นชิ้นย่อย (บ้าน) แบบ Battlefield — คู่มือเต็ม: …
 BLDDEF:8 BLD_PIECES:9 BLD_GRID:10 BLD_FIRE:11 BLD_ICE:11 BLD_ROOF_MIN:11 BLDG:12 BLDON:12 genBldg:13 bldRect:23 bldChunk:25 bldAlive:32 bldLocal:33 bldWorld:34 rectDist:35 bldNear:36 BLD_MOUND:39 bldGone:40 bldMoundAt:41 bldMoundH:42 hitBldPiece:44 breakBldChunk:55 bldSupport:63 damageEnv:83 bldPieceAt:97 projEl:107 bldPush:112 collideBld:118 updateBldg:133 bldSnap:145 bldParse:151
@@ -172,10 +172,10 @@ MM3:2 makeMinion:3 syncMins:36 drawMinBars:58
 ## js/25-efx.js (297) — efxFX: ภาพของ event "efx" ทุกคาถา (หนึ่ง case ต่อหนึ่งเอฟเฟกต์)
 efxState:4 efxFX:15
 
-## js/26-fx-events.js (244) — fx(ev): เอฟเฟกต์+เสียงของทุก event จากโฮสต์ • statusFX (สถานะบนตัว) •…
+## js/26-fx-events.js (245) — fx(ev): เอฟเฟกต์+เสียงของทุก event จากโฮสต์ • statusFX (สถานะบนตัว) •…
 statusFX:3 fx:27
-§197 overlay: เลือกบัฟ / สรุปผล
-choosePick:198 syncOverlays:203 showOver:225
+§198 overlay: เลือกบัฟ / สรุปผล
+choosePick:199 syncOverlays:204 showOver:226
 
 ## js/27-world.js (231) — 
 S3:4 tx:4 tz:4 GY:6 TW:6 hdr:7 gl:9 scene:15 cam:17 composer:18
@@ -232,13 +232,13 @@ iceMat:2 iceRim:3 makeIceSword:4 makeIceAxe:23 makeKiteShield:39
 §47 อาวุธน้ำแข็งลอย (ผู้ใช้ 2026-10-22: "ร่ายคาถาให้ดาบฟันเอง ระยะเท่าเดิ…
 FWS:50 FWA:50 _fwM:51 _fwM2:51 _fwX:51 _fwY:51 _fwZ:51 _fwP:51 _fwS:51 _fwQ:51 _eo:52 _ei:52 _ss:52 fwAim:54 fwWeapons:55 FWP:57 FWT:57 fwChop:58 fwSweep:59 fwIdle:60 fwSwing:63 FWL_N:75 fwLink:76 fwMat:79 frostFX:80
 
-## js/35-sync.js (457) — ซิงก์ผู้เล่น/ศัตรู/ลูกเวทจาก snapshot + ฉายตำแหน่งลงจอ (ป้ายชื่อ/ตัวเ…
+## js/35-sync.js (458) — ซิงก์ผู้เล่น/ศัตรู/ลูกเวทจาก snapshot + ฉายตำแหน่งลงจอ (ป้ายชื่อ/ตัวเ…
 §2 ท่าร่ายคาถาแบบนักเวทในหนัง Harry Potter (ผู้ใช้ 2026-10-22: "ยิงปกติท…
 CPOSE_T:7 _ce:7 _cs:7 CPOSE:9 _cpT:17 _cpR:17 CGUARD:17 CP_STEP:18 CPCOL:19 castStyle:20 castStart:21
 §22 ท่าร่ายสกิล / อัลติ / โล่ (ผู้ใช้ 2026-10-22: "เกือบทุกสกิลควรมีการเห…
-CANIM:27 SKANIM:40 skAnim:42 _caT:43 _caR:43 skillPose:44 CBLOCK:66 blockPose:67 castPose:72 castPose0:76 syncPlayers:102 syncEnemies:182 projGeo:220 tailGeo:221 _t1:222 makeProj:223 _a:243 _b:243 syncProj:244 _awT:321 animateWorld:322
-§363 ฉายตำแหน่ง 3D ลงจอ (ป้ายชื่อ / ตัวเลขดาเมจ)
-_v:364 toScreen:365 burnNum:372 drawLabels:379 drawTexts:410 HITM:424 DIRI:424 drawXh:426 drawCrosshair:436
+CANIM:27 SKANIM:40 skAnim:42 _caT:43 _caR:43 skillPose:44 CBLOCK:66 blockPose:67 castPose:72 castPose0:77 syncPlayers:103 syncEnemies:183 projGeo:221 tailGeo:222 _t1:223 makeProj:224 _a:244 _b:244 syncProj:245 _awT:322 animateWorld:323
+§364 ฉายตำแหน่ง 3D ลงจอ (ป้ายชื่อ / ตัวเลขดาเมจ)
+_v:365 toScreen:366 burnNum:373 drawLabels:380 drawTexts:411 HITM:425 DIRI:425 drawXh:427 drawCrosshair:437
 
 ## js/36-modes-view.js (164) — 
 ROLE:4 KC:4 roleShowT:4 onPriv:5 MO:10 BREATHS:11 clearModeObjs:12 ITEMC:21 makeItem:22 syncModeObjs:34
@@ -253,21 +253,22 @@ rr:2 SLOTS:3 fmtTime:4
 §5 ชิ้นส่วน HUD ธีมทอง-น้ำเงิน
 HG:6 HG2:6 HN:6 diaPath:7 plate:9 frameBox:15 bossTrail:23 drawBossBar:24 spellDia:42 thinBar:71 drawHUD:76 raceRankClient:132 drawModeHUD:136 MM:173 drawMinimap:174 slotKey:247 mySlots:248 drawUlt:258 STATUS_ICO:277 SLOTS_IMP:278 BR_LOCK:279 CLUSTER:281 E_NEEDSTAND:282 slotState:283 drawBottom:302 drawBoard:343
 
-## js/39-menu.js (271) — 
+## js/39-menu.js (274) — 
 myLook:5 myColor:5 myKit:5 myName:6 renderMyHouse:9
 §11 หน้าสร้าง/แต่งตัวละคร (2 ขั้น: 1 หน้าตา → 2 เลือกบ้าน)
 crLib:12 crSaved:12 crKitSaved:12 crOpen:12 crStep:12 crTab:12 crFirst:12 crKitOnly:12 crSlot:12 CRTABS:13 sw_:14 bt_:15 nameBox_:16 crPanelSet:17 crRenderStep1:22 crRenderWand:33
 §36 ขั้น 3: สาย + ชุดคาถา
 ROLE_COL:37 roleTag:38 DESIGNED:39 spellTags:40 spellDescHTML:47 baseDescHTML:51 SB_THEME:59 ROLE_ORDER:68 sbFxRun:69 sbFxT:69 sbParts:69 crRenderKit:70 sbStartFx:99 sbFxTick:100 sbBurst:127 crAssign:133 crRenderHouse:142 crGo:149 crSaveName:161 crSetHouse:162 openCreator:163 closeCreator:173 lobbyKitSend:180
 §221 ฉากเปิด (#intro) + ประกายบนหน้าเมนู (#menuFx)
-TITLE:224 titleSpark:225 titleDraw:226 titleLoop:237 titleGo:248
+TITLE:224 titleSpark:225 titleDraw:226 titleLoop:237 titleGo:248 JOINQ:256
 
-## js/40-train-settings.js (170) — เมนูทดลอง (ห้องฝึก / Test Place)
+## js/40-train-settings.js (173) — เมนูทดลอง (ห้องฝึก / Test Place)
 trOpenF:2 trKey:2 trN:2 TR_OPTS:3 trToggle:4 trSend:9 trSync:14 hovEl:62
 §63 หน้าตั้งค่า
-setRow:64 setTog:65 setTab:66 XHC:67 XHN:67 setOpts:68 renderSettings:69 drawXhPrev:86 openSettings:87 closeSettings:88 modeIcon:140 modeTitle:141 renderLobby:142
+setRow:64 setTog:65 setTab:66 XHC:67 XHN:67 setOpts:68 renderSettings:69 drawXhPrev:86 openSettings:87 closeSettings:88 modeIcon:143 modeTitle:144 renderLobby:145
 
-## js/41-debug.js (141) — 
+## js/41-debug.js (141) — เครื่องมือทดสอบสมดุล (ใช้ผ่านคอนโซล WD.bal / WD.dmgTest เท่านั้น ผู้เล่นปกติไม่เห็น)
+§5 บอทต่อสู้แบบง่ายๆ: เล็งนำเป้า เดินรักษาระยะ+ส่ายไปมา ร่ายคาถาทุกครั้ง…
 botBrain:6 _obsKeep:47 balArena:48 balReset:49 balDuel:53 balTour:68 balCoop:82 balSpellTest:98
 §117 Service Worker (sw.js): เก็บไฟล์เกมไว้ในเครื่อง เปิดครั้งต่อไปเร็วขึ้…
 SWK:118 swSetup:119
@@ -405,4 +406,14 @@ GRASS:52 GR_GLSL_V:53 GR_BEGIN:55 grassMat:79 grassBuild:93 _grBasic:107 grassBa
 WARM:11 WARM_FXDIR:12 WARM_COMMON:12 WARM_X:13 WARM_Y:13 warmKeep:15 warmCompile:21 WARM_SKIP:24 warmFx:25 warmFxEnd:33 warmGather:35 warmPaths:37 warmStep:39 warmTick:54
 §63 ภาพจากโค้ดของแต่ละสาย (เฟรมละฟังก์ชัน)
 
-(52 files, 12197 lines)
+## js/52-social.js (164) — เล่นกับเพื่อน (ผู้ใช้ 2026-10-22): แชท + อีโมต + ดูเพื่อนเล่น (spectator) + ป้ายต่อเน็ตให…
+§6 แชท: Enter = พิมพ์ / Enter อีกที = ส่ง / Esc = ปิด • ข้อความขึ้นมุมซ้…
+CHAT:7 chatOpen:27 chatClose:32 chatSend:41 chatAdd:46 escH:51 onChat:52 drawSocial:58
+§82 อีโมต: กด Z ค้าง → วงล้อ 6 แบบ ลากเมาส์ไปทางที่ต้องการ ปล่อย Z = เล่น…
+EMOS:83 EMO:84 drawEmoWheel:102 emoFx:115 emotePose:117
+§133 ดูเพื่อนเล่น: ตายแล้ว ≥2 วิ หรือเข้ามาเป็นคนดู → กล้องตามคนอื่น คลิกซ…
+SPEC:134 specTarget:135 specCycle:144 drawSpecHint:149
+§157 ป้าย "กำลังต่อใหม่..." (ลูกข่ายหลุดจากโฮสต์ js/10 netLost)
+drawNetBanner:158
+
+(53 files, 12437 lines)

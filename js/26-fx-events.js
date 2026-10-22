@@ -25,7 +25,8 @@ function statusFX(o,fm,x,y,z,sz,now){
 }
 
 function fx(ev,raw){   // raw = ภาพเดิมในโค้ดเท่านั้น (ไม่ใช้ bind.json)
-  if(ev.k==='sk'){skAnim(ev);return;}   // ร่ายสกิลสำเร็จ → ท่าเหวี่ยงไม้ (js/35 SKANIM)
+  if(ev.k==='sk'){skAnim(ev);return;}
+  if(ev.k==='emo'){emoFx(ev);return;}   // อีโมต (js/52)   // ร่ายสกิลสำเร็จ → ท่าเหวี่ยงไม้ (js/35 SKANIM)
   const me=myPos(),near=!me||Math.hypot(ev.x-me.x,ev.y-me.y)<1000,H=ev.h!==undefined?ev.h:1.3;
   if(ev.k==='efx')try{efxState(ev);}catch(e){console.error(e);}   // ท่า/วัตถุที่อยู่นาน (ไม่ขึ้นกับ bind.json)
   if(!raw)try{if(fxBind(ev,H))return;}catch(e){console.error(e);}   // เอฟเฟกต์จากไฟล์ที่ผูกไว้ใน assets/fx/bind.json (replace = ข้ามภาพเดิม)

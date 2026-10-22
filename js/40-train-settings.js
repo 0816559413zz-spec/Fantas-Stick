@@ -125,7 +125,10 @@ cv.addEventListener('click',e=>{
   const r=STAGE.plates.find(r=>e.clientX>=r.x&&e.clientX<=r.x+r.w&&e.clientY>=r.y-16&&e.clientY<=r.y+r.h);
   if(r){const p=G.players[r.id];if(p){p.lteam^=1;broadcastLobby();}}
 });
-$('#btnCopy').onclick=()=>{const c=LOBBY&&LOBBY.code;if(!c)return;try{navigator.clipboard.writeText(c);toast('คัดลอกรหัสห้อง '+c+' แล้ว ส่งให้เพื่อนได้เลย');}catch(e){toast('รหัสห้อง: '+c);}};
+// คัดลอกลิงก์เชิญ (ผู้ใช้ 2026-10-22): เพื่อนกดลิงก์ ...?join=รหัส แล้วเข้าห้องทันที (ยังไม่มีตัวละคร = สร้างก่อนแล้วเข้าเอง)
+$('#btnCopy').onclick=()=>{const c=LOBBY&&LOBBY.code;if(!c)return;const u=location.origin+location.pathname+'?join='+c;
+  const ok=()=>toast('คัดลอกลิงก์เชิญแล้ว ส่งให้เพื่อนกดเข้าห้องได้เลย'),no=()=>toast('ลิงก์เชิญ: '+u);
+  try{navigator.clipboard.writeText(u).then(ok,no);}catch(e){no();}};
 $('#micBtn').onclick=toggleMic;
 $('#micMode').onchange=e=>{VOICE.ptt=e.target.value==='ptt';};
 $('#teamOnly').onchange=e=>{VOICE.teamOnly=e.target.checked;};

@@ -1,8 +1,12 @@
 // =====================================================================
 //  เครือข่าย (PeerJS / WebRTC)
 // =====================================================================
-const PREFIX='wizduel-th-v33-';
-const NET={peer:null,isHost:false,online:false,myId:'me',conns:new Map(),hostConn:null,code:''};
+const PREFIX='wizduel-th-v34-';
+const NET={peer:null,isHost:false,online:false,myId:'me',conns:new Map(),hostConn:null,code:'',spec:false,
+  // token ของแท็บนี้ (อยู่ข้ามการรีเฟรช) — โฮสต์ใช้จำว่า "คนเดิมต่อกลับมา" ตอนเน็ตหลุด
+  tok:(()=>{const r=()=>Math.random().toString(36).slice(2,10);try{let t=sessionStorage.getItem('wd_tok');if(!t){t=r();sessionStorage.setItem('wd_tok',t);}return t;}catch(e){return r();}})()};
+// ต่อใหม่อัตโนมัติ (ลูกข่าย): หลุดจากโฮสต์ → ลองต่อห้องเดิมทุก 2 วิ นาน 30 วิ (โฮสต์เก็บตัวละครไว้ให้) • เกินแล้วค่อยรีโหลด
+const RC={on:false,t0:0,iv:0};
 let LOBBY=null;
 function genCode(){const c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let s='';for(let i=0;i<5;i++)s+=c[Math.floor(Math.random()*c.length)];return s;}
 function sendAll(m){for(const c of NET.conns.values()){try{if(c.open)c.send(m);}catch(e){}}}
@@ -20,8 +24,8 @@ function hostGame(online){
   peer.on('open',id=>{NET.myId=id;NET.code=code;setStatus('');initHostLobby();});
   peer.on('connection',conn=>{
     conn.on('data',d=>hostOnData(conn,d));
-    conn.on('close',()=>hostDrop(conn.peer));
-    conn.on('error',()=>hostDrop(conn.peer));
+    conn.on('close',()=>hostDrop(conn.pid||conn.peer,conn));
+    conn.on('error',()=>hostDrop(conn.pid||conn.peer,conn));
   });
   peer.on('call',onIncomingCall);
   peer.on('disconnected',()=>{try{peer.reconnect();}catch(e){}});
@@ -31,6 +35,29 @@ function hostGame(online){
   });
 }
 
+function netConnect(peer,code){
+  const c=peer.connect(PREFIX+code,{reliable:true,serialization:'json'});
+  NET.hostConn=c;
+  c.on('open',()=>{c.send({t:'hello',name:myName(),look:lookStr(myLook),kit:myKit,tok:NET.tok});setStatus('');});
+  c.on('data',clientOnData);
+  c.on('close',()=>{if(NET.hostConn===c)netLost();});
+  c.on('error',()=>{if(NET.hostConn===c)netLost();});
+}
+function netLost(){
+  if(RC.on)return;
+  if(screen!=='game'&&screen!=='lobby'){alert('หลุดจากห้อง (โฮสต์ออก หรือการเชื่อมต่อขาด)');location.reload();return;}
+  RC.on=true;RC.t0=performance.now();chatAdd('📶 เน็ตหลุด — กำลังต่อกลับ...',1);setStatus('📶 กำลังต่อกลับเข้าห้อง...');
+  RC.iv=setInterval(()=>{
+    if(!RC.on){clearInterval(RC.iv);return;}
+    if(performance.now()-RC.t0>30000){clearInterval(RC.iv);alert('ต่อกลับเข้าห้องไม่ได้ (โฮสต์ออก หรือเน็ตหลุดนานเกิน 30 วิ)');location.reload();return;}
+    const pr=NET.peer;
+    try{
+      if(!pr||pr.destroyed){const np=new Peer(undefined,{debug:1});NET.peer=np;np.on('open',()=>netConnect(np,NET.code));np.on('call',onIncomingCall);np.on('error',()=>{});return;}
+      if(pr.disconnected){pr.reconnect();return;}
+      const c=NET.hostConn;if(!c||!c.open)netConnect(pr,NET.code);
+    }catch(e){}
+  },2000);
+}
 function joinGame(code){
   ac();
   code=code.trim().toUpperCase();
@@ -40,14 +67,7 @@ function joinGame(code){
   setStatus('กำลังเชื่อมต่อห้อง '+code+' ...');
   const peer=new Peer(undefined,{debug:1});
   NET.peer=peer;
-  peer.on('open',id=>{
-    NET.myId=id;
-    const c=peer.connect(PREFIX+code,{reliable:true,serialization:'json'});
-    NET.hostConn=c;
-    c.on('open',()=>{c.send({t:'hello',name:myName(),look:lookStr(myLook),kit:myKit});setStatus('');});
-    c.on('data',clientOnData);
-    c.on('close',()=>{alert('หลุดจากห้อง (โฮสต์ออก หรือการเชื่อมต่อขาด)');location.reload();});
-  });
+  peer.on('open',id=>{if(!NET.myId||!RC.on)NET.myId=id;netConnect(peer,code);});
   peer.on('call',onIncomingCall);
   peer.on('disconnected',()=>{try{peer.reconnect();}catch(e){}});
   peer.on('error',e=>{
@@ -59,7 +79,8 @@ function joinGame(code){
 function clientOnData(d){
   if(!d)return;
   switch(d.t){
-    case 'welcome':NET.myId=d.id;break;
+    case 'welcome':NET.myId=d.id;NET.spec=!!d.spec;if(RC.on){RC.on=false;clearInterval(RC.iv);chatAdd('📶 ต่อกลับเข้าห้องแล้ว',1);}break;
+    case 'chat':onChat(d);break;
     case 'reject':alert(d.r);location.reload();break;
     case 'lobby':onLobby(d);break;
     case 'start':VIEW.prev=VIEW.cur=null;setScreen('game');break;

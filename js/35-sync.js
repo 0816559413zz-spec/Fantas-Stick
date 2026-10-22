@@ -70,6 +70,7 @@ function blockPose(o,p,dt,now){
   R.x=lerp(R.x,B[0]+br,w);R.z=lerp(R.z,B[1],w);o.b.rotation.y+=B[2]*w;o.b.rotation.x+=(B[3]+br*0.5)*w;L.x=lerp(L.x,B[4]-br,w);L.z=lerp(L.z,B[5],w);o.b.position.y-=0.1*w;
 }
 function castPose(o,p,v,dt,now){
+  if(o.emo&&!o.caN&&!(o.cpT>0)){o.vsp=v.sp;if(emotePose(o,p,dt))return;}   // อีโมต (js/52)
   if(o.caN&&!p.fl&&!p.dn){o.vsp=v.sp;o.cgd=Math.max(0,(o.cgd||0)-dt);if(skillPose(o,p,dt,now)){blockPose(o,p,dt,now);return;}}
   castPose0(o,p,v,dt,now);blockPose(o,p,dt,now);
 }
@@ -398,7 +399,7 @@ function drawLabels(P,E,v,me,spk){
     const s=toScreen(p.x,(p.z||0)+2.55,p.y);if(!s)continue;
     cx.font='600 13px Kanit,sans-serif';
     cx.fillStyle='rgba(0,0,0,0.65)';cx.fillText(p.n,s[0]+1,s[1]-7);
-    cx.fillStyle=teamOn(v)?TEAMC[p.tm]:mates.includes(p.id)?'#ff6b6b':'#ffffff';cx.fillText(p.n+(p.hb?' 🔴':''),s[0],s[1]-8);
+    cx.fillStyle=teamOn(v)?TEAMC[p.tm]:mates.includes(p.id)?'#ff6b6b':'#ffffff';cx.fillText((p.aw?'📶 ':'')+p.n+(p.hb?' 🔴':''),s[0],s[1]-8);   // 📶 = เน็ตหลุด รอต่อกลับ
     if(v.mode==='imp')continue;
     if(spk.has(p.id)){cx.font='14px sans-serif';cx.fillText('🔊',s[0]+cx.measureText(p.n).width/2+16,s[1]-8);}
     const bw=50,hr=p.hp/p.mh;

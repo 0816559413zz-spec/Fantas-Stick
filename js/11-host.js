@@ -41,19 +41,25 @@ function broadcastLobby(){const m=lobbyMsg();sendAll(m);onLobby(m);}
 const INPN=['ax','ay','ah','ap','gx','gy','mx','my'];
 function hostOnData(conn,d){
   if(!d||!G)return;
-  const id=conn.peer;
+  const id=conn.pid||conn.peer;   // pid = ตัวละครเดิมที่ต่อกลับเข้ามา (เน็ตหลุดแล้ว id ใหม่)
   if(d.t==='hello'){
     const reject=r=>{try{conn.send({t:'reject',r});}catch(e){}setTimeout(()=>conn.close(),600);};
-    if(G.ph!=='lobby')return reject('เกมกำลังเล่นอยู่ รอจบเกมแล้วค่อยเข้าใหม่นะ');
-    if(G.players[id]){conn.send({t:'welcome',id});return;}   // hello ซ้ำ: อย่าเพิ่มคนเดิมซ้ำ (ไม่งั้นตัวเดินเร็ว 2 เท่า)
+    const tok=String(d.tok||'').slice(0,16);
+    // ต่อกลับเข้าห้อง: token เดิม (เก็บใน sessionStorage ของแท็บ) → ผูกกับตัวละครเดิม ไม่ต้องเริ่มใหม่
+    const old=tok&&plist().find(q=>q.tok===tok&&q.id!==NET.myId);
+    if(old){conn.pid=old.id;NET.conns.set(old.id,conn);old.awayT=0;conn.send({t:'welcome',id:old.id});toast(old.name+' ต่อกลับเข้าห้องแล้ว');if(G.ph!=='lobby')feed('📶 '+old.name+' กลับมาแล้ว');broadcastLobby();return;}
+    if(G.players[id]){conn.send({t:'welcome',id});return;}
+    if(G.ph!=='lobby')return midJoin(conn,id,d,tok,reject);   // hello ซ้ำ: อย่าเพิ่มคนเดิมซ้ำ (ไม่งั้นตัวเดินเร็ว 2 เท่า)
     if(plist().length>=6)return reject('ห้องเต็มแล้ว (สูงสุด 6 คน)');
     NET.conns.set(id,conn);
-    const p=addPlayer(id,cleanName(d.name),null,String(d.look||'').slice(0,40),String(d.kit||'').slice(0,24));
+    const p=addPlayer(id,cleanName(d.name),null,String(d.look||'').slice(0,40),String(d.kit||'').slice(0,24));p.tok=tok;
     conn.send({t:'welcome',id});
     toast(p.name+' เข้าห้องแล้ว');
     broadcastLobby();
     return;
   }
+  if(d.t==='chat'){chatRelay(id,d.m);return;}
+  if(d.t==='emo'){emoHost(id,d.e);return;}
   const p=G.players[id];if(!p)return;
   if(d.t==='in'&&d.i&&d.i.c&&typeof d.i.c==='object'){const i=d.i;for(const k of INPN)if(i[k]!==undefined&&!Number.isFinite(i[k]))delete i[k];p.inp=i;}   // ค่าเล็งที่ไม่ใช่ตัวเลข = ตัด (กัน NaN ลามทั้งเกม)
   else if(d.t==='team'&&G.ph==='lobby'){p.lteam^=1;broadcastLobby();}
@@ -62,9 +68,17 @@ function hostOnData(conn,d){
   else if(d.t==='pick')hostPick(p,d.i|0);
   else if(d.t==='vote')hostVote(p,d.v);
 }
-function hostDrop(id){
+function hostDrop(id,conn){
+  if(conn&&NET.conns.get(id)!==conn)return;   // conn เก่าที่ปิดช้า (คนนี้ต่อใหม่ไปแล้ว)
   NET.conns.delete(id);
+  if(G&&G.spec&&G.spec[id]){delete G.spec[id];return;}
   if(!G||!G.players[id])return;
+  // หลุดกลางเกม: เก็บตัวละครไว้ 30 วิ (ยืนนิ่ง อมตะ) รอต่อกลับ — เกิน 30 วิค่อยลบ (updatePlayer)
+  if(G.ph!=='lobby'&&G.ph!=='over'&&!G.players[id].awayT){const p=G.players[id];p.awayT=30;p.inp=emptyInput();feed('📶 '+p.name+' เน็ตหลุด — รอต่อกลับ 30 วิ');broadcastLobby();return;}
+  hostRemove(id);
+}
+function hostRemove(id){
+  if(!G||!G.players[id])return;NET.conns.delete(id);
   const name=G.players[id].name;
   delete G.players[id];G.order=G.order.filter(x=>x!==id);
   toast(name+' ออกจากห้อง');
@@ -112,7 +126,39 @@ function hostStart(){
   broadcastLobby();
   setScreen('game');
 }
-function hostToLobby(){G.ph='lobby';G.proj=[];G.en=[];broadcastLobby();}
+function hostToLobby(){G.ph='lobby';G.proj=[];G.en=[];
+  for(const p of plist())if(p.awayT>0)hostRemove(p.id);   // หลุดแล้วไม่กลับ = ลบตอนกลับล็อบบี้
+  // คนดู → เป็นผู้เล่นในรอบหน้า (ถ้าห้องยังไม่เต็ม)
+  for(const id in (G.spec||{})){const s=G.spec[id],c=NET.conns.get(id);if(!c||plist().length>=6)continue;delete G.spec[id];const p=addPlayer(id,s.name,null,s.look,s.kit);p.tok=s.tok;try{c.send({t:'welcome',id});}catch(e){}}
+  broadcastLobby();}
+// เข้าห้องกลางเกม: ffa/tdm/ห้องฝึก/co-op = เกิดเลย • โหมดอื่น/ห้องเต็ม 6 คน = เป็นคนดู (สูงสุด 4) แล้วได้เล่นรอบหน้า
+const MIDJOIN=['ffa','tdm','train','coop'];
+function midJoin(conn,id,d,tok,reject){
+  const name=cleanName(d.name),look=String(d.look||'').slice(0,40),kit=String(d.kit||'').slice(0,24);
+  if(MIDJOIN.includes(G.mode)&&G.ph!=='over'&&plist().length<6){
+    NET.conns.set(id,conn);const p=addPlayer(id,name,null,look,kit);p.tok=tok;Object.assign(p,freshStats());
+    const MD=MODES[G.mode];
+    if(G.mode==='coop'||G.mode==='train')p.team=0;
+    else if(MD.team){const ps=plist().filter(q=>q!==p),a=ps.filter(q=>q.team===0).length;p.team=p.lteam=a<=ps.length-a?0:1;}
+    else p.team=10+G.order.length+Math.floor(Math.random()*900);
+    respawn(p);p.inv=2;
+    conn.send({t:'welcome',id});toast(p.name+' เข้าห้องกลางเกม');feed('✨ '+p.name+' เข้าร่วมกลางเกม');broadcastLobby();return;
+  }
+  if(Object.keys(G.spec||{}).length>=4)return reject('ห้องเต็มแล้ว (ผู้เล่น 6 + คนดู 4)');
+  NET.conns.set(id,conn);(G.spec||(G.spec={}))[id]={name,look,kit,tok};
+  conn.send({t:'welcome',id,spec:1});feed('👁 '+name+' เข้ามาดู (ได้เล่นรอบหน้า)');
+}
+// แชท: โฮสต์ส่งต่อให้ทุกเครื่อง (ตัดยาว 120 ตัว, กันรัวไม่เกิน 2 ข้อความ/วิ)
+const CHATT={};
+function chatRelay(id,m){
+  m=String(m||'').replace(/s+/g,' ').trim().slice(0,120);if(!m)return;
+  const n=performance.now();if(n-(CHATT[id]||0)<500)return;CHATT[id]=n;
+  const p=G.players[id],s=G.spec&&G.spec[id];if(!p&&!s)return;
+  const msg={t:'chat',id,n:p?p.name:s.name+' 👁',c:p?p.color:'#c8c2ff',m};
+  sendAll(msg);onChat(msg);
+}
+// อีโมต: event ใน snapshot (ทุกเครื่องเห็นท่าพร้อมกัน) • 1 ครั้ง/วิ
+function emoHost(id,e){const p=G.players[id];e=e|0;if(!p||!p.alive||p.downed||G.ph==='lobby'||e<0||e>5)return;const n=performance.now();if(n-(p.emoT||0)<1000)return;p.emoT=n;emit({k:'emo',id,e});}
 
 function resetBody(p,x,y){
   Object.assign(p,{x,y,z:0,vz:0,fly:false,flyCd:0,root:0,vx:0,vy:0,hp:p.maxHp,alive:true,downed:false,revive:0,stun:0,burn:0,dash:0,inv:0,
@@ -195,6 +241,7 @@ function updatePlayer(p,dt,acting){
   if(p.grT>0&&p.alive&&p.grM===1){p.grT-=dt;if(p.grT<=0)frostGlacier(p);}
   else if(p.grT>0&&p.alive){p.grT-=dt;if(p.grT<=0){const c=Math.cos(p.ang),s=Math.sin(p.ang);for(const sd of (p.mirror>0?[0,-1,1]:[0])){const ox=p.x+c*30-s*55*sd,oy=p.y+s*30+c*55*sd;(G.waves||(G.waves=[])).push({x:ox,y:oy,dx:c,dy:s,left:600,acc:0,owner:p.id,team:p.team,hit:new Set()});emit({k:'efx',z:'gwave',x:ox,y:oy,h:p.z+1,a:Math.round(p.ang*1000)/1000,len:600,id:p.id,cl:sd?1:0});}}}
   p.flyCd=Math.max(0,p.flyCd-dt);p.root=Math.max(0,p.root-dt);
+  if(p.awayT>0){p.awayT-=dt;p.inp=emptyInput();p.inv=Math.max(p.inv,0.1);if(p.awayT<=0){feed('🚪 '+p.name+' ออกจากเกม');hostRemove(p.id);return;}}
   if(!p.alive){
     if(['ffa','tdm','quid','race','train'].includes(G.mode)&&acting){p.respawn-=dt;if(p.respawn<=0)respawn(p);}
     return;

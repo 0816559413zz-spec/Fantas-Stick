@@ -171,7 +171,7 @@ function openCreator(first,step){
   $('#creator').classList.remove('hidden');crGo(step||1);
 }
 function closeCreator(save){
-  if(save){crSaveName();store('wd_look',lookStr(myLook));store('wd_kit2',myKit);}
+  if(save){crSaveName();store('wd_look',lookStr(myLook));store('wd_kit2',myKit);if(JOINQ){const c=JOINQ;JOINQ='';setTimeout(()=>joinGame(c),300);}}
   else{myLook=parseLook(crSaved);myKit=crKitSaved;}
   crOpen=false;STAGE.rotY=STAGE.rotV=0;document.body.classList.remove('crRot');renderMyHouse();$('#creator').classList.add('hidden');
   if(screen==='menu'){document.querySelector('.mprof').classList.remove('hidden');document.querySelector('.mleft').classList.remove('hidden');}
@@ -252,6 +252,9 @@ function titleGo(){
   intro.classList.add('go');STAGE.introT=0;document.body.classList.add('menuIn');
   setTimeout(()=>{intro.classList.add('gone');if(!store('wd_look'))openCreator(true);},1100);
 }
+// ลิงก์เชิญ ?join=ABCDE → ใส่รหัสให้ แล้วเข้าห้องเลย (ครั้งแรก = สร้างตัวละครก่อน กดบันทึกแล้วเข้าเอง)
+let JOINQ=(()=>{const m=/[?&]join=([A-Za-z0-9]{5})/.exec(location.search);return m?m[1].toUpperCase():'';})();
+if(JOINQ){$('#codeIn').value=JOINQ;if(store('wd_look')){const c=JOINQ;JOINQ='';setTimeout(()=>joinGame(c),900);}}
 if(/[?&](nointro|studio|join)\b/.test(location.search)){$('#intro').classList.add('gone');STAGE.introT=1;if(!store('wd_look'))openCreator(true);}
 else{$('#intro').addEventListener('pointerdown',titleGo);addEventListener('keydown',e=>{if(!$('#intro').classList.contains('go')&&!e.repeat)titleGo();});}
 requestAnimationFrame(titleLoop);
