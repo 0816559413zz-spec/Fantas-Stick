@@ -243,8 +243,9 @@ function stormFX(o,p,pz,now,dt){
   // ลำสายฟ้า (กดค้าง): สายฟ้าหนาจากปลายไม้ไปทุกเป้าที่ล็อก
   if(f&1&&!god){
     // ท่ายิงลำแสงแบบดวลในหนัง (Priori Incantatem): แขนขวายื่นตรงเกร็ง มือซ้ายจับข้อมือประคอง ตัวเอนหลังต้านแรง ไหล่ขวาออก ขากาง • สั่นตลอด
-    {const tr=Math.sin(now/31)*0.035+Math.sin(now/53)*0.02;o.armR.rotation.x=-1.5+tr;o.armR.rotation.z=-0.05+tr*0.5;o.armL.rotation.x=-1.3+tr;o.armL.rotation.z=-0.42;
-      o.b.rotation.y=0.28;o.b.rotation.x-=0.1;if((o.vsp||0)<0.6){o.legs[1].rotation.x=-0.3;o.legs[0].rotation.x=0.25;o.legs[1].rotation.z=0.12;o.legs[0].rotation.z=-0.12;}}
+    {const tr=Math.sin(now/31)*0.06+Math.sin(now/53)*0.035;o.armR.rotation.x=-1.5+tr;o.armR.rotation.z=-0.05+tr*0.5;o.armL.rotation.x=-1.3+tr;o.armL.rotation.z=-0.42;
+      o.b.rotation.y=0.28+Math.sin(now/260)*0.08;o.b.rotation.x-=0.1+Math.sin(now/170)*0.03;o.b.position.y-=0.05;   // ยิงลำค้าง: ตัวโยกต้านแรง ไม่นิ่ง
+     if((o.vsp||0)<0.6){o.legs[1].rotation.x=-0.3;o.legs[0].rotation.x=0.25;o.legs[1].rotation.z=0.12;o.legs[0].rotation.z=-0.12;}}
     o.bmT=(o.bmT||0)-dt;
     if(o.bmT<=0){o.bmT=0.05;o.tip.getWorldPosition(_pw);const q=simOf(_pw),T=M[7]||[];
       if(T.length)for(const t of T){tbolt(q.x,q.y,q.h,t[0]+rnd(-5,5),t[1]+rnd(-5,5),t[2]+rnd(-0.2,0.3),0.07,0,0.1,Math.random()<0.4?1:0);

@@ -182,7 +182,7 @@ function castSlot(p,i){
   const S=SPELLS[p.kitIds[i]];if(!S)return false;
   if(p.aug||p.ramp||p.ecb||(p.wr&&p.wr.ph!=='trans'))return false;   // สายดิน: ชาร์จ Auger / Rampage / อยู่บนฟ้า (Wrath)
   const k=SLOTK[i];
-  if(S.toggle&&S.toggle(p))return true;
+  if(S.toggle&&S.toggle(p)){emit({k:'sk',id:p.id,s:S.id+'_2'});return true;}   // กดครั้งที่ 2 (เช่น Tectonic Crush บีบ) → ท่าร่าย
   if(S.melee&&p.fmode===1)return false;
   if(p.cryo>0&&S.id!=='frostaura')return false;
   if(p.grT>0||p.dfall||p.sdome||p.rail||p.slnT>0)return false;

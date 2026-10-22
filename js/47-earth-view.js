@@ -260,7 +260,7 @@ function earthFX(o,p,pz,now,dt){
     if(s.lastTier&&tier>s.lastTier){burst(q.x,q.y,tier===3?'#ff6a2a':'#ffb04a',16,140,0.5,2.4,{h:q.h,g:0});FX.flashLight(q.x,q.y,q.h,tier===3?'#ff6a2a':'#ffb04a',3,8,0.25);if(p.id===NET.myId)snd('buff',{x:p.x,y:p.y,vol:0.6});}s.lastTier=tier;
     // ท่าตอนชาร์จ: ขาไปหลัง แขนชี้ไปทางเป้า • ระดับสูงสุด = ชูไม้
     if(o.legs){o.legs[1].rotation.x=0.6;o.legs[0].rotation.x=-0.25;}
-    if(!(o.wdT>0)){o.armR.rotation.x=tier===3?-2.9:-1.5;o.armR.rotation.z=-0.05;}
+    if(!(o.wdT>0)){const tr=Math.sin(now/24)*0.025*(1+tier);o.armR.rotation.x=(tier===3?-2.9:-1.5)+tr;o.armR.rotation.z=-0.05+tr;o.armL.rotation.x=-1.0-0.2*tier+tr;o.armL.rotation.z=0.5;o.b.rotation.y+=Math.sin(now/280)*0.06;o.b.position.y-=0.04*tier;}   // ชาร์จ Auger: แขนสั่นแรงขึ้นตามระดับ ตัวโยก
     if(Math.random()<0.4)burst(p.x+rnd(-25,25),p.y+rnd(-25,25),ECOL.dust,1,40,0.6,2,{h:z0+0.1,vh:[0.5,1.5],g:-0.5,smoke:true});}
   else if(s.drill){s.drill.visible=false;s.lastTier=0;}
   if(!(A[2]>0)&&s.augW)s.augW.visible=false;

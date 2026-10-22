@@ -107,7 +107,7 @@ function pyroFX(o,p,pz,now,dt){
   if(dcFull){for(let i=0;i<4;i++){const an=now/120+i*Math.PI/2;PARTS.push({x:p.x+Math.cos(an)*30,y:p.y+Math.sin(an)*30,h:pz+0.15,vx:0,vy:0,vh:rnd(2.5,4.5),life:0.4,max:0.4,col:i%2?'#ffd27a':'#ff6a1a',size:3.5,g:-1});}}
   if((p.cg||0)>0||p.kd>0){
     // ชาร์จลูกไฟ: ง้างไม้ไว้ข้างไหล่ขวา ตัวบิดหันไหล่ขวาไปหลัง มือซ้ายยื่นไปหน้าเหมือนประคองไฟ • ยิ่งเต็มยิ่งสั่น (ปล่อย = พุ่งแทงแรง castPose ท่า 3)
-    if(p.cg>0){const k=Math.min(1,p.cg),tr=Math.sin(now/27)*0.04*k;o.armR.rotation.x=lerp(-1.45,-2.05,k)+tr;o.armR.rotation.z=lerp(-0.15,-0.7,k);o.armL.rotation.x=lerp(-0.6,-1.35,k)+tr;o.armL.rotation.z=lerp(0.3,-0.1,k);o.b.rotation.y=lerp(0,-0.35,k);o.b.rotation.x-=0.06*k;o.armR.updateMatrixWorld(true);}
+    if(p.cg>0){const k=Math.min(1,p.cg),tr=(Math.sin(now/27)*0.06+Math.sin(now/61)*0.03)*k;o.b.position.y-=0.06*k;o.b.rotation.x+=Math.sin(now/340)*0.03*k;o.armR.rotation.x=lerp(-1.45,-2.05,k)+tr;o.armR.rotation.z=lerp(-0.15,-0.7,k);o.armL.rotation.x=lerp(-0.6,-1.35,k)+tr;o.armL.rotation.z=lerp(0.3,-0.1,k);o.b.rotation.y=lerp(0,-0.45,k)+Math.sin(now/290)*0.06*k;o.b.rotation.x-=0.06*k;o.armR.updateMatrixWorld(true);}   // ชาร์จ: ตัวบิดมากขึ้นตามแรง + โยกหายใจ
     o.tip.getWorldPosition(_pw);const s=simOf(_pw),k=p.kd>0?1:p.cg,full=k>=1;
     for(let i=0;i<2+Math.floor(k*2);i++){const an=rnd(0,6.283),r=rnd(25,55),hv=rnd(-0.9,0.9);
       PARTS.push({x:s.x+Math.cos(an)*r,y:s.y+Math.sin(an)*r,h:s.h+hv,vx:-Math.cos(an)*r/0.28,vy:-Math.sin(an)*r/0.28,vh:-hv/0.28,life:0.28,max:0.28,col:i%2?'#ffd27a':'#fff0b0',size:rnd(1.2,2),g:0,drag:0});}

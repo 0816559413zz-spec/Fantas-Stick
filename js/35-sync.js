@@ -4,7 +4,10 @@
 //   3 พุ่งแทงแรง (ปล่อยลูกไฟชาร์จ / ก้อนน้ำแข็ง) 4 ฟาดจากเหนือหัว (สายฟ้าสามเหลี่ยม) 5 ชี้สั่ง (สายดินสั่ง Stand ต่อย)
 // จังหวะ: ง้าง 25% → ฟาดเร็ว 30% → ตามแรง/คืนท่า • แขนขวาถือไม้ ตัวบิดหันไหล่ขวาเข้าหาเป้า เอนตัว มือซ้ายกางทรงตัว • ยืนนิ่ง = ก้าวขาเล็กน้อย
 // ภาพอย่างเดียว (ดาเมจ/จังหวะยิงของ host ไม่เปลี่ยน) • ทำงานกับโมเดลไฟล์: เรียกหลัง rigStd → แขนซ้าย/ขาตามโค้ด
-const CPOSE_T=0.38,_ce=t=>1-Math.pow(1-t,3),_cs=t=>t*t*(3-2*t);
+const CPOSE_T=0.46,_ce=t=>1-Math.pow(1-t,3),_cs=t=>t*t*(3-2*t),_cb=t=>{const u=t-1;return 1+2.5*u*u*u+1.5*u*u;};   // _cb = ฟาดเลยเป้านิดแล้วเด้งกลับ (มีน้ำหนัก)
+// ผู้ใช้ 2026-10-22 รอบ 2: "เหวี่ยงมากขึ้นกว่านี้หน่อย" → ขยายระยะท่าจากท่ายืนปกติ [แขนขวา x, z, บิดตัว, เอนตัว, แขนซ้าย x, z, (เอียงข้าง, ย่อตัว)]
+const AMP_B=[1.25,1.35,1.75,1.6,1.3,1.3],AMP_S=[1.2,1.3,1.6,1.5,1.2,1.2,1.6,1.4];
+const CP_BEND=[0.13,0.05,0.06,0.09,0.04,0.07,-0.13];   // เอียงตัวตามทิศเหวี่ยงของแต่ละท่า (ยิงปกติ)
 //          [แขนขวา x, แขนขวา z, บิดตัว, เอนตัว, แขนซ้าย x, แขนซ้าย z] ของ ง้าง / ฟาด / ตามแรง
 const CPOSE=[
   [[-2.7,-0.75,-0.4,-0.06,-0.5,0.45],[-1.3,0.3,0.3,0.12,0.3,0.7],[-1.45,0.05,0.12,0.05,0.1,0.5]],
@@ -35,10 +38,22 @@ const CANIM={
   line:{d:0.5,st:1,tr:[0.3,0.6],k:[[0.3,0.2,-0.4,-0.55,-0.1,-1.0,0.2,0,-0.08,'s'],[0.55,-1.62,0,0.35,0.3,-0.3,0.8,0,-0.12,'o'],[1,-1.55,-0.05,0.15,0.15,-0.2,0.6,0,-0.05,'s']]},   // ดึงไม้ไปข้างหลัง ก้าว แล้วแทงยาวไปหน้า
   siphon:{d:0.7,st:0,tr:null,k:[[0.35,-2.2,-0.6,-0.35,-0.2,-1.6,0.1,0.05,0,'s'],[0.75,-2.0,-0.7,-0.3,-0.25,-1.4,-0.1,0.05,0,'s'],[1,-1.6,-0.4,-0.15,-0.1,-1.0,0.2,0,0,'s']],tm:[0.3,0.8]},   // มือซ้ายกางดูด ไม้ยกไว้หลัง เอนตัวต้าน
   orbs:{d:0.6,st:0.4,tr:[0.05,0.7],k:[[0.45,-2.9,-0.1,0,-0.1,-0.5,0.6,0,0,'s'],[0.7,-1.6,-0.05,0.25,0.15,-0.4,0.6,0,-0.05,'o'],[1,-1.5,-0.1,0.1,0.05,-0.3,0.5,0,0,'s']],ci:[0.05,0.45]},   // วนไม้เหนือหัวแล้วชี้ไปหน้า
+  upflick:{d:0.45,st:0.3,tr:[0.25,0.7],k:[[0.3,-0.6,-0.5,-0.4,-0.1,-0.5,0.5,0.05,-0.15,'s'],[0.6,-2.8,-0.2,0.3,-0.25,-1.6,0.3,-0.05,0.1,'o'],[1,-2.4,-0.1,0.15,-0.15,-1.2,0.4,0,0.05,'s']]},   // ย่อแล้วสะบัดไม้ขึ้นฟ้า (Kindle)
+  snap:{d:0.6,st:0.3,tr:[0.2,0.6],k:[[0.3,-2.9,0.5,0.35,-0.15,-0.4,0.6,0.06,0,'s'],[0.55,-1.9,-0.6,-0.35,0.15,-0.5,0.5,-0.08,-0.1,'o'],[1,-2.2,-0.4,-0.2,0.05,-0.4,0.5,-0.04,-0.05,'s']]},   // ยกมือข้ามไหล่ แล้วสะบัดดีดนิ้วลงเฉียง (Ignition Snap)
+  pullback:{d:0.65,st:0.6,tr:null,k:[[0.4,-0.9,-0.7,-0.6,-0.1,-1.3,-0.2,0.06,-0.12,'s'],[1,-1.2,-0.5,-0.4,-0.05,-1.45,-0.1,0.04,-0.08,'s']],tm:[0.3,1]},   // ดึงไม้ไปข้างหลัง มือซ้ายเล็ง เกร็งสั่น (ท่าชาร์จ: Railgun / Terra Auger)
+  summon3:{d:0.8,st:0,tr:[0.3,0.75],k:[[0.3,-1.5,0.6,0,0.1,-1.5,-0.6,0,-0.15,'s'],[0.65,-2.2,-1.2,0,-0.15,-2.2,1.2,0,0.08,'o'],[1,-1.9,-1.0,0,-0.1,-1.9,1.0,0,0.04,'s']]},   // สองมือรวบหน้าอก แล้วกางออกเรียกของ (Mirror Legion)
+  punchcmd:{d:0.55,st:1,tr:[0.3,0.6],k:[[0.3,-1.0,-0.6,-0.6,-0.1,-1.2,0.3,0.05,-0.1,'s'],[0.5,-1.65,0.05,0.5,0.25,0.2,0.7,-0.06,-0.14,'o'],[1,-1.55,0,0.3,0.12,0,0.6,-0.03,-0.08,'s']]},   // บิดตัวแล้วแทงไม้สั่งต่อย มือซ้ายดึงกลับ (Stonebreaker)
+  ground:{d:0.6,st:0.5,tr:[0.3,0.6],k:[[0.35,-2.6,-0.3,0.2,-0.1,-0.8,0.6,0,0.05,'s'],[0.6,-0.5,-0.1,-0.1,0.45,-0.5,0.5,0,-0.3,'o'],[1,-0.6,-0.1,0,0.35,-0.5,0.5,0,-0.2,'s']]},   // ฟาดไม้ลงพื้นตรงหน้า ย่อตัว (Mud Swamp)
+  clap:{d:0.6,st:0.4,tr:[0.3,0.6],k:[[0.35,-1.5,-1.3,0,-0.05,-1.5,1.3,0,-0.05,'s'],[0.55,-1.5,0.5,0,0.15,-1.5,-0.5,0,-0.15,'o'],[1,-1.4,0.35,0,0.1,-1.4,-0.35,0,-0.1,'s']],tm:[0.55,0.9]},   // กางแขนกว้างแล้วบีบเข้าหากัน (Tectonic Crush บีบ)
+  burst:{d:0.55,st:0,tr:[0.3,0.65],k:[[0.35,-0.9,0.8,0,0.3,-0.9,-0.8,0,-0.25,'s'],[0.55,-2.0,-1.3,0,-0.25,-2.0,1.3,0,0.1,'o'],[1,-1.6,-1.0,0,-0.1,-1.6,1.0,0,0.03,'s']]},   // ห่อตัวแล้วระเบิดกางออก (Dust Burst)
+  skycall:{d:0.65,st:0.6,tr:[0.3,0.65],k:[[0.35,-3.1,-0.2,-0.05,-0.2,-0.6,0.5,0,0.05,'s'],[0.6,-1.3,0.1,0.3,0.3,-0.5,0.6,0,-0.12,'o'],[1,-1.4,0.05,0.15,0.15,-0.4,0.5,0,-0.06,'s']]},   // ชูไม้เรียกฟ้า แล้วฟาดชี้ลงจุดเป้า (Triple Strike)
   dome:{d:0.7,st:0,tr:[0.3,0.75],k:[[0.35,0.2,-0.5,0,0.3,0.2,0.5,0,-0.25,'s'],[0.7,-2.6,-0.8,0,-0.2,-2.6,0.8,0,0.08,'o'],[1,-2.3,-0.7,0,-0.1,-2.3,0.7,0,0.04,'s']]},   // สองมือต่ำแล้วยกกางขึ้นเป็นโดม
 };
-const SKANIM={ringofembers:'sweep',blazeform:'powerup',colossus:'ultraise',frostforge:'forge',permafrost:'slam',cryoshell:'wrap',frostaura:'powerup',
-  thunderline:'line',speedsiphon:'siphon',stormorbs:'orbs',stormdome:'dome'};
+// รอบ 2: ใส่ให้สกิลที่เดิมมีแต่ท่าค้าง (ไม่เหวี่ยง) ด้วย — ท่านี้เล่นหลังไฟล์สาย (lateSkillPose) จึงทับท่าค้างช่วงสั้น ๆ แล้วกลับท่าเดิม
+const SKANIM={ringofembers:'sweep',blazeform:'powerup',colossus:'ultraise',kindle:'upflick',ignitionsnap:'snap',
+  frostforge:'forge',glacierrend:'rend',permafrost:'slam',cryoshell:'wrap',frostaura:'powerup',mirrorlegion:'summon3',
+  thunderline:'line',speedsiphon:'siphon',stormorbs:'orbs',stormdome:'dome',triplestrike:'skycall',railgun:'pullback',godlightning:'ultraise',
+  stonebreaker:'punchcmd',mudswamp:'ground',tectoniccrush:'dome',tectoniccrush_2:'clap',dustburst:'burst',terraauger:'pullback',wrath:'ultraise'};
 function skAnim(ev){const o=PM3.get(ev.id),n=SKANIM[ev.s];if(!o||!n)return;o.caN=n;o.caT=0;o.cpT=0;o.cgd=2.2;}
 const _caT=[0,0,0,0,0,0,0,0],_caR=[0,0,0,0,0,0,0,0];
 function skillPose(o,p,dt,now){
@@ -49,8 +64,9 @@ function skillPose(o,p,dt,now){
   if(o.caT<=dt)for(let i=0;i<8;i++)c[i]=rest[i];
   const w=Math.min(1,u/0.06)*(u<0.75?1:1-_cs((u-0.75)/0.25));   // เข้าท่าเร็ว จบแล้วคืนท่านุ่ม ๆ
   let j=0;while(j<A.k.length-1&&u>A.k[j][0])j++;
-  const K=A.k[j],P=j?A.k[j-1]:null,u0=P?P[0]:0,f=Math.min(1,(u-u0)/Math.max(0.001,K[0]-u0)),e=K[9]==='o'?_ce(f):_cs(f);
-  for(let i=0;i<8;i++)_caT[i]=lerp(rest[i],lerp(P?P[i+1]:rest[i],K[i+1],e),w);
+  const K=A.k[j],P=j?A.k[j-1]:null,u0=P?P[0]:0,f=Math.min(1,(u-u0)/Math.max(0.001,K[0]-u0)),e=K[9]==='o'?_cb(f):_cs(f);
+  for(let i=0;i<8;i++){const a=lerp(P?P[i+1]:rest[i],K[i+1],e);_caT[i]=lerp(rest[i],rest[i]+(a-rest[i])*AMP_S[i],w);}
+  _caT[0]=Math.max(-3.35,_caT[0]);_caT[4]=Math.max(-3.35,_caT[4]);
   if(A.ci&&u>A.ci[0]&&u<A.ci[1]){const q=(u-A.ci[0])/(A.ci[1]-A.ci[0])*Math.PI*2;_caT[0]+=0.32*Math.sin(q)*w;_caT[1]+=0.32*(Math.cos(q)-1)*w;}   // วนไม้เป็นวง
   if(A.tm&&u>A.tm[0]&&u<A.tm[1]){const tr=(Math.sin(now/23)+Math.sin(now/37))*0.03*w;_caT[0]+=tr;_caT[4]+=tr;_caT[3]+=tr*0.3;}   // เกร็งสั่น (ออกแรง)
   const r=Math.min(1,dt*30);for(let i=0;i<8;i++)c[i]+=(_caT[i]-c[i])*r;
@@ -71,28 +87,32 @@ function blockPose(o,p,dt,now){
 }
 function castPose(o,p,v,dt,now){
   if(o.emo&&!o.caN&&!(o.cpT>0)){o.vsp=v.sp;if(emotePose(o,p,dt))return;}   // อีโมต (js/52)
-  if(o.caN&&!p.fl&&!p.dn){o.vsp=v.sp;o.cgd=Math.max(0,(o.cgd||0)-dt);if(skillPose(o,p,dt,now)){blockPose(o,p,dt,now);return;}}
+  if(o.caN){if(p.fl||p.dn){o.caN=null;o.b.rotation.z=0;if(o.ctr){trailStop(o.ctr);o.ctr=null;}}else{o.vsp=v.sp;o.cgd=Math.max(0,(o.cgd||0)-dt);blockPose(o,p,dt,now);return;}}   // ท่าสกิลเล่นทีหลัง (lateSkillPose)
   castPose0(o,p,v,dt,now);blockPose(o,p,dt,now);
 }
+// เรียกหลังไฟล์สาย (pyroFX/stormFX/frostFX/earthFX) → ท่าสกิลทับท่าค้างของสายได้ แล้วคืนท่าเดิมตอนจบ
+function lateSkillPose(o,p,dt,now){if(o.caN&&!p.fl&&!p.dn)skillPose(o,p,dt,now);}
 function castPose0(o,p,v,dt,now){
   const R=o.armR.rotation,L=o.armL.rotation,c=o.cpa||(o.cpa=[R.x,R.z,0,0,L.x,L.z]);o.vsp=v.sp;
   if(p.fl||p.dn){o.cpT=0;o.cgd=0;o.gw=0;if(o.ctr){trailStop(o.ctr);o.ctr=null;}return;}
   // ท่าตั้งการ์ด (ดวลในหนัง): หลังร่าย 2 วิ ถือไม้ยกไว้หน้าไหล่ขวา ตัวเฉียงข้าง มือซ้ายกางออก • ค่อย ๆ เข้า/ออก
   if(o.cgd>0)o.cgd-=dt;o.gw=(o.gw||0)+((o.cgd>0?1:0)-(o.gw||0))*Math.min(1,dt*(o.cgd>0?8:3));const gw=o.gw,G=CGUARD;
   if(gw>0.005){R.x=lerp(R.x,G[0],gw);R.z=lerp(R.z,G[1],gw);o.b.rotation.y+=G[2]*gw;o.b.rotation.x+=G[3]*gw;L.x=lerp(L.x,G[4],gw);L.z=lerp(L.z,G[5],gw);}
-  if(!(o.cpT>0)){c[0]=R.x;c[1]=R.z;c[2]=o.b.rotation.y;c[3]=0;c[4]=L.x;c[5]=L.z;if(o.ctr){trailStop(o.ctr);o.ctr=null;}return;}
+  if(!(o.cpT>0)){if(o.bz){o.b.rotation.z=0;o.bz=0;}c[0]=R.x;c[1]=R.z;c[2]=o.b.rotation.y;c[3]=0;c[4]=L.x;c[5]=L.z;if(o.ctr){trailStop(o.ctr);o.ctr=null;}return;}
   o.cpT-=dt;const k=1-Math.max(0,o.cpT)/CPOSE_T,K=CPOSE[o.cpS|0]||CPOSE[0];
   // host ปล่อยลูกเวททันทีที่กด → ง้างสั้นมาก (0.06 วิ) แล้วฟาดทันที (0.1 วิ) ให้ลูกเวทออกตอนไม้ฟาด • ตามแรงยาว
   const k0=0.15,k1=0.42,w=Math.min(1,k/0.05)*(k<0.6?1:1-_cs((k-0.6)/0.4));
   const T=_cpT,rest=_cpR;rest[0]=R.x;rest[1]=R.z;rest[2]=o.b.rotation.y;rest[3]=0;rest[4]=L.x;rest[5]=L.z;
   for(let i=0;i<6;i++){let a;
     if(k<k0)a=lerp(rest[i],K[0][i],_ce(k/k0));
-    else if(k<k1)a=lerp(K[0][i],K[1][i],_cs((k-k0)/(k1-k0)));
+    else if(k<k1)a=lerp(K[0][i],K[1][i],_cb((k-k0)/(k1-k0)));
     else a=lerp(K[1][i],K[2][i],_ce((k-k1)/(1-k1)));
-    T[i]=lerp(rest[i],a,w);}
+    a=rest[i]+(a-rest[i])*AMP_B[i];T[i]=lerp(rest[i],a,w);}
+  T[0]=Math.max(-3.35,T[0]);T[4]=Math.max(-3.35,T[4]);
   if((o.cpS|0)===1){if(k<k1){const u=k/k1*Math.PI*2;T[0]+=0.3*Math.sin(u)*w;T[1]+=0.3*(Math.cos(u)-1)*w;}}   // วนข้อมือเป็นวงแล้วสะบัด
   const r=Math.min(1,dt*32);for(let i=0;i<6;i++)c[i]+=(T[i]-c[i])*r;   // ลื่นเวลาร่ายรัว ๆ (ท่าใหม่เริ่มก่อนท่าเก่าจบ)
   R.x=c[0];R.z=c[1];o.b.rotation.y=c[2];o.b.rotation.x+=c[3];L.x=c[4];L.z=c[5];
+  {const bell=k<k0?0:Math.sin(Math.min(1,(k-k0)/(1-k0))*Math.PI)*w;o.b.position.y-=0.08*bell;o.b.rotation.z=(CP_BEND[o.cpS|0]||0)*bell;o.bz=1;}   // ทิ้งน้ำหนักตัวลงตอนฟาด + เอียงตามแรง
   const st=CP_STEP[o.cpS|0]*w*(k<k0?0:k<k1?_cs((k-k0)/(k1-k0)):1);
   if(st>0.01&&v.sp<0.6){o.legs[1].rotation.x=-0.42*st;o.legs[0].rotation.x=0.3*st;}
   // หางแสงบาง ๆ จากปลายไม้ตอนฟาด
@@ -171,6 +191,7 @@ function syncPlayers(P,mode,now,dt){
     chillFX(o,p,pz,now,dt);
     frostFX(o,p,pz,now,dt);
     earthFX(o,p,pz,now,dt);
+    lateSkillPose(o,p,dt,now);
     if(o.rig)rigSync(o,dt);
     if(ragTick(o,p,v,dt,now))o.tip.scale.setScalar(0.001);   // ล้ม/กระแทกแรง = ragdoll (js/48)
     if(p.bn&&Math.random()<0.7)burst(p.x,p.y,'#ff6a2a',1,30,0.45,3.5,{h:pz+rnd(0.3,1.8),vh:[1,2.5],g:-1});
