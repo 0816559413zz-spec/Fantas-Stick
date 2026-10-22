@@ -27,6 +27,10 @@ body[data-screen=game] #hub,body.crOpenB #hub{display:none}
 body.hub.hS-room #voice{display:none!important}
 #hFade{position:absolute;inset:0;background:#000;opacity:0;transition:opacity .42s ease;pointer-events:none}
 #hFade.on{opacity:1}
+/* ผ้าคลุมสะบัดผ่านจอตอนหยิบไม้แล้วหันตัว (js/61 hubRender เลื่อน transform ตามเวลา) — วงรีใหญ่กว่าจอ บังเต็มตอนอยู่กลาง
+   ขอบนำ = ซับในแดง + เส้นทอง (box-shadow ด้านใน) • ลายจีบผ้า = รูปจาก hubWipeImg() */
+#hWipe{position:absolute;left:-60vw;top:-25vh;width:220vw;height:150vh;border-radius:50%;display:none;pointer-events:none;will-change:transform;
+  background:#141a30 center/100% 100% no-repeat;box-shadow:inset 1.8vw 0 0 #6a1624,inset 2.05vw 0 0 #c9a35e,inset -3vw 0 4vw rgba(0,0,0,.55),0 0 5vw 1vw rgba(0,0,0,.7)}
 #hub button{font-family:inherit;color:inherit;-webkit-tap-highlight-color:transparent}
 #hub button:focus-visible{outline:1px solid var(--h-violet);outline-offset:3px}
 
@@ -54,22 +58,38 @@ body.hS-menu .hNav{animation-delay:.12s}body.hS-menu .hDock{animation-delay:.24s
 .hRule i:last-child::before{left:auto;right:22%}
 .hRule b{width:17px;height:17px;color:#fff;filter:drop-shadow(0 0 8px #c9c2ff)}
 .hRule b svg{width:100%;height:100%;display:block}
-.hSub{margin-top:12px;font:300 clamp(15px,1.2vw,20px) var(--h-sans);letter-spacing:.38em;color:rgba(238,241,255,.86)}
-.hSub small{display:block;margin-top:5px;font:500 10px var(--h-serif);letter-spacing:.55em;color:var(--h-mute)}
-.hNav{position:absolute;left:clamp(28px,4.4vw,88px);top:clamp(250px,43vh,440px);display:flex;flex-direction:column;gap:clamp(12px,2.4vh,26px);pointer-events:auto}
-.hItem>button,.hItem.big{display:block;position:relative;background:none;border:0;padding:4px 0 6px 28px;text-align:left;cursor:pointer}
-.hItem em{display:block;font:500 10px var(--h-serif);font-style:normal;letter-spacing:.5em;color:var(--h-violet);opacity:.75;transition:opacity .3s,letter-spacing .5s var(--h-ease)}
-.hItem span{display:block;font:200 clamp(28px,2.4vw,42px)/1.12 var(--h-sans);letter-spacing:.02em;transition:text-shadow .4s,transform .5s var(--h-ease)}
-.hItem.big span{font-size:clamp(40px,3.5vw,62px);font-weight:200}
-.hItem small{display:block;font:300 13px var(--h-sans);color:var(--h-mute);opacity:0;transform:translateY(-4px);transition:opacity .35s,transform .45s var(--h-ease)}
-.hItem>button::before,.hItem.big::before{content:'';position:absolute;left:2px;top:calc(50% - 4px);width:9px;height:9px;border:1px solid var(--h-violet);transform:rotate(45deg) scale(.55);opacity:.35;transition:all .45s var(--h-ease)}
-.hItem>button::after,.hItem.big::after{content:'';position:absolute;left:28px;bottom:0;height:1px;width:0;background:linear-gradient(90deg,var(--h-violet),transparent);transition:width .6s var(--h-ease)}
-.hItem>button:hover::before,.hItem.big:hover::before,.hItem.open>button::before{opacity:1;transform:rotate(45deg) scale(1);background:rgba(169,149,255,.35);box-shadow:0 0 12px var(--h-violet)}
-.hItem>button:hover::after,.hItem.big:hover::after,.hItem.open>button::after{width:min(320px,70%)}
-.hItem>button:hover span,.hItem.big:hover span{text-shadow:0 0 18px rgba(185,170,255,.55);transform:translateX(4px)}
+.hSub{margin-top:14px;max-width:min(470px,36vw)}
+.hSub b{display:block;font:500 clamp(11px,.85vw,14px) var(--h-serif);letter-spacing:.42em;text-transform:uppercase;color:rgba(238,241,255,.9)}
+.hSub small{display:block;margin-top:8px;font:300 clamp(13px,.95vw,15px)/1.55 var(--h-sans);letter-spacing:.03em;color:var(--h-mute)}
+.hNav{position:absolute;left:clamp(28px,4.4vw,88px);top:clamp(250px,43vh,440px);display:flex;flex-direction:column;gap:clamp(10px,2.2vh,24px);pointer-events:auto}
+/* ปุ่มเมนูแรก (ผู้ใช้ 2026-10-23 "ธรรมดาไป แต่ไม่เอากรอบ"): ไอคอนหกเหลี่ยมเส้นบาง + เลขโรมัน + คำอธิบายจาง + แสงฟุ้งจากซ้ายตอนชี้ + ลูกศรเลื่อนเข้า + ประกายวิ่งผ่านคำ "เล่น" */
+.hItem>button,.hItem.big{display:grid;grid-template-columns:auto 1fr;column-gap:clamp(14px,1.2vw,20px);align-items:center;position:relative;background:none;border:0;padding:6px 26px 8px 0;text-align:left;cursor:pointer;isolation:isolate}
+.hItem .hIc{grid-row:1/4;width:clamp(42px,3.2vw,56px);height:clamp(42px,3.2vw,56px);color:rgba(214,206,255,.7);transition:color .4s,filter .4s,transform .6s var(--h-ease)}
+.hItem.big .hIc{width:clamp(52px,4vw,68px);height:clamp(52px,4vw,68px)}
+.hItem .hIc .hx{width:100%;height:100%;display:block;overflow:visible}
+.hItem .hIc .o{stroke-width:1.2;opacity:.55}.hItem .hIc .i{stroke-width:.8;opacity:.3;stroke-dasharray:4 5;transform-origin:50% 50%;transition:transform 1.2s var(--h-ease),opacity .4s}
+.hItem em{display:flex;align-items:center;gap:10px;font:500 10px var(--h-serif);font-style:normal;letter-spacing:.5em;color:var(--h-violet);opacity:.8;transition:opacity .3s,letter-spacing .5s var(--h-ease)}
+.hItem em b{font:600 11px var(--h-serif);letter-spacing:.1em;color:var(--h-gold);opacity:.85}
+.hItem em b::after{content:'';display:inline-block;width:18px;height:1px;margin-left:10px;vertical-align:middle;background:linear-gradient(90deg,var(--h-gold),transparent);opacity:.6}
+.hItem span{display:flex;align-items:center;gap:12px;font:200 clamp(28px,2.4vw,42px)/1.12 var(--h-sans);letter-spacing:.02em;transition:filter .4s,transform .5s var(--h-ease)}
+.hItem.big span{font-size:clamp(40px,3.5vw,62px);font-weight:200;background:linear-gradient(100deg,#eef1ff 0%,#eef1ff 42%,#fff 48%,#d6ccff 52%,#eef1ff 58%,#eef1ff 100%) 0 0/320% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:hShine 7s ease-in-out infinite 2s}
+@keyframes hShine{0%,70%{background-position:100% 0}100%{background-position:0 0}}
+.hItem .hArr{display:grid;width:20px;height:20px;color:var(--h-violet);opacity:0;transform:translateX(-10px) rotate(180deg);transition:opacity .35s,transform .5s var(--h-ease)}
+.hItem .hArr svg{width:100%;height:100%}
+.hItem small{display:block;font:300 13px var(--h-sans);color:var(--h-mute);opacity:.55;transition:opacity .35s,transform .45s var(--h-ease)}
+/* แสงฟุ้งด้านหลัง (ไม่มีกรอบ) + เส้นใต้ไล่สี */
+.hItem>button::before,.hItem.big::before{content:'';position:absolute;z-index:-1;left:-40px;top:-14px;bottom:-14px;width:min(520px,38vw);background:radial-gradient(60% 55% at 18% 50%,rgba(150,128,255,.2),rgba(150,128,255,.06) 55%,transparent 75%);opacity:0;transform:scaleX(.6);transform-origin:left center;transition:opacity .5s,transform .7s var(--h-ease);pointer-events:none}
+.hItem>button::after,.hItem.big::after{content:'';position:absolute;left:calc(clamp(42px,3.2vw,56px) + clamp(14px,1.2vw,20px));bottom:0;height:1px;width:0;background:linear-gradient(90deg,var(--h-violet),rgba(226,194,122,.5) 40%,transparent);transition:width .6s var(--h-ease)}
+.hItem.big::after{left:calc(clamp(52px,4vw,68px) + clamp(14px,1.2vw,20px))}
+.hItem>button:hover::before,.hItem.big:hover::before,.hItem.open>button::before{opacity:1;transform:none}
+.hItem>button:hover::after,.hItem.big:hover::after,.hItem.open>button::after{width:min(300px,68%)}
+.hItem>button:hover .hIc,.hItem.big:hover .hIc,.hItem.open .hIc{color:#fff;filter:drop-shadow(0 0 8px rgba(185,170,255,.8));transform:scale(1.06)}
+.hItem>button:hover .hIc .i,.hItem.big:hover .hIc .i,.hItem.open .hIc .i{transform:rotate(60deg);opacity:.7}
+.hItem>button:hover span,.hItem.big:hover span{filter:drop-shadow(0 0 14px rgba(185,170,255,.5));transform:translateX(4px)}
+.hItem>button:hover .hArr,.hItem.big:hover .hArr{opacity:.9;transform:rotate(180deg)}
 .hItem>button:hover em,.hItem.big:hover em{opacity:1;letter-spacing:.62em}
-.hItem>button:hover small,.hItem.big:hover small,.hItem.open small{opacity:.9;transform:none}
-.hCode{display:flex;align-items:center;gap:12px;padding-left:28px;max-height:0;opacity:0;overflow:hidden;transition:max-height .5s var(--h-ease),opacity .35s,margin .4s}
+.hItem>button:hover small,.hItem.big:hover small,.hItem.open small{opacity:.95;transform:translateX(4px)}
+.hCode{display:flex;align-items:center;gap:12px;padding-left:calc(clamp(42px,3.2vw,56px) + clamp(14px,1.2vw,20px));max-height:0;opacity:0;overflow:hidden;transition:max-height .5s var(--h-ease),opacity .35s,margin .4s}
 .hItem.open .hCode{max-height:70px;opacity:1;margin-top:8px}
 .hCode input{width:200px;background:transparent;border:0;border-bottom:1px solid var(--h-line2);color:#fff;font:500 22px var(--h-serif);letter-spacing:.42em;padding:6px 2px;outline:none;transition:border-color .3s}
 .hCode input::placeholder{font:300 15px var(--h-sans);letter-spacing:.12em;color:var(--h-faint)}
@@ -92,7 +112,7 @@ body.hS-menu .hNav{animation-delay:.12s}body.hS-menu .hDock{animation-delay:.24s
 .hIcons button:hover i{opacity:1;transform:translate(-50%,0)}
 
 /* ---------- การ์ดโหมด (ส่วนล่างของจอ) ---------- */
-.hModes{position:absolute;left:0;right:0;bottom:0;height:37vh;min-height:250px;opacity:0;visibility:hidden;transition:opacity .4s,visibility 0s .4s}
+.hModes{position:absolute;left:0;right:0;bottom:0;height:47vh;min-height:300px;opacity:0;visibility:hidden;transition:opacity .4s,visibility 0s .4s}
 body.hS-modes .hModes,body.hS-flip .hModes{opacity:1;visibility:visible;transition:opacity .6s}
 .hModes::before{content:'';position:absolute;inset:-8vh 0 0;background:linear-gradient(0deg,rgba(3,4,12,.94) 0%,rgba(3,4,12,.72) 45%,transparent 100%);pointer-events:none}
 .hGrid{position:absolute;inset:-6vh 0 0;overflow:hidden;pointer-events:none;-webkit-mask-image:linear-gradient(0deg,#000 45%,transparent 92%);mask-image:linear-gradient(0deg,#000 45%,transparent 92%)}
@@ -110,7 +130,7 @@ body.hS-flip .hModeHead,body.hS-flip .hGrid{opacity:0;transition:opacity .4s}
 .hBack svg{width:16px;height:16px}
 body.hS-modes .hBack{opacity:.85;transform:none;pointer-events:auto}
 .hBack:hover{opacity:1;border-color:var(--h-violet);box-shadow:var(--h-glow)}
-.hCards{position:absolute;left:50%;bottom:clamp(14px,3.6vh,38px);transform:translateX(-50%);display:flex;gap:clamp(14px,1.6vw,30px);pointer-events:auto}
+.hCards{position:absolute;left:50%;bottom:clamp(58px,10vh,110px);transform:translateX(-50%);display:flex;gap:clamp(14px,1.6vw,30px);pointer-events:auto}
 .hCard{--h:min(29vh,330px);position:relative;width:calc(var(--h)*.74);height:var(--h);min-height:200px;min-width:148px;padding:0;border:1px solid var(--h-line);border-radius:3px;overflow:hidden;background:#05060d;cursor:pointer;
   transition:transform .55s var(--h-ease),border-color .4s,box-shadow .55s,opacity .45s}
 body.hS-modes .hCard{animation:hCardIn .8s var(--h-ease) backwards;animation-delay:calc(var(--i)*90ms + 120ms)}
@@ -140,6 +160,45 @@ body.hS-modes .hCard{animation:hCardIn .8s var(--h-ease) backwards;animation-del
 .hCard:hover .cSweep{transform:translateX(130%);transition:transform 1s var(--h-ease)}
 .hCard:hover .cCorner{opacity:1;inset:4px}
 .hCards:hover .hCard:not(:hover){opacity:.62}
+/* กลับ: การ์ดร่วงลงทีละใบจากขวาไปซ้าย (ย้อนตอนเข้า) */
+body.hS-leave .hCard{animation:hCardOut .42s var(--h-ease) forwards;animation-delay:calc((3 - var(--i))*55ms)}
+@keyframes hCardOut{to{opacity:0;transform:translateY(60px) scale(.94)}}
+body.hS-leave .hModeHead,body.hS-leave .hBack,body.hS-leave .hMx{opacity:0!important;transition:opacity .3s}
+/* ออกจากห้อง: แผงห้อง/ปุ่มขวาล่างหายก่อน แล้วการ์ดลอยหดกลับ */
+body.hS-unflip .hRoom,body.hS-unflip .hGo{opacity:0;transition:opacity .25s}
+/* ---------- ปุ่มรอบจอหน้าเลือกโหมด ---------- */
+.hMx{position:absolute;inset:0;pointer-events:none;opacity:0;visibility:hidden;transition:opacity .4s,visibility 0s .4s}
+body.hS-modes .hMx{opacity:1;visibility:visible;transition:opacity .7s .35s}
+.hMx>div{position:absolute;display:flex;align-items:center;gap:10px;pointer-events:auto}
+.mxTop{right:clamp(20px,3vw,48px);top:clamp(18px,4vh,40px)}
+.mxTop .mxMe{margin-right:8px}
+.mxIc{position:relative;width:38px;height:38px;border-radius:50%;border:1px solid var(--h-line);background:rgba(8,10,26,.4);color:var(--h-mute);display:grid;place-items:center;cursor:pointer;transition:all .35s var(--h-ease)}
+.mxIc svg{width:18px;height:18px}
+.mxIc i{position:absolute;right:0;top:calc(100% + 8px);white-space:nowrap;font:300 12px var(--h-sans);font-style:normal;color:var(--h-ink);opacity:0;transform:translateY(-4px);pointer-events:none;transition:all .3s var(--h-ease)}
+.mxIc:hover{color:#fff;border-color:var(--h-violet);box-shadow:var(--h-glow);background:rgba(169,149,255,.14)}
+.mxIc:hover i{opacity:.9;transform:none}
+.mxBL{left:clamp(20px,3vw,48px);bottom:clamp(10px,2.2vh,24px)}
+.mxBR{right:clamp(20px,3vw,48px);bottom:clamp(10px,2.2vh,24px)}
+.mxPill{display:flex;align-items:center;gap:9px;height:38px;padding:0 14px 0 11px;border:0;border-radius:19px;background:none;color:var(--h-mute);cursor:pointer;position:relative;transition:color .3s,background .4s}
+.mxPill svg{width:18px;height:18px;flex:none;transition:filter .3s}
+.mxPill span{display:flex;flex-direction:column;align-items:flex-start;font:300 14px/1.05 var(--h-sans);color:var(--h-ink);opacity:.85}
+.mxPill small{font:500 8.5px var(--h-serif);letter-spacing:.32em;color:var(--h-violet);opacity:.7;margin-top:3px}
+.mxPill::after{content:'';position:absolute;left:12px;right:14px;bottom:3px;height:1px;background:linear-gradient(90deg,var(--h-violet),transparent);transform:scaleX(0);transform-origin:left;transition:transform .45s var(--h-ease)}
+.mxPill:hover{color:#fff;background:radial-gradient(70% 90% at 30% 50%,rgba(150,128,255,.16),transparent 75%)}
+.mxPill:hover svg{filter:drop-shadow(0 0 6px rgba(185,170,255,.8))}
+.mxPill:hover::after{transform:none}
+.mxPill+.mxPill::before{content:'';position:absolute;left:-6px;top:11px;bottom:11px;width:1px;background:var(--h-line)}
+.mxJoin{display:flex;align-items:center;gap:12px;cursor:text}
+.mxJoin span{display:flex;flex-direction:column;align-items:flex-end;font:300 14px/1.05 var(--h-sans);color:var(--h-ink);opacity:.85}
+.mxJoin small{font:500 8.5px var(--h-serif);letter-spacing:.32em;color:var(--h-violet);opacity:.7;margin-top:3px}
+.mxJoin input{width:130px;background:transparent;border:0;border-bottom:1px solid var(--h-line2);color:#fff;font:500 17px var(--h-serif);letter-spacing:.34em;padding:5px 2px;outline:none;transition:border-color .3s}
+.mxJoin input::placeholder{font:300 13px var(--h-sans);letter-spacing:.08em;color:var(--h-faint)}
+.mxJoin input:focus{border-bottom-color:var(--h-violet)}
+.mxJoin input.bad{border-bottom-color:#ff8fa3;animation:hShake .4s}
+.mxJoin button{width:34px;height:34px;border-radius:50%;border:1px solid var(--h-line2);background:rgba(169,149,255,.08);color:var(--h-ink);display:grid;place-items:center;cursor:pointer;transition:all .3s}
+.mxJoin button svg{width:15px;height:15px;transform:rotate(180deg)}
+.mxJoin button:hover{border-color:var(--h-violet);box-shadow:var(--h-glow);background:rgba(169,149,255,.2)}
+@media (max-width:1150px){.mxPill small,.mxJoin small{display:none}.mxPill{padding:0 9px}}
 .hCard.away{opacity:0!important;transform:translateY(70px) scale(.94);pointer-events:none;transition:all .5s var(--h-ease)}
 
 /* ---------- การ์ดพลิกแล้วขยาย ---------- */

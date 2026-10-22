@@ -27,7 +27,11 @@ const HICO={
   mic:'<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21M8.5 21h7"/>',
   link:'<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>',
   back:'<path d="M15 5l-7 7 7 7"/>',
-  crown:'<path d="M4 17l-1-9 5 4 4-7 4 7 5-4-1 9z"/>'};
+  // ไอคอนปุ่มเมนูแรก (สเกล 100 ใส่ในหกเหลี่ยม): ไม้กายสิทธิ์ + ประกาย • ประตูโค้ง
+  play:'<path d="M33 69l29-29"/><path d="M30 72l4-4" stroke-width="5"/><path d="M68 25c1 6 3 8 9 9-6 1-8 3-9 9-1-6-3-8-9-9 6-1 8-3 9-9z"/><path d="M45 33v5M42.5 35.5h5M74 52v4M72 54h4"/>',
+  join:'<path d="M37 70V45a13 13 0 0 1 26 0v25"/><path d="M31 70h38"/><path d="M44 56h12M52 51l5 5-5 5"/>',
+  crown:'<path d="M4 17l-1-9 5 4 4-7 4 7 5-4-1 9z"/>',
+  spells:'<path d="M12 2.8l8.6 6.3-3.3 10.1H6.7L3.4 9.1z"/><path d="M12 7.6l4 2.9-1.5 4.7h-5L8 10.5z"/>'};
 const hSvg=(k,vb)=>`<svg viewBox="${vb||'0 0 24 24'}" fill="none" stroke="currentColor" stroke-width="${vb?2:1.4}" stroke-linecap="round" stroke-linejoin="round">${HICO[k]}</svg>`;
 const hHex=k=>`<svg class="hx" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-linejoin="round"><polygon class="o" points="50,3 91,26.5 91,73.5 50,97 9,73.5 9,26.5"/><polygon class="i" points="50,11 84,30.5 84,69.5 50,89 16,69.5 16,30.5"/><g class="g" stroke-width="2" stroke-linecap="round">${HICO[k]}</g></svg>`;
 const H_STAR='<svg viewBox="0 0 24 24"><path d="M12 0C12.8 8 16 11.2 24 12 16 12.8 12.8 16 12 24 11.2 16 8 12.8 0 12 8 11.2 11.2 8 12 0z" fill="currentColor"/></svg>';
@@ -40,11 +44,11 @@ document.body.insertAdjacentHTML('beforeend',`
       <div class="hStars"><i>${H_STAR}</i><i class="b">${H_STAR}</i><i class="d">${H_STAR}</i></div>
       <h1><span>Fantas</span> <span>Stick</span></h1>
       <div class="hRule"><i></i><b>${H_STAR}</b><i></i></div>
-      <div class="hSub">ดวลเวทมนตร์<small>A WIZARD DUEL</small></div>
+      <div class="hSub"><b>Four Elements · One Arena</b><small>Pick your element, build your spellbook, and duel your friends online.</small></div>
     </div>
     <nav class="hNav">
-      <button class="hItem big" id="hPlay"><em>PLAY</em><span>เล่น</span><small>เลือกโหมด แล้วเริ่มดวล</small></button>
-      <div class="hItem" id="hJoin"><button class="hJoinB" id="hJoinB"><em>JOIN</em><span>เข้าห้องเพื่อน</span><small>ใส่รหัสห้อง 5 ตัวจากเพื่อน</small></button>
+      <button class="hItem big" id="hPlay"><i class="hIc">${hHex('play')}</i><em><b>I</b>PLAY</em><span>เล่น<i class="hArr">${hSvg('back')}</i></span><small>เลือกโหมด แล้วเริ่มดวล</small></button>
+      <div class="hItem" id="hJoin"><button class="hJoinB" id="hJoinB"><i class="hIc">${hHex('join')}</i><em><b>II</b>JOIN</em><span>เข้าห้องเพื่อน<i class="hArr">${hSvg('back')}</i></span><small>ใส่รหัสห้อง 5 ตัวจากเพื่อน</small></button>
         <div class="hCode"><input id="hCode" maxlength="5" placeholder="รหัสห้อง" autocomplete="off" spellcheck="false"><button id="hCodeGo" aria-label="เข้าห้อง">${hSvg('back')}</button></div></div>
     </nav>
     <div class="hStatus" id="hStatus"></div>
@@ -71,6 +75,18 @@ document.body.insertAdjacentHTML('beforeend',`
         <span class="cN">${m.n} คน</span><span class="cCorner"></span>
       </button>`).join('')}</div>
   </div>
+  <!-- ปุ่มรอบจอหน้าเลือกโหมด (ผู้ใช้ 2026-10-23 "เพิ่มปุ่มรอบๆ จอ") ⚠ Claude เลือกปุ่มเอง -->
+  <div class="hMx" id="hMx">
+    <div class="mxTop"><button class="hMe mxMe" id="hMxMe"></button>
+      <button class="mxIc" data-mx="set" aria-label="ตั้งค่า">${hSvg('set')}<i>ตั้งค่า</i></button>
+      <button class="mxIc" data-mx="music" aria-label="เพลงของฉัน">${hSvg('music')}<i>เพลงของฉัน</i></button></div>
+    <div class="mxBL">
+      <button class="mxPill" data-mx="spells">${hSvg('spells')}<span>จัดคาถา<small>GRIMOIRE</small></span></button>
+      <button class="mxPill" data-mx="look">${hSvg('look')}<span>แต่งตัว<small>WARDROBE</small></span></button>
+      <button class="mxPill" data-mx="guide">${hSvg('guide')}<span>คู่มือ<small>GUIDE</small></span></button>
+      <button class="mxPill" data-mx="prog">${hSvg('prog')}<span>เลเวล<small>PROGRESS</small></span></button></div>
+    <div class="mxBR"><label class="mxJoin"><span>เข้าห้องเพื่อน<small>JOIN BY CODE</small></span><input id="hMxCode" maxlength="5" placeholder="รหัส 5 ตัว" autocomplete="off" spellcheck="false"><button id="hMxGo" aria-label="เข้าห้อง">${hSvg('back')}</button></label></div>
+  </div>
   <div class="hRoom" id="hRoom"></div>
   <div class="hGo" id="hGo"></div>
 </div>`);
@@ -82,13 +98,13 @@ function hubUiState(s){
   const b=document.body;
   b.classList.toggle('hS-menu',s==='menu');b.classList.toggle('hS-modes',s==='modes');b.classList.toggle('hS-room',s==='room');b.classList.toggle('hS-go',s==='go');
   if(s==='menu'){hubMeChip();}
-  if(s==='modes'){const cs=[...document.querySelectorAll('.hCard')];cs.forEach(c=>c.classList.remove('pick','away'));}
+  if(s==='modes'){const cs=[...document.querySelectorAll('.hCard')];cs.forEach(c=>c.classList.remove('pick','away'));hubMeChip();}
   if(s==='room'&&prev!=='flip')hubLobby();
 }
 function hubMeChip(){
   let lv='';try{lv='Lv '+progLv().L;}catch(e){}
   const P=PATHS[parseKit(myKit).path]||PATHS[0];
-  $('#hMe').innerHTML=`<span class="em">${icoHTML('p_'+P.id,P.col,18)}</span><span class="nm">${esc(myName())}</span><span class="lv">${lv}</span>`;
+  $('#hMe').innerHTML=$('#hMxMe').innerHTML=`<span class="em">${icoHTML('p_'+P.id,P.col,18)}</span><span class="nm">${esc(myName())}</span><span class="lv">${lv}</span>`;
 }
 // เรียกจาก setScreen (js/19)
 function hubOnScreen(s){
@@ -115,7 +131,17 @@ document.querySelector('.hIcons').addEventListener('click',e=>{const b=e.target.
 document.addEventListener('mouseover',e=>{const b=e.target.closest&&e.target.closest('.hItem>button,.hItem.big,.hIcons button,.hCard,.hRoom button,.hGo button,.hBack');if(b&&b!==HUI.hov){HUI.hov=b;try{snd('ui_hover',{vol:0.25});}catch(_){}}});
 
 // ---------- การ์ดโหมด ----------
-$('#hModesBack').onclick=()=>{snd('ui_click');hubUiState('menu');hubBack();};
+$('#hModesBack').onclick=()=>{if(HUI.leaving||HUI.st!=='modes')return;snd('ui_click');HUI.leaving=true;document.body.classList.add('hS-leave');
+  setTimeout(()=>{document.body.classList.remove('hS-leave');HUI.leaving=false;hubUiState('go');hubBack();},460);};
+$('#hMxMe').onclick=()=>{ac();openCreator(false);};
+$('#hMx').addEventListener('click',e=>{const b=e.target.closest('[data-mx]');if(!b)return;ac();snd('ui_click');const k=b.dataset.mx;
+  if(k==='set')openSettings();else if(k==='music')$('#btnMyMusic').click();else if(k==='spells')skwOpen();else if(k==='look')openCreator(false);
+  else if(k==='guide')$('#btnGuide').click();else if(k==='prog')progOpen();});
+const hubMxJoin=()=>{const i=$('#hMxCode'),v=(i.value||'').trim().toUpperCase();if(v.length!==5){i.classList.remove('bad');void i.offsetWidth;i.classList.add('bad');return;}
+  store('wd_name',myName());HUI.pend=true;joinGame(v);};
+$('#hMxGo').onclick=e=>{e.preventDefault();hubMxJoin();};
+$('#hMxCode').addEventListener('keydown',e=>{if(e.key==='Enter')hubMxJoin();e.stopPropagation();});
+$('#hMxCode').addEventListener('input',e=>{e.target.value=e.target.value.toUpperCase().replace(/[^A-Z0-9]/g,'');});
 $('#hCards').addEventListener('click',e=>{const c=e.target.closest('.hCard');if(!c||HUI.st!=='modes')return;hubPickMode(c.dataset.mode,c);});
 addEventListener('keydown',e=>{
   if(e.code!=='Escape'||screen!=='menu'||crOpen)return;
@@ -152,6 +178,20 @@ function hubFlip(card,k){
   }));
   HUI.flipT=performance.now();
   setTimeout(()=>{card.style.visibility='';HUI.flipDone=true;if(screen==='lobby'){hubFlipEnd();}},950);
+}
+// ย้อนการพลิก: แผงห้อง → หดเป็นการ์ดที่ช่องเดิม หมุนกลับด้านหน้า → เฟดดำ แล้วเรียก done (รีโหลดไปหน้าการ์ดโหมด)
+function hubUnflip(done){
+  if(HUI.unflip)return;HUI.unflip=true;
+  const card=document.querySelector('.hCard[data-mode="'+(LOBBY&&LOBBY.mode||HUI.mode)+'"]')||document.querySelector('.hCard');
+  const k=card?card.dataset.mode:'ffa',m=HMODES.find(x=>x.k===k)||HMODES[0],R=$('#hRoom').getBoundingClientRect(),r=card?card.getBoundingClientRect():{left:innerWidth/2-90,top:innerHeight*0.6,width:180,height:240};
+  const f=document.createElement('div');f.className='hFlip go';
+  f.innerHTML=`<div class="fIn"><div class="fFront" style="--bg:url('${HUI_IMG}modes/${k}.jpg')"><span class="cBg"></span><span class="cShade"></span><span class="cHex">${hHex(k)}</span><span class="cTxt"><b>${m.en}</b><i>${m.th}</i></span></div>
+    <div class="fBack"><span class="fx">${hHex(k)}</span><b>${m.en}</b><i>ออกจากห้อง…</i></div></div>`;
+  Object.assign(f.style,{left:R.left+'px',top:R.top+'px',width:R.width+'px',height:R.height+'px'});
+  document.body.appendChild(f);document.body.classList.add('hS-unflip');snd('portal',{vol:0.4});
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{f.classList.remove('go');Object.assign(f.style,{left:r.left+'px',top:r.top+'px',width:r.width+'px',height:r.height+'px'});}));
+  setTimeout(()=>$('#hFade').classList.add('on'),900);
+  setTimeout(done,1320);
 }
 function hubFlipEnd(){
   if(!HUI.flip)return;
@@ -227,7 +267,7 @@ addEventListener('resize',()=>{if(HUI.st==='room')hubLobby();});
 const hubRoomClick=e=>{
   const b=e.target.closest('button');if(!b)return;ac();snd('ui_click');
   const id=b.id;
-  if(id==='hrLeave'){try{sessionStorage.setItem('wd_hub','modes');}catch(_){}leave();return;}
+  if(id==='hrLeave'){try{sessionStorage.setItem('wd_hub','modes');}catch(_){}hubUnflip(()=>leave());return;}
   if(id==='hrCopy'){$('#btnCopy').click();return;}
   if(id==='hrTeam'){$('#btnTeam').click();return;}
   if(id==='hrKit'){skwOpen();return;}
