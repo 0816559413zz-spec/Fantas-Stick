@@ -5,7 +5,7 @@ Format: `name:line` = top-level function/const/let in that file. `§line title` 
 ## js/01-core.js (22) — แกนกลาง: import Three.js + ฟังก์ชันพื้นฐาน ($ rnd clamp lerp store to…
 $:12 rnd:13 clamp:14 lerp:15 dist2:16 lerpAng:17 esc:18 shuffle:19 store:20 toastT:21 toast:22
 
-## js/02-data.js (315) — 
+## js/02-data.js (316) — 
 W:4 H:4 PR:4 PILLARS:6 SPAWNF:7 mulberry:9 genForest:10 genPitch:27 genHogsmeade:36
 §54 แผนที่โล่ง 3 แบบ (ผู้ใช้: ป่ามืดไม่สนุก อยากได้ที่โล่งๆ)
 genMeadow:55 genLake:61 genRuins:66
@@ -16,7 +16,7 @@ FMAPS:133 b64i16:134 regFileMap:135 loadMapData:147 loadAllMapData:155 mapReady:
 §160 ของประกอบฉากที่พังได้ / ใช้ได้ (prop)
 PROPDEF:164 PROP_OFF_MODES:171 PROP_USE:173 PROPS:174 PROPON:174 genProps:175
 §195 ตัวละคร: บ้านฮอกวอตส์ + หน้าตา
-HOUSES:197 HAIRC:202 HAIRSTY:204 WOODC:206 WOODN:207 WCOREC:208 WCOREN:209 WANDSTY:210 EYEC:211 SKINC:212 CLOAKC:213 TIESTY:214 LOOKK:215 LOOKN:215 lookStr:216 parseLook:217 randLook:218 LOOKS:219 LOOKP:219 KITS:219 getKit:220 getLook:221 CREST_SH:222 CREST_PAT:223 starPts:228 CREST_ANI:230 crestSVG:236 houseColor:244 TEAMC:245 TEAMN:245 MODES:246 PDEF:257 EDEF:284 POOLS:296 CDK:306 BUFFS:307
+HOUSES:197 HAIRC:202 HAIRSTY:204 WOODC:207 WOODN:208 WCOREC:209 WCOREN:210 WANDSTY:211 EYEC:212 SKINC:213 CLOAKC:214 TIESTY:215 LOOKK:216 LOOKN:216 lookStr:217 parseLook:218 randLook:219 LOOKS:220 LOOKP:220 KITS:220 getKit:221 getLook:222 CREST_SH:223 CREST_PAT:224 starPts:229 CREST_ANI:231 crestSVG:237 houseColor:245 TEAMC:246 TEAMN:246 MODES:247 PDEF:258 EDEF:285 POOLS:297 CDK:307 BUFFS:308
 
 ## js/03-spells-core.js (222) — 
 ICONS:8 ICOALIAS:9 hasIco:10 ICOBASE:12 icoURL:13 ICO:14 icoTint:15 icoHTML:24 PATHS:25 SPELL_LIST:34 SPELLS:34 defSpell:35 SLOTK:36 BRMAP:36 KITP:37 parseKit:38 cleanKit:54 setKit:55 pathReset:58
@@ -203,10 +203,10 @@ makeSnow:480 makeFireflies:487 makeSnitch:494 fileMapFx:501
 §511 แผนที่จากไฟล์ Blender (MAP-DESIGN.md)
 terrGeo:513 buildFileMap:521 tickM:557 testSign:558 buildTest:565 buildRuins:631 buildPitch:656
 
-## js/29-characters.js (373) — ระบบผ้า (เสื้อคลุมพลิ้วตามการเคลื่อนที่)
+## js/29-characters.js (376) — ระบบผ้า (เสื้อคลุมพลิ้วตามการเคลื่อนที่)
 makeCloak:2 updateCloth:10
 §33 โมเดลนักเรียนเวทมนตร์
-SHGEO:35 SHMAT:35 SHTEX:35 sGeo:36 sMat:37 bMat:40 matKey:42 bodyPatch:48 BODYM:55 bodyMat:56 plainMat:61 mergeBody:62 sStripe:98 hashStr:99 stripeTex:100 shieldMat:101 addStatus:109 makeStudent:115 makeEnemy:218 keepTex:356 keepMatSet:357 disposeMaterial:358 disposeTree:364 disposeObj:371 PM3:372 EM3:372 JM3:372 clearDyn:373
+SHGEO:35 SHMAT:35 SHTEX:35 sGeo:36 sMat:37 bMat:40 matKey:42 bodyPatch:48 BODYM:55 bodyMat:56 plainMat:61 mergeBody:62 sStripe:98 hashStr:99 stripeTex:100 shieldMat:101 addStatus:109 makeStudent:115 makeEnemy:221 keepTex:359 keepMatSet:360 disposeMaterial:361 disposeTree:367 disposeObj:374 PM3:375 EM3:375 JM3:375 clearDyn:376
 
 ## js/30-particles.js (265) — อนุภาค 2 ชั้น: แสงเรือง (additive) + ควัน (normal)
 PMAX:2 PGLOW_OCC:6 PLIT:6 makePointSys:7
@@ -439,4 +439,7 @@ FFAV:104 MULTI:105 MULTI_TH:105 STREAK:106 pName:107 ffaKf:108 kfSound:123 KINDN
 ## js/55-podium.js (84) — โพเดียมธีมฮอกวอตส์ (ผู้ใช้ 2026-10-22 "podium but make it magician theme hogwart theme")
 POD:6 POD_X:7 POD_H:7 POD_C:7 podStart:8 podStop:29 podPose:37 renderPodium:49
 
-(56 files, 13083 lines)
+## js/56-progress.js (71) — เลเวล + สถิติ + ของปลดล็อค (ผู้ใช้ 2026-10-22: "more skin wand cloak unlock as lvl" → เลื…
+LV_MAX:7 lvNeed:8 UNLOCKS:9 PROG:15 progSave:16 lvOf:17 lookLock:18 lookClampLocks:19 progXP:21 progAward:22 progBox:33 progOpen:41 progChip:53
+
+(57 files, 13158 lines)

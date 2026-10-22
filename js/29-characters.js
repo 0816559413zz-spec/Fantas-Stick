@@ -195,6 +195,9 @@ function makeStudent(look,id){
     if(look.ws===0)add(wandG,sGeo(THREE.SphereGeometry,0.034,8,6),wM,0,-0.65,0);
     else if(look.ws===1)for(let i=0;i<7;i++){const r=add(wandG,sGeo(THREE.TorusGeometry,0.024-i*0.0014,0.006,5,10),dkM,0,-0.7-i*0.055,0);r.rotation.x=Math.PI/2+0.35;}
     else if(look.ws===2){add(wandG,sGeo(THREE.SphereGeometry,0.04,8,6),wM,0,-0.65,0);for(const [y,r] of [[-0.72,0.034],[-0.84,0.028],[-0.95,0.026]])add(wandG,sGeo(THREE.SphereGeometry,r,8,6),wM,0.007,y,0);}
+    else if(look.ws===4){const bM=M('#e8e0c8',0.7);for(let i=0;i<5;i++)add(wandG,sGeo(THREE.SphereGeometry,0.03-i*0.002,8,6),bM,0,-0.68-i*0.09,0);add(wandG,sGeo(THREE.CylinderGeometry,0.012,0.022,0.46,8),bM,0,-0.87,0);}   // กระดูก (ปลดล็อค Lv16)
+    else if(look.ws===5){for(let i=0;i<6;i++)add(wandG,sGeo(THREE.SphereGeometry,0.024-i*0.002,7,5),dkM,(i%2?0.006:-0.006),-0.68-i*0.085,0);add(wandG,sGeo(THREE.SphereGeometry,0.04,8,6),dkM,0,-0.64,0);}   // เอลเดอร์วอนด์: ปุ่มไม้เป็นข้อ ๆ (Lv24)
+    else if(look.ws===6){add(wandG,sGeo(THREE.CylinderGeometry,0.03,0.03,0.12,8),goldW,0,-0.7,0);const cr=add(wandG,sGeo(THREE.OctahedronGeometry,0.05,0),sMat({color:WCOREC[look.wc],emissive:WCOREC[look.wc],emissiveIntensity:1.4,metalness:0.2,roughness:0.1,transparent:true,opacity:0.9}),0,-1.1,0);cr.scale.y=1.6;}   // คริสตัลปลายไม้ (Lv28)
     else{add(wandG,sGeo(THREE.CylinderGeometry,0.031,0.031,0.13,10),goldW,0,-0.71,0);for(const y of[-0.79,-1.0]){const r=add(wandG,sGeo(THREE.TorusGeometry,0.024,0.007,6,12),goldW,0,y,0);r.rotation.x=Math.PI/2;}add(wandG,sGeo(THREE.SphereGeometry,0.02,8,6),goldW,0,-1.1,0);}
   }
   const tip=new THREE.Sprite(glowMat(WCOREC[look.wc],2.2));tip.scale.setScalar(0.32);tip.position.set(0,-1.09,0);armR.add(tip);

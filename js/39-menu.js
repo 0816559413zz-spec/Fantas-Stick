@@ -11,8 +11,8 @@ renderMyHouse();
 // ----- หน้าสร้าง/แต่งตัวละคร (2 ขั้น: 1 หน้าตา → 2 เลือกบ้าน) -----
 let crLib=0,crSaved=null,crKitSaved='0',crOpen=false,crStep=1,crTab=0,crFirst=false,crKitOnly=false,crSlot=0;
 const CRTABS=[['👤','ใบหน้า'],['💇','ผม'],['🧥','เสื้อคลุม'],['👔','เนคไท']];
-const sw_=(k,arr)=>`<div class="colors">${arr.map((c,i)=>`<div class="sw ${myLook[k]===i?'on':''}" data-k="${k}" data-v="${i}" style="background:${c}"></div>`).join('')}</div>`;
-const bt_=(k,arr)=>`<div class="opts">${arr.map((t,i)=>`<button class="obtn ${myLook[k]===i?'on':''}" data-k="${k}" data-v="${i}">${t}</button>`).join('')}</div>`;
+const sw_=(k,arr)=>`<div class="colors">${arr.map((c,i)=>{const L=lookLock(k,i);return L?`<div class="sw lk" title="ปลดล็อคที่เลเวล ${L}" style="background:${c}"><i>${L}</i></div>`:`<div class="sw ${myLook[k]===i?'on':''}" data-k="${k}" data-v="${i}" style="background:${c}"></div>`;}).join('')}</div>`;   // ของล็อก = เทา + เลขเลเวล (js/56)
+const bt_=(k,arr)=>`<div class="opts">${arr.map((t,i)=>{const L=lookLock(k,i);return L?`<button class="obtn lk" disabled title="ปลดล็อคที่เลเวล ${L}">🔒 ${t} <small>Lv${L}</small></button>`:`<button class="obtn ${myLook[k]===i?'on':''}" data-k="${k}" data-v="${i}">${t}</button>`;}).join('')}</div>`;
 const nameBox_=()=>`<label class="f" style="margin-top:0">ชื่อพ่อมด</label><input type="text" id="cName" maxlength="16" value="${esc($('#nameIn').value)}"><div class="orn" style="width:100%;margin:12px 0 4px"></div>`;
 function crPanelSet(html){
   const cur=document.activeElement&&document.activeElement.id==='cName';
@@ -205,7 +205,7 @@ $('#creator').addEventListener('dragstart',e=>{const s=e.target.closest('[data-k
 $('#creator').addEventListener('dragover',e=>{const t=e.target.closest('[data-ks]');if(t){e.preventDefault();t.classList.add('drop');}});
 $('#creator').addEventListener('dragleave',e=>{const t=e.target.closest('[data-ks]');if(t)t.classList.remove('drop');});
 $('#creator').addEventListener('drop',e=>{const t=e.target.closest('[data-ks]');if(!t)return;e.preventDefault();const si=+e.dataTransfer.getData('text/plain');if(!isNaN(si)){crSlot=+t.dataset.ks;crAssign(si);}});
-$('#crRand').onclick=()=>{const k={h:myLook.h,wd:myLook.wd,wc:myLook.wc,ws:myLook.ws};myLook=Object.assign(randLook(),k);crRenderStep1();};
+$('#crRand').onclick=()=>{const k={h:myLook.h,wd:myLook.wd,wc:myLook.wc,ws:myLook.ws};myLook=lookClampLocks(Object.assign(randLook(),k));crRenderStep1();};
 $('#crNext').onclick=()=>crGo(2);
 $('#crBack2').onclick=()=>crGo(1);
 $('#crNext2').onclick=()=>crGo(3);

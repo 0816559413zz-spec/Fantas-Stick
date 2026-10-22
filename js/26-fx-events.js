@@ -233,12 +233,12 @@ function showOver(r){
     else best=`<p class="sub">สถิติดีที่สุดของคุณ: ด่าน ${b}</p>`;
   }
   const isCoop=r.mode==='coop';
-  $('#over').innerHTML=`<div class="card" style="width:min(640px,100%)"><h1 style="font-size:44px">${esc(r.title)}</h1><div class="orn"></div><p class="sub">${esc(r.sub)}</p>${best}${overMvp(r)}
+  $('#over').innerHTML=`<div class="card" style="width:min(640px,100%)"><h1 style="font-size:44px">${esc(r.title)}</h1><div class="orn"></div><p class="sub">${esc(r.sub)}</p>${best}${progBox(r)}${overMvp(r)}
     <table><tr><th>ผู้เล่น</th><th>${isCoop?'ฆ่าศัตรู':'KILLS'}</th><th>${isCoop?'ล้ม':'DEATHS'}</th><th>ดาเมจ</th><th>รับดาเมจ</th>${r.mode==='ffa'?'<th>ช่วย</th>':''}</tr>
     ${r.rows.map((x,i)=>`<tr style="${i===0&&!isCoop?'background:linear-gradient(90deg,rgba(217,180,90,.18),transparent)':''}"><td><span class="dot" style="background:${x.c};margin-right:8px;${x.tm>=0?'outline:2px solid '+TEAMC[x.tm]:''}"></span>${i===0&&!isCoop?'👑 ':''}${esc(x.n)}${overBar(r,x)}</td><td>${x.k}</td><td>${x.d}</td><td>${x.dmg}</td><td>${x.tk||0}</td>${r.mode==='ffa'?`<td>${x.as||0}</td>`:''}</tr>`).join('')}</table>
     <div class="row">${NET.isHost?'<button class="pri" id="btnAgain">กลับล็อบบี้ / เล่นอีกครั้ง</button>':'<div class="sub" style="margin:8px 0">รอโฮสต์กดเล่นอีกครั้ง...</div>'}</div>
     <div class="row"><button id="btnQuit">ออกจากห้อง</button></div></div>`;
-  $('#over').classList.remove('hidden');
+  $('#over').classList.remove('hidden');progChip();
 }
 $('#buff').addEventListener('click',e=>{const c=e.target.closest('[data-pick]');if(c)choosePick(+c.dataset.pick);});
 $('#over').addEventListener('click',e=>{

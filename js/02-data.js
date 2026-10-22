@@ -203,19 +203,20 @@ const HAIRC=['#15100d','#2b1b10','#4a2c17','#8a5a2b','#c9a15a','#eadba0','#b8431
 // ลำดับสำคัญ: ทรง 0-3 เป็นของเดิม (ตัวละครที่บันทึกไว้ยังใช้ได้) 4+ เป็นทรงใหม่
 const HAIRSTY=['ทรงสั้น','หน้าม้า','ยาวสยาย','มวยผม','ยุ่งแบบพอตเตอร์','ผมบ็อบ','หางม้า','ผมเปีย','หยิกฟู','หางเปียคู่','หัวแหลม'];
 // ไม้กายสิทธิ์: ไม้ (สีด้าม) / แกนเวท (สีประกายปลายไม้) / ทรงด้าม
-const WOODC=['#6b4423','#8a5a2f','#2a1a14','#a9885a','#d8c9a0','#5a2e22','#c9b48a','#7a3a2a'];
-const WOODN=['โอ๊ค','ฮอลลี','อีโบนี','วิลโลว์','เอลเดอร์','ยู','เบิร์ช','เชอร์รี'];
-const WCOREC=['#fff2c0','#ffb040','#6aff7a','#6ab4ff','#c88aff','#ff6a6a'];
-const WCOREN=['ขนยูนิคอร์น','ขนฟินิกซ์','เส้นหัวใจมังกร','ผลึกน้ำแข็ง','ธุลีจันทรา','เปลวเพลิง'];
-const WANDSTY=['เรียบ','เกลียว','ปมไม้','ด้ามทอง'];
+// ของท้ายรายการ = ปลดล็อคตามเลเวล (js/56 UNLOCKS) — ห้ามแทรกกลาง (ลุคที่บันทึกไว้อ้างเลขลำดับ)
+const WOODC=['#6b4423','#8a5a2f','#2a1a14','#a9885a','#d8c9a0','#5a2e22','#c9b48a','#7a3a2a','#3b5a6a'];
+const WOODN=['โอ๊ค','ฮอลลี','อีโบนี','วิลโลว์','เอลเดอร์','ยู','เบิร์ช','เชอร์รี','เงาจันทร์'];
+const WCOREC=['#fff2c0','#ffb040','#6aff7a','#6ab4ff','#c88aff','#ff6a6a','#7ff0e0','#ff9ad5','#f4f6ff'];
+const WCOREN=['ขนยูนิคอร์น','ขนฟินิกซ์','เส้นหัวใจมังกร','ผลึกน้ำแข็ง','ธุลีจันทรา','เปลวเพลิง','ขนเทสตรัล','ขนนกแสงจันทร์','ประกายดาวตก'];
+const WANDSTY=['เรียบ','เกลียว','ปมไม้','ด้ามทอง','กระดูก','เอลเดอร์วอนด์','คริสตัล'];
 const EYEC=['#4a2e16','#171210','#3f7fd0','#3f9a5a','#8a6a2a','#8a94a0','#8a5ad0','#d08a20'];
 const SKINC=['#fbe3cf','#f1d2b0','#e0b48c','#c68e62','#a6704a','#8d5a3b','#6b4128','#4a2c1c'];
-const CLOAKC=['#141218','#1d2b4a','#1f3a2a','#4a1620','#3a2a1a','#3d3f4a','#4a2a6a','#e6e2da'];
+const CLOAKC=['#141218','#1d2b4a','#1f3a2a','#4a1620','#3a2a1a','#3d3f4a','#4a2a6a','#e6e2da','#0f3d33','#5a0c18','#141a3c','#5a4512','#060606','#b9bccb','#8a6a1a','#2c0a44'];
 const TIESTY=['ลายตามบ้าน','สีหลักบ้าน','สีรองบ้าน','ไม่ผูกเนคไท'];
 const LOOKK=['h','hr','hs','ey','sk','cl','ti','wd','wc','ws'],LOOKN=[4,HAIRC.length,HAIRSTY.length,EYEC.length,SKINC.length,CLOAKC.length,TIESTY.length,WOODC.length,WCOREC.length,WANDSTY.length];
 function lookStr(l){return LOOKK.map(k=>l[k]).join('.');}
 function parseLook(s){const a=String(s||'').split('.'),o={};LOOKK.forEach((k,i)=>{const v=+a[i];o[k]=Number.isInteger(v)&&v>=0&&v<LOOKN[i]?v:0;});return o;}
-function randLook(seed){const R=mulberry(seed===undefined?Math.floor(Math.random()*1e9):seed),o={};LOOKK.forEach((k,i)=>{o[k]=Math.floor(R()*LOOKN[i]);});if(o.cl>3)o.cl=0;return o;}
+function randLook(seed){const R=mulberry(seed===undefined?Math.floor(Math.random()*1e9):seed),o={};LOOKK.forEach((k,i)=>{o[k]=Math.floor(R()*LOOKN[i]);});if(o.cl>3)o.cl=0;o.wd%=8;o.wc%=6;o.ws%=4;return o;}   // สุ่ม = ของพื้นฐานเท่านั้น (ไม่สุ่มของปลดล็อค)
 const LOOKS={},LOOKP={},KITS={};
 function getKit(id){return parseKit(KITS[id]!==undefined?KITS[id]:'0');}
 function getLook(id){const s=LOOKS[id]||(LOOKS[id]=lookStr(randLook(hashStr(id))));return LOOKP[s]||(LOOKP[s]=parseLook(s));}
