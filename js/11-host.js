@@ -42,6 +42,7 @@ const INPN=['ax','ay','ah','ap','gx','gy','mx','my'];
 function hostOnData(conn,d){
   if(!d||!G)return;
   const id=conn.pid||conn.peer;   // pid = ตัวละครเดิมที่ต่อกลับเข้ามา (เน็ตหลุดแล้ว id ใหม่)
+  if(d.t==='pi'){try{conn.send({t:'po',c:d.c});}catch(e){}return;}   // ปิง: ตอบกลับทันที
   if(d.t==='hello'){
     const reject=r=>{try{conn.send({t:'reject',r});}catch(e){}setTimeout(()=>conn.close(),600);};
     const tok=String(d.tok||'').slice(0,16);
@@ -300,6 +301,7 @@ function updatePlayer(p,dt,acting){
   if(!canAct||p.root>0||p.dchgOn||p.cryo>0){mx=my=0;}
   else if(p.fear>0){const fa=Math.atan2(p.y-p.fearY,p.x-p.fearX);mx=Math.cos(fa);my=Math.sin(fa);}
   const spd=(p.fly?540*p.buffs.spd:175*p.buffs.spd*(p.shieldOn?0.5:1))*(p.boost>0?1.45:1)*moveMul(p)*(p.wr||p.aug||p.ecb?earthSpd(p):1)*(p.dfall?(p.dfall.ph===2?0.45:0):p.sdome?(p.sdome.ph===2?0.45:0):p.rail?0:(p.kindle>0&&p.hover>0)?0.35:p.breath>0?0.7:(p.snapT>0||p.colos>0||p.grT>0)?0.5:1)*(p.slideT>0?1.8:1+(p.iceB||0));
+  p.wSpd=(p.dash>0||p.slideT>0||p.slip>0||!canAct||p.root>0||p.dchgOn||p.cryo>0||p.fear>0||p.gh)?0:Math.round(spd);   // ความเร็วเดินตอนนี้ → ลูกข่ายใช้ทำนายตัวเอง (0 = อย่าทำนาย)
   if(p.dash>0){
     p.dash-=dt;const ds=p.dashSp||900;
     // ก้าวย่อย ≤8 หน่วย + ชนโลกทุกก้าว: กันพุ่งทะลุผนังบ้านบาง (ก้าวเดียวอาจยาว 30+ หน่วย)

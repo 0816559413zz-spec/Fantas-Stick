@@ -2,11 +2,15 @@
 //  เครือข่าย (PeerJS / WebRTC)
 // =====================================================================
 const PREFIX='wizduel-th-v34-';
-const NET={peer:null,isHost:false,online:false,myId:'me',conns:new Map(),hostConn:null,code:'',spec:false,
+const NET={peer:null,isHost:false,online:false,myId:'me',conns:new Map(),hostConn:null,code:'',spec:false,rtt:0,
   // token ของแท็บนี้ (อยู่ข้ามการรีเฟรช) — โฮสต์ใช้จำว่า "คนเดิมต่อกลับมา" ตอนเน็ตหลุด
   tok:(()=>{const r=()=>Math.random().toString(36).slice(2,10);try{let t=sessionStorage.getItem('wd_tok');if(!t){t=r();sessionStorage.setItem('wd_tok',t);}return t;}catch(e){return r();}})()};
 // ต่อใหม่อัตโนมัติ (ลูกข่าย): หลุดจากโฮสต์ → ลองต่อห้องเดิมทุก 2 วิ นาน 30 วิ (โฮสต์เก็บตัวละครไว้ให้) • เกินแล้วค่อยรีโหลด
 const RC={on:false,t0:0,iv:0};
+// ทดสอบเน็ตช้า: ?lag=150&jit=40 (มิลลิวินาที ไป-กลับ + แกว่งสุ่ม) — หน่วงข้อมูลที่ลูกข่ายรับ/ส่ง ลำดับไม่สลับ (เหมือน WebRTC reliable)
+const LAG=(()=>{const q=new URLSearchParams(location.search);return {ms:+q.get('lag')||0,jit:+q.get('jit')||0,tIn:0,tOut:0};})();
+function lagDo(out,f){if(!LAG.ms&&!LAG.jit)return f();const n=performance.now(),k=out?'tOut':'tIn';LAG[k]=Math.max(LAG[k],n+LAG.ms/2+Math.random()*LAG.jit);setTimeout(f,LAG[k]-n);}
+function hostSend(m){if(LAG.ms||LAG.jit)m=JSON.parse(JSON.stringify(m));lagDo(1,()=>{const c=NET.hostConn;try{if(c&&c.open)c.send(m);}catch(e){}});}
 let LOBBY=null;
 function genCode(){const c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let s='';for(let i=0;i<5;i++)s+=c[Math.floor(Math.random()*c.length)];return s;}
 function sendAll(m){for(const c of NET.conns.values()){try{if(c.open)c.send(m);}catch(e){}}}
@@ -39,7 +43,7 @@ function netConnect(peer,code){
   const c=peer.connect(PREFIX+code,{reliable:true,serialization:'json'});
   NET.hostConn=c;
   c.on('open',()=>{c.send({t:'hello',name:myName(),look:lookStr(myLook),kit:myKit,tok:NET.tok});setStatus('');});
-  c.on('data',clientOnData);
+  c.on('data',d=>lagDo(0,()=>clientOnData(d)));
   c.on('close',()=>{if(NET.hostConn===c)netLost();});
   c.on('error',()=>{if(NET.hostConn===c)netLost();});
 }
@@ -83,8 +87,9 @@ function clientOnData(d){
     case 'chat':onChat(d);break;
     case 'reject':alert(d.r);location.reload();break;
     case 'lobby':onLobby(d);break;
-    case 'start':VIEW.prev=VIEW.cur=null;setScreen('game');break;
-    case 's':if(screen!=='game')setScreen('game');onSnap(d.s);break;
+    case 'start':VIEW.prev=VIEW.cur=null;sbufReset();setScreen('game');break;
+    case 'po':{const r=performance.now()-d.c;NET.rtt=NET.rtt?NET.rtt*0.8+r*0.2:r;break;}   // ปิงไป-กลับ (เฉลี่ยนุ่ม ๆ)
+    case 's':if(screen!=='game')setScreen('game');unpackP(d.s);onSnap(d.s);break;
     case 'priv':onPriv(d.m);break;
   }
 }

@@ -84,13 +84,13 @@ MIND:66 summonMin:72 minTarget:81 minShoot:88 updateMins:93 aimTarget:133
 §180 ร่ายคาถา
 castSlot:181 castUlt:196
 
-## js/10-net.js (92) — เครือข่าย (PeerJS / WebRTC)
-PREFIX:4 NET:5 RC:9 LOBBY:10 genCode:11 sendAll:12 setStatus:13 hostGame:15 netConnect:38 netLost:46 joinGame:61 clientOnData:79 leave:92
+## js/10-net.js (97) — 
+PREFIX:4 NET:5 RC:9 LAG:11 lagDo:12 hostSend:13 LOBBY:14 genCode:15 sendAll:16 setStatus:17 hostGame:19 netConnect:42 netLost:50 joinGame:65 clientOnData:83 leave:97
 
-## js/11-host.js (377) — 
-G:4 EVL:4 EVN:4 hostLast:4 tickN:4 emit:5 feed:6 banner:7 plist:8 cleanName:9 freshStats:11 newPlayer:18 emptyInput:21 addPlayer:22 initHostLobby:31 lobbyMsg:38 broadcastLobby:39 INPN:41 hostOnData:42 hostDrop:71 hostRemove:80 validate:93 hostStart:104 hostToLobby:129 MIDJOIN:135 midJoin:136 CHATT:152 chatRelay:153 emoHost:161 resetBody:163 fmap:169 spawnPts:170 teamPts:172 placeAll:173 respawn:185
-§202 ลูปหลักฝั่งโฮสต์
-hostTick:203 angDiff:215 cH:217 vR:218 updatePlayer:220 hitProp:364 damagePropsIn:371 nearUseProp:372 useProp:373
+## js/11-host.js (379) — 
+G:4 EVL:4 EVN:4 hostLast:4 tickN:4 emit:5 feed:6 banner:7 plist:8 cleanName:9 freshStats:11 newPlayer:18 emptyInput:21 addPlayer:22 initHostLobby:31 lobbyMsg:38 broadcastLobby:39 INPN:41 hostOnData:42 hostDrop:72 hostRemove:81 validate:94 hostStart:105 hostToLobby:130 MIDJOIN:136 midJoin:137 CHATT:153 chatRelay:154 emoHost:162 resetBody:164 fmap:170 spawnPts:171 teamPts:173 placeAll:174 respawn:186
+§203 ลูปหลักฝั่งโฮสต์
+hostTick:204 angDiff:216 cH:218 vR:219 updatePlayer:221 hitProp:366 damagePropsIn:373 nearUseProp:374 useProp:375
 
 ## js/12-buildings.js (412) — สิ่งปลูกสร้างที่พังเป็นชิ้นย่อย (บ้าน) แบบ Battlefield — คู่มือเต็ม: …
 BLDDEF:8 BLD_PIECES:9 BLD_GRID:10 BLD_FIRE:11 BLD_ICE:11 BLD_ROOF_MIN:11 BLDG:12 BLDON:12 genBldg:13 bldRect:23 bldChunk:25 bldAlive:32 bldLocal:33 bldWorld:34 rectDist:35 bldNear:36 BLD_MOUND:39 bldGone:40 bldMoundAt:41 bldMoundH:42 hitBldPiece:44 breakBldChunk:55 bldSupport:63 damageEnv:83 bldPieceAt:97 projEl:107 bldPush:112 collideBld:118 updateBldg:133 bldSnap:145 bldParse:151
@@ -103,7 +103,7 @@ spawnEnemy:2 setupWave:19 bossPhase:36 enemySlam:44 updateEnemies:55
 ## js/14-mode-rules.js (102) — กติกาของแต่ละโหมด
 hostPick:2 clearField:10 modeLogic:11 endMatch:79
 
-## js/15-modes.js (388) — 
+## js/15-modes.js (400) — 
 sendPriv:5 TASKF:9 taskPts:10 raceRings:11 modeInit:17 spawnDummy:59 trainTick:64 TR_KEYS:79 trTeams:81 trCmd:89 hostEndTraining:106
 §108 ควิดดิช
 quidThrow:109 quidDrop:115 quidTick:120 snitchTick:155
@@ -116,7 +116,7 @@ impActions:237 startMeeting:275 hostVote:282 meetTick:287 impCheck:306
 §314 ระเบิดที่ตั้งเวลาไว้ (ลูกไฟมังกร / คลื่นไฟ)
 bombTick:315 modeSnap:328
 §350 สร้าง snapshot ส่งให้ทุกเครื่อง
-r1:351 makeSnap:352 PROF:370 pf:371
+r1:351 DEFP:353 packP:354 unpackP:355 makeSnap:356 PROF:374 pf:375 hostLoop:376 HLW:390 pingN:400
 
 ## js/16-voice.js (89) — 
 VOICE:4 rosterIds:5 toggleMic:6 voiceSync:20 teamOn:37 teamOf:38 applyVoiceGates:39 VAC:49 onIncomingCall:50 voiceLevels:62 speakingIds:70 updateVoiceUI:76
@@ -133,14 +133,18 @@ MY:202 myDB:203 mySave:204 myLoad:207 myDecodeReady:213 myPlay:214 myNext:226 my
 §248 เพลงประกอบ (สร้างสดตามแผนที่)
 MUSIC:249 THEMES:250 padNote:255 musicTick:262 toggleMusic:291
 
-## js/19-client.js (186) — 
+## js/19-client.js (243) — ฝั่งแสดงผล (ทุกเครื่อง รวมโฮสต์ ใช้ snapshot เดียวกัน)
 cv:4 cx:4 DPR:5 SW:5 SH:5 resize:6 VIEW:12 screen:13 lastBuffKey:13 overShown:13 lastCount:13 PARTS:14 TEXTS:14
 §15 งบเอฟเฟกต์ (VFX budget)
-VFXB:20 _apush:21 vfxQual:29 vfxBegin:31 vfxEnd:34 vfxOnce:36 vfxExtra:38 PCOL:39 setScreen:41 onLobby:50 onSnap:56 myPos:64
-§66 เอฟเฟกต์
-burst:68 smoke:79 ring:80 floatText:81 shake:82 wandPos:83 impactFX:85 explosionFX:102
-§114 เอฟเฟกต์คาถาใหม่
-ZV:115 COLB:115 WVV:115 GLV:115 ICEV:115 SLV:115 ULTV:115 OBV:115 _iceDisc:117 _iceEdge:118 _iceSpk:119 iceFloorMat:120 _icePlane:121 _icePathMat:122 makeIceFloor:123 updateIceFloors:146 FLASHM:157 FLASHING:158 flashModel:159 endFlash:168 tickFlash:169 GHOSTM:171 SOLIDM:171 ghostOf:172 setGhost:178 hitSparks:186
+VFXB:20 _apush:21 vfxQual:29 vfxBegin:31 vfxEnd:34 vfxOnce:36 vfxExtra:38 PCOL:39 setScreen:41 onLobby:50 onSnap:56 snapApply:60
+§68 บัฟเฟอร์ snapshot (ลูกข่าย, ผู้ใช้ 2026-10-22 "เล่นออนไลน์ให้ลื่น")
+SBUF:71 NETOLD:72 sbufReset:73 sbufPush:74 sbufAdvance:84
+§96 ทำนายตัวเอง (ลูกข่าย): ตัวเราขยับทันทีที่กด ไม่ต้องรอโฮสต์ตอบ
+PRED:99 predictMe:100 myPos:121
+§123 เอฟเฟกต์
+burst:125 smoke:136 ring:137 floatText:138 shake:139 wandPos:140 impactFX:142 explosionFX:159
+§171 เอฟเฟกต์คาถาใหม่
+ZV:172 COLB:172 WVV:172 GLV:172 ICEV:172 SLV:172 ULTV:172 OBV:172 _iceDisc:174 _iceEdge:175 _iceSpk:176 iceFloorMat:177 _icePlane:178 _icePathMat:179 makeIceFloor:180 updateIceFloors:203 FLASHM:214 FLASHING:215 flashModel:216 endFlash:225 tickFlash:226 GHOSTM:228 SOLIDM:228 ghostOf:229 setGhost:235 hitSparks:243
 
 ## js/20-vfx-pyro-storm.js (397) — Dragonfall (ภาพ)
 makeDfCircle:3 DFV:20 dfCracks:21 updateDfCracks:31 dragonfallFX:32
@@ -245,8 +249,8 @@ ROLE:4 KC:4 roleShowT:4 onPriv:5 MO:10 BREATHS:11 clearModeObjs:12 ITEMC:21 make
 §133 หน้าประชุมโหวต (หาลอร์ดโวลเดอมอร์)
 meetKey:134 myVoted:134 castVote:135 syncMeeting:141
 
-## js/37-render-loop.js (76) — ลูปเรนเดอร์
-lastFrame:2 HSTOP:5 hitStop:6 FXSTUDIO:8 frame:9 _fpsAcc:18 _fpsN:18 render:19 renderGame:56
+## js/37-render-loop.js (78) — ลูปเรนเดอร์
+lastFrame:2 HSTOP:5 hitStop:6 FXSTUDIO:8 frame:9 _fpsAcc:18 _fpsN:18 render:19 renderGame:58
 
 ## js/38-hud.js (360) — HUD
 rr:2 SLOTS:3 fmtTime:4
@@ -406,14 +410,14 @@ GRASS:52 GR_GLSL_V:53 GR_BEGIN:55 grassMat:79 grassBuild:93 _grBasic:107 grassBa
 WARM:11 WARM_FXDIR:12 WARM_COMMON:12 WARM_X:13 WARM_Y:13 warmKeep:15 warmCompile:21 WARM_SKIP:24 warmFx:25 warmFxEnd:33 warmGather:35 warmPaths:37 warmStep:39 warmTick:54
 §63 ภาพจากโค้ดของแต่ละสาย (เฟรมละฟังก์ชัน)
 
-## js/52-social.js (164) — เล่นกับเพื่อน (ผู้ใช้ 2026-10-22): แชท + อีโมต + ดูเพื่อนเล่น (spectator) + ป้ายต่อเน็ตให…
+## js/52-social.js (170) — เล่นกับเพื่อน (ผู้ใช้ 2026-10-22): แชท + อีโมต + ดูเพื่อนเล่น (spectator) + ป้ายต่อเน็ตให…
 §6 แชท: Enter = พิมพ์ / Enter อีกที = ส่ง / Esc = ปิด • ข้อความขึ้นมุมซ้…
-CHAT:7 chatOpen:27 chatClose:32 chatSend:41 chatAdd:46 escH:51 onChat:52 drawSocial:58
-§82 อีโมต: กด Z ค้าง → วงล้อ 6 แบบ ลากเมาส์ไปทางที่ต้องการ ปล่อย Z = เล่น…
-EMOS:83 EMO:84 drawEmoWheel:102 emoFx:115 emotePose:117
-§133 ดูเพื่อนเล่น: ตายแล้ว ≥2 วิ หรือเข้ามาเป็นคนดู → กล้องตามคนอื่น คลิกซ…
-SPEC:134 specTarget:135 specCycle:144 drawSpecHint:149
-§157 ป้าย "กำลังต่อใหม่..." (ลูกข่ายหลุดจากโฮสต์ js/10 netLost)
-drawNetBanner:158
+CHAT:7 chatOpen:27 chatClose:32 chatSend:41 chatAdd:46 escH:51 onChat:52 drawSocial:58 drawPing:82
+§88 อีโมต: กด Z ค้าง → วงล้อ 6 แบบ ลากเมาส์ไปทางที่ต้องการ ปล่อย Z = เล่น…
+EMOS:89 EMO:90 drawEmoWheel:108 emoFx:121 emotePose:123
+§139 ดูเพื่อนเล่น: ตายแล้ว ≥2 วิ หรือเข้ามาเป็นคนดู → กล้องตามคนอื่น คลิกซ…
+SPEC:140 specTarget:141 specCycle:150 drawSpecHint:155
+§163 ป้าย "กำลังต่อใหม่..." (ลูกข่ายหลุดจากโฮสต์ js/10 netLost)
+drawNetBanner:164
 
-(53 files, 12437 lines)
+(53 files, 12521 lines)

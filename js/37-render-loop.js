@@ -21,6 +21,7 @@ function render(dt,now){
   cx.setTransform(DPR,0,0,DPR,0,0);
   cx.clearRect(0,0,SW,SH);
   animateWorld(now);
+  if(!NET.isHost&&screen==='game')sbufAdvance(now);   // ลูกข่าย: เลือก snapshot ที่จะแสดงจากบัฟเฟอร์ (js/19)
   const v=VIEW.cur;
   if(screen!=='game'||!v){
     if(PM3.size||EM3.size||JM3.size||WM3.size||MM3.size)clearDyn();
@@ -29,11 +30,12 @@ function render(dt,now){
     updateParticles(dt);updateShapes(dt);updateLights(dt);
     menuCamera(now);gl.shadowMap.needsUpdate=true;composer.render();return;
   }
-  const a=VIEW.prev?clamp((now-VIEW.tCur)/Math.max(8,VIEW.tCur-VIEW.tPrev),0,1):1;
+  const a=VIEW.a!==null?VIEW.a:VIEW.prev?clamp((now-VIEW.tCur)/Math.max(8,VIEW.tCur-VIEW.tPrev),0,1):1;
   const pm={},em={};
   if(VIEW.prev){for(const p of VIEW.prev.P)pm[p.id]=p;for(const e of VIEW.prev.E)em[e.id]=e;}
   const P=v.P.map(p=>{const q=pm[p.id];if(!q||Math.abs(q.x-p.x)+Math.abs(q.y-p.y)>200)return p;return Object.assign({},p,{x:lerp(q.x,p.x,a),y:lerp(q.y,p.y,a),a:lerpAng(q.a,p.a,a)});});
   const E=v.E.map(e=>{const q=em[e.id];if(!q)return e;return Object.assign({},e,{x:lerp(q.x,e.x,a),y:lerp(q.y,e.y,a)});});
+  predictMe(P,dt,now);
   const me=P.find(p=>p.id===NET.myId);
   if(v.ph==='count'&&lastPh!=='count'&&me){yaw=me.a;pitch=0.3;}
   lastPh=v.ph;warmTick(v);

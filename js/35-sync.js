@@ -243,7 +243,7 @@ function makeProj(col,t){
 }
 const _a=new THREE.Vector3(),_b=new THREE.Vector3();
 function syncProj(v,now){
-  const ex=Math.min(0.1,(now-VIEW.tCur)/1000),seen=new Set();
+  const ex=VIEW.ex!==null?VIEW.ex:Math.min(0.1,(now-VIEW.tCur)/1000),seen=new Set();
   for(const j of v.J){
     seen.add(j.id);
     const vt=(j.t==='pfire'||j.t==='pfireb')?'fire':j.t,col=j.rf?'#7ff6ff':PCOL[j.t],r=PDEF[j.t].r*S3*(vt==='fire'?1.4:1);

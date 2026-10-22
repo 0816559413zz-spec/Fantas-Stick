@@ -41,7 +41,7 @@ addEventListener('keydown',e=>{
 function chatSend(m){
   m=String(m).slice(0,120);
   if(NET.isHost){chatRelay(NET.myId,m);return;}
-  const c=NET.hostConn;try{if(c&&c.open)c.send({t:'chat',m});}catch(e){}
+  hostSend({t:'chat',m});
 }
 function chatAdd(html,sys){
   const L=$('#chatLog');if(!L)return;const d=document.createElement('div');if(sys)d.className='sys';d.innerHTML=html;L.appendChild(d);
@@ -76,7 +76,13 @@ function drawSocial(P,me,dt,now){
       cx.beginPath();cx.moveTo(s[0]-5,y0+h);cx.lineTo(s[0],y0+h+6);cx.lineTo(s[0]+5,y0+h);cx.fill();
       cx.fillStyle='#1d1a24';cx.fillText(txt,s[0],y0+h/2+1);cx.restore();}
   }
-  drawEmoWheel();drawSpecHint(P,me);drawNetBanner();
+  drawEmoWheel();drawSpecHint(P,me);drawNetBanner();drawPing();
+}
+// ปิงมุมซ้ายบน (ลูกข่ายเท่านั้น): เขียว <80 / เหลือง <150 / แดง
+function drawPing(){
+  if(NET.isHost||!NET.online||!NET.rtt)return;const r=Math.round(NET.rtt);
+  cx.save();cx.font='600 12px Kanit,sans-serif';cx.textAlign='left';cx.textBaseline='top';cx.fillStyle='rgba(0,0,0,.6)';cx.fillText('ปิง '+r+' ms',11,SET.fps?27:9);
+  cx.fillStyle=r<80?'#9fe0a0':r<150?'#ffe27a':'#ff8a6a';cx.fillText('ปิง '+r+' ms',10,SET.fps?26:8);cx.restore();
 }
 
 // ---------- อีโมต: กด Z ค้าง → วงล้อ 6 แบบ ลากเมาส์ไปทางที่ต้องการ ปล่อย Z = เล่นท่า ----------
@@ -92,7 +98,7 @@ addEventListener('keyup',e=>{
   if(e.code!==(KEYS.emote||'KeyZ')||!EMO.open)return;
   EMO.open=false;if(EMO.sel<0)return;
   if(performance.now()-EMO.last<1000)return;EMO.last=performance.now();
-  if(NET.isHost)emoHost(NET.myId,EMO.sel);else{const c=NET.hostConn;try{if(c&&c.open)c.send({t:'emo',e:EMO.sel});}catch(e){}}
+  if(NET.isHost)emoHost(NET.myId,EMO.sel);else hostSend({t:'emo',e:EMO.sel});
 });
 addEventListener('mousemove',e=>{
   if(!EMO.open)return;EMO.vx+=e.movementX||0;EMO.vy+=e.movementY||0;

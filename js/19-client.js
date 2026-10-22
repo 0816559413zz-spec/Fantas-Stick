@@ -9,7 +9,7 @@ function resize(){
 }
 addEventListener('resize',resize);
 
-const VIEW={prev:null,cur:null,tPrev:0,tCur:0};
+const VIEW={prev:null,cur:null,tPrev:0,tCur:0,a:null,ex:null};   // a/ex = ค่าเลื่อนภาพจากบัฟเฟอร์ snapshot (ลูกข่าย) — null = แบบเดิม (โฮสต์)
 let screen='menu',lastBuffKey='',overShown=false,lastCount=0;
 const PARTS=[],TEXTS=[];let shakeA=0;
 // ---------- งบเอฟเฟกต์ (VFX budget) ----------
@@ -54,12 +54,69 @@ function onLobby(m){
   voiceSync();updateVoiceUI();
 }
 function onSnap(s){
+  if(!NET.isHost&&s.T!==undefined&&!NETOLD){sbufPush(s);return;}   // ลูกข่าย: เข้าบัฟเฟอร์ก่อน (ใช้ตอนเรนเดอร์ sbufAdvance)
+  snapApply(s,true);
+}
+function snapApply(s,live){
   if(s.mp&&s.mp!==builtMap&&mapReady(s.mp)){setMapVars(s.mp);buildWorld(s.mp);}
   PROPON=!!s.PB;if(s.PB)for(let i=0;i<PROPS.length;i++)PROPS[i].st=+(s.PB[i]||0);
   if(!NET.isHost){bldParse(s.BD);brkParse(s.BK);}
-  VIEW.prev=VIEW.cur;VIEW.tPrev=VIEW.tCur;VIEW.cur=s;VIEW.tCur=performance.now();
-  if(s.ev)for(const ev of s.ev)fx(ev);
+  if(live){VIEW.prev=VIEW.cur;VIEW.tPrev=VIEW.tCur;VIEW.cur=s;VIEW.tCur=performance.now();VIEW.a=VIEW.ex=null;}
+  if(s.ev&&!(NET.isHost&&document.hidden))for(const ev of s.ev)fx(ev);   // โฮสต์ย่อแท็บ: ไม่สร้างเอฟเฟกต์ (ไม่มีใครเห็น กันอนุภาคค้างเต็มหน่วยความจำ)
   syncOverlays(s);
+}
+// ---------- บัฟเฟอร์ snapshot (ลูกข่าย, ผู้ใช้ 2026-10-22 "เล่นออนไลน์ให้ลื่น") ----------
+// แสดงภาพช้ากว่าโฮสต์นิดหน่อย (~1 ช่วง snapshot + ค่าเน็ตแกว่ง ×2.5, 45–250 ms) แล้วเลื่อนตำแหน่งระหว่าง 2 snapshot ตามเวลาโฮสต์ (s.T)
+// → คนอื่น/ศัตรู/ลูกเวทนุ่มแม้เน็ตไม่นิ่ง • event ของ snapshot เล่นตอน snapshot นั้นถึงคิวแสดง (ภาพกับเอฟเฟกต์ตรงกัน)
+const SBUF={q:[],off:null,lastN:0,jit:0,itv:33,d:80,dT:80,ap:-1};
+const NETOLD=/[?&]netold\b/.test(location.search);   // ?netold = ปิดบัฟเฟอร์ + ทำนายตัวเอง (ไว้เทียบก่อน/หลัง)
+function sbufReset(){SBUF.q.length=0;SBUF.off=null;SBUF.ap=-1;SBUF.jit=0;VIEW.a=VIEW.ex=null;}
+function sbufPush(s){
+  const n=performance.now(),o=n-s.T,Q=SBUF.q;
+  if(Q.length&&s.T<=Q[Q.length-1].T)return;   // ซ้ำ/ย้อนเวลา (ไม่ควรเกิดกับ reliable)
+  if(Q.length){const g=s.T-Q[Q.length-1].T;if(g>0&&g<200)SBUF.itv+=(g-SBUF.itv)*0.1;}
+  // off = เวลาเดินทางต่ำสุด (เครื่องเรา − เวลาโฮสต์) ค่อย ๆ ไหลขึ้นตามนาฬิกา/เส้นทางที่เปลี่ยน • jit = ค่าแกว่งเฉลี่ย
+  SBUF.off=SBUF.off===null||n-SBUF.lastN>3000?o:Math.min(o,SBUF.off+(n-SBUF.lastN)*0.002);SBUF.lastN=n;
+  SBUF.jit+=((o-SBUF.off)-SBUF.jit)*0.1;
+  SBUF.dT=clamp(SBUF.itv*1.15+SBUF.jit*2.5,45,250);
+  s._rcv=n;Q.push(s);if(Q.length>90)Q.splice(0,Q.length-90);
+}
+function sbufAdvance(now){
+  const Q=SBUF.q;if(!Q.length)return;
+  SBUF.d+=(SBUF.dT-SBUF.d)*0.03;   // ปรับค่าหน่วงช้า ๆ (ไม่ให้ภาพกระตุกตอนเปลี่ยน)
+  const rt=now-SBUF.off-SBUF.d;   // เวลาโฮสต์ที่กำลังแสดง
+  let k=Q.findIndex(s=>s.T>rt);if(k<0)k=Q.length-1;   // cur = snapshot ถัดไปจากเวลาที่แสดง (ไม่มี = ล่าสุด, ภาพหยุดรอ)
+  for(let j=0;j<=k;j++)if(Q[j].T>SBUF.ap){snapApply(Q[j],false);SBUF.ap=Q[j].T;}
+  const cur=Q[k],prev=k>0?Q[k-1]:null;
+  if(VIEW.cur!==cur){VIEW.prev=prev;VIEW.cur=cur;VIEW.tPrev=prev?prev._rcv:0;VIEW.tCur=cur._rcv;}
+  VIEW.a=prev?clamp((rt-prev.T)/Math.max(1,cur.T-prev.T),0,1):1;
+  VIEW.ex=clamp((rt-cur.T)/1000,-0.25,0.1);   // ลูกเวท: เลื่อนตามความเร็วจากตำแหน่งใน cur
+  if(k>1)Q.splice(0,k-1);
+}
+// ---------- ทำนายตัวเอง (ลูกข่าย): ตัวเราขยับทันทีที่กด ไม่ต้องรอโฮสต์ตอบ ----------
+// ตำแหน่ง = ตำแหน่งล่าสุดจากโฮสต์ (+เลื่อนตามความเร็วจริงตั้งแต่ได้รับ) + ระยะของปุ่มที่กดไปแล้วแต่โฮสต์ยังไม่เห็น (ช่วง ~ปิง+40 ms) × ความเร็วเดิน (wv)
+// เดินชนกำแพงแล้วโฮสต์ไม่ขยับ → ค่อย ๆ เลิกทำนาย (ไม่ทะลุ) • ผิดไป = ไหลกลับนุ่ม ๆ (ไม่วาร์ป) • Dash/สตัน/ตรึง = wv 0 = ใช้ตำแหน่งโฮสต์ตรง ๆ
+const PRED={h:[],ex:0,ey:0,dx:null,dy:null,k:1,lt:0,lx:0,ly:0,vx:0,vy:0};
+function predictMe(P,dt,now){
+  if(NET.isHost||NETOLD||!SBUF.q.length)return;
+  const L=SBUF.q[SBUF.q.length-1],q=L.P.find(p=>p.id===NET.myId),i=P.findIndex(p=>p.id===NET.myId);
+  if(!q||i<0||!q.al||q.dn){PRED.dx=null;PRED.h.length=0;return;}
+  if(L.T!==PRED.lt){if(PRED.lt&&L.T-PRED.lt<300){const d=(L.T-PRED.lt)/1000;PRED.vx=(q.x-PRED.lx)/d;PRED.vy=(q.y-PRED.ly)/d;}PRED.lt=L.T;PRED.lx=q.x;PRED.ly=q.y;}
+  const W=clamp(NET.rtt||60,30,500);   // วัดจริง (lag 150+แกว่ง 40): ปิงพอดี — +40 แล้วหยุดเดินเลยไป ~0.4 ม. แล้วดึงกลับ
+  let mx=INPUT.mx||0,my=INPUT.my||0;const ml=Math.hypot(mx,my);if(ml>1){mx/=ml;my/=ml;}
+  PRED.h.push({t:now,x:mx,y:my});while(PRED.h.length>2&&PRED.h[1].t<now-W-150)PRED.h.shift();
+  let lx=0,ly=0,past=null;
+  for(let j=0;j<PRED.h.length;j++){const a=PRED.h[j],t1=j+1<PRED.h.length?PRED.h[j+1].t:now,t0=Math.max(a.t,now-W);
+    if(a.t<=now-W)past=a;if(t1>t0){lx+=a.x*(t1-t0)/1000;ly+=a.y*(t1-t0)/1000;}}
+  const ws=q.wv||0,sv=Math.hypot(PRED.vx,PRED.vy);
+  // ชนกำแพง: ปุ่มที่โฮสต์กำลังทำอยู่ (เมื่อ ~W ที่แล้ว) บอกให้เดิน แต่โฮสต์แทบไม่ขยับ
+  const blocked=past&&Math.hypot(past.x,past.y)>0.5&&ws>0&&sv<ws*0.35;
+  PRED.k+=((ws>0&&!blocked?1:0)-PRED.k)*Math.min(1,dt*(blocked?14:6));
+  const age=Math.min(0.1,(now-L._rcv)/1000),bx=q.x+PRED.vx*age,by=q.y+PRED.vy*age,gx=bx+lx*ws*PRED.k,gy=by+ly*ws*PRED.k;
+  if(PRED.dx===null||Math.hypot(PRED.dx-gx,PRED.dy-gy)>160){PRED.ex=PRED.ey=0;}   // เกิดใหม่/วาร์ป = ไปเลย
+  else{PRED.ex=PRED.dx-gx;PRED.ey=PRED.dy-gy;const f=Math.exp(-12*dt);PRED.ex*=f;PRED.ey*=f;}
+  PRED.dx=gx+PRED.ex;PRED.dy=gy+PRED.ey;
+  P[i]=Object.assign({},q,{x:PRED.dx,y:PRED.dy});   // ข้อมูลตัวเราใช้ snapshot ล่าสุด (HP/คูลดาวน์ไม่หน่วงตามบัฟเฟอร์)
 }
 function myPos(){const v=VIEW.cur;return v?v.P.find(p=>p.id===NET.myId):null;}
 
