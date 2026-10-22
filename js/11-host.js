@@ -9,7 +9,7 @@ function plist(){return G.order.map(id=>G.players[id]).filter(Boolean);}
 function cleanName(n){n=String(n||'').trim().slice(0,16);return n||'พ่อมด';}
 
 function freshStats(){
-  return {lst:0,emp:0,dch:3,stS:null,stCd:0,god:0,sdome:null,rail:null,slnT:0,sorb:null,beam:0,hp:200,maxHp:200,alive:true,downed:false,revive:0,respawn:0,vx:0,vy:0,ang:0,z:0,vz:0,fly:false,flyCd:0,root:0,
+  return {lst:0,emp:0,orbs:0,orbBlk:0,dch:3,stS:null,stCd:0,god:0,sdome:null,rail:null,slnT:0,sorb:null,beam:0,hp:200,maxHp:200,alive:true,downed:false,revive:0,respawn:0,vx:0,vy:0,ang:0,z:0,vz:0,fly:false,flyCd:0,root:0,
     cd:{basic:0,q:0,e:0,r:0,f:0,dodge:0},cdMax:{basic:1,q:1,e:1,r:1,f:1,dodge:1},
     shieldOn:false,shieldE:100,shieldT:0,shieldBroken:0,dash:0,dashX:0,dashY:0,inv:0,stun:0,burn:0,bt:0,burnSrc:null,
     ult:0,kills:0,deaths:0,dmgDealt:0,lastHit:null,bo:null,picked:true,taken:[],dfall:null,
@@ -38,12 +38,14 @@ function initHostLobby(){
 function lobbyMsg(){return {t:'lobby',ph:G.ph,mode:G.mode,map:G.map,mpk:G.mapPick||'',code:NET.code,online:NET.online,host:NET.myId,players:plist().map(p=>({id:p.id,n:p.name,c:p.color,lk:p.lk,kt:p.kit,tm:p.lteam}))};}
 function broadcastLobby(){const m=lobbyMsg();sendAll(m);onLobby(m);}
 
+const INPN=['ax','ay','ah','ap','gx','gy','mx','my'];
 function hostOnData(conn,d){
   if(!d||!G)return;
   const id=conn.peer;
   if(d.t==='hello'){
     const reject=r=>{try{conn.send({t:'reject',r});}catch(e){}setTimeout(()=>conn.close(),600);};
     if(G.ph!=='lobby')return reject('เกมกำลังเล่นอยู่ รอจบเกมแล้วค่อยเข้าใหม่นะ');
+    if(G.players[id]){conn.send({t:'welcome',id});return;}   // hello ซ้ำ: อย่าเพิ่มคนเดิมซ้ำ (ไม่งั้นตัวเดินเร็ว 2 เท่า)
     if(plist().length>=6)return reject('ห้องเต็มแล้ว (สูงสุด 6 คน)');
     NET.conns.set(id,conn);
     const p=addPlayer(id,cleanName(d.name),null,String(d.look||'').slice(0,40),String(d.kit||'').slice(0,24));
@@ -53,7 +55,7 @@ function hostOnData(conn,d){
     return;
   }
   const p=G.players[id];if(!p)return;
-  if(d.t==='in'&&d.i&&d.i.c)p.inp=d.i;
+  if(d.t==='in'&&d.i&&d.i.c&&typeof d.i.c==='object'){const i=d.i;for(const k of INPN)if(i[k]!==undefined&&!Number.isFinite(i[k]))delete i[k];p.inp=i;}   // ค่าเล็งที่ไม่ใช่ตัวเลข = ตัด (กัน NaN ลามทั้งเกม)
   else if(d.t==='team'&&G.ph==='lobby'){p.lteam^=1;broadcastLobby();}
   else if(d.t==='kit'&&(G.ph==='lobby'||G.mode==='train')){setKit(p,String(d.k||'').slice(0,24));broadcastLobby();}
   else if(d.t==='tr')trCmd(p,d);
@@ -114,7 +116,7 @@ function hostToLobby(){G.ph='lobby';G.proj=[];G.en=[];broadcastLobby();}
 
 function resetBody(p,x,y){
   Object.assign(p,{x,y,z:0,vz:0,fly:false,flyCd:0,root:0,vx:0,vy:0,hp:p.maxHp,alive:true,downed:false,revive:0,stun:0,burn:0,dash:0,inv:0,
-    shieldOn:false,shieldE:100,shieldBroken:0,respawn:0});
+    shieldOn:false,shieldE:100,shieldBroken:0,respawn:0,slam:false,slam3:null,dashSp:0});   // slam: ตายกลางท่ากระโดดฟาด (น้ำแข็ง) แล้วค้าง = ฟันไม่ได้หลังเกิดใหม่
   for(const k of CDK)p.cd[k]=0;clearStatus(p);p.trail=null;earthReset(p);
   p.ang=Math.atan2(MH/2-y,MW/2-x);
 }

@@ -309,6 +309,8 @@ function damage(t,amt,srcId,kind){
 function playerDown(t,srcId){
   t.shieldOn=false;t.burn=0;t.fly=false;
   t.stS=null;t.sdome=null;t.rail=null;t.slnT=0;t.beam=0;t.sdHit=null;earthReset(t);if(t.god>0){t.god=0;t.xhp=0;}
+  // ท่าที่ง้าง/ค้างอยู่ตอนล้ม: ไม่งั้นคนล้ม (co-op) ยังปล่อยท่าได้ หรือท่าค้างไว้แล้วออกเองทันทีที่ถูกชุบ
+  t.dfall=null;t.snapT=0;t.grT=0;t.slam=false;t.slam3=null;t.dchgOn=false;t.dchg=0;t.chg=0;t.dash=0;t.dashSp=0;t.trail=null;
   if(G.mode==='coop'){
     t.downed=true;t.revive=0;t.deaths++;
     feed(`💀 ${t.name} ล้ม! ไปยืนข้างๆ เพื่อชุบ`);

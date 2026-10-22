@@ -92,7 +92,7 @@ function trCmd(p,d){
   if(d.c==='pvp'){const v=clamp(d.v|0,0,2);if(G.tr.pvp!==v){G.tr.pvp=v;trTeams();feed(['🤝 ทุกคนทีมเดียวกัน','⚔️ แบ่ง 2 ทีม','💥 ตัวใครตัวมัน'][v]);}}
   else if(d.c==='team'){p.trT=d.v?1:0;trTeams();if(G.tr.pvp===1)feed(`${p.name} → ${TEAMN[p.trT]}`);}
   else if(d.c==='set'&&TR_KEYS.includes(d.k)){G.tr[d.k]=d.v?1:0;if(d.k==='ult'&&!d.v)for(const q of plist())q.ult=0;}
-  else if(d.c==='spawn'&&(EDEF[d.e])){
+  else if(d.c==='spawn'&&typeof d.e==='string'&&Object.prototype.hasOwnProperty.call(EDEF,d.e)){
     const cnt=clamp(d.n|0||1,1,10),z=trZone();
     for(let i=0;i<cnt&&G.en.length<40;i++){
       const a=rnd(0,Math.PI*2),r=rnd(0,z.r*0.55);
@@ -281,7 +281,7 @@ function startMeeting(p,body){
 }
 function hostVote(p,v){
   if(!G||G.ph!=='meet'||!G.meet||G.meet.res||p.gh||G.meet.votes[p.id]!==undefined)return;
-  if(v!=='skip'&&!(G.players[v]&&!G.players[v].gh))return;
+  if(v!=='skip'&&!plist().some(q=>q.id===v&&!q.gh))return;   // v มาจากเครือข่าย: ต้องเป็นผู้เล่นจริงในห้อง
   G.meet.votes[p.id]=v;emit({k:'voted',x:0,y:0});
 }
 function meetTick(dt){
@@ -298,6 +298,7 @@ function meetTick(dt){
     let best=null,bc=0,tie=false;
     for(const [k,c] of Object.entries(cnt)){if(c>bc){best=k;bc=c;tie=false;}else if(c===bc)tie=true;}
     if(!best||best==='skip'||tie)m.res='ไม่มีใครถูกโหวตออก';
+    else if(!plist().some(x=>x.id===best))m.res='ไม่มีใครถูกโหวตออก (คนที่ถูกโหวตออกจากห้องไปแล้ว)';   // คนโดนโหวตหลุดระหว่างประชุม = เดิมโฮสต์ค้างทั้งเกม
     else{const q=G.players[best];q.gh=true;m.res=`${q.name} ถูกโหวตออก — ${q.role==='imp'?'เป็นฝ่ายโวลเดอมอร์จริง! 🐍':'ไม่ใช่โวลเดอมอร์ ⚡'}`;}
     m.rt=4.5;m.tally=cnt;emit({k:'eject',x:0,y:0});
   }
@@ -366,13 +367,14 @@ function makeSnap(){
   };
 }
 // ตัววัดเวลาแต่ละส่วน (เปิดด้วย WD.PROF.on=true แล้วดู WD.PROF.t)
-const PROF={on:false,t:{},n:{}};
+const PROF={on:false,t:{},n:{}};let hostErrN=0;
 function pf(k,t0){if(!PROF.on)return;const d=performance.now()-t0;PROF.t[k]=(PROF.t[k]||0)+d;PROF.n[k]=(PROF.n[k]||0)+1;}
 setInterval(()=>{
   if(!NET.isHost||!G||G.ph==='lobby')return;
   const t=performance.now();
   const dt=Math.min(0.05,(t-hostLast)/1000);hostLast=t;
-  hostTick(dt);tickN++;pf('hostTick',t);
+  try{hostTick(dt);}catch(e){if(hostErrN++%600===0)console.error('hostTick',e);}   // บั๊กหลุดมา 1 จุด = ไม่ให้เกมค้างทั้งห้อง (snapshot ยังส่งต่อ)
+  tickN++;pf('hostTick',t);
   const t1=performance.now(),base=makeSnap();
   const evl=EVL;EVL=[];
   onSnap(Object.assign({},base,{ev:evl}));pf('snap',t1);

@@ -5,6 +5,9 @@ function hostPick(p,i){
   b.ap(p);p.picked=true;p.taken.push(b.n);
   emit({k:'buff',id:p.id});
 }
+// ล้างของในสนามที่มีเวลาจำกัด (วง/ฟ้าผ่าหน่วง/คลื่น/พื้นน้ำแข็ง ...) ตอนขึ้นชั้นใหม่ (co-op) / รอบใหม่ (ดวล)
+// เดิมค้างนิ่งไว้ช่วงเลือกบัฟ/นับถอยหลัง แล้วกลับมาทำดาเมจต่อทั้งที่ภาพบนจอหายไปแล้ว (ภาพนับเวลาเอง)
+function clearField(){Object.assign(G,{proj:[],bombs:[],zones:[],strikes:[],chan:[],waves:[],ices:[],glac:[],erings:[],slines:[],sorbs:[],sballs:[],sdomes:[]});for(const p of plist())p.iceB=0;}
 function modeLogic(dt){
   if(G.banner){G.banner.t-=dt;if(G.banner.t<=0)G.banner=null;}
   const ps=plist();
@@ -23,7 +26,7 @@ function modeLogic(dt){
             else p.hp=Math.min(p.maxHp,p.hp+p.maxHp*0.3);
             p.bo=shuffle(BUFFS.map((_,i)=>i)).slice(0,3);p.picked=false;p.stun=0;p.burn=0;p.revive=0;p.root=0;
           });
-          banner(`ผ่านชั้น ${G.wave}! เลือกพลังเสริม`,3);G.bombs=[];
+          banner(`ผ่านชั้น ${G.wave}! เลือกพลังเสริม`,3);clearField();
           emit({k:'wave',x:0,y:0});
         }
       }else if(G.ph==='buff'){
@@ -46,7 +49,7 @@ function modeLogic(dt){
         G.rendT-=dt;
         if(G.rendT<=0){
           if(ps.some(p=>(G.rw[p.id]||0)>=2))endMatch();
-          else{G.round++;placeAll();G.ph='count';G.cdT=3;banner(`รอบที่ ${G.round}`,2);}
+          else{G.round++;clearField();placeAll();G.ph='count';G.cdT=3;banner(`รอบที่ ${G.round}`,2);}
         }
       }
       break;

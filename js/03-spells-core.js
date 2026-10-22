@@ -52,7 +52,10 @@ function parseKit(str){
   return KITP[str]=k;
 }
 function cleanKit(s){return parseKit(parseKit(s).str).str;}
-function setKit(p,str){p.fmode=0;p.orbs=0;p.orbBlk=0;p.kit=cleanKit(str);const k=parseKit(p.kit);p.pathIdx=k.path;p.kitIds=k.ids.map(i=>SPELL_LIST[i].id);p.ultId=SPELL_LIST[k.ult].id;}
+function setKit(p,str){const old=p.pathIdx;p.fmode=0;p.orbs=0;p.orbBlk=0;p.kit=cleanKit(str);const k=parseKit(p.kit);p.pathIdx=k.path;p.kitIds=k.ids.map(i=>SPELL_LIST[i].id);p.ultId=SPELL_LIST[k.ult].id;
+  if(old!==undefined&&old!==p.pathIdx&&G&&G.ph!=='lobby')pathReset(p);}
+// เปลี่ยนสายกลางเกม (เมนูทดลอง): ล้างท่าค้างของสายเก่า — ไม่งั้นค้างลอยฟ้า (Wrath) / เดินไม่ได้ (Railgun/Auger) / ร่างเทพค้าง
+function pathReset(p){clearStatus(p);earthReset(p);Object.assign(p,{stS:null,stCd:0,god:0,xhp:0,sdome:null,rail:null,slnT:0,sorb:null,beam:0,sdHit:null,slam:false,slam3:null,chg:0,dash:0,dashSp:0,trail:null,shieldOn:false});}
 
 // ---------- สถานะ (ใช้ได้ทั้งผู้เล่นและศัตรู) ----------
 const isBig=t=>t.isE&&(t.type==='troll'||t.type==='queen'||(EDEF[t.type]&&EDEF[t.type].boss));
