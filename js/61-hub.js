@@ -453,7 +453,9 @@ function hubFrame(out,f0,dist,yaw,pitch,nx,ny,fov){
 const _hcA={p:new THREE.Vector3(),l:new THREE.Vector3()},_hcB={p:new THREE.Vector3(),l:new THREE.Vector3()};
 function hubCamMenu(o){const n=cam.aspect<1.45?0.3:0.38;return hubFrame(o,_ht.set(HB.TB.x+0.4,1.05,HB.TB.z-0.45),4.7,0.46,0.07,n,0.02,44);}
 function hubCamPose(o){return hubFrame(o,_ht.set(HB.P1.x,0.98,HB.P1.z+0.1),3.05,0,0.22,0,0,48);}
-function hubCamRoom(o){const n=cam.aspect<1.45?0.5:0.44;return hubFrame(o,_ht.set(0.7,1.1,-0.2),10.5,-0.1,0.09,n,0.06,34);}
+// ล็อบบี้: ให้แถวตัวละคร (x −2.1…3.75 ม.) อยู่เต็มพื้นที่ขวาของแผงห้องพอดีทุกขนาดจอ (จอแคบ = ถอยกล้อง) — ตรวจ 1891×942 / 1366×768 / 1024×768
+function hubCamRoom(o){const th=Math.tan(17*Math.PI/180),R=typeof hubRoomRect==='function'?hubRoomRect():null,nx0=R?Math.min(0.2,(R.l+R.w)/Math.max(1,innerWidth)*2-1):-0.1;
+  return hubFrame(o,_ht.set(0.83,1.1,-0.2),Math.max(10.5,6.6/((1-nx0)*th*cam.aspect)),-0.1,0.09,(nx0+1)/2,0.06,34);}
 
 // ---------- ลำดับตอนกด "เล่น" ----------
 function hubGo(){
@@ -495,8 +497,9 @@ function hubSnapModes(){
 }
 
 // ---------- ล็อบบี้: ใครยืนตรงไหน ท่าอะไร ----------
-const HL_SPOTS=[[0.15,1.35],[-1.75,0.25],[2.05,0.15],[-0.85,-1.25],[1.15,-1.45],[3.3,-0.85]];
-const HL_TEAM=[[[-1.25,1.2],[-2.75,0.05],[-1.7,-1.3]],[[1.45,1.05],[2.95,-0.1],[1.95,-1.4]]];
+// ที่ยืนทั้งหมดอยู่ครึ่งขวาของจอ (แผงห้องบังครึ่งซ้าย ~x < −2) • แถวหน้า/หลังสลับกันไม่ให้บังกัน (ตรวจ 2026-10-23 ที่ 1891×942: เดิมทีมฟ้า 2 คนไปอยู่หลังแผง)
+const HL_SPOTS=[[0.85,1.25],[-1.15,0.45],[2.85,0.4],[-0.15,-1.15],[1.85,-1.15],[3.55,-1.45]];
+const HL_TEAM=[[[-0.85,1.1],[-1.6,-0.4],[0.35,-1.35]],[[2.25,1.1],[3.25,-0.35],[1.55,-1.4]]];
 function hubLobbyLayout(L){
   const out=[],team=MODES[L.mode]&&MODES[L.mode].team,P=L.players.slice();
   const me=P.findIndex(p=>p.id===NET.myId);if(me>0)P.unshift(P.splice(me,1)[0]);
@@ -511,7 +514,7 @@ function hubLobbyTick(dt,now){
     const id=s.p.id,lk=s.p.lk||lookStr(getLook(id));let c=HUB.chars.get(id);
     if(c&&c.lk!==lk){HUBL.remove(c.g);disposeTree(c.g);HUB.chars.delete(id);c=null;}
     if(!c){c=hubMakeChar(lk);if(!c)return;HUB.chars.set(id,c);HUBL.add(c.g);c.g.position.set(s.x,0.2,s.z);c.inT=0;
-      const pn=id===NET.myId?'spread':LOBBY_POSES[1+((i+hashStr(id))%5)];c.poseN0=pn;c.ry=c.ryT=(HPOSE[pn].ry||0)-s.x*0.06;hubSetPose(c,pn);c.pw=1;for(const k of HPK)if(HPOSE[pn][k])c.cur[k].set(...HPOSE[pn][k]).normalize();
+      let pn='spread';if(id!==NET.myId){const used=new Set([...HUB.chars.values()].map(q=>q.poseN0));const h=hashStr(id);for(let k=0;k<5;k++){pn=LOBBY_POSES[1+((h+k)%5)];if(!used.has(pn))break;}}c.poseN0=pn;c.ry=c.ryT=(HPOSE[pn].ry||0)-s.x*0.06;hubSetPose(c,pn);c.pw=1;for(const k of HPK)if(HPOSE[pn][k])c.cur[k].set(...HPOSE[pn][k]).normalize();
       if(c.wand)c.wand.visible=true;c.wandOn=true;}
     want.add(id);
     c.g.position.x+=(s.x-c.g.position.x)*(1-Math.exp(-6*dt));c.g.position.z+=(s.z-c.g.position.z)*(1-Math.exp(-6*dt));c.g.position.y=0.2;

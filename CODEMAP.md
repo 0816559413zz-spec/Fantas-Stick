@@ -411,15 +411,15 @@ GRASS:52 GR_GLSL_V:53 GR_BEGIN:55 grassMat:79 grassBuild:93 _grBasic:107 grassBa
 WARM:11 WARM_FXDIR:12 WARM_COMMON:12 WARM_X:13 WARM_Y:13 warmKeep:15 warmCompile:21 WARM_SKIP:24 warmFx:25 warmFxEnd:33 warmGather:35 warmPaths:37 warmStep:39 warmTick:54
 §63 ภาพจากโค้ดของแต่ละสาย (เฟรมละฟังก์ชัน)
 
-## js/52-social.js (171) — เล่นกับเพื่อน (ผู้ใช้ 2026-10-22): แชท + อีโมต + ดูเพื่อนเล่น (spectator) + ป้ายต่อเน็ตให…
+## js/52-social.js (172) — เล่นกับเพื่อน (ผู้ใช้ 2026-10-22): แชท + อีโมต + ดูเพื่อนเล่น (spectator) + ป้ายต่อเน็ตให…
 §6 แชท: Enter = พิมพ์ / Enter อีกที = ส่ง / Esc = ปิด • ข้อความขึ้นมุมซ้…
-CHAT:7 chatOpen:27 chatClose:32 chatSend:41 chatAdd:46 escH:51 onChat:52 drawSocial:58 drawPing:82
-§88 อีโมต: กด Z ค้าง → วงล้อ 6 แบบ ลากเมาส์ไปทางที่ต้องการ ปล่อย Z = เล่น…
-EMOS:89 EMO:90 drawEmoWheel:108 emoFx:121 emotePose:123
-§139 ดูเพื่อนเล่น: ตายแล้ว ≥2 วิ หรือเข้ามาเป็นคนดู → กล้องตามคนอื่น คลิกซ…
-SPEC:140 specTarget:141 specCycle:151 drawSpecHint:156
-§164 ป้าย "กำลังต่อใหม่..." (ลูกข่ายหลุดจากโฮสต์ js/10 netLost)
-drawNetBanner:165
+CHAT:7 chatOpen:27 chatClose:32 chatSend:42 chatAdd:47 escH:52 onChat:53 drawSocial:59 drawPing:83
+§89 อีโมต: กด Z ค้าง → วงล้อ 6 แบบ ลากเมาส์ไปทางที่ต้องการ ปล่อย Z = เล่น…
+EMOS:90 EMO:91 drawEmoWheel:109 emoFx:122 emotePose:124
+§140 ดูเพื่อนเล่น: ตายแล้ว ≥2 วิ หรือเข้ามาเป็นคนดู → กล้องตามคนอื่น คลิกซ…
+SPEC:141 specTarget:142 specCycle:152 drawSpecHint:157
+§165 ป้าย "กำลังต่อใหม่..." (ลูกข่ายหลุดจากโฮสต์ js/10 netLost)
+drawNetBanner:166
 
 ## js/53-victory.js (165) — จบเกม (ผู้ใช้ 2026-10-22): VICTORY / DEFEAT แบบ Overwatch แต่เป็นเวทมนตร์ (สายฟ้า + ไฟ) +…
 VIC:6 VPAL:7 vicKind:17 vicStart:25 vicStop:31 vicSkip:32 vicBolt:36 vicLoop:42
@@ -462,7 +462,7 @@ MN_BLOCK:259 mnRay:260 mnPick:261 mnHot:267 mnToy:285
 §290 เรนเดอร์ (เรียกจาก renderStage js/32 — คืน true = จัดการแล้ว)
 mnRestore:291 mnMenuRender:297
 
-## js/61-hub.js (598) — 
+## js/61-hub.js (601) — 
 HUBS:9 HUBL:9 HUB:12 HB:15 _hq:17 _hq2:17 _hq3:17 _hv:17 _hv2:17 _hv3:17 _hY:17 hEase:18 hSm:19
 §21 อนุภาคเรืองแสงของเมนู (ขนาด/สี/ความจางต่อเม็ด)
 hubPS:22 hCol:48 H_SPARK:49
@@ -479,25 +479,25 @@ hubMakeOrb:372 hubOrbTick:386 hubBurst:402
 §405 สร้างฉาก (ครั้งแรกที่เปิดเมนู)
 hubBuild:406 hubPlaceWand:413 hubMenuChar:425 hubResetMenu:432
 §441 กล้อง
-_hf0:443 _hf1:443 _hf2:443 _hf3:443 hubFrame:444 _hcA:453 _hcB:453 hubCamMenu:454 hubCamPose:455 hubCamRoom:456
-§458 ลำดับตอนกด "เล่น"
-hubGo:459 hubBack:463 hubFadeDo:466 hubSeq:467 hubSnapModes:489
-§497 ล็อบบี้: ใครยืนตรงไหน ท่าอะไร
-HL_SPOTS:498 HL_TEAM:499 hubLobbyLayout:500 hubLobbyTick:507 hubLabels:533
-§547 เรนเดอร์ (เรียกจาก renderStage — คืน true = วาดแล้ว)
-hubRender:548
+_hf0:443 _hf1:443 _hf2:443 _hf3:443 hubFrame:444 _hcA:453 _hcB:453 hubCamMenu:454 hubCamPose:455 hubCamRoom:457
+§460 ลำดับตอนกด "เล่น"
+hubGo:461 hubBack:465 hubFadeDo:468 hubSeq:469 hubSnapModes:491
+§499 ล็อบบี้: ใครยืนตรงไหน ท่าอะไร
+HL_SPOTS:501 HL_TEAM:502 hubLobbyLayout:503 hubLobbyTick:510 hubLabels:536
+§550 เรนเดอร์ (เรียกจาก renderStage — คืน true = วาดแล้ว)
+hubRender:551
 
-## js/62-hub-ui.js (248) — 
-HMODES:8 HUI:13 HICO:15 hSvg:29 hHex:30 H_STAR:31
-§76 สถานะหน้าจอ: menu / modes / room / off
-hubUiState:77 hubMeChip:85 hubOnScreen:91
-§100 เมนูแรก
-hubJoinGo:103
-§114 การ์ดโหมด
-hubPickMode:124 hubFlipKill:137 hubRoomRect:138 hubFlip:139 hubFlipEnd:153
-§160 แผงห้อง (การ์ดที่ขยายแล้ว)
-HUI_MAPN:161 hubLobby:162 hubKitChanged:240
-§242 เริ่มต้น
+## js/62-hub-ui.js (254) — 
+HUI_IMG:9 HMODES:10 HUI:15 HICO:17 hSvg:31 hHex:32 H_STAR:33
+§79 สถานะหน้าจอ: menu / modes / room / off
+hubUiState:80 hubMeChip:88 hubOnScreen:94
+§103 เมนูแรก
+hubJoinGo:106
+§117 การ์ดโหมด
+hubPickMode:127 hubFlipKill:140 hubRoomRect:141 hubFlip:142 hubFlipEnd:156
+§163 แผงห้อง (การ์ดที่ขยายแล้ว)
+HUI_MAPN:164 hubLobby:165 hubRoomClick:227 hubKitChanged:246
+§248 เริ่มต้น
 
 ## js/63-skillwheel.js (270) — วงเลือกคาถา (ผู้ใช้ 2026-10-22, designs/ui-menu.md "วงคาถา + ห้าเหลี่ยม 4 ช่อง") • สไตล์ม…
 SKW:9 SKW_PO:10 SKW_PI:10 SKW_RUNE:11 skwPaths:12 skwKey:13 skwOffN:14 skwChanged:15 skwSnd:16
@@ -514,7 +514,7 @@ skwBurst:212 skwFxStart:216 skwFxTick:221
 §241 เปิด/ปิด
 skwOpen:242 skwClose:252
 
-## js/64-mappick.js (154) — 
-MPK_TXT:7 MPK_SKY:19 MPK_I:21 MPK_DICE:31 MPK:36 mpkE:37 mpkC:37 mpkSnd:38 mpkCut:39 mpkName:40 mpkCardHTML:41 mpkBuild:51 mpkUp:89 mpkMeasure:101 mpkIdx:102 mpkStep:103 mpkTo:104 mpkPick:105 mpkOpen:111 mpkClose:125 mpkLoop:129 mpkTick:131
+## js/64-mappick.js (156) — 
+MPK_TXT:7 MPK_SKY:19 MPK_I:21 MPK_DICE:31 MPK:36 mpkE:37 mpkC:37 mpkSnd:38 mpkCut:39 mpkName:40 mpkCardHTML:41 mpkBuild:51 mpkUp:89 mpkMeasure:101 mpkIdx:102 mpkStep:103 mpkTo:104 mpkPick:105 mpkOpen:111 mpkClose:126 mpkLoop:130 mpkTick:132
 
-(65 files, 15186 lines)
+(65 files, 15198 lines)

@@ -25,8 +25,8 @@ const MAP_SHOTS={
 };
 // การ์ดโหมด (แนวตั้ง 600×800) • map = แผนที่ที่ใช้ถ่าย • mode = โหมดเกมตอนถ่าย (train = มีหุ่นซ้อม) • grade = โทนมืดฟ้า-ม่วงเข้าธีมเมนู 0..1
 const MODE_SHOTS={
-  ffa:  {map:'ruins',     pos:[-20,8,20],  at:[0,3,0],   fov:55, exp:1.0,  grade:0.55},
-  tdm:  {map:'castle',    pos:[0,10,22],   at:[0,4,0],   fov:55, exp:1.2,  grade:0.55},
+  ffa:  {map:'ruins',     pos:[-14,12,27], at:[0,2,0],   fov:55, exp:1.0,  grade:0.55},
+  tdm:  {map:'castle',    pos:[-9,11,24],  at:[0,3,-2],   fov:55, exp:1.2,  grade:0.55},
   coop: {map:'forest',    pos:[-12,6,12],  at:[0,3,0],   fov:55, exp:1.2,  grade:0.6},
   train:{map:'test',      mode:'train', pos:[0,6,14], at:[0,2,0], fov:55, exp:1.0, grade:0.5},
 };

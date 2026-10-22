@@ -36,6 +36,7 @@ addEventListener('keydown',e=>{
   if(e.target&&(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA'||e.target.tagName==='SELECT'))return;
   if((screen!=='game'&&screen!=='lobby')||!NET.online&&!NET.isHost)return;
   if(screen==='game'&&crOpen)return;
+  for(const id of ['mpk','skw']){const o=document.getElementById(id);if(o&&o.classList.contains('on'))return;}   // หน้าเลือกแผนที่/วงคาถาใช้ Enter เอง
   e.preventDefault();chatOpen();
 },true);
 function chatSend(m){

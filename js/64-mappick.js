@@ -33,7 +33,7 @@ const MPK_DICE=`<svg class="mpkSig" viewBox="0 0 160 160"><g class="r1"><circle 
   `<g class="die"><path d="M80 46l30 17v34l-30 17-30-17V63z"/><path d="M50 63l30 17 30-17M80 80v34"/></g>`+
   `<g class="pip"><ellipse cx="80" cy="63" rx="4.2" ry="2.4"/><circle cx="58" cy="76.5" r="2.3"/><circle cx="72" cy="100.5" r="2.3"/><circle cx="102" cy="76.5" r="2.3"/><circle cx="95" cy="88.5" r="2.3"/><circle cx="88" cy="100.5" r="2.3"/></g>`+
   `<g class="st"><path d="M30 34l1.4 3.6 3.6 1.4-3.6 1.4-1.4 3.6-1.4-3.6-3.6-1.4 3.6-1.4z"/><path d="M132 118l1 2.6 2.6 1-2.6 1-1 2.6-1-2.6-2.6-1 2.6-1z"/><path d="M128 30l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z"/></g></svg>`;
-const MPK={el:null,ring:null,dots:null,o:null,keys:[],cards:[],n:0,wrap:false,pos:0,tgt:0,W:300,H:400,on:false,t0:0,shut:0,last:0,raf:0,drag:null,swallow:false,hov:-1,pick:-1,wAcc:0,wT:0,wL:0,hT:0,dot:-1};
+const MPK={el:null,ring:null,dots:null,o:null,keys:[],cards:[],n:0,wrap:false,pos:0,tgt:0,W:300,H:400,ox:150,oy:200,on:false,t0:0,shut:0,last:0,raf:0,drag:null,swallow:false,hov:-1,pick:-1,wAcc:0,wT:0,wL:0,hT:0,dot:-1};
 const mpkE=t=>1-Math.pow(1-t,3), mpkC=t=>t<0?0:t>1?1:t;
 function mpkSnd(n,v){try{snd(n,{vol:v==null?1:v,rev:0});}catch(e){}}
 function mpkCut(s,n){s=String(s||'');if(s.length<=n)return s;const c=s.slice(0,n),i=c.lastIndexOf(' ');return (i>n*.5?c.slice(0,i):c)+'…';}
@@ -98,7 +98,7 @@ addEventListener('keydown',e=>{if(!MPK.on)return;const c=e.code;
   else if(c==='Escape')mpkClose();else{e.stopImmediatePropagation();return;}
   e.preventDefault();e.stopImmediatePropagation();},true);
 addEventListener('resize',()=>{if(MPK.on){mpkMeasure();mpkLoop();}});
-function mpkMeasure(){const c=MPK.ring&&MPK.ring.firstElementChild;if(c){MPK.W=c.offsetWidth||300;MPK.H=c.offsetHeight||400;}if(MPK.ring)MPK.ring.style.perspective=Math.round(MPK.W*2.3)+'px';}
+function mpkMeasure(){const c=MPK.ring&&MPK.ring.firstElementChild;if(c){MPK.W=c.offsetWidth||300;MPK.H=c.offsetHeight||400;}if(MPK.ring)MPK.ring.style.perspective=Math.round(MPK.W*2.3)+'px';MPK.ox=Math.round(MPK.W/2);MPK.oy=Math.round(MPK.H/2);}   // ox/oy เต็มพิกเซล = ตัวหนังสือใบกลางคม
 function mpkIdx(){const n=MPK.n||1;return ((Math.round(MPK.tgt)%n)+n)%n;}
 function mpkStep(d){if(!MPK.on||!MPK.n)return;let t=Math.round(MPK.tgt)+d;if(!MPK.wrap)t=Math.max(0,Math.min(MPK.n-1,t));MPK.tgt=t;mpkLoop();}
 function mpkTo(i){if(!MPK.on||!MPK.n)return;if(MPK.wrap){const n=MPK.n;let d=i-mpkIdx();if(d>n/2)d-=n;if(d<-n/2)d+=n;MPK.tgt=Math.round(MPK.tgt)+d;}else MPK.tgt=i;mpkLoop();}
@@ -120,6 +120,7 @@ function mpkOpen(o){
   MPK.pos=MPK.tgt=Math.max(0,ks.indexOf(o.cur||''));
   MPK.on=true;MPK.shut=0;MPK.pick=-1;MPK.hov=-1;MPK.drag=null;MPK.swallow=false;clearTimeout(MPK.hT);
   MPK.el.hidden=false;MPK.el.classList.remove('drag');void MPK.el.offsetWidth;MPK.el.classList.add('on');
+  try{const a=document.activeElement;if(a&&a!==document.body&&a.blur)a.blur();}catch(e){}   // ช่องพิมพ์ข้างหลังไม่รับตัวอักษรต่อ
   mpkMeasure();MPK.t0=MPK.last=performance.now();mpkLoop();
 }
 function mpkClose(){
@@ -139,16 +140,17 @@ function mpkTick(now){
     const ad=Math.abs(d),sg=d<0?-1:1,q=Math.min(ad,3.4);
     c.h+=((i===MPK.hov&&MPK.on?1:0)-c.h)*kh;if(Math.abs(c.h-(i===MPK.hov?1:0))>.002)busy=true;
     let x=sg*W*(.9*q-.02*q*q),z=-W*(.55*q-.05*q*q),ry=sg*(34*Math.min(q,1)+6*Math.max(0,Math.min(q,2)-1)),y=0;
-    let op=ad<2.3?1:Math.max(0,1-(ad-2.3)/.6),dim=Math.min(ad,2.6)*.25*(1-.5*c.h);
+    let op=ad<2.3?1:Math.max(0,1-(ad-2.3)/.6),dim=Math.min(ad,2.6)*.28*(1-.5*c.h);
     if(ad>.5)z+=c.h*W*.06;
     if(S<0){const e=mpkE(mpkC((T-.05-.075*Math.min(ad,4))/.9));x*=.22+.78*e;z-=(1-e)*W*1.1;y+=(1-e)*H*.14;ry*=.3+.7*e;op*=mpkC(e*1.7);}
     else if(i===MPK.pick){const e=mpkC(S/.5);z+=mpkE(e)*W*.16;y-=mpkE(e)*H*.03;op*=1-e*e;}
     else{const e=mpkC((S-.03*(3-Math.min(ad,3)))/.36),f=e*e;x*=1-.25*f;z-=f*W*.7;y+=f*H*.1;op*=1-f;}
-    const tr=`translate(-50%,-50%) translate3d(${x.toFixed(1)}px,${y.toFixed(1)}px,${z.toFixed(1)}px) rotateY(${ry.toFixed(2)}deg)`,key=tr+op.toFixed(3)+dim.toFixed(3);
+    const tr=`translate3d(${(x-MPK.ox).toFixed(1)}px,${(y-MPK.oy).toFixed(1)}px,${z.toFixed(1)}px) rotateY(${ry.toFixed(2)}deg)`,key=tr+op.toFixed(3)+dim.toFixed(3);
     if(key!==c.st){c.st=key;const s=c.el.style;s.transform=tr;s.opacity=op.toFixed(3);s.zIndex=String(300-Math.round(ad*40));s.pointerEvents=op<.25?'none':'';c.dim.style.opacity=dim.toFixed(3);}
     const cc=ad<.5;if(cc!==c.cc){c.cc=cc;c.el.classList.toggle('c',cc);}
   }
-  const di=((Math.round(MPK.pos)%n)+n)%n;if(di!==MPK.dot){if(MPK.dot>=0&&MPK.on)mpkSnd('ui_hover',.35);MPK.dot=di;[...MPK.dots.children].forEach((e,j)=>e.classList.toggle('on',j===di));}
+  const di=((Math.round(MPK.pos)%n)+n)%n;if(di!==MPK.dot){if(MPK.dot>=0&&MPK.on)mpkSnd('ui_hover',.35);MPK.dot=di;[...MPK.dots.children].forEach((e,j)=>e.classList.toggle('on',j===di));
+    MPK.el.querySelectorAll('.mpkArr').forEach(b=>b.classList.toggle('off',!MPK.wrap&&(+b.dataset.d<0?di===0:di===n-1)));}
   if(busy)mpkLoop();
 }
 if(typeof WD!=='undefined')WD.mpkOpen=mpkOpen;

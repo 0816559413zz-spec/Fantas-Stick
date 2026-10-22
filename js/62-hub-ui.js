@@ -5,6 +5,8 @@
 //  → กดการ์ด: พื้นหลังเฟดดำ การ์ดพลิกแล้วขยายเป็นแผงห้อง (ห้องออนไลน์อัตโนมัติ) → ล็อบบี้แท่นวงเวท (ทุกคนยืนโชว์ด้านขวา)
 //  ปุ่มเดิม (#btnSettings #btnGuide #btnMyMusic #btnStart #btnTeam #btnCopy …) ยังอยู่ — UI ใหม่เรียกใช้ปุ่มเหล่านั้น
 // =====================================================================
+// ภาพการ์ด/แผนที่: URL เต็ม — url() ใน CSS var อ่านเทียบไฟล์ css/hub.css ไม่ใช่หน้าเว็บ (เดิมชี้ css/assets/... = ภาพไม่ขึ้น)
+const HUI_IMG=new URL('assets/ui/',location.href).href;
 const HMODES=[
   {k:'ffa',en:'Free For All',th:'ทุกคนคือศัตรู',d:'ใครได้ 10 kill ก่อน ชนะ',n:'2–6'},
   {k:'tdm',en:'Team PvP',th:'สองทีมปะทะกัน',d:'ทีมแรกที่ได้ 15 kill ชนะ',n:'2–6'},
@@ -62,7 +64,7 @@ document.body.insertAdjacentHTML('beforeend',`
     <button class="hBack" id="hModesBack">${hSvg('back')}<span>กลับ</span></button>
     <div class="hModeHead"><b>SELECT MODE</b><span>เลือกโหมด</span></div>
     <div class="hCards" id="hCards">${HMODES.map((m,i)=>`
-      <button class="hCard" data-mode="${m.k}" style="--i:${i};--bg:url('assets/ui/modes/${m.k}.jpg')">
+      <button class="hCard" data-mode="${m.k}" style="--i:${i};--bg:url('${HUI_IMG}modes/${m.k}.jpg')">
         <span class="cBg"></span><span class="cShade"></span><span class="cSweep"></span>
         <span class="cHex">${hHex(m.k)}</span>
         <span class="cTxt"><b>${m.en}</b><i>${m.th}</i><small>${m.d}</small></span>
@@ -70,6 +72,7 @@ document.body.insertAdjacentHTML('beforeend',`
       </button>`).join('')}</div>
   </div>
   <div class="hRoom" id="hRoom"></div>
+  <div class="hGo" id="hGo"></div>
 </div>`);
 $('#hMe').onclick=()=>{ac();openCreator(false);};
 
@@ -91,7 +94,7 @@ function hubMeChip(){
 function hubOnScreen(s){
   if(!HUB.on)return;
   document.body.classList.add('hub');
-  if(s!=='lobby'){const r=$('#hRoom');if(r)r.classList.remove('on');}
+  if(s!=='lobby'){const r=$('#hRoom');if(r)r.classList.remove('on');const g=$('#hGo');if(g)g.classList.remove('on');}
   if(s==='game'){document.body.classList.remove('hubOn');HUI.st='';['hS-menu','hS-modes','hS-room','hS-go'].forEach(c=>document.body.classList.remove(c));hubFlipKill();return;}
   if(s==='lobby'){const fl=HUI.st==='flip';if(!fl)hubUiState('room');if(HUI.pend){HUI.pend=false;if(!fl)setTimeout(()=>$('#hFade').classList.remove('on'),260);}return;}
   if(s==='menu'&&!HUI.st)hubUiState(HUB.st==='modes'?'modes':'menu');
@@ -109,7 +112,7 @@ document.querySelector('.hIcons').addEventListener('click',e=>{const b=e.target.
   const k=b.dataset.h;
   if(k==='set')openSettings();else if(k==='look')openCreator(false);else if(k==='guide')$('#btnGuide').click();
   else if(k==='music')$('#btnMyMusic').click();else if(k==='prog')progOpen();});
-document.addEventListener('mouseover',e=>{const b=e.target.closest&&e.target.closest('.hItem>button,.hItem.big,.hIcons button,.hCard,.hRoom button,.hBack');if(b&&b!==HUI.hov){HUI.hov=b;try{snd('ui_hover',{vol:0.25});}catch(_){}}});
+document.addEventListener('mouseover',e=>{const b=e.target.closest&&e.target.closest('.hItem>button,.hItem.big,.hIcons button,.hCard,.hRoom button,.hGo button,.hBack');if(b&&b!==HUI.hov){HUI.hov=b;try{snd('ui_hover',{vol:0.25});}catch(_){}}});
 
 // ---------- การ์ดโหมด ----------
 $('#hModesBack').onclick=()=>{snd('ui_click');hubUiState('menu');hubBack();};
@@ -140,7 +143,7 @@ function hubFlip(card,k){
   hubFlipKill();
   const r=card.getBoundingClientRect(),T=hubRoomRect(),m=HMODES.find(x=>x.k===k);
   const f=document.createElement('div');f.className='hFlip';
-  f.innerHTML=`<div class="fIn"><div class="fFront" style="--bg:url('assets/ui/modes/${k}.jpg')"><span class="cBg"></span><span class="cShade"></span><span class="cHex">${hHex(k)}</span><span class="cTxt"><b>${m.en}</b><i>${m.th}</i></span></div>
+  f.innerHTML=`<div class="fIn"><div class="fFront" style="--bg:url('${HUI_IMG}modes/${k}.jpg')"><span class="cBg"></span><span class="cShade"></span><span class="cHex">${hHex(k)}</span><span class="cTxt"><b>${m.en}</b><i>${m.th}</i></span></div>
     <div class="fBack"><span class="fx">${hHex(k)}</span><b>${m.en}</b><i>กำลังเปิดห้อง…</i></div></div>`;
   Object.assign(f.style,{left:r.left+'px',top:r.top+'px',width:r.width+'px',height:r.height+'px'});
   document.body.appendChild(f);HUI.flip=f;card.style.visibility='hidden';
@@ -167,7 +170,7 @@ function hubLobby(){
   const host=NET.isHost,M=MODES[L.mode]||MODES.coop,hm=HMODES.find(x=>x.k===L.mode)||{k:L.mode,en:modeTitle(M),th:'',d:M.d};
   const team=!!M.team,me=L.players.find(p=>p.id===NET.myId);
   const K=parseKit(myKit),P=PATHS[K.path]||PATHS[0],ult=SPELL_LIST[K.ult];
-  const fixed=M.map?M.map:null,mk=fixed||L.mpk||'',img=mk?`url('assets/ui/maps/${mk}.jpg')`:'none';
+  const fixed=M.map?M.map:null,mk=fixed||L.mpk||'',img=mk?`url('${HUI_IMG}maps/${mk}.jpg')`:'none';
   const err=host?validate():'';
   const plRow=p=>{const kk=parseKit(p.kt!==undefined?p.kt:'0'),pp=PATHS[kk.path]||PATHS[0];return `<div class="pl ${p.id===NET.myId?'me':''}"><span class="em">${icoHTML('p_'+pp.id,pp.col,18)}</span><span class="nm">${esc(p.n)}</span>${p.id===L.host?`<span class="cr" title="โฮสต์">${hSvg('crown')}</span>`:''}${speakingIds().has(p.id)?'<span class="spk">♪</span>':''}</div>`;};
   const slots=L.online?Math.max(0,(M.max||6)-L.players.length):0;
@@ -205,6 +208,9 @@ function hubLobby(){
         ${team?`<button class="sel ${VOICE.teamOnly?'on':''}" id="hrTeamVoice">${VOICE.teamOnly?'คุยเฉพาะทีม':'คุยทุกคน'}</button>`:''}`:''}
         <button class="ico" id="hrSet" title="ตั้งค่า">${hSvg('set')}</button>
       </div>
+    </footer>
+    </div>`;
+  $('#hGo').innerHTML=`
       <div class="rGo">
         <button class="mapBtn ${fixed||!host?'fixed':''}" id="hrMap" style="--img:${img}">
           <span class="mImg"></span><span class="mShade"></span>
@@ -212,14 +218,13 @@ function hubLobby(){
         </button>
         ${host?`<button class="startBtn" id="hrStart" ${err?'disabled':''}><span>เริ่มเกม</span><em>START</em></button>`:'<div class="waitTxt">รอโฮสต์เริ่มเกม<i></i></div>'}
       </div>
-      <div class="rErr">${err||''}</div>
-    </footer>
-    </div>`;
+      <div class="rErr">${err||''}</div>`;
+  $('#hGo').classList.add('on');
   if(!el.classList.contains('on')){el.classList.add('on','anim');clearTimeout(HUI.animT);HUI.animT=setTimeout(()=>el.classList.remove('anim'),900);}
   const R=hubRoomRect();Object.assign(el.style,{left:R.l+'px',top:R.t+'px',width:R.w+'px',height:R.h+'px'});
 }
 addEventListener('resize',()=>{if(HUI.st==='room')hubLobby();});
-$('#hRoom').addEventListener('click',e=>{
+const hubRoomClick=e=>{
   const b=e.target.closest('button');if(!b)return;ac();snd('ui_click');
   const id=b.id;
   if(id==='hrLeave'){try{sessionStorage.setItem('wd_hub','modes');}catch(_){}leave();return;}
@@ -235,7 +240,8 @@ $('#hRoom').addEventListener('click',e=>{
   if(id==='hrMap'){const L=LOBBY,M=MODES[L.mode];if(!NET.isHost||M.map)return;
     mpkOpen({cur:L.mpk||'',mode:L.mode,onPick:k=>{if(NET.isHost&&G&&G.ph==='lobby'){G.mapPick=k;broadcastLobby();}}});return;}
   const rm=b.dataset.rmode;if(rm&&NET.isHost&&G&&G.ph==='lobby'&&G.mode!==rm){G.mode=rm;broadcastLobby();}
-});
+};
+$('#hRoom').addEventListener('click',hubRoomClick);$('#hGo').addEventListener('click',hubRoomClick);
 // วงเลือกคาถา (js/63) เรียกตอนเปลี่ยนชุดคาถา
 function hubKitChanged(){hubMeChip();if(HUI.st==='room')hubLobby();}
 
