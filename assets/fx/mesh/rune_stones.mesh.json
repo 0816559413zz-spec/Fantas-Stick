@@ -1,0 +1,11 @@
+{
+  "v": 1,
+  "desc": "แท่งหินสลักรูน 6 แท่งเรียงเป็นวง (เอียงต่างกัน) — แบบหินรูนโบราณ (var2-earth)",
+  "mat": "solid",
+  "pal": "earth",
+  "tags": ["earth", "rune", "stone"],
+  "parts": [
+    {"id":"stones","k":"box","w":0.5,"h":1.15,"d":0.28,"noise":0.035,"nfreq":3,"flat":true,"pos":[0,0.6,0],"arr":6,"arrR":1.5,"arrJit":0.35,"seed":17},
+    {"id":"caps","k":"box","w":0.3,"h":0.12,"d":0.3,"noise":0.02,"flat":true,"pos":[0,1.26,0],"arr":6,"arrR":1.5,"arrJit":0.35,"seed":17}
+  ]
+}

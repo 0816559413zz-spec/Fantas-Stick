@@ -1,0 +1,980 @@
+{
+ "v": 1,
+ "desc": "แบบ 2 (หินรูนโบราณ): Stonebreaker — งัดแผ่นหินขึ้น Stand ต่อย แผ่นพุ่ง 35 ม. แตกตอนโดน — หินรูนโบราณ — แท่งหินสลักลอยขึ้นจากพื้น อักขระเวทเรืองสีหยก วงรูนหมุน ฝุ่นทองลอย",
+ "tags": [
+  "earth",
+  "variant2",
+  "rune"
+ ],
+ "pal": "earth",
+ "layers": [
+  {
+   "id": "flash1",
+   "t": "flash",
+   "at": 0,
+   "life": 0.1,
+   "pos": [
+    0,
+    0.6,
+    2
+   ],
+   "col": "#5cffb0",
+   "size": 0.36
+  },
+  {
+   "id": "stones2",
+   "t": "mesh",
+   "at": 0,
+   "life": 1.2,
+   "att": "ground",
+   "pos": [
+    0,
+    0,
+    2
+   ],
+   "shape": "model",
+   "model": "rune_stones",
+   "mat": "solid",
+   "col": "#6a6a62",
+   "scale": {
+    "0": [
+     0.48,
+     0.05,
+     0.48
+    ],
+    "1": 0.504,
+    "0.15": 0.504,
+    "ease": "out"
+   },
+   "dis": {
+    "0": 0,
+    "1": 1,
+    "0.7": 0
+   }
+  },
+  {
+   "id": "circle3",
+   "t": "mesh",
+   "at": 0,
+   "life": 1,
+   "att": "ground",
+   "pos": [
+    0,
+    0.05,
+    2
+   ],
+   "shape": "model",
+   "model": "rune_swirl",
+   "mat": "energy",
+   "col": "#5cffb0",
+   "col2": "#1a9a6a",
+   "scale": {
+    "0": 0.2,
+    "1": 0.78,
+    "0.2": 0.72,
+    "ease": "out"
+   },
+   "spin": 120,
+   "op": {
+    "0": 0.7,
+    "1": 0,
+    "0.6": 0.5
+   },
+   "rim": 1.4
+  },
+  {
+   "id": "decal4",
+   "t": "decal",
+   "at": 0,
+   "life": 2.2,
+   "att": "ground",
+   "pos": [
+    0,
+    0,
+    2
+   ],
+   "kind": "glyph",
+   "r": 0.96,
+   "col": "#5cffb0"
+  },
+  {
+   "id": "chunks5",
+   "t": "emit",
+   "at": 0,
+   "life": 0.05,
+   "burst": 8.4,
+   "pos": [
+    0,
+    0.4,
+    2
+   ],
+   "from": "sphere",
+   "fr": 0.3,
+   "dir": "out",
+   "spread": 1.2,
+   "speed": [
+    1.44,
+    2.64
+   ],
+   "up": [
+    3,
+    5
+   ],
+   "plife": [
+    0.8,
+    1.4
+   ],
+   "look": "model",
+   "model": "rock_chunk",
+   "mmat": "solid",
+   "msize": [
+    0.12,
+    0.28
+   ],
+   "bounce": 0.35,
+   "mspin": 540,
+   "gravity": 11,
+   "drag": 1,
+   "col": "#6a6a62",
+   "c2": "#3a3a34"
+  },
+  {
+   "id": "motes6",
+   "t": "emit",
+   "at": 0,
+   "life": 0.05,
+   "burst": 12.8,
+   "pos": [
+    0,
+    0.4,
+    2
+   ],
+   "from": "disc",
+   "fr": 0.48,
+   "dir": "up",
+   "speed": [
+    1,
+    3
+   ],
+   "plife": [
+    0.8,
+    1.3
+   ],
+   "look": "glow",
+   "size": [
+    2,
+    3.4
+   ],
+   "col": "#e8d27a",
+   "c2": "#5cffb0",
+   "gravity": -0.5
+  },
+  {
+   "id": "smoke7",
+   "t": "emit",
+   "at": 0.04,
+   "life": 0.06,
+   "burst": 4,
+   "pos": [
+    0,
+    0.3,
+    2
+   ],
+   "from": "disc",
+   "fr": 0.6,
+   "dir": "up",
+   "spread": 1.1,
+   "speed": [
+    0.6,
+    1.8
+   ],
+   "plife": [
+    1,
+    1.7
+   ],
+   "look": "smoke",
+   "fb": "tex/smoke_puff",
+   "size": [
+    6,
+    9.6
+   ],
+   "col": "#c8c0a0",
+   "c2": "#c8c0a0",
+   "gravity": -0.35,
+   "grow": 1.1,
+   "drag": 2,
+   "x": true
+  },
+  {
+   "id": "ring8",
+   "t": "ring",
+   "at": 0,
+   "life": 0.45,
+   "att": "ground",
+   "pos": [
+    0,
+    0.08,
+    2
+   ],
+   "col": "#5cffb0",
+   "r": 1.56,
+   "op": 0.5
+  },
+  {
+   "id": "light9",
+   "t": "light",
+   "at": 0,
+   "life": 0.5,
+   "pos": [
+    0,
+    1.2,
+    2
+   ],
+   "col": "#7affc0",
+   "int": {
+    "0": 1.8,
+    "1": 0
+   },
+   "dist": 10.8
+  },
+  {
+   "id": "wall10",
+   "t": "mesh",
+   "at": 0,
+   "life": 0.5,
+   "att": "ground",
+   "pos": [
+    0,
+    0,
+    2
+   ],
+   "yaw": 90,
+   "shape": "model",
+   "model": "stone_tablet",
+   "mat": "solid",
+   "col": "#6a6a62",
+   "scale": {
+    "0": [
+     1.4400000000000002,
+     0.05,
+     1.2
+    ],
+    "1": [
+     1.4400000000000002,
+     1.1199999999999999,
+     1.2
+    ],
+    "0.08": [
+     1.4400000000000002,
+     1.1199999999999999,
+     1.2
+    ]
+   },
+   "op": {
+    "0": 1,
+    "1": 0,
+    "0.9": 1
+   }
+  },
+  {
+   "id": "decal11",
+   "t": "decal",
+   "at": 0,
+   "life": 0.5,
+   "att": "ground",
+   "pos": [
+    0,
+    0,
+    2
+   ],
+   "kind": "glyph",
+   "r": 1.2,
+   "col": "#5cffb0"
+  },
+  {
+   "id": "chunks12",
+   "t": "emit",
+   "at": 0,
+   "life": 0.05,
+   "burst": 12,
+   "pos": [
+    0,
+    0,
+    2
+   ],
+   "from": "box",
+   "fr": 0.6,
+   "dir": "out",
+   "spread": 1.2,
+   "speed": [
+    2,
+    4
+   ],
+   "up": [
+    3,
+    5
+   ],
+   "plife": [
+    0.8,
+    1.4
+   ],
+   "look": "model",
+   "model": "rock_chunk",
+   "mmat": "solid",
+   "msize": [
+    0.12,
+    0.28
+   ],
+   "bounce": 0.35,
+   "mspin": 540,
+   "gravity": 11,
+   "drag": 1,
+   "col": "#6a6a62",
+   "c2": "#3a3a34"
+  },
+  {
+   "id": "smoke13",
+   "t": "emit",
+   "at": 0,
+   "life": 0.06,
+   "burst": 4,
+   "pos": [
+    0,
+    0.3,
+    2
+   ],
+   "from": "disc",
+   "fr": 0.48,
+   "dir": "up",
+   "spread": 1.1,
+   "speed": [
+    0.6,
+    1.8
+   ],
+   "plife": [
+    1,
+    1.7
+   ],
+   "look": "smoke",
+   "fb": "tex/smoke_puff",
+   "size": [
+    6,
+    8.4
+   ],
+   "col": "#c8c0a0",
+   "c2": "#c8c0a0",
+   "gravity": -0.35,
+   "grow": 1.1,
+   "drag": 2,
+   "x": true
+  },
+  {
+   "id": "flash14",
+   "t": "flash",
+   "at": 0.4,
+   "life": 0.1,
+   "pos": [
+    0.6,
+    1.4,
+    0.6
+   ],
+   "col": "#5cffb0",
+   "size": 0.8
+  },
+  {
+   "id": "sigil15",
+   "t": "mesh",
+   "at": 0.4,
+   "life": 0.4,
+   "pos": [
+    0.6,
+    1.4,
+    0.6
+   ],
+   "shape": "model",
+   "model": "rune_swirl",
+   "mat": "glow",
+   "col": "#5cffb0",
+   "bill": true,
+   "scale": {
+    "0": 0.2,
+    "1": 1.2,
+    "ease": "out"
+   },
+   "rot": [
+    90,
+    0,
+    0
+   ],
+   "op": {
+    "0": 1,
+    "1": 0
+   }
+  },
+  {
+   "id": "motes16",
+   "t": "emit",
+   "at": 0.4,
+   "life": 0.05,
+   "burst": 12,
+   "pos": [
+    0.6,
+    1.4,
+    0.6
+   ],
+   "from": "sphere",
+   "fr": 0.6,
+   "dir": "out",
+   "speed": [
+    0.6,
+    1.6
+   ],
+   "plife": [
+    0.5,
+    0.8
+   ],
+   "look": "glow",
+   "size": [
+    2,
+    3
+   ],
+   "col": "#e8d27a",
+   "c2": "#5cffb0",
+   "gravity": 0
+  },
+  {
+   "id": "flash17",
+   "t": "flash",
+   "at": 0.45,
+   "life": 0.1,
+   "pos": [
+    0,
+    0.6,
+    2
+   ],
+   "col": "#5cffb0",
+   "size": 0.24
+  },
+  {
+   "id": "stones18",
+   "t": "mesh",
+   "at": 0.45,
+   "life": 1.2,
+   "att": "ground",
+   "pos": [
+    0,
+    0,
+    2
+   ],
+   "shape": "model",
+   "model": "rune_stones",
+   "mat": "solid",
+   "col": "#6a6a62",
+   "scale": {
+    "0": [
+     0.32000000000000006,
+     0.05,
+     0.32000000000000006
+    ],
+    "1": 0.336,
+    "0.15": 0.336,
+    "ease": "out"
+   },
+   "dis": {
+    "0": 0,
+    "1": 1,
+    "0.7": 0
+   }
+  },
+  {
+   "id": "circle19",
+   "t": "mesh",
+   "at": 0.45,
+   "life": 1,
+   "att": "ground",
+   "pos": [
+    0,
+    0.05,
+    2
+   ],
+   "shape": "model",
+   "model": "rune_swirl",
+   "mat": "energy",
+   "col": "#5cffb0",
+   "col2": "#1a9a6a",
+   "scale": {
+    "0": 0.2,
+    "1": 0.52,
+    "0.2": 0.48,
+    "ease": "out"
+   },
+   "spin": 120,
+   "op": {
+    "0": 0.7,
+    "1": 0,
+    "0.6": 0.5
+   },
+   "rim": 1.4
+  },
+  {
+   "id": "decal20",
+   "t": "decal",
+   "at": 0.45,
+   "life": 2.2,
+   "att": "ground",
+   "pos": [
+    0,
+    0,
+    2
+   ],
+   "kind": "glyph",
+   "r": 0.6400000000000001,
+   "col": "#5cffb0"
+  },
+  {
+   "id": "chunks21",
+   "t": "emit",
+   "at": 0.45,
+   "life": 0.05,
+   "burst": 7.6,
+   "pos": [
+    0,
+    0.4,
+    2
+   ],
+   "from": "sphere",
+   "fr": 0.3,
+   "dir": "out",
+   "spread": 1.2,
+   "speed": [
+    0.96,
+    1.7600000000000002
+   ],
+   "up": [
+    3,
+    5
+   ],
+   "plife": [
+    0.8,
+    1.4
+   ],
+   "look": "model",
+   "model": "rock_chunk",
+   "mmat": "solid",
+   "msize": [
+    0.12,
+    0.28
+   ],
+   "bounce": 0.35,
+   "mspin": 540,
+   "gravity": 11,
+   "drag": 1,
+   "col": "#6a6a62",
+   "c2": "#3a3a34"
+  },
+  {
+   "id": "motes22",
+   "t": "emit",
+   "at": 0.45,
+   "life": 0.05,
+   "burst": 11.2,
+   "pos": [
+    0,
+    0.4,
+    2
+   ],
+   "from": "disc",
+   "fr": 0.32000000000000006,
+   "dir": "up",
+   "speed": [
+    1,
+    3
+   ],
+   "plife": [
+    0.8,
+    1.3
+   ],
+   "look": "glow",
+   "size": [
+    2,
+    3.4
+   ],
+   "col": "#e8d27a",
+   "c2": "#5cffb0",
+   "gravity": -0.5
+  },
+  {
+   "id": "smoke23",
+   "t": "emit",
+   "at": 0.49,
+   "life": 0.06,
+   "burst": 3,
+   "pos": [
+    0,
+    0.3,
+    2
+   ],
+   "from": "disc",
+   "fr": 0.4,
+   "dir": "up",
+   "spread": 1.1,
+   "speed": [
+    0.6,
+    1.8
+   ],
+   "plife": [
+    1,
+    1.7
+   ],
+   "look": "smoke",
+   "fb": "tex/smoke_puff",
+   "size": [
+    6,
+    9.6
+   ],
+   "col": "#c8c0a0",
+   "c2": "#c8c0a0",
+   "gravity": -0.35,
+   "grow": 1.1,
+   "drag": 2,
+   "x": true
+  },
+  {
+   "id": "ring24",
+   "t": "ring",
+   "at": 0.45,
+   "life": 0.45,
+   "att": "ground",
+   "pos": [
+    0,
+    0.08,
+    2
+   ],
+   "col": "#5cffb0",
+   "r": 1.04,
+   "op": 0.5
+  },
+  {
+   "id": "light25",
+   "t": "light",
+   "at": 0.45,
+   "life": 0.5,
+   "pos": [
+    0,
+    1.2,
+    2
+   ],
+   "col": "#7affc0",
+   "int": {
+    "0": 1.8,
+    "1": 0
+   },
+   "dist": 9.2
+  },
+  {
+   "id": "slab26",
+   "t": "mesh",
+   "at": 0.45,
+   "life": 0.55,
+   "pos": {
+    "0": [
+     0,
+     1.2,
+     2.2
+    ],
+    "1": [
+     0,
+     1.2,
+     20
+    ]
+   },
+   "shape": "model",
+   "model": "stone_tablet",
+   "mat": "solid",
+   "col": "#6a6a62",
+   "rot": [
+    0,
+    0,
+    0
+   ],
+   "scale": 1.2,
+   "fade": 0
+  },
+  {
+   "id": "glyphs27",
+   "t": "emit",
+   "at": 0.45,
+   "life": 0.55,
+   "rate": 24,
+   "pos": {
+    "0": [
+     0,
+     1.2,
+     2.2
+    ],
+    "1": [
+     0,
+     1.2,
+     20
+    ]
+   },
+   "from": "sphere",
+   "fr": 0.6,
+   "dir": "random",
+   "speed": [
+    0.2,
+    0.6
+   ],
+   "plife": [
+    0.4,
+    0.7
+   ],
+   "look": "glow",
+   "size": [
+    2.5,
+    4
+   ],
+   "col": "#5cffb0",
+   "c2": "#1a9a6a",
+   "gravity": 0
+  },
+  {
+   "id": "flash28",
+   "t": "flash",
+   "at": 1,
+   "life": 0.1,
+   "pos": [
+    0,
+    0.6,
+    20
+   ],
+   "col": "#5cffb0",
+   "size": 0.66
+  },
+  {
+   "id": "stones29",
+   "t": "mesh",
+   "at": 1,
+   "life": 1.2,
+   "att": "ground",
+   "pos": [
+    0,
+    0,
+    20
+   ],
+   "shape": "model",
+   "model": "rune_stones",
+   "mat": "solid",
+   "col": "#6a6a62",
+   "scale": {
+    "0": [
+     0.8800000000000001,
+     0.05,
+     0.8800000000000001
+    ],
+    "1": 0.924,
+    "0.15": 0.924,
+    "ease": "out"
+   },
+   "dis": {
+    "0": 0,
+    "1": 1,
+    "0.7": 0
+   }
+  },
+  {
+   "id": "circle30",
+   "t": "mesh",
+   "at": 1,
+   "life": 1,
+   "att": "ground",
+   "pos": [
+    0,
+    0.05,
+    20
+   ],
+   "shape": "model",
+   "model": "rune_swirl",
+   "mat": "energy",
+   "col": "#5cffb0",
+   "col2": "#1a9a6a",
+   "scale": {
+    "0": 0.2,
+    "1": 1.4300000000000002,
+    "0.2": 1.32,
+    "ease": "out"
+   },
+   "spin": 120,
+   "op": {
+    "0": 0.7,
+    "1": 0,
+    "0.6": 0.5
+   },
+   "rim": 1.4
+  },
+  {
+   "id": "decal31",
+   "t": "decal",
+   "at": 1,
+   "life": 2.2,
+   "att": "ground",
+   "pos": [
+    0,
+    0,
+    20
+   ],
+   "kind": "glyph",
+   "r": 1.7600000000000002,
+   "col": "#5cffb0"
+  },
+  {
+   "id": "chunks32",
+   "t": "emit",
+   "at": 1,
+   "life": 0.05,
+   "burst": 10.4,
+   "pos": [
+    0,
+    0.4,
+    20
+   ],
+   "from": "sphere",
+   "fr": 0.3,
+   "dir": "out",
+   "spread": 1.2,
+   "speed": [
+    2.64,
+    4.840000000000001
+   ],
+   "up": [
+    3,
+    5
+   ],
+   "plife": [
+    0.8,
+    1.4
+   ],
+   "look": "model",
+   "model": "rock_chunk",
+   "mmat": "solid",
+   "msize": [
+    0.12,
+    0.28
+   ],
+   "bounce": 0.35,
+   "mspin": 540,
+   "gravity": 11,
+   "drag": 1,
+   "col": "#6a6a62",
+   "c2": "#3a3a34"
+  },
+  {
+   "id": "motes33",
+   "t": "emit",
+   "at": 1,
+   "life": 0.05,
+   "burst": 16.8,
+   "pos": [
+    0,
+    0.4,
+    20
+   ],
+   "from": "disc",
+   "fr": 0.8800000000000001,
+   "dir": "up",
+   "speed": [
+    1,
+    3
+   ],
+   "plife": [
+    0.8,
+    1.3
+   ],
+   "look": "glow",
+   "size": [
+    2,
+    3.4
+   ],
+   "col": "#e8d27a",
+   "c2": "#5cffb0",
+   "gravity": -0.5
+  },
+  {
+   "id": "smoke34",
+   "t": "emit",
+   "at": 1.04,
+   "life": 0.06,
+   "burst": 5,
+   "pos": [
+    0,
+    0.3,
+    20
+   ],
+   "from": "disc",
+   "fr": 1.1,
+   "dir": "up",
+   "spread": 1.1,
+   "speed": [
+    0.6,
+    1.8
+   ],
+   "plife": [
+    1,
+    1.7
+   ],
+   "look": "smoke",
+   "fb": "tex/smoke_puff",
+   "size": [
+    6,
+    9.6
+   ],
+   "col": "#c8c0a0",
+   "c2": "#c8c0a0",
+   "gravity": -0.35,
+   "grow": 1.1,
+   "drag": 2,
+   "x": true
+  },
+  {
+   "id": "ring35",
+   "t": "ring",
+   "at": 1,
+   "life": 0.45,
+   "att": "ground",
+   "pos": [
+    0,
+    0.08,
+    20
+   ],
+   "col": "#5cffb0",
+   "r": 2.8600000000000003,
+   "op": 0.5
+  },
+  {
+   "id": "light36",
+   "t": "light",
+   "at": 1,
+   "life": 0.5,
+   "pos": [
+    0,
+    1.2,
+    20
+   ],
+   "col": "#7affc0",
+   "int": {
+    "0": 1.8,
+    "1": 0
+   },
+   "dist": 14.8
+  },
+  {
+   "id": "cam37",
+   "t": "screen",
+   "at": 1,
+   "life": 0.25,
+   "shake": 3.3200000000000003,
+   "own": true
+  }
+ ],
+ "dur": 3.4
+}

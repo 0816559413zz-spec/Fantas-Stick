@@ -1,0 +1,633 @@
+{
+ "v": 1,
+ "desc": "แบบ 2 (ไฟนรก): พุ่งชาร์จ (Dash) — ชาร์จแล้วพุ่งไปข้างหน้า ~10 ม. ทิ้งทางไฟ 3 วิ — ไฟนรกแดงเข้ม-ดำ — ลูกไฟแกนดำขอบแดง ควันดำหนัก หินออบซิเดียนแหลมพุ่ง รอยแตกลาวา ถ่านแดงลอย",
+ "tags": [
+  "fire",
+  "variant2",
+  "infernal"
+ ],
+ "pal": "fire",
+ "layers": [
+  {
+   "id": "void1",
+   "t": "mesh",
+   "at": 0,
+   "life": 0.6,
+   "pos": [
+    0,
+    0.5,
+    0
+   ],
+   "shape": "sphere",
+   "mat": "solid",
+   "col": "#080304",
+   "scale": {
+    "0": 0.03,
+    "1": 0.68,
+    "ease": "in"
+   }
+  },
+  {
+   "id": "rim2",
+   "t": "mesh",
+   "at": 0,
+   "life": 0.6,
+   "pos": [
+    0,
+    0.5,
+    0
+   ],
+   "shape": "sphere",
+   "mat": "energy",
+   "col": "#ff3a14",
+   "col2": "#2a0402",
+   "scale": {
+    "0": 0.05,
+    "1": 0.96,
+    "ease": "in"
+   },
+   "rim": 2.6,
+   "scroll": 3
+  },
+  {
+   "id": "souls3",
+   "t": "emit",
+   "at": 0,
+   "life": 0.6,
+   "pos": [
+    0,
+    0.5,
+    0
+   ],
+   "rate": 26,
+   "from": "sphere",
+   "fr": 3,
+   "dir": "in",
+   "speed": [
+    1.5,
+    3
+   ],
+   "plife": [
+    0.35,
+    0.5
+   ],
+   "look": "streak",
+   "size": [
+    1.6,
+    2.4
+   ],
+   "col": "#ff5a2a",
+   "c2": "#3a0604",
+   "gravity": 0,
+   "drag": 0
+  },
+  {
+   "id": "halo4",
+   "t": "halo",
+   "at": 0,
+   "life": 0.6,
+   "pos": [
+    0,
+    0.5,
+    0
+   ],
+   "col": "#c01808",
+   "size": 3.2,
+   "k": 0.8,
+   "size0": 0.4
+  },
+  {
+   "id": "embers5",
+   "t": "emit",
+   "at": 0,
+   "life": 0.6,
+   "pos": [
+    0,
+    0.5,
+    0
+   ],
+   "rate": 30,
+   "from": "sphere",
+   "fr": 2.4,
+   "dir": "in",
+   "speed": [
+    2,
+    3.5
+   ],
+   "plife": [
+    0.3,
+    0.45
+   ],
+   "look": "ember",
+   "size": [
+    1.4,
+    2.2
+   ],
+   "col": "#ff8a5a",
+   "c2": "#c01808",
+   "gravity": 0,
+   "drag": 0
+  },
+  {
+   "id": "light6",
+   "t": "light",
+   "at": 0,
+   "life": 0.6,
+   "pos": [
+    0,
+    0.5,
+    0
+   ],
+   "col": "#ff4a20",
+   "int": {
+    "0": 1.2,
+    "1": 0
+   },
+   "dist": 6
+  },
+  {
+   "id": "flash7",
+   "t": "flash",
+   "at": 0.6,
+   "life": 0.1,
+   "pos": [
+    0,
+    0.8999999999999999,
+    -1
+   ],
+   "col": "#ff8a5a",
+   "size": 1.2
+  },
+  {
+   "id": "fvol8",
+   "t": "firevol",
+   "at": 0.6,
+   "life": 1.1,
+   "att": "ground",
+   "pos": [
+    0,
+    0,
+    -1
+   ],
+   "kind": "pillar",
+   "hx": 0.7,
+   "hz": 0.7,
+   "h": 1.8,
+   "int": 0.85,
+   "den": 1.05,
+   "hgt": {
+    "0": 0.05,
+    "1": 0.2,
+    "0.1": 1,
+    "0.6": 0.7
+   }
+  },
+  {
+   "id": "obsidian9",
+   "t": "mesh",
+   "at": 0.6,
+   "life": 1.4,
+   "att": "ground",
+   "pos": [
+    0,
+    0,
+    -1
+   ],
+   "shape": "model",
+   "model": "rock_spikes",
+   "mat": "solid",
+   "col": "#1a1214",
+   "scale": {
+    "0": 0.7,
+    "1": 0.7
+   },
+   "grow": {
+    "0": 0,
+    "1": 0,
+    "0.12": 1,
+    "0.75": 1
+   },
+   "stagger": 0.6,
+   "growBy": "center"
+  },
+  {
+   "id": "decal10",
+   "t": "decal",
+   "at": 0.6,
+   "life": 2.6,
+   "att": "ground",
+   "pos": [
+    0,
+    0,
+    -1
+   ],
+   "kind": "crack",
+   "r": 2.4,
+   "n": 12
+  },
+  {
+   "id": "decal11",
+   "t": "decal",
+   "at": 0.6,
+   "life": 2.6,
+   "att": "ground",
+   "pos": [
+    0,
+    0,
+    -1
+   ],
+   "kind": "dark",
+   "r": 1.8,
+   "op": 0.7
+  },
+  {
+   "id": "veins12",
+   "t": "mesh",
+   "at": 0.6,
+   "life": 2.6,
+   "att": "ground",
+   "pos": [
+    0,
+    0.045,
+    -1
+   ],
+   "shape": "disc",
+   "mat": "tex",
+   "tex": "tex/noise_veins",
+   "col": "#c01808",
+   "col2": "#ff5a2a",
+   "rim": 1.2,
+   "uvTile": [
+    1,
+    1
+   ],
+   "uvScroll": [
+    0.02,
+    0.01
+   ],
+   "scale": {
+    "0": 0.2,
+    "1": 2.2,
+    "0.08": 2.2,
+    "ease": "out"
+   },
+   "op": {
+    "0": 0,
+    "1": 0,
+    "0.08": 0.95,
+    "0.7": 0.8
+   }
+  },
+  {
+   "id": "smoke13",
+   "t": "emit",
+   "at": 0.64,
+   "life": 0.06,
+   "burst": 10,
+   "pos": [
+    0,
+    0.3,
+    -1
+   ],
+   "from": "disc",
+   "fr": 0.8,
+   "dir": "up",
+   "spread": 1.1,
+   "speed": [
+    0.6,
+    1.8
+   ],
+   "plife": [
+    1.4,
+    2.2
+   ],
+   "look": "smoke",
+   "fb": "tex/smoke_puff",
+   "size": [
+    7.199999999999999,
+    12
+   ],
+   "col": "#6a5654",
+   "c2": "#2a1c1a",
+   "gravity": -0.35,
+   "grow": 1.1,
+   "drag": 2,
+   "x": true
+  },
+  {
+   "id": "sparks14",
+   "t": "emit",
+   "at": 0.6,
+   "life": 0.05,
+   "burst": 30,
+   "pos": [
+    0,
+    0.4,
+    -1
+   ],
+   "from": "sphere",
+   "fr": 0.3,
+   "dir": "out",
+   "spread": 1.2,
+   "speed": [
+    3,
+    6
+   ],
+   "up": [
+    1,
+    4
+   ],
+   "plife": [
+    0.6,
+    1.2
+   ],
+   "look": "ember",
+   "size": [
+    1.6,
+    2.6
+   ],
+   "col": "#ff8a5a",
+   "c2": "#c01808",
+   "gravity": 3,
+   "drag": 2
+  },
+  {
+   "id": "ring15",
+   "t": "ring",
+   "at": 0.6,
+   "life": 0.5,
+   "att": "ground",
+   "pos": [
+    0,
+    0.08,
+    -1
+   ],
+   "col": "#c01808",
+   "r": 2.8,
+   "op": 0.55
+  },
+  {
+   "id": "shock16",
+   "t": "warp",
+   "at": 0.6,
+   "life": 0.45,
+   "att": "ground",
+   "pos": [
+    0,
+    0.2,
+    -1
+   ],
+   "kind": "shock",
+   "flat": true,
+   "size": {
+    "0": 0.5,
+    "1": 1,
+    "x": 4
+   },
+   "op": {
+    "0": 1,
+    "1": 0
+   },
+   "str": 1.4,
+   "col": "#ff5a2a",
+   "x": true
+  },
+  {
+   "id": "light17",
+   "t": "light",
+   "at": 0.6,
+   "life": 0.6,
+   "pos": [
+    0,
+    1.2,
+    -1
+   ],
+   "col": "#ff4a20",
+   "int": {
+    "0": 2,
+    "1": 0
+   },
+   "dist": 14
+  },
+  {
+   "id": "cam18",
+   "t": "screen",
+   "at": 0.6,
+   "life": 0.25,
+   "shake": 4.6,
+   "own": true
+  },
+  {
+   "id": "shot19",
+   "t": "mesh",
+   "at": 0.6,
+   "life": 0.3,
+   "shape": "sphere",
+   "mat": "fire",
+   "mode": "ball",
+   "col": "#ff3a14",
+   "col2": "#2a0402",
+   "heat": -0.35,
+   "disp": 0.6,
+   "flow": [
+    0,
+    0.3,
+    -1
+   ],
+   "scale": 0.7480000000000001,
+   "pos": {
+    "0": [
+     0,
+     1,
+     0
+    ],
+    "1": [
+     0,
+     1,
+     10
+    ]
+   },
+   "fade": 0
+  },
+  {
+   "id": "darkcore21",
+   "t": "mesh",
+   "at": 0.6,
+   "life": 0.3,
+   "pos": {
+    "0": [
+     0,
+     1,
+     0
+    ],
+    "1": [
+     0,
+     1,
+     10
+    ]
+   },
+   "shape": "sphere",
+   "mat": "solid",
+   "col": "#0a0405",
+   "scale": 0.30800000000000005,
+   "fade": 0
+  },
+  {
+   "id": "tail22",
+   "t": "trail",
+   "at": 0.6,
+   "life": 0.3,
+   "of": "shot19",
+   "col": "#c01808",
+   "col2": "#1a0202",
+   "w": 0.66,
+   "tlife": 0.3,
+   "k": 1.1
+  },
+  {
+   "id": "smoke23",
+   "t": "emit",
+   "at": 0.6,
+   "life": 0.3,
+   "rate": 18,
+   "from": "mesh",
+   "of": "shot19",
+   "dir": "up",
+   "speed": [
+    0.2,
+    0.6
+   ],
+   "plife": [
+    0.4,
+    0.7
+   ],
+   "look": "smoke",
+   "fb": "tex/smoke_puff",
+   "size": [
+    5.5,
+    8.8
+   ],
+   "col": "#6a5654",
+   "c2": "#4a3432",
+   "gravity": -0.3,
+   "grow": 0.8,
+   "x": true
+  },
+  {
+   "id": "embers24",
+   "t": "emit",
+   "at": 0.6,
+   "life": 0.3,
+   "rate": 40,
+   "from": "mesh",
+   "of": "shot19",
+   "dir": "random",
+   "speed": [
+    0.5,
+    1.5
+   ],
+   "plife": [
+    0.4,
+    0.8
+   ],
+   "look": "ember",
+   "size": [
+    1.2,
+    2
+   ],
+   "col": "#ff8a5a",
+   "c2": "#c01808",
+   "gravity": 2
+  },
+  {
+   "id": "fvol25",
+   "t": "firevol",
+   "at": 0.62,
+   "life": 3,
+   "att": "ground",
+   "pos": [
+    0,
+    0,
+    5
+   ],
+   "kind": "wall",
+   "hx": 0.81,
+   "hz": 5,
+   "h": 1,
+   "int": 0.75,
+   "den": 1.05,
+   "hgt": {
+    "0": 0.05,
+    "1": 0.1,
+    "0.06": 1,
+    "0.8": 0.8
+   },
+   "yaw": 0
+  },
+  {
+   "id": "decal26",
+   "t": "decal",
+   "at": 0.62,
+   "life": 3.6,
+   "att": "ground",
+   "pos": [
+    0,
+    0,
+    2.5
+   ],
+   "kind": "crack",
+   "r": 2.5
+  },
+  {
+   "id": "decal27",
+   "t": "decal",
+   "at": 0.62,
+   "life": 3.6,
+   "att": "ground",
+   "pos": [
+    0,
+    0,
+    7.5
+   ],
+   "kind": "crack",
+   "r": 2.5
+  },
+  {
+   "id": "smoke28",
+   "t": "emit",
+   "at": 0.62,
+   "life": 3,
+   "rate": 10,
+   "pos": [
+    0,
+    0.5,
+    0
+   ],
+   "att": "ground",
+   "yaw": 0,
+   "from": "line",
+   "fh": 10,
+   "dir": "up",
+   "speed": [
+    0.3,
+    0.9
+   ],
+   "plife": [
+    1.2,
+    2
+   ],
+   "look": "smoke",
+   "fb": "tex/smoke_puff",
+   "size": [
+    10,
+    16
+   ],
+   "col": "#6a5654",
+   "c2": "#2a1c1a",
+   "gravity": -0.3,
+   "grow": 1,
+   "x": true
+  }
+ ],
+ "dur": 5.9
+}

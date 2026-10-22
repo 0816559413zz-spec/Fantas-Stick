@@ -1,0 +1,912 @@
+{
+ "v": 1,
+ "desc": "แบบ 4 (เหล็กหลอม): Ignition Snap — ดีดนิ้ว ศัตรูที่ติดไฟระเบิดทุกคน — เหล็กหลอมเหลวในเตา — ก้อนลาวาเหลวสาดกระเซ็นแล้วเด้งพื้น ประกายเชื่อมเหล็กพุ่งเป็นสาย ไอน้ำขาว บ่อเหล็กหลอมบนพื้นที่ค่อย ๆ เย็นดำ",
+ "tags": [
+  "fire",
+  "variant2",
+  "forge"
+ ],
+ "pal": "fire",
+ "layers": [
+  {
+   "id": "flash1",
+   "t": "flash",
+   "at": 0,
+   "life": 0.08,
+   "pos": [
+    0.35,
+    1.45,
+    0.6
+   ],
+   "col": "#fffef0",
+   "size": 1.2
+  },
+  {
+   "id": "sparks2",
+   "t": "emit",
+   "at": 0,
+   "life": 0.05,
+   "burst": 14,
+   "pos": [
+    0.35,
+    1.45,
+    0.6
+   ],
+   "from": "sphere",
+   "fr": 0.15,
+   "dir": "aim",
+   "spread": 0.5,
+   "speed": [
+    6,
+    14
+   ],
+   "up": [
+    1,
+    4
+   ],
+   "plife": [
+    0.3,
+    0.6
+   ],
+   "look": "streak",
+   "size": [
+    1.6,
+    2.6
+   ],
+   "col": "#fffbe0",
+   "c2": "#ff9a2a",
+   "gravity": 9,
+   "drag": 0.8
+  },
+  {
+   "id": "smoke3",
+   "t": "emit",
+   "at": 0,
+   "life": 0.06,
+   "burst": 2,
+   "pos": [
+    0.35,
+    1.45,
+    0.6
+   ],
+   "from": "disc",
+   "fr": 0.2,
+   "dir": "aim",
+   "spread": 1.1,
+   "speed": [
+    0.6,
+    1.8
+   ],
+   "plife": [
+    0.4,
+    0.6
+   ],
+   "look": "smoke",
+   "fb": "tex/smoke_puff",
+   "size": [
+    1.5,
+    2.4
+   ],
+   "col": "#f4f1ee",
+   "c2": "#f4f1ee",
+   "gravity": -0.35,
+   "grow": 1.1,
+   "drag": 2,
+   "x": true
+  },
+  {
+   "id": "flash4",
+   "t": "flash",
+   "at": 0.18,
+   "life": 0.09,
+   "pos": [
+    -3,
+    0.8,
+    8
+   ],
+   "col": "#fffef0",
+   "size": 1.68
+  },
+  {
+   "id": "splash5",
+   "t": "mesh",
+   "at": 0.18,
+   "life": 0.45,
+   "att": "ground",
+   "pos": [
+    -3,
+    0,
+    8
+   ],
+   "shape": "model",
+   "model": "spike_shell",
+   "mat": "fire",
+   "col": "#ffe0a0",
+   "col2": "#a83a10",
+   "heat": 0.3,
+   "scale": {
+    "0": [
+     0.48,
+     0.1,
+     0.48
+    ],
+    "1": [
+     1.56,
+     0.05,
+     1.56
+    ],
+    "0.3": [
+     1.32,
+     0.96,
+     1.32
+    ]
+   },
+   "op": {
+    "0": 1,
+    "1": 0
+   }
+  },
+  {
+   "id": "pool6",
+   "t": "mesh",
+   "at": 0.18,
+   "life": 2.2,
+   "att": "ground",
+   "pos": [
+    -3,
+    0.04,
+    8
+   ],
+   "shape": "disc",
+   "mat": "energy",
+   "col": "#ff9a2a",
+   "col2": "#ffe0a0",
+   "rim": 1.8,
+   "scale": {
+    "0": 0.2,
+    "1": 1.68,
+    "0.12": 1.68,
+    "ease": "out"
+   },
+   "op": {
+    "0": 1,
+    "1": 0,
+    "0.75": 0.9
+   },
+   "scroll": 0.4
+  },
+  {
+   "id": "decal7",
+   "t": "decal",
+   "at": 0.18,
+   "life": 3,
+   "att": "ground",
+   "pos": [
+    -3,
+    0,
+    8
+   ],
+   "kind": "dark",
+   "r": 1.92,
+   "op": 0.75
+  },
+  {
+   "id": "chunks8",
+   "t": "emit",
+   "at": 0.18,
+   "life": 0.05,
+   "burst": 20,
+   "pos": [
+    -3,
+    0.3,
+    8
+   ],
+   "from": "sphere",
+   "fr": 0.3,
+   "dir": "out",
+   "spread": 1.2,
+   "speed": [
+    2.88,
+    6.24
+   ],
+   "up": [
+    3,
+    6
+   ],
+   "plife": [
+    0.8,
+    1.3
+   ],
+   "look": "model",
+   "model": "rock_chunk",
+   "mmat": "glow",
+   "msize": [
+    0.12,
+    0.26
+   ],
+   "bounce": 0.25,
+   "mspin": 540,
+   "gravity": 12,
+   "drag": 1,
+   "col": "#ff9a2a",
+   "c2": "#a83a10"
+  },
+  {
+   "id": "sparks9",
+   "t": "emit",
+   "at": 0.18,
+   "life": 0.05,
+   "burst": 35.2,
+   "pos": [
+    -3,
+    0.3,
+    8
+   ],
+   "from": "sphere",
+   "fr": 0.15,
+   "dir": "out",
+   "spread": 1.3,
+   "speed": [
+    4.8,
+    10.799999999999999
+   ],
+   "up": [
+    1,
+    4
+   ],
+   "plife": [
+    0.3,
+    0.6
+   ],
+   "look": "streak",
+   "size": [
+    1.6,
+    2.6
+   ],
+   "col": "#fffbe0",
+   "c2": "#ff9a2a",
+   "gravity": 9,
+   "drag": 0.8
+  },
+  {
+   "id": "smoke10",
+   "t": "emit",
+   "at": 0.32999999999999996,
+   "life": 0.06,
+   "burst": 7,
+   "pos": [
+    -3,
+    0.3,
+    8
+   ],
+   "from": "disc",
+   "fr": 1.2,
+   "dir": "up",
+   "spread": 1.1,
+   "speed": [
+    0.6,
+    1.8
+   ],
+   "plife": [
+    1,
+    1.6
+   ],
+   "look": "smoke",
+   "fb": "tex/smoke_puff",
+   "size": [
+    6,
+    9.6
+   ],
+   "col": "#f4f1ee",
+   "c2": "#bdb8b2",
+   "gravity": -0.35,
+   "grow": 1.1,
+   "drag": 2,
+   "x": true
+  },
+  {
+   "id": "ring11",
+   "t": "ring",
+   "at": 0.18,
+   "life": 0.4,
+   "att": "ground",
+   "pos": [
+    -3,
+    0.08,
+    8
+   ],
+   "col": "#ff9a2a",
+   "r": 3.36,
+   "op": 0.55
+  },
+  {
+   "id": "shock12",
+   "t": "warp",
+   "at": 0.18,
+   "life": 0.4,
+   "att": "ground",
+   "pos": [
+    -3,
+    0.2,
+    8
+   ],
+   "kind": "shock",
+   "flat": true,
+   "size": {
+    "0": 0.5,
+    "1": 1,
+    "x": 4.8
+   },
+   "op": {
+    "0": 1,
+    "1": 0
+   },
+   "str": 1.2,
+   "col": "#ffc070",
+   "x": true
+  },
+  {
+   "id": "light13",
+   "t": "light",
+   "at": 0.18,
+   "life": 0.6,
+   "pos": [
+    -3,
+    1.2,
+    8
+   ],
+   "col": "#ffb860",
+   "int": {
+    "0": 2,
+    "1": 0
+   },
+   "dist": 15.6
+  },
+  {
+   "id": "flash14",
+   "t": "flash",
+   "at": 0.26,
+   "life": 0.09,
+   "pos": [
+    2.5,
+    0.8,
+    11
+   ],
+   "col": "#fffef0",
+   "size": 1.68
+  },
+  {
+   "id": "splash15",
+   "t": "mesh",
+   "at": 0.26,
+   "life": 0.45,
+   "att": "ground",
+   "pos": [
+    2.5,
+    0,
+    11
+   ],
+   "shape": "model",
+   "model": "spike_shell",
+   "mat": "fire",
+   "col": "#ffe0a0",
+   "col2": "#a83a10",
+   "heat": 0.3,
+   "scale": {
+    "0": [
+     0.48,
+     0.1,
+     0.48
+    ],
+    "1": [
+     1.56,
+     0.05,
+     1.56
+    ],
+    "0.3": [
+     1.32,
+     0.96,
+     1.32
+    ]
+   },
+   "op": {
+    "0": 1,
+    "1": 0
+   }
+  },
+  {
+   "id": "pool16",
+   "t": "mesh",
+   "at": 0.26,
+   "life": 2.2,
+   "att": "ground",
+   "pos": [
+    2.5,
+    0.04,
+    11
+   ],
+   "shape": "disc",
+   "mat": "energy",
+   "col": "#ff9a2a",
+   "col2": "#ffe0a0",
+   "rim": 1.8,
+   "scale": {
+    "0": 0.2,
+    "1": 1.68,
+    "0.12": 1.68,
+    "ease": "out"
+   },
+   "op": {
+    "0": 1,
+    "1": 0,
+    "0.75": 0.9
+   },
+   "scroll": 0.4
+  },
+  {
+   "id": "decal17",
+   "t": "decal",
+   "at": 0.26,
+   "life": 3,
+   "att": "ground",
+   "pos": [
+    2.5,
+    0,
+    11
+   ],
+   "kind": "dark",
+   "r": 1.92,
+   "op": 0.75
+  },
+  {
+   "id": "chunks18",
+   "t": "emit",
+   "at": 0.26,
+   "life": 0.05,
+   "burst": 20,
+   "pos": [
+    2.5,
+    0.3,
+    11
+   ],
+   "from": "sphere",
+   "fr": 0.3,
+   "dir": "out",
+   "spread": 1.2,
+   "speed": [
+    2.88,
+    6.24
+   ],
+   "up": [
+    3,
+    6
+   ],
+   "plife": [
+    0.8,
+    1.3
+   ],
+   "look": "model",
+   "model": "rock_chunk",
+   "mmat": "glow",
+   "msize": [
+    0.12,
+    0.26
+   ],
+   "bounce": 0.25,
+   "mspin": 540,
+   "gravity": 12,
+   "drag": 1,
+   "col": "#ff9a2a",
+   "c2": "#a83a10"
+  },
+  {
+   "id": "sparks19",
+   "t": "emit",
+   "at": 0.26,
+   "life": 0.05,
+   "burst": 35.2,
+   "pos": [
+    2.5,
+    0.3,
+    11
+   ],
+   "from": "sphere",
+   "fr": 0.15,
+   "dir": "out",
+   "spread": 1.3,
+   "speed": [
+    4.8,
+    10.799999999999999
+   ],
+   "up": [
+    1,
+    4
+   ],
+   "plife": [
+    0.3,
+    0.6
+   ],
+   "look": "streak",
+   "size": [
+    1.6,
+    2.6
+   ],
+   "col": "#fffbe0",
+   "c2": "#ff9a2a",
+   "gravity": 9,
+   "drag": 0.8
+  },
+  {
+   "id": "smoke20",
+   "t": "emit",
+   "at": 0.41000000000000003,
+   "life": 0.06,
+   "burst": 7,
+   "pos": [
+    2.5,
+    0.3,
+    11
+   ],
+   "from": "disc",
+   "fr": 1.2,
+   "dir": "up",
+   "spread": 1.1,
+   "speed": [
+    0.6,
+    1.8
+   ],
+   "plife": [
+    1,
+    1.6
+   ],
+   "look": "smoke",
+   "fb": "tex/smoke_puff",
+   "size": [
+    6,
+    9.6
+   ],
+   "col": "#f4f1ee",
+   "c2": "#bdb8b2",
+   "gravity": -0.35,
+   "grow": 1.1,
+   "drag": 2,
+   "x": true
+  },
+  {
+   "id": "ring21",
+   "t": "ring",
+   "at": 0.26,
+   "life": 0.4,
+   "att": "ground",
+   "pos": [
+    2.5,
+    0.08,
+    11
+   ],
+   "col": "#ff9a2a",
+   "r": 3.36,
+   "op": 0.55
+  },
+  {
+   "id": "shock22",
+   "t": "warp",
+   "at": 0.26,
+   "life": 0.4,
+   "att": "ground",
+   "pos": [
+    2.5,
+    0.2,
+    11
+   ],
+   "kind": "shock",
+   "flat": true,
+   "size": {
+    "0": 0.5,
+    "1": 1,
+    "x": 4.8
+   },
+   "op": {
+    "0": 1,
+    "1": 0
+   },
+   "str": 1.2,
+   "col": "#ffc070",
+   "x": true
+  },
+  {
+   "id": "light23",
+   "t": "light",
+   "at": 0.26,
+   "life": 0.6,
+   "pos": [
+    2.5,
+    1.2,
+    11
+   ],
+   "col": "#ffb860",
+   "int": {
+    "0": 2,
+    "1": 0
+   },
+   "dist": 15.6
+  },
+  {
+   "id": "flash24",
+   "t": "flash",
+   "at": 0.34,
+   "life": 0.09,
+   "pos": [
+    0,
+    0.8,
+    14
+   ],
+   "col": "#fffef0",
+   "size": 2.2399999999999998
+  },
+  {
+   "id": "splash25",
+   "t": "mesh",
+   "at": 0.34,
+   "life": 0.45,
+   "att": "ground",
+   "pos": [
+    0,
+    0,
+    14
+   ],
+   "shape": "model",
+   "model": "spike_shell",
+   "mat": "fire",
+   "col": "#ffe0a0",
+   "col2": "#a83a10",
+   "heat": 0.3,
+   "scale": {
+    "0": [
+     0.6400000000000001,
+     0.1,
+     0.6400000000000001
+    ],
+    "1": [
+     2.08,
+     0.05,
+     2.08
+    ],
+    "0.3": [
+     1.7600000000000002,
+     1.2800000000000002,
+     1.7600000000000002
+    ]
+   },
+   "op": {
+    "0": 1,
+    "1": 0
+   }
+  },
+  {
+   "id": "pool26",
+   "t": "mesh",
+   "at": 0.34,
+   "life": 2.2,
+   "att": "ground",
+   "pos": [
+    0,
+    0.04,
+    14
+   ],
+   "shape": "disc",
+   "mat": "energy",
+   "col": "#ff9a2a",
+   "col2": "#ffe0a0",
+   "rim": 1.8,
+   "scale": {
+    "0": 0.2,
+    "1": 2.2399999999999998,
+    "0.12": 2.2399999999999998,
+    "ease": "out"
+   },
+   "op": {
+    "0": 1,
+    "1": 0,
+    "0.75": 0.9
+   },
+   "scroll": 0.4
+  },
+  {
+   "id": "decal27",
+   "t": "decal",
+   "at": 0.34,
+   "life": 3,
+   "att": "ground",
+   "pos": [
+    0,
+    0,
+    14
+   ],
+   "kind": "dark",
+   "r": 2.5600000000000005,
+   "op": 0.75
+  },
+  {
+   "id": "chunks28",
+   "t": "emit",
+   "at": 0.34,
+   "life": 0.05,
+   "burst": 24,
+   "pos": [
+    0,
+    0.3,
+    14
+   ],
+   "from": "sphere",
+   "fr": 0.3,
+   "dir": "out",
+   "spread": 1.2,
+   "speed": [
+    3.84,
+    8.32
+   ],
+   "up": [
+    3,
+    6
+   ],
+   "plife": [
+    0.8,
+    1.3
+   ],
+   "look": "model",
+   "model": "rock_chunk",
+   "mmat": "glow",
+   "msize": [
+    0.12,
+    0.26
+   ],
+   "bounce": 0.25,
+   "mspin": 540,
+   "gravity": 12,
+   "drag": 1,
+   "col": "#ff9a2a",
+   "c2": "#a83a10"
+  },
+  {
+   "id": "sparks29",
+   "t": "emit",
+   "at": 0.34,
+   "life": 0.05,
+   "burst": 41.6,
+   "pos": [
+    0,
+    0.3,
+    14
+   ],
+   "from": "sphere",
+   "fr": 0.15,
+   "dir": "out",
+   "spread": 1.3,
+   "speed": [
+    6.4,
+    14.4
+   ],
+   "up": [
+    1,
+    4
+   ],
+   "plife": [
+    0.3,
+    0.6
+   ],
+   "look": "streak",
+   "size": [
+    1.6,
+    2.6
+   ],
+   "col": "#fffbe0",
+   "c2": "#ff9a2a",
+   "gravity": 9,
+   "drag": 0.8
+  },
+  {
+   "id": "smoke30",
+   "t": "emit",
+   "at": 0.49,
+   "life": 0.06,
+   "burst": 9,
+   "pos": [
+    0,
+    0.3,
+    14
+   ],
+   "from": "disc",
+   "fr": 1.6,
+   "dir": "up",
+   "spread": 1.1,
+   "speed": [
+    0.6,
+    1.8
+   ],
+   "plife": [
+    1,
+    1.6
+   ],
+   "look": "smoke",
+   "fb": "tex/smoke_puff",
+   "size": [
+    6,
+    9.6
+   ],
+   "col": "#f4f1ee",
+   "c2": "#bdb8b2",
+   "gravity": -0.35,
+   "grow": 1.1,
+   "drag": 2,
+   "x": true
+  },
+  {
+   "id": "ring31",
+   "t": "ring",
+   "at": 0.34,
+   "life": 0.4,
+   "att": "ground",
+   "pos": [
+    0,
+    0.08,
+    14
+   ],
+   "col": "#ff9a2a",
+   "r": 4.4799999999999995,
+   "op": 0.55
+  },
+  {
+   "id": "shock32",
+   "t": "warp",
+   "at": 0.34,
+   "life": 0.4,
+   "att": "ground",
+   "pos": [
+    0,
+    0.2,
+    14
+   ],
+   "kind": "shock",
+   "flat": true,
+   "size": {
+    "0": 0.5,
+    "1": 1,
+    "x": 6.4
+   },
+   "op": {
+    "0": 1,
+    "1": 0
+   },
+   "str": 1.2,
+   "col": "#ffc070",
+   "x": true
+  },
+  {
+   "id": "light33",
+   "t": "light",
+   "at": 0.34,
+   "life": 0.6,
+   "pos": [
+    0,
+    1.2,
+    14
+   ],
+   "col": "#ffb860",
+   "int": {
+    "0": 2,
+    "1": 0
+   },
+   "dist": 18.8
+  },
+  {
+   "id": "cam34",
+   "t": "screen",
+   "at": 0.34,
+   "life": 0.25,
+   "shake": 5.0600000000000005,
+   "own": true,
+   "kick": 0.2
+  }
+ ],
+ "dur": 3.6
+}

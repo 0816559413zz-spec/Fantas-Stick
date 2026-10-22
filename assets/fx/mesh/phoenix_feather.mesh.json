@@ -1,0 +1,10 @@
+{
+  "v": 1,
+  "desc": "ขนนกไฟเส้นเดียว (โค้งปลาย) — อนุภาคขนนก / ปีกเล็ก ของแบบนกไฟฟีนิกซ์ (var2-fire)",
+  "mat": "fire",
+  "pal": "fire",
+  "tags": ["fire", "feather", "phoenix"],
+  "parts": [
+    {"id":"feather","k":"fan","n":1,"spread":0,"len":0.7,"lvar":0,"w":0.2,"tipw":0.35,"curve":34,"seg":10}
+  ]
+}

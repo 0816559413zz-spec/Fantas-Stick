@@ -1,0 +1,397 @@
+{
+ "v": 1,
+ "desc": "แบบ 1 (หินผลึก): BA ชาร์จ — Stand ใหญ่ยกสองมือ 2 วิ แล้วทุบ (รัศมี 9 ม. 50 ดาเมจ + มึน) — หินผลึกอเมทิสต์ — ผลึกม่วงใสแหลมพุ่งจากพื้น เศษผลึกแตกกระเด็น ประกายวิบวับ ฝุ่นม่วงอ่อน",
+ "tags": [
+  "earth",
+  "variant2",
+  "crystal"
+ ],
+ "pal": "earth",
+ "layers": [
+  {
+   "id": "flash1",
+   "t": "flash",
+   "at": 0,
+   "life": 0.1,
+   "pos": [
+    0,
+    3,
+    -1.5
+   ],
+   "col": "#f0d8ff",
+   "size": 1.8
+  },
+  {
+   "id": "chunks2",
+   "t": "emit",
+   "at": 0,
+   "life": 0.05,
+   "burst": 16,
+   "pos": [
+    0,
+    3,
+    -1.5
+   ],
+   "from": "sphere",
+   "fr": 2.4,
+   "dir": "in",
+   "spread": 1.2,
+   "speed": [
+    2,
+    3
+   ],
+   "up": [
+    0,
+    0
+   ],
+   "plife": [
+    0.25,
+    0.35
+   ],
+   "look": "model",
+   "model": "frost_shard",
+   "mmat": "glow",
+   "msize": [
+    0.08,
+    0.16
+   ],
+   "bounce": 0,
+   "mspin": 540,
+   "gravity": 0,
+   "drag": 1,
+   "col": "#b07aff",
+   "c2": "#5a28b0"
+  },
+  {
+   "id": "glint3",
+   "t": "emit",
+   "at": 0,
+   "life": 0.05,
+   "burst": 20,
+   "pos": [
+    0,
+    3,
+    -1.5
+   ],
+   "from": "sphere",
+   "fr": 1.4,
+   "dir": "out",
+   "speed": [
+    0.5,
+    1.5
+   ],
+   "plife": [
+    0.4,
+    0.7
+   ],
+   "look": "glow",
+   "fb": "tex/star_flare",
+   "size": [
+    3,
+    5
+   ],
+   "col": "#ffffff",
+   "c2": "#b07aff",
+   "gravity": 0
+  },
+  {
+   "id": "floor4",
+   "t": "mesh",
+   "at": 0,
+   "life": 2,
+   "att": "ground",
+   "pos": [
+    0,
+    0.04,
+    9
+   ],
+   "shape": "disc",
+   "mat": "energy",
+   "col": "#5a28b0",
+   "col2": "#b07aff",
+   "rim": 1.2,
+   "scroll": 0.25,
+   "scale": {
+    "0": 0.1,
+    "1": 9,
+    "0.1": 9,
+    "ease": "out"
+   },
+   "op": {
+    "0": 0.45,
+    "1": 0,
+    "0.85": 0.35
+   }
+  },
+  {
+   "id": "rimc5",
+   "t": "mesh",
+   "at": 0,
+   "life": 2,
+   "att": "ground",
+   "pos": [
+    0,
+    0,
+    9
+   ],
+   "shape": "model",
+   "model": "frost_rim",
+   "mat": "energy",
+   "col": "#b07aff",
+   "col2": "#5a28b0",
+   "rim": 1.8,
+   "scroll": 0.25,
+   "scale": [
+    9,
+    1.6,
+    9
+   ],
+   "grow": {
+    "0": 0,
+    "1": 0,
+    "0.08": 1,
+    "0.92": 1
+   },
+   "stagger": 0.7,
+   "growBy": "random"
+  },
+  {
+   "id": "glint6",
+   "t": "emit",
+   "at": 0,
+   "life": 2,
+   "rate": 30,
+   "pos": [
+    0,
+    0.3,
+    9
+   ],
+   "att": "ground",
+   "from": "disc",
+   "fr": 8.1,
+   "dir": "up",
+   "speed": [
+    0.3,
+    0.8
+   ],
+   "plife": [
+    0.6,
+    1
+   ],
+   "look": "glow",
+   "fb": "tex/star_flare",
+   "size": [
+    2.5,
+    4
+   ],
+   "col": "#ffffff",
+   "c2": "#b07aff",
+   "gravity": -0.2
+  },
+  {
+   "id": "flash7",
+   "t": "flash",
+   "at": 2,
+   "life": 0.1,
+   "pos": [
+    0,
+    0.6,
+    9
+   ],
+   "col": "#f0d8ff",
+   "size": 5.3999999999999995
+  },
+  {
+   "id": "geode8",
+   "t": "mesh",
+   "at": 2,
+   "life": 1.3,
+   "att": "ground",
+   "pos": [
+    0,
+    0,
+    9
+   ],
+   "shape": "model",
+   "model": "crystal_crown",
+   "mat": "energy",
+   "col": "#b07aff",
+   "col2": "#5a28b0",
+   "rim": 1.8,
+   "scroll": 0.25,
+   "scale": {
+    "0": [
+     3.6,
+     0.05,
+     3.6
+    ],
+    "0.12": [
+     4.05,
+     4.5,
+     4.05
+    ],
+    "0.3": 4.05,
+    "ease": "out"
+   },
+   "dis": {
+    "0": 0,
+    "1": 1,
+    "0.7": 0
+   }
+  },
+  {
+   "id": "chunks9",
+   "t": "emit",
+   "at": 2,
+   "life": 0.05,
+   "burst": 24,
+   "pos": [
+    0,
+    0.5,
+    9
+   ],
+   "from": "sphere",
+   "fr": 0.3,
+   "dir": "out",
+   "spread": 1.2,
+   "speed": [
+    10.799999999999999,
+    22.5
+   ],
+   "up": [
+    2,
+    5
+   ],
+   "plife": [
+    0.8,
+    1.4
+   ],
+   "look": "model",
+   "model": "frost_shard",
+   "mmat": "glow",
+   "msize": [
+    0.1,
+    0.25
+   ],
+   "bounce": 0.35,
+   "mspin": 540,
+   "gravity": 11,
+   "drag": 1,
+   "col": "#b07aff",
+   "c2": "#5a28b0"
+  },
+  {
+   "id": "glint10",
+   "t": "emit",
+   "at": 2,
+   "life": 0.05,
+   "burst": 30,
+   "pos": [
+    0,
+    0.5,
+    9
+   ],
+   "from": "sphere",
+   "fr": 3.6,
+   "dir": "out",
+   "speed": [
+    1,
+    3
+   ],
+   "up": [
+    1,
+    2
+   ],
+   "plife": [
+    0.5,
+    0.9
+   ],
+   "look": "glow",
+   "fb": "tex/star_flare",
+   "size": [
+    3,
+    6
+   ],
+   "col": "#ffffff",
+   "c2": "#b07aff",
+   "gravity": 0.5
+  },
+  {
+   "id": "smoke11",
+   "t": "emit",
+   "at": 2.04,
+   "life": 0.06,
+   "burst": 8,
+   "pos": [
+    0,
+    0.3,
+    9
+   ],
+   "from": "disc",
+   "fr": 4.5,
+   "dir": "up",
+   "spread": 1.1,
+   "speed": [
+    0.6,
+    1.8
+   ],
+   "plife": [
+    0.9,
+    1.4
+   ],
+   "look": "smoke",
+   "fb": "tex/smoke_puff",
+   "size": [
+    6,
+    9.6
+   ],
+   "col": "#d8c8f0",
+   "c2": "#d8c8f0",
+   "gravity": -0.35,
+   "grow": 1.1,
+   "drag": 2,
+   "x": true
+  },
+  {
+   "id": "ring12",
+   "t": "ring",
+   "at": 2,
+   "life": 0.45,
+   "att": "ground",
+   "pos": [
+    0,
+    0.08,
+    9
+   ],
+   "col": "#b07aff",
+   "r": 11.700000000000001,
+   "op": 0.5
+  },
+  {
+   "id": "light13",
+   "t": "light",
+   "at": 2,
+   "life": 0.4,
+   "pos": [
+    0,
+    1.2,
+    9
+   ],
+   "col": "#c8a0ff",
+   "int": {
+    "0": 1.8,
+    "1": 0
+   },
+   "dist": 42
+  },
+  {
+   "id": "cam14",
+   "t": "screen",
+   "at": 2,
+   "life": 0.25,
+   "shake": 7.3999999999999995,
+   "own": true
+  }
+ ],
+ "dur": 3.7
+}

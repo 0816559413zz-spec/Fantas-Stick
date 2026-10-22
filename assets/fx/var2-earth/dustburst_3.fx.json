@@ -1,0 +1,526 @@
+{
+ "v": 1,
+ "desc": "แบบ 3 (หินหลอมเหลว): Dust Burst — ดึงหินขึ้นระดับหัว Stand บีบ แล้วระเบิดเป็นฝุ่นใหญ่ (รัศมี 17 ม.) — หินหลอมเหลว — หินดำแหลมพุ่งพร้อมลาวาส้มในรอยแตก ก้อนหินร้อนเรืองกระเด็น ไอร้อนบิดอากาศ ควันเทาเข้ม",
+ "tags": [
+  "earth",
+  "variant2",
+  "magma"
+ ],
+ "pal": "earth",
+ "layers": [
+  {
+   "id": "flash1",
+   "t": "flash",
+   "at": 0,
+   "life": 0.1,
+   "pos": [
+    0,
+    1.7,
+    10
+   ],
+   "col": "#ffb040",
+   "size": 0.96
+  },
+  {
+   "id": "chunks2",
+   "t": "emit",
+   "at": 0,
+   "life": 0.05,
+   "burst": 10,
+   "pos": [
+    0,
+    1.7,
+    10
+   ],
+   "from": "sphere",
+   "fr": 1.44,
+   "dir": "in",
+   "spread": 1.2,
+   "speed": [
+    2,
+    3
+   ],
+   "up": [
+    0,
+    0
+   ],
+   "plife": [
+    0.25,
+    0.35
+   ],
+   "look": "model",
+   "model": "rock_chunk",
+   "mmat": "glow",
+   "msize": [
+    0.08,
+    0.16
+   ],
+   "bounce": 0,
+   "mspin": 540,
+   "gravity": 0,
+   "drag": 1,
+   "col": "#ff6a1a",
+   "c2": "#7a1a08"
+  },
+  {
+   "id": "haze3",
+   "t": "warp",
+   "at": 0,
+   "life": 0.5,
+   "pos": [
+    0,
+    1.7,
+    10
+   ],
+   "kind": "haze",
+   "size": 1.44,
+   "str": 0.9,
+   "op": {
+    "0": 0,
+    "1": 0,
+    "0.15": 1,
+    "0.8": 1
+   },
+   "x": true
+  },
+  {
+   "id": "slab4",
+   "t": "mesh",
+   "at": 0,
+   "life": 1.1,
+   "pos": {
+    "0": [
+     0,
+     1.7,
+     10
+    ],
+    "1": [
+     0,
+     1.75,
+     10
+    ]
+   },
+   "shape": "model",
+   "model": "rock_chunks",
+   "mat": "solid",
+   "col": "#24201e",
+   "scale": 0.7,
+   "spin": 200,
+   "fade": 0
+  },
+  {
+   "id": "glow5",
+   "t": "mesh",
+   "at": 0,
+   "life": 1.1,
+   "pos": {
+    "0": [
+     0,
+     1.7,
+     10
+    ],
+    "1": [
+     0,
+     1.75,
+     10
+    ]
+   },
+   "shape": "sphere",
+   "mat": "fire",
+   "mode": "ball",
+   "col": "#ffb040",
+   "col2": "#7a1a08",
+   "heat": -0.2,
+   "scale": 0.5,
+   "fade": 0
+  },
+  {
+   "id": "smoke6",
+   "t": "emit",
+   "at": 0,
+   "life": 1.1,
+   "rate": 30,
+   "pos": {
+    "0": [
+     0,
+     1.7,
+     10
+    ],
+    "1": [
+     0,
+     1.75,
+     10
+    ]
+   },
+   "from": "sphere",
+   "fr": 0.5,
+   "dir": "up",
+   "speed": [
+    0.2,
+    0.6
+   ],
+   "plife": [
+    0.6,
+    1
+   ],
+   "look": "smoke",
+   "fb": "tex/smoke_puff",
+   "size": [
+    6,
+    10
+   ],
+   "col": "#5a524c",
+   "c2": "#3a3430",
+   "gravity": -0.3,
+   "grow": 1,
+   "x": true
+  },
+  {
+   "id": "flash7",
+   "t": "flash",
+   "at": 1.1,
+   "life": 0.1,
+   "pos": [
+    0,
+    0.5,
+    10
+   ],
+   "col": "#ffb040",
+   "size": 1
+  },
+  {
+   "id": "spikes8",
+   "t": "mesh",
+   "at": 1.1,
+   "life": 1.4,
+   "att": "ground",
+   "pos": [
+    0,
+    0,
+    10
+   ],
+   "shape": "model",
+   "model": "rock_spikes",
+   "mat": "solid",
+   "col": "#24201e",
+   "scale": 0.8,
+   "grow": {
+    "0": 0,
+    "1": 0,
+    "0.12": 1,
+    "0.8": 1
+   },
+   "stagger": 0.6,
+   "growBy": "center"
+  },
+  {
+   "id": "decal9",
+   "t": "decal",
+   "at": 1.1,
+   "life": 2.6,
+   "att": "ground",
+   "pos": [
+    0,
+    0,
+    10
+   ],
+   "kind": "crack",
+   "r": 2.5,
+   "n": 12
+  },
+  {
+   "id": "veins10",
+   "t": "mesh",
+   "at": 1.1,
+   "life": 2.6,
+   "att": "ground",
+   "pos": [
+    0,
+    0.045,
+    10
+   ],
+   "shape": "disc",
+   "mat": "tex",
+   "tex": "tex/noise_veins",
+   "col": "#ff5a14",
+   "col2": "#ffb040",
+   "rim": 1.2,
+   "uvTile": [
+    1,
+    1
+   ],
+   "uvScroll": [
+    0.02,
+    0.01
+   ],
+   "scale": {
+    "0": 0.2,
+    "1": 2.4,
+    "0.08": 2.4,
+    "ease": "out"
+   },
+   "op": {
+    "0": 0,
+    "1": 0,
+    "0.08": 0.95,
+    "0.7": 0.8
+   }
+  },
+  {
+   "id": "chunks11",
+   "t": "emit",
+   "at": 1.1,
+   "life": 0.05,
+   "burst": 10,
+   "pos": [
+    0,
+    0.4,
+    10
+   ],
+   "from": "sphere",
+   "fr": 0.3,
+   "dir": "out",
+   "spread": 1.2,
+   "speed": [
+    2.4,
+    4.8
+   ],
+   "up": [
+    3,
+    6
+   ],
+   "plife": [
+    0.8,
+    1.4
+   ],
+   "look": "model",
+   "model": "rock_chunk",
+   "mmat": "glow",
+   "msize": [
+    0.1,
+    0.24
+   ],
+   "bounce": 0.35,
+   "mspin": 540,
+   "gravity": 11,
+   "drag": 1,
+   "col": "#ff6a1a",
+   "c2": "#7a1a08"
+  },
+  {
+   "id": "chunks12",
+   "t": "emit",
+   "at": 1.1,
+   "life": 0.05,
+   "burst": 8,
+   "pos": [
+    0,
+    0.4,
+    10
+   ],
+   "from": "sphere",
+   "fr": 0.3,
+   "dir": "out",
+   "spread": 1.2,
+   "speed": [
+    2,
+    4
+   ],
+   "up": [
+    2,
+    5
+   ],
+   "plife": [
+    0.8,
+    1.4
+   ],
+   "look": "model",
+   "model": "rock_chunk",
+   "mmat": "solid",
+   "msize": [
+    0.15,
+    0.32
+   ],
+   "bounce": 0.35,
+   "mspin": 540,
+   "gravity": 11,
+   "drag": 1,
+   "col": "#3a302a",
+   "c2": "#24201e"
+  },
+  {
+   "id": "smoke13",
+   "t": "emit",
+   "at": 1.1500000000000001,
+   "life": 0.06,
+   "burst": 5,
+   "pos": [
+    0,
+    0.3,
+    10
+   ],
+   "from": "disc",
+   "fr": 1,
+   "dir": "up",
+   "spread": 1.1,
+   "speed": [
+    0.6,
+    1.8
+   ],
+   "plife": [
+    1.2,
+    1.8
+   ],
+   "look": "smoke",
+   "fb": "tex/smoke_puff",
+   "size": [
+    7.199999999999999,
+    10.799999999999999
+   ],
+   "col": "#5a524c",
+   "c2": "#5a524c",
+   "gravity": -0.35,
+   "grow": 1.1,
+   "drag": 2,
+   "x": true
+  },
+  {
+   "id": "haze14",
+   "t": "warp",
+   "at": 1.1,
+   "life": 1.2,
+   "pos": [
+    0,
+    1,
+    10
+   ],
+   "kind": "haze",
+   "size": 3.2,
+   "str": 1,
+   "op": {
+    "0": 0,
+    "1": 0,
+    "0.15": 1,
+    "0.8": 1
+   },
+   "x": true
+  },
+  {
+   "id": "shock15",
+   "t": "warp",
+   "at": 1.1,
+   "life": 0.45,
+   "att": "ground",
+   "pos": [
+    0,
+    0.2,
+    10
+   ],
+   "kind": "shock",
+   "flat": true,
+   "size": {
+    "0": 0.5,
+    "1": 1,
+    "x": 4
+   },
+   "op": {
+    "0": 1,
+    "1": 0
+   },
+   "str": 1.3,
+   "col": "#ff8a40",
+   "x": true
+  },
+  {
+   "id": "light16",
+   "t": "light",
+   "at": 1.1,
+   "life": 0.6,
+   "pos": [
+    0,
+    1,
+    10
+   ],
+   "col": "#ff7a30",
+   "int": {
+    "0": 2,
+    "1": 0
+   },
+   "dist": 14
+  },
+  {
+   "id": "cam17",
+   "t": "screen",
+   "at": 1.1,
+   "life": 0.25,
+   "shake": 3.9,
+   "own": true
+  },
+  {
+   "id": "cloud18",
+   "t": "emit",
+   "at": 1.1,
+   "life": 0.4,
+   "rate": 60,
+   "pos": [
+    0,
+    1.2,
+    10
+   ],
+   "from": "sphere",
+   "fr": 5.1,
+   "dir": "out",
+   "speed": [
+    8.5,
+    20.4
+   ],
+   "plife": [
+    2.8,
+    4
+   ],
+   "look": "smoke",
+   "fb": "tex/smoke_puff",
+   "size": [
+    30,
+    46
+   ],
+   "col": "#7a7068",
+   "c2": "#5a524c",
+   "gravity": -0.05,
+   "grow": 0.6,
+   "drag": 1.4
+  },
+  {
+   "id": "cinders19",
+   "t": "emit",
+   "at": 1.1,
+   "life": 2.4,
+   "rate": 24,
+   "pos": [
+    0,
+    1.2,
+    10
+   ],
+   "from": "sphere",
+   "fr": 10.2,
+   "dir": "random",
+   "speed": [
+    0.3,
+    0.8
+   ],
+   "plife": [
+    0.8,
+    1.2
+   ],
+   "look": "ember",
+   "size": [
+    1.2,
+    2
+   ],
+   "col": "#ffb040",
+   "c2": "#ff6a1a",
+   "gravity": 0
+  }
+ ],
+ "dur": 5.7
+}

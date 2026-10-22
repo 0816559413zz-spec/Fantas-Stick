@@ -1,0 +1,11 @@
+{
+  "v": 1,
+  "desc": "แผ่นหินสลักแผ่นเดียว (ขอบบิ่น) — โล่/กำแพงของแบบหินรูนโบราณ (var2-earth)",
+  "mat": "solid",
+  "pal": "earth",
+  "tags": ["earth", "rune", "stone", "slab"],
+  "parts": [
+    {"id":"slab","k":"box","w":1,"h":1.5,"d":0.24,"noise":0.05,"nfreq":2.5,"flat":true,"pos":[0,0.75,0],"seed":5},
+    {"id":"chip","k":"box","w":0.32,"h":0.2,"d":0.26,"noise":0.03,"flat":true,"pos":[0.38,1.52,0],"rot":[0,0,24],"seed":6}
+  ]
+}
