@@ -4,6 +4,12 @@ const SLOTS=[['คลิกซ้าย','✨','ยิง',0],['คลิกข�
 function fmtTime(s){return Math.floor(s/60)+':'+String(s%60).padStart(2,'0');}
 // ---------- ชิ้นส่วน HUD ธีมทอง-น้ำเงิน ----------
 const HG='#d9b45a',HG2='#f3dc94',HN='rgba(7,11,24,0.84)';
+// สถานะความรู้สึกของ HUD ฝั่งจอเรา (ไม่เกี่ยวกับเน็ต): แฟลชโดนตี / แถบเลือดค้าง / ช่องคาถาเพิ่งพร้อม / นับถอยหลัง / kill feed เลื่อนเข้า
+const HUDF={t:0,dt:0,id:null,hp:0,hit:0,trail:1,trailHold:0,rdy:{},rdyT:{},ph:'',go:0,uFull:false,uT:-9,feed:new Map()};
+function hudTick(){const n=performance.now();HUDF.dt=HUDF.t?Math.min(0.1,(n-HUDF.t)/1000):0;HUDF.t=n;return n;}
+// วงเพชรขยายออกตอนช่องคาถาเพิ่งคูลดาวน์เสร็จ (k = 0→1)
+function readyPulse(x,y,r,k){cx.save();cx.globalAlpha=1-k;cx.strokeStyle=HG2;cx.lineWidth=3*(1-k)+1;cx.shadowColor=HG2;cx.shadowBlur=12;diaPath(x,y,r+3+k*16);cx.stroke();
+  cx.globalCompositeOperation='lighter';cx.globalAlpha=0.45*(1-k);diaPath(x,y,r);cx.fillStyle='#f3dc94';cx.fill();cx.restore();}
 function diaPath(x,y,r){cx.beginPath();cx.moveTo(x,y-r);cx.lineTo(x+r,y);cx.lineTo(x,y+r);cx.lineTo(x-r,y);cx.closePath();}
 // แผ่นป้ายกรอบทอง มีเพชรเล็กสองข้าง
 function plate(x,y,w,h,hl){
@@ -35,6 +41,8 @@ function drawBossBar(e){
   cx.fillStyle='rgba(255,226,190,0.6)';cx.fillRect(x,y,w*bossTrail.v,10);
   const g=cx.createLinearGradient(0,y,0,y+10);g.addColorStop(0,'#ff5d6c');g.addColorStop(1,'#9e1229');
   cx.fillStyle=g;cx.fillRect(x,y,w*r,10);
+  {const h=cx.createLinearGradient(0,y,0,y+10);h.addColorStop(0,'rgba(255,255,255,0.3)');h.addColorStop(0.5,'rgba(255,255,255,0)');cx.fillStyle=h;cx.fillRect(x,y,w*r,10);}   // เงาแก้ว + ขีดทุก 10%
+  cx.fillStyle='rgba(5,7,15,0.55)';for(let i=1;i<10;i++)cx.fillRect(Math.round(x+w*i/10),y+(i===5?0:3),1,i===5?10:7);
   cx.strokeStyle=HG;cx.strokeRect(x-0.5,y-0.5,w+1,11);
   for(const sx of [x-1,x+w+1]){diaPath(sx,y+5,6);cx.fillStyle='#05070f';cx.fill();cx.strokeStyle=HG;cx.stroke();}
 }
@@ -60,7 +68,7 @@ function spellDia(x,y,r,ic,key,name,st){
     cx.lineWidth=2;cx.strokeStyle='rgba(255,194,122,0.18)';diaPath(x,y,R);cx.stroke();
     cx.save();cx.lineWidth=3;cx.lineCap='round';cx.lineJoin='round';cx.strokeStyle='#ffc27a';cx.shadowColor='#ff9a4a';cx.shadowBlur=6;cx.beginPath();cx.moveTo(x,y-R);
     let q=k*4;for(let i=0;i<4&&q>0;i++){const f=Math.min(1,q);q-=1;cx.lineTo(x+P[i][0]+(P[i+1][0]-P[i][0])*f,y+P[i][1]+(P[i+1][1]-P[i][1])*f);}cx.stroke();cx.restore();}
-  if(st.txt){cx.font='600 16px Kanit,sans-serif';cx.fillStyle='rgba(0,0,0,0.7)';cx.fillText(st.txt,x+1,y+7);cx.fillStyle='#fff';cx.fillText(st.txt,x,y+6);}
+  if(st.txt){const fs=Math.max(14,Math.round(r*0.6));cx.font=`700 ${fs}px Kanit,sans-serif`;cx.lineJoin='round';cx.lineWidth=4;cx.strokeStyle='rgba(0,0,0,0.85)';cx.strokeText(st.txt,x,y+fs*0.36);cx.fillStyle='#fff';cx.fillText(st.txt,x,y+fs*0.36);}
   cx.font='600 10px Kanit,sans-serif';
   const kw=Math.max(18,cx.measureText(key).width+10),ky=y+r-4;
   cx.fillStyle='#05070f';cx.fillRect(x-kw/2,ky,kw,15);cx.strokeStyle=st.ready?HG:'rgba(217,180,90,0.4)';cx.lineWidth=1;cx.strokeRect(x-kw/2+0.5,ky+0.5,kw-1,14);
@@ -76,6 +84,13 @@ function thinBar(x,y,w,h,ratio,c1,c2){
 function drawHUD(v,me,P){
   cx.textAlign='center';cx.textBaseline='alphabetic';
   if(me&&(me.fm&4096)){const g=cx.createRadialGradient(SW/2,SH/2,SH*0.12,SW/2,SH/2,SH*0.75);g.addColorStop(0,'rgba(10,4,20,0.55)');g.addColorStop(1,'rgba(4,0,10,0.96)');cx.fillStyle=g;cx.fillRect(0,0,SW,SH);}
+  const now=hudTick(),dt=HUDF.dt;
+  // ขอบจอแดง: เลือดต่ำกว่า 35% = เต้นตามชีพจร (ต่ำกว่า 15% เต้นเร็ว) + แฟลชสั้นๆ ตอนโดนตี
+  if(me&&me.al&&!me.dn){const hr=me.hp/me.mh;
+    if(HUDF.id===me.id&&me.hp<HUDF.hp)HUDF.hit=Math.min(1,HUDF.hit+0.3+(HUDF.hp-me.hp)/me.mh*3);
+    const low=hr<0.35?(0.35-hr)/0.35*(0.72+0.28*Math.sin(now/(hr<0.15?130:230))):0,a=Math.min(0.85,low*0.95+HUDF.hit*0.45);
+    if(a>0.01){const g=cx.createRadialGradient(SW/2,SH/2,SH*(0.42-low*0.1),SW/2,SH/2,Math.hypot(SW,SH)*0.55);g.addColorStop(0,'rgba(120,0,12,0)');g.addColorStop(0.7,`rgba(130,6,18,${a*0.55})`);g.addColorStop(1,`rgba(165,10,24,${a})`);cx.fillStyle=g;cx.fillRect(0,0,SW,SH);}}
+  HUDF.hit=Math.max(0,HUDF.hit-dt*2.2);if(me){HUDF.id=me.id;HUDF.hp=me.hp;}
   // แถบบน
   let top='';const M=v.M||{};
   if(v.mode==='coop')top=`🗝️ ดันเจียนชั้น ${v.wave}   •   ศัตรูเหลือ ${v.el}`;
@@ -96,8 +111,14 @@ function drawHUD(v,me,P){
   if(boss)drawBossBar(boss);
 
   // kill feed
+  // (ข้อความใหม่เลื่อนเข้าจากขวา • ข้อความที่มีชื่อเรา = ตัวทอง) • ห้องฝึก: เลื่อนลงให้พ้นปุ่ม "จบการฝึก" ใต้แผนที่ย่อ
   cx.textAlign='right';cx.font='14px Kanit,sans-serif';
-  v.feed.forEach((f,i)=>{const w=cx.measureText(f).width+26,y=(me?MM.r*2+56:58)+i*28;cx.fillStyle=HN;cx.fillRect(SW-12-w,y,w,24);cx.fillStyle=HG;cx.fillRect(SW-14,y,2,24);cx.fillStyle='#efe6cf';cx.fillText(f,SW-24,y+17);});
+  {const F=HUDF.feed,y0=(me&&SET.mini?MM.r*2+56:58)+(v.mode==='train'?46:0);for(const k of [...F.keys()])if(!v.feed.includes(k))F.delete(k);
+  v.feed.forEach((f,i)=>{if(!F.has(f))F.set(f,now);const k=Math.min(1,(now-F.get(f))/220),e=1-Math.pow(1-k,3),w=cx.measureText(f).width+30,y=y0+i*28,ox=(1-e)*60,mine=me&&f.includes(me.n);
+    cx.globalAlpha=e;const g=cx.createLinearGradient(SW-12-w,0,SW-12,0);g.addColorStop(0,'rgba(7,11,24,0)');g.addColorStop(0.18,HN);g.addColorStop(1,mine?'rgba(60,44,12,0.9)':HN);
+    cx.fillStyle=g;cx.fillRect(SW-12-w+ox,y,w,24);cx.fillStyle=mine?HG2:HG;cx.fillRect(SW-14+ox,y,2,24);
+    if(k<1){cx.fillStyle=`rgba(243,220,148,${0.35*(1-k)})`;cx.fillRect(SW-12-w+ox,y,w,24);}
+    cx.fillStyle=mine?HG2:'#efe6cf';cx.fillText(f,SW-24+ox,y+17);cx.globalAlpha=1;});}
 
   // ข้อความกลางจอ
   cx.textAlign='center';
@@ -107,11 +128,22 @@ function drawHUD(v,me,P){
     const bw=Math.min(cx.measureText(v.ban).width,SW-40)/2;cx.strokeStyle='rgba(217,180,90,0.7)';cx.lineWidth=1;
     for(const sd of [-1,1]){cx.beginPath();cx.moveTo(SW/2+sd*(bw+14),SH*0.28-11);cx.lineTo(SW/2+sd*(bw+90),SH*0.28-11);cx.stroke();diaPath(SW/2+sd*(bw+14),SH*0.28-11,4);cx.fillStyle=HG;cx.fill();}
   }
+  // นับถอยหลัง 3-2-1: ตัวเลขกระแทกลงจากใหญ่ → ปกติ + วงคลื่นทองขยายออก แล้วจางตอนท้าย • จบนับ = "เริ่ม!" แว้บหนึ่ง
   if(v.ph==='count'){
-    const n=String(Math.ceil(v.cd)),y=SH*0.44;cx.font='800 110px Cinzel,serif';
-    cx.fillStyle='rgba(0,0,0,0.55)';cx.fillText(n,SW/2+3,y+3);
-    const g=cx.createLinearGradient(0,y-90,0,y);g.addColorStop(0,'#fff4cc');g.addColorStop(0.6,'#e2bd66');g.addColorStop(1,'#94692a');cx.fillStyle=g;cx.fillText(n,SW/2,y);
+    const ni=Math.max(1,Math.ceil(v.cd)),n=String(ni),f=clamp(ni-v.cd,0,1),cy=SH*0.44-40,s=1+0.75*Math.pow(1-Math.min(1,f/0.16),2),al=f>0.8?1-(f-0.8)/0.2*0.7:Math.min(1,f/0.06+0.2);
+    cx.save();cx.globalAlpha=0.55*(1-f);cx.strokeStyle=HG2;cx.lineWidth=3*(1-f)+0.5;cx.beginPath();cx.arc(SW/2,cy,50+f*170,0,Math.PI*2);cx.stroke();
+    cx.globalAlpha=0.3*(1-f);cx.lineWidth=1;cx.beginPath();cx.arc(SW/2,cy,40+f*120,0,Math.PI*2);cx.stroke();
+    diaPath(SW/2,cy,70+f*40);cx.globalAlpha=0.25*(1-f);cx.stroke();cx.restore();
+    cx.save();cx.translate(SW/2,cy);cx.scale(s,s);cx.globalAlpha=al;cx.font='800 110px Cinzel,serif';
+    cx.fillStyle='rgba(0,0,0,0.55)';cx.fillText(n,3,43);
+    cx.shadowColor='rgba(255,200,90,0.8)';cx.shadowBlur=18+30*(1-Math.min(1,f/0.3));
+    const g=cx.createLinearGradient(0,-50,0,40);g.addColorStop(0,'#fff4cc');g.addColorStop(0.6,'#e2bd66');g.addColorStop(1,'#94692a');cx.fillStyle=g;cx.fillText(n,0,40);cx.restore();
   }
+  if(HUDF.ph==='count'&&v.ph==='play')HUDF.go=now;HUDF.ph=v.ph;
+  if(now-HUDF.go<850&&v.ph==='play'){const k=(now-HUDF.go)/850,cy=SH*0.44-40,s=0.8+0.5*Math.pow(k,0.5);
+    cx.save();cx.globalAlpha=k<0.15?k/0.15:1-Math.pow((k-0.15)/0.85,2);cx.translate(SW/2,cy);cx.scale(s,s);cx.font='800 76px Cinzel,Kanit,serif';
+    cx.shadowColor='rgba(255,200,90,0.9)';cx.shadowBlur=26;cx.fillStyle=HG2;cx.fillText('เริ่ม!',0,26);cx.restore();
+    cx.save();cx.globalAlpha=0.5*(1-k);cx.strokeStyle=HG2;cx.lineWidth=2;cx.beginPath();cx.arc(SW/2,cy,90+k*260,0,Math.PI*2);cx.stroke();cx.restore();}
   if(v.ph==='buff'){
     const waiting=P.filter(p=>!p.pk).map(p=>p.n);
     big(`พักระหว่างด่าน — เหลือ ${v.bt} วิ`,SH*0.36,24,'#efe9ff');
@@ -237,8 +269,14 @@ function drawMinimap(v,me,P){
   cx.fillStyle=HG2;cx.fill();cx.strokeStyle='#05070f';cx.lineWidth=1;cx.stroke();cx.restore();
   cx.restore();
   // กรอบทอง + ตัว N ชี้ทิศเหนือของแผนที่ (หมุนตามกล้อง)
+  // กรอบ: เงาขอบด้านใน (ดูลึก) + วงทองคู่ + ขีดเข็มทิศทุก 30° หมุนตามทิศเหนือ (ขีดยาว+เพชร = ทิศหลัก)
+  {const g=cx.createRadialGradient(mx,my,R*0.78,mx,my,R);g.addColorStop(0,'rgba(2,4,10,0)');g.addColorStop(1,'rgba(2,4,10,0.38)');cx.beginPath();cx.arc(mx,my,R,0,Math.PI*2);cx.fillStyle=g;cx.fill();}
+  cx.beginPath();cx.arc(mx,my,R+3,0,Math.PI*2);cx.strokeStyle='rgba(5,7,15,0.85)';cx.lineWidth=6;cx.stroke();
   cx.beginPath();cx.arc(mx,my,R,0,Math.PI*2);cx.strokeStyle=HG;cx.lineWidth=2;cx.stroke();
-  cx.beginPath();cx.arc(mx,my,R+4,0,Math.PI*2);cx.strokeStyle='rgba(217,180,90,0.25)';cx.lineWidth=1;cx.stroke();
+  cx.beginPath();cx.arc(mx,my,R+6,0,Math.PI*2);cx.strokeStyle='rgba(217,180,90,0.4)';cx.lineWidth=1;cx.stroke();
+  {const a0=Math.atan2(sn,-cs);cx.strokeStyle='rgba(243,220,148,0.75)';
+    for(let i=1;i<12;i++){const a=a0+i*Math.PI/6,c=Math.cos(a),s=Math.sin(a),big=i%3===0,r0=R+1,r1=R+(big?7:4);cx.lineWidth=big?1.5:1;cx.beginPath();cx.moveTo(mx+c*r0,my+s*r0);cx.lineTo(mx+c*r1,my+s*r1);cx.stroke();
+      if(big){diaPath(mx+c*(R+6),my+s*(R+6),2.5);cx.fillStyle=HG;cx.fill();}}}
   // เหนือของแผนที่ = ทิศ -y ของโลก
   const nxp=mx-cs*(R+11),nyp=my+sn*(R+11);
   diaPath(nxp,nyp,8);cx.fillStyle='#05070f';cx.fill();cx.strokeStyle=HG;cx.lineWidth=1;cx.stroke();
@@ -265,11 +303,17 @@ function drawUlt(me){
   cx.lineWidth=6;cx.strokeStyle='rgba(217,180,90,0.18)';cx.beginPath();cx.arc(x,y,R-3,0,Math.PI*2);cx.stroke();
   if(me.u>0){cx.save();if(full){cx.shadowColor=P.col;cx.shadowBlur=14;}cx.strokeStyle=full?P.col:HG;cx.lineCap='round';cx.beginPath();cx.arc(x,y,R-3,-Math.PI/2,-Math.PI/2+Math.PI*2*Math.min(1,me.u/100));cx.stroke();cx.restore();}
   cx.lineWidth=1.5;cx.strokeStyle=full?HG2:'rgba(217,180,90,0.55)';cx.beginPath();cx.arc(x,y,R+3,0,Math.PI*2);cx.stroke();
+  // เต็มแล้ว: วงอักษรรูนหมุน + ประกาย 4 ดวงโคจร • เพิ่งเต็ม = คลื่นแสงขยายออก
+  if(full&&!HUDF.uFull)HUDF.uT=t;HUDF.uFull=full;
+  if(full){cx.save();cx.strokeStyle=P.col;cx.globalAlpha=0.55+0.35*pulse;cx.lineWidth=1.5;cx.setLineDash([3,6]);cx.lineDashOffset=-t/45;cx.beginPath();cx.arc(x,y,R+9,0,Math.PI*2);cx.stroke();cx.setLineDash([]);
+    cx.globalCompositeOperation='lighter';for(let i=0;i<4;i++){const a=t/700+i*Math.PI/2,px=x+Math.cos(a)*(R+9),py=y+Math.sin(a)*(R+9);cx.globalAlpha=0.9;cx.fillStyle=HG2;cx.shadowColor=P.col;cx.shadowBlur=10;diaPath(px,py,3);cx.fill();}cx.restore();}
+  {const k=(t-HUDF.uT)/700;if(k>=0&&k<1){cx.save();cx.globalAlpha=1-k;cx.strokeStyle=P.col;cx.lineWidth=4*(1-k)+1;cx.shadowColor=P.col;cx.shadowBlur=16;cx.beginPath();cx.arc(x,y,R+6+k*50,0,Math.PI*2);cx.stroke();cx.restore();}}
   diaPath(x,y-R-9,4.5);cx.fillStyle='#05070f';cx.fill();cx.strokeStyle=HG;cx.lineWidth=1;cx.stroke();
   // ไอคอน
   const im=icoTint(S.id,full?P.col:'#6a7388',96);
   if(im){cx.globalAlpha=full?1:0.5;const z=R*1.15;cx.drawImage(im,x-z/2,y-z/2,z,z);cx.globalAlpha=1;}
-  if(!full){cx.textAlign='center';cx.font='700 17px Kanit,sans-serif';cx.fillStyle='rgba(0,0,0,0.85)';cx.fillText(me.u+'%',x+1,y+7);cx.fillStyle='#fff';cx.fillText(me.u+'%',x,y+6);}
+  if(!full){cx.textAlign='center';cx.font='700 17px Kanit,sans-serif';cx.lineWidth=4;cx.lineJoin='round';cx.strokeStyle='rgba(0,0,0,0.85)';cx.strokeText(me.u+'%',x,y+6);cx.fillStyle='#fff';cx.fillText(me.u+'%',x,y+6);}
+  else{cx.textAlign='center';cx.font='600 12px Kanit,sans-serif';const w=cx.measureText('พร้อม!').width+16;plate(x-w/2,y-R-34,w,18,true);cx.fillStyle=HG2;cx.fillText('พร้อม!',x,y-R-21);}
   // ปุ่ม X + ชื่อ/สถานะ
   cx.font='700 12px Kanit,sans-serif';cx.textAlign='center';
   cx.fillStyle='#05070f';cx.fillRect(x-12,y+R-4,24,16);cx.strokeStyle=full?HG2:'rgba(217,180,90,0.5)';cx.lineWidth=1;cx.strokeRect(x-11.5,y+R-3.5,23,15);cx.fillStyle=HG2;cx.fillText(keyName(KEYS.ult||'KeyX'),x,y+R+8);
@@ -322,23 +366,34 @@ function drawBottom(me,v){
   const bx=ex+48,bw=Math.min(300,SW*0.24);
   cx.textAlign='left';cx.font='600 15px Kanit,sans-serif';
   cx.fillStyle='rgba(0,0,0,0.6)';cx.fillText(me.n,bx+1,ey-19);cx.fillStyle=HG2;cx.fillText(me.n,bx,ey-20);
-  const hr=me.hp/me.mh;
+  const hr=clamp(me.hp/me.mh,0,1);
+  // แถบเลือด: ส่วนที่เพิ่งเสีย = สีครีมค้างแล้วค่อยหด (แบบเกมต่อสู้) • ขีดแบ่งทุก 25% • เลือดน้อย = ขอบแดงเต้น
+  if(hr>=HUDF.trail){HUDF.trail=hr;HUDF.trailHold=0.45;}else if((HUDF.trailHold-=HUDF.dt)<=0)HUDF.trail=Math.max(hr,HUDF.trail-HUDF.dt*0.6);
   thinBar(bx,ey-12,bw,12,hr,hr>0.3?'#6fd57f':'#ff6a6a',hr>0.3?'#2c8a45':'#a51e1e');
-  cx.textAlign='right';cx.font='600 11px Kanit,sans-serif';cx.fillStyle='#fff';cx.fillText(`${me.hp} / ${me.mh}`,bx+bw-5,ey-2.5);
+  if(HUDF.trail>hr){cx.fillStyle='rgba(255,236,196,0.75)';cx.fillRect(bx+bw*hr,ey-12,bw*(HUDF.trail-hr),12);}
+  {const g=cx.createLinearGradient(0,ey-12,0,ey);g.addColorStop(0,'rgba(255,255,255,0.22)');g.addColorStop(0.5,'rgba(255,255,255,0)');cx.fillStyle=g;cx.fillRect(bx,ey-12,bw*hr,12);}
+  cx.fillStyle='rgba(5,7,15,0.6)';for(let i=1;i<4;i++)cx.fillRect(Math.round(bx+bw*i/4),ey-12,1,12);
+  if(hr<0.35&&me.al){cx.save();cx.strokeStyle=`rgba(255,90,90,${0.6+0.3*Math.sin(t/200)})`;cx.lineWidth=2;cx.shadowColor='#ff3a3a';cx.shadowBlur=10;cx.strokeRect(bx-2,ey-14,bw+4,16);cx.restore();}
+  cx.textAlign='right';cx.font='600 11px Kanit,sans-serif';cx.lineWidth=3;cx.lineJoin='round';cx.strokeStyle='rgba(0,0,0,0.75)';cx.strokeText(`${me.hp} / ${me.mh}`,bx+bw-5,ey-2.5);cx.fillStyle='#fff';cx.fillText(`${me.hp} / ${me.mh}`,bx+bw-5,ey-2.5);
   if(me.ea){eShieldNum(bx,ey+21,me.ea);eShieldSegs(bx,ey+26,bw*0.72,me.ea);}else thinBar(bx,ey+6,bw*0.72,5,me.se/100,'#9ff0ff','#2d8fc0');   // สายดิน: ตัวเลข HP โล่ (เหนือแถบ) + แถบช่องเล็กติดกัน แบบ Reinhardt
   {let sx=bx;cx.textAlign='left';cx.font='15px sans-serif';for(const [bit,ic] of STATUS_ICO)if((me.fm|0)&bit){cx.fillText(ic,sx,me.ea?ey+53:ey+30);sx+=20;}}
   if(!me.ea){cx.textAlign='left';cx.font='10px Kanit,sans-serif';cx.fillStyle='#7f8aa6';cx.fillText('โล่',bx+bw*0.72+8,ey+12);}
   // มุมขวาล่าง: กลุ่มเพชรคาถา
   const c0x=SW-128,c0y=SH-122,d=47,r=31;
   const MYS=mySlots(me);
+  // ช่องที่เพิ่งคูลดาวน์เสร็จ (ไม่พร้อม → พร้อม) = วงเพชรทองขยายออก 0.5 วิ
+  const dia=(x,y,rr,ic,key,ci)=>{const st=slotState(me,v,ci),ok=st.ready&&!st.dim,R=HUDF.rdy;
+    if(ok&&R[ci]===false&&(ci>=1||ci===-4))HUDF.rdyT[ci]=t;   // ยิงปกติ/โล่ไม่ต้อง (คูลสั้น กะพริบรก)
+    R[ci]=ok;spellDia(x,y,rr,ic,key,'',st);
+    const k=(t-(HUDF.rdyT[ci]||-1e9))/500;if(k<1)readyPulse(x,y,rr,k);};
   for(const [key,ic,name,ci] of MYS){
-    if(CLUSTER[ci]){const [ox,oy]=CLUSTER[ci];spellDia(c0x+ox*d,c0y+oy*d,r,ic,key,'',slotState(me,v,ci));}
+    if(CLUSTER[ci]){const [ox,oy]=CLUSTER[ci];dia(c0x+ox*d,c0y+oy*d,r,ic,key,ci);}
   }
   diaPath(c0x,c0y,6);cx.fillStyle=HG;cx.fill();
   const small=MYS.filter(s=>(s[3]<=0&&s[3]!==-2&&s[3]!==-4)||s[3]===5),cb=MYS.find(s=>s[3]===-4);
   drawUlt(me);
-  small.forEach(([key,ic,name,ci],i)=>spellDia(SW-266-(small.length-1-i)*66,SH-78,25,ic,key,'',slotState(me,v,ci)));
-  if(cb)spellDia(SW-266-(small.length-1)*66,SH-138,22,cb[1],cb[0],'',slotState(me,v,-4));   // BA ชาร์จ: วางเหนือช่องยิง (คลิกซ้าย)
+  small.forEach(([key,ic,name,ci],i)=>dia(SW-266-(small.length-1-i)*66,SH-78,25,ic,key,ci));
+  if(cb)dia(SW-266-(small.length-1)*66,SH-138,22,cb[1],cb[0],-4);   // BA ชาร์จ: วางเหนือช่องยิง (คลิกซ้าย)
 }
 function drawBoard(v,P){
   const rows=[...P].sort((a,b)=>b.k-a.k),w=Math.min(540,SW-32),h=96+rows.length*32,x=SW/2-w/2,y=SH/2-h/2;

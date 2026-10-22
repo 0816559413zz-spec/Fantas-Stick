@@ -272,3 +272,12 @@ addEventListener('keydown',e=>{if(e.code==='Escape'&&!$('#settings').classList.c
 $('#btnGuide').onclick=()=>{ac();$('#guide').classList.remove('hidden');};
 $('#btnGuideClose').onclick=()=>$('#guide').classList.add('hidden');
 $('#trainEnd').onclick=()=>{if(NET.isHost)hostEndTraining();};
+// จอผลการแข่ง (#over สร้างใน 26-fx-events): เดาว่าเราชนะ/แพ้/เสมอจากหัวข้อ + ชื่อ/ทีม/บทบาทเรา → data-res (CSS ทำแสงตามผล) + แท็กเหนือหัวข้อ + แถวของเราเป็นสีทอง (แค่ภาพ ไม่แตะผลจริง)
+function ovResult(){const o=$('#over'),h=o.querySelector('h1');if(!h||o.querySelector('.ovTag'))return;
+  const t=h.textContent,v=VIEW.cur,me=v&&v.P&&v.P.find(p=>p.id===NET.myId);let r='end';
+  if(t.includes('เสมอ'))r='draw';
+  else if(v&&v.mode==='imp'&&ROLE)r=t.includes('โวลเดอมอร์ชนะ')===(ROLE.role==='imp')?'win':'lose';
+  else if(t.startsWith('🏆')&&me)r=t.includes(me.n)||(me.tm>=0&&t.includes(TEAMN[me.tm]))?'win':'lose';
+  o.dataset.res=r;h.insertAdjacentHTML('beforebegin',`<div class="ovTag">${{win:'ชัยชนะ',lose:'พ่ายแพ้',draw:'เสมอ',end:'จบเกม'}[r]}</div>`);
+  if(me)o.querySelectorAll('tr').forEach(tr=>{const td=tr.querySelector('td');if(td&&td.textContent.replace('👑','').trim()===me.n)tr.classList.add('ovMe');});}
+new MutationObserver(ovResult).observe($('#over'),{childList:true});
