@@ -28,6 +28,7 @@ function fx(ev,raw){   // raw = ภาพเดิมในโค้ดเท่
   if(ev.k==='sk'){skAnim(ev);return;}
   if(ev.k==='emo'){emoFx(ev);return;}   // อีโมต (js/52)
   if(ev.k==='hit'&&ev.e!==undefined)comboHit(ev);   // ห้องฝึก: นับคอมโบ (js/53)
+  if(ev.k==='die'&&ev.id)dcamDie(ev);   // กล้องตอนตาย (js/58)
   if(ev.k==='kf'){ffaKf(ev);return;}if(ev.k==='pot'){potFx(ev);return;}   // FFA (js/54)   // ร่ายสกิลสำเร็จ → ท่าเหวี่ยงไม้ (js/35 SKANIM)
   const me=myPos(),near=!me||Math.hypot(ev.x-me.x,ev.y-me.y)<1000,H=ev.h!==undefined?ev.h:1.3;
   if(ev.k==='efx')try{efxState(ev);}catch(e){console.error(e);}   // ท่า/วัตถุที่อยู่นาน (ไม่ขึ้นกับ bind.json)

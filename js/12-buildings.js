@@ -325,10 +325,11 @@ function playerDown(t,srcId){
   t.alive=false;t.deaths++;t.respawn=G.mode==='race'||G.mode==='train'?2:G.mode==='br'?1e9:3;
   if(G.mode==='br')emit({k:'brout',x:t.x,y:t.y});
   const k=G.players[srcId]||G.players[t.lastHit];
+  if(k&&k!==t&&['ffa','tdm','quid'].includes(G.mode))t.respawn=7.5;   // กล้องตอนตาย 3+4 วิ + จอดำ แล้วค่อยเกิด (js/58)
   if(k&&k!==t){k.kills++;if(G.mode==='tdm')G.teamScore[k.team]++;feed(`${k.name} ⚡ ${t.name}`);}
   else feed(`💀 ${t.name}`);
   if(G.mode==='ffa')ffaKill(k&&k!==t?k:null,t);   // ฆ่าต่อเนื่อง/ค่าหัว/แก้แค้น/assist/ขวดดรอป (js/54)
-  emit({k:'die',x:t.x,y:t.y,h:t.z+1,c:t.color});
+  emit({k:'die',x:t.x,y:t.y,h:t.z+1,c:t.color,id:t.id,ki:k&&k!==t?k.id:''});   // id/ki = กล้องตอนตาย (js/58)
 }
 
 function killProj(pr){

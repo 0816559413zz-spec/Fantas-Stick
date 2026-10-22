@@ -139,6 +139,7 @@ function emotePose(o,p,dt){
 // ---------- ดูเพื่อนเล่น: ตายแล้ว ≥2 วิ หรือเข้ามาเป็นคนดู → กล้องตามคนอื่น คลิกซ้าย/ขวา = เปลี่ยนคน ----------
 const SPEC={id:null,dead:0,on:false};
 function specTarget(P,me,dt){
+  if(DCAM.on&&me&&!me.al)return null;   // กำลังเล่นกล้องตอนตาย (js/58)
   if(me&&me.al){SPEC.dead=0;SPEC.on=false;return null;}
   if(me)SPEC.dead+=dt;
   if(me&&SPEC.dead<2){SPEC.on=false;return null;}

@@ -6,6 +6,9 @@
 // =====================================================================
 // var/function (ไม่ใช่ const): หน้าสร้างตัวละครอาจเปิดตอนโหลด (?nointro / ?join) ก่อนไฟล์นี้รัน — const จะพังทั้งเกม
 var LV_MAX=30;
+// ช่วงพัฒนาเกม (ผู้ใช้ 2026-10-22 "for now make everyone lvl maxed first so u unlock everything cuz still dev"): ทุกคนเลเวลเต็ม ของปลดล็อคครบ
+// XP จริงยังสะสมเก็บไว้ตามปกติ — เปลี่ยนเป็น false ตอนเปิดใช้ระบบเลเวลจริง
+var DEV_MAXLV=true;
 function lvNeed(L){return 150+30*(L-1);}   // XP ที่ต้องใช้จากเลเวล L ไป L+1
 var UNLOCKS=[
   {lv:2,k:'cl',v:8,n:'ผ้าคลุมเขียวมรกต'},{lv:4,k:'wc',v:6,n:'แกนเวท: ขนเทสตรัล'},{lv:6,k:'cl',v:9,n:'ผ้าคลุมแดงเลือดนก'},
@@ -16,18 +19,20 @@ var UNLOCKS=[
 var PROG=(()=>{const d={xp:0,games:0,wins:0,losses:0,draws:0,kills:0,deaths:0,assists:0,dmg:0,bestK:0,bestD:0,paths:{},modes:{}};try{return Object.assign(d,JSON.parse(store('wd_prog')||'{}'));}catch(e){return d;}})();
 function progSave(){try{store('wd_prog',JSON.stringify(PROG));}catch(e){}}
 function lvOf(xp){let L=1;while(L<LV_MAX&&xp>=lvNeed(L)){xp-=lvNeed(L);L++;}return {L,cur:xp,need:L<LV_MAX?lvNeed(L):0};}
-function lookLock(k,i){if(!UNLOCKS||!PROG)return 0;const u=UNLOCKS.find(q=>q.k===k&&q.v===i);return u&&lvOf(PROG.xp).L<u.lv?u.lv:0;}
+function progLv(){return lvOf(DEV_MAXLV?Math.max(PROG.xp,xpMax()):PROG.xp);}
+function xpMax(){let t=0;for(let L=1;L<LV_MAX;L++)t+=lvNeed(L);return t;}
+function lookLock(k,i){if(!UNLOCKS||!PROG||DEV_MAXLV)return 0;const u=UNLOCKS.find(q=>q.k===k&&q.v===i);return u&&lvOf(PROG.xp).L<u.lv?u.lv:0;}
 function lookClampLocks(l){for(const u of UNLOCKS)if(l[u.k]===u.v&&lookLock(u.k,u.v))l[u.k]=0;return l;}
 // XP ของตานี้: จบเกม 40 + ชนะ 100 / เสมอ 25 + ฆ่า×15 + ช่วย×5 + ดาเมจ/20 (+ co-op ชั้น×15)
 function progXP(r,me,kind){if(!me)return 0;let x=40+(kind==='win'?100:kind==='draw'?25:0)+(me.k||0)*15+(me.as||0)*5+Math.round((me.dmg||0)/20);if(r.mode==='coop')x+=(r.wave||0)*15;return x;}
 function progAward(r){
   if(!r||r.__aw||r.mode==='train')return null;r.__aw=1;
   const me=(r.rows||[]).find(q=>q.id===NET.myId);if(!me)return null;
-  const kind=vicKind(r),before=lvOf(PROG.xp),gain=progXP(r,me,kind);
+  const kind=vicKind(r),before=DEV_MAXLV?progLv():lvOf(PROG.xp),gain=progXP(r,me,kind);
   PROG.xp+=gain;PROG.games++;if(kind==='win')PROG.wins++;else if(kind==='draw')PROG.draws++;else PROG.losses++;
   PROG.kills+=me.k||0;PROG.deaths+=me.d||0;PROG.assists+=me.as||0;PROG.dmg+=me.dmg||0;PROG.bestK=Math.max(PROG.bestK,me.k||0);PROG.bestD=Math.max(PROG.bestD,me.dmg||0);
   const pth=getKit(NET.myId).path;PROG.paths[pth]=(PROG.paths[pth]||0)+1;PROG.modes[r.mode]=(PROG.modes[r.mode]||0)+1;
-  progSave();const after=lvOf(PROG.xp);
+  progSave();const after=DEV_MAXLV?progLv():lvOf(PROG.xp);
   return {gain,before,after,unl:UNLOCKS.filter(u=>u.lv>before.L&&u.lv<=after.L)};
 }
 // กล่อง XP ในจอสรุป (เรียกจาก showOver js/26)
@@ -40,7 +45,7 @@ function progBox(r){
 }
 // หน้า "เลเวล & สถิติ" (ปุ่มในเมนู)
 function progOpen(){
-  const v=lvOf(PROG.xp),pct=v.need?Math.round(v.cur/v.need*100):100,P=PROG,kd=(P.kills/Math.max(1,P.deaths)).toFixed(2),wr=P.games?Math.round(P.wins/P.games*100):0;
+  const v=progLv(),pct=v.need?Math.round(v.cur/v.need*100):100,P=PROG,kd=(P.kills/Math.max(1,P.deaths)).toFixed(2),wr=P.games?Math.round(P.wins/P.games*100):0;
   const fav=Object.entries(P.paths).sort((a,b)=>b[1]-a[1])[0],fp=fav&&PATHS[+fav[0]];
   const st=(l,x)=>`<div class="pgS"><span>${l}</span><b>${x}</b></div>`;
   let el=$('#progOv');if(!el){el=document.createElement('div');el.id='progOv';el.className='overlay';document.body.appendChild(el);el.addEventListener('click',e=>{if(e.target===el||e.target.id==='progX')el.classList.add('hidden');});}
@@ -51,7 +56,7 @@ function progOpen(){
     <div class="row"><button class="pri" id="progX">ปิด</button></div></div>`;
   el.classList.remove('hidden');
 }
-function progChip(){const el=$('#myLvl');if(el)el.textContent='Lv '+lvOf(PROG.xp).L;}
+function progChip(){const el=$('#myLvl');if(el)el.textContent='Lv '+progLv().L+(DEV_MAXLV?' (dev)':'');}
 (function(){
   const st=document.createElement('style');st.textContent=`
 .xpBox{margin:10px auto;max-width:420px;text-align:left}.xpTop{display:flex;align-items:baseline;gap:10px}.xpTop b{font:900 22px "Cinzel Decorative",Cinzel,serif;color:#ffd86b}.xpTop span{font:600 14px Kanit,sans-serif;color:#9fe0a0}.xpTop em{font:700 14px Kanit,sans-serif;font-style:normal;color:#fff4cc;background:rgba(217,180,90,.25);padding:1px 8px;border-radius:6px;animation:inSlam .6s both}

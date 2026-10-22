@@ -92,10 +92,10 @@ G:4 EVL:4 EVN:4 hostLast:4 tickN:4 emit:5 feed:6 banner:7 plist:8 cleanName:9 fr
 §203 ลูปหลักฝั่งโฮสต์
 hostTick:204 angDiff:218 cH:220 vR:221 updatePlayer:223 hitProp:368 damagePropsIn:375 nearUseProp:376 useProp:377
 
-## js/12-buildings.js (418) — สิ่งปลูกสร้างที่พังเป็นชิ้นย่อย (บ้าน) แบบ Battlefield — คู่มือเต็ม: …
+## js/12-buildings.js (419) — สิ่งปลูกสร้างที่พังเป็นชิ้นย่อย (บ้าน) แบบ Battlefield — คู่มือเต็ม: …
 BLDDEF:8 BLD_PIECES:9 BLD_GRID:10 BLD_FIRE:11 BLD_ICE:11 BLD_ROOF_MIN:11 BLDG:12 BLDON:12 genBldg:13 bldRect:23 bldChunk:25 bldAlive:32 bldLocal:33 bldWorld:34 rectDist:35 bldNear:36 BLD_MOUND:39 bldGone:40 bldMoundAt:41 bldMoundH:42 hitBldPiece:44 breakBldChunk:55 bldSupport:63 damageEnv:83 bldPieceAt:97 projEl:107 bldPush:112 collideBld:118 updateBldg:133 bldSnap:145 bldParse:151
 §155 ของบังในแผนที่ไฟล์ที่พังได้ (หิน เสา รูปปั้น ต้นไม้ โคมไฟ ลัง ...) — …
-BRKDEF:159 BRK_M:159 BRK_MCOL:159 BRK:160 genBrk:161 brkApply:168 brkStage:172 hitBrk:173 damageBrkIn:181 brkSnap:187 brkParse:188 collideWorld:189 shoot:216 eShoot:237 foesOf:244 breakShield:251 ULT_RATE:253 ultActive:254 gainUlt:255 lifesteal:256 damage:258 playerDown:314 killProj:334 explode:343 hitTarget:355 updateProjectiles:371
+BRKDEF:159 BRK_M:159 BRK_MCOL:159 BRK:160 genBrk:161 brkApply:168 brkStage:172 hitBrk:173 damageBrkIn:181 brkSnap:187 brkParse:188 collideWorld:189 shoot:216 eShoot:237 foesOf:244 breakShield:251 ULT_RATE:253 ultActive:254 gainUlt:255 lifesteal:256 damage:258 playerDown:314 killProj:335 explode:344 hitTarget:356 updateProjectiles:372
 
 ## js/13-enemies.js (168) — ศัตรู (โหมด Co-op)
 spawnEnemy:2 setupWave:19 bossPhase:36 enemySlam:44 updateEnemies:55
@@ -176,10 +176,10 @@ MM3:2 makeMinion:3 syncMins:36 drawMinBars:58
 ## js/25-efx.js (297) — efxFX: ภาพของ event "efx" ทุกคาถา (หนึ่ง case ต่อหนึ่งเอฟเฟกต์)
 efxState:4 efxFX:15
 
-## js/26-fx-events.js (247) — fx(ev): เอฟเฟกต์+เสียงของทุก event จากโฮสต์ • statusFX (สถานะบนตัว) •…
+## js/26-fx-events.js (248) — fx(ev): เอฟเฟกต์+เสียงของทุก event จากโฮสต์ • statusFX (สถานะบนตัว) •…
 statusFX:3 fx:27
-§200 overlay: เลือกบัฟ / สรุปผล
-choosePick:201 syncOverlays:206 showOver:228
+§201 overlay: เลือกบัฟ / สรุปผล
+choosePick:202 syncOverlays:207 showOver:229
 
 ## js/27-world.js (265) — 
 S3:4 tx:4 tz:4 GY:6 TW:6 hdr:7 gl:9 scene:15 cam:17 composer:18
@@ -410,15 +410,15 @@ GRASS:52 GR_GLSL_V:53 GR_BEGIN:55 grassMat:79 grassBuild:93 _grBasic:107 grassBa
 WARM:11 WARM_FXDIR:12 WARM_COMMON:12 WARM_X:13 WARM_Y:13 warmKeep:15 warmCompile:21 WARM_SKIP:24 warmFx:25 warmFxEnd:33 warmGather:35 warmPaths:37 warmStep:39 warmTick:54
 §63 ภาพจากโค้ดของแต่ละสาย (เฟรมละฟังก์ชัน)
 
-## js/52-social.js (170) — เล่นกับเพื่อน (ผู้ใช้ 2026-10-22): แชท + อีโมต + ดูเพื่อนเล่น (spectator) + ป้ายต่อเน็ตให…
+## js/52-social.js (171) — เล่นกับเพื่อน (ผู้ใช้ 2026-10-22): แชท + อีโมต + ดูเพื่อนเล่น (spectator) + ป้ายต่อเน็ตให…
 §6 แชท: Enter = พิมพ์ / Enter อีกที = ส่ง / Esc = ปิด • ข้อความขึ้นมุมซ้…
 CHAT:7 chatOpen:27 chatClose:32 chatSend:41 chatAdd:46 escH:51 onChat:52 drawSocial:58 drawPing:82
 §88 อีโมต: กด Z ค้าง → วงล้อ 6 แบบ ลากเมาส์ไปทางที่ต้องการ ปล่อย Z = เล่น…
 EMOS:89 EMO:90 drawEmoWheel:108 emoFx:121 emotePose:123
 §139 ดูเพื่อนเล่น: ตายแล้ว ≥2 วิ หรือเข้ามาเป็นคนดู → กล้องตามคนอื่น คลิกซ…
-SPEC:140 specTarget:141 specCycle:150 drawSpecHint:155
-§163 ป้าย "กำลังต่อใหม่..." (ลูกข่ายหลุดจากโฮสต์ js/10 netLost)
-drawNetBanner:164
+SPEC:140 specTarget:141 specCycle:151 drawSpecHint:156
+§164 ป้าย "กำลังต่อใหม่..." (ลูกข่ายหลุดจากโฮสต์ js/10 netLost)
+drawNetBanner:165
 
 ## js/53-victory.js (165) — จบเกม (ผู้ใช้ 2026-10-22): VICTORY / DEFEAT แบบ Overwatch แต่เป็นเวทมนตร์ (สายฟ้า + ไฟ) +…
 VIC:6 VPAL:7 vicKind:17 vicStart:25 vicStop:31 vicSkip:32 vicBolt:36 vicLoop:42
@@ -439,11 +439,14 @@ FFAV:104 MULTI:105 MULTI_TH:105 STREAK:106 pName:107 ffaKf:108 kfSound:123 KINDN
 ## js/55-podium.js (84) — โพเดียมธีมฮอกวอตส์ (ผู้ใช้ 2026-10-22 "podium but make it magician theme hogwart theme")
 POD:6 POD_X:7 POD_H:7 POD_C:7 podStart:8 podStop:29 podPose:37 renderPodium:49
 
-## js/56-progress.js (72) — เลเวล + สถิติ + ของปลดล็อค (ผู้ใช้ 2026-10-22: "more skin wand cloak unlock as lvl" → เลื…
+## js/56-progress.js (77) — เลเวล + สถิติ + ของปลดล็อค (ผู้ใช้ 2026-10-22: "more skin wand cloak unlock as lvl" → เลื…
 §7 var/function (ไม่ใช่ const): หน้าสร้างตัวละครอาจเปิดตอนโหลด (?nointro…
-LV_MAX:8 lvNeed:9 UNLOCKS:10 PROG:16 progSave:17 lvOf:18 lookLock:19 lookClampLocks:20 progXP:22 progAward:23 progBox:34 progOpen:42 progChip:54
+LV_MAX:8 DEV_MAXLV:11 lvNeed:12 UNLOCKS:13 PROG:19 progSave:20 lvOf:21 progLv:22 xpMax:23 lookLock:24 lookClampLocks:25 progXP:27 progAward:28 progBox:39 progOpen:47 progChip:59
 
 ## js/57-tutorial.js (44) — วิธีเล่นแต่ละสาย (ผู้ใช้ 2026-10-22 "สอนเล่นแต่ละสาย") — ปุ่ม "📖 วิธีเล่นสายนี้" ในหน้าเ…
 TUTTIPS:7 tutOpen:12 tutTry:31
 
-(58 files, 13204 lines)
+## js/58-deathcam.js (60) — กล้องตอนตาย (ผู้ใช้ 2026-10-22): "when ded make cam focus on person who kill u at ur ded …
+DCAM_T1:10 DCAM_T2:10 DCAM_FADE:10 DCAM:11 dcamDie:12 _dcP:19 _dcL:19 dcamCam:20 drawDeathCam:47
+
+(59 files, 13272 lines)

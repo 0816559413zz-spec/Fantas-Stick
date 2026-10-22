@@ -47,7 +47,7 @@ function render(dt,now){
     INPUT.mx=fx*f-fy*s;INPUT.my=fy*f+fx*s;
     INPUT.ax=me.x+fx*2000;INPUT.ay=me.y+fy*2000;
     INPUT.ap=clamp((0.3-pitch)*1.2,-0.9,0.9);
-    updateCamera(specTarget(P,me,dt)||me,dt);   // ตายนาน ≥2 วิ = ดูคนอื่น (js/52)
+    if(!dcamCam(P,me,dt))updateCamera(specTarget(P,me,dt)||me,dt);   // ตายนาน ≥2 วิ = ดูคนอื่น (js/52)
     aimFromCrosshair(me,P,E);
     updatePlaceGhost(me);
     const o=PM3.get(me.id);windUpdate(o?Math.hypot(o.svx,o.svz):0,!!me.fl);
@@ -75,5 +75,5 @@ function renderGame(v,P,E,me,dt,now){
   drawLabels(P,E,v,me,spk);drawMinBars(v,me);
   drawTexts(dt);
   if(me&&me.al&&!me.dn)drawCrosshair();
-  if(!VIC.on)drawHUD(v,me,P);drawSocial(P,me,dt,now);drawCombo(v,E,now);drawFFA(v,P,me,now);if(PROPON&&me&&me.al&&!me.dn&&!showBoard)drawPropHint(me);pf('hud2d',t0);   // ป้าย VICTORY/DEFEAT = ซ่อน HUD
+  if(!VIC.on)drawHUD(v,me,P);drawSocial(P,me,dt,now);drawCombo(v,E,now);drawFFA(v,P,me,now);drawDeathCam(me);if(PROPON&&me&&me.al&&!me.dn&&!showBoard)drawPropHint(me);pf('hud2d',t0);   // ป้าย VICTORY/DEFEAT = ซ่อน HUD
 }
