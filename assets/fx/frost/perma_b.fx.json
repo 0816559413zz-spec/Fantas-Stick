@@ -1,0 +1,485 @@
+{
+ "v": 1,
+ "desc": "Permafrost (แบบ B — ผู้ใช้เลือก 2026-10-22: วงน้ำแข็งต้องเห็นชัด ไม่จาง + หมอกนิดหน่อย): แฟลช + วงช็อกขาว 2 ชั้น + หนามแตก + เส้นความเร็ว → พื้นน้ำแข็งทึบขึ้น + ขอบวงเรืองขาวหมุน + ผลึกรอบขอบ + หิมะวน + หมอกต่ำค้าง → แตกตอนหมด (6 วิ) • r = รัศมี (ม.)",
+ "tags": [
+  "frost",
+  "zone",
+  "ult"
+ ],
+ "pal": "ice",
+ "dur": 6.4,
+ "params": {
+  "r": {
+   "def": 15,
+   "desc": "รัศมี (ม.)"
+  }
+ },
+ "layers": [
+  {
+   "id": "flash",
+   "t": "flash",
+   "at": 0,
+   "life": 0.06,
+   "col": "#ffffff",
+   "size": 4.4,
+   "pos": [
+    0,
+    0.9,
+    0
+   ]
+  },
+  {
+   "id": "ringW",
+   "t": "mesh",
+   "at": 0,
+   "life": 0.22,
+   "att": "ground",
+   "shape": "ring",
+   "inner": 0.9,
+   "mat": "glow",
+   "col": "#ffffff",
+   "pos": [
+    0,
+    0.12,
+    0
+   ],
+   "scale": {
+    "0": 0.3,
+    "1": 1,
+    "ease": "out",
+    "x": "r*0.6"
+   },
+   "op": {
+    "0": 1,
+    "1": 0
+   }
+  },
+  {
+   "id": "ringE",
+   "t": "mesh",
+   "at": 0.05,
+   "life": 0.3,
+   "att": "ground",
+   "shape": "ring",
+   "inner": 0.8,
+   "mat": "energy",
+   "col": "$main",
+   "col2": "$deep",
+   "pos": [
+    0,
+    0.1,
+    0
+   ],
+   "scale": {
+    "0": 0.2,
+    "1": 1,
+    "ease": "out",
+    "x": "r*0.45"
+   },
+   "op": {
+    "0": 1,
+    "1": 0
+   },
+   "rim": 2
+  },
+  {
+   "id": "spikes",
+   "t": "mesh",
+   "at": 0,
+   "life": 0.35,
+   "att": "ground",
+   "shape": "spikes",
+   "n": 10,
+   "mat": "ice",
+   "col": "$hi",
+   "col2": "$deep",
+   "scale": {
+    "0": [
+     0.8,
+     0.1,
+     0.8
+    ],
+    "1": [
+     2,
+     0.05,
+     2
+    ],
+    "0.3": [
+     1.8,
+     2.2,
+     1.8
+    ]
+   },
+   "op": {
+    "0": 1,
+    "1": 0
+   }
+  },
+  {
+   "id": "lines",
+   "t": "emit",
+   "at": 0,
+   "life": 0.05,
+   "burst": 54,
+   "from": "disc",
+   "fr": 0.8,
+   "dir": "flat",
+   "speed": [
+    12,
+    20
+   ],
+   "plife": [
+    0.18,
+    0.32
+   ],
+   "look": "streak",
+   "size": [
+    2.6,
+    3.6
+   ],
+   "col": "#ffffff",
+   "c2": "$main",
+   "gravity": 0,
+   "drag": 4,
+   "pos": [
+    0,
+    0.3,
+    0
+   ]
+  },
+  {
+   "id": "cam",
+   "t": "screen",
+   "at": 0,
+   "life": 0.25,
+   "shake": 4.4,
+   "kick": 0.35,
+   "flash": 0.04,
+   "own": true
+  },
+  {
+   "id": "light",
+   "t": "light",
+   "at": 0,
+   "life": 0.3,
+   "col": "$light",
+   "int": 2.2,
+   "dist": 22,
+   "pos": [
+    0,
+    1.4,
+    0
+   ]
+  },
+  {
+   "id": "crackC",
+   "t": "decal",
+   "at": 0,
+   "life": 1.6,
+   "att": "ground",
+   "kind": "icecrack",
+   "r": 4.4,
+   "col": "$main"
+  },
+  {
+   "id": "freeze",
+   "t": "mesh",
+   "at": 0,
+   "life": 6,
+   "att": "ground",
+   "shape": "disc",
+   "mat": "ice",
+   "pos": [
+    0,
+    0.04,
+    0
+   ],
+   "rot": [
+    -90,
+    0,
+    0
+   ],
+   "col": "#9fdcff",
+   "col2": "#2f7fe0",
+   "scale": {
+    "0": 0.05,
+    "1": 1,
+    "0.07": 1,
+    "ease": "out",
+    "x": "r"
+   },
+   "op": {
+    "0": 0.8,
+    "1": 0,
+    "0.9": 0.62
+   },
+   "fade": 0.1
+  },
+  {
+   "id": "sheen",
+   "t": "mesh",
+   "at": 0.1,
+   "life": 5.9,
+   "att": "ground",
+   "shape": "disc",
+   "mat": "energy",
+   "col": "$main",
+   "col2": "$deep",
+   "pos": [
+    0,
+    0.05,
+    0
+   ],
+   "scale": {
+    "0": 0.05,
+    "1": 1,
+    "0.06": 1,
+    "ease": "out",
+    "x": "r"
+   },
+   "op": {
+    "0": 0.4,
+    "1": 0,
+    "0.85": 0.3
+   },
+   "rim": 0.8,
+   "scroll": 0.2
+  },
+  {
+   "id": "edge",
+   "t": "mesh",
+   "at": 0.1,
+   "life": 5.9,
+   "att": "ground",
+   "shape": "ring",
+   "inner": 0.965,
+   "mat": "glow",
+   "col": "#ffffff",
+   "pos": [
+    0,
+    0.07,
+    0
+   ],
+   "scale": {
+    "0": 0.05,
+    "1": 1,
+    "0.06": 1,
+    "ease": "out",
+    "x": "r"
+   },
+   "op": {
+    "0": 0.9,
+    "1": 0,
+    "0.85": 0.75
+   },
+   "spin": 20
+  },
+  {
+   "id": "cracks",
+   "t": "decal",
+   "at": 0.1,
+   "life": 6,
+   "att": "ground",
+   "kind": "icecrack",
+   "r": "r*0.95",
+   "n": 18,
+   "col": "#2f7fe0"
+  },
+  {
+   "id": "rim",
+   "t": "mesh",
+   "at": 0.25,
+   "life": 5.6,
+   "att": "ground",
+   "shape": "model",
+   "model": "frost_rim",
+   "mat": "ice",
+   "col": "#9fdcff",
+   "col2": "#2f7fe0",
+   "scale": [
+    "r",
+    2.2,
+    "r"
+   ],
+   "grow": {
+    "0": 0,
+    "1": 0,
+    "0.06": 1,
+    "0.95": 1
+   },
+   "stagger": 0.8,
+   "growBy": "random"
+  },
+  {
+   "id": "mist0",
+   "t": "mist",
+   "at": 0.05,
+   "life": 1,
+   "att": "ground",
+   "r": "r*0.8",
+   "n": 16,
+   "out": 1.6
+  },
+  {
+   "id": "fog",
+   "t": "emit",
+   "at": 0.4,
+   "life": 5.2,
+   "rate": 7,
+   "att": "ground",
+   "from": "disc",
+   "fr": "r*0.9",
+   "dir": "flat",
+   "spread": 1,
+   "speed": [
+    0.2,
+    0.6
+   ],
+   "up": [
+    0,
+    0.1
+   ],
+   "plife": [
+    2.2,
+    3.2
+   ],
+   "look": "smoke",
+   "fb": "tex/smoke_puff",
+   "size": [
+    16,
+    24
+   ],
+   "col": "#e6f2fa",
+   "c2": "#b8d4ea",
+   "gravity": -0.02,
+   "drag": 1.2,
+   "pos": [
+    0,
+    0.35,
+    0
+   ],
+   "x": true
+  },
+  {
+   "id": "snow",
+   "t": "emit",
+   "at": 0.3,
+   "life": 5.4,
+   "rate": 14,
+   "att": "ground",
+   "from": "disc",
+   "fr": "r*0.9",
+   "pos": [
+    0,
+    0.3,
+    0
+   ],
+   "dir": "tangent",
+   "speed": [
+    0.6,
+    1.4
+   ],
+   "up": [
+    0.3,
+    0.8
+   ],
+   "plife": [
+    1.6,
+    2.6
+   ],
+   "look": "flake",
+   "size": [
+    1.8,
+    2.8
+   ],
+   "col": "#ffffff",
+   "c2": "#9fdcff",
+   "gravity": -0.05,
+   "drag": 1
+  },
+  {
+   "id": "shatter",
+   "t": "emit",
+   "at": 5.7,
+   "life": 0.05,
+   "burst": 24,
+   "att": "ground",
+   "from": "disc",
+   "fr": "r*0.9",
+   "dir": "up",
+   "spread": 0.6,
+   "speed": [
+    2,
+    4
+   ],
+   "up": [
+    2,
+    4
+   ],
+   "plife": [
+    0.6,
+    1.1
+   ],
+   "look": "model",
+   "model": "frost_shard",
+   "mmat": "ice",
+   "msize": [
+    0.1,
+    0.22
+   ],
+   "bounce": 0.3,
+   "mspin": 540,
+   "gravity": 12,
+   "drag": 1.2,
+   "col": "#e6f7ff",
+   "c2": "#2f7fe0"
+  },
+  {
+   "id": "shatterfl",
+   "t": "emit",
+   "at": 5.7,
+   "life": 0.05,
+   "burst": 30,
+   "att": "ground",
+   "from": "disc",
+   "fr": "r*0.9",
+   "dir": "up",
+   "spread": 1.2,
+   "speed": [
+    1,
+    2.5
+   ],
+   "up": [
+    0.5,
+    2
+   ],
+   "plife": [
+    0.7,
+    1.3
+   ],
+   "look": "flake",
+   "size": [
+    2,
+    3.4
+   ],
+   "col": "#ffffff",
+   "c2": "#9fdcff",
+   "gravity": 1.2,
+   "drag": 2.2
+  },
+  {
+   "id": "snd",
+   "t": "sound",
+   "at": 0,
+   "name": "nova",
+   "vol": 0.6
+  },
+  {
+   "id": "snd2",
+   "t": "sound",
+   "at": 5.7,
+   "name": "break",
+   "vol": 0.5
+  }
+ ]
+}

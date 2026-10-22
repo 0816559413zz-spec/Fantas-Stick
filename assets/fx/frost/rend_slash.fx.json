@@ -1,0 +1,231 @@
+{
+ "v": 1,
+ "desc": "Glacier Rend คลื่นดาบ (ทำใหม่ 2026-10-22 ผู้ใช้: slash ต้องดีขึ้นมาก): ใบเสี้ยวในโค้ด js/21 (ใหญ่ขึ้น + แกนขาวร้อน + เรืองไซยาน 2 ชั้น) + ไฟล์นี้ = หางไซยานยาว + เส้นความเร็วที่ปลายบน/ล่าง + เศษผลึกกระเด็น + ไอเย็น • ติดกับคลื่นจริง วนจนคลื่นหยุด",
+ "tags": [
+  "frost",
+  "slash",
+  "projectile"
+ ],
+ "pal": "ice",
+ "dur": 1,
+ "layers": [
+  {
+   "id": "mid",
+   "t": "mesh",
+   "at": 0,
+   "life": 1,
+   "loop": true,
+   "shape": "sphere",
+   "mat": "glow",
+   "col": "#9fdcff",
+   "pos": [
+    0,
+    1.75,
+    0
+   ],
+   "scale": 0.05,
+   "fade": 0
+  },
+  {
+   "id": "topT",
+   "t": "mesh",
+   "at": 0,
+   "life": 1,
+   "loop": true,
+   "shape": "sphere",
+   "mat": "glow",
+   "col": "#ffffff",
+   "pos": [
+    0,
+    3.5,
+    -1.3
+   ],
+   "scale": 0.06,
+   "fade": 0
+  },
+  {
+   "id": "botT",
+   "t": "mesh",
+   "at": 0,
+   "life": 1,
+   "loop": true,
+   "shape": "sphere",
+   "mat": "glow",
+   "col": "#ffffff",
+   "pos": [
+    0,
+    0.2,
+    -1.3
+   ],
+   "scale": 0.06,
+   "fade": 0
+  },
+  {
+   "id": "tail",
+   "t": "trail",
+   "at": 0,
+   "life": 1,
+   "loop": true,
+   "of": "mid",
+   "col": "#5fe8ff",
+   "col2": "#2f7fe0",
+   "w": 1.6,
+   "tlife": 0.3,
+   "k": 1.1
+  },
+  {
+   "id": "topLine",
+   "t": "trail",
+   "at": 0,
+   "life": 1,
+   "loop": true,
+   "of": "topT",
+   "col": "#ffffff",
+   "col2": "#5fe8ff",
+   "w": 0.16,
+   "tlife": 0.22,
+   "k": 2
+  },
+  {
+   "id": "botLine",
+   "t": "trail",
+   "at": 0,
+   "life": 1,
+   "loop": true,
+   "of": "botT",
+   "col": "#ffffff",
+   "col2": "#5fe8ff",
+   "w": 0.16,
+   "tlife": 0.22,
+   "k": 2
+  },
+  {
+   "id": "lines",
+   "t": "emit",
+   "at": 0,
+   "life": 1,
+   "loop": true,
+   "rate": 70,
+   "from": "sphere",
+   "fr": 1.4,
+   "dir": "aim",
+   "yaw": 180,
+   "spread": 0.08,
+   "speed": [
+    10,
+    16
+   ],
+   "plife": [
+    0.08,
+    0.14
+   ],
+   "look": "streak",
+   "size": [
+    2,
+    3
+   ],
+   "col": "#ffffff",
+   "c2": "#5fe8ff",
+   "gravity": 0,
+   "drag": 0,
+   "pos": [
+    0,
+    1.5,
+    0
+   ]
+  },
+  {
+   "id": "throw",
+   "t": "emit",
+   "at": 0,
+   "life": 1,
+   "loop": true,
+   "rate": 60,
+   "from": "sphere",
+   "fr": 1.2,
+   "pos": [
+    0,
+    1.6,
+    -0.4
+   ],
+   "dir": "random",
+   "spread": 1,
+   "speed": [
+    1,
+    3
+   ],
+   "up": [
+    1,
+    3
+   ],
+   "plife": [
+    0.5,
+    0.9
+   ],
+   "look": "model",
+   "model": "frost_shard",
+   "mmat": "ice",
+   "msize": [
+    0.1,
+    0.22
+   ],
+   "bounce": 0.3,
+   "mspin": 540,
+   "gravity": 9,
+   "drag": 1.2,
+   "col": "#e6f7ff",
+   "c2": "#2f7fe0"
+  },
+  {
+   "id": "mist",
+   "t": "emit",
+   "at": 0,
+   "life": 1,
+   "loop": true,
+   "rate": 35,
+   "from": "sphere",
+   "fr": 1.2,
+   "pos": [
+    0,
+    1.2,
+    -0.8
+   ],
+   "dir": "random",
+   "spread": 0.6,
+   "speed": [
+    0.2,
+    0.6
+   ],
+   "plife": [
+    0.8,
+    1.2
+   ],
+   "look": "smoke",
+   "fb": "tex/smoke_puff",
+   "size": [
+    12,
+    18
+   ],
+   "col": "#d6ecff",
+   "c2": "#8fb4d8",
+   "gravity": -0.3,
+   "drag": 1.6,
+   "x": true
+  },
+  {
+   "id": "light",
+   "t": "light",
+   "at": 0,
+   "life": 1,
+   "loop": true,
+   "col": "#8fe0ff",
+   "int": 1.6,
+   "dist": 10,
+   "pos": [
+    0,
+    1.4,
+    0
+   ]
+  }
+ ]
+}

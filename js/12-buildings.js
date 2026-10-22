@@ -393,7 +393,7 @@ function updateProjectiles(dt){
           // Perfect Parry: ปัดกระสุนทิ้ง (ไม่สะท้อนกลับแล้ว) ไม่เสียพลังโล่ + ผลพิเศษของแต่ละสาย
           pr.dead=true;
           if(!ultActive(p))p.ult=Math.min(100,p.ult+12*ULT_RATE);
-          emit({k:'parry',x:p.x,y:p.y,h:p.z+1.3});
+          emit({k:'parry',x:p.x,y:p.y,h:p.z+1.3,id:p.id});
           {const B=PBASIC[p.pathIdx|0];if(B&&B.onParry&&!p.shPar){p.shPar=1;B.onParry(p);}}
         }else{
           if(p.pathIdx===EARTH)earthShHit(p,pr.dmg);else{p.shieldE-=pr.dmg*1.6;p.shBlk=(p.shBlk|0)+1;}pr.dead=true;emit({k:'block',x:pr.x,y:pr.y,h:pr.h});

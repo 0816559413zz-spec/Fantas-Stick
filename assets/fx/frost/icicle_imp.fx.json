@@ -1,0 +1,19 @@
+{
+ "v": 1,
+ "desc": "Icicle โดนเป้า — ภาพอยู่ใน icicle_hitb (เล่นตอนกระสุนหาย) ไฟล์นี้มีแค่เสียง (แทนภาพเดิม)",
+ "tags": [
+  "frost",
+  "impact"
+ ],
+ "pal": "ice",
+ "dur": 0.4,
+ "layers": [
+  {
+   "id": "snd",
+   "t": "sound",
+   "at": 0,
+   "name": "hit",
+   "vol": 0.4
+  }
+ ]
+}

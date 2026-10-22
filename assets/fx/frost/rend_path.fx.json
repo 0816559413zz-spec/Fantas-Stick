@@ -1,0 +1,345 @@
+{
+ "v": 1,
+ "desc": "Glacier Rend — น้ำแข็งงอกตามทางคลื่น (ผู้ใช้ 2026-10-22: ice along the path): หนามน้ำแข็งงอกสลับซ้าย-ขวาตามจังหวะคลื่นผ่าน + พื้นร้าว + ไอเย็นเลียดพื้น • 1.4 วิแล้วแตกเป็นเศษ • len = ระยะคลื่น (ม.)",
+ "tags": [
+  "frost",
+  "ground",
+  "path"
+ ],
+ "pal": "ice",
+ "dur": 3.2,
+ "params": {
+  "len": {
+   "def": 30,
+   "desc": "ระยะคลื่น (ม.)"
+  }
+ },
+ "layers": [
+  {
+   "id": "sp0",
+   "t": "crown",
+   "at": "0.1*len/75",
+   "life": 1.5,
+   "att": "ground",
+   "pos": [
+    -0.75,
+    0,
+    "len*0.1"
+   ],
+   "r": 1,
+   "hy": 1.4,
+   "mist": 3
+  },
+  {
+   "id": "br0",
+   "t": "debris",
+   "at": "0.1*len/75+1.35",
+   "life": 1.1,
+   "att": "ground",
+   "pos": [
+    -0.75,
+    0.4,
+    "len*0.1"
+   ],
+   "kind": "ice",
+   "n": 5,
+   "speed": 3,
+   "r": 0.5,
+   "size": 0.7,
+   "x": true
+  },
+  {
+   "id": "sp1",
+   "t": "crown",
+   "at": "0.24*len/75",
+   "life": 1.5,
+   "att": "ground",
+   "pos": [
+    0.75,
+    0,
+    "len*0.24"
+   ],
+   "r": 0.8,
+   "hy": 1.15,
+   "mist": 3
+  },
+  {
+   "id": "br1",
+   "t": "debris",
+   "at": "0.24*len/75+1.35",
+   "life": 1.1,
+   "att": "ground",
+   "pos": [
+    0.75,
+    0.4,
+    "len*0.24"
+   ],
+   "kind": "ice",
+   "n": 5,
+   "speed": 3,
+   "r": 0.5,
+   "size": 0.7,
+   "x": true
+  },
+  {
+   "id": "sp2",
+   "t": "crown",
+   "at": "0.38*len/75",
+   "life": 1.5,
+   "att": "ground",
+   "pos": [
+    -0.75,
+    0,
+    "len*0.38"
+   ],
+   "r": 0.8,
+   "hy": 1.4,
+   "mist": 3
+  },
+  {
+   "id": "br2",
+   "t": "debris",
+   "at": "0.38*len/75+1.35",
+   "life": 1.1,
+   "att": "ground",
+   "pos": [
+    -0.75,
+    0.4,
+    "len*0.38"
+   ],
+   "kind": "ice",
+   "n": 5,
+   "speed": 3,
+   "r": 0.5,
+   "size": 0.7,
+   "x": true
+  },
+  {
+   "id": "sp3",
+   "t": "crown",
+   "at": "0.52*len/75",
+   "life": 1.5,
+   "att": "ground",
+   "pos": [
+    0.75,
+    0,
+    "len*0.52"
+   ],
+   "r": 1,
+   "hy": 1.15,
+   "mist": 3
+  },
+  {
+   "id": "br3",
+   "t": "debris",
+   "at": "0.52*len/75+1.35",
+   "life": 1.1,
+   "att": "ground",
+   "pos": [
+    0.75,
+    0.4,
+    "len*0.52"
+   ],
+   "kind": "ice",
+   "n": 5,
+   "speed": 3,
+   "r": 0.5,
+   "size": 0.7,
+   "x": true
+  },
+  {
+   "id": "sp4",
+   "t": "crown",
+   "at": "0.66*len/75",
+   "life": 1.5,
+   "att": "ground",
+   "pos": [
+    -0.75,
+    0,
+    "len*0.66"
+   ],
+   "r": 0.8,
+   "hy": 1.4,
+   "mist": 3
+  },
+  {
+   "id": "br4",
+   "t": "debris",
+   "at": "0.66*len/75+1.35",
+   "life": 1.1,
+   "att": "ground",
+   "pos": [
+    -0.75,
+    0.4,
+    "len*0.66"
+   ],
+   "kind": "ice",
+   "n": 5,
+   "speed": 3,
+   "r": 0.5,
+   "size": 0.7,
+   "x": true
+  },
+  {
+   "id": "sp5",
+   "t": "crown",
+   "at": "0.8*len/75",
+   "life": 1.5,
+   "att": "ground",
+   "pos": [
+    0.75,
+    0,
+    "len*0.8"
+   ],
+   "r": 0.8,
+   "hy": 1.15,
+   "mist": 3
+  },
+  {
+   "id": "br5",
+   "t": "debris",
+   "at": "0.8*len/75+1.35",
+   "life": 1.1,
+   "att": "ground",
+   "pos": [
+    0.75,
+    0.4,
+    "len*0.8"
+   ],
+   "kind": "ice",
+   "n": 5,
+   "speed": 3,
+   "r": 0.5,
+   "size": 0.7,
+   "x": true
+  },
+  {
+   "id": "sp6",
+   "t": "crown",
+   "at": "0.94*len/75",
+   "life": 1.5,
+   "att": "ground",
+   "pos": [
+    -0.75,
+    0,
+    "len*0.94"
+   ],
+   "r": 1,
+   "hy": 1.4,
+   "mist": 3
+  },
+  {
+   "id": "br6",
+   "t": "debris",
+   "at": "0.94*len/75+1.35",
+   "life": 1.1,
+   "att": "ground",
+   "pos": [
+    -0.75,
+    0.4,
+    "len*0.94"
+   ],
+   "kind": "ice",
+   "n": 5,
+   "speed": 3,
+   "r": 0.5,
+   "size": 0.7,
+   "x": true
+  },
+  {
+   "id": "cr0",
+   "t": "decal",
+   "at": "0.2*len/75",
+   "life": 2.4,
+   "att": "ground",
+   "kind": "icecrack",
+   "r": 1.7,
+   "n": 8,
+   "col": "#2f7fe0",
+   "pos": [
+    0,
+    0,
+    "len*0.2"
+   ]
+  },
+  {
+   "id": "cr1",
+   "t": "decal",
+   "at": "0.5*len/75",
+   "life": 2.4,
+   "att": "ground",
+   "kind": "icecrack",
+   "r": 1.7,
+   "n": 8,
+   "col": "#2f7fe0",
+   "pos": [
+    0,
+    0,
+    "len*0.5"
+   ]
+  },
+  {
+   "id": "cr2",
+   "t": "decal",
+   "at": "0.8*len/75",
+   "life": 2.4,
+   "att": "ground",
+   "kind": "icecrack",
+   "r": 1.7,
+   "n": 8,
+   "col": "#2f7fe0",
+   "pos": [
+    0,
+    0,
+    "len*0.8"
+   ]
+  },
+  {
+   "id": "mist",
+   "t": "emit",
+   "at": 0.05,
+   "life": 0.6,
+   "rate": 30,
+   "att": "ground",
+   "from": "line",
+   "fh": "len",
+   "dir": "flat",
+   "spread": 1,
+   "speed": [
+    0.4,
+    1
+   ],
+   "up": [
+    0,
+    0.3
+   ],
+   "plife": [
+    1.2,
+    1.8
+   ],
+   "look": "smoke",
+   "fb": "tex/smoke_puff",
+   "size": [
+    12,
+    18
+   ],
+   "col": "#e6f2fa",
+   "c2": "#9fc4e0",
+   "gravity": -0.05,
+   "drag": 1.5,
+   "pos": [
+    0,
+    0.3,
+    0
+   ],
+   "x": true
+  },
+  {
+   "id": "snd",
+   "t": "sound",
+   "at": 0.1,
+   "name": "break",
+   "vol": 0.45
+  }
+ ]
+}

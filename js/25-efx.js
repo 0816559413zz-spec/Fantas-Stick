@@ -6,7 +6,7 @@ function efxState(ev){
   switch(ev.z){
     case 'slamgo':if(o)o.slamT=1.5;break;
     case 'slam':if(o)o.slamT=0;break;
-    case 'gwave':{if(o&&!ev.cl)o.grDown=0.3;if(!(ev.len>0))break;const m=makeWaveBlade();m.rotation.y=-ev.a;scene.add(m);WVV.push({x,y,a:ev.a,len:ev.len,d:0,m,gh:0});break;}
+    case 'gwave':{if(o&&!ev.cl)o.grDown=0.3;if(!(ev.len>0))break;const fx=fxPlay('frost/rend_slash',{x,y,h:0,a:ev.a}),m=makeWaveBlade();m.rotation.y=-ev.a;scene.add(m);WVV.push({x,y,a:ev.a,len:ev.len,d:0,m,fx,gh:0});break;}
     case 'glacier':if(o)o.grUp=0.5;if(ev.len>0)GLV.push(makeGlacier(x,y,ev.a,ev.len,ev.t));break;
     case 'mirror':ULTV.push({x,y,a:ev.a,d:0,acc:100});break;
     case 'stri':if(o)castStart(o,'',4);break;     // สายฟ้าสามเหลี่ยม = ฟาดไม้จากเหนือหัว

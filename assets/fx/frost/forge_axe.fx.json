@@ -1,0 +1,212 @@
+{
+ "v": 1,
+ "desc": "Frostforge โหมดประชิด: ขวานผลึกงอกจากพื้นหน้าขวา (หนามน้ำแข็งแตก + เศษ + พื้นร้าว) แล้วหมุนลอยขึ้นเข้าที่ — มีเกล็ด/ประกายตามทางขึ้น + ดาววิ้งตอนล็อกเข้าที่",
+ "tags": [
+  "frost",
+  "buff"
+ ],
+ "pal": "ice",
+ "dur": 1.8,
+ "layers": [
+  {
+   "id": "crown",
+   "t": "crown",
+   "at": 0,
+   "life": 1.3,
+   "att": "feet",
+   "pos": [
+    1.1,
+    0,
+    0.85
+   ],
+   "r": 0.75,
+   "hy": 1.25,
+   "mist": 6
+  },
+  {
+   "id": "crack",
+   "t": "decal",
+   "at": 0,
+   "life": 1.8,
+   "att": "feet",
+   "kind": "icecrack",
+   "r": 1.4,
+   "n": 9,
+   "col": "#2f7fe0",
+   "pos": [
+    1.1,
+    0,
+    0.85
+   ]
+  },
+  {
+   "id": "chunks",
+   "t": "debris",
+   "at": 0.02,
+   "life": 1.2,
+   "att": "feet",
+   "kind": "ice",
+   "n": 8,
+   "speed": 5,
+   "r": 0.4,
+   "size": 0.8,
+   "pos": [
+    1.1,
+    0.2,
+    0.85
+   ]
+  },
+  {
+   "id": "burst",
+   "t": "emit",
+   "at": 0,
+   "life": 0.05,
+   "burst": 24,
+   "att": "feet",
+   "from": "disc",
+   "fr": 0.4,
+   "dir": "up",
+   "spread": 0.7,
+   "speed": [
+    3,
+    7
+   ],
+   "plife": [
+    0.4,
+    0.8
+   ],
+   "look": "flake",
+   "size": [
+    1.8,
+    2.8
+   ],
+   "col": "#ffffff",
+   "c2": "#9fdcff",
+   "gravity": 2,
+   "drag": 2,
+   "pos": [
+    1.1,
+    0.1,
+    0.85
+   ]
+  },
+  {
+   "id": "climb",
+   "t": "emit",
+   "at": 0,
+   "life": 0.7,
+   "rate": 90,
+   "att": "feet",
+   "from": "sphere",
+   "fr": 0.35,
+   "dir": "random",
+   "speed": [
+    0.3,
+    1.2
+   ],
+   "plife": [
+    0.3,
+    0.6
+   ],
+   "look": "glow",
+   "size": [
+    1.6,
+    2.6
+   ],
+   "col": "#ffffff",
+   "c2": "#5fe8ff",
+   "gravity": -0.5,
+   "drag": 2,
+   "pos": {
+    "0": [
+     1.25,
+     -0.4,
+     1.4
+    ],
+    "1": [
+     1.15,
+     1.5,
+     0.75
+    ],
+    "ease": "out"
+   }
+  },
+  {
+   "id": "flash",
+   "t": "flash",
+   "at": 0.72,
+   "life": 0.1,
+   "att": "feet",
+   "col": "#e6f7ff",
+   "size": 1.4,
+   "pos": [
+    1.15,
+    1.5,
+    0.75
+   ]
+  },
+  {
+   "id": "star",
+   "t": "emit",
+   "at": 0.72,
+   "life": 0.05,
+   "burst": 1,
+   "att": "feet",
+   "from": "point",
+   "dir": "out",
+   "speed": [
+    0,
+    0.1
+   ],
+   "plife": [
+    0.3,
+    0.3
+   ],
+   "size": [
+    20,
+    20
+   ],
+   "pos": [
+    1.15,
+    1.5,
+    0.75
+   ],
+   "look": "glow",
+   "fb": "tex/star_flare",
+   "col": "#ffffff",
+   "c2": "#9fdcff",
+   "gravity": 0,
+   "drag": 3
+  },
+  {
+   "id": "lock",
+   "t": "ring",
+   "at": 0.72,
+   "life": 0.25,
+   "att": "feet",
+   "pos": [
+    1.15,
+    1.5,
+    0.75
+   ],
+   "vert": true,
+   "col": "#9fdcff",
+   "r": 1.4,
+   "op": 0.7
+  },
+  {
+   "id": "snd",
+   "t": "sound",
+   "at": 0,
+   "name": "break",
+   "vol": 0.5
+  },
+  {
+   "id": "snd2",
+   "t": "sound",
+   "at": 0.72,
+   "name": "parry",
+   "vol": 0.35
+  }
+ ]
+}

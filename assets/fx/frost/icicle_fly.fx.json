@@ -1,0 +1,78 @@
+{
+ "v": 1,
+ "desc": "Icicle ระหว่างบิน (แบบ B): เข็มพลังงานไซยานบางเร็ว + เส้นขาวยาว + เส้นความเร็ว • ติดกับกระสุนจริง (js/35 PJFX)",
+ "tags": [
+  "frost",
+  "projectile"
+ ],
+ "pal": "ice",
+ "dur": 1,
+ "layers": [
+  {
+   "id": "needle",
+   "t": "mesh",
+   "at": 0,
+   "life": 1,
+   "loop": true,
+   "shape": "model",
+   "model": "energy_spear",
+   "mat": "energy",
+   "col": "#5fe8ff",
+   "col2": "#1f6fff",
+   "pos": [
+    0,
+    0,
+    -0.6
+   ],
+   "scale": [
+    0.25,
+    0.25,
+    1.4
+   ],
+   "fade": 0,
+   "rim": 2.5
+  },
+  {
+   "id": "line",
+   "t": "trail",
+   "at": 0,
+   "life": 1,
+   "loop": true,
+   "of": "needle",
+   "col": "#ffffff",
+   "col2": "#5fe8ff",
+   "w": 0.08,
+   "tlife": 0.32,
+   "k": 2.2
+  },
+  {
+   "id": "speed",
+   "t": "emit",
+   "at": 0,
+   "life": 1,
+   "loop": true,
+   "rate": 90,
+   "from": "mesh",
+   "of": "needle",
+   "dir": "aim",
+   "spread": 0.05,
+   "speed": [
+    2,
+    5
+   ],
+   "plife": [
+    0.1,
+    0.16
+   ],
+   "look": "streak",
+   "size": [
+    1.4,
+    2
+   ],
+   "col": "#ffffff",
+   "c2": "#5fe8ff",
+   "gravity": 0,
+   "drag": 0.5
+  }
+ ]
+}

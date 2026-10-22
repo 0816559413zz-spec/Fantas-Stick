@@ -88,7 +88,7 @@
     }
   },
   "efx:perma": {
-    "fx": "frost/perma",
+    "fx": "frost/perma_b",
     "mode": "replace",
     "p": {
       "r": "ev.r/20"
@@ -114,10 +114,20 @@
     "fx": "frost/grcharge",
     "mode": "replace"
   },
-  "efx:gwave": {
-    "fx": "frost/gwave",
-    "mode": "replace"
-  },
+  "efx:gwave": [
+    {
+      "fx": "frost/gwave",
+      "mode": "replace"
+    },
+    {
+      "fx": "frost/rend_path",
+      "mode": "add",
+      "p": {
+        "len": "ev.len/20"
+      },
+      "if": "ev.len>0"
+    }
+  ],
   "efx:glacier": {
     "fx": "frost/glacier",
     "mode": "replace",
@@ -133,13 +143,22 @@
     "fx": "frost/mirrorend",
     "mode": "replace"
   },
-  "efx:forge": {
-    "fx": "frost/forge",
-    "mode": "replace"
-  },
+  "efx:forge": [
+    {
+      "fx": "frost/forge_b",
+      "mode": "replace",
+      "follow": "ev.id"
+    },
+    {
+      "fx": "frost/forge_axe",
+      "mode": "replace",
+      "follow": "ev.id",
+      "if": "ev.ml==1"
+    }
+  ],
   "imp:icicle": {
-    "fx": "frost/icicle_hit",
-    "mode": "add"
+    "fx": "frost/icicle_imp",
+    "mode": "replace"
   },
   "brk:c": {
     "fx": "env/brk_crack",
@@ -252,5 +271,9 @@
     "fx": "fire/spark_cast",
     "mode": "add",
     "follow": "ev.id"
+  },
+  "cast:icicle": {
+    "fx": "frost/icicle_cast",
+    "mode": "add"
   }
 }

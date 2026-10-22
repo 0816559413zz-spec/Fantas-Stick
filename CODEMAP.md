@@ -133,7 +133,7 @@ MY:202 myDB:203 mySave:204 myLoad:207 myDecodeReady:213 myPlay:214 myNext:226 my
 §248 เพลงประกอบ (สร้างสดตามแผนที่)
 MUSIC:249 THEMES:250 padNote:255 musicTick:262 toggleMusic:291
 
-## js/19-client.js (243) — ฝั่งแสดงผล (ทุกเครื่อง รวมโฮสต์ ใช้ snapshot เดียวกัน)
+## js/19-client.js (244) — ฝั่งแสดงผล (ทุกเครื่อง รวมโฮสต์ ใช้ snapshot เดียวกัน)
 cv:4 cx:4 DPR:5 SW:5 SH:5 resize:6 VIEW:12 screen:13 lastBuffKey:13 overShown:13 lastCount:13 PARTS:14 TEXTS:14
 §15 งบเอฟเฟกต์ (VFX budget)
 VFXB:20 _apush:21 vfxQual:29 vfxBegin:31 vfxEnd:34 vfxOnce:36 vfxExtra:38 PCOL:39 setScreen:41 onLobby:50 onSnap:56 snapApply:60
@@ -144,7 +144,7 @@ PRED:99 predictMe:100 myPos:121
 §123 เอฟเฟกต์
 burst:125 smoke:136 ring:137 floatText:138 shake:139 wandPos:140 impactFX:142 explosionFX:159
 §171 เอฟเฟกต์คาถาใหม่
-ZV:172 COLB:172 WVV:172 GLV:172 ICEV:172 SLV:172 ULTV:172 OBV:172 _iceDisc:174 _iceEdge:175 _iceSpk:176 iceFloorMat:177 _icePlane:178 _icePathMat:179 makeIceFloor:180 updateIceFloors:203 FLASHM:214 FLASHING:215 flashModel:216 endFlash:225 tickFlash:226 GHOSTM:228 SOLIDM:228 ghostOf:229 setGhost:235 hitSparks:243
+ZV:172 COLB:172 WVV:172 GLV:172 ICEV:172 SLV:172 ULTV:172 OBV:172 _iceDisc:174 _iceEdge:175 _iceSpk:176 iceFloorMat:177 _icePlane:178 _icePathMat:179 makeIceFloor:180 updateIceFloors:204 FLASHM:215 FLASHING:216 flashModel:217 endFlash:226 tickFlash:227 GHOSTM:229 SOLIDM:229 ghostOf:230 setGhost:236 hitSparks:244
 
 ## js/20-vfx-pyro-storm.js (405) — Dragonfall (ภาพ)
 makeDfCircle:3 DFV:20 dfCracks:21 updateDfCracks:31 dragonfallFX:32
@@ -153,8 +153,8 @@ TBN:87 TBA:87 TBF:87 TBMAX:87 _tv:88 _tt:88 _ts:88 _tw:88 tbLayer:90 TBL:95 TBC:
 §140 รอยกรงเล็บ (อัลติสายฟ้า): รอยข่วน 3 เส้นโค้งปลายแหลมขนานกัน ตั้งขวางห…
 clawGeo:143 clawRakes:148 updateClaws:162 later:170 stFade:171 stBeam:172 shellPt:177 updateStormV:178 _ev:209 GODPTS:211 bWorld:213 stormClawSwipe:217 stormFX:244 STHUD:360 drawStormHud:361
 
-## js/21-vfx-frost.js (202) — น้ำแข็ง (ภาพ): ชิ้นผลึก/หนาม/แผ่นน้ำแข็งชั่วคราว (โผล่ → ค้าง → หด) •…
-FRV:2 _cryG:3 _spkG:3 _plateG:3 _hexG:3 _iceFxM:4 _frostM:4 iceFxM:5 frostM:6 ICEP:8 _im4:8 _iq:8 _ie:8 _ip:8 _is:8 icePool:9 iceBit:10 iceChips:13 updateFRV:14 iceRing:24 chillFX:25 makeSlash:41 _wbGeo:49 crescentGeo:51 makeWaveBlade:54 WGH:65 updateSlashes:66 _glGeo:79 _glMat:79 _glMat2:79 makeGlacier:80 updateGlacierVis:111 updateOrbShots:120 updateZV:130 WM3:202
+## js/21-vfx-frost.js (205) — น้ำแข็ง (ภาพ): ชิ้นผลึก/หนาม/แผ่นน้ำแข็งชั่วคราว (โผล่ → ค้าง → หด) •…
+FRV:2 _cryG:3 _spkG:3 _plateG:3 _hexG:3 _iceFxM:4 _frostM:4 iceFxM:5 frostM:6 ICEP:8 _im4:8 _iq:8 _ie:8 _ip:8 _is:8 icePool:9 iceBit:10 iceChips:13 updateFRV:14 iceRing:24 chillFX:25 makeSlash:41 _wbGeo:49 crescentGeo:51 makeWaveBlade:54 WGH:68 updateSlashes:69 _glGeo:82 _glMat:82 _glMat2:82 makeGlacier:83 updateGlacierVis:114 updateOrbShots:123 updateZV:133 WM3:205
 
 ## js/22-models.js (253) — โมเดลจากไฟล์ (.glb จาก Blender) — ข้อตกลงฝั่งคนปั้นอยู่ใน ASSETS.md
 MODELS:5 modelManifest:6 gltfLoader:11 loadModel:16 modelInst:30 modelOr:31 prefetchModels:43
@@ -176,10 +176,10 @@ MM3:2 makeMinion:3 syncMins:36 drawMinBars:58
 ## js/25-efx.js (297) — efxFX: ภาพของ event "efx" ทุกคาถา (หนึ่ง case ต่อหนึ่งเอฟเฟกต์)
 efxState:4 efxFX:15
 
-## js/26-fx-events.js (248) — fx(ev): เอฟเฟกต์+เสียงของทุก event จากโฮสต์ • statusFX (สถานะบนตัว) •…
+## js/26-fx-events.js (249) — fx(ev): เอฟเฟกต์+เสียงของทุก event จากโฮสต์ • statusFX (สถานะบนตัว) •…
 statusFX:3 fx:27
-§201 overlay: เลือกบัฟ / สรุปผล
-choosePick:202 syncOverlays:207 showOver:229
+§202 overlay: เลือกบัฟ / สรุปผล
+choosePick:203 syncOverlays:208 showOver:230
 
 ## js/27-world.js (265) — 
 S3:4 tx:4 tz:4 GY:6 TW:6 hdr:7 gl:9 scene:15 cam:17 composer:18
@@ -231,18 +231,18 @@ localVel:3
 §11 ภาพของสายไฟ: ชาร์จลูกไฟ / ย่อตัวชาร์จพุ่ง / วงเวทพ่นไฟ / ดีดนิ้ว / กล…
 _pw:12 simOf:13 makeColossus:14 makeMagicCircle:67 _fsGeo:77 fireShieldFX:79 pyroFX:93
 
-## js/34-frost-view.js (247) — ภาพของสายน้ำแข็ง: ดาบ/ขวานน้ำแข็งที่ปลายไม้ ท่าฟัน โล่อัศวิน ไถล แช่แ…
+## js/34-frost-view.js (258) — ภาพของสายน้ำแข็ง: ดาบ/ขวานน้ำแข็งที่ปลายไม้ ท่าฟัน โล่อัศวิน ไถล แช่แ…
 iceMat:2 iceRim:3 makeIceSword:4 makeIceAxe:23 makeKiteShield:39
-§47 อาวุธน้ำแข็งลอย (ผู้ใช้ 2026-10-22: "ร่ายคาถาให้ดาบฟันเอง ระยะเท่าเดิ…
-FWS:50 FWA:50 _fwM:51 _fwM2:51 _fwX:51 _fwY:51 _fwZ:51 _fwP:51 _fwS:51 _fwQ:51 _eo:52 _ei:52 _ss:52 fwAim:54 fwWeapons:55 FWP:57 FWT:57 fwChop:58 fwSweep:59 fwIdle:60 fwSwing:63 FWL_N:75 fwLink:76 fwMat:79 frostFX:80
+§51 อาวุธน้ำแข็งลอย (ผู้ใช้ 2026-10-22: "ร่ายคาถาให้ดาบฟันเอง ระยะเท่าเดิ…
+FWS:54 FWA:54 _fwM:55 _fwM2:55 _fwX:55 _fwY:55 _fwZ:55 _fwP:55 _fwS:55 _fwQ:55 _eo:56 _ei:56 _ss:56 fwAim:58 fwWeapons:59 FWP:61 FWT:61 fwChop:62 fwSweep:63 FF_RISE:64 fwIdle:65 fwSwing:68 FWL_N:80 fwLink:81 fwMat:84 frostFX:85
 
-## js/35-sync.js (497) — ซิงก์ผู้เล่น/ศัตรู/ลูกเวทจาก snapshot + ฉายตำแหน่งลงจอ (ป้ายชื่อ/ตัวเ…
+## js/35-sync.js (498) — ซิงก์ผู้เล่น/ศัตรู/ลูกเวทจาก snapshot + ฉายตำแหน่งลงจอ (ป้ายชื่อ/ตัวเ…
 §2 ท่าร่ายคาถาแบบนักเวทในหนัง Harry Potter (ผู้ใช้ 2026-10-22: "ยิงปกติท…
 CPOSE_T:7 _ce:7 _cs:7 _cb:7 AMP_B:9 AMP_S:9 CP_BEND:10 CPOSE:12 _cpT:20 _cpR:20 CGUARD:20 CP_STEP:21 CPCOL:22 castStyle:23 castStart:24
 §25 ท่าร่ายสกิล / อัลติ / โล่ (ผู้ใช้ 2026-10-22: "เกือบทุกสกิลควรมีการเห…
-CANIM:30 SKANIM:53 skAnim:57 _caT:58 _caR:58 skillPose:59 _g2:84 wandTwoHand:85 CBLOCK:92 blockPose:93 castPose:98 lateSkillPose:104 castPose0:105 syncPlayers:134 syncEnemies:215 projGeo:253 tailGeo:254 _t1:255 makeProj:256 _a:276 _b:276 PJFX:278 syncProj:279 _awT:361 animateWorld:362
-§403 ฉายตำแหน่ง 3D ลงจอ (ป้ายชื่อ / ตัวเลขดาเมจ)
-_v:404 toScreen:405 burnNum:412 drawLabels:419 drawTexts:450 HITM:464 DIRI:464 drawXh:466 drawCrosshair:476
+CANIM:30 SKANIM:53 skAnim:57 _caT:58 _caR:58 skillPose:59 _g2:84 wandTwoHand:85 CBLOCK:92 blockPose:93 castPose:98 lateSkillPose:104 castPose0:105 syncPlayers:134 syncEnemies:215 projGeo:253 tailGeo:254 _t1:255 makeProj:256 _a:276 _b:276 PJFX:278 syncProj:279 _awT:362 animateWorld:363
+§404 ฉายตำแหน่ง 3D ลงจอ (ป้ายชื่อ / ตัวเลขดาเมจ)
+_v:405 toScreen:406 burnNum:413 drawLabels:420 drawTexts:451 HITM:465 DIRI:465 drawXh:467 drawCrosshair:477
 
 ## js/36-modes-view.js (164) — 
 ROLE:4 KC:4 roleShowT:4 onPriv:5 MO:10 BREATHS:11 clearModeObjs:12 ITEMC:21 makeItem:22 syncModeObjs:34
@@ -461,4 +461,4 @@ MN_BLOCK:258 mnRay:259 mnPick:260 mnHot:266 mnToy:284
 §289 เรนเดอร์ (เรียกจาก renderStage js/32 — คืน true = จัดการแล้ว)
 mnRestore:290 mnMenuRender:296
 
-(61 files, 13870 lines)
+(61 files, 13887 lines)

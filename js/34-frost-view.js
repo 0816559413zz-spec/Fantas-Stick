@@ -39,9 +39,13 @@ function makeIceAxe(){
 function makeKiteShield(){
   const sh=new THREE.Shape();sh.moveTo(0,0.6);sh.lineTo(0.42,0.42);sh.lineTo(0.36,-0.15);sh.lineTo(0,-0.72);sh.lineTo(-0.36,-0.15);sh.lineTo(-0.42,0.42);sh.lineTo(0,0.6);
   const geo=new THREE.ExtrudeGeometry(sh,{depth:0.06,bevelEnabled:true,bevelSize:0.03,bevelThickness:0.03,bevelSegments:1});geo.translate(0,0,-0.03);
-  const g=new THREE.Group();g.add(new THREE.Mesh(geo,iceMat(0.82)));
-  const rim=new THREE.Mesh(geo,new THREE.MeshBasicMaterial({color:hdr('#9fe0ff',1.2),transparent:true,opacity:0.3,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.BackSide}));rim.scale.setScalar(1.08);g.add(rim);
+  // แบบ A โล่ว่าวคริสตัล (ผู้ใช้เลือก 2026-10-22): ผลึกใส + แกนฟ้าเย็นข้างใน + ขอบขาวเรือง 2 ชั้น + อัญมณีกลาง • ประกาย/เกล็ด = frost/shield_a
+  const g=new THREE.Group();g.add(new THREE.Mesh(geo,new THREE.MeshStandardMaterial({color:'#e6f8ff',emissive:'#4aa8e8',emissiveIntensity:0.35,roughness:0.25,metalness:0,transparent:true,opacity:0.62,flatShading:true})));
+  const core=new THREE.Mesh(geo,new THREE.MeshBasicMaterial({color:hdr('#3f9cff',0.9),transparent:true,opacity:0.45,blending:THREE.AdditiveBlending,depthWrite:false}));core.scale.set(0.55,0.6,1.3);g.add(core);
+  const rim=new THREE.Mesh(geo,new THREE.MeshBasicMaterial({color:hdr('#ffffff',1.2),transparent:true,opacity:0.32,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.BackSide}));rim.scale.setScalar(1.07);g.add(rim);
+  const rim2=new THREE.Mesh(geo,new THREE.MeshBasicMaterial({color:hdr('#5fc8ff',1),transparent:true,opacity:0.25,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.BackSide}));rim2.scale.setScalar(1.16);g.add(rim2);
   const boss=new THREE.Mesh(new THREE.OctahedronGeometry(0.11),iceMat(1,'#6ac0f0'));boss.position.z=0.08;g.add(boss);
+  g.scale.setScalar(1.15);
   return g;
 }
 // ---------- อาวุธน้ำแข็งลอย (ผู้ใช้ 2026-10-22: "ร่ายคาถาให้ดาบฟันเอง ระยะเท่าเดิม" • อัลติ = ดาบ/ขวาน 3 เล่มแทนร่างแยก) ----------
@@ -57,6 +61,7 @@ function fwWeapons(){const g=new THREE.Group(),sword=makeIceSword(),axe=makeIceA
 const FWP={},FWT={};
 function fwChop(P,th,ff){const c=Math.cos(th),s=Math.sin(th),L=ff?2.0:1.75;P.x=-0.1;P.y=1.95+c*L;P.z=0.7+s*L;P.bx=0;P.by=c;P.bz=s;P.nx=1;P.ny=0;P.nz=0;}   // สับแนวตั้ง: th 0 = ใบชี้ฟ้า → 2.05 = ปลายแตะพื้นหน้า ~4.7 ม.
 function fwSweep(P,ph,h,ff){const s=Math.sin(ph),c=Math.cos(ph),R=ff?2.45:2.1;P.x=R*s;P.y=h;P.z=R*c;P.bx=s;P.by=0.12;P.bz=c;P.nx=0;P.ny=1;P.nz=0;}   // กวาดรอบตัว: ph 0 = หน้า, + = ไปทางซ้าย • ปลายใบถึง ~4.8 ม. (ขวาน ~5.3)
+const FF_RISE=0.75;   // Frostforge เปิด: เวลาที่ขวานงอกจากพื้นหมุนขึ้นเข้าที่ (คู่กับ frost/forge_axe)
 function fwIdle(P,now,ff,seed){const bob=Math.sin(now/430+seed)*0.09,sw=Math.sin(now/700+seed)*0.12;
   P.x=ff?-1.15:-1.0;P.y=1.5+bob;P.z=0.75;P.bx=-0.2+sw;P.by=0.92;P.bz=0.35;P.nx=1;P.ny=0;P.nz=0.2;P.rate=9;P.strike=false;P.ax=-0.95;P.az=-0.3;P.ty=-0.1;P.tx=0;}
 // ท่าฟันคอมโบที่เวลา k (0..1) ของจังหวะ c: 0 = ขวา→ซ้าย (ลงเฉียง) • 1 = ซ้าย→ขวา (ขึ้นเฉียง) • 2 = ยกสูงแล้วสับลงพื้นหน้า (ตรงกับระเบิด slam3) • ขวานง้างนานกว่า หนักกว่า
@@ -93,7 +98,8 @@ function frostFX(o,p,pz,now,dt){
     else if(o.ffBall)o.ffBall.visible=false;}
   else if(o.ffBall)o.ffBall.visible=false;
   // Frostforge โหมดประชิด: หัวขวานงอกจากผลึกน้ำแข็งตามใบ (ตอนเพิ่งเปิด)
-  if(ff&&!o.ffWas){o.ffGrow=0.45;}o.ffWas=!!ff;
+  if(ff&&!o.ffWas){o.ffGrow=0.45;o.ffRise=FF_RISE;}o.ffWas=!!ff;
+  if(ff&&!o.ffFx)o.ffFx=fxPlay('frost/forge_buff',{x:p.x,y:p.y,h:pz,follow:p.id});else if(!ff&&o.ffFx){fxStop(o.ffFx);o.ffFx=null;}   // วงเวทใต้เท้าระหว่างบัฟ (แบบ B)
   if(ff&&!p.fl)forgeAura(p.x,p.y,pz);   // บัฟ Frostforge ยังอยู่: ผลึก/หมอกลอยขึ้นเบา ๆ
   if(o.ffGrow>0){o.ffGrow-=dt;const k=1-Math.max(0,o.ffGrow)/0.45;if(melee&&o.axe){o.axe.scale.setScalar(0.35+0.65*k);o.axe.getWorldPosition(_pw);const q=simOf(_pw);for(let i=0;i<3;i++)PARTS.push({x:q.x+rnd(-14,14),y:q.y+rnd(-14,14),h:q.h-rnd(0.2,1.2),vx:rnd(-30,30),vy:rnd(-30,30),vh:rnd(0,1.5),life:0.25,max:0.25,col:i?'#bfeaff':'#ffffff',size:1.8,g:0});}}
   else if(o.axe&&o.axe.scale.x!==1)o.axe.scale.setScalar(1);
@@ -119,6 +125,10 @@ function frostFX(o,p,pz,now,dt){
     else{const e=1-Math.pow(1-(k-0.35)/0.65,3);ax=lerp(-0.4,-0.95,e);bx=lerp(0.4,0,e);if(fwOn){fwChop(P,2.05-0.3*e,ff);P.strike=false;P.rate=lerp(30,8,e);}}}
   // ฟาดจากที่สูง (กระโดดลง): อาวุธพุ่งนำลงไปข้างหน้า ปลายชี้พื้น
   if(fwOn&&o.slamT>0&&pz>0.2&&!(o.swT>0)){P.x=0;P.y=0.5;P.z=1.4;P.bx=0;P.by=-0.8;P.bz=0.6;P.nx=1;P.ny=0;P.nz=0;P.rate=14;P.strike=false;ax=-0.6;az=-0.1;bx=0.25;}
+  // Frostforge เปิด (ผู้ใช้ 2026-10-22 'new animation of axe coming up'): ขวานงอกจากใต้พื้นหน้าขวา หมุนวนขึ้นมาเข้าที่
+  if(fwOn&&o.ffRise>0){o.ffRise-=dt;const k=1-Math.max(0,o.ffRise)/FF_RISE,e=1-Math.pow(1-k,3),sp=(1-e)*Math.PI*3,c=Math.cos(sp),s=Math.sin(sp);
+    P.y=lerp(-1.1,P.y,e);P.z=lerp(0.85,P.z,e);P.x=lerp(-1.1,P.x,e);
+    const bx=P.bx,bz=P.bz,nx=P.nx,nz=P.nz;P.bx=bx*c-bz*s;P.bz=bx*s+bz*c;P.nx=nx*c-nz*s;P.nz=nx*s+nz*c;P.rate=60;P.strike=false;o.fwSub=0;}
   // วางอาวุธ: ช่วงฟันจริงวางตรงทุกเฟรม (ทางโค้งคม ไม่ตัดมุม) • นอกนั้นไล่ตามนุ่ม ๆ
   fwAim(P.bx,P.by,P.bz,P.nx,P.ny,P.nz);_fwP.set(P.x,P.y,P.z);
   {const G=o.fw.g;if(P.strike||!o.fwInit){G.position.copy(_fwP);G.quaternion.copy(_fwQ);o.fwInit=1;}else{const r=Math.min(1,dt*P.rate);G.position.lerp(_fwP,r);G.quaternion.slerp(_fwQ,r);}}
@@ -177,11 +187,12 @@ function frostFX(o,p,pz,now,dt){
   // โล่อัศวินน้ำแข็ง (แทนโล่ฟองสบู่)
   if(p.sh){
     if(!o.ishield){o.ishield=makeKiteShield();o.g.add(o.ishield);}
-    o.ishield.visible=true;o.ishield.position.set(0.12,1.15,0.5);o.ishield.rotation.set(0.08,0,0);
+    if(!o.shFx)o.shFx=fxPlay('frost/shield_a',{x:p.x,y:p.y,h:pz,follow:p.id});   // โล่ว่าวคริสตัลแบบ A (ผู้ใช้เลือก 2026-10-22: ยื่นออกหน้าตัวมากขึ้น 0.5 → 0.95 ม.) — ประกาย/เกล็ดจากไฟล์
+    o.ishield.visible=true;o.ishield.position.set(0.12,1.15,0.95);o.ishield.rotation.set(0.08,0,0);
     o.armL.rotation.x=-1.3;o.armL.rotation.z=0.5;
     o.shield.visible=!!((p.fm|0)&(128|16384));
     if(Math.random()<0.3){o.ishield.getWorldPosition(_pw);const s=simOf(_pw);PARTS.push({x:s.x+rnd(-8,8),y:s.y+rnd(-8,8),h:s.h+rnd(-0.5,0.5),vx:0,vy:0,vh:0.4,life:0.5,max:0.5,col:'#dff6ff',size:1.6,g:0});}
-  }else if(o.ishield)o.ishield.visible=false;
+  }else{if(o.shFx){fxStop(o.shFx);o.shFx=null;}if(o.ishield)o.ishield.visible=false;}
   // ไถลน้ำแข็ง
   if(flags&1){o.b.rotation.x=0.5;o.legs[0].rotation.x=-0.75;o.legs[1].rotation.x=0.6;o.armL.rotation.x=0.6;o.armL.rotation.z=0.6;
     for(let i=0;i<3;i++)PARTS.push({x:p.x+rnd(-10,10),y:p.y+rnd(-10,10),h:pz+0.1,vx:rnd(-60,60),vy:rnd(-60,60),vh:rnd(0.5,2),life:0.35,max:0.35,col:i?'#ffffff':'#bfeaff',size:1.8,g:4});

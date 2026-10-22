@@ -1,0 +1,118 @@
+{
+ "v": 1,
+ "desc": "โล่ Frost — Parry (แบบ A): แสงร้าว + วงตั้ง + เศษผลึกพุ่งไปทางเล็ง + ดาววิ้ง",
+ "tags": [
+  "frost",
+  "shield",
+  "parry"
+ ],
+ "pal": "ice",
+ "dur": 1.2,
+ "layers": [
+  {
+   "id": "flash",
+   "t": "flash",
+   "at": 0,
+   "life": 0.1,
+   "col": "#e6f7ff",
+   "size": 1.8,
+   "att": "feet",
+   "pos": [
+    0.2,
+    1.15,
+    1.35
+   ]
+  },
+  {
+   "id": "ring",
+   "t": "ring",
+   "at": 0,
+   "life": 0.25,
+   "att": "feet",
+   "pos": [
+    0.2,
+    1.15,
+    1.25
+   ],
+   "vert": true,
+   "col": "#9fdcff",
+   "r": 1.8,
+   "op": 0.7
+  },
+  {
+   "id": "shards",
+   "t": "emit",
+   "at": 0,
+   "life": 0.05,
+   "burst": 12,
+   "att": "feet",
+   "from": "disc",
+   "fr": 0.4,
+   "dir": "aim",
+   "spread": 0.35,
+   "speed": [
+    10,
+    16
+   ],
+   "up": [
+    0,
+    1
+   ],
+   "plife": [
+    0.6,
+    1.1
+   ],
+   "look": "model",
+   "model": "frost_shard",
+   "mmat": "ice",
+   "msize": [
+    0.08,
+    0.16
+   ],
+   "bounce": 0.3,
+   "mspin": 540,
+   "gravity": 3,
+   "drag": 1.2,
+   "col": "#e6f7ff",
+   "c2": "#2f7fe0",
+   "pos": [
+    0.2,
+    1.15,
+    1.25
+   ]
+  },
+  {
+   "id": "star",
+   "t": "emit",
+   "at": 0,
+   "life": 0.05,
+   "burst": 1,
+   "att": "feet",
+   "from": "point",
+   "dir": "out",
+   "speed": [
+    0,
+    0.1
+   ],
+   "plife": [
+    0.3,
+    0.3
+   ],
+   "size": [
+    16,
+    16
+   ],
+   "pos": [
+    0.2,
+    1.3,
+    1.25
+   ],
+   "look": "glow",
+   "fb": "tex/star_flare",
+   "col": "#ffffff",
+   "c2": "#9fdcff",
+   "gravity": 0,
+   "drag": 3
+  }
+ ]
+}

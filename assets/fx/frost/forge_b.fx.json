@@ -1,0 +1,148 @@
+{
+ "v": 1,
+ "desc": "Frostforge เปิด (แบบ B อนิเมะ — ผู้ใช้เลือก 2026-10-22): เฟรมกระแทก + ลำแสงไซยานพุ่งขึ้นจากเท้า + วงเวทหมุนกางออก + วงช็อก + เส้นแสงพุ่งขึ้น",
+ "tags": [
+  "frost",
+  "buff"
+ ],
+ "pal": "ice",
+ "dur": 1.2,
+ "layers": [
+  {
+   "id": "frame",
+   "t": "screen",
+   "at": 0,
+   "life": 0.08,
+   "kick": 0.3,
+   "flash": 0.04,
+   "fcol": "#5fe8ff",
+   "own": true
+  },
+  {
+   "id": "pillar",
+   "t": "mesh",
+   "at": 0,
+   "life": 0.5,
+   "shape": "cylinder",
+   "mat": "energy",
+   "col": "#5fe8ff",
+   "col2": "#1f6fff",
+   "att": "feet",
+   "scale": {
+    "0": [
+     0.3,
+     7,
+     0.3
+    ],
+    "1": [
+     0.2,
+     7,
+     0.2
+    ],
+    "0.2": [
+     1,
+     7,
+     1
+    ],
+    "ease": "out"
+   },
+   "op": {
+    "0": 0.9,
+    "1": 0,
+    "0.5": 0.6
+   },
+   "rim": 2.4,
+   "scroll": 4
+  },
+  {
+   "id": "rune_in",
+   "t": "mesh",
+   "at": 0,
+   "life": 0.35,
+   "shape": "model",
+   "model": "rune_swirl",
+   "mat": "energy",
+   "col": "#5fe8ff",
+   "col2": "#1f6fff",
+   "att": "feet",
+   "pos": [
+    0,
+    0.06,
+    0
+   ],
+   "scale": {
+    "0": 0.3,
+    "1": 2.4,
+    "ease": "out"
+   },
+   "spin": 300,
+   "op": {
+    "0": 1,
+    "1": 0.6
+   }
+  },
+  {
+   "id": "shock",
+   "t": "ring",
+   "at": 0,
+   "life": 0.3,
+   "att": "feet",
+   "pos": [
+    0,
+    0.12,
+    0
+   ],
+   "col": "#5fe8ff",
+   "r": 6,
+   "op": 0.7
+  },
+  {
+   "id": "rays",
+   "t": "emit",
+   "at": 0,
+   "life": 0.05,
+   "burst": 20,
+   "att": "feet",
+   "from": "ring",
+   "fr": 1,
+   "dir": "up",
+   "spread": 0.1,
+   "speed": [
+    14,
+    22
+   ],
+   "plife": [
+    0.15,
+    0.25
+   ],
+   "look": "streak",
+   "size": [
+    1.8,
+    2.8
+   ],
+   "col": "#ffffff",
+   "c2": "#5fe8ff",
+   "gravity": 0,
+   "drag": 0.5,
+   "pos": [
+    0,
+    0.2,
+    0
+   ]
+  },
+  {
+   "id": "snd",
+   "t": "sound",
+   "at": 0,
+   "name": "buff",
+   "vol": 0.7
+  },
+  {
+   "id": "snd2",
+   "t": "sound",
+   "at": 0,
+   "name": "nova",
+   "vol": 0.3
+  }
+ ]
+}
