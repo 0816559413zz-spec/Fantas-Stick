@@ -8,7 +8,7 @@ const POD_X=[0,-2.05,2.05],POD_H=[1.05,0.7,0.45],POD_C=['#ffd86b','#dfe6f2','#e0
 function podStart(res,cb){
   const R=(res&&res.rows||[]).filter(r=>r.id).slice(0,3);
   if(R.length<2||res.mode==='train'){cb();return;}
-  Object.assign(POD,{on:true,t:0,rows:R,cb,spark:[]});
+  Object.assign(POD,{on:true,t:0,rows:R,cb,spark:[]});podRoomBuild();   // ห้องโถงใหญ่ฉากแยก (js/59)
   if(!POD.g){
     const g=new THREE.Group(),stone=stoneMat(2,1,'#7a7a96'),gold=new THREE.MeshStandardMaterial({color:'#e8c468',metalness:1,roughness:0.28,emissive:'#5a3d08',emissiveIntensity:0.35});
     POD_X.forEach((x,i)=>{const h=POD_H[i],m=new THREE.Mesh(new THREE.CylinderGeometry(0.78,0.86,h,40),stone);m.position.set(x,STAGE_Y+h/2,0);m.castShadow=m.receiveShadow=true;g.add(m);
@@ -24,12 +24,12 @@ function podStart(res,cb){
     const L=new THREE.PointLight('#ffd98a',2.2,8,2);L.position.set(0,STAGE_Y+3.6,1.2);g.add(L);
     POD.g=g;
   }
-  stage.add(POD.g);
+  PODS.add(POD.g);
 }
 function podStop(){
   if(!POD.on)return;POD.on=false;
-  if(POD.g)stage.remove(POD.g);
-  for(const o of STAGE.chars.values()){o.g.visible=true;o.g.scale.setScalar(1);}
+  if(POD.g)PODS.remove(POD.g);
+  for(const o of STAGE.chars.values()){stage.add(o.g);o.g.visible=true;o.g.scale.setScalar(1);}   // คืนตัวละครให้ฉากล็อบบี้
   const cb=POD.cb;POD.cb=null;if(cb)cb();
 }
 addEventListener('keydown',e=>{if(POD.on&&POD.t>1&&(e.code==='Space'||e.code==='Enter'||e.code==='Escape'))podStop();});
@@ -49,20 +49,18 @@ function podPose(o,place,now,dt,i){
 function renderPodium(dt,now){
   POD.t+=dt;if(POD.t>6.5){podStop();return;}
   const want=new Set();
-  POD.rows.forEach((r,i)=>{const o=stageChar(r.id,lookStr(getLook(r.id)));want.add(r.id);o.g.visible=true;
+  POD.rows.forEach((r,i)=>{const o=stageChar(r.id,lookStr(getLook(r.id)));want.add(r.id);o.g.visible=true;if(o.g.parent!==PODS)PODS.add(o.g);
     const rise=Math.min(1,Math.max(0,(POD.t-0.25*(2-i))/0.6)),e=1-Math.pow(1-rise,3);   // 3 → 2 → 1 ลอยขึ้นแท่นตามลำดับ
     o.g.position.set(POD_X[i],STAGE_Y+POD_H[i]-0.6*(1-e),0.05);o.g.rotation.y=-POD_X[i]*0.08;o.g.scale.setScalar(Math.max(0.001,e));
     podPose(o,i,now,dt,i);});
   for(const [id,o] of STAGE.chars)if(!want.has(id))o.g.visible=false;
-  STAGE.slotRings.forEach(r=>r.visible=false);STAGE.env.forEach(g=>g.visible=false);STAGE.wins.forEach(m=>m.visible=true);
-  for(const c of STAGE.candles)c.g.position.y=c.y+Math.sin(now/900+c.ph)*0.25;
-  STAGE.rune.rotation.z=now/6000;STAGE.rune.material.opacity=0.4+0.15*Math.sin(now/500);STAGE.dust.rotation.y=now/30000;
+  podRoomTick(dt,now);
   const cupT=Math.min(1,Math.max(0,(POD.t-1.0)/0.8));
   POD.cup.visible=cupT>0;POD.cup.position.set(0,STAGE_Y+POD_H[0]+2.4+Math.sin(now/600)*0.08+(1-cupT)*1.5,0.05);POD.cup.rotation.y=now/700;
   // กล้อง: เลื่อนเข้าหาแท่นช้า ๆ มุมต่ำมองขึ้น
   const u=Math.min(1,POD.t/2.5),e=1-Math.pow(1-u,3);
   cam.position.set(Math.sin(now/4000)*0.25,lerp(2.6,2.0,e),lerp(10.5,7.2,e));cam.lookAt(0,1.95,0);
-  rpass.scene=stage;gl.shadowMap.needsUpdate=true;composer.render();rpass.scene=scene;
+  rpass.scene=PODS;gl.shadowMap.needsUpdate=true;composer.render();rpass.scene=scene;
   // 2D: หัวข้อ + ชื่อ/สถิติใต้แท่น + ประกายทองโปรย
   cx.save();cx.textAlign='center';cx.textBaseline='middle';
   cx.globalAlpha=Math.min(1,POD.t/0.6);
