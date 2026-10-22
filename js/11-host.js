@@ -12,7 +12,7 @@ function freshStats(){
   return {lst:0,emp:0,orbs:0,orbBlk:0,dch:3,stS:null,stCd:0,god:0,sdome:null,rail:null,slnT:0,sorb:null,beam:0,hp:200,maxHp:200,alive:true,downed:false,revive:0,respawn:0,vx:0,vy:0,ang:0,z:0,vz:0,fly:false,flyCd:0,root:0,
     cd:{basic:0,q:0,e:0,r:0,f:0,dodge:0},cdMax:{basic:1,q:1,e:1,r:1,f:1,dodge:1},
     shieldOn:false,shieldE:100,shieldT:0,shieldBroken:0,dash:0,dashX:0,dashY:0,inv:0,stun:0,burn:0,bt:0,burnSrc:null,
-    ult:0,kills:0,deaths:0,dmgDealt:0,lastHit:null,bo:null,picked:true,taken:[],dfall:null,
+    ult:0,kills:0,deaths:0,dmgDealt:0,dmgTaken:0,lastHit:null,bo:null,picked:true,taken:[],dfall:null,
     buffs:{dmg:1,cdr:1,spd:1,life:0,shReg:1,ult:1}};
 }
 function newPlayer(id,name,color,lk){
@@ -203,6 +203,8 @@ function respawn(p){
 // ---------- ลูปหลักฝั่งโฮสต์ ----------
 function hostTick(dt){
   const g=G;
+  // จบเกมแบบสโลว์ (ผู้ใช้ 2026-10-22 "เวลาหมดเกมช้าลง จอมืดจาง ๆ แล้ว VICTORY/DEFEAT ขึ้น"): endMatch ตั้ง endT → โลกเดินช้า 0.3× จนหมด แล้วค่อยจบจริง
+  if(g.endT>0){g.endT-=dt;dt*=0.3;if(g.endT<=0){matchOver();return;}}
   g.time+=dt;
   if(g.ph==='count'){g.cdT-=dt;if(g.cdT<=0)g.ph='play';}
   const acting=g.ph==='play';

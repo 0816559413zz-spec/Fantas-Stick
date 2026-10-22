@@ -74,5 +74,5 @@ function renderGame(v,P,E,me,dt,now){
   drawLabels(P,E,v,me,spk);drawMinBars(v,me);
   drawTexts(dt);
   if(me&&me.al&&!me.dn)drawCrosshair();
-  drawHUD(v,me,P);drawSocial(P,me,dt,now);if(PROPON&&me&&me.al&&!me.dn&&!showBoard)drawPropHint(me);pf('hud2d',t0);
+  if(!VIC.on)drawHUD(v,me,P);drawSocial(P,me,dt,now);   // ป้าย VICTORY/DEFEAT = ซ่อน HUDdrawCombo(v,E,now);if(PROPON&&me&&me.al&&!me.dn&&!showBoard)drawPropHint(me);pf('hud2d',t0);
 }

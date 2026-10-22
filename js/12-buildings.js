@@ -300,7 +300,7 @@ function damage(t,amt,srcId,kind){
     if(t.ward.abs<=0)t.ward=null;
     if(amt<=0.01)return;
   }
-  t.hp-=amt;t.lastHit=srcId;
+  t.hp-=amt;t.lastHit=srcId;t.dmgTaken=(t.dmgTaken||0)+amt;   // สรุปจบเกม: ดาเมจที่รับ
   if(src&&src!==t){gainUlt(src,amt*0.7);lifesteal(src,amt);src.dmgDealt+=amt;}
   gainUlt(t,amt*0.25);
   emit({k:'hit',x:t.x,y:t.y,h:t.z+2.4,n:Math.round(amt),id:t.id,s:srcId||undefined,ns:src&&src.baHit?1:undefined,b:kind==='burn'?1:undefined,kl:t.hp<=0?1:undefined,sx:src&&src!==t?Math.round(src.x):undefined,sy:src&&src!==t?Math.round(src.y):undefined,a:(kind==='aoe'||kind==='zone')?1:undefined});

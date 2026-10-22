@@ -77,26 +77,28 @@ function modeLogic(dt){
   }
 }
 function endMatch(){
-  const ps=plist();let title='จบเกม',sub='';
+  if(G.ph==='over'||G.endT>0)return;   // กำลังสโลว์ก่อนจบอยู่แล้ว
+  const ps=plist();let title='จบเกม',sub='';let win=[],draw=false;   // win = id ผู้ชนะ (ลูกข่ายใช้เลือก VICTORY / DEFEAT)
+  const teamIds=t=>ps.filter(p=>p.team===t).map(p=>p.id);
   const byK=[...ps].sort((a,b)=>b.kills-a.kills);
   if(G.mode==='coop'){title='จบการผจญภัยในดันเจียน';sub=`ทีมของคุณไปถึงชั้น ${G.wave}`;}
   else if(G.mode==='train'){title='จบการฝึก';sub='ไปลองฝีมือจริงในโหมดอื่นกันเลย!';}
-  else if(G.mode==='quid'){const [a,b]=G.qs;title=a===b?'เสมอ!':`🏆 ${TEAMN[a>b?0:1]} ชนะควิดดิช!`;sub=`${TEAMN[0]} ${a} — ${b} ${TEAMN[1]}`+(G.snitchBy?`  •  ✨ ${G.snitchBy} จับลูกบอลทองได้`:'');}
-  else if(G.mode==='race'){const r=raceRank();title=r[0]?`🏆 ${r[0].name} ชนะการแข่ง!`:'จบการแข่ง';sub=r.map((p,i)=>`${i+1}. ${p.name}${p.fin?` (${p.finT.toFixed(1)} วิ)`:''}`).join('   ');}
-  else if(G.mode==='br'){const w=ps.find(p=>p.alive);title=w?`🏆 ${w.name} รอดเป็นคนสุดท้าย!`:'ไม่มีผู้รอดชีวิต';sub='🌀 แบทเทิลรอยัล';}
-  else if(G.mode==='imp'){title=G.impWin==='imp'?'🐍 ฝ่ายโวลเดอมอร์ชนะ! ความมืดครองฮอกวอตส์':'⚡ ฝ่ายนักเรียนฮอกวอตส์ชนะ!';sub='ฝ่ายโวลเดอมอร์คือ: '+ps.filter(p=>p.role==='imp').map(p=>p.name).join(', ');}
+  else if(G.mode==='quid'){const [a,b]=G.qs;if(a===b)draw=true;else win=teamIds(a>b?0:1);title=a===b?'เสมอ!':`🏆 ${TEAMN[a>b?0:1]} ชนะควิดดิช!`;sub=`${TEAMN[0]} ${a} — ${b} ${TEAMN[1]}`+(G.snitchBy?`  •  ✨ ${G.snitchBy} จับลูกบอลทองได้`:'');}
+  else if(G.mode==='race'){const r=raceRank();if(r[0])win=[r[0].id];title=r[0]?`🏆 ${r[0].name} ชนะการแข่ง!`:'จบการแข่ง';sub=r.map((p,i)=>`${i+1}. ${p.name}${p.fin?` (${p.finT.toFixed(1)} วิ)`:''}`).join('   ');}
+  else if(G.mode==='br'){const w=ps.find(p=>p.alive);if(w)win=[w.id];title=w?`🏆 ${w.name} รอดเป็นคนสุดท้าย!`:'ไม่มีผู้รอดชีวิต';sub='🌀 แบทเทิลรอยัล';}
+  else if(G.mode==='imp'){win=ps.filter(p=>(p.role==='imp')===(G.impWin==='imp')).map(p=>p.id);title=G.impWin==='imp'?'🐍 ฝ่ายโวลเดอมอร์ชนะ! ความมืดครองฮอกวอตส์':'⚡ ฝ่ายนักเรียนฮอกวอตส์ชนะ!';sub='ฝ่ายโวลเดอมอร์คือ: '+ps.filter(p=>p.role==='imp').map(p=>p.name).join(', ');}
   else if(G.mode==='duel'){
     const s=[...ps].sort((a,b)=>(G.rw[b.id]||0)-(G.rw[a.id]||0));
-    title=s[0]?`🏆 ${s[0].name} ชนะการดวล!`:'จบเกม';
+    title=s[0]?`🏆 ${s[0].name} ชนะการดวล!`:'จบเกม';if(s[0])win=[s[0].id];
     sub=ps.map(p=>`${p.name} ${G.rw[p.id]||0}`).join('  —  ');
-  }else if(G.mode==='ffa'){title=byK[0]?`🏆 ${byK[0].name} ชนะ FFA!`:'จบเกม';sub=byK[0]?`${byK[0].kills} kills`:'';}
+  }else if(G.mode==='ffa'){if(byK[0])win=[byK[0].id];title=byK[0]?`🏆 ${byK[0].name} ชนะ FFA!`:'จบเกม';sub=byK[0]?`${byK[0].kills} kills`:'';}
   else{
-    const [a,b]=G.teamScore;
+    const [a,b]=G.teamScore;if(a===b)draw=true;else win=teamIds(a>b?0:1);
     title=a===b?'เสมอ!':`🏆 ${TEAMN[a>b?0:1]} ชนะ!`;
     sub=`${TEAMN[0]} ${a} — ${b} ${TEAMN[1]}`;
   }
-  G.result={title,sub,mode:G.mode,wave:G.wave,
-    rows:(G.mode==='race'?raceRank():byK).map(p=>({n:p.name+(G.mode==='imp'?(p.role==='imp'?' 🐍':' ⚡'):''),c:p.color,k:p.kills,d:p.deaths,dmg:Math.round(p.dmgDealt),tm:MODES[G.mode].team?p.team:-1}))};
-  G.ph='over';G.proj=[];
-  emit({k:'over',x:0,y:0});
+  G.result={title,sub,mode:G.mode,wave:G.wave,win,draw,
+    rows:(G.mode==='race'?raceRank():byK).map(p=>({id:p.id,tk:Math.round(p.dmgTaken||0),n:p.name+(G.mode==='imp'?(p.role==='imp'?' 🐍':' ⚡'):''),c:p.color,k:p.kills,d:p.deaths,dmg:Math.round(p.dmgDealt),tm:MODES[G.mode].team?p.team:-1}))};
+  if(G.mode==='train')matchOver();else G.endT=1.6;   // ห้องฝึก = จบทันที (ไม่มีชนะ/แพ้)
 }
+function matchOver(){G.endT=0;G.ph='over';G.proj=[];emit({k:'over',x:0,y:0});}

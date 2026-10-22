@@ -470,7 +470,7 @@ function drawCrosshair(){
   if(!(_me&&_me.ea&&_me.al&&_me.sh&&!(_me.ea[0]>0)))drawXh(x,y,hot);   // สายดินถือโล่: ซ่อนเป้าเล็ง (โชว์โค้ง HP โล่ + ตัวเลขแทน ใน drawEarthHud)
   if(_me&&_me.sm&&_me.al)drawStormHud(x,y,_me.sm);
   if(_me&&_me.ea&&_me.al)drawEarthHud(x,y,_me.ea,_me);
-  if(!locked){
+  if(!locked&&!VIC.on&&!(VIEW.cur&&VIEW.cur.ph==='over')){
     cx.font='600 17px Kanit,sans-serif';cx.textAlign='center';
     const t='🖱️ คลิกที่จอเพื่อบังคับกล้อง (Esc = ปล่อยเมาส์)',w=cx.measureText(t).width+48;
     plate(SW/2-w/2,SH/2+30,w,38);
