@@ -59,6 +59,15 @@ Goal: models, VFX and sounds become files that are easy to edit/replace with bet
 - [x] Asset manifest (one JSON listing files + versions) so the loader and Service Worker share one list. (done: `assets/manifest.json`; Blender conventions in `ASSETS.md`)
 - [ ] Licences: repo is public — only CC0 / CC-BY / self-made assets, credits in guide.
 
+## F. Future tech plan: big maps + lots of destruction + many skill lights (talked with user 2026-10-22 — record only, do later)
+User's future goals: bigger maps, more and finer breakable things, light from skill effects. Map + mode design comes first; do not start this until asked.
+- **Now:** stay on WebGL (three.js 0.160) + JS. Measured: sim/particles < 2 ms per frame, the heavy part is drawing (GPU submit ≈ 7 ms in the heavy bench).
+- **Skill lights:** only 6 pooled point lights today (`LPOOL`, js/27). In WebGL forward rendering every lit pixel loops over every light, and a change in light count recompiles every shader (see the 2026-10-21 warm-up entry) → more real lights does not scale. Options: (a) fake light (emissive + glow sprites + light decals on the ground) — works now; (b) **WebGPU + tiled/clustered lighting** (three.js WebGPU renderer, TSL) → 100+ dynamic lights. Shadows from skill lights stay expensive either way (keep to 1–2).
+- **Bigger maps:** split into zones, LOD (low-detail far away, also §E), bake static map lighting (lightmaps / light probes), keep `batchStatic` for unbreakable parts. Breakable parts can't be merged → more draw calls → instancing per chunk type; WebGPU lowers draw cost and allows GPU culling / indirect draws.
+- **More/finer destruction:** debris physics with **Rapier (WebAssembly)**, debris simulated on each client only (visual), network sends only "which piece broke" (bandwidth is the real online limit, not CPU).
+- **WebGPU cost/risk:** every custom GLSL shader (fireVol, ice, particles, grass, trails, soft particles, AO/grade passes…) must be rewritten in TSL; some friends' browsers/devices may lack WebGPU → need a WebGL fallback.
+- **First step when the user asks:** a separate test scene (not the game): WebGPU + 100–200 moving lights + one house breaking into a few hundred Rapier chunks; open on the user's and friends' PCs, compare FPS and which devices can't run it; decide from those numbers.
+
 ## Benchmarks
 `tools/bench-start.js` = match start / map switch hitch (see its header).
 
