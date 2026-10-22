@@ -42,8 +42,8 @@ async function main(){
     await cmd('Emulation.setDeviceMetricsOverride',{width:W,height:H,deviceScaleFactor:1,mobile:false});
     await cmd('Page.navigate',{url});
     // รอให้หน้าโหลดเสร็จ: เกม = มี window.WD • สตูดิโอ = STUDIO.state.ready
-    const isStudio=/studio\.html|\?studio/.test(url);
-    for(let i=0;i<240;i++){await sleep(250);try{if(await ev(isStudio?`!!(window.STUDIO&&STUDIO.state&&STUDIO.state.ready)`:`!!(window.WD&&window.WD.G!==undefined&&document.readyState==='complete')`,false))break;}catch(e){}}
+    const isStudio=/studio\.html|\?studio/.test(url),isGame=!isStudio&&/^\/(index\.html)?(\?|#|$)/.test(url.replace(/^https?:\/\/[^/]+/,''));
+    for(let i=0;i<240;i++){await sleep(250);try{if(await ev(isStudio?`!!(window.STUDIO&&STUDIO.state&&STUDIO.state.ready)`:isGame?`!!(window.WD&&window.WD.G!==undefined&&document.readyState==='complete')`:`document.readyState!=='loading'`,false))break;}catch(e){}}
     if(A['wait-shot']){const f=String(A['wait-shot']).replace(/\.(jpg|png)$/,''),c=['jpg','png'].map(x=>path.join(ROOT,'shots',f+'.'+x)),t0=Date.now();
       const old=c.map(p=>fs.existsSync(p)?fs.statSync(p).mtimeMs:0);
       for(;;){await sleep(400);const k=c.findIndex((p,i)=>fs.existsSync(p)&&fs.statSync(p).mtimeMs>Math.max(old[i],t0-60000)&&fs.statSync(p).mtimeMs>old[i]);if(k>=0){console.log('✓ '+path.relative(ROOT,c[k]).replace(/\\/g,'/'));break;}}
