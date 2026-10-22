@@ -219,7 +219,7 @@ function syncOverlays(s){
   }
   if(s.ph==='over'&&s.res){
     if(!overShown){overShown=true;vicStart(s.res,()=>showOver(s.res));if(document.pointerLockElement)document.exitPointerLock();}   // VICTORY/DEFEAT ก่อน แล้วค่อยจอสรุป (js/53)
-  }else if(overShown){overShown=false;vicStop();$('#over').classList.add('hidden');}
+  }else if(overShown){overShown=false;vicStop();podStop();$('#over').classList.add('hidden');}
   if(s.ph==='count'){const c=Math.ceil(s.cd);if(c!==lastCount){lastCount=c;if(c>0)sfx('tick');}}
   else if(lastCount){lastCount=0;sfx('go');}
   syncMeeting(s);

@@ -25,7 +25,7 @@ function vicKind(r){
 function vicStart(res,cb){
   const k=vicKind(res);
   if(res&&res.mode==='train'){cb();return;}   // ห้องฝึก: ไปจอสรุปเลย
-  Object.assign(VIC,{on:true,t:0,kind:k,res,cb,bolts:[],bt:0,emb:[],sh:0});
+  Object.assign(VIC,{on:true,t:0,kind:k,res,cb:()=>podStart(res,cb),bolts:[],bt:0,emb:[],sh:0});   // ป้าย → โพเดียม (js/55) → จอสรุป
   try{snd(k==='win'?'buff':'end',{vol:0.8});}catch(e){}
 }
 function vicStop(){if(!VIC.on)return;VIC.on=false;const cb=VIC.cb;VIC.cb=null;if(cb)cb();}

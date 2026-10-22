@@ -249,8 +249,8 @@ ROLE:4 KC:4 roleShowT:4 onPriv:5 MO:10 BREATHS:11 clearModeObjs:12 ITEMC:21 make
 §133 หน้าประชุมโหวต (หาลอร์ดโวลเดอมอร์)
 meetKey:134 myVoted:134 castVote:135 syncMeeting:141
 
-## js/37-render-loop.js (78) — ลูปเรนเดอร์
-lastFrame:2 HSTOP:5 hitStop:6 FXSTUDIO:8 frame:9 _fpsAcc:18 _fpsN:18 render:19 renderGame:58
+## js/37-render-loop.js (79) — ลูปเรนเดอร์
+lastFrame:2 HSTOP:5 hitStop:6 FXSTUDIO:8 frame:9 _fpsAcc:18 _fpsN:18 render:19 renderGame:59
 
 ## js/38-hud.js (415) — HUD
 rr:2 SLOTS:3 fmtTime:4
@@ -436,4 +436,7 @@ POT3:75 potMesh:76 syncPots:86 potFx:98
 §103 ภาพ: ป้ายตอนฆ่า / จอตอนตาย / อันดับ / มงกุฎค่าหัว
 FFAV:104 MULTI:105 MULTI_TH:105 STREAK:106 pName:107 ffaKf:108 kfSound:123 KINDN:124 drawFFA:125
 
-(55 files, 12998 lines)
+## js/55-podium.js (84) — โพเดียมธีมฮอกวอตส์ (ผู้ใช้ 2026-10-22 "podium but make it magician theme hogwart theme")
+POD:6 POD_X:7 POD_H:7 POD_C:7 podStart:8 podStop:29 podPose:37 renderPodium:49
+
+(56 files, 13083 lines)

@@ -22,6 +22,7 @@ function render(dt,now){
   cx.clearRect(0,0,SW,SH);
   animateWorld(now);
   if(!NET.isHost&&screen==='game')sbufAdvance(now);   // ลูกข่าย: เลือก snapshot ที่จะแสดงจากบัฟเฟอร์ (js/19)
+  if(POD.on&&screen==='game'){renderPodium(dt,now);return;}   // โพเดียมหลังจบเกม (js/55)
   const v=VIEW.cur;
   if(screen!=='game'||!v){
     if(PM3.size||EM3.size||JM3.size||WM3.size||MM3.size)clearDyn();
