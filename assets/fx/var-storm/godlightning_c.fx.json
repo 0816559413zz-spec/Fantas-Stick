@@ -1,0 +1,186 @@
+{
+ "v": 1,
+ "desc": "แบบ C (สมจริง): อัลติ ร่างเทพสายฟ้า (กรงเล็บ 3 จังหวะ) — ไฟ/ควัน/หมอกจริง เศษกระเด็น อากาศบิด รอยบนพื้นค้าง",
+ "tags": [
+  "storm",
+  "godlightning",
+  "variant"
+ ],
+ "pal": "storm",
+ "dur": 2.4,
+ "layers": [
+  {
+   "id": "bolt1",
+   "t": "bolt",
+   "loop": true,
+   "at": 0,
+   "life": 1,
+   "att": "chest",
+   "radial": [
+    0.6,
+    1.6
+   ],
+   "n": 2,
+   "w": 0.06,
+   "blife": 0.08,
+   "rate": 14,
+   "acc": true
+  },
+  {
+   "id": "emit2",
+   "t": "emit",
+   "at": 0,
+   "life": 1,
+   "loop": true,
+   "att": "feet",
+   "rate": 18,
+   "from": "disc",
+   "fr": 1.8,
+   "dir": "up",
+   "spread": 0.6,
+   "speed": [
+    0.4,
+    1
+   ],
+   "plife": [
+    1,
+    1.6
+   ],
+   "look": "smoke",
+   "size": [
+    6,
+    9
+   ],
+   "col": "#3a3c48",
+   "c2": "#3a3c48",
+   "gravity": -0.3,
+   "grow": 1,
+   "x": true
+  },
+  {
+   "id": "warp3",
+   "t": "warp",
+   "loop": true,
+   "at": 0,
+   "life": 1.5,
+   "att": "feet",
+   "pos": [
+    0,
+    1.2,
+    0
+   ],
+   "kind": "bulge",
+   "size": 2.4,
+   "str": 0.6,
+   "op": 0.8,
+   "col": "#9fdcff"
+  },
+  {
+   "id": "endpop",
+   "t": "flash",
+   "end": true,
+   "at": 0,
+   "life": 0.15,
+   "att": "chest",
+   "col": "$hi",
+   "size": 3
+  },
+  {
+   "id": "endburst",
+   "t": "emit",
+   "end": true,
+   "at": 0,
+   "life": 0.05,
+   "att": "chest",
+   "burst": 30,
+   "from": "sphere",
+   "fr": 1,
+   "dir": "out",
+   "speed": [
+    3,
+    7
+   ],
+   "plife": [
+    0.3,
+    0.6
+   ],
+   "look": "streak",
+   "size": [
+    2,
+    3
+   ],
+   "col": "$core",
+   "c2": "$deep",
+   "gravity": 2
+  },
+  {
+   "id": "claw0",
+   "t": "trail",
+   "at": 0.4,
+   "life": 0.1,
+   "sweep": true,
+   "a0": -60,
+   "a1": 60,
+   "r": 7,
+   "r0": 5.5,
+   "tilt": 20,
+   "col": "#ffffff",
+   "col2": "$main",
+   "tlife": 0.25,
+   "k": 2.2,
+   "w": 0.3,
+   "att": "feet",
+   "pos": [
+    0,
+    1.2,
+    0
+   ]
+  },
+  {
+   "id": "claw1",
+   "t": "trail",
+   "at": 0.75,
+   "life": 0.1,
+   "sweep": true,
+   "a0": 60,
+   "a1": -60,
+   "r": 7,
+   "r0": 5.5,
+   "tilt": 20,
+   "col": "#ffffff",
+   "col2": "$main",
+   "tlife": 0.25,
+   "k": 2.2,
+   "w": 0.3,
+   "att": "feet",
+   "pos": [
+    0,
+    1.2,
+    0
+   ]
+  },
+  {
+   "id": "claw2",
+   "t": "trail",
+   "at": 1.1,
+   "life": 0.1,
+   "sweep": true,
+   "a0": -60,
+   "a1": 60,
+   "r": 7,
+   "r0": 5.5,
+   "tilt": -35,
+   "col": "#ffffff",
+   "col2": "$main",
+   "tlife": 0.25,
+   "k": 2.2,
+   "w": 0.3,
+   "att": "feet",
+   "pos": [
+    0,
+    1.2,
+    0
+   ]
+  }
+ ]
+}

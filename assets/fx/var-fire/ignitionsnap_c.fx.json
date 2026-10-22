@@ -1,0 +1,459 @@
+{
+ "v": 1,
+ "desc": "แบบ C (สมจริง): Ignition Snap (ดีดนิ้ว ทุกคนที่ติดไฟระเบิด) — ไฟ/ควัน/หมอกจริง เศษกระเด็น อากาศบิด รอยบนพื้นค้าง",
+ "tags": [
+  "fire",
+  "ignitionsnap",
+  "variant"
+ ],
+ "pal": "fire",
+ "dur": 2.84,
+ "layers": [
+  {
+   "id": "flash1",
+   "t": "flash",
+   "at": 0,
+   "life": 0.1,
+   "col": "$core",
+   "size": 1.2,
+   "att": "wand"
+  },
+  {
+   "id": "snapw",
+   "t": "mesh",
+   "at": 0,
+   "life": 0.3,
+   "att": "chest",
+   "shape": "ring",
+   "inner": 0.9,
+   "mat": "glow",
+   "col": "$hi",
+   "pos": [
+    0,
+    0.3,
+    0.5
+   ],
+   "scale": {
+    "0": 0.2,
+    "1": 6,
+    "ease": "out"
+   },
+   "op": {
+    "0": 0.9,
+    "1": 0
+   }
+  },
+  {
+   "id": "flash2",
+   "t": "flash",
+   "at": 0.18,
+   "life": 0.1,
+   "col": "$core",
+   "size": 0.9,
+   "pos": [
+    -3,
+    0.6,
+    8
+   ]
+  },
+  {
+   "id": "warp3",
+   "t": "warp",
+   "at": 0.18,
+   "life": 0.45,
+   "att": "ground",
+   "pos": [
+    -3,
+    0.2,
+    8
+   ],
+   "kind": "shock",
+   "flat": true,
+   "size": {
+    "0": 0.5,
+    "1": 3.9600000000000004
+   },
+   "op": {
+    "0": 1,
+    "1": 0
+   },
+   "str": 1.2,
+   "col": "#ff7a3a"
+  },
+  {
+   "id": "deb4",
+   "t": "debris",
+   "at": 0.18,
+   "life": 1.4,
+   "att": "ground",
+   "pos": [
+    -3,
+    0.3,
+    8
+   ],
+   "kind": "rock",
+   "n": 9.6,
+   "speed": 5.880000000000001,
+   "r": 0.54
+  },
+  {
+   "id": "emit5",
+   "t": "emit",
+   "at": 0.22999999999999998,
+   "life": 0.1,
+   "burst": 11.6,
+   "from": "disc",
+   "fr": 0.9,
+   "dir": "up",
+   "spread": 1.2,
+   "speed": [
+    0.6,
+    1.8
+   ],
+   "plife": [
+    1.2,
+    2
+   ],
+   "look": "smoke",
+   "size": [
+    8,
+    14
+   ],
+   "col": "#2a2420",
+   "c2": "#2a2420",
+   "gravity": -0.4,
+   "grow": 1.2,
+   "drag": 2,
+   "x": true,
+   "pos": [
+    -3,
+    0.3,
+    8
+   ]
+  },
+  {
+   "id": "decal6",
+   "t": "decal",
+   "at": 0.18,
+   "life": 2.5,
+   "att": "ground",
+   "kind": "scorch",
+   "r": 1.62,
+   "pos": [
+    -3,
+    0,
+    8
+   ]
+  },
+  {
+   "id": "light7",
+   "t": "light",
+   "at": 0.18,
+   "life": 0.6,
+   "col": "$light",
+   "int": 1.8,
+   "dist": 13.2,
+   "pos": [
+    -3,
+    1.2,
+    8
+   ]
+  },
+  {
+   "id": "cam8",
+   "t": "screen",
+   "at": 0.18,
+   "life": 0.25,
+   "shake": 2.9,
+   "own": true
+  },
+  {
+   "id": "vol9",
+   "t": "firevol",
+   "at": 0.18,
+   "life": 1.6,
+   "att": "ground",
+   "pos": [
+    -3,
+    0,
+    8
+   ],
+   "kind": "pillar",
+   "hx": 0.81,
+   "hz": 0.81,
+   "h": 1.9800000000000002,
+   "int": 1.3,
+   "den": 1.3
+  },
+  {
+   "id": "flash10",
+   "t": "flash",
+   "at": 0.26,
+   "life": 0.1,
+   "col": "$core",
+   "size": 0.9,
+   "pos": [
+    2.5,
+    0.6,
+    11
+   ]
+  },
+  {
+   "id": "warp11",
+   "t": "warp",
+   "at": 0.26,
+   "life": 0.45,
+   "att": "ground",
+   "pos": [
+    2.5,
+    0.2,
+    11
+   ],
+   "kind": "shock",
+   "flat": true,
+   "size": {
+    "0": 0.5,
+    "1": 3.9600000000000004
+   },
+   "op": {
+    "0": 1,
+    "1": 0
+   },
+   "str": 1.2,
+   "col": "#ff7a3a"
+  },
+  {
+   "id": "deb12",
+   "t": "debris",
+   "at": 0.26,
+   "life": 1.4,
+   "att": "ground",
+   "pos": [
+    2.5,
+    0.3,
+    11
+   ],
+   "kind": "rock",
+   "n": 9.6,
+   "speed": 5.880000000000001,
+   "r": 0.54
+  },
+  {
+   "id": "emit13",
+   "t": "emit",
+   "at": 0.31,
+   "life": 0.1,
+   "burst": 11.6,
+   "from": "disc",
+   "fr": 0.9,
+   "dir": "up",
+   "spread": 1.2,
+   "speed": [
+    0.6,
+    1.8
+   ],
+   "plife": [
+    1.2,
+    2
+   ],
+   "look": "smoke",
+   "size": [
+    8,
+    14
+   ],
+   "col": "#2a2420",
+   "c2": "#2a2420",
+   "gravity": -0.4,
+   "grow": 1.2,
+   "drag": 2,
+   "x": true,
+   "pos": [
+    2.5,
+    0.3,
+    11
+   ]
+  },
+  {
+   "id": "decal14",
+   "t": "decal",
+   "at": 0.26,
+   "life": 2.5,
+   "att": "ground",
+   "kind": "scorch",
+   "r": 1.62,
+   "pos": [
+    2.5,
+    0,
+    11
+   ]
+  },
+  {
+   "id": "light15",
+   "t": "light",
+   "at": 0.26,
+   "life": 0.6,
+   "col": "$light",
+   "int": 1.8,
+   "dist": 13.2,
+   "pos": [
+    2.5,
+    1.2,
+    11
+   ]
+  },
+  {
+   "id": "cam16",
+   "t": "screen",
+   "at": 0.26,
+   "life": 0.25,
+   "shake": 2.9,
+   "own": true
+  },
+  {
+   "id": "vol17",
+   "t": "firevol",
+   "at": 0.26,
+   "life": 1.6,
+   "att": "ground",
+   "pos": [
+    2.5,
+    0,
+    11
+   ],
+   "kind": "pillar",
+   "hx": 0.81,
+   "hz": 0.81,
+   "h": 1.9800000000000002,
+   "int": 1.3,
+   "den": 1.3
+  },
+  {
+   "id": "flash18",
+   "t": "flash",
+   "at": 0.34,
+   "life": 0.1,
+   "col": "$core",
+   "size": 0.9,
+   "pos": [
+    0,
+    0.6,
+    14
+   ]
+  },
+  {
+   "id": "warp19",
+   "t": "warp",
+   "at": 0.34,
+   "life": 0.45,
+   "att": "ground",
+   "pos": [
+    0,
+    0.2,
+    14
+   ],
+   "kind": "shock",
+   "flat": true,
+   "size": {
+    "0": 0.5,
+    "1": 3.9600000000000004
+   },
+   "op": {
+    "0": 1,
+    "1": 0
+   },
+   "str": 1.2,
+   "col": "#ff7a3a"
+  },
+  {
+   "id": "deb20",
+   "t": "debris",
+   "at": 0.34,
+   "life": 1.4,
+   "att": "ground",
+   "pos": [
+    0,
+    0.3,
+    14
+   ],
+   "kind": "rock",
+   "n": 9.6,
+   "speed": 5.880000000000001,
+   "r": 0.54
+  },
+  {
+   "id": "emit21",
+   "t": "emit",
+   "at": 0.39,
+   "life": 0.1,
+   "burst": 11.6,
+   "from": "disc",
+   "fr": 0.9,
+   "dir": "up",
+   "spread": 1.2,
+   "speed": [
+    0.6,
+    1.8
+   ],
+   "plife": [
+    1.2,
+    2
+   ],
+   "look": "smoke",
+   "size": [
+    8,
+    14
+   ],
+   "col": "#2a2420",
+   "c2": "#2a2420",
+   "gravity": -0.4,
+   "grow": 1.2,
+   "drag": 2,
+   "x": true,
+   "pos": [
+    0,
+    0.3,
+    14
+   ]
+  },
+  {
+   "id": "decal22",
+   "t": "decal",
+   "at": 0.34,
+   "life": 2.5,
+   "att": "ground",
+   "kind": "scorch",
+   "r": 1.62,
+   "pos": [
+    0,
+    0,
+    14
+   ]
+  },
+  {
+   "id": "cam24",
+   "t": "screen",
+   "at": 0.34,
+   "life": 0.25,
+   "shake": 2.9,
+   "own": true
+  },
+  {
+   "id": "vol25",
+   "t": "firevol",
+   "at": 0.34,
+   "life": 1.6,
+   "att": "ground",
+   "pos": [
+    0,
+    0,
+    14
+   ],
+   "kind": "pillar",
+   "hx": 0.81,
+   "hz": 0.81,
+   "h": 1.9800000000000002,
+   "int": 1.3,
+   "den": 1.3
+  }
+ ]
+}

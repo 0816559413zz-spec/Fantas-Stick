@@ -1,0 +1,171 @@
+{
+ "v": 1,
+ "desc": "แบบ C (สมจริง): Dash ทะลุศัตรู (วาร์ป) — ไฟ/ควัน/หมอกจริง เศษกระเด็น อากาศบิด รอยบนพื้นค้าง",
+ "tags": [
+  "storm",
+  "dash",
+  "variant"
+ ],
+ "pal": "storm",
+ "dur": 2.05,
+ "layers": [
+  {
+   "id": "flash1",
+   "t": "flash",
+   "at": 0,
+   "life": 0.1,
+   "col": "$core",
+   "size": 2.4,
+   "att": "feet",
+   "pos": [
+    0,
+    1,
+    0
+   ]
+  },
+  {
+   "id": "runner",
+   "t": "mesh",
+   "at": 0,
+   "life": 0.25,
+   "att": "feet",
+   "shape": "sphere",
+   "mat": "glow",
+   "col": "$hi",
+   "pos": {
+    "0": [
+     0,
+     1,
+     0
+    ],
+    "1": [
+     0,
+     1,
+     10
+    ]
+   },
+   "scale": 0.35,
+   "fade": 0
+  },
+  {
+   "id": "tr2",
+   "t": "trail",
+   "at": 0,
+   "life": 0.25,
+   "of": "runner",
+   "col": "$hi",
+   "col2": "$deep",
+   "w": 0.9,
+   "tlife": 0.4,
+   "k": 1.4
+  },
+  {
+   "id": "emit3",
+   "t": "emit",
+   "at": 0,
+   "life": 0.25,
+   "rate": 70,
+   "from": "mesh",
+   "of": "runner",
+   "dir": "up",
+   "speed": [
+    0.3,
+    1
+   ],
+   "plife": [
+    0.8,
+    1.4
+   ],
+   "look": "smoke",
+   "size": [
+    5,
+    8
+   ],
+   "col": "#3a3c48",
+   "c2": "#3a3c48",
+   "gravity": -0.3,
+   "grow": 1,
+   "att": "feet",
+   "x": true
+  },
+  {
+   "id": "decal4",
+   "t": "decal",
+   "at": 0,
+   "life": 1.8,
+   "att": "feet",
+   "kind": "dark",
+   "r": 1.2,
+   "pos": [
+    0,
+    0,
+    1.25
+   ]
+  },
+  {
+   "id": "decal5",
+   "t": "decal",
+   "at": 0.0625,
+   "life": 1.8,
+   "att": "feet",
+   "kind": "dark",
+   "r": 1.2,
+   "pos": [
+    0,
+    0,
+    3.75
+   ]
+  },
+  {
+   "id": "decal6",
+   "t": "decal",
+   "at": 0.125,
+   "life": 1.8,
+   "att": "feet",
+   "kind": "dark",
+   "r": 1.2,
+   "pos": [
+    0,
+    0,
+    6.25
+   ]
+  },
+  {
+   "id": "decal7",
+   "t": "decal",
+   "at": 0.1875,
+   "life": 1.8,
+   "att": "feet",
+   "kind": "dark",
+   "r": 1.2,
+   "pos": [
+    0,
+    0,
+    8.75
+   ]
+  },
+  {
+   "id": "bolt8",
+   "t": "bolt",
+   "at": 0,
+   "life": 0.25,
+   "att": "feet",
+   "pos": [
+    0,
+    0.6,
+    0
+   ],
+   "to": [
+    0,
+    0,
+    10
+   ],
+   "jit": 0.8,
+   "n": 2,
+   "w": 0.1,
+   "blife": 0.1,
+   "rate": 30,
+   "acc": true
+  }
+ ]
+}

@@ -1,0 +1,130 @@
+{
+ "v": 1,
+ "desc": "แบบ C (สมจริง): Kindle (ไฟลุกที่ปลายไม้ ยิงลูกไฟใหญ่ได้ทันที) — ไฟ/ควัน/หมอกจริง เศษกระเด็น อากาศบิด รอยบนพื้นค้าง",
+ "tags": [
+  "fire",
+  "kindle",
+  "variant"
+ ],
+ "pal": "fire",
+ "dur": 3,
+ "layers": [
+  {
+   "id": "flash1",
+   "t": "flash",
+   "at": 0,
+   "life": 0.1,
+   "col": "$core",
+   "size": 2,
+   "att": "wand"
+  },
+  {
+   "id": "vol2",
+   "t": "firevol",
+   "loop": true,
+   "at": 0,
+   "life": 2,
+   "att": "feet",
+   "kind": "shell",
+   "hx": 0.7,
+   "hz": 0.7,
+   "h": 2.4,
+   "int": 1,
+   "hgt": {
+    "0": 1,
+    "1": 1
+   },
+   "dis": {
+    "0": 0,
+    "1": 0
+   }
+  },
+  {
+   "id": "emit3",
+   "t": "emit",
+   "at": 0,
+   "life": 1,
+   "loop": true,
+   "att": "wand",
+   "rate": 18,
+   "from": "disc",
+   "fr": 0.3,
+   "dir": "up",
+   "spread": 0.6,
+   "speed": [
+    0.4,
+    1
+   ],
+   "plife": [
+    1,
+    1.6
+   ],
+   "look": "smoke",
+   "size": [
+    6,
+    9
+   ],
+   "col": "#2a2420",
+   "c2": "#2a2420",
+   "gravity": -0.3,
+   "grow": 1,
+   "x": true
+  },
+  {
+   "id": "warp4",
+   "t": "warp",
+   "loop": true,
+   "at": 0,
+   "life": 1.5,
+   "att": "feet",
+   "pos": [
+    0,
+    1.2,
+    0
+   ],
+   "kind": "haze",
+   "size": 2.4,
+   "str": 0.6,
+   "op": 0.8,
+   "col": "#ff7a3a"
+  },
+  {
+   "id": "endpop",
+   "t": "flash",
+   "end": true,
+   "at": 0,
+   "life": 0.15,
+   "att": "chest",
+   "col": "$hi",
+   "size": 3
+  },
+  {
+   "id": "endburst",
+   "t": "emit",
+   "end": true,
+   "at": 0,
+   "life": 0.05,
+   "att": "chest",
+   "burst": 30,
+   "from": "sphere",
+   "fr": 1,
+   "dir": "out",
+   "speed": [
+    3,
+    7
+   ],
+   "plife": [
+    0.3,
+    0.6
+   ],
+   "look": "ember",
+   "size": [
+    2,
+    3
+   ],
+   "col": "$core",
+   "c2": "$deep",
+   "gravity": 2
+  }
+ ]
+}

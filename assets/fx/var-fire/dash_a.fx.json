@@ -1,0 +1,120 @@
+{
+ "v": 1,
+ "desc": "แบบ A (พรีเมียม): พุ่งชาร์จ (Dash) — พลังงานเรียบหรู แกนสว่าง + ขอบเรือง + วงกระแทก + ประกายตามธาตุ",
+ "tags": [
+  "fire",
+  "dash",
+  "variant"
+ ],
+ "pal": "fire",
+ "dur": 2.05,
+ "layers": [
+  {
+   "id": "flash1",
+   "t": "flash",
+   "at": 0,
+   "life": 0.1,
+   "col": "$core",
+   "size": 2.4,
+   "att": "feet",
+   "pos": [
+    0,
+    1,
+    0
+   ]
+  },
+  {
+   "id": "runner",
+   "t": "mesh",
+   "at": 0,
+   "life": 0.25,
+   "att": "feet",
+   "shape": "sphere",
+   "mat": "glow",
+   "col": "$hi",
+   "pos": {
+    "0": [
+     0,
+     1,
+     0
+    ],
+    "1": [
+     0,
+     1,
+     9
+    ]
+   },
+   "scale": 0.35,
+   "fade": 0
+  },
+  {
+   "id": "tr2",
+   "t": "trail",
+   "at": 0,
+   "life": 0.25,
+   "of": "runner",
+   "col": "$hi",
+   "col2": "$deep",
+   "w": 0.9,
+   "tlife": 0.4,
+   "k": 1.4
+  },
+  {
+   "id": "emit3",
+   "t": "emit",
+   "at": 0,
+   "life": 0.25,
+   "rate": 160,
+   "from": "mesh",
+   "of": "runner",
+   "dir": "random",
+   "speed": [
+    0.5,
+    1.5
+   ],
+   "plife": [
+    0.4,
+    0.7
+   ],
+   "look": "ember",
+   "size": [
+    1.6,
+    2.4
+   ],
+   "col": "$hi",
+   "c2": "$deep",
+   "gravity": -1,
+   "att": "feet"
+  },
+  {
+   "id": "ring4",
+   "t": "ring",
+   "at": 0,
+   "life": 0.45,
+   "att": "ground",
+   "pos": [
+    0,
+    0.1,
+    0
+   ],
+   "col": "$main",
+   "r": 2.5,
+   "op": 0.5
+  },
+  {
+   "id": "ring5",
+   "t": "ring",
+   "at": 0.25,
+   "life": 0.45,
+   "att": "ground",
+   "pos": [
+    0,
+    0.1,
+    9
+   ],
+   "col": "$main",
+   "r": 2.5,
+   "op": 0.5
+  }
+ ]
+}

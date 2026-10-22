@@ -1,0 +1,965 @@
+{
+ "v": 1,
+ "desc": "แบบ C (สมจริง): สายฟ้าสามเหลี่ยม (ยิงปกติแรง) — ไฟ/ควัน/หมอกจริง เศษกระเด็น อากาศบิด รอยบนพื้นค้าง",
+ "tags": [
+  "storm",
+  "tri",
+  "variant"
+ ],
+ "pal": "storm",
+ "dur": 2.72,
+ "layers": [
+  {
+   "id": "bolt1",
+   "t": "bolt",
+   "at": 0.1,
+   "life": 0.25,
+   "att": "ground",
+   "pos": [
+    0,
+    16,
+    4
+   ],
+   "to": [
+    0,
+    -16,
+    0
+   ],
+   "jit": 0.5,
+   "n": 4,
+   "w": 0.28,
+   "br": 1,
+   "blife": 0.16,
+   "rate": 16
+  },
+  {
+   "id": "flash2",
+   "t": "flash",
+   "at": 0.1,
+   "life": 0.1,
+   "col": "$core",
+   "size": 0.7,
+   "pos": [
+    0,
+    0.6,
+    4
+   ]
+  },
+  {
+   "id": "warp3",
+   "t": "warp",
+   "at": 0.1,
+   "life": 0.45,
+   "att": "ground",
+   "pos": [
+    0,
+    0.2,
+    4
+   ],
+   "kind": "shock",
+   "flat": true,
+   "size": {
+    "0": 0.5,
+    "1": 3.08
+   },
+   "op": {
+    "0": 1,
+    "1": 0
+   },
+   "str": 1.2,
+   "col": "#ffe27a"
+  },
+  {
+   "id": "deb4",
+   "t": "debris",
+   "at": 0.1,
+   "life": 1.4,
+   "att": "ground",
+   "pos": [
+    0,
+    0.3,
+    4
+   ],
+   "kind": "rock",
+   "n": 8.8,
+   "speed": 5.24,
+   "r": 0.42
+  },
+  {
+   "id": "emit5",
+   "t": "emit",
+   "at": 0.15000000000000002,
+   "life": 0.1,
+   "burst": 10.8,
+   "from": "disc",
+   "fr": 0.7,
+   "dir": "up",
+   "spread": 1.2,
+   "speed": [
+    0.6,
+    1.8
+   ],
+   "plife": [
+    1.2,
+    2
+   ],
+   "look": "smoke",
+   "size": [
+    8,
+    14
+   ],
+   "col": "#3a3c48",
+   "c2": "#3a3c48",
+   "gravity": -0.4,
+   "grow": 1.2,
+   "drag": 2,
+   "x": true,
+   "pos": [
+    0,
+    0.3,
+    4
+   ]
+  },
+  {
+   "id": "decal6",
+   "t": "decal",
+   "at": 0.1,
+   "life": 2.5,
+   "att": "ground",
+   "kind": "dark",
+   "r": 1.26,
+   "pos": [
+    0,
+    0,
+    4
+   ]
+  },
+  {
+   "id": "light7",
+   "t": "light",
+   "at": 0.1,
+   "life": 0.6,
+   "col": "$light",
+   "int": 1.8,
+   "dist": 11.6,
+   "pos": [
+    0,
+    1.2,
+    4
+   ]
+  },
+  {
+   "id": "cam8",
+   "t": "screen",
+   "at": 0.1,
+   "life": 0.25,
+   "shake": 2.7,
+   "own": true
+  },
+  {
+   "id": "bolt9",
+   "t": "bolt",
+   "at": 0.1,
+   "life": 0.5,
+   "pos": [
+    0,
+    0.2,
+    4
+   ],
+   "radial": [
+    0.5599999999999999,
+    1.54
+   ],
+   "n": 6,
+   "w": 0.08,
+   "br": 1,
+   "blife": 0.1,
+   "rate": 18,
+   "acc": true
+  },
+  {
+   "id": "bolt10",
+   "t": "bolt",
+   "at": 0.16,
+   "life": 0.25,
+   "att": "ground",
+   "pos": [
+    -1.5,
+    16,
+    8
+   ],
+   "to": [
+    0,
+    -16,
+    0
+   ],
+   "jit": 0.5,
+   "n": 4,
+   "w": 0.28,
+   "br": 1,
+   "blife": 0.16,
+   "rate": 16
+  },
+  {
+   "id": "flash11",
+   "t": "flash",
+   "at": 0.16,
+   "life": 0.1,
+   "col": "$core",
+   "size": 0.7,
+   "pos": [
+    -1.5,
+    0.6,
+    8
+   ]
+  },
+  {
+   "id": "warp12",
+   "t": "warp",
+   "at": 0.16,
+   "life": 0.45,
+   "att": "ground",
+   "pos": [
+    -1.5,
+    0.2,
+    8
+   ],
+   "kind": "shock",
+   "flat": true,
+   "size": {
+    "0": 0.5,
+    "1": 3.08
+   },
+   "op": {
+    "0": 1,
+    "1": 0
+   },
+   "str": 1.2,
+   "col": "#ffe27a"
+  },
+  {
+   "id": "deb13",
+   "t": "debris",
+   "at": 0.16,
+   "life": 1.4,
+   "att": "ground",
+   "pos": [
+    -1.5,
+    0.3,
+    8
+   ],
+   "kind": "rock",
+   "n": 8.8,
+   "speed": 5.24,
+   "r": 0.42
+  },
+  {
+   "id": "emit14",
+   "t": "emit",
+   "at": 0.21000000000000002,
+   "life": 0.1,
+   "burst": 10.8,
+   "from": "disc",
+   "fr": 0.7,
+   "dir": "up",
+   "spread": 1.2,
+   "speed": [
+    0.6,
+    1.8
+   ],
+   "plife": [
+    1.2,
+    2
+   ],
+   "look": "smoke",
+   "size": [
+    8,
+    14
+   ],
+   "col": "#3a3c48",
+   "c2": "#3a3c48",
+   "gravity": -0.4,
+   "grow": 1.2,
+   "drag": 2,
+   "x": true,
+   "pos": [
+    -1.5,
+    0.3,
+    8
+   ]
+  },
+  {
+   "id": "decal15",
+   "t": "decal",
+   "at": 0.16,
+   "life": 2.5,
+   "att": "ground",
+   "kind": "dark",
+   "r": 1.26,
+   "pos": [
+    -1.5,
+    0,
+    8
+   ]
+  },
+  {
+   "id": "light16",
+   "t": "light",
+   "at": 0.16,
+   "life": 0.6,
+   "col": "$light",
+   "int": 1.8,
+   "dist": 11.6,
+   "pos": [
+    -1.5,
+    1.2,
+    8
+   ]
+  },
+  {
+   "id": "cam17",
+   "t": "screen",
+   "at": 0.16,
+   "life": 0.25,
+   "shake": 2.7,
+   "own": true
+  },
+  {
+   "id": "bolt18",
+   "t": "bolt",
+   "at": 0.16,
+   "life": 0.5,
+   "pos": [
+    -1.5,
+    0.2,
+    8
+   ],
+   "radial": [
+    0.5599999999999999,
+    1.54
+   ],
+   "n": 6,
+   "w": 0.08,
+   "br": 1,
+   "blife": 0.1,
+   "rate": 18,
+   "acc": true
+  },
+  {
+   "id": "bolt19",
+   "t": "bolt",
+   "at": 0.16,
+   "life": 0.25,
+   "att": "ground",
+   "pos": [
+    1.5,
+    16,
+    8
+   ],
+   "to": [
+    0,
+    -16,
+    0
+   ],
+   "jit": 0.5,
+   "n": 4,
+   "w": 0.28,
+   "br": 1,
+   "blife": 0.16,
+   "rate": 16
+  },
+  {
+   "id": "flash20",
+   "t": "flash",
+   "at": 0.16,
+   "life": 0.1,
+   "col": "$core",
+   "size": 0.7,
+   "pos": [
+    1.5,
+    0.6,
+    8
+   ]
+  },
+  {
+   "id": "warp21",
+   "t": "warp",
+   "at": 0.16,
+   "life": 0.45,
+   "att": "ground",
+   "pos": [
+    1.5,
+    0.2,
+    8
+   ],
+   "kind": "shock",
+   "flat": true,
+   "size": {
+    "0": 0.5,
+    "1": 3.08
+   },
+   "op": {
+    "0": 1,
+    "1": 0
+   },
+   "str": 1.2,
+   "col": "#ffe27a"
+  },
+  {
+   "id": "deb22",
+   "t": "debris",
+   "at": 0.16,
+   "life": 1.4,
+   "att": "ground",
+   "pos": [
+    1.5,
+    0.3,
+    8
+   ],
+   "kind": "rock",
+   "n": 8.8,
+   "speed": 5.24,
+   "r": 0.42
+  },
+  {
+   "id": "emit23",
+   "t": "emit",
+   "at": 0.21000000000000002,
+   "life": 0.1,
+   "burst": 10.8,
+   "from": "disc",
+   "fr": 0.7,
+   "dir": "up",
+   "spread": 1.2,
+   "speed": [
+    0.6,
+    1.8
+   ],
+   "plife": [
+    1.2,
+    2
+   ],
+   "look": "smoke",
+   "size": [
+    8,
+    14
+   ],
+   "col": "#3a3c48",
+   "c2": "#3a3c48",
+   "gravity": -0.4,
+   "grow": 1.2,
+   "drag": 2,
+   "x": true,
+   "pos": [
+    1.5,
+    0.3,
+    8
+   ]
+  },
+  {
+   "id": "decal24",
+   "t": "decal",
+   "at": 0.16,
+   "life": 2.5,
+   "att": "ground",
+   "kind": "dark",
+   "r": 1.26,
+   "pos": [
+    1.5,
+    0,
+    8
+   ]
+  },
+  {
+   "id": "cam26",
+   "t": "screen",
+   "at": 0.16,
+   "life": 0.25,
+   "shake": 2.7,
+   "own": true
+  },
+  {
+   "id": "bolt27",
+   "t": "bolt",
+   "at": 0.16,
+   "life": 0.5,
+   "pos": [
+    1.5,
+    0.2,
+    8
+   ],
+   "radial": [
+    0.5599999999999999,
+    1.54
+   ],
+   "n": 6,
+   "w": 0.08,
+   "br": 1,
+   "blife": 0.1,
+   "rate": 18,
+   "acc": true
+  },
+  {
+   "id": "bolt28",
+   "t": "bolt",
+   "at": 0.22,
+   "life": 0.25,
+   "att": "ground",
+   "pos": [
+    -3,
+    16,
+    12
+   ],
+   "to": [
+    0,
+    -16,
+    0
+   ],
+   "jit": 0.5,
+   "n": 4,
+   "w": 0.28,
+   "br": 1,
+   "blife": 0.16,
+   "rate": 16
+  },
+  {
+   "id": "flash29",
+   "t": "flash",
+   "at": 0.22,
+   "life": 0.1,
+   "col": "$core",
+   "size": 0.7,
+   "pos": [
+    -3,
+    0.6,
+    12
+   ]
+  },
+  {
+   "id": "warp30",
+   "t": "warp",
+   "at": 0.22,
+   "life": 0.45,
+   "att": "ground",
+   "pos": [
+    -3,
+    0.2,
+    12
+   ],
+   "kind": "shock",
+   "flat": true,
+   "size": {
+    "0": 0.5,
+    "1": 3.08
+   },
+   "op": {
+    "0": 1,
+    "1": 0
+   },
+   "str": 1.2,
+   "col": "#ffe27a"
+  },
+  {
+   "id": "deb31",
+   "t": "debris",
+   "at": 0.22,
+   "life": 1.4,
+   "att": "ground",
+   "pos": [
+    -3,
+    0.3,
+    12
+   ],
+   "kind": "rock",
+   "n": 8.8,
+   "speed": 5.24,
+   "r": 0.42
+  },
+  {
+   "id": "emit32",
+   "t": "emit",
+   "at": 0.27,
+   "life": 0.1,
+   "burst": 10.8,
+   "from": "disc",
+   "fr": 0.7,
+   "dir": "up",
+   "spread": 1.2,
+   "speed": [
+    0.6,
+    1.8
+   ],
+   "plife": [
+    1.2,
+    2
+   ],
+   "look": "smoke",
+   "size": [
+    8,
+    14
+   ],
+   "col": "#3a3c48",
+   "c2": "#3a3c48",
+   "gravity": -0.4,
+   "grow": 1.2,
+   "drag": 2,
+   "x": true,
+   "pos": [
+    -3,
+    0.3,
+    12
+   ]
+  },
+  {
+   "id": "decal33",
+   "t": "decal",
+   "at": 0.22,
+   "life": 2.5,
+   "att": "ground",
+   "kind": "dark",
+   "r": 1.26,
+   "pos": [
+    -3,
+    0,
+    12
+   ]
+  },
+  {
+   "id": "cam35",
+   "t": "screen",
+   "at": 0.22,
+   "life": 0.25,
+   "shake": 2.7,
+   "own": true
+  },
+  {
+   "id": "bolt36",
+   "t": "bolt",
+   "at": 0.22,
+   "life": 0.5,
+   "pos": [
+    -3,
+    0.2,
+    12
+   ],
+   "radial": [
+    0.5599999999999999,
+    1.54
+   ],
+   "n": 6,
+   "w": 0.08,
+   "br": 1,
+   "blife": 0.1,
+   "rate": 18,
+   "acc": true
+  },
+  {
+   "id": "bolt37",
+   "t": "bolt",
+   "at": 0.22,
+   "life": 0.25,
+   "att": "ground",
+   "pos": [
+    0,
+    16,
+    12
+   ],
+   "to": [
+    0,
+    -16,
+    0
+   ],
+   "jit": 0.5,
+   "n": 4,
+   "w": 0.28,
+   "br": 1,
+   "blife": 0.16,
+   "rate": 16
+  },
+  {
+   "id": "flash38",
+   "t": "flash",
+   "at": 0.22,
+   "life": 0.1,
+   "col": "$core",
+   "size": 0.7,
+   "pos": [
+    0,
+    0.6,
+    12
+   ]
+  },
+  {
+   "id": "warp39",
+   "t": "warp",
+   "at": 0.22,
+   "life": 0.45,
+   "att": "ground",
+   "pos": [
+    0,
+    0.2,
+    12
+   ],
+   "kind": "shock",
+   "flat": true,
+   "size": {
+    "0": 0.5,
+    "1": 3.08
+   },
+   "op": {
+    "0": 1,
+    "1": 0
+   },
+   "str": 1.2,
+   "col": "#ffe27a"
+  },
+  {
+   "id": "deb40",
+   "t": "debris",
+   "at": 0.22,
+   "life": 1.4,
+   "att": "ground",
+   "pos": [
+    0,
+    0.3,
+    12
+   ],
+   "kind": "rock",
+   "n": 8.8,
+   "speed": 5.24,
+   "r": 0.42
+  },
+  {
+   "id": "emit41",
+   "t": "emit",
+   "at": 0.27,
+   "life": 0.1,
+   "burst": 10.8,
+   "from": "disc",
+   "fr": 0.7,
+   "dir": "up",
+   "spread": 1.2,
+   "speed": [
+    0.6,
+    1.8
+   ],
+   "plife": [
+    1.2,
+    2
+   ],
+   "look": "smoke",
+   "size": [
+    8,
+    14
+   ],
+   "col": "#3a3c48",
+   "c2": "#3a3c48",
+   "gravity": -0.4,
+   "grow": 1.2,
+   "drag": 2,
+   "x": true,
+   "pos": [
+    0,
+    0.3,
+    12
+   ]
+  },
+  {
+   "id": "decal42",
+   "t": "decal",
+   "at": 0.22,
+   "life": 2.5,
+   "att": "ground",
+   "kind": "dark",
+   "r": 1.26,
+   "pos": [
+    0,
+    0,
+    12
+   ]
+  },
+  {
+   "id": "cam44",
+   "t": "screen",
+   "at": 0.22,
+   "life": 0.25,
+   "shake": 2.7,
+   "own": true
+  },
+  {
+   "id": "bolt45",
+   "t": "bolt",
+   "at": 0.22,
+   "life": 0.5,
+   "pos": [
+    0,
+    0.2,
+    12
+   ],
+   "radial": [
+    0.5599999999999999,
+    1.54
+   ],
+   "n": 6,
+   "w": 0.08,
+   "br": 1,
+   "blife": 0.1,
+   "rate": 18,
+   "acc": true
+  },
+  {
+   "id": "bolt46",
+   "t": "bolt",
+   "at": 0.22,
+   "life": 0.25,
+   "att": "ground",
+   "pos": [
+    3,
+    16,
+    12
+   ],
+   "to": [
+    0,
+    -16,
+    0
+   ],
+   "jit": 0.5,
+   "n": 4,
+   "w": 0.28,
+   "br": 1,
+   "blife": 0.16,
+   "rate": 16
+  },
+  {
+   "id": "flash47",
+   "t": "flash",
+   "at": 0.22,
+   "life": 0.1,
+   "col": "$core",
+   "size": 0.7,
+   "pos": [
+    3,
+    0.6,
+    12
+   ]
+  },
+  {
+   "id": "warp48",
+   "t": "warp",
+   "at": 0.22,
+   "life": 0.45,
+   "att": "ground",
+   "pos": [
+    3,
+    0.2,
+    12
+   ],
+   "kind": "shock",
+   "flat": true,
+   "size": {
+    "0": 0.5,
+    "1": 3.08
+   },
+   "op": {
+    "0": 1,
+    "1": 0
+   },
+   "str": 1.2,
+   "col": "#ffe27a"
+  },
+  {
+   "id": "deb49",
+   "t": "debris",
+   "at": 0.22,
+   "life": 1.4,
+   "att": "ground",
+   "pos": [
+    3,
+    0.3,
+    12
+   ],
+   "kind": "rock",
+   "n": 8.8,
+   "speed": 5.24,
+   "r": 0.42
+  },
+  {
+   "id": "emit50",
+   "t": "emit",
+   "at": 0.27,
+   "life": 0.1,
+   "burst": 10.8,
+   "from": "disc",
+   "fr": 0.7,
+   "dir": "up",
+   "spread": 1.2,
+   "speed": [
+    0.6,
+    1.8
+   ],
+   "plife": [
+    1.2,
+    2
+   ],
+   "look": "smoke",
+   "size": [
+    8,
+    14
+   ],
+   "col": "#3a3c48",
+   "c2": "#3a3c48",
+   "gravity": -0.4,
+   "grow": 1.2,
+   "drag": 2,
+   "x": true,
+   "pos": [
+    3,
+    0.3,
+    12
+   ]
+  },
+  {
+   "id": "decal51",
+   "t": "decal",
+   "at": 0.22,
+   "life": 2.5,
+   "att": "ground",
+   "kind": "dark",
+   "r": 1.26,
+   "pos": [
+    3,
+    0,
+    12
+   ]
+  },
+  {
+   "id": "cam53",
+   "t": "screen",
+   "at": 0.22,
+   "life": 0.25,
+   "shake": 2.7,
+   "own": true
+  },
+  {
+   "id": "bolt54",
+   "t": "bolt",
+   "at": 0.22,
+   "life": 0.5,
+   "pos": [
+    3,
+    0.2,
+    12
+   ],
+   "radial": [
+    0.5599999999999999,
+    1.54
+   ],
+   "n": 6,
+   "w": 0.08,
+   "br": 1,
+   "blife": 0.1,
+   "rate": 18,
+   "acc": true
+  }
+ ]
+}

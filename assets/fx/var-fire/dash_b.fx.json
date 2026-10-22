@@ -1,0 +1,143 @@
+{
+ "v": 1,
+ "desc": "แบบ B (อนิเมะ): พุ่งชาร์จ (Dash) — แฟลชคม เส้นความเร็ว วงช็อกขาว 2 ชั้น หนามแหลม จอกระตุก",
+ "tags": [
+  "fire",
+  "dash",
+  "variant"
+ ],
+ "pal": "fire",
+ "dur": 2.05,
+ "layers": [
+  {
+   "id": "flash1",
+   "t": "flash",
+   "at": 0,
+   "life": 0.1,
+   "col": "$core",
+   "size": 2.4,
+   "att": "feet",
+   "pos": [
+    0,
+    1,
+    0
+   ]
+  },
+  {
+   "id": "runner",
+   "t": "mesh",
+   "at": 0,
+   "life": 0.25,
+   "att": "feet",
+   "shape": "sphere",
+   "mat": "glow",
+   "col": "$hi",
+   "pos": {
+    "0": [
+     0,
+     1,
+     0
+    ],
+    "1": [
+     0,
+     1,
+     9
+    ]
+   },
+   "scale": 0.35,
+   "fade": 0
+  },
+  {
+   "id": "tr2",
+   "t": "trail",
+   "at": 0,
+   "life": 0.25,
+   "of": "runner",
+   "col": "#ffffff",
+   "col2": "$deep",
+   "w": 1.6,
+   "tlife": 0.18,
+   "k": 2
+  },
+  {
+   "id": "emit3",
+   "t": "emit",
+   "at": 0,
+   "life": 0.25,
+   "rate": 200,
+   "from": "mesh",
+   "of": "runner",
+   "dir": "flat",
+   "speed": [
+    0.2,
+    0.6
+   ],
+   "plife": [
+    0.2,
+    0.3
+   ],
+   "look": "streak",
+   "size": [
+    3,
+    4.5
+   ],
+   "col": "#ffffff",
+   "c2": "$main",
+   "gravity": 0,
+   "att": "feet"
+  },
+  {
+   "id": "mesh4",
+   "t": "mesh",
+   "at": 0.25,
+   "life": 0.2,
+   "att": "feet",
+   "shape": "ring",
+   "inner": 0.88,
+   "mat": "glow",
+   "col": "#ffffff",
+   "pos": [
+    0,
+    1,
+    9
+   ],
+   "rot": [
+    90,
+    0,
+    0
+   ],
+   "scale": {
+    "0": 0.3,
+    "1": 4,
+    "ease": "out"
+   },
+   "op": {
+    "0": 1,
+    "1": 0
+   }
+  },
+  {
+   "id": "flash5",
+   "t": "flash",
+   "at": 0.25,
+   "life": 0.1,
+   "col": "$core",
+   "size": 3,
+   "att": "feet",
+   "pos": [
+    0,
+    1,
+    9
+   ]
+  },
+  {
+   "id": "cam6",
+   "t": "screen",
+   "at": 0,
+   "life": 0.25,
+   "shake": 2,
+   "own": true,
+   "kick": 0.3
+  }
+ ]
+}

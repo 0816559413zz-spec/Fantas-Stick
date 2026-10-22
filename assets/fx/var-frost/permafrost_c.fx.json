@@ -1,0 +1,224 @@
+{
+ "v": 1,
+ "desc": "แบบ C (สมจริง): Permafrost (พื้นน้ำแข็งวงใหญ่ r 15 ม.) — ไฟ/ควัน/หมอกจริง เศษกระเด็น อากาศบิด รอยบนพื้นค้าง",
+ "tags": [
+  "frost",
+  "permafrost",
+  "variant"
+ ],
+ "pal": "ice",
+ "dur": 3,
+ "layers": [
+  {
+   "id": "flash1",
+   "t": "flash",
+   "at": 0,
+   "life": 0.1,
+   "col": "$core",
+   "size": 2,
+   "pos": [
+    0,
+    0.6,
+    0
+   ]
+  },
+  {
+   "id": "warp2",
+   "t": "warp",
+   "at": 0,
+   "life": 0.45,
+   "att": "ground",
+   "pos": [
+    0,
+    0.2,
+    0
+   ],
+   "kind": "shock",
+   "flat": true,
+   "size": {
+    "0": 0.5,
+    "1": 8.8
+   },
+   "op": {
+    "0": 1,
+    "1": 0
+   },
+   "str": 1.2,
+   "col": "#9fdcff"
+  },
+  {
+   "id": "deb3",
+   "t": "debris",
+   "at": 0,
+   "life": 1.4,
+   "att": "ground",
+   "pos": [
+    0,
+    0.3,
+    0
+   ],
+   "kind": "ice",
+   "n": 14,
+   "speed": 9.4,
+   "r": 1.2
+  },
+  {
+   "id": "emit4",
+   "t": "emit",
+   "at": 0.05,
+   "life": 0.1,
+   "burst": 16,
+   "from": "disc",
+   "fr": 2,
+   "dir": "up",
+   "spread": 1.2,
+   "speed": [
+    0.6,
+    1.8
+   ],
+   "plife": [
+    1.2,
+    2
+   ],
+   "look": "smoke",
+   "size": [
+    8,
+    14
+   ],
+   "col": "#dfeaf2",
+   "c2": "#dfeaf2",
+   "gravity": -0.4,
+   "grow": 1.2,
+   "drag": 2,
+   "x": true,
+   "pos": [
+    0,
+    0.3,
+    0
+   ]
+  },
+  {
+   "id": "decal5",
+   "t": "decal",
+   "at": 0,
+   "life": 2.5,
+   "att": "ground",
+   "kind": "icecrack",
+   "r": 3.6,
+   "pos": [
+    0,
+    0,
+    0
+   ],
+   "col": "$main"
+  },
+  {
+   "id": "light6",
+   "t": "light",
+   "at": 0,
+   "life": 0.6,
+   "col": "$light",
+   "int": 1.8,
+   "dist": 22,
+   "pos": [
+    0,
+    1.2,
+    0
+   ]
+  },
+  {
+   "id": "cam7",
+   "t": "screen",
+   "at": 0,
+   "life": 0.25,
+   "shake": 4,
+   "own": true
+  },
+  {
+   "id": "mist8",
+   "t": "mist",
+   "at": 0,
+   "life": 1.5,
+   "att": "ground",
+   "pos": [
+    0,
+    0,
+    0
+   ],
+   "r": 3.2,
+   "n": 18,
+   "out": 1.6
+  },
+  {
+   "id": "crown9",
+   "t": "crown",
+   "at": 0,
+   "life": 1.6,
+   "att": "ground",
+   "pos": [
+    0,
+    0,
+    0
+   ],
+   "r": 2.4,
+   "hy": 1.4
+  },
+  {
+   "id": "floor",
+   "t": "mesh",
+   "at": 0.1,
+   "life": 2.6,
+   "att": "ground",
+   "shape": "disc",
+   "mat": "ice",
+   "col": "$main",
+   "col2": "$deep",
+   "pos": [
+    0,
+    0.04,
+    0
+   ],
+   "scale": {
+    "0": 1,
+    "1": 15,
+    "0.25": 15,
+    "ease": "out"
+   },
+   "op": {
+    "0": 0.6,
+    "1": 0,
+    "0.8": 0.45
+   },
+   "rim": 0.8,
+   "scroll": 0.2
+  },
+  {
+   "id": "edge",
+   "t": "mesh",
+   "at": 0.1,
+   "life": 2.6,
+   "att": "ground",
+   "shape": "ring",
+   "inner": 0.96,
+   "mat": "energy",
+   "col": "$hi",
+   "pos": [
+    0,
+    0.06,
+    0
+   ],
+   "scale": {
+    "0": 1,
+    "1": 15,
+    "0.25": 15,
+    "ease": "out"
+   },
+   "op": {
+    "0": 0.9,
+    "1": 0,
+    "0.8": 0.7
+   },
+   "spin": 6
+  }
+ ]
+}

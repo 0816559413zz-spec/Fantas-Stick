@@ -1,0 +1,286 @@
+{
+ "v": 1,
+ "desc": "แบบ B (อนิเมะ): Dragonfall (บินขึ้น ปีกไฟ แล้วดิ่งลงระเบิด) — แฟลชคม เส้นความเร็ว วงช็อกขาว 2 ชั้น หนามแหลม จอกระตุก",
+ "tags": [
+  "fire",
+  "dragonfall",
+  "variant"
+ ],
+ "pal": "fire",
+ "dur": 3.2,
+ "layers": [
+  {
+   "id": "emit1",
+   "t": "emit",
+   "at": 0,
+   "life": 0.6,
+   "att": "feet",
+   "rate": 120,
+   "from": "disc",
+   "fr": 1,
+   "dir": "up",
+   "spread": 0.3,
+   "speed": [
+    6,
+    10
+   ],
+   "plife": [
+    0.4,
+    0.7
+   ],
+   "look": "streak",
+   "size": [
+    3,
+    5
+   ],
+   "col": "$hi",
+   "c2": "$deep",
+   "gravity": -2
+  },
+  {
+   "id": "warn2",
+   "t": "decal",
+   "at": 0.7999999999999999,
+   "life": 0.7,
+   "att": "ground",
+   "pos": [
+    0,
+    0,
+    10
+   ],
+   "kind": "glyph",
+   "r": 5.4,
+   "col": "$main"
+  },
+  {
+   "id": "fall3",
+   "t": "mesh",
+   "at": 1.1199999999999999,
+   "life": 0.28,
+   "shape": "sphere",
+   "mat": "fire",
+   "mode": "ball",
+   "col": "$main",
+   "col2": "$deep",
+   "pos": {
+    "0": [
+     -3,
+     14,
+     7
+    ],
+    "1": [
+     0,
+     0.5,
+     10
+    ]
+   },
+   "rot": [
+    0,
+    0,
+    0
+   ],
+   "scale": 1.5,
+   "fade": 0,
+   "rim": 1.6
+  },
+  {
+   "id": "ftail4",
+   "t": "trail",
+   "at": 1.1199999999999999,
+   "life": 0.28,
+   "col": "$hi",
+   "col2": "$deep",
+   "w": 1.2000000000000002,
+   "tlife": 0.3,
+   "k": 1.4,
+   "pos": {
+    "0": [
+     -3,
+     14,
+     7
+    ],
+    "1": [
+     0,
+     0.5,
+     10
+    ]
+   }
+  },
+  {
+   "id": "flash5",
+   "t": "flash",
+   "at": 1.4,
+   "life": 0.06,
+   "col": "#ffffff",
+   "size": 6,
+   "pos": [
+    0,
+    0.9,
+    10
+   ]
+  },
+  {
+   "id": "mesh6",
+   "t": "mesh",
+   "at": 1.4,
+   "life": 0.22,
+   "shape": "ring",
+   "inner": 0.9,
+   "mat": "glow",
+   "col": "#ffffff",
+   "pos": [
+    0,
+    0.12,
+    10
+   ],
+   "rot": [
+    0,
+    0,
+    0
+   ],
+   "scale": {
+    "0": 0.3,
+    "1": 10.2,
+    "ease": "out"
+   },
+   "op": {
+    "0": 1,
+    "1": 0
+   }
+  },
+  {
+   "id": "mesh7",
+   "t": "mesh",
+   "at": 1.45,
+   "life": 0.3,
+   "shape": "ring",
+   "inner": 0.8,
+   "mat": "energy",
+   "col": "$main",
+   "col2": "$deep",
+   "pos": [
+    0,
+    0.1,
+    10
+   ],
+   "scale": {
+    "0": 0.2,
+    "1": 7.5,
+    "ease": "out"
+   },
+   "op": {
+    "0": 1,
+    "1": 0
+   },
+   "rim": 2
+  },
+  {
+   "id": "mesh8",
+   "t": "mesh",
+   "at": 1.4,
+   "life": 0.35,
+   "shape": "spikes",
+   "n": 10,
+   "mat": "energy",
+   "col": "$hi",
+   "col2": "$deep",
+   "pos": [
+    0,
+    0,
+    10
+   ],
+   "scale": {
+    "0": [
+     1.2000000000000002,
+     0.1,
+     1.2000000000000002
+    ],
+    "1": [
+     3,
+     0.05,
+     3
+    ],
+    "0.3": [
+     2.7,
+     3.3000000000000003,
+     2.7
+    ]
+   },
+   "op": {
+    "0": 1,
+    "1": 0
+   }
+  },
+  {
+   "id": "emit9",
+   "t": "emit",
+   "at": 1.4,
+   "life": 0.05,
+   "burst": 66,
+   "from": "disc",
+   "fr": 1.2000000000000002,
+   "dir": "flat",
+   "speed": [
+    18,
+    30
+   ],
+   "plife": [
+    0.18,
+    0.32
+   ],
+   "look": "streak",
+   "size": [
+    2.6,
+    3.6
+   ],
+   "col": "#ffffff",
+   "c2": "$main",
+   "gravity": 0,
+   "drag": 4,
+   "pos": [
+    0,
+    0.3,
+    10
+   ]
+  },
+  {
+   "id": "cam10",
+   "t": "screen",
+   "at": 1.4,
+   "life": 0.25,
+   "shake": 5.6,
+   "own": true,
+   "kick": 0.35,
+   "flash": 0.04
+  },
+  {
+   "id": "light11",
+   "t": "light",
+   "at": 1.4,
+   "life": 0.25,
+   "col": "$light",
+   "int": 2.2,
+   "dist": 30,
+   "pos": [
+    0,
+    1.4,
+    10
+   ]
+  },
+  {
+   "id": "decal12",
+   "t": "decal",
+   "at": 1.4,
+   "life": 1.6,
+   "att": "ground",
+   "kind": "crack",
+   "r": 6,
+   "burn": 1.5,
+   "pos": [
+    0,
+    0,
+    10
+   ]
+  }
+ ]
+}

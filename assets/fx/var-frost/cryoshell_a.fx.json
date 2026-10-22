@@ -1,0 +1,172 @@
+{
+ "v": 1,
+ "desc": "แบบ A (พรีเมียม): Cryo Shell (แช่แข็งตัวเอง 5 วิ) — พลังงานเรียบหรู แกนสว่าง + ขอบเรือง + วงกระแทก + ประกายตามธาตุ",
+ "tags": [
+  "frost",
+  "cryoshell",
+  "variant"
+ ],
+ "pal": "ice",
+ "dur": 3,
+ "layers": [
+  {
+   "id": "shell",
+   "t": "mesh",
+   "loop": true,
+   "at": 0,
+   "life": 2,
+   "att": "feet",
+   "shape": "sphere",
+   "mat": "ice",
+   "mode": "ball",
+   "col": "$main",
+   "col2": "$deep",
+   "pos": [
+    0,
+    1,
+    0
+   ],
+   "scale": 1.35,
+   "op": 0.55,
+   "rim": 1.6,
+   "scroll": 0.8,
+   "spin": 30
+  },
+  {
+   "id": "floor1",
+   "t": "mesh",
+   "loop": true,
+   "at": 0,
+   "life": 1.5,
+   "att": "feet",
+   "shape": "ring",
+   "inner": 0.9,
+   "mat": "energy",
+   "col": "$main",
+   "col2": "$deep",
+   "pos": [
+    0,
+    0.06,
+    0
+   ],
+   "scale": 1.4,
+   "spin": 50,
+   "op": {
+    "0": 0.6,
+    "1": 0.6,
+    "0.5": 0.9
+   },
+   "rim": 1
+  },
+  {
+   "id": "emit2",
+   "t": "emit",
+   "at": 0,
+   "life": 1,
+   "loop": true,
+   "att": "feet",
+   "rate": 30,
+   "from": "ring",
+   "fr": 1.4,
+   "dir": "up",
+   "spread": 0.2,
+   "speed": [
+    1,
+    2.4
+   ],
+   "plife": [
+    0.7,
+    1.2
+   ],
+   "look": "flake",
+   "size": [
+    1.6,
+    2.4
+   ],
+   "col": "$hi",
+   "c2": "$deep",
+   "gravity": -0.3,
+   "spin": 3
+  },
+  {
+   "id": "glow3",
+   "t": "light",
+   "loop": true,
+   "at": 0,
+   "life": 1,
+   "att": "chest",
+   "col": "$light",
+   "int": {
+    "0": 1,
+    "1": 1,
+    "0.5": 1.5
+   },
+   "dist": 8
+  },
+  {
+   "id": "endpop",
+   "t": "flash",
+   "end": true,
+   "at": 0,
+   "life": 0.15,
+   "att": "chest",
+   "col": "$hi",
+   "size": 3
+  },
+  {
+   "id": "endburst",
+   "t": "emit",
+   "end": true,
+   "at": 0,
+   "life": 0.05,
+   "att": "chest",
+   "burst": 30,
+   "from": "sphere",
+   "fr": 1,
+   "dir": "out",
+   "speed": [
+    3,
+    7
+   ],
+   "plife": [
+    0.3,
+    0.6
+   ],
+   "look": "flake",
+   "size": [
+    2,
+    3
+   ],
+   "col": "$core",
+   "c2": "$deep",
+   "gravity": 2
+  },
+  {
+   "id": "form",
+   "t": "emit",
+   "at": 0,
+   "life": 0.3,
+   "att": "chest",
+   "rate": 120,
+   "from": "sphere",
+   "fr": 2,
+   "dir": "in",
+   "speed": [
+    4,
+    6
+   ],
+   "plife": [
+    0.25,
+    0.35
+   ],
+   "look": "flake",
+   "size": [
+    2,
+    3
+   ],
+   "col": "#ffffff",
+   "c2": "$main",
+   "gravity": 0
+  }
+ ]
+}

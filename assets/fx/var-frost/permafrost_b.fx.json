@@ -1,0 +1,246 @@
+{
+ "v": 1,
+ "desc": "แบบ B (อนิเมะ): Permafrost (พื้นน้ำแข็งวงใหญ่ r 15 ม.) — แฟลชคม เส้นความเร็ว วงช็อกขาว 2 ชั้น หนามแหลม จอกระตุก",
+ "tags": [
+  "frost",
+  "permafrost",
+  "variant"
+ ],
+ "pal": "ice",
+ "dur": 3,
+ "layers": [
+  {
+   "id": "flash1",
+   "t": "flash",
+   "at": 0,
+   "life": 0.06,
+   "col": "#ffffff",
+   "size": 4.4,
+   "pos": [
+    0,
+    0.9,
+    0
+   ]
+  },
+  {
+   "id": "mesh2",
+   "t": "mesh",
+   "at": 0,
+   "life": 0.22,
+   "shape": "ring",
+   "inner": 0.9,
+   "mat": "glow",
+   "col": "#ffffff",
+   "pos": [
+    0,
+    0.12,
+    0
+   ],
+   "rot": [
+    0,
+    0,
+    0
+   ],
+   "scale": {
+    "0": 0.3,
+    "1": 6.8,
+    "ease": "out"
+   },
+   "op": {
+    "0": 1,
+    "1": 0
+   }
+  },
+  {
+   "id": "mesh3",
+   "t": "mesh",
+   "at": 0.05,
+   "life": 0.3,
+   "shape": "ring",
+   "inner": 0.8,
+   "mat": "energy",
+   "col": "$main",
+   "col2": "$deep",
+   "pos": [
+    0,
+    0.1,
+    0
+   ],
+   "scale": {
+    "0": 0.2,
+    "1": 5,
+    "ease": "out"
+   },
+   "op": {
+    "0": 1,
+    "1": 0
+   },
+   "rim": 2
+  },
+  {
+   "id": "mesh4",
+   "t": "mesh",
+   "at": 0,
+   "life": 0.35,
+   "shape": "spikes",
+   "n": 10,
+   "mat": "ice",
+   "col": "$hi",
+   "col2": "$deep",
+   "pos": [
+    0,
+    0,
+    0
+   ],
+   "scale": {
+    "0": [
+     0.8,
+     0.1,
+     0.8
+    ],
+    "1": [
+     2,
+     0.05,
+     2
+    ],
+    "0.3": [
+     1.8,
+     2.2,
+     1.8
+    ]
+   },
+   "op": {
+    "0": 1,
+    "1": 0
+   }
+  },
+  {
+   "id": "emit5",
+   "t": "emit",
+   "at": 0,
+   "life": 0.05,
+   "burst": 54,
+   "from": "disc",
+   "fr": 0.8,
+   "dir": "flat",
+   "speed": [
+    12,
+    20
+   ],
+   "plife": [
+    0.18,
+    0.32
+   ],
+   "look": "streak",
+   "size": [
+    2.6,
+    3.6
+   ],
+   "col": "#ffffff",
+   "c2": "$main",
+   "gravity": 0,
+   "drag": 4,
+   "pos": [
+    0,
+    0.3,
+    0
+   ]
+  },
+  {
+   "id": "cam6",
+   "t": "screen",
+   "at": 0,
+   "life": 0.25,
+   "shake": 4.4,
+   "own": true,
+   "kick": 0.35,
+   "flash": 0.04
+  },
+  {
+   "id": "light7",
+   "t": "light",
+   "at": 0,
+   "life": 0.25,
+   "col": "$light",
+   "int": 2.2,
+   "dist": 22,
+   "pos": [
+    0,
+    1.4,
+    0
+   ]
+  },
+  {
+   "id": "crack8",
+   "t": "decal",
+   "at": 0,
+   "life": 1.6,
+   "att": "ground",
+   "kind": "icecrack",
+   "r": 4.4,
+   "col": "$main",
+   "pos": [
+    0,
+    0,
+    0
+   ]
+  },
+  {
+   "id": "floor",
+   "t": "mesh",
+   "at": 0.1,
+   "life": 2.6,
+   "att": "ground",
+   "shape": "disc",
+   "mat": "energy",
+   "col": "$main",
+   "col2": "$deep",
+   "pos": [
+    0,
+    0.04,
+    0
+   ],
+   "scale": {
+    "0": 1,
+    "1": 15,
+    "0.25": 15,
+    "ease": "out"
+   },
+   "op": {
+    "0": 0.6,
+    "1": 0,
+    "0.8": 0.45
+   },
+   "rim": 0.8,
+   "scroll": 0.2
+  },
+  {
+   "id": "edge",
+   "t": "mesh",
+   "at": 0.1,
+   "life": 2.6,
+   "att": "ground",
+   "shape": "ring",
+   "inner": 0.96,
+   "mat": "glow",
+   "col": "#ffffff",
+   "pos": [
+    0,
+    0.06,
+    0
+   ],
+   "scale": {
+    "0": 1,
+    "1": 15,
+    "0.25": 15,
+    "ease": "out"
+   },
+   "op": {
+    "0": 0.9,
+    "1": 0,
+    "0.8": 0.7
+   },
+   "spin": 20
+  }
+ ]
+}

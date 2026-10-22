@@ -1,0 +1,441 @@
+{
+ "v": 1,
+ "desc": "แบบ A (พรีเมียม): Ignition Snap (ดีดนิ้ว ทุกคนที่ติดไฟระเบิด) — พลังงานเรียบหรู แกนสว่าง + ขอบเรือง + วงกระแทก + ประกายตามธาตุ",
+ "tags": [
+  "fire",
+  "ignitionsnap",
+  "variant"
+ ],
+ "pal": "fire",
+ "dur": 2.2,
+ "layers": [
+  {
+   "id": "flash1",
+   "t": "flash",
+   "at": 0,
+   "life": 0.1,
+   "col": "$core",
+   "size": 1.2,
+   "att": "wand"
+  },
+  {
+   "id": "snapw",
+   "t": "mesh",
+   "at": 0,
+   "life": 0.3,
+   "att": "chest",
+   "shape": "ring",
+   "inner": 0.9,
+   "mat": "glow",
+   "col": "$hi",
+   "pos": [
+    0,
+    0.3,
+    0.5
+   ],
+   "scale": {
+    "0": 0.2,
+    "1": 6,
+    "ease": "out"
+   },
+   "op": {
+    "0": 0.9,
+    "1": 0
+   }
+  },
+  {
+   "id": "flash2",
+   "t": "flash",
+   "at": 0.18,
+   "life": 0.1,
+   "col": "$core",
+   "size": 1.26,
+   "pos": [
+    -3,
+    0.8,
+    8
+   ]
+  },
+  {
+   "id": "halo3",
+   "t": "halo",
+   "at": 0.18,
+   "life": 0.35,
+   "col": "$main",
+   "size": 2.52,
+   "k": 1,
+   "pos": [
+    -3,
+    0.8,
+    8
+   ]
+  },
+  {
+   "id": "mesh4",
+   "t": "mesh",
+   "at": 0.18,
+   "life": 0.55,
+   "shape": "dome",
+   "mat": "energy",
+   "col": "$main",
+   "col2": "$deep",
+   "pos": [
+    -3,
+    0,
+    8
+   ],
+   "scale": {
+    "0": 0.2,
+    "1": 1.8,
+    "0.4": 1.53,
+    "ease": "out"
+   },
+   "op": {
+    "0": 0.9,
+    "1": 0
+   },
+   "rim": 1.6,
+   "dis": {
+    "0": 0,
+    "1": 0.8,
+    "0.5": 0
+   }
+  },
+  {
+   "id": "ring5",
+   "t": "ring",
+   "at": 0.18,
+   "life": 0.45,
+   "att": "ground",
+   "pos": [
+    -3,
+    0.1,
+    8
+   ],
+   "col": "$main",
+   "r": 2.7,
+   "op": 0.5
+  },
+  {
+   "id": "emit6",
+   "t": "emit",
+   "at": 0.18,
+   "life": 0.06,
+   "burst": 30.8,
+   "from": "hemisphere",
+   "fr": 0.45,
+   "dir": "out",
+   "speed": [
+    2.16,
+    4.680000000000001
+   ],
+   "plife": [
+    0.4,
+    0.8
+   ],
+   "look": "ember",
+   "size": [
+    2,
+    3.2
+   ],
+   "col": "$core",
+   "c2": "$deep",
+   "gravity": -0.5,
+   "pos": [
+    -3,
+    0.4,
+    8
+   ]
+  },
+  {
+   "id": "light7",
+   "t": "light",
+   "at": 0.18,
+   "life": 0.5,
+   "col": "$light",
+   "int": 2,
+   "dist": 13.2,
+   "pos": [
+    -3,
+    1.5,
+    8
+   ]
+  },
+  {
+   "id": "vol8",
+   "t": "firevol",
+   "at": 0.18,
+   "life": 1,
+   "att": "ground",
+   "pos": [
+    -3,
+    0,
+    8
+   ],
+   "kind": "pillar",
+   "hx": 0.54,
+   "hz": 0.54,
+   "h": 1.62,
+   "int": 1.2,
+   "x": true
+  },
+  {
+   "id": "flash9",
+   "t": "flash",
+   "at": 0.26,
+   "life": 0.1,
+   "col": "$core",
+   "size": 1.26,
+   "pos": [
+    2.5,
+    0.8,
+    11
+   ]
+  },
+  {
+   "id": "halo10",
+   "t": "halo",
+   "at": 0.26,
+   "life": 0.35,
+   "col": "$main",
+   "size": 2.52,
+   "k": 1,
+   "pos": [
+    2.5,
+    0.8,
+    11
+   ]
+  },
+  {
+   "id": "mesh11",
+   "t": "mesh",
+   "at": 0.26,
+   "life": 0.55,
+   "shape": "dome",
+   "mat": "energy",
+   "col": "$main",
+   "col2": "$deep",
+   "pos": [
+    2.5,
+    0,
+    11
+   ],
+   "scale": {
+    "0": 0.2,
+    "1": 1.8,
+    "0.4": 1.53,
+    "ease": "out"
+   },
+   "op": {
+    "0": 0.9,
+    "1": 0
+   },
+   "rim": 1.6,
+   "dis": {
+    "0": 0,
+    "1": 0.8,
+    "0.5": 0
+   }
+  },
+  {
+   "id": "ring12",
+   "t": "ring",
+   "at": 0.26,
+   "life": 0.45,
+   "att": "ground",
+   "pos": [
+    2.5,
+    0.1,
+    11
+   ],
+   "col": "$main",
+   "r": 2.7,
+   "op": 0.5
+  },
+  {
+   "id": "emit13",
+   "t": "emit",
+   "at": 0.26,
+   "life": 0.06,
+   "burst": 30.8,
+   "from": "hemisphere",
+   "fr": 0.45,
+   "dir": "out",
+   "speed": [
+    2.16,
+    4.680000000000001
+   ],
+   "plife": [
+    0.4,
+    0.8
+   ],
+   "look": "ember",
+   "size": [
+    2,
+    3.2
+   ],
+   "col": "$core",
+   "c2": "$deep",
+   "gravity": -0.5,
+   "pos": [
+    2.5,
+    0.4,
+    11
+   ]
+  },
+  {
+   "id": "light14",
+   "t": "light",
+   "at": 0.26,
+   "life": 0.5,
+   "col": "$light",
+   "int": 2,
+   "dist": 13.2,
+   "pos": [
+    2.5,
+    1.5,
+    11
+   ]
+  },
+  {
+   "id": "vol15",
+   "t": "firevol",
+   "at": 0.26,
+   "life": 1,
+   "att": "ground",
+   "pos": [
+    2.5,
+    0,
+    11
+   ],
+   "kind": "pillar",
+   "hx": 0.54,
+   "hz": 0.54,
+   "h": 1.62,
+   "int": 1.2,
+   "x": true
+  },
+  {
+   "id": "flash16",
+   "t": "flash",
+   "at": 0.34,
+   "life": 0.1,
+   "col": "$core",
+   "size": 1.26,
+   "pos": [
+    0,
+    0.8,
+    14
+   ]
+  },
+  {
+   "id": "halo17",
+   "t": "halo",
+   "at": 0.34,
+   "life": 0.35,
+   "col": "$main",
+   "size": 2.52,
+   "k": 1,
+   "pos": [
+    0,
+    0.8,
+    14
+   ]
+  },
+  {
+   "id": "mesh18",
+   "t": "mesh",
+   "at": 0.34,
+   "life": 0.55,
+   "shape": "dome",
+   "mat": "energy",
+   "col": "$main",
+   "col2": "$deep",
+   "pos": [
+    0,
+    0,
+    14
+   ],
+   "scale": {
+    "0": 0.2,
+    "1": 1.8,
+    "0.4": 1.53,
+    "ease": "out"
+   },
+   "op": {
+    "0": 0.9,
+    "1": 0
+   },
+   "rim": 1.6,
+   "dis": {
+    "0": 0,
+    "1": 0.8,
+    "0.5": 0
+   }
+  },
+  {
+   "id": "ring19",
+   "t": "ring",
+   "at": 0.34,
+   "life": 0.45,
+   "att": "ground",
+   "pos": [
+    0,
+    0.1,
+    14
+   ],
+   "col": "$main",
+   "r": 2.7,
+   "op": 0.5
+  },
+  {
+   "id": "emit20",
+   "t": "emit",
+   "at": 0.34,
+   "life": 0.06,
+   "burst": 30.8,
+   "from": "hemisphere",
+   "fr": 0.45,
+   "dir": "out",
+   "speed": [
+    2.16,
+    4.680000000000001
+   ],
+   "plife": [
+    0.4,
+    0.8
+   ],
+   "look": "ember",
+   "size": [
+    2,
+    3.2
+   ],
+   "col": "$core",
+   "c2": "$deep",
+   "gravity": -0.5,
+   "pos": [
+    0,
+    0.4,
+    14
+   ]
+  },
+  {
+   "id": "vol22",
+   "t": "firevol",
+   "at": 0.34,
+   "life": 1,
+   "att": "ground",
+   "pos": [
+    0,
+    0,
+    14
+   ],
+   "kind": "pillar",
+   "hx": 0.54,
+   "hz": 0.54,
+   "h": 1.62,
+   "int": 1.2,
+   "x": true
+  }
+ ]
+}
