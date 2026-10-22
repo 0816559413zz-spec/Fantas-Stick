@@ -17,21 +17,28 @@
 <canvas id="cv"></canvas>
 
 <!-- ===== ฉากเปิด (โชว์ครั้งแรกที่เปิดหน้าเว็บ — คลิก/กดปุ่มเพื่อเข้าเมนู) ===== -->
+<!-- หน้าแรก (ผู้ใช้ 2026-10-23 ตามรูป MOTH): ตัวใหญ่ "FTA" + ไอคอน (ไม้กายสิทธิ์ + รอยเวทโค้ง + ประกาย) แทรกระหว่างตัวอักษร + วงบางรอบตัว T
+     ข้างล่างตัวเล็ก "FANTAS STICK" • ทุกส่วนร่วงลงมาจากด้านบนทีละชิ้น (css/game.css "หน้าแรก FTA") ⚠ ไอคอน/สี/จังหวะ Claude ออกแบบ -->
 <div id="intro">
   <canvas id="introFx"></canvas>
-  <div class="inRays"></div>
+  <div class="inArc"></div>
   <div class="inCore">
-    <svg class="inSigil" viewBox="0 0 400 400" aria-hidden="true">
-      <circle cx="200" cy="200" r="190"/><circle cx="200" cy="200" r="172"/><circle cx="200" cy="200" r="118"/>
-      <polygon points="200,28 349,286 51,286"/><polygon points="200,372 51,114 349,114"/>
-      <g class="ticks"><path d="M200 10v24M200 366v24M10 200h24M366 200h24M66 66l17 17M317 317l17 17M66 334l17-17M317 83l17-17"/></g>
-      <text><textPath href="#inRing" startOffset="0">ᚠ ᚨ ᚾ ᛏ ᚨ ᛊ · ᛊ ᛏ ᛁ ᚲ ᚲ · ᛞ ᚢ ᛖ ᛚ · ᛗ ᚨ ᚷ ᛁ ᚲ · ᚠ ᛁ ᚱ ᛖ · ᛁ ᚲ ᛖ · ᛊ ᛏ ᛟ ᚱ ᛗ ·</textPath></text>
-      <path id="inRing" d="M200 19a181 181 0 1 1 -0.1 0" fill="none" stroke="none"/>
-    </svg>
-    <div class="inLogo"><span class="w1">Fantas</span><span class="w2">Stick</span></div>
-    <div class="inSub">ดวลเวทมนตร์</div>
-    <div class="inTag">CO-OP · DUEL · QUIDDITCH · BATTLE ROYALE</div>
-    <div class="inPress">✦ คลิกเพื่อเริ่มการผจญภัย ✦</div>
+    <div class="inMark">
+      <svg class="inRing" viewBox="-100 -100 200 200" aria-hidden="true"><circle r="97"/><circle class="b" r="91"/><path d="M-150 72L150 -72"/></svg>
+      <div class="inFTA" aria-label="FTA"><span class="l1">F</span><span class="l2">T</span><span class="l3">A</span></div>
+      <svg class="inIcon" viewBox="0 0 400 300" aria-hidden="true">
+        <defs>
+          <linearGradient id="inSw" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".45" stop-color="#e9ecff" stop-opacity=".95"/><stop offset="1" stop-color="#fff"/></linearGradient>
+          <linearGradient id="inSw2" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#b9a6ff" stop-opacity="0"/><stop offset="1" stop-color="#cfc4ff" stop-opacity=".85"/></linearGradient>
+          <radialGradient id="inSt"><stop offset="0" stop-color="#fff"/><stop offset=".35" stop-color="#e8e2ff" stop-opacity=".9"/><stop offset="1" stop-color="#a995ff" stop-opacity="0"/></radialGradient>
+        </defs>
+        <g class="sw"><path d="M30 262C70 120 220 40 372 34C230 62 120 140 30 262Z" fill="url(#inSw)"/><path d="M92 252C132 174 238 104 340 86C240 116 152 182 92 252Z" fill="url(#inSw2)"/></g>
+        <g class="wd"><path d="M104 246L318 60" stroke="#dfe3f5" stroke-width="13" stroke-linecap="round"/><path d="M104 246L318 60" stroke="#121730" stroke-width="8.5" stroke-linecap="round"/><path d="M104 246L150 206" stroke="#2a2f52" stroke-width="12" stroke-linecap="round"/><circle cx="98" cy="252" r="9" fill="#121730" stroke="#dfe3f5" stroke-width="2.5"/></g>
+        <g class="st"><circle cx="326" cy="53" r="46" fill="url(#inSt)"/><path d="M326 13C329 45 334 50 366 53C334 56 329 61 326 93C323 61 318 56 286 53C318 50 323 45 326 13Z" fill="#fff"/><circle cx="356" cy="22" r="3" fill="#fff"/><circle cx="292" cy="92" r="2.2" fill="#e8e2ff"/><circle cx="372" cy="84" r="1.8" fill="#fff"/></g>
+      </svg>
+    </div>
+    <div class="inName"><i></i><b>FANTAS STICK</b><i></i></div>
+    <div class="inPress">CLICK TO BEGIN<small>คลิกเพื่อเริ่ม</small></div>
   </div>
   <div class="inFlash"></div>
 </div>

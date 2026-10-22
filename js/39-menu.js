@@ -224,10 +224,10 @@ $('#btnKit').onclick=()=>openCreator(false,3);
 // ข้ามได้ด้วย ?nointro (ทดสอบ / VFX Studio)
 const TITLE={on:false,parts:[],menuParts:[],t0:performance.now()};
 function titleSpark(arr,x,y,n,sp,col){for(let i=0;i<n;i++){const a=Math.random()*6.283,v=sp*(0.3+Math.random());arr.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v-sp*0.2,life:0.8+Math.random()*1.2,max:2,r:1+Math.random()*2.2,col:col||(Math.random()<0.5?'255,214,140':'255,245,220'),g:40});}}
-function titleDraw(cv,arr,dt,ambient){
+function titleDraw(cv,arr,dt,ambient,c1,c2){
   const w=cv.clientWidth,h=cv.clientHeight;if(cv.width!==w||cv.height!==h){cv.width=w;cv.height=h;}
   const g=cv.getContext('2d');g.clearRect(0,0,w,h);g.globalCompositeOperation='lighter';
-  if(Math.random()<ambient*dt)arr.push({x:Math.random()*w,y:h+10,vx:(Math.random()-0.5)*14,vy:-(20+Math.random()*50),life:5+Math.random()*5,max:10,r:0.8+Math.random()*2,col:Math.random()<0.7?'255,206,120':'170,190,255',g:0,tw:Math.random()*6});
+  if(Math.random()<ambient*dt)arr.push({x:Math.random()*w,y:h+10,vx:(Math.random()-0.5)*14,vy:-(20+Math.random()*50),life:5+Math.random()*5,max:10,r:0.8+Math.random()*2,col:Math.random()<0.7?(c1||'255,206,120'):(c2||'170,190,255'),g:0,tw:Math.random()*6});
   for(let i=arr.length-1;i>=0;i--){const p=arr[i];p.life-=dt;if(p.life<=0||p.y<-20){arr.splice(i,1);continue;}
     p.vy+=p.g*dt;p.x+=p.vx*dt+Math.sin(performance.now()/900+(p.tw||0))*0.25;p.y+=p.vy*dt;
     const a=Math.min(1,p.life/(p.max*0.35))*(p.tw!==undefined?0.55+0.45*Math.sin(performance.now()/300+p.tw):1);
@@ -240,8 +240,8 @@ function titleLoop(){
   const intro=$('#intro');
   if(intro&&!intro.classList.contains('gone')){
     const cv=$('#introFx');
-    if(!TITLE.slam&&now-TITLE.t0>1350){TITLE.slam=1;const r=$('.inLogo').getBoundingClientRect();titleSpark(TITLE.parts,r.left+r.width/2,r.top+r.height*0.35,90,420);titleSpark(TITLE.parts,r.left+r.width/2,r.top+r.height*0.8,60,320);}
-    titleDraw(cv,TITLE.parts,dt,30);
+    if(!TITLE.slam&&now-TITLE.t0>1500){TITLE.slam=1;const r=$('.inFTA').getBoundingClientRect();titleSpark(TITLE.parts,r.left+r.width*0.72,r.top+r.height*0.12,70,380,'235,230,255');titleSpark(TITLE.parts,r.left+r.width/2,r.top+r.height*0.6,50,300,'185,170,255');}   // ประกายตอนดาวที่ปลายไม้โผล่
+    titleDraw(cv,TITLE.parts,dt,30,'220,226,255','170,150,255');
   }
   if(screen==='menu'&&!crOpen&&!document.hidden)titleDraw($('#menuFx'),TITLE.menuParts,dt,14);
   requestAnimationFrame(titleLoop);
@@ -249,7 +249,7 @@ function titleLoop(){
 function titleGo(){
   const intro=$('#intro');if(!intro||intro.classList.contains('go'))return;
   try{ac();snd('whoosh',{vol:0.8});setTimeout(()=>snd('buff',{vol:0.6}),180);}catch(e){}
-  titleSpark(TITLE.parts,innerWidth/2,innerHeight*0.45,140,700);
+  titleSpark(TITLE.parts,innerWidth/2,innerHeight*0.45,140,700,'230,232,255');
   intro.classList.add('go');STAGE.introT=0;document.body.classList.add('menuIn');
   setTimeout(()=>{intro.classList.add('gone');if(!store('wd_look'))openCreator(true);},1100);
 }
