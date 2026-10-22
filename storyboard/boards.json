@@ -1,5 +1,5 @@
 {
- "next": 2,
+ "next": 3,
  "items": [
   {
    "id": 1,
@@ -103,6 +103,132 @@
      "refs": [],
      "result": "storyboard/img/sb1_s3.jpg",
      "note": "ลิ้นสายฟ้า 9 จุดแตกออกตามจังหวะกวาด แทนเปลวไฟในรูปที่ 2 + ประกาย แล้วสลาย"
+    }
+   ]
+  },
+  {
+   "id": 2,
+   "title": "",
+   "who": "",
+   "skill": "",
+   "status": "draft",
+   "created": "2026-10-21T14:42:19",
+   "updated": "2026-10-21T14:42:44",
+   "overview": "",
+   "mood": [],
+   "colors": [
+    "#ff7a1a",
+    "#ffd27a"
+   ],
+   "refs": [],
+   "fx": "",
+   "reply": "",
+   "shots": [
+    {
+     "id": "mvht0xn51",
+     "kind": "charge",
+     "name": "",
+     "dur": 0.5,
+     "overlap": 0,
+     "where": "",
+     "size": 1,
+     "power": 3,
+     "shapes": [],
+     "motion": [],
+     "camera": [],
+     "colors": [],
+     "text": "",
+     "sketches": [
+      {
+       "img": "storyboard/img/s2_3d_mvht1fj0.jpg",
+       "kind": "3d",
+       "view": "ด้านข้าง"
+      }
+     ],
+     "scene3d": null,
+     "refs": [],
+     "result": "",
+     "note": ""
+    },
+    {
+     "id": "mvht0xn52",
+     "kind": "cast",
+     "name": "",
+     "dur": 0.3,
+     "overlap": 0,
+     "where": "",
+     "size": 1,
+     "power": 3,
+     "shapes": [],
+     "motion": [],
+     "camera": [],
+     "colors": [],
+     "text": "",
+     "sketches": [],
+     "scene3d": null,
+     "refs": [],
+     "result": "",
+     "note": ""
+    },
+    {
+     "id": "mvht0xn53",
+     "kind": "travel",
+     "name": "",
+     "dur": 0.3,
+     "overlap": 0,
+     "where": "",
+     "size": 1,
+     "power": 3,
+     "shapes": [],
+     "motion": [],
+     "camera": [],
+     "colors": [],
+     "text": "",
+     "sketches": [],
+     "scene3d": null,
+     "refs": [],
+     "result": "",
+     "note": ""
+    },
+    {
+     "id": "mvht0xn54",
+     "kind": "impact",
+     "name": "",
+     "dur": 0.4,
+     "overlap": 0,
+     "where": "",
+     "size": 1,
+     "power": 3,
+     "shapes": [],
+     "motion": [],
+     "camera": [],
+     "colors": [],
+     "text": "",
+     "sketches": [],
+     "scene3d": null,
+     "refs": [],
+     "result": "",
+     "note": ""
+    },
+    {
+     "id": "mvht0xn55",
+     "kind": "fade",
+     "name": "",
+     "dur": 0.3,
+     "overlap": 0,
+     "where": "",
+     "size": 1,
+     "power": 3,
+     "shapes": [],
+     "motion": [],
+     "camera": [],
+     "colors": [],
+     "text": "",
+     "sketches": [],
+     "scene3d": null,
+     "refs": [],
+     "result": "",
+     "note": ""
     }
    ]
   }
