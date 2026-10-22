@@ -1,0 +1,209 @@
+{
+ "v": 1,
+ "desc": "Pyro Dash ออกตัว (แบบ C สมจริง — ผู้ใช้เลือก 2026-10-22): ระเบิดไฟดันหลัง + ควันจริง + คลื่นอากาศบิด + เศษหิน + รอยไหม้ • n = แรงชาร์จ 0–5",
+ "tags": [
+  "fire",
+  "dash",
+  "pyro"
+ ],
+ "pal": "fire",
+ "dur": 2,
+ "params": {
+  "n": {
+   "def": 3,
+   "desc": "แรงชาร์จ 0–5"
+  }
+ },
+ "layers": [
+  {
+   "id": "core",
+   "t": "flash",
+   "at": 0,
+   "life": 0.12,
+   "col": "$core",
+   "size": "1.6+n*0.25",
+   "pos": [
+    0,
+    0.6,
+    0
+   ]
+  },
+  {
+   "id": "shock",
+   "t": "warp",
+   "at": 0,
+   "life": 0.45,
+   "att": "ground",
+   "pos": [
+    0,
+    0.2,
+    0
+   ],
+   "kind": "shock",
+   "flat": true,
+   "size": {
+    "0": 0.5,
+    "1": 1,
+    "x": "3+n*0.7"
+   },
+   "op": {
+    "0": 1,
+    "1": 0
+   },
+   "str": 1.2,
+   "col": "#ff7a3a"
+  },
+  {
+   "id": "blast",
+   "t": "emit",
+   "at": 0,
+   "life": 0.05,
+   "burst": "20+n*8",
+   "from": "sphere",
+   "fr": 0.3,
+   "dir": "aim",
+   "yaw": 180,
+   "spread": 0.9,
+   "speed": [
+    6,
+    14
+   ],
+   "plife": [
+    0.25,
+    0.45
+   ],
+   "look": "fire",
+   "size": [
+    5,
+    9
+   ],
+   "col": "$hi",
+   "c2": "$deep",
+   "gravity": -1,
+   "drag": 4,
+   "pos": [
+    0,
+    0.6,
+    0
+   ]
+  },
+  {
+   "id": "embers",
+   "t": "emit",
+   "at": 0,
+   "life": 0.05,
+   "burst": "16+n*4",
+   "from": "sphere",
+   "fr": 0.3,
+   "dir": "out",
+   "speed": [
+    4,
+    11
+   ],
+   "up": [
+    1,
+    4
+   ],
+   "plife": [
+    0.4,
+    0.8
+   ],
+   "look": "ember",
+   "size": [
+    1.6,
+    2.6
+   ],
+   "col": "#fff1c0",
+   "c2": "#ff5a1a",
+   "gravity": 5,
+   "pos": [
+    0,
+    0.6,
+    0
+   ]
+  },
+  {
+   "id": "smoke",
+   "t": "emit",
+   "at": 0.03,
+   "life": 0.1,
+   "burst": "6+n*1.5",
+   "from": "disc",
+   "fr": 0.8,
+   "dir": "up",
+   "spread": 1.2,
+   "speed": [
+    0.6,
+    1.8
+   ],
+   "plife": [
+    1,
+    1.7
+   ],
+   "look": "smoke",
+   "size": [
+    8,
+    14
+   ],
+   "col": "#3a3430",
+   "c2": "#3a3430",
+   "gravity": -0.4,
+   "grow": 1.2,
+   "drag": 2,
+   "pos": [
+    0,
+    0.3,
+    0
+   ],
+   "x": true
+  },
+  {
+   "id": "scorch",
+   "t": "decal",
+   "at": 0,
+   "life": 2,
+   "att": "ground",
+   "kind": "scorch",
+   "r": "1+n*0.15"
+  },
+  {
+   "id": "light",
+   "t": "light",
+   "at": 0,
+   "life": 0.35,
+   "col": "$light",
+   "int": {
+    "0": 2.2,
+    "1": 0
+   },
+   "dist": 10,
+   "pos": [
+    0,
+    1.2,
+    0
+   ]
+  },
+  {
+   "id": "cam",
+   "t": "screen",
+   "at": 0,
+   "life": 0.25,
+   "shake": "2+n",
+   "own": true
+  },
+  {
+   "id": "snd",
+   "t": "sound",
+   "at": 0,
+   "name": "boom",
+   "vol": 0.7
+  },
+  {
+   "id": "snd2",
+   "t": "sound",
+   "at": 0,
+   "name": "whoosh",
+   "vol": 0.6
+  }
+ ]
+}

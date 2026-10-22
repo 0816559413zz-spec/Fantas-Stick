@@ -202,5 +202,55 @@
     },
     "s": "0.8",
     "if": "ev.g==1"
+  },
+  "efx:pboom": [
+    {
+      "fx": "fire/dash_go",
+      "mode": "replace",
+      "p": {
+        "n": "ev.n"
+      }
+    },
+    {
+      "fx": "fire/dash_trail",
+      "mode": "replace",
+      "follow": "ev.id",
+      "p": {
+        "T": "0.075+0.095*ev.n"
+      }
+    }
+  ],
+  "efx:pfpath": {
+    "fx": "fire/dash_path",
+    "mode": "replace",
+    "p": {
+      "len": "ev.len/20"
+    }
+  },
+  "efx:dfrise": {
+    "fx": "fire/df_rise_plus",
+    "mode": "add",
+    "follow": "ev.id"
+  },
+  "efx:dfdive": {
+    "fx": "fire/df_dive_plus",
+    "mode": "add",
+    "follow": "ev.id"
+  },
+  "efx:dfboom": {
+    "fx": "fire/df_impact_plus",
+    "mode": "add",
+    "p": {
+      "r": "ev.r/20"
+    }
+  },
+  "cast:pfire": {
+    "fx": "fire/fireball_launch",
+    "mode": "add"
+  },
+  "cast:spark": {
+    "fx": "fire/spark_cast",
+    "mode": "add",
+    "follow": "ev.id"
   }
 }

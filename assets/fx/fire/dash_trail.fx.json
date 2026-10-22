@@ -1,0 +1,124 @@
+{
+ "v": 1,
+ "desc": "Pyro Dash ระหว่างพุ่ง (ตามตัว, ซ้อนหางไฟเดิม): เปลวไฟลุกตามพื้น + ถ่านกระเด็น + ควันจริง (แบบ C) • T = เวลาพุ่ง (วิ)",
+ "tags": [
+  "fire",
+  "dash",
+  "pyro",
+  "trail"
+ ],
+ "pal": "fire",
+ "dur": 1.6,
+ "params": {
+  "T": {
+   "def": 0.4,
+   "desc": "เวลาพุ่ง (วิ)"
+  }
+ },
+ "layers": [
+  {
+   "id": "flames",
+   "t": "emit",
+   "at": 0,
+   "life": "T+0.04",
+   "rate": 110,
+   "att": "feet",
+   "from": "disc",
+   "fr": 0.45,
+   "dir": "up",
+   "spread": 0.8,
+   "speed": [
+    0.5,
+    2
+   ],
+   "plife": [
+    0.3,
+    0.6
+   ],
+   "look": "fire",
+   "size": [
+    5,
+    8
+   ],
+   "col": "$hi",
+   "c2": "$deep",
+   "gravity": -1.5,
+   "drag": 3,
+   "pos": [
+    0,
+    0.2,
+    0
+   ]
+  },
+  {
+   "id": "embers",
+   "t": "emit",
+   "at": 0,
+   "life": "T+0.04",
+   "rate": 70,
+   "att": "feet",
+   "from": "sphere",
+   "fr": 0.4,
+   "dir": "random",
+   "speed": [
+    1,
+    4
+   ],
+   "up": [
+    0.5,
+    2
+   ],
+   "plife": [
+    0.4,
+    0.8
+   ],
+   "look": "ember",
+   "size": [
+    1.4,
+    2.2
+   ],
+   "col": "#fff1c0",
+   "c2": "#ff5a1a",
+   "gravity": 3,
+   "pos": [
+    0,
+    0.8,
+    0
+   ]
+  },
+  {
+   "id": "smoke",
+   "t": "emit",
+   "at": 0,
+   "life": "T+0.04",
+   "rate": 40,
+   "att": "feet",
+   "from": "disc",
+   "fr": 0.5,
+   "dir": "up",
+   "speed": [
+    0.3,
+    1
+   ],
+   "plife": [
+    0.8,
+    1.4
+   ],
+   "look": "smoke",
+   "size": [
+    6,
+    10
+   ],
+   "col": "#3a3430",
+   "c2": "#3a3430",
+   "gravity": -0.3,
+   "grow": 1,
+   "pos": [
+    0,
+    0.5,
+    0
+   ],
+   "x": true
+  }
+ ]
+}

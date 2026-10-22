@@ -1,0 +1,292 @@
+{
+ "v": 1,
+ "desc": "ทางไฟจาก Pyro Dash (ผู้ใช้ 2026-10-22: ค้าง 3 วิ เหยียบ = burn +1, 10 ดาเมจ/วิ): กำแพงไฟเตี้ยตามทาง + เปลว/ถ่าน/ควัน + อากาศร้อนบิด + รอยไหม้ • len = ยาว (ม.)",
+ "tags": [
+  "fire",
+  "dash",
+  "pyro",
+  "zone"
+ ],
+ "pal": "fire",
+ "dur": 4,
+ "params": {
+  "len": {
+   "def": 10,
+   "desc": "ความยาวทาง (ม.)"
+  }
+ },
+ "layers": [
+  {
+   "id": "wall",
+   "t": "firevol",
+   "at": 0,
+   "life": 3.2,
+   "att": "ground",
+   "pos": [
+    0,
+    0,
+    "len/2"
+   ],
+   "kind": "wall",
+   "hx": 0.55,
+   "hz": "len/2",
+   "h": 1.2,
+   "hgt": {
+    "0": 0.05,
+    "1": 0.15,
+    "0.06": 1,
+    "0.8": 0.8
+   },
+   "dis": {
+    "0": 0,
+    "1": 1,
+    "0.75": 0
+   },
+   "int": 1.15,
+   "den": 1.1
+  },
+  {
+   "id": "flames",
+   "t": "emit",
+   "at": 0,
+   "life": 2.9,
+   "rate": "min(160,len*7)",
+   "att": "ground",
+   "from": "line",
+   "fh": "len",
+   "dir": "up",
+   "spread": 0.6,
+   "speed": [
+    0.5,
+    1.6
+   ],
+   "plife": [
+    0.3,
+    0.6
+   ],
+   "look": "fire",
+   "size": [
+    5,
+    8
+   ],
+   "col": "$hi",
+   "c2": "$deep",
+   "gravity": -2,
+   "drag": 3,
+   "pos": [
+    0,
+    0.15,
+    0
+   ]
+  },
+  {
+   "id": "embers",
+   "t": "emit",
+   "at": 0,
+   "life": 3,
+   "rate": "min(60,len*3)",
+   "att": "ground",
+   "from": "line",
+   "fh": "len",
+   "dir": "up",
+   "spread": 1,
+   "speed": [
+    0.5,
+    2
+   ],
+   "plife": [
+    0.6,
+    1.2
+   ],
+   "look": "ember",
+   "size": [
+    1.2,
+    2
+   ],
+   "col": "#fff1c0",
+   "c2": "#ff5a1a",
+   "gravity": -1,
+   "pos": [
+    0,
+    0.3,
+    0
+   ]
+  },
+  {
+   "id": "smoke",
+   "t": "emit",
+   "at": 0.4,
+   "life": 3,
+   "rate": "min(10,len*0.6)",
+   "att": "ground",
+   "from": "line",
+   "fh": "len",
+   "dir": "up",
+   "spread": 0.8,
+   "speed": [
+    0.3,
+    0.9
+   ],
+   "plife": [
+    1,
+    1.6
+   ],
+   "look": "smoke",
+   "size": [
+    6,
+    10
+   ],
+   "col": "#4a423c",
+   "c2": "#4a423c",
+   "gravity": -0.5,
+   "grow": 1,
+   "pos": [
+    0,
+    0.8,
+    0
+   ],
+   "x": true
+  },
+  {
+   "id": "haze1",
+   "t": "warp",
+   "at": 0,
+   "life": 3,
+   "att": "ground",
+   "pos": [
+    0,
+    1,
+    "len*0.3"
+   ],
+   "kind": "haze",
+   "size": 3,
+   "str": 0.7,
+   "op": {
+    "0": 0,
+    "1": 0,
+    "0.1": 1,
+    "0.85": 1
+   },
+   "x": true
+  },
+  {
+   "id": "haze2",
+   "t": "warp",
+   "at": 0,
+   "life": 3,
+   "att": "ground",
+   "pos": [
+    0,
+    1,
+    "len*0.75"
+   ],
+   "kind": "haze",
+   "size": 3,
+   "str": 0.7,
+   "op": {
+    "0": 0,
+    "1": 0,
+    "0.1": 1,
+    "0.85": 1
+   },
+   "x": true
+  },
+  {
+   "id": "sc1",
+   "t": "decal",
+   "at": 0,
+   "life": 4,
+   "att": "ground",
+   "kind": "scorch",
+   "r": 1.1,
+   "pos": [
+    0,
+    0,
+    "len*0.1"
+   ]
+  },
+  {
+   "id": "sc2",
+   "t": "decal",
+   "at": 0,
+   "life": 4,
+   "att": "ground",
+   "kind": "scorch",
+   "r": 1.1,
+   "pos": [
+    0,
+    0,
+    "len*0.3"
+   ]
+  },
+  {
+   "id": "sc3",
+   "t": "decal",
+   "at": 0,
+   "life": 4,
+   "att": "ground",
+   "kind": "scorch",
+   "r": 1.1,
+   "pos": [
+    0,
+    0,
+    "len*0.5"
+   ]
+  },
+  {
+   "id": "sc4",
+   "t": "decal",
+   "at": 0,
+   "life": 4,
+   "att": "ground",
+   "kind": "scorch",
+   "r": 1.1,
+   "pos": [
+    0,
+    0,
+    "len*0.7"
+   ]
+  },
+  {
+   "id": "sc5",
+   "t": "decal",
+   "at": 0,
+   "life": 4,
+   "att": "ground",
+   "kind": "scorch",
+   "r": 1.1,
+   "pos": [
+    0,
+    0,
+    "len*0.9"
+   ]
+  },
+  {
+   "id": "light",
+   "t": "light",
+   "at": 0,
+   "life": 3.2,
+   "col": "$light",
+   "int": {
+    "0": 0,
+    "1": 0,
+    "0.06": 1.4,
+    "0.8": 1.1
+   },
+   "dist": "len/2+5",
+   "att": "ground",
+   "pos": [
+    0,
+    1,
+    "len/2"
+   ]
+  },
+  {
+   "id": "snd",
+   "t": "sound",
+   "at": 0,
+   "name": "cast_fire",
+   "vol": 0.5
+  }
+ ]
+}

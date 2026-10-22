@@ -1,0 +1,68 @@
+{
+ "v": 1,
+ "desc": "ประกายไฟ — ตอนยิง (แบบ C): ควันพ่นปากไม้ + เปลวแวบ",
+ "tags": [
+  "fire",
+  "pyro",
+  "cast"
+ ],
+ "pal": "fire",
+ "dur": 0.8,
+ "layers": [
+  {
+   "id": "puff",
+   "t": "emit",
+   "at": 0,
+   "life": 0.04,
+   "burst": 4,
+   "att": "wand",
+   "from": "point",
+   "dir": "aim",
+   "spread": 0.4,
+   "speed": [
+    1,
+    2
+   ],
+   "plife": [
+    0.4,
+    0.7
+   ],
+   "look": "smoke",
+   "size": [
+    3,
+    4
+   ],
+   "col": "#3a3230",
+   "c2": "#3a3230",
+   "gravity": -0.5,
+   "grow": 1.4,
+   "drag": 3
+  },
+  {
+   "id": "flame",
+   "t": "emit",
+   "at": 0,
+   "life": 0.04,
+   "burst": 5,
+   "att": "wand",
+   "from": "point",
+   "dir": "aim",
+   "spread": 0.5,
+   "speed": [
+    2,
+    4
+   ],
+   "plife": [
+    0.12,
+    0.2
+   ],
+   "look": "fire",
+   "size": [
+    3,
+    4.5
+   ],
+   "gravity": -1,
+   "drag": 4
+  }
+ ]
+}

@@ -1,0 +1,138 @@
+{
+ "v": 1,
+ "desc": "ประกายไฟ — ระหว่างบิน (แบบ C ถ่านไฟจริง): ก้อนถ่านแดงลุกไฟ + หางสั้น + ควันเทาบาง + ถ่านร่วง + อากาศร้อนบิดเล็กน้อย • ติดกับกระสุนจริง (js/35 PJFX)",
+ "tags": [
+  "fire",
+  "pyro",
+  "projectile"
+ ],
+ "pal": "fire",
+ "dur": 1,
+ "layers": [
+  {
+   "id": "coal",
+   "t": "mesh",
+   "at": 0,
+   "life": 1,
+   "loop": true,
+   "shape": "sphere",
+   "mat": "solid",
+   "col": "#5a1a06",
+   "scale": 0.1,
+   "fade": 0
+  },
+  {
+   "id": "burn",
+   "t": "mesh",
+   "at": 0,
+   "life": 1,
+   "loop": true,
+   "shape": "sphere",
+   "mat": "fire",
+   "mode": "ball",
+   "disp": 0.7,
+   "flow": [
+    0,
+    0.4,
+    -1
+   ],
+   "scale": [
+    0.3,
+    0.32,
+    0.4
+   ],
+   "heat": 0.1,
+   "fade": 0
+  },
+  {
+   "id": "tail",
+   "t": "trail",
+   "at": 0,
+   "life": 1,
+   "loop": true,
+   "of": "coal",
+   "col": "$main",
+   "col2": "$deep",
+   "w": 0.12,
+   "tlife": 0.1,
+   "k": 1.2
+  },
+  {
+   "id": "smoke",
+   "t": "emit",
+   "at": 0,
+   "life": 1,
+   "loop": true,
+   "rate": 45,
+   "from": "sphere",
+   "fr": 0.08,
+   "dir": "up",
+   "spread": 0.6,
+   "speed": [
+    0.2,
+    0.6
+   ],
+   "plife": [
+    0.5,
+    0.9
+   ],
+   "look": "smoke",
+   "size": [
+    2.5,
+    4
+   ],
+   "col": "#3a3230",
+   "c2": "#5a5450",
+   "gravity": -0.6,
+   "grow": 1.5,
+   "drag": 2,
+   "x": true
+  },
+  {
+   "id": "drips",
+   "t": "emit",
+   "at": 0,
+   "life": 1,
+   "loop": true,
+   "rate": 60,
+   "from": "sphere",
+   "fr": 0.08,
+   "dir": "down",
+   "spread": 0.8,
+   "speed": [
+    0.3,
+    1
+   ],
+   "plife": [
+    0.3,
+    0.6
+   ],
+   "look": "ember",
+   "size": [
+    1,
+    1.5
+   ],
+   "col": "$hi",
+   "c2": "$deep",
+   "gravity": 7,
+   "drag": 1
+  },
+  {
+   "id": "haze",
+   "t": "warp",
+   "at": 0,
+   "life": 1,
+   "loop": true,
+   "kind": "haze",
+   "size": 0.9,
+   "str": 0.6,
+   "op": 0.8,
+   "pos": [
+    0,
+    0.1,
+    -0.4
+   ],
+   "x": true
+  }
+ ]
+}

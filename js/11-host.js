@@ -113,7 +113,7 @@ function hostStart(){
   setMapVars(G.map);
   PROPON=!PROP_OFF_MODES.includes(G.mode);BLDON=PROPON;
   Object.assign(G,{ph:'count',cdT:3,time:0,proj:[],en:[],feed:[],pid:0,eid:0,wave:0,round:1,rw:{},teamScore:[0,0],
-    timer:(G.mode==='ffa'||G.mode==='tdm')?480:G.mode==='quid'?360:0,result:null,banner:null,queue:[],slines:[],sorbs:[],sballs:[],sdomes:[],impWin:null,snitchBy:null,raceEnd:undefined});
+    timer:(G.mode==='ffa'||G.mode==='tdm')?480:G.mode==='quid'?360:0,result:null,banner:null,queue:[],slines:[],sorbs:[],fpaths:[],sballs:[],sdomes:[],impWin:null,snitchBy:null,raceEnd:undefined});
   plist().forEach((p,i)=>{
     Object.assign(p,freshStats());
     p.team=(G.mode==='coop'||G.mode==='train')?0:MD.team?p.lteam:10+i;
@@ -323,6 +323,7 @@ function updatePlayer(p,dt,acting){
   if(p.dash>0&&p.ultSlash)for(const t of foesOf(p.team)){if(p.ultSlash.has(t))continue;if(Math.hypot(t.x-p.x,t.y-p.y)<90+(t.r||PR)){p.ultSlash.add(t);p.noMul=true;aoeHit(p,t,75,t=>{t.fslUltT=3;});p.noMul=false;}}
   if(p.dash<=0)p.ultSlash=null;
   if(p.sdHit)stormDashTick(p);
+  if(p.fpath&&!(p.dash>0))pyroPathEnd(p);
   if(p.slideT>0&&Math.hypot(p.x-p.slX,p.y-p.slY)>40){const lx=p.slX,ly=p.slY;p.slX=p.x;p.slY=p.y;addIce({x:p.x,y:p.y,r:46,t:4,team:p.team,owner:p.id,kind:'path',lx,ly});}
   p.x+=p.vx*dt;p.y+=p.vy*dt;
   const fr=Math.exp(-6*dt);p.vx*=fr;p.vy*=fr;

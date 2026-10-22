@@ -1,0 +1,115 @@
+{
+ "v": 1,
+ "desc": "Dragonfall ทะยานขึ้น — ชั้นเสริม (แบบ A+C): เสาเปลวไฟพุ่งจากเท้า + คลื่นอากาศบิดบนพื้น + รอยไหม้ + จอสั่นเล็กน้อย",
+ "tags": [
+  "fire",
+  "pyro",
+  "dragonfall"
+ ],
+ "pal": "fire",
+ "dur": 2.2,
+ "layers": [
+  {
+   "id": "jet",
+   "t": "emit",
+   "at": 0,
+   "life": 0.6,
+   "att": "feet",
+   "rate": 140,
+   "from": "disc",
+   "fr": 1,
+   "dir": "up",
+   "spread": 0.3,
+   "speed": [
+    6,
+    10
+   ],
+   "plife": [
+    0.4,
+    0.7
+   ],
+   "look": "fire",
+   "size": [
+    4,
+    6
+   ],
+   "col": "$hi",
+   "c2": "$deep",
+   "gravity": -2
+  },
+  {
+   "id": "shock",
+   "t": "warp",
+   "at": 0,
+   "life": 0.4,
+   "att": "ground",
+   "pos": [
+    0,
+    0.2,
+    0
+   ],
+   "kind": "shock",
+   "flat": true,
+   "size": {
+    "0": 0.5,
+    "1": 6
+   },
+   "op": {
+    "0": 1,
+    "1": 0
+   },
+   "str": 1.1,
+   "col": "#ff7a3a"
+  },
+  {
+   "id": "scorch",
+   "t": "decal",
+   "at": 0,
+   "life": 2.2,
+   "att": "ground",
+   "kind": "scorch",
+   "r": 2
+  },
+  {
+   "id": "smoke",
+   "t": "emit",
+   "at": 0.05,
+   "life": 0.1,
+   "burst": 8,
+   "from": "disc",
+   "fr": 1.2,
+   "dir": "flat",
+   "speed": [
+    1.5,
+    3
+   ],
+   "up": [
+    0.3,
+    1
+   ],
+   "plife": [
+    0.9,
+    1.4
+   ],
+   "look": "smoke",
+   "size": [
+    8,
+    12
+   ],
+   "col": "#3a2c24",
+   "c2": "#2a2420",
+   "gravity": -0.3,
+   "grow": 1.1,
+   "drag": 2,
+   "x": true
+  },
+  {
+   "id": "cam",
+   "t": "screen",
+   "at": 0,
+   "life": 0.25,
+   "shake": 3,
+   "own": true
+  }
+ ]
+}

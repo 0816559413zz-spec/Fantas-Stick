@@ -1,0 +1,24 @@
+{
+ "v": 1,
+ "desc": "Dragonfall กระแทก — ชั้นเสริม (แบบ A+C ผู้ใช้เลือก 2026-10-22 'more impact'): โดมพลังงาน + ฮาโล + วงช็อก 2 ชั้น (A) • คลื่นอากาศบิด + หินกระเด็น + เสาควัน (C) • แฟลชจอ + จอสั่นแรง + คลื่นที่สอง • เล่นซ้อนภาพเดิม (ไฟ Blender)",
+ "tags": ["fire", "impact", "pyro", "dragonfall"],
+ "pal": "fire",
+ "dur": 2.4,
+ "params": {"r": {"def": 6, "desc": "รัศมี (ม.)"}},
+ "layers": [
+  {"id": "core", "t": "flash", "at": 0, "life": 0.1, "col": "$core", "size": "r*0.7", "pos": [0, 0.8, 0]},
+  {"id": "halo", "t": "halo", "at": 0, "life": 0.4, "col": "$main", "size": "r*1.4", "k": 1, "pos": [0, 0.8, 0]},
+  {"id": "dome", "t": "mesh", "at": 0, "life": 0.55, "att": "ground", "shape": "dome", "mat": "energy", "col": "$main", "col2": "$deep", "scale": {"0": 0.2, "0.4": 0.85, "1": 1, "ease": "out", "x": "r"}, "op": {"0": 0.9, "1": 0}, "rim": 1.6, "dis": {"0": 0, "0.5": 0, "1": 0.8}},
+  {"id": "ring1", "t": "ring", "at": 0, "life": 0.45, "att": "ground", "pos": [0, 0.1, 0], "col": "$main", "r": "r*1.5", "op": 0.55},
+  {"id": "ring2", "t": "ring", "at": 0.08, "life": 0.6, "att": "ground", "pos": [0, 0.08, 0], "col": "$hi", "r": "r*2.3", "op": 0.35},
+  {"id": "shock", "t": "warp", "at": 0, "life": 0.5, "att": "ground", "pos": [0, 0.2, 0], "kind": "shock", "flat": true, "size": {"0": 0.5, "1": 1, "x": "r*2.4"}, "op": {"0": 1, "1": 0}, "str": 1.5, "col": "#ff7a3a"},
+  {"id": "shock2", "t": "warp", "at": 0.22, "life": 0.45, "att": "ground", "pos": [0, 0.2, 0], "kind": "shock", "flat": true, "size": {"0": 0.5, "1": 1, "x": "r*1.6"}, "op": {"0": 0.8, "1": 0}, "str": 1, "col": "#ff7a3a", "x": true},
+  {"id": "rocks", "t": "debris", "at": 0, "life": 1.5, "att": "ground", "pos": [0, 0.3, 0], "kind": "rock", "n": 12, "speed": "r*2.1", "r": "r*0.3", "size": 1.4},
+  {"id": "embers", "t": "emit", "at": 0, "life": 0.06, "burst": 60, "from": "hemisphere", "fr": "r*0.25", "dir": "out", "speed": ["r*1.2", "r*2.6"], "plife": [0.4, 0.8], "look": "ember", "size": [2, 3.2], "col": "$core", "c2": "$deep", "gravity": -0.5, "pos": [0, 0.4, 0]},
+  {"id": "smoke", "t": "emit", "at": 0.05, "life": 0.1, "burst": 18, "from": "disc", "fr": "r*0.5", "dir": "up", "spread": 1.2, "speed": [0.6, 1.8], "plife": [1.2, 2], "look": "smoke", "size": [8, 14], "col": "#3a2c24", "c2": "#2a2420", "gravity": -0.4, "grow": 1.2, "drag": 2, "pos": [0, 0.3, 0], "x": true},
+  {"id": "rise", "t": "emit", "at": 0.2, "life": 0.5, "rate": 60, "from": "disc", "fr": "r*0.8", "dir": "up", "spread": 0.4, "speed": [2, 5], "plife": [0.4, 0.7], "look": "fire", "size": [5, 8], "col": "#fff1c0", "c2": "#ff3a0a", "gravity": -2, "pos": [0, 0.1, 0], "x": true},
+  {"id": "cam", "t": "screen", "at": 0, "life": 0.35, "shake": 10, "kick": 0.45, "radial": 0.5, "flash": 0.05, "fcol": "#ffb347", "own": true},
+  {"id": "camo", "t": "screen", "at": 0, "life": 0.3, "shake": 5, "other": true, "near": 30},
+  {"id": "snd", "t": "sound", "at": 0.02, "name": "slam", "vol": 0.9}
+ ]
+}

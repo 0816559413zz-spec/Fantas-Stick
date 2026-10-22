@@ -274,6 +274,8 @@ function makeProj(col,t){
   return o;
 }
 const _a=new THREE.Vector3(),_b=new THREE.Vector3();
+// กระสุนที่มีเอฟเฟกต์จากไฟล์ติดตัว (ผู้ใช้เลือก VFX 2026-10-22): [ระหว่างบิน (วน), ตอนโดน]
+const PJFX={spark:['fire/spark_fly','fire/spark_hit'],pfire:['fire/fireball_fly',null]};
 function syncProj(v,now){
   const ex=VIEW.ex!==null?VIEW.ex:Math.min(0.1,(now-VIEW.tCur)/1000),seen=new Set();
   for(const j of v.J){
@@ -281,9 +283,11 @@ function syncProj(v,now){
     const vt=(j.t==='pfire'||j.t==='pfireb')?'fire':j.t,col=j.rf?'#7ff6ff':PCOL[j.t],r=PDEF[j.t].r*S3*(vt==='fire'?1.4:1);
     let o=JM3.get(j.id);
     if(!o){o=makeProj(col,j.t);o.pt=j.t;JM3.set(j.id,o);
-      {const P=palOf(pjPal(j.t),col),big=j.t==='iceboulder'||j.t==='pfireb';o.tr=trailNew({col:P.hi,col2:P.deep,w:big?0.32:vt==='fire'?0.2:0.11,life:big?0.28:0.17,k:1.7});}}   // หางแสงทุกกระสุน (สีตามธาตุ)
+      if(PJFX[j.t])o.fx=fxPlay(PJFX[j.t][0],{x:j.x,y:j.y,h:j.h!==undefined?j.h:1.35,a:Math.atan2(j.vy,j.vx)});
+      if(!o.fx){const P=palOf(pjPal(j.t),col),big=j.t==='iceboulder'||j.t==='pfireb';o.tr=trailNew({col:P.hi,col2:P.deep,w:big?0.32:vt==='fire'?0.2:0.11,life:big?0.28:0.17,k:1.7});}}   // หางแสงทุกกระสุน (สีตามธาตุ)
     if(o.col!==col){o.halo.material=glowMat(col,0.9);o.inner.material.color.copy(hdr(col,2.2));o.tail.material.color.copy(hdr(col,1.6));o.col=col;}
     const x=j.x+j.vx*ex,y=j.y+j.vy*ex,X=tx(x),Z=tz(y),H=(j.h!==undefined?j.h:1.35)+(j.vh||0)*ex;
+    if(o.fx){o.fx.x=x;o.fx.y=y;o.fx.h=H;o.fx.a=Math.atan2(j.vy,j.vx);}
     {const Hw=H+GY(x,y);o.g.position.set(X,Hw,Z);if(o.tr)trailPoint(o.tr,X,Hw,Z);o.g.lookAt(_t1.set(X+j.vx*S3,Hw+(j.vh||0),Z+j.vy*S3));}
     if(j.t==='web'){o.core.material.color.set('#f4f4ff');o.tail.visible=false;if(Math.random()<0.6)PARTS.push({x,y,h:H,vx:rnd(-30,30),vy:rnd(-30,30),vh:rnd(-0.5,0.5),life:0.5,max:0.5,col:'#e8e8f0',size:2.5,g:1,smoke:true});}
     const fl=1+0.15*Math.sin(now/30+j.id);
@@ -306,6 +310,7 @@ function syncProj(v,now){
         if(Math.random()<0.3)PARTS.push({x,y,h:H,vx:0,vy:0,vh:0.3,life:0.8,max:0.8,col:'#e8f6ff',size:5,g:-0.2,smoke:true,grow:1.3});
         break;
       case 'spark':
+        if(o.fx){o.core.visible=o.inner.visible=o.tail.visible=false;o.halo.scale.setScalar(r*1.3*fl);o.lp=[x,y,H];break;}   // แบบ C: ก้อนถ่านไฟจากไฟล์ fx
         // ประกายไฟพุ่งเร็ว: แกนเหลืองสว่าง + หางส้มแดง + ถ่านไฟเล็ก ๆ
         o.core.visible=false;o.inner.visible=false;o.halo.scale.setScalar(r*2*fl);o.tail.visible=false;
         PARTS.push({x,y,h:H,vx:0,vy:0,vh:0,life:0.05,max:0.05,col:'#fff6c0',size:3.4,g:0});
@@ -316,6 +321,7 @@ function syncProj(v,now){
       case 'fire':{
         // ลูกไฟชาร์จ/Kindle: ลูกไฟ shader แกนเหลืองขาว เปลวไหลไปด้านหลัง + กรวยหางไฟ + เปลวอนุภาค • Kindle ใหญ่และหนักกว่า มีเปลววนรอบแกน
         const big=j.t==='pfireb';o.halo.scale.setScalar(r*(big?5:3.6)*fl);o.inner.visible=o.core.visible=o.tail.visible=false;
+        if(o.fx){o.fb.visible=o.ft.visible=false;o.halo.scale.setScalar(r*2.2*fl);o.lp=[x,y,H];break;}   // ลูกไฟชาร์จแบบ B: ลูกแสงขาวจากไฟล์ fx (ตอนโดนใช้แบบเดิม)
         if(o.fb){o.fb.scale.setScalar(r*(big?0.95:0.72)*fl);o.fb.userData.shell.rotation.z+=0.15;o.ft.scale.set(r*(big?0.9:0.68),r*(big?0.9:0.68),big?4.2:3.2);}
         for(let i=0;i<(big?5:3);i++)flame(x-j.vx*0.012*i+rnd(-5,5),y-j.vy*0.012*i+rnd(-5,5),H-0.25+rnd(-0.1,0.1),{vx:-j.vx*0.15+rnd(-20,20),vy:-j.vy*0.15+rnd(-20,20),vh:rnd(0.5,2),life:rnd(0.25,0.4),size:big?rnd(9,13):rnd(6,9),g:-2,drag:3});
         if(big)for(let i=0;i<4;i++){const a=now/55+i*1.57;flame(x+Math.cos(a)*r*16,y+Math.sin(a)*r*16,H-0.2+Math.sin(a*1.3)*0.2,{vx:-j.vx*0.05,vy:-j.vy*0.05,vh:rnd(0.5,1.5),life:0.22,size:6,g:-1});}
@@ -343,6 +349,7 @@ function syncProj(v,now){
   }
   for(const [id,o] of JM3)if(!seen.has(id)){
     if(o.tr)trailStop(o.tr);
+    if(o.fx){fxStop(o.fx);const hf=PJFX[o.pt]&&PJFX[o.pt][1];if(hf&&o.lp)fxPlay(hf,{x:o.lp[0],y:o.lp[1],h:o.lp[2],a:o.fx.a});}
     if(o.lp&&o.pt==='icicle'){const [x,y,H]=o.lp;playFx('ice_hit',x,y,H,{s:0.8});for(let i=0;i<8;i++){const an=rnd(0,6.283),sp=rnd(100,220);PARTS.push({x,y,h:H,vx:Math.cos(an)*sp,vy:Math.sin(an)*sp,vh:rnd(-1,2.5),life:rnd(0.15,0.3),max:0.3,col:i%2?'#ffffff':'#bfeaff',size:1.4,g:6,drag:4});}FX.flashSprite(x,y,H,'#dff6ff',0.25,1.3,0.25,1.6);}
     if(o.lp&&o.pt==='spark'){const [x,y,H]=o.lp;for(let i=0;i<9;i++){const an=rnd(0,6.283),sp=rnd(120,260);PARTS.push({x,y,h:H,vx:Math.cos(an)*sp,vy:Math.sin(an)*sp,vh:rnd(-1,3),life:rnd(0.12,0.22),max:0.22,col:i%3?'#ffc04a':'#fff6c0',size:1.3,g:6,drag:5});}}
     if(o.lp&&o.pt==='pfire'){const [x,y,H]=o.lp;ring(x,y,'#ff9a3a',70,0.28,Math.max(0.15,H-1));for(let i=0;i<14;i++){const an=i/14*6.283;flame(x+Math.cos(an)*10,y+Math.sin(an)*10,Math.max(0.1,H-0.5),{vx:Math.cos(an)*260,vy:Math.sin(an)*260,vh:rnd(1,3),life:0.3,size:rnd(6,9),drag:5});}

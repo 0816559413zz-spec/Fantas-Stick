@@ -1,0 +1,66 @@
+{
+ "v": 1,
+ "desc": "ลูกไฟชาร์จ — ระหว่างกดค้าง (แบบ B อนิเมะ, ซ้อนอนุภาคเดิม): เส้นแสงถูกดูดเข้าปลายไม้ + วงแหวนบางหดเข้า • วนจนปล่อย",
+ "tags": [
+  "fire",
+  "pyro",
+  "charge"
+ ],
+ "pal": "fire",
+ "dur": 1,
+ "layers": [
+  {
+   "id": "pull",
+   "t": "emit",
+   "at": 0,
+   "life": 1,
+   "loop": true,
+   "rate": 60,
+   "att": "wand",
+   "from": "sphere",
+   "fr": 1.4,
+   "dir": "in",
+   "speed": [
+    2,
+    4
+   ],
+   "plife": [
+    0.25,
+    0.35
+   ],
+   "look": "streak",
+   "size": [
+    1.6,
+    2.4
+   ],
+   "col": "$hi",
+   "c2": "$main",
+   "gravity": 0,
+   "drag": 0
+  },
+  {
+   "id": "hoop",
+   "t": "mesh",
+   "at": 0,
+   "life": 0.45,
+   "loop": true,
+   "att": "wand",
+   "shape": "ring",
+   "inner": 0.9,
+   "mat": "glow",
+   "col": "#ffffff",
+   "bill": true,
+   "scale": {
+    "0": 1.3,
+    "1": 0.12,
+    "ease": "in"
+   },
+   "op": {
+    "0": 0,
+    "1": 0,
+    "0.3": 0.7
+   },
+   "fade": 0
+  }
+ ]
+}

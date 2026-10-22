@@ -1,0 +1,50 @@
+{
+ "v": 1,
+ "desc": "Dragonfall ดิ่งลง — ชั้นเสริม: จอเบลอพุ่ง (ของเรา) + เปลวไฟพ่นท้ายตัวตอนดิ่ง",
+ "tags": [
+  "fire",
+  "pyro",
+  "dragonfall"
+ ],
+ "pal": "fire",
+ "dur": 0.8,
+ "layers": [
+  {
+   "id": "blur",
+   "t": "screen",
+   "at": 0,
+   "life": 0.45,
+   "radial": 0.6,
+   "own": true
+  },
+  {
+   "id": "jet",
+   "t": "emit",
+   "at": 0,
+   "life": 0.45,
+   "att": "chest",
+   "rate": 120,
+   "from": "sphere",
+   "fr": 0.6,
+   "dir": "up",
+   "spread": 0.5,
+   "speed": [
+    3,
+    6
+   ],
+   "plife": [
+    0.25,
+    0.45
+   ],
+   "look": "fire",
+   "size": [
+    6,
+    9
+   ],
+   "col": "#fff1c0",
+   "c2": "#ff3a0a",
+   "gravity": -1,
+   "drag": 3
+  }
+ ]
+}

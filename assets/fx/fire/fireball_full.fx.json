@@ -1,0 +1,72 @@
+{
+ "v": 1,
+ "desc": "ลูกไฟชาร์จเต็ม (แบบ B): แฟลชขาว + วงช็อกขาวที่ปลายไม้ + เส้นแสงแตกออก",
+ "tags": [
+  "fire",
+  "pyro",
+  "charge"
+ ],
+ "pal": "fire",
+ "dur": 0.5,
+ "layers": [
+  {
+   "id": "core",
+   "t": "flash",
+   "at": 0,
+   "life": 0.08,
+   "att": "wand",
+   "col": "#ffffff",
+   "size": 1.4
+  },
+  {
+   "id": "ring",
+   "t": "mesh",
+   "at": 0,
+   "life": 0.2,
+   "att": "wand",
+   "shape": "ring",
+   "inner": 0.85,
+   "mat": "glow",
+   "col": "#ffffff",
+   "bill": true,
+   "scale": {
+    "0": 0.2,
+    "1": 2.2,
+    "ease": "out"
+   },
+   "op": {
+    "0": 1,
+    "1": 0
+   },
+   "fade": 0
+  },
+  {
+   "id": "spark",
+   "t": "emit",
+   "at": 0,
+   "life": 0.04,
+   "burst": 18,
+   "att": "wand",
+   "from": "sphere",
+   "fr": 0.1,
+   "dir": "out",
+   "speed": [
+    5,
+    9
+   ],
+   "plife": [
+    0.12,
+    0.22
+   ],
+   "look": "streak",
+   "size": [
+    2,
+    3
+   ],
+   "col": "#ffffff",
+   "c2": "$main",
+   "gravity": 0,
+   "drag": 4
+  }
+ ]
+}

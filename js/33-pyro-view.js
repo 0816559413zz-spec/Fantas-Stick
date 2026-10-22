@@ -102,6 +102,9 @@ function pyroFX(o,p,pz,now,dt){
     o.cgBurst=0.4;ring(p.x,p.y,'#ff8a2a',45,0.3,pz+0.1);for(let i=0;i<12;i++){const an=i/12*6.283;flame(p.x+Math.cos(an)*14,p.y+Math.sin(an)*14,pz+0.05,{vx:Math.cos(an)*70,vy:Math.sin(an)*70,vh:rnd(5,8),life:0.32,size:rnd(7,10),g:-2,drag:3});}}
   if(dcFull&&!o.dcFull){ring(p.x,p.y,'#ffb347',70,0.4,pz+0.15);burst(p.x,p.y,'#ff7a2a',40,260,0.45,3,{h:pz+0.3,vh:[2,6],g:-1});FX.flashLight(p.x,p.y,pz+0.8,'#ff8a3a',5,12,0.3);if(p.id===NET.myId)snd('buff');}
   o.cgFull=cgFull;o.dcFull=dcFull;
+  // ลูกไฟชาร์จแบบ B (ผู้ใช้เลือก 2026-10-22): เส้นแสงดูดเข้า + วงหด (ซ้อนอนุภาคเดิม) • เต็ม = แฟลช/วงช็อกขาว
+  if(p.cg>0&&o.pyroOn){if(!o.cgFx)o.cgFx=fxPlay('fire/fireball_charge',{x:p.x,y:p.y,h:pz,follow:p.id});if(cgFull&&!o.cgFx2)o.cgFx2=fxPlay('fire/fireball_full',{x:p.x,y:p.y,h:pz,follow:p.id})||1;}
+  else{if(o.cgFx){fxStop(o.cgFx);o.cgFx=null;}o.cgFx2=null;}
   // ชาร์จเต็ม: ไฟพุ่งจากใต้เท้าแค่แว้บเดียว ~0.4 วิ ตอนเพิ่งเต็ม แล้วหายไป (ผู้เล่น 2026-10-19: ของเดิมเยอะและนานเกิน) — หลังจากนั้นเหลือแค่ลูกไฟที่ปลายไม้บอกว่าเต็ม
   if(o.cgBurst>0){if(!cgFull)o.cgBurst=0;else{o.cgBurst-=dt;const f=Math.max(0,o.cgBurst/0.4);for(let i=0;i<Math.ceil(4*f);i++){const an=rnd(0,6.283),rr=rnd(6,22);flame(p.x+Math.cos(an)*rr,p.y+Math.sin(an)*rr,pz+0.05,{vh:rnd(5,8)*(0.5+0.5*f),life:rnd(0.22,0.32),size:rnd(6,9)*(0.6+0.4*f),g:-2.5});}}}
   if(dcFull){for(let i=0;i<4;i++){const an=now/120+i*Math.PI/2;PARTS.push({x:p.x+Math.cos(an)*30,y:p.y+Math.sin(an)*30,h:pz+0.15,vx:0,vy:0,vh:rnd(2.5,4.5),life:0.4,max:0.4,col:i%2?'#ffd27a':'#ff6a1a',size:3.5,g:-1});}}

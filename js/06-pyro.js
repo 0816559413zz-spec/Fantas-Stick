@@ -49,13 +49,36 @@ function pyroDash(p,inp,pr,dt,setCd){
     const dist=150+950*p.dchg/4,sp=2000;
     p.dash=dist/sp;p.dashSp=sp;p.dashX=dx;p.dashY=dy;p.inv=p.dash+0.06;p.shieldOn=false;
     setCd('dodge',(3+p.dash)*p.buffs.cdr);
-    emit({k:'efx',z:'pboom',x:p.x-dx*24,y:p.y-dy*24,h:p.z+0.6,a:Math.atan2(dy,dx),n:Math.round(p.dchg/4*50)/10});
+    emit({k:'efx',z:'pboom',x:p.x-dx*24,y:p.y-dy*24,h:p.z+0.6,a:Math.atan2(dy,dx),n:Math.round(p.dchg/4*50)/10,id:p.id});
     emit({k:'dash',x:p.x,y:p.y});
-    p.dchg=0;
+    p.dchg=0;p.fpath={x:p.x,y:p.y};
     return false;
   }
   if(pr.sp&&p.cd.dodge<=0&&p.z<0.5){p.dchgOn=true;p.dchg=0;p.shieldOn=false;return true;}
   return false;
+}
+// ทางไฟจาก Dash (ผู้ใช้ 2026-10-22): ค้าง 3 วิ • ศัตรูเหยียบเข้า = burn +1 stack (ต่อการเข้า 1 ครั้ง) • ยืนบนทาง = 10 ดาเมจ/วิ
+// ⚠ Claude เลือกเอง: กว้าง 1.5 ม. (ครึ่ง 15 px + ตัว) • เข้าซ้ำได้ stack ใหม่หลังออกไปแล้ว ≥1 วิ • ไม่โดนตัวเอง/ทีม • ลอยสูง >1.2 ม. ไม่โดน
+const FPATH={T:3,W:15,DPS:10};
+function pyroPathEnd(p){
+  const f=p.fpath;p.fpath=null;const len=Math.hypot(p.x-f.x,p.y-f.y);if(len<20||len>1300||!p.alive||p.downed)return;
+  (G.fpaths||(G.fpaths=[])).push({x0:f.x,y0:f.y,x1:p.x,y1:p.y,t:FPATH.T,tt:0.5,owner:p.id,team:p.team,on:new Map()});
+  emit({k:'efx',z:'pfpath',x:Math.round(f.x),y:Math.round(f.y),h:groundH(f.x,f.y),a:Math.round(Math.atan2(p.y-f.y,p.x-f.x)*1000)/1000,len:Math.round(len),id:p.id});
+}
+function updateFirePaths(dt){
+  if(!G.fpaths||!G.fpaths.length)return;
+  for(const f of G.fpaths){
+    f.t-=dt;f.tt-=dt;const tick=f.tt<=0;if(tick)f.tt=0.5;
+    const dx=f.x1-f.x0,dy=f.y1-f.y0,L2=dx*dx+dy*dy||1;
+    for(const t of foesOf(f.team)){
+      const u=clamp(((t.x-f.x0)*dx+(t.y-f.y0)*dy)/L2,0,1),d=Math.hypot(t.x-(f.x0+dx*u),t.y-(f.y0+dy*u));
+      const inside=d<FPATH.W+(t.r||PR)*0.6&&(t.isE?(t.h||0):(t.z||0))<1.2&&!(t.inv>0);
+      const last=f.on.get(t);
+      if(inside){if(last===undefined||(last<0&&G.time+last>=1))addBurn(t,1,f.owner);f.on.set(t,1);if(tick)damage(t,FPATH.DPS*0.5,f.owner,'zone');}
+      else if(last>0)f.on.set(t,-(G.time+0.001));
+    }
+  }
+  G.fpaths=G.fpaths.filter(f=>f.t>0);
 }
 
 

@@ -1,0 +1,76 @@
+{
+ "v": 1,
+ "desc": "ลูกไฟชาร์จ — ระหว่างบิน (แบบ B): ลูกแสงขาวแกนร้อน ขอบส้ม + หางขาวสั้นคม + ถ่านไฟร่วง • ติดกับกระสุนจริง (js/35 PJFX) วนจนโดน",
+ "tags": [
+  "fire",
+  "pyro",
+  "projectile"
+ ],
+ "pal": "fire",
+ "dur": 1,
+ "layers": [
+  {
+   "id": "orb",
+   "t": "mesh",
+   "at": 0,
+   "life": 1,
+   "loop": true,
+   "shape": "sphere",
+   "mat": "glow",
+   "col": "#ffffff",
+   "scale": 0.5,
+   "fade": 0
+  },
+  {
+   "id": "rim",
+   "t": "halo",
+   "at": 0,
+   "life": 1,
+   "loop": true,
+   "col": "$main",
+   "size": 2.2,
+   "size0": 2.2,
+   "k": 0.9
+  },
+  {
+   "id": "tail",
+   "t": "trail",
+   "at": 0,
+   "life": 1,
+   "loop": true,
+   "of": "orb",
+   "col": "#ffffff",
+   "col2": "$deep",
+   "w": 0.36,
+   "tlife": 0.13,
+   "k": 2.2
+  },
+  {
+   "id": "embers",
+   "t": "emit",
+   "at": 0,
+   "life": 1,
+   "loop": true,
+   "rate": 50,
+   "from": "sphere",
+   "fr": 0.2,
+   "dir": "random",
+   "speed": [
+    0.3,
+    1.2
+   ],
+   "plife": [
+    0.3,
+    0.6
+   ],
+   "look": "ember",
+   "size": [
+    1.4,
+    2.2
+   ],
+   "col": "$hi",
+   "c2": "$deep",
+   "gravity": -1
+  }
+ ]
+}
