@@ -31,7 +31,7 @@ function skwBuild(){
     <div class="skwHead"><div class="skwTi"><b>Grimoire</b><small>จัดชุดคาถา</small></div><button type="button" class="skwX" data-x="1" title="ปิด (Esc)">✕</button></div>
     <div class="skwTop"><div class="skwRow"></div></div>
     <div class="skwMid"><div class="skwRing">${skwSvg()}<div class="skwFlash"></div><div class="skwArc skwArcL"></div><div class="skwArc skwArcR"></div><div class="skwSp"></div><div class="skwInfo"></div></div></div>
-    <div class="skwBot"><button type="button" class="skwGuide">วิธีเล่นสายนี้ ›</button><div class="skwSlots"></div><button type="button" class="skwDone" data-x="1">เสร็จ</button></div>`;
+    <div class="skwBot"><button type="button" class="skwGuide">วิธีเล่นสายนี้ ›</button><div class="skwTray"><div class="skwLoad"><b>LOADOUT</b><span>ชุดคาถาที่ใส่อยู่</span></div><div class="skwHint"><i></i><span></span></div><div class="skwSlots"></div></div><button type="button" class="skwDone" data-x="1">เสร็จ</button></div>`;
   document.body.appendChild(el);SKW.el=el;SKW.cv=el.querySelector('.skwFx');
   el.addEventListener('click',skwClick);
   el.addEventListener('pointerover',skwOver);
@@ -86,7 +86,7 @@ function skwRing(k){
     const si=+b.dataset.sp,S=SPELL_LIST[si],e=k.ids.indexOf(si);
     b.classList.toggle('eq',e>=0);b.classList.toggle('act',e===SKW.slot);
     b.classList.toggle('blk',e<0&&S.path!==k.path&&off>=2&&actOwn);
-    b.querySelector('.skwK').textContent=e>=0?skwKey(e):'';
+    b.querySelector('.skwK').textContent=e>=0?'ใส่ '+skwKey(e):'';   // ป้าย "ใส่ Q" = ใส่อยู่แล้ว (ไม่ใช่ช่อง)
   });
 }
 // เปลี่ยนวง: คาถาเดิมบินออก (ทีละตัว) แล้วชุดใหม่บินเข้า
@@ -99,6 +99,7 @@ function skwSwap(fn){
 function skwSlots(k){
   const box=SKW.el.querySelector('.skwSlots'),first=!box.children.length;
   if(first)box.innerHTML=[0,1,2,3].map(i=>`<button type="button" class="skwP" data-slot="${i}" style="--i:${i}"><span class="skwPg"><svg viewBox="0 0 100 100" aria-hidden="true"><polygon class="o" points="${SKW_PO}"/><polygon class="n" points="${SKW_PI}"/></svg><span class="skwPi"></span></span><b class="skwPk"></b><small class="skwPn"></small></button>`).join('');
+  {const h=SKW.el.querySelector('.skwHint'),a=box.children[SKW.slot];if(a&&h){h.style.setProperty('--x',(a.offsetLeft+a.offsetWidth/2)+'px');SKW.el.querySelector('.skwLoad span').textContent='ชุดคาถาที่ใส่อยู่ · กดคาถาบนวงเพื่อใส่ช่อง '+skwKey(SKW.slot);}}
   [...box.children].forEach((b,i)=>{
     const S=SPELL_LIST[k.ids[i]],c=PATHS[S.path].col;
     b.style.setProperty('--c',c);b.classList.toggle('on',i===SKW.slot);b.classList.toggle('oth',S.path!==k.path);
@@ -253,7 +254,7 @@ function skwClose(save){
   if(!SKW.on)return;SKW.on=false;
   store('wd_kit2',myKit);try{lobbyKitSend();}catch(e){console.warn(e);}skwChanged();   // ปิดแบบไหนก็เก็บชุดเสมอ
   const el=SKW.el;el.classList.add('out');document.body.classList.remove('skwOn');
-  clearTimeout(SKW.closeT);SKW.closeT=setTimeout(()=>{if(!SKW.on){el.classList.add('hidden');el.classList.remove('out');}},240);
+  clearTimeout(SKW.closeT);SKW.closeT=setTimeout(()=>{if(!SKW.on){el.classList.add('hidden');el.classList.remove('out');}},640);   // รอแอนิเมชันปิด (= เปิดย้อนกลับ)
 }
 // ปุ่มลัดตอนเปิด (จับก่อนปุ่มเกม): Esc ปิด • Q/E/R/F หรือ 1-4 เลือกช่อง • ←/→ เลื่อนช่อง • ไม่ส่งปุ่มอื่นเข้าเกม
 addEventListener('keydown',e=>{

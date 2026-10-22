@@ -337,3 +337,86 @@ body.hS-room .hGo.on{display:flex;animation:hUp .6s var(--h-ease) .15s both}
 .hGo .waitTxt{padding:0 18px;border:1px solid var(--h-line);border-radius:3px;background:rgba(7,9,18,.8)}
 .hGo .rErr{text-align:right;max-width:min(520px,60vw);padding:4px 10px;border-radius:3px;background:rgba(20,6,12,.7)}
 @media (max-height:820px){.hGo .mapBtn,.hGo .startBtn{height:70px}.hGo .startBtn span{font-size:21px}}
+
+
+/* =====================================================================
+   ตั้งค่า (ผู้ใช้ 2026-10-23 รูปอ้างอิง "Settings" แบบวงโค้ง) — ใช้ทั้งเมนูและในเกม (ในเกมจะออกแบบอีกแบบทีหลัง)
+   ไม่ใช่หน้าใหม่: ฉากหลังเฟดมืด/เบลอ • ซ้าย = เส้นโค้งวงกลมทองบาง ปุ่มกลมไอคอนเรียงบนเส้น (ไม่มีรูปในวง → ไล่สีจางแทน)
+   ขวา = แผงไล่สีน้ำเงินเข้ม→น้ำเงิน หัวข้อบาง ตัวเลือกแบบจุด + เส้นใต้ สไลเดอร์เส้นบาง
+   ===================================================================== */
+#settings.sx{display:block;padding:0;background:none;backdrop-filter:none;z-index:40;overflow:hidden;--sxR:min(46vh,31vw);--sxCx:calc(var(--sxR) * -.3);font-family:var(--h-sans)}
+#settings.sx.hidden{display:none}
+.sx .sxBg{position:absolute;inset:0;background:
+  radial-gradient(circle at var(--sxCx) 50%,rgba(40,30,80,.55) 0,rgba(14,12,34,.75) calc(var(--sxR) * .98),transparent calc(var(--sxR) * 1.02)),
+  linear-gradient(90deg,rgba(4,5,14,.86) 0%,rgba(6,9,26,.84) 34%,rgba(10,22,58,.9) 70%,rgba(18,44,104,.92) 100%);
+  backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px);animation:sxFade .45s ease both}
+.sx .sxArc{position:absolute;left:0;top:0;bottom:0;width:calc(var(--sxR) * 1.1 + 180px);pointer-events:none}
+.sx .sxCurve{position:absolute;left:calc(var(--sxCx) - var(--sxR));top:calc(50% - var(--sxR));width:calc(var(--sxR) * 2);height:calc(var(--sxR) * 2);overflow:visible;fill:none;animation:sxArcIn .9s var(--h-ease) both}
+.sx .sxCurve circle{stroke:#d9b45a;stroke-width:.5;vector-effect:non-scaling-stroke;opacity:.85}
+.sx .sxCurve circle.b{stroke-width:1.6;opacity:.75;stroke-dasharray:0}
+.sx .sxCurve circle.c{stroke:rgba(217,180,90,.25);stroke-dasharray:2 6}
+.sx .stabs{position:absolute;inset:0;margin:0;display:block;pointer-events:none}
+/* ปุ่มบนเส้นโค้ง: ตำแหน่ง = จุดศูนย์กลางวง + R·(cos a, sin a) */
+.sx .stab{position:absolute;left:calc(var(--sxCx) + var(--sxR) * cos(var(--a)) * .975);top:calc(50% + var(--sxR) * sin(var(--a)) * .975);transform:translate(calc(clamp(46px,6.2vh,64px) / -2),-50%);
+  display:flex;align-items:center;gap:22px;padding:0;background:none;border:0;cursor:pointer;pointer-events:auto;color:#e9d9a6;animation:sxTabIn .6s var(--h-ease) both;animation-delay:calc(var(--i) * 60ms + 150ms)}
+.sx .sxI{display:grid;place-items:center;width:clamp(46px,6.2vh,64px);height:clamp(46px,6.2vh,64px);border-radius:50%;background:radial-gradient(circle at 50% 35%,#1d1a2c,#0b0a14 70%);border:1.5px solid #c9a35e;box-shadow:0 0 0 4px rgba(10,9,20,.85),0 0 0 5px rgba(201,163,94,.35);transition:all .35s var(--h-ease)}
+.sx .sxI svg{width:44%;height:44%}
+.sx .sxL{display:flex;flex-direction:column;align-items:flex-start;text-align:left;font:500 clamp(13px,1.1vw,16px) var(--h-serif);letter-spacing:.14em;color:#e2c27a;text-shadow:0 1px 6px rgba(0,0,0,.8)}
+.sx .sxL small{font:300 11px var(--h-sans);letter-spacing:.06em;color:var(--h-mute);margin-top:2px}
+.sx .stab:hover .sxI{border-color:#f3dc94;box-shadow:0 0 0 4px rgba(10,9,20,.85),0 0 0 5px rgba(243,220,148,.6),0 0 22px rgba(226,194,122,.45);color:#fff}
+.sx .stab.on .sxI{background:radial-gradient(circle at 50% 35%,#3a2e14,#140f06 75%);border-color:#f3dc94;color:#fff;box-shadow:0 0 0 4px rgba(10,9,20,.85),0 0 0 6px rgba(243,220,148,.8),0 0 28px rgba(226,194,122,.55);transform:scale(1.1)}
+.sx .stab.on .sxL{color:#fff}
+.sx .sxExit .sxI{border-color:rgba(201,163,94,.6)}
+/* แผงขวา */
+.sx .sxPanel{position:absolute;left:auto;right:clamp(20px,6vw,140px);top:50%;transform:translateY(-50%);width:min(560px,calc(100vw - var(--sxR) * .62 - 300px));min-width:min(420px,92vw);max-height:calc(100vh - 60px);overflow-y:auto;
+  background:none;border:0;box-shadow:none;padding:0 6px 0 0;animation:sxPanIn .6s var(--h-ease) both .1s}
+.sx .sxPanel::before,.sx .sxPanel::after{display:none}
+.sx .sxTi{margin:0 0 18px;font:400 clamp(30px,3.2vw,48px)/1 var(--h-serif);letter-spacing:.12em;color:#f2f4ff;text-shadow:0 0 22px rgba(160,180,255,.35);display:flex;align-items:baseline;gap:16px}
+.sx .sxTi small{font:300 14px var(--h-sans);letter-spacing:.1em;color:var(--h-mute)}
+.sx #setBody.sxNew{animation:sxBody .45s var(--h-ease)}
+.sx .srow{display:grid;grid-template-columns:1fr;gap:10px;margin:0 0 20px;font-size:14px;color:var(--h-ink)}
+.sx .srow>span{font:400 clamp(17px,1.4vw,21px) var(--h-sans);color:#f2f4ff;letter-spacing:.02em}
+.sx .srow:has(input[type=range]){grid-template-columns:1fr 64px;row-gap:8px}
+.sx .srow:has(input[type=range])>span{grid-column:1/3}
+.sx .srow input[type=range]{-webkit-appearance:none;appearance:none;height:16px;background:transparent;accent-color:auto}
+.sx .srow input[type=range]::-webkit-slider-runnable-track{height:1px;background:linear-gradient(90deg,#e2c27a,rgba(255,255,255,.35))}
+.sx .srow input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:12px;margin-top:-6px;border-radius:50%;background:#f3dc94;box-shadow:0 0 10px rgba(243,220,148,.8)}
+.sx .srow input[type=range]::-moz-range-track{height:1px;background:rgba(255,255,255,.4)}
+.sx .srow input[type=range]::-moz-range-thumb{width:12px;height:12px;border:0;border-radius:50%;background:#f3dc94}
+.sx .srow b{font:400 13px var(--h-serif);color:#f3dc94;letter-spacing:.06em}
+.sx .srow.tog{grid-template-columns:1fr auto;align-items:center;margin-bottom:14px}
+.sx .srow.tog>span{font-size:clamp(15px,1.15vw,17px)}
+.sx .srow.tog input{-webkit-appearance:none;appearance:none;width:44px;height:20px;margin:0;position:relative;cursor:pointer;background:none;border:0;border-bottom:1px solid rgba(255,255,255,.35)}
+.sx .srow.tog input::after{content:'';position:absolute;left:2px;top:5px;width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,.45);transition:all .3s var(--h-ease)}
+.sx .srow.tog input:checked{border-bottom-color:#e2c27a}
+.sx .srow.tog input:checked::after{left:30px;background:#f3dc94;box-shadow:0 0 10px rgba(243,220,148,.9)}
+.sx .segs{grid-column:auto;display:flex;flex-wrap:wrap;gap:4px 26px;border-bottom:1px solid rgba(255,255,255,.18);padding-bottom:0}
+.sx .seg{position:relative;display:flex;align-items:center;gap:9px;padding:6px 2px 9px;background:none;border:0;font:300 13px var(--h-sans);letter-spacing:.06em;color:rgba(238,241,255,.78);cursor:pointer}
+.sx .seg::before{content:'';width:7px;height:7px;border-radius:50%;background:rgba(238,241,255,.75);transition:all .3s}
+.sx .seg::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1.5px;background:#e2c27a;transform:scaleX(0);transform-origin:left;transition:transform .45s var(--h-ease)}
+.sx .seg:hover{color:#fff}
+.sx .seg.on{color:#fff;background:none}
+.sx .seg.on::before{background:#f3dc94;box-shadow:0 0 8px rgba(243,220,148,.9)}
+.sx .seg.on::after{transform:none}
+.sx h3.sec{margin:26px 0 14px;font:500 11px var(--h-serif);letter-spacing:.42em;color:var(--h-violet)}
+.sx select{background:rgba(6,10,28,.6);color:#fff;border:0;border-bottom:1px solid rgba(255,255,255,.3);padding:6px 4px;font:300 14px var(--h-sans)}
+.sx .xhprev canvas{border:1px solid rgba(255,255,255,.15)!important;border-radius:4px}
+.sx .kbind{gap:0 26px}
+.sx .srow.kb{grid-template-columns:1fr 100px;margin:2px 0;align-items:center}
+.sx .srow.kb>span{font-size:14px}
+.sx .crnote{color:var(--h-mute)}
+.sx .sxFoot{display:flex;justify-content:flex-end;gap:12px;margin-top:22px}
+.sx .sxFoot button{background:none;border:1px solid rgba(255,255,255,.25);border-radius:22px;padding:9px 22px;font:300 14px var(--h-sans);color:var(--h-ink);letter-spacing:.06em;cursor:pointer;transition:all .3s}
+.sx .sxFoot button.pri{border-color:#e2c27a;color:#f3dc94;background:linear-gradient(180deg,rgba(226,194,122,.16),rgba(226,194,122,.04))}
+.sx .sxFoot button:hover{border-color:#f3dc94;color:#fff;box-shadow:0 0 16px rgba(226,194,122,.35)}
+/* เปิด/ปิด (ปิด = ย้อน) */
+#settings.sx.out .sxBg{animation:sxFadeOut .35s ease .08s both}
+#settings.sx.out .sxCurve{animation:sxArcOut .4s ease both}
+#settings.sx.out .stab{animation:sxTabOut .3s ease both;animation-delay:calc((5 - var(--i)) * 35ms)}
+#settings.sx.out .sxPanel{animation:sxPanOut .32s ease both}
+@keyframes sxFade{from{opacity:0}}@keyframes sxFadeOut{to{opacity:0}}
+@keyframes sxArcIn{from{opacity:0;transform:scale(.85) rotate(-25deg)}}@keyframes sxArcOut{to{opacity:0;transform:scale(.85) rotate(-25deg)}}
+@keyframes sxTabIn{from{opacity:0;translate:-30px 0}}@keyframes sxTabOut{to{opacity:0;translate:-30px 0}}
+@keyframes sxPanIn{from{opacity:0;translate:40px 0}}@keyframes sxPanOut{to{opacity:0;translate:40px 0}}
+@keyframes sxBody{from{opacity:0;translate:0 8px}}
+@media (max-width:900px){#settings.sx{--sxR:min(40vh,26vw)}.sx .sxL small{display:none}}

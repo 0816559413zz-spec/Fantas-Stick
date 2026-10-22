@@ -10,7 +10,7 @@
   --mute:var(--h-mute,#9aa3c7);--faint:var(--h-faint,rgba(220,226,255,.42));--serif:var(--h-serif,'Cinzel','Kanit',serif);--sans:var(--h-sans,'Kanit',sans-serif);
   transition:--skc .8s ease;animation:skwIn .4s var(--se) backwards}
 #skw.hidden{display:none}
-#skw.out{animation:skwOut .22s ease forwards;pointer-events:none}
+#skw.out{animation:skwOut .26s ease .34s forwards;pointer-events:none}
 body.skwOn #toast{z-index:60}
 body.skwOn #tutOv{z-index:60}
 #skw button{all:unset;box-sizing:border-box;cursor:pointer;-webkit-tap-highlight-color:transparent}
@@ -93,6 +93,8 @@ body.skwOn #tutOv{z-index:60}
 #skw .skwK{position:absolute;right:-5px;top:-5px;min-width:19px;height:19px;padding:0 5px;border-radius:10px;display:none;place-items:center;font:500 10px/1 var(--serif);font-style:normal;letter-spacing:.04em;color:#fff;
   background:rgba(8,10,26,.96);border:1px solid color-mix(in srgb,var(--c) 70%,transparent);box-shadow:0 0 8px color-mix(in srgb,var(--c) 35%,transparent)}
 #skw .skwS.eq .skwK{display:grid}
+/* ป้ายบนวง = "ใส่ Q" เล็กๆ ใต้ไอคอน สีทองหม่น — ไม่ให้ดูเหมือนช่องใส่คาถา */
+#skw .skwK{right:auto;top:auto;left:50%;bottom:-8px;transform:translateX(-50%);height:15px;padding:0 6px;font:400 9px/1 var(--sans);letter-spacing:.06em;white-space:nowrap;color:#f3dc94;background:rgba(8,10,26,.92);border:1px solid rgba(226,194,122,.45);box-shadow:none}
 #skw .skwSl{position:absolute;left:50%;top:calc(100% + 9px);translate:-50% 0;white-space:nowrap;pointer-events:none;font:400 11px/1.2 var(--serif);letter-spacing:.1em;color:var(--mute);opacity:.62;transition:opacity .3s,color .3s,translate .35s var(--se)}
 #skw .skwS.up .skwSl{top:auto;bottom:calc(100% + 9px)}
 #skw .skwS:hover .skwSl{translate:-50% 6px}
@@ -139,6 +141,17 @@ body.skwOn #tutOv{z-index:60}
 /* ล่าง: ห้าเหลี่ยม Q E R F */
 #skw .skwBot{position:relative;display:flex;justify-content:center;align-items:flex-end;padding:0 24px clamp(14px,2.6vh,28px)}
 #skw .skwSlots{position:relative;display:flex;gap:clamp(12px,2vw,34px)}
+/* ถาด LOADOUT: พื้นเรืองจาง + เส้นบนสีสาย + หัวข้อ */
+#skw .skwTray{position:relative;display:flex;flex-direction:column;align-items:center;padding:30px clamp(26px,3vw,54px) 0;animation:skwPIn .55s var(--se) backwards .18s}
+#skw .skwTray::before{content:'';position:absolute;inset:8px -10px -40px;border-radius:50% 50% 0 0/40px 40px 0 0;background:radial-gradient(60% 90% at 50% 100%,color-mix(in srgb,var(--skc) 13%,transparent),transparent 72%),linear-gradient(180deg,rgba(10,13,32,.55),rgba(6,8,20,.85));border-top:1px solid color-mix(in srgb,var(--skc) 35%,transparent);pointer-events:none}
+#skw .skwLoad{position:absolute;top:0;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:10px;white-space:nowrap;padding:3px 14px;background:rgba(6,8,20,.95);border:1px solid color-mix(in srgb,var(--skc) 35%,transparent);border-radius:12px}
+#skw .skwLoad b{font:600 10px var(--serif);letter-spacing:.42em;color:var(--skc)}
+#skw .skwLoad span{font:300 12px var(--sans);letter-spacing:.06em;color:var(--mute)}
+/* เส้นแสงจากช่องที่เลือก ขึ้นไปหาวง + คำบอก */
+#skw .skwHint{position:absolute;left:calc(clamp(26px,3vw,54px) + var(--x,0px));bottom:100%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;pointer-events:none;transition:left .45s var(--se)}
+#skw .skwHint span{display:none;order:-1;font:300 12px var(--sans);letter-spacing:.06em;color:var(--h-ink,#eef1ff);white-space:nowrap;opacity:.85;margin-bottom:6px}
+#skw .skwHint span::before{content:'↑ '}
+#skw .skwHint i{width:1px;height:clamp(14px,3vh,34px);background:linear-gradient(0deg,var(--skc),transparent);box-shadow:0 0 6px var(--skc)}
 #skw .skwSlots::before{content:'';position:absolute;left:-70px;right:-70px;top:calc(var(--P) * .52 + 10px);height:1px;background:linear-gradient(90deg,transparent,var(--sl) 18%,var(--sl) 82%,transparent)}
 #skw .skwP{position:relative;display:flex;flex-direction:column;align-items:center;width:calc(var(--P) + 22px);padding-top:10px;transition:transform .4s var(--se);animation:skwPIn .55s var(--se) backwards;animation-delay:calc(var(--i) * 60ms + 220ms)}
 #skw .skwPg{position:relative;width:var(--P);height:var(--P);transition:filter .4s}
@@ -172,6 +185,18 @@ body.skwOn #tutOv{z-index:60}
 #skw .skwGhost{position:fixed;z-index:5;width:46px;height:46px;border-radius:50%;display:grid;place-items:center;pointer-events:none;transform:translate(-50%,-50%);
   background:radial-gradient(circle,color-mix(in srgb,var(--c) 40%,transparent),transparent 70%);filter:drop-shadow(0 0 8px var(--c))}
 /* แอนิเมชัน */
+#skw.out .skwS{animation:skwSpRev .36s cubic-bezier(.5,0,.75,0) forwards!important;animation-delay:calc((9 - var(--i)) * 26ms)!important}
+#skw.out .skwRing{animation:skwRingRev .5s cubic-bezier(.5,0,.75,0) .1s forwards}
+#skw.out .skwKi,#skw.out .skwLi{animation:skwArcRev .3s ease forwards;animation-delay:calc((4 - var(--i)) * 40ms)}
+#skw.out .skwAT,#skw.out .skwTi,#skw.out .skwInfo,#skw.out .skwGuide,#skw.out .skwDone,#skw.out .skwHint{animation:skwOut .25s ease forwards}
+#skw.out .skwP{animation:skwPRev .36s var(--se) forwards;animation-delay:calc((3 - var(--i)) * 50ms + 60ms)}
+#skw.out .skwTray{animation:skwPRev .4s var(--se) .2s forwards}
+#skw.out .skwRow{animation:skwDropRev .4s ease .15s forwards}
+@keyframes skwSpRev{to{opacity:0;transform:rotate(calc(var(--a) - 55deg)) translateY(calc(var(--R) * -.3)) rotate(calc(55deg - var(--a))) scale(.3)}}
+@keyframes skwRingRev{to{opacity:0;transform:scale(.84) rotate(-10deg)}}
+@keyframes skwArcRev{to{opacity:0;translate:0 10px}}
+@keyframes skwPRev{to{opacity:0;translate:0 18px}}
+@keyframes skwDropRev{to{opacity:0;translate:0 -14px}}
 @keyframes skwIn{from{opacity:0}}
 @keyframes skwOut{to{opacity:0}}
 @keyframes skwFade{from{opacity:0}}

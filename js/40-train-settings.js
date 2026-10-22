@@ -66,6 +66,11 @@ function setTog(lab,key){return `<label class="srow tog"><span>${lab}</span><inp
 let setTab=0;
 const XHC=['#f3dc94','#ffffff','#7dff9a','#7fe8ff','#ff6b6b','#ff9ad5'],XHN=['ทอง','ขาว','เขียว','ฟ้า','แดง','ชมพู'];
 function setOpts(lab,key,names){return `<label class="srow"><span>${lab}</span><div class="segs">${names.map((n,i)=>`<button type="button" class="seg ${SET[key]===i?'on':''}" data-seg="${key}" data-v="${i}">${n}</button>`).join('')}</div></label>`;}
+// ไอคอนแท็บ (เส้นบาง 24×24) — เรียงบนเส้นโค้งวงกลมด้านซ้าย (มุม --a) + ปุ่มออกล่างสุด
+const SET_ICO=['<circle cx="12" cy="12" r="7"/><path d="M12 2.5v5M12 16.5v5M2.5 12h5M16.5 12h5"/>','<path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z"/><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/>',
+  '<rect x="3" y="5" width="18" height="12" rx="1.5"/><path d="M9 21h6M12 17v4"/><path d="M6.5 14l3.5-4 2.5 2.5 2-2 3 3.5"/>','<rect x="3" y="4" width="18" height="16" rx="1.5"/><path d="M3 8.5h18M7 12.5h4M7 15.5h7"/><circle cx="17" cy="14" r="1.6"/>',
+  '<rect x="2.5" y="6.5" width="19" height="11" rx="1.5"/><path d="M6 10h1M9 10h1M12 10h1M15 10h1M18 10h1M7.5 14h9"/>','<path d="M10 4H5.5v16H10"/><path d="M14 8l4 4-4 4M18 12H9"/>'];
+const SET_EN=['Mouse','Audio','Graphics','Display','Controls','Exit'];
 function renderSettings(){
   const tabs=['เมาส์ & เป้าเล็ง','เสียง','ภาพ','หน้าจอ','ปุ่มกด'];
   let b='';
@@ -78,19 +83,24 @@ function renderSettings(){
   if(setTab===3)b=`${setTog('ตัวเลขดาเมจ','dmg')}${setTog('เครื่องหมายตอนยิงโดน','hitm')}${setTog('บอกทิศที่โดนยิง','dirm')}${setTog('แผนที่ย่อ','mini')}${setTog('ชื่อผู้เล่นเหนือหัว','names')}`;
   if(setTab===4)b=`<p class="crnote" style="margin:4px 0 10px">คลิกปุ่มแล้วกดปุ่มบนคีย์บอร์ดที่ต้องการ (Esc = ยกเลิก)</p><div class="kbind">${KEYACT.map(([a,n])=>`<label class="srow kb"><span>${n}</span><button type="button" class="kbtn ${_rebind===a?'wait':''}" data-bind="${a}">${_rebind===a?'กดปุ่ม...':keyName(KEYS[a])}</button></label>`).join('')}</div>
     <p class="crnote" style="margin-top:10px">คลิกซ้าย = ยิง • คลิกขวา = โล่ • N = เพลงถัดไป • Esc = เมนูหยุดพัก</p>`;
-  $('#setTabs').innerHTML=tabs.map((t,i)=>`<button type="button" class="stab ${setTab===i?'on':''}" data-stab="${i}">${t}</button>`).join('');
+  const N=tabs.length+1,ang=i=>(-52+104*i/(N-1)).toFixed(1)+'deg',ico=i=>`<span class="sxI"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">${SET_ICO[i]}</svg></span>`;
+  $('#setTabs').innerHTML=tabs.map((t,i)=>`<button type="button" class="stab ${setTab===i?'on':''}" data-stab="${i}" style="--a:${ang(i)};--i:${i}">${ico(i)}<span class="sxL">${SET_EN[i]}<small>${t}</small></span></button>`).join('')
+    +`<button type="button" class="stab sxExit" data-sx="exit" style="--a:${ang(N-1)};--i:${N-1}">${ico(5)}<span class="sxL">${SET_EN[5]}<small>ปิด</small></span></button>`;
+  {const ti=$('#setTiTh');if(ti)ti.textContent=tabs[setTab];}
   $('#setBody').innerHTML=b;
   const mt=$('#setBody').querySelector('[data-set="_music"]');if(mt)mt.checked=MUSIC.on;
   drawXhPrev();
 }
 function drawXhPrev(){const c=document.getElementById('xhPrev');if(!c)return;const g=c.getContext('2d');g.clearRect(0,0,c.width,c.height);g.fillStyle='#1a2340';g.fillRect(0,0,c.width,c.height);drawXh(c.width/2,c.height/2,false,g);}
-function openSettings(){renderSettings();$('#settings').classList.remove('hidden');}
-function closeSettings(){$('#settings').classList.add('hidden');}
+function openSettings(){const el=$('#settings');clearTimeout(el._t);el.classList.remove('out');renderSettings();el.classList.remove('hidden');}
+// ปิด = เล่นตอนเปิดย้อนกลับ (ผู้ใช้ 2026-10-23: กดกลับแล้วแอนิเมชันย้อน)
+function closeSettings(){const el=$('#settings');if(el.classList.contains('hidden')||el.classList.contains('out'))return;el.classList.add('out');clearTimeout(el._t);el._t=setTimeout(()=>{el.classList.add('hidden');el.classList.remove('out');},430);}
 $('#btnSettings').onclick=()=>{ac();openSettings();};
 $('#setClose').onclick=closeSettings;
 $('#setReset').onclick=()=>{Object.assign(SET,SET_DEF,{keys:{}});saveSet();rebuildKeys();applySettings();renderSettings();};
 $('#settings').addEventListener('click',e=>{
-  const t=e.target.closest('[data-stab]');if(t){setTab=+t.dataset.stab;_rebind=null;renderSettings();return;}
+  if(e.target.closest('[data-sx="exit"]')||e.target.classList.contains('sxBg')){closeSettings();return;}
+  const t=e.target.closest('[data-stab]');if(t){setTab=+t.dataset.stab;_rebind=null;renderSettings();$('#setBody').classList.remove('sxNew');void $('#setBody').offsetWidth;$('#setBody').classList.add('sxNew');return;}
   const s=e.target.closest('[data-seg]');if(s){SET[s.dataset.seg]=+s.dataset.v;saveSet();renderSettings();return;}
   const k=e.target.closest('[data-bind]');if(k){_rebind=k.dataset.bind;renderSettings();return;}
 });

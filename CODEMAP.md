@@ -267,10 +267,10 @@ ROLE_COL:37 roleTag:38 DESIGNED:39 spellTags:40 spellDescHTML:47 baseDescHTML:51
 §222 ฉากเปิด (#intro) + ประกายบนหน้าเมนู (#menuFx)
 TITLE:225 titleSpark:226 titleDraw:227 titleLoop:238 titleGo:249 JOINQ:257 ovResult:277
 
-## js/40-train-settings.js (174) — เมนูทดลอง (ห้องฝึก / Test Place)
+## js/40-train-settings.js (184) — เมนูทดลอง (ห้องฝึก / Test Place)
 trOpenF:2 trKey:2 trN:2 TR_OPTS:3 trToggle:4 trSend:9 trSync:14 hovEl:62
 §63 หน้าตั้งค่า
-setRow:64 setTog:65 setTab:66 XHC:67 XHN:67 setOpts:68 renderSettings:69 drawXhPrev:86 openSettings:87 closeSettings:88 modeIcon:143 modeTitle:144 renderLobby:145
+setRow:64 setTog:65 setTab:66 XHC:67 XHN:67 setOpts:68 SET_ICO:70 SET_EN:73 renderSettings:74 drawXhPrev:94 openSettings:95 closeSettings:97 modeIcon:153 modeTitle:154 renderLobby:155
 
 ## js/41-debug.js (141) — เครื่องมือทดสอบสมดุล (ใช้ผ่านคอนโซล WD.bal / WD.dmgTest เท่านั้น ผู้เล่นปกติไม่เห็น)
 §5 บอทต่อสู้แบบง่ายๆ: เล็งนำเป้า เดินรักษาระยะ+ส่ายไปมา ร่ายคาถาทุกครั้ง…
@@ -499,22 +499,22 @@ hubMxJoin:140 hubPickMode:153 hubFlipKill:166 hubRoomRect:167 hubFlip:168 hubUnf
 HUI_MAPN:204 hubLobby:205 hubRoomClick:267 hubKitChanged:286
 §288 เริ่มต้น
 
-## js/63-skillwheel.js (270) — วงเลือกคาถา (ผู้ใช้ 2026-10-22, designs/ui-menu.md "วงคาถา + ห้าเหลี่ยม 4 ช่อง") • สไตล์ม…
+## js/63-skillwheel.js (271) — วงเลือกคาถา (ผู้ใช้ 2026-10-22, designs/ui-menu.md "วงคาถา + ห้าเหลี่ยม 4 ช่อง") • สไตล์ม…
 SKW:9 SKW_PO:10 SKW_PI:10 SKW_RUNE:11 skwPaths:12 skwKey:13 skwOffN:14 skwChanged:15 skwSnd:16
 §17 โครง DOM (สร้างครั้งแรกที่เปิด)
 skwSvg:18 skwBuild:28
 §44 วาด
-skwRender:45 skwRow:50 skwPos:58 skwArcs:59 skwRing:72 skwSwap:93 skwSlots:99 skwInd:114 skwIndApply:120
-§121 ข้อความกลางวง
-skwSetInfo:122 skwSpellInfo:126 skwBaseInfo:133 skwClassInfo:140 skwLibInfo:144 skwInfoDef:148 skwSpellHover:149 skwOver:155
-§167 การกระทำ
-skwClick:168 skwSetSlot:177 skwSetPath:178 skwSetLib:185 skwAssign:186 skwGhost:202 skwFlashSlot:210
-§211 พื้นหลัง: ฝุ่นดาว + ประกายตอนใส่คาถา (canvas เดียว หลังเนื้อหา)
-skwBurst:212 skwFxStart:216 skwFxTick:221
-§241 เปิด/ปิด
-skwOpen:242 skwClose:252
+skwRender:45 skwRow:50 skwPos:58 skwArcs:59 skwRing:72 skwSwap:93 skwSlots:99 skwInd:115 skwIndApply:121
+§122 ข้อความกลางวง
+skwSetInfo:123 skwSpellInfo:127 skwBaseInfo:134 skwClassInfo:141 skwLibInfo:145 skwInfoDef:149 skwSpellHover:150 skwOver:156
+§168 การกระทำ
+skwClick:169 skwSetSlot:178 skwSetPath:179 skwSetLib:186 skwAssign:187 skwGhost:203 skwFlashSlot:211
+§212 พื้นหลัง: ฝุ่นดาว + ประกายตอนใส่คาถา (canvas เดียว หลังเนื้อหา)
+skwBurst:213 skwFxStart:217 skwFxTick:222
+§242 เปิด/ปิด
+skwOpen:243 skwClose:253
 
 ## js/64-mappick.js (156) — 
 MPK_TXT:7 MPK_SKY:19 MPK_I:21 MPK_DICE:31 MPK:36 mpkE:37 mpkC:37 mpkSnd:38 mpkCut:39 mpkName:40 mpkCardHTML:41 mpkBuild:51 mpkUp:89 mpkMeasure:101 mpkIdx:102 mpkStep:103 mpkTo:104 mpkPick:105 mpkOpen:111 mpkClose:126 mpkLoop:130 mpkTick:132
 
-(65 files, 15400 lines)
+(65 files, 15411 lines)
