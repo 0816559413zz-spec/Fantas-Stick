@@ -453,7 +453,7 @@ function hubFrame(out,f0,dist,yaw,pitch,nx,ny,fov){
 const _hcA={p:new THREE.Vector3(),l:new THREE.Vector3()},_hcB={p:new THREE.Vector3(),l:new THREE.Vector3()};
 function hubCamMenu(o){const n=cam.aspect<1.45?0.3:0.38;return hubFrame(o,_ht.set(HB.TB.x+0.4,1.05,HB.TB.z-0.45),4.7,0.46,0.07,n,0.02,44);}
 function hubCamPose(o){return hubFrame(o,_ht.set(HB.P1.x,0.98,HB.P1.z+0.1),3.05,0,0.22,0,0,48);}
-function hubCamRoom(o){const n=cam.aspect<1.45?0.42:0.34;return hubFrame(o,_ht.set(0.6,1.25,0),8.6,-0.06,0.07,n,0.02,36);}
+function hubCamRoom(o){const n=cam.aspect<1.45?0.5:0.44;return hubFrame(o,_ht.set(0.7,1.1,-0.2),10.5,-0.1,0.09,n,0.06,34);}
 
 // ---------- ลำดับตอนกด "เล่น" ----------
 function hubGo(){
