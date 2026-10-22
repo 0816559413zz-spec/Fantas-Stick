@@ -125,7 +125,7 @@ function frostFX(o,p,pz,now,dt){
   o.fwStrike=fwOn&&P.strike;
   const sm=(o.swT>0||o.grDown>0||o.grUp>0||o.mlT>0)?Math.min(1,dt*30):Math.min(1,dt*10);
   fa.ax+=(ax-fa.ax)*sm;fa.az+=(az-fa.az)*sm;fa.by+=(by-fa.by)*sm;fa.bx+=(bx-fa.bx)*sm;
-  if((melee||rpose)&&!p.fl){o.armR.rotation.x=fa.ax;o.armR.rotation.z=fa.az;o.b.rotation.y=fa.by;if(Math.abs(fa.bx)>0.01)o.b.rotation.x+=fa.bx;
+  if((melee&&!o.caN||rpose)&&!p.fl){o.armR.rotation.x=fa.ax;o.armR.rotation.z=fa.az;o.b.rotation.y=fa.by;if(Math.abs(fa.bx)>0.01)o.b.rotation.x+=fa.bx;
     if(rpose){o.armL.rotation.x=lerp(-0.2,-1.6,o.grUp>0?1:0.5);o.armL.rotation.z=0.25;}
     if(melee&&!p.sh){const act=o.swT>0||o.grDown>0||(flags&32)||o.mlT>0;o.armL.rotation.x=act?-0.75:-0.4;o.armL.rotation.z=act?0.8:0.35;}}   // มือซ้ายกางทรงตัวตอนร่าย
   else o.b.rotation.y*=0.8;

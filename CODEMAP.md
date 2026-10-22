@@ -18,16 +18,16 @@ PROPDEF:164 PROP_OFF_MODES:171 PROP_USE:173 PROPS:174 PROPON:174 genProps:175
 §195 ตัวละคร: บ้านฮอกวอตส์ + หน้าตา
 HOUSES:197 HAIRC:202 HAIRSTY:204 WOODC:206 WOODN:207 WCOREC:208 WCOREN:209 WANDSTY:210 EYEC:211 SKINC:212 CLOAKC:213 TIESTY:214 LOOKK:215 LOOKN:215 lookStr:216 parseLook:217 randLook:218 LOOKS:219 LOOKP:219 KITS:219 getKit:220 getLook:221 CREST_SH:222 CREST_PAT:223 starPts:228 CREST_ANI:230 crestSVG:236 houseColor:244 TEAMC:245 TEAMN:245 MODES:246 PDEF:257 EDEF:284 POOLS:296 CDK:306 BUFFS:307
 
-## js/03-spells-core.js (219) — 
-ICONS:8 ICOALIAS:9 hasIco:10 ICOBASE:12 icoURL:13 ICO:14 icoTint:15 icoHTML:24 PATHS:25 SPELL_LIST:34 SPELLS:34 defSpell:35 SLOTK:36 BRMAP:36 KITP:37 parseKit:38 cleanKit:54 setKit:55
-§57 สถานะ (ใช้ได้ทั้งผู้เล่นและศัตรู)
-isBig:58 ccScale:60 ccTouch:61 addStun:62 addRoot:63 addFreeze:64 addSlow:69 addChill:70 ignite:75 shock:83 knock:84 addWard:85 addFrostSlow:87 frostSlow:88 moveMul:95 BRN_MAX:97 addBurn:98 addXBurn:100 addPoison:101 addSil:102 addFear:103 addBlind:104 addMark:105 healT:107 tickStatus:112 clearStatus:132 fxMask:133
-§135 วัตถุในสนามที่คาถาสร้าง: โซน / ฟ้าผ่าหน่วงเวลา / กำแพง / ช่องร่ายต่อเ…
-foesIn:136 shieldFaces:143 aoeHit:149 addZone:155 updateZones:160 addStrike:171 updateStrikes:172 addWall:173 updateWalls:174 updateChan:178 updateSpells:182 aimPoint:184
-§196 ตัวช่วยคอมโบ (ทุกสายใช้หลักเดียวกัน: ตั้งต้น → ต่อยอด → ปิดจบ)
-ROLE_N:198 takePoison:199
-§201 ความสามารถพื้นฐาน (คลิกซ้าย) ของแต่ละสาย: สะสมสถานะตั้งต้นให้เองทุกๆ …
-PBASIC:202
+## js/03-spells-core.js (222) — 
+ICONS:8 ICOALIAS:9 hasIco:10 ICOBASE:12 icoURL:13 ICO:14 icoTint:15 icoHTML:24 PATHS:25 SPELL_LIST:34 SPELLS:34 defSpell:35 SLOTK:36 BRMAP:36 KITP:37 parseKit:38 cleanKit:54 setKit:55 pathReset:58
+§60 สถานะ (ใช้ได้ทั้งผู้เล่นและศัตรู)
+isBig:61 ccScale:63 ccTouch:64 addStun:65 addRoot:66 addFreeze:67 addSlow:72 addChill:73 ignite:78 shock:86 knock:87 addWard:88 addFrostSlow:90 frostSlow:91 moveMul:98 BRN_MAX:100 addBurn:101 addXBurn:103 addPoison:104 addSil:105 addFear:106 addBlind:107 addMark:108 healT:110 tickStatus:115 clearStatus:135 fxMask:136
+§138 วัตถุในสนามที่คาถาสร้าง: โซน / ฟ้าผ่าหน่วงเวลา / กำแพง / ช่องร่ายต่อเ…
+foesIn:139 shieldFaces:146 aoeHit:152 addZone:158 updateZones:163 addStrike:174 updateStrikes:175 addWall:176 updateWalls:177 updateChan:181 updateSpells:185 aimPoint:187
+§199 ตัวช่วยคอมโบ (ทุกสายใช้หลักเดียวกัน: ตั้งต้น → ต่อยอด → ปิดจบ)
+ROLE_N:201 takePoison:202
+§204 ความสามารถพื้นฐาน (คลิกซ้าย) ของแต่ละสาย: สะสมสถานะตั้งต้นให้เองทุกๆ …
+PBASIC:205
 
 ## js/04-frost-mech.js (102) — สายน้ำแข็ง: ประชิด/ไกล (V) • ฟันดาบ/ขวาน • ไถลน้ำแข็ง • พื้นน้ำแข็ง/ภ…
 frostBoom:3 meleeHit:10 mirrorPos:21 frostBasic:22 frostSlam3:46 frostSlam:54 frostDash:60 addIce:65 updateIces:66 updateWaves:82 groundH:95
@@ -78,32 +78,32 @@ earthPillarThrow:194 earthWrathTick:205 earthWrathDrill:216 earthWrathEnd:221
 §224 ทั้งสนาม: สิ่งก่อสร้างพัง / ฝุ่นหมดเวลา / Stonebreaker ชนกำแพง
 updateEarth:225 earthSnapP:234 earthSnapW:236
 
-## js/09-other-paths.js (195) — 
+## js/09-other-paths.js (196) — 
 §65 สัตว์เวท (minion): AI ฝั่งโฮสต์
 MIND:66 summonMin:72 minTarget:81 minShoot:88 updateMins:93 aimTarget:133
 §180 ร่ายคาถา
-castSlot:181 castUlt:195
+castSlot:181 castUlt:196
 
 ## js/10-net.js (71) — 
 PREFIX:4 NET:5 LOBBY:6 genCode:7 sendAll:8 setStatus:9 hostGame:11 joinGame:34 clientOnData:59 leave:71
 
-## js/11-host.js (328) — 
-G:4 EVL:4 EVN:4 hostLast:4 tickN:4 emit:5 feed:6 banner:7 plist:8 cleanName:9 freshStats:11 newPlayer:18 emptyInput:21 addPlayer:22 initHostLobby:31 lobbyMsg:38 broadcastLobby:39 hostOnData:41 hostDrop:63 validate:77 hostStart:88 hostToLobby:113 resetBody:115 fmap:121 spawnPts:122 teamPts:124 placeAll:125 respawn:137
-§154 ลูปหลักฝั่งโฮสต์
-hostTick:155 angDiff:167 cH:169 vR:170 updatePlayer:172 hitProp:315 damagePropsIn:322 nearUseProp:323 useProp:324
+## js/11-host.js (330) — 
+G:4 EVL:4 EVN:4 hostLast:4 tickN:4 emit:5 feed:6 banner:7 plist:8 cleanName:9 freshStats:11 newPlayer:18 emptyInput:21 addPlayer:22 initHostLobby:31 lobbyMsg:38 broadcastLobby:39 INPN:41 hostOnData:42 hostDrop:65 validate:79 hostStart:90 hostToLobby:115 resetBody:117 fmap:123 spawnPts:124 teamPts:126 placeAll:127 respawn:139
+§156 ลูปหลักฝั่งโฮสต์
+hostTick:157 angDiff:169 cH:171 vR:172 updatePlayer:174 hitProp:317 damagePropsIn:324 nearUseProp:325 useProp:326
 
-## js/12-buildings.js (410) — สิ่งปลูกสร้างที่พังเป็นชิ้นย่อย (บ้าน) แบบ Battlefield — คู่มือเต็ม: …
+## js/12-buildings.js (412) — สิ่งปลูกสร้างที่พังเป็นชิ้นย่อย (บ้าน) แบบ Battlefield — คู่มือเต็ม: …
 BLDDEF:8 BLD_PIECES:9 BLD_GRID:10 BLD_FIRE:11 BLD_ICE:11 BLD_ROOF_MIN:11 BLDG:12 BLDON:12 genBldg:13 bldRect:23 bldChunk:25 bldAlive:32 bldLocal:33 bldWorld:34 rectDist:35 bldNear:36 BLD_MOUND:39 bldGone:40 bldMoundAt:41 bldMoundH:42 hitBldPiece:44 breakBldChunk:55 bldSupport:63 damageEnv:83 bldPieceAt:97 projEl:107 bldPush:112 collideBld:118 updateBldg:133 bldSnap:145 bldParse:151
 §155 ของบังในแผนที่ไฟล์ที่พังได้ (หิน เสา รูปปั้น ต้นไม้ โคมไฟ ลัง ...) — …
-BRKDEF:159 BRK_M:159 BRK_MCOL:159 BRK:160 genBrk:161 brkApply:168 brkStage:172 hitBrk:173 damageBrkIn:181 brkSnap:187 brkParse:188 collideWorld:189 shoot:216 eShoot:237 foesOf:244 breakShield:251 gainUlt:252 lifesteal:253 damage:255 playerDown:309 killProj:326 explode:335 hitTarget:347 updateProjectiles:363
+BRKDEF:159 BRK_M:159 BRK_MCOL:159 BRK:160 genBrk:161 brkApply:168 brkStage:172 hitBrk:173 damageBrkIn:181 brkSnap:187 brkParse:188 collideWorld:189 shoot:216 eShoot:237 foesOf:244 breakShield:251 gainUlt:252 lifesteal:253 damage:255 playerDown:309 killProj:328 explode:337 hitTarget:349 updateProjectiles:365
 
 ## js/13-enemies.js (168) — ศัตรู (โหมด Co-op)
 spawnEnemy:2 setupWave:19 bossPhase:36 enemySlam:44 updateEnemies:55
 
-## js/14-mode-rules.js (99) — กติกาของแต่ละโหมด
-hostPick:2 modeLogic:8 endMatch:76
+## js/14-mode-rules.js (102) — กติกาของแต่ละโหมด
+hostPick:2 clearField:10 modeLogic:11 endMatch:79
 
-## js/15-modes.js (386) — 
+## js/15-modes.js (388) — 
 sendPriv:5 TASKF:9 taskPts:10 raceRings:11 modeInit:17 spawnDummy:59 trainTick:64 TR_KEYS:79 trTeams:81 trCmd:89 hostEndTraining:106
 §108 ควิดดิช
 quidThrow:109 quidDrop:115 quidTick:120 snitchTick:155
@@ -112,11 +112,11 @@ raceTick:179 raceRank:201
 §211 แบทเทิลรอยัล
 brTick:212 ITEMN:226 brPick:227
 §236 หาลอร์ดโวลเดอมอร์
-impActions:237 startMeeting:275 hostVote:282 meetTick:287 impCheck:305
-§313 ระเบิดที่ตั้งเวลาไว้ (ลูกไฟมังกร / คลื่นไฟ)
-bombTick:314 modeSnap:327
-§349 สร้าง snapshot ส่งให้ทุกเครื่อง
-r1:350 makeSnap:351 PROF:369 pf:370
+impActions:237 startMeeting:275 hostVote:282 meetTick:287 impCheck:306
+§314 ระเบิดที่ตั้งเวลาไว้ (ลูกไฟมังกร / คลื่นไฟ)
+bombTick:315 modeSnap:328
+§350 สร้าง snapshot ส่งให้ทุกเครื่อง
+r1:351 makeSnap:352 PROF:370 pf:371
 
 ## js/16-voice.js (89) — 
 VOICE:4 rosterIds:5 toggleMic:6 voiceSync:20 teamOn:37 teamOf:38 applyVoiceGates:39 VAC:49 onIncomingCall:50 voiceLevels:62 speakingIds:70 updateVoiceUI:76
@@ -172,10 +172,10 @@ MM3:2 makeMinion:3 syncMins:36 drawMinBars:58
 ## js/25-efx.js (297) — efxFX: ภาพของ event "efx" ทุกคาถา (หนึ่ง case ต่อหนึ่งเอฟเฟกต์)
 efxState:4 efxFX:15
 
-## js/26-fx-events.js (243) — fx(ev): เอฟเฟกต์+เสียงของทุก event จากโฮสต์ • statusFX (สถานะบนตัว) •…
+## js/26-fx-events.js (244) — fx(ev): เอฟเฟกต์+เสียงของทุก event จากโฮสต์ • statusFX (สถานะบนตัว) •…
 statusFX:3 fx:27
-§196 overlay: เลือกบัฟ / สรุปผล
-choosePick:197 syncOverlays:202 showOver:224
+§197 overlay: เลือกบัฟ / สรุปผล
+choosePick:198 syncOverlays:203 showOver:225
 
 ## js/27-world.js (231) — 
 S3:4 tx:4 tz:4 GY:6 TW:6 hdr:7 gl:9 scene:15 cam:17 composer:18
@@ -232,11 +232,13 @@ iceMat:2 iceRim:3 makeIceSword:4 makeIceAxe:23 makeKiteShield:39
 §47 อาวุธน้ำแข็งลอย (ผู้ใช้ 2026-10-22: "ร่ายคาถาให้ดาบฟันเอง ระยะเท่าเดิ…
 FWS:50 FWA:50 _fwM:51 _fwM2:51 _fwX:51 _fwY:51 _fwZ:51 _fwP:51 _fwS:51 _fwQ:51 _eo:52 _ei:52 _ss:52 fwAim:54 fwWeapons:55 FWP:57 FWT:57 fwChop:58 fwSweep:59 fwIdle:60 fwSwing:63 FWL_N:75 fwLink:76 fwMat:79 frostFX:80
 
-## js/35-sync.js (402) — ซิงก์ผู้เล่น/ศัตรู/ลูกเวทจาก snapshot + ฉายตำแหน่งลงจอ (ป้ายชื่อ/ตัวเ…
+## js/35-sync.js (457) — ซิงก์ผู้เล่น/ศัตรู/ลูกเวทจาก snapshot + ฉายตำแหน่งลงจอ (ป้ายชื่อ/ตัวเ…
 §2 ท่าร่ายคาถาแบบนักเวทในหนัง Harry Potter (ผู้ใช้ 2026-10-22: "ยิงปกติท…
-CPOSE_T:7 _ce:7 _cs:7 CPOSE:9 _cpT:16 _cpR:16 CGUARD:16 CP_STEP:17 CPCOL:18 castStyle:19 castStart:20 castPose:21 syncPlayers:47 syncEnemies:127 projGeo:165 tailGeo:166 _t1:167 makeProj:168 _a:188 _b:188 syncProj:189 _awT:266 animateWorld:267
-§308 ฉายตำแหน่ง 3D ลงจอ (ป้ายชื่อ / ตัวเลขดาเมจ)
-_v:309 toScreen:310 burnNum:317 drawLabels:324 drawTexts:355 HITM:369 DIRI:369 drawXh:371 drawCrosshair:381
+CPOSE_T:7 _ce:7 _cs:7 CPOSE:9 _cpT:17 _cpR:17 CGUARD:17 CP_STEP:18 CPCOL:19 castStyle:20 castStart:21
+§22 ท่าร่ายสกิล / อัลติ / โล่ (ผู้ใช้ 2026-10-22: "เกือบทุกสกิลควรมีการเห…
+CANIM:27 SKANIM:40 skAnim:42 _caT:43 _caR:43 skillPose:44 CBLOCK:66 blockPose:67 castPose:72 castPose0:76 syncPlayers:102 syncEnemies:182 projGeo:220 tailGeo:221 _t1:222 makeProj:223 _a:243 _b:243 syncProj:244 _awT:321 animateWorld:322
+§363 ฉายตำแหน่ง 3D ลงจอ (ป้ายชื่อ / ตัวเลขดาเมจ)
+_v:364 toScreen:365 burnNum:372 drawLabels:379 drawTexts:410 HITM:424 DIRI:424 drawXh:426 drawCrosshair:436
 
 ## js/36-modes-view.js (164) — 
 ROLE:4 KC:4 roleShowT:4 onPriv:5 MO:10 BREATHS:11 clearModeObjs:12 ITEMC:21 makeItem:22 syncModeObjs:34
@@ -403,4 +405,4 @@ GRASS:52 GR_GLSL_V:53 GR_BEGIN:55 grassMat:79 grassBuild:93 _grBasic:107 grassBa
 WARM:11 WARM_FXDIR:12 WARM_COMMON:12 WARM_X:13 WARM_Y:13 warmKeep:15 warmCompile:21 WARM_SKIP:24 warmFx:25 warmFxEnd:33 warmGather:35 warmPaths:37 warmStep:39 warmTick:54
 §63 ภาพจากโค้ดของแต่ละสาย (เฟรมละฟังก์ชัน)
 
-(52 files, 12128 lines)
+(52 files, 12197 lines)

@@ -190,6 +190,7 @@ function castSlot(p,i){
   if(G.mode==='br'&&!(p.unl&&p.unl[BRMAP[k]]))return false;
   if(S.cast(p,S,i)===false){p.cd[k]=0.5;p.cdMax[k]=0.5;return false;}
   const cd=S.cd*p.buffs.cdr;p.cd[k]=cd;p.cdMax[k]=cd;
+  emit({k:'sk',id:p.id,s:S.id});   // ภาพ: ท่าร่ายสกิล (js/35 skAnim)
   return true;
 }
-function castUlt(p){if(p.wr)return false;const S=SPELLS[p.ultId];if(!S||p.ult<100||p.sil>0||p.cryo>0)return false;S.cast(p,S);p.ult=0;return true;}
+function castUlt(p){if(p.wr)return false;const S=SPELLS[p.ultId];if(!S||p.ult<100||p.sil>0||p.cryo>0)return false;S.cast(p,S);p.ult=0;emit({k:'sk',id:p.id,s:S.id});return true;}
