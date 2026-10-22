@@ -249,7 +249,10 @@ function foesOf(team){
   return out;
 }
 function breakShield(p){if(p.pathIdx===EARTH){if(!(p.stdB>0))earthBreak(p);return;}p.shieldOn=false;p.shieldE=0;p.shieldBroken=1.5;emit({k:'sbreak',x:p.x,y:p.y,h:p.z+1.3});}
-function gainUlt(p,v){p.ult=Math.min(100,p.ult+v*0.5*p.buffs.ult);}
+// อัลติ (ผู้ใช้ 2026-10-22): ชาร์จช้าลง 30% ทุกสาย (ULT_RATE) + ระหว่างอัลติยังทำงานอยู่ไม่ได้ชาร์จเพิ่ม (นับใหม่หลังอัลติจบ)
+const ULT_RATE=0.7;
+function ultActive(p){return p.colos>0||p.god>0||!!p.wr||p.mirror>0;}
+function gainUlt(p,v){if(ultActive(p))return;p.ult=Math.min(100,p.ult+v*0.5*ULT_RATE*p.buffs.ult);}
 function lifesteal(p,amt){if(p.buffs.life&&p.alive&&!p.downed)healT(p,amt*p.buffs.life);}
 
 function damage(t,amt,srcId,kind){
@@ -300,7 +303,9 @@ function damage(t,amt,srcId,kind){
     if(t.ward.abs<=0)t.ward=null;
     if(amt<=0.01)return;
   }
-  t.hp-=amt;t.lastHit=srcId;t.dmgTaken=(t.dmgTaken||0)+amt;   // สรุปจบเกม: ดาเมจที่รับ
+  const real=Math.min(amt,Math.max(0,t.hp));   // ดาเมจจริง (ไม่นับส่วนที่เกินเลือด)
+  t.hp-=amt;t.lastHit=srcId;t.dmgTaken=(t.dmgTaken||0)+real;   // สรุปจบเกม: ดาเมจที่รับ
+  if(G.mode==='ffa')ffaDmgLog(t,srcId,real,kind);   // assist + จอตอนตาย (js/54)
   if(src&&src!==t){gainUlt(src,amt*0.7);lifesteal(src,amt);src.dmgDealt+=amt;}
   gainUlt(t,amt*0.25);
   emit({k:'hit',x:t.x,y:t.y,h:t.z+2.4,n:Math.round(amt),id:t.id,s:srcId||undefined,ns:src&&src.baHit?1:undefined,b:kind==='burn'?1:undefined,kl:t.hp<=0?1:undefined,sx:src&&src!==t?Math.round(src.x):undefined,sy:src&&src!==t?Math.round(src.y):undefined,a:(kind==='aoe'||kind==='zone')?1:undefined});
@@ -322,6 +327,7 @@ function playerDown(t,srcId){
   const k=G.players[srcId]||G.players[t.lastHit];
   if(k&&k!==t){k.kills++;if(G.mode==='tdm')G.teamScore[k.team]++;feed(`${k.name} ⚡ ${t.name}`);}
   else feed(`💀 ${t.name}`);
+  if(G.mode==='ffa')ffaKill(k&&k!==t?k:null,t);   // ฆ่าต่อเนื่อง/ค่าหัว/แก้แค้น/assist/ขวดดรอป (js/54)
   emit({k:'die',x:t.x,y:t.y,h:t.z+1,c:t.color});
 }
 
@@ -385,7 +391,7 @@ function updateProjectiles(dt){
         if(G.time-p.shieldT<0.28){
           // Perfect Parry: ปัดกระสุนทิ้ง (ไม่สะท้อนกลับแล้ว) ไม่เสียพลังโล่ + ผลพิเศษของแต่ละสาย
           pr.dead=true;
-          p.ult=Math.min(100,p.ult+12);
+          if(!ultActive(p))p.ult=Math.min(100,p.ult+12*ULT_RATE);
           emit({k:'parry',x:p.x,y:p.y,h:p.z+1.3});
           {const B=PBASIC[p.pathIdx|0];if(B&&B.onParry&&!p.shPar){p.shPar=1;B.onParry(p);}}
         }else{

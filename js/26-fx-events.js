@@ -27,7 +27,8 @@ function statusFX(o,fm,x,y,z,sz,now){
 function fx(ev,raw){   // raw = ภาพเดิมในโค้ดเท่านั้น (ไม่ใช้ bind.json)
   if(ev.k==='sk'){skAnim(ev);return;}
   if(ev.k==='emo'){emoFx(ev);return;}   // อีโมต (js/52)
-  if(ev.k==='hit'&&ev.e!==undefined)comboHit(ev);   // ห้องฝึก: นับคอมโบ (js/53)   // ร่ายสกิลสำเร็จ → ท่าเหวี่ยงไม้ (js/35 SKANIM)
+  if(ev.k==='hit'&&ev.e!==undefined)comboHit(ev);   // ห้องฝึก: นับคอมโบ (js/53)
+  if(ev.k==='kf'){ffaKf(ev);return;}if(ev.k==='pot'){potFx(ev);return;}   // FFA (js/54)   // ร่ายสกิลสำเร็จ → ท่าเหวี่ยงไม้ (js/35 SKANIM)
   const me=myPos(),near=!me||Math.hypot(ev.x-me.x,ev.y-me.y)<1000,H=ev.h!==undefined?ev.h:1.3;
   if(ev.k==='efx')try{efxState(ev);}catch(e){console.error(e);}   // ท่า/วัตถุที่อยู่นาน (ไม่ขึ้นกับ bind.json)
   if(!raw)try{if(fxBind(ev,H))return;}catch(e){console.error(e);}   // เอฟเฟกต์จากไฟล์ที่ผูกไว้ใน assets/fx/bind.json (replace = ข้ามภาพเดิม)
@@ -233,8 +234,8 @@ function showOver(r){
   }
   const isCoop=r.mode==='coop';
   $('#over').innerHTML=`<div class="card" style="width:min(640px,100%)"><h1 style="font-size:44px">${esc(r.title)}</h1><div class="orn"></div><p class="sub">${esc(r.sub)}</p>${best}${overMvp(r)}
-    <table><tr><th>ผู้เล่น</th><th>${isCoop?'ฆ่าศัตรู':'KILLS'}</th><th>${isCoop?'ล้ม':'DEATHS'}</th><th>ดาเมจ</th><th>รับดาเมจ</th></tr>
-    ${r.rows.map((x,i)=>`<tr style="${i===0&&!isCoop?'background:linear-gradient(90deg,rgba(217,180,90,.18),transparent)':''}"><td><span class="dot" style="background:${x.c};margin-right:8px;${x.tm>=0?'outline:2px solid '+TEAMC[x.tm]:''}"></span>${i===0&&!isCoop?'👑 ':''}${esc(x.n)}${overBar(r,x)}</td><td>${x.k}</td><td>${x.d}</td><td>${x.dmg}</td><td>${x.tk||0}</td></tr>`).join('')}</table>
+    <table><tr><th>ผู้เล่น</th><th>${isCoop?'ฆ่าศัตรู':'KILLS'}</th><th>${isCoop?'ล้ม':'DEATHS'}</th><th>ดาเมจ</th><th>รับดาเมจ</th>${r.mode==='ffa'?'<th>ช่วย</th>':''}</tr>
+    ${r.rows.map((x,i)=>`<tr style="${i===0&&!isCoop?'background:linear-gradient(90deg,rgba(217,180,90,.18),transparent)':''}"><td><span class="dot" style="background:${x.c};margin-right:8px;${x.tm>=0?'outline:2px solid '+TEAMC[x.tm]:''}"></span>${i===0&&!isCoop?'👑 ':''}${esc(x.n)}${overBar(r,x)}</td><td>${x.k}</td><td>${x.d}</td><td>${x.dmg}</td><td>${x.tk||0}</td>${r.mode==='ffa'?`<td>${x.as||0}</td>`:''}</tr>`).join('')}</table>
     <div class="row">${NET.isHost?'<button class="pri" id="btnAgain">กลับล็อบบี้ / เล่นอีกครั้ง</button>':'<div class="sub" style="margin:8px 0">รอโฮสต์กดเล่นอีกครั้ง...</div>'}</div>
     <div class="row"><button id="btnQuit">ออกจากห้อง</button></div></div>`;
   $('#over').classList.remove('hidden');

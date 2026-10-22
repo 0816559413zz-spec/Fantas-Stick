@@ -119,7 +119,7 @@ function hostStart(){
     p.team=(G.mode==='coop'||G.mode==='train')?0:MD.team?p.lteam:10+i;
   });
   placeAll();
-  modeInit();
+  modeInit();if(G.mode==='ffa')ffaInit();
   if(G.mode==='coop'){G.wave=1;setupWave();}else if(G.mode!=='imp')banner(MD.name,3);
   hostLast=performance.now();
   VIEW.prev=VIEW.cur=null;
@@ -195,7 +195,7 @@ function respawn(p){
       if(m>best){best=m;x=s[0];y=s[1];}
     }
   }
-  resetBody(p,x,y);p.inv=1.5;
+  resetBody(p,x,y);p.inv=G.mode==='ffa'?FFA.PROT:1.5;   // FFA: เกิดใหม่อมตะ 2 วิ
   if(G.mode==='quid'){p.fly=true;p.z=4;}
   emit({k:'revive',x,y});
 }

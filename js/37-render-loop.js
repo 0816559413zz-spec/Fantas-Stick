@@ -60,7 +60,7 @@ function renderGame(v,P,E,me,dt,now){
   syncPlayers(P,v.mode,now,dt);grassTick(dt);clothTick(dt);pf('players',t0);   // grassTick = ลม + หญ้า (js/50) • clothTick = ผ้าคลุมจริงของเรา (js/49)
   if(me&&me.al&&!me.fl&&!me.dn){const o=PM3.get(me.id);if(o){const k=Math.floor(o.walk/Math.PI);if(o.stepK!==undefined&&k!==o.stepK)snd('step',{vol:0.35,rev:0.1});o.stepK=k;}}t0=performance.now();
   syncEnemies(E,P,now,dt);pf('enemies',t0);t0=performance.now();
-  syncProj(v,now);syncWalls(v);syncEarth(v,dt,now);syncProps(v);syncBld(dt);brkSync(dt);syncMins(v,now,dt);
+  syncProj(v,now);syncWalls(v);syncPots(v,now);syncEarth(v,dt,now);syncProps(v);syncBld(dt);brkSync(dt);syncMins(v,now,dt);
   syncModeObjs(v,P,me,now,dt);pf('projMode',t0);
   KC=Math.max(0,KC-dt);roleShowT=Math.max(0,roleShowT-dt);
   $('#trainEnd').classList.toggle('hidden',!(NET.isHost&&v.mode==='train'&&v.ph!=='over'));
@@ -74,5 +74,5 @@ function renderGame(v,P,E,me,dt,now){
   drawLabels(P,E,v,me,spk);drawMinBars(v,me);
   drawTexts(dt);
   if(me&&me.al&&!me.dn)drawCrosshair();
-  if(!VIC.on)drawHUD(v,me,P);drawSocial(P,me,dt,now);   // ป้าย VICTORY/DEFEAT = ซ่อน HUDdrawCombo(v,E,now);if(PROPON&&me&&me.al&&!me.dn&&!showBoard)drawPropHint(me);pf('hud2d',t0);
+  if(!VIC.on)drawHUD(v,me,P);drawSocial(P,me,dt,now);drawCombo(v,E,now);drawFFA(v,P,me,now);if(PROPON&&me&&me.al&&!me.dn&&!showBoard)drawPropHint(me);pf('hud2d',t0);   // ป้าย VICTORY/DEFEAT = ซ่อน HUD
 }

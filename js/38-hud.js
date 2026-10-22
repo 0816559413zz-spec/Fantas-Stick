@@ -96,7 +96,7 @@ function drawHUD(v,me,P){
   if(v.mode==='coop')top=`🗝️ ดันเจียนชั้น ${v.wave}   •   ศัตรูเหลือ ${v.el}`;
   else if(v.mode==='train')top='🎯 ห้องฝึก   •   ลองทุกคาถากับหุ่นซ้อม';
   else if(v.mode==='duel')top=`รอบ ${v.round}   •   `+P.map(p=>`${p.n} ${v.rw[p.id]||0}`).join('  :  ');
-  else if(v.mode==='ffa')top=`FFA   •   ⏱ ${fmtTime(v.tm)}   •   ใครได้ 10 kill ก่อนชนะ`;
+  else if(v.mode==='ffa')top=v.ot?`FFA   •   ⏱ ต่อเวลา!   •   ใครฆ่าก่อนชนะ`:`FFA   •   ⏱ ${fmtTime(v.tm)}   •   ใครได้ ${FFA.TARGET} kill ก่อนชนะ`;
   else if(v.mode==='quid')top=`🏟️ ${TEAMN[0]} ${(M.qs||[0,0])[0]}   —   ${(M.qs||[0,0])[1]} ${TEAMN[1]}   •   ⏱ ${fmtTime(v.tm)}${M.sn?'   •   ✨ ลูกบอลทองโผล่แล้ว!':''}`;
   else if(v.mode==='race'&&me){const rk=raceRankClient(P).findIndex(p=>p.id===me.id)+1;top=me.fin?`🏁 เข้าเส้นชัยอันดับ ${me.fin}!`:`🏁 รอบ ${Math.min(me.lap+1,M.laps||2)}/${M.laps||2}   •   ห่วง ${me.cp+1}/${(M.rings||[]).length}   •   อันดับ ${rk}/${P.length}   •   ⏱ ${(M.rt||0).toFixed(1)}`+(M.re>=0?`   •   เหลือ ${M.re} วิ`:'');}
   else if(v.mode==='br')top=`🌀 เหลือ ${M.al||0} คน   •   `+(M.zone&&!M.zone.sh?`วงเริ่มหดใน ${M.zone.tl} วิ`:'วงกำลังหด!');
