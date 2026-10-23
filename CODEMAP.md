@@ -5,7 +5,7 @@ Format: `name:line` = top-level function/const/let in that file. `§line title` 
 ## js/01-core.js (22) — แกนกลาง: import Three.js + ฟังก์ชันพื้นฐาน ($ rnd clamp lerp store to…
 $:12 rnd:13 clamp:14 lerp:15 dist2:16 lerpAng:17 esc:18 shuffle:19 store:20 toastT:21 toast:22
 
-## js/02-data.js (316) — 
+## js/02-data.js (320) — ค่าคงที่ของเกม
 W:4 H:4 PR:4 PILLARS:6 SPAWNF:7 mulberry:9 genForest:10 genPitch:27 genHogsmeade:36
 §54 แผนที่โล่ง 3 แบบ (ผู้ใช้: ป่ามืดไม่สนุก อยากได้ที่โล่งๆ)
 genMeadow:55 genLake:61 genRuins:66
@@ -16,7 +16,7 @@ FMAPS:133 b64i16:134 regFileMap:135 loadMapData:147 loadAllMapData:155 mapReady:
 §160 ของประกอบฉากที่พังได้ / ใช้ได้ (prop)
 PROPDEF:164 PROP_OFF_MODES:171 PROP_USE:173 PROPS:174 PROPON:174 genProps:175
 §195 ตัวละคร: บ้านฮอกวอตส์ + หน้าตา
-HOUSES:197 HAIRC:202 HAIRSTY:204 WOODC:207 WOODN:208 WCOREC:209 WCOREN:210 WANDSTY:211 EYEC:212 SKINC:213 CLOAKC:214 TIESTY:215 LOOKK:216 LOOKN:216 lookStr:217 parseLook:218 randLook:219 LOOKS:220 LOOKP:220 KITS:220 getKit:221 getLook:222 CREST_SH:223 CREST_PAT:224 starPts:229 CREST_ANI:231 crestSVG:237 houseColor:245 TEAMC:246 TEAMN:246 MODES:247 PDEF:258 EDEF:285 POOLS:297 CDK:307 BUFFS:308
+HOUSES:197 HAIRC:202 HAIRSTY:204 WOODC:207 WOODN:208 WCOREC:209 WCOREN:210 WANDSTY:211 EYEC:212 SKINC:213 CLOAKC:214 TIESTY:215 LOOKK:216 LOOKN:216 lookStr:217 parseLook:218 randLook:219 LOOKS:220 LOOKP:220 KITS:220 getKit:221 getLook:222 CREST_SH:223 CREST_PAT:224 starPts:229 CREST_ANI:231 crestSVG:237 houseColor:245 TEAMC:246 TEAMN:246 MODES:247 PDEF:258 EDEF:285 POOLS:297 CDK:307 BUFFS:310 BRAR:319 rollRar:320
 
 ## js/03-spells-core.js (222) — 
 ICONS:8 ICOALIAS:9 hasIco:10 ICOBASE:12 icoURL:13 ICO:14 icoTint:15 icoHTML:24 PATHS:25 SPELL_LIST:34 SPELLS:34 defSpell:35 SLOTK:36 BRMAP:36 KITP:37 parseKit:38 cleanKit:54 setKit:55 pathReset:58
@@ -104,7 +104,8 @@ spawnEnemy:2 setupWave:19 bossPhase:36 enemySlam:44 updateEnemies:55
 ## js/14-mode-rules.js (105) — กติกาของแต่ละโหมด
 hostPick:2 clearField:10 modeLogic:11 endMatch:80 matchOver:105
 
-## js/15-modes.js (400) — 
+## js/15-modes.js (400) — โหมดพิเศษ: ควิดดิช / แข่งไม้กวาด / แบทเทิลรอยัล / หาลอร์ดโวลเดอมอร์ / ห้องฝึก
+§4 ส่งข้อความลับถึงผู้เล่นคนเดียว (เช่น บทบาทในโหมดหาลอร์ดโวลเดอมอร์)
 sendPriv:5 TASKF:9 taskPts:10 raceRings:11 modeInit:17 spawnDummy:59 trainTick:64 TR_KEYS:79 trTeams:81 trCmd:89 hostEndTraining:106
 §108 ควิดดิช
 quidThrow:109 quidDrop:115 quidTick:120 snitchTick:155
@@ -177,10 +178,10 @@ MM3:2 makeMinion:3 syncMins:36 drawMinBars:58
 ## js/25-efx.js (299) — efxFX: ภาพของ event "efx" ทุกคาถา (หนึ่ง case ต่อหนึ่งเอฟเฟกต์)
 efxState:4 efxFX:15
 
-## js/26-fx-events.js (235) — fx(ev): เอฟเฟกต์+เสียงของทุก event จากโฮสต์ • statusFX (สถานะบนตัว) •…
+## js/26-fx-events.js (234) — fx(ev): เอฟเฟกต์+เสียงของทุก event จากโฮสต์ • statusFX (สถานะบนตัว) •…
 statusFX:3 fx:27
 §202 overlay: เลือกบัฟ / สรุปผล
-choosePick:203 syncOverlays:208 showOver:230
+choosePick:203 syncOverlays:208 showOver:229
 
 ## js/27-world.js (265) — 
 S3:4 tx:4 tz:4 GY:6 TW:6 hdr:7 gl:9 scene:15 cam:17 composer:18
@@ -521,7 +522,7 @@ skwOpen:243 skwClose:253
 ## js/64-mappick.js (156) — 
 MPK_TXT:7 MPK_SKY:19 MPK_I:21 MPK_DICE:31 MPK:36 mpkE:37 mpkC:37 mpkSnd:38 mpkCut:39 mpkName:40 mpkCardHTML:41 mpkBuild:51 mpkUp:89 mpkMeasure:101 mpkIdx:102 mpkStep:103 mpkTo:104 mpkPick:105 mpkOpen:111 mpkClose:126 mpkLoop:130 mpkTick:132
 
-## js/65-ui3.js (336) — UI รอบ 3 (ผู้ใช้ 2026-10-23 — สเปก designs/ui-menu.md "รอบ 3") • สไตล์เดียวกับเมนูใหม่ (c…
+## js/65-ui3.js (362) — UI รอบ 3 (ผู้ใช้ 2026-10-23 — สเปก designs/ui-menu.md "รอบ 3") • สไตล์เดียวกับเมนูใหม่ (c…
 UIG:6 uiGalaxy:7 uiGalaxyOn:15 uiGalRaf:16 uiGalT:16 uiGalLoop:17 uiGalDraw:19 uiShow:36 uiHide:37
 §40 เมนูหยุดเกม
 §44 คู่มือ (แบบ Skill Tree)
@@ -530,5 +531,7 @@ GICO:47 GROW:58 GPATH:59 GUIDE:63 GD:84 guideBuild:85 guideLayout:95 guideOpen:1
 RICO:133 rIcon:139 OV:140 ovScore:141 ovOpen:142 ovHead:151 ovSummary:157 ovNextReward:179 ovLvAnim:186 ovBoard:205
 §227 หน้าโปรไฟล์ (แบบ Naraka ย่อ) + รางวัลเลเวล
 PRF:231 prfItem:232 prfLv:233 prfOk:234 prfGet:235 myFrame:236 FR_IDX:237 prfAvatar:239 BADGES:240 BICO:244 SICO:247 PT:249 PFS:250 prfSave:251 prf3Sync:252 profOpen:253 prfStageX:261 profClose:263 prfRender:264 prfItems:288 prfRwHtml:295 prfRewards:306 prfClick:315 prfDrag:328
+§338 การ์ดพลังเสริม (ดันเจียน) + ความหายาก
+BKICO:341 buffShow:345
 
-(66 files, 15880 lines)
+(66 files, 15909 lines)

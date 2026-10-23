@@ -334,3 +334,29 @@ function prfDrag(e){
 }
 document.addEventListener('wheel',e=>{const sc=e.target.closest&&e.target.closest('#profOv .rwScroll');if(!sc)return;e.preventDefault();sc.scrollLeft+=e.deltaY+e.deltaX;},{passive:false});
 if(typeof WD!=='undefined')Object.assign(WD,{profOpen,profClose,prfRewards,PRF,myFrame,prfAvatar});
+
+// ---------- การ์ดพลังเสริม (ดันเจียน) + ความหายาก ----------
+// การ์ดแจกขึ้นมาคว่ำ (หลังการ์ด = ตราเพชรกลาง) แล้วพลิกทีละใบ • ไอคอนในกรอบเพชรกลางการ์ด • Epic/Legendary เงาวาววิ่งตามการ์ด
+// Legendary ตอนพลิก: เฟรมแรกขาวทั้งใบ → ระเบิดแสง + ประกาย • ชี้เมาส์ = การ์ดเอียงตามเมาส์ + แสงสะท้อนตามจุดเมาส์ • คลิก / 1 2 3 = เลือก
+const BKICO={pow:'<path d="M12 2.5l1.9 6.2 6.6.1-5.3 3.9 2 6.3L12 15.1 6.8 19l2-6.3L3.5 8.8l6.6-.1z"/>',cd:'<path d="M7 3h10M7 21h10M8 3c0 5 8 5 8 9s-8 4-8 9M16 3c0 5-8 5-8 9s8 4 8 9"/>',
+  hp:'<path d="M12 20s-7.5-4.6-7.5-10A4.3 4.3 0 0112 7.3 4.3 4.3 0 0119.5 10c0 5.4-7.5 10-7.5 10z"/>',spd:'<path d="M4 20c4-1 7-4 9-8l5-8c-5 1-9 4-11 8M8 15l4-1M10 11l5-1"/>',
+  life:'<path d="M12 3s6 6.5 6 11a6 6 0 01-12 0c0-4.5 6-11 6-11z"/><path d="M9.5 14.5a2.5 2.5 0 002.5 2.5"/>',sh:'<path d="M12 3l7 3v5c0 4.6-3 8.3-7 10-4-1.7-7-5.4-7-10V6z"/>',
+  ult:'<circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/>'};
+function buffShow(el,me,s){
+  const R=i=>BRAR[(me.bR&&me.bR[i])|0]||BRAR[0];   // bR = ระดับความหายาก (br ในสแนปช็อต = Burning)
+  el.className='overlay u3Buff';
+  el.innerHTML=`<div class="bkHead"><small>CHOOSE A BOON</small><b>เลือกพลังเสริม</b><span>ผ่านชั้น ${s.wave} แล้ว • คลิก หรือกด 1 / 2 / 3</span></div>
+    <div class="bkRow">${me.bo.map((b,i)=>{const B=BUFFS[b],r=R(i);if(!B)return '';return `<div class="bk r-${r.id}" data-pick="${i}" style="--rc:${r.c};--i:${i}">
+      <div class="bkIn"><div class="bkBack"><span class="bkDia"><svg viewBox="0 0 24 24"><path d="M12 5l7 7-7 7-7-7z"/></svg></span></div>
+      <div class="bkFront"><i class="bkFlash"></i><span class="bkRar">${r.en}<em>${r.n}</em></span><span class="bkDia"><svg viewBox="0 0 24 24">${BKICO[B.ic]||BKICO.pow}</svg></span>
+        <b>${esc(B.t)}</b><strong>${B.f(r.k)}</strong><p>${esc(B.d)}</p><kbd>${i+1}</kbd><i class="bkShine"></i><i class="bkGlare"></i></div></div></div>`;}).join('')}</div>`;
+  // พลิกทีละใบ (Legendary = แฟลชขาว + ระเบิดแสง)
+  [...el.querySelectorAll('.bk')].forEach((c,i)=>setTimeout(()=>{if(!c.isConnected)return;c.classList.add('flip');
+    if(c.classList.contains('r-legendary')){c.classList.add('boom');try{snd('buff',{vol:0.6});}catch(e){}}else if(c.classList.contains('r-epic')){try{snd('ui_click',{vol:0.5});}catch(e){}}},
+    520+i*260));
+}
+// เอียงตามเมาส์ + จุดแสงสะท้อน
+document.addEventListener('pointermove',e=>{const c=e.target.closest&&e.target.closest('#buff .bk.flip');document.querySelectorAll('#buff .bk.tilt').forEach(q=>{if(q!==c){q.classList.remove('tilt');q.style.removeProperty('--rx');q.style.removeProperty('--ry');}});
+  if(!c)return;const r=c.getBoundingClientRect(),u=(e.clientX-r.left)/r.width,v=(e.clientY-r.top)/r.height;
+  c.classList.add('tilt');c.style.setProperty('--ry',((u-0.5)*22).toFixed(2)+'deg');c.style.setProperty('--rx',((0.5-v)*18).toFixed(2)+'deg');c.style.setProperty('--gx',(u*100).toFixed(1)+'%');c.style.setProperty('--gy',(v*100).toFixed(1)+'%');});
+if(typeof WD!=='undefined')Object.assign(WD,{buffShow});

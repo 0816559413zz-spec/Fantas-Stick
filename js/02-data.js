@@ -305,12 +305,16 @@ const POOLS={
   ruins:{early:['gob','spl'],mid:['wiz','troll','spider'],boss:'dragon'}
 };
 const CDK=['basic','q','e','r','f','dodge'];
+// การ์ดพลังเสริม (ดันเจียน) • ความหายาก (ผู้ใช้ 2026-10-23 รอบ 3 เลือกแบบ 1): บัฟเดิม แรงขึ้นตามระดับ — ค่าในตาราง = Epic (×1)
+//   k = ตัวคูณของระดับ (BRAR) • t = ชื่อ • f(k) = ตัวเลขที่แสดง • ic = ไอคอน (js/65 BKICO) • ⚠ ตัวคูณ + โอกาสสุ่ม Claude เลือก
 const BUFFS=[
-  {n:'พลังเวท +20%',i:'✨',d:'ทุกคาถาแรงขึ้น',ap:p=>p.buffs.dmg*=1.2},
-  {n:'ร่ายไว +15%',i:'⏳',d:'คูลดาวน์สั้นลง',ap:p=>p.buffs.cdr*=0.85},
-  {n:'พลังชีวิต +25',i:'❤️',d:'เลือดสูงสุดเพิ่ม และฮีลเต็ม',ap:p=>{p.maxHp+=25;p.hp=p.maxHp;}},
-  {n:'ฝีเท้าลม +12%',i:'🪶',d:'เดินและบินเร็วขึ้น',ap:p=>p.buffs.spd*=1.12},
-  {n:'ดูดชีวิต 6%',i:'🩸',d:'ฟื้นเลือดจากดาเมจที่ทำ',ap:p=>p.buffs.life+=0.06},
-  {n:'โล่แกร่ง',i:'🛡️',d:'โล่ฟื้นเร็วขึ้น 50%',ap:p=>p.buffs.shReg*=1.5},
-  {n:'เวทโบราณ +35%',i:'🌟',d:'ชาร์จอัลติเร็วขึ้น',ap:p=>p.buffs.ult*=1.35}
+  {t:'พลังเวท',ic:'pow',i:'✨',d:'ทุกคาถาแรงขึ้น',f:k=>'+'+Math.round(20*k)+'%',ap:(p,k)=>p.buffs.dmg*=1+0.2*k},
+  {t:'ร่ายไว',ic:'cd',i:'⏳',d:'คูลดาวน์สั้นลง',f:k=>'+'+Math.round(15*k)+'%',ap:(p,k)=>p.buffs.cdr*=1-0.15*k},
+  {t:'พลังชีวิต',ic:'hp',i:'❤️',d:'เลือดสูงสุดเพิ่ม และฮีลเต็ม',f:k=>'+'+Math.round(25*k),ap:(p,k)=>{p.maxHp+=Math.round(25*k);p.hp=p.maxHp;}},
+  {t:'ฝีเท้าลม',ic:'spd',i:'🪶',d:'เดินและบินเร็วขึ้น',f:k=>'+'+Math.round(12*k)+'%',ap:(p,k)=>p.buffs.spd*=1+0.12*k},
+  {t:'ดูดชีวิต',ic:'life',i:'🩸',d:'ฟื้นเลือดจากดาเมจที่ทำ',f:k=>Math.round(6*k)+'%',ap:(p,k)=>p.buffs.life+=0.06*k},
+  {t:'โล่แกร่ง',ic:'sh',i:'🛡️',d:'โล่ฟื้นเร็วขึ้น',f:k=>'+'+Math.round(50*k)+'%',ap:(p,k)=>p.buffs.shReg*=1+0.5*k},
+  {t:'เวทโบราณ',ic:'ult',i:'🌟',d:'ชาร์จอัลติเร็วขึ้น',f:k=>'+'+Math.round(35*k)+'%',ap:(p,k)=>p.buffs.ult*=1+0.35*k}
 ];
+const BRAR=[{id:'common',n:'ธรรมดา',en:'COMMON',k:0.5,w:50,c:'#a9b3d6'},{id:'rare',n:'หายาก',en:'RARE',k:0.75,w:30,c:'#5ab4ff'},{id:'epic',n:'มหากาพย์',en:'EPIC',k:1,w:15,c:'#b884ff'},{id:'legendary',n:'ตำนาน',en:'LEGENDARY',k:1.5,w:5,c:'#ffc24a'}];
+function rollRar(){let r=Math.random()*100;for(let i=0;i<BRAR.length;i++){if((r-=BRAR[i].w)<0)return i;}return 0;}

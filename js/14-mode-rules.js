@@ -2,7 +2,7 @@
 function hostPick(p,i){
   if(G.ph!=='buff'||p.picked||!p.bo)return;
   const b=BUFFS[p.bo[i]];if(!b)return;
-  b.ap(p);p.picked=true;p.taken.push(b.n);
+  const R=BRAR[(p.br&&p.br[i])|0]||BRAR[0];b.ap(p,R.k);p.picked=true;p.taken.push(b.t+' '+b.f(R.k));
   emit({k:'buff',id:p.id});
 }
 // ล้างของในสนามที่มีเวลาจำกัด (วง/ฟ้าผ่าหน่วง/คลื่น/พื้นน้ำแข็ง ...) ตอนขึ้นชั้นใหม่ (co-op) / รอบใหม่ (ดวล)
@@ -24,7 +24,7 @@ function modeLogic(dt){
           ps.forEach(p=>{
             if(p.downed){p.downed=false;p.hp=Math.round(p.maxHp*0.5);}
             else p.hp=Math.min(p.maxHp,p.hp+p.maxHp*0.3);
-            p.bo=shuffle(BUFFS.map((_,i)=>i)).slice(0,3);p.picked=false;p.stun=0;p.burn=0;p.revive=0;p.root=0;
+            p.bo=shuffle(BUFFS.map((_,i)=>i)).slice(0,3);p.br=p.bo.map(()=>rollRar());p.picked=false;p.stun=0;p.burn=0;p.revive=0;p.root=0;
           });
           banner(`ผ่านชั้น ${G.wave}! เลือกพลังเสริม`,3);clearField();
           emit({k:'wave',x:0,y:0});

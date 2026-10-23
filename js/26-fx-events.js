@@ -208,13 +208,12 @@ function choosePick(i){
 function syncOverlays(s){
   const me=s.P.find(p=>p.id===NET.myId);
   const showBuff=s.ph==='buff'&&me&&!me.pk&&me.bo;
-  const key=showBuff?'b'+me.bo.join(',')+s.wave:'';
+  const key=showBuff?'b'+me.bo.join(',')+'/'+(me.bR||[]).join(',')+s.wave:'';
   if(key!==lastBuffKey){
     lastBuffKey=key;
     const el=$('#buff');
     if(showBuff){
-      el.innerHTML=`<div class="card boon"><h2 style="text-align:center">เลือกพลังเสริม</h2><div class="orn"></div><p class="sub">ผ่านชั้น ${s.wave} แล้ว! เลือก 1 อย่าง (คลิก หรือกด 1 / 2 / 3)</p>
-        ${me.bo.map((b,i)=>`<div class="bc" data-pick="${i}"><div class="dia"><span>${BUFFS[b].i||'✨'}</span></div><div><div class="n">${BUFFS[b].n}</div><div class="d">${BUFFS[b].d}</div></div><kbd>${i+1}</kbd></div>`).join('')}</div>`;
+      buffShow(el,me,s);   // การ์ดแบบใหม่ + ความหายาก (js/65)
       el.classList.remove('hidden');
       if(document.pointerLockElement)document.exitPointerLock();
     }else el.classList.add('hidden');
