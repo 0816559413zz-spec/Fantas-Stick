@@ -1,7 +1,26 @@
 # สายลม (Wind) — สมุดออกแบบ
 
 > ผู้ใช้ออกแบบเองทั้งหมด (สัมภาษณ์ทีละข้อ เริ่ม 2026-10-21). Claude แค่จดคำตอบ — ห้ามคิดตัวเลข/สกิลเอง.
-> สถานะ: **กำลังออกแบบ** (ยังไม่ทำในเกม)
+> สถานะ: **คอนเซ็ปต์ใหม่ (2026-10-23)** — ผู้ใช้เริ่มใหม่หมด: “i will do new concept of wind again cuz i literally out of mind” • ของเดิม (ลูกลม ผลัก/ดึง/ล็อค) เก็บไว้ด้านล่างเป็นประวัติ
+
+## คอนเซ็ปต์ใหม่ (2026-10-23)
+- **บทบาท: “ผู้ผลัก” (The Pusher)** — เล่นกับ **กำแพง** เป็นหลัก คุมศัตรู + มีการเคลื่อนที่บ้าง. ผู้ใช้: “u will be the pusher sound weird lol but u will mostly play with the wall and control ppl with some mobility”
+- **ความรู้สึกที่อยากได้:** วางแผนคุมศัตรู คิดตาต่อไป + เล่นกับศัตรูได้สนุก. ผู้ใช้เลือก: “Plan to Control enemies and think ur next move” + “เล่นกับศัตรูได้สนุก”
+- **ชนกำแพง = สตัน** (ธรรมดา).
+- **กำแพงลม (ของพิเศษเฉพาะสายลม):** สร้างกำแพงลมเองได้ • **บล็อกกระสุน/ลูกเวท** ได้ • ผลักศัตรูไปชนกำแพงลม = สตัน • **ถ้าตีกำแพงลมดาเมจถึงพอ กำแพงจะแตกแล้วระเบิด** ทำดาเมจเพิ่ม. ผู้ใช้: “wind wall will kinda exclusive special than other u can make wind wall and block the bullet or projectile if u make enemy stun to the wall it just stun right? but if u deal enough damage wind wall will break and explode itself make extra damage”
+- **คลิกซ้าย:** ยังไม่ได้คิด (“havent think yet”).
+- **สร้างกำแพงลม = สกิลของมันเอง** แล้วเลือกวิธีด้วยเมาส์: **คลิกซ้าย = ดันกำแพงพุ่งไปข้างหน้า** กวาดศัตรูในระยะไปด้วย หยุดเมื่อสุดระยะ (กดสกิลอีกครั้ง = หยุดก่อนสุดระยะ) • **คลิกขวา = เล็งวางตรงจุด** (ในระยะ). ผู้ใช้: “left to push it forward can enemy in range and stop when end of range can stop before end of range by press skill again or just right click and aim where to place with range”
+- **บล็อกเฉพาะลูกเวทของศัตรู** (ของเรา/เพื่อนผ่านได้ ⚠ ตีความ: คนเดินผ่านได้).
+- **ชาร์จ สูงสุด 3** = มีกำแพงพร้อมกันได้หลายอัน. ผู้ใช้: “หลายอัน collect charge maximum is 3”
+- **ระเบิด: เราตีกำแพงเองจนแตก** → ระเบิดดาเมจเพิ่ม.
+- **ตัวเลขกำแพงลม (ผู้ใช้เลือก):** กว้าง **250** • อยู่ **6 วิ** • ชาร์จคืน **8 วิ**/ชาร์จ (สูงสุด 3) • ดันไปได้ **400** • วางได้ไกล **500**.
+- **ชนกำแพง = สตัน 0.5 วิ.**
+- **ระเบิดกำแพง:** ⚠ ตีความ — นับดาเมจที่เราทำใส่ศัตรูที่ติดสตันอยู่กับกำแพงนั้น ครบ **70** → กำแพงแตกระเบิด: **50 ดาเมจ + ผลักศัตรูกระเด็นไกล + ragdoll**. ผู้ใช้: “stun 0.5 but it will explode with damage only when u make them stun to wall with damage only deal 70 damage for stunning enemies to wall it will explode but แตกออกและผลักศัตรูไปค่อนข้างไกล damage 50 and ragdoll too”
+- **สกิลที่เลือกเพิ่ม (จากไอเดีย Claude):** **ลมกระแทก (Gust)** — พัดลมรูปกรวยด้านหน้า ผลักศัตรูไปชนกำแพง • **สุญญากาศดูด (Vacuum)** — วางจุดดูด ดึงศัตรูเข้าหากำแพง/เข้าหากัน (ดึงเข้ากำแพง = สตัน). ⚠ รายละเอียด/ตัวเลขยังไม่คุย
+- **คลิกซ้าย:** **ใบมีดลมเล็ก ๆ** • มี **ปีกลมติดหลังตลอดเวลา** (ผู้ใช้วางแผนจะเล่นกับปีกต่อ) • ยิงโดนแต่ละครั้ง = ได้ **GaleBurst stack** → ครบแล้ว BA ถัดไปเสริมพลัง = **ยิงทอร์นาโดแนวนอนไปข้างหน้า ผลักศัตรู**. ผู้ใช้: “tiny blade of wind then u will has wind wing all the time too i plan to play with it and everytime left click hit it will gain GaleBurst Stack it push ba enchaned u will shoot tornado infront in horizontal i can send pic as ref” • ผู้ใช้จะส่งรูปอ้างอิงทอร์นาโด
+
+---
+## (ของเดิม — ก่อน 2026-10-23)
 
 ## ภาพรวมสาย
 - **แนวการเล่น:** นักฆ่าระยะใกล้ คล้าย Yasuo — คุมการเคลื่อนที่ของศัตรู / ทำให้ศัตรูขยับยาก แล้วเข้าไปฆ่าในระยะของเรา. **จุดอ่อน: สู้ระยะไกล.**
