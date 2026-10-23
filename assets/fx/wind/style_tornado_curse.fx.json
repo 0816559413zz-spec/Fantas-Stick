@@ -1,0 +1,286 @@
+{
+ "v": 1,
+ "desc": "ทดสอบสไตล์สายลม: ทอร์นาโดลมต้องสาป แบบวงลม — วงเส้นดำแหว่ง + เส้นเขียวนีออน + ประกายเขียว (ใช้กับไม้ธาตุลม)",
+ "tags": [
+  "wind",
+  "style-test"
+ ],
+ "pal": "curse",
+ "dur": 3,
+ "layers": [
+  {
+   "id": "lift",
+   "t": "emit",
+   "at": 0,
+   "life": 3,
+   "att": "ground",
+   "rate": 30,
+   "from": "disc",
+   "fr": 0.35,
+   "dir": "up",
+   "spread": 0.15,
+   "speed": [
+    5,
+    8
+   ],
+   "plife": [
+    0.3,
+    0.55
+   ],
+   "look": "streak",
+   "size": [
+    1.2,
+    2
+   ],
+   "col": "$light",
+   "c2": "$main",
+   "gravity": 0
+  },
+  {
+   "id": "arcs",
+   "t": "mesh",
+   "at": 0,
+   "life": 3,
+   "att": "ground",
+   "shape": "model",
+   "model": "wind_tornado",
+   "mat": "glow",
+   "col": "$light",
+   "spin": 540,
+   "scale": {
+    "0": 0.3,
+    "0.12": 1,
+    "0.88": 1,
+    "1": 0.7
+   },
+   "op": {
+    "0": 0,
+    "0.08": 1,
+    "0.85": 1,
+    "1": 0
+   }
+  },
+  {
+   "id": "arcs2",
+   "t": "mesh",
+   "at": 0,
+   "life": 3,
+   "att": "ground",
+   "shape": "model",
+   "model": "wind_tornado",
+   "mat": "toon",
+   "col": "$main",
+   "col2": "$deep",
+   "rot": [
+    0,
+    90,
+    0
+   ],
+   "spin": 380,
+   "scale": {
+    "0": 0.3,
+    "0.12": 1.25,
+    "0.88": 1.25,
+    "1": 0.8
+   },
+   "rim": 0,
+   "op": {
+    "0": 0,
+    "0.08": 1,
+    "0.85": 1,
+    "1": 0
+   },
+   "dis": 0.1
+  },
+  {
+   "id": "swirl",
+   "t": "emit",
+   "at": 0,
+   "life": 3,
+   "att": "ground",
+   "rate": 70,
+   "from": "ring",
+   "fr": 1.0,
+   "fh": 2.6,
+   "dir": "tangent",
+   "speed": [
+    5,
+    8
+   ],
+   "up": [
+    1.5,
+    3.5
+   ],
+   "plife": [
+    0.4,
+    0.8
+   ],
+   "look": "streak",
+   "size": [
+    1.4,
+    2.4
+   ],
+   "col": "$hi",
+   "c2": "$deep",
+   "gravity": -0.6,
+   "drag": 1.5,
+   "curl": true
+  },
+  {
+   "id": "motes",
+   "t": "emit",
+   "at": 0,
+   "life": 3,
+   "att": "ground",
+   "rate": 40,
+   "from": "cone",
+   "fr": 1.5,
+   "fh": 3,
+   "dir": "tangent",
+   "speed": [
+    3,
+    6
+   ],
+   "up": [
+    0.5,
+    2
+   ],
+   "plife": [
+    0.6,
+    1.1
+   ],
+   "look": "glow",
+   "size": [
+    1.2,
+    2.2
+   ],
+   "col": "$light",
+   "c2": "$deep",
+   "gravity": -0.3
+  },
+  {
+   "id": "dust",
+   "t": "emit",
+   "at": 0,
+   "life": 3,
+   "att": "ground",
+   "rate": 28,
+   "from": "ring",
+   "fr": 0.7,
+   "dir": "flat",
+   "spread": 0.4,
+   "speed": [
+    3,
+    6
+   ],
+   "up": [
+    0.2,
+    0.6
+   ],
+   "plife": [
+    0.4,
+    0.8
+   ],
+   "look": "smoke",
+   "size": [
+    5,
+    9
+   ],
+   "grow": 2,
+   "col": "$main",
+   "c2": "$deep",
+   "gravity": 0,
+   "drag": 3
+  },
+  {
+   "id": "base",
+   "t": "mesh",
+   "at": 0,
+   "life": 3,
+   "att": "ground",
+   "shape": "ring",
+   "inner": 0.9,
+   "mat": "energy",
+   "col": "$light",
+   "col2": "$deep",
+   "pos": [
+    0,
+    0.05,
+    0
+   ],
+   "scale": 2.2,
+   "spin": 200,
+   "op": {
+    "0": 0,
+    "0.1": 0.6,
+    "0.85": 0.6,
+    "1": 0
+   }
+  },
+  {
+   "id": "sparks",
+   "t": "emit",
+   "at": 0,
+   "life": 3,
+   "att": "ground",
+   "rate": 40,
+   "from": "ring",
+   "fr": 1.2,
+   "dir": "out",
+   "speed": [
+    2,
+    5
+   ],
+   "up": [
+    0.5,
+    2
+   ],
+   "plife": [
+    0.2,
+    0.5
+   ],
+   "look": "spark",
+   "size": [
+    1.2,
+    2
+   ],
+   "col": "$light",
+   "c2": "$hi",
+   "gravity": 3
+  },
+  {
+   "id": "ink",
+   "t": "emit",
+   "at": 0,
+   "life": 3,
+   "att": "ground",
+   "rate": 16,
+   "from": "cone",
+   "fr": 1.2,
+   "fh": 2.6,
+   "dir": "tangent",
+   "speed": [
+    2,
+    4
+   ],
+   "up": [
+    0.6,
+    1.6
+   ],
+   "plife": [
+    0.6,
+    1.0
+   ],
+   "look": "smoke",
+   "size": [
+    5,
+    8
+   ],
+   "grow": 1.5,
+   "col": "#03100a",
+   "c2": "#000000",
+   "gravity": -0.4,
+   "drag": 2
+  }
+ ]
+}

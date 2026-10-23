@@ -64,6 +64,9 @@ const VFXPAL={
   arcane:{core:'#ffffff',hi:'#e8f0ff',main:'#bfd4ff',deep:'#5a7cff',light:'#cfe0ff',sig:''},
   shield:{core:'#ffffff',hi:'#dffcff',main:'#7ff6ff',deep:'#1aa8c8',light:'#7ff6ff',sig:''},
   heal:{core:'#ffffff',hi:'#d8ffe4',main:'#7dff9a',deep:'#1a9a4a',light:'#7dff9a',sig:'nature'},
+  // สายลม (ผู้ใช้ 2026-10-24, designs/wind_ref): ลมใส มิ้นต์-ขาว • ลมต้องสาป = ริบบิ้นดำ + เขียวเข้ม/นีออน (ใช้กับไม้ธาตุลม)
+  wind:{core:'#ffffff',hi:'#d8fff4',main:'#7fe8c8',deep:'#2a9a86',light:'#9ff0d8',sig:''},
+  curse:{core:'#b8ffd0',hi:'#4dff95',main:'#0c2a20',deep:'#010604',light:'#3aff8a',sig:''},
 };
 // แม่แบบ: ขนาด/ชนิดของเหตุการณ์ (ทุกธาตุใช้ร่วมกัน) + ชั้นเฉพาะธาตุ (VFXSIG) ต่อท้าย
 const VFXTPL={

@@ -236,12 +236,22 @@ function fxEnergyMat(c1,c2,c3){const U={time:FIRE_U.time,uC1:{value:new THREE.Co
       'float body=clamp(0.3+0.7*n,0.0,1.0)*(0.35+0.65*min(1.0,fr*uRim+0.25));'+
       'vec3 c=mix(uC3,uC2,smoothstep(0.2,0.75,n+fr*0.3));c=mix(c,uC1,smoothstep(0.82,1.12,n*0.5+fr*uRim*0.55));c+=uC1*edge*1.4;'+
       'float a=clamp(body+edge,0.0,1.0)*uOp;gl_FragColor=vec4(c*uInt*a,a*0.82);}'});}
+// วัสดุการ์ตูน (cel): เฉดสว่าง col / เงา col2 ตัดคม + ขอบหันข้าง = core • dis = ตัดขอบแหว่งตามลาย noise (ลมต้องสาปแตกเป็นเศษ) • ทึบ (สีดำได้)
+function fxToonMat(c1,c2,c3,rim){const U={time:FIRE_U.time,uC1:{value:new THREE.Color(c1)},uC2:{value:new THREE.Color(c2)},uC3:{value:new THREE.Color(c3)},uOp:{value:1},uDis:{value:0},uInt:{value:1},uRim:{value:rim===undefined?1:rim},uNz:{value:NOISETEX}};
+  return new THREE.ShaderMaterial({uniforms:U,transparent:true,depthWrite:false,side:THREE.DoubleSide,
+    vertexShader:'varying vec2 vUv;varying vec3 vN;varying vec3 vV;void main(){vUv=uv;vec4 mv=modelViewMatrix*vec4(position,1.0);vN=normalize(normalMatrix*normal);vV=normalize(-mv.xyz);gl_Position=projectionMatrix*mv;}',
+    fragmentShader:'uniform sampler2D uNz;uniform vec3 uC1,uC2,uC3;uniform float time,uOp,uDis,uInt,uRim;varying vec2 vUv;varying vec3 vN;varying vec3 vV;'+
+      'void main(){vec3 n=normalize(vN);if(!gl_FrontFacing)n=-n;float l=dot(n,normalize(vec3(0.35,0.75,0.55)));float fr=1.0-abs(dot(n,normalize(vV)));'+
+      'float nz=texture2D(uNz,vUv*vec2(3.0,1.0)+vec2(time*0.08,-time*0.25)).r;if(nz<uDis)discard;'+
+      'vec3 c=l>0.3?uC2:uC3;c=mix(c,uC1,step(0.8,fr*uRim+(l>0.55?0.25:0.0)));c=mix(c,uC1,step(nz,uDis+0.04)*step(0.001,uDis));'+
+      'gl_FragColor=vec4(c*uInt,uOp);}'});}
 function fxMeshMake(S,I,w){const L=S.d,g=k=>fxG(L,k),sh=g('shape'),mt=g('mat'),C=k=>fxCol(g(k),I);let obj,mats=[];
   const mkMat=()=>{switch(mt){
     case 'fire':{const ball=g('mode')==='ball'||(g('mode')==='auto'&&['sphere','dome','torus','glb','spikes','model'].includes(sh));
       const m=fireMat({mode:ball?'ball':'sheet',flow:g('flow'),speed:(ball?1.2:1.4)*g('scroll'),int:1.15,disp:g('disp'),tint:L.col?C('col'):undefined,side:sh==='plane'});return m;}
     case 'ice':return iceShaderMat({glow:1,rim:g('rim')});
     case 'glow':return new THREE.MeshBasicMaterial({color:hdr(C('col'),1.15),transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide});
+    case 'toon':return fxToonMat(fxCol('$core',I),C('col'),C('col2'),g('rim'));   // การ์ตูน 2 เฉด + ขอบสว่าง + ขอบแหว่งด้วย dis (ลม)
     case 'solid':return new THREE.MeshStandardMaterial({color:C('col'),emissive:C('col2'),emissiveIntensity:0.35,roughness:0.85,metalness:0,flatShading:true,transparent:true});
     case 'tex':return fxTexMat(g('tex'),{col:C('col'),col2:C('col2'),rim:g('rim'),tile:g('uvTile'),scroll:g('uvScroll')});   // ภาพจากสตูดิโอบนผิวรูปทรง (js/46)
     case 'flip':{const t=fxFlipTex(g('tex')),add=!t||t.add!==false;const m=new THREE.MeshBasicMaterial({map:t?t.map:null,color:add?hdr(C('col'),1.2):C('col'),transparent:true,depthWrite:false,blending:add?THREE.AdditiveBlending:THREE.NormalBlending,side:THREE.DoubleSide});if(t)S.flip=t;return m;}

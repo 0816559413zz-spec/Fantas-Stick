@@ -8,7 +8,7 @@
 - **ตัวเลข** — ตัวเลข • [min,max] = สุ่มในช่วง (ฟิลด์ที่มี range) • "r*0.5" = สูตรจาก params (+ - * / ( ) min max abs sqrt) • ฟิลด์ที่มี curve รับเส้นโค้งตามอายุชั้น {"0":0,"0.3":1,"1":0} (+ "ease":"in|out|inout|step", "x":ตัวคูณ)
 - **สี** — #rrggbb หรือสีจากจานธาตุ $core $hi $main $deep $light
 - **ตำแหน่ง (vec3)** — [x,y,z] เมตร (+x ขวา +y ขึ้น +z หน้า) • รับเส้นโค้งได้ (ค่าเป็น [x,y,z] ทุกจุด)
-- **ธาตุ (pal)**: `fire` `ice` `storm` `nature` `hex` `summon` `earth` `arcane` `shield` `heal` `col` (`col` = สร้างจานสีจากสีที่เกมส่งมา)
+- **ธาตุ (pal)**: `fire` `ice` `storm` `nature` `hex` `summon` `earth` `arcane` `shield` `heal` `wind` `curse` `col` (`col` = สร้างจานสีจากสีที่เกมส่งมา)
 
 ## ไฟล์
 | ฟิลด์ | ชนิด | ค่าเริ่ม | ช่วง | รับ | ความหมาย |
@@ -16,7 +16,7 @@
 | `v` | int | `1` |  |  | เวอร์ชันรูปแบบไฟล์ — Format version (always 1 for now). |
 | `desc` | str | `` |  |  | คำอธิบาย — What this effect is for (one line). |
 | `tags` | list | `[]` |  |  | ป้ายค้นหา — Search tags, e.g. impact, ult, aura. |
-| `pal` | enum (fire/ice/storm/nature/hex/summon/earth/arcane/shield/heal/col) | `arcane` |  |  | ธาตุ (จานสี) — Palette the $ colours come from. Callers may override (pal or col). |
+| `pal` | enum (fire/ice/storm/nature/hex/summon/earth/arcane/shield/heal/wind/curse/col) | `arcane` |  |  | ธาตุ (จานสี) — Palette the $ colours come from. Callers may override (pal or col). |
 | `dur` | num | `0` | 0–20 |  | ความยาวไทม์ไลน์ (วิ) — Timeline length shown in the studio. 0 = auto (latest layer end). |
 | `k` | num | `1` | 0.3–2 |  | ความแรงรวม — Intensity: multiplies counts, sizes and brightness of every layer. |
 | `seed` | int | `0` |  |  | เลขสุ่มคงที่ — 0 = random every play. Any other number = same random values every play (screenshots). |
@@ -147,7 +147,7 @@ Play a game sound (names from SFXN in js/18-audio.js).
 | `wk` | num | `0.6` | 0.05–2 |  | ความกว้าง (เสี้ยว/ริบบิ้น) |
 | `prof` | list | `[[0.2,0],[1,0.4],[0.6,1],[0,1.3]]` |  |  | เส้นโปรไฟล์ [รัศมี,สูง] (lathe) |
 | `path` | list | `[[0,0,0],[0,1,2],[0,0,4]]` |  |  | เส้นทาง [x,y,z] (ribbon) |
-| `mat` | enum (energy/fire/ice/glow/solid/flip/tex) | `energy` |  |  | วัสดุ |
+| `mat` | enum (energy/fire/ice/glow/solid/flip/tex/toon) | `energy` |  |  | วัสดุ |
 | `col` | col | `$main` |  |  | สีหลัก |
 | `col2` | col | `$deep` |  |  | สีขอบ/ท้าย |
 | `scale` | vec3 | `1` | 0–30 | เส้นโค้ง · สูตร | ขนาด (ม. หรือ [x,y,z]) |
@@ -320,7 +320,7 @@ Escape hatch: call a registered helper (FXCODE in js/45-fx-runtime.js) with args
 
 ## ตัวเลือกของ enum
 - รูปทรง (shape): sphere, dome, disc, ring, cylinder, cone, torus, crescent, spikes, beam, plane, lathe, ribbon, glb, model
-- วัสดุ (mat): energy, fire, ice, glow, solid, flip, tex — energy = ขอบเรือง+ลายไหล (สีจากจาน) • fire = shader ไฟของเกม • ice = shader น้ำแข็ง • glow = สีเรียบบวกแสง • solid = ทึบ • flip = ภาพ flipbook
+- วัสดุ (mat): energy, fire, ice, glow, solid, flip, tex, toon — energy = ขอบเรือง+ลายไหล (สีจากจาน) • fire = shader ไฟของเกม • ice = shader น้ำแข็ง • glow = สีเรียบบวกแสง • solid = ทึบ • flip = ภาพ flipbook
 - ปล่อยจาก (from): point, sphere, hemisphere, ring, disc, cone, box, line, mesh
 - ทิศ (dir): out, flat, up, down, in, aim, tangent, random — flat = กระจายแนวนอน (ความเร็วขึ้นจาก up)
 - หน้าตาเม็ด (look): glow, spark, streak, ring, flake, smoke, fire, ember, model
@@ -335,7 +335,7 @@ Escape hatch: call a registered helper (FXCODE in js/45-fx-runtime.js) with args
 | `v` | int | `1` |  |  | เวอร์ชันรูปแบบไฟล์ |
 | `desc` | str | `` |  |  | คำอธิบาย |
 | `mat` | enum (energy/fire/ice/glow/solid) | `energy` |  |  | วัสดุที่แนะนำ (ใช้ตอนดูในสตูดิโอ / ตอนกดใช้ในเอฟเฟกต์) |
-| `pal` | enum (fire/ice/storm/nature/hex/summon/earth/arcane/shield/heal/col) | `arcane` |  |  | ธาตุที่ใช้ดูในสตูดิโอ |
+| `pal` | enum (fire/ice/storm/nature/hex/summon/earth/arcane/shield/heal/wind/curse/col) | `arcane` |  |  | ธาตุที่ใช้ดูในสตูดิโอ |
 | `tags` | list | `[]` |  |  | แท็ก |
 | `parts` | list | `[]` |  |  | ชิ้นส่วน |
 ### ทุกชิ้นส่วนมีฟิลด์เหล่านี้ (ลำดับตัวแต่ง: เรียว → บิด → โค้ง → ขรุขระ → ขนาด/หมุน/ตำแหน่ง → ทำซ้ำ → กระจก)

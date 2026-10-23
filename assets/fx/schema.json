@@ -6,7 +6,7 @@
     "col": "#rrggbb หรือสีจากจานธาตุ $core $hi $main $deep $light",
     "vec3": "[x,y,z] เมตร (+x ขวา +y ขึ้น +z หน้า) • รับเส้นโค้งได้ (ค่าเป็น [x,y,z] ทุกจุด)"
   },
-  "pals": ["fire", "ice", "storm", "nature", "hex", "summon", "earth", "arcane", "shield", "heal", "col"],
+  "pals": ["fire", "ice", "storm", "nature", "hex", "summon", "earth", "arcane", "shield", "heal", "wind", "curse", "col"],
   "file": {
     "v": {"type": "int", "def": 1, "th": "เวอร์ชันรูปแบบไฟล์", "desc": "Format version (always 1 for now)."},
     "desc": {"type": "str", "def": "", "th": "คำอธิบาย", "desc": "What this effect is for (one line)."},
@@ -213,7 +213,7 @@
       "args": {"type": "obj", "def": {}, "th": "ค่าที่ส่ง"}}}
   },
   "shapes": ["sphere", "dome", "disc", "ring", "cylinder", "cone", "torus", "crescent", "spikes", "beam", "plane", "lathe", "ribbon", "glb", "model"],
-  "mats": ["energy", "fire", "ice", "glow", "solid", "flip", "tex"],
+  "mats": ["energy", "fire", "ice", "glow", "solid", "flip", "tex", "toon"],
   "froms": ["point", "sphere", "hemisphere", "ring", "disc", "cone", "box", "line", "mesh"],
   "dirs": ["out", "flat", "up", "down", "in", "aim", "tangent", "random"],
   "looks": ["glow", "spark", "streak", "ring", "flake", "smoke", "fire", "ember", "model"],

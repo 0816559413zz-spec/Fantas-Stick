@@ -7,7 +7,7 @@
 // =====================================================================
 const SQ=new URLSearchParams(location.search);
 const ST={fx:null,name:'',saved:'',mtime:0,dirty:false,t:0,play:!SQ.has('sheet'),speed:1,loop:true,seed:+(SQ.get('seed')||1),I:null,sel:null,
-  cam:SQ.get('cam')||'game',orb:{yaw:0.9,pitch:0.32,dist:12},at:SQ.get('at')||'front',map:SQ.get('map')||'test',undo:[],redo:[],acc:0,seekTo:null,
+  cam:SQ.get('cam')||'game',dist:+SQ.get('dist')||9,orb:{yaw:0.9,pitch:0.32,dist:12},at:SQ.get('at')||'front',map:SQ.get('map')||'test',undo:[],redo:[],acc:0,seekTo:null,
   met:{white:0,lum:0,parts:0,calls:0,ms:0,block:0},run:{white:0,parts:0,block:0},list:{},ready:false,tail:0.6,api:false,mute:{},solo:null,busy:false,lint:[]};
 const STD=1/60;let stVnow=performance.now(),stLast=performance.now(),stFr=0;
 const $st=id=>document.getElementById(id);
@@ -49,8 +49,8 @@ function stAnchor(){const me=G&&G.players&&G.players.me;if(!me)return null;const
 const _stv=new THREE.Vector3();
 function stCam(c){if(ST.cam==='game'||!ST.fx)return;const A=stAnchor();if(!A)return;const T=_stv.set(tx(A.x),GY(A.x,A.y)+1.1,tz(A.y));
   const f=[Math.cos(A.a),Math.sin(A.a)],r=[-Math.sin(A.a),Math.cos(A.a)];
-  if(ST.cam==='side')c.position.set(T.x+r[0]*9,T.y+2.2,T.z+r[1]*9);
-  else if(ST.cam==='front')c.position.set(T.x+f[0]*9,T.y+2,T.z+f[1]*9);
+  if(ST.cam==='side')c.position.set(T.x+r[0]*ST.dist,T.y+2.2*ST.dist/9,T.z+r[1]*ST.dist);
+  else if(ST.cam==='front')c.position.set(T.x+f[0]*ST.dist,T.y+2*ST.dist/9,T.z+f[1]*ST.dist);
   else if(ST.cam==='top')c.position.set(T.x+0.01,T.y+22,T.z+0.01);
   else{const o=ST.orb;c.position.set(T.x+Math.cos(o.yaw)*Math.cos(o.pitch)*o.dist,T.y+Math.sin(o.pitch)*o.dist,T.z+Math.sin(o.yaw)*Math.cos(o.pitch)*o.dist);}
   c.lookAt(T);}

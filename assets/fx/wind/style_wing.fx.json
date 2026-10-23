@@ -1,0 +1,103 @@
+{
+ "v": 1,
+ "desc": "ทดสอบสไตล์สายลม: ปีกลมโปร่ง (เส้นลมเป็นทรงปีกขนแหลม ต้องเห็นชัด) ติดหลังตัวละคร",
+ "tags": [
+  "wind",
+  "style-test"
+ ],
+ "pal": "wind",
+ "dur": 3,
+ "layers": [
+  {
+   "id": "wing",
+   "t": "mesh",
+   "at": 0,
+   "life": 3,
+   "att": "feet",
+   "shape": "model",
+   "model": "wind_wing",
+   "mat": "energy",
+   "col": "$main",
+   "col2": "$deep",
+   "pos": [
+    0,
+    1.35,
+    -0.3
+   ],
+   "rim": 1.8,
+   "scroll": 2,
+   "op": {
+    "0": 0,
+    "0.1": 1,
+    "0.9": 1,
+    "1": 0
+   },
+   "scale": {
+    "0": 0.3,
+    "0.15": 1.15,
+    "1": 1.15
+   }
+  },
+  {
+   "id": "edge",
+   "t": "mesh",
+   "at": 0,
+   "life": 3,
+   "att": "feet",
+   "shape": "model",
+   "model": "wind_wing",
+   "mat": "glow",
+   "col": "$hi",
+   "pos": [
+    0,
+    1.35,
+    -0.31
+   ],
+   "op": {
+    "0": 0,
+    "0.1": 0.5,
+    "0.9": 0.5,
+    "1": 0
+   },
+   "scale": {
+    "0": 0.3,
+    "0.15": 1.15,
+    "1": 1.15
+   }
+  },
+  {
+   "id": "wisps",
+   "t": "emit",
+   "at": 0,
+   "life": 3,
+   "att": "feet",
+   "rate": 36,
+   "from": "box",
+   "fr": 1.4,
+   "fh": 0.8,
+   "pos": [
+    0,
+    1.5,
+    -0.45
+   ],
+   "dir": "tangent",
+   "spread": 0.5,
+   "speed": [
+    0.6,
+    1.6
+   ],
+   "plife": [
+    0.4,
+    0.8
+   ],
+   "look": "streak",
+   "size": [
+    1.1,
+    1.8
+   ],
+   "col": "$core",
+   "c2": "$main",
+   "gravity": 0.2
+  }
+ ]
+}
