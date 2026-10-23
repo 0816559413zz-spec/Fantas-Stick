@@ -46,7 +46,7 @@ function setScreen(s){
   $('#lobby').classList.toggle('hidden',s!=='lobby');
   $('#voice').classList.toggle('hidden',!(NET.online&&s!=='menu'));
   if(s!=='game'){$('#buff').classList.add('hidden');$('#over').classList.add('hidden');lastBuffKey='';overShown=false;}
-  cv.style.cursor=s==='game'?'crosshair':'default';
+  cv.style.cursor=s==='game'?'crosshair':'default';if(s!=='game'&&typeof hud4Hide==='function')hud4Hide();
   try{hubOnScreen(s);}catch(e){}   // เมนูใหม่ (js/62) • ตอนโหลดไฟล์ js/61 ยังไม่พร้อม = ข้าม
 }
 function onLobby(m){

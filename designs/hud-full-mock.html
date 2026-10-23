@@ -1,0 +1,147 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>HUD full mock</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Kanit:wght@300;400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/hub.css">
+<style>
+/* HUD เต็มจอ (ม็อกอัป) — สไตล์ L2 สีตามธาตุ • ?el=pyro|frost|storm|earth */
+body{margin:0;background:#000}
+#st{position:relative;width:1600px;height:900px;overflow:hidden;background:url(hud_mock_bg.jpg) center/cover;font-family:var(--h-sans);color:#fff}
+svg.ln{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible}
+.sh{position:absolute;bottom:0;height:420px;width:620px;pointer-events:none}
+.sh.l{left:0;background:radial-gradient(ellipse at 0% 100%,rgba(6,9,20,.6),transparent 65%)}
+.sh.r{right:0;background:radial-gradient(ellipse at 100% 100%,rgba(6,9,20,.6),transparent 65%)}
+.cd{position:absolute;width:78px;height:110px;border-radius:9px;background:linear-gradient(180deg,var(--cb),#0a0c18);
+  box-shadow:inset 0 0 0 1px var(--c1),inset 0 0 0 4px #0a0c18,inset 0 0 0 5px color-mix(in srgb,var(--c2) 45%,transparent),0 10px 20px rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center}
+.cd::before{content:'';position:absolute;left:9px;right:9px;top:9px;height:62%;border-radius:5px;background:radial-gradient(circle at 50% 45%,color-mix(in srgb,var(--c1) 45%,transparent),transparent 70%),repeating-conic-gradient(from 0deg at 50% 45%,color-mix(in srgb,var(--c2) 10%,transparent) 0 6deg,transparent 6deg 18deg)}
+.cd img{position:relative;width:60%;margin-top:-18px;filter:drop-shadow(0 0 8px var(--c1))}
+.cd .k{position:absolute;bottom:8px;font:700 13px var(--h-serif);color:var(--c2)}
+.cd .gem{position:absolute;top:-5px;left:50%;width:10px;height:10px;transform:translateX(-50%) rotate(45deg);background:var(--c1);box-shadow:0 0 8px var(--c1);border:1px solid #fff}
+.cd.on{box-shadow:inset 0 0 0 2px #fff,inset 0 0 0 4px #0a0c18,0 0 30px var(--c1)}
+.cd.cdn img{opacity:.28;filter:grayscale(1)}
+.cd.cdn::after{content:'';position:absolute;inset:0;border-radius:9px;background:linear-gradient(0deg,transparent 40%,rgba(4,6,16,.65) 40%)}
+.cd.cdn b{position:absolute;top:28px;z-index:2;font:700 28px var(--h-serif);text-shadow:0 0 10px #000}
+.cd.cdn .gem{background:#445;box-shadow:none}
+.u{position:absolute;border-radius:50%;transform:translate(-50%,-50%);display:grid;place-items:center;
+  background:radial-gradient(circle at 40% 35%,#fff 0,var(--c2) 14%,var(--c1) 40%,var(--c0) 78%);box-shadow:0 0 40px var(--c1),0 0 0 7px rgba(6,9,20,.4),0 0 0 8px color-mix(in srgb,var(--c2) 70%,transparent)}
+.u svg{position:absolute;inset:-4px;width:calc(100% + 8px);height:calc(100% + 8px)}
+.u div{text-align:center}.u b{display:block;font:700 28px/1 var(--h-serif);text-shadow:0 0 8px var(--c0),0 0 14px var(--c0)}
+.u small{font:600 9.5px var(--h-serif);letter-spacing:.22em;text-shadow:0 0 6px var(--c0)}
+.kk{position:absolute;padding:0 6px;font:700 10px var(--h-serif);color:#0a0c18;background:var(--c2);border-radius:3px;white-space:nowrap}
+.s{position:absolute;width:46px;height:46px;border-radius:6px;transform:translate(-50%,-50%) rotate(45deg);background:radial-gradient(circle at 50% 35%,var(--cb),#0a0c18 75%);box-shadow:inset 0 0 0 1px var(--c1),0 0 0 3px rgba(6,9,20,.5),0 0 0 4px color-mix(in srgb,var(--c2) 50%,transparent);display:grid;place-items:center}
+.s img{width:58%;transform:rotate(-45deg);filter:drop-shadow(0 0 6px var(--c1))}
+.s .kk{bottom:-12px;left:70%;transform:translateX(-50%) rotate(-45deg)}
+/* ซ้ายล่าง: โปรไฟล์ + แถบเลือดช่องเฉียงเรียว (แบบที่ตกลงรอบแรก) สีตามธาตุ */
+#me{position:absolute;left:34px;bottom:34px;display:flex;align-items:flex-end;gap:18px}
+.por{position:relative;width:112px;height:112px;flex:none}
+.por .rg{position:absolute;inset:0;border-radius:50%;padding:3px;background:conic-gradient(from 200deg,var(--c1),var(--c2),#fff,var(--c1));box-shadow:0 0 24px var(--c1)}
+.por .rg i{display:block;width:100%;height:100%;border-radius:50%;background:url(hud_mock_face.jpg) center/cover;border:3px solid #0a0c18;box-sizing:border-box}
+.por .tk{position:absolute;inset:-9px;border-radius:50%;border:1px dashed color-mix(in srgb,var(--c2) 50%,transparent)}
+.por .el{position:absolute;right:-4px;top:-2px;width:32px;height:32px;border-radius:50%;background:#0a0c18;box-shadow:0 0 0 1.5px var(--c1),0 0 10px var(--c1);display:grid;place-items:center}
+.por .el img{width:21px}
+.por .lv{position:absolute;left:50%;bottom:-12px;transform:translateX(-50%);padding:1px 12px;font:700 12px var(--h-serif);letter-spacing:.12em;white-space:nowrap;color:#0a0c18;background:var(--c2);clip-path:polygon(9px 0,calc(100% - 9px) 0,100% 50%,calc(100% - 9px) 100%,9px 100%,0 50%)}
+.hpw{display:flex;flex-direction:column;gap:6px;padding-bottom:6px}
+.hpw .nm{display:flex;align-items:baseline;gap:10px;font:600 15px var(--h-serif);letter-spacing:.16em;text-shadow:0 1px 4px #000}
+.hpw .nm small{font:600 10.5px var(--h-serif);letter-spacing:.3em;color:var(--c1)}
+.hpw .num{font:700 42px/1 var(--h-serif);text-shadow:0 0 16px var(--c1),0 2px 6px #000;white-space:nowrap}
+.hpw .num small{font-size:17px;color:rgba(255,255,255,.8);margin-left:4px}
+.hpw .num em{font:700 22px var(--h-serif);font-style:normal;color:#bfefff;margin-left:10px;text-shadow:0 0 12px #8fd8ff}
+.segs{display:flex;gap:4px;align-items:flex-end;height:26px}
+.sg{width:30px;transform:skewX(-22deg);border-radius:2px;background:rgba(6,9,20,.55);box-shadow:inset 0 0 0 1px rgba(255,255,255,.15)}
+.sg.f{background:linear-gradient(180deg,#fff,var(--c2) 40%,var(--c1));box-shadow:0 0 10px var(--c1),inset 0 0 0 1px rgba(6,9,20,.4)}
+.sg.d{background:linear-gradient(180deg,#ff9fb6,#ff4d78);opacity:.9}
+.sg.shd{background:linear-gradient(180deg,#e6f9ff,#8fd8ff 60%,#3fa9e6);box-shadow:0 0 12px rgba(143,216,255,.8)}
+.dash{display:flex;gap:6px;margin-top:2px}
+.dash i{width:46px;height:5px;transform:skewX(-22deg);background:linear-gradient(90deg,var(--c2),var(--c1));box-shadow:0 0 8px var(--c1)}
+.dash i.e{background:rgba(255,255,255,.15);box-shadow:none}
+.chips{display:flex;gap:6px;margin-top:4px}
+.chips span{display:flex;align-items:center;gap:4px;padding:2px 9px 2px 4px;font:400 11.5px var(--h-sans);border-radius:20px;background:rgba(9,12,30,.65);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--c1) 60%,transparent)}
+.chips i{width:16px;height:16px;border-radius:50%;display:grid;place-items:center;font-style:normal;font-size:10px}
+/* บนกลาง */
+#top{position:absolute;left:50%;top:16px;transform:translateX(-50%);display:flex;align-items:stretch}
+#top>div{background:linear-gradient(180deg,rgba(9,12,30,.78),rgba(9,12,30,.55));box-shadow:inset 0 -2px 0 var(--c1);text-align:center}
+#top .sd{width:110px;padding:7px 0}
+#top .sd b{font:700 24px/1 var(--h-serif)}#top .sd small{display:block;font:600 9.5px var(--h-serif);letter-spacing:.26em;color:rgba(255,255,255,.65);margin-top:3px}
+#top .l{clip-path:polygon(18px 0,100% 0,100% 100%,0 100%)}#top .r{clip-path:polygon(0 0,calc(100% - 18px) 0,100% 100%,0 100%)}
+#top .md{padding:6px 28px;box-shadow:inset 0 -2px 0 var(--c1),0 0 20px color-mix(in srgb,var(--c1) 30%,transparent)}
+#top .md b{display:block;font:700 26px/1 var(--h-serif);letter-spacing:.1em;text-shadow:0 0 12px var(--c1)}
+#top .md small{display:block;font:600 10px var(--h-serif);letter-spacing:.34em;color:var(--c1);margin-top:4px}
+#toast{position:absolute;left:50%;top:150px;transform:translateX(-50%);text-align:center}
+#toast b{display:block;font:700 34px var(--h-serif);letter-spacing:.3em;text-shadow:0 0 22px var(--c1),0 2px 6px #000}
+#toast i{display:block;width:300px;height:2px;margin:8px auto;background:linear-gradient(90deg,transparent,var(--c1),transparent)}
+#toast span{font:400 14px var(--h-sans);text-shadow:0 1px 4px #000}
+/* ขวาบน */
+#feed{position:absolute;right:30px;top:226px;display:flex;flex-direction:column;align-items:flex-end;gap:5px}
+#feed div{display:flex;align-items:center;gap:8px;padding:4px 14px;font:400 13px var(--h-sans);background:rgba(9,12,30,.62);clip-path:polygon(10px 0,100% 0,100% 100%,0 100%)}
+#feed div img{width:16px}
+#feed .me{background:linear-gradient(90deg,color-mix(in srgb,var(--c1) 45%,transparent),rgba(9,12,30,.7))}
+/* กลาง */
+.dmg{position:absolute;font:700 30px var(--h-serif);color:#fff;text-shadow:0 0 10px var(--c1),0 2px 0 #0a0c18}
+.dmg.cr{font-size:42px;color:var(--c2);text-shadow:0 0 16px var(--c1),0 2px 0 #0a0c18}
+.tag{position:absolute;transform:translateX(-50%);text-align:center}
+.tag b{font:700 12px var(--h-serif);letter-spacing:.14em;color:#ffd0da;text-shadow:0 1px 3px #000}
+.tag .hb{display:flex;gap:2px;margin-top:3px;justify-content:center}
+.tag .hb i{width:10px;height:5px;transform:skewX(-22deg);background:#ff5a7e;box-shadow:0 0 4px #ff5a7e}
+.tag .hb i.e{background:rgba(255,255,255,.2);box-shadow:none}
+#combo{position:absolute;right:40px;top:300px;text-align:right}
+#combo small{font:600 10px var(--h-serif);letter-spacing:.32em;color:var(--c1)}
+#combo b{display:block;font:700 54px/1 var(--h-serif);color:#fff;text-shadow:0 0 18px var(--c1),0 2px 6px #000}
+#combo span{font:300 12px var(--h-sans);text-shadow:0 1px 3px #000}
+#combo i{display:block;height:3px;margin-top:6px;width:150px;margin-left:auto;background:linear-gradient(90deg,transparent,var(--c1));box-shadow:0 0 8px var(--c1)}
+</style></head><body>
+<div id="st"></div>
+<script>
+const EL={
+ pyro:{n:'PYRO',c0:'#5a1206',c1:'#ff6a2a',c2:'#ffc27a',cb:'#4a1a10',ult:'COLOSSUS',sk:['kindle','dragonbreath','ringofembers','ignitionsnap'],sm:['b_pyro','sh_pyro','dsh_pyro','blazeform'],pt:'ember'},
+ frost:{n:'FROST',c0:'#0a2a5a',c1:'#8fe0ff',c2:'#e6f8ff',cb:'#13305a',ult:'MIRROR',sk:['glacierrend','permafrost','cryoshell','frostaura'],sm:['b_frost','sh_frost','dsh_frost','frostforge'],pt:'snow'},
+ storm:{n:'STORM',c0:'#4a3a06',c1:'#ffe27a',c2:'#fff6c8',cb:'#3a3010',ult:'GOD LIGHTNING',sk:['thunderline','speedsiphon','triplestrike','railgun'],sm:['b_storm','sh_storm','dsh_storm','stormorbs'],pt:'spark'},
+ earth:{n:'EARTH',c0:'#3a2410',c1:'#c9a36a',c2:'#f0dcb4',cb:'#3a2a18',ult:'WRATH',sk:['stonebreaker','mudswamp','tectoniccrush','dustburst'],sm:['b_earth','sh_earth','dsh_earth','terraauger'],pt:'rock'}};
+const id=(location.search.match(/el=(\w+)/)||[0,'frost'])[1],E=EL[id];
+const W=1600,H=900,st=document.getElementById('st');st.style.cssText+=`;--c0:${E.c0};--c1:${E.c1};--c2:${E.c2};--cb:${E.cb}`;
+let seed=7;const rnd=()=>((seed=seed*16807%2147483647)/2147483647);
+const runes=(R,n,col)=>Array.from({length:n},(_,i)=>`<text x="0" y="${-R+9}" fill="${col}" opacity=".7" font-size="9" text-anchor="middle" transform="rotate(${i*360/n})">${'ᚠᚢᚦᚨᚱᚲᚷᚹᚺᚾᛁᛃᛇᛈᛉ'[i%15]}</text>`).join('');
+const arcP=p=>`<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="48" fill="none" stroke="rgba(255,255,255,.15)" stroke-width="3"/><circle cx="50" cy="50" r="48" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-dasharray="302" stroke-dashoffset="${302*(1-p)}" transform="rotate(-90 50 50)" style="filter:drop-shadow(0 0 5px #fff)"/></svg>`;
+function parts(cx,cy,R,a0,a1,n){let o='';for(let i=0;i<n;i++){const a=(a0+rnd()*(a1-a0))*Math.PI/180,r=40+rnd()*(R+40),x=cx+Math.cos(a)*r,y=cy+Math.sin(a)*r,s=rnd();
+  if(E.pt==='ember')o+=i%3?`<circle cx="${x}" cy="${y}" r="${1+s*2.4}" fill="${s>.5?E.c2:E.c1}" opacity="${.5+s*.5}" style="filter:drop-shadow(0 0 4px ${E.c1})"/>`:`<path d="M${x} ${y} q 4 -8 0 -16 q -4 8 0 16z" fill="${E.c1}" opacity=".8" style="filter:drop-shadow(0 0 5px ${E.c1})"/>`;
+  else if(E.pt==='snow'){const z=3+s*5;o+=`<g transform="translate(${x} ${y}) rotate(${s*60})" stroke="${E.c2}" stroke-width="1.1" opacity="${.45+s*.55}" style="filter:drop-shadow(0 0 3px ${E.c1})">${[0,60,120].map(r=>`<line x1="0" y1="${-z}" x2="0" y2="${z}" transform="rotate(${r})"/>`).join('')}</g>`;}
+  else if(E.pt==='spark'){const z=6+s*10;o+=`<polyline points="${x},${y} ${x+z*.4},${y-z*.4} ${x+z*.1},${y-z*.55} ${x+z*.6},${y-z}" fill="none" stroke="${s>.4?'#fff':E.c1}" stroke-width="1.4" opacity="${.5+s*.5}" style="filter:drop-shadow(0 0 4px ${E.c1})"/>`;}
+  else {const z=2+s*5;o+=`<polygon points="${x},${y-z} ${x+z},${y-z*.2} ${x+z*.5},${y+z} ${x-z*.8},${y+z*.4}" fill="${s>.6?E.c2:E.c1}" opacity="${.45+s*.5}"/>`;}}
+ return o;}
+function ring(cx,cy,RC,glow,inner){return `<defs><radialGradient id="vg${RC}"><stop offset="0" stop-color="#fff"/><stop offset=".18" stop-color="${E.c1}"/><stop offset=".55" stop-color="${E.c0}" stop-opacity=".85"/><stop offset="1" stop-color="#0a0c18" stop-opacity="0"/></radialGradient></defs>
+ ${glow?`<circle cx="${cx}" cy="${cy}" r="${RC+90}" fill="url(#vg${RC})" opacity=".8"/>`:''}
+ <g transform="translate(${cx} ${cy})"><circle r="${RC+30}" fill="rgba(9,12,30,.35)"/><circle r="${RC}" fill="rgba(9,12,30,.3)" stroke="${E.c1}" stroke-width="3" style="filter:drop-shadow(0 0 6px ${E.c1})"/><circle r="${RC+12}" fill="none" stroke="${E.c2}" stroke-opacity=".45" stroke-dasharray="2 6"/><circle r="${RC-12}" fill="none" stroke="${E.c2}" stroke-opacity=".3"/>
+ ${Array.from({length:120},(_,i)=>`<line x1="0" y1="${-RC-12}" x2="0" y2="${i%5?-RC-17:-RC-24}" stroke="${E.c1}" stroke-opacity=".7" transform="rotate(${i*3})"/>`).join('')}
+ ${runes(RC-14,Math.round(RC/4.7),E.c2)}${inner?`<circle r="${RC*0.6}" fill="none" stroke="${E.c1}" stroke-opacity=".45"/>${runes(RC*0.6-2,40,E.c2)}`:''}</g>`;}
+let h='<div class="sh l" style="height:300px"></div><div class="sh r"></div>';
+// ---------- ขวาล่าง: L2 ----------
+{const cx=W-20,cy=H-20,RC=330;let s=`<svg class="ln">${ring(cx,cy,RC,1,1)}${parts(cx,cy,RC,180,270,46)}</svg>`;const sts=['','cdn','on',''];
+ E.sk.forEach((n,i)=>{const d=196+i*20,a=d*Math.PI/180,on=sts[i]==='on',R=RC+(on?18:0),x=cx+Math.cos(a)*R,y=cy+Math.sin(a)*R;
+  s+=`<div class="cd ${sts[i]}" style="left:${x-39}px;top:${y-55}px;transform:rotate(${((d+90)-360)*0.55}deg)"><i class="gem"></i><img src="../icons/${n}.svg">${sts[i]==='cdn'?'<b>7</b>':''}<span class="k">${'QERF'[i]}</span></div>`;});
+ E.sm.forEach((n,i)=>{const a=(196+i*21)*Math.PI/180;s+=`<div class="s" style="left:${cx+Math.cos(a)*RC*0.6}px;top:${cy+Math.sin(a)*RC*0.6}px"><img src="../icons/${n}.svg"><span class="kk">${['LMB','RMB','SHIFT','B'][i]}</span></div>`;});
+ s+=`<div class="u" style="left:${W-85}px;top:${H-85}px;width:130px;height:130px">${arcP(.66)}<div><b>66%</b><small>${E.ult}</small></div><span class="kk" style="bottom:-10px;left:50%;transform:translateX(-50%)">X</span></div>`;h+=s;}
+// ---------- ซ้ายล่าง: โปรไฟล์ + แถบเลือด (ช่องเฉียง 25 HP เรียว + โล่ฟ้าต่อท้าย) ----------
+{const hp=150,mx=200,sh=50;let sg='';for(let i=0;i<(mx+sh)/25;i++){const c=i<hp/25?'f':i<mx/25?(i<hp/25+1?'d':''):'shd';sg+=`<i class="sg ${c}" style="height:${26-i}px"></i>`;}
+ h+=`<svg class="ln">${parts(150,H-90,150,180,360,22)}</svg><div id="me"><div class="por"><div class="tk"></div><div class="rg"><i></i></div><div class="el"><img src="../icons/p_${id}.svg"></div><div class="lv">LV 12</div></div>
+ <div class="hpw"><div class="nm">PHOMDA932<small>${E.n}</small></div><div class="num">${hp}<small>/ ${mx}</small><em>+${sh}</em></div><div class="segs">${sg}</div>
+ <div class="dash"><i></i><i></i><i class="e"></i></div><div class="chips"><span><i style="background:#3fa9e6">❄</i>ช้าลง 2.1</span><span><i style="background:#58c27a">✚</i>ฮีล</span></div></div></div>`;}
+// ---------- บน ----------
+h+=`<div id="top"><div class="sd l"><b>12</b><small>KILLS</small></div><div class="md"><b>4:32</b><small>FREE FOR ALL · #2</small></div><div class="sd r"><b>15</b><small>LEADER</small></div></div>`;
+h+=`<div id="toast"><b>DOUBLE KILL</b><i></i><span>+50 ทอง • สตรีค 2</span></div>`;
+// ---------- มินิแมพ: วงเวทเล็ก ----------
+{const cx=W-120,cy=118,R=92;let s=`<svg class="ln"><g transform="translate(${cx} ${cy})"><circle r="${R}" fill="rgba(9,12,30,.72)"/>
+ ${Array.from({length:5},(_,i)=>`<circle r="${R*(i+1)/6}" fill="none" stroke="${E.c1}" stroke-opacity=".1"/>`).join('')}
+ <path d="M0 0 L ${-R*0.45} ${-R*0.85} A ${R} ${R} 0 0 1 ${R*0.45} ${-R*0.85} Z" fill="${E.c1}" opacity=".14"/>
+ <circle r="${R}" fill="none" stroke="${E.c1}" stroke-width="2.5" style="filter:drop-shadow(0 0 5px ${E.c1})"/><circle r="${R+9}" fill="none" stroke="${E.c2}" stroke-opacity=".4" stroke-dasharray="2 5"/>
+ ${Array.from({length:72},(_,i)=>`<line x1="0" y1="${-R-9}" x2="0" y2="${i%6?-R-13:-R-19}" stroke="${E.c1}" stroke-opacity=".7" transform="rotate(${i*5})"/>`).join('')}
+ <polygon points="0,-10 7,8 0,4 -7,8" fill="#fff" style="filter:drop-shadow(0 0 4px ${E.c1})"/>
+ <circle cx="-40" cy="-30" r="5" fill="#ff5a7e" style="filter:drop-shadow(0 0 4px #ff5a7e)"/><circle cx="30" cy="25" r="5" fill="#ff5a7e"/><circle cx="-10" cy="55" r="5" fill="#ffd36a"/>
+ <text x="0" y="${-R-24}" fill="${E.c2}" font-size="13" font-weight="700" font-family="Cinzel" text-anchor="middle">N</text></g>${parts(cx,cy,R-30,0,360,14)}</svg>`;h+=s;}
+h+=`<div id="feed"><div class="me"><b>Phomda932</b><img src="../icons/${E.sk[0]}.svg"><span>Nox</span></div><div><b>Ember</b><img src="../icons/p_pyro.svg"><span>Vale</span></div></div>`;
+// ---------- กลาง ----------
+h+=`<svg class="ln"><g transform="translate(800 450)" style="filter:drop-shadow(0 0 4px ${E.c1})"><circle r="2.5" fill="#fff"/>${[0,90,180,270].map(r=>`<line x1="0" y1="-9" x2="0" y2="-17" stroke="#fff" stroke-width="2" transform="rotate(${r})"/>`).join('')}
+ <circle r="24" fill="none" stroke="${E.c1}" stroke-width="2" stroke-dasharray="14 23.7" transform="rotate(-25)" opacity=".9"/></g></svg>`;
+h+=`<div class="tag" style="left:560px;top:300px"><b>NOX</b><div class="hb"><i></i><i></i><i></i><i class="e"></i><i class="e"></i><i class="e"></i><i class="e"></i><i class="e"></i></div></div>`;
+h+=`<div class="dmg" style="left:600px;top:330px">35</div><div class="dmg cr" style="left:650px;top:280px">72!</div>`;
+h+=`<div id="combo"><small>COMBO</small><b>×7</b><span>ดีที่สุด 12</span><i></i></div>`;
+st.innerHTML=h;
+</script>
+</body></html>

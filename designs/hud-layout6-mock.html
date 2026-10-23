@@ -1,0 +1,71 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>HUD layout L2 elements</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Kanit:wght@300;400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/hub.css">
+<style>
+/* แบบ L2 (ผู้ใช้เลือก) — สีตามธาตุ + อนุภาคของธาตุ • ม็อกอัป */
+body{margin:0;background:#000}
+#st{width:1600px;height:900px;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:3px;font-family:var(--h-sans);color:var(--h-ink)}
+.pn{position:relative;overflow:hidden;background:url(hud_mock_bg.jpg) right bottom/1600px 900px}
+.pn::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 100% 100%,rgba(6,9,20,.7),transparent 62%)}
+.ttl{position:absolute;left:20px;top:14px;font:700 38px var(--h-serif);color:var(--c1);text-shadow:0 2px 8px #000;z-index:5}
+svg.ln{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+/* ไพ่: สีจากตัวแปรธาตุ --c0 เข้ม, --c1 หลัก, --c2 อ่อน */
+.cd{position:absolute;width:78px;height:110px;border-radius:9px;background:linear-gradient(180deg,var(--cb),#0a0c18);
+  box-shadow:inset 0 0 0 1px var(--c1),inset 0 0 0 4px #0a0c18,inset 0 0 0 5px color-mix(in srgb,var(--c2) 45%,transparent),0 10px 20px rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center}
+.cd::before{content:'';position:absolute;left:9px;right:9px;top:9px;height:62%;border-radius:5px;background:radial-gradient(circle at 50% 45%,color-mix(in srgb,var(--c1) 45%,transparent),transparent 70%),repeating-conic-gradient(from 0deg at 50% 45%,color-mix(in srgb,var(--c2) 10%,transparent) 0 6deg,transparent 6deg 18deg)}
+.cd img{position:relative;width:60%;margin-top:-18px;filter:drop-shadow(0 0 8px var(--c1))}
+.cd .k{position:absolute;bottom:8px;font:700 13px var(--h-serif);color:var(--c2);letter-spacing:.08em}
+.cd .gem{position:absolute;top:-5px;left:50%;width:10px;height:10px;transform:translateX(-50%) rotate(45deg);background:var(--c1);box-shadow:0 0 8px var(--c1);border:1px solid #fff}
+.cd.on{box-shadow:inset 0 0 0 2px #fff,inset 0 0 0 4px #0a0c18,0 0 30px var(--c1)}
+.cd.cdn img{opacity:.28;filter:grayscale(1)}
+.cd.cdn::after{content:'';position:absolute;inset:0;border-radius:9px;background:linear-gradient(0deg,transparent 40%,rgba(4,6,16,.65) 40%)}
+.cd.cdn b{position:absolute;top:28px;z-index:2;font:700 28px var(--h-serif);text-shadow:0 0 10px #000}
+.cd.cdn .gem{background:#445;box-shadow:none}
+.u{position:absolute;border-radius:50%;transform:translate(-50%,-50%);display:grid;place-items:center;
+  background:radial-gradient(circle at 40% 35%,#fff 0,var(--c2) 14%,var(--c1) 40%,var(--c0) 78%);box-shadow:0 0 40px var(--c1),0 0 0 7px rgba(6,9,20,.4),0 0 0 8px color-mix(in srgb,var(--c2) 70%,transparent)}
+.u svg{position:absolute;inset:-4px;width:calc(100% + 8px);height:calc(100% + 8px)}
+.u div{text-align:center}.u b{display:block;font:700 28px/1 var(--h-serif);color:#fff;text-shadow:0 0 8px var(--c0),0 0 14px var(--c0)}
+.u small{font:600 9.5px var(--h-serif);letter-spacing:.22em;color:#fff;text-shadow:0 0 6px var(--c0)}
+.u .k{position:absolute;bottom:-10px;left:50%;transform:translateX(-50%);padding:0 8px;font:700 11px var(--h-serif);color:#0a0c18;background:var(--c2);border-radius:3px}
+.s{position:absolute;width:46px;height:46px;border-radius:6px;transform:translate(-50%,-50%) rotate(45deg);background:radial-gradient(circle at 50% 35%,var(--cb),#0a0c18 75%);box-shadow:inset 0 0 0 1px var(--c1),0 0 0 3px rgba(6,9,20,.5),0 0 0 4px color-mix(in srgb,var(--c2) 50%,transparent);display:grid;place-items:center}
+.s img{width:58%;transform:rotate(-45deg);filter:drop-shadow(0 0 6px var(--c1))}
+.s .k{position:absolute;bottom:-12px;left:70%;transform:translateX(-50%) rotate(-45deg);padding:0 5px;font:700 9.5px var(--h-serif);color:#0a0c18;background:var(--c2);border-radius:3px;white-space:nowrap}
+</style></head><body>
+<div id="st"></div>
+<script>
+// ธาตุ: สีจาก PATHS (js/03, js/09) + เฉดเข้ม/อ่อน, ไอคอนสกิล, อนุภาค
+const EL=[
+ {id:'pyro',n:'PYRO',c0:'#5a1206',c1:'#ff6a2a',c2:'#ffc27a',cb:'#4a1a10',ult:'COLOSSUS',sk:['kindle','dragonfall','ringofembers','ignitionsnap'],sm:['b_pyro','sh_pyro','dsh_pyro','blazeform'],pt:'ember'},
+ {id:'frost',n:'FROST',c0:'#0a2a5a',c1:'#8fe0ff',c2:'#e6f8ff',cb:'#13305a',ult:'MIRROR',sk:['glacierrend','permafrost','cryoshell','frostaura'],sm:['b_frost','sh_frost','dsh_frost','frostforge'],pt:'snow'},
+ {id:'storm',n:'STORM',c0:'#4a3a06',c1:'#ffe27a',c2:'#fff6c8',cb:'#3a3010',ult:'GOD LIGHTNING',sk:['thunderline','speedsiphon','triplestrike','railgun'],sm:['b_storm','sh_storm','dsh_storm','stormorbs'],pt:'spark'},
+ {id:'earth',n:'EARTH',c0:'#3a2410',c1:'#c9a36a',c2:'#f0dcb4',cb:'#3a2a18',ult:'WRATH',sk:['stonebreaker','mudswamp','tectoniccrush','dustburst'],sm:['b_earth','sh_earth','dsh_earth','terraauger'],pt:'rock'}];
+EL[1].sk[0]='glacierrend';
+const ICON=n=>`../icons/${n==='dragonfall'?'dragonbreath':n}.svg`;
+const W=800,H=448;
+let seed=7;const rnd=()=>((seed=seed*16807%2147483647)/2147483647);
+const runes=(R,n,col)=>Array.from({length:n},(_,i)=>`<text x="0" y="${-R+9}" fill="${col}" opacity=".7" font-size="9" text-anchor="middle" transform="rotate(${i*360/n})">${'ᚠᚢᚦᚨᚱᚲᚷᚹᚺᚾᛁᛃᛇᛈᛉ'[i%15]}</text>`).join('');
+const arc=p=>`<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="48" fill="none" stroke="rgba(255,255,255,.15)" stroke-width="3"/><circle cx="50" cy="50" r="48" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-dasharray="302" stroke-dashoffset="${302*(1-p)}" transform="rotate(-90 50 50)" style="filter:drop-shadow(0 0 5px #fff)"/></svg>`;
+// อนุภาคธาตุ (กระจายในวงประตู)
+function parts(E,cx,cy,R){let o='';for(let i=0;i<46;i++){const a=(180+rnd()*90)*Math.PI/180,r=60+rnd()*(R+40),x=cx+Math.cos(a)*r,y=cy+Math.sin(a)*r,s=rnd();
+  if(E.pt==='ember')o+=i%3?`<circle cx="${x}" cy="${y}" r="${1+s*2.4}" fill="${s>.5?E.c2:E.c1}" opacity="${.5+s*.5}" style="filter:drop-shadow(0 0 4px ${E.c1})"/>`:`<path d="M${x} ${y} q 4 -8 0 -16 q -4 8 0 16z" fill="${E.c1}" opacity=".8" style="filter:drop-shadow(0 0 5px ${E.c1})"/>`;
+  else if(E.pt==='snow'){const z=3+s*5;o+=`<g transform="translate(${x} ${y}) rotate(${s*60})" stroke="${E.c2}" stroke-width="1.1" opacity="${.45+s*.55}" style="filter:drop-shadow(0 0 3px ${E.c1})">${[0,60,120].map(r=>`<line x1="0" y1="${-z}" x2="0" y2="${z}" transform="rotate(${r})"/>`).join('')}</g>`;}
+  else if(E.pt==='spark'){const z=6+s*10;o+=`<polyline points="${x},${y} ${x+z*.4},${y-z*.4} ${x+z*.1},${y-z*.55} ${x+z*.6},${y-z}" fill="none" stroke="${s>.4?'#fff':E.c1}" stroke-width="1.4" opacity="${.5+s*.5}" style="filter:drop-shadow(0 0 4px ${E.c1})"/>`;}
+  else {const z=2+s*5;o+=`<polygon points="${x},${y-z} ${x+z},${y-z*.2} ${x+z*.5},${y+z} ${x-z*.8},${y+z*.4}" fill="${s>.6?E.c2:E.c1}" opacity="${.45+s*.5}"/>`+(i%4?'':`<circle cx="${x}" cy="${y}" r="${8+s*12}" fill="${E.c1}" opacity=".08"/>`);}}
+ return o;}
+function portal(E,cx,cy,RC){return `<svg class="ln"><defs><radialGradient id="vg${E.id}"><stop offset="0" stop-color="#fff"/><stop offset=".18" stop-color="${E.c1}"/><stop offset=".55" stop-color="${E.c0}" stop-opacity=".85"/><stop offset="1" stop-color="#0a0c18" stop-opacity="0"/></radialGradient></defs>
+ <circle cx="${cx}" cy="${cy}" r="${RC+90}" fill="url(#vg${E.id})" opacity=".85"/>
+ ${Array.from({length:12},(_,i)=>{const a0=i*0.52;return `<path d="M${cx} ${cy} q ${150*Math.cos(a0)} ${150*Math.sin(a0)} ${280*Math.cos(a0+1.1)} ${280*Math.sin(a0+1.1)}" fill="none" stroke="${E.c2}" stroke-opacity="${0.12+0.05*(i%3)}" stroke-width="${1+i%2}"/>`}).join('')}
+ <g transform="translate(${cx} ${cy})"><circle r="${RC+30}" fill="rgba(9,12,30,.35)"/><circle r="${RC}" fill="rgba(9,12,30,.3)" stroke="${E.c1}" stroke-width="3" style="filter:drop-shadow(0 0 6px ${E.c1})"/><circle r="${RC+12}" fill="none" stroke="${E.c2}" stroke-opacity=".45" stroke-dasharray="2 6"/><circle r="${RC-12}" fill="none" stroke="${E.c2}" stroke-opacity=".3"/>
+ ${Array.from({length:120},(_,i)=>`<line x1="0" y1="${-RC-12}" x2="0" y2="${i%5?-RC-17:-RC-24}" stroke="${E.c1}" stroke-opacity=".7" transform="rotate(${i*3})"/>`).join('')}
+ ${runes(RC-14,70,E.c2)}<circle r="${RC*0.6}" fill="none" stroke="${E.c1}" stroke-opacity=".45"/>${runes(RC*0.6-2,40,E.c2)}</g>${parts(E,cx,cy,RC)}</svg>`;}
+EL.forEach((E,k)=>{const pn=document.createElement('div');pn.className='pn';pn.style.cssText=`--c0:${E.c0};--c1:${E.c1};--c2:${E.c2};--cb:${E.cb}`;
+ const cx=W-20,cy=H-20,RC=330;let h=`<div class="ttl">${E.n}</div>`+portal(E,cx,cy,RC);
+ const st=['','cdn','on',''];
+ E.sk.forEach((n,i)=>{const d=196+i*20,a=d*Math.PI/180,on=st[i]==='on',R=RC+(on?18:0),x=cx+Math.cos(a)*R,y=cy+Math.sin(a)*R;
+  h+=`<div class="cd ${st[i]}" style="left:${x-39}px;top:${y-55}px;transform:rotate(${((d+90)-360)*0.55}deg)"><i class="gem"></i><img src="${ICON(n)}">${st[i]==='cdn'?'<b>7</b>':''}<span class="k">${'QERF'[i]}</span></div>`;});
+ E.sm.forEach((n,i)=>{const a=(196+i*21)*Math.PI/180;h+=`<div class="s" style="left:${cx+Math.cos(a)*RC*0.6}px;top:${cy+Math.sin(a)*RC*0.6}px"><img src="${ICON(n)}"><span class="k">${['LMB','RMB','SHIFT','B'][i]}</span></div>`;});
+ h+=`<div class="u" style="left:${W-85}px;top:${H-85}px;width:130px;height:130px">${arc(.66)}<div><b>66%</b><small>${E.ult}</small></div><span class="k">X</span></div>`;
+ pn.innerHTML=h;document.getElementById('st').appendChild(pn);});
+</script>
+</body></html>

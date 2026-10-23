@@ -3,7 +3,7 @@ function rr(x,y,w,h,r){cx.beginPath();cx.moveTo(x+r,y);cx.arcTo(x+w,y,x+w,y+h,r)
 const SLOTS=[['คลิกซ้าย','✨','ยิง',0],['คลิกขวา','🛡️','โล่',-1],['Q','🔥','ลูกไฟ',1],['E','⚡','สตัน',2],['R','💨','ผลัก',3],['F','🌀','ดึง',4],['Shift','💫','หลบ',5],['X','🌟','เวทโบราณ',-2],['B','🧹','ไม้กวาด',-3]];
 function fmtTime(s){return Math.floor(s/60)+':'+String(s%60).padStart(2,'0');}
 // ---------- ชิ้นส่วน HUD ธีมทอง-น้ำเงิน ----------
-const HG='#d9b45a',HG2='#f3dc94',HN='rgba(7,11,24,0.84)';
+let HG='#d9b45a',HG2='#f3dc94';const HN='rgba(7,11,24,0.84)';
 // สถานะความรู้สึกของ HUD ฝั่งจอเรา (ไม่เกี่ยวกับเน็ต): แฟลชโดนตี / แถบเลือดค้าง / ช่องคาถาเพิ่งพร้อม / นับถอยหลัง / kill feed เลื่อนเข้า
 const HUDF={t:0,dt:0,id:null,hp:0,hit:0,trail:1,trailHold:0,rdy:{},rdyT:{},ph:'',go:0,uFull:false,uT:-9,feed:new Map()};
 function hudTick(){const n=performance.now();HUDF.dt=HUDF.t?Math.min(0.1,(n-HUDF.t)/1000):0;HUDF.t=n;return n;}
@@ -84,7 +84,7 @@ function thinBar(x,y,w,h,ratio,c1,c2){
 function drawHUD(v,me,P){
   cx.textAlign='center';cx.textBaseline='alphabetic';
   if(me&&(me.fm&4096)){const g=cx.createRadialGradient(SW/2,SH/2,SH*0.12,SW/2,SH/2,SH*0.75);g.addColorStop(0,'rgba(10,4,20,0.55)');g.addColorStop(1,'rgba(4,0,10,0.96)');cx.fillStyle=g;cx.fillRect(0,0,SW,SH);}
-  const now=hudTick(),dt=HUDF.dt;
+  const now=hudTick(),dt=HUDF.dt;hud4Col(me);   // สีทอง → สีธาตุของเรา (js/66)
   // ขอบจอแดง: เลือดต่ำกว่า 35% = เต้นตามชีพจร (ต่ำกว่า 15% เต้นเร็ว) + แฟลชสั้นๆ ตอนโดนตี
   if(me&&me.al&&!me.dn){const hr=me.hp/me.mh;
     if(HUDF.id===me.id&&me.hp<HUDF.hp)HUDF.hit=Math.min(1,HUDF.hit+0.3+(HUDF.hp-me.hp)/me.mh*3);
@@ -292,32 +292,6 @@ function mySlots(me){
     if(me.ea&&me.ea[0]>0)for(const s of L)if(s[1]&&s[1].id==='b_earth')s[1]={id:'p_earth',c:P.col};}   // Stand แตก: คลิกซ้าย = ยิงหินเล็ก
   return L;
 }
-// เวทโบราณ (X) ตรงกลางล่างจอ แบบ Overwatch: วงกลมใหญ่ มีไอคอน เกจรอบวง เปอร์เซ็นต์ และเรืองแสงเมื่อพร้อม
-function drawUlt(me){
-  const k=getKit(me.id),S=SPELL_LIST[k.ult],P=PATHS[k.path],x=SW/2,y=SH-74,R=45,full=me.u>=100,t=performance.now(),pulse=0.5+0.5*Math.sin(t/220);
-  cx.save();
-  if(full){cx.shadowColor=P.col;cx.shadowBlur=22+14*pulse;}
-  cx.beginPath();cx.arc(x,y,R,0,Math.PI*2);cx.fillStyle='rgba(6,9,20,0.93)';cx.fill();
-  cx.restore();
-  // เกจ (วงนอก)
-  cx.lineWidth=6;cx.strokeStyle='rgba(217,180,90,0.18)';cx.beginPath();cx.arc(x,y,R-3,0,Math.PI*2);cx.stroke();
-  if(me.u>0){cx.save();if(full){cx.shadowColor=P.col;cx.shadowBlur=14;}cx.strokeStyle=full?P.col:HG;cx.lineCap='round';cx.beginPath();cx.arc(x,y,R-3,-Math.PI/2,-Math.PI/2+Math.PI*2*Math.min(1,me.u/100));cx.stroke();cx.restore();}
-  cx.lineWidth=1.5;cx.strokeStyle=full?HG2:'rgba(217,180,90,0.55)';cx.beginPath();cx.arc(x,y,R+3,0,Math.PI*2);cx.stroke();
-  // เต็มแล้ว: วงอักษรรูนหมุน + ประกาย 4 ดวงโคจร • เพิ่งเต็ม = คลื่นแสงขยายออก
-  if(full&&!HUDF.uFull)HUDF.uT=t;HUDF.uFull=full;
-  if(full){cx.save();cx.strokeStyle=P.col;cx.globalAlpha=0.55+0.35*pulse;cx.lineWidth=1.5;cx.setLineDash([3,6]);cx.lineDashOffset=-t/45;cx.beginPath();cx.arc(x,y,R+9,0,Math.PI*2);cx.stroke();cx.setLineDash([]);
-    cx.globalCompositeOperation='lighter';for(let i=0;i<4;i++){const a=t/700+i*Math.PI/2,px=x+Math.cos(a)*(R+9),py=y+Math.sin(a)*(R+9);cx.globalAlpha=0.9;cx.fillStyle=HG2;cx.shadowColor=P.col;cx.shadowBlur=10;diaPath(px,py,3);cx.fill();}cx.restore();}
-  {const k=(t-HUDF.uT)/700;if(k>=0&&k<1){cx.save();cx.globalAlpha=1-k;cx.strokeStyle=P.col;cx.lineWidth=4*(1-k)+1;cx.shadowColor=P.col;cx.shadowBlur=16;cx.beginPath();cx.arc(x,y,R+6+k*50,0,Math.PI*2);cx.stroke();cx.restore();}}
-  diaPath(x,y-R-9,4.5);cx.fillStyle='#05070f';cx.fill();cx.strokeStyle=HG;cx.lineWidth=1;cx.stroke();
-  // ไอคอน
-  const im=icoTint(S.id,full?P.col:'#6a7388',96);
-  if(im){cx.globalAlpha=full?1:0.5;const z=R*1.15;cx.drawImage(im,x-z/2,y-z/2,z,z);cx.globalAlpha=1;}
-  if(!full){cx.textAlign='center';cx.font='700 17px Kanit,sans-serif';cx.lineWidth=4;cx.lineJoin='round';cx.strokeStyle='rgba(0,0,0,0.85)';cx.strokeText(me.u+'%',x,y+6);cx.fillStyle='#fff';cx.fillText(me.u+'%',x,y+6);}
-  else{cx.textAlign='center';cx.font='600 12px Kanit,sans-serif';const w=cx.measureText('พร้อม!').width+16;plate(x-w/2,y-R-34,w,18,true);cx.fillStyle=HG2;cx.fillText('พร้อม!',x,y-R-21);}
-  // ปุ่ม X + ชื่อ/สถานะ
-  cx.font='700 12px Kanit,sans-serif';cx.textAlign='center';
-  cx.fillStyle='#05070f';cx.fillRect(x-12,y+R-4,24,16);cx.strokeStyle=full?HG2:'rgba(217,180,90,0.5)';cx.lineWidth=1;cx.strokeRect(x-11.5,y+R-3.5,23,15);cx.fillStyle=HG2;cx.fillText(keyName(KEYS.ult||'KeyX'),x,y+R+8);
-}
 const STATUS_ICO=[[1,'💫'],[2,'🔥'],[4,'❄️'],[8,'🧊'],[16,'⚡'],[32,'🌿'],[64,'🤐'],[128,'🛡️'],[256,'💨'],[512,'🔋'],[1024,'☠️'],[2048,'😱'],[4096,'🕶️'],[8192,'🎯'],[16384,'🌳'],[32768,'🔥'],[65536,'✨'],[131072,'🔆'],[262144,'☄️']];
 const SLOTS_IMP=[['E','📜','ภารกิจ',-10],['R','📢','รายงานศพ',-11],['F','🔔','ประชุม',-12],['Q','💀','อวาดา',-13]];
 const BR_LOCK={1:'fire',2:'stun',3:'push',4:'pull'};
@@ -356,44 +330,7 @@ function drawBottom(me,v){
     });
     return;
   }
-  // มุมซ้ายล่าง: ตราประจำตัว (วงทอง = เกจเวทโบราณ) + หลอดเลือด / โล่
-  const ex=62,ey=SH-62,full=me.u>=100,t=performance.now();
-  cx.beginPath();cx.arc(ex,ey,34,0,Math.PI*2);cx.fillStyle='rgba(5,7,15,0.88)';cx.fill();
-  cx.lineWidth=4;cx.strokeStyle='rgba(217,180,90,0.18)';cx.beginPath();cx.arc(ex,ey,30,0,Math.PI*2);cx.stroke();
-  diaPath(ex,ey,17);cx.fillStyle=me.c||'#888';cx.fill();cx.strokeStyle=HG2;cx.lineWidth=1.5;cx.stroke();
-  diaPath(ex,ey,9);cx.fillStyle='rgba(255,255,255,0.25)';cx.fill();
-  cx.textAlign='center';cx.font='600 11px Kanit,sans-serif';
-  const bx=ex+48,bw=Math.min(300,SW*0.24);
-  cx.textAlign='left';cx.font='600 15px Kanit,sans-serif';
-  cx.fillStyle='rgba(0,0,0,0.6)';cx.fillText(me.n,bx+1,ey-19);cx.fillStyle=HG2;cx.fillText(me.n,bx,ey-20);
-  const hr=clamp(me.hp/me.mh,0,1);
-  // แถบเลือด: ส่วนที่เพิ่งเสีย = สีครีมค้างแล้วค่อยหด (แบบเกมต่อสู้) • ขีดแบ่งทุก 25% • เลือดน้อย = ขอบแดงเต้น
-  if(hr>=HUDF.trail){HUDF.trail=hr;HUDF.trailHold=0.45;}else if((HUDF.trailHold-=HUDF.dt)<=0)HUDF.trail=Math.max(hr,HUDF.trail-HUDF.dt*0.6);
-  thinBar(bx,ey-12,bw,12,hr,hr>0.3?'#6fd57f':'#ff6a6a',hr>0.3?'#2c8a45':'#a51e1e');
-  if(HUDF.trail>hr){cx.fillStyle='rgba(255,236,196,0.75)';cx.fillRect(bx+bw*hr,ey-12,bw*(HUDF.trail-hr),12);}
-  {const g=cx.createLinearGradient(0,ey-12,0,ey);g.addColorStop(0,'rgba(255,255,255,0.22)');g.addColorStop(0.5,'rgba(255,255,255,0)');cx.fillStyle=g;cx.fillRect(bx,ey-12,bw*hr,12);}
-  cx.fillStyle='rgba(5,7,15,0.6)';for(let i=1;i<4;i++)cx.fillRect(Math.round(bx+bw*i/4),ey-12,1,12);
-  if(hr<0.35&&me.al){cx.save();cx.strokeStyle=`rgba(255,90,90,${0.6+0.3*Math.sin(t/200)})`;cx.lineWidth=2;cx.shadowColor='#ff3a3a';cx.shadowBlur=10;cx.strokeRect(bx-2,ey-14,bw+4,16);cx.restore();}
-  cx.textAlign='right';cx.font='600 11px Kanit,sans-serif';cx.lineWidth=3;cx.lineJoin='round';cx.strokeStyle='rgba(0,0,0,0.75)';cx.strokeText(`${me.hp} / ${me.mh}`,bx+bw-5,ey-2.5);cx.fillStyle='#fff';cx.fillText(`${me.hp} / ${me.mh}`,bx+bw-5,ey-2.5);
-  if(me.ea){eShieldNum(bx,ey+21,me.ea);eShieldSegs(bx,ey+26,bw*0.72,me.ea);}else thinBar(bx,ey+6,bw*0.72,5,me.se/100,'#9ff0ff','#2d8fc0');   // สายดิน: ตัวเลข HP โล่ (เหนือแถบ) + แถบช่องเล็กติดกัน แบบ Reinhardt
-  {let sx=bx;cx.textAlign='left';cx.font='15px sans-serif';for(const [bit,ic] of STATUS_ICO)if((me.fm|0)&bit){cx.fillText(ic,sx,me.ea?ey+53:ey+30);sx+=20;}}
-  if(!me.ea){cx.textAlign='left';cx.font='10px Kanit,sans-serif';cx.fillStyle='#7f8aa6';cx.fillText('โล่',bx+bw*0.72+8,ey+12);}
-  // มุมขวาล่าง: กลุ่มเพชรคาถา
-  const c0x=SW-128,c0y=SH-122,d=47,r=31;
-  const MYS=mySlots(me);
-  // ช่องที่เพิ่งคูลดาวน์เสร็จ (ไม่พร้อม → พร้อม) = วงเพชรทองขยายออก 0.5 วิ
-  const dia=(x,y,rr,ic,key,ci)=>{const st=slotState(me,v,ci),ok=st.ready&&!st.dim,R=HUDF.rdy;
-    if(ok&&R[ci]===false&&(ci>=1||ci===-4))HUDF.rdyT[ci]=t;   // ยิงปกติ/โล่ไม่ต้อง (คูลสั้น กะพริบรก)
-    R[ci]=ok;spellDia(x,y,rr,ic,key,'',st);
-    const k=(t-(HUDF.rdyT[ci]||-1e9))/500;if(k<1)readyPulse(x,y,rr,k);};
-  for(const [key,ic,name,ci] of MYS){
-    if(CLUSTER[ci]){const [ox,oy]=CLUSTER[ci];dia(c0x+ox*d,c0y+oy*d,r,ic,key,ci);}
-  }
-  diaPath(c0x,c0y,6);cx.fillStyle=HG;cx.fill();
-  const small=MYS.filter(s=>(s[3]<=0&&s[3]!==-2&&s[3]!==-4)||s[3]===5),cb=MYS.find(s=>s[3]===-4);
-  drawUlt(me);
-  small.forEach(([key,ic,name,ci],i)=>dia(SW-266-(small.length-1-i)*66,SH-78,25,ic,key,ci));
-  if(cb)dia(SW-266-(small.length-1)*66,SH-138,22,cb[1],cb[0],-4);   // BA ชาร์จ: วางเหนือช่องยิง (คลิกซ้าย)
+  hud4Draw(me,v);   // HUD รอบ 4 (DOM, js/66): ซ้ายล่าง เลือด • ขวาล่าง ไพ่สกิล L2 + อัลติ
 }
 function drawBoard(v,P){
   const rows=[...P].sort((a,b)=>b.k-a.k),w=Math.min(540,SW-32),h=96+rows.length*32,x=SW/2-w/2,y=SH/2-h/2;

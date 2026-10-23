@@ -151,8 +151,8 @@ function drawCombo(v,E,now){
       cx.font='700 15px Kanit,sans-serif';cx.lineWidth=4;cx.strokeText(c.hits+' HIT',s[0],s[1]-fz*0.75);cx.fillStyle='#ffe9a8';cx.fillText(c.hits+' HIT',s[0],s[1]-fz*0.75);}}
   // แผงขวา
   const L=c||COMBO.last,x=SW-212,y=Math.round(SH*0.36),w=196,h=128;
-  cx.globalAlpha=c?1:0.8;cx.fillStyle='rgba(6,8,18,.62)';cx.fillRect(x,y,w,h);cx.fillStyle='rgba(217,180,90,.7)';cx.fillRect(x,y,w,2);
-  cx.textAlign='left';cx.textBaseline='top';cx.font='600 14px Kanit,sans-serif';cx.fillStyle='#ffd86b';cx.fillText(c?'⚡ คอมโบ':'คอมโบล่าสุด',x+10,y+8);
+  cx.globalAlpha=c?1:0.8;cx.fillStyle='rgba(6,8,18,.62)';cx.fillRect(x,y,w,h);cx.fillStyle=HG;cx.fillRect(x,y,w,2);
+  cx.textAlign='left';cx.textBaseline='top';cx.font='600 14px Kanit,sans-serif';cx.fillStyle=HG2;cx.fillText(c?'⚡ คอมโบ':'คอมโบล่าสุด',x+10,y+8);
   if(L){const tm=Math.max(0.1,(L.tl-L.t0)/1000),dps=Math.round(L.dmg/Math.max(0.5,tm));
     cx.font='800 30px Kanit,sans-serif';cx.fillStyle='#fff';cx.fillText(L.dmg,x+10,y+28);
     cx.font='500 13px Kanit,sans-serif';cx.fillStyle='rgba(255,255,255,.8)';
