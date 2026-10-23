@@ -1,148 +1,15 @@
 {
  "v": 1,
- "desc": "Cryo Shell เริ่ม: น้ำแข็งงอกจากพื้นรอบเท้า + เกล็ดลอยขึ้นตามเปลือก + แสงเย็นกลางตัว",
+ "desc": "Cryo Shell เริ่ม: เสียงอย่างเดียว — ภาพทั้งหมดอยู่ใน frost/cryoshell (แบบ 4 แก้วปริซึม) ที่ js/34 เล่นตามตัว",
  "tags": [
   "frost",
   "shield",
   "self"
  ],
  "pal": "ice",
- "dur": 1.4,
+ "dur": 0.1,
  "params": {},
  "layers": [
-  {
-   "id": "base",
-   "t": "mesh",
-   "at": 0,
-   "life": 1.2,
-   "att": "ground",
-   "shape": "model",
-   "model": "frost_spires",
-   "mat": "ice",
-   "col": "#9fdcff",
-   "col2": "#2f7fe0",
-   "scale": {
-    "0": [
-     1.05,
-     0.7,
-     1.05
-    ],
-    "1": [
-     1.05,
-     0.7,
-     1.05
-    ]
-   },
-   "grow": {
-    "0": 0,
-    "1": 0,
-    "0.25": 1,
-    "0.75": 1
-   },
-   "stagger": 0.6,
-   "growBy": "random"
-  },
-  {
-   "id": "rise",
-   "t": "emit",
-   "at": 0,
-   "life": 0.35,
-   "rate": 60,
-   "att": "ground",
-   "from": "ring",
-   "fr": 1,
-   "pos": [
-    0,
-    0.1,
-    0
-   ],
-   "dir": "up",
-   "spread": 0.15,
-   "speed": [
-    4,
-    6
-   ],
-   "plife": [
-    0.3,
-    0.45
-   ],
-   "look": "streak",
-   "size": [
-    1.4,
-    2
-   ],
-   "col": "#ffffff",
-   "c2": "#9fdcff",
-   "gravity": 0,
-   "drag": 1
-  },
-  {
-   "id": "flakes",
-   "t": "emit",
-   "at": 0.1,
-   "life": 0.05,
-   "burst": 14,
-   "from": "ring",
-   "fr": 1,
-   "dir": "tangent",
-   "spread": 1.2,
-   "speed": [
-    1,
-    2
-   ],
-   "up": [
-    0.5,
-    2
-   ],
-   "plife": [
-    0.7,
-    1.3
-   ],
-   "look": "flake",
-   "size": [
-    2,
-    3.4
-   ],
-   "col": "#ffffff",
-   "c2": "#9fdcff",
-   "gravity": 1.2,
-   "drag": 2.2,
-   "spin": 6,
-   "fin": 6,
-   "x": true,
-   "att": "ground",
-   "pos": [
-    0,
-    1.2,
-    0
-   ]
-  },
-  {
-   "id": "cracks",
-   "t": "decal",
-   "at": 0,
-   "life": 1.4,
-   "att": "ground",
-   "kind": "icecrack",
-   "r": 1.8,
-   "n": 9,
-   "col": "#2f7fe0"
-  },
-  {
-   "id": "light",
-   "t": "light",
-   "at": 0.1,
-   "life": 0.8,
-   "att": "ground",
-   "pos": [
-    0,
-    1.2,
-    0
-   ],
-   "col": "#9fdcff",
-   "int": 1.2,
-   "dist": 8
-  },
   {
    "id": "snd",
    "t": "sound",

@@ -84,7 +84,7 @@ function fwLink(){const geo=new THREE.BufferGeometry();geo.setAttribute('positio
 function fwMat(o,W,P,off){fwAim(P.bx,P.by,P.bz,P.nx,P.ny,P.nz);_fwP.set(P.x+(off?off[0]:0),P.y+(off?off[1]:0),P.z+(off?off[2]:0));_fwM2.compose(_fwP,_fwQ,_fwS);_fwM.multiplyMatrices(o.g.matrixWorld,_fwM2);return _fwM.multiply(W.matrix);}
 function frostFX(o,p,pz,now,dt){
   const F=p.fr;
-  if(!F){if(o.fw)o.fw.g.visible=false;if(o.fwLk)o.fwLk.visible=false;if(o.ishield)o.ishield.visible=false;if(o.cryoM)o.cryoM.visible=false;if(o.fwx)o.fwx.forEach(c=>{c.g.visible=false;c.on=0;});return;}
+  if(!F){if(o.fw)o.fw.g.visible=false;if(o.fwLk)o.fwLk.visible=false;if(o.ishield)o.ishield.visible=false;if(o.cryoM)o.cryoM.visible=false;if(o.cryoFx){fxKill(o.cryoFx);o.cryoFx=null;}if(o.fwx)o.fwx.forEach(c=>{c.g.visible=false;c.on=0;});return;}
   const melee=F[0]===0,flags=F[3]|0,ff=flags&8,fwOn=melee&&!p.fl;
   if(!o.fw){o.fw=fwWeapons();o.g.add(o.fw.g);o.sword=o.fw.sword;o.axe=o.fw.axe;o.fwLk=fwLink();scene.add(o.fwLk);(o.g.userData.extra||(o.g.userData.extra=[])).push(o.fwLk);}
   else if(!o.sword.userData.file&&MODELS.ready.get('mesh_ice_sword')&&MODELS.ready.get('mesh_ice_axe')){   // โมเดลไฟล์โหลดเสร็จทีหลัง → สลับเป็นแบบไฟล์
@@ -204,13 +204,15 @@ function frostFX(o,p,pz,now,dt){
     for(let i=0;i<10;i++)PARTS.push({x:p.x+Math.cos(a)*16,y:p.y+Math.sin(a)*16,h:pz+0.1,vx:Math.cos(a+rnd(-0.6,0.6))*rnd(120,240),vy:Math.sin(a+rnd(-0.6,0.6))*rnd(120,240),vh:rnd(0.5,2.5),life:0.35,max:0.35,col:i%2?'#ffffff':'#bfeaff',size:1.6,g:6});}
   // แช่แข็งตัวเอง
   if(flags&2){
+    // ผู้ใช้ 2026-10-23 เลือกแบบ 4 (แก้วปริซึม) = assets/fx/frost/cryoshell — เปลือกเดิม (ทรงยี่สิบหน้า) เหลือไว้เป็นสำรองถ้าเล่นไฟล์ไม่ได้
+    if(!o.cryoFx)o.cryoFx=fxPlay('frost/cryoshell',{x:p.x,y:p.y,h:pz,a:p.a||0,follow:p.id});
     if(!o.cryoM){o.cryoM=new THREE.Mesh(new THREE.IcosahedronGeometry(1,1),iceMat(0.6,'#4aa0d8'));o.g.add(o.cryoM);}
     if(!o.cryoM.visible)o.cryoGrow=0;o.cryoGrow=Math.min(1,(o.cryoGrow||0)+dt/0.35);const gk=1-Math.pow(1-o.cryoGrow,3);
-    o.cryoM.visible=true;o.cryoM.scale.set(0.95*(0.6+0.4*gk),1.45*gk+0.01,0.95*(0.6+0.4*gk));o.cryoM.position.y=1.15*gk;o.cryoM.rotation.y=now/3000;
+    o.cryoM.visible=!o.cryoFx;o.cryoM.scale.set(0.95*(0.6+0.4*gk),1.45*gk+0.01,0.95*(0.6+0.4*gk));o.cryoM.position.y=1.15*gk;o.cryoM.rotation.y=now/3000;
     if(o.cryoGrow<1)for(let i=0;i<4;i++){const an=rnd(0,6.283);PARTS.push({x:p.x+Math.cos(an)*22,y:p.y+Math.sin(an)*22,h:pz+2.4*gk*rnd(0.6,1),vx:0,vy:0,vh:0,life:0.25,max:0.25,col:'#ffffff',size:2,g:0});}
     {const pl=0.5+0.5*Math.sin(now/260);LREQ.push({x:tx(p.x),y:pz+1.2,z:tz(p.y),col:'#9fe8ff',int:1.2+2*pl,dist:6});if(Math.random()<0.3)PARTS.push({x:p.x+rnd(-6,6),y:p.y+rnd(-6,6),h:pz+1.2,vx:0,vy:0,vh:0,life:0.4,max:0.4,col:'#dff6ff',size:3+3*pl,g:0});}
     if(Math.random()<0.4)PARTS.push({x:p.x+rnd(-20,20),y:p.y+rnd(-20,20),h:pz+rnd(0.3,2.4),vx:0,vy:0,vh:0.3,life:0.7,max:0.7,col:'#7dff9a',size:1.6,g:-0.5});
-  }else if(o.cryoM)o.cryoM.visible=false;
+  }else{if(o.cryoM)o.cryoM.visible=false;if(o.cryoFx){fxKill(o.cryoFx);o.cryoFx=null;}}
   if(!(flags&4)&&o.auraR)o.auraR.visible=o.auraD.visible=false;
   if(flags&4){
     for(let i=0;i<4;i++){const an=now/260+i*1.571,r=24+6*Math.sin(now/300+i),hh=pz+0.3+((now/600+i*0.25)%1)*2.2;PARTS.push({x:p.x+Math.cos(an)*r,y:p.y+Math.sin(an)*r,h:hh,vx:-Math.sin(an)*r*4,vy:Math.cos(an)*r*4,vh:0.6,life:0.25,max:0.25,col:i%2?'#ffffff':'#cfefff',size:i%2?1.6:2.4,g:0});}

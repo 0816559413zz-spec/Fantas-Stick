@@ -1,9 +1,10 @@
 {
  "v": 1,
- "desc": "แบบ 4 (แก้วปริซึม): Cryo Shell — แช่แข็งตัวเอง 5 วิ (อมตะ) — คริสตัลใสเหมือนแก้วเจียระไน — ประกายรุ้งหลายสีกระจาย เลนส์หักเหอากาศ แสงดาวกากบาทวิบวับ สะอาด คม หรู",
+ "desc": "Cryo Shell (ผู้ใช้เลือกแบบ 4 แก้วปริซึม 2026-10-23): เปลือกแก้วใส + กรงหนาม + ผลึกพื้น + ประกายรุ้ง 5 วิ • js/34 เล่นตามตัวตอนแช่แข็ง (follow) และ fxKill ตอนจบ/กดออก",
  "tags": [
-  "ice",
-  "variant3",
+  "frost",
+  "shield",
+  "self",
   "prism"
  ],
  "pal": "ice",
@@ -12,7 +13,7 @@
    "id": "shell1",
    "t": "mesh",
    "at": 0,
-   "life": 3,
+   "life": 5,
    "att": "feet",
    "pos": [
     0,
@@ -53,7 +54,7 @@
    "id": "cage2",
    "t": "mesh",
    "at": 0,
-   "life": 3,
+   "life": 5,
    "att": "feet",
    "pos": [
     0,
@@ -86,7 +87,7 @@
    "id": "facets3",
    "t": "mesh",
    "at": 0,
-   "life": 3,
+   "life": 5,
    "att": "ground",
    "pos": [
     0,
@@ -118,7 +119,7 @@
    "id": "rainbow4",
    "t": "emit",
    "at": 0,
-   "life": 3,
+   "life": 5,
    "rate": 3.6,
    "att": "ground",
    "pos": [
@@ -151,7 +152,7 @@
    "id": "rainbow5",
    "t": "emit",
    "at": 0,
-   "life": 3,
+   "life": 5,
    "rate": 3.6,
    "att": "ground",
    "pos": [
@@ -184,7 +185,7 @@
    "id": "rainbow6",
    "t": "emit",
    "at": 0,
-   "life": 3,
+   "life": 5,
    "rate": 3.6,
    "att": "ground",
    "pos": [
@@ -217,7 +218,7 @@
    "id": "rainbow7",
    "t": "emit",
    "at": 0,
-   "life": 3,
+   "life": 5,
    "rate": 3.6,
    "att": "ground",
    "pos": [
@@ -250,7 +251,7 @@
    "id": "rainbow8",
    "t": "emit",
    "at": 0,
-   "life": 3,
+   "life": 5,
    "rate": 3.6,
    "att": "ground",
    "pos": [
@@ -499,5 +500,5 @@
    "x": true
   }
  ],
- "dur": 4.5
+ "dur": 5
 }
