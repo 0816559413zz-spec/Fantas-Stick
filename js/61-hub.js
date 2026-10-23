@@ -741,6 +741,46 @@ function hubLabels(lay){
   cx.textBaseline='alphabetic';
 }
 
+// ---------- หน้าโปรไฟล์ (UI ใน js/65 PRF, ผู้ใช้ 2026-10-23 รอบ 3) ----------
+// ฉากแยก HUBP: ตัวเราฝั่งขวาของจอ บนพื้นหลังที่เลือก (ภาพแผ่นใหญ่ด้านหลัง) + ท่าโพส + เอฟเฟกต์รอบตัว • ลากเมาส์ = หมุนตัว (PRF3.spin)
+const HUBP=new THREE.Scene();
+const PRF3={built:false,c:null,lk:'',bg:'',bgM:null,bgP:null,bgAsp:1.6,ps:null,orb:null,ring:null,pose:'present',au:null,spin:0,cam:new THREE.Vector3()};
+function hubProfBuild(){
+  if(PRF3.built)return;PRF3.built=true;const S=HUBP;
+  S.add(new THREE.HemisphereLight('#8fa2e0','#100c20',0.55));
+  const k=new THREE.DirectionalLight('#e6ecff',1.35);k.position.set(2.5,4,3.5);S.add(k);
+  const rim=new THREE.DirectionalLight('#b39dff',2.6);rim.position.set(-3,2.5,-3);S.add(rim);
+  const fill=new THREE.PointLight('#8fd8ff',1.2,8,2);fill.position.set(-1.6,1.2,2);S.add(fill);
+  PRF3.bgM=new THREE.MeshBasicMaterial({color:'#6f7696',fog:false,depthWrite:false});   // พื้นหลังหรี่ลงให้ตัวละครเด่น
+  PRF3.bgP=new THREE.Mesh(new THREE.PlaneGeometry(1,1),PRF3.bgM);PRF3.bgP.renderOrder=-1;S.add(PRF3.bgP);
+  const ring=new THREE.Mesh(new THREE.RingGeometry(0.55,0.585,72),new THREE.MeshBasicMaterial({color:hdr('#b9a6ff',1.4),transparent:true,opacity:0.6,depthWrite:false,blending:THREE.AdditiveBlending}));
+  ring.rotation.x=-Math.PI/2;ring.position.y=0.012;S.add(ring);PRF3.ring=ring;
+  const disc=new THREE.Mesh(new THREE.CircleGeometry(1.2,48),new THREE.MeshBasicMaterial({map:glowTex,color:hdr('#6a5cff',0.5),transparent:true,depthWrite:false,blending:THREE.AdditiveBlending}));
+  disc.rotation.x=-Math.PI/2;disc.position.y=0.006;S.add(disc);
+  PRF3.ps=hubPS(S,700);PRF3.orb=hubMakeOrb(S);
+}
+// o = {lk ลุคตัวละคร, bg url รูปพื้นหลัง, pose ชื่อท่าใน HPOSE, au สีเอฟเฟกต์รอบตัว | null}
+function hubProfSet(o){
+  hubProfBuild();
+  if(o.bg&&o.bg!==PRF3.bg){PRF3.bg=o.bg;new THREE.TextureLoader().load(o.bg,t=>{if(PRF3.bg!==o.bg){t.dispose();return;}t.colorSpace=THREE.SRGBColorSpace;const old=PRF3.bgM.map;PRF3.bgM.map=t;PRF3.bgM.needsUpdate=true;PRF3.bgAsp=t.image.width/t.image.height;if(old)old.dispose();});}
+  if(PRF3.c&&PRF3.lk!==o.lk){HUBP.remove(PRF3.c.g);disposeTree(PRF3.c.g);PRF3.c=null;}
+  PRF3.lk=o.lk;PRF3.pose=HPOSE[o.pose]?o.pose:'present';PRF3.au=o.au||null;
+}
+function hubProfTick(dt,now){
+  if(!PRF3.c&&PRF3.lk){const c=hubMakeChar(PRF3.lk);if(c){PRF3.c=c;HUBP.add(c.g);if(c.wand)c.wand.visible=true;c.wandOn=true;c.ry=c.ryT=0;}}
+  const c=PRF3.c,t=now/1000,ry0=(HPOSE[PRF3.pose].ry||0)*0.5;
+  if(c){if(c.poseN!==PRF3.pose)hubSetPose(c,PRF3.pose);c.ryT=ry0+PRF3.spin;hubCharTick(c,dt,now,PRF3.cam);
+    PRF3.orb.kT=c.pose&&c.pose.orb?1:0;hubOrbTick(PRF3.orb,c,dt,now,PRF3.ps);}
+  if(PRF3.au&&Math.random()<dt*46){const a=Math.random()*6.28,r=0.42+Math.random()*0.3;   // เอฟเฟกต์รอบตัว: ละอองหมุนเป็นเกลียวขึ้น
+    PRF3.ps.add({x:Math.cos(a)*r,y:0.05+Math.random()*0.4,z:Math.sin(a)*r,vx:-Math.sin(a)*0.3,vy:0.35+Math.random()*0.45,vz:Math.cos(a)*0.3,life:1.5+Math.random()*1.3,s:0.03+Math.random()*0.045,c:hCol(PRF3.au,1.7),sw:2,swr:0.2,a:0.85,fi:3});}
+  PRF3.ps.tick(dt);PRF3.ring.material.opacity=0.45+0.15*Math.sin(t*1.5);
+  const R=typeof prfStageX==='function'?prfStageX():0.14,want=hubFrame(_hcB,_ht.set(0,0.98,0),6.8,0,0.04,R,-0.04,34);   // ตัวละครอยู่กลางช่องว่างระหว่างแผงซ้าย-ขวา (js/65 prfStageX)
+  // พื้นหลัง: แผ่นตั้งฉากกับแนวมอง ห่าง 12 หน่วย ขยายให้คลุมเต็มจอ (แบบ cover)
+  const fw=_hd.copy(want.l).sub(want.p).normalize(),D=12,h=2*D*Math.tan(17*Math.PI/180)*1.12,w=h*cam.aspect,sw=Math.max(w,h*PRF3.bgAsp);
+  PRF3.bgP.position.copy(want.p).addScaledVector(fw,D);PRF3.bgP.scale.set(sw,sw/PRF3.bgAsp,1);PRF3.bgP.lookAt(want.p);
+  return want;
+}
+
 // ---------- เรนเดอร์ (เรียกจาก renderStage — คืน true = วาดแล้ว) ----------
 function hubRender(dt,now){
   const room=screen==='lobby'&&LOBBY&&LOBBY.ph==='lobby';
@@ -749,13 +789,14 @@ function hubRender(dt,now){
   document.body.classList.add('hubOn');
   dt=Math.min(dt,0.05);const t=now/1000,F=HUB.fx;
   const mx=((mouseX||SW/2)/Math.max(1,SW)-0.5),my=((mouseY||SH/2)/Math.max(1,SH)-0.5);
-  let sc=HUBS,lay=null,want,tt=0;
+  let sc=HUBS,lay=null,want,tt=0,fvO=0;
   if(room){
     sc=HUBL;lay=hubLobbyTick(dt,now);want=hubCamRoom(_hcB);
     F.lRune.rotation.z=t/20;F.lRune.material.opacity=0.24+0.08*Math.sin(t*0.8);F.dustL.rotation.y=t/60;
     if(Math.random()<dt*14)HUB.psL.add({x:rnd(-4,5),y:0.25,z:rnd(-3,2.5),vx:0,vy:0.25+Math.random()*0.3,vz:0,life:3+Math.random()*2,s:0.03+Math.random()*0.03,c:H_SPARK[(Math.random()*4)|0],sw:1.5,swr:0.1,a:0.7,fi:3});
     HUB.psL.tick(dt);
-  }else{
+  }else if(HUB.profOn){sc=HUBP;want=hubProfTick(dt,now);fvO=34;}   // หน้าโปรไฟล์ (js/65)
+  else{
     const c=hubMenuChar();
     if(c){hubSeq(c,dt,now);hubCharTick(c,dt,now,HUB.cam.p);}
     hubOrbTick(HUB.orb,c,dt,now,HUB.ps);
@@ -785,17 +826,18 @@ function hubRender(dt,now){
   }
   // กล้องนุ่ม + เอียงตามเมาส์นิดๆ
   const seqOn=!room&&(HUB.st==='go'||HUB.st==='back');
-  const fv=room?36:(HUB.fovT||44);
+  const fv=fvO||(room?36:(HUB.fovT||44));
   if(Math.abs(cam.fov-fv)>0.01){cam.fov=fv;cam.updateProjectionMatrix();}HUB.fovSet=true;
   if(!HUB.cam.init||HUB.camScene!==sc){HUB.cam.p.copy(want.p);HUB.cam.l.copy(want.l);HUB.cam.init=true;HUB.camScene=sc;}
   const kk=1-Math.exp(-(seqOn?12:4)*dt);HUB.cam.p.lerp(want.p,kk);HUB.cam.l.lerp(want.l,kk);
-  const par=seqOn?0.04:HUB.st==='modes'?0.1:0.16;
+  const par=seqOn?0.04:HUB.profOn?0.05:HUB.st==='modes'?0.1:0.16;
   cam.position.copy(HUB.cam.p).add(_hv.set(mx*par,-my*par*0.5+Math.sin(t*0.5)*0.03,0));
   cam.lookAt(_hv2.copy(HUB.cam.l).add(_hv.set(mx*par*0.3,-my*par*0.2,0)));
+  if(HUB.profOn)PRF3.cam.copy(cam.position);
   rpass.scene=sc;gl.shadowMap.needsUpdate=true;composer.render();rpass.scene=scene;
   // ผ้าคลุมสะบัดผ่านหน้ากล้อง (ตัดฉากใต้ผ้า) — ชั้นแยกทับภาพที่ post แล้ว
   {const wp=room?-1:hWipeP(tt);if(F.wipe&&wp>0&&wp<1){hubWipeLook(F.wipe,HUB.me);hubWipeDraw(F.wipe,wp,t);}}
   if(lay)hubLabels(lay);
   return true;
 }
-if(typeof WD!=='undefined')Object.assign(WD,{HUB,HUBS,HUBL,HPOSE,hubGo,hubSnapModes,hubResetMenu});
+if(typeof WD!=='undefined')Object.assign(WD,{HUB,HUBS,HUBL,HUBP,PRF3,HPOSE,hubGo,hubSnapModes,hubResetMenu,hubProfSet});

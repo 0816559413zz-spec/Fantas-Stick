@@ -1,7 +1,7 @@
 // =====================================================================
 //  เครือข่าย (PeerJS / WebRTC)
 // =====================================================================
-const PREFIX='wizduel-th-v37-';
+const PREFIX='wizduel-th-v38-';
 const NET={peer:null,isHost:false,online:false,myId:'me',conns:new Map(),hostConn:null,code:'',spec:false,rtt:0,
   // token ของแท็บนี้ (อยู่ข้ามการรีเฟรช) — โฮสต์ใช้จำว่า "คนเดิมต่อกลับมา" ตอนเน็ตหลุด
   tok:(()=>{const r=()=>Math.random().toString(36).slice(2,10);try{let t=sessionStorage.getItem('wd_tok');if(!t){t=r();sessionStorage.setItem('wd_tok',t);}return t;}catch(e){return r();}})()};
@@ -42,7 +42,7 @@ function hostGame(online){
 function netConnect(peer,code){
   const c=peer.connect(PREFIX+code,{reliable:true,serialization:'json'});
   NET.hostConn=c;
-  c.on('open',()=>{c.send({t:'hello',name:myName(),look:lookStr(myLook),kit:myKit,tok:NET.tok});setStatus('');});
+  c.on('open',()=>{c.send({t:'hello',name:myName(),look:lookStr(myLook),kit:myKit,tok:NET.tok,fr:myFrame()});setStatus('');});
   c.on('data',d=>lagDo(0,()=>clientOnData(d)));
   c.on('close',()=>{if(NET.hostConn===c)netLost();});
   c.on('error',()=>{if(NET.hostConn===c)netLost();});

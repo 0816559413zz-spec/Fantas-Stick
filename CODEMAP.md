@@ -88,10 +88,10 @@ castSlot:181 castUlt:196
 ## js/10-net.js (110) — เครือข่าย (PeerJS / WebRTC)
 PREFIX:4 NET:5 RC:9 LAG:11 lagDo:12 hostSend:13 LOBBY:14 genCode:15 sendAll:16 setStatus:17 hostGame:19 netConnect:42 netLost:50 joinGame:65 clientOnData:83 leave:98 leaveRoom:100
 
-## js/11-host.js (382) — 
-G:4 EVL:4 EVN:4 hostLast:4 tickN:4 emit:5 feed:6 banner:7 plist:8 cleanName:9 freshStats:11 newPlayer:18 emptyInput:21 addPlayer:22 initHostLobby:31 lobbyMsg:38 broadcastLobby:39 INPN:41 hostOnData:42 hostDrop:72 hostRemove:81 validate:94 hostStart:105 hostToLobby:130 MIDJOIN:136 midJoin:137 CHATT:153 chatRelay:154 emoHost:162 resetBody:164 fmap:170 spawnPts:171 teamPts:173 placeAll:174 respawn:186
-§203 ลูปหลักฝั่งโฮสต์
-hostTick:204 angDiff:218 cH:220 vR:221 updatePlayer:223 hitProp:369 damagePropsIn:376 nearUseProp:377 useProp:378
+## js/11-host.js (384) — ฝั่งโฮสต์: สถานะเกมทั้งหมดคำนวณที่นี่ (server-authoritative)
+G:4 EVL:4 EVN:4 hostLast:4 tickN:4 emit:5 feed:6 banner:7 plist:8 cleanName:9 freshStats:11 newPlayer:18 emptyInput:21 frameOk:23 addPlayer:24 initHostLobby:33 lobbyMsg:40 broadcastLobby:41 INPN:43 hostOnData:44 hostDrop:74 hostRemove:83 validate:96 hostStart:107 hostToLobby:132 MIDJOIN:138 midJoin:139 CHATT:155 chatRelay:156 emoHost:164 resetBody:166 fmap:172 spawnPts:173 teamPts:175 placeAll:176 respawn:188
+§205 ลูปหลักฝั่งโฮสต์
+hostTick:206 angDiff:220 cH:222 vR:223 updatePlayer:225 hitProp:371 damagePropsIn:378 nearUseProp:379 useProp:380
 
 ## js/12-buildings.js (419) — สิ่งปลูกสร้างที่พังเป็นชิ้นย่อย (บ้าน) แบบ Battlefield — คู่มือเต็ม: …
 BLDDEF:8 BLD_PIECES:9 BLD_GRID:10 BLD_FIRE:11 BLD_ICE:11 BLD_ROOF_MIN:11 BLDG:12 BLDON:12 genBldg:13 bldRect:23 bldChunk:25 bldAlive:32 bldLocal:33 bldWorld:34 rectDist:35 bldNear:36 BLD_MOUND:39 bldGone:40 bldMoundAt:41 bldMoundH:42 hitBldPiece:44 breakBldChunk:55 bldSupport:63 damageEnv:83 bldPieceAt:97 projEl:107 bldPush:112 collideBld:118 updateBldg:133 bldSnap:145 bldParse:151
@@ -463,7 +463,7 @@ MN_BLOCK:259 mnRay:260 mnPick:261 mnHot:267 mnToy:285
 §290 เรนเดอร์ (เรียกจาก renderStage js/32 — คืน true = จัดการแล้ว)
 mnRestore:291 mnMenuRender:297
 
-## js/61-hub.js (801) — เมนูใหม่ — ฉาก 3D (ผู้ใช้ 2026-10-22 • สเปกเต็ม designs/ui-menu.md • หน้าจอ/ปุ่มอยู่ js/6…
+## js/61-hub.js (843) — เมนูใหม่ — ฉาก 3D (ผู้ใช้ 2026-10-22 • สเปกเต็ม designs/ui-menu.md • หน้าจอ/ปุ่มอยู่ js/6…
 HUBS:11 HUBL:11 HUB:14 HB:18 _hq:19 _hq2:19 _hq3:19 _hv:19 _hv2:19 _hv3:19 _hY:19 hEase:20 hSm:21
 §23 อนุภาคเรืองแสงของเมนู (ขนาด/สี/ความจางต่อเม็ด)
 hubPS:24 hCol:50 H_SPARK:51
@@ -485,8 +485,10 @@ _hf0:607 _hf1:607 _hf2:607 _hf3:607 hubFrame:608 _hcA:617 _hcB:617 _hcC:617 hCam
 HSQ:637 hPickRy:638 hubGo:639 hubBack:643 hubFadeDo:647 hubSeqAt:649 hubCamSeq:672 hWipeP:678 hubSeq:679 hubSnapModes:687
 §693 ล็อบบี้: ใครยืนตรงไหน ท่าอะไร
 HL_SPOTS:695 HL_TEAM:696 hubLobbyLayout:697 hubLobbyTick:704 hubLabels:730
-§744 เรนเดอร์ (เรียกจาก renderStage — คืน true = วาดแล้ว)
-hubRender:745
+§744 หน้าโปรไฟล์ (UI ใน js/65 PRF, ผู้ใช้ 2026-10-23 รอบ 3)
+HUBP:746 PRF3:747 hubProfBuild:748 hubProfSet:763 hubProfTick:769
+§784 เรนเดอร์ (เรียกจาก renderStage — คืน true = วาดแล้ว)
+hubRender:785
 
 ## js/62-hub-ui.js (302) — เมนูใหม่ — หน้าจอ/ปุ่ม (ผู้ใช้ 2026-10-22 • สเปก designs/ui-menu.md)
 §8 ภาพการ์ด/แผนที่: URL เต็ม — url() ใน CSS var อ่านเทียบไฟล์ css/hub.cs…
@@ -519,12 +521,14 @@ skwOpen:243 skwClose:253
 ## js/64-mappick.js (156) — 
 MPK_TXT:7 MPK_SKY:19 MPK_I:21 MPK_DICE:31 MPK:36 mpkE:37 mpkC:37 mpkSnd:38 mpkCut:39 mpkName:40 mpkCardHTML:41 mpkBuild:51 mpkUp:89 mpkMeasure:101 mpkIdx:102 mpkStep:103 mpkTo:104 mpkPick:105 mpkOpen:111 mpkClose:126 mpkLoop:130 mpkTick:132
 
-## js/65-ui3.js (225) — UI รอบ 3 (ผู้ใช้ 2026-10-23 — สเปก designs/ui-menu.md "รอบ 3") • สไตล์เดียวกับเมนูใหม่ (c…
+## js/65-ui3.js (336) — UI รอบ 3 (ผู้ใช้ 2026-10-23 — สเปก designs/ui-menu.md "รอบ 3") • สไตล์เดียวกับเมนูใหม่ (c…
 UIG:6 uiGalaxy:7 uiGalaxyOn:15 uiGalRaf:16 uiGalT:16 uiGalLoop:17 uiGalDraw:19 uiShow:36 uiHide:37
 §40 เมนูหยุดเกม
 §44 คู่มือ (แบบ Skill Tree)
 GICO:47 GROW:58 GPATH:59 GUIDE:63 GD:84 guideBuild:85 guideLayout:95 guideOpen:102 guideClose:106 guidePic:107 guideGo:112
 §130 จอสรุปหลังจบเกม (ต่อจากป้ายชนะ + โพเดียม)
 RICO:133 rIcon:139 OV:140 ovScore:141 ovOpen:142 ovHead:151 ovSummary:157 ovNextReward:179 ovLvAnim:186 ovBoard:205
+§227 หน้าโปรไฟล์ (แบบ Naraka ย่อ) + รางวัลเลเวล
+PRF:231 prfItem:232 prfLv:233 prfOk:234 prfGet:235 myFrame:236 FR_IDX:237 prfAvatar:239 BADGES:240 BICO:244 SICO:247 PT:249 PFS:250 prfSave:251 prf3Sync:252 profOpen:253 prfStageX:261 profClose:263 prfRender:264 prfItems:288 prfRwHtml:295 prfRewards:306 prfClick:315 prfDrag:328
 
-(66 files, 15698 lines)
+(66 files, 15853 lines)

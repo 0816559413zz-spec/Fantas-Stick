@@ -58,7 +58,7 @@ function progBox(r){
     ${a.unl.map(u=>`<div class="xpUnl">🔓 ปลดล็อค: ${u.n}</div>`).join('')}</div>`;
 }
 // หน้า "เลเวล & สถิติ" (ปุ่มในเมนู)
-function progOpen(){
+function progOpen(){if(typeof profOpen==='function'&&typeof HUB!=='undefined'&&HUB.on){profOpen();return;}   // เมนูใหม่: เลเวล = หน้าโปรไฟล์ (js/65)
   const v=progLv(),pct=v.need?Math.round(v.cur/v.need*100):100,P=PROG,kd=(P.kills/Math.max(1,P.deaths)).toFixed(2),wr=P.games?Math.round(P.wins/P.games*100):0;
   const fav=Object.entries(P.paths).sort((a,b)=>b[1]-a[1])[0],fp=fav&&PATHS[+fav[0]];
   const st=(l,x)=>`<div class="pgS"><span>${l}</span><b>${x}</b></div>`;

@@ -209,7 +209,7 @@ function ovBoard(){
     <div class="ovBh"><span>RANK</span><span>PLAYER</span>${H.map(h=>`<span>${h}</span>`).join('')}<span>SCORE</span></div>
     <div class="ovRows">${rows.map((x,i)=>{const T=x.tm>=0&&typeof TEAMC!=='undefined'?TEAMC[x.tm]:'';return `<div class="ovR ${x.id===NET.myId?'me':''} ${i===0&&!coop?'top':''}" style="--i:${i};--pc:${x.c||'#888'};${T?'--tc:'+T:''}">
       <span class="rk">${i===0&&!coop?`<svg viewBox="0 0 24 24"><path d="M7 4h10v4a5 5 0 01-10 0zM7 6H4a3 3 0 003 4M17 6h3a3 3 0 01-3 4M12 13v4M8.5 20h7M10 17h4"/></svg>`:''}<b>${i+1}</b></span>
-      <span class="ovPl"><i class="av">${esc((x.n||'?').trim().charAt(0).toUpperCase())}</i><b>${esc(x.n)}</b></span>
+      <span class="ovPl">${prfAvatar(x.n,x.fr,x.c,36)}<b>${esc(x.n)}</b></span>
       <span class="n">${x.k}</span><span class="n">${x.d}</span><span class="n">${x.as||0}</span><span class="n">${(x.dmg||0).toLocaleString()}</span>
       <span class="ovSc" style="--w:${(ovScore(x)/mx).toFixed(3)}"><i></i><b>${ovScore(x).toLocaleString()}</b></span></div>`;}).join('')}</div>
     ${coop?`<p class="ovNote">ไปถึงชั้น ${r.wave||0}${OV.note?' • '+esc(OV.note):''}</p>`:''}</div>
@@ -223,3 +223,114 @@ $('#over').addEventListener('click',e=>{
 addEventListener('keydown',e=>{const el=$('#over');if(el.classList.contains('hidden')||!el.classList.contains('u3Over'))return;
   if((e.code==='Enter'||e.code==='Space')&&OV.step===0){e.preventDefault();ovBoard();}});
 if(typeof WD!=='undefined')Object.assign(WD,{ovOpen,ovBoard,OV});
+
+// ---------- หน้าโปรไฟล์ (แบบ Naraka ย่อ) + รางวัลเลเวล ----------
+// ขวา = ตัวเรา 3D (js/61 hubProfTick) บนพื้นหลังที่เลือก • ซ้าย = การ์ดชื่อ/เลเวล + สถิติรวม + ธาตุที่เล่นบ่อย + ตราสัญลักษณ์ (ผู้ใช้เลือก)
+// ปรับแต่ง = พื้นหลัง / ท่าโพส / กรอบรูป (ใช้ในเกมด้วย) / เอฟเฟกต์รอบตัว — ปลดตามเลเวล (js/56 PROF_ITEMS) • เก็บใน localStorage 'wd_prof'
+// รางวัลเลเวล = ไทม์ไลน์แนวนอนด้านล่าง (วงกลมเลเวล + เส้นขึ้นไปหาของในห้าเหลี่ยม ของใหญ่ = ใหญ่กว่า/สีทอง) เลื่อนซ้ายขวาได้
+const PRF=(()=>{const d={bg:'bg0',pose:'po0',fr:'fr0',au:''};try{return Object.assign(d,JSON.parse(store('wd_prof')||'{}'));}catch(e){return d;}})();
+const prfItem=id=>PROF_ITEMS.find(q=>q.id===id);
+const prfLv=()=>DEV_MAXLV?progLv().L:lvOf(PROG.xp).L;
+const prfOk=it=>!!it&&(DEV_MAXLV||lvOf(PROG.xp).L>=it.lv);
+function prfGet(t){const k={bg:'bg',pose:'pose',frame:'fr',aura:'au'}[t],it=prfItem(PRF[k]);return prfOk(it)?it:null;}
+function myFrame(){const it=prfGet('frame');return it?it.id:'fr0';}   // กรอบรูปของเรา (ส่งให้ห้องตอนเข้า js/10 hello)
+const FR_IDX=id=>Math.max(0,PROF_ITEMS.filter(q=>q.t==='frame').findIndex(q=>q.id===id));
+// อวตาร: หกเหลี่ยม + ตัวอักษรแรกของชื่อ + กรอบตามที่เลือก (คลาส fr-0..5)
+function prfAvatar(name,fr,col,sz,inner){const f=prfItem(fr)||prfItem('fr0');return `<span class="pfAv fr-${FR_IDX(f.id)}" style="--fc:${f.c};--pc:${col||'#7a9cff'};${sz?'--sz:'+sz+'px':''}">${inner?`<i class="ic">${inner}</i>`:`<i>${esc((name||'?').trim().charAt(0).toUpperCase())}</i>`}</span>`;}   // inner = ไอคอนแทนตัวอักษร (เช่นไอคอนสายในห้อง)
+const BADGES=[   // ⚠ ตราสัญลักษณ์ Claude เลือกเอง: [id, ชื่อ, คำอธิบาย, ค่าปัจจุบัน, เป้า]
+  ()=>['first','ชัยชนะแรก','ชนะ 1 ตา',PROG.wins,1],()=>['win10','สิบชัยชนะ','ชนะ 10 ตา',PROG.wins,10],()=>['kill100','นักล่า','ฆ่ารวม 100',PROG.kills,100],
+  ()=>['bestk','สังหารต่อเนื่อง','ฆ่า 10 ในตาเดียว',PROG.bestK,10],()=>['dmg','พลังทำลาย','ดาเมจ 5,000 ในตาเดียว',PROG.bestD,5000],()=>['vet','ทหารผ่านศึก','เล่น 50 ตา',PROG.games,50],
+  ()=>['dun','นักฝ่าดันเจียน','ถึงชั้น 10 ในดันเจียน',+(store('wd_best')||0),10],()=>['elem','จอมเวทสี่ธาตุ','เล่นครบ 4 ธาตุ',PATHS.filter((p,i)=>!p.off&&PROG.paths[i]).length,4]];
+const BICO={first:'<path d="M12 3l2.6 5.6 6 .6-4.5 4 1.3 6L12 16.2 6.6 19.2l1.3-6-4.5-4 6-.6z"/>',win10:'<path d="M7 4h10v4a5 5 0 01-10 0zM12 13v4M8.5 20h7"/>',kill100:'<path d="M5 19L19 5M14 5h5v5M5 14v5h5"/>',
+  bestk:'<path d="M13.5 2L5 13.5h6L9.5 22 19 9.8h-6.2z"/>',dmg:'<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/>',vet:'<path d="M12 3l7 3v5c0 4.6-3 8.3-7 10-4-1.7-7-5.4-7-10V6z"/><path d="M8.5 11l3.5 3 3.5-3"/>',
+  dun:'<path d="M4 21V9l8-6 8 6v12M9 21v-6h6v6"/>',elem:'<circle cx="8" cy="8" r="3.2"/><circle cx="16" cy="8" r="3.2"/><circle cx="8" cy="16" r="3.2"/><circle cx="16" cy="16" r="3.2"/>'};
+const SICO={games:'<rect x="4" y="5" width="16" height="14" rx="2"/><path d="M9 12h6M12 9v6"/>',wins:BICO.win10,kd:'<path d="M5 19L19 5M14 5h5v5"/><circle cx="7" cy="7" r="2"/>',kills:BICO.kill100,
+  as:'<circle cx="9" cy="8" r="3"/><circle cx="16" cy="9" r="2.4"/><path d="M3.5 19c.6-3.3 2.8-5 5.5-5s4.9 1.7 5.5 5M15 14.3c2.6-.4 5 1 5.5 4.7"/>',dmg:BICO.dmg,bk:BICO.bestk,bd:'<path d="M12 21c-3.9 0-6.5-2.7-6.5-6.2 0-3.4 2.6-5.3 3.4-8.8 1.9 1.6 2.6 3.4 2.6 5.1 1.2-.9 1.8-2.4 1.7-4.2 2.7 2 5.3 4.9 5.3 8.1 0 3.4-2.6 6-6.5 6z"/>'};
+const PT={bg:['พื้นหลัง','BACKGROUND'],pose:['ท่าโพส','POSE'],frame:['กรอบรูป','FRAME'],aura:['เอฟเฟกต์','AURA']};
+const PFS={tab:'bg',rw:false};
+function prfSave(){try{store('wd_prof',JSON.stringify(PRF));}catch(e){}}
+function prf3Sync(){const bg=prfGet('bg'),po=prfGet('pose'),au=prfGet('aura');hubProfSet({lk:lookStr(myLook),bg:HUI_IMG+(bg||prfItem('bg0')).img,pose:(po||prfItem('po0')).p,au:au?au.c:null});}
+function profOpen(){
+  let el=$('#profOv');
+  if(!el){el=document.createElement('div');el.id='profOv';el.className='hidden u3Prof';document.body.appendChild(el);
+    el.addEventListener('click',prfClick);el.addEventListener('pointerdown',prfDrag);
+    addEventListener('keydown',e=>{if(el.classList.contains('hidden')||el.classList.contains('out'))return;if(e.code==='Escape'){e.stopImmediatePropagation();if(PFS.rw)prfRewards(false);else profClose();}},true);}
+  PFS.rw=false;prfRender();prf3Sync();HUB.profOn=true;PRF3.spin=0;document.body.classList.add('profOn');uiShow(el);
+}
+// ตำแหน่งแนวนอนของตัวละคร (−1…1 บนจอ) = กลางช่องว่างระหว่างแผงซ้ายกับแผงขวา
+function prfStageX(){const el=$('#profOv');if(!el||el.classList.contains('hidden'))return 0.14;const L=el.querySelector('.pfL'),R=el.querySelector('.pfR');if(!L||!R)return 0.14;
+  const a=L.getBoundingClientRect().right,b=R.getBoundingClientRect().left;return (a+b)/innerWidth-1;}
+function profClose(){const el=$('#profOv');uiHide(el,()=>{HUB.profOn=false;document.body.classList.remove('profOn');hubMeChip&&hubMeChip();},360);}
+function prfRender(){
+  const el=$('#profOv'),v=DEV_MAXLV?progLv():lvOf(PROG.xp),P=PROG,kd=(P.kills/Math.max(1,P.deaths)).toFixed(2),wr=P.games?Math.round(P.wins/P.games*100):0;
+  const kit=parseKit(myKit),pc=(PATHS[kit.path]||PATHS[0]).col;
+  const st=[['games','เล่นแล้ว',P.games],['wins','ชนะ',`${P.wins}<small>${wr}%</small>`],['kd','K/D',kd],['kills','ฆ่า',P.kills],['as','ช่วยฆ่า',P.assists],['dmg','ดาเมจรวม',P.dmg.toLocaleString()],['bk','ฆ่าสูงสุด/ตา',P.bestK],['bd','ดาเมจสูงสุด/ตา',P.bestD.toLocaleString()]];
+  const els=PATHS.map((p,i)=>({p,i,n:P.paths[i]||0})).filter(x=>!x.p.off),emax=Math.max(1,...els.map(x=>x.n)),fav=els.slice().sort((a,b)=>b.n-a.n)[0];
+  const bd=BADGES.map(f=>f());
+  el.innerHTML=`<div class="pfShade"></div>
+  <div class="pfTop"><button class="gBack" data-a="close" aria-label="กลับ"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button><div><b>PROFILE</b><span>โปรไฟล์</span></div></div>
+  <div class="pfL">
+    <div class="pfCard">${prfAvatar(myName(),PRF.fr,pc,84)}<div class="pfId"><b>${esc(myName())}</b><small>${esc((PATHS[kit.path]||PATHS[0]).n)}</small>
+      <div class="pfLv"><span>Lv ${v.L}</span><div class="pfXp"><i style="width:${v.need?Math.round(v.cur/v.need*100):100}%"></i></div><em>${v.need?`${v.cur} / ${v.need} XP`:'MAX'}</em></div></div></div>
+    <h4>STATS <i>สถิติรวม</i></h4><div class="pfStats">${st.map(s=>`<div class="pfS"><svg viewBox="0 0 24 24">${SICO[s[0]]}</svg><b>${s[2]}</b><span>${s[1]}</span></div>`).join('')}</div>
+    <h4>ELEMENTS <i>ธาตุที่เล่นบ่อย</i></h4><div class="pfEls">${els.map(x=>`<div class="pfE ${fav&&fav.n&&x===fav?'fav':''}" style="--c:${x.p.col}"><span class="ic">${GICO[x.p.id]?`<svg viewBox="0 0 24 24">${GICO[x.p.id]}</svg>`:''}</span><b>${esc(x.p.n)}</b><i style="width:${Math.round(x.n/emax*100)}%"></i><em>${x.n} ตา</em></div>`).join('')}</div>
+    <h4>BADGES <i>ตราสัญลักษณ์ ${bd.filter(b=>b[3]>=b[4]).length}/${bd.length}</i></h4><div class="pfBds">${bd.map(b=>{const ok=b[3]>=b[4];return `<div class="pfB ${ok?'ok':''}" title="${esc(b[1]+' — '+b[2]+(ok?' ✓':` (${Math.min(b[3],b[4]).toLocaleString()}/${b[4].toLocaleString()})`))}"><svg viewBox="0 0 24 24">${BICO[b[0]]}</svg><span>${esc(b[1])}</span></div>`;}).join('')}</div>
+  </div>
+  <div class="pfR">
+    <div class="pfBtns"><button data-a="rw"><span>รางวัลเลเวล</span><small>LEVEL REWARDS</small></button></div>
+    <div class="pfCus"><div class="pfTabs">${Object.keys(PT).map(t=>`<button data-tab="${t}" class="${PFS.tab===t?'on':''}">${PT[t][0]}</button>`).join('')}</div>
+      <div class="pfItems">${prfItems(PFS.tab)}</div></div>
+    <div class="pfHint">ลากที่ตัวละครเพื่อหมุน</div>
+  </div>
+  <div class="pfRw">${prfRwHtml(v)}</div>`;
+  el.classList.toggle('rw',PFS.rw);
+}
+function prfItems(t){
+  const k={bg:'bg',pose:'pose',frame:'fr',aura:'au'}[t],L=prfLv(),list=PROF_ITEMS.filter(q=>q.t===t);
+  const none=t==='aura'?`<button class="pfIt ${!PRF.au?'on':''}" data-it=""><span class="pv none"></span><b>ไม่มี</b></button>`:'';
+  return none+list.map(q=>{const ok=prfOk(q),on=PRF[k]===q.id;
+    const pv=t==='bg'?`<span class="pv" style="background-image:url('${HUI_IMG}${q.img}')"></span>`:t==='frame'?`<span class="pv">${prfAvatar(myName(),q.id,'#5a6aa8',40)}</span>`:t==='aura'?`<span class="pv au" style="--c:${q.c}"></span>`:`<span class="pv po"><svg viewBox="0 0 24 24">${RICO.pose}</svg></span>`;
+    return `<button class="pfIt ${on?'on':''} ${ok?'':'lk'}" data-it="${q.id}" ${ok?'':'disabled'}>${pv}<b>${esc(q.n)}</b>${ok?'':`<em>Lv ${q.lv}</em>`}</button>`;}).join('');
+}
+function prfRwHtml(v){
+  const L=v.L,cols=[];
+  for(let l=1;l<=LV_MAX;l++){const r=lvRewards(l),big=r.some(x=>x.big);
+    cols.push(`<div class="rwC ${l<L?'got':l===L?'cur':''} ${big?'big':''}" data-rl="${l}">${r.length?`<div class="rwIts">${r.map(x=>`<div class="rwIt ${x.big?'big':''}" title="${esc(x.n)}"><div class="ovPent ${x.big?'big':''}">${rIcon(x.t)}${l>L?`<i class="lk"><svg viewBox="0 0 24 24"><rect x="6" y="11" width="12" height="9" rx="1"/><path d="M9 11V8a3 3 0 016 0v3"/></svg></i>`:''}</div><small>${esc(x.n)}</small></div>`).join('')}</div><span class="rwStem"></span>`:''}<span class="rwDot">${l}</span></div>`);}
+  const fr=v.need?v.cur/v.need:1;
+  return `<div class="rwHead"><div><b>LEVEL REWARDS</b><span>รางวัลเลเวล</span></div><div class="rwNow"><span>Lv ${L}</span><div class="pfXp"><i style="width:${Math.round(fr*100)}%"></i></div><em>${v.need?`${v.cur} / ${v.need} XP`:'MAX'}</em></div>
+    <button class="gBack" data-a="rwx" aria-label="ปิด"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+    <div class="rwWrap"><button class="rwArr l" data-a="rwl"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <div class="rwScroll"><div class="rwTrack" data-fr="${fr.toFixed(3)}"><span class="rwLine"></span><span class="rwFill"></span>${cols.join('')}</div></div>
+    <button class="rwArr r" data-a="rwr"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button></div>`;
+}
+function prfRewards(on){
+  PFS.rw=on;const el=$('#profOv');el.classList.toggle('rw',on);
+  if(on){const sc=el.querySelector('.rwScroll'),cur=el.querySelector('.rwC.cur'),cs=[...el.querySelectorAll('.rwC')],fill=el.querySelector('.rwFill'),line=el.querySelector('.rwLine');
+    // เส้นความคืบหน้า: จากจุดเลเวล 1 ถึงจุดเลเวลปัจจุบัน (+ส่วนที่ได้ของเลเวลนี้) • วัดจากตำแหน่งจริง (คอลัมน์กว้างไม่เท่ากัน)
+    const cx=c=>c.offsetLeft+c.offsetWidth/2,x0=cx(cs[0]),xN=cx(cs[cs.length-1]),i=cs.indexOf(cur),fr=+el.querySelector('.rwTrack').dataset.fr||0;
+    const xc=i<0?x0:cx(cs[i])+(i<cs.length-1?(cx(cs[i+1])-cx(cs[i]))*fr:0);
+    Object.assign(line.style,{left:x0+'px',width:(xN-x0)+'px'});Object.assign(fill.style,{left:x0+'px',width:Math.max(0,xc-x0)+'px'});
+    if(sc&&cur)sc.scrollLeft=Math.max(0,cur.offsetLeft-sc.clientWidth/2+cur.offsetWidth/2);}
+}
+function prfClick(e){
+  const b=e.target.closest('button');if(!b)return;ac();snd('ui_click');
+  const a=b.dataset.a;
+  if(a==='close'){profClose();return;}
+  if(a==='rw'){prfRewards(true);return;}
+  if(a==='rwx'){prfRewards(false);return;}
+  if(a==='rwl'||a==='rwr'){const sc=$('#profOv').querySelector('.rwScroll');sc.scrollBy({left:(a==='rwl'?-1:1)*sc.clientWidth*0.7,behavior:'smooth'});return;}
+  if(b.dataset.tab){PFS.tab=b.dataset.tab;$('#profOv').querySelectorAll('.pfTabs button').forEach(x=>x.classList.toggle('on',x===b));$('#profOv').querySelector('.pfItems').innerHTML=prfItems(PFS.tab);return;}
+  if(b.dataset.it!==undefined){const id=b.dataset.it,it=prfItem(id);if(id&&!prfOk(it))return;const k={bg:'bg',pose:'pose',frame:'fr',aura:'au'}[PFS.tab];PRF[k]=id;prfSave();
+    $('#profOv').querySelector('.pfItems').innerHTML=prfItems(PFS.tab);prf3Sync();
+    if(PFS.tab==='frame'){const av=$('#profOv').querySelector('.pfCard .pfAv');if(av)av.outerHTML=prfAvatar(myName(),PRF.fr,(PATHS[parseKit(myKit).path]||PATHS[0]).col,84);}}
+}
+// ลากบนพื้นที่ว่าง = หมุนตัวละคร • ล้อเมาส์บนไทม์ไลน์ = เลื่อนซ้ายขวา
+function prfDrag(e){
+  if(e.target.closest('button,.pfL,.pfR .pfCus,.pfRw .rwHead,.pfTop'))return;
+  const sc=e.target.closest('.rwScroll');const x0=e.clientX,s0=sc?sc.scrollLeft:PRF3.spin;
+  const mv=ev=>{const dx=ev.clientX-x0;if(sc)sc.scrollLeft=s0-dx;else PRF3.spin=s0+dx*0.012;};
+  const up=()=>{removeEventListener('pointermove',mv);removeEventListener('pointerup',up);};
+  addEventListener('pointermove',mv);addEventListener('pointerup',up);
+}
+document.addEventListener('wheel',e=>{const sc=e.target.closest&&e.target.closest('#profOv .rwScroll');if(!sc)return;e.preventDefault();sc.scrollLeft+=e.deltaY+e.deltaX;},{passive:false});
+if(typeof WD!=='undefined')Object.assign(WD,{profOpen,profClose,prfRewards,PRF,myFrame,prfAvatar});

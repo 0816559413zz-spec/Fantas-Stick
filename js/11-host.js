@@ -19,6 +19,8 @@ function newPlayer(id,name,color,lk){
   return Object.assign({id,name,color,lk,kit:'0',kitIds:[],ultId:'inferno',team:0,lteam:0,x:800,y:500,inp:emptyInput(),last:{}},freshStats());
 }
 function emptyInput(){return {u:0,d:0,l:0,r:0,ax:0,ay:0,ap:0,fire:0,sh:0,jh:0,ch:0,dh:0,c:{q:0,e:0,r:0,f:0,sp:0,x:0,b:0,v:0,jp:0,g:0}};}
+// กรอบรูปโปรไฟล์ที่ส่งมา: ต้องเป็นกรอบที่มีจริง ไม่งั้นใช้กรอบเริ่มต้น
+function frameOk(f){f=String(f||'');return PROF_ITEMS.some(q=>q.t==='frame'&&q.id===f)?f:'fr0';}
 function addPlayer(id,name,color,lk,kit){
   // หน้าตา: ไม่ส่งมา (บอท) = สุ่มจาก id / สีประจำตัวมาจากสีบ้านเสมอ
   lk=lookStr(parseLook(lk||lookStr(randLook(hashStr(id)))));LOOKS[id]=lk;color=houseColor(lk);
@@ -31,11 +33,11 @@ function addPlayer(id,name,color,lk,kit){
 function initHostLobby(){
   G={mode:'coop',map:'castle',ph:'lobby',players:{},order:[],proj:[],en:[],feed:[],time:0,pid:0,eid:0,wave:0,round:1,rw:{},teamScore:[0,0],timer:0,banner:null,result:null,queue:[],escale:1,espd:1};
   const me=addPlayer(NET.myId,myName(),myColor,lookStr(myLook),myKit);
-  me.inp=INPUT;
+  me.inp=INPUT;me.fr=myFrame();
   broadcastLobby();
   setScreen('lobby');
 }
-function lobbyMsg(){return {t:'lobby',ph:G.ph,mode:G.mode,map:G.map,mpk:G.mapPick||'',code:NET.code,online:NET.online,host:NET.myId,players:plist().map(p=>({id:p.id,n:p.name,c:p.color,lk:p.lk,kt:p.kit,tm:p.lteam}))};}
+function lobbyMsg(){return {t:'lobby',ph:G.ph,mode:G.mode,map:G.map,mpk:G.mapPick||'',code:NET.code,online:NET.online,host:NET.myId,players:plist().map(p=>({id:p.id,n:p.name,c:p.color,lk:p.lk,kt:p.kit,tm:p.lteam,fr:p.fr||'fr0'}))};}
 function broadcastLobby(){const m=lobbyMsg();sendAll(m);onLobby(m);}
 
 const INPN=['ax','ay','ah','ap','gx','gy','mx','my'];
@@ -53,7 +55,7 @@ function hostOnData(conn,d){
     if(G.ph!=='lobby')return midJoin(conn,id,d,tok,reject);   // hello ซ้ำ: อย่าเพิ่มคนเดิมซ้ำ (ไม่งั้นตัวเดินเร็ว 2 เท่า)
     if(plist().length>=6)return reject('ห้องเต็มแล้ว (สูงสุด 6 คน)');
     NET.conns.set(id,conn);
-    const p=addPlayer(id,cleanName(d.name),null,String(d.look||'').slice(0,40),String(d.kit||'').slice(0,24));p.tok=tok;
+    const p=addPlayer(id,cleanName(d.name),null,String(d.look||'').slice(0,40),String(d.kit||'').slice(0,24));p.tok=tok;p.fr=frameOk(d.fr);
     conn.send({t:'welcome',id});
     toast(p.name+' เข้าห้องแล้ว');
     broadcastLobby();
@@ -137,7 +139,7 @@ const MIDJOIN=['ffa','tdm','train','coop'];
 function midJoin(conn,id,d,tok,reject){
   const name=cleanName(d.name),look=String(d.look||'').slice(0,40),kit=String(d.kit||'').slice(0,24);
   if(MIDJOIN.includes(G.mode)&&G.ph!=='over'&&plist().length<6){
-    NET.conns.set(id,conn);const p=addPlayer(id,name,null,look,kit);p.tok=tok;Object.assign(p,freshStats());
+    NET.conns.set(id,conn);const p=addPlayer(id,name,null,look,kit);p.tok=tok;p.fr=frameOk(d.fr);Object.assign(p,freshStats());
     const MD=MODES[G.mode];
     if(G.mode==='coop'||G.mode==='train')p.team=0;
     else if(MD.team){const ps=plist().filter(q=>q!==p),a=ps.filter(q=>q.team===0).length;p.team=p.lteam=a<=ps.length-a?0:1;}

@@ -90,7 +90,7 @@ document.body.insertAdjacentHTML('beforeend',`
   <div class="hRoom" id="hRoom"></div>
   <div class="hGo" id="hGo"></div>
 </div>`);
-$('#hMe').onclick=()=>{ac();openCreator(false);};
+$('#hMe').onclick=()=>{ac();profOpen();};   // ชื่อ/เลเวล = หน้าโปรไฟล์ (js/65)
 
 // ---------- สถานะหน้าจอ: menu / modes / room / off ----------
 function hubUiState(s){
@@ -133,7 +133,7 @@ document.addEventListener('mouseover',e=>{const b=e.target.closest&&e.target.clo
 // ---------- การ์ดโหมด ----------
 $('#hModesBack').onclick=()=>{if(HUI.leaving||HUI.st!=='modes')return;snd('ui_click');HUI.leaving=true;document.body.classList.add('hS-leave');
   setTimeout(()=>{document.body.classList.remove('hS-leave');HUI.leaving=false;hubUiState('go');hubBack();},460);};
-$('#hMxMe').onclick=()=>{ac();openCreator(false);};
+$('#hMxMe').onclick=()=>{ac();profOpen();};
 $('#hMx').addEventListener('click',e=>{const b=e.target.closest('[data-mx]');if(!b)return;ac();snd('ui_click');const k=b.dataset.mx;
   if(k==='set')openSettings();else if(k==='music')$('#btnMyMusic').click();else if(k==='spells')skwOpen();else if(k==='look')openCreator(false);
   else if(k==='guide')$('#btnGuide').click();else if(k==='prog')progOpen();});
@@ -218,7 +218,7 @@ function hubLobby(){
   const K=parseKit(myKit),P=PATHS[K.path]||PATHS[0],ult=SPELL_LIST[K.ult];
   const fixed=M.map?M.map:null,mk=fixed||L.mpk||'',img=mk?`url('${HUI_IMG}maps/${mk}.jpg')`:'none';
   const err=host?validate():'';
-  const plRow=p=>{const kk=parseKit(p.kt!==undefined?p.kt:'0'),pp=PATHS[kk.path]||PATHS[0];return `<div class="pl ${p.id===NET.myId?'me':''}"><span class="em">${icoHTML('p_'+pp.id,pp.col,18)}</span><span class="nm">${esc(p.n)}</span>${p.id===L.host?`<span class="cr" title="โฮสต์">${hSvg('crown')}</span>`:''}${speakingIds().has(p.id)?'<span class="spk">♪</span>':''}</div>`;};
+  const plRow=p=>{const kk=parseKit(p.kt!==undefined?p.kt:'0'),pp=PATHS[kk.path]||PATHS[0];return `<div class="pl ${p.id===NET.myId?'me':''}">${typeof prfAvatar==='function'?prfAvatar(p.n,p.fr,pp.col,30,icoHTML('p_'+pp.id,pp.col,15)):`<span class="em">${icoHTML('p_'+pp.id,pp.col,18)}</span>`}<span class="nm">${esc(p.n)}</span>${p.id===L.host?`<span class="cr" title="โฮสต์">${hSvg('crown')}</span>`:''}${speakingIds().has(p.id)?'<span class="spk">♪</span>':''}</div>`;};
   const slots=L.online?Math.max(0,(M.max||6)-L.players.length):0;
   const players=team?`<div class="teams">${[0,1].map(t=>`<div class="tm t${t}"><h4><i style="background:${TEAMC[t]}"></i>${t?'RED':'BLUE'}<span>${TEAMN[t]}</span></h4>${L.players.filter(p=>p.tm===t).map(plRow).join('')||'<div class="pl empty">ว่าง</div>'}</div>`).join('')}</div>
       <button class="hLink" id="hrTeam">⇄ ย้ายทีม</button>`
