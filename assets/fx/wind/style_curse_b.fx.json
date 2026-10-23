@@ -1,0 +1,136 @@
+{
+ "v": 1,
+ "desc": "ลมต้องสาป แบบ B: ใบเสี้ยวดำหนาเหมือนหมึก + เกลียวเขียวนีออนข้างใน + รอยแตกเรืองเขียวที่พื้น + หยดหมึกกระเด็น",
+ "tags": [
+  "wind",
+  "style-test"
+ ],
+ "pal": "curse",
+ "dur": 3,
+ "layers": [
+  {
+   "id": "ink",
+   "t": "mesh",
+   "at": 0,
+   "life": 3,
+   "att": "ground",
+   "shape": "model",
+   "model": "wind_crescents",
+   "mat": "toon",
+   "col": "$main",
+   "col2": "$deep",
+   "rim": 0,
+   "dis": 0.12,
+   "spin": 480,
+   "scale": {
+    "0": 0.33,
+    "0.12": 1.1,
+    "0.88": 1.1,
+    "1": 0.77
+   },
+   "op": {
+    "0": 0,
+    "0.08": 1,
+    "0.85": 1,
+    "1": 0
+   }
+  },
+  {
+   "id": "neon",
+   "t": "mesh",
+   "at": 0,
+   "life": 3,
+   "att": "ground",
+   "shape": "model",
+   "model": "wind_helix",
+   "mat": "glow",
+   "col": "$light",
+   "spin": 700,
+   "scale": {
+    "0": 0.22499999999999998,
+    "0.12": 0.75,
+    "0.88": 0.75,
+    "1": 0.5249999999999999
+   },
+   "op": {
+    "0": 0,
+    "0.08": 1,
+    "0.85": 1,
+    "1": 0
+   }
+  },
+  {
+   "id": "crack",
+   "t": "decal",
+   "at": 0,
+   "life": 3,
+   "att": "ground",
+   "kind": "glyph",
+   "r": 1.8,
+   "col": "$light"
+  },
+  {
+   "id": "drops",
+   "t": "emit",
+   "at": 0,
+   "life": 3,
+   "att": "ground",
+   "rate": 30,
+   "from": "cone",
+   "fr": 1.3,
+   "fh": 2.6,
+   "dir": "out",
+   "speed": [
+    3,
+    6
+   ],
+   "up": [
+    1,
+    3
+   ],
+   "plife": [
+    0.4,
+    0.8
+   ],
+   "look": "smoke",
+   "size": [
+    2.5,
+    4
+   ],
+   "col": "#020805",
+   "c2": "#000000",
+   "gravity": 4
+  },
+  {
+   "id": "sparks",
+   "t": "emit",
+   "at": 0,
+   "life": 3,
+   "att": "ground",
+   "rate": 40,
+   "from": "ring",
+   "fr": 1.2,
+   "dir": "tangent",
+   "speed": [
+    3,
+    6
+   ],
+   "up": [
+    1,
+    3
+   ],
+   "plife": [
+    0.3,
+    0.6
+   ],
+   "look": "spark",
+   "size": [
+    1.2,
+    2
+   ],
+   "col": "$light",
+   "c2": "$hi",
+   "gravity": 1
+  }
+ ]
+}

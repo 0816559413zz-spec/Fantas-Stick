@@ -1,0 +1,114 @@
+{
+ "v": 1,
+ "desc": "ลมต้องสาป แบบ C: กรวยพลังมืดแหว่ง ๆ หมุน + วงเส้นดำ + สายฟ้าเขียวแลบ + หมอกดำที่พื้น",
+ "tags": [
+  "wind",
+  "style-test"
+ ],
+ "pal": "curse",
+ "dur": 3,
+ "layers": [
+  {
+   "id": "fun",
+   "t": "mesh",
+   "at": 0,
+   "life": 3,
+   "att": "ground",
+   "shape": "model",
+   "model": "wind_funnel",
+   "mat": "energy",
+   "col": "$hi",
+   "col2": "$main",
+   "dis": 0.35,
+   "rim": 1.6,
+   "scroll": 3,
+   "spin": 500,
+   "scale": {
+    "0": 0.3,
+    "0.12": 1,
+    "0.88": 1,
+    "1": 0.7
+   },
+   "op": {
+    "0": 0,
+    "0.08": 1,
+    "0.85": 1,
+    "1": 0
+   }
+  },
+  {
+   "id": "arcs",
+   "t": "mesh",
+   "at": 0,
+   "life": 3,
+   "att": "ground",
+   "shape": "model",
+   "model": "wind_tornado",
+   "mat": "toon",
+   "col": "$main",
+   "col2": "$deep",
+   "rim": 0,
+   "spin": 380,
+   "scale": {
+    "0": 0.345,
+    "0.12": 1.15,
+    "0.88": 1.15,
+    "1": 0.8049999999999999
+   },
+   "op": {
+    "0": 0,
+    "0.08": 1,
+    "0.85": 1,
+    "1": 0
+   }
+  },
+  {
+   "id": "zap",
+   "t": "bolt",
+   "at": 0.2,
+   "life": 2.6,
+   "att": "ground",
+   "pos": [
+    0,
+    1.2,
+    0
+   ],
+   "radial": 1.6,
+   "n": 2,
+   "w": 0.06,
+   "br": 2,
+   "rate": 6,
+   "blife": 0.1,
+   "acc": false
+  },
+  {
+   "id": "fog",
+   "t": "emit",
+   "at": 0,
+   "life": 3,
+   "att": "ground",
+   "rate": 20,
+   "from": "disc",
+   "fr": 1.6,
+   "dir": "flat",
+   "speed": [
+    1,
+    2
+   ],
+   "plife": [
+    0.8,
+    1.4
+   ],
+   "look": "smoke",
+   "size": [
+    8,
+    12
+   ],
+   "grow": 1,
+   "col": "#04120c",
+   "c2": "#000000",
+   "gravity": 0,
+   "drag": 2
+  }
+ ]
+}

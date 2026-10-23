@@ -1,0 +1,158 @@
+{
+ "v": 1,
+ "desc": "ทดสอบสไตล์: โล่ = ปีกลมหุบห่อตัว (0–1.4 วิ) → ปีกระเบิดกางออก รัศมี 10 ม. (1.4 วิ)",
+ "tags": [
+  "wind",
+  "style-test"
+ ],
+ "pal": "wind",
+ "dur": 2.4,
+ "layers": [
+  {
+   "id": "cocoon",
+   "t": "mesh",
+   "at": 0,
+   "life": 1.4,
+   "att": "feet",
+   "shape": "model",
+   "model": "wind_wing",
+   "mat": "energy",
+   "col": "$main",
+   "col2": "$deep",
+   "pos": [
+    0,
+    1.2,
+    0.2
+   ],
+   "rot": [
+    0,
+    180,
+    0
+   ],
+   "rim": 2,
+   "scroll": 2.5,
+   "op": {
+    "0": 0,
+    "0.08": 0.9,
+    "0.95": 0.9,
+    "1": 0
+   },
+   "scale": {
+    "0": 0.4,
+    "0.15": 0.8,
+    "1": 0.75
+   }
+  },
+  {
+   "id": "shell",
+   "t": "mesh",
+   "at": 0,
+   "life": 1.4,
+   "att": "feet",
+   "shape": "model",
+   "model": "wind_cone",
+   "mat": "tex",
+   "tex": "tex/wind_streaks",
+   "col": "$hi",
+   "col2": "$main",
+   "rim": 0.4,
+   "uvTile": [
+    3,
+    2
+   ],
+   "uvScroll": [
+    -1.5,
+    0
+   ],
+   "pos": [
+    0,
+    0.1,
+    0
+   ],
+   "scale": [
+    0.55,
+    0.62,
+    0.55
+   ],
+   "op": {
+    "0": 0,
+    "0.1": 0.6,
+    "0.9": 0.6,
+    "1": 0
+   }
+  },
+  {
+   "id": "burst",
+   "t": "mesh",
+   "at": 1.4,
+   "life": 0.9,
+   "att": "feet",
+   "shape": "model",
+   "model": "wind_wing",
+   "mat": "energy",
+   "col": "$hi",
+   "col2": "$main",
+   "pos": [
+    0,
+    1.35,
+    -0.3
+   ],
+   "rim": 2,
+   "op": {
+    "0": 1,
+    "0.6": 0.7,
+    "1": 0
+   },
+   "scale": {
+    "0": 0.8,
+    "0.2": 1.7,
+    "1": 2
+   }
+  },
+  {
+   "id": "ring",
+   "t": "ring",
+   "at": 1.45,
+   "life": 0.5,
+   "att": "feet",
+   "col": "$main"
+  },
+  {
+   "id": "wave",
+   "t": "emit",
+   "at": 1.4,
+   "life": 0.1,
+   "att": "feet",
+   "pos": [
+    0,
+    0.8,
+    0
+   ],
+   "burst": 75,
+   "from": "ring",
+   "fr": 0.6,
+   "dir": "flat",
+   "speed": [
+    12,
+    20
+   ],
+   "up": [
+    0,
+    1
+   ],
+   "plife": [
+    0.3,
+    0.5
+   ],
+   "look": "streak",
+   "size": [
+    1.6,
+    2.6
+   ],
+   "col": "$core",
+   "c2": "$main",
+   "gravity": 0,
+   "drag": 2
+  }
+ ]
+}

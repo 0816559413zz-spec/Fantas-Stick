@@ -1,0 +1,175 @@
+{
+ "v": 1,
+ "desc": "ทดสอบสไตล์: GaleBurst เต็ม — ทอร์นาโดแนวนอนพุ่งไปข้างหน้า 25 ม.",
+ "tags": [
+  "wind",
+  "style-test"
+ ],
+ "pal": "wind",
+ "dur": 1.2,
+ "layers": [
+  {
+   "id": "cone0",
+   "t": "mesh",
+   "at": 0,
+   "life": 1.1,
+   "att": "feet",
+   "shape": "model",
+   "model": "wind_cone",
+   "mat": "tex",
+   "tex": "tex/wind_streaks",
+   "col": "$main",
+   "col2": "$deep",
+   "rim": 0,
+   "uvTile": [
+    3,
+    2
+   ],
+   "uvScroll": [
+    -2.2,
+    0
+   ],
+   "pos": {
+    "0": [
+     0,
+     1.1,
+     1
+    ],
+    "1": [
+     0,
+     1.1,
+     25
+    ]
+   },
+   "rot": [
+    -90,
+    0,
+    0
+   ],
+   "scale": 0.55,
+   "op": {
+    "0": 0,
+    "0.1": 1,
+    "0.85": 1,
+    "1": 0
+   }
+  },
+  {
+   "id": "cone1",
+   "t": "mesh",
+   "at": 0,
+   "life": 1.1,
+   "att": "feet",
+   "shape": "model",
+   "model": "wind_cone",
+   "mat": "tex",
+   "tex": "tex/wind_streaks",
+   "col": "$core",
+   "col2": "$deep",
+   "rim": 0,
+   "uvTile": [
+    3,
+    2
+   ],
+   "uvScroll": [
+    -3,
+    0
+   ],
+   "pos": {
+    "0": [
+     0,
+     1.1,
+     1
+    ],
+    "1": [
+     0,
+     1.1,
+     25
+    ]
+   },
+   "rot": [
+    -90,
+    0,
+    0
+   ],
+   "scale": 0.42,
+   "op": {
+    "0": 0,
+    "0.1": 1,
+    "0.85": 1,
+    "1": 0
+   }
+  },
+  {
+   "id": "st0",
+   "t": "emit",
+   "at": 0,
+   "life": 1.0,
+   "att": "feet",
+   "pos": {
+    "0": [
+     0,
+     1.1,
+     1
+    ],
+    "1": [
+     0,
+     1.1,
+     25
+    ]
+   },
+   "rate": 90,
+   "from": "ring",
+   "fr": 0.8,
+   "fh": 0,
+   "dir": "tangent",
+   "speed": [
+    3,
+    6
+   ],
+   "up": [
+    0,
+    0.5
+   ],
+   "plife": [
+    0.3,
+    0.6
+   ],
+   "look": "streak",
+   "size": [
+    1.2,
+    2.2
+   ],
+   "col": "$core",
+   "c2": "$main",
+   "gravity": -0.3
+  },
+  {
+   "id": "gust",
+   "t": "emit",
+   "at": 0,
+   "life": 0.15,
+   "att": "chest",
+   "burst": 40,
+   "from": "point",
+   "dir": "aim",
+   "spread": 0.5,
+   "speed": [
+    10,
+    18
+   ],
+   "plife": [
+    0.2,
+    0.4
+   ],
+   "look": "streak",
+   "size": [
+    1.5,
+    2.5
+   ],
+   "col": "$core",
+   "c2": "$main",
+   "gravity": 0
+  }
+ ]
+}

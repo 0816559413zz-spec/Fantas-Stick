@@ -1,0 +1,22 @@
+{
+ "v": 1,
+ "desc": "ใบไม้เล็ก (อนุภาค)",
+ "mat": "energy",
+ "pal": "storm",
+ "tags": [
+  "wind",
+  "style-test"
+ ],
+ "parts": [
+  {
+   "id": "leaf",
+   "k": "blade",
+   "arc": 70,
+   "r": 0.12,
+   "w": 0.08,
+   "thick": 0.004,
+   "taper": 1,
+   "seg": 12
+  }
+ ]
+}

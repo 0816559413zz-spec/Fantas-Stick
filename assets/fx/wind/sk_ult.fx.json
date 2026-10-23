@@ -1,0 +1,270 @@
+{
+ "v": 1,
+ "desc": "ทดสอบสไตล์ (⚠ อัลติของ Claude): คุกฟ้า — กำแพงลม 4 ด้านขึ้นทีละด้าน (กรง 12 ม.) + ทอร์นาโดใหญ่จาง ๆ ข้างใน → จบ: ผนังระเบิดเข้ากลาง",
+ "tags": [
+  "wind",
+  "style-test"
+ ],
+ "pal": "wind",
+ "dur": 3.8,
+ "layers": [
+  {
+   "id": "w0",
+   "t": "mesh",
+   "at": 0.0,
+   "life": 3,
+   "att": "ground",
+   "shape": "plane",
+   "mat": "tex",
+   "tex": "tex/wind_streaks",
+   "col": "$main",
+   "col2": "$deep",
+   "rim": 0,
+   "uvTile": [
+    1,
+    5
+   ],
+   "uvScroll": [
+    -1.4,
+    0
+   ],
+   "pos": [
+    0,
+    1.6,
+    6
+   ],
+   "rot": [
+    0,
+    0,
+    90
+   ],
+   "scale": [
+    3.2,
+    12,
+    1
+   ],
+   "op": {
+    "0": 0,
+    "0.08": 0.95,
+    "0.85": 0.95,
+    "1": 0
+   }
+  },
+  {
+   "id": "w1",
+   "t": "mesh",
+   "at": 0.2,
+   "life": 3,
+   "att": "ground",
+   "shape": "plane",
+   "mat": "tex",
+   "tex": "tex/wind_streaks",
+   "col": "$main",
+   "col2": "$deep",
+   "rim": 0,
+   "uvTile": [
+    1,
+    5
+   ],
+   "uvScroll": [
+    -1.4,
+    0
+   ],
+   "pos": [
+    0,
+    1.6,
+    18
+   ],
+   "rot": [
+    0,
+    0,
+    90
+   ],
+   "scale": [
+    3.2,
+    12,
+    1
+   ],
+   "op": {
+    "0": 0,
+    "0.08": 0.95,
+    "0.85": 0.95,
+    "1": 0
+   }
+  },
+  {
+   "id": "w2",
+   "t": "mesh",
+   "at": 0.4,
+   "life": 3,
+   "att": "ground",
+   "shape": "plane",
+   "mat": "tex",
+   "tex": "tex/wind_streaks",
+   "col": "$main",
+   "col2": "$deep",
+   "rim": 0,
+   "uvTile": [
+    1,
+    5
+   ],
+   "uvScroll": [
+    -1.4,
+    0
+   ],
+   "pos": [
+    -6,
+    1.6,
+    12
+   ],
+   "rot": [
+    0,
+    90,
+    90
+   ],
+   "scale": [
+    3.2,
+    12,
+    1
+   ],
+   "op": {
+    "0": 0,
+    "0.08": 0.95,
+    "0.85": 0.95,
+    "1": 0
+   }
+  },
+  {
+   "id": "w3",
+   "t": "mesh",
+   "at": 0.6000000000000001,
+   "life": 3,
+   "att": "ground",
+   "shape": "plane",
+   "mat": "tex",
+   "tex": "tex/wind_streaks",
+   "col": "$main",
+   "col2": "$deep",
+   "rim": 0,
+   "uvTile": [
+    1,
+    5
+   ],
+   "uvScroll": [
+    -1.4,
+    0
+   ],
+   "pos": [
+    6,
+    1.6,
+    12
+   ],
+   "rot": [
+    0,
+    90,
+    90
+   ],
+   "scale": [
+    3.2,
+    12,
+    1
+   ],
+   "op": {
+    "0": 0,
+    "0.08": 0.95,
+    "0.85": 0.95,
+    "1": 0
+   }
+  },
+  {
+   "id": "cone0",
+   "t": "mesh",
+   "at": 0.6,
+   "life": 2.6,
+   "att": "feet",
+   "shape": "model",
+   "model": "wind_cone",
+   "mat": "tex",
+   "tex": "tex/wind_streaks",
+   "col": "$main",
+   "col2": "$deep",
+   "rim": 0,
+   "uvTile": [
+    5,
+    3
+   ],
+   "uvScroll": [
+    -0.8,
+    0
+   ],
+   "pos": [
+    0,
+    0,
+    12
+   ],
+   "rot": [
+    0,
+    0,
+    0
+   ],
+   "scale": {
+    "0": 0.3,
+    "0.1": 1.6,
+    "0.85": 1.6,
+    "1": 2
+   },
+   "op": {
+    "0": 0,
+    "0.1": 0.5,
+    "0.85": 0.5,
+    "1": 0
+   }
+  },
+  {
+   "id": "boom",
+   "t": "emit",
+   "at": 3.2,
+   "life": 0.1,
+   "att": "ground",
+   "pos": [
+    0,
+    1.5,
+    12
+   ],
+   "burst": 80,
+   "from": "box",
+   "fr": 6,
+   "fh": 1.5,
+   "dir": "in",
+   "speed": [
+    14,
+    22
+   ],
+   "plife": [
+    0.3,
+    0.5
+   ],
+   "look": "streak",
+   "size": [
+    1.8,
+    3
+   ],
+   "col": "$core",
+   "c2": "$main",
+   "gravity": 0
+  },
+  {
+   "id": "flash",
+   "t": "ring",
+   "at": 3.3,
+   "life": 0.5,
+   "att": "ground",
+   "pos": [
+    0,
+    0,
+    12
+   ],
+   "col": "$hi"
+  }
+ ]
+}

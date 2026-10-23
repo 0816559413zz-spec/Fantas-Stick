@@ -1,0 +1,76 @@
+{
+ "v": 1,
+ "desc": "ปีกแบบ B: เส้นลมยาวคู่ลู่ไปข้างหลัง (ลมลาง ๆ) + เส้นลมไหลออกจากปลายปีก",
+ "tags": [
+  "wind",
+  "style-test"
+ ],
+ "pal": "wind",
+ "dur": 3,
+ "layers": [
+  {
+   "id": "wing",
+   "t": "mesh",
+   "at": 0,
+   "life": 3,
+   "att": "feet",
+   "shape": "model",
+   "model": "wind_wing_b",
+   "mat": "energy",
+   "col": "$hi",
+   "col2": "$main",
+   "pos": [
+    0,
+    1.35,
+    -0.3
+   ],
+   "rim": 1.8,
+   "scroll": 2.5,
+   "op": {
+    "0": 0,
+    "0.1": 1,
+    "0.9": 1,
+    "1": 0
+   },
+   "scale": {
+    "0": 0.3,
+    "0.15": 1.15,
+    "1": 1.15
+   }
+  },
+  {
+   "id": "trail",
+   "t": "emit",
+   "at": 0,
+   "life": 3,
+   "att": "feet",
+   "rate": 40,
+   "from": "box",
+   "fr": 1.8,
+   "fh": 0.9,
+   "pos": [
+    0,
+    1.5,
+    -0.55
+   ],
+   "dir": "down",
+   "spread": 0.3,
+   "speed": [
+    1,
+    2
+   ],
+   "plife": [
+    0.4,
+    0.7
+   ],
+   "look": "streak",
+   "size": [
+    1.2,
+    2
+   ],
+   "col": "$core",
+   "c2": "$main",
+   "gravity": 0
+  }
+ ]
+}

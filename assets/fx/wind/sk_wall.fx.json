@@ -1,0 +1,164 @@
+{
+ "v": 1,
+ "desc": "ทดสอบสไตล์: กำแพงลม กว้าง 12.5 ม. — ม่านเส้นลมไหลขึ้น + ขอบเรือง + ใบลมวิ่งตามแนว (วางที่ 8 ม. ข้างหน้า)",
+ "tags": [
+  "wind",
+  "style-test"
+ ],
+ "pal": "wind",
+ "dur": 3,
+ "layers": [
+  {
+   "id": "curtain",
+   "t": "mesh",
+   "at": 0,
+   "life": 3,
+   "att": "ground",
+   "shape": "plane",
+   "mat": "tex",
+   "tex": "tex/wind_streaks",
+   "col": "$main",
+   "col2": "$deep",
+   "rim": 0,
+   "uvTile": [
+    1,
+    5
+   ],
+   "uvScroll": [
+    -1.2,
+    0
+   ],
+   "pos": [
+    0,
+    1.6,
+    8
+   ],
+   "rot": [
+    0,
+    0,
+    90
+   ],
+   "scale": [
+    3.2,
+    12.5,
+    1
+   ],
+   "op": {
+    "0": 0,
+    "0.08": 1,
+    "0.9": 1,
+    "1": 0
+   }
+  },
+  {
+   "id": "curtain2",
+   "t": "mesh",
+   "at": 0,
+   "life": 3,
+   "att": "ground",
+   "shape": "plane",
+   "mat": "tex",
+   "tex": "tex/wind_streaks",
+   "col": "$hi",
+   "col2": "$main",
+   "rim": 0,
+   "uvTile": [
+    1.5,
+    7
+   ],
+   "uvScroll": [
+    -1.8,
+    0.1
+   ],
+   "pos": [
+    0,
+    1.6,
+    8.05
+   ],
+   "rot": [
+    0,
+    0,
+    90
+   ],
+   "scale": [
+    3.2,
+    12.5,
+    1
+   ],
+   "op": {
+    "0": 0,
+    "0.08": 0.6,
+    "0.9": 0.6,
+    "1": 0
+   }
+  },
+  {
+   "id": "base",
+   "t": "emit",
+   "at": 0,
+   "life": 3,
+   "att": "ground",
+   "pos": [
+    0,
+    0.1,
+    8
+   ],
+   "rate": 50,
+   "from": "line",
+   "fr": 6.2,
+   "dir": "up",
+   "spread": 0.3,
+   "speed": [
+    2,
+    4
+   ],
+   "plife": [
+    0.4,
+    0.8
+   ],
+   "look": "smoke",
+   "size": [
+    4,
+    7
+   ],
+   "grow": 1.5,
+   "col": "$hi",
+   "c2": "$main",
+   "gravity": -0.5
+  },
+  {
+   "id": "wisps",
+   "t": "emit",
+   "at": 0,
+   "life": 3,
+   "att": "ground",
+   "pos": [
+    0,
+    1.5,
+    8
+   ],
+   "rate": 50,
+   "from": "box",
+   "fr": 6.2,
+   "fh": 1.5,
+   "dir": "up",
+   "spread": 0.2,
+   "speed": [
+    3,
+    5
+   ],
+   "plife": [
+    0.3,
+    0.6
+   ],
+   "look": "streak",
+   "size": [
+    1.2,
+    2
+   ],
+   "col": "$core",
+   "c2": "$main",
+   "gravity": 0
+  }
+ ]
+}
