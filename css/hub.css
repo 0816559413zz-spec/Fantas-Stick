@@ -101,7 +101,7 @@ body.hS-menu .hNav{animation-delay:.12s}body.hS-menu .hDock{animation-delay:.24s
 .hMe:hover{opacity:1}.hMe .lv{font:500 10px var(--h-serif);letter-spacing:.18em;color:var(--h-gold);border:1px solid rgba(226,194,122,.35);padding:2px 7px;border-radius:2px}
 .hMe .em{display:grid;place-items:center;width:26px;height:26px;border:1px solid var(--h-line);border-radius:50%}
 .hIcons{display:flex;gap:10px}
-.hIcons button{position:relative;width:38px;height:38px;border-radius:50%;border:1px solid var(--h-line);background:rgba(8,10,26,.35);color:var(--h-mute);display:grid;place-items:center;cursor:pointer;transition:all .35s var(--h-ease)}
+.hIcons button{position:relative;width:38px;height:38px;border-radius:50%;border:1px solid var(--h-line);background:rgba(8,10,26,.35);color:var(--h-mute);display:grid;place-items:center;padding:0;cursor:pointer;transition:all .35s var(--h-ease)}
 .hIcons svg{width:18px;height:18px}
 .hIcons i{position:absolute;left:50%;bottom:calc(100% + 9px);transform:translate(-50%,5px);white-space:nowrap;font:300 12px var(--h-sans);font-style:normal;letter-spacing:.06em;color:var(--h-ink);opacity:0;pointer-events:none;transition:all .3s var(--h-ease)}
 .hIcons button:hover{border-color:var(--h-violet);color:#fff;box-shadow:var(--h-glow);transform:translateY(-2px)}
@@ -168,7 +168,7 @@ body.hS-modes .hMx{opacity:1;visibility:visible;transition:opacity .7s .35s}
 .hMx>div{position:absolute;display:flex;align-items:center;gap:10px;pointer-events:auto}
 .mxTop{right:clamp(20px,3vw,48px);top:clamp(18px,4vh,40px)}
 .mxTop .mxMe{margin-right:8px}
-.mxIc{position:relative;width:38px;height:38px;border-radius:50%;border:1px solid var(--h-line);background:rgba(8,10,26,.4);color:var(--h-mute);display:grid;place-items:center;cursor:pointer;transition:all .35s var(--h-ease)}
+.mxIc{position:relative;width:38px;height:38px;border-radius:50%;border:1px solid var(--h-line);background:rgba(8,10,26,.4);color:var(--h-mute);display:grid;place-items:center;padding:0;cursor:pointer;transition:all .35s var(--h-ease)}
 .mxIc svg{width:18px;height:18px}
 .mxIc i{position:absolute;right:0;top:calc(100% + 8px);white-space:nowrap;font:300 12px var(--h-sans);font-style:normal;color:var(--h-ink);opacity:0;transform:translateY(-4px);pointer-events:none;transition:all .3s var(--h-ease)}
 .mxIc:hover{color:#fff;border-color:var(--h-violet);box-shadow:var(--h-glow);background:rgba(169,149,255,.14)}
@@ -476,3 +476,5 @@ body.hS-room .hGo.on{display:flex;animation:hUp .6s var(--h-ease) .15s both}
 #creator .sc{border-radius:4px;background:linear-gradient(180deg,rgba(14,17,40,.85),rgba(6,8,20,.9));border-color:var(--h-line)}
 #creator .sc b,#creator .sc .nm{font-family:var(--h-serif);font-weight:500;letter-spacing:.04em}
 #creator .sbInfo{background:rgba(4,6,16,.4);border-top-color:var(--h-line)}
+/* ปุ่มกลมไอคอน: ไม่เอา padding ของ button ทั่วไป (game.css 11px 16px) — ไอคอนเยื้องขวา-ล่าง (ผู้ใช้ 2026-10-23) */
+.hIcons button,.mxIc,.hCode button,.mxJoin button,#creator .sbT,#skw .skwX,#skw .skwKc,#mpk .mpkX,#mpk .mpkArr,#hRoom .ico,.hGo .ico{padding:0}
