@@ -47,3 +47,94 @@
 @keyframes u3Rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 @keyframes u3Slide{from{opacity:0;transform:translateX(-16px)}to{opacity:1;transform:none}}
 @media (max-height:520px){.u3Pause .u3Box{padding:20px 24px 16px}.u3Head{margin-bottom:10px}.u3Head b{font-size:30px}.u3List button{padding:8px 14px;font-size:16px}}
+
+/* ---------- คู่มือ (แบบ Skill Tree): ฟองหัวข้อบนเส้นโค้ง + หัวข้อบนสุด + กล่องข้อมูล + รูปขวาเฟดดำ ---------- */
+#guide.u3Guide{display:block;padding:0;background:#04060d;animation:none;font-family:var(--h-sans);color:var(--h-ink);overflow:hidden;z-index:60}
+#guide.u3Guide.hidden{display:none}
+.gPic{position:absolute;inset:0;pointer-events:none;
+  -webkit-mask-image:linear-gradient(to left,#000 0,#000 40%,rgba(0,0,0,.32) 52%,rgba(0,0,0,.08) 64%,rgba(0,0,0,.02) 80%);mask-image:linear-gradient(to left,#000 0,#000 40%,rgba(0,0,0,.32) 52%,rgba(0,0,0,.08) 64%,rgba(0,0,0,.02) 80%)}
+.gPic i{position:absolute;inset:0 -14% 0 14%;background:#04060d center/cover no-repeat;   /* เลื่อนขวา: จุดเด่นกลางภาพไปอยู่ช่วงที่เห็นชัด (ขวา 40%) */opacity:0;transform:scale(1.06);transition:opacity .7s ease,transform 6s ease-out}
+.gPic i.on{opacity:1;transform:scale(1)}
+.gShade{position:absolute;inset:0;pointer-events:none;background:linear-gradient(to top,rgba(4,6,13,.9),transparent 34%),linear-gradient(to bottom,rgba(4,6,13,.55),transparent 18%)}
+.gTop{position:absolute;left:max(24px,3vw);top:max(18px,3.2vh);display:flex;align-items:center;gap:16px;z-index:2}
+.gTop b{display:block;font:500 22px/1 var(--h-serif);letter-spacing:.34em}
+.gTop span{font-size:12px;font-weight:300;color:var(--h-mute);letter-spacing:.06em}
+.gBack{all:unset;width:40px;height:40px;border-radius:50%;border:1px solid var(--h-line2);display:grid;place-items:center;cursor:pointer;transition:background .2s,box-shadow .2s}
+.gBack svg{width:18px;height:18px;fill:none;stroke:var(--h-ink);stroke-width:1.6}
+.gBack:hover{background:rgba(169,149,255,.16);box-shadow:var(--h-glow)}
+.gMain{position:absolute;left:max(24px,3vw);top:13vh;width:min(46vw,640px);bottom:35vh;display:flex;flex-direction:column;gap:14px;z-index:2}
+.gHead{display:flex;align-items:center;gap:18px;transition:opacity .2s}
+.gHead.hide{opacity:0}
+.gHead.show{animation:u3Rise .45s var(--h-ease) both}
+.gHi{flex:none;width:66px;height:66px;border-radius:50%;border:1px solid var(--h-violet);display:grid;place-items:center;
+  background:radial-gradient(circle,rgba(169,149,255,.28),rgba(20,16,50,.6) 70%);box-shadow:0 0 26px rgba(169,149,255,.45),inset 0 0 14px rgba(169,149,255,.3)}
+.gHi svg,.gRing svg,.gFly svg{width:46%;height:46%;fill:none;stroke:currentColor;stroke-width:1.4;stroke-linejoin:round;stroke-linecap:round}
+.gHead small{display:block;font-size:13px;font-weight:300;color:var(--h-cyan);letter-spacing:.08em}
+.gHead b{display:block;font:500 clamp(28px,3.2vw,44px)/1.05 var(--h-serif);letter-spacing:.08em;text-shadow:0 0 24px rgba(169,149,255,.45)}
+.gBox{flex:1;min-height:0;overflow:auto;padding:18px 22px;background:linear-gradient(160deg,rgba(14,16,40,.72),rgba(8,10,26,.55));border:1px solid var(--h-line);
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);font-size:14.5px;font-weight:300;line-height:1.6;scrollbar-width:thin;scrollbar-color:rgba(169,149,255,.35) transparent;transition:opacity .2s}
+.gBox.hide{opacity:0}
+.gBox.show>*{animation:u3Rise .42s var(--h-ease) both}
+.gBox.show>*:nth-child(2){animation-delay:.05s}.gBox.show>*:nth-child(3){animation-delay:.1s}.gBox.show>*:nth-child(4){animation-delay:.15s}.gBox.show>*:nth-child(5){animation-delay:.2s}
+.gBox p{margin:0 0 10px}
+.gBox b{font-weight:400;color:#fff}
+.gLead{font-size:15.5px;color:var(--h-ink)}
+.gTip{padding:8px 12px;border-left:2px solid var(--h-violet);background:rgba(169,149,255,.08);font-size:13.5px;color:#d9dcf5}
+.gTip b{color:var(--h-violet);margin-right:6px}
+.gBox h4{display:flex;align-items:center;gap:10px;margin:14px 0 8px;font:500 12px var(--h-serif);letter-spacing:.2em;color:var(--h-mute);text-transform:uppercase}
+.gBox h4::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,var(--h-line2),transparent)}
+.gBox h4 i{font-style:normal;color:var(--h-cyan)}
+.gSps{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.gSps.one{grid-template-columns:1fr}
+.gSp{padding:9px 11px;border:1px solid rgba(190,178,255,.14);background:rgba(255,255,255,.025);display:grid;grid-template-columns:1fr auto;gap:2px 8px}
+.gSp b{font-size:14px}.gSp em{font-style:normal;font-size:11.5px;color:var(--h-cyan)}
+.gSp p{grid-column:1/-1;margin:0;font-size:12px;line-height:1.45;color:var(--h-mute);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.gSteps{margin:0 0 12px;padding:0;list-style:none;counter-reset:gs;display:flex;flex-direction:column;gap:9px}
+.gSteps li{counter-increment:gs;display:grid;grid-template-columns:30px 1fr;column-gap:12px;align-items:start;color:var(--h-mute)}
+.gSteps li::before{content:counter(gs);grid-row:span 2;width:28px;height:28px;border-radius:50%;border:1px solid var(--h-line2);display:grid;place-items:center;font:500 13px var(--h-serif);color:var(--h-ink)}
+.gSteps li b{display:block;color:var(--h-ink)}
+.gRows{display:grid;grid-template-columns:1fr 1fr;gap:6px 18px}
+.gRow{display:flex;align-items:baseline;gap:10px;padding:5px 0;border-bottom:1px solid rgba(190,178,255,.08);font-size:13.5px;color:var(--h-mute)}
+.gRow kbd{flex:none;min-width:74px;font:500 11.5px var(--h-sans);color:var(--h-ink);padding:3px 8px;border:1px solid var(--h-line2);border-radius:4px;background:rgba(169,149,255,.08);text-align:center}
+.gBig{display:flex;align-items:center;gap:12px;margin:8px 0 12px}
+.gBig b{font:500 46px/1 var(--h-serif);color:var(--h-cyan);text-shadow:0 0 20px rgba(143,216,255,.5)}
+.gBig span{font-size:12.5px;color:var(--h-mute);line-height:1.3}
+.gModes{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.gMode{padding:11px 13px;border:1px solid rgba(190,178,255,.16);background:rgba(255,255,255,.025)}
+.gMode b{font:500 15px var(--h-serif);letter-spacing:.06em}.gMode i{float:right;font-style:normal;font-size:11.5px;color:var(--h-cyan)}
+.gMode span{display:block;font-size:12.5px;color:var(--h-violet)}.gMode p{margin:4px 0 0;font-size:12.5px;color:var(--h-mute)}
+.gCred{font-size:12.5px;color:var(--h-mute)}.gCred h3{font:500 13px var(--h-serif);letter-spacing:.14em;color:var(--h-ink);margin:12px 0 6px}.gCred h3:first-child{margin-top:0}
+.gCred p{margin:0 0 8px}
+/* แถบฟองหัวข้อ (เส้นโค้ง) */
+.gTrack{position:absolute;left:0;bottom:0;width:min(66vw,1100px);height:31vh;z-index:2}
+.gArc{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none}
+.gArc path{fill:none;stroke:rgba(190,178,255,.3);stroke-width:1;filter:drop-shadow(0 0 4px rgba(169,149,255,.5))}
+.gBubs{position:absolute;inset:0}
+.gBub{all:unset;position:absolute;transform:translate(-50%,-30px);display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;text-align:center;width:96px}
+.gRing{width:60px;height:60px;border-radius:50%;display:grid;place-items:center;border:1px solid var(--h-line2);color:#cfd4f5;
+  background:radial-gradient(circle,rgba(30,26,70,.9),rgba(8,10,26,.95) 72%);transition:transform .3s var(--h-ease),box-shadow .3s,border-color .3s,color .3s}
+.gBub b{font:500 11px var(--h-serif);letter-spacing:.16em;text-transform:uppercase;color:var(--h-mute);transition:color .2s}
+.gBub small{font-size:11px;font-weight:300;color:var(--h-faint);margin-top:-4px}
+.gBub:hover .gRing{transform:scale(1.08);border-color:var(--h-violet);box-shadow:0 0 18px rgba(169,149,255,.4);color:#fff}
+.gBub:hover b{color:var(--h-ink)}
+.gBub.on .gRing{transform:translateY(-8px) scale(1.14);border-color:var(--h-cyan);color:#fff;box-shadow:0 0 24px rgba(143,216,255,.55),inset 0 0 12px rgba(143,216,255,.35);
+  background:radial-gradient(circle,rgba(70,90,180,.7),rgba(10,14,40,.95) 72%)}
+.gBub.on b{color:var(--h-cyan)}
+.gBub.on::after{content:"";position:absolute;top:-2px;width:5px;height:5px;border-radius:50%;background:var(--h-cyan);box-shadow:0 0 8px var(--h-cyan);transform:translateY(-14px)}
+.gFly{position:absolute;z-index:5;border-radius:50%;display:grid;place-items:center;color:#fff;border:1px solid var(--h-cyan);
+  background:radial-gradient(circle,rgba(70,90,180,.8),rgba(10,14,40,.95) 72%);box-shadow:0 0 26px rgba(143,216,255,.6);
+  transition:left .42s var(--h-ease),top .42s var(--h-ease),width .42s var(--h-ease),height .42s var(--h-ease),opacity .25s}
+.gFly.end{opacity:0}
+/* เข้า / ออก (ออก = ย้อน) */
+#guide.in{animation:u3Fade .3s ease both}
+#guide.in .gTop{animation:u3Rise .4s .05s var(--h-ease) both}
+#guide.in .gMain{animation:u3Rise .5s .12s var(--h-ease) both}
+#guide.in .gArc{animation:gDraw .7s .1s var(--h-ease) both}
+#guide.in .gBub{animation:gPop .45s var(--h-ease) both;animation-delay:calc(.18s + var(--i)*.04s)}
+#guide.out{animation:u3Fade .42s ease reverse both}
+#guide.out .gMain,#guide.out .gTop{animation:u3Rise .3s ease reverse both}
+#guide.out .gBub{animation:gPop .3s ease reverse both;animation-delay:calc((9 - var(--i))*.02s)}
+@keyframes gPop{from{opacity:0;transform:translate(-50%,-10px) scale(.6)}to{opacity:1;transform:translate(-50%,-30px) scale(1)}}
+@keyframes gDraw{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
+@media (max-width:1300px){.gTrack{width:78vw}.gBub small{display:none}.gRing{width:52px;height:52px}.gBub{width:76px}.gBub b{font-size:10px;letter-spacing:.1em}.gMain{width:min(56vw,620px)}}
+@media (max-height:800px){.gMain{top:11vh;bottom:33vh}.gHi{width:54px;height:54px}.gBox{padding:14px 18px;font-size:13.5px}}

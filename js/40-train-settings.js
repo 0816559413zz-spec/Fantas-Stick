@@ -45,7 +45,6 @@ $('#trPanel').addEventListener('click',e=>{
   else if(b.dataset.tr==='kit'){trToggle(false);openCreator(false,3);}
   if(v)trSync(v);
 });
-$('#guide').addEventListener('click',e=>{if(e.target.id==='guide')$('#guide').classList.add('hidden');});
 $('#btnMyMusic').onclick=()=>{ac();$('#myMusicIn').click();};
 $('#myMusicIn').onchange=async e=>{
   const fs=[...e.target.files].filter(f=>/^audio\//.test(f.type)||/\.(mp3|ogg|wav|m4a|aac|flac|opus|webm)$/i.test(f.name));
