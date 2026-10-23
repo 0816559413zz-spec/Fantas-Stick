@@ -27,10 +27,6 @@ body[data-screen=game] #hub,body.crOpenB #hub{display:none}
 body.hub.hS-room #voice{display:none!important}
 #hFade{position:absolute;inset:0;background:#000;opacity:0;transition:opacity .42s ease;pointer-events:none}
 #hFade.on{opacity:1}
-/* ผ้าคลุมสะบัดผ่านจอตอนหยิบไม้แล้วหันตัว (js/61 hubRender เลื่อน transform ตามเวลา) — วงรีใหญ่กว่าจอ บังเต็มตอนอยู่กลาง
-   ขอบนำ = ซับในแดง + เส้นทอง (box-shadow ด้านใน) • ลายจีบผ้า = รูปจาก hubWipeImg() */
-#hWipe{position:absolute;left:-60vw;top:-25vh;width:220vw;height:150vh;border-radius:50%;display:none;pointer-events:none;will-change:transform;
-  background:#141a30 center/100% 100% no-repeat;box-shadow:inset 1.8vw 0 0 #6a1624,inset 2.05vw 0 0 #c9a35e,inset -3vw 0 4vw rgba(0,0,0,.55),0 0 5vw 1vw rgba(0,0,0,.7)}
 #hub button{font-family:inherit;color:inherit;-webkit-tap-highlight-color:transparent}
 #hub button:focus-visible{outline:1px solid var(--h-violet);outline-offset:3px}
 

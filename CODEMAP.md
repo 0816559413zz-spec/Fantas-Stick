@@ -462,30 +462,30 @@ MN_BLOCK:259 mnRay:260 mnPick:261 mnHot:267 mnToy:285
 §290 เรนเดอร์ (เรียกจาก renderStage js/32 — คืน true = จัดการแล้ว)
 mnRestore:291 mnMenuRender:297
 
-## js/61-hub.js (763) — เมนูใหม่ — ฉาก 3D (ผู้ใช้ 2026-10-22 • สเปกเต็ม designs/ui-menu.md • หน้าจอ/ปุ่มอยู่ js/6…
+## js/61-hub.js (801) — เมนูใหม่ — ฉาก 3D (ผู้ใช้ 2026-10-22 • สเปกเต็ม designs/ui-menu.md • หน้าจอ/ปุ่มอยู่ js/6…
 HUBS:11 HUBL:11 HUB:14 HB:18 _hq:19 _hq2:19 _hq3:19 _hv:19 _hv2:19 _hv3:19 _hY:19 hEase:20 hSm:21
 §23 อนุภาคเรืองแสงของเมนู (ขนาด/สี/ความจางต่อเม็ด)
 hubPS:24 hCol:50 H_SPARK:51
 §53 ผิว/ลาย (วาดด้วย canvas)
 hubTexCloth:54 hubTexFloor:79 hubTexWindow:85 hubTexPage:92 hubTexCard:98 hubStarTex:103 hubStar:105 hubShaftTex:106
 §109 ของบนโต๊ะ
-hubLathe:110 hubCloth:112 hubTexRug:128 hubTexGlobe:138 hubTexMap:144 hubTexStars:152 hubWipeImg:161 hubBuildStudy:166
-§332 ล็อบบี้รอเริ่ม: แท่นวงเวท + ม่าน + หน้าต่างโค้ง + ลำแสงลงแต่ละที่ยืน
-hubBuildLobby:333
-§370 ตัวละคร (โมเดลไฟล์ + จัดท่าเอง)
-HPOSE:372 HPK:385 HBN:385 LOBBY_POSES:386 hubMakeChar:387 hubSetPose:419 hbAim:421 hbRot:427 _hcq:432 _hax:432 _hd:432 _ht:432 hubCharTick:433
-§490 ลูกแก้วเวท (เล่นในมือ)
-hubMakeOrb:491 hubOrbTick:505 hubBurst:521
-§524 สร้างฉาก (ครั้งแรกที่เปิดเมนู)
-hubBuild:525 hubPlaceWand:532 hubMenuChar:548 hubResetMenu:556
-§563 กล้อง
-_hf0:565 _hf1:565 _hf2:565 _hf3:565 hubFrame:566 _hcA:575 _hcB:575 _hcC:575 hCamMix:576 hAspK:578 hubCamMenu:580 hubCamPick:582 hubCamLift:583 hubCamPoseA:586 hubCamPose:587 hubCamRoom:589
-§592 ลำดับตอนกด "เล่น" (ผู้ใช้ 2026-10-23)
-HSQ:595 hPickRy:596 hubGo:597 hubBack:601 hubFadeDo:605 hubSeqAt:607 hubCamSeq:630 hWipeU:636 hubSeq:639 hubSnapModes:647
-§653 ล็อบบี้: ใครยืนตรงไหน ท่าอะไร
-HL_SPOTS:655 HL_TEAM:656 hubLobbyLayout:657 hubLobbyTick:664 hubLabels:690
-§704 เรนเดอร์ (เรียกจาก renderStage — คืน true = วาดแล้ว)
-hubRender:705
+hubLathe:110 hubCloth:112 hubTexRug:128 hubTexGlobe:138 hubTexMap:144 hubTexStars:152 HWP:162 hubWipeMake:163 hubWipeLook:174 hubWipeDraw:182 hubBuildStudy:200
+§367 ล็อบบี้รอเริ่ม: แท่นวงเวท + ม่าน + หน้าต่างโค้ง + ลำแสงลงแต่ละที่ยืน
+hubBuildLobby:368
+§405 ตัวละคร (โมเดลไฟล์ + จัดท่าเอง)
+HPOSE:407 HPK:420 HBN:420 LOBBY_POSES:421 hubMakeChar:422 hubSetPose:454 hbAim:456 hbRot:462 _hcq:467 _hax:467 _hd:467 _ht:467 hubCharTick:468
+§525 ลูกแก้วเวท (เล่นในมือ)
+hubMakeOrb:526 hubOrbTick:540 hubBurst:556
+§559 สร้างฉาก (ครั้งแรกที่เปิดเมนู)
+hubBuild:560 hubPlaceWand:567 hubMenuChar:590 hubResetMenu:598
+§605 กล้อง
+_hf0:607 _hf1:607 _hf2:607 _hf3:607 hubFrame:608 _hcA:617 _hcB:617 _hcC:617 hCamMix:618 hAspK:620 hubCamMenu:622 hubCamPick:624 hubCamLift:625 hubCamPoseA:628 hubCamPose:629 hubCamRoom:631
+§634 ลำดับตอนกด "เล่น" (ผู้ใช้ 2026-10-23)
+HSQ:637 hPickRy:638 hubGo:639 hubBack:643 hubFadeDo:647 hubSeqAt:649 hubCamSeq:672 hWipeP:678 hubSeq:679 hubSnapModes:687
+§693 ล็อบบี้: ใครยืนตรงไหน ท่าอะไร
+HL_SPOTS:695 HL_TEAM:696 hubLobbyLayout:697 hubLobbyTick:704 hubLabels:730
+§744 เรนเดอร์ (เรียกจาก renderStage — คืน true = วาดแล้ว)
+hubRender:745
 
 ## js/62-hub-ui.js (294) — 
 HUI_IMG:9 HMODES:10 HUI:15 HICO:17 hSvg:35 hHex:36 H_STAR:37
@@ -517,4 +517,4 @@ skwOpen:243 skwClose:253
 ## js/64-mappick.js (156) — 
 MPK_TXT:7 MPK_SKY:19 MPK_I:21 MPK_DICE:31 MPK:36 mpkE:37 mpkC:37 mpkSnd:38 mpkCut:39 mpkName:40 mpkCardHTML:41 mpkBuild:51 mpkUp:89 mpkMeasure:101 mpkIdx:102 mpkStep:103 mpkTo:104 mpkPick:105 mpkOpen:111 mpkClose:126 mpkLoop:130 mpkTick:132
 
-(65 files, 15415 lines)
+(65 files, 15453 lines)

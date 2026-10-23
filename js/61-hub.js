@@ -15,7 +15,7 @@ const HUB={on:true,built:false,st:'menu',t:0,me:null,chars:new Map(),fx:{},cam:{
   orb:null,wandT:null,ps:null,psL:null,fade:0,pick:false,goT:0,roomIn:0};
 // จุดสำคัญในห้อง (หน่วย 3D) • TB = กลางโต๊ะ (สี่เหลี่ยม TW×TD) • C0 = ที่ยืนหยิบไม้ (ขวาโต๊ะ นอกจอเมนู) • P1 = ที่ยืนโพสหน้าโต๊ะ (หันหากล้อง)
 //   WAND = ไม้บนโต๊ะ • GRIP = จุดจับด้าม (คำนวณใน hubPlaceWand)
-const HB={TB:new THREE.Vector3(0.4,0,-0.6),TOP:0.925,TW:3.0,TD:1.4,C0:new THREE.Vector3(2.5,0,-0.42),P1:new THREE.Vector3(0.5,0,0.95),WAND:new THREE.Vector3(1.7,0.94,-0.4),GRIP:new THREE.Vector3()};
+const HB={TB:new THREE.Vector3(0.4,0,-0.6),TOP:0.925,TW:3.0,TD:1.4,C0:new THREE.Vector3(2.5,0,-0.42),P1:new THREE.Vector3(0.5,0,0.95),WAND:new THREE.Vector3(1.7,0.931,-0.4),GRIP:new THREE.Vector3()};
 const _hq=new THREE.Quaternion(),_hq2=new THREE.Quaternion(),_hq3=new THREE.Quaternion(),_hv=new THREE.Vector3(),_hv2=new THREE.Vector3(),_hv3=new THREE.Vector3(),_hY=new THREE.Vector3(0,1,0);
 const hEase=u=>u<0?0:u>1?1:u<0.5?4*u*u*u:1-Math.pow(-2*u+2,3)/2;
 const hSm=(a,b,u)=>{u=clamp((u-a)/(b-a),0,1);return u*u*(3-2*u);};
@@ -156,12 +156,46 @@ function hubTexStars(){
     g.fillStyle='#e8eeff';for(const [x,y] of st){g.beginPath();g.arc(x,y,1.2+Math.random()*1.6,0,7);g.fill();}
   });
 }
-// ผ้าคลุมตัวละครที่สะบัดผ่านกล้อง (ตอนหยิบไม้แล้วหันตัว) — ลายจีบผ้าแนวตั้ง • เป็นชั้น DOM ทับจอ (#hWipe ใน css/hub.css: ซับในแดง/ขอบทอง = box-shadow)
-//   (เดิมลองเป็นแผ่น 3D หน้ากล้อง แต่เส้นขอบของ AO/AA ทะลุผ้าขึ้นมา)
-function hubWipeImg(){
-  const c=document.createElement('canvas');c.width=512;c.height=64;const g=c.getContext('2d'),r=g.createLinearGradient(0,0,512,0);
-  for(let i=0;i<=32;i++){const u=i/32,k=0.5+0.5*Math.sin(u*37+Math.sin(u*11)*2);r.addColorStop(u,'rgb('+Math.round(13+17*k)+','+Math.round(15+19*k)+','+Math.round(28+32*k)+')');}
-  g.fillStyle=r;g.fillRect(0,0,512,64);return c.toDataURL('image/jpeg',0.85);
+// ผ้าคลุมตัวละครที่สะบัดผ่านกล้อง (ตอนหยิบไม้แล้วหันตัว) — ผ้า 3D ใช้วัสดุผ้าคลุมจริงของตัวเรา (tint_cloak ด้านนอก + tint_house ซับใน)
+//   วาดเป็นชั้นแยกหลัง composer (ฉาก/กล้อง/ไฟของตัวเอง) → ไม่โดน AO/AA ของฉากหลัก (เดิมแผ่น 3D ในฉากมีเส้นขอบ AO ทะลุ, แบบ DOM ดูแตกเป็นภาพ)
+//   ขอบนำม้วนกลับเป็นทรงกระบอก (เห็นซับใน) • จีบผ้าแนวตั้งพลิ้วตามเวลา • เลื่อนต่อเนื่องไม่หยุด (บังเต็มจอช่วง hold0–hold1)
+const HWP={NS:300,NV:26,D:1,W:6,CURL:0.55,TAIL:0.4,R:0.2};   // W = ความกว้างผ้า (เท่าของครึ่งจอ) • CURL/TAIL = ช่วงขอบนำ/ขอบท้ายที่ม้วน • R = รัศมีม้วน (เท่าครึ่งจอ)
+function hubWipeMake(){
+  const S=new THREE.Scene(),cam2=new THREE.PerspectiveCamera(44,1,0.05,10);
+  S.add(new THREE.HemisphereLight('#7f92d8','#0a0716',0.22));   // ไฟเฉียงจากขวา (แสงจันทร์ฝั่งหน้าต่าง) → สันจีบสว่าง ร่องมืด
+  const l1=new THREE.DirectionalLight('#c8d6ff',2.6);l1.position.set(2.6,0.7,0.45);S.add(l1);
+  const l2=new THREE.DirectionalLight('#9a74ff',0.7);l2.position.set(-2,-0.3,0.4);S.add(l2);
+  const geo=new THREE.PlaneGeometry(1,1,HWP.NS,HWP.NV);
+  const out=new THREE.Mesh(geo,new THREE.MeshStandardMaterial()),inn=new THREE.Mesh(geo,new THREE.MeshStandardMaterial());
+  out.frustumCulled=inn.frustumCulled=false;S.add(out,inn);
+  return {S,cam:cam2,geo,out,inn,lk:null};
+}
+// เอาวัสดุผ้าคลุมของตัวละครเรามาใช้ (โคลน: ด้านนอก = หน้าผ้า, ซับใน = หลังผ้า)
+function hubWipeLook(W,c){
+  if(!c||W.lk===c.lk)return;W.lk=c.lk;
+  let mo=null,mi=null;c.inst.traverse(m=>{if(!m.isMesh)return;const n=(m.material&&m.material.name||'').toLowerCase();if(n==='tint_cloak')mo=m.material;else if(n==='tint_house')mi=m.material;});
+  for(const [mesh,src,side,fb] of [[W.out,mo,THREE.FrontSide,'#141a30'],[W.inn,mi,THREE.BackSide,'#6a1624']]){
+    const old=mesh.material,mt=src?src.clone():new THREE.MeshStandardMaterial({color:fb,roughness:0.9});
+    mt.side=side;mt.transparent=false;mt.opacity=1;mt.fog=false;mesh.material=mt;old.dispose();}
+}
+// p = ความคืบหน้า 0…1 (wipe0…wipe1) • ขยับจุดผ้าทั้งแผ่นตามเวลา แล้ววาดทับจอ
+function hubWipeDraw(W,p,t){
+  const cam2=W.cam;cam2.fov=cam.fov;cam2.aspect=cam.aspect;cam2.updateProjectionMatrix();
+  const hh=Math.tan(cam2.fov*Math.PI/360)*HWP.D,hw=hh*cam2.aspect,L0=HWP.CURL*hw,L1=HWP.TAIL*hw,St=HWP.W*hw+L0+L1,R=HWP.R*hw;
+  const e=p*p*p*(p*(p*6-15)+10);   // smootherstep: เร่งเข้า-ผ่อนออก ไม่มีจังหวะหยุด
+  const x0=hw*1.1-L0+R,x1=-hw*1.1-St+L1-R,xL=x0+(x1-x0)*e;   // ขอบนำเริ่มนอกจอขวา → จบเมื่อขอบท้ายพ้นจอซ้าย
+  const P=W.geo.attributes.position,NS=HWP.NS,NV=HWP.NV,H=hh*3.2,tilt=0.07-0.09*(e-0.5),D=HWP.D;
+  for(let j=0;j<=NV;j++){const v=j/NV,y0=(0.5-v)*H,fan=1+0.3*v;
+    const r=R*(1+0.35*Math.sin(v*5.5+t*7)+0.15*Math.sin(v*13-t*11)),r2=R*0.8*(1+0.3*Math.sin(v*4-t*6));   // ขอบพลิ้วตามความสูง
+    for(let i=0;i<=NS;i++){const s=i/NS*St,q=s/hw;let x,z;
+      // จีบผ้า: สันคม ร่องกว้าง (กางออกไปทางชายผ้า) + โป่งลมช้า ๆ
+      const sn=Math.sin(q*5.2/fan+Math.sin(v*2.2+t*1.7)*0.7),pl=Math.pow(sn*sn+0.03,0.32)*0.11*hw+Math.sin(q*1.6-t*2.3)*0.1*hw;
+      if(s<L0){const ph=(L0-s)/r;x=xL+L0-r*Math.sin(ph);z=-D+pl*(s/L0)-r*(1-Math.cos(ph));}
+      else if(s>St-L1){const ph=(s-St+L1)/r2;x=xL+St-L1+r2*Math.sin(ph);z=-D+pl*((St-s)/L1)-r2*(1-Math.cos(ph));}
+      else{x=xL+s;z=-D+pl;}
+      P.setXYZ(j*(NS+1)+i,x,y0+Math.sin(q*0.5+t*2)*0.02*hh-x*tilt,z+0.08*hw*Math.sin(v*Math.PI));}}
+  P.needsUpdate=true;W.geo.computeVertexNormals();
+  const ac=gl.autoClear;gl.autoClear=false;gl.setRenderTarget(null);gl.clearDepth();gl.render(W.S,cam2);gl.autoClear=ac;
 }
 function hubBuildStudy(){
   const S=HUBS,F=HUB.fx,TB=HB.TB,y0=HB.TOP,hw=HB.TW/2,hd=HB.TD/2;
@@ -280,7 +314,7 @@ function hubBuildStudy(){
   // แผนที่กระดาษ + แว่นขยาย
   {const m=new THREE.Mesh(new THREE.PlaneGeometry(0.46,0.34,8,1),new THREE.MeshStandardMaterial({map:hubTexMap(),roughness:0.9,side:THREE.DoubleSide}));const p=m.geometry.attributes.position;
     for(let i=0;i<p.count;i++){const u=p.getX(i)/0.23;p.setZ(i,Math.max(0,Math.abs(u)-0.7)*0.06);}m.geometry.computeVertexNormals();
-    m.rotation.set(-Math.PI/2,0,0.35);m.position.set(0.32,y0+0.004,0.3);m.receiveShadow=true;T.add(m);
+    m.rotation.set(-Math.PI/2,0,0.35);m.position.set(0.32,y0+0.009,0.3);m.receiveShadow=true;T.add(m);
     const g=new THREE.Group();g.position.set(0.5,y0+0.012,0.18);g.rotation.y=0.9;T.add(g);
     const ring=new THREE.Mesh(new THREE.TorusGeometry(0.06,0.008,8,32),goldM);ring.rotation.x=Math.PI/2;g.add(ring);
     const lens=new THREE.Mesh(new THREE.CircleGeometry(0.058,24),new THREE.MeshPhysicalMaterial({color:'#dfe8ff',roughness:0.05,transparent:true,opacity:0.25}));lens.rotation.x=-Math.PI/2;g.add(lens);
@@ -313,7 +347,7 @@ function hubBuildStudy(){
     const core=new THREE.Mesh(new THREE.SphereGeometry(0.035,16,12),new THREE.MeshBasicMaterial({color:hdr('#8fd8ff',1.4)}));rings.add(core);const cs=new THREE.Sprite(glowMat('#8fd8ff',0.6));cs.scale.set(0.26,0.26,1);rings.add(cs);}
   // ไพ่ทาโรต์วางกระจาย + ขนนกกับขวดหมึก
   {const ct=hubTexCard(),cm=new THREE.MeshStandardMaterial({map:ct,roughness:0.6});
-    for(let i=0;i<4;i++){const c=new THREE.Mesh(new THREE.BoxGeometry(0.1,0.003,0.16),cm);c.position.set(0.02+i*0.045,y0+0.004+i*0.002,0.5-i*0.03);c.rotation.y=-0.6+i*0.28;T.add(c);}
+    for(let i=0;i<4;i++){const c=new THREE.Mesh(new THREE.BoxGeometry(0.1,0.003,0.16),cm);c.position.set(0.02+i*0.045,y0+0.008+i*0.003,0.5-i*0.03);c.rotation.y=-0.6+i*0.28;T.add(c);}
     const ink=new THREE.Mesh(new THREE.CylinderGeometry(0.035,0.045,0.06,14),new THREE.MeshPhysicalMaterial({color:'#101830',roughness:0.1}));ink.position.set(-0.12,y0+0.03,0.5);T.add(ink);
     const qg=new THREE.SphereGeometry(0.5,10,6);qg.scale(0.035,0.18,0.006);const q=new THREE.Mesh(qg,new THREE.MeshStandardMaterial({color:'#efe9dc',roughness:0.8}));q.position.set(-0.06,y0+0.13,0.52);q.rotation.set(0.25,0.4,-0.75);T.add(q);}
   // ไม้กายสิทธิ์บนโต๊ะ (ใส่ทีหลังเมื่อโมเดลตัวละครพร้อม — ใช้ไม้แบบเดียวกับที่เลือกไว้) + ประกาย
@@ -321,8 +355,9 @@ function hubBuildStudy(){
   F.wandTip=new THREE.Object3D();F.wandPivot.add(F.wandTip);
   F.wandGlow=new THREE.Sprite(glowMat('#cfe6ff',1.3));F.wandGlow.scale.set(0.22,0.22,1);F.wandTip.add(F.wandGlow);
   F.wandStar=hubStar('#e6f0ff',2.4);F.wandStar.scale.set(0.3,0.3,1);F.wandTip.add(F.wandStar);
-  // ผ้าคลุมสะบัดผ่านกล้อง (ชั้น DOM ทับจอ — เลื่อนตามเวลาใน hubRender)
-  {const el=document.createElement('div');el.id='hWipe';el.style.backgroundImage='url('+hubWipeImg()+')';($('#hub')||document.body).prepend(el);F.wipeEl=el;}
+  // แสงปลายไม้ไม่ทดสอบความลึก: สไปรต์หันหากล้องตัดกับผิวโต๊ะเป็นเส้นตรง ดูเหมือนปลายไม้จมโต๊ะ (ผู้ใช้ 2026-10-23) • โคลนเพราะ glowMat ใช้ร่วมกัน
+  F.wandGlow.material=F.wandGlow.material.clone();for(const sp of [F.wandGlow,F.wandStar]){sp.material.depthTest=false;sp.renderOrder=5;}
+  F.wipe=hubWipeMake();   // ผ้าคลุมสะบัดผ่านกล้อง (วาดหลัง composer ใน hubRender)
   // ฝุ่นละอองลอยในแสงจันทร์
   HUB.ps=hubPS(S,700);
   {const n=160,pos=new Float32Array(n*3);for(let i=0;i<n;i++){pos[i*3]=rnd(-2,6);pos[i*3+1]=rnd(0.2,4.5);pos[i*3+2]=rnd(-3.5,3);}
@@ -537,8 +572,15 @@ function hubPlaceWand(c){
   // แนวไม้จริง (ศูนย์กลาง → ปลาย ตอนท่ายืน) หมุนให้นอนตามแกน x — ปลายไม้อยู่ที่ (ยาว,0,0)
   const ax=c.wandBind.tip.clone().sub(c.wandBind.c),len=ax.length();ax.normalize();
   const holder=new THREE.Group();holder.add(inner);holder.quaternion.setFromUnitVectors(ax,new THREE.Vector3(1,0,0));
-  F.wandPivot.add(holder);F.wandMesh=holder;
-  F.wandTip.position.set(len,0,0);
+  const tilt=new THREE.Group();tilt.add(holder);F.wandPivot.add(tilt);F.wandMesh=tilt;
+  // วางให้นอนแตะผิวจริง: จุดต่ำสุดฝั่งด้าม + ฝั่งปลาย แตะพื้นทั้งคู่ (เอียงตาม) แล้วยกจุดต่ำสุดขึ้นมาที่ผิว (เดิมแกนกลางอยู่ที่ผิว ครึ่งล่างของไม้หนา/งอจมโต๊ะ)
+  F.wandPivot.position.set(0,0,0);F.wandPivot.rotation.set(0,0,0);
+  const low=()=>{F.wandPivot.updateMatrixWorld(true);const A=[null,null];let mn=Infinity;
+    tilt.traverse(m=>{if(!m.isMesh||!m.geometry)return;const p=m.geometry.attributes.position;
+      for(let i=0;i<p.count;i++){const v=_hv.fromBufferAttribute(p,i).applyMatrix4(m.matrixWorld),k=v.x<0?0:1;mn=Math.min(mn,v.y);if(!A[k]||v.y<A[k].y)A[k]={x:v.x,y:v.y};}});return {A,mn};};
+  const {A}=low();if(A[0]&&A[1])tilt.rotation.z=-Math.atan2(A[1].y-A[0].y,A[1].x-A[0].x);
+  tilt.position.y=-low().mn;tilt.updateMatrix();
+  F.wandTip.position.set(len,0,0).applyMatrix4(tilt.matrix);
   // หมุนรอบแกนตั้งให้ปลายชี้ออกจากคนหยิบ (มุม atan2 ของเวกเตอร์ปลาย + rotation.y = มุมใหม่)
   const want=Math.atan2(HB.WAND.x-HB.C0.x,HB.WAND.z-HB.C0.z),a0=Math.atan2(F.wandTip.position.x,F.wandTip.position.z);
   F.wandPivot.position.copy(HB.WAND);F.wandPivot.rotation.set(0,want-a0,0);F.wandPivot.updateMatrixWorld(true);
@@ -632,10 +674,8 @@ function hubCamSeq(o,t){
   if(t<HSQ.snap)return hCamMix(o,hubCamPick(_hcA),hubCamLift(_hcC),hEase(hSm(HSQ.grab,HSQ.snap,t)));
   return hCamMix(o,hubCamPoseA(_hcA),hubCamPose(_hcC),hEase(hSm(HSQ.snap+0.05,HSQ.end-0.1,t)));
 }
-// ผ้าคลุมบังจอ: −1 (ขวานอกจอ) … 0 (บังเต็ม) … 1 (ซ้ายนอกจอ)
-const hWipeU=t=>{if(t<=HSQ.wipe0)return -1;if(t>=HSQ.wipe1)return 1;
-  if(t<HSQ.hold0){const u=(t-HSQ.wipe0)/(HSQ.hold0-HSQ.wipe0);return -(1-u)*(1-u);}   // เข้าเร็วแล้วช้าลง
-  if(t<HSQ.hold1)return 0;const u=(t-HSQ.hold1)/(HSQ.wipe1-HSQ.hold1);return u*u;};   // ค้างบังเต็มจอช่วงตัดฉาก แล้วเร่งออก
+// ผ้าคลุมผ่านจอ: ความคืบหน้า 0…1 ระหว่าง wipe0…wipe1 (นอกช่วง = ไม่วาด) • ถอยหลัง (กลับเมนู) = t ลดลง ผ้าผ่านย้อนทางเอง
+const hWipeP=t=>(t-HSQ.wipe0)/(HSQ.wipe1-HSQ.wipe0);
 function hubSeq(c,dt,now){
   if(HUB.st==='go'){HUB.t=Math.min(HSQ.end,HUB.t+dt);hubSeqAt(c,HUB.t);
     if(HUB.t>=HSQ.ui){HUB.st='modes';if(typeof hubUiState==='function')hubUiState('modes');}}
@@ -752,11 +792,9 @@ function hubRender(dt,now){
   const par=seqOn?0.04:HUB.st==='modes'?0.1:0.16;
   cam.position.copy(HUB.cam.p).add(_hv.set(mx*par,-my*par*0.5+Math.sin(t*0.5)*0.03,0));
   cam.lookAt(_hv2.copy(HUB.cam.l).add(_hv.set(mx*par*0.3,-my*par*0.2,0)));
-  // ผ้าคลุมสะบัดผ่านหน้ากล้อง (ตัดฉากใต้ผ้า) — วางในกรอบกล้องทุกเฟรม
-  {const el=F.wipeEl,wu=room?-1:hWipeU(tt),on=wu>-1&&wu<1;
-    if(on!==F.wipeOn){F.wipeOn=on;el.style.display=on?'block':'none';}
-    if(on)el.style.transform='translateX('+(-wu*160).toFixed(2)+'vw) translateY('+(wu*6).toFixed(2)+'vh) rotate('+(4-wu*5).toFixed(2)+'deg)';}
   rpass.scene=sc;gl.shadowMap.needsUpdate=true;composer.render();rpass.scene=scene;
+  // ผ้าคลุมสะบัดผ่านหน้ากล้อง (ตัดฉากใต้ผ้า) — ชั้นแยกทับภาพที่ post แล้ว
+  {const wp=room?-1:hWipeP(tt);if(F.wipe&&wp>0&&wp<1){hubWipeLook(F.wipe,HUB.me);hubWipeDraw(F.wipe,wp,t);}}
   if(lay)hubLabels(lay);
   return true;
 }
