@@ -444,9 +444,9 @@ FFAV:131 MULTI:132 MULTI_TH:132 STREAK:133 pName:134 ffaKf:135 kfSound:150 KINDN
 ## js/55-podium.js (82) — โพเดียมธีมฮอกวอตส์ (ผู้ใช้ 2026-10-22 "podium but make it magician theme hogwart theme")
 POD:6 POD_X:7 POD_H:7 POD_C:7 podStart:8 podStop:29 podPose:37 renderPodium:49
 
-## js/56-progress.js (91) — เลเวล + สถิติ + ของปลดล็อค (ผู้ใช้ 2026-10-22: "more skin wand cloak unlock as lvl" → เลื…
+## js/56-progress.js (90) — เลเวล + สถิติ + ของปลดล็อค (ผู้ใช้ 2026-10-22: "more skin wand cloak unlock as lvl" → เลื…
 §7 var/function (ไม่ใช่ const): หน้าสร้างตัวละครอาจเปิดตอนโหลด (?nointro…
-LV_MAX:8 DEV_MAXLV:11 lvNeed:12 UNLOCKS:13 PROF_ITEMS:22 lvRewards:31 lvNextReward:32 PROG:33 progSave:34 lvOf:35 progLv:36 xpMax:37 lookLock:38 lookClampLocks:39 progXP:41 progAward:42 progBox:53 progOpen:61 progChip:73
+LV_MAX:8 DEV_MAXLV:11 lvNeed:12 UNLOCKS:13 PROF_ITEMS:22 lvRewards:30 lvNextReward:31 PROG:32 progSave:33 lvOf:34 progLv:35 xpMax:36 lookLock:37 lookClampLocks:38 progXP:40 progAward:41 progBox:52 progOpen:60 progChip:72
 
 ## js/57-tutorial.js (44) — วิธีเล่นแต่ละสาย (ผู้ใช้ 2026-10-22 "สอนเล่นแต่ละสาย") — ปุ่ม "📖 วิธีเล่นสายนี้" ในหน้าเ…
 TUTTIPS:7 tutOpen:12 tutTry:31
@@ -466,7 +466,7 @@ MN_BLOCK:259 mnRay:260 mnPick:261 mnHot:267 mnToy:285
 §290 เรนเดอร์ (เรียกจาก renderStage js/32 — คืน true = จัดการแล้ว)
 mnRestore:291 mnMenuRender:297
 
-## js/61-hub.js (888) — เมนูใหม่ — ฉาก 3D (ผู้ใช้ 2026-10-22 • สเปกเต็ม designs/ui-menu.md • หน้าจอ/ปุ่มอยู่ js/6…
+## js/61-hub.js (883) — เมนูใหม่ — ฉาก 3D (ผู้ใช้ 2026-10-22 • สเปกเต็ม designs/ui-menu.md • หน้าจอ/ปุ่มอยู่ js/6…
 HUBS:11 HUBL:11 HUB:14 HB:18 _hq:19 _hq2:19 _hq3:19 _hv:19 _hv2:19 _hv3:19 _hY:19 hEase:20 hSm:21
 §23 อนุภาคเรืองแสงของเมนู (ขนาด/สี/ความจางต่อเม็ด)
 hubPS:24 hCol:50 H_SPARK:51
@@ -490,10 +490,10 @@ _hf0:649 _hf1:649 _hf2:649 _hf3:649 hubFrame:650 _hcA:659 _hcB:659 _hcC:659 hCam
 HSQ:679 hPickRy:680 hubGo:681 hubBack:685 hubFadeDo:689 hubSeqAt:691 hubCamSeq:714 hWipeP:720 hubSeq:721 hubSnapModes:729
 §735 ล็อบบี้: ใครยืนตรงไหน ท่าอะไร
 HL_SPOTS:737 HL_TEAM:738 hubLobbyLayout:739 hubLobbyTick:746 hubLabels:772
-§786 หน้าโปรไฟล์ (UI ใน js/65 PRF, ผู้ใช้ 2026-10-23 รอบ 3)
-HUBP:788 PRF3:789 hubProfBuild:790 hubProfSet:805 hubProfTick:811
-§826 เรนเดอร์ (เรียกจาก renderStage — คืน true = วาดแล้ว)
-hubRender:827
+§786 หน้าโปรไฟล์ (UI ใน js/65 PRF)
+PRF3:790 prfSpot:792 hubProfSet:801 hubProfShow:809 hubProfTick:810
+§821 เรนเดอร์ (เรียกจาก renderStage — คืน true = วาดแล้ว)
+hubRender:822
 
 ## js/62-hub-ui.js (302) — เมนูใหม่ — หน้าจอ/ปุ่ม (ผู้ใช้ 2026-10-22 • สเปก designs/ui-menu.md)
 §8 ภาพการ์ด/แผนที่: URL เต็ม — url() ใน CSS var อ่านเทียบไฟล์ css/hub.cs…
@@ -526,18 +526,18 @@ skwOpen:243 skwClose:253
 ## js/64-mappick.js (156) — 
 MPK_TXT:7 MPK_SKY:19 MPK_I:21 MPK_DICE:31 MPK:36 mpkE:37 mpkC:37 mpkSnd:38 mpkCut:39 mpkName:40 mpkCardHTML:41 mpkBuild:51 mpkUp:89 mpkMeasure:101 mpkIdx:102 mpkStep:103 mpkTo:104 mpkPick:105 mpkOpen:111 mpkClose:126 mpkLoop:130 mpkTick:132
 
-## js/65-ui3.js (373) — UI รอบ 3 (ผู้ใช้ 2026-10-23 — สเปก designs/ui-menu.md "รอบ 3") • สไตล์เดียวกับเมนูใหม่ (c…
+## js/65-ui3.js (409) — UI รอบ 3 (ผู้ใช้ 2026-10-23 — สเปก designs/ui-menu.md "รอบ 3") • สไตล์เดียวกับเมนูใหม่ (c…
 UIG:6 uiGalaxy:7 uiGalaxyOn:15 uiGalRaf:16 uiGalT:16 uiGalLoop:17 uiGalDraw:19 uiShow:36 uiHide:37
 §40 เมนูหยุดเกม
 §44 คู่มือ (แบบ Skill Tree)
 GICO:47 GROW:58 GPATH:59 GUIDE:63 GD:84 guideBuild:85 guideLayout:95 guideOpen:102 guideClose:106 guidePic:107 guideGo:112
 §130 จอสรุปหลังจบเกม (ต่อจากป้ายชนะ + โพเดียม)
 RICO:133 rIcon:139 OV:140 ovScore:141 ovOpen:142 ovHead:151 ovSummary:157 ovNextReward:179 ovLvAnim:186 ovBoard:205
-§227 หน้าโปรไฟล์ (แบบ Naraka ย่อ) + รางวัลเลเวล
-PRF:231 prfItem:232 prfLv:233 prfOk:234 prfGet:235 myFrame:236 FR_IDX:237 prfAvatar:239 BADGES:240 BICO:244 SICO:247 PT:249 PFS:250 prfSave:251 prf3Sync:252 profOpen:253 prfStageX:261 profClose:263 prfRender:264 prfItems:288 prfRwHtml:295 prfRewards:306 prfClick:315 prfDrag:328
-§338 การ์ดพลังเสริม (ดันเจียน) + ความหายาก
-BKICO:341 buffShow:345
-§364 จอมืดตอนเริ่มแมตช์ (ผู้ใช้ 2026-10-23: กระตุกตอนเริ่มแมตช์แรก)
-gameCover:367
+§227 หน้าโปรไฟล์ + รางวัลเลเวล
+PRF:232 prfItem:233 prfLv:234 prfOk:235 prfGet:236 pathIdx:237 BORDERS:239 BRAR_C:248 BRAR_N:248 bordOk:249 myFrame:250 PBN:252 PB_SVG:253 prfAvatar:268 BADGES:271 BICO:275 BFR:279 badgeHtml:283 SICO:284 PT:286 PFS:287 prfSave:288 prf3Sync:289 profOpen:290 prfStageX:298 profClose:300 prfRender:301 prfItems:325 prfRwHtml:332 prfRewards:343 prfClick:352 prfDrag:364
+§374 การ์ดพลังเสริม (ดันเจียน) + ความหายาก
+BKICO:377 buffShow:381
+§400 จอมืดตอนเริ่มแมตช์ (ผู้ใช้ 2026-10-23: กระตุกตอนเริ่มแมตช์แรก)
+gameCover:403
 
-(66 files, 16004 lines)
+(66 files, 16034 lines)

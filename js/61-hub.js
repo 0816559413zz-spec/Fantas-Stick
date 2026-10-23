@@ -577,11 +577,11 @@ function hubWarm(){
   try{
     const c=HUB.me,F=HUB.fx,lk=lookStr(myLook);
     if(c&&!c.tipStar){c.tipStar=hubTipStar(c);c.tipStar.visible=false;}
-    for(const S of [HUBL,HUBP]){const d=hubMakeChar(lk);if(!d)continue;d.g.position.set(0,0.2,-40);if(d.wand)d.wand.visible=true;S.add(d.g);
-      const o=hubMakeOrb(S,S===HUBL);o.g.position.set(0,1,-40);(HWARM.keep||(HWARM.keep=[])).push(d,o);}
-    hubProfBuild();
-    const undo=[HUBS,HUBL,HUBP].map(hubShowAll);
-    const ps=warmCompile([HUBS,HUBL,HUBP]);
+    for(const S of [HUBL,scene]){const d=hubMakeChar(lk);if(!d)continue;d.g.position.set(0,0.2,-40);if(d.wand)d.wand.visible=true;S.add(d.g);
+      const o=hubMakeOrb(S,true);o.g.position.set(0,1,-40);(HWARM.keep||(HWARM.keep=[])).push(d,o);}
+    const undo=[HUBS,HUBL].map(hubShowAll);
+    const ps=warmCompile([HUBS,HUBL]);
+    {const k=(HWARM.keep||[]).filter(q=>q.g.parent===scene);k.forEach(q=>q.g.visible=true);ps.push(...warmCompile([scene]));k.forEach(q=>q.g.visible=false);}   // ตัวละครในฉากเกม (หน้าโปรไฟล์)
     undo.forEach(f=>f());
     for(const q of HWARM.keep||[])q.g.visible=false;
     if(F.wipe&&c){hubWipeLook(F.wipe,c);const pr=gl.getRenderTarget();gl.setRenderTarget(null);ps.push(gl.compileAsync(F.wipe.S,F.wipe.cam));gl.setRenderTarget(pr);}
@@ -595,7 +595,7 @@ function hubWarmDraw(i){
       return ()=>{c.g.visible=v;if(c.wand)c.wand.visible=w;};}],
     [HUBL,()=>{const k=(HWARM.keep||[]).filter(q=>q.g.parent===HUBL);k.forEach(q=>{q.g.visible=true;q.g.position.set(0,0.2,0);});const sp=HUB.fx.spots||[];sp.forEach(q=>q.g.visible=true);
       return ()=>{k.forEach(q=>{q.g.visible=false;q.g.position.set(0,0.2,-40);});sp.forEach(q=>q.g.visible=false);};}],
-    [HUBP,()=>{const k=(HWARM.keep||[]).filter(q=>q.g.parent===HUBP);k.forEach(q=>{q.g.visible=true;q.g.position.set(0,0.2,0);});return ()=>k.forEach(q=>{q.g.visible=false;q.g.position.set(0,0.2,-40);});}]];
+    [scene,()=>{const k=(HWARM.keep||[]).filter(q=>q.g.parent===scene);k.forEach(q=>{q.g.visible=true;q.g.position.set(0,GY(MW/2,MH/2),0);});return ()=>k.forEach(q=>{q.g.visible=false;q.g.position.set(0,0.2,-40);});}]];
   if(i>=L.length||HUB.st!=='menu'&&HUB.st!=='modes')return;
   try{
     HWARM.rt=HWARM.rt||new THREE.WebGLRenderTarget(64,64,{type:composer.renderTarget1.texture.type,colorSpace:composer.renderTarget1.texture.colorSpace});
@@ -783,44 +783,39 @@ function hubLabels(lay){
   cx.textBaseline='alphabetic';
 }
 
-// ---------- หน้าโปรไฟล์ (UI ใน js/65 PRF, ผู้ใช้ 2026-10-23 รอบ 3) ----------
-// ฉากแยก HUBP: ตัวเราฝั่งขวาของจอ บนพื้นหลังที่เลือก (ภาพแผ่นใหญ่ด้านหลัง) + ท่าโพส + เอฟเฟกต์รอบตัว • ลากเมาส์ = หมุนตัว (PRF3.spin)
-const HUBP=new THREE.Scene();
-const PRF3={built:false,c:null,lk:'',bg:'',bgM:null,bgP:null,bgAsp:1.6,ps:null,orb:null,ring:null,pose:'present',au:null,spin:0,cam:new THREE.Vector3()};
-function hubProfBuild(){
-  if(PRF3.built)return;PRF3.built=true;const S=HUBP;
-  S.add(new THREE.HemisphereLight('#8fa2e0','#100c20',0.55));
-  const k=new THREE.DirectionalLight('#e6ecff',1.35);k.position.set(2.5,4,3.5);S.add(k);
-  const rim=new THREE.DirectionalLight('#b39dff',2.6);rim.position.set(-3,2.5,-3);S.add(rim);
-  const fill=new THREE.PointLight('#8fd8ff',1.2,8,2);fill.position.set(-1.6,1.2,2);S.add(fill);
-  PRF3.bgM=new THREE.MeshBasicMaterial({color:'#6f7696',fog:false,depthWrite:false});   // พื้นหลังหรี่ลงให้ตัวละครเด่น
-  PRF3.bgP=new THREE.Mesh(new THREE.PlaneGeometry(1,1),PRF3.bgM);PRF3.bgP.renderOrder=-1;S.add(PRF3.bgP);
-  const ring=new THREE.Mesh(new THREE.RingGeometry(0.55,0.585,72),new THREE.MeshBasicMaterial({color:hdr('#b9a6ff',1.4),transparent:true,opacity:0.6,depthWrite:false,blending:THREE.AdditiveBlending}));
-  ring.rotation.x=-Math.PI/2;ring.position.y=0.012;S.add(ring);PRF3.ring=ring;
-  const disc=new THREE.Mesh(new THREE.CircleGeometry(1.2,48),new THREE.MeshBasicMaterial({map:glowTex,color:hdr('#6a5cff',0.5),transparent:true,depthWrite:false,blending:THREE.AdditiveBlending}));
-  disc.rotation.x=-Math.PI/2;disc.position.y=0.006;S.add(disc);
-  PRF3.ps=hubPS(S,700);PRF3.orb=hubMakeOrb(S);
+// ---------- หน้าโปรไฟล์ (UI ใน js/65 PRF) ----------
+// ผู้ใช้ 2026-10-23: "our character stand at the map, not map just background" → ตัวเรายืนอยู่ในแผนที่จริง (ฉากเกม scene + buildWorld)
+// จุดยืน = ที่ว่างใกล้กลางแผนที่ (prfSpot) • กล้องอยู่ฝั่งที่โล่ง หันเข้าหาตัวละคร (ฉากแผนที่อยู่ข้างหลัง) • ลากเมาส์ = หมุนตัว (PRF3.spin)
+// ลูกแก้วไม่มีไฟจุด (จำนวนไฟในฉากเกมต้องคงที่ ไม่งั้นเชดเดอร์ทุกชิ้น compile ใหม่)
+const PRF3={c:null,lk:'',map:'',pose:'present',spin:0,cam:new THREE.Vector3(),spot:null,orb:null};
+// จุดยืน + ทิศกล้อง: ที่ว่างใกล้กลางที่สุด แล้วเลือกทิศที่กล้อง (ห่าง ~7 ม.) ไม่ชนอะไร — คืน {x,y,a} (พิกัดเกม, a = มุมจากตัวละครไปกล้อง)
+function prfSpot(){
+  const ok=(x,y)=>typeof potSpotOk==='function'?potSpotOk(x,y):true,cx=MW/2,cy=MH/2;
+  for(let rr=0;rr<=600;rr+=50)for(let k=0;k<(rr?12:1);k++){const t=k/12*Math.PI*2+Math.PI/2,x=cx+Math.cos(t)*rr,y=cy+Math.sin(t)*rr;if(!ok(x,y))continue;
+    let best=null;for(let j=0;j<16;j++){const a=j/16*Math.PI*2+Math.PI/2;let free=0;for(let d=40;d<=150;d+=22)if(ok(x+Math.cos(a)*d,y+Math.sin(a)*d))free++;else break;
+      const score=free*10-Math.abs(Math.atan2(Math.sin(a-Math.PI/2),Math.cos(a-Math.PI/2)));if(!best||score>best.s)best={a,s:score};}   // ชอบกล้องฝั่งใต้ (มองขึ้นเหนือ) เมื่อโล่งเท่ากัน
+    return {x,y,a:best?best.a:Math.PI/2};}
+  return {x:cx,y:cy,a:Math.PI/2};
 }
-// o = {lk ลุคตัวละคร, bg url รูปพื้นหลัง, pose ชื่อท่าใน HPOSE, au สีเอฟเฟกต์รอบตัว | null}
+// o = {lk ลุคตัวละคร, map แผนที่ที่ยืน, pose ชื่อท่าใน HPOSE}
 function hubProfSet(o){
-  hubProfBuild();
-  if(o.bg&&o.bg!==PRF3.bg){PRF3.bg=o.bg;new THREE.TextureLoader().load(o.bg,t=>{if(PRF3.bg!==o.bg){t.dispose();return;}t.colorSpace=THREE.SRGBColorSpace;const old=PRF3.bgM.map;PRF3.bgM.map=t;PRF3.bgM.needsUpdate=true;PRF3.bgAsp=t.image.width/t.image.height;if(old)old.dispose();});}
-  if(PRF3.c&&PRF3.lk!==o.lk){HUBP.remove(PRF3.c.g);disposeTree(PRF3.c.g);PRF3.c=null;}
-  PRF3.lk=o.lk;PRF3.pose=HPOSE[o.pose]?o.pose:'present';PRF3.au=o.au||null;
+  PRF3.pose=HPOSE[o.pose]?o.pose:'present';
+  if(PRF3.c&&PRF3.lk!==o.lk){scene.remove(PRF3.c.g);disposeTree(PRF3.c.g);PRF3.c=null;}
+  PRF3.lk=o.lk;
+  if(o.map&&(o.map!==PRF3.map||builtMap!==o.map)){PRF3.map=o.map;PRF3.spot=null;
+    const go=()=>{if(PRF3.map!==o.map||!MAPS[o.map])return;if(builtMap!==o.map||MAPID!==o.map){setMapVars(o.map);buildWorld(o.map);}PRF3.spot=prfSpot();};
+    if(MAPS[o.map])go();else loadMapData(o.map).then(go);}
 }
+function hubProfShow(on){if(PRF3.c)PRF3.c.g.visible=on;if(PRF3.orb)PRF3.orb.g.visible=on;}
 function hubProfTick(dt,now){
-  if(!PRF3.c&&PRF3.lk){const c=hubMakeChar(PRF3.lk);if(c){PRF3.c=c;HUBP.add(c.g);if(c.wand)c.wand.visible=true;c.wandOn=true;c.ry=c.ryT=0;}}
-  const c=PRF3.c,t=now/1000,ry0=(HPOSE[PRF3.pose].ry||0)*0.5;
-  if(c){if(c.poseN!==PRF3.pose)hubSetPose(c,PRF3.pose);c.ryT=ry0+PRF3.spin;hubCharTick(c,dt,now,PRF3.cam);
-    PRF3.orb.kT=c.pose&&c.pose.orb?1:0;hubOrbTick(PRF3.orb,c,dt,now,PRF3.ps);}
-  if(PRF3.au&&Math.random()<dt*46){const a=Math.random()*6.28,r=0.42+Math.random()*0.3;   // เอฟเฟกต์รอบตัว: ละอองหมุนเป็นเกลียวขึ้น
-    PRF3.ps.add({x:Math.cos(a)*r,y:0.05+Math.random()*0.4,z:Math.sin(a)*r,vx:-Math.sin(a)*0.3,vy:0.35+Math.random()*0.45,vz:Math.cos(a)*0.3,life:1.5+Math.random()*1.3,s:0.03+Math.random()*0.045,c:hCol(PRF3.au,1.7),sw:2,swr:0.2,a:0.85,fi:3});}
-  PRF3.ps.tick(dt);PRF3.ring.material.opacity=0.45+0.15*Math.sin(t*1.5);
-  const R=typeof prfStageX==='function'?prfStageX():0.14,want=hubFrame(_hcB,_ht.set(0,0.98,0),6.8,0,0.04,R,-0.04,34);   // ตัวละครอยู่กลางช่องว่างระหว่างแผงซ้าย-ขวา (js/65 prfStageX)
-  // พื้นหลัง: แผ่นตั้งฉากกับแนวมอง ห่าง 12 หน่วย ขยายให้คลุมเต็มจอ (แบบ cover)
-  const fw=_hd.copy(want.l).sub(want.p).normalize(),D=12,h=2*D*Math.tan(17*Math.PI/180)*1.12,w=h*cam.aspect,sw=Math.max(w,h*PRF3.bgAsp);
-  PRF3.bgP.position.copy(want.p).addScaledVector(fw,D);PRF3.bgP.scale.set(sw,sw/PRF3.bgAsp,1);PRF3.bgP.lookAt(want.p);
-  return want;
+  if(!PRF3.c&&PRF3.lk){const c=hubMakeChar(PRF3.lk);if(c){PRF3.c=c;scene.add(c.g);if(c.wand)c.wand.visible=true;c.wandOn=true;c.ry=c.ryT=0;}}
+  if(!PRF3.orb){PRF3.orb=hubMakeOrb(scene,true);}
+  const c=PRF3.c,S=PRF3.spot||{x:MW/2,y:MH/2,a:Math.PI/2};
+  const P=(PRF3.P||(PRF3.P=new THREE.Vector3())).set(tx(S.x),GY(S.x,S.y),tz(S.y)),dx=Math.cos(S.a),dz=Math.sin(S.a),face=Math.atan2(dx,dz);   // ทิศจากตัวละครไปกล้อง (3D: x=cos, z=sin)
+  if(c){c.g.visible=true;c.g.position.copy(P);if(c.poseN!==PRF3.pose)hubSetPose(c,PRF3.pose);c.ryT=face+(HPOSE[PRF3.pose].ry||0)*0.5+PRF3.spin;
+    hubCharTick(c,dt,now,PRF3.cam);PRF3.orb.kT=c.pose&&c.pose.orb?1:0;hubOrbTick(PRF3.orb,c,dt,now,null);}
+  const nx=typeof prfStageX==='function'?prfStageX():0.14;
+  return hubFrame(_hcB,(PRF3.L||(PRF3.L=new THREE.Vector3())).copy(P).add(_hv2.set(0,0.98,0)),6.4,Math.atan2(-dx,dz),0.05,nx,-0.04,34);
 }
 
 // ---------- เรนเดอร์ (เรียกจาก renderStage — คืน true = วาดแล้ว) ----------
@@ -838,7 +833,7 @@ function hubRender(dt,now){
     F.lRune.rotation.z=t/20;F.lRune.material.opacity=0.24+0.08*Math.sin(t*0.8);F.dustL.rotation.y=t/60;
     if(Math.random()<dt*14)HUB.psL.add({x:rnd(-4,5),y:0.25,z:rnd(-3,2.5),vx:0,vy:0.25+Math.random()*0.3,vz:0,life:3+Math.random()*2,s:0.03+Math.random()*0.03,c:H_SPARK[(Math.random()*4)|0],sw:1.5,swr:0.1,a:0.7,fi:3});
     HUB.psL.tick(dt);
-  }else if(HUB.profOn){sc=HUBP;want=hubProfTick(dt,now);fvO=34;}   // หน้าโปรไฟล์ (js/65)
+  }else if(HUB.profOn){sc=scene;want=hubProfTick(dt,now);fvO=34;}   // หน้าโปรไฟล์: ฉากเกม + แผนที่ที่เลือก (js/65)
   else{
     const c=hubMenuChar();
     if(!HWARM.st&&c&&HUB.st==='menu'&&(HWARM.t+=dt)>0.8){HWARM.st=0.5;setTimeout(()=>{HWARM.st=0;hubWarm();},0);}   // อุ่นเชดเดอร์ตอนเมนูว่าง
@@ -885,4 +880,4 @@ function hubRender(dt,now){
   if(lay)hubLabels(lay);
   return true;
 }
-if(typeof WD!=='undefined')Object.assign(WD,{HWARM,HUB,HUBS,HUBL,HUBP,PRF3,HPOSE,hubGo,hubSnapModes,hubResetMenu,hubProfSet});
+if(typeof WD!=='undefined')Object.assign(WD,{HWARM,HUB,HUBS,HUBL,PRF3,HPOSE,hubGo,hubSnapModes,hubResetMenu,hubProfSet});

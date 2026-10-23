@@ -99,7 +99,7 @@ function endMatch(){
     sub=`${TEAMN[0]} ${a} — ${b} ${TEAMN[1]}`;
   }
   G.result={title,sub,mode:G.mode,wave:G.wave,win,draw,
-    rows:(G.mode==='race'?raceRank():byK).map(p=>({id:p.id,fr:p.fr||'fr0',tk:Math.round(p.dmgTaken||0),as:p.assists|0,n:p.name+(G.mode==='imp'?(p.role==='imp'?' 🐍':' ⚡'):''),c:p.color,k:p.kills,d:p.deaths,dmg:Math.round(p.dmgDealt),tm:MODES[G.mode].team?p.team:-1}))};
+    rows:(G.mode==='race'?raceRank():byK).map(p=>({id:p.id,fr:p.fr||'b_def',tk:Math.round(p.dmgTaken||0),as:p.assists|0,n:p.name+(G.mode==='imp'?(p.role==='imp'?' 🐍':' ⚡'):''),c:p.color,k:p.kills,d:p.deaths,dmg:Math.round(p.dmgDealt),tm:MODES[G.mode].team?p.team:-1}))};
   if(G.mode==='train')matchOver();else G.endT=1.6;   // ห้องฝึก = จบทันที (ไม่มีชนะ/แพ้)
 }
 function matchOver(){G.endT=0;G.ph='over';G.proj=[];emit({k:'over',x:0,y:0});}

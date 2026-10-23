@@ -298,12 +298,96 @@ body.profOn #hub{display:none}
 .pfE.fav{border-color:color-mix(in srgb,var(--c) 60%,transparent);background:linear-gradient(90deg,color-mix(in srgb,var(--c) 18%,transparent),transparent)}
 .pfE.fav::after{content:"FAVORITE";position:absolute;right:12px;top:-8px;padding:0 6px;font:500 9px var(--h-serif);letter-spacing:.2em;color:var(--c);background:#0a0b20}
 .pfBds{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
-.pfB{display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 4px;text-align:center;opacity:.38;filter:grayscale(1)}
-.pfB svg{width:42px;height:42px;padding:9px;fill:none;stroke:#fff;stroke-width:1.3;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);background:linear-gradient(160deg,#3a3270,#14122e)}
-.pfB span{font-size:11.5px;color:var(--h-mute)}
+.pfB{display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 2px;text-align:center;opacity:.42;filter:grayscale(1) brightness(.8)}
 .pfB.ok{opacity:1;filter:none}
-.pfB.ok svg{background:linear-gradient(160deg,#ffe9a8,#a8782a);stroke:#2a1a04}
-.pfB.ok span{color:#fff}
+.pfB>span:not(.bdF){font-size:11.5px;color:var(--h-mute)}.pfB.ok>span:not(.bdF){color:#fff}
+.pfB em{font:500 9px var(--h-serif);font-style:normal;letter-spacing:.16em;color:var(--rc)}
+.pfB.r0{--rc:#a9b3d6}.pfB.r1{--rc:#5ab4ff}.pfB.r2{--rc:#b884ff}.pfB.r3{--rc:#ffc24a}
+/* กรอบตราตามความหายาก */
+.bdF{position:relative;width:58px;height:58px;display:grid;place-items:center}
+.bdF>svg:first-child{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.bdF .f1{fill:color-mix(in srgb,var(--rc) 22%,#0b0b20);stroke:var(--rc);stroke-width:1.6}
+.bdF .f2{fill:#0d0c24;stroke:color-mix(in srgb,var(--rc) 60%,transparent);stroke-width:.8}
+.bdF .lau ellipse{fill:color-mix(in srgb,var(--rc) 80%,#5a3a08);stroke:#fff3c8;stroke-width:.3}
+.bdF .cr{fill:var(--rc);stroke:#fff3c8;stroke-width:.4}
+.bdI{position:relative;width:22px;height:22px;fill:none;stroke:#fff;stroke-width:1.4;stroke-linejoin:round;stroke-linecap:round;filter:drop-shadow(0 0 4px var(--rc))}
+.pfB.r3 .bdI{stroke:#fff6d8}
+.pfB.ok.r2 .bdF,.pfB.ok.r3 .bdF{filter:drop-shadow(0 0 7px color-mix(in srgb,var(--rc) 70%,transparent))}
+.shn{position:absolute;inset:0;overflow:hidden;border-radius:50%;pointer-events:none}
+.pfB.ok.r3 .shn::after,.pfB.ok.r2 .shn::after{content:"";position:absolute;inset:-30%;background:linear-gradient(115deg,transparent 40%,rgba(255,255,255,.55) 50%,transparent 60%);animation:bdShn 3.2s ease-in-out infinite}
+.pfB.ok.r2 .shn::after{animation-duration:4.4s;opacity:.6}
+@keyframes bdShn{0%{transform:translateX(-60%)}55%,100%{transform:translateX(60%)}}
+/* ---------- กรอบโปรไฟล์วงกลม (ขยับได้) ---------- */
+.pb{--sz:84px;position:relative;flex:none;width:var(--sz);height:var(--sz);display:inline-grid;place-items:center}
+.pbIn{position:absolute;inset:17%;border-radius:50%;display:grid;place-items:center;font:500 calc(var(--sz)*.3) var(--h-serif);font-style:normal;color:#fff;
+  background:radial-gradient(circle at 50% 32%,color-mix(in srgb,var(--pc) 75%,#fff),color-mix(in srgb,var(--pc) 60%,#0a0a20) 78%);text-shadow:0 1px 4px rgba(0,0,0,.6);box-shadow:inset 0 0 calc(var(--sz)*.08) rgba(0,0,0,.5)}
+.pbIn.ic{background:radial-gradient(circle at 50% 35%,#2a2560,#0b0b22 75%)}
+.pbIn.ic svg,.pbIn.ic img{width:62%;height:62%}
+.pbS{position:absolute;left:-12%;top:-12%;width:124%;height:124%;overflow:visible;pointer-events:none}
+.pbS *{vector-effect:non-scaling-stroke}
+.pbS .r1,.pbS .r2,.pbS circle[class^=g]{fill:none}
+/* พื้นฐาน */
+.pb-def .r1{stroke:#c9c4f0;stroke-width:1.4}.pb-def .r2{stroke:rgba(190,178,255,.5);stroke-width:1;stroke-dasharray:3 5;animation:pbSpin 24s linear infinite;transform-origin:0 0}
+.pb-def .gm{fill:#d9d4ff}
+/* ไฟ: เปลวรอบวงสั่นไหว + ถ่านลอยขึ้น */
+.pb-pyro .r1{stroke:#ff8a3a;stroke-width:2.2;filter:drop-shadow(0 0 3px #ff6a1a)}.pb-pyro .r2{stroke:#ffd27a;stroke-width:.8}
+.pb-pyro .fl.f2{fill:#ffe08a!important;opacity:.95}
+.pb-pyro .fl{fill:#ff6a1a;transform-box:fill-box;transform-origin:50% 100%;animation:pbFlick .7s ease-in-out infinite alternate;animation-delay:calc(var(--d)*-1);opacity:.92}
+.pb-pyro g:nth-child(3n) .fl:not(.f2){fill:#ff9a3a}
+.pb-pyro .pbS{filter:drop-shadow(0 0 4px rgba(255,120,40,.9))}
+@keyframes pbFlick{0%{transform:scaleY(calc(var(--s)*.55)) scaleX(1.05)}100%{transform:scaleY(calc(var(--s)*1.15)) scaleX(.85)}}
+.pb .emb{position:absolute;left:50%;top:6%;width:3px;height:3px;border-radius:50%;background:#ffd27a;box-shadow:0 0 5px #ff8a3a;animation:pbEmb 2.4s linear infinite;opacity:0}
+.pb .emb.e2{left:30%;top:14%;animation-delay:1.1s}
+@keyframes pbEmb{0%{opacity:0;transform:translate(0,0)}15%{opacity:1}100%{opacity:0;transform:translate(6px,calc(var(--sz)*-.35))}}
+/* น้ำแข็ง: ผลึกแหลมรอบวงหมุนช้า + ประกายกะพริบ */
+.pb-frost .r1{stroke:#bff0ff;stroke-width:1.8;filter:drop-shadow(0 0 3px #7fd8ff)}.pb-frost .r2{stroke:#6fc8ff;stroke-width:.8}
+.pb-frost .sh{fill:url(#none);fill:#d8f6ff;stroke:#7fd8ff;stroke-width:.5;opacity:.95}.pb-frost .sh.s2{fill:#9fe4ff}
+.pb-frost .spin{animation:pbSpin 30s linear infinite;transform-origin:0 0}
+.pb-frost .tw{fill:#fff;transform-box:fill-box;transform-origin:center;animation:pbTw 2.4s ease-in-out infinite;animation-delay:var(--d)}
+.pb-frost .pbS{filter:drop-shadow(0 0 3px rgba(140,220,255,.8))}
+@keyframes pbTw{0%,100%{opacity:.2;transform:scale(.5)}50%{opacity:1;transform:scale(1.3)}}
+/* สายฟ้า: สายฟ้าหยักรอบวงสลับกันแลบ */
+.pb-storm .r1{stroke:#b48cff;stroke-width:1.8;animation:pbFlk 1.7s steps(1) infinite}.pb-storm .r2{stroke:#ffe27a;stroke-width:.7}
+.pb-storm polyline{fill:none;stroke:#fff6c0;stroke-width:1.4;stroke-linejoin:bevel;filter:drop-shadow(0 0 2px #ffe27a) drop-shadow(0 0 4px #b48cff)}
+.pb-storm .bz{opacity:0;animation:pbBolt .9s steps(1) infinite}.pb-storm .b1{animation-delay:.3s}.pb-storm .b2{animation-delay:.6s}
+@keyframes pbBolt{0%{opacity:1}22%{opacity:.35}30%{opacity:0}100%{opacity:0}}
+@keyframes pbFlk{0%{opacity:1}48%{opacity:.6}52%{opacity:1}76%{opacity:.75}}
+/* ดิน: วงหินร้าว + หินลอยโคจร + รูนเรืองทีละอัน */
+.pb-earth .r1{stroke:#8a6a44;stroke-width:4.2;stroke-dasharray:12 1.6}.pb-earth .r2{stroke:#ffb35a;stroke-width:.9;filter:drop-shadow(0 0 3px #ff9a3a)}
+.pb-earth .rn{stroke:#ffc46b;stroke-width:1.2;animation:pbRn 3s ease-in-out infinite;animation-delay:var(--d);opacity:.25}
+.pb-earth .orb{animation:pbSpin 14s linear infinite;transform-origin:0 0}
+.pb-earth .rk{fill:#7a5a3a;stroke:#c99a62;stroke-width:.6;filter:drop-shadow(0 0 2px rgba(255,160,70,.6))}
+@keyframes pbRn{0%,100%{opacity:.25}40%{opacity:1}}
+/* สัญญาณรบกวน (รูปอ้างอิง 2): วงสามสีเหลื่อมกระตุก + เส้นสแกน */
+.pb-glitch path{fill:none}.pb-glitch .g0{stroke:#120a24;stroke-width:3.6}.pb-glitch .g1{stroke:#20e4ff;stroke-width:3;animation:pbG1 1.3s steps(1) infinite}.pb-glitch .g2{stroke:#ff2ad4;stroke-width:3;animation:pbG2 1.3s steps(1) infinite}
+.pb-glitch .gl{fill:#1a1030;animation:pbGl 1.1s steps(1) infinite;animation-delay:var(--d)}
+@keyframes pbG1{0%{transform:translate(-1.6px,0)}20%{transform:translate(1.2px,-1px)}40%{transform:translate(-2.4px,1px)}60%{transform:translate(0,0)}80%{transform:translate(2px,.6px)}}
+@keyframes pbG2{0%{transform:translate(1.6px,0)}20%{transform:translate(-1.4px,1px)}40%{transform:translate(2.2px,-1px)}60%{transform:translate(0,0)}80%{transform:translate(-2px,-.6px)}}
+@keyframes pbGl{0%{opacity:1;transform:translateX(0)}30%{opacity:0}55%{opacity:.8;transform:translateX(6px)}75%{opacity:0}}
+/* วงรูน (รูปอ้างอิง 3): อักษรรูนหมุนรอบ + ควันเรืองฟ้า */
+.pb-rune .r1,.pb-rune .r2{stroke:#7fe4ff;stroke-width:1.3;filter:drop-shadow(0 0 3px #3fc8ff)}
+.pb-rune text{font:7.2px serif;fill:#a8f0ff;letter-spacing:1.2px;filter:drop-shadow(0 0 2px #3fc8ff)}
+.pb-rune .spin{animation:pbSpin 26s linear infinite;transform-origin:0 0}
+.pb-rune .sm{fill:none;stroke:rgba(60,170,255,.35);stroke-width:14;filter:blur(4px);animation:pbSm 3.6s ease-in-out infinite}
+.pb-rune .dm{fill:#bff6ff}
+@keyframes pbSm{50%{stroke:rgba(80,200,255,.6);stroke-width:18}}
+/* ปีกสวรรค์ (รูปอ้างอิง 1): เสี้ยวแสงขาว + ปีกขยับ + ผีเสื้อฟ้ากระพือ */
+.pb-wings .arc{fill:none;stroke:#fff;stroke-width:2.4;stroke-linecap:round;filter:drop-shadow(0 0 3px #fff) drop-shadow(0 0 7px #9fdcff)}
+.pb-wings .wing{transform-origin:-26px -26px;animation:pbWing 2.6s ease-in-out infinite}
+.pb-wings .fe{fill:#f4f8ff;stroke:#c8e6ff;stroke-width:.4;filter:drop-shadow(0 0 2px #fff)}
+.pb-wings .hd{fill:#fff;filter:drop-shadow(0 0 3px #9fdcff)}
+.pb-wings .bf path{fill:#7fe0ff;filter:drop-shadow(0 0 3px #3fc8ff);transform-box:fill-box;animation:pbFlap .5s ease-in-out infinite alternate;animation-delay:var(--d)}
+.pb-wings .bf path:first-child{transform-origin:100% 50%}.pb-wings .bf path:last-child{transform-origin:0 50%}
+@keyframes pbWing{50%{transform:rotate(-7deg)}}
+@keyframes pbFlap{to{transform:scaleX(.25)}}
+@keyframes pbSpin{to{transform:rotate(360deg)}}
+/* รายการกรอบในแท็บปรับแต่ง (แถวเดียว) */
+.pfItems.one{grid-template-columns:1fr}
+.pfIt.pfBd{flex-direction:row;align-items:center;gap:12px;padding:8px 10px}
+.pfIt.pfBd .bdTx{display:flex;flex-direction:column;gap:1px;min-width:0;text-align:left}
+.pfIt.pfBd .bdTx b{text-align:left;font-size:13.5px;font-weight:400}
+.pfIt.pfBd .bdTx em{position:static;padding:0;background:none;font:500 9.5px var(--h-serif);letter-spacing:.16em}
+.pfIt.pfBd .bdTx small{font-size:11px;color:var(--h-mute)}
 /* ขวา: ปุ่ม + ปรับแต่ง */
 .pfR{position:absolute;right:max(20px,2.4vw);top:calc(max(18px,3.2vh) + 4px);bottom:max(18px,3vh);width:min(300px,26vw);display:flex;flex-direction:column;gap:12px;pointer-events:none}
 .pfR>*{pointer-events:auto}

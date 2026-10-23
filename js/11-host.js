@@ -20,7 +20,7 @@ function newPlayer(id,name,color,lk){
 }
 function emptyInput(){return {u:0,d:0,l:0,r:0,ax:0,ay:0,ap:0,fire:0,sh:0,jh:0,ch:0,dh:0,c:{q:0,e:0,r:0,f:0,sp:0,x:0,b:0,v:0,jp:0,g:0}};}
 // กรอบรูปโปรไฟล์ที่ส่งมา: ต้องเป็นกรอบที่มีจริง ไม่งั้นใช้กรอบเริ่มต้น
-function frameOk(f){f=String(f||'');return PROF_ITEMS.some(q=>q.t==='frame'&&q.id===f)?f:'fr0';}
+function frameOk(f){f=String(f||'');return typeof BORDERS!=='undefined'&&BORDERS.some(q=>q.id===f)?f:'b_def';}
 function addPlayer(id,name,color,lk,kit){
   // หน้าตา: ไม่ส่งมา (บอท) = สุ่มจาก id / สีประจำตัวมาจากสีบ้านเสมอ
   lk=lookStr(parseLook(lk||lookStr(randLook(hashStr(id)))));LOOKS[id]=lk;color=houseColor(lk);
@@ -37,7 +37,7 @@ function initHostLobby(){
   broadcastLobby();
   setScreen('lobby');
 }
-function lobbyMsg(){return {t:'lobby',ph:G.ph,mode:G.mode,map:G.map,mpk:G.mapPick||'',code:NET.code,online:NET.online,host:NET.myId,players:plist().map(p=>({id:p.id,n:p.name,c:p.color,lk:p.lk,kt:p.kit,tm:p.lteam,fr:p.fr||'fr0'}))};}
+function lobbyMsg(){return {t:'lobby',ph:G.ph,mode:G.mode,map:G.map,mpk:G.mapPick||'',code:NET.code,online:NET.online,host:NET.myId,players:plist().map(p=>({id:p.id,n:p.name,c:p.color,lk:p.lk,kt:p.kit,tm:p.lteam,fr:p.fr||'b_def'}))};}
 function broadcastLobby(){const m=lobbyMsg();sendAll(m);onLobby(m);}
 
 const INPN=['ax','ay','ah','ap','gx','gy','mx','my'];

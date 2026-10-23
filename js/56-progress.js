@@ -16,17 +16,16 @@ var UNLOCKS=[
   {lv:14,k:'cl',v:11,n:'ผ้าคลุมทองหม่น'},{lv:16,k:'ws',v:4,n:'ทรงด้าม: กระดูก'},{lv:18,k:'cl',v:12,n:'ผ้าคลุมดำสนิท'},
   {lv:20,k:'wc',v:8,n:'แกนเวท: ประกายดาวตก'},{lv:22,k:'cl',v:13,n:'ผ้าคลุมเงินจันทรา'},{lv:24,k:'ws',v:5,n:'ทรงด้าม: เอลเดอร์วอนด์'},
   {lv:26,k:'cl',v:14,n:'ผ้าคลุมทองแชมป์'},{lv:28,k:'ws',v:6,n:'ทรงด้าม: คริสตัล'},{lv:30,k:'cl',v:15,n:'ผ้าคลุมจอมเวทสูงสุด'}];
-// ของตกแต่งโปรไฟล์ปลดตามเลเวล (ผู้ใช้ 2026-10-23 รอบ 3: พื้นหลัง / ท่าโพส / กรอบรูป (ใช้ในเกมด้วย) / เอฟเฟกต์รอบตัว) • lv 1 = ของเริ่มต้น
-//   ⚠ รายการ ชื่อ เลเวล และของใหญ่ (big = ห้าเหลี่ยมใหญ่สีทองในไทม์ไลน์ รางวัลเลเวล) Claude เลือกเอง
-//   t: frame กรอบรูป (c = สีกรอบ) • bg พื้นหลังโปรไฟล์ (img = assets/ui/<img>) • pose ท่าโพส (p = ชื่อท่าใน HPOSE js/61) • aura เอฟเฟกต์รอบตัว (c = สี)
+// ของตกแต่งโปรไฟล์ปลดตามเลเวล (ผู้ใช้ 2026-10-23 รอบ 3 แก้: "just edit pose and background as map we standing on") • lv 1 = ของเริ่มต้น
+//   t: bg = แผนที่ที่ตัวละครยืนในหน้าโปรไฟล์ (m = id แผนที่, ภาพย่อ assets/ui/maps/<m>.jpg) • pose = ท่าโพส (p = ชื่อท่าใน HPOSE js/61)
+//   กรอบโปรไฟล์ไม่อยู่ที่นี่แล้ว — ปลดด้วยความสำเร็จ (js/65 BORDERS) • ⚠ รายการ/เลเวล Claude เลือกเอง
 var PROF_ITEMS=[
-  {id:'fr0',t:'frame',lv:1,n:'กรอบเริ่มต้น',c:'#9aa3c7'},{id:'bg0',t:'bg',lv:1,n:'ห้องศึกษายามค่ำ',img:'guide/credits.jpg'},{id:'po0',t:'pose',lv:1,n:'ยื่นลูกแก้ว',p:'present'},
-  {id:'bg1',t:'bg',lv:3,n:'โถงใหญ่',img:'maps/greathall.jpg'},{id:'fr1',t:'frame',lv:5,n:'กรอบจันทร์เงิน',c:'#dfe6ff'},{id:'po1',t:'pose',lv:7,n:'ฮีโร่',p:'hero'},
-  {id:'bg2',t:'bg',lv:9,n:'ป่าต้องห้าม',img:'maps/forest.jpg'},{id:'au1',t:'aura',lv:10,n:'ละอองดาว',c:'#b9a6ff',big:1},{id:'fr2',t:'frame',lv:11,n:'กรอบเวทม่วง',c:'#a995ff'},
-  {id:'po2',t:'pose',lv:13,n:'ท่าดวล',p:'duel'},{id:'bg3',t:'bg',lv:15,n:'ซากเมืองทะเลทราย',img:'maps/ruins.jpg'},{id:'fr3',t:'frame',lv:17,n:'กรอบพายุฟ้า',c:'#8fd8ff'},
-  {id:'po3',t:'pose',lv:19,n:'สองลูกแก้ว',p:'orb2'},{id:'au2',t:'aura',lv:20,n:'เปลวถ่านวน',c:'#ffab5c',big:1},{id:'bg4',t:'bg',lv:21,n:'ทะเลสาบดำ',img:'maps/lake.jpg'},
-  {id:'fr4',t:'frame',lv:23,n:'กรอบถ่านทอง',c:'#ffc46b'},{id:'po4',t:'pose',lv:25,n:'ร่ายเวท',p:'cast'},{id:'bg5',t:'bg',lv:27,n:'ปราสาทยามราตรี',img:'maps/castle.jpg'},
-  {id:'fr5',t:'frame',lv:29,n:'กรอบสวรรค์',c:'#ffe9a8'},{id:'au3',t:'aura',lv:30,n:'รัศมีสวรรค์',c:'#ffe9a8',big:1}];
+  {id:'bg0',t:'bg',lv:1,n:'ลานปราสาท',m:'castle'},{id:'po0',t:'pose',lv:1,n:'ยื่นลูกแก้ว',p:'present'},
+  {id:'bg1',t:'bg',lv:3,n:'โถงใหญ่',m:'greathall'},{id:'po1',t:'pose',lv:5,n:'ฮีโร่',p:'hero'},{id:'bg2',t:'bg',lv:7,n:'ป่ามืด',m:'forest'},
+  {id:'po2',t:'pose',lv:9,n:'ท่าดวล',p:'duel'},{id:'bg3',t:'bg',lv:11,n:'ซากเมืองทะเลทราย',m:'ruins'},{id:'po3',t:'pose',lv:13,n:'สองลูกแก้ว',p:'orb2'},
+  {id:'bg4',t:'bg',lv:15,n:'ทะเลสาบดำ',m:'lake'},{id:'po4',t:'pose',lv:17,n:'ร่ายเวท',p:'cast'},{id:'bg5',t:'bg',lv:19,n:'หมู่บ้านฮอกส์มี้ด',m:'hogsmeade'},
+  {id:'po5',t:'pose',lv:21,n:'กางแขน',p:'spread'},{id:'bg6',t:'bg',lv:23,n:'ทุ่งหญ้า',m:'meadow'},{id:'po6',t:'pose',lv:25,n:'พักผ่อน',p:'rest'},
+  {id:'bg7',t:'bg',lv:27,n:'หุบเขา',m:'valley'},{id:'bg8',t:'bg',lv:29,n:'สนามควิดดิช',m:'pitch'}];
 // ของรางวัลทั้งหมดของเลเวล L (ชุดแต่งตัว UNLOCKS + ของโปรไฟล์) • ใช้ในจอสรุป (ของถัดไปปลายแถบ) + ไทม์ไลน์รางวัลเลเวล
 function lvRewards(L){return [...UNLOCKS.filter(u=>u.lv===L).map(u=>({t:u.k==='cl'?'cloak':'wand',n:u.n,lv:u.lv,big:u.lv%10===0?1:0})),...PROF_ITEMS.filter(q=>q.lv===L&&L>1)];}
 function lvNextReward(L){for(let l=L+1;l<=LV_MAX;l++){const r=lvRewards(l);if(r.length)return {lv:l,r};}return null;}

@@ -224,72 +224,109 @@ addEventListener('keydown',e=>{const el=$('#over');if(el.classList.contains('hid
   if((e.code==='Enter'||e.code==='Space')&&OV.step===0){e.preventDefault();ovBoard();}});
 if(typeof WD!=='undefined')Object.assign(WD,{ovOpen,ovBoard,OV});
 
-// ---------- หน้าโปรไฟล์ (แบบ Naraka ย่อ) + รางวัลเลเวล ----------
-// ขวา = ตัวเรา 3D (js/61 hubProfTick) บนพื้นหลังที่เลือก • ซ้าย = การ์ดชื่อ/เลเวล + สถิติรวม + ธาตุที่เล่นบ่อย + ตราสัญลักษณ์ (ผู้ใช้เลือก)
-// ปรับแต่ง = พื้นหลัง / ท่าโพส / กรอบรูป (ใช้ในเกมด้วย) / เอฟเฟกต์รอบตัว — ปลดตามเลเวล (js/56 PROF_ITEMS) • เก็บใน localStorage 'wd_prof'
-// รางวัลเลเวล = ไทม์ไลน์แนวนอนด้านล่าง (วงกลมเลเวล + เส้นขึ้นไปหาของในห้าเหลี่ยม ของใหญ่ = ใหญ่กว่า/สีทอง) เลื่อนซ้ายขวาได้
-const PRF=(()=>{const d={bg:'bg0',pose:'po0',fr:'fr0',au:''};try{return Object.assign(d,JSON.parse(store('wd_prof')||'{}'));}catch(e){return d;}})();
+// ---------- หน้าโปรไฟล์ + รางวัลเลเวล ----------
+// ผู้ใช้ 2026-10-23 (รอบแก้): ตัวเรายืนอยู่ "ในแผนที่จริง" (js/61 hubProfTick) — ปรับแต่งได้แค่ ท่าโพส + แผนที่ที่ยืน (ปลดตามเลเวล js/56 PROF_ITEMS)
+//   กรอบโปรไฟล์ = วงกลมขยับได้แบบรูปอ้างอิง (ปีกสวรรค์ / สัญญาณรบกวน / วงรูน) + กรอบประจำธาตุ 4 แบบ — ปลดด้วยความสำเร็จ (BORDERS) ใช้ในห้อง/ตารางคะแนนด้วย
+//   ตราสัญลักษณ์มีกรอบตามความหายาก (ธรรมดา วง / หายาก โล่ / มหากาพย์ ดาว / ตำนาน เหรียญทองมีใบลอเรล) • ซ้าย = การ์ดชื่อ + สถิติ + ธาตุที่เล่นบ่อย + ตรา
+//   ⚠ หน้าตากรอบ เงื่อนไขปลด และความหายากของตรา Claude ออกแบบเอง
+const PRF=(()=>{const d={bg:'bg0',pose:'po0',fr:'b_def'};try{const o=Object.assign(d,JSON.parse(store('wd_prof')||'{}'));if(!/^b_/.test(o.fr))o.fr='b_def';return o;}catch(e){return d;}})();
 const prfItem=id=>PROF_ITEMS.find(q=>q.id===id);
 const prfLv=()=>DEV_MAXLV?progLv().L:lvOf(PROG.xp).L;
 const prfOk=it=>!!it&&(DEV_MAXLV||lvOf(PROG.xp).L>=it.lv);
-function prfGet(t){const k={bg:'bg',pose:'pose',frame:'fr',aura:'au'}[t],it=prfItem(PRF[k]);return prfOk(it)?it:null;}
-function myFrame(){const it=prfGet('frame');return it?it.id:'fr0';}   // กรอบรูปของเรา (ส่งให้ห้องตอนเข้า js/10 hello)
-const FR_IDX=id=>Math.max(0,PROF_ITEMS.filter(q=>q.t==='frame').findIndex(q=>q.id===id));
-// อวตาร: หกเหลี่ยม + ตัวอักษรแรกของชื่อ + กรอบตามที่เลือก (คลาส fr-0..5)
-function prfAvatar(name,fr,col,sz,inner){const f=prfItem(fr)||prfItem('fr0');return `<span class="pfAv fr-${FR_IDX(f.id)}" style="--fc:${f.c};--pc:${col||'#7a9cff'};${sz?'--sz:'+sz+'px':''}">${inner?`<i class="ic">${inner}</i>`:`<i>${esc((name||'?').trim().charAt(0).toUpperCase())}</i>`}</span>`;}   // inner = ไอคอนแทนตัวอักษร (เช่นไอคอนสายในห้อง)
-const BADGES=[   // ⚠ ตราสัญลักษณ์ Claude เลือกเอง: [id, ชื่อ, คำอธิบาย, ค่าปัจจุบัน, เป้า]
-  ()=>['first','ชัยชนะแรก','ชนะ 1 ตา',PROG.wins,1],()=>['win10','สิบชัยชนะ','ชนะ 10 ตา',PROG.wins,10],()=>['kill100','นักล่า','ฆ่ารวม 100',PROG.kills,100],
-  ()=>['bestk','สังหารต่อเนื่อง','ฆ่า 10 ในตาเดียว',PROG.bestK,10],()=>['dmg','พลังทำลาย','ดาเมจ 5,000 ในตาเดียว',PROG.bestD,5000],()=>['vet','ทหารผ่านศึก','เล่น 50 ตา',PROG.games,50],
-  ()=>['dun','นักฝ่าดันเจียน','ถึงชั้น 10 ในดันเจียน',+(store('wd_best')||0),10],()=>['elem','จอมเวทสี่ธาตุ','เล่นครบ 4 ธาตุ',PATHS.filter((p,i)=>!p.off&&PROG.paths[i]).length,4]];
+function prfGet(t){const it=prfItem(PRF[t]);return prfOk(it)?it:null;}
+const pathIdx=id=>PATHS.findIndex(p=>p.id===id);
+// กรอบโปรไฟล์: req() = [ค่าปัจจุบัน, เป้า] • r = ความหายาก (0 ธรรมดา … 3 ตำนาน)
+const BORDERS=[
+  {id:'b_def',n:'วงเวทพื้นฐาน',r:0,how:'มีตั้งแต่เริ่ม',req:()=>[1,1]},
+  {id:'b_pyro',n:'วงเพลิงนิรันดร์',r:2,el:'pyro',how:'เล่นสายไฟ 10 ตา',req:()=>[PROG.paths[pathIdx('pyro')]||0,10]},
+  {id:'b_frost',n:'วงผลึกเยือกแข็ง',r:2,el:'frost',how:'เล่นสายน้ำแข็ง 10 ตา',req:()=>[PROG.paths[pathIdx('frost')]||0,10]},
+  {id:'b_storm',n:'วงอสุนีบาต',r:2,el:'storm',how:'เล่นสายฟ้า 10 ตา',req:()=>[PROG.paths[pathIdx('storm')]||0,10]},
+  {id:'b_earth',n:'วงศิลาโบราณ',r:2,el:'earth',how:'เล่นสายดิน 10 ตา',req:()=>[PROG.paths[pathIdx('earth')]||0,10]},
+  {id:'b_glitch',n:'สัญญาณรบกวน',r:1,how:'ฆ่ารวม 100',req:()=>[PROG.kills,100]},
+  {id:'b_rune',n:'วงรูนต้องห้าม',r:2,how:'ดันเจียนถึงชั้น 10',req:()=>[+(store('wd_best')||0),10]},
+  {id:'b_wings',n:'ปีกสวรรค์',r:3,how:'ชนะ 50 ตา',req:()=>[PROG.wins,50]}];
+const BRAR_C=['#a9b3d6','#5ab4ff','#b884ff','#ffc24a'],BRAR_N=['ธรรมดา','หายาก','มหากาพย์','ตำนาน'];
+const bordOk=b=>!!b&&(DEV_MAXLV||(()=>{const q=b.req();return q[0]>=q[1];})());
+function myFrame(){const b=BORDERS.find(q=>q.id===PRF.fr);return bordOk(b)?b.id:'b_def';}   // กรอบของเรา (ส่งให้ห้องตอนเข้า js/10 hello)
+// SVG ของแต่ละกรอบ (viewBox −50…50, อวตารวงในรัศมี ~32) — ขยับด้วย CSS (css/ui3.css .pb-*)
+let PBN=0;
+const PB_SVG={
+  b_def:()=>`<circle class="r1" r="37"/><circle class="r2" r="42"/>${[0,90,180,270].map(a=>`<path class="gm" transform="rotate(${a})" d="M0,-45 l2.5,3 -2.5,3 -2.5,-3z"/>`).join('')}`,
+  b_pyro:()=>{const fl=(n,r0,h,cls,ph)=>Array.from({length:n},(_,i)=>{const a=i*360/n+ph,k=0.7+((i*37)%10)/14,lean=((i*53)%7-3)*0.9;   // เปลว: โคนกว้าง ปลายแหลมเอียง โค้งแบบไฟ
+      return `<g transform="rotate(${a.toFixed(1)})"><path class="${cls}" style="--d:${(i*0.29%1).toFixed(2)}s" d="M-4,${-r0} C-6,${-r0-h*0.35} ${lean-1},${-r0-h*0.6} ${lean+1.5},${-r0-h*k} C${lean+2},${-r0-h*0.55} 6,${-r0-h*0.35} 4,${-r0} Z"/></g>`;}).join('');
+    return `<circle class="r1" r="36.5"/>${fl(16,35,15,'fl',0)}${fl(16,35.5,9,'fl f2',11)}<circle class="r2" r="34"/>`;},
+  b_frost:()=>`<g class="spin">${Array.from({length:12},(_,i)=>`<path class="sh${i%2?' s2':''}" transform="rotate(${i*30})" d="${i%2?'M0,-36 L1.6,-41 L0,-46 L-1.6,-41Z':'M0,-36 L2.6,-44 L0,-56 L-2.6,-44Z'}"/>`).join('')}</g><circle class="r1" r="37"/><circle class="r2" r="34.5"/>${[30,120,200,300].map((a,i)=>`<path class="tw" style="--d:${i*0.6}s" transform="rotate(${a}) translate(0,-49)" d="M0,-3 L.8,-.8 3,0 .8,.8 0,3 -.8,.8 -3,0 -.8,-.8Z"/>`).join('')}`,
+  b_storm:()=>{const bolt=(a0,seed)=>{let p=[],r=38;for(let k=0;k<=6;k++){const a=(a0+k*9)*Math.PI/180,rr=r+(((seed*7+k*13)%9)-4)*1.4;p.push((Math.sin(a)*rr).toFixed(1)+','+(-Math.cos(a)*rr).toFixed(1));}return `<polyline points="${p.join(' ')}"/>`;};
+    return `<circle class="r1" r="37"/>${[0,1,2].map(g=>`<g class="bz b${g}">${[0,1,2,3].map(k=>bolt(g*40+k*90,g*3+k)).join('')}</g>`).join('')}<circle class="r2" r="34"/>`;},
+  b_earth:()=>`<circle class="r1" r="37"/><circle class="r2" r="33.5"/>${Array.from({length:12},(_,i)=>`<path class="rn" style="--d:${(i*0.25).toFixed(2)}s" transform="rotate(${i*30})" d="M0,-35.5 v-3"/>`).join('')}<g class="orb">${[0,90,180,270].map((a,i)=>`<path class="rk" transform="rotate(${a}) translate(0,-46)" d="${['M-3,-2 L1,-4 L4,0 L2,3 L-3,2Z','M-2,-3 L3,-2 L3,2 L-1,4 L-4,0Z','M-4,-1 L0,-4 L4,-1 L2,3 L-2,3Z','M-3,-3 L3,-3 L4,1 L0,4 L-4,1Z'][i]}"/>`).join('')}</g>`,
+  b_glitch:()=>{const jag=sd=>{let d='';for(let i=0;i<=72;i++){const t=i/72*Math.PI*2,n=((i*sd*37)%11-5)/5,sp=(i*sd)%13===0?3.5:0,r=38+n*1.1+((i%2)?sp:-sp*0.4);d+=(i?'L':'M')+(Math.sin(t)*r).toFixed(1)+','+(-Math.cos(t)*r).toFixed(1);}return d+'Z';};   // วงขอบขาดแหว่งแบบภาพกระตุก
+    const streak=(x,y,w,i)=>`<rect class="gl" style="--d:${(i*0.23).toFixed(2)}s" x="${x}" y="${y}" width="${w}" height="${i%3?0.9:1.6}"/>`;
+    return `<path class="g1" d="${jag(3)}"/><path class="g2" d="${jag(5)}"/><path class="g0" d="${jag(7)}"/>${[[-60,-30,24],[-58,-26,14],[-54,-33,9],[34,22,26],[40,26,18],[44,18,10],[-64,12,12],[30,-34,14]].map((q,i)=>streak(q[0],q[1],q[2],i)).join('')}`;},
+  b_rune:()=>{const id='pbp'+(++PBN);return `<circle class="sm" r="44"/><circle class="r1" r="35.5"/><circle class="r2" r="46"/><g class="spin"><path id="${id}" fill="none" d="M0,-41 a41,41 0 1,1 -0.01,0"/><text><textPath href="#${id}">ᚠᚢᚦᚨᚱᚲ ᚷᚹᚺᚾᛁ ᛃᛇᛈᛉᛊ ᛏᛒᛖᛗᛚ ᛜᛞᛟᚠᚢᚦ ᚨᚱᚲᚷ ᚹᚺᚾᛁᛃ</textPath></text></g>${[45,165,285].map(a=>`<path class="dm" transform="rotate(${a}) translate(0,-50)" d="M0,-3 L2.4,0 0,3 -2.4,0Z"/>`).join('')}`;},
+  b_wings:()=>`<path class="arc" d="M-30,-23 A38,38 0 1,1 -26,28"/><g class="wing">${[0,1,2,3,4].map(k=>`<path class="fe" transform="rotate(${-62+k*13} -26 -26)" d="M-26,-26 C-36,-30 -50,-30 -58,-24 C-48,-22 -36,-21 -26,-26Z"/>`).join('')}<circle class="hd" cx="-24" cy="-28" r="4"/></g>${[[22,30,1],[34,18,.7],[8,40,.6]].map((b,i)=>`<g class="bf" style="--d:${i*0.3}s" transform="translate(${b[0]},${b[1]}) scale(${b[2]})"><path d="M0,0 C-4,-6 -9,-5 -8,0 C-7,3 -3,3 0,0Z"/><path d="M0,0 C4,-6 9,-5 8,0 C7,3 3,3 0,0Z"/></g>`).join('')}`};
+// อวตารวงกลม + กรอบ (ชื่อเดิม prfAvatar — ห้อง/ตารางคะแนนเรียกใช้) • inner = ไอคอนแทนตัวอักษร
+function prfAvatar(name,fr,col,sz,inner){const b=BORDERS.find(q=>q.id===fr)||BORDERS[0];
+  return `<span class="pb pb-${b.id.slice(2)}" style="--pc:${col||'#7a9cff'};${sz?'--sz:'+sz+'px':''}"><i class="pbIn${inner?' ic':''}">${inner||esc((name||'?').trim().charAt(0).toUpperCase())}</i><svg class="pbS" viewBox="-50 -50 100 100">${PB_SVG[b.id]()}</svg>${b.id==='b_pyro'?'<b class="emb"></b><b class="emb e2"></b>':''}</span>`;}
+// ตราสัญลักษณ์ (มีความหายาก): [id, ชื่อ, คำอธิบาย, ค่าปัจจุบัน, เป้า, ความหายาก 0–3]
+const BADGES=[
+  ()=>['first','ชัยชนะแรก','ชนะ 1 ตา',PROG.wins,1,0],()=>['win10','สิบชัยชนะ','ชนะ 10 ตา',PROG.wins,10,1],()=>['kill100','นักล่า','ฆ่ารวม 100',PROG.kills,100,1],
+  ()=>['vet','ทหารผ่านศึก','เล่น 50 ตา',PROG.games,50,1],()=>['bestk','สังหารต่อเนื่อง','ฆ่า 10 ในตาเดียว',PROG.bestK,10,2],()=>['dmg','พลังทำลาย','ดาเมจ 5,000 ในตาเดียว',PROG.bestD,5000,2],
+  ()=>['dun','นักฝ่าดันเจียน','ถึงชั้น 10 ในดันเจียน',+(store('wd_best')||0),10,2],()=>['elem','จอมเวทสี่ธาตุ','เล่นครบ 4 ธาตุ',PATHS.filter((p,i)=>!p.off&&PROG.paths[i]).length,4,3]];
 const BICO={first:'<path d="M12 3l2.6 5.6 6 .6-4.5 4 1.3 6L12 16.2 6.6 19.2l1.3-6-4.5-4 6-.6z"/>',win10:'<path d="M7 4h10v4a5 5 0 01-10 0zM12 13v4M8.5 20h7"/>',kill100:'<path d="M5 19L19 5M14 5h5v5M5 14v5h5"/>',
   bestk:'<path d="M13.5 2L5 13.5h6L9.5 22 19 9.8h-6.2z"/>',dmg:'<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/>',vet:'<path d="M12 3l7 3v5c0 4.6-3 8.3-7 10-4-1.7-7-5.4-7-10V6z"/><path d="M8.5 11l3.5 3 3.5-3"/>',
   dun:'<path d="M4 21V9l8-6 8 6v12M9 21v-6h6v6"/>',elem:'<circle cx="8" cy="8" r="3.2"/><circle cx="16" cy="8" r="3.2"/><circle cx="8" cy="16" r="3.2"/><circle cx="16" cy="16" r="3.2"/>'};
+// กรอบตราตามความหายาก (viewBox 0 0 60 60)
+const BFR=[`<circle class="f1" cx="30" cy="30" r="25"/><circle class="f2" cx="30" cy="30" r="21"/>`,
+  `<path class="f1" d="M30 5 L51 12 V30 C51 43 42 51 30 56 C18 51 9 43 9 30 V12 Z"/><path class="f2" d="M30 10 L46 15.5 V30 C46 40 39 46.5 30 50.5 C21 46.5 14 40 14 30 V15.5 Z"/>`,
+  `<path class="f1" d="M30 3 L36 14 L48 10 L45 22 L57 28 L46 35 L50 47 L38 45 L30 56 L22 45 L10 47 L14 35 L3 28 L15 22 L12 10 L24 14 Z"/><circle class="f2" cx="30" cy="30" r="17"/>`,
+  `<g class="lau">${[0,1,2,3,4].map(k=>`<ellipse cx="${10+k*1.2}" cy="${44-k*7}" rx="2.6" ry="5.5" transform="rotate(${-30+k*14} ${10+k*1.2} ${44-k*7})"/><ellipse cx="${50-k*1.2}" cy="${44-k*7}" rx="2.6" ry="5.5" transform="rotate(${30-k*14} ${50-k*1.2} ${44-k*7})"/>`).join('')}</g><path class="cr" d="M24 8 L27 3 L30 7 L33 3 L36 8Z"/><circle class="f1" cx="30" cy="31" r="20"/><circle class="f2" cx="30" cy="31" r="16"/>`];
+function badgeHtml(b){const ok=b[3]>=b[4],r=b[5];return `<div class="pfB r${r} ${ok?'ok':''}" title="${esc(b[1]+' — '+b[2]+(ok?' ✓':` (${Math.min(b[3],b[4]).toLocaleString()}/${b[4].toLocaleString()})`))}"><span class="bdF"><svg viewBox="0 0 60 60">${BFR[r]}</svg><svg class="bdI" viewBox="0 0 24 24">${BICO[b[0]]}</svg><i class="shn"></i></span><span>${esc(b[1])}</span><em>${BRAR_N[r]}</em></div>`;}
 const SICO={games:'<rect x="4" y="5" width="16" height="14" rx="2"/><path d="M9 12h6M12 9v6"/>',wins:BICO.win10,kd:'<path d="M5 19L19 5M14 5h5v5"/><circle cx="7" cy="7" r="2"/>',kills:BICO.kill100,
   as:'<circle cx="9" cy="8" r="3"/><circle cx="16" cy="9" r="2.4"/><path d="M3.5 19c.6-3.3 2.8-5 5.5-5s4.9 1.7 5.5 5M15 14.3c2.6-.4 5 1 5.5 4.7"/>',dmg:BICO.dmg,bk:BICO.bestk,bd:'<path d="M12 21c-3.9 0-6.5-2.7-6.5-6.2 0-3.4 2.6-5.3 3.4-8.8 1.9 1.6 2.6 3.4 2.6 5.1 1.2-.9 1.8-2.4 1.7-4.2 2.7 2 5.3 4.9 5.3 8.1 0 3.4-2.6 6-6.5 6z"/>'};
-const PT={bg:['พื้นหลัง','BACKGROUND'],pose:['ท่าโพส','POSE'],frame:['กรอบรูป','FRAME'],aura:['เอฟเฟกต์','AURA']};
+const PT={bg:['แผนที่','MAP'],pose:['ท่าโพส','POSE'],fr:['กรอบโปรไฟล์','BORDER']};
 const PFS={tab:'bg',rw:false};
 function prfSave(){try{store('wd_prof',JSON.stringify(PRF));}catch(e){}}
-function prf3Sync(){const bg=prfGet('bg'),po=prfGet('pose'),au=prfGet('aura');hubProfSet({lk:lookStr(myLook),bg:HUI_IMG+(bg||prfItem('bg0')).img,pose:(po||prfItem('po0')).p,au:au?au.c:null});}
+function prf3Sync(){const bg=prfGet('bg')||prfItem('bg0'),po=prfGet('pose')||prfItem('po0');hubProfSet({lk:lookStr(myLook),map:bg.m,pose:po.p});}
 function profOpen(){
   let el=$('#profOv');
   if(!el){el=document.createElement('div');el.id='profOv';el.className='hidden u3Prof';document.body.appendChild(el);
     el.addEventListener('click',prfClick);el.addEventListener('pointerdown',prfDrag);
     addEventListener('keydown',e=>{if(el.classList.contains('hidden')||el.classList.contains('out'))return;if(e.code==='Escape'){e.stopImmediatePropagation();if(PFS.rw)prfRewards(false);else profClose();}},true);}
-  PFS.rw=false;prfRender();prf3Sync();HUB.profOn=true;PRF3.spin=0;document.body.classList.add('profOn');uiShow(el);
+  PFS.rw=false;prfRender();prf3Sync();HUB.profOn=true;PRF3.spin=0;hubProfShow(true);document.body.classList.add('profOn');uiShow(el);
 }
 // ตำแหน่งแนวนอนของตัวละคร (−1…1 บนจอ) = กลางช่องว่างระหว่างแผงซ้ายกับแผงขวา
 function prfStageX(){const el=$('#profOv');if(!el||el.classList.contains('hidden'))return 0.14;const L=el.querySelector('.pfL'),R=el.querySelector('.pfR');if(!L||!R)return 0.14;
   const a=L.getBoundingClientRect().right,b=R.getBoundingClientRect().left;return (a+b)/innerWidth-1;}
-function profClose(){const el=$('#profOv');uiHide(el,()=>{HUB.profOn=false;document.body.classList.remove('profOn');hubMeChip&&hubMeChip();},360);}
+function profClose(){const el=$('#profOv');uiHide(el,()=>{HUB.profOn=false;hubProfShow(false);document.body.classList.remove('profOn');hubMeChip&&hubMeChip();},360);}
 function prfRender(){
   const el=$('#profOv'),v=DEV_MAXLV?progLv():lvOf(PROG.xp),P=PROG,kd=(P.kills/Math.max(1,P.deaths)).toFixed(2),wr=P.games?Math.round(P.wins/P.games*100):0;
-  const kit=parseKit(myKit),pc=(PATHS[kit.path]||PATHS[0]).col;
+  const kit=parseKit(myKit),pc=(PATHS[kit.path]||PATHS[0]).col,mb=BORDERS.find(q=>q.id===myFrame());
   const st=[['games','เล่นแล้ว',P.games],['wins','ชนะ',`${P.wins}<small>${wr}%</small>`],['kd','K/D',kd],['kills','ฆ่า',P.kills],['as','ช่วยฆ่า',P.assists],['dmg','ดาเมจรวม',P.dmg.toLocaleString()],['bk','ฆ่าสูงสุด/ตา',P.bestK],['bd','ดาเมจสูงสุด/ตา',P.bestD.toLocaleString()]];
   const els=PATHS.map((p,i)=>({p,i,n:P.paths[i]||0})).filter(x=>!x.p.off),emax=Math.max(1,...els.map(x=>x.n)),fav=els.slice().sort((a,b)=>b.n-a.n)[0];
   const bd=BADGES.map(f=>f());
   el.innerHTML=`<div class="pfShade"></div>
   <div class="pfTop"><button class="gBack" data-a="close" aria-label="กลับ"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button><div><b>PROFILE</b><span>โปรไฟล์</span></div></div>
   <div class="pfL">
-    <div class="pfCard">${prfAvatar(myName(),PRF.fr,pc,84)}<div class="pfId"><b>${esc(myName())}</b><small>${esc((PATHS[kit.path]||PATHS[0]).n)}</small>
+    <div class="pfCard">${prfAvatar(myName(),myFrame(),pc,96)}<div class="pfId"><b>${esc(myName())}</b><small>${esc((PATHS[kit.path]||PATHS[0]).n)} • <i style="color:${BRAR_C[mb.r]}">${esc(mb.n)}</i></small>
       <div class="pfLv"><span>Lv ${v.L}</span><div class="pfXp"><i style="width:${v.need?Math.round(v.cur/v.need*100):100}%"></i></div><em>${v.need?`${v.cur} / ${v.need} XP`:'MAX'}</em></div></div></div>
     <h4>STATS <i>สถิติรวม</i></h4><div class="pfStats">${st.map(s=>`<div class="pfS"><svg viewBox="0 0 24 24">${SICO[s[0]]}</svg><b>${s[2]}</b><span>${s[1]}</span></div>`).join('')}</div>
     <h4>ELEMENTS <i>ธาตุที่เล่นบ่อย</i></h4><div class="pfEls">${els.map(x=>`<div class="pfE ${fav&&fav.n&&x===fav?'fav':''}" style="--c:${x.p.col}"><span class="ic">${GICO[x.p.id]?`<svg viewBox="0 0 24 24">${GICO[x.p.id]}</svg>`:''}</span><b>${esc(x.p.n)}</b><i style="width:${Math.round(x.n/emax*100)}%"></i><em>${x.n} ตา</em></div>`).join('')}</div>
-    <h4>BADGES <i>ตราสัญลักษณ์ ${bd.filter(b=>b[3]>=b[4]).length}/${bd.length}</i></h4><div class="pfBds">${bd.map(b=>{const ok=b[3]>=b[4];return `<div class="pfB ${ok?'ok':''}" title="${esc(b[1]+' — '+b[2]+(ok?' ✓':` (${Math.min(b[3],b[4]).toLocaleString()}/${b[4].toLocaleString()})`))}"><svg viewBox="0 0 24 24">${BICO[b[0]]}</svg><span>${esc(b[1])}</span></div>`;}).join('')}</div>
+    <h4>BADGES <i>ตราสัญลักษณ์ ${bd.filter(b=>b[3]>=b[4]).length}/${bd.length}</i></h4><div class="pfBds">${bd.map(badgeHtml).join('')}</div>
   </div>
   <div class="pfR">
     <div class="pfBtns"><button data-a="rw"><span>รางวัลเลเวล</span><small>LEVEL REWARDS</small></button></div>
     <div class="pfCus"><div class="pfTabs">${Object.keys(PT).map(t=>`<button data-tab="${t}" class="${PFS.tab===t?'on':''}">${PT[t][0]}</button>`).join('')}</div>
-      <div class="pfItems">${prfItems(PFS.tab)}</div></div>
+      <div class="pfItems ${PFS.tab==='fr'?'one':''}">${prfItems(PFS.tab)}</div></div>
     <div class="pfHint">ลากที่ตัวละครเพื่อหมุน</div>
   </div>
   <div class="pfRw">${prfRwHtml(v)}</div>`;
   el.classList.toggle('rw',PFS.rw);
 }
 function prfItems(t){
-  const k={bg:'bg',pose:'pose',frame:'fr',aura:'au'}[t],L=prfLv(),list=PROF_ITEMS.filter(q=>q.t===t);
-  const none=t==='aura'?`<button class="pfIt ${!PRF.au?'on':''}" data-it=""><span class="pv none"></span><b>ไม่มี</b></button>`:'';
-  return none+list.map(q=>{const ok=prfOk(q),on=PRF[k]===q.id;
-    const pv=t==='bg'?`<span class="pv" style="background-image:url('${HUI_IMG}${q.img}')"></span>`:t==='frame'?`<span class="pv">${prfAvatar(myName(),q.id,'#5a6aa8',40)}</span>`:t==='aura'?`<span class="pv au" style="--c:${q.c}"></span>`:`<span class="pv po"><svg viewBox="0 0 24 24">${RICO.pose}</svg></span>`;
+  if(t==='fr')return BORDERS.map(b=>{const ok=bordOk(b),on=PRF.fr===b.id,q=b.req();
+    return `<button class="pfIt pfBd ${on?'on':''} ${ok?'':'lk'}" data-fr="${b.id}" ${ok?'':'disabled'}>${prfAvatar(myName(),b.id,(PATHS[parseKit(myKit).path]||PATHS[0]).col,54)}<span class="bdTx"><b>${esc(b.n)}</b><em style="color:${BRAR_C[b.r]}">${BRAR_N[b.r]}</em><small>${ok?'ปลดแล้ว':`${esc(b.how)} (${Math.min(q[0],q[1])}/${q[1]})`}</small></span></button>`;}).join('');
+  return PROF_ITEMS.filter(q=>q.t===t).map(q=>{const ok=prfOk(q),on=PRF[t]===q.id;
+    const pv=t==='bg'?`<span class="pv" style="background-image:url('${HUI_IMG}maps/${q.m}.jpg')"></span>`:`<span class="pv po"><svg viewBox="0 0 24 24">${RICO.pose}</svg></span>`;
     return `<button class="pfIt ${on?'on':''} ${ok?'':'lk'}" data-it="${q.id}" ${ok?'':'disabled'}>${pv}<b>${esc(q.n)}</b>${ok?'':`<em>Lv ${q.lv}</em>`}</button>`;}).join('');
 }
 function prfRwHtml(v){
@@ -314,15 +351,14 @@ function prfRewards(on){
 }
 function prfClick(e){
   const b=e.target.closest('button');if(!b)return;ac();snd('ui_click');
-  const a=b.dataset.a;
+  const a=b.dataset.a,el=$('#profOv');
   if(a==='close'){profClose();return;}
   if(a==='rw'){prfRewards(true);return;}
   if(a==='rwx'){prfRewards(false);return;}
-  if(a==='rwl'||a==='rwr'){const sc=$('#profOv').querySelector('.rwScroll');sc.scrollBy({left:(a==='rwl'?-1:1)*sc.clientWidth*0.7,behavior:'smooth'});return;}
-  if(b.dataset.tab){PFS.tab=b.dataset.tab;$('#profOv').querySelectorAll('.pfTabs button').forEach(x=>x.classList.toggle('on',x===b));$('#profOv').querySelector('.pfItems').innerHTML=prfItems(PFS.tab);return;}
-  if(b.dataset.it!==undefined){const id=b.dataset.it,it=prfItem(id);if(id&&!prfOk(it))return;const k={bg:'bg',pose:'pose',frame:'fr',aura:'au'}[PFS.tab];PRF[k]=id;prfSave();
-    $('#profOv').querySelector('.pfItems').innerHTML=prfItems(PFS.tab);prf3Sync();
-    if(PFS.tab==='frame'){const av=$('#profOv').querySelector('.pfCard .pfAv');if(av)av.outerHTML=prfAvatar(myName(),PRF.fr,(PATHS[parseKit(myKit).path]||PATHS[0]).col,84);}}
+  if(a==='rwl'||a==='rwr'){const sc=el.querySelector('.rwScroll');sc.scrollBy({left:(a==='rwl'?-1:1)*sc.clientWidth*0.7,behavior:'smooth'});return;}
+  if(b.dataset.tab){PFS.tab=b.dataset.tab;el.querySelectorAll('.pfTabs button').forEach(x=>x.classList.toggle('on',x===b));const it=el.querySelector('.pfItems');it.classList.toggle('one',PFS.tab==='fr');it.innerHTML=prfItems(PFS.tab);return;}
+  if(b.dataset.fr){const bd=BORDERS.find(q=>q.id===b.dataset.fr);if(!bordOk(bd))return;PRF.fr=bd.id;prfSave();prfRender();return;}
+  if(b.dataset.it!==undefined){const it=prfItem(b.dataset.it);if(!prfOk(it))return;PRF[PFS.tab]=it.id;prfSave();el.querySelector('.pfItems').innerHTML=prfItems(PFS.tab);prf3Sync();}
 }
 // ลากบนพื้นที่ว่าง = หมุนตัวละคร • ล้อเมาส์บนไทม์ไลน์ = เลื่อนซ้ายขวา
 function prfDrag(e){
@@ -333,7 +369,7 @@ function prfDrag(e){
   addEventListener('pointermove',mv);addEventListener('pointerup',up);
 }
 document.addEventListener('wheel',e=>{const sc=e.target.closest&&e.target.closest('#profOv .rwScroll');if(!sc)return;e.preventDefault();sc.scrollLeft+=e.deltaY+e.deltaX;},{passive:false});
-if(typeof WD!=='undefined')Object.assign(WD,{profOpen,profClose,prfRewards,PRF,myFrame,prfAvatar});
+if(typeof WD!=='undefined')Object.assign(WD,{profOpen,profClose,prfRewards,PRF,myFrame,prfAvatar,BORDERS});
 
 // ---------- การ์ดพลังเสริม (ดันเจียน) + ความหายาก ----------
 // การ์ดแจกขึ้นมาคว่ำ (หลังการ์ด = ตราเพชรกลาง) แล้วพลิกทีละใบ • ไอคอนในกรอบเพชรกลางการ์ด • Epic/Legendary เงาวาววิ่งตามการ์ด
