@@ -7,9 +7,10 @@ const FROST_U={time:{value:0}};
 // ---------- shader น้ำแข็ง: ฐานน้ำเงินเข้ม → ปลายขาว • ขอบสว่าง (fresnel) • รอยร้าวข้างใน • ประกายวิบวับ ----------
 const ICE_VS=`varying vec3 vW;varying vec3 vO;varying float vH;
 void main(){vH=uv.y;vO=position;vec4 w=modelMatrix*vec4(position,1.0);vW=w.xyz;gl_Position=projectionMatrix*viewMatrix*w;}`;
+// normal จาก dFdx/dFdy: สามเหลี่ยมเล็กมาก cross = 0 → normalize = NaN → bloom ลามเป็นจอขาว → ใช้ normal ชี้ขึ้นแทน (2026-10-23)
 const ICE_FS=`uniform float uT;uniform float uFade;uniform float uGlow;uniform float uRim;uniform sampler2D uNz;varying vec3 vW;varying vec3 vO;varying float vH;
 void main(){
-  vec3 n=normalize(cross(dFdx(vW),dFdy(vW)));vec3 v=normalize(cameraPosition-vW);if(dot(n,v)<0.0)n=-n;
+  vec3 cn=cross(dFdx(vW),dFdy(vW));vec3 n=dot(cn,cn)>1e-24?normalize(cn):vec3(0.0,1.0,0.0);vec3 v=normalize(cameraPosition-vW);if(dot(n,v)<0.0)n=-n;
   float fr=pow(1.0-abs(dot(n,v)),2.0);
   float nz=texture2D(uNz,vO.xz*1.3+vec2(vO.y*0.7,vO.y*0.4)).r;
   float cr=1.0-smoothstep(0.0,0.035,abs(nz-0.5));

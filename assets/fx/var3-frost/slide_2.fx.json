@@ -1,0 +1,319 @@
+{
+ "v": 1,
+ "desc": "แบบ 2 (น้ำแข็งดำ): Dash ไถลน้ำแข็ง ~10 ม. — น้ำแข็งดำมันวาวเหมือนหินออบซิเดียน รอยร้าวสีฟ้าเรืองใต้ผิว หมอกมืดเย็นไหลต่ำ ประกายคมน้อยแต่ชัด",
+ "tags": [
+  "ice",
+  "variant3",
+  "blackice"
+ ],
+ "pal": "ice",
+ "layers": [
+  {
+   "id": "shot1",
+   "t": "mesh",
+   "at": 0,
+   "life": 0.28,
+   "shape": "sphere",
+   "mat": "glow",
+   "col": "#e6fbff",
+   "scale": 0.25,
+   "pos": {
+    "0": [
+     0,
+     1,
+     0
+    ],
+    "1": [
+     0,
+     1,
+     10
+    ]
+   },
+   "fade": 0
+  },
+  {
+   "id": "tail3",
+   "t": "trail",
+   "at": 0,
+   "life": 0.33,
+   "of": "shot1",
+   "col": "#9fe8ff",
+   "col2": "#1a7ec4",
+   "w": 1,
+   "tlife": 0.35,
+   "k": 1.8
+  },
+  {
+   "id": "path4",
+   "t": "mesh",
+   "at": 0,
+   "life": 1.6,
+   "att": "ground",
+   "pos": [
+    0,
+    0.12,
+    0
+   ],
+   "shape": "ribbon",
+   "path": [
+    [
+     0,
+     0,
+     0
+    ],
+    [
+     0,
+     0,
+     2.5
+    ],
+    [
+     0,
+     0,
+     5
+    ],
+    [
+     0,
+     0,
+     7.5
+    ],
+    [
+     0,
+     0,
+     10
+    ]
+   ],
+   "wk": 1.4,
+   "mat": "solid",
+   "col": "#0d1a2e",
+   "col2": "#3fc8ff",
+   "op": {
+    "0": 0,
+    "1": 0,
+    "0.06": 0.85,
+    "0.8": 0.65
+   },
+   "rim": 1.4,
+   "scroll": 0.5
+  },
+  {
+   "id": "pathCore5",
+   "t": "mesh",
+   "at": 0,
+   "life": 1.6,
+   "att": "ground",
+   "pos": [
+    0,
+    0.07,
+    0
+   ],
+   "shape": "ribbon",
+   "path": [
+    [
+     0,
+     0,
+     0
+    ],
+    [
+     0,
+     0,
+     5
+    ],
+    [
+     0,
+     0,
+     10
+    ]
+   ],
+   "wk": 0.252,
+   "mat": "glow",
+   "col": "#4fd0ff",
+   "op": {
+    "0": 0,
+    "1": 0,
+    "0.06": 0.9,
+    "0.7": 0.5
+   }
+  },
+  {
+   "id": "chips6",
+   "t": "emit",
+   "at": 0,
+   "life": 0.6,
+   "rate": 50,
+   "pos": [
+    0,
+    0.2,
+    0
+   ],
+   "att": "ground",
+   "yaw": 0,
+   "from": "line",
+   "fh": 10,
+   "dir": "up",
+   "speed": [
+    0.6,
+    1.6
+   ],
+   "plife": [
+    0.4,
+    0.8
+   ],
+   "look": "spark",
+   "fb": "",
+   "size": [
+    1.8,
+    2.8
+   ],
+   "col": "#e6fbff",
+   "c2": "#1a7ec4",
+   "gravity": -0.2
+  },
+  {
+   "id": "glint7",
+   "t": "emit",
+   "at": 0,
+   "life": 0.05,
+   "burst": 14,
+   "pos": [
+    0,
+    0.8,
+    0
+   ],
+   "from": "sphere",
+   "fr": 0.2,
+   "dir": "out",
+   "speed": [
+    3,
+    7
+   ],
+   "plife": [
+    0.18,
+    0.35
+   ],
+   "look": "streak",
+   "size": [
+    2,
+    3
+   ],
+   "col": "#e6fbff",
+   "c2": "#56d6ff",
+   "gravity": 0,
+   "drag": 4
+  },
+  {
+   "id": "chunks8",
+   "t": "emit",
+   "at": 0,
+   "life": 0.05,
+   "burst": 5,
+   "pos": [
+    0,
+    0.8,
+    0
+   ],
+   "from": "sphere",
+   "fr": 0.3,
+   "dir": "out",
+   "spread": 1.2,
+   "speed": [
+    3,
+    5.5
+   ],
+   "up": [
+    2,
+    5
+   ],
+   "plife": [
+    0.8,
+    1.4
+   ],
+   "look": "model",
+   "model": "frost_shard",
+   "mmat": "solid",
+   "msize": [
+    0.08,
+    0.18
+   ],
+   "bounce": 0.35,
+   "mspin": 540,
+   "gravity": 11,
+   "drag": 1,
+   "col": "#0d1a2e",
+   "c2": "#3fc8ff"
+  },
+  {
+   "id": "glint9",
+   "t": "emit",
+   "at": 0.28,
+   "life": 0.05,
+   "burst": 15,
+   "pos": [
+    0,
+    0.8,
+    10
+   ],
+   "from": "sphere",
+   "fr": 0.2,
+   "dir": "out",
+   "speed": [
+    3.5999999999999996,
+    8.4
+   ],
+   "plife": [
+    0.18,
+    0.35
+   ],
+   "look": "streak",
+   "size": [
+    2,
+    3
+   ],
+   "col": "#e6fbff",
+   "c2": "#56d6ff",
+   "gravity": 0,
+   "drag": 4
+  },
+  {
+   "id": "chunks10",
+   "t": "emit",
+   "at": 0.28,
+   "life": 0.05,
+   "burst": 5,
+   "pos": [
+    0,
+    0.8,
+    10
+   ],
+   "from": "sphere",
+   "fr": 0.3,
+   "dir": "out",
+   "spread": 1.2,
+   "speed": [
+    3.2,
+    5.8
+   ],
+   "up": [
+    2,
+    5
+   ],
+   "plife": [
+    0.8,
+    1.4
+   ],
+   "look": "model",
+   "model": "frost_shard",
+   "mmat": "solid",
+   "msize": [
+    0.08,
+    0.18
+   ],
+   "bounce": 0.35,
+   "mspin": 540,
+   "gravity": 11,
+   "drag": 1,
+   "col": "#0d1a2e",
+   "c2": "#3fc8ff"
+  }
+ ],
+ "dur": 2
+}

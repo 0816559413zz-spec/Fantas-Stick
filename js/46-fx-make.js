@@ -145,7 +145,10 @@ function fxMeshBuild(d,rec){const G=mkG();for(const P of (d&&d.parts)||[]){if(!P
     for(let v=0;v<n;v++){const pi=G.k[v],q=G.piv[pi];piv[v*3]=-q[0];piv[v*3+1]=q[1];piv[v*3+2]=q[2];
       ord[v*4]=np>1?pi/(np-1):0;ord[v*4+1]=Math.hypot(q[0],q[2])/rMax;ord[v*4+2]=mkHash(pi,7,3,11);ord[v*4+3]=y1>y0?(q[1]-y0)/(y1-y0):0;}
     g.setAttribute('aPiv',new THREE.BufferAttribute(piv,3));g.setAttribute('aOrd',new THREE.BufferAttribute(ord,4));g.userData.pieces=np;}
-  g.setIndex(G.p.length/3>65535?new THREE.Uint32BufferAttribute(G.i,1):new THREE.Uint16BufferAttribute(G.i,1));g.computeVertexNormals();g.computeBoundingSphere();g.computeBoundingBox();g.userData.tris=G.i.length/3;return g;}
+  g.setIndex(G.p.length/3>65535?new THREE.Uint32BufferAttribute(G.i,1):new THREE.Uint16BufferAttribute(G.i,1));g.computeVertexNormals();
+  // จุดที่ติดแต่สามเหลี่ยมพื้นที่ 0 ได้ normal = 0 → shader normalize(0) = NaN → bloom ลามเป็นจอขาว (เจอกับโมเดล tornado มองจากหน้า 2026-10-23) → ใส่ normal ชี้ขึ้นแทน
+  {const nm=g.attributes.normal.array;for(let k=0;k<nm.length;k+=3)if(nm[k]*nm[k]+nm[k+1]*nm[k+1]+nm[k+2]*nm[k+2]<1e-12)nm[k+1]=1;}
+  g.computeBoundingSphere();g.computeBoundingBox();g.userData.tris=G.i.length/3;return g;}
 // ---------- โหลด ----------
 function fxMeshLoad(name){let e=FXMK.mesh.get(name);if(e)return e.p;e={data:null,geo:null,fail:false};FXMK.mesh.set(name,e);const v=((FXR.index.mesh||{})[name]||{}).v||'';
   e.p=fxFetch('assets/fx/mesh/'+name+'.mesh.json'+(v?'?v='+v:'')).then(d=>{e.data=d;e.geo=fxMeshBuild(d);e.geo.userData.keep=true;return e.geo;}).catch(err=>{e.fail=true;console.warn('fx: โหลดโมเดลไม่ได้',name,err.message);return null;});return e.p;}

@@ -1,0 +1,802 @@
+{
+ "v": 1,
+ "desc": "แบบ 3 (พายุหิมะ): Glacier Rend — ชาร์จ 1 วิ ส่งคลื่นดาบไกล 30 ม. ทิ้งทางน้ำแข็ง — พายุหิมะขาว — ผงหิมะระเบิดฟุ้ง ลมหมุนเป็นเกลียว เกล็ดหิมะใหญ่ปลิว เส้นลมพัด เย็นแบบหนาวจริง ไม่เรืองแสง",
+ "tags": [
+  "ice",
+  "variant3",
+  "blizzard"
+ ],
+ "pal": "ice",
+ "layers": [
+  {
+   "id": "form1",
+   "t": "mesh",
+   "at": 0,
+   "life": 1,
+   "pos": [
+    0.5,
+    1.3,
+    0.8
+   ],
+   "shape": "model",
+   "model": "crystal_crown",
+   "mat": "ice",
+   "col": "#f4faff",
+   "col2": "#9cbad6",
+   "scale": {
+    "0": 0.05,
+    "1": 0.45,
+    "ease": "in"
+   },
+   "spin": 90
+  },
+  {
+   "id": "halo2",
+   "t": "halo",
+   "at": 0,
+   "life": 1,
+   "pos": [
+    0.5,
+    1.3,
+    0.8
+   ],
+   "col": "#b8d4ec",
+   "size": 2,
+   "k": 0.8,
+   "size0": 0.4
+  },
+  {
+   "id": "gather3",
+   "t": "emit",
+   "at": 0,
+   "life": 1,
+   "pos": [
+    0.5,
+    1.3,
+    0.8
+   ],
+   "rate": 40,
+   "from": "sphere",
+   "fr": 1.3,
+   "dir": "in",
+   "speed": [
+    1.8,
+    3.2
+   ],
+   "plife": [
+    0.3,
+    0.45
+   ],
+   "look": "glow",
+   "size": [
+    1.8,
+    3
+   ],
+   "col": "#ffffff",
+   "c2": "#b8d4ec",
+   "gravity": 0,
+   "drag": 0
+  },
+  {
+   "id": "swirl4",
+   "t": "mesh",
+   "at": 0,
+   "life": 1,
+   "att": "ground",
+   "pos": [
+    0.5,
+    0,
+    0.8
+   ],
+   "shape": "model",
+   "model": "tornado",
+   "mat": "tex",
+   "tex": "tex/noise_clouds",
+   "col": "#ffffff",
+   "col2": "#b8d4ec",
+   "scale": {
+    "0": [
+     0.2,
+     0.2,
+     0.2
+    ],
+    "1": [
+     0.36000000000000004,
+     0.498,
+     0.36000000000000004
+    ],
+    "0.12": [
+     0.336,
+     0.498,
+     0.336
+    ]
+   },
+   "spin": 220,
+   "op": {
+    "0": 0,
+    "1": 0,
+    "0.12": 0.32,
+    "0.85": 0.25
+   },
+   "uvScroll": [
+    0.4,
+    0.6
+   ]
+  },
+  {
+   "id": "snow5",
+   "t": "emit",
+   "at": 0,
+   "life": 1,
+   "rate": 18.8,
+   "pos": [
+    0.5,
+    0.6,
+    0.8
+   ],
+   "from": "disc",
+   "fr": 0.8,
+   "dir": "random",
+   "speed": [
+    0.8,
+    1.8
+   ],
+   "up": [
+    0.2,
+    0.8
+   ],
+   "plife": [
+    0.6,
+    1
+   ],
+   "look": "glow",
+   "size": [
+    1,
+    1.8
+   ],
+   "col": "#ffffff",
+   "c2": "#b8d4ec",
+   "gravity": 0,
+   "drag": 2
+  },
+  {
+   "id": "light6",
+   "t": "light",
+   "at": 0,
+   "life": 1,
+   "pos": [
+    0.5,
+    1.3,
+    0.8
+   ],
+   "col": "#b8d4ec",
+   "int": {
+    "0": 1.2,
+    "1": 0
+   },
+   "dist": 6
+  },
+  {
+   "id": "cut7",
+   "t": "trail",
+   "at": 1,
+   "life": 0.16,
+   "sweep": true,
+   "a0": -60,
+   "a1": 60,
+   "r": 3,
+   "r0": 1.35,
+   "tilt": 0,
+   "pos": [
+    0,
+    1.15,
+    0.2
+   ],
+   "col": "#ffffff",
+   "col2": "#b8d4ec",
+   "w": 0.7,
+   "tlife": 0.22,
+   "k": 2.2
+  },
+  {
+   "id": "cutG8",
+   "t": "trail",
+   "at": 1.02,
+   "life": 0.16,
+   "sweep": true,
+   "a0": -60,
+   "a1": 60,
+   "r": 3.24,
+   "r0": 2.4000000000000004,
+   "tilt": 0,
+   "pos": [
+    0,
+    1.15,
+    0.2
+   ],
+   "col": "#eef7ff",
+   "col2": "#6f8eae",
+   "w": 0.35,
+   "tlife": 0.3,
+   "k": 1.4
+  },
+  {
+   "id": "powder9",
+   "t": "emit",
+   "at": 1.08,
+   "life": 0.06,
+   "burst": 8,
+   "pos": [
+    0,
+    0.95,
+    2.3
+   ],
+   "from": "sphere",
+   "fr": 0.452,
+   "dir": "out",
+   "spread": 1.2,
+   "speed": [
+    1.1360000000000001,
+    2.672
+   ],
+   "plife": [
+    0.6,
+    1
+   ],
+   "look": "glow",
+   "size": [
+    9,
+    14
+   ],
+   "grow": 0.8,
+   "col": "#f4f9ff",
+   "c2": "#c9d9ea",
+   "gravity": -0.1,
+   "drag": 2.5,
+   "x": true
+  },
+  {
+   "id": "flakes10",
+   "t": "emit",
+   "at": 1.08,
+   "life": 0.05,
+   "burst": 22,
+   "pos": [
+    0,
+    1.15,
+    2.3
+   ],
+   "from": "sphere",
+   "fr": 0.252,
+   "dir": "out",
+   "speed": [
+    1.26,
+    2.94
+   ],
+   "plife": [
+    0.6,
+    1.1
+   ],
+   "look": "flake",
+   "size": [
+    1.4,
+    2.4
+   ],
+   "col": "#ffffff",
+   "c2": "#b8d4ec",
+   "gravity": 0.8,
+   "drag": 3.5,
+   "spin": 6
+  },
+  {
+   "id": "gust11",
+   "t": "emit",
+   "at": 1.08,
+   "life": 0.05,
+   "burst": 11,
+   "pos": [
+    0,
+    1.15,
+    2.3
+   ],
+   "from": "disc",
+   "fr": 0.252,
+   "dir": "flat",
+   "speed": [
+    4.2,
+    7.56
+   ],
+   "plife": [
+    0.2,
+    0.35
+   ],
+   "look": "streak",
+   "size": [
+    2,
+    3
+   ],
+   "col": "#ffffff",
+   "c2": "#b8d4ec",
+   "gravity": 0,
+   "drag": 3
+  },
+  {
+   "id": "shot12",
+   "t": "mesh",
+   "at": 1.02,
+   "life": 0.7,
+   "shape": "cone",
+   "mat": "ice",
+   "col": "#f4faff",
+   "col2": "#9cbad6",
+   "rot": [
+    90,
+    0,
+    0
+   ],
+   "yaw": 0,
+   "scale": [
+    0.35200000000000004,
+    1.54,
+    0.35200000000000004
+   ],
+   "rim": 2,
+   "pos": {
+    "0": [
+     0,
+     1,
+     1.5
+    ],
+    "1": [
+     0,
+     1,
+     30
+    ]
+   },
+   "fade": 0
+  },
+  {
+   "id": "aura14",
+   "t": "halo",
+   "at": 1.02,
+   "life": 0.7,
+   "col": "#b8d4ec",
+   "size": 1.9800000000000002,
+   "size0": 1.9800000000000002,
+   "k": 0.7,
+   "pos": {
+    "0": [
+     0,
+     1,
+     1.5
+    ],
+    "1": [
+     0,
+     1,
+     30
+    ]
+   }
+  },
+  {
+   "id": "tail15",
+   "t": "trail",
+   "at": 1.02,
+   "life": 0.7,
+   "of": "shot12",
+   "col": "#ffffff",
+   "col2": "#b8d4ec",
+   "w": 0.396,
+   "tlife": 0.18,
+   "k": 1.8
+  },
+  {
+   "id": "drift16",
+   "t": "emit",
+   "at": 1.02,
+   "life": 0.7,
+   "rate": 36,
+   "from": "mesh",
+   "of": "shot12",
+   "dir": "random",
+   "speed": [
+    0.2,
+    0.8
+   ],
+   "plife": [
+    0.25,
+    0.45
+   ],
+   "look": "glow",
+   "size": [
+    1.6,
+    2.6
+   ],
+   "col": "#ffffff",
+   "c2": "#b8d4ec",
+   "gravity": 0
+  },
+  {
+   "id": "path17",
+   "t": "mesh",
+   "at": 1.02,
+   "life": 2.6,
+   "att": "ground",
+   "pos": [
+    0,
+    0.12,
+    0
+   ],
+   "shape": "ribbon",
+   "path": [
+    [
+     0,
+     0,
+     1.5
+    ],
+    [
+     0,
+     0,
+     8.63
+    ],
+    [
+     0,
+     0,
+     15.75
+    ],
+    [
+     0,
+     0,
+     22.88
+    ],
+    [
+     0,
+     0,
+     30
+    ]
+   ],
+   "wk": 2,
+   "mat": "energy",
+   "col": "#eef7ff",
+   "col2": "#6f8eae",
+   "op": {
+    "0": 0,
+    "1": 0,
+    "0.06": 0.85,
+    "0.8": 0.65
+   },
+   "rim": 1.4,
+   "scroll": 0.5
+  },
+  {
+   "id": "pathCore18",
+   "t": "mesh",
+   "at": 1.02,
+   "life": 2.6,
+   "att": "ground",
+   "pos": [
+    0,
+    0.07,
+    0
+   ],
+   "shape": "ribbon",
+   "path": [
+    [
+     0,
+     0,
+     1.5
+    ],
+    [
+     0,
+     0,
+     15.75
+    ],
+    [
+     0,
+     0,
+     30
+    ]
+   ],
+   "wk": 0.36,
+   "mat": "glow",
+   "col": "#ffffff",
+   "op": {
+    "0": 0,
+    "1": 0,
+    "0.06": 0.9,
+    "0.7": 0.5
+   }
+  },
+  {
+   "id": "chips19",
+   "t": "emit",
+   "at": 1.02,
+   "life": 0.6,
+   "rate": 90,
+   "pos": [
+    0,
+    0.2,
+    1.5
+   ],
+   "att": "ground",
+   "yaw": 0,
+   "from": "line",
+   "fh": 20,
+   "dir": "up",
+   "speed": [
+    0.6,
+    1.6
+   ],
+   "plife": [
+    0.4,
+    0.8
+   ],
+   "look": "glow",
+   "size": [
+    1.8,
+    2.8
+   ],
+   "col": "#ffffff",
+   "c2": "#b8d4ec",
+   "gravity": 0
+  },
+  {
+   "id": "flash20",
+   "t": "flash",
+   "at": 1.72,
+   "life": 0.1,
+   "pos": [
+    0,
+    1.3,
+    30
+   ],
+   "col": "#ffffff",
+   "size": 1.8
+  },
+  {
+   "id": "halo21",
+   "t": "halo",
+   "at": 1.72,
+   "life": 0.45,
+   "pos": [
+    0,
+    1.3,
+    30
+   ],
+   "col": "#b8d4ec",
+   "size": 2.8,
+   "k": 1
+  },
+  {
+   "id": "spikes22",
+   "t": "mesh",
+   "at": 1.72,
+   "life": 0.6,
+   "att": "ground",
+   "pos": [
+    0,
+    0,
+    30
+   ],
+   "shape": "model",
+   "model": "frost_spires",
+   "mat": "ice",
+   "col": "#f4faff",
+   "col2": "#9cbad6",
+   "scale": {
+    "0": 0.1,
+    "1": 1,
+    "0.25": 1.1,
+    "ease": "out"
+   },
+   "op": {
+    "0": 1,
+    "1": 0,
+    "0.7": 1
+   },
+   "grow": {
+    "0": 0,
+    "0.3": 1
+   }
+  },
+  {
+   "id": "chunks23",
+   "t": "emit",
+   "at": 1.72,
+   "life": 0.05,
+   "burst": 14,
+   "pos": [
+    0,
+    1.2,
+    30
+   ],
+   "from": "sphere",
+   "fr": 0.3,
+   "dir": "out",
+   "spread": 1.2,
+   "speed": [
+    4,
+    7
+   ],
+   "up": [
+    2,
+    5
+   ],
+   "plife": [
+    0.8,
+    1.4
+   ],
+   "look": "model",
+   "model": "frost_shard",
+   "mmat": "ice",
+   "msize": [
+    0.1,
+    0.24
+   ],
+   "bounce": 0.35,
+   "mspin": 540,
+   "gravity": 11,
+   "drag": 1,
+   "col": "#eef7ff",
+   "c2": "#6f8eae"
+  },
+  {
+   "id": "ring24",
+   "t": "ring",
+   "at": 1.72,
+   "life": 0.4,
+   "att": "ground",
+   "pos": [
+    0,
+    0.08,
+    30
+   ],
+   "col": "#eef7ff",
+   "r": 3,
+   "op": 0.55
+  },
+  {
+   "id": "shock25",
+   "t": "warp",
+   "at": 1.72,
+   "life": 0.45,
+   "att": "ground",
+   "pos": [
+    0,
+    0.2,
+    30
+   ],
+   "kind": "shock",
+   "flat": true,
+   "size": {
+    "0": 0.5,
+    "1": 1,
+    "x": 4
+   },
+   "op": {
+    "0": 1,
+    "1": 0
+   },
+   "str": 1.1,
+   "col": "#e8f8ff",
+   "x": true
+  },
+  {
+   "id": "powder26",
+   "t": "emit",
+   "at": 1.72,
+   "life": 0.06,
+   "burst": 11,
+   "pos": [
+    0,
+    0.8,
+    30
+   ],
+   "from": "sphere",
+   "fr": 0.8,
+   "dir": "out",
+   "spread": 1.2,
+   "speed": [
+    1.6,
+    3.6
+   ],
+   "plife": [
+    0.6,
+    1
+   ],
+   "look": "glow",
+   "size": [
+    9,
+    14
+   ],
+   "grow": 0.8,
+   "col": "#f4f9ff",
+   "c2": "#c9d9ea",
+   "gravity": -0.1,
+   "drag": 2.5,
+   "x": true
+  },
+  {
+   "id": "flakes27",
+   "t": "emit",
+   "at": 1.72,
+   "life": 0.05,
+   "burst": 34,
+   "pos": [
+    0,
+    1,
+    30
+   ],
+   "from": "sphere",
+   "fr": 0.6,
+   "dir": "out",
+   "speed": [
+    3,
+    7
+   ],
+   "plife": [
+    0.6,
+    1.1
+   ],
+   "look": "flake",
+   "size": [
+    1.4,
+    2.4
+   ],
+   "col": "#ffffff",
+   "c2": "#b8d4ec",
+   "gravity": 0.8,
+   "drag": 3.5,
+   "spin": 6
+  },
+  {
+   "id": "gust28",
+   "t": "emit",
+   "at": 1.72,
+   "life": 0.05,
+   "burst": 16,
+   "pos": [
+    0,
+    1,
+    30
+   ],
+   "from": "disc",
+   "fr": 0.6,
+   "dir": "flat",
+   "speed": [
+    10,
+    18
+   ],
+   "plife": [
+    0.2,
+    0.35
+   ],
+   "look": "streak",
+   "size": [
+    2,
+    3
+   ],
+   "col": "#ffffff",
+   "c2": "#b8d4ec",
+   "gravity": 0,
+   "drag": 3
+  },
+  {
+   "id": "light29",
+   "t": "light",
+   "at": 1.72,
+   "life": 0.4,
+   "pos": [
+    0,
+    1.4,
+    30
+   ],
+   "col": "#b8d4ec",
+   "int": {
+    "0": 2,
+    "1": 0
+   },
+   "dist": 14
+  }
+ ],
+ "dur": 3.9
+}

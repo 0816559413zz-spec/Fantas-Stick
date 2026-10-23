@@ -1,0 +1,1194 @@
+{
+ "v": 1,
+ "desc": "แบบ 3 (พายุหิมะ): ดาบน้ำแข็ง คอมโบ 3 จังหวะ (ระยะ ~6 ม.) — พายุหิมะขาว — ผงหิมะระเบิดฟุ้ง ลมหมุนเป็นเกลียว เกล็ดหิมะใหญ่ปลิว เส้นลมพัด เย็นแบบหนาวจริง ไม่เรืองแสง",
+ "tags": [
+  "ice",
+  "variant3",
+  "blizzard"
+ ],
+ "pal": "ice",
+ "layers": [
+  {
+   "id": "cut1",
+   "t": "trail",
+   "at": 0,
+   "life": 0.16,
+   "sweep": true,
+   "a0": -75,
+   "a1": 65,
+   "r": 2.6,
+   "r0": 1.1700000000000002,
+   "tilt": -18,
+   "pos": [
+    0,
+    1.15,
+    0.2
+   ],
+   "col": "#ffffff",
+   "col2": "#b8d4ec",
+   "w": 0.5,
+   "tlife": 0.22,
+   "k": 2.2
+  },
+  {
+   "id": "cutG2",
+   "t": "trail",
+   "at": 0.02,
+   "life": 0.16,
+   "sweep": true,
+   "a0": -75,
+   "a1": 65,
+   "r": 2.8080000000000003,
+   "r0": 2.08,
+   "tilt": -18,
+   "pos": [
+    0,
+    1.15,
+    0.2
+   ],
+   "col": "#eef7ff",
+   "col2": "#6f8eae",
+   "w": 0.25,
+   "tlife": 0.3,
+   "k": 1.4
+  },
+  {
+   "id": "powder3",
+   "t": "emit",
+   "at": 0.08,
+   "life": 0.06,
+   "burst": 7,
+   "pos": [
+    -0.15862345180073784,
+    0.95,
+    2.013074350526977
+   ],
+   "from": "sphere",
+   "fr": 0.38,
+   "dir": "out",
+   "spread": 1.2,
+   "speed": [
+    1.04,
+    2.48
+   ],
+   "plife": [
+    0.6,
+    1
+   ],
+   "look": "glow",
+   "size": [
+    9,
+    14
+   ],
+   "grow": 0.8,
+   "col": "#f4f9ff",
+   "c2": "#c9d9ea",
+   "gravity": -0.1,
+   "drag": 2.5,
+   "x": true
+  },
+  {
+   "id": "flakes4",
+   "t": "emit",
+   "at": 0.08,
+   "life": 0.05,
+   "burst": 20,
+   "pos": [
+    -0.15862345180073784,
+    1.15,
+    2.013074350526977
+   ],
+   "from": "sphere",
+   "fr": 0.18,
+   "dir": "out",
+   "speed": [
+    0.8999999999999999,
+    2.1
+   ],
+   "plife": [
+    0.6,
+    1.1
+   ],
+   "look": "flake",
+   "size": [
+    1.4,
+    2.4
+   ],
+   "col": "#ffffff",
+   "c2": "#b8d4ec",
+   "gravity": 0.8,
+   "drag": 3.5,
+   "spin": 6
+  },
+  {
+   "id": "gust5",
+   "t": "emit",
+   "at": 0.08,
+   "life": 0.05,
+   "burst": 10,
+   "pos": [
+    -0.15862345180073784,
+    1.15,
+    2.013074350526977
+   ],
+   "from": "disc",
+   "fr": 0.18,
+   "dir": "flat",
+   "speed": [
+    3,
+    5.3999999999999995
+   ],
+   "plife": [
+    0.2,
+    0.35
+   ],
+   "look": "streak",
+   "size": [
+    2,
+    3
+   ],
+   "col": "#ffffff",
+   "c2": "#b8d4ec",
+   "gravity": 0,
+   "drag": 3
+  },
+  {
+   "id": "flash6",
+   "t": "flash",
+   "at": 0.12,
+   "life": 0.1,
+   "pos": [
+    0.6,
+    1.3,
+    2.6
+   ],
+   "col": "#ffffff",
+   "size": 0.81
+  },
+  {
+   "id": "halo7",
+   "t": "halo",
+   "at": 0.12,
+   "life": 0.45,
+   "pos": [
+    0.6,
+    1.3,
+    2.6
+   ],
+   "col": "#b8d4ec",
+   "size": 1.26,
+   "k": 1
+  },
+  {
+   "id": "spikes8",
+   "t": "mesh",
+   "at": 0.12,
+   "life": 0.6,
+   "att": "ground",
+   "pos": [
+    0.6,
+    0,
+    2.6
+   ],
+   "shape": "model",
+   "model": "frost_spires",
+   "mat": "ice",
+   "col": "#f4faff",
+   "col2": "#9cbad6",
+   "scale": {
+    "0": 0.1,
+    "1": 0.45,
+    "0.25": 0.49500000000000005,
+    "ease": "out"
+   },
+   "op": {
+    "0": 1,
+    "1": 0,
+    "0.7": 1
+   },
+   "grow": {
+    "0": 0,
+    "0.3": 1
+   }
+  },
+  {
+   "id": "chunks9",
+   "t": "emit",
+   "at": 0.12,
+   "life": 0.05,
+   "burst": 9.6,
+   "pos": [
+    0.6,
+    1.2,
+    2.6
+   ],
+   "from": "sphere",
+   "fr": 0.3,
+   "dir": "out",
+   "spread": 1.2,
+   "speed": [
+    2.9,
+    5.35
+   ],
+   "up": [
+    2,
+    5
+   ],
+   "plife": [
+    0.8,
+    1.4
+   ],
+   "look": "model",
+   "model": "frost_shard",
+   "mmat": "ice",
+   "msize": [
+    0.1,
+    0.24
+   ],
+   "bounce": 0.35,
+   "mspin": 540,
+   "gravity": 11,
+   "drag": 1,
+   "col": "#eef7ff",
+   "c2": "#6f8eae"
+  },
+  {
+   "id": "ring10",
+   "t": "ring",
+   "at": 0.12,
+   "life": 0.4,
+   "att": "ground",
+   "pos": [
+    0.6,
+    0.08,
+    2.6
+   ],
+   "col": "#eef7ff",
+   "r": 1.35,
+   "op": 0.55
+  },
+  {
+   "id": "shock11",
+   "t": "warp",
+   "at": 0.12,
+   "life": 0.45,
+   "att": "ground",
+   "pos": [
+    0.6,
+    0.2,
+    2.6
+   ],
+   "kind": "shock",
+   "flat": true,
+   "size": {
+    "0": 0.5,
+    "1": 1,
+    "x": 1.8
+   },
+   "op": {
+    "0": 1,
+    "1": 0
+   },
+   "str": 1.1,
+   "col": "#e8f8ff",
+   "x": true
+  },
+  {
+   "id": "powder12",
+   "t": "emit",
+   "at": 0.12,
+   "life": 0.06,
+   "burst": 8,
+   "pos": [
+    0.6,
+    0.8,
+    2.6
+   ],
+   "from": "sphere",
+   "fr": 0.47000000000000003,
+   "dir": "out",
+   "spread": 1.2,
+   "speed": [
+    1.1600000000000001,
+    2.72
+   ],
+   "plife": [
+    0.6,
+    1
+   ],
+   "look": "glow",
+   "size": [
+    9,
+    14
+   ],
+   "grow": 0.8,
+   "col": "#f4f9ff",
+   "c2": "#c9d9ea",
+   "gravity": -0.1,
+   "drag": 2.5,
+   "x": true
+  },
+  {
+   "id": "flakes13",
+   "t": "emit",
+   "at": 0.12,
+   "life": 0.05,
+   "burst": 23,
+   "pos": [
+    0.6,
+    1,
+    2.6
+   ],
+   "from": "sphere",
+   "fr": 0.27,
+   "dir": "out",
+   "speed": [
+    1.35,
+    3.15
+   ],
+   "plife": [
+    0.6,
+    1.1
+   ],
+   "look": "flake",
+   "size": [
+    1.4,
+    2.4
+   ],
+   "col": "#ffffff",
+   "c2": "#b8d4ec",
+   "gravity": 0.8,
+   "drag": 3.5,
+   "spin": 6
+  },
+  {
+   "id": "gust14",
+   "t": "emit",
+   "at": 0.12,
+   "life": 0.05,
+   "burst": 12,
+   "pos": [
+    0.6,
+    1,
+    2.6
+   ],
+   "from": "disc",
+   "fr": 0.27,
+   "dir": "flat",
+   "speed": [
+    4.5,
+    8.1
+   ],
+   "plife": [
+    0.2,
+    0.35
+   ],
+   "look": "streak",
+   "size": [
+    2,
+    3
+   ],
+   "col": "#ffffff",
+   "c2": "#b8d4ec",
+   "gravity": 0,
+   "drag": 3
+  },
+  {
+   "id": "cut15",
+   "t": "trail",
+   "at": 0.32,
+   "life": 0.16,
+   "sweep": true,
+   "a0": 70,
+   "a1": -70,
+   "r": 2.6,
+   "r0": 1.1700000000000002,
+   "tilt": 20,
+   "pos": [
+    0,
+    1.15,
+    0.2
+   ],
+   "col": "#ffffff",
+   "col2": "#b8d4ec",
+   "w": 0.5,
+   "tlife": 0.22,
+   "k": 2.2
+  },
+  {
+   "id": "cutG16",
+   "t": "trail",
+   "at": 0.34,
+   "life": 0.16,
+   "sweep": true,
+   "a0": 70,
+   "a1": -70,
+   "r": 2.8080000000000003,
+   "r0": 2.08,
+   "tilt": 20,
+   "pos": [
+    0,
+    1.15,
+    0.2
+   ],
+   "col": "#eef7ff",
+   "col2": "#6f8eae",
+   "w": 0.25,
+   "tlife": 0.3,
+   "k": 1.4
+  },
+  {
+   "id": "powder17",
+   "t": "emit",
+   "at": 0.4,
+   "life": 0.06,
+   "burst": 7,
+   "pos": [
+    0,
+    0.95,
+    2.02
+   ],
+   "from": "sphere",
+   "fr": 0.38,
+   "dir": "out",
+   "spread": 1.2,
+   "speed": [
+    1.04,
+    2.48
+   ],
+   "plife": [
+    0.6,
+    1
+   ],
+   "look": "glow",
+   "size": [
+    9,
+    14
+   ],
+   "grow": 0.8,
+   "col": "#f4f9ff",
+   "c2": "#c9d9ea",
+   "gravity": -0.1,
+   "drag": 2.5,
+   "x": true
+  },
+  {
+   "id": "flakes18",
+   "t": "emit",
+   "at": 0.4,
+   "life": 0.05,
+   "burst": 20,
+   "pos": [
+    0,
+    1.15,
+    2.02
+   ],
+   "from": "sphere",
+   "fr": 0.18,
+   "dir": "out",
+   "speed": [
+    0.8999999999999999,
+    2.1
+   ],
+   "plife": [
+    0.6,
+    1.1
+   ],
+   "look": "flake",
+   "size": [
+    1.4,
+    2.4
+   ],
+   "col": "#ffffff",
+   "c2": "#b8d4ec",
+   "gravity": 0.8,
+   "drag": 3.5,
+   "spin": 6
+  },
+  {
+   "id": "gust19",
+   "t": "emit",
+   "at": 0.4,
+   "life": 0.05,
+   "burst": 10,
+   "pos": [
+    0,
+    1.15,
+    2.02
+   ],
+   "from": "disc",
+   "fr": 0.18,
+   "dir": "flat",
+   "speed": [
+    3,
+    5.3999999999999995
+   ],
+   "plife": [
+    0.2,
+    0.35
+   ],
+   "look": "streak",
+   "size": [
+    2,
+    3
+   ],
+   "col": "#ffffff",
+   "c2": "#b8d4ec",
+   "gravity": 0,
+   "drag": 3
+  },
+  {
+   "id": "flash20",
+   "t": "flash",
+   "at": 0.44,
+   "life": 0.1,
+   "pos": [
+    -0.6,
+    1.3,
+    2.6
+   ],
+   "col": "#ffffff",
+   "size": 0.81
+  },
+  {
+   "id": "halo21",
+   "t": "halo",
+   "at": 0.44,
+   "life": 0.45,
+   "pos": [
+    -0.6,
+    1.3,
+    2.6
+   ],
+   "col": "#b8d4ec",
+   "size": 1.26,
+   "k": 1
+  },
+  {
+   "id": "spikes22",
+   "t": "mesh",
+   "at": 0.44,
+   "life": 0.6,
+   "att": "ground",
+   "pos": [
+    -0.6,
+    0,
+    2.6
+   ],
+   "shape": "model",
+   "model": "frost_spires",
+   "mat": "ice",
+   "col": "#f4faff",
+   "col2": "#9cbad6",
+   "scale": {
+    "0": 0.1,
+    "1": 0.45,
+    "0.25": 0.49500000000000005,
+    "ease": "out"
+   },
+   "op": {
+    "0": 1,
+    "1": 0,
+    "0.7": 1
+   },
+   "grow": {
+    "0": 0,
+    "0.3": 1
+   }
+  },
+  {
+   "id": "chunks23",
+   "t": "emit",
+   "at": 0.44,
+   "life": 0.05,
+   "burst": 9.6,
+   "pos": [
+    -0.6,
+    1.2,
+    2.6
+   ],
+   "from": "sphere",
+   "fr": 0.3,
+   "dir": "out",
+   "spread": 1.2,
+   "speed": [
+    2.9,
+    5.35
+   ],
+   "up": [
+    2,
+    5
+   ],
+   "plife": [
+    0.8,
+    1.4
+   ],
+   "look": "model",
+   "model": "frost_shard",
+   "mmat": "ice",
+   "msize": [
+    0.1,
+    0.24
+   ],
+   "bounce": 0.35,
+   "mspin": 540,
+   "gravity": 11,
+   "drag": 1,
+   "col": "#eef7ff",
+   "c2": "#6f8eae"
+  },
+  {
+   "id": "ring24",
+   "t": "ring",
+   "at": 0.44,
+   "life": 0.4,
+   "att": "ground",
+   "pos": [
+    -0.6,
+    0.08,
+    2.6
+   ],
+   "col": "#eef7ff",
+   "r": 1.35,
+   "op": 0.55
+  },
+  {
+   "id": "shock25",
+   "t": "warp",
+   "at": 0.44,
+   "life": 0.45,
+   "att": "ground",
+   "pos": [
+    -0.6,
+    0.2,
+    2.6
+   ],
+   "kind": "shock",
+   "flat": true,
+   "size": {
+    "0": 0.5,
+    "1": 1,
+    "x": 1.8
+   },
+   "op": {
+    "0": 1,
+    "1": 0
+   },
+   "str": 1.1,
+   "col": "#e8f8ff",
+   "x": true
+  },
+  {
+   "id": "powder26",
+   "t": "emit",
+   "at": 0.44,
+   "life": 0.06,
+   "burst": 8,
+   "pos": [
+    -0.6,
+    0.8,
+    2.6
+   ],
+   "from": "sphere",
+   "fr": 0.47000000000000003,
+   "dir": "out",
+   "spread": 1.2,
+   "speed": [
+    1.1600000000000001,
+    2.72
+   ],
+   "plife": [
+    0.6,
+    1
+   ],
+   "look": "glow",
+   "size": [
+    9,
+    14
+   ],
+   "grow": 0.8,
+   "col": "#f4f9ff",
+   "c2": "#c9d9ea",
+   "gravity": -0.1,
+   "drag": 2.5,
+   "x": true
+  },
+  {
+   "id": "flakes27",
+   "t": "emit",
+   "at": 0.44,
+   "life": 0.05,
+   "burst": 23,
+   "pos": [
+    -0.6,
+    1,
+    2.6
+   ],
+   "from": "sphere",
+   "fr": 0.27,
+   "dir": "out",
+   "speed": [
+    1.35,
+    3.15
+   ],
+   "plife": [
+    0.6,
+    1.1
+   ],
+   "look": "flake",
+   "size": [
+    1.4,
+    2.4
+   ],
+   "col": "#ffffff",
+   "c2": "#b8d4ec",
+   "gravity": 0.8,
+   "drag": 3.5,
+   "spin": 6
+  },
+  {
+   "id": "gust28",
+   "t": "emit",
+   "at": 0.44,
+   "life": 0.05,
+   "burst": 12,
+   "pos": [
+    -0.6,
+    1,
+    2.6
+   ],
+   "from": "disc",
+   "fr": 0.27,
+   "dir": "flat",
+   "speed": [
+    4.5,
+    8.1
+   ],
+   "plife": [
+    0.2,
+    0.35
+   ],
+   "look": "streak",
+   "size": [
+    2,
+    3
+   ],
+   "col": "#ffffff",
+   "c2": "#b8d4ec",
+   "gravity": 0,
+   "drag": 3
+  },
+  {
+   "id": "cut29",
+   "t": "trail",
+   "at": 0.66,
+   "life": 0.16,
+   "sweep": true,
+   "a0": -30,
+   "a1": 30,
+   "r": 3.2,
+   "r0": 1.4400000000000002,
+   "tilt": -80,
+   "pos": [
+    0,
+    1.15,
+    0.2
+   ],
+   "col": "#ffffff",
+   "col2": "#b8d4ec",
+   "w": 0.7,
+   "tlife": 0.22,
+   "k": 2.2
+  },
+  {
+   "id": "cutG30",
+   "t": "trail",
+   "at": 0.68,
+   "life": 0.16,
+   "sweep": true,
+   "a0": -30,
+   "a1": 30,
+   "r": 3.4560000000000004,
+   "r0": 2.5600000000000005,
+   "tilt": -80,
+   "pos": [
+    0,
+    1.15,
+    0.2
+   ],
+   "col": "#eef7ff",
+   "col2": "#6f8eae",
+   "w": 0.35,
+   "tlife": 0.3,
+   "k": 1.4
+  },
+  {
+   "id": "powder31",
+   "t": "emit",
+   "at": 0.74,
+   "life": 0.06,
+   "burst": 8,
+   "pos": [
+    0,
+    0.95,
+    2.44
+   ],
+   "from": "sphere",
+   "fr": 0.452,
+   "dir": "out",
+   "spread": 1.2,
+   "speed": [
+    1.1360000000000001,
+    2.672
+   ],
+   "plife": [
+    0.6,
+    1
+   ],
+   "look": "glow",
+   "size": [
+    9,
+    14
+   ],
+   "grow": 0.8,
+   "col": "#f4f9ff",
+   "c2": "#c9d9ea",
+   "gravity": -0.1,
+   "drag": 2.5,
+   "x": true
+  },
+  {
+   "id": "flakes32",
+   "t": "emit",
+   "at": 0.74,
+   "life": 0.05,
+   "burst": 22,
+   "pos": [
+    0,
+    1.15,
+    2.44
+   ],
+   "from": "sphere",
+   "fr": 0.252,
+   "dir": "out",
+   "speed": [
+    1.26,
+    2.94
+   ],
+   "plife": [
+    0.6,
+    1.1
+   ],
+   "look": "flake",
+   "size": [
+    1.4,
+    2.4
+   ],
+   "col": "#ffffff",
+   "c2": "#b8d4ec",
+   "gravity": 0.8,
+   "drag": 3.5,
+   "spin": 6
+  },
+  {
+   "id": "gust33",
+   "t": "emit",
+   "at": 0.74,
+   "life": 0.05,
+   "burst": 11,
+   "pos": [
+    0,
+    1.15,
+    2.44
+   ],
+   "from": "disc",
+   "fr": 0.252,
+   "dir": "flat",
+   "speed": [
+    4.2,
+    7.56
+   ],
+   "plife": [
+    0.2,
+    0.35
+   ],
+   "look": "streak",
+   "size": [
+    2,
+    3
+   ],
+   "col": "#ffffff",
+   "c2": "#b8d4ec",
+   "gravity": 0,
+   "drag": 3
+  },
+  {
+   "id": "flash34",
+   "t": "flash",
+   "at": 0.78,
+   "life": 0.1,
+   "pos": [
+    0,
+    0.7,
+    3
+   ],
+   "col": "#ffffff",
+   "size": 1.62
+  },
+  {
+   "id": "halo35",
+   "t": "halo",
+   "at": 0.78,
+   "life": 0.45,
+   "pos": [
+    0,
+    0.7,
+    3
+   ],
+   "col": "#b8d4ec",
+   "size": 2.52,
+   "k": 1
+  },
+  {
+   "id": "spikes36",
+   "t": "mesh",
+   "at": 0.78,
+   "life": 0.6,
+   "att": "ground",
+   "pos": [
+    0,
+    0,
+    3
+   ],
+   "shape": "model",
+   "model": "frost_spires",
+   "mat": "ice",
+   "col": "#f4faff",
+   "col2": "#9cbad6",
+   "scale": {
+    "0": 0.1,
+    "1": 0.9,
+    "0.25": 0.9900000000000001,
+    "ease": "out"
+   },
+   "op": {
+    "0": 1,
+    "1": 0,
+    "0.7": 1
+   },
+   "grow": {
+    "0": 0,
+    "0.3": 1
+   }
+  },
+  {
+   "id": "chunks37",
+   "t": "emit",
+   "at": 0.78,
+   "life": 0.05,
+   "burst": 13.2,
+   "pos": [
+    0,
+    0.6000000000000001,
+    3
+   ],
+   "from": "sphere",
+   "fr": 0.3,
+   "dir": "out",
+   "spread": 1.2,
+   "speed": [
+    3.8,
+    6.7
+   ],
+   "up": [
+    2,
+    5
+   ],
+   "plife": [
+    0.8,
+    1.4
+   ],
+   "look": "model",
+   "model": "frost_shard",
+   "mmat": "ice",
+   "msize": [
+    0.1,
+    0.24
+   ],
+   "bounce": 0.35,
+   "mspin": 540,
+   "gravity": 11,
+   "drag": 1,
+   "col": "#eef7ff",
+   "c2": "#6f8eae"
+  },
+  {
+   "id": "ring38",
+   "t": "ring",
+   "at": 0.78,
+   "life": 0.4,
+   "att": "ground",
+   "pos": [
+    0,
+    0.08,
+    3
+   ],
+   "col": "#eef7ff",
+   "r": 2.7,
+   "op": 0.55
+  },
+  {
+   "id": "shock39",
+   "t": "warp",
+   "at": 0.78,
+   "life": 0.45,
+   "att": "ground",
+   "pos": [
+    0,
+    0.2,
+    3
+   ],
+   "kind": "shock",
+   "flat": true,
+   "size": {
+    "0": 0.5,
+    "1": 1,
+    "x": 3.6
+   },
+   "op": {
+    "0": 1,
+    "1": 0
+   },
+   "str": 1.1,
+   "col": "#e8f8ff",
+   "x": true
+  },
+  {
+   "id": "powder40",
+   "t": "emit",
+   "at": 0.78,
+   "life": 0.06,
+   "burst": 10,
+   "pos": [
+    0,
+    0.3,
+    3
+   ],
+   "from": "sphere",
+   "fr": 0.74,
+   "dir": "out",
+   "spread": 1.2,
+   "speed": [
+    1.52,
+    3.4400000000000004
+   ],
+   "plife": [
+    0.6,
+    1
+   ],
+   "look": "glow",
+   "size": [
+    9,
+    14
+   ],
+   "grow": 0.8,
+   "col": "#f4f9ff",
+   "c2": "#c9d9ea",
+   "gravity": -0.1,
+   "drag": 2.5,
+   "x": true
+  },
+  {
+   "id": "flakes41",
+   "t": "emit",
+   "at": 0.78,
+   "life": 0.05,
+   "burst": 32,
+   "pos": [
+    0,
+    0.4,
+    3
+   ],
+   "from": "sphere",
+   "fr": 0.54,
+   "dir": "out",
+   "speed": [
+    2.7,
+    6.3
+   ],
+   "plife": [
+    0.6,
+    1.1
+   ],
+   "look": "flake",
+   "size": [
+    1.4,
+    2.4
+   ],
+   "col": "#ffffff",
+   "c2": "#b8d4ec",
+   "gravity": 0.8,
+   "drag": 3.5,
+   "spin": 6
+  },
+  {
+   "id": "gust42",
+   "t": "emit",
+   "at": 0.78,
+   "life": 0.05,
+   "burst": 15,
+   "pos": [
+    0,
+    0.4,
+    3
+   ],
+   "from": "disc",
+   "fr": 0.54,
+   "dir": "flat",
+   "speed": [
+    9,
+    16.2
+   ],
+   "plife": [
+    0.2,
+    0.35
+   ],
+   "look": "streak",
+   "size": [
+    2,
+    3
+   ],
+   "col": "#ffffff",
+   "c2": "#b8d4ec",
+   "gravity": 0,
+   "drag": 3
+  },
+  {
+   "id": "light43",
+   "t": "light",
+   "at": 0.78,
+   "life": 0.4,
+   "pos": [
+    0,
+    1.4,
+    3
+   ],
+   "col": "#b8d4ec",
+   "int": {
+    "0": 2,
+    "1": 0
+   },
+   "dist": 13.2
+  },
+  {
+   "id": "cam44",
+   "t": "screen",
+   "at": 0.78,
+   "life": 0.25,
+   "shake": 2.58,
+   "own": true,
+   "kick": 0.2
+  }
+ ],
+ "dur": 2.5
+}
