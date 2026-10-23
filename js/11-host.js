@@ -121,7 +121,7 @@ function hostStart(){
     p.team=(G.mode==='coop'||G.mode==='train')?0:MD.team?p.lteam:10+i;
   });
   placeAll();
-  modeInit();if(G.mode==='ffa')ffaInit();
+  modeInit();if(G.mode==='ffa')ffaInit();else if(G.mode==='tdm')potInit();
   if(G.mode==='coop'){G.wave=1;setupWave();}else if(G.mode!=='imp')banner(MD.name,3);
   hostLast=performance.now();
   VIEW.prev=VIEW.cur=null;

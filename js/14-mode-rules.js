@@ -56,7 +56,7 @@ function modeLogic(dt){
     case 'ffa':case 'tdm':
       if(G.ph==='play'){
         G.timer-=dt;
-        if(G.mode==='ffa')ffaTick(dt);   // ขวดเลือด (js/54)
+        if(G.mode==='ffa')ffaTick(dt);else potTick(dt);   // แท่นขวดเลือด FFA + ทีม (js/54)
         const done=G.mode==='ffa'?ffaDone():G.timer<=0||G.teamScore.some(s=>s>=15);
         if(done)endMatch();
       }

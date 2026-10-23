@@ -429,14 +429,14 @@ overMvp:117 overBar:127
 §129 ห้องฝึก: นับคอมโบ (ผู้ใช้ 2026-10-22 "ห้องลองคอมโบ ... ใส่ในห้องฝึก")
 COMBO:132 comboHit:133 comboEnd:139 drawCombo:140
 
-## js/54-ffa.js (170) — FFA ให้มันขึ้น (ผู้ใช้ 2026-10-22 เลือกชุด A + B(เฉพาะขวดเลือด) + C)
+## js/54-ffa.js (197) — FFA ให้มันขึ้น (ผู้ใช้ 2026-10-22 เลือกชุด A + B(เฉพาะขวดเลือด) + C)
 FFA:8
-§10 โฮสต์
-ffaInit:11 ffaPotSpots:16 ffaTick:27 ffaDmgLog:40 ffaKill:46 ffaDone:65 ffaSnapPots:72
-§74 ภาพ: ขวดเลือด 3 มิติ
-POT3:75 potMesh:76 syncPots:86 potFx:98
-§103 ภาพ: ป้ายตอนฆ่า / จอตอนตาย / อันดับ / มงกุฎค่าหัว
-FFAV:104 MULTI:105 MULTI_TH:105 STREAK:106 pName:107 ffaKf:108 kfSound:123 KINDN:124 drawFFA:125
+§12 โฮสต์
+ffaInit:13 potSpotOk:19 potSpots:23 potInit:31 potTick:32 ffaTick:43 ffaDmgLog:45 ffaKill:51 ffaDone:69 ffaSnapPots:77
+§79 ภาพ: แท่นขวดเลือด 3 มิติ (แบบแท่นเฮล Overwatch)
+POT3:81 potBottle:82 potMesh:91 syncPots:108 potFx:125
+§130 ภาพ: ป้ายตอนฆ่า / จอตอนตาย / อันดับ / มงกุฎค่าหัว
+FFAV:131 MULTI:132 MULTI_TH:132 STREAK:133 pName:134 ffaKf:135 kfSound:150 KINDN:151 drawFFA:152
 
 ## js/55-podium.js (82) — โพเดียมธีมฮอกวอตส์ (ผู้ใช้ 2026-10-22 "podium but make it magician theme hogwart theme")
 POD:6 POD_X:7 POD_H:7 POD_C:7 podStart:8 podStop:29 podPose:37 renderPodium:49
@@ -531,4 +531,4 @@ RICO:133 rIcon:139 OV:140 ovScore:141 ovOpen:142 ovHead:151 ovSummary:157 ovNext
 §227 หน้าโปรไฟล์ (แบบ Naraka ย่อ) + รางวัลเลเวล
 PRF:231 prfItem:232 prfLv:233 prfOk:234 prfGet:235 myFrame:236 FR_IDX:237 prfAvatar:239 BADGES:240 BICO:244 SICO:247 PT:249 PFS:250 prfSave:251 prf3Sync:252 profOpen:253 prfStageX:261 profClose:263 prfRender:264 prfItems:288 prfRwHtml:295 prfRewards:306 prfClick:315 prfDrag:328
 
-(66 files, 15853 lines)
+(66 files, 15880 lines)

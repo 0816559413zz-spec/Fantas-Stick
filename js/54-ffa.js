@@ -5,37 +5,42 @@
 //  C ยุติธรรม: เกิดใหม่อมตะ 2 วิ (js/11 respawn) • จอตอนตายบอกว่าโดนใคร/อะไร/เท่าไหร่ • อันดับ 3 คนแรกมุมจอ • หมดเวลาแต่เสมอ = ต่อเวลา (ใครฆ่าก่อนชนะ, สูงสุด 2 นาที)
 //  ส่วนโฮสต์ (ffa*) + ส่วนภาพ (draw/sync) อยู่ไฟล์เดียวกัน • ⚠ ตัวเลขทั้งหมด Claude เลือกเอง (ผู้ใช้เลือกแค่ชุด)
 // =====================================================================
-const FFA={TARGET:10,BOUNTY_MIN:3,MULTI:4,POT_BIG:50,POT_SMALL:25,POT_RE:25,POT_LIFE:15,PROT:2,OT_MAX:120,REVENGE_HP:20};
+const FFA={TARGET:10,BOUNTY_MIN:3,MULTI:4,POT_BIG:150,POT_CORNER:100,POT_RE:20,POT_R:48,PROT:2,OT_MAX:120,REVENGE_HP:20};
+// ขวดเลือดบนแท่น (ผู้ใช้ 2026-10-23 รอบ 3: "dont make it too randomly … center of map … and at some corner enough … it will has base like" แท่นเฮล Overwatch)
+//   โหมด FFA + ทีม • กลางแผนที่ 1 แท่น ฮีล 150 / มุมแผนที่ ฮีล 100 • เกิดใหม่ 20 วิ • เลิกดรอปขวดตอนตาย (สุ่มตำแหน่ง) ⚠ จำนวนมุม (4) + ระยะเก็บ Claude เลือก
 
 // ---------- โฮสต์ ----------
 function ffaInit(){
-  G.pots=[];G.potId=0;G.ot=0;G.potSpots=ffaPotSpots();
+  potInit();G.ot=0;
   for(const p of plist()){p.streak=0;p.multi=0;p.lastKillT=-99;p.killedBy=null;p.assists=0;p.dmgBy={};p.recap=[];}
 }
-// จุดขวดเลือด: กึ่งกลางระหว่างจุดเกิดกับกลางแผนที่ + กลางแผนที่ — ตัดจุดที่อยู่ในกำแพง/สิ่งของ (ลองดันด้วย collideWorld แล้วขยับ = ใช้ไม่ได้)
-function ffaPotSpots(){
-  const cx=MW/2,cy=MH/2,cand=[[cx,cy]],out=[];
-  for(const s of spawnPts())cand.push([lerp(s[0],cx,0.5),lerp(s[1],cy,0.5)]);
-  for(const [x,y] of cand){
-    const pr={x,y,z:0};try{collideWorld(pr,26,0);}catch(e){}
-    if(Math.hypot(pr.x-x,pr.y-y)>2)continue;
-    if(out.some(o=>Math.hypot(o.x-x,o.y-y)<320))continue;
-    out.push({x,y,has:false,t:0});if(out.length>=5)break;
-  }
+// แท่นขวดเลือด: กลางแผนที่ (ใหญ่) + 4 มุม (ขยับเข้าหากลางทีละนิดจนไม่ชนกำแพง/สิ่งของ) • เริ่มเกมมีขวดพร้อมทุกแท่น
+// ที่ว่างพอวางแท่น: ไม่ทับสิ่งกีดขวาง/ของ (เช็กระยะเอง — collideWorld ข้ามจุดที่ตรงกลางวัตถุพอดี) + ไม่ถูกดันออก (กำแพง/บ้าน)
+function potSpotOk(x,y){const r=40;
+  if(OBS.some(c=>c.bi===undefined&&Math.hypot(x-c.x,y-c.y)<c.r+r))return false;
+  if(PROPON&&PROPS.some(c=>c.st!==1&&Math.hypot(x-c.x,y-c.y)<c.r+r))return false;
+  const pr={x:x+0.3,y:y+0.3,z:0};try{collideWorld(pr,r,0);}catch(e){}return Math.hypot(pr.x-x-0.3,pr.y-y-0.3)<=2;}
+function potSpots(){
+  const cx=MW/2,cy=MH/2,out=[];
+  const add=(x,y,big)=>{if(out.some(o=>Math.hypot(o.x-x,o.y-y)<320))return false;out.push({x,y,big,has:true,t:0});return true;};
+  center:for(let rr=0;rr<=420;rr+=60)for(let k=0;k<(rr?12:1);k++){const a=k/12*Math.PI*2+Math.PI/2,x=cx+Math.cos(a)*rr,y=cy+Math.sin(a)*rr;if(potSpotOk(x,y)){add(x,y,1);break center;}}   // จุดว่างใกล้กลางที่สุด
+  for(const [sx,sy] of [[-1,-1],[1,-1],[1,1],[-1,1]])
+    for(let f=0.14;f<=0.34;f+=0.02){const x=cx+sx*(0.5-f)*MW,y=cy+sy*(0.5-f)*MH;if(potSpotOk(x,y)){add(x,y,0);break;}}
   return out;
 }
-function ffaTick(dt){
-  if(!G.pots)ffaInit();
-  for(const s of G.potSpots)if(!s.has){s.t-=dt;if(s.t<=0){s.has=true;G.pots.push({id:++G.potId,x:s.x,y:s.y,big:1,spot:s});}}
-  for(let i=G.pots.length-1;i>=0;i--){const o=G.pots[i];
-    if(o.life!==undefined){o.life-=dt;if(o.life<=0){G.pots.splice(i,1);continue;}}
+function potInit(){G.potSpots=potSpots();}
+function potTick(dt){
+  if(!G.potSpots)potInit();
+  for(const s of G.potSpots){
+    if(!s.has){s.t-=dt;if(s.t<=0){s.has=true;s.t=0;}continue;}
     for(const p of plist()){
-      if(!p.alive||p.downed||p.hp>=p.maxHp||Math.hypot(p.x-o.x,p.y-o.y)>45||(p.z||0)>groundH(o.x,o.y,0)+3)continue;
-      const n=o.big?FFA.POT_BIG:FFA.POT_SMALL;healT(p,n);emit({k:'pot',x:Math.round(o.x),y:Math.round(o.y),id:p.id,n});
-      G.pots.splice(i,1);if(o.spot){o.spot.has=false;o.spot.t=FFA.POT_RE;}break;
+      if(!p.alive||p.downed||p.hp>=p.maxHp||Math.hypot(p.x-s.x,p.y-s.y)>FFA.POT_R||(p.z||0)>groundH(s.x,s.y,0)+3)continue;
+      const n=s.big?FFA.POT_BIG:FFA.POT_CORNER;healT(p,n);emit({k:'pot',x:Math.round(s.x),y:Math.round(s.y),id:p.id,n});
+      s.has=false;s.t=FFA.POT_RE;break;
     }
   }
 }
+function ffaTick(dt){potTick(dt);}
 // ใครตีใคร (assist + จอตอนตาย) — เรียกจาก damage() เฉพาะผู้เล่นโดน
 function ffaDmgLog(t,srcId,amt,kind){
   if(!srcId||srcId===t.id)return;
@@ -58,7 +63,6 @@ function ffaKill(k,t){
   const rcA=Object.entries(rc).sort((a,b)=>b[1].n-a[1].n).slice(0,4).map(([id,o])=>[id,Math.round(o.n),o.h,Object.entries(o.k).sort((a,b)=>b[1]-a[1])[0][0]]);
   const es=t.streak|0;if(k&&es>=3)feed(`🛑 ${k.name} ปิดฉาก ${t.name} (${es} kill ติด)`);
   t.streak=0;t.multi=0;t.killedBy=k?k.id:null;t.dmgBy={};t.recap=[];
-  if(G.pots)G.pots.push({id:++G.potId,x:t.x,y:t.y,big:0,life:FFA.POT_LIFE});
   emit({k:'kf',ki:k?k.id:'',vi:t.id,ms,st,bn:bounty?1:0,rv:revenge?1:0,es:es>=3?es:0,as:asst,rc:rcA,kh:k?Math.ceil(k.hp):0,kp:k?k.pathIdx|0:-1});
 }
 // จบเกม: มีคนถึงเป้า หรือหมดเวลา — หมดเวลาแต่อันดับ 1 เสมอ = ต่อเวลา (ใครฆ่าก่อนชนะ) ไม่เกิน 2 นาที
@@ -69,29 +73,52 @@ function ffaDone(){
   if(n>1&&ps.length>1&&G.timer>-FFA.OT_MAX){if(!G.ot){G.ot=1;banner('⏱ ต่อเวลา! ใครฆ่าก่อนชนะ',3);}return false;}
   return true;
 }
-function ffaSnapPots(){return G.mode==='ffa'&&G.pots?G.pots.map(o=>[o.id,Math.round(o.x),Math.round(o.y),o.big?1:0]):undefined;}
+// แท่นขวดเลือดในสแนปช็อต: [ลำดับ, x, y, ใหญ่?, มีขวด?, วิที่เหลือ×10]
+function ffaSnapPots(){return (G.mode==='ffa'||G.mode==='tdm')&&G.potSpots?G.potSpots.map((s,i)=>[i,Math.round(s.x),Math.round(s.y),s.big?1:0,s.has?1:0,Math.ceil(s.t*10)]):undefined;}
 
-// ---------- ภาพ: ขวดเลือด 3 มิติ ----------
+// ---------- ภาพ: แท่นขวดเลือด 3 มิติ (แบบแท่นเฮล Overwatch) ----------
+// แท่นโลหะเข้ม + วงเรืองแดง + ตรากากบาทกลางแท่น • ขวดลอยหมุนเหนือแท่น • ขวดถูกเก็บ = ตราหรี่ + วงความคืบหน้าวิ่งรอบจนเกิดใหม่ • แท่นกลาง = ใหญ่กว่า ขอบทอง
 const POT3=new Map();
-function potMesh(big){
-  const g=new THREE.Group(),s=big?1:0.7;
+function potBottle(s){
+  const g=new THREE.Group();
   const glass=new THREE.MeshStandardMaterial({color:'#ff3a4a',emissive:'#a0101c',emissiveIntensity:1.2,roughness:0.15,metalness:0.1,transparent:true,opacity:0.9});
-  const body=new THREE.Mesh(new THREE.SphereGeometry(0.42*s,14,10),glass);body.scale.y=1.1;g.add(body);
-  const neck=new THREE.Mesh(new THREE.CylinderGeometry(0.12*s,0.16*s,0.32*s,10),new THREE.MeshStandardMaterial({color:'#f6e6d0',roughness:0.3,transparent:true,opacity:0.7}));neck.position.y=0.52*s;g.add(neck);
-  const cork=new THREE.Mesh(new THREE.CylinderGeometry(0.13*s,0.11*s,0.14*s,8),new THREE.MeshStandardMaterial({color:'#8a5a2b',roughness:0.9}));cork.position.y=0.74*s;g.add(cork);
+  const body=new THREE.Mesh(new THREE.SphereGeometry(0.42*s,16,12),glass);body.scale.y=1.1;g.add(body);
+  const neck=new THREE.Mesh(new THREE.CylinderGeometry(0.12*s,0.16*s,0.32*s,12),new THREE.MeshStandardMaterial({color:'#f6e6d0',roughness:0.3,transparent:true,opacity:0.7}));neck.position.y=0.52*s;g.add(neck);
+  const cork=new THREE.Mesh(new THREE.CylinderGeometry(0.13*s,0.11*s,0.14*s,10),new THREE.MeshStandardMaterial({color:'#8a5a2b',roughness:0.9}));cork.position.y=0.74*s;g.add(cork);
   const glow=new THREE.Sprite(glowMat('#ff4a5a',1.4));glow.scale.setScalar(2.2*s);g.add(glow);
-  const ring=new THREE.Mesh(new THREE.RingGeometry(0.55*s,0.68*s,24),new THREE.MeshBasicMaterial({color:'#ff7a8a',transparent:true,opacity:0.55,side:THREE.DoubleSide,depthWrite:false}));ring.rotation.x=-Math.PI/2;g.add(ring);
-  g.userData={ring,glow,body,s};return g;
+  return g;
+}
+function potMesh(big){
+  const g=new THREE.Group(),R=big?1.25:0.95,col=big?'#ffd27a':'#ff5a6a';
+  const metal=new THREE.MeshStandardMaterial({color:'#1b2033',roughness:0.45,metalness:0.7});
+  const base=new THREE.Mesh(new THREE.CylinderGeometry(R,R*1.12,0.22,40),metal);base.position.y=0.11;base.receiveShadow=true;g.add(base);
+  const top=new THREE.Mesh(new THREE.CylinderGeometry(R*0.82,R,0.06,40),new THREE.MeshStandardMaterial({color:'#262d46',roughness:0.35,metalness:0.6}));top.position.y=0.25;g.add(top);
+  const rim=new THREE.Mesh(new THREE.TorusGeometry(R*0.9,0.035,8,64),new THREE.MeshBasicMaterial({color:hdr(col,1.6),transparent:true,opacity:0.9}));rim.rotation.x=Math.PI/2;rim.position.y=0.27;g.add(rim);
+  if(big){const gold=new THREE.Mesh(new THREE.TorusGeometry(R*1.1,0.03,8,64),new THREE.MeshStandardMaterial({color:'#e8c468',metalness:1,roughness:0.3,emissive:'#5a3d08',emissiveIntensity:0.4}));gold.rotation.x=Math.PI/2;gold.position.y=0.2;g.add(gold);}
+  // ตรากากบาทกลางแท่น (เรือง)
+  const crossM=new THREE.MeshBasicMaterial({color:hdr('#ff7a8a',1.8),transparent:true,opacity:0.95,depthWrite:false,blending:THREE.AdditiveBlending});
+  const cross=new THREE.Group();for(const [w,d] of [[0.62,0.2],[0.2,0.62]]){const m=new THREE.Mesh(new THREE.PlaneGeometry(w*R,d*R),crossM);m.rotation.x=-Math.PI/2;cross.add(m);}cross.position.y=0.285;g.add(cross);
+  // วงความคืบหน้าตอนรอเกิดใหม่ (วาดบางส่วนด้วย drawRange)
+  const pg=new THREE.RingGeometry(R*0.62,R*0.74,96,1);const prog=new THREE.Mesh(pg,new THREE.MeshBasicMaterial({color:hdr(col,1.8),transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide}));
+  prog.rotation.x=-Math.PI/2;prog.rotation.z=Math.PI/2;prog.position.y=0.29;g.add(prog);
+  const bottle=potBottle(big?1.15:0.9);g.add(bottle);
+  const beam=new THREE.Mesh(new THREE.CylinderGeometry(R*0.55,R*0.75,1.6,32,1,true),new THREE.MeshBasicMaterial({color:hdr('#ff5a6a',0.25),transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide}));beam.position.y=1.1;g.add(beam);
+  g.userData={rim,cross,crossM,prog,pg,bottle,beam,big};return g;
 }
 function syncPots(v,now){
   const seen=new Set();
   for(const q of (v.PT||[])){
-    seen.add(q[0]);let o=POT3.get(q[0]);
-    if(!o){o=potMesh(!!q[3]);scene.add(o);POT3.set(q[0],o);}
-    const gy=GY(q[1],q[2]),t=now/1000+q[0];
-    o.position.set(tx(q[1]),gy+0.9+Math.sin(t*2.2)*0.15,tz(q[2]));o.rotation.y=t*1.2;
-    const u=o.userData;u.ring.position.y=-0.85-Math.sin(t*2.2)*0.15;u.ring.material.opacity=0.35+0.25*Math.sin(t*4);
-    LREQ.push({x:o.position.x,y:o.position.y,z:o.position.z,col:'#ff4a5a',int:1.2,dist:5});
+    const id='s'+q[0];seen.add(id);let o=POT3.get(id);
+    if(!o){o=potMesh(!!q[3]);scene.add(o);POT3.set(id,o);}
+    const gy=GY(q[1],q[2]),t=now/1000+q[0],u=o.userData,has=!!q[4];
+    o.position.set(tx(q[1]),gy,tz(q[2]));
+    u.bottle.visible=has;u.beam.visible=has;
+    if(has){u.bottle.position.y=1.25+Math.sin(t*2.2)*0.14;u.bottle.rotation.y=t*1.2;u.beam.material.opacity=0.55+0.25*Math.sin(t*3);
+      LREQ.push({x:o.position.x,y:gy+1.3,z:o.position.z,col:'#ff4a5a',int:u.big?1.6:1.2,dist:5});}
+    u.crossM.opacity=has?0.85+0.15*Math.sin(t*3):0.22;
+    const fr=has?0:Math.max(0,Math.min(1,1-q[5]/10/FFA.POT_RE));u.prog.visible=!has;
+    if(!has)u.pg.setDrawRange(0,Math.floor(96*fr)*6);
+    u.rim.material.opacity=has?0.9:0.35;
   }
   for(const [id,o] of POT3)if(!seen.has(id)){scene.remove(o);disposeObj(o);POT3.delete(id);}
 }
