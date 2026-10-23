@@ -96,9 +96,9 @@ function efxFX(ev){
       for(let i=0;i<=N;i++){const d=L*i/N,px=x+c*d,py=y+sn*d;later(0.3*i/N,()=>{tbolt(px+rnd(-15,15),py+rnd(-15,15),H+10,px+rnd(-8,8),py+rnd(-8,8),H+0.1,0.2,0,0.26,1);burst(px,py,'#ffd000',8,160,0.3,2.2,{h:H+0.2,vh:[1,5],g:6});burst(px,py,'#ffffff',3,120,0.2,1.6,{h:H+0.2,g:6});burst(px,py,'#9fd8ff',3,140,0.25,1.6,{h:H+0.2,vh:[1,4],g:6});if(i%3===0)FX.flashLight(px,py,H+1.5,'#ffd23a',3,10,0.2);});}
       if(near){snd('zap',ev);later(0.15,()=>snd('boom',{x,y,vol:0.3}));shake(2);}break;}
     case 'ssiph':{const T=ev.tg||[];
-      for(const t of T){tbolt(t[0],t[1],t[2],x,y,H,0.3,0,0.16,1);FX.flashSprite(t[0],t[1],t[2],'#ffd23a',0.9,0.2,0.3,1.6);
-        for(let j=0;j<10;j++)PARTS.push({x:t[0]+rnd(-12,12),y:t[1]+rnd(-12,12),h:t[2]+rnd(-0.6,0.8),vx:(x-t[0])*rnd(1.5,2.5),vy:(y-t[1])*rnd(1.5,2.5),vh:rnd(-2,-0.5),life:0.4,max:0.4,col:j%2?'#ffd000':'#ffffff',size:rnd(2,3),g:0});}
-      for(const t of T){const d=Math.hypot(x-t[0],y-t[1]);if(d>20)fxPlay('storm/siphon_c',{x:t[0],y:t[1],h:t[2],a:Math.atan2(y-t[1],x-t[0]),p:{len:d/20}});}
+      // ผู้ใช้ 2026-10-23: ใช้ตัวเลือกรอบ 3 แบบ 1 (เทสลา) แต่สีเหลือง — ส่วนต่อศัตรู (siphon_y ยืดตามระยะ) + ส่วนรอบตัวเรา (siphon_yself)
+      for(const t of T){const d=Math.hypot(x-t[0],y-t[1]);if(d>20)fxPlay('storm/siphon_y',{x:t[0],y:t[1],h:t[2],a:Math.atan2(y-t[1],x-t[0]),p:{len:d/20}});}
+      if(T.length)fxPlay('storm/siphon_yself',{x,y,h:H});
       if(near)snd('zap',ev);if(ev.id===NET.myId&&T.length)snd('buff');break;}
     case 'sorbon':burst(x,y,'#ffd000',20,140,0.4,2.2,{h:H,g:0});FX.flashLight(x,y,H,'#ffd23a',3,10,0.25);if(ev.id===NET.myId)snd('buff');break;
     case 'sorbgo':if(ev.T){const o=PM3.get(ev.id);for(let i=0;i<(ev.n||1);i++){let s=[x+(i%2?40:-40),y,H];const sl=o&&o.sOrbs&&o.sOrbs[i%2];if(sl&&sl.parent){sl.getWorldPosition(_tw);const q=simOf(_tw);s=[q.x,q.y,q.h];}
