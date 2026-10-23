@@ -314,8 +314,8 @@ function hubBuildStudy(){
   // แผนที่กระดาษ + แว่นขยาย
   {const m=new THREE.Mesh(new THREE.PlaneGeometry(0.46,0.34,8,1),new THREE.MeshStandardMaterial({map:hubTexMap(),roughness:0.9,side:THREE.DoubleSide}));const p=m.geometry.attributes.position;
     for(let i=0;i<p.count;i++){const u=p.getX(i)/0.23;p.setZ(i,Math.max(0,Math.abs(u)-0.7)*0.06);}m.geometry.computeVertexNormals();
-    m.rotation.set(-Math.PI/2,0,0.35);m.position.set(0.32,y0+0.009,0.3);m.receiveShadow=true;T.add(m);
-    const g=new THREE.Group();g.position.set(0.5,y0+0.012,0.18);g.rotation.y=0.9;T.add(g);
+    m.rotation.set(-Math.PI/2,0,0.35);m.position.set(0.46,y0+0.012,0.16);m.receiveShadow=true;T.add(m);   // เลื่อนออกจากไพ่ทาโรต์ (เดิมไพ่ทะลุแผนที่ — ผู้ใช้ 2026-10-23)
+    const g=new THREE.Group();g.position.set(0.56,y0+0.016,0.14);g.rotation.y=-0.5;T.add(g);
     const ring=new THREE.Mesh(new THREE.TorusGeometry(0.06,0.008,8,32),goldM);ring.rotation.x=Math.PI/2;g.add(ring);
     const lens=new THREE.Mesh(new THREE.CircleGeometry(0.058,24),new THREE.MeshPhysicalMaterial({color:'#dfe8ff',roughness:0.05,transparent:true,opacity:0.25}));lens.rotation.x=-Math.PI/2;g.add(lens);
     const h=new THREE.Mesh(new THREE.CylinderGeometry(0.012,0.014,0.13,8),wood);h.rotation.z=Math.PI/2;h.position.x=0.13;g.add(h);}
@@ -347,9 +347,9 @@ function hubBuildStudy(){
     const core=new THREE.Mesh(new THREE.SphereGeometry(0.035,16,12),new THREE.MeshBasicMaterial({color:hdr('#8fd8ff',1.4)}));rings.add(core);const cs=new THREE.Sprite(glowMat('#8fd8ff',0.6));cs.scale.set(0.26,0.26,1);rings.add(cs);}
   // ไพ่ทาโรต์วางกระจาย + ขนนกกับขวดหมึก
   {const ct=hubTexCard(),cm=new THREE.MeshStandardMaterial({map:ct,roughness:0.6});
-    for(let i=0;i<4;i++){const c=new THREE.Mesh(new THREE.BoxGeometry(0.1,0.003,0.16),cm);c.position.set(0.02+i*0.045,y0+0.008+i*0.003,0.5-i*0.03);c.rotation.y=-0.6+i*0.28;T.add(c);}
-    const ink=new THREE.Mesh(new THREE.CylinderGeometry(0.035,0.045,0.06,14),new THREE.MeshPhysicalMaterial({color:'#101830',roughness:0.1}));ink.position.set(-0.12,y0+0.03,0.5);T.add(ink);
-    const qg=new THREE.SphereGeometry(0.5,10,6);qg.scale(0.035,0.18,0.006);const q=new THREE.Mesh(qg,new THREE.MeshStandardMaterial({color:'#efe9dc',roughness:0.8}));q.position.set(-0.06,y0+0.13,0.52);q.rotation.set(0.25,0.4,-0.75);T.add(q);}
+    for(let i=0;i<4;i++){const c=new THREE.Mesh(new THREE.BoxGeometry(0.1,0.003,0.16),cm);c.position.set(-0.08+i*0.045,y0+0.008+i*0.003,0.52-i*0.03);c.rotation.y=-0.6+i*0.28;T.add(c);}
+    const ink=new THREE.Mesh(new THREE.CylinderGeometry(0.035,0.045,0.06,14),new THREE.MeshPhysicalMaterial({color:'#101830',roughness:0.1}));ink.position.set(-0.24,y0+0.03,0.52);T.add(ink);
+    const qg=new THREE.SphereGeometry(0.5,10,6);qg.scale(0.035,0.18,0.006);const q=new THREE.Mesh(qg,new THREE.MeshStandardMaterial({color:'#efe9dc',roughness:0.8}));q.position.set(-0.18,y0+0.13,0.54);q.rotation.set(0.25,0.4,-0.75);T.add(q);}
   // ไม้กายสิทธิ์บนโต๊ะ (ใส่ทีหลังเมื่อโมเดลตัวละครพร้อม — ใช้ไม้แบบเดียวกับที่เลือกไว้) + ประกาย
   F.wandPivot=new THREE.Group();S.add(F.wandPivot);
   F.wandTip=new THREE.Object3D();F.wandPivot.add(F.wandTip);
