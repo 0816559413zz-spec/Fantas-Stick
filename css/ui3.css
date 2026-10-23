@@ -329,13 +329,13 @@ body.profOn #hub{display:none}
 .pfIt em{position:absolute;top:8px;right:8px;font:500 10px var(--h-serif);font-style:normal;padding:1px 6px;background:rgba(0,0,0,.7);color:#ffe9a8}
 .pfHint{text-align:center;font-size:11.5px;color:var(--h-faint);pointer-events:none}
 /* รางวัลเลเวล: ไทม์ไลน์แนวนอนด้านล่าง */
-.pfRw{position:absolute;left:0;right:0;bottom:0;height:min(56vh,470px);display:flex;flex-direction:column;padding:16px max(24px,3vw) 18px;
+.pfRw{position:absolute;left:0;right:0;bottom:0;height:max(50vh,420px);display:flex;flex-direction:column;padding:16px max(24px,3vw) 18px;
   background:linear-gradient(to top,rgba(4,6,18,.97) 60%,rgba(4,6,18,.85) 85%,transparent);transform:translateY(105%);opacity:0;transition:transform .5s var(--h-ease),opacity .35s;pointer-events:none}
 #profOv.rw .pfRw{transform:none;opacity:1;pointer-events:auto}
 #profOv.rw .pfL,#profOv.rw .pfR{filter:opacity(.1) blur(2px);pointer-events:none}
 .pfL,.pfR{transition:filter .35s}
 .rwHead{display:flex;align-items:center;gap:30px}
-.rwHead b{display:block;font:500 20px/1 var(--h-serif);letter-spacing:.3em}
+.rwHead b{display:block;font:500 26px/1 var(--h-serif);letter-spacing:.3em}
 .rwHead span{font-size:12px;color:var(--h-mute)}
 .rwHead .rwNow{flex:1;max-width:520px;margin:0}
 .rwHead .gBack{margin-left:auto}
@@ -344,23 +344,33 @@ body.profOn #hub{display:none}
 .rwArr svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.5}
 .rwArr:hover{color:#fff}
 .rwScroll{flex:1;overflow-x:auto;overflow-y:hidden;scrollbar-width:thin;scrollbar-color:rgba(169,149,255,.35) transparent;cursor:grab;-webkit-mask-image:linear-gradient(90deg,transparent,#000 4%,#000 96%,transparent);mask-image:linear-gradient(90deg,transparent,#000 4%,#000 96%,transparent)}
-.rwTrack{position:relative;height:100%;width:max-content;display:flex;align-items:flex-end;padding:0 40px 30px}
-.rwLine,.rwFill{position:absolute;bottom:46px;height:2px}
-.rwLine{background:rgba(190,178,255,.22)}
-.rwFill{transition:width .8s var(--h-ease);background:linear-gradient(90deg,var(--h-violet),#ffe9a8);box-shadow:0 0 10px rgba(255,220,150,.6)}
-.rwC{position:relative;flex:none;min-width:96px;padding:0 6px;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:flex-end}
-.rwDot{position:relative;z-index:1;width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font:500 13px var(--h-serif);background:#0b0c22;border:1px solid rgba(190,178,255,.35);color:var(--h-mute)}
-.rwC.got .rwDot{border-color:var(--h-violet);color:#fff;background:#221c52}
-.rwC.cur .rwDot{width:40px;height:40px;font-size:16px;border-color:#ffe9a8;color:#ffe9a8;background:#2a2050;box-shadow:0 0 18px rgba(255,220,150,.6)}
-.rwStem{width:1px;height:26px;background:linear-gradient(to top,rgba(190,178,255,.5),rgba(190,178,255,.1))}
-.rwC.got .rwStem,.rwC.cur .rwStem{background:linear-gradient(to top,#ffe9a8,rgba(255,233,168,.2))}
-.rwIts{display:flex;gap:6px;align-items:flex-end}
-.rwIt{display:flex;flex-direction:column;align-items:center;gap:4px;width:92px;text-align:center}
-.rwIt small{font-size:10.5px;line-height:1.25;color:var(--h-mute)}
+.rwTrack{position:relative;height:100%;width:max-content;display:flex;align-items:flex-end;padding:0 50px 34px}
+/* เส้นไทม์ไลน์: ร่องเข้มมีขอบบน-ล่าง + เส้นเรืองวิ่งประกาย + หัวเรืองที่จุดปัจจุบัน + เพชรเล็กคั่นแต่ละเลเวล (ผู้ใช้: ไม่ใช่เส้นธรรมดา) */
+.rwLine,.rwFill{position:absolute}
+.rwLine{bottom:55px;height:12px;border-radius:6px;background:linear-gradient(to bottom,rgba(0,0,0,.55),rgba(20,18,50,.85));box-shadow:inset 0 0 0 1px rgba(190,178,255,.22),0 0 0 3px rgba(10,10,30,.6),0 0 0 4px rgba(190,178,255,.1)}
+.rwFill{bottom:59px;height:4px;border-radius:2px;transition:width .8s var(--h-ease);
+  background:linear-gradient(90deg,rgba(255,255,255,0) 0,rgba(255,255,255,.75) 6%,rgba(255,255,255,0) 12%) 0 0/220px 100% repeat-x,linear-gradient(90deg,var(--h-violet),#cdb8ff 55%,#ffe9a8);
+  box-shadow:0 0 10px rgba(255,220,150,.7),0 0 22px rgba(169,149,255,.5);animation:rwFlow 2.6s linear infinite}
+.rwFill::after{content:"";position:absolute;right:-9px;top:50%;width:18px;height:18px;margin-top:-9px;border-radius:50%;background:radial-gradient(circle,#fff 0 18%,rgba(255,233,168,.9) 30%,rgba(255,200,120,0) 70%);filter:blur(.3px);animation:rwPulse 1.6s ease-in-out infinite}
+@keyframes rwFlow{to{background-position:220px 0,0 0}}
+@keyframes rwPulse{50%{transform:scale(1.45);opacity:.75}}
+.rwC{position:relative;flex:none;min-width:150px;padding:0 8px;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:flex-end}
+.rwC+.rwC::before{content:"";position:absolute;left:-5px;bottom:21px;width:10px;height:10px;transform:rotate(45deg);background:#0b0c22;border:1px solid rgba(190,178,255,.45);z-index:1}
+.rwC.got+.rwC::before,.rwC.got+.rwC.cur::before{background:#ffe9a8;border-color:#fff;box-shadow:0 0 8px rgba(255,220,150,.8)}
+.rwDot{position:relative;z-index:2;width:52px;height:52px;border-radius:50%;display:grid;place-items:center;font:500 19px var(--h-serif);background:radial-gradient(circle at 50% 35%,#1c1a40,#0b0c22 70%);border:1px solid rgba(190,178,255,.4);color:var(--h-mute);box-shadow:0 0 0 4px rgba(11,12,34,.9),0 0 0 5px rgba(190,178,255,.18)}
+.rwC.got .rwDot{border-color:var(--h-violet);color:#fff;background:radial-gradient(circle at 50% 35%,#3a2f86,#1a1548 70%);box-shadow:0 0 0 4px rgba(11,12,34,.9),0 0 0 5px rgba(169,149,255,.5),0 0 14px rgba(169,149,255,.45)}
+.rwC.cur .rwDot{width:66px;height:66px;margin-bottom:-7px;font-size:24px;border:2px solid #ffe9a8;color:#ffe9a8;background:radial-gradient(circle at 50% 35%,#4a3a8a,#221a52 70%);box-shadow:0 0 0 5px rgba(11,12,34,.9),0 0 0 6px rgba(255,233,168,.55),0 0 26px rgba(255,220,150,.7);animation:rwCur 2.2s ease-in-out infinite}
+@keyframes rwCur{50%{box-shadow:0 0 0 5px rgba(11,12,34,.9),0 0 0 9px rgba(255,233,168,.3),0 0 40px rgba(255,220,150,.9)}}
+.rwStem{width:2px;height:clamp(40px,9vh,90px);background:linear-gradient(to top,rgba(190,178,255,.6),rgba(190,178,255,.05))}
+.rwC.got .rwStem,.rwC.cur .rwStem{background:linear-gradient(to top,#ffe9a8,rgba(255,233,168,.12));box-shadow:0 0 6px rgba(255,220,150,.5)}
+.rwIts{display:flex;gap:10px;align-items:flex-end}
+.rwIt{display:flex;flex-direction:column;align-items:center;gap:8px;width:136px;text-align:center}
+.rwIt small{font-size:13.5px;line-height:1.3;color:var(--h-mute)}
 .rwC.got .rwIt small,.rwC.cur .rwIt small{color:#fff}
 .rwC:not(.got):not(.cur) .ovPent{opacity:.55}
-.rwIt .ovPent{width:50px;height:50px}
-.rwIt .ovPent.big{width:70px;height:70px}
+.rwIt .ovPent{width:clamp(70px,10vh,96px);height:clamp(70px,10vh,96px)}
+.rwIt .ovPent.big{width:clamp(96px,14vh,132px);height:clamp(96px,14vh,132px)}
+.rwIt .ovPent .lk{width:24px;height:24px}.rwIt .ovPent .lk svg{width:15px;height:15px}
 #profOv.in .pfL{animation:u3Rise .5s .1s var(--h-ease) both}
 #profOv.in .pfR{animation:gSlideL .5s .15s var(--h-ease) both}
 #profOv.in .pfTop{animation:u3Rise .4s var(--h-ease) both}
