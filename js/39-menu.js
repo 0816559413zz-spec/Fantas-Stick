@@ -274,7 +274,7 @@ $('#btnGuide').onclick=()=>{ac();guideOpen();};   // คู่มือแบบ
 $('#btnGuideClose').onclick=()=>guideClose();
 $('#trainEnd').onclick=()=>{if(NET.isHost)hostEndTraining();};
 // จอผลการแข่ง (#over สร้างใน 26-fx-events): เดาว่าเราชนะ/แพ้/เสมอจากหัวข้อ + ชื่อ/ทีม/บทบาทเรา → data-res (CSS ทำแสงตามผล) + แท็กเหนือหัวข้อ + แถวของเราเป็นสีทอง (แค่ภาพ ไม่แตะผลจริง)
-function ovResult(){const o=$('#over'),h=o.querySelector('h1');if(!h||o.querySelector('.ovTag'))return;
+function ovResult(){const o=$('#over'),h=o.querySelector('h1');if(!h||o.querySelector('.ovTag')||o.classList.contains('u3Over'))return;   // จอสรุปแบบใหม่ (js/65) ไม่ใช้
   const t=h.textContent,v=VIEW.cur,me=v&&v.P&&v.P.find(p=>p.id===NET.myId);let r='end';
   if(t.includes('เสมอ'))r='draw';
   else if(v&&v.mode==='imp'&&ROLE)r=t.includes('โวลเดอมอร์ชนะ')===(ROLE.role==='imp')?'win':'lose';

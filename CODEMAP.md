@@ -177,7 +177,7 @@ MM3:2 makeMinion:3 syncMins:36 drawMinBars:58
 ## js/25-efx.js (299) — efxFX: ภาพของ event "efx" ทุกคาถา (หนึ่ง case ต่อหนึ่งเอฟเฟกต์)
 efxState:4 efxFX:15
 
-## js/26-fx-events.js (249) — fx(ev): เอฟเฟกต์+เสียงของทุก event จากโฮสต์ • statusFX (สถานะบนตัว) •…
+## js/26-fx-events.js (235) — fx(ev): เอฟเฟกต์+เสียงของทุก event จากโฮสต์ • statusFX (สถานะบนตัว) •…
 statusFX:3 fx:27
 §202 overlay: เลือกบัฟ / สรุปผล
 choosePick:203 syncOverlays:208 showOver:230
@@ -441,9 +441,9 @@ FFAV:104 MULTI:105 MULTI_TH:105 STREAK:106 pName:107 ffaKf:108 kfSound:123 KINDN
 ## js/55-podium.js (82) — โพเดียมธีมฮอกวอตส์ (ผู้ใช้ 2026-10-22 "podium but make it magician theme hogwart theme")
 POD:6 POD_X:7 POD_H:7 POD_C:7 podStart:8 podStop:29 podPose:37 renderPodium:49
 
-## js/56-progress.js (77) — เลเวล + สถิติ + ของปลดล็อค (ผู้ใช้ 2026-10-22: "more skin wand cloak unlock as lvl" → เลื…
+## js/56-progress.js (91) — เลเวล + สถิติ + ของปลดล็อค (ผู้ใช้ 2026-10-22: "more skin wand cloak unlock as lvl" → เลื…
 §7 var/function (ไม่ใช่ const): หน้าสร้างตัวละครอาจเปิดตอนโหลด (?nointro…
-LV_MAX:8 DEV_MAXLV:11 lvNeed:12 UNLOCKS:13 PROG:19 progSave:20 lvOf:21 progLv:22 xpMax:23 lookLock:24 lookClampLocks:25 progXP:27 progAward:28 progBox:39 progOpen:47 progChip:59
+LV_MAX:8 DEV_MAXLV:11 lvNeed:12 UNLOCKS:13 PROF_ITEMS:22 lvRewards:31 lvNextReward:32 PROG:33 progSave:34 lvOf:35 progLv:36 xpMax:37 lookLock:38 lookClampLocks:39 progXP:41 progAward:42 progBox:53 progOpen:61 progChip:73
 
 ## js/57-tutorial.js (44) — วิธีเล่นแต่ละสาย (ผู้ใช้ 2026-10-22 "สอนเล่นแต่ละสาย") — ปุ่ม "📖 วิธีเล่นสายนี้" ในหน้าเ…
 TUTTIPS:7 tutOpen:12 tutTry:31
@@ -519,10 +519,12 @@ skwOpen:243 skwClose:253
 ## js/64-mappick.js (156) — 
 MPK_TXT:7 MPK_SKY:19 MPK_I:21 MPK_DICE:31 MPK:36 mpkE:37 mpkC:37 mpkSnd:38 mpkCut:39 mpkName:40 mpkCardHTML:41 mpkBuild:51 mpkUp:89 mpkMeasure:101 mpkIdx:102 mpkStep:103 mpkTo:104 mpkPick:105 mpkOpen:111 mpkClose:126 mpkLoop:130 mpkTick:132
 
-## js/65-ui3.js (128) — UI รอบ 3 (ผู้ใช้ 2026-10-23 — สเปก designs/ui-menu.md "รอบ 3") • สไตล์เดียวกับเมนูใหม่ (c…
+## js/65-ui3.js (225) — UI รอบ 3 (ผู้ใช้ 2026-10-23 — สเปก designs/ui-menu.md "รอบ 3") • สไตล์เดียวกับเมนูใหม่ (c…
 UIG:6 uiGalaxy:7 uiGalaxyOn:15 uiGalRaf:16 uiGalT:16 uiGalLoop:17 uiGalDraw:19 uiShow:36 uiHide:37
 §40 เมนูหยุดเกม
 §44 คู่มือ (แบบ Skill Tree)
 GICO:47 GROW:58 GPATH:59 GUIDE:63 GD:84 guideBuild:85 guideLayout:95 guideOpen:102 guideClose:106 guidePic:107 guideGo:112
+§130 จอสรุปหลังจบเกม (ต่อจากป้ายชนะ + โพเดียม)
+RICO:133 rIcon:139 OV:140 ovScore:141 ovOpen:142 ovHead:151 ovSummary:157 ovNextReward:179 ovLvAnim:186 ovBoard:205
 
-(66 files, 15601 lines)
+(66 files, 15698 lines)

@@ -15,7 +15,7 @@ function uiGalaxy(host,opt){
 function uiGalaxyOn(G,on){G.on=on;if(on){G.fit();uiGalDraw(G,0);uiGalLoop();}}   // วาดเฟรมแรกทันที (ไม่ต้องรอ rAF)
 let uiGalRaf=0,uiGalT=0;
 function uiGalLoop(){if(uiGalRaf)return;uiGalT=performance.now();const f=now=>{const dt=Math.min(0.05,(now-uiGalT)/1000);uiGalT=now;let any=false;
-    for(const G of UIG)if(G.on){any=true;uiGalDraw(G,dt);}uiGalRaf=any?requestAnimationFrame(f):0;};uiGalRaf=requestAnimationFrame(f);}
+    for(const G of UIG)if(G.on){if(!G.c.offsetParent){G.on=false;continue;}any=true;uiGalDraw(G,dt);}uiGalRaf=any?requestAnimationFrame(f):0;};uiGalRaf=requestAnimationFrame(f);}   // ถูกซ่อนจากที่อื่น = หยุดวาด
 function uiGalDraw(G,dt){
   G.fit();const g=G.g,w=G.w,h=G.h,t=(G.t+=dt);
   const bg=g.createLinearGradient(0,0,w,h);bg.addColorStop(0,'#070a1d');bg.addColorStop(0.55,'#0b0d2a');bg.addColorStop(1,'#140b2b');g.fillStyle=bg;g.fillRect(0,0,w,h);
@@ -126,3 +126,100 @@ function guideGo(i,fly){
   GD.t=setTimeout(()=>{fill();f.classList.add('end');setTimeout(()=>f.remove(),260);},430);
 }
 if(typeof WD!=='undefined')Object.assign(WD,{guideOpen,guideClose,guideGo,GUIDE});
+
+// ---------- จอสรุปหลังจบเกม (ต่อจากป้ายชนะ + โพเดียม) ----------
+// ขั้น 1 สรุปตัวเรา (แบบ BF1): แถบเลเวลวิ่งตาม XP ที่ได้ + ของชิ้นถัดไปที่ล็อคอยู่ปลายแถบ (เลเวลอัป = ปลดล็อค) + คะแนนแยก ฆ่า/ช่วย/คะแนน/ดาเมจ
+// ขั้น 2 ตารางคะแนน (แบบ Footbar): แถบเฉียงเรียงอันดับ บนพื้นกาแล็กซี • ปุ่มเดิม #btnAgain / #btnQuit (js/26)
+const RICO={frame:'<path d="M12 2.5l8.2 4.75v9.5L12 21.5l-8.2-4.75v-9.5z"/><path d="M12 6.5l4.8 2.75v5.5L12 17.5l-4.8-2.75v-5.5z"/>',
+  bg:'<rect x="3" y="5" width="18" height="14" rx="1"/><path d="M3 16l5-5 4 4 3-3 6 6"/><circle cx="16" cy="9" r="1.5"/>',
+  pose:'<circle cx="12" cy="4.8" r="2.1"/><path d="M12 7.3v7M12 14.3l-3 6.2M12 14.3l3 6.2M12 9.4L7 6.6M12 9.4l5 2"/>',
+  aura:'<path d="M12 3l1.6 4.4L18 9l-4.4 1.6L12 15l-1.6-4.4L6 9l4.4-1.6z"/><path d="M18.5 15l.7 1.8 1.8.7-1.8.7-.7 1.8-.7-1.8-1.8-.7 1.8-.7z"/>',
+  cloak:'<path d="M9 3h6l1 3 4 15H4L8 6z"/><path d="M12 6v15"/>',
+  wand:'<path d="M5 19L17 7"/><path d="M17 3v2M17 9v2M13 7h2M19 7h2"/>'};
+const rIcon=t=>`<svg viewBox="0 0 24 24">${RICO[t]||RICO.aura}</svg>`;
+const OV={r:null,step:0,tw:0};
+const ovScore=x=>(x.k||0)*100+(x.as||0)*50+(x.dmg||0);   // ⚠ คะแนนรวม = ฆ่า×100 + ช่วย×50 + ดาเมจ
+function ovOpen(r){
+  const el=$('#over');el.className='overlay u3Over';el.removeAttribute('data-res');OV.r=r;OV.step=0;
+  if(!el._gal){el.innerHTML='';el._gal=uiGalaxy(el,{stars:220,glints:10});el.appendChild(Object.assign(document.createElement('div'),{className:'ovIn'}));}
+  const a=progAward(r),me=(r.rows||[]).find(q=>q.id===NET.myId),kind=vicKind(r);
+  let note='';if(r.mode==='coop'){const b=+(store('wd_best')||0);if(r.wave>b){store('wd_best',String(r.wave));note='สถิติใหม่ของคุณ!';}else note='สถิติดีที่สุด: ชั้น '+b;}
+  OV.a=a;OV.me=me;OV.kind=kind;OV.note=note;
+  if(a&&me)ovSummary();else ovBoard();
+  uiShow(el);progChip();
+}
+function ovHead(t){
+  const mk=typeof MAPID!=='undefined'?MAPID:'',m=HMODES.find(x=>x.k===OV.r.mode),K={win:'VICTORY',lose:'DEFEAT',draw:'DRAW',end:'MATCH END'}[OV.kind]||'MATCH END';
+  return `<div class="ovTop"><div class="l"><small>THIS ROUND</small><b>${esc(m?m.en:OV.r.mode)}${mk?' | '+esc(HUI_MAPN(mk)):''}</b></div><h1>${t}</h1>
+    <div class="r"><small>RESULT</small><b class="res ${OV.kind}">${K}</b></div></div>
+    <div class="ovTabs"><span class="${OV.step===0?'on':''}">PERSONAL</span><span class="${OV.step===1?'on':''}">SCOREBOARD</span></div>`;
+}
+function ovSummary(){
+  const el=$('#over').querySelector('.ovIn'),a=OV.a,me=OV.me,r=OV.r;
+  const xp1=PROG.xp,xp0=xp1-a.gain,L0=lvOf(xp0),L1=lvOf(xp1);   // แสดง XP จริง (โหมด dev เลเวลเต็มก็ยังเห็นแถบวิ่ง)
+  const parts=[['จบเกม',40],OV.kind==='win'?['ชนะ',100]:OV.kind==='draw'?['เสมอ',25]:null,me.k?[`ฆ่า ${me.k}×15`,me.k*15]:null,me.as?[`ช่วย ${me.as}×5`,me.as*5]:null,
+    me.dmg?['ดาเมจ',Math.round(me.dmg/20)]:null,r.mode==='coop'&&r.wave?[`ชั้น ${r.wave}×15`,r.wave*15]:null].filter(Boolean);
+  const st=[['KILLS','ฆ่า',me.k||0,'#ff7a8a'],['ASSISTS','ช่วยฆ่า',me.as||0,'#8fd8ff'],['SCORE','คะแนน',ovScore(me),'#e2c27a'],['DAMAGE','ดาเมจ',me.dmg||0,'#a995ff']];
+  const tot=st.reduce((s,x)=>s+Math.max(1,x[0]==='SCORE'?x[2]/40:x[0]==='DAMAGE'?x[2]/20:x[2]*12),0);
+  el.innerHTML=ovHead('MATCH SUMMARY')+`
+    <div class="ovSum">${OV.note?`<p class="ovNote">${esc(OV.note)}</p>`:''}
+      <div class="ovLv"><div class="ovLvC"><small>LEVEL</small><b>${L0.L}</b></div>
+        <div class="ovLvB"><div class="ovLvT"><span class="ovLvX">${L0.need?`${L0.cur} / ${L0.need} XP`:'MAX'}</span><em>+${a.gain} XP</em></div><div class="ovBar"><i class="old"></i><i class="new"></i><span class="ovFlash"></span></div></div>
+        <div class="ovNext"></div></div>
+      <div class="ovXp">${parts.map(p=>`<span>${esc(p[0])}<b>+${p[1]}</b></span>`).join('')}</div>
+      <div class="ovStats">${st.map((s,i)=>`<div class="ovSt" style="--c:${s[3]};--i:${i}"><b data-n="${s[2]}">0</b><span>${s[0]}</span><small>${s[1]}</small></div>`).join('')}</div>
+      <div class="ovLine">${st.map((s,i)=>{const w=Math.max(1,s[0]==='SCORE'?s[2]/40:s[0]==='DAMAGE'?s[2]/20:s[2]*12)/tot*100;return `<i style="--c:${s[3]};--w:${w.toFixed(1)}%;--i:${i}"></i>`;}).join('')}</div>
+    </div>
+    <div class="ovFoot"><span class="ovHint">Enter / คลิก เพื่อไปต่อ</span><button class="ovGo" id="ovNext">CONTINUE<svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button></div>`;
+  ovNextReward(L0.L);
+  // นับเลขขึ้น
+  const t0=performance.now();el.querySelectorAll('.ovSt b').forEach(b=>{const n=+b.dataset.n;const f=()=>{const u=Math.min(1,(performance.now()-t0-400)/1100);b.textContent=Math.round(n*Math.max(0,1-Math.pow(1-Math.max(0,u),3))).toLocaleString();if(u<1&&OV.step===0)requestAnimationFrame(f);};requestAnimationFrame(f);});
+  ovLvAnim(xp0,xp1);
+}
+function ovNextReward(L){
+  const box=$('#over').querySelector('.ovNext');if(!box)return;const n=lvNextReward(L);
+  if(!n){box.innerHTML=`<div class="ovPent max">${rIcon('aura')}</div><span>MAX</span>`;return;}
+  const it=n.r[0];box.innerHTML=`<div class="ovPent ${it.big?'big':''}">${rIcon(it.t)}<i class="lk"><svg viewBox="0 0 24 24"><rect x="6" y="11" width="12" height="9" rx="1"/><path d="M9 11V8a3 3 0 016 0v3"/></svg></i></div><span>Lv ${n.lv}</span><small>${esc(it.n)}${n.r.length>1?` +${n.r.length-1}`:''}</small>`;
+  box.dataset.lv=n.lv;
+}
+// แถบ XP: วิ่งทีละเลเวล — เต็มแล้วแฟลช + ปลดล็อคของปลายแถบ แล้วเริ่มเลเวลถัดไป
+function ovLvAnim(xp0,xp1){
+  const el=$('#over'),bar=el.querySelector('.ovBar'),iOld=bar.querySelector('.old'),iNew=bar.querySelector('.new'),cL=el.querySelector('.ovLvC b'),tx=el.querySelector('.ovLvX');
+  let L=lvOf(xp0),xp=xp0;const pct=v=>v.need?v.cur/v.need*100:100;
+  iOld.style.width=pct(L)+'%';iNew.style.left=pct(L)+'%';iNew.style.width='0%';
+  const seg=()=>{if(OV.step!==0)return;const target=Math.min(xp1,xp+(L.need?L.need-L.cur:0)),Lt=lvOf(target),full=Lt.L>L.L||!L.need;
+    const from=pct(L),to=full?100:pct(Lt),t0=performance.now(),D=900;
+    const f=()=>{if(OV.step!==0)return;const u=Math.min(1,(performance.now()-t0)/D),e=1-Math.pow(1-u,3),w=from+(to-from)*e;iNew.style.width=(w-from)+'%';
+      const cur=Math.round(L.cur+(L.need?L.need*(w-from)/100:0));tx.textContent=L.need?`${Math.min(cur,L.need)} / ${L.need} XP`:'MAX';
+      if(u<1){requestAnimationFrame(f);return;}
+      xp=target;
+      if(full&&L.need&&Lt.L>L.L){   // เลเวลอัป
+        bar.classList.remove('up');void bar.offsetWidth;bar.classList.add('up');snd('buff',{vol:0.5});
+        const nx=el.querySelector('.ovNext');if(nx&&+nx.dataset.lv===Lt.L){nx.classList.add('open');}
+        setTimeout(()=>{if(OV.step!==0)return;L=Lt;cL.textContent=L.L;cL.parentNode.classList.remove('pop');void cL.offsetWidth;cL.parentNode.classList.add('pop');
+          iOld.style.width='0%';iNew.style.left='0%';iNew.style.width='0%';
+          setTimeout(()=>{if(OV.step!==0)return;if(nx){nx.classList.remove('open');ovNextReward(L.L);}if(xp<xp1)seg();},nx&&nx.classList.contains('open')?1400:300);},500);
+      }};requestAnimationFrame(f);};
+  setTimeout(seg,700);
+}
+function ovBoard(){
+  OV.step=1;const el=$('#over').querySelector('.ovIn'),r=OV.r,coop=r.mode==='coop',rows=(r.rows||[]).slice();
+  const H=coop?['ฆ่าศัตรู','ล้ม','ช่วย','ดาเมจ']:['KILLS','DEATHS','ASSISTS','DAMAGE'],mx=Math.max(1,...rows.map(ovScore));
+  el.innerHTML=ovHead('SCOREBOARD')+`<div class="ovBd">
+    <div class="ovBh"><span>RANK</span><span>PLAYER</span>${H.map(h=>`<span>${h}</span>`).join('')}<span>SCORE</span></div>
+    <div class="ovRows">${rows.map((x,i)=>{const T=x.tm>=0&&typeof TEAMC!=='undefined'?TEAMC[x.tm]:'';return `<div class="ovR ${x.id===NET.myId?'me':''} ${i===0&&!coop?'top':''}" style="--i:${i};--pc:${x.c||'#888'};${T?'--tc:'+T:''}">
+      <span class="rk">${i===0&&!coop?`<svg viewBox="0 0 24 24"><path d="M7 4h10v4a5 5 0 01-10 0zM7 6H4a3 3 0 003 4M17 6h3a3 3 0 01-3 4M12 13v4M8.5 20h7M10 17h4"/></svg>`:''}<b>${i+1}</b></span>
+      <span class="ovPl"><i class="av">${esc((x.n||'?').trim().charAt(0).toUpperCase())}</i><b>${esc(x.n)}</b></span>
+      <span class="n">${x.k}</span><span class="n">${x.d}</span><span class="n">${x.as||0}</span><span class="n">${(x.dmg||0).toLocaleString()}</span>
+      <span class="ovSc" style="--w:${(ovScore(x)/mx).toFixed(3)}"><i></i><b>${ovScore(x).toLocaleString()}</b></span></div>`;}).join('')}</div>
+    ${coop?`<p class="ovNote">ไปถึงชั้น ${r.wave||0}${OV.note?' • '+esc(OV.note):''}</p>`:''}</div>
+    <div class="ovFoot">${OV.a&&OV.me?`<button class="ovGo ghost" id="ovBack"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>PERSONAL</button>`:''}
+      <button class="ovGo ghost" id="btnQuit">ออกจากห้อง</button>${NET.isHost?'<button class="ovGo" id="btnAgain">เล่นอีกครั้ง</button>':'<span class="ovHint">รอโฮสต์กดเล่นอีกครั้ง…</span>'}</div>`;
+}
+$('#over').addEventListener('click',e=>{
+  if(e.target.closest('#ovNext')){ac();snd('ui_click');ovBoard();}
+  else if(e.target.closest('#ovBack')){ac();snd('ui_click');OV.step=0;ovSummary();}
+});
+addEventListener('keydown',e=>{const el=$('#over');if(el.classList.contains('hidden')||!el.classList.contains('u3Over'))return;
+  if((e.code==='Enter'||e.code==='Space')&&OV.step===0){e.preventDefault();ovBoard();}});
+if(typeof WD!=='undefined')Object.assign(WD,{ovOpen,ovBoard,OV});

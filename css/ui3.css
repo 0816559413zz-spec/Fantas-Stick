@@ -138,3 +138,105 @@
 @keyframes gDraw{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
 @media (max-width:1300px){.gTrack{width:78vw}.gBub small{display:none}.gRing{width:52px;height:52px}.gBub{width:76px}.gBub b{font-size:10px;letter-spacing:.1em}.gMain{width:min(56vw,620px)}}
 @media (max-height:800px){.gMain{top:11vh;bottom:33vh}.gHi{width:54px;height:54px}.gBox{padding:14px 18px;font-size:13.5px}}
+
+/* ---------- จอสรุปหลังเกม + ตารางคะแนน (กาแล็กซีเต็มจอ ตัวหนังสือขาว) ---------- */
+#over.u3Over{display:block;padding:0;background:#05071a;animation:none;font-family:var(--h-sans);color:#fff;overflow:hidden;z-index:55}
+#over.u3Over.hidden{display:none}
+#over.u3Over::before{display:none}
+#over.u3Over h1{animation:none}
+.ovIn{position:absolute;inset:0;z-index:1;display:flex;flex-direction:column;padding:max(20px,3.4vh) max(24px,5vw) max(18px,3vh)}
+.ovTop{display:grid;grid-template-columns:1fr auto 1fr;align-items:end;gap:20px}
+.ovTop h1{margin:0;background:none;-webkit-text-fill-color:#fff;color:#fff;font:400 clamp(30px,4.2vw,64px)/1 var(--h-serif);letter-spacing:.14em;text-align:center;text-shadow:0 0 30px rgba(169,149,255,.45);white-space:nowrap}
+.ovTop small{display:block;font:500 11px var(--h-serif);letter-spacing:.22em;color:rgba(255,255,255,.55)}
+.ovTop b{font:400 14px var(--h-sans);letter-spacing:.06em;text-transform:uppercase}
+.ovTop .r{text-align:right}
+.ovTop .res{font:500 18px var(--h-serif);letter-spacing:.2em}
+.ovTop .res.win{color:#ffe9a8;text-shadow:0 0 16px rgba(255,210,120,.6)}.ovTop .res.lose{color:#ff9aa8}.ovTop .res.draw{color:var(--h-cyan)}
+.ovTabs{display:flex;justify-content:center;gap:4px;margin:18px auto 0;width:min(560px,100%);border-bottom:1px solid rgba(255,255,255,.18)}
+.ovTabs span{flex:1;text-align:center;padding:9px 0 8px;font:500 12px var(--h-serif);letter-spacing:.24em;color:rgba(255,255,255,.5);position:relative}
+.ovTabs span.on{color:#fff}
+.ovTabs span.on::after{content:"";position:absolute;left:18%;right:18%;bottom:-1px;height:2px;background:linear-gradient(90deg,transparent,#fff,transparent);box-shadow:0 0 10px rgba(255,255,255,.7)}
+.ovSum{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:clamp(18px,3.4vh,40px)}
+.ovNote{margin:0;text-align:center;font-size:14px;color:var(--h-cyan);letter-spacing:.04em}
+/* แถบเลเวล */
+.ovLv{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:22px;width:min(1000px,100%)}
+.ovLvC{width:78px;height:78px;border-radius:50%;border:1px solid rgba(255,255,255,.55);display:grid;place-content:center;text-align:center;box-shadow:0 0 22px rgba(169,149,255,.35),inset 0 0 18px rgba(169,149,255,.25)}
+.ovLvC small{font:500 9px var(--h-serif);letter-spacing:.24em;color:rgba(255,255,255,.6)}
+.ovLvC b{font:400 32px/1 var(--h-serif)}
+.ovLvC.pop{animation:ovPop .6s var(--h-ease)}
+.ovLvT{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px}
+.ovLvX{font:300 13px var(--h-sans);color:rgba(255,255,255,.75);letter-spacing:.04em}
+.ovLvT em{font:500 15px var(--h-serif);font-style:normal;letter-spacing:.1em;color:#ffe9a8;text-shadow:0 0 12px rgba(255,210,120,.5)}
+.ovBar{position:relative;height:10px;background:rgba(255,255,255,.1);box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)}
+.ovBar i{position:absolute;top:0;bottom:0;left:0}
+.ovBar .old{background:linear-gradient(90deg,rgba(169,149,255,.55),rgba(200,190,255,.85))}
+.ovBar .new{background:linear-gradient(90deg,#ffd27a,#fff2c8);box-shadow:0 0 14px rgba(255,210,120,.75)}
+.ovFlash{position:absolute;inset:-6px 0;opacity:0;background:radial-gradient(ellipse at right,rgba(255,255,255,.95),transparent 60%)}
+.ovBar.up .ovFlash{animation:ovFlash .7s ease-out}
+.ovNext{display:flex;flex-direction:column;align-items:center;gap:4px;min-width:96px;text-align:center}
+.ovNext span{font:500 12px var(--h-serif);letter-spacing:.16em}
+.ovNext small{font-size:11.5px;color:rgba(255,255,255,.6);max-width:130px}
+.ovPent{position:relative;width:58px;height:58px;display:grid;place-items:center;color:#fff;
+  clip-path:polygon(50% 0,100% 38%,82% 100%,18% 100%,0 38%);background:linear-gradient(160deg,rgba(169,149,255,.55),rgba(30,26,80,.9))}
+.ovPent::before{content:"";position:absolute;inset:1.5px;clip-path:inherit;background:linear-gradient(160deg,#1b1840,#0b0b26);z-index:0}
+.ovPent svg{position:relative;z-index:1;width:46%;height:46%;fill:none;stroke:currentColor;stroke-width:1.4;stroke-linejoin:round;stroke-linecap:round}
+.ovPent.big{width:72px;height:72px;background:linear-gradient(160deg,#ffe9a8,#a8782a);color:#ffe9a8}
+.ovPent .lk{position:absolute;z-index:2;right:16%;bottom:12%;width:18px;height:18px;border-radius:50%;background:#0b0b26;display:grid;place-items:center;transition:transform .4s,opacity .4s}
+.ovPent .lk svg{width:12px;height:12px;stroke:rgba(255,255,255,.8)}
+.ovNext.open .ovPent{animation:ovUnl 1.2s var(--h-ease)}
+.ovNext.open .lk{transform:translateY(-14px) scale(.6);opacity:0}
+.ovNext.open::after{content:"UNLOCKED";font:500 11px var(--h-serif);letter-spacing:.24em;color:#ffe9a8;text-shadow:0 0 12px rgba(255,210,120,.8)}
+/* XP ที่ได้ */
+.ovXp{display:flex;flex-wrap:wrap;justify-content:center;gap:8px 18px;font-size:13px;color:rgba(255,255,255,.7)}
+.ovXp span{display:flex;gap:6px;align-items:baseline}
+.ovXp b{font-weight:400;color:#fff}
+/* คะแนนแยก 4 ช่อง + เส้นสีซ้อนกันนิด ๆ */
+.ovStats{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(12px,3vw,48px);width:min(900px,100%)}
+.ovSt{text-align:center;animation:u3Rise .5s var(--h-ease) both;animation-delay:calc(.25s + var(--i)*.08s)}
+.ovSt b{display:block;font:300 clamp(30px,3.6vw,52px)/1.05 var(--h-serif);color:#fff;text-shadow:0 0 18px rgba(255,255,255,.25)}
+.ovSt span{display:block;margin-top:6px;font:500 11px var(--h-serif);letter-spacing:.26em;color:#fff}
+.ovSt small{font-size:11px;color:rgba(255,255,255,.55)}
+.ovLine{display:flex;width:min(900px,100%);height:4px;margin-top:-12px}
+.ovLine i{height:100%;width:var(--w);margin-right:-14px;background:linear-gradient(90deg,transparent,var(--c) 22%,var(--c) 78%,transparent);opacity:.9;
+  box-shadow:0 0 10px var(--c);border-radius:2px;transform-origin:left;animation:ovLineIn .7s var(--h-ease) both;animation-delay:calc(.45s + var(--i)*.1s);mix-blend-mode:screen}
+.ovFoot{display:flex;justify-content:flex-end;align-items:center;gap:14px;padding-top:12px;border-top:1px solid rgba(255,255,255,.14)}
+.ovHint{margin-right:auto;font-size:12px;color:rgba(255,255,255,.5)}
+.ovGo{all:unset;display:inline-flex;align-items:center;gap:8px;padding:9px 20px;cursor:pointer;font:500 14px var(--h-serif);letter-spacing:.2em;color:#fff;
+  border:1px solid rgba(255,255,255,.6);background:rgba(255,255,255,.06);transition:background .2s,box-shadow .2s}
+.ovGo svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.6}
+.ovGo:hover{background:rgba(255,255,255,.16);box-shadow:0 0 18px rgba(255,255,255,.25)}
+.ovGo.ghost{border-color:rgba(255,255,255,.25);font-family:var(--h-sans);letter-spacing:.06em;font-weight:300}
+/* ตารางคะแนน (แถบเฉียง) */
+.ovBd{flex:1;min-height:0;display:flex;flex-direction:column;width:min(1100px,100%);margin:16px auto 0}
+.ovBh,.ovR{display:grid;grid-template-columns:80px minmax(160px,1.6fr) repeat(4,minmax(54px,.6fr)) minmax(120px,1fr);align-items:center;column-gap:10px}
+.ovBh{padding:0 26px 8px;font:500 10.5px var(--h-serif);letter-spacing:.2em;color:rgba(255,255,255,.55)}
+.ovBh span:nth-child(n+3){text-align:center}
+.ovRows{flex:1;min-height:0;overflow:auto;display:flex;flex-direction:column;gap:8px;padding:2px 10px 6px;scrollbar-width:thin}
+.ovR{position:relative;padding:10px 26px;min-height:46px;animation:ovRowIn .5s var(--h-ease) both;animation-delay:calc(.1s + var(--i)*.07s)}
+.ovR::before{content:"";position:absolute;inset:0;transform:skewX(-14deg);background:linear-gradient(90deg,rgba(26,24,62,.92),rgba(14,14,40,.82));border:1px solid rgba(255,255,255,.1);
+  box-shadow:inset 3px 0 0 var(--tc,var(--pc)),0 6px 18px rgba(0,0,0,.35);z-index:-1}
+.ovR.me::before{border-color:rgba(169,149,255,.7);background:linear-gradient(90deg,rgba(60,46,140,.92),rgba(20,18,56,.85));box-shadow:inset 3px 0 0 var(--tc,var(--pc)),0 0 24px rgba(169,149,255,.35)}
+.ovR.me::after{content:"";position:absolute;left:12%;right:30%;bottom:3px;height:1px;background:linear-gradient(90deg,transparent,rgba(190,170,255,.8),transparent);filter:blur(1px);opacity:.55;pointer-events:none;animation:ovSweep 2.6s ease-in-out infinite}
+.ovR.top::before{border-color:rgba(255,220,140,.55)}
+.ovR .rk{display:flex;align-items:center;gap:8px;font:400 24px var(--h-serif)}
+.ovR .rk svg{width:24px;height:24px;fill:none;stroke:#ffe09a;stroke-width:1.4;filter:drop-shadow(0 0 6px rgba(255,210,120,.7))}
+.ovR.top .rk b{color:#ffe9a8}
+.ovR .ovPl{display:flex;align-items:center;gap:12px;min-width:0}
+.ovR .ovPl b{font-weight:400;font-size:15.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ovR .av{flex:none;width:34px;height:34px;display:grid;place-items:center;font:500 15px var(--h-serif);font-style:normal;color:#fff;
+  clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);background:radial-gradient(circle at 50% 35%,color-mix(in srgb,var(--pc) 70%,#fff),var(--pc) 70%)}
+.ovR .n{text-align:center;font:300 17px var(--h-sans)}
+.ovR .ovSc{display:flex;align-items:center;height:30px}
+.ovR .ovSc i{flex:0 0 calc((100% - 86px)*var(--w));height:2px;background:linear-gradient(90deg,rgba(169,149,255,.2),rgba(143,216,255,.9));box-shadow:0 0 8px rgba(143,216,255,.6)}
+.ovR .ovSc b{padding:4px 12px;line-height:1.1;font:500 16px var(--h-serif);background:rgba(10,10,30,.85);border:1px solid rgba(255,255,255,.35)}
+.ovR.me .ovSc b{border-color:var(--h-violet);box-shadow:0 0 12px rgba(169,149,255,.5)}
+#over.in .ovIn{animation:u3Fade .4s ease both}
+#over.out{animation:u3Fade .3s ease reverse both}
+@keyframes ovPop{0%{transform:scale(1)}40%{transform:scale(1.25);box-shadow:0 0 40px rgba(255,230,160,.9)}100%{transform:scale(1)}}
+@keyframes ovFlash{0%{opacity:0}20%{opacity:1}100%{opacity:0}}
+@keyframes ovUnl{0%{transform:scale(1);filter:brightness(1)}30%{transform:scale(1.3);filter:brightness(2.4)}100%{transform:scale(1);filter:brightness(1.2)}}
+@keyframes ovLineIn{from{transform:scaleX(0);opacity:0}to{transform:scaleX(1);opacity:.9}}
+@keyframes ovRowIn{from{opacity:0;transform:translateX(-30px)}to{opacity:1;transform:none}}
+@keyframes ovSweep{0%{transform:translateX(-30%);opacity:0}50%{opacity:.6}100%{transform:translateX(60%);opacity:0}}
+@media (max-width:1100px){.ovBh,.ovR{grid-template-columns:56px minmax(120px,1.4fr) repeat(4,minmax(40px,.5fr)) minmax(90px,.9fr)}.ovR .n{font-size:15px}.ovTop{grid-template-columns:1fr auto}.ovTop .l{display:none}}
+@media (max-height:800px){.ovLvC{width:64px;height:64px}.ovLvC b{font-size:26px}.ovR{min-height:40px;padding:7px 22px}}
