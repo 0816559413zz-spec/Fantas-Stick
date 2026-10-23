@@ -14,8 +14,8 @@ const camPos=new THREE.Vector3(0,20,40),camLook=new THREE.Vector3();
 document.addEventListener('pointerlockchange',()=>{locked=document.pointerLockElement===cv;if(locked){hidePause();trToggle(false);}else if(screen==='game'&&!trOpenF&&!crOpen)showPause();});
 // เมนู Esc: ปล่อยเมาส์ (Esc) ระหว่างเล่น = เปิดเมนูหยุดพัก
 function overlayOpen(){return ['#over','#buff','#meet'].some(s=>{const el=document.querySelector(s);return el&&!el.classList.contains('hidden');});}
-function showPause(){if(overlayOpen())return;const el=$('#pause');el.classList.remove('hidden');$('#pLobby').style.display=NET.isHost?'':'none';INPUT.fire=INPUT.sh=INPUT.u=INPUT.d=INPUT.l=INPUT.r=INPUT.jh=INPUT.ch=0;}
-function hidePause(){$('#pause').classList.add('hidden');}
+function showPause(){if(overlayOpen())return;const el=$('#pause');uiShow(el);$('#pLobby').style.display=NET.isHost?'':'none';INPUT.fire=INPUT.sh=INPUT.u=INPUT.d=INPUT.l=INPUT.r=INPUT.jh=INPUT.ch=0;}
+function hidePause(){uiHide($('#pause'));}
 const MAPCAM={castle:{m:1.4,wy:0},forest:{m:6,wy:0},pitch:{m:7,wy:0},hogsmeade:{m:4,wy:0},greathall:{m:1.4,wy:0},meadow:{m:8,wy:0},lake:{m:8,wy:0},ruins:{m:5,wy:0}};
 // วางสกิลแบบ Overwatch: กดครั้งแรก = เห็นเงาสีฟ้าตรงจุดที่จะวาง • กดซ้ำ/คลิกซ้าย = วาง • คลิกขวา = ยกเลิก
 const PLACE={slot:-1,g:null};const PLACE_SP={mudswamp:{r:120,range:600},dustburst:{r:350,range:500},ringofembers:{r:170,range:400},triplestrike:{r:70,range:600}};

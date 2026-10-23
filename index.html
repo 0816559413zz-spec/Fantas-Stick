@@ -11,6 +11,7 @@
 <link rel="stylesheet" href="css/hub.css">
 <link rel="stylesheet" href="css/skillwheel.css">
 <link rel="stylesheet" href="css/mappick.css">
+<link rel="stylesheet" href="css/ui3.css">
 </head>
 <body>
 <canvas id="gl"></canvas>
@@ -194,7 +195,9 @@
 <!-- ตั้งค่า (ผู้ใช้ 2026-10-23 ตามรูปอ้างอิง): ไม่ใช่หน้าใหม่ — ฉากหลังเฟด • ซ้าย = เส้นโค้งวงกลมมีปุ่มกลม (แท็บ) • ขวา = แผงไล่สีน้ำเงิน ตัวเลือกแบบจุด + เส้นใต้ — สไตล์ css/hub.css ".sx" -->
 <div id="settings" class="overlay hidden sx"><div class="sxBg"></div><div class="sxArc"><svg class="sxCurve" viewBox="-100 -100 200 200" aria-hidden="true"><circle r="99.2"/><circle class="b" r="95"/><circle class="c" r="70"/></svg><div id="setTabs" class="stabs"></div></div><div class="card setcard sxPanel"><h1 class="sxTi">Settings<small id="setTiTh">ตั้งค่า</small></h1><div id="setBody"></div><div class="row sxFoot"><button id="setReset">ค่าเริ่มต้น</button><button class="pri" id="setClose">เสร็จ</button></div></div></div>
 <div id="fps"></div>
-<div id="pause" class="overlay hidden"><div class="card" style="width:min(360px,100%);text-align:center"><h1 style="font-size:34px">หยุดพัก</h1><div class="orn"></div><p class="sub">เกมยังเดินต่อสำหรับคนอื่น</p><div class="row" style="justify-content:center"><button class="pri" id="pResume">เล่นต่อ</button></div><div class="row" style="justify-content:center"><button id="pSettings">ตั้งค่า</button><button id="pLobby">กลับล็อบบี้</button><button id="pLeave">ออกจากห้อง</button></div></div></div>
+<!-- เมนูหยุดเกม (ผู้ใช้ 2026-10-23 รอบ 3): สี่เหลี่ยมพื้นกาแล็กซี + ประกาย (js/65 uiGalaxy) หัวข้อ "Menu" ฟอนต์เดียวกับเมนูใหม่ • ปิด = เล่นย้อน (.out) -->
+<div id="pause" class="overlay hidden u3Pause"><div class="u3Box"><div class="u3Head"><b>Menu</b><i></i><span>เกมยังเดินต่อสำหรับคนอื่น</span></div>
+  <div class="u3List"><button id="pResume"><span>เล่นต่อ</span><small>RESUME</small></button><button id="pSettings"><span>ตั้งค่า</span><small>SETTINGS</small></button><button id="pLobby"><span>กลับล็อบบี้</span><small>LOBBY</small></button><button id="pLeave"><span>ออกจากห้อง</span><small>LEAVE ROOM</small></button></div></div></div>
 
 <!-- ===== VOICE ===== -->
 <div id="voice" class="hidden">
@@ -212,7 +215,7 @@
 // ตัวโหลดโค้ดเกม: โค้ดอยู่ใน js/*.js (ดูแผนที่โค้ดใน CODEMAP.md) — ดึงทุกไฟล์มาต่อกันตามลำดับเป็นโมดูลเดียว
 // ทุกไฟล์จึงเห็นตัวแปร/ฟังก์ชันของกันและกันเหมือนอยู่ไฟล์เดียว • ไฟล์ใหม่ = เพิ่มชื่อใน FILES (ลำดับสำคัญ: โค้ดที่รันตอนโหลดใช้ของในไฟล์ก่อนหน้าเท่านั้น)
 // มี source map → DevTools/ข้อความ error ชี้ไฟล์+บรรทัดจริง • srcAt(n) = แปลงบรรทัด n ของ game.js เป็น "js/ไฟล์.js:บรรทัด"
-const FILES=['01-core','02-data','03-spells-core','04-frost-mech','05-terrain','06-pyro','07-frost-spells','08-storm','09-other-paths','09-earth','10-net','11-host','12-buildings','13-enemies','14-mode-rules','15-modes','16-voice','17-input','18-audio','19-client','20-vfx-pyro-storm','21-vfx-frost','22-models','23-props-bld-view','24-minions-view','25-efx','26-fx-events','27-world','28-maps-build','29-characters','30-particles','31-camera','32-stage','33-pyro-view','34-frost-view','35-sync','36-modes-view','37-render-loop','38-hud','39-menu','40-train-settings','41-debug','42-fire-vfx','43-frost-vfx','44-vfx-kit','45-fx-runtime','46-fx-make','47-earth-view','48-ragdoll','49-cloth','50-grass','51-warmup','52-social','53-victory','54-ffa','55-podium','56-progress','57-tutorial','58-deathcam','59-podroom','60-menu3d','61-hub','62-hub-ui','63-skillwheel','64-mappick'];
+const FILES=['01-core','02-data','03-spells-core','04-frost-mech','05-terrain','06-pyro','07-frost-spells','08-storm','09-other-paths','09-earth','10-net','11-host','12-buildings','13-enemies','14-mode-rules','15-modes','16-voice','17-input','18-audio','19-client','20-vfx-pyro-storm','21-vfx-frost','22-models','23-props-bld-view','24-minions-view','25-efx','26-fx-events','27-world','28-maps-build','29-characters','30-particles','31-camera','32-stage','33-pyro-view','34-frost-view','35-sync','36-modes-view','37-render-loop','38-hud','39-menu','40-train-settings','41-debug','42-fire-vfx','43-frost-vfx','44-vfx-kit','45-fx-runtime','46-fx-make','47-earth-view','48-ragdoll','49-cloth','50-grass','51-warmup','52-social','53-victory','54-ffa','55-podium','56-progress','57-tutorial','58-deathcam','59-podroom','60-menu3d','61-hub','62-hub-ui','63-skillwheel','64-mappick','65-ui3'];
 // ?studio = VFX Studio (studio.html): ต่อท้ายด้วยตัวตรวจไฟล์เอฟเฟกต์ + โค้ดสตูดิโอ (เกมปกติไม่โหลด)
 const STUDIO_ON=new URLSearchParams(location.search).has('studio');
 const SRCS=FILES.map(f=>'js/'+f+'.js').concat(STUDIO_ON?['tools/fx-lint.js','studio/studio.js','studio/texgen.js','studio/maker.js','studio/meshedit.js']:[]);
