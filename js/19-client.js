@@ -39,6 +39,7 @@ function vfxExtra(){return VFXB.mul>=1;}
 const PCOL={bolt:'#ffe27a',fire:'#ff6a2a',stun:'#5ad1ff',pull:'#c77dff',ebolt:'#7dff6a',web:'#e8e8f0',ice:'#9fe8ff',zap:'#fff27a',vine:'#6fd57f',dart:'#b6e86a',hex:'#b57dff',ember:'#ff9a4a',spike:'#d8f4ff',pb0:'#ff8a3a',pb1:'#9fe8ff',pb2:'#fff27a',pb3:'#8ef07a',pb4:'#b57dff',pb5:'#ff9ad5',spark:'#ffb347',pfire:'#ff6a2a',pfireb:'#ff5a1a',icicle:'#bfeaff',iceboulder:'#9fe0ff'};
 
 function setScreen(s){
+  if(s==='game'&&screen!=='game'&&typeof gameCover==='function')gameCover();   // จอมืดสั้น ๆ คลุมเฟรมแรกของแมตช์ (โหลด/compile ที่เหลือ) js/65
   if(s!=='game'&&document.getElementById('pause')){const pz=document.getElementById('pause');pz.classList.add('hidden');pz.classList.remove('in','out');if(pz._gal)uiGalaxyOn(pz._gal,false);}
   screen=s;document.body.dataset.screen=s;
   $('#menu').classList.toggle('hidden',s!=='menu');

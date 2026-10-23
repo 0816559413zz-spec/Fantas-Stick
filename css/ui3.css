@@ -419,3 +419,6 @@ body.profOn #hub{display:none}
 @keyframes bkSpin{to{transform:rotate(360deg)}}
 @media (max-width:820px){.bkRow{gap:10px}.bk{--w:30vw}}
 @media (max-height:800px){.pfCard{padding:12px 14px}.pfAv{--sz:66px}.pfL h4{margin:14px 0 8px}.pfS{padding:7px 8px}.pfS b{font-size:17px}}
+/* จอมืดตอนเริ่มแมตช์ (js/65 gameCover) */
+#gameCover{position:fixed;inset:0;z-index:80;background:#04060d;pointer-events:none;opacity:1;transition:opacity .4s ease}
+#gameCover.off{opacity:0}

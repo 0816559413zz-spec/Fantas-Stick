@@ -523,7 +523,8 @@ function hubCharTick(c,dt,now,camP){
 }
 
 // ---------- ลูกแก้วเวท (เล่นในมือ) ----------
-function hubMakeOrb(scene){
+// noLight = ไม่มีไฟจุด (ลูกแก้วในห้อง: ไฟเพิ่มทีละดวงตอนคนเข้า = จำนวนไฟในฉากเปลี่ยน → เชดเดอร์ทุกชิ้น compile ใหม่ = กระตุก)
+function hubMakeOrb(scene,noLight){
   const g=new THREE.Group();scene.add(g);
   const U={uT:{value:0}};
   const core=new THREE.Mesh(new THREE.SphereGeometry(0.075,32,24),new THREE.ShaderMaterial({uniforms:U,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,
@@ -533,21 +534,22 @@ function hubMakeOrb(scene){
   const halo=new THREE.Sprite(glowMat('#a995ff',0.85));halo.scale.set(0.5,0.5,1);g.add(halo);
   const halo2=new THREE.Sprite(glowMat('#8fd8ff',0.4));halo2.scale.set(1.0,1.0,1);g.add(halo2);
   const rings=[];for(const [r,c] of [[0.13,'#cfc4ff'],[0.17,'#8fd8ff']]){const m=new THREE.Mesh(new THREE.TorusGeometry(r,0.0035,6,96),new THREE.MeshBasicMaterial({color:hdr(c,1.6),transparent:true,opacity:0.8,depthWrite:false,blending:THREE.AdditiveBlending}));g.add(m);rings.push(m);}
-  const L=new THREE.PointLight('#a99cff',0,3.2,2);g.add(L);
+  const L=noLight?null:new THREE.PointLight('#a99cff',0,3.2,2);if(L)g.add(L);
   const motes=[];for(let i=0;i<3;i++){const s=hubStar(i?'#cfe6ff':'#e2d8ff',2);s.scale.set(0.09,0.09,1);g.add(s);motes.push(s);}
   return {g,U,core,halo,halo2,rings,motes,L,k:0,kT:0,pos:new THREE.Vector3()};
 }
 function hubOrbTick(o,c,dt,now,ps){
   if(!o)return;
   o.k+=(o.kT-o.k)*(1-Math.exp(-5*dt));
-  o.g.visible=o.k>0.01;if(!o.g.visible||!c)return;
+  // ซ่อนแค่ตัวลูกแก้ว — กลุ่ม + ไฟยังอยู่ในฉากตลอด (ไฟหรี่เป็น 0) จำนวนไฟคงที่ เชดเดอร์ไม่ต้อง compile ใหม่ตอนลูกแก้วโผล่/หาย
+  const on=o.k>0.01;o.g.visible=true;for(const ch of o.g.children)if(ch!==o.L)ch.visible=on;if(o.L&&!on)o.L.intensity=0;if(!on||!c)return;
   const t=now/1000,P=c.pose,B=c.B;
   if(P&&P.orb==='M'&&B.hand_L&&B.hand_R){B.hand_L.getWorldPosition(_ht);B.hand_R.getWorldPosition(_hd);_ht.add(_hd).multiplyScalar(0.5);_ht.y+=0.1;}
   else if(B.hand_L){B.hand_L.getWorldPosition(_ht);const up=_hd.set(0,0.2,0.17).applyQuaternion(c.g.getWorldQuaternion(_hq));_ht.add(up);}
   _ht.x+=Math.sin(t*1.6)*0.025;_ht.y+=Math.sin(t*2.1)*0.03;_ht.z+=Math.cos(t*1.3)*0.02;
   if(!o.init){o.pos.copy(_ht);o.init=true;}else o.pos.lerp(_ht,1-Math.exp(-14*dt));
   o.g.position.copy(o.pos);o.g.scale.setScalar(o.k*(1+0.05*Math.sin(t*3)));
-  o.U.uT.value=t;o.L.intensity=o.k*(1.3+0.25*Math.sin(t*2.3));
+  o.U.uT.value=t;if(o.L)o.L.intensity=o.k*(1.3+0.25*Math.sin(t*2.3));
   o.rings[0].rotation.set(t*0.9,t*1.3,0);o.rings[1].rotation.set(-t*0.7,0.5,t*1.1);
   o.motes.forEach((m,i)=>{const a=t*(1.4+i*0.5)+i*2.1;m.position.set(Math.cos(a)*0.2,Math.sin(a*1.3)*0.08,Math.sin(a)*0.2);m.material.opacity=0.6+0.4*Math.sin(t*5+i);});
   if(ps&&Math.random()<dt*42){const a=Math.random()*6.28,r=0.08+Math.random()*0.08;
@@ -562,6 +564,46 @@ function hubBuild(){
   hubBuildStudy();hubBuildLobby();
   HUB.orb=hubMakeOrb(HUBS);
   loadModel('char_student');
+}
+const hubTipStar=c=>{const s=hubStar('#e6f0ff',2.2);s.scale.set(0.2,0.2,1);c.tip.add(s);return s;};
+// ---------- อุ่นเชดเดอร์ล่วงหน้า (ผู้ใช้ 2026-10-23: "กระตุกตอนกดเล่น / เข้าห้อง") ----------
+// เมนูแรกเปิดค้าง ~1 วิ → compile วัสดุทุกชิ้นแบบ async (KHR_parallel_shader_compile ไม่บล็อกจอ) ลง render target เดียวกับที่วาดจริง:
+//   ฉากโพส HUBS รวมของที่ยังซ่อน (ลูกแก้ว ไม้ในมือ ประกายปลายไม้) • ฉากห้อง HUBL + ฉากโปรไฟล์ HUBP (ใส่ตัวละครตัวอย่าง + ลูกแก้ว ซ่อนเก็บไว้ —
+//   ห้าม dispose ไม่งั้น three.js ลบ program ทิ้ง) • ผ้าคลุมปัดจอ (วาดลงจอตรง = RT null) • เดิมกดเล่นค้าง ~0.5+1.4 วิ เข้าห้อง ~0.8 วิ (compile 13–17 เชดเดอร์ตอนนั้น)
+const HWARM={st:0,t:0};
+function hubShowAll(root){const hid=[];root.traverse(o=>{if(!o.visible&&!o.isLight){hid.push(o);o.visible=true;}});return ()=>{for(const o of hid)o.visible=false;};}
+function hubWarm(){
+  if(HWARM.st)return;HWARM.st=1;
+  try{
+    const c=HUB.me,F=HUB.fx,lk=lookStr(myLook);
+    if(c&&!c.tipStar){c.tipStar=hubTipStar(c);c.tipStar.visible=false;}
+    for(const S of [HUBL,HUBP]){const d=hubMakeChar(lk);if(!d)continue;d.g.position.set(0,0.2,-40);if(d.wand)d.wand.visible=true;S.add(d.g);
+      const o=hubMakeOrb(S,S===HUBL);o.g.position.set(0,1,-40);(HWARM.keep||(HWARM.keep=[])).push(d,o);}
+    hubProfBuild();
+    const undo=[HUBS,HUBL,HUBP].map(hubShowAll);
+    const ps=warmCompile([HUBS,HUBL,HUBP]);
+    undo.forEach(f=>f());
+    for(const q of HWARM.keep||[])q.g.visible=false;
+    if(F.wipe&&c){hubWipeLook(F.wipe,c);const pr=gl.getRenderTarget();gl.setRenderTarget(null);ps.push(gl.compileAsync(F.wipe.S,F.wipe.cam));gl.setRenderTarget(pr);}
+    const next=()=>{HWARM.st=2;setTimeout(()=>hubWarmDraw(0),60);};Promise.all(ps).then(next,next);
+  }catch(e){console.warn('hubWarm',e);HWARM.st=2;}
+}
+// ขั้น 2: วาดแต่ละฉากครั้งเดียวลงภาพเล็กที่ไม่แสดง (ตัวละคร/ของตัวอย่างโผล่เฉพาะในภาพนี้) — compileAsync ไม่ทำส่วนนี้:
+//   อัปโหลด geometry/texture ครั้งแรก + เชดเดอร์เงา (depth) ของตัวละคร • ฉากละเฟรม (เว้นช่วงกันเมนูสะดุด)
+function hubWarmDraw(i){
+  const L=[[HUBS,()=>{const c=HUB.me;if(!c)return ()=>{};const v=c.g.visible,w=c.wand&&c.wand.visible;c.g.visible=true;if(c.wand)c.wand.visible=true;
+      return ()=>{c.g.visible=v;if(c.wand)c.wand.visible=w;};}],
+    [HUBL,()=>{const k=(HWARM.keep||[]).filter(q=>q.g.parent===HUBL);k.forEach(q=>{q.g.visible=true;q.g.position.set(0,0.2,0);});const sp=HUB.fx.spots||[];sp.forEach(q=>q.g.visible=true);
+      return ()=>{k.forEach(q=>{q.g.visible=false;q.g.position.set(0,0.2,-40);});sp.forEach(q=>q.g.visible=false);};}],
+    [HUBP,()=>{const k=(HWARM.keep||[]).filter(q=>q.g.parent===HUBP);k.forEach(q=>{q.g.visible=true;q.g.position.set(0,0.2,0);});return ()=>k.forEach(q=>{q.g.visible=false;q.g.position.set(0,0.2,-40);});}]];
+  if(i>=L.length||HUB.st!=='menu'&&HUB.st!=='modes')return;
+  try{
+    HWARM.rt=HWARM.rt||new THREE.WebGLRenderTarget(64,64,{type:composer.renderTarget1.texture.type,colorSpace:composer.renderTarget1.texture.colorSpace});
+    const [S,fn]=L[i],undo=fn(),pr=gl.getRenderTarget(),au=gl.shadowMap.autoUpdate;
+    gl.setRenderTarget(HWARM.rt);gl.shadowMap.needsUpdate=true;gl.render(S,cam);gl.setRenderTarget(pr);gl.shadowMap.needsUpdate=true;
+    undo();
+  }catch(e){console.warn('hubWarmDraw',e);}
+  setTimeout(()=>hubWarmDraw(i+1),120);
 }
 // ไม้บนโต๊ะ = โคลนไม้ที่ตัวละครเลือก วางนอนบนผ้า ด้ามหันหาที่ยืนหยิบ (C0) ปลายชี้เข้ากลางโต๊ะ → HB.GRIP = จุดจับ (ใช้เอื้อมมือ)
 function hubPlaceWand(c){
@@ -722,7 +764,7 @@ function hubLobbyTick(dt,now){
   for(const [id,c] of HUB.chars)if(!want.has(id)){HUBL.remove(c.g);disposeTree(c.g);if(c.orb){HUBL.remove(c.orb.g);}HUB.chars.delete(id);}
   const camP=HUB.cam.p;
   for(const s of lay)if(s.c){const c=s.c;hubCharTick(c,dt,now,camP);
-    if(c.pose&&c.pose.orb){if(!c.orb){c.orb=hubMakeOrb(HUBL);c.orb.kT=1;}hubOrbTick(c.orb,c,dt,now,HUB.psL);}}
+    if(c.pose&&c.pose.orb){if(!c.orb){c.orb=hubMakeOrb(HUBL,true);c.orb.kT=1;}hubOrbTick(c.orb,c,dt,now,HUB.psL);}}
   return lay;
 }
 
@@ -792,12 +834,14 @@ function hubRender(dt,now){
   let sc=HUBS,lay=null,want,tt=0,fvO=0;
   if(room){
     sc=HUBL;lay=hubLobbyTick(dt,now);want=hubCamRoom(_hcB);
+    if(typeof gameWarmTick==='function')gameWarmTick(dt);   // อุ่นฉากเกมระหว่างรอ (js/51)
     F.lRune.rotation.z=t/20;F.lRune.material.opacity=0.24+0.08*Math.sin(t*0.8);F.dustL.rotation.y=t/60;
     if(Math.random()<dt*14)HUB.psL.add({x:rnd(-4,5),y:0.25,z:rnd(-3,2.5),vx:0,vy:0.25+Math.random()*0.3,vz:0,life:3+Math.random()*2,s:0.03+Math.random()*0.03,c:H_SPARK[(Math.random()*4)|0],sw:1.5,swr:0.1,a:0.7,fi:3});
     HUB.psL.tick(dt);
   }else if(HUB.profOn){sc=HUBP;want=hubProfTick(dt,now);fvO=34;}   // หน้าโปรไฟล์ (js/65)
   else{
     const c=hubMenuChar();
+    if(!HWARM.st&&c&&HUB.st==='menu'&&(HWARM.t+=dt)>0.8){HWARM.st=0.5;setTimeout(()=>{HWARM.st=0;hubWarm();},0);}   // อุ่นเชดเดอร์ตอนเมนูว่าง
     if(c){hubSeq(c,dt,now);hubCharTick(c,dt,now,HUB.cam.p);}
     hubOrbTick(HUB.orb,c,dt,now,HUB.ps);
     // กล้อง: เมนู → (หยิบ/หัน/ตัดใต้ผ้าคลุม) → โพส • ย้อนได้ (back)
@@ -818,7 +862,8 @@ function hubRender(dt,now){
       if(Math.random()<dt*34)HUB.ps.add({x:tp.x+(Math.random()-0.5)*0.03,y:tp.y,z:tp.z+(Math.random()-0.5)*0.03,vx:(Math.random()-0.5)*0.12,vy:0.12+Math.random()*0.28,vz:(Math.random()-0.5)*0.12,life:0.9+Math.random()*1.4,s:0.02+Math.random()*0.035,c:H_SPARK[(Math.random()*4)|0],dr:0.8,sw:4,swr:0.06,tw:18,fi:10});
       if(Math.random()<dt*1.4)hubBurst(HUB.ps,tp,6,null,0.35);}
     // ประกายปลายไม้ในมือ
-    if(c&&c.wandOn){c.tipStar=c.tipStar||(()=>{const s=hubStar('#e6f0ff',2.2);s.scale.set(0.2,0.2,1);c.tip.add(s);return s;})();const tw=0.17+0.06*Math.sin(t*6.3)+0.04*Math.sin(t*15);c.tipStar.scale.set(tw,tw,1);c.tipStar.material.rotation=t*0.5;}
+    if(c&&c.wandOn){c.tipStar=c.tipStar||hubTipStar(c);c.tipStar.visible=true;const tw=0.17+0.06*Math.sin(t*6.3)+0.04*Math.sin(t*15);c.tipStar.scale.set(tw,tw,1);c.tipStar.material.rotation=t*0.5;}
+    else if(c&&c.tipStar)c.tipStar.visible=false;
     if(c&&c.wandOn&&tt>=HSQ.snap&&Math.random()<dt*3){const tp=c.tip.getWorldPosition(_hv3);HUB.ps.add({x:tp.x,y:tp.y,z:tp.z,vx:(Math.random()-0.5)*0.06,vy:0.08+Math.random()*0.1,vz:(Math.random()-0.5)*0.06,life:1.4+Math.random(),s:0.03+Math.random()*0.03,c:H_SPARK[(Math.random()*4)|0],sw:3,swr:0.07,a:0.7,fi:5,fo:1.5});}
     if(c&&c.wandOn&&Math.random()<dt*(HUB.st==='modes'?10:8)){const tp=c.tip.getWorldPosition(_hv3);HUB.ps.add({x:tp.x,y:tp.y,z:tp.z,vx:(Math.random()-0.5)*0.15,vy:0.05+Math.random()*0.2,vz:(Math.random()-0.5)*0.15,life:0.6+Math.random()*0.8,s:0.025+Math.random()*0.03,c:H_SPARK[(Math.random()*4)|0],dr:1.2,tw:20,fi:10});}
     if(Math.random()<dt*5)HUB.ps.add({x:rnd(0,4),y:rnd(0.3,2.6),z:rnd(-2,2.5),vx:0,vy:0.04,vz:0,life:4+Math.random()*3,s:0.02+Math.random()*0.02,c:H_SPARK[(Math.random()*4)|0],sw:0.6,swr:0.05,tw:3,a:0.6,fi:2,fo:2});
@@ -840,4 +885,4 @@ function hubRender(dt,now){
   if(lay)hubLabels(lay);
   return true;
 }
-if(typeof WD!=='undefined')Object.assign(WD,{HUB,HUBS,HUBL,HUBP,PRF3,HPOSE,hubGo,hubSnapModes,hubResetMenu,hubProfSet});
+if(typeof WD!=='undefined')Object.assign(WD,{HWARM,HUB,HUBS,HUBL,HUBP,PRF3,HPOSE,hubGo,hubSnapModes,hubResetMenu,hubProfSet});

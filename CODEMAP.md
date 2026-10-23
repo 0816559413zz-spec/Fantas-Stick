@@ -135,18 +135,18 @@ MY:202 myDB:203 mySave:204 myLoad:207 myDecodeReady:213 myPlay:214 myNext:226 my
 §248 เพลงประกอบ (สร้างสดตามแผนที่)
 MUSIC:249 THEMES:250 padNote:255 musicTick:262 toggleMusic:291
 
-## js/19-client.js (245) — ฝั่งแสดงผล (ทุกเครื่อง รวมโฮสต์ ใช้ snapshot เดียวกัน)
+## js/19-client.js (246) — ฝั่งแสดงผล (ทุกเครื่อง รวมโฮสต์ ใช้ snapshot เดียวกัน)
 cv:4 cx:4 DPR:5 SW:5 SH:5 resize:6 VIEW:12 screen:13 lastBuffKey:13 overShown:13 lastCount:13 PARTS:14 TEXTS:14
 §15 งบเอฟเฟกต์ (VFX budget)
-VFXB:20 _apush:21 vfxQual:29 vfxBegin:31 vfxEnd:34 vfxOnce:36 vfxExtra:38 PCOL:39 setScreen:41 onLobby:51 onSnap:57 snapApply:61
-§69 บัฟเฟอร์ snapshot (ลูกข่าย, ผู้ใช้ 2026-10-22 "เล่นออนไลน์ให้ลื่น")
-SBUF:72 NETOLD:73 sbufReset:74 sbufPush:75 sbufAdvance:85
-§97 ทำนายตัวเอง (ลูกข่าย): ตัวเราขยับทันทีที่กด ไม่ต้องรอโฮสต์ตอบ
-PRED:100 predictMe:101 myPos:122
-§124 เอฟเฟกต์
-burst:126 smoke:137 ring:138 floatText:139 shake:140 wandPos:141 impactFX:143 explosionFX:160
-§172 เอฟเฟกต์คาถาใหม่
-ZV:173 COLB:173 WVV:173 GLV:173 ICEV:173 SLV:173 ULTV:173 OBV:173 _iceDisc:175 _iceEdge:176 _iceSpk:177 iceFloorMat:178 _icePlane:179 _icePathMat:180 makeIceFloor:181 updateIceFloors:205 FLASHM:216 FLASHING:217 flashModel:218 endFlash:227 tickFlash:228 GHOSTM:230 SOLIDM:230 ghostOf:231 setGhost:237 hitSparks:245
+VFXB:20 _apush:21 vfxQual:29 vfxBegin:31 vfxEnd:34 vfxOnce:36 vfxExtra:38 PCOL:39 setScreen:41 onLobby:52 onSnap:58 snapApply:62
+§70 บัฟเฟอร์ snapshot (ลูกข่าย, ผู้ใช้ 2026-10-22 "เล่นออนไลน์ให้ลื่น")
+SBUF:73 NETOLD:74 sbufReset:75 sbufPush:76 sbufAdvance:86
+§98 ทำนายตัวเอง (ลูกข่าย): ตัวเราขยับทันทีที่กด ไม่ต้องรอโฮสต์ตอบ
+PRED:101 predictMe:102 myPos:123
+§125 เอฟเฟกต์
+burst:127 smoke:138 ring:139 floatText:140 shake:141 wandPos:142 impactFX:144 explosionFX:161
+§173 เอฟเฟกต์คาถาใหม่
+ZV:174 COLB:174 WVV:174 GLV:174 ICEV:174 SLV:174 ULTV:174 OBV:174 _iceDisc:176 _iceEdge:177 _iceSpk:178 iceFloorMat:179 _icePlane:180 _icePathMat:181 makeIceFloor:182 updateIceFloors:206 FLASHM:217 FLASHING:218 flashModel:219 endFlash:228 tickFlash:229 GHOSTM:231 SOLIDM:231 ghostOf:232 setGhost:238 hitSparks:246
 
 ## js/20-vfx-pyro-storm.js (414) — Dragonfall (ภาพ)
 makeDfCircle:3 DFV:20 dfCracks:21 updateDfCracks:31 dragonfallFX:32
@@ -192,18 +192,18 @@ QUAL:143 QUAL_NAME:144 qualPR:145 applyQuality:151 qualTick:169 texCanvas:180 gl
 §239 เงาตามผู้เล่น
 SHD:243 _shF:244 _shR:244 _shU:244 _shC:244 _shY:244 shadowFollow:245 LPOOL:264
 
-## js/28-maps-build.js (725) — สร้างแผนที่
-CANDLESYS:2 builtMap:3 builtKey:3 world:3 TORCHES:3 CANDLES:3 FIREFLIES:3 CRYSTAL:3 RUNE:3 SNITCH:3 BANNERS:3 SNOW:3 WCACHE:5 WCACHE_MAX:5 wkey:7 buildWorld:8 addW:40 _prewarmed:42 prewarmShaders:43 batchStatic:61 makeCandles:86 updateCandles:95 buildCastle:104 buildHogsmeade:170 buildGreatHall:258 buildForest:328
-§425 ทุ่งหญ้าฮอกวอตส์ (เย็น)
-ringTrees:426 grassTex:435 buildMeadow:436
-§455 ทะเลสาบน้ำแข็ง (กลางคืน)
-buildLake:456
-§477 ซากลานประลอง (เย็น ทราย)
-§478 Test Place (ห้องฝึก): พื้นตารางเรียบๆ กลางวัน + วงโซนเสกมอนสเตอร์
-§479 บรรยากาศที่ใช้ร่วมกัน (แผนที่จากโค้ด + แผนที่จากไฟล์ผ่าน fx ใน MAP-DE…
-makeSnow:480 makeFireflies:487 makeSnitch:494 fileMapFx:501
-§511 แผนที่จากไฟล์ Blender (MAP-DESIGN.md)
-terrGeo:513 buildFileMap:521 tickM:557 testSign:558 buildTest:565 buildRuins:631 buildPitch:656
+## js/28-maps-build.js (726) — สร้างแผนที่
+CANDLESYS:2 builtMap:3 builtKey:3 world:3 TORCHES:3 CANDLES:3 FIREFLIES:3 CRYSTAL:3 RUNE:3 SNITCH:3 BANNERS:3 SNOW:3 WCACHE:5 WCACHE_MAX:5 wkey:7 buildWorld:8 addW:40 _prewarmed:42 prewarmShaders:43 batchStatic:62 makeCandles:87 updateCandles:96 buildCastle:105 buildHogsmeade:171 buildGreatHall:259 buildForest:329
+§426 ทุ่งหญ้าฮอกวอตส์ (เย็น)
+ringTrees:427 grassTex:436 buildMeadow:437
+§456 ทะเลสาบน้ำแข็ง (กลางคืน)
+buildLake:457
+§478 ซากลานประลอง (เย็น ทราย)
+§479 Test Place (ห้องฝึก): พื้นตารางเรียบๆ กลางวัน + วงโซนเสกมอนสเตอร์
+§480 บรรยากาศที่ใช้ร่วมกัน (แผนที่จากโค้ด + แผนที่จากไฟล์ผ่าน fx ใน MAP-DE…
+makeSnow:481 makeFireflies:488 makeSnitch:495 fileMapFx:502
+§512 แผนที่จากไฟล์ Blender (MAP-DESIGN.md)
+terrGeo:514 buildFileMap:522 tickM:558 testSign:559 buildTest:566 buildRuins:632 buildPitch:657
 
 ## js/29-characters.js (376) — ระบบผ้า (เสื้อคลุมพลิ้วตามการเคลื่อนที่)
 makeCloak:2 updateCloth:10
@@ -409,9 +409,11 @@ CLW:48
 §50 หญ้า
 GRASS:52 GR_GLSL_V:53 GR_BEGIN:55 grassMat:79 grassBuild:93 _grBasic:107 grassBake:108 grassCount:158 grassTick:163
 
-## js/51-warmup.js (72) — 
+## js/51-warmup.js (109) — อุ่นเครื่องช่วงนับถอยหลัง (ผู้ใช้ 2026-10-21: "ช่วงนับถอยหลังให้โหลดสิ่งที่ต้องใช้ — กดสก…
 WARM:11 WARM_FXDIR:12 WARM_COMMON:12 WARM_X:13 WARM_Y:13 warmKeep:15 warmCompile:21 WARM_SKIP:24 warmFx:25 warmFxEnd:33 warmGather:35 warmPaths:37 warmStep:39 warmTick:54
 §63 ภาพจากโค้ดของแต่ละสาย (เฟรมละฟังก์ชัน)
+§72 อุ่นฉากเกมระหว่างรอในห้อง (ผู้ใช้ 2026-10-23: "กระตุกตอนเริ่มแมตช์แรก…
+GWARM:77 gameWarmTick:78
 
 ## js/52-social.js (172) — เล่นกับเพื่อน (ผู้ใช้ 2026-10-22): แชท + อีโมต + ดูเพื่อนเล่น (spectator) + ป้ายต่อเน็ตให…
 §6 แชท: Enter = พิมพ์ / Enter อีกที = ส่ง / Esc = ปิด • ข้อความขึ้นมุมซ้…
@@ -464,7 +466,7 @@ MN_BLOCK:259 mnRay:260 mnPick:261 mnHot:267 mnToy:285
 §290 เรนเดอร์ (เรียกจาก renderStage js/32 — คืน true = จัดการแล้ว)
 mnRestore:291 mnMenuRender:297
 
-## js/61-hub.js (843) — เมนูใหม่ — ฉาก 3D (ผู้ใช้ 2026-10-22 • สเปกเต็ม designs/ui-menu.md • หน้าจอ/ปุ่มอยู่ js/6…
+## js/61-hub.js (888) — เมนูใหม่ — ฉาก 3D (ผู้ใช้ 2026-10-22 • สเปกเต็ม designs/ui-menu.md • หน้าจอ/ปุ่มอยู่ js/6…
 HUBS:11 HUBL:11 HUB:14 HB:18 _hq:19 _hq2:19 _hq3:19 _hv:19 _hv2:19 _hv3:19 _hY:19 hEase:20 hSm:21
 §23 อนุภาคเรืองแสงของเมนู (ขนาด/สี/ความจางต่อเม็ด)
 hubPS:24 hCol:50 H_SPARK:51
@@ -477,19 +479,21 @@ hubBuildLobby:368
 §405 ตัวละคร (โมเดลไฟล์ + จัดท่าเอง)
 HPOSE:407 HPK:420 HBN:420 LOBBY_POSES:421 hubMakeChar:422 hubSetPose:454 hbAim:456 hbRot:462 _hcq:467 _hax:467 _hd:467 _ht:467 hubCharTick:468
 §525 ลูกแก้วเวท (เล่นในมือ)
-hubMakeOrb:526 hubOrbTick:540 hubBurst:556
-§559 สร้างฉาก (ครั้งแรกที่เปิดเมนู)
-hubBuild:560 hubPlaceWand:567 hubMenuChar:590 hubResetMenu:598
-§605 กล้อง
-_hf0:607 _hf1:607 _hf2:607 _hf3:607 hubFrame:608 _hcA:617 _hcB:617 _hcC:617 hCamMix:618 hAspK:620 hubCamMenu:622 hubCamPick:624 hubCamLift:625 hubCamPoseA:628 hubCamPose:629 hubCamRoom:631
-§634 ลำดับตอนกด "เล่น" (ผู้ใช้ 2026-10-23)
-HSQ:637 hPickRy:638 hubGo:639 hubBack:643 hubFadeDo:647 hubSeqAt:649 hubCamSeq:672 hWipeP:678 hubSeq:679 hubSnapModes:687
-§693 ล็อบบี้: ใครยืนตรงไหน ท่าอะไร
-HL_SPOTS:695 HL_TEAM:696 hubLobbyLayout:697 hubLobbyTick:704 hubLabels:730
-§744 หน้าโปรไฟล์ (UI ใน js/65 PRF, ผู้ใช้ 2026-10-23 รอบ 3)
-HUBP:746 PRF3:747 hubProfBuild:748 hubProfSet:763 hubProfTick:769
-§784 เรนเดอร์ (เรียกจาก renderStage — คืน true = วาดแล้ว)
-hubRender:785
+hubMakeOrb:527 hubOrbTick:541 hubBurst:558
+§561 สร้างฉาก (ครั้งแรกที่เปิดเมนู)
+hubBuild:562 hubTipStar:568
+§569 อุ่นเชดเดอร์ล่วงหน้า (ผู้ใช้ 2026-10-23: "กระตุกตอนกดเล่น / เข้าห้อง")
+HWARM:573 hubShowAll:574 hubWarm:575 hubWarmDraw:593 hubPlaceWand:609 hubMenuChar:632 hubResetMenu:640
+§647 กล้อง
+_hf0:649 _hf1:649 _hf2:649 _hf3:649 hubFrame:650 _hcA:659 _hcB:659 _hcC:659 hCamMix:660 hAspK:662 hubCamMenu:664 hubCamPick:666 hubCamLift:667 hubCamPoseA:670 hubCamPose:671 hubCamRoom:673
+§676 ลำดับตอนกด "เล่น" (ผู้ใช้ 2026-10-23)
+HSQ:679 hPickRy:680 hubGo:681 hubBack:685 hubFadeDo:689 hubSeqAt:691 hubCamSeq:714 hWipeP:720 hubSeq:721 hubSnapModes:729
+§735 ล็อบบี้: ใครยืนตรงไหน ท่าอะไร
+HL_SPOTS:737 HL_TEAM:738 hubLobbyLayout:739 hubLobbyTick:746 hubLabels:772
+§786 หน้าโปรไฟล์ (UI ใน js/65 PRF, ผู้ใช้ 2026-10-23 รอบ 3)
+HUBP:788 PRF3:789 hubProfBuild:790 hubProfSet:805 hubProfTick:811
+§826 เรนเดอร์ (เรียกจาก renderStage — คืน true = วาดแล้ว)
+hubRender:827
 
 ## js/62-hub-ui.js (302) — เมนูใหม่ — หน้าจอ/ปุ่ม (ผู้ใช้ 2026-10-22 • สเปก designs/ui-menu.md)
 §8 ภาพการ์ด/แผนที่: URL เต็ม — url() ใน CSS var อ่านเทียบไฟล์ css/hub.cs…
@@ -522,7 +526,7 @@ skwOpen:243 skwClose:253
 ## js/64-mappick.js (156) — 
 MPK_TXT:7 MPK_SKY:19 MPK_I:21 MPK_DICE:31 MPK:36 mpkE:37 mpkC:37 mpkSnd:38 mpkCut:39 mpkName:40 mpkCardHTML:41 mpkBuild:51 mpkUp:89 mpkMeasure:101 mpkIdx:102 mpkStep:103 mpkTo:104 mpkPick:105 mpkOpen:111 mpkClose:126 mpkLoop:130 mpkTick:132
 
-## js/65-ui3.js (362) — UI รอบ 3 (ผู้ใช้ 2026-10-23 — สเปก designs/ui-menu.md "รอบ 3") • สไตล์เดียวกับเมนูใหม่ (c…
+## js/65-ui3.js (373) — UI รอบ 3 (ผู้ใช้ 2026-10-23 — สเปก designs/ui-menu.md "รอบ 3") • สไตล์เดียวกับเมนูใหม่ (c…
 UIG:6 uiGalaxy:7 uiGalaxyOn:15 uiGalRaf:16 uiGalT:16 uiGalLoop:17 uiGalDraw:19 uiShow:36 uiHide:37
 §40 เมนูหยุดเกม
 §44 คู่มือ (แบบ Skill Tree)
@@ -533,5 +537,7 @@ RICO:133 rIcon:139 OV:140 ovScore:141 ovOpen:142 ovHead:151 ovSummary:157 ovNext
 PRF:231 prfItem:232 prfLv:233 prfOk:234 prfGet:235 myFrame:236 FR_IDX:237 prfAvatar:239 BADGES:240 BICO:244 SICO:247 PT:249 PFS:250 prfSave:251 prf3Sync:252 profOpen:253 prfStageX:261 profClose:263 prfRender:264 prfItems:288 prfRwHtml:295 prfRewards:306 prfClick:315 prfDrag:328
 §338 การ์ดพลังเสริม (ดันเจียน) + ความหายาก
 BKICO:341 buffShow:345
+§364 จอมืดตอนเริ่มแมตช์ (ผู้ใช้ 2026-10-23: กระตุกตอนเริ่มแมตช์แรก)
+gameCover:367
 
-(66 files, 15909 lines)
+(66 files, 16004 lines)

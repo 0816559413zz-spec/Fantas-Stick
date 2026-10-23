@@ -38,7 +38,7 @@ function warmPaths(v){const s=new Set();for(const p of (v&&v.P)||[]){const k=get
 // งาน 1 ขั้น: 'common' / 'fx:<สาย>' / 'reg:<สาย>:<i>' / 'compile'
 function warmStep(step){
   if(step==='compile'){WARM.busy=true;scene.add(WARM.hold);fxScene.add(WARM.holdF);const t0=performance.now(),hid=[];
-    for(const sc of [scene,fxScene])sc.traverse(o=>{if(!o.visible){o.visible=true;hid.push(o);}});   // ของซ่อน (ระบบอนุภาค/ของรอใช้) — compile ปกติข้ามไป
+    for(const sc of [scene,fxScene])sc.traverse(o=>{if(!o.visible&&!o.isLight){o.visible=true;hid.push(o);}});   // ไฟที่ซ่อนอยู่ห้ามเปิด (จำนวนไฟเปลี่ยน = เชดเดอร์คนละชุดกับตอนเล่นจริง) • ของซ่อน (ระบบอนุภาค/ของรอใช้) — compile ปกติข้ามไป
     const fin=()=>{WARM.busy=false;WARM.log.push('compile '+(performance.now()-t0).toFixed(0)+'ms');};let ps=[];
     // compileAsync สร้าง program ทันที (ส่วน async แค่รอ GPU) → คืนค่า visible + เอา hold ออกได้เลย ไม่มีเฟรมไหนวาดของพวกนี้
     try{ps=warmCompile([scene,fxScene]);}finally{for(const o of hid)o.visible=false;scene.remove(WARM.hold);fxScene.remove(WARM.holdF);}
@@ -69,4 +69,41 @@ WARM.reg.earth=[
   ()=>{eChunks(WARM_X,WARM_Y,0.3,2,10,1,0.1);},   // เศษหิน (InstancedMesh + ลายหิน) — เดิมไม่ได้อุ่น → กด Dash ครั้งแรก compile shader ใหม่ เกมค้าง
   ()=>{for(const k of [0,1,2,3])eMakeSO([0,k,WARM_X,WARM_Y,WARM_X+200,WARM_Y,30,100]);earthMudZone({x:WARM_X,y:WARM_Y,r:100,t:0.2});},
 ];
+// ---------- อุ่นฉากเกมระหว่างรอในห้อง (ผู้ใช้ 2026-10-23: "กระตุกตอนเริ่มแมตช์แรก" ~1.3 วิ) ----------
+// ห้องรอเริ่มวาดฉากของ hub — ฉากเกม (แผนที่ที่สร้างไว้แล้ว + ตัวละคร) ยังไม่เคยถูกวาดเลย → เฟรมแรกของแมตช์ compile ~18 เชดเดอร์
+// + อัปโหลด geometry/texture พร้อมกัน • ตอนนี้: อยู่ในห้องครบ 1 วิ → สร้างตัวละครของทุกคนในห้องไว้ก่อน (syncPlayers ใช้ตัวเดิมตอนเริ่ม)
+// → compileAsync (scene + fxScene) → วาดฉากเกมครั้งเดียวลงภาพเล็กที่ไม่แสดง ด้วยกล้องมุมกว้างมองทั้งแผนที่ (อัปโหลด + เชดเดอร์เงา)
+// ทำใหม่เมื่อแผนที่/คนในห้องเปลี่ยน • ฝั่ง client ล้วน
+const GWARM={key:'',t:0,busy:false,rt:null,cam:null,chars:new Map()};
+function gameWarmTick(dt){
+  if(GWARM.busy||!LOBBY||LOBBY.ph!=='lobby'||!world||screen!=='lobby')return;
+  const key=builtKey+'|'+LOBBY.players.map(p=>p.id+':'+(p.lk||'')).join(',');
+  if(key===GWARM.key){GWARM.t=0;return;}
+  if((GWARM.t+=dt)<1)return;
+  GWARM.t=0;GWARM.key=key;GWARM.busy=true;
+  try{
+    // ตัวละครตัวอย่างตามลุคของคนในห้อง — เก็บเองซ่อนไว้ (ห้ามใส่ PM3: syncPlayers ลบตัวที่ไม่มีในสแนปช็อต + dispose วัสดุ → program ถูกลบ ต้อง compile ใหม่ตอนเริ่ม)
+    for(const p of LOBBY.players){const L=getLook(p.id),k=lookStr(L);if(GWARM.chars.has(k))continue;const o=makeStudent(L,'warm'+GWARM.chars.size);useFileModel(o,'char_student',lookTint(L),L);GWARM.chars.set(k,o);}
+    const ch=[...GWARM.chars.values()].map(o=>o.g);ch.forEach((g,i)=>{g.visible=true;g.position.set((i-2)*1.5,GY(MW/2,MH/2),0);});
+    const hid=[];for(const sc of [scene,fxScene])sc.traverse(o=>{if(!o.visible&&!o.isLight){o.visible=true;hid.push(o);}});
+    // compile (ไม่ใช่ compileAsync): three r160 compileAsync พังถ้าวัสดุบางชิ้นไม่มี program (isReady of undefined) • ไดรเวอร์ compile ขนานอยู่แล้ว (KHR_parallel_shader_compile)
+    //   ฉากเกมกับ fxScene คนละเฟรม (กันห้องสะดุดทีเดียวนาน)
+    const comp=sc=>{const pr0=gl.getRenderTarget();gl.setRenderTarget(composer.renderTarget1);try{gl.compile(sc,cam);}finally{gl.setRenderTarget(pr0);}};
+    try{comp(scene);}finally{for(const o of hid)o.visible=false;}
+    setTimeout(()=>{const h2=[];fxScene.traverse(o=>{if(!o.visible&&!o.isLight){o.visible=true;h2.push(o);}});try{comp(fxScene);}catch(e){}for(const o of h2)o.visible=false;},120);
+    const fin=()=>{setTimeout(()=>{   // วาดครั้งเดียว (เฟรมถัดไป ไม่ซ้อนกับ compile)
+      try{if(screen==='lobby'){
+        GWARM.rt=GWARM.rt||new THREE.WebGLRenderTarget(64,64,{type:composer.renderTarget1.texture.type,colorSpace:composer.renderTarget1.texture.colorSpace});
+        if(!GWARM.cam){GWARM.cam=new THREE.PerspectiveCamera(100,1,0.5,4000);}
+        const r=Math.max(MW,MH)*S3*0.6;GWARM.cam.position.set(0,r,r*0.4);GWARM.cam.lookAt(0,0,0);
+        ch.forEach(g=>g.visible=true);
+        const pr=gl.getRenderTarget();gl.setRenderTarget(GWARM.rt);gl.shadowMap.needsUpdate=true;gl.render(scene,GWARM.cam);gl.render(fxScene,GWARM.cam);gl.setRenderTarget(pr);gl.shadowMap.needsUpdate=true;
+        ch.forEach(g=>g.visible=false);}
+      }catch(e){console.warn('gameWarm draw',e);}
+      GWARM.busy=false;},50);};
+    setTimeout(fin,800);
+    ch.forEach(g=>g.visible=false);
+  }catch(e){console.warn('gameWarm',e);GWARM.busy=false;}
+}
 if(window.WD)window.WD.warm=WARM;
+if(window.WD)window.WD.gwarm=GWARM;

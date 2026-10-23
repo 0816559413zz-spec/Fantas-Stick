@@ -50,6 +50,7 @@ function prewarmShaders(){
       add(new THREE.Mesh(_iceDisc,iceFloorMat(0.5)));add(new THREE.Mesh(_iceEdge,new THREE.MeshBasicMaterial({color:'#9fe4ff',transparent:true,blending:THREE.AdditiveBlending,depthWrite:false})));
       add(new THREE.Mesh(_iceSpk,iceMat(0.85)));
       for(const c of ['#ff6a2a','#bfeaff','#ffb347','#9fe0ff'])add(makeProj(c,'fire').g);
+      add(potMesh(1));add(potMesh(0));   // แท่นขวดเลือด (js/54) — สร้างตอนเริ่มแมตช์
       add(new THREE.Mesh(new THREE.IcosahedronGeometry(1,1),iceMat(0.6,'#4aa0d8')));
     }
     scene.add(grp);
