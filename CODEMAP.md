@@ -85,8 +85,8 @@ MIND:66 summonMin:72 minTarget:81 minShoot:88 updateMins:93 aimTarget:133
 §180 ร่ายคาถา
 castSlot:181 castUlt:196
 
-## js/10-net.js (97) — 
-PREFIX:4 NET:5 RC:9 LAG:11 lagDo:12 hostSend:13 LOBBY:14 genCode:15 sendAll:16 setStatus:17 hostGame:19 netConnect:42 netLost:50 joinGame:65 clientOnData:83 leave:97
+## js/10-net.js (110) — เครือข่าย (PeerJS / WebRTC)
+PREFIX:4 NET:5 RC:9 LAG:11 lagDo:12 hostSend:13 LOBBY:14 genCode:15 sendAll:16 setStatus:17 hostGame:19 netConnect:42 netLost:50 joinGame:65 clientOnData:83 leave:98 leaveRoom:100
 
 ## js/11-host.js (382) — 
 G:4 EVL:4 EVN:4 hostLast:4 tickN:4 emit:5 feed:6 banner:7 plist:8 cleanName:9 freshStats:11 newPlayer:18 emptyInput:21 addPlayer:22 initHostLobby:31 lobbyMsg:38 broadcastLobby:39 INPN:41 hostOnData:42 hostDrop:72 hostRemove:81 validate:94 hostStart:105 hostToLobby:130 MIDJOIN:136 midJoin:137 CHATT:153 chatRelay:154 emoHost:162 resetBody:164 fmap:170 spawnPts:171 teamPts:173 placeAll:174 respawn:186
@@ -487,17 +487,18 @@ HL_SPOTS:695 HL_TEAM:696 hubLobbyLayout:697 hubLobbyTick:704 hubLabels:730
 §744 เรนเดอร์ (เรียกจาก renderStage — คืน true = วาดแล้ว)
 hubRender:745
 
-## js/62-hub-ui.js (294) — 
+## js/62-hub-ui.js (302) — เมนูใหม่ — หน้าจอ/ปุ่ม (ผู้ใช้ 2026-10-22 • สเปก designs/ui-menu.md)
+§8 ภาพการ์ด/แผนที่: URL เต็ม — url() ใน CSS var อ่านเทียบไฟล์ css/hub.cs…
 HUI_IMG:9 HMODES:10 HUI:15 HICO:17 hSvg:35 hHex:36 H_STAR:37
 §95 สถานะหน้าจอ: menu / modes / room / off
 hubUiState:96 hubMeChip:104 hubOnScreen:110
 §119 เมนูแรก
 hubJoinGo:122
 §133 การ์ดโหมด
-hubMxJoin:140 hubPickMode:153 hubFlipKill:166 hubRoomRect:167 hubFlip:168 hubUnflip:183 hubFlipEnd:196
-§203 แผงห้อง (การ์ดที่ขยายแล้ว)
-HUI_MAPN:204 hubLobby:205 hubRoomClick:267 hubKitChanged:286
-§288 เริ่มต้น
+hubMxJoin:140 hubPickMode:153 hubFlipKill:166 hubRoomRect:167 hubFlip:168 hubLeaveRoom:184 hubUnflip:189 hubFlipEnd:202
+§209 แผงห้อง (การ์ดที่ขยายแล้ว)
+HUI_MAPN:210 hubLobby:211 hubRoomClick:273 hubKitChanged:292
+§294 เริ่มต้น
 
 ## js/63-skillwheel.js (271) — วงเลือกคาถา (ผู้ใช้ 2026-10-22, designs/ui-menu.md "วงคาถา + ห้าเหลี่ยม 4 ช่อง") • สไตล์ม…
 SKW:9 SKW_PO:10 SKW_PI:10 SKW_RUNE:11 skwPaths:12 skwKey:13 skwOffN:14 skwChanged:15 skwSnd:16
@@ -517,4 +518,4 @@ skwOpen:243 skwClose:253
 ## js/64-mappick.js (156) — 
 MPK_TXT:7 MPK_SKY:19 MPK_I:21 MPK_DICE:31 MPK:36 mpkE:37 mpkC:37 mpkSnd:38 mpkCut:39 mpkName:40 mpkCardHTML:41 mpkBuild:51 mpkUp:89 mpkMeasure:101 mpkIdx:102 mpkStep:103 mpkTo:104 mpkPick:105 mpkOpen:111 mpkClose:126 mpkLoop:130 mpkTick:132
 
-(65 files, 15453 lines)
+(65 files, 15474 lines)

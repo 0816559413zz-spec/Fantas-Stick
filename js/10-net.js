@@ -94,4 +94,17 @@ function clientOnData(d){
   }
 }
 
-function leave(){try{NET.peer&&NET.peer.destroy();}catch(e){}location.reload();}
+// ออกจากห้อง/เกม = รีโหลดหน้า (ล้างสถานะทั้งหมด) แล้วไปหน้าการ์ดโหมดเลย ไม่เล่นฉากเปิดซ้ำ (js/62 อ่าน wd_hub)
+function leave(){try{sessionStorage.setItem('wd_hub','modes');}catch(e){}try{NET.peer&&NET.peer.destroy();}catch(e){}location.reload();}
+// ออกจากห้องตอนยังอยู่ในล็อบบี้ (ยังไม่เริ่มเกม) แบบไม่รีโหลด: ปิดการเชื่อมต่อ + ไมค์ แล้วล้างสถานะห้อง (ผู้ใช้ 2026-10-23: ห้อง → กลับ = หน้าโหมดทันที)
+function leaveRoom(){
+  if(RC.on){RC.on=false;clearInterval(RC.iv);}
+  const pr=NET.peer;NET.peer=null;NET.hostConn=null;   // ล้างก่อน destroy → close ของ conn ไม่เรียก netLost
+  for(const o of VOICE.inc.values()){try{o.call.close();}catch(e){}if(o.audio){o.audio.srcObject=null;}}VOICE.inc.clear();
+  for(const o of VOICE.out.values()){try{o.call.close();}catch(e){}o.stream.getTracks().forEach(t=>t.stop());}VOICE.out.clear();
+  if(VOICE.stream){VOICE.stream.getTracks().forEach(t=>t.stop());VOICE.stream=null;}VOICE.on=false;
+  try{pr&&pr.destroy();}catch(e){}
+  NET.conns.clear();Object.assign(NET,{isHost:false,online:false,myId:'me',code:'',spec:false,rtt:0});
+  G=null;LOBBY=null;setStatus('');
+  setScreen('menu');
+}

@@ -180,6 +180,12 @@ function hubFlip(card,k){
   setTimeout(()=>{card.style.visibility='';HUI.flipDone=true;if(screen==='lobby'){hubFlipEnd();}},950);
 }
 // ย้อนการพลิก: แผงห้อง → หดเป็นการ์ดที่ช่องเดิม หมุนกลับด้านหน้า → เฟดดำ แล้วเรียก done (รีโหลดไปหน้าการ์ดโหมด)
+// ออกจากห้อง (หลังการ์ดหดกลับเข้าช่อง + จอมืด): ล้างห้องโดยไม่รีโหลด → ท่าโพส + หน้าการ์ดโหมด → สว่างกลับ
+function hubLeaveRoom(){
+  clearTimeout(HUI.hostT);HUI.want=null;HUI.pend=false;
+  leaveRoom();hubSnapModes();hubUiState('modes');
+  setTimeout(()=>{document.body.classList.remove('hS-unflip');if(HUI.unflipEl){HUI.unflipEl.remove();HUI.unflipEl=null;}HUI.unflip=false;$('#hFade').classList.remove('on');},140);
+}
 function hubUnflip(done){
   if(HUI.unflip)return;HUI.unflip=true;
   const card=document.querySelector('.hCard[data-mode="'+(LOBBY&&LOBBY.mode||HUI.mode)+'"]')||document.querySelector('.hCard');
@@ -188,7 +194,7 @@ function hubUnflip(done){
   f.innerHTML=`<div class="fIn"><div class="fFront" style="--bg:url('${HUI_IMG}modes/${k}.jpg')"><span class="cBg"></span><span class="cShade"></span><span class="cHex">${hHex(k)}</span><span class="cTxt"><b>${m.en}</b><i>${m.th}</i></span></div>
     <div class="fBack"><span class="fx">${hHex(k)}</span><b>${m.en}</b><i>ออกจากห้อง…</i></div></div>`;
   Object.assign(f.style,{left:R.left+'px',top:R.top+'px',width:R.width+'px',height:R.height+'px'});
-  document.body.appendChild(f);document.body.classList.add('hS-unflip');snd('portal',{vol:0.4});
+  document.body.appendChild(f);HUI.unflipEl=f;document.body.classList.add('hS-unflip');snd('portal',{vol:0.4});
   requestAnimationFrame(()=>requestAnimationFrame(()=>{f.classList.remove('go');Object.assign(f.style,{left:r.left+'px',top:r.top+'px',width:r.width+'px',height:r.height+'px'});}));
   setTimeout(()=>$('#hFade').classList.add('on'),900);
   setTimeout(done,1320);
@@ -267,7 +273,7 @@ addEventListener('resize',()=>{if(HUI.st==='room')hubLobby();});
 const hubRoomClick=e=>{
   const b=e.target.closest('button');if(!b)return;ac();snd('ui_click');
   const id=b.id;
-  if(id==='hrLeave'){try{sessionStorage.setItem('wd_hub','modes');}catch(_){}hubUnflip(()=>leave());return;}
+  if(id==='hrLeave'){hubUnflip(hubLeaveRoom);return;}
   if(id==='hrCopy'){$('#btnCopy').click();return;}
   if(id==='hrTeam'){$('#btnTeam').click();return;}
   if(id==='hrKit'){skwOpen();return;}
@@ -289,6 +295,8 @@ function hubKitChanged(){hubMeChip();if(HUI.st==='room')hubLobby();}
 document.body.classList.add('hub');
 hubUiState('menu');
 // ออกจากห้องแล้วกลับมา = ข้ามฉากเปิด ไปหน้าการ์ดโหมดเลย
+//   จอมืดไว้จนตัวละครพร้อม (ไม่เห็นฉากแรกแวบก่อน) • เกิน 8 วิ (โหลดช้า) = เปิดจอที่หน้าโหมดเลย ตัวละครโผล่ในท่าโพสเองเมื่อโหลดเสร็จ (HUB.st='modes')
 try{if(sessionStorage.getItem('wd_hub')==='modes'&&!/[?&](join|studio)\b/.test(location.search)){sessionStorage.removeItem('wd_hub');$('#intro').classList.add('gone');STAGE.introT=1;
-  const wait=setInterval(()=>{if(HUB.me||!HUB.on){clearInterval(wait);if(hubSnapModes())hubUiState('modes');}},120);}}catch(e){}
+  $('#hFade').classList.add('on');document.body.classList.remove('hS-menu');const t0=performance.now();
+  const wait=setInterval(()=>{const late=performance.now()-t0>8000;if(HUB.me||!HUB.on||late){clearInterval(wait);HUI.st='';hubSnapModes();hubUiState('modes');setTimeout(()=>$('#hFade').classList.remove('on'),200);}},100);}}catch(e){}
 if(typeof WD!=='undefined')Object.assign(WD,{HUI,hubUiState,hubLobby,hubPickMode});
