@@ -30,6 +30,65 @@ function updateCloth(c,lvx,lvz,speed,now,dt){
   if(c.fixBS||!c.geo.boundingSphere||!Number.isFinite(c.geo.boundingSphere.radius)){c.geo.computeBoundingSphere();c.fixBS=false;}
 }
 
+// ไม้สำเร็จรูป (WANDN js/02) → กลุ่ม mesh ในแกนของ wandG: โคน y −0.56 • ด้ามถึง −0.74 (มืออยู่ −0.64) • ปลาย −1.12
+function wandNamed(parent,W,M){
+  const G=new THREE.Group();parent.add(G);
+  const yb=-0.56,yh=-0.74,yt=-1.12,L=yh-yt,em=(c,k)=>sMat({color:c,emissive:c,emissiveIntensity:k||1.4,roughness:0.35}),
+    put=(geo,mat,x,y,z)=>{const m=new THREE.Mesh(geo,mat);m.position.set(x||0,y,z||0);G.add(m);return m;},
+    rr=u=>W.r0+(W.r1-W.r0)*u,wob=u=>W.wb?Math.sin(u*9)*W.wb:0,yU=u=>yh-L*u;   // u: 0 = ด้าม → 1 = ปลาย
+  const tube=(pts,r,mat)=>put(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts),Math.max(8,pts.length*3),r,5,false),mat,0,0);
+  // ก้าน: 8 ท่อนเรียว สีไล่ตาม W.sh (ปลาย→โคน)
+  const N=8,C=W.sh,shM=C.map(c=>M('#'+new THREE.Color(c).multiplyScalar(1.25).getHexString(),W.ice?0.25:0.5));   // สีสว่างขึ้นนิด (ไม่ใช้ emissive = ยังรวม mesh ได้ → draw call น้อย)
+  for(let i=0;i<N;i++){const u0=i/N,u1=(i+1)/N,ci=Math.min(C.length-1,Math.floor((1-(u0+u1)/2)*C.length));
+    const m=put(new THREE.CylinderGeometry(rr(u0),rr(u1),L/N+0.002,10),shM[ci],wob((u0+u1)/2),yU((u0+u1)/2));m.rotation.z=(wob(u1)-wob(u0))/(L/N);}
+  const helix=(turns,ph,rk,steps)=>Array.from({length:steps+1},(_,i)=>{const u=i/steps,a=u*turns*Math.PI*2+ph,r=rr(u)*rk;return new THREE.Vector3(Math.cos(a)*r+wob(u),yU(u),Math.sin(a)*r);});
+  if(W.sp){tube(helix(5,0,1.02,60),0.0028,M(W.sp,0.4));tube(helix(5,Math.PI,1.0,60),0.0016,M(W.sp,0.4));}
+  if(W.zg)tube(Array.from({length:13},(_,i)=>{const u=0.04+i*0.075;return new THREE.Vector3((i%2?-1:1)*rr(u)*0.75,yU(u),rr(u)*0.75);}),0.0022,em(W.zg,1.8));
+  if(W.ck)for(let i=0;i<7;i++){const u=0.08+i*0.12,a=i*2.1;const m=put(new THREE.BoxGeometry(0.004,0.03,0.004),em(W.ck,2),Math.cos(a)*rr(u),yU(u),Math.sin(a)*rr(u));m.rotation.z=(i%2?0.5:-0.5);}
+  if(W.sg)for(let i=1;i<6;i++){const u=i/6,t=put(new THREE.TorusGeometry(rr(u)+0.0015,0.0028,5,12),M(W.sg,0.4,{metalness:0.6}),wob(u),yU(u));t.rotation.x=Math.PI/2;}
+  if(W.vn){tube(helix(2.2,0.6,1.25,40).map(p=>{p.y=Math.max(p.y,yU(0.55));return p;}),0.0042,M(W.vn,0.7));
+    for(let i=0;i<5;i++){const u=0.06+i*0.1,a=i*1.9,lf=put(new THREE.SphereGeometry(0.012,6,4),M(W.vn,0.7),Math.cos(a)*rr(u)*1.6,yU(u),Math.sin(a)*rr(u)*1.6);lf.scale.set(1,0.35,0.6);lf.rotation.z=a;}}
+  // ด้าม
+  const hM=M('#'+new THREE.Color(W.hd).multiplyScalar(1.2).getHexString(),0.6),gold=W.band?M(W.band,0.3,{metalness:0.85}):null,ym=(yb+yh)/2,HL=yb-yh;
+  const ring=(y,r,t,mat)=>{const m=put(new THREE.TorusGeometry(r,t,6,14),mat,0,y);m.rotation.x=Math.PI/2;return m;};
+  switch(W.hd2){
+    case 'wrap':put(new THREE.CylinderGeometry(0.029,0.031,HL,10),hM,0,ym);for(let i=0;i<5;i++)ring(yb-0.02-i*0.034,0.031,0.004,M(new THREE.Color(W.hd).multiplyScalar(1.8),0.6));if(gold)ring(yh+0.004,0.03,0.005,gold);break;
+    case 'bulb':put(new THREE.LatheGeometry([[0.02,0],[0.03,0.04],[0.036,0.11],[0.024,0.168],[0.001,0.18]].map(([x,y])=>new THREE.Vector2(x,y)),12),M(W.hd,0.3,{metalness:0.15}),0,yb-HL);
+      if(gold){ring(yh+0.005,0.021,0.004,gold);ring(yb-0.002,0.024,0.0045,gold);}if(W.gem)put(new THREE.SphereGeometry(0.016,8,6),em(W.gem,1),0,yb+0.012);break;
+    case 'root':put(new THREE.CylinderGeometry(0.028,0.036,HL,9),hM,0,ym);put(new THREE.ConeGeometry(0.045,0.05,9),hM,0,yb+0.012).rotation.x=Math.PI;
+      for(let k=0;k<3;k++)tube(Array.from({length:7},(_,i)=>{const t=i/6,a=k*2.1+t*2.4;return new THREE.Vector3(Math.cos(a)*0.032,yb+0.02-HL*t,Math.sin(a)*0.032);}),0.006,M(new THREE.Color(W.hd).multiplyScalar(1.4),0.8));break;
+    case 'facet':{const m=put(new THREE.CylinderGeometry(0.032,0.024,HL,6),M(W.hd,0.35,{metalness:0.4,flatShading:true}),0,ym);if(gold){ring(yh+0.004,0.026,0.005,gold);ring(yb-0.004,0.03,0.004,gold);}
+      put(new THREE.SphereGeometry(0.02,6,2),M(W.hd,0.35,{metalness:0.4,flatShading:true}),0,yb+0.01);break;}
+    case 'stone':for(let i=0;i<4;i++){const m=put(new THREE.BoxGeometry(0.052,HL/4-0.004,0.052),M(new THREE.Color(W.hd).multiplyScalar(0.85+0.12*(i%2)),0.95,{flatShading:true}),0,yb-HL/8-i*HL/4);m.rotation.y=i*0.4;
+      put(new THREE.BoxGeometry(0.005,0.03,0.054),em(W.ck||'#ffb84a',1.8),0.012*(i%2?1:-1),m.position.y,0).rotation.y=i*0.4;}break;
+    case 'heart':put(new THREE.CylinderGeometry(0.022,0.026,HL,10),hM,0,ym);
+      for(const s of [-1,1])put(new THREE.SphereGeometry(0.012,8,6),em('#ff3a5a',0.6),s*0.009,ym+0.008,0.022);put(new THREE.ConeGeometry(0.017,0.022,8),em('#ff3a5a',0.6),0,ym-0.008,0.022).rotation.z=Math.PI;
+      ring(yh+0.004,0.022,0.004,M('#e8c26a',0.3,{metalness:0.85}));put(new THREE.SphereGeometry(0.014,8,6),em('#ff3a5a',0.6),0,yb+0.01);break;
+    case 'petal':for(let i=0;i<6;i++){const p=put(new THREE.SphereGeometry(0.026,8,6),M(new THREE.Color(W.hd).multiplyScalar(1-i*0.08),0.5),0,yb-0.012-i*0.03);p.scale.set(1,0.7,1);}
+      put(new THREE.ConeGeometry(0.008,0.03,6),M('#ffc0d0',0.4),0,yb+0.006).rotation.x=Math.PI;break;
+  }
+  // ปลายไม้
+  const tM=em(W.tc||W.gl,1.6),ty=yt-0.004;
+  switch(W.tip){
+    case 'gem':put(new THREE.OctahedronGeometry(0.016,0),tM,0,ty).scale.y=1.7;break;
+    case 'crys':put(new THREE.OctahedronGeometry(0.02,0),tM,0,ty-0.01).scale.y=2;break;
+    case 'cage':put(new THREE.SphereGeometry(0.016,10,8),tM,0,ty-0.01);ring(ty-0.01,0.026,0.0025,M('#e8c84a',0.3,{metalness:0.85}));{const r=ring(ty-0.01,0.026,0.0025,M('#e8c84a',0.3,{metalness:0.85}));r.rotation.y=Math.PI/2;r.rotation.x=0;}break;
+    case 'flake':for(let i=0;i<3;i++){const b=put(new THREE.BoxGeometry(0.004,0.07,0.004),tM,0,ty-0.026);b.rotation.z=i*Math.PI/3;}break;
+    case 'claw':put(new THREE.SphereGeometry(0.018,10,8),tM,0,ty-0.012);for(let i=0;i<3;i++){const a=i*2.1,c=put(new THREE.ConeGeometry(0.006,0.05,5),M('#1a0c08',0.6),Math.cos(a)*0.02,ty-0.012,Math.sin(a)*0.02);c.rotation.set(Math.sin(a)*0.5,0,-Math.cos(a)*0.5+Math.PI);}break;
+    case 'star':{const a=put(new THREE.OctahedronGeometry(0.02,0),tM,0,ty-0.014);a.scale.set(0.35,1.8,0.35);const b=put(new THREE.OctahedronGeometry(0.02,0),tM,0,ty-0.014);b.scale.set(1.5,0.35,0.35);break;}
+  }
+  return G;
+}
+// ประกายไม้สำเร็จรูป (ไม้ธาตุทุกอัน + เลเวล 20+) — เรียกทุกเฟรมจาก syncPlayers (js/35) • ไม่เกิน ~12 เม็ด/วิ ต่อคน
+function wandSparks(o,dt){const S=o.wspk;if(!S||!o.tip.visible||Math.random()>dt*12)return;
+  o.tip.getWorldPosition(_pw);const q=simOf(_pw),t=S[1],c=S[0];
+  const P={x:q.x+rnd(-4,4),y:q.y+rnd(-4,4),h:q.h+rnd(-0.05,0.1),vx:rnd(-12,12),vy:rnd(-12,12),vh:rnd(0.2,0.8),life:0.7,max:0.7,col:c,size:rnd(1,1.8),g:-0.4};
+  if(t==='ember'){P.vh=rnd(1,2);P.g=-1;P.col=Math.random()<0.5?c:'#ffe27a';}
+  else if(t==='snow'){P.vh=rnd(-0.3,0.2);P.g=0.3;P.life=P.max=1.1;P.size=rnd(1.4,2.2);}
+  else if(t==='bolt'){P.life=P.max=0.14;P.size=rnd(1.6,2.6);P.vx*=3;P.vy*=3;P.g=0;P.col=Math.random()<0.5?'#ffffff':c;}
+  else if(t==='rock'){P.vh=rnd(0.5,1.2);P.g=3;P.life=P.max=0.8;}
+  else if(t==='star'){P.size=rnd(1.8,2.8);P.life=P.max=0.9;P.g=-0.2;}
+  PARTS.push(P);}
 // ---------- โมเดลนักเรียนเวทมนตร์ ----------
 // geometry/material/texture ที่ใช้ร่วมกันระหว่างตัวละคร: สร้างครั้งเดียวต่อรูปทรง/สี แล้วใช้ซ้ำ (userData.keep = disposeTree จะไม่ทิ้ง)
 const SHGEO=new Map(),SHMAT=new Map(),SHTEX=new Map();
@@ -189,7 +248,8 @@ function makeStudent(look,id){
   };
   const armR=mkArm(-1),armL=mkArm(1);
   const wandG=new THREE.Group();armR.add(wandG);
-  {
+  const WN=look.wn>0&&WANDN[look.wn],wnG=WN?wandNamed(wandG,WN,M):null;   // ไม้สำเร็จรูป (WANDN js/02)
+  if(!WN){
     const wC=WOODC[look.wd],wM=M(wC,0.5),dkM=M(new THREE.Color(wC).multiplyScalar(0.55),0.6),goldW=sMat({color:'#e8c060',metalness:0.85,roughness:0.3,emissive:'#2a1c04'});
     add(wandG,sGeo(THREE.CylinderGeometry,0.014,0.026,0.46,8),wM,0,-0.87,0);
     if(look.ws===0)add(wandG,sGeo(THREE.SphereGeometry,0.034,8,6),wM,0,-0.65,0);
@@ -200,7 +260,7 @@ function makeStudent(look,id){
     else if(look.ws===6){add(wandG,sGeo(THREE.CylinderGeometry,0.03,0.03,0.12,8),goldW,0,-0.7,0);const cr=add(wandG,sGeo(THREE.OctahedronGeometry,0.05,0),sMat({color:WCOREC[look.wc],emissive:WCOREC[look.wc],emissiveIntensity:1.4,metalness:0.2,roughness:0.1,transparent:true,opacity:0.9}),0,-1.1,0);cr.scale.y=1.6;}   // คริสตัลปลายไม้ (Lv28)
     else{add(wandG,sGeo(THREE.CylinderGeometry,0.031,0.031,0.13,10),goldW,0,-0.71,0);for(const y of[-0.79,-1.0]){const r=add(wandG,sGeo(THREE.TorusGeometry,0.024,0.007,6,12),goldW,0,y,0);r.rotation.x=Math.PI/2;}add(wandG,sGeo(THREE.SphereGeometry,0.02,8,6),goldW,0,-1.1,0);}
   }
-  const tip=new THREE.Sprite(glowMat(WCOREC[look.wc],2.2));tip.scale.setScalar(0.32);tip.position.set(0,-1.09,0);armR.add(tip);
+  const tip=new THREE.Sprite(glowMat(WN?WN.gl:WCOREC[look.wc],2.2));tip.scale.setScalar(0.32);tip.position.set(0,WN?-1.13:-1.09,0);armR.add(tip);
   shadowAll(b);mergeBody(b);
   const shield=new THREE.Mesh(sGeo(THREE.SphereGeometry,1.35,32,20),shieldMat());shield.position.y=1.1;shield.visible=false;g.add(shield);
   const ring=new THREE.Mesh(sGeo(THREE.RingGeometry,0.85,1.05,32),new THREE.MeshBasicMaterial({color:'#ffffff',transparent:true,opacity:0.7,depthWrite:false}));
@@ -216,7 +276,7 @@ function makeStudent(look,id){
   const cocoon=new THREE.Mesh(sGeo(THREE.IcosahedronGeometry,0.75,1),sMat({color:'#e8e8f0',transparent:true,opacity:0.55,roughness:1,wireframe:true}));
   cocoon.position.y=0.7;cocoon.scale.set(1,1.2,1);cocoon.visible=false;g.add(cocoon);
   scene.add(g);
-  return {g,b,legs,armR,armL,wandG,ends,cloak,tip,shield,ring,stars,broom,cocoon,walk:0,castT:0,lx:null,lz:null,svx:0,svz:0};
+  return {g,b,legs,armR,armL,wandG,wnG,wspk:WN&&WN.spk||null,ends,cloak,tip,shield,ring,stars,broom,cocoon,walk:0,castT:0,lx:null,lz:null,svx:0,svz:0};
 }
 function makeEnemy(t){
   const g=new THREE.Group(),b=new THREE.Group();g.add(b);

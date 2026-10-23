@@ -12,7 +12,7 @@ renderMyHouse();
 let crLib=0,crSaved=null,crKitSaved='0',crOpen=false,crStep=1,crTab=0,crFirst=false,crKitOnly=false,crSlot=0;
 const CRTABS=[['👤','ใบหน้า'],['💇','ผม'],['🧥','เสื้อคลุม'],['👔','เนคไท']];
 const sw_=(k,arr)=>`<div class="colors">${arr.map((c,i)=>{const L=lookLock(k,i);return L?`<div class="sw lk" title="ปลดล็อคที่เลเวล ${L}" style="background:${c}"><i>${L}</i></div>`:`<div class="sw ${myLook[k]===i?'on':''}" data-k="${k}" data-v="${i}" style="background:${c}"></div>`;}).join('')}</div>`;   // ของล็อก = เทา + เลขเลเวล (js/56)
-const bt_=(k,arr)=>`<div class="opts">${arr.map((t,i)=>{const L=lookLock(k,i);return L?`<button class="obtn lk" disabled title="ปลดล็อคที่เลเวล ${L}">🔒 ${t} <small>Lv${L}</small></button>`:`<button class="obtn ${myLook[k]===i?'on':''}" data-k="${k}" data-v="${i}">${t}</button>`;}).join('')}</div>`;
+const bt_=(k,arr)=>`<div class="opts">${arr.map((t,i)=>{const L=lookLock(k,i);return L?`<button class="obtn lk" disabled title="${typeof L==='number'?'ปลดล็อคที่เลเวล '+L:L}">🔒 ${t} <small>${typeof L==='number'?'Lv'+L:L}</small></button>`:`<button class="obtn ${myLook[k]===i?'on':''}" data-k="${k}" data-v="${i}">${t}</button>`;}).join('')}</div>`;
 const nameBox_=()=>`<label class="f" style="margin-top:0">ชื่อพ่อมด</label><input type="text" id="cName" maxlength="16" value="${esc($('#nameIn').value)}"><div class="orn" style="width:100%;margin:12px 0 4px"></div>`;
 function crPanelSet(html){
   const cur=document.activeElement&&document.activeElement.id==='cName';
@@ -31,7 +31,7 @@ function crRenderStep1(){
   crPanelSet(nameBox_()+body);
 }
 function crRenderWand(){
-  crPanelSet(nameBox_()+`<h3 class="sec">ไม้กายสิทธิ์ของคุณ</h3><p class="crnote">ไม้กายสิทธิ์เป็นฝ่ายเลือกพ่อมด — แต่ที่นี่คุณเลือกเองได้เลย</p><label class="f">ไม้ (${WOODN[myLook.wd]})</label>${sw_('wd',WOODC)}<label class="f">แกนเวท (${WCOREN[myLook.wc]})</label>${sw_('wc',WCOREC)}<label class="f">ทรงด้าม</label>${bt_('ws',WANDSTY)}`);
+  crPanelSet(nameBox_()+`<h3 class="sec">ไม้กายสิทธิ์ของคุณ</h3><p class="crnote">ไม้กายสิทธิ์เป็นฝ่ายเลือกพ่อมด — แต่ที่นี่คุณเลือกเองได้เลย</p><label class="f">ไม้ (${WOODN[myLook.wd]})</label>${sw_('wd',WOODC)}<label class="f">แกนเวท (${WCOREN[myLook.wc]})</label>${sw_('wc',WCOREC)}<label class="f">ทรงด้าม</label>${bt_('ws',WANDSTY)}<label class="f">ไม้สำเร็จรูป (แทนแบบประกอบเองด้านบน • ไม้ธาตุ = ฆ่าด้วยธาตุนั้น • ✨ = มีประกาย)</label>${bt_('wn',WANDNN.map((n,i)=>i&&WANDN[i].spk?n+' ✨':n))}`);
 }
 // ----- ขั้น 3: สาย + ชุดคาถา -----
 const ROLE_COL={builder:'#ffb066',control:'#8fe0ff',finisher:'#ff7a8a',utility:'#9ad7a0',summon:'#ff9ad5',ult:'#ffe27a'};

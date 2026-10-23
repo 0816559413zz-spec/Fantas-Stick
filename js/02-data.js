@@ -209,14 +209,34 @@ const WOODN=['โอ๊ค','ฮอลลี','อีโบนี','วิลโ
 const WCOREC=['#fff2c0','#ffb040','#6aff7a','#6ab4ff','#c88aff','#ff6a6a','#7ff0e0','#ff9ad5','#f4f6ff'];
 const WCOREN=['ขนยูนิคอร์น','ขนฟินิกซ์','เส้นหัวใจมังกร','ผลึกน้ำแข็ง','ธุลีจันทรา','เปลวเพลิง','ขนเทสตรัล','ขนนกแสงจันทร์','ประกายดาวตก'];
 const WANDSTY=['เรียบ','เกลียว','ปมไม้','ด้ามทอง','กระดูก','เอลเดอร์วอนด์','คริสตัล'];
+// ไม้สำเร็จรูป (ผู้ใช้ 2026-10-23, คอนเซ็ปต์ designs/wands-concept.html) • look.wn: 0 = ประกอบเอง (ไม้/แกน/ทรงด้ามด้านบน) • 1+ = ไม้ในรายการนี้
+//   el = ไม้ประจำธาตุ (ปลดเมื่อฆ่าด้วยธาตุนั้นครบ kills — PROG.pk js/56) • lv = ไม้ตามเลเวล (UNLOCKS js/56) • ต่อท้ายเท่านั้น (ลุคที่บันทึกไว้อ้างเลข)
+//   sh = สีก้าน ปลาย→โคน • hd = สีด้าม • r0/r1 = รัศมีโคน/ปลาย • deco: sp เกลียว / zg สายฟ้า / ck รอยแตกเรือง / sg ปล้อง / vn เถาวัลย์ / wb ส่าย
+//   hd2 = แบบด้าม (wrap/bulb/root/facet/stone/heart/petal) • tip = ปลาย (gem/cage/flake/claw/star/crys) • gl = สีแสงปลายไม้ • spk = ประกาย [สี, แบบ]
+var WANDN=[null,
+ {id:'emberT',n:'เปลวบิดเกลียว',el:'pyro',kills:100,sh:['#ffe27a','#ff9a2a','#e0401a','#5a1206'],hd:'#1e120e',r0:0.024,r1:0.006,sp:'#7a1a06',wb:0.004,hd2:'wrap',band:'#e8b04a',gl:'#ffb040',spk:['#ffb040','ember']},
+ {id:'dragonH',n:'หัวใจมังกร',el:'pyro',kills:300,sh:['#2a1a18','#1a0e0c','#0c0606'],hd:'#1a0a08',r0:0.027,r1:0.011,ck:'#ff7a2a',hd2:'facet',band:'#e8b04a',tip:'claw',tc:'#ffb040',gl:'#ff6a2a',spk:['#ff8a3a','ember']},
+ {id:'glacierS',n:'เกลียวธารน้ำแข็ง',el:'frost',kills:100,sh:['#ffffff','#c8eeff','#8fd0ff','#6aa8e8'],hd:'#9fd0f8',r0:0.027,r1:0.006,sp:'#ffffff',hd2:'bulb',band:'#e8f6ff',gl:'#bfeaff',spk:['#e6f8ff','snow'],ice:1},
+ {id:'winterC',n:'มงกุฎเหมันต์',el:'frost',kills:300,sh:['#e6f8ff','#9fd8ff','#4a8ac8'],hd:'#b8c0cc',r0:0.021,r1:0.008,sg:'#e6f8ff',hd2:'facet',band:'#c8d0dc',tip:'flake',tc:'#e6f8ff',gl:'#8fe0ff',spk:['#bfeaff','snow'],ice:1},
+ {id:'thunderS',n:'ยอดสายฟ้า',el:'storm',kills:100,sh:['#3a3a48','#22222c','#121218'],hd:'#1a1a22',r0:0.024,r1:0.006,zg:'#ffe27a',hd2:'wrap',band:'#e8c84a',tip:'gem',tc:'#fff6a8',gl:'#fff27a',spk:['#ffe27a','bolt']},
+ {id:'tempestR',n:'คทาพายุ',el:'storm',kills:300,sh:['#7a5ac8','#4a2a8a','#22124a'],hd:'#2a1a50',r0:0.024,r1:0.009,zg:'#ffe27a',hd2:'bulb',band:'#e8c84a',gem:'#ffe27a',tip:'cage',tc:'#fff6c8',gl:'#ffe27a',spk:['#fff27a','bolt']},
+ {id:'rootS',n:'รากศิลา',el:'earth',kills:100,sh:['#c89a5a','#8a5a2a','#5a3a1a'],hd:'#5a3e24',r0:0.027,r1:0.007,wb:0.006,hd2:'root',tip:'crys',tc:'#e8c88a',gl:'#f0dcb4',spk:['#c9a36a','rock']},
+ {id:'titanP',n:'เสาไททัน',el:'earth',kills:300,sh:['#8a8070','#5a5248','#3a342c'],hd:'#4a443c',r0:0.028,r1:0.013,ck:'#ffb84a',sg:'#2a2620',hd2:'stone',tip:'crys',tc:'#ffd27a',gl:'#ffb84a',spk:['#d8b878','rock']},
+ {id:'birch',n:'ไม้เบิร์ชขาว',lv:5,sh:['#efe0c4','#e2d0ae','#d0bc94'],hd:'#5aa8f0',r0:0.017,r1:0.009,hd2:'bulb',band:'#e8c84a',gem:'#e8c84a',gl:'#fff2c0'},
+ {id:'vine',n:'เถาวัลย์พัน',lv:10,sh:['#8a5a3a','#6a4028','#4a2a18'],hd:'#1f4a2e',r0:0.021,r1:0.006,vn:'#3a6a3a',hd2:'wrap',gl:'#bfffb0'},
+ {id:'queenH',n:'หัวใจราชินี',lv:15,sh:['#e0405a','#a8203a','#6a0c20'],hd:'#7a1028',r0:0.018,r1:0.007,sg:'#e8c26a',hd2:'heart',gl:'#ff8aa0'},
+ {id:'thornR',n:'กุหลาบหนาม',lv:20,sh:['#e88aa8','#6a2a3a','#2a0c14'],hd:'#a03060',r0:0.018,r1:0.006,hd2:'petal',tip:'gem',tc:'#ffc0d0',gl:'#ffb0c8',spk:['#ffb0c8','dot']},
+ {id:'voidA',n:'อเมทิสต์แห่งความว่าง',lv:25,sh:['#c8a8ff','#7a3aff','#3a1a8a','#120a24'],hd:'#1a1024',r0:0.025,r1:0.006,wb:0.005,hd2:'root',tip:'crys',tc:'#c8a0ff',gl:'#b07aff',spk:['#c8a0ff','dot']},
+ {id:'starL',n:'แสงดาว',lv:30,sh:['#ffffff','#e6ecff','#b8c4e8','#8a98c8'],hd:'#dfe4f4',r0:0.021,r1:0.006,sp:'#e8c84a',hd2:'facet',band:'#e8c84a',tip:'star',tc:'#fff6c8',gl:'#fff6c8',spk:['#fff6c8','star']}];
+var WANDNN=WANDN.map((w,i)=>i?w.n:'ประกอบเอง');
 const EYEC=['#4a2e16','#171210','#3f7fd0','#3f9a5a','#8a6a2a','#8a94a0','#8a5ad0','#d08a20'];
 const SKINC=['#fbe3cf','#f1d2b0','#e0b48c','#c68e62','#a6704a','#8d5a3b','#6b4128','#4a2c1c'];
 const CLOAKC=['#141218','#1d2b4a','#1f3a2a','#4a1620','#3a2a1a','#3d3f4a','#4a2a6a','#e6e2da','#0f3d33','#5a0c18','#141a3c','#5a4512','#060606','#b9bccb','#8a6a1a','#2c0a44'];
 const TIESTY=['ลายตามบ้าน','สีหลักบ้าน','สีรองบ้าน','ไม่ผูกเนคไท'];
-const LOOKK=['h','hr','hs','ey','sk','cl','ti','wd','wc','ws'],LOOKN=[4,HAIRC.length,HAIRSTY.length,EYEC.length,SKINC.length,CLOAKC.length,TIESTY.length,WOODC.length,WCOREC.length,WANDSTY.length];
+const LOOKK=['h','hr','hs','ey','sk','cl','ti','wd','wc','ws','wn'],LOOKN=[4,HAIRC.length,HAIRSTY.length,EYEC.length,SKINC.length,CLOAKC.length,TIESTY.length,WOODC.length,WCOREC.length,WANDSTY.length,WANDN.length];
 function lookStr(l){return LOOKK.map(k=>l[k]).join('.');}
 function parseLook(s){const a=String(s||'').split('.'),o={};LOOKK.forEach((k,i)=>{const v=+a[i];o[k]=Number.isInteger(v)&&v>=0&&v<LOOKN[i]?v:0;});return o;}
-function randLook(seed){const R=mulberry(seed===undefined?Math.floor(Math.random()*1e9):seed),o={};LOOKK.forEach((k,i)=>{o[k]=Math.floor(R()*LOOKN[i]);});if(o.cl>3)o.cl=0;o.wd%=8;o.wc%=6;o.ws%=4;return o;}   // สุ่ม = ของพื้นฐานเท่านั้น (ไม่สุ่มของปลดล็อค)
+function randLook(seed){const R=mulberry(seed===undefined?Math.floor(Math.random()*1e9):seed),o={};LOOKK.forEach((k,i)=>{o[k]=Math.floor(R()*LOOKN[i]);});if(o.cl>3)o.cl=0;o.wd%=8;o.wc%=6;o.ws%=4;o.wn=0;return o;}   // สุ่ม = ของพื้นฐานเท่านั้น (ไม่สุ่มของปลดล็อค)
 const LOOKS={},LOOKP={},KITS={};
 function getKit(id){return parseKit(KITS[id]!==undefined?KITS[id]:'0');}
 function getLook(id){const s=LOOKS[id]||(LOOKS[id]=lookStr(randLook(hashStr(id))));return LOOKP[s]||(LOOKP[s]=parseLook(s));}

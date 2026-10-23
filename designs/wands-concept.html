@@ -1,0 +1,87 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Wand concepts</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Kanit:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+/* ไม้กายสิทธิ์ใหม่ (ภาพคอนเซ็ปต์ให้ผู้ใช้อนุมัติก่อนทำ 3D) — ไม้ธาตุ 2 อัน/ธาตุ (ฆ่า 100 / 300 ด้วยธาตุนั้น) + ไม้เลเวล 6 อัน */
+body{margin:0;background:#9a9aa2;font-family:Kanit,sans-serif}
+#st{width:1600px;height:900px;display:grid;grid-template-rows:auto 1fr auto 1fr;padding:0 10px;box-sizing:border-box}
+h2{margin:8px 0 0 10px;font:700 22px Cinzel,serif;color:#1a1a24;letter-spacing:.12em}
+h2 small{font:400 14px Kanit;letter-spacing:0;margin-left:10px;color:#2a2a34}
+.row{display:flex;justify-content:space-around;align-items:flex-end}
+.w{display:flex;flex-direction:column;align-items:center;width:160px}
+.w svg{width:120px;height:330px;overflow:visible}
+.w b{font:600 14px Kanit;color:#14141c;margin-top:2px;white-space:nowrap}
+.w small{font:400 12px Kanit;color:#2c2c38;white-space:nowrap}
+.el{font:700 11px Cinzel;letter-spacing:.2em;padding:1px 8px;border-radius:9px;color:#fff;margin-top:3px}
+</style></head><body><div id="st">
+<h2>ELEMENT WANDS<small>ไม้ประจำธาตุ — อันแรก ฆ่า 100 ด้วยธาตุนั้น • อันที่สอง ฆ่า 300 ⚠ • มีประกายธาตุทุกอัน</small></h2>
+<div class="row" id="r1"></div>
+<h2>LEVEL WANDS<small>ไม้ตามเลเวล — เพิ่มจากของเดิม • Lv 20 ขึ้นไปมีประกายพิเศษ ⚠ เลเวล Claude เลือก</small></h2>
+<div class="row" id="r2"></div>
+</div>
+<script>
+// ไม้ 1 อัน: ยาว 300 (y 10 = ปลาย, y 310 = ก้น) • ด้าม = ส่วนล่าง • ก้าน = ส่วนบน เรียว
+let gid=0;
+function wand(o){const id='g'+(gid++);let s=`<svg viewBox="-60 0 120 330"><defs>
+ <linearGradient id="${id}s" x1="0" y1="0" x2="0" y2="1">${o.shaft.map((c,i)=>`<stop offset="${i/(o.shaft.length-1)}" stop-color="${c}"/>`).join('')}</linearGradient>
+ <linearGradient id="${id}h" x1="0" y1="0" x2="0" y2="1">${o.hand.map((c,i)=>`<stop offset="${i/(o.hand.length-1)}" stop-color="${c}"/>`).join('')}</linearGradient>
+ <linearGradient id="${id}x" x1="0" x2="1"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".35" stop-color="#fff" stop-opacity=".35"/><stop offset=".6" stop-color="#fff" stop-opacity="0"/></linearGradient>
+ <radialGradient id="${id}g"><stop offset="0" stop-color="${o.glow||'#fff'}" stop-opacity=".95"/><stop offset="1" stop-color="${o.glow||'#fff'}" stop-opacity="0"/></radialGradient></defs>`;
+ const H=o.hy||200;   // ด้ามเริ่มที่ y
+ if(o.glow)s+=`<circle cx="0" cy="${o.tipY||14}" r="${o.gr||26}" fill="url(#${id}g)"/>`;
+ // ก้าน: เรียวจาก w0 (ที่ด้าม) → w1 (ปลาย)
+ const w0=o.w0||7,w1=o.w1||1.5,wob=o.wob||0;let L='',R='';
+ for(let i=0;i<=20;i++){const y=10+(H-10)*i/20,w=w1+(w0-w1)*i/20,dx=wob?Math.sin(i*1.3)*wob:0;L=`${(dx-w).toFixed(1)},${y.toFixed(1)} `+L;R+=`${(dx+w).toFixed(1)},${y.toFixed(1)} `;}
+ s+=`<polygon points="${R}${L}" fill="url(#${id}s)" stroke="${o.edge||'#0006'}" stroke-width=".8"/>`;
+ if(o.spiral)for(let k=0;k<2;k++){let p='';for(let i=0;i<=60;i++){const y=12+(H-14)*i/60,w=w1+(w0-w1)*i/60,dx=wob?Math.sin(i/3*1.3)*wob:0;p+=(i?'L':'M')+(dx+Math.sin(i*0.55+k*Math.PI)*w*0.9).toFixed(1)+' '+y.toFixed(1);}s+=`<path d="${p}" fill="none" stroke="${o.spiral}" stroke-width="${k?1:1.6}" opacity="${k?.5:.9}"/>`;}
+ if(o.zig){let p='M0 '+(H-6);for(let y=H-6,i=0;y>30;y-=16,i++)p+=` L ${(i%2?-1:1)*(w1+(w0-w1)*(y-10)/(H-10))*0.7} ${y-8}`;s+=`<path d="${p}" fill="none" stroke="${o.zig}" stroke-width="1.6" style="filter:drop-shadow(0 0 2px ${o.zig})"/>`;}
+ if(o.cracks)for(let i=0;i<7;i++){const y=30+i*24;s+=`<path d="M${-3+i%2*3} ${y} l ${2+i%3} 6 l -3 5 l 2 6" stroke="${o.cracks}" stroke-width="1.3" fill="none" style="filter:drop-shadow(0 0 3px ${o.cracks})"/>`;}
+ if(o.vine){let p='';for(let i=0;i<=40;i++){const y=H-10+(i/40)*(-H*0.55),w=w0*0.9;p+=(i?'L':'M')+(Math.sin(i*0.7)*w*1.3).toFixed(1)+' '+y.toFixed(1);}s+=`<path d="${p}" fill="none" stroke="${o.vine}" stroke-width="2.4"/>`;for(let i=0;i<5;i++)s+=`<ellipse cx="${(i%2?6:-6)}" cy="${H-30-i*22}" rx="4" ry="2" fill="${o.vine}" transform="rotate(${i%2?30:-30} ${(i%2?6:-6)} ${H-30-i*22})"/>`;}
+ if(o.segs)for(let i=1;i<6;i++){const y=10+(H-10)*i/6;s+=`<rect x="${-(w1+(w0-w1)*i/6)-1}" y="${y-1.5}" width="${2*(w1+(w0-w1)*i/6)+2}" height="3" rx="1.2" fill="${o.segs}"/>`;}
+ // ด้าม
+ s+=o.handle(id,H);
+ s+=`<rect x="-${w0+1}" y="${H}" width="${2*w0+2}" height="${(o.hl||100)}" fill="url(#${id}x)" opacity=".6" style="mix-blend-mode:screen"/>`;
+ // ปลาย
+ if(o.tip)s+=o.tip(id);
+ // ประกาย
+ if(o.sp)s+=o.sp();
+ return s+'</svg>';}
+const sparks=(col,n,shape)=>()=>Array.from({length:n},(_,i)=>{const a=Math.random()*6.28,r=6+Math.random()*34,x=Math.cos(a)*r*0.8,y=14+Math.sin(a)*r-Math.random()*10,z=1+Math.random()*2.2;
+  return shape==='snow'?`<g transform="translate(${x} ${y})" stroke="${col}" stroke-width=".9" style="filter:drop-shadow(0 0 2px ${col})">${[0,60,120].map(q=>`<line x1="0" y1="-${z*2}" x2="0" y2="${z*2}" transform="rotate(${q})"/>`).join('')}</g>`
+  :shape==='bolt'?`<polyline points="${x},${y} ${x+3},${y-3} ${x+1},${y-4} ${x+4},${y-8}" fill="none" stroke="${col}" stroke-width="1.2" style="filter:drop-shadow(0 0 3px ${col})"/>`
+  :shape==='rock'?`<polygon points="${x},${y-z} ${x+z},${y} ${x},${y+z} ${x-z*1.2},${y+z*.3}" fill="${col}"/>`
+  :shape==='star'?`<path d="M${x} ${y-z*2.5} L ${x+z*.6} ${y} L ${x} ${y+z*2.5} L ${x-z*.6} ${y} Z M ${x-z*2.5} ${y} L ${x} ${y+z*.6} L ${x+z*2.5} ${y} L ${x} ${y-z*.6} Z" fill="${col}" style="filter:drop-shadow(0 0 3px ${col})"/>`
+  :`<circle cx="${x}" cy="${y}" r="${z*.8}" fill="${col}" style="filter:drop-shadow(0 0 3px ${col})"/>`;}).join('');
+// ด้ามแบบต่างๆ
+const hWrap=(c1,c2,band)=>(id,H)=>`<path d="M-9 ${H} C -12 ${H+40} -8 ${H+70} -11 ${H+100} L 11 ${H+100} C 8 ${H+70} 12 ${H+40} 9 ${H} Z" fill="url(#${id}h)" stroke="#0007"/>${Array.from({length:6},(_,i)=>`<path d="M-11 ${H+12+i*14} q 11 6 22 -4" stroke="${c2}" stroke-width="2" fill="none" opacity=".7"/>`).join('')}${band?`<rect x="-10" y="${H-3}" width="20" height="5" rx="2" fill="${band}"/>`:''}`;
+const hBulb=(band,gem)=>(id,H)=>`<path d="M-6 ${H} C -14 ${H+30} -16 ${H+70} -8 ${H+92} L 8 ${H+92} C 16 ${H+70} 14 ${H+30} 6 ${H} Z" fill="url(#${id}h)" stroke="#0007"/>${band?`<rect x="-8" y="${H}" width="16" height="5" rx="2" fill="${band}"/><rect x="-11" y="${H+88}" width="22" height="5" rx="2" fill="${band}"/>`:''}${gem?`<circle cx="0" cy="${H+100}" r="7" fill="${gem}" stroke="#fff8"/>`:''}`;
+const hRoot=(c)=>(id,H)=>`<path d="M-8 ${H} C -16 ${H+40} -20 ${H+80} -14 ${H+104} C -6 ${H+96} 6 ${H+110} 14 ${H+100} C 18 ${H+70} 12 ${H+40} 8 ${H} Z" fill="url(#${id}h)" stroke="#0008"/>${[0,1,2].map(i=>`<path d="M${-10+i*7} ${H+8} C ${-16+i*9} ${H+50} ${-4+i*6} ${H+70} ${-12+i*10} ${H+102}" stroke="${c}" stroke-width="2.2" fill="none"/>`).join('')}`;
+const hFacet=(c,band)=>(id,H)=>`<polygon points="-7,${H} 7,${H} 12,${H+30} 9,${H+80} 0,${H+100} -9,${H+80} -12,${H+30}" fill="url(#${id}h)" stroke="#0008"/><polyline points="-12,${H+30} 0,${H+40} 12,${H+30}" stroke="${c}" fill="none"/><polyline points="-9,${H+80} 0,${H+70} 9,${H+80}" stroke="${c}" fill="none"/><line x1="0" y1="${H+40}" x2="0" y2="${H+70}" stroke="${c}"/>${band?`<rect x="-9" y="${H-3}" width="18" height="5" rx="2" fill="${band}"/>`:''}`;
+const hStone=(c)=>(id,H)=>Array.from({length:5},(_,i)=>`<path d="M${-10-i%2} ${H+i*20} l ${21+i%2*2} ${-1+i%3} l ${-1} 19 l ${-20-i%2} 1 z" fill="url(#${id}h)" stroke="#0009"/><path d="M${-4+i%3*3} ${H+i*20+4} l 3 6 l -2 6" stroke="${c}" stroke-width="1.4" fill="none" style="filter:drop-shadow(0 0 3px ${c})"/>`).join('');
+const hHeart=(id,H)=>`<path d="M-6 ${H} C -10 ${H+20} -6 ${H+30} -10 ${H+50} C -12 ${H+75} -6 ${H+90} 0 ${H+100} C 6 ${H+90} 12 ${H+75} 10 ${H+50} C 6 ${H+30} 10 ${H+20} 6 ${H} Z" fill="url(#${id}h)" stroke="#0008"/><path d="M-5 ${H+28} c -4 -6 -10 0 -5 5 l 5 5 l 5 -5 c 5 -5 -1 -11 -5 -5" fill="#ff3a5a" transform="translate(5 0)"/><path d="M-8 ${H+8} C 0 ${H+20} -8 ${H+30} 8 ${H+44}" stroke="#e8c26a" stroke-width="1.6" fill="none"/><path d="M8 ${H+8} C 0 ${H+20} 8 ${H+30} -8 ${H+44}" stroke="#e8c26a" stroke-width="1.6" fill="none"/><circle cx="0" cy="${H+106}" r="6" fill="#ff3a5a"/>`;
+const hPetal=(id,H)=>`${Array.from({length:6},(_,i)=>`<path d="M0 ${H+8+i*15} C -12 ${H+14+i*15} -12 ${H+24+i*15} 0 ${H+28+i*15} C 12 ${H+24+i*15} 12 ${H+14+i*15} 0 ${H+8+i*15}" fill="url(#${id}h)" stroke="#0007"/>`).join('')}<path d="M-3 ${H+98} L 0 ${H+112} L 3 ${H+98} Z" fill="#ffc0d0"/>`;
+const tGem=(c,sz,el)=>id=>`<polygon points="0,${14-sz*1.6} ${sz},14 0,${14+sz*1.2} ${-sz},14" fill="${c}" stroke="#fff" stroke-width=".8" style="filter:drop-shadow(0 0 6px ${c})"/>`;
+const tCage=(c)=>id=>`<circle cx="0" cy="16" r="7" fill="${c}" style="filter:drop-shadow(0 0 6px ${c})"/><ellipse cx="0" cy="16" rx="11" ry="4" fill="none" stroke="#e8c26a" stroke-width="1.4"/><ellipse cx="0" cy="16" rx="4" ry="11" fill="none" stroke="#e8c26a" stroke-width="1.4"/>`;
+const tFlake=(c)=>id=>`<g transform="translate(0 14)" stroke="${c}" stroke-width="2" style="filter:drop-shadow(0 0 5px ${c})">${[0,60,120].map(q=>`<g transform="rotate(${q})"><line x1="0" y1="-12" x2="0" y2="12"/><line x1="0" y1="-8" x2="-4" y2="-11"/><line x1="0" y1="-8" x2="4" y2="-11"/><line x1="0" y1="8" x2="-4" y2="11"/><line x1="0" y1="8" x2="4" y2="11"/></g>`).join('')}</g>`;
+const tClaw=(c)=>id=>`<circle cx="0" cy="20" r="7" fill="${c}" style="filter:drop-shadow(0 0 8px ${c})"/>${[-1,1,0].map(s=>`<path d="M${s*3} 32 C ${s*14} 24 ${s*12} 10 ${s*4} 6" stroke="#1a0c08" stroke-width="2.6" fill="none"/>`).join('')}`;
+const tStar=(c)=>id=>`<path d="M0 -4 L 3 11 L 0 26 L -3 11 Z M -14 11 L 0 14 L 14 11 L 0 8 Z" fill="${c}" style="filter:drop-shadow(0 0 6px ${c})"/>`;
+const tCrys=(c)=>id=>`<polygon points="0,-6 5,8 3,22 -3,22 -5,8" fill="${c}" stroke="#fff" stroke-width=".8" style="filter:drop-shadow(0 0 6px ${c})"/>`;
+const EW=[
+ {el:'PYRO',ec:'#ff6a2a',n:'เปลวบิดเกลียว',u:'ฆ่า 100 ด้วยไฟ',o:{shaft:['#ffe27a','#ff9a2a','#e0401a','#5a1206'],hand:['#2a1a14','#120a08'],w0:7,w1:1.2,spiral:'#7a1a06',wob:1.2,glow:'#ffb040',handle:hWrap('#2a1a14','#5a3020','#e8b04a'),sp:sparks('#ffb040',16,'dot')}},
+ {el:'PYRO',ec:'#ff6a2a',n:'หัวใจมังกร',u:'ฆ่า 300 ด้วยไฟ',o:{shaft:['#2a1a18','#1a0e0c','#0c0606'],hand:['#2a1410','#0a0404'],w0:8,w1:3,cracks:'#ff7a2a',glow:'#ff6a2a',gr:34,tipY:20,handle:hFacet('#ff7a2a','#e8b04a'),tip:tClaw('#ffb040'),sp:sparks('#ff8a3a',24,'dot')}},
+ {el:'FROST',ec:'#3fa9e6',n:'เกลียวธารน้ำแข็ง',u:'ฆ่า 100 ด้วยน้ำแข็ง',o:{shaft:['#ffffff','#c8eeff','#8fd0ff','#6aa8e8'],hand:['#bfe6ff','#7ab8f0'],w0:8,w1:1.5,spiral:'#ffffff',glow:'#bfeaff',handle:hBulb('#e8f6ff'),sp:sparks('#e6f8ff',14,'snow')}},
+ {el:'FROST',ec:'#3fa9e6',n:'มงกุฎเหมันต์',u:'ฆ่า 300 ด้วยน้ำแข็ง',o:{shaft:['#e6f8ff','#9fd8ff','#4a8ac8'],hand:['#d8dee8','#8a96a8'],w0:6,w1:2,segs:'#e6f8ff',glow:'#8fe0ff',gr:34,handle:hFacet('#bfeaff','#c8d0dc'),tip:tFlake('#e6f8ff'),sp:sparks('#bfeaff',22,'snow')}},
+ {el:'STORM',ec:'#e8b800',n:'ยอดสายฟ้า',u:'ฆ่า 100 ด้วยสายฟ้า',o:{shaft:['#3a3a48','#22222c','#121218'],hand:['#2a2a34','#101016'],w0:7,w1:1.6,zig:'#ffe27a',glow:'#fff27a',handle:hWrap('#22222c','#e8c84a','#e8c84a'),tip:tGem('#fff6a8',5),sp:sparks('#ffe27a',14,'bolt')}},
+ {el:'STORM',ec:'#e8b800',n:'คทาพายุ',u:'ฆ่า 300 ด้วยสายฟ้า',o:{shaft:['#7a5ac8','#4a2a8a','#22124a'],hand:['#3a2a6a','#1a1030'],w0:7,w1:2.5,zig:'#ffe27a',glow:'#ffe27a',gr:36,tipY:16,handle:hBulb('#e8c84a','#ffe27a'),tip:tCage('#fff6c8'),sp:sparks('#fff27a',24,'bolt')}},
+ {el:'EARTH',ec:'#9a7a4a',n:'รากศิลา',u:'ฆ่า 100 ด้วยดิน',o:{shaft:['#c89a5a','#8a5a2a','#5a3a1a'],hand:['#7a5a3a','#3a2614'],w0:8,w1:2,wob:1.6,glow:'#f0dcb4',gr:18,handle:hRoot('#a87a4a'),tip:tCrys('#e8c88a'),sp:sparks('#c9a36a',14,'rock')}},
+ {el:'EARTH',ec:'#9a7a4a',n:'เสาไททัน',u:'ฆ่า 300 ด้วยดิน',o:{shaft:['#8a8070','#5a5248','#3a342c'],hand:['#6a6258','#2a2620'],w0:8,w1:3.5,cracks:'#ffb84a',segs:'#2a2620',glow:'#ffb84a',gr:30,hy:190,handle:hStone('#ffb84a'),tip:tCrys('#ffd27a'),sp:sparks('#d8b878',22,'rock')}}];
+const LW=[
+ {lv:5,n:'ไม้เบิร์ชขาว',o:{shaft:['#efe0c4','#e2d0ae','#d0bc94'],hand:['#8fd0ff','#3a88d8'],w0:5,w1:2.4,handle:hBulb('#e8c84a','#e8c84a')}},
+ {lv:10,n:'เถาวัลย์พัน',o:{shaft:['#8a5a3a','#6a4028','#4a2a18'],hand:['#2a5a3a','#163a24'],w0:6,w1:1.6,vine:'#3a6a3a',handle:hWrap('#2a5a3a','#e8dcc0')}},
+ {lv:15,n:'หัวใจราชินี',o:{shaft:['#e0405a','#a8203a','#6a0c20'],hand:['#a8203a','#4a0614'],w0:5,w1:1.8,segs:'#e8c26a',handle:hHeart}},
+ {lv:20,n:'กุหลาบหนาม',u:'มีประกาย',o:{shaft:['#e88aa8','#6a2a3a','#2a0c14'],hand:['#d04a7a','#5a1a30'],w0:5,w1:1.6,glow:'#ffb0c8',gr:20,handle:hPetal,tip:tGem('#ffc0d0',4),sp:sparks('#ffb0c8',12,'dot')}},
+ {lv:25,n:'อเมทิสต์แห่งความว่าง',u:'มีประกาย',o:{shaft:['#c8a8ff','#7a3aff','#3a1a8a','#120a24'],hand:['#2a1a3a','#0a0610'],w0:7,w1:1.5,wob:1.4,glow:'#b07aff',gr:26,handle:hRoot('#4a2a6a'),tip:tCrys('#c8a0ff'),sp:sparks('#c8a0ff',18,'dot')}},
+ {lv:30,n:'แสงดาว',u:'มีประกาย',o:{shaft:['#ffffff','#e6ecff','#b8c4e8','#8a98c8'],hand:['#f4f6ff','#a8b4d8'],w0:6,w1:1.5,spiral:'#e8c84a',glow:'#fff6c8',gr:36,handle:hFacet('#e8c84a','#e8c84a'),tip:tStar('#fff6c8'),sp:sparks('#fff6c8',20,'star')}}];
+r1.innerHTML=EW.map(w=>`<div class="w">${wand(w.o)}<b>${w.n}</b><small>${w.u}</small><span class="el" style="background:${w.ec}">${w.el}</span></div>`).join('');
+r2.innerHTML=LW.map(w=>`<div class="w">${wand(w.o)}<b>${w.n}</b><small>Lv ${w.lv}${w.u?' • '+w.u:''}</small></div>`).join('');
+</script></body></html>

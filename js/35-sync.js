@@ -196,6 +196,7 @@ function syncPlayers(P,mode,now,dt){
     else if(isMe){o.ring.visible=true;o.ring.material.color.set('#ffffff');}
     else o.ring.visible=false;
     o.tip.scale.setScalar(0.3+0.08*Math.sin(now/120)+(o.castT>0?0.4:0))*((p.cg||0)>0?0.4:1);
+    if(o.wspk&&p.al)wandSparks(o,dt);   // ไม้สำเร็จรูปที่มีประกาย (js/29)
     const pz=o.zs;
     pyroFX(o,p,pz,now,dt);
     stormFX(o,p,pz,now,dt);

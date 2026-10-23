@@ -5,7 +5,7 @@ Format: `name:line` = top-level function/const/let in that file. `§line title` 
 ## js/01-core.js (22) — แกนกลาง: import Three.js + ฟังก์ชันพื้นฐาน ($ rnd clamp lerp store to…
 $:12 rnd:13 clamp:14 lerp:15 dist2:16 lerpAng:17 esc:18 shuffle:19 store:20 toastT:21 toast:22
 
-## js/02-data.js (320) — ค่าคงที่ของเกม
+## js/02-data.js (340) — ค่าคงที่ของเกม
 W:4 H:4 PR:4 PILLARS:6 SPAWNF:7 mulberry:9 genForest:10 genPitch:27 genHogsmeade:36
 §54 แผนที่โล่ง 3 แบบ (ผู้ใช้: ป่ามืดไม่สนุก อยากได้ที่โล่งๆ)
 genMeadow:55 genLake:61 genRuins:66
@@ -16,7 +16,7 @@ FMAPS:133 b64i16:134 regFileMap:135 loadMapData:147 loadAllMapData:155 mapReady:
 §160 ของประกอบฉากที่พังได้ / ใช้ได้ (prop)
 PROPDEF:164 PROP_OFF_MODES:171 PROP_USE:173 PROPS:174 PROPON:174 genProps:175
 §195 ตัวละคร: บ้านฮอกวอตส์ + หน้าตา
-HOUSES:197 HAIRC:202 HAIRSTY:204 WOODC:207 WOODN:208 WCOREC:209 WCOREN:210 WANDSTY:211 EYEC:212 SKINC:213 CLOAKC:214 TIESTY:215 LOOKK:216 LOOKN:216 lookStr:217 parseLook:218 randLook:219 LOOKS:220 LOOKP:220 KITS:220 getKit:221 getLook:222 CREST_SH:223 CREST_PAT:224 starPts:229 CREST_ANI:231 crestSVG:237 houseColor:245 TEAMC:246 TEAMN:246 MODES:247 PDEF:258 EDEF:285 POOLS:297 CDK:307 BUFFS:310 BRAR:319 rollRar:320
+HOUSES:197 HAIRC:202 HAIRSTY:204 WOODC:207 WOODN:208 WCOREC:209 WCOREN:210 WANDSTY:211 WANDN:216 WANDNN:231 EYEC:232 SKINC:233 CLOAKC:234 TIESTY:235 LOOKK:236 LOOKN:236 lookStr:237 parseLook:238 randLook:239 LOOKS:240 LOOKP:240 KITS:240 getKit:241 getLook:242 CREST_SH:243 CREST_PAT:244 starPts:249 CREST_ANI:251 crestSVG:257 houseColor:265 TEAMC:266 TEAMN:266 MODES:267 PDEF:278 EDEF:305 POOLS:317 CDK:327 BUFFS:330 BRAR:339 rollRar:340
 
 ## js/03-spells-core.js (222) — 
 ICONS:8 ICOALIAS:9 hasIco:10 ICOBASE:12 icoURL:13 ICO:14 icoTint:15 icoHTML:24 PATHS:25 SPELL_LIST:34 SPELLS:34 defSpell:35 SLOTK:36 BRMAP:36 KITP:37 parseKit:38 cleanKit:54 setKit:55 pathReset:58
@@ -158,12 +158,12 @@ clawGeo:146 clawRakes:151 updateClaws:165 later:173 stFade:174 stBeam:175 shellP
 ## js/21-vfx-frost.js (205) — น้ำแข็ง (ภาพ): ชิ้นผลึก/หนาม/แผ่นน้ำแข็งชั่วคราว (โผล่ → ค้าง → หด) •…
 FRV:2 _cryG:3 _spkG:3 _plateG:3 _hexG:3 _iceFxM:4 _frostM:4 iceFxM:5 frostM:6 ICEP:8 _im4:8 _iq:8 _ie:8 _ip:8 _is:8 icePool:9 iceBit:10 iceChips:13 updateFRV:14 iceRing:24 chillFX:25 makeSlash:41 _wbGeo:49 crescentGeo:51 makeWaveBlade:54 WGH:68 updateSlashes:69 _glGeo:82 _glMat:82 _glMat2:82 makeGlacier:83 updateGlacierVis:114 updateOrbShots:123 updateZV:133 WM3:205
 
-## js/22-models.js (253) — โมเดลจากไฟล์ (.glb จาก Blender) — ข้อตกลงฝั่งคนปั้นอยู่ใน ASSETS.md
+## js/22-models.js (254) — โมเดลจากไฟล์ (.glb จาก Blender) — ข้อตกลงฝั่งคนปั้นอยู่ใน ASSETS.md
 MODELS:5 modelManifest:6 gltfLoader:11 loadModel:16 modelInst:30 modelOr:31 prefetchModels:43
 §45 Animation จากไฟล์ (Blender Actions) + โมเดลตัวละคร/ศัตรูจากไฟล์
-ANIM_ALT:48 makeAnimator:49 animResolve:54 animPlay:55 animTick:64 lookTint:82 tintModel:86 useFileModel:101 rigStage:118 fileVariants:120 fileBroom:121 _rq:125 _rq2:125 _rq3:125 rigBind:126 rigStd:134 rigSync:135 FILE_MODELS:146
-§148 VFX จากไฟล์ (รายละเอียดฝั่งคนทำอยู่ใน ASSETS.md)
-VFXL:154 FLIPL:154 FLIPS:154 prefetchFx:155 playVfx:156 vfxSeq:202 flipTex:207 playFlip:215 fileFx:230 zoneFx:237 clearVfx:238 updateVfx:239
+ANIM_ALT:48 makeAnimator:49 animResolve:54 animPlay:55 animTick:64 lookTint:82 tintModel:86 useFileModel:101 rigStage:119 fileVariants:121 fileBroom:122 _rq:126 _rq2:126 _rq3:126 rigBind:127 rigStd:135 rigSync:136 FILE_MODELS:147
+§149 VFX จากไฟล์ (รายละเอียดฝั่งคนทำอยู่ใน ASSETS.md)
+VFXL:155 FLIPL:155 FLIPS:155 prefetchFx:156 playVfx:157 vfxSeq:203 flipTex:208 playFlip:216 fileFx:231 zoneFx:238 clearVfx:239 updateVfx:240
 
 ## js/23-props-bld-view.js (378) — prop ฝั่งแสดงผล
 PROPV:2 propFallback:4 syncProps:32
@@ -205,10 +205,10 @@ makeSnow:481 makeFireflies:488 makeSnitch:495 fileMapFx:502
 §512 แผนที่จากไฟล์ Blender (MAP-DESIGN.md)
 terrGeo:514 buildFileMap:522 tickM:558 testSign:559 buildTest:566 buildRuins:632 buildPitch:657
 
-## js/29-characters.js (376) — ระบบผ้า (เสื้อคลุมพลิ้วตามการเคลื่อนที่)
-makeCloak:2 updateCloth:10
-§33 โมเดลนักเรียนเวทมนตร์
-SHGEO:35 SHMAT:35 SHTEX:35 sGeo:36 sMat:37 bMat:40 matKey:42 bodyPatch:48 BODYM:55 bodyMat:56 plainMat:61 mergeBody:62 sStripe:98 hashStr:99 stripeTex:100 shieldMat:101 addStatus:109 makeStudent:115 makeEnemy:221 keepTex:359 keepMatSet:360 disposeMaterial:361 disposeTree:367 disposeObj:374 PM3:375 EM3:375 JM3:375 clearDyn:376
+## js/29-characters.js (436) — ระบบผ้า (เสื้อคลุมพลิ้วตามการเคลื่อนที่)
+makeCloak:2 updateCloth:10 wandNamed:34 wandSparks:83
+§92 โมเดลนักเรียนเวทมนตร์
+SHGEO:94 SHMAT:94 SHTEX:94 sGeo:95 sMat:96 bMat:99 matKey:101 bodyPatch:107 BODYM:114 bodyMat:115 plainMat:120 mergeBody:121 sStripe:157 hashStr:158 stripeTex:159 shieldMat:160 addStatus:168 makeStudent:174 makeEnemy:281 keepTex:419 keepMatSet:420 disposeMaterial:421 disposeTree:427 disposeObj:434 PM3:435 EM3:435 JM3:435 clearDyn:436
 
 ## js/30-particles.js (265) — อนุภาค 2 ชั้น: แสงเรือง (additive) + ควัน (normal)
 PMAX:2 PGLOW_OCC:6 PLIT:6 makePointSys:7
@@ -238,13 +238,13 @@ iceMat:2 iceRim:3 makeIceSword:4 makeIceAxe:23 makeKiteShield:39
 §51 อาวุธน้ำแข็งลอย (ผู้ใช้ 2026-10-22: "ร่ายคาถาให้ดาบฟันเอง ระยะเท่าเดิ…
 FWS:54 FWA:54 _fwM:55 _fwM2:55 _fwX:55 _fwY:55 _fwZ:55 _fwP:55 _fwS:55 _fwQ:55 _eo:56 _ei:56 _ss:56 fwAim:58 fwWeapons:59 FWP:61 FWT:61 fwChop:62 fwSweep:63 FF_RISE:64 fwIdle:65 fwSwing:68 FWL_N:80 fwLink:81 fwMat:84 frostFX:85
 
-## js/35-sync.js (498) — ซิงก์ผู้เล่น/ศัตรู/ลูกเวทจาก snapshot + ฉายตำแหน่งลงจอ (ป้ายชื่อ/ตัวเ…
+## js/35-sync.js (499) — ซิงก์ผู้เล่น/ศัตรู/ลูกเวทจาก snapshot + ฉายตำแหน่งลงจอ (ป้ายชื่อ/ตัวเ…
 §2 ท่าร่ายคาถาแบบนักเวทในหนัง Harry Potter (ผู้ใช้ 2026-10-22: "ยิงปกติท…
 CPOSE_T:7 _ce:7 _cs:7 _cb:7 AMP_B:9 AMP_S:9 CP_BEND:10 CPOSE:12 _cpT:20 _cpR:20 CGUARD:20 CP_STEP:21 CPCOL:22 castStyle:23 castStart:24
 §25 ท่าร่ายสกิล / อัลติ / โล่ (ผู้ใช้ 2026-10-22: "เกือบทุกสกิลควรมีการเห…
-CANIM:30 SKANIM:53 skAnim:57 _caT:58 _caR:58 skillPose:59 _g2:84 wandTwoHand:85 CBLOCK:92 blockPose:93 castPose:98 lateSkillPose:104 castPose0:105 syncPlayers:134 syncEnemies:215 projGeo:253 tailGeo:254 _t1:255 makeProj:256 _a:276 _b:276 PJFX:278 syncProj:279 _awT:362 animateWorld:363
-§404 ฉายตำแหน่ง 3D ลงจอ (ป้ายชื่อ / ตัวเลขดาเมจ)
-_v:405 toScreen:406 burnNum:413 drawLabels:420 drawTexts:451 HITM:465 DIRI:465 drawXh:467 drawCrosshair:477
+CANIM:30 SKANIM:53 skAnim:57 _caT:58 _caR:58 skillPose:59 _g2:84 wandTwoHand:85 CBLOCK:92 blockPose:93 castPose:98 lateSkillPose:104 castPose0:105 syncPlayers:134 syncEnemies:216 projGeo:254 tailGeo:255 _t1:256 makeProj:257 _a:277 _b:277 PJFX:279 syncProj:280 _awT:363 animateWorld:364
+§405 ฉายตำแหน่ง 3D ลงจอ (ป้ายชื่อ / ตัวเลขดาเมจ)
+_v:406 toScreen:407 burnNum:414 drawLabels:421 drawTexts:452 HITM:466 DIRI:466 drawXh:468 drawCrosshair:478
 
 ## js/36-modes-view.js (164) — 
 ROLE:4 KC:4 roleShowT:4 onPriv:5 MO:10 BREATHS:11 clearModeObjs:12 ITEMC:21 makeItem:22 syncModeObjs:34
@@ -274,7 +274,7 @@ trOpenF:2 trKey:2 trN:2 TR_OPTS:3 trToggle:4 trSend:9 trSync:14 hovEl:61
 §62 หน้าตั้งค่า
 setRow:63 setTog:64 setTab:65 XHC:66 XHN:66 setOpts:67 SET_ICO:69 SET_EN:72 renderSettings:73 drawXhPrev:93 openSettings:94 closeSettings:96 modeIcon:152 modeTitle:153 renderLobby:154
 
-## js/41-debug.js (141) — เครื่องมือทดสอบสมดุล (ใช้ผ่านคอนโซล WD.bal / WD.dmgTest เท่านั้น ผู้เล่นปกติไม่เห็น)
+## js/41-debug.js (142) — เครื่องมือทดสอบสมดุล (ใช้ผ่านคอนโซล WD.bal / WD.dmgTest เท่านั้น ผู้เล่นปกติไม่เห็น)
 §5 บอทต่อสู้แบบง่ายๆ: เล็งนำเป้า เดินรักษาระยะ+ส่ายไปมา ร่ายคาถาทุกครั้ง…
 botBrain:6 _obsKeep:47 balArena:48 balReset:49 balDuel:53 balTour:68 balCoop:82 balSpellTest:98
 §117 Service Worker (sw.js): เก็บไฟล์เกมไว้ในเครื่อง เปิดครั้งต่อไปเร็วขึ้…
@@ -444,9 +444,9 @@ FFAV:131 MULTI:132 MULTI_TH:132 STREAK:133 pName:134 ffaKf:135 kfSound:150 KINDN
 ## js/55-podium.js (82) — โพเดียมธีมฮอกวอตส์ (ผู้ใช้ 2026-10-22 "podium but make it magician theme hogwart theme")
 POD:6 POD_X:7 POD_H:7 POD_C:7 podStart:8 podStop:29 podPose:37 renderPodium:49
 
-## js/56-progress.js (90) — เลเวล + สถิติ + ของปลดล็อค (ผู้ใช้ 2026-10-22: "more skin wand cloak unlock as lvl" → เลื…
+## js/56-progress.js (94) — เลเวล + สถิติ + ของปลดล็อค (ผู้ใช้ 2026-10-22: "more skin wand cloak unlock as lvl" → เลื…
 §7 var/function (ไม่ใช่ const): หน้าสร้างตัวละครอาจเปิดตอนโหลด (?nointro…
-LV_MAX:8 DEV_MAXLV:11 lvNeed:12 UNLOCKS:13 PROF_ITEMS:22 lvRewards:30 lvNextReward:31 PROG:32 progSave:33 lvOf:34 progLv:35 xpMax:36 lookLock:37 lookClampLocks:38 progXP:40 progAward:41 progBox:52 progOpen:60 progChip:72
+LV_MAX:8 DEV_MAXLV:11 lvNeed:12 UNLOCKS:13 PROF_ITEMS:23 lvRewards:31 lvNextReward:32 PROG:33 progSave:34 lvOf:35 progLv:36 xpMax:37 wandKillNeed:39 lookLock:40 lookClampLocks:41 progXP:43 progAward:44 progBox:56 progOpen:64 progChip:76
 
 ## js/57-tutorial.js (44) — วิธีเล่นแต่ละสาย (ผู้ใช้ 2026-10-22 "สอนเล่นแต่ละสาย") — ปุ่ม "📖 วิธีเล่นสายนี้" ในหน้าเ…
 TUTTIPS:7 tutOpen:12 tutTry:31
@@ -543,4 +543,4 @@ gameCover:403
 ## js/66-hud4.js (113) — HUD รอบ 4 (ผู้ใช้ 2026-10-23, designs/hud-full-mock.html)
 H4E:5 H4:10 H4C:11 H4RC:11 h4Pal:12 hud4Col:14 h4Runes:15 h4RingSVG:16 h4Parts:25 h4Key:29 h4Ico:30 h4Build:31 h4Set:58 hud4Draw:59 hud4Frame:96 hud4Hide:97 _h4RT:99 _h4Cam:99 h4FaceShot:100 h4FaceSet:113
 
-(67 files, 16086 lines)
+(67 files, 16173 lines)

@@ -139,3 +139,4 @@ Object.assign(window.WD,{PFB,ptexUse,ptexLoad,CURL,PLIT,PSYS,fireVol});
 // prop / โมเดลจากไฟล์ (ดีบัก)
 Object.defineProperties(window.WD,{TERR:{get:()=>TERR},MAPID:{get:()=>MAPID},OBS:{get:()=>OBS},PROPS:{get:()=>PROPS},PROPON:{get:()=>PROPON},BLDG:{get:()=>BLDG},BRK:{get:()=>BRK},BRKV:{get:()=>BRKV},BLDON:{get:()=>BLDON},HSTOP:{get:()=>HSTOP}});Object.assign(window.WD,{MAPS,RANDOM_MAPS,FMAPS,loadMapData,terrT,groundH,terrSolid,setMapVars,buildWorld,PROPDEF,genProps,MODELS,loadModel,modelManifest,useProp,hitProp,damageEnv,hitBldPiece,breakBldChunk,bldSupport,bldChunk,bldPieceAt,collideWorld,PM3,EM3,JM3,animTick,playVfx,playFlip,fileFx,zoneFx,VFXL,FLIPL,FLIPS,fx});
 window.WD.hostStep=dt=>{hostTick(dt);const b=makeSnap(),ev=EVL;EVL=[];EVN=[];onSnap(Object.assign({},b,{ev}));};
+window.WD.mkStudent=makeStudent;window.WD.scene=scene;window.WD.parseLook=parseLook;   // ดีบัก: ภาพไม้สำเร็จรูป (ทดสอบ headless)

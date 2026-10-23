@@ -105,7 +105,8 @@ function useFileModel(o,name,tint,look){
     if(tint)tintModel(inst,tint);
     if(look)fileVariants(inst,look);
     o.b.traverse(m=>{if(m.isMesh||m.isSprite||m.isPoints||m.isLine)m.layers.set(31);});
-    if(look&&o.tip)o.tip.layers.set(0);                       // แสงปลายไม้ยังโชว์ (อยู่ที่แขนโค้ดซึ่งตามแขนโมเดล)
+    if(look&&o.tip)o.tip.layers.set(0);
+    if(look&&o.wnG)o.wnG.traverse(m=>m.layers.set(0));     // ไม้สำเร็จรูป (โค้ด) แทนไม้ในไฟล์                       // แสงปลายไม้ยังโชว์ (อยู่ที่แขนโค้ดซึ่งตามแขนโมเดล)
     (look?o.b:o.g).add(inst);o.fileModel=inst;
     if(r.animations.length)o.anim=makeAnimator(inst,r.animations);
     if(look){rigBind(o,inst);fileBroom(o);}
@@ -117,7 +118,7 @@ function useFileModel(o,name,tint,look){
 // เวที/เมนู: ท่าจากโค้ด (POSES) ไม่มีท่าเดินปกติให้เทียบ → ล้างแกน y แล้วใช้ 0 เป็นท่าปกติ
 function rigStage(o){for(const k of o.rig){if(k.al)continue;const r=k.c.rotation;r.y=0;if(k.leg)r.z=0;k.sx=k.sz=0;}}
 // ชิ้นที่ผู้เล่นเลือกได้: object ชื่อ hair_<ทรงผม> tie_<เนคไท> wand_<ไม้> → โชว์เฉพาะเลขที่ตรงกับหน้าตา
-function fileVariants(inst,look){const K={hair:'hs',tie:'ti',wand:'ws'};inst.traverse(m=>{const r=/^(hair|tie|wand)_(\d+)$/.exec(m.name);if(r)m.visible=+r[2]===look[K[r[1]]];});}
+function fileVariants(inst,look){const K={hair:'hs',tie:'ti',wand:'ws'};inst.traverse(m=>{const r=/^(hair|tie|wand)_(\d+)$/.exec(m.name);if(r)m.visible=+r[2]===look[K[r[1]]]&&!(r[1]==='wand'&&look.wn>0);});}
 function fileBroom(o){loadModel('char_broom').then(r=>{if(!r||!o.g.parent||!o.broom)return;const m=modelInst('char_broom');if(!m)return;for(const c of [...o.broom.children])o.broom.remove(c);o.broom.add(m);});}
 // แขนขาโค้ด (o.armR/armL/legs ที่คาถาต่างๆ จัดท่า) ↔ กระดูกโมเดลไฟล์
 //  • แขนขวา (ถือไม้) = ตามโค้ดเสมอ → ปลายไม้/ดาบน้ำแข็งที่ติดแขนโค้ดตรงกับมือโมเดล

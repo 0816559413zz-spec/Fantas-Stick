@@ -15,7 +15,8 @@ var UNLOCKS=[
   {lv:8,k:'wc',v:7,n:'แกนเวท: ขนนกแสงจันทร์'},{lv:10,k:'cl',v:10,n:'ผ้าคลุมกรมท่าราตรี'},{lv:12,k:'wd',v:8,n:'ไม้: เงาจันทร์'},
   {lv:14,k:'cl',v:11,n:'ผ้าคลุมทองหม่น'},{lv:16,k:'ws',v:4,n:'ทรงด้าม: กระดูก'},{lv:18,k:'cl',v:12,n:'ผ้าคลุมดำสนิท'},
   {lv:20,k:'wc',v:8,n:'แกนเวท: ประกายดาวตก'},{lv:22,k:'cl',v:13,n:'ผ้าคลุมเงินจันทรา'},{lv:24,k:'ws',v:5,n:'ทรงด้าม: เอลเดอร์วอนด์'},
-  {lv:26,k:'cl',v:14,n:'ผ้าคลุมทองแชมป์'},{lv:28,k:'ws',v:6,n:'ทรงด้าม: คริสตัล'},{lv:30,k:'cl',v:15,n:'ผ้าคลุมจอมเวทสูงสุด'}];
+  {lv:26,k:'cl',v:14,n:'ผ้าคลุมทองแชมป์'},{lv:28,k:'ws',v:6,n:'ทรงด้าม: คริสตัล'},{lv:30,k:'cl',v:15,n:'ผ้าคลุมจอมเวทสูงสุด'},
+  ...WANDN.map((w,i)=>w&&w.lv?{lv:w.lv,k:'wn',v:i,n:'ไม้: '+w.n}:null).filter(Boolean)];   // ไม้สำเร็จรูปตามเลเวล (ผู้ใช้ 2026-10-23 เพิ่มต่อจากของเดิม)
 // ของตกแต่งโปรไฟล์ปลดตามเลเวล (ผู้ใช้ 2026-10-23 รอบ 3 แก้: "just edit pose and background as map we standing on") • lv 1 = ของเริ่มต้น
 //   t: bg = แผนที่ที่ตัวละครยืนในหน้าโปรไฟล์ (m = id แผนที่, ภาพย่อ assets/ui/maps/<m>.jpg) • pose = ท่าโพส (p = ชื่อท่าใน HPOSE js/61)
 //   กรอบโปรไฟล์ไม่อยู่ที่นี่แล้ว — ปลดด้วยความสำเร็จ (js/65 BORDERS) • ⚠ รายการ/เลเวล Claude เลือกเอง
@@ -29,24 +30,27 @@ var PROF_ITEMS=[
 // ของรางวัลทั้งหมดของเลเวล L (ชุดแต่งตัว UNLOCKS + ของโปรไฟล์) • ใช้ในจอสรุป (ของถัดไปปลายแถบ) + ไทม์ไลน์รางวัลเลเวล
 function lvRewards(L){return [...UNLOCKS.filter(u=>u.lv===L).map(u=>({t:u.k==='cl'?'cloak':'wand',n:u.n,lv:u.lv,big:u.lv%10===0?1:0})),...PROF_ITEMS.filter(q=>q.lv===L&&L>1)];}
 function lvNextReward(L){for(let l=L+1;l<=LV_MAX;l++){const r=lvRewards(l);if(r.length)return {lv:l,r};}return null;}
-var PROG=(()=>{const d={xp:0,games:0,wins:0,losses:0,draws:0,kills:0,deaths:0,assists:0,dmg:0,bestK:0,bestD:0,paths:{},modes:{}};try{return Object.assign(d,JSON.parse(store('wd_prog')||'{}'));}catch(e){return d;}})();
+var PROG=(()=>{const d={xp:0,games:0,wins:0,losses:0,draws:0,kills:0,deaths:0,assists:0,dmg:0,bestK:0,bestD:0,paths:{},modes:{},pk:{}};try{return Object.assign(d,JSON.parse(store('wd_prog')||'{}'));}catch(e){return d;}})();
 function progSave(){try{store('wd_prog',JSON.stringify(PROG));}catch(e){}}
 function lvOf(xp){let L=1;while(L<LV_MAX&&xp>=lvNeed(L)){xp-=lvNeed(L);L++;}return {L,cur:xp,need:L<LV_MAX?lvNeed(L):0};}
 function progLv(){return lvOf(DEV_MAXLV?Math.max(PROG.xp,xpMax()):PROG.xp);}
 function xpMax(){let t=0;for(let L=1;L<LV_MAX;L++)t+=lvNeed(L);return t;}
-function lookLock(k,i){if(!UNLOCKS||!PROG||DEV_MAXLV)return 0;const u=UNLOCKS.find(q=>q.k===k&&q.v===i);return u&&lvOf(PROG.xp).L<u.lv?u.lv:0;}
-function lookClampLocks(l){for(const u of UNLOCKS)if(l[u.k]===u.v&&lookLock(u.k,u.v))l[u.k]=0;return l;}
+// ล็อก: ตัวเลข = เลเวลที่ต้องถึง • ข้อความ = เงื่อนไขอื่น (ไม้ธาตุ: ฆ่าด้วยธาตุนั้นครบ — PROG.pk ตามเลข path)
+function wandKillNeed(i){const w=WANDN[i];if(!w||!w.el)return '';const pi=PATHS.findIndex(p=>p.id===w.el),have=(PROG.pk&&PROG.pk[pi])||0;return have>=w.kills?'':`ฆ่า ${w.kills} ด้วย${(PATHS[pi]||{}).n||w.el} (${have})`;}
+function lookLock(k,i){if(!UNLOCKS||!PROG||DEV_MAXLV)return 0;if(k==='wn'&&WANDN[i]&&WANDN[i].el)return wandKillNeed(i);const u=UNLOCKS.find(q=>q.k===k&&q.v===i);return u&&lvOf(PROG.xp).L<u.lv?u.lv:0;}
+function lookClampLocks(l){for(const u of UNLOCKS)if(l[u.k]===u.v&&lookLock(u.k,u.v))l[u.k]=0;if(l.wn&&lookLock('wn',l.wn))l.wn=0;return l;}
 // XP ของตานี้: จบเกม 40 + ชนะ 100 / เสมอ 25 + ฆ่า×15 + ช่วย×5 + ดาเมจ/20 (+ co-op ชั้น×15)
 function progXP(r,me,kind){if(!me)return 0;let x=40+(kind==='win'?100:kind==='draw'?25:0)+(me.k||0)*15+(me.as||0)*5+Math.round((me.dmg||0)/20);if(r.mode==='coop')x+=(r.wave||0)*15;return x;}
 function progAward(r){
   if(!r||r.__aw||r.mode==='train')return null;r.__aw=1;
   const me=(r.rows||[]).find(q=>q.id===NET.myId);if(!me)return null;
+  const pkBefore=(PROG.pk&&PROG.pk[getKit(NET.myId).path])||0;
   const kind=vicKind(r),before=DEV_MAXLV?progLv():lvOf(PROG.xp),gain=progXP(r,me,kind);
   PROG.xp+=gain;PROG.games++;if(kind==='win')PROG.wins++;else if(kind==='draw')PROG.draws++;else PROG.losses++;
   PROG.kills+=me.k||0;PROG.deaths+=me.d||0;PROG.assists+=me.as||0;PROG.dmg+=me.dmg||0;PROG.bestK=Math.max(PROG.bestK,me.k||0);PROG.bestD=Math.max(PROG.bestD,me.dmg||0);
-  const pth=getKit(NET.myId).path;PROG.paths[pth]=(PROG.paths[pth]||0)+1;PROG.modes[r.mode]=(PROG.modes[r.mode]||0)+1;
+  const pth=getKit(NET.myId).path;PROG.paths[pth]=(PROG.paths[pth]||0)+1;PROG.pk=PROG.pk||{};PROG.pk[pth]=(PROG.pk[pth]||0)+(me.k||0);   // ฆ่าต่อธาตุ → ไม้ธาตุPROG.modes[r.mode]=(PROG.modes[r.mode]||0)+1;
   progSave();const after=DEV_MAXLV?progLv():lvOf(PROG.xp);
-  return {gain,before,after,unl:UNLOCKS.filter(u=>u.lv>before.L&&u.lv<=after.L)};
+  return {gain,before,after,unl:UNLOCKS.filter(u=>u.lv>before.L&&u.lv<=after.L).concat(WANDN.map((w,i)=>w&&w.el&&pkBefore<w.kills&&(PROG.pk[pth]||0)>=w.kills&&PATHS[pth]&&PATHS[pth].id===w.el?{n:'ไม้: '+w.n}:null).filter(Boolean))};
 }
 // กล่อง XP ในจอสรุป (เรียกจาก showOver js/26)
 function progBox(r){
