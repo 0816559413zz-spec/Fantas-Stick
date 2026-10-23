@@ -1,0 +1,68 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Wind Kit</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Kanit:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+/* แผ่นออกแบบสายลม (สรุปจาก designs/wind.md ให้ผู้ใช้ตรวจ ก่อนคุยสไตล์ภาพ) */
+:root{--bg:#0b1220;--card:#121c30;--line:#24344f;--ink:#e9f4f1;--mute:#93a7b8;--m:#7fe8c8;--m2:#c8fff0;--w:#ffffff;--warn:#ffd36a}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Kanit,sans-serif}
+#st{width:1600px;padding:28px 32px;box-sizing:border-box}
+h1{margin:0;font:700 44px Cinzel,serif;letter-spacing:.14em;color:var(--m2);text-shadow:0 0 24px #7fe8c855}
+h1 small{display:block;font:400 16px Kanit;letter-spacing:0;color:var(--mute);margin-top:4px}
+.idn{display:flex;gap:14px;margin:16px 0 18px}
+.idn div{flex:1;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 14px;font-size:14px;line-height:1.5}
+.idn b{color:var(--m);font-weight:600}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.c{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px 14px;display:flex;flex-direction:column;gap:6px}
+.c.tbd{border-style:dashed;opacity:.75}
+.hd{display:flex;align-items:center;gap:10px}
+.k{min-width:34px;height:26px;padding:0 6px;border-radius:6px;background:var(--m);color:#06231b;font:700 12px Cinzel;display:grid;place-items:center}
+.hd b{font:600 18px Kanit}
+.hd small{margin-left:auto;font:400 12px Kanit;color:var(--mute)}
+svg{width:100%;height:150px;background:#0d1626;border-radius:10px;border:1px solid #1c2a42}
+ul{margin:0;padding-left:18px;font-size:13px;line-height:1.55;color:#cfe0e6}
+ul b{color:var(--w);font-weight:600}
+.num{display:flex;flex-wrap:wrap;gap:5px}
+.num span{font:500 11.5px Kanit;padding:2px 8px;border-radius:20px;background:#1b2a44;color:var(--m2);border:1px solid #2c4366}
+.air{color:#9fd8ff}.warn{color:var(--warn)}
+.combo{margin-top:16px;background:linear-gradient(90deg,#123a33,#121c30);border:1px solid #2a5a4f;border-radius:14px;padding:12px 18px;font-size:14px;line-height:1.7}
+.combo b{color:var(--m)}
+</style></head><body><div id="st">
+<h1>WIND — THE PUSHER<small>สายลม: ผลักศัตรูไปชนกำแพง คุมสนาม วางแผนตาต่อไป • สรุปจากที่คุยกัน (designs/wind.md) • ⚠ = Claude ตีความ</small></h1>
+<div class="idn">
+ <div><b>ตัวตน</b><br>มีปีกลมติดหลังตลอดเวลา • เน้นผลัก/ดึง/ขัง • อ่อนเรื่องดาเมจตรง ต้องใช้กำแพงทำดาเมจ</div>
+ <div><b>กฎกำแพง</b><br>ศัตรูโดนผลัก/ลากไปชนกำแพง = <b>สตัน 0.5 วิ</b> (กำแพงในแมพ + กำแพงลมของเรา)</div>
+ <div><b>GaleBurst (เกจ %)</b><br>BA โดน +12% • โล่โดนตี +10% • กดค้างคลิกซ้ายดูดลม +8%/วิ • เต็ม = BA ทอร์นาโด / ปีกระเบิด</div>
+ <div><b>กลางอากาศ</b><br>หลัง Dash เราลอยแล้วตก • ใช้ได้: <span class="air">กำแพงลม • Gust • ลูกหลุมดำ</span> (Vacuum ไม่ได้)</div>
+</div>
+<div class="grid" id="g"></div>
+<div class="combo"><b>ตัวอย่างคอมโบ ⚠</b> — วางกำแพงลม (คลิกขวา) หลังศัตรู → <b>Vacuum</b> ดึงมาหน้าเรา → <b>Dash</b> ผลักกลับไปชนกำแพง (สตัน + 20) → ยิง BA ใส่ตอนติดกำแพงจนครบ 70 → <b>กำแพงระเบิด</b> 50 + กระเด็น + ragdoll<br>
+หรือ: <b>Dash</b> ลอยขึ้น → กลางอากาศยิง <b>ลูกหลุมดำ</b> ลากศัตรูเข้ากำแพง → ลงพื้นด้วย <b>Gust</b> ลมตามมาพัดกระเด็นไกล</div>
+</div>
+<script>
+// แผนภาพมุมบน: วงกลมเขียว = เรา • แดง = ศัตรู • แถบฟ้าขาว = กำแพงลม • ลูกศร = ทิศผลัก/ดึง
+const me=(x,y)=>`<circle cx="${x}" cy="${y}" r="9" fill="#7fe8c8"/><path d="M${x-14} ${y-4} q -10 -10 -4 -16 M${x+14} ${y-4} q 10 -10 4 -16" stroke="#c8fff0" stroke-width="2" fill="none"/>`;
+const en=(x,y,o)=>`<circle cx="${x}" cy="${y}" r="8" fill="#ff6a7a" opacity="${o||1}"/>`;
+const wall=(x1,y1,x2,y2)=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#c8fff0" stroke-width="7" stroke-linecap="round" opacity=".85"/><line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#7fe8c8" stroke-width="2" stroke-dasharray="4 4"/>`;
+const ar=(x1,y1,x2,y2,c,d)=>`<defs><marker id="a${c.slice(1)}" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 z" fill="${c}"/></marker></defs><line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${c}" stroke-width="2.4" ${d?'stroke-dasharray="5 4"':''} marker-end="url(#a${c.slice(1)})"/>`;
+const star=(x,y)=>`<text x="${x}" y="${y}" font-size="18" text-anchor="middle">💫</text>`;
+const tor=(x,y,s)=>`<g transform="translate(${x} ${y}) scale(${s||1})">${[0,1,2,3].map(i=>`<ellipse cx="${i*1.5}" cy="${-i*7}" rx="${6+i*3}" ry="${2.5+i*.6}" fill="none" stroke="#c8fff0" stroke-width="1.6"/>`).join('')}</g>`;
+const bh=(x,y)=>`<circle cx="${x}" cy="${y}" r="8" fill="#05080e" stroke="#7fe8c8" stroke-width="3"/>`;
+const t=(x,y,s,c)=>`<text x="${x}" y="${y}" font-size="11" fill="${c||'#93a7b8'}" text-anchor="middle" font-family="Kanit">${s}</text>`;
+const S=[
+ {k:'LMB',n:'ใบมีดลม',s:'ยิงปกติ',d:me(40,75)+ar(55,75,150,75,'#c8fff0')+en(165,75)+t(110,65,'5 ดาเมจ')+tor(230,90,1.3)+ar(250,75,300,75,'#7fe8c8')+t(255,120,'GaleBurst เต็ม = ทอร์นาโด',"#7fe8c8"),
+  li:['ใบมีดลมเล็ก <b>5 ดาเมจ</b> ทุก <b>0.3 วิ</b> ระยะ <b>400</b>','โดน = <b>GaleBurst +12%</b> • กดค้าง (เกจยังไม่เต็ม) = ดูดลม <b>+8%/วิ</b>','เกจเต็ม → นัดถัดไป = <b>ทอร์นาโดแนวนอน</b> 25 ดาเมจ ไป 500 ผลัก 250'],num:['5 dmg','0.3 วิ','400','ทอร์นาโด 25/500/250']},
+ {k:'RMB',n:'ปีกห่อตัว',s:'โล่',d:me(150,80)+`<path d="M128 60 q 22 -30 44 0 q 10 25 -22 45 q -32 -20 -22 -45z" fill="none" stroke="#c8fff0" stroke-width="3"/>`+en(60,70)+ar(75,72,125,76,'#ff6a7a',1)+t(95,62,'+10%')+`<circle cx="150" cy="80" r="62" fill="none" stroke="#7fe8c8" stroke-dasharray="5 5"/>`+en(230,60)+ar(212,66,250,50,'#7fe8c8')+star(230,48),
+  li:['ปีกหุบห่อตัวเป็นโล่','โดนตีแต่ละครั้ง = <b>GaleBurst +10%</b>','เกจเต็มระหว่างถือโล่ → <b>คลิกซ้าย = ปีกระเบิด</b> รัศมี <b>200</b> สตัน <b>0.8</b> ผลัก <b>250</b> <b>20</b> ดาเมจ'],num:['r200','สตัน 0.8','ผลัก 250','20 dmg']},
+ {k:'SHIFT',n:'ถอยผลัก',s:'Dash',d:me(150,95)+ar(150,95,60,60,'#c8fff0',1)+t(80,90,'ถอย 300 (ลอย)')+en(205,80)+ar(212,78,275,60,'#7fe8c8')+wall(285,30,285,110)+star(268,55)+t(240,120,'ชนกำแพง 20 + สตัน','#ffd36a'),
+  li:['ผลักศัตรูข้างหน้า <b>250</b> + ดีดตัวเราถอยหลัง <b>300</b>','ตอนดีดตัว <b>เราลอยกลางอากาศ</b> แล้วตก → ใช้สกิลกลางอากาศต่อได้','ศัตรูโดนผลักไปชนกำแพง = <b>20 ดาเมจ</b> + สตัน'],num:['ผลัก 250','ถอย 300','ชน 20','CD 8']},
+ {k:'Q',n:'กำแพงลม',s:'สกิล',d:me(40,80)+wall(120,40,120,120)+ar(125,80,200,80,'#c8fff0',1)+t(165,70,'คลิกซ้าย ดัน 400')+wall(250,30,250,70)+t(250,90,'คลิกขวา วาง ≤500')+en(232,120)+star(250,112),
+  li:['<b>ชาร์จ 3</b> (คืนชาร์จละ <b>8 วิ</b>) • กว้าง <b>250</b> อยู่ <b>6 วิ</b>','<b>คลิกซ้าย</b> = ดันกำแพงไปข้างหน้า 400 กวาดศัตรูไปด้วย (กดสกิลซ้ำ = หยุด) • <b>คลิกขวา</b> = เล็งวางตรงจุด ≤500','บล็อก <b>ลูกเวทศัตรู</b> เท่านั้น • ดาเมจใส่ศัตรูที่ติดกำแพงครบ <b>70</b> → <span class="warn">กำแพงระเบิด 50 + กระเด็นไกล + ragdoll ⚠</span>'],num:['3 ชาร์จ','8 วิ/ชาร์จ','กว้าง 250','6 วิ','ระเบิด 50'],air:1},
+ {k:'E',n:'Gust (ชื่อชั่วคราว)',s:'สกิล',d:me(50,80)+`<path d="M50 62 l -6 -14 M50 62 l 6 -14" stroke="#c8fff0" stroke-width="2"/>`+t(50,40,'ชาร์จ 0.3')+ar(65,80,150,80,'#c8fff0')+me(165,80)+t(165,108,'ท่าฮีโร่แลนดิ้ง')+en(105,80,.6)+ar(110,92,255,92,'#7fe8c8',1)+en(268,92)+t(200,130,'อีก 1 วิ ลมตามมา → กระเด็น 400','#7fe8c8'),
+  li:['ลอยขึ้นนิด ปีกชาร์จ <b>0.3 วิ</b> → BOOM พุ่ง <b>200</b> → ลงท่าฮีโร่แลนดิ้ง','พุ่งผ่านศัตรูยังไม่รู้สึกอะไร → <b>1 วิ</b> ต่อมาลมแรงตามมา','ศัตรูในแนว (กว้าง <b>100</b>) กระเด็น <b>400</b> ไปทางเดียวกับที่เราพุ่ง • ดาเมจต่ำ <b>10</b>'],num:['พุ่ง 200','ดีเลย์ 1 วิ','กระเด็น 400','10 dmg','CD 14'],air:1},
+ {k:'R',n:'Vacuum',s:'สกิล',d:me(40,80)+tor(150,55)+tor(165,90)+tor(150,125)+`<path d="M60 80 L 175 40 M60 80 L 175 120" stroke="#2c4366" stroke-dasharray="3 3"/>`+en(185,52)+en(175,128)+ar(140,58,95,75,'#7fe8c8',1)+ar(140,118,95,88,'#7fe8c8',1)+t(240,80,'0.6 วิ แล้วดึงกลับ')+t(240,96,'หยุดห่างเรา 60'),
+  li:['เสก <b>ทอร์นาโด 3 อัน</b> เรียงโค้ง ในมุม <b>45°</b> ระยะ <b>200</b>','<b>0.6 วิ</b> แล้วดึงทอร์นาโดกลับ ลากศัตรูมาหยุด <b>ห่างเรา 60</b> พร้อมคอมโบ • ชนกำแพงลมระหว่างทาง = สตัน','ท่า: หมุนตัว 90° ไปซ้าย แขนขวายื่นตรง → ดึงกลับ พับแขนมาหน้าตัว'],num:['3 ทอร์นาโด','45° / 200','20 dmg','CD 10']},
+ {k:'F',n:'ลูกลมหลุมดำ',s:'สกิล',d:me(40,80)+bh(110,80)+bh(165,80)+bh(220,80)+ar(55,80,280,80,'#7fe8c8',1)+en(140,80,.5)+en(190,80)+wall(290,40,290,120)+star(275,70)+t(160,115,'ลากตามทางไม่เกิน 200'),
+  li:['กดทีเดียว <b>ยิงต่อกัน 3 ลูก</b> — ลูกลมบีบอัด ข้างในดำเหมือนหลุมดำ ขอบนอกสีลม','ลูกละ <b>10 ดาเมจ</b> ระยะ <b>400</b> • <b>ลากศัตรูไปตามทางลูก</b> แรง แต่ไม่เกิน <b>200</b>','ลากไปชนกำแพงลม = <b>สตัน</b>'],num:['3 ลูก','10 dmg/ลูก','400','ลาก ≤200','CD 12'],air:1},
+ {k:'?',n:'สกิลที่ 5 + อัลติ',s:'ยังไม่ออกแบบ',tbd:1,d:t(150,70,'ยังไม่ได้คิด','#ffd36a')+t(150,92,'ไอเดีย ⚠: ตาพายุ / คุกฟ้า / ปีกเฮอริเคน'),li:['รอผู้ใช้ออกแบบ'],num:[]}];
+g.innerHTML=S.map(s=>`<div class="c ${s.tbd?'tbd':''}"><div class="hd"><span class="k">${s.k}</span><b>${s.n}</b><small>${s.s}${s.air?' • <span class="air">กลางอากาศได้</span>':''}</small></div><svg viewBox="0 0 320 150">${s.d}</svg><ul>${s.li.map(l=>`<li>${l}</li>`).join('')}</ul><div class="num">${s.num.map(n=>`<span>${n}</span>`).join('')}</div></div>`).join('');
+</script></body></html>

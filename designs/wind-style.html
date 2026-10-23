@@ -1,0 +1,47 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Wind Style</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Kanit:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+/* ทางเลือกสไตล์ภาพสายลม 4 แบบ (คุยก่อนทำเอฟเฟกต์จริง) — แต่ละช่อง: ปีก + ทอร์นาโด + กำแพงลม + ลูกหลุมดำ บนพื้นแผนที่มืด */
+body{margin:0;background:#0a0f1a;font-family:Kanit,sans-serif;color:#eef6f4}
+#st{width:1600px;height:900px;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:4px}
+.p{position:relative;overflow:hidden}
+.p svg{position:absolute;inset:0;width:100%;height:100%}
+.t{position:absolute;left:18px;top:12px;z-index:2}
+.t b{font:700 30px Cinzel,serif;letter-spacing:.06em;text-shadow:0 2px 8px #000}
+.t small{display:block;font:400 14px Kanit;max-width:520px;text-shadow:0 1px 4px #000;opacity:.92}
+.sw{position:absolute;right:16px;top:16px;display:flex;gap:6px;z-index:2}
+.sw i{width:26px;height:26px;border-radius:50%;border:2px solid #fff4}
+</style></head><body><div id="st"></div>
+<script>
+let seed=3;const R=()=>((seed=seed*16807%2147483647)/2147483647);
+const P=[
+ {n:'A • ลมใส (แนว Anemo)',d:'เส้นลมบางคม สีมิ้นต์-ขาว เรืองนุ่ม วงเกลียวสะอาด อ่านง่าย ไม่รก',sw:['#7fe8c8','#c8fff0','#ffffff'],bg:['#1a2a3a','#0c1522'],k:'clean'},
+ {n:'B • ใบไม้ปลิว',d:'ลมพาใบไม้/กลีบดอกเขียวอ่อนปลิวตาม ดูมีชีวิต ธรรมชาติ (ตามสีที่เลือกตอนแรก)',sw:['#7fe8c8','#a8e86a','#f4ffe8'],bg:['#1c2e26','#0c1712'],k:'leaf'},
+ {n:'C • พู่กันหมึก',d:'ลายเส้นพู่กันขาวหนา-บาง แบบภาพวาดจีน/ญี่ปุ่น ขอบมิ้นต์ ดูมีสไตล์ แรง',sw:['#ffffff','#7fe8c8','#20302c'],bg:['#202830','#0e1418'],k:'ink'},
+ {n:'D • พายุมืด',d:'ลมหนัก เทาเข้ม-เขียวหัวเป็ด มีฝุ่น/เศษ ดูทรงพลังกว่า (หลุมดำเข้ากันดี)',sw:['#3fb8a0','#8aa0a8','#0e2a2a'],bg:['#1a1f26','#07090c'],k:'dark'}];
+function stroke(k,c,w,o){return `stroke="${c}" stroke-width="${w}" fill="none" stroke-linecap="round" opacity="${o}"`;}
+function swirl(cx,cy,r,turns,k,c,w){let d='';for(let i=0;i<=60;i++){const t=i/60,a=t*turns*6.283,rr=r*(1-t*0.75);d+=(i?'L':'M')+(cx+Math.cos(a)*rr).toFixed(1)+' '+(cy+Math.sin(a)*rr*0.45).toFixed(1);}return `<path d="${d}" ${stroke(k,c,w,.9)}/>`;}
+function streak(x,y,l,k,c,w,o){const b=k==='ink'?`stroke-width="${w*2.2}"`:'';return `<path d="M${x} ${y} q ${l*0.5} ${-l*0.12} ${l} ${l*0.02}" ${stroke(k,c,w,o)} ${b}/>`;}
+function panel(S){const W=800,H=448,[c1,c2,c3]=S.sw;let s=`<svg viewBox="0 0 ${W} ${H}"><defs><radialGradient id="bg${S.k}" cx=".5" cy=".7" r=".9"><stop offset="0" stop-color="${S.bg[0]}"/><stop offset="1" stop-color="${S.bg[1]}"/></radialGradient>
+ <filter id="gl${S.k}"><feGaussianBlur stdDeviation="${S.k==='ink'?0.6:3}"/><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+ <radialGradient id="bh${S.k}"><stop offset="0" stop-color="#000"/><stop offset=".55" stop-color="#000"/><stop offset=".75" stop-color="${c1}"/><stop offset="1" stop-color="${c1}" stop-opacity="0"/></radialGradient></defs>
+ <rect width="${W}" height="${H}" fill="url(#bg${S.k})"/><ellipse cx="400" cy="400" rx="420" ry="70" fill="#000" opacity=".25"/><g filter="url(#gl${S.k})">`;
+ // ตัวละคร (เงาดำ) + ปีกลม
+ const px=210,py=330;s+=`<path d="M${px-22} ${py} l 10 -70 h 24 l 10 70 z" fill="#05070c"/><circle cx="${px}" cy="${py-82}" r="14" fill="#05070c"/>`;
+ for(const sd of [-1,1]){if(S.k==='leaf'){for(let i=0;i<7;i++){const a=(-0.3-i*0.22)*sd,r=30+i*8;s+=`<ellipse cx="${px+sd*(14+i*9)}" cy="${py-70-i*6}" rx="9" ry="3.5" fill="${i%2?c2:c1}" transform="rotate(${-30*sd-i*8*sd} ${px+sd*(14+i*9)} ${py-70-i*6})"/>`;}}
+   for(let i=0;i<5;i++)s+=`<path d="M${px+sd*8} ${py-62} q ${sd*(40+i*8)} ${-50+i*6} ${sd*(70+i*10)} ${-20+i*14}" ${stroke(S.k,i%2?c2:c3,S.k==='ink'?4-i*0.6:2.2-i*0.3,.9-i*0.12)}/>`;}
+ // ทอร์นาโด
+ const tx=420,ty=330;for(let i=0;i<9;i++){const y=ty-i*22,r=14+i*9;s+=`<ellipse cx="${tx+Math.sin(i*0.7)*6}" cy="${y}" rx="${r}" ry="${r*0.28}" ${stroke(S.k,i%3?c1:c3,S.k==='ink'?(i%2?5:2):1.8,S.k==='dark'?.65:.85)}/>`;}
+ if(S.k==='dark')for(let i=0;i<40;i++){const a=R()*6.28,r=R()*90;s+=`<rect x="${tx+Math.cos(a)*r}" y="${ty-100+Math.sin(a)*r*0.9}" width="${2+R()*3}" height="${2+R()*3}" fill="#8aa0a8" opacity="${.3+R()*.5}"/>`;}
+ if(S.k==='leaf')for(let i=0;i<14;i++){const a=R()*6.28,r=30+R()*80;s+=`<ellipse cx="${tx+Math.cos(a)*r}" cy="${ty-90+Math.sin(a)*r*0.6}" rx="6" ry="2.5" fill="${R()<.5?c1:c2}" transform="rotate(${R()*180} ${tx+Math.cos(a)*r} ${ty-90+Math.sin(a)*r*0.6})"/>`;}
+ // กำแพงลม (มองข้าง: ม่านลมแนวตั้ง)
+ const wx=600;for(let i=0;i<12;i++){const x=wx+(i-6)*7;s+=`<path d="M${x} ${ty} q ${S.k==='ink'?14:8} -60 0 -120 q -8 -40 ${S.k==='ink'?-10:4} -70" ${stroke(S.k,i%3?c1:c3,S.k==='ink'?(i%2?4:1.5):1.6,S.k==='dark'?.55:.7)}/>`;}
+ s+=`<rect x="${wx-46}" y="${ty-200}" width="92" height="200" fill="${c1}" opacity="${S.k==='dark'?.12:.08}" rx="10"/>`;
+ // ลูกหลุมดำ
+ for(const [x,y] of [[300,190],[350,175]]){s+=`<circle cx="${x}" cy="${y}" r="18" fill="url(#bh${S.k})"/>`+swirl(x,y,26,1.5,S.k,c3,1.4);}
+ // เส้นลมพัดผ่าน
+ for(let i=0;i<14;i++){const y=60+R()*300,x=20+R()*700;s+=streak(x,y,60+R()*120,S.k,R()<.5?c1:c3,S.k==='ink'?2.2:1.2,.35+R()*.45);}
+ return s+'</g></svg>';}
+st.innerHTML=P.map(S=>`<div class="p">${panel(S)}<div class="t"><b style="color:${S.sw[0]}">${S.n}</b><small>${S.d}</small></div><div class="sw">${S.sw.map(c=>`<i style="background:${c}"></i>`).join('')}</div></div>`).join('');
+</script></body></html>
