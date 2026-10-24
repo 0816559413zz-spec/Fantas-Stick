@@ -1,0 +1,14 @@
+{
+ "v": 1,
+ "desc": "สโตรกพู่กันเดียวกับ wind_brush แต่เรืองแสง — ชั้นในสุดขาวนีออน",
+ "gen": "image",
+ "seed": 1,
+ "px": 256,
+ "cols": 1,
+ "rows": 1,
+ "kind": "loop",
+ "fps": 24,
+ "ramp": "white",
+ "add": true,
+ "p": {}
+}
