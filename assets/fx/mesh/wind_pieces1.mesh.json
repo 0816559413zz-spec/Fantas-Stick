@@ -10,12 +10,12 @@
   {
    "id": "p0",
    "k": "spiral",
-   "turns": 0.23,
+   "turns": 0.29,
    "r0": 1.0,
    "r1": 1.2,
    "rise": 0.33,
-   "w": 0.36,
-   "taper": 0.9,
+   "w": 0.61,
+   "taper": 0,
    "wall": true,
    "seg": 48,
    "rot": [
@@ -27,12 +27,12 @@
   {
    "id": "p1",
    "k": "spiral",
-   "turns": 0.34,
+   "turns": 0.43,
    "r0": 1.0,
    "r1": 1.23,
    "rise": 0.36,
-   "w": 0.53,
-   "taper": 0.9,
+   "w": 0.9,
+   "taper": 0,
    "wall": true,
    "seg": 48,
    "rot": [
@@ -44,12 +44,12 @@
   {
    "id": "p2",
    "k": "spiral",
-   "turns": 0.37,
+   "turns": 0.46,
    "r0": 1.0,
    "r1": 1.23,
    "rise": 0.18,
-   "w": 0.32,
-   "taper": 0.9,
+   "w": 0.54,
+   "taper": 0,
    "wall": true,
    "seg": 48,
    "rot": [

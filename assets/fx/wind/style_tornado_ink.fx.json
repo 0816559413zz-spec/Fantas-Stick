@@ -171,11 +171,11 @@
    },
    "spin": 700,
    "id": "in0",
-   "tex": "tex/wind_brush_glow",
+   "tex": "tex/wind_swoosh_a_hi",
    "col": "#eaffff",
    "int": 1.0,
    "uvScroll": [
-    -1.5,
+    0,
     0
    ],
    "op": {
@@ -229,10 +229,10 @@
    },
    "spin": 520,
    "id": "out0",
-   "tex": "tex/wind_brush",
+   "tex": "tex/wind_swoosh_a",
    "col": "#1d6f86",
    "uvScroll": [
-    -0.8,
+    0,
     0
    ],
    "op": {
@@ -286,11 +286,11 @@
    },
    "spin": 520,
    "id": "hi0",
-   "tex": "tex/wind_brush_hi",
+   "tex": "tex/wind_swoosh_a_hi",
    "col": "#ffffff",
    "int": 1.2,
    "uvScroll": [
-    -0.8,
+    0,
     0
    ],
    "op": {
@@ -312,8 +312,8 @@
    "col2": "#000000",
    "rim": 0,
    "uvTile": [
-    1.5,
-    1.5
+    1,
+    1
    ],
    "rot": [
     0,
@@ -344,10 +344,10 @@
    },
    "spin": 520,
    "id": "ln0",
-   "tex": "tex/wind_lines",
+   "tex": "tex/wind_swoosh_a_ln",
    "col": "#123a55",
    "uvScroll": [
-    -1.2,
+    0,
     0
    ],
    "op": {
@@ -401,10 +401,10 @@
    },
    "spin": 600,
    "id": "mid1",
-   "tex": "tex/wind_brush",
+   "tex": "tex/wind_swoosh_b",
    "col": "#8fd8ff",
    "uvScroll": [
-    -1.0,
+    0,
     0
    ]
   },
@@ -452,10 +452,10 @@
    },
    "spin": 520,
    "id": "out1",
-   "tex": "tex/wind_brush",
+   "tex": "tex/wind_swoosh_b",
    "col": "#1d6f86",
    "uvScroll": [
-    -0.8,
+    0,
     0
    ],
    "op": {
@@ -509,11 +509,11 @@
    },
    "spin": 520,
    "id": "hi1",
-   "tex": "tex/wind_brush_hi",
+   "tex": "tex/wind_swoosh_b_hi",
    "col": "#ffffff",
    "int": 1.2,
    "uvScroll": [
-    -0.8,
+    0,
     0
    ],
    "op": {
@@ -535,8 +535,8 @@
    "col2": "#000000",
    "rim": 0,
    "uvTile": [
-    1.5,
-    1.5
+    1,
+    1
    ],
    "rot": [
     0,
@@ -567,10 +567,10 @@
    },
    "spin": 520,
    "id": "ln1",
-   "tex": "tex/wind_lines",
+   "tex": "tex/wind_swoosh_b_ln",
    "col": "#123a55",
    "uvScroll": [
-    -1.2,
+    0,
     0
    ],
    "op": {
@@ -624,11 +624,11 @@
    },
    "spin": 700,
    "id": "in2",
-   "tex": "tex/wind_brush_glow",
+   "tex": "tex/wind_swoosh_a_hi",
    "col": "#eaffff",
    "int": 1.0,
    "uvScroll": [
-    -1.5,
+    0,
     0
    ],
    "op": {
@@ -682,10 +682,10 @@
    },
    "spin": 520,
    "id": "out2",
-   "tex": "tex/wind_brush",
+   "tex": "tex/wind_swoosh_a",
    "col": "#1d6f86",
    "uvScroll": [
-    -0.8,
+    0,
     0
    ],
    "op": {
@@ -739,11 +739,11 @@
    },
    "spin": 520,
    "id": "hi2",
-   "tex": "tex/wind_brush_hi",
+   "tex": "tex/wind_swoosh_a_hi",
    "col": "#ffffff",
    "int": 1.2,
    "uvScroll": [
-    -0.8,
+    0,
     0
    ],
    "op": {
@@ -765,8 +765,8 @@
    "col2": "#000000",
    "rim": 0,
    "uvTile": [
-    1.5,
-    1.5
+    1,
+    1
    ],
    "rot": [
     0,
@@ -797,10 +797,10 @@
    },
    "spin": 520,
    "id": "ln2",
-   "tex": "tex/wind_lines",
+   "tex": "tex/wind_swoosh_a_ln",
    "col": "#123a55",
    "uvScroll": [
-    -1.2,
+    0,
     0
    ],
    "op": {
@@ -854,10 +854,10 @@
    },
    "spin": 600,
    "id": "mid3",
-   "tex": "tex/wind_brush",
+   "tex": "tex/wind_swoosh_b",
    "col": "#8fd8ff",
    "uvScroll": [
-    -1.0,
+    0,
     0
    ]
   },
@@ -905,10 +905,10 @@
    },
    "spin": 520,
    "id": "out3",
-   "tex": "tex/wind_brush",
+   "tex": "tex/wind_swoosh_b",
    "col": "#1d6f86",
    "uvScroll": [
-    -0.8,
+    0,
     0
    ],
    "op": {
@@ -962,11 +962,11 @@
    },
    "spin": 520,
    "id": "hi3",
-   "tex": "tex/wind_brush_hi",
+   "tex": "tex/wind_swoosh_b_hi",
    "col": "#ffffff",
    "int": 1.2,
    "uvScroll": [
-    -0.8,
+    0,
     0
    ],
    "op": {
@@ -988,8 +988,8 @@
    "col2": "#000000",
    "rim": 0,
    "uvTile": [
-    1.5,
-    1.5
+    1,
+    1
    ],
    "rot": [
     0,
@@ -1020,10 +1020,10 @@
    },
    "spin": 520,
    "id": "ln3",
-   "tex": "tex/wind_lines",
+   "tex": "tex/wind_swoosh_b_ln",
    "col": "#123a55",
    "uvScroll": [
-    -1.2,
+    0,
     0
    ],
    "op": {
@@ -1077,11 +1077,11 @@
    },
    "spin": 700,
    "id": "in4",
-   "tex": "tex/wind_brush_glow",
+   "tex": "tex/wind_swoosh_a_hi",
    "col": "#eaffff",
    "int": 1.0,
    "uvScroll": [
-    -1.5,
+    0,
     0
    ],
    "op": {
@@ -1135,10 +1135,10 @@
    },
    "spin": 520,
    "id": "out4",
-   "tex": "tex/wind_brush",
+   "tex": "tex/wind_swoosh_a",
    "col": "#1d6f86",
    "uvScroll": [
-    -0.8,
+    0,
     0
    ],
    "op": {
@@ -1192,11 +1192,11 @@
    },
    "spin": 520,
    "id": "hi4",
-   "tex": "tex/wind_brush_hi",
+   "tex": "tex/wind_swoosh_a_hi",
    "col": "#ffffff",
    "int": 1.2,
    "uvScroll": [
-    -0.8,
+    0,
     0
    ],
    "op": {
@@ -1218,8 +1218,8 @@
    "col2": "#000000",
    "rim": 0,
    "uvTile": [
-    1.5,
-    1.5
+    1,
+    1
    ],
    "rot": [
     0,
@@ -1250,10 +1250,10 @@
    },
    "spin": 520,
    "id": "ln4",
-   "tex": "tex/wind_lines",
+   "tex": "tex/wind_swoosh_a_ln",
    "col": "#123a55",
    "uvScroll": [
-    -1.2,
+    0,
     0
    ],
    "op": {
@@ -1307,10 +1307,10 @@
    },
    "spin": 600,
    "id": "mid5",
-   "tex": "tex/wind_brush",
+   "tex": "tex/wind_swoosh_b",
    "col": "#8fd8ff",
    "uvScroll": [
-    -1.0,
+    0,
     0
    ]
   },
@@ -1358,10 +1358,10 @@
    },
    "spin": 520,
    "id": "out5",
-   "tex": "tex/wind_brush",
+   "tex": "tex/wind_swoosh_b",
    "col": "#1d6f86",
    "uvScroll": [
-    -0.8,
+    0,
     0
    ],
    "op": {
@@ -1415,11 +1415,11 @@
    },
    "spin": 520,
    "id": "hi5",
-   "tex": "tex/wind_brush_hi",
+   "tex": "tex/wind_swoosh_b_hi",
    "col": "#ffffff",
    "int": 1.2,
    "uvScroll": [
-    -0.8,
+    0,
     0
    ],
    "op": {
@@ -1441,8 +1441,8 @@
    "col2": "#000000",
    "rim": 0,
    "uvTile": [
-    1.5,
-    1.5
+    1,
+    1
    ],
    "rot": [
     0,
@@ -1473,10 +1473,10 @@
    },
    "spin": 520,
    "id": "ln5",
-   "tex": "tex/wind_lines",
+   "tex": "tex/wind_swoosh_b_ln",
    "col": "#123a55",
    "uvScroll": [
-    -1.2,
+    0,
     0
    ],
    "op": {
@@ -1530,11 +1530,11 @@
    },
    "spin": 700,
    "id": "in6",
-   "tex": "tex/wind_brush_glow",
+   "tex": "tex/wind_swoosh_a_hi",
    "col": "#eaffff",
    "int": 1.0,
    "uvScroll": [
-    -1.5,
+    0,
     0
    ],
    "op": {
@@ -1588,10 +1588,10 @@
    },
    "spin": 520,
    "id": "out6",
-   "tex": "tex/wind_brush",
+   "tex": "tex/wind_swoosh_a",
    "col": "#1d6f86",
    "uvScroll": [
-    -0.8,
+    0,
     0
    ],
    "op": {
@@ -1645,11 +1645,11 @@
    },
    "spin": 520,
    "id": "hi6",
-   "tex": "tex/wind_brush_hi",
+   "tex": "tex/wind_swoosh_a_hi",
    "col": "#ffffff",
    "int": 1.2,
    "uvScroll": [
-    -0.8,
+    0,
     0
    ],
    "op": {
@@ -1671,8 +1671,8 @@
    "col2": "#000000",
    "rim": 0,
    "uvTile": [
-    1.5,
-    1.5
+    1,
+    1
    ],
    "rot": [
     0,
@@ -1703,10 +1703,10 @@
    },
    "spin": 520,
    "id": "ln6",
-   "tex": "tex/wind_lines",
+   "tex": "tex/wind_swoosh_a_ln",
    "col": "#123a55",
    "uvScroll": [
-    -1.2,
+    0,
     0
    ],
    "op": {
@@ -1760,10 +1760,10 @@
    },
    "spin": 600,
    "id": "mid7",
-   "tex": "tex/wind_brush",
+   "tex": "tex/wind_swoosh_b",
    "col": "#8fd8ff",
    "uvScroll": [
-    -1.0,
+    0,
     0
    ]
   },
@@ -1811,10 +1811,10 @@
    },
    "spin": 520,
    "id": "out7",
-   "tex": "tex/wind_brush",
+   "tex": "tex/wind_swoosh_b",
    "col": "#1d6f86",
    "uvScroll": [
-    -0.8,
+    0,
     0
    ],
    "op": {
@@ -1868,11 +1868,11 @@
    },
    "spin": 520,
    "id": "hi7",
-   "tex": "tex/wind_brush_hi",
+   "tex": "tex/wind_swoosh_b_hi",
    "col": "#ffffff",
    "int": 1.2,
    "uvScroll": [
-    -0.8,
+    0,
     0
    ],
    "op": {
@@ -1894,8 +1894,8 @@
    "col2": "#000000",
    "rim": 0,
    "uvTile": [
-    1.5,
-    1.5
+    1,
+    1
    ],
    "rot": [
     0,
@@ -1926,10 +1926,10 @@
    },
    "spin": 520,
    "id": "ln7",
-   "tex": "tex/wind_lines",
+   "tex": "tex/wind_swoosh_b_ln",
    "col": "#123a55",
    "uvScroll": [
-    -1.2,
+    0,
     0
    ],
    "op": {
@@ -1983,11 +1983,11 @@
    },
    "spin": 700,
    "id": "in8",
-   "tex": "tex/wind_brush_glow",
+   "tex": "tex/wind_swoosh_a_hi",
    "col": "#eaffff",
    "int": 1.0,
    "uvScroll": [
-    -1.5,
+    0,
     0
    ],
    "op": {
@@ -2041,10 +2041,10 @@
    },
    "spin": 520,
    "id": "out8",
-   "tex": "tex/wind_brush",
+   "tex": "tex/wind_swoosh_a",
    "col": "#1d6f86",
    "uvScroll": [
-    -0.8,
+    0,
     0
    ],
    "op": {
@@ -2098,11 +2098,11 @@
    },
    "spin": 520,
    "id": "hi8",
-   "tex": "tex/wind_brush_hi",
+   "tex": "tex/wind_swoosh_a_hi",
    "col": "#ffffff",
    "int": 1.2,
    "uvScroll": [
-    -0.8,
+    0,
     0
    ],
    "op": {
@@ -2124,8 +2124,8 @@
    "col2": "#000000",
    "rim": 0,
    "uvTile": [
-    1.5,
-    1.5
+    1,
+    1
    ],
    "rot": [
     0,
@@ -2156,10 +2156,10 @@
    },
    "spin": 520,
    "id": "ln8",
-   "tex": "tex/wind_lines",
+   "tex": "tex/wind_swoosh_a_ln",
    "col": "#123a55",
    "uvScroll": [
-    -1.2,
+    0,
     0
    ],
    "op": {
@@ -2213,10 +2213,10 @@
    },
    "spin": 600,
    "id": "mid9",
-   "tex": "tex/wind_brush",
+   "tex": "tex/wind_swoosh_b",
    "col": "#8fd8ff",
    "uvScroll": [
-    -1.0,
+    0,
     0
    ]
   },
@@ -2264,10 +2264,10 @@
    },
    "spin": 520,
    "id": "out9",
-   "tex": "tex/wind_brush",
+   "tex": "tex/wind_swoosh_b",
    "col": "#1d6f86",
    "uvScroll": [
-    -0.8,
+    0,
     0
    ],
    "op": {
@@ -2321,11 +2321,11 @@
    },
    "spin": 520,
    "id": "hi9",
-   "tex": "tex/wind_brush_hi",
+   "tex": "tex/wind_swoosh_b_hi",
    "col": "#ffffff",
    "int": 1.2,
    "uvScroll": [
-    -0.8,
+    0,
     0
    ],
    "op": {
@@ -2347,8 +2347,8 @@
    "col2": "#000000",
    "rim": 0,
    "uvTile": [
-    1.5,
-    1.5
+    1,
+    1
    ],
    "rot": [
     0,
@@ -2379,10 +2379,10 @@
    },
    "spin": 520,
    "id": "ln9",
-   "tex": "tex/wind_lines",
+   "tex": "tex/wind_swoosh_b_ln",
    "col": "#123a55",
    "uvScroll": [
-    -1.2,
+    0,
     0
    ],
    "op": {
