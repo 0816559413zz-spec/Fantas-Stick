@@ -1,0 +1,14 @@
+{
+ "v": 1,
+ "desc": "สโตรกพู่กันหนาขอบแหว่ง (ทึบ ไม่เรืองแสง) ต่อขอบซ้าย-ขวาได้ — ตัวลมแบบหมึก ตามภาพอ้างอิง designs/wind_ref/curse_tornado_main.webp",
+ "gen": "image",
+ "seed": 1,
+ "px": 256,
+ "cols": 1,
+ "rows": 1,
+ "kind": "loop",
+ "fps": 24,
+ "ramp": "white",
+ "add": false,
+ "p": {}
+}
