@@ -1,6 +1,6 @@
 {
  "v": 1,
- "desc": "ทดสอบสไตล์: ลูกลมหลุมดำ ×3 — แกนดำสนิท ขอบวงลมมิ้นต์หมุน + เส้นลมถูกดูดเข้า พุ่ง 20 ม. ห่างกัน 0.18 วิ",
+ "desc": "สไตล์สโตรก: ลูกหลุมดำ ×3 — แกนดำ + วงสโตรกพู่กันหมุนรอบ (หันหน้าเข้าทิศพุ่ง) + เศษหมึกถูกดูดเข้า",
  "tags": [
   "wind",
   "style-test"
@@ -40,18 +40,23 @@
    }
   },
   {
-   "id": "rim0",
    "t": "mesh",
    "at": 0.0,
    "life": 0.7,
    "att": "feet",
-   "shape": "ring",
-   "inner": 0.72,
-   "mat": "energy",
-   "col": "$hi",
-   "col2": "$main",
-   "rim": 1.5,
-   "bill": true,
+   "shape": "model",
+   "model": "wind_groundswirl",
+   "mat": "tex",
+   "col2": "#000000",
+   "rim": 0,
+   "uvTile": [
+    1,
+    1
+   ],
+   "uvScroll": [
+    0,
+    0
+   ],
    "pos": {
     "0": [
      0,
@@ -64,14 +69,114 @@
      20
     ]
    },
-   "scale": 1.2,
-   "spin": 400,
+   "rot": [
+    90,
+    0,
+    0
+   ],
    "op": {
     "0": 0,
-    "0.05": 1,
-    "0.9": 1,
+    "0.1": 1,
+    "0.8": 1,
     "1": 0
-   }
+   },
+   "id": "o0ro",
+   "tex": "tex/wind_swoosh_a",
+   "col": "#1d6f86",
+   "scale": 0.55
+  },
+  {
+   "t": "mesh",
+   "at": 0.0,
+   "life": 0.7,
+   "att": "feet",
+   "shape": "model",
+   "model": "wind_groundswirl",
+   "mat": "tex",
+   "col2": "#000000",
+   "rim": 0,
+   "uvTile": [
+    1,
+    1
+   ],
+   "uvScroll": [
+    0,
+    0
+   ],
+   "pos": {
+    "0": [
+     0,
+     1.2,
+     1
+    ],
+    "1": [
+     0,
+     1.2,
+     20
+    ]
+   },
+   "rot": [
+    90,
+    0,
+    0
+   ],
+   "op": {
+    "0": 0,
+    "0.1": 1,
+    "0.8": 1,
+    "1": 0
+   },
+   "id": "o0rh",
+   "tex": "tex/wind_swoosh_a_hi",
+   "col": "#ffffff",
+   "int": 1.3,
+   "scale": 0.55
+  },
+  {
+   "t": "mesh",
+   "at": 0.0,
+   "life": 0.7,
+   "att": "feet",
+   "shape": "model",
+   "model": "wind_groundswirl",
+   "mat": "tex",
+   "col2": "#000000",
+   "rim": 0,
+   "uvTile": [
+    1,
+    1
+   ],
+   "uvScroll": [
+    0,
+    0
+   ],
+   "pos": {
+    "0": [
+     0,
+     1.2,
+     1
+    ],
+    "1": [
+     0,
+     1.2,
+     20
+    ]
+   },
+   "rot": [
+    90,
+    0,
+    0
+   ],
+   "op": {
+    "0": 0,
+    "0.1": 1,
+    "0.8": 1,
+    "1": 0
+   },
+   "id": "o0rl",
+   "tex": "tex/wind_swoosh_a_ln",
+   "col": "#123a55",
+   "scale": 0.59
   },
   {
    "id": "suck0",
@@ -91,9 +196,9 @@
      20
     ]
    },
-   "rate": 90,
+   "rate": 60,
    "from": "sphere",
-   "fr": 1.2,
+   "fr": 1.0,
    "dir": "in",
    "speed": [
     3,
@@ -103,14 +208,18 @@
     0.15,
     0.3
    ],
-   "look": "streak",
-   "size": [
-    1,
-    1.6
+   "look": "model",
+   "model": "wind_slash",
+   "mmat": "solid",
+   "msize": [
+    0.08,
+    0.18
    ],
-   "col": "$core",
-   "c2": "$main",
-   "gravity": 0
+   "col": "#1d6f86",
+   "c2": "#1d6f86",
+   "gravity": 0,
+   "mspin": 600,
+   "bounce": 0
   },
   {
    "id": "orb1",
@@ -144,18 +253,23 @@
    }
   },
   {
-   "id": "rim1",
    "t": "mesh",
    "at": 0.18,
    "life": 0.7,
    "att": "feet",
-   "shape": "ring",
-   "inner": 0.72,
-   "mat": "energy",
-   "col": "$hi",
-   "col2": "$main",
-   "rim": 1.5,
-   "bill": true,
+   "shape": "model",
+   "model": "wind_groundswirl",
+   "mat": "tex",
+   "col2": "#000000",
+   "rim": 0,
+   "uvTile": [
+    1,
+    1
+   ],
+   "uvScroll": [
+    0,
+    0
+   ],
    "pos": {
     "0": [
      0,
@@ -168,14 +282,114 @@
      20
     ]
    },
-   "scale": 1.2,
-   "spin": 400,
+   "rot": [
+    90,
+    0,
+    0
+   ],
    "op": {
     "0": 0,
-    "0.05": 1,
-    "0.9": 1,
+    "0.1": 1,
+    "0.8": 1,
     "1": 0
-   }
+   },
+   "id": "o1ro",
+   "tex": "tex/wind_swoosh_b",
+   "col": "#1d6f86",
+   "scale": 0.55
+  },
+  {
+   "t": "mesh",
+   "at": 0.18,
+   "life": 0.7,
+   "att": "feet",
+   "shape": "model",
+   "model": "wind_groundswirl",
+   "mat": "tex",
+   "col2": "#000000",
+   "rim": 0,
+   "uvTile": [
+    1,
+    1
+   ],
+   "uvScroll": [
+    0,
+    0
+   ],
+   "pos": {
+    "0": [
+     0,
+     1.2,
+     1
+    ],
+    "1": [
+     0,
+     1.2,
+     20
+    ]
+   },
+   "rot": [
+    90,
+    0,
+    0
+   ],
+   "op": {
+    "0": 0,
+    "0.1": 1,
+    "0.8": 1,
+    "1": 0
+   },
+   "id": "o1rh",
+   "tex": "tex/wind_swoosh_b_hi",
+   "col": "#ffffff",
+   "int": 1.3,
+   "scale": 0.55
+  },
+  {
+   "t": "mesh",
+   "at": 0.18,
+   "life": 0.7,
+   "att": "feet",
+   "shape": "model",
+   "model": "wind_groundswirl",
+   "mat": "tex",
+   "col2": "#000000",
+   "rim": 0,
+   "uvTile": [
+    1,
+    1
+   ],
+   "uvScroll": [
+    0,
+    0
+   ],
+   "pos": {
+    "0": [
+     0,
+     1.2,
+     1
+    ],
+    "1": [
+     0,
+     1.2,
+     20
+    ]
+   },
+   "rot": [
+    90,
+    0,
+    0
+   ],
+   "op": {
+    "0": 0,
+    "0.1": 1,
+    "0.8": 1,
+    "1": 0
+   },
+   "id": "o1rl",
+   "tex": "tex/wind_swoosh_b_ln",
+   "col": "#123a55",
+   "scale": 0.59
   },
   {
    "id": "suck1",
@@ -195,9 +409,9 @@
      20
     ]
    },
-   "rate": 90,
+   "rate": 60,
    "from": "sphere",
-   "fr": 1.2,
+   "fr": 1.0,
    "dir": "in",
    "speed": [
     3,
@@ -207,14 +421,18 @@
     0.15,
     0.3
    ],
-   "look": "streak",
-   "size": [
-    1,
-    1.6
+   "look": "model",
+   "model": "wind_slash",
+   "mmat": "solid",
+   "msize": [
+    0.08,
+    0.18
    ],
-   "col": "$core",
-   "c2": "$main",
-   "gravity": 0
+   "col": "#1d6f86",
+   "c2": "#1d6f86",
+   "gravity": 0,
+   "mspin": 600,
+   "bounce": 0
   },
   {
    "id": "orb2",
@@ -248,18 +466,23 @@
    }
   },
   {
-   "id": "rim2",
    "t": "mesh",
    "at": 0.36,
    "life": 0.7,
    "att": "feet",
-   "shape": "ring",
-   "inner": 0.72,
-   "mat": "energy",
-   "col": "$hi",
-   "col2": "$main",
-   "rim": 1.5,
-   "bill": true,
+   "shape": "model",
+   "model": "wind_groundswirl",
+   "mat": "tex",
+   "col2": "#000000",
+   "rim": 0,
+   "uvTile": [
+    1,
+    1
+   ],
+   "uvScroll": [
+    0,
+    0
+   ],
    "pos": {
     "0": [
      0,
@@ -272,14 +495,114 @@
      20
     ]
    },
-   "scale": 1.2,
-   "spin": 400,
+   "rot": [
+    90,
+    0,
+    0
+   ],
    "op": {
     "0": 0,
-    "0.05": 1,
-    "0.9": 1,
+    "0.1": 1,
+    "0.8": 1,
     "1": 0
-   }
+   },
+   "id": "o2ro",
+   "tex": "tex/wind_swoosh_a",
+   "col": "#1d6f86",
+   "scale": 0.55
+  },
+  {
+   "t": "mesh",
+   "at": 0.36,
+   "life": 0.7,
+   "att": "feet",
+   "shape": "model",
+   "model": "wind_groundswirl",
+   "mat": "tex",
+   "col2": "#000000",
+   "rim": 0,
+   "uvTile": [
+    1,
+    1
+   ],
+   "uvScroll": [
+    0,
+    0
+   ],
+   "pos": {
+    "0": [
+     0,
+     1.2,
+     1
+    ],
+    "1": [
+     0,
+     1.2,
+     20
+    ]
+   },
+   "rot": [
+    90,
+    0,
+    0
+   ],
+   "op": {
+    "0": 0,
+    "0.1": 1,
+    "0.8": 1,
+    "1": 0
+   },
+   "id": "o2rh",
+   "tex": "tex/wind_swoosh_a_hi",
+   "col": "#ffffff",
+   "int": 1.3,
+   "scale": 0.55
+  },
+  {
+   "t": "mesh",
+   "at": 0.36,
+   "life": 0.7,
+   "att": "feet",
+   "shape": "model",
+   "model": "wind_groundswirl",
+   "mat": "tex",
+   "col2": "#000000",
+   "rim": 0,
+   "uvTile": [
+    1,
+    1
+   ],
+   "uvScroll": [
+    0,
+    0
+   ],
+   "pos": {
+    "0": [
+     0,
+     1.2,
+     1
+    ],
+    "1": [
+     0,
+     1.2,
+     20
+    ]
+   },
+   "rot": [
+    90,
+    0,
+    0
+   ],
+   "op": {
+    "0": 0,
+    "0.1": 1,
+    "0.8": 1,
+    "1": 0
+   },
+   "id": "o2rl",
+   "tex": "tex/wind_swoosh_a_ln",
+   "col": "#123a55",
+   "scale": 0.59
   },
   {
    "id": "suck2",
@@ -299,9 +622,9 @@
      20
     ]
    },
-   "rate": 90,
+   "rate": 60,
    "from": "sphere",
-   "fr": 1.2,
+   "fr": 1.0,
    "dir": "in",
    "speed": [
     3,
@@ -311,14 +634,18 @@
     0.15,
     0.3
    ],
-   "look": "streak",
-   "size": [
-    1,
-    1.6
+   "look": "model",
+   "model": "wind_slash",
+   "mmat": "solid",
+   "msize": [
+    0.08,
+    0.18
    ],
-   "col": "$core",
-   "c2": "$main",
-   "gravity": 0
+   "col": "#1d6f86",
+   "c2": "#1d6f86",
+   "gravity": 0,
+   "mspin": 600,
+   "bounce": 0
   }
  ]
 }
