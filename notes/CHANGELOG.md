@@ -1,6 +1,7 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
 > Moved out of HANDOFF.md on 2026-10-19 to save tokens. Function/variable names are still valid; find them with `CODEMAP.md` (old `index.html` line numbers no longer apply — the code now lives in `js/`).
 
+- 2026-10-24 — **Wind VFX fix list recorded** (HANDOFF §0 + designs/wind.md): ink tornadoes = bigger/brighter white core rising with the tornado; all sk_* skill effects = redo.
 - 2026-10-24 — **Handoff (weekly limit 97%)**: wind skill generator saved as `tools/wind-kit-gen.py` (was in scratchpad); HANDOFF §0 "🆕 WIND" written (design, approved "line storm" style + layer list + colours, skill test files, weak spots, next steps) + HUD4/wands quick ref. User reviewed the skill tests: "alot thing to fix" (list not given yet).
 - 2026-10-24 — **Wind: new concept + style tests.** designs/wind.md (pusher kit, all numbers from user), wind-kit.html, wind-style.html, wind_ref/ refs. VFX: wind/style_tornado (wind circles + particles after user feedback), style_tornado_curse (black arcs + neon green + dark smoke), style_wing (sharp feather wings made of wind ribbons); mesh wind_tornado/wind_wing; palettes wind/curse; toon material; studio ?dist=. Skill 5 (Updraft) + ult (Sky Prison) ⚠ Claude-designed, awaiting user.
 - 2026-10-23 — **Menu table: paper map no longer clipped by tarot cards** (user "paper ทะลุ"). js/61: map (0.46,0.16), magnifier (0.56,0.14, handle turned away from the crystals), cards/ink/quill shifted left. Checked headless at 1891×942.
