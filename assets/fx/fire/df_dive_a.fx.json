@@ -1,0 +1,105 @@
+{
+ "v": 1,
+ "desc": "Dragonfall ดิ่ง แบบ A (สตอรี่บอร์ด #9 เฟรม 13-18 เป็นมังกรไฟพุ่งลงมา): ตัวกลายเป็นก้อนไฟ 3 มิติ + เปลวพ่นท้าย + วงความเร็วสีขาวทิ้งตามทาง (ดาวหางไฟ Blender มาจากโค้ด)",
+ "tags": [
+  "fire",
+  "pyro",
+  "dragonfall",
+  "storyboard9"
+ ],
+ "pal": "fire",
+ "dur": 0.8,
+ "layers": [
+  {
+   "id": "s3_body",
+   "t": "firevol",
+   "at": 0,
+   "life": 0.5,
+   "att": "chest",
+   "pos": [
+    0,
+    -1.3,
+    0
+   ],
+   "kind": "shell",
+   "hx": 0.95,
+   "hz": 0.95,
+   "h": 2.8,
+   "hgt": {
+    "0": 0.4,
+    "0.15": 1
+   },
+   "dis": {
+    "0": 0,
+    "0.8": 0,
+    "1": 1
+   },
+   "int": 1.4,
+   "spd": 2.5
+  },
+  {
+   "id": "s3_jet",
+   "t": "emit",
+   "at": 0,
+   "life": 0.45,
+   "att": "chest",
+   "rate": 140,
+   "from": "sphere",
+   "fr": 0.6,
+   "dir": "up",
+   "spread": 0.5,
+   "speed": [
+    3,
+    6
+   ],
+   "plife": [
+    0.25,
+    0.45
+   ],
+   "look": "fire",
+   "size": [
+    6,
+    9
+   ],
+   "col": "#fff1c0",
+   "c2": "#ff3a0a",
+   "gravity": -1,
+   "drag": 3
+  },
+  {
+   "id": "s3_rings",
+   "t": "emit",
+   "at": 0.02,
+   "life": 0.42,
+   "att": "chest",
+   "rate": 22,
+   "burst": 0,
+   "from": "point",
+   "dir": "up",
+   "speed": 0,
+   "plife": [
+    0.22,
+    0.3
+   ],
+   "look": "ring",
+   "size": [
+    16,
+    20
+   ],
+   "col": "#ffffff",
+   "c2": "#ffd27a",
+   "gravity": 0,
+   "drag": 0,
+   "curl": false,
+   "fin": 20
+  },
+  {
+   "id": "s3_blur",
+   "t": "screen",
+   "at": 0,
+   "life": 0.45,
+   "radial": 0.6,
+   "own": true
+  }
+ ]
+}

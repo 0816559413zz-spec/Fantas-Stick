@@ -1,7 +1,8 @@
 # Dragonfall impact: one Mantaflow fire sim shaped after the user's sketch (2026-10-20)
 #   1) blast at the hit point  2) tall twisting fire column in the middle
 #   3) one continuous fire ring that rolls out along the ground  4) fire rising along the edge of the circle
-# Run headless:  blender -b -P assets/src/dragonfall_impact_build.py -- <outdir> [res] [frames] [render_step] [dump]
+# Run headless:  blender -b -P assets/src/dragonfall_impact_build.py -- <outdir> [res] [frames] [render_step] [dump] [mode]
+#   mode full (default) = column + ring • ring = no tall column: low burst, rolling ring, edge fire (storyboard #9 variant A)
 #   writes <outdir>/prev_####.png (perspective preview, game-like camera, dark ground lit by the fire)
 #   dump=1 also writes <outdir>/f####.f32 flame grids + seq.json (for tools/pack_volseq.py)
 # Units: 1 Blender unit = impact radius / 1.6 (ring ends at R = 1.6).
@@ -13,6 +14,7 @@ RES = int(argv[1]) if len(argv) > 1 else 112
 FRAMES = int(argv[2]) if len(argv) > 2 else 60
 STEP = int(argv[3]) if len(argv) > 3 else 4
 DUMP = len(argv) > 4 and argv[4] == '1'
+MODE = argv[5] if len(argv) > 5 else 'full'
 R = 1.6
 os.makedirs(OUT, exist_ok=True)
 
@@ -42,24 +44,25 @@ def key_fuel(f, pts):
 # 1) blast: squashed ball at the hit point, few frames, pushes out + up
 bpy.ops.mesh.primitive_uv_sphere_add(radius=0.38, location=(0, 0, 0.12)); blast = bpy.context.active_object
 blast.name = 'Blast'; blast.scale = (1, 1, 0.45)
-fb = fire_flow(blast, 2.6, 2.4, normal=3.2, up=2.2)
+fb = fire_flow(blast, 2.6, 2.4, normal=3.2, up=2.2 if MODE != 'ring' else 1.2)
 key_fuel(fb, [(1, 2.6), (4, 2.6), (6, 0)])
 
-# 2) column: a thin emitter that shoots up like a geyser (its height = column height), then sinks back
-bpy.ops.mesh.primitive_cone_add(vertices=48, radius1=0.42, radius2=0.12, depth=1.0, location=(0, 0, 0.5)); col = bpy.context.active_object  # wide base, narrow top (sketch)
-col.name = 'Column'
-bpy.context.scene.cursor.location = (0, 0, 0)
-with bpy.context.temp_override(object=col, active_object=col, selected_objects=[col], selected_editable_objects=[col]):
-    bpy.ops.object.origin_set(type='ORIGIN_CURSOR')
-for f, h in ((1, 0.1), (5, 2.3), (22, 2.5), (36, 0.3)):
-    col.scale = (1, 1, h); col.keyframe_insert('scale', frame=f)
-fc = fire_flow(col, 1.5, 2.0, src_vel=0.6, normal=1.4, up=3.0, dist=0.25)
-fc.subframes = 2
-# break the emission up with a noise texture -> flame tongues instead of a solid pipe
-tx = bpy.data.textures.new('ColNoise', 'CLOUDS'); tx.noise_scale = 0.18; tx.noise_depth = 2
-fc.use_texture = True; fc.noise_texture = tx; fc.texture_map_type = 'AUTO'; fc.texture_size = 1.0
-fc.keyframe_insert('texture_offset', frame=1); fc.texture_offset = 3.0; fc.keyframe_insert('texture_offset', frame=40)
-key_fuel(fc, [(1, 1.6), (22, 1.6), (34, 0.6), (38, 0)])
+if MODE != 'ring':
+    # 2) column: a thin emitter that shoots up like a geyser (its height = column height), then sinks back
+    bpy.ops.mesh.primitive_cone_add(vertices=48, radius1=0.42, radius2=0.12, depth=1.0, location=(0, 0, 0.5)); col = bpy.context.active_object  # wide base, narrow top (sketch)
+    col.name = 'Column'
+    bpy.context.scene.cursor.location = (0, 0, 0)
+    with bpy.context.temp_override(object=col, active_object=col, selected_objects=[col], selected_editable_objects=[col]):
+        bpy.ops.object.origin_set(type='ORIGIN_CURSOR')
+    for f, h in ((1, 0.1), (5, 2.3), (22, 2.5), (36, 0.3)):
+        col.scale = (1, 1, h); col.keyframe_insert('scale', frame=f)
+    fc = fire_flow(col, 1.5, 2.0, src_vel=0.6, normal=1.4, up=3.0, dist=0.25)
+    fc.subframes = 2
+    # break the emission up with a noise texture -> flame tongues instead of a solid pipe
+    tx = bpy.data.textures.new('ColNoise', 'CLOUDS'); tx.noise_scale = 0.18; tx.noise_depth = 2
+    fc.use_texture = True; fc.noise_texture = tx; fc.texture_map_type = 'AUTO'; fc.texture_size = 1.0
+    fc.keyframe_insert('texture_offset', frame=1); fc.texture_offset = 3.0; fc.keyframe_insert('texture_offset', frame=40)
+    key_fuel(fc, [(1, 1.6), (22, 1.6), (34, 0.6), (38, 0)])
 
 # 3) ground ring: thin torus that grows from the centre to R, its motion drives the fire outward
 bpy.ops.mesh.primitive_torus_add(major_radius=1.0, minor_radius=0.07, major_segments=96, minor_segments=8, location=(0, 0, 0.08))

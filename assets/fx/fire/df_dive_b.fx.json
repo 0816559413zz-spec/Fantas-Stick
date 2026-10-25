@@ -1,0 +1,108 @@
+{
+ "v": 1,
+ "desc": "Dragonfall ดิ่ง แบบ B: เปลวไฟพ่นท้ายแรง + เส้นความเร็ว + วงความเร็วสีขาว (ไม่หุ้มตัว เห็นตัวละครหมุน)",
+ "tags": [
+  "fire",
+  "pyro",
+  "dragonfall",
+  "storyboard9"
+ ],
+ "pal": "fire",
+ "dur": 0.8,
+ "layers": [
+  {
+   "id": "s3_jet",
+   "t": "emit",
+   "at": 0,
+   "life": 0.45,
+   "att": "chest",
+   "rate": 200,
+   "from": "sphere",
+   "fr": 0.7,
+   "dir": "up",
+   "spread": 0.45,
+   "speed": [
+    4,
+    8
+   ],
+   "plife": [
+    0.3,
+    0.5
+   ],
+   "look": "fire",
+   "size": [
+    7,
+    11
+   ],
+   "col": "#fff1c0",
+   "c2": "#ff3a0a",
+   "gravity": -1,
+   "drag": 3
+  },
+  {
+   "id": "s3_lines",
+   "t": "emit",
+   "at": 0,
+   "life": 0.45,
+   "att": "chest",
+   "rate": 60,
+   "from": "sphere",
+   "fr": 1.2,
+   "dir": "up",
+   "spread": 0.15,
+   "speed": [
+    10,
+    16
+   ],
+   "plife": [
+    0.12,
+    0.2
+   ],
+   "look": "streak",
+   "size": [
+    3,
+    5
+   ],
+   "col": "#ffffff",
+   "c2": "#ffb347",
+   "gravity": 0,
+   "drag": 0,
+   "curl": false
+  },
+  {
+   "id": "s3_rings",
+   "t": "emit",
+   "at": 0.02,
+   "life": 0.42,
+   "att": "chest",
+   "rate": 14,
+   "burst": 0,
+   "from": "point",
+   "dir": "up",
+   "speed": 0,
+   "plife": [
+    0.22,
+    0.3
+   ],
+   "look": "ring",
+   "size": [
+    18,
+    22
+   ],
+   "col": "#ffffff",
+   "c2": "#ffd27a",
+   "gravity": 0,
+   "drag": 0,
+   "curl": false,
+   "fin": 20
+  },
+  {
+   "id": "s3_blur",
+   "t": "screen",
+   "at": 0,
+   "life": 0.45,
+   "radial": 0.6,
+   "own": true
+  }
+ ]
+}

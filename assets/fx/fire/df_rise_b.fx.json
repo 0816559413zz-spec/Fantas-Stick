@@ -1,0 +1,189 @@
+{
+ "v": 1,
+ "desc": "Dragonfall ทะยาน แบบ B (สตอรี่บอร์ด #9 เฟรม 1-5): เสาไฟพุ่งจากพื้น + ไอพ่นเปลวไฟใต้เท้า + วงความเร็วสีขาว + คลื่นอากาศ",
+ "tags": [
+  "fire",
+  "pyro",
+  "dragonfall",
+  "storyboard9"
+ ],
+ "pal": "fire",
+ "dur": 2.2,
+ "layers": [
+  {
+   "id": "s1_geyser",
+   "t": "geyser",
+   "at": 0,
+   "life": 0.6,
+   "att": "ground",
+   "hgt": 5,
+   "w": 1.4
+  },
+  {
+   "id": "s1_jet",
+   "t": "emit",
+   "at": 0,
+   "life": 0.55,
+   "att": "feet",
+   "rate": 160,
+   "from": "disc",
+   "fr": 0.5,
+   "dir": "down",
+   "spread": 0.35,
+   "speed": [
+    5,
+    9
+   ],
+   "plife": [
+    0.25,
+    0.45
+   ],
+   "look": "fire",
+   "size": [
+    6,
+    9
+   ],
+   "col": "#fff1c0",
+   "c2": "#ff3a0a",
+   "gravity": -1,
+   "drag": 2
+  },
+  {
+   "id": "s1_spd0",
+   "t": "mesh",
+   "at": 0.1,
+   "life": 0.32,
+   "att": "ground",
+   "shape": "ring",
+   "inner": 0.86,
+   "mat": "glow",
+   "col": "#ffffff",
+   "col2": "#ffd27a",
+   "pos": {
+    "0": [
+     0,
+     0.3,
+     0
+    ],
+    "1": [
+     0,
+     2.6,
+     0
+    ],
+    "ease": "out"
+   },
+   "scale": {
+    "0": 0.45,
+    "1": 1.1,
+    "ease": "out"
+   },
+   "op": {
+    "0": 0.85,
+    "1": 0
+   },
+   "int": 1.3
+  },
+  {
+   "id": "s1_spd1",
+   "t": "mesh",
+   "at": 0.2,
+   "life": 0.32,
+   "att": "ground",
+   "shape": "ring",
+   "inner": 0.86,
+   "mat": "glow",
+   "col": "#ffffff",
+   "col2": "#ffd27a",
+   "pos": {
+    "0": [
+     0,
+     0.8,
+     0
+    ],
+    "1": [
+     0,
+     4.0,
+     0
+    ],
+    "ease": "out"
+   },
+   "scale": {
+    "0": 0.45,
+    "1": 1.1,
+    "ease": "out"
+   },
+   "op": {
+    "0": 0.85,
+    "1": 0
+   },
+   "int": 1.3
+  },
+  {
+   "id": "s1_shock",
+   "t": "warp",
+   "at": 0,
+   "life": 0.4,
+   "att": "ground",
+   "pos": [
+    0,
+    0.2,
+    0
+   ],
+   "kind": "shock",
+   "flat": true,
+   "size": {
+    "0": 0.5,
+    "1": 6
+   },
+   "op": {
+    "0": 1,
+    "1": 0
+   },
+   "str": 1.1
+  },
+  {
+   "id": "s1_ring",
+   "t": "ring",
+   "at": 0,
+   "life": 0.35,
+   "att": "ground",
+   "pos": [
+    0,
+    0.08,
+    0
+   ],
+   "col": "$hi",
+   "r": 3,
+   "op": 0.6
+  },
+  {
+   "id": "s1_light",
+   "t": "light",
+   "at": 0,
+   "life": 0.5,
+   "att": "feet",
+   "int": {
+    "0": 2.2,
+    "1": 0
+   },
+   "dist": 9
+  },
+  {
+   "id": "s1_scorch",
+   "t": "decal",
+   "at": 0,
+   "life": 2.2,
+   "att": "ground",
+   "kind": "scorch",
+   "r": 1.6
+  },
+  {
+   "id": "s1_cam",
+   "t": "screen",
+   "at": 0,
+   "life": 0.25,
+   "shake": 3,
+   "own": true
+  }
+ ]
+}

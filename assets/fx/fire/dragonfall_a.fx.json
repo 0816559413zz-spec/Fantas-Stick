@@ -1,0 +1,54 @@
+{
+ "v": 1,
+ "desc": "Dragonfall ทั้งสกิล แบบ A: พรีวิวในสตูดิโอ (สตอรี่บอร์ด #9) ทะยาน 0, ดิ่ง 0.9, กระแทก 1.35 ที่เป้าห่าง 10.5 ม. (ช่วงบิน 3 วิ ย่อไว้ ปีกไฟกับดาวหางมาจากโค้ด)",
+ "tags": [
+  "fire",
+  "pyro",
+  "dragonfall",
+  "storyboard9",
+  "preview"
+ ],
+ "pal": "fire",
+ "dur": 3.8,
+ "params": {
+  "r": {
+   "def": 6,
+   "desc": "รัศมี (ม.)"
+  }
+ },
+ "layers": [
+  {
+   "id": "s1",
+   "t": "use",
+   "at": 0,
+   "fx": "fire/df_rise_a"
+  },
+  {
+   "id": "s3",
+   "t": "use",
+   "at": 0.9,
+   "att": "point",
+   "pos": [
+    0,
+    5,
+    6
+   ],
+   "fx": "fire/df_dive_a"
+  },
+  {
+   "id": "s4",
+   "t": "use",
+   "at": 1.35,
+   "att": "ground",
+   "pos": [
+    0,
+    0,
+    10.5
+   ],
+   "fx": "fire/df_impact_a",
+   "p": {
+    "r": "r"
+   }
+  }
+ ]
+}
