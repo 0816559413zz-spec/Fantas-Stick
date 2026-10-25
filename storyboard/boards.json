@@ -69936,7 +69936,7 @@
    "skill": "X (อัลติ)",
    "status": "draft",
    "created": "2026-10-25T20:44:35",
-   "updated": "2026-10-25T20:53:15",
+   "updated": "2026-10-25T21:02:04",
    "overview": "[จากเกม] เวทโบราณสายไฟ: กระโดดขึ้นฟ้าทันที ร่างยักษ์ไฟปรากฏกลางอากาศ 6 วิ (Space = ขึ้น / Ctrl หรือ C = ลง) ถือหน้าไม้ไฟ ยิงได้ 3 นัด (เว้น 1 วิ) นัดละ 100 ดาเมจ ระเบิดวง ~200",
    "mood": [],
    "colors": [
@@ -69988,18 +69988,58 @@
      "result": "",
      "note": "",
      "frames": {
-      "fps": 8,
+      "fps": 24,
       "list": [
        {
-        "id": "mvnvuzkt85",
+        "id": "mvnw4ua287",
         "bg": "blank",
-        "base": "storyboard/img/s14_frb_mvnvuzkl.jpg",
-        "t": 7.75,
+        "base": "storyboard/img/s14_frb_mvnw4u9p.jpg",
+        "t": 0,
         "ops": [],
-        "img": "storyboard/img/s14_fr_mvnw1cw1.jpg"
+        "img": "storyboard/img/s14_fr_mvnw4y47.jpg"
+       },
+       {
+        "id": "mvnw4uao88",
+        "bg": "blank",
+        "base": "storyboard/img/s14_frb_mvnw4uaf.jpg",
+        "t": 0.04,
+        "ops": [],
+        "img": "storyboard/img/s14_fr_mvnw4y51.jpg"
+       },
+       {
+        "id": "mvnw4ub789",
+        "bg": "blank",
+        "base": "storyboard/img/s14_frb_mvnw4ub2.jpg",
+        "t": 0.08,
+        "ops": [],
+        "img": "storyboard/img/s14_fr_mvnw4y5u.jpg"
+       },
+       {
+        "id": "mvnw4ubp90",
+        "bg": "blank",
+        "base": "storyboard/img/s14_frb_mvnw4ubi.jpg",
+        "t": 0.13,
+        "ops": [],
+        "img": "storyboard/img/s14_fr_mvnw4y6n.jpg"
+       },
+       {
+        "id": "mvnw4uc691",
+        "bg": "blank",
+        "base": "storyboard/img/s14_frb_mvnw4uc0.jpg",
+        "t": 0.17,
+        "ops": [],
+        "img": "storyboard/img/s14_fr_mvnw4y7i.jpg"
+       },
+       {
+        "id": "mvnw4ucm92",
+        "bg": "blank",
+        "base": "storyboard/img/s14_frb_mvnw4uch.jpg",
+        "t": 0.21,
+        "ops": [],
+        "img": "storyboard/img/s14_fr_mvnw4y82.jpg"
        }
       ],
-      "sheet": "storyboard/img/s14_frs_mvnw1cwj.jpg"
+      "sheet": "storyboard/img/s14_frs_mvnw4y8j.jpg"
      }
     },
     {
@@ -70028,11 +70068,81 @@
        "m": "enemy_dummy",
        "a": "hit"
       },
-      "at": 0.2
+      "at": 0.29
      },
      "refs": [],
      "result": "",
-     "note": ""
+     "note": "",
+     "frames": {
+      "fps": 12,
+      "list": [
+       {
+        "id": "mvnw8vet101",
+        "bg": "blank",
+        "base": "storyboard/img/s14_frb_mvnw8vel.jpg",
+        "t": 0.2,
+        "ops": [],
+        "img": "storyboard/img/s14_fr_mvnw8wzw.jpg"
+       },
+       {
+        "id": "mvnw8vic102",
+        "bg": "blank",
+        "base": "storyboard/img/s14_frb_mvnw8vi5.jpg",
+        "t": 0.28,
+        "ops": [],
+        "img": "storyboard/img/s14_fr_mvnw8x0b.jpg"
+       },
+       {
+        "id": "mvnw8vjg103",
+        "bg": "blank",
+        "base": "storyboard/img/s14_frb_mvnw8vj9.jpg",
+        "t": 0.37,
+        "ops": [],
+        "img": "storyboard/img/s14_fr_mvnw8x0w.jpg"
+       },
+       {
+        "id": "mvnw8vkc104",
+        "bg": "blank",
+        "base": "storyboard/img/s14_frb_mvnw8vk5.jpg",
+        "t": 0.45,
+        "ops": [],
+        "img": "storyboard/img/s14_fr_mvnw8x1h.jpg"
+       },
+       {
+        "id": "mvnw8vku105",
+        "bg": "blank",
+        "base": "storyboard/img/s14_frb_mvnw8vkm.jpg",
+        "t": 0.53,
+        "ops": [],
+        "img": "storyboard/img/s14_fr_mvnw8x21.jpg"
+       },
+       {
+        "id": "mvnw8vl7106",
+        "bg": "blank",
+        "base": "storyboard/img/s14_frb_mvnw8vl2.jpg",
+        "t": 0.62,
+        "ops": [],
+        "img": "storyboard/img/s14_fr_mvnw8x2l.jpg"
+       },
+       {
+        "id": "mvnw8vlp107",
+        "bg": "blank",
+        "base": "storyboard/img/s14_frb_mvnw8vlj.jpg",
+        "t": 0.7,
+        "ops": [],
+        "img": "storyboard/img/s14_fr_mvnw8x36.jpg"
+       },
+       {
+        "id": "mvnw8vm6108",
+        "bg": "blank",
+        "base": "storyboard/img/s14_frb_mvnw8vm0.jpg",
+        "t": 0.78,
+        "ops": [],
+        "img": "storyboard/img/s14_fr_mvnw8x3q.jpg"
+       }
+      ],
+      "sheet": "storyboard/img/s14_frs_mvnw8x48.jpg"
+     }
     },
     {
      "id": "mvnvq7ca3",
@@ -70106,5 +70216,5 @@
    }
   }
  ],
- "rev": 82
+ "rev": 102
 }
