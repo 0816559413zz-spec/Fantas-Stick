@@ -1,0 +1,87 @@
+{
+ "v": 1,
+ "desc": "โล่ไฟ แบบ C: กรอบหกเหลี่ยมเรืองแสง (แค่ขอบ) ลอยรอบตัว ซ้อนบนเปลือกไฟเดิมในเกม (keep) • โดนบล็อก = แผ่นเต็มต่อกันเป็นเปลือก • ตอนบล็อกโดน (bind loop:fsh_hit)",
+ "tags": [
+  "fire",
+  "pyro",
+  "shield",
+  "hex",
+  "storyboard13",
+  "impact"
+ ],
+ "pal": "fire",
+ "dur": 0.8,
+ "layers": [
+  {
+   "id": "s2_field",
+   "t": "mesh",
+   "at": 0,
+   "life": 0.42,
+   "att": "chest",
+   "pos": [
+    0,
+    -0.1,
+    0
+   ],
+   "shape": "model",
+   "model": "fire_hex_field",
+   "mat": "glow",
+   "col": "#ffb347",
+   "col2": "#ffd27a",
+   "scale": {
+    "0": 1.55,
+    "0.25": 1.35,
+    "1": 1.37,
+    "ease": "out"
+   },
+   "op": {
+    "0": 0.5,
+    "0.6": 0.35,
+    "1": 0
+   },
+   "int": {
+    "0": 0.9099999999999999,
+    "0.3": 0.9,
+    "1": 0.7
+   },
+   "rim": 1.6,
+   "fade": 0.3
+  },
+  {
+   "id": "s2_flash",
+   "t": "flash",
+   "at": 0,
+   "life": 0.08,
+   "att": "chest",
+   "size": 1.2,
+   "k": 1.2
+  },
+  {
+   "id": "s2_sparks",
+   "t": "emit",
+   "at": 0,
+   "life": 0.05,
+   "burst": 14,
+   "att": "chest",
+   "from": "sphere",
+   "fr": 1.3,
+   "dir": "out",
+   "speed": [
+    3,
+    6
+   ],
+   "plife": [
+    0.2,
+    0.35
+   ],
+   "look": "spark",
+   "size": [
+    2,
+    3
+   ],
+   "col": "#ffffff",
+   "c2": "#ff6a2a",
+   "gravity": 2
+  }
+ ]
+}

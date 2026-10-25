@@ -358,6 +358,186 @@
    "dur": 0.5,
    "n": 5
   },
+  "fire/fshield_a": {
+   "v": "0a36de6f",
+   "desc": "โล่ไฟ แบบ A (สตอรี่บอร์ด #13): แผ่นหกเหลี่ยมพลังงานไฟลอยหมุนรอบตัว • โดนบล็อก = แผ่นต่อกันเป็นเปลือก Force Field ชั่วครู่ • ตอนยกโล่ (bind loop:fsh)",
+   "pal": "fire",
+   "tags": [
+    "fire",
+    "pyro",
+    "shield",
+    "hex",
+    "storyboard13",
+    "loop"
+   ],
+   "dur": 2.7,
+   "n": 5
+  },
+  "fire/fshield_b": {
+   "v": "2820bdb9",
+   "desc": "โล่ไฟ แบบ B: แผ่นหกเหลี่ยมเป็นไฟลุก (shader ไฟ) + ไฟ 3 มิติเตี้ย ๆ ที่เท้า • โดนบล็อก = เปลือกไฟต่อกัน + คลื่นอากาศ • ตอนยกโล่ (bind loop:fsh)",
+   "pal": "fire",
+   "tags": [
+    "fire",
+    "pyro",
+    "shield",
+    "hex",
+    "storyboard13",
+    "loop"
+   ],
+   "dur": 2.7,
+   "n": 6
+  },
+  "fire/fshield_c": {
+   "v": "7078dace",
+   "desc": "โล่ไฟ แบบ C: กรอบหกเหลี่ยมเรืองแสง (แค่ขอบ) ลอยรอบตัว ซ้อนบนเปลือกไฟเดิมในเกม (keep) • โดนบล็อก = แผ่นเต็มต่อกันเป็นเปลือก • ตอนยกโล่ (bind loop:fsh)",
+   "pal": "fire",
+   "tags": [
+    "fire",
+    "pyro",
+    "shield",
+    "hex",
+    "storyboard13",
+    "loop"
+   ],
+   "dur": 2.7,
+   "n": 3
+  },
+  "fire/fshield_hit_a": {
+   "v": "6c0b474c",
+   "desc": "โล่ไฟ แบบ A (สตอรี่บอร์ด #13): แผ่นหกเหลี่ยมพลังงานไฟลอยหมุนรอบตัว • โดนบล็อก = แผ่นต่อกันเป็นเปลือก Force Field ชั่วครู่ • ตอนบล็อกโดน (bind loop:fsh_hit)",
+   "pal": "fire",
+   "tags": [
+    "fire",
+    "pyro",
+    "shield",
+    "hex",
+    "storyboard13",
+    "impact"
+   ],
+   "dur": 0.8,
+   "n": 3
+  },
+  "fire/fshield_hit_b": {
+   "v": "e2735ef7",
+   "desc": "โล่ไฟ แบบ B: แผ่นหกเหลี่ยมเป็นไฟลุก (shader ไฟ) + ไฟ 3 มิติเตี้ย ๆ ที่เท้า • โดนบล็อก = เปลือกไฟต่อกัน + คลื่นอากาศ • ตอนบล็อกโดน (bind loop:fsh_hit)",
+   "pal": "fire",
+   "tags": [
+    "fire",
+    "pyro",
+    "shield",
+    "hex",
+    "storyboard13",
+    "impact"
+   ],
+   "dur": 0.8,
+   "n": 4
+  },
+  "fire/fshield_hit_c": {
+   "v": "9657cc2c",
+   "desc": "โล่ไฟ แบบ C: กรอบหกเหลี่ยมเรืองแสง (แค่ขอบ) ลอยรอบตัว ซ้อนบนเปลือกไฟเดิมในเกม (keep) • โดนบล็อก = แผ่นเต็มต่อกันเป็นเปลือก • ตอนบล็อกโดน (bind loop:fsh_hit)",
+   "pal": "fire",
+   "tags": [
+    "fire",
+    "pyro",
+    "shield",
+    "hex",
+    "storyboard13",
+    "impact"
+   ],
+   "dur": 0.8,
+   "n": 3
+  },
+  "fire/fshield_parry_a": {
+   "v": "70e0dbff",
+   "desc": "โล่ไฟ แบบ A (สตอรี่บอร์ด #13): แผ่นหกเหลี่ยมพลังงานไฟลอยหมุนรอบตัว • โดนบล็อก = แผ่นต่อกันเป็นเปลือก Force Field ชั่วครู่ • ตอน Parry (bind loop:fsh_parry)",
+   "pal": "fire",
+   "tags": [
+    "fire",
+    "pyro",
+    "shield",
+    "hex",
+    "storyboard13",
+    "impact"
+   ],
+   "dur": 0.8,
+   "n": 4
+  },
+  "fire/fshield_parry_b": {
+   "v": "663a18b1",
+   "desc": "โล่ไฟ แบบ B: แผ่นหกเหลี่ยมเป็นไฟลุก (shader ไฟ) + ไฟ 3 มิติเตี้ย ๆ ที่เท้า • โดนบล็อก = เปลือกไฟต่อกัน + คลื่นอากาศ • ตอน Parry (bind loop:fsh_parry)",
+   "pal": "fire",
+   "tags": [
+    "fire",
+    "pyro",
+    "shield",
+    "hex",
+    "storyboard13",
+    "impact"
+   ],
+   "dur": 0.8,
+   "n": 4
+  },
+  "fire/fshield_parry_c": {
+   "v": "91bf1e0e",
+   "desc": "โล่ไฟ แบบ C: กรอบหกเหลี่ยมเรืองแสง (แค่ขอบ) ลอยรอบตัว ซ้อนบนเปลือกไฟเดิมในเกม (keep) • โดนบล็อก = แผ่นเต็มต่อกันเป็นเปลือก • ตอน Parry (bind loop:fsh_parry)",
+   "pal": "fire",
+   "tags": [
+    "fire",
+    "pyro",
+    "shield",
+    "hex",
+    "storyboard13",
+    "impact"
+   ],
+   "dur": 0.8,
+   "n": 3
+  },
+  "fire/fshield_preview_a": {
+   "v": "ae0f425f",
+   "desc": "พรีวิวโล่ไฟ แบบ A ในสตูดิโอ: ยกโล่ → บล็อกโดน 0.8 / 1.6 วิ → Parry 2.4 วิ",
+   "pal": "fire",
+   "tags": [
+    "fire",
+    "pyro",
+    "shield",
+    "hex",
+    "storyboard13",
+    "preview"
+   ],
+   "dur": 3.2,
+   "n": 4
+  },
+  "fire/fshield_preview_b": {
+   "v": "2f8131ac",
+   "desc": "พรีวิวโล่ไฟ แบบ B ในสตูดิโอ: ยกโล่ → บล็อกโดน 0.8 / 1.6 วิ → Parry 2.4 วิ",
+   "pal": "fire",
+   "tags": [
+    "fire",
+    "pyro",
+    "shield",
+    "hex",
+    "storyboard13",
+    "preview"
+   ],
+   "dur": 3.2,
+   "n": 4
+  },
+  "fire/fshield_preview_c": {
+   "v": "70d7d535",
+   "desc": "พรีวิวโล่ไฟ แบบ C ในสตูดิโอ: ยกโล่ → บล็อกโดน 0.8 / 1.6 วิ → Parry 2.4 วิ",
+   "pal": "fire",
+   "tags": [
+    "fire",
+    "pyro",
+    "shield",
+    "hex",
+    "storyboard13",
+    "preview"
+   ],
+   "dur": 3.2,
+   "n": 4
+  },
   "fire/spark_cast": {
    "v": "f47bfb55",
    "desc": "ประกายไฟ — ตอนยิง (แบบ C): ควันพ่นปากไม้ + เปลวแวบ",
@@ -1676,6 +1856,24 @@
    "desc": "หอกพลังงานชี้ไปข้างหน้า (+z) — กระสุน / ท่าแทง",
    "mat": "energy",
    "n": 3
+  },
+  "fire_hex_field": {
+   "v": "090432e3",
+   "desc": "โล่หกเหลี่ยมต่อกันเป็นเปลือก (Force Field) ตอนโดนโจมตี (โล่ไฟ สตอรี่บอร์ด #13) • จุดกลาง = กลางลำตัว",
+   "mat": "energy",
+   "n": 7
+  },
+  "fire_hex_frames": {
+   "v": "1e10ccf6",
+   "desc": "กรอบหกเหลี่ยมไฟ (แค่ขอบ) ลอยรอบตัว (โล่ไฟ #13 แบบ C)",
+   "mat": "energy",
+   "n": 4
+  },
+  "fire_hex_plates": {
+   "v": "2c72cbde",
+   "desc": "แผ่นหกเหลี่ยมไฟลอยรอบตัว (โล่ไฟ สตอรี่บอร์ด #13) — แผ่นแยกกัน มีช่องว่าง • จุดกลาง = กลางลำตัว",
+   "mat": "energy",
+   "n": 4
   },
   "fire_licks": {
    "v": "8e23a85a",

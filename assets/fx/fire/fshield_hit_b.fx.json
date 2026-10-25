@@ -1,0 +1,109 @@
+{
+ "v": 1,
+ "desc": "โล่ไฟ แบบ B: แผ่นหกเหลี่ยมเป็นไฟลุก (shader ไฟ) + ไฟ 3 มิติเตี้ย ๆ ที่เท้า • โดนบล็อก = เปลือกไฟต่อกัน + คลื่นอากาศ • ตอนบล็อกโดน (bind loop:fsh_hit)",
+ "tags": [
+  "fire",
+  "pyro",
+  "shield",
+  "hex",
+  "storyboard13",
+  "impact"
+ ],
+ "pal": "fire",
+ "dur": 0.8,
+ "layers": [
+  {
+   "id": "s2_field",
+   "t": "mesh",
+   "at": 0,
+   "life": 0.42,
+   "att": "chest",
+   "pos": [
+    0,
+    -0.1,
+    0
+   ],
+   "shape": "model",
+   "model": "fire_hex_field",
+   "mat": "fire",
+   "col": "#ff6a2a",
+   "col2": "#ffd27a",
+   "scale": {
+    "0": 1.18,
+    "0.25": 1,
+    "1": 1.02,
+    "ease": "out"
+   },
+   "op": {
+    "0": 0.8,
+    "0.6": 0.55,
+    "1": 0
+   },
+   "int": {
+    "0": 1.3,
+    "0.3": 0.9,
+    "1": 0.7
+   },
+   "rim": 1.6,
+   "fade": 0.3,
+   "heat": {
+    "0": 0.5,
+    "1": 0
+   },
+   "disp": 0.3
+  },
+  {
+   "id": "s2_warp",
+   "t": "warp",
+   "at": 0,
+   "life": 0.35,
+   "att": "chest",
+   "kind": "shock",
+   "size": {
+    "0": 2,
+    "1": 5
+   },
+   "op": {
+    "0": 1,
+    "1": 0
+   },
+   "str": 1.2
+  },
+  {
+   "id": "s2_flash",
+   "t": "flash",
+   "at": 0,
+   "life": 0.08,
+   "att": "chest",
+   "size": 1.2,
+   "k": 1.2
+  },
+  {
+   "id": "s2_sparks",
+   "t": "emit",
+   "at": 0,
+   "life": 0.05,
+   "burst": 14,
+   "att": "chest",
+   "from": "sphere",
+   "fr": 1.3,
+   "dir": "out",
+   "speed": [
+    3,
+    6
+   ],
+   "plife": [
+    0.2,
+    0.35
+   ],
+   "look": "spark",
+   "size": [
+    2,
+    3
+   ],
+   "col": "#ffffff",
+   "c2": "#ff6a2a",
+   "gravity": 2
+  }
+ ]
+}

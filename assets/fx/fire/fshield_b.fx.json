@@ -1,0 +1,175 @@
+{
+ "v": 1,
+ "desc": "โล่ไฟ แบบ B: แผ่นหกเหลี่ยมเป็นไฟลุก (shader ไฟ) + ไฟ 3 มิติเตี้ย ๆ ที่เท้า • โดนบล็อก = เปลือกไฟต่อกัน + คลื่นอากาศ • ตอนยกโล่ (bind loop:fsh)",
+ "tags": [
+  "fire",
+  "pyro",
+  "shield",
+  "hex",
+  "storyboard13",
+  "loop"
+ ],
+ "pal": "fire",
+ "dur": 2.7,
+ "layers": [
+  {
+   "t": "mesh",
+   "att": "chest",
+   "pos": [
+    0,
+    -0.1,
+    0
+   ],
+   "shape": "model",
+   "model": "fire_hex_plates",
+   "mat": "fire",
+   "col": "#ff6a2a",
+   "col2": "#ffd27a",
+   "rim": 1.4,
+   "int": 1.2,
+   "heat": 0.15,
+   "disp": 0.3,
+   "id": "s1_in",
+   "at": 0,
+   "life": 0.22,
+   "scale": {
+    "0": 1.7,
+    "1": 1,
+    "ease": "out",
+    "x": 1
+   },
+   "op": {
+    "0": 0,
+    "1": 0.95
+   },
+   "spin": 160,
+   "fade": 0
+  },
+  {
+   "t": "mesh",
+   "att": "chest",
+   "pos": [
+    0,
+    -0.1,
+    0
+   ],
+   "shape": "model",
+   "model": "fire_hex_plates",
+   "mat": "fire",
+   "col": "#ff6a2a",
+   "col2": "#ffd27a",
+   "rim": 1.4,
+   "int": 1.2,
+   "heat": 0.15,
+   "disp": 0.3,
+   "id": "s1_plates",
+   "at": 0.22,
+   "life": 2.4,
+   "loop": true,
+   "scale": {
+    "0": 1,
+    "0.5": 1.04,
+    "1": 1,
+    "x": 1
+   },
+   "op": 0.95,
+   "spin": 40,
+   "fade": 0
+  },
+  {
+   "t": "mesh",
+   "att": "chest",
+   "pos": [
+    0,
+    -0.1,
+    0
+   ],
+   "shape": "model",
+   "model": "fire_hex_plates",
+   "mat": "fire",
+   "col": "#ff6a2a",
+   "col2": "#ffd27a",
+   "rim": 1.4,
+   "int": 1.2,
+   "heat": 0.15,
+   "disp": 0.3,
+   "id": "s3_out",
+   "at": 0,
+   "end": true,
+   "life": 0.3,
+   "scale": {
+    "0": 1,
+    "1": 1.6,
+    "ease": "out",
+    "x": 1
+   },
+   "op": {
+    "0": 0.95,
+    "1": 0
+   },
+   "spin": 120,
+   "fade": 0
+  },
+  {
+   "id": "s1_feet",
+   "t": "firevol",
+   "at": 0,
+   "life": 2,
+   "loop": true,
+   "att": "feet",
+   "kind": "shell",
+   "hx": 1.0,
+   "hz": 1.0,
+   "h": 1.1,
+   "hgt": {
+    "0": 1
+   },
+   "dis": {
+    "0": 0
+   },
+   "int": 0.9,
+   "spd": 1.2
+  },
+  {
+   "id": "s1_embers",
+   "t": "emit",
+   "at": 0.1,
+   "life": 1,
+   "loop": true,
+   "att": "chest",
+   "rate": 10,
+   "burst": 0,
+   "from": "sphere",
+   "fr": 1.35,
+   "dir": "up",
+   "spread": 0.6,
+   "speed": [
+    0.4,
+    1
+   ],
+   "plife": [
+    0.4,
+    0.7
+   ],
+   "look": "ember",
+   "size": [
+    1.6,
+    2.4
+   ],
+   "col": "#ffd27a",
+   "c2": "#ff3a0a",
+   "gravity": -0.8,
+   "x": true
+  },
+  {
+   "id": "s1_light",
+   "t": "light",
+   "at": 0,
+   "life": 1,
+   "loop": true,
+   "att": "chest",
+   "int": 1.2,
+   "dist": 6
+  }
+ ]
+}

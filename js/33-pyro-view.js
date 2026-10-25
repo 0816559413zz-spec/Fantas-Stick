@@ -77,6 +77,11 @@ function makeMagicCircle(){
 const _fsGeo=(()=>{const P=[[0.95,0],[1.22,0.35],[1.38,0.9],[1.36,1.45],[1.2,1.95],[0.95,2.4],[0.7,2.9],[0.5,3.3]].map(([r,y])=>new THREE.Vector2(r,y));
   const g=new THREE.LatheGeometry(P,48);g.userData.keep=true;return g;})();
 function fireShieldFX(o,p,on,dt){
+  // โล่ไฟจากไฟล์เอฟเฟกต์ (สตอรี่บอร์ด #13): bind.json "loop:fsh" เล่นวนตอนยกโล่ (ตามตัว) • keep:true = ซ้อนเปลือกไฟเดิม ไม่งั้นซ่อนของเดิม
+  o.fshOn=on;const fn=on?fxLoopName('fsh'):null;
+  if(fn){if(!o.fshFx||o.fshFxN!==fn){if(o.fshFx)fxStop(o.fshFx);o.fshFx=fxPlay(fn,{x:p.x,y:p.y,h:o.zs||0,follow:p.id,aim:false});o.fshFxN=fn;}}
+  else if(o.fshFx){fxStop(o.fshFx);o.fshFx=null;o.fshFxN=null;}
+  if(fn&&!fxLoopKeep('fsh'))on=false;
   if(!on){if(o.fshR)o.fshR.visible=false;return;}
   if(!o.fshR){const g=new THREE.Group();
     const m1=fireMat({mode:'sheet',scale:[14,2.8,1],speed:1.8,int:0.82,heat:-0.08,op:0.85}),m2=fireMat({mode:'sheet',scale:[19,2.5,1],speed:2.3,int:0.8,heat:-0.18,op:0.7});

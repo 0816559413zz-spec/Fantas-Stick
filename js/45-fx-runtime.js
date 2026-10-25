@@ -314,6 +314,10 @@ const FXCODE={
 // เอฟเฟกต์วนตามสถานะ (ไม่ใช่ event): bind.json "loop:<ชื่อ>" เช่น loop:blaze = ออร่า Blazeform • ทดลองได้ด้วย localStorage wd_fxbind
 function fxLoopName(k){const e=FXR.over['loop:'+k]||FXR.bind['loop:'+k];return e&&e.fx||null;}
 const blzFxName=()=>fxLoopName('blaze');
+const fxLoopKeep=k=>{const e=FXR.over['loop:'+k]||FXR.bind['loop:'+k];return !!(e&&e.keep);};   // keep:true = เล่นซ้อนภาพจากโค้ด (ไม่ซ่อนของเดิม)
+// โล่ไฟโดนบล็อก: event block ไม่มี id → หาผู้เล่นที่ยกโล่ไฟอยู่ใกล้จุดนั้น แล้วเล่น loop:fsh_hit ตามตัว (Force Field ต่อกันชั่วครู่)
+function fshHitFx(ev){const n=fxLoopName('fsh_hit');if(!n)return;const now=performance.now();
+  for(const [id,o] of PM3){if(!o.fshOn||now-(o.fshHitT||0)<180)continue;const q=simOf(o.g.position);if(Math.hypot(q.x-ev.x,q.y-ev.y)<70){o.fshHitT=now;fxPlay(n,{x:q.x,y:q.y,h:Math.max(0,q.h-GY(q.x,q.y)),follow:id,aim:false});break;}}}
 // คืน true = "replace" → ข้ามภาพจากโค้ดเดิมของ event นี้
 function fxBind(ev,H){if(!FXR.ready||!FXR.on||ev.x===undefined)return false;
   const keys=ev.k==='efx'?['efx:'+ev.z]:(ev.t!==undefined?[ev.k+':'+ev.t,ev.k]:[ev.k]);let rep=false;

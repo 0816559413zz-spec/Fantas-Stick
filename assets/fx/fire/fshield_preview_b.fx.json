@@ -1,0 +1,40 @@
+{
+ "v": 1,
+ "desc": "พรีวิวโล่ไฟ แบบ B ในสตูดิโอ: ยกโล่ → บล็อกโดน 0.8 / 1.6 วิ → Parry 2.4 วิ",
+ "tags": [
+  "fire",
+  "pyro",
+  "shield",
+  "hex",
+  "storyboard13",
+  "preview"
+ ],
+ "pal": "fire",
+ "dur": 3.2,
+ "layers": [
+  {
+   "id": "hold",
+   "t": "use",
+   "at": 0,
+   "fx": "fire/fshield_b"
+  },
+  {
+   "id": "hit1",
+   "t": "use",
+   "at": 0.8,
+   "fx": "fire/fshield_hit_b"
+  },
+  {
+   "id": "hit2",
+   "t": "use",
+   "at": 1.6,
+   "fx": "fire/fshield_hit_b"
+  },
+  {
+   "id": "parry",
+   "t": "use",
+   "at": 2.4,
+   "fx": "fire/fshield_parry_b"
+  }
+ ]
+}
