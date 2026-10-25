@@ -1,5 +1,5 @@
 {
- "next": 14,
+ "next": 15,
  "items": [
   {
    "id": 1,
@@ -69928,7 +69928,183 @@
     "dur": 1.783,
     "clips": "0s idle"
    }
+  },
+  {
+   "id": 14,
+   "title": "สายไฟ — Inferno Colossus",
+   "who": "Pyro (ไฟ)",
+   "skill": "X (อัลติ)",
+   "status": "draft",
+   "created": "2026-10-25T20:44:35",
+   "updated": "2026-10-25T20:53:15",
+   "overview": "[จากเกม] เวทโบราณสายไฟ: กระโดดขึ้นฟ้าทันที ร่างยักษ์ไฟปรากฏกลางอากาศ 6 วิ (Space = ขึ้น / Ctrl หรือ C = ลง) ถือหน้าไม้ไฟ ยิงได้ 3 นัด (เว้น 1 วิ) นัดละ 100 ดาเมจ ระเบิดวง ~200",
+   "mood": [],
+   "colors": [
+    "#ff6a2a",
+    "#ffffff"
+   ],
+   "refs": [],
+   "fx": "",
+   "reply": "",
+   "game": {
+    "id": "colossus",
+    "kind": "ult",
+    "path": "pyro",
+    "pathI": 0,
+    "cd": 0,
+    "file": "js/06-pyro.js",
+    "line": 135
+   },
+   "shots": [
+    {
+     "id": "mvnvq7ca1",
+     "kind": "cast",
+     "name": "ปล่อย",
+     "dur": 0.2,
+     "overlap": 0,
+     "where": "มือ / อาวุธ",
+     "size": 1,
+     "power": 3,
+     "shapes": [],
+     "motion": [],
+     "camera": [],
+     "colors": [],
+     "text": "",
+     "sketches": [],
+     "scene3d": {
+      "v": 1,
+      "objs": [],
+      "cast": {
+       "m": "char_student",
+       "rec": "storyboard/rec/colossus_mvnvqceb.json"
+      },
+      "targ": {
+       "m": "enemy_dummy",
+       "a": "idle"
+      },
+      "at": 0
+     },
+     "refs": [],
+     "result": "",
+     "note": "",
+     "frames": {
+      "fps": 8,
+      "list": [
+       {
+        "id": "mvnvuzkt85",
+        "bg": "blank",
+        "base": "storyboard/img/s14_frb_mvnvuzkl.jpg",
+        "t": 7.75,
+        "ops": [],
+        "img": "storyboard/img/s14_fr_mvnw1cw1.jpg"
+       }
+      ],
+      "sheet": "storyboard/img/s14_frs_mvnw1cwj.jpg"
+     }
+    },
+    {
+     "id": "mvnvq7ca2",
+     "kind": "impact",
+     "name": "กระทบ",
+     "dur": 0.4,
+     "overlap": 0,
+     "where": "ใต้เท้า / พื้นรอบตัว",
+     "size": 1,
+     "power": 3,
+     "shapes": [],
+     "motion": [],
+     "camera": [],
+     "colors": [],
+     "text": "เวทโบราณสายไฟ: กระโดดขึ้นฟ้าทันที ร่างยักษ์ไฟปรากฏกลางอากาศ 6 วิ (Space = ขึ้น / Ctrl หรือ C = ลง) ถือหน้าไม้ไฟ ยิงได้ 3 นัด (เว้น 1 วิ) นัดละ 100 ดาเมจ ระเบิดวง ~200",
+     "sketches": [],
+     "scene3d": {
+      "v": 1,
+      "objs": [],
+      "cast": {
+       "m": "char_student",
+       "rec": "storyboard/rec/colossus_mvnvqceb.json"
+      },
+      "targ": {
+       "m": "enemy_dummy",
+       "a": "hit"
+      },
+      "at": 0.2
+     },
+     "refs": [],
+     "result": "",
+     "note": ""
+    },
+    {
+     "id": "mvnvq7ca3",
+     "kind": "linger",
+     "name": "ค้าง 6 วิ (จากเกม) — ในเกมยาวกว่าแถบ",
+     "dur": 3,
+     "overlap": 0,
+     "where": "รอบตัวผู้ร่าย",
+     "size": 1,
+     "power": 3,
+     "shapes": [],
+     "motion": [],
+     "camera": [],
+     "colors": [],
+     "text": "เวทโบราณสายไฟ: กระโดดขึ้นฟ้าทันที ร่างยักษ์ไฟปรากฏกลางอากาศ 6 วิ (Space = ขึ้น / Ctrl หรือ C = ลง) ถือหน้าไม้ไฟ ยิงได้ 3 นัด (เว้น 1 วิ) นัดละ 100 ดาเมจ ระเบิดวง ~200",
+     "sketches": [],
+     "scene3d": {
+      "v": 1,
+      "objs": [],
+      "cast": {
+       "m": "char_student",
+       "rec": "storyboard/rec/colossus_mvnvqceb.json"
+      },
+      "targ": {
+       "m": "enemy_dummy",
+       "a": "idle"
+      },
+      "at": 0.6
+     },
+     "refs": [],
+     "result": "",
+     "note": ""
+    },
+    {
+     "id": "mvnvq7ca4",
+     "kind": "fade",
+     "name": "จางหาย",
+     "dur": 0.3,
+     "overlap": 0,
+     "where": "",
+     "size": 1,
+     "power": 3,
+     "shapes": [],
+     "motion": [],
+     "camera": [],
+     "colors": [],
+     "text": "",
+     "sketches": [],
+     "scene3d": {
+      "v": 1,
+      "objs": [],
+      "cast": {
+       "m": "char_student",
+       "rec": "storyboard/rec/colossus_mvnvqceb.json"
+      },
+      "targ": {
+       "m": "enemy_dummy",
+       "a": "idle"
+      },
+      "at": 3.6
+     },
+     "refs": [],
+     "result": "",
+     "note": ""
+    }
+   ],
+   "rec": {
+    "file": "storyboard/rec/colossus_mvnvqceb.json",
+    "dur": 7.75,
+    "clips": "0s idle"
+   }
   }
  ],
- "rev": 59
+ "rev": 82
 }
