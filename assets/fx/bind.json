@@ -246,6 +246,16 @@
       "len": "ev.len/20"
     }
   },
+  "loop:fsh": {
+    "fx": "fire/fshield_c",
+    "keep": true
+  },
+  "loop:fsh_hit": {
+    "fx": "fire/fshield_hit_c"
+  },
+  "loop:fsh_parry": {
+    "fx": "fire/fshield_parry_c"
+  },
   "loop:blaze": {
     "fx": "fire/blazeform_b"
   },

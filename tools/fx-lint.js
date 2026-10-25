@@ -84,7 +84,7 @@
         if (!b || !b.fx) { out.push({ lv: 'err', at: key, msg: 'ต้องมี fx' }); continue; }
         if (ctx.names && !ctx.names.has(b.fx)) out.push({ lv: 'err', at: key, msg: `ไม่มีไฟล์ assets/fx/${b.fx}.fx.json` });
         if (b.mode && !['add', 'replace'].includes(b.mode)) out.push({ lv: 'err', at: key, msg: 'mode ต้องเป็น add หรือ replace' });
-        for (const k of Object.keys(b)) if (!['fx', 'mode', 'p', 's', 'pal', 'follow', 'note', 'if'].includes(k)) out.push({ lv: 'warn', at: key + '.' + k, msg: 'ฟิลด์ที่ไม่รู้จัก' });
+        for (const k of Object.keys(b)) if (!['fx', 'mode', 'p', 's', 'pal', 'follow', 'note', 'if', 'keep'].includes(k)) out.push({ lv: 'warn', at: key + '.' + k, msg: 'ฟิลด์ที่ไม่รู้จัก' });
       }
     }
     return out;

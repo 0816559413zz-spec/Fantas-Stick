@@ -825,13 +825,14 @@ Real 2D fluid simulation (stable fluids with buoyancy + vorticity) — like Blen
 
 ## ผูกกับเกม — `assets/fx/bind.json`
 assets/fx/bind.json — ผูกเหตุการณ์ของเกมกับเอฟเฟกต์ โดยไม่แก้โค้ดสกิล
-- คีย์: "efx:<ชื่อ efx>" (เช่น efx:dfboom) • "<k>:<t>" หรือ "<k>" สำหรับ event ทั่วไป (เช่น imp:fire, parry, die)
+- คีย์: "efx:<ชื่อ efx>" (เช่น efx:dfboom) • "<k>:<t>" หรือ "<k>" สำหรับ event ทั่วไป (เช่น imp:fire, parry, die) • "loop:<ชื่อ>" = เล่นตามสถานะที่โค้ดเรียก: loop:blaze (Blazeform ตลอด 6 วิ), loop:fsh (ยกโล่ไฟ), loop:fsh_hit (โล่ไฟโดนบล็อก), loop:fsh_parry (โล่ไฟ Parry)
 - `fx`: ชื่อเอฟเฟกต์ (path ใต้ assets/fx/ ไม่มี .fx.json)
 - `mode`: add = เล่นเพิ่มจากภาพเดิม (ค่าเริ่ม) • replace = แทนภาพเดิมทั้งหมดของ event นี้
 - `p`: params เป็นสูตรจาก ev ได้ เช่น {"r":"ev.r/20"}
 - `s`: ขนาด (ตัวเลขหรือสูตร)
 - `pal`: บังคับธาตุ
 - `follow`: "ev.id" = ติดตามผู้เล่นคนนั้น
+- `keep`: loop:<ชื่อ> เท่านั้น: true = เล่นซ้อนภาพจากโค้ดเดิม (ไม่ซ่อนของเดิม)
 - `if`: เล่นเฉพาะเมื่อสูตรเป็นจริง/ไม่เป็น 0 เช่น "ev.ax==1" (ขวาน) / "ev.ax==0&&ev.c<2" (ดาบ จังหวะ 1-2) — ใช้ == != < > && || ได้ (ห้าม = ตัวเดียว) • คีย์เดียวใส่เป็นรายการ [ ] ได้หลายอัน
 
 ตัวอย่าง:
