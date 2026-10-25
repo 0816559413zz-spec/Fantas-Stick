@@ -97,3 +97,4 @@ Then do the work, keep replying in Thai, and update this file at the end (CLAUDE
 > **🔥 Dragonfall storyboard #9 (2026-10-25):** 2 variants built from the user's frame-by-frame sketch — A (literal: no tall column, hollow fire ring, radial spikes) / B (Blender column kept + sketch details). Waiting for the user's pick; then bind it in `assets/fx/bind.json` (A: dfboom `replace`).
 > **✅ Dragonfall = storyboard #9 variant A (user picked 2026-10-25):** rise df_rise_a, dive df_dive_a, impact df_impact_a (replace — no tall column any more; hollow fire ring + radial spikes + white streaks).
 > **🔥 Blazeform storyboard #12 (2026-10-25):** 3 variants (A sketch / B fire rune + geysers / C light) in `fire/blazeform_a|b|c`, waiting for the user's pick → bind with `"loop:blaze": {"fx": "fire/blazeform_x"}` in bind.json.
+> **✅ Blazeform = storyboard #12 variant B (user picked 2026-10-25):** `loop:blaze` → `fire/blazeform_b` (fire rune circle + tall edge wall + random geysers).

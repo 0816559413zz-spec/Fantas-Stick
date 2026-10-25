@@ -246,6 +246,9 @@
       "len": "ev.len/20"
     }
   },
+  "loop:blaze": {
+    "fx": "fire/blazeform_b"
+  },
   "efx:dfrise": {
     "fx": "fire/df_rise_a",
     "mode": "add",

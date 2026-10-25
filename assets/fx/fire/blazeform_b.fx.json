@@ -800,7 +800,7 @@
   {
    "id": "s3_rune_2",
    "t": "decal",
-   "life": 2.3,
+   "life": 1.6,
    "att": "feet",
    "kind": "rune",
    "r": 5.98,
@@ -829,7 +829,7 @@
   {
    "id": "s3_glow_2",
    "t": "decal",
-   "life": 2.3,
+   "life": 1.6,
    "att": "feet",
    "kind": "glyph",
    "r": 3.9,
