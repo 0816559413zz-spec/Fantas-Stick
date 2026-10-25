@@ -5,7 +5,7 @@ Format: `name:line` = top-level function/const/let in that file. `§line title` 
 ## js/01-core.js (22) — แกนกลาง: import Three.js + ฟังก์ชันพื้นฐาน ($ rnd clamp lerp store to…
 $:12 rnd:13 clamp:14 lerp:15 dist2:16 lerpAng:17 esc:18 shuffle:19 store:20 toastT:21 toast:22
 
-## js/02-data.js (340) — ค่าคงที่ของเกม
+## js/02-data.js (340) — 
 W:4 H:4 PR:4 PILLARS:6 SPAWNF:7 mulberry:9 genForest:10 genPitch:27 genHogsmeade:36
 §54 แผนที่โล่ง 3 แบบ (ผู้ใช้: ป่ามืดไม่สนุก อยากได้ที่โล่งๆ)
 genMeadow:55 genLake:61 genRuins:66
@@ -56,8 +56,7 @@ stormRailFire:145
 §155 สกิล 6 (3 stacks): ลูกสายฟ้าโดม — ทะยานขึ้น บินเล็ง 3 วิ คลิกยิงลูกสา…
 stormDomeTick:156 stormDomeFire:171 stormDomeSlam:179 updateStorm:184
 
-## js/09-earth.js (244) — สายดิน ⛰️ (ผู้ใช้ออกแบบทั้งหมด — designs/earth.md §0 FINAL SPEC) • ฝั่งโฮสต์
-§8 E_CRUSH = เวลาก่อนหนีบ Tectonic Crush = ช่วง Stand ออกแรงดัน (ช้า) + …
+## js/09-earth.js (244) — 
 EARTH:10 E_SH:10 E_CRUSH_PUSH:10 E_CRUSH_SLIDE:10 E_ENV:10
 §14 ตัวช่วย
 eOn:15 eStand:16 eNoStand:17 eSegD:19 eAdd:20 eCollide:22 eProjHit:29 eKill:32
@@ -85,10 +84,10 @@ MIND:66 summonMin:72 minTarget:81 minShoot:88 updateMins:93 aimTarget:133
 §180 ร่ายคาถา
 castSlot:181 castUlt:196
 
-## js/10-net.js (110) — เครือข่าย (PeerJS / WebRTC)
+## js/10-net.js (110) — 
 PREFIX:4 NET:5 RC:9 LAG:11 lagDo:12 hostSend:13 LOBBY:14 genCode:15 sendAll:16 setStatus:17 hostGame:19 netConnect:42 netLost:50 joinGame:65 clientOnData:83 leave:98 leaveRoom:100
 
-## js/11-host.js (384) — ฝั่งโฮสต์: สถานะเกมทั้งหมดคำนวณที่นี่ (server-authoritative)
+## js/11-host.js (384) — 
 G:4 EVL:4 EVN:4 hostLast:4 tickN:4 emit:5 feed:6 banner:7 plist:8 cleanName:9 freshStats:11 newPlayer:18 emptyInput:21 frameOk:23 addPlayer:24 initHostLobby:33 lobbyMsg:40 broadcastLobby:41 INPN:43 hostOnData:44 hostDrop:74 hostRemove:83 validate:96 hostStart:107 hostToLobby:132 MIDJOIN:138 midJoin:139 CHATT:155 chatRelay:156 emoHost:164 resetBody:166 fmap:172 spawnPts:173 teamPts:175 placeAll:176 respawn:188
 §205 ลูปหลักฝั่งโฮสต์
 hostTick:206 angDiff:220 cH:222 vR:223 updatePlayer:225 hitProp:371 damagePropsIn:378 nearUseProp:379 useProp:380
@@ -104,8 +103,7 @@ spawnEnemy:2 setupWave:19 bossPhase:36 enemySlam:44 updateEnemies:55
 ## js/14-mode-rules.js (105) — กติกาของแต่ละโหมด
 hostPick:2 clearField:10 modeLogic:11 endMatch:80 matchOver:105
 
-## js/15-modes.js (400) — โหมดพิเศษ: ควิดดิช / แข่งไม้กวาด / แบทเทิลรอยัล / หาลอร์ดโวลเดอมอร์ / ห้องฝึก
-§4 ส่งข้อความลับถึงผู้เล่นคนเดียว (เช่น บทบาทในโหมดหาลอร์ดโวลเดอมอร์)
+## js/15-modes.js (400) — 
 sendPriv:5 TASKF:9 taskPts:10 raceRings:11 modeInit:17 spawnDummy:59 trainTick:64 TR_KEYS:79 trTeams:81 trCmd:89 hostEndTraining:106
 §108 ควิดดิช
 quidThrow:109 quidDrop:115 quidTick:120 snitchTick:155
@@ -135,7 +133,7 @@ MY:202 myDB:203 mySave:204 myLoad:207 myDecodeReady:213 myPlay:214 myNext:226 my
 §248 เพลงประกอบ (สร้างสดตามแผนที่)
 MUSIC:249 THEMES:250 padNote:255 musicTick:262 toggleMusic:291
 
-## js/19-client.js (246) — ฝั่งแสดงผล (ทุกเครื่อง รวมโฮสต์ ใช้ snapshot เดียวกัน)
+## js/19-client.js (246) — 
 cv:4 cx:4 DPR:5 SW:5 SH:5 resize:6 VIEW:12 screen:13 lastBuffKey:13 overShown:13 lastCount:13 PARTS:14 TEXTS:14
 §15 งบเอฟเฟกต์ (VFX budget)
 VFXB:20 _apush:21 vfxQual:29 vfxBegin:31 vfxEnd:34 vfxOnce:36 vfxExtra:38 PCOL:39 setScreen:41 onLobby:52 onSnap:58 snapApply:62
@@ -259,8 +257,7 @@ rr:2 SLOTS:3 fmtTime:4
 §5 ชิ้นส่วน HUD ธีมทอง-น้ำเงิน
 HG:6 HG2:6 HUDF:8 hudTick:9 readyPulse:11 diaPath:13 plate:15 frameBox:21 bossTrail:29 drawBossBar:30 spellDia:50 thinBar:79 drawHUD:84 raceRankClient:164 drawModeHUD:168 MM:205 drawMinimap:206 slotKey:285 mySlots:286 STATUS_ICO:295 SLOTS_IMP:296 BR_LOCK:297 CLUSTER:299 E_NEEDSTAND:300 slotState:301 drawBottom:320 drawBoard:335
 
-## js/39-menu.js (284) — เมนู / ล็อบบี้ (DOM)
-§4 ตัวละครของฉัน (เก็บในเครื่อง: wd_look) — ครั้งแรกที่เข้าเกมจะเปิดหน้า…
+## js/39-menu.js (284) — 
 myLook:5 myColor:5 myKit:5 myName:6 renderMyHouse:9
 §11 หน้าสร้าง/แต่งตัวละคร (2 ขั้น: 1 หน้าตา → 2 เลือกบ้าน)
 crLib:12 crSaved:12 crKitSaved:12 crOpen:12 crStep:12 crTab:12 crFirst:12 crKitOnly:12 crSlot:12 CRTABS:13 sw_:14 bt_:15 nameBox_:16 crPanelSet:17 crRenderStep1:22 crRenderWand:33
@@ -274,8 +271,7 @@ trOpenF:2 trKey:2 trN:2 TR_OPTS:3 trToggle:4 trSend:9 trSync:14 hovEl:61
 §62 หน้าตั้งค่า
 setRow:63 setTog:64 setTab:65 XHC:66 XHN:66 setOpts:67 SET_ICO:69 SET_EN:72 renderSettings:73 drawXhPrev:93 openSettings:94 closeSettings:96 modeIcon:152 modeTitle:153 renderLobby:154
 
-## js/41-debug.js (142) — เครื่องมือทดสอบสมดุล (ใช้ผ่านคอนโซล WD.bal / WD.dmgTest เท่านั้น ผู้เล่นปกติไม่เห็น)
-§5 บอทต่อสู้แบบง่ายๆ: เล็งนำเป้า เดินรักษาระยะ+ส่ายไปมา ร่ายคาถาทุกครั้ง…
+## js/41-debug.js (142) — 
 botBrain:6 _obsKeep:47 balArena:48 balReset:49 balDuel:53 balTour:68 balCoop:82 balSpellTest:98
 §117 Service Worker (sw.js): เก็บไฟล์เกมไว้ในเครื่อง เปิดครั้งต่อไปเร็วขึ้…
 SWK:118 swSetup:119
@@ -308,7 +304,7 @@ _wpM:108 fileWeapon:109
 §117 Ice circle (Permafrost): ริบบิ้นแสงวนเป็นก้นหอยบนพื้น + ผลึกลอยหมุนรอ…
 SWIRL_FS:118 ICIRC:122 iceCircle:123 updateIceCircles:134
 
-## js/44-vfx-kit.js (210) — ชุดเครื่องมือ VFX กลาง (ขั้น 2 ของแผนอัปเกรด VFX)
+## js/44-vfx-kit.js (210) — 
 §8 1) หางแสง
 TRMAX:11 TRPTS:11 TRAILS:11 _trL:12 trailLayer:13 trailNew:22 trailPoint:24 trailStop:27 _tv1:28 _tv2:28 _tv3:28 updateTrails:29
 §52 2) สูตรเอฟเฟกต์ = จานสี (ธาตุ) × แม่แบบ (ขนาด/ชนิด)
@@ -318,7 +314,7 @@ EFXAUG:147 PJPAL:166 pjPal:168 ULTCOL:169 efxAug:170 VFXAUG_ON:174 fxAug:175
 §195 4) เอฟเฟกต์ทั้งจอ (ค่าไปที่ GradePass ใน js/27-world.js)
 SCR:196 screenFlash:197 screenRadial:198 screenKick:199 screenHurt:200 _scv:201 updateScreenFx:202 updateVfxKit:210
 
-## js/45-fx-runtime.js (336) — VFX Studio runtime — เล่นเอฟเฟกต์จากไฟล์ข้อมูล assets/fx/<กลุ่ม>/<ชื่อ>.fx.json (แผน desi…
+## js/45-fx-runtime.js (336) — 
 FXR:9 FXDEG:10
 §11 โหลด
 fxFetch:12 fxDefaults:13 fxBoot:14 fxOverrides:24 fxLoad:27 fxData:31
@@ -409,13 +405,13 @@ CLW:48
 §50 หญ้า
 GRASS:52 GR_GLSL_V:53 GR_BEGIN:55 grassMat:79 grassBuild:93 _grBasic:107 grassBake:108 grassCount:158 grassTick:163
 
-## js/51-warmup.js (109) — อุ่นเครื่องช่วงนับถอยหลัง (ผู้ใช้ 2026-10-21: "ช่วงนับถอยหลังให้โหลดสิ่งที่ต้องใช้ — กดสก…
+## js/51-warmup.js (109) — 
 WARM:11 WARM_FXDIR:12 WARM_COMMON:12 WARM_X:13 WARM_Y:13 warmKeep:15 warmCompile:21 WARM_SKIP:24 warmFx:25 warmFxEnd:33 warmGather:35 warmPaths:37 warmStep:39 warmTick:54
 §63 ภาพจากโค้ดของแต่ละสาย (เฟรมละฟังก์ชัน)
 §72 อุ่นฉากเกมระหว่างรอในห้อง (ผู้ใช้ 2026-10-23: "กระตุกตอนเริ่มแมตช์แรก…
 GWARM:77 gameWarmTick:78
 
-## js/52-social.js (172) — เล่นกับเพื่อน (ผู้ใช้ 2026-10-22): แชท + อีโมต + ดูเพื่อนเล่น (spectator) + ป้ายต่อเน็ตให…
+## js/52-social.js (172) — 
 §6 แชท: Enter = พิมพ์ / Enter อีกที = ส่ง / Esc = ปิด • ข้อความขึ้นมุมซ้…
 CHAT:7 chatOpen:27 chatClose:32 chatSend:42 chatAdd:47 escH:52 onChat:53 drawSocial:59 drawPing:83
 §89 อีโมต: กด Z ค้าง → วงล้อ 6 แบบ ลากเมาส์ไปทางที่ต้องการ ปล่อย Z = เล่น…
@@ -425,14 +421,14 @@ SPEC:141 specTarget:142 specCycle:152 drawSpecHint:157
 §165 ป้าย "กำลังต่อใหม่..." (ลูกข่ายหลุดจากโฮสต์ js/10 netLost)
 drawNetBanner:166
 
-## js/53-victory.js (165) — จบเกม (ผู้ใช้ 2026-10-22): VICTORY / DEFEAT แบบ Overwatch แต่เป็นเวทมนตร์ (สายฟ้า + ไฟ) +…
+## js/53-victory.js (165) — 
 VIC:6 VPAL:7 vicKind:17 vicStart:25 vicStop:31 vicSkip:32 vicBolt:36 vicLoop:42
 §108 จอสรุป: MVP + จุดเด่น (ใส่ใน showOver js/26)
 overMvp:117 overBar:127
 §129 ห้องฝึก: นับคอมโบ (ผู้ใช้ 2026-10-22 "ห้องลองคอมโบ ... ใส่ในห้องฝึก")
 COMBO:132 comboHit:133 comboEnd:139 drawCombo:140
 
-## js/54-ffa.js (197) — FFA ให้มันขึ้น (ผู้ใช้ 2026-10-22 เลือกชุด A + B(เฉพาะขวดเลือด) + C)
+## js/54-ffa.js (197) — 
 FFA:8
 §12 โฮสต์
 ffaInit:13 potSpotOk:19 potSpots:23 potInit:31 potTick:32 ffaTick:43 ffaDmgLog:45 ffaKill:51 ffaDone:69 ffaSnapPots:77
@@ -441,23 +437,22 @@ POT3:81 potBottle:82 potMesh:91 syncPots:108 potFx:125
 §130 ภาพ: ป้ายตอนฆ่า / จอตอนตาย / อันดับ / มงกุฎค่าหัว
 FFAV:131 MULTI:132 MULTI_TH:132 STREAK:133 pName:134 ffaKf:135 kfSound:150 KINDN:151 drawFFA:152
 
-## js/55-podium.js (82) — โพเดียมธีมฮอกวอตส์ (ผู้ใช้ 2026-10-22 "podium but make it magician theme hogwart theme")
+## js/55-podium.js (82) — 
 POD:6 POD_X:7 POD_H:7 POD_C:7 podStart:8 podStop:29 podPose:37 renderPodium:49
 
-## js/56-progress.js (94) — เลเวล + สถิติ + ของปลดล็อค (ผู้ใช้ 2026-10-22: "more skin wand cloak unlock as lvl" → เลื…
-§7 var/function (ไม่ใช่ const): หน้าสร้างตัวละครอาจเปิดตอนโหลด (?nointro…
+## js/56-progress.js (94) — 
 LV_MAX:8 DEV_MAXLV:11 lvNeed:12 UNLOCKS:13 PROF_ITEMS:23 lvRewards:31 lvNextReward:32 PROG:33 progSave:34 lvOf:35 progLv:36 xpMax:37 wandKillNeed:39 lookLock:40 lookClampLocks:41 progXP:43 progAward:44 progBox:56 progOpen:64 progChip:76
 
-## js/57-tutorial.js (44) — วิธีเล่นแต่ละสาย (ผู้ใช้ 2026-10-22 "สอนเล่นแต่ละสาย") — ปุ่ม "📖 วิธีเล่นสายนี้" ในหน้าเ…
+## js/57-tutorial.js (44) — 
 TUTTIPS:7 tutOpen:12 tutTry:31
 
-## js/58-deathcam.js (60) — กล้องตอนตาย (ผู้ใช้ 2026-10-22): "when ded make cam focus on person who kill u at ur ded …
+## js/58-deathcam.js (60) — 
 DCAM_T1:10 DCAM_T2:10 DCAM_FADE:10 DCAM:11 dcamDie:12 _dcP:19 _dcL:19 dcamCam:20 drawDeathCam:47
 
-## js/59-podroom.js (151) — ห้องโถงใหญ่ฮอกวอตส์สำหรับโพเดียม (ผู้ใช้ 2026-10-22 "design me a new lobby for background…
+## js/59-podroom.js (151) — 
 PODS:9 PODR:11 podRoomBuild:12 podRoomTick:142
 
-## js/60-menu3d.js (397) — เมนูแรก = ลานดวลเวทใต้ดาว ที่ "เดินได้" (ผู้ใช้ 2026-10-22, รอบ 2: "redesign the menu by …
+## js/60-menu3d.js (397) — 
 MENUS:14 MN:17 MN_FOV:19 MN_R:19 _mv:20 _mcp:20 _mcl:20 mnCrest:21 mnTone:25 mnHit:30 mnBuild:32 MNPOP:223 mnToast:243
 §244 สั่งพ่อมด
 mnGo:245 mnWalkTo:248 mnUse:249 mnClose:254
@@ -466,7 +461,7 @@ MN_BLOCK:259 mnRay:260 mnPick:261 mnHot:267 mnToy:285
 §290 เรนเดอร์ (เรียกจาก renderStage js/32 — คืน true = จัดการแล้ว)
 mnRestore:291 mnMenuRender:297
 
-## js/61-hub.js (883) — เมนูใหม่ — ฉาก 3D (ผู้ใช้ 2026-10-22 • สเปกเต็ม designs/ui-menu.md • หน้าจอ/ปุ่มอยู่ js/6…
+## js/61-hub.js (883) — 
 HUBS:11 HUBL:11 HUB:14 HB:18 _hq:19 _hq2:19 _hq3:19 _hv:19 _hv2:19 _hv3:19 _hY:19 hEase:20 hSm:21
 §23 อนุภาคเรืองแสงของเมนู (ขนาด/สี/ความจางต่อเม็ด)
 hubPS:24 hCol:50 H_SPARK:51
@@ -495,8 +490,7 @@ PRF3:790 prfSpot:792 hubProfSet:801 hubProfShow:809 hubProfTick:810
 §821 เรนเดอร์ (เรียกจาก renderStage — คืน true = วาดแล้ว)
 hubRender:822
 
-## js/62-hub-ui.js (302) — เมนูใหม่ — หน้าจอ/ปุ่ม (ผู้ใช้ 2026-10-22 • สเปก designs/ui-menu.md)
-§8 ภาพการ์ด/แผนที่: URL เต็ม — url() ใน CSS var อ่านเทียบไฟล์ css/hub.cs…
+## js/62-hub-ui.js (302) — 
 HUI_IMG:9 HMODES:10 HUI:15 HICO:17 hSvg:35 hHex:36 H_STAR:37
 §95 สถานะหน้าจอ: menu / modes / room / off
 hubUiState:96 hubMeChip:104 hubOnScreen:110
@@ -508,7 +502,7 @@ hubMxJoin:140 hubPickMode:153 hubFlipKill:166 hubRoomRect:167 hubFlip:168 hubLea
 HUI_MAPN:210 hubLobby:211 hubRoomClick:273 hubKitChanged:292
 §294 เริ่มต้น
 
-## js/63-skillwheel.js (271) — วงเลือกคาถา (ผู้ใช้ 2026-10-22, designs/ui-menu.md "วงคาถา + ห้าเหลี่ยม 4 ช่อง") • สไตล์ม…
+## js/63-skillwheel.js (271) — 
 SKW:9 SKW_PO:10 SKW_PI:10 SKW_RUNE:11 skwPaths:12 skwKey:13 skwOffN:14 skwChanged:15 skwSnd:16
 §17 โครง DOM (สร้างครั้งแรกที่เปิด)
 skwSvg:18 skwBuild:28
@@ -526,7 +520,7 @@ skwOpen:243 skwClose:253
 ## js/64-mappick.js (156) — 
 MPK_TXT:7 MPK_SKY:19 MPK_I:21 MPK_DICE:31 MPK:36 mpkE:37 mpkC:37 mpkSnd:38 mpkCut:39 mpkName:40 mpkCardHTML:41 mpkBuild:51 mpkUp:89 mpkMeasure:101 mpkIdx:102 mpkStep:103 mpkTo:104 mpkPick:105 mpkOpen:111 mpkClose:126 mpkLoop:130 mpkTick:132
 
-## js/65-ui3.js (409) — UI รอบ 3 (ผู้ใช้ 2026-10-23 — สเปก designs/ui-menu.md "รอบ 3") • สไตล์เดียวกับเมนูใหม่ (c…
+## js/65-ui3.js (409) — 
 UIG:6 uiGalaxy:7 uiGalaxyOn:15 uiGalRaf:16 uiGalT:16 uiGalLoop:17 uiGalDraw:19 uiShow:36 uiHide:37
 §40 เมนูหยุดเกม
 §44 คู่มือ (แบบ Skill Tree)

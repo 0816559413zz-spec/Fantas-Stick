@@ -144,13 +144,30 @@ def sb_md(b):
             L.append(f"- สี: {' '.join('`' + c + '`' for c in s['colors'])}")
         for k, sk in enumerate(sb_sketches(s)):
             L.append(f"- ภาพร่าง {k+1}{' (3D ' + sk['view'] + ')' if sk.get('view') else ' (3D)' if sk.get('kind') == '3d' else ''}{' + วาดทับ' if sk.get('over') and sk.get('kind') == '3d' else ''}: `{sk['img']}`")
-        objs = (s.get('scene3d') or {}).get('objs') or []
+        S3 = s.get('scene3d') or {}
+        objs = S3.get('objs') or []
+        for r, th in (('cast', 'ผู้ร่าย'), ('targ', 'เป้า')):
+            if S3.get(r):
+                L.append(f"- ฉาก 3D: {th} = ตัวละครจากเกม `{S3[r].get('m')}` ท่า `{S3[r].get('a')}` (ท่าเดียวกับในเกม)")
+        if (S3.get('cast') or S3.get('targ') or any(o.get('t') == 'actor' for o in objs)) and S3.get('at') is not None:
+            L.append(f"- ฉาก 3D: เวลาของท่าตอนถ่าย = {f(S3.get('at') or 0)} วิ (นับจากเริ่มท่า)")
         if objs:
             L += ['', 'ฉาก 3D (เมตร; หน้า = ไปทางเป้า, ขวา = ขวาของผู้ร่าย → fx `pos` = [ขวา, สูง, หน้า]; ขนาด = กล่องรอบชิ้น หน้า×สูง×ข้าง):', '',
                   '| ชิ้น | ป้าย | หน้า | สูง | ขวา | ขนาด (ม.) | หมุน (องศา) | สี | ทึบ | เรือง |', '|---|---|---|---|---|---|---|---|---|---|']
             for o in objs:
                 p_ = o.get('p') or [0, 0, 0]; z = o.get('size') or [0, 0, 0]
-                L.append(f"| {SB_3D.get(o.get('t'), o.get('t'))} | {o.get('label') or '-'} | {f(p_[0])} | {f(p_[1])} | {f(p_[2])} | {f(z[0])}×{f(z[1])}×{f(z[2])} | {', '.join(str(v) for v in o.get('r') or [0, 0, 0])} | `{o.get('col')}` | {f(o.get('op', 1))} | {'ใช่' if o.get('glow') else '-'} |")
+                nm = f"ตัวละครเกม `{o.get('am')}` ท่า `{o.get('aa')}`" if o.get('t') == 'actor' else SB_3D.get(o.get('t'), o.get('t'))
+                L.append(f"| {nm} | {o.get('label') or '-'} | {f(p_[0])} | {f(p_[1])} | {f(p_[2])} | {f(z[0])}×{f(z[1])}×{f(z[2])} | {', '.join(str(v) for v in o.get('r') or [0, 0, 0])} | `{o.get('col')}` | {f(o.get('op', 1))} | {'ใช่' if o.get('glow') else '-'} |")
+        fr = s.get('frames') or {}
+        if fr.get('list'):
+            fl = fr['list']; fps = float(fr.get('fps') or 12)
+            L += ['', f"🎞 **เฟรมต่อเฟรม (ผู้ใช้วาดทีละเฟรม = การเคลื่อนไหวที่ต้องการ):** {len(fl)} เฟรม • {f(fps)} fps • ยาว {f(len(fl) / fps)} วิ"
+                  + (f" • รูปรวมทุกเฟรม: `{fr['sheet']}` (อ่านอันนี้ก่อน)" if fr.get('sheet') else '')]
+            for k, x in enumerate(fl):
+                im = x.get('img') or x.get('base')
+                if im:
+                    L.append(f"  - เฟรม {k+1} ({f(k / fps)} วิ{', ท่า ' + f(x['t']) + ' วิ' if x.get('t') is not None else ''}{', มีวาดทับ' if x.get('ops') else ''}): `{im}`")
+            L.append('')
         for r in s.get('refs', []):
             L.append(f"- รูปตัวอย่าง: `{r}`")
         if s.get('result'):
@@ -185,7 +202,9 @@ def sb_save(db):
     for b in db.get('items', []):
         used |= {os.path.basename(i) for i in b.get('refs', [])}
         for s in b.get('shots', []):
-            used |= {os.path.basename(i) for i in s.get('refs', []) + [k['img'] for k in sb_sketches(s)] + [s.get('result') or ''] if i}
+            fr = s.get('frames') or {}
+            used |= {os.path.basename(i) for i in s.get('refs', []) + [k['img'] for k in sb_sketches(s)] + [s.get('result') or '', fr.get('sheet') or '']
+                     + [x.get(k) or '' for x in fr.get('list') or [] for k in ('img', 'base')] if i}
     d = os.path.join(SBD, 'img')
     for fn in os.listdir(d):
         if fn not in used and time.time() - os.path.getmtime(os.path.join(d, fn)) > 120:
