@@ -84,7 +84,7 @@ MIND:66 summonMin:72 minTarget:81 minShoot:88 updateMins:93 aimTarget:133
 §180 ร่ายคาถา
 castSlot:181 castUlt:196
 
-## js/10-net.js (159) — 
+## js/10-net.js (159) — เครือข่าย (PeerJS / WebRTC)
 PREFIX:4 NET:5 RC:9 TURN_SERVERS:12 ICE:13 PEER_OPT:14 TURN_URL:16 ICE_READY:18 JN:22 LAG:24 lagDo:25 hostSend:26 LOBBY:27 genCode:28 sendAll:29 setStatus:30 hostGame:32 hostPeer:40 netConnect:59 joinWatch:70 joinFail:85 netLost:91 joinGame:106 joinPeer:117 clientOnData:132 leave:147 leaveRoom:149
 
 ## js/11-host.js (384) — 

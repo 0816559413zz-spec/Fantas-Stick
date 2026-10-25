@@ -13,7 +13,7 @@ const TURN_SERVERS=[];
 const ICE=[{urls:['stun:stun.l.google.com:19302','stun:stun1.l.google.com:19302','stun:stun2.l.google.com:19302']},{urls:'stun:stun.cloudflare.com:3478'},{urls:'stun:global.stun.twilio.com:3478'},...TURN_SERVERS];
 const PEER_OPT={debug:1,config:{iceServers:ICE}};
 // TURN แบบขอรหัสผ่านลิงก์ (metered.ca: https://<ชื่อแอป>.metered.live/api/v1/turn/credentials?apiKey=...) — ว่าง = ไม่ใช้
-const TURN_URL='';
+const TURN_URL='https://fantas-stick.metered.live/api/v1/turn/credentials?apiKey=c38e05b067af11e7f3e8299b4c0e66de6975';
 // รอรหัส TURN ก่อนสร้าง peer (สูงสุด 4 วิ — ช้า/พัง = ไปต่อแบบไม่มี TURN)
 const ICE_READY=!TURN_URL?Promise.resolve():Promise.race([
   fetch(TURN_URL).then(r=>r.json()).then(a=>{if(Array.isArray(a))ICE.push(...a);}).catch(()=>{}),
