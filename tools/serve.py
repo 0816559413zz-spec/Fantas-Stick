@@ -462,4 +462,11 @@ if __name__ == '__main__':
         sb_save(sb_load()); print('storyboard/*.md updated'); sys.exit()
     port = int(sys.argv[1]) if len(sys.argv) > 1 else 8765
     print(f'Fantas Stick: http://localhost:{port}/  •  VFX Studio: http://localhost:{port}/studio.html  •  Bug Notes: http://localhost:{port}/bugs.html  •  Storyboard: http://localhost:{port}/storyboard.html')
-    ThreadingHTTPServer(('127.0.0.1', port), H).serve_forever()
+    class Srv(ThreadingHTTPServer):
+        allow_reuse_address = False   # Windows: reuse = เปิดซ้อนพอร์ตเดียวกันได้ 2 ตัว → คำขอสลับไปมา ข้อมูลเพี้ยน
+    try:
+        srv = Srv(('127.0.0.1', port), H)
+    except OSError:
+        print(f'มีเซิร์ฟเวอร์เปิดอยู่แล้วที่พอร์ต {port} (เช่นเปิด VFX Studio.bat / Storyboard.bat ไว้แล้ว) — ใช้ตัวเดิมได้เลย ปิดหน้าต่างนี้ได้')
+        sys.exit(0)
+    srv.serve_forever()
