@@ -328,8 +328,29 @@ let db={next:1,items:[]},cur=null,selShot=null,saveT=0,dirty=false,online=false;
 function stat(t,err){const s=$('#stat');s.textContent=t;s.className=err?'err':'';}
 function esc(s){return String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
 function nowISO(){const d=new Date();return new Date(d-d.getTimezoneOffset()*6e4).toISOString().slice(0,19);}
+// เปิดหลายหน้าต่างพร้อมกัน: เซิร์ฟเวอร์นับ rev — บันทึกชน (409) = รวมเอง: บอร์ดที่หน้านี้แก้/ลบ ใช้ของเรา, บอร์ดอื่นใช้ของล่าสุด แล้วบันทึกใหม่
+let BASE={};   // id → JSON ของบอร์ดตอนตรงกับเซิร์ฟเวอร์ล่าสุด (ไว้ดูว่าหน้านี้แก้อะไร)
+const bj=b=>JSON.stringify(b,(k,v)=>k[0]==='_'?undefined:v);
+function setBase(){BASE={};for(const b of db.items)BASE[b.id]=bj(b);}
+const sbChan=(()=>{try{return new BroadcastChannel('sb');}catch(e){return null;}})();
+if(sbChan)sbChan.onmessage=()=>{if(!dirty&&$('#dr').style.display!=='flex'&&$('#d3').style.display!=='flex')load();};   // อีกหน้าบันทึก → โหลดใหม่ (ถ้าเราไม่ได้แก้ค้าง)
+function sbMerge(S){
+  const mine=new Map(db.items.map(b=>[b.id,b])),srv=new Map(S.items.map(b=>[b.id,b])),out=[],ren=[];
+  const edited=b=>bj(b)!==BASE[b.id];
+  for(const b of S.items){
+    const m=mine.get(b.id),had=b.id in BASE;
+    if(!had){out.push(b);if(m)ren.push(m);continue;}            // ใหม่จากหน้าอื่น (ถ้าเลขชนกับบอร์ดใหม่ของเรา → เราเปลี่ยนเลข)
+    if(!m){if(BASE[b.id]!==bj(b))out.push(b);continue;}          // เราลบ: หน้าอื่นแก้ต่อ = เก็บไว้, ไม่ได้แก้ = ลบตามเรา
+    out.push(edited(m)?m:b);}                                     // ใครแก้ใช้ของคนนั้น (แก้ทั้งคู่ = ของเรา)
+  for(const b of db.items)if(!srv.has(b.id)&&(!(b.id in BASE)||edited(b)))out.push(b);   // ใหม่ของเรา / หน้าอื่นลบแต่เราแก้อยู่
+  let nx=Math.max(S.next||1,db.next||1,...out.map(b=>b.id+1));for(const b of ren){b.id=nx++;out.push(b);}
+  db={next:nx,rev:S.rev,items:out};
+  BASE={};for(const b of S.items)BASE[b.id]=bj(b);fixShots();
+  if(cur&&!out.includes(cur))cur=out.find(b=>b.id===cur.id)||null;renderList();
+}
 async function load(){
-  try{const r=await fetch('/api/sb',{cache:'no-store'});if(!r.ok)throw 0;const j=await r.json();online=true;if(dirty)return;db=j;fixShots();stat('พร้อม • บันทึกอัตโนมัติ');} // แก้อะไรไประหว่างโหลด → ไม่ทับ
+  try{const r=await fetch('/api/sb',{cache:'no-store'});if(!r.ok)throw 0;const j=await r.json();online=true;if(dirty)return;
+    const keep=cur&&cur.id;db=j;fixShots();setBase();if(keep)cur=db.items.find(b=>b.id===keep)||null;stat('พร้อม • บันทึกอัตโนมัติ');} // แก้อะไรไประหว่างโหลด → ไม่ทับ
   catch(e){online=false;stat('⚠ ต้องเปิดผ่าน "Storyboard.bat" (tools/serve.py) ถึงจะบันทึกได้',1);}
   if(cur)cur=db.items.find(b=>b.id===cur.id)||null;
   renderList();renderEd();
@@ -337,8 +358,12 @@ async function load(){
 function save(now){
   dirty=true;stat('กำลังบันทึก…');clearTimeout(saveT);
   saveT=setTimeout(async()=>{
-    try{const r=await fetch('/api/sb',{method:'POST',body:JSON.stringify(db,(k,v)=>k[0]==='_'?undefined:v)});const j=await r.json();if(!j.ok)throw j.err;dirty=false;stat('บันทึกแล้ว ✓ '+new Date().toLocaleTimeString('th-TH'));}
-    catch(e){stat('⚠ บันทึกไม่ได้ — เปิดผ่าน "Storyboard.bat" หรือยัง?',1);}
+    try{for(let n=0;n<4;n++){
+        const r=await fetch('/api/sb',{method:'POST',body:JSON.stringify(db,(k,v)=>k[0]==='_'?undefined:v)});const j=await r.json();
+        if(j.conflict){sbMerge(j.db);stat('มีหน้าต่างอื่นบันทึกก่อน — รวมให้แล้ว กำลังบันทึก…');continue;}
+        if(!j.ok)throw j.err;db.rev=j.rev;setBase();dirty=false;stat('บันทึกแล้ว ✓ '+new Date().toLocaleTimeString('th-TH'));if(sbChan)sbChan.postMessage(j.rev);return;}
+      throw 'ชนกันหลายรอบ';}
+    catch(e){stat('⚠ บันทึกไม่ได้ — เปิดผ่าน "Storyboard.bat" หรือยัง? ('+e+')',1);}
   },now?0:600);
 }
 function touch(re){cur.updated=nowISO();renderList();if(re)renderEd();save();}

@@ -52,7 +52,7 @@ BUG_ST = {'open': '⬜ ยังไม่แก้', 'fixed': '✅ แก้แ�
 def bugs_load():
     p = os.path.join(BUGD, 'bugs.json')
     if not os.path.exists(p):
-        return {'next': 1, 'items': []}
+        return {'next': 1, 'rev': 0, 'items': []}
     return json.load(open(p, encoding='utf-8'))
 
 def bugs_md(db):
@@ -100,10 +100,12 @@ SB_3D = {'ball': 'ลูกบอล', 'ring': 'วงแหวน', 'disc': '�
 def sb_sketches(s):  # ข้อมูลเก่ามี sketch รูปเดียว
     return s.get('sketches') or ([{'img': s['sketch'], 'kind': '2d'}] if s.get('sketch') else [])
 
+SB_LOCK = __import__('threading').Lock()
+
 def sb_load():
     p = os.path.join(SBD, 'boards.json')
     if not os.path.exists(p):
-        return {'next': 1, 'items': []}
+        return {'next': 1, 'rev': 0, 'items': []}
     return json.load(open(p, encoding='utf-8'))
 
 def sb_times(b):  # เวลาเริ่ม/จบของแต่ละช่วง = ต่อจากช่วงก่อน ลบ overlap (เหมือนใน storyboard.html)
@@ -347,8 +349,13 @@ class H(SimpleHTTPRequestHandler):
                 assert isinstance(db.get('items'), list)
             except Exception as e:
                 return self._json(400, {'ok': False, 'err': 'ข้อมูลผิดรูปแบบ: ' + str(e)})
-            sb_save(db)
-            return self._json(200, {'ok': True})
+            with SB_LOCK:  # หลายหน้าต่างเปิดพร้อมกัน: ต้องส่ง rev ที่โหลดมา — ไม่ตรง = มีคนบันทึกก่อน → ส่งของล่าสุดกลับไปให้รวมเอง (ไม่ทับกัน)
+                cur = sb_load()
+                if int(db.get('rev') or 0) != int(cur.get('rev') or 0):
+                    return self._json(409, {'ok': False, 'conflict': True, 'db': cur})
+                db['rev'] = int(cur.get('rev') or 0) + 1
+                sb_save(db)
+            return self._json(200, {'ok': True, 'rev': db['rev']})
         if u.path == '/api/sb-rec':
             name = re.sub(r'[^a-zA-Z0-9_\-]', '_', q.get('name', ['rec'])[0])[:60] or 'rec'
             data = self._body(); json.loads(data)

@@ -29,10 +29,11 @@ async function recBoot(){
     if(!await W(()=>{const o=PM3.get('me');return o&&o.fileModel;},15000))throw 'โหลดโมเดลตัวละครไม่ได้';
     clearInterval(pump);pump=0;
     const o=PM3.get('me'),inst=o.fileModel,T={x:me.x+CHAR_PX*5,y:me.y};   // เป้า: ห่าง 5 ตัวละคร ทาง +x
-    const aim=()=>{INPUT.gx=T.x;INPUT.gy=T.y;INPUT.ah=0;INPUT.u=INPUT.d=INPUT.l=INPUT.r=0;};
+    const I=emptyInput();me.inp=I;   // ปุ่มของเราเอง (ไม่ใช้ INPUT ของหน้าเกม — โค้ดฝั่งภาพ/หน้าหยุดชั่วคราวเขียนทับได้)
+    const aim=()=>{if(me.inp!==I)me.inp=I;I.gx=T.x;I.gy=T.y;I.ah=0;I.ax=T.x;I.ay=T.y;};
     const D=1/60,step=()=>{aim();WD.hostStep(D);draw(D);};
     // ส่วนนี้ทำรวดเดียว (ไม่มี await) → ลูปโฮสต์ปกติแทรกไม่ได้ = เดินเกมตามเราเท่านั้น
-    for(let i=0;i<72;i++)step();   // ยืนนิ่ง 1.2 วิ ให้ท่าเข้าที่
+    for(let i=0;i<900&&(i<72||G.ph!=='play'||me.z>groundH(me.x,me.y)+0.02||Math.hypot(me.vx||0,me.vy||0)>1);i++)step();   // รอนับถอยหลังจบ (G.ph='play' ถึงกดปุ่มได้) + ยืนนิ่งบนพื้น อย่างน้อย 1.2 วิ
     o.g.updateWorldMatrix(true,true);
     const org=new THREE.Vector3().setFromMatrixPosition(o.g.matrixWorld);
     const bones=[];inst.traverse(b=>{if(b.isBone)bones.push(b);});
@@ -43,16 +44,19 @@ async function recBoot(){
         b:bones.map(b=>[...[b.quaternion.x,b.quaternion.y,b.quaternion.z,b.quaternion.w].map(v=>r(v,10000)),...(top.has(b.name)?[b.position.x,b.position.y,b.position.z].map(v=>r(v,10000)):[])])});};
     // กดสกิล (ปุ่มที่ต้องกดค้าง = ปล่อยตามเวลาในเกม)
     let ok=true,rel=0;aim();
-    if(kind==='spell'){me.kitIds[0]=id;me.cd.q=0;ok=castSlot(me,0)!==false;}
+    // ให้สกิลกดได้เหมือนตอนเล่นจริง: สายฟ้ามี stack เต็ม • เป้า (หุ่นฝึก) มี Burning ให้ Ignition Snap • สกิลกดค้าง (Terra Auger) ค้าง 2.2 วิ
+    me.lst=5;const foe=foesOf(me.team).filter(e=>e.alive!==false).sort((a,b)=>Math.hypot(a.x-T.x,a.y-T.y)-Math.hypot(b.x-T.x,b.y-T.y))[0];
+    if(foe){foe.x=T.x;foe.y=T.y;foe.brn=3;foe.brnT=4;}
+    if(kind==='spell'){me.kitIds[0]=id;me.cd.q=0;I.hq=1;ok=castSlot(me,0)!==false||!!(me.aug||me.ramp||me.ecb);if(me.aug)rel=2.2;else I.hq=0;}
     else if(kind==='ult'){me.ultId=id;me.ult=100;ok=castUlt(me)!==false;}
-    else if(kind==='basic'){INPUT.fire=1;rel=0.9;}
-    else if(kind==='shield'){INPUT.sh=1;rel=1.2;}
-    else if(kind==='dash'){INPUT.c.sp=(INPUT.c.sp|0)+1;INPUT.dh=1;rel=0.45;}
+    else if(kind==='basic'){I.fire=1;rel=0.9;}
+    else if(kind==='shield'){I.sh=1;rel=1.2;}
+    else if(kind==='dash'){I.c.sp++;I.dh=1;rel=0.45;}
     if(!ok)throw 'กดสกิลนี้ในห้องฝึกไม่ได้';
     let t=0,still=0,lp=o.g.position.clone();grab(0);
     while(t<12){
       step();t+=D;
-      if(rel&&t>=rel){INPUT.fire=INPUT.sh=INPUT.dh=0;rel=0;}
+      if(rel&&t>=rel){I.fire=I.sh=I.dh=I.hq=0;rel=0;}
       if(Math.round(t*60)%2===0)grab(t);
       const p=o.g.position,moved=p.distanceTo(lp);lp.copy(p);
       const busy=me.dfall||me.colos>0||me.sdome||me.wr||me.rail||me.aug||me.ramp||me.snapT>0||me.hover>0||me.grT>0||rel;
