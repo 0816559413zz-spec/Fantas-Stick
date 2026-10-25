@@ -311,6 +311,9 @@ const FXCODE={
   playFx:(x,y,h,a,I)=>playFx(a.name||'arcane_impact',x,y,h,{s:a.s||1,a:I.a}),   // เทียบแม่แบบไฟล์กับแบบโค้ดเดิม (สตูดิโอ)
 };
 // ---------- ผูกกับ event ของเกม (assets/fx/bind.json) — เรียกจาก fx(ev) ----------
+// เอฟเฟกต์วนตามสถานะ (ไม่ใช่ event): bind.json "loop:<ชื่อ>" เช่น loop:blaze = ออร่า Blazeform • ทดลองได้ด้วย localStorage wd_fxbind
+function fxLoopName(k){const e=FXR.over['loop:'+k]||FXR.bind['loop:'+k];return e&&e.fx||null;}
+const blzFxName=()=>fxLoopName('blaze');
 // คืน true = "replace" → ข้ามภาพจากโค้ดเดิมของ event นี้
 function fxBind(ev,H){if(!FXR.ready||!FXR.on||ev.x===undefined)return false;
   const keys=ev.k==='efx'?['efx:'+ev.z]:(ev.t!==undefined?[ev.k+':'+ev.t,ev.k]:[ev.k]);let rep=false;

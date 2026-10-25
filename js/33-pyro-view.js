@@ -199,7 +199,11 @@ function pyroFX(o,p,pz,now,dt){
   // Kindle ลอยกลางอากาศ: ไฟพ่นลงจากใต้เท้า
   if(p.hv){for(let i=0;i<4;i++)PARTS.push({x:p.x+rnd(-8,8),y:p.y+rnd(-8,8),h:pz+rnd(-0.1,0.2),vx:rnd(-20,20),vy:rnd(-20,20),vh:rnd(-5,-2.5),life:rnd(0.25,0.4),max:0.4,col:i?'#ff8a2a':'#ffe08a',size:rnd(2.4,3.6),g:2,drag:2,smoke:i===3});LREQ.push({x:tx(p.x),y:pz,z:tz(p.y),col:'#ff8a3a',int:2,dist:8});}
   // Blazeform: ออร่าไฟรอบตัว + ขอบวงบอกระยะ (~180)
-  if((p.fm|0)&131072){
+  // Blazeform จากไฟล์เอฟเฟกต์ (สตอรี่บอร์ด #12): bind.json "loop:blaze" = fx ที่เล่นวนตลอด 6 วิ (ตามตัว ไม่หมุนตามเล็ง) → แทนขอบวงจากโค้ดด้านล่าง
+  const blzN=(p.fm|0)&131072?blzFxName():null;
+  if(blzN){if(!o.blzFx||o.blzFxN!==blzN){if(o.blzFx)fxStop(o.blzFx);o.blzFx=fxPlay(blzN,{x:p.x,y:p.y,h:pz,follow:p.id,aim:false});o.blzFxN=blzN;}}
+  else if(o.blzFx){fxStop(o.blzFx);o.blzFx=null;o.blzFxN=null;}
+  if(((p.fm|0)&131072)&&!blzN){
     // ขอบออร่า = "ออร่าความร้อน" (ผู้เล่น 2026-10-19 รอบ 2): ไฟลุกเตี้ย ๆ หรี่ ๆ แบบกำแพง Ring of Embers + ม่านอากาศร้อนบิดเบี้ยวเหนือขอบ + เส้นขอบส้มจาง → เห็นรัศมีโดยไม่ขาวจ้า
     if(!o.blzR){o.blzR=new THREE.Mesh(_iceEdge,new THREE.MeshBasicMaterial({color:hdr('#ff5a14',1.3),transparent:true,opacity:0.6,depthWrite:false}));o.blzR.scale.setScalar(130*S3);o.g.add(o.blzR);
       o.blzD=new THREE.Mesh(_iceDisc,new THREE.MeshBasicMaterial({color:'#ff4a10',transparent:true,opacity:0.08,depthWrite:false}));o.blzD.scale.setScalar(130*S3);o.g.add(o.blzD);
@@ -211,7 +215,7 @@ function pyroFX(o,p,pz,now,dt){
       return fireVol(B,{int:1.15,bias:0.25,den:2.6});},true);h.position.set(o.g.position.x,o.g.position.y-0.05,o.g.position.z);o.blzW.visible=false;}
     {const h=hazeOf(o,'blzHzE',()=>new THREE.Mesh(_hzRing,hazeMat(1)));h.position.set(o.g.position.x,o.g.position.y,o.g.position.z);}
     for(let i=0;i<1;i++){const an=rnd(0,6.283);PARTS.push({x:p.x+Math.cos(an)*130,y:p.y+Math.sin(an)*130,h:pz+0.1,vx:0,vy:0,vh:rnd(1.5,3.5),life:rnd(0.35,0.6),max:0.6,col:i?'#ff7a2a':'#ffc04a',size:rnd(2.6,4),g:-1.5,drag:2});}
-  }else{if(o.blzR)o.blzR.visible=o.blzD.visible=o.blzW.visible=false;}
+  }else if(o.blzR)o.blzR.visible=o.blzD.visible=o.blzW.visible=false;
   if((p.fm|0)&131072){
     const hp=[[o.armR,0,-0.66,0],[o.armL,0,-0.66,0],[o.legs[0],0,-0.8,0.05],[o.legs[1],0,-0.8,0.05]];
     // เปลวไฟ shader ลุกขึ้นที่มือ/เท้า (กรวยชี้ขึ้นเสมอ) — ไม่ห่อตัว
