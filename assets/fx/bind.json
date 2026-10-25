@@ -247,18 +247,18 @@
     }
   },
   "efx:dfrise": {
-    "fx": "fire/df_rise_plus",
+    "fx": "fire/df_rise_a",
     "mode": "add",
     "follow": "ev.id"
   },
   "efx:dfdive": {
-    "fx": "fire/df_dive_plus",
+    "fx": "fire/df_dive_a",
     "mode": "add",
     "follow": "ev.id"
   },
   "efx:dfboom": {
-    "fx": "fire/df_impact_plus",
-    "mode": "add",
+    "fx": "fire/df_impact_a",
+    "mode": "replace",
     "p": {
       "r": "ev.r/20"
     }
