@@ -6,7 +6,7 @@
 //   ไฟล์ในเว็บเรา (audio/ icons/ assets/) → stale-while-revalidate (ใช้ของในแคชทันที แล้วอัปเดตเบื้องหลัง)
 //   assets/manifest.json                → network-first (รู้ทันทีว่ามีโมเดลเวอร์ชันใหม่)
 //   assets/fx/ (ไฟล์เอฟเฟกต์ .fx.json), studio/ → network-first (แก้ในสตูดิโอแล้วเห็นทันที)
-//   คำขอแบบ Range (เพลงที่สตรีมผ่าน <audio>) / PeerJS / อื่นๆ → ไม่ยุ่ง ปล่อยให้เบราว์เซอร์จัดการ
+//   /api/ (tools/serve.py), คำขอแบบ Range (เพลงที่สตรีมผ่าน <audio>) / PeerJS / อื่นๆ → ไม่ยุ่ง ปล่อยให้เบราว์เซอร์จัดการ
 const VER = new URL(self.location).searchParams.get('v') || 'dev';
 const CACHE = 'wd-' + VER;
 const IMMUTABLE = ['unpkg.com', 'fonts.gstatic.com'];
@@ -58,6 +58,7 @@ self.addEventListener('fetch', e => {
   if (req.method !== 'GET' || req.headers.has('range')) return;
   const url = new URL(req.url);
   if (url.protocol !== 'https:' && url.protocol !== 'http:') return;
+  if (url.origin === self.location.origin && /\/api\//.test(url.pathname)) return;   // ช่องทางของ tools/serve.py (สตอรี่บอร์ด/สตูดิโอ/บั๊ก) = ข้อมูลสด ห้ามแคช (เคยคืนข้อมูลเก่า → งานที่บันทึกหาย)
   if (req.mode === 'navigate' || (url.origin === self.location.origin && /\/(js|css|studio)\/[^/]+$|\/assets\/manifest\.json$|\/assets\/fx\//.test(url.pathname))) { e.respondWith(networkFirst(req, url)); return; }
   const k = kind(url);
   if (!k) return;

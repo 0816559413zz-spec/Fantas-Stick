@@ -325,6 +325,8 @@ const SIZE_TH=v=>v<0.6?'เล็กกว่าตัว':v<1.3?'เท่า�
 const POW=['','เบามาก','เบา','ปานกลาง','แรง','สุดพลัง'];
 let db={next:1,items:[]},cur=null,selShot=null,saveT=0,dirty=false,online=false;
 
+// อ่านข้อมูลสดจาก serve.py เสมอ: Service Worker รุ่นเก่า (sw.js) เคยแคช /api/ แล้วคืนของเก่า → ใส่ Range ให้มันไม่ยุ่ง (รุ่นใหม่ข้าม /api/ เองแล้ว)
+const apiGet=u=>fetch(u,{cache:'no-store',headers:{Range:'bytes=0-'}});
 function stat(t,err){const s=$('#stat');s.textContent=t;s.className=err?'err':'';}
 function esc(s){return String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
 function nowISO(){const d=new Date();return new Date(d-d.getTimezoneOffset()*6e4).toISOString().slice(0,19);}
@@ -333,7 +335,10 @@ let BASE={};   // id → JSON ของบอร์ดตอนตรงกั�
 const bj=b=>JSON.stringify(b,(k,v)=>k[0]==='_'?undefined:v);
 function setBase(){BASE={};for(const b of db.items)BASE[b.id]=bj(b);}
 const sbChan=(()=>{try{return new BroadcastChannel('sb');}catch(e){return null;}})();
-if(sbChan)sbChan.onmessage=()=>{if(!dirty&&$('#dr').style.display!=='flex'&&$('#d3').style.display!=='flex')load();};   // อีกหน้าบันทึก → โหลดใหม่ (ถ้าเราไม่ได้แก้ค้าง)
+if(sbChan)sbChan.onmessage=()=>{if(!dirty&&!busyOv())load();};
+const busyOv=()=>['#dr','#d3','#imp','#rec'].some(q=>$(q)&&$(q).style.display==='flex');   // หน้าต่างวาด/3D/Import/อัดท่า เปิดอยู่ = ห้ามโหลดข้อมูลใหม่ทับ
+// หาช่วงตัวจริงใน db ตาม id (กันกรณีโหลดใหม่ระหว่างแก้ แล้วอ็อบเจกต์เก่าไม่อยู่ใน db แล้ว → แก้ไปก็ไม่ถูกบันทึก)
+function liveShot(s){if(!s)return s;for(const b of db.items){const x=b.shots.find(q=>q.id===s.id);if(x)return x;}return s;}   // อีกหน้าบันทึก → โหลดใหม่ (ถ้าเราไม่ได้แก้ค้าง)
 function sbMerge(S){
   const mine=new Map(db.items.map(b=>[b.id,b])),srv=new Map(S.items.map(b=>[b.id,b])),out=[],ren=[];
   const edited=b=>bj(b)!==BASE[b.id];
@@ -349,8 +354,10 @@ function sbMerge(S){
   if(cur&&!out.includes(cur))cur=out.find(b=>b.id===cur.id)||null;renderList();
 }
 async function load(){
-  try{const r=await fetch('/api/sb',{cache:'no-store'});if(!r.ok)throw 0;const j=await r.json();online=true;if(dirty)return;
-    const keep=cur&&cur.id;db=j;fixShots();setBase();if(keep)cur=db.items.find(b=>b.id===keep)||null;stat('พร้อม • บันทึกอัตโนมัติ');} // แก้อะไรไประหว่างโหลด → ไม่ทับ
+  try{const r=await apiGet('/api/sb');if(!r.ok)throw 0;const j=await r.json();online=true;if(dirty)return;
+    const keep=cur&&cur.id,old=new Map(db.items.map(b=>[b.id,b]));
+    j.items=j.items.map(b=>{const o=old.get(b.id);return o&&BASE[b.id]===bj(b)&&bj(o)===BASE[b.id]?o:b;});   // บอร์ดที่ไม่เปลี่ยน = ใช้อ็อบเจกต์เดิม
+    db=j;fixShots();setBase();if(keep)cur=db.items.find(b=>b.id===keep)||null;stat('พร้อม • บันทึกอัตโนมัติ');} // แก้อะไรไประหว่างโหลด → ไม่ทับ
   catch(e){online=false;stat('⚠ ต้องเปิดผ่าน "Storyboard.bat" (tools/serve.py) ถึงจะบันทึกได้',1);}
   if(cur)cur=db.items.find(b=>b.id===cur.id)||null;
   renderList();renderEd();
@@ -692,7 +699,7 @@ const nFr=s=>s.frames&&s.frames.list?s.frames.list.length:0;
 function fbNew(bg,base,t){return {id:newId(),bg:bg||'side',base:base||'',t:t??null,ops:[],img:''};}
 function fbLoad(p){if(!p||FB.im[p])return Promise.resolve();return new Promise(ok=>{const im=new Image();im.onload=()=>{FB.im[p]=im;ok();};im.onerror=()=>ok();im.src=p;});}
 function fbOpen(s,at){
-  FB.on=true;FB.s=s;DR.s=s;FB.play=0;FB.cmp={};
+  s=liveShot(s);FB.on=true;FB.s=s;DR.s=s;FB.play=0;FB.cmp={};
   const f=s.frames||{fps:12,list:[]};FB.fps=f.fps||12;FB.list=JSON.parse(JSON.stringify(f.list));
   FB.chg=new Set(FB.list.filter(x=>!x.img).map(x=>x.id)); // เฟรมใหม่จากฉาก 3D ยังไม่มีภาพรวม
   if(!FB.list.length){FB.list=Array.from({length:6},()=>fbNew('side'));FB.list.forEach(x=>FB.chg.add(x.id));}
@@ -759,8 +766,9 @@ async function fbSave(){
     const cols=Math.min(n,6),w=320,h=180,c=document.createElement('canvas');c.width=cols*w;c.height=Math.ceil(n/cols)*h;const g=c.getContext('2d');
     g.font='600 20px Segoe UI, Leelawadee UI, sans-serif';
     L.forEach((fr,k)=>{const x=k%cols*w,y=Math.floor(k/cols)*h;g.drawImage(fbCompose(fr),x,y,w,h);const t=`${k+1}${fr.t!=null?' • '+f2(fr.t)+'s':''}`;g.fillStyle='#000b';g.fillRect(x,y,g.measureText(t).width+14,28);g.fillStyle='#e8b84a';g.fillText(t,x+7,y+21);g.strokeStyle='#000';g.strokeRect(x+0.5,y+0.5,w-1,h-1);});
-    const s=FB.s;s.frames={fps:FB.fps,list:L,sheet:await upload(c.toDataURL('image/jpeg',0.85),'frs')};
-    FB.chg.clear();touch(1);fbClose();stat(`บันทึก ${n} เฟรมแล้ว ✓`);
+    const s=liveShot(FB.s);s.frames={fps:FB.fps,list:L,sheet:await upload(c.toDataURL('image/jpeg',0.85),'frs')};
+    const bd=db.items.find(b=>b.shots.includes(s));if(bd&&bd!==cur){cur=bd;}selShot=s.id;vMode='clip';
+    FB.chg.clear();touch(1);fbClose();stat(`บันทึก ${n} เฟรมแล้ว ✓ — ดูคลิปที่จอกลาง (🎞 คลิป) / แก้ต่อ: ปุ่ม 🎞 เฟรม`);
   }catch(e){stat('⚠ เก็บภาพไม่ได้ — เปิดผ่าน "Storyboard.bat" หรือยัง? '+e,1);}
 }
 function fbVideo(){ // อัดคลิปจากทุกเฟรม 2 รอบ → ดาวน์โหลด .webm
@@ -826,7 +834,7 @@ const PX_M=20; // ในเกม 20 หน่วย = 1 เมตร (S3 = 1/20
 const WHO_OF={pyro:'Pyro (ไฟ)',frost:'Frost (น้ำแข็ง)',storm:'Storm (สายฟ้า)',earth:'Earth (ดิน)'};
 async function impOpen(){
   $('#imp').style.display='flex';
-  if(!IMP.data){try{const r=await fetch('/api/sb-skills',{cache:'no-store'});if(!r.ok)throw 0;IMP.data=await r.json();}
+  if(!IMP.data){try{const r=await apiGet('/api/sb-skills');if(!r.ok)throw 0;IMP.data=await r.json();}
     catch(e){$('#impL').innerHTML='<div class="empty">อ่านสกิลไม่ได้ — เปิดผ่าน "Storyboard.bat" (และปิดเปิดใหม่ถ้าเพิ่งอัปเดต)</div>';return;}}
   impRender();
 }
@@ -898,7 +906,7 @@ function recApply(b){ // ฉาก 3D ทุกช่วง: ผู้ร่า�
 }
 async function recBoard(b){
   const g=b.game;if(!g)return;
-  let pi=g.pathI;if(pi==null){try{const d=IMP.data||(IMP.data=await (await fetch('/api/sb-skills',{cache:'no-store'})).json());pi=(d.paths.find(p=>p.id===g.path)||{}).i;}catch(e){}}
+  let pi=g.pathI;if(pi==null){try{const d=IMP.data||(IMP.data=await (await apiGet('/api/sb-skills')).json());pi=(d.paths.find(p=>p.id===g.path)||{}).i;}catch(e){}}
   try{b.rec=await recGame(g.id.replace(/_(shield|dash)$/,''),g.kind,pi??0);recApply(b);touch(1);stat(`อัดท่าจากเกมแล้ว ✓ ${f2(b.rec.dur)} วิ — เปิด 🧊 ฉาก 3D เพื่อดู/เลื่อนเวลา`);}
   catch(e){stat('⚠ อัดท่าจากเกมไม่ได้: '+e,1);}
 }
@@ -930,9 +938,9 @@ document.addEventListener('keydown',e=>{
     if(e.key==='ArrowDown'&&i<cur.shots.length-1){e.preventDefault();selectShot(cur.shots[i+1].id,1);}
     if(e.key==='ArrowUp'&&i>0){e.preventDefault();selectShot(cur.shots[i-1].id,1);}}
 });
-window.addEventListener('focus',()=>{if(!dirty&&$('#dr').style.display!=='flex'&&!document.activeElement.matches('input,textarea'))load();}); // Claude อาจตอบ/แปะผลมาแล้ว
+window.addEventListener('focus',()=>{if(!dirty&&!busyOv()&&!document.activeElement.matches('input,textarea'))load();}); // Claude อาจตอบ/แปะผลมาแล้ว
 load();
-Object.assign(window,{SB:{upload,touch,stat,reRender,fbOpen,newId,get cur(){return cur;}}});
+Object.assign(window,{SB:{upload,touch,stat,reRender,fbOpen,newId,liveShot,get cur(){return cur;}}});
 </script>
 <script type="module">
 // ===== ฉาก 3D แบบร่าง (Basic Draft): วางรูปทรงง่าย ๆ รอบผู้ร่าย/เป้า แล้วถ่ายภาพหลายมุมเป็นภาพร่างของช่วง =====
@@ -1119,7 +1127,7 @@ function place(o){o.m.position.set(...o.p);o.m.rotation.set(...o.r.map(v=>v*PI/1
 function measure(o){o.m.updateMatrixWorld(true);const b=new THREE.Box3();o.m.traverse(c=>{if(c.isMesh)b.expandByObject(c);});const z=b.getSize(new THREE.Vector3());o.size=[r2(z.x),r2(z.y),r2(z.z)];}
 function readBack(o){const m=o.m;o.p=m.position.toArray().map(r2);o.r=[m.rotation.x,m.rotation.y,m.rotation.z].map(v=>Math.round(v*180/PI));o.s=m.scale.toArray().map(r2);measure(o);posLabel(o);dirty();}
 function data(o){const {m,lab,...d}=o;return d;}
-function dirty(){if(!shot)return;shot.scene3d={v:1,objs:objs.map(data),cast:roles.cast,targ:roles.targ,at:r2(at)};clearTimeout(saveT);saveT=setTimeout(()=>SB.touch(),400);}
+function dirty(){if(!shot)return;shot=SB.liveShot(shot);shot.scene3d={v:1,objs:objs.map(data),cast:roles.cast,targ:roles.targ,at:r2(at)};clearTimeout(saveT);saveT=setTimeout(()=>SB.touch(),400);}
 function addObj(t,from,spec){
   const tg=orbit.target,id=Date.now().toString(36)+Math.random().toString(36).slice(2,5);
   const o=from?{...data(from),id,p:from.p.map((v,i)=>i===2?r2(v+0.6):v)}
@@ -1158,7 +1166,7 @@ async function snap(list){
       const o=document.createElement('canvas');o.width=1280;o.height=720;const g=o.getContext('2d');g.drawImage(R.domElement,0,0);
       const t='3D • '+VIEWS[k].th+(maxDur()>0?` • ${f2(at)} วิ`:'');g.font='600 26px Segoe UI, Leelawadee UI, sans-serif';g.fillStyle='#000a';g.fillRect(0,0,g.measureText(t).width+28,44);g.fillStyle='#e8b84a';g.fillText(t,14,31);
       const img=await SB.upload(o.toDataURL('image/jpeg',0.9),'3d');
-      const an=maxDur()>0;shot.sketches.push({img,kind:'3d',view:VIEWS[k].th+(an?` • ท่า ${f2(at)} วิ`:''),...(an?{t:r2(at)}:{})});shot._sel=shot.sketches.length-1;
+      shot=SB.liveShot(shot);const an=maxDur()>0;shot.sketches.push({img,kind:'3d',view:VIEWS[k].th+(an?` • ท่า ${f2(at)} วิ`:''),...(an?{t:r2(at)}:{})});shot._sel=shot.sketches.length-1;
     }
     SB.touch();SB.stat('ถ่ายแล้ว '+list.length+' ภาพ ✓ (อยู่ในภาพร่างของช่วงนี้)');
   }catch(e){SB.stat('⚠ เก็บภาพไม่ได้ — เปิดผ่าน "Storyboard.bat" หรือยัง? '+e,1);}
@@ -1184,7 +1192,7 @@ async function frames(){
       list.push({id:SB.newId(),bg:'blank',base,t:r2(at),ops:[],img:''});}
   }catch(e){SB.stat('⚠ เก็บภาพไม่ได้ — เปิดผ่าน "Storyboard.bat" หรือยัง? '+e,1);done();return;}
   done();
-  const s=shot;s.frames={fps,list:mode==='add'?[...s.frames.list,...list]:list,sheet:''};
+  const s=SB.liveShot(shot);s.frames={fps,list:mode==='add'?[...s.frames.list,...list]:list,sheet:''};
   close();SB.fbOpen(s,mode==='add'?s.frames.list.length-n:0);
 }
 async function open3D(s){
