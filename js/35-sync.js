@@ -419,12 +419,20 @@ function toScreen(x,h,y){
 }
 // Burning: ตัวเลขแบบแฟนตาซี (ฟอนต์ Pirata One) สีแดง-ส้ม กลางตัวศัตรู
 try{document.fonts.load("40px 'Pirata One'");}catch(e){}
+// วาดตัวเลขครั้งเดียวลงแผ่นเล็กแล้วเก็บไว้ (shadowBlur ทุกเฟรม = แพงมาก) • key = เลข + ขนาด + DPR
+const BURNC=new Map();
 function burnNum(x,y,n){
-  const t=performance.now(),s=30+n*3+(n>=5?3*Math.sin(t/90):0);
-  cx.save();cx.textAlign='center';cx.textBaseline='middle';cx.font=`${Math.round(s)}px 'Pirata One',serif`;
-  const g=cx.createLinearGradient(0,y-s/2,0,y+s/2);g.addColorStop(0,n>=5?'#ffe27a':'#ffb347');g.addColorStop(0.55,'#ff6a1a');g.addColorStop(1,'#b3140a');
-  cx.shadowColor='#ff4a10';cx.shadowBlur=12;cx.lineWidth=4;cx.strokeStyle='rgba(30,4,0,0.85)';cx.strokeText(n,x,y);
-  cx.fillStyle=g;cx.fillText(n,x,y);cx.restore();
+  const t=performance.now(),S=Math.round(30+n*3+(n>=5?3*Math.sin(t/90):0)),key=n+'|'+S+'|'+DPR;
+  let c=BURNC.get(key);
+  if(!c){const fam=`${S}px 'Pirata One',serif`,pad=18,w=Math.ceil(S*0.7*String(n).length+S*0.6)+pad*2,h=S+pad*2;
+    c=document.createElement('canvas');c.width=Math.ceil(w*DPR);c.height=Math.ceil(h*DPR);c.cw=w;c.ch=h;
+    const g=c.getContext('2d');g.scale(DPR,DPR);g.textAlign='center';g.textBaseline='middle';g.font=fam;const yy=h/2;
+    const gr=g.createLinearGradient(0,yy-S/2,0,yy+S/2);gr.addColorStop(0,n>=5?'#ffe27a':'#ffb347');gr.addColorStop(0.55,'#ff6a1a');gr.addColorStop(1,'#b3140a');
+    g.shadowColor='#ff4a10';g.shadowBlur=12;g.lineWidth=4;g.strokeStyle='rgba(30,4,0,0.85)';g.strokeText(n,w/2,yy);g.fillStyle=gr;g.fillText(n,w/2,yy);
+    if(document.fonts&&!document.fonts.check(fam))c=null;   // ฟอนต์ยังไม่มา: ไม่เก็บ (เดี๋ยววาดใหม่)
+    else{if(BURNC.size>200)BURNC.clear();BURNC.set(key,c);}
+    if(!c){cx.save();cx.textAlign='center';cx.textBaseline='middle';cx.font=fam;cx.fillStyle='#ff6a1a';cx.fillText(n,x,y);cx.restore();return;}}
+  cx.drawImage(c,x-c.cw/2,y-c.ch/2,c.cw,c.ch);
 }
 function drawLabels(P,E,v,me,spk){
   if(!SET.names){const team=teamOn(v);P=P.filter(p=>team&&me&&p.tm===me.tm);}

@@ -54,7 +54,7 @@ function clothSetup(o){
     const m=new THREE.Mesh(g,mat);m.frustumCulled=false;m.castShadow=outer.castShadow;m.receiveShadow=outer.receiveShadow;scene.add(m);return m;};
   const mo=mk(outer.material,false),mi=mk(inner.material,true);
   const B=n=>o.fileModel.getObjectByName(n);
-  const C={o,outer,ref,rf,NR,N,pk,E,mo,mi,P:new Float32Array(N*3),Q:new Float32Array(N*3),T:new Float32Array(N*3),Tm:new Float32Array(CL_ROWS.length*CL_NC*3),
+  const C={o,outer,ref,rf,NR,N,pk,E:new Float64Array(E),mo,mi,P:new Float32Array(N*3),Q:new Float32Array(N*3),T:new Float32Array(N*3),Tm:new Float32Array(CL_ROWS.length*CL_NC*3),
     caps:[['hips','neck','TORSO'],['thigh_L','shin_L','LEG'],['shin_L','foot_L','LEG'],['thigh_R','shin_R','LEG'],['shin_R','foot_R','LEG'],['upper_arm_L','forearm_L','ARM'],['upper_arm_R','forearm_R','ARM']].map(([a,b,k])=>[B(a),B(b),k]).filter(c=>c[0]&&c[1]),
     init:false,flip:false,t:0,acc:0};
   o.g.userData.extra=(o.g.userData.extra||[]).concat([mo,mi]);   // disposeObj(o.g) ทิ้ง mesh ผ้าด้วย
@@ -67,7 +67,7 @@ function clTargets(C){const P=C.outer.geometry.attributes.position,M=C.Tm;
 function clReset(C){C.P.set(C.T);C.Q.set(C.T);C.init=true;}
 // ดันจุดออกจากแคปซูล (a→b รัศมี rad)
 function clCapsule(P,Q,i,a,b,rad){const ax=a.x,ay=a.y,az=a.z,bx=b.x-ax,by=b.y-ay,bz=b.z-az,px=P[i]-ax,py=P[i+1]-ay,pz=P[i+2]-az,L=bx*bx+by*by+bz*bz||1;
-  const t=clamp((px*bx+py*by+pz*bz)/L,0,1),dx=px-bx*t,dy=py-by*t,dz=pz-bz*t,d=Math.hypot(dx,dy,dz);
+  const t=clamp((px*bx+py*by+pz*bz)/L,0,1),dx=px-bx*t,dy=py-by*t,dz=pz-bz*t,d=Math.sqrt(dx*dx+dy*dy+dz*dz);
   if(d<rad&&d>1e-5){const k=(rad-d)/d;P[i]+=dx*k;P[i+1]+=dy*k;P[i+2]+=dz*k;Q[i]+=dx*k;Q[i+1]+=dy*k;Q[i+2]+=dz*k;}}   // เลื่อน Q ตามด้วย = ดันออกแต่ไม่เพิ่มความเร็ว (ขาแกว่งไม่ดีดผ้าปลิว)
 // ของในโลกใกล้ตัว (รวบทีละเฟรม): วงกลม [x,y,r,สูง,abs] (px / ม.) • บ้านใกล้ ๆ • กำแพง/เสาสายดิน (เส้น) — ผ้าชนแล้วไม่ทะลุ (ผู้ใช้ 2026-10-21)
 const _clO={x:0,y:0};
@@ -81,7 +81,7 @@ function clWorld(cx,cy){const R=140,c=[],b=[],s=[],near=q=>Math.abs(q.x-cx)<R+q.
   return c.length||b.length||s.length?{c,b,s}:null;}
 // ดันจุดผ้าออกจากของในโลก (แนวนอน) • เลื่อน Q ตาม = ไม่เด้ง
 function clWorldHit(P,Q,i,W){const sx=P[i]/S3+MW/2,sy=P[i+2]/S3+MH/2,zh=P[i+1]-GY(sx,sy),r=4;let x=sx,y=sy;
-  for(const c of W.c){if(zh>=(c[4]?c[3]-(TERR?terrT(x,y):0):c[3]))continue;const dx=x-c[0],dy=y-c[1],d=Math.hypot(dx,dy),m=c[2]+r;if(d<m&&d>0.001){x=c[0]+dx/d*m;y=c[1]+dy/d*m;}}
+  for(const c of W.c){if(zh>=(c[4]?c[3]-(TERR?terrT(x,y):0):c[3]))continue;const dx=x-c[0],dy=y-c[1],d=Math.sqrt(dx*dx+dy*dy),m=c[2]+r;if(d<m&&d>0.001){x=c[0]+dx/d*m;y=c[1]+dy/d*m;}}
   for(const q of W.s){if(zh>=q[5])continue;const e=eSegD(x,y,{x1:q[0],y1:q[1],x2:q[2],y2:q[3]}),m=q[4]+r;if(e.d<m&&e.d>0.001){x=e.qx+(x-e.qx)/e.d*m;y=e.qy+(y-e.qy)/e.d*m;}}
   if(W.b.length){_clO.x=x;_clO.y=y;for(const b of W.b)collideBld(b,_clO,r,Math.max(0,zh));x=_clO.x;y=_clO.y;}
   if(x!==sx||y!==sy){const ax=(x-sx)*S3,az=(y-sy)*S3;P[i]+=ax;P[i+2]+=az;Q[i]+=ax;Q[i+2]+=az;}}
@@ -89,12 +89,12 @@ function clStep(C,h,gy,caps,bv,W){const P=C.P,Q=C.Q,T=C.T,pk=C.pk,E=C.E,N=C.N,g=
   for(let n=0;n<N;n++){const i=n*3,k=pk[n];
     if(k>=1){P[i]=Q[i]=T[i];P[i+1]=Q[i+1]=T[i+1];P[i+2]=Q[i+2]=T[i+2];continue;}
     const fl=(1-k)*CLOTH.FLUT*h*h*Math.sin(C.t*7+n*0.37);
-    let vx=(P[i]-Q[i])*D,vy=(P[i+1]-Q[i+1])*D,vz=(P[i+2]-Q[i+2])*D;const bx=bv.x*h,by=bv.y*h,bz=bv.z*h,rx=vx-bx,ry=vy-by,rz=vz-bz,vm=Math.hypot(rx,ry,rz),mx=CLOTH.VMAX*h;if(vm>mx){const s=mx/vm;vx=bx+rx*s;vy=by+ry*s;vz=bz+rz*s;}   // จำกัดความเร็วผ้าเทียบกับตัว (วิ่ง/พุ่งเร็วแค่ไหนผ้าก็ตามทัน)
+    let vx=(P[i]-Q[i])*D,vy=(P[i+1]-Q[i+1])*D,vz=(P[i+2]-Q[i+2])*D;const bx=bv.x*h,by=bv.y*h,bz=bv.z*h,rx=vx-bx,ry=vy-by,rz=vz-bz,vm=Math.sqrt(rx*rx+ry*ry+rz*rz),mx=CLOTH.VMAX*h;if(vm>mx){const s=mx/vm;vx=bx+rx*s;vy=by+ry*s;vz=bz+rz*s;}   // จำกัดความเร็วผ้าเทียบกับตัว (วิ่ง/พุ่งเร็วแค่ไหนผ้าก็ตามทัน)
     const wk=(1-k)*h*h;Q[i]=P[i];Q[i+1]=P[i+1];Q[i+2]=P[i+2];P[i]+=vx+fl+CLW.x*wk;P[i+1]+=vy+g;P[i+2]+=vz+fl+CLW.z*wk;   // CLW = ลม ณ ตัวเรา (js/50)
     if(k>0)for(let q=0;q<3;q++)P[i+q]+=(T[i+q]-P[i+q])*k;}
   for(let it=0;it<CLOTH.IT;it++){
     for(let e=0;e<E.length;e+=4){const a=E[e]*3,b=E[e+1]*3,wa=pk[E[e]]>=1?0:1,wb=pk[E[e+1]]>=1?0:1;if(!(wa+wb))continue;
-      const dx=P[b]-P[a],dy=P[b+1]-P[a+1],dz=P[b+2]-P[a+2],d=Math.hypot(dx,dy,dz)||1e-6,s=(d-E[e+2])/d*E[e+3]/(wa+wb);
+      const dx=P[b]-P[a],dy=P[b+1]-P[a+1],dz=P[b+2]-P[a+2],d=Math.sqrt(dx*dx+dy*dy+dz*dz)||1e-6,s=(d-E[e+2])/d*E[e+3]/(wa+wb);
       P[a]+=dx*s*wa;P[a+1]+=dy*s*wa;P[a+2]+=dz*s*wa;P[b]-=dx*s*wb;P[b+1]-=dy*s*wb;P[b+2]-=dz*s*wb;}
     for(let n=0;n<N;n++){if(pk[n]>=1)continue;const i=n*3;for(const c of caps)clCapsule(P,Q,i,c[0],c[1],c[2]);if(P[i+1]<gy){P[i+1]=gy;Q[i]=lerp(Q[i],P[i],0.6);Q[i+2]=lerp(Q[i+2],P[i+2],0.6);}if(W&&it===CLOTH.IT-1)clWorldHit(P,Q,i,W);}}}
 function clDraw(C){const po=C.mo.geometry.attributes.position,pi=C.mi.geometry.attributes.position;po.array.set(C.P);po.needsUpdate=true;C.mo.geometry.computeVertexNormals();

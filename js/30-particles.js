@@ -138,9 +138,10 @@ function updateParticles(dt){
   if(typeof hemi!=='undefined'){const h=hemi.color,k=Math.min(1.15,Math.max(0.55,hemi.intensity*1.25));PLIT.value.setRGB((0.65+0.35*h.r)*k,(0.65+0.35*h.g)*k,(0.65+0.35*h.b)*k);}
   const T=PTIME.value;
   const cap=Math.min(PMAX*1.6,VFXB.cap);if(PARTS.length>cap)PARTS.splice(0,PARTS.length-cap);   // เพดานตามระดับกราฟิก (ตัดอันเก่าสุดก่อน)
+  let dead=0;   // อนุภาคหมดอายุ: นับไว้แล้วบีบอาร์เรย์ทีเดียวท้ายลูป (splice ทีละตัว = ช้ามากตอนมีหลายพันตัว)
   for(let i=PARTS.length-1;i>=0;i--){
     const p=PARTS[i];p.life-=dt;
-    if(p.life<=0){PARTS.splice(i,1);continue;}
+    if(p.life<=0){dead++;continue;}
     if(p.h===undefined){p.h=1.2;p.vh=rnd(-1,3.5);}
     if(p.g===undefined)p.g=4;
     const dr=Math.exp(-(p.drag||3)*dt);
@@ -166,6 +167,7 @@ function updateParticles(dt){
       if(p.sh){if(p.vr)p.rot=(p.rot||0)+p.vr*dt;S.shp[j*2]=p.sh;S.shp[j*2+1]=p.rot||0;if(p.sh===2){S.vel[j*3]=p.vx*S3;S.vel[j*3+1]=p.vh;S.vel[j*3+2]=p.vy*S3;}}else S.shp[j*2]=0;}
     S.size[j]=p.size*0.12*(p.fl&&FLAME_STYLE===2?0.45+0.55*k:p.fl&&FLAME_STYLE===3?(0.55+0.45*Math.min(1,(1-k)*5))*(1-0.3*(1-k)*(1-k)):1);S.n++;
   }
+  if(dead){let w=0;for(let i=0;i<PARTS.length;i++){const p=PARTS[i];if(p.life>0)PARTS[w++]=p;}PARTS.length=w;}
   for(const S of [...PSYS,...Object.values(PFB)]){if(!S.geo)continue;S.geo.setDrawRange(0,S.n);const a=S.geo.attributes;a.position.needsUpdate=a.pcol.needsUpdate=a.psize.needsUpdate=true;if(a.page)a.page.needsUpdate=true;if(a.pvar)a.pvar.needsUpdate=true;if(a.pshp){a.pshp.needsUpdate=a.pvel.needsUpdate=true;}}
 }
 

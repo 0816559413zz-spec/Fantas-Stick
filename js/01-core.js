@@ -6,6 +6,11 @@ import {UnrealBloomPass} from 'three/addons/postprocessing/UnrealBloomPass.js';
 import {OutputPass} from 'three/addons/postprocessing/OutputPass.js';
 import {Pass,FullScreenQuad} from 'three/addons/postprocessing/Pass.js';
 import {mergeGeometries} from 'three/addons/utils/BufferGeometryUtils.js';
+// วัสดุโปร่งใส 2 ด้าน: three วาด 2 รอบ (ด้านหลัง → ด้านหน้า) และเช็ค shader ใหม่ทั้ง 2 รอบทุกเฟรม (~170 ครั้ง/เฟรมตอนสู้)
+// แสงแบบบวก (Additive) ผลลัพธ์ไม่ขึ้นกับลำดับ → วาดรอบเดียวได้ ภาพเหมือนเดิมทุกพิกเซล • ต้องอยู่ก่อนสร้างวัสดุใด ๆ
+Object.defineProperty(THREE.Material.prototype,'forceSinglePass',{configurable:true,
+  get(){return this._fsp||this.blending===THREE.AdditiveBlending;},set(v){this._fsp=v;}});
+{const cp=THREE.Material.prototype.copy;THREE.Material.prototype.copy=function(s){const r=cp.call(this,s);this._fsp=s._fsp;return r;};}
 // =====================================================================
 //  พื้นฐาน
 // =====================================================================

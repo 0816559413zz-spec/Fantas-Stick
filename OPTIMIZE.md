@@ -69,6 +69,15 @@ User's future goals: bigger maps, more and finer breakable things, light from sk
 - **WebGPU cost/risk:** every custom GLSL shader (fireVol, ice, particles, grass, trails, soft particles, AO/grade passes…) must be rewritten in TSL; some friends' browsers/devices may lack WebGPU → need a WebGL fallback.
 - **First step when the user asks:** a separate test scene (not the game): WebGPU + 100–200 moving lights + one house breaking into a few hundred Rapier chunks; open on the user's and friends' PCs, compare FPS and which devices can't run it; decide from those numbers.
 
+## G. Round 2026-10-25 (user: "แล็คมาก") — CPU-bound on the user's AMD iGPU PC
+- [x] Auto quality shadow toggle = full shader recompile (~2 s freeze) → auto keeps shadows on, updates every 4th frame at lvl 2.
+- [x] Cloth `Math.hypot` → `Math.sqrt` (V8 hypot is slow), typed edge array.
+- [x] Particle removal O(n) compaction instead of per-item `splice`.
+- [x] Additive DoubleSide transparent materials single pass (`forceSinglePass`, js/01).
+- [x] `burnNum` cached canvases (no per-frame shadowBlur).
+- [ ] Auto quality lowers resolution to 0.45 even when the frame is CPU-bound (no gain, just blurry) → only drop scale when GPU is the limit (e.g. compare `render()` JS time with frame time).
+- [ ] Remaining CPU: three.js render traversal/matrix updates, `getParameters` for 54 normal-blend DoubleSide materials (two-pass), cloth still ~8%, labels/HUD 2D.
+
 ## Benchmarks
 `tools/bench-start.js` = match start / map switch hitch (see its header).
 

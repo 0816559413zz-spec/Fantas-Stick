@@ -153,7 +153,8 @@ function qualPR(){
 }
 function applyQuality(){
   const pr=qualPR();gl.setPixelRatio(pr);composer.setPixelRatio(pr);
-  const sh=QUAL.mode!=='low'&&!(QUAL.mode==='auto'&&QUAL.lvl>=2);
+  // เปิด/ปิดเงา = คอมไพล์ shader ใหม่ทุกตัว (ค้าง ~2 วิ) → ปิดจริงเฉพาะโหมดประหยัด • อัตโนมัติขั้น 2 แค่อัปเดตเงาห่างขึ้น (renderGame js/37)
+  const sh=QUAL.mode!=='low';
   if(gl.shadowMap.enabled!==sh){
     gl.shadowMap.enabled=sh;
     for(const sc of [scene,typeof stage!=='undefined'?stage:null])if(sc)sc.traverse(o=>{if(o.material)[].concat(o.material).forEach(m=>m.needsUpdate=true);});

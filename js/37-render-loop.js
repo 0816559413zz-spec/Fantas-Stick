@@ -72,7 +72,7 @@ function renderGame(v,P,E,me,dt,now){
   trSync(v);bpSync(v);
   tickFlash(dt);
   t0=performance.now();updateZV(dt);updateParticles(dt);updateShapes(dt);updateLights(dt);updateVfx(dt);updateDebris(dt);pf('fx',t0);
-  QUAL.frame++;gl.shadowMap.needsUpdate=QUAL.mode==='high'||QUAL.frame%2===0;if(gl.shadowMap.needsUpdate)shadowFollow();
+  QUAL.frame++;gl.shadowMap.needsUpdate=QUAL.mode==='high'||QUAL.frame%(QUAL.mode==='auto'&&QUAL.lvl>=2?4:2)===0;if(gl.shadowMap.needsUpdate)shadowFollow();
   if(FXSTUDIO.noDraw)return;
   t0=performance.now();composer.render();pf('gpuSubmit',t0);
   t0=performance.now();const spk=speakingIds();
