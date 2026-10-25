@@ -8,6 +8,7 @@
 #   GET/POST /api/sb                → สตอรี่บอร์ด VFX (storyboard.html): storyboard/boards.json + เขียน storyboard/sb-<id>.md + STORYBOARDS.md ให้ Claude อ่าน
 #   POST /api/sb-img?name=<ชื่อ>    → เก็บภาพร่าง/รูปตัวอย่างลง storyboard/img/<ชื่อ>.png|.jpg
 #   POST /api/sb-rec?name=<ชื่อ>    → เก็บท่าตัวละครที่อัดจากเกม (studio/rec.js) ลง storyboard/rec/<ชื่อ>.json
+#   POST /api/sb-sync               → ☁ ซิงก์สตอรี่บอร์ดกับเครื่องอื่นผ่าน GitHub (fetch → รวมรายบอร์ด → commit เฉพาะ storyboard/ → merge → push)
 #   GET  /api/sb-skills             → รายการสกิลจากโค้ดเกม (js/*.js: PATHS, PBASIC, defSpell) ให้ปุ่ม Import ของสตอรี่บอร์ด — อ่านสดทุกครั้ง ไม่มีไฟล์ค้าง
 # ฟังเฉพาะ 127.0.0.1 (เครื่องตัวเองเท่านั้น)
 import base64, json, os, re, subprocess, sys, time
@@ -191,6 +192,81 @@ def sb_md(b):
         L += ['## Claude ตอบ', '', b['reply'].strip(), '']
     return '\n'.join(L) + '\n'
 
+# ---------- ☁ ซิงก์สตอรี่บอร์ดระหว่างเครื่อง ผ่าน GitHub (git ของโปรเจกต์นี้) ----------
+# เพื่อน/เครื่องอื่น clone repo เดียวกัน → กดซิงก์ = ดึงของคนอื่น + รวมรายบอร์ด + ส่งขึ้น (commit เฉพาะโฟลเดอร์ storyboard/)
+# รวมแบบ 3 ทาง: ฐาน = boards.json ใน commit ล่าสุดของเครื่องนี้ (HEAD), เรา = ไฟล์ตอนนี้, เขา = origin
+#   ใครแก้บอร์ดไหนใช้ของคนนั้น • แก้ทั้งคู่ = อันที่ updated ใหม่กว่า • ลบฝั่งเดียว (อีกฝั่งไม่ได้แก้) = ลบ • เลขบอร์ดใหม่ชนกัน = เปลี่ยนเลขของเรา
+def git(*a):
+    return subprocess.run(['git', *a], cwd=ROOT, capture_output=True, text=True, encoding='utf-8', errors='replace')
+
+def git_json(ref):
+    r = git('show', ref + ':storyboard/boards.json')
+    try:
+        return json.loads(r.stdout) if r.returncode == 0 else {'next': 1, 'items': []}
+    except Exception:
+        return {'next': 1, 'items': []}
+
+def sb_merge3(base, mine, theirs):
+    J = lambda b: json.dumps(b, sort_keys=True, ensure_ascii=False) if b is not None else None
+    B = {b['id']: b for b in base.get('items', [])}; M = {b['id']: b for b in mine.get('items', [])}; T = {b['id']: b for b in theirs.get('items', [])}
+    order = [b['id'] for b in theirs.get('items', [])] + [i for i in M if i not in T]
+    out, clash = [], []
+    for i in order:
+        b, m, t = B.get(i), M.get(i), T.get(i)
+        if b is None and m is not None and t is not None and J(m) != J(t):
+            out.append(t); clash.append(m); continue          # สร้างบอร์ดใหม่เลขเดียวกันทั้งสองเครื่อง
+        mc, tc = J(m) != J(b), J(t) != J(b)
+        if not mc: pick = t
+        elif not tc: pick = m
+        elif m is None: pick = t
+        elif t is None: pick = m
+        else: pick = m if (m.get('updated') or '') >= (t.get('updated') or '') else t
+        if pick is not None: out.append(pick)
+    nx = max([mine.get('next') or 1, theirs.get('next') or 1] + [b['id'] + 1 for b in out])
+    for m in clash:
+        m['id'] = nx; nx += 1; out.append(m)
+    return {'next': nx, 'items': out}
+
+SYNC = {'last': 0, 'msg': ''}
+def sb_sync():
+    with SB_LOCK:
+        br = git('rev-parse', '--abbrev-ref', 'HEAD').stdout.strip() or 'main'
+        f = git('fetch', 'origin', br)
+        if f.returncode != 0:
+            return {'ok': False, 'err': 'ต่อ GitHub ไม่ได้ (เน็ต / ยังไม่ได้ล็อกอิน git?) ' + f.stderr.strip()[-200:]}
+        local = sb_load()
+        merged = sb_merge3(git_json('HEAD'), local, git_json('origin/' + br))
+        merged['rev'] = int(local.get('rev') or 0) + 1
+        sb_save(merged)
+        idn = [] if git('config', 'user.email').stdout.strip() else ['-c', 'user.name=Storyboard', '-c', 'user.email=storyboard@localhost']
+        git('add', '-A', 'storyboard')
+        if git('diff', '--cached', '--quiet', '--', 'storyboard').returncode != 0:
+            c = git(*idn, 'commit', '-m', 'Storyboard sync (' + os.environ.get('COMPUTERNAME', 'pc') + ')', '--', 'storyboard')
+            if c.returncode != 0:
+                return {'ok': False, 'err': 'commit ไม่ได้: ' + (c.stderr or c.stdout).strip()[-200:]}
+        if git('rev-list', '--count', 'HEAD..origin/' + br).stdout.strip() not in ('', '0'):
+            m = git(*idn, 'merge', '--no-ff', '--no-commit', 'origin/' + br)
+            bad = [x for x in git('diff', '--name-only', '--diff-filter=U').stdout.split() if x]
+            if [x for x in bad if not x.startswith('storyboard/')] or (m.returncode != 0 and not bad):
+                git('merge', '--abort')
+                return {'ok': False, 'err': 'ดึงของใหม่ไม่ได้ — มีไฟล์อื่นในเครื่องนี้ชนกับของบน GitHub (ให้ Claude ช่วย) ' + (m.stderr or m.stdout).strip()[-200:]}
+            for x in bad:   # ชนเฉพาะข้อมูลสตอรี่บอร์ด = ใช้ของเรา (รวมแล้วข้างบน) — ไฟล์ .md เขียนใหม่จาก json
+                if git('checkout', '--ours', '--', x).returncode != 0:
+                    git('rm', '-q', '--cached', '--', x)
+            sb_save(dict(merged))
+            git('add', '-A', 'storyboard')
+            c = git(*idn, 'commit', '--no-edit', '-m', 'Storyboard sync: merge')
+            if c.returncode != 0:
+                git('merge', '--abort')
+                return {'ok': False, 'err': 'รวมไม่ได้: ' + (c.stderr or c.stdout).strip()[-200:]}
+        ahead = git('rev-list', '--count', 'origin/' + br + '..HEAD').stdout.strip()
+        if ahead not in ('', '0'):
+            ps = git('push', 'origin', br)
+            if ps.returncode != 0:
+                return {'ok': False, 'db': sb_load(), 'err': 'ดึงของใหม่แล้ว แต่ส่งขึ้น GitHub ไม่ได้ (ไม่มีสิทธิ์ push / มีคนส่งพร้อมกัน — กดซิงก์อีกครั้ง) ' + ps.stderr.strip()[-200:]}
+        SYNC['last'] = time.time()
+        return {'ok': True, 'db': sb_load(), 'pushed': ahead not in ('', '0')}
+
 def sb_save(db):
     os.makedirs(os.path.join(SBD, 'img'), exist_ok=True)
     with open(os.path.join(SBD, 'boards.json'), 'w', encoding='utf-8') as fh:
@@ -356,6 +432,11 @@ class H(SimpleHTTPRequestHandler):
                 db['rev'] = int(cur.get('rev') or 0) + 1
                 sb_save(db)
             return self._json(200, {'ok': True, 'rev': db['rev']})
+        if u.path == '/api/sb-sync':
+            try:
+                return self._json(200, sb_sync())
+            except Exception as e:
+                return self._json(200, {'ok': False, 'err': str(e)})
         if u.path == '/api/sb-rec':
             name = re.sub(r'[^a-zA-Z0-9_\-]', '_', q.get('name', ['rec'])[0])[:60] or 'rec'
             data = self._body(); json.loads(data)

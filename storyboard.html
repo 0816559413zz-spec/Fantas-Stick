@@ -210,6 +210,7 @@ h3{margin:0;font:600 11px "Segoe UI",sans-serif;letter-spacing:.6px;color:var(--
   <select id="fSt" title="สถานะ"></select>
   <span class="sep"></span>
   <button id="bCopy" title="คัดลอกข้อความไปวางในแชท Claude">📋 ส่งให้ Claude</button>
+  <button id="bSync" title="ซิงก์สตอรี่บอร์ดกับเครื่องอื่น/เพื่อน ผ่าน GitHub (ทำเองตอนเปิด และ 3 นาทีหลังแก้ล่าสุด)">☁ ซิงก์</button>
   <a id="bFx" target="_blank" style="display:none"><button title="เปิดเอฟเฟกต์ที่ Claude ทำใน VFX Studio">✦ เปิดใน VFX Studio</button></a>
   <span id="stat">กำลังโหลด…</span>
 </header>
@@ -244,7 +245,7 @@ h3{margin:0;font:600 11px "Segoe UI",sans-serif;letter-spacing:.6px;color:var(--
   </div>
   <div id="tl"></div>
 </section>
-<footer id="S"><span id="sInfo"></span><span style="flex:1"></span><span>Claude อ่าน <span class="mono" id="sMd">storyboard/sb-?.md</span></span></footer>
+<footer id="S"><span id="sInfo"></span><span style="flex:1"></span><span id="sSync" title="ซิงก์กับเครื่องอื่นผ่าน GitHub">☁ ยังไม่ได้ซิงก์</span><span>Claude อ่าน <span class="mono" id="sMd">storyboard/sb-?.md</span></span></footer>
 <div id="zoom"><img alt=""></div>
 <div id="rec"><div class="bar"><b>🎬 อัดท่าจากเกมจริง</b><span class="hint" id="recSt">กำลังเปิดเกม…</span><button id="recX">ยกเลิก</button></div><iframe id="recF" title="เกม"></iframe>
   <div class="hint">เกมจะเข้าห้องฝึก กดสกิลให้เอง แล้วอัดท่าตัวละครทุกเฟรม (ไม่ต้องกดอะไร) — เสร็จแล้วปิดเอง</div></div>
@@ -368,7 +369,7 @@ function save(now){
     try{for(let n=0;n<4;n++){
         const r=await fetch('/api/sb',{method:'POST',body:JSON.stringify(db,(k,v)=>k[0]==='_'?undefined:v)});const j=await r.json();
         if(j.conflict){sbMerge(j.db);stat('มีหน้าต่างอื่นบันทึกก่อน — รวมให้แล้ว กำลังบันทึก…');continue;}
-        if(!j.ok)throw j.err;db.rev=j.rev;setBase();dirty=false;stat('บันทึกแล้ว ✓ '+new Date().toLocaleTimeString('th-TH'));if(sbChan)sbChan.postMessage(j.rev);return;}
+        if(!j.ok)throw j.err;db.rev=j.rev;setBase();dirty=false;clearTimeout(SY.t);SY.t=setTimeout(()=>syncNow(1),180000);stat('บันทึกแล้ว ✓ '+new Date().toLocaleTimeString('th-TH'));if(sbChan)sbChan.postMessage(j.rev);return;}
       throw 'ชนกันหลายรอบ';}
     catch(e){stat('⚠ บันทึกไม่ได้ — เปิดผ่าน "Storyboard.bat" หรือยัง? ('+e+')',1);}
   },now?0:600);
@@ -939,7 +940,25 @@ document.addEventListener('keydown',e=>{
     if(e.key==='ArrowUp'&&i>0){e.preventDefault();selectShot(cur.shots[i-1].id,1);}}
 });
 window.addEventListener('focus',()=>{if(!dirty&&!busyOv()&&!document.activeElement.matches('input,textarea'))load();}); // Claude อาจตอบ/แปะผลมาแล้ว
-load();
+// ===== ☁ ซิงก์กับเครื่องอื่น/เพื่อน ผ่าน GitHub (tools/serve.py /api/sb-sync): ตอนเปิด + 3 นาทีหลังแก้ล่าสุด + กดปุ่ม =====
+const SY={busy:false,t:0,pend:false};
+const typing=()=>document.activeElement&&document.activeElement.matches('input,textarea,select');
+async function syncNow(auto){
+  if(SY.busy||!online)return;
+  if(busyOv()||(auto&&typing())){SY.pend=true;return;}   // กำลังวาด/แก้อยู่ → ไว้ทีหลัง
+  SY.busy=true;SY.pend=false;const B=$('#bSync');B.disabled=true;B.textContent='☁ กำลังซิงก์…';$('#sSync').textContent='☁ กำลังซิงก์…';
+  try{
+    if(dirty){clearTimeout(saveT);save(1);for(let i=0;i<60&&dirty;i++)await new Promise(r=>setTimeout(r,150));}
+    const j=await (await fetch('/api/sb-sync',{method:'POST'})).json();
+    if(j.db&&!dirty&&!busyOv()){const keep=cur&&cur.id;db=j.db;fixShots();setBase();cur=keep?db.items.find(b=>b.id===keep)||null:null;renderList();renderEd();if(sbChan)sbChan.postMessage(db.rev);}
+    if(!j.ok)throw j.err;
+    $('#sSync').textContent='☁ ซิงก์แล้ว '+new Date().toLocaleTimeString('th-TH');if(!auto)stat('ซิงก์กับเครื่องอื่นแล้ว ✓'+(j.pushed?' (ส่งของเครื่องนี้ขึ้น GitHub แล้ว)':''));
+  }catch(e){$('#sSync').textContent='☁ ซิงก์ไม่ได้';if(!auto||String(e).length)stat('⚠ ซิงก์ไม่ได้: '+e,1);}
+  SY.busy=false;B.disabled=false;B.textContent='☁ ซิงก์';
+}
+$('#bSync').onclick=()=>syncNow(0);
+setInterval(()=>{if(SY.pend&&!busyOv()&&!typing())syncNow(1);},20000);
+load().then(()=>setTimeout(()=>syncNow(1),1500));
 Object.assign(window,{SB:{upload,touch,stat,reRender,fbOpen,newId,liveShot,get cur(){return cur;}}});
 </script>
 <script type="module">
