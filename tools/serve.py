@@ -7,6 +7,7 @@
 #   POST /api/bug-img?name=<ชื่อ>   → เก็บรูปของโน้ตลง bugs/img/<ชื่อ>.png|.jpg
 #   GET/POST /api/sb                → สตอรี่บอร์ด VFX (storyboard.html): storyboard/boards.json + เขียน storyboard/sb-<id>.md + STORYBOARDS.md ให้ Claude อ่าน
 #   POST /api/sb-img?name=<ชื่อ>    → เก็บภาพร่าง/รูปตัวอย่างลง storyboard/img/<ชื่อ>.png|.jpg
+#   POST /api/sb-rec?name=<ชื่อ>    → เก็บท่าตัวละครที่อัดจากเกม (studio/rec.js) ลง storyboard/rec/<ชื่อ>.json
 #   GET  /api/sb-skills             → รายการสกิลจากโค้ดเกม (js/*.js: PATHS, PBASIC, defSpell) ให้ปุ่ม Import ของสตอรี่บอร์ด — อ่านสดทุกครั้ง ไม่มีไฟล์ค้าง
 # ฟังเฉพาะ 127.0.0.1 (เครื่องตัวเองเท่านั้น)
 import base64, json, os, re, subprocess, sys, time
@@ -123,6 +124,9 @@ def sb_md(b):
          f"- ความรู้สึก: {', '.join(b.get('mood') or []) or '-'}",
          f"- สีหลัก: {' '.join('`' + c + '`' for c in b.get('colors') or []) or '-'}"]
     g = b.get('game')
+    if b.get('rec'):
+        rc = b['rec']
+        L.append(f"- **ท่าตัวละครจากเกมจริง (อัดไว้):** `{rc.get('file')}` • ยาว {f(rc.get('dur') or 0)} วิ • ท่าในไฟล์ตามเวลา: {rc.get('clips') or '-'} — ฉาก 3D ของแต่ละช่วงใช้ท่านี้ที่เวลาเริ่มของช่วง (ภาพ 3D = ท่าจริงในเกม)")
     if g:
         L.append(f"- **นำเข้าจากเกม:** `{g.get('id')}` ({g.get('kind', 'spell')}) • โค้ด `{g.get('file')}:{g.get('line')}` • คูลดาวน์ {f(g.get('cd') or 0)} วิ — เวลา/ขนาดในช่วงต่าง ๆ เดาจากคำอธิบายในเกม ผู้ใช้อาจแก้แล้ว; ถ้าไม่ตรงกับโค้ด ให้เชื่อโค้ดและบอกผู้ใช้")
     if b.get('fx'):
@@ -152,7 +156,7 @@ def sb_md(b):
         objs = S3.get('objs') or []
         for r, th in (('cast', 'ผู้ร่าย'), ('targ', 'เป้า')):
             if S3.get(r):
-                L.append(f"- ฉาก 3D: {th} = ตัวละครจากเกม `{S3[r].get('m')}` ท่า `{S3[r].get('a')}` (ท่าเดียวกับในเกม)")
+                L.append(f"- ฉาก 3D: {th} = " + (f"ท่าจริงที่อัดจากเกม `{S3[r]['rec']}`" if S3[r].get('rec') else f"ตัวละครจากเกม `{S3[r].get('m')}` ท่า `{S3[r].get('a')}` (ท่าเดียวกับในเกม)"))
         if (S3.get('cast') or S3.get('targ') or any(o.get('t') == 'actor' for o in objs)) and S3.get('at') is not None:
             L.append(f"- ฉาก 3D: เวลาของท่าตอนถ่าย = {f(S3.get('at') or 0)} วิ (นับจากเริ่มท่า)")
         if objs:
@@ -209,6 +213,12 @@ def sb_save(db):
             fr = s.get('frames') or {}
             used |= {os.path.basename(i) for i in s.get('refs', []) + [k['img'] for k in sb_sketches(s)] + [s.get('result') or '', fr.get('sheet') or '']
                      + [x.get(k) or '' for x in fr.get('list') or [] for k in ('img', 'base')] if i}
+    recs = set(re.findall(r'storyboard/rec/([\w\-]+\.json)', json.dumps(db, ensure_ascii=False)))
+    rd = os.path.join(SBD, 'rec')
+    if os.path.isdir(rd):  # ท่าที่อัดไว้แต่ไม่มีบอร์ดไหนใช้แล้ว → ลบ
+        for fn in os.listdir(rd):
+            if fn not in recs and time.time() - os.path.getmtime(os.path.join(rd, fn)) > 120:
+                os.remove(os.path.join(rd, fn))
     d = os.path.join(SBD, 'img')
     for fn in os.listdir(d):
         if fn not in used and time.time() - os.path.getmtime(os.path.join(d, fn)) > 120:
@@ -339,6 +349,12 @@ class H(SimpleHTTPRequestHandler):
                 return self._json(400, {'ok': False, 'err': 'ข้อมูลผิดรูปแบบ: ' + str(e)})
             sb_save(db)
             return self._json(200, {'ok': True})
+        if u.path == '/api/sb-rec':
+            name = re.sub(r'[^a-zA-Z0-9_\-]', '_', q.get('name', ['rec'])[0])[:60] or 'rec'
+            data = self._body(); json.loads(data)
+            d = os.path.join(SBD, 'rec'); os.makedirs(d, exist_ok=True)
+            with open(os.path.join(d, name + '.json'), 'wb') as f: f.write(data)
+            return self._json(200, {'ok': True, 'path': 'storyboard/rec/' + name + '.json'})
         if u.path in ('/api/bug-img', '/api/sb-img'):
             name = re.sub(r'[^a-zA-Z0-9_\-]', '_', q.get('name', ['img'])[0])[:60] or 'img'
             data = self._body(); ext = 'png'

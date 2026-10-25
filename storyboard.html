@@ -154,6 +154,10 @@ h3{margin:0;font:600 11px "Segoe UI",sans-serif;letter-spacing:.6px;color:var(--
 #imp .card .tg i{font-style:normal;color:var(--sok)}
 #imp .card p{margin:0;color:var(--tx2);font-size:12px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
 #imp .ft{padding:8px 12px;border-top:1px solid var(--ln);color:var(--tx3);font-size:12px}
+/* อัดท่าจากเกม */
+#rec{position:fixed;inset:0;background:#000d;display:none;z-index:12;align-items:center;justify-content:center;flex-direction:column;gap:8px}
+#rec iframe{width:min(960px,92vw);aspect-ratio:16/9;border:1px solid var(--ln2);border-radius:6px;background:#000}
+#rec .bar{display:flex;gap:10px;align-items:center}
 /* เส้นแบ่งลากปรับขนาด */
 .spl{position:absolute;z-index:3;background:transparent}
 .spl:hover,.spl.drag{background:var(--acc)}
@@ -242,6 +246,8 @@ h3{margin:0;font:600 11px "Segoe UI",sans-serif;letter-spacing:.6px;color:var(--
 </section>
 <footer id="S"><span id="sInfo"></span><span style="flex:1"></span><span>Claude อ่าน <span class="mono" id="sMd">storyboard/sb-?.md</span></span></footer>
 <div id="zoom"><img alt=""></div>
+<div id="rec"><div class="bar"><b>🎬 อัดท่าจากเกมจริง</b><span class="hint" id="recSt">กำลังเปิดเกม…</span><button id="recX">ยกเลิก</button></div><iframe id="recF" title="เกม"></iframe>
+  <div class="hint">เกมจะเข้าห้องฝึก กดสกิลให้เอง แล้วอัดท่าตัวละครทุกเฟรม (ไม่ต้องกดอะไร) — เสร็จแล้วปิดเอง</div></div>
 <div id="imp"><div class="box">
   <div class="ph"><h3>⬇ Import สกิลจากเกม</h3><span class="hint">ดึงชื่อ คำอธิบาย เวลา ขนาด และท่าตัวละครมาให้ — <b>ไม่เอา VFX มา</b> ให้ออกแบบเองในสตอรี่บอร์ด</span><button class="ghost" id="impX">✕</button></div>
   <div class="body"><div class="pt" id="impP"></div><div class="ls" id="impL"><div class="empty">กำลังอ่านสกิลจากโค้ดเกม…</div></div></div>
@@ -260,7 +266,7 @@ h3{margin:0;font:600 11px "Segoe UI",sans-serif;letter-spacing:.6px;color:var(--
   <div class="mid"><div class="vp"><canvas id="d3c"></canvas><div class="lbl">ลากซ้าย = หมุนกล้อง • ลากขวา = เลื่อน • ล้อ = ซูม • คลิกชิ้น = เลือก • Delete = ลบ • Ctrl+D = ทำสำเนา</div></div>
     <div class="side"><h4>🎭 ท่าจากเกม (Library)</h4>
       <div class="hint" style="margin-bottom:4px">ใส่ท่าให้:</div><div class="seg" id="d3Who" style="margin-bottom:6px"><button data-w="cast" class="on">ผู้ร่าย</button><button data-w="targ">เป้า</button><button data-w="sel">ตัวที่เลือก</button><button data-w="new">＋ ตัวใหม่</button></div>
-      <div id="d3Lib"><span class="hint">กำลังโหลดตัวละครจากเกม…</span></div>
+      <div id="d3RecB" class="d3lib"></div><div id="d3Lib" class="d3lib"><span class="hint">กำลังโหลดตัวละครจากเกม…</span></div>
       <h4 style="margin-top:12px">⏱ เวลาของท่า</h4>
       <div style="display:flex;gap:4px;align-items:center"><button class="sm" id="d3Play">▶</button><input type="range" id="d3T" min="0" max="1" step="0.01" value="0" style="flex:1"><b id="d3Tl" style="font-size:12px;min-width:64px;text-align:right">0 วิ</b></div>
       <div class="hint" style="margin-top:6px">🎞 แยกเป็นเฟรม (มุมกล้องนี้) → วาดทับทีละเฟรม</div>
@@ -439,6 +445,9 @@ function boardHTML(){const b=cur;
   <div class="sec drop" id="dRefs"><h3>รูป / คลิปตัวอย่างที่ชอบ</h3>
     <div class="imgs">${imgs(b.refs,'refs')}<button class="sm" data-pick="refs">📎 เพิ่มรูป…</button></div>
     <div class="hint" style="margin-top:4px">วาง <kbd>Ctrl</kbd>+<kbd>V</kbd> หรือลากไฟล์มาวาง • ลิงก์ YouTube ใส่ในภาพรวมได้</div></div>
+  ${b.game?`<div class="sec"><h3>นำเข้าจากเกม</h3><div class="hint"><span class="mono">${esc(b.game.id)}</span> • ${esc(b.game.file||'')}:${b.game.line||''}</div>
+    <div style="margin-top:6px">${b.rec?`🎬 ท่าจากเกม ${f2(b.rec.dur)} วิ <span class="hint">(${esc(b.rec.clips||'')})</span>`:'<span class="hint">ยังไม่ได้อัดท่าจากเกม</span>'}</div>
+    <button class="sm" id="bRec" style="margin-top:6px">🎬 อัดท่าจากเกม${b.rec?'ใหม่':''}</button></div>`:''}
   ${b.fx?`<div class="sec"><h3>ไฟล์เอฟเฟกต์</h3><span class="mono">${esc(b.fx)}</span> <a href="studio.html?fx=${encodeURIComponent(b.fx)}" target="_blank"><button class="sm">✦ เปิดใน VFX Studio</button></a></div>`:''}
   ${b.reply?`<div class="sec"><div id="reply"><b>💬 Claude ตอบ:</b>\n${esc(b.reply)}</div></div>`:''}
   <div class="sec"><button id="bDel" class="dng">🗑 ลบสตอรี่บอร์ดนี้</button> <span class="hint">#${b.id}</span></div>`;
@@ -451,6 +460,7 @@ function bindBoard(){const b=cur;
   bindSw($('#fCols'),b.colors);
   bindDrop($('#dRefs'),f=>addImgs(f,b.refs));
   $('#dRefs').addEventListener('click',e=>{if(e.target.dataset.del!=null&&e.target.dataset.k==='refs'){b.refs.splice(+e.target.dataset.del,1);touch(1);}else if(e.target.dataset.pick==='refs')pick(f=>addImgs(f,b.refs));});
+  if($('#bRec'))$('#bRec').onclick=()=>recBoard(b);
   $('#bDel').onclick=()=>{if(!confirm('ลบสตอรี่บอร์ด #'+b.id+' ทั้งรูป?'))return;db.items=db.items.filter(x=>x!==b);cur=null;renderList();renderEd();save(1);};
 }
 function shotHTML(s,i,T){
@@ -845,12 +855,35 @@ function impShots(x){
       targ:{m:'enemy_dummy',a:hitT?'hit':'idle'},at:s.kind==='cast'?0.3:0};}
   return S;
 }
+// 🎬 อัดท่าจากเกม: เปิดเกมใน iframe (index.html?rec=…, studio/rec.js) → ได้ท่าทุกเฟรม → เก็บ storyboard/rec/<ชื่อ>.json
+function recGame(id,kind,path){return new Promise((ok,no)=>{
+  const O=$('#rec'),fr=$('#recF');O.style.display='flex';$('#recSt').textContent='กำลังเปิดเกม…';
+  const done=(e,v)=>{removeEventListener('message',on);clearTimeout(to);fr.src='about:blank';O.style.display='none';e?no(e):ok(v);};
+  const on=async ev=>{const d=ev.data;if(!d||!d.sbrec||ev.source!==fr.contentWindow)return;if(d.st)$('#recSt').textContent=d.st;if(d.err){done(d.err);return;}
+    if(d.done){try{$('#recSt').textContent='กำลังบันทึกท่า…';
+      const r=await fetch('/api/sb-rec?name='+id+'_'+Date.now().toString(36),{method:'POST',body:JSON.stringify(d.data)});const j=await r.json();if(!j.ok)throw j.err;
+      const cl=[];for(const f of d.data.frames)if(!cl.length||cl[cl.length-1][1]!==f.a)cl.push([f.t,f.a]);
+      done(null,{file:j.path,dur:d.data.dur,clips:cl.map(([t,a])=>`${f2(t)}s ${a||'-'}`).join(' → ')});}catch(e){done(e);}}};
+  addEventListener('message',on);const to=setTimeout(()=>done('หมดเวลา'),45000);
+  $('#recX').onclick=()=>done('ยกเลิกแล้ว');
+  fr.src=`index.html?rec=${encodeURIComponent(id)}&kind=${kind}&path=${path}`;
+});}
+function recApply(b){ // ฉาก 3D ทุกช่วง: ผู้ร่าย = ท่าที่อัด ที่เวลาเริ่มของช่วง
+  const T=times(b);b.shots.forEach((s,i)=>{s.scene3d=s.scene3d||{v:1,objs:[]};s.scene3d.cast={m:'char_student',rec:b.rec.file};s.scene3d.at=Math.round(Math.min(T[i][0],b.rec.dur)*100)/100;});
+}
+async function recBoard(b){
+  const g=b.game;if(!g)return;
+  let pi=g.pathI;if(pi==null){try{const d=IMP.data||(IMP.data=await (await fetch('/api/sb-skills',{cache:'no-store'})).json());pi=(d.paths.find(p=>p.id===g.path)||{}).i;}catch(e){}}
+  try{b.rec=await recGame(g.id.replace(/_(shield|dash)$/,''),g.kind,pi??0);recApply(b);touch(1);stat(`อัดท่าจากเกมแล้ว ✓ ${f2(b.rec.dur)} วิ — เปิด 🧊 ฉาก 3D เพื่อดู/เลื่อนเวลา`);}
+  catch(e){stat('⚠ อัดท่าจากเกมไม่ได้: '+e,1);}
+}
 function impMake(P,x){
   const b={id:db.next++,title:`${P.n} — ${x.n}`,who:WHO_OF[P.id]||P.n,skill:x.tag,status:'draft',created:nowISO(),updated:nowISO(),
     overview:`[จากเกม] ${x.d}`,mood:[],colors:[P.col,'#ffffff'],refs:[],fx:'',reply:'',
-    game:{id:x.id,kind:x.kind,path:P.id,cd:x.cd||0,file:x.file,line:x.line},shots:impShots(x)};
+    game:{id:x.id,kind:x.kind,path:P.id,pathI:P.i,cd:x.cd||0,file:x.file,line:x.line},shots:impShots(x)};
   db.items.push(b);cur=b;selShot=b.shots[0]?.id||null;insTab='shot';renderList();renderEd();save();
-  stat(`นำเข้า "${x.n}" แล้ว ✓ ${b.shots.length} ช่วง — แก้เวลา/ขนาดได้ แล้ววาด VFX เอง`);
+  stat(`นำเข้า "${x.n}" แล้ว ✓ ${b.shots.length} ช่วง — กำลังอัดท่าจากเกม…`);
+  recBoard(b);
 }
 $('#list').onclick=e=>{const it=e.target.closest('.it');if(!it)return;if(PL.on)plStop();cur=db.items.find(b=>b.id===+it.dataset.id);selShot=null;renderList();renderEd();};
 $('#bCopy').onclick=async()=>{
@@ -913,6 +946,9 @@ const MOD_TH={char_student:'นักเรียน (ผู้เล่น)',en
 const FACE=PI/2; // โมเดลในไฟล์หันไป +z → หมุนให้หันไป +x (ทางเป้า) เหมือนในเกม
 const LIB={};let LIBP=null,who='cast',at=0,playing=false,scale0=1,roles={cast:null,targ:null},roleG={},figA,figB,lastT=0;
 const clipName=c=>c.name.split('|').pop().toLowerCase().trim();
+// ท่าที่อัดจากเกมจริง (storyboard/rec/*.json จาก studio/rec.js): ทุกเฟรม = ตำแหน่ง/หมุนของโมเดล + มุมกระดูก
+const RECS={};
+async function loadRec(f){if(!RECS[f])RECS[f]=await (await fetch(f,{cache:'no-store'})).json();return RECS[f];}
 const animTh=n=>ANIM_TH[n]?`${ANIM_TH[n]} (${n})`:n;
 function loadLib(){
   if(LIBP)return LIBP;
@@ -932,20 +968,26 @@ function renderLib(){
   $('#d3Lib').innerHTML=ks.length?ks.map(k=>`<div style="margin:4px 0"><b style="font-size:12px">${LIB[k].th}</b><div class="add" style="margin-top:2px">${Object.keys(LIB[k].clips).map(c=>`<button data-am="${k}" data-aa="${c}" title="${k} • ${c} • ${f2(LIB[k].clips[c].duration)} วิ">${animTh(c)}</button>`).join('')}</div></div>`).join('')
     +'<button class="sm" data-reset="1" style="margin-top:4px">↺ กลับเป็นหุ่นแท่ง</button>':'<span class="hint">โหลดตัวละครไม่ได้ (เปิดผ่าน Storyboard.bat หรือยัง?)</span>';
 }
-function actor(spec,tint){ // spec = {m: ชื่อโมเดล, a: ชื่อท่า} → Group หันไป +x, สูงตามเกม
+function actor(spec,tint){ // spec = {m: ชื่อโมเดล, a: ชื่อท่า} หรือ {m, rec: ไฟล์ท่าที่อัด} → Group หันไป +x, สูงตามเกม
+  if(spec.rec){const D=RECS[spec.rec],L=D&&LIB[D.model||spec.m];if(!L)return null;
+    const g=new THREE.Group(),inner=SkeletonUtils.clone(L.scene),map={};g.add(inner);inner.traverse(o=>{if(o.isBone)map[o.name]=o;});
+    g.userData.rec={D,inner,bones:D.bones.map(n=>map[n])};return g;}
   const L=LIB[spec.m];if(!L)return null;
   const g=new THREE.Group(),inner=SkeletonUtils.clone(L.scene);inner.scale.setScalar(scale0);inner.rotation.y=FACE;g.add(inner);
   if(tint){const tc_=new THREE.Color(tint);inner.traverse(c=>{if(!c.isMesh)return;c.material=Array.isArray(c.material)?c.material.map(m=>m.clone()):c.material.clone();(Array.isArray(c.material)?c.material:[c.material]).forEach(m=>m.color&&m.color.lerp(tc_,0.55));});}
   const clip=L.clips[spec.a]||Object.values(L.clips)[0],mx=new THREE.AnimationMixer(inner),act=mx.clipAction(clip);act.play();
   g.userData.anim={mx,act,clip,name:clipName(clip)};return g;
 }
-function pose(g){const A=g&&g.userData.anim;if(!A)return;const d=A.clip.duration;A.act.time=LOOPS.has(A.name)?at%d:Math.min(at,d-1e-3);A.mx.update(0);}
+function poseRec(R){const F=R.D.frames;if(!F.length)return;let k=0;while(k<F.length-1&&F[k+1].t<=at)k++;const f=F[k];
+  R.inner.position.set(...f.p);R.inner.quaternion.set(...f.q);R.inner.scale.setScalar(f.s);
+  R.bones.forEach((b,j)=>{if(!b)return;const a=f.b[j];b.quaternion.set(a[0],a[1],a[2],a[3]);if(a.length>4)b.position.set(a[4],a[5],a[6]);});}
+function pose(g){if(g&&g.userData.rec){poseRec(g.userData.rec);return;}const A=g&&g.userData.anim;if(!A)return;const d=A.clip.duration;A.act.time=LOOPS.has(A.name)?at%d:Math.min(at,d-1e-3);A.mx.update(0);}
 function actors(){return [roleG.cast,roleG.targ,...objs.filter(o=>o.t==='actor').map(o=>o.m)].filter(Boolean);}
 function poseAll(){for(const g of actors())pose(g);}
-function maxDur(){return Math.max(0,...actors().map(g=>g.userData.anim?g.userData.anim.clip.duration:0));}
+function maxDur(){return Math.max(0,...actors().map(g=>g.userData.rec?g.userData.rec.D.dur:g.userData.anim?g.userData.anim.clip.duration:0));}
 function setRole(r,spec){
   if(roleG[r]){scene.remove(roleG[r]);roleG[r]=null;}
-  roles[r]=spec&&LIB[spec.m]?spec:null;(r==='cast'?figA:figB).visible=!roles[r];
+  roles[r]=spec&&(spec.rec?RECS[spec.rec]:LIB[spec.m])?spec:null;(r==='cast'?figA:figB).visible=!roles[r];
   if(roles[r]){const g=actor(roles[r],r==='targ'?'#e5534b':null);if(r==='targ'){g.position.x=TX;g.rotation.y=PI;}scene.add(g);roleG[r]=g;}
   timeUI();
 }
@@ -953,6 +995,7 @@ function timeUI(){const d=maxDur(),T=$('#d3T');T.max=Math.max(0.05,d);T.value=Ma
   const F1=$('#d3F1');if(d&&F1._auto!==false)F1.value=f2(d);poseAll();}
 function libClick(e){
   const b=e.target.closest('button');if(!b)return;
+  if(b.dataset.rec){loadRec(b.dataset.rec).then(()=>{setRole('cast',{m:'char_student',rec:b.dataset.rec});timeUI();setView(view);dirty();SB.stat('ผู้ร่าย: ท่าจริงจากเกมของสกิลนี้');});return;}
   if(b.dataset.reset){if(who==='cast'||who==='targ'){setRole(who,null);dirty();}else SB.stat('↺ ใช้กับผู้ร่าย / เป้า',1);return;}
   const spec={m:b.dataset.am,a:b.dataset.aa};if(!spec.m)return;
   if(who==='cast'||who==='targ'){setRole(who,spec);at=0;timeUI();dirty();SB.stat(`${who==='cast'?'ผู้ร่าย':'เป้า'}: ${LIB[spec.m].th} ท่า${animTh(spec.a)}`);}
@@ -1004,7 +1047,7 @@ function init(){
   $('#d3Mode').onclick=e=>{if(e.target.dataset.m)setMode(e.target.dataset.m);};
   $('#d3Add').innerHTML=Object.keys(SH).filter(k=>!SH[k].hide).map(k=>`<button data-t="${k}">${SH[k].th}</button>`).join('');
   $('#d3Who').onclick=e=>{const w=e.target.dataset.w;if(!w)return;who=w;document.querySelectorAll('#d3Who button').forEach(x=>x.classList.toggle('on',x===e.target));};
-  $('#d3Lib').onclick=libClick;
+  document.querySelectorAll('.d3lib').forEach(el=>el.onclick=libClick);
   $('#d3T').oninput=e=>{at=+e.target.value;playing=false;$('#d3Play').textContent='▶';timeUI();};
   $('#d3T').onchange=()=>dirty();
   $('#d3Play').onclick=()=>{if(!maxDur()){SB.stat('ยังไม่มีตัวละครที่มีท่า — เลือกท่าจาก Library ก่อน',1);return;}playing=!playing;$('#d3Play').textContent=playing?'⏸':'▶';if(!playing)dirty();};
@@ -1024,7 +1067,9 @@ function init(){
     else if(k==='escape'){if(sel)select(null);else close();}});
 }
 function setMode(m){tc.setMode(m);document.querySelectorAll('#d3Mode button').forEach(b=>b.classList.toggle('on',b.dataset.m===m));}
-function setView(k){view=k;const v=VIEWS[k];cam.position.set(...v.p);orbit.target.set(...v.t);orbit.update();document.querySelectorAll('#d3View button').forEach(b=>b.classList.toggle('on',b.dataset.v===k));}
+function recTop(){let y=0;for(const g of actors()){const R=g.userData.rec;if(R)for(const f of R.D.frames)y=Math.max(y,f.p[1]);}return y;} // ท่าที่อัดลอยสูงแค่ไหน
+function setView(k){view=k;const v=VIEWS[k],hy=recTop(),up=hy>1.5?hy:0; // ลอยสูง → ถอยกล้อง/ยกขึ้นให้เห็นทั้งท่า
+  cam.position.set(v.p[0],v.p[1]+up*(k==='top'?0:0.55),v.p[2]+(k==='side'?up*1.6:k==='q'?up*0.8:0));orbit.target.set(v.t[0],v.t[1]+(k==='top'?0:up*0.45),v.t[2]);orbit.update();document.querySelectorAll('#d3View button').forEach(b=>b.classList.toggle('on',b.dataset.v===k));}
 function fit(){if(!R)return;const c=$('#d3c');R.setSize(c.clientWidth,c.clientHeight,false);cam.aspect=c.clientWidth/Math.max(1,c.clientHeight);cam.updateProjectionMatrix();}
 function build(o){
   let m;
@@ -1123,9 +1168,11 @@ async function open3D(s){
   for(const o of objs)scene.remove(o.m);objs=[];shot=null;select(null);
   fit();setView('side');setMode('translate');cancelAnimationFrame(raf);loop();
   await loadLib();
-  const S=s.scene3d||{};at=+S.at||0;playing=false;$('#d3Play').textContent='▶';$('#d3F1')._auto=true;
+  const S=s.scene3d||{},rf=SB.cur&&SB.cur.rec&&SB.cur.rec.file;
+  for(const f of [S.cast&&S.cast.rec,rf])if(f)try{await loadRec(f);}catch(e){console.warn('rec',f,e);}
+  $('#d3RecB').innerHTML=rf?`<button class="pri" data-rec="${rf}" style="width:100%;margin-bottom:6px" title="ท่าที่อัดจากเกมจริงตอนกดสกิลนี้ (ขยับตัว ลอย พุ่ง ครบ)">🎬 ท่าจริงของสกิลนี้ (จากเกม)</button>`:'';at=+S.at||0;playing=false;$('#d3Play').textContent='▶';$('#d3F1')._auto=true;
   setRole('cast',S.cast);setRole('targ',S.targ);
-  shot=s;objs=(S.objs||[]).map(d=>build({...d,s:d.s||[1,1,1],r:d.r||[0,0,0]}));select(null);timeUI();
+  shot=s;objs=(S.objs||[]).map(d=>build({...d,s:d.s||[1,1,1],r:d.r||[0,0,0]}));select(null);timeUI();setView('side');
 }
 function close(){playing=false;cancelAnimationFrame(raf);clearTimeout(saveT);select(null);$('#d3').style.display='none';if(shot)SB.touch(1);}
 window.open3D=open3D;
