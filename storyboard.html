@@ -6,84 +6,143 @@
      เก็บใน storyboard/boards.json + storyboard/img/ แล้ว serve.py เขียน storyboard/sb-<id>.md (+ STORYBOARDS.md) ให้ Claude อ่าน
      ต้องเปิดผ่าน tools/serve.py (ดับเบิลคลิก "Storyboard.bat") • Claude: อ่าน storyboard/sb-<id>.md -->
 <style>
-:root{--bg:#1b1d22;--pn:#24272e;--pn2:#2c3038;--ln:#3a3f49;--tx:#e6e8ec;--mu:#9aa0ab;--ac:#e8b84a;--red:#e5534b;--ok:#4fb477}
+/* หน้าตาแบบเดียวกับ VFX Studio (studio/studio.css): โทนเทาเข้ม + ฟ้าเป็นสีเน้น
+   เลย์เอาต์: แถบบน | ซ้าย = สตอรี่บอร์ด + ช่วง | กลาง = จอภาพร่าง | ขวา = แผงแก้ค่า | ล่าง = ไทม์ไลน์ | แถบสถานะ • ลากเส้นแบ่งเพื่อปรับขนาด */
+:root{--sL:250px;--sR:380px;--sB:170px;
+  --bg0:#161616;--bg1:#1f1f1f;--bg2:#282828;--bg3:#333333;--bg4:#3f3f3f;--ln:#2d2d2d;--ln2:#474747;
+  --tx:#dedede;--tx2:#9b9b9b;--tx3:#6c6c6c;--acc:#4a8cff;--acc2:#8fb9ff;--accBg:rgba(74,140,255,.18);--hov:rgba(255,255,255,.05);
+  --sok:#6fcf97;--swarn:#f2a35e;--serr:#f06a6a;--fu:'JetBrains Mono',ui-monospace,Consolas,monospace;
+  /* ชื่อเดิมที่หน้าต่างวาด / ฉาก 3D ใช้ */
+  --bg:var(--bg0);--pn:var(--bg1);--pn2:var(--bg2);--mu:var(--tx2);--ac:var(--acc);--red:var(--serr);--ok:var(--sok)}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.45 "Segoe UI","Leelawadee UI",Tahoma,sans-serif;height:100vh;display:flex;flex-direction:column}
-button,input,select,textarea{font:inherit;color:inherit}
-button{background:var(--pn2);border:1px solid var(--ln);border-radius:6px;padding:6px 12px;cursor:pointer}
-button:hover{border-color:var(--ac)}
-button.pri{background:var(--ac);color:#1b1d22;border-color:var(--ac);font-weight:600}
-button.on{background:var(--ac);color:#1b1d22;border-color:var(--ac)}
-button.sm{padding:2px 8px;font-size:13px}
-input,select,textarea{background:var(--pn);border:1px solid var(--ln);border-radius:6px;padding:6px 8px}
-textarea{width:100%;resize:vertical}
-header{display:flex;align-items:center;gap:10px;padding:8px 14px;background:var(--pn);border-bottom:1px solid var(--ln)}
-header h1{font-size:17px;margin:0 8px 0 0}
-#stat{margin-left:auto;color:var(--mu);font-size:13px}
-#stat.err{color:var(--red)}
-main{flex:1;display:flex;min-height:0}
-#side{width:270px;border-right:1px solid var(--ln);display:flex;flex-direction:column;background:var(--pn)}
-#list{flex:1;overflow:auto}
-.it{padding:9px 12px;border-bottom:1px solid var(--ln);cursor:pointer}
-.it:hover{background:var(--pn2)}
-.it.sel{background:#3a3424;box-shadow:inset 3px 0 var(--ac)}
-.it b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.it small{color:var(--mu)}
-#ed{flex:1;overflow:auto;padding:16px 22px 60px}
-#empty{color:var(--mu);text-align:center;margin-top:12vh;font-size:17px;line-height:2}
-.row{display:flex;gap:10px;align-items:center;margin-bottom:10px;flex-wrap:wrap}
-.lb{color:var(--mu);font-size:13px}
-#fTitle{flex:1;min-width:240px;font-size:19px;font-weight:600}
-.seg{display:flex;flex-wrap:wrap}.seg button{border-radius:0;padding:4px 10px;font-size:13px}.seg button:first-child{border-radius:6px 0 0 6px}.seg button:last-child{border-radius:0 6px 6px 0}
-.chips{display:flex;flex-wrap:wrap;gap:4px}
-.chips button{padding:2px 9px;font-size:13px;border-radius:12px}
-.sw{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
-.sw .c{position:relative;width:30px;height:30px;border-radius:50%;border:2px solid #fff3;overflow:hidden;cursor:pointer}
-.sw .c input{opacity:0;position:absolute;inset:0;width:100%;height:100%;cursor:pointer}
-.sw .c i{position:absolute;top:-2px;right:0;font-style:normal;font-size:11px;background:#000a;border-radius:50%;padding:0 3px;display:none}
-.sw .c:hover i{display:block}
-.box{background:var(--pn);border:1px solid var(--ln);border-radius:8px;padding:12px 14px;margin:12px 0}
-.box h3{margin:0 0 8px;font-size:15px}
-.imgs{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
-.im{position:relative;width:150px;height:96px;background:#111;border:1px solid var(--ln);border-radius:6px;overflow:hidden}
-.im img{width:100%;height:100%;object-fit:contain;cursor:zoom-in}
-.im .x{position:absolute;top:3px;right:3px;padding:0 6px;font-size:12px;background:#000a}
-.drop.over{outline:2px dashed var(--ac);outline-offset:4px}
-.hint{color:var(--mu);font-size:13px}
-/* แถบเวลา */
-#tl{position:relative;height:58px;background:var(--pn);border:1px solid var(--ln);border-radius:8px;margin:14px 0 4px;overflow:hidden}
-#tl .blk{position:absolute;height:22px;border-radius:4px;font-size:12px;padding:2px 6px;white-space:nowrap;overflow:hidden;cursor:pointer;color:#111;font-weight:600}
-#tl .tk{position:absolute;bottom:0;font-size:11px;color:var(--mu);border-left:1px solid var(--ln);padding-left:3px;height:14px}
-/* ช่วง (shot) */
-.shot{display:flex;gap:14px;background:var(--pn);border:1px solid var(--ln);border-left:6px solid var(--k);border-radius:8px;padding:12px;margin:12px 0}
-.shot.sel{box-shadow:0 0 0 2px var(--ac)}
-.shot .pic{flex:none;width:340px}
-.shot .pic .frame{position:relative;width:340px;height:191px;background:#111 center/contain no-repeat;border:1px solid var(--ln);border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--mu);font-size:14px;text-align:center}
-.shot .pic .frame:hover{border-color:var(--ac)}
-.shot .pic .tools{display:flex;gap:6px;margin-top:6px}
-.shot .pic .tools button{flex:1;font-size:13px;padding:4px 6px}
-.th{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
-.th .t{position:relative;width:78px;height:44px;background:#111 center/cover no-repeat;border:2px solid var(--ln);border-radius:5px;cursor:pointer}
-.th .t.on{border-color:var(--ac)}
-.th .t span{position:absolute;left:0;bottom:0;font-size:10px;background:#000b;padding:0 3px;border-radius:0 3px 0 0}
+body{margin:0;background:var(--bg0);color:var(--tx);font:13px/1.45 "Segoe UI","Noto Sans Thai","Leelawadee UI",Tahoma,sans-serif;height:100vh;overflow:hidden;
+  display:grid;grid-template-columns:var(--sL) minmax(0,1fr) var(--sR);grid-template-rows:44px minmax(0,1fr) var(--sB) 24px}
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-thumb{background:var(--bg4);border:3px solid transparent;background-clip:padding-box;border-radius:6px}
+::-webkit-scrollbar-thumb:hover{background-color:var(--tx3)}
+::-webkit-scrollbar-track,::-webkit-scrollbar-corner{background:transparent}
+button,input,select,textarea{font:inherit;color:var(--tx);background:var(--bg2);border:1px solid var(--ln2);border-radius:4px}
+button{padding:3px 9px;cursor:pointer;white-space:nowrap;transition:background .12s,border-color .12s,color .12s}
+button:hover{background:var(--bg3);border-color:var(--tx3)}
+button:active{background:var(--bg4)}
+button:disabled{opacity:.45;cursor:default}
+button.on{background:var(--accBg);border-color:var(--acc);color:var(--acc2)}
+button.pri{background:linear-gradient(180deg,#4f90ff,#2f6fe0);color:#fff;border-color:#5a97ff;font-weight:600}
+button.pri:hover{filter:brightness(1.08)}
+button.ghost{background:none;border-color:transparent}
+button.ghost:hover{background:var(--hov);border-color:var(--ln2)}
+button.sm{padding:1px 7px;font-size:12px}
+button.dng:hover{border-color:var(--serr);color:var(--serr)}
+input,select{padding:2px 6px;height:26px}
+input:hover,select:hover,textarea:hover{border-color:var(--tx3)}
+textarea{padding:5px 7px;width:100%;resize:vertical}
+input[type=range]{accent-color:var(--acc);padding:0;border:0;background:none;height:18px}
+input[type=checkbox]{height:auto;accent-color:var(--acc)}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--acc);outline-offset:1px}
+kbd{font:10.5px var(--fu);background:var(--bg3);border:1px solid var(--ln2);border-bottom-width:2px;border-radius:3px;padding:0 4px}
+h3{margin:0;font:600 11px "Segoe UI",sans-serif;letter-spacing:.6px;color:var(--tx2);text-transform:uppercase}
+.lb{color:var(--tx2);font-size:12px}
+.hint{color:var(--tx3);font-size:12px}
+.mono{font-family:var(--fu);font-size:11.5px}
+/* หัวแผง */
+.ph{display:flex;align-items:center;gap:6px;height:30px;padding:0 8px;background:var(--bg2);border-bottom:1px solid var(--ln);flex:none}
+.ph h3{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* แถบบน */
+#top{grid-column:1/-1;display:flex;gap:6px;align-items:center;padding:0 8px;background:var(--bg2);border-bottom:1px solid var(--ln);min-width:0;overflow:hidden}
+#top .logo{display:flex;align-items:center;gap:6px;font:700 14px "Segoe UI",sans-serif;color:var(--acc2);margin-right:4px;white-space:nowrap}
+#top .logo i{font-style:normal;display:grid;place-items:center;width:24px;height:24px;border-radius:6px;background:linear-gradient(135deg,#6aa2ff,#2f6fe0);color:#fff;font-size:13px}
+#top .sep{width:1px;height:22px;background:var(--ln2);flex:none;margin:0 2px}
+#fTitle{flex:1;min-width:160px;max-width:520px;font-weight:600;background:var(--bg1);border-color:var(--ln)}
+#stat{margin-left:auto;color:var(--tx2);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#stat.err{color:var(--serr)}
+/* ซ้าย */
+#L{grid-row:2;background:var(--bg1);border-right:1px solid var(--ln);display:flex;flex-direction:column;min-height:0;position:relative}
+#list{overflow:auto;max-height:38%;flex:none;padding:3px 4px}
+#outline{overflow:auto;flex:1;padding:3px 4px}
+.it{display:block;width:100%;text-align:left;background:none;border:1px solid transparent;border-radius:4px;padding:5px 8px;cursor:pointer;overflow:hidden}
+.it:hover{background:var(--hov)}
+.it.sel{background:var(--accBg);border-color:rgba(74,140,255,.45)}
+.it b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600}
+.it.sel b{color:var(--acc2)}
+.it small{color:var(--tx3);font-size:11px;white-space:nowrap}
+.sh{display:grid;grid-template-columns:4px 60px minmax(0,1fr);gap:0 8px;align-items:center;width:100%;text-align:left;background:none;border:1px solid transparent;border-radius:4px;padding:4px 6px 4px 0;cursor:pointer;margin-bottom:1px}
+.sh:hover{background:var(--hov)}
+.sh.sel{background:var(--accBg);border-color:rgba(74,140,255,.45)}
+.sh i{grid-row:span 2;align-self:stretch;border-radius:2px;background:var(--k)}
+.sh .tb{grid-row:span 2;width:60px;height:34px;border-radius:3px;background:#111 center/cover no-repeat;border:1px solid var(--ln)}
+.sh b{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sh small{color:var(--tx3);font:10.5px var(--fu);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* กลาง: จอภาพร่าง */
+#C{grid-row:2;display:flex;flex-direction:column;min-width:0;min-height:0;background:var(--bg0)}
+#C .ph b{color:var(--k,var(--tx));font-weight:700}
+#C .ph .tm{font:11px var(--fu);color:var(--tx2)}
+#vBox{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;padding:10px;position:relative}
+#vScr{position:relative;max-width:100%;max-height:100%;aspect-ratio:16/9;height:100%;background:#0d0d0d center/contain no-repeat;border:1px solid var(--ln);border-radius:4px;display:flex;align-items:center;justify-content:center;text-align:center;color:var(--tx3);font-size:14px;line-height:1.9;cursor:zoom-in}
+#vScr.cmp{background:none;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:100%;align-items:stretch;justify-content:stretch;gap:6px;border:0;cursor:default;aspect-ratio:auto;width:100%}
+#vScr.cmp div{background:#0d0d0d center/contain no-repeat;border:1px solid var(--ln);border-radius:4px;position:relative}
+#vScr .cap,#vScr.cmp span{position:absolute;left:8px;top:6px;background:#000b;padding:2px 9px;border-radius:4px;font-size:12px;color:var(--tx);line-height:1.5}
+#vScr.empty{cursor:default;border-style:dashed}
+#vBar{display:flex;gap:6px;align-items:center;padding:6px 10px;border-top:1px solid var(--ln);background:var(--bg1);flex:none;min-height:62px}
+.th{display:flex;gap:5px;overflow-x:auto;flex:1;min-width:0;padding:2px 0}
+.th .t{flex:none;position:relative;width:84px;height:48px;background:#111 center/cover no-repeat;border:2px solid var(--ln);border-radius:4px;cursor:pointer}
+.th .t.on{border-color:var(--acc)}
+.th .t span{position:absolute;left:0;bottom:0;font-size:10px;background:#000b;padding:0 3px;border-radius:0 3px 0 0;max-width:100%;overflow:hidden;white-space:nowrap}
 .th .t .bt{position:absolute;top:1px;right:1px;display:none;gap:2px}
 .th .t:hover .bt{display:flex}
 .th .t .bt button{padding:0 4px;font-size:10px;background:#000c;border-radius:3px}
-.shot .pic .res{margin-top:8px}
-.shot .pic .res .frame{cursor:zoom-in;height:150px}
-.shot .fl{flex:1;min-width:0}
-.shot .hd{display:flex;gap:8px;align-items:center;margin-bottom:8px}
-.shot .hd .no{font-weight:700;font-size:18px;color:var(--k)}
-.shot .hd input.nm{flex:1;font-weight:600}
-.shot .hd .tm{color:var(--mu);font-size:13px;white-space:nowrap}
-.g2{display:grid;grid-template-columns:auto 1fr;gap:6px 10px;align-items:center;margin-bottom:8px}
-.g2 .lb{text-align:right}
-.rng{display:flex;align-items:center;gap:8px}.rng input[type=range]{flex:1}.rng b{min-width:96px;font-size:13px}
-.note{background:#1f2c24;border:1px solid #2f5a3d;border-radius:6px;padding:8px 10px;margin-top:8px;white-space:pre-wrap;font-size:14px}
-.note b{color:var(--ok)}
-#reply{background:#1f2c24;border:1px solid #2f5a3d;border-radius:6px;padding:10px 12px;margin:12px 0;white-space:pre-wrap}
-#reply b{color:var(--ok)}
-#add{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:6px}
+#vBar .tools{display:flex;gap:6px;flex:none}
+#vBar .tools button{padding:6px 12px}
+/* ขวา: แผงแก้ค่า */
+#R{grid-row:2;background:var(--bg1);border-left:1px solid var(--ln);display:flex;flex-direction:column;min-height:0;position:relative}
+#R .tabs{display:flex;gap:0;background:var(--bg2);border-bottom:1px solid var(--ln);flex:none}
+#R .tabs button{flex:1;border:0;border-radius:0;background:none;padding:6px 4px;color:var(--tx2);border-bottom:2px solid transparent}
+#R .tabs button.on{color:var(--acc2);border-bottom-color:var(--acc);background:var(--bg1)}
+#insp{overflow:auto;flex:1;padding:8px 10px 30px}
+.sec{border-bottom:1px solid var(--ln);padding:8px 0}
+.sec:last-child{border-bottom:0}
+.sec>h3{margin-bottom:6px}
+.g2{display:grid;grid-template-columns:78px minmax(0,1fr);gap:6px 8px;align-items:center}
+.g2>.lb{text-align:right}
+.rng{display:flex;align-items:center;gap:6px}.rng input[type=range]{flex:1;min-width:0}.rng b{min-width:70px;font-size:12px;font-weight:600}
+.seg{display:flex;flex-wrap:wrap}.seg button{border-radius:0;margin-left:-1px;padding:3px 9px;font-size:12px}.seg button:first-child{border-radius:4px 0 0 4px;margin-left:0}.seg button:last-child{border-radius:0 4px 4px 0}
+.chips{display:flex;flex-wrap:wrap;gap:3px}
+.chips button{padding:1px 8px;font-size:12px;border-radius:11px}
+.sw{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.sw .c{position:relative;width:26px;height:26px;border-radius:50%;border:2px solid #fff3;overflow:hidden;cursor:pointer}
+.sw .c input{opacity:0;position:absolute;inset:0;width:100%;height:100%;cursor:pointer}
+.sw .c i{position:absolute;top:-2px;right:0;font-style:normal;font-size:10px;background:#000a;border-radius:50%;padding:0 3px;display:none}
+.sw .c:hover i{display:block}
+.imgs{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.im{position:relative;width:104px;height:64px;background:#111;border:1px solid var(--ln);border-radius:4px;overflow:hidden}
+.im img{width:100%;height:100%;object-fit:contain;cursor:zoom-in}
+.im .x{position:absolute;top:2px;right:2px;padding:0 5px;font-size:11px;background:#000a}
+.drop.over{outline:2px dashed var(--acc);outline-offset:3px}
+.note,#reply{background:rgba(111,207,151,.08);border:1px solid rgba(111,207,151,.35);border-radius:4px;padding:7px 9px;white-space:pre-wrap;font-size:12.5px}
+.note b,#reply b{color:var(--sok)}
+.empty{color:var(--tx3);text-align:center;padding:30px 14px;line-height:1.9}
+/* ล่าง: ไทม์ไลน์ */
+#B{grid-column:1/-1;grid-row:3;background:var(--bg1);border-top:1px solid var(--ln);display:flex;flex-direction:column;min-height:0;position:relative}
+#B .ph{gap:6px}
+#B .ph .tm{font:12px var(--fu);color:var(--tx);min-width:118px}
+#tl{position:relative;flex:1;min-height:0;margin:0 12px 8px;overflow:hidden;cursor:pointer}
+#tl .rul{position:absolute;left:0;right:0;top:0;height:20px;border-bottom:1px solid var(--ln)}
+#tl .tk{position:absolute;top:0;font:10px var(--fu);color:var(--tx3);border-left:1px solid var(--ln2);padding-left:3px;height:20px;line-height:20px}
+#tl .lane{position:absolute;left:0;right:0;height:1px;background:var(--ln)}
+#tl .blk{position:absolute;border-radius:4px;font-size:12px;padding:3px 8px;white-space:nowrap;overflow:hidden;color:#111;font-weight:600;border:1px solid #0005;opacity:.85}
+#tl .blk:hover{opacity:1}
+#tl .blk.sel{opacity:1;box-shadow:0 0 0 2px #fff,0 0 0 4px var(--acc)}
+#tl .blk small{display:block;font:10px var(--fu);opacity:.75}
+#tl .blk .rz{position:absolute;right:0;top:0;bottom:0;width:8px;cursor:ew-resize;background:linear-gradient(90deg,transparent,#0004)}
+#tl .ph2{position:absolute;top:0;bottom:0;width:2px;background:#fff;box-shadow:0 0 4px #000;pointer-events:none;display:none}
+#tl .ph2::before{content:'';position:absolute;top:0;left:-5px;border:6px solid transparent;border-top-color:#fff}
+/* แถบสถานะ */
+#S{grid-column:1/-1;grid-row:4;display:flex;gap:14px;align-items:center;padding:0 10px;background:var(--bg2);border-top:1px solid var(--ln);font-size:11.5px;color:var(--tx2);white-space:nowrap;overflow:hidden}
+#S .ok{color:var(--sok)}
+/* เส้นแบ่งลากปรับขนาด */
+.spl{position:absolute;z-index:3;background:transparent}
+.spl:hover,.spl.drag{background:var(--acc)}
+.spl.v{top:0;bottom:0;width:4px;cursor:ew-resize}
+.spl.h{left:0;right:0;height:4px;cursor:ns-resize;top:-2px}
 /* หน้าต่างฉาก 3D */
 #d3{position:fixed;inset:0;background:#000e;display:none;z-index:9;flex-direction:column;align-items:center;justify-content:center}
 #d3 .bar{display:flex;gap:6px;padding:8px;align-items:center;flex-wrap:wrap;justify-content:center}
@@ -121,29 +180,51 @@ main{flex:1;display:flex;min-height:0}
 .fbp{display:flex;gap:8px;align-items:center;margin-top:6px}
 .fbp .fbv{width:150px;height:84px;background:#111 center/contain no-repeat;border:1px solid var(--ln);border-radius:5px;cursor:pointer;flex:none}
 .fbp .fbv:hover{border-color:var(--ac)}
-/* เล่นทั้งสกิล */
-#pl{position:fixed;inset:0;background:#000e;display:none;z-index:10;align-items:center;justify-content:center;flex-direction:column;gap:8px}
-#pl .scr{position:relative;width:min(92vw,calc(80vh*16/9));aspect-ratio:16/9;background:#111 center/contain no-repeat;border-radius:6px}
-#pl .cap{position:absolute;left:10px;top:8px;background:#000b;padding:3px 10px;border-radius:5px;font-size:15px}
-#pl .bar{display:flex;gap:6px;align-items:center}
-#pl .tl{position:relative;width:min(92vw,calc(80vh*16/9));height:22px;background:var(--pn2);border-radius:4px;cursor:pointer;overflow:hidden}
-#pl .tl i{position:absolute;top:0;bottom:0;opacity:.75;border-right:1px solid #000}
-#pl .tl b{position:absolute;top:0;bottom:0;width:2px;background:#fff}
 </style></head><body>
-<header>
-  <h1>🎬 สตอรี่บอร์ด VFX</h1>
-  <button class="pri" id="bNew">＋ สกิลใหม่</button>
-  <button id="bCopy" title="คัดลอกข้อความไปวางในแชท Claude">📋 คัดลอกข้อความส่ง Claude</button>
+<header id="top">
+  <span class="logo"><i>🎬</i>Storyboard</span>
+  <button class="pri" id="bNew" title="สร้างสตอรี่บอร์ดของสกิลใหม่">＋ สกิลใหม่</button>
+  <span class="sep"></span>
+  <input id="fTitle" placeholder="ชื่อสกิล เช่น 'Earth — Tectonic Slam'">
+  <select id="fSt" title="สถานะ"></select>
+  <span class="sep"></span>
+  <button id="bCopy" title="คัดลอกข้อความไปวางในแชท Claude">📋 ส่งให้ Claude</button>
+  <a id="bFx" target="_blank" style="display:none"><button title="เปิดเอฟเฟกต์ที่ Claude ทำใน VFX Studio">✦ เปิดใน VFX Studio</button></a>
   <span id="stat">กำลังโหลด…</span>
 </header>
-<main>
-  <div id="side"><div id="list"></div></div>
-  <div id="ed"></div>
-</main>
+<aside id="L">
+  <div class="ph"><h3>สตอรี่บอร์ด</h3></div>
+  <div id="list"></div>
+  <div class="ph" style="border-top:1px solid var(--ln)"><h3>ช่วงของสกิล</h3><span class="hint" id="oTot"></span></div>
+  <div id="outline"></div>
+  <div class="spl v" data-spl="L" style="right:-2px"></div>
+</aside>
+<section id="C">
+  <div class="ph" id="vHead"><h3>ภาพร่าง</h3></div>
+  <div id="vBox"><div id="vScr" class="empty"></div></div>
+  <div id="vBar"></div>
+</section>
+<aside id="R">
+  <div class="tabs"><button data-tab="shot" class="on">ช่วงนี้</button><button data-tab="board">ทั้งสกิล</button></div>
+  <div id="insp"></div>
+  <div class="spl v" data-spl="R" style="left:-2px"></div>
+</aside>
+<section id="B">
+  <div class="spl h" data-spl="B"></div>
+  <div class="ph">
+    <button id="tPlay" class="pri" title="เล่นทุกช่วงต่อกันบนจอกลาง (Space)">▶ เล่นทั้งสกิล</button>
+    <button id="tStop" title="กลับไปจุดเริ่ม">⏮</button>
+    <span class="tm" id="tTime">0.00 / 0.00 วิ</span>
+    <select id="tSpd" title="ความเร็ว"><option value="1">×1</option><option value="0.5">×0.5</option><option value="0.25">×0.25</option></select>
+    <button id="tLoop" class="on" title="เล่นวน">🔁</button>
+    <span class="sep" style="width:1px;height:22px;background:var(--ln2);margin:0 4px"></span>
+    <span class="lb">＋ เพิ่มช่วง:</span><span class="chips" id="add"></span>
+    <span style="flex:1"></span><span class="hint">คลิกแถบ = เลือกช่วง • ลากขอบขวา = ปรับความยาว</span>
+  </div>
+  <div id="tl"></div>
+</section>
+<footer id="S"><span id="sInfo"></span><span style="flex:1"></span><span>Claude อ่าน <span class="mono" id="sMd">storyboard/sb-?.md</span></span></footer>
 <div id="zoom"><img alt=""></div>
-<div id="pl"><div class="scr" id="plScr"><span class="cap" id="plCap"></span></div><div class="tl" id="plTl"></div>
-  <div class="bar"><button id="plPlay" class="pri">⏸ หยุด</button><button id="plSlow">🐢 ช้า ×0.5</button><button id="plLoop" class="on">🔁 วน</button><button id="plClose">✕ ปิด</button></div>
-  <div class="hint">เล่นทุกช่วงต่อกันตามเวลา: ช่วงที่มีเฟรม = เล่นเฟรม, ช่วงอื่น = ภาพร่างหลักค้างไว้ตามความยาวช่วง • คลิกแถบเพื่อกระโดด</div></div>
 <div id="d3">
   <div class="bar">
     <span class="lb">มุมกล้อง</span><span class="seg" id="d3View"></span>
@@ -247,126 +328,191 @@ function newBoard(){
 function times(b){let t=0;return b.shots.map(s=>{const st=Math.max(0,t-(+s.overlap||0));t=st+(+s.dur||0);return [st,t];});}
 const f2=v=>(+v).toFixed(2).replace(/\.?0+$/,'')||'0';
 
-function renderList(){
-  const L=[...db.items].sort((a,b)=>b.updated<a.updated?-1:1);
-  $('#list').innerHTML=L.length?L.map(b=>`<div class="it ${cur&&cur.id===b.id?'sel':''}" data-id="${b.id}"><b>#${b.id} ${esc(b.title||'(ยังไม่ตั้งชื่อ)')}</b>
-    <small>${esc(b.who)} • ${b.shots.length} ช่วง • ${STATUS[b.status]||''}${b.reply?' • 💬':''}</small></div>`).join('')
-    :`<div style="padding:16px;color:var(--mu)">ยังไม่มีสตอรี่บอร์ด<br>กด ＋ สกิลใหม่</div>`;
-}
+// ===== หน้าหลักแบบสตูดิโอ: ซ้าย = สตอรี่บอร์ด + ช่วง, กลาง = จอภาพร่าง, ขวา = แผงแก้ค่า, ล่าง = ไทม์ไลน์ =====
 function chips(attr,opts,sel){return `<div class="chips" ${attr}>${opts.map(o=>`<button data-v="${esc(o)}" class="${sel.includes(o)?'on':''}">${esc(o)}</button>`).join('')}</div>`;}
 function swatches(attr,cols){return `<div class="sw" ${attr}>${cols.map((c,i)=>`<label class="c" style="background:${c}"><input type="color" value="${c}" data-i="${i}"><i data-del="${i}">✕</i></label>`).join('')}<button class="sm" data-add="1">＋ สี</button></div>`;}
 function imgs(list,key){return list.map((p,i)=>`<div class="im"><img src="${p}" data-z="1"><button class="x" data-del="${i}" data-k="${key}">✕</button></div>`).join('');}
-
+let insTab='shot',vMode='sk';
+const curShot=()=>cur?cur.shots.find(s=>s.id===selShot)||cur.shots[0]||null:null;
+const mainSk=s=>s&&s.sketches.length?s.sketches[Math.min(s._sel||0,s.sketches.length-1)]:null;
+function renderList(){
+  const L=[...db.items].sort((a,b)=>b.updated<a.updated?-1:1);
+  $('#list').innerHTML=L.length?L.map(b=>`<button class="it ${cur&&cur.id===b.id?'sel':''}" data-id="${b.id}"><b>#${b.id} ${esc(b.title||'(ยังไม่ตั้งชื่อ)')}</b>
+    <small>${esc(b.who||'-')} • ${b.shots.length} ช่วง • ${STATUS[b.status]||''}${b.reply?' • 💬':''}</small></button>`).join('')
+    :`<div class="empty">ยังไม่มีสตอรี่บอร์ด<br>กด ＋ สกิลใหม่</div>`;
+}
 function renderEd(){
-  const E=$('#ed');
-  if(!cur){E.innerHTML=`<div id="empty">🎬 วางแผน VFX ของสกิลทีละช่วง<br>ชาร์จ → ปล่อย → พุ่ง → กระทบ → ค้าง → จาง<br>แต่ละช่วงวาดภาพร่าง แปะรูปตัวอย่าง เลือกขนาด/สี/รูปทรง<br>แล้วกด <b>📋 คัดลอกข้อความส่ง Claude</b><br><br>กด <b>＋ สกิลใหม่</b> เพื่อเริ่ม</div>`;return;}
-  const b=cur,T=times(b),tot=Math.max(0.1,...T.map(t=>t[1]));
-  E.innerHTML=`
-  <div class="row"><input id="fTitle" placeholder="ชื่อสกิล เช่น 'Earth — Tectonic Slam'" value="${esc(b.title)}"></div>
-  <div class="row"><span class="lb">สาย</span><input id="fWho" list="wl" value="${esc(b.who)}" style="width:170px"><datalist id="wl">${WHO.map(w=>`<option value="${w}">`).join('')}</datalist>
-    <span class="lb">ปุ่ม / ชื่อในเกม</span><input id="fSkill" placeholder="เช่น Q, ult, ตีครั้งที่ 3" value="${esc(b.skill)}" style="width:190px">
-    <span class="lb">สถานะ</span><select id="fSt">${Object.keys(STATUS).map(k=>`<option value="${k}" ${b.status===k?'selected':''}>${STATUS[k]}</option>`).join('')}</select></div>
-  <div class="box"><h3>ภาพรวม</h3>
-    <textarea id="fOv" rows="3" placeholder="สกิลนี้ทำอะไร และอยากให้รู้สึกยังไง เช่น 'ทุบพื้นแล้วหินพุ่งเป็นแนวไปข้างหน้า อยากให้รู้สึกหนักเหมือนแผ่นดินไหว'">${esc(b.overview)}</textarea>
-    <div class="row" style="margin-top:8px"><span class="lb">ความรู้สึก</span>${chips('id="fMood"',MOOD,b.mood)}</div>
-    <div class="row"><span class="lb">สีหลักของสกิล</span>${swatches('id="fCols"',b.colors)}</div>
-    <div class="drop" id="dRefs"><span class="lb">รูป / คลิปตัวอย่างที่ชอบ (จากเกมอื่นก็ได้)</span>
-      <div class="imgs" style="margin-top:6px">${imgs(b.refs,'refs')}<button class="sm" data-pick="refs">📎 เพิ่มรูป…</button></div>
-      <div class="hint" style="margin-top:4px">วางรูป <kbd>Ctrl</kbd>+<kbd>V</kbd> หรือลากไฟล์มาวางในกล่องนี้ • ลิงก์คลิป YouTube ใส่ในช่องภาพรวมได้</div></div>
-  </div>
-  <div id="tl">${b.shots.map((s,i)=>`<div class="blk" data-go="${s.id}" style="left:${T[i][0]/tot*100}%;width:calc(${(T[i][1]-T[i][0])/tot*100}% - 2px);top:${4+(i%2)*14}px;background:${(KIND[s.kind]||KIND.other).c}" title="${esc(s.name||KIND[s.kind]?.th)}">${i+1}. ${esc(s.name||KIND[s.kind]?.th)}</div>`).join('')}
-    ${Array.from({length:Math.floor(tot/0.25)+1},(_,k)=>k*0.25).filter(t=>t<=tot).map(t=>`<span class="tk" style="left:${t/tot*100}%">${f2(t)}s</span>`).join('')}</div>
-  <div class="hint">แถบเวลา: รวม ${f2(tot)} วินาที • คลิกแถบเพื่อไปที่ช่วงนั้น <button class="sm pri" id="bPlayAll" style="margin-left:8px">▶ เล่นทั้งสกิล (ดูภาพรวม)</button></div>
-  <div id="shots">${b.shots.map((s,i)=>shotHTML(s,i,T[i])).join('')}</div>
-  <div id="add"><span class="lb">＋ เพิ่มช่วง:</span>${Object.keys(KIND).map(k=>`<button class="sm" data-addk="${k}">${KIND[k].th}</button>`).join('')}</div>
-  ${b.reply?`<div id="reply"><b>💬 Claude ตอบ:</b>\n${esc(b.reply)}</div>`:''}
-  <div class="row" style="margin-top:16px">${b.fx?`<span class="lb">ไฟล์เอฟเฟกต์:</span> <code>${esc(b.fx)}</code> <a href="studio.html?fx=${encodeURIComponent(b.fx)}" target="_blank"><button class="sm">เปิดใน VFX Studio</button></a>`:''}
-    <span style="flex:1"></span><button id="bDel" style="color:var(--red)">🗑 ลบสตอรี่บอร์ดนี้</button></div>
-  <div class="hint">สตอรี่บอร์ด #${b.id} • Claude อ่านไฟล์ <code>storyboard/sb-${b.id}.md</code></div>`;
-  bindEd();
+  const on=!!cur;$('#fTitle').disabled=!on;$('#fSt').disabled=!on;
+  $('#fSt').innerHTML=Object.keys(STATUS).map(k=>`<option value="${k}" ${on&&cur.status===k?'selected':''}>${STATUS[k]}</option>`).join('');
+  $('#fTitle').value=on?cur.title:'';
+  $('#bFx').style.display=on&&cur.fx?'':'none';if(on&&cur.fx)$('#bFx').href='studio.html?fx='+encodeURIComponent(cur.fx);
+  $('#add').innerHTML=Object.keys(KIND).map(k=>`<button data-addk="${k}" style="border-color:${KIND[k].c}66" ${on?'':'disabled'}>${KIND[k].th}</button>`).join('');
+  $('#sMd').textContent=on?`storyboard/sb-${cur.id}.md`:'-';
+  if(on&&!cur.shots.find(s=>s.id===selShot))selShot=cur.shots[0]?.id||null;
+  renderOutline();renderView();renderInsp();renderTL();
 }
-function shotHTML(s,i,T){
-  const K=KIND[s.kind]||KIND.other;
-  return `<div class="shot ${selShot===s.id?'sel':''}" id="s_${s.id}" data-sid="${s.id}" style="--k:${K.c}">
-   <div class="pic">
-    ${(()=>{const k=Math.min(s._sel||0,s.sketches.length-1),m=s.sketches[k];
-      return `<div class="frame" data-main="${k}" style="${m?`background-image:url('${m.img}')`:''}">${m?'':'ยังไม่มีภาพร่าง<br><small>✏️ วาดเอง หรือ 🧊 จัดฉาก 3D แล้วถ่ายหลายมุม</small>'}</div>
-      ${s.sketches.length>1||m?`<div class="th">${s.sketches.map((x,j)=>`<div class="t ${j===k?'on':''}" data-sk="${j}" style="background-image:url('${x.img}')"><span>${j+1}${x.view?' '+esc(x.view):x.kind==='3d'?' 3D':''}${x.over&&x.kind==='3d'?' ✏️':''}</span><div class="bt"><button data-skdraw="${j}" title="วาดทับภาพนี้">✏️</button><button data-skdel="${j}" title="ลบภาพนี้">✕</button></div></div>`).join('')}</div>`:''}`;})()}
-    <div class="tools"><button data-draw="1">✏️ วาดภาพใหม่</button><button data-d3="1">🧊 ฉาก 3D${s.scene3d&&s.scene3d.objs.length?` (${s.scene3d.objs.length} ชิ้น)`:''}</button><button data-fbo="1" title="วาดทีละเฟรม แล้วเล่นต่อกันเป็นคลิป">🎞 เฟรม${nFr(s)?` (${nFr(s)})`:''}</button></div>
-    ${nFr(s)?`<div class="fbp"><div class="fbv" data-fbo="1" data-fps="${s.frames.fps||12}" data-l="${esc(JSON.stringify(s.frames.list.map(x=>x.img).filter(Boolean)))}" title="คลิกเพื่อแก้ทีละเฟรม"></div><span class="hint">🎞 คลิป ${nFr(s)} เฟรม • ${s.frames.fps||12} fps • ${f2(nFr(s)/(s.frames.fps||12))} วิ<br>คลิกเพื่อแก้ / วาดต่อ</span></div>`:''}
-    <div class="imgs drop" data-refs="1" style="margin-top:6px">${s.refs.map((p,k)=>`<div class="im" style="width:105px;height:66px"><img src="${p}" data-z="1"><button class="x" data-del="${k}" data-k="shot">✕</button></div>`).join('')}<button class="sm" data-pick="shot">📎 รูปตัวอย่าง</button></div>
-    ${s.result?`<div class="res"><div class="lb">🖼 ผลที่ Claude ทำ (เทียบกับภาพร่าง)</div><div class="frame" style="background-image:url('${s.result}')" data-zs="${s.result}"></div></div>`:''}
-   </div>
-   <div class="fl">
-    <div class="hd"><span class="no">${i+1}</span>
-      <select data-f="kind">${Object.keys(KIND).map(k=>`<option value="${k}" ${s.kind===k?'selected':''}>${KIND[k].th}</option>`).join('')}</select>
-      <input class="nm" data-f="name" placeholder="ชื่อช่วง (ไม่ใส่ก็ได้)" value="${esc(s.name)}">
-      <span class="tm">${f2(T[0])}–${f2(T[1])} วิ</span>
-      <button class="sm" data-mv="-1" title="เลื่อนขึ้น">↑</button><button class="sm" data-mv="1" title="เลื่อนลง">↓</button><button class="sm" data-dup="1" title="ทำสำเนา">⧉</button><button class="sm" data-rm="1" title="ลบช่วงนี้" style="color:var(--red)">✕</button></div>
-    <div class="g2">
-      <span class="lb">นานแค่ไหน</span><div class="rng"><input type="range" min="0.05" max="3" step="0.05" value="${s.dur}" data-f="dur" data-n="1"><b>${f2(s.dur)} วินาที</b>
-        <span class="lb">เริ่มก่อนช่วงที่แล้วจบ</span><input type="number" min="0" max="3" step="0.05" value="${s.overlap||0}" data-f="overlap" data-n="1" style="width:70px"><span class="lb">วิ</span></div>
-      <span class="lb">เกิดที่ไหน</span><div class="chips" data-one="where">${WHERE.map(w=>`<button data-v="${w}" class="${s.where===w?'on':''}">${w}</button>`).join('')}</div>
-      <span class="lb">ขนาด</span><div class="rng"><input type="range" min="0.2" max="10" step="0.1" value="${s.size}" data-f="size" data-n="1"><b>${f2(s.size)} เท่าตัวละคร<br><small class="lb">${SIZE_TH(s.size)}</small></b></div>
-      <span class="lb">ความแรง</span><div class="rng"><input type="range" min="1" max="5" step="1" value="${s.power}" data-f="power" data-n="1"><b>${POW[s.power]}</b></div>
-      <span class="lb">รูปทรง</span>${chips('data-many="shapes"',SHAPES,s.shapes)}
-      <span class="lb">การเคลื่อนไหว</span>${chips('data-many="motion"',MOTION,s.motion)}
-      <span class="lb">กล้อง / จอ</span>${chips('data-many="camera"',CAM,s.camera)}
-      <span class="lb">สีช่วงนี้</span>${swatches('data-cols="1"',s.colors)}
-    </div>
-    <textarea data-f="text" rows="2" placeholder="${esc(K.ph)}">${esc(s.text)}</textarea>
-    ${s.note?`<div class="note"><b>💬 Claude:</b> ${esc(s.note)}</div>`:''}
-   </div></div>`;
+function renderOutline(){
+  const O=$('#outline');if(!cur){O.innerHTML='';$('#oTot').textContent='';return;}
+  const T=times(cur);$('#oTot').textContent=f2(Math.max(0,...T.map(t=>t[1])))+' วิ';
+  O.innerHTML=cur.shots.map((s,i)=>{const K=KIND[s.kind]||KIND.other,m=mainSk(s);
+    return `<button class="sh ${s.id===selShot?'sel':''}" data-sid="${s.id}" style="--k:${K.c}"><i></i><span class="tb" style="${m?`background-image:url('${m.img}')`:''}"></span>
+      <b>${i+1}. ${esc(s.name||K.th)}</b><small>${f2(T[i][0])}–${f2(T[i][1])}s${s.sketches.length?' • 🖼'+s.sketches.length:''}${nFr(s)?' • 🎞'+nFr(s):''}${s.result?' • ✅':''}</small></button>`;}).join('')
+    +(cur.shots.length?'':'<div class="empty">ยังไม่มีช่วง<br>เพิ่มจากไทม์ไลน์ด้านล่าง</div>');
 }
-function bindEd(){
-  const b=cur;
-  $('#fTitle').oninput=e=>{b.title=e.target.value;touch();};
+function selectShot(id,scroll){
+  if(PL.on)plStop();selShot=id;vMode='sk';
+  document.querySelectorAll('#outline .sh').forEach(x=>x.classList.toggle('sel',x.dataset.sid===id));
+  document.querySelectorAll('#tl .blk').forEach(x=>x.classList.toggle('sel',x.dataset.go===id));
+  if(scroll)document.querySelector(`#outline [data-sid="${id}"]`)?.scrollIntoView({block:'nearest'});
+  renderView();if(insTab==='shot')renderInsp();
+}
+// ----- จอกลาง -----
+function renderView(){
+  const s=curShot(),H=$('#vHead'),V=$('#vScr'),Bar=$('#vBar');
+  V.className='';V.innerHTML='';V.style.backgroundImage='';
+  if(!cur||!s){H.innerHTML='<h3>ภาพร่าง</h3>';V.className='empty';
+    V.innerHTML=cur?'ยังไม่มีช่วง<br>กด ＋ เพิ่มช่วง ที่ไทม์ไลน์ด้านล่าง':'🎬 วางแผน VFX ของสกิลทีละช่วง<br>ชาร์จ → ปล่อย → พุ่ง → กระทบ → ค้าง → จาง<br>แต่ละช่วงวาดภาพร่าง / จัดฉาก 3D / วาดทีละเฟรม<br>แล้วกด <b>📋 ส่งให้ Claude</b><br><br>เลือกสตอรี่บอร์ดทางซ้าย หรือกด <b>＋ สกิลใหม่</b>';
+    Bar.innerHTML='';return;}
+  const i=cur.shots.indexOf(s),K=KIND[s.kind]||KIND.other,T=times(cur)[i],m=mainSk(s),nf=nFr(s);
+  if(vMode==='clip'&&!nf||vMode==='res'&&!s.result||vMode==='cmp'&&!s.result)vMode='sk';
+  const md=[['sk','🖼 ภาพร่าง'],...(nf?[['clip',`🎞 คลิป (${nf})`]]:[]),...(s.result?[['res','✅ ผล Claude'],['cmp','⇆ เทียบ']]:[])];
+  H.style.setProperty('--k',K.c);
+  H.innerHTML=`<b>ช่วง ${i+1}</b><span>${esc(K.th)}${s.name?' — '+esc(s.name):''}</span><span class="tm">${f2(T[0])}–${f2(T[1])} วิ</span><span style="flex:1"></span>
+    ${md.length>1?`<span class="seg" id="vMode">${md.map(([k,t])=>`<button data-vm="${k}" class="${vMode===k?'on':''}">${t}</button>`).join('')}</span>`:''}`;
+  if(vMode==='clip'){V.className='fbv';V.dataset.l=JSON.stringify(s.frames.list.map(x=>x.img||x.base).filter(Boolean));V.dataset.fps=s.frames.fps||12;V._l=null;V._pre=null;V._k=-1;V.innerHTML=`<span class="cap">🎞 ${nf} เฟรม • ${s.frames.fps||12} fps — คลิกเพื่อแก้ทีละเฟรม</span>`;}
+  else if(vMode==='res'){V.style.backgroundImage=`url('${s.result}')`;V.innerHTML='<span class="cap">✅ ผลที่ Claude ทำ</span>';}
+  else if(vMode==='cmp'){V.className='cmp';V.innerHTML=`<div style="background-image:url('${m?m.img:''}')"><span>🖼 ภาพร่าง</span></div><div style="background-image:url('${s.result}')"><span>✅ ผล Claude</span></div>`;}
+  else if(m){V.style.backgroundImage=`url('${m.img}')`;V.innerHTML=`<span class="cap">ภาพ ${(s._sel||0)+1}/${s.sketches.length}${m.view?' • 3D '+esc(m.view):m.kind==='3d'?' • 3D':''}</span>`;}
+  else{V.className='empty';V.innerHTML='ยังไม่มีภาพร่าง<br><small>✏️ วาดเอง • 🧊 จัดฉาก 3D (มีตัวละคร + ท่าจากเกม) • 🎞 วาดทีละเฟรม</small>';}
+  const k=Math.min(s._sel||0,s.sketches.length-1);
+  Bar.innerHTML=`<div class="th">${s.sketches.map((x,j)=>`<div class="t ${j===k&&vMode==='sk'?'on':''}" data-sk="${j}" style="background-image:url('${x.img}')"><span>${j+1}${x.view?' '+esc(x.view):x.kind==='3d'?' 3D':''}${x.over&&x.kind==='3d'?' ✏️':''}</span><div class="bt"><button data-skdraw="${j}" title="วาดทับภาพนี้">✏️</button><button data-skdel="${j}" title="ลบภาพนี้">✕</button></div></div>`).join('')||'<span class="hint">ภาพร่างของช่วงนี้จะอยู่ตรงนี้</span>'}</div>
+    <div class="tools"><button data-draw="1">✏️ วาดภาพใหม่</button><button data-d3="1">🧊 ฉาก 3D${s.scene3d&&s.scene3d.objs&&s.scene3d.objs.length?` (${s.scene3d.objs.length})`:''}</button><button data-fbo="1" title="วาดทีละเฟรม แล้วเล่นต่อกันเป็นคลิป">🎞 เฟรม${nf?` (${nf})`:''}</button></div>`;
+}
+$('#vHead').onclick=e=>{const v=e.target.dataset.vm;if(v){vMode=v;renderView();}};
+$('#vScr').onclick=e=>{const s=curShot();if(!s||PL.on)return;
+  if(vMode==='clip')fbOpen(s);else if(vMode==='res')zoom(s.result);else if(vMode==='sk'){const m=mainSk(s);if(m)zoom(m.img);else draw(s,-1);}
+  else if(vMode==='cmp'){const d=e.target.closest('#vScr>div');if(d)zoom(d===$('#vScr').lastElementChild?s.result:mainSk(s)?.img);}};
+$('#vBar').onclick=e=>{const s=curShot();if(!s)return;const t=e.target.closest('[data-sk],[data-skdraw],[data-skdel],[data-draw],[data-d3],[data-fbo]');if(!t)return;
+  if(t.dataset.skdel!=null){if(!confirm('ลบภาพร่างนี้?'))return;s.sketches.splice(+t.dataset.skdel,1);s._sel=0;touch(1);}
+  else if(t.dataset.skdraw!=null)draw(s,+t.dataset.skdraw);
+  else if(t.dataset.sk!=null){s._sel=+t.dataset.sk;vMode='sk';renderView();renderOutline();}
+  else if(t.dataset.draw)draw(s,-1);else if(t.dataset.d3)open3D(s);else if(t.dataset.fbo)fbOpen(s);};
+// ----- แผงขวา -----
+function renderInsp(){
+  document.querySelectorAll('#R .tabs button').forEach(b=>b.classList.toggle('on',b.dataset.tab===insTab));
+  const I=$('#insp');
+  if(!cur){I.innerHTML='<div class="empty">เลือกสตอรี่บอร์ดก่อน</div>';return;}
+  if(insTab==='board'){I.innerHTML=boardHTML();bindBoard();return;}
+  const s=curShot();if(!s){I.innerHTML='<div class="empty">ยังไม่มีช่วง</div>';return;}
+  I.innerHTML=shotHTML(s,cur.shots.indexOf(s),times(cur)[cur.shots.indexOf(s)]);bindShot(s);
+}
+$('#R .tabs').onclick=e=>{const t=e.target.dataset.tab;if(!t)return;insTab=t;renderInsp();};
+function boardHTML(){const b=cur;
+  return `<div class="sec"><h3>สกิล</h3><div class="g2">
+    <span class="lb">สาย</span><input id="fWho" list="wl" value="${esc(b.who)}"><datalist id="wl">${WHO.map(w=>`<option value="${w}">`).join('')}</datalist>
+    <span class="lb">ปุ่ม / ชื่อ</span><input id="fSkill" placeholder="เช่น Q, ult, ตีครั้งที่ 3" value="${esc(b.skill)}"></div></div>
+  <div class="sec"><h3>ภาพรวม</h3><textarea id="fOv" rows="4" placeholder="สกิลนี้ทำอะไร และอยากให้รู้สึกยังไง เช่น 'ทุบพื้นแล้วหินพุ่งเป็นแนวไปข้างหน้า อยากให้รู้สึกหนักเหมือนแผ่นดินไหว'">${esc(b.overview)}</textarea></div>
+  <div class="sec"><h3>ความรู้สึก</h3>${chips('id="fMood"',MOOD,b.mood)}</div>
+  <div class="sec"><h3>สีหลักของสกิล</h3>${swatches('id="fCols"',b.colors)}</div>
+  <div class="sec drop" id="dRefs"><h3>รูป / คลิปตัวอย่างที่ชอบ</h3>
+    <div class="imgs">${imgs(b.refs,'refs')}<button class="sm" data-pick="refs">📎 เพิ่มรูป…</button></div>
+    <div class="hint" style="margin-top:4px">วาง <kbd>Ctrl</kbd>+<kbd>V</kbd> หรือลากไฟล์มาวาง • ลิงก์ YouTube ใส่ในภาพรวมได้</div></div>
+  ${b.fx?`<div class="sec"><h3>ไฟล์เอฟเฟกต์</h3><span class="mono">${esc(b.fx)}</span> <a href="studio.html?fx=${encodeURIComponent(b.fx)}" target="_blank"><button class="sm">✦ เปิดใน VFX Studio</button></a></div>`:''}
+  ${b.reply?`<div class="sec"><div id="reply"><b>💬 Claude ตอบ:</b>\n${esc(b.reply)}</div></div>`:''}
+  <div class="sec"><button id="bDel" class="dng">🗑 ลบสตอรี่บอร์ดนี้</button> <span class="hint">#${b.id}</span></div>`;
+}
+function bindBoard(){const b=cur;
   $('#fWho').oninput=e=>{b.who=e.target.value;touch();};
   $('#fSkill').oninput=e=>{b.skill=e.target.value;touch();};
-  $('#fSt').onchange=e=>{b.status=e.target.value;touch();};
   $('#fOv').oninput=e=>{b.overview=e.target.value;touch();};
   $('#fMood').onclick=e=>{const v=e.target.dataset.v;if(!v)return;tog(b.mood,v);e.target.classList.toggle('on');touch();};
   bindSw($('#fCols'),b.colors);
   bindDrop($('#dRefs'),f=>addImgs(f,b.refs));
-  $('#bPlayAll').onclick=()=>playAll(b);
-  $('#bDel').onclick=()=>{if(!confirm('ลบสตอรี่บอร์ด #'+b.id+' ทั้งรูป?'))return;db.items=db.items.filter(x=>x!==b);cur=null;renderList();renderEd();save(1);};
-  $('#tl').onclick=e=>{const id=e.target.dataset.go;if(!id)return;selShot=id;document.querySelectorAll('.shot').forEach(x=>x.classList.toggle('sel',x.dataset.sid===id));$('#s_'+id).scrollIntoView({behavior:'smooth',block:'center'});};
-  $('#add').onclick=e=>{const k=e.target.dataset.addk;if(!k)return;const s=newShot(k);b.shots.push(s);selShot=s.id;touch(1);setTimeout(()=>$('#s_'+s.id)?.scrollIntoView({behavior:'smooth',block:'center'}),0);};
-  document.querySelectorAll('.shot').forEach(el=>{
-    const s=b.shots.find(x=>x.id===el.dataset.sid),i=b.shots.indexOf(s);
-    el.addEventListener('pointerdown',()=>{selShot=s.id;});
-    el.querySelectorAll('[data-f]').forEach(inp=>{
-      const f=inp.dataset.f,num=inp.dataset.n;
-      inp[inp.tagName==='SELECT'?'onchange':'oninput']=()=>{s[f]=num?+inp.value:inp.value;
-        if(inp.type==='range'||f==='overlap'||f==='kind'){clearTimeout(inp._t);touch();inp._t=setTimeout(()=>{if(document.activeElement!==inp||inp.type!=='range')reRender();},inp.type==='range'?400:0);
-          if(inp.type==='range'){const lbl=inp.nextElementSibling;if(f==='dur')lbl.innerHTML=f2(s.dur)+' วินาที';if(f==='size')lbl.innerHTML=`${f2(s.size)} เท่าตัวละคร<br><small class="lb">${SIZE_TH(s.size)}</small>`;if(f==='power')lbl.innerHTML=POW[s.power];}}
-        else touch();};
-      if(inp.type==='range')inp.onchange=()=>reRender();
-    });
-    el.querySelector('[data-one]').onclick=e=>{const v=e.target.dataset.v;if(!v)return;s.where=s.where===v?'':v;el.querySelectorAll('[data-one] button').forEach(x=>x.classList.toggle('on',x.dataset.v===s.where));touch();};
-    el.querySelectorAll('[data-many]').forEach(c=>c.onclick=e=>{const v=e.target.dataset.v;if(!v)return;tog(s[c.dataset.many],v);e.target.classList.toggle('on');touch();});
-    bindSw(el.querySelector('[data-cols]'),s.colors);
-    el.querySelector('[data-draw]').onclick=()=>draw(s,-1);
-    el.querySelector('[data-d3]').onclick=()=>open3D(s);
-    el.querySelectorAll('[data-fbo]').forEach(x=>x.onclick=()=>fbOpen(s));
-    el.querySelector('.pic').addEventListener('click',e=>{const t=e.target.closest('[data-sk],[data-skdraw],[data-skdel],[data-main]');if(!t)return;
-      if(t.dataset.skdel!=null){if(!confirm('ลบภาพร่างนี้?'))return;s.sketches.splice(+t.dataset.skdel,1);s._sel=0;touch(1);}
-      else if(t.dataset.skdraw!=null)draw(s,+t.dataset.skdraw);
-      else if(t.dataset.sk!=null){s._sel=+t.dataset.sk;reRender();}
-      else if(t.dataset.main!=null&&s.sketches[+t.dataset.main])zoom(s.sketches[+t.dataset.main].img);
-      else if(t.dataset.main!=null)draw(s,-1);});
-    const rz=el.querySelector('[data-zs]');if(rz)rz.onclick=()=>zoom(s.result);
-    bindDrop(el.querySelector('[data-refs]'),f=>addImgs(f,s.refs));
-    el.querySelector('[data-refs]').addEventListener('click',e=>{if(e.target.dataset.del!=null){s.refs.splice(+e.target.dataset.del,1);touch(1);}else if(e.target.dataset.pick)pick(f=>addImgs(f,s.refs));});
-    el.querySelector('[data-mv="-1"]').onclick=()=>{if(i>0){b.shots.splice(i-1,0,b.shots.splice(i,1)[0]);touch(1);}};
-    el.querySelector('[data-mv="1"]').onclick=()=>{if(i<b.shots.length-1){b.shots.splice(i+1,0,b.shots.splice(i,1)[0]);touch(1);}};
-    el.querySelector('[data-dup]').onclick=()=>{const c=JSON.parse(JSON.stringify(s));c.id=newId();c.result='';c.note='';b.shots.splice(i+1,0,c);touch(1);};
-    el.querySelector('[data-rm]').onclick=()=>{if(!confirm('ลบช่วงที่ '+(i+1)+'?'))return;b.shots.splice(i,1);touch(1);};
-  });
   $('#dRefs').addEventListener('click',e=>{if(e.target.dataset.del!=null&&e.target.dataset.k==='refs'){b.refs.splice(+e.target.dataset.del,1);touch(1);}else if(e.target.dataset.pick==='refs')pick(f=>addImgs(f,b.refs));});
-  $('#ed').onclick=e=>{if(e.target.dataset.z)zoom(e.target.src);};
+  $('#bDel').onclick=()=>{if(!confirm('ลบสตอรี่บอร์ด #'+b.id+' ทั้งรูป?'))return;db.items=db.items.filter(x=>x!==b);cur=null;renderList();renderEd();save(1);};
 }
-function reRender(){const y=$('#ed').scrollTop;renderEd();$('#ed').scrollTop=y;}
+function shotHTML(s,i,T){
+  const K=KIND[s.kind]||KIND.other;
+  return `<div class="sec"><div style="display:flex;gap:4px;align-items:center;margin-bottom:6px"><b style="color:${K.c};font-size:15px">ช่วง ${i+1}</b><span class="mono" style="color:var(--tx2)">${f2(T[0])}–${f2(T[1])} วิ</span><span style="flex:1"></span>
+      <button class="sm" data-mv="-1" title="เลื่อนขึ้น">↑</button><button class="sm" data-mv="1" title="เลื่อนลง">↓</button><button class="sm" data-dup="1" title="ทำสำเนา">⧉</button><button class="sm dng" data-rm="1" title="ลบช่วงนี้">🗑</button></div>
+    <div class="g2">
+      <span class="lb">ชนิด</span><select data-f="kind">${Object.keys(KIND).map(k=>`<option value="${k}" ${s.kind===k?'selected':''}>${KIND[k].th}</option>`).join('')}</select>
+      <span class="lb">ชื่อช่วง</span><input data-f="name" placeholder="ไม่ใส่ก็ได้" value="${esc(s.name)}">
+    </div></div>
+  <div class="sec"><h3>เวลา / ขนาด</h3><div class="g2">
+      <span class="lb">นานแค่ไหน</span><div class="rng"><input type="range" min="0.05" max="3" step="0.05" value="${s.dur}" data-f="dur" data-n="1"><b>${f2(s.dur)} วินาที</b></div>
+      <span class="lb">ซ้อนช่วงก่อน</span><div class="rng"><input type="number" min="0" max="3" step="0.05" value="${s.overlap||0}" data-f="overlap" data-n="1" style="width:70px"><span class="lb">วิ (เริ่มก่อนช่วงที่แล้วจบ)</span></div>
+      <span class="lb">ขนาด</span><div class="rng"><input type="range" min="0.2" max="10" step="0.1" value="${s.size}" data-f="size" data-n="1"><b>${f2(s.size)} เท่าตัว<br><small class="lb">${SIZE_TH(s.size)}</small></b></div>
+      <span class="lb">ความแรง</span><div class="rng"><input type="range" min="1" max="5" step="1" value="${s.power}" data-f="power" data-n="1"><b>${POW[s.power]}</b></div>
+    </div></div>
+  <div class="sec"><h3>เกิดที่ไหน</h3><div class="chips" data-one="where">${WHERE.map(w=>`<button data-v="${w}" class="${s.where===w?'on':''}">${w}</button>`).join('')}</div></div>
+  <div class="sec"><h3>รูปทรง</h3>${chips('data-many="shapes"',SHAPES,s.shapes)}</div>
+  <div class="sec"><h3>การเคลื่อนไหว</h3>${chips('data-many="motion"',MOTION,s.motion)}</div>
+  <div class="sec"><h3>กล้อง / จอ</h3>${chips('data-many="camera"',CAM,s.camera)}</div>
+  <div class="sec"><h3>สีช่วงนี้</h3>${swatches('data-cols="1"',s.colors)}</div>
+  <div class="sec"><h3>อธิบายเพิ่ม</h3><textarea data-f="text" rows="3" placeholder="${esc(K.ph)}">${esc(s.text)}</textarea></div>
+  <div class="sec drop" data-refs="1"><h3>รูปตัวอย่างของช่วงนี้</h3><div class="imgs">${s.refs.map((p,k)=>`<div class="im"><img src="${p}" data-z="1"><button class="x" data-del="${k}" data-k="shot">✕</button></div>`).join('')}<button class="sm" data-pick="shot">📎 เพิ่มรูป</button></div></div>
+  ${s.note?`<div class="sec"><div class="note"><b>💬 Claude:</b> ${esc(s.note)}</div></div>`:''}`;
+}
+function bindShot(s){
+  const b=cur,i=b.shots.indexOf(s),el=$('#insp');
+  el.querySelectorAll('[data-f]').forEach(inp=>{
+    const f=inp.dataset.f,num=inp.dataset.n;
+    inp[inp.tagName==='SELECT'?'onchange':'oninput']=()=>{s[f]=num?+inp.value:inp.value;touch();
+      if(inp.type==='range'){const lbl=inp.nextElementSibling;if(f==='dur')lbl.innerHTML=f2(s.dur)+' วินาที';if(f==='size')lbl.innerHTML=`${f2(s.size)} เท่าตัว<br><small class="lb">${SIZE_TH(s.size)}</small>`;if(f==='power')lbl.innerHTML=POW[s.power];}
+      if(['dur','overlap','kind','name'].includes(f)){renderTL();renderOutline();renderView();}
+      if(f==='kind')renderInsp();};
+  });
+  el.querySelector('[data-one]').onclick=e=>{const v=e.target.dataset.v;if(!v)return;s.where=s.where===v?'':v;el.querySelectorAll('[data-one] button').forEach(x=>x.classList.toggle('on',x.dataset.v===s.where));touch();};
+  el.querySelectorAll('[data-many]').forEach(c=>c.onclick=e=>{const v=e.target.dataset.v;if(!v)return;tog(s[c.dataset.many],v);e.target.classList.toggle('on');touch();});
+  bindSw(el.querySelector('[data-cols]'),s.colors);
+  bindDrop(el.querySelector('[data-refs]'),f=>addImgs(f,s.refs));
+  el.querySelector('[data-refs]').addEventListener('click',e=>{if(e.target.dataset.del!=null){s.refs.splice(+e.target.dataset.del,1);touch(1);}else if(e.target.dataset.pick)pick(f=>addImgs(f,s.refs));});
+  el.querySelector('[data-mv="-1"]').onclick=()=>{if(i>0){b.shots.splice(i-1,0,b.shots.splice(i,1)[0]);touch(1);}};
+  el.querySelector('[data-mv="1"]').onclick=()=>{if(i<b.shots.length-1){b.shots.splice(i+1,0,b.shots.splice(i,1)[0]);touch(1);}};
+  el.querySelector('[data-dup]').onclick=()=>{const c=JSON.parse(JSON.stringify(s));c.id=newId();c.result='';c.note='';b.shots.splice(i+1,0,c);selShot=c.id;touch(1);};
+  el.querySelector('[data-rm]').onclick=()=>{if(!confirm('ลบช่วงที่ '+(i+1)+'?'))return;b.shots.splice(i,1);selShot=b.shots[Math.min(i,b.shots.length-1)]?.id||null;touch(1);};
+}
+$('#insp').onclick=e=>{if(e.target.dataset.z)zoom(e.target.src);};
+// ----- ไทม์ไลน์ล่าง -----
+function tlTot(){return cur?Math.max(0.5,...times(cur).map(t=>t[1])):1;}
+function renderTL(){
+  const E=$('#tl');if(!cur){E.innerHTML='';$('#tTime').textContent='0.00 / 0.00 วิ';return;}
+  const T=times(cur),tot=tlTot(),step=tot>4?0.5:tot>2?0.25:0.1,X=t=>`calc(${t/tot*100}% )`;
+  const H=E.clientHeight||110,lh=Math.max(30,Math.min(46,(H-26)/2-4));
+  E.innerHTML=`<div class="rul">${Array.from({length:Math.floor(tot/step+1e-6)+1},(_,k)=>k*step).map(t=>`<span class="tk" style="left:${X(t)}">${f2(t)}s</span>`).join('')}</div>`
+    +cur.shots.map((s,i)=>{const K=KIND[s.kind]||KIND.other,ln=i%2;return `<div class="blk ${s.id===selShot?'sel':''}" data-go="${s.id}" style="left:${X(T[i][0])};width:calc(${(T[i][1]-T[i][0])/tot*100}% - 2px);top:${24+ln*(lh+4)}px;height:${lh}px;background:${K.c}" title="${esc(s.name||K.th)}">${i+1}. ${esc(s.name||K.th)}<small>${f2(s.dur)} วิ${nFr(s)?' • 🎞':''}</small><span class="rz" data-rz="${s.id}"></span></div>`;}).join('')
+    +'<div class="ph2" id="tlHead"></div>';
+  $('#tTime').textContent=`${f2(PL.on?PL.tt:0)} / ${f2(Math.max(0,...T.map(t=>t[1])))} วิ`;
+  if(PL.on)plShow();
+}
+$('#tl').addEventListener('pointerdown',e=>{
+  if(!cur)return;const rz=e.target.dataset.rz,E=$('#tl'),r=E.getBoundingClientRect(),tot=tlTot();
+  if(rz){ // ลากขอบขวา = ปรับความยาวช่วง
+    e.preventDefault();const s=cur.shots.find(x=>x.id===rz),x0=e.clientX,d0=+s.dur;try{E.setPointerCapture(e.pointerId);}catch(_){}
+    const mv=ev=>{s.dur=Math.max(0.05,Math.min(3,Math.round((d0+(ev.clientX-x0)/r.width*tot)/0.05)*0.05));const el=E.querySelector(`[data-go="${rz}"]`),T=times(cur),i=cur.shots.indexOf(s);
+      if(el){el.style.width=`calc(${(T[i][1]-T[i][0])/tot*100}% - 2px)`;el.querySelector('small').textContent=f2(s.dur)+' วิ';}$('#sInfo').textContent=`ช่วง ${i+1}: ${f2(s.dur)} วิ`;};
+    const up=()=>{E.removeEventListener('pointermove',mv);E.removeEventListener('pointerup',up);touch();renderTL();renderOutline();renderView();if(insTab==='shot'&&selShot===rz)renderInsp();};
+    E.addEventListener('pointermove',mv);E.addEventListener('pointerup',up);return;}
+  const blk=e.target.closest('.blk');
+  if(PL.on&&!blk){plSeek((e.clientX-r.left)/r.width*tot);return;}
+  if(blk)selectShot(blk.dataset.go,1);
+});
+$('#add').onclick=e=>{const k=e.target.dataset.addk;if(!k||!cur)return;const s=newShot(k);const i=cur.shots.findIndex(x=>x.id===selShot);cur.shots.splice(i<0?cur.shots.length:i+1,0,s);selShot=s.id;insTab='shot';touch(1);};
+$('#fTitle').oninput=e=>{if(!cur)return;cur.title=e.target.value;touch();};
+$('#fSt').onchange=e=>{if(!cur)return;cur.status=e.target.value;touch();};
+$('#outline').onclick=e=>{const b=e.target.closest('.sh');if(b)selectShot(b.dataset.sid);};
+addEventListener('resize',()=>renderTL());
+// เส้นแบ่งแผง: ลากเพื่อปรับขนาด (จำไว้ในเครื่อง) • ดับเบิลคลิก = ขนาดเดิม
+const SPL={L:['--sL',250,160,480],R:['--sR',380,280,640],B:['--sB',170,110,420]};
+try{const v=JSON.parse(localStorage.getItem('sb_layout')||'{}');for(const k in v)document.documentElement.style.setProperty(SPL[k][0],v[k]+'px');}catch(e){}
+document.querySelectorAll('.spl').forEach(el=>{const k=el.dataset.spl,[vr,def,mn,mx]=SPL[k];
+  const set=v=>{v=Math.max(mn,Math.min(mx,v));document.documentElement.style.setProperty(vr,v+'px');try{const o=JSON.parse(localStorage.getItem('sb_layout')||'{}');o[k]=v;localStorage.setItem('sb_layout',JSON.stringify(o));}catch(e){}renderTL();};
+  el.ondblclick=()=>set(def);
+  el.onpointerdown=e=>{e.preventDefault();try{el.setPointerCapture(e.pointerId);}catch(_){}el.classList.add('drag');const x0=e.clientX,y0=e.clientY,v0=parseFloat(getComputedStyle(document.documentElement).getPropertyValue(vr))||def;
+    el.onpointermove=ev=>set(k==='L'?v0+ev.clientX-x0:k==='R'?v0-(ev.clientX-x0):v0-(ev.clientY-y0));
+    el.onpointerup=()=>{el.onpointermove=null;el.classList.remove('drag');};};});
+function reRender(){const y=$('#insp').scrollTop;renderEd();$('#insp').scrollTop=y;}
 function tog(a,v){const k=a.indexOf(v);k<0?a.push(v):a.splice(k,1);}
 function bindSw(el,cols){
   el.oninput=e=>{const i=e.target.dataset.i;if(i==null)return;cols[+i]=e.target.value;e.target.parentNode.style.background=e.target.value;touch();};
@@ -576,36 +722,47 @@ setInterval(()=>{const now=performance.now()/1000;document.querySelectorAll('.fb
   if(!el._pre){el._pre=L.map(p=>{const i=new Image();i.src=p;return i;});}
   const k=Math.floor(now*(+el.dataset.fps||12))%L.length;if(el._k!==k){el._k=k;el.style.backgroundImage=`url('${L[k]}')`;}});},40);
 
-// ===== ▶ เล่นทั้งสกิล: ทุกช่วงต่อกัน (ช่วงที่มีเฟรม = เล่นเฟรม, ไม่มี = ภาพร่างหลักค้างไว้) =====
-const PL={seq:[],tot:0,t:0,run:false,slow:1,loop:true,raf:0,last:0};
-function playAll(b){
+// ===== ▶ เล่นทั้งสกิลบนจอกลาง: ทุกช่วงต่อกัน (ช่วงที่มีเฟรม = เล่นเฟรม, ไม่มี = ภาพร่างหลักค้างไว้ตามความยาวช่วง) =====
+// PL.t = เวลาในคลิป, PL.tt = เวลาบนไทม์ไลน์ (ช่วงที่มีเฟรมอาจยาวไม่เท่าช่วง → ย่อ/ขยายให้ตรงแถบ)
+const PL={on:false,seq:[],tot:0,t:0,tt:0,run:false,raf:0,last:0};
+function plBuild(b){
   const T=times(b);PL.seq=[];let t=0;
-  b.shots.forEach((s,i)=>{const K=KIND[s.kind]||KIND.other,cap=`${i+1}. ${s.name||K.th}`;
-    if(nFr(s)){const L=s.frames.list.filter(x=>x.img),d=1/(s.frames.fps||12);L.forEach((fr,k)=>{PL.seq.push({img:fr.img,t0:t,t1:t+d,cap:`${cap} • เฟรม ${k+1}/${L.length}`,c:K.c,sh:i});t+=d;});}
-    else{const m=s.sketches[Math.min(s._sel||0,s.sketches.length-1)],d=Math.max(0.1,T[i][1]-T[i][0]);PL.seq.push({img:m?m.img:'',t0:t,t1:t+d,cap:cap+(m?'':' (ยังไม่มีภาพ)'),c:K.c,sh:i});t+=d;}});
-  if(!PL.seq.length){stat('ยังไม่มีช่วง',1);return;}
-  PL.tot=t;PL.t=0;PL.seq.forEach(x=>{if(x.img){const i=new Image();i.src=x.img;}});
-  // แถบช่วง
-  const shots=[];PL.seq.forEach(x=>{const z=shots[x.sh]||(shots[x.sh]={t0:x.t0,t1:x.t1,c:x.c});z.t1=x.t1;});
-  $('#plTl').innerHTML=shots.filter(Boolean).map(z=>`<i style="left:${z.t0/t*100}%;width:${(z.t1-z.t0)/t*100}%;background:${z.c}"></i>`).join('')+'<b id="plHead"></b>';
-  $('#pl').style.display='flex';PL.run=true;$('#plPlay').textContent='⏸ หยุด';PL.last=performance.now();cancelAnimationFrame(PL.raf);plTick();
+  b.shots.forEach((s,i)=>{const K=KIND[s.kind]||KIND.other,cap=`${i+1}. ${s.name||K.th}`,a=t;
+    const L=nFr(s)?s.frames.list.map(x=>x.img||x.base).filter(Boolean):[];
+    if(L.length){const d=1/(s.frames.fps||12);L.forEach((img,k)=>{PL.seq.push({img,t0:t,t1:t+d,cap:`${cap} • เฟรม ${k+1}/${L.length}`,sh:i});t+=d;});}
+    else{const m=mainSk(s),d=Math.max(0.1,T[i][1]-T[i][0]);PL.seq.push({img:m?m.img:'',t0:t,t1:t+d,cap:cap+(m?'':' (ยังไม่มีภาพ)'),sh:i});t+=d;}
+    for(const x of PL.seq)if(x.sh===i){x.a=a;x.b=t;x.T=T[i];}});
+  PL.tot=t;PL.seq.forEach(x=>{if(x.img){const im=new Image();im.src=x.img;}});
 }
-function plShow(){const x=PL.seq.find(q=>PL.t<q.t1)||PL.seq[PL.seq.length-1];
-  if(PL._x!==x){PL._x=x;$('#plScr').style.backgroundImage=x.img?`url('${x.img}')`:'none';$('#plCap').textContent=x.cap;}
-  $('#plHead').style.left=(PL.t/PL.tot*100)+'%';$('#plCap').textContent=x.cap+` • ${f2(PL.t)}/${f2(PL.tot)} วิ`;}
+function playAll(){
+  if(!cur||!cur.shots.length){stat('ยังไม่มีช่วง',1);return;}
+  if(PL.on){PL.run=!PL.run;if(PL.run&&PL.t>=PL.tot-1e-3)PL.t=0;PL.last=performance.now();plBtn();return;}
+  plBuild(cur);PL.on=true;PL.run=true;PL.t=0;PL.last=performance.now();
+  $('#vHead').innerHTML='<b>▶ เล่นทั้งสกิล</b><span class="hint">คลิกแถบเวลาเพื่อกระโดด • คลิกช่วงหรือ ⏮ เพื่อหยุด</span>';$('#vBar').innerHTML='';
+  const V=$('#vScr');V.className='';V.innerHTML='<span class="cap" id="plCap"></span>';
+  $('#tlHead').style.display='block';plBtn();cancelAnimationFrame(PL.raf);plTick();
+}
+function plBtn(){$('#tPlay').textContent=PL.on&&PL.run?'⏸ หยุดชั่วคราว':'▶ เล่นทั้งสกิล';}
+function plShow(){
+  const x=PL.seq.find(q=>PL.t<q.t1)||PL.seq[PL.seq.length-1];if(!x)return;
+  PL.tt=x.T[0]+(PL.t-x.a)/Math.max(1e-6,x.b-x.a)*(x.T[1]-x.T[0]);
+  if(PL._x!==x){PL._x=x;$('#vScr').style.backgroundImage=x.img?`url('${x.img}')`:'none';}
+  const c=$('#plCap');if(c)c.textContent=x.cap;
+  const h=$('#tlHead');if(h){h.style.display='block';h.style.left=(PL.tt/tlTot()*100)+'%';}
+  $('#tTime').textContent=`${f2(PL.tt.toFixed(2))} / ${f2(Math.max(0,...times(cur).map(t=>t[1])))} วิ`;
+}
 function plTick(){const now=performance.now(),dt=(now-PL.last)/1000;PL.last=now;
-  if(PL.run){PL.t+=dt*PL.slow;if(PL.t>=PL.tot){if(PL.loop)PL.t=0;else{PL.t=PL.tot-1e-4;PL.run=false;$('#plPlay').textContent='▶ เล่น';}}}
+  if(PL.run){PL.t+=dt*(+$('#tSpd').value||1);if(PL.t>=PL.tot){if($('#tLoop').classList.contains('on'))PL.t=0;else{PL.t=PL.tot-1e-4;PL.run=false;plBtn();}}}
   plShow();PL.raf=requestAnimationFrame(plTick);}
-function plStop(){cancelAnimationFrame(PL.raf);$('#pl').style.display='none';}
-$('#plPlay').onclick=()=>{PL.run=!PL.run;if(PL.run&&PL.t>=PL.tot-1e-3)PL.t=0;$('#plPlay').textContent=PL.run?'⏸ หยุด':'▶ เล่น';};
-$('#plSlow').onclick=e=>{PL.slow=PL.slow===1?0.5:PL.slow===0.5?0.25:1;e.target.textContent=PL.slow===1?'🐢 ช้า ×0.5':PL.slow===0.5?'🐢 ช้า ×0.25':'ปกติ ×1';};
-$('#plLoop').onclick=e=>{PL.loop=!PL.loop;e.target.classList.toggle('on',PL.loop);};
-$('#plClose').onclick=plStop;
-$('#plTl').onclick=e=>{const r=e.currentTarget.getBoundingClientRect();PL.t=Math.max(0,Math.min(PL.tot-1e-4,(e.clientX-r.left)/r.width*PL.tot));};
+function plSeek(tt){const x=PL.seq.find(q=>tt<q.T[1])||PL.seq[PL.seq.length-1];PL.t=Math.min(PL.tot-1e-4,x.a+(tt-x.T[0])/Math.max(1e-6,x.T[1]-x.T[0])*(x.b-x.a));}
+function plStop(){if(!PL.on)return;cancelAnimationFrame(PL.raf);PL.on=false;PL.run=false;PL._x=null;plBtn();const h=$('#tlHead');if(h)h.style.display='none';renderView();renderTL();}
+$('#tPlay').onclick=()=>playAll();
+$('#tStop').onclick=()=>{if(PL.on)plStop();};
+$('#tLoop').onclick=e=>e.currentTarget.classList.toggle('on');
 
 $('#zoom').onclick=()=>$('#zoom').style.display='none';
 $('#bNew').onclick=newBoard;
-$('#list').onclick=e=>{const it=e.target.closest('.it');if(!it)return;cur=db.items.find(b=>b.id===+it.dataset.id);selShot=null;renderList();renderEd();$('#ed').scrollTop=0;};
+$('#list').onclick=e=>{const it=e.target.closest('.it');if(!it)return;if(PL.on)plStop();cur=db.items.find(b=>b.id===+it.dataset.id);selShot=null;renderList();renderEd();};
 $('#bCopy').onclick=async()=>{
   if(!cur){stat('เลือกสตอรี่บอร์ดก่อน',1);return;}
   const msg=cur.reply||cur.fx?`ดูสตอรี่บอร์ด VFX #${cur.id} (${cur.title||'ไม่มีชื่อ'}) ใน storyboard/sb-${cur.id}.md อีกครั้ง ผมแก้/เพิ่มรายละเอียดแล้ว ปรับเอฟเฟกต์ให้ตรงตามนี้`
@@ -617,7 +774,13 @@ document.addEventListener('keydown',e=>{
   if(e.key==='Escape'){$('#zoom').style.display='none';}
   if($('#dr').style.display==='flex'&&(e.ctrlKey||e.metaKey)&&e.key==='z'){e.preventDefault();fbMark();DR.ops.pop();drawInk();fbThumb();}
   if(FB.on&&!e.target.closest('input,textarea,select')){if(e.key==='ArrowLeft'){e.preventDefault();fbCmd('prev');}if(e.key==='ArrowRight'){e.preventDefault();fbCmd('next');}if(e.key===' '){e.preventDefault();fbCmd('play');}}
-  if($('#pl').style.display==='flex'&&e.key==='Escape')plStop();
+  if(e.key==='Escape'&&PL.on)plStop();
+  const ov=['#dr','#d3','#zoom'].some(q=>$(q).style.display==='flex');
+  if(!ov&&cur&&!e.target.closest('input,textarea,select')){
+    if(e.key===' '){e.preventDefault();playAll();}
+    const i=cur.shots.findIndex(s=>s.id===selShot);
+    if(e.key==='ArrowDown'&&i<cur.shots.length-1){e.preventDefault();selectShot(cur.shots[i+1].id,1);}
+    if(e.key==='ArrowUp'&&i>0){e.preventDefault();selectShot(cur.shots[i-1].id,1);}}
 });
 window.addEventListener('focus',()=>{if(!dirty&&$('#dr').style.display!=='flex'&&!document.activeElement.matches('input,textarea'))load();}); // Claude อาจตอบ/แปะผลมาแล้ว
 load();
