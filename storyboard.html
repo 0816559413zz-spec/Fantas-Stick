@@ -138,6 +138,22 @@ h3{margin:0;font:600 11px "Segoe UI",sans-serif;letter-spacing:.6px;color:var(--
 /* แถบสถานะ */
 #S{grid-column:1/-1;grid-row:4;display:flex;gap:14px;align-items:center;padding:0 10px;background:var(--bg2);border-top:1px solid var(--ln);font-size:11.5px;color:var(--tx2);white-space:nowrap;overflow:hidden}
 #S .ok{color:var(--sok)}
+/* หน้าต่าง Import สกิลจากเกม */
+#imp{position:fixed;inset:0;background:#000c;display:none;z-index:11;align-items:center;justify-content:center}
+#imp .box{width:min(1100px,94vw);height:min(760px,90vh);background:var(--bg1);border:1px solid var(--ln2);border-radius:6px;display:flex;flex-direction:column;box-shadow:0 12px 40px #000a}
+#imp .body{display:flex;flex:1;min-height:0}
+#imp .pt{width:180px;flex:none;border-right:1px solid var(--ln);padding:6px;display:flex;flex-direction:column;gap:2px;overflow:auto}
+#imp .pt button{text-align:left;background:none;border-color:transparent;padding:6px 8px}
+#imp .pt button.on{background:var(--accBg);border-color:rgba(74,140,255,.45);color:var(--acc2)}
+#imp .ls{flex:1;overflow:auto;padding:10px;display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:8px;align-content:start}
+#imp .card{display:grid;grid-template-columns:36px minmax(0,1fr);gap:2px 10px;text-align:left;white-space:normal;padding:8px 10px;background:var(--bg2);border-color:var(--ln2);border-left:3px solid var(--k)}
+#imp .card:hover{background:var(--bg3)}
+#imp .card .ic{grid-row:span 3;font-size:24px;line-height:36px;text-align:center}
+#imp .card b{font-size:13.5px}
+#imp .card .tg{font:10.5px var(--fu);color:var(--tx2)}
+#imp .card .tg i{font-style:normal;color:var(--sok)}
+#imp .card p{margin:0;color:var(--tx2);font-size:12px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+#imp .ft{padding:8px 12px;border-top:1px solid var(--ln);color:var(--tx3);font-size:12px}
 /* เส้นแบ่งลากปรับขนาด */
 .spl{position:absolute;z-index:3;background:transparent}
 .spl:hover,.spl.drag{background:var(--acc)}
@@ -184,6 +200,7 @@ h3{margin:0;font:600 11px "Segoe UI",sans-serif;letter-spacing:.6px;color:var(--
 <header id="top">
   <span class="logo"><i>🎬</i>Storyboard</span>
   <button class="pri" id="bNew" title="สร้างสตอรี่บอร์ดของสกิลใหม่">＋ สกิลใหม่</button>
+  <button id="bImp" title="ดึงสกิลที่มีในเกม (ชื่อ เวลา ขนาด ท่าตัวละคร) มาเป็นสตอรี่บอร์ด — ไม่เอา VFX มา ให้ออกแบบเอง">⬇ Import สกิลจากเกม</button>
   <span class="sep"></span>
   <input id="fTitle" placeholder="ชื่อสกิล เช่น 'Earth — Tectonic Slam'">
   <select id="fSt" title="สถานะ"></select>
@@ -225,6 +242,11 @@ h3{margin:0;font:600 11px "Segoe UI",sans-serif;letter-spacing:.6px;color:var(--
 </section>
 <footer id="S"><span id="sInfo"></span><span style="flex:1"></span><span>Claude อ่าน <span class="mono" id="sMd">storyboard/sb-?.md</span></span></footer>
 <div id="zoom"><img alt=""></div>
+<div id="imp"><div class="box">
+  <div class="ph"><h3>⬇ Import สกิลจากเกม</h3><span class="hint">ดึงชื่อ คำอธิบาย เวลา ขนาด และท่าตัวละครมาให้ — <b>ไม่เอา VFX มา</b> ให้ออกแบบเองในสตอรี่บอร์ด</span><button class="ghost" id="impX">✕</button></div>
+  <div class="body"><div class="pt" id="impP"></div><div class="ls" id="impL"><div class="empty">กำลังอ่านสกิลจากโค้ดเกม…</div></div></div>
+  <div class="ft">ช่วงเวลา/ขนาดเดาจากคำอธิบายสกิลในเกม (เช่น "ท่าเตรียม 0.6 วิ", "รัศมี ~300") — แก้ต่อได้ • ฉาก 3D ใส่ตัวผู้เล่น + ท่าร่าย และวงบอกขอบเขตจริงในเกมไว้ให้แล้ว</div>
+</div></div>
 <div id="d3">
   <div class="bar">
     <span class="lb">มุมกล้อง</span><span class="seg" id="d3View"></span>
@@ -762,6 +784,74 @@ $('#tLoop').onclick=e=>e.currentTarget.classList.toggle('on');
 
 $('#zoom').onclick=()=>$('#zoom').style.display='none';
 $('#bNew').onclick=newBoard;
+
+// ===== ⬇ Import สกิลจากเกม: serve.py อ่าน js/*.js สด ๆ (/api/sb-skills) → สร้างสตอรี่บอร์ดพร้อมช่วงเวลา/ขนาด/ท่าตัวละคร (ไม่เอา VFX) =====
+const IMP={data:null,path:0};
+const PX_M=20; // ในเกม 20 หน่วย = 1 เมตร (S3 = 1/20) • ตัวละครสูง 2.1 ม.
+const WHO_OF={pyro:'Pyro (ไฟ)',frost:'Frost (น้ำแข็ง)',storm:'Storm (สายฟ้า)',earth:'Earth (ดิน)'};
+async function impOpen(){
+  $('#imp').style.display='flex';
+  if(!IMP.data){try{const r=await fetch('/api/sb-skills',{cache:'no-store'});if(!r.ok)throw 0;IMP.data=await r.json();}
+    catch(e){$('#impL').innerHTML='<div class="empty">อ่านสกิลไม่ได้ — เปิดผ่าน "Storyboard.bat" (และปิดเปิดใหม่ถ้าเพิ่งอัปเดต)</div>';return;}}
+  impRender();
+}
+function impItems(P){ // ทุกอย่างของสาย: ท่าพื้นฐาน + โล่ + Dash + สกิล + อัลติ
+  const L=[],B=P.basic;
+  if(B){if(B.d)L.push({kind:'basic',id:B.id,n:B.n,ic:'🖱️',tag:'คลิกซ้าย',d:B.d,file:B.file,line:B.line});
+    if(B.shd)L.push({kind:'shield',id:B.id+'_shield',n:B.shd.split(':')[0],ic:'🛡️',tag:'คลิกขวา (โล่)',d:B.shd,file:B.file,line:B.line});
+    if(B.dsd)L.push({kind:'dash',id:B.id+'_dash',n:B.dsd.split(':')[0],ic:'💨',tag:'Shift (Dash)',d:B.dsd,file:B.file,line:B.line});}
+  for(const s of P.spells)L.push({kind:s.ult?'ult':'spell',id:s.id,n:s.n,ic:s.ic||'✦',tag:s.ult?'X (อัลติ)':`${s.role||'สกิล'} • CD ${f2(s.cd||0)} วิ`,d:s.d||'',cd:s.cd,file:s.file,line:s.line});
+  return L;
+}
+function impRender(){
+  const D=IMP.data.paths;
+  $('#impP').innerHTML=D.map((P,k)=>`<button data-p="${k}" class="${k===IMP.path?'on':''}">${P.ic} ${esc(P.n)} <small class="hint">${P.spells.length+3}</small></button>`).join('');
+  const P=D[IMP.path];
+  $('#impL').innerHTML=impItems(P).map((x,k)=>{const had=db.items.find(b=>b.game&&b.game.id===x.id);
+    return `<button class="card" data-k="${k}" style="--k:${P.col}"><span class="ic">${x.ic}</span><b>${esc(x.n)}</b><span class="tg">${esc(x.tag)}${had?` • <i>มีแล้ว #${had.id}</i>`:''}</span><p>${esc(x.d)}</p></button>`;}).join('');
+}
+$('#impP').onclick=e=>{const b=e.target.closest('[data-p]');if(!b)return;IMP.path=+b.dataset.p;impRender();};
+$('#impX').onclick=()=>$('#imp').style.display='none';
+$('#imp').onclick=e=>{if(e.target.id==='imp')$('#imp').style.display='none';};
+$('#bImp').onclick=impOpen;
+$('#impL').onclick=e=>{const c=e.target.closest('.card');if(!c)return;
+  const P=IMP.data.paths[IMP.path],x=impItems(P)[+c.dataset.k],had=db.items.find(b=>b.game&&b.game.id===x.id);
+  if(had&&!confirm(`มีสตอรี่บอร์ดของ "${x.n}" แล้ว (#${had.id})\nตกลง = สร้างใหม่อีกอัน • ยกเลิก = เปิดอันเดิม`)){cur=had;selShot=null;$('#imp').style.display='none';renderList();renderEd();return;}
+  impMake(P,x);$('#imp').style.display='none';};
+// เดาช่วงเวลา/ขนาดจากคำอธิบายในเกม (ผู้ใช้แก้ต่อได้)
+function impShots(x){
+  const d=x.d||'',num=s=>parseFloat(s),sec=[...d.matchAll(/(\d+(?:\.\d+)?)\s*วิ/g)].map(m=>({v:num(m[1]),i:m.index}));
+  const wm=d.match(/(ท่าเตรียม|ชาร์จ\S*|วงเตือน|ร่าย\S*|ชูไม้\S*|เตรียม\S*|กดค้าง\S*|ลอยกลางอากาศ|เล็งค้าง)[^•:]{0,30}?(\d+(?:\.\d+)?)\s*วิ/);
+  const wind=wm?num(wm[2]):0;
+  const rm=d.match(/รัศมี\s*~?\s*(\d+)/),R=rm?num(rm[1])/PX_M:0;
+  const gm=d.match(/ระยะ\s*~?\s*(\d+)/),RG=gm?num(gm[1])/PX_M:0;
+  const longs=sec.filter(q=>q.v>=1&&!(wm&&q.v===wind)).map(q=>q.v),dur=longs.length?Math.max(...longs):0;
+  const self=/รอบตัว|ตัวเอง|ร่าง|แปลงร่าง|กลายร่าง|ออร่า|โล่|Stand/.test(d)&&!/จุดเล็ง|ที่เป้า|เล็งพื้น/.test(d);
+  const proj=/ยิง|พุ่ง|ลูก|คลื่น|ปา|โยน|ลำ|เส้น|ส่ง|ทะยาน|บิน/.test(d)&&x.kind!=='shield';
+  const hit=/ระเบิด|ดาเมจ|โดน|ผ่า|ตก|ต่อย|ทุบ|ฟัน|กระแทก/.test(d);
+  const sz=R?Math.min(10,Math.max(0.2,Math.round(R*2/2.1*10)/10)):1;
+  const clause=re=>{const m=d.split(/[•]/).find(c=>re.test(c));return m?m.trim():'';};
+  const S=[],mk=(kind,dur,o)=>{const s=newShot(kind);Object.assign(s,{dur:Math.round(Math.min(3,Math.max(0.05,dur))*20)/20},o||{});S.push(s);return s;};
+  if(wind)mk('charge',wind,{name:`ท่าเตรียม ${f2(wind)} วิ (จากเกม)`,where:'มือ / อาวุธ',text:'จากเกม: '+(wm[0]||'')});
+  mk('cast',0.2,{name:'ปล่อย',where:'มือ / อาวุธ'});
+  if(proj&&!self)mk('travel',RG?Math.min(1,RG/40):0.3,{name:RG?`พุ่ง (ระยะ ~${f2(RG)} ม.)`:'พุ่ง',where:'ระหว่างทาง',text:clause(/ยิง|พุ่ง|ลูก|คลื่น|ปา|โยน|ลำ|เส้น|ระยะ/)});
+  if(hit)mk('impact',0.4,{name:'กระทบ',where:self?'ใต้เท้า / พื้นรอบตัว':'ที่เป้า',size:sz,text:clause(/ระเบิด|ดาเมจ|โดน|ผ่า|ตก|ต่อย|ทุบ|ฟัน/)});
+  if(dur)mk('linger',dur,{name:`ค้าง ${f2(dur)} วิ (จากเกม)${dur>3?' — ในเกมยาวกว่าแถบ':''}`,where:self?'รอบตัวผู้ร่าย':'พื้นรอบเป้า',size:sz,text:clause(new RegExp(String(dur).replace('.','\\.')+'\\s*วิ'))});
+  mk('fade',0.3,{name:'จางหาย'});
+  // ฉาก 3D: ผู้เล่นทำท่า + เป้า + วงบอกขอบเขตจริงในเกม (ไม่ใช่ VFX — แค่บอกขนาด)
+  const TX=2.1*5,guide=R?[{id:newId(),t:'disc',label:`ขอบเขตในเกม รัศมี ~${f2(R)} ม.`,col:'#9aa0ab',op:0.25,glow:false,p:[self?0:TX,0.03,0],r:[0,0,0],s:[R*2,1,R*2],size:[R*2,0,R*2]}]:[];
+  for(const s of S){const hitT=s.kind==='impact'||s.kind==='linger'&&!self;
+    s.scene3d={v:1,objs:JSON.parse(JSON.stringify(guide)).map(o=>({...o,id:newId()})),cast:{m:'char_student',a:['charge','cast','travel'].includes(s.kind)?'cast':'idle'},
+      targ:{m:'enemy_dummy',a:hitT?'hit':'idle'},at:s.kind==='cast'?0.3:0};}
+  return S;
+}
+function impMake(P,x){
+  const b={id:db.next++,title:`${P.n} — ${x.n}`,who:WHO_OF[P.id]||P.n,skill:x.tag,status:'draft',created:nowISO(),updated:nowISO(),
+    overview:`[จากเกม] ${x.d}`,mood:[],colors:[P.col,'#ffffff'],refs:[],fx:'',reply:'',
+    game:{id:x.id,kind:x.kind,path:P.id,cd:x.cd||0,file:x.file,line:x.line},shots:impShots(x)};
+  db.items.push(b);cur=b;selShot=b.shots[0]?.id||null;insTab='shot';renderList();renderEd();save();
+  stat(`นำเข้า "${x.n}" แล้ว ✓ ${b.shots.length} ช่วง — แก้เวลา/ขนาดได้ แล้ววาด VFX เอง`);
+}
 $('#list').onclick=e=>{const it=e.target.closest('.it');if(!it)return;if(PL.on)plStop();cur=db.items.find(b=>b.id===+it.dataset.id);selShot=null;renderList();renderEd();};
 $('#bCopy').onclick=async()=>{
   if(!cur){stat('เลือกสตอรี่บอร์ดก่อน',1);return;}
@@ -771,11 +861,11 @@ $('#bCopy').onclick=async()=>{
   try{await navigator.clipboard.writeText(msg);stat('คัดลอกแล้ว — ไปวางในแชท Claude ได้เลย ✓');}catch(e){prompt('คัดลอกข้อความนี้:',msg);}
 };
 document.addEventListener('keydown',e=>{
-  if(e.key==='Escape'){$('#zoom').style.display='none';}
+  if(e.key==='Escape'){$('#zoom').style.display='none';$('#imp').style.display='none';}
   if($('#dr').style.display==='flex'&&(e.ctrlKey||e.metaKey)&&e.key==='z'){e.preventDefault();fbMark();DR.ops.pop();drawInk();fbThumb();}
   if(FB.on&&!e.target.closest('input,textarea,select')){if(e.key==='ArrowLeft'){e.preventDefault();fbCmd('prev');}if(e.key==='ArrowRight'){e.preventDefault();fbCmd('next');}if(e.key===' '){e.preventDefault();fbCmd('play');}}
   if(e.key==='Escape'&&PL.on)plStop();
-  const ov=['#dr','#d3','#zoom'].some(q=>$(q).style.display==='flex');
+  const ov=['#dr','#d3','#zoom','#imp'].some(q=>$(q).style.display==='flex');
   if(!ov&&cur&&!e.target.closest('input,textarea,select')){
     if(e.key===' '){e.preventDefault();playAll();}
     const i=cur.shots.findIndex(s=>s.id===selShot);

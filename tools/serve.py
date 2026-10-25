@@ -7,6 +7,7 @@
 #   POST /api/bug-img?name=<ชื่อ>   → เก็บรูปของโน้ตลง bugs/img/<ชื่อ>.png|.jpg
 #   GET/POST /api/sb                → สตอรี่บอร์ด VFX (storyboard.html): storyboard/boards.json + เขียน storyboard/sb-<id>.md + STORYBOARDS.md ให้ Claude อ่าน
 #   POST /api/sb-img?name=<ชื่อ>    → เก็บภาพร่าง/รูปตัวอย่างลง storyboard/img/<ชื่อ>.png|.jpg
+#   GET  /api/sb-skills             → รายการสกิลจากโค้ดเกม (js/*.js: PATHS, PBASIC, defSpell) ให้ปุ่ม Import ของสตอรี่บอร์ด — อ่านสดทุกครั้ง ไม่มีไฟล์ค้าง
 # ฟังเฉพาะ 127.0.0.1 (เครื่องตัวเองเท่านั้น)
 import base64, json, os, re, subprocess, sys, time
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
@@ -121,6 +122,9 @@ def sb_md(b):
          f"- ความยาวรวม: **{f(tot)} วินาที** • {len(T)} ช่วง",
          f"- ความรู้สึก: {', '.join(b.get('mood') or []) or '-'}",
          f"- สีหลัก: {' '.join('`' + c + '`' for c in b.get('colors') or []) or '-'}"]
+    g = b.get('game')
+    if g:
+        L.append(f"- **นำเข้าจากเกม:** `{g.get('id')}` ({g.get('kind', 'spell')}) • โค้ด `{g.get('file')}:{g.get('line')}` • คูลดาวน์ {f(g.get('cd') or 0)} วิ — เวลา/ขนาดในช่วงต่าง ๆ เดาจากคำอธิบายในเกม ผู้ใช้อาจแก้แล้ว; ถ้าไม่ตรงกับโค้ด ให้เชื่อโค้ดและบอกผู้ใช้")
     if b.get('fx'):
         L.append(f"- ไฟล์เอฟเฟกต์: `assets/fx/{b['fx']}.fx.json`")
     L.append('')
@@ -210,6 +214,44 @@ def sb_save(db):
         if fn not in used and time.time() - os.path.getmtime(os.path.join(d, fn)) > 120:
             os.remove(os.path.join(d, fn))
 
+def sb_skills():  # อ่านสกิลจากโค้ดเกมตรง ๆ (ชื่อ ไอคอน คูลดาวน์ บทบาท คำอธิบาย) — ไม่เอาข้อความ VFX (fx:) มา
+    S = lambda k: r"(?<![\w])" + k + r":'((?:[^'\\]|\\.)*)'"
+    def get(blk, k, num=False):
+        m = re.search((r"(?<![\w])" + k + r":([\d.]+)") if num else S(k), blk)
+        return (float(m.group(1)) if num else m.group(1).replace("\\'", "'")) if m else None
+    paths, spells, basics, consts = [], [], [], {}
+    for fn in sorted(os.listdir(os.path.join(ROOT, 'js'))):
+        if not fn.endswith('.js'):
+            continue
+        src = open(os.path.join(ROOT, 'js', fn), encoding='utf-8').read()
+        for m in re.finditer(r'const (\w+)=(\d+)\b', src):
+            consts.setdefault(m.group(1), int(m.group(2)))
+        if 'const PATHS=[' in src:
+            body = src[src.index('const PATHS=['):]; body = body[:body.index('\n];')]
+            for ln in body.split('\n')[1:]:
+                if "{id:'" in ln:
+                    paths.append({'id': get(ln, 'id'), 'n': get(ln, 'n'), 'ic': get(ln, 'ic'), 'col': get(ln, 'col'), 'd': get(ln, 'd'), 'off': "off:1" in ln})
+        for m in re.finditer(r"PATHS\.push\(\{(.*)", src):
+            ln = m.group(1); paths.append({'id': get(ln, 'id'), 'n': get(ln, 'n'), 'ic': get(ln, 'ic'), 'col': get(ln, 'col'), 'd': get(ln, 'd'), 'off': "off:1" in ln})
+        starts = [m for m in re.finditer(r"defSpell\((\w+),\{", src)]
+        for k, m in enumerate(starts):
+            blk = src[m.end():starts[k + 1].start() if k + 1 < len(starts) else len(src)][:6000]
+            pa = m.group(1); pa = int(pa) if pa.isdigit() else consts.get(pa, -1)
+            spells.append({'id': get(blk, 'id'), 'n': get(blk, 'n'), 'ic': get(blk, 'ic'), 'cd': get(blk, 'cd', 1), 'role': get(blk, 'role'),
+                           'ult': bool(re.search(r'(?<![\w])ult:true', blk[:400])), 'd': get(blk, 'd'), 'path': pa,
+                           'file': 'js/' + fn, 'line': src[:m.start()].count('\n') + 1})
+        for m in re.finditer(r"\{id:'(b_\w+)'", src):
+            blk = src[m.start():m.start() + 4000]; nx = blk.find("{id:'b_", 5); blk = blk[:nx] if nx > 0 else blk
+            basics.append({'id': m.group(1), 'n': get(blk, 'n'), 'd': get(blk, 'd'), 'shd': get(blk, 'shd'), 'dsd': get(blk, 'dsd'),
+                           'file': 'js/' + fn, 'line': src[:m.start()].count('\n') + 1})
+    out = []
+    for i, pt in enumerate(paths):
+        if pt['off']:
+            continue
+        b = next((x for x in basics if x['id'] == 'b_' + pt['id']), None)
+        out.append({**pt, 'i': i, 'basic': b, 'spells': [s for s in spells if s['path'] == i]})
+    return {'paths': out}
+
 def fx_list():
     out = {}
     for d, _, fs in os.walk(FXD):
@@ -245,6 +287,8 @@ class H(SimpleHTTPRequestHandler):
             return self._json(200, bugs_load())
         if u.path == '/api/sb':
             return self._json(200, sb_load())
+        if u.path == '/api/sb-skills':
+            return self._json(200, sb_skills())
         return super().do_GET()
     def _body(self):
         n = int(self.headers.get('Content-Length', 0))
