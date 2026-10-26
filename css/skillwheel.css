@@ -174,7 +174,18 @@ body.skwOn #tutOv{z-index:60}
 #skw .skwP.on .skwPk{color:#fff;text-shadow:0 0 12px var(--c)}
 #skw .skwP.on .skwPn{color:var(--h-ink,#eef1ff)}
 #skw .skwP.on::before{content:'';position:absolute;top:-4px;left:50%;width:5px;height:5px;border:1px solid var(--c);transform:translateX(-50%) rotate(45deg);box-shadow:0 0 8px var(--c);animation:skwBob 2.2s ease-in-out infinite}
-#skw .skwP.drop .skwPg .o{stroke:#fff}
+#skw .skwP.drop .skwPg .o{stroke:#fff;fill:color-mix(in srgb,var(--skc) 22%,rgba(8,10,26,.85))}
+#skw .skwP.drop .skwPg{filter:drop-shadow(0 0 14px var(--skc));transform:scale(1.14)}
+#skw .skwPg{transition:filter .4s,transform .25s var(--se)}
+/* ลากคาถา */
+#skw .skwS,#skw .skwP{touch-action:none;cursor:grab}
+#skw.dragging,#skw.dragging *{cursor:grabbing!important}
+#skw.dragging .skwS:hover .skwSi{transform:none}
+#skw .dragSrc{opacity:.35}
+#skw.dragging .skwP:not(.drop) .skwPg .o{stroke:color-mix(in srgb,var(--skc) 75%,transparent);animation:skwDrop 1.1s ease-in-out infinite}
+#skw .skwDg{position:fixed;left:0;top:0;z-index:6;width:58px;height:58px;border-radius:50%;display:grid;place-items:center;pointer-events:none;will-change:transform;
+  background:radial-gradient(circle,color-mix(in srgb,var(--c) 45%,rgba(8,10,26,.8)),transparent 72%);border:1px solid color-mix(in srgb,var(--c) 70%,transparent);filter:drop-shadow(0 0 12px var(--c))}
+@keyframes skwDrop{50%{stroke-opacity:.35}}
 #skw .skwP.land .skwPi{animation:skwLand .5s var(--se) .3s backwards}
 #skw .skwP.flash .skwPg{animation:skwPFlash .6s ease-out}
 #skw .skwGuide{position:absolute;left:clamp(18px,2vw,30px);bottom:clamp(18px,3vh,32px);font:300 13px/1.2 var(--sans);letter-spacing:.08em;color:var(--mute);padding-bottom:4px;border-bottom:1px solid var(--sl);transition:color .3s,border-color .3s;animation:skwFade .6s var(--se) backwards .4s}

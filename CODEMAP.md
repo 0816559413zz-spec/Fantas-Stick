@@ -84,7 +84,7 @@ MIND:66 summonMin:72 minTarget:81 minShoot:88 updateMins:93 aimTarget:133
 §180 ร่ายคาถา
 castSlot:181 castUlt:196
 
-## js/10-net.js (159) — เครือข่าย (PeerJS / WebRTC)
+## js/10-net.js (159) — 
 PREFIX:4 NET:5 RC:9 TURN_SERVERS:12 ICE:13 PEER_OPT:14 TURN_URL:16 ICE_READY:18 JN:22 LAG:24 lagDo:25 hostSend:26 LOBBY:27 genCode:28 sendAll:29 setStatus:30 hostGame:32 hostPeer:40 netConnect:59 joinWatch:70 joinFail:85 netLost:91 joinGame:106 joinPeer:117 clientOnData:132 leave:147 leaveRoom:149
 
 ## js/11-host.js (384) — 
@@ -271,8 +271,7 @@ trOpenF:2 trKey:2 trN:2 TR_OPTS:3 trToggle:4 trSend:9 trSync:14 hovEl:61
 §62 หน้าตั้งค่า
 setRow:63 setTog:64 setTab:65 XHC:66 XHN:66 setOpts:67 SET_ICO:69 SET_EN:72 renderSettings:73 drawXhPrev:93 openSettings:94 closeSettings:96 modeIcon:152 modeTitle:153 renderLobby:154
 
-## js/41-debug.js (142) — เครื่องมือทดสอบสมดุล (ใช้ผ่านคอนโซล WD.bal / WD.dmgTest เท่านั้น ผู้เล่นปกติไม่เห็น)
-§5 บอทต่อสู้แบบง่ายๆ: เล็งนำเป้า เดินรักษาระยะ+ส่ายไปมา ร่ายคาถาทุกครั้ง…
+## js/41-debug.js (142) — 
 botBrain:6 _obsKeep:47 balArena:48 balReset:49 balDuel:53 balTour:68 balCoop:82 balSpellTest:98
 §117 Service Worker (sw.js): เก็บไฟล์เกมไว้ในเครื่อง เปิดครั้งต่อไปเร็วขึ้…
 SWK:118 swSetup:119
@@ -399,7 +398,7 @@ RAG:10 RAGJ:23 RAGB:29 RAGS:33 RAGMIN:37 RAGHINGE:39 _rv1:40 _rv2:40 _rv3:40 _rq
 ## js/49-cloth.js (120) — 
 CLOTH:10 CL_ROWS:22 CL_NC:22 CL_GAP:22 CL_IN:22 _clV:23 _clA:23 _clB:23 clPinK:25 clBind:27 clothSetup:30 clTargets:63 clReset:67 clCapsule:69 _clO:73 clWorld:74 clWorldHit:83 clStep:88 clDraw:100 clothTick:107
 
-## js/50-grass.js (186) — 
+## js/50-grass.js (186) — ลม + หญ้า 3D (ภาพบนเครื่องตัวเองล้วน ไม่แตะโฮสต์/โปรโตคอล)
 AIR:9 AIR_MAP:16 airGust:18 airGs:21 airMark:23 airForMap:26 _airV:27 airAt:28 airGv:34 airTick:35
 §38 ต่อเข้ากับเอฟเฟกต์เดิม (ไม่ต้องแก้ทุกสกิล): แสงวาบ = ลมกระโชก • วงคลื…
 CLW:48
@@ -503,20 +502,22 @@ hubMxJoin:140 hubPickMode:153 hubFlipKill:166 hubRoomRect:167 hubFlip:168 hubLea
 HUI_MAPN:210 hubLobby:211 hubRoomClick:273 hubKitChanged:292
 §294 เริ่มต้น
 
-## js/63-skillwheel.js (271) — 
+## js/63-skillwheel.js (317) — 
 SKW:9 SKW_PO:10 SKW_PI:10 SKW_RUNE:11 skwPaths:12 skwKey:13 skwOffN:14 skwChanged:15 skwSnd:16
 §17 โครง DOM (สร้างครั้งแรกที่เปิด)
 skwSvg:18 skwBuild:28
-§44 วาด
-skwRender:45 skwRow:50 skwPos:58 skwArcs:59 skwRing:72 skwSwap:93 skwSlots:99 skwInd:115 skwIndApply:121
-§122 ข้อความกลางวง
-skwSetInfo:123 skwSpellInfo:127 skwBaseInfo:134 skwClassInfo:141 skwLibInfo:145 skwInfoDef:149 skwSpellHover:150 skwOver:156
-§168 การกระทำ
-skwClick:169 skwSetSlot:178 skwSetPath:179 skwSetLib:186 skwAssign:187 skwGhost:203 skwFlashSlot:211
-§212 พื้นหลัง: ฝุ่นดาว + ประกายตอนใส่คาถา (canvas เดียว หลังเนื้อหา)
-skwBurst:213 skwFxStart:217 skwFxTick:222
-§242 เปิด/ปิด
-skwOpen:243 skwClose:253
+§41 ลากคาถาลงช่อง (pointer — ใช้ได้ทุกเบราว์เซอร์/จอสัมผัส)
+skwDragDown:43 skwSlotAt:50 skwDragMove:55 skwDragUp:71
+§90 วาด
+skwRender:91 skwRow:96 skwPos:104 skwArcs:105 skwRing:118 skwSwap:139 skwSlots:145 skwInd:161 skwIndApply:167
+§168 ข้อความกลางวง
+skwSetInfo:169 skwSpellInfo:173 skwBaseInfo:180 skwClassInfo:187 skwLibInfo:191 skwInfoDef:195 skwSpellHover:196 skwOver:202
+§214 การกระทำ
+skwClick:215 skwSetSlot:224 skwSetPath:225 skwSetLib:232 skwAssign:233 skwGhost:249 skwFlashSlot:257
+§258 พื้นหลัง: ฝุ่นดาว + ประกายตอนใส่คาถา (canvas เดียว หลังเนื้อหา)
+skwBurst:259 skwFxStart:263 skwFxTick:268
+§288 เปิด/ปิด
+skwOpen:289 skwClose:299
 
 ## js/64-mappick.js (156) — 
 MPK_TXT:7 MPK_SKY:19 MPK_I:21 MPK_DICE:31 MPK:36 mpkE:37 mpkC:37 mpkSnd:38 mpkCut:39 mpkName:40 mpkCardHTML:41 mpkBuild:51 mpkUp:89 mpkMeasure:101 mpkIdx:102 mpkStep:103 mpkTo:104 mpkPick:105 mpkOpen:111 mpkClose:126 mpkLoop:130 mpkTick:132
@@ -538,4 +539,4 @@ gameCover:403
 ## js/66-hud4.js (113) — HUD รอบ 4 (ผู้ใช้ 2026-10-23, designs/hud-full-mock.html)
 H4E:5 H4:10 H4C:11 H4RC:11 h4Pal:12 hud4Col:14 h4Runes:15 h4RingSVG:16 h4Parts:25 h4Key:29 h4Ico:30 h4Build:31 h4Set:58 hud4Draw:59 hud4Frame:96 hud4Hide:97 _h4RT:99 _h4Cam:99 h4FaceShot:100 h4FaceSet:113
 
-(67 files, 16252 lines)
+(67 files, 16298 lines)

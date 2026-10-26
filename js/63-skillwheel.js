@@ -35,11 +35,57 @@ function skwBuild(){
   document.body.appendChild(el);SKW.el=el;SKW.cv=el.querySelector('.skwFx');
   el.addEventListener('click',skwClick);
   el.addEventListener('pointerover',skwOver);
-  el.addEventListener('dragstart',e=>{const s=e.target.closest('[data-sp]');if(s){e.dataTransfer.setData('text/plain',s.dataset.sp);e.dataTransfer.effectAllowed='move';}});
-  el.addEventListener('dragover',e=>{const t=e.target.closest('[data-slot]');if(t){e.preventDefault();t.classList.add('drop');}});
-  el.addEventListener('dragleave',e=>{const t=e.target.closest('[data-slot]');if(t)t.classList.remove('drop');});
-  el.addEventListener('drop',e=>{const t=e.target.closest('[data-slot]');if(!t)return;e.preventDefault();t.classList.remove('drop');const si=parseInt(e.dataTransfer.getData('text/plain'));if(isNaN(si))return;
-    SKW.slot=+t.dataset.slot;skwAssign(si,SKW.el.querySelector(`.skwS[data-sp="${si}"]`));});
+  el.addEventListener('pointerdown',skwDragDown);
+  el.addEventListener('click',e=>{if(SKW.noClick){SKW.noClick=false;e.stopPropagation();e.preventDefault();}},true);   // ลากเสร็จ = ไม่นับเป็นคลิก
+}
+// ---------- ลากคาถาลงช่อง (pointer — ใช้ได้ทุกเบราว์เซอร์/จอสัมผัส) ----------
+// ลากไอคอนจากวงหรือจากช่องหนึ่ง → วางบนช่องห้าเหลี่ยม (วางช่องที่มีของ = สลับกัน)
+function skwDragDown(e){
+  if(e.button>0||SKW.drag)return;
+  const src=e.target.closest('.skwS:not(.out),.skwP');if(!src)return;
+  const si=src.dataset.sp!==undefined?+src.dataset.sp:SPELL_LIST[parseKit(myKit).ids[+src.dataset.slot]].i;
+  SKW.drag={src,si,x:e.clientX,y:e.clientY,id:e.pointerId,on:false,g:null,over:-1};
+  addEventListener('pointermove',skwDragMove);addEventListener('pointerup',skwDragUp);addEventListener('pointercancel',skwDragUp);
+}
+function skwSlotAt(x,y){
+  const ps=[...SKW.el.querySelectorAll('.skwP')];let best=-1,bd=1e9;
+  ps.forEach((p,i)=>{const r=p.querySelector('.skwPg').getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2,d=Math.hypot(x-cx,y-cy);if(d<Math.max(r.width*0.75,44)&&d<bd){bd=d;best=i;}});
+  return best;
+}
+function skwDragMove(e){
+  const d=SKW.drag;if(!d||e.pointerId!==d.id)return;
+  if(!d.on){
+    if(Math.hypot(e.clientX-d.x,e.clientY-d.y)<7)return;
+    d.on=true;const S=SPELL_LIST[d.si],c=PATHS[S.path].col,g=document.createElement('span');
+    g.className='skwDg';g.style.setProperty('--c',c);g.innerHTML=icoHTML(S.id,c,30);SKW.el.appendChild(g);d.g=g;
+    d.src.classList.add('dragSrc');SKW.el.classList.add('dragging');SKW.hov=-1;skwSnd('ui_click');
+  }
+  e.preventDefault();
+  d.g.style.transform=`translate(${e.clientX}px,${e.clientY}px) translate(-50%,-50%)`;
+  const o=skwSlotAt(e.clientX,e.clientY);
+  if(o!==d.over){d.over=o;SKW.el.querySelectorAll('.skwP').forEach((p,i)=>p.classList.toggle('drop',i===o));
+    if(o>=0){const k=parseKit(myKit),S=SPELL_LIST[d.si],key=skwKey(o);
+      skwSetInfo('g'+d.si+'.'+o+'.'+myKit,skwSpellInfo(S,'ปล่อยเพื่อใส่ช่อง '+key,k.ids[o]===d.si?'อยู่ในช่องนี้แล้ว':k.ids.includes(d.si)?`สลับกับช่อง ${skwKey(k.ids.indexOf(d.si))}`:`ใส่ช่อง ${key}`));}
+  }
+}
+function skwDragUp(e){
+  const d=SKW.drag;if(!d||(e&&e.pointerId!==d.id))return;
+  removeEventListener('pointermove',skwDragMove);removeEventListener('pointerup',skwDragUp);removeEventListener('pointercancel',skwDragUp);
+  SKW.drag=null;if(!d.on)return;
+  SKW.noClick=true;setTimeout(()=>{SKW.noClick=false;},0);
+  d.src.classList.remove('dragSrc');SKW.el.classList.remove('dragging');
+  SKW.el.querySelectorAll('.skwP.drop').forEach(p=>p.classList.remove('drop'));
+  const o=e&&e.type==='pointerup'?skwSlotAt(e.clientX,e.clientY):-1,g=d.g;
+  if(o<0){   // วางนอกช่อง = ยกเลิก (ไอคอนจางหาย)
+    g.animate([{opacity:1},{opacity:0,transform:g.style.transform+' scale(.6)'}],{duration:180}).onfinish=()=>g.remove();SKW.infoK='';skwInfoDef();return;
+  }
+  g.remove();
+  const k=parseKit(myKit);
+  if(k.ids[o]===d.si){skwSetSlot(o);return;}
+  SKW.slot=o;
+  const bad=skwAssign(d.si,null);
+  const pg=SKW.el.querySelector(`.skwP[data-slot="${o}"]`);
+  if(!bad){const r=pg.querySelector('.skwPg').getBoundingClientRect();skwFlashSlot(pg);skwBurst(r.left+r.width/2,r.top+r.height*0.53,PATHS[SPELL_LIST[d.si].path].col,26);}
 }
 // ---------- วาด ----------
 function skwRender(){
@@ -78,7 +124,7 @@ function skwRing(k){
       const a=j*360/n,c=Math.cos(a*Math.PI/180)*-1,c2=PATHS[S.path].col;SKW.ang[S.i]=a;
       // ชื่อใต้ไอคอน (ตัวล่างสุด = เหนือไอคอน ไม่ชนห้าเหลี่ยม) — ไม่วางข้างๆ เพราะชนคอลัมน์ซ้าย/ขวา
       const up=c>0.9;
-      return `<button type="button" class="skwS in${up?' up':''}" data-sp="${S.i}" draggable="true" style="--a:${a.toFixed(2)}deg;--c:${c2};--i:${j}"><span class="skwSi">${icoHTML(S.id,c2,28)}<i class="skwK"></i></span><span class="skwSl">${S.n}</span></button>`;
+      return `<button type="button" class="skwS in${up?' up':''}" data-sp="${S.i}" style="--a:${a.toFixed(2)}deg;--c:${c2};--i:${j}"><span class="skwSi">${icoHTML(S.id,c2,28)}<i class="skwK"></i></span><span class="skwSl">${S.n}</span></button>`;
     }).join('');
   }
   const off=skwOffN(k),actOwn=SPELL_LIST[k.ids[SKW.slot]].path===k.path;
@@ -191,7 +237,7 @@ function skwAssign(si,node){
   if(cur>=0)ids[cur]=ids[slot];
   ids[slot]=si;
   const nk=cleanKit([k.path,...ids].join('.'));
-  if(parseKit(nk).ids[slot]!==si){toast('คาถาสายอื่นใส่ได้ไม่เกิน 2 ช่อง');if(node){node.classList.remove('no');void node.offsetWidth;node.classList.add('no');}return;}
+  if(parseKit(nk).ids[slot]!==si){toast('คาถาสายอื่นใส่ได้ไม่เกิน 2 ช่อง');if(node){node.classList.remove('no');void node.offsetWidth;node.classList.add('no');}return true;}
   myKit=nk;
   if(node)skwGhost(node,pg,SPELL_LIST[si]);
   SKW.slot=(slot+1)%4;SKW.infoK='';
