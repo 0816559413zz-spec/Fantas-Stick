@@ -81,10 +81,10 @@ function crRenderKit(){
     <div class="chain">${mine.map((S,i)=>`${i?'<span class="ar">➜</span>':''}<span class="st" style="--rc:${ROLE_COL[S.role]||'#fff'}" data-ksp-info="${S.i}">${icoHTML(S.id,P.col,22)}<b>${ROLE_N[S.role]||''}</b></span>`).join('')}<span class="ar">➜</span><span class="st" style="--rc:#ffe27a" data-kult="1">${icoHTML(ult.id,P.col,22)}<b>เวทโบราณ</b></span></div>
     <div class="cb">✦ ${P.combo}</div><button type="button" class="tutBtn" id="tutOpen">📖 วิธีเล่นสายนี้</button>`;   // js/57
   // ชุดคาถารูปเพชร
-  const POS=[[22,50],[50,18],[78,50],[50,82]];
-  $('#sbLoad').innerHTML=`<div class="ring"></div>${k.ids.map((id,i)=>{const S=SPELL_LIST[id],c=PATHS[S.path].col;return `<button class="dslot ${crSlot===i?'on':''}" data-ks="${i}" style="left:${POS[i][0]}%;top:${POS[i][1]}%;--c:${c}"><span class="dm"></span><span class="di">${icoHTML(S.id,c,34)}</span><span class="k">${keyName(KEYS[SLOTK[i]]||'Key'+'QERF'[i])}</span><span class="nm">${S.n}</span></button>`;}).join('')}
+  const POS=[[19,50],[50,14],[81,50],[50,86]];
+  $('#sbLoad').innerHTML=`<div class="ring"></div>${k.ids.map((id,i)=>{const S=SPELL_LIST[id],c=PATHS[S.path].col;return `<button class="dslot ${crSlot===i?'on':''}${i===1?' top':''}" data-ks="${i}" style="left:${POS[i][0]}%;top:${POS[i][1]}%;--c:${c}"><span class="dm"></span><span class="di">${icoHTML(S.id,c,34)}</span><span class="k">${keyName(KEYS[SLOTK[i]]||'Key'+'QERF'[i])}</span><span class="nm">${S.n}</span></button>`;}).join('')}
     <div class="uslot" data-kult="1">${icoHTML(ult.id,P.col,46)}<span class="k">${keyName(KEYS.ult||'KeyX')}</span></div>
-    <div class="bkit">${[['b','b_'+P.id+(P.id==='frost'?'_m':''),'ยิงปกติ','คลิกซ้าย'],['s',hasIco('sh_'+P.id)?'sh_'+P.id:'b_'+P.id,'โล่','คลิกขวา'],['d',hasIco('dsh_'+P.id)?'dsh_'+P.id:'p_'+P.id,'พุ่ง',keyName(KEYS.dash||'ShiftLeft')]].map(([w,ic,n,key])=>`<button type="button" class="bk" data-kbase="${w}">${icoHTML(ic,P.col,22)}${w==='b'&&P.id==='frost'?icoHTML('b_frost',P.col,22):''}<span>${n}</span><em>${key}</em></button>`).join('')}</div>`;
+    <div class="bkit">${[['b','b_'+P.id+(P.id==='frost'?'_m':''),'ยิงปกติ','คลิกซ้าย'],['s',hasIco('sh_'+P.id)?'sh_'+P.id:'b_'+P.id,'โล่','คลิกขวา'],['d',hasIco('dsh_'+P.id)?'dsh_'+P.id:'p_'+P.id,'พุ่ง',keyName(KEYS.dash||'ShiftLeft')]].map(([w,ic,n,key])=>`<button type="button" class="bkb" data-kbase="${w}">${icoHTML(ic,P.col,22)}${w==='b'&&P.id==='frost'?icoHTML('b_frost',P.col,22):''}<span>${n}</span><em>${key}</em></button>`).join('')}</div>`;
   // คลังคาถา
   const libOk=PATHS.map((p,i)=>i===k.path&&!p.off&&SPELL_LIST.some(x=>x.path===i&&!x.ult));
   if(!libOk[crLib])crLib=k.path;

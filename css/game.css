@@ -309,7 +309,7 @@ body[data-screen=lobby] #voice{top:84px;left:auto;right:24px;width:340px}
 .chain .ar{color:var(--pc);font-size:16px;text-shadow:0 0 8px var(--pc)}
 .sbHero .cb{margin-top:6px;max-height:3.2em;overflow:hidden;font-size:11px;color:var(--mute);background:rgba(6,9,20,.7);border-right:2px solid var(--pc);padding:6px 10px;text-align:left}
 /* --- ชุดคาถา (รูปเพชรเหมือน HUD ตอนเล่น) --- */
-.sbLoad{position:absolute;right:30px;bottom:96px;width:380px;height:262px;z-index:2}
+.sbLoad{position:absolute;right:30px;bottom:96px;width:400px;height:300px;z-index:2}
 .sbLoad .ring{position:absolute;left:50%;top:50%;width:230px;height:230px;transform:translate(-50%,-50%);border-radius:50%;border:1px solid color-mix(in srgb,var(--pc) 40%,transparent);box-shadow:0 0 40px color-mix(in srgb,var(--pc) 25%,transparent),inset 0 0 30px color-mix(in srgb,var(--pc) 15%,transparent);pointer-events:none}
 .sbLoad .ring::before{content:'';position:absolute;inset:16px;border-radius:50%;border:1px dashed color-mix(in srgb,var(--pc) 45%,transparent);animation:spin 30s linear infinite}
 .dslot{position:absolute;width:78px;height:78px;margin:-39px 0 0 -39px;padding:0;background:none;border:none;box-shadow:none}
@@ -317,6 +317,7 @@ body[data-screen=lobby] #voice{top:84px;left:auto;right:24px;width:340px}
 .dslot .di{position:absolute;inset:0;display:grid;place-items:center}
 .dslot .k{position:absolute;left:50%;bottom:-6px;transform:translateX(-50%);font-size:10px;font-weight:700;color:#05070f;background:var(--gold);padding:0 6px;z-index:2}
 .dslot .nm{position:absolute;left:50%;top:84px;transform:translateX(-50%);white-space:nowrap;font-family:var(--fm);font-size:14px;color:var(--text);text-shadow:0 1px 2px #000}
+.dslot.top .nm{top:auto;bottom:84px}   /* ช่องบน: ชื่อไว้เหนือไอคอน ไม่ให้ทับวงเวทโบราณ */
 .dslot:hover .dm{border-color:var(--gold2)}
 .dslot.on .dm{border-color:var(--gold2);box-shadow:0 0 18px rgba(243,220,148,.6);animation:slotPulse 1.4s ease-in-out infinite}
 .dslot.drop .dm{box-shadow:0 0 0 3px var(--gold2),0 0 24px rgba(243,220,148,.8)}
@@ -326,8 +327,8 @@ body[data-screen=lobby] #voice{top:84px;left:auto;right:24px;width:340px}
 .uslot{position:absolute;left:50%;top:50%;width:96px;height:96px;margin:-48px 0 0 -48px;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle,color-mix(in srgb,var(--pc) 30%,#0b1226),#05070f);border:2px solid var(--gold);box-shadow:0 0 22px color-mix(in srgb,var(--pc) 55%,transparent);cursor:help}
 .uslot .k{position:absolute;bottom:-8px;font-size:10px;font-weight:700;color:#05070f;background:var(--gold);padding:0 6px}
 .bkit{position:absolute;left:-150px;bottom:6px;display:flex;flex-direction:column;gap:6px}
-.bk{display:flex;align-items:center;gap:8px;padding:5px 10px 5px 6px;font-size:11.5px;background:rgba(6,9,20,.85);border:1px solid var(--line);color:var(--text);text-align:left}
-.bk em{font-style:normal;font-size:9.5px;color:#05070f;background:var(--gold2);padding:0 4px;margin-left:auto}
+.bkb{display:flex;align-items:center;gap:8px;padding:5px 10px 5px 6px;font-size:11.5px;background:rgba(6,9,20,.85);border:1px solid var(--line);color:var(--text);text-align:left}
+.bkb em{font-style:normal;font-size:9.5px;color:#05070f;background:var(--gold2);padding:0 4px;margin-left:auto}
 #creator.s3 .crBar.cr3{left:auto;right:30px;width:380px;bottom:22px}
 body.crOpenB #lobby .lp,body.crOpenB #lobby>*:not(canvas){visibility:hidden}
 body.crOpenB .mnews{display:none}
