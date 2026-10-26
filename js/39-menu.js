@@ -86,7 +86,7 @@ function crRenderKit(){
     <div class="uslot" data-kult="1">${icoHTML(ult.id,P.col,46)}<span class="k">${keyName(KEYS.ult||'KeyX')}</span></div>
     <div class="bkit">${[['b','b_'+P.id+(P.id==='frost'?'_m':''),'ยิงปกติ','คลิกซ้าย'],['s',hasIco('sh_'+P.id)?'sh_'+P.id:'b_'+P.id,'โล่','คลิกขวา'],['d',hasIco('dsh_'+P.id)?'dsh_'+P.id:'p_'+P.id,'พุ่ง',keyName(KEYS.dash||'ShiftLeft')]].map(([w,ic,n,key])=>`<button type="button" class="bk" data-kbase="${w}">${icoHTML(ic,P.col,22)}${w==='b'&&P.id==='frost'?icoHTML('b_frost',P.col,22):''}<span>${n}</span><em>${key}</em></button>`).join('')}</div>`;
   // คลังคาถา
-  const libOk=PATHS.map((p,i)=>!p.off&&SPELL_LIST.some(x=>x.path===i&&!x.ult));
+  const libOk=PATHS.map((p,i)=>i===k.path&&!p.off&&SPELL_LIST.some(x=>x.path===i&&!x.ult));
   if(!libOk[crLib])crLib=k.path;
   $('#sbTabs').innerHTML=PATHS.map((p,i)=>libOk[i]?`<button class="sbT ${crLib===i?'on':''}" style="--c:${p.col}" data-klib="${i}" title="${p.n}${i===k.path?' (สายหลัก)':' (ใส่ได้ไม่เกิน 2 ช่อง)'}">${icoHTML('p_'+p.id,p.col,20)}</button>`:'').join('');
   const L=SPELL_LIST.filter(x=>x.path===crLib&&!x.ult);

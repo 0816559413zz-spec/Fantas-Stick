@@ -108,11 +108,11 @@ function skwArcs(k){
     SKW.arcPath=k.path;const U=SPELL_LIST[k.ult];
     const it=[['b','b_'+P.id+(P.id==='frost'?'_m':''),'ยิงปกติ','คลิกซ้าย'],['s',hasIco('sh_'+P.id)?'sh_'+P.id:'b_'+P.id,'โล่','คลิกขวา'],['d',hasIco('dsh_'+P.id)?'dsh_'+P.id:'p_'+P.id,'พุ่ง',keyName(KEYS.dash||'ShiftLeft')],['u',U.id,U.n,'เวทโบราณ · '+keyName(KEYS.ult||'KeyX')]];
     SKW.el.querySelector('.skwArcL').innerHTML=`<div class="skwAT" style="${skwPos(-52,-1)}">ท่าประจำสาย</div>`+it.map(([w,ic,n,key],j)=>`<button type="button" class="skwKi${w==='u'?' ult':''}" data-base="${w}" style="--c:${P.col};--i:${j};${skwPos(-36+24*j,-1)}"><span class="skwKc">${icoHTML(ic,P.col,20)}</span><span class="skwKt"><b>${n}</b><em>${key}</em></span></button>`).join('');
-    const ord=[k.path,...L.filter(i=>i!==k.path)],n=ord.length,st=n>1?Math.min(24,72/(n-1)):0;
+    const ord=[k.path],n=ord.length,st=n>1?Math.min(24,72/(n-1)):0;
     SKW.el.querySelector('.skwArcR').innerHTML=`<div class="skwAT" style="${skwPos(-52,1)}">คลังคาถา<small></small></div>`+ord.map((i,j)=>{const p=PATHS[i];return `<button type="button" class="skwLi" data-lib="${i}" style="--c:${p.col};--i:${j};${skwPos(-st*(n-1)/2+st*j,1)}"><span class="skwKc">${icoHTML('p_'+p.id,p.col,18)}</span><span class="skwKt"><b>${p.n.replace(/^สาย/,'')}</b><em>${i===k.path?'สายหลัก':'สายอื่น'}</em></span></button>`;}).join('');
   }
   SKW.el.querySelectorAll('.skwLi').forEach(b=>b.classList.toggle('on',+b.dataset.lib===SKW.lib));
-  const sm=SKW.el.querySelector('.skwArcR .skwAT small');if(sm)sm.textContent=`สายอื่น ${off}/2`;
+  const sm=SKW.el.querySelector('.skwArcR .skwAT small');if(sm)sm.textContent='';
 }
 // วงคาถา: สร้างใหม่เมื่อเปลี่ยนสาย/คลัง (มีแอนิเมชันบินเข้า) • ไม่งั้นแค่อัปเดตสถานะ (ป้ายปุ่ม/เรือง/ล็อก)
 function skwRing(k){

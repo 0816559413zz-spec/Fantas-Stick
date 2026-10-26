@@ -1,6 +1,6 @@
 // =====================================================================
 //  ระบบคาถาใหม่: สาย (path) × คาถา (spell) + สถานะ (status effects)
-//  ผู้เล่นเลือก "สาย" 1 สาย → ได้เวทโบราณ (X) ของสายนั้น + จัดชุดคาถา Q/E/R/F (คาถาสายอื่นได้ไม่เกิน 2 ช่อง)
+//  ผู้เล่นเลือก "สาย" 1 สาย → ได้เวทโบราณ (X) ของสายนั้น + จัดชุดคาถา Q/E/R/F (ใส่ได้เฉพาะคาถาของสายตัวเอง)
 //  สตริงชุดคาถา "สาย.q.e.r.f" (ตัวเลข = index ใน SPELL_LIST ห้ามสลับลำดับ เพิ่มต่อท้ายเท่านั้น)
 // =====================================================================
 // ไอคอนคาถา: จาก game-icons.net (CC BY 3.0, เครดิตใน "คู่มือ" และ icons/CREDITS.md) ไฟล์อยู่ที่ icons/<id>.svg (Service Worker เก็บไว้เล่นออฟไลน์)
@@ -44,7 +44,7 @@ function parseKit(str){
   const main=SPELL_LIST.filter(x=>x.path===path&&!x.ult).map(x=>x.i);
   for(let k=1;k<=4;k++){
     const i=a[k],S=Number.isInteger(i)&&SPELL_LIST[i];
-    if(S&&!S.ult&&!PATHS[S.path].off&&!ids.includes(i)&&(S.path===path||off<2)){if(S.path!==path)off++;ids.push(i);}else ids.push(null);
+    if(S&&!S.ult&&!PATHS[S.path].off&&!ids.includes(i)&&S.path===path){if(S.path!==path)off++;ids.push(i);}else ids.push(null);
   }
   for(let k=0;k<4;k++)if(ids[k]===null){const c=main.find(i=>!ids.includes(i));ids[k]=c!==undefined?c:SPELL_LIST.find(x=>!x.ult&&!PATHS[x.path].off&&!ids.includes(x.i)).i;}
   const k={path,ids,ult:SPELL_LIST.find(x=>x.path===path&&x.ult).i};
