@@ -26,7 +26,7 @@ function render(dt,now){
   const v=VIEW.cur;
   if(screen!=='game'||!v){
     if(PM3.size||EM3.size||JM3.size||WM3.size||MM3.size)clearDyn();
-    PARTS.length=0;TEXTS.length=0;
+    PARTS.length=0;TEXTS.length=0;CAMRS.has=false;
     if(screen==='menu'||screen==='lobby'){renderStage(dt,now);return;}
     updateParticles(dt);updateShapes(dt);updateLights(dt);
     menuCamera(now);gl.shadowMap.needsUpdate=true;composer.render();return;
@@ -34,11 +34,13 @@ function render(dt,now){
   const a=VIEW.a!==null?VIEW.a:VIEW.prev?clamp((now-VIEW.tCur)/Math.max(8,VIEW.tCur-VIEW.tPrev),0,1):1;
   const pm={},em={};
   if(VIEW.prev){for(const p of VIEW.prev.P)pm[p.id]=p;for(const e of VIEW.prev.E)em[e.id]=e;}
-  const P=v.P.map(p=>{const q=pm[p.id];if(!q||Math.abs(q.x-p.x)+Math.abs(q.y-p.y)>200)return p;return Object.assign({},p,{x:lerp(q.x,p.x,a),y:lerp(q.y,p.y,a),a:lerpAng(q.a,p.a,a)});});
+  const P=v.P.map(p=>{const q=pm[p.id];if(!q||Math.abs(q.x-p.x)+Math.abs(q.y-p.y)>200)return p;return Object.assign({},p,{x:lerp(q.x,p.x,a),y:lerp(q.y,p.y,a),z:lerp(q.z||0,p.z||0,a),a:lerpAng(q.a,p.a,a)});});   // z ด้วย: เดิมความสูงกระโดดขยับเป็นขั้น 30 ครั้ง/วิ → กล้องสั่นตอนกระโดด (ผู้ใช้ 2026-10-26)
   const E=v.E.map(e=>{const q=em[e.id];if(!q)return e;return Object.assign({},e,{x:lerp(q.x,e.x,a),y:lerp(q.y,e.y,a)});});
   predictMe(P,dt,now);
   const me=P.find(p=>p.id===NET.myId);
-  if(v.ph==='count'&&lastPh!=='count'&&me){yaw=me.a;pitch=0.3;}
+  // เริ่มรอบ: หันกล้องตามทิศเกิด เฉพาะตอนถูกย้ายไปจุดเกิดจริง (เริ่มเกม / รอบใหม่ PvP) — ไม่ใช่ทุกเวฟ Co-op (เดิมกล้องหันเองทุกเวฟ เพราะทิศจากเน็ตช้ากว่าเมาส์)
+  if(v.ph==='count'&&lastPh!=='count'&&me&&(!CAMRS.has||Math.hypot(me.x-CAMRS.x,me.y-CAMRS.y)>150)){yaw=me.a;pitch=0.3;}
+  if(me){CAMRS.has=true;CAMRS.x=me.x;CAMRS.y=me.y;}else CAMRS.has=false;
   lastPh=v.ph;warmTick(v);
   if(me){
     if(me.al&&!me.dn)me.a=yaw;

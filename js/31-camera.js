@@ -1,5 +1,6 @@
 // ---------- กล้องมุมหลังไหล่ (แบบ Hogwarts Legacy) ----------
 let yaw=0,pitch=0.3,lastPh='',locked=false;
+const CAMRS={has:false,x:0,y:0};   // ตำแหน่งตัวเราเฟรมก่อน (ดูว่าเริ่มรอบแล้วถูกย้ายจุดเกิดไหม)
 let SENS=0.0015*SET.sens/100;
 function saveSet(){store('wd_set',JSON.stringify(SET));}
 function applySettings(){

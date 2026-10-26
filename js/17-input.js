@@ -41,9 +41,14 @@ addEventListener('keyup',e=>{
   if(KMAP[e.code])INPUT[KMAP[e.code]]=0;
 });
 addEventListener('blur',()=>{INPUT.hq=INPUT.he=INPUT.hr=INPUT.hf=0;INPUT.u=INPUT.d=INPUT.l=INPUT.r=INPUT.fire=INPUT.sh=INPUT.jh=INPUT.ch=INPUT.dh=0;VOICE.talking=false;showBoard=false;});
+// Chrome บน Windows บางทีส่งค่าเมาส์กระโดดก้อนใหญ่ตอนล็อกเมาส์ (บั๊กเบราว์เซอร์) → กล้องสะบัดหันเอง: ทิ้งค่าที่ใหญ่ผิดปกติเทียบกับที่ขยับอยู่
+const MSANE={avg:8,drop:0};
+function mouseSane(e){const m=Math.max(Math.abs(e.movementX),Math.abs(e.movementY));
+  if(m>500||(m>150&&m>MSANE.avg*10)){MSANE.drop++;return false;}
+  MSANE.avg+=(Math.max(4,m)-MSANE.avg)*0.15;return true;}
 addEventListener('mousemove',e=>{
   mouseX=e.clientX;mouseY=e.clientY;
-  if(locked&&screen==='game'&&!EMO.open){const v=VIEW.cur,me=v&&v.P&&v.P.find(q=>q.id===NET.myId),k=(me&&me.bm===2?0.55:1)*(1-0.25*AIMZ);if(!(me&&me.sm&&(me.sm[3]&16))){yaw+=e.movementX*SENS*k;pitch=clamp(pitch+e.movementY*SENS*k*(SET.inv?-1:1),-0.25,1.15);}}
+  if(locked&&screen==='game'&&!EMO.open&&mouseSane(e)){const v=VIEW.cur,me=v&&v.P&&v.P.find(q=>q.id===NET.myId),k=(me&&me.bm===2?0.55:1)*(1-0.25*AIMZ);if(!(me&&me.sm&&(me.sm[3]&16))){yaw+=e.movementX*SENS*k;pitch=clamp(pitch+e.movementY*SENS*k*(SET.inv?-1:1),-0.25,1.15);}}
 });
 cvEl().addEventListener('mousedown',e=>{
   if(screen!=='game')return;
