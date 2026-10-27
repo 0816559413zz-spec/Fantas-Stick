@@ -5,7 +5,7 @@ Format: `name:line` = top-level function/const/let in that file. `§line title` 
 ## js/01-core.js (22) — แกนกลาง: import Three.js + ฟังก์ชันพื้นฐาน ($ rnd clamp lerp store to…
 $:12 rnd:13 clamp:14 lerp:15 dist2:16 lerpAng:17 esc:18 shuffle:19 store:20 toastT:21 toast:22
 
-## js/02-data.js (340) — 
+## js/02-data.js (342) — 
 W:4 H:4 PR:4 PILLARS:6 SPAWNF:7 mulberry:9 genForest:10 genPitch:27 genHogsmeade:36
 §54 แผนที่โล่ง 3 แบบ (ผู้ใช้: ป่ามืดไม่สนุก อยากได้ที่โล่งๆ)
 genMeadow:55 genLake:61 genRuins:66
@@ -16,7 +16,7 @@ FMAPS:133 b64i16:134 regFileMap:135 loadMapData:147 loadAllMapData:155 mapReady:
 §160 ของประกอบฉากที่พังได้ / ใช้ได้ (prop)
 PROPDEF:164 PROP_OFF_MODES:171 PROP_USE:173 PROPS:174 PROPON:174 genProps:175
 §195 ตัวละคร: บ้านฮอกวอตส์ + หน้าตา
-HOUSES:197 HAIRC:202 HAIRSTY:204 WOODC:207 WOODN:208 WCOREC:209 WCOREN:210 WANDSTY:211 WANDN:216 WANDNN:231 EYEC:232 SKINC:233 CLOAKC:234 TIESTY:235 LOOKK:236 LOOKN:236 lookStr:237 parseLook:238 randLook:239 LOOKS:240 LOOKP:240 KITS:240 getKit:241 getLook:242 CREST_SH:243 CREST_PAT:244 starPts:249 CREST_ANI:251 crestSVG:257 houseColor:265 TEAMC:266 TEAMN:266 MODES:267 PDEF:278 EDEF:305 POOLS:317 CDK:327 BUFFS:330 BRAR:339 rollRar:340
+HOUSES:197 HAIRC:202 HAIRSTY:204 WOODC:207 WOODN:208 WCOREC:209 WCOREN:210 WANDSTY:211 WANDN:216 WANDNN:231 EYEC:232 SKINC:233 CLOAKC:234 TIESTY:235 LOOKK:236 LOOKN:236 lookStr:237 parseLook:238 randLook:239 LOOKS:240 LOOKP:240 KITS:240 getKit:241 getLook:242 CREST_SH:243 CREST_PAT:244 starPts:249 CREST_ANI:251 crestSVG:257 houseColor:265 TEAMC:266 TEAMN:266 NOBROOM:268 MODES:269 PDEF:280 EDEF:307 POOLS:319 CDK:329 BUFFS:332 BRAR:341 rollRar:342
 
 ## js/03-spells-core.js (222) — 
 ICONS:8 ICOALIAS:9 hasIco:10 ICOBASE:12 icoURL:13 ICO:14 icoTint:15 icoHTML:24 PATHS:25 SPELL_LIST:34 SPELLS:34 defSpell:35 SLOTK:36 BRMAP:36 KITP:37 parseKit:38 cleanKit:54 setKit:55 pathReset:58
@@ -539,4 +539,4 @@ gameCover:403
 ## js/66-hud4.js (113) — HUD รอบ 4 (ผู้ใช้ 2026-10-23, designs/hud-full-mock.html)
 H4E:5 H4:10 H4C:11 H4RC:11 h4Pal:12 hud4Col:14 h4Runes:15 h4RingSVG:16 h4Parts:25 h4Key:29 h4Ico:30 h4Build:31 h4Set:58 hud4Draw:59 hud4Frame:96 hud4Hide:97 _h4RT:99 _h4Cam:99 h4FaceShot:100 h4FaceSet:113
 
-(67 files, 16306 lines)
+(67 files, 16308 lines)

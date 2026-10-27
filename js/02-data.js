@@ -264,6 +264,8 @@ ${rib?`<path d="M-2 100L102 100L94 113L102 126L-2 126L6 113Z" fill="#eadcae" str
 }
 function houseColor(lk){return HOUSES[parseLook(lk).h].c;}
 const TEAMC=['#4da3ff','#ff5a5a'], TEAMN=['ทีมฟ้า','ทีมแดง'];
+// โหมดที่ไม่มีไม้กวาด (กด B ไม่ได้ + ไม่มีไอคอน B บน HUD)
+const NOBROOM=new Set(['imp','ffa']);
 const MODES={
   coop:{name:'🗝️ ดันเจียน Co-op',d:'1-6 คน ฝ่าทีละชั้น บอสเรดทุก 5 ชั้น',min:1,max:6},
   train:{name:'🎯 ห้องฝึก',d:'1-6 คน Test Place: ลองคาถา เสกมอนสเตอร์ ปรับไม่มีคูลดาวน์ได้',min:1,max:6,map:'test'},

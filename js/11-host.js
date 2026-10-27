@@ -269,7 +269,7 @@ function updatePlayer(p,dt,acting){
   if(acting&&(inp.ax||inp.ay))p.ang=Math.atan2(inp.ay-p.y,inp.ax-p.x)+(p.bld>0?rnd(-0.22,0.22):0);
 
   // ไม้กวาด: B ขึ้น/ลง — โดนสตันหรือใยแมงมุมจะตกจากไม้กวาด • โหมดโวลเดอมอร์ + FFA ไม่มีไม้กวาด (ผู้ใช้ 2026-10-27)
-  if(pr.b&&canAct&&p.flyCd<=0&&G.mode!=='imp'&&G.mode!=='ffa'){
+  if(pr.b&&canAct&&p.flyCd<=0&&!NOBROOM.has(G.mode)){
     p.fly=!p.fly;p.flyCd=0.8;
     if(p.fly){p.vz=7;p.shieldOn=false;p.dash=0;emit({k:'mount',x:p.x,y:p.y,h:p.z,id:p.id});}
     else emit({k:'dismount',x:p.x,y:p.y,h:p.z});

@@ -284,8 +284,8 @@ function drawMinimap(v,me,P){
 }
 function slotKey(s){const m={Q:'q',E:'e',R:'r',F:'f',Shift:'dash',X:'ult',B:'broom'}[s];return m&&KEYS[m]?keyName(KEYS[m]):s;}
 function mySlots(me){
-  const k=getKit(me.id),sp=k.ids.map(i=>SPELL_LIST[i]),P=PATHS[k.path],ult=SPELL_LIST[k.ult];
-  const L=SLOTS.map(s0=>{const s=[slotKey(s0[0]),...s0.slice(1)];return (s[3]>=1&&s[3]<=4?[s[0],{id:sp[s[3]-1].id,c:P.col},sp[s[3]-1].n,s[3]]:s[3]===-2?[s[0],{id:ult.id,c:P.col},ult.n,-2]:s[3]===0?[s[0],{id:'b_'+P.id+(P.id==='frost'&&me.fr&&me.fr[0]===0?'_m':''),c:P.col},PBASIC[k.path].n,0]:s[3]===-1&&hasIco('sh_'+P.id)?[s[0],{id:'sh_'+P.id,c:P.col},s[2],-1]:s[3]===5&&hasIco('dsh_'+P.id)?[s[0],{id:'dsh_'+P.id,c:P.col},s[2],5]:s);});
+  const k=getKit(me.id),sp=k.ids.map(i=>SPELL_LIST[i]),P=PATHS[k.path],ult=SPELL_LIST[k.ult],nb=VIEW.cur&&NOBROOM.has(VIEW.cur.mode);
+  const L=SLOTS.filter(s=>!(nb&&s[3]===-3)).map(s0=>{const s=[slotKey(s0[0]),...s0.slice(1)];return (s[3]>=1&&s[3]<=4?[s[0],{id:sp[s[3]-1].id,c:P.col},sp[s[3]-1].n,s[3]]:s[3]===-2?[s[0],{id:ult.id,c:P.col},ult.n,-2]:s[3]===0?[s[0],{id:'b_'+P.id+(P.id==='frost'&&me.fr&&me.fr[0]===0?'_m':''),c:P.col},PBASIC[k.path].n,0]:s[3]===-1&&hasIco('sh_'+P.id)?[s[0],{id:'sh_'+P.id,c:P.col},s[2],-1]:s[3]===5&&hasIco('dsh_'+P.id)?[s[0],{id:'dsh_'+P.id,c:P.col},s[2],5]:s);});
   // สายดิน: ช่อง BA ชาร์จ (กดค้างคลิกซ้าย) ต่อจากช่องยิง • Tectonic รอบหนีบได้ = ไอคอนบีบกำแพง
   if(P.id==='earth'){L.splice(1,0,['กดค้าง',{id:'cb_earth',c:P.col},'ทุบชาร์จ',-4]);
     if(me.ea&&me.ea[8])for(const s of L)if(s[1]&&s[1].id==='tectoniccrush')s[1]={id:'tectoniccrush_sq',c:'#ffc27a'};

@@ -57,7 +57,7 @@ function h4Build(me,v){
 // ค่าเปลี่ยนเท่านั้นถึงเขียน DOM
 function h4Set(key,v,fn){if(H4.cache[key]===v)return;H4.cache[key]=v;fn(v);}
 function hud4Draw(me,v){
-  const k=getKit(me.id),lay=me.id+'|'+k.path+'|'+k.ids.join(',')+'|'+k.ult+'|'+(me.ea?1:0)+'|'+(me.fr?me.fr[0]:'')+'|'+(me.ea&&me.ea[0]>0?1:0)+'|'+(me.ea&&me.ea[8]?1:0);
+  const k=getKit(me.id),lay=me.id+'|'+k.path+'|'+k.ids.join(',')+'|'+k.ult+'|'+(me.ea?1:0)+'|'+(me.fr?me.fr[0]:'')+'|'+(me.ea&&me.ea[0]>0?1:0)+'|'+(me.ea&&me.ea[8]?1:0)+'|'+(NOBROOM.has(v&&v.mode)?1:0);
   if(!H4.el||H4.lay!==lay){H4.lay=lay;h4Build(me,v);}
   H4.drawn=true;if(H4.el.hidden)H4.el.hidden=false;
   const Q=H4.q,t=performance.now();
