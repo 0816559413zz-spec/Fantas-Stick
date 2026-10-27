@@ -38,16 +38,16 @@ function h4Build(me,v){
   R+=h4Parts(E,22,(a,b)=>{const t=(180+a*90)*Math.PI/180,r=40+b*(H4RC+30);return [H4C+Math.cos(t)*r,H4C+Math.sin(t)*r];});
   cards.forEach((s,i)=>{const d=196+i*20,a=d*Math.PI/180,x=H4C+Math.cos(a)*H4RC,y=H4C+Math.sin(a)*H4RC;
     R+=`<div class="h4Cd" data-ci="${s[3]}" style="left:${(x-39).toFixed(1)}px;top:${(y-55).toFixed(1)}px;transform:rotate(${(((d+90)-360)*0.55).toFixed(1)}deg)"><i class="gem"></i>${h4Ico(s[1],46)}<i class="sh"></i><b class="n"></b><span class="k">${esc(h4Key(s[0]))}</span></div>`;});
-  const gs=gems.length>4?19:21,g0=gems.length>4?186:196;
+  const gs=gems.length>4?19:21,g0=226-(gems.length-1)*gs/2;   // อัญมณีเรียงกึ่งกลางใต้ไพ่ (ไพ่ 196–256°) — จำนวนเปลี่ยนได้ (ไม่มีไม้กวาด = 3)
   gems.forEach((s,i)=>{const a=(g0+i*gs)*Math.PI/180,x=H4C+Math.cos(a)*H4RC*0.6,y=H4C+Math.sin(a)*H4RC*0.6;
     R+=`<div class="h4Gm" data-ci="${s[3]}" style="left:${x.toFixed(1)}px;top:${y.toFixed(1)}px">${h4Ico(s[1],26)}<i class="sh"></i><b class="n"></b><span class="k">${esc(h4Key(s[0]))}</span></div>`;});
-  R+=`<div class="h4U"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="48" fill="none" stroke="rgba(255,255,255,.15)" stroke-width="3"/><circle class="ua" cx="50" cy="50" r="48" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-dasharray="301.6" stroke-dashoffset="301.6" transform="rotate(-90 50 50)"/></svg>
+  const M=`<div class="h4U"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="48" fill="none" stroke="rgba(255,255,255,.15)" stroke-width="3"/><circle class="ua" cx="50" cy="50" r="48" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-dasharray="301.6" stroke-dashoffset="301.6" transform="rotate(-90 50 50)"/></svg>
     <div class="tx"><b class="up">0%</b><small>${esc(U?U.n:'')}</small></div><span class="k">${esc(slotKey('X'))}</span></div>`;
   let L=`<div class="h4Sh"></div>`+h4Parts(E,10,(a,b)=>[20+a*260,-30-b*180]);
   L+=`<div class="h4Me"><div class="h4Por"><div class="tk"></div><div class="rg"><i class="fc">${icoHTML('p_'+P.id,E.c1,54)}</i></div><div class="el">${icoHTML('p_'+P.id,E.c1,21)}</div><div class="lv">LV ${typeof progLv==='function'?progLv().L:1}</div></div>
     <div class="h4Hp"><div class="h4Nm">${esc(me.n||'')}<small>${E.n}</small></div><div class="h4Num"><span class="hp">0</span><small class="mh">/ 0</small><em class="xh"></em></div><div class="h4Seg"></div>
     <div class="h4Sub"><i><b></b></i><small></small></div><div class="h4Chips"></div></div></div>`;
-  root.innerHTML=`<div class="h4L">${L}</div><div class="h4R">${R}</div>`;
+  root.innerHTML=`<div class="h4L">${L}</div><div class="h4R">${R}</div><div class="h4M">${M}</div>`;   // h4M = อัลติกลางล่าง (ผู้ใช้ 2026-10-27)
   H4.el=root;H4.cache={};H4.rdy={};H4.segN=0;H4.uFull=false;
   H4.q={hp:root.querySelector('.hp'),mh:root.querySelector('.mh'),xh:root.querySelector('.xh'),seg:root.querySelector('.h4Seg'),sub:root.querySelector('.h4Sub'),subB:root.querySelector('.h4Sub b'),subT:root.querySelector('.h4Sub small'),
     chips:root.querySelector('.h4Chips'),u:root.querySelector('.h4U'),ua:root.querySelector('.ua'),up:root.querySelector('.up'),fc:root.querySelector('.fc'),

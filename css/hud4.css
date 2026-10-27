@@ -6,6 +6,8 @@
 #h4{position:fixed;inset:0;z-index:1;pointer-events:none;font-family:'Kanit',sans-serif;color:#fff;--hs:1}
 #h4[hidden]{display:none}
 .h4L,.h4R{position:absolute;bottom:0}
+.h4M{position:absolute;left:50%;bottom:22px;width:116px;height:116px;transform-origin:50% 100%;transform:translateX(-50%) scale(var(--hs))}
+.h4M .h4U{left:50%;top:50%;width:116px;height:116px}
 .h4L{left:0;transform-origin:0 100%;transform:scale(var(--hs))}
 .h4R{right:0;width:480px;height:480px;transform-origin:100% 100%;transform:scale(var(--hs))}
 .h4Sh{position:absolute;bottom:0;width:640px;height:340px}
