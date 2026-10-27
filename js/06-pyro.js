@@ -10,7 +10,7 @@ function pyroBigBoom(pr){
   for(const t of foesIn(pr.team,pr.x,pr.y,90,pr.h+3.5)){aoeHit(o,t,20,t=>addBurn(t,1,pr.owner));const d=Math.hypot(t.x-pr.x,t.y-pr.y);if(d<bd){bd=d;best=t;}}
   if(best)launchOrbs(o,best);
 }
-function pyroBall(p){shoot(p,'pfire',{sp:'pyroball',dmg:20});}
+function pyroBall(p){shoot(p,'pfire',{sp:'pyroball',dmg:15});}   // เนิร์ฟ 2026-10-27: 20→15
 function pyroBasic(p,inp,dt,setCd){
   const prev=p.bfPrev;p.bfPrev=inp.fire;
   if(p.dfall){if(p.dfall.ph===2&&inp.fire&&!prev)dragonfallDive(p);p.chg=0;return;}
@@ -27,8 +27,8 @@ function pyroBasic(p,inp,dt,setCd){
     p.chg=0;
   }
 }
-// โล่สายไฟ: เก็บ "ลูกไฟวิญญาณ" (orb) หมุนรอบตัว — Parry +2 / บล็อกครบ 3 ครั้ง +2 / สูงสุด 6 ไม่หายจนกว่าจะใช้
-function addOrbs(p,n){const was=p.orbs|0;p.orbs=Math.min(6,was+n);if(p.orbs>was)emit({k:'efx',z:'orbget',x:p.x,y:p.y,h:p.z+1.2,id:p.id,n:p.orbs});}
+// โล่สายไฟ: เก็บ "ลูกไฟวิญญาณ" (orb) หมุนรอบตัว — Parry +2 / บล็อกครบ 3 ครั้ง +2 / สูงสุด 4 (ลูกละ 5 — เนิร์ฟ 2026-10-27) ไม่หายจนกว่าจะใช้
+function addOrbs(p,n){const was=p.orbs|0;p.orbs=Math.min(4,was+n);if(p.orbs>was)emit({k:'efx',z:'orbget',x:p.x,y:p.y,h:p.z+1.2,id:p.id,n:p.orbs});}
 function pyroParry(p){addOrbs(p,2);}
 function pyroBlock(p){p.orbBlk=(p.orbBlk|0)+1;if(p.orbBlk>=3){p.orbBlk=0;addOrbs(p,2);}}
 // ลูกไฟ (ชาร์จ/Kindle) โดนศัตรู = ปล่อยลูกไฟวิญญาณทั้งหมดพุ่งใส่เป้านั้น ลูกละ 10 • ทุก 2 ลูก = +1 Burning
@@ -36,7 +36,7 @@ function launchOrbs(p,t){
   const n=p.orbs|0;if(!n||!t)return;p.orbs=0;
   const d=Math.hypot(t.x-p.x,t.y-p.y),tt=Math.max(0.15,d/1300);
   emit({k:'efx',z:'orbshot',x:p.x,y:p.y,h:p.z+1.3,x2:t.x,y2:t.y,h2:cH(t),n,t:Math.round(tt*100)/100});
-  G.strikes.push({t:tt,fn:()=>{if(t.dead||(!t.isE&&!t.isM&&(!t.alive||t.downed)))return;aoeHit(p,t,10*n);emit({k:'efx',z:'orbhit',x:t.x,y:t.y,h:cH(t),n});}});
+  G.strikes.push({t:tt,fn:()=>{if(t.dead||(!t.isE&&!t.isM&&(!t.alive||t.downed)))return;aoeHit(p,t,5*n);emit({k:'efx',z:'orbhit',x:t.x,y:t.y,h:cH(t),n});}});
 }
 // คืนค่า true = กำลังชาร์จ (ขยับ/ยิง/ร่ายไม่ได้)
 function pyroDash(p,inp,pr,dt,setCd){
