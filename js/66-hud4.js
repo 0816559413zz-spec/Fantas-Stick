@@ -26,6 +26,13 @@ function h4Parts(E,n,box){const an={ember:'h4Rise',snow:'h4Fall',spark:'h4Flick'
   for(let i=0;i<n;i++){const [x,y]=box(Math.random(),Math.random());
     o+=`<i style="left:${x.toFixed(0)}px;top:${y.toFixed(0)}px;--an:${an};--du:${(E.pt==='spark'?1.6:3+Math.random()*3).toFixed(2)}s;--de:${(-Math.random()*6).toFixed(2)}s;--dx:${(Math.random()*40-20).toFixed(0)}px"></i>`;}
   return `<div class="h4P ${E.pt}">${o}</div>`;}
+// ชิ้นออร่าอัลติตามธาตุ: ไฟ = เปลวลุกขึ้นรอบวง • น้ำแข็ง = หมอก + ผลึกน้ำแข็งรอบวง (สายฟ้า/ดิน ใช้วง .fl อย่างเดียว)
+function h4AuBits(pt){let o='';const at=(deg,r)=>{const t=deg*Math.PI/180;return `left:${(58+Math.cos(t)*r).toFixed(1)}px;top:${(58+Math.sin(t)*r).toFixed(1)}px`;};
+  if(pt==='ember')for(let i=0;i<11;i++){const d=150+i*24,up=Math.sin(d*Math.PI/180)<-0.5;   // ครึ่งบน + ข้าง (ล่างติดขอบจอ) • บนวง = เปลวสูงกว่า
+    o+=`<i class="fm" style="${at(d,50)};--s:${((up?1.1:0.8)+(i%3)*0.1).toFixed(2)};--du:${(2.4+(i*37%5)*0.2).toFixed(2)}s;--de:${(-(i*0.41)).toFixed(2)}s"></i>`;}
+  if(pt==='snow'){for(let i=0;i<5;i++)o+=`<i class="ms" style="--a:${i*72}deg;--du:${9+i*1.7}s;--de:${-i*2.1}s"></i>`;
+    for(let i=0;i<12;i++){const d=i*30+(i%2?11:0);o+=`<i class="cr" style="${at(d,70)};--a:${d+90}deg;--s:${i%3===0?1.25:i%2?0.7:0.95};--de:${(-(i*0.37)).toFixed(2)}s"></i>`;}}
+  return o;}
 const h4Key=k=>({'คลิกซ้าย':'LMB','คลิกขวา':'RMB','กดค้าง':'HOLD'})[k]||k;
 const h4Ico=(ic,sz)=>ic&&typeof ic==='object'?icoHTML(ic.id,'#fff',sz):`<span style="font-size:${Math.round(sz*0.8)}px">${ic||''}</span>`;
 function h4Build(me,v){
@@ -43,7 +50,7 @@ function h4Build(me,v){
     R+=`<div class="h4Gm" data-ci="${s[3]}" style="left:${x.toFixed(1)}px;top:${y.toFixed(1)}px">${h4Ico(s[1],32)}<i class="sh"></i><b class="n"></b><span class="k">${esc(h4Key(s[0]))}</span></div>`;});
   R+=`<div class="h4X"><i class="rg"></i><i class="rg2"></i><i class="ic">${icoHTML('p_'+P.id,E.c2,64)}</i></div>`;   // ตราธาตุกลางวง (ที่เดิมของอัลติ) — ใช้สกิล = กะพริบ
   // ออร่าธาตุรอบอัลติ (โชว์เฉพาะตอนเต็ม: .h4M.full) — วงแสงหมุน 2 ชั้น + อนุภาคธาตุรอบลูกแก้ว
-  const au=`<div class="h4Au ${E.pt}"><i class="fl"></i><i class="fl b"></i>${h4Parts(E,18,(a,b)=>{const t=a*Math.PI*2,r=50+b*16;return [58+Math.cos(t)*r,58+Math.sin(t)*r];})}</div>`;
+  const au=`<div class="h4Au ${E.pt}"><i class="fl"></i><i class="fl b"></i>${h4AuBits(E.pt)}${h4Parts(E,18,(a,b)=>{const t=a*Math.PI*2,r=50+b*16;return [58+Math.cos(t)*r,58+Math.sin(t)*r];})}</div>`;
   const M=au+`<div class="h4U"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="48" fill="none" stroke="rgba(255,255,255,.15)" stroke-width="3"/><circle class="ua" cx="50" cy="50" r="48" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-dasharray="301.6" stroke-dashoffset="301.6" transform="rotate(-90 50 50)"/></svg>
     <div class="tx"><i class="ui">${U?icoHTML(U.id,'#fff',58):''}</i><b class="up">0%</b></div><span class="k">${esc(slotKey('X'))}</span></div>`;
   let L=`<div class="h4Sh"></div>`+h4Parts(E,10,(a,b)=>[20+a*260,-30-b*180]);

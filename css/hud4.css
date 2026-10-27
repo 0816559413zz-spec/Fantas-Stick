@@ -20,7 +20,19 @@
 .h4Au .fl{position:absolute;inset:-46px;border-radius:50%;-webkit-mask:radial-gradient(circle closest-side,transparent 52%,#000 60%,#000 76%,transparent 100%);mask:radial-gradient(circle closest-side,transparent 52%,#000 60%,#000 76%,transparent 100%)}
 .h4Au .fl.b{inset:-34px;opacity:.85}
 .h4M:not(.full) .h4Au .fl,.h4M:not(.full) .h4Au .h4P i{animation-play-state:paused}
-/* ไฟ: เปลวลุกเป็นแฉก เบลอ สั่นขึ้นลง */
+/* ไฟ: เปลวลุกขึ้นรอบวง (ไม่หมุน) — แต่ละเปลวยืดขึ้น สั่น จาง */
+.h4Au.ember .fl,.h4Au.snow .fl{display:none}
+.h4Au .fm{position:absolute;width:70px;height:70px;margin:-62px 0 0 -35px;transform-origin:50% 100%;transform:scale(var(--s));mix-blend-mode:screen;
+  background:url('../assets/fx/tex/fire_loop.png') 0 0/560px 560px;   /* ไฟจริงจาก Blender (8×8 เฟรม) */
+  animation:h4FbX calc(var(--du)/8) steps(8) var(--de) infinite,h4FbY var(--du) steps(8) var(--de) infinite}
+.h4M:not(.full) .h4Au .fm,.h4M:not(.full) .h4Au .ms,.h4M:not(.full) .h4Au .cr{animation-play-state:paused}
+/* น้ำแข็ง: หมอกเย็นลอยวนช้า ๆ + ผลึกน้ำแข็งแหลมรอบวง กะพริบวิบวับ */
+.h4Au .ms{position:absolute;left:58px;top:58px;width:0;height:0;transform:rotate(var(--a));animation:h4MistR var(--du) linear var(--de) infinite}
+.h4Au .ms::before{content:'';position:absolute;left:24px;top:-34px;width:78px;height:56px;border-radius:50%;background:radial-gradient(ellipse,color-mix(in srgb,#fff 85%,transparent) 0,color-mix(in srgb,var(--c1) 55%,transparent) 45%,transparent 70%);filter:blur(6px);animation:h4MistB 3.2s ease-in-out var(--de) infinite alternate}
+.h4Au .cr{position:absolute;width:14px;height:34px;margin:-17px 0 0 -7px;transform:rotate(var(--a)) scale(var(--s));
+  background:linear-gradient(#fff,var(--c2) 35%,var(--c1) 75%,color-mix(in srgb,var(--c0) 60%,transparent));clip-path:polygon(50% 0,100% 62%,50% 100%,0 62%);
+  filter:drop-shadow(0 0 4px var(--c1));animation:h4Glint 2.4s ease-in-out var(--de) infinite}
+/* (เดิม) ไฟ: เปลวลุกเป็นแฉก เบลอ สั่นขึ้นลง */
 .h4Au.ember .fl{background:repeating-conic-gradient(from 0deg,var(--c1) 0 9deg,var(--c2) 13deg,transparent 22deg 30deg);filter:blur(5px);animation:h4Spin 5s linear infinite,h4Flame .45s ease-in-out infinite alternate}
 .h4Au.ember .fl.b{background:repeating-conic-gradient(from 12deg,#fff 0 4deg,var(--c1) 9deg,transparent 16deg 24deg);animation:h4Spin 3.4s linear infinite reverse,h4Flame .32s ease-in-out infinite alternate}
 /* น้ำแข็ง: หนามคริสตัลคม ไม่เบลอ หมุนช้า */
@@ -142,3 +154,9 @@
 @keyframes h4Flame{from{scale:1}to{scale:1.07 1.12}}
 @keyframes h4Zap{0%{opacity:1}50%{opacity:.35}100%{opacity:1}}
 @keyframes h4Glow{from{opacity:.55;scale:.96}to{opacity:.95;scale:1.05}}
+@keyframes h4FbX{from{background-position-x:0}to{background-position-x:-560px}}
+@keyframes h4FbY{from{background-position-y:0}to{background-position-y:-560px}}
+@keyframes h4Lick{0%{transform:translateY(0) scale(calc(var(--s)*.8),calc(var(--s)*.7));opacity:.5}45%{transform:translateY(-7px) scale(var(--s),calc(var(--s)*1.25));opacity:1}100%{transform:translateY(-16px) scale(calc(var(--s)*.5),calc(var(--s)*1.4));opacity:0}}
+@keyframes h4MistR{to{transform:rotate(calc(var(--a) + 360deg))}}
+@keyframes h4MistB{from{opacity:.45;scale:.85}to{opacity:.9;scale:1.15}}
+@keyframes h4Glint{0%,100%{filter:drop-shadow(0 0 3px var(--c1)) brightness(1)}50%{filter:drop-shadow(0 0 8px var(--c2)) brightness(1.7)}}
