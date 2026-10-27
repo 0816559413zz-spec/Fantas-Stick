@@ -45,7 +45,7 @@ function hostOnData(conn,d){
   if(!d||!G)return;
   const id=conn.pid||conn.peer;   // pid = ตัวละครเดิมที่ต่อกลับเข้ามา (เน็ตหลุดแล้ว id ใหม่)
   if(d.t==='pi'){try{conn.send({t:'po',c:d.c});}catch(e){}return;}   // ปิง: ตอบกลับทันที
-  if(d.t==='hello'){
+  if(d.t==='hello'){netDeltaReset();   // คนต่อเข้ามา: snapshot ถัดไปส่งสถานะของพังได้แบบเต็ม
     const reject=r=>{try{conn.send({t:'reject',r});}catch(e){}setTimeout(()=>conn.close(),600);};
     const tok=String(d.tok||'').slice(0,16);
     // ต่อกลับเข้าห้อง: token เดิม (เก็บใน sessionStorage ของแท็บ) → ผูกกับตัวละครเดิม ไม่ต้องเริ่มใหม่
@@ -53,7 +53,7 @@ function hostOnData(conn,d){
     if(old){conn.pid=old.id;NET.conns.set(old.id,conn);old.awayT=0;conn.send({t:'welcome',id:old.id});toast(old.name+' ต่อกลับเข้าห้องแล้ว');if(G.ph!=='lobby')feed('📶 '+old.name+' กลับมาแล้ว');broadcastLobby();return;}
     if(G.players[id]){conn.send({t:'welcome',id});return;}
     if(G.ph!=='lobby')return midJoin(conn,id,d,tok,reject);   // hello ซ้ำ: อย่าเพิ่มคนเดิมซ้ำ (ไม่งั้นตัวเดินเร็ว 2 เท่า)
-    if(plist().length>=6)return reject('ห้องเต็มแล้ว (สูงสุด 6 คน)');
+    if(humans().length>=6)return reject('ห้องเต็มแล้ว (สูงสุด 6 คน)');
     NET.conns.set(id,conn);
     const p=addPlayer(id,cleanName(d.name),null,String(d.look||'').slice(0,40),String(d.kit||'').slice(0,24));p.tok=tok;p.fr=frameOk(d.fr);
     conn.send({t:'welcome',id});
@@ -82,11 +82,11 @@ function hostDrop(id,conn){
 }
 function hostRemove(id){
   if(!G||!G.players[id])return;NET.conns.delete(id);
-  const name=G.players[id].name;
+  const name=G.players[id].name,ai=G.players[id].ai;
   delete G.players[id];G.order=G.order.filter(x=>x!==id);
-  toast(name+' ออกจากห้อง');
+  if(!ai)toast(name+' ออกจากห้อง');
   if(G.ph!=='lobby'&&G.ph!=='over'){
-    feed('🚪 '+name+' ออกจากเกม');
+    if(!ai)feed('🚪 '+name+' ออกจากเกม');
     if(G.mode==='imp')impCheck();
     else if(G.mode!=='coop'&&G.mode!=='train'&&G.mode!=='race'&&plist().length<2)endMatch();
   }
@@ -105,6 +105,7 @@ function validate(){
   return '';
 }
 function hostStart(){
+  removeBots();
   const err=validate();if(err){toast(err);return;}
   // สุ่มแผนที่ทุกครั้งที่เริ่มเกม (ไม่ซ้ำกับรอบที่แล้วถ้าเป็นไปได้)
   const MD=MODES[G.mode];
@@ -130,15 +131,16 @@ function hostStart(){
   setScreen('game');
 }
 function hostToLobby(){G.ph='lobby';G.proj=[];G.en=[];
+  removeBots();   // บอทห้องฝึกไม่ตามไปล็อบบี้
   for(const p of plist())if(p.awayT>0)hostRemove(p.id);   // หลุดแล้วไม่กลับ = ลบตอนกลับล็อบบี้
   // คนดู → เป็นผู้เล่นในรอบหน้า (ถ้าห้องยังไม่เต็ม)
-  for(const id in (G.spec||{})){const s=G.spec[id],c=NET.conns.get(id);if(!c||plist().length>=6)continue;delete G.spec[id];const p=addPlayer(id,s.name,null,s.look,s.kit);p.tok=s.tok;try{c.send({t:'welcome',id});}catch(e){}}
+  for(const id in (G.spec||{})){const s=G.spec[id],c=NET.conns.get(id);if(!c||humans().length>=6)continue;delete G.spec[id];const p=addPlayer(id,s.name,null,s.look,s.kit);p.tok=s.tok;try{c.send({t:'welcome',id});}catch(e){}}
   broadcastLobby();}
 // เข้าห้องกลางเกม: ffa/tdm/ห้องฝึก/co-op = เกิดเลย • โหมดอื่น/ห้องเต็ม 6 คน = เป็นคนดู (สูงสุด 4) แล้วได้เล่นรอบหน้า
 const MIDJOIN=['ffa','tdm','train','coop'];
 function midJoin(conn,id,d,tok,reject){
   const name=cleanName(d.name),look=String(d.look||'').slice(0,40),kit=String(d.kit||'').slice(0,24);
-  if(MIDJOIN.includes(G.mode)&&G.ph!=='over'&&plist().length<6){
+  if(MIDJOIN.includes(G.mode)&&G.ph!=='over'&&humans().length<6){
     NET.conns.set(id,conn);const p=addPlayer(id,name,null,look,kit);p.tok=tok;p.fr=frameOk(d.fr);Object.assign(p,freshStats());
     const MD=MODES[G.mode];
     if(G.mode==='coop'||G.mode==='train')p.team=0;
@@ -189,6 +191,7 @@ function respawn(p){
   let x,y;
   if(MODES[G.mode].team){const a=teamPts(p.team);if(a){const q=a[Math.floor(Math.random()*a.length)];x=q[0];y=q[1];}else{x=MW*(p.team?0.9:0.1);y=MH/2+rnd(-170,170);}}
   else if(G.mode==='race'){const n=G.rings.length,r=G.rings[(p.cp-1+n)%n];resetBody(p,r.x,r.y);p.fly=true;p.z=r.h;p.inv=1;p.ang=Math.atan2(G.rings[p.cp].y-r.y,G.rings[p.cp].x-r.x);emit({k:'revive',x:r.x,y:r.y});return;}
+  else if(G.mode==='train'&&p.ai){x=p.ai.home.x+rnd(-80,80);y=p.ai.home.y+rnd(-80,80);}
   else if(G.mode==='train'){const pv=G.tr&&G.tr.pvp;if(pv===1){x=MW*(p.team?0.62:0.38);y=MH/2+160;}else if(pv===2){const a=rnd(0,Math.PI*2);x=MW/2+Math.cos(a)*420;y=MH/2+Math.sin(a)*300;}else{x=MW/2;y=MH/2+160;}}
   else{
     let best=-1;
@@ -210,7 +213,7 @@ function hostTick(dt){
   g.time+=dt;
   if(g.ph==='count'){g.cdT-=dt;if(g.cdT<=0)g.ph='play';}
   const acting=g.ph==='play';
-  for(const p of plist()){if(p.bot)botBrain(p,dt);updatePlayer(p,dt,acting);}
+  for(const p of plist()){if(p.bot)(p.ai?aiBot:botBrain)(p,dt);updatePlayer(p,dt,acting);}
   if(acting){
     updateProjectiles(dt);updateSpells(dt);updateMins(dt);
     if(g.mode==='coop'||g.mode==='train')updateEnemies(dt);

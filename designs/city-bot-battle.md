@@ -73,6 +73,7 @@
 แต่ละขั้นเล่นได้จริงก่อนไปขั้นต่อไป
 1. **บอท v1 + ปุ่ม "+ บอท" ในห้อง** — เล่นกับบอทได้ทันทีในแมพเดิม (ดวล / FFA / ทีม) ⟵ ใช้ร่วมกับแผนห้องฝึก
 2. **เตรียมเครื่องยนต์สำหรับแมพใหญ่** — ยังไม่เห็นอะไรใหม่ แต่ถ้าไม่ทำ เมืองจะกระตุก (ดู §7)
+   ✅ ทำแล้ว 2026-10-27: ส่งเฉพาะของที่พังเพิ่ม • ตารางช่องเช็กชน (โฮสต์เร็วขึ้น ~5 เท่า) • ซ่อนตึก/ของที่ไกลเกินหมอก (วาดน้อยลง ~3 เท่า) • แมพทดสอบ `citytest` • เหลือ: พื้นที่ต่อโหมด + งบเศษซาก (ทำตอนมีเมืองจริง)
 3. **เมืองแบบกล่องเทา (blockout)** — ถนน ตึกเป็นกล่อง เดินเล่น/ทดสอบขนาดกับผู้ใช้ก่อนลงรายละเอียด
 4. **ชุดตึกพังได้** — ตึกแถว 2–3 ชั้น ถล่มทีละชั้น, กระจก, รถระเบิด, เสาไฟล้ม
 5. **บอทหาทางในเมือง** — อ้อมตึก ใช้ที่กำบัง พังกำแพงเข้าหา อัปเดตทางเมื่อตึกพัง
@@ -89,7 +90,7 @@
   - `collideWorld` (js/12) loops every prop / BRK / building per mover → add a uniform spatial grid (e.g. 400 px cells) for OBS, PROPS, BRK, BLDG pieces; projectiles query the grid too.
   - `bldSnap` sends ALL buildings every snapshot as one string → with ~150 buildings that's too big. Change to **event/delta**: send only pieces that changed since the client's last ack + full state on join/midJoin. `PREFIX` bump.
   - Rendering: per-district chunk groups with frustum + distance culling, instanced windows/cars/lamps, merged static geometry per chunk, LOD for far buildings (box with baked texture). Shadow map can't cover 480 m → `shadowFollow` already follows the local player; keep shadow distance short.
-  - Minimap (city is too big to read without one) — HUD4 has no minimap yet.
+  - Minimap: HUD4 already has one (top right) — check it scales to 480 m.
   - Debris/decal caps (`DEBRIS` 180, decals ~40 in battlefield plan) need per-chunk budgets, merge rubble into static mounds (house `BLD_MOUND` pattern).
   - Mode sub-areas: `MODES[x].area` → `{x1,y1,x2,y2}` per map, used by spawn points, `collideWorld` bounds (invisible wall), BR ring, camera clamp. Generic, also useful for other big maps.
 - **Destruction kit (step 4):** generalise `BLDDEF`/`BLD_PIECES`/`BLD_GRID` (now one `house` type) into data-driven building types with floors: pieces per floor, support rule per floor (`bldSupport` already handles roof vs top wall row → extend: floor N collapses when floor N-1 supports < X%). Glass = cheap piece with 1 HP, no collision. Cars = new destructible object type (hp → burning → explode via existing `explode`). Big tower collapse = scripted host event + client animation (fx event), result = static rubble OBS.

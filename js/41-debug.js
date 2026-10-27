@@ -2,13 +2,13 @@
 // =====================================================================
 //  เครื่องมือทดสอบสมดุล (ใช้ผ่านคอนโซล WD.bal / WD.dmgTest เท่านั้น ผู้เล่นปกติไม่เห็น)
 // =====================================================================
-// บอทต่อสู้แบบง่ายๆ: เล็งนำเป้า เดินรักษาระยะ+ส่ายไปมา ร่ายคาถาทุกครั้งที่พร้อมและอยู่ในระยะ
-function botBrain(p,dt){
-  const inp=p.inp;let foe=plist().find(q=>q!==p&&q.alive&&!q.downed&&q.team!==p.team);
+// บอทต่อสู้แบบง่ายๆ: เล็งนำเป้า เดินรักษาระยะ+ส่ายไปมา ร่ายคาถาทุกครั้งที่พร้อมและอยู่ในระยะ • tg0 = เป้าที่เลือกมาแล้ว (บอทห้องฝึก aiBot js/15-bot)
+function botBrain(p,dt,tg0){
+  const inp=p.inp;let foe=tg0||plist().find(q=>q!==p&&q.alive&&!q.downed&&q.team!==p.team);
   if(!foe){let bd=1e12;for(const e of G.en)if(!e.dead){const d=(e.x-p.x)**2+(e.y-p.y)**2;if(d<bd){bd=d;foe=e;}}}
   if(!foe)return;
   let tg=foe;
-  {let md=450*450,bm=null;for(const m of G.mins)if(!m.dead&&m.team!==p.team){const dd=(m.x-p.x)**2+(m.y-p.y)**2;if(dd<md){md=dd;bm=m;}}if(bm&&Math.hypot(foe.x-p.x,foe.y-p.y)>240)tg=bm;}
+  if(!tg0){let md=450*450,bm=null;for(const m of G.mins)if(!m.dead&&m.team!==p.team){const dd=(m.x-p.x)**2+(m.y-p.y)**2;if(dd<md){md=dd;bm=m;}}if(bm&&Math.hypot(foe.x-p.x,foe.y-p.y)>240)tg=bm;}
   const dx=tg.x-p.x,dy=tg.y-p.y,d=Math.hypot(dx,dy),t=G.time;
   const fvx=tg._px===undefined?0:(tg.x-tg._px)/Math.max(dt,0.001),fvy=tg._py===undefined?0:(tg.y-tg._py)/Math.max(dt,0.001);tg._px=tg.x;tg._py=tg.y;
   const lead=d/950;inp.ax=tg.x+fvx*lead;inp.ay=tg.y+fvy*lead;
@@ -134,7 +134,7 @@ async function swSetup(){
 }
 swSetup();
 window.WD.SW=SWK;
-Object.assign(window.WD,{fxEv:ev=>fx(ev),PFB,ptexUse,ptexLoad,CURL,PLIT,PSYS,fireVol});
+Object.assign(window.WD,{fxEv:ev=>fx(ev),PFB,ptexUse,ptexLoad,CURL,PLIT,PSYS,fireVol,bot:botDebug,bots});
 // เทส/วัดผล: เดินลูปโฮสต์ 1 รอบด้วยมือ (hostTick + snapshot + เอฟเฟกต์) — ใช้ตอนหน้าต่างถูกซ่อนแล้ว setInterval ช้า
 // prop / โมเดลจากไฟล์ (ดีบัก)
 Object.defineProperties(window.WD,{TERR:{get:()=>TERR},MAPID:{get:()=>MAPID},OBS:{get:()=>OBS},PROPS:{get:()=>PROPS},PROPON:{get:()=>PROPON},BLDG:{get:()=>BLDG},BRK:{get:()=>BRK},BRKV:{get:()=>BRKV},BLDON:{get:()=>BLDON},HSTOP:{get:()=>HSTOP}});Object.assign(window.WD,{MAPS,RANDOM_MAPS,FMAPS,loadMapData,terrT,groundH,terrSolid,setMapVars,buildWorld,PROPDEF,genProps,MODELS,loadModel,modelManifest,useProp,hitProp,damageEnv,hitBldPiece,breakBldChunk,bldSupport,bldChunk,bldPieceAt,bldRay,aimClip,aimRay3,collideWorld,PM3,EM3,JM3,animTick,playVfx,playFlip,fileFx,zoneFx,VFXL,FLIPL,FLIPS,fx});
