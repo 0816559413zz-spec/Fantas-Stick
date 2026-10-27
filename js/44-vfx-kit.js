@@ -213,7 +213,7 @@ function bfAfter(ev,H){if(!BF.on||ev.x===undefined||isNaN(ev.x))return;
   else if(ev.k==='cast'){el=pjPal(ev.t);if(el==='fire'||el==='ice'){const [wx,wy]=wandPos(ev);bfPlay('bf_'+el+'_cast',el,wx,wy,h,1);}return;}
   else return;
   if(!BF_EL[el])return;
-  if(h<=2.5)grassScar(x,y,el,s);   // รอยบนหญ้า/พื้นทั้งแมตช์ (js/50) — ทาทุกครั้ง ไม่ติดกันซ้อน/ระยะของ bfPlay
+  if(h<=Math.max(0.6,s))grassScar(x,y,el,s);   // รอยบนหญ้า/พื้นทั้งแมตช์ (js/50) เฉพาะที่โดนใกล้พื้น (ตีโดนตัวกลางอากาศ = ไม่มีรอย) — ทาทุกครั้ง ไม่ติดกันซ้อน/ระยะของ bfPlay
   bfPlay('bf_'+el+(h>2.5?'_air':''),el,x,y,h,s);}
 // กันซ้อนถี่: จุดเดียวกัน (ช่อง 40 px) ธาตุเดียวกัน เล่นได้ทุก 0.25 วิ • ไกลกว่า ~80 ม. ไม่เล่น
 function bfPlay(name,el,x,y,h,s){if(!nearMe(x,y,1600))return;
