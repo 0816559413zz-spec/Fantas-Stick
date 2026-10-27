@@ -1,0 +1,318 @@
+{
+ "v": 1,
+ "desc": "แบบ A สมจริง (Battlefield): ฝุ่นเทาน้ำตาลพุ่งเป็นวง + ควันดำทึบลอยค้าง + เศษหินคม + รอยไหม้",
+ "tags": [
+  "env",
+  "style",
+  "battlefield"
+ ],
+ "pal": "fire",
+ "dur": 10.0,
+ "seed": 7,
+ "params": {
+  "r": {
+   "def": 4,
+   "desc": "รัศมีระเบิด (ม.)"
+  }
+ },
+ "layers": [
+  {
+   "id": "core",
+   "t": "flash",
+   "at": 0,
+   "life": 0.08,
+   "col": "$core",
+   "size": "r*0.7"
+  },
+  {
+   "id": "ball",
+   "t": "mesh",
+   "at": 0,
+   "life": 0.5,
+   "shape": "sphere",
+   "mat": "fire",
+   "mode": "ball",
+   "disp": 0.3,
+   "pos": [
+    0,
+    0.7,
+    0
+   ],
+   "scale": {
+    "0": 0.2,
+    "0.35": 0.8,
+    "1": 1.0,
+    "ease": "out",
+    "x": "r*0.45"
+   },
+   "heat": {
+    "0": 0.35,
+    "1": 0
+   },
+   "dis": {
+    "0": 0,
+    "0.3": 0,
+    "1": 0.95
+   }
+  },
+  {
+   "id": "sparks",
+   "t": "emit",
+   "at": 0,
+   "life": 0.08,
+   "burst": 26,
+   "from": "hemisphere",
+   "fr": 0.4,
+   "dir": "out",
+   "speed": [
+    7,
+    15
+   ],
+   "plife": [
+    0.35,
+    0.8
+   ],
+   "look": "streak",
+   "size": [
+    2.2,
+    3.2
+   ],
+   "col": "$core",
+   "c2": "$deep",
+   "gravity": 8,
+   "drag": 2
+  },
+  {
+   "id": "light",
+   "t": "light",
+   "at": 0,
+   "life": 0.4,
+   "col": "$light",
+   "int": 2.2,
+   "dist": 18
+  },
+  {
+   "id": "cam",
+   "t": "screen",
+   "at": 0,
+   "life": 0.3,
+   "shake": 5,
+   "kick": 0.25
+  },
+  {
+   "id": "dustring",
+   "t": "emit",
+   "at": 0.02,
+   "life": 0.06,
+   "burst": 30,
+   "att": "ground",
+   "from": "disc",
+   "fr": 1.0,
+   "dir": "flat",
+   "up": [
+    0.2,
+    0.9
+   ],
+   "speed": [
+    7,
+    13
+   ],
+   "plife": [
+    2.2,
+    3.4
+   ],
+   "look": "smoke",
+   "fb": "tex/smoke_puff",
+   "size": [
+    11,
+    17
+   ],
+   "col": "#b3a58e",
+   "c2": "#8a8070",
+   "gravity": -0.05,
+   "drag": 2.6,
+   "grow": 0.45
+  },
+  {
+   "id": "column",
+   "t": "emit",
+   "at": 0.05,
+   "life": 0.1,
+   "burst": 14,
+   "from": "sphere",
+   "fr": 0.9,
+   "dir": "up",
+   "spread": 0.45,
+   "speed": [
+    1.6,
+    3.2
+   ],
+   "plife": [
+    3,
+    4.5
+   ],
+   "look": "smoke",
+   "fb": "tex/smoke_puff",
+   "size": [
+    15,
+    22
+   ],
+   "col": "#4a423a",
+   "c2": "#6a625a",
+   "gravity": -0.2,
+   "drag": 1.8,
+   "grow": 0.45
+  },
+  {
+   "id": "linger",
+   "t": "emit",
+   "at": 0.6,
+   "life": 7.2,
+   "rate": {
+    "0": 5,
+    "0.6": 3,
+    "1": 1
+   },
+   "att": "ground",
+   "from": "disc",
+   "fr": 1.5,
+   "dir": "up",
+   "spread": 0.3,
+   "speed": [
+    0.5,
+    1.1
+   ],
+   "plife": [
+    3.5,
+    5
+   ],
+   "look": "smoke",
+   "fb": "tex/smoke_puff",
+   "size": [
+    10,
+    15
+   ],
+   "col": "#3a3430",
+   "c2": "#77706a",
+   "gravity": -0.3,
+   "drag": 1.2,
+   "grow": 0.45
+  },
+  {
+   "id": "embers",
+   "t": "emit",
+   "at": 0.3,
+   "life": 5,
+   "rate": {
+    "0": 10,
+    "1": 0
+   },
+   "att": "ground",
+   "from": "disc",
+   "fr": 1.4,
+   "dir": "up",
+   "spread": 0.6,
+   "speed": [
+    0.6,
+    1.8
+   ],
+   "plife": [
+    1.2,
+    2.4
+   ],
+   "look": "ember",
+   "size": [
+    1.2,
+    2
+   ],
+   "col": "#ffb060",
+   "c2": "#ff5a1a",
+   "gravity": -0.8,
+   "x": true
+  },
+  {
+   "id": "rocks",
+   "t": "emit",
+   "at": 0,
+   "life": 0.05,
+   "burst": 22,
+   "att": "ground",
+   "from": "disc",
+   "fr": 0.8,
+   "dir": "up",
+   "spread": 1.1,
+   "speed": [
+    5,
+    11
+   ],
+   "plife": [
+    6,
+    7.5
+   ],
+   "look": "model",
+   "model": "rock_chunk",
+   "mmat": "solid",
+   "msize": [
+    0.14,
+    0.34
+   ],
+   "bounce": 0.25,
+   "mspin": 420,
+   "col": "#5e554c",
+   "c2": "#2e2925",
+   "gravity": 16,
+   "drag": 0.4
+  },
+  {
+   "id": "clods",
+   "t": "emit",
+   "at": 0,
+   "life": 0.05,
+   "burst": 35,
+   "att": "ground",
+   "from": "disc",
+   "fr": 0.6,
+   "dir": "up",
+   "spread": 0.9,
+   "speed": [
+    7,
+    15
+   ],
+   "plife": [
+    6,
+    7.5
+   ],
+   "look": "model",
+   "model": "rock_chunk",
+   "mmat": "solid",
+   "msize": [
+    0.04,
+    0.1
+   ],
+   "bounce": 0.15,
+   "mspin": 700,
+   "col": "#2e2925",
+   "c2": "#2e2925",
+   "gravity": 18,
+   "drag": 0.6,
+   "x": true
+  },
+  {
+   "id": "scorch",
+   "t": "decal",
+   "at": 0,
+   "life": 10.0,
+   "kind": "scorch",
+   "r": "r*1.0"
+  },
+  {
+   "id": "soot",
+   "t": "decal",
+   "at": 0,
+   "life": 10.0,
+   "kind": "dark",
+   "r": "r*1.6",
+   "op": 0.55
+  }
+ ]
+}
