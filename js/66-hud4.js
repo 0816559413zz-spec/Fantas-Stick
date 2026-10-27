@@ -26,12 +26,21 @@ function h4Parts(E,n,box){const an={ember:'h4Rise',snow:'h4Fall',spark:'h4Flick'
   for(let i=0;i<n;i++){const [x,y]=box(Math.random(),Math.random());
     o+=`<i style="left:${x.toFixed(0)}px;top:${y.toFixed(0)}px;--an:${an};--du:${(E.pt==='spark'?1.6:3+Math.random()*3).toFixed(2)}s;--de:${(-Math.random()*6).toFixed(2)}s;--dx:${(Math.random()*40-20).toFixed(0)}px"></i>`;}
   return `<div class="h4P ${E.pt}">${o}</div>`;}
-// ชิ้นออร่าอัลติตามธาตุ: ไฟ = เปลวลุกขึ้นรอบวง • น้ำแข็ง = หมอก + ผลึกน้ำแข็งรอบวง (สายฟ้า/ดิน ใช้วง .fl อย่างเดียว)
+// ชิ้นออร่าอัลติตามธาตุ: ไฟ = เปลวลุกขึ้นรอบวง • น้ำแข็ง = หมอก + ผลึกน้ำแข็งรอบวง • สายฟ้า = สายฟ้าแลบเลียบขอบวง • ดิน = หินลอยวนรอบวง + ฝุ่น
 function h4AuBits(pt){let o='';const at=(deg,r)=>{const t=deg*Math.PI/180;return `left:${(58+Math.cos(t)*r).toFixed(1)}px;top:${(58+Math.sin(t)*r).toFixed(1)}px`;};
   if(pt==='ember')for(let i=0;i<11;i++){const d=150+i*24,up=Math.sin(d*Math.PI/180)<-0.5;   // ครึ่งบน + ข้าง (ล่างติดขอบจอ) • บนวง = เปลวสูงกว่า
     o+=`<i class="fm" style="${at(d,50)};--s:${((up?1.1:0.8)+(i%3)*0.1).toFixed(2)};--du:${(2.4+(i*37%5)*0.2).toFixed(2)}s;--de:${(-(i*0.41)).toFixed(2)}s"></i>`;}
   if(pt==='snow'){for(let i=0;i<5;i++)o+=`<i class="ms" style="--a:${i*72}deg;--du:${9+i*1.7}s;--de:${-i*2.1}s"></i>`;
     for(let i=0;i<12;i++){const d=i*30+(i%2?11:0);o+=`<i class="cr" style="${at(d,70)};--a:${d+90}deg;--s:${i%3===0?1.25:i%2?0.7:0.95};--de:${(-(i*0.37)).toFixed(2)}s"></i>`;}}
+  if(pt==='spark'){   // ประกายไฟฟ้า: แต่ละเส้นมี 2 ร่าง (a/b) สลับกันติด-ดับ = แลบไปมา
+    const bolt=(a0,a1,seed)=>{let d='',n=7;for(let j=0;j<=n;j++){const t=(a0+(a1-a0)*j/n)*Math.PI/180,r=63+((Math.sin(seed*13.7+j*7.3)*43758.5)%1+1)%1*20-(j===0||j===n?5:0);d+=(j?'L':'M')+(88+Math.cos(t)*r).toFixed(1)+' '+(88+Math.sin(t)*r).toFixed(1);}return d;};
+    let g='';for(let i=0;i<6;i++){const a=i*60+(i%2?17:0),w=34+(i%3)*10;
+      g+=`<g class="bo" style="--de:${(-(i*0.29)).toFixed(2)}s;--du:${(0.9+(i%3)*0.35).toFixed(2)}s"><path class="a" d="${bolt(a,a+w,i+1)}"/><path class="b" d="${bolt(a+4,a+w+4,i+7)}"/></g>`;}
+    o+=`<svg class="h4Bolt" viewBox="0 0 176 176">${g}</svg>`;}
+  if(pt==='rock'){   // หินลอย: วงหมุนช้า ๆ (.orb) — แต่ละก้อนลอยขึ้นลง + หมุนตัวเอง
+    let r='';for(let i=0;i<9;i++){const d=i*40+(i%2?13:0),t=d*Math.PI/180,R=70+(i%3)*5,sz=(i%3===0?17:i%2?10:13);
+      r+=`<i class="rk" style="left:${(Math.cos(t)*R).toFixed(1)}px;top:${(Math.sin(t)*R).toFixed(1)}px;--sz:${sz}px;--k:${i%4};--de:${(-(i*0.53)).toFixed(2)}s"></i>`;}
+    o+=`<i class="dust"></i><div class="orb">${r}</div>`;}
   return o;}
 const h4Key=k=>({'คลิกซ้าย':'LMB','คลิกขวา':'RMB','กดค้าง':'HOLD'})[k]||k;
 const h4Ico=(ic,sz)=>ic&&typeof ic==='object'?icoHTML(ic.id,'#fff',sz):`<span style="font-size:${Math.round(sz*0.8)}px">${ic||''}</span>`;

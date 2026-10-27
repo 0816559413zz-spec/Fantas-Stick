@@ -21,7 +21,22 @@
 .h4Au .fl.b{inset:-34px;opacity:.85}
 .h4M:not(.full) .h4Au .fl,.h4M:not(.full) .h4Au .h4P i{animation-play-state:paused}
 /* ไฟ: เปลวลุกขึ้นรอบวง (ไม่หมุน) — แต่ละเปลวยืดขึ้น สั่น จาง */
-.h4Au.ember .fl,.h4Au.snow .fl{display:none}
+.h4Au.ember .fl,.h4Au.snow .fl,.h4Au.spark .fl,.h4Au.rock .fl{display:none}
+/* สายฟ้า: เส้นฟ้าแลบเลียบขอบวง 6 เส้น แต่ละเส้น 2 ร่างสลับกันติด-ดับ */
+.h4Bolt{left:-30px;top:-30px;width:176px;height:176px;filter:drop-shadow(0 0 3px #fff) drop-shadow(0 0 8px var(--c1)) drop-shadow(0 0 14px var(--c1))}
+.h4Bolt path{fill:none;stroke:#fff;stroke-width:3.2;stroke-linejoin:bevel;stroke-linecap:round}
+.h4Bolt path.b{stroke:var(--c2);stroke-width:2.4}
+.h4Bolt .bo path{opacity:0;animation:h4BoltA var(--du) steps(1) var(--de) infinite}
+.h4Bolt .bo path.b{animation-name:h4BoltB}
+/* ดิน: หินลอยวนรอบวง + ฝุ่นจาง ๆ */
+.h4Au .dust{position:absolute;inset:-26px;border-radius:50%;background:radial-gradient(circle closest-side,transparent 58%,color-mix(in srgb,var(--c1) 45%,transparent) 72%,transparent 100%);filter:blur(4px);animation:h4Glow 2.2s ease-in-out infinite alternate}
+.h4Au .orb{position:absolute;left:58px;top:58px;width:0;height:0;animation:h4Spin 16s linear infinite}
+.h4Au .rk{position:absolute;width:var(--sz);height:var(--sz);margin:calc(var(--sz)/-2) 0 0 calc(var(--sz)/-2);
+  background:linear-gradient(140deg,var(--c2) 0,var(--c1) 40%,var(--c0) 100%);box-shadow:inset -2px -2px 0 rgba(0,0,0,.35);filter:drop-shadow(0 2px 3px rgba(0,0,0,.6)) drop-shadow(0 0 4px color-mix(in srgb,var(--c1) 70%,transparent));
+  clip-path:polygon(18% 6%,70% 0,100% 38%,86% 88%,34% 100%,0 62%);animation:h4Bob 2.6s ease-in-out var(--de) infinite alternate}
+.h4Au .rk:nth-child(2n){clip-path:polygon(30% 0,92% 18%,100% 70%,58% 100%,6% 80%,0 28%)}
+.h4Au .rk:nth-child(3n){clip-path:polygon(50% 0,100% 30%,80% 100%,14% 92%,0 36%)}
+.h4M:not(.full) .h4Au .bo path,.h4M:not(.full) .h4Au .orb,.h4M:not(.full) .h4Au .rk,.h4M:not(.full) .h4Au .dust{animation-play-state:paused}
 .h4Au .fm{position:absolute;width:70px;height:70px;margin:-62px 0 0 -35px;transform-origin:50% 100%;transform:scale(var(--s));mix-blend-mode:screen;
   background:url('../assets/fx/tex/fire_loop.png') 0 0/560px 560px;   /* ไฟจริงจาก Blender (8×8 เฟรม) */
   animation:h4FbX calc(var(--du)/8) steps(8) var(--de) infinite,h4FbY var(--du) steps(8) var(--de) infinite}
@@ -160,3 +175,6 @@
 @keyframes h4MistR{to{transform:rotate(calc(var(--a) + 360deg))}}
 @keyframes h4MistB{from{opacity:.45;scale:.85}to{opacity:.9;scale:1.15}}
 @keyframes h4Glint{0%,100%{filter:drop-shadow(0 0 3px var(--c1)) brightness(1)}50%{filter:drop-shadow(0 0 8px var(--c2)) brightness(1.7)}}
+@keyframes h4BoltA{0%{opacity:1}28%{opacity:0}38%{opacity:1}56%{opacity:0}100%{opacity:0}}
+@keyframes h4BoltB{0%{opacity:0}26%{opacity:1}40%{opacity:0}58%{opacity:1}82%{opacity:0}100%{opacity:0}}
+@keyframes h4Bob{from{translate:0 -4px;rotate:-12deg}to{translate:0 4px;rotate:14deg}}

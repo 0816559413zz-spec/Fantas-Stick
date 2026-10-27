@@ -536,7 +536,7 @@ BKICO:377 buffShow:381
 §400 จอมืดตอนเริ่มแมตช์ (ผู้ใช้ 2026-10-23: กระตุกตอนเริ่มแมตช์แรก)
 gameCover:403
 
-## js/66-hud4.js (124) — HUD รอบ 4 (ผู้ใช้ 2026-10-23, designs/hud-full-mock.html)
-H4E:5 H4:10 H4C:11 H4RC:11 h4Pal:12 hud4Col:14 h4Runes:15 h4RingSVG:16 h4Parts:25 h4AuBits:30 h4Key:36 h4Ico:37 h4Build:38 h4Set:68 hud4Draw:69 hud4Frame:107 hud4Hide:108 _h4RT:110 _h4Cam:110 h4FaceShot:111 h4FaceSet:124
+## js/66-hud4.js (133) — HUD รอบ 4 (ผู้ใช้ 2026-10-23, designs/hud-full-mock.html)
+H4E:5 H4:10 H4C:11 H4RC:11 h4Pal:12 hud4Col:14 h4Runes:15 h4RingSVG:16 h4Parts:25 h4AuBits:30 h4Key:45 h4Ico:46 h4Build:47 h4Set:77 hud4Draw:78 hud4Frame:116 hud4Hide:117 _h4RT:119 _h4Cam:119 h4FaceShot:120 h4FaceSet:133
 
-(67 files, 16351 lines)
+(67 files, 16360 lines)
