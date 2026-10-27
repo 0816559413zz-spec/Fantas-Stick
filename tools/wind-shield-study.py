@@ -151,7 +151,7 @@ def feather_curve(side,i,component):
 fx=json.loads((ROOT/'assets/fx/start/shield.fx.json').read_text(encoding='utf-8'))
 fx.update(desc='โล่ปีกลม — ขนปีกล่างขยายทันทีเป็นแผงยาวห่อไขว้ถึงขา ตามภาพอ้างอิง; แกนปีกขนาดเดิม (Studio review)',tags=['wind','shield','self','review'],pal='wind',dur=DUR,seed=73)
 fx['layers']=[]
-MATERIALS=[('body','toon','#c9fff0','#3aa58a',1.0,.15),('flow','energy','#e8fff6','#7fe8c4',.85,.65),('feathers','energy','#4fd07a','#14663c',1.0,.45),('spines','glow','#f0fffa','#9cf5d8',.9,0),('accents','glow','#ffffff','#c8fff0',.9,0),('cuts','toon','#3aa58a','#1d6f5a',.5,0)]
+MATERIALS=[('body','toon','#c9fff0','#3aa58a',1.0,.15),('flow','energy','#e8fff6','#7fe8c4',.0,.65),('feathers','energy','#4fd07a','#14663c',1.0,.45),('spines','glow','#f0fffa','#9cf5d8',.9,0),('accents','glow','#ffffff','#c8fff0',.9,0),('cuts','toon','#3aa58a','#1d6f5a',.0,0)]
 for side,sid in [(-1,'L'),(1,'R')]:
     for bone in range(3):
         pos=curve_for(side,bone,0);rot=curve_for(side,bone,1);scale=curve_for(side,bone,2)
@@ -160,7 +160,7 @@ for side,sid in [(-1,'L'),(1,'R')]:
             if name=='feathers':
                 op={str(round(t/DUR,5)):opacity*(1-.85*extension(t)) for t in TIMES}
             fx['layers'].append({'id':f'{sid}_{bone}_{name}','t':'mesh','at':0,'life':DUR,'att':'feet','shape':'model','model':f'wind_shield_{sid}_{name}_{bone}','mat':mat,'col':col,'col2':c2,'op':op,'rim':rim,'scroll':2.8,'fade':0,'pos':pos,'rot':rot,'scale':scale})
-        fx['layers'].append({'id':f'{sid}_{bone}_air','t':'emit','at':0,'life':DUR,'att':'feet','from':'mesh','of':f'{sid}_{bone}_feathers','rate':3,'burst':0,'dir':'random','speed':[.3,.8],'plife':[.22,.45],'look':'model','model':'wind_wing_airchip','mmat':'glow','msize':[.09,.18],'mspin':80,'col':'#b7ff87','c2':'#329b50','gravity':-.05,'drag':1.6,'curl':False,'bounce':0})
+        fx['layers'].append({'id':f'{sid}_{bone}_air','t':'emit','at':0,'life':DUR,'att':'feet','from':'mesh','of':f'{sid}_{bone}_feathers','rate':0,'burst':0,'dir':'random','speed':[.3,.8],'plife':[.22,.45],'look':'model','model':'wind_wing_airchip','mmat':'glow','msize':[.09,.18],'mspin':80,'col':'#b7ff87','c2':'#329b50','gravity':-.05,'drag':1.6,'curl':False,'bounce':0})
 
     for i in range(6):
         # ผู้ใช้ 2026-10-27 "make layer for feather and diff color too": แต่ละชั้นขนคนละสี ไล่จากชั้นใน (มิ้นต์/ขาว) ไปชั้นนอก (เขียวเข้ม)
@@ -169,18 +169,18 @@ for side,sid in [(-1,'L'),(1,'R')]:
             ('shadow','toon',FC[0],FC[1],1.0,.14),
             ('flow','energy',FC[2],FC[3],.85,.45),
             ('edge','glow',FC[4],FC[5],1.0,0),
-            ('glint','glow','#eeffcf','#a0ff7f',.7,0)]:
+            ('glint','glow','#eeffcf','#a0ff7f',.0,0)]:
             op={str(round(t/DUR,5)):round(opacity*extension(t,i)*(1+.15*smooth(t,2.65,3.5)),4) for t in TIMES}
             fx['layers'].append({'id':f'{sid}_long_{i}_{name}','t':'mesh','at':0,'life':DUR,'att':'feet','shape':'model','model':f'wind_shield_longfeather_{name}','mat':mat,'col':col,'col2':c2,'op':op,'rim':rim,'scroll':3,'fade':0,'pos':feather_curve(side,i,0),'rot':feather_curve(side,i,1),'scale':feather_curve(side,i,2)})
-        fx['layers'].append({'id':f'{sid}_long_{i}_motes','t':'emit','at':.35,'life':3.38,'att':'feet','from':'mesh','of':f'{sid}_long_{i}_flow','rate':3,'dir':'up','speed':[.4,1],'plife':[.18,.35],'look':'streak','size':[.4,.85],'col':'#c8ff9d','c2':'#45b96a','gravity':0,'drag':1.5,'curl':False})
+        fx['layers'].append({'id':f'{sid}_long_{i}_motes','t':'emit','at':.35,'life':3.38,'att':'feet','from':'mesh','of':f'{sid}_long_{i}_flow','rate':0,'dir':'up','speed':[.4,1],'plife':[.18,.35],'look':'streak','size':[.4,.85],'col':'#c8ff9d','c2':'#45b96a','gravity':0,'drag':1.5,'curl':False})
 
 # เปลือกโล่บาง ๆ แบบโล่ไฟ: ริบบิ้นลมสโตรกหมุนรอบตัว 3 ชั้น + กรอบหกเหลี่ยมเส้นบาง (โผล่ตอนยกโล่ หายตอนปล่อย)
 SHELL=lambda pk,a,b:{str(round(t/DUR,5)):round(pk*smooth(t,.18,.42)*(1-smooth(t,3.45,3.7)),4) for t in TIMES}
 for j,(tilt,yaw,sc,tex,col,spin,pk) in enumerate([(18,0,1.25,'tex/wind_swoosh_b','#5fb5a6',240,.42),(-28,70,1.18,'tex/wind_swoosh_a_hi','#eaffff',-300,.30),(52,140,1.10,'tex/wind_swoosh_b','#7fcfbf',280,.36),(-60,210,1.15,'tex/wind_swoosh_a_hi','#ffffff',-260,.24),(4,300,1.32,'tex/wind_swoosh_b','#4c9d8f',200,.32)]):
     fx['layers'].append({'id':f'shell_{j}','t':'mesh','at':0,'life':DUR,'att':'feet','shape':'model','model':f'wind_pieces{j%3}','mat':'tex','tex':tex,'col':col,'col2':'#000000','rim':0,'uvTile':[1,1],'uvScroll':[0,0],
         'pos':[0,.75,0],'rot':[tilt,yaw,0],'scale':[sc,.62*sc,sc],'spin':spin,'op':SHELL(pk,0,0),'fade':0})
-fx['layers'].append({'id':'shell_hex','t':'mesh','at':0,'life':DUR,'att':'chest','pos':[0,-.1,0],'shape':'model','model':'fire_hex_frames','mat':'glow','col':'#9dff7a','col2':'#efffe8','rim':1.2,'int':.9,
-    'scale':{'0':.95,'0.07':.72,'0.6':.74,'1':.72,'x':1.15},'spin':30,'op':SHELL(.14,0,0),'fade':0})
+fx['layers'].append({'id':'shell_hex','t':'mesh','at':0,'life':DUR,'att':'chest','pos':[0,-.35,0],'shape':'model','model':'fire_hex_frames','mat':'glow','col':'#9dff7a','col2':'#efffe8','rim':1.2,'int':.9,
+    'scale':{'0':[.95,.6,.95],'0.07':[.72,.46,.72],'0.6':[.74,.47,.74],'1':[.72,.46,.72]},'spin':30,'op':SHELL(.14,0,0),'fade':0})
 
 # Demonstration hits: small white contact, wind splinters, light travelling back to the hinge.
 for i,t in enumerate(HITS):
