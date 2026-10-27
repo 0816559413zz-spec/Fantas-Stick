@@ -124,15 +124,10 @@ for name,(material,parts) in QUILL_MODELS.items():
 FEATHER_ROOTS=[.32,.70,1.08,1.46,1.84,2.20]
 # ทุกขนไขว้ข้ามกลางตัว (X ชัด) ปลายลงถึงเท้า เรียงเป็นชั้นจากบนลงล่าง
 # z ลบ = ด้านหน้าตัวละคร (โคนปีกอยู่ z บวก = หลังไหล่) → ขนอ้อมมาห่อไขว้ด้านหน้า
-FEATHER_TIPS=[[-.40,1.15,-.96],[-.45,.85,-.90],[-.38,.50,-.84],[-.30,.20,-.78],[-.20,.02,-.72],[-.50,1.40,-1.02]]
+FEATHER_TIPS=[[.30,1.45,-.70],[.18,1.20,-.78],[-.38,.40,-.92],[-.30,.10,-.88],[-.18,-.02,-.80],[.42,1.70,-.62]]
 FEATHER_WIDTHS=[.36,.44,.48,.46,.40,.34]
 # สีต่อชั้น [ตัวขน, เงา, ลมไหล, ลมไหล2, ขอบ, ขอบ2] — 0 = บนสุด/ในสุด (สว่าง) … 4 = ล่างสุด/นอกสุด (เข้ม), 5 = ขนบนสุดคลุมไหล่
-FEATHER_COL=[['#c9fff4','#3aa79a','#ffffff','#8ff0ff','#ffffff','#b8fbff'],
-             ['#8ff5c8','#1f8f78','#d8fff0','#4fe0b0','#f0fff8','#7ff7d0'],
-             ['#5fe08a','#13734a','#b8ff8a','#2fc46a','#d8ffa0','#7cff7a'],
-             ['#9dff52','#2f7a18','#e2ff7a','#6fd63a','#f4ffb0','#b6ff5a'],
-             ['#2fb894','#0a4a44','#6ff0d0','#1a8f7a','#9ffff0','#3fd8b8'],
-             ['#e8fff4','#5fb5a6','#ffffff','#bdf7ea','#ffffff','#e0fff8']]
+FEATHER_COL=[['#c9fff0','#3aa58a','#f0fffa','#9cf5d8','#ffffff','#c8fff0'],['#c9fff0','#3aa58a','#f0fffa','#9cf5d8','#ffffff','#c8fff0'],['#4fd07a','#14663c','#8cff9a','#2fae5e','#b8ffb0','#4fd07a'],['#4fd07a','#14663c','#8cff9a','#2fae5e','#b8ffb0','#4fd07a'],['#4fd07a','#14663c','#8cff9a','#2fae5e','#b8ffb0','#4fd07a'],['#c9fff0','#3aa58a','#f0fffa','#9cf5d8','#ffffff','#c8fff0']]
 
 def feather_pose(side,i,t):
     s=FEATHER_ROOTS[i];bone=0 if s<CUTS[1] else 1 if s<CUTS[2] else 2
@@ -156,7 +151,7 @@ def feather_curve(side,i,component):
 fx=json.loads((ROOT/'assets/fx/start/shield.fx.json').read_text(encoding='utf-8'))
 fx.update(desc='โล่ปีกลม — ขนปีกล่างขยายทันทีเป็นแผงยาวห่อไขว้ถึงขา ตามภาพอ้างอิง; แกนปีกขนาดเดิม (Studio review)',tags=['wind','shield','self','review'],pal='wind',dur=DUR,seed=73)
 fx['layers']=[]
-MATERIALS=[('body','toon','#57ce6a','#196a40',1.0,.15),('flow','energy','#7cff68','#2ec772',.85,.65),('feathers','energy','#8dff65','#35b96d',1.0,.45),('spines','glow','#b2ff83','#44f778',.9,0),('accents','glow','#efffe8','#d2ffb8',.9,0),('cuts','toon','#2a8c48','#0c5230',.5,0)]
+MATERIALS=[('body','toon','#c9fff0','#3aa58a',1.0,.15),('flow','energy','#e8fff6','#7fe8c4',.85,.65),('feathers','energy','#4fd07a','#14663c',1.0,.45),('spines','glow','#f0fffa','#9cf5d8',.9,0),('accents','glow','#ffffff','#c8fff0',.9,0),('cuts','toon','#3aa58a','#1d6f5a',.5,0)]
 for side,sid in [(-1,'L'),(1,'R')]:
     for bone in range(3):
         pos=curve_for(side,bone,0);rot=curve_for(side,bone,1);scale=curve_for(side,bone,2)
