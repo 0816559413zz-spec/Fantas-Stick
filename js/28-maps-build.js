@@ -568,9 +568,9 @@ function buildTest(){
   hemi.color.set('#ffffff');hemi.groundColor.set('#6a7078');hemi.intensity=0.85;moonL.intensity=1.35;moonL.color.set('#fff4e6');gl.toneMappingExposure=1;
   // พื้นตาราง: กระเบื้องปูน 4×4 แผ่น/ช่อง สีต่างกันนิด ๆ + เม็ดลาย + ร่องขอบมีแสง/เงา (ไม่แบนจืด) — ต้นทุนเท่าเดิม (ภาพเดียว)
   const grid=(base,line,rep)=>{const t=texCanvas(512,512,g=>{g.fillStyle=base;g.fillRect(0,0,512,512);
-    for(let i=0;i<4;i++)for(let j=0;j<4;j++){const v=Math.random();g.fillStyle=v<0.5?`rgba(0,0,0,${(0.5-v)*0.1})`:`rgba(255,255,255,${(v-0.5)*0.08})`;g.fillRect(i*128,j*128,128,128);}
+    for(let i=0;i<4;i++)for(let j=0;j<4;j++){const v=Math.random();g.fillStyle=v<0.5?`rgba(0,0,0,${(0.5-v)*0.03})`:`rgba(255,255,255,${(v-0.5)*0.025})`;g.fillRect(i*128,j*128,128,128);}
     for(let i=0;i<4000;i++){const k=Math.random();g.fillStyle=k<0.5?`rgba(0,0,0,${0.03+k*0.08})`:`rgba(255,255,255,${0.02+(k-0.5)*0.06})`;g.fillRect(Math.random()*512,Math.random()*512,1+(k*3|0),1+(k*3|0));}
-    for(let i=0;i<14;i++){g.strokeStyle=`rgba(0,0,0,${0.03+Math.random()*0.04})`;g.lineWidth=2+Math.random()*5;g.beginPath();const x=Math.random()*512,y=Math.random()*512,a=Math.random()*6.3,L=20+Math.random()*60;g.moveTo(x,y);g.quadraticCurveTo(x+Math.cos(a)*L*0.6+10,y+Math.sin(a)*L*0.6,x+Math.cos(a)*L,y+Math.sin(a)*L);g.stroke();}
+    for(let i=0;i<14;i++){g.strokeStyle=`rgba(0,0,0,${0.01+Math.random()*0.015})`;g.lineWidth=2+Math.random()*5;g.beginPath();const x=Math.random()*512,y=Math.random()*512,a=Math.random()*6.3,L=20+Math.random()*60;g.moveTo(x,y);g.quadraticCurveTo(x+Math.cos(a)*L*0.6+10,y+Math.sin(a)*L*0.6,x+Math.cos(a)*L,y+Math.sin(a)*L);g.stroke();}
     g.globalAlpha=0.55;g.strokeStyle=line;g.lineWidth=2;for(const p of [128,256,384]){g.beginPath();g.moveTo(p,0);g.lineTo(p,512);g.moveTo(0,p);g.lineTo(512,p);g.stroke();}
     g.globalAlpha=0.18;g.strokeStyle='#ffffff';g.lineWidth=1;for(const p of [130.5,258.5,386.5,6.5]){g.beginPath();g.moveTo(p,0);g.lineTo(p,512);g.moveTo(0,p);g.lineTo(512,p);g.stroke();}
     g.globalAlpha=1;g.strokeStyle=line;g.lineWidth=5;g.strokeRect(2.5,2.5,507,507);});
