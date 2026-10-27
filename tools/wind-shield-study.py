@@ -124,8 +124,15 @@ for name,(material,parts) in QUILL_MODELS.items():
 FEATHER_ROOTS=[.32,.70,1.08,1.46,1.84,2.20]
 # ทุกขนไขว้ข้ามกลางตัว (X ชัด) ปลายลงถึงเท้า เรียงเป็นชั้นจากบนลงล่าง
 # z ลบ = ด้านหน้าตัวละคร (โคนปีกอยู่ z บวก = หลังไหล่) → ขนอ้อมมาห่อไขว้ด้านหน้า
-FEATHER_TIPS=[[-.40,1.15,-.80],[-.45,.85,-.88],[-.38,.50,-.90],[-.30,.20,-.86],[-.20,.02,-.80],[-.50,1.40,-.72]]
+FEATHER_TIPS=[[-.40,1.15,-.96],[-.45,.85,-.90],[-.38,.50,-.84],[-.30,.20,-.78],[-.20,.02,-.72],[-.50,1.40,-1.02]]
 FEATHER_WIDTHS=[.36,.44,.48,.46,.40,.34]
+# สีต่อชั้น [ตัวขน, เงา, ลมไหล, ลมไหล2, ขอบ, ขอบ2] — 0 = บนสุด/ในสุด (สว่าง) … 4 = ล่างสุด/นอกสุด (เข้ม), 5 = ขนบนสุดคลุมไหล่
+FEATHER_COL=[['#9ff0b0','#3d8f6a','#e6fff0','#7fd6a6','#ffffff','#bff5d2'],
+             ['#7fe39a','#2f7f58','#c8ffd8','#5cc489','#eaffef','#9de8b5'],
+             ['#5ccf7c','#1f6a46','#a8ff9e','#3cae6c','#c8ff9e','#6fd88b'],
+             ['#3fb465','#155937','#8cff66','#28935a','#a5ff76','#45c463'],
+             ['#2a9452','#0d4428','#6fe85a','#1d7a46','#86f06a','#2fa553'],
+             ['#b8f7d6','#4c9d8f','#f2fff8','#8fd8c8','#ffffff','#cdeee6']]
 
 def feather_pose(side,i,t):
     s=FEATHER_ROOTS[i];bone=0 if s<CUTS[1] else 1 if s<CUTS[2] else 2
@@ -161,10 +168,12 @@ for side,sid in [(-1,'L'),(1,'R')]:
         fx['layers'].append({'id':f'{sid}_{bone}_air','t':'emit','at':0,'life':DUR,'att':'feet','from':'mesh','of':f'{sid}_{bone}_feathers','rate':3,'burst':0,'dir':'random','speed':[.3,.8],'plife':[.22,.45],'look':'model','model':'wind_wing_airchip','mmat':'glow','msize':[.09,.18],'mspin':80,'col':'#b7ff87','c2':'#329b50','gravity':-.05,'drag':1.6,'curl':False,'bounce':0})
 
     for i in range(6):
+        # ผู้ใช้ 2026-10-27 "make layer for feather and diff color too": แต่ละชั้นขนคนละสี ไล่จากชั้นใน (มิ้นต์/ขาว) ไปชั้นนอก (เขียวเข้ม)
+        FC=FEATHER_COL[i]
         for name,mat,col,c2,opacity,rim in [
-            ('shadow','toon','#48ae5b','#124d32',1.0,.14),
-            ('flow','energy','#8cff66','#239756',.85,.45),
-            ('edge','glow','#a5ff76','#35c85b',1.0,0),
+            ('shadow','toon',FC[0],FC[1],1.0,.14),
+            ('flow','energy',FC[2],FC[3],.85,.45),
+            ('edge','glow',FC[4],FC[5],1.0,0),
             ('glint','glow','#eeffcf','#a0ff7f',.7,0)]:
             op={str(round(t/DUR,5)):round(opacity*extension(t,i)*(1+.15*smooth(t,2.65,3.5)),4) for t in TIMES}
             fx['layers'].append({'id':f'{sid}_long_{i}_{name}','t':'mesh','at':0,'life':DUR,'att':'feet','shape':'model','model':f'wind_shield_longfeather_{name}','mat':mat,'col':col,'col2':c2,'op':op,'rim':rim,'scroll':3,'fade':0,'pos':feather_curve(side,i,0),'rot':feather_curve(side,i,1),'scale':feather_curve(side,i,2)})
