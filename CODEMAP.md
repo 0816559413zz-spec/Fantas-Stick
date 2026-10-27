@@ -134,18 +134,18 @@ MY:202 myDB:203 mySave:204 myLoad:207 myDecodeReady:213 myPlay:214 myNext:226 my
 §248 เพลงประกอบ (สร้างสดตามแผนที่)
 MUSIC:249 THEMES:250 padNote:255 musicTick:262 toggleMusic:291
 
-## js/19-client.js (246) — 
+## js/19-client.js (247) — 
 cv:4 cx:4 DPR:5 SW:5 SH:5 resize:6 VIEW:12 screen:13 lastBuffKey:13 overShown:13 lastCount:13 PARTS:14 TEXTS:14
 §15 งบเอฟเฟกต์ (VFX budget)
-VFXB:20 _apush:21 vfxQual:29 vfxBegin:31 vfxEnd:34 vfxOnce:36 vfxExtra:38 PCOL:39 setScreen:41 onLobby:52 onSnap:58 snapApply:62
-§70 บัฟเฟอร์ snapshot (ลูกข่าย, ผู้ใช้ 2026-10-22 "เล่นออนไลน์ให้ลื่น")
-SBUF:73 NETOLD:74 sbufReset:75 sbufPush:76 sbufAdvance:86
-§98 ทำนายตัวเอง (ลูกข่าย): ตัวเราขยับทันทีที่กด ไม่ต้องรอโฮสต์ตอบ
-PRED:101 predictMe:102 myPos:123
-§125 เอฟเฟกต์
-burst:127 smoke:138 ring:139 floatText:140 shake:141 wandPos:142 impactFX:144 explosionFX:161
-§173 เอฟเฟกต์คาถาใหม่
-ZV:174 COLB:174 WVV:174 GLV:174 ICEV:174 SLV:174 ULTV:174 OBV:174 _iceDisc:176 _iceEdge:177 _iceSpk:178 iceFloorMat:179 _icePlane:180 _icePathMat:181 makeIceFloor:182 updateIceFloors:206 FLASHM:217 FLASHING:218 flashModel:219 endFlash:228 tickFlash:229 GHOSTM:231 SOLIDM:231 ghostOf:232 setGhost:238 hitSparks:246
+VFXB:20 _apush:21 vfxQual:29 vfxBegin:31 vfxEnd:34 vfxOnce:36 vfxExtra:38 PCOL:39 setScreen:41 onLobby:53 onSnap:59 snapApply:63
+§71 บัฟเฟอร์ snapshot (ลูกข่าย, ผู้ใช้ 2026-10-22 "เล่นออนไลน์ให้ลื่น")
+SBUF:74 NETOLD:75 sbufReset:76 sbufPush:77 sbufAdvance:87
+§99 ทำนายตัวเอง (ลูกข่าย): ตัวเราขยับทันทีที่กด ไม่ต้องรอโฮสต์ตอบ
+PRED:102 predictMe:103 myPos:124
+§126 เอฟเฟกต์
+burst:128 smoke:139 ring:140 floatText:141 shake:142 wandPos:143 impactFX:145 explosionFX:162
+§174 เอฟเฟกต์คาถาใหม่
+ZV:175 COLB:175 WVV:175 GLV:175 ICEV:175 SLV:175 ULTV:175 OBV:175 _iceDisc:177 _iceEdge:178 _iceSpk:179 iceFloorMat:180 _icePlane:181 _icePathMat:182 makeIceFloor:183 updateIceFloors:207 FLASHM:218 FLASHING:219 flashModel:220 endFlash:229 tickFlash:230 GHOSTM:232 SOLIDM:232 ghostOf:233 setGhost:239 hitSparks:247
 
 ## js/20-vfx-pyro-storm.js (414) — Dragonfall (ภาพ)
 makeDfCircle:3 DFV:20 dfCracks:21 updateDfCracks:31 dragonfallFX:32
@@ -547,4 +547,4 @@ gameCover:403
 ## js/66-hud4.js (133) — HUD รอบ 4 (ผู้ใช้ 2026-10-23, designs/hud-full-mock.html)
 H4E:5 H4:10 H4C:11 H4RC:11 h4Pal:12 hud4Col:14 h4Runes:15 h4RingSVG:16 h4Parts:25 h4AuBits:30 h4Key:45 h4Ico:46 h4Build:47 h4Set:77 hud4Draw:78 hud4Frame:116 hud4Hide:117 _h4RT:119 _h4Cam:119 h4FaceShot:120 h4FaceSet:133
 
-(67 files, 16502 lines)
+(67 files, 16503 lines)

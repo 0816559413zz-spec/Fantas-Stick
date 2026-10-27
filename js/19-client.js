@@ -40,6 +40,7 @@ const PCOL={bolt:'#ffe27a',fire:'#ff6a2a',stun:'#5ad1ff',pull:'#c77dff',ebolt:'#
 
 function setScreen(s){
   if(s==='game'&&screen!=='game'&&typeof gameCover==='function')gameCover();   // จอมืดสั้น ๆ คลุมเฟรมแรกของแมตช์ (โหลด/compile ที่เหลือ) js/65
+  if(s==='game'&&screen!=='game')try{SCAR.clearNext=true;}catch(e){}   // แมตช์ใหม่ = รอยสนามรบบนหญ้า/พื้นหายหมด (js/50; try = ตอนโหลดไฟล์ js/50 อาจยังไม่มา)
   if(s!=='game'&&document.getElementById('pause')){const pz=document.getElementById('pause');pz.classList.add('hidden');pz.classList.remove('in','out');if(pz._gal)uiGalaxyOn(pz._gal,false);}
   screen=s;document.body.dataset.screen=s;
   $('#menu').classList.toggle('hidden',s!=='menu');

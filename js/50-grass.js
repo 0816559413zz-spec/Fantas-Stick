@@ -52,7 +52,7 @@ const CLW={x:0,z:0,K:9};
 const GRASS={ON:true,DENS:18,H:0.46,W:0.05,MAXN:75000,S:{high:60,auto:46,auto1:34},mesh:null,key:'',cache:new Map(),tex:null,box:null,bakeMs:0,n:0,trail:[],trLast:new WeakMap()};
 // ---------- รอยสนามรบบนหญ้า + พื้น (อยู่ทั้งแมตช์ — designs/battlefield.md ขั้น 3) ----------
 // ภาพรอยขนาดเท่าแผนที่ (RES ช่อง/หน่วย): R = ไหม้ • G = น้ำแข็ง • B = ราบ/หาย • A = ทิศที่ล้ม (0..1 = 0..2π)
-// ล้างเมื่อเริ่มแมตช์ใหม่ / เปลี่ยนแผนที่ • ทุกเครื่องทาที่จุดเดียวกัน (มาจาก event ของโฮสต์) • ภาพล้วน ไม่แตะโปรโตคอล
+// ล้างเมื่อเข้าหน้าเกม (แมตช์ใหม่ — setScreen js/19) / เปลี่ยนแผนที่ • ทุกเครื่องทาที่จุดเดียวกัน (มาจาก event ของโฮสต์) • ภาพล้วน ไม่แตะโปรโตคอล
 const SCAR={RES:2,w:0,h:0,D:null,tex:null,dirty:false,key:'',clearNext:true,empty:null,U:{uScar:{value:null},uScarMap:{value:new THREE.Vector4(0,0,1,1)},uGrLo:{value:0}}};
 SCAR.empty=new THREE.DataTexture(new Uint8Array(4),1,1);SCAR.empty.needsUpdate=true;SCAR.U.uScar.value=SCAR.empty;
 function scarReset(){const b=GRASS.box;if(!b)return;
@@ -258,7 +258,7 @@ function grassTick(dt){
   airTick(dt);
   if(!GRASS.mesh)grassBuild();
   const m=GRASS.mesh;
-  if(screen!=='game'||!world){m.visible=false;SCAR.clearNext=true;GRASS.trail.length=0;return;}
+  if(screen!=='game'||!world){m.visible=false;GRASS.trail.length=0;return;}   // ล้างรอยตอนเข้าแมตช์ใหม่ = setScreen (js/19)
   if(GRASS.key!==builtKey){GRASS.key=builtKey;const c=GRASS.cache.get(builtKey);
     if(c){Object.assign(GRASS,{tex:c.tex,texH:c.texH,box:c.box,n:c.n});airForMap();}
     else try{grassBake();}catch(e){console.error(e);GRASS.n=0;}}
