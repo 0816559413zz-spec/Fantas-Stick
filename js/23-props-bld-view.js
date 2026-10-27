@@ -29,6 +29,8 @@ function propFallback(k,st){
   }
   shadowAll(g);return g;
 }
+// แมพใหญ่: ของที่ไกลกว่าหมอก (มองไม่เห็นอยู่แล้ว) ไม่ต้องวาด — x,y,r = sim px • เช็กเป็นวงกลมรอบกล้องบนพื้น
+function farCull(x,y,r){const dx=tx(x)-cam.position.x,dz=tz(y)-cam.position.z,R=(scene.fog?scene.fog.far:170)+10+r*S3;return dx*dx+dz*dz>R*R;}
 function syncProps(v){
   if(!v||!v.PB){if(PROPV.g)PROPV.g.visible=false;return;}
   if(!PROPV.g||PROPV.g.parent!==world||PROPV.map!==builtMap){
@@ -38,6 +40,7 @@ function syncProps(v){
   }
   PROPV.g.visible=true;
   for(const q of PROPV.list){
+    if(farCull(q.o.x,q.o.y,60)){q.g.visible=false;continue;}q.g.visible=true;   // ไกลเกินหมอก: ซ่อน + ยังไม่ต้องสร้างโมเดล
     const st=+(v.PB[q.o.i]||0);if(st===q.st)continue;q.st=st;
     for(const c of [...q.g.children]){q.g.remove(c);disposeTree(c);}
     const D=PROPDEF[q.o.k];
@@ -189,6 +192,8 @@ function syncBld(dt){
   const file=MODELS.ready.has(BLDDEF.house.model);
   for(const q of BLDV.list){
     if(BLDG[q.b.i]&&q.b!==BLDG[q.b.i]){q.b=BLDG[q.b.i];q.key='';if(DEBRIS.length)clearDebris();}   // เริ่มเกมใหม่ แผนที่เดิม → สถานะชุดใหม่
+    if(farCull(q.b.o.x,q.b.o.y,q.b.o.w)){if(q.g)q.g.visible=false;continue;}   // ไกลเกินหมอก: ซ่อน (ยังไม่เคยเห็น = ยังไม่สร้าง)
+    if(q.g)q.g.visible=true;
     let key=file?'F':'C';for(const p of q.b.pc)key+=(p.fl&3)+'.'+p.cb+',';
     if(key!==q.key){
       q.key=key;if(q.g){BLDV.g.remove(q.g);disposeTree(q.g);}

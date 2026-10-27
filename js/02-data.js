@@ -202,7 +202,7 @@ const PROP_OFF_MODES=['quid','race','imp'];
 const PROP_USE={pchest(p,o){}};
 let PROPS=[],PROPON=false;
 function genProps(id){
-  const M=MAPS[id];if(!M)return [];if(id==='test')return testProps();
+  const M=MAPS[id];if(!M)return [];if(id==='test')return testProps();if(M.props)return M.props();   // แมพจากโค้ดที่วางของเอง (เช่น citytest)
   if(M.fm&&M.fm.props)return M.fm.props.filter(q=>PROPDEF[q.k]).map((q,i)=>{const D=PROPDEF[q.k];return {i,k:q.k,x:q.x,y:q.y,a:q.a||0,r:D.r,hgt:D.hgt,hp:D.hp||0,st:0,ht:0};});   // วางเองในไฟล์แผนที่
   const rng=mulberry(hashStr('props:'+id)),out=[],W=M.W,H=M.H,obs=M.obs||[];
   const n=Math.min(24,Math.round(W*H/200000)),kinds=Object.keys(PROPDEF),wsum=kinds.reduce((a,k)=>a+PROPDEF[k].w,0),cnt={};

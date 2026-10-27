@@ -1,7 +1,7 @@
 // =====================================================================
 //  เครือข่าย (PeerJS / WebRTC)
 // =====================================================================
-const PREFIX='wizduel-th-v42-';
+const PREFIX='wizduel-th-v43-';
 const NET={peer:null,isHost:false,online:false,myId:'me',conns:new Map(),hostConn:null,code:'',spec:false,rtt:0,
   // token ของแท็บนี้ (อยู่ข้ามการรีเฟรช) — โฮสต์ใช้จำว่า "คนเดิมต่อกลับมา" ตอนเน็ตหลุด
   tok:(()=>{const r=()=>Math.random().toString(36).slice(2,10);try{let t=sessionStorage.getItem('wd_tok');if(!t){t=r();sessionStorage.setItem('wd_tok',t);}return t;}catch(e){return r();}})()};
@@ -27,6 +27,30 @@ function hostSend(m){if(LAG.ms||LAG.jit)m=JSON.parse(JSON.stringify(m));lagDo(1,
 let LOBBY=null;
 function genCode(){const c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let s='';for(let i=0;i<5;i++)s+=c[Math.floor(Math.random()*c.length)];return s;}
 function sendAll(m){for(const c of NET.conns.values()){try{if(c.open)c.send(m);}catch(e){}}}
+// ส่งสถานะของพังได้แบบ "เฉพาะที่เปลี่ยน" (แมพใหญ่มีของเป็นพันชิ้น ส่งทั้งหมด 30 ครั้ง/วิ ไม่ไหว — designs/city-bot-battle.md ขั้น 2)
+// สตริงสถานะ PB (prop ละ 1 ตัว) / BK (ของบังละ 1 ตัว) / BD (บ้านคั่นด้วย '|') แบ่งเป็นช่อง → ส่ง: ไม่มีคีย์ = เหมือนเดิม • {i:ค่า} = เฉพาะช่องที่เปลี่ยน • สตริง = ทั้งหมด
+// ทั้งหมดทุก ~2 วิ (เผื่อหลุด/คนเข้าใหม่) + ทันทีที่มีคนต่อเข้ามา (netDeltaReset) • ช่องทาง reliable+เรียงลำดับ ลูกข่ายใช้ทุก snapshot ตามลำดับ
+const NETD_KEYS={PB:'',BK:'',BD:'|'},NETD={last:{},n:0};
+function netDeltaReset(){NETD.last={};}
+function netDelta(base){
+  const o={},full=++NETD.n%60===0;
+  for(const k in NETD_KEYS){const cur=base[k]||'',prev=NETD.last[k];
+    if(prev===cur&&!full){o[k]=undefined;continue;}
+    NETD.last[k]=cur;const sep=NETD_KEYS[k];
+    if(full||prev==null){o[k]=cur;continue;}
+    const A=prev.split(sep),B=cur.split(sep);if(A.length!==B.length){o[k]=cur;continue;}
+    const d={};let n=0;for(let i=0;i<B.length;i++)if(A[i]!==B[i]){d[i]=B[i];n++;}
+    o[k]=n*4<B.length?d:cur;}
+  return o;
+}
+// ลูกข่าย: เติมกลับเป็นสตริงเต็มก่อนเข้า onSnap (snapApply/bldParse/brkParse ใช้แบบเดิม)
+const NETU={};
+function netUndelta(s){
+  for(const k in NETD_KEYS){const v=s[k];
+    if(v===undefined||v===null){if(NETU[k]!==undefined)s[k]=NETU[k];continue;}
+    if(typeof v==='object'){if(NETU[k]===undefined){delete s[k];continue;}const sep=NETD_KEYS[k],L=NETU[k].split(sep);for(const i in v)L[i]=v[i];s[k]=L.join(sep);}
+    NETU[k]=s[k];}
+}
 function setStatus(t){$('#status').textContent=t;const h=document.getElementById('hStatus');if(h)h.textContent=t;}
 
 function hostGame(online){
@@ -138,7 +162,7 @@ function clientOnData(d){
     case 'lobby':onLobby(d);break;
     case 'start':VIEW.prev=VIEW.cur=null;sbufReset();setScreen('game');break;
     case 'po':{const r=performance.now()-d.c;NET.rtt=NET.rtt?NET.rtt*0.8+r*0.2:r;break;}   // ปิงไป-กลับ (เฉลี่ยนุ่ม ๆ)
-    case 's':if(screen!=='game')setScreen('game');unpackP(d.s);onSnap(d.s);break;
+    case 's':if(screen!=='game')setScreen('game');unpackP(d.s);netUndelta(d.s);onSnap(d.s);break;
     case 'priv':onPriv(d.m);break;
   }
 }

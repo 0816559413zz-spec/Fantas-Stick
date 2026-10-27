@@ -39,7 +39,7 @@ function bldNear(b,x,y,pad){return Math.abs(x-b.o.x)<b.o.w*0.75+pad&&Math.abs(y-
 const BLD_MOUND={h:1.5,pad:30};
 function bldGone(b){return b.pc.every(q=>q.fl&1);}
 function bldMoundAt(b,x,y){const [lx,ly]=bldLocal(b,x,y),e=(lx/(b.o.w/2+BLD_MOUND.pad))**2+(ly/(b.o.d/2+BLD_MOUND.pad))**2;return e<1?BLD_MOUND.h*Math.min(1,1.6*(1-e)):0;}
-function bldMoundH(x,y){let g=0;for(const b of BLDG)if(bldNear(b,x,y,BLD_MOUND.pad)&&bldGone(b)){const v=bldMoundAt(b,x,y);if(v>g)g=v;}return g;}
+function bldMoundH(x,y){let g=0;if(!BLDG.length)return 0;for(const b of sgNear(sgBld(),x,y,BLD_MOUND.pad,_sgM))if(bldNear(b,x,y,BLD_MOUND.pad)&&bldGone(b)){const v=bldMoundAt(b,x,y);if(v>g)g=v;}return g;}
 // โดนชิ้นย่อย: code = ส่วน*100 + ชิ้นย่อย (ค่าจาก bldPieceAt)
 function hitBldPiece(b,code,dmg,el,ox,oy){
   const j=Math.floor(code/100),k=code%100,q=b.pc[j];if(!BLDON||!q||!bldAlive(q,k))return;
@@ -83,7 +83,7 @@ function bldSupport(b){
 function damageEnv(x,y,rad,dmg,by,el,h){
   damagePropsIn(x,y,rad,dmg,by);damageBrkIn(x,y,rad,dmg,h);
   if(!BLDON)return;h=h||0;const R=rad/20;
-  for(const b of BLDG){
+  for(const b of sgNear(sgBld(),x,y,rad,_sgE)){
     if(!bldNear(b,x,y,rad))continue;
     const [lx,ly]=bldLocal(b,x,y),hits=[];
     for(let j=0;j<6;j++){const q=b.pc[j];if(q.fl&1)continue;
@@ -118,7 +118,7 @@ function aimRay3(p,h0,range){
     const nx=p.x+dx*s,ny=p.y+dy*s,nh=h0+dh*s/20;
     if(nx<40||nx>MW-40||ny<40||ny>MH-40)return {x,y,h,hit:'edge'};
     const g=groundH(nx,ny);if(nh<=g)return {x:nx,y:ny,h:g,hit:'ground'};
-    if(BLDON)for(const b of BLDG)if(bldNear(b,nx,ny,8)&&bldPieceAt(b,nx,ny,nh,6)>=0)return {x:nx,y:ny,h:nh,hit:'bld'};
+    if(BLDON)for(const b of sgNear(sgBld(),nx,ny,8,_sgA))if(bldNear(b,nx,ny,8)&&bldPieceAt(b,nx,ny,nh,6)>=0)return {x:nx,y:ny,h:nh,hit:'bld'};
     x=nx;y=ny;h=nh;
   }
   return {x,y,h,hit:'air'};
@@ -216,18 +216,37 @@ function damageBrkIn(x,y,rad,dmg,h){
 }
 function brkSnap(){return PROPON&&BRK.some(g=>g.st)?BRK.map(g=>g.st).join(''):'';}
 function brkParse(s){s=s||'';for(const g of BRK){const st=+(s[g.i]||0);if(st!==g.st)brkApply(g,st);}}
+// ---------- ตารางช่อง (spatial grid) สำหรับแมพใหญ่: หาเฉพาะของใกล้ ๆ แทนวนทุกชิ้นในแผนที่ ----------
+// ช่องละ SG.c px • สร้างใหม่เองเมื่อรายการ/ขนาดแผนที่เปลี่ยน (ของในรายการต้องไม่ย้ายที่ — OBS / PROPS / BLDG ไม่ย้าย)
+// sgNear(ตาราง,x,y,รัศมี,out) = ของทุกชิ้นที่กรอบแตะวงนั้น (ไม่ซ้ำ) ใส่ลง out • แต่ละจุดเรียกใช้ out ของตัวเอง (กันทับกันตอนเรียกซ้อน)
+const SG={c:400,s:0,m:new Map()};
+const sgObs=()=>sgGrid('o',OBS,c=>[c.x-c.r,c.y-c.r,c.x+c.r,c.y+c.r]),sgProps=()=>sgGrid('p',PROPS,c=>[c.x-c.r,c.y-c.r,c.x+c.r,c.y+c.r]),
+  sgBld=()=>sgGrid('b',BLDG,b=>{const e=b.o.w*0.75;return [b.o.x-e,b.o.y-e,b.o.x+e,b.o.y+e];});
+function sgGrid(key,list,box){
+  let g=SG.m.get(key);if(g&&g.list===list&&g.n===list.length&&g.mw===MW&&g.mh===MH)return g;
+  const c=SG.c,nx=Math.ceil(MW/c)+1,ny=Math.ceil(MH/c)+1,cells=Array.from({length:nx*ny},()=>[]);
+  for(const o of list){const B=box(o),x0=clamp(Math.floor(B[0]/c),0,nx-1),x1=clamp(Math.floor(B[2]/c),0,nx-1),y0=clamp(Math.floor(B[1]/c),0,ny-1),y1=clamp(Math.floor(B[3]/c),0,ny-1);
+    for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++)cells[y*nx+x].push(o);}
+  g={list,n:list.length,mw:MW,mh:MH,nx,ny,cells};SG.m.set(key,g);return g;
+}
+function sgNear(g,x,y,r,out){
+  out.length=0;const c=SG.c,s=++SG.s,x0=clamp(Math.floor((x-r)/c),0,g.nx-1),x1=clamp(Math.floor((x+r)/c),0,g.nx-1),y0=clamp(Math.floor((y-r)/c),0,g.ny-1),y1=clamp(Math.floor((y+r)/c),0,g.ny-1);
+  for(let cy=y0;cy<=y1;cy++)for(let cx=x0;cx<=x1;cx++)for(const o of g.cells[cy*g.nx+cx])if(o._sg!==s){o._sg=s;out.push(o);}
+  return out;
+}
+const _sgCW=[],_sgCB=[],_sgCO=[],_sgPO=[],_sgPB=[],_sgPP=[],_sgM=[],_sgE=[],_sgA=[];
 function collideWorld(o,r,z){
   z=z||0;const sx=o.x,sy=o.y;let sol=0;
   o.x=clamp(o.x,r+20,MW-r-20);o.y=clamp(o.y,r+20,MH-r-20);if(o.x!==sx||o.y!==sy)sol++;
-  if(PROPON)for(const c of PROPS){
+  if(PROPON)for(const c of sgNear(sgProps(),o.x,o.y,r,_sgCW)){
     if(c.st===1||c.hgt<=z)continue;
     if(Math.abs(o.x-c.x)>c.r+r||Math.abs(o.y-c.y)>c.r+r)continue;
     const dx=o.x-c.x,dy=o.y-c.y,d=Math.hypot(dx,dy),m=c.r+r;
     if(d<m&&d>0.001){o.x=c.x+dx/d*m;o.y=c.y+dy/d*m;}
   }
-  for(const b of BLDG)if(bldNear(b,o.x,o.y,r)){const bx=o.x,by=o.y;collideBld(b,o,r,z);if(o.x!==bx||o.y!==by)sol++;}
+  if(BLDG.length)for(const b of sgNear(sgBld(),o.x,o.y,r,_sgCB))if(bldNear(b,o.x,o.y,r)){const bx=o.x,by=o.y;collideBld(b,o,r,z);if(o.x!==bx||o.y!==by)sol++;}
   const za=TERR?terrT(o.x,o.y)+z:z;
-  for(const c of OBS){
+  for(const c of sgNear(sgObs(),o.x,o.y,r,_sgCO)){
     if((c.top!==undefined?c.top<=za:c.hgt<=z)||c.bi!==undefined)continue;
     if(Math.abs(o.x-c.x)>c.r+r||Math.abs(o.y-c.y)>c.r+r)continue;
     const dx=o.x-c.x,dy=o.y-c.y,d=Math.hypot(dx,dy),m=c.r+r;
@@ -407,9 +426,9 @@ function updateProjectiles(dt){
     if(pr.life<=0||pr.x<20||pr.x>MW-20||pr.y<20||pr.y>MH-20||pr.h>40){killProj(pr);continue;}
     if(pr.h<0.05||(TERR&&terrSolid(pr.x,pr.y,pr.h))||(BLDG.length&&pr.h<bldMoundH(pr.x,pr.y))){pr.h=Math.max(pr.h,0.1);killProj(pr);continue;}   // + ชนเนินซากบ้าน
     let hp=false;
-    for(const c of OBS)if(c.bi===undefined&&(c.top!==undefined?terrT(pr.x,pr.y)+pr.h<c.top:pr.h<c.hgt)&&(pr.x-c.x)**2+(pr.y-c.y)**2<(c.r+pr.r)**2){hp=true;break;}
-    if(!hp)for(const b of BLDG){if(!bldNear(b,pr.x,pr.y,pr.r))continue;const j=bldPieceAt(b,pr.x,pr.y,pr.h,pr.r);if(j>=0){hitBldPiece(b,j,pr.dmg||5,projEl(pr),pr.x-pr.vx*0.08,pr.y-pr.vy*0.08);hp=true;break;}}
-    if(!hp&&PROPON)for(const c of PROPS)if(c.st!==1&&pr.h<c.hgt&&(pr.x-c.x)**2+(pr.y-c.y)**2<(c.r+pr.r)**2){hitProp(c,pr.dmg||5,pr.owner);hp=true;break;}
+    for(const c of sgNear(sgObs(),pr.x,pr.y,pr.r,_sgPO))if(c.bi===undefined&&(c.top!==undefined?terrT(pr.x,pr.y)+pr.h<c.top:pr.h<c.hgt)&&(pr.x-c.x)**2+(pr.y-c.y)**2<(c.r+pr.r)**2){hp=true;break;}
+    if(!hp&&BLDG.length)for(const b of sgNear(sgBld(),pr.x,pr.y,pr.r,_sgPB)){if(!bldNear(b,pr.x,pr.y,pr.r))continue;const j=bldPieceAt(b,pr.x,pr.y,pr.h,pr.r);if(j>=0){hitBldPiece(b,j,pr.dmg||5,projEl(pr),pr.x-pr.vx*0.08,pr.y-pr.vy*0.08);hp=true;break;}}
+    if(!hp&&PROPON)for(const c of sgNear(sgProps(),pr.x,pr.y,pr.r,_sgPP))if(c.st!==1&&pr.h<c.hgt&&(pr.x-c.x)**2+(pr.y-c.y)**2<(c.r+pr.r)**2){hitProp(c,pr.dmg||5,pr.owner);hp=true;break;}
     if(!hp)for(const w of G.walls)if(pr.team!==w.team&&pr.h<w.hgt&&(pr.x-w.x)**2+(pr.y-w.y)**2<(w.r+pr.r)**2){w.hp-=pr.dmg||5;hp=true;emit({k:'efx',z:'wallhit',x:pr.x,y:pr.y,h:pr.h});break;}
     if(!hp&&eProjHit(pr))hp=true;
     if(hp){killProj(pr);continue;}

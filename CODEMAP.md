@@ -95,10 +95,12 @@ G:4 EVL:4 EVN:4 hostLast:4 tickN:4 emit:5 feed:6 banner:7 plist:8 cleanName:9 fr
 §208 ลูปหลักฝั่งโฮสต์
 hostTick:209 angDiff:223 cH:225 vR:226 updatePlayer:228 hitProp:374 damagePropsIn:381 nearUseProp:382 useProp:383
 
-## js/12-buildings.js (449) — สิ่งปลูกสร้างที่พังเป็นชิ้นย่อย (บ้าน) แบบ Battlefield — คู่มือเต็ม: …
+## js/12-buildings.js (468) — สิ่งปลูกสร้างที่พังเป็นชิ้นย่อย (บ้าน) แบบ Battlefield — คู่มือเต็ม: …
 BLDDEF:8 BLD_PIECES:9 BLD_GRID:10 BLD_FIRE:11 BLD_ICE:11 BLD_ROOF_MIN:11 BLDG:12 BLDON:12 genBldg:13 bldRect:23 bldChunk:25 bldAlive:32 bldLocal:33 bldWorld:34 rectDist:35 bldNear:36 BLD_MOUND:39 bldGone:40 bldMoundAt:41 bldMoundH:42 hitBldPiece:44 breakBldChunk:55 bldSupport:63 damageEnv:83 bldRay:97 aimClip:105 aimRay3:112 bldPieceAt:127 projEl:137 bldPush:142 collideBld:148 updateBldg:163 bldSnap:175 bldParse:181
 §185 ของบังในแผนที่ไฟล์ที่พังได้ (หิน เสา รูปปั้น ต้นไม้ โคมไฟ ลัง ...) — …
-BRKDEF:189 BRK_M:189 BRK_MCOL:189 BRK:190 genBrk:191 brkApply:198 brkStage:202 hitBrk:203 damageBrkIn:211 brkSnap:217 brkParse:218 collideWorld:219 shoot:246 eShoot:267 foesOf:274 breakShield:281 ULT_RATE:283 ultActive:284 gainUlt:285 lifesteal:286 damage:288 playerDown:344 killProj:365 explode:374 hitTarget:386 updateProjectiles:402
+BRKDEF:189 BRK_M:189 BRK_MCOL:189 BRK:190 genBrk:191 brkApply:198 brkStage:202 hitBrk:203 damageBrkIn:211 brkSnap:217 brkParse:218
+§219 ตารางช่อง (spatial grid) สำหรับแมพใหญ่: หาเฉพาะของใกล้ ๆ แทนวนทุกชิ้น…
+SG:222 sgObs:223 sgProps:223 sgGrid:225 sgNear:232 _sgCW:237 _sgCB:237 _sgCO:237 _sgPO:237 _sgPB:237 _sgPP:237 _sgM:237 _sgE:237 _sgA:237 collideWorld:238 shoot:265 eShoot:286 foesOf:293 breakShield:300 ULT_RATE:302 ultActive:303 gainUlt:304 lifesteal:305 damage:307 playerDown:363 killProj:384 explode:393 hitTarget:405 updateProjectiles:421
 
 ## js/13-enemies.js (168) — ศัตรู (โหมด Co-op)
 spawnEnemy:2 setupWave:19 bossPhase:36 enemySlam:44 updateEnemies:55
@@ -553,4 +555,4 @@ gameCover:403
 ## js/66-hud4.js (133) — HUD รอบ 4 (ผู้ใช้ 2026-10-23, designs/hud-full-mock.html)
 H4E:5 H4:10 H4C:11 H4RC:11 h4Pal:12 hud4Col:14 h4Runes:15 h4RingSVG:16 h4Parts:25 h4AuBits:30 h4Key:45 h4Ico:46 h4Build:47 h4Set:77 hud4Draw:78 hud4Frame:116 hud4Hide:117 _h4RT:119 _h4Cam:119 h4FaceShot:120 h4FaceSet:133
 
-(69 files, 16702 lines)
+(69 files, 16721 lines)
