@@ -7,23 +7,23 @@ function pyroBigBoom(pr){
   damageEnv(pr.x,pr.y,90,40,pr.owner,'fireblast',pr.h);
   const o=G.players[pr.owner];if(!o)return;
   let best=null,bd=1e9;
-  for(const t of foesIn(pr.team,pr.x,pr.y,90,pr.h+3.5)){aoeHit(o,t,20,t=>addBurn(t,1,pr.owner));const d=Math.hypot(t.x-pr.x,t.y-pr.y);if(d<bd){bd=d;best=t;}}
+  for(const t of foesIn(pr.team,pr.x,pr.y,90,pr.h+3.5)){aoeHit(o,t,16,t=>addBurn(t,1,pr.owner));const d=Math.hypot(t.x-pr.x,t.y-pr.y);if(d<bd){bd=d;best=t;}}
   if(best)launchOrbs(o,best);
 }
-function pyroBall(p){shoot(p,'pfire',{sp:'pyroball',dmg:15});}   // เนิร์ฟ 2026-10-27: 20→15
+function pyroBall(p){shoot(p,'pfire',{sp:'pyroball',dmg:12});}   // เนิร์ฟ 2026-10-27: 20→15→12
 function pyroBasic(p,inp,dt,setCd){
   const prev=p.bfPrev;p.bfPrev=inp.fire;
   if(p.dfall){if(p.dfall.ph===2&&inp.fire&&!prev)dragonfallDive(p);p.chg=0;return;}
   if(p.breath>0||p.snapT>0){p.chg=0;return;}
   if(inp.fire&&!prev){
     // Kindle: คลิก = ลูกไฟชาร์จเต็มทันที
-    if(p.kindle>0&&p.cd.basic<=0){p.kindle--;if(!p.kindle){p.kindleT=0;p.hover=0;}shoot(p,'pfireb',{sp:'pyrobig',dmg:20});setCd('basic',0.5);p.chg=-1;return;}
+    if(p.kindle>0&&p.cd.basic<=0){p.kindle--;if(!p.kindle){p.kindleT=0;p.hover=0;}shoot(p,'pfireb',{sp:'pyrobig',dmg:16});setCd('basic',0.5);p.chg=-1;return;}
     p.chg=0;
   }else if(inp.fire){if(p.chg>=0)p.chg=Math.min(1.5,p.chg+dt);}
   else if(prev){
     // ปล่อยคลิก: แตะสั้น = ประกายไฟ / ชาร์จครบ 3 วิ = ลูกไฟ / ระหว่างนั้น = ไม่ยิง
     if(p.chg>=1.5){pyroBall(p);setCd('basic',0.5);}
-    else if(p.chg>=0&&p.chg<0.25&&p.cd.basic<=0){shoot(p,'spark',{sp:'b_pyro',dmg:6});setCd('basic',0.3);}
+    else if(p.chg>=0&&p.chg<0.25&&p.cd.basic<=0){shoot(p,'spark',{sp:'b_pyro',dmg:5});setCd('basic',0.3);}
     p.chg=0;
   }
 }
@@ -36,7 +36,7 @@ function launchOrbs(p,t){
   const n=p.orbs|0;if(!n||!t)return;p.orbs=0;
   const d=Math.hypot(t.x-p.x,t.y-p.y),tt=Math.max(0.15,d/1300);
   emit({k:'efx',z:'orbshot',x:p.x,y:p.y,h:p.z+1.3,x2:t.x,y2:t.y,h2:cH(t),n,t:Math.round(tt*100)/100});
-  G.strikes.push({t:tt,fn:()=>{if(t.dead||(!t.isE&&!t.isM&&(!t.alive||t.downed)))return;aoeHit(p,t,5*n);emit({k:'efx',z:'orbhit',x:t.x,y:t.y,h:cH(t),n});}});
+  G.strikes.push({t:tt,fn:()=>{if(t.dead||(!t.isE&&!t.isM&&(!t.alive||t.downed)))return;aoeHit(p,t,4*n);emit({k:'efx',z:'orbhit',x:t.x,y:t.y,h:cH(t),n});}});
 }
 // คืนค่า true = กำลังชาร์จ (ขยับ/ยิง/ร่ายไม่ได้)
 function pyroDash(p,inp,pr,dt,setCd){
@@ -59,7 +59,7 @@ function pyroDash(p,inp,pr,dt,setCd){
 }
 // ทางไฟจาก Dash (ผู้ใช้ 2026-10-22): ค้าง 3 วิ • ศัตรูเหยียบเข้า = burn +1 stack (ต่อการเข้า 1 ครั้ง) • ยืนบนทาง = 10 ดาเมจ/วิ
 // ⚠ Claude เลือกเอง: กว้าง 1.5 ม. (ครึ่ง 15 px + ตัว) • เข้าซ้ำได้ stack ใหม่หลังออกไปแล้ว ≥1 วิ • ไม่โดนตัวเอง/ทีม • ลอยสูง >1.2 ม. ไม่โดน
-const FPATH={T:3,W:15,DPS:10};
+const FPATH={T:3,W:15,DPS:8};
 function pyroPathEnd(p){
   const f=p.fpath;p.fpath=null;const len=Math.hypot(p.x-f.x,p.y-f.y);if(len<20||len>1300||!p.alive||p.downed)return;
   (G.fpaths||(G.fpaths=[])).push({x0:f.x,y0:f.y,x1:p.x,y1:p.y,t:FPATH.T,tt:0.5,owner:p.id,team:p.team,on:new Map()});
@@ -85,9 +85,9 @@ function updateFirePaths(dt){
 // =====================================================================
 //  สายไฟ — ความร้อน: สะสมด้วยลูกไฟ/กำแพง/พุ่งเพลิง แล้วจุดระเบิดด้วยระเบิดความร้อน/อุกกาบาต
 // =====================================================================
-defSpell(0,{id:'kindle',role:'builder',n:'Kindle',ic:'🔥',cd:9,d:'กระโดดสูงไปทางที่กด WASD (ไม่กด = ถอยหลัง) ขึ้นกลางอากาศ แล้วลอยตกช้าๆ 3 วิ (แบบฟาราห์/เฟรย่า) • ยิงปกติ 2 นัดกลายเป็นลูกไฟใหญ่ทันที (20 ดาเมจ ระเบิดวงกว้าง ~90 +1 Burning ทุกคนในวง)',fx:'ยิงครบ 2 ลูกหรือครบ 3 วิ = ตกลงพื้นตามปกติ • ไฟพุ่งจากใต้เท้าตอนลอย',
+defSpell(0,{id:'kindle',role:'builder',n:'Kindle',ic:'🔥',cd:9,d:'กระโดดสูงไปทางที่กด WASD (ไม่กด = ถอยหลัง) ขึ้นกลางอากาศ แล้วลอยตกช้าๆ 3 วิ (แบบฟาราห์/เฟรย่า) • ยิงปกติ 2 นัดกลายเป็นลูกไฟใหญ่ทันที (16 ดาเมจ ระเบิดวงกว้าง ~90 +1 Burning ทุกคนในวง)',fx:'ยิงครบ 2 ลูกหรือครบ 3 วิ = ตกลงพื้นตามปกติ • ไฟพุ่งจากใต้เท้าตอนลอย',
   cast(p,S){p.kindle=2;p.kindleT=3;p.hover=3;p.vz=15;{const i=p.inp||{};let dx=i.mx||0,dy=i.my||0;const l=Math.hypot(dx,dy);if(l>0.1){dx/=l;dy/=l;}else{dx=-Math.cos(p.ang);dy=-Math.sin(p.ang);}p.vx+=dx*1000;p.vy+=dy*1000;}p.shieldOn=false;emit({k:'efx',z:'kindle',x:p.x,y:p.y,h:p.z,id:p.id});}});
-defSpell(0,{id:'dragonfall',role:'builder',n:'Dragonfall',ic:'🐉',cd:13,d:'ทะยานขึ้นฟ้าด้วยเปลวไฟ แล้วบินควบคุมได้ 3 วิ (WASD เคลื่อนช้าๆ • Space ขึ้น / C ลง เล็กน้อย) — จุดที่เล็งคือจุดลง มีวงเตือนบนพื้นตามเป้าเล็งให้ทุกคนเห็น • คลิกยิง = ดิ่งกระแทกทันที • ครบ 3 วิ = ดิ่งลงจุดเล็งล่าสุดอัตโนมัติ',fx:'กระแทกวงรัศมี 120: 28 ดาเมจ +1 Burning + ช้าลง 30% 1.2 วิ (โดนครั้งเดียวต่อคน) • ไม่อมตะระหว่างบิน • โดนสตัน/แช่แข็งระหว่างบิน = ร่วงลงเฉยๆ ไม่กระแทก • ระหว่างบิน: ยิงปกติได้ แต่ใช้โล่/พุ่ง/คาถาอื่นไม่ได้',
+defSpell(0,{id:'dragonfall',role:'builder',n:'Dragonfall',ic:'🐉',cd:13,d:'ทะยานขึ้นฟ้าด้วยเปลวไฟ แล้วบินควบคุมได้ 3 วิ (WASD เคลื่อนช้าๆ • Space ขึ้น / C ลง เล็กน้อย) — จุดที่เล็งคือจุดลง มีวงเตือนบนพื้นตามเป้าเล็งให้ทุกคนเห็น • คลิกยิง = ดิ่งกระแทกทันที • ครบ 3 วิ = ดิ่งลงจุดเล็งล่าสุดอัตโนมัติ',fx:'กระแทกวงรัศมี 120: 22 ดาเมจ +1 Burning + ช้าลง 30% 1.2 วิ (โดนครั้งเดียวต่อคน) • ไม่อมตะระหว่างบิน • โดนสตัน/แช่แข็งระหว่างบิน = ร่วงลงเฉยๆ ไม่กระแทก • ระหว่างบิน: ยิงปกติได้ แต่ใช้โล่/พุ่ง/คาถาอื่นไม่ได้',
   cast(p,S){
     if(p.dfall||p.colos>0)return false;
     const g0=groundH(p.x,p.y),q=aimPoint(p,600);
@@ -115,31 +115,31 @@ function dragonfallTick(p,inp,dt){
 }
 function dragonfallBoom(p,x,y,gh){
   emit({k:'efx',z:'dfboom',x:Math.round(x),y:Math.round(y),h:gh+0.08,r:DF_R,id:p.id});
-  for(const t of foesIn(p.team,x,y,DF_R,gh+4))aoeHit(p,t,28,t=>{addBurn(t,1,p.id);addSlow(t,0.7,1.2);});
+  for(const t of foesIn(p.team,x,y,DF_R,gh+4))aoeHit(p,t,22,t=>{addBurn(t,1,p.id);addSlow(t,0.7,1.2);});
   damageEnv(x,y,DF_R,60,p.id,'fireblast',gh);
 }
-defSpell(0,{id:'ringofembers',role:'control',n:'Ring of Embers',ic:'⭕',cd:14,d:'อุกกาบาตไฟตกลงที่จุดเล็ง (ระยะ ~400) โดนคนในวง 10 ดาเมจ แล้วกลายเป็นวงเพลิง (รัศมี ~170) นาน 3 วิ — คนข้างในเดินออกไม่ได้',fx:'พยายามเดินออก = 12.5 ดาเมจ + ผลักกลับเข้าวง • ใครแตะขอบวงไฟ = ช้าลง 40% • คนข้างนอกเดินเข้าได้',
+defSpell(0,{id:'ringofembers',role:'control',n:'Ring of Embers',ic:'⭕',cd:14,d:'อุกกาบาตไฟตกลงที่จุดเล็ง (ระยะ ~400) โดนคนในวง 8 ดาเมจ แล้วกลายเป็นวงเพลิง (รัศมี ~170) นาน 3 วิ — คนข้างในเดินออกไม่ได้',fx:'พยายามเดินออก = 10 ดาเมจ + ผลักกลับเข้าวง • ใครแตะขอบวงไฟ = ช้าลง 40% • คนข้างนอกเดินเข้าได้',
   cast(p,S){
     const q=aimPoint(p,400);
     // อุกกาบาตไฟตกลงจุดที่วาง ~0.3 วิ → ตกถึงพื้น = 10 ดาเมจครั้งเดียว (ผู้เล่นสั่ง 2026-10-19) แล้ววงไฟค่อยเริ่ม (กับดักเริ่มช้าลง 0.3 วิ)
     (G.erings||(G.erings=[])).push({x:q.x,y:q.y,r:170,t:3,del:0.3,owner:p.id,team:p.team,in:new Set(),cd:new Map(),ed:new Map()});
     emit({k:'efx',z:'ermet',x:q.x,y:q.y,h:0.2,r:170,t:0.3,id:p.id});
   }});
-defSpell(0,{id:'blazeform',role:'utility',n:'Blazeform',ic:'🔥',cd:20,d:'กลายร่างเปลวไฟ 4 วิ: ดาเมจทุกสกิล (รวมเผา Burning) +15% • เดินเร็ว +25% • ออร่าไฟรอบตัว (รัศมี ~130) เผา 3/วิ • ศัตรูที่โดนออร่าครั้งแรก +1 Burning (คนละ 1 ชั้นต่อการใช้ 1 ครั้ง)',fx:'ผลเสีย: เรารับดาเมจ +25% ระหว่างนั้น',
+defSpell(0,{id:'blazeform',role:'utility',n:'Blazeform',ic:'🔥',cd:20,d:'กลายร่างเปลวไฟ 4 วิ: ดาเมจทุกสกิล (รวมเผา Burning) +15% • เดินเร็ว +25% • ออร่าไฟรอบตัว (รัศมี ~130) เผา ~2.4/วิ • ศัตรูที่โดนออร่าครั้งแรก +1 Burning (คนละ 1 ชั้นต่อการใช้ 1 ครั้ง)',fx:'ผลเสีย: เรารับดาเมจ +25% ระหว่างนั้น',
   cast(p,S){p.blaze=4;p.blzTk=0;p.blzN=0;p.blzHit=new Set();emit({k:'efx',z:'blaze',x:p.x,y:p.y,h:p.z+1,id:p.id});}});
-defSpell(0,{id:'ignitionsnap',role:'finisher',n:'Ignition Snap',ic:'🫰',cd:15,d:'ท่าเตรียม 0.6 วิ แล้วดีดนิ้ว: ศัตรูทุกคนที่มี Burning ในระยะ 500 ระเบิดพร้อมกัน (ไม่ต้องเล็ง)',fx:'20 ดาเมจต่อ 1 ชั้น Burning (5 ชั้น = 100) และฮีลเรา 10 ต่อชั้น แล้วใช้ Burning หมด • ไม่มีใครติดไฟในระยะ = ไม่เสียคูลดาวน์',
+defSpell(0,{id:'ignitionsnap',role:'finisher',n:'Ignition Snap',ic:'🫰',cd:15,d:'ท่าเตรียม 0.6 วิ แล้วดีดนิ้ว: ศัตรูทุกคนที่มี Burning ในระยะ 500 ระเบิดพร้อมกัน (ไม่ต้องเล็ง)',fx:'16 ดาเมจต่อ 1 ชั้น Burning (5 ชั้น = 80) และฮีลเรา 8 ต่อชั้น แล้วใช้ Burning หมด • ไม่มีใครติดไฟในระยะ = ไม่เสียคูลดาวน์',
   cast(p,S){
     if(!foesOf(p.team).some(t=>t.brn>0&&Math.hypot(t.x-p.x,t.y-p.y)<500))return false;
     p.snapT=0.6;emit({k:'efx',z:'snapwind',x:p.x,y:p.y,h:p.z+1.4,id:p.id});
   }});
-defSpell(0,{id:'colossus',role:'ult',n:'Inferno Colossus',ic:'👹',cd:0,ult:true,d:'เวทโบราณสายไฟ: กระโดดขึ้นฟ้าทันที ร่างยักษ์ไฟปรากฏกลางอากาศ 6 วิ (Space = ขึ้น / Ctrl หรือ C = ลง) ถือหน้าไม้ไฟ ยิงได้ 3 นัด (เว้น 1 วิ) นัดละ 100 ดาเมจ ระเบิดวง ~200',fx:'คนโดน +3 Burning และ Extreme Burning (10/วิ 5 วิ) • ลอยเคลื่อนที่ได้ช้า โดนยิงได้ปกติ • ยิงครบ 3 นัด = ร่างหาย',
+defSpell(0,{id:'colossus',role:'ult',n:'Inferno Colossus',ic:'👹',cd:0,ult:true,d:'เวทโบราณสายไฟ: กระโดดขึ้นฟ้าทันที ร่างยักษ์ไฟปรากฏกลางอากาศ 6 วิ (Space = ขึ้น / Ctrl หรือ C = ลง) ถือหน้าไม้ไฟ ยิงได้ 3 นัด (เว้น 1 วิ) นัดละ 80 ดาเมจ ระเบิดวง ~200',fx:'คนโดน +3 Burning และ Extreme Burning (8/วิ 5 วิ) • ลอยเคลื่อนที่ได้ช้า โดนยิงได้ปกติ • ยิงครบ 3 นัด = ร่างหาย',
   cast(p,S){p.colos=6;p.colN=3;p.colCd=0.6;p.colH=9;p.vz=0;p.fly=false;p.shieldOn=false;p.dchgOn=false;p.breath=0;emit({k:'efx',z:'colossus',x:p.x,y:p.y,h:p.z,id:p.id});}});
 function pyroSnap(p){
   emit({k:'efx',z:'snap',x:p.x,y:p.y,h:p.z+1.6,id:p.id});
   for(const t of foesOf(p.team)){
     if(!(t.brn>0)||Math.hypot(t.x-p.x,t.y-p.y)>500)continue;
     const n=t.brn|0;
-    if(aoeHit(p,t,20*n)){t.brn=0;t.brnT=0;healT(p,10*n);}   // เนิร์ฟ 2026-10-27 (ผู้ใช้): 25→20 ดาเมจ, ฮีล 20→10 ต่อชั้น
+    if(aoeHit(p,t,16*n)){t.brn=0;t.brnT=0;healT(p,8*n);}   // เนิร์ฟ 2026-10-27 (ผู้ใช้): 25→20→16 ดาเมจ, ฮีล 20→10→8 ต่อชั้น
     emit({k:'efx',z:'snapboom',x:t.x,y:t.y,h:cH(t),n});
   }
 }
@@ -158,7 +158,7 @@ function colossusTick(p,inp,dt){
   emit({k:'efx',z:'colbolt',x:fx,y:fy,h:p.z+4.2,x2:q.x,y2:q.y,h2:qh,t:tt,id:p.id});
   G.strikes.push({x:q.x,y:q.y,r:200,t:tt,fn:s=>{
     emit({k:'efx',z:'colboom',x:s.x,y:s.y,h:qh+0.3,r:200});
-    for(const t of foesIn(p.team,s.x,s.y,200,q.h+6))if((t.isE?(t.h||0):(t.z||0))>q.h-6)aoeHit(p,t,100,t=>{addBurn(t,3,p.id);addXBurn(t,p.id);});
+    for(const t of foesIn(p.team,s.x,s.y,200,q.h+6))if((t.isE?(t.h||0):(t.z||0))>q.h-6)aoeHit(p,t,80,t=>{addBurn(t,3,p.id);addXBurn(t,p.id);});
     damageEnv(s.x,s.y,200,100,p.id,'fireblast',q.h);   // พังบ้าน/ลัง
   }});
   if(p.colN<=0)p.colos=Math.min(p.colos,0.5);
@@ -167,7 +167,7 @@ function updateERings(dt){
   if(!G.erings||!G.erings.length)return;
   for(const R of G.erings){
     if(R.del>0){R.del-=dt;if(R.del>0)continue;
-      for(const t of foesIn(R.team,R.x,R.y,R.r,6))aoeHit({id:R.owner,x:R.x,y:R.y},t,10);
+      for(const t of foesIn(R.team,R.x,R.y,R.r,6))aoeHit({id:R.owner,x:R.x,y:R.y},t,8);
       emit({k:'efx',z:'ering',x:R.x,y:R.y,h:0.2,r:R.r,t:R.t});continue;}
     R.t-=dt;
     for(const t of foesOf(R.team)){
@@ -178,7 +178,7 @@ function updateERings(dt){
       if(!R.in.has(t))continue;
       // อยู่ข้างในแล้วพยายามออก: ผลักกลับเข้าวง
       const m=R.r-tr*0.5-4;t.x=R.x+dx/d*m;t.y=R.y+dy/d*m;t.vx=-dx/d*280;t.vy=-dy/d*280;if(t.dash>0)t.dash=0;
-      if(!(R.cd.get(t)>G.time)&&!(!t.isE&&!t.isM&&t.inv>0)){R.cd.set(t,G.time+0.5);damage(t,12.5,R.owner,'zone');emit({k:'efx',z:'eringhit',x:t.x,y:t.y,h:cH(t)});}
+      if(!(R.cd.get(t)>G.time)&&!(!t.isE&&!t.isM&&t.inv>0)){R.cd.set(t,G.time+0.5);damage(t,10,R.owner,'zone');emit({k:'efx',z:'eringhit',x:t.x,y:t.y,h:cH(t)});}
     }
   }
   G.erings=G.erings.filter(R=>R.t>0);

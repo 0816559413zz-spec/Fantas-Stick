@@ -96,10 +96,10 @@ function frostSlow(t){
   return Math.min(80,s);
 }
 function moveMul(t){let m=1;const fs=frostSlow(t);if(fs>0)m*=1-fs/100;if(t.chl>0)m*=1-0.1*t.chl;if(t.slowT>0)m*=t.slowF;if(t.haste>0)m*=t.hasteF;if(t.blaze>0)m*=1.25;return Math.max(0.25,m);}
-// Burning (สายไฟ): สูงสุด BRN_MAX ชั้น • เผา 1/วิ/ชั้น • ไม่โดนเพิ่ม 6 วิ แล้วลดทีละ 1 ชั้นทุก 1 วิ (เนิร์ฟ 2026-10-27: เดิม 2/วิ, 10 วิ)
+// Burning (สายไฟ): สูงสุด BRN_MAX ชั้น • เผา 0.8/วิ/ชั้น • ไม่โดนเพิ่ม 6 วิ แล้วลดทีละ 1 ชั้นทุก 1 วิ (เนิร์ฟ 2026-10-27: เดิม 2/วิ, 10 วิ)
 const BRN_MAX=6;
 function addBurn(t,n,src){if(t.dead)return;const was=t.brn|0;t.brn=Math.min(BRN_MAX,was+n);t.brnT=6;t.brnSrc=src;if(!(t.brnTick>0))t.brnTick=0.5;if(t.brn>was)emit({k:'efx',z:'brn',x:t.x,y:t.y,h:cH(t)+0.8,n:t.brn});}
-// Extreme Burning (อัลติสายไฟ): เผา 10/วิ นาน 5 วิ (รวม 50)
+// Extreme Burning (อัลติสายไฟ): เผา 8/วิ นาน 5 วิ (รวม 40)
 function addXBurn(t,src){t.xb=5;t.xbTick=0.5;t.xbSrc=src;}
 function addPoison(t,src,n){t.psn=Math.min(3,(t.psn|0)+(n||1));t.psnT=4;t.psnSrc=src;if(!(t.psnTick>0))t.psnTick=0.8;}
 function addSil(t,d){d*=ccScale(t);if(d<0.1)return;t.sil=Math.max(t.sil||0,d);ccTouch(t);}
@@ -113,8 +113,8 @@ function healT(t,amt){
   const a=Math.min(amt,t.maxHp-t.hp);t.hp+=a;emit({k:'heal',x:t.x,y:t.y,h:(t.z||0)+2.2,n:Math.round(a),id:t.id});
 }
 function tickStatus(t,dt){
-  if(t.brn>0){t.brnTick-=dt;if(t.brnTick<=0){t.brnTick=0.5;damage(t,0.5*t.brn,t.brnSrc,'burn');}t.brnT-=dt;if(t.brnT<=0&&t.brn>0){t.brn--;t.brnT=1;}}
-  if(t.xb>0){t.xb-=dt;t.xbTick-=dt;if(t.xbTick<=0){t.xbTick=0.5;damage(t,5,t.xbSrc,'burn');}}
+  if(t.brn>0){t.brnTick-=dt;if(t.brnTick<=0){t.brnTick=0.5;damage(t,0.4*t.brn,t.brnSrc,'burn');}t.brnT-=dt;if(t.brnT<=0&&t.brn>0){t.brn--;t.brnT=1;}}
+  if(t.xb>0){t.xb-=dt;t.xbTick-=dt;if(t.xbTick<=0){t.xbTick=0.5;damage(t,4,t.xbSrc,'burn');}}
   if(t.blaze>0)t.blaze-=dt;
   if(t.kindleT>0){t.kindleT-=dt;if(t.kindleT<=0)t.kindle=0;}
   if(t.fslT>0){t.fslT-=dt;if(t.fslT<=0)t.fsl=0;}
@@ -203,8 +203,8 @@ function takePoison(t){const n=t.psn|0;t.psn=0;t.psnT=0;return n;}
 
 // ---------- ความสามารถพื้นฐาน (คลิกซ้าย) ของแต่ละสาย: สะสมสถานะตั้งต้นให้เองทุกๆ N ครั้งที่ยิงโดน ----------
 const PBASIC=[
-  {id:'b_pyro',type:'spark',n:'ประกายไฟ / ลูกไฟชาร์จ',d:'คลิก = ยิงประกายไฟ (6 ดาเมจ ทุก 0.3 วิ ระยะ ~400) โดนเป้าเดียวครบ 3 นัด = +1 Burning • กดค้าง = รวบรวมลูกไฟที่ปลายไม้ (ไม่ยิง) ครบ 2 วิ แล้วปล่อย = ลูกไฟ (15 ดาเมจ ระยะ ~900 +1 Burning)',
-    shd:'โล่ไฟ: บล็อกปกติ • Parry = ได้ลูกไฟวิญญาณ 2 ลูก (ครั้งเดียวต่อการยกโล่) • บล็อกโดนครบ 3 ครั้ง = ได้ 2 ลูก • สะสมได้สูงสุด 4 ลูก หมุนรอบตัวไม่หายจนกว่าจะใช้ • ลูกไฟ (ชาร์จ/Kindle) โดนศัตรู = ลูกไฟวิญญาณทั้งหมดพุ่งใส่ ลูกละ 5',dsd:'พุ่ง (Shift): กดค้างชาร์จ (สูงสุด 4 วิ ห้ามขยับ ยิ่งชาร์จยิ่งย่อตัวต่ำ) ปล่อย = ระเบิดดันตัวพุ่ง 150-1100 อมตะระหว่างพุ่ง คูลดาวน์ 3 วิ',
+  {id:'b_pyro',type:'spark',n:'ประกายไฟ / ลูกไฟชาร์จ',d:'คลิก = ยิงประกายไฟ (5 ดาเมจ ทุก 0.3 วิ ระยะ ~400) โดนเป้าเดียวครบ 3 นัด = +1 Burning • กดค้าง = รวบรวมลูกไฟที่ปลายไม้ (ไม่ยิง) ครบ 2 วิ แล้วปล่อย = ลูกไฟ (12 ดาเมจ ระยะ ~900 +1 Burning)',
+    shd:'โล่ไฟ: บล็อกปกติ • Parry = ได้ลูกไฟวิญญาณ 2 ลูก (ครั้งเดียวต่อการยกโล่) • บล็อกโดนครบ 3 ครั้ง = ได้ 2 ลูก • สะสมได้สูงสุด 4 ลูก หมุนรอบตัวไม่หายจนกว่าจะใช้ • ลูกไฟ (ชาร์จ/Kindle) โดนศัตรู = ลูกไฟวิญญาณทั้งหมดพุ่งใส่ ลูกละ 4',dsd:'พุ่ง (Shift): กดค้างชาร์จ (สูงสุด 4 วิ ห้ามขยับ ยิ่งชาร์จยิ่งย่อตัวต่ำ) ปล่อย = ระเบิดดันตัวพุ่ง 150-1100 อมตะระหว่างพุ่ง คูลดาวน์ 3 วิ',
     hit(pr,t){damage(t,pr.dmg,pr.owner,'proj');if((t.spkN=(t.spkN|0)+1)>=3){t.spkN=0;addBurn(t,1,pr.owner);}},
     tick:pyroBasic,onParry:pyroParry,onBlock:pyroBlock,dash:pyroDash},
   {id:'b_frost',type:'icicle',n:'ดาบน้ำแข็ง / แท่งน้ำแข็ง',d:'กด V สลับโหมด • ประชิด: ดาบน้ำแข็งคอมโบ 10/10/15 ระยะ ~120 จังหวะ 3 ฮีล 10 เดินได้ระหว่างฟัน • ไกล: แท่งน้ำแข็ง 7 ดาเมจ ทุก 0.3 วิ ระยะ ~700 ช้าลง +10% (สูงสุด 30%) • อยู่สูงกว่า ~4 เมตร + ฟัน = กระโดดฟาดลงพื้น 30',
