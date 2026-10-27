@@ -335,7 +335,7 @@ function buildForest(){
     for(let i=0;i<9000;i++){const v=R();g.fillStyle=v<0.5?`rgba(40,${70+R()*50|0},30,0.55)`:v<0.85?`rgba(20,${40+R()*30|0},18,0.5)`:'rgba(70,55,35,0.45)';g.fillRect(R()*512,R()*512,2+R()*3,2+R()*6);}
   });
   grass.wrapS=grass.wrapT=THREE.RepeatWrapping;grass.repeat.set(80,80);grass.anisotropy=gl.capabilities.getMaxAnisotropy();
-  const gr=addW(new THREE.Mesh(new THREE.PlaneGeometry(700,700),new THREE.MeshStandardMaterial({map:grass,roughness:1})));
+  const gr=addW(new THREE.Mesh(new THREE.PlaneGeometry(700,700),grLive(new THREE.MeshStandardMaterial({map:grass,roughness:1}))));   // grLive = พื้นสีเป็นหย่อม + รอยสนามรบ (js/50)
   gr.rotation.x=-Math.PI/2;gr.receiveShadow=true;
   const dirt=texCanvas(256,256,(g)=>{const r=g.createRadialGradient(128,128,40,128,128,128);r.addColorStop(0,'rgba(80,64,44,1)');r.addColorStop(0.8,'rgba(70,56,38,0.8)');r.addColorStop(1,'rgba(70,56,38,0)');g.fillStyle=r;g.fillRect(0,0,256,256);});
   const cl=addW(new THREE.Mesh(new THREE.PlaneGeometry(36,36),new THREE.MeshStandardMaterial({map:dirt,transparent:true,roughness:1,depthWrite:false})));
@@ -438,8 +438,8 @@ function buildMeadow(){
   scene.fog.color.set('#d8a888');scene.fog.near=130;scene.fog.far=520;
   hemi.color.set('#ffe0b8');hemi.groundColor.set('#4a5a2a');hemi.intensity=0.75;moonL.intensity=1.5;
   const R=mulberry(808),hw=MW*S3/2,hh=MH*S3/2;
-  const fl=addW(new THREE.Mesh(new THREE.PlaneGeometry(MW*S3,MH*S3),new THREE.MeshStandardMaterial({map:grassTex('#4f8a38',11,MW*S3/10),roughness:0.95})));fl.rotation.x=-Math.PI/2;fl.receiveShadow=true;
-  const out=addW(new THREE.Mesh(new THREE.PlaneGeometry(900,900),new THREE.MeshStandardMaterial({map:grassTex('#3f7430',12,90),roughness:1})));out.rotation.x=-Math.PI/2;out.position.y=-0.02;out.receiveShadow=true;
+  const fl=addW(new THREE.Mesh(new THREE.PlaneGeometry(MW*S3,MH*S3),grLive(new THREE.MeshStandardMaterial({map:grassTex('#4f8a38',11,MW*S3/10),roughness:0.95}))));fl.rotation.x=-Math.PI/2;fl.receiveShadow=true;
+  const out=addW(new THREE.Mesh(new THREE.PlaneGeometry(900,900),grLive(new THREE.MeshStandardMaterial({map:grassTex('#3f7430',12,90),roughness:1}))));out.rotation.x=-Math.PI/2;out.position.y=-0.02;out.receiveShadow=true;
   // ทะเลสาบไกลๆ ด้านใต้ + ปราสาทเงาๆ ด้านเหนือ + ต้นไม้รอบนอกสนาม
   const lake=addW(new THREE.Mesh(new THREE.PlaneGeometry(500,120),new THREE.MeshStandardMaterial({color:'#5a7fa8',roughness:0.15,metalness:0.4})));lake.rotation.x=-Math.PI/2;lake.position.set(0,0.02,hh+80);
   const cm=new THREE.MeshStandardMaterial({color:'#5a4a5a',roughness:1,flatShading:true});
@@ -528,7 +528,7 @@ function buildFileMap(id){
   const W=world,fb=addW(new THREE.Group());
   if(T){
     const tex=t=>{t=t.clone();t.repeat.set(1,1);t.needsUpdate=true;return t;};
-    const gm=new THREE.MeshStandardMaterial({map:tex(grassTex(night?'#3d5a3a':'#4f8a38',11,1)),roughness:0.95,flatShading:false});
+    const gm=grLive(new THREE.MeshStandardMaterial({map:tex(grassTex(night?'#3d5a3a':'#4f8a38',11,1)),roughness:0.95,flatShading:false}));
     const gr=new THREE.Mesh(terrGeo((i,j)=>T.g[j*T.nx+i],T.nx,T.ny,T.c,Math.max(1,Math.ceil(Math.max(T.nx,T.ny)/240))),gm);gr.receiveShadow=true;fb.add(gr);
     const sm=stoneMat(1,1,'#8a8478');
     for(const f of T.fl){const m=new THREE.Mesh(terrGeo((i,j)=>f.top[j*f.nx+i],f.nx,f.ny,T.c,1),sm);m.position.set(f.x0*S3,0,f.y0*S3);m.castShadow=m.receiveShadow=true;fb.add(m);}
@@ -546,7 +546,8 @@ function buildFileMap(id){
   gltfLoader().then(L=>L.loadAsync('assets/'+F.file+'?v='+(F.v||0))).then(gltf=>{
     if(!fb.parent)return;                                       // ฉากถูกทิ้งไปแล้ว
     const sc=gltf.scene,skip=new Set();
-    sc.traverse(o=>{if(/^anim_/i.test(o.name))skip.add(o);if(!o.isMesh)return;o.receiveShadow=true;o.castShadow=!(o.userData&&o.userData.ns);});
+    sc.traverse(o=>{if(/^anim_/i.test(o.name))skip.add(o);if(!o.isMesh)return;o.receiveShadow=true;o.castShadow=!(o.userData&&o.userData.ns);
+      if(/^ground/i.test(o.name))o.material=Array.isArray(o.material)?o.material.map(m=>grLive(m.clone())):grLive(o.material.clone());});   // พื้นหลัก: สีเป็นหย่อม + รอยสนามรบ (js/50)
     W.remove(fb);setTimeout(()=>disposeTree(fb),5000);W.add(sc);   // ทิ้งพื้นสำรองทีหลัง (กำลังอุ่นเชดเดอร์อยู่ได้)
     brkSetup(sc,skip);   // ของบังที่พังได้: แยกออกจาก batch (js/23)
     batchStatic(sc,skip);
@@ -591,7 +592,7 @@ function buildTest(){
   });
   const zm=addW(new THREE.Mesh(new THREE.PlaneGeometry(zs,zs),new THREE.MeshBasicMaterial({map:zt,transparent:true,depthWrite:false})));zm.rotation.x=-Math.PI/2;zm.position.set(tx(Z.x),0.04,tz(Z.y));
   // หมู่บ้านทดสอบทำลาย (ฝั่งตะวันตก): ลานหญ้า + ถนนดิน + ป้าย — บ้าน/ต้นไม้/ลังมาจากระบบพังได้ (syncBld / syncProps)
-  {const V=TEST_VIL,gm=new THREE.MeshStandardMaterial({map:grassTex('#5f8f45',11,1),roughness:0.95}),dm=new THREE.MeshStandardMaterial({color:'#8a7456',roughness:1});
+  {const V=TEST_VIL,gm=grLive(new THREE.MeshStandardMaterial({map:grassTex('#5f8f45',11,1),roughness:0.95})),dm=new THREE.MeshStandardMaterial({color:'#8a7456',roughness:1});
     const gr=addW(new THREE.Mesh(new THREE.PlaneGeometry(1900*S3,2900*S3),gm));gr.rotation.x=-Math.PI/2;gr.position.set(tx(V.x+150),0.01,tz(V.y));gr.receiveShadow=true;
     const rd=addW(new THREE.Mesh(new THREE.PlaneGeometry(1800*S3,180*S3),dm));rd.rotation.x=-Math.PI/2;rd.position.set(tx(V.x+100),0.02,tz(V.y));rd.receiveShadow=true;
     testSign('หมู่บ้านทดสอบทำลาย','บ้าน · ต้นไม้ · ลัง พังได้ทั้งหมด',V.x+1050,V.y-150,Math.PI/2);}
@@ -669,11 +670,11 @@ function buildPitch(){
   f.beginPath();f.moveTo(750,30);f.lineTo(750,870);f.stroke();
   for(const x of [105,1395]){f.beginPath();f.ellipse(x,450,150,250,0,0,Math.PI*2);f.stroke();}
   const ft=new THREE.CanvasTexture(fc);ft.colorSpace=THREE.SRGBColorSpace;ft.anisotropy=gl.capabilities.getMaxAnisotropy();
-  const fl=addW(new THREE.Mesh(new THREE.PlaneGeometry(MW*S3,MH*S3),new THREE.MeshStandardMaterial({map:ft,roughness:0.95})));
+  const fl=addW(new THREE.Mesh(new THREE.PlaneGeometry(MW*S3,MH*S3),grLive(new THREE.MeshStandardMaterial({map:ft,roughness:0.95}))));
   fl.rotation.x=-Math.PI/2;fl.position.y=0.01;fl.receiveShadow=true;
   const grass=texCanvas(256,256,(g)=>{g.fillStyle='#355f2a';g.fillRect(0,0,256,256);for(let i=0;i<3000;i++){g.fillStyle=`rgba(${20+Math.random()*30|0},${50+Math.random()*40|0},20,0.5)`;g.fillRect(Math.random()*256,Math.random()*256,2,4);}});
   grass.wrapS=grass.wrapT=THREE.RepeatWrapping;grass.repeat.set(90,90);
-  const out=addW(new THREE.Mesh(new THREE.PlaneGeometry(900,900),new THREE.MeshStandardMaterial({map:grass,roughness:1})));
+  const out=addW(new THREE.Mesh(new THREE.PlaneGeometry(900,900),grLive(new THREE.MeshStandardMaterial({map:grass,roughness:1}))));
   out.rotation.x=-Math.PI/2;out.receiveShadow=true;
 
   // ไม้ (ลาย planks)

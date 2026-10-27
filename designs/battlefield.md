@@ -2,7 +2,7 @@
 
 > **For Claude:** user plan for a "battlefield" feel. Read this before any work on dust/smoke/debris/scorch/grass.
 > Core rule from the user: **the map starts clean and pretty — every mark comes from players fighting** (no pre-placed wreckage). Marks stay until the match ends; a new match = clean map again.
-> Status: **ขั้น 0 done (user picked C). ขั้น 1 built 2026-10-27 (not hand-played)** — files/routing in HANDOFF §0 BATTLEFIELD. Next: ขั้น 2 (marks stay all match).
+> Status: **ขั้น 0 done (user picked C). ขั้น 1 built 2026-10-27 (not hand-played)** — files/routing in HANDOFF §0 BATTLEFIELD. **ขั้น 3 built 2026-10-27** (new grass + persistent grass/ground scars + livelier ground). Next: ขั้น 2 (other marks/debris stay all match — the `SCAR` texture in js/50 can carry ground marks for grass maps already).
 
 ## หลักการ
 - แมพเริ่มสวยสะอาด 100% ทุกร่องรอยมาจากการต่อสู้ของผู้เล่นเท่านั้น
@@ -31,10 +31,12 @@
 - เศษบ้าน/หิน/ไม้กองค้าง ไม่หาย (ตอนนี้หายใน 3–4 วิ)
 - บ้านถล่ม = ฝุ่นก้อนใหญ่ฟุ้ง • ของที่โดนเผาไฟค้างสักพัก → ตอไหม้/เถ้า
 
-## ขั้น 3 — หญ้าใหม่ (ผู้ใช้อยากให้สวยกว่านี้)
-- ใบโค้ง โคนเข้มปลายอ่อน แสงทะลุใบเวลาย้อนแสง ขึ้นเป็นกอ สูงต่ำไม่เท่ากัน หลายแบบปน + ดอกไม้เล็ก ลมพัดเป็นคลื่น
-- พังได้: ไฟ = ไหม้ดำ • น้ำแข็ง = แข็งขาว • ระเบิด/หิน = ราบ/หายเป็นหย่อม • คนเดินแหวก (มีแล้ว ปรับให้ดีขึ้น)
-- ทำภาพเทียบเก่า/ใหม่ให้ดูก่อน • กราฟิกต่ำ = หญ้าน้อยลงเอง
+## ขั้น 3 — หญ้าใหม่ ✅ ทำแล้ว 2026-10-27 (ผู้ใช้ผ่านหน้าตาหญ้า • รอเล่นจริง)
+- ✅ ใบโค้ง โคนเข้มปลายอ่อน แสงทะลุใบเวลาย้อนแสง ขึ้นเป็นกอ สูงต่ำไม่เท่ากัน หลายแบบปน + ดอกไม้เล็ก ลมพัดเป็นคลื่น — ภาพเทียบ `designs/grass-compare.html` (`designs/vfx-variants/grass-v1-*.jpg`)
+- ✅ พังได้ (ค้างทั้งแมตช์ ทั้งบนหญ้าและพื้น): ไฟ = ไหม้ดำ ขอบน้ำตาล • สายฟ้า = ไหม้จาง • น้ำแข็ง = แข็งขาว • ระเบิด/หิน = ล้มราบออกจากจุดระเบิด / หายเป็นหย่อม เหลือดินแตก • คนเดินแหวก + รอยเท้าที่เพิ่งเดินผ่าน
+- ✅ พื้นหญ้ามีชีวิต (ผู้ใช้ขอเพิ่ม): สีเป็นหย่อม (เขียวเข้ม / แห้งทอง / ดินโผล่) + ลายเส้นหญ้า โคลเวอร์ กรวดเล็ก • เหลี่ยมพื้นนุ่มลง
+- ✅ กราฟิกต่ำ = หญ้าน้อยลงเอง (รอยบนพื้นยังอยู่)
+- Tech: `SCAR` ภาพรอยขนาดเท่าแผนที่ (2 ช่อง/หน่วย, R ไหม้ G น้ำแข็ง B ราบ A ทิศล้ม) ใน js/50 • `grassScar(x,y,el,s)` เรียกจาก `bfAfter` js/44 • พื้น = `grLive(mat)` (js/50) ใส่ในวัสดุพื้นหญ้า js/28 + พื้น `ground*` ของแผนที่จากไฟล์ • ล้างเมื่อออกจากหน้าเกม/เปลี่ยนแผนที่ • ภาพล้วน ไม่แตะโปรโตคอล
 
 ## ขั้น 4 — ทำลายได้มากขึ้น (ทีหลัง)
 - รั้ว ลัง ม้านั่ง พังได้ • ต้นไม้ล้มทั้งต้น
