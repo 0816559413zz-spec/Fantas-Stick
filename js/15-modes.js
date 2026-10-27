@@ -69,7 +69,7 @@ function trainTick(dt){
   const ST=G.spotT||(G.spotT=[]);
   testDummySpots().forEach(([x,y],i)=>{if(G.en.some(e=>e.spot===i))return;ST[i]=(ST[i]===undefined?3:ST[i])-dt;if(ST[i]<=0){ST[i]=undefined;spawnDummy(x,y);G.en[G.en.length-1].spot=i;}});
   const T=G.tr||{};
-  for(const p of plist()){
+  for(const p of humans()){   // ค่าโกง (ไม่มีคูลดาวน์/อัลติเต็ม/อมตะ) ไม่ใช้กับบอท
     if(T.nocd)for(const k of ['q','e','r','f'])p.cd[k]=0;
     if(T.ult)p.ult=100;
     if(T.god&&p.alive)p.hp=p.maxHp;
@@ -81,6 +81,7 @@ const TR_KEYS=['datk','mai','nocd','ult','god'];
 function trTeams(){
   const T=G.tr||{};
   plist().forEach((p,i)=>{
+    if(p.ai){p.team=p.ai.team;return;}   // บอท = ทีมบอท (js/15-bot)
     if(p.trT===undefined)p.trT=i%2;
     p.team=T.pvp===1?p.trT:T.pvp===2?10+i:0;
   });
@@ -101,6 +102,7 @@ function trCmd(p,d){
     }
     feed(`🧪 ${p.name} เสก ${EDEF[d.e].name}${cnt>1?' ×'+cnt:''}`);
   }
+  else if(d.c==='bot'||d.c==='botclr')trBotCmd(p,d);
   else if(d.c==='clear'){for(const e of G.en)if(e.type!=='dummy'||e.trz){e.dead=true;}G.en=G.en.filter(e=>!e.dead);feed('🧹 ล้างมอนสเตอร์แล้ว');}
 }
 function hostEndTraining(){if(G&&G.mode==='train'&&G.ph!=='over')endMatch();}
@@ -382,7 +384,7 @@ function hostLoop(){
   const t1=performance.now(),base=makeSnap();
   const evl=EVL;EVL=[];
   onSnap(Object.assign({},base,{ev:evl}));pf('snap',t1);
-  if(NET.online&&tickN%2===0){const evn=EVN;EVN=[];sendAll({t:'s',s:Object.assign({},base,{ev:evn,T:Math.round(t),P:packP(base.P)})});}   // T = เวลาโฮสต์ (ลูกข่ายใช้เรียง/เลื่อนภาพให้นุ่ม)
+  if(NET.online&&tickN%2===0){const evn=EVN;EVN=[];sendAll({t:'s',s:Object.assign({},base,{ev:evn,T:Math.round(t),P:packP(base.P)},netDelta(base))});}   // T = เวลาโฮสต์ (ลูกข่ายใช้เรียง/เลื่อนภาพให้นุ่ม)
 }
 setInterval(()=>{if(!HLW.on)hostLoop();},1000/60);
 // โฮสต์สลับไปหน้าต่างอื่น: Chrome ชะลอ setInterval ของแท็บที่ซ่อนเหลือ ~1 ครั้ง/วิ → ทั้งห้องค้าง
