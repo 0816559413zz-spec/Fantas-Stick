@@ -359,7 +359,7 @@ const DEFP={fl:false,rt:false,z:0,aw:0,wv:0,al:true,dn:false,rv:0,sh:false,st:fa
 function packP(L){return L.map(p=>{const o={};for(const k in p)if(!(k in DEFP)||p[k]!==DEFP[k])o[k]=p[k];return o;});}
 function unpackP(s){if(s&&s.P)for(const p of s.P)for(const k in DEFP)if(!(k in p))p[k]=DEFP[k];}
 function makeSnap(){
-  return {ph:G.ph,sl:G.endT>0?1:0,ot:G.ot&&G.mode==='ffa'?1:0,PT:ffaSnapPots(),mode:G.mode,mp:G.map,PB:PROPON?PROPS.map(o=>o.st).join(''):'',BD:bldSnap(),BK:brkSnap(),tm:Math.max(0,Math.ceil(G.timer)),cd:G.cdT||0,wave:G.wave,round:G.round,rw:G.rw,ts:G.teamScore,
+  return {ph:G.ph,sl:G.endT>0?1:0,ot:G.ot&&G.mode==='ffa'?1:0,PT:ffaSnapPots(),mode:G.mode,mp:G.map,PB:PROPON?PROPS.map(o=>o.st).join(''):'',BD:bldSnap(),BK:brkSnap(),CB:citySnapB(),CS:citySnapS(),tm:Math.max(0,Math.ceil(G.timer)),cd:G.cdT||0,wave:G.wave,round:G.round,rw:G.rw,ts:G.teamScore,
     bt:Math.ceil(G.buffT||0),ban:G.banner?G.banner.text:'',res:G.result,el:G.en.length+G.queue.length,
     feed:G.feed.filter(f=>G.time-f.t<6).slice(-5).map(f=>f.text),
     P:plist().map(p=>({id:p.id,n:p.name,c:p.color,tm:p.team,x:r1(p.x),y:r1(p.y),z:r1(p.z||0),fl:!!p.fly,rt:p.root>0,a:Math.round(p.ang*100)/100,

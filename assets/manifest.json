@@ -312,6 +312,30 @@
     "city_cw_win": {
       "file": "city/cw_win.glb",
       "v": 2
+    },
+    "bld_house_ldn": {
+      "file": "buildings/house_ldn.glb",
+      "v": 1
+    },
+    "city_cc_hole": {
+      "file": "city/cc_hole.glb",
+      "v": 2
+    },
+    "city_cg_hole": {
+      "file": "city/cg_hole.glb",
+      "v": 2
+    },
+    "city_co_hole": {
+      "file": "city/co_hole.glb",
+      "v": 2
+    },
+    "city_ct_hole": {
+      "file": "city/ct_hole.glb",
+      "v": 2
+    },
+    "city_cw_hole": {
+      "file": "city/cw_hole.glb",
+      "v": 2
     }
   },
   "maps": {

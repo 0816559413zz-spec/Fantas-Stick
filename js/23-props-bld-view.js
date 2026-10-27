@@ -69,7 +69,8 @@ function halfRoofGeo(side){
   return _halfRoof[side]=g;
 }
 function bldMats(b){
-  return {wall:sMat({color:BLD_WALLC[Math.floor(b.o.s*4)%4],roughness:0.9}),beam:sMat({color:'#3a281a',roughness:0.9}),roof:sMat({color:'#4a3438',roughness:0.85}),
+  const wc=b.D.wallc||BLD_WALLC;
+  return {wall:sMat({color:wc[Math.floor(b.o.s*4)%4],roughness:0.9}),beam:sMat({color:'#3a281a',roughness:0.9}),roof:sMat({color:b.D.roofc||'#4a3438',roughness:0.85}),
     cap:sMat({color:'#eef3fb',roughness:1}),door:sMat({color:'#5a3a22',roughness:0.9}),stone:sMat({color:'#9a9fb0',roughness:0.95}),win:bMat({color:hdr('#ffc36b',1.6)})};
 }
 // ชิ้นจากโค้ด (ใช้เมื่อไม่มีไฟล์) — หน่วย 3D, แกนของบ้าน: หน้า (ประตู) = +z
@@ -117,7 +118,7 @@ function bldFilePiece(b,name){
   const h=new THREE.Group();h.scale.set(b.o.w*S3/b.D.bw,1,b.o.d*S3/b.D.bd);h.add(c);return h;
 }
 // ชิ้นย่อยจากไฟล์ (<ส่วน>_c<เลข>) มีครบไหม — ไฟล์รุ่นเก่า (ไม่มีชิ้นย่อย) = ใช้ทั้งส่วนแบบเดิม
-function bldHasChunks(){const r=MODELS.ready.get(BLDDEF.house.model);return !!(r&&r.scene.getObjectByName('wall_front_c0'));}
+function bldHasChunks(b){const r=MODELS.ready.get(b?b.D.model:BLDDEF.house.model);return !!(r&&r.scene.getObjectByName('wall_front_c0'));}
 // ส่วนจากโค้ด (ไม่มีไฟล์) แบบชิ้นย่อย: ผนัง = กล่องต่อชิ้น, หลังคา = ปิรามิดครึ่งซีกถ้ายังเหลือ ≥ ครึ่ง
 function bldFallbackChunks(b,j,q){
   if(j>=4)return bldFallback(b,j,q.cb&&(q.cb.toString(2).split('1').length-1)*2>q.nc*q.nr);
@@ -158,7 +159,7 @@ function bldMound(b,M,charred){
 // ความสูงซากเมื่อส่วนนั้นพังหมด (คูณแกนตั้งของโมเดล _broken) — ซากไม่มีการชน เลยให้เตี้ยระดับเข่า
 const BLD_RUBBLE_H=0.28;
 function bldBuild(b,file){
-  const g=new THREE.Group(),chunks=file&&bldHasChunks(),M=bldMats(b),gone=bldGone(b);
+  const g=new THREE.Group(),chunks=file&&bldHasChunks(b),M=bldMats(b),gone=bldGone(b);
   if(gone)g.add(bldMound(b,M,b.pc.some(q=>q.fl&2)));   // พังครบทั้งหลัง = เนินกองซาก (เดินปีนได้ — host groundH)
   for(let j=0;j<6&&!gone;j++){
     const q=b.pc[j],f=q.fl,br=f&1;let m;
@@ -186,14 +187,14 @@ function syncBld(dt){
   if(!BLDV.g||BLDV.g.parent!==world||BLDV.map!==builtMap){
     if(BLDV.g){if(BLDV.g.parent)BLDV.g.parent.remove(BLDV.g);disposeTree(BLDV.g);}
     BLDV.g=new THREE.Group();world.add(BLDV.g);BLDV.map=builtMap;BLDV.list=BLDG.map(b=>({b,key:'',g:null,ice:[]}));
-    prefetchModels([BLDDEF.house.model,'debris_wood','debris_stone']);
+    prefetchModels([...new Set(BLDG.map(b=>b.D.model)),'debris_wood','debris_stone']);
   }
   BLDV.g.visible=true;
-  const file=MODELS.ready.has(BLDDEF.house.model);
   for(const q of BLDV.list){
     if(BLDG[q.b.i]&&q.b!==BLDG[q.b.i]){q.b=BLDG[q.b.i];q.key='';if(DEBRIS.length)clearDebris();}   // เริ่มเกมใหม่ แผนที่เดิม → สถานะชุดใหม่
     if(farCull(q.b.o.x,q.b.o.y,q.b.o.w)){if(q.g)q.g.visible=false;continue;}   // ไกลเกินหมอก: ซ่อน (ยังไม่เคยเห็น = ยังไม่สร้าง)
     if(q.g)q.g.visible=true;
+    const file=MODELS.ready.has(q.b.D.model);   // แต่ละหลังใช้ไฟล์ของชนิดตัวเอง (บ้านหิมะ / บ้านลอนดอน)
     let key=file?'F':'C';for(const p of q.b.pc)key+=(p.fl&3)+'.'+p.cb+',';
     if(key!==q.key){
       q.key=key;if(q.g){BLDV.g.remove(q.g);disposeTree(q.g);}
@@ -238,7 +239,7 @@ function bldDebris(ev){
 // ชิ้นย่อยที่พัง: ก๊อปชิ้นจริงจากไฟล์ (หรือกล่องสีผนัง) แล้วให้ร่วง/กระเด็นหมุนลงพื้น — เฉพาะเครื่องนี้
 function bldChunkFall(b,j,k,C,ev,fire,blast,fall){
   const piv=new THREE.Group(),[x,y]=bldWorld(b,C[0],C[1]),zc=(C[4]+C[5])/2;
-  let src=bldHasChunks()?bldFilePiece(b,BLD_PIECES[j]+'_c'+k):null;
+  let src=bldHasChunks(b)?bldFilePiece(b,BLD_PIECES[j]+'_c'+k):null;
   if(!src){src=new THREE.Mesh(sGeo(THREE.BoxGeometry,1,1,1),j<4?bldMats(b).wall:bldMats(b).roof);src.scale.set(C[2]*2*S3,C[5]-C[4],C[3]*2*S3);src.position.set(C[0]*S3,zc,C[1]*S3);}
   src.position.x-=C[0]*S3;src.position.y-=zc;src.position.z-=C[1]*S3;     // หมุนรอบกลางชิ้น
   piv.add(src);if(fire)piv.traverse(m=>{if(m.isMesh)m.material=Array.isArray(m.material)?m.material.map(charMat):charMat(m.material);});

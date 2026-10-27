@@ -1,7 +1,7 @@
 // =====================================================================
 //  เครือข่าย (PeerJS / WebRTC)
 // =====================================================================
-const PREFIX='wizduel-th-v46-';
+const PREFIX='wizduel-th-v47-';
 const NET={peer:null,isHost:false,online:false,myId:'me',conns:new Map(),hostConn:null,code:'',spec:false,rtt:0,
   // token ของแท็บนี้ (อยู่ข้ามการรีเฟรช) — โฮสต์ใช้จำว่า "คนเดิมต่อกลับมา" ตอนเน็ตหลุด
   tok:(()=>{const r=()=>Math.random().toString(36).slice(2,10);try{let t=sessionStorage.getItem('wd_tok');if(!t){t=r();sessionStorage.setItem('wd_tok',t);}return t;}catch(e){return r();}})()};
@@ -30,7 +30,7 @@ function sendAll(m){for(const c of NET.conns.values()){try{if(c.open)c.send(m);}
 // ส่งสถานะของพังได้แบบ "เฉพาะที่เปลี่ยน" (แมพใหญ่มีของเป็นพันชิ้น ส่งทั้งหมด 30 ครั้ง/วิ ไม่ไหว — designs/city-bot-battle.md ขั้น 2)
 // สตริงสถานะ PB (prop ละ 1 ตัว) / BK (ของบังละ 1 ตัว) / BD (บ้านคั่นด้วย '|') แบ่งเป็นช่อง → ส่ง: ไม่มีคีย์ = เหมือนเดิม • {i:ค่า} = เฉพาะช่องที่เปลี่ยน • สตริง = ทั้งหมด
 // ทั้งหมดทุก ~2 วิ (เผื่อหลุด/คนเข้าใหม่) + ทันทีที่มีคนต่อเข้ามา (netDeltaReset) • ช่องทาง reliable+เรียงลำดับ ลูกข่ายใช้ทุก snapshot ตามลำดับ
-const NETD_KEYS={PB:'',BK:'',BD:'|'},NETD={last:{},n:0};
+const NETD_KEYS={PB:'',BK:'',BD:'|',CB:'|',CS:''},NETD={last:{},n:0};
 function netDeltaReset(){NETD.last={};}
 function netDelta(base){
   const o={},full=++NETD.n%60===0;

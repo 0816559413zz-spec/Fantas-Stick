@@ -6,6 +6,7 @@
 // snapshot BD = บ้านคั่นด้วย '|' ('' = บ้านนั้นปกติ): 6 ตัวแรก = สถานะส่วน (ฐาน 16: 1 พังหมด | 2 ไหม้ดำ | 4 ติดไฟ | 8 เกาะน้ำแข็ง) + ส่วนละ 3 ตัว = บิตชิ้นย่อยที่พัง
 // เหตุการณ์ {k:'bld',e:'h'|'b',i,p,c,el,x,y,ox,oy,h} (c = เลขชิ้นย่อย) • ตำแหน่งในบ้าน = หน่วย sim px แกนของบ้านเอง หน้าบ้าน (ประตู) = +y
 const BLDDEF={house:{model:'bld_house',bw:8,bd:6.5,wh:4.2,rh:3.4,th:14,hp:{wall:35,roof:30}}};
+BLDDEF.ldn=Object.assign({},BLDDEF.house,{model:'bld_house_ldn',wallc:['#8a4a3a','#7a4232','#94553f','#7c4232'],roofc:'#4a4e58'});   // บ้านอิฐลอนดอน (แมพ city, OBS bt:'ldn') — โครง/ชิ้นเหมือนบ้านหิมะทุกอย่าง
 const BLD_PIECES=['wall_front','wall_back','wall_left','wall_right','roof_left','roof_right'];
 const BLD_GRID=[[4,3],[4,3],[3,3],[3,3],[3,2],[3,2]];      // [คอลัมน์, แถว] ต่อส่วน — ต้องตรงกับ house_chunks.py
 const BLD_FIRE={burn:5,dps:6},BLD_ICE={frz:6},BLD_ROOF_MIN=0.35;   // หลังคาถล่มเมื่อผนังแถวบนที่รองรับเหลือน้อยกว่า 35%
@@ -13,7 +14,7 @@ let BLDG=[],BLDON=false;
 function genBldg(id){
   const M=MAPS[id],out=[];if(!M)return out;
   for(const o of M.obs||[])if(o.k==='house'){
-    const D=BLDDEF.house;o.bi=out.length;
+    const D=BLDDEF[o.bt]||BLDDEF.house;o.bi=out.length;
     out.push({i:out.length,o,D,c:Math.cos(o.ry||0),s:Math.sin(o.ry||0),ht:0,dirty:false,pc:BLD_PIECES.map((n,j)=>{const mx=D.hp[j<4?'wall':'roof'],[nc,nr]=BLD_GRID[j];
       return {n,fl:0,burnT:0,frzT:0,nc,nr,cb:0,max:mx,ch:new Array(nc*nr).fill(mx)};})});
   }
@@ -39,7 +40,7 @@ function bldNear(b,x,y,pad){return Math.abs(x-b.o.x)<b.o.w*0.75+pad&&Math.abs(y-
 const BLD_MOUND={h:1.5,pad:30};
 function bldGone(b){return b.pc.every(q=>q.fl&1);}
 function bldMoundAt(b,x,y){const [lx,ly]=bldLocal(b,x,y),e=(lx/(b.o.w/2+BLD_MOUND.pad))**2+(ly/(b.o.d/2+BLD_MOUND.pad))**2;return e<1?BLD_MOUND.h*Math.min(1,1.6*(1-e)):0;}
-function bldMoundH(x,y){let g=0;if(!BLDG.length)return 0;for(const b of sgNear(sgBld(),x,y,BLD_MOUND.pad,_sgM))if(bldNear(b,x,y,BLD_MOUND.pad)&&bldGone(b)){const v=bldMoundAt(b,x,y);if(v>g)g=v;}return g;}
+function bldMoundH(x,y){let g=cityMoundH(x,y);if(!BLDG.length)return g;for(const b of sgNear(sgBld(),x,y,BLD_MOUND.pad,_sgM))if(bldNear(b,x,y,BLD_MOUND.pad)&&bldGone(b)){const v=bldMoundAt(b,x,y);if(v>g)g=v;}return g;}
 // โดนชิ้นย่อย: code = ส่วน*100 + ชิ้นย่อย (ค่าจาก bldPieceAt)
 function hitBldPiece(b,code,dmg,el,ox,oy){
   const j=Math.floor(code/100),k=code%100,q=b.pc[j];if(!BLDON||!q||!bldAlive(q,k))return;
@@ -83,6 +84,7 @@ function bldSupport(b){
 function damageEnv(x,y,rad,dmg,by,el,h){
   damagePropsIn(x,y,rad,dmg,by);damageBrkIn(x,y,rad,dmg,h);
   if(!BLDON)return;h=h||0;const R=rad/20;
+  cityDamageIn(x,y,rad,dmg,el,h,by);   // ตึก/ของในเมือง (js/12-city-dmg)
   for(const b of sgNear(sgBld(),x,y,rad,_sgE)){
     if(!bldNear(b,x,y,rad))continue;
     const [lx,ly]=bldLocal(b,x,y),hits=[];
@@ -161,6 +163,7 @@ function collideBld(b,o,r,z){
   if(moved){o.x=b.o.x+lx*b.c+ly*b.s;o.y=b.o.y-lx*b.s+ly*b.c;}
 }
 function updateBldg(dt){
+  cityTick(dt);
   if(!BLDON)return;
   for(const b of BLDG){let br=false;
     for(let j=0;j<6;j++){
@@ -262,7 +265,7 @@ function collideWorld(o,r,z){
   // กล่องตึกทึบ (แมพเมือง MAPS[id].boxes {x,y,w,d,h}): ขอบชนด้วยวงกลม cwall แล้ว — ตรงนี้กันกรณีหลุดเข้าไปข้างใน (วาร์ป/จุดสุ่ม) → ดันออกด้านที่ใกล้สุด
   const BX=MAPS[MAPID]&&MAPS[MAPID].boxes;
   if(BX)for(const b of sgNear(sgGrid('r',BX,b=>[b.x,b.y,b.x+b.w,b.y+b.d]),o.x,o.y,0,_sgCR)){
-    if(b.h<=z||o.x<=b.x||o.x>=b.x+b.w||o.y<=b.y||o.y>=b.y+b.d)continue;
+    if(b.cl||b.h<=z||o.x<=b.x||o.x>=b.x+b.w||o.y<=b.y||o.y>=b.y+b.d)continue;
     const L=o.x-b.x,Rr=b.x+b.w-o.x,T=o.y-b.y,Bt=b.y+b.d-o.y,m=Math.min(L,Rr,T,Bt);
     if(m===L)o.x=b.x-r;else if(m===Rr)o.x=b.x+b.w+r;else if(m===T)o.y=b.y-r;else o.y=b.y+b.d+r;sol++;}
   if(sol)o.solN=(o.solN|0)+1;   // ชนของแข็ง (Stonebreaker ใช้ทำคอมโบชนกำแพง)
@@ -432,7 +435,7 @@ function updateProjectiles(dt){
     if(pr.life<=0||pr.x<20||pr.x>MW-20||pr.y<20||pr.y>MH-20||pr.h>40){killProj(pr);continue;}
     if(pr.h<0.05||(TERR&&terrSolid(pr.x,pr.y,pr.h))||(BLDG.length&&pr.h<bldMoundH(pr.x,pr.y))){pr.h=Math.max(pr.h,0.1);killProj(pr);continue;}   // + ชนเนินซากบ้าน
     let hp=false;
-    for(const c of sgNear(sgObs(),pr.x,pr.y,pr.r,_sgPO))if(c.bi===undefined&&(c.top!==undefined?terrT(pr.x,pr.y)+pr.h<c.top:pr.h<c.hgt)&&(pr.x-c.x)**2+(pr.y-c.y)**2<(c.r+pr.r)**2){hp=true;break;}
+    for(const c of sgNear(sgObs(),pr.x,pr.y,pr.r,_sgPO))if(c.bi===undefined&&(c.top!==undefined?terrT(pr.x,pr.y)+pr.h<c.top:pr.h<c.hgt)&&(pr.x-c.x)**2+(pr.y-c.y)**2<(c.r+pr.r)**2){hp=true;if(c.cb!==undefined||c.ci!==undefined)cityHitObs(c,pr);break;}
     if(!hp&&BLDG.length)for(const b of sgNear(sgBld(),pr.x,pr.y,pr.r,_sgPB)){if(!bldNear(b,pr.x,pr.y,pr.r))continue;const j=bldPieceAt(b,pr.x,pr.y,pr.h,pr.r);if(j>=0){hitBldPiece(b,j,pr.dmg||5,projEl(pr),pr.x-pr.vx*0.08,pr.y-pr.vy*0.08);hp=true;break;}}
     if(!hp&&PROPON)for(const c of sgNear(sgProps(),pr.x,pr.y,pr.r,_sgPP))if(c.st!==1&&pr.h<c.hgt&&(pr.x-c.x)**2+(pr.y-c.y)**2<(c.r+pr.r)**2){hitProp(c,pr.dmg||5,pr.owner);hp=true;break;}
     if(!hp)for(const w of G.walls)if(pr.team!==w.team&&pr.h<w.hgt&&(pr.x-w.x)**2+(pr.y-w.y)**2<(w.r+pr.r)**2){w.hp-=pr.dmg||5;hp=true;emit({k:'efx',z:'wallhit',x:pr.x,y:pr.y,h:pr.h});break;}

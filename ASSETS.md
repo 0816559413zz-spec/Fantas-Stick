@@ -233,3 +233,7 @@ repo นี้เป็น **public** ใช้ได้เฉพาะโมเ
 - ยานพาหนะ: `cp_car` `cp_van` (สีย้อม) `cp_bus` รถเมล์ 2 ชั้น `cp_train` ตู้รถไฟ 17 ม. (ยาวตามแกน x) `cp_container` 12.2 ม. (แกน x, สีย้อม) `cp_boat`
 - ของ: `cp_tlight` ไฟจราจร `cp_busstop` `cp_bin` `cp_bollard` `cp_tube` ป้ายรถไฟใต้ดิน `cp_planter` `cp_bush` `cp_cone` `cp_barrier` `cp_pallet` `cp_crane` ปั้นจั่น 46 ม. `cp_kiosk` (ยืดตามกล่อง 6×4×3) `cs_stand` อัฒจันทร์ 1 ช่วง 4 ม.
 - ชนิดกล่องในผัง → ชุดแผ่น: `CITY_STY` ใน `js/28-city-build.js` (shop/brick/station → อิฐ, office, glass, metal, garage) • ตำแหน่งของ + ที่ชน: `MAPS.city.street` / `SPC` ใน `js/02-city.js`
+
+### 3c-3. ผนังแตก + บ้านลอนดอน (ขั้น 4)
+- แผ่นที่แตกแล้วต่อชนิดตึก: `ct_hole` `co_hole` `cg_hole` `cw_hole` `cc_hole` (ฟังก์ชัน `hole()` ท้าย `city_kit_more.py`) — ขนาด/origin เหมือนแผ่นปกติ ขอบฟันเลื่อย + ข้างในมืด
+- บ้านลอนดอนพังได้ `bld_house_ldn` (`assets/buildings/house_ldn.glb`): ชื่อชิ้น/ขนาดเหมือน `bld_house` ทุกอย่าง (§3b) • รัน 2 ขั้น: `london_house_build.py` → `house_ldn.blend` แล้ว `blender -b assets/src/house_ldn.blend --python assets/src/house_chunks.py -- house_ldn.glb`

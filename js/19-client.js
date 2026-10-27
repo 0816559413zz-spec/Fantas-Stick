@@ -63,7 +63,7 @@ function onSnap(s){
 function snapApply(s,live){
   if(s.mp&&s.mp!==builtMap&&mapReady(s.mp)){setMapVars(s.mp);buildWorld(s.mp);}
   PROPON=!!s.PB;if(s.PB)for(let i=0;i<PROPS.length;i++)PROPS[i].st=+(s.PB[i]||0);
-  if(!NET.isHost){bldParse(s.BD);brkParse(s.BK);}
+  if(!NET.isHost){bldParse(s.BD);brkParse(s.BK);cityParse(s.CB,s.CS);}
   if(live){VIEW.prev=VIEW.cur;VIEW.tPrev=VIEW.tCur;VIEW.cur=s;VIEW.tCur=performance.now();VIEW.a=VIEW.ex=null;}
   if(s.ev&&!(NET.isHost&&document.hidden))for(const ev of s.ev)fx(ev);   // โฮสต์ย่อแท็บ: ไม่สร้างเอฟเฟกต์ (ไม่มีใครเห็น กันอนุภาคค้างเต็มหน่วยความจำ)
   syncOverlays(s);
