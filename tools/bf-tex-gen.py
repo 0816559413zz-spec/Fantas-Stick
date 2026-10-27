@@ -20,7 +20,7 @@ def puff_sheet(name, seed, blobs, desc):
     y, x = np.mgrid[0:PX, 0:PX].astype(np.float32)
     x = x / PX - 0.5
     y = y / PX - 0.5
-    C = [(rng.uniform(-0.2, 0.2), rng.uniform(-0.12, 0.17), rng.uniform(0.11, 0.19)) for _ in range(blobs)]
+    C = [(rng.uniform(-0.13, 0.13), rng.uniform(-0.15, 0.15), rng.uniform(0.12, 0.19)) for _ in range(blobs)]
     C[0] = (0.0, 0.0, 0.22)
     nz = 0.6 * noise(rng, 6, PX) + 0.4 * noise(rng, 14, PX)
 
@@ -51,7 +51,7 @@ def puff_sheet(name, seed, blobs, desc):
         sheet.paste(Image.fromarray(img, 'RGBA'), ((i % COLS) * PX, (i // COLS) * PX))
     sheet.save(os.path.join(ROOT, name + '.png'), optimize=True)
     meta = {"v": 1, "desc": desc, "gen": "image", "seed": seed, "px": PX, "cols": COLS, "rows": ROWS, "kind": "life", "fps": 24,
-            "ramp": "white", "add": False, "rot": 0, "p": {}}
+            "ramp": "white", "add": False, "rot": 0.35, "p": {}}
     with open(os.path.join(ROOT, name + '.tex.json'), 'w', encoding='utf8') as f:
         json.dump(meta, f, ensure_ascii=False, indent=1)
     print('wrote', name)

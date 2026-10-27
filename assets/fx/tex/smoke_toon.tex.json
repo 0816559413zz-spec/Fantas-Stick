@@ -10,6 +10,6 @@
  "fps": 24,
  "ramp": "white",
  "add": false,
- "rot": 0,
+ "rot": 0.35,
  "p": {}
 }

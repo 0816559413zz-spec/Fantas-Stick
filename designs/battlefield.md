@@ -2,22 +2,23 @@
 
 > **For Claude:** user plan for a "battlefield" feel. Read this before any work on dust/smoke/debris/scorch/grass.
 > Core rule from the user: **the map starts clean and pretty — every mark comes from players fighting** (no pre-placed wreckage). Marks stay until the match ends; a new match = clean map again.
-> Status: **ขั้น 0 done — sheets sent (`designs/vfx-variants/bf-style-v3.jpg`, `bf-style-v3-game.jpg`), waiting for the user to pick A/B/C.** Everything else not started.
+> Status: **ขั้น 0 done (user picked C). ขั้น 1 built 2026-10-27 (not hand-played)** — files/routing in HANDOFF §0 BATTLEFIELD. Next: ขั้น 2 (marks stay all match).
 
 ## หลักการ
 - แมพเริ่มสวยสะอาด 100% ทุกร่องรอยมาจากการต่อสู้ของผู้เล่นเท่านั้น
 - ร่องรอยค้างจนจบแมตช์ → แมตช์ใหม่แมพกลับมาสวย
 - ยิ่งสู้ตรงไหนหนัก ตรงนั้นยิ่งเละ
 
-## ขั้น 0 — เทียบสไตล์ (ทำแล้ว รอเลือก)
+## ขั้น 0 — เทียบสไตล์ ✅ เลือก C
 ระเบิดชุดเดียวกัน (ฝุ่นวง + ควันค้าง + รอยไหม้ + เศษ) 3 แบบ ให้ผู้ใช้เลือก:
 - **A สมจริง** — ฝุ่นเทาน้ำตาล ควันดำทึบ เศษคม (`assets/fx/env/bf_style_a`)
 - **B การ์ตูน** — ควันก้อนนุ่ม ขอบชัด สีอุ่น (`assets/fx/env/bf_style_b`)
 - **C ผสม** — ทรงการ์ตูน สีหม่น (`assets/fx/env/bf_style_c`)
 สร้างด้วย `python tools/bf-style-gen.py` (ควันการ์ตูน `tex/smoke_toon` จาก `tools/bf-tex-gen.py`) • ภาพเทียบ `designs/vfx-variants/bf-style-v3.jpg` (ด้านข้าง) + `bf-style-v3-game.jpg` (มุมเกม)
-ผลที่เลือก: _(รอผู้ใช้)_ → ทุกเอฟเฟกต์หลังจากนี้ใช้สไตล์นี้
+ผลที่เลือก: **C ผสม** (ผู้ใช้ 2026-10-27) → ทุกเอฟเฟกต์หลังจากนี้ใช้สไตล์นี้
 
-## ขั้น 1 — ควัน/ไอจากสกิล
+## ขั้น 1 — ควัน/ไอจากสกิล ✅ ทำแล้ว (รอเล่นจริง)
+`assets/fx/env/bf_<ธาตุ>` (+ `_air`, `_trail`, `_cast`) จาก `tools/bf-skill-gen.py` • ตัวเลือกไฟล์ `bfAfter` ใน js/44
 | ธาตุ | ตอนใช้ | หลังสกิลลง |
 |---|---|---|
 | 🔥 ไฟ | ควันลอยจากลูกไฟ/เปลว/มือ | ควันดำค้าง เขม่า รอยไหม้ |
