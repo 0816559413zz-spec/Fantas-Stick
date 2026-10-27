@@ -71,15 +71,37 @@ function genRuins(){
   return {W:FW,H:FH,obs};
 }
 // ----- Test Place (ห้องฝึก): พื้นโล่งไม่มีสิ่งกีดขวาง -----
-// ห้องฝึก 360 × 270 หน่วย: กลาง = ที่ฝึกเดิม (หุ่นซ้อม/จุดเกิด/โซนมอนสเตอร์) • รอบๆ = จุดทดสอบ (TEST_ST) • ไกลออกไปทางตะวันตก = หมู่บ้านทดสอบทำลาย (บ้าน 10 หลัง + ต้นไม้/ลัง/ถัง/หีบใน testProps)
+// ห้องฝึก 360 × 270 หน่วย แบ่งเป็นโซน (TEST_Z): กลาง = ลานกลาง/จุดเกิด (หุ่นซ้อม, ไม่มีรั้ว) • เหนือ = เทสสกิล • ตะวันตก = หมู่บ้านทดสอบทำลาย (บ้าน 10 หลัง + ต้นไม้/ลัง/ถัง/หีบใน testProps) • ตะวันออก = เสกบอท/มอนสเตอร์ • ใต้ = สังเวียน
 const TEST_W=7200,TEST_H=5400,TEST_C={x:TEST_W/2,y:TEST_H/2},TEST_VIL={x:1000,y:TEST_H/2};
-// จุดทดสอบ (พิกัดเกม): range = ลานยิงไกล (หุ่นที่ 1000/1400/1800 จากจุดเกิด) • aoe = วงวัดรัศมี 100–600 + หุ่นกลางวง • pillar = เสาสูงต่างกัน (บินข้าม/บังกระสุน) • wall = กำแพงยาว + ทางแคบ (ชนกำแพง/พุ่ง)
-const TEST_ST={aoe:{x:TEST_C.x+1400,y:TEST_C.y-1350},pillar:{x:TEST_C.x+1500,y:TEST_C.y+1000},wall:{x:TEST_C.x,y:TEST_C.y+1500}};
+// โซน: กล่อง x1..x2,y1..y2 (สังเวียน = วงกลม cx,cy,r) • col = สีพื้น • t/s = ป้ายชื่อ • g = ประตู [ด้าน n/e/s/w, พิกัดกลางประตู] (สังเวียน: มุมเรเดียน)
+const TEST_GW=320;   // ความกว้างช่องประตู
+const TEST_Z={
+  skill:{x1:2600,y1:100,x2:6950,y2:2100,col:'#7f93a8',t:'โซนเทสสกิล',s:'ยิงไกล · วงรัศมี · เสา · กำแพง',g:[['s',3600],['s',5000]]},
+  vil:{x1:150,y1:1000,x2:2450,y2:4400,t:'โซนทำลายบ้าน',s:'บ้าน · ต้นไม้ · ลัง พังได้ทั้งหมด',g:[['e',2700]]},
+  bot:{x1:5250,y1:2350,x2:7000,y2:4400,col:'#9890ab',t:'โซนเสกบอท',s:'เสกบอท / มอนสเตอร์มาสู้',g:[['w',2700],['w',3700]]},
+  arena:{cx:3600,cy:4400,r:800,col:'#b39a70',t:'สังเวียน',s:'ดวล 1v1 · 2v2',g:[-2.36,-0.79]},
+};
+// จุดทดสอบในโซนเทสสกิล (พิกัดเกม): range = ลานยิงไกล (เส้นเริ่ม + หุ่นที่ 1000/1400/1800) • aoe = วงวัดรัศมี 100–600 + หุ่นกลางวง • pillar = เสาสูงต่างกัน (บินข้าม/บังกระสุน) • wall = กำแพงยาว + ทางแคบ (ชนกำแพง/พุ่ง)
+const TEST_ST={range:{x:2800,y:420},aoe:{x:6330,y:720},pillar:{x:3450,y:1450},wall:{x:5000,y:1550}};
 const TEST_PH=[1.5,3,6,12];                                                                  // ความสูงเสาแต่ละคอลัมน์ (หน่วย 3D)
 // กำแพง [x1,y1,x2,y2] — ชนเป็นเสากลมเรียงชิด (OBS) ภาพเป็นกล่องยาว (buildTest)
 function testWalls(){const W=TEST_ST.wall;return [[W.x-700,W.y-130,W.x+500,W.y-130],[W.x-700,W.y+130,W.x+500,W.y+130],[W.x+800,W.y-450,W.x+800,W.y+450]];}
 // หุ่นซ้อมประจำที่ (ตายแล้วฟื้นที่เดิม — trainTick)
-function testDummySpots(){const C=TEST_C,A=TEST_ST.aoe;return [[C.x,C.y+160-1000],[C.x,C.y+160-1400],[C.x,C.y+160-1800],[A.x,A.y],[A.x+300,A.y],[A.x-150,A.y+260]];}
+function testDummySpots(){const R=TEST_ST.range,A=TEST_ST.aoe;return [[R.x+1000,R.y],[R.x+1400,R.y],[R.x+1800,R.y],[A.x,A.y],[A.x+300,A.y],[A.x-150,A.y+260]];}
+// รั้วโซน: segs = เส้นรั้ว [x1,y1,x2,y2] (เว้นช่องประตู) • gates = จุดกลางประตู {x,y,a = มุมแนวรั้ว, side, z = ชื่อโซน}
+function testFences(){
+  const segs=[],gates=[],G2=TEST_GW/2;
+  for(const k of ['skill','vil','bot']){const z=TEST_Z[k],c=[[z.x1,z.y1],[z.x2,z.y1],[z.x2,z.y2],[z.x1,z.y2]],sd=['n','e','s','w'];
+    for(let i=0;i<4;i++){const [ax,ay]=c[i],[bx,by]=c[(i+1)%4],L=Math.hypot(bx-ax,by-ay),hz=ay===by;
+      const cuts=z.g.filter(g=>g[0]===sd[i]).map(g=>(hz?(g[1]-ax)/(bx-ax):(g[1]-ay)/(by-ay))*L).sort((a,b)=>a-b);
+      let s=0;for(const m of [...cuts,L+G2]){const e=Math.min(L,m-G2);if(e>s)segs.push([ax+(bx-ax)*s/L,ay+(by-ay)*s/L,ax+(bx-ax)*e/L,ay+(by-ay)*e/L]);s=m+G2;}
+      for(const m of cuts)gates.push({x:ax+(bx-ax)*m/L,y:ay+(by-ay)*m/L,a:Math.atan2(by-ay,bx-ax),side:sd[i],z:k});}
+  }
+  const A=TEST_Z.arena,N=72,gh=G2/A.r,inG=a=>A.g.some(g=>Math.abs(Math.atan2(Math.sin(a-g),Math.cos(a-g)))<gh);   // วงสังเวียน: ข้ามช่วงประตู
+  for(let i=0;i<N;i++){const a0=i/N*Math.PI*2,a1=(i+1)/N*Math.PI*2;if(inG(a0)||inG(a1))continue;segs.push([A.cx+Math.cos(a0)*A.r,A.cy+Math.sin(a0)*A.r,A.cx+Math.cos(a1)*A.r,A.cy+Math.sin(a1)*A.r]);}
+  for(const g of A.g)gates.push({x:A.cx+Math.cos(g)*A.r,y:A.cy+Math.sin(g)*A.r,a:g+Math.PI/2,side:'arena',z:'arena'});
+  return {segs,gates};
+}
 function genTest(){
   const W=TEST_W,H=TEST_H,V=TEST_VIL,hs=[],obs=[];
   for(let i=0;i<4;i++){hs.push({x:V.x-600+i*360,y:V.y-330,ry:0});hs.push({x:V.x-600+i*360,y:V.y+330,ry:Math.PI});}   // 2 แถวหันหน้าเข้าถนน
@@ -88,13 +110,17 @@ function genTest(){
   const P=TEST_ST.pillar;
   for(let c=0;c<4;c++)for(let r=0;r<3;r++)obs.push({x:P.x+(c-1.5)*280,y:P.y+(r-1)*260,r:40,k:'tpillar',hgt:TEST_PH[c],s:0});
   for(const [x1,y1,x2,y2] of testWalls()){const L=Math.hypot(x2-x1,y2-y1),n=Math.ceil(L/36);for(let i=0;i<=n;i++)obs.push({x:x1+(x2-x1)*i/n,y:y1+(y2-y1)*i/n,r:26,k:'twall',hgt:6,s:0});}
+  // รั้วโซน: เตี้ย (กระโดด/บินข้ามได้) • เสาประตูสูงกว่า
+  const F=testFences();
+  for(const [x1,y1,x2,y2] of F.segs){const L=Math.hypot(x2-x1,y2-y1),n=Math.max(1,Math.ceil(L/44));for(let i=0;i<=n;i++)obs.push({x:x1+(x2-x1)*i/n,y:y1+(y2-y1)*i/n,r:24,k:'tfence',hgt:1.3,s:0});}
+  for(const g of F.gates)for(const s of [-1,1])obs.push({x:g.x+Math.cos(g.a)*s*(TEST_GW/2+8),y:g.y+Math.sin(g.a)*s*(TEST_GW/2+8),r:30,k:'tgate',hgt:4,s:0});
   return {W,H,obs};
 }
 // ของพังได้ในห้องฝึก (เหมือนกันทุกเครื่อง): ป่าเล็กเหนือ/ใต้หมู่บ้าน + ต้นไม้ริมถนน + ลัง/ถังหน้าบ้าน + หีบ 2 ใบ
 function testProps(){
   const V=TEST_VIL,R=mulberry(4242),out=[],add=(k,x,y)=>out.push({i:out.length,k,x:Math.round(x),y:Math.round(y),a:R()*6.283,r:PROPDEF[k].r,hgt:PROPDEF[k].hgt,hp:PROPDEF[k].hp||0,st:0,ht:0});
   const free=(x,y,r)=>!MAPS.test.obs.some(o=>Math.abs(x-o.x)<(o.w||o.r*2)/2+r+40&&Math.abs(y-o.y)<(o.w||o.r*2)/2+r+40)&&!out.some(o=>Math.hypot(o.x-x,o.y-y)<o.r+r+30);
-  for(const [cx,cy,n] of [[V.x,V.y-900,26],[V.x,V.y+900,26],[V.x+1000,V.y-1250,10],[V.x+1000,V.y+1250,10]])
+  for(const [cx,cy,n] of [[V.x,V.y-900,26],[V.x,V.y+900,26],[V.x+650,V.y-1250,10],[V.x+650,V.y+1250,10]])
     for(let t=0,k=0;k<n&&t<400;t++){const x=cx+(R()-0.5)*1300,y=cy+(R()-0.5)*520;if(!free(x,y,24))continue;add(R()<0.5?'ptree':'ppine',x,y);k++;}
   for(let i=0;i<5;i++){add('ptree',V.x-760+i*360,V.y-130);add('ppine',V.x-580+i*360,V.y+130);}                         // ต้นไม้ริมถนน
   for(let i=0;i<4;i++)for(const s of [-1,1]){const x=V.x-600+i*360+(R()-0.5)*80,y=V.y+s*190;if(free(x,y,20))add(R()<0.5?'pcrate':'pbarrel',x,y);}
@@ -102,8 +128,9 @@ function testProps(){
   for(let i=0;i<8;i++){const x=V.x+900+(i%4)*55,y=V.y+380+Math.floor(i/4)*55;add(i%2?'pbarrel':'pcrate',x,y);}            // กองลังไว้ทดสอบระเบิด
   return out;
 }
-// โซนเสกมอนสเตอร์ในห้องฝึก (พิกัดเกม) — ใช้ทั้งโฮสต์ (จุดเกิด) และจอ (วงบนพื้น)
-function trZone(){return {x:MW/2+1344,y:MH/2-288,r:230};}
+// วงเสกมอนสเตอร์ในโซนเสกบอท (พิกัดเกม) — ใช้ทั้งโฮสต์ (จุดเกิด) และจอ (วงบนพื้น) • trBotPad = แท่นเสกบอท (ขั้นถัดไป)
+function trZone(){return {x:6450,y:2950,r:230};}
+function trBotPad(){return {x:6450,y:3800,r:200};}
 function genGreatHall(){
   const FW=2400,FH=1500,obs=[],tables=[];
   // โต๊ะยาว 4 บ้านวางตามแนวยาว (ช่องกลางเป็นทางเดินพรม) + โต๊ะอาจารย์ที่ปลายห้อง

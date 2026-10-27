@@ -5,18 +5,18 @@ Format: `name:line` = top-level function/const/let in that file. `§line title` 
 ## js/01-core.js (22) — แกนกลาง: import Three.js + ฟังก์ชันพื้นฐาน ($ rnd clamp lerp store to…
 $:12 rnd:13 clamp:14 lerp:15 dist2:16 lerpAng:17 esc:18 shuffle:19 store:20 toastT:21 toast:22
 
-## js/02-data.js (344) — 
+## js/02-data.js (371) — 
 W:4 H:4 PR:4 PILLARS:6 SPAWNF:7 mulberry:9 genForest:10 genPitch:27 genHogsmeade:36
 §54 แผนที่โล่ง 3 แบบ (ผู้ใช้: ป่ามืดไม่สนุก อยากได้ที่โล่งๆ)
 genMeadow:55 genLake:61 genRuins:66
 §73 Test Place (ห้องฝึก): พื้นโล่งไม่มีสิ่งกีดขวาง
-TEST_W:75 TEST_H:75 TEST_C:75 TEST_VIL:75 TEST_ST:77 TEST_PH:78 testWalls:80 testDummySpots:82 genTest:83 testProps:94 trZone:106 genGreatHall:107 MAPS:115 MAP_OFF:128 RANDOM_MAPS:129 MAPID:130 MW:130 MH:130 OBS:130 setMapVars:131
-§132 แผนที่จากไฟล์ (Blender → assets/maps/<id>.json + .glb, สคริปต์ assets…
-FMAPS:135 b64i16:136 regFileMap:137 loadMapData:149 loadAllMapData:157 mapReady:160 mapOkFor:161
-§162 ของประกอบฉากที่พังได้ / ใช้ได้ (prop)
-PROPDEF:166 PROP_OFF_MODES:173 PROP_USE:175 PROPS:176 PROPON:176 genProps:177
-§197 ตัวละคร: บ้านฮอกวอตส์ + หน้าตา
-HOUSES:199 HAIRC:204 HAIRSTY:206 WOODC:209 WOODN:210 WCOREC:211 WCOREN:212 WANDSTY:213 WANDN:218 WANDNN:233 EYEC:234 SKINC:235 CLOAKC:236 TIESTY:237 LOOKK:238 LOOKN:238 lookStr:239 parseLook:240 randLook:241 LOOKS:242 LOOKP:242 KITS:242 getKit:243 getLook:244 CREST_SH:245 CREST_PAT:246 starPts:251 CREST_ANI:253 crestSVG:259 houseColor:267 TEAMC:268 TEAMN:268 NOBROOM:270 MODES:271 PDEF:282 EDEF:309 POOLS:321 CDK:331 BUFFS:334 BRAR:343 rollRar:344
+TEST_W:75 TEST_H:75 TEST_C:75 TEST_VIL:75 TEST_GW:77 TEST_Z:78 TEST_ST:85 TEST_PH:86 testWalls:88 testDummySpots:90 testFences:92 genTest:105 testProps:120 trZone:132 trBotPad:133 genGreatHall:134 MAPS:142 MAP_OFF:155 RANDOM_MAPS:156 MAPID:157 MW:157 MH:157 OBS:157 setMapVars:158
+§159 แผนที่จากไฟล์ (Blender → assets/maps/<id>.json + .glb, สคริปต์ assets…
+FMAPS:162 b64i16:163 regFileMap:164 loadMapData:176 loadAllMapData:184 mapReady:187 mapOkFor:188
+§189 ของประกอบฉากที่พังได้ / ใช้ได้ (prop)
+PROPDEF:193 PROP_OFF_MODES:200 PROP_USE:202 PROPS:203 PROPON:203 genProps:204
+§224 ตัวละคร: บ้านฮอกวอตส์ + หน้าตา
+HOUSES:226 HAIRC:231 HAIRSTY:233 WOODC:236 WOODN:237 WCOREC:238 WCOREN:239 WANDSTY:240 WANDN:245 WANDNN:260 EYEC:261 SKINC:262 CLOAKC:263 TIESTY:264 LOOKK:265 LOOKN:265 lookStr:266 parseLook:267 randLook:268 LOOKS:269 LOOKP:269 KITS:269 getKit:270 getLook:271 CREST_SH:272 CREST_PAT:273 starPts:278 CREST_ANI:280 crestSVG:286 houseColor:294 TEAMC:295 TEAMN:295 NOBROOM:297 MODES:298 PDEF:309 EDEF:336 POOLS:348 CDK:358 BUFFS:361 BRAR:370 rollRar:371
 
 ## js/03-spells-core.js (222) — 
 ICONS:8 ICOALIAS:9 hasIco:10 ICOBASE:12 icoURL:13 ICO:14 icoTint:15 icoHTML:24 PATHS:25 SPELL_LIST:34 SPELLS:34 defSpell:35 SLOTK:36 BRMAP:36 KITP:37 parseKit:38 cleanKit:54 setKit:55 pathReset:58
@@ -56,8 +56,7 @@ stormRailFire:145
 §155 สกิล 6 (3 stacks): ลูกสายฟ้าโดม — ทะยานขึ้น บินเล็ง 3 วิ คลิกยิงลูกสา…
 stormDomeTick:156 stormDomeFire:171 stormDomeSlam:179 updateStorm:184
 
-## js/09-earth.js (245) — สายดิน ⛰️ (ผู้ใช้ออกแบบทั้งหมด — designs/earth.md §0 FINAL SPEC) • ฝั่งโฮสต์
-§8 E_CRUSH = เวลาก่อนหนีบ Tectonic Crush = ช่วง Stand ออกแรงดัน (ช้า) + …
+## js/09-earth.js (245) — 
 EARTH:10 E_SH:10 E_CRUSH_PUSH:10 E_CRUSH_SLIDE:10 E_ENV:10
 §14 ตัวช่วย
 eOn:15 eStand:16 eNoStand:17 eSegD:19 eAdd:20 eCollide:22 eProjHit:29 eKill:32
@@ -85,7 +84,7 @@ MIND:66 summonMin:72 minTarget:81 minShoot:88 updateMins:93 aimTarget:133
 §180 ร่ายคาถา
 castSlot:181 castUlt:196
 
-## js/10-net.js (159) — 
+## js/10-net.js (159) — เครือข่าย (PeerJS / WebRTC)
 PREFIX:4 NET:5 RC:9 TURN_SERVERS:12 ICE:13 PEER_OPT:14 TURN_URL:16 ICE_READY:18 JN:22 LAG:24 lagDo:25 hostSend:26 LOBBY:27 genCode:28 sendAll:29 setStatus:30 hostGame:32 hostPeer:40 netConnect:59 joinWatch:70 joinFail:85 netLost:91 joinGame:106 joinPeer:117 clientOnData:132 leave:147 leaveRoom:149
 
 ## js/11-host.js (384) — 
@@ -191,7 +190,7 @@ QUAL:143 QUAL_NAME:144 qualPR:145 applyQuality:151 qualTick:169 texCanvas:180 gl
 §239 เงาตามผู้เล่น
 SHD:243 _shF:244 _shR:244 _shU:244 _shC:244 _shY:244 shadowFollow:245 LPOOL:264
 
-## js/28-maps-build.js (727) — สร้างแผนที่
+## js/28-maps-build.js (754) — สร้างแผนที่
 CANDLESYS:2 builtMap:3 builtKey:3 world:3 TORCHES:3 CANDLES:3 FIREFLIES:3 CRYSTAL:3 RUNE:3 SNITCH:3 BANNERS:3 SNOW:3 WCACHE:5 WCACHE_MAX:5 wkey:7 buildWorld:8 addW:40 _prewarmed:42 prewarmShaders:43 batchStatic:62 makeCandles:87 updateCandles:96 buildCastle:105 buildHogsmeade:171 buildGreatHall:259 buildForest:329
 §426 ทุ่งหญ้าฮอกวอตส์ (เย็น)
 ringTrees:427 grassTex:436 buildMeadow:437
@@ -202,7 +201,7 @@ buildLake:457
 §480 บรรยากาศที่ใช้ร่วมกัน (แผนที่จากโค้ด + แผนที่จากไฟล์ผ่าน fx ใน MAP-DE…
 makeSnow:481 makeFireflies:488 makeSnitch:495 fileMapFx:502
 §512 แผนที่จากไฟล์ Blender (MAP-DESIGN.md)
-terrGeo:514 buildFileMap:522 tickM:559 testSign:560 buildTest:567 buildRuins:633 buildPitch:658
+terrGeo:514 buildFileMap:522 tickM:559 signTex:560 testSign:561 buildTest:568 buildRuins:660 buildPitch:685
 
 ## js/29-characters.js (436) — ระบบผ้า (เสื้อคลุมพลิ้วตามการเคลื่อนที่)
 makeCloak:2 updateCloth:10 wandNamed:34 wandSparks:83
@@ -272,8 +271,7 @@ trOpenF:2 trKey:2 trN:2 TR_OPTS:3 trToggle:4 trSend:9 trSync:14 hovEl:61
 §62 หน้าตั้งค่า
 setRow:63 setTog:64 setTab:65 XHC:66 XHN:66 setOpts:67 SET_ICO:69 SET_EN:72 renderSettings:73 drawXhPrev:93 openSettings:94 closeSettings:96 modeIcon:152 modeTitle:153 renderLobby:154
 
-## js/41-debug.js (142) — เครื่องมือทดสอบสมดุล (ใช้ผ่านคอนโซล WD.bal / WD.dmgTest เท่านั้น ผู้เล่นปกติไม่เห็น)
-§5 บอทต่อสู้แบบง่ายๆ: เล็งนำเป้า เดินรักษาระยะ+ส่ายไปมา ร่ายคาถาทุกครั้ง…
+## js/41-debug.js (142) — 
 botBrain:6 _obsKeep:47 balArena:48 balReset:49 balDuel:53 balTour:68 balCoop:82 balSpellTest:98
 §117 Service Worker (sw.js): เก็บไฟล์เกมไว้ในเครื่อง เปิดครั้งต่อไปเร็วขึ้…
 SWK:118 swSetup:119
@@ -369,7 +367,7 @@ fxWarpMake:222 fxWarpTick:234
 §240 ไฟ 3 มิติจากการจำลอง (ชั้น vol) — ไฟล์รูปแบบเดียวกับที่เพื่อน bake จา…
 FXVOL:243 fxVolLoad:244 fxVolTex:248 fxVolSet:251 fxVolReady:252 fxVolMake:253 fxVolTick:256 fxPreAssets:261 fxAssetsWait:263
 
-## js/47-earth-view.js (664) — สายดิน ⛰️ — ภาพฝั่งเครื่องเล่น (Stand / Stand ใหญ่ / กำแพง / เสา / เนิน / ฝุ่น / สว่าน / …
+## js/47-earth-view.js (664) — 
 ECOL:9 EGUARD_BIG:14 EGUARD:14 CB:15 EV:16 eW:17 eYaw:18
 §19 ลายผิว (วาดเองบน canvas: หิน/ทราย + รอยร้าว + ขอบบล็อกแบบ Roblox)
 ETEX:20 eTex:21 eFadeTex:35 eMat:37 eTMat:38 rockGeo:39 _eChunkM:43 eChunks:44
@@ -402,7 +400,7 @@ RAG:10 RAGJ:23 RAGB:29 RAGS:33 RAGMIN:37 RAGHINGE:39 _rv1:40 _rv2:40 _rv3:40 _rq
 ## js/49-cloth.js (120) — 
 CLOTH:10 CL_ROWS:22 CL_NC:22 CL_GAP:22 CL_IN:22 _clV:23 _clA:23 _clB:23 clPinK:25 clBind:27 clothSetup:30 clTargets:63 clReset:67 clCapsule:69 _clO:73 clWorld:74 clWorldHit:83 clStep:88 clDraw:100 clothTick:107
 
-## js/50-grass.js (288) — ลม + หญ้า 3D (ภาพบนเครื่องตัวเองล้วน ไม่แตะโฮสต์/โปรโตคอล)
+## js/50-grass.js (288) — 
 AIR:10 AIR_MAP:17 airGust:19 airGs:22 airMark:24 airForMap:27 _airV:28 airAt:29 airGv:35 airTick:36
 §39 ต่อเข้ากับเอฟเฟกต์เดิม (ไม่ต้องแก้ทุกสกิล): แสงวาบ = ลมกระโชก • วงคลื…
 CLW:48
@@ -547,4 +545,4 @@ gameCover:403
 ## js/66-hud4.js (133) — HUD รอบ 4 (ผู้ใช้ 2026-10-23, designs/hud-full-mock.html)
 H4E:5 H4:10 H4C:11 H4RC:11 h4Pal:12 hud4Col:14 h4Runes:15 h4RingSVG:16 h4Parts:25 h4AuBits:30 h4Key:45 h4Ico:46 h4Build:47 h4Set:77 hud4Draw:78 hud4Frame:116 hud4Hide:117 _h4RT:119 _h4Cam:119 h4FaceShot:120 h4FaceSet:133
 
-(67 files, 16503 lines)
+(67 files, 16557 lines)

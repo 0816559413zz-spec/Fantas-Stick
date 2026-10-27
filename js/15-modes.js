@@ -51,7 +51,7 @@ function modeInit(){
     G.tr=Object.assign({datk:1,mai:1,nocd:0,ult:0,god:0,pvp:0},G.tr||{});trTeams();
     const cy=MH/2-260;
     for(let i=0;i<5;i++)spawnDummy(MW/2+(i-2)*170,cy);
-    spawnDummy(MW/2,MH/2-620>80?MH/2-620:80);
+    spawnDummy(MW/2,MH/2-500);   // ไม่เกินรั้วโซนเทสสกิล (y 2100)
     testDummySpots().forEach(([x,y],i)=>{spawnDummy(x,y);G.en[G.en.length-1].spot=i;});G.spotT=[];   // หุ่นประจำจุดทดสอบ (ลานยิงไกล / วงวัดรัศมี)
     G.tipT=0;G.tipI=0;
   }

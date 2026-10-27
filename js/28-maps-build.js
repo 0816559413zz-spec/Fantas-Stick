@@ -557,8 +557,9 @@ function buildFileMap(id){
 }
 // ห้องฝึก: วัสดุขีดระยะ + ป้ายไม้ (ข้อความ 2 บรรทัด) — x,y = พิกัดเกม, ry = หันป้าย
 function tickM(){return new THREE.MeshBasicMaterial({color:'#ffffff',transparent:true,opacity:0.55});}
+function signTex(t1,t2){return texCanvas(512,160,g=>{g.fillStyle='#5a3a22';g.fillRect(0,0,512,160);g.strokeStyle='#e8c060';g.lineWidth=8;g.strokeRect(6,6,500,148);g.fillStyle='#f3dc94';g.textAlign='center';g.textBaseline='middle';g.font='bold 54px Kanit, sans-serif';g.fillText(t1,256,62);g.font=(t2.length>30?'24':'30')+'px Kanit, sans-serif';g.fillText(t2,256,118);});}
 function testSign(t1,t2,x,y,ry){
-  const st=texCanvas(512,160,g=>{g.fillStyle='#5a3a22';g.fillRect(0,0,512,160);g.strokeStyle='#e8c060';g.lineWidth=8;g.strokeRect(6,6,500,148);g.fillStyle='#f3dc94';g.textAlign='center';g.textBaseline='middle';g.font='bold 54px Kanit, sans-serif';g.fillText(t1,256,62);g.font=(t2.length>30?'24':'30')+'px Kanit, sans-serif';g.fillText(t2,256,118);});
+  const st=signTex(t1,t2);
   const sg=addW(new THREE.Group()),post=new THREE.MeshStandardMaterial({color:'#4e3420',roughness:0.9});
   for(const s of [-1,1]){const p=new THREE.Mesh(new THREE.CylinderGeometry(0.12,0.12,3.2,6),post);p.position.set(s*2.2,1.6,0);sg.add(p);}
   const bd=new THREE.Mesh(new THREE.PlaneGeometry(5,1.56),new THREE.MeshStandardMaterial({map:st,roughness:0.8,side:THREE.DoubleSide}));bd.position.y=2.6;sg.add(bd);
@@ -591,21 +592,49 @@ function buildTest(){
     g.fillStyle='rgba(255,235,230,0.95)';g.textAlign='center';g.textBaseline='middle';g.font='bold 52px Kanit, sans-serif';g.fillText('โซนเสกมอนสเตอร์',0,-14);g.font='34px Kanit, sans-serif';g.fillText('กด P → เสกมอนสเตอร์',0,44);
   });
   const zm=addW(new THREE.Mesh(new THREE.PlaneGeometry(zs,zs),new THREE.MeshBasicMaterial({map:zt,transparent:true,depthWrite:false})));zm.rotation.x=-Math.PI/2;zm.position.set(tx(Z.x),0.04,tz(Z.y));
-  // หมู่บ้านทดสอบทำลาย (ฝั่งตะวันตก): ลานหญ้า + ถนนดิน + ป้าย — บ้าน/ต้นไม้/ลังมาจากระบบพังได้ (syncBld / syncProps)
-  {const V=TEST_VIL,gm=grLive(new THREE.MeshStandardMaterial({map:grassTex('#5f8f45',11,1),roughness:0.95})),dm=new THREE.MeshStandardMaterial({color:'#8a7456',roughness:1});
-    const gr=addW(new THREE.Mesh(new THREE.PlaneGeometry(1900*S3,2900*S3),gm));gr.rotation.x=-Math.PI/2;gr.position.set(tx(V.x+150),0.01,tz(V.y));gr.receiveShadow=true;
-    const rd=addW(new THREE.Mesh(new THREE.PlaneGeometry(1800*S3,180*S3),dm));rd.rotation.x=-Math.PI/2;rd.position.set(tx(V.x+100),0.02,tz(V.y));rd.receiveShadow=true;
-    testSign('หมู่บ้านทดสอบทำลาย','บ้าน · ต้นไม้ · ลัง พังได้ทั้งหมด',V.x+1050,V.y-150,Math.PI/2);}
-  // จุดทดสอบรอบลานฝึก (TEST_ST ใน js/02) — พื้นสีแยกโซน + ป้าย
+  // หมู่บ้านทดสอบทำลาย (โซนตะวันตก): ลานหญ้าเต็มรั้ว + ถนนดินถึงประตู — บ้าน/ต้นไม้/ลังมาจากระบบพังได้ (syncBld / syncProps)
+  {const Zv=TEST_Z.vil,V=TEST_VIL,gm=grLive(new THREE.MeshStandardMaterial({map:grassTex('#5f8f45',11,1),roughness:0.95})),dm=new THREE.MeshStandardMaterial({color:'#8a7456',roughness:1});
+    const gr=addW(new THREE.Mesh(new THREE.PlaneGeometry((Zv.x2-Zv.x1)*S3,(Zv.y2-Zv.y1)*S3),gm));gr.rotation.x=-Math.PI/2;gr.position.set(tx((Zv.x1+Zv.x2)/2),0.01,tz((Zv.y1+Zv.y2)/2));gr.receiveShadow=true;
+    const rd=addW(new THREE.Mesh(new THREE.PlaneGeometry((Zv.x2-200)*S3,180*S3),dm));rd.rotation.x=-Math.PI/2;rd.position.set(tx((Zv.x2+200)/2),0.02,tz(V.y));rd.receiveShadow=true;}
+  // พื้นสีแยกโซน / จุดทดสอบ (TEST_Z, TEST_ST ใน js/02)
   const padT=grid('#ffffff','#b4b9be',[1,1]);   // ลายพื้นเดียวกัน (สีขาว คูณสีของแผ่นเอง)
-  const pad=(x,y,w,h,col)=>{const t=padT.clone();t.needsUpdate=true;t.repeat.set(w*S3/8,h*S3/8);const m=addW(new THREE.Mesh(new THREE.PlaneGeometry(w*S3,h*S3),new THREE.MeshStandardMaterial({map:t,color:col,roughness:0.95})));m.rotation.x=-Math.PI/2;m.position.set(tx(x),0.012,tz(y));m.receiveShadow=true;};
+  const pad=(x,y,w,h,col,yy)=>{const t=padT.clone();t.needsUpdate=true;t.repeat.set(w*S3/8,h*S3/8);const m=addW(new THREE.Mesh(new THREE.PlaneGeometry(w*S3,h*S3),new THREE.MeshStandardMaterial({map:t,color:col,roughness:0.95})));m.rotation.x=-Math.PI/2;m.position.set(tx(x),yy||0.012,tz(y));m.receiveShadow=true;};
   const lbl=(t,x,y,sz,col)=>{const c=texCanvas(256,96,g=>{g.fillStyle=col||'#ffffff';g.textAlign='center';g.textBaseline='middle';g.font='bold 60px Kanit, sans-serif';g.fillText(t,128,48);});
     const m=addW(new THREE.Mesh(new THREE.PlaneGeometry(sz,sz*0.375),new THREE.MeshBasicMaterial({map:c,transparent:true,depthWrite:false})));m.rotation.x=-Math.PI/2;m.position.set(tx(x),0.05,tz(y));};
-  {// ลานยิงไกล: ทางเดินยาวไปทางเหนือ + เลขระยะจากจุดเกิด (เมตร) ทุก 200 px ถึง 2000
-    const C=TEST_C,y0=C.y+160;pad(C.x,y0-1050,420,2150,'#8c949b');
-    for(let d=1000;d<=2000;d+=200){const m=addW(new THREE.Mesh(new THREE.PlaneGeometry(6,0.3),tickM()));m.rotation.x=-Math.PI/2;m.position.set(0,0.03,tz(y0-d));}
-    for(let d=200;d<=2000;d+=200)lbl(d/20+' ม.',C.x+170,y0-d,4.2);
-    testSign('ลานยิงไกล','หุ่นที่ 50 · 70 · 90 เมตร',C.x-300,y0-760,0);}
+  for(const k of ['skill','bot']){const z=TEST_Z[k];pad((z.x1+z.x2)/2,(z.y1+z.y2)/2,z.x2-z.x1,z.y2-z.y1,z.col,0.008);}
+  {// สังเวียน: พื้นทรายวงกลม + เส้นขอบ + เส้นแบ่งกลาง
+    const A=TEST_Z.arena,t=padT.clone();t.needsUpdate=true;t.repeat.set(A.r*2*S3/8,A.r*2*S3/8);
+    const m=addW(new THREE.Mesh(new THREE.CircleGeometry(A.r*S3,64),new THREE.MeshStandardMaterial({map:t,color:A.col,roughness:1})));m.rotation.x=-Math.PI/2;m.position.set(tx(A.cx),0.008,tz(A.cy));m.receiveShadow=true;
+    const lm=new THREE.MeshBasicMaterial({color:'#fff2d0',transparent:true,opacity:0.6});
+    for(const r of [A.r-40,170]){const g=addW(new THREE.Mesh(new THREE.RingGeometry(r*S3-0.2,r*S3,64),lm));g.rotation.x=-Math.PI/2;g.position.set(tx(A.cx),0.03,tz(A.cy));}
+    const ln=addW(new THREE.Mesh(new THREE.PlaneGeometry(0.4,(A.r-40)*2*S3),lm));ln.rotation.x=-Math.PI/2;ln.position.set(tx(A.cx),0.03,tz(A.cy));
+    lbl('ทีม A',A.cx-420,A.cy,16,'#8fc8ff');lbl('ทีม B',A.cx+420,A.cy,16,'#ff9a8a');}
+  {// แท่นเสกบอท (ยังไม่ทำงาน — ขั้นที่ 3)
+    const B=trBotPad(),t=texCanvas(512,512,g=>{g.translate(256,256);g.fillStyle='rgba(150,110,230,0.22)';g.beginPath();g.arc(0,0,250,0,7);g.fill();
+      g.strokeStyle='rgba(190,160,255,0.95)';g.lineWidth=10;g.beginPath();g.arc(0,0,244,0,7);g.stroke();g.lineWidth=4;g.setLineDash([26,16]);g.beginPath();g.arc(0,0,190,0,7);g.stroke();g.setLineDash([]);
+      g.fillStyle='rgba(240,232,255,0.95)';g.textAlign='center';g.textBaseline='middle';g.font='bold 56px Kanit, sans-serif';g.fillText('แท่นเสกบอท',0,-14);g.font='32px Kanit, sans-serif';g.fillText('(เร็วๆ นี้)',0,44);});
+    const m=addW(new THREE.Mesh(new THREE.PlaneGeometry(B.r*2*S3,B.r*2*S3),new THREE.MeshBasicMaterial({map:t,transparent:true,depthWrite:false})));m.rotation.x=-Math.PI/2;m.position.set(tx(B.x),0.04,tz(B.y));}
+  {// รั้วโซน (testFences ใน js/02): เสา + ราว 2 เส้น เป็น InstancedMesh (2 draw call) • ประตู = เสาสูง 2 ต้น + คาน + ป้ายชื่อโซน 2 หน้า
+    const F=testFences(),wd=new THREE.MeshStandardMaterial({color:'#8a6238',roughness:0.9}),posts=[],rails=[];
+    for(const [x1,y1,x2,y2] of F.segs){const L=Math.hypot(x2-x1,y2-y1),n=Math.max(1,Math.round(L/160)),a=Math.atan2(y2-y1,x2-x1);
+      for(let i=0;i<=n;i++)posts.push([x1+(x2-x1)*i/n,y1+(y2-y1)*i/n]);for(const h of [0.55,1.1])rails.push([(x1+x2)/2,(y1+y2)/2,L,a,h]);}
+    const q=new THREE.Object3D(),pm=addW(new THREE.InstancedMesh(new THREE.CylinderGeometry(0.11,0.13,1.4,6),wd,posts.length)),rm=addW(new THREE.InstancedMesh(new THREE.BoxGeometry(1,0.12,0.1),wd,rails.length));
+    posts.forEach(([x,y],i)=>{q.position.set(tx(x),0.7,tz(y));q.rotation.set(0,0,0);q.scale.set(1,1,1);q.updateMatrix();pm.setMatrixAt(i,q.matrix);});
+    rails.forEach(([x,y,L,a,h],i)=>{q.position.set(tx(x),h,tz(y));q.rotation.set(0,-a,0);q.scale.set(L*S3+0.2,1,1);q.updateMatrix();rm.setMatrixAt(i,q.matrix);});
+    pm.castShadow=rm.castShadow=true;
+    const gp=new THREE.MeshStandardMaterial({color:'#5a3c22',roughness:0.85}),gl2=new THREE.MeshStandardMaterial({color:'#ffd27a',emissive:'#ffb040',emissiveIntensity:0.8});
+    for(const g of F.gates){const Z=TEST_Z[g.z],gr=addW(new THREE.Group()),w=TEST_GW*S3+0.8;gr.position.set(tx(g.x),0,tz(g.y));gr.rotation.y=-g.a;
+      for(const s of [-1,1]){const p=new THREE.Mesh(new THREE.CylinderGeometry(0.28,0.32,4.4,8),gp);p.position.set(s*w/2,2.2,0);gr.add(p);const l=new THREE.Mesh(new THREE.SphereGeometry(0.32,10,8),gl2);l.position.set(s*w/2,4.6,0);gr.add(l);}
+      const bm=new THREE.Mesh(new THREE.BoxGeometry(w+0.6,0.4,0.4),gp);bm.position.y=4.1;gr.add(bm);
+      const st=signTex(Z.t,Z.s);for(const ry of [0,Math.PI]){const b=new THREE.Mesh(new THREE.PlaneGeometry(8,2.5),new THREE.MeshStandardMaterial({map:st,roughness:0.8}));b.position.set(0,5.6,ry?-0.06:0.06);b.rotation.y=ry;gr.add(b);}
+      shadowAll(gr);}}
+  {// ลานยิงไกล: ยืนที่เส้นเริ่ม ยิงไปทางตะวันออก • เลขระยะ (เมตร) ทุก 200 px ถึง 2000
+    const R=TEST_ST.range;pad(R.x+1000,R.y,2200,340,'#8c949b');
+    const st=addW(new THREE.Mesh(new THREE.PlaneGeometry(0.5,15),new THREE.MeshBasicMaterial({color:'#ffd860'})));st.rotation.x=-Math.PI/2;st.position.set(tx(R.x),0.03,tz(R.y));
+    lbl('ยืนตรงนี้',R.x-60,R.y-130,5,'#ffd860');
+    for(let d=1000;d<=2000;d+=200){const m=addW(new THREE.Mesh(new THREE.PlaneGeometry(0.3,15),tickM()));m.rotation.x=-Math.PI/2;m.position.set(tx(R.x+d),0.03,tz(R.y));}
+    for(let d=200;d<=2000;d+=200)lbl(d/20+' ม.',R.x+d,R.y+130,4.2);
+    testSign('ลานยิงไกล','หุ่นที่ 50 · 70 · 90 เมตร',R.x+500,R.y+260,0);}
   {// วงวัดรัศมี: วงทุก 100 px (5 ม.) ถึง 600 + หุ่น 3 ตัว (กลาง / 300 / 300 เฉียง)
     const A=TEST_ST.aoe,R=600,t=texCanvas(1024,1024,g=>{g.translate(512,512);const k=500/R;g.fillStyle='rgba(80,140,255,0.10)';g.beginPath();g.arc(0,0,R*k,0,7);g.fill();
       for(let r=100;r<=R;r+=100){g.strokeStyle=r%200?'rgba(150,200,255,0.6)':'rgba(190,225,255,0.95)';g.lineWidth=r%200?3:6;g.beginPath();g.arc(0,0,r*k,0,7);g.stroke();
@@ -621,14 +650,12 @@ function buildTest(){
     TEST_PH.forEach((h,c)=>lbl(h+' ม.',P.x+(c-1.5)*280,P.y-420,4,cols[c]));
     testSign('เสาสูงต่างกัน','1.5 · 3 · 6 · 12 ม. — บินข้าม / หลบ / บังกระสุน',P.x-760,P.y,Math.PI/2);}
   {// กำแพงยาว + ทางแคบ: ชนกำแพง (กระแทก/Stonebreaker) / พุ่ง / ต่อสู้ในทางแคบ
-    const Wd=TEST_ST.wall,wm=new THREE.MeshStandardMaterial({map:grid('#a39078','#7d6c58',[1,1]),roughness:0.9});pad(Wd.x+50,Wd.y,1800,1100,'#8a8478');
+    const Wd=TEST_ST.wall,wm=new THREE.MeshStandardMaterial({map:grid('#a39078','#7d6c58',[1,1]),roughness:0.9});pad(Wd.x+50,Wd.y,1700,1000,'#8a8478');
     for(const [x1,y1,x2,y2] of testWalls()){const L=Math.hypot(x2-x1,y2-y1)*S3+2.6,m=addW(new THREE.Mesh(new THREE.BoxGeometry(L,6,2.6),wm.clone()));m.material.map=m.material.map.clone();m.material.map.repeat.set(L/3,2);m.material.map.needsUpdate=true;
       m.position.set(tx((x1+x2)/2),3,tz((y1+y2)/2));m.rotation.y=-Math.atan2(y2-y1,x2-x1);shadowAll(m);}
     testSign('กำแพง + ทางแคบ','ลองกระแทกศัตรูชนกำแพง / พุ่งชน',Wd.x-300,Wd.y-420,Math.PI);}
-  // ป้ายบอกทางกลางลาน
-  testSign('จุดทดสอบ','↑ ยิงไกล   ↗ วงรัศมี   ↘ เสา   ↓ กำแพง   ← หมู่บ้าน',TEST_C.x-420,TEST_C.y-60,0);
-  // ป้ายระยะ (ทุก 200 px) จากจุดเกิดไปทางหุ่นซ้อมไกล — ไว้ดูระยะคาถา
-  for(let d=200;d<=800;d+=200){const m=addW(new THREE.Mesh(new THREE.PlaneGeometry(3,0.25),tickM()));m.rotation.x=-Math.PI/2;m.position.set(0,0.03,tz(MH/2+160-d));}
+  // ป้ายบอกทางกลางลาน (จุดเกิด)
+  testSign('ลานกลาง','↑ เทสสกิล   ← ทำลายบ้าน   → เสกบอท   ↓ สังเวียน',TEST_C.x-420,TEST_C.y-60,0);
 }
 function buildRuins(){
   scene.fog.color.set('#d09a6a');scene.fog.near=120;scene.fog.far=480;
