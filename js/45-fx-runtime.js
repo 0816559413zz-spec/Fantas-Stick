@@ -121,12 +121,14 @@ function fxSpawn(S,I,w){const L=S.d,g=k=>fxG(L,k),V=(k,q)=>fxV(g(k),I,q||0),C=k=
       fxPlace(m,I,S,w,V('yaw')*FXDEG);fxScene.add(m);S.obj=m;break;}
     case 'trail':S.obj=trailNew({col:C('col'),col2:C('col2'),w:g('w')*I.s,life:g('tlife'),k:g('k')*I.k,sweep:!!g('sweep')});break;
     case 'bolt':fxBolt(S,I,w);S.acc=0;break;
-    case 'decal':{const r=V('r')*I.s,kd=g('kind');
-      if(kd==='scorch')scorch(w[0],w[1],w[2],r*20,S.life);else if(kd==='rune')fireRune(w[0],w[1],w[2],r*20,S.life);
-      else if(kd==='crack')fireCrackWeb(w[0],w[1],w[2],r*20,S.life,{n:g('n'),burn:g('burn'),burnT:g('burn')?Math.min(S.life,g('burn')+0.9):0});
-      else if(kd==='icecrack')dfCracks(w[0],w[1],w[2]+0.04,r*20,C('col'),S.life);
-      else SHAPES_Q.push({k:kd==='glyph'?'rune':'decal',x:w[0],y:w[1],h:kd==='glyph'?w[2]+0.05:undefined,col:kd==='glyph'?C('col'):'#000000',s1:r,life:S.life,op:g('op')});
-      S.oneshot=1;break;}
+    case 'decal':{const r=V('r')*I.s,kd=g('kind');S.oneshot=1;
+      // รอยบนพื้นเสมอ (ไม่ลอยตามจุดที่โดน) • จุดที่โดนสูงจากพื้นเกินรัศมีรอย (ตีโดนมอน/คนกลางอากาศ) = ไม่มีรอย
+      if(w[2]>Math.max(0.6,r*0.6))break;
+      if(kd==='scorch')scorch(w[0],w[1],0,r*20,S.life);else if(kd==='rune')fireRune(w[0],w[1],0,r*20,S.life);
+      else if(kd==='crack')fireCrackWeb(w[0],w[1],0,r*20,S.life,{n:g('n'),burn:g('burn'),burnT:g('burn')?Math.min(S.life,g('burn')+0.9):0});
+      else if(kd==='icecrack')dfCracks(w[0],w[1],0.04,r*20,C('col'),S.life);
+      else SHAPES_Q.push({k:kd==='glyph'?'rune':'decal',x:w[0],y:w[1],h:kd==='glyph'?0.05:undefined,col:kd==='glyph'?C('col'):'#000000',s1:r,life:S.life,op:g('op')});
+      break;}
     case 'debris':{const n=fxN(I,V('n'));if(g('kind')==='ice')iceChips(w[0],w[1],w[2],n,V('speed')*20*I.s,4);else rockChunks(w[0],w[1],w[2],n,V('speed')*Math.sqrt(I.s),{r:V('r')*20*I.s,s:g('size')*Math.sqrt(I.s),life:g('dlife')});S.oneshot=1;break;}
     case 'mist':glacierMist(w[0],w[1],V('r')*20*I.s,fxN(I,g('n')),{h:w[2],out:g('out')*I.s});S.oneshot=1;break;
     case 'crown':iceBurst(w[0],w[1],V('r')*I.s,{life:S.life,hy:g('hy'),h:w[2],mist:g('mist')||undefined});S.oneshot=1;break;

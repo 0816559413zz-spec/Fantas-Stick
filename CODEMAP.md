@@ -328,7 +328,7 @@ _wpM:108 fileWeapon:109
 §117 Ice circle (Permafrost): ริบบิ้นแสงวนเป็นก้นหอยบนพื้น + ผลึกลอยหมุนรอ…
 SWIRL_FS:118 ICIRC:122 iceCircle:123 updateIceCircles:134
 
-## js/44-vfx-kit.js (240) — 
+## js/44-vfx-kit.js (240) — ชุดเครื่องมือ VFX กลาง (ขั้น 2 ของแผนอัปเกรด VFX)
 §8 1) หางแสง
 TRMAX:11 TRPTS:11 TRAILS:11 _trL:12 trailLayer:13 trailNew:22 trailPoint:24 trailStop:27 _tv1:28 _tv2:28 _tv3:28 updateTrails:29
 §52 2) สูตรเอฟเฟกต์ = จานสี (ธาตุ) × แม่แบบ (ขนาด/ชนิด)
@@ -340,7 +340,7 @@ BF_EL:198 BF_CLS:198 BF_EXTRA:200 BF:203 bfAfter:204 bfPlay:219
 §225 4) เอฟเฟกต์ทั้งจอ (ค่าไปที่ GradePass ใน js/27-world.js)
 SCR:226 screenFlash:227 screenRadial:228 screenKick:229 screenHurt:230 _scv:231 updateScreenFx:232 updateVfxKit:240
 
-## js/45-fx-runtime.js (344) — 
+## js/45-fx-runtime.js (346) — VFX Studio runtime — เล่นเอฟเฟกต์จากไฟล์ข้อมูล assets/fx/<กลุ่ม>/<ชื่อ>.fx.json (แผน desi…
 FXR:9 FXDEG:10
 §11 โหลด
 fxFetch:12 fxDefaults:13 fxBoot:14 fxOverrides:24 fxLoad:27 fxData:31
@@ -353,21 +353,21 @@ fxPlay:73 fxStart:74 fxStop:83 fxKill:84 fxClearAll:85 fxGate:87
 §89 ทุกเฟรม
 updateFx:90
 §106 สร้างชั้น
-fxN:107 fxSpawn:108 fxTick:140 fxEnd:151
-§158 อนุภาค
-_fxrnd:159 fxUnit:160 fxCone:161 fxEmit:163 fxPart:180
-§195 รูปทรง 3D
-FXGEO:196 fxMerge:197 fxRibbon:202 fxGeo:208 fxEnergyMat:228 fxToonMat:240 fxMeshMake:248 fxMeshTick:266 fxFlipTex:281
-§286 หางแสง / รอยฟัน
-fxTrailTick:287
-§293 สายฟ้า
-fxBolt:294
-§300 ฟังก์ชันในโค้ดที่ไฟล์เรียกได้ (ชั้น t:"code")
-FXCODE:301
-§314 ผูกกับ event ของเกม (assets/fx/bind.json) — เรียกจาก fx(ev)
-fxLoopName:316 blzFxName:317 fxLoopKeep:318 fshHitFx:320 fxBind:323
-§334 แม่แบบ playFx เป็นไฟล์ (assets/fx/tpl/*, sig/*, rec/*)
-fxTpl:336
+fxN:107 fxSpawn:108 fxTick:142 fxEnd:153
+§160 อนุภาค
+_fxrnd:161 fxUnit:162 fxCone:163 fxEmit:165 fxPart:182
+§197 รูปทรง 3D
+FXGEO:198 fxMerge:199 fxRibbon:204 fxGeo:210 fxEnergyMat:230 fxToonMat:242 fxMeshMake:250 fxMeshTick:268 fxFlipTex:283
+§288 หางแสง / รอยฟัน
+fxTrailTick:289
+§295 สายฟ้า
+fxBolt:296
+§302 ฟังก์ชันในโค้ดที่ไฟล์เรียกได้ (ชั้น t:"code")
+FXCODE:303
+§316 ผูกกับ event ของเกม (assets/fx/bind.json) — เรียกจาก fx(ev)
+fxLoopName:318 blzFxName:319 fxLoopKeep:320 fshHitFx:322 fxBind:325
+§336 แม่แบบ playFx เป็นไฟล์ (assets/fx/tpl/*, sig/*, rec/*)
+fxTpl:338
 
 ## js/46-fx-make.js (264) — 
 FXMK:10 MKD:11 mkRng:12 mkHash:13 mkNoise:15 mkL:17 mkR2:18
@@ -569,4 +569,4 @@ gameCover:403
 ## js/66-hud4.js (133) — HUD รอบ 4 (ผู้ใช้ 2026-10-23, designs/hud-full-mock.html)
 H4E:5 H4:10 H4C:11 H4RC:11 h4Pal:12 hud4Col:14 h4Runes:15 h4RingSVG:16 h4Parts:25 h4AuBits:30 h4Key:45 h4Ico:46 h4Build:47 h4Set:77 hud4Draw:78 hud4Frame:116 hud4Hide:117 _h4RT:119 _h4Cam:119 h4FaceShot:120 h4FaceSet:133
 
-(73 files, 17336 lines)
+(73 files, 17338 lines)
