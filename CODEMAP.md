@@ -5,6 +5,9 @@ Format: `name:line` = top-level function/const/let in that file. `§line title` 
 ## js/01-core.js (22) — แกนกลาง: import Three.js + ฟังก์ชันพื้นฐาน ($ rnd clamp lerp store to…
 $:12 rnd:13 clamp:14 lerp:15 dist2:16 lerpAng:17 esc:18 shuffle:19 store:20 toastT:21 toast:22
 
+## js/02-city.js (88) — เมืองมักเกิ้ล — กล่องเทา (designs/city-bot-battle.md ขั้น 3)
+CITY_PLAN:6 CITY_ZN:11 CITY_PLAZA:12 genCity:13 cityProps:76
+
 ## js/02-citytest.js (28) — แมพทดสอบเมืองใหญ่ (กล่องเทา) — ใช้วัดความลื่นของเครื่องยนต์ก่อนสร้างเ…
 CITY_N:4 CITY_B:4 CITY_ROAD:4 genCityTest:5 cityTestProps:19
 
@@ -90,17 +93,17 @@ castSlot:181 castUlt:196
 ## js/10-net.js (183) — เครือข่าย (PeerJS / WebRTC)
 PREFIX:4 NET:5 RC:9 TURN_SERVERS:12 ICE:13 PEER_OPT:14 TURN_URL:16 ICE_READY:18 JN:22 LAG:24 lagDo:25 hostSend:26 LOBBY:27 genCode:28 sendAll:29 NETD_KEYS:33 NETD:33 netDeltaReset:34 netDelta:35 NETU:47 netUndelta:48 setStatus:54 hostGame:56 hostPeer:64 netConnect:83 joinWatch:94 joinFail:109 netLost:115 joinGame:130 joinPeer:141 clientOnData:156 leave:171 leaveRoom:173
 
-## js/11-host.js (387) — 
+## js/11-host.js (388) — 
 G:4 EVL:4 EVN:4 hostLast:4 tickN:4 emit:5 feed:6 banner:7 plist:8 cleanName:9 freshStats:11 newPlayer:18 emptyInput:21 frameOk:23 addPlayer:24 initHostLobby:33 lobbyMsg:40 broadcastLobby:41 INPN:43 hostOnData:44 hostDrop:74 hostRemove:83 validate:96 hostStart:107 hostToLobby:133 MIDJOIN:140 midJoin:141 CHATT:157 chatRelay:158 emoHost:166 resetBody:168 fmap:174 spawnPts:175 teamPts:177 placeAll:178 respawn:190
-§208 ลูปหลักฝั่งโฮสต์
-hostTick:209 angDiff:223 cH:225 vR:226 updatePlayer:228 hitProp:374 damagePropsIn:381 nearUseProp:382 useProp:383
+§209 ลูปหลักฝั่งโฮสต์
+hostTick:210 angDiff:224 cH:226 vR:227 updatePlayer:229 hitProp:375 damagePropsIn:382 nearUseProp:383 useProp:384
 
-## js/12-buildings.js (468) — สิ่งปลูกสร้างที่พังเป็นชิ้นย่อย (บ้าน) แบบ Battlefield — คู่มือเต็ม: …
+## js/12-buildings.js (474) — สิ่งปลูกสร้างที่พังเป็นชิ้นย่อย (บ้าน) แบบ Battlefield — คู่มือเต็ม: …
 BLDDEF:8 BLD_PIECES:9 BLD_GRID:10 BLD_FIRE:11 BLD_ICE:11 BLD_ROOF_MIN:11 BLDG:12 BLDON:12 genBldg:13 bldRect:23 bldChunk:25 bldAlive:32 bldLocal:33 bldWorld:34 rectDist:35 bldNear:36 BLD_MOUND:39 bldGone:40 bldMoundAt:41 bldMoundH:42 hitBldPiece:44 breakBldChunk:55 bldSupport:63 damageEnv:83 bldRay:97 aimClip:105 aimRay3:112 bldPieceAt:127 projEl:137 bldPush:142 collideBld:148 updateBldg:163 bldSnap:175 bldParse:181
 §185 ของบังในแผนที่ไฟล์ที่พังได้ (หิน เสา รูปปั้น ต้นไม้ โคมไฟ ลัง ...) — …
 BRKDEF:189 BRK_M:189 BRK_MCOL:189 BRK:190 genBrk:191 brkApply:198 brkStage:202 hitBrk:203 damageBrkIn:211 brkSnap:217 brkParse:218
 §219 ตารางช่อง (spatial grid) สำหรับแมพใหญ่: หาเฉพาะของใกล้ ๆ แทนวนทุกชิ้น…
-SG:222 sgObs:223 sgProps:223 sgGrid:225 sgNear:232 _sgCW:237 _sgCB:237 _sgCO:237 _sgPO:237 _sgPB:237 _sgPP:237 _sgM:237 _sgE:237 _sgA:237 collideWorld:238 shoot:265 eShoot:286 foesOf:293 breakShield:300 ULT_RATE:302 ultActive:303 gainUlt:304 lifesteal:305 damage:307 playerDown:363 killProj:384 explode:393 hitTarget:405 updateProjectiles:421
+SG:222 sgObs:223 sgProps:223 sgGrid:225 sgNear:232 _sgCR:237 _sgCW:237 _sgCB:237 _sgCO:237 _sgPO:237 _sgPB:237 _sgPP:237 _sgM:237 _sgE:237 _sgA:237 collideWorld:238 shoot:271 eShoot:292 foesOf:299 breakShield:306 ULT_RATE:308 ultActive:309 gainUlt:310 lifesteal:311 damage:313 playerDown:369 killProj:390 explode:399 hitTarget:411 updateProjectiles:427
 
 ## js/13-enemies.js (168) — ศัตรู (โหมด Co-op)
 spawnEnemy:2 setupWave:19 bossPhase:36 enemySlam:44 updateEnemies:55
@@ -108,24 +111,26 @@ spawnEnemy:2 setupWave:19 bossPhase:36 enemySlam:44 updateEnemies:55
 ## js/14-mode-rules.js (105) — กติกาของแต่ละโหมด
 hostPick:2 clearField:10 modeLogic:11 endMatch:80 matchOver:105
 
-## js/15-bot.js (82) — บอทรุ่นแรก (designs/training-zones.md ขั้น 2): ผู้เล่นปลอมฝั่งโฮสต์ ใช้สกิลผ่านปุ่มเหมือน…
-§5 ระดับความเก่ง: react = วิที่ใช้คิดใหม่ (เลือกเป้า/ขยับเป้าเล็ง) • err…
-BOT_LV:7 BOT_TEAM:12 BOT_MAX:12 bots:13 humans:14 botInZone:16 spawnBot:22 removeBots:33 botPickTarget:35 aiBot:43 trBotCmd:73 botDebug:82
+## js/15-arena.js (71) — 
+AR_SIDE:7 AR_TEAM:7 AR_MAX:7 arPads:8 arOn:9 arState:10 arBusy:11 arReady:13 arNames:21 arenaTick:22 arStart:43 arEnd:51 arReset:57 arAddBots:64
 
-## js/15-modes.js (402) — 
-sendPriv:5 TASKF:9 taskPts:10 raceRings:11 modeInit:17 spawnDummy:59 trainTick:64 TR_KEYS:79 trTeams:81 trCmd:90 hostEndTraining:108
-§110 ควิดดิช
-quidThrow:111 quidDrop:117 quidTick:122 snitchTick:157
-§180 แข่งไม้กวาด
-raceTick:181 raceRank:203
-§213 แบทเทิลรอยัล
-brTick:214 ITEMN:228 brPick:229
-§238 หาลอร์ดโวลเดอมอร์
-impActions:239 startMeeting:277 hostVote:284 meetTick:289 impCheck:308
-§316 ระเบิดที่ตั้งเวลาไว้ (ลูกไฟมังกร / คลื่นไฟ)
-bombTick:317 modeSnap:330
-§352 สร้าง snapshot ส่งให้ทุกเครื่อง
-r1:353 DEFP:355 packP:356 unpackP:357 makeSnap:358 PROF:376 pf:377 hostLoop:378 HLW:392 pingN:402
+## js/15-bot.js (91) — 
+BOT_LV:7 BOT_TEAM:12 BOT_MAX:12 bots:13 humans:14 botInZone:16 spawnBot:22 OWNED_K:34 clearOwned:35 removeBots:36 botPickTarget:38 aiBot:51 trBotCmd:81 botDebug:91
+
+## js/15-modes.js (405) — 
+sendPriv:5 TASKF:9 taskPts:10 raceRings:11 modeInit:17 spawnDummy:59 trainTick:64 TR_KEYS:81 trTeams:83 trCmd:93 hostEndTraining:111
+§113 ควิดดิช
+quidThrow:114 quidDrop:120 quidTick:125 snitchTick:160
+§183 แข่งไม้กวาด
+raceTick:184 raceRank:206
+§216 แบทเทิลรอยัล
+brTick:217 ITEMN:231 brPick:232
+§241 หาลอร์ดโวลเดอมอร์
+impActions:242 startMeeting:280 hostVote:287 meetTick:292 impCheck:311
+§319 ระเบิดที่ตั้งเวลาไว้ (ลูกไฟมังกร / คลื่นไฟ)
+bombTick:320 modeSnap:333
+§355 สร้าง snapshot ส่งให้ทุกเครื่อง
+r1:356 DEFP:358 packP:359 unpackP:360 makeSnap:361 PROF:379 pf:380 hostLoop:381 HLW:395 pingN:405
 
 ## js/16-voice.js (89) — 
 VOICE:4 rosterIds:5 toggleMic:6 voiceSync:20 teamOn:37 teamOf:38 applyVoiceGates:39 VAC:49 onIncomingCall:50 voiceLevels:62 speakingIds:70 updateVoiceUI:76
@@ -199,7 +204,10 @@ QUAL:143 QUAL_NAME:144 qualPR:145 applyQuality:151 qualTick:169 texCanvas:180 gl
 §239 เงาตามผู้เล่น
 SHD:243 _shF:244 _shR:244 _shU:244 _shC:244 _shY:244 shadowFollow:245 LPOOL:264
 
-## js/28-maps-build.js (754) — สร้างแผนที่
+## js/28-city-build.js (79) — เมืองมักเกิ้ล (กล่องเทา) — ภาพ • ข้อมูลอยู่ js/02-city.js
+CITY_WIN:4 cityWinTex:5 cityEmTex:10 cityBoxGeo:16 buildCity:21
+
+## js/28-maps-build.js (760) — สร้างแผนที่
 CANDLESYS:2 builtMap:3 builtKey:3 world:3 TORCHES:3 CANDLES:3 FIREFLIES:3 CRYSTAL:3 RUNE:3 SNITCH:3 BANNERS:3 SNOW:3 WCACHE:5 WCACHE_MAX:5 wkey:7 buildWorld:8 addW:40 _prewarmed:42 prewarmShaders:43 batchStatic:62 makeCandles:87 updateCandles:96 buildCastle:105 buildHogsmeade:171 buildGreatHall:259 buildForest:329
 §426 ทุ่งหญ้าฮอกวอตส์ (เย็น)
 ringTrees:427 grassTex:436 buildMeadow:437
@@ -210,7 +218,7 @@ buildLake:457
 §480 บรรยากาศที่ใช้ร่วมกัน (แผนที่จากโค้ด + แผนที่จากไฟล์ผ่าน fx ใน MAP-DE…
 makeSnow:481 makeFireflies:488 makeSnitch:495 fileMapFx:502
 §512 แผนที่จากไฟล์ Blender (MAP-DESIGN.md)
-terrGeo:514 buildFileMap:522 tickM:559 signTex:560 testSign:561 buildTest:568 buildRuins:660 buildPitch:685
+terrGeo:514 buildFileMap:522 tickM:559 TRPAD:560 ARPAD:560 signTex:561 testSign:562 buildTest:569 buildRuins:666 buildPitch:691
 
 ## js/29-characters.js (436) — ระบบผ้า (เสื้อคลุมพลิ้วตามการเคลื่อนที่)
 makeCloak:2 updateCloth:10 wandNamed:34 wandSparks:83
@@ -275,13 +283,14 @@ ROLE_COL:37 roleTag:38 DESIGNED:39 spellTags:40 spellDescHTML:47 baseDescHTML:51
 §222 ฉากเปิด (#intro) + ประกายบนหน้าเมนู (#menuFx)
 TITLE:225 titleSpark:226 titleDraw:227 titleLoop:238 titleGo:249 JOINQ:257 ovResult:277
 
-## js/40-train-settings.js (183) — เมนูทดลอง (ห้องฝึก / Test Place)
-trOpenF:2 trKey:2 trN:2 TR_OPTS:3 trToggle:4 trSend:9 trSync:14 hovEl:61
-§62 หน้าตั้งค่า
-setRow:63 setTog:64 setTab:65 XHC:66 XHN:66 setOpts:67 SET_ICO:69 SET_EN:72 renderSettings:73 drawXhPrev:93 openSettings:94 closeSettings:96 modeIcon:152 modeTitle:153 renderLobby:154
+## js/40-train-settings.js (219) — เมนูทดลอง (ห้องฝึก / Test Place)
+trOpenF:2 trKey:2 trN:2 TR_OPTS:3 trToggle:4 trSend:9 trSync:14
+§48 แท่นเสกบอท (โซนเสกบอท ห้องฝึก, trBotPad js/02): ยืนบนแท่น = เมนูขึ้น …
+bpOpen:49 bpOn:49 bpKey:49 bpShow:51 bpSync:53 hovEl:97
+§98 หน้าตั้งค่า
+setRow:99 setTog:100 setTab:101 XHC:102 XHN:102 setOpts:103 SET_ICO:105 SET_EN:108 renderSettings:109 drawXhPrev:129 openSettings:130 closeSettings:132 modeIcon:188 modeTitle:189 renderLobby:190
 
-## js/41-debug.js (142) — เครื่องมือทดสอบสมดุล (ใช้ผ่านคอนโซล WD.bal / WD.dmgTest เท่านั้น ผู้เล่นปกติไม่เห็น)
-§5 บอทต่อสู้แบบง่ายๆ: เล็งนำเป้า เดินรักษาระยะ+ส่ายไปมา ร่ายคาถาทุกครั้ง…
+## js/41-debug.js (142) — 
 botBrain:6 _obsKeep:47 balArena:48 balReset:49 balDuel:53 balTour:68 balCoop:82 balSpellTest:98
 §117 Service Worker (sw.js): เก็บไฟล์เกมไว้ในเครื่อง เปิดครั้งต่อไปเร็วขึ้…
 SWK:118 swSetup:119
@@ -555,4 +564,4 @@ gameCover:403
 ## js/66-hud4.js (133) — HUD รอบ 4 (ผู้ใช้ 2026-10-23, designs/hud-full-mock.html)
 H4E:5 H4:10 H4C:11 H4RC:11 h4Pal:12 hud4Col:14 h4Runes:15 h4RingSVG:16 h4Parts:25 h4AuBits:30 h4Key:45 h4Ico:46 h4Build:47 h4Set:77 hud4Draw:78 hud4Frame:116 hud4Hide:117 _h4RT:119 _h4Cam:119 h4FaceShot:120 h4FaceSet:133
 
-(69 files, 16721 lines)
+(72 files, 17020 lines)

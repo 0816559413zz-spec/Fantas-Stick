@@ -3,7 +3,7 @@ let trOpenF=false,trKey='',trN=1;
 const TR_OPTS=[['datk','🎯 หุ่นซ้อมยิงเวทใส่เรา'],['mai','👹 มอนสเตอร์ขยับ + โจมตี'],['nocd','⏱️ ไม่มีคูลดาวน์ (Q/E/R/F)'],['ult','🌟 อัลติเมทเต็มตลอด'],['god','🛡️ อมตะ (เลือดไม่ลด)']];
 function trToggle(on){
   const want=on===undefined?!trOpenF:!!on;if(want===trOpenF)return;
-  trOpenF=want;$('#trPanel').classList.toggle('hidden',!want);
+  trOpenF=want;$('#trPanel').classList.toggle('hidden',!want);if(want&&bpOpen)bpShow(false);
   if(want){trKey='';hidePause();if(document.pointerLockElement)document.exitPointerLock();INPUT.fire=INPUT.sh=0;if(VIEW.cur)trSync(VIEW.cur);}
 }
 function trSend(d){
@@ -44,6 +44,42 @@ $('#trPanel').addEventListener('click',e=>{
   else if(b.dataset.tr==='clear')trSend({c:'clear'});
   else if(b.dataset.tr==='kit'){trToggle(false);openCreator(false,3);}
   if(v)trSync(v);
+});
+// ---------- แท่นเสกบอท (โซนเสกบอท ห้องฝึก, trBotPad js/02): ยืนบนแท่น = เมนูขึ้น + ปล่อยเมาส์ • คลิกจอ = ซ่อนจนกว่าจะเดินออกแล้วเข้าใหม่ ----------
+let bpOpen=false,bpOn='',bpKey='';const BP={p:0,lv:1,n:1,side:'A'};
+document.body.insertAdjacentHTML('beforeend','<div id="bpPanel" class="card hidden"></div>');
+function bpShow(on){bpOpen=on;$('#bpPanel').classList.toggle('hidden',!on);if(on){bpKey='';hidePause();if(document.pointerLockElement)document.exitPointerLock();INPUT.fire=INPUT.sh=0;}}
+// แท่นที่ยืนอยู่: 'bot' = แท่นโซนเสกบอท • 'arena' = แท่นเพิ่มบอทสังเวียน (เลือกทีม A/B, ฝั่งละไม่เกิน 2)
+function bpSync(v){
+  const me=v.mode==='train'&&v.ph!=='over'&&MAPID==='test'&&v.P.find(q=>q.id===NET.myId);
+  let on='';if(me&&me.al)for(const [k,B] of [['bot',trBotPad()],['arena',arPads().bot]])if(Math.hypot(me.x-B.x,me.y-B.y)<B.r)on=k;
+  if(on!==bpOn){bpOn=on;bpShow(!!on&&!trOpenF);}
+  const pl=0.7+0.3*Math.sin(performance.now()/160);if(TRPAD)TRPAD.material.opacity=on==='bot'?pl:1;if(ARPAD)ARPAD.material.opacity=on==='arena'?pl:1;
+  if(!bpOpen)return;
+  const ar=on==='arena',nb=v.P.filter(q=>String(q.id).startsWith('bot')).length,k=on+JSON.stringify(BP)+'|'+nb;if(k===bpKey)return;bpKey=k;
+  if(ar&&BP.n>AR_MAX)BP.n=AR_MAX;
+  $('#bpPanel').innerHTML=`<h2>🤖 ${ar?'เพิ่มบอทในสังเวียน':'แท่นเสกบอท'}</h2>
+    ${ar?`<div class="trs">ทีม</div><div class="trn">${AR_SIDE.map(s=>`<button class="${BP.side===s?'on':''}" data-bps="${s}" style="color:${s==='A'?'#8fc8ff':'#ff9a8a'}">ทีม ${s}</button>`).join('')}</div>`:''}
+    <div class="trs">ธาตุ</div>
+    <div class="trg">${PATHS.map((P,i)=>P.off?'':`<button class="${BP.p===i?'on':''}" data-bpp="${i}" style="color:${P.col}">${P.ic} ${P.n}</button>`).join('')}</div>
+    <div class="trs">ความเก่ง</div>
+    <div class="trn">${BOT_LV.map((L,i)=>`<button class="${BP.lv===i?'on':''}" data-bpl="${i}">${L.n}</button>`).join('')}</div>
+    <div class="trs">จำนวน</div>
+    <div class="trn">${(ar?[1,2]:[1,2,3]).map(n=>`<button class="${BP.n===n?'on':''}" data-bpn="${n}">×${n}</button>`).join('')}</div>
+    <button class="pri trw" data-bp="go" ${nb>=BOT_MAX?'disabled':''}>🤖 ${ar?'เพิ่มบอททีม '+BP.side:'เสกบอท'}</button>
+    <button class="trw" data-bp="clr">🧹 ${ar?'ลบบอทในสังเวียน':'ลบบอทในโซนนี้'}</button>
+    <small>${ar?'ยืนบนแท่นทีม A / B = พร้อม • 2 ฝั่งพร้อม = เริ่มนับ 3-2-1':'บอทอยู่แค่ในโซนนี้'} • บอทสูงสุด ${BOT_MAX} ตัว • คลิกจอ = เล่นต่อ</small>`;
+}
+$('#bpPanel').addEventListener('click',e=>{
+  const b=e.target.closest('button');if(!b)return;ac();
+  const ar=bpOn==='arena';
+  if(b.dataset.bpp)BP.p=+b.dataset.bpp;
+  else if(b.dataset.bpl)BP.lv=+b.dataset.bpl;
+  else if(b.dataset.bpn)BP.n=+b.dataset.bpn;
+  else if(b.dataset.bps)BP.side=b.dataset.bps;
+  else if(b.dataset.bp==='go')trSend(ar?{c:'bot',p:BP.p,lv:BP.lv,n:BP.n,side:BP.side}:{c:'bot',p:BP.p,lv:BP.lv,n:BP.n});
+  else if(b.dataset.bp==='clr')trSend(ar?{c:'botclr',z:'arena'}:{c:'botclr'});
+  bpKey='';if(VIEW.cur)bpSync(VIEW.cur);
 });
 $('#btnMyMusic').onclick=()=>{ac();$('#myMusicIn').click();};
 $('#myMusicIn').onchange=async e=>{
@@ -161,7 +197,7 @@ function renderLobby(){
   $('#modes').innerHTML=Object.entries(MODES).map(([k,m])=>`<button class="mode ${L.mode===k?'on':''}" data-mode="${k}" ${host?'':'disabled'}><span class="ic"><span>${modeIcon(m)}</span></span><span><b>${modeTitle(m)}</b><small>${m.min===m.max?m.min:m.min+'-'+m.max} คน</small></span></button>`).join('');
   $('#mapNote').textContent='';
   const mapTxt=M.map?(MAPS[M.map]||{name:M.map}).name:L.mpk&&MAPS[L.mpk]?MAPS[L.mpk].name:'🎲 สุ่ม';
-  const mapPick=M.map?'':`<div class="mpick">${['',...new Set([...RANDOM_MAPS,'forest',...Object.keys(MAPS).filter(k=>MAPS[k].fm)])].filter(k=>!MAP_OFF.has(k)).map(k=>`<button type="button" class="mchip ${(L.mpk||'')===k?'on':''}" data-mappick="${k}" ${host?'':'disabled'} title="${k?esc(MAPS[k].d):'สุ่มทุกรอบ'}">${k?MAPS[k].name:'🎲 สุ่ม'}</button>`).join('')}</div>`;
+  const mapPick=M.map?'':`<div class="mpick">${['',...new Set([...RANDOM_MAPS,'forest',...Object.keys(MAPS).filter(k=>MAPS[k].fm||MAPS[k].pick)])].filter(k=>!MAP_OFF.has(k)).map(k=>`<button type="button" class="mchip ${(L.mpk||'')===k?'on':''}" data-mappick="${k}" ${host?'':'disabled'} title="${k?esc(MAPS[k].d):'สุ่มทุกรอบ'}">${k?MAPS[k].name:'🎲 สุ่ม'}</button>`).join('')}</div>`;
   $('#modeCard').innerHTML=`<div class="k">โหมดที่เลือก</div><div class="n">${modeIcon(M)} ${modeTitle(M)}</div><div class="d">${M.d}</div>
     <div class="meta"><span>👥 ${M.min===M.max?M.min:M.min+'-'+M.max} คน</span><span>🗺️ ${mapTxt}</span>${M.team?'<span>⚔️ 2 ทีม</span>':''}</div>
     ${mapPick}

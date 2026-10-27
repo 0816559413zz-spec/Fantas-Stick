@@ -188,6 +188,7 @@ function placeAll(){
   }else{const sp=spawnPts();ps.forEach((p,i)=>resetBody(p,sp[i%6][0],sp[i%6][1]));}
 }
 function respawn(p){
+  if(p.arSide&&arBusy()){p.respawn=0.5;return;}   // ตายในสังเวียน = รอจบรอบ (arReset ฟื้นให้)
   let x,y;
   if(MODES[G.mode].team){const a=teamPts(p.team);if(a){const q=a[Math.floor(Math.random()*a.length)];x=q[0];y=q[1];}else{x=MW*(p.team?0.9:0.1);y=MH/2+rnd(-170,170);}}
   else if(G.mode==='race'){const n=G.rings.length,r=G.rings[(p.cp-1+n)%n];resetBody(p,r.x,r.y);p.fly=true;p.z=r.h;p.inv=1;p.ang=Math.atan2(G.rings[p.cp].y-r.y,G.rings[p.cp].x-r.x);emit({k:'revive',x:r.x,y:r.y});return;}
