@@ -124,7 +124,7 @@ for name,(material,parts) in QUILL_MODELS.items():
 FEATHER_ROOTS=[.32,.70,1.08,1.46,1.84,2.20]
 # ทุกขนไขว้ข้ามกลางตัว (X ชัด) ปลายลงถึงเท้า เรียงเป็นชั้นจากบนลงล่าง
 # z ลบ = ด้านหน้าตัวละคร (โคนปีกอยู่ z บวก = หลังไหล่) → ขนอ้อมมาห่อไขว้ด้านหน้า
-FEATHER_TIPS=[[-.40,1.15,-.45],[-.45,.85,-.50],[-.38,.50,-.55],[-.30,.20,-.52],[-.20,.02,-.46],[-.50,1.40,-.38]]
+FEATHER_TIPS=[[-.40,1.15,-.80],[-.45,.85,-.88],[-.38,.50,-.90],[-.30,.20,-.86],[-.20,.02,-.80],[-.50,1.40,-.72]]
 FEATHER_WIDTHS=[.36,.44,.48,.46,.40,.34]
 
 def feather_pose(side,i,t):
@@ -133,6 +133,7 @@ def feather_pose(side,i,t):
     u=s-CUTS[bone]
     root=quat_rotate(q,[-side*u*scale,(.454*u-.07)*scale,(-.124*u+.06)*scale])
     root=[p[0]-root[0],p[1]+root[1],p[2]+root[2]]
+    e0=extension(t,i);root=[root[0]+side*.22*e0,root[1],root[2]-.62*e0]
     target=FEATHER_TIPS[i];target=[side*target[0],target[1],target[2]+(.035 if side<0 else 0)]
     e=extension(t,i)
     restdir=quat_rotate(q,[-side*.8,-.45,.02])
