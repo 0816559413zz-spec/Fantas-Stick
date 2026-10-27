@@ -214,20 +214,20 @@ body[data-screen=lobby] #voice{top:84px;left:auto;right:24px;width:340px}
 #toast.show{opacity:1}
 #trainEnd{position:fixed;right:12px;top:204px;z-index:5}   /* ใต้แผนที่ย่อ (เดิม top:60 ทับวงแผนที่) — kill feed ห้องฝึกเลื่อนลงให้ใน 38-hud */
 #trOpen{position:fixed;left:12px;top:60px;z-index:5}
-#trPanel{position:fixed;left:12px;top:60px;z-index:6;width:310px;max-height:calc(100vh - 80px);overflow-y:auto;scrollbar-width:thin;padding:16px 18px;margin:0}
-#trPanel h2{font-size:18px;margin:0 0 6px;text-align:center}
-#trPanel .trs{font-size:12px;letter-spacing:2px;color:var(--gold);margin:12px 0 6px}
-#trPanel .trt{display:flex;justify-content:space-between;align-items:center;width:100%;margin:4px 0;padding:6px 10px;font-size:13px;text-align:left}
-#trPanel .trt b{font-size:11px;padding:1px 8px;border-radius:2px;background:#3a2a2a;color:#e99}
-#trPanel .trt.on b{background:#244a2c;color:#9f9}
-#trPanel .trg{display:grid;grid-template-columns:1fr 1fr;gap:5px}
-#trPanel .trg button{padding:6px 4px;font-size:12px}
-#trPanel .trn{display:flex;gap:5px;margin-bottom:6px}
-#trPanel .trn button{flex:1;padding:4px;font-size:12px}
-#trPanel .trn button.on,#trPanel .trg button.boss{border-color:var(--gold)}
-#trPanel .trn button.on{background:rgba(217,180,90,.25)}
-#trPanel .trw{width:100%;margin-top:4px}
-#trPanel small{display:block;color:var(--mute);font-size:11px;margin-top:8px;text-align:center}
+#trPanel,#bpPanel{position:fixed;left:12px;top:60px;z-index:6;width:310px;max-height:calc(100vh - 80px);overflow-y:auto;scrollbar-width:thin;padding:16px 18px;margin:0}
+#trPanel h2,#bpPanel h2{font-size:18px;margin:0 0 6px;text-align:center}
+#trPanel .trs,#bpPanel .trs{font-size:12px;letter-spacing:2px;color:var(--gold);margin:12px 0 6px}
+#trPanel .trt,#bpPanel .trt{display:flex;justify-content:space-between;align-items:center;width:100%;margin:4px 0;padding:6px 10px;font-size:13px;text-align:left}
+#trPanel .trt b,#bpPanel .trt b{font-size:11px;padding:1px 8px;border-radius:2px;background:#3a2a2a;color:#e99}
+#trPanel .trt.on b,#bpPanel .trt.on b{background:#244a2c;color:#9f9}
+#trPanel .trg,#bpPanel .trg{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+#trPanel .trg button,#bpPanel .trg button{padding:6px 4px;font-size:12px}
+#trPanel .trn,#bpPanel .trn{display:flex;gap:5px;margin-bottom:6px}
+#trPanel .trn button,#bpPanel .trn button{flex:1;padding:4px;font-size:12px}
+#trPanel .trn button.on,#trPanel .trg button.boss,#bpPanel .trn button.on,#bpPanel .trg button.on{border-color:var(--gold)}
+#trPanel .trn button.on,#bpPanel .trn button.on{background:rgba(217,180,90,.25)}
+#trPanel .trw,#bpPanel .trw{width:100%;margin-top:4px}
+#trPanel small,#bpPanel small{display:block;color:var(--mute);font-size:11px;margin-top:8px;text-align:center}
 #settings{z-index:20}
 .setcard{width:min(560px,100%);max-height:calc(100vh - 40px);overflow-y:auto;scrollbar-width:none}
 .setcard::-webkit-scrollbar{display:none}
@@ -491,3 +491,4 @@ body.crOpenB .mver{display:none}
 @keyframes ovCard{from{opacity:0;transform:translateY(24px) scale(.92)}to{opacity:1;transform:none}}
 @keyframes rowIn{from{opacity:0;transform:translateX(-14px)}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion:reduce){body::after,#over::before,#over *,.overlay:not(.hidden),#lobby *{animation:none!important}}
+#bpPanel .trg button.on{background:rgba(217,180,90,.25)}

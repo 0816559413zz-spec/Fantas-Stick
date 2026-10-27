@@ -3,7 +3,7 @@ let trOpenF=false,trKey='',trN=1;
 const TR_OPTS=[['datk','🎯 หุ่นซ้อมยิงเวทใส่เรา'],['mai','👹 มอนสเตอร์ขยับ + โจมตี'],['nocd','⏱️ ไม่มีคูลดาวน์ (Q/E/R/F)'],['ult','🌟 อัลติเมทเต็มตลอด'],['god','🛡️ อมตะ (เลือดไม่ลด)']];
 function trToggle(on){
   const want=on===undefined?!trOpenF:!!on;if(want===trOpenF)return;
-  trOpenF=want;$('#trPanel').classList.toggle('hidden',!want);
+  trOpenF=want;$('#trPanel').classList.toggle('hidden',!want);if(want&&bpOpen)bpShow(false);
   if(want){trKey='';hidePause();if(document.pointerLockElement)document.exitPointerLock();INPUT.fire=INPUT.sh=0;if(VIEW.cur)trSync(VIEW.cur);}
 }
 function trSend(d){
@@ -44,6 +44,37 @@ $('#trPanel').addEventListener('click',e=>{
   else if(b.dataset.tr==='clear')trSend({c:'clear'});
   else if(b.dataset.tr==='kit'){trToggle(false);openCreator(false,3);}
   if(v)trSync(v);
+});
+// ---------- แท่นเสกบอท (โซนเสกบอท ห้องฝึก, trBotPad js/02): ยืนบนแท่น = เมนูขึ้น + ปล่อยเมาส์ • คลิกจอ = ซ่อนจนกว่าจะเดินออกแล้วเข้าใหม่ ----------
+let bpOpen=false,bpOn=false,bpKey='';const BP={p:0,lv:1,n:1};
+document.body.insertAdjacentHTML('beforeend','<div id="bpPanel" class="card hidden"></div>');
+function bpShow(on){bpOpen=on;$('#bpPanel').classList.toggle('hidden',!on);if(on){bpKey='';hidePause();if(document.pointerLockElement)document.exitPointerLock();INPUT.fire=INPUT.sh=0;}}
+function bpSync(v){
+  const me=v.mode==='train'&&v.ph!=='over'&&MAPID==='test'&&v.P.find(q=>q.id===NET.myId),B=me?trBotPad():null;
+  const on=!!(B&&me.al&&Math.hypot(me.x-B.x,me.y-B.y)<B.r);
+  if(on!==bpOn){bpOn=on;bpShow(on&&!trOpenF);}
+  if(TRPAD)TRPAD.material.opacity=on?0.7+0.3*Math.sin(performance.now()/160):1;
+  if(!bpOpen)return;
+  const nb=v.P.filter(q=>String(q.id).startsWith('bot')).length,k=JSON.stringify(BP)+'|'+nb;if(k===bpKey)return;bpKey=k;
+  $('#bpPanel').innerHTML=`<h2>🤖 แท่นเสกบอท</h2>
+    <div class="trs">ธาตุ</div>
+    <div class="trg">${PATHS.map((P,i)=>P.off?'':`<button class="${BP.p===i?'on':''}" data-bpp="${i}" style="color:${P.col}">${P.ic} ${P.n}</button>`).join('')}</div>
+    <div class="trs">ความเก่ง</div>
+    <div class="trn">${BOT_LV.map((L,i)=>`<button class="${BP.lv===i?'on':''}" data-bpl="${i}">${L.n}</button>`).join('')}</div>
+    <div class="trs">จำนวน</div>
+    <div class="trn">${[1,2,3].map(n=>`<button class="${BP.n===n?'on':''}" data-bpn="${n}">×${n}</button>`).join('')}</div>
+    <button class="pri trw" data-bp="go" ${nb>=BOT_MAX?'disabled':''}>🤖 เสกบอท</button>
+    <button class="trw" data-bp="clr" ${nb?'':'disabled'}>🧹 ลบบอททั้งหมด${nb?` (${nb} ตัว)`:''}</button>
+    <small>บอทอยู่แค่ในโซนนี้ • สูงสุด ${BOT_MAX} ตัว • คลิกจอ = เล่นต่อ</small>`;
+}
+$('#bpPanel').addEventListener('click',e=>{
+  const b=e.target.closest('button');if(!b)return;ac();
+  if(b.dataset.bpp)BP.p=+b.dataset.bpp;
+  else if(b.dataset.bpl)BP.lv=+b.dataset.bpl;
+  else if(b.dataset.bpn)BP.n=+b.dataset.bpn;
+  else if(b.dataset.bp==='go')trSend({c:'bot',p:BP.p,lv:BP.lv,n:BP.n});
+  else if(b.dataset.bp==='clr')trSend({c:'botclr'});
+  bpKey='';if(VIEW.cur)bpSync(VIEW.cur);
 });
 $('#btnMyMusic').onclick=()=>{ac();$('#myMusicIn').click();};
 $('#myMusicIn').onchange=async e=>{
