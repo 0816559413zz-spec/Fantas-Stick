@@ -1,6 +1,6 @@
 # เมืองพังได้ + เล่นกับบอท — แผน (2026-10-27)
 
-> **For Claude:** plan only — nothing built yet. User wants (1) an extra-large **modern city** map, destructible like Battlefield, playable in **every mode**, and (2) a way to play **against bots that use player skills**. User decisions so far are in §8 (✅). Open: Q5 + Q6 — ask before building.
+> **For Claude:** plan only — nothing built yet. User wants (1) an extra-large **modern city** map, destructible like Battlefield, playable in **every mode**, and (2) a way to play **against bots that use player skills**. All decisions in §8 answered. Bot brain v1 is built by the training-room chat — don't build a second one here; this plan's step 1 waits for it. Bots = solo play only for now (no filling online rooms).
 > **Shared with `designs/training-zones.md`:** that plan's "bot brain v1" (its step 2) is the SAME bot brain as step 1 here. Build it once (host side, `js/41` `botBrain` grows into its own file), whichever plan gets there first. Don't make two bot systems.
 
 ## 0. ภาพรวม (สำหรับผู้ใช้)
@@ -104,5 +104,5 @@
 2. ✅ ธีม **"เมืองมักเกิ้ล"** (เมืองคนธรรมดายุคปัจจุบันที่พ่อมดมาดวลกัน)
 3. ✅ **เอา** ตึกสูงถล่มทั้งตึก 1 ตึก (ไฮไลต์)
 4. ✅ เล่นได้ **ทุกโหมดยกเว้นห้องฝึก** (ควิดดิช = ห่วงกลางลาน, หาโวลเดอมอร์ = ใช้ครึ่งเมือง)
-5. ❓ บอทเข้าห้องได้ทุกโหมด รวมโหมดออนไลน์กับเพื่อน (บอทเติมคนที่ขาด) — ใช่ไหม
-6. ❓ ใครทำ bot brain v1 — แชทนี้ หรือแชทห้องฝึก (ทำครั้งเดียว ใช้ร่วมกัน)
+5. ✅ **ตอนนี้ยัง** — บอทเล่นได้แค่ตอนเล่นคนเดียว (ไม่เติมคนในห้องออนไลน์กับเพื่อน) • ค่อยเปิดทีหลัง
+6. ✅ **แชทห้องฝึกทำ** bot brain v1 (`designs/training-zones.md` ขั้น 2) → ขั้น 1 ของแผนนี้ = แค่ปุ่ม "+ บอท" ในห้องเล่นคนเดียว ต่อจากสมองบอทนั้น
