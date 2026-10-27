@@ -11,7 +11,7 @@
 // จบแล้วพิมพ์ error ของหน้า (window.onerror / console.error) ทั้งหมด • exit code 1 = สคริปต์ล้ม/หมดเวลา
 const {spawn}=require('child_process'),fs=require('fs'),path=require('path'),os=require('os'),net=require('net');
 const ROOT=path.join(__dirname,'..'),BASE='http://localhost:8765/';
-const CHROME=['C:/Program Files/Google/Chrome/Application/chrome.exe','C:/Program Files (x86)/Google/Chrome/Application/chrome.exe','C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe','/usr/bin/google-chrome','/usr/bin/chromium','/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'].find(p=>fs.existsSync(p));
+const CHROME=[process.env.CHROME||'','C:/Program Files/Google/Chrome/Application/chrome.exe','C:/Program Files (x86)/Google/Chrome/Application/chrome.exe','C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe','/usr/bin/google-chrome','/usr/bin/chromium','/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'].find(p=>fs.existsSync(p));
 const A={};{const a=process.argv.slice(2);for(let i=0;i<a.length;i++){if(!a[i].startsWith('--'))continue;const k=a[i].slice(2),v=a[i+1]&&!a[i+1].startsWith('--')?a[++i]:true;A[k]=v;}}
 const W=+(A.w||1280),H=+(A.h||720),TMO=+(A.timeout||180)*1000;
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
@@ -23,7 +23,7 @@ async function main(){
   let url=A.url||(A.game?'index.html?nosw':'');if(!url)throw new Error('ต้องมี --url หรือ --game');
   if(!/^https?:/.test(url))url=BASE+url.replace(/^\//,'');
   const port=await freePort(),prof=fs.mkdtempSync(path.join(os.tmpdir(),'wdhl-'));
-  const ch=spawn(CHROME,['--headless=new','--remote-debugging-port='+port,'--user-data-dir='+prof,'--window-size='+W+','+H,'--hide-scrollbars','--no-first-run','--mute-audio','--autoplay-policy=no-user-gesture-required','--enable-unsafe-swiftshader','--ignore-gpu-blocklist','--disable-background-timer-throttling','--disable-renderer-backgrounding','about:blank'],{stdio:'ignore'});
+  const ch=spawn(CHROME,['--headless=new','--remote-debugging-port='+port,'--user-data-dir='+prof,'--window-size='+W+','+H,'--hide-scrollbars','--no-first-run','--mute-audio','--autoplay-policy=no-user-gesture-required','--enable-unsafe-swiftshader','--ignore-gpu-blocklist','--disable-background-timer-throttling','--disable-renderer-backgrounding',...(process.getuid&&process.getuid()===0?['--no-sandbox']:[]),'about:blank'],{stdio:'ignore'});
   let ws,id=0;const pend={},errs=[],logs=[];
   const timer=setTimeout(()=>{console.error('✗ หมดเวลา '+TMO/1000+' วิ');finish(1);},TMO);
   let done=false;
@@ -33,12 +33,20 @@ async function main(){
     if(!tgt)throw new Error('Chrome ไม่ตอบ');
     ws=new WebSocket(tgt.webSocketDebuggerUrl);await new Promise((r,j)=>{ws.onopen=r;ws.onerror=j;});
     ws.onmessage=m=>{const d=JSON.parse(m.data);if(d.id&&pend[d.id]){pend[d.id](d);delete pend[d.id];return;}
+      if(d.method==='Fetch.requestPaused'){cdnServe(d.params);return;}
       if(d.method==='Runtime.consoleAPICalled'){const t=d.params.type,s=d.params.args.map(a=>a.value!==undefined?(typeof a.value==='string'?a.value:JSON.stringify(a.value)):(a.description||a.type)).join(' ');
         if(t==='error'||t==='assert')errs.push('console.error: '+s.slice(0,400));else if(!A.quiet)logs.push(s.slice(0,300));}
       if(d.method==='Runtime.exceptionThrown'){const e=d.params.exceptionDetails;errs.push('uncaught: '+((e.exception&&e.exception.description)||e.text).slice(0,500));}};
     const cmd=(method,params)=>new Promise((r,j)=>{const i=++id;pend[i]=d=>d.error?j(new Error(method+': '+d.error.message)):r(d.result);ws.send(JSON.stringify({id:i,method,params:params||{}}));});
     const ev=async(js,aw=true)=>{const r=await cmd('Runtime.evaluate',{expression:js,awaitPromise:aw,returnByValue:true});if(r.exceptionDetails)throw new Error((r.exceptionDetails.exception||{}).description||r.exceptionDetails.text);return r.result.value;};
     await cmd('Runtime.enable');
+    // CDN_DIR=<folder> → serve https://unpkg.com/<pkg>@<ver>/... from <folder>/<pkg>@<ver>/... (cloud sessions where the CDN is blocked; npm tarballs unpacked there)
+    const CDN=process.env.CDN_DIR;
+    function cdnServe(q){const f=path.join(CDN,decodeURIComponent(new URL(q.request.url).pathname));
+      if(!fs.existsSync(f)||!fs.statSync(f).isFile()){console.log('cdn miss '+q.request.url);return cmd('Fetch.failRequest',{requestId:q.requestId,errorReason:'FileNotFound'}).catch(()=>{});}
+      const ct=/\.m?js$/.test(f)?'application/javascript':'application/octet-stream';
+      cmd('Fetch.fulfillRequest',{requestId:q.requestId,responseCode:200,responseHeaders:[{name:'Content-Type',value:ct},{name:'Access-Control-Allow-Origin',value:'*'}],body:fs.readFileSync(f).toString('base64')}).catch(()=>{});}
+    if(CDN){await cmd('Network.enable');await cmd('Network.setBypassServiceWorker',{bypass:true});await cmd('Fetch.enable',{patterns:[{urlPattern:'https://unpkg.com/*'}]});}
     await cmd('Emulation.setDeviceMetricsOverride',{width:W,height:H,deviceScaleFactor:1,mobile:false});
     await cmd('Page.navigate',{url});
     // รอให้หน้าโหลดเสร็จ: เกม = มี window.WD • สตูดิโอ = STUDIO.state.ready

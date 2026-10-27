@@ -1,0 +1,47 @@
+{
+ "v": 1,
+ "desc": "สนามรบ/น้ำแข็ง ไอเย็นตามหลังลูกน้ำแข็งที่บินอยู่ (ร่วงลงช้าๆ)",
+ "tags": [
+  "env",
+  "battlefield"
+ ],
+ "pal": "ice",
+ "dur": 1.5,
+ "layers": [
+  {
+   "id": "mist",
+   "t": "emit",
+   "at": 0,
+   "life": 0.5,
+   "loop": true,
+   "burst": 0,
+   "rate": 14,
+   "from": "sphere",
+   "fr": 0.12,
+   "dir": "down",
+   "spread": 0.8,
+   "speed": [
+    0.2,
+    0.5
+   ],
+   "plife": [
+    0.7,
+    1.0
+   ],
+   "size": [
+    5,
+    7.5
+   ],
+   "col": "#d6e2ea",
+   "c2": "#a2b6c6",
+   "gravity": 0.5,
+   "drag": 2,
+   "grow": 0.6,
+   "x": true,
+   "look": "smoke",
+   "fb": "tex/smoke_toon",
+   "fin": 30,
+   "curl": false
+  }
+ ]
+}

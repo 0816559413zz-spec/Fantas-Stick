@@ -1,0 +1,203 @@
+{
+ "v": 1,
+ "desc": "สนามรบ/ดิน (แบบ C): ฝุ่นก้อนการ์ตูนพุ่งเป็นวง + ฝุ่นจริงฟุ้งต่ำ + เศษกรวด + พื้นแตก • s = ขนาดการโจมตี",
+ "tags": [
+  "env",
+  "battlefield"
+ ],
+ "pal": "earth",
+ "dur": 5,
+ "layers": [
+  {
+   "id": "ring",
+   "t": "emit",
+   "at": 0.02,
+   "life": 0.06,
+   "burst": 16,
+   "att": "ground",
+   "from": "disc",
+   "fr": 0.8,
+   "dir": "flat",
+   "up": [
+    0.2,
+    0.7
+   ],
+   "speed": [
+    5,
+    10
+   ],
+   "plife": [
+    1.2,
+    1.9
+   ],
+   "size": [
+    11,
+    16
+   ],
+   "col": "#a39582",
+   "c2": "#857866",
+   "gravity": -0.05,
+   "drag": 3,
+   "grow": 0.4,
+   "look": "smoke",
+   "fb": "tex/smoke_toon",
+   "fin": 30,
+   "curl": false
+  },
+  {
+   "id": "dust",
+   "t": "emit",
+   "at": 0.02,
+   "life": 0.05,
+   "burst": 12,
+   "att": "ground",
+   "from": "disc",
+   "fr": 0.9,
+   "dir": "flat",
+   "up": [
+    0.2,
+    0.8
+   ],
+   "speed": [
+    5,
+    10
+   ],
+   "plife": [
+    1.6,
+    2.6
+   ],
+   "size": [
+    11,
+    17
+   ],
+   "col": "#a8987f",
+   "c2": "#7a7064",
+   "gravity": -0.05,
+   "drag": 2.6,
+   "grow": 0.5,
+   "x": true,
+   "look": "smoke",
+   "fb": "tex/smoke_puff"
+  },
+  {
+   "id": "column",
+   "t": "emit",
+   "at": 0.05,
+   "life": 0.08,
+   "burst": "max(0,s-0.8)*9",
+   "att": "ground",
+   "from": "disc",
+   "fr": 0.6,
+   "dir": "up",
+   "spread": 0.4,
+   "speed": [
+    1.4,
+    2.8
+   ],
+   "plife": [
+    1.8,
+    2.6
+   ],
+   "size": [
+    13,
+    19
+   ],
+   "col": "#8f8372",
+   "c2": "#6c6256",
+   "gravity": -0.25,
+   "drag": 2,
+   "grow": 0.45,
+   "look": "smoke",
+   "fb": "tex/smoke_toon",
+   "fin": 30,
+   "curl": false
+  },
+  {
+   "id": "rocks",
+   "t": "emit",
+   "at": 0,
+   "life": 0.05,
+   "burst": 12,
+   "att": "ground",
+   "from": "disc",
+   "fr": 0.5,
+   "dir": "up",
+   "spread": 1.0,
+   "speed": [
+    4,
+    9
+   ],
+   "plife": [
+    2.5,
+    3.5
+   ],
+   "look": "model",
+   "model": "rock_chunk",
+   "mmat": "solid",
+   "msize": [
+    0.1,
+    0.26
+   ],
+   "bounce": 0.25,
+   "mspin": 480,
+   "col": "#7a6e60",
+   "c2": "#4a4238",
+   "gravity": 16,
+   "drag": 0.5,
+   "x": true
+  },
+  {
+   "id": "gravel",
+   "t": "emit",
+   "at": 0,
+   "life": 0.05,
+   "burst": 22,
+   "att": "ground",
+   "from": "disc",
+   "fr": 0.5,
+   "dir": "up",
+   "spread": 0.9,
+   "speed": [
+    5,
+    11
+   ],
+   "plife": [
+    2.5,
+    3.5
+   ],
+   "look": "model",
+   "model": "rock_chunk",
+   "mmat": "solid",
+   "msize": [
+    0.03,
+    0.08
+   ],
+   "bounce": 0.15,
+   "mspin": 700,
+   "col": "#5e5448",
+   "c2": "#3a332b",
+   "gravity": 18,
+   "drag": 0.6,
+   "x": true
+  },
+  {
+   "id": "crack",
+   "t": "decal",
+   "at": 0,
+   "life": 5,
+   "kind": "crack",
+   "r": 1.8,
+   "n": 7,
+   "burn": 0
+  },
+  {
+   "id": "dirt",
+   "t": "decal",
+   "at": 0,
+   "life": 5,
+   "kind": "dark",
+   "r": 2.0,
+   "op": 0.3
+  }
+ ]
+}

@@ -1,0 +1,130 @@
+{
+ "v": 1,
+ "desc": "สนามรบ/ฟ้า (แบบ C): รอยไหม้เป็นเส้นแตกแขนง + ประกายไฟกระเด็น + ควันจางลอยจากรอย • s = ขนาดการโจมตี",
+ "tags": [
+  "env",
+  "battlefield"
+ ],
+ "pal": "storm",
+ "dur": 5,
+ "layers": [
+  {
+   "id": "lines",
+   "t": "decal",
+   "at": 0,
+   "life": 5,
+   "kind": "crack",
+   "r": 2.2,
+   "n": 11,
+   "burn": 0
+  },
+  {
+   "id": "char",
+   "t": "decal",
+   "at": 0,
+   "life": 5,
+   "kind": "dark",
+   "r": 1.2,
+   "op": 0.5
+  },
+  {
+   "id": "sparks",
+   "t": "emit",
+   "at": 0,
+   "life": 0.06,
+   "burst": 16,
+   "att": "ground",
+   "from": "point",
+   "dir": "up",
+   "spread": 1.2,
+   "speed": [
+    3,
+    8
+   ],
+   "plife": [
+    0.3,
+    0.7
+   ],
+   "look": "streak",
+   "size": [
+    1.6,
+    2.4
+   ],
+   "col": "#fff6c0",
+   "c2": "#ff9a1a",
+   "gravity": 12,
+   "drag": 1.5
+  },
+  {
+   "id": "wisp",
+   "t": "emit",
+   "at": 0.15,
+   "life": 2.6,
+   "rate": {
+    "0": 7,
+    "1": 1
+   },
+   "att": "ground",
+   "from": "disc",
+   "fr": 1.2,
+   "dir": "up",
+   "spread": 0.25,
+   "speed": [
+    0.5,
+    1.0
+   ],
+   "plife": [
+    1.2,
+    1.8
+   ],
+   "size": [
+    5,
+    8
+   ],
+   "col": "#8a857e",
+   "c2": "#5e5a55",
+   "gravity": -0.5,
+   "drag": 1.6,
+   "grow": 0.4,
+   "look": "smoke",
+   "fb": "tex/smoke_toon",
+   "fin": 30,
+   "curl": false
+  },
+  {
+   "id": "dust",
+   "t": "emit",
+   "at": 0.02,
+   "life": 0.05,
+   "burst": 6,
+   "att": "ground",
+   "from": "disc",
+   "fr": 0.4,
+   "dir": "flat",
+   "up": [
+    0.2,
+    0.5
+   ],
+   "speed": [
+    3,
+    6
+   ],
+   "plife": [
+    0.9,
+    1.4
+   ],
+   "size": [
+    8,
+    12
+   ],
+   "col": "#9a8c7a",
+   "c2": "#776d60",
+   "gravity": -0.05,
+   "drag": 3,
+   "grow": 0.4,
+   "x": true,
+   "look": "smoke",
+   "fb": "tex/smoke_puff"
+  }
+ ]
+}

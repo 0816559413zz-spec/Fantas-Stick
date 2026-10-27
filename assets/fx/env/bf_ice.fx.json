@@ -1,0 +1,134 @@
+{
+ "v": 1,
+ "desc": "สนามรบ/น้ำแข็ง (แบบ C): ไอเย็นขาวไหลเรี่ยพื้น + คราบน้ำแข็ง + ไอเย็นลอยค้าง + เกล็ดน้ำแข็ง • s = ขนาดการโจมตี",
+ "tags": [
+  "env",
+  "battlefield"
+ ],
+ "pal": "ice",
+ "dur": 5,
+ "layers": [
+  {
+   "id": "flow",
+   "t": "emit",
+   "at": 0.02,
+   "life": 0.08,
+   "burst": 16,
+   "att": "ground",
+   "from": "disc",
+   "fr": 0.8,
+   "dir": "flat",
+   "up": [
+    0,
+    0.3
+   ],
+   "speed": [
+    2.5,
+    5.5
+   ],
+   "plife": [
+    1.6,
+    2.4
+   ],
+   "size": [
+    10,
+    15
+   ],
+   "col": "#d6e4ee",
+   "c2": "#9fb6c8",
+   "gravity": 0.15,
+   "drag": 2.4,
+   "grow": 0.5,
+   "look": "smoke",
+   "fb": "tex/smoke_toon",
+   "fin": 30,
+   "curl": false
+  },
+  {
+   "id": "mist",
+   "t": "mist",
+   "at": 0.05,
+   "life": 3.5,
+   "r": 2.2,
+   "n": 8,
+   "out": 1.2,
+   "x": true
+  },
+  {
+   "id": "linger",
+   "t": "emit",
+   "at": 0.4,
+   "life": 3.5,
+   "rate": {
+    "0": "max(0,s-0.8)*6",
+    "1": "max(0,s-0.8)*1"
+   },
+   "att": "ground",
+   "from": "disc",
+   "fr": 1.2,
+   "dir": "up",
+   "spread": 0.4,
+   "speed": [
+    0.2,
+    0.5
+   ],
+   "plife": [
+    1.6,
+    2.4
+   ],
+   "size": [
+    7,
+    11
+   ],
+   "col": "#dfeaf2",
+   "c2": "#aabfce",
+   "gravity": -0.1,
+   "drag": 1.8,
+   "grow": 0.4,
+   "look": "smoke",
+   "fb": "tex/smoke_toon",
+   "fin": 30,
+   "curl": false
+  },
+  {
+   "id": "flakes",
+   "t": "emit",
+   "at": 0,
+   "life": 0.08,
+   "burst": 14,
+   "att": "ground",
+   "from": "disc",
+   "fr": 0.6,
+   "dir": "up",
+   "spread": 1.1,
+   "speed": [
+    2,
+    5
+   ],
+   "plife": [
+    0.8,
+    1.4
+   ],
+   "look": "flake",
+   "size": [
+    1.4,
+    2.2
+   ],
+   "col": "#ffffff",
+   "c2": "#9fe8ff",
+   "gravity": 4,
+   "drag": 2,
+   "x": true
+  },
+  {
+   "id": "frost",
+   "t": "decal",
+   "at": 0,
+   "life": 5,
+   "kind": "icecrack",
+   "r": 1.8,
+   "n": 9,
+   "col": "#bfeaff"
+  }
+ ]
+}

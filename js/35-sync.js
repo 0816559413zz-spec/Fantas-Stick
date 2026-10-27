@@ -285,10 +285,12 @@ function syncProj(v,now){
     let o=JM3.get(j.id);
     if(!o){o=makeProj(col,j.t);o.pt=j.t;JM3.set(j.id,o);
       if(PJFX[j.t])o.fx=fxPlay(PJFX[j.t][0],{x:j.x,y:j.y,h:j.h!==undefined?j.h:1.35,a:Math.atan2(j.vy,j.vx)});
+      {const bp=pjPal(j.t);if(BF.on&&(bp==='fire'||bp==='ice'))o.bt=fxPlay('env/bf_'+bp+'_trail',{x:j.x,y:j.y,h:j.h!==undefined?j.h:1.35,s:(j.t==='iceboulder'||j.t==='pfireb')?1.8:1});}   // สนามรบ: หางควัน/ไอเย็น (js/44 BF)
       if(!o.fx){const P=palOf(pjPal(j.t),col),big=j.t==='iceboulder'||j.t==='pfireb';o.tr=trailNew({col:P.hi,col2:P.deep,w:big?0.32:vt==='fire'?0.2:0.11,life:big?0.28:0.17,k:1.7});}}   // หางแสงทุกกระสุน (สีตามธาตุ)
     if(o.col!==col){o.halo.material=glowMat(col,0.9);o.inner.material.color.copy(hdr(col,2.2));o.tail.material.color.copy(hdr(col,1.6));o.col=col;}
     const x=j.x+j.vx*ex,y=j.y+j.vy*ex,X=tx(x),Z=tz(y),H=(j.h!==undefined?j.h:1.35)+(j.vh||0)*ex;
     if(o.fx){o.fx.x=x;o.fx.y=y;o.fx.h=H;o.fx.a=Math.atan2(j.vy,j.vx);}
+    if(o.bt){o.bt.x=x;o.bt.y=y;o.bt.h=H;}
     {const Hw=H+GY(x,y);o.g.position.set(X,Hw,Z);if(o.tr)trailPoint(o.tr,X,Hw,Z);o.g.lookAt(_t1.set(X+j.vx*S3,Hw+(j.vh||0),Z+j.vy*S3));}
     if(j.t==='web'){o.core.material.color.set('#f4f4ff');o.tail.visible=false;if(Math.random()<0.6)PARTS.push({x,y,h:H,vx:rnd(-30,30),vy:rnd(-30,30),vh:rnd(-0.5,0.5),life:0.5,max:0.5,col:'#e8e8f0',size:2.5,g:1,smoke:true});}
     const fl=1+0.15*Math.sin(now/30+j.id);
@@ -351,6 +353,7 @@ function syncProj(v,now){
   }
   for(const [id,o] of JM3)if(!seen.has(id)){
     if(o.tr)trailStop(o.tr);
+    if(o.bt)fxStop(o.bt);
     if(o.fx){fxStop(o.fx);const hf=PJFX[o.pt]&&PJFX[o.pt][1];if(hf&&o.lp)fxPlay(hf,{x:o.lp[0],y:o.lp[1],h:o.lp[2],a:o.fx.a});}
     if(o.lp&&o.pt==='icicle'&&!o.fx){const [x,y,H]=o.lp;playFx('ice_hit',x,y,H,{s:0.8});for(let i=0;i<8;i++){const an=rnd(0,6.283),sp=rnd(100,220);PARTS.push({x,y,h:H,vx:Math.cos(an)*sp,vy:Math.sin(an)*sp,vh:rnd(-1,2.5),life:rnd(0.15,0.3),max:0.3,col:i%2?'#ffffff':'#bfeaff',size:1.4,g:6,drag:4});}FX.flashSprite(x,y,H,'#dff6ff',0.25,1.3,0.25,1.6);}
     if(o.lp&&o.pt==='spark'){const [x,y,H]=o.lp;for(let i=0;i<9;i++){const an=rnd(0,6.283),sp=rnd(120,260);PARTS.push({x,y,h:H,vx:Math.cos(an)*sp,vy:Math.sin(an)*sp,vh:rnd(-1,3),life:rnd(0.12,0.22),max:0.22,col:i%3?'#ffc04a':'#fff6c0',size:1.3,g:6,drag:5});}}

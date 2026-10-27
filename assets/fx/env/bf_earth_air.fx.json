@@ -1,0 +1,74 @@
+{
+ "v": 1,
+ "desc": "สนามรบ/ดิน กลางอากาศ: ฝุ่นก้อนเล็ก + กรวดร่วง",
+ "tags": [
+  "env",
+  "battlefield"
+ ],
+ "pal": "earth",
+ "dur": 2.2,
+ "layers": [
+  {
+   "id": "puff",
+   "t": "emit",
+   "at": 0.02,
+   "life": 0.06,
+   "burst": 5,
+   "from": "sphere",
+   "fr": 0.4,
+   "dir": "out",
+   "speed": [
+    1,
+    2.5
+   ],
+   "plife": [
+    0.9,
+    1.4
+   ],
+   "size": [
+    9,
+    13
+   ],
+   "col": "#a39582",
+   "c2": "#857866",
+   "gravity": -0.1,
+   "drag": 2.6,
+   "grow": 0.4,
+   "look": "smoke",
+   "fb": "tex/smoke_toon",
+   "fin": 30,
+   "curl": false
+  },
+  {
+   "id": "gravel",
+   "t": "emit",
+   "at": 0,
+   "life": 0.05,
+   "burst": 10,
+   "from": "sphere",
+   "fr": 0.3,
+   "dir": "out",
+   "speed": [
+    2,
+    5
+   ],
+   "plife": [
+    1.2,
+    1.8
+   ],
+   "look": "model",
+   "model": "rock_chunk",
+   "mmat": "solid",
+   "msize": [
+    0.04,
+    0.09
+   ],
+   "bounce": 0.15,
+   "mspin": 700,
+   "col": "#5e5448",
+   "c2": "#3a332b",
+   "gravity": 16,
+   "x": true
+  }
+ ]
+}

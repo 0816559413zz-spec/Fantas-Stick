@@ -192,6 +192,35 @@ function fxAug(ev,H){if(!VFXAUG_ON&&ev.k!=='hit')return;
   }
 }
 
+// ---------- 3b) สนามรบ (designs/battlefield.md ขั้น 1, แบบ C): ทุกสกิลทิ้งควัน/ฝุ่น/ไอเย็นตามธาตุ ----------
+// ไฟล์ assets/fx/env/bf_<ธาตุ>(_air|_trail|_cast) สร้างจาก tools/bf-skill-gen.py • ขนาด s: 0.6 โดน / 1 ระเบิด / 1.5 ใหญ่
+// เรียกจาก fx(ev) ทุก event (ก่อน bind.json → ใช้ได้แม้ท่านั้นถูก replace) • ภาพบนเครื่องตัวเองล้วน ไม่แตะโปรโตคอล
+const BF_EL={fire:1,storm:1,earth:1,ice:1},BF_CLS={pop:0.45,hit:0.6,impact:1,big:1.5};
+// ท่าที่ไม่อยู่ใน EFXAUG: [ธาตุ, s] (epunch ใช้จุดหมัด x2,y2)
+const BF_EXTRA={iceboom:['ice',1.2],glacier:['ice',1],slam3:['ice',1.3],gwave:['ice',1],
+  epunch:['earth',0.6],eslam:['earth',1.2],ecbslam:['earth',1.3],ecrush:['earth',1.2],epilland:['earth',1],ewland:['earth',1],eaugboom:['earth',1.3],
+  esbhit:['earth',0.8],erhit:['earth',0.6],ewallup:['earth',0.8],estdbreak:['earth',1],ebreakw:['earth',0.8]};
+const BF={on:true,last:new Map()};
+function bfAfter(ev,H){if(!BF.on||ev.x===undefined||isNaN(ev.x))return;
+  let el=null,s=1,x=ev.x,y=ev.y,h=H;
+  if(ev.k==='efx'){const X=BF_EXTRA[ev.z];
+    if(X){[el,s]=X;if(ev.x2!==undefined){x=ev.x2;y=ev.y2;}if(ev.h===undefined)h=0;}
+    else{const A=EFXAUG[ev.z];if(!A||!A[0])return;const [e,c]=A[0].split('_');el=e;
+      if(c==='charge'||c==='summon'){if(el==='fire'||el==='ice')bfPlay('bf_'+el+'_cast',el,x,y,h,1);return;}
+      s=(BF_CLS[c]||0.8)*(A[1]||1);}}
+  else if(ev.k==='imp'||ev.k==='pop'){el=pjPal(ev.t);s=ev.k==='imp'?0.6:0.45;}
+  else if(ev.k==='boom'){el='fire';s=1.4;}
+  else if(ev.k==='cast'){el=pjPal(ev.t);if(el==='fire'||el==='ice'){const [wx,wy]=wandPos(ev);bfPlay('bf_'+el+'_cast',el,wx,wy,h,1);}return;}
+  else return;
+  if(!BF_EL[el])return;
+  bfPlay('bf_'+el+(h>2.5?'_air':''),el,x,y,h,s);}
+// กันซ้อนถี่: จุดเดียวกัน (ช่อง 40 px) ธาตุเดียวกัน เล่นได้ทุก 0.25 วิ • ไกลกว่า ~80 ม. ไม่เล่น
+function bfPlay(name,el,x,y,h,s){if(!nearMe(x,y,1600))return;
+  const k=name+'|'+Math.round(x/40)+'|'+Math.round(y/40),t=performance.now(),o=BF.last.get(k);if(o&&t-o<250)return;
+  BF.last.set(k,t);if(BF.last.size>400)BF.last.clear();
+  fxPlay('env/'+name,{x,y,h,s});}
+if(window.WD)window.WD.bf={BF,after:bfAfter,play:bfPlay};   // ทดสอบ: WD.bf.after({k:'imp',t:'fire',x,y,h:1},1) • ปิด: WD.bf.BF.on=false
+
 // ---------- 4) เอฟเฟกต์ทั้งจอ (ค่าไปที่ GradePass ใน js/27-world.js) ----------
 const SCR={fl:[],rad:null,chr:0,hurt:0};
 function screenFlash(col,amt,life){if(QUAL.mode==='low')return;SCR.fl.push({c:new THREE.Color(col),a:amt,t:life,max:life});}
