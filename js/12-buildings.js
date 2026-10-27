@@ -234,7 +234,7 @@ function sgNear(g,x,y,r,out){
   for(let cy=y0;cy<=y1;cy++)for(let cx=x0;cx<=x1;cx++)for(const o of g.cells[cy*g.nx+cx])if(o._sg!==s){o._sg=s;out.push(o);}
   return out;
 }
-const _sgCW=[],_sgCB=[],_sgCO=[],_sgPO=[],_sgPB=[],_sgPP=[],_sgM=[],_sgE=[],_sgA=[];
+const _sgCR=[],_sgCW=[],_sgCB=[],_sgCO=[],_sgPO=[],_sgPB=[],_sgPP=[],_sgM=[],_sgE=[],_sgA=[];
 function collideWorld(o,r,z){
   z=z||0;const sx=o.x,sy=o.y;let sol=0;
   o.x=clamp(o.x,r+20,MW-r-20);o.y=clamp(o.y,r+20,MH-r-20);if(o.x!==sx||o.y!==sy)sol++;
@@ -259,6 +259,12 @@ function collideWorld(o,r,z){
     if(d<m&&d>0.001){o.x=c.x+dx/d*m;o.y=c.y+dy/d*m;}
   }
   sol+=eCollide(o,r,z);   // สิ่งก่อสร้างสายดิน
+  // กล่องตึกทึบ (แมพเมือง MAPS[id].boxes {x,y,w,d,h}): ขอบชนด้วยวงกลม cwall แล้ว — ตรงนี้กันกรณีหลุดเข้าไปข้างใน (วาร์ป/จุดสุ่ม) → ดันออกด้านที่ใกล้สุด
+  const BX=MAPS[MAPID]&&MAPS[MAPID].boxes;
+  if(BX)for(const b of sgNear(sgGrid('r',BX,b=>[b.x,b.y,b.x+b.w,b.y+b.d]),o.x,o.y,0,_sgCR)){
+    if(b.h<=z||o.x<=b.x||o.x>=b.x+b.w||o.y<=b.y||o.y>=b.y+b.d)continue;
+    const L=o.x-b.x,Rr=b.x+b.w-o.x,T=o.y-b.y,Bt=b.y+b.d-o.y,m=Math.min(L,Rr,T,Bt);
+    if(m===L)o.x=b.x-r;else if(m===Rr)o.x=b.x+b.w+r;else if(m===T)o.y=b.y-r;else o.y=b.y+b.d+r;sol++;}
   if(sol)o.solN=(o.solN|0)+1;   // ชนของแข็ง (Stonebreaker ใช้ทำคอมโบชนกำแพง)
 }
 
