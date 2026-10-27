@@ -96,7 +96,7 @@ function frostSlow(t){
   return Math.min(80,s);
 }
 function moveMul(t){let m=1;const fs=frostSlow(t);if(fs>0)m*=1-fs/100;if(t.chl>0)m*=1-0.1*t.chl;if(t.slowT>0)m*=t.slowF;if(t.haste>0)m*=t.hasteF;if(t.blaze>0)m*=1.25;return Math.max(0.25,m);}
-// Burning (สายไฟ): สูงสุด BRN_MAX ชั้น • เผา 0.8/วิ/ชั้น • ไม่โดนเพิ่ม 6 วิ แล้วลดทีละ 1 ชั้นทุก 1 วิ (เนิร์ฟ 2026-10-27: เดิม 2/วิ, 10 วิ)
+// Burning (สายไฟ): สูงสุด BRN_MAX ชั้น • เผา 0.3/วิ/ชั้น (แค่ดาเมจเสริม) • ไม่โดนเพิ่ม 6 วิ แล้วลดทีละ 1 ชั้นทุก 1 วิ (เนิร์ฟ 2026-10-27: เดิม 2/วิ, 10 วิ)
 const BRN_MAX=6;
 function addBurn(t,n,src){if(t.dead)return;const was=t.brn|0;t.brn=Math.min(BRN_MAX,was+n);t.brnT=6;t.brnSrc=src;if(!(t.brnTick>0))t.brnTick=0.5;if(t.brn>was)emit({k:'efx',z:'brn',x:t.x,y:t.y,h:cH(t)+0.8,n:t.brn});}
 // Extreme Burning (อัลติสายไฟ): เผา 8/วิ นาน 5 วิ (รวม 40)
@@ -113,7 +113,7 @@ function healT(t,amt){
   const a=Math.min(amt,t.maxHp-t.hp);t.hp+=a;emit({k:'heal',x:t.x,y:t.y,h:(t.z||0)+2.2,n:Math.round(a),id:t.id});
 }
 function tickStatus(t,dt){
-  if(t.brn>0){t.brnTick-=dt;if(t.brnTick<=0){t.brnTick=0.5;damage(t,0.4*t.brn,t.brnSrc,'burn');}t.brnT-=dt;if(t.brnT<=0&&t.brn>0){t.brn--;t.brnT=1;}}
+  if(t.brn>0){t.brnTick-=dt;if(t.brnTick<=0){t.brnTick=0.5;damage(t,0.15*t.brn,t.brnSrc,'burn');}t.brnT-=dt;if(t.brnT<=0&&t.brn>0){t.brn--;t.brnT=1;}}
   if(t.xb>0){t.xb-=dt;t.xbTick-=dt;if(t.xbTick<=0){t.xbTick=0.5;damage(t,4,t.xbSrc,'burn');}}
   if(t.blaze>0)t.blaze-=dt;
   if(t.kindleT>0){t.kindleT-=dt;if(t.kindleT<=0)t.kindle=0;}
