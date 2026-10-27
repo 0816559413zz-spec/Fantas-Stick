@@ -124,9 +124,9 @@ const MAPS={
   test:Object.assign({name:'🧪 Test Place',d:'พื้นโล่งสำหรับทดลองคาถา (ห้องฝึก)'},genTest())
 };
 // แผนที่ที่สุ่มได้ (ป่ามืดเอาออกจากการสุ่มตามที่ผู้ใช้ขอ — ยังเลือกเองในล็อบบี้ได้)
-// แผนที่ที่ปิดไว้ชั่วคราว (ไฟล์ยังอยู่ครบ ไม่สุ่ม/เลือกไม่ได้) — greathall: กระโดดข้ามโต๊ะไม่ได้ (ผู้ใช้ 2026-10-27) • เปิดคืน = ลบออกจากชุดนี้
-const MAP_OFF=new Set(['greathall']);
-const RANDOM_MAPS=['castle','pitch','hogsmeade','meadow','lake','ruins'];
+// แผนที่ที่ปิดไว้ชั่วคราว (ไฟล์ยังอยู่ครบ ไม่สุ่ม/เลือกไม่ได้) — ใส่ id ลงชุดนี้ • greathall เคยปิด 2026-10-27 (ข้ามโต๊ะไม่ได้) แก้แล้ว
+const MAP_OFF=new Set([]);
+const RANDOM_MAPS=['castle','pitch','hogsmeade','greathall','meadow','lake','ruins'];
 let MAPID='castle',MW=W,MH=H,OBS=MAPS.castle.obs;
 function setMapVars(id){if(!MAPS[id])id='castle';MAPID=id;MW=MAPS[id].W;MH=MAPS[id].H;OBS=MAPS[id].obs;TERR=MAPS[id].terr||null;PROPS=genProps(id);BLDG=genBldg(id);BRK=genBrk(id);}
 // ---------- แผนที่จากไฟล์ (Blender → assets/maps/<id>.json + .glb, สคริปต์ assets/src/map_export.py, กติกา MAP-DESIGN.md) ----------
@@ -135,7 +135,7 @@ function setMapVars(id){if(!MAPS[id])id='castle';MAPID=id;MW=MAPS[id].W;MH=MAPS[
 const FMAPS={pend:new Map(),fail:new Set()};
 function b64i16(b){const bin=atob(b),u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);const v=new Int16Array(u.buffer),f=new Float32Array(v.length);for(let i=0;i<v.length;i++)f[i]=v[i]===-32768?NaN:v[i]/100;return f;}
 function regFileMap(id,e,d){
-  const obs=(d.obs||[]).map(o=>Object.assign({x:o.x,y:o.y,r:o.r,hgt:o.hgt,k:o.k||'col',fm:1},o.ring!=null?{ring:o.ring}:{},o.b!=null?{b:o.b}:{}));   // b = กลุ่มของบังที่พังได้ (d.brk[b]) • ring = ความสูงห่วงควิดดิช (k:'hoop')
+  const obs=(d.obs||[]).map(o=>Object.assign({x:o.x,y:o.y,r:o.r,hgt:o.hgt,k:o.k||'col',fm:1},o.ring!=null?{ring:o.ring}:{},o.b!=null?{b:o.b}:{},o.st?{st:1}:{}));   // st = ยืนบนหลังได้ (โต๊ะห้องโถง) — groundH js/04   // b = กลุ่มของบังที่พังได้ (d.brk[b]) • ring = ความสูงห่วงควิดดิช (k:'hoop')
   (d.houses||[]).forEach((h,i)=>obs.push({x:h.x,y:h.y,r:Math.max(h.w,h.d)/2,k:'house',hgt:10,w:h.w,d:h.d,s:(i*0.37)%1,ry:h.ry||0}));
   const terr={c:d.c,nx:d.nx,ny:d.ny,g:b64i16(d.g),fl:(d.fl||[]).map(f=>({x0:f.x0,y0:f.y0,nx:f.nx,ny:f.ny,top:b64i16(f.top),bot:b64i16(f.bot)}))};
   {const keep=TERR;TERR=terr;for(const o of obs)if(o.fm)o.top=terrT(o.x,o.y)+o.hgt;TERR=keep;}   // ที่ชนจากไฟล์: เทียบความสูงจริง (พื้นใต้ตัวกับใต้ที่ชนสูงไม่เท่ากันได้)

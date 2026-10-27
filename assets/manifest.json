@@ -127,7 +127,7 @@
     "greathall": {
       "file": "maps/greathall.glb",
       "data": "maps/greathall.json",
-      "v": 5
+      "v": 6
     },
     "meadow": {
       "file": "maps/meadow.glb",
