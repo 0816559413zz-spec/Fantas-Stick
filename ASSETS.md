@@ -226,3 +226,10 @@ repo นี้เป็น **public** ใช้ได้เฉพาะโมเ
 - **ของริมถนน** (`cp_*`): `cp_phone` ตู้โทรศัพท์แดง • `cp_postbox` ตู้ไปรษณีย์ • `cp_lamp` เสาไฟวิกตอเรียน 4.6 ม. • `cp_bench` • `cp_taxi` แท็กซี่ดำ (หน้ารถ = +z)
 - วัสดุ: `city_pal` (สีตามช่อง palette + ไฟเรือง) และ `city_brick` (ลายอิฐ UV เป็นเมตร: 1 ลาย = 2 ม.) — ทุกชิ้นใช้ 2 วัสดุนี้ร่วมกัน
 - เกมวาดเป็น InstancedMesh (`cityFacade` / `cityKitLoad` ใน `js/28-city-build.js`) • ที่ชนของริมถนนอยู่ในโค้ด (`js/02-city.js` `SP`)
+
+### 3c-2. ชุดเมืองครบทั้งเมือง (2026-10-27)
+สคริปต์ส่วนต่อ `assets/src/city_kit_more.py` (ถูก `exec` จาก city_kit_build.py — รันไฟล์หลักไฟล์เดียว) • วัสดุเพิ่ม `city_pal2` (สีชุดที่ 2 + ไฟเรือง) และ `city_paint` (สีขาว — เกมย้อมสีต่อชิ้นด้วย instanceColor: รถ ตู้คอนเทนเนอร์)
+- ตึก 4 แบบ (แผ่น 4 ม. × 3.5 ม. เหมือนตึกแถว): ออฟฟิศหินขาว `co_win|co_win_d|co_plain|co_lobby|co_top|co_corner` • ตึกกระจก `cg_win|cg_win_d|cg_lobby|cg_top|cg_corner` • โกดังเหล็กลอน `cw_wall|cw_wall_b|cw_win|cw_door|cw_top|cw_corner` • อาคารจอดรถ `cc_open|cc_entry|cc_top|cc_corner`
+- ยานพาหนะ: `cp_car` `cp_van` (สีย้อม) `cp_bus` รถเมล์ 2 ชั้น `cp_train` ตู้รถไฟ 17 ม. (ยาวตามแกน x) `cp_container` 12.2 ม. (แกน x, สีย้อม) `cp_boat`
+- ของ: `cp_tlight` ไฟจราจร `cp_busstop` `cp_bin` `cp_bollard` `cp_tube` ป้ายรถไฟใต้ดิน `cp_planter` `cp_bush` `cp_cone` `cp_barrier` `cp_pallet` `cp_crane` ปั้นจั่น 46 ม. `cp_kiosk` (ยืดตามกล่อง 6×4×3) `cs_stand` อัฒจันทร์ 1 ช่วง 4 ม.
+- ชนิดกล่องในผัง → ชุดแผ่น: `CITY_STY` ใน `js/28-city-build.js` (shop/brick/station → อิฐ, office, glass, metal, garage) • ตำแหน่งของ + ที่ชน: `MAPS.city.street` / `SPC` ใน `js/02-city.js`

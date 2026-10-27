@@ -99,59 +99,219 @@
     },
     "city_ct_win": {
       "file": "city/ct_win.glb",
-      "v": 1
+      "v": 2
     },
     "city_ct_win_d": {
       "file": "city/ct_win_d.glb",
-      "v": 1
+      "v": 2
     },
     "city_ct_plain": {
       "file": "city/ct_plain.glb",
-      "v": 1
+      "v": 2
     },
     "city_ct_door": {
       "file": "city/ct_door.glb",
-      "v": 1
+      "v": 2
     },
     "city_ct_shop_r": {
       "file": "city/ct_shop_r.glb",
-      "v": 1
+      "v": 2
     },
     "city_ct_shop_b": {
       "file": "city/ct_shop_b.glb",
-      "v": 1
+      "v": 2
     },
     "city_ct_corner": {
       "file": "city/ct_corner.glb",
-      "v": 1
+      "v": 2
     },
     "city_ct_cornice": {
       "file": "city/ct_cornice.glb",
-      "v": 1
+      "v": 2
     },
     "city_ct_chimney": {
       "file": "city/ct_chimney.glb",
-      "v": 1
+      "v": 2
     },
     "city_cp_phone": {
       "file": "city/cp_phone.glb",
-      "v": 1
+      "v": 2
     },
     "city_cp_postbox": {
       "file": "city/cp_postbox.glb",
-      "v": 1
+      "v": 2
     },
     "city_cp_lamp": {
       "file": "city/cp_lamp.glb",
-      "v": 1
+      "v": 2
     },
     "city_cp_bench": {
       "file": "city/cp_bench.glb",
-      "v": 1
+      "v": 2
     },
     "city_cp_taxi": {
       "file": "city/cp_taxi.glb",
-      "v": 1
+      "v": 2
+    },
+    "city_cc_corner": {
+      "file": "city/cc_corner.glb",
+      "v": 2
+    },
+    "city_cc_entry": {
+      "file": "city/cc_entry.glb",
+      "v": 2
+    },
+    "city_cc_open": {
+      "file": "city/cc_open.glb",
+      "v": 2
+    },
+    "city_cc_top": {
+      "file": "city/cc_top.glb",
+      "v": 2
+    },
+    "city_cg_corner": {
+      "file": "city/cg_corner.glb",
+      "v": 2
+    },
+    "city_cg_lobby": {
+      "file": "city/cg_lobby.glb",
+      "v": 2
+    },
+    "city_cg_top": {
+      "file": "city/cg_top.glb",
+      "v": 2
+    },
+    "city_cg_win": {
+      "file": "city/cg_win.glb",
+      "v": 2
+    },
+    "city_cg_win_d": {
+      "file": "city/cg_win_d.glb",
+      "v": 2
+    },
+    "city_co_corner": {
+      "file": "city/co_corner.glb",
+      "v": 2
+    },
+    "city_co_lobby": {
+      "file": "city/co_lobby.glb",
+      "v": 2
+    },
+    "city_co_plain": {
+      "file": "city/co_plain.glb",
+      "v": 2
+    },
+    "city_co_top": {
+      "file": "city/co_top.glb",
+      "v": 2
+    },
+    "city_co_win": {
+      "file": "city/co_win.glb",
+      "v": 2
+    },
+    "city_co_win_d": {
+      "file": "city/co_win_d.glb",
+      "v": 2
+    },
+    "city_cp_barrier": {
+      "file": "city/cp_barrier.glb",
+      "v": 2
+    },
+    "city_cp_bin": {
+      "file": "city/cp_bin.glb",
+      "v": 2
+    },
+    "city_cp_boat": {
+      "file": "city/cp_boat.glb",
+      "v": 2
+    },
+    "city_cp_bollard": {
+      "file": "city/cp_bollard.glb",
+      "v": 2
+    },
+    "city_cp_bus": {
+      "file": "city/cp_bus.glb",
+      "v": 2
+    },
+    "city_cp_bush": {
+      "file": "city/cp_bush.glb",
+      "v": 2
+    },
+    "city_cp_busstop": {
+      "file": "city/cp_busstop.glb",
+      "v": 2
+    },
+    "city_cp_car": {
+      "file": "city/cp_car.glb",
+      "v": 2
+    },
+    "city_cp_cone": {
+      "file": "city/cp_cone.glb",
+      "v": 2
+    },
+    "city_cp_container": {
+      "file": "city/cp_container.glb",
+      "v": 2
+    },
+    "city_cp_crane": {
+      "file": "city/cp_crane.glb",
+      "v": 2
+    },
+    "city_cp_kiosk": {
+      "file": "city/cp_kiosk.glb",
+      "v": 2
+    },
+    "city_cp_pallet": {
+      "file": "city/cp_pallet.glb",
+      "v": 2
+    },
+    "city_cp_planter": {
+      "file": "city/cp_planter.glb",
+      "v": 2
+    },
+    "city_cp_tlight": {
+      "file": "city/cp_tlight.glb",
+      "v": 2
+    },
+    "city_cp_train": {
+      "file": "city/cp_train.glb",
+      "v": 2
+    },
+    "city_cp_tube": {
+      "file": "city/cp_tube.glb",
+      "v": 2
+    },
+    "city_cp_van": {
+      "file": "city/cp_van.glb",
+      "v": 2
+    },
+    "city_cs_stand": {
+      "file": "city/cs_stand.glb",
+      "v": 2
+    },
+    "city_cw_corner": {
+      "file": "city/cw_corner.glb",
+      "v": 2
+    },
+    "city_cw_door": {
+      "file": "city/cw_door.glb",
+      "v": 2
+    },
+    "city_cw_top": {
+      "file": "city/cw_top.glb",
+      "v": 2
+    },
+    "city_cw_wall": {
+      "file": "city/cw_wall.glb",
+      "v": 2
+    },
+    "city_cw_wall_b": {
+      "file": "city/cw_wall_b.glb",
+      "v": 2
+    },
+    "city_cw_win": {
+      "file": "city/cw_win.glb",
+      "v": 2
     }
   },
   "maps": {
