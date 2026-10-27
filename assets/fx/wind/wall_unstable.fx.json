@@ -20,7 +20,7 @@
    "pos": [
     0,
     0,
-    -10.9
+    10.9
    ],
    "shape": "model",
    "model": "wind_wall_body",
@@ -98,7 +98,7 @@
    "pos": [
     0,
     0,
-    -10.9
+    10.9
    ],
    "from": "mesh",
    "of": "shiver",
@@ -133,7 +133,7 @@
    "pos": [
     0,
     0,
-    -10.9
+    10.9
    ],
    "from": "mesh",
    "of": "shiver",
@@ -168,7 +168,7 @@
    "pos": [
     0,
     0,
-    -10.9
+    10.9
    ],
    "from": "mesh",
    "of": "shiver",

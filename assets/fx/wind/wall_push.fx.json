@@ -1,0 +1,241 @@
+{
+ "v": 1,
+ "desc": "ดันกำแพงลมพุ่งไปข้างหน้า (เล่นวนซ้อนกำแพงขณะวิ่ง): กำแพงเอนไปข้างหน้า ลมอัดสว่างที่หน้ากำแพง รอยลมลากยาวบนพื้นด้านหลัง เศษลมปลิว เส้นลมพุ่งนำ",
+ "tags": [
+  "wind",
+  "wall",
+  "push",
+  "loop"
+ ],
+ "pal": "wind",
+ "dur": 0.6,
+ "seed": 8,
+ "layers": [
+  {
+   "id": "lean",
+   "t": "mesh",
+   "at": 0,
+   "life": 0.6,
+   "loop": true,
+   "att": "ground",
+   "pos": [
+    0,
+    0,
+    10.9
+   ],
+   "shape": "model",
+   "model": "wind_wall_lean",
+   "mat": "tex",
+   "tex": "tex/wind_wall_curtain",
+   "col": "#e6fff4",
+   "col2": "#4fd07a",
+   "rim": 0,
+   "uvTile": [
+    51.4,
+    0.96
+   ],
+   "uvScroll": [
+    0.6,
+    0
+   ],
+   "op": 0.45,
+   "fade": 0
+  },
+  {
+   "id": "front",
+   "t": "mesh",
+   "at": 0,
+   "life": 0.6,
+   "loop": true,
+   "att": "ground",
+   "pos": [
+    0,
+    0,
+    10.9
+   ],
+   "shape": "model",
+   "model": "wind_wall_front",
+   "mat": "tex",
+   "tex": "tex/wind_wall_curtain",
+   "col": "#ffffff",
+   "col2": "#c9fff0",
+   "rim": 0,
+   "uvTile": [
+    40,
+    0.96
+   ],
+   "uvScroll": [
+    -0.8,
+    0
+   ],
+   "op": {
+    "0": 0.35,
+    "0.5": 0.55,
+    "1": 0.35
+   },
+   "fade": 0
+  },
+  {
+   "id": "drag",
+   "t": "emit",
+   "at": 0,
+   "life": 0.6,
+   "loop": true,
+   "att": "ground",
+   "pos": [
+    0,
+    0.05,
+    -10.9
+   ],
+   "from": "mesh",
+   "of": "lean",
+   "rate": 90,
+   "dir": "aim",
+   "yaw": 180,
+   "spread": 0.25,
+   "speed": [
+    5,
+    9
+   ],
+   "up": [
+    0,
+    0.3
+   ],
+   "plife": [
+    0.4,
+    0.8
+   ],
+   "look": "streak",
+   "size": [
+    2,
+    4
+   ],
+   "col": "#c9fff0",
+   "c2": "#14663c",
+   "gravity": 3,
+   "drag": 1.5,
+   "curl": false
+  },
+  {
+   "id": "dust",
+   "t": "emit",
+   "at": 0,
+   "life": 0.6,
+   "loop": true,
+   "att": "ground",
+   "pos": [
+    0,
+    0.1,
+    -10.9
+   ],
+   "from": "mesh",
+   "of": "lean",
+   "rate": 35,
+   "dir": "aim",
+   "yaw": 180,
+   "spread": 0.6,
+   "speed": [
+    2,
+    5
+   ],
+   "up": [
+    0.5,
+    2
+   ],
+   "plife": [
+    0.5,
+    1
+   ],
+   "look": "model",
+   "model": "wind_wing_airchip",
+   "mmat": "glow",
+   "msize": [
+    0.08,
+    0.16
+   ],
+   "mspin": 200,
+   "col": "#b7ff87",
+   "c2": "#329b50",
+   "gravity": 1,
+   "drag": 1.2,
+   "curl": true
+  },
+  {
+   "id": "floorlines",
+   "t": "mesh",
+   "at": 0,
+   "life": 0.6,
+   "loop": true,
+   "att": "ground",
+   "pos": [
+    0,
+    0.03,
+    -1.6
+   ],
+   "shape": "model",
+   "model": "wind_groundswirl",
+   "mat": "tex",
+   "tex": "tex/wind_swoosh_b",
+   "col": "#7fe8b0",
+   "col2": "#000000",
+   "rim": 0,
+   "uvTile": [
+    1,
+    1
+   ],
+   "uvScroll": [
+    0,
+    0
+   ],
+   "scale": [
+    3.2,
+    1,
+    1.2
+   ],
+   "spin": 0,
+   "op": {
+    "0": 0.15,
+    "0.5": 0.35,
+    "1": 0.15
+   },
+   "fade": 0
+  },
+  {
+   "id": "ahead",
+   "t": "emit",
+   "at": 0,
+   "life": 0.6,
+   "loop": true,
+   "att": "ground",
+   "pos": [
+    0,
+    1.2,
+    -10.9
+   ],
+   "from": "mesh",
+   "of": "front",
+   "rate": 45,
+   "dir": "aim",
+   "yaw": 0,
+   "spread": 0.2,
+   "speed": [
+    8,
+    12
+   ],
+   "plife": [
+    0.15,
+    0.3
+   ],
+   "look": "streak",
+   "size": [
+    1.5,
+    3
+   ],
+   "col": "#ffffff",
+   "c2": "#7fe8b0",
+   "gravity": 0,
+   "drag": 0.5,
+   "curl": false
+  }
+ ]
+}

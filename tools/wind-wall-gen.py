@@ -122,21 +122,21 @@ def flick(seed,lo=.45,hi=.92,step=.22):
         k[str(u)]=[1,round(max(.02,v*g),3),1];t+=step*rg.uniform(.7,1.3)
     k['1']=[1,.02,1];return k
 L=[]
-L.append({'id':'back','t':'mesh','at':0,'life':DUR,'att':'ground','pos':[0,0,-R],'shape':'model','model':'wind_wall_back','mat':'tex','tex':'tex/wind_wall_curtain','col':'#4fd07a','col2':'#14663c','rim':0,'uvTile':[72.0,.96],'uvScroll':[-.015,0],'op':fade(.32),'scale':flick(4,.8,1.0,.27),'fade':0})
-L.append({'id':'body','t':'mesh','at':0,'life':DUR,'att':'ground','pos':[0,0,-R],'shape':'model','model':'wind_wall_body','mat':'tex','tex':'tex/wind_wall_curtain','col':'#c9fff0','col2':'#3aa58a','rim':0,'uvTile':[51.4,.96],'uvScroll':[.01,0],'op':fade(.34),'scale':flick(3,.82,1.0,.3),'fade':0})
-L.append({'id':'body2','t':'mesh','at':0,'life':DUR,'att':'ground','pos':[0,0,-R],'shape':'model','model':'wind_wall_body','mat':'tex','tex':'tex/wind_wall_curtain','col':'#ffffff','col2':'#c9fff0','rim':0,'uvTile':[30.9,.96],'uvScroll':[.02,0],'op':fade(.12),'scale':grow,'fade':0})
+L.append({'id':'back','t':'mesh','at':0,'life':DUR,'att':'ground','pos':[0,0,R],'shape':'model','model':'wind_wall_back','mat':'tex','tex':'tex/wind_wall_curtain','col':'#4fd07a','col2':'#14663c','rim':0,'uvTile':[72.0,.96],'uvScroll':[-.015,0],'op':fade(.32),'scale':flick(4,.8,1.0,.27),'fade':0})
+L.append({'id':'body','t':'mesh','at':0,'life':DUR,'att':'ground','pos':[0,0,R],'shape':'model','model':'wind_wall_body','mat':'tex','tex':'tex/wind_wall_curtain','col':'#c9fff0','col2':'#3aa58a','rim':0,'uvTile':[51.4,.96],'uvScroll':[.01,0],'op':fade(.34),'scale':flick(3,.82,1.0,.3),'fade':0})
+L.append({'id':'body2','t':'mesh','at':0,'life':DUR,'att':'ground','pos':[0,0,R],'shape':'model','model':'wind_wall_body','mat':'tex','tex':'tex/wind_wall_curtain','col':'#ffffff','col2':'#c9fff0','rim':0,'uvTile':[30.9,.96],'uvScroll':[.02,0],'op':fade(.12),'scale':grow,'fade':0})
 # ยอดเส้นลมขยับขึ้นลงตลอดเหมือนเปลวไฟ (ผู้ใช้ 2026-10-27): 6 ชั้นปลายเส้น แต่ละชั้นสูง-ต่ำสุ่มคนละจังหวะ แตะเพดานนาน ๆ ครั้ง
 for j,(col,c2,tile,sx,pk) in enumerate([('#c9fff0','#4fd07a',[7,1],.03,.45),('#4fd07a','#14663c',[11,.9],-.02,.38),('#ffffff','#c9fff0',[5,1],.05,.3),
                                          ('#7fe8b0','#2fae5e',[9,1.1],-.04,.36),('#c9fff0','#3aa58a',[13,.95],.02,.32),('#4fd07a','#14663c',[6,1.05],-.03,.34)]):
   for s in range(NSEG):
-    L.append({'id':f'tips{j}_{s}','t':'mesh','at':0,'life':DUR,'att':'ground','pos':[0,0,-R],'shape':'model','model':f'wind_wall_tips{s}','mat':'tex','tex':'tex/wind_wall_tips','col':col,'col2':c2,'rim':0,'uvTile':[round(tile[0]*360/70,1),tile[1]],'uvScroll':[sx,0],'op':fade(pk),'scale':flick(31+j*7+s*101,step=.16+.05*((j+s)%4)),'fade':0})
-L.append({'id':'ends','t':'mesh','at':0,'life':DUR,'att':'ground','pos':[0,0,-R],'shape':'model','model':'wind_wall_ends','mat':'tex','tex':'tex/wind_wall_curtain','col':'#ffffff','col2':'#c9fff0','rim':0,'uvTile':[15.4,.96],'uvScroll':[.03,0],'op':fade(.6),'scale':grow,'fade':0})
-L.append({'id':'line','t':'mesh','at':0,'life':DUR,'att':'ground','pos':[0,0,-R],'shape':'model','model':'wind_wall_line','mat':'glow','col':'#c9fff0','col2':'#4fd07a','op':{'0':0,'0.02':1,'0.94':1,'1':0},'scale':{'0':[.2,1,.2],'0.05':[1,1,1]},'fade':0})
+    L.append({'id':f'tips{j}_{s}','t':'mesh','at':0,'life':DUR,'att':'ground','pos':[0,0,R],'shape':'model','model':f'wind_wall_tips{s}','mat':'tex','tex':'tex/wind_wall_tips','col':col,'col2':c2,'rim':0,'uvTile':[round(tile[0]*360/70,1),tile[1]],'uvScroll':[sx,0],'op':fade(pk),'scale':flick(31+j*7+s*101,step=.16+.05*((j+s)%4)),'fade':0})
+L.append({'id':'ends','t':'mesh','at':0,'life':DUR,'att':'ground','pos':[0,0,R],'shape':'model','model':'wind_wall_ends','mat':'tex','tex':'tex/wind_wall_curtain','col':'#ffffff','col2':'#c9fff0','rim':0,'uvTile':[15.4,.96],'uvScroll':[.03,0],'op':fade(.6),'scale':grow,'fade':0})
+L.append({'id':'line','t':'mesh','at':0,'life':DUR,'att':'ground','pos':[0,0,R],'shape':'model','model':'wind_wall_line','mat':'glow','col':'#c9fff0','col2':'#4fd07a','op':{'0':0,'0.02':1,'0.94':1,'1':0},'scale':{'0':[.2,1,.2],'0.05':[1,1,1]},'fade':0})
 # เศษลมร่วงลงตามกำแพง
 for s,ph in [(-1,0),(1,.5)]:
-    L.append({'id':f'wisp{"LR"[(s+1)//2]}','t':'emit','at':.15,'life':DUR-.4,'att':'ground','pos':[s*R*math.sin(AMAX*.92),2.6,round(R*math.cos(AMAX*.92)-R,3)],'rate':10,'from':'sphere','fr':.4,'dir':'down','speed':[1.2,2.4],'plife':[.4,.9],'look':'streak','size':[.5,1.1],'col':'#e6fff4','c2':'#4fd07a','gravity':0,'drag':.5,'curl':False})
+    L.append({'id':f'wisp{"LR"[(s+1)//2]}','t':'emit','at':.15,'life':DUR-.4,'att':'ground','pos':[s*R*math.sin(AMAX*.92),2.6,round(R-R*math.cos(AMAX*.92),3)],'rate':10,'from':'sphere','fr':.4,'dir':'down','speed':[1.2,2.4],'plife':[.4,.9],'look':'streak','size':[.5,1.1],'col':'#e6fff4','c2':'#4fd07a','gravity':0,'drag':.5,'curl':False})
 for j,(col,c2,rate) in enumerate([('#e6fff4','#4fd07a',70),('#4fd07a','#14663c',55)]):
-    L.append({'id':f'fall{j}','t':'emit','at':.1,'life':DUR-.35,'att':'ground','pos':[0,0,-R],'from':'mesh','of':'body','rate':rate,'dir':'down','speed':[2.6,4.2],'plife':[.35,.75],'look':'streak','size':[1.6,3.2],'col':col,'c2':c2,'gravity':0,'drag':0,'curl':False})
+    L.append({'id':f'fall{j}','t':'emit','at':.1,'life':DUR-.35,'att':'ground','pos':[0,0,R],'from':'mesh','of':'body','rate':rate,'dir':'down','speed':[2.6,4.2],'plife':[.35,.75],'look':'streak','size':[1.6,3.2],'col':col,'c2':c2,'gravity':0,'drag':0,'curl':False})
 L.append({'id':'wispM','t':'emit','at':.15,'life':DUR-.4,'att':'ground','from':'mesh','of':'body','rate':14,'dir':'down','speed':[1,2],'plife':[.5,1],'look':'streak','size':[.4,.9],'col':'#c9fff0','c2':'#3aa58a','gravity':0,'drag':.5,'curl':False})
 # ลมวนรอบกำแพง (ผู้ใช้ 2026-10-27 "add abit effect like wind around"): สโตรกลมเล็กวิ่งเลียบหน้ากำแพงไปมา + เศษลมลอยตาม
 rgw=random.Random(21)
@@ -145,10 +145,10 @@ for j in range(9):
     pts={}
     for k in range(7):
         u=k/6;a=a0+(a1-a0)*u;rr=R+off+.15*math.sin(u*6.3+j)
-        pts[str(round(u,3))]=[round(rr*math.sin(a),3),round(y+.35*math.sin(u*9+j*1.7),3),round(rr*math.cos(a)-R,3)]
+        pts[str(round(u,3))]=[round(rr*math.sin(a),3),round(y+.35*math.sin(u*9+j*1.7),3),round(-rr*math.cos(a)+R,3)]
     L.append({'id':f'gust{j}','t':'mesh','at':.3+j*.55,'life':round(min(DUR-.35-(.3+j*.55),1.6+rgw.uniform(0,.6)),2),'loop':True,'att':'ground','shape':'model','model':f'wind_pieces{j%3}','mat':'tex','tex':'tex/wind_swoosh_a_hi' if j%3 else 'tex/wind_swoosh_b',
         'col':'#e6fff4' if j%2 else '#7fe8b0','col2':'#000000','rim':0,'uvTile':[1,1],'uvScroll':[0,0],'pos':pts,'rot':[0,0,90],'scale':[.35,.18,.35],'spin':s*420,'op':{'0':0,'0.15':.55,'0.8':.45,'1':0},'fade':0})
-L.append({'id':'drift','t':'emit','at':.2,'life':DUR-.5,'att':'ground','pos':[0,0,-R],'from':'mesh','of':'body','rate':18,'dir':'random','speed':[.6,1.6],'plife':[.8,1.6],'look':'streak','size':[.3,.6],'col':'#e6fff4','c2':'#4fd07a','gravity':0,'drag':.8,'curl':True})
+L.append({'id':'drift','t':'emit','at':.2,'life':DUR-.5,'att':'ground','pos':[0,0,R],'from':'mesh','of':'body','rate':18,'dir':'random','speed':[.6,1.6],'plife':[.8,1.6],'look':'streak','size':[.3,.6],'col':'#e6fff4','c2':'#4fd07a','gravity':0,'drag':.8,'curl':True})
 # ตอนเกิด: วาบตามเส้นพื้น
 L.append({'id':'rise','t':'emit','at':0,'life':.12,'att':'ground','from':'mesh','of':'line','burst':60,'rate':0,'dir':'up','speed':[3,6],'plife':[.25,.5],'look':'streak','size':[.8,1.6],'col':'#e6fff4','c2':'#4fd07a','gravity':0,'drag':2,'curl':False})
 fx={'v':1,'desc':'กำแพงลม Aegis Gale — แบบกำแพงลม Yasuo (ผู้ใช้ 2026-10-27): ผนังโค้ง เส้นลมไหลลงตลอด ขอบสองข้างสว่าง กลางโปร่ง เส้นพื้นบอกระยะปลายม้วน','tags':['wind','wall','ground'],'pal':'wind','dur':DUR,'seed':11,'layers':L}
@@ -157,7 +157,7 @@ print('wind/wall: Yasuo-style curved wall, 6 s')
 
 # =====================================================================
 # ชนกำแพง / ใกล้แตก / แตกระเบิด (ผู้ใช้ 2026-10-27 เลือก: กำแพงกระเพื่อม+ลมรัด • เส้นลมปั่นป่วน • ม่านลมระเบิดออกด้านหน้า)
-# ทิศ (เช็กในสตูดิโอแล้ว): ผู้ร่ายอยู่ฝั่ง -z • ฝั่งศัตรู (ด้านหน้ากำแพง) = +z
+# ทิศ (เช็กพิกัดจริงในสตูดิโอแล้ว): ผู้ร่ายอยู่ฝั่ง -z • ฝั่งศัตรู (ด้านหน้ากำแพง) = +z • ปลายกำแพงโค้งไปทาง +z
 # =====================================================================
 SW=lambda j:'tex/wind_swoosh_a_hi' if j%2 else 'tex/wind_swoosh_b'
 # ---- ชน: วางที่ตัวศัตรู หัน -z เข้าหากำแพง • นาน 0.6 วิ (สตัน 0.5) ----
@@ -175,29 +175,62 @@ H.append({'id':'shake','t':'screen','at':0,'life':.15,'shake':2.5})
 save(ROOT/'assets/fx/wind/wall_hit.fx.json',{'v':1,'desc':'กำแพงลม: ศัตรูถูกผลักชนกำแพง (สตัน) — กำแพงกระเพื่อมเป็นวงคลื่นตรงจุดชน + ลมสโตรกรัดรอบตัวศัตรูตลอดสตัน 0.5 วิ (วางที่ตัวศัตรู หัน -z เข้ากำแพง)','tags':['wind','wall','hit','stun'],'pal':'wind','dur':.6,'seed':5,'layers':H})
 
 # ---- ใกล้แตก: เล่นซ้อนกำแพงเดิม (วางเหมือน wind/wall) วนตลอดจนแตก ----
-U=[{'id':'shiver','t':'mesh','at':0,'life':2,'loop':True,'att':'ground','pos':[0,0,-R],'shape':'model','model':'wind_wall_body','mat':'tex','tex':'tex/wind_wall_curtain','col':'#e6fff4','col2':'#4fd07a','rim':0,'uvTile':[60,.96],'uvScroll':[.35,0],
+U=[{'id':'shiver','t':'mesh','at':0,'life':2,'loop':True,'att':'ground','pos':[0,0,R],'shape':'model','model':'wind_wall_body','mat':'tex','tex':'tex/wind_wall_curtain','col':'#e6fff4','col2':'#4fd07a','rim':0,'uvTile':[60,.96],'uvScroll':[.35,0],
     'scale':{'0':[1,1,1],'0.13':[1.005,1.06,1],'0.27':[.997,.95,1],'0.4':[1.004,1.04,1],'0.55':[.996,.97,1],'0.7':[1.006,1.07,1],'0.85':[.998,.96,1],'1':[1,1,1]},'op':{'0':.25,'0.2':.4,'0.45':.22,'0.7':.42,'1':.25},'fade':0}]
 for j,(col,rate,sp) in enumerate([('#ffffff',120,[4,6.5]),('#7fe8b0',90,[3.5,5.5])]):
-    U.append({'id':f'rush{j}','t':'emit','at':0,'life':2,'loop':True,'att':'ground','pos':[0,0,-R],'from':'mesh','of':'shiver','rate':rate,'dir':'down','speed':sp,'plife':[.25,.5],'look':'streak','size':[1.8,3.4],'col':col,'c2':'#14663c','gravity':0,'drag':0,'curl':False})
-U.append({'id':'chips','t':'emit','at':0,'life':2,'loop':True,'att':'ground','pos':[0,0,-R],'from':'mesh','of':'shiver','rate':40,'dir':'aim','yaw':0,'spread':.9,'speed':[1.5,3.5],'plife':[.3,.7],'look':'streak','size':[.5,1.1],'col':'#e6fff4','c2':'#4fd07a','gravity':0,'drag':1.2,'curl':True})
+    U.append({'id':f'rush{j}','t':'emit','at':0,'life':2,'loop':True,'att':'ground','pos':[0,0,R],'from':'mesh','of':'shiver','rate':rate,'dir':'down','speed':sp,'plife':[.25,.5],'look':'streak','size':[1.8,3.4],'col':col,'c2':'#14663c','gravity':0,'drag':0,'curl':False})
+U.append({'id':'chips','t':'emit','at':0,'life':2,'loop':True,'att':'ground','pos':[0,0,R],'from':'mesh','of':'shiver','rate':40,'dir':'aim','yaw':0,'spread':.9,'speed':[1.5,3.5],'plife':[.3,.7],'look':'streak','size':[.5,1.1],'col':'#e6fff4','c2':'#4fd07a','gravity':0,'drag':1.2,'curl':True})
 save(ROOT/'assets/fx/wind/wall_unstable.fx.json',{'v':1,'desc':'กำแพงลมใกล้แตก (ดาเมจใกล้ 70) — เส้นลมไหลเร็วขึ้น สั่น สว่างขึ้น เศษลมหลุดออก (เล่นซ้อนกำแพง วนจนแตก)','tags':['wind','wall','loop'],'pal':'wind','dur':2,'seed':6,'layers':U})
 
 # ---- แตกระเบิด: วางเหมือน wind/wall • หดเข้า 0.12 วิ แล้วระเบิดพัดออกด้านหน้า (-z) ----
-B=[{'id':'contract','t':'mesh','at':0,'life':.2,'att':'ground','pos':[0,0,-R],'shape':'model','model':'wind_wall_body','mat':'tex','tex':'tex/wind_wall_curtain','col':'#ffffff','col2':'#c9fff0','rim':0,'uvTile':[51.4,.96],'uvScroll':[0,0],
+B=[{'id':'contract','t':'mesh','at':0,'life':.2,'att':'ground','pos':[0,0,R],'shape':'model','model':'wind_wall_body','mat':'tex','tex':'tex/wind_wall_curtain','col':'#ffffff','col2':'#c9fff0','rim':0,'uvTile':[51.4,.96],'uvScroll':[0,0],
     'scale':{'0':[1,1,1],'0.6':[.97,.72,.94],'1':[1.03,.3,1.1]},'op':{'0':.6,'0.6':.95,'1':0},'fade':0}]
 rgb=random.Random(77)
 for j in range(22):
-    a=-AMAX*.95+1.9*AMAX*j/21;x=R*math.sin(a);z=R*math.cos(a)-R;y=rgb.uniform(.3,2.6);dist=rgb.uniform(5,10);nx,nz=math.sin(a)*.3,1
+    a=-AMAX*.95+1.9*AMAX*j/21;x=R*math.sin(a);z=-R*math.cos(a)+R;y=rgb.uniform(.3,2.6);dist=rgb.uniform(5,10);nx,nz=math.sin(a)*.3,1
     B.append({'id':f'gust{j}','t':'mesh','at':round(.12+rgb.uniform(0,.06),3),'life':round(.55+rgb.uniform(0,.2),3),'att':'ground','shape':'model','model':f'wind_pieces{j%3}','mat':'tex','tex':SW(j),'col':'#e6fff4' if j%2 else '#4fd07a','col2':'#000000','rim':0,'uvTile':[1,1],'uvScroll':[0,0],
         'pos':{'0':[round(x,3),round(y,3),round(z,3)],'1':[round(x+nx*dist,3),round(y+rgb.uniform(-.3,.8),3),round(z+nz*dist,3)],'ease':'out'},'rot':[90,0,round(rgb.uniform(-30,30),1)],'scale':{'0':[.9,.4,.9],'0.3':[2.6,.6,2.6],'1':[4.2,.25,4.2]},'spin':rgb.choice([-1,1])*500,'op':{'0':0,'0.06':1,'0.6':.75,'1':0},'fade':0})
 # ตัวม่านลมถูกพัดพุ่งออกไปด้านหน้าทั้งแผ่น (กว้างขึ้น เตี้ยลง จาง)
 for j,(col,dz,dl) in enumerate([('#ffffff',7,0),('#7fe8b0',10,.04)]):
     B.append({'id':f'blow{j}','t':'mesh','at':.12+dl,'life':.55,'att':'ground','shape':'model','model':'wind_wall_body','mat':'tex','tex':'tex/wind_wall_curtain','col':col,'col2':'#4fd07a','rim':0,'uvTile':[51.4,.96],'uvScroll':[0,-2],
-        'pos':{'0':[0,0,-R],'1':[0,0,round(-R+dz,2)],'ease':'out'},'scale':{'0':[1,1,1],'0.3':[1.15,.85,1.15],'1':[1.4,.45,1.4]},'op':{'0':.95,'0.4':.7,'1':0},'fade':0})
-B.append({'id':'shards','t':'emit','at':.12,'life':.05,'att':'ground','pos':[0,0,-R],'from':'mesh','of':'contract','burst':80,'rate':0,'dir':'aim','yaw':0,'spread':.8,'speed':[7,14],'up':[0,3],'plife':[.35,.8],'look':'streak','size':[1.4,3],'col':'#e6fff4','c2':'#4fd07a','gravity':0,'drag':1.4,'curl':False})
+        'pos':{'0':[0,0,R],'1':[0,0,round(R+dz,2)],'ease':'out'},'scale':{'0':[1,1,1],'0.3':[1.15,.85,1.15],'1':[1.4,.45,1.4]},'op':{'0':.95,'0.4':.7,'1':0},'fade':0})
+B.append({'id':'shards','t':'emit','at':.12,'life':.05,'att':'ground','pos':[0,0,R],'from':'mesh','of':'contract','burst':80,'rate':0,'dir':'aim','yaw':0,'spread':.8,'speed':[7,14],'up':[0,3],'plife':[.35,.8],'look':'streak','size':[1.4,3],'col':'#e6fff4','c2':'#4fd07a','gravity':0,'drag':1.4,'curl':False})
 B.append({'id':'floor','t':'mesh','at':.12,'life':.7,'att':'ground','pos':[0,.04,1.5],'shape':'model','model':'wind_groundswirl','mat':'tex','tex':'tex/wind_swoosh_b','col':'#8dff65','col2':'#000000','rim':0,'uvTile':[1,1],'uvScroll':[0,0],'scale':{'0':1,'0.4':5,'1':8,'ease':'out'},'spin':200,'op':{'0':0,'0.08':.9,'1':0},'fade':0})
 B.append({'id':'flash','t':'flash','at':.12,'life':.2,'att':'ground','pos':[0,1.3,1.2],'col':'#e6fff4','size0':1,'size':5,'k':1})
 B.append({'id':'shock','t':'warp','at':.12,'life':.45,'att':'ground','pos':[0,.1,1.5],'kind':'shock','flat':True,'size':{'0':1,'1':14},'str':1.4,'op':{'0':1,'1':0},'col':'#c9fff0','glow':.05})
 B.append({'id':'shake','t':'screen','at':.12,'life':.3,'shake':7,'flash':.03,'fcol':'#e6fff4'})
 save(ROOT/'assets/fx/wind/wall_break.fx.json',{'v':1,'desc':'กำแพงลมแตกระเบิด — หดเข้าสั้น ๆ แล้วม่านลมระเบิดพัดออกด้านหน้า (สโตรกลมใหญ่ + เส้นลมแตกกระจาย + คลื่นพื้น + จอสั่น) วางเหมือน wind/wall','tags':['wind','wall','break'],'pal':'wind','dur':1.2,'seed':7,'layers':B})
 print('wind/wall_hit, wall_unstable, wall_break')
+
+# =====================================================================
+# ดันกำแพงพุ่งไปข้างหน้า (ผู้ใช้ 2026-10-27 เลือก: กำแพงเอนไปข้างหน้า + รอยลาก)
+# wind/wall_push = เล่นวนซ้อนกำแพงตอนกำแพงวิ่ง (เกมขยับตำแหน่งตามกำแพง) • wind/wall_stop = ตอนหยุด เด้งตั้งตรง + คลื่นลมเล็ก
+# พิกัด: pos กับโมเดลแกนเดียวกัน • +z = ไปข้างหน้า (ฝั่งศัตรู) • กลางกำแพงอยู่ที่จุดวาง (pos z = R ชดเชยรัศมีวงโค้ง)
+# =====================================================================
+def lean_wall(name,r,hmax,k,n=120):
+    V=[];F=[]
+    for i in range(n+1):
+        a=-AMAX+2*AMAX*i/n;x=r*math.sin(a);z=-r*math.cos(a);e=abs(a)/AMAX;h=hmax*max(.08,(1-e**6))**.5
+        V+=[[round(x,4),0,round(z,4)],[round(x,4),round(h,4),round(z+k*h,4)]]
+        if i<n:F.append([2*i,2*i+2,2*i+3,2*i+1])
+    return {'id':name,'k':'poly','v':V,'f':F}
+save(ROOT/'assets/fx/mesh/wind_wall_lean.mesh.json',{'v':1,'desc':'กำแพงลมเอนไปข้างหน้า (ตอนดัน)','pal':'wind','mat':'solid','parts':[lean_wall('lean',R,HMAX,.38)]})
+save(ROOT/'assets/fx/mesh/wind_wall_front.mesh.json',{'v':1,'desc':'ลมอัดหน้ากำแพง (ตอนดัน)','pal':'wind','mat':'solid','parts':[lean_wall('front',R-.35,HMAX*.85,.5)]})
+P=[]
+P.append({'id':'lean','t':'mesh','at':0,'life':.6,'loop':True,'att':'ground','pos':[0,0,R],'shape':'model','model':'wind_wall_lean','mat':'tex','tex':'tex/wind_wall_curtain','col':'#e6fff4','col2':'#4fd07a','rim':0,'uvTile':[51.4,.96],'uvScroll':[.6,0],'op':.45,'fade':0})
+P.append({'id':'front','t':'mesh','at':0,'life':.6,'loop':True,'att':'ground','pos':[0,0,R],'shape':'model','model':'wind_wall_front','mat':'tex','tex':'tex/wind_wall_curtain','col':'#ffffff','col2':'#c9fff0','rim':0,'uvTile':[40,.96],'uvScroll':[-.8,0],'op':{'0':.35,'0.5':.55,'1':.35},'fade':0})
+# รอยลากบนพื้นด้านหลัง + เศษฝุ่น/ใบไม้ปลิวตาม
+P.append({'id':'drag','t':'emit','at':0,'life':.6,'loop':True,'att':'ground','pos':[0,.05,-R],'from':'mesh','of':'lean','rate':90,'dir':'aim','yaw':180,'spread':.25,'speed':[5,9],'up':[0,.3],'plife':[.4,.8],'look':'streak','size':[2,4],'col':'#c9fff0','c2':'#14663c','gravity':3,'drag':1.5,'curl':False})
+P.append({'id':'dust','t':'emit','at':0,'life':.6,'loop':True,'att':'ground','pos':[0,.1,-R],'from':'mesh','of':'lean','rate':35,'dir':'aim','yaw':180,'spread':.6,'speed':[2,5],'up':[.5,2],'plife':[.5,1],'look':'model','model':'wind_wing_airchip','mmat':'glow','msize':[.08,.16],'mspin':200,'col':'#b7ff87','c2':'#329b50','gravity':1,'drag':1.2,'curl':True})
+P.append({'id':'floorlines','t':'mesh','at':0,'life':.6,'loop':True,'att':'ground','pos':[0,.03,-1.6],'shape':'model','model':'wind_groundswirl','mat':'tex','tex':'tex/wind_swoosh_b','col':'#7fe8b0','col2':'#000000','rim':0,'uvTile':[1,1],'uvScroll':[0,0],'scale':[3.2,1,1.2],'spin':0,'op':{'0':.15,'0.5':.35,'1':.15},'fade':0})
+# เส้นลมพุ่งนำหน้ากำแพง
+P.append({'id':'ahead','t':'emit','at':0,'life':.6,'loop':True,'att':'ground','pos':[0,1.2,-R],'from':'mesh','of':'front','rate':45,'dir':'aim','yaw':0,'spread':.2,'speed':[8,12],'plife':[.15,.3],'look':'streak','size':[1.5,3],'col':'#ffffff','c2':'#7fe8b0','gravity':0,'drag':.5,'curl':False})
+save(ROOT/'assets/fx/wind/wall_push.fx.json',{'v':1,'desc':'ดันกำแพงลมพุ่งไปข้างหน้า (เล่นวนซ้อนกำแพงขณะวิ่ง): กำแพงเอนไปข้างหน้า ลมอัดสว่างที่หน้ากำแพง รอยลมลากยาวบนพื้นด้านหลัง เศษลมปลิว เส้นลมพุ่งนำ','tags':['wind','wall','push','loop'],'pal':'wind','dur':.6,'seed':8,'layers':P})
+S=[]
+S.append({'id':'snap','t':'mesh','at':0,'life':.35,'att':'ground','pos':[0,0,R],'shape':'model','model':'wind_wall_lean','mat':'tex','tex':'tex/wind_wall_curtain','col':'#ffffff','col2':'#c9fff0','rim':0,'uvTile':[51.4,.96],'uvScroll':[0,0],'scale':{'0':[1,1,1],'0.4':[1,1.08,1],'1':[1,1,1]},'op':{'0':.6,'1':0},'fade':0})
+for j in range(2):
+    S.append({'id':f'puff{j}','t':'mesh','at':.03*j,'life':.45,'att':'ground','pos':[0,.05,0],'shape':'model','model':'wind_groundswirl','mat':'tex','tex':'tex/wind_swoosh_b' if j else 'tex/wind_swoosh_a_hi','col':'#c9fff0' if j else '#ffffff','col2':'#000000','rim':0,'uvTile':[1,1],'uvScroll':[0,0],'scale':{'0':[1.5,1,.6],'1':[5,1,2],'ease':'out'},'spin':120*(1-2*j),'op':{'0':0,'0.1':.7,'1':0},'fade':0})
+S.append({'id':'spray','t':'emit','at':0,'life':.05,'att':'ground','pos':[0,1.2,0],'from':'sphere','fr':1.5,'burst':40,'rate':0,'dir':'aim','yaw':0,'spread':.9,'speed':[4,8],'up':[.5,2],'plife':[.25,.5],'look':'streak','size':[1,2.2],'col':'#e6fff4','c2':'#4fd07a','gravity':0,'drag':2,'curl':False})
+S.append({'id':'shake','t':'screen','at':0,'life':.15,'shake':2})
+save(ROOT/'assets/fx/wind/wall_stop.fx.json',{'v':1,'desc':'กำแพงลมหยุดหลังดัน: เด้งตั้งตรง + คลื่นลมพื้นเล็ก + เส้นลมพ่นไปข้างหน้า (วางเหมือน wind/wall)','tags':['wind','wall','push'],'pal':'wind','dur':.5,'seed':9,'layers':S})
+print('wind/wall_push, wall_stop')

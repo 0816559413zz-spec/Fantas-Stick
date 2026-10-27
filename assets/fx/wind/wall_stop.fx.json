@@ -1,0 +1,205 @@
+{
+ "v": 1,
+ "desc": "กำแพงลมหยุดหลังดัน: เด้งตั้งตรง + คลื่นลมพื้นเล็ก + เส้นลมพ่นไปข้างหน้า (วางเหมือน wind/wall)",
+ "tags": [
+  "wind",
+  "wall",
+  "push"
+ ],
+ "pal": "wind",
+ "dur": 0.5,
+ "seed": 9,
+ "layers": [
+  {
+   "id": "snap",
+   "t": "mesh",
+   "at": 0,
+   "life": 0.35,
+   "att": "ground",
+   "pos": [
+    0,
+    0,
+    10.9
+   ],
+   "shape": "model",
+   "model": "wind_wall_lean",
+   "mat": "tex",
+   "tex": "tex/wind_wall_curtain",
+   "col": "#ffffff",
+   "col2": "#c9fff0",
+   "rim": 0,
+   "uvTile": [
+    51.4,
+    0.96
+   ],
+   "uvScroll": [
+    0,
+    0
+   ],
+   "scale": {
+    "0": [
+     1,
+     1,
+     1
+    ],
+    "0.4": [
+     1,
+     1.08,
+     1
+    ],
+    "1": [
+     1,
+     1,
+     1
+    ]
+   },
+   "op": {
+    "0": 0.6,
+    "1": 0
+   },
+   "fade": 0
+  },
+  {
+   "id": "puff0",
+   "t": "mesh",
+   "at": 0.0,
+   "life": 0.45,
+   "att": "ground",
+   "pos": [
+    0,
+    0.05,
+    0
+   ],
+   "shape": "model",
+   "model": "wind_groundswirl",
+   "mat": "tex",
+   "tex": "tex/wind_swoosh_a_hi",
+   "col": "#ffffff",
+   "col2": "#000000",
+   "rim": 0,
+   "uvTile": [
+    1,
+    1
+   ],
+   "uvScroll": [
+    0,
+    0
+   ],
+   "scale": {
+    "0": [
+     1.5,
+     1,
+     0.6
+    ],
+    "1": [
+     5,
+     1,
+     2
+    ],
+    "ease": "out"
+   },
+   "spin": 120,
+   "op": {
+    "0": 0,
+    "0.1": 0.7,
+    "1": 0
+   },
+   "fade": 0
+  },
+  {
+   "id": "puff1",
+   "t": "mesh",
+   "at": 0.03,
+   "life": 0.45,
+   "att": "ground",
+   "pos": [
+    0,
+    0.05,
+    0
+   ],
+   "shape": "model",
+   "model": "wind_groundswirl",
+   "mat": "tex",
+   "tex": "tex/wind_swoosh_b",
+   "col": "#c9fff0",
+   "col2": "#000000",
+   "rim": 0,
+   "uvTile": [
+    1,
+    1
+   ],
+   "uvScroll": [
+    0,
+    0
+   ],
+   "scale": {
+    "0": [
+     1.5,
+     1,
+     0.6
+    ],
+    "1": [
+     5,
+     1,
+     2
+    ],
+    "ease": "out"
+   },
+   "spin": -120,
+   "op": {
+    "0": 0,
+    "0.1": 0.7,
+    "1": 0
+   },
+   "fade": 0
+  },
+  {
+   "id": "spray",
+   "t": "emit",
+   "at": 0,
+   "life": 0.05,
+   "att": "ground",
+   "pos": [
+    0,
+    1.2,
+    0
+   ],
+   "from": "sphere",
+   "fr": 1.5,
+   "burst": 40,
+   "rate": 0,
+   "dir": "aim",
+   "yaw": 0,
+   "spread": 0.9,
+   "speed": [
+    4,
+    8
+   ],
+   "up": [
+    0.5,
+    2
+   ],
+   "plife": [
+    0.25,
+    0.5
+   ],
+   "look": "streak",
+   "size": [
+    1,
+    2.2
+   ],
+   "col": "#e6fff4",
+   "c2": "#4fd07a",
+   "gravity": 0,
+   "drag": 2,
+   "curl": false
+  },
+  {
+   "id": "shake",
+   "t": "screen",
+   "at": 0,
+   "life": 0.15,
+   "shake": 2
+  }
+ ]
+}
