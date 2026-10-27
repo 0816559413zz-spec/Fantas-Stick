@@ -118,7 +118,7 @@ function dragonfallBoom(p,x,y,gh){
   for(const t of foesIn(p.team,x,y,DF_R,gh+4))aoeHit(p,t,20,t=>{addBurn(t,1,p.id);addSlow(t,0.7,1.2);});
   damageEnv(x,y,DF_R,60,p.id,'fireblast',gh);
 }
-defSpell(0,{id:'ringofembers',role:'control',n:'Ring of Embers',ic:'⭕',cd:14,d:'อุกกาบาตไฟตกลงที่จุดเล็ง (ระยะ ~400) ไม่มีดาเมจ แล้วกลายเป็นวงเพลิง (รัศมี ~170) นาน 3 วิ — คนข้างในเดินออกไม่ได้',fx:'พยายามเดินออก = ผลักกลับเข้าวง • ใครแตะขอบวงไฟ = ช้าลง 40% • คนข้างนอกเดินเข้าได้',
+defSpell(0,{id:'ringofembers',role:'control',n:'Ring of Embers',ic:'⭕',cd:14,d:'อุกกาบาตไฟตกลงที่จุดเล็ง (ระยะ ~400) ไม่มีดาเมจ แล้วกลายเป็นวงเพลิง (รัศมี ~170) นาน 3 วิ — คนข้างในเดินออกไม่ได้',fx:'พยายามเดินออก = 10 ดาเมจ + ผลักกลับเข้าวง • ใครแตะขอบวงไฟ = ช้าลง 40% • คนข้างนอกเดินเข้าได้',
   cast(p,S){
     const q=aimPoint(p,400);
     // อุกกาบาตไฟตกลงจุดที่วาง ~0.3 วิ → ตกถึงพื้น = 10 ดาเมจครั้งเดียว (ผู้เล่นสั่ง 2026-10-19) แล้ววงไฟค่อยเริ่ม (กับดักเริ่มช้าลง 0.3 วิ)
@@ -167,7 +167,7 @@ function updateERings(dt){
   if(!G.erings||!G.erings.length)return;
   for(const R of G.erings){
     if(R.del>0){R.del-=dt;if(R.del>0)continue;
-      // อุกกาบาตไม่มีดาเมจแล้ว (ผู้ใช้ 2026-10-27) — Ring of Embers เป็นท่าขังอย่างเดียว
+      // อุกกาบาตไม่มีดาเมจแล้ว (ผู้ใช้ 2026-10-27) — ดาเมจมีแค่ตอนพยายามเดินออก (10)
       emit({k:'efx',z:'ering',x:R.x,y:R.y,h:0.2,r:R.r,t:R.t});continue;}
     R.t-=dt;
     for(const t of foesOf(R.team)){
@@ -178,7 +178,7 @@ function updateERings(dt){
       if(!R.in.has(t))continue;
       // อยู่ข้างในแล้วพยายามออก: ผลักกลับเข้าวง
       const m=R.r-tr*0.5-4;t.x=R.x+dx/d*m;t.y=R.y+dy/d*m;t.vx=-dx/d*280;t.vy=-dy/d*280;if(t.dash>0)t.dash=0;
-      if(!(R.cd.get(t)>G.time)&&!(!t.isE&&!t.isM&&t.inv>0)){R.cd.set(t,G.time+0.5);emit({k:'efx',z:'eringhit',x:t.x,y:t.y,h:cH(t)});}
+      if(!(R.cd.get(t)>G.time)&&!(!t.isE&&!t.isM&&t.inv>0)){R.cd.set(t,G.time+0.5);damage(t,10,R.owner,'zone');emit({k:'efx',z:'eringhit',x:t.x,y:t.y,h:cH(t)});}
     }
   }
   G.erings=G.erings.filter(R=>R.t>0);
