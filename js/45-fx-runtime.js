@@ -261,10 +261,11 @@ function fxMeshMake(S,I,w){const L=S.d,g=k=>fxG(L,k),sh=g('shape'),mt=g('mat'),C
   else if(sh==='model'){let geo=fxMeshGeo(g('model'));if(!geo){S.oneshot=1;return;}if(L.grow!==undefined)geo=fxGrowInit(S,geo);const m=mkMat();mats.push(m);obj=new THREE.Mesh(geo,m);obj.renderOrder=3;S.geo=geo;}   // โมเดลที่ปั้นในสตูดิโอ (assets/fx/mesh)
   else{const geo=fxGeo(L),m=mkMat();mats.push(m);obj=new THREE.Mesh(geo,m);obj.renderOrder=3;S.geo=geo;}
   const root=new THREE.Group();root.add(obj);S.inner=obj;
-  const r=g('rot')||[0,0,0];obj.rotation.order='YXZ';obj.rotation.set(-(r[0]||0)*FXDEG,-(r[1]||0)*FXDEG,(r[2]||0)*FXDEG);
+  obj.rotation.order='YXZ';
   S.obj=root;S.mats=mats;S.spin=0;fxPlace(root,I,S,w,fxV(g('yaw'),I,0)*FXDEG);scene.add(root);fxMeshTick(S,I,0,0);}
 function fxMeshTick(S,I,k,dt){const L=S.d,g=q=>fxG(L,q),V=q=>fxV(g(q),I,k);if(!S.obj)return;
   const w=fxPos(I,S,k);fxPlace(S.obj,I,S,w,V('yaw')*FXDEG);S.spin+=(g('spin')||0)*FXDEG*dt;S.obj.rotation.y-=S.spin;
+  const r=V('rot')||[0,0,0];S.inner.rotation.set(-(r[0]||0)*FXDEG,-(r[1]||0)*FXDEG,(r[2]||0)*FXDEG);
   let sc=fxV(g('scale'),I,k);if(Array.isArray(sc))S.inner.scale.set(Math.max(1e-3,sc[0]*I.s),Math.max(1e-3,sc[1]*I.s),Math.max(1e-3,sc[2]*I.s));else S.inner.scale.setScalar(Math.max(1e-3,(sc||1)*I.s));
   if(g('bill')){S.obj.rotation.set(0,0,0);S.obj.lookAt(cam.position);}
   let op;if(L.op!==undefined)op=V('op');else{const fd=g('fade'),inT=Math.min(0.06,S.life*0.15);op=Math.min(1,S.age/Math.max(1e-3,inT));if(!g('loop')&&fd>0&&k>1-fd)op*=Math.max(0,(1-k)/fd);if(I.stop&&g('loop'))op=0;}

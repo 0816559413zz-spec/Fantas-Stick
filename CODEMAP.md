@@ -324,7 +324,7 @@ BF_EL:198 BF_CLS:198 BF_EXTRA:200 BF:203 bfAfter:204 bfPlay:219
 §225 4) เอฟเฟกต์ทั้งจอ (ค่าไปที่ GradePass ใน js/27-world.js)
 SCR:226 screenFlash:227 screenRadial:228 screenKick:229 screenHurt:230 _scv:231 updateScreenFx:232 updateVfxKit:240
 
-## js/45-fx-runtime.js (343) — 
+## js/45-fx-runtime.js (344) — 
 FXR:9 FXDEG:10
 §11 โหลด
 fxFetch:12 fxDefaults:13 fxBoot:14 fxOverrides:24 fxLoad:27 fxData:31
@@ -341,17 +341,17 @@ fxN:107 fxSpawn:108 fxTick:140 fxEnd:151
 §158 อนุภาค
 _fxrnd:159 fxUnit:160 fxCone:161 fxEmit:163 fxPart:180
 §195 รูปทรง 3D
-FXGEO:196 fxMerge:197 fxRibbon:202 fxGeo:208 fxEnergyMat:228 fxToonMat:240 fxMeshMake:248 fxMeshTick:266 fxFlipTex:280
-§285 หางแสง / รอยฟัน
-fxTrailTick:286
-§292 สายฟ้า
-fxBolt:293
-§299 ฟังก์ชันในโค้ดที่ไฟล์เรียกได้ (ชั้น t:"code")
-FXCODE:300
-§313 ผูกกับ event ของเกม (assets/fx/bind.json) — เรียกจาก fx(ev)
-fxLoopName:315 blzFxName:316 fxLoopKeep:317 fshHitFx:319 fxBind:322
-§333 แม่แบบ playFx เป็นไฟล์ (assets/fx/tpl/*, sig/*, rec/*)
-fxTpl:335
+FXGEO:196 fxMerge:197 fxRibbon:202 fxGeo:208 fxEnergyMat:228 fxToonMat:240 fxMeshMake:248 fxMeshTick:266 fxFlipTex:281
+§286 หางแสง / รอยฟัน
+fxTrailTick:287
+§293 สายฟ้า
+fxBolt:294
+§300 ฟังก์ชันในโค้ดที่ไฟล์เรียกได้ (ชั้น t:"code")
+FXCODE:301
+§314 ผูกกับ event ของเกม (assets/fx/bind.json) — เรียกจาก fx(ev)
+fxLoopName:316 blzFxName:317 fxLoopKeep:318 fshHitFx:320 fxBind:323
+§334 แม่แบบ playFx เป็นไฟล์ (assets/fx/tpl/*, sig/*, rec/*)
+fxTpl:336
 
 ## js/46-fx-make.js (264) — 
 FXMK:10 MKD:11 mkRng:12 mkHash:13 mkNoise:15 mkL:17 mkR2:18
@@ -553,4 +553,4 @@ gameCover:403
 ## js/66-hud4.js (133) — HUD รอบ 4 (ผู้ใช้ 2026-10-23, designs/hud-full-mock.html)
 H4E:5 H4:10 H4C:11 H4RC:11 h4Pal:12 hud4Col:14 h4Runes:15 h4RingSVG:16 h4Parts:25 h4AuBits:30 h4Key:45 h4Ico:46 h4Build:47 h4Set:77 hud4Draw:78 hud4Frame:116 hud4Hide:117 _h4RT:119 _h4Cam:119 h4FaceShot:120 h4FaceSet:133
 
-(69 files, 16701 lines)
+(69 files, 16702 lines)
