@@ -93,6 +93,20 @@ function damageEnv(x,y,rad,dmg,by,el,h){
     for(const [code,dd] of hits)hitBldPiece(b,code,dd,el,x,y);
   }
 }
+// เส้นจาก (x0,y0,h0) → (x1,y1,h1) ชนชิ้นบ้านแรกตรงไหน (ก้าวละ 10 px) • null = ไม่ชน
+function bldRay(x0,y0,h0,x1,y1,h1){
+  if(!BLDON)return null;const L=Math.hypot(x1-x0,y1-y0),mx=(x0+x1)/2,my=(y0+y1)/2,near=BLDG.filter(b=>bldNear(b,mx,my,L/2+20));
+  if(!near.length)return null;const n=Math.max(1,Math.ceil(L/10));
+  for(let i=1;i<=n;i++){const t=i/n,x=lerp(x0,x1,t),y=lerp(y0,y1,t),h=lerp(h0,h1,t);
+    for(const b of near)if(bldNear(b,x,y,8)&&bldPieceAt(b,x,y,h,6)>=0)return {x,y,h,t};}
+  return null;
+}
+// ท่าที่พุ่ง/ยิงลงจุดเล็ง: จุดลงหยุดที่ผนัง/หลังคาบ้านที่ขวางอยู่ (ไม่ทะลุ) • ถอยออกจากผนัง back px • คืน {x,y,h} (h = ความสูงจุดชน หรือพื้น)
+function aimClip(x0,y0,h0,o,back){
+  const g=groundH(o.x,o.y),c=bldRay(x0,y0,h0,o.x,o.y,g);if(!c)return {x:o.x,y:o.y,h:g,hit:false};
+  const d=Math.hypot(o.x-x0,o.y-y0)||1,k=Math.min(back||0,c.t*d)/d;
+  return {x:c.x-(o.x-x0)*k,y:c.y-(o.y-y0)*k,h:c.h,hit:true};
+}
 // ชิ้นที่กระสุนชน (-1 = ไม่ชน / ลอดรู): ต่ำกว่าผนัง = ชิ้นผนังแถวนั้นที่ใกล้สุด, สูงกว่า = ชิ้นหลังคาใต้กระสุน (ทรงปิรามิด)
 function bldPieceAt(b,x,y,h,r){
   const [lx,ly]=bldLocal(b,x,y),D=b.D,hw=b.o.w/2,hd=b.o.d/2;

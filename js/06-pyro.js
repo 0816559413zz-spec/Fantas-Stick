@@ -105,10 +105,10 @@ function dragonfallTick(p,inp,dt){
   if(D.ph===1){if(D.t<0.25)p.z+=(D.H-p.z)*Math.min(1,14*dt);p.vz=0;if(D.t<=0){D.ph=2;D.t=3;}}
   else if(D.ph===2){
     D.H=clamp(D.H+((inp.jh?1:0)-(inp.ch?1:0))*2.5*dt,D.g0+4.5,D.g0+7.5);p.z+=(D.H-p.z)*Math.min(1,6*dt);p.vz=0;
-    const q=aimPoint(p,600);D.tx=q.x;D.ty=q.y;
+    const q=aimClip(p.x,p.y,p.z,aimPoint(p,600),PR+6);D.tx=q.x;D.ty=q.y;D.th=q.hit?q.h:null;   // ไม่ทะลุบ้าน
     if(D.t<=0)dragonfallDive(p);
   }else{
-    const k=1-Math.max(0,D.t)/0.45,gh=groundH(D.tx,D.ty);
+    const k=1-Math.max(0,D.t)/0.45,gh=D.th!=null?D.th:groundH(D.tx,D.ty);
     p.x=lerp(D.sx,D.tx,k);p.y=lerp(D.sy,D.ty,k);p.z=lerp(D.sz,gh,k*k);p.vz=0;
     if(D.t<=0){p.x=D.tx;p.y=D.ty;p.z=gh;p.dfall=null;dragonfallBoom(p,D.tx,D.ty,gh);}
   }
@@ -152,13 +152,14 @@ function colossusTick(p,inp,dt){
   if(!q&&typeof inp.ah==='number'&&!p.bot){const g=inp.gx>=0,dx=(g?inp.gx:inp.ax)-p.x,dy=(g?inp.gy:inp.ay)-p.y,dd=Math.hypot(dx,dy)||1,k=Math.min(1000,Math.max(120,dd))/dd;q={x:p.x+dx*k,y:p.y+dy*k};}
   if(!q){const ap=(inp.ap||0),H=p.z+4;let d=1000;if(ap<-0.03)d=Math.min(1000,H*20/Math.tan(-ap));d=Math.max(120,d);q={x:p.x+Math.cos(p.ang)*d,y:p.y+Math.sin(p.ang)*d};}
   q.x=clamp(q.x,40,MW-40);q.y=clamp(q.y,40,MH-40);
+  {const c=aimClip(p.x,p.y,p.z+4.2,q,0);q.x=c.x;q.y=c.y;q.h=c.hit?c.h:0.5;}   // ชนบ้านก่อน = ระเบิดที่ผนัง
   p.colN--;p.colCd=1;
   const fx=p.x+Math.cos(p.ang)*30,fy=p.y+Math.sin(p.ang)*30,tt=Math.hypot(q.x-fx,q.y-fy)/1800+0.08;
   emit({k:'efx',z:'colbolt',x:fx,y:fy,h:p.z+4.2,x2:q.x,y2:q.y,t:tt,id:p.id});
   G.strikes.push({x:q.x,y:q.y,r:200,t:tt,fn:s=>{
     emit({k:'efx',z:'colboom',x:s.x,y:s.y,h:0.3,r:200});
     for(const t of foesIn(p.team,s.x,s.y,200,6))aoeHit(p,t,100,t=>{addBurn(t,3,p.id);addXBurn(t,p.id);});
-    damageEnv(s.x,s.y,200,100,p.id,'fireblast',0.5);   // พังบ้าน/ลัง
+    damageEnv(s.x,s.y,200,100,p.id,'fireblast',q.h);   // พังบ้าน/ลัง
   }});
   if(p.colN<=0)p.colos=Math.min(p.colos,0.5);
 }

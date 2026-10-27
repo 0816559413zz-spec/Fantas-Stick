@@ -160,10 +160,10 @@ function stormDomeTick(p,inp,dt){
   if(D.ph===1){if(D.t<0.25)p.z+=(D.H-p.z)*Math.min(1,14*dt);p.vz=0;if(D.t<=0){D.ph=2;D.t=3;}}
   else if(D.ph===2){
     D.H=clamp(D.H+((inp.jh?1:0)-(inp.ch?1:0))*2.5*dt,D.g0+4.5,D.g0+7.5);p.z+=(D.H-p.z)*Math.min(1,6*dt);p.vz=0;
-    const q=aimPoint(p,600);D.tx=q.x;D.ty=q.y;
+    const q=aimClip(p.x,p.y,p.z,aimPoint(p,600),PR+6);D.tx=q.x;D.ty=q.y;D.th=q.hit?q.h:null;   // ไม่ทะลุบ้าน
     if(D.t<=0)stormDomeFire(p);
   }else{
-    const k=1-Math.max(0,D.t)/0.45,gh=groundH(D.tx,D.ty);
+    const k=1-Math.max(0,D.t)/0.45,gh=D.th!=null?D.th:groundH(D.tx,D.ty);
     p.x=lerp(D.sx,D.tx,k);p.y=lerp(D.sy,D.ty,k);p.z=lerp(D.sz,gh,k*k);p.vz=0;
     if(D.t<=0){p.x=D.tx;p.y=D.ty;p.z=gh;p.sdome=null;stormDomeSlam(p,D.tx,D.ty,gh);}
   }

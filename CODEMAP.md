@@ -35,8 +35,8 @@ frostBoom:3 meleeHit:10 mirrorPos:21 frostBasic:22 frostSlam3:46 frostSlam:54 fr
 ## js/05-terrain.js (44) — พื้นสูงต่ำ (แผนที่จากไฟล์ Blender — กติกาฝั่งคนปั้นใน MAP-DESIGN.md)
 TERR:5 TSTEP:6 TSLOPE:6 terrT:7 floorAt:12 terrSolid:14 terrMove:21 updateGlaciers:30
 
-## js/06-pyro.js (184) — สายไฟ: ยิงปกติ 2 โหมด / โล่ระเบิด / พุ่งชาร์จ
-pyroBigBoom:5 pyroBall:13 pyroBasic:14 addOrbs:31 pyroParry:32 pyroBlock:33 launchOrbs:35 pyroDash:42 FPATH:62 pyroPathEnd:63 updateFirePaths:68 DF_R:99 dragonfallDive:100 dragonfallTick:101 dragonfallBoom:116 pyroSnap:137 colossusTick:147 updateERings:165
+## js/06-pyro.js (185) — สายไฟ: ยิงปกติ 2 โหมด / โล่ระเบิด / พุ่งชาร์จ
+pyroBigBoom:5 pyroBall:13 pyroBasic:14 addOrbs:31 pyroParry:32 pyroBlock:33 launchOrbs:35 pyroDash:42 FPATH:62 pyroPathEnd:63 updateFirePaths:68 DF_R:99 dragonfallDive:100 dragonfallTick:101 dragonfallBoom:116 pyroSnap:137 colossusTick:147 updateERings:166
 
 ## js/07-frost-spells.js (33) — 
 frostGlacier:11
@@ -92,10 +92,10 @@ G:4 EVL:4 EVN:4 hostLast:4 tickN:4 emit:5 feed:6 banner:7 plist:8 cleanName:9 fr
 §205 ลูปหลักฝั่งโฮสต์
 hostTick:206 angDiff:220 cH:222 vR:223 updatePlayer:225 hitProp:371 damagePropsIn:378 nearUseProp:379 useProp:380
 
-## js/12-buildings.js (419) — สิ่งปลูกสร้างที่พังเป็นชิ้นย่อย (บ้าน) แบบ Battlefield — คู่มือเต็ม: …
-BLDDEF:8 BLD_PIECES:9 BLD_GRID:10 BLD_FIRE:11 BLD_ICE:11 BLD_ROOF_MIN:11 BLDG:12 BLDON:12 genBldg:13 bldRect:23 bldChunk:25 bldAlive:32 bldLocal:33 bldWorld:34 rectDist:35 bldNear:36 BLD_MOUND:39 bldGone:40 bldMoundAt:41 bldMoundH:42 hitBldPiece:44 breakBldChunk:55 bldSupport:63 damageEnv:83 bldPieceAt:97 projEl:107 bldPush:112 collideBld:118 updateBldg:133 bldSnap:145 bldParse:151
-§155 ของบังในแผนที่ไฟล์ที่พังได้ (หิน เสา รูปปั้น ต้นไม้ โคมไฟ ลัง ...) — …
-BRKDEF:159 BRK_M:159 BRK_MCOL:159 BRK:160 genBrk:161 brkApply:168 brkStage:172 hitBrk:173 damageBrkIn:181 brkSnap:187 brkParse:188 collideWorld:189 shoot:216 eShoot:237 foesOf:244 breakShield:251 ULT_RATE:253 ultActive:254 gainUlt:255 lifesteal:256 damage:258 playerDown:314 killProj:335 explode:344 hitTarget:356 updateProjectiles:372
+## js/12-buildings.js (433) — สิ่งปลูกสร้างที่พังเป็นชิ้นย่อย (บ้าน) แบบ Battlefield — คู่มือเต็ม: …
+BLDDEF:8 BLD_PIECES:9 BLD_GRID:10 BLD_FIRE:11 BLD_ICE:11 BLD_ROOF_MIN:11 BLDG:12 BLDON:12 genBldg:13 bldRect:23 bldChunk:25 bldAlive:32 bldLocal:33 bldWorld:34 rectDist:35 bldNear:36 BLD_MOUND:39 bldGone:40 bldMoundAt:41 bldMoundH:42 hitBldPiece:44 breakBldChunk:55 bldSupport:63 damageEnv:83 bldRay:97 aimClip:105 bldPieceAt:111 projEl:121 bldPush:126 collideBld:132 updateBldg:147 bldSnap:159 bldParse:165
+§169 ของบังในแผนที่ไฟล์ที่พังได้ (หิน เสา รูปปั้น ต้นไม้ โคมไฟ ลัง ...) — …
+BRKDEF:173 BRK_M:173 BRK_MCOL:173 BRK:174 genBrk:175 brkApply:182 brkStage:186 hitBrk:187 damageBrkIn:195 brkSnap:201 brkParse:202 collideWorld:203 shoot:230 eShoot:251 foesOf:258 breakShield:265 ULT_RATE:267 ultActive:268 gainUlt:269 lifesteal:270 damage:272 playerDown:328 killProj:349 explode:358 hitTarget:370 updateProjectiles:386
 
 ## js/13-enemies.js (168) — ศัตรู (โหมด Co-op)
 spawnEnemy:2 setupWave:19 bossPhase:36 enemySlam:44 updateEnemies:55
@@ -539,4 +539,4 @@ gameCover:403
 ## js/66-hud4.js (113) — HUD รอบ 4 (ผู้ใช้ 2026-10-23, designs/hud-full-mock.html)
 H4E:5 H4:10 H4C:11 H4RC:11 h4Pal:12 hud4Col:14 h4Runes:15 h4RingSVG:16 h4Parts:25 h4Key:29 h4Ico:30 h4Build:31 h4Set:58 hud4Draw:59 hud4Frame:96 hud4Hide:97 _h4RT:99 _h4Cam:99 h4FaceShot:100 h4FaceSet:113
 
-(67 files, 16308 lines)
+(67 files, 16323 lines)
