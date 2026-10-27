@@ -1,233 +1,134 @@
 {
- "v": 1,
- "desc": "สไตล์สโตรก: คลิกซ้าย ใบมีดลม = เสี้ยวสโตรกพู่กันพุ่ง 20 ม. + เศษหมึก/ประกายตาม",
- "tags": [
-  "wind",
-  "style-test"
- ],
- "pal": "wind",
- "dur": 0.8,
- "layers": [
-  {
-   "t": "mesh",
-   "at": 0,
-   "life": 0.6,
-   "att": "feet",
-   "shape": "model",
-   "model": "wind_slashstroke",
-   "mat": "tex",
-   "col2": "#000000",
-   "rim": 0,
-   "uvTile": [
-    1,
-    1
-   ],
-   "uvScroll": [
-    0,
-    0
-   ],
-   "pos": {
-    "0": [
-     0,
-     1.2,
-     0.8
-    ],
-    "1": [
-     0,
-     1.2,
-     20
-    ]
-   },
-   "rot": [
-    90,
-    0,
-    20
-   ],
-   "op": {
-    "0": 0,
-    "0.1": 1,
-    "0.8": 1,
-    "1": 0
-   },
-   "id": "bo",
-   "tex": "tex/wind_swoosh_a",
-   "col": "#1d6f86",
-   "scale": 1.9
-  },
-  {
-   "t": "mesh",
-   "at": 0,
-   "life": 0.6,
-   "att": "feet",
-   "shape": "model",
-   "model": "wind_slashstroke",
-   "mat": "tex",
-   "col2": "#000000",
-   "rim": 0,
-   "uvTile": [
-    1,
-    1
-   ],
-   "uvScroll": [
-    0,
-    0
-   ],
-   "pos": {
-    "0": [
-     0,
-     1.2,
-     0.8
-    ],
-    "1": [
-     0,
-     1.2,
-     20
-    ]
-   },
-   "rot": [
-    90,
-    0,
-    20
-   ],
-   "op": {
-    "0": 0,
-    "0.1": 1,
-    "0.8": 1,
-    "1": 0
-   },
-   "id": "bh",
-   "tex": "tex/wind_swoosh_a_hi",
-   "col": "#ffffff",
-   "int": 1.3,
-   "scale": 1.9
-  },
-  {
-   "t": "mesh",
-   "at": 0,
-   "life": 0.6,
-   "att": "feet",
-   "shape": "model",
-   "model": "wind_slashstroke",
-   "mat": "tex",
-   "col2": "#000000",
-   "rim": 0,
-   "uvTile": [
-    1,
-    1
-   ],
-   "uvScroll": [
-    0,
-    0
-   ],
-   "pos": {
-    "0": [
-     0,
-     1.2,
-     0.8
-    ],
-    "1": [
-     0,
-     1.2,
-     20
-    ]
-   },
-   "rot": [
-    90,
-    0,
-    20
-   ],
-   "op": {
-    "0": 0,
-    "0.1": 1,
-    "0.8": 1,
-    "1": 0
-   },
-   "id": "bl",
-   "tex": "tex/wind_swoosh_a_ln",
-   "col": "#123a55",
-   "scale": 2.05
-  },
-  {
-   "id": "bfk",
-   "t": "emit",
-   "at": 0,
-   "life": 0.55,
-   "att": "feet",
-   "pos": {
-    "0": [
-     0,
-     1.2,
-     0.8
-    ],
-    "1": [
-     0,
-     1.2,
-     20
-    ]
-   },
-   "rate": 40,
-   "from": "sphere",
-   "fr": 0.3,
-   "dir": "random",
-   "speed": [
-    2,
-    5
-   ],
-   "plife": [
-    0.3,
-    0.6
-   ],
-   "look": "model",
-   "model": "wind_slash",
-   "mmat": "solid",
-   "msize": [
-    0.12,
-    0.3
-   ],
-   "col": "#1d6f86",
-   "c2": "#1d6f86",
-   "gravity": 0.5,
-   "mspin": 500,
-   "bounce": 0
-  },
-  {
-   "id": "bsp",
-   "t": "emit",
-   "at": 0,
-   "life": 0.55,
-   "att": "feet",
-   "pos": {
-    "0": [
-     0,
-     1.2,
-     0.8
-    ],
-    "1": [
-     0,
-     1.2,
-     20
-    ]
-   },
-   "rate": 40,
-   "from": "sphere",
-   "fr": 0.3,
-   "dir": "random",
-   "speed": [
-    1,
-    3
-   ],
-   "plife": [
-    0.2,
-    0.45
-   ],
-   "look": "spark",
-   "size": [
-    1,
-    1.8
-   ],
-   "col": "#d8ffa0",
-   "c2": "#7fe8c8",
-   "gravity": 0
-  }
- ]
+  "v": 1,
+  "desc": "BA: คมหมึกพุ่งเร็ว—สโตรกพู่กันสีลมซ้อนชั้นกับเศษเส้นพุ่งตาม ไม่หมุนเป็นวง",
+  "tags": ["wind", "basic", "ink", "draft"],
+  "pal": "wind",
+  "dur": 0.72,
+  "seed": 17,
+  "layers": [
+    {
+      "id": "ba_ink_shell",
+      "t": "mesh",
+      "at": 0,
+      "life": 0.64,
+      "att": "feet",
+      "shape": "model",
+      "model": "wind_slashstroke",
+      "mat": "tex",
+      "tex": "tex/wind_swoosh_a",
+      "col": "#124b56",
+      "col2": "#071d2a",
+      "rim": 0.15,
+      "uvTile": [1, 1],
+      "uvScroll": [0.2, 0],
+      "pos": {"0": [0, 1.2, 0.7], "1": [0, 1.2, 20]},
+      "rot": [90, 0, 20],
+      "op": {"0": 0, "0.08": 1, "0.76": 0.9, "1": 0},
+      "scale": 2.65
+    },
+    {
+      "id": "ba_ink_body",
+      "t": "mesh",
+      "at": 0,
+      "life": 0.62,
+      "att": "feet",
+      "shape": "model",
+      "model": "wind_slashstroke",
+      "mat": "tex",
+      "tex": "tex/wind_swoosh_a_hi",
+      "col": "#54cbb9",
+      "col2": "#124b56",
+      "rim": 0.35,
+      "uvTile": [1, 1],
+      "uvScroll": [0.35, 0],
+      "pos": {"0": [0, 1.2, 0.7], "1": [0, 1.2, 20]},
+      "rot": [90, 0, 20],
+      "op": {"0": 0, "0.1": 1, "0.75": 0.85, "1": 0},
+      "scale": 2.35
+    },
+    {
+      "id": "ba_ink_core",
+      "t": "mesh",
+      "at": 0.015,
+      "life": 0.58,
+      "att": "feet",
+      "shape": "model",
+      "model": "wind_slashstroke",
+      "mat": "tex",
+      "tex": "tex/wind_swoosh_a_ln",
+      "col": "#e4fff4",
+      "col2": "#8cebd8",
+      "rim": 0.45,
+      "uvTile": [1, 1],
+      "uvScroll": [0.5, 0],
+      "pos": {"0": [0, 1.21, 0.8], "1": [0, 1.21, 20]},
+      "rot": [90, 0, 20],
+      "op": {"0": 0, "0.12": 0.95, "0.72": 0.75, "1": 0},
+      "scale": 1.95
+    },
+    {
+      "id": "ba_ink_tail",
+      "t": "trail",
+      "at": 0,
+      "life": 0.64,
+      "of": "ba_ink_shell",
+      "col": "#0b3946",
+      "col2": "#124b56",
+      "w": 0.44,
+      "tlife": 0.2
+    },
+    {
+      "id": "ba_mint_tail",
+      "t": "trail",
+      "at": 0.015,
+      "life": 0.6,
+      "of": "ba_ink_body",
+      "col": "#8cebd8",
+      "col2": "#1c7380",
+      "w": 0.2,
+      "tlife": 0.16
+    },
+    {
+      "id": "ba_ink_flecks",
+      "t": "emit",
+      "at": 0.02,
+      "life": 0.52,
+      "att": "feet",
+      "pos": {"0": [0, 1.18, 0.9], "1": [0, 1.18, 18]},
+      "burst": 4,
+      "rate": 16,
+      "from": "sphere",
+      "fr": 0.16,
+      "dir": "tangent",
+      "speed": [1.5, 3.4],
+      "plife": [0.16, 0.32],
+      "look": "model",
+      "model": "wind_needle",
+      "mmat": "glow",
+      "msize": [0.22, 0.48],
+      "col": "#0d4b59",
+      "c2": "#73e2c8",
+      "gravity": 0.05,
+      "mspin": 130
+    },
+    {
+      "id": "ba_sparks",
+      "t": "emit",
+      "at": 0,
+      "life": 0.52,
+      "att": "feet",
+      "pos": {"0": [0, 1.2, 0.7], "1": [0, 1.2, 18]},
+      "burst": 5,
+      "rate": 12,
+      "from": "point",
+      "dir": "tangent",
+      "speed": [2, 4],
+      "plife": [0.12, 0.25],
+      "look": "streak",
+      "size": [0.7, 1.3],
+      "col": "#c9fff0",
+      "c2": "#4ccbb5",
+      "gravity": 0
+    }
+  ]
 }

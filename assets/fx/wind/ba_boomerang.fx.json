@@ -1,0 +1,904 @@
+{
+  "v": 1,
+  "desc": "A — บูมเมอแรงลมแนวนอนขนาดเล็กลง 25% หางริ้วหลายชั้นแตกปลาย + ละอองลม + คมลมปะทะ (Studio demo)",
+  "tags": [
+    "wind",
+    "ba",
+    "projectile",
+    "shape-study",
+    "review"
+  ],
+  "pal": "wind",
+  "dur": 1.08,
+  "seed": 17,
+  "layers": [
+    {
+      "id": "flight_body",
+      "t": "mesh",
+      "at": 0,
+      "life": 0.64,
+      "att": "feet",
+      "shape": "model",
+      "model": "wind_ba_boomerang_body",
+      "mat": "toon",
+      "col": "#309b9b",
+      "col2": "#124b60",
+      "op": {
+        "0": 0,
+        "0.06": 0.86,
+        "0.88": 0.86,
+        "1": 0
+      },
+      "fade": 0,
+      "rim": 0.28,
+      "dis": {
+        "0": 0.015,
+        "0.78": 0.025,
+        "1": 0.22
+      },
+      "pos": {
+        "0": [
+          0,
+          1.35,
+          0.75
+        ],
+        "1": [
+          0,
+          1.35,
+          20
+        ]
+      },
+      "rot": [
+        0,
+        0,
+        0
+      ],
+      "scale": 0.75
+    },
+    {
+      "id": "flight_flow",
+      "t": "mesh",
+      "at": 0,
+      "life": 0.64,
+      "att": "feet",
+      "shape": "model",
+      "model": "wind_ba_boomerang_flow",
+      "mat": "toon",
+      "col": "#9eedd9",
+      "col2": "#3caeac",
+      "op": {
+        "0": 0,
+        "0.06": 0.92,
+        "0.88": 0.92,
+        "1": 0
+      },
+      "fade": 0,
+      "rim": 0.35,
+      "dis": {
+        "0": 0.015,
+        "0.78": 0.025,
+        "1": 0.22
+      },
+      "pos": {
+        "0": [
+          0,
+          1.35,
+          0.75
+        ],
+        "1": [
+          0,
+          1.35,
+          20
+        ]
+      },
+      "rot": [
+        0,
+        0,
+        0
+      ],
+      "scale": 0.75
+    },
+    {
+      "id": "flight_edge",
+      "t": "mesh",
+      "at": 0,
+      "life": 0.64,
+      "att": "feet",
+      "shape": "model",
+      "model": "wind_ba_boomerang_edge",
+      "mat": "glow",
+      "col": "#edfff7",
+      "col2": "#a4f2e1",
+      "op": {
+        "0": 0,
+        "0.06": 0.9,
+        "0.88": 0.9,
+        "1": 0
+      },
+      "fade": 0,
+      "rim": 0,
+      "dis": {
+        "0": 0.015,
+        "0.78": 0.025,
+        "1": 0.22
+      },
+      "pos": {
+        "0": [
+          0,
+          1.35,
+          0.75
+        ],
+        "1": [
+          0,
+          1.35,
+          20
+        ]
+      },
+      "rot": [
+        0,
+        0,
+        0
+      ],
+      "scale": 0.75
+    },
+    {
+      "id": "flowing_wake",
+      "t": "mesh",
+      "at": 0,
+      "life": 0.64,
+      "att": "feet",
+      "shape": "model",
+      "model": "wind_ba_boomerang_wake",
+      "mat": "energy",
+      "col": "#b4f6e0",
+      "col2": "#277386",
+      "rim": 0.6,
+      "scroll": 2.5,
+      "op": {
+        "0": 0,
+        "0.12": 0.7,
+        "0.8": 0.6,
+        "1": 0
+      },
+      "fade": 0,
+      "pos": {
+        "0": [
+          0,
+          1.35,
+          0.75
+        ],
+        "1": [
+          0,
+          1.35,
+          20
+        ]
+      },
+      "scale": 0.75
+    },
+    {
+      "id": "wake_filaments",
+      "t": "mesh",
+      "at": 0,
+      "life": 0.64,
+      "att": "feet",
+      "shape": "model",
+      "model": "wind_ba_boomerang_wake_detail",
+      "mat": "energy",
+      "col": "#dbfff0",
+      "col2": "#378d9e",
+      "rim": 0.35,
+      "scroll": 3.3,
+      "op": {
+        "0": 0,
+        "0.10": 0.7,
+        "0.82": 0.55,
+        "1": 0
+      },
+      "fade": 0,
+      "pos": {
+        "0": [
+          0,
+          1.35,
+          0.75
+        ],
+        "1": [
+          0,
+          1.35,
+          20
+        ]
+      },
+      "scale": 0.75
+    },
+    {
+      "id": "slipstream_0",
+      "t": "mesh",
+      "at": 0.016,
+      "life": 0.58,
+      "att": "feet",
+      "shape": "model",
+      "model": "wind_ba_boomerang_edge",
+      "mat": "glow",
+      "col": "#91e9d4",
+      "pos": {
+        "0": [
+          0,
+          1.35,
+          0.3
+        ],
+        "1": [
+          0,
+          1.35,
+          18.25
+        ]
+      },
+      "rot": [
+        0,
+        0,
+        0
+      ],
+      "scale": 0.66,
+      "op": {
+        "0": 0,
+        "0.12": 0.38,
+        "0.7": 0.25,
+        "1": 0
+      },
+      "fade": 0
+    },
+    {
+      "id": "slipstream_1",
+      "t": "mesh",
+      "at": 0.032,
+      "life": 0.58,
+      "att": "feet",
+      "shape": "model",
+      "model": "wind_ba_boomerang_edge",
+      "mat": "glow",
+      "col": "#46aeb4",
+      "pos": {
+        "0": [
+          0,
+          1.35,
+          -0.15000000000000002
+        ],
+        "1": [
+          0,
+          1.35,
+          17.8
+        ]
+      },
+      "rot": [
+        0,
+        0,
+        0
+      ],
+      "scale": 0.5625,
+      "op": {
+        "0": 0,
+        "0.12": 0.26,
+        "0.7": 0.16999999999999998,
+        "1": 0
+      },
+      "fade": 0
+    },
+    {
+      "id": "short_tail",
+      "t": "trail",
+      "at": 0,
+      "life": 0.64,
+      "of": "flight_body",
+      "col": "#c3fff0",
+      "col2": "#26878f",
+      "w": 0.13,
+      "tlife": 0.2,
+      "k": 0.8
+    },
+    {
+      "id": "air_splinters",
+      "t": "emit",
+      "at": 0,
+      "life": 0.64,
+      "att": "feet",
+      "burst": 3,
+      "rate": 22,
+      "from": "mesh",
+      "fr": 0.16,
+      "dir": "random",
+      "speed": [
+        0.2,
+        0.65
+      ],
+      "plife": [
+        0.18,
+        0.29
+      ],
+      "look": "model",
+      "model": "wind_needle",
+      "mmat": "glow",
+      "msize": [
+        0.09,
+        0.18
+      ],
+      "col": "#c1fff0",
+      "c2": "#398d99",
+      "mspin": 90,
+      "gravity": 0,
+      "of": "flight_body",
+      "bounce": 0,
+      "curl": false
+    },
+    {
+      "id": "hit_blade_0",
+      "t": "mesh",
+      "at": 0.64,
+      "life": 0.27,
+      "att": "feet",
+      "shape": "model",
+      "model": "wind_ba_tiny_body",
+      "mat": "toon",
+      "col": "#e2fff3",
+      "col2": "#277f8c",
+      "pos": {
+        "0": [
+          0,
+          1.35,
+          20
+        ],
+        "1": [
+          1.02,
+          1.35,
+          21.15
+        ]
+      },
+      "rot": [
+        68,
+        0,
+        0
+      ],
+      "scale": {
+        "0": 0.204,
+        "0.25": 0.493,
+        "1": 0.017
+      },
+      "op": {
+        "0": 0.8,
+        "0.45": 0.7,
+        "1": 0
+      },
+      "fade": 0
+    },
+    {
+      "id": "hit_blade_1",
+      "t": "mesh",
+      "at": 0.648,
+      "life": 0.27,
+      "att": "feet",
+      "shape": "model",
+      "model": "wind_ba_tiny_body",
+      "mat": "toon",
+      "col": "#83d9c8",
+      "col2": "#277f8c",
+      "pos": {
+        "0": [
+          0,
+          1.35,
+          20
+        ],
+        "1": [
+          0.51,
+          1.9683,
+          21.15
+        ]
+      },
+      "rot": [
+        68,
+        60,
+        53
+      ],
+      "scale": {
+        "0": 0.204,
+        "0.25": 0.493,
+        "1": 0.017
+      },
+      "op": {
+        "0": 0.8,
+        "0.45": 0.7,
+        "1": 0
+      },
+      "fade": 0
+    },
+    {
+      "id": "hit_blade_2",
+      "t": "mesh",
+      "at": 0.656,
+      "life": 0.27,
+      "att": "feet",
+      "shape": "model",
+      "model": "wind_ba_tiny_body",
+      "mat": "toon",
+      "col": "#e2fff3",
+      "col2": "#277f8c",
+      "pos": {
+        "0": [
+          0,
+          1.35,
+          20
+        ],
+        "1": [
+          -0.51,
+          1.9683,
+          21.15
+        ]
+      },
+      "rot": [
+        68,
+        120,
+        106
+      ],
+      "scale": {
+        "0": 0.204,
+        "0.25": 0.493,
+        "1": 0.017
+      },
+      "op": {
+        "0": 0.8,
+        "0.45": 0.7,
+        "1": 0
+      },
+      "fade": 0
+    },
+    {
+      "id": "hit_blade_3",
+      "t": "mesh",
+      "at": 0.664,
+      "life": 0.27,
+      "att": "feet",
+      "shape": "model",
+      "model": "wind_ba_tiny_body",
+      "mat": "toon",
+      "col": "#83d9c8",
+      "col2": "#277f8c",
+      "pos": {
+        "0": [
+          0,
+          1.35,
+          20
+        ],
+        "1": [
+          -1.02,
+          1.35,
+          21.15
+        ]
+      },
+      "rot": [
+        68,
+        180,
+        159
+      ],
+      "scale": {
+        "0": 0.204,
+        "0.25": 0.493,
+        "1": 0.017
+      },
+      "op": {
+        "0": 0.8,
+        "0.45": 0.7,
+        "1": 0
+      },
+      "fade": 0
+    },
+    {
+      "id": "hit_blade_4",
+      "t": "mesh",
+      "at": 0.672,
+      "life": 0.27,
+      "att": "feet",
+      "shape": "model",
+      "model": "wind_ba_tiny_body",
+      "mat": "toon",
+      "col": "#e2fff3",
+      "col2": "#277f8c",
+      "pos": {
+        "0": [
+          0,
+          1.35,
+          20
+        ],
+        "1": [
+          -0.51,
+          0.7317,
+          21.15
+        ]
+      },
+      "rot": [
+        68,
+        240,
+        212
+      ],
+      "scale": {
+        "0": 0.204,
+        "0.25": 0.493,
+        "1": 0.017
+      },
+      "op": {
+        "0": 0.8,
+        "0.45": 0.7,
+        "1": 0
+      },
+      "fade": 0
+    },
+    {
+      "id": "hit_blade_5",
+      "t": "mesh",
+      "at": 0.68,
+      "life": 0.27,
+      "att": "feet",
+      "shape": "model",
+      "model": "wind_ba_tiny_body",
+      "mat": "toon",
+      "col": "#83d9c8",
+      "col2": "#277f8c",
+      "pos": {
+        "0": [
+          0,
+          1.35,
+          20
+        ],
+        "1": [
+          0.51,
+          0.7317,
+          21.15
+        ]
+      },
+      "rot": [
+        68,
+        300,
+        265
+      ],
+      "scale": {
+        "0": 0.204,
+        "0.25": 0.493,
+        "1": 0.017
+      },
+      "op": {
+        "0": 0.8,
+        "0.45": 0.7,
+        "1": 0
+      },
+      "fade": 0
+    },
+    {
+      "id": "tail_streak_0",
+      "t": "emit",
+      "at": 0,
+      "life": 0.64,
+      "att": "feet",
+      "pos": {
+        "0": [
+          -0.75,
+          1.365,
+          0.4125
+        ],
+        "1": [
+          -0.75,
+          1.365,
+          19.6625
+        ]
+      },
+      "burst": 2,
+      "rate": 36,
+      "from": "sphere",
+      "fr": 0.04,
+      "dir": "aim",
+      "yaw": 180,
+      "spread": 0.23,
+      "speed": [
+        0.7,
+        1.7
+      ],
+      "plife": [
+        0.18,
+        0.3
+      ],
+      "look": "streak",
+      "size": [
+        0.8,
+        1.65
+      ],
+      "col": "#d9fff2",
+      "c2": "#2b8d91",
+      "gravity": 0,
+      "drag": 2.2,
+      "curl": false,
+      "fin": 16
+    },
+    {
+      "id": "tail_streak_1",
+      "t": "emit",
+      "at": 0,
+      "life": 0.64,
+      "att": "feet",
+      "pos": {
+        "0": [
+          0.75,
+          1.365,
+          0.4125
+        ],
+        "1": [
+          0.75,
+          1.365,
+          19.6625
+        ]
+      },
+      "burst": 2,
+      "rate": 36,
+      "from": "sphere",
+      "fr": 0.04,
+      "dir": "aim",
+      "yaw": 180,
+      "spread": 0.23,
+      "speed": [
+        0.7,
+        1.7
+      ],
+      "plife": [
+        0.18,
+        0.3
+      ],
+      "look": "streak",
+      "size": [
+        0.8,
+        1.65
+      ],
+      "col": "#d9fff2",
+      "c2": "#2b8d91",
+      "gravity": 0,
+      "drag": 2.2,
+      "curl": false,
+      "fin": 16
+    },
+    {
+      "id": "tail_motes",
+      "t": "emit",
+      "at": 0,
+      "life": 0.64,
+      "att": "feet",
+      "from": "mesh",
+      "of": "flight_body",
+      "burst": 4,
+      "rate": 40,
+      "dir": "random",
+      "speed": [
+        0.2,
+        0.7
+      ],
+      "plife": [
+        0.19,
+        0.32
+      ],
+      "look": "spark",
+      "size": [
+        0.45,
+        0.9
+      ],
+      "col": "#b8f8dc",
+      "c2": "#388c9d",
+      "gravity": 0,
+      "drag": 2.5,
+      "curl": false,
+      "fin": 12
+    },
+    {
+      "id": "hit_contact",
+      "t": "flash",
+      "at": 0.64,
+      "life": 0.085,
+      "att": "feet",
+      "pos": [
+        0,
+        1.35,
+        20
+      ],
+      "col": "#e9fff5",
+      "size0": 0.12,
+      "size": 0.7,
+      "k": 1.15
+    },
+    {
+      "id": "hit_pressure_dark",
+      "t": "mesh",
+      "at": 0.64,
+      "life": 0.24,
+      "att": "feet",
+      "shape": "model",
+      "model": "wind_ba_hit_ribbons",
+      "mat": "toon",
+      "col": "#35a8a2",
+      "col2": "#164f66",
+      "pos": {
+        "0": [
+          0,
+          1.35,
+          20
+        ],
+        "1": [
+          0,
+          1.35,
+          20.8
+        ]
+      },
+      "scale": {
+        "0": 0.2125,
+        "0.25": 1.275,
+        "1": 1.5725
+      },
+      "op": {
+        "0": 0.75,
+        "0.3": 0.7,
+        "1": 0
+      },
+      "dis": {
+        "0": 0,
+        "0.45": 0.1,
+        "1": 0.8
+      },
+      "fade": 0,
+      "rim": 0.3
+    },
+    {
+      "id": "hit_pressure_light",
+      "t": "mesh",
+      "at": 0.648,
+      "life": 0.23,
+      "att": "feet",
+      "shape": "model",
+      "model": "wind_ba_hit_ribbons",
+      "mat": "energy",
+      "col": "#c0f9e3",
+      "col2": "#57bab4",
+      "pos": {
+        "0": [
+          0,
+          1.35,
+          20.025
+        ],
+        "1": [
+          0,
+          1.35,
+          20.825
+        ]
+      },
+      "scale": {
+        "0": 0.2125,
+        "0.25": 1.122,
+        "1": 1.445
+      },
+      "op": {
+        "0": 0.85,
+        "0.3": 0.8,
+        "1": 0
+      },
+      "dis": {
+        "0": 0,
+        "0.45": 0.12,
+        "1": 1
+      },
+      "fade": 0,
+      "rim": 0.65,
+      "scroll": 2.8
+    },
+    {
+      "id": "hit_sparks",
+      "t": "emit",
+      "at": 0.64,
+      "life": 0.035,
+      "att": "feet",
+      "pos": [
+        0,
+        1.35,
+        20
+      ],
+      "burst": 30,
+      "rate": 0,
+      "from": "sphere",
+      "fr": 0.1,
+      "dir": "aim",
+      "spread": 1.05,
+      "speed": [
+        4.5,
+        8.5
+      ],
+      "plife": [
+        0.17,
+        0.33
+      ],
+      "look": "streak",
+      "size": [
+        1.5,
+        2.7
+      ],
+      "col": "#e4fff1",
+      "c2": "#439d9d",
+      "gravity": 0,
+      "drag": 3.8,
+      "curl": false,
+      "fin": 24
+    },
+    {
+      "id": "hit_flecks",
+      "t": "emit",
+      "at": 0.65,
+      "life": 0.035,
+      "att": "feet",
+      "pos": [
+        0,
+        1.35,
+        20
+      ],
+      "burst": 12,
+      "rate": 0,
+      "from": "sphere",
+      "fr": 0.12,
+      "dir": "random",
+      "speed": [
+        1.6,
+        3.2
+      ],
+      "plife": [
+        0.16,
+        0.28
+      ],
+      "look": "model",
+      "model": "wind_ba_tiny_edge",
+      "mmat": "glow",
+      "msize": [
+        0.15,
+        0.32
+      ],
+      "col": "#b8f6df",
+      "c2": "#2f8294",
+      "gravity": 0,
+      "drag": 3.5,
+      "mspin": 260,
+      "bounce": 0,
+      "curl": false
+    },
+    {
+      "id": "tail_curved_chips",
+      "t": "emit",
+      "at": 0,
+      "life": 0.64,
+      "att": "feet",
+      "burst": 1,
+      "rate": 14,
+      "from": "mesh",
+      "fr": 0.16,
+      "dir": "aim",
+      "speed": [
+        0.4,
+        1.1
+      ],
+      "plife": [
+        0.22,
+        0.38
+      ],
+      "look": "model",
+      "model": "wind_ba_tiny_edge",
+      "mmat": "glow",
+      "msize": [
+        0.12,
+        0.22
+      ],
+      "col": "#b7f3df",
+      "c2": "#357e91",
+      "mspin": 145,
+      "gravity": 0,
+      "of": "flight_body",
+      "bounce": 0,
+      "curl": false,
+      "yaw": 180,
+      "spread": 0.3,
+      "drag": 2
+    }
+  ]
+}

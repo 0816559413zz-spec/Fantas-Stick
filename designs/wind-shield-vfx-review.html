@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Wind — โล่ปีกลม</title>
+  <style>
+    :root{color-scheme:dark;--bg:#101713;--panel:#18231d;--line:#324b39;--text:#edf7ea;--muted:#a6baa7;--green:#a2ff7c}
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 "Segoe UI",Tahoma,sans-serif}
+    main{max-width:1240px;margin:auto;padding:32px 28px 38px}
+    header{display:flex;justify-content:space-between;align-items:end;gap:24px;margin-bottom:22px}
+    .eyebrow{color:var(--green);font-size:12px;letter-spacing:.13em;font-weight:700}
+    h1{font-size:34px;line-height:1.25;margin:7px 0 9px}
+    p{margin:0;color:var(--muted)}
+    a{color:var(--green);text-decoration:none;border-bottom:1px solid #587a4a;white-space:nowrap}
+    .hero,.stage{margin:0;border:1px solid var(--line);border-radius:12px;background:var(--panel);overflow:hidden}
+    .hero img{display:block;width:100%;height:auto;background:#17221b}
+    figcaption{padding:13px 17px}
+    .hero figcaption{display:flex;justify-content:space-between;gap:18px}
+    strong{font-weight:650;color:var(--text)}
+    .hint{font-size:13px;color:var(--muted)}
+    .stages{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-top:20px}
+    .stage img{display:block;width:100%;height:auto;aspect-ratio:16/10;object-fit:cover;background:#17221b}
+    .number{color:var(--green);margin-right:9px;font-size:13px}
+    .reference{display:flex;align-items:center;gap:22px;border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:20px;background:var(--panel)}
+    .reference img{width:115px;max-height:180px;object-fit:contain;background:#fff;border-radius:5px}
+    .reference p{font-size:14px;margin-top:6px}
+    .views{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:20px}
+    .views img{display:block;width:100%;height:auto}
+    .stage p{font-size:14px;margin-top:4px}
+    footer{border-top:1px solid var(--line);margin-top:23px;padding-top:15px;font-size:13px;color:var(--muted)}
+    @media(max-width:680px){main{padding:23px 15px}header{display:block}header a{display:inline-block;margin-top:15px}h1{font-size:29px}.stages,.views{grid-template-columns:1fr}.hero figcaption{display:block}.hint{display:block;margin-top:5px}.reference{gap:13px}.reference img{width:85px}}
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <div>
+        <div class="eyebrow">WIND · VFX STUDIO</div>
+        <h1>โล่ปีกลม</h1>
+        <p>ขนลมยืดยาว ห่อไขว้จากเหนือศีรษะถึงหน้าแข้ง · ตัวอย่างรอรีวิว</p>
+      </div>
+      <a href="../index.html?studio&amp;fx=wind/shield_wing&amp;at=self&amp;map=test">เปิดใน Studio ↗</a>
+    </header>
+
+    <section class="reference" aria-label="ภาพอ้างอิงจากผู้ใช้">
+      <img src="../storyboard/img/wind_shield_fold_ref.png" alt="ภาพอ้างอิงปีกซ้อนเหลื่อมห่อไขว้ด้านหน้าเต็มตัวจากผู้ใช้">
+      <div><strong>ทรงห่อเต็มตัวตามภาพอ้างอิง</strong><p>ปีกปกติยังขนาดเดิม ขนลมด้านล่าง 6 ชิ้นต่อข้างยืดยาวและซ้อนเหลื่อมเฉพาะตอนป้องกัน<br>แสงเขียวนีออนโปร่ง เงาเข้มแบ่งชั้น ปลายเหลี่ยมไขว้ลงด้านหน้า</p></div>
+    </section>
+
+    <figure class="hero">
+      <img src="../storyboard/img/wind_shield_motion.gif" alt="ตัวอย่างแอนิเมชันปีกพับเป็นโล่ รับแรงสะเทือน หุบอัด และสะบัดกาง">
+      <figcaption>
+        <strong>ขนลมยืด → ปีกห่อไขว้ → หุบอัด → สะบัดกางและหดกลับ</strong>
+        <span class="hint">เดโม 5.6 วินาที · คืนท่าปีกค้าง ขยับเบา ๆ</span>
+      </figcaption>
+    </figure>
+
+    <section class="stages" aria-label="สี่จังหวะของโล่ปีกลม">
+      <figure class="stage">
+        <img src="../storyboard/img/wind_shield_guard.jpg" alt="ปีกและขนลมยาวห่อไขว้ตั้งแต่เหนือศีรษะถึงหน้าแข้ง">
+        <figcaption><strong><span class="number">01</span>ขนลมยาวห่อเต็มตัว</strong><p>เริ่มยืดทันทีแล้วพับตามข้อปีก ยอดสูงเหนือศีรษะ แผ่นลมซ้อนไขว้ถึงหน้าแข้ง</p></figcaption>
+      </figure>
+      <figure class="stage">
+        <img src="../storyboard/img/wind_shield_hit.jpg" alt="จุดรับแรงกระทบวาบขาวพร้อมสะเก็ดลม">
+        <figcaption><strong><span class="number">02</span>รับแรงและสะสมพลัง</strong><p>ปีกสะเทือนสั้น ๆ ประกายวิ่งกลับตามข้อปีก สันเขียวค่อย ๆ สว่างขึ้น</p></figcaption>
+      </figure>
+      <figure class="stage">
+        <img src="../storyboard/img/wind_shield_compress.jpg" alt="ปีกหุบอัดลมเข้าหาตัวก่อนปล่อยพลัง">
+        <figcaption><strong><span class="number">03</span>หุบอัดลม</strong><p>บีบปีกเข้าหาตัวช่วงสั้น ๆ เน้นจังหวะเก็บแรงก่อนสะบัด</p></figcaption>
+      </figure>
+      <figure class="stage">
+        <img src="../storyboard/img/wind_shield_release.jpg" alt="ปีกสะบัดกางพร้อมแฉกลมพุ่งออกโดยรอบ">
+        <figcaption><strong><span class="number">04</span>สะบัดกางปล่อยพลัง</strong><p>แฉกลมกวาดออกเป็นชิ้นแยก ขนลมยาวหดกลับ แล้วคืนปีกขนาดปกติที่กางค้าง</p></figcaption>
+      </figure>
+    </section>
+
+    <section class="views" aria-label="มุมมองเพิ่มเติม">
+      <figure class="stage"><img src="../storyboard/img/wind_shield_front.jpg" alt="โล่ปีกลมมุมด้านหน้า"><figcaption><strong>ด้านหน้า</strong></figcaption></figure>
+      <figure class="stage"><img src="../storyboard/img/wind_shield_side.jpg" alt="โล่ปีกลมมุมด้านข้าง"><figcaption><strong>ด้านข้าง</strong></figcaption></figure>
+      <figure class="stage"><img src="../storyboard/img/wind_shield_bright.jpg" alt="โล่ปีกลมบนพื้นหลังสว่าง"><figcaption><strong>พื้นหลังสว่าง</strong></figcaption></figure>
+    </section>
+
+    <footer>
+      ตัวอย่างสำหรับรีวิวใน Studio · จำลองรับแรงที่ 1.25 / 1.82 / 2.38 วินาที และปล่อยพลังที่ 3.56 วินาที<br>
+      จังหวะเวลาใช้จัดภาพเดโม ยังไม่ผูกเอฟเฟกต์หรือเปลี่ยนกลไกในเกมจริง
+    </footer>
+  </main>
+</body>
+</html>

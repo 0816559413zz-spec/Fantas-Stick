@@ -1,4 +1,26 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
+
+- 2026-10-25 — **Wind shield full wrapping feather redesign (Studio, review pending):** user supplied folded-wing reference; normal wing size and main vane dimensions preserved. Six angular lower quills per side extend promptly, overlap and cross from above the head to shins; dark seams distinguish neon-green translucent layers. Fan retracts on release. Added five canonical feather models, front/side/bright review views and saved reference. Supersedes the weak narrow collar/torso shield. Current still/motion/bright captures succeeded (transient first source-fetch attempts retried); lint empty, syntax/fx-check/diff checks passed. User visual review pending; no gameplay binding or mechanics changes.
+
+- 2026-10-25 — **Wind wing shield choreography (Studio review):** three-section rig folds wings over torso, hit recoil with light returning along wing seams, charge/compress and one strong opening with radial wind forks/trails; returns to fixed idle. Standalone effect, motion GIF/review page/storyboard #7; no gameplay binding or mechanics changes.
+
+- 2026-10-25 — **Wind wing gameplay motion policy recorded:** normal pose mostly fixed with slight movement; large flaps only for selected skill actions. Current flap study retained as potential Gust motion, not default idle. No effect/gameplay binding changed.
+
+- 2026-10-25 — **Wind actual wing flapping (user clarification):** shoulder-hinged up/down wingbeats, 1.6 s cycle, faster downstroke and slower recovery. Wing details/emitters follow the motion. Added generic mesh rotation-curve support in runtime/schema; refreshed GIF/storyboard.
+
+- 2026-10-25 — **Wind wing moving preview:** 4 s looping GIF from the existing Studio renderer, 48 frames at 12 fps, shared palette. Live Studio refreshed and play/loop at 1x verified; storyboard #6/review page updated. Effect design unchanged.
+
+- 2026-10-25 — **Wind wing: short translucent neon green + featherlets (Studio):** span reduced 25%, rise 15%, lower body/flow opacity, green palette with small white accents. Added six local angular featherlets per side beneath the single main vane. Updated generator, storyboard #6 and review images.
+
+- 2026-10-25 — **Wind wing: single-tier revision (Studio):** removed all lower stacked vanes, kept original length and narrowed the remaining main vane. Added internal channels/cuts/glints and fine under-edge wind traces/particles. Updated generator, storyboard #6 and review screenshots.
+
+- 2026-10-25 — **Wind angular wing study (Studio only):** five straight pointed vanes per side, layered translucent teal/cyan, white seams on both faces, subtle breathing and continuous wind chips/motes/tip streaks. User reference saved; standalone `wind/wing_angular`, generator and storyboard #6. BA visual accepted; no gameplay or shield changes.
+
+- 2026-10-25 — **Wind BA smaller + detailed tail (Studio review):** boomerang 25% smaller; extended asymmetric twin wakes, five fine curved/branching streamers, sparse curved chips and finer motes. Hit mesh/flash scaled modestly to suit. Flat orientation retained; storyboard #4 updated. No gameplay binding.
+
+- 2026-10-25 — **Wind boomerang: tail + impact VFX** (user accepted flat orientation): tip streak tails, surface wind motes and a longer short trail; contact flash + layered curved pressure swipes, forward particles and curved fragments, fading quickly. Studio demo and staged-target screenshots; no gameplay bind.
+
+- 2026-10-25 — **Wind BA visual candidates (review only):** new three-dimensional boomerang and tiny curved wind blade, custom body/flow/edge/wake meshes, Studio flight and dispersal previews, same-scale comparison + storyboard #4/#5. User clarified that Ink describes layering/color/edge motion; each skill needs its own shape. Gameplay not bound. Orientation correction: user meant A should lie flat parallel to ground, convex front edge leading and tips trailing. Reset flight/slipstream pitch to zero, restored convex-forward meshes, reattached wake; prior V flip was a misunderstanding.
 > Moved out of HANDOFF.md on 2026-10-19 to save tokens. Function/variable names are still valid; find them with `CODEMAP.md` (old `index.html` line numbers no longer apply — the code now lives in `js/`).
 
 - 2026-10-27 — **Test Place zones (step 1 of `designs/training-zones.md`, user)** — map split into 5 zones (`TEST_Z` js/02): centre hub/spawn (no fence, dummies, signpost) • north skill test (range lane now east-west from a start line, AOE rings, pillars, walls — `TEST_ST` moved) • west destruction village • east bot zone (monster ring `trZone` moved here + placeholder bot pad `trBotPad`) • south round arena (team A/B halves). Low fences (`tfence` obs, hgt 1.3 = jump/fly over) with gates (`tgate` posts) from `testFences()`; js/28 `buildTest` draws zone floors, fences (2 InstancedMesh), gate arches with 2-sided zone signs (`signTex`). Camera ignores `tfence`; minimap colours. `PREFIX` v41→v42. Tested: fences block walking, gates pass, jumping (z 1.5) clears, no console errors. Not hand-played.
