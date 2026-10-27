@@ -6,6 +6,13 @@
 #h4{position:fixed;inset:0;z-index:1;pointer-events:none;font-family:'Kanit',sans-serif;color:#fff;--hs:1}
 #h4[hidden]{display:none}
 .h4L,.h4R{position:absolute;bottom:0}
+.h4X{position:absolute;left:395px;top:395px;width:118px;height:118px;transform:translate(-50%,-50%);border-radius:50%;display:grid;place-items:center;
+  background:radial-gradient(circle,color-mix(in srgb,var(--c1) 40%,transparent) 0,rgba(6,9,20,.5) 60%,transparent 72%)}
+.h4X .rg,.h4X .rg2{position:absolute;border-radius:50%}
+.h4X .rg{inset:0;border:2px dashed color-mix(in srgb,var(--c2) 55%,transparent);animation:h4Spin 26s linear infinite}
+.h4X .rg2{inset:13px;border:1px solid color-mix(in srgb,var(--c2) 45%,transparent);box-shadow:inset 0 0 18px var(--c1);animation:h4Spin 17s linear infinite reverse}
+.h4X .ic{position:relative;display:grid;filter:drop-shadow(0 0 8px var(--c1)) drop-shadow(0 0 16px var(--c0));animation:h4Breath 3s ease-in-out infinite alternate}
+.h4X.cast .ic{animation:h4Cast .55s ease-out}
 .h4M{position:absolute;left:50%;bottom:22px;width:116px;height:116px;transform-origin:50% 100%;transform:translateX(-50%) scale(var(--hs))}
 .h4M .h4U{left:50%;top:50%;width:116px;height:116px}
 .h4L{left:0;transform-origin:0 100%;transform:scale(var(--hs))}
@@ -110,3 +117,5 @@
 @keyframes h4PopG{0%{filter:brightness(2.4)}100%{filter:none}}
 @keyframes h4Full{from{box-shadow:0 0 30px var(--c1),0 0 0 7px rgba(6,9,20,.4),0 0 0 8px var(--c2)}to{box-shadow:0 0 60px var(--c1),0 0 0 7px rgba(6,9,20,.4),0 0 0 9px #fff}}
 @keyframes h4Burst{from{opacity:1;transform:scale(1)}to{opacity:0;transform:scale(1.6)}}
+@keyframes h4Breath{from{transform:scale(.94);opacity:.85}to{transform:scale(1.04);opacity:1}}
+@keyframes h4Cast{0%{transform:scale(1.28);filter:brightness(2.3) drop-shadow(0 0 22px var(--c2))}100%{transform:scale(1)}}

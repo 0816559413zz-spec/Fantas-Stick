@@ -41,6 +41,7 @@ function h4Build(me,v){
   const gs=gems.length>4?19:21,g0=226-(gems.length-1)*gs/2;   // อัญมณีเรียงกึ่งกลางใต้ไพ่ (ไพ่ 196–256°) — จำนวนเปลี่ยนได้ (ไม่มีไม้กวาด = 3)
   gems.forEach((s,i)=>{const a=(g0+i*gs)*Math.PI/180,x=H4C+Math.cos(a)*H4RC*0.6,y=H4C+Math.sin(a)*H4RC*0.6;
     R+=`<div class="h4Gm" data-ci="${s[3]}" style="left:${x.toFixed(1)}px;top:${y.toFixed(1)}px">${h4Ico(s[1],26)}<i class="sh"></i><b class="n"></b><span class="k">${esc(h4Key(s[0]))}</span></div>`;});
+  R+=`<div class="h4X"><i class="rg"></i><i class="rg2"></i><i class="ic">${icoHTML('p_'+P.id,E.c2,64)}</i></div>`;   // ตราธาตุกลางวง (ที่เดิมของอัลติ) — ใช้สกิล = กะพริบ
   const M=`<div class="h4U"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="48" fill="none" stroke="rgba(255,255,255,.15)" stroke-width="3"/><circle class="ua" cx="50" cy="50" r="48" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-dasharray="301.6" stroke-dashoffset="301.6" transform="rotate(-90 50 50)"/></svg>
     <div class="tx"><b class="up">0%</b><small>${esc(U?U.n:'')}</small></div><span class="k">${esc(slotKey('X'))}</span></div>`;
   let L=`<div class="h4Sh"></div>`+h4Parts(E,10,(a,b)=>[20+a*260,-30-b*180]);
@@ -50,7 +51,7 @@ function h4Build(me,v){
   root.innerHTML=`<div class="h4L">${L}</div><div class="h4R">${R}</div><div class="h4M">${M}</div>`;   // h4M = อัลติกลางล่าง (ผู้ใช้ 2026-10-27)
   H4.el=root;H4.cache={};H4.rdy={};H4.segN=0;H4.uFull=false;
   H4.q={hp:root.querySelector('.hp'),mh:root.querySelector('.mh'),xh:root.querySelector('.xh'),seg:root.querySelector('.h4Seg'),sub:root.querySelector('.h4Sub'),subB:root.querySelector('.h4Sub b'),subT:root.querySelector('.h4Sub small'),
-    chips:root.querySelector('.h4Chips'),u:root.querySelector('.h4U'),ua:root.querySelector('.ua'),up:root.querySelector('.up'),fc:root.querySelector('.fc'),
+    chips:root.querySelector('.h4Chips'),x:root.querySelector('.h4X'),u:root.querySelector('.h4U'),ua:root.querySelector('.ua'),up:root.querySelector('.up'),fc:root.querySelector('.fc'),
     slots:[...root.querySelectorAll('.h4Cd,.h4Gm')].map(el=>({el,ci:+el.dataset.ci,sh:el.querySelector('.sh'),n:el.querySelector('.n'),gem:el.classList.contains('h4Gm')}))};
   if(H4.face&&H4.faceFor===me.id+'|'+k.path)h4FaceSet();
 }
@@ -85,6 +86,7 @@ function hud4Draw(me,v){
     if(S.gem)h4Set(key+'r',r.toFixed(3),x=>S.sh.style.setProperty('--r',x));else h4Set(key+'r',r.toFixed(3),x=>S.sh.style.height=x*100+'%');
     h4Set(key+'t',st.txt||'',x=>S.n.textContent=x);
     if(ok&&H4.rdy[S.ci]===false&&(S.ci>=1||S.ci===-4)){S.el.classList.remove('pop');void S.el.offsetWidth;S.el.classList.add('pop');}
+    if(!ok&&H4.rdy[S.ci]===true&&S.ci>=1&&S.ci<=4&&Q.x){Q.x.classList.remove('cast');void Q.x.offsetWidth;Q.x.classList.add('cast');}
     H4.rdy[S.ci]=ok;}
   // อัลติ
   const u=Math.min(100,me.u|0),full=u>=100;
