@@ -69936,7 +69936,7 @@
    "skill": "X (อัลติ)",
    "status": "draft",
    "created": "2026-10-25T20:44:35",
-   "updated": "2026-10-25T21:09:26",
+   "updated": "2026-10-25T22:10:56",
    "overview": "[จากเกม] เวทโบราณสายไฟ: กระโดดขึ้นฟ้าทันที ร่างยักษ์ไฟปรากฏกลางอากาศ 6 วิ (Space = ขึ้น / Ctrl หรือ C = ลง) ถือหน้าไม้ไฟ ยิงได้ 3 นัด (เว้น 1 วิ) นัดละ 100 ดาเมจ ระเบิดวง ~200",
    "mood": [],
    "colors": [
@@ -70174,7 +70174,165 @@
      },
      "refs": [],
      "result": "",
-     "note": ""
+     "note": "",
+     "frames": {
+      "fps": 6,
+      "list": [
+       {
+        "id": "mvnyt8ds44",
+        "bg": "blank",
+        "base": "storyboard/img/s14_frb_mvnyt8dg.jpg",
+        "t": 0.6,
+        "ops": [],
+        "img": ""
+       },
+       {
+        "id": "mvnyt8em45",
+        "bg": "blank",
+        "base": "storyboard/img/s14_frb_mvnyt8eg.jpg",
+        "t": 0.77,
+        "ops": [],
+        "img": ""
+       },
+       {
+        "id": "mvnyt8g146",
+        "bg": "blank",
+        "base": "storyboard/img/s14_frb_mvnyt8fr.jpg",
+        "t": 0.93,
+        "ops": [],
+        "img": ""
+       },
+       {
+        "id": "mvnyt8ha47",
+        "bg": "blank",
+        "base": "storyboard/img/s14_frb_mvnyt8h2.jpg",
+        "t": 1.1,
+        "ops": [],
+        "img": ""
+       },
+       {
+        "id": "mvnyt8in48",
+        "bg": "blank",
+        "base": "storyboard/img/s14_frb_mvnyt8ig.jpg",
+        "t": 1.27,
+        "ops": [],
+        "img": ""
+       },
+       {
+        "id": "mvnyt8jf49",
+        "bg": "blank",
+        "base": "storyboard/img/s14_frb_mvnyt8j8.jpg",
+        "t": 1.43,
+        "ops": [],
+        "img": ""
+       },
+       {
+        "id": "mvnyt8k350",
+        "bg": "blank",
+        "base": "storyboard/img/s14_frb_mvnyt8jv.jpg",
+        "t": 1.6,
+        "ops": [],
+        "img": ""
+       },
+       {
+        "id": "mvnyt8li51",
+        "bg": "blank",
+        "base": "storyboard/img/s14_frb_mvnyt8lb.jpg",
+        "t": 1.77,
+        "ops": [],
+        "img": ""
+       },
+       {
+        "id": "mvnyt8mz52",
+        "bg": "blank",
+        "base": "storyboard/img/s14_frb_mvnyt8mt.jpg",
+        "t": 1.93,
+        "ops": [],
+        "img": ""
+       },
+       {
+        "id": "mvnyt8nx53",
+        "bg": "blank",
+        "base": "storyboard/img/s14_frb_mvnyt8np.jpg",
+        "t": 2.1,
+        "ops": [],
+        "img": ""
+       },
+       {
+        "id": "mvnyt8os54",
+        "bg": "blank",
+        "base": "storyboard/img/s14_frb_mvnyt8oj.jpg",
+        "t": 2.27,
+        "ops": [],
+        "img": ""
+       },
+       {
+        "id": "mvnyt8ph55",
+        "bg": "blank",
+        "base": "storyboard/img/s14_frb_mvnyt8pc.jpg",
+        "t": 2.43,
+        "ops": [],
+        "img": ""
+       },
+       {
+        "id": "mvnyt8q556",
+        "bg": "blank",
+        "base": "storyboard/img/s14_frb_mvnyt8px.jpg",
+        "t": 2.6,
+        "ops": [],
+        "img": ""
+       },
+       {
+        "id": "mvnyt8r257",
+        "bg": "blank",
+        "base": "storyboard/img/s14_frb_mvnyt8qu.jpg",
+        "t": 2.77,
+        "ops": [],
+        "img": ""
+       },
+       {
+        "id": "mvnyt8s858",
+        "bg": "blank",
+        "base": "storyboard/img/s14_frb_mvnyt8rs.jpg",
+        "t": 2.93,
+        "ops": [],
+        "img": ""
+       },
+       {
+        "id": "mvnyt8sx59",
+        "bg": "blank",
+        "base": "storyboard/img/s14_frb_mvnyt8sp.jpg",
+        "t": 3.1,
+        "ops": [],
+        "img": ""
+       },
+       {
+        "id": "mvnyt8tt60",
+        "bg": "blank",
+        "base": "storyboard/img/s14_frb_mvnyt8ti.jpg",
+        "t": 3.27,
+        "ops": [],
+        "img": ""
+       },
+       {
+        "id": "mvnyt8ur61",
+        "bg": "blank",
+        "base": "storyboard/img/s14_frb_mvnyt8uj.jpg",
+        "t": 3.43,
+        "ops": [],
+        "img": ""
+       },
+       {
+        "id": "mvnyt8vr62",
+        "bg": "blank",
+        "base": "storyboard/img/s14_frb_mvnyt8vj.jpg",
+        "t": 3.6,
+        "ops": [],
+        "img": ""
+       }
+      ],
+      "sheet": ""
+     }
     },
     {
      "id": "mvnvq7ca4",
@@ -70216,5 +70374,5 @@
    }
   }
  ],
- "rev": 108
+ "rev": 109
 }
