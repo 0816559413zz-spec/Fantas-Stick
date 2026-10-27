@@ -168,15 +168,16 @@ defSpell(EARTH,{id:'dustburst',role:'utility',n:'Dust Burst',ic:'🌫️',cd:20,
 defSpell(EARTH,{id:'terraauger',role:'finisher',n:'Terra Auger',ic:'🌀',cd:14,d:'กดค้างชาร์จสว่านหินหมุนเหนือหัว แตะ = ระดับ 1 • ค้าง 2 วิ = 2 • 4.5 วิ = 3 ปล่อยแล้วพุ่งลงจุดเล็ง (ระยะ 600) • ระหว่างชาร์จเดินช้า 85% ใช้ท่าอื่นไม่ได้ กดโล่ = ยกเลิก • สว่านพุ่งเฉียงลงจากข้างบนไปที่เป้า',fx:'ดาเมจ 20 / 50 / 120 รัศมี 80 / 110 / 150 • ระดับ 3 พื้นแตกเป็นหลุม + เนินดินเล็ก ๆ เดินข้ามได้ (มีได้ทีละอัน) • โดนสตัน/แช่แข็ง = ยกเลิก คูลดาวน์ 7 วิ • ใช้ได้แม้ Stand แตก',
   cast(p,S,i){if(p.aug||p.ramp||p.ecb)return false;p.aug={t:0,k:SLOTK[i]};emit({k:'efx',z:'eaugon',x:p.x,y:p.y,h:p.z,id:p.id});return false;}});
 // จุดลงของสว่าน: ตามเป้าเมาส์เสมอ • เล็งเหนือขอบฟ้า (ไม่โดนพื้น) = ไกลสุด 600 ตามทิศที่หัน (ไม่ดูดเข้าศัตรูใกล้ ๆ)
-function eAugAim(p){if(!p.inp||p.bot||p.inp.gx>=0)return aimPoint(p,600);return {x:clamp(p.x+Math.cos(p.ang)*600,40,MW-40),y:clamp(p.y+Math.sin(p.ang)*600,40,MH-40)};}
-function earthAugFire(p){const A=p.aug;p.aug=null;const tier=A.t>=4.5?3:A.t>=2?2:1,o=aimClip(p.x,p.y,p.z+3,eAugAim(p),0),dm=[20,50,120][tier-1],r=[80,110,150][tier-1];
+// เล็งอิสระ 3 มิติ (ผู้ใช้ 2026-10-27): ตามเส้นเป้ากลางจอจากสว่านเหนือหัว ชนพื้น/บ้าน/สุดระยะ (กลางอากาศ) • บอท = จุดเล็งบนพื้นแบบเดิม
+function eAugAim(p,range){const r=aimRay3(p,p.z+3,range);if(r)return Object.assign(r,{hit:r.hit==='bld'||r.hit==='air'||r.hit==='edge'});return aimClip(p.x,p.y,p.z+3,aimPoint(p,range),0);}
+function earthAugFire(p){const A=p.aug;p.aug=null;const tier=A.t>=4.5?3:A.t>=2?2:1,o=eAugAim(p,600),oh=Math.round(o.h*10)/10,dm=[20,50,120][tier-1],r=[80,110,150][tier-1];
   p.cd[A.k]=14*p.buffs.cdr;p.cdMax[A.k]=p.cd[A.k];
-  emit({k:'efx',z:'eaugfire',x:Math.round(o.x),y:Math.round(o.y),h:0,x2:Math.round(p.x),y2:Math.round(p.y),n:tier,r,id:p.id});
+  emit({k:'efx',z:'eaugfire',x:Math.round(o.x),y:Math.round(o.y),h:oh,x2:Math.round(p.x),y2:Math.round(p.y),n:tier,r,id:p.id});
   G.strikes.push({x:o.x,y:o.y,t:0.35,fn(){
-    for(const t of foesIn(p.team,o.x,o.y,r,5))aoeHit(p,t,dm);
+    for(const t of foesIn(p.team,o.x,o.y,r,o.h+5))if((t.isE?(t.h||0):(t.z||0))>o.h-5)aoeHit(p,t,dm);
     damageEnv(o.x,o.y,r,dm*E_ENV,p.id,'rock',o.hit?o.h:0.5);
     if(tier===3&&!o.hit)earthMound(p,o.x,o.y,false);
-    emit({k:'efx',z:'eaugboom',x:Math.round(o.x),y:Math.round(o.y),h:0,n:tier,r});}});}
+    emit({k:'efx',z:'eaugboom',x:Math.round(o.x),y:Math.round(o.y),h:oh,n:tier,r});}});}
 
 // เนินดินระดับ 3 (ผู้ใช้ 2026-10-21: เล็กลงครึ่งนึง เดินผ่านได้เหมือนเนินเล็ก ๆ): โดมรัศมี 37 สูง 1.2 • ไม่ใช่ของแข็ง ไม่บังกระสุน เดินขึ้นไปยืนได้ (groundH)
 // ของท่าปกติมีได้ทีละอัน • ของอัลติ (u) เล็กกว่า (รัศมี 28 สูง 0.9) ไม่ลบกันเอง หายเองใน 15 วิ ⚠ การตีความ
@@ -213,11 +214,11 @@ function earthWrathTick(p,dt){const W=p.wr;W.t+=dt;
   if(W.ph==='land'){W.lt-=dt;if(W.lt<=0){W.ph='trans';W.nd=5;W.dt=10;p.vz=-10;emit({k:'efx',z:'ewland',x:Math.round(p.x),y:Math.round(p.y),h:0,id:p.id});}return;}
   W.dt-=dt;if(W.dt<=0||W.nd<=0)earthWrathEnd(p);}
 // คลิกซ้ายตอนมีสว่าน: ยิงทีละอัน (ขวา → ซ้าย) = Terra Auger ระดับ 3
-function earthWrathDrill(p){const W=p.wr;if(!W||W.nd<=0)return;W.nd--;const o=aimClip(p.x,p.y,p.z+3,aimPoint(p,700),0),i=W.nd;
-  emit({k:'efx',z:'ewdrill',x:Math.round(o.x),y:Math.round(o.y),h:0,x2:Math.round(p.x),y2:Math.round(p.y),n:i,id:p.id});
+function earthWrathDrill(p){const W=p.wr;if(!W||W.nd<=0)return;W.nd--;const o=eAugAim(p,700),oh=Math.round(o.h*10)/10,i=W.nd;
+  emit({k:'efx',z:'ewdrill',x:Math.round(o.x),y:Math.round(o.y),h:oh,x2:Math.round(p.x),y2:Math.round(p.y),n:i,id:p.id});
   G.strikes.push({x:o.x,y:o.y,t:0.35,fn(){
-    for(const t of foesIn(p.team,o.x,o.y,80,5))aoeHit(p,t,120);damageEnv(o.x,o.y,80,120*E_ENV,p.id,'rock',o.hit?o.h:0.5);
-    if(!o.hit)earthMound(p,o.x,o.y,true);emit({k:'efx',z:'eaugboom',x:Math.round(o.x),y:Math.round(o.y),h:0,n:3,r:80});}});}   // รัศมีระเบิดสว่าน 150 → 80 (ผู้ใช้ 2026-10-21)
+    for(const t of foesIn(p.team,o.x,o.y,80,o.h+5))if((t.isE?(t.h||0):(t.z||0))>o.h-5)aoeHit(p,t,120);damageEnv(o.x,o.y,80,120*E_ENV,p.id,'rock',o.hit?o.h:0.5);
+    if(!o.hit)earthMound(p,o.x,o.y,true);emit({k:'efx',z:'eaugboom',x:Math.round(o.x),y:Math.round(o.y),h:oh,n:3,r:80});}});}   // รัศมีระเบิดสว่าน 150 → 80 (ผู้ใช้ 2026-10-21)
 function earthWrathEnd(p){const W=p.wr;p.wr=null;if(!W)return;
   emit({k:'efx',z:'ewend',x:Math.round(p.x),y:Math.round(p.y),h:p.z,id:p.id});}
 

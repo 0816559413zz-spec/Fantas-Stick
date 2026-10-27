@@ -107,6 +107,22 @@ function aimClip(x0,y0,h0,o,back){
   const d=Math.hypot(o.x-x0,o.y-y0)||1,k=Math.min(back||0,c.t*d)/d;
   return {x:c.x-(o.x-x0)*k,y:c.y-(o.y-y0)*k,h:c.h,hit:true};
 }
+// เล็งอิสระ 3 มิติ: ยิงจาก (ตัวเรา, สูง h0) ไปตามเส้นเป้ากลางจอ (inp.ax/ay/ah) แล้วเลยต่อไปจนชน พื้น / บ้าน / ขอบแมพ หรือครบ range px
+// คืน {x,y,h,hit:'ground'|'bld'|'edge'|'air'} • null = ไม่มีข้อมูลเล็ง (บอท) ให้ใช้วิธีเดิม
+function aimRay3(p,h0,range){
+  const i=p.inp;if(!i||p.bot||typeof i.ah!=='number')return null;
+  let dx=i.ax-p.x,dy=i.ay-p.y,dh=(i.ah-h0)*20;const L=Math.hypot(dx,dy,dh);
+  if(L<1){dx=Math.cos(p.ang);dy=Math.sin(p.ang);dh=0;}else{dx/=L;dy/=L;dh/=L;}
+  let x=p.x,y=p.y,h=h0;
+  for(let s=10;s<=range;s+=10){
+    const nx=p.x+dx*s,ny=p.y+dy*s,nh=h0+dh*s/20;
+    if(nx<40||nx>MW-40||ny<40||ny>MH-40)return {x,y,h,hit:'edge'};
+    const g=groundH(nx,ny);if(nh<=g)return {x:nx,y:ny,h:g,hit:'ground'};
+    if(BLDON)for(const b of BLDG)if(bldNear(b,nx,ny,8)&&bldPieceAt(b,nx,ny,nh,6)>=0)return {x:nx,y:ny,h:nh,hit:'bld'};
+    x=nx;y=ny;h=nh;
+  }
+  return {x,y,h,hit:'air'};
+}
 // ชิ้นที่กระสุนชน (-1 = ไม่ชน / ลอดรู): ต่ำกว่าผนัง = ชิ้นผนังแถวนั้นที่ใกล้สุด, สูงกว่า = ชิ้นหลังคาใต้กระสุน (ทรงปิรามิด)
 function bldPieceAt(b,x,y,h,r){
   const [lx,ly]=bldLocal(b,x,y),D=b.D,hw=b.o.w/2,hd=b.o.d/2;

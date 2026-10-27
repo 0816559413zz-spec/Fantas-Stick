@@ -549,7 +549,7 @@ function earthEfx(ev){
     // ----- Terra Auger -----
     case 'eaugon':smoke(x,y,0.3,6,ECOL.dust,1,6,40);return true;
     case 'eaugoff':{const s=EV.st.get(ev.id);if(s&&s.drill&&s.drill.visible){const q=simOf(s.drill.position);eChunks(q.x,q.y,q.h-GY(q.x,q.y),6,100,2,0.08);}return true;}
-    case 'eaugfire':{const s=EV.st.get(ev.id),o=PM3.get(ev.id);if(o)o.wdT=0.25;const from=s&&s.drill&&s.drill.visible?s.drill.position.clone():eW(ev.x2,ev.y2,4);eDrillFly(from,x,y,ev.n);eWindOut(from,eW(x,y,0),ev.n);
+    case 'eaugfire':{const s=EV.st.get(ev.id),o=PM3.get(ev.id);if(o)o.wdT=0.25;const from=s&&s.drill&&s.drill.visible?s.drill.position.clone():eW(ev.x2,ev.y2,4);eDrillFly(from,x,y,ev.n,undefined,ev.h);eWindOut(from,eW(x,y,ev.h||0),ev.n);
       ring(x,y,'#ff9a4a',ev.r,0.4,0.15);if(near)snd('whoosh',ev);return true;}
     case 'eaugboom':{const n=ev.n;eDebris(x,y,0.3,16+n*14,ev.r*2);playFx(n===3?'earth_big':'earth_impact',x,y,0.4,{s:ev.r/100});eWave(x,y,0.2,ev.r);
       SHAPES_Q.push({k:'decal',x,y,col:'#000000',s1:ev.r/26,life:5,op:0.75});eChunks(x,y,0.3,6+n*4,240,7,0.24);if(n>=2)FX.flashLight(x,y,0.8,'#ff7a2a',2+n,12,0.3);
@@ -567,7 +567,7 @@ function earthEfx(ev){
       for(let i=0;i<26;i++){const a=rnd(0,6.283),r=rnd(40,260);smoke(x+Math.cos(a)*r,y+Math.sin(a)*r,rnd(0.3,3),1,i%2?ECOL.dust:'#c9b38c',rnd(3,5),rnd(12,20),30);}
       shake(near?1:0.3);if(near){snd('boom',ev);snd('break',ev);}return true;}
     case 'ewland':eDebris(x,y,0.3,30,260);playFx('earth_impact',x,y,0.4,{s:1.2});shake(0.5);if(near)snd('boom',ev);return true;
-    case 'ewdrill':{const s=EV.st.get(ev.id);let from=null;if(s&&s.drills[ev.n])from=s.drills[ev.n].position.clone();eDrillFly(from||eW(ev.x2,ev.y2,4),x,y,3,0.75);ring(x,y,'#ff9a4a',80,0.4,0.15);if(near)snd('whoosh',ev);return true;}
+    case 'ewdrill':{const s=EV.st.get(ev.id);let from=null;if(s&&s.drills[ev.n])from=s.drills[ev.n].position.clone();eDrillFly(from||eW(ev.x2,ev.y2,4),x,y,3,0.75,ev.h);ring(x,y,'#ff9a4a',80,0.4,0.15);if(near)snd('whoosh',ev);return true;}
     case 'ewend':smoke(x,y,0.5,8,ECOL.dust,1.2,8,80);return true;
   }
   return false;}
@@ -582,7 +582,7 @@ function eWindOut(from,to,tier){const dir=to.clone().sub(from).normalize(),w=sim
 // กรวยคลื่นอากาศครอบหัวสว่าน (แหวกอากาศตอนพุ่ง): กรวยเปิดโปร่งแสงชี้ไปข้างหน้า ปลายติดหัวสว่าน บานออกด้านหลัง
 function eAirCone(){const m=new THREE.MeshBasicMaterial({color:hdr('#eef4fa',1.2),transparent:true,opacity:0.0,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide}),
   c=new THREE.Mesh(new THREE.ConeGeometry(0.75,2,24,1,true),m);c.rotation.x=-Math.PI/2;c.position.z=0.9;c.userData.m=m;return c;}
-function eDrillFly(from,x,y,tier,sc){const d=makeDrill(),to=eW(x,y,0),ac=eAirCone();d.scale.setScalar(sc||1);d.position.copy(from);d.add(ac);scene.add(d);
+function eDrillFly(from,x,y,tier,sc,h){const d=makeDrill(),to=eW(x,y,h||0),ac=eAirCone();d.scale.setScalar(sc||1);d.position.copy(from);d.add(ac);scene.add(d);
   eAnim({g:d,life:0.33,fn(a){const k=Math.min(1,a.t/0.32);d.position.copy(from).lerp(to,k*k);d.lookAt(to);ac.rotation.z=0;ac.userData.m.opacity=0.22*Math.min(1,a.t/0.06)*(1-k*0.5);ac.scale.set(1,1+k*0.6,1);d.children[0].rotation.y=a.t*80;drillHeat(d,tier,a.t);const w=simOf(d.position);
     burst(w.x,w.y,tier===3?'#ff6a2a':'#e8e4dc',1,30,0.25,tier===3?2.2:1.6,{h:w.h,g:0});
     for(let i=0;i<3;i++){const an=rnd(0,6.283);PARTS.push({x:w.x+Math.cos(an)*12,y:w.y+Math.sin(an)*12,h:w.h+rnd(-0.3,0.3),vx:Math.cos(an)*140,vy:Math.sin(an)*140,vh:rnd(-0.3,0.8),life:0.2,max:0.2,col:'#f4f6f8',size:1.5,g:0,drag:2,sh:2});}}});}   // อากาศแตกออกรอบตัวตามทาง

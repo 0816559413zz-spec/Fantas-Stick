@@ -149,16 +149,16 @@ function colossusTick(p,inp,dt){
   if(!inp.fire||p.colCd>0||!(p.colN>0))return;
   let q=null,bs=1e9;
   for(const t of foesOf(p.team)){const dx=t.x-p.x,dy=t.y-p.y,dd=Math.hypot(dx,dy);if(dd>1000||dd<1)continue;const da=Math.abs(angDiff(Math.atan2(dy,dx),p.ang));if(da<0.3&&da+dd/4000<bs){bs=da+dd/4000;q={x:t.x,y:t.y};}}
-  if(!q&&typeof inp.ah==='number'&&!p.bot){const g=inp.gx>=0,dx=(g?inp.gx:inp.ax)-p.x,dy=(g?inp.gy:inp.ay)-p.y,dd=Math.hypot(dx,dy)||1,k=Math.min(1000,Math.max(120,dd))/dd;q={x:p.x+dx*k,y:p.y+dy*k};}
+  if(!q){const r=aimRay3(p,p.z+4.2,1000);if(r){q=r;q.free=1;}}   // ไม่ล็อกศัตรู = ยิงตามเป้ากลางจอ 3 มิติ (ชนพื้น/บ้าน/สุดระยะกลางอากาศ)
   if(!q){const ap=(inp.ap||0),H=p.z+4;let d=1000;if(ap<-0.03)d=Math.min(1000,H*20/Math.tan(-ap));d=Math.max(120,d);q={x:p.x+Math.cos(p.ang)*d,y:p.y+Math.sin(p.ang)*d};}
   q.x=clamp(q.x,40,MW-40);q.y=clamp(q.y,40,MH-40);
-  {const c=aimClip(p.x,p.y,p.z+4.2,q,0);q.x=c.x;q.y=c.y;q.h=c.hit?c.h:0.5;}   // ชนบ้านก่อน = ระเบิดที่ผนัง
+  if(!q.free){const c=aimClip(p.x,p.y,p.z+4.2,q,0);q.x=c.x;q.y=c.y;q.h=c.hit?c.h:groundH(q.x,q.y);}   // ชนบ้านก่อน = ระเบิดที่ผนัง
   p.colN--;p.colCd=1;
-  const fx=p.x+Math.cos(p.ang)*30,fy=p.y+Math.sin(p.ang)*30,tt=Math.hypot(q.x-fx,q.y-fy)/1800+0.08;
-  emit({k:'efx',z:'colbolt',x:fx,y:fy,h:p.z+4.2,x2:q.x,y2:q.y,t:tt,id:p.id});
+  const fx=p.x+Math.cos(p.ang)*30,fy=p.y+Math.sin(p.ang)*30,tt=Math.hypot(q.x-fx,q.y-fy,(q.h-p.z-4.2)*20)/1800+0.08,qh=Math.round(q.h*10)/10;
+  emit({k:'efx',z:'colbolt',x:fx,y:fy,h:p.z+4.2,x2:q.x,y2:q.y,h2:qh,t:tt,id:p.id});
   G.strikes.push({x:q.x,y:q.y,r:200,t:tt,fn:s=>{
-    emit({k:'efx',z:'colboom',x:s.x,y:s.y,h:0.3,r:200});
-    for(const t of foesIn(p.team,s.x,s.y,200,6))aoeHit(p,t,100,t=>{addBurn(t,3,p.id);addXBurn(t,p.id);});
+    emit({k:'efx',z:'colboom',x:s.x,y:s.y,h:qh+0.3,r:200});
+    for(const t of foesIn(p.team,s.x,s.y,200,q.h+6))if((t.isE?(t.h||0):(t.z||0))>q.h-6)aoeHit(p,t,100,t=>{addBurn(t,3,p.id);addXBurn(t,p.id);});
     damageEnv(s.x,s.y,200,100,p.id,'fireblast',q.h);   // พังบ้าน/ลัง
   }});
   if(p.colN<=0)p.colos=Math.min(p.colos,0.5);

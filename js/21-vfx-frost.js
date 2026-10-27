@@ -148,7 +148,7 @@ function updateZV(dt){
     if(w.d>=w.len){if(w.fx)fxStop(w.fx);if(w.m||w.fx){playFx('ice_impact',x,y,1.2,{s:1});iceRing(x,y,30,8,0.9,0.5,{up:0.06,down:0.25});iceChips(x,y,1,8,200,4);smoke(x,y,0.6,8,'#eef8ff',1,7,50);iceBurst(x,y,1.1,{life:0.8,hy:0.9,mist:6});}if(w.m){scene.remove(w.m);w.m.userData.mats.forEach(m=>m.dispose());}WVV.splice(i,1);}
   }
   for(let i=COLB.length-1;i>=0;i--){
-    const b=COLB[i];b.t+=dt;const k=Math.min(1,b.t/b.max),x=lerp(b.x,b.x2,k),y=lerp(b.y,b.y2,k),H=lerp(b.h,0.2,k);
+    const b=COLB[i];b.t+=dt;const k=Math.min(1,b.t/b.max),x=lerp(b.x,b.x2,k),y=lerp(b.y,b.y2,k),H=lerp(b.h,b.h2!==undefined?b.h2+0.2:0.2,k);
     for(let j=0;j<5;j++)flame(x+rnd(-8,8),y+rnd(-8,8),H-0.3+rnd(-0.2,0.2),{vx:(b.x-b.x2)*0.3+rnd(-30,30),vy:(b.y-b.y2)*0.3+rnd(-30,30),vh:rnd(0.5,2),life:rnd(0.3,0.45),size:rnd(11,15),drag:3});
     for(let n=0;n<5;n++)PARTS.push({x:x+rnd(-6,6),y:y+rnd(-6,6),h:H+rnd(-0.2,0.2),vx:rnd(-40,40),vy:rnd(-40,40),vh:rnd(0,2),life:0.35,max:0.35,col:n<2?'#fff0b0':'#ff7a2a',size:n<2?3:5,g:-1,drag:3});
     LREQ.push({x:tx(x),y:H,z:tz(y),col:'#ff8a3a',int:3,dist:14});

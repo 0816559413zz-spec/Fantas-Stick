@@ -240,11 +240,11 @@ function efxFX(ev){
       later(0.25+n*0.07,()=>{smoke(x,y,H-0.6,8,'#3a2a22',1.2,7,60);for(let i=0;i<8;i++)PARTS.push({x:x+rnd(-20,20),y:y+rnd(-20,20),h:H-0.8,vx:rnd(-20,20),vy:rnd(-20,20),vh:rnd(0.5,1.5),life:0.8,max:0.8,col:'#ff6a1a',size:1.6,g:-0.3});});
       if(near){snd('boom',ev);shake(3+n);}break;}
     case 'colossus':for(let i=0;i<6;i++){const an=i/6*6.283;for(let j=0;j<10;j++)flame(x+Math.cos(an)*150,y+Math.sin(an)*150,0.1,{vh:rnd(8,14),life:rnd(0.4,0.6),size:rnd(12,16),g:-1});}burst(x,y,'#ff6a2a',40,300,1,3,{h:H+1,vh:[2,8],g:-1});ring(x,y,'#ffb347',140,0.6,0.2);FX.flashLight(x,y,H+3,'#ff7a2a',8,30,0.6);if(near){snd('roar',ev);shake(6);}break;
-    case 'colbolt':{const o=PM3.get(ev.id);if(o)o.colShot=performance.now();}FX.flashSprite(x,y,H,'#ffd27a',0.5,4,0.15,2.4);COLB.push({x,y,h:H,x2:ev.x2,y2:ev.y2,t:0,max:ev.t});if(near)snd('cast_fire',ev);break;
-    case 'colboom':explosionFX(x,y,0.4);
-      for(let i=0;i<40;i++)flame(x+rnd(-30,30),y+rnd(-30,30),0.1,{vh:rnd(10,18),life:rnd(0.5,0.8),size:rnd(14,20),g:-1,drag:1.5});
-      for(let i=0;i<18;i++){const an=rnd(0,6.283),sp=rnd(150,350);PARTS.push({x,y,h:0.5,vx:Math.cos(an)*sp,vy:Math.sin(an)*sp,vh:rnd(5,11),life:rnd(0.7,1),max:1,col:i%2?'#3a2418':'#ff7a2a',size:rnd(2.4,3.6),g:16,drag:0.4});}
-ring(x,y,'#ff9a4a',ev.r,0.55,0.2);ring(x,y,'#ffd27a',ev.r*0.6,0.45,0.2);burst(x,y,'#ff6a2a',90,ev.r*2.6,1,5,{h:0.5,vh:[2,10],g:9});SHAPES_Q.push({k:'decal',x,y,col:'#000000',s1:ev.r/30,life:6,op:0.55});FX.flashLight(x,y,3,'#ff7a2a',9,32,0.5);shake(10);snd('boom',ev);break;
+    case 'colbolt':{const o=PM3.get(ev.id);if(o)o.colShot=performance.now();}FX.flashSprite(x,y,H,'#ffd27a',0.5,4,0.15,2.4);COLB.push({x,y,h:H,x2:ev.x2,y2:ev.y2,h2:ev.h2,t:0,max:ev.t});if(near)snd('cast_fire',ev);break;
+    case 'colboom':explosionFX(x,y,H+0.1);
+      for(let i=0;i<40;i++)flame(x+rnd(-30,30),y+rnd(-30,30),H-0.2,{vh:rnd(10,18),life:rnd(0.5,0.8),size:rnd(14,20),g:-1,drag:1.5});
+      for(let i=0;i<18;i++){const an=rnd(0,6.283),sp=rnd(150,350);PARTS.push({x,y,h:H+0.2,vx:Math.cos(an)*sp,vy:Math.sin(an)*sp,vh:rnd(5,11),life:rnd(0.7,1),max:1,col:i%2?'#3a2418':'#ff7a2a',size:rnd(2.4,3.6),g:16,drag:0.4});}
+ring(x,y,'#ff9a4a',ev.r,0.55,0.2);ring(x,y,'#ffd27a',ev.r*0.6,0.45,0.2);burst(x,y,'#ff6a2a',90,ev.r*2.6,1,5,{h:0.5,vh:[2,10],g:9});if(H<1.5)SHAPES_Q.push({k:'decal',x,y,col:'#000000',s1:ev.r/30,life:6,op:0.55});FX.flashLight(x,y,H+2.7,'#ff7a2a',9,32,0.5);shake(10);snd('boom',ev);break;
     case 'colend':smoke(x,y,H,14,'#3a2a22',2,9,120);
       for(let i=0;i<70;i++){const an=rnd(0,6.283),r=rnd(10,70);flame(x+Math.cos(an)*r,y+Math.sin(an)*r,H-2+rnd(0,6),{vx:Math.cos(an)*rnd(20,80),vy:Math.sin(an)*rnd(20,80),vh:rnd(2,5),life:rnd(0.6,1.1),size:rnd(6,11),g:-1,drag:1});}
       for(let i=0;i<30;i++){const an=rnd(0,6.283),r=rnd(10,70);PARTS.push({x:x+Math.cos(an)*r,y:y+Math.sin(an)*r,h:H-1+rnd(0,5),vx:rnd(-30,30),vy:rnd(-30,30),vh:rnd(1.5,4),life:rnd(0.8,1.3),max:1.3,col:i%2?'#ff7a2a':'#ffd27a',size:rnd(2,3.2),g:-0.5});}break;
