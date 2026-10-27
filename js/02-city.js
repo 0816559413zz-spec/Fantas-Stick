@@ -71,7 +71,23 @@ function genCity(){
     const x0=B.x+r,y0=B.y+r,x1=B.x+B.w-r,y1=B.y+B.d-r,line=(ax,ay,bx2,by2)=>{const L=Math.hypot(bx2-ax,by2-ay),n=Math.max(1,Math.ceil(L/step));for(let i=0;i<n;i++)obs.push({x:ax+(bx2-ax)*i/n,y:ay+(by2-ay)*i/n,r:Math.min(r,B.w/2,B.d/2),k:'cwall',hgt:B.h,s:0,cb:B.i});};
     if(x1<=x0||y1<=y0){line(Math.min(x0,x1),Math.min(y0,y1),Math.max(x0,x1),Math.max(y0,y1));obs.push({x:Math.max(x0,x1),y:Math.max(y0,y1),r:Math.min(r,B.w/2,B.d/2),k:'cwall',hgt:B.h,s:0,cb:B.i});continue;}
     line(x0,y0,x1,y0);line(x1,y0,x1,y1);line(x1,y1,x0,y1);line(x0,y1,x0,y0);}
-  return {W,H,obs,boxes,zones,deck};
+  // ของริมถนนแบบลอนดอน (ชุดทดสอบ — ย่านร้านค้าเท่านั้น): street = {m:ชื่อโมเดล,x,y,a} • ชนด้วยวงกลม k:'cprop' (ยังไม่พัง — ขั้น 4)
+  const street=[],RS=mulberry(2031),SP={lamp:[5,4.6],phone:[22,2.6],postbox:[9,1.6],bench:[18,0.9]};
+  const sprop=(m,x,y,a)=>{if(Math.hypot(x-mid,y-mid)<CITY_PLAZA+60)return;street.push({m,x:Math.round(x),y:Math.round(y),a});
+    if(m==='taxi'){for(const t of [-1,1])obs.push({x:x+Math.sin(a)*t*24,y:y+Math.cos(a)*t*24,r:20,k:'cprop',hgt:1.8,s:0});}
+    else obs.push({x,y,r:SP[m][0],k:'cprop',hgt:SP[m][1],s:0});};
+  for(const z of zones)if(z.k==='shops'){
+    const e=30,sides=[[z.x,z.y+e,1,0,Math.PI],[z.x,z.y+z.d-e,1,0,0],[z.x+e,z.y,0,1,-Math.PI/2],[z.x+z.w-e,z.y,0,1,Math.PI/2]];   // ทางเท้า 4 ด้าน: จุดเริ่ม, ทิศเดิน, มุมหันหน้าออกถนน
+    for(const [sx,sy,dx,dy,fa] of sides){
+      const L=dx?z.w:z.d,out=fa;   // a = rotation.y ของโมเดล (หน้า +z → ทิศโลก (sin a, cos a)) หันออกถนน
+      for(let t=160;t<L-100;t+=320)sprop('lamp',sx+dx*t,sy+dy*t,out);
+      const pick=['phone','postbox','bench','bench'];
+      for(let i=0;i<pick.length;i++){const t=320+i*400+RS()*120;if(t>L-200)break;sprop(pick[i],sx+dx*t+(dx?0:(sx<z.x+z.w/2?14:-14)),sy+dy*t+(dy?0:(sy<z.y+z.d/2?14:-14)),out);}
+      for(let i=0;i<2;i++){const t=520+i*700+RS()*200;if(t>L-300)break;const rx=sx+dx*t-(dx?0:(sx<z.x+z.w/2?95:-95)),ry=sy+dy*t-(dy?0:(sy<z.y+z.d/2?95:-95));
+        sprop('taxi',rx,ry,dx?Math.PI/2:0);}
+    }
+  }
+  return {W,H,obs,boxes,zones,deck,street};
 }
 function cityProps(){
   const M=MAPS.city,R=mulberry(1712),out=[],add=(k,x,y)=>out.push({i:out.length,k,x:Math.round(x),y:Math.round(y),a:R()*6.283,r:PROPDEF[k].r,hgt:PROPDEF[k].hgt,hp:PROPDEF[k].hp||0,st:0,ht:0});
