@@ -5,8 +5,8 @@ Format: `name:line` = top-level function/const/let in that file. `§line title` 
 ## js/01-core.js (22) — แกนกลาง: import Three.js + ฟังก์ชันพื้นฐาน ($ rnd clamp lerp store to…
 $:12 rnd:13 clamp:14 lerp:15 dist2:16 lerpAng:17 esc:18 shuffle:19 store:20 toastT:21 toast:22
 
-## js/02-city.js (135) — เมืองมักเกิ้ล — กล่องเทา (designs/city-bot-battle.md ขั้น 3)
-CITY_PLAN:6 CITY_ZN:11 CITY_PLAZA:12 genCity:13 cityProps:123
+## js/02-city.js (137) — เมืองมักเกิ้ล — กล่องเทา (designs/city-bot-battle.md ขั้น 3)
+CITY_PLAN:6 CITY_ZN:11 CITY_PLAZA:12 genCity:13 cityProps:125
 
 ## js/02-citytest.js (28) — แมพทดสอบเมืองใหญ่ (กล่องเทา) — ใช้วัดความลื่นของเครื่องยนต์ก่อนสร้างเ…
 CITY_N:4 CITY_B:4 CITY_ROAD:4 genCityTest:5 cityTestProps:19
@@ -90,7 +90,7 @@ MIND:66 summonMin:72 minTarget:81 minShoot:88 updateMins:93 aimTarget:133
 §180 ร่ายคาถา
 castSlot:181 castUlt:196
 
-## js/10-net.js (183) — เครือข่าย (PeerJS / WebRTC)
+## js/10-net.js (183) — 
 PREFIX:4 NET:5 RC:9 TURN_SERVERS:12 ICE:13 PEER_OPT:14 TURN_URL:16 ICE_READY:18 JN:22 LAG:24 lagDo:25 hostSend:26 LOBBY:27 genCode:28 sendAll:29 NETD_KEYS:33 NETD:33 netDeltaReset:34 netDelta:35 NETU:47 netUndelta:48 setStatus:54 hostGame:56 hostPeer:64 netConnect:83 joinWatch:94 joinFail:109 netLost:115 joinGame:130 joinPeer:141 clientOnData:156 leave:171 leaveRoom:173
 
 ## js/11-host.js (388) — 
@@ -98,12 +98,15 @@ G:4 EVL:4 EVN:4 hostLast:4 tickN:4 emit:5 feed:6 banner:7 plist:8 cleanName:9 fr
 §209 ลูปหลักฝั่งโฮสต์
 hostTick:210 angDiff:224 cH:226 vR:227 updatePlayer:229 hitProp:375 damagePropsIn:382 nearUseProp:383 useProp:384
 
-## js/12-buildings.js (474) — สิ่งปลูกสร้างที่พังเป็นชิ้นย่อย (บ้าน) แบบ Battlefield — คู่มือเต็ม: …
-BLDDEF:8 BLD_PIECES:9 BLD_GRID:10 BLD_FIRE:11 BLD_ICE:11 BLD_ROOF_MIN:11 BLDG:12 BLDON:12 genBldg:13 bldRect:23 bldChunk:25 bldAlive:32 bldLocal:33 bldWorld:34 rectDist:35 bldNear:36 BLD_MOUND:39 bldGone:40 bldMoundAt:41 bldMoundH:42 hitBldPiece:44 breakBldChunk:55 bldSupport:63 damageEnv:83 bldRay:97 aimClip:105 aimRay3:112 bldPieceAt:127 projEl:137 bldPush:142 collideBld:148 updateBldg:163 bldSnap:175 bldParse:181
-§185 ของบังในแผนที่ไฟล์ที่พังได้ (หิน เสา รูปปั้น ต้นไม้ โคมไฟ ลัง ...) — …
-BRKDEF:189 BRK_M:189 BRK_MCOL:189 BRK:190 genBrk:191 brkApply:198 brkStage:202 hitBrk:203 damageBrkIn:211 brkSnap:217 brkParse:218
-§219 ตารางช่อง (spatial grid) สำหรับแมพใหญ่: หาเฉพาะของใกล้ ๆ แทนวนทุกชิ้น…
-SG:222 sgObs:223 sgProps:223 sgGrid:225 sgNear:232 _sgCR:237 _sgCW:237 _sgCB:237 _sgCO:237 _sgPO:237 _sgPB:237 _sgPP:237 _sgM:237 _sgE:237 _sgA:237 collideWorld:238 shoot:271 eShoot:292 foesOf:299 breakShield:306 ULT_RATE:308 ultActive:309 gainUlt:310 lifesteal:311 damage:313 playerDown:369 killProj:390 explode:399 hitTarget:411 updateProjectiles:427
+## js/12-buildings.js (477) — สิ่งปลูกสร้างที่พังเป็นชิ้นย่อย (บ้าน) แบบ Battlefield — คู่มือเต็ม: …
+BLDDEF:8 BLD_PIECES:10 BLD_GRID:11 BLD_FIRE:12 BLD_ICE:12 BLD_ROOF_MIN:12 BLDG:13 BLDON:13 genBldg:14 bldRect:24 bldChunk:26 bldAlive:33 bldLocal:34 bldWorld:35 rectDist:36 bldNear:37 BLD_MOUND:40 bldGone:41 bldMoundAt:42 bldMoundH:43 hitBldPiece:45 breakBldChunk:56 bldSupport:64 damageEnv:84 bldRay:99 aimClip:107 aimRay3:114 bldPieceAt:129 projEl:139 bldPush:144 collideBld:150 updateBldg:165 bldSnap:178 bldParse:184
+§188 ของบังในแผนที่ไฟล์ที่พังได้ (หิน เสา รูปปั้น ต้นไม้ โคมไฟ ลัง ...) — …
+BRKDEF:192 BRK_M:192 BRK_MCOL:192 BRK:193 genBrk:194 brkApply:201 brkStage:205 hitBrk:206 damageBrkIn:214 brkSnap:220 brkParse:221
+§222 ตารางช่อง (spatial grid) สำหรับแมพใหญ่: หาเฉพาะของใกล้ ๆ แทนวนทุกชิ้น…
+SG:225 sgObs:226 sgProps:226 sgGrid:228 sgNear:235 _sgCR:240 _sgCW:240 _sgCB:240 _sgCO:240 _sgPO:240 _sgPB:240 _sgPP:240 _sgM:240 _sgE:240 _sgA:240 collideWorld:241 shoot:274 eShoot:295 foesOf:302 breakShield:309 ULT_RATE:311 ultActive:312 gainUlt:313 lifesteal:314 damage:316 playerDown:372 killProj:393 explode:402 hitTarget:414 updateProjectiles:430
+
+## js/12-city-dmg.js (110) — เมืองพังได้ (designs/city-bot-battle.md ขั้น 4) — ข้อมูลที่ทุกเครื่อง…
+CITY_FL:8 CITY_PW:8 CDMG:9 CITYD:12 cityOn:13 cityLayout:15 cityReset:25 cityApplyBox:37 cityApplyItem:38 cityHex:39 cityMark:40 cityPanelAt:42 cityHitPanel:47 cityHitItem:57 cityHitObs:66 _sgCD:71 cityDamageIn:73 cityTick:81 _sgCM:91 cityMoundH:92 citySnapB:99 citySnapS:100 cityParse:102
 
 ## js/13-enemies.js (168) — ศัตรู (โหมด Co-op)
 spawnEnemy:2 setupWave:19 bossPhase:36 enemySlam:44 updateEnemies:55
@@ -177,12 +180,12 @@ ANIM_ALT:48 makeAnimator:49 animResolve:54 animPlay:55 animTick:64 lookTint:82 t
 §149 VFX จากไฟล์ (รายละเอียดฝั่งคนทำอยู่ใน ASSETS.md)
 VFXL:155 FLIPL:155 FLIPS:155 prefetchFx:156 playVfx:157 vfxSeq:203 flipTex:208 playFlip:216 fileFx:231 zoneFx:238 clearVfx:239 updateVfx:240
 
-## js/23-props-bld-view.js (383) — prop ฝั่งแสดงผล
+## js/23-props-bld-view.js (384) — prop ฝั่งแสดงผล
 PROPV:2 propFallback:4 farCull:33 syncProps:34
 §51 บ้านพังเป็นชิ้น ฝั่งแสดงผล
-BLDV:54 CHARM:54 DEBRIS:54 BLD_WALLC:55 _bldIce:56 _halfRoof:56 charMat:57 bldIceMat:61 halfRoofGeo:63 bldMats:71 bldFallback:76 bldFilePiece:112 bldHasChunks:120 bldFallbackChunks:122 bldRubble:130 _moundMat:136 bldMound:137 BLD_RUBBLE_H:159 bldBuild:160 syncBld:184 bldDebris:216 bldChunkFall:239 updateDebris:251 clearDebris:261 drawPropHint:262 syncWalls:270
-§288 ของบังในแผนที่ไฟล์ที่พังได้ ฝั่งแสดงผล (สถานะจาก BRK[].st — host js/1…
-BRKV:291 BRK_COL:291 brkSetup:292 BRK_CM:310 brkCrackMat:311 brkClip:327 brkYc:342 brkStump:344 brkSync:354 BRK_ZERO:372 brkFall:374
+BLDV:54 CHARM:54 DEBRIS:54 BLD_WALLC:55 _bldIce:56 _halfRoof:56 charMat:57 bldIceMat:61 halfRoofGeo:63 bldMats:71 bldFallback:77 bldFilePiece:113 bldHasChunks:121 bldFallbackChunks:123 bldRubble:131 _moundMat:137 bldMound:138 BLD_RUBBLE_H:160 bldBuild:161 syncBld:185 bldDebris:217 bldChunkFall:240 updateDebris:252 clearDebris:262 drawPropHint:263 syncWalls:271
+§289 ของบังในแผนที่ไฟล์ที่พังได้ ฝั่งแสดงผล (สถานะจาก BRK[].st — host js/1…
+BRKV:292 BRK_COL:292 brkSetup:293 BRK_CM:311 brkCrackMat:312 brkClip:328 brkYc:343 brkStump:345 brkSync:355 BRK_ZERO:373 brkFall:375
 
 ## js/24-minions-view.js (68) — สัตว์เวท: โมเดลโปร่งแสง + ซิงก์จาก snapshot (MN)
 MM3:2 makeMinion:3 syncMins:36 drawMinBars:58
@@ -190,10 +193,10 @@ MM3:2 makeMinion:3 syncMins:36 drawMinBars:58
 ## js/25-efx.js (299) — efxFX: ภาพของ event "efx" ทุกคาถา (หนึ่ง case ต่อหนึ่งเอฟเฟกต์)
 efxState:4 efxFX:15
 
-## js/26-fx-events.js (236) — fx(ev): เอฟเฟกต์+เสียงของทุก event จากโฮสต์ • statusFX (สถานะบนตัว) •…
+## js/26-fx-events.js (237) — fx(ev): เอฟเฟกต์+เสียงของทุก event จากโฮสต์ • statusFX (สถานะบนตัว) •…
 statusFX:3 fx:27
-§204 overlay: เลือกบัฟ / สรุปผล
-choosePick:205 syncOverlays:210 showOver:231
+§205 overlay: เลือกบัฟ / สรุปผล
+choosePick:206 syncOverlays:211 showOver:232
 
 ## js/27-world.js (265) — 
 S3:4 tx:4 tz:4 GY:6 TW:6 hdr:7 gl:9 scene:15 cam:17 composer:18
@@ -204,10 +207,10 @@ QUAL:143 QUAL_NAME:144 qualPR:145 applyQuality:151 qualTick:169 texCanvas:180 gl
 §239 เงาตามผู้เล่น
 SHD:243 _shF:244 _shR:244 _shU:244 _shC:244 _shY:244 shadowFollow:245 LPOOL:264
 
-## js/28-city-build.js (137) — เมืองมักเกิ้ล (ลอนดอน) — ภาพ • ข้อมูลอยู่ js/02-city.js • โมเดลจาก as…
+## js/28-city-build.js (231) — เมืองมักเกิ้ล (ลอนดอน) — ภาพ • ข้อมูลอยู่ js/02-city.js • โมเดลจาก as…
 CITY_WIN:4 cityWinTex:5 cityEmTex:10 cityBoxGeo:16 buildCity:21
-§89 ชุดโมเดลลอนดอน (assets/city/*.glb จาก assets/src/city_kit_build.py)
-CITY_FL:92 CITY_PW:92 CITY_STY:94 cityFacade:101 CITYK:117 cityKitLoad:118 cityCull:133
+§95 ชุดโมเดลลอนดอน (assets/city/*.glb จาก assets/src/city_kit_build.py)
+CITY_STY:100 CITY_VEH:107 cityFacade:109 CITYK:120 _cZ:121 _cT:121 _cR:121 _cC:121 cityKitLoad:122 cityCull:143 citySet:149 cityTint:151 cityPools:153 cityShowBld:158 cityRubble:165 CITY_FALL:173 cityViewSync:175 cityDebris:207 cityFX:215
 
 ## js/28-maps-build.js (760) — สร้างแผนที่
 CANDLESYS:2 builtMap:3 builtKey:3 world:3 TORCHES:3 CANDLES:3 FIREFLIES:3 CRYSTAL:3 RUNE:3 SNITCH:3 BANNERS:3 SNOW:3 WCACHE:5 WCACHE_MAX:5 wkey:7 buildWorld:8 addW:40 _prewarmed:42 prewarmShaders:43 batchStatic:62 makeCandles:87 updateCandles:96 buildCastle:105 buildHogsmeade:171 buildGreatHall:259 buildForest:329
@@ -566,4 +569,4 @@ gameCover:403
 ## js/66-hud4.js (133) — HUD รอบ 4 (ผู้ใช้ 2026-10-23, designs/hud-full-mock.html)
 H4E:5 H4:10 H4C:11 H4RC:11 h4Pal:12 hud4Col:14 h4Runes:15 h4RingSVG:16 h4Parts:25 h4AuBits:30 h4Key:45 h4Ico:46 h4Build:47 h4Set:77 hud4Draw:78 hud4Frame:116 hud4Hide:117 _h4RT:119 _h4Cam:119 h4FaceShot:120 h4FaceSet:133
 
-(72 files, 17125 lines)
+(73 files, 17336 lines)

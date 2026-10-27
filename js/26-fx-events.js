@@ -191,7 +191,8 @@ function fx(ev,raw){   // raw = ภาพเดิมในโค้ดเท่
         if(near){snd('break',ev);if(el.includes('blast'))snd('boom',{x:ev.x,y:ev.y,vol:0.6});shake(el.includes('blast')?6:3);}
       }
       break;}
-    case 'brk':if(ev.t==='b')brkFall(ev);break;   // ของบังพัง: ส่วนบนล้ม (เศษ/ฝุ่น/เสียง = assets/fx/env/brk_*.fx.json ผูกใน bind.json brk:c / brk:b / brk:land)
+    case 'brk':if(ev.t==='b')brkFall(ev);break;
+    case 'cb':case 'cs':cityFX(ev,H,near);break;   // ตึก/ของในเมืองพัง (js/28-city-build)   // ของบังพัง: ส่วนบนล้ม (เศษ/ฝุ่น/เสียง = assets/fx/env/brk_*.fx.json ผูกใน bind.json brk:c / brk:b / brk:land)
     case 'heal':floatText(ev.x,ev.y,'+'+ev.n,'#7dff9a',ev.id===NET.myId?20:15,ev.h);if(ev.id===NET.myId)burst(ev.x,ev.y,'#7dff9a',8,60,0.6,1.6,{h:ev.h-1,vh:[0.5,2],g:-0.5});break;
     case 'fbomb':
       explosionFX(ev.x,ev.y,0.6);

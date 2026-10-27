@@ -1,7 +1,7 @@
 // ---------- เมืองมักเกิ้ล — กล่องเทา (designs/city-bot-battle.md ขั้น 3) ----------
 // 9600 × 9600 px (480 × 480 ม.) • ถนนกว้าง CITY_ROAD ทุก CITY_B px → 4×4 บล็อก • แต่ละบล็อก = 1 ย่าน (CITY_PLAN) • ลานใหญ่กลางเมือง (จุดเกิด)
 // ตึก = กล่องตั้งตรง (boxes: x,y = มุมซ้ายบน px, w,d px, h ม., m = ชนิดผนัง) — ชนด้วยวงกลมเรียงรอบขอบ (OBS k:'cwall') เพราะระบบชนทั้งเกมใช้วงกลม
-// บ้านในย่านบ้าน = บ้านพังได้แบบเดิม (OBS k:'house') • ต้นไม้/ลัง = prop พังได้ • ตึก/รถ/ตู้คอนเทนเนอร์ยังไม่พัง (ขั้น 4)
+// บ้านในย่านบ้าน = บ้านพังได้แบบเดิม (OBS k:'house', bt:'ldn' = บ้านอิฐลอนดอน) • ต้นไม้/ลัง = prop พังได้ • ตึก/รถ/ของในเมืองพังได้ = js/12-city-dmg.js (ตู้คอนเทนเนอร์/ซุ้ม/อัฒจันทร์ยังไม่พัง)
 // ทางด่วนลอย = พื้นสะพานเป็นแค่ภาพ (ยังเดินขึ้นไม่ได้ ลอดใต้ได้ ชนแค่เสา) • น้ำที่ท่าเรือ = ภาพบนพื้น (เดินได้)
 const CITY_PLAN=[   // [แถว][คอลัมน์] จากทิศเหนือ (y น้อย) ลงใต้
   ['park','homes','homes','docks'],
@@ -11,12 +11,12 @@ const CITY_PLAN=[   // [แถว][คอลัมน์] จากทิศเ�
 const CITY_ZN={park:'สวนสาธารณะ',homes:'ย่านบ้าน',docks:'ท่าเรือ',station:'สถานีรถไฟ',plaza:'ลานใหญ่',shops:'ย่านร้านค้า',warehouse:'โกดัง',parking:'ลานจอดรถ',towers:'ตึกสูง',build:'ไซต์ก่อสร้าง',field:'สนามกีฬา',highway:'ทางด่วนลอย',bridge:'ใต้สะพาน'};
 const CITY_PLAZA=1000;   // รัศมีลานกลาง (px) — ห้ามมีของ
 function genCity(){
-  const W=CITY_N*CITY_B,H=W,R=mulberry(4810),mid=W/2,obs=[],boxes=[],zones=[],deck=[],taken=[];
+  const W=CITY_N*CITY_B,H=W,R=mulberry(4810),mid=W/2,obs=[],boxes=[],zones=[],deck=[],taken=[],cars=[];
   // จุดเกิดทั่วไป (ดวล/ทีม/FFA) ต้องโล่ง
   const keep=[[mid,mid,CITY_PLAZA],...SPAWNF.map(f=>[f[0]*W,f[1]*H,260]),[W*0.14,H/2,260],[W*0.86,H/2,260]];
   const clear=(x,y,w,d)=>!keep.some(([cx,cy,r])=>cx>x-r&&cx<x+w+r&&cy>y-r&&cy<y+d+r)&&![...boxes,...taken].some(b=>x<b.x+b.w+10&&x+w+10>b.x&&y<b.y+b.d+10&&y+d+10>b.y);
   const box=(x,y,w,d,h,m,o)=>{x=Math.round(x);y=Math.round(y);w=Math.round(w);d=Math.round(d);if(!clear(x,y,w,d))return null;const b=Object.assign({i:boxes.length,x,y,w,d,h,m},o);boxes.push(b);return b;};
-  const house=(x,y,ry)=>{const w=150+R()*40,d=120+R()*30;if(!clear(x-w/2,y-w/2,w,w))return;obs.push({x,y,r:Math.max(w,d)/2,k:'house',hgt:10,w,d,s:R(),ry});taken.push({x:x-w/2,y:y-w/2,w,d:w});};
+  const house=(x,y,ry)=>{const w=150+R()*40,d=120+R()*30;if(!clear(x-w/2,y-w/2,w,w))return;obs.push({x,y,r:Math.max(w,d)/2,k:'house',bt:'ldn',hgt:10,w,d,s:R(),ry});taken.push({x:x-w/2,y:y-w/2,w,d:w});};
   const pillar=(x,y,r,h)=>obs.push({x,y,r,k:'cpill',hgt:h,s:0});
   for(let by=0;by<CITY_N;by++)for(let bx=0;bx<CITY_N;bx++){
     const k=CITY_PLAN[by][bx],S=CITY_B-CITY_ROAD,x0=bx*CITY_B+CITY_ROAD/2,y0=by*CITY_B+CITY_ROAD/2,P=60;   // P = ทางเท้ารอบบล็อก
@@ -47,7 +47,7 @@ function genCity(){
       box(a+60,b+s-520,800,440,10,'metal');
       for(let i=0;i<4;i++)pillar(a+s*0.6,b+200+i*500,40,1.2);   // หลักผูกเรือ
     }else if(k==='parking'){   // ลานจอดรถ: รถเป็นแถว เว้นทางวิ่ง + อาคารจอดรถ
-      for(let r=0;r<5;r++)for(let c=0;c<9;c++)if(R()<0.72)box(a+60+c*130,b+80+r*240,90,46,1.6,'car');
+      for(let r=0;r<5;r++)for(let c=0;c<9;c++)if(R()<0.72)cars.push([a+60+c*130+45,b+80+r*240+23]);   // รถจอด = ของในเมือง (พังได้) ใส่ทีหลังใน street
       box(a+s-640,b+60,600,s-120,10.5,'garage');
     }else if(k==='build'){   // ไซต์ก่อสร้าง: เสาตอม่อเป็นตาราง + กำแพงครึ่งตัว + ปั้นจั่น
       for(let i=0;i<5;i++)for(let j=0;j<4;j++)pillar(a+200+i*220,b+200+j*220,26,i===2&&j===1?46:6+((i+j)%3)*4);
@@ -74,12 +74,14 @@ function genCity(){
   // ของในเมืองแบบลอนดอน: street = {m:ชื่อโมเดล (city_cp_<m>),x,y,a} • a = rotation.y (หน้าโมเดล +z → ทิศโลก (sin a, cos a))
   // ที่ชน k:'cprop' = วงกลมเรียงตามแนวยาวของของชิ้นนั้น: SPC[m] = [ระยะวงตามแนวยาว px, รัศมี px, สูง ม., แกนยาว 'z' (รถ) | 'x' (ม้านั่ง/ป้าย)] • null = ไม่ชน (ภาพอย่างเดียว)
   // ยังไม่พัง (ขั้น 4)
-  const street=[],RS=mulberry(2031),SPC={lamp:[[0],5,4.6],phone:[[0],22,2.6],postbox:[[0],9,1.6],bench:[[0],18,0.9],taxi:[[-24,24],20,1.8],bus:[[-80,-40,0,40,80],25,4.4],
+  const street=[],RS=mulberry(2031),SPC={car:[[-24,24],20,1.6],van:[[-26,26],22,2.3],lamp:[[0],5,4.6],phone:[[0],22,2.6],postbox:[[0],9,1.6],bench:[[0],18,0.9],taxi:[[-24,24],20,1.8],bus:[[-80,-40,0,40,80],25,4.4],
     tlight:[[0],6,3.3],busstop:[[-35,35],10,2.5,'x'],bin:[[0],8,1],tube:[[0],5,3.4],planter:[[-18,18],12,0.6,'x'],bush:[[0],22,1.2],cone:[[0],6,0.7],barrier:[[-18,18],6,1,'x'],pallet:[[0],14,1],boat:null,crane:null};
   const free=(x,y,r)=>!boxes.some(b=>x>b.x-r&&x<b.x+b.w+r&&y>b.y-r&&y<b.y+b.d+r)&&!obs.some(o=>Math.abs(x-o.x)<(o.w||o.r*2)/2+r&&Math.abs(y-o.y)<(o.w||o.r*2)/2+r);
-  const sprop=(m,x,y,a,inPlaza)=>{if(!inPlaza&&Math.hypot(x-mid,y-mid)<CITY_PLAZA+60)return false;street.push({m,x:Math.round(x),y:Math.round(y),a});const C=SPC[m];if(!C)return true;
+  const sprop=(m,x,y,a,inPlaza,col)=>{if(!inPlaza&&Math.hypot(x-mid,y-mid)<CITY_PLAZA+60)return false;const ci=street.length;street.push(col?{m,x:Math.round(x),y:Math.round(y),a,col}:{m,x:Math.round(x),y:Math.round(y),a});const C=SPC[m];if(!C)return true;
     const lx=C[3]==='x'?Math.cos(a):Math.sin(a),ly=C[3]==='x'?-Math.sin(a):Math.cos(a);
-    for(const t of C[0])obs.push({x:x+lx*t,y:y+ly*t,r:C[1],k:'cprop',hgt:C[2],s:0});return true;};
+    for(const t of C[0])obs.push({x:x+lx*t,y:y+ly*t,r:C[1],k:'cprop',hgt:C[2],s:0,ci});return true;};
+  const PAINT=['#b8342e','#e4e4e6','#2a2c34','#2e5aa8','#8a9098','#3e7a4a','#c8a03a'];   // สีรถ (ภาพย้อมสีตาม col)
+  for(const [x,y] of cars)sprop(RS()<0.18?'van':'car',x,y,Math.PI/2,0,PAINT[Math.floor(RS()*PAINT.length)]);
   for(const z of zones)if(z.k==='shops'){
     const e=30,sides=[[z.x,z.y+e,1,0,Math.PI],[z.x,z.y+z.d-e,1,0,0],[z.x+e,z.y,0,1,-Math.PI/2],[z.x+z.w-e,z.y,0,1,Math.PI/2]];   // ทางเท้า 4 ด้าน: จุดเริ่ม, ทิศเดิน, มุมหันหน้าออกถนน
     for(const [sx,sy,dx,dy,fa] of sides){

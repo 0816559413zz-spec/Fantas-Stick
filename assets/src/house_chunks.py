@@ -5,11 +5,11 @@
 #   wall_left / wall_right : 3 คอลัมน์ตามแกน Y (คอลัมน์ 0 = ฝั่ง +Y = หลังบ้าน; ขอบ ±1.083) × 3 แถว
 #   roof_left / roof_right : 3 คอลัมน์ตามแกน Y (เหมือนผนังข้าง) × 2 แถว (แถว 0 = ชายคา |X| > 2, แถว 1 = สันหลังคา)
 # ชิ้นย่อยชื่อ <ชิ้น>_c<เลข>  เลข = แถว × คอลัมน์ทั้งหมด + คอลัมน์ • ชิ้นเดิมและ _broken ยังอยู่ในไฟล์ (_broken = กองซากตอนชิ้นนั้นพังหมด)
-import bpy, bmesh, os, math
+import bpy, bmesh, os, math, sys
 from mathutils import Vector
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-OUT = os.path.join(os.path.dirname(HERE), 'buildings', 'house.glb')
+OUT = os.path.join(os.path.dirname(HERE), 'buildings', sys.argv[sys.argv.index('--') + 1] if '--' in sys.argv else 'house.glb')   # -- house_ldn.glb = บ้านลอนดอน
 INF = 99.0
 BW, BD, WH = 8.0, 6.5, 4.2
 WROWS = [-INF, WH / 3, WH * 2 / 3, INF]

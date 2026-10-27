@@ -503,3 +503,41 @@ def demo2(shot, all_src):
     put('cp_crane', 0, 0, 0)
     g = MB(MATS); bx(g, -30, 40, -0.15, 0, -20, 20, PALM, STONE); g.build('demo2_ground3', c2)
     shot('shots/city_kit_crane.png', (-30, -70, 30), (8, 0, 26))
+
+
+# ---------------- แผ่นผนังที่แตกแล้ว (ขั้น 4 — เกมสลับแผ่นปกติเป็นแผ่นนี้เมื่อเลือดแผ่นหมด) ----------------
+# ขอบผนังเหลือเป็นฟันเลื่อย + ข้างในมืด (เห็นพื้นชั้น + เหล็กเส้น) • ใช้วัสดุตามชนิดตึก
+def hole(name, mt, sw, seed):
+    rr = random.Random(seed)
+    m = MB(MATS)
+    w = (lambda x0, x1, y0, y1, z0=-TH, z1=0.0: bx(m, x0, x1, y0, y1, z0, z1, mt, sw))
+    w(-MW / 2, MW / 2, 0, 0.25 + rr.random() * 0.35)                                       # ตอผนังล่าง
+    w(-MW / 2, MW / 2, MH - 0.3 - rr.random() * 0.3, MH)                                    # คานบน
+    for s in (-1, 1):                                                                       # ขอบซ้าย/ขวา ฟันเลื่อย
+        for k in range(6):
+            y0 = k * MH / 6
+            ww = 0.25 + rr.random() * 0.7
+            x = s * MW / 2
+            w(min(x, x - s * ww), max(x, x - s * ww), y0, y0 + MH / 6)
+    for k in range(5):                                                                      # เศษห้อยจากคาน
+        x = -1.4 + k * 0.7 + rr.uniform(-0.2, 0.2)
+        h = 0.15 + rr.random() * 0.5
+        w(x - 0.2, x + 0.2, MH - 0.55 - h, MH - 0.5)
+    bx(m, -MW / 2, MW / 2, 0.05, 0.25, -2.5, -TH, PAL2, P_CONC2)                            # พื้นชั้นด้านใน
+    bx(m, -MW / 2, MW / 2, MH - 0.35, MH - 0.15, -2.5, -TH, PAL2, P_CONC2)                  # เพดาน
+    bx(m, -MW / 2, MW / 2, 0, MH, -2.6, -2.5, PALM, BLACK)                                  # ข้างในมืด
+    for k in range(4):                                                                      # เหล็กเส้นโผล่
+        x = rr.uniform(-1.6, 1.6)
+        bx(m, x - 0.02, x + 0.02, MH - 0.6 - rr.random() * 0.6, MH - 0.3, -0.25, -0.2, PALM, IRON, rot=(0, 0, rr.uniform(-0.4, 0.4)))
+    for k in range(5):                                                                      # เศษกองบนพื้นด้านใน
+        x = rr.uniform(-1.6, 1.6)
+        s3 = 0.2 + rr.random() * 0.25
+        bx(m, x - s3, x + s3, 0.25, 0.25 + s3, -1.2 - rr.random(), -0.5, mt, sw, rot=(0, rr.random() * 3, 0))
+    return m.build('city_' + name)
+
+
+holes = [hole('ct_hole', BRICK, None, 1), hole('co_hole', PAL2, P_STONE, 2), hole('cg_hole', PAL2, P_MULL, 3), hole('cw_hole', PAL2, P_COR, 4), hole('cc_hole', PAL2, P_CONC, 5)]
+for o in holes:
+    if o.name == 'city_ct_hole':
+        brick_uv(o)
+    export([o], 'assets/city/%s.glb' % o.name[len('city_'):])
