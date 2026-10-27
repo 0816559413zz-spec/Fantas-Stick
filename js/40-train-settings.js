@@ -46,34 +46,39 @@ $('#trPanel').addEventListener('click',e=>{
   if(v)trSync(v);
 });
 // ---------- แท่นเสกบอท (โซนเสกบอท ห้องฝึก, trBotPad js/02): ยืนบนแท่น = เมนูขึ้น + ปล่อยเมาส์ • คลิกจอ = ซ่อนจนกว่าจะเดินออกแล้วเข้าใหม่ ----------
-let bpOpen=false,bpOn=false,bpKey='';const BP={p:0,lv:1,n:1};
+let bpOpen=false,bpOn='',bpKey='';const BP={p:0,lv:1,n:1,side:'A'};
 document.body.insertAdjacentHTML('beforeend','<div id="bpPanel" class="card hidden"></div>');
 function bpShow(on){bpOpen=on;$('#bpPanel').classList.toggle('hidden',!on);if(on){bpKey='';hidePause();if(document.pointerLockElement)document.exitPointerLock();INPUT.fire=INPUT.sh=0;}}
+// แท่นที่ยืนอยู่: 'bot' = แท่นโซนเสกบอท • 'arena' = แท่นเพิ่มบอทสังเวียน (เลือกทีม A/B, ฝั่งละไม่เกิน 2)
 function bpSync(v){
-  const me=v.mode==='train'&&v.ph!=='over'&&MAPID==='test'&&v.P.find(q=>q.id===NET.myId),B=me?trBotPad():null;
-  const on=!!(B&&me.al&&Math.hypot(me.x-B.x,me.y-B.y)<B.r);
-  if(on!==bpOn){bpOn=on;bpShow(on&&!trOpenF);}
-  if(TRPAD)TRPAD.material.opacity=on?0.7+0.3*Math.sin(performance.now()/160):1;
+  const me=v.mode==='train'&&v.ph!=='over'&&MAPID==='test'&&v.P.find(q=>q.id===NET.myId);
+  let on='';if(me&&me.al)for(const [k,B] of [['bot',trBotPad()],['arena',arPads().bot]])if(Math.hypot(me.x-B.x,me.y-B.y)<B.r)on=k;
+  if(on!==bpOn){bpOn=on;bpShow(!!on&&!trOpenF);}
+  const pl=0.7+0.3*Math.sin(performance.now()/160);if(TRPAD)TRPAD.material.opacity=on==='bot'?pl:1;if(ARPAD)ARPAD.material.opacity=on==='arena'?pl:1;
   if(!bpOpen)return;
-  const nb=v.P.filter(q=>String(q.id).startsWith('bot')).length,k=JSON.stringify(BP)+'|'+nb;if(k===bpKey)return;bpKey=k;
-  $('#bpPanel').innerHTML=`<h2>🤖 แท่นเสกบอท</h2>
+  const ar=on==='arena',nb=v.P.filter(q=>String(q.id).startsWith('bot')).length,k=on+JSON.stringify(BP)+'|'+nb;if(k===bpKey)return;bpKey=k;
+  if(ar&&BP.n>AR_MAX)BP.n=AR_MAX;
+  $('#bpPanel').innerHTML=`<h2>🤖 ${ar?'เพิ่มบอทในสังเวียน':'แท่นเสกบอท'}</h2>
+    ${ar?`<div class="trs">ทีม</div><div class="trn">${AR_SIDE.map(s=>`<button class="${BP.side===s?'on':''}" data-bps="${s}" style="color:${s==='A'?'#8fc8ff':'#ff9a8a'}">ทีม ${s}</button>`).join('')}</div>`:''}
     <div class="trs">ธาตุ</div>
     <div class="trg">${PATHS.map((P,i)=>P.off?'':`<button class="${BP.p===i?'on':''}" data-bpp="${i}" style="color:${P.col}">${P.ic} ${P.n}</button>`).join('')}</div>
     <div class="trs">ความเก่ง</div>
     <div class="trn">${BOT_LV.map((L,i)=>`<button class="${BP.lv===i?'on':''}" data-bpl="${i}">${L.n}</button>`).join('')}</div>
     <div class="trs">จำนวน</div>
-    <div class="trn">${[1,2,3].map(n=>`<button class="${BP.n===n?'on':''}" data-bpn="${n}">×${n}</button>`).join('')}</div>
-    <button class="pri trw" data-bp="go" ${nb>=BOT_MAX?'disabled':''}>🤖 เสกบอท</button>
-    <button class="trw" data-bp="clr" ${nb?'':'disabled'}>🧹 ลบบอททั้งหมด${nb?` (${nb} ตัว)`:''}</button>
-    <small>บอทอยู่แค่ในโซนนี้ • สูงสุด ${BOT_MAX} ตัว • คลิกจอ = เล่นต่อ</small>`;
+    <div class="trn">${(ar?[1,2]:[1,2,3]).map(n=>`<button class="${BP.n===n?'on':''}" data-bpn="${n}">×${n}</button>`).join('')}</div>
+    <button class="pri trw" data-bp="go" ${nb>=BOT_MAX?'disabled':''}>🤖 ${ar?'เพิ่มบอททีม '+BP.side:'เสกบอท'}</button>
+    <button class="trw" data-bp="clr">🧹 ${ar?'ลบบอทในสังเวียน':'ลบบอทในโซนนี้'}</button>
+    <small>${ar?'ยืนบนแท่นทีม A / B = พร้อม • 2 ฝั่งพร้อม = เริ่มนับ 3-2-1':'บอทอยู่แค่ในโซนนี้'} • บอทสูงสุด ${BOT_MAX} ตัว • คลิกจอ = เล่นต่อ</small>`;
 }
 $('#bpPanel').addEventListener('click',e=>{
   const b=e.target.closest('button');if(!b)return;ac();
+  const ar=bpOn==='arena';
   if(b.dataset.bpp)BP.p=+b.dataset.bpp;
   else if(b.dataset.bpl)BP.lv=+b.dataset.bpl;
   else if(b.dataset.bpn)BP.n=+b.dataset.bpn;
-  else if(b.dataset.bp==='go')trSend({c:'bot',p:BP.p,lv:BP.lv,n:BP.n});
-  else if(b.dataset.bp==='clr')trSend({c:'botclr'});
+  else if(b.dataset.bps)BP.side=b.dataset.bps;
+  else if(b.dataset.bp==='go')trSend(ar?{c:'bot',p:BP.p,lv:BP.lv,n:BP.n,side:BP.side}:{c:'bot',p:BP.p,lv:BP.lv,n:BP.n});
+  else if(b.dataset.bp==='clr')trSend(ar?{c:'botclr',z:'arena'}:{c:'botclr'});
   bpKey='';if(VIEW.cur)bpSync(VIEW.cur);
 });
 $('#btnMyMusic').onclick=()=>{ac();$('#myMusicIn').click();};

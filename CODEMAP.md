@@ -90,7 +90,7 @@ MIND:66 summonMin:72 minTarget:81 minShoot:88 updateMins:93 aimTarget:133
 §180 ร่ายคาถา
 castSlot:181 castUlt:196
 
-## js/10-net.js (183) — เครือข่าย (PeerJS / WebRTC)
+## js/10-net.js (183) — 
 PREFIX:4 NET:5 RC:9 TURN_SERVERS:12 ICE:13 PEER_OPT:14 TURN_URL:16 ICE_READY:18 JN:22 LAG:24 lagDo:25 hostSend:26 LOBBY:27 genCode:28 sendAll:29 NETD_KEYS:33 NETD:33 netDeltaReset:34 netDelta:35 NETU:47 netUndelta:48 setStatus:54 hostGame:56 hostPeer:64 netConnect:83 joinWatch:94 joinFail:109 netLost:115 joinGame:130 joinPeer:141 clientOnData:156 leave:171 leaveRoom:173
 
 ## js/11-host.js (388) — 
@@ -218,7 +218,7 @@ buildLake:457
 §480 บรรยากาศที่ใช้ร่วมกัน (แผนที่จากโค้ด + แผนที่จากไฟล์ผ่าน fx ใน MAP-DE…
 makeSnow:481 makeFireflies:488 makeSnitch:495 fileMapFx:502
 §512 แผนที่จากไฟล์ Blender (MAP-DESIGN.md)
-terrGeo:514 buildFileMap:522 tickM:559 TRPAD:560 ARPAD:560 signTex:561 testSign:562 buildTest:569 buildRuins:666 buildPitch:691
+terrGeo:514 buildFileMap:522 tickM:559 TRPAD:560 signTex:561 testSign:562 buildTest:569 buildRuins:666 buildPitch:691
 
 ## js/29-characters.js (436) — ระบบผ้า (เสื้อคลุมพลิ้วตามการเคลื่อนที่)
 makeCloak:2 updateCloth:10 wandNamed:34 wandSparks:83

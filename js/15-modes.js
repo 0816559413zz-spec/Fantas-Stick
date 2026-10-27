@@ -48,7 +48,7 @@ function modeInit(){
     banner(`🐍 ลอร์ดโวลเดอมอร์${ni>1?'และผู้เสพความตาย':''}แฝงตัวอยู่ในหมู่พวกเรา — ทำภารกิจ แล้วหาตัวให้เจอ!`,4);
   }else if(m==='train'){
     // Test Place: หุ่นซ้อมเรียงเป็นแถว + 1 ตัวไกลๆ ไว้ฝึกยิงระยะไกล • ค่าตั้ง G.tr คงอยู่ข้ามรอบ
-    G.tr=Object.assign({datk:1,mai:1,nocd:0,ult:0,god:0,pvp:0},G.tr||{});trTeams();
+    G.tr=Object.assign({datk:1,mai:1,nocd:0,ult:0,god:0,pvp:0},G.tr||{});G.ar=null;trTeams();
     const cy=MH/2-260;
     for(let i=0;i<5;i++)spawnDummy(MW/2+(i-2)*170,cy);
     spawnDummy(MW/2,MH/2-500);   // ไม่เกินรั้วโซนเทสสกิล (y 2100)
@@ -69,7 +69,9 @@ function trainTick(dt){
   const ST=G.spotT||(G.spotT=[]);
   testDummySpots().forEach(([x,y],i)=>{if(G.en.some(e=>e.spot===i))return;ST[i]=(ST[i]===undefined?3:ST[i])-dt;if(ST[i]<=0){ST[i]=undefined;spawnDummy(x,y);G.en[G.en.length-1].spot=i;}});
   const T=G.tr||{};
-  for(const p of humans()){   // ค่าโกง (ไม่มีคูลดาวน์/อัลติเต็ม/อมตะ) ไม่ใช้กับบอท
+  arenaTick(dt);
+  for(const p of humans()){   // ค่าโกง (ไม่มีคูลดาวน์/อัลติเต็ม/อมตะ) ไม่ใช้กับบอท และคนที่กำลังแข่งในสังเวียน
+    if(p.arSide)continue;
     if(T.nocd)for(const k of ['q','e','r','f'])p.cd[k]=0;
     if(T.ult)p.ult=100;
     if(T.god&&p.alive)p.hp=p.maxHp;
@@ -81,6 +83,7 @@ const TR_KEYS=['datk','mai','nocd','ult','god'];
 function trTeams(){
   const T=G.tr||{};
   plist().forEach((p,i)=>{
+    if(p.arSide){p.team=AR_TEAM[p.arSide];return;}   // กำลังแข่งในสังเวียน (js/15-arena)
     if(p.ai){p.team=p.ai.team;return;}   // บอท = ทีมบอท (js/15-bot)
     if(p.trT===undefined)p.trT=i%2;
     p.team=T.pvp===1?p.trT:T.pvp===2?10+i:0;

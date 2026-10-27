@@ -609,7 +609,12 @@ function buildTest(){
     const lm=new THREE.MeshBasicMaterial({color:'#fff2d0',transparent:true,opacity:0.6});
     for(const r of [A.r-40,170]){const g=addW(new THREE.Mesh(new THREE.RingGeometry(r*S3-0.2,r*S3,64),lm));g.rotation.x=-Math.PI/2;g.position.set(tx(A.cx),0.03,tz(A.cy));}
     const ln=addW(new THREE.Mesh(new THREE.PlaneGeometry(0.4,(A.r-40)*2*S3),lm));ln.rotation.x=-Math.PI/2;ln.position.set(tx(A.cx),0.03,tz(A.cy));
-    lbl('ทีม A',A.cx-420,A.cy,16,'#8fc8ff');lbl('ทีม B',A.cx+420,A.cy,16,'#ff9a8a');}
+    // แท่นทีม A/B (ยืน = พร้อม) + แท่นเพิ่มบอทสังเวียน (arPads js/15-arena)
+    const dec=(P,rgb,t1,t2)=>{const t=texCanvas(512,512,g=>{g.translate(256,256);g.fillStyle=`rgba(${rgb},0.25)`;g.beginPath();g.arc(0,0,250,0,7);g.fill();
+        g.strokeStyle=`rgba(${rgb},0.95)`;g.lineWidth=12;g.beginPath();g.arc(0,0,242,0,7);g.stroke();g.lineWidth=4;g.setLineDash([26,16]);g.beginPath();g.arc(0,0,190,0,7);g.stroke();g.setLineDash([]);
+        g.fillStyle='rgba(255,250,240,0.97)';g.textAlign='center';g.textBaseline='middle';g.font='bold 76px Kanit, sans-serif';g.fillText(t1,0,-22);g.font='34px Kanit, sans-serif';g.fillText(t2,0,48);});
+      const m=addW(new THREE.Mesh(new THREE.PlaneGeometry(P.r*2*S3,P.r*2*S3),new THREE.MeshBasicMaterial({map:t,transparent:true,depthWrite:false})));m.rotation.x=-Math.PI/2;m.position.set(tx(P.x),0.04,tz(P.y));return m;};
+    const AP=arPads();dec(AP.A,'110,180,255','ทีม A','ยืนที่นี่ = พร้อม');dec(AP.B,'255,120,100','ทีม B','ยืนที่นี่ = พร้อม');ARPAD=dec(AP.bot,'170,130,250','เพิ่มบอท','ยืนบนแท่น = เมนู');}
   {// แท่นเสกบอท: ยืนบนแท่น = เมนูเสกบอท (bpSync js/40)
     const B=trBotPad(),t=texCanvas(512,512,g=>{g.translate(256,256);g.fillStyle='rgba(150,110,230,0.22)';g.beginPath();g.arc(0,0,250,0,7);g.fill();
       g.strokeStyle='rgba(190,160,255,0.95)';g.lineWidth=10;g.beginPath();g.arc(0,0,244,0,7);g.stroke();g.lineWidth=4;g.setLineDash([26,16]);g.beginPath();g.arc(0,0,190,0,7);g.stroke();g.setLineDash([]);

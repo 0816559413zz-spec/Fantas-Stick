@@ -1,6 +1,6 @@
 # Training room zones + bot v1 (plan, 2026-10-27)
 
-Status: **steps 1 (zones), 2 (bot brain, `js/15-bot.js`), 3 (pad menu, js/40 `bpSync`) built 2026-10-27; step 4 (arena) not yet.** User wants zones clearly separated, and bot v1 callable in the training room.
+Status: **steps 1 (zones), 2 (bot brain, `js/15-bot.js`), 3 (pad menu, js/40 `bpSync`) built 2026-10-27; 4 (arena, `js/15-arena.js`) built 2026-10-27 — plan complete.** User wants zones clearly separated, and bot v1 callable in the training room.
 
 ## User decisions
 - Summon bot: **walk onto a pad** → menu: element, difficulty (easy/medium/hard), count 1–3 → summon.

@@ -30,10 +30,18 @@ function spawnBot(path,lv,x,y,zk,owner){
   emit({k:'revive',x:p.x,y:p.y});
   return p;
 }
-function removeBots(filter){for(const p of bots())if(!filter||filter(p))hostRemove(p.id);}
+// ลบของที่คนเหล่านี้เสกไว้ (กำแพง/หินดิน/โซน/กระสุน/สัตว์เวท ...) — ใช้ตอนลบบอท และจบรอบสังเวียน
+const OWNED_K=['proj','zones','strikes','walls','chan','mins','erings','ices','waves','glac','eso','edust'];
+function clearOwned(ids){const S=new Set(ids);for(const k of OWNED_K)if(Array.isArray(G[k]))G[k]=G[k].filter(o=>!S.has(o.owner));}
+function removeBots(filter){const L=bots().filter(p=>!filter||filter(p));if(!L.length)return;clearOwned(L.map(p=>p.id));for(const p of L)hostRemove(p.id);}
 // เป้า: ศัตรูที่ยังสู้ได้ในโซนเดียวกัน (คนก่อน, คนที่เสกได้ก่อนนิดหน่อย) → ไม่มีก็มอนสเตอร์ในโซน (ไม่นับหุ่นซ้อม)
 function botPickTarget(p){
   const A=p.ai,zk=A.zone;let best=null,bd=1e18;
+  if(A.side){   // บอทสังเวียน: สู้เฉพาะตอนแข่ง กับฝั่งตรงข้ามเท่านั้น (js/15-arena)
+    if(!p.arSide||!G.ar||G.ar.ph!=='fight')return null;
+    for(const id of G.ar[p.arSide==='A'?'B':'A']){const q=G.players[id];if(!q||!q.alive||q.downed)continue;const d=(q.x-p.x)**2+(q.y-p.y)**2;if(d<bd){bd=d;best=q;}}
+    return best;
+  }
   for(const q of plist()){if(q===p||!q.alive||q.downed||q.team===p.team||q.gh)continue;if(!botInZone(zk,q.x,q.y,120))continue;
     let d=(q.x-p.x)**2+(q.y-p.y)**2;if(q.id===A.owner)d*=0.6;if(q===A.tg)d*=0.8;if(d<bd){bd=d;best=q;}}
   if(best)return best;
@@ -71,12 +79,13 @@ function aiBot(p,dt){
 }
 // คำสั่งเสก/ลบบอทจากห้องฝึก (trCmd js/15): จุดเกิด = แท่นเสกบอท
 function trBotCmd(p,d){
-  if(d.c==='bot'){
+  if(d.c==='bot'&&d.side){const k=arAddBots(p,d);if(k){feed(`🤖 ${p.name} เพิ่มบอททีม ${d.side==='B'?'B':'A'} ×${k}`);broadcastLobby();}}
+  else if(d.c==='bot'){
     const B=trBotPad(),n=clamp(d.n|0||1,1,3);let k=0;
     for(let i=0;i<n;i++){const a=i/n*Math.PI*2;if(spawnBot(d.p|0,d.lv|0,B.x+Math.cos(a)*120,B.y-300+Math.sin(a)*120,'bot',p.id))k++;}
     if(k){feed(`🤖 ${p.name} เสกบอท${PATHS[d.p|0]&&!PATHS[d.p|0].off?PATHS[d.p|0].n:''} ×${k}`);broadcastLobby();}
     else toast('บอทเต็มแล้ว (สูงสุด '+BOT_MAX+' ตัว)');
-  }else if(d.c==='botclr'){const n=bots().length;removeBots(q=>q.ai.zone==='bot');if(n){feed('🧹 ลบบอทแล้ว');broadcastLobby();}}
+  }else if(d.c==='botclr'){const z=d.z==='arena'?'arena':'bot';if(z==='arena'&&arBusy())return toast('กำลังแข่งอยู่ — รอจบรอบก่อน');const n=bots().filter(q=>q.ai.zone===z).length;removeBots(q=>q.ai.zone===z);if(n){feed('🧹 ลบบอทแล้ว');broadcastLobby();}}
 }
-// ดีบัก (คอนโซล): WD.bot(path, lv, n) = เสกบอทจากชื่อเรา • WD.bot() = ลบบอททั้งหมด
-function botDebug(path,lv,n){const me=G&&G.players[NET.myId];if(!me)return;if(path===undefined)return trBotCmd(me,{c:'botclr'});trBotCmd(me,{c:'bot',p:path,lv,n});return bots().map(q=>q.name);}
+// ดีบัก (คอนโซล): WD.bot(path, lv, n, side) = เสกบอทจากชื่อเรา (side 'A'/'B' = บอทสังเวียน) • WD.bot() = ลบบอททั้งหมด
+function botDebug(path,lv,n,side){const me=G&&G.players[NET.myId];if(!me)return;if(path===undefined)return removeBots();trBotCmd(me,side?{c:'bot',p:path,lv,n,side}:{c:'bot',p:path,lv,n});return bots().map(q=>q.name);}
