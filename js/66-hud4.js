@@ -38,12 +38,12 @@ function h4Build(me,v){
   R+=h4Parts(E,22,(a,b)=>{const t=(180+a*90)*Math.PI/180,r=40+b*(H4RC+30);return [H4C+Math.cos(t)*r,H4C+Math.sin(t)*r];});
   cards.forEach((s,i)=>{const d=196+i*20,a=d*Math.PI/180,x=H4C+Math.cos(a)*H4RC,y=H4C+Math.sin(a)*H4RC;
     R+=`<div class="h4Cd" data-ci="${s[3]}" style="left:${(x-39).toFixed(1)}px;top:${(y-55).toFixed(1)}px;transform:rotate(${(((d+90)-360)*0.55).toFixed(1)}deg)"><i class="gem"></i>${h4Ico(s[1],46)}<i class="sh"></i><b class="n"></b><span class="k">${esc(h4Key(s[0]))}</span></div>`;});
-  const gs=gems.length>4?19:21,g0=226-(gems.length-1)*gs/2;   // อัญมณีเรียงกึ่งกลางใต้ไพ่ (ไพ่ 196–256°) — จำนวนเปลี่ยนได้ (ไม่มีไม้กวาด = 3)
+  const gs=gems.length>4?21:27,g0=226-(gems.length-1)*gs/2;   // อัญมณีเรียงกึ่งกลางใต้ไพ่ (ไพ่ 196–256°) — จำนวนเปลี่ยนได้ (ไม่มีไม้กวาด = 3)
   gems.forEach((s,i)=>{const a=(g0+i*gs)*Math.PI/180,x=H4C+Math.cos(a)*H4RC*0.6,y=H4C+Math.sin(a)*H4RC*0.6;
-    R+=`<div class="h4Gm" data-ci="${s[3]}" style="left:${x.toFixed(1)}px;top:${y.toFixed(1)}px">${h4Ico(s[1],26)}<i class="sh"></i><b class="n"></b><span class="k">${esc(h4Key(s[0]))}</span></div>`;});
+    R+=`<div class="h4Gm" data-ci="${s[3]}" style="left:${x.toFixed(1)}px;top:${y.toFixed(1)}px">${h4Ico(s[1],32)}<i class="sh"></i><b class="n"></b><span class="k">${esc(h4Key(s[0]))}</span></div>`;});
   R+=`<div class="h4X"><i class="rg"></i><i class="rg2"></i><i class="ic">${icoHTML('p_'+P.id,E.c2,64)}</i></div>`;   // ตราธาตุกลางวง (ที่เดิมของอัลติ) — ใช้สกิล = กะพริบ
   const M=`<div class="h4U"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="48" fill="none" stroke="rgba(255,255,255,.15)" stroke-width="3"/><circle class="ua" cx="50" cy="50" r="48" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-dasharray="301.6" stroke-dashoffset="301.6" transform="rotate(-90 50 50)"/></svg>
-    <div class="tx"><b class="up">0%</b><small>${esc(U?U.n:'')}</small></div><span class="k">${esc(slotKey('X'))}</span></div>`;
+    <div class="tx"><i class="ui">${U?icoHTML(U.id,'#fff',58):''}</i><b class="up">0%</b></div><span class="k">${esc(slotKey('X'))}</span></div>`;
   let L=`<div class="h4Sh"></div>`+h4Parts(E,10,(a,b)=>[20+a*260,-30-b*180]);
   L+=`<div class="h4Me"><div class="h4Por"><div class="tk"></div><div class="rg"><i class="fc">${icoHTML('p_'+P.id,E.c1,54)}</i></div><div class="el">${icoHTML('p_'+P.id,E.c1,21)}</div><div class="lv">LV ${typeof progLv==='function'?progLv().L:1}</div></div>
     <div class="h4Hp"><div class="h4Nm">${esc(me.n||'')}<small>${E.n}</small></div><div class="h4Num"><span class="hp">0</span><small class="mh">/ 0</small><em class="xh"></em></div><div class="h4Seg"></div>
@@ -90,7 +90,7 @@ function hud4Draw(me,v){
     H4.rdy[S.ci]=ok;}
   // อัลติ
   const u=Math.min(100,me.u|0),full=u>=100;
-  h4Set('u',u,x=>{Q.ua.setAttribute('stroke-dashoffset',(301.6*(1-x/100)).toFixed(1));Q.up.textContent=x>=100?'READY':x+'%';Q.up.style.fontSize=x>=100?'20px':'';});
+  h4Set('u',u,x=>{Q.ua.setAttribute('stroke-dashoffset',(301.6*(1-x/100)).toFixed(1));Q.up.textContent=x>=100?'READY':x+'%';});
   if(full!==H4.uFull){H4.uFull=full;Q.u.classList.toggle('full',full);if(full){Q.u.classList.remove('burst');void Q.u.offsetWidth;Q.u.classList.add('burst');}}
   if(!H4.face||H4.faceFor!==me.id+'|'+k.path)h4FaceShot(me,k);
 }
