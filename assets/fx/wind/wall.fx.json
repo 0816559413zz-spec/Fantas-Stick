@@ -1,0 +1,396 @@
+{
+ "v": 1,
+ "desc": "กำแพงลม Aegis Gale — แบบกำแพงลม Yasuo (ผู้ใช้ 2026-10-27): ผนังโค้ง เส้นลมไหลลงตลอด ขอบสองข้างสว่าง กลางโปร่ง เส้นพื้นบอกระยะปลายม้วน",
+ "tags": [
+  "wind",
+  "wall",
+  "ground"
+ ],
+ "pal": "wind",
+ "dur": 6.0,
+ "seed": 11,
+ "layers": [
+  {
+   "id": "back",
+   "t": "mesh",
+   "at": 0,
+   "life": 6.0,
+   "att": "ground",
+   "shape": "model",
+   "model": "wind_wall_back",
+   "mat": "tex",
+   "tex": "tex/wind_wall_fall",
+   "col": "#4fd07a",
+   "col2": "#14663c",
+   "rim": 0.3,
+   "uvTile": [
+    14,
+    1.3
+   ],
+   "uvScroll": [
+    0,
+    -1.5
+   ],
+   "op": {
+    "0": 0,
+    "0.03": 0.32,
+    "0.94": 0.32,
+    "1": 0
+   },
+   "scale": {
+    "0": [
+     1,
+     0.02,
+     1
+    ],
+    "0.045": [
+     1,
+     1.08,
+     1
+    ],
+    "0.07": [
+     1,
+     1,
+     1
+    ],
+    "0.93": [
+     1,
+     1,
+     1
+    ],
+    "1": [
+     1,
+     0.02,
+     1
+    ]
+   },
+   "fade": 0
+  },
+  {
+   "id": "body",
+   "t": "mesh",
+   "at": 0,
+   "life": 6.0,
+   "att": "ground",
+   "shape": "model",
+   "model": "wind_wall_body",
+   "mat": "tex",
+   "tex": "tex/wind_wall_fall",
+   "col": "#c9fff0",
+   "col2": "#3aa58a",
+   "rim": 0.4,
+   "uvTile": [
+    10,
+    1
+   ],
+   "uvScroll": [
+    0,
+    -1.0
+   ],
+   "op": {
+    "0": 0,
+    "0.03": 0.34,
+    "0.94": 0.34,
+    "1": 0
+   },
+   "scale": {
+    "0": [
+     1,
+     0.02,
+     1
+    ],
+    "0.045": [
+     1,
+     1.08,
+     1
+    ],
+    "0.07": [
+     1,
+     1,
+     1
+    ],
+    "0.93": [
+     1,
+     1,
+     1
+    ],
+    "1": [
+     1,
+     0.02,
+     1
+    ]
+   },
+   "fade": 0
+  },
+  {
+   "id": "body2",
+   "t": "mesh",
+   "at": 0,
+   "life": 6.0,
+   "att": "ground",
+   "shape": "model",
+   "model": "wind_wall_body",
+   "mat": "tex",
+   "tex": "tex/wind_wall_fall",
+   "col": "#ffffff",
+   "col2": "#c9fff0",
+   "rim": 0.2,
+   "uvTile": [
+    6,
+    0.8
+   ],
+   "uvScroll": [
+    0.02,
+    -0.7
+   ],
+   "op": {
+    "0": 0,
+    "0.03": 0.12,
+    "0.94": 0.12,
+    "1": 0
+   },
+   "scale": {
+    "0": [
+     1,
+     0.02,
+     1
+    ],
+    "0.045": [
+     1,
+     1.08,
+     1
+    ],
+    "0.07": [
+     1,
+     1,
+     1
+    ],
+    "0.93": [
+     1,
+     1,
+     1
+    ],
+    "1": [
+     1,
+     0.02,
+     1
+    ]
+   },
+   "fade": 0
+  },
+  {
+   "id": "ends",
+   "t": "mesh",
+   "at": 0,
+   "life": 6.0,
+   "att": "ground",
+   "shape": "model",
+   "model": "wind_wall_ends",
+   "mat": "tex",
+   "tex": "tex/wind_wall_fall",
+   "col": "#ffffff",
+   "col2": "#c9fff0",
+   "rim": 0.6,
+   "uvTile": [
+    3,
+    1.1
+   ],
+   "uvScroll": [
+    0,
+    -1.8
+   ],
+   "op": {
+    "0": 0,
+    "0.03": 0.6,
+    "0.94": 0.6,
+    "1": 0
+   },
+   "scale": {
+    "0": [
+     1,
+     0.02,
+     1
+    ],
+    "0.045": [
+     1,
+     1.08,
+     1
+    ],
+    "0.07": [
+     1,
+     1,
+     1
+    ],
+    "0.93": [
+     1,
+     1,
+     1
+    ],
+    "1": [
+     1,
+     0.02,
+     1
+    ]
+   },
+   "fade": 0
+  },
+  {
+   "id": "line",
+   "t": "mesh",
+   "at": 0,
+   "life": 6.0,
+   "att": "ground",
+   "shape": "model",
+   "model": "wind_wall_line",
+   "mat": "glow",
+   "col": "#c9fff0",
+   "col2": "#4fd07a",
+   "op": {
+    "0": 0,
+    "0.02": 1,
+    "0.94": 1,
+    "1": 0
+   },
+   "scale": {
+    "0": [
+     0.2,
+     1,
+     0.2
+    ],
+    "0.05": [
+     1,
+     1,
+     1
+    ]
+   },
+   "fade": 0
+  },
+  {
+   "id": "wispL",
+   "t": "emit",
+   "at": 0.15,
+   "life": 5.6,
+   "att": "ground",
+   "pos": [
+    -5.808351409170957,
+    2.6,
+    1.6764944892095524
+   ],
+   "rate": 10,
+   "from": "sphere",
+   "fr": 0.4,
+   "dir": "down",
+   "speed": [
+    1.2,
+    2.4
+   ],
+   "plife": [
+    0.4,
+    0.9
+   ],
+   "look": "streak",
+   "size": [
+    0.5,
+    1.1
+   ],
+   "col": "#e6fff4",
+   "c2": "#4fd07a",
+   "gravity": 0,
+   "drag": 0.5,
+   "curl": false
+  },
+  {
+   "id": "wispR",
+   "t": "emit",
+   "at": 0.15,
+   "life": 5.6,
+   "att": "ground",
+   "pos": [
+    5.808351409170957,
+    2.6,
+    1.6764944892095524
+   ],
+   "rate": 10,
+   "from": "sphere",
+   "fr": 0.4,
+   "dir": "down",
+   "speed": [
+    1.2,
+    2.4
+   ],
+   "plife": [
+    0.4,
+    0.9
+   ],
+   "look": "streak",
+   "size": [
+    0.5,
+    1.1
+   ],
+   "col": "#e6fff4",
+   "c2": "#4fd07a",
+   "gravity": 0,
+   "drag": 0.5,
+   "curl": false
+  },
+  {
+   "id": "wispM",
+   "t": "emit",
+   "at": 0.15,
+   "life": 5.6,
+   "att": "ground",
+   "from": "mesh",
+   "of": "body",
+   "rate": 14,
+   "dir": "down",
+   "speed": [
+    1,
+    2
+   ],
+   "plife": [
+    0.5,
+    1
+   ],
+   "look": "streak",
+   "size": [
+    0.4,
+    0.9
+   ],
+   "col": "#c9fff0",
+   "c2": "#3aa58a",
+   "gravity": 0,
+   "drag": 0.5,
+   "curl": false
+  },
+  {
+   "id": "rise",
+   "t": "emit",
+   "at": 0,
+   "life": 0.12,
+   "att": "ground",
+   "from": "mesh",
+   "of": "line",
+   "burst": 60,
+   "rate": 0,
+   "dir": "up",
+   "speed": [
+    3,
+    6
+   ],
+   "plife": [
+    0.25,
+    0.5
+   ],
+   "look": "streak",
+   "size": [
+    0.8,
+    1.6
+   ],
+   "col": "#e6fff4",
+   "c2": "#4fd07a",
+   "gravity": 0,
+   "drag": 2,
+   "curl": false
+  }
+ ]
+}
