@@ -289,7 +289,7 @@ function damage(t,amt,srcId,kind){
   if(G.mode==='train'&&G.tr&&G.tr.god&&G.players[t.id]===t)return;   // ห้องฝึก: อมตะ
   const src=srcId!=null?G.players[srcId]:null;
   if(src&&kind!=='burn')amt*=src.buffs.dmg;
-  if(src&&src.blaze>0)amt*=1.3;
+  if(src&&src.blaze>0)amt*=1.15;   // Blazeform (เนิร์ฟ 2026-10-27: 1.3→1.15)
   if(src&&src.mirror>0&&!src.noMul)amt*=2;
   if(t.isM){
     if(t.dead)return;

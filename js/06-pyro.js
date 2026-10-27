@@ -125,9 +125,9 @@ defSpell(0,{id:'ringofembers',role:'control',n:'Ring of Embers',ic:'⭕',cd:14,d
     (G.erings||(G.erings=[])).push({x:q.x,y:q.y,r:170,t:3,del:0.3,owner:p.id,team:p.team,in:new Set(),cd:new Map(),ed:new Map()});
     emit({k:'efx',z:'ermet',x:q.x,y:q.y,h:0.2,r:170,t:0.3,id:p.id});
   }});
-defSpell(0,{id:'blazeform',role:'utility',n:'Blazeform',ic:'🔥',cd:20,d:'กลายร่างเปลวไฟ 6 วิ: ดาเมจทุกสกิล (รวมเผา Burning) +30% • เดินเร็ว +25% • ออร่าไฟรอบตัว (รัศมี ~130) เผา ~19/วิ • ศัตรูที่โดนออร่าครั้งแรก +1 Burning (คนละ 1 ชั้นต่อการใช้ 1 ครั้ง)',fx:'ผลเสีย: เรารับดาเมจ +25% ระหว่างนั้น',
-  cast(p,S){p.blaze=6;p.blzTk=0;p.blzN=0;p.blzHit=new Set();emit({k:'efx',z:'blaze',x:p.x,y:p.y,h:p.z+1,id:p.id});}});
-defSpell(0,{id:'ignitionsnap',role:'finisher',n:'Ignition Snap',ic:'🫰',cd:5,d:'ท่าเตรียม 0.6 วิ แล้วดีดนิ้ว: ศัตรูทุกคนที่มี Burning ในระยะ 500 ระเบิดพร้อมกัน (ไม่ต้องเล็ง)',fx:'25 ดาเมจต่อ 1 ชั้น Burning (6 ชั้น = 150) และฮีลเรา 20 ต่อชั้น แล้วใช้ Burning หมด • ไม่มีใครติดไฟในระยะ = ไม่เสียคูลดาวน์',
+defSpell(0,{id:'blazeform',role:'utility',n:'Blazeform',ic:'🔥',cd:20,d:'กลายร่างเปลวไฟ 4 วิ: ดาเมจทุกสกิล (รวมเผา Burning) +15% • เดินเร็ว +25% • ออร่าไฟรอบตัว (รัศมี ~130) เผา 3/วิ • ศัตรูที่โดนออร่าครั้งแรก +1 Burning (คนละ 1 ชั้นต่อการใช้ 1 ครั้ง)',fx:'ผลเสีย: เรารับดาเมจ +25% ระหว่างนั้น',
+  cast(p,S){p.blaze=4;p.blzTk=0;p.blzN=0;p.blzHit=new Set();emit({k:'efx',z:'blaze',x:p.x,y:p.y,h:p.z+1,id:p.id});}});
+defSpell(0,{id:'ignitionsnap',role:'finisher',n:'Ignition Snap',ic:'🫰',cd:15,d:'ท่าเตรียม 0.6 วิ แล้วดีดนิ้ว: ศัตรูทุกคนที่มี Burning ในระยะ 500 ระเบิดพร้อมกัน (ไม่ต้องเล็ง)',fx:'20 ดาเมจต่อ 1 ชั้น Burning (5 ชั้น = 100) และฮีลเรา 10 ต่อชั้น แล้วใช้ Burning หมด • ไม่มีใครติดไฟในระยะ = ไม่เสียคูลดาวน์',
   cast(p,S){
     if(!foesOf(p.team).some(t=>t.brn>0&&Math.hypot(t.x-p.x,t.y-p.y)<500))return false;
     p.snapT=0.6;emit({k:'efx',z:'snapwind',x:p.x,y:p.y,h:p.z+1.4,id:p.id});
@@ -139,7 +139,7 @@ function pyroSnap(p){
   for(const t of foesOf(p.team)){
     if(!(t.brn>0)||Math.hypot(t.x-p.x,t.y-p.y)>500)continue;
     const n=t.brn|0;
-    if(aoeHit(p,t,25*n)){t.brn=0;t.brnT=0;healT(p,20*n);}
+    if(aoeHit(p,t,20*n)){t.brn=0;t.brnT=0;healT(p,10*n);}   // เนิร์ฟ 2026-10-27 (ผู้ใช้): 25→20 ดาเมจ, ฮีล 20→10 ต่อชั้น
     emit({k:'efx',z:'snapboom',x:t.x,y:t.y,h:cH(t),n});
   }
 }

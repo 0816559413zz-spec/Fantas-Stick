@@ -204,7 +204,7 @@ function pyroFX(o,p,pz,now,dt){
   // Kindle ลอยกลางอากาศ: ไฟพ่นลงจากใต้เท้า
   if(p.hv){for(let i=0;i<4;i++)PARTS.push({x:p.x+rnd(-8,8),y:p.y+rnd(-8,8),h:pz+rnd(-0.1,0.2),vx:rnd(-20,20),vy:rnd(-20,20),vh:rnd(-5,-2.5),life:rnd(0.25,0.4),max:0.4,col:i?'#ff8a2a':'#ffe08a',size:rnd(2.4,3.6),g:2,drag:2,smoke:i===3});LREQ.push({x:tx(p.x),y:pz,z:tz(p.y),col:'#ff8a3a',int:2,dist:8});}
   // Blazeform: ออร่าไฟรอบตัว + ขอบวงบอกระยะ (~180)
-  // Blazeform จากไฟล์เอฟเฟกต์ (สตอรี่บอร์ด #12): bind.json "loop:blaze" = fx ที่เล่นวนตลอด 6 วิ (ตามตัว ไม่หมุนตามเล็ง) → แทนขอบวงจากโค้ดด้านล่าง
+  // Blazeform จากไฟล์เอฟเฟกต์ (สตอรี่บอร์ด #12): bind.json "loop:blaze" = fx ที่เล่นวนตลอดร่าง (4 วิ) (ตามตัว ไม่หมุนตามเล็ง) → แทนขอบวงจากโค้ดด้านล่าง
   const blzN=(p.fm|0)&131072?blzFxName():null;
   if(blzN){if(!o.blzFx||o.blzFxN!==blzN){if(o.blzFx)fxStop(o.blzFx);o.blzFx=fxPlay(blzN,{x:p.x,y:p.y,h:pz,follow:p.id,aim:false});o.blzFxN=blzN;}}
   else if(o.blzFx){fxStop(o.blzFx);o.blzFx=null;o.blzFxN=null;}
