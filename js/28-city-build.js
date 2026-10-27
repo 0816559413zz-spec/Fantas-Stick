@@ -53,8 +53,13 @@ function buildCity(){
     metal:std('#6a7078',{roughness:0.6,metalness:0.3}),garage:std('#77787c'),concrete:std('#8a8a8a'),stand:std('#5a5e66'),kiosk:std('#d8d4c8'),train:std('#b8c0c8',{metalness:0.5,roughness:0.4})};
   const contM=['#a8442e','#2e6aa8','#3e8a4a','#c8a03a','#7a3a6a'].map(c=>std(c,{roughness:0.7,metalness:0.2})),carM=['#c8302e','#e8e8ea','#2a2c34','#2e5aa8','#9aa0a8'].map(c=>std(c,{roughness:0.4,metalness:0.4}));
   const roofM=std('#3a3c42'),glassCar=std('#1a2230',{roughness:0.2,metalness:0.6});
+  const zoneOf=(x,y)=>M.zones.find(z=>x>=z.x&&x<=z.x+z.w&&y>=z.y&&y<=z.y+z.d);
+  const KI={},kput=(n,x,y,z,a,sx)=>{(KI[n]||(KI[n]=[])).push(new THREE.Matrix4().compose(new THREE.Vector3(x,y,z),new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,1,0),a),new THREE.Vector3(sx||1,1,1)));};
+  const KR=mulberry(3550),coreM=std('#2a2624');
   for(const B of M.boxes){
     const w=B.w*S3,d=B.d*S3,x=tx(B.x+B.w/2),z=tz(B.y+B.d/2);
+    const zn=(B.m==='shop'||B.m==='brick')&&zoneOf(B.x+B.w/2,B.y+B.d/2);
+    if(zn&&zn.k==='shops'){cityFacade(B,zn,w,d,x,z,kput,KR);const m=addW(new THREE.Mesh(new THREE.BoxGeometry(w-0.8,B.h,d-0.8),coreM));m.position.set(x,B.h/2,z);flat(w-0.4,d-0.4,roofM,x,z,B.h+0.02);continue;}
     if(B.m==='car'){const c=carM[B.i%carM.length],b=addW(new THREE.Mesh(new THREE.BoxGeometry(w,0.8,d),c));b.position.set(x,0.5,z);const t=addW(new THREE.Mesh(new THREE.BoxGeometry(w*0.55,0.6,d*0.9),glassCar));t.position.set(x,1.2,z);shadowAll(b);shadowAll(t);continue;}
     const mat=B.m==='cont'?contM[B.i%contM.length]:MAT[B.m]||MAT.concrete;
     const m=addW(new THREE.Mesh(cityBoxGeo(w,B.h,d),mat));m.position.set(x,B.h/2,z);m.castShadow=m.receiveShadow=true;
@@ -72,8 +77,39 @@ function buildCity(){
   const poleM=std('#22252c',{roughness:0.5}),lamps=[];
   for(let k=1;k<CITY_N;k++)for(let s=CITY_ROAD/2+150;s<MW;s+=500){if(Math.abs(s%CITY_B)<CITY_ROAD/2+60||Math.abs(s%CITY_B-CITY_B)<CITY_ROAD/2+60)continue;
     for(const sd of [-1,1]){const c=k*CITY_B+sd*(CITY_ROAD/2+18);
-      for(const [px,py] of [[c,s],[s,c]]){if(Math.hypot(px-MW/2,py-MH/2)<CITY_PLAZA)continue;const p=addW(new THREE.Mesh(new THREE.CylinderGeometry(0.09,0.12,6,6),poleM));p.position.set(tx(px),3,tz(py));lamps.push(tx(px),6.1,tz(py));}}}
+      for(const [px,py] of [[c,s],[s,c]]){if(Math.hypot(px-MW/2,py-MH/2)<CITY_PLAZA)continue;{const zz=zoneOf(px+(px===c?sd*60:0),py+(py===c?sd*60:0));if(zz&&zz.k==='shops')continue;}const p=addW(new THREE.Mesh(new THREE.CylinderGeometry(0.09,0.12,6,6),poleM));p.position.set(tx(px),3,tz(py));lamps.push(tx(px),6.1,tz(py));}}}
   for(let a=0;a<16;a++){const x=Math.cos(a/16*Math.PI*2)*(CITY_PLAZA*S3-2),z=Math.sin(a/16*Math.PI*2)*(CITY_PLAZA*S3-2);const p=addW(new THREE.Mesh(new THREE.CylinderGeometry(0.09,0.12,5,6),poleM));p.position.set(x,2.5,z);lamps.push(x,5.1,z);}
+  for(const q of M.street||[]){kput('cp_'+q.m,tx(q.x),0,tz(q.y),q.a);if(q.m==='lamp')lamps.push(tx(q.x),4.42,tz(q.y));}
+  cityKitLoad(KI);
   const lg=new THREE.BufferGeometry();lg.setAttribute('position',new THREE.Float32BufferAttribute(lamps,3));
   addW(new THREE.Points(lg,new THREE.PointsMaterial({map:glowTex,color:hdr('#ffd08a',2),size:3.2,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending})));
+}
+// ---------- ชุดโมเดลลอนดอน (assets/city/*.glb จาก assets/src/city_kit_build.py) ----------
+// ผนังตึกแถว = แผ่น 4 ม. × ชั้นละ 3.5 ม. ต่อกันรอบกล่องตึก (ยืดแผ่นให้พอดีความยาวด้าน) • ด้านที่หันหาถนนใกล้สุด = หน้าตึก (ชั้นล่างเป็นร้าน/ประตู)
+// ทุกชิ้นวาดแบบ InstancedMesh (ชิ้นชนิดเดียวกันทั้งเมือง = draw call เดียวต่อวัสดุ) • โหลดไฟล์ไม่ได้ = เหลือกล่องแกนสีเข้มตามเดิม
+const CITY_FL=3.5,CITY_PW=4;
+function cityFacade(B,zn,w,d,x,z,kput,R){
+  const n=Math.max(1,Math.round(B.h/CITY_FL));
+  // ด้าน: [มุม rotation.y, ระยะออกจากกลาง, ความยาว, ระยะถึงขอบย่าน (หาหน้าตึก)]
+  const F=[[0,d/2,w,zn.y+zn.d-(B.y+B.d)],[Math.PI,d/2,w,B.y-zn.y],[Math.PI/2,w/2,d,zn.x+zn.w-(B.x+B.w)],[-Math.PI/2,w/2,d,B.x-zn.x]];
+  const front=F.reduce((a,f,i)=>f[3]<F[a][3]?i:a,0);
+  F.forEach(([a,off,L],fi)=>{
+    const k=Math.max(1,Math.round(L/CITY_PW)),sx=L/(k*CITY_PW),nx=Math.sin(a),nz=Math.cos(a),tx2=Math.cos(a),tz2=-Math.sin(a);
+    for(let i=0;i<k;i++){const t=(i+0.5-k/2)*CITY_PW*sx,px=x+nx*off+tx2*t,pz=z+nz*off+tz2*t;
+      for(let f=0;f<n;f++){const nm=f>0?(R()<0.6?'ct_win':'ct_win_d'):fi===front?(i%3===1?'ct_door':(Math.floor(B.x+B.y)+i)%2?'ct_shop_r':'ct_shop_b'):(R()<0.5?'ct_plain':'ct_win_d');kput(nm,px,f*CITY_FL,pz,a,sx);}
+      kput('ct_cornice',px,n*CITY_FL,pz,a,sx);}
+  });
+  for(const [sx2,sz2] of [[-1,-1],[1,-1],[-1,1],[1,1]])for(let f=0;f<n;f++)kput('ct_corner',x+sx2*w/2,f*CITY_FL,z+sz2*d/2,0);
+  const nc=1+Math.floor(R()*2);for(let i=0;i<nc;i++)kput('ct_chimney',x+(R()-0.5)*(w-3),n*CITY_FL,z+(R()-0.5)*(d-3),R()<0.5?0:Math.PI/2);
+}
+function cityKitLoad(KI){
+  const W0=world,names=Object.keys(KI),tmp=new THREE.Matrix4();
+  Promise.all(names.map(n=>loadModel('city_'+n))).then(rs=>{
+    if(world!==W0)return;   // เปลี่ยนแผนที่ไปแล้ว
+    rs.forEach((r,j)=>{if(!r)return;const L=KI[names[j]];r.scene.updateMatrixWorld(true);
+      r.scene.traverse(o=>{if(!o.isMesh)return;const im=new THREE.InstancedMesh(o.geometry,o.material,L.length);
+        for(let i=0;i<L.length;i++){tmp.multiplyMatrices(L[i],o.matrixWorld);im.setMatrixAt(i,tmp);}
+        im.castShadow=im.receiveShadow=true;im.computeBoundingSphere();W0.add(im);});});
+    gl.shadowMap.needsUpdate=true;
+  });
 }

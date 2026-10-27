@@ -96,6 +96,62 @@
     "prop_pine_broken": {
       "file": "props/pine_broken.glb",
       "v": 1
+    },
+    "city_ct_win": {
+      "file": "city/ct_win.glb",
+      "v": 1
+    },
+    "city_ct_win_d": {
+      "file": "city/ct_win_d.glb",
+      "v": 1
+    },
+    "city_ct_plain": {
+      "file": "city/ct_plain.glb",
+      "v": 1
+    },
+    "city_ct_door": {
+      "file": "city/ct_door.glb",
+      "v": 1
+    },
+    "city_ct_shop_r": {
+      "file": "city/ct_shop_r.glb",
+      "v": 1
+    },
+    "city_ct_shop_b": {
+      "file": "city/ct_shop_b.glb",
+      "v": 1
+    },
+    "city_ct_corner": {
+      "file": "city/ct_corner.glb",
+      "v": 1
+    },
+    "city_ct_cornice": {
+      "file": "city/ct_cornice.glb",
+      "v": 1
+    },
+    "city_ct_chimney": {
+      "file": "city/ct_chimney.glb",
+      "v": 1
+    },
+    "city_cp_phone": {
+      "file": "city/cp_phone.glb",
+      "v": 1
+    },
+    "city_cp_postbox": {
+      "file": "city/cp_postbox.glb",
+      "v": 1
+    },
+    "city_cp_lamp": {
+      "file": "city/cp_lamp.glb",
+      "v": 1
+    },
+    "city_cp_bench": {
+      "file": "city/cp_bench.glb",
+      "v": 1
+    },
+    "city_cp_taxi": {
+      "file": "city/cp_taxi.glb",
+      "v": 1
     }
   },
   "maps": {
