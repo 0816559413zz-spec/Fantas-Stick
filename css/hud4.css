@@ -14,6 +14,24 @@
 .h4X .ic{position:relative;display:grid;filter:drop-shadow(0 0 8px var(--c1)) drop-shadow(0 0 16px var(--c0));animation:h4Breath 3s ease-in-out infinite alternate}
 .h4X.cast .ic{animation:h4Cast .55s ease-out}
 .h4M{position:absolute;left:50%;bottom:22px;width:116px;height:116px;transform-origin:50% 100%;transform:translateX(-50%) scale(var(--hs))}
+.h4Au{position:absolute;inset:0;opacity:0;transition:opacity .4s}
+.h4M.full .h4Au{opacity:1}
+.h4Au::before{content:'';position:absolute;inset:-26px;border-radius:50%;background:radial-gradient(circle closest-side,var(--c1) 55%,color-mix(in srgb,var(--c1) 40%,transparent) 70%,transparent 100%);animation:h4Glow 1.2s ease-in-out infinite alternate}
+.h4Au .fl{position:absolute;inset:-46px;border-radius:50%;-webkit-mask:radial-gradient(circle closest-side,transparent 52%,#000 60%,#000 76%,transparent 100%);mask:radial-gradient(circle closest-side,transparent 52%,#000 60%,#000 76%,transparent 100%)}
+.h4Au .fl.b{inset:-34px;opacity:.85}
+.h4M:not(.full) .h4Au .fl,.h4M:not(.full) .h4Au .h4P i{animation-play-state:paused}
+/* ไฟ: เปลวลุกเป็นแฉก เบลอ สั่นขึ้นลง */
+.h4Au.ember .fl{background:repeating-conic-gradient(from 0deg,var(--c1) 0 9deg,var(--c2) 13deg,transparent 22deg 30deg);filter:blur(5px);animation:h4Spin 5s linear infinite,h4Flame .45s ease-in-out infinite alternate}
+.h4Au.ember .fl.b{background:repeating-conic-gradient(from 12deg,#fff 0 4deg,var(--c1) 9deg,transparent 16deg 24deg);animation:h4Spin 3.4s linear infinite reverse,h4Flame .32s ease-in-out infinite alternate}
+/* น้ำแข็ง: หนามคริสตัลคม ไม่เบลอ หมุนช้า */
+.h4Au.snow .fl{background:repeating-conic-gradient(from 0deg,transparent 0 6deg,var(--c2) 9deg,#fff 10deg,var(--c1) 12deg,transparent 15deg 22.5deg);filter:drop-shadow(0 0 6px var(--c1));animation:h4Spin 14s linear infinite}
+.h4Au.snow .fl.b{background:repeating-conic-gradient(from 11deg,transparent 0 10deg,var(--c1) 12deg,transparent 14deg 30deg);animation:h4Spin 9s linear infinite reverse}
+/* สายฟ้า: แฉกขาด ๆ กะพริบเร็ว */
+.h4Au.spark .fl{background:repeating-conic-gradient(from 0deg,var(--c1) 0 2deg,#fff 3deg,transparent 5deg 17deg,var(--c2) 18deg,transparent 21deg 36deg);filter:drop-shadow(0 0 5px var(--c1));animation:h4Spin 2.2s steps(9) infinite,h4Zap .23s steps(2) infinite}
+.h4Au.spark .fl.b{background:repeating-conic-gradient(from 20deg,#fff 0 1.5deg,transparent 3deg 29deg);animation:h4Spin 1.6s steps(7) infinite reverse,h4Zap .17s steps(2) infinite}
+/* ดิน: ฝุ่นหินหนา ๆ หมุนช้า */
+.h4Au.rock .fl{background:repeating-conic-gradient(from 0deg,var(--c1) 0 14deg,var(--c0) 20deg,var(--c2) 26deg,transparent 34deg 45deg);filter:blur(3px);animation:h4Spin 11s linear infinite}
+.h4Au.rock .fl.b{background:repeating-conic-gradient(from 8deg,var(--c2) 0 5deg,transparent 9deg 40deg);filter:blur(1px);animation:h4Spin 7s linear infinite reverse}
 .h4M .h4U{left:50%;top:50%;width:116px;height:116px}
 .h4L{left:0;transform-origin:0 100%;transform:scale(var(--hs))}
 .h4R{right:0;width:480px;height:480px;transform-origin:100% 100%;transform:scale(var(--hs))}
@@ -121,3 +139,6 @@
 @keyframes h4Burst{from{opacity:1;transform:scale(1)}to{opacity:0;transform:scale(1.6)}}
 @keyframes h4Breath{from{transform:scale(.94);opacity:.85}to{transform:scale(1.04);opacity:1}}
 @keyframes h4Cast{0%{transform:scale(1.28);filter:brightness(2.3) drop-shadow(0 0 22px var(--c2))}100%{transform:scale(1)}}
+@keyframes h4Flame{from{scale:1}to{scale:1.07 1.12}}
+@keyframes h4Zap{0%{opacity:1}50%{opacity:.35}100%{opacity:1}}
+@keyframes h4Glow{from{opacity:.55;scale:.96}to{opacity:.95;scale:1.05}}

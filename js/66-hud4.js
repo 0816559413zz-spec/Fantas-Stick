@@ -42,7 +42,9 @@ function h4Build(me,v){
   gems.forEach((s,i)=>{const a=(g0+i*gs)*Math.PI/180,x=H4C+Math.cos(a)*H4RC*0.6,y=H4C+Math.sin(a)*H4RC*0.6;
     R+=`<div class="h4Gm" data-ci="${s[3]}" style="left:${x.toFixed(1)}px;top:${y.toFixed(1)}px">${h4Ico(s[1],32)}<i class="sh"></i><b class="n"></b><span class="k">${esc(h4Key(s[0]))}</span></div>`;});
   R+=`<div class="h4X"><i class="rg"></i><i class="rg2"></i><i class="ic">${icoHTML('p_'+P.id,E.c2,64)}</i></div>`;   // ตราธาตุกลางวง (ที่เดิมของอัลติ) — ใช้สกิล = กะพริบ
-  const M=`<div class="h4U"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="48" fill="none" stroke="rgba(255,255,255,.15)" stroke-width="3"/><circle class="ua" cx="50" cy="50" r="48" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-dasharray="301.6" stroke-dashoffset="301.6" transform="rotate(-90 50 50)"/></svg>
+  // ออร่าธาตุรอบอัลติ (โชว์เฉพาะตอนเต็ม: .h4M.full) — วงแสงหมุน 2 ชั้น + อนุภาคธาตุรอบลูกแก้ว
+  const au=`<div class="h4Au ${E.pt}"><i class="fl"></i><i class="fl b"></i>${h4Parts(E,18,(a,b)=>{const t=a*Math.PI*2,r=50+b*16;return [58+Math.cos(t)*r,58+Math.sin(t)*r];})}</div>`;
+  const M=au+`<div class="h4U"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="48" fill="none" stroke="rgba(255,255,255,.15)" stroke-width="3"/><circle class="ua" cx="50" cy="50" r="48" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-dasharray="301.6" stroke-dashoffset="301.6" transform="rotate(-90 50 50)"/></svg>
     <div class="tx"><i class="ui">${U?icoHTML(U.id,'#fff',58):''}</i><b class="up">0%</b></div><span class="k">${esc(slotKey('X'))}</span></div>`;
   let L=`<div class="h4Sh"></div>`+h4Parts(E,10,(a,b)=>[20+a*260,-30-b*180]);
   L+=`<div class="h4Me"><div class="h4Por"><div class="tk"></div><div class="rg"><i class="fc">${icoHTML('p_'+P.id,E.c1,54)}</i></div><div class="el">${icoHTML('p_'+P.id,E.c1,21)}</div><div class="lv">LV ${typeof progLv==='function'?progLv().L:1}</div></div>
@@ -51,7 +53,7 @@ function h4Build(me,v){
   root.innerHTML=`<div class="h4L">${L}</div><div class="h4R">${R}</div><div class="h4M">${M}</div>`;   // h4M = อัลติกลางล่าง (ผู้ใช้ 2026-10-27)
   H4.el=root;H4.cache={};H4.rdy={};H4.segN=0;H4.uFull=false;
   H4.q={hp:root.querySelector('.hp'),mh:root.querySelector('.mh'),xh:root.querySelector('.xh'),seg:root.querySelector('.h4Seg'),sub:root.querySelector('.h4Sub'),subB:root.querySelector('.h4Sub b'),subT:root.querySelector('.h4Sub small'),
-    chips:root.querySelector('.h4Chips'),x:root.querySelector('.h4X'),u:root.querySelector('.h4U'),ua:root.querySelector('.ua'),up:root.querySelector('.up'),fc:root.querySelector('.fc'),
+    chips:root.querySelector('.h4Chips'),m:root.querySelector('.h4M'),x:root.querySelector('.h4X'),u:root.querySelector('.h4U'),ua:root.querySelector('.ua'),up:root.querySelector('.up'),fc:root.querySelector('.fc'),
     slots:[...root.querySelectorAll('.h4Cd,.h4Gm')].map(el=>({el,ci:+el.dataset.ci,sh:el.querySelector('.sh'),n:el.querySelector('.n'),gem:el.classList.contains('h4Gm')}))};
   if(H4.face&&H4.faceFor===me.id+'|'+k.path)h4FaceSet();
 }
@@ -91,7 +93,7 @@ function hud4Draw(me,v){
   // อัลติ
   const u=Math.min(100,me.u|0),full=u>=100;
   h4Set('u',u,x=>{Q.ua.setAttribute('stroke-dashoffset',(301.6*(1-x/100)).toFixed(1));Q.up.textContent=x>=100?'READY':x+'%';});
-  if(full!==H4.uFull){H4.uFull=full;Q.u.classList.toggle('full',full);if(full){Q.u.classList.remove('burst');void Q.u.offsetWidth;Q.u.classList.add('burst');}}
+  if(full!==H4.uFull){H4.uFull=full;Q.u.classList.toggle('full',full);Q.m.classList.toggle('full',full);if(full){Q.u.classList.remove('burst');void Q.u.offsetWidth;Q.u.classList.add('burst');}}
   if(!H4.face||H4.faceFor!==me.id+'|'+k.path)h4FaceShot(me,k);
 }
 // เรียกท้ายทุกเฟรมจาก render loop: เฟรมนี้ไม่ได้วาด HUD (ชนะ/แพ้, โหมด imp, ไม่มีตัวเรา) = ซ่อน
