@@ -73,13 +73,34 @@ def make_brick():
 
 PALM = make_pal()
 BRICK = make_brick()
-MATS = [PALM, BRICK]
+PAL2C = ['#d8d0bc', '#b4ab96', '#22344a', '#7fa6c0',    # 0 หินพอร์ตแลนด์ 1 หินเงา 2 กระจกตึกมืด 3 กระจกตึกไฟ
+         '#5a636e', '#3a4048', '#7d8590', '#4a6a8a',    # 4 โครงอลูมิเนียม 5 แผงทึบ 6 เหล็กลอนเทา 7 เหล็กลอนฟ้า
+         '#9aa0a6', '#9a9890', '#6e6c66', '#d8b030',    # 8 ประตูม้วน 9 คอนกรีต 10 คอนกรีตเข้ม 11 เหลืองเตือน
+         '#b02a24', '#3e6a32', '#24448a', '#2a8a4a']    # 12 แดงรถเมล์ 13 พุ่มไม้ 14 น้ำเงินรถไฟใต้ดิน 15 ไฟเขียว
+P_STONE, P_STONE2, P_GLASS, P_GLASS_LIT, P_MULL, P_SPAND, P_COR, P_CORB, P_SHUT, P_CONC, P_CONC2, P_HAZ, P_BUS, P_HEDGE, P_TUBE, P_GREEN = range(16)
+
+
+def make_pal2():
+    base = palette('city_pal2_img', PAL2C)
+    emi = palette('city_emit2_img', [{P_GLASS_LIT: '#9fd0ff', P_GREEN: '#40ff80'}.get(i, '#000000') for i in range(16)])
+    m = mat('city_pal2', rough=0.6, img=base)
+    nt = m.node_tree
+    bs = nt.nodes.get('Principled BSDF')
+    t2 = nt.nodes.new('ShaderNodeTexImage'); t2.image = emi; t2.interpolation = 'Closest'
+    nt.links.new(t2.outputs['Color'], bs.inputs['Emission Color'])
+    bs.inputs['Emission Strength'].default_value = 0.8
+    return m
+
+
+PAL2 = make_pal2()
+PAINT = mat('city_paint', '#ffffff', rough=0.45, metal=0.3)
+MATS = [PALM, BRICK, PAL2, PAINT]
 
 
 def bx(m, x0, x1, y0, y1, z0, z1, mt=PALM, sw=STONE, rot=None):
     """กล่องจากขอบ (พิกัด three: x ขวา, y ขึ้น, z หน้า)"""
     c = ((x0 + x1) / 2, (y0 + y1) / 2, (z0 + z1) / 2)
-    m.box((abs(x1 - x0), abs(y1 - y0), abs(z1 - z0)), trs3(c, rot or (0, 0, 0)), mt, sw if mt is PALM else None)
+    m.box((abs(x1 - x0), abs(y1 - y0), abs(z1 - z0)), trs3(c, rot or (0, 0, 0)), mt, sw if mt is PALM or mt is PAL2 else None)
 
 
 def brick_uv(ob, scale=0.5):
@@ -336,11 +357,15 @@ def taxi():
 pieces = [piece_win(True), piece_win(False), piece_plain(), piece_door(), piece_shop(AWN_R), piece_shop(AWN_B),
           piece_corner(), piece_cornice(), piece_chimney()]
 props = [phone(), postbox(), lamp(), bench(), taxi()]
+exec(open(os.path.join(HERE, 'city_kit_more.py'), encoding='utf-8').read())
+pieces2 = [co_win(True), co_win(False), co_plain(), co_lobby(), co_top(), co_corner(), cg_win(True), cg_win(False), cg_lobby(), cg_top(), cg_corner(),
+           cw_wall(P_COR), cw_wall(P_CORB), cw_win(), cw_door(), cw_top(), cw_corner(), cc_open(), cc_entry(), cc_top(), cc_corner()]
+props2 = [car(), van(), bus(), container(), train(), tlight(), busstop(), bin_(), bollard(), tube(), planter(), bush(), cone(), barrier(), pallet(), crane(), boat(), kiosk(), stand()]
 for o in pieces:
     brick_uv(o)
 
 out = {}
-for o in pieces + props:
+for o in pieces + props + pieces2 + props2:
     nm = o.name[len('city_'):]
     out[o.name] = (tris(o), export([o], 'assets/city/%s.glb' % nm))
 
@@ -420,3 +445,4 @@ for i, o in enumerate(pieces + props):
         o.location.y = 9
 shot('shots/city_kit_pieces.png', (0, -26, 14), (0, 4, 1.5))
 print('RESULT', out)
+demo2(shot, pieces + props + pieces2 + props2)

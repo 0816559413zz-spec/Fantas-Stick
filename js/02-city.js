@@ -35,8 +35,8 @@ function genCity(){
       for(let n=0;n<4;n++)box(a+s/2-60+(R()-0.5)*300,b+s/2-40+(R()-0.5)*300,120,80,3,'kiosk');
     }else if(k==='station'){   // อาคารสถานียาว + รางกับตู้รถไฟจอด
       box(a+80,b+120,s-160,420,13,'station');
-      for(let i=0;i<5;i++)box(a+120+i*370,b+700,340,110,4.2,'train');
-      for(let i=0;i<4;i++)box(a+300+i*420,b+1100,340,110,4.2,'train');
+      for(let i=0;i<5;i++)box(a+120+i*370,b+700,340,60,4.2,'train');
+      for(let i=0;i<4;i++)box(a+300+i*420,b+1100,340,60,4.2,'train');
       for(let i=0;i<6;i++)box(a+100+i*300,b+s-420,200,260,7,'brick');
     }else if(k==='warehouse'){   // โกดังใหญ่ 3 หลัง + ตู้คอนเทนเนอร์
       box(a+60,b+80,820,560,12,'metal');box(a+s-880,b+80,820,560,12,'metal');box(a+60,b+s-660,1000,560,14,'metal');
@@ -71,11 +71,15 @@ function genCity(){
     const x0=B.x+r,y0=B.y+r,x1=B.x+B.w-r,y1=B.y+B.d-r,line=(ax,ay,bx2,by2)=>{const L=Math.hypot(bx2-ax,by2-ay),n=Math.max(1,Math.ceil(L/step));for(let i=0;i<n;i++)obs.push({x:ax+(bx2-ax)*i/n,y:ay+(by2-ay)*i/n,r:Math.min(r,B.w/2,B.d/2),k:'cwall',hgt:B.h,s:0,cb:B.i});};
     if(x1<=x0||y1<=y0){line(Math.min(x0,x1),Math.min(y0,y1),Math.max(x0,x1),Math.max(y0,y1));obs.push({x:Math.max(x0,x1),y:Math.max(y0,y1),r:Math.min(r,B.w/2,B.d/2),k:'cwall',hgt:B.h,s:0,cb:B.i});continue;}
     line(x0,y0,x1,y0);line(x1,y0,x1,y1);line(x1,y1,x0,y1);line(x0,y1,x0,y0);}
-  // ของริมถนนแบบลอนดอน (ชุดทดสอบ — ย่านร้านค้าเท่านั้น): street = {m:ชื่อโมเดล,x,y,a} • ชนด้วยวงกลม k:'cprop' (ยังไม่พัง — ขั้น 4)
-  const street=[],RS=mulberry(2031),SP={lamp:[5,4.6],phone:[22,2.6],postbox:[9,1.6],bench:[18,0.9]};
-  const sprop=(m,x,y,a)=>{if(Math.hypot(x-mid,y-mid)<CITY_PLAZA+60)return;street.push({m,x:Math.round(x),y:Math.round(y),a});
-    if(m==='taxi'){for(const t of [-1,1])obs.push({x:x+Math.sin(a)*t*24,y:y+Math.cos(a)*t*24,r:20,k:'cprop',hgt:1.8,s:0});}
-    else obs.push({x,y,r:SP[m][0],k:'cprop',hgt:SP[m][1],s:0});};
+  // ของในเมืองแบบลอนดอน: street = {m:ชื่อโมเดล (city_cp_<m>),x,y,a} • a = rotation.y (หน้าโมเดล +z → ทิศโลก (sin a, cos a))
+  // ที่ชน k:'cprop' = วงกลมเรียงตามแนวยาวของของชิ้นนั้น: SPC[m] = [ระยะวงตามแนวยาว px, รัศมี px, สูง ม., แกนยาว 'z' (รถ) | 'x' (ม้านั่ง/ป้าย)] • null = ไม่ชน (ภาพอย่างเดียว)
+  // ยังไม่พัง (ขั้น 4)
+  const street=[],RS=mulberry(2031),SPC={lamp:[[0],5,4.6],phone:[[0],22,2.6],postbox:[[0],9,1.6],bench:[[0],18,0.9],taxi:[[-24,24],20,1.8],bus:[[-80,-40,0,40,80],25,4.4],
+    tlight:[[0],6,3.3],busstop:[[-35,35],10,2.5,'x'],bin:[[0],8,1],tube:[[0],5,3.4],planter:[[-18,18],12,0.6,'x'],bush:[[0],22,1.2],cone:[[0],6,0.7],barrier:[[-18,18],6,1,'x'],pallet:[[0],14,1],boat:null,crane:null};
+  const free=(x,y,r)=>!boxes.some(b=>x>b.x-r&&x<b.x+b.w+r&&y>b.y-r&&y<b.y+b.d+r)&&!obs.some(o=>Math.abs(x-o.x)<(o.w||o.r*2)/2+r&&Math.abs(y-o.y)<(o.w||o.r*2)/2+r);
+  const sprop=(m,x,y,a,inPlaza)=>{if(!inPlaza&&Math.hypot(x-mid,y-mid)<CITY_PLAZA+60)return false;street.push({m,x:Math.round(x),y:Math.round(y),a});const C=SPC[m];if(!C)return true;
+    const lx=C[3]==='x'?Math.cos(a):Math.sin(a),ly=C[3]==='x'?-Math.sin(a):Math.cos(a);
+    for(const t of C[0])obs.push({x:x+lx*t,y:y+ly*t,r:C[1],k:'cprop',hgt:C[2],s:0});return true;};
   for(const z of zones)if(z.k==='shops'){
     const e=30,sides=[[z.x,z.y+e,1,0,Math.PI],[z.x,z.y+z.d-e,1,0,0],[z.x+e,z.y,0,1,-Math.PI/2],[z.x+z.w-e,z.y,0,1,Math.PI/2]];   // ทางเท้า 4 ด้าน: จุดเริ่ม, ทิศเดิน, มุมหันหน้าออกถนน
     for(const [sx,sy,dx,dy,fa] of sides){
@@ -86,6 +90,33 @@ function genCity(){
       for(let i=0;i<2;i++){const t=520+i*700+RS()*200;if(t>L-300)break;const rx=sx+dx*t-(dx?0:(sx<z.x+z.w/2?95:-95)),ry=sy+dy*t-(dy?0:(sy<z.y+z.d/2?95:-95));
         sprop('taxi',rx,ry,dx?Math.PI/2:0);}
     }
+  }
+  // เสาไฟ + ถังขยะ ริมทางเท้าทุกถนน (ย่านร้านค้ามีเสาไฟของตัวเองแล้ว) • ลานกลาง: วงเสาไฟ
+  const zoneAt=(x,y)=>zones.find(z=>x>=z.x&&x<=z.x+z.w&&y>=z.y&&y<=z.y+z.d);
+  for(let k=1;k<CITY_N;k++)for(let s=CITY_ROAD/2+150;s<W;s+=500){if(Math.abs(s%CITY_B)<CITY_ROAD/2+60||Math.abs(s%CITY_B-CITY_B)<CITY_ROAD/2+60)continue;
+    for(const sd of [-1,1]){const c=k*CITY_B+sd*(CITY_ROAD/2+18);
+      for(const [px,py,vert] of [[c,s,1],[s,c,0]]){const zz=zoneAt(px+(vert?sd*60:0),py+(vert?0:sd*60));if(zz&&zz.k==='shops')continue;
+        sprop('lamp',px,py,0);if(RS()<0.45){const bx2=vert?px:px+250,by2=vert?py+250:py;if(free(bx2,by2,10))sprop('bin',bx2,by2,0);}}}}
+  for(let i=0;i<16;i++){const t=i/16*Math.PI*2;sprop('lamp',mid+Math.cos(t)*(CITY_PLAZA-40),mid+Math.sin(t)*(CITY_PLAZA-40),0,1);}
+  // ไฟจราจร 4 มุมทุกสี่แยก (ยกเว้นสี่แยกกลาง = ลาน) หันหน้าเข้ากลางแยก
+  for(let i=1;i<CITY_N;i++)for(let j=1;j<CITY_N;j++){if(i===CITY_N/2&&j===CITY_N/2)continue;const cx=i*CITY_B,cy=j*CITY_B;
+    for(const [sx,sy] of [[-1,-1],[1,-1],[-1,1],[1,1]]){const x=cx+sx*(CITY_ROAD/2+25),y=cy+sy*(CITY_ROAD/2+25);sprop('tlight',x,y,Math.atan2(cx-x,cy-y));}}
+  // ป้ายรถเมล์ + รถเมล์จอด (สุ่ม ~1 ใน 3 ของช่วงถนน)
+  for(let k=1;k<CITY_N;k++)for(let b2=0;b2<CITY_N;b2++){if(RS()>0.38)continue;const s=b2*CITY_B+CITY_B/2+(RS()-0.5)*600,sd=RS()<0.5?-1:1,vert=RS()<0.5,c=k*CITY_B+sd*(CITY_ROAD/2+30);
+    const [x,y]=vert?[c,s]:[s,c];if(Math.hypot(x-mid,y-mid)<CITY_PLAZA+200)continue;
+    sprop('busstop',x,y,vert?-sd*Math.PI/2:(sd>0?0:Math.PI));
+    const lc=k*CITY_B+sd*(CITY_ROAD/2-70),[bx2,by2]=vert?[lc,s+40]:[s+40,lc];sprop('bus',bx2,by2,vert?(sd>0?0:Math.PI):(sd>0?Math.PI/2:-Math.PI/2));}
+  // ลานกลาง: กระถางต้นไม้ + ม้านั่ง ระหว่างทางเข้า 4 ทาง + ป้ายรถไฟใต้ดิน
+  for(let q=0;q<4;q++){const t=Math.PI/4+q*Math.PI/2,r=CITY_PLAZA-130,x=mid+Math.cos(t)*r,y=mid+Math.sin(t)*r,ta=Math.atan2(mid-x,mid-y);
+    sprop('planter',x,y,ta+Math.PI/2,1);for(const o of [-0.13,0.13]){const t2=t+o;sprop('bench',mid+Math.cos(t2)*(r-10),mid+Math.sin(t2)*(r-10),Math.atan2(mid-(mid+Math.cos(t2)*r),mid-(mid+Math.sin(t2)*r)),1);}
+    if(q%2===0)sprop('tube',mid+Math.cos(t)*(CITY_PLAZA-40)+Math.cos(t+Math.PI/2)*120,mid+Math.sin(t)*(CITY_PLAZA-40)+Math.sin(t+Math.PI/2)*120,ta,1);}
+  for(const z of zones){const a2=z.x+60,b2=z.y+60,s2=z.w-120,rnd=()=>RS();
+    if(z.k==='station')sprop('tube',z.x+40,z.y+z.d/2,-Math.PI/2);
+    if(z.k==='park'||z.k==='field')for(let t=0,c=0;c<(z.k==='park'?30:12)&&t<400;t++){const x=a2+40+rnd()*(s2-80),y=b2+40+rnd()*(s2-80);if(z.k==='field'&&Math.abs(y-(z.y+z.d/2))<z.d*0.25)continue;if(free(x,y,30))sprop('bush',x,y,rnd()*6.28),c++;}
+    if(z.k==='build'){for(let t=a2+80;t<a2+s2-80;t+=160){sprop('cone',t,b2+20,0);sprop('cone',t,b2+s2-20,0);}for(const [x,y,a3] of [[a2+s2/2,b2+20,0],[a2+20,b2+s2/2,Math.PI/2]])sprop('barrier',x,y,a3);
+      const cr=obs.find(o=>o.k==='cpill'&&o.hgt>=40&&o.x>z.x&&o.x<z.x+z.w&&o.y>z.y&&o.y<z.y+z.d);if(cr)sprop('crane',cr.x,cr.y,RS()*6.28);}
+    if(z.k==='warehouse'||z.k==='docks')for(let t=0,c=0;c<10&&t<300;t++){const x=a2+40+rnd()*(s2-80),y=b2+40+rnd()*(s2-80);if(z.water&&x>z.water.x-80)continue;if(free(x,y,20))sprop('pallet',x,y,rnd()*1.6),c++;}
+    if(z.water)for(const f of [0.3,0.72])sprop('boat',z.water.x+z.water.w*0.45,z.y+z.d*f,0);
   }
   return {W,H,obs,boxes,zones,deck,street};
 }
