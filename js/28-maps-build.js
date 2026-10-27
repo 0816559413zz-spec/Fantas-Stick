@@ -557,7 +557,7 @@ function buildFileMap(id){
 }
 // ห้องฝึก: วัสดุขีดระยะ + ป้ายไม้ (ข้อความ 2 บรรทัด) — x,y = พิกัดเกม, ry = หันป้าย
 function tickM(){return new THREE.MeshBasicMaterial({color:'#ffffff',transparent:true,opacity:0.55});}
-let TRPAD=null;   // แท่นเสกบอท (กระพริบตอนยืนบน — bpSync js/40)
+let TRPAD=null,ARPAD=null;   // แท่นเสกบอท / แท่นเพิ่มบอทสังเวียน (กระพริบตอนยืนบน — bpSync js/40)
 function signTex(t1,t2){return texCanvas(512,160,g=>{g.fillStyle='#5a3a22';g.fillRect(0,0,512,160);g.strokeStyle='#e8c060';g.lineWidth=8;g.strokeRect(6,6,500,148);g.fillStyle='#f3dc94';g.textAlign='center';g.textBaseline='middle';g.font='bold 54px Kanit, sans-serif';g.fillText(t1,256,62);g.font=(t2.length>30?'24':'30')+'px Kanit, sans-serif';g.fillText(t2,256,118);});}
 function testSign(t1,t2,x,y,ry){
   const st=signTex(t1,t2);
