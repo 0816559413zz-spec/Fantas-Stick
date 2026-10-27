@@ -109,7 +109,7 @@ function hostStart(){
   // สุ่มแผนที่ทุกครั้งที่เริ่มเกม (ไม่ซ้ำกับรอบที่แล้วถ้าเป็นไปได้)
   const MD=MODES[G.mode];
   if(MD.map)G.map=MD.map;
-  else if(G.mapPick&&MAPS[G.mapPick])G.map=G.mapPick;
+  else if(G.mapPick&&MAPS[G.mapPick]&&!MAP_OFF.has(G.mapPick))G.map=G.mapPick;
   else{let ks=RANDOM_MAPS.filter(k=>k!==G.lastMap&&MAPS[k]&&mapOkFor(k,G.mode));if(!ks.length)ks=['castle'];G.map=ks[Math.floor(Math.random()*ks.length)];}
   G.lastMap=G.map;
   setMapVars(G.map);

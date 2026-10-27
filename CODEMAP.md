@@ -5,18 +5,18 @@ Format: `name:line` = top-level function/const/let in that file. `§line title` 
 ## js/01-core.js (22) — แกนกลาง: import Three.js + ฟังก์ชันพื้นฐาน ($ rnd clamp lerp store to…
 $:12 rnd:13 clamp:14 lerp:15 dist2:16 lerpAng:17 esc:18 shuffle:19 store:20 toastT:21 toast:22
 
-## js/02-data.js (342) — 
+## js/02-data.js (344) — 
 W:4 H:4 PR:4 PILLARS:6 SPAWNF:7 mulberry:9 genForest:10 genPitch:27 genHogsmeade:36
 §54 แผนที่โล่ง 3 แบบ (ผู้ใช้: ป่ามืดไม่สนุก อยากได้ที่โล่งๆ)
 genMeadow:55 genLake:61 genRuins:66
 §73 Test Place (ห้องฝึก): พื้นโล่งไม่มีสิ่งกีดขวาง
-TEST_W:75 TEST_H:75 TEST_C:75 TEST_VIL:75 TEST_ST:77 TEST_PH:78 testWalls:80 testDummySpots:82 genTest:83 testProps:94 trZone:106 genGreatHall:107 MAPS:115 RANDOM_MAPS:127 MAPID:128 MW:128 MH:128 OBS:128 setMapVars:129
-§130 แผนที่จากไฟล์ (Blender → assets/maps/<id>.json + .glb, สคริปต์ assets…
-FMAPS:133 b64i16:134 regFileMap:135 loadMapData:147 loadAllMapData:155 mapReady:158 mapOkFor:159
-§160 ของประกอบฉากที่พังได้ / ใช้ได้ (prop)
-PROPDEF:164 PROP_OFF_MODES:171 PROP_USE:173 PROPS:174 PROPON:174 genProps:175
-§195 ตัวละคร: บ้านฮอกวอตส์ + หน้าตา
-HOUSES:197 HAIRC:202 HAIRSTY:204 WOODC:207 WOODN:208 WCOREC:209 WCOREN:210 WANDSTY:211 WANDN:216 WANDNN:231 EYEC:232 SKINC:233 CLOAKC:234 TIESTY:235 LOOKK:236 LOOKN:236 lookStr:237 parseLook:238 randLook:239 LOOKS:240 LOOKP:240 KITS:240 getKit:241 getLook:242 CREST_SH:243 CREST_PAT:244 starPts:249 CREST_ANI:251 crestSVG:257 houseColor:265 TEAMC:266 TEAMN:266 NOBROOM:268 MODES:269 PDEF:280 EDEF:307 POOLS:319 CDK:329 BUFFS:332 BRAR:341 rollRar:342
+TEST_W:75 TEST_H:75 TEST_C:75 TEST_VIL:75 TEST_ST:77 TEST_PH:78 testWalls:80 testDummySpots:82 genTest:83 testProps:94 trZone:106 genGreatHall:107 MAPS:115 MAP_OFF:128 RANDOM_MAPS:129 MAPID:130 MW:130 MH:130 OBS:130 setMapVars:131
+§132 แผนที่จากไฟล์ (Blender → assets/maps/<id>.json + .glb, สคริปต์ assets…
+FMAPS:135 b64i16:136 regFileMap:137 loadMapData:149 loadAllMapData:157 mapReady:160 mapOkFor:161
+§162 ของประกอบฉากที่พังได้ / ใช้ได้ (prop)
+PROPDEF:166 PROP_OFF_MODES:173 PROP_USE:175 PROPS:176 PROPON:176 genProps:177
+§197 ตัวละคร: บ้านฮอกวอตส์ + หน้าตา
+HOUSES:199 HAIRC:204 HAIRSTY:206 WOODC:209 WOODN:210 WCOREC:211 WCOREN:212 WANDSTY:213 WANDN:218 WANDNN:233 EYEC:234 SKINC:235 CLOAKC:236 TIESTY:237 LOOKK:238 LOOKN:238 lookStr:239 parseLook:240 randLook:241 LOOKS:242 LOOKP:242 KITS:242 getKit:243 getLook:244 CREST_SH:245 CREST_PAT:246 starPts:251 CREST_ANI:253 crestSVG:259 houseColor:267 TEAMC:268 TEAMN:268 NOBROOM:270 MODES:271 PDEF:282 EDEF:309 POOLS:321 CDK:331 BUFFS:334 BRAR:343 rollRar:344
 
 ## js/03-spells-core.js (222) — 
 ICONS:8 ICOALIAS:9 hasIco:10 ICOBASE:12 icoURL:13 ICO:14 icoTint:15 icoHTML:24 PATHS:25 SPELL_LIST:34 SPELLS:34 defSpell:35 SLOTK:36 BRMAP:36 KITP:37 parseKit:38 cleanKit:54 setKit:55 pathReset:58
@@ -539,4 +539,4 @@ gameCover:403
 ## js/66-hud4.js (133) — HUD รอบ 4 (ผู้ใช้ 2026-10-23, designs/hud-full-mock.html)
 H4E:5 H4:10 H4C:11 H4RC:11 h4Pal:12 hud4Col:14 h4Runes:15 h4RingSVG:16 h4Parts:25 h4AuBits:30 h4Key:45 h4Ico:46 h4Build:47 h4Set:77 hud4Draw:78 hud4Frame:116 hud4Hide:117 _h4RT:119 _h4Cam:119 h4FaceShot:120 h4FaceSet:133
 
-(67 files, 16360 lines)
+(67 files, 16362 lines)

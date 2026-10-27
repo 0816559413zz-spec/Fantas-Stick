@@ -124,7 +124,9 @@ const MAPS={
   test:Object.assign({name:'🧪 Test Place',d:'พื้นโล่งสำหรับทดลองคาถา (ห้องฝึก)'},genTest())
 };
 // แผนที่ที่สุ่มได้ (ป่ามืดเอาออกจากการสุ่มตามที่ผู้ใช้ขอ — ยังเลือกเองในล็อบบี้ได้)
-const RANDOM_MAPS=['castle','pitch','hogsmeade','greathall','meadow','lake','ruins'];
+// แผนที่ที่ปิดไว้ชั่วคราว (ไฟล์ยังอยู่ครบ ไม่สุ่ม/เลือกไม่ได้) — greathall: กระโดดข้ามโต๊ะไม่ได้ (ผู้ใช้ 2026-10-27) • เปิดคืน = ลบออกจากชุดนี้
+const MAP_OFF=new Set(['greathall']);
+const RANDOM_MAPS=['castle','pitch','hogsmeade','meadow','lake','ruins'];
 let MAPID='castle',MW=W,MH=H,OBS=MAPS.castle.obs;
 function setMapVars(id){if(!MAPS[id])id='castle';MAPID=id;MW=MAPS[id].W;MH=MAPS[id].H;OBS=MAPS[id].obs;TERR=MAPS[id].terr||null;PROPS=genProps(id);BLDG=genBldg(id);BRK=genBrk(id);}
 // ---------- แผนที่จากไฟล์ (Blender → assets/maps/<id>.json + .glb, สคริปต์ assets/src/map_export.py, กติกา MAP-DESIGN.md) ----------
@@ -140,7 +142,7 @@ function regFileMap(id,e,d){
   MAPS[id]={name:d.name||id,d:d.desc||'',W:d.W,H:d.H,obs,terr,fm:{file:e.file,v:e.v||0,sky:d.sky||'night',fog:d.fog||null,music:d.music||'',modes:d.modes||null,
     spawns:d.spawns||[],props:d.props,espawn:d.espawn||[],rings:d.rings||[],tasks:d.tasks||[],lights:d.lights||[],env:d.env||[],weather:d.weather||'',fx:d.fx||[],brk:d.brk||[]}};
   const ri=RANDOM_MAPS.indexOf(id);
-  if(d.random===0){if(ri>=0)RANDOM_MAPS.splice(ri,1);}else if(ri<0)RANDOM_MAPS.push(id);
+  if(d.random===0){if(ri>=0)RANDOM_MAPS.splice(ri,1);}else if(ri<0&&!MAP_OFF.has(id))RANDOM_MAPS.push(id);
   if(builtMap===id)builtMap='';                                   // ฉากที่สร้างไว้เป็นแบบโค้ด (เช่นเมนู) → ให้สร้างใหม่ครั้งหน้า
   if(window.WD)WD.MAPS=MAPS;
 }
@@ -156,7 +158,7 @@ function loadAllMapData(){return modelManifest().then(m=>Promise.all(Object.keys
 // แผนที่ที่ใช้ได้กับโหมดนี้ (ไฟล์แผนที่บอกโหมดเองได้)
 // เครื่องลูก: ยังไม่มีข้อมูลแผนที่นี้ → สั่งโหลดแล้วรอ snapshot ถัดไป (โหลดไม่ได้ = ใช้แผนที่สำรอง)
 function mapReady(id){if(MAPS[id]||FMAPS.fail.has(id))return true;loadMapData(id);return false;}
-function mapOkFor(id,mode){const f=MAPS[id]&&MAPS[id].fm;return !f||!f.modes||f.modes.includes(mode);}
+function mapOkFor(id,mode){if(MAP_OFF.has(id))return false;const f=MAPS[id]&&MAPS[id].fm;return !f||!f.modes||f.modes.includes(mode);}
 // ---------- ของประกอบฉากที่พังได้ / ใช้ได้ (prop) ----------
 // ตำแหน่งสุ่มแบบ seed จากชื่อแผนที่ → ทุกเครื่องคำนวณได้ตรงกันเอง ส่งในเน็ตแค่สถานะ (snapshot PB: 1 ตัวต่อชิ้น 0=ปกติ 1=พัง 2=ใช้แล้ว)
 // ตัวเลข (hp/ขนาด/จำนวน/โหมดที่เปิด) เป็นค่าตั้งต้นให้ทีมเกมเพลย์ปรับ • model = ชื่อใน assets/manifest.json (ไม่มีไฟล์ = ใช้โมเดลจากโค้ด)

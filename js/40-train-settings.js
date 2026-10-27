@@ -161,7 +161,7 @@ function renderLobby(){
   $('#modes').innerHTML=Object.entries(MODES).map(([k,m])=>`<button class="mode ${L.mode===k?'on':''}" data-mode="${k}" ${host?'':'disabled'}><span class="ic"><span>${modeIcon(m)}</span></span><span><b>${modeTitle(m)}</b><small>${m.min===m.max?m.min:m.min+'-'+m.max} คน</small></span></button>`).join('');
   $('#mapNote').textContent='';
   const mapTxt=M.map?(MAPS[M.map]||{name:M.map}).name:L.mpk&&MAPS[L.mpk]?MAPS[L.mpk].name:'🎲 สุ่ม';
-  const mapPick=M.map?'':`<div class="mpick">${['',...new Set([...RANDOM_MAPS,'forest',...Object.keys(MAPS).filter(k=>MAPS[k].fm)])].map(k=>`<button type="button" class="mchip ${(L.mpk||'')===k?'on':''}" data-mappick="${k}" ${host?'':'disabled'} title="${k?esc(MAPS[k].d):'สุ่มทุกรอบ'}">${k?MAPS[k].name:'🎲 สุ่ม'}</button>`).join('')}</div>`;
+  const mapPick=M.map?'':`<div class="mpick">${['',...new Set([...RANDOM_MAPS,'forest',...Object.keys(MAPS).filter(k=>MAPS[k].fm)])].filter(k=>!MAP_OFF.has(k)).map(k=>`<button type="button" class="mchip ${(L.mpk||'')===k?'on':''}" data-mappick="${k}" ${host?'':'disabled'} title="${k?esc(MAPS[k].d):'สุ่มทุกรอบ'}">${k?MAPS[k].name:'🎲 สุ่ม'}</button>`).join('')}</div>`;
   $('#modeCard').innerHTML=`<div class="k">โหมดที่เลือก</div><div class="n">${modeIcon(M)} ${modeTitle(M)}</div><div class="d">${M.d}</div>
     <div class="meta"><span>👥 ${M.min===M.max?M.min:M.min+'-'+M.max} คน</span><span>🗺️ ${mapTxt}</span>${M.team?'<span>⚔️ 2 ทีม</span>':''}</div>
     ${mapPick}
