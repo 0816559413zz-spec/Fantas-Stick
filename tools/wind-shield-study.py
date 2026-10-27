@@ -127,12 +127,12 @@ FEATHER_ROOTS=[.32,.70,1.08,1.46,1.84,2.20]
 FEATHER_TIPS=[[-.40,1.15,-.96],[-.45,.85,-.90],[-.38,.50,-.84],[-.30,.20,-.78],[-.20,.02,-.72],[-.50,1.40,-1.02]]
 FEATHER_WIDTHS=[.36,.44,.48,.46,.40,.34]
 # สีต่อชั้น [ตัวขน, เงา, ลมไหล, ลมไหล2, ขอบ, ขอบ2] — 0 = บนสุด/ในสุด (สว่าง) … 4 = ล่างสุด/นอกสุด (เข้ม), 5 = ขนบนสุดคลุมไหล่
-FEATHER_COL=[['#9ff0b0','#3d8f6a','#e6fff0','#7fd6a6','#ffffff','#bff5d2'],
-             ['#7fe39a','#2f7f58','#c8ffd8','#5cc489','#eaffef','#9de8b5'],
-             ['#5ccf7c','#1f6a46','#a8ff9e','#3cae6c','#c8ff9e','#6fd88b'],
-             ['#3fb465','#155937','#8cff66','#28935a','#a5ff76','#45c463'],
-             ['#2a9452','#0d4428','#6fe85a','#1d7a46','#86f06a','#2fa553'],
-             ['#b8f7d6','#4c9d8f','#f2fff8','#8fd8c8','#ffffff','#cdeee6']]
+FEATHER_COL=[['#c9fff4','#3aa79a','#ffffff','#8ff0ff','#ffffff','#b8fbff'],
+             ['#8ff5c8','#1f8f78','#d8fff0','#4fe0b0','#f0fff8','#7ff7d0'],
+             ['#5fe08a','#13734a','#b8ff8a','#2fc46a','#d8ffa0','#7cff7a'],
+             ['#9dff52','#2f7a18','#e2ff7a','#6fd63a','#f4ffb0','#b6ff5a'],
+             ['#2fb894','#0a4a44','#6ff0d0','#1a8f7a','#9ffff0','#3fd8b8'],
+             ['#e8fff4','#5fb5a6','#ffffff','#bdf7ea','#ffffff','#e0fff8']]
 
 def feather_pose(side,i,t):
     s=FEATHER_ROOTS[i];bone=0 if s<CUTS[1] else 1 if s<CUTS[2] else 2
@@ -153,67 +153,6 @@ def feather_pose(side,i,t):
 def feather_curve(side,i,component):
     return {str(round(t/DUR,5)):feather_pose(side,i,t)[component] for t in TIMES}
 
-# ===== ปีกห่อ (ผู้ใช้ 2026-10-27): "only 1 main layer is wing (ตามรูปอ้างอิง) and do layer of feather in it" =====
-# ปีกละ 1 แผ่นหลัก โค้งจากเหนือไหล่ อ้อมหน้าอก ไขว้กันกลางตัว ลงถึงเท้าอีกฝั่ง • บนแผ่นมีขนนกเรียงเป็นแถวซ้อนแบบเกล็ด ปลายมนชี้ลง
-# แถวขน 4 แถว: ขนคลุมสั้น (ขอบนอก สว่างสุด) → ขนยาวปลายปีก (ขอบใน เข้มสุด) • โมเดลอยู่ในกรอบรอบจุดหมุนที่ไหล่ → ขยายออกจากไหล่ตอนยกโล่
-WRAP_C=[(-.58,2.38,-.05),(-.68,1.98,-.40),(-.52,1.45,-.62),(-.20,.95,-.70),(.10,.50,-.66),(.30,.06,-.58)]
-WRAP_ROWS=[(.84,.10,.10,'#d9ffe6','#6fcf98'),(.62,.13,.16,'#9ff0b6','#3f9f6a'),(.40,.16,.22,'#62d487','#22744a'),(.17,.18,.30,'#38b062','#0f5232')]   # (ตำแหน่งข้ามแผ่น v, กว้าง, ยาวเพิ่ม, สี, สีเงา)
-def _cr(P,u):
-    n=len(P)-1;x=min(n-1e-6,u*n);i=int(x);t=x-i
-    p0=P[max(0,i-1)];p1=P[i];p2=P[i+1];p3=P[min(n,i+2)]
-    return [.5*((2*p1[j])+(-p0[j]+p2[j])*t+(2*p0[j]-5*p1[j]+4*p2[j]-p3[j])*t*t+(-p0[j]+3*p1[j]-3*p2[j]+p3[j])*t*t*t) for j in range(3)]
-def wrap_frame(side,u):
-    P=[(-side*x,y,z+(-.05 if side>0 else 0)) for x,y,z in WRAP_C]
-    c=_cr(P,u);c2=_cr(P,min(1,u+.01));c1=_cr(P,max(0,u-.01))
-    T=unit([c2[j]-c1[j] for j in range(3)]);D=unit(cross(T,[0,0,-1]))
-    if D[0]*(-side)<0:D=[-d for d in D]   # D ชี้ไปขอบนอกของปีก
-    w=.11+.40*max(0,math.sin(math.pi*min(1,u*1.12)))**.7
-    return c,T,D,w
-def wrap_meshes(side,sid,piv):
-    rel=lambda q:[round(q[j]-piv[j],4) for j in range(3)]
-    N=30;V=[];F=[]
-    for i in range(N+1):
-        c,T,D,w=wrap_frame(side,i/N)
-        V+= [rel([c[j]+D[j]*w*.55+(0,0,.012)[j] for j in range(3)]),rel([c[j]-D[j]*w*.45+(0,0,.012)[j] for j in range(3)])]
-        if i<N:F.append([2*i,2*i+1,2*i+3,2*i+2])
-    save(ROOT/f'assets/fx/mesh/wind_wrap_{sid}_base.mesh.json',{'v':1,'desc':'ปีกห่อแผ่นหลัก (โล่ปีก)','pal':'wind','mat':'solid','parts':[{'id':'base','k':'poly','v':V,'f':F,'flat':True}]})
-    # ขอบนอกเรือง
-    E=[];EF=[]
-    for i in range(N+1):
-        c,T,D,w=wrap_frame(side,i/N)
-        o=[c[j]+D[j]*w*.55 for j in range(3)];E+=[rel([o[0]-D[0]*.025,o[1]-D[1]*.025,o[2]-.02]),rel([o[0]+D[0]*.006,o[1]+D[1]*.006,o[2]-.02])]
-        if i<N:EF.append([2*i,2*i+1,2*i+3,2*i+2])
-    save(ROOT/f'assets/fx/mesh/wind_wrap_{sid}_edge.mesh.json',{'v':1,'desc':'ขอบนอกปีกห่อ','pal':'wind','mat':'glow','parts':[{'id':'edge','k':'poly','v':E,'f':EF,'flat':True}]})
-    for r,(v,fw,fl,col,c2) in enumerate(WRAP_ROWS):
-        parts=[];rach=[];k=0;u=.03+(r%2)*.022
-        while u<.97:
-            c,T,D,w=wrap_frame(side,u)
-            L=.09+fl*u+.06*(r==3)*u;W=fw*(.55+.6*min(1,w/.4))*.5
-            root=[c[j]+D[j]*w*(v-.45) for j in range(3)]
-            z=-.018*(4-r)-.0015*k
-            pt=lambda a,b:rel([root[j]+T[j]*a+D[j]*b+(0,0,z)[j] for j in range(3)])
-            ol=[(0,-W*.7),(L*.45,-W),(L*.8,-W*.75),(L,0),(L*.8,W*.75),(L*.45,W),(0,W*.7)]
-            vs=[pt(a,b) for a,b in ol]+[pt(L*.4,0)]
-            parts.append({'id':f'f{k}','k':'poly','v':vs,'f':[[7,i,(i+1)%7] for i in range(7)],'flat':True})
-            rach.append({'id':f'r{k}','k':'poly','v':[pt(.02,-.006),pt(L*.82,-.002),pt(L*.82,.002),pt(.02,.006)],'f':[[0,1,2,3]],'flat':True})
-            k+=1;u+=max(.035,L*.42)
-        save(ROOT/f'assets/fx/mesh/wind_wrap_{sid}_row{r}.mesh.json',{'v':1,'desc':f'แถวขนปีกห่อ {r}','pal':'wind','mat':'solid','parts':parts})
-        save(ROOT/f'assets/fx/mesh/wind_wrap_{sid}_rach{r}.mesh.json',{'v':1,'desc':f'แกนขนแถว {r}','pal':'wind','mat':'glow','parts':rach})
-def WRAP_LAYERS(side,sid):
-    piv=[side*.42,1.78,-.12];wrap_meshes(side,sid,piv)
-    # ขยายจากไหล่ตอนยกโล่ (.25-.55) • ตอนปล่อยพลัง สะบัดกางออก+จาง (3.50-3.80)
-    sc={str(round(t/DUR,5)):round(.05+.95*smooth(t,.22,.55)*(1+.35*smooth(t,3.5,3.75)),4) for t in TIMES}
-    op=lambda pk:{str(round(t/DUR,5)):round(pk*smooth(t,.2,.38)*(1-smooth(t,3.58,3.85)),4) for t in TIMES}
-    pos={str(round(t/DUR,5)):[round(piv[0]+side*.5*smooth(t,3.5,3.8),4),round(piv[1]+LIFT(t),4),round(piv[2]+.25*smooth(t,3.5,3.8),4)] for t in TIMES}
-    rot={str(round(t/DUR,5)):[0,round(side*55*smooth(t,3.5,3.8),2),0] for t in TIMES}
-    out=[{'id':f'{sid}_wrap_base','t':'mesh','at':0,'life':DUR,'att':'feet','shape':'model','model':f'wind_wrap_{sid}_base','mat':'toon','col':'#2a8a52','col2':'#0b3f25','rim':.25,'op':op(1),'fade':0,'pos':pos,'rot':rot,'scale':sc}]
-    for r,(v,fw,fl,col,c2) in enumerate(WRAP_ROWS):
-        out.append({'id':f'{sid}_wrap_row{r}','t':'mesh','at':0,'life':DUR,'att':'feet','shape':'model','model':f'wind_wrap_{sid}_row{r}','mat':'toon','col':col,'col2':c2,'rim':.35,'op':op(1),'fade':0,'pos':pos,'rot':rot,'scale':sc})
-        out.append({'id':f'{sid}_wrap_rach{r}','t':'mesh','at':0,'life':DUR,'att':'feet','shape':'model','model':f'wind_wrap_{sid}_rach{r}','mat':'glow','col':'#f2fff6','col2':col,'op':op(.55),'fade':0,'pos':pos,'rot':rot,'scale':sc})
-    out.append({'id':f'{sid}_wrap_edge','t':'mesh','at':0,'life':DUR,'att':'feet','shape':'model','model':f'wind_wrap_{sid}_edge','mat':'glow','col':'#c8ffd8','col2':'#5fe08a','op':op(.9),'fade':0,'pos':pos,'rot':rot,'scale':sc})
-    out.append({'id':f'{sid}_wrap_air','t':'emit','at':.4,'life':3.15,'att':'feet','from':'mesh','of':f'{sid}_wrap_edge','rate':6,'dir':'up','speed':[.3,.8],'plife':[.25,.5],'look':'streak','size':[.4,.8],'col':'#d8ffe0','c2':'#4fc47a','gravity':0,'drag':1.5,'curl':False})
-    return out
-
 fx=json.loads((ROOT/'assets/fx/start/shield.fx.json').read_text(encoding='utf-8'))
 fx.update(desc='โล่ปีกลม — ขนปีกล่างขยายทันทีเป็นแผงยาวห่อไขว้ถึงขา ตามภาพอ้างอิง; แกนปีกขนาดเดิม (Studio review)',tags=['wind','shield','self','review'],pal='wind',dur=DUR,seed=73)
 fx['layers']=[]
@@ -228,7 +167,17 @@ for side,sid in [(-1,'L'),(1,'R')]:
             fx['layers'].append({'id':f'{sid}_{bone}_{name}','t':'mesh','at':0,'life':DUR,'att':'feet','shape':'model','model':f'wind_shield_{sid}_{name}_{bone}','mat':mat,'col':col,'col2':c2,'op':op,'rim':rim,'scroll':2.8,'fade':0,'pos':pos,'rot':rot,'scale':scale})
         fx['layers'].append({'id':f'{sid}_{bone}_air','t':'emit','at':0,'life':DUR,'att':'feet','from':'mesh','of':f'{sid}_{bone}_feathers','rate':3,'burst':0,'dir':'random','speed':[.3,.8],'plife':[.22,.45],'look':'model','model':'wind_wing_airchip','mmat':'glow','msize':[.09,.18],'mspin':80,'col':'#b7ff87','c2':'#329b50','gravity':-.05,'drag':1.6,'curl':False,'bounce':0})
 
-    for L in WRAP_LAYERS(side,sid):fx['layers'].append(L)
+    for i in range(6):
+        # ผู้ใช้ 2026-10-27 "make layer for feather and diff color too": แต่ละชั้นขนคนละสี ไล่จากชั้นใน (มิ้นต์/ขาว) ไปชั้นนอก (เขียวเข้ม)
+        FC=FEATHER_COL[i]
+        for name,mat,col,c2,opacity,rim in [
+            ('shadow','toon',FC[0],FC[1],1.0,.14),
+            ('flow','energy',FC[2],FC[3],.85,.45),
+            ('edge','glow',FC[4],FC[5],1.0,0),
+            ('glint','glow','#eeffcf','#a0ff7f',.7,0)]:
+            op={str(round(t/DUR,5)):round(opacity*extension(t,i)*(1+.15*smooth(t,2.65,3.5)),4) for t in TIMES}
+            fx['layers'].append({'id':f'{sid}_long_{i}_{name}','t':'mesh','at':0,'life':DUR,'att':'feet','shape':'model','model':f'wind_shield_longfeather_{name}','mat':mat,'col':col,'col2':c2,'op':op,'rim':rim,'scroll':3,'fade':0,'pos':feather_curve(side,i,0),'rot':feather_curve(side,i,1),'scale':feather_curve(side,i,2)})
+        fx['layers'].append({'id':f'{sid}_long_{i}_motes','t':'emit','at':.35,'life':3.38,'att':'feet','from':'mesh','of':f'{sid}_long_{i}_flow','rate':3,'dir':'up','speed':[.4,1],'plife':[.18,.35],'look':'streak','size':[.4,.85],'col':'#c8ff9d','c2':'#45b96a','gravity':0,'drag':1.5,'curl':False})
 
 # เปลือกโล่บาง ๆ แบบโล่ไฟ: ริบบิ้นลมสโตรกหมุนรอบตัว 3 ชั้น + กรอบหกเหลี่ยมเส้นบาง (โผล่ตอนยกโล่ หายตอนปล่อย)
 SHELL=lambda pk,a,b:{str(round(t/DUR,5)):round(pk*smooth(t,.18,.42)*(1-smooth(t,3.45,3.7)),4) for t in TIMES}
@@ -263,7 +212,7 @@ for j,(y,tex,col,sp) in enumerate([(1.05,'tex/wind_swoosh_a_hi','#efffe8',260),(
         'pos':[0,y,0],'rot':[0,j*60,0],'scale':{'0':[.6,.3,.6],'0.3':[4.2,.45,4.2],'1':[8,.25,8],'ease':'out'},'spin':sp,'op':{'0':0,'0.06':1,'0.6':.75,'1':0},'fade':0,'life':.9})
 fx['layers'].append({'id':'impact_floor','t':'mesh','at':3.58,'life':.7,'att':'feet','shape':'model','model':'wind_groundswirl','mat':'tex','tex':'tex/wind_swoosh_b','col':'#8dff65','col2':'#000000','rim':0,'uvTile':[1,1],'uvScroll':[0,0],
     'pos':[0,.04,0],'scale':{'0':.6,'0.4':4,'1':7,'ease':'out'},'spin':180,'op':{'0':0,'0.08':1,'0.6':.7,'1':0},'fade':0})
-fx['layers'].append({'id':'release_contact','t':'flash','at':3.56,'life':.18,'att':'feet','pos':[0,1.1,0],'col':'#e6ffd8','size0':.4,'size':4.2,'k':1})
+fx['layers'].append({'id':'release_contact','t':'flash','at':3.56,'life':.12,'att':'feet','pos':[0,1.1,0],'col':'#e6ffd8','size0':.4,'size':4.2,'k':1})
 fx['layers'].append({'id':'release_splinters','t':'emit','at':3.56,'life':.05,'att':'feet','pos':[0,1.1,0],'burst':48,'rate':0,'from':'ring','fr':.7,'dir':'out','speed':[7,12],'up':[.2,1.2],'plife':[.22,.5],'look':'streak','size':[1.1,2.2],'col':'#d1ffa7','c2':'#3b9952','gravity':0,'drag':1.6,'curl':False})
 
 save(ROOT/'assets/fx/wind/shield_wing.fx.json',fx)

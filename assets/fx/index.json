@@ -1758,7 +1758,7 @@
    "n": 11
   },
   "wind/shield_wing": {
-   "v": "f4f853e7",
+   "v": "91db632e",
    "desc": "โล่ปีกลม — ขนปีกล่างขยายทันทีเป็นแผงยาวห่อไขว้ถึงขา ตามภาพอ้างอิง; แกนปีกขนาดเดิม (Studio review)",
    "pal": "wind",
    "tags": [
@@ -1768,7 +1768,7 @@
     "review"
    ],
    "dur": 5.6,
-   "n": 110
+   "n": 148
   },
   "wind/sk_ba": {
    "v": "26a9ed94",
@@ -2759,126 +2759,6 @@
    "desc": "สายลม: ปีก = เสี้ยวสโตรกแผ่ออก 5 ชิ้นต่อข้าง (ทรงขนแหลม) กระจกซ้าย-ขวา",
    "mat": "energy",
    "n": 5
-  },
-  "wind_wrap_L_base": {
-   "v": "02e79200",
-   "desc": "ปีกห่อแผ่นหลัก (โล่ปีก)",
-   "mat": "solid",
-   "n": 1
-  },
-  "wind_wrap_L_edge": {
-   "v": "ec8a114e",
-   "desc": "ขอบนอกปีกห่อ",
-   "mat": "glow",
-   "n": 1
-  },
-  "wind_wrap_L_rach0": {
-   "v": "02fe49d3",
-   "desc": "แกนขนแถว 0",
-   "mat": "glow",
-   "n": 17
-  },
-  "wind_wrap_L_rach1": {
-   "v": "616f3e69",
-   "desc": "แกนขนแถว 1",
-   "mat": "glow",
-   "n": 15
-  },
-  "wind_wrap_L_rach2": {
-   "v": "dbc06b5f",
-   "desc": "แกนขนแถว 2",
-   "mat": "glow",
-   "n": 13
-  },
-  "wind_wrap_L_rach3": {
-   "v": "334d91a2",
-   "desc": "แกนขนแถว 3",
-   "mat": "glow",
-   "n": 10
-  },
-  "wind_wrap_L_row0": {
-   "v": "96c7ba53",
-   "desc": "แถวขนปีกห่อ 0",
-   "mat": "solid",
-   "n": 17
-  },
-  "wind_wrap_L_row1": {
-   "v": "0b4291bc",
-   "desc": "แถวขนปีกห่อ 1",
-   "mat": "solid",
-   "n": 15
-  },
-  "wind_wrap_L_row2": {
-   "v": "f13260bd",
-   "desc": "แถวขนปีกห่อ 2",
-   "mat": "solid",
-   "n": 13
-  },
-  "wind_wrap_L_row3": {
-   "v": "1f91b78c",
-   "desc": "แถวขนปีกห่อ 3",
-   "mat": "solid",
-   "n": 10
-  },
-  "wind_wrap_R_base": {
-   "v": "bef3d799",
-   "desc": "ปีกห่อแผ่นหลัก (โล่ปีก)",
-   "mat": "solid",
-   "n": 1
-  },
-  "wind_wrap_R_edge": {
-   "v": "3408fb13",
-   "desc": "ขอบนอกปีกห่อ",
-   "mat": "glow",
-   "n": 1
-  },
-  "wind_wrap_R_rach0": {
-   "v": "6f4ab3b9",
-   "desc": "แกนขนแถว 0",
-   "mat": "glow",
-   "n": 17
-  },
-  "wind_wrap_R_rach1": {
-   "v": "b567ed80",
-   "desc": "แกนขนแถว 1",
-   "mat": "glow",
-   "n": 15
-  },
-  "wind_wrap_R_rach2": {
-   "v": "9b328875",
-   "desc": "แกนขนแถว 2",
-   "mat": "glow",
-   "n": 13
-  },
-  "wind_wrap_R_rach3": {
-   "v": "ba46e00e",
-   "desc": "แกนขนแถว 3",
-   "mat": "glow",
-   "n": 10
-  },
-  "wind_wrap_R_row0": {
-   "v": "3fceb989",
-   "desc": "แถวขนปีกห่อ 0",
-   "mat": "solid",
-   "n": 17
-  },
-  "wind_wrap_R_row1": {
-   "v": "5505fec7",
-   "desc": "แถวขนปีกห่อ 1",
-   "mat": "solid",
-   "n": 15
-  },
-  "wind_wrap_R_row2": {
-   "v": "6568cb97",
-   "desc": "แถวขนปีกห่อ 2",
-   "mat": "solid",
-   "n": 13
-  },
-  "wind_wrap_R_row3": {
-   "v": "de2b2a4e",
-   "desc": "แถวขนปีกห่อ 3",
-   "mat": "solid",
-   "n": 10
   },
   "wood_splinter": {
    "v": "1d202f0f",
