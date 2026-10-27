@@ -128,6 +128,10 @@ body.studio #gl:active{cursor:grabbing}
 .stTick{position:absolute;top:4px;font:10px var(--fu);color:var(--tx3);transform:translateX(-50%);pointer-events:none}
 .stTick::after{content:'';position:absolute;left:50%;top:15px;width:1px;height:5px;background:var(--tx3)}
 .stTrack.ruler .end{position:absolute;top:0;bottom:0;right:0;background:rgba(0,0,0,.25);pointer-events:none;border-left:1px dashed var(--tx3)}
+.stTrack.ruler .endH{position:absolute;top:0;bottom:0;left:-6px;width:12px;cursor:col-resize;pointer-events:auto;z-index:4}
+.stTrack.ruler .endH::after{content:'';position:absolute;top:3px;bottom:3px;left:4px;width:4px;border-radius:2px;background:var(--tx3)}
+.stTrack.ruler .endH.set::after{background:var(--acc2)}
+.stTrack.ruler .endH:hover::after{background:var(--acc);box-shadow:0 0 6px var(--acc)}
 .stSeg{position:absolute;top:4px;bottom:4px;border-radius:4px;background:linear-gradient(180deg,color-mix(in srgb,var(--c,#d9b45a) 85%,#fff),var(--c,#d9b45a));opacity:.72;cursor:grab;min-width:6px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.35);display:flex;align-items:center;overflow:hidden}
 .stSeg:hover{opacity:.92}
 .stSeg span.lb{font:10.5px var(--fu);color:rgba(10,10,12,.85);padding:0 6px;white-space:nowrap;pointer-events:none;overflow:hidden;text-overflow:ellipsis}

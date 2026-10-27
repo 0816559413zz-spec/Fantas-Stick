@@ -60,10 +60,13 @@ function stIsLoop(){return (ST.fx&&ST.fx.layers||[]).some(L=>L.loop);}
 function stRender(dt,draw){stVnow+=dt*1000;FXSTUDIO.noDraw=!draw;try{render(dt,stVnow);}catch(e){console.error(e);}finally{FXSTUDIO.noDraw=false;}}
 function stFlush(){if(ST.I){fxKill(ST.I);ST.I=null;}fxClearAll();for(let i=0;i<34;i++)stRender(0.15,false);PARTS.length=0;SCR.fl.length=0;SCR.rad=null;SCR.chr=0;shakeA=0;}
 function stLayers(){const F=ST.fx;return Object.assign({},F,{layers:(F.layers||[]).filter(L=>!ST.mute[L.id]&&(!ST.solo||ST.solo===L.id))});}
-function stRestart(){if(!ST.fx||!VIEW.cur||MK.ws!=='fx')return;stFlush();Math.random=stRng(ST.seed*7919+13);ST.t=0;ST.acc=0;ST.run={white:0,parts:0,block:0};
+function stSimKey(){return JSON.stringify(stLayers())+'|'+ST.at+'|'+ST.seed+'|'+ST.map;}
+function stRestart(){ST.simKey=null;if(!ST.fx||!VIEW.cur||MK.ws!=='fx')return;stFlush();Math.random=stRng(ST.seed*7919+13);ST.t=0;ST.acc=0;ST.run={white:0,parts:0,block:0};ST.simKey=stSimKey();
   const A=stAnchor();if(!A)return;ST.I=fxStart(stLayers(),{x:A.x,y:A.y,h:A.h,a:A.a,follow:A.follow,own:true},ST.name);}
 function stStep(){ST.t+=STD;if(ST.I&&stIsLoop()&&!ST.I.stop&&ST.t>=stDur())fxStop(ST.I);stRender(STD,false);}
-function stSeek(t){t=Math.max(0,Math.min(t,stDur()+ST.tail));stRestart();let n=0;while(ST.t+STD*0.5<t&&n<900){stStep();n++;}stDraw(true);}
+// กรอไปข้างหน้า = เดินต่อจากเวลาเดิม (ไม่เริ่มใหม่) • ถอยหลัง/ไฟล์เปลี่ยน = เริ่มใหม่ • ระหว่างกรอข้ามตัวละคร (FXSTUDIO.seek) — เดิมกรอครั้งละ ~1 วิ
+function stSeek(t){t=Math.max(0,Math.min(t,stDur()+ST.tail));FXSTUDIO.seek=true;
+  try{if(!(ST.simKey&&t>=ST.t-STD*0.5&&ST.simKey===stSimKey()))stRestart();let n=0;while(ST.t+STD*0.5<t&&n<900){stStep();n++;}}finally{FXSTUDIO.seek=false;}stDraw(true);}
 function stDraw(meas){gl.info.reset();const t0=performance.now();stRender(0,true);ST.met.ms=performance.now()-t0;ST.met.calls=gl.info.render.calls;ST.met.parts=PARTS.length;
   if(meas||stFr%5===0)stMeasure();stHudUpdate();}
 // วัด: % พิกเซลขาวจ้า, ความสว่างเฉลี่ย, % ขาวจ้าบนตัวละคร (บังตัว)
@@ -199,9 +202,9 @@ function stBuildUI(){
   // กล้องหมุนเอง: ลากบนจอ / ล้อเมาส์ซูม
   const cv=gl.domElement;let drag=null;
   cv.addEventListener('pointerdown',e=>{if(mkGizmoHot()||meBoxDown(e))return;drag={x:e.clientX,y:e.clientY};cv.setPointerCapture(e.pointerId);if(ST.cam!=='orbit'){ST.cam='orbit';stSync();}});
-  cv.addEventListener('pointermove',e=>{if(!drag)return;ST.orb.yaw+=(e.clientX-drag.x)*0.008;ST.orb.pitch=Math.max(-0.2,Math.min(1.45,ST.orb.pitch+(e.clientY-drag.y)*0.006));drag={x:e.clientX,y:e.clientY};if(!ST.play)ST.seekTo=ST.t;});
+  cv.addEventListener('pointermove',e=>{if(!drag)return;ST.orb.yaw+=(e.clientX-drag.x)*0.008;ST.orb.pitch=Math.max(-0.2,Math.min(1.45,ST.orb.pitch+(e.clientY-drag.y)*0.006));drag={x:e.clientX,y:e.clientY};});
   cv.addEventListener('pointerup',()=>drag=null);
-  cv.addEventListener('wheel',e=>{e.preventDefault();ST.orb.dist=Math.max(3,Math.min(60,ST.orb.dist*(e.deltaY>0?1.1:0.9)));if(ST.cam!=='orbit'){ST.cam='orbit';stSync();}if(!ST.play)ST.seekTo=ST.t;},{passive:false});
+  cv.addEventListener('wheel',e=>{e.preventDefault();ST.orb.dist=Math.max(3,Math.min(60,ST.orb.dist*(e.deltaY>0?1.1:0.9)));if(ST.cam!=='orbit'){ST.cam='orbit';stSync();}},{passive:false});
   // ปุ่มลัด (กันไม่ให้ปุ่มไหลเข้าเกม)
   addEventListener('keydown',e=>{if(!document.body.classList.contains('studio'))return;const tg=e.target.tagName;const typing=tg==='INPUT'||tg==='TEXTAREA'||tg==='SELECT';
     if(typing&&e.target._key){e.target._key(e);e.stopImmediatePropagation();return;}
@@ -231,7 +234,7 @@ function stBuildUI(){
   addEventListener('beforeunload',e=>{if(ST.dirty){e.preventDefault();e.returnValue='';}});
 }
 const stWs=()=>{try{return MK.ws;}catch(e){return 'fx';}};
-function stSetCam(k){ST.cam=k;stSync();if(!ST.play)ST.seekTo=ST.t;}
+function stSetCam(k){ST.cam=k;stSync();}   // หยุดอยู่ก็วาดใหม่ทุกเฟรมอยู่แล้ว — ไม่ต้องจำลองใหม่
 // ---------- แถบสถานะ + คำใบ้ ----------
 const ST_HINT={fx:'ลากแถบสี = เลื่อนเวลา • ลากขอบขวา = ยืดอายุ • คลิกขวาที่ชั้น = เมนู • Shift+A เพิ่มชั้น • Space เล่น/หยุด • ? ดูปุ่มลัดทั้งหมด',
   mesh:'คลิกชิ้นบนจอ = เลือก • G ย้าย / R หมุน / S ย่อขยาย • ลากจอ = หมุนกล้อง • ล้อเมาส์ = ซูม',edit:'โหมดแก้จุด: 1 จุด / 2 ขอบ / 3 หน้า • คลิก = เลือก (Shift เพิ่ม) • Alt+คลิกขอบ = เลือกวง • B ลากกรอบ • Ctrl+R ตัดวง • A ทั้งหมด • ลากลูกศร G/R/S • E ดึงออก • I หดใน • F เติมหน้า • M รวมจุด • X ลบ • Tab ออก',
@@ -313,9 +316,15 @@ function stTlRender(){const R=$st('stRows');if(!R||!ST.fx)return;const sc=R.scro
   R.append(h('div',{className:'stName head'+(ST.sel===null?' on':''),title:'ตั้งค่าทั้งไฟล์: คำอธิบาย ธาตุ ความยาว ผลตรวจ และผูกกับท่าในเกม',on:{click:()=>{ST.sel=null;stTlRender();stInspRender();}}},h('span',{className:'nm'},'⚙ ตั้งค่าไฟล์ / ผูกกับท่า'),h('span',{className:'ty'},F.layers.length+' ชั้น')));
   const ru=h('div',{className:'stTrack ruler',id:'stRuler',title:'คลิกหรือลาก = เลื่อนหัวเล่นไปเวลานั้น'});
   for(let s=0;s<=D+1e-6;s+=step)ru.append(h('span',{className:'stTick',style:'left:'+(s/D*100)+'%'},String(+s.toFixed(2))));
-  ru.append(h('div',{className:'end',style:'left:'+(stDur()/D*100)+'%'}),h('div',{className:'stPh',id:'stPh'}));
+  const endH=h('span',{className:'endH'+(F.dur?' set':''),title:'ลาก = ตั้งความยาวเอฟเฟกต์ ('+stDur().toFixed(2)+' วิ'+(F.dur?'':' อัตโนมัติ')+') • ดับเบิลคลิก = กลับเป็นอัตโนมัติ (ยาวตามชั้นที่ยาวสุด)'}),endD=h('div',{className:'end',style:'left:'+(stDur()/D*100)+'%'},endH);
+  ru.append(endD,h('div',{className:'stPh',id:'stPh'}));
+  // ลากขอบเวลา = เขียน fx.dur (สเกลคงที่ระหว่างลาก ลากสุดขวาแล้วปล่อย = ยืดต่อได้อีก)
+  endH.addEventListener('pointerdown',e=>{if(e.button!==0)return;e.preventDefault();e.stopPropagation();const b=ru.getBoundingClientRect();let moved=false;endH.setPointerCapture(e.pointerId);
+    const mv=ev=>{if(!b.width)return;if(!moved){moved=true;stPush();}const v=Math.max(0.05,Math.min(D,Math.round((ev.clientX-b.left)/b.width*D/0.05)*0.05));F.dur=+v.toFixed(2);endD.style.left=(v/D*100)+'%';ST.dirty=true;stHint('ความยาว '+v.toFixed(2)+' วิ');$st('stTime').textContent=ST.t.toFixed(2)+' / '+v.toFixed(2)+' วิ';};
+    const up=()=>{endH.removeEventListener('pointermove',mv);endH.removeEventListener('pointerup',up);if(moved){if(ST.t>F.dur+ST.tail)ST.t=F.dur;stChanged(true);}};endH.addEventListener('pointermove',mv);endH.addEventListener('pointerup',up);});
+  endH.addEventListener('dblclick',e=>{e.stopPropagation();if(!F.dur)return;stPush();delete F.dur;stChanged(true);stToast('ความยาว = อัตโนมัติ ('+stDur().toFixed(2)+' วิ)');});
   const seekAt=(e,el)=>{const b=el.getBoundingClientRect();ST.play=false;ST.seekTo=Math.max(0,Math.min(D,(e.clientX-b.left)/b.width*D));stSync();};
-  const scrub=el=>el.addEventListener('pointerdown',e=>{if(e.button!==0||e.target.closest('.stSeg'))return;seekAt(e,el);el.setPointerCapture(e.pointerId);const mv=ev=>seekAt(ev,el),up=()=>{el.removeEventListener('pointermove',mv);el.removeEventListener('pointerup',up);};el.addEventListener('pointermove',mv);el.addEventListener('pointerup',up);});
+  const scrub=el=>el.addEventListener('pointerdown',e=>{if(e.button!==0||e.target.closest('.stSeg,.endH'))return;seekAt(e,el);el.setPointerCapture(e.pointerId);const mv=ev=>seekAt(ev,el),up=()=>{el.removeEventListener('pointermove',mv);el.removeEventListener('pointerup',up);};el.addEventListener('pointermove',mv);el.addEventListener('pointerup',up);});
   scrub(ru);R.append(ru);
   const errAt=new Set(ST.lint.filter(r=>r.lv==='err'||r.lv==='warn').map(r=>String(r.at).split('.')[0]));
   F.layers.forEach((L,i)=>{const g=k=>L[k]!==undefined?L[k]:stDef(L,k),num=v=>typeof v==='number'?v:Array.isArray(v)?+v[1]||0:0,T=FXR.schema.types[L.t]||{},col=TYPEC[L.t]||'#d9b45a',muted=!!ST.mute[L.id],solo=ST.solo===L.id;

@@ -4,8 +4,8 @@ let lastFrame=performance.now();
 // หยุดภาพได้ครั้งละครั้ง แล้วพัก HSTOP.gap วินาที — กันตีถี่/โดนหลายตัวแล้วภาพหยุดๆ เดินๆ จนดูเหมือนกระตุก
 const HSTOP={t:0,pend:0,until:0,gap:0.3};
 function hitStop(d){if(screen==='game'&&performance.now()>=HSTOP.until)HSTOP.pend=Math.max(HSTOP.pend,d);}
-// สตูดิโอ VFX (studio/studio.js) ขับเฟรมเอง: own = หยุดลูปนี้ • noDraw = อัปเดตเอฟเฟกต์โดยไม่วาด (กรอเวลา) 
-const FXSTUDIO={own:false,noDraw:false};
+// สตูดิโอ VFX (studio/studio.js) ขับเฟรมเอง: own = หยุดลูปนี้ • noDraw = อัปเดตเอฟเฟกต์โดยไม่วาด (กรอเวลา) • seek = กำลังกรอ: ข้ามตัวละคร/หญ้า/ผ้าคลุม (กินเวลา ~85% ของการกรอ)
+const FXSTUDIO={own:false,noDraw:false,seek:false};
 function frame(now){
   if(FXSTUDIO.own)return;
   const dt=Math.min(0.05,(now-lastFrame)/1000);lastFrame=now;
@@ -60,7 +60,7 @@ function render(dt,now){
 // ส่วนที่รันทุกเฟรมในเกม (อยู่ใต้งบเอฟเฟกต์ vfxBegin/vfxEnd)
 function renderGame(v,P,E,me,dt,now){
   let t0=performance.now();
-  syncPlayers(P,v.mode,now,dt);grassTick(dt);clothTick(dt);pf('players',t0);   // grassTick = ลม + หญ้า (js/50) • clothTick = ผ้าคลุมจริงของเรา (js/49)
+  if(!FXSTUDIO.seek){syncPlayers(P,v.mode,now,dt);grassTick(dt);clothTick(dt);}pf('players',t0);   // grassTick = ลม + หญ้า (js/50) • clothTick = ผ้าคลุมจริงของเรา (js/49)
   if(me&&me.al&&!me.fl&&!me.dn){const o=PM3.get(me.id);if(o){const k=Math.floor(o.walk/Math.PI);if(o.stepK!==undefined&&k!==o.stepK)snd('step',{vol:0.35,rev:0.1});o.stepK=k;}}t0=performance.now();
   syncEnemies(E,P,now,dt);pf('enemies',t0);t0=performance.now();
   syncProj(v,now);syncWalls(v);syncPots(v,now);syncEarth(v,dt,now);syncProps(v);syncBld(dt);brkSync(dt);syncMins(v,now,dt);
