@@ -10,8 +10,9 @@ ROOT=Path(__file__).resolve().parents[1]
 WING=json.loads((ROOT/'assets/fx/wind/wing_angular.fx.json').read_text(encoding='utf-8'))
 G=dict(inner='#efffe8',mid='#8dff65',outer='#2ec772',hi='#ffffff',line='#196a40',deep='#0f4a2c')
 T=lambda n:'tex/'+n
-DUR=1.2
-T_CH,T_GO,T_LAND,T_WIND,T_HIT=0.0,0.15,0.25,0.25,0.38   # shot starts (s)
+DUR=1.6
+T_CH,T_GO,T_LAND,T_WIND,T_HIT=0.0,0.15,0.25,0.25,0.5    # shot starts (s)
+WBLOW=0.75         # how long the follow-up wind keeps blowing (user: longer)
 DASH=11.0          # dash distance m (~200 units + landing slide)
 ENEMY_Z=6.0        # enemy standing in the path
 WALL_Z=17.0        # wind wall face the enemy is blown into
@@ -88,27 +89,32 @@ for k,(tex,col,sc) in enumerate([('wind_swoosh_a_hi',G['hi'],1.6),('wind_swoosh_
         'uvTile':[1,1],'uvScroll':[0,0],'pos':[0,.05+k*.03,LZ],'rot':[0,k*120,0],'scale':{'0':sc*.3,'1':sc,'ease':'out'},'spin':300*(1-2*k),'op':{'0':0,'0.1':.9,'1':0},'fade':0})
 L.append({'id':'s2_shake','t':'screen','at':T_LAND,'life':.1,'shake':1.2,'own':True})
 # ---------- shot 3: the strong wind follows the path — long streamlines, curls at the front ----------
+# User 2026-10-28: "longer wind effect" — the gust keeps blowing for WBLOW s in waves (not one short puff), with longer streamlines.
 rg=random.Random(8)
-WL=.38
-for i in range(14):
-    y=rg.uniform(.25,2.9);x=rg.uniform(-1.3,1.3);t0=T_WIND+rg.uniform(-.03,.06);ln=rg.uniform(2.6,4.6)
-    z0=rg.uniform(-.5,2.5);z1=min(WALL_Z-1,z0+rg.uniform(11,14))
-    tex,col=[('wind_swoosh_a_hi',G['hi']),('wind_swoosh_b',G['mid']),('wind_swoosh_a',G['outer'])][i%3]
-    L.append({'id':f's3_line{i}','t':'mesh','at':round(t0,3),'life':WL,'att':'feet','shape':'model','model':'wind_slashstroke','mat':'tex','tex':T(tex),'col':col,'col2':'#000000','rim':0,
-        'uvTile':[1,1],'uvScroll':[0,0],'pos':{'0':[round(x,2),round(y,2),round(z0,2)],'0.55':[round(x,2),round(y-.1,2),round(z0+(z1-z0)*.8,2)],'1':[round(x,2),round(y-.15,2),round(z1,2)],'ease':'out'},
-        'rot':[rg.choice([88,92]),0,90],'scale':{'0':[ln*.5,1,.5],'0.3':[ln,1,.7],'1':[ln*1.2,1,.35]},'op':{'0':0,'0.12':.9,'0.7':.7,'1':0},'fade':0})
-# curls (spirals seen from the side) riding the wind front, ending around the enemy / wall
-for j,(y,sz,dz) in enumerate([(2.4,.9,-2.5),(1.5,.75,-.8),(.8,.85,.3),(1.9,.55,-4)]):
-    zs=ENEMY_Z+dz;ze=WALL_Z-1.6+dz*.3
+for i in range(30):
+    wave=i%3;y=rg.uniform(.2,3.1);x=rg.uniform(-1.6,1.6);t0=T_WIND+wave*.18+rg.uniform(-.03,.08);ln=rg.uniform(4,7.5);wl=rg.uniform(.45,.6)
+    z0=rg.uniform(-1,3)+wave*1.5;z1=min(WALL_Z+3,z0+rg.uniform(13,17))
+    tex,col=[('wind_swoosh_a_hi',G['hi']),('wind_swoosh_b',G['mid']),('wind_swoosh_a',G['outer']),('wind_swoosh_b',G['mid'])][i%4]
+    L.append({'id':f's3_line{i}','t':'mesh','at':round(t0,3),'life':round(wl,2),'att':'feet','shape':'model','model':'wind_slashstroke','mat':'tex','tex':T(tex),'col':col,'col2':'#000000','rim':0,
+        'uvTile':[1,1],'uvScroll':[0,0],'pos':{'0':[round(x,2),round(y,2),round(z0,2)],'0.5':[round(x,2),round(y-.1,2),round(z0+(z1-z0)*.7,2)],'1':[round(x,2),round(y-.2,2),round(z1,2)],'ease':'out'},
+        'rot':[rg.choice([88,92]),0,90],'scale':{'0':[ln*.4,1,.5],'0.3':[ln,1,.75],'1':[ln*1.4,1,.3]},'op':{'0':0,'0.1':.9 if wave<2 else .7,'0.7':.65,'1':0},'fade':0})
+# curls (spirals seen from the side) riding the wind fronts — two waves, the first ends around the enemy / wall
+CU=[(2.4,.9,-2.5,0),(1.5,.75,-.8,0),(.8,.85,.3,0),(1.9,.55,-4,0),(2.7,.7,-1.5,1),(1.1,.95,-3,1),(.5,.6,0,1)]
+for j,(y,sz,dz,wv) in enumerate(CU):
+    zs=ENEMY_Z+dz-wv*2;ze=WALL_Z-1.6+dz*.3+wv*1.5
     for k,(tex,col,m) in enumerate([('wind_swoosh_a_hi',G['hi'],1.0),('wind_swoosh_b',G['mid'],1.25)]):
-        L.append({'id':f's3_curl{j}_{k}','t':'mesh','at':round(T_WIND+.03+j*.02,3),'life':.45,'att':'feet','shape':'model','model':f'wind_pieces{(j+k)%3}','mat':'tex','tex':T(tex),'col':col,'col2':'#000000','rim':0,
-            'uvTile':[1,1],'uvScroll':[0,0],'pos':{'0':[0,y,round(zs,2)],'0.35':[0,y,round(ze-.5,2)],'1':[0,y+.2,round(ze,2)],'ease':'out'},'rot':[0,90,j*40],
-            'scale':{'0':[.3*sz*m,.2,.3*sz*m],'0.35':[sz*m,.3,sz*m],'1':[1.3*sz*m,.2,1.3*sz*m],'ease':'out'},'spin':(-700 if j%2 else 700),'op':{'0':0,'0.12':.9,'0.7':.6,'1':0},'fade':0})
-L.append({'id':'s3_gust','t':'emit','at':T_WIND,'life':.16,'att':'feet','pos':{'0':[0,1.4,0],'1':[0,1.4,WALL_Z-2]},'rate':120,'from':'sphere','fr':1.5,'dir':'aim','spread':.08,
-    'speed':[16,24],'plife':[.12,.24],'look':'streak','size':[1,2],'col':G['mid'],'c2':G['outer'],'gravity':0,'drag':1,'curl':False})
-L.append({'id':'s3_floor','t':'emit','at':T_WIND,'life':.2,'att':'feet','pos':{'0':[0,.08,0],'1':[0,.08,WALL_Z-1.5]},'rate':160,'from':'disc','fr':1.4,'dir':'aim','spread':.25,'up':[0,.6],
-    'speed':[8,14],'plife':[.2,.4],'look':'streak','size':[1,1.8],'col':G['inner'],'c2':G['outer'],'gravity':1,'drag':1.5,'curl':False})
-L.append({'id':'s3_warp','t':'warp','at':T_WIND,'life':.22,'att':'feet','pos':{'0':[0,1.3,1],'1':[0,1.3,WALL_Z-2]},'kind':'shock','size':{'0':1.5,'1':3},'str':.6,'op':{'0':.8,'1':0},'col':G['inner'],'glow':.02})
+        L.append({'id':f's3_curl{j}_{k}','t':'mesh','at':round(T_WIND+.03+j*.02+wv*.25,3),'life':.6,'att':'feet','shape':'model','model':f'wind_pieces{(j+k)%3}','mat':'tex','tex':T(tex),'col':col,'col2':'#000000','rim':0,
+            'uvTile':[1,1],'uvScroll':[0,0],'pos':{'0':[0,y,round(zs,2)],'0.35':[0,y,round(ze-.5,2)],'1':[0,y+.3,round(ze+.8,2)],'ease':'out'},'rot':[0,90,j*40],
+            'scale':{'0':[.3*sz*m,.2,.3*sz*m],'0.35':[sz*m,.3,sz*m],'1':[1.5*sz*m,.2,1.5*sz*m],'ease':'out'},'spin':(-650 if j%2 else 650),'op':{'0':0,'0.1':.9,'0.7':.55,'1':0},'fade':0})
+L.append({'id':'s3_gust','t':'emit','at':T_WIND,'life':WBLOW,'att':'feet','pos':{'0':[0,1.4,0],'0.4':[0,1.4,WALL_Z-3],'1':[0,1.4,WALL_Z-1]},'rate':130,'from':'sphere','fr':1.6,'dir':'aim','spread':.08,
+    'speed':[16,24],'plife':[.15,.3],'look':'streak','size':[1,2.2],'col':G['mid'],'c2':G['outer'],'gravity':0,'drag':1,'curl':False})
+L.append({'id':'s3_path','t':'emit','at':T_WIND+.05,'life':WBLOW-.1,'att':'feet','pos':[0,1.3,0],'rate':110,'from':'line','fh':WALL_Z,'dir':'aim','spread':.06,
+    'speed':[12,20],'plife':[.12,.25],'look':'streak','size':[.8,1.6],'col':G['inner'],'c2':G['mid'],'gravity':0,'drag':.5,'curl':False,'x':True})
+L.append({'id':'s3_floor','t':'emit','at':T_WIND,'life':WBLOW,'att':'feet','pos':{'0':[0,.08,0],'0.4':[0,.08,WALL_Z-2],'1':[0,.08,WALL_Z-1]},'rate':140,'from':'disc','fr':1.5,'dir':'aim','spread':.25,'up':[0,.6],
+    'speed':[8,14],'plife':[.2,.45],'look':'streak','size':[1,1.8],'col':G['inner'],'c2':G['outer'],'gravity':1,'drag':1.5,'curl':False})
+L.append({'id':'s3_leaves','t':'emit','at':T_WIND+.05,'life':WBLOW-.05,'att':'feet','pos':{'0':[0,1,2],'1':[0,1,WALL_Z-3]},'rate':40,'from':'sphere','fr':1.8,'dir':'aim','spread':.3,
+    'speed':[9,15],'plife':[.35,.6],'look':'model','model':'wind_wing_airchip','mmat':'glow','msize':[.12,.26],'col':G['mid'],'c2':G['outer'],'mspin':500,'gravity':-.2,'drag':.8,'bounce':0})
+L.append({'id':'s3_warp','t':'warp','at':T_WIND,'life':.3,'att':'feet','pos':{'0':[0,1.3,1],'1':[0,1.3,WALL_Z-2]},'kind':'shock','size':{'0':1.5,'1':3},'str':.6,'op':{'0':.8,'1':0},'col':G['inner'],'glow':.02})
 # ---------- shot 4: enemy slams into the wind wall — crack burst ----------
 HP=[0,1.1,WALL_Z-.5]
 L.append({'id':'s4_hit','t':'use','at':T_HIT,'life':.6,'att':'feet','pos':[0,0,WALL_Z],'fx':'wind/wall_hit'})
