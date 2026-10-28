@@ -193,10 +193,10 @@ th{color:var(--gold);font-weight:400;font-size:12px;letter-spacing:2px}
 /* ===== ไมค์ ===== */
 #voice{position:fixed;left:12px;top:12px;width:230px;background:var(--corners),var(--fill);border:1px solid var(--line);padding:10px;font-size:13px;z-index:5}
 body[data-screen=lobby] #voice{top:84px;left:auto;right:24px;width:340px}
-#voice button{padding:6px 10px;font-size:13px;width:100%}
-#voice button.on{background:linear-gradient(180deg,#2e8a50,#1b5a33);border-color:#5be37d}
-#voice select{width:100%;margin-top:6px;background:rgba(3,5,12,.75);color:var(--text);border:1px solid var(--line);padding:5px;font:inherit;font-size:12px}
-#voice label{display:flex;gap:6px;align-items:center;margin-top:6px;color:var(--mute);font-size:12px}
+#voice button,#setVoice button{padding:6px 10px;font-size:13px;width:100%}
+#voice button.on,#setVoice button.on{background:linear-gradient(180deg,#2e8a50,#1b5a33);border-color:#5be37d}
+#voice select,#setVoice select{width:100%;margin-top:6px;background:rgba(3,5,12,.75);color:var(--text);border:1px solid var(--line);padding:5px;font:inherit;font-size:12px}
+#voice label,#setVoice label{display:flex;gap:6px;align-items:center;margin-top:6px;color:var(--mute);font-size:12px}
 #vlist{margin-top:8px}
 .vp{display:flex;align-items:center;gap:6px;padding:3px 0}
 .vp .lv{flex:1;height:4px;background:rgba(255,255,255,.08);overflow:hidden}
@@ -463,6 +463,9 @@ input[type=checkbox]:checked{background:linear-gradient(180deg,#f3dc94,#c99d42 6
 input[type=checkbox]:checked::after{content:'';position:absolute;left:6px;top:2px;width:5px;height:10px;border:solid #1b1204;border-width:0 2px 2px 0;transform:rotate(45deg)}
 input[type=checkbox]:focus-visible{outline:2px solid var(--gold2);outline-offset:2px}
 #voice input[type=checkbox]{width:16px;height:16px}#voice input[type=checkbox]:checked::after{left:4px;top:1px;width:4px;height:8px}
+#setVoice input[type=checkbox]{width:16px;height:16px}#setVoice input[type=checkbox]:checked::after{left:4px;top:1px;width:4px;height:8px}
+#voice{display:none!important}   /* แผงไมค์ย้ายไปอยู่ในตั้งค่า > เสียง (js/40 renderSettings) */
+#setVoice{font-size:13px}#setVoice #vbody{display:flex;flex-direction:column;align-items:stretch;gap:6px;max-width:360px}#setVoice #vbody>*{margin-top:0;width:100%;box-sizing:border-box}
 input[type=range]{cursor:pointer}
 /* แท็กบรรทัดล่างของหน้าเมนูไม่ต้องโผล่หลังหน้าสร้างตัวละคร */
 body.crOpenB .mver{display:none}

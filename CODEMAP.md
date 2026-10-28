@@ -306,10 +306,10 @@ meetKey:134 myVoted:134 castVote:135 syncMeeting:141
 ## js/37-render-loop.js (81) — ลูปเรนเดอร์
 lastFrame:2 HSTOP:5 hitStop:6 FXSTUDIO:8 frame:9 _fpsAcc:18 _fpsN:18 render:19 renderGame:61
 
-## js/38-hud.js (352) — HUD
+## js/38-hud.js (346) — HUD
 rr:2 SLOTS:3 fmtTime:4
 §5 ชิ้นส่วน HUD ธีมทอง-น้ำเงิน
-HG:6 HG2:6 HUDF:8 hudTick:9 readyPulse:11 diaPath:13 plate:15 frameBox:21 bossTrail:29 drawBossBar:30 spellDia:50 thinBar:79 drawHUD:84 raceRankClient:164 drawModeHUD:168 MM:205 drawMinimap:206 slotKey:285 mySlots:286 STATUS_ICO:295 SLOTS_IMP:296 BR_LOCK:297 CLUSTER:299 E_NEEDSTAND:300 slotState:301 drawBottom:320 drawBoard:335
+HG:6 HG2:6 HUDF:8 hudTick:9 readyPulse:11 diaPath:13 plate:15 frameBox:21 bossTrail:29 drawBossBar:30 spellDia:50 thinBar:79 drawHUD:84 raceRankClient:164 drawModeHUD:168 MM:205 drawMinimap:206 slotKey:279 mySlots:280 STATUS_ICO:289 SLOTS_IMP:290 BR_LOCK:291 CLUSTER:293 E_NEEDSTAND:294 slotState:295 drawBottom:314 drawBoard:329
 
 ## js/39-menu.js (284) — 
 myLook:5 myColor:5 myKit:5 myName:6 renderMyHouse:9
@@ -320,12 +320,12 @@ ROLE_COL:37 roleTag:38 DESIGNED:39 spellTags:40 spellDescHTML:47 baseDescHTML:51
 §222 ฉากเปิด (#intro) + ประกายบนหน้าเมนู (#menuFx)
 TITLE:225 titleSpark:226 titleDraw:227 titleLoop:238 titleGo:249 JOINQ:257 ovResult:277
 
-## js/40-train-settings.js (219) — เมนูทดลอง (ห้องฝึก / Test Place)
+## js/40-train-settings.js (221) — เมนูทดลอง (ห้องฝึก / Test Place)
 trOpenF:2 trKey:2 trN:2 TR_OPTS:3 trToggle:4 trSend:9 trSync:14
 §48 แท่นเสกบอท (โซนเสกบอท ห้องฝึก, trBotPad js/02): ยืนบนแท่น = เมนูขึ้น …
 bpOpen:49 bpOn:49 bpKey:49 bpShow:51 bpSync:53 hovEl:97
 §98 หน้าตั้งค่า
-setRow:99 setTog:100 setTab:101 XHC:102 XHN:102 setOpts:103 SET_ICO:105 SET_EN:108 renderSettings:109 drawXhPrev:129 openSettings:130 closeSettings:132 modeIcon:188 modeTitle:189 renderLobby:190
+setRow:99 setTog:100 setTab:101 XHC:102 XHN:102 setOpts:103 SET_ICO:105 SET_EN:108 renderSettings:109 drawXhPrev:131 openSettings:132 closeSettings:134 modeIcon:190 modeTitle:191 renderLobby:192
 
 ## js/41-debug.js (143) — เครื่องมือทดสอบสมดุล (ใช้ผ่านคอนโซล WD.bal / WD.dmgTest เท่านั้น ผู้เล่นปกติไม่เห็น)
 §5 บอทต่อสู้แบบง่ายๆ: เล็งนำเป้า เดินรักษาระยะ+ส่ายไปมา ร่ายคาถาทุกครั้ง…
@@ -603,12 +603,12 @@ BKICO:377 buffShow:381
 §400 จอมืดตอนเริ่มแมตช์ (ผู้ใช้ 2026-10-23: กระตุกตอนเริ่มแมตช์แรก)
 gameCover:403
 
-## js/66-hud4.js (185) — HUD รอบ 4 (ผู้ใช้ 2026-10-23, designs/hud-full-mock.html)
+## js/66-hud4.js (176) — HUD รอบ 4 (ผู้ใช้ 2026-10-23, designs/hud-full-mock.html)
 H4E:5 H4:11 h4Pal:12 hud4Col:14 h4Parts:16 h4AuBits:21 h4Key:36 h4Ico:37 h4Build:38 h4Set:65 hud4Draw:66
-§108 ไพ่สกิล: นาฬิกาทราย / ท่าใช้ / สลับตำแหน่ง
-h4Glass:110 h4Bits:116 h4Fx:118 h4CardUse:120 h4GlassOut:124 h4Place:128 h4OrdKey:131 h4OrdLoad:132 h4Swap:135 h4Pick:138 h4AltKey:140 h4CardWire:144
-§155 ไพ่อัลติ
-H4SH:157 h4UltCard:159 h4UltUse:164 hud4Frame:168 hud4Hide:169 _h4RT:171 _h4Cam:171 h4FaceShot:172 h4FaceSet:185
+§113 ไพ่สกิล: นาฬิกาทราย / ท่าใช้ / สลับตำแหน่ง
+h4Glass:115 h4Bits:121 h4Fx:123 h4CardUse:125 h4GlassOut:129 h4Place:133 h4OrdKey:136 h4OrdLoad:137 h4Swap:140 h4Pick:143 h4AltKey:145 h4CardWire:149
+§160 ไพ่อัลติ
+H4SH:162 h4UltCard:164 h4UltUse:169 hud4Frame:173 hud4Hide:174 h4MapBox:176
 
 ## js/67-backdrop.js (139) — 
 BACKDROP:8
@@ -628,4 +628,4 @@ drawWindHud:78
 §85 ตัวช่วยเล็งกำแพงลม (เห็นเฉพาะเรา): เส้นโค้งเรืองที่จุดวาง (คลิกขวา) +…
 wvAimGhost:86
 
-(76 files, 18232 lines)
+(76 files, 18219 lines)

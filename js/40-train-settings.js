@@ -112,7 +112,7 @@ function renderSettings(){
   if(setTab===0)b=`${setRow('ความไวเมาส์','sens',20,250,5,'%')}${setTog('กลับแกนขึ้น-ลง','inv')}
     <h3 class="sec">เป้าเล็ง</h3>${setOpts('รูปแบบ','xh',['กากบาท','จุด','วงกลม','กากบาท+วง'])}${setOpts('สี','xhc',XHN)}${setRow('ขนาด','xhs',50,200,10,'%')}
     <div class="xhprev"><canvas id="xhPrev" width="120" height="70"></canvas></div>`;
-  if(setTab===1)b=`${setRow('เสียงรวม','master',0,100,1,'%')}${setRow('เสียงเอฟเฟกต์','sfx',0,100,1,'%')}${setRow('เพลง','music',0,100,1,'%')}${setTog('เปิดเพลงประกอบ','_music')}`;
+  if(setTab===1)b=`${setRow('เสียงรวม','master',0,100,1,'%')}${setRow('เสียงเอฟเฟกต์','sfx',0,100,1,'%')}${setRow('เพลง','music',0,100,1,'%')}${setTog('เปิดเพลงประกอบ','_music')}<h3 class="sec">ไมค์ (คุยเสียง)</h3>${NET.online?'':'<p class="crnote">ใช้ได้ตอนเล่นออนไลน์กับเพื่อน</p>'}<div id="setVoice"></div>`;
   if(setTab===2)b=`<label class="srow"><span>กราฟิก</span><select id="setGfx">${['auto','high','low'].map(m=>`<option value="${m}" ${QUAL.mode===m?'selected':''}>${QUAL_NAME[m]}${m==='auto'?' (ปรับเองให้ลื่น)':m==='high'?' (เครื่องแรง)':' (ลื่นสุด ไม่มีเงา)'}</option>`).join('')}</select></label>
     ${setRow('มุมกว้างกล้อง (FOV)','fov',50,95,1,'°')}${setTog('กล้องสั่น','shake')}${setTog('แสดง FPS','fps')}`;
   if(setTab===3)b=`${setTog('ตัวเลขดาเมจ','dmg')}${setTog('เครื่องหมายตอนยิงโดน','hitm')}${setTog('บอกทิศที่โดนยิง','dirm')}${setTog('แผนที่ย่อ','mini')}${setTog('ชื่อผู้เล่นเหนือหัว','names')}`;
@@ -122,7 +122,9 @@ function renderSettings(){
   $('#setTabs').innerHTML=tabs.map((t,i)=>`<button type="button" class="stab ${setTab===i?'on':''}" data-stab="${i}" style="--a:${ang(i)};--i:${i}">${ico(i)}<span class="sxL">${SET_EN[i]}<small>${t}</small></span></button>`).join('')
     +`<button type="button" class="stab sxExit" data-sx="exit" style="--a:${ang(N-1)};--i:${N-1}">${ico(5)}<span class="sxL">${SET_EN[5]}<small>ปิด</small></span></button>`;
   {const ti=$('#setTiTh');if(ti)ti.textContent=tabs[setTab];}
+  const vb=$('#vbody');if(vb&&vb.parentElement!==$('#voice'))$('#voice').appendChild(vb);   // คืนแผงไมค์ก่อนล้างหน้า (ไม่ให้ปุ่ม/รายชื่อหาย)
   $('#setBody').innerHTML=b;
+  {const h=$('#setVoice');if(h&&vb){h.appendChild(vb);vb.classList.remove('hidden');}}   // แผงไมค์อยู่ในตั้งค่า > เสียง เท่านั้น (ผู้ใช้ 2026-10-28)
   const mt=$('#setBody').querySelector('[data-set="_music"]');if(mt)mt.checked=MUSIC.on;
   drawXhPrev();
 }

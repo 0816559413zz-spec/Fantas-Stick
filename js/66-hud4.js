@@ -1,5 +1,5 @@
 // ---------- HUD รอบ 4 (ผู้ใช้ 2026-10-23, designs/hud-full-mock.html) ----------
-// DOM ทับ #cv: ซ้ายล่าง = รูปตัวละคร + เลือดช่องเฉียง • ขวาล่าง = ไพ่สกิลหลัก 4 ใบเรียงแถว + ไอคอนเล็ก (ตีปกติ/โล่/พุ่ง/ไม้กวาด) ขวาสุด (ผู้ใช้ 2026-10-28) • อัลติกลางล่าง • สีตามธาตุ
+// DOM ทับ #cv: ซ้ายล่าง = แผนที่ย่อสี่เหลี่ยม (วาดบน canvas ใน js/38 ตามกรอบ h4MapBox) + รายชื่อทีม + แถบโล่ + แถบเลือดช่องเฉียง (ผู้ใช้ 2026-10-28) • ขวาล่าง = ไพ่สกิลหลัก 4 ใบเรียงแถว + ไอคอนเล็ก (ตีปกติ/โล่/พุ่ง/ไม้กวาด) ขวาสุด (ผู้ใช้ 2026-10-28) • อัลติกลางล่าง • สีตามธาตุ
 // สร้างโครงครั้งเดียวต่อธาตุ แล้วอัปเดตเฉพาะค่าที่เปลี่ยน (js/38 drawBottom → hud4Draw) • ไม่ถูกวาดในเฟรมไหน = ซ่อน (hud4Frame จาก render loop)
 // สีของ HUD canvas เดิม (แผ่นป้าย/kill feed/แผนที่ย่อ = HG/HG2 ใน js/38) ก็เปลี่ยนตามธาตุด้วย hud4Col
 const H4E={
@@ -8,7 +8,7 @@ const H4E={
   storm:{c0:'#4a3a06',c1:'#ffe27a',c2:'#fff6c8',cb:'#3a3010',pt:'spark',n:'STORM'},
   earth:{c0:'#3a2410',c1:'#c9a36a',c2:'#f0dcb4',cb:'#3a2a18',pt:'rock',n:'EARTH'},
   wind:{c0:'#0f3a22',c1:'#8dff65',c2:'#efffe8',cb:'#123a26',pt:'snow',n:'WIND'}};
-const H4={pick:null,ordFor:'',el:null,on:false,drawn:false,pid:'',lay:'',cache:{},rdy:{},seg:[],segN:0,trail:1,hold:0,uFull:false,face:null,faceFor:'',faceTry:0};
+const H4={pick:null,ordFor:'',el:null,on:false,drawn:false,pid:'',lay:'',cache:{},rdy:{},seg:[],segN:0,trail:1,hold:0,uFull:false};
 function h4Pal(me){const k=getKit(me.id),P=PATHS[k.path]||PATHS[0];return [P,H4E[P.id]||H4E.frost];}
 // สีของ HUD canvas (js/38) ตามธาตุของเรา — เรียกทุกเฟรมจาก drawHUD
 function hud4Col(me){if(!me)return;const E=h4Pal(me)[1];HG=E.c1;HG2=E.c2;}
@@ -50,16 +50,16 @@ function h4Build(me,v){
   const uFace=`<i class="art"></i>${U?icoHTML(U.id,'#fff',72):''}<b class="nm">${esc(U?U.n:'')}</b>`;
   R=R.replace('<div class="h4Ic">',h4UltCard(uFace,au)+'<div class="h4Ic">');
   let L=`<div class="h4Sh"></div>`+h4Parts(E,10,(a,b)=>[20+a*260,-30-b*180]);
-  L+=`<div class="h4Me"><div class="h4Por"><div class="tk"></div><div class="rg"><i class="fc">${icoHTML('p_'+P.id,E.c1,54)}</i></div><div class="el">${icoHTML('p_'+P.id,E.c1,21)}</div><div class="lv">LV ${typeof progLv==='function'?progLv().L:1}</div></div>
-    <div class="h4Hp"><div class="h4Nm">${esc(me.n||'')}<small>${E.n}</small></div><div class="h4Num"><span class="hp">0</span><small class="mh">/ 0</small><em class="xh"></em></div><div class="h4Seg"></div>
-    <div class="h4Sub"><i><b></b></i><small></small></div><div class="h4Chips"></div></div></div>`;
+  // ซ้ายล่าง: กรอบแผนที่ย่อ | รายชื่อทีม (.h4Sq) • ชื่อเรา • โล่ (.h4Sub) • เลือด (.h4Seg + ตัวเลข)
+  L+=`<div class="h4Me"><div class="h4Map"><i class="c a"></i><i class="c b"></i><i class="c d"></i><i class="c e"></i></div>
+    <div class="h4Hp"><div class="h4Sq"></div><div class="h4Chips"></div><div class="h4Nm">${esc(me.n||'')}<small>${E.n}</small><em>LV ${typeof progLv==='function'?progLv().L:1}</em></div>
+    <div class="h4Sub"><i><b></b></i><small></small></div><div class="h4HpR"><div class="h4Seg"></div><div class="h4Num"><span class="hp">0</span><small class="mh">/ 0</small><em class="xh"></em></div></div></div></div>`;
   root.innerHTML=`<div class="h4L">${L}</div><div class="h4R">${R}</div>`;
   H4.el=root;H4.cache={};H4.rdy={};H4.segN=0;H4.uFull=false;
   H4.q={hp:root.querySelector('.hp'),mh:root.querySelector('.mh'),xh:root.querySelector('.xh'),seg:root.querySelector('.h4Seg'),sub:root.querySelector('.h4Sub'),subB:root.querySelector('.h4Sub b'),subT:root.querySelector('.h4Sub small'),
-    chips:root.querySelector('.h4Chips'),uc:root.querySelector('.h4UC'),ufc:root.querySelector('.h4UC .fc'),up:root.querySelector('.h4UC .up'),uFace,sd:[...root.querySelectorAll('.h4UC .sd')].map(el=>({el,th:+el.dataset.th})),fc:root.querySelector('.fc'),
+    chips:root.querySelector('.h4Chips'),sq:root.querySelector('.h4Sq'),map:root.querySelector('.h4Map'),uc:root.querySelector('.h4UC'),ufc:root.querySelector('.h4UC .fc'),up:root.querySelector('.h4UC .up'),uFace,sd:[...root.querySelectorAll('.h4UC .sd')].map(el=>({el,th:+el.dataset.th})),
     slots:[...root.querySelectorAll('.h4Cd,.h4Gm')].map(el=>({el,ci:+el.dataset.ci,sh:el.querySelector('.sh'),n:el.querySelector('.n'),fc:el.querySelector('.fc'),k:el.querySelector('.k'),gem:el.classList.contains('h4Gm')}))};
   h4CardWire(root);h4Place();
-  if(H4.face&&H4.faceFor===me.id+'|'+k.path)h4FaceSet();
 }
 // ค่าเปลี่ยนเท่านั้นถึงเขียน DOM
 function h4Set(key,v,fn){if(H4.cache[key]===v)return;H4.cache[key]=v;fn(v);}
@@ -103,7 +103,12 @@ function hud4Draw(me,v){
   h4Set('u',u,x=>{Q.uc.style.setProperty('--g',(1-x/100).toFixed(3));Q.up.textContent=x>=100?'READY':x+'%';for(const d of Q.sd)d.el.classList.toggle('on',x>=d.th);});
   h4Set('ud',!!slotState(me,v,-2).dim,x=>Q.uc.classList.toggle('dim',x));
   if(full!==H4.uFull){if(H4.uFull&&!full)h4UltUse();H4.uFull=full;Q.uc.classList.toggle('full',full);if(full){Q.uc.classList.remove('burst');void Q.uc.offsetWidth;Q.uc.classList.add('burst');}}
-  if(!H4.face||H4.faceFor!==me.id+'|'+k.path)h4FaceShot(me,k);
+  // รายชื่อทีม: โหมดทีม = คนทีมเดียวกัน • ดันเจียน = ทุกคน • อื่น ๆ = ว่าง (ระบบ Squad ยังไม่มี — แสดงเส้นว่าง)
+  {const tm=teamOn(v)||v.mode==='tdm'||v.mode==='quid',L=(v.P||[]).filter(p=>p.id!==me.id&&(v.mode==='coop'||tm&&p.tm===me.tm)).slice(0,4);
+    h4Set('sqL',L.map(p=>p.id+':'+(p.n||'')).join('|'),()=>{Q.sq.innerHTML=Array.from({length:4},(_,i)=>{const p=L[i];
+      return p?`<div class="r" data-id="${esc(p.id)}"><b>${esc(p.n||'')}</b><i><u></u></i></div>`:`<div class="r e"><i></i></div>`;}).join('');});
+    for(const p of L){const r=Q.sq.querySelector(`[data-id="${CSS.escape(p.id)}"]`);if(!r)continue;h4Set('sq'+p.id,p.al?clamp(p.hp/p.mh,0,1).toFixed(2):'x',x=>{r.classList.toggle('dead',x==='x');r.querySelector('u').style.width=(x==='x'?0:x*100)+'%';});}}
+  h4Set('mini',!!SET.mini,x=>Q.map.classList.toggle('off',!x));
 }
 // ---------- ไพ่สกิล: นาฬิกาทราย / ท่าใช้ / สลับตำแหน่ง ----------
 // นาฬิกาทราย: ทรายบน = เวลาคูลดาวน์ที่เหลือ (--r ของไพ่) ไหลลงล่าง • ตัวเลขวินาทีใต้แก้ว
@@ -167,19 +172,5 @@ function h4UltUse(){const Q=H4.q;
 // เรียกท้ายทุกเฟรมจาก render loop: เฟรมนี้ไม่ได้วาด HUD (ชนะ/แพ้, โหมด imp, ไม่มีตัวเรา) = ซ่อน
 function hud4Frame(){if(H4.el&&!H4.drawn&&!H4.el.hidden)H4.el.hidden=true;H4.drawn=false;}
 function hud4Hide(){try{if(H4.el)H4.el.hidden=true;}catch(e){}}   // setScreen เรียกได้ตั้งแต่ตอนโหลดไฟล์ (H4 ยังไม่พร้อม)
-// รูปหน้าตัวละครของเรา: เรนเดอร์ฉากครั้งเดียวด้วยกล้องเล็กหน้าหัว → RT 160×160 → dataURL (ลองใหม่ทุก 1 วิ ถ้าโมเดลยังไม่พร้อม)
-let _h4RT=null,_h4Cam=null;const _h4Box=new THREE.Box3();
-function h4FaceShot(me,k){const n=performance.now();if(n-H4.faceTry<1000)return;H4.faceTry=n;
-  const o=PM3.get(me.id);if(!o||!o.g||!o.g.visible||!me.al)return;
-  try{const S=160;if(!_h4RT){_h4RT=new THREE.WebGLRenderTarget(S,S);_h4Cam=new THREE.PerspectiveCamera(30,1,0.05,50);}
-    const g=o.g,ry=g.rotation.y,fx=Math.sin(ry),fz=Math.cos(ry),P=g.position;
-    const hy=_h4Box.setFromObject(o.b||o.g).max.y-0.26;   // ยอดหัว (ผม) − ครึ่งหัว
-    _h4Cam.position.set(P.x+fx*1.3+Math.cos(ry)*0.3,hy+0.08,P.z+fz*1.3-Math.sin(ry)*0.3);_h4Cam.lookAt(P.x,hy,P.z);
-    const prev=gl.getRenderTarget();gl.setRenderTarget(_h4RT);gl.render(scene,_h4Cam);
-    const px=new Uint8Array(S*S*4);gl.readRenderTargetPixels(_h4RT,0,0,S,S,px);gl.setRenderTarget(prev);
-    const c=document.createElement('canvas');c.width=c.height=S;const x=c.getContext('2d'),im=x.createImageData(S,S);
-    for(let y=0;y<S;y++)im.data.set(px.subarray((S-1-y)*S*4,(S-y)*S*4),y*S*4);x.putImageData(im,0,0);
-    let sum=0;for(let i=0;i<px.length;i+=64)sum+=px[i]+px[i+1]+px[i+2];if(sum<50)return;   // ยังดำทั้งภาพ (ฉากยังไม่พร้อม)
-    H4.face=c.toDataURL('image/jpeg',0.85);H4.faceFor=me.id+'|'+k.path;h4FaceSet();
-  }catch(e){H4.faceFor=me.id+'|'+k.path;}}
-function h4FaceSet(){if(H4.q&&H4.q.fc&&H4.face){H4.q.fc.style.backgroundImage=`url(${H4.face})`;H4.q.fc.innerHTML='';}}
+// กรอบแผนที่ย่อ (พิกัดจอ px) — js/38 drawMinimap วาดลงตรงนี้ • ตรงกับ .h4Me/.h4Map ใน css (left 24, bottom 24, กว้าง 176 × --hs)
+function h4MapBox(){const hs=Math.max(0.62,Math.min(1.15,SH/900,SW/1400)),S=176*hs;return {x:24*hs,y:SH-24*hs-S,S};}

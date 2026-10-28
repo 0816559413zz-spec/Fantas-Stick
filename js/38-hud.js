@@ -113,7 +113,7 @@ function drawHUD(v,me,P){
   // kill feed
   // (ข้อความใหม่เลื่อนเข้าจากขวา • ข้อความที่มีชื่อเรา = ตัวทอง) • ห้องฝึก: เลื่อนลงให้พ้นปุ่ม "จบการฝึก" ใต้แผนที่ย่อ
   cx.textAlign='right';cx.font='14px Kanit,sans-serif';
-  {const F=HUDF.feed,y0=(me&&SET.mini?MM.r*2+56:58)+(v.mode==='train'?46:0);for(const k of [...F.keys()])if(!v.feed.includes(k))F.delete(k);
+  {const F=HUDF.feed,y0=58+(v.mode==='train'?46:0);for(const k of [...F.keys()])if(!v.feed.includes(k))F.delete(k);
   v.feed.forEach((f,i)=>{if(!F.has(f))F.set(f,now);const k=Math.min(1,(now-F.get(f))/220),e=1-Math.pow(1-k,3),w=cx.measureText(f).width+30,y=y0+i*28,ox=(1-e)*60,mine=me&&f.includes(me.n);
     cx.globalAlpha=e;const g=cx.createLinearGradient(SW-12-w,0,SW-12,0);g.addColorStop(0,'rgba(7,11,24,0)');g.addColorStop(0.18,HN);g.addColorStop(1,mine?'rgba(60,44,12,0.9)':HN);
     cx.fillStyle=g;cx.fillRect(SW-12-w+ox,y,w,24);cx.fillStyle=mine?HG2:HG;cx.fillRect(SW-14+ox,y,2,24);
@@ -205,16 +205,17 @@ function drawModeHUD(v,me,P,big){
 const MM={r:82,view:620,col:{pillar:'#7d8499',stone:'#7d8499',rock:'#6e7482',tree:'#2f6b3f',crate:'#8a6a3e',hay:'#a8883e',hoop:'#e8c25a',house:'#9a8a78',stall:'#c0603a',lamp:'#ffd070',barrel:'#8a6a3e',well:'#6a7a94',table:'#8a6a3e',tfence:'#c8a060',tgate:'#f0d070'}};
 function drawMinimap(v,me,P){
   if(!me)return;
-  const R=MM.r,mx=SW-R-18,my=R+22,sc=R/MM.view,cs=Math.cos(yaw),sn=Math.sin(yaw),M=v.M||{};
-  // แปลงพิกัดโลก -> หน้าจอมินิแมป (clampEdge = ถ้าเกินวงให้ไปแปะที่ขอบ)
+  // แผนที่ย่อสี่เหลี่ยมมุมซ้ายล่าง (ผู้ใช้ 2026-10-28) — กรอบตาม h4MapBox (js/66) • R = ครึ่งความกว้าง
+  const B=h4MapBox(),R=B.S/2,mx=B.x+R,my=B.y+R,sc=R/MM.view,cs=Math.cos(yaw),sn=Math.sin(yaw),M=v.M||{};
+  // แปลงพิกัดโลก -> หน้าจอมินิแมป (clampEdge = ถ้าเกินกรอบให้ไปแปะที่ขอบ)
   const pt=(x,y,clampEdge)=>{
     const dx=x-me.x,dy=y-me.y;let u=(-sn*dx+cs*dy)*sc,f=(cs*dx+sn*dy)*sc;
-    const d=Math.hypot(u,f);
+    const d=Math.max(Math.abs(u),Math.abs(f));
     if(d>R-4){if(!clampEdge)return null;u*=(R-4)/d;f*=(R-4)/d;}
     return [mx+u,my-f];
   };
   cx.save();
-  cx.beginPath();cx.arc(mx,my,R,0,Math.PI*2);cx.fillStyle='rgba(6,10,22,0.78)';cx.fill();
+  cx.beginPath();cx.rect(mx-R,my-R,R*2,R*2);cx.fillStyle='rgba(6,10,22,0.78)';cx.fill();
   cx.clip();
   // ขอบแผนที่
   {
@@ -268,17 +269,10 @@ function drawMinimap(v,me,P){
   cx.beginPath();cx.moveTo(0,-7);cx.lineTo(5.5,6);cx.lineTo(0,3);cx.lineTo(-5.5,6);cx.closePath();
   cx.fillStyle=HG2;cx.fill();cx.strokeStyle='#05070f';cx.lineWidth=1;cx.stroke();cx.restore();
   cx.restore();
-  // กรอบทอง + ตัว N ชี้ทิศเหนือของแผนที่ (หมุนตามกล้อง)
-  // กรอบ: เงาขอบด้านใน (ดูลึก) + วงทองคู่ + ขีดเข็มทิศทุก 30° หมุนตามทิศเหนือ (ขีดยาว+เพชร = ทิศหลัก)
-  {const g=cx.createRadialGradient(mx,my,R*0.78,mx,my,R);g.addColorStop(0,'rgba(2,4,10,0)');g.addColorStop(1,'rgba(2,4,10,0.38)');cx.beginPath();cx.arc(mx,my,R,0,Math.PI*2);cx.fillStyle=g;cx.fill();}
-  cx.beginPath();cx.arc(mx,my,R+3,0,Math.PI*2);cx.strokeStyle='rgba(5,7,15,0.85)';cx.lineWidth=6;cx.stroke();
-  cx.beginPath();cx.arc(mx,my,R,0,Math.PI*2);cx.strokeStyle=HG;cx.lineWidth=2;cx.stroke();
-  cx.beginPath();cx.arc(mx,my,R+6,0,Math.PI*2);cx.strokeStyle='rgba(217,180,90,0.4)';cx.lineWidth=1;cx.stroke();
-  {const a0=Math.atan2(sn,-cs);cx.strokeStyle='rgba(243,220,148,0.75)';
-    for(let i=1;i<12;i++){const a=a0+i*Math.PI/6,c=Math.cos(a),s=Math.sin(a),big=i%3===0,r0=R+1,r1=R+(big?7:4);cx.lineWidth=big?1.5:1;cx.beginPath();cx.moveTo(mx+c*r0,my+s*r0);cx.lineTo(mx+c*r1,my+s*r1);cx.stroke();
-      if(big){diaPath(mx+c*(R+6),my+s*(R+6),2.5);cx.fillStyle=HG;cx.fill();}}}
+  // กรอบ (DOM .h4Map วาดขอบ/มุม) • เงาขอบด้านในให้ดูลึก
+  {const g=cx.createRadialGradient(mx,my,R*0.75,mx,my,R*1.42);g.addColorStop(0,'rgba(2,4,10,0)');g.addColorStop(1,'rgba(2,4,10,0.5)');cx.fillStyle=g;cx.fillRect(mx-R,my-R,R*2,R*2);}
   // เหนือของแผนที่ = ทิศ -y ของโลก
-  const nxp=mx-cs*(R+11),nyp=my+sn*(R+11);
+  const nk=(R-10)/Math.max(Math.abs(cs),Math.abs(sn)),nxp=mx-cs*nk,nyp=my+sn*nk;   // ตัว N เลื่อนตามขอบด้านในกรอบ
   diaPath(nxp,nyp,8);cx.fillStyle='#05070f';cx.fill();cx.strokeStyle=HG;cx.lineWidth=1;cx.stroke();
   cx.font='700 10px Cinzel,Kanit,serif';cx.textAlign='center';cx.fillStyle=HG2;cx.fillText('N',nxp,nyp+3.5);
 }
