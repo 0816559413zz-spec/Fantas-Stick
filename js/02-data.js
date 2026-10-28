@@ -346,14 +346,15 @@ const EDEF={
   dummy:{hp:250,spd:0,r:18,dmg:6,col:'#c8a060',ch:1,vr:1.1,name:'หุ่นซ้อม'}
 };
 EDEF.queen.boss=true;
+// พิกซี่ (นกบินสีฟ้า) ถูกถอดออกจากทุก pool ชั่วคราว (ผู้ใช้ 2026-10-28) — EDEF/AI/โมเดลยังอยู่ ใส่ 'pixie' กลับเข้า pool ได้เลย
 const POOLS={
-  castle:{early:['gob'],mid:['wiz','pixie','troll'],boss:'dragon'},
+  castle:{early:['gob'],mid:['wiz','troll'],boss:'dragon'},
   forest:{early:['spl','spider'],mid:['spider','wiz'],boss:'queen'},
-  pitch:{early:['pixie','gob'],mid:['wiz','spider','pixie','troll'],boss:'dragon'},
-  hogsmeade:{early:['gob','pixie'],mid:['wiz','pixie','troll'],boss:'dragon'},
-  greathall:{early:['gob','pixie'],mid:['wiz','troll','pixie'],boss:'dragon'},
-  meadow:{early:['gob','pixie'],mid:['wiz','spider','troll'],boss:'dragon'},
-  lake:{early:['pixie','spl'],mid:['spider','wiz','pixie'],boss:'queen'},
+  pitch:{early:['gob'],mid:['wiz','spider','troll'],boss:'dragon'},
+  hogsmeade:{early:['gob'],mid:['wiz','troll'],boss:'dragon'},
+  greathall:{early:['gob'],mid:['wiz','troll'],boss:'dragon'},
+  meadow:{early:['gob'],mid:['wiz','spider','troll'],boss:'dragon'},
+  lake:{early:['spl'],mid:['spider','wiz'],boss:'queen'},
   ruins:{early:['gob','spl'],mid:['wiz','troll','spider'],boss:'dragon'}
 };
 const CDK=['basic','q','e','r','f','dodge'];
