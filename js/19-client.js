@@ -45,7 +45,7 @@ function setScreen(s){
   screen=s;document.body.dataset.screen=s;
   $('#menu').classList.toggle('hidden',s!=='menu');
   $('#lobby').classList.toggle('hidden',s!=='lobby');
-  $('#voice').classList.toggle('hidden',!(NET.online&&s!=='menu'));
+  {const vp=$('#voice');vp.classList.add('hidden');vp.style.display='none';}   // แผงไมค์ลอยเลิกใช้ — อยู่ในตั้งค่า > เสียง (ผู้ใช้ 2026-10-28) • ซ่อนจาก JS ด้วย เผื่อ CSS เก่าค้างแคช
   if(s!=='game'){$('#buff').classList.add('hidden');$('#over').classList.add('hidden');lastBuffKey='';overShown=false;}
   cv.style.cursor=s==='game'?'crosshair':'default';if(s!=='game'&&typeof hud4Hide==='function')hud4Hide();
   try{hubOnScreen(s);}catch(e){}   // เมนูใหม่ (js/62) • ตอนโหลดไฟล์ js/61 ยังไม่พร้อม = ข้าม
