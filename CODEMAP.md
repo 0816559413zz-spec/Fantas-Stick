@@ -570,9 +570,9 @@ gameCover:403
 ## js/66-hud4.js (133) — HUD รอบ 4 (ผู้ใช้ 2026-10-23, designs/hud-full-mock.html)
 H4E:5 H4:10 H4C:11 H4RC:11 h4Pal:12 hud4Col:14 h4Runes:15 h4RingSVG:16 h4Parts:25 h4AuBits:30 h4Key:45 h4Ico:46 h4Build:47 h4Set:77 hud4Draw:78 hud4Frame:116 hud4Hide:117 _h4RT:119 _h4Cam:119 h4FaceShot:120 h4FaceSet:133
 
-## js/67-backdrop.js (81) — 
+## js/67-backdrop.js (139) — 
 BACKDROP:8
-§17 noise เล็ก ๆ (คงที่ต่อ seed)
-bdHash:18 bdNoise:19 bdFbm:20 bdEdge:22 bdRing:24 bdPaint:30 bdTree:33 buildBackdrop:38 backdropHide:81
+§66 noise เล็ก ๆ (คงที่ต่อ seed)
+bdHash:67 bdNoise:68 bdFbm:69 bdEdge:71 bdRing:73 bdPaint:79 bdTree:82 buildBackdrop:89 bdTower:135 backdropHide:139
 
-(74 files, 17421 lines)
+(74 files, 17479 lines)

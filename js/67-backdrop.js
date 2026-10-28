@@ -6,13 +6,62 @@
 //  เรียกจาก buildWorld (js/28) ตอนสร้างแผนที่ใหม่ → อยู่ใน world จึงถูก cache ไปพร้อมแผนที่ • กราฟิกประหยัด: ไม่มีป่า
 // =====================================================================
 var BACKDROP={   // var: buildWorld ถูกเรียกตอนโหลด (ก่อนไฟล์นี้) → ตอนนั้นยัง undefined = ไม่มีฉากหลัง (เมนู)
-  meadow:{seed:3,hide:/^meadow_far/,                                   // hide = ชื่อของในไฟล์แผนที่ที่ถูกแทน (ภูเขากรวย + ปราสาทเดิม)
-    near:{d:[-4,120],h:[2,24],col:'#5a8c3a',col2:'#3f6a2e'},            // เนินต่อจากพื้นแผนที่ (d = ระยะจากขอบพื้น, เมตร)
-    trees:{n:380,d:[34,118],s:[1.4,2.9],col:['#4a7a34','#5b8a3a','#3f6a30','#6a8a3a']},   // ป่าบนเนิน
+  // near = เนินต่อจากขอบพื้น (d = ระยะจากขอบพื้น ม.) • trees.kind round/pine/snowpine • towers = อาคารปราสาทรอบ ๆ (บนเนินใกล้)
+  // mid/far = สันเขา (rg = ยอดแหลม, k = ผสมสีอากาศ, snow = สีหิมะบนยอด) • mist = ม่านหมอก • castle = ปราสาทเงาบนสันเขากลาง (a = มุมเรเดียน 0 = +x)
+  // hide = ชื่อของไกลเดิมในไฟล์แผนที่ที่ฉากหลังมาแทน (ตัดออกก่อน batch)
+  meadow:{seed:3,hide:/^meadow_far/,
+    near:{d:[-4,120],h:[2,24],col:'#5a8c3a',col2:'#3f6a2e'},
+    trees:{n:380,d:[34,118],s:[1.4,2.9],col:['#4a7a34','#5b8a3a','#3f6a30','#6a8a3a']},
     mid:{d:[140,230],h:[18,55],rg:0.3,col:'#3e4a3c',lit:'#8a7a4a',tint:'#b0807a',k:0.16},
     mist:[{d:252,h:42,col:'#e9b098',a:0.55}],
     far:{d:[285,375],h:[60,150],rg:0.75,col:'#4e3c62',lit:'#e08a6e',tint:'#d89088',k:0.26,snow:'#ffe2d0'},
-    castle:{a:-1.33,d:168,s:1.6,col:'#2a2132',win:'#ffb860'}},       // a = มุม (เรเดียน, 0 = +x; เดิมปราสาทในไฟล์อยู่ทิศนี้) • d = ระยะจากขอบพื้น
+    castle:{a:-1.33,d:168,s:1.6,col:'#2a2132',win:'#ffb860'}},
+  pitch:{seed:7,hide:/^pitch_far/,
+    near:{d:[-4,110],h:[3,20],col:'#5a8c3a',col2:'#456e30'},
+    trees:{n:320,d:[30,108],s:[1.4,2.8],col:['#4a7a34','#5b8a3a','#3f6a30']},
+    mid:{d:[130,220],h:[16,48],rg:0.3,col:'#3e4a3c',lit:'#8a7a4a',tint:'#b0807a',k:0.16},
+    mist:[{d:245,h:40,col:'#e9b098',a:0.5}],
+    far:{d:[280,370],h:[60,145],rg:0.75,col:'#4e3c62',lit:'#e08a6e',tint:'#d89088',k:0.26,snow:'#ffe2d0'},
+    castle:{a:-1.64,d:150,s:1.9,col:'#2a2132',win:'#ffb860'}},
+  castle:{seed:11,hide:/^castle_far/,
+    near:{d:[-4,110],h:[3,20],col:'#2a3a26',col2:'#1c2a1e'},
+    towers:{n:11,d:[8,55],h:[18,38],col:'#181a2a',win:'#ffc070'},
+    trees:{n:220,kind:'pine',d:[45,108],s:[1.8,3.2],col:['#1f3a2a','#24402c','#1a3324']},
+    mid:{d:[130,215],h:[20,60],rg:0.35,col:'#141a2c',lit:'#3a4a72',tint:'#26304e',k:0.2},
+    mist:[{d:235,h:40,col:'#2a3456',a:0.5}],
+    far:{d:[275,365],h:[70,160],rg:0.75,col:'#151b33',lit:'#5a6c9e',tint:'#36426c',k:0.3,snow:'#b8c8ec'},
+    castle:{a:2.2,d:150,s:1.8,col:'#121222',win:'#ffc070'}},
+  forest:{seed:13,
+    near:{d:[-4,110],h:[4,24],col:'#16261c',col2:'#101c16'},
+    trees:{n:560,kind:'pine',d:[6,108],s:[2.2,3.8],col:['#16301f','#1b3a24','#122a1b']},
+    mid:{d:[130,215],h:[24,64],rg:0.3,col:'#0e1820',lit:'#2c4250',tint:'#18282c',k:0.2},
+    mist:[{d:235,h:45,col:'#1c2c30',a:0.55}],
+    far:{d:[275,365],h:[70,165],rg:0.75,col:'#121a2a',lit:'#4a5e80',tint:'#26343e',k:0.3,snow:'#a8b8d0'}},
+  hogsmeade:{seed:17,hide:/^hog_far_castle/,
+    near:{d:[-4,110],h:[4,24],col:'#c4d0e4',col2:'#98a6c2'},
+    trees:{n:340,kind:'snowpine',d:[28,108],s:[1.8,3.2],col:['#22402e','#1c3628','#284a34']},
+    mid:{d:[130,215],h:[22,62],rg:0.35,col:'#283250',lit:'#8a9ac8',tint:'#2a3654',k:0.2,snow:'#dfe7f6'},
+    mist:[{d:235,h:42,col:'#34406a',a:0.5}],
+    far:{d:[275,365],h:[70,165],rg:0.75,col:'#1e2642',lit:'#8090c0',tint:'#3a4670',k:0.3,snow:'#e6eefc'},
+    castle:{a:-1.77,d:150,s:1.9,col:'#141626',win:'#ffc070'}},
+  lake:{seed:19,hide:/^lake_far(?!_pine)/,
+    near:{d:[-4,110],h:[3,22],col:'#2a3a4a',col2:'#9aaac4'},
+    trees:{n:300,kind:'snowpine',d:[30,108],s:[1.8,3.2],col:['#1c3628','#22402e','#183022']},
+    mid:{d:[130,215],h:[20,58],rg:0.35,col:'#1c2440',lit:'#6a7cb0',tint:'#26304e',k:0.2,snow:'#d6e0f4'},
+    mist:[{d:235,h:42,col:'#2c3a5e',a:0.5}],
+    far:{d:[275,365],h:[80,175],rg:0.8,col:'#171e38',lit:'#7488c0',tint:'#34406a',k:0.28,snow:'#e8f0ff'},
+    castle:{a:-2.4,d:160,s:1.6,col:'#121424',win:'#ffc070'}},
+  ruins:{seed:23,hide:/^ruins_far/,
+    near:{d:[-4,110],h:[2,16],col:'#d2a872',col2:'#b08452'},
+    mid:{d:[130,215],h:[20,50],rg:0.15,col:'#6a4a3c',lit:'#e09468',tint:'#c89078',k:0.2},
+    mist:[{d:235,h:40,col:'#ecb88e',a:0.5}],
+    far:{d:[275,365],h:[55,130],rg:0.7,col:'#5a4060',lit:'#e48c6a',tint:'#d89488',k:0.28}},
+  valley:{seed:29,hide:/^mountain_\d/,
+    near:{d:[-4,110],h:[6,30],col:'#5a8a3e',col2:'#3e6a32'},
+    trees:{n:380,kind:'pine',d:[26,108],s:[1.8,3.2],col:['#2e5a32','#3a6a38','#28502c']},
+    mid:{d:[130,215],h:[24,64],rg:0.3,col:'#2e4636',lit:'#8aa078',tint:'#8aa0b0',k:0.22},
+    mist:[{d:235,h:42,col:'#b8ccd8',a:0.5}],
+    far:{d:[275,365],h:[80,175],rg:0.8,col:'#34425e',lit:'#9aaac2',tint:'#8aa0b8',k:0.25,snow:'#f4f8ff'}},
 };
 // ---------- noise เล็ก ๆ (คงที่ต่อ seed) ----------
 function bdHash(i,s){const x=Math.sin(i*127.1+s*311.7)*43758.5453;return x-Math.floor(x);}
@@ -30,8 +79,10 @@ function bdRing(hx,hz,d0,d1,N,M,hf){const pos=[],idx=[],uk=[];
 function bdPaint(g,fn){g=g.toNonIndexed();g.computeVertexNormals();const P=g.attributes.position,N=g.attributes.normal,col=new Float32Array(P.count*3),c=new THREE.Color();
   for(let i=0;i<P.count;i++){fn(c,P.getX(i),P.getY(i),P.getZ(i),N.getX(i)*LDIR.x+N.getY(i)*LDIR.y+N.getZ(i)*LDIR.z);col[i*3]=c.r;col[i*3+1]=c.g;col[i*3+2]=c.b;}
   g.setAttribute('color',new THREE.BufferAttribute(col,3));return g;}
-function bdTree(){const parts=[],put=(geo,col,y)=>{geo=geo.toNonIndexed();geo.translate(0,y,0);const c=new THREE.Color(col),n=geo.attributes.position.count,a=new Float32Array(n*3);for(let i=0;i<n;i++){a[i*3]=c.r;a[i*3+1]=c.g;a[i*3+2]=c.b;}geo.setAttribute('color',new THREE.BufferAttribute(a,3));parts.push(geo);};
-  put(new THREE.CylinderGeometry(0.18,0.26,1.6,5),'#5a3e28',0.8);put(new THREE.IcosahedronGeometry(1.25,0),'#ffffff',2.4);put(new THREE.IcosahedronGeometry(0.85,0),'#e8f0d8',3.3);
+function bdTree(kind){const parts=[],put=(geo,col,y)=>{geo=geo.toNonIndexed();geo.translate(0,y,0);const c=new THREE.Color(col),n=geo.attributes.position.count,a=new Float32Array(n*3);for(let i=0;i<n;i++){a[i*3]=c.r;a[i*3+1]=c.g;a[i*3+2]=c.b;}geo.setAttribute('color',new THREE.BufferAttribute(a,3));parts.push(geo);};
+  if(kind==='pine'||kind==='snowpine'){put(new THREE.CylinderGeometry(0.14,0.2,1.2,5),'#4a3424',0.6);   // สน: กรวย 3 ชั้น (snowpine = ปลายกิ่งขาว)
+    for(const [r,h,y] of [[1.2,1.9,1.9],[0.95,1.6,2.9],[0.65,1.3,3.8]]){put(new THREE.ConeGeometry(r,h,6),'#ffffff',y);if(kind==='snowpine')put(new THREE.ConeGeometry(r*0.6,h*0.42,6),'#eef3fb',y+h*0.3);}}
+  else{put(new THREE.CylinderGeometry(0.18,0.26,1.6,5),'#5a3e28',0.8);put(new THREE.IcosahedronGeometry(1.25,0),'#ffffff',2.4);put(new THREE.IcosahedronGeometry(0.85,0),'#e8f0d8',3.3);}
   const n=parts.reduce((t,q)=>t+q.attributes.position.count,0),P=new Float32Array(n*3),C=new Float32Array(n*3);let o=0;
   for(const q of parts){P.set(q.attributes.position.array,o*3);C.set(q.attributes.color.array,o*3);o+=q.attributes.position.count;q.dispose();}
   const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(P,3));g.setAttribute('color',new THREE.BufferAttribute(C,3));g.computeVertexNormals();return g;}
@@ -39,11 +90,12 @@ function buildBackdrop(id){const B=BACKDROP&&BACKDROP[id];if(!B)return;
   const g=new THREE.Group();g.name='backdrop';const hx=MW/2*S3+20,hz=MH/2*S3+17,sd=B.seed||1,low=QUAL.mode==='low';
   const L2=new THREE.Vector2(LDIR.x,LDIR.z).normalize(),C=k=>new THREE.Color(k);
   // 1) เนินใกล้: ต่อจากขอบพื้น สูงขึ้นเรื่อย ๆ ไปข้างนอก (แสงจริง + หมอกฉาก → เข้ากับแผนที่)
+  let nearH=null;
   if(B.near){const n=B.near,hf=(u,k)=>{const r=Math.pow(k,1.4);return -0.6+r*(n.h[0]+(n.h[1]-n.h[0])*bdFbm(u,sd,5))+Math.sin(k*9+u*40)*0.6*k;};
     const c1=C(n.col),c2=C(n.col2),geo=bdPaint(bdRing(hx,hz,n.d[0],n.d[1],220,18,hf),(c,x,y,z)=>{c.copy(c1).lerp(c2,Math.min(1,Math.max(0,y/n.h[1]))*0.8+bdHash(Math.round(x*3+z*7),sd)*0.15);});
-    const m=new THREE.Mesh(geo,new THREE.MeshLambertMaterial({vertexColors:true,flatShading:true}));m.receiveShadow=false;g.add(m);
+    const m=new THREE.Mesh(geo,new THREE.MeshLambertMaterial({vertexColors:true,flatShading:true}));m.receiveShadow=false;g.add(m);nearH=hf;
     // ป่าบนเนิน (instanced) — ความสูงเอาจากสูตรเดียวกับเนิน
-    if(B.trees&&!low){const t=B.trees,im=new THREE.InstancedMesh(bdTree(),new THREE.MeshLambertMaterial({vertexColors:true,flatShading:true}),t.n),m4=new THREE.Matrix4(),q=new THREE.Quaternion(),cc=new THREE.Color();let n2=0;
+    if(B.trees&&!low){const t=B.trees,im=new THREE.InstancedMesh(bdTree(t.kind),new THREE.MeshLambertMaterial({vertexColors:true,flatShading:true}),t.n),m4=new THREE.Matrix4(),q=new THREE.Quaternion(),cc=new THREE.Color();let n2=0;
       for(let i=0;i<t.n*3&&n2<t.n;i++){const u=bdHash(i,sd+5),dd=t.d[0]+(t.d[1]-t.d[0])*Math.pow(bdHash(i,sd+6),0.8),a=u*Math.PI*2,c=Math.cos(a),s=Math.sin(a),e=bdEdge(c,s,hx,hz),k=(dd-n.d[0])/(n.d[1]-n.d[0]);
         if(bdFbm(u,sd+9,8)<0.42&&bdHash(i,sd+7)<0.7)continue;   // เป็นกลุ่ม ๆ ไม่กระจายเท่ากันหมด
         const sc=t.s[0]+bdHash(i,sd+8)*(t.s[1]-t.s[0]),r=e+dd;q.setFromAxisAngle(new THREE.Vector3(0,1,0),bdHash(i,sd+10)*6.28);
@@ -68,14 +120,20 @@ function buildBackdrop(id){const B=BACKDROP&&BACKDROP[id];if(!B)return;
     const m=new THREE.Mesh(geo,mat);m.renderOrder=-1;g.add(m);}
   // 5) ปราสาทเงาบนสันเขากลาง (หอคอย + หลังคาแหลม + หน้าต่างเรือง)
   if(B.castle){const K=B.castle,c=Math.cos(K.a),s=Math.sin(K.a),r=bdEdge(c,s,hx,hz)+K.d,cg=new THREE.Group(),dm=new THREE.MeshBasicMaterial({color:K.col,fog:false}),wm=new THREE.MeshBasicMaterial({color:hdr(K.win,1.6),fog:false});
-    const T=[[0,0,6,52],[-14,4,4.2,38],[13,3,4.6,42],[-24,-2,3.2,28],[22,-3,3,26],[5,9,3.4,33],[-6,-8,3,24]];
-    for(const [x,z,w,h] of T){const tw=new THREE.Mesh(new THREE.CylinderGeometry(w*0.85,w,h,8),dm);tw.position.set(x,h/2,z);cg.add(tw);
-      const rf=new THREE.Mesh(new THREE.ConeGeometry(w*1.15,w*2.6,8),dm);rf.position.set(x,h+w*1.3,z);cg.add(rf);
-      for(let k=0;k<3;k++)if(bdHash(x*7+k,z+sd)<0.75){const wi=new THREE.Mesh(new THREE.PlaneGeometry(0.9,1.6),wm);const a2=Math.PI/2+(k-1)*0.5;wi.position.set(x+Math.cos(a2)*w*0.9,h*(0.45+k*0.15),z+Math.sin(a2)*w*0.9);wi.lookAt(x+Math.cos(a2)*w*3,h*(0.45+k*0.15),z+Math.sin(a2)*w*3);cg.add(wi);}}
+    for(const T of [[0,0,6,52],[-14,4,4.2,38],[13,3,4.6,42],[-24,-2,3.2,28],[22,-3,3,26],[5,9,3.4,33],[-6,-8,3,24]])bdTower(cg,T,dm,wm,sd);
     const wall=new THREE.Mesh(new THREE.BoxGeometry(48,14,10),dm);wall.position.set(0,7,2);cg.add(wall);
     const u=((K.a/(Math.PI*2))%1+1)%1,by=midH?midH(u,(K.d-B.mid.d[0])/(B.mid.d[1]-B.mid.d[0]))-3:0;   // ตั้งบนสันเขา
     cg.position.set(c*r,by,s*r);cg.lookAt(0,by,0);cg.scale.setScalar(K.s||1);g.add(cg);}
+  // 6) อาคารปราสาทรอบ ๆ บนเนินใกล้ (แผนที่ลานปราสาท) — แสงจริง + หมอกฉาก (อยู่ใกล้)
+  if(B.towers&&nearH){const T=B.towers,dm=new THREE.MeshLambertMaterial({color:T.col,flatShading:true}),wm=new THREE.MeshBasicMaterial({color:hdr(T.win,1.5)});
+    for(let i=0;i<T.n;i++){const u=(i+bdHash(i,sd+31)*0.6)/T.n,a=u*Math.PI*2,c=Math.cos(a),s=Math.sin(a),dd=T.d[0]+(T.d[1]-T.d[0])*bdHash(i,sd+32),r=bdEdge(c,s,hx,hz)+dd,k=(dd-B.near.d[0])/(B.near.d[1]-B.near.d[0]),h=T.h[0]+(T.h[1]-T.h[0])*bdHash(i,sd+33),w=3+bdHash(i,sd+34)*3;
+      const tg=new THREE.Group();bdTower(tg,[0,0,w,h],dm,wm,sd+i);if(bdHash(i,sd+35)<0.6){const hall=new THREE.Mesh(new THREE.BoxGeometry(w*4,h*0.45,w*2.2),dm);hall.position.set(w*2.4,h*0.22,0);tg.add(hall);}
+      tg.position.set(c*r,nearH(u,k)-0.5,s*r);tg.lookAt(0,tg.position.y,0);g.add(tg);}}
   for(const o of g.children)o.traverse(q=>{q.castShadow=q.receiveShadow=false;});
   world.add(g);return g;}
+// หอคอย 1 ต้น: ทรงกระบอก + หลังคาแหลม + หน้าต่างเรือง (หันหาศูนย์กลาง = +z ของกลุ่ม) • T = [x,z,รัศมี,สูง]
+function bdTower(cg,T,dm,wm,sd){const [x,z,w,h]=T,tw=new THREE.Mesh(new THREE.CylinderGeometry(w*0.85,w,h,8),dm);tw.position.set(x,h/2,z);cg.add(tw);
+  const rf=new THREE.Mesh(new THREE.ConeGeometry(w*1.15,w*2.6,8),dm);rf.position.set(x,h+w*1.3,z);cg.add(rf);
+  for(let k=0;k<3;k++)if(bdHash(x*7+k,z+sd)<0.75){const wi=new THREE.Mesh(new THREE.PlaneGeometry(0.9,1.6),wm),a2=Math.PI/2+(k-1)*0.5,y=h*(0.45+k*0.15);wi.position.set(x+Math.cos(a2)*w*0.9,y,z+Math.sin(a2)*w*0.9);wi.lookAt(x+Math.cos(a2)*w*3,y,z+Math.sin(a2)*w*3);cg.add(wi);}}
 // ซ่อนของไกลเดิมในไฟล์แผนที่ (เรียกตอน .glb โหลดเสร็จ ก่อน batch — js/28 buildFileMap)
 function backdropHide(id,sc){const B=BACKDROP&&BACKDROP[id];if(!B||!B.hide)return;const rm=[];sc.traverse(o=>{if(B.hide.test(o.name))rm.push(o);});for(const o of rm){o.parent.remove(o);disposeTree(o);}}
