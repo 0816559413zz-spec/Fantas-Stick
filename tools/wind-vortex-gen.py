@@ -5,7 +5,7 @@
 import json,math
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
-DUR=1.4;LIFE=1.2;T_PULL=0.6;T_ARR=0.95;FAR=10.0;NEAR=3.0;S=1.15
+DUR=1.75;LIFE=1.55;T_PULL=0.8;T_ARR=1.25;FAR=15.0;NEAR=3.0;S=1.5   # ผู้ใช้ 2026-10-28 รอบ 2: ใหญ่ขึ้น ดึงไกลขึ้น (300) มีจังหวะก่อนดึงนานขึ้นนิด (0.8 วิ) เอฟเฟกต์มากขึ้น
 W,LG,G,DG,LN='#ffffff','#efffe8','#8dff65','#2ec772','#1a7a45'
 k=lambda t:str(round(t/LIFE,3))
 def path(a,y=0.0):
@@ -13,7 +13,7 @@ def path(a,y=0.0):
     P=lambda d:[round(sx*d,2),y,round(cz*d,2)]
     return {'0':P(FAR),k(T_PULL):P(FAR),k(T_PULL+.12):P(FAR-1.2),k(T_ARR):P(NEAR),'1':P(NEAR)}
 def grow(s,end=.15):   # โผล่จากพื้น → ค้าง → ตอนดึงหดเล็กลง (ถูกดูดเข้าหาเรา ไม่บังจอในเกม — ผู้ใช้ 2026-10-28) → ยุบลงพื้น
-    return {'0':round(.15*s,3),k(.2):round(s,3),k(T_PULL):round(s,3),k(T_ARR):round(.62*s,3),k(T_ARR+.1):round(.5*s,3),'1':round(end*s,3)}
+    return {'0':round(.15*s,3),k(.2):round(s,3),k(T_PULL-.12):round(s,3),k(T_PULL):round(1.1*s,3),k(T_ARR):round(.8*s,3),k(T_ARR+.1):round(.6*s,3),'1':round(end*s,3)}   # ง้างพองก่อนดึง แล้วหดลงตอนมาถึง
 OP=lambda o:{'0':0,k(.06):o,k(T_ARR+.1):o,'1':0}
 L=[]
 for n,a in enumerate([math.radians(-22.5),0.0,math.radians(22.5)]):
@@ -44,6 +44,16 @@ for n,a in enumerate([math.radians(-22.5),0.0,math.radians(22.5)]):
     E=[round(math.sin(a)*NEAR,2),1.2,round(math.cos(a)*NEAR,2)]
     L.append({'id':p+'pop','t':'flash','at':T_ARR+at+.08,'life':.12,'att':'feet','pos':E,'col':LG,'size0':.3,'size':2.2,'k':.8})
     L.append({'id':p+'popstk','t':'emit','at':T_ARR+at+.08,'life':.05,'att':'feet','pos':E,'burst':30,'rate':0,'from':'sphere','fr':.6,'dir':'out','speed':[5,9],'plife':[.15,.3],'look':'streak','size':[1.2,2.2],'col':W,'c2':G,'gravity':0,'drag':2,'curl':False})
+# เพิ่มเอฟเฟกต์ (ผู้ใช้ รอบ 2): ระหว่างรอ = ลมดูดพื้นเข้าแกน + วงรอบโคน • ก่อนดึง = ทอร์นาโดพองเรือง • ตอนดึง = สายลมยาวโยงจากไม้ไปหาทอร์นาโด + รอยลากพื้นยาว + เศษหิน/ใบไม้ถูกดูดตาม
+for n,a in enumerate([math.radians(-22.5),0.0,math.radians(22.5)]):
+    p=f'x{n}_';P=path(a);at=round(n*.04,2);sx,cz=math.sin(a),math.cos(a)
+    L.append({'id':p+'suck','t':'emit','at':at+.15,'life':T_PULL-.1,'att':'feet','pos':P,'rate':70,'from':'ring','fr':2.6,'dir':'in','speed':[4,7],'up':[0,1.5],'plife':[.3,.5],'look':'streak','size':[1,2],'col':W,'c2':G,'gravity':0,'drag':.5,'curl':False})
+    L.append({'id':p+'chips','t':'emit','at':at+.1,'life':T_ARR-.1,'att':'feet','pos':P,'rate':25,'from':'ring','fr':1.8,'dir':'tangent','speed':[3,6],'up':[2,5],'plife':[.5,.9],'look':'model','model':'wind_slash','mmat':'solid','msize':[.07,.16],'col':'#5b4a3a','c2':'#8a7560','gravity':3,'mspin':600,'bounce':0})
+    L.append({'id':p+'charge','t':'flash','at':T_PULL-.12+at,'life':.16,'att':'feet','pos':{kk:[v[0],1.6,v[2]] for kk,v in P.items()},'col':G,'size0':.6,'size':3.2,'k':.7})
+    L.append({'id':p+'tether','t':'emit','at':T_PULL+at,'life':T_ARR-T_PULL,'att':'feet','pos':{'0':[round(sx*FAR*.5,2),1.2,round(cz*FAR*.5,2)],'1':[round(sx*NEAR*.5,2),1.2,round(cz*NEAR*.5,2)]},'rate':160,'from':'line','fr':FAR*.5,'dir':'aim','yaw':round((math.degrees(a)+360)%360-180,1),'spread':.05,'speed':[14,20],'plife':[.1,.2],'look':'streak','size':[1.4,2.6],'col':W,'c2':G,'gravity':0,'drag':.5,'curl':False})
+    for j,(tex,col) in enumerate([('tex/wind_swoosh_b',G),('tex/wind_swoosh_a_hi',W)]):
+        L.append({'id':p+f'trail{j}','t':'mesh','at':T_PULL+at,'life':T_ARR-T_PULL+.25,'att':'feet','shape':'model','model':'wind_groundswirl','mat':'tex','tex':tex,'col':col,'col2':'#000000','rim':0,'uvTile':[1,1],'uvScroll':[0,0],
+                  'pos':{kk:[v[0],.05+j*.02,v[2]] for kk,v in path(a).items()},'rot':[0,j*70,0],'spin':500*(1-2*j),'scale':{'0':1.6,'0.5':2.6,'1':1.2},'op':{'0':0,'0.1':.95,'0.7':.8,'1':0},'fade':0,**({'int':1.2} if j else {})})
 # ท่าร่าย: แสงที่ไม้ตอนชี้ + ตอนพับแขนดึง
 L.append({'id':'cast','t':'flash','at':0,'life':.15,'att':'feet','pos':[0,1.2,.6],'col':LG,'size0':.2,'size':1.2,'k':1})
 L.append({'id':'pull','t':'flash','at':T_PULL,'life':.15,'att':'feet','pos':[0,1.2,.5],'col':G,'size0':.2,'size':1.5,'k':1})

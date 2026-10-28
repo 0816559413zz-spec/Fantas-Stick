@@ -58,7 +58,7 @@ function windEfx(ev){
     case 'wndr':fxPlay('wind/windrift',{x,y,h:H,a});if(near)snd('cast_pull',ev);return true;
     case 'wndrslow':ring(x,y,'#8dff65',26,0.35,H+0.2);return true;
     case 'wndrland':case 'wndrwind':return true;   // ลงท่า/ลมตามมา อยู่ในเอฟเฟกต์ windrift แล้ว
-    case 'wnvx':fxPlay('wind/vortex_bind',{x,y,h:H,a});later(0.6,()=>{if(near)shake(0.12);});if(near)snd('cast_pull',ev);return true;
+    case 'wnvx':fxPlay('wind/vortex_bind',{x,y,h:H,a});later(0.8,()=>{if(near)shake(0.18);});if(near)snd('cast_pull',ev);return true;
     case 'wnvxstun':fxPlay('wind/wall_hit',{x,y,h:0,a:Math.random()*6.283});if(near)shake(0.15);return true;   // ลมรัดตัว = สตัน 0.5 วิ
     case 'wnvxcap':case 'wnvohit':fxPlay('wind/ba_hit',{x,y,h:Math.max(0,H-0.2),a:Math.random()*6.283});return true;
     case 'wnvofire':if(near)snd('cast_pull',ev);return true;
