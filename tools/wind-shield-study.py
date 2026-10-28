@@ -8,6 +8,7 @@ ROOT=Path(__file__).resolve().parents[1]
 DUR=5.6
 CUTS=[0,.88,1.74,2.6025]
 REST_AXIS=[1,.454,-.124]
+# ผู้ใช้ 2026-10-28 'wrap shape weird' → ตามสเก็ตช์ wind_shield_fold_ref: ข้อปีกยกเหนือหัว แล้วโค้งลงมาด้านหน้า
 GUARD=[[0,0,0],[.48,.58,.28],[.75,0,.58],[-.25,-.40,.75]]
 HITS=[1.25,1.82,2.38]
 TIMES=sorted(set([0,.20,.24,.28,.32,.36,.40,.44,.48,.52,.56,.60,.64,.75,.85,.95,1.1,1.25,1.30,1.37,1.5,1.82,1.87,1.94,2.07,2.38,2.43,2.50,2.65,2.75,3.0,3.25,3.38,3.50,3.56,3.62,3.70,3.78,3.9,4.1,4.4,4.8,5.2,5.6]))
@@ -158,7 +159,7 @@ for side,sid in [(-1,'L'),(1,'R')]:
         for name,mat,col,c2,opacity,rim in MATERIALS:
             op={'0':opacity,'0.48':opacity,'0.58':min(.85,opacity*1.32),'0.625':min(.9,opacity*1.5),'0.70':opacity,'1':opacity}
             if name=='feathers':
-                op={str(round(t/DUR,5)):opacity*(1-.85*extension(t)) for t in TIMES}
+                op={'0':1.0,'1':1.0}   # ผู้ใช้: ปีก 100% ไม่จาง
             fx['layers'].append({'id':f'{sid}_{bone}_{name}','t':'mesh','at':0,'life':DUR,'att':'feet','shape':'model','model':f'wind_shield_{sid}_{name}_{bone}','mat':mat,'col':col,'col2':c2,'op':op,'rim':rim,'scroll':2.8,'fade':0,'pos':pos,'rot':rot,'scale':scale})
         fx['layers'].append({'id':f'{sid}_{bone}_air','t':'emit','at':0,'life':DUR,'att':'feet','from':'mesh','of':f'{sid}_{bone}_feathers','rate':0,'burst':0,'dir':'random','speed':[.3,.8],'plife':[.22,.45],'look':'model','model':'wind_wing_airchip','mmat':'glow','msize':[.09,.18],'mspin':80,'col':'#b7ff87','c2':'#329b50','gravity':-.05,'drag':1.6,'curl':False,'bounce':0})
 
@@ -167,10 +168,10 @@ for side,sid in [(-1,'L'),(1,'R')]:
         FC=FEATHER_COL[i]
         for name,mat,col,c2,opacity,rim in [
             ('shadow','toon',FC[0],FC[1],1.0,.14),
-            ('flow','energy',FC[2],FC[3],.85,.45),
+            ('flow','energy',FC[2],FC[3],1.0,.45),
             ('edge','glow',FC[4],FC[5],1.0,0),
             ('glint','glow','#eeffcf','#a0ff7f',.0,0)]:
-            op={str(round(t/DUR,5)):round(opacity*extension(t,i)*(1+.15*smooth(t,2.65,3.5)),4) for t in TIMES}
+            op={str(round(t/DUR,5)):round(min(1,opacity*min(1,extension(t,i)*3)),4) for t in TIMES}   # ขนยาวทึบเต็มเร็ว ไม่โปร่ง
             fx['layers'].append({'id':f'{sid}_long_{i}_{name}','t':'mesh','at':0,'life':DUR,'att':'feet','shape':'model','model':f'wind_shield_longfeather_{name}','mat':mat,'col':col,'col2':c2,'op':op,'rim':rim,'scroll':3,'fade':0,'pos':feather_curve(side,i,0),'rot':feather_curve(side,i,1),'scale':feather_curve(side,i,2)})
         fx['layers'].append({'id':f'{sid}_long_{i}_motes','t':'emit','at':.35,'life':3.38,'att':'feet','from':'mesh','of':f'{sid}_long_{i}_flow','rate':0,'dir':'up','speed':[.4,1],'plife':[.18,.35],'look':'streak','size':[.4,.85],'col':'#c8ff9d','c2':'#45b96a','gravity':0,'drag':1.5,'curl':False})
 
@@ -195,20 +196,35 @@ piece={'v':1,'desc':'แฉกลมกวาดออกจากการส�
  {'id':'slice','k':'poly','v':[[-.43,.07,-.33],[-.24,.08,.20],[-.13,.08,.57],[-.18,.07,-.21]],'f':[[0,1,2,3]],'flat':True}]}
 save(ROOT/'assets/fx/mesh/wind_shield_burst.mesh.json',piece)
 fx['params']={'r':{'def':10,'desc':'Shield release radius in metres (existing gameplay 200 sim units)'}}
-for i in range(10):
-    a=i*math.tau/10;s=math.sin(a);c=math.cos(a)
-    pos={'0':[s*.45,1.05,c*.45],'1':[f'r*{s:.7f}',.55+(i%3)*.24,f'r*{c:.7f}']}
-    fx['layers'].append({'id':f'release_body_{i}','t':'mesh','at':3.56+i*.014,'life':.48,'att':'feet','shape':'model','model':'wind_shield_burst','mat':'toon','col':'#5cc96b','col2':'#175b34','pos':pos,'rot':[0,-i*36,0],'scale':{'0':[.55,.5,.6],'0.24':[1.3,.7,2.4],'1':[.15,.15,1.7]},'op':{'0':0,'0.12':.46,'0.5':.38,'1':0},'rim':.15,'dis':{'0':0,'0.55':.03,'1':.85},'fade':0})
-    fx['layers'].append({'id':f'release_{i}','t':'mesh','at':3.56+i*.014,'life':.48,'att':'feet','shape':'model','model':'wind_shield_burst','mat':'energy','col':'#a5ff79','col2':'#2e9a53','pos':pos,'rot':[0,-i*36,0],'scale':{'0':[.55,.5,.6],'0.24':[1.3,.7,2.4],'1':[.15,.15,1.7]},'op':{'0':0,'0.12':.65,'0.5':.38,'1':0},'rim':.35,'scroll':4,'dis':{'0':0,'0.45':.03,'1':.85},'fade':0})
-    if i%2==0:
-        fx['layers'].append({'id':f'release_tail_{i}','t':'trail','at':3.56+i*.014,'life':.48,'of':f'release_{i}','col':'#bfff8e','col2':'#25814a','w':.10,'tlife':.13,'k':.65})
-for j,(y,tex,col,sp) in enumerate([(1.05,'tex/wind_swoosh_a_hi','#efffe8',260),(1.0,'tex/wind_swoosh_b','#8dff65',-200),(.15,'tex/wind_swoosh_b','#57ce6a',160)]):
-    fx['layers'].append({'id':f'impact_ring_{j}','t':'mesh','at':3.56+j*.03,'life':.6,'att':'feet','shape':'model','model':f'wind_pieces{j}','mat':'tex','tex':tex,'col':col,'col2':'#000000','rim':0,'uvTile':[1,1],'uvScroll':[0,0],
-        'pos':[0,y,0],'rot':[0,j*60,0],'scale':{'0':[.6,.3,.6],'0.3':[4.2,.45,4.2],'1':[8,.25,8],'ease':'out'},'spin':sp,'op':{'0':0,'0.06':1,'0.6':.75,'1':0},'fade':0,'life':.9})
-fx['layers'].append({'id':'impact_floor','t':'mesh','at':3.58,'life':.7,'att':'feet','shape':'model','model':'wind_groundswirl','mat':'tex','tex':'tex/wind_swoosh_b','col':'#8dff65','col2':'#000000','rim':0,'uvTile':[1,1],'uvScroll':[0,0],
-    'pos':[0,.04,0],'scale':{'0':.6,'0.4':4,'1':7,'ease':'out'},'spin':180,'op':{'0':0,'0.08':1,'0.6':.7,'1':0},'fade':0})
-fx['layers'].append({'id':'release_contact','t':'flash','at':3.56,'life':.12,'att':'feet','pos':[0,1.1,0],'col':'#e6ffd8','size0':.4,'size':4.2,'k':1})
-fx['layers'].append({'id':'release_splinters','t':'emit','at':3.56,'life':.05,'att':'feet','pos':[0,1.1,0],'burst':48,'rate':0,'from':'ring','fr':.7,'dir':'out','speed':[7,12],'up':[.2,1.2],'plife':[.22,.5],'look':'streak','size':[1.1,2.2],'col':'#d1ffa7','c2':'#3b9952','gravity':0,'drag':1.6,'curl':False})
+# ระเบิดโล่ (ผู้ใช้ 2026-10-28 ส่งรูป Spellcasters "Wind Shield"): ทรงกลมลมขยายออกจากตัว — แถบสโตรกพู่กันพันรอบทรงกลมหลายแนวเอียง
+# + ไส้ทรงกลมใสสีมิ้นต์ + สโตรกดินน้ำตาลกวาดพื้น + เศษดิน/ใบไม้ปลิว
+RB=3.0;T0=3.56;BC=[0,1.0,0]
+SPH=lambda k:{'0':[.35*k,.35*k,.35*k],'0.22':[RB*k,RB*k,RB*k],'1':[RB*1.18*k,RB*1.18*k,RB*1.18*k],'ease':'out'}
+fx['layers'].append({'id':'burst_fill','t':'mesh','at':T0,'life':.7,'att':'feet','shape':'sphere','mat':'energy','col':'#e0ffd2','col2':'#2ec772','pos':BC,'scale':SPH(.97),'rim':1.1,'scroll':1.5,'op':{'0':0,'0.08':.42,'0.55':.3,'1':0},'fade':0})
+BANDS=[(0,0,'tex/wind_swoosh_a_hi','#ffffff',520,1.0),(28,40,'tex/wind_swoosh_b','#8dff65',-460,.95),(-24,95,'tex/wind_swoosh_a_hi','#efffe8',480,.95),(48,150,'tex/wind_swoosh_b','#2ec772',-420,.9),
+       (-46,200,'tex/wind_swoosh_b_hi','#ffffff',440,.9),(14,255,'tex/wind_swoosh_b','#8dff65',-500,.9),(-12,310,'tex/wind_swoosh_a','#1f9a55',400,.8),(62,20,'tex/wind_swoosh_a_hi','#efffe8',-380,.85),(-64,120,'tex/wind_swoosh_b','#2ec772',360,.85)]
+for j,(tilt,yaw,tex,col,sp,o) in enumerate(BANDS):
+    fx['layers'].append({'id':f'burst_band_{j}','t':'mesh','at':T0+j*.012,'life':.68,'att':'feet','shape':'model','model':f'wind_pieces{j%3}','mat':'tex','tex':tex,'col':col,'col2':'#000000','rim':0,'uvTile':[1,1],'uvScroll':[0,0],
+        'pos':BC,'rot':[tilt,yaw,0],'scale':{k:[v[0],round(v[1]*.32,2),v[2]] for k,v in SPH(1).items() if k!='ease'},'spin':sp,'op':{'0':0,'0.07':o,'0.6':round(o*.85,2),'1':0},'fade':0,**({'int':1.4} if col in('#ffffff','#efffe8','#efffe8') else {})})
+    if j%3==0:fx['layers'].append({'id':f'burst_line_{j}','t':'mesh','at':T0+j*.012,'life':.68,'att':'feet','shape':'model','model':f'wind_pieces{j%3}','mat':'tex','tex':'tex/wind_swoosh_a_ln','col':'#1a7a45','col2':'#000000','rim':0,'uvTile':[1,1],'uvScroll':[0,0],
+        'pos':BC,'rot':[tilt,yaw+25,0],'scale':{k:[round(v[0]*1.05,2),round(v[1]*.3,2),round(v[2]*1.05,2)] for k,v in SPH(1).items() if k!='ease'},'spin':sp,'op':{'0':0,'0.07':.7,'0.6':.55,'1':0},'fade':0})
+# สโตรกดินกวาดพื้นรอบฐาน (น้ำตาล แบบในรูป) + เศษดิน + ใบไม้
+for j,(tex,col,sp,sc) in enumerate([('tex/wind_swoosh_b','#8a7560',300,1.0),('tex/wind_swoosh_a','#6e5a48',-260,1.2)]):
+    fx['layers'].append({'id':f'burst_dirt_{j}','t':'mesh','at':T0+.02,'life':.7,'att':'feet','shape':'model','model':'wind_groundswirl','mat':'tex','tex':tex,'col':col,'col2':'#000000','rim':0,'uvTile':[1,1],'uvScroll':[0,0],
+        'pos':[0,.05+j*.03,0],'rot':[0,j*70,0],'scale':{'0':.5,'0.25':RB*sc,'1':RB*sc*1.3,'ease':'out'},'spin':sp,'op':{'0':0,'0.08':.95,'0.6':.7,'1':0},'fade':0})
+fx['layers'].append({'id':'burst_soil','t':'emit','at':T0+.02,'life':.08,'att':'feet','pos':[0,.2,0],'burst':60,'rate':0,'from':'ring','fr':1.2,'dir':'out','speed':[5,10],'up':[1,4],'plife':[.4,.8],'look':'model','model':'wind_slash','mmat':'solid','msize':[.06,.16],'col':'#5b4a3a','c2':'#8a7560','gravity':6,'mspin':600,'bounce':0})
+fx['layers'].append({'id':'burst_leaves','t':'emit','at':T0+.03,'life':.1,'att':'feet','pos':BC,'burst':26,'rate':0,'from':'sphere','fr':1.5,'dir':'out','speed':[4,8],'plife':[.6,1.1],'look':'model','model':'wind_leaf','mmat':'solid','msize':[.12,.22],'col':'#6fae5a','c2':'#3f7a3a','gravity':.6,'drag':1.2,'mspin':500,'bounce':0})
+fx['layers'].append({'id':'release_contact','t':'flash','at':3.56,'life':.12,'att':'feet','pos':[0,1.1,0],'col':'#efffe8','size0':.4,'size':3.2,'k':1})
+fx['layers'].append({'id':'release_splinters','t':'emit','at':3.56,'life':.05,'att':'feet','pos':[0,1.1,0],'burst':48,'rate':0,'from':'ring','fr':.7,'dir':'out','speed':[7,12],'up':[.2,1.2],'plife':[.22,.5],'look':'streak','size':[1.1,2.2],'col':'#ffffff','c2':'#8dff65','gravity':0,'drag':1.6,'curl':False})
 
+# เพิ่มเอฟเฟกต์ (ผู้ใช้ "abit more effect"): เส้นลมพุ่งออกรอบทิศ + ประกายเขียว + วงสโตรกนอกขยายไกล + คลื่นอากาศ + เข็มลม
+fx['layers'].append({'id':'burst_streaks','t':'emit','at':T0,'life':.06,'att':'feet','pos':BC,'burst':70,'rate':0,'from':'sphere','fr':.8,'dir':'out','speed':[9,16],'plife':[.2,.4],'look':'streak','size':[1.4,2.8],'col':'#ffffff','c2':'#8dff65','gravity':0,'drag':2,'curl':False})
+fx['layers'].append({'id':'burst_glint','t':'emit','at':T0+.04,'life':.45,'att':'feet','pos':BC,'rate':90,'from':'sphere','fr':RB,'dir':'tangent','speed':[2,5],'plife':[.3,.6],'look':'spark','size':[1,2],'col':'#d2ffb8','c2':'#8dff65','gravity':0})
+fx['layers'].append({'id':'burst_needle','t':'emit','at':T0,'life':.06,'att':'feet','pos':BC,'burst':22,'rate':0,'from':'sphere','fr':1,'dir':'out','speed':[6,11],'plife':[.25,.45],'look':'model','model':'wind_needle','mmat':'solid','msize':[.3,.6],'col':'#efffe8','c2':'#8dff65','gravity':0,'drag':2,'mspin':0,'bounce':0})
+for j,(tex,col,sp) in enumerate([('tex/wind_swoosh_a_hi','#ffffff',420),('tex/wind_swoosh_b','#8dff65',-360)]):
+    fx['layers'].append({'id':f'burst_outer_{j}','t':'mesh','at':T0+.05+j*.03,'life':.6,'att':'feet','shape':'model','model':f'wind_pieces{j+1}','mat':'tex','tex':tex,'col':col,'col2':'#000000','rim':0,'uvTile':[1,1],'uvScroll':[0,0],
+        'pos':[0,.9,0],'rot':[0,j*90,0],'scale':{'0':[RB,.25,RB],'0.4':[RB*2,.3,RB*2],'1':[RB*3.2,.15,RB*3.2],'ease':'out'},'spin':sp,'op':{'0':0,'0.1':.95,'0.6':.6,'1':0},'fade':0,**({'int':1.4} if j==0 else {})})
+fx['layers'].append({'id':'burst_shock','t':'warp','at':T0,'life':.35,'att':'feet','pos':BC,'kind':'shock','size':{'0':.5,'1':RB*2.2},'str':1,'op':{'0':1,'1':0},'col':'#efffe8','glow':.05})
+fx['layers'].append({'id':'burst_shake','t':'screen','at':T0,'life':.15,'shake':2.5})
 save(ROOT/'assets/fx/wind/shield_wing.fx.json',fx)
 print('Wind wing shield: 5.6 s, 3-section wing animation, staged hits and radial release')

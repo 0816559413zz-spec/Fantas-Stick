@@ -168,7 +168,7 @@ function emoHost(id,e){const p=G.players[id];e=e|0;if(!p||!p.alive||p.downed||G.
 function resetBody(p,x,y){
   Object.assign(p,{x,y,z:0,vz:0,fly:false,flyCd:0,root:0,vx:0,vy:0,hp:p.maxHp,alive:true,downed:false,revive:0,stun:0,burn:0,dash:0,inv:0,
     shieldOn:false,shieldE:100,shieldBroken:0,respawn:0,slam:false,slam3:null,dashSp:0});   // slam: ตายกลางท่ากระโดดฟาด (น้ำแข็ง) แล้วค้าง = ฟันไม่ได้หลังเกิดใหม่
-  for(const k of CDK)p.cd[k]=0;clearStatus(p);p.trail=null;earthReset(p);
+  for(const k of CDK)p.cd[k]=0;clearStatus(p);p.trail=null;earthReset(p);windReset(p);
   p.ang=Math.atan2(MH/2-y,MW/2-x);
 }
 function fmap(){const M=MAPS[MAPID];return M&&M.fm;}
@@ -287,10 +287,12 @@ function updatePlayer(p,dt,acting){
   else if(p.dfall)dragonfallTick(p,inp,dt);
   else if(p.sdome)stormDomeTick(p,inp,dt);
   else if(p.wr&&p.wr.ph!=='trans'){}   // Wrath: ลอยบนฟ้า (earthWrathTick คุมความสูง)
+  else if(p.wfw)windFlyZ(p,dt);   // สายลม Featherwing: บิน/ร่อนลง
+  else if(p.wflt>0)windFloatZ(p,dt);   // โดนอัลติสายลม: ลอยค้าง
   else gravity();
 
   // โล่
-  const wantSh=canAct&&!p.fly&&G.mode!=='imp'&&!(G.ball&&G.ball.holder===p.id)&&inp.sh&&p.shieldBroken<=0&&p.shieldE>5&&p.dash<=0&&!p.dchgOn&&!(p.colos>0)&&!(p.cryo>0)&&!p.dfall&&p.pathIdx!==2&&!p.aug&&!p.ramp&&!(p.wr&&p.wr.ph!=='trans');
+  const wantSh=canAct&&!p.fly&&G.mode!=='imp'&&!(G.ball&&G.ball.holder===p.id)&&inp.sh&&p.shieldBroken<=0&&p.shieldE>5&&p.dash<=0&&!p.dchgOn&&!(p.colos>0)&&!(p.cryo>0)&&!p.dfall&&p.pathIdx!==2&&!p.aug&&!p.ramp&&!(p.wr&&p.wr.ph!=='trans')&&!(p.wsbL>0)&&!p.wwAim;
   if(wantSh&&!p.shieldOn){p.shieldOn=true;p.shieldT=G.time;p.shBlk=0;p.shPar=0;}
   if(!wantSh)p.shieldOn=false;
   if(p.shieldOn){p.shieldE-=12*dt*((PBASIC[p.pathIdx|0]||{}).shDrain||1);if(p.shieldE<=0)breakShield(p);}
@@ -299,6 +301,7 @@ function updatePlayer(p,dt,acting){
   p.shWas=p.shieldOn;
   if(p.pathIdx===2)stormTick(p,dt);
   if(p.pathIdx===EARTH)earthTick(p,dt);
+  if(p.pathIdx===WINDP)windTick(p,dt);
 
   // เคลื่อนที่
   const ox0=p.x,oy0=p.y,oz0=p.z,onG0=!p.fly&&p.z<=groundH(p.x,p.y,p.z)+0.05;
@@ -308,7 +311,7 @@ function updatePlayer(p,dt,acting){
   const ml=Math.hypot(mx,my);if(ml){mx/=ml;my/=ml;}
   if(!canAct||p.root>0||p.dchgOn||p.cryo>0){mx=my=0;}
   else if(p.fear>0){const fa=Math.atan2(p.y-p.fearY,p.x-p.fearX);mx=Math.cos(fa);my=Math.sin(fa);}
-  const spd=(p.fly?540*p.buffs.spd:175*p.buffs.spd*(p.shieldOn?0.5:1))*(p.boost>0?1.45:1)*moveMul(p)*(p.wr||p.aug||p.ecb?earthSpd(p):1)*(p.dfall?(p.dfall.ph===2?0.45:0):p.sdome?(p.sdome.ph===2?0.45:0):p.rail?0:(p.kindle>0&&p.hover>0)?0.35:p.breath>0?0.7:(p.snapT>0||p.colos>0||p.grT>0)?0.5:1)*(p.slideT>0?1.8:1+(p.iceB||0));
+  const spd=(p.fly?540*p.buffs.spd:175*p.buffs.spd*(p.shieldOn?0.5:1))*(p.boost>0?1.45:1)*moveMul(p)*(p.wr||p.aug||p.ecb?earthSpd(p):1)*(p.wdr||p.wfw?windSpd(p):1)*(p.dfall?(p.dfall.ph===2?0.45:0):p.sdome?(p.sdome.ph===2?0.45:0):p.rail?0:(p.kindle>0&&p.hover>0)?0.35:p.breath>0?0.7:(p.snapT>0||p.colos>0||p.grT>0)?0.5:1)*(p.slideT>0?1.8:1+(p.iceB||0));
   p.wSpd=(p.dash>0||p.slideT>0||p.slip>0||!canAct||p.root>0||p.dchgOn||p.cryo>0||p.fear>0||p.gh)?0:Math.round(spd);   // ความเร็วเดินตอนนี้ → ลูกข่ายใช้ทำนายตัวเอง (0 = อย่าทำนาย)
   if(p.dash>0){
     p.dash-=dt;const ds=p.dashSp||900;

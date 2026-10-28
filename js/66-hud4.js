@@ -6,7 +6,8 @@ const H4E={
   pyro:{c0:'#5a1206',c1:'#ff6a2a',c2:'#ffc27a',cb:'#4a1a10',pt:'ember',n:'PYRO'},
   frost:{c0:'#0a2a5a',c1:'#8fe0ff',c2:'#e6f8ff',cb:'#13305a',pt:'snow',n:'FROST'},
   storm:{c0:'#4a3a06',c1:'#ffe27a',c2:'#fff6c8',cb:'#3a3010',pt:'spark',n:'STORM'},
-  earth:{c0:'#3a2410',c1:'#c9a36a',c2:'#f0dcb4',cb:'#3a2a18',pt:'rock',n:'EARTH'}};
+  earth:{c0:'#3a2410',c1:'#c9a36a',c2:'#f0dcb4',cb:'#3a2a18',pt:'rock',n:'EARTH'},
+  wind:{c0:'#0f3a22',c1:'#8dff65',c2:'#efffe8',cb:'#123a26',pt:'snow',n:'WIND'}};
 const H4={el:null,on:false,drawn:false,pid:'',lay:'',cache:{},rdy:{},seg:[],segN:0,trail:1,hold:0,uFull:false,face:null,faceFor:'',faceTry:0};
 const H4C=440,H4RC=330;   // มุมวง (พิกัดในกล่อง 480×480 ขวาล่าง) + รัศมีวงที่ไพ่วางอยู่
 function h4Pal(me){const k=getKit(me.id),P=PATHS[k.path]||PATHS[0];return [P,H4E[P.id]||H4E.frost];}

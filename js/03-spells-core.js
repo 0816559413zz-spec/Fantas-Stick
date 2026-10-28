@@ -5,7 +5,7 @@
 // =====================================================================
 // ไอคอนคาถา: จาก game-icons.net (CC BY 3.0, เครดิตใน "คู่มือ" และ icons/CREDITS.md) ไฟล์อยู่ที่ icons/<id>.svg (Service Worker เก็บไว้เล่นออฟไลน์)
 // เพิ่มไอคอนใหม่ = วางไฟล์ icons/<id>.svg (สีขาวล้วน) แล้วเพิ่ม id ใน ICONS • ICOALIAS = ใช้ไอคอนเดิมซ้ำ
-const ICONS=new Set(['p_earth','b_earth','sh_earth','dsh_earth','cb_earth','tectoniccrush_sq','stonebreaker','mudswamp','tectoniccrush','dustburst','terraauger','wrath','b_frost','b_frost_m','b_hex','b_nature','b_pyro','b_storm','b_summon','blazeform','blinddust','bloom','colossus','cryoshell','darkness','dragonbreath','dsh_frost','dsh_pyro','dsh_storm','firesprite','frostaura','frostforge','glacierrend','godlightning','hexmark','ignitionsnap','kindle','legion','mirrorlegion','p_frost','p_hex','p_nature','p_pyro','p_storm','p_summon','permafrost','poisondart','railgun','ringofembers','sh_frost','sh_pyro','sh_storm','silencecurse','soulburst','soulsiphon','speedsiphon','spiritwolf','sporecloud','staticfield','stonegolem','stormorbs','terror','thornburst','thunderline','triplestrike','vinelash','wispheal','worldtree']);
+const ICONS=new Set(['p_wind','b_wind','sh_wind','dsh_wind','aegisgale','windrift','vortexbind','voidspheres','featherwing','eyeofheaven','p_earth','b_earth','sh_earth','dsh_earth','cb_earth','tectoniccrush_sq','stonebreaker','mudswamp','tectoniccrush','dustburst','terraauger','wrath','b_frost','b_frost_m','b_hex','b_nature','b_pyro','b_storm','b_summon','blazeform','blinddust','bloom','colossus','cryoshell','darkness','dragonbreath','dsh_frost','dsh_pyro','dsh_storm','firesprite','frostaura','frostforge','glacierrend','godlightning','hexmark','ignitionsnap','kindle','legion','mirrorlegion','p_frost','p_hex','p_nature','p_pyro','p_storm','p_summon','permafrost','poisondart','railgun','ringofembers','sh_frost','sh_pyro','sh_storm','silencecurse','soulburst','soulsiphon','speedsiphon','spiritwolf','sporecloud','staticfield','stonegolem','stormorbs','terror','thornburst','thunderline','triplestrike','vinelash','wispheal','worldtree']);
 const ICOALIAS={dragonfall:'dragonbreath',stormdome:'staticfield'};   // Dragonfall ใช้ไอคอนมังกรเดิม • ลูกสายฟ้าโดมใช้ไอคอนโดมสายฟ้า
 const hasIco=id=>ICONS.has(ICOALIAS[id]||id);
 // URL เต็ม: ค่านี้ไปอยู่ใน CSS var(--u) ซึ่งเบราว์เซอร์จะอ่าน url() เทียบกับไฟล์ css/game.css ถ้าเป็นที่อยู่แบบสั้น
@@ -55,7 +55,7 @@ function cleanKit(s){return parseKit(parseKit(s).str).str;}
 function setKit(p,str){const old=p.pathIdx;p.fmode=0;p.orbs=0;p.orbBlk=0;p.kit=cleanKit(str);const k=parseKit(p.kit);p.pathIdx=k.path;p.kitIds=k.ids.map(i=>SPELL_LIST[i].id);p.ultId=SPELL_LIST[k.ult].id;
   if(old!==undefined&&old!==p.pathIdx&&G&&G.ph!=='lobby')pathReset(p);}
 // เปลี่ยนสายกลางเกม (เมนูทดลอง): ล้างท่าค้างของสายเก่า — ไม่งั้นค้างลอยฟ้า (Wrath) / เดินไม่ได้ (Railgun/Auger) / ร่างเทพค้าง
-function pathReset(p){clearStatus(p);earthReset(p);Object.assign(p,{stS:null,stCd:0,god:0,xhp:0,sdome:null,rail:null,slnT:0,sorb:null,beam:0,sdHit:null,slam:false,slam3:null,chg:0,dash:0,dashSp:0,trail:null,fpath:null,shieldOn:false});}
+function pathReset(p){clearStatus(p);earthReset(p);windReset(p);Object.assign(p,{stS:null,stCd:0,god:0,xhp:0,sdome:null,rail:null,slnT:0,sorb:null,beam:0,sdHit:null,slam:false,slam3:null,chg:0,dash:0,dashSp:0,trail:null,fpath:null,shieldOn:false});}
 
 // ---------- สถานะ (ใช้ได้ทั้งผู้เล่นและศัตรู) ----------
 const isBig=t=>t.isE&&(t.type==='troll'||t.type==='queen'||(EDEF[t.type]&&EDEF[t.type].boss));
@@ -182,7 +182,7 @@ function updateChan(dt){
   for(const c of G.chan){c.t-=dt;c.tt-=dt;const p=G.players[c.owner];if(!p||!p.alive||p.downed||(c.stun&&p.stun>0)){c.t=0;if(p&&c.stun)p.breath=0;continue;}if(c.tt<=0){c.tt=c.tick;c.fn(c,p);}}
   G.chan=G.chan.filter(c=>c.t>0);
 }
-function updateSpells(dt){updateStorm(dt);updateEarth(dt);updateZones(dt);updateFirePaths(dt);updateStrikes(dt);updateWalls(dt);updateChan(dt);updateERings(dt);updateIces(dt);updateWaves(dt);updateGlaciers(dt);updateBldg(dt);}
+function updateSpells(dt){updateStorm(dt);updateEarth(dt);updateWind(dt);updateZones(dt);updateFirePaths(dt);updateStrikes(dt);updateWalls(dt);updateChan(dt);updateERings(dt);updateIces(dt);updateWaves(dt);updateGlaciers(dt);updateBldg(dt);}
 // จุดเล็งของคาถาวางพื้น: ถ้ามีศัตรูอยู่ในแนวเล็งให้วางที่ตัวมัน ไม่งั้นวางที่ระยะ 75% ของพิสัย
 function aimPoint(p,range){
   // ผู้เล่นจริง: วางตรงจุดที่เป้ากลางจอชี้พื้น (ไม่เกินพิสัย)

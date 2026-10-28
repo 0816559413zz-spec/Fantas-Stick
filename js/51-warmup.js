@@ -9,7 +9,7 @@
 //  (ไม่งั้นทุกครั้งที่เอฟเฟกต์จบแล้วกดใหม่ จะ compile ใหม่อีก) • ฝั่ง client ล้วน ไม่เปลี่ยนโปรโตคอล
 // =====================================================================
 const WARM={reg:{},done:new Set(),hold:new THREE.Group(),holdF:new THREE.Group(),key:'',q:[],late:false,busy:false,log:[]};
-const WARM_FXDIR={pyro:'fire',frost:'frost',earth:'earth'},WARM_COMMON=['tpl','sig','rec'];
+const WARM_FXDIR={pyro:'fire',frost:'frost',earth:'earth',wind:'wind'},WARM_COMMON=['tpl','sig','rec'];
 const WARM_X=-20000,WARM_Y=-20000;   // นอกแผนที่ ~1 กม. (หมอก/ระยะกล้องซ่อนหมด, ไม่มีเสียงเพราะ nearMe)
 // ย้ายของไป hold ของ scene เดิม (fxScene ไม่มีไฟ → program คนละแบบกับ scene) • วัสดุ dispose = ไม่ทำอะไร • อัปโหลด texture ไว้เลย
 function warmKeep(o,fxs){(o.parent||scene).remove(o);(fxs?WARM.holdF:WARM.hold).add(o);
