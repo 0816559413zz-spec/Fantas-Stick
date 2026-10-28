@@ -35,7 +35,7 @@ ROLE_N:201 takePoison:202
 §204 ความสามารถพื้นฐาน (คลิกซ้าย) ของแต่ละสาย: สะสมสถานะตั้งต้นให้เองทุกๆ …
 PBASIC:205
 
-## js/04-frost-mech.js (105) — สายน้ำแข็ง: ประชิด/ไกล (V) • ฟันดาบ/ขวาน • ไถลน้ำแข็ง • พื้นน้ำแข็ง/ภ…
+## js/04-frost-mech.js (106) — สายน้ำแข็ง: ประชิด/ไกล (V) • ฟันดาบ/ขวาน • ไถลน้ำแข็ง • พื้นน้ำแข็ง/ภ…
 frostBoom:3 meleeHit:10 mirrorPos:21 frostBasic:22 frostSlam3:46 frostSlam:54 frostDash:60 addIce:65 updateIces:66 updateWaves:82 _stO:96 _stL:96 groundH:97
 
 ## js/05-terrain.js (44) — พื้นสูงต่ำ (แผนที่จากไฟล์ Blender — กติกาฝั่งคนปั้นใน MAP-DESIGN.md)
@@ -90,7 +90,7 @@ MIND:66 summonMin:72 minTarget:81 minShoot:88 updateMins:93 aimTarget:133
 §180 ร่ายคาถา
 castSlot:181 castUlt:196
 
-## js/10-net.js (183) — 
+## js/10-net.js (183) — เครือข่าย (PeerJS / WebRTC)
 PREFIX:4 NET:5 RC:9 TURN_SERVERS:12 ICE:13 PEER_OPT:14 TURN_URL:16 ICE_READY:18 JN:22 LAG:24 lagDo:25 hostSend:26 LOBBY:27 genCode:28 sendAll:29 NETD_KEYS:33 NETD:33 netDeltaReset:34 netDelta:35 NETU:47 netUndelta:48 setStatus:54 hostGame:56 hostPeer:64 netConnect:83 joinWatch:94 joinFail:109 netLost:115 joinGame:130 joinPeer:141 clientOnData:156 leave:171 leaveRoom:173
 
 ## js/11-host.js (388) — 
@@ -98,15 +98,17 @@ G:4 EVL:4 EVN:4 hostLast:4 tickN:4 emit:5 feed:6 banner:7 plist:8 cleanName:9 fr
 §209 ลูปหลักฝั่งโฮสต์
 hostTick:210 angDiff:224 cH:226 vR:227 updatePlayer:229 hitProp:375 damagePropsIn:382 nearUseProp:383 useProp:384
 
-## js/12-buildings.js (483) — สิ่งปลูกสร้างที่พังเป็นชิ้นย่อย (บ้าน) แบบ Battlefield — คู่มือเต็ม: …
+## js/12-buildings.js (485) — สิ่งปลูกสร้างที่พังเป็นชิ้นย่อย (บ้าน) แบบ Battlefield — คู่มือเต็ม: …
 BLDDEF:8 BLD_PIECES:10 BLD_GRID:11 BLD_DOOR:13 BLD_FIRE:14 BLD_ICE:14 BLD_ROOF_MIN:14 BLDG:15 BLDON:15 genBldg:16 bldRect:26 bldChunk:28 bldAlive:35 bldLocal:36 bldWorld:37 rectDist:38 bldNear:39 BLD_MOUND:42 bldGone:43 bldMoundAt:44 bldMoundH:45 hitBldPiece:47 breakBldChunk:58 bldSupport:66 damageEnv:86 bldRay:101 aimClip:109 aimRay3:116 bldPieceAt:131 projEl:142 bldPush:147 collideBld:153 updateBldg:171 bldSnap:184 bldParse:190
 §194 ของบังในแผนที่ไฟล์ที่พังได้ (หิน เสา รูปปั้น ต้นไม้ โคมไฟ ลัง ...) — …
 BRKDEF:198 BRK_M:198 BRK_MCOL:198 BRK:199 genBrk:200 brkApply:207 brkStage:211 hitBrk:212 damageBrkIn:220 brkSnap:226 brkParse:227
 §228 ตารางช่อง (spatial grid) สำหรับแมพใหญ่: หาเฉพาะของใกล้ ๆ แทนวนทุกชิ้น…
-SG:231 sgObs:232 sgProps:232 sgGrid:234 sgNear:241 _sgCR:246 _sgCW:246 _sgCB:246 _sgCO:246 _sgPO:246 _sgPB:246 _sgPP:246 _sgM:246 _sgE:246 _sgA:246 collideWorld:247 shoot:280 eShoot:301 foesOf:308 breakShield:315 ULT_RATE:317 ultActive:318 gainUlt:319 lifesteal:320 damage:322 playerDown:378 killProj:399 explode:408 hitTarget:420 updateProjectiles:436
+SG:231 sgObs:232 sgProps:232 sgGrid:234 sgNear:241 _sgCR:246 _sgCW:246 _sgCB:246 _sgCO:246 _sgPO:246 _sgPB:246 _sgPP:246 _sgM:246 _sgE:246 _sgA:246 collideWorld:247 shoot:281 eShoot:302 foesOf:309 breakShield:316 ULT_RATE:318 ultActive:319 gainUlt:320 lifesteal:321 damage:323 playerDown:379 killProj:400 explode:409 hitTarget:421 updateProjectiles:437
 
-## js/12-city-dmg.js (110) — เมืองพังได้ (designs/city-bot-battle.md ขั้น 4) — ข้อมูลที่ทุกเครื่อง…
-CITY_FL:8 CITY_PW:8 CDMG:9 CITYD:12 cityOn:13 cityLayout:15 cityReset:25 cityApplyBox:37 cityApplyItem:38 cityHex:39 cityMark:40 cityPanelAt:42 cityHitPanel:47 cityHitItem:57 cityHitObs:66 _sgCD:71 cityDamageIn:73 cityTick:81 _sgCM:91 cityMoundH:92 citySnapB:99 citySnapS:100 cityParse:102
+## js/12-city-dmg.js (176) — เมืองพังได้ (designs/city-bot-battle.md ขั้น 4) — ข้อมูลที่ทุกเครื่อง…
+CITY_FL:8 CITY_PW:8 CDMG:9 CITYD:12 cityOn:13 cityLayout:15 cityReset:25 cityApplyBox:38 cityApplyItem:39 cityHex:40 cityMark:41 cityPanelAt:43 cityHitPanel:48 cityHitItem:57 cityHitObs:66 _sgCD:71 cityDamageIn:73 cityTick:81 _sgCM:91 cityMoundH:92 cityMounds:99
+§105 ข้างในตึก (2026-10-28 ผู้ใช้: เดินเข้าได้ 1–3 ชั้น มีทางขึ้น • ผนังนอ…
+CIN:109 cityInterior:110 cinIn:122 cinHole:123 cinRampH:124 _sgCI:125 cityBoxGrid:126 cityRoomAt:127 cityFloorH:129 cityCeilH:134 cinWallRect:138 cityCollideIn:141 cityProjIn:150 cityRoomBox:164 citySnapB:165 citySnapS:166 cityParse:168
 
 ## js/13-enemies.js (168) — ศัตรู (โหมด Co-op)
 spawnEnemy:2 setupWave:19 bossPhase:36 enemySlam:44 updateEnemies:55
@@ -207,10 +209,12 @@ QUAL:143 QUAL_NAME:144 qualPR:145 applyQuality:151 qualTick:169 texCanvas:180 gl
 §239 เงาตามผู้เล่น
 SHD:243 _shF:244 _shR:244 _shU:244 _shC:244 _shY:244 shadowFollow:245 LPOOL:264
 
-## js/28-city-build.js (233) — เมืองมักเกิ้ล (ลอนดอน) — ภาพ • ข้อมูลอยู่ js/02-city.js • โมเดลจาก as…
+## js/28-city-build.js (278) — เมืองมักเกิ้ล (ลอนดอน) — ภาพ • ข้อมูลอยู่ js/02-city.js • โมเดลจาก as…
 CITY_WIN:4 cityWinTex:5 cityEmTex:10 cityBoxGeo:16 buildCity:21
-§95 ชุดโมเดลลอนดอน (assets/city/*.glb จาก assets/src/city_kit_build.py)
-CITY_STY:100 CITY_VEH:107 cityFacade:109 CITYK:120 _cZ:121 _cT:121 _cR:121 _cC:121 cityKitLoad:122 cityCull:143 citySet:149 cityTint:151 cityPools:153 cityShowBld:158 cityRubble:165 CITY_FALL:173 cityViewSync:175 cityDebris:207 cityFX:216
+§97 ข้างในตึกกลวง (ภาพ — ผัง I จาก cityInterior js/12-city-dmg)
+cityInteriorView:100 cityMoundView:127
+§138 ชุดโมเดลลอนดอน (assets/city/*.glb จาก assets/src/city_kit_build.py)
+CITY_STY:143 CITY_VEH:150 cityFacade:152 CITYK:163 _cZ:164 _cT:164 _cR:164 _cC:164 cityKitLoad:165 cityCull:186 citySet:192 cityTint:194 cityPools:196 cityShowBld:201 cityRubble:208 CITY_FALL:216 cityViewSync:218 cityDebris:252 cityFX:261
 
 ## js/28-maps-build.js (762) — สร้างแผนที่
 CANDLESYS:2 builtMap:3 builtKey:3 world:3 TORCHES:3 CANDLES:3 FIREFLIES:3 CRYSTAL:3 RUNE:3 SNITCH:3 BANNERS:3 SNOW:3 WCACHE:5 WCACHE_MAX:5 wkey:7 buildWorld:8 addW:41 _prewarmed:43 prewarmShaders:44 batchStatic:63 makeCandles:88 updateCandles:97 buildCastle:106 buildHogsmeade:172 buildGreatHall:260 buildForest:330
@@ -237,8 +241,8 @@ FLAME_STYLE:48 PTIME:49 NOISETEX:51 FLAMETEX_V1:57 FLAMETEX_V2:62 PSYS:72 FLAMEL
 §172 เอฟเฟกต์รูปทรง: แฟลช / วงแหวน / โดม / รอยไหม้ / สายฟ้า / แสงชั่วคราว
 SHAPES_Q:173 SHAPES:173 FLASHL:173 LINES:173 LREQ:174 ringGeo:175 ringVGeo:176 arcGeo:177 domeGeo:178 fullGeo:179 discGeo:180 decalTex:181 FX:182 jag:196 spawnShape:204 updateShapes:231 _cp:250 updateLights:251
 
-## js/31-camera.js (117) — กล้องมุมหลังไหล่ (แบบ Hogwarts Legacy)
-yaw:2 pitch:2 lastPh:2 locked:2 CAMRS:3 SENS:4 saveSet:5 applySettings:6 camPos:14 camLook:14 overlayOpen:17 showPause:18 hidePause:19 MAPCAM:20 PLACE:22 placeKey:23 updatePlaceGhost:31 _aimD:45 rayTerr:47 aimFromCrosshair:53 AIMZ:83 EZC:85 ESC:85 updateCamera:86 menuCamera:113
+## js/31-camera.js (129) — กล้องมุมหลังไหล่ (แบบ Hogwarts Legacy)
+yaw:2 pitch:2 lastPh:2 locked:2 CAMRS:3 SENS:4 saveSet:5 applySettings:6 camPos:14 camLook:14 overlayOpen:17 showPause:18 hidePause:19 MAPCAM:20 PLACE:22 placeKey:23 updatePlaceGhost:31 _aimD:45 rayTerr:47 aimFromCrosshair:53 AIMZ:83 EZC:85 ESC:85 camRoomK:87 updateCamera:97 menuCamera:125
 
 ## js/32-stage.js (313) — เวทีเมนู/ล็อบบี้: ห้องโถงมืด แท่นวงเวททอง เทียนลอย (ฉากแยกจากแผนที่)
 stage:2 STAGE:5 STAGE_Y:6 stageSpots:58 stageChar:74 POSES:81 stageIdle:87
@@ -295,7 +299,8 @@ bpOpen:49 bpOn:49 bpKey:49 bpShow:51 bpSync:53 hovEl:97
 §98 หน้าตั้งค่า
 setRow:99 setTog:100 setTab:101 XHC:102 XHN:102 setOpts:103 SET_ICO:105 SET_EN:108 renderSettings:109 drawXhPrev:129 openSettings:130 closeSettings:132 modeIcon:188 modeTitle:189 renderLobby:190
 
-## js/41-debug.js (142) — 
+## js/41-debug.js (143) — เครื่องมือทดสอบสมดุล (ใช้ผ่านคอนโซล WD.bal / WD.dmgTest เท่านั้น ผู้เล่นปกติไม่เห็น)
+§5 บอทต่อสู้แบบง่ายๆ: เล็งนำเป้า เดินรักษาระยะ+ส่ายไปมา ร่ายคาถาทุกครั้ง…
 botBrain:6 _obsKeep:47 balArena:48 balReset:49 balDuel:53 balTour:68 balCoop:82 balSpellTest:98
 §117 Service Worker (sw.js): เก็บไฟล์เกมไว้ในเครื่อง เปิดครั้งต่อไปเร็วขึ้…
 SWK:118 swSetup:119
@@ -578,4 +583,4 @@ BACKDROP:8
 §66 noise เล็ก ๆ (คงที่ต่อ seed)
 bdHash:67 bdNoise:68 bdFbm:69 bdEdge:71 bdRing:73 bdPaint:79 bdTree:82 buildBackdrop:89 bdTower:135 backdropHide:139
 
-(74 files, 17644 lines)
+(74 files, 17771 lines)

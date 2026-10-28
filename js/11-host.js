@@ -257,7 +257,7 @@ function updatePlayer(p,dt,acting){
   }
   p.boost=Math.max(0,(p.boost||0)-dt);
   // ตกลงพื้นเมื่อไม่ได้บิน
-  const gravity=()=>{const gh=groundH(p.x,p.y,p.z);if(p.z>gh||p.vz>0){p.vz-=(p.slam?40:22)*dt;if(p.hover>0&&p.vz<-0.6)p.vz=-0.6;p.z+=p.vz*dt;if(p.z<=gh){if(p.vz<-12)emit({k:'land',x:p.x,y:p.y});p.z=gh;p.vz=0;if(p.slam)frostSlam(p);}}else p.z=gh;};
+  const gravity=()=>{const gh=groundH(p.x,p.y,p.z);if(p.z>gh||p.vz>0){p.vz-=(p.slam?40:22)*dt;if(p.hover>0&&p.vz<-0.6)p.vz=-0.6;p.z+=p.vz*dt;{const c=cityCeilH(p.x,p.y,gh);if(p.z+1.9>c){p.z=Math.max(gh,c-1.9);if(p.vz>0)p.vz=0;}}if(p.z<=gh){if(p.vz<-12)emit({k:'land',x:p.x,y:p.y});p.z=gh;p.vz=0;if(p.slam)frostSlam(p);}}else p.z=gh;};
   if(p.downed){
     p.vx=p.vy=0;p.fly=false;gravity();
     let helper=null;

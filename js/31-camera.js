@@ -83,6 +83,17 @@ function aimFromCrosshair(me,P,E){
 let AIMZ=0;
 // สายดิน: ซูมออก + เลื่อนกล้องไปซ้ายตอนกดค้าง BA ชาร์จ / ตอนรอปาเสาอัลติบนฟ้า (Stand ใหญ่ไม่บังจอ) — ผู้ใช้ 2026-10-21
 let EZC=0,ESC=0;   // ESC = โล่ Earth: Stand ทึบอยู่หลังเรา → กล้องเลื่อนไปซ้ายให้เห็นข้างหน้า (ผู้ใช้ 2026-10-21)
+// ผู้เล่นอยู่ในห้อง (บ้านที่เดินเข้าได้ / ตึกกลวงในเมือง): ร่นกล้องตามแนวจากจุดโฟกัสให้อยู่ในห้อง (ห่างผนัง 0.3 ม. ต่ำกว่าเพดาน 0.25 ม.) • คืนสัดส่วน 0.12..1
+function camRoomK(me,F,x,y,z){
+  const mz=me.z||0;let k=1;const fit=(f,c,lo,hi)=>{if(c<lo&&f>lo)k=Math.min(k,(f-lo)/(f-c));else if(c>hi&&f<hi)k=Math.min(k,(hi-f)/(c-f));};
+  const R=cityRoomBox(me.x,me.y,mz);
+  if(R){fit(F.x,x,tx(R.x0)+0.3,tx(R.x1)-0.3);fit(F.z,z,tz(R.y0)+0.3,tz(R.y1)-0.3);fit(F.y,y,R.z0+0.3,R.z1-0.25);return Math.max(0.12,k);}
+  if(BLDG.length)for(const b of BLDG){const [lx,ly]=bldLocal(b,me.x,me.y),hw=b.o.w/2-b.D.th/2,hd=b.o.d/2-b.D.th/2;
+    if(Math.abs(lx)>=hw||Math.abs(ly)>=hd||mz>=b.D.wh||bldGone(b))continue;
+    const [cx,cy]=bldLocal(b,x/S3+MW/2,z/S3+MH/2),[fx,fy]=bldLocal(b,F.x/S3+MW/2,F.z/S3+MH/2),m=6;
+    fit(fx,cx,-hw+m,hw-m);fit(fy,cy,-hd+m,hd-m);fit(F.y,y,0.3,GY(b.o.x,b.o.y)+b.D.wh+b.D.rh*0.45);return Math.max(0.12,k);}
+  return 1;
+}
 function updateCamera(me,dt){
   AIMZ+=(((me.kd>0&&me.hv)?1:0)-AIMZ)*Math.min(1,dt*10);if(AIMZ<0.001)AIMZ=0;
   {const fv=SET.fov*(1-0.25*AIMZ);if(Math.abs(cam.fov-fv)>0.01){cam.fov=fv;cam.updateProjectionMatrix();}}
@@ -103,6 +114,7 @@ function updateCamera(me,dt){
     for(let i=1;i<=10;i++){const f=i/10,X=focus.x+(x-focus.x)*f,Z=focus.z+(z-focus.z)*f,Y=focus.y+(y-focus.y)*f;if(Y<TW(X,Z)+0.4){const f2=Math.max(0.15,(i-1)/10);x=focus.x+(x-focus.x)*f2;z=focus.z+(z-focus.z)*f2;y=focus.y+(y-focus.y)*f2;break;}}
     y=Math.max(TW(x,z)+0.5,y);
   }else y=Math.max(0.5,y);
+  {const k2=camRoomK(me,focus,x,y,z);if(k2<1){x=focus.x+(x-focus.x)*k2;y=focus.y+(y-focus.y)*k2;z=focus.z+(z-focus.z)*k2;}}   // อยู่ในบ้าน/ตึก: กล้องไม่ทะลุผนัง/เพดาน
   camPos.lerp(new THREE.Vector3(x,y,z),1-Math.exp(-25*dt));
   cam.position.copy(camPos);
   if(shakeA>0)cam.position.add(new THREE.Vector3(rnd(-1,1),rnd(-1,1),rnd(-1,1)).multiplyScalar(shakeA*0.02));
