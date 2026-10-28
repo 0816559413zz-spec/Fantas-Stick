@@ -5,10 +5,8 @@
 import json,math
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
-_src=(ROOT/'tools/wind-kit-gen.py').read_text(encoding='utf-8');_g={'__name__':'kit'};exec(_src[:_src.index('def stroke_fx')].replace("W('mesh/","(lambda *a:None)('mesh/"),_g);tornado=_g['tornado']   # ทอร์นาโดเส้นพู่กันที่ผู้ใช้อนุมัติ
-DUR=1.7;LIFE=1.35;T_PULL=0.8;T_ARR=1.05;FAR=15.0;NEAR=3.0;S=1.5   # ผู้ใช้ 2026-10-28 รอบ 2: ใหญ่ขึ้น ดึงไกลขึ้น (300) มีจังหวะก่อนดึงนานขึ้นนิด (0.8 วิ) เอฟเฟกต์มากขึ้น
-W,LG,G,DG,LN='#ffffff','#efffe8','#8dff65','#2ec772','#0f4a2c'
-GP=dict(inner='#efffe8',mid='#8dff65',outer='#2ec772',hi='#ffffff',line='#0f4a2c',ring='#8dff65',ring2='#ffffff',spark='#d2ffb8')   # ลายเส้นเข้มขึ้น (ตัดกับพื้นสว่าง)
+DUR=1.6;LIFE=1.35;T_PULL=0.8;T_ARR=1.05;FAR=15.0;NEAR=3.0;S=1.5   # ผู้ใช้ 2026-10-28 รอบ 6: "เอาแบบแรก + เอฟเฟกต์ลมเยอะขึ้น" (รอบ 3-5 เส้นพู่กัน/ริบบิ้นทึบ ผู้ใช้ไม่เอา) • ดึง 0.25 วิ • รอบ 2: ใหญ่ขึ้น ดึงไกลขึ้น (300) มีจังหวะก่อนดึงนานขึ้นนิด (0.8 วิ) เอฟเฟกต์มากขึ้น
+W,LG,G,DG,LN='#ffffff','#efffe8','#8dff65','#2ec772','#1a7a45'
 k=lambda t:str(round(t/LIFE,3))
 def path(a,y=0.0):
     sx,cz=math.sin(a),math.cos(a)
@@ -20,25 +18,17 @@ OP=lambda o:{'0':0,k(.06):o,k(T_ARR+.1):o,'1':0}
 L=[]
 for n,a in enumerate([math.radians(-22.5),0.0,math.radians(22.5)]):
     p=f't{n}_';P=path(a);at=round(n*.04,2)
-    # ผู้ใช้ รอบ 5 "ไม่เอาหมึก ทำทอร์นาโดทึบมี layer" (รูป designs/wind_ref/normal_tornado.png เวอร์ชันเขียว):
-    # ริบบิ้นหนาทึบแบบการ์ตูน (toon cel-shade 2 เฉด) วางซ้อนเป็นกรวยบานขึ้น หมุนสลับทิศ ขอบแหว่งนิด ๆ + แกนขาวสว่างกลางลำ + เส้นลมบาง ๆ รอบนอก
-    RIB=[(0.15,.42,'#b6ffb0','#2ec772',660),(0.6,.5,'#8dff65','#1f9a55',-600),(1.05,.58,'#5fe0a0','#178a5a',560),(1.5,.68,'#8dff65','#1f9a55',-520),
-         (1.95,.8,'#b6ffb0','#2ec772',500),(2.4,.94,'#5fe0a0','#178a5a',-470),(2.85,1.1,'#8dff65','#1f9a55',450),(3.3,1.28,'#b6ffb0','#2ec772',-430),(3.75,1.46,'#5fe0a0','#178a5a',410)]
-    for j,(y,r,c1,c2,sp) in enumerate(RIB):
-        for q in range(2):   # 2 ริบบิ้นต่อชั้น (หมุนเหลื่อมกัน 180°) = ดูหนา ทึบรอบลำ
-            L.append({'id':p+f'rb{j}_{q}','t':'mesh','at':at+j*.02,'life':LIFE-j*.02,'att':'feet','shape':'model','model':f'wind_pieces{(j+q)%3}','mat':'toon','col':c1,'col2':c2,'rim':.7,
-                      'dis':.04,'pos':path(a,round(y*S/1.5,2)),'rot':[(11 if (j+q)%2 else -9),j*41+q*180,(7 if q else -6)],'spin':sp,'scale':{kk:[round(v*r*(1.06 if q else 1),3),round(v*.58,3),round(v*r*(1.06 if q else 1),3)] for kk,v in grow(S*.95).items()},'op':OP(1),'fade':0})
-    # แกนขาวสว่างกลางลำ (เรืองแรง) + ไส้เขียวอ่อน
-    L.append({'id':p+'corew','t':'mesh','at':at,'life':LIFE,'att':'feet','shape':'model','model':'wind_core','mat':'glow','col':W,'pos':P,'spin':700,
-              'scale':{kk:[round(v*.55,3),round(v*.85,3),round(v*.55,3)] for kk,v in grow(S).items()},'int':2.2,'op':OP(1),'fade':0})
-    L.append({'id':p+'coreg','t':'mesh','at':at,'life':LIFE,'att':'feet','shape':'model','model':'wind_core','mat':'tex','tex':'tex/wind_streaks','col':'#d2ffb8','col2':'#000000','rim':0,'uvTile':[2,3],'uvScroll':[-2.5,-.8],'pos':P,'spin':-500,
-              'scale':{kk:[round(v*.8,3),round(v*.82,3),round(v*.8,3)] for kk,v in grow(S).items()},'int':1.2,'op':OP(.9),'fade':0})
-    # เส้นลมบาง ๆ วนรอบนอก (สีขาว ไม่ใช่หมึก)
-    for j,(y,sc,sp) in enumerate([(1.2,1.9,520),(2.6,2.4,-460),(3.8,2.8,420)]):
-        L.append({'id':p+f'wisp{j}','t':'mesh','at':at+.05,'life':LIFE-.05,'att':'feet','shape':'model','model':f'wind_pieces{j}','mat':'tex','tex':'tex/wind_swoosh_a_hi','col':W,'col2':'#000000','rim':0,'uvTile':[1,1],'uvScroll':[0,0],
-                  'pos':path(a,round(y*S/1.5,2)),'rot':[0,j*70,0],'spin':sp,'scale':{kk:[round(v*sc*.5,3),round(v*.12,3),round(v*sc*.5,3)] for kk,v in grow(S).items()},'op':OP(.6),'int':1.2,'fade':0})
-    L.append({'id':p+'needles','t':'emit','at':at,'life':T_ARR+.05,'att':'feet','pos':P,'rate':45,'from':'cone','fr':1.6,'fh':4.4,'dir':'tangent','speed':[5,9],'up':[1,3],'plife':[.3,.55],'look':'model','model':'wind_needle','mmat':'solid','msize':[.25,.5],'col':W,'c2':'#d2ffb8','gravity':-.5,'mspin':0,'bounce':0})
-    L.append({'id':p+'baseglow','t':'mesh','at':at,'life':LIFE,'att':'feet','shape':'ring','inner':.55,'mat':'tex','tex':'tex/wind_streaks','col':G,'col2':'#000000','rim':0,'uvTile':[3,1],'uvScroll':[-1.6,0],'pos':path(a,.06),'scale':grow(2.2*S),'int':1.4,'op':OP(.9),'fade':0})
+    # ตัวทอร์นาโด: เกลียวเส้นยาวพันขึ้น 3 ชั้น (ขาวใน / เขียว / เส้นเข้มนอก) — ลด rim/glow ลง (ผู้ใช้: สะท้อนแสงน้อยลง)
+    L.append({'id':p+'helix','t':'mesh','at':at,'life':LIFE,'att':'feet','shape':'model','model':'wind_helix','mat':'glow','col':LG,'int':.75,'pos':P,'spin':600,'scale':grow(S),'op':OP(.95),'fade':0})
+    L.append({'id':p+'helix2','t':'mesh','at':at,'life':LIFE,'att':'feet','shape':'model','model':'wind_helix','mat':'energy','col':G,'col2':DG,'rot':[0,45,0],'pos':P,'spin':420,'scale':grow(S*1.12),'rim':.3,'op':OP(.85),'fade':0})
+    L.append({'id':p+'helix3','t':'mesh','at':at,'life':LIFE,'att':'feet','shape':'model','model':'wind_helix','mat':'solid','col':DG,'col2':LN,'rot':[0,100,0],'pos':P,'spin':-380,'scale':grow(S*1.22),'rim':0,'op':OP(.7),'fade':0})
+    # แกนขาวเรือง ใหญ่ขึ้น ขึ้นพร้อมทอร์นาโด
+    L.append({'id':p+'core','t':'mesh','at':at,'life':LIFE,'att':'feet','shape':'model','model':'wind_core','mat':'tex','tex':'tex/wind_streaks','col':W,'col2':'#000000','rim':0,'uvTile':[2,3],'uvScroll':[-2.5,-.8],'pos':P,'spin':700,
+              'scale':{kk:[round(v*.75,3),round(v*.8,3),round(v*.75,3)] for kk,v in grow(S).items()},'int':1.3,'op':OP(.9),'fade':0})
+    # เอฟเฟกต์รอบ ๆ: แถบสโตรกพู่กันวนรอบกลางลำ 2 ชั้น
+    for j,(y,tex,col,sp,sc) in enumerate([(1.0,'tex/wind_swoosh_a_hi',W,560,1.25),(2.2,'tex/wind_swoosh_b',G,-480,1.55)]):
+        L.append({'id':p+f'band{j}','t':'mesh','at':at+.05,'life':LIFE-.05,'att':'feet','shape':'model','model':f'wind_pieces{j}','mat':'tex','tex':tex,'col':col,'col2':'#000000','rim':0,'uvTile':[1,1],'uvScroll':[0,0],
+                  'pos':path(a,y),'rot':[0,j*90,0],'spin':sp,'scale':{kk:[v,round(v*.45,3),v] for kk,v in grow(sc*S*.75).items()},'op':OP(.9),'fade':0,**({'int':1.2} if j==0 else {})})
     # พื้น: สโตรกวนพื้น + คลื่นวง
     for j,(tex,col,sp,sc) in enumerate([('tex/wind_swoosh_b',G,300,1.5),('tex/wind_swoosh_a_hi',W,-240,1.1)]):
         L.append({'id':p+f'gs{j}','t':'mesh','at':at,'life':LIFE,'att':'feet','shape':'model','model':'wind_groundswirl','mat':'tex','tex':tex,'col':col,'col2':'#000000','rim':0,'uvTile':[1,1],'uvScroll':[0,0],
@@ -64,6 +54,18 @@ for n,a in enumerate([math.radians(-22.5),0.0,math.radians(22.5)]):
     for j,(tex,col) in enumerate([('tex/wind_swoosh_b',G),('tex/wind_swoosh_a_hi',W)]):
         L.append({'id':p+f'trail{j}','t':'mesh','at':T_PULL+at,'life':T_ARR-T_PULL+.25,'att':'feet','shape':'model','model':'wind_groundswirl','mat':'tex','tex':tex,'col':col,'col2':'#000000','rim':0,'uvTile':[1,1],'uvScroll':[0,0],
                   'pos':{kk:[v[0],.05+j*.02,v[2]] for kk,v in path(a).items()},'rot':[0,j*70,0],'spin':500*(1-2*j),'scale':{'0':1.6,'0.5':2.6,'1':1.2},'op':{'0':0,'0.1':.95,'0.7':.8,'1':0},'fade':0,**({'int':1.2} if j else {})})
+# เพิ่มเอฟเฟกต์ลม (ผู้ใช้ รอบ 6): เส้นลมขาวยาววนรอบลำหลายระดับ + ลมพัดเฉียงขึ้น + ฝุ่นวงโคน + ใบไม้มากขึ้น + ประกาย
+for n,a in enumerate([math.radians(-22.5),0.0,math.radians(22.5)]):
+    p=f'y{n}_';P=path(a);at=round(n*.04,2)
+    for j,(y,fr,sp) in enumerate([(0.6,1.9,1),(1.7,2.3,-1),(2.8,2.8,1),(3.8,3.2,-1)]):
+        L.append({'id':p+f'orbit{j}','t':'emit','at':at+.05,'life':T_ARR,'att':'feet','pos':path(a,round(y*S/1.5,2)),'rate':55,'from':'ring','fr':round(fr*S/1.5,2),'dir':'tangent','speed':[7*sp,11*sp],'up':[.3,1.2],'plife':[.25,.45],'look':'streak','size':[1.6,3.0],'col':W,'c2':G,'gravity':0,'drag':.3,'curl':False})
+    for j,(y,sc,sp) in enumerate([(1.3,2.2,600),(2.5,2.7,-520),(3.6,3.1,470)]):
+        L.append({'id':p+f'wisp{j}','t':'mesh','at':at+.05,'life':LIFE-.05,'att':'feet','shape':'model','model':f'wind_pieces{j}','mat':'tex','tex':'tex/wind_swoosh_a_hi','col':W,'col2':'#000000','rim':0,'uvTile':[1,1],'uvScroll':[0,0],
+                  'pos':path(a,round(y*S/1.5,2)),'rot':[0,j*70,0],'spin':sp,'scale':{kk:[round(v*sc*.5,3),round(v*.14,3),round(v*sc*.5,3)] for kk,v in grow(S).items()},'op':OP(.7),'int':1.3,'fade':0})
+    L.append({'id':p+'updraft','t':'emit','at':at,'life':T_ARR,'att':'feet','pos':P,'rate':60,'from':'disc','fr':1.6,'dir':'up','spread':.35,'speed':[6,11],'plife':[.3,.6],'look':'streak','size':[1.4,2.6],'col':'#efffe8','c2':G,'gravity':0,'drag':.5,'curl':False})
+    L.append({'id':p+'dust','t':'emit','at':at,'life':T_ARR,'att':'feet','pos':path(a,.1),'rate':35,'from':'ring','fr':1.6,'dir':'tangent','speed':[4,7],'up':[.2,.8],'plife':[.4,.7],'look':'model','model':'wind_slash','mmat':'solid','msize':[.06,.14],'col':'#8a7560','c2':'#c9b79a','gravity':1,'mspin':500,'bounce':0})
+    L.append({'id':p+'leaves2','t':'emit','at':at,'life':T_ARR,'att':'feet','pos':P,'rate':18,'from':'cone','fr':1.5,'fh':3.5,'dir':'tangent','speed':[4,7],'up':[1,3],'plife':[.6,1],'look':'model','model':'wind_leaf','mmat':'solid','msize':[.1,.18],'col':'#6fae5a','c2':'#3f7a3a','gravity':-.2,'mspin':500,'bounce':0})
+    L.append({'id':p+'glint','t':'emit','at':at,'life':T_ARR,'att':'feet','pos':P,'rate':40,'from':'cone','fr':1.8,'fh':4,'dir':'tangent','speed':[3,6],'up':[.5,2],'plife':[.3,.6],'look':'spark','size':[1,2],'col':'#d2ffb8','c2':G,'gravity':-.2})
 # ท่าร่าย: แสงที่ไม้ตอนชี้ + ตอนพับแขนดึง
 L.append({'id':'cast','t':'flash','at':0,'life':.15,'att':'feet','pos':[0,1.2,.6],'col':LG,'size0':.2,'size':1.2,'k':1})
 L.append({'id':'pull','t':'flash','at':T_PULL,'life':.15,'att':'feet','pos':[0,1.2,.5],'col':G,'size0':.2,'size':1.5,'k':1})

@@ -1,5 +1,6 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
 
+- 2026-10-28 — **Vortex Bind round 6 (user: round 5 ugly, back to the first look + more wind):** generator restored from round 2 (first-version helix look, brighter), toon/brush tornado removed; added orbit streak rings ×4, white wisps ×3, updraft streaks, base dust swirl, leaves, glints per tornado.
 - 2026-10-28 — **Vortex Bind round 5 (user "no ink, solid layered tornado"):** brush/ink strokes removed; each tornado = 18 thick opaque toon-shaded ribbons stacked as a widening funnel (tilted, counter-spinning) + bright white glow core + thin white wisps.
 - 2026-10-28 — **Vortex Bind round 4 (user "too faded, more layers"):** each tornado now uses the approved opaque brush-stroke `tornado()` (green palette) following the pull path; faded white glow helix removed (235 layers).
 - 2026-10-28 — **Vortex Bind round 3 (user):** pull 0.25 s, arrival stun 0.75 s, tornado gets 7 brush-stroke bands + needles + base glow, white glow down / green up.
