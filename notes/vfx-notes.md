@@ -129,3 +129,6 @@ Latest user reference: `storyboard/img/wind_shield_fold_ref.png`. The narrow col
 
 ### Wind Featherwing — approved 2026-10-28
 `wind/featherwing` (generator `tools/wind-featherwing-gen.py`). It uses the approved angular wings, posed by curves, and they grow to 1.6× while flying. Shots: take-off flap with a ground wind ring and up-streaks → mostly gliding, with 2 light flaps and long gaps → charge (wings sweep back and instantly glow neon) → forward flick that sends a wind fan slanted down to the ground (12.5 m) → just fall, with the wings returning to the open pose. No ink.
+
+### Wind ult Eye of Heaven — approved 2026-10-28
+`wind/eye_of_heaven` (generator `tools/wind-ult-gen.py`). Sequence: arm up with the glowing wand, rising aura and heavy spinning wind → wand planted → a zone-wide wave (17.5 m) and everyone floats → the round wall rises → rise and wrap the 1.6× wings, which glow very bright neon → flick open into a moderate, fast 360° wave → wall hits with a 3 s stun → the wall stays 5 s and then dissolves upward. The wall is the real Aegis Gale wall: ring meshes `wind_ringwall_*` carry the `wind/wall` layers. The user wanted it to look like one continuous ring, so the pieces touch with no gaps or bright ends. The user asked to keep the impact from being too big. No ink. 3 fx-check ⚠ remain for the big thin rings, which the zone size needs.
