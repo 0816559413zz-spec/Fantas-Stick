@@ -68,7 +68,7 @@ rc=Image.new('RGBA',(CW,CH),(255,255,255,0));rc.putalpha(cur);rc.save(ROOT/'asse
 save(ROOT/'assets/fx/tex/wind_wall_curtain.tex.json',{'v':1,'desc':'ม่านเส้นลมกำแพง: เส้นตั้งจากพื้น ยอดสูงต่ำ จางหายก่อนขอบบน (เลื่อนแนวนอนได้ ห้ามเลื่อนแนวตั้ง)','gen':'image','seed':13,'px':1024,'cols':1,'rows':1,'kind':'loop','fps':24,'ramp':'white','add':True,'p':{}})
 
 # ---- รูปทรง: ผนังโค้ง (ปลายสองข้างโค้งเข้าหาผู้ร่าย +z) ยอดมนตรงปลาย ----
-R=10.9;AMAX=math.radians(35);HMAX=5.0   # กว้างรวม ~12.5 ม. = 250 หน่วยในเกม
+R=10.9;AMAX=math.radians(35);HMAX=8.0   # กว้างรวม ~12.5 ม. = 250 หน่วยในเกม
 def arc_wall(name,r,a0,a1,hmax,n=240,lift=0,seed=1):
     V=[];F=[];rg=random.Random(seed);jag=[1.0 for _ in range(n+1)]   # ยอดสูงต่ำมาจากภาพม่านแล้ว (ตัดรูปทรง = เห็นรอยตัด)
     for i in range(n+1):
@@ -110,7 +110,7 @@ save(ROOT/'assets/fx/mesh/wind_wall_line.mesh.json',{'v':1,'desc':'เส้น�
   {'id':'thin','k':'ribbon','path':[[round(c,4) for c in p] for p in ground_path(R-.22,.3)],'w':.025,'seg':160}]})
 
 # ---- เอฟเฟกต์ ----
-DUR=12.0   # ผู้ใช้ 2026-10-28: อยู่ 12 วิ (เดิม 6) • สูงกว่าตัวผู้เล่น (HMAX 3.4 → 5.0)
+DUR=12.0   # ผู้ใช้ 2026-10-28: อยู่ 12 วิ (เดิม 6) • สูงกว่าตัวผู้เล่น (HMAX 3.4 → 5.0 → 8.0)
 grow={'0':[1,.02,1],'0.045':[1,1.08,1],'0.07':[1,1,1],'0.93':[1,1,1],'1':[1,.02,1]}
 fade=lambda pk:{'0':0,'0.03':pk,'0.94':pk,'1':0}
 def flick(seed,lo=.45,hi=.92,step=.22):

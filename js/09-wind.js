@@ -120,12 +120,12 @@ function windDmg(t,amt,srcId){if(!(t.wwW>0)||!(t.stun>0)||srcId==null)return;con
   if(w.acc>=W_WL.boom)windWallBoom(w);}
 // กระสุนศัตรูชนกำแพงลม = หายไป + กำแพงเสีย HP (ศัตรูตีพังได้) • กระสุนพวกเดียวกันทะลุ (ผู้ใช้ 2026-10-28)
 function windProjHit(pr){if(!G.wwl)return false;
-  for(const w of G.wwl){if(w.dead||pr.team===w.team||pr.h>7)continue;if(wSeg(w,pr.x,pr.y).d<w.r+pr.r){emit({k:'efx',z:'wnwblk',x:Math.round(pr.x),y:Math.round(pr.y),h:pr.h,n:w.id});windWallHurt(w,pr.dmg||5);return true;}}
+  for(const w of G.wwl){if(w.dead||pr.team===w.team||pr.h>9)continue;if(wSeg(w,pr.x,pr.y).d<w.r+pr.r){emit({k:'efx',z:'wnwblk',x:Math.round(pr.x),y:Math.round(pr.y),h:pr.h,n:w.id});windWallHurt(w,pr.dmg||5);return true;}}
   return false;}
 function windWallHurt(w,n){if(w.dead||w.hp===undefined)return;w.hp-=n;if(w.hp<=0){w.dead=1;emit({k:'efx',z:'wnwboom',x:Math.round(w.x),y:Math.round(w.y),a:Math.round(w.a*100)/100,n:w.id,m:1});}}
 // ศัตรูเดินผ่านกำแพงลมไม่ได้ (พวกเดียวกันผ่านได้) — เรียกจาก collideWorld
 function windCollide(o,r,z){if(!G||!G.wwl||!G.wwl.length||o.team===undefined)return 0;let n=0;
-  for(const w of G.wwl){if(w.dead||w.team===o.team||z>=6)continue;const s=wSeg(w,o.x,o.y),m=w.r+r;if(s.d>=m)continue;
+  for(const w of G.wwl){if(w.dead||w.team===o.team||z>=8.5)continue;const s=wSeg(w,o.x,o.y),m=w.r+r;if(s.d>=m)continue;
     if(s.d>0.001){o.x=s.qx+(o.x-s.qx)/s.d*m;o.y=s.qy+(o.y-s.qy)/s.d*m;}else{const sg=s.s>=0?1:-1;o.x=s.qx+Math.cos(w.a)*m*sg;o.y=s.qy+Math.sin(w.a)*m*sg;}
     n++;}
   return n;}
