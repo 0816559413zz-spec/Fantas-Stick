@@ -3,7 +3,7 @@
 //  เอฟเฟกต์ทั้งหมดมาจาก VFX Studio ที่ผู้ใช้ผ่านแล้ว (assets/fx/wind/*) — ชิ้นที่ใช้ในเกมแยกด้วย tools/wind-ingame-split.py
 //  เรียกจาก: efxFX (js/25, z ขึ้นต้น 'wn') • syncPlayers (js/35 windFX) • render loop (js/37 syncWind)
 // =====================================================================
-const WV={st:new Map(),wl:new Map()};
+const WV={st:new Map(),wl:new Map(),vo:new Map()};
 const wvState=id=>{let s=WV.st.get(id);if(!s){s={};WV.st.set(id,s);}return s;};
 const wvAlive=I=>!!I&&FXR.inst.indexOf(I)>=0;
 // ---------- ทุกเฟรมของผู้เล่นสายลม: ปีกติดหลัง / ปีกห่อตอนยกโล่ / ดูดลมชาร์จเกจ ----------
@@ -12,7 +12,8 @@ function windFX(o,p,pz,now,dt){
   if(!A){const s=WV.st.get(p.id);if(s){for(const k of ['wing','guard'])if(s[k]){fxKill(s[k]);s[k]=null;}}return;}
   const s=wvState(p.id),alive=p.al&&!p.dn,guard=alive&&p.sh,h=o.zs||0;
   // ปีกติดหลังตลอดเวลา (ท่ากางเกือบนิ่ง) — ซ่อนตอนยกโล่ (ปีกห่อแทน)
-  if(alive&&!guard){if(!wvAlive(s.wing))s.wing=fxPlay('wind/wing_idle',{x:p.x,y:p.y,h,follow:p.id,aim:false});}
+  const big=A[5]===1;   // Featherwing บินอยู่: ปีกใหญ่ 1.6 เท่า (ผู้ใช้)
+  if(alive&&!guard){if(!wvAlive(s.wing)||s.wingBig!==big){if(s.wing)fxKill(s.wing);s.wing=fxPlay('wind/wing_idle',{x:p.x,y:p.y,h,s:big?1.6:1,follow:p.id,aim:false});s.wingBig=big;}}
   else if(s.wing){fxStop(s.wing);s.wing=null;}
   if(guard){if(!wvAlive(s.guard))s.guard=fxPlay('wind/shield_guard',{x:p.x,y:p.y,h,follow:p.id,aim:false});}
   else if(s.guard){fxKill(s.guard);s.guard=null;}   // ห่อปีกยาว 9.5 วิ → ตัดทิ้งทันทีตอนลดโล่
@@ -26,6 +27,10 @@ function syncWind(v,dt,now){
   const seen=new Set();
   for(const w of (v.WW||[])){seen.add(w[0]);const o=WV.wl.get(w[0]);if(!o)continue;
     if(o.I){o.I.x=w[1];o.I.y=w[2];}if(o.P){o.P.x=w[1];o.P.y=w[2];if(!w[6]){fxStop(o.P);o.P=null;}}o.x=w[1];o.y=w[2];o.a=w[3];}
+  const sv=new Set();
+  for(const o of (v.WO||[])){sv.add(o[0]);let I=WV.vo.get(o[0]);if(!wvAlive(I)){I=fxPlay('wind/void_orb',{x:o[1],y:o[2],h:Math.max(0,o[3]-1.2),aim:false});if(I)WV.vo.set(o[0],I);}
+    if(I){I.x=o[1];I.y=o[2];I.h=Math.max(0,o[3]-1.2);}}
+  for(const [id,I] of WV.vo)if(!sv.has(id)){fxStop(I);WV.vo.delete(id);}
   for(const [id,o] of WV.wl)if(!seen.has(id)&&(o.age=(o.age||0)+dt)>0.5){if(o.I)fxStop(o.I);if(o.P)fxStop(o.P);WV.wl.delete(id);}
 }
 function wvWall(n){return WV.wl.get(n);}
@@ -50,6 +55,16 @@ function windEfx(ev){
     case 'wnwboom':{const o=wvWall(ev.n);if(o){if(o.I)fxKill(o.I);if(o.P)fxKill(o.P);if(o.U)fxKill(o.U);WV.wl.delete(ev.n);}fxPlay('wind/wall_break',{x,y,h:0,a});if(near){shake(0.35);snd('break',ev);}return true;}
     case 'wnwend':{const o=wvWall(ev.n);if(o){if(o.I)fxStop(o.I);if(o.P)fxStop(o.P);if(o.U)fxStop(o.U);WV.wl.delete(ev.n);}return true;}
     case 'wnwblk':fxPlay('wind/ba_hit',{x,y,h:Math.max(0,H-0.2),a:Math.random()*6.283});return true;
+    case 'wndr':fxPlay('wind/windrift',{x,y,h:H,a});if(near)snd('cast_pull',ev);return true;
+    case 'wndrslow':ring(x,y,'#8dff65',26,0.35,H+0.2);return true;
+    case 'wndrland':case 'wndrwind':return true;   // ลงท่า/ลมตามมา อยู่ในเอฟเฟกต์ windrift แล้ว
+    case 'wnvx':fxPlay('wind/vortex_bind',{x,y,h:H,a});if(near)snd('cast_pull',ev);return true;
+    case 'wnvxcap':case 'wnvohit':fxPlay('wind/ba_hit',{x,y,h:Math.max(0,H-0.2),a:Math.random()*6.283});return true;
+    case 'wnvofire':if(near)snd('cast_pull',ev);return true;
+    case 'wnvoend':burst(x,y,'#8dff65',8,90,0.3,2,{h:H,g:0});return true;
+    case 'wnfw':fxPlay('wind/fw_takeoff',{x,y,h:H,aim:false});return true;
+    case 'wnfwflick':fxPlay('wind/fw_flick',{x,y,h:Math.max(0,H-3.2),a});if(near)shake(0.2);return true;
+    case 'wnfwend':case 'wnfwland':return true;
     case 'wnsoon':if(mine)toast('สกิลนี้ของสายลมยังทำไม่เสร็จ (ขั้นที่ 2-3)');return true;
   }
   return false;

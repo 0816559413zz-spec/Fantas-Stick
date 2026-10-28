@@ -66,3 +66,14 @@ for L in S['layers']:
     a=L.get('at',0);L['life']=round(GL-a,3);guard.append(L)
 save('shield_guard',{'v':1,'desc':'โล่ปีก: ปีกห่อตัวค้างตลอดที่ยกโล่ (เกม) — จาก wind/shield_wing','tags':['wind','shield','ingame'],'pal':'wind','dur':GL,'layers':guard})
 save('shield_burst',{'v':1,'desc':'โล่ปีกระเบิด: ทรงกลมลมแถบสโตรก (เกม) — จาก wind/shield_wing','tags':['wind','shield','ingame'],'pal':'wind','dur':1.3,'layers':burst})
+
+# ---------- Featherwing: ขึ้นบิน / สะบัดปีก (ตำแหน่งในไฟล์ต้นทางอยู่ที่ความสูงสาธิต 3.2 ม. — เกมเล่นที่ h = ตัวเรา − 3.2) ----------
+FW=load('featherwing')
+def part(pre,t0,name,desc):
+    out=[]
+    for L in FW['layers']:
+        if not L['id'].startswith(pre):continue
+        L=copy.deepcopy(L);L['at']=round(max(0,L.get('at',0)-t0),4);out.append(L)
+    save(name,{'v':1,'desc':desc,'tags':['wind','featherwing','ingame'],'pal':'wind','dur':round(max(l['at']+l.get('life',0.5) for l in out),2),'layers':out})
+part('s1_',0.15,'fw_takeoff','Featherwing ขึ้นบิน: วงลมพื้น + เส้นลมพุ่งขึ้น (เกม) — จาก wind/featherwing')
+part('s3_',3.0,'fw_flick','Featherwing สะบัดปีก: ชาร์จเรือง + ลมพัดไปข้างหน้าเอียงลงพื้น 12.5 ม. (เกม, h = ตัวเรา − 3.2) — จาก wind/featherwing')
