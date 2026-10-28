@@ -11,7 +11,7 @@ const W_BA={dmg:5,cd:0.30,gain:12,hold:0.35,chg:8},                       // ใ
   W_SH={mul:100/75,gain:10,chg:0.3,r:200,stun:0.8,push:1500,dmg:20},        // โล่ปีก: รับได้ 75 • ระเบิดปีก ชาร์จ 0.3 วิ ⚠
   W_DS={back:1800,vz:7,push:1500,reach:150,cone:Math.PI/3,wall:20,cd:8},    // Dash ถอยหลังผลัก: ถอย 300 ผลัก 250 ชนกำแพง 20 • ระยะผลักข้างหน้า 150 / มุม 60° ⚠
   W_DR={chg:0.3,dist:200,t:0.15,wait:1.0,w:50,push:2400,dmg:10,slow:0.5,slowT:1.2,cd:14},   // Windrift: ชาร์จ 0.3 พุ่ง 200 ลมตามมา 1 วิ แนวกว้าง 100 กระเด็น 400 10 ดาเมจ • slow ทันที ⚠ 50% 1.2 วิ
-  W_VX={far:300,near:60,arc:Math.PI/8,hold:0.8,pull:0.45,r:60,dmg:20,stun:0.5,cd:10},   // ผู้ใช้ 2026-10-28: ดึงมาถึงตัวแล้วสตัน 0.5 วิ   // Vortex Bind: 3 อันโค้ง 45° (±22.5°) • รัศมีจับ ⚠ 40
+  W_VX={far:300,near:60,arc:Math.PI/8,hold:0.8,pull:0.25,r:60,dmg:20,stun:0.75,cd:10},   // ผู้ใช้ 2026-10-28: ดึงมาถึงตัวแล้วสตัน 0.5 วิ   // Vortex Bind: 3 อันโค้ง 45° (±22.5°) • รัศมีจับ ⚠ 40
   W_VO={n:3,gap:0.18,spd:700,range:400,carry:200,r:22,dmg:10,cd:12},   // Void Spheres: ⚠ ยิงห่างกัน 0.18 วิ เร็ว 700
   W_FW={t:5,hgt:6,vz:3.5,spd:1.3,range:250,cone:Math.PI*0.28,push:1800,dmg:15,glide:2.2,cd:14},   // Featherwing: บิน 5 วิ สูงสุด 6 ม. • สะบัด 250 ผลัก 300 15 ดาเมจ • ร่อนลง ⚠ 2.2 ม./วิ
   W_UL={r:350,slam:1.0,wall:1.15,imp:2.38,end:2.7,float:1.5,fz:2.2,dmg:30,stun:3,wlife:6.25,seg:8},   // Eye of Heaven: เขต/กำแพงวงรัศมี 350 • ลอยค้าง 1.5 วิ • กระแทก 30 ชนกำแพงวง = สตัน 3 วิ • กำแพงอยู่ 5 วิหลังกระแทก • ความสูงที่ลอย ⚠ 2.2 ม. (เวลาตรงกับ wind/eye_of_heaven)
@@ -227,7 +227,7 @@ defSpell(WINDP,{id:'aegisgale',role:'control',n:'Aegis Gale',ic:'🌬️',cd:0.4
   cast(p){if((p.wwc|0)<=0)return false;p.wwc--;const inp=p.inp||{};p.wwAim={t:W_WL.aim,f0:inp.fire,s0:inp.sh};emit({k:'efx',z:'wnwaim',x:p.x,y:p.y,h:p.z,id:p.id});}});
 defSpell(WINDP,{id:'windrift',role:'utility',n:'Windrift',ic:'💨',cd:W_DR.cd,d:'ชาร์จปีก 0.3 วิ (ลอยนิดหน่อย) แล้วพุ่ง 200 แบบ Jett ลงท่าฮีโร่ • ศัตรูในทางพุ่งช้าลงทันที • 1 วิต่อมาลมแรงตามมา ศัตรูในแนวกว้าง 100 กระเด็น 400 ตามทิศที่พุ่ง 10 ดาเมจ • ใช้กลางอากาศได้',
   cast(p){if(p.wdr)return false;p.wdr={ph:'chg',t:W_DR.chg,a:p.ang,x0:p.x,y0:p.y,sl:new Set()};p.vz=Math.max(p.vz||0,2.5);emit({k:'efx',z:'wndr',x:Math.round(p.x),y:Math.round(p.y),h:p.z,a:Math.round(p.ang*100)/100,id:p.id});}});
-defSpell(WINDP,{id:'vortexbind',role:'control',n:'Vortex Bind',ic:'🌀',cd:W_VX.cd,d:'เสกทอร์นาโด 3 อันเรียงโค้ง 45° ข้างหน้าระยะ 300 → 0.8 วิ ดึงกลับมาหยุดห่างเรา 60 ลากศัตรูที่โดนมาด้วย 20 ดาเมจ แล้วสตัน 0.5 วิ • ระหว่างดึงชนกำแพงลม = สตัน • ใช้กลางอากาศไม่ได้',
+defSpell(WINDP,{id:'vortexbind',role:'control',n:'Vortex Bind',ic:'🌀',cd:W_VX.cd,d:'เสกทอร์นาโด 3 อันเรียงโค้ง 45° ข้างหน้าระยะ 300 → 0.8 วิ ดึงกลับมาหยุดห่างเรา 60 ลากศัตรูที่โดนมาด้วย 20 ดาเมจ แล้วสตัน 0.75 วิ • ระหว่างดึงชนกำแพงลม = สตัน • ใช้กลางอากาศไม่ได้',
   cast(p){if(p.z>groundH(p.x,p.y,p.z)+0.4)return false;const a=p.ang;(G.wvx||(G.wvx=[])).push({o:p.id,team:p.team,x:p.x,y:p.y,h:p.z+1,t:0,as:[a-W_VX.arc,a,a+W_VX.arc],c:[],cap:new Map()});
     emit({k:'efx',z:'wnvx',x:Math.round(p.x),y:Math.round(p.y),h:p.z,a:Math.round(a*100)/100,id:p.id});}});
 defSpell(WINDP,{id:'voidspheres',role:'control',n:'Void Spheres',ic:'⚫',cd:W_VO.cd,d:'ยิงลูกหลุมดำลม 3 ลูกติดกัน ลูกละ 10 ดาเมจ ระยะ 400 • โดนแล้วลากศัตรูไปตามทางที่ลูกพุ่ง (ไม่เกิน 200) • ลากไปชนกำแพงลม = สตัน • ใช้กลางอากาศได้',
