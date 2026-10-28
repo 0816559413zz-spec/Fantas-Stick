@@ -43,19 +43,19 @@ save(ROOT/'assets/fx/tex/wind_wall_tips.tex.json',{'v':1,'desc':'ปลายเ
 random.seed(13);CW,CH=1024,512
 cur=Image.new('L',(CW,CH),0);cp=cur.load()
 for _ in range(260):
-    x=random.uniform(0,CW);w=random.uniform(1.0,6.0);top=random.uniform(.12,.8)*CH;b=random.uniform(.3,1)
+    x=random.uniform(0,CW);w=random.uniform(1.0,6.0);top=random.uniform(.0,.3)*CH;b=random.uniform(.45,1)   # ผู้ใช้: ทึบเต็มความสูง (เดิมเส้นเริ่ม 12-80% → ส่วนบนโหรง ดูเตี้ยเท่าตัวผู้เล่น)
     for y in range(int(top),CH):
         t=max(0,(y-top)/(CH-top));env=b*min(1,t*2.6)**1.5
         for dx in range(int(-w*2),int(w*2)+1):
             xx=int(x+dx)%CW;d=abs(dx)/w;a=env*(max(0,1-d)**1.6*.75+math.exp(-(d*2.2)**2)*.6)
             cp[xx,y]=min(255,cp[xx,y]+int(a*175))
 for _ in range(420):   # เส้นบางคม (เส้นผมลม) ให้ดูละเอียด
-    x=random.uniform(0,CW);top=random.uniform(.1,.85)*CH;b=random.uniform(.25,.8);wob=random.uniform(-1.5,1.5)
+    x=random.uniform(0,CW);top=random.uniform(.0,.45)*CH;b=random.uniform(.25,.8);wob=random.uniform(-1.5,1.5)
     for y in range(int(top),CH):
         t=max(0,(y-top)/(CH-top));xx=int(x+wob*t*6)%CW;env=b*min(1,t*3)**1.3
         cp[xx,y]=min(255,cp[xx,y]+int(env*150));cp[(xx+1)%CW,y]=min(255,cp[(xx+1)%CW,y]+int(env*55))
 for _ in range(40):    # แผ่นจางกว้าง ให้ม่านมีเนื้อ
-    x=random.uniform(0,CW);w=random.uniform(14,40);top=random.uniform(.25,.7)*CH;b=random.uniform(.12,.25)
+    x=random.uniform(0,CW);w=random.uniform(14,40);top=random.uniform(.03,.35)*CH;b=random.uniform(.15,.3)
     for y in range(int(top),CH):
         t=max(0,(y-top)/(CH-top));env=b*min(1,t*2)**1.2
         for dx in range(int(-w),int(w)+1):
@@ -68,7 +68,7 @@ rc=Image.new('RGBA',(CW,CH),(255,255,255,0));rc.putalpha(cur);rc.save(ROOT/'asse
 save(ROOT/'assets/fx/tex/wind_wall_curtain.tex.json',{'v':1,'desc':'ม่านเส้นลมกำแพง: เส้นตั้งจากพื้น ยอดสูงต่ำ จางหายก่อนขอบบน (เลื่อนแนวนอนได้ ห้ามเลื่อนแนวตั้ง)','gen':'image','seed':13,'px':1024,'cols':1,'rows':1,'kind':'loop','fps':24,'ramp':'white','add':True,'p':{}})
 
 # ---- รูปทรง: ผนังโค้ง (ปลายสองข้างโค้งเข้าหาผู้ร่าย +z) ยอดมนตรงปลาย ----
-R=10.9;AMAX=math.radians(35);HMAX=4.2   # กว้างรวม ~12.5 ม. = 250 หน่วยในเกม
+R=10.9;AMAX=math.radians(35);HMAX=4.5   # กว้างรวม ~12.5 ม. = 250 หน่วยในเกม
 def arc_wall(name,r,a0,a1,hmax,n=240,lift=0,seed=1):
     V=[];F=[];rg=random.Random(seed);jag=[1.0 for _ in range(n+1)]   # ยอดสูงต่ำมาจากภาพม่านแล้ว (ตัดรูปทรง = เห็นรอยตัด)
     for i in range(n+1):
