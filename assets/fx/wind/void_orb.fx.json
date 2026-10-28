@@ -1,0 +1,234 @@
+{
+ "v": 1,
+ "desc": "Void Spheres: ลูกหลุมดำลม 1 ลูก (วน) — แกนดำ วงแสงขาว จานลมหมุน 3 ชั้นหลายสี ลมถูกดูดเข้า • ให้เกมยึดกับกระสุน",
+ "tags": [
+  "wind",
+  "void",
+  "blackhole",
+  "projectile",
+  "loop"
+ ],
+ "pal": "wind",
+ "dur": 1.0,
+ "seed": 4,
+ "layers": [
+  {
+   "id": "disk0",
+   "t": "mesh",
+   "at": 0,
+   "life": 1.0,
+   "att": "feet",
+   "shape": "plane",
+   "mat": "tex",
+   "tex": "tex/wind_void_disk",
+   "col": "#ffffff",
+   "col2": "#000000",
+   "rim": 0,
+   "uvTile": [
+    1,
+    1
+   ],
+   "uvScroll": [
+    0,
+    0
+   ],
+   "pos": [
+    0,
+    1.2,
+    1.0
+   ],
+   "rot": [
+    90,
+    0,
+    18
+   ],
+   "spin": 520,
+   "int": 0.95,
+   "scale": 4.0,
+   "op": 1,
+   "fade": 0,
+   "loop": true
+  },
+  {
+   "id": "disk1",
+   "t": "mesh",
+   "at": 0,
+   "life": 1.0,
+   "att": "feet",
+   "shape": "plane",
+   "mat": "tex",
+   "tex": "tex/wind_void_disk_b",
+   "col": "#ffffff",
+   "col2": "#000000",
+   "rim": 0,
+   "uvTile": [
+    1,
+    1
+   ],
+   "uvScroll": [
+    0,
+    0
+   ],
+   "pos": [
+    0,
+    1.2,
+    1.0
+   ],
+   "rot": [
+    90,
+    40,
+    24
+   ],
+   "spin": 330,
+   "int": 0.95,
+   "scale": 5.6,
+   "op": 1,
+   "fade": 0,
+   "loop": true
+  },
+  {
+   "id": "disk2",
+   "t": "mesh",
+   "at": 0,
+   "life": 1.0,
+   "att": "feet",
+   "shape": "plane",
+   "mat": "tex",
+   "tex": "tex/wind_void_disk",
+   "col": "#ffffff",
+   "col2": "#000000",
+   "rim": 0,
+   "uvTile": [
+    1,
+    1
+   ],
+   "uvScroll": [
+    0,
+    0
+   ],
+   "pos": [
+    0,
+    1.2,
+    1.0
+   ],
+   "rot": [
+    90,
+    80,
+    -30
+   ],
+   "spin": -700,
+   "int": 0.95,
+   "scale": 3.6,
+   "op": 1,
+   "fade": 0,
+   "loop": true
+  },
+  {
+   "id": "core",
+   "t": "mesh",
+   "at": 0,
+   "life": 1.0,
+   "att": "feet",
+   "shape": "sphere",
+   "mat": "toon",
+   "col": "#000000",
+   "col2": "#000000",
+   "rim": 1.0,
+   "pos": [
+    0,
+    1.2,
+    1.0
+   ],
+   "scale": 0.42,
+   "op": 1,
+   "fade": 0,
+   "loop": true
+  },
+  {
+   "id": "suck",
+   "t": "emit",
+   "at": 0,
+   "life": 1.0,
+   "att": "feet",
+   "pos": [
+    0,
+    1.2,
+    1.0
+   ],
+   "rate": 120,
+   "from": "sphere",
+   "fr": 1.8,
+   "dir": "in",
+   "speed": [
+    5,
+    8
+   ],
+   "plife": [
+    0.14,
+    0.24
+   ],
+   "look": "streak",
+   "size": [
+    1,
+    1.8
+   ],
+   "col": "#c6ff5a",
+   "c2": "#5cf0c8",
+   "gravity": 0,
+   "drag": 0,
+   "curl": false,
+   "loop": true
+  },
+  {
+   "id": "spark",
+   "t": "emit",
+   "at": 0,
+   "life": 1.0,
+   "att": "feet",
+   "pos": [
+    0,
+    1.2,
+    1.0
+   ],
+   "rate": 50,
+   "from": "ring",
+   "fr": 1.6,
+   "dir": "tangent",
+   "speed": [
+    3,
+    5
+   ],
+   "plife": [
+    0.2,
+    0.35
+   ],
+   "look": "glow",
+   "size": [
+    0.6,
+    1.1
+   ],
+   "col": "#b8ffe0",
+   "c2": "#21b89a",
+   "gravity": 0,
+   "drag": 1,
+   "x": true,
+   "loop": true
+  },
+  {
+   "id": "light",
+   "t": "light",
+   "at": 0,
+   "life": 1.0,
+   "att": "feet",
+   "pos": [
+    0,
+    1.2,
+    1.0
+   ],
+   "col": "#8dff65",
+   "int": 2,
+   "dist": 6,
+   "loop": true
+  }
+ ]
+}
