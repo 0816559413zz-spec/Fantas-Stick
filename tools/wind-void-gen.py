@@ -30,7 +30,7 @@ def orb(L,pre,at,life,zend,end_pop=True,lit=True):
             'scale':{'0':.2,'0.1':sc,'0.88':sc,'1':.15},'op':{k:v*o for k,v in op.items()},'fade':0})
     # black core, drawn after the disks so it stays black; toon rim = thin white-hot photon ring on its edge
     L.append({'id':pre+'core','t':'mesh','at':at,'life':life,'att':'feet','shape':'sphere','mat':'toon','col':'#000000','col2':'#000000','rim':1.0,
-        'pos':P(),'scale':{'0':.05,'0.08':.27,'0.9':.27,'1':.05},'op':op,'fade':0})
+        'pos':P(),'scale':{'0':.04,'0.08':.18,'0.9':.18,'1':.04},'op':op,'fade':0})
     # wind bands orbiting the orb on crossed tilts (gyroscope look), 3 colours
     for j,(tex,col,sc,rx,rz,sp) in enumerate([('wind_swoosh_a_hi',G['mint'],.75,60,0,700),('wind_swoosh_b',G['aqua'],.85,-55,40,-620),('wind_swoosh_a_hi',G['lime'],.95,15,-70,540)]):
         L.append({'id':f'{pre}band{j}','t':'mesh','at':at,'life':life,'att':'feet','shape':'model','model':f'wind_pieces{j}','mat':'tex','tex':T(tex),'col':col,'col2':'#000000','rim':0,
@@ -39,16 +39,16 @@ def orb(L,pre,at,life,zend,end_pop=True,lit=True):
     # helix trails: two wind ribbons corkscrewing behind the orb (two colours)
     for h,(c,c2,ph) in enumerate([(G['mint'],G['outer'],0),(G['aqua'],G['teal'],math.pi)]):
         L.append({'id':f'{pre}helix{h}','t':'trail','at':at,'life':life,'att':'feet','col':c,'col2':c2,'w':.07,'tlife':.22,'k':1.0,
-            'pos':{str(round(u,2)):[round(.4*math.cos(u*16+ph),3),round(Y+.4*math.sin(u*16+ph),3),round(1.0+(zend-1.0)*u,3)] for u in K}})
+            'pos':{str(round(u,2)):[round(.32*math.cos(u*16+ph),3),round(Y+.32*math.sin(u*16+ph),3),round(1.0+(zend-1.0)*u,3)] for u in K}})
     L.append({'id':pre+'tail','t':'trail','at':at,'life':life,'att':'feet','pos':P(),'col':G['lime'],'col2':G['deep'],'w':.12,'tlife':.16,'k':1.0})
     # wind pulled into the hole (two colours), chips spiralling in, motes orbiting
-    for j,(c,c2,fr) in enumerate([(G['lime'],G['aqua'],1.3),(G['inner'],G['mid'],.9)]):
+    for j,(c,c2,fr) in enumerate([(G['lime'],G['aqua'],1.0),(G['inner'],G['mid'],.7)]):
         L.append({'id':f'{pre}suck{j}','t':'emit','at':at,'life':life,'att':'feet','pos':P(),'rate':90,'from':'sphere','fr':fr,'dir':'in','speed':[3.5,6],'plife':[.12,.22],
             'look':'streak','size':[.7,1.3],'col':c,'c2':c2,'gravity':0,'drag':0,'curl':False})
-    L.append({'id':pre+'chips','t':'emit','at':at,'life':life,'att':'feet','pos':P(),'rate':30,'from':'ring','fr':1.1,'dir':'tangent','speed':[3,5],'plife':[.25,.4],
+    L.append({'id':pre+'chips','t':'emit','at':at,'life':life,'att':'feet','pos':P(),'rate':30,'from':'ring','fr':.8,'dir':'tangent','speed':[3,5],'plife':[.25,.4],
         'look':'model','model':'wind_wing_airchip','mmat':'glow','msize':[.05,.11],'col':G['mint'],'c2':G['teal'],'mspin':600,'gravity':0,'drag':3,'bounce':0,'x':True})
     for j,(c,c2) in enumerate([(G['mint'],G['teal']),(G['lime'],G['outer'])]):
-        L.append({'id':f'{pre}spark{j}','t':'emit','at':at,'life':life,'att':'feet','pos':P(),'rate':45,'from':'ring','fr':1.0+.3*j,'dir':'tangent','speed':[2.5,4.5],'plife':[.2,.35],
+        L.append({'id':f'{pre}spark{j}','t':'emit','at':at,'life':life,'att':'feet','pos':P(),'rate':45,'from':'ring','fr':.75+.2*j,'dir':'tangent','speed':[2.5,4.5],'plife':[.2,.35],
             'look':'glow','size':[.4,.8],'col':c,'c2':c2,'gravity':0,'drag':1,'x':True})
     # no bulge warp: it redraws the scene over the black core
     #L.append({'id':pre+'warp','t':'warp','at':at,'life':life,'att':'feet','pos':P(),'kind':'bulge','size':1.6,'str':.6,'op':op,'col':G['inner'],'glow':0,'x':True})
