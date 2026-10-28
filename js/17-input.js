@@ -8,14 +8,16 @@ const SET=Object.assign({},SET_DEF,(()=>{try{return JSON.parse(store('wd_set')||
 // ปุ่มกดตั้งเองได้ (หน้าตั้งค่า > ปุ่มกด) — KMAP = ปุ่มค้าง / PMAP = ปุ่มกดทีละครั้ง
 const KEYACT=[['up','เดินหน้า','KeyW'],['down','ถอยหลัง','KeyS'],['left','ไปซ้าย','KeyA'],['right','ไปขวา','KeyD'],['dash','พุ่ง/หลบ','ShiftLeft'],['jump','กระโดด / บินขึ้น','Space'],['q','คาถา 1','KeyQ'],['e','คาถา 2','KeyE'],['r','คาถา 3','KeyR'],['f','คาถา 4','KeyF'],['ult','เวทโบราณ','KeyX'],['mode','สลับโหมด (สายน้ำแข็ง)','KeyV'],['broom','ไม้กวาด','KeyB'],['use','ใช้ของ / โต้ตอบ','KeyG'],['down2','บินลง','KeyC'],['talk','พูดไมค์','KeyT'],['emote','อีโมต (กดค้าง แล้วลากเมาส์)','KeyZ'],['score','ตารางคะแนน','Tab'],['music','เปิด/ปิดเพลง','KeyM'],['test','เมนูทดลอง (ห้องฝึก)','KeyP']];
 const KMAP={},PMAP={};let KEYS={};
+let SKORD=[1,2,3,4];   // ลำดับไพ่สกิล: ตำแหน่ง Q/E/R/F → ช่องคาถา 1–4 (สลับระหว่างเกม js/66 h4Swap, จำต่อชุดสกิลใน localStorage wd_skord)
 function rebuildKeys(){
   KEYS={};for(const [a,,d] of KEYACT)KEYS[a]=(SET.keys&&SET.keys[a])||d;
   for(const o of [KMAP,PMAP])for(const k in o)delete o[k];
   const K=(code,v)=>{KMAP[code]=v;},Pp=(code,v)=>{PMAP[code]=v;};
   K(KEYS.up,'u');K(KEYS.down,'d');K(KEYS.left,'l');K(KEYS.right,'r');K('ArrowUp','u');K('ArrowDown','d');K('ArrowLeft','l');K('ArrowRight','r');
   K(KEYS.jump,'jh');K(KEYS.down2,'ch');K('ControlLeft','ch');K(KEYS.dash,'dh');if(KEYS.dash==='ShiftLeft')K('ShiftRight','dh');
-  K(KEYS.q,'hq');K(KEYS.e,'he');K(KEYS.r,'hr');K(KEYS.f,'hf');   // ปุ่มสกิลกดค้าง (Terra Auger ชาร์จ)
-  Pp(KEYS.q,'q');Pp(KEYS.e,'e');Pp(KEYS.r,'r');Pp(KEYS.f,'f');Pp(KEYS.dash,'sp');if(KEYS.dash==='ShiftLeft')Pp('ShiftRight','sp');Pp(KEYS.jump,'jp');Pp(KEYS.ult,'x');Pp(KEYS.broom,'b');Pp(KEYS.use,'g');Pp(KEYS.mode,'v');
+  // ปุ่มตำแหน่งไพ่ที่ j (Q/E/R/F) → คาถาช่อง SKORD[j] (ผู้เล่นสลับไพ่ได้, js/66) • h* = กดค้าง (Terra Auger ชาร์จ)
+  [KEYS.q,KEYS.e,KEYS.r,KEYS.f].forEach((c,j)=>{const s='qerf'[SKORD[j]-1];K(c,'h'+s);Pp(c,s);});
+  Pp(KEYS.dash,'sp');if(KEYS.dash==='ShiftLeft')Pp('ShiftRight','sp');Pp(KEYS.jump,'jp');Pp(KEYS.ult,'x');Pp(KEYS.broom,'b');Pp(KEYS.use,'g');Pp(KEYS.mode,'v');
 }
 function keyName(c){return ({Space:'Space',ShiftLeft:'Shift',ShiftRight:'Shift R',ControlLeft:'Ctrl',Tab:'Tab',Escape:'Esc'})[c]||c.replace(/^Key|^Digit/,'');}
 rebuildKeys();
@@ -27,7 +29,9 @@ addEventListener('keydown',e=>{
   if(e.code==='Space'||e.code==='Tab')e.preventDefault();
   if(screen==='game'&&crOpen)return;   // หน้าเลือกคาถาเปิดอยู่กลางเกม (ห้องฝึก) → ไม่ส่งปุ่มเข้าเกม
   if(e.code===KEYS.talk)VOICE.talking=true;
+  if(e.code==='AltLeft'||e.code==='AltRight'){if(screen==='game')e.preventDefault();return;}   // Alt = โหมดสลับไพ่ (ไม่ให้เบราว์เซอร์โฟกัสเมนู)
   if(e.repeat)return;
+  if(e.altKey&&screen==='game'&&h4AltKey(e))return;   // Alt + ปุ่มสกิล 2 ปุ่ม = สลับไพ่ (js/66)
   if(e.code===KEYS.test&&screen==='game'&&VIEW.cur&&VIEW.cur.mode==='train'){trToggle();return;}
   if(KMAP[e.code])INPUT[KMAP[e.code]]=1;
   if(PMAP[e.code]&&screen==='game'){const a=PMAP[e.code];if(placeKey(a))return;INPUT.c[a]++;}
@@ -39,6 +43,7 @@ addEventListener('keyup',e=>{
   if(e.code===KEYS.score)showBoard=false;
   if(e.code===KEYS.talk)VOICE.talking=false;
   if(KMAP[e.code])INPUT[KMAP[e.code]]=0;
+  if(e.code==='AltLeft'||e.code==='AltRight')h4AltKey(null);
 });
 addEventListener('blur',()=>{INPUT.hq=INPUT.he=INPUT.hr=INPUT.hf=0;INPUT.u=INPUT.d=INPUT.l=INPUT.r=INPUT.fire=INPUT.sh=INPUT.jh=INPUT.ch=INPUT.dh=0;VOICE.talking=false;showBoard=false;});
 // Chrome บน Windows บางทีส่งค่าเมาส์กระโดดก้อนใหญ่ตอนล็อกเมาส์ (บั๊กเบราว์เซอร์) → กล้องสะบัดหันเอง: ทิ้งค่าที่ใหญ่ผิดปกติเทียบกับที่ขยับอยู่

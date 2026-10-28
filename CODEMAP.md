@@ -168,8 +168,8 @@ r1:356 DEFP:358 packP:359 unpackP:360 makeSnap:361 PROF:379 pf:380 hostLoop:381 
 ## js/16-voice.js (89) — 
 VOICE:4 rosterIds:5 toggleMic:6 voiceSync:20 teamOn:37 teamOf:38 applyVoiceGates:39 VAC:49 onIncomingCall:50 voiceLevels:62 speakingIds:70 updateVoiceUI:76
 
-## js/17-input.js (61) — 
-INPUT:4 mouseX:5 mouseY:5 showBoard:5 SET_DEF:6 SET:7 KEYACT:9 KMAP:10 PMAP:10 rebuildKeys:11 keyName:20 _rebind:22 MSANE:45 mouseSane:46 cvEl:61
+## js/17-input.js (66) — 
+INPUT:4 mouseX:5 mouseY:5 showBoard:5 SET_DEF:6 SET:7 KEYACT:9 KMAP:10 PMAP:10 SKORD:11 rebuildKeys:12 keyName:22 _rebind:24 MSANE:50 mouseSane:51 cvEl:66
 
 ## js/18-audio.js (300) — 
 AC:4 MASTER:4 SFXBUS:4 REVERB:4 NB:4 WIND:4 sfxLast:5 ac:6 outNode:27 tone:42 noiz:48 snd:55 sfx:118
@@ -603,8 +603,10 @@ BKICO:377 buffShow:381
 §400 จอมืดตอนเริ่มแมตช์ (ผู้ใช้ 2026-10-23: กระตุกตอนเริ่มแมตช์แรก)
 gameCover:403
 
-## js/66-hud4.js (134) — HUD รอบ 4 (ผู้ใช้ 2026-10-23, designs/hud-full-mock.html)
-H4E:5 H4:11 H4C:12 H4RC:12 h4Pal:13 hud4Col:15 h4Runes:16 h4RingSVG:17 h4Parts:26 h4AuBits:31 h4Key:46 h4Ico:47 h4Build:48 h4Set:78 hud4Draw:79 hud4Frame:117 hud4Hide:118 _h4RT:120 _h4Cam:120 h4FaceShot:121 h4FaceSet:134
+## js/66-hud4.js (172) — HUD รอบ 4 (ผู้ใช้ 2026-10-23, designs/hud-full-mock.html)
+H4E:5 H4:11 h4Pal:12 hud4Col:14 h4Parts:16 h4AuBits:21 h4Key:36 h4Ico:37 h4Build:38 h4Set:65 hud4Draw:66
+§107 ไพ่สกิล: นาฬิกาทราย / ท่าใช้ / สลับตำแหน่ง
+h4Glass:109 h4Bits:115 h4Fx:117 h4CardUse:119 h4GlassOut:123 h4Place:127 h4OrdKey:130 h4OrdLoad:131 h4Swap:134 h4Pick:137 h4AltKey:139 h4CardWire:143 hud4Frame:155 hud4Hide:156 _h4RT:158 _h4Cam:158 h4FaceShot:159 h4FaceSet:172
 
 ## js/67-backdrop.js (139) — 
 BACKDROP:8
@@ -622,4 +624,4 @@ windEfx:38
 §75 HUD รอบเป้าเล็ง: เกจ GaleBurst (โค้งซ้าย) + ชาร์จกำแพงลม (จุด 3 จุดใต…
 drawWindHud:76
 
-(76 files, 18149 lines)
+(76 files, 18192 lines)

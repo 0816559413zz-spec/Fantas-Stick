@@ -1,5 +1,5 @@
 // ---------- HUD รอบ 4 (ผู้ใช้ 2026-10-23, designs/hud-full-mock.html) ----------
-// DOM ทับ #cv: ซ้ายล่าง = รูปตัวละคร + เลือดช่องเฉียง • ขวาล่าง = แบบ L2 (ไพ่สกิลโค้งบนวงประตูมิติ + อัญมณีปุ่มเล็ก + ลูกแก้วอัลติ) • สีตามธาตุ
+// DOM ทับ #cv: ซ้ายล่าง = รูปตัวละคร + เลือดช่องเฉียง • ขวาล่าง = ไพ่สกิลหลัก 4 ใบเรียงแถว + ไอคอนเล็ก (ตีปกติ/โล่/พุ่ง/ไม้กวาด) ขวาสุด (ผู้ใช้ 2026-10-28) • อัลติกลางล่าง • สีตามธาตุ
 // สร้างโครงครั้งเดียวต่อธาตุ แล้วอัปเดตเฉพาะค่าที่เปลี่ยน (js/38 drawBottom → hud4Draw) • ไม่ถูกวาดในเฟรมไหน = ซ่อน (hud4Frame จาก render loop)
 // สีของ HUD canvas เดิม (แผ่นป้าย/kill feed/แผนที่ย่อ = HG/HG2 ใน js/38) ก็เปลี่ยนตามธาตุด้วย hud4Col
 const H4E={
@@ -8,20 +8,10 @@ const H4E={
   storm:{c0:'#4a3a06',c1:'#ffe27a',c2:'#fff6c8',cb:'#3a3010',pt:'spark',n:'STORM'},
   earth:{c0:'#3a2410',c1:'#c9a36a',c2:'#f0dcb4',cb:'#3a2a18',pt:'rock',n:'EARTH'},
   wind:{c0:'#0f3a22',c1:'#8dff65',c2:'#efffe8',cb:'#123a26',pt:'snow',n:'WIND'}};
-const H4={el:null,on:false,drawn:false,pid:'',lay:'',cache:{},rdy:{},seg:[],segN:0,trail:1,hold:0,uFull:false,face:null,faceFor:'',faceTry:0};
-const H4C=440,H4RC=330;   // มุมวง (พิกัดในกล่อง 480×480 ขวาล่าง) + รัศมีวงที่ไพ่วางอยู่
+const H4={pick:null,ordFor:'',el:null,on:false,drawn:false,pid:'',lay:'',cache:{},rdy:{},seg:[],segN:0,trail:1,hold:0,uFull:false,face:null,faceFor:'',faceTry:0};
 function h4Pal(me){const k=getKit(me.id),P=PATHS[k.path]||PATHS[0];return [P,H4E[P.id]||H4E.frost];}
 // สีของ HUD canvas (js/38) ตามธาตุของเรา — เรียกทุกเฟรมจาก drawHUD
 function hud4Col(me){if(!me)return;const E=h4Pal(me)[1];HG=E.c1;HG2=E.c2;}
-const h4Runes=(R,n,col)=>Array.from({length:n},(_,i)=>`<text x="0" y="${-R+9}" fill="${col}" opacity=".7" font-size="9" text-anchor="middle" transform="rotate(${(i*360/n).toFixed(1)})">${'ᚠᚢᚦᚨᚱᚲᚷᚹᚺᚾᛁᛃᛇᛈᛉ'[i%15]}</text>`).join('');
-function h4RingSVG(E){const C=H4C,RC=H4RC,id='h4g'+E.n;
-  return `<svg class="h4Ring" viewBox="0 0 480 480"><defs><radialGradient id="${id}" cx="${C}" cy="${C}" r="${RC+90}" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#fff"/><stop offset=".18" stop-color="${E.c1}"/><stop offset=".55" stop-color="${E.c0}" stop-opacity=".85"/><stop offset="1" stop-color="#0a0c18" stop-opacity="0"/></radialGradient></defs>
-  <circle cx="${C}" cy="${C}" r="${RC+90}" fill="url(#${id})" opacity=".8"/>
-  <g class="spin2">${Array.from({length:12},(_,i)=>{const a=i*0.52;return `<path d="M${C} ${C} q ${(150*Math.cos(a)).toFixed(0)} ${(150*Math.sin(a)).toFixed(0)} ${(280*Math.cos(a+1.1)).toFixed(0)} ${(280*Math.sin(a+1.1)).toFixed(0)}" fill="none" stroke="${E.c2}" stroke-opacity="${(0.12+0.05*(i%3)).toFixed(2)}" stroke-width="${1+i%2}"/>`;}).join('')}</g>
-  <g transform="translate(${C} ${C})"><circle r="${RC+30}" fill="rgba(9,12,30,.35)"/><circle r="${RC}" fill="rgba(9,12,30,.3)" stroke="${E.c1}" stroke-width="3"/><circle r="${RC-12}" fill="none" stroke="${E.c2}" stroke-opacity=".3"/><circle r="${RC*0.6}" fill="none" stroke="${E.c1}" stroke-opacity=".45"/></g>
-  <g class="spin"><g transform="translate(${C} ${C})"><circle r="${RC+12}" fill="none" stroke="${E.c2}" stroke-opacity=".45" stroke-dasharray="2 6"/>
-  ${Array.from({length:120},(_,i)=>`<line x1="0" y1="${-RC-12}" x2="0" y2="${i%5?-RC-17:-RC-24}" stroke="${E.c1}" stroke-opacity=".7" transform="rotate(${i*3})"/>`).join('')}${h4Runes(RC-14,70,E.c2)}</g></g>
-  <g class="spin2"><g transform="translate(${C} ${C})">${h4Runes(RC*0.6-2,40,E.c2)}</g></g></svg>`;}
 // อนุภาคธาตุ: จุดเกิดสุ่มในวง (ซ้ายล่าง: รอบรูป) • การเคลื่อนเป็น CSS animation ล้วน
 function h4Parts(E,n,box){const an={ember:'h4Rise',snow:'h4Fall',spark:'h4Flick',rock:'h4Fall'}[E.pt];let o='';
   for(let i=0;i<n;i++){const [x,y]=box(Math.random(),Math.random());
@@ -51,14 +41,10 @@ function h4Build(me,v){
   if(!root){root=document.createElement('div');root.id='h4';root.hidden=true;const cvEl=document.getElementById('cv');cvEl.parentNode.insertBefore(root,cvEl.nextSibling);}
   root.style.cssText=`--c0:${E.c0};--c1:${E.c1};--c2:${E.c2};--cb:${E.cb}`;
   const cards=MYS.filter(s=>s[3]>=1&&s[3]<=4),gems=MYS.filter(s=>(s[3]<=0&&s[3]!==-2)||s[3]===5);
-  let R=`<div class="h4Sh"></div>${h4RingSVG(E)}`;
-  R+=h4Parts(E,22,(a,b)=>{const t=(180+a*90)*Math.PI/180,r=40+b*(H4RC+30);return [H4C+Math.cos(t)*r,H4C+Math.sin(t)*r];});
-  cards.forEach((s,i)=>{const d=196+i*20,a=d*Math.PI/180,x=H4C+Math.cos(a)*H4RC,y=H4C+Math.sin(a)*H4RC;
-    R+=`<div class="h4Cd" data-ci="${s[3]}" style="left:${(x-39).toFixed(1)}px;top:${(y-55).toFixed(1)}px;transform:rotate(${(((d+90)-360)*0.55).toFixed(1)}deg)"><i class="gem"></i>${h4Ico(s[1],46)}<i class="sh"></i><b class="n"></b><span class="k">${esc(h4Key(s[0]))}</span></div>`;});
-  const gs=gems.length>4?21:27,g0=226-(gems.length-1)*gs/2;   // อัญมณีเรียงกึ่งกลางใต้ไพ่ (ไพ่ 196–256°) — จำนวนเปลี่ยนได้ (ไม่มีไม้กวาด = 3)
-  gems.forEach((s,i)=>{const a=(g0+i*gs)*Math.PI/180,x=H4C+Math.cos(a)*H4RC*0.6,y=H4C+Math.sin(a)*H4RC*0.6;
-    R+=`<div class="h4Gm" data-ci="${s[3]}" style="left:${x.toFixed(1)}px;top:${y.toFixed(1)}px">${h4Ico(s[1],32)}<i class="sh"></i><b class="n"></b><span class="k">${esc(h4Key(s[0]))}</span></div>`;});
-  R+=`<div class="h4X"><i class="rg"></i><i class="rg2"></i><i class="ic">${icoHTML('p_'+P.id,E.c2,64)}</i></div>`;   // ตราธาตุกลางวง (ที่เดิมของอัลติ) — ใช้สกิล = กะพริบ
+  // ไพ่ 4 ใบ: ตำแหน่ง = SKORD (สลับได้) • .fc = หน้าไพ่ (เล่นท่าดึงขึ้น/สลาย/ไพ่ใหม่แทรก) • .hg = นาฬิกาทรายตอนคูลดาวน์
+  let R=`<div class="h4Sh"></div>`+h4Parts(E,16,(a,b)=>[20+a*480,40+b*200]);
+  cards.forEach(s=>{R+=`<div class="h4Cd" data-ci="${s[3]}"><div class="fc"><i class="art"></i>${h4Ico(s[1],62)}<b class="nm">${esc(s[2]||'')}</b><span class="k"></span>${h4Glass(s[3])}</div></div>`;});
+  R+=`<div class="h4Ic">`+gems.map(s=>`<div class="h4Gm" data-ci="${s[3]}">${h4Ico(s[1],26)}<i class="sh"></i><b class="n"></b><span class="k">${esc(h4Key(s[0]))}</span></div>`).join('')+`</div><div class="h4Tip">ลากไพ่เพื่อสลับตำแหน่ง • ระหว่างเล่น: กด Alt ค้าง + ปุ่มสกิล 2 ปุ่ม</div>`;
   // ออร่าธาตุรอบอัลติ (โชว์เฉพาะตอนเต็ม: .h4M.full) — วงแสงหมุน 2 ชั้น + อนุภาคธาตุรอบลูกแก้ว
   const au=`<div class="h4Au ${E.pt}"><i class="fl"></i><i class="fl b"></i>${h4AuBits(E.pt)}${h4Parts(E,18,(a,b)=>{const t=a*Math.PI*2,r=50+b*16;return [58+Math.cos(t)*r,58+Math.sin(t)*r];})}</div>`;
   const M=au+`<div class="h4U"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="48" fill="none" stroke="rgba(255,255,255,.15)" stroke-width="3"/><circle class="ua" cx="50" cy="50" r="48" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-dasharray="301.6" stroke-dashoffset="301.6" transform="rotate(-90 50 50)"/></svg>
@@ -70,14 +56,16 @@ function h4Build(me,v){
   root.innerHTML=`<div class="h4L">${L}</div><div class="h4R">${R}</div><div class="h4M">${M}</div>`;   // h4M = อัลติกลางล่าง (ผู้ใช้ 2026-10-27)
   H4.el=root;H4.cache={};H4.rdy={};H4.segN=0;H4.uFull=false;
   H4.q={hp:root.querySelector('.hp'),mh:root.querySelector('.mh'),xh:root.querySelector('.xh'),seg:root.querySelector('.h4Seg'),sub:root.querySelector('.h4Sub'),subB:root.querySelector('.h4Sub b'),subT:root.querySelector('.h4Sub small'),
-    chips:root.querySelector('.h4Chips'),m:root.querySelector('.h4M'),x:root.querySelector('.h4X'),u:root.querySelector('.h4U'),ua:root.querySelector('.ua'),up:root.querySelector('.up'),fc:root.querySelector('.fc'),
-    slots:[...root.querySelectorAll('.h4Cd,.h4Gm')].map(el=>({el,ci:+el.dataset.ci,sh:el.querySelector('.sh'),n:el.querySelector('.n'),gem:el.classList.contains('h4Gm')}))};
+    chips:root.querySelector('.h4Chips'),m:root.querySelector('.h4M'),u:root.querySelector('.h4U'),ua:root.querySelector('.ua'),up:root.querySelector('.up'),fc:root.querySelector('.fc'),
+    slots:[...root.querySelectorAll('.h4Cd,.h4Gm')].map(el=>({el,ci:+el.dataset.ci,sh:el.querySelector('.sh'),n:el.querySelector('.n'),fc:el.querySelector('.fc'),k:el.querySelector('.k'),gem:el.classList.contains('h4Gm')}))};
+  h4CardWire(root);h4Place();
   if(H4.face&&H4.faceFor===me.id+'|'+k.path)h4FaceSet();
 }
 // ค่าเปลี่ยนเท่านั้นถึงเขียน DOM
 function h4Set(key,v,fn){if(H4.cache[key]===v)return;H4.cache[key]=v;fn(v);}
 function hud4Draw(me,v){
   const k=getKit(me.id),lay=me.id+'|'+k.path+'|'+k.ids.join(',')+'|'+k.ult+'|'+(me.ea?1:0)+'|'+(me.fr?me.fr[0]:'')+'|'+(me.ea&&me.ea[0]>0?1:0)+'|'+(me.ea&&me.ea[8]?1:0)+'|'+(NOBROOM.has(v&&v.mode)?1:0);
+  h4OrdLoad(k);
   if(!H4.el||H4.lay!==lay){H4.lay=lay;h4Build(me,v);}
   H4.drawn=true;if(H4.el.hidden)H4.el.hidden=false;
   const Q=H4.q,t=performance.now();
@@ -97,15 +85,18 @@ function hud4Draw(me,v){
     h4Set('sb',val.toFixed(3),x=>Q.subB.style.width=x*100+'%');h4Set('st',brk?'Stand แตก':(A[7]|0)+' / 300',x=>Q.subT.textContent=x);h4Set('sk',brk,x=>Q.sub.classList.toggle('brk',x));}
   else{h4Set('sb',clamp(me.se/100,0,1).toFixed(3),x=>Q.subB.style.width=x*100+'%');h4Set('st','โล่',x=>Q.subT.textContent=x);}
   {let s='';for(const [bit,ic] of STATUS_ICO)if((me.fm|0)&bit)s+=`<span>${ic}</span>`;h4Set('ch',s,x=>Q.chips.innerHTML=x);}
-  // ช่องสกิล (ไพ่ + อัญมณี)
+  h4Set('ed',!locked&&screen==='game',x=>{H4.el.classList.toggle('edit',x);if(!x)h4Pick(null);});   // เมาส์ว่าง (Esc/เมนู) = ลากสลับไพ่ได้
+  // ช่องสกิล (ไพ่ + ไอคอนเล็ก)
   for(const S of Q.slots){const st=slotState(me,v,S.ci),ok=st.ready&&!st.dim,key='c'+S.ci;
     const cls=(st.ready?'':' cd')+(st.hl?' on':'')+(st.dim?' dim':'')+(st.bar>0?' win':'');
     h4Set(key+'c',cls,x=>{S.el.classList.toggle('cd',!st.ready);S.el.classList.toggle('on',!!st.hl);S.el.classList.toggle('dim',!!st.dim);S.el.classList.toggle('win',st.bar>0);});
     const r=st.bar>0?st.bar:clamp(st.ratio||0,0,1);
-    if(S.gem)h4Set(key+'r',r.toFixed(3),x=>S.sh.style.setProperty('--r',x));else h4Set(key+'r',r.toFixed(3),x=>S.sh.style.height=x*100+'%');
+    h4Set(key+'r',r.toFixed(3),x=>S.el.style.setProperty('--r',x));
     h4Set(key+'t',st.txt||'',x=>S.n.textContent=x);
-    if(ok&&H4.rdy[S.ci]===false&&(S.ci>=1||S.ci===-4)){S.el.classList.remove('pop');void S.el.offsetWidth;S.el.classList.add('pop');}
-    if(!ok&&H4.rdy[S.ci]===true&&S.ci>=1&&S.ci<=4&&Q.x){Q.x.classList.remove('cast');void Q.x.offsetWidth;Q.x.classList.add('cast');}
+    if(!S.gem){   // ไพ่: ใช้แล้ว = ดึงขึ้น + สลาย + ไพ่ใหม่แทรกขึ้นมา • คูลดาวน์จบ = นาฬิกาทรายสลาย
+      if(!ok&&H4.rdy[S.ci]===true&&!st.dim&&me.cd[S.ci]>0)h4CardUse(S);
+      if(ok&&H4.rdy[S.ci]===false)h4GlassOut(S);}
+    else if(ok&&H4.rdy[S.ci]===false&&(S.ci>=1||S.ci===-4)){S.el.classList.remove('pop');void S.el.offsetWidth;S.el.classList.add('pop');}
     H4.rdy[S.ci]=ok;}
   // อัลติ
   const u=Math.min(100,me.u|0),full=u>=100;
@@ -113,6 +104,53 @@ function hud4Draw(me,v){
   if(full!==H4.uFull){H4.uFull=full;Q.u.classList.toggle('full',full);Q.m.classList.toggle('full',full);if(full){Q.u.classList.remove('burst');void Q.u.offsetWidth;Q.u.classList.add('burst');}}
   if(!H4.face||H4.faceFor!==me.id+'|'+k.path)h4FaceShot(me,k);
 }
+// ---------- ไพ่สกิล: นาฬิกาทราย / ท่าใช้ / สลับตำแหน่ง ----------
+// นาฬิกาทราย: ทรายบน = เวลาคูลดาวน์ที่เหลือ (--r ของไพ่) ไหลลงล่าง • ตัวเลขวินาทีใต้แก้ว
+function h4Glass(ci){const t='h4t'+ci,b='h4b'+ci;
+  return `<div class="hg"><svg viewBox="0 0 40 60"><defs><clipPath id="${t}"><path d="M8 7H32Q31 20 21 29H19Q9 20 8 7Z"/></clipPath><clipPath id="${b}"><path d="M19 31H21Q31 40 32 53H8Q9 40 19 31Z"/></clipPath></defs>
+    <path class="gl" d="M8 7H32Q31 20 21 29V31Q31 40 32 53H8Q9 40 19 31V29Q9 20 8 7Z"/>
+    <g clip-path="url(#${t})"><rect class="st" x="6" y="7" width="28" height="22"/></g><g clip-path="url(#${b})"><rect class="sb" x="6" y="31" width="28" height="22"/></g>
+    <line class="fl" x1="20" y1="28" x2="20" y2="52"/><rect class="cap" x="5" y="3" width="30" height="4" rx="1.5"/><rect class="cap" x="5" y="53" width="30" height="4" rx="1.5"/></svg><b class="n"></b></div>`;}
+// ประกายที่ปลิวออกตอนไพ่/นาฬิกาสลาย
+const h4Bits=n=>Array.from({length:n},(_,i)=>{const a=i/n*Math.PI*2+Math.random()*0.5,d=40+Math.random()*50;
+  return `<i style="--dx:${(Math.cos(a)*d).toFixed(0)}px;--dy:${(Math.sin(a)*d-30).toFixed(0)}px;--de:${(Math.random()*0.15).toFixed(2)}s"></i>`;}).join('');
+function h4Fx(host,cls,html,ms){const g=document.createElement('div');g.className=cls;g.innerHTML=html;host.appendChild(g);setTimeout(()=>g.remove(),ms);return g;}
+// ใช้สกิล: สำเนาหน้าไพ่ลอยขึ้นแล้วสลาย (ประกายปลิว) • ไพ่จริงเล่นท่าแทรกขึ้นจากใต้จอ (มีนาฬิกาทรายทับอยู่แล้ว)
+function h4CardUse(S){
+  const g=h4Fx(S.el,'h4Gh',`<div class="fc gf">${S.fc.innerHTML}</div><div class="bits">${h4Bits(14)}</div>`,1000);g.querySelector('.hg')?.remove();
+  S.fc.classList.remove('draw');void S.fc.offsetWidth;S.fc.classList.add('draw');}
+// คูลดาวน์จบ: นาฬิกาทรายสำเนาขยาย + จาง + ประกาย • ไพ่สว่างวาบ
+function h4GlassOut(S){const hg=S.fc.querySelector('.hg');if(!hg)return;
+  const g=h4Fx(S.el,'h4HgOut',hg.outerHTML+`<div class="bits">${h4Bits(10)}</div>`,900),n=g.querySelector('.n');if(n)n.textContent='';
+  S.fc.classList.remove('draw');S.el.classList.remove('pop');void S.el.offsetWidth;S.el.classList.add('pop');}
+// วางไพ่ตามลำดับ SKORD (เลื่อนด้วย CSS transition) + ป้ายปุ่มตามตำแหน่ง
+function h4Place(){if(!H4.q)return;for(const S of H4.q.slots){if(S.gem)continue;const p=SKORD.indexOf(S.ci);if(p<0)continue;
+  S.el.style.left=(16+p*112)+'px';S.el.style.rotate=((p-1.5)*2.4).toFixed(1)+'deg';S.el.style.translate=`0 ${(Math.abs(p-1.5)*7).toFixed(0)}px`;
+  S.k.textContent=h4Key(slotKey('QERF'[p]));}}
+const h4OrdKey=k=>k.path+'|'+k.ids.join(',');
+function h4OrdLoad(k){const id=h4OrdKey(k);if(H4.ordFor===id)return;H4.ordFor=id;let o=null;
+  try{o=(JSON.parse(localStorage.getItem('wd_skord')||'{}'))[id];}catch(e){}
+  SKORD=o&&o.length===4&&[1,2,3,4].every(i=>o.includes(i))?o.slice():[1,2,3,4];rebuildKeys();h4Place();}
+function h4Swap(a,b){if(a===b)return;[SKORD[a],SKORD[b]]=[SKORD[b],SKORD[a]];rebuildKeys();h4Place();
+  INPUT.hq=INPUT.he=INPUT.hr=INPUT.hf=0;
+  try{const m=JSON.parse(localStorage.getItem('wd_skord')||'{}');m[H4.ordFor]=SKORD.slice();localStorage.setItem('wd_skord',JSON.stringify(m));}catch(e){}}
+function h4Pick(p){H4.pick=p;if(!H4.q)return;for(const S of H4.q.slots)if(!S.gem)S.el.classList.toggle('sel',p!=null&&SKORD.indexOf(S.ci)===p);}
+// Alt + ปุ่มสกิล: ปุ่มแรก = เลือกไพ่ • ปุ่มที่สอง = สลับ • ปล่อย Alt = ยกเลิก (e=null)
+function h4AltKey(e){if(!e){h4Pick(null);return false;}
+  const p=[KEYS.q,KEYS.e,KEYS.r,KEYS.f].indexOf(e.code);if(p<0)return false;e.preventDefault();
+  if(H4.pick==null||H4.pick===p)h4Pick(p);else{h4Swap(H4.pick,p);h4Pick(null);}return true;}
+// เมาส์ว่าง: ลากไพ่ไปวางทับอีกใบ = สลับ • หรือคลิกใบหนึ่งแล้วคลิกอีกใบ
+function h4CardWire(root){let drag=null;
+  const posAt=(x,y)=>{for(const S of H4.q.slots){if(S.gem||S===drag?.S)continue;const r=S.el.getBoundingClientRect();if(x>=r.left&&x<=r.right&&y>=r.top&&y<=r.bottom)return SKORD.indexOf(S.ci);}return -1;};
+  for(const el of root.querySelectorAll('.h4Cd'))el.addEventListener('pointerdown',ev=>{if(!root.classList.contains('edit'))return;ev.preventDefault();
+    drag={S:H4.q.slots.find(q=>q.el===el),x:ev.clientX,y:ev.clientY,moved:false};el.setPointerCapture(ev.pointerId);});
+  root.addEventListener('pointermove',ev=>{if(!drag)return;const dx=ev.clientX-drag.x,dy=ev.clientY-drag.y;
+    if(!drag.moved&&Math.hypot(dx,dy)>6){drag.moved=true;drag.S.el.classList.add('drag');}
+    if(drag.moved){const s=parseFloat(getComputedStyle(root).getPropertyValue('--hs'))||1;drag.S.fc.style.transform=`translate(${(dx/s).toFixed(0)}px,${(dy/s).toFixed(0)}px) scale(1.06)`;}});
+  const up=ev=>{if(!drag)return;const S=drag.S,moved=drag.moved,me=SKORD.indexOf(S.ci),to=posAt(ev.clientX,ev.clientY);drag=null;S.el.classList.remove('drag');S.fc.style.transform='';
+    if(moved){if(to>=0)h4Swap(me,to);h4Pick(null);}
+    else if(H4.pick!=null&&H4.pick!==me){h4Swap(H4.pick,me);h4Pick(null);}else h4Pick(H4.pick===me?null:me);};
+  root.addEventListener('pointerup',up);root.addEventListener('pointercancel',up);}
 // เรียกท้ายทุกเฟรมจาก render loop: เฟรมนี้ไม่ได้วาด HUD (ชนะ/แพ้, โหมด imp, ไม่มีตัวเรา) = ซ่อน
 function hud4Frame(){if(H4.el&&!H4.drawn&&!H4.el.hidden)H4.el.hidden=true;H4.drawn=false;}
 function hud4Hide(){try{if(H4.el)H4.el.hidden=true;}catch(e){}}   // setScreen เรียกได้ตั้งแต่ตอนโหลดไฟล์ (H4 ยังไม่พร้อม)
