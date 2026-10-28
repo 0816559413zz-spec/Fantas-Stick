@@ -1,5 +1,6 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
 
+- 2026-10-28 — **Wind Featherwing VFX draft (user design)** — new `wind/featherwing` from `tools/wind-featherwing-gen.py`: take-off flap + ground ring; mostly gliding with rare light flaps; charge with an instant neon glow, then a forward wing flick that sends a wind fan down to the ground; fall back to the open-wing pose. No ink. Waiting for the user's review.
 - 2026-10-28 — **Void Spheres VFX approved (user)** — `wind/void_spheres` and `wind/void_orb` approved as they are. Not bound in game yet; the Void Spheres skill code does not exist.
 - 2026-10-28 — **Void Spheres: smaller black core and tighter particles (user)** — the core radius is 0.18 m. The disk texture holes are smaller (r_in .17 / .12), so the swirl hugs the core. The suck-in, chip and mote rings and the helix trails are tighter.
 - 2026-10-28 — **Void Spheres: smaller orb with more around it (user)** — the disks are about 40% smaller and the core radius is 0.27 m. Added 3 wind bands orbiting on crossed tilts (mint, aqua, lime), 2-colour suck-in streaks, wind chips spiralling around the orb and 2 rings of orbiting motes. Helix trails are tighter.
