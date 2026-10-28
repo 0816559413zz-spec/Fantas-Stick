@@ -42,9 +42,9 @@
     0,
     18
    ],
-   "spin": 520,
+   "spin": 560,
    "int": 0.95,
-   "scale": 4.0,
+   "scale": 2.4,
    "op": 1,
    "fade": 0,
    "loop": true
@@ -79,9 +79,9 @@
     40,
     24
    ],
-   "spin": 330,
+   "spin": 360,
    "int": 0.95,
-   "scale": 5.6,
+   "scale": 3.4,
    "op": 1,
    "fade": 0,
    "loop": true
@@ -118,7 +118,7 @@
    ],
    "spin": -700,
    "int": 0.95,
-   "scale": 3.6,
+   "scale": 2.2,
    "op": 1,
    "fade": 0,
    "loop": true
@@ -139,13 +139,136 @@
     1.2,
     1.0
    ],
-   "scale": 0.42,
+   "scale": 0.27,
    "op": 1,
    "fade": 0,
    "loop": true
   },
   {
-   "id": "suck",
+   "id": "band0",
+   "t": "mesh",
+   "at": 0,
+   "life": 1.0,
+   "att": "feet",
+   "shape": "model",
+   "model": "wind_pieces0",
+   "mat": "tex",
+   "tex": "tex/wind_swoosh_a_hi",
+   "col": "#b8ffe0",
+   "col2": "#000000",
+   "rim": 0,
+   "uvTile": [
+    1,
+    1
+   ],
+   "uvScroll": [
+    0,
+    0
+   ],
+   "pos": [
+    0,
+    1.2,
+    1.0
+   ],
+   "rot": [
+    60,
+    0,
+    0
+   ],
+   "spin": 700,
+   "scale": [
+    0.75,
+    0.25,
+    0.75
+   ],
+   "op": 1,
+   "fade": 0,
+   "loop": true
+  },
+  {
+   "id": "band1",
+   "t": "mesh",
+   "at": 0,
+   "life": 1.0,
+   "att": "feet",
+   "shape": "model",
+   "model": "wind_pieces1",
+   "mat": "tex",
+   "tex": "tex/wind_swoosh_b",
+   "col": "#5cf0c8",
+   "col2": "#000000",
+   "rim": 0,
+   "uvTile": [
+    1,
+    1
+   ],
+   "uvScroll": [
+    0,
+    0
+   ],
+   "pos": [
+    0,
+    1.2,
+    1.0
+   ],
+   "rot": [
+    -55,
+    60,
+    40
+   ],
+   "spin": -620,
+   "scale": [
+    0.85,
+    0.25,
+    0.85
+   ],
+   "op": 1,
+   "fade": 0,
+   "loop": true
+  },
+  {
+   "id": "band2",
+   "t": "mesh",
+   "at": 0,
+   "life": 1.0,
+   "att": "feet",
+   "shape": "model",
+   "model": "wind_pieces2",
+   "mat": "tex",
+   "tex": "tex/wind_swoosh_a_hi",
+   "col": "#c6ff5a",
+   "col2": "#000000",
+   "rim": 0,
+   "uvTile": [
+    1,
+    1
+   ],
+   "uvScroll": [
+    0,
+    0
+   ],
+   "pos": [
+    0,
+    1.2,
+    1.0
+   ],
+   "rot": [
+    15,
+    120,
+    -70
+   ],
+   "spin": 540,
+   "scale": [
+    0.95,
+    0.25,
+    0.95
+   ],
+   "op": 1,
+   "fade": 0,
+   "loop": true
+  },
+  {
+   "id": "suck0",
    "t": "emit",
    "at": 0,
    "life": 1.0,
@@ -155,22 +278,22 @@
     1.2,
     1.0
    ],
-   "rate": 120,
+   "rate": 90,
    "from": "sphere",
-   "fr": 1.8,
+   "fr": 1.3,
    "dir": "in",
    "speed": [
-    5,
-    8
+    3.5,
+    6
    ],
    "plife": [
-    0.14,
-    0.24
+    0.12,
+    0.22
    ],
    "look": "streak",
    "size": [
-    1,
-    1.8
+    0.7,
+    1.3
    ],
    "col": "#c6ff5a",
    "c2": "#5cf0c8",
@@ -180,7 +303,7 @@
    "loop": true
   },
   {
-   "id": "spark",
+   "id": "suck1",
    "t": "emit",
    "at": 0,
    "life": 1.0,
@@ -190,13 +313,87 @@
     1.2,
     1.0
    ],
-   "rate": 50,
+   "rate": 90,
+   "from": "sphere",
+   "fr": 0.9,
+   "dir": "in",
+   "speed": [
+    3.5,
+    6
+   ],
+   "plife": [
+    0.12,
+    0.22
+   ],
+   "look": "streak",
+   "size": [
+    0.7,
+    1.3
+   ],
+   "col": "#efffe8",
+   "c2": "#8dff65",
+   "gravity": 0,
+   "drag": 0,
+   "curl": false,
+   "loop": true
+  },
+  {
+   "id": "chips",
+   "t": "emit",
+   "at": 0,
+   "life": 1.0,
+   "att": "feet",
+   "pos": [
+    0,
+    1.2,
+    1.0
+   ],
+   "rate": 30,
    "from": "ring",
-   "fr": 1.6,
+   "fr": 1.1,
    "dir": "tangent",
    "speed": [
     3,
     5
+   ],
+   "plife": [
+    0.25,
+    0.4
+   ],
+   "look": "model",
+   "model": "wind_wing_airchip",
+   "mmat": "glow",
+   "msize": [
+    0.05,
+    0.11
+   ],
+   "col": "#b8ffe0",
+   "c2": "#21b89a",
+   "mspin": 600,
+   "gravity": 0,
+   "drag": 3,
+   "bounce": 0,
+   "x": true,
+   "loop": true
+  },
+  {
+   "id": "spark0",
+   "t": "emit",
+   "at": 0,
+   "life": 1.0,
+   "att": "feet",
+   "pos": [
+    0,
+    1.2,
+    1.0
+   ],
+   "rate": 45,
+   "from": "ring",
+   "fr": 1.0,
+   "dir": "tangent",
+   "speed": [
+    2.5,
+    4.5
    ],
    "plife": [
     0.2,
@@ -204,11 +401,46 @@
    ],
    "look": "glow",
    "size": [
-    0.6,
-    1.1
+    0.4,
+    0.8
    ],
    "col": "#b8ffe0",
    "c2": "#21b89a",
+   "gravity": 0,
+   "drag": 1,
+   "x": true,
+   "loop": true
+  },
+  {
+   "id": "spark1",
+   "t": "emit",
+   "at": 0,
+   "life": 1.0,
+   "att": "feet",
+   "pos": [
+    0,
+    1.2,
+    1.0
+   ],
+   "rate": 45,
+   "from": "ring",
+   "fr": 1.3,
+   "dir": "tangent",
+   "speed": [
+    2.5,
+    4.5
+   ],
+   "plife": [
+    0.2,
+    0.35
+   ],
+   "look": "glow",
+   "size": [
+    0.4,
+    0.8
+   ],
+   "col": "#c6ff5a",
+   "c2": "#2ec772",
    "gravity": 0,
    "drag": 1,
    "x": true,
