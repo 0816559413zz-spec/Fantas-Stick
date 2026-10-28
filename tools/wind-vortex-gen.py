@@ -5,8 +5,10 @@
 import json,math
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
-DUR=1.55;LIFE=1.35;T_PULL=0.8;T_ARR=1.05;FAR=15.0;NEAR=3.0;S=1.5   # ผู้ใช้ 2026-10-28 รอบ 2: ใหญ่ขึ้น ดึงไกลขึ้น (300) มีจังหวะก่อนดึงนานขึ้นนิด (0.8 วิ) เอฟเฟกต์มากขึ้น
-W,LG,G,DG,LN='#ffffff','#efffe8','#8dff65','#2ec772','#0f4a2c'   # ลายเส้นเข้มขึ้น (ตัดกับพื้นสว่าง)
+_src=(ROOT/'tools/wind-kit-gen.py').read_text(encoding='utf-8');_g={'__name__':'kit'};exec(_src[:_src.index('def stroke_fx')].replace("W('mesh/","(lambda *a:None)('mesh/"),_g);tornado=_g['tornado']   # ทอร์นาโดเส้นพู่กันที่ผู้ใช้อนุมัติ
+DUR=1.7;LIFE=1.35;T_PULL=0.8;T_ARR=1.05;FAR=15.0;NEAR=3.0;S=1.5   # ผู้ใช้ 2026-10-28 รอบ 2: ใหญ่ขึ้น ดึงไกลขึ้น (300) มีจังหวะก่อนดึงนานขึ้นนิด (0.8 วิ) เอฟเฟกต์มากขึ้น
+W,LG,G,DG,LN='#ffffff','#efffe8','#8dff65','#2ec772','#0f4a2c'
+GP=dict(inner='#efffe8',mid='#8dff65',outer='#2ec772',hi='#ffffff',line='#0f4a2c',ring='#8dff65',ring2='#ffffff',spark='#d2ffb8')   # ลายเส้นเข้มขึ้น (ตัดกับพื้นสว่าง)
 k=lambda t:str(round(t/LIFE,3))
 def path(a,y=0.0):
     sx,cz=math.sin(a),math.cos(a)
@@ -18,8 +20,13 @@ OP=lambda o:{'0':0,k(.06):o,k(T_ARR+.1):o,'1':0}
 L=[]
 for n,a in enumerate([math.radians(-22.5),0.0,math.radians(22.5)]):
     p=f't{n}_';P=path(a);at=round(n*.04,2)
+    # ผู้ใช้ รอบ 4 "ทอร์นาโดจางมาก ให้มี layer กว่านี้": ใส่ทอร์นาโดเส้นพู่กันทึบแบบที่อนุมัติ (ชั้นใน/กลาง/นอก/ไฮไลต์/ลายเส้น) วิ่งตามทางดึง
+    def ctr(t,a=a):
+        d=FAR if t<T_PULL else NEAR if t>=T_ARR else FAR+(NEAR-FAR)*((t-T_PULL)/(T_ARR-T_PULL))
+        return [round(math.sin(a)*d,2),0,round(math.cos(a)*d,2)]
+    L+=tornado(p+'ts',ctr,at,T_ARR-.12,s=.62,axis='up',every=.07,life=.45,col=GP,core=False,floor=False)
     # ตัวทอร์นาโด: เกลียวเส้นยาวพันขึ้น 3 ชั้น (ขาวใน / เขียว / เส้นเข้มนอก) — ลด rim/glow ลง (ผู้ใช้: สะท้อนแสงน้อยลง)
-    L.append({'id':p+'helix','t':'mesh','at':at,'life':LIFE,'att':'feet','shape':'model','model':'wind_helix','mat':'glow','col':LG,'int':.35,'pos':P,'spin':600,'scale':grow(S),'op':OP(.55),'fade':0})
+    # (เกลียวขาวเรืองเดิมเอาออก — ดูจาง)
     L.append({'id':p+'helix2','t':'mesh','at':at,'life':LIFE,'att':'feet','shape':'model','model':'wind_helix','mat':'energy','col':G,'col2':DG,'rot':[0,45,0],'pos':P,'spin':420,'scale':grow(S*1.12),'rim':.3,'op':OP(1),'fade':0})
     L.append({'id':p+'helix3','t':'mesh','at':at,'life':LIFE,'att':'feet','shape':'model','model':'wind_helix','mat':'solid','col':DG,'col2':LN,'rot':[0,100,0],'pos':P,'spin':-380,'scale':grow(S*1.22),'rim':0,'op':OP(.7),'fade':0})
     # แกนขาวเรือง ใหญ่ขึ้น ขึ้นพร้อมทอร์นาโด

@@ -1,5 +1,6 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
 
+- 2026-10-28 — **Vortex Bind round 4 (user "too faded, more layers"):** each tornado now uses the approved opaque brush-stroke `tornado()` (green palette) following the pull path; faded white glow helix removed (235 layers).
 - 2026-10-28 — **Vortex Bind round 3 (user):** pull 0.25 s, arrival stun 0.75 s, tornado gets 7 brush-stroke bands + needles + base glow, white glow down / green up.
 - 2026-10-28 — **Vortex Bind round 2 (user):** range 300, wind-up 0.8 s (tornadoes swell + glow), pull 0.45 s, grab radius 60, tornadoes ×1.5, extra fx (suction streaks, spinning chips, tether streaks from the wand, ground swirl trails); pose `vxpull` stretched to 1.4 s.
 - 2026-10-28 — **Wind fixes round 1 — Vortex Bind + wing bug (user):** pulled enemies are stunned 0.5 s on arrival (`W_VX.stun`, efx `wnvxstun` → `wind/wall_hit`), capture radius 50, tornadoes shrink while pulled + dimmer (`tools/wind-vortex-gen.py`), new pose `vxpull` (CANIM/SKANIM js/35). Bug: wing_idle / shield_guard / shield_burst were played with `aim:false` so they never turned with the player — now follow facing.
