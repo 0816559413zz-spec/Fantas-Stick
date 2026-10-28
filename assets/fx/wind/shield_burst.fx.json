@@ -1,0 +1,1223 @@
+{
+ "v": 1,
+ "desc": "โล่ปีกระเบิด: ทรงกลมลมแถบสโตรก (เกม) — จาก wind/shield_wing",
+ "tags": [
+  "wind",
+  "shield",
+  "ingame"
+ ],
+ "pal": "wind",
+ "dur": 1.3,
+ "layers": [
+  {
+   "id": "burst_fill",
+   "t": "mesh",
+   "at": 0,
+   "life": 0.7,
+   "att": "feet",
+   "shape": "sphere",
+   "mat": "energy",
+   "col": "#e0ffd2",
+   "col2": "#2ec772",
+   "pos": [
+    0,
+    1.0,
+    0
+   ],
+   "scale": {
+    "0": [
+     0.33949999999999997,
+     0.33949999999999997,
+     0.33949999999999997
+    ],
+    "0.22": [
+     2.91,
+     2.91,
+     2.91
+    ],
+    "1": [
+     3.4337999999999997,
+     3.4337999999999997,
+     3.4337999999999997
+    ],
+    "ease": "out"
+   },
+   "rim": 1.1,
+   "scroll": 1.5,
+   "op": {
+    "0": 0,
+    "0.08": 0.42,
+    "0.55": 0.3,
+    "1": 0
+   },
+   "fade": 0
+  },
+  {
+   "id": "burst_band_0",
+   "t": "mesh",
+   "at": 0,
+   "life": 0.68,
+   "att": "feet",
+   "shape": "model",
+   "model": "wind_pieces0",
+   "mat": "tex",
+   "tex": "tex/wind_swoosh_a_hi",
+   "col": "#ffffff",
+   "col2": "#000000",
+   "rim": 0,
+   "uvTile": [
+    1,
+    1
+   ],
+   "uvScroll": [
+    0,
+    0
+   ],
+   "pos": [
+    0,
+    1.0,
+    0
+   ],
+   "rot": [
+    0,
+    0,
+    0
+   ],
+   "scale": {
+    "0": [
+     0.35,
+     0.11,
+     0.35
+    ],
+    "0.22": [
+     3.0,
+     0.96,
+     3.0
+    ],
+    "1": [
+     3.54,
+     1.13,
+     3.54
+    ]
+   },
+   "spin": 520,
+   "op": {
+    "0": 0,
+    "0.07": 1.0,
+    "0.6": 0.85,
+    "1": 0
+   },
+   "fade": 0,
+   "int": 1.4
+  },
+  {
+   "id": "burst_line_0",
+   "t": "mesh",
+   "at": 0,
+   "life": 0.68,
+   "att": "feet",
+   "shape": "model",
+   "model": "wind_pieces0",
+   "mat": "tex",
+   "tex": "tex/wind_swoosh_a_ln",
+   "col": "#1a7a45",
+   "col2": "#000000",
+   "rim": 0,
+   "uvTile": [
+    1,
+    1
+   ],
+   "uvScroll": [
+    0,
+    0
+   ],
+   "pos": [
+    0,
+    1.0,
+    0
+   ],
+   "rot": [
+    0,
+    25,
+    0
+   ],
+   "scale": {
+    "0": [
+     0.37,
+     0.1,
+     0.37
+    ],
+    "0.22": [
+     3.15,
+     0.9,
+     3.15
+    ],
+    "1": [
+     3.72,
+     1.06,
+     3.72
+    ]
+   },
+   "spin": 520,
+   "op": {
+    "0": 0,
+    "0.07": 0.7,
+    "0.6": 0.55,
+    "1": 0
+   },
+   "fade": 0
+  },
+  {
+   "id": "burst_band_1",
+   "t": "mesh",
+   "at": 0.012,
+   "life": 0.68,
+   "att": "feet",
+   "shape": "model",
+   "model": "wind_pieces1",
+   "mat": "tex",
+   "tex": "tex/wind_swoosh_b",
+   "col": "#8dff65",
+   "col2": "#000000",
+   "rim": 0,
+   "uvTile": [
+    1,
+    1
+   ],
+   "uvScroll": [
+    0,
+    0
+   ],
+   "pos": [
+    0,
+    1.0,
+    0
+   ],
+   "rot": [
+    28,
+    40,
+    0
+   ],
+   "scale": {
+    "0": [
+     0.35,
+     0.11,
+     0.35
+    ],
+    "0.22": [
+     3.0,
+     0.96,
+     3.0
+    ],
+    "1": [
+     3.54,
+     1.13,
+     3.54
+    ]
+   },
+   "spin": -460,
+   "op": {
+    "0": 0,
+    "0.07": 0.95,
+    "0.6": 0.81,
+    "1": 0
+   },
+   "fade": 0
+  },
+  {
+   "id": "burst_band_2",
+   "t": "mesh",
+   "at": 0.024,
+   "life": 0.68,
+   "att": "feet",
+   "shape": "model",
+   "model": "wind_pieces2",
+   "mat": "tex",
+   "tex": "tex/wind_swoosh_a_hi",
+   "col": "#efffe8",
+   "col2": "#000000",
+   "rim": 0,
+   "uvTile": [
+    1,
+    1
+   ],
+   "uvScroll": [
+    0,
+    0
+   ],
+   "pos": [
+    0,
+    1.0,
+    0
+   ],
+   "rot": [
+    -24,
+    95,
+    0
+   ],
+   "scale": {
+    "0": [
+     0.35,
+     0.11,
+     0.35
+    ],
+    "0.22": [
+     3.0,
+     0.96,
+     3.0
+    ],
+    "1": [
+     3.54,
+     1.13,
+     3.54
+    ]
+   },
+   "spin": 480,
+   "op": {
+    "0": 0,
+    "0.07": 0.95,
+    "0.6": 0.81,
+    "1": 0
+   },
+   "fade": 0,
+   "int": 1.4
+  },
+  {
+   "id": "burst_band_3",
+   "t": "mesh",
+   "at": 0.036,
+   "life": 0.68,
+   "att": "feet",
+   "shape": "model",
+   "model": "wind_pieces0",
+   "mat": "tex",
+   "tex": "tex/wind_swoosh_b",
+   "col": "#2ec772",
+   "col2": "#000000",
+   "rim": 0,
+   "uvTile": [
+    1,
+    1
+   ],
+   "uvScroll": [
+    0,
+    0
+   ],
+   "pos": [
+    0,
+    1.0,
+    0
+   ],
+   "rot": [
+    48,
+    150,
+    0
+   ],
+   "scale": {
+    "0": [
+     0.35,
+     0.11,
+     0.35
+    ],
+    "0.22": [
+     3.0,
+     0.96,
+     3.0
+    ],
+    "1": [
+     3.54,
+     1.13,
+     3.54
+    ]
+   },
+   "spin": -420,
+   "op": {
+    "0": 0,
+    "0.07": 0.9,
+    "0.6": 0.77,
+    "1": 0
+   },
+   "fade": 0
+  },
+  {
+   "id": "burst_line_3",
+   "t": "mesh",
+   "at": 0.036,
+   "life": 0.68,
+   "att": "feet",
+   "shape": "model",
+   "model": "wind_pieces0",
+   "mat": "tex",
+   "tex": "tex/wind_swoosh_a_ln",
+   "col": "#1a7a45",
+   "col2": "#000000",
+   "rim": 0,
+   "uvTile": [
+    1,
+    1
+   ],
+   "uvScroll": [
+    0,
+    0
+   ],
+   "pos": [
+    0,
+    1.0,
+    0
+   ],
+   "rot": [
+    48,
+    175,
+    0
+   ],
+   "scale": {
+    "0": [
+     0.37,
+     0.1,
+     0.37
+    ],
+    "0.22": [
+     3.15,
+     0.9,
+     3.15
+    ],
+    "1": [
+     3.72,
+     1.06,
+     3.72
+    ]
+   },
+   "spin": -420,
+   "op": {
+    "0": 0,
+    "0.07": 0.7,
+    "0.6": 0.55,
+    "1": 0
+   },
+   "fade": 0
+  },
+  {
+   "id": "burst_band_4",
+   "t": "mesh",
+   "at": 0.048,
+   "life": 0.68,
+   "att": "feet",
+   "shape": "model",
+   "model": "wind_pieces1",
+   "mat": "tex",
+   "tex": "tex/wind_swoosh_b_hi",
+   "col": "#ffffff",
+   "col2": "#000000",
+   "rim": 0,
+   "uvTile": [
+    1,
+    1
+   ],
+   "uvScroll": [
+    0,
+    0
+   ],
+   "pos": [
+    0,
+    1.0,
+    0
+   ],
+   "rot": [
+    -46,
+    200,
+    0
+   ],
+   "scale": {
+    "0": [
+     0.35,
+     0.11,
+     0.35
+    ],
+    "0.22": [
+     3.0,
+     0.96,
+     3.0
+    ],
+    "1": [
+     3.54,
+     1.13,
+     3.54
+    ]
+   },
+   "spin": 440,
+   "op": {
+    "0": 0,
+    "0.07": 0.9,
+    "0.6": 0.77,
+    "1": 0
+   },
+   "fade": 0,
+   "int": 1.4
+  },
+  {
+   "id": "burst_band_5",
+   "t": "mesh",
+   "at": 0.06,
+   "life": 0.68,
+   "att": "feet",
+   "shape": "model",
+   "model": "wind_pieces2",
+   "mat": "tex",
+   "tex": "tex/wind_swoosh_b",
+   "col": "#8dff65",
+   "col2": "#000000",
+   "rim": 0,
+   "uvTile": [
+    1,
+    1
+   ],
+   "uvScroll": [
+    0,
+    0
+   ],
+   "pos": [
+    0,
+    1.0,
+    0
+   ],
+   "rot": [
+    14,
+    255,
+    0
+   ],
+   "scale": {
+    "0": [
+     0.35,
+     0.11,
+     0.35
+    ],
+    "0.22": [
+     3.0,
+     0.96,
+     3.0
+    ],
+    "1": [
+     3.54,
+     1.13,
+     3.54
+    ]
+   },
+   "spin": -500,
+   "op": {
+    "0": 0,
+    "0.07": 0.9,
+    "0.6": 0.77,
+    "1": 0
+   },
+   "fade": 0
+  },
+  {
+   "id": "burst_band_6",
+   "t": "mesh",
+   "at": 0.072,
+   "life": 0.68,
+   "att": "feet",
+   "shape": "model",
+   "model": "wind_pieces0",
+   "mat": "tex",
+   "tex": "tex/wind_swoosh_a",
+   "col": "#1f9a55",
+   "col2": "#000000",
+   "rim": 0,
+   "uvTile": [
+    1,
+    1
+   ],
+   "uvScroll": [
+    0,
+    0
+   ],
+   "pos": [
+    0,
+    1.0,
+    0
+   ],
+   "rot": [
+    -12,
+    310,
+    0
+   ],
+   "scale": {
+    "0": [
+     0.35,
+     0.11,
+     0.35
+    ],
+    "0.22": [
+     3.0,
+     0.96,
+     3.0
+    ],
+    "1": [
+     3.54,
+     1.13,
+     3.54
+    ]
+   },
+   "spin": 400,
+   "op": {
+    "0": 0,
+    "0.07": 0.8,
+    "0.6": 0.68,
+    "1": 0
+   },
+   "fade": 0
+  },
+  {
+   "id": "burst_line_6",
+   "t": "mesh",
+   "at": 0.072,
+   "life": 0.68,
+   "att": "feet",
+   "shape": "model",
+   "model": "wind_pieces0",
+   "mat": "tex",
+   "tex": "tex/wind_swoosh_a_ln",
+   "col": "#1a7a45",
+   "col2": "#000000",
+   "rim": 0,
+   "uvTile": [
+    1,
+    1
+   ],
+   "uvScroll": [
+    0,
+    0
+   ],
+   "pos": [
+    0,
+    1.0,
+    0
+   ],
+   "rot": [
+    -12,
+    335,
+    0
+   ],
+   "scale": {
+    "0": [
+     0.37,
+     0.1,
+     0.37
+    ],
+    "0.22": [
+     3.15,
+     0.9,
+     3.15
+    ],
+    "1": [
+     3.72,
+     1.06,
+     3.72
+    ]
+   },
+   "spin": 400,
+   "op": {
+    "0": 0,
+    "0.07": 0.7,
+    "0.6": 0.55,
+    "1": 0
+   },
+   "fade": 0
+  },
+  {
+   "id": "burst_band_7",
+   "t": "mesh",
+   "at": 0.084,
+   "life": 0.68,
+   "att": "feet",
+   "shape": "model",
+   "model": "wind_pieces1",
+   "mat": "tex",
+   "tex": "tex/wind_swoosh_a_hi",
+   "col": "#efffe8",
+   "col2": "#000000",
+   "rim": 0,
+   "uvTile": [
+    1,
+    1
+   ],
+   "uvScroll": [
+    0,
+    0
+   ],
+   "pos": [
+    0,
+    1.0,
+    0
+   ],
+   "rot": [
+    62,
+    20,
+    0
+   ],
+   "scale": {
+    "0": [
+     0.35,
+     0.11,
+     0.35
+    ],
+    "0.22": [
+     3.0,
+     0.96,
+     3.0
+    ],
+    "1": [
+     3.54,
+     1.13,
+     3.54
+    ]
+   },
+   "spin": -380,
+   "op": {
+    "0": 0,
+    "0.07": 0.85,
+    "0.6": 0.72,
+    "1": 0
+   },
+   "fade": 0,
+   "int": 1.4
+  },
+  {
+   "id": "burst_band_8",
+   "t": "mesh",
+   "at": 0.096,
+   "life": 0.68,
+   "att": "feet",
+   "shape": "model",
+   "model": "wind_pieces2",
+   "mat": "tex",
+   "tex": "tex/wind_swoosh_b",
+   "col": "#2ec772",
+   "col2": "#000000",
+   "rim": 0,
+   "uvTile": [
+    1,
+    1
+   ],
+   "uvScroll": [
+    0,
+    0
+   ],
+   "pos": [
+    0,
+    1.0,
+    0
+   ],
+   "rot": [
+    -64,
+    120,
+    0
+   ],
+   "scale": {
+    "0": [
+     0.35,
+     0.11,
+     0.35
+    ],
+    "0.22": [
+     3.0,
+     0.96,
+     3.0
+    ],
+    "1": [
+     3.54,
+     1.13,
+     3.54
+    ]
+   },
+   "spin": 360,
+   "op": {
+    "0": 0,
+    "0.07": 0.85,
+    "0.6": 0.72,
+    "1": 0
+   },
+   "fade": 0
+  },
+  {
+   "id": "burst_dirt_0",
+   "t": "mesh",
+   "at": 0.02,
+   "life": 0.7,
+   "att": "feet",
+   "shape": "model",
+   "model": "wind_groundswirl",
+   "mat": "tex",
+   "tex": "tex/wind_swoosh_b",
+   "col": "#8a7560",
+   "col2": "#000000",
+   "rim": 0,
+   "uvTile": [
+    1,
+    1
+   ],
+   "uvScroll": [
+    0,
+    0
+   ],
+   "pos": [
+    0,
+    0.05,
+    0
+   ],
+   "rot": [
+    0,
+    0,
+    0
+   ],
+   "scale": {
+    "0": 0.5,
+    "0.25": 3.0,
+    "1": 3.9000000000000004,
+    "ease": "out"
+   },
+   "spin": 300,
+   "op": {
+    "0": 0,
+    "0.08": 0.95,
+    "0.6": 0.7,
+    "1": 0
+   },
+   "fade": 0
+  },
+  {
+   "id": "burst_dirt_1",
+   "t": "mesh",
+   "at": 0.02,
+   "life": 0.7,
+   "att": "feet",
+   "shape": "model",
+   "model": "wind_groundswirl",
+   "mat": "tex",
+   "tex": "tex/wind_swoosh_a",
+   "col": "#6e5a48",
+   "col2": "#000000",
+   "rim": 0,
+   "uvTile": [
+    1,
+    1
+   ],
+   "uvScroll": [
+    0,
+    0
+   ],
+   "pos": [
+    0,
+    0.08,
+    0
+   ],
+   "rot": [
+    0,
+    70,
+    0
+   ],
+   "scale": {
+    "0": 0.5,
+    "0.25": 3.5999999999999996,
+    "1": 4.68,
+    "ease": "out"
+   },
+   "spin": -260,
+   "op": {
+    "0": 0,
+    "0.08": 0.95,
+    "0.6": 0.7,
+    "1": 0
+   },
+   "fade": 0
+  },
+  {
+   "id": "burst_soil",
+   "t": "emit",
+   "at": 0.02,
+   "life": 0.08,
+   "att": "feet",
+   "pos": [
+    0,
+    0.2,
+    0
+   ],
+   "burst": 60,
+   "rate": 0,
+   "from": "ring",
+   "fr": 1.2,
+   "dir": "out",
+   "speed": [
+    5,
+    10
+   ],
+   "up": [
+    1,
+    4
+   ],
+   "plife": [
+    0.4,
+    0.8
+   ],
+   "look": "model",
+   "model": "wind_slash",
+   "mmat": "solid",
+   "msize": [
+    0.06,
+    0.16
+   ],
+   "col": "#5b4a3a",
+   "c2": "#8a7560",
+   "gravity": 6,
+   "mspin": 600,
+   "bounce": 0
+  },
+  {
+   "id": "burst_leaves",
+   "t": "emit",
+   "at": 0.03,
+   "life": 0.1,
+   "att": "feet",
+   "pos": [
+    0,
+    1.0,
+    0
+   ],
+   "burst": 26,
+   "rate": 0,
+   "from": "sphere",
+   "fr": 1.5,
+   "dir": "out",
+   "speed": [
+    4,
+    8
+   ],
+   "plife": [
+    0.6,
+    1.1
+   ],
+   "look": "model",
+   "model": "wind_leaf",
+   "mmat": "solid",
+   "msize": [
+    0.12,
+    0.22
+   ],
+   "col": "#6fae5a",
+   "c2": "#3f7a3a",
+   "gravity": 0.6,
+   "drag": 1.2,
+   "mspin": 500,
+   "bounce": 0
+  },
+  {
+   "id": "release_contact",
+   "t": "flash",
+   "at": 0,
+   "life": 0.12,
+   "att": "feet",
+   "pos": [
+    0,
+    1.1,
+    0
+   ],
+   "col": "#efffe8",
+   "size0": 0.4,
+   "size": 3.2,
+   "k": 1
+  },
+  {
+   "id": "release_splinters",
+   "t": "emit",
+   "at": 0,
+   "life": 0.05,
+   "att": "feet",
+   "pos": [
+    0,
+    1.1,
+    0
+   ],
+   "burst": 48,
+   "rate": 0,
+   "from": "ring",
+   "fr": 0.7,
+   "dir": "out",
+   "speed": [
+    7,
+    12
+   ],
+   "up": [
+    0.2,
+    1.2
+   ],
+   "plife": [
+    0.22,
+    0.5
+   ],
+   "look": "streak",
+   "size": [
+    1.1,
+    2.2
+   ],
+   "col": "#ffffff",
+   "c2": "#8dff65",
+   "gravity": 0,
+   "drag": 1.6,
+   "curl": false
+  },
+  {
+   "id": "burst_streaks",
+   "t": "emit",
+   "at": 0,
+   "life": 0.06,
+   "att": "feet",
+   "pos": [
+    0,
+    1.0,
+    0
+   ],
+   "burst": 70,
+   "rate": 0,
+   "from": "sphere",
+   "fr": 0.8,
+   "dir": "out",
+   "speed": [
+    9,
+    16
+   ],
+   "plife": [
+    0.2,
+    0.4
+   ],
+   "look": "streak",
+   "size": [
+    1.4,
+    2.8
+   ],
+   "col": "#ffffff",
+   "c2": "#8dff65",
+   "gravity": 0,
+   "drag": 2,
+   "curl": false
+  },
+  {
+   "id": "burst_glint",
+   "t": "emit",
+   "at": 0.04,
+   "life": 0.45,
+   "att": "feet",
+   "pos": [
+    0,
+    1.0,
+    0
+   ],
+   "rate": 90,
+   "from": "sphere",
+   "fr": 3.0,
+   "dir": "tangent",
+   "speed": [
+    2,
+    5
+   ],
+   "plife": [
+    0.3,
+    0.6
+   ],
+   "look": "spark",
+   "size": [
+    1,
+    2
+   ],
+   "col": "#d2ffb8",
+   "c2": "#8dff65",
+   "gravity": 0
+  },
+  {
+   "id": "burst_needle",
+   "t": "emit",
+   "at": 0,
+   "life": 0.06,
+   "att": "feet",
+   "pos": [
+    0,
+    1.0,
+    0
+   ],
+   "burst": 22,
+   "rate": 0,
+   "from": "sphere",
+   "fr": 1,
+   "dir": "out",
+   "speed": [
+    6,
+    11
+   ],
+   "plife": [
+    0.25,
+    0.45
+   ],
+   "look": "model",
+   "model": "wind_needle",
+   "mmat": "solid",
+   "msize": [
+    0.3,
+    0.6
+   ],
+   "col": "#efffe8",
+   "c2": "#8dff65",
+   "gravity": 0,
+   "drag": 2,
+   "mspin": 0,
+   "bounce": 0
+  },
+  {
+   "id": "burst_outer_0",
+   "t": "mesh",
+   "at": 0.05,
+   "life": 0.6,
+   "att": "feet",
+   "shape": "model",
+   "model": "wind_pieces1",
+   "mat": "tex",
+   "tex": "tex/wind_swoosh_a_hi",
+   "col": "#ffffff",
+   "col2": "#000000",
+   "rim": 0,
+   "uvTile": [
+    1,
+    1
+   ],
+   "uvScroll": [
+    0,
+    0
+   ],
+   "pos": [
+    0,
+    0.9,
+    0
+   ],
+   "rot": [
+    0,
+    0,
+    0
+   ],
+   "scale": {
+    "0": [
+     3.0,
+     0.25,
+     3.0
+    ],
+    "0.4": [
+     6.0,
+     0.3,
+     6.0
+    ],
+    "1": [
+     9.600000000000001,
+     0.15,
+     9.600000000000001
+    ],
+    "ease": "out"
+   },
+   "spin": 420,
+   "op": {
+    "0": 0,
+    "0.1": 0.95,
+    "0.6": 0.6,
+    "1": 0
+   },
+   "fade": 0,
+   "int": 1.4
+  },
+  {
+   "id": "burst_outer_1",
+   "t": "mesh",
+   "at": 0.08,
+   "life": 0.6,
+   "att": "feet",
+   "shape": "model",
+   "model": "wind_pieces2",
+   "mat": "tex",
+   "tex": "tex/wind_swoosh_b",
+   "col": "#8dff65",
+   "col2": "#000000",
+   "rim": 0,
+   "uvTile": [
+    1,
+    1
+   ],
+   "uvScroll": [
+    0,
+    0
+   ],
+   "pos": [
+    0,
+    0.9,
+    0
+   ],
+   "rot": [
+    0,
+    90,
+    0
+   ],
+   "scale": {
+    "0": [
+     3.0,
+     0.25,
+     3.0
+    ],
+    "0.4": [
+     6.0,
+     0.3,
+     6.0
+    ],
+    "1": [
+     9.600000000000001,
+     0.15,
+     9.600000000000001
+    ],
+    "ease": "out"
+   },
+   "spin": -360,
+   "op": {
+    "0": 0,
+    "0.1": 0.95,
+    "0.6": 0.6,
+    "1": 0
+   },
+   "fade": 0
+  },
+  {
+   "id": "burst_shock",
+   "t": "warp",
+   "at": 0,
+   "life": 0.35,
+   "att": "feet",
+   "pos": [
+    0,
+    1.0,
+    0
+   ],
+   "kind": "shock",
+   "size": {
+    "0": 0.5,
+    "1": 6.6000000000000005
+   },
+   "str": 1,
+   "op": {
+    "0": 1,
+    "1": 0
+   },
+   "col": "#efffe8",
+   "glow": 0.05
+  },
+  {
+   "id": "burst_shake",
+   "t": "screen",
+   "at": 0,
+   "life": 0.15,
+   "shake": 2.5
+  }
+ ]
+}

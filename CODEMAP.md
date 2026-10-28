@@ -24,7 +24,8 @@ PROPDEF:194 PROP_OFF_MODES:201 PROP_USE:203 PROPS:204 PROPON:204 genProps:205
 §225 ตัวละคร: บ้านฮอกวอตส์ + หน้าตา
 HOUSES:227 HAIRC:232 HAIRSTY:234 WOODC:237 WOODN:238 WCOREC:239 WCOREN:240 WANDSTY:241 WANDN:246 WANDNN:261 EYEC:262 SKINC:263 CLOAKC:264 TIESTY:265 LOOKK:266 LOOKN:266 lookStr:267 parseLook:268 randLook:269 LOOKS:270 LOOKP:270 KITS:270 getKit:271 getLook:272 CREST_SH:273 CREST_PAT:274 starPts:279 CREST_ANI:281 crestSVG:287 houseColor:295 TEAMC:296 TEAMN:296 NOBROOM:298 MODES:299 PDEF:310 EDEF:337 POOLS:349 CDK:359 BUFFS:362 BRAR:371 rollRar:372
 
-## js/03-spells-core.js (222) — 
+## js/03-spells-core.js (222) — ระบบคาถาใหม่: สาย (path) × คาถา (spell) + สถานะ (status effects)
+§6 ไอคอนคาถา: จาก game-icons.net (CC BY 3.0, เครดิตใน "คู่มือ" และ icons…
 ICONS:8 ICOALIAS:9 hasIco:10 ICOBASE:12 icoURL:13 ICO:14 icoTint:15 icoHTML:24 PATHS:25 SPELL_LIST:34 SPELLS:34 defSpell:35 SLOTK:36 BRMAP:36 KITP:37 parseKit:38 cleanKit:54 setKit:55 pathReset:58
 §60 สถานะ (ใช้ได้ทั้งผู้เล่นและศัตรู)
 isBig:61 ccScale:63 ccTouch:64 addStun:65 addRoot:66 addFreeze:67 addSlow:72 addChill:73 ignite:78 shock:86 knock:87 addWard:88 addFrostSlow:90 frostSlow:91 moveMul:98 BRN_MAX:100 addBurn:101 addXBurn:103 addPoison:104 addSil:105 addFear:106 addBlind:107 addMark:108 healT:110 tickStatus:115 clearStatus:135 fxMask:136
@@ -90,20 +91,39 @@ MIND:66 summonMin:72 minTarget:81 minShoot:88 updateMins:93 aimTarget:133
 §180 ร่ายคาถา
 castSlot:181 castUlt:196
 
-## js/10-net.js (183) — 
+## js/09-wind.js (155) — สายลม 🌪️ (ผู้ใช้ออกแบบทั้งหมด — designs/wind.md "คอนเซ็ปต์ใหม่") • ฝั่งโฮสต์ • ขั้นที่ 1…
+WINDP:8 W_BA:9
+§17 ตัวช่วย
+wOn:18 wGain:19 wSeg:21 wFoeNear:22
+§24 ทุกเฟรมของผู้เล่นสายลม (เรียกจาก updatePlayer หลังส่วนโล่)
+windTick:25 windReset:41
+§43 ท่าพื้นฐาน (คลิกซ้าย): ใบมีดลม / ดูดลมชาร์จเกจ / GaleBurst
+windBasic:44 windGaleBurst:63 windGBTick:66
+§72 โล่ปีก
+windShieldBurst:73
+§77 Dash: ผลักศัตรูข้างหน้า + ดีดตัวเราถอยหลังลอยกลางอากาศ
+windDash:78
+§88 กำแพงลม Aegis Gale
+windWallMake:89 windWallStop:96 windWallBoom:97 windDmg:102 windProjHit:106
+§110 ทั้งสนาม: GaleBurst / กำแพงลม / ชนกำแพง
+updateWind:111 windSnapP:132 windSnapW:133
+§135 สกิล
+wSoon:140
+
+## js/10-net.js (183) — เครือข่าย (PeerJS / WebRTC)
 PREFIX:4 NET:5 RC:9 TURN_SERVERS:12 ICE:13 PEER_OPT:14 TURN_URL:16 ICE_READY:18 JN:22 LAG:24 lagDo:25 hostSend:26 LOBBY:27 genCode:28 sendAll:29 NETD_KEYS:33 NETD:33 netDeltaReset:34 netDelta:35 NETU:47 netUndelta:48 setStatus:54 hostGame:56 hostPeer:64 netConnect:83 joinWatch:94 joinFail:109 netLost:115 joinGame:130 joinPeer:141 clientOnData:156 leave:171 leaveRoom:173
 
-## js/11-host.js (388) — 
+## js/11-host.js (389) — ฝั่งโฮสต์: สถานะเกมทั้งหมดคำนวณที่นี่ (server-authoritative)
 G:4 EVL:4 EVN:4 hostLast:4 tickN:4 emit:5 feed:6 banner:7 plist:8 cleanName:9 freshStats:11 newPlayer:18 emptyInput:21 frameOk:23 addPlayer:24 initHostLobby:33 lobbyMsg:40 broadcastLobby:41 INPN:43 hostOnData:44 hostDrop:74 hostRemove:83 validate:96 hostStart:107 hostToLobby:133 MIDJOIN:140 midJoin:141 CHATT:157 chatRelay:158 emoHost:166 resetBody:168 fmap:174 spawnPts:175 teamPts:177 placeAll:178 respawn:190
 §209 ลูปหลักฝั่งโฮสต์
-hostTick:210 angDiff:224 cH:226 vR:227 updatePlayer:229 hitProp:375 damagePropsIn:382 nearUseProp:383 useProp:384
+hostTick:210 angDiff:224 cH:226 vR:227 updatePlayer:229 hitProp:376 damagePropsIn:383 nearUseProp:384 useProp:385
 
-## js/12-buildings.js (485) — สิ่งปลูกสร้างที่พังเป็นชิ้นย่อย (บ้าน) แบบ Battlefield — คู่มือเต็ม: …
+## js/12-buildings.js (487) — สิ่งปลูกสร้างที่พังเป็นชิ้นย่อย (บ้าน) แบบ Battlefield — คู่มือเต็ม: …
 BLDDEF:8 BLD_PIECES:10 BLD_GRID:11 BLD_DOOR:13 BLD_FIRE:14 BLD_ICE:14 BLD_ROOF_MIN:14 BLDG:15 BLDON:15 genBldg:16 bldRect:26 bldChunk:28 bldAlive:35 bldLocal:36 bldWorld:37 rectDist:38 bldNear:39 BLD_MOUND:42 bldGone:43 bldMoundAt:44 bldMoundH:45 hitBldPiece:47 breakBldChunk:58 bldSupport:66 damageEnv:86 bldRay:101 aimClip:109 aimRay3:116 bldPieceAt:131 projEl:142 bldPush:147 collideBld:153 updateBldg:171 bldSnap:184 bldParse:190
 §194 ของบังในแผนที่ไฟล์ที่พังได้ (หิน เสา รูปปั้น ต้นไม้ โคมไฟ ลัง ...) — …
 BRKDEF:198 BRK_M:198 BRK_MCOL:198 BRK:199 genBrk:200 brkApply:207 brkStage:211 hitBrk:212 damageBrkIn:220 brkSnap:226 brkParse:227
 §228 ตารางช่อง (spatial grid) สำหรับแมพใหญ่: หาเฉพาะของใกล้ ๆ แทนวนทุกชิ้น…
-SG:231 sgObs:232 sgProps:232 sgGrid:234 sgNear:241 _sgCR:246 _sgCW:246 _sgCB:246 _sgCO:246 _sgPO:246 _sgPB:246 _sgPP:246 _sgM:246 _sgE:246 _sgA:246 collideWorld:247 shoot:281 eShoot:302 foesOf:309 breakShield:316 ULT_RATE:318 ultActive:319 gainUlt:320 lifesteal:321 damage:323 playerDown:379 killProj:400 explode:409 hitTarget:421 updateProjectiles:437
+SG:231 sgObs:232 sgProps:232 sgGrid:234 sgNear:241 _sgCR:246 _sgCW:246 _sgCB:246 _sgCO:246 _sgPO:246 _sgPB:246 _sgPP:246 _sgM:246 _sgE:246 _sgA:246 collideWorld:247 shoot:281 eShoot:302 foesOf:309 breakShield:316 ULT_RATE:318 ultActive:319 gainUlt:320 lifesteal:321 damage:323 playerDown:380 killProj:401 explode:410 hitTarget:422 updateProjectiles:438
 
 ## js/12-city-dmg.js (176) — เมืองพังได้ (designs/city-bot-battle.md ขั้น 4) — ข้อมูลที่ทุกเครื่อง…
 CITY_FL:8 CITY_PW:8 CDMG:9 CITYD:12 cityOn:13 cityLayout:15 cityReset:25 cityApplyBox:38 cityApplyItem:39 cityHex:40 cityMark:41 cityPanelAt:43 cityHitPanel:48 cityHitItem:57 cityHitObs:66 _sgCD:71 cityDamageIn:73 cityTick:81 _sgCM:91 cityMoundH:92 cityMounds:99
@@ -122,7 +142,8 @@ AR_SIDE:7 AR_TEAM:7 AR_MAX:7 arPads:8 arOn:9 arState:10 arBusy:11 arReady:13 arN
 ## js/15-bot.js (91) — 
 BOT_LV:7 BOT_TEAM:12 BOT_MAX:12 bots:13 humans:14 botInZone:16 spawnBot:22 OWNED_K:34 clearOwned:35 removeBots:36 botPickTarget:38 aiBot:51 trBotCmd:81 botDebug:91
 
-## js/15-modes.js (405) — 
+## js/15-modes.js (405) — โหมดพิเศษ: ควิดดิช / แข่งไม้กวาด / แบทเทิลรอยัล / หาลอร์ดโวลเดอมอร์ / ห้องฝึก
+§4 ส่งข้อความลับถึงผู้เล่นคนเดียว (เช่น บทบาทในโหมดหาลอร์ดโวลเดอมอร์)
 sendPriv:5 TASKF:9 taskPts:10 raceRings:11 modeInit:17 spawnDummy:59 trainTick:64 TR_KEYS:81 trTeams:83 trCmd:93 hostEndTraining:111
 §113 ควิดดิช
 quidThrow:114 quidDrop:120 quidTick:125 snitchTick:160
@@ -192,7 +213,7 @@ BRKV:312 BRK_COL:312 brkSetup:313 BRK_CM:331 brkCrackMat:332 brkClip:348 brkYc:3
 ## js/24-minions-view.js (68) — สัตว์เวท: โมเดลโปร่งแสง + ซิงก์จาก snapshot (MN)
 MM3:2 makeMinion:3 syncMins:36 drawMinBars:58
 
-## js/25-efx.js (299) — efxFX: ภาพของ event "efx" ทุกคาถา (หนึ่ง case ต่อหนึ่งเอฟเฟกต์)
+## js/25-efx.js (300) — efxFX: ภาพของ event "efx" ทุกคาถา (หนึ่ง case ต่อหนึ่งเอฟเฟกต์)
 efxState:4 efxFX:15
 
 ## js/26-fx-events.js (237) — fx(ev): เอฟเฟกต์+เสียงของทุก event จากโฮสต์ • statusFX (สถานะบนตัว) •…
@@ -262,13 +283,13 @@ iceMat:2 iceRim:3 makeIceSword:4 makeIceAxe:23 makeKiteShield:39
 §51 อาวุธน้ำแข็งลอย (ผู้ใช้ 2026-10-22: "ร่ายคาถาให้ดาบฟันเอง ระยะเท่าเดิ…
 FWS:54 FWA:54 _fwM:55 _fwM2:55 _fwX:55 _fwY:55 _fwZ:55 _fwP:55 _fwS:55 _fwQ:55 _eo:56 _ei:56 _ss:56 fwAim:58 fwWeapons:59 FWP:61 FWT:61 fwChop:62 fwSweep:63 FF_RISE:64 fwIdle:65 fwSwing:68 FWL_N:80 fwLink:81 fwMat:84 frostFX:85
 
-## js/35-sync.js (502) — ซิงก์ผู้เล่น/ศัตรู/ลูกเวทจาก snapshot + ฉายตำแหน่งลงจอ (ป้ายชื่อ/ตัวเ…
+## js/35-sync.js (504) — ซิงก์ผู้เล่น/ศัตรู/ลูกเวทจาก snapshot + ฉายตำแหน่งลงจอ (ป้ายชื่อ/ตัวเ…
 §2 ท่าร่ายคาถาแบบนักเวทในหนัง Harry Potter (ผู้ใช้ 2026-10-22: "ยิงปกติท…
 CPOSE_T:7 _ce:7 _cs:7 _cb:7 AMP_B:9 AMP_S:9 CP_BEND:10 CPOSE:12 _cpT:20 _cpR:20 CGUARD:20 CP_STEP:21 CPCOL:22 castStyle:23 castStart:24
 §25 ท่าร่ายสกิล / อัลติ / โล่ (ผู้ใช้ 2026-10-22: "เกือบทุกสกิลควรมีการเห…
-CANIM:30 SKANIM:53 skAnim:57 _caT:58 _caR:58 skillPose:59 _g2:84 wandTwoHand:85 CBLOCK:92 blockPose:93 castPose:98 lateSkillPose:104 castPose0:105 syncPlayers:134 syncEnemies:216 projGeo:254 tailGeo:255 _t1:256 makeProj:257 _a:277 _b:277 PJFX:279 syncProj:280 _awT:366 animateWorld:367
-§408 ฉายตำแหน่ง 3D ลงจอ (ป้ายชื่อ / ตัวเลขดาเมจ)
-_v:409 toScreen:410 burnNum:417 drawLabels:424 drawTexts:455 HITM:469 DIRI:469 drawXh:471 drawCrosshair:481
+CANIM:30 SKANIM:53 skAnim:57 _caT:58 _caR:58 skillPose:59 _g2:84 wandTwoHand:85 CBLOCK:92 blockPose:93 castPose:98 lateSkillPose:104 castPose0:105 syncPlayers:134 syncEnemies:217 projGeo:255 tailGeo:256 _t1:257 makeProj:258 _a:278 _b:278 PJFX:280 syncProj:281 _awT:367 animateWorld:368
+§409 ฉายตำแหน่ง 3D ลงจอ (ป้ายชื่อ / ตัวเลขดาเมจ)
+_v:410 toScreen:411 burnNum:418 drawLabels:425 drawTexts:456 HITM:470 DIRI:470 drawXh:472 drawCrosshair:482
 
 ## js/36-modes-view.js (164) — 
 ROLE:4 KC:4 roleShowT:4 onPriv:5 MO:10 BREATHS:11 clearModeObjs:12 ITEMC:21 makeItem:22 syncModeObjs:34
@@ -576,12 +597,23 @@ BKICO:377 buffShow:381
 §400 จอมืดตอนเริ่มแมตช์ (ผู้ใช้ 2026-10-23: กระตุกตอนเริ่มแมตช์แรก)
 gameCover:403
 
-## js/66-hud4.js (133) — HUD รอบ 4 (ผู้ใช้ 2026-10-23, designs/hud-full-mock.html)
-H4E:5 H4:10 H4C:11 H4RC:11 h4Pal:12 hud4Col:14 h4Runes:15 h4RingSVG:16 h4Parts:25 h4AuBits:30 h4Key:45 h4Ico:46 h4Build:47 h4Set:77 hud4Draw:78 hud4Frame:116 hud4Hide:117 _h4RT:119 _h4Cam:119 h4FaceShot:120 h4FaceSet:133
+## js/66-hud4.js (134) — HUD รอบ 4 (ผู้ใช้ 2026-10-23, designs/hud-full-mock.html)
+H4E:5 H4:11 H4C:12 H4RC:12 h4Pal:13 hud4Col:15 h4Runes:16 h4RingSVG:17 h4Parts:26 h4AuBits:31 h4Key:46 h4Ico:47 h4Build:48 h4Set:78 hud4Draw:79 hud4Frame:117 hud4Hide:118 _h4RT:120 _h4Cam:120 h4FaceShot:121 h4FaceSet:134
 
 ## js/67-backdrop.js (139) — 
 BACKDROP:8
 §66 noise เล็ก ๆ (คงที่ต่อ seed)
 bdHash:67 bdNoise:68 bdFbm:69 bdEdge:71 bdRing:73 bdPaint:79 bdTree:82 buildBackdrop:89 bdTower:135 backdropHide:139
 
-(74 files, 17771 lines)
+## js/68-wind-view.js (64) — สายลม 🌪️ — ภาพฝั่งเครื่องเล่น (ขั้นที่ 1) • ตรรกะอยู่ js/09-wind.js • ไฟล์นี้มีแต่นิยามฟ…
+WV:6 wvState:7 wvAlive:8
+§9 ทุกเฟรมของผู้เล่นสายลม: ปีกติดหลัง / ปีกห่อตอนยกโล่ / ดูดลมชาร์จเกจ
+windFX:10
+§24 กำแพงลมจาก snapshot (ตามตำแหน่ง/ลบเมื่อหมด)
+syncWind:25 wvWall:31
+§32 เหตุการณ์ (efx z 'wn…')
+windEfx:33
+§57 HUD รอบเป้าเล็ง: เกจ GaleBurst (โค้งซ้าย) + ชาร์จกำแพงลม (จุด 3 จุดใต…
+drawWindHud:58
+
+(76 files, 17997 lines)

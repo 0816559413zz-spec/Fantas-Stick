@@ -1,0 +1,423 @@
+{
+ "v": 1,
+ "desc": "ใบมีดลม BA ตอนบิน (ตามกระสุน) — แยกจาก wind/ba_boomerang ที่ผู้ใช้ผ่าน",
+ "tags": [
+  "wind",
+  "ba",
+  "ingame"
+ ],
+ "pal": "wind",
+ "dur": 0.6,
+ "layers": [
+  {
+   "id": "flight_body",
+   "t": "mesh",
+   "at": 0,
+   "life": 0.6,
+   "att": "feet",
+   "shape": "model",
+   "model": "wind_ba_boomerang_body",
+   "mat": "toon",
+   "col": "#309b9b",
+   "col2": "#124b60",
+   "op": {
+    "0": 0,
+    "0.06": 0.86,
+    "0.88": 0.86,
+    "1": 0
+   },
+   "fade": 0,
+   "rim": 0.28,
+   "dis": {
+    "0": 0.015,
+    "0.78": 0.025,
+    "1": 0.22
+   },
+   "pos": [
+    0,
+    0.0,
+    0
+   ],
+   "rot": [
+    0,
+    0,
+    0
+   ],
+   "scale": 0.75
+  },
+  {
+   "id": "flight_flow",
+   "t": "mesh",
+   "at": 0,
+   "life": 0.6,
+   "att": "feet",
+   "shape": "model",
+   "model": "wind_ba_boomerang_flow",
+   "mat": "toon",
+   "col": "#9eedd9",
+   "col2": "#3caeac",
+   "op": {
+    "0": 0,
+    "0.06": 0.92,
+    "0.88": 0.92,
+    "1": 0
+   },
+   "fade": 0,
+   "rim": 0.35,
+   "dis": {
+    "0": 0.015,
+    "0.78": 0.025,
+    "1": 0.22
+   },
+   "pos": [
+    0,
+    0.0,
+    0
+   ],
+   "rot": [
+    0,
+    0,
+    0
+   ],
+   "scale": 0.75
+  },
+  {
+   "id": "flight_edge",
+   "t": "mesh",
+   "at": 0,
+   "life": 0.6,
+   "att": "feet",
+   "shape": "model",
+   "model": "wind_ba_boomerang_edge",
+   "mat": "glow",
+   "col": "#edfff7",
+   "col2": "#a4f2e1",
+   "op": {
+    "0": 0,
+    "0.06": 0.9,
+    "0.88": 0.9,
+    "1": 0
+   },
+   "fade": 0,
+   "rim": 0,
+   "dis": {
+    "0": 0.015,
+    "0.78": 0.025,
+    "1": 0.22
+   },
+   "pos": [
+    0,
+    0.0,
+    0
+   ],
+   "rot": [
+    0,
+    0,
+    0
+   ],
+   "scale": 0.75
+  },
+  {
+   "id": "flowing_wake",
+   "t": "mesh",
+   "at": 0,
+   "life": 0.6,
+   "att": "feet",
+   "shape": "model",
+   "model": "wind_ba_boomerang_wake",
+   "mat": "energy",
+   "col": "#b4f6e0",
+   "col2": "#277386",
+   "rim": 0.6,
+   "scroll": 2.5,
+   "op": {
+    "0": 0,
+    "0.12": 0.7,
+    "0.8": 0.6,
+    "1": 0
+   },
+   "fade": 0,
+   "pos": [
+    0,
+    0.0,
+    0
+   ],
+   "scale": 0.75
+  },
+  {
+   "id": "wake_filaments",
+   "t": "mesh",
+   "at": 0,
+   "life": 0.6,
+   "att": "feet",
+   "shape": "model",
+   "model": "wind_ba_boomerang_wake_detail",
+   "mat": "energy",
+   "col": "#dbfff0",
+   "col2": "#378d9e",
+   "rim": 0.35,
+   "scroll": 3.3,
+   "op": {
+    "0": 0,
+    "0.10": 0.7,
+    "0.82": 0.55,
+    "1": 0
+   },
+   "fade": 0,
+   "pos": [
+    0,
+    0.0,
+    0
+   ],
+   "scale": 0.75
+  },
+  {
+   "id": "slipstream_0",
+   "t": "mesh",
+   "at": 0,
+   "life": 0.6,
+   "att": "feet",
+   "shape": "model",
+   "model": "wind_ba_boomerang_edge",
+   "mat": "glow",
+   "col": "#91e9d4",
+   "pos": [
+    0,
+    0.0,
+    0
+   ],
+   "rot": [
+    0,
+    0,
+    0
+   ],
+   "scale": 0.66,
+   "op": {
+    "0": 0,
+    "0.12": 0.38,
+    "0.7": 0.25,
+    "1": 0
+   },
+   "fade": 0
+  },
+  {
+   "id": "slipstream_1",
+   "t": "mesh",
+   "at": 0,
+   "life": 0.6,
+   "att": "feet",
+   "shape": "model",
+   "model": "wind_ba_boomerang_edge",
+   "mat": "glow",
+   "col": "#46aeb4",
+   "pos": [
+    0,
+    0.0,
+    0
+   ],
+   "rot": [
+    0,
+    0,
+    0
+   ],
+   "scale": 0.5625,
+   "op": {
+    "0": 0,
+    "0.12": 0.26,
+    "0.7": 0.16999999999999998,
+    "1": 0
+   },
+   "fade": 0
+  },
+  {
+   "id": "short_tail",
+   "t": "trail",
+   "at": 0,
+   "life": 0.6,
+   "of": "flight_body",
+   "col": "#c3fff0",
+   "col2": "#26878f",
+   "w": 0.13,
+   "tlife": 0.2,
+   "k": 0.8
+  },
+  {
+   "id": "air_splinters",
+   "t": "emit",
+   "at": 0,
+   "life": 0.6,
+   "att": "feet",
+   "burst": 3,
+   "rate": 22,
+   "from": "mesh",
+   "fr": 0.16,
+   "dir": "random",
+   "speed": [
+    0.2,
+    0.65
+   ],
+   "plife": [
+    0.18,
+    0.29
+   ],
+   "look": "model",
+   "model": "wind_needle",
+   "mmat": "glow",
+   "msize": [
+    0.09,
+    0.18
+   ],
+   "col": "#c1fff0",
+   "c2": "#398d99",
+   "mspin": 90,
+   "gravity": 0,
+   "of": "flight_body",
+   "bounce": 0,
+   "curl": false
+  },
+  {
+   "id": "tail_streak_0",
+   "t": "emit",
+   "at": 0,
+   "life": 0.6,
+   "att": "feet",
+   "pos": [
+    -0.75,
+    0.015,
+    0
+   ],
+   "burst": 2,
+   "rate": 36,
+   "from": "sphere",
+   "fr": 0.04,
+   "dir": "aim",
+   "yaw": 180,
+   "spread": 0.23,
+   "speed": [
+    0.7,
+    1.7
+   ],
+   "plife": [
+    0.18,
+    0.3
+   ],
+   "look": "streak",
+   "size": [
+    0.8,
+    1.65
+   ],
+   "col": "#d9fff2",
+   "c2": "#2b8d91",
+   "gravity": 0,
+   "drag": 2.2,
+   "curl": false,
+   "fin": 16
+  },
+  {
+   "id": "tail_streak_1",
+   "t": "emit",
+   "at": 0,
+   "life": 0.6,
+   "att": "feet",
+   "pos": [
+    0.75,
+    0.015,
+    0
+   ],
+   "burst": 2,
+   "rate": 36,
+   "from": "sphere",
+   "fr": 0.04,
+   "dir": "aim",
+   "yaw": 180,
+   "spread": 0.23,
+   "speed": [
+    0.7,
+    1.7
+   ],
+   "plife": [
+    0.18,
+    0.3
+   ],
+   "look": "streak",
+   "size": [
+    0.8,
+    1.65
+   ],
+   "col": "#d9fff2",
+   "c2": "#2b8d91",
+   "gravity": 0,
+   "drag": 2.2,
+   "curl": false,
+   "fin": 16
+  },
+  {
+   "id": "tail_motes",
+   "t": "emit",
+   "at": 0,
+   "life": 0.6,
+   "att": "feet",
+   "from": "mesh",
+   "of": "flight_body",
+   "burst": 4,
+   "rate": 40,
+   "dir": "random",
+   "speed": [
+    0.2,
+    0.7
+   ],
+   "plife": [
+    0.19,
+    0.32
+   ],
+   "look": "spark",
+   "size": [
+    0.45,
+    0.9
+   ],
+   "col": "#b8f8dc",
+   "c2": "#388c9d",
+   "gravity": 0,
+   "drag": 2.5,
+   "curl": false,
+   "fin": 12
+  },
+  {
+   "id": "tail_curved_chips",
+   "t": "emit",
+   "at": 0,
+   "life": 0.6,
+   "att": "feet",
+   "burst": 1,
+   "rate": 14,
+   "from": "mesh",
+   "fr": 0.16,
+   "dir": "aim",
+   "speed": [
+    0.4,
+    1.1
+   ],
+   "plife": [
+    0.22,
+    0.38
+   ],
+   "look": "model",
+   "model": "wind_ba_tiny_edge",
+   "mmat": "glow",
+   "msize": [
+    0.12,
+    0.22
+   ],
+   "col": "#b7f3df",
+   "c2": "#357e91",
+   "mspin": 145,
+   "gravity": 0,
+   "of": "flight_body",
+   "bounce": 0,
+   "curl": false,
+   "yaw": 180,
+   "spread": 0.3,
+   "drag": 2
+  }
+ ]
+}

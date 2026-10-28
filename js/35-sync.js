@@ -203,6 +203,7 @@ function syncPlayers(P,mode,now,dt){
     chillFX(o,p,pz,now,dt);
     frostFX(o,p,pz,now,dt);
     earthFX(o,p,pz,now,dt);
+    windFX(o,p,pz,now,dt);
     lateSkillPose(o,p,dt,now);
     if(o.rig)rigSync(o,dt);
     if(ragTick(o,p,v,dt,now))o.tip.scale.setScalar(0.001);   // ล้ม/กระแทกแรง = ragdoll (js/48)
@@ -276,7 +277,7 @@ function makeProj(col,t){
 }
 const _a=new THREE.Vector3(),_b=new THREE.Vector3();
 // กระสุนที่มีเอฟเฟกต์จากไฟล์ติดตัว (ผู้ใช้เลือก VFX 2026-10-22): [ระหว่างบิน (วน), ตอนโดน]
-const PJFX={spark:['fire/spark_fly','fire/spark_hit'],pfire:['fire/fireball_fly',null],icicle:['frost/icicle_fly','frost/icicle_hitb']};
+const PJFX={spark:['fire/spark_fly','fire/spark_hit'],pfire:['fire/fireball_fly',null],icicle:['frost/icicle_fly','frost/icicle_hitb'],wblade:['wind/ba_fly','wind/ba_hit']};
 function syncProj(v,now){
   const ex=VIEW.ex!==null?VIEW.ex:Math.min(0.1,(now-VIEW.tCur)/1000),seen=new Set();
   for(const j of v.J){
@@ -493,6 +494,7 @@ function drawCrosshair(){
   if(!(_me&&_me.ea&&_me.al&&_me.sh&&!(_me.ea[0]>0)))drawXh(x,y,hot);   // สายดินถือโล่: ซ่อนเป้าเล็ง (โชว์โค้ง HP โล่ + ตัวเลขแทน ใน drawEarthHud)
   if(_me&&_me.sm&&_me.al)drawStormHud(x,y,_me.sm);
   if(_me&&_me.ea&&_me.al)drawEarthHud(x,y,_me.ea,_me);
+  if(_me&&_me.wn&&_me.al)drawWindHud(x,y,_me.wn,_me);
   if(!locked&&!VIC.on&&!(VIEW.cur&&VIEW.cur.ph==='over')){
     cx.font='600 17px Kanit,sans-serif';cx.textAlign='center';
     const t='🖱️ คลิกที่จอเพื่อบังคับกล้อง (Esc = ปล่อยเมาส์)',w=cx.measureText(t).width+48;

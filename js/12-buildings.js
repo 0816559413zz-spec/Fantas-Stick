@@ -326,6 +326,7 @@ function damage(t,amt,srcId,kind){
   if(src&&kind!=='burn')amt*=src.buffs.dmg;
   if(src&&src.blaze>0)amt*=1.15;   // Blazeform (เนิร์ฟ 2026-10-27: 1.3→1.15)
   if(src&&src.mirror>0&&!src.noMul)amt*=2;
+  if(G.wwl&&G.wwl.length)windDmg(t,amt,srcId);   // สายลม: ดาเมจใส่ศัตรูที่ติดกำแพงลม
   if(t.isM){
     if(t.dead)return;
     if(t.frz>0)amt*=1.15;
@@ -350,7 +351,7 @@ function damage(t,amt,srcId,kind){
   if(G.ball&&G.ball.holder===t.id&&kind!=='burn'&&kind!=='zone')quidDrop(t);
   if(t.stS&&kind!=='burn'){t.stS.abs+=amt;emit({k:'efx',z:'sthit',x:Math.round(t.x),y:Math.round(t.y),h:t.z+1.2,sx:src?Math.round(src.x):undefined,sy:src?Math.round(src.y):undefined,n:Math.round(amt),id:t.id});if(t.stS.abs>90)stormShieldBlast(t);return;}
   if(t.shieldOn&&(kind==='melee'||kind==='aoe')&&shieldFaces(t,src?src.x:null,src?src.y:null)){
-    if(t.pathIdx===EARTH)earthShHit(t,amt);else{t.shieldE-=amt*1.5;t.shBlk=(t.shBlk|0)+1;}emit({k:'block',x:t.x,y:t.y,h:t.z+1.2});
+    if(t.pathIdx===EARTH)earthShHit(t,amt);else{t.shieldE-=amt*((PBASIC[t.pathIdx|0]||{}).shMul||1.5);t.shBlk=(t.shBlk|0)+1;}emit({k:'block',x:t.x,y:t.y,h:t.z+1.2});
     {const B=PBASIC[t.pathIdx|0];if(B&&B.onBlock)B.onBlock(t);}
     if(t.shieldE<=0)breakShield(t);
     return;
@@ -378,7 +379,7 @@ function damage(t,amt,srcId,kind){
 }
 function playerDown(t,srcId){
   t.shieldOn=false;t.burn=0;t.fly=false;
-  t.stS=null;t.sdome=null;t.rail=null;t.slnT=0;t.beam=0;t.sdHit=null;earthReset(t);if(t.god>0){t.god=0;t.xhp=0;}
+  t.stS=null;t.sdome=null;t.rail=null;t.slnT=0;t.beam=0;t.sdHit=null;earthReset(t);windReset(t);if(t.god>0){t.god=0;t.xhp=0;}
   // ท่าที่ง้าง/ค้างอยู่ตอนล้ม: ไม่งั้นคนล้ม (co-op) ยังปล่อยท่าได้ หรือท่าค้างไว้แล้วออกเองทันทีที่ถูกชุบ
   t.dfall=null;t.snapT=0;t.grT=0;t.slam=false;t.slam3=null;t.dchgOn=false;t.dchg=0;t.chg=0;t.dash=0;t.dashSp=0;t.trail=null;
   if(G.mode==='coop'){
@@ -447,6 +448,7 @@ function updateProjectiles(dt){
     if(!hp&&PROPON)for(const c of sgNear(sgProps(),pr.x,pr.y,pr.r,_sgPP))if(c.st!==1&&pr.h<c.hgt&&(pr.x-c.x)**2+(pr.y-c.y)**2<(c.r+pr.r)**2){hitProp(c,pr.dmg||5,pr.owner);hp=true;break;}
     if(!hp)for(const w of G.walls)if(pr.team!==w.team&&pr.h<w.hgt&&(pr.x-w.x)**2+(pr.y-w.y)**2<(w.r+pr.r)**2){w.hp-=pr.dmg||5;hp=true;emit({k:'efx',z:'wallhit',x:pr.x,y:pr.y,h:pr.h});break;}
     if(!hp&&eProjHit(pr))hp=true;
+    if(!hp&&windProjHit(pr))hp=true;
     if(!hp&&cityProjIn(pr,dt))hp=true;   // ตึกกลวงในเมือง: ผนังนอกทีละแผ่น / พื้นชั้นบน / ทางลาด
     if(hp){killProj(pr);continue;}
     for(const p of ps){
@@ -462,7 +464,7 @@ function updateProjectiles(dt){
           emit({k:'parry',x:p.x,y:p.y,h:p.z+1.3,id:p.id});
           {const B=PBASIC[p.pathIdx|0];if(B&&B.onParry&&!p.shPar){p.shPar=1;B.onParry(p);}}
         }else{
-          if(p.pathIdx===EARTH)earthShHit(p,pr.dmg);else{p.shieldE-=pr.dmg*1.6;p.shBlk=(p.shBlk|0)+1;}pr.dead=true;emit({k:'block',x:pr.x,y:pr.y,h:pr.h});
+          if(p.pathIdx===EARTH)earthShHit(p,pr.dmg);else{p.shieldE-=pr.dmg*((PBASIC[p.pathIdx|0]||{}).shMul||1.6);p.shBlk=(p.shBlk|0)+1;}pr.dead=true;emit({k:'block',x:pr.x,y:pr.y,h:pr.h});
           {const B=PBASIC[p.pathIdx|0];if(B&&B.onBlock)B.onBlock(p);}
           if(p.shieldE<=0)breakShield(p);
         }

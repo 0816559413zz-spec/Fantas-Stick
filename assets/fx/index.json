@@ -1754,6 +1754,30 @@
    "dur": 1.08,
    "n": 24
   },
+  "wind/ba_fly": {
+   "v": "1a4d7aa1",
+   "desc": "ใบมีดลม BA ตอนบิน (ตามกระสุน) — แยกจาก wind/ba_boomerang ที่ผู้ใช้ผ่าน",
+   "pal": "wind",
+   "tags": [
+    "wind",
+    "ba",
+    "ingame"
+   ],
+   "dur": 0.6,
+   "n": 13
+  },
+  "wind/ba_hit": {
+   "v": "1997af80",
+   "desc": "ใบมีดลม BA ตอนโดน — แยกจาก wind/ba_boomerang",
+   "pal": "wind",
+   "tags": [
+    "wind",
+    "ba",
+    "ingame"
+   ],
+   "dur": 0.4,
+   "n": 11
+  },
   "wind/ba_tiny_blade": {
    "v": "a70d7d51",
    "desc": "B — ใบมีดลมเล็ก — ทรงสามมิติใหม่ สีลมซ้อนชั้น คมขาวและริ้วอากาศสั้น; ใช้เทียบงานภาพ BA ใน Studio",
@@ -1767,6 +1791,17 @@
    ],
    "dur": 0.96,
    "n": 11
+  },
+  "wind/dash_push": {
+   "v": "925f0a91",
+   "desc": "Dash สายลม (⚠ ร่าง Claude): คลื่นวงสโตรกผลักไปข้างหน้า + เส้นลม/ใบไม้ + ตัวเราดีดถอยหลัง (สโตรกลู่ตามทาง) + วงลมพื้น — เขียวขาวแบบ Windrift",
+   "pal": "wind",
+   "tags": [
+    "wind",
+    "dash"
+   ],
+   "dur": 0.7,
+   "n": 15
   },
   "wind/eye_of_heaven": {
    "v": "b9af8163",
@@ -1806,6 +1841,30 @@
    ],
    "dur": 1.1,
    "n": 50
+  },
+  "wind/shield_burst": {
+   "v": "ff71a6da",
+   "desc": "โล่ปีกระเบิด: ทรงกลมลมแถบสโตรก (เกม) — จาก wind/shield_wing",
+   "pal": "wind",
+   "tags": [
+    "wind",
+    "shield",
+    "ingame"
+   ],
+   "dur": 1.3,
+   "n": 26
+  },
+  "wind/shield_guard": {
+   "v": "9f99f947",
+   "desc": "โล่ปีก: ปีกห่อตัวค้างตลอดที่ยกโล่ (เกม) — จาก wind/shield_wing",
+   "pal": "wind",
+   "tags": [
+    "wind",
+    "shield",
+    "ingame"
+   ],
+   "dur": 9.5,
+   "n": 108
   },
   "wind/shield_wing": {
    "v": "d4dea266",
@@ -2224,6 +2283,18 @@
     "review"
    ],
    "dur": 4.8,
+   "n": 24
+  },
+  "wind/wing_idle": {
+   "v": "20508e89",
+   "desc": "ปีกลมติดหลัง ท่ากางนิ่ง (เกม) — จาก wind/wing_angular ตัดการกระพือออก",
+   "pal": "wind",
+   "tags": [
+    "wind",
+    "wing",
+    "ingame"
+   ],
+   "dur": 1.6,
    "n": 24
   }
  },
