@@ -1,5 +1,6 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
 
+- 2026-10-28 — **Handoff:** HANDOFF §0 "🆕 WIND" rewritten for the playable wind class (files, generators, what was fixed, what is left, style rules, headless test recipe).
 - 2026-10-28 — **Aegis Gale round 1 (user):** enemies can no longer walk through (`windCollide` hooked in collideWorld; allies pass), life 12 s, wall fx 5 m tall + 12 s (`tools/wind-wall-gen.py` HMAX/DUR), enemy projectiles damage the wall (HP 200 ⚠, `windWallHurt`), push speed 900 ⚠, poses `wallpush` / `ground`, local aim preview (green arc at the place point + push line, `wvAimGhost`).
 - 2026-10-28 — **Vortex Bind round 6 (user: round 5 ugly, back to the first look + more wind):** generator restored from round 2 (first-version helix look, brighter), toon/brush tornado removed; added orbit streak rings ×4, white wisps ×3, updraft streaks, base dust swirl, leaves, glints per tornado.
 - 2026-10-28 — **Vortex Bind round 5 (user "no ink, solid layered tornado"):** brush/ink strokes removed; each tornado = 18 thick opaque toon-shaded ribbons stacked as a widening funnel (tilted, counter-spinning) + bright white glow core + thin white wisps.
