@@ -40,6 +40,12 @@ def wing_rot(t,side):
     return [0,round(side*y,1),round(side*z,1)]
 KEYS=sorted(set([round(x*.05,3) for x in range(int(DUR/.05)+1)]+[.12,.24,T_GLIDE,T_CH,T_FL,T_FL+.1,T_FALL,T_LAND]+[f+d for f in FLAPS for d in (0,.15,.3,.45,.6)]))
 ck=lambda t:str(round(t/DUR,4))
+BIG=1.6                                 # wings grow while flying (user: bigger than the normal wing)
+def wscale(t):
+    if t<.05:return 1.0
+    if t<.25:return 1+(BIG-1)*(t-.05)/.2
+    if t<T_LAND+.05:return BIG
+    return BIG-(BIG-1)*min(1,(t-T_LAND-.05)/.25)
 L=[]
 # ---------- the approved angular wings, posed by the curves above ----------
 for w in WING['layers']:
@@ -48,6 +54,7 @@ for w in WING['layers']:
         n=dict(w);n.pop('loop',None);n['at']=0;n['life']=DUR
         p0=w['pos'];n['pos']={ck(t):[p0[0],round(p0[1]+lift(t),3),p0[2]] for t in KEYS}
         n['rot']={ck(t):wing_rot(t,side) for t in KEYS}
+        n['scale']={ck(t):round(wscale(t),3) for t in KEYS}
         b=n.get('op',.3);n['op']={'0':0,ck(.08):b*1.6,ck(.5):b*1.2,ck(T_CH):b*1.2,ck(T_CH+.05):min(.9,b*2.6),ck(T_FL+.1):min(.9,b*2.4),ck(T_FALL+.3):b*1.3,ck(DUR-.15):b*1.2,'1':0}
         L.append(n)
     elif w['id'].endswith(('airchips','motes')):
@@ -58,7 +65,7 @@ for side,suf in((1,''),(-1,'_L')):
     GK=[t for t in KEYS if T_CH-.01<=t<=T_FALL+.25]
     for part,col,c2,pk in(('feathers',G['neon'],G['mid'],.85),('spines',G['hi'],G['neon'],.95)):
         L.append({'id':f's3_glow_{part}{suf or "_R"}','t':'mesh','at':T_CH,'life':round(T_FALL+.25-T_CH,3),'att':'feet','shape':'model','model':f'wind_wing_angular_{part}'+suf,
-            'mat':'energy' if part=='feathers' else 'glow','col':col,'col2':c2,'rim':.9,'fade':0,'scale':1.02,
+            'mat':'energy' if part=='feathers' else 'glow','col':col,'col2':c2,'rim':.9,'fade':0,'scale':round(BIG*1.02,3),
             'pos':{str(round((t-T_CH)/(T_FALL+.25-T_CH),3)):[p0[0],round(p0[1]+lift(t),3),p0[2]] for t in GK},
             'rot':{str(round((t-T_CH)/(T_FALL+.25-T_CH),3)):wing_rot(t,side) for t in GK},'op':{'0':0,'0.06':pk*.8,'0.6':pk,'0.75':pk,'1':0}})
 
@@ -82,7 +89,7 @@ L.append({'id':'s2_under','t':'mesh','at':T_GLIDE,'life':GL,'att':'feet','shape'
 L.append({'id':'s2_slip','t':'emit','at':T_GLIDE,'life':GL,'att':'feet','pos':[0,H+1.7,-.5],'rate':40,'from':'line','fh':.1,'dir':'aim','yaw':180,'spread':.15,
     'speed':[3,5],'plife':[.3,.5],'look':'streak','size':[.8,1.4],'col':G['inner'],'c2':G['outer'],'gravity':0,'drag':.5,'curl':False,'x':True})
 for side in(1,-1):
-    L.append({'id':f's2_tipwind{"R" if side>0 else "L"}','t':'emit','at':T_GLIDE,'life':GL,'att':'feet','pos':[side*2.2,H+2.2,-.6],'rate':30,'from':'sphere','fr':.4,'dir':'aim','yaw':180,
+    L.append({'id':f's2_tipwind{"R" if side>0 else "L"}','t':'emit','at':T_GLIDE,'life':GL,'att':'feet','pos':[side*3.4,H+2.9,-.8],'rate':30,'from':'sphere','fr':.4,'dir':'aim','yaw':180,
         'spread':.1,'speed':[3,5],'plife':[.25,.45],'look':'streak','size':[.7,1.2],'col':G['mid'],'c2':G['outer'],'gravity':0,'drag':.3,'curl':False})
 for i,f in enumerate(FLAPS):
     L.append({'id':f's2_flapchips{i}','t':'emit','at':f+.3,'life':.05,'att':'feet','pos':[0,H+1.6,-.4],'burst':10,'rate':0,'from':'line','fh':.1,'dir':'down','spread':.8,
@@ -91,7 +98,7 @@ for i,f in enumerate(FLAPS):
         'speed':[2,4],'plife':[.2,.35],'look':'streak','size':[.8,1.4],'col':G['inner'],'c2':G['mid'],'gravity':0,'drag':2,'curl':False})
 
 # ---------- shot 3: charge (instant neon glow) then flick — a wide wind fan forward, slanted down ----------
-HC=H+1.6
+HC=H+2.0
 L.append({'id':'s3_flashon','t':'flash','at':T_CH,'life':.1,'att':'feet','pos':[0,HC,-.4],'col':G['neon'],'size0':.5,'size':2.2,'k':.55})
 L.append({'id':'s3_suck','t':'emit','at':T_CH,'life':T_FL-T_CH,'att':'feet','pos':[0,HC,-.4],'rate':180,'from':'sphere','fr':2.8,'dir':'in','speed':[9,13],'plife':[.12,.2],
     'look':'streak','size':[1,1.8],'col':G['neon'],'c2':G['mid'],'gravity':0,'drag':0,'curl':False})
