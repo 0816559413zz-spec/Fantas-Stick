@@ -133,7 +133,8 @@ for i,(a,r) in enumerate(ENS):
 # the round wind wall rises after everyone floats — 8 real Aegis Gale wall pieces in a circle (user: "same like the wind
 # wall we designed"). Ring meshes wind_ringwall_* = the wall's own arc shapes (tools/wind-wall-gen.py) rebuilt at radius R,
 # 8 arcs of 42° (each ≈ one normal wall, 13 m) with small gaps; the layers are the approved wind/wall layers, retimed.
-WA=math.radians(21);WHM=3.4;RW=R
+WA=math.radians(22.5);   # pieces touch: one continuous ring (user: เชื่อมกันหมด)
+WHM=3.4;RW=R
 def _rot(p,th):x,y,z=p;return [round(x*math.cos(th)+z*math.sin(th),4),round(y,4),round(-x*math.sin(th)+z*math.cos(th),4)]
 SEGA=[math.radians(s*45+22.5) for s in range(8)]
 def ring_wall(name,r,a0,a1,hmax,n=60,lift=0):
@@ -141,7 +142,7 @@ def ring_wall(name,r,a0,a1,hmax,n=60,lift=0):
     for k,th in enumerate(SEGA):
         V=[];F=[]
         for i in range(n+1):
-            a=a0+(a1-a0)*i/n;e=abs(a)/WA;h=hmax*max(.08,(1-e**6))**.5
+            a=a0+(a1-a0)*i/n;h=hmax
             V+=[_rot([r*math.sin(a),lift,-r*math.cos(a)],th),_rot([r*math.sin(a),lift+h,-r*math.cos(a)],th)]
             if i<n:F.append([2*i,2*i+2,2*i+3,2*i+1])
         parts.append({'id':f'{name}{k}','k':'poly','v':V,'f':F})
@@ -151,7 +152,7 @@ def ring_band(name,r,y0,y1,a0,a1,n=12):
     for k,th in enumerate(SEGA):
         V=[];F=[]
         for i in range(n+1):
-            a=a0+(a1-a0)*i/n;e=abs(a)/WA;sc=max(.08,(1-e**6))**.5
+            a=a0+(a1-a0)*i/n;sc=1.0
             V+=[_rot([r*math.sin(a),y0*sc,-r*math.cos(a)],th),_rot([r*math.sin(a),y1*sc,-r*math.cos(a)],th)]
             if i<n:F.append([2*i,2*i+2,2*i+3,2*i+1])
         parts.append({'id':f'{name}{k}','k':'poly','v':V,'f':F})
@@ -179,14 +180,15 @@ for q in range(NSEG):
     msave(f'wind_ringwall_tips{q}',f'อัลติ: แถบปลายเส้นลมยอดกำแพงวง ช่วง {q}',ring_band('tips',RW+.04+.01*(q%3),1.35,3.7,max(-WA,a0),min(WA,a1)))
 E=math.radians(5)
 msave('wind_ringwall_ends','อัลติ: ปลายกำแพงวงทั้ง 16 ข้าง (สว่าง)',ring_wall('endL',RW-.06,-WA,-WA+E,WHM,6)+ring_wall('endR',RW-.06,WA-E,WA,WHM,6))
-(MESH/'wind_ringwall_line.mesh.json').write_text(json.dumps({'v':1,'desc':'อัลติ: เส้นพื้นกำแพงวง ปลายม้วน','pal':'wind','mat':'glow','parts':
-    [{'id':f'main{k}','k':'ribbon','path':[[round(c,4) for c in p] for p in pts],'w':.07,'seg':80} for k,pts in enumerate(ring_line(RW+.05,.55))]+
-    [{'id':f'thin{k}','k':'ribbon','path':[[round(c,4) for c in p] for p in pts],'w':.025,'seg':80} for k,pts in enumerate(ring_line(RW-.22,.3))]},ensure_ascii=False),encoding='utf-8')
+circ=lambda r:[[round(r*math.sin(i/96*2*math.pi),4),.02,round(r*math.cos(i/96*2*math.pi),4)] for i in range(97)]
+(MESH/'wind_ringwall_line.mesh.json').write_text(json.dumps({'v':1,'desc':'อัลติ: เส้นพื้นกำแพงวง (วงต่อเนื่อง)','pal':'wind','mat':'glow','parts':
+    [{'id':'main','k':'ribbon','path':circ(RW+.05),'w':.07,'seg':200},{'id':'thin','k':'ribbon','path':circ(RW-.22),'w':.025,'seg':200}]},ensure_ascii=False),encoding='utf-8')
 WALLFX=json.loads((ROOT/'assets/fx/wind/wall.fx.json').read_text(encoding='utf-8'))
 WL=round(WALL_END+.4-T_WALL,3);KW=WL/WALLFX.get('dur',6.0)
 for w in WALLFX['layers']:
     if w.get('loop') or (w['t']=='emit' and isinstance(w.get('pos'),list) and w['pos']!=[0,0,10.9] and not w.get('of')):continue   # gusts / end wisps belong to one straight wall
     if w['t']=='mesh' and not str(w.get('model','')).startswith('wind_wall_'):continue
+    if w.get('model')=='wind_wall_ends':continue          # no bright piece ends: the ring is continuous
     n=json.loads(json.dumps(w));n['id']='w_'+w['id']
     if 'of' in n:n['of']='w_'+n['of']
     if n['t']=='mesh':n['model']=n['model'].replace('wind_wall_','wind_ringwall_')
