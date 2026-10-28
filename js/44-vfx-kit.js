@@ -291,7 +291,8 @@ function bfScatter(x,y,R,n,kind,size){if(FXSTUDIO.own||!BF.on||!nearMe(x,y,1800)
     _bfMx.compose(_bfP.set(tx(px),GY(px,py)+_bfS.y*0.3,tz(py)),_bfQ,_bfS);bfRestAdd(geo,mat,_bfMx);}}
 function _rockMat(){return _rockM||(_rockM=new THREE.MeshStandardMaterial({color:'#3d3833',roughness:1,flatShading:true}));}
 // ฝุ่นก้อนใหญ่ตอนตึก/บ้านถล่มทั้งหลัง (w,d = ขนาดพิกเซลเกม) • charred = เคยโดนไฟ → ควันกรุ่น + รอยไหม้
-function bfCollapse(x,y,w,d,charred){if(!BF.on||!nearMe(x,y,2400))return;BFRS.nCol++;const s=clamp(Math.max(w,d)/180,0.8,2.6);
+function bfCollapse(x,y,w,d,charred){if(!BF.on)return;BFA.col.push({x,y,w:4+Math.max(w,d)/60});if(!nearMe(x,y,2400))return;BFRS.nCol++;
+  snd('rubble',{x,y,vol:1});const s=clamp(Math.max(w,d)/180,0.8,2.6);
   fxPlay('env/bf_collapse',{x,y,h:0,s});
   const R=Math.max(w,d)*0.6;bfScatter(x,y,R,30*s,'rock',1.2);
   for(let k=0;k<5;k++){const an=Math.random()*6.283,dd=Math.sqrt(Math.random())*R*0.8;bfMark(x+Math.cos(an)*dd,y+Math.sin(an)*dd,charred?'fire':'earth',1.2+Math.random()*0.5);}
@@ -303,12 +304,48 @@ function updateBfRest(dt){const S=BFRS.smoke;
     q.acc+=dt*(q.big?1.4:0.7)*Math.min(1,q.t/6);if(q.acc<1||!nearMe(q.x,q.y,1400))continue;q.acc-=1;
     smoke(q.x+rnd(-8,8),q.y+rnd(-8,8),q.h,1,Math.random()<0.5?'#3a3430':'#55504a',q.big?3:2.2,q.big?11:6,12);
     if(Math.random()<0.25)PARTS.push({x:q.x+rnd(-10,10),y:q.y+rnd(-10,10),h:q.h+0.1,vx:0,vy:0,vh:rnd(0.6,1.4),life:0.9,max:0.9,col:'#ff8a3a',size:2,g:-0.5,drag:2});}}
-function bfClear(){BFM.n=BFM.head=0;BFM.at.length=0;BFM.grow.length=0;bfMarkMesh().count=0;   // สร้างไว้ก่อน = ภาพรอยโหลดตั้งแต่เริ่มแมตช์
+function bfClear(){BFA.col.length=0;BFA.k=BFA.kt=0;BFM.n=BFM.head=0;BFM.at.length=0;BFM.grow.length=0;bfMarkMesh().count=0;   // สร้างไว้ก่อน = ภาพรอยโหลดตั้งแต่เริ่มแมตช์
   for(const e in BF_EL)for(const v of ['','_air'])fxLoad('env/bf_'+e+v);fxLoad('env/bf_collapse');   // โหลดไฟล์ไว้ก่อน (ครั้งแรกจะได้ไม่พลาด)
   for(const p of BFRS.pools.values()){scene.remove(p.M);p.M.dispose();}BFRS.pools.clear();BFRS.smoke.length=0;
   for(const b of BFRS.bins.values()){if(b.mesh){scene.remove(b.mesh);b.mesh.geometry.dispose();}b.geos.forEach(g=>g.dispose());}BFRS.bins.clear();BFRS.big.length=0;BFRS.dirty=false;}
-function updateBf(dt){updateBfMarks(dt);updateBfRest(dt);}
-if(window.WD)window.WD.bf={BF,BFM,BFRS,after:bfAfter,play:bfPlay,mark:bfMark,scatter:bfScatter,collapse:bfCollapse,clear:bfClear};   // ทดสอบ: WD.bf.after({k:'imp',t:'fire',x,y,h:1},1) • ปิด: WD.bf.BF.on=false
+// ---------- 3d) สนามรบ ขั้น 5: บรรยากาศตามความพังรอบตัว (designs/battlefield.md) ----------
+// ทุก 0.5 วิ นับความพังใกล้ตัว (รอยค้าง BFM.at + ตึกถล่ม BFA.col + ควันกรุ่น) → k 0..1 (ขึ้นช้า ลงช้า)
+// k → หมอกควันหนาขึ้น/สีหม่นอมน้ำตาล • แสงหม่น สีซีด ขอบจอมืด • เถ้าลอย (ถ่านไฟถ้ามีรอยไหม้ใกล้) • เสียงไฟปะทุใกล้ซากไหม้ + เสียงครางต่ำ
+// ค่าเดิมของแผนที่ (หมอก/แสง) เก็บตอนสร้างแผนที่ (builtKey เปลี่ยน) แล้วคำนวณจากค่าเดิมทุกเฟรม → ไม่สะสมเพี้ยน • ภาพ/เสียงบนเครื่องตัวเองล้วน
+const BFA={k:0,kt:0,fire:0,acc:0,ash:0,crk:0,key:'',base:null,col:[],rum:null,R:1400,HZ:new THREE.Color('#6b6157'),c:new THREE.Color()};
+function bfWreck(){const me=myPos();if(!me){BFA.kt=0;BFA.fire=0;return;}let s=0,f=0;
+  for(const q of BFM.at){if(!q)continue;const d=Math.hypot(q.x-me.x,q.y-me.y);if(d>BFA.R)continue;const w=q.r*q.r*q.a*0.25*(1-d/BFA.R);s+=w;if(q.el==='fire')f+=w;}
+  for(const c of BFA.col){const d=Math.hypot(c.x-me.x,c.y-me.y);if(d<BFA.R*1.5)s+=c.w*(1-d/(BFA.R*1.5));}
+  for(const q of BFRS.smoke){if(Math.hypot(q.x-me.x,q.y-me.y)<BFA.R){s+=0.4;f+=0.4;}}
+  BFA.kt=clamp((s-4)/40,0,1);BFA.fire=clamp(f/20,0,1);}
+function updateBfAir(dt){const F=scene.fog;if(!F||FXSTUDIO.own)return;
+  if(BFA.key!==builtKey){BFA.key=builtKey;BFA.base={c:F.color.clone(),near:F.near,far:F.far,exp:gl.toneMappingExposure,bg:scene.background&&scene.background.isColor?scene.background.clone():null};BFA.k=BFA.kt=0;}
+  const game=screen==='game'&&BF.on;
+  if(game&&(BFA.acc-=dt)<=0){BFA.acc=0.5;bfWreck();}
+  if(!game)BFA.kt=BFA.k=0;   // ออกจากเกม = กลับค่าเดิมทันที (เมนูใช้ตัวปรับสีเดียวกัน)
+  BFA.k+=(BFA.kt-BFA.k)*Math.min(1,dt*(BFA.kt>BFA.k?0.35:0.15));const k=BFA.k,B=BFA.base;
+  // หมอกควัน: สีอมน้ำตาลหม่น ความสว่างเท่าหมอกเดิม (แมพกลางคืนไม่สว่างขึ้น) • ใกล้เข้ามา
+  const L=Math.max(0.02,B.c.r*0.3+B.c.g*0.59+B.c.b*0.11),hz=BFA.c.copy(BFA.HZ).multiplyScalar(Math.min(1.6,L/0.38+0.12));
+  F.color.copy(B.c).lerp(hz,0.5*k);F.near=B.near*(1-0.6*k);F.far=B.far*(1-0.28*k);
+  if(B.bg&&scene.background&&scene.background.isColor)scene.background.copy(B.bg).lerp(hz,0.5*k);
+  gl.toneMappingExposure=B.exp*(1-0.14*k);GRADEU.uSat.value=1.1-0.3*k;GRADEU.uVig.value=0.28+0.16*k;
+  if(!game||k<0.03){bfRumble(0);return;}
+  // เถ้าลอยรอบตัว (ถ่านไฟส้มปนถ้ามีรอยไหม้ใกล้)
+  const me=myPos();if(!me)return;BFA.ash+=dt*(QUAL.mode==='low'?10:26)*k;
+  if(BFA.ash>=1)vfxOnce(()=>{while(BFA.ash>=1){BFA.ash-=1;const x=me.x+rnd(-320,320),y=me.y+rnd(-320,320),e=Math.random()<0.25*BFA.fire;
+    const wx=AIR.dir.x*AIR.str*40,wy=AIR.dir.y*AIR.str*40;
+    PARTS.push(e?{x,y,h:rnd(0.2,2),vx:wx+rnd(-6,6),vy:wy+rnd(-6,6),vh:rnd(0.5,1.2),life:rnd(1.6,2.6),max:2.6,col:Math.random()<0.5?'#ff8a3a':'#ffb24a',size:rnd(1.4,2.2),g:-0.3,drag:0.6}
+      :{x,y,h:rnd(2.5,8),vx:wx+rnd(-8,8),vy:wy+rnd(-8,8),vh:rnd(-0.45,-0.15),life:rnd(4,6.5),max:6.5,col:Math.random()<0.5?'#8c867e':'#55504a',size:rnd(1.6,2.8),g:0.04,drag:0.4,smoke:true});}});
+  // เสียง: ไฟปะทุใกล้ซากที่กรุ่น/รอยไหม้ • เสียงครางต่ำตาม k
+  bfRumble(k);BFA.crk-=dt;
+  if(BFA.crk<=0){let n=null,nd=700;for(const q of BFRS.smoke){const d=Math.hypot(q.x-me.x,q.y-me.y);if(d<nd){nd=d;n=q;}}
+    const fk=n?1-nd/700:BFA.fire*0.5;BFA.crk=fk>0.05?rnd(0.05,0.22)/(0.4+fk):0.5;
+    if(fk>0.05)snd('crackle',n?{x:n.x+rnd(-20,20),y:n.y+rnd(-20,20),vol:0.35+0.65*fk}:{vol:0.25*fk});}}
+function bfRumble(k){if(!AC||AC.state!=='running')return;
+  if(!BFA.rum){if(k<0.03)return;const s=AC.createBufferSource(),f=AC.createBiquadFilter(),g=AC.createGain();s.buffer=NB;s.loop=true;f.type='lowpass';f.frequency.value=110;f.Q.value=0.7;g.gain.value=0;s.connect(f);f.connect(g);g.connect(SFXBUS);s.start();BFA.rum={s,g};}
+  BFA.rum.g.gain.setTargetAtTime(0.09*k,AC.currentTime,0.8);}
+function updateBf(dt){updateBfMarks(dt);updateBfRest(dt);updateBfAir(dt);}
+if(window.WD)window.WD.bf={BF,BFM,BFRS,BFA,after:bfAfter,play:bfPlay,mark:bfMark,scatter:bfScatter,collapse:bfCollapse,clear:bfClear};   // ทดสอบ: WD.bf.after({k:'imp',t:'fire',x,y,h:1},1) • ปิด: WD.bf.BF.on=false
 
 // ---------- 4) เอฟเฟกต์ทั้งจอ (ค่าไปที่ GradePass ใน js/27-world.js) ----------
 const SCR={fl:[],rad:null,chr:0,hurt:0};

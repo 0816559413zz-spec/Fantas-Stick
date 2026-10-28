@@ -68,6 +68,8 @@ function snd(n,o){
         g.gain.setValueAtTime(0.2,t);g.gain.exponentialRampToValueAtTime(0.0001,t+0.38);o2.connect(g);g.connect(d);o2.start(t);l.start(t);o2.stop(t+0.4);l.stop(t+0.4);break;}
       case 'cast_ebolt':tone(d,320,140,0.3,'triangle',0.14);noiz(d,0.25,0.08,'bandpass',900,400,2);break;
       case 'cast_web':noiz(d,0.18,0.25,'bandpass',2500,700,3);tone(d,600,250,0.12,'square',0.04);break;
+      case 'crackle':noiz(d,rnd(0.012,0.045),rnd(0.05,0.13),'bandpass',rnd(1800,5200),0,rnd(2,6));if(Math.random()<0.25)noiz(d,0.07,0.06,'lowpass',700,200,1,0.01);break;   // ไฟปะทุ (สนามรบ ขั้น 5 — สร้างจากโค้ด)
+      case 'rubble':for(let i=0;i<9;i++)noiz(d,rnd(0.03,0.09),rnd(0.04,0.12),'bandpass',rnd(900,3200),0,rnd(1.5,4),i*rnd(0.03,0.09));noiz(d,0.5,0.12,'lowpass',260,90,1,0,0.03);break;   // เศษหล่นกราวรูด
       case 'hit':tone(d,170,60,0.14,'sine',0.35);noiz(d,0.08,0.18,'lowpass',2500,600,1);break;
       case 'hurt':tone(d,220,80,0.25,'sawtooth',0.16);noiz(d,0.15,0.25,'lowpass',1800,300,1);tone(d,60,40,0.2,'sine',0.4);break;
       case 'zap':noiz(d,0.25,0.25,'highpass',3000,6000,2);tone(d,2400,800,0.15,'square',0.05);break;

@@ -2,7 +2,7 @@
 
 > **For Claude:** user plan for a "battlefield" feel. Read this before any work on dust/smoke/debris/scorch/grass.
 > Core rule from the user: **the map starts clean and pretty — every mark comes from players fighting** (no pre-placed wreckage). Marks stay until the match ends; a new match = clean map again.
-> Status: **ขั้น 0 done (user picked C). ขั้น 1 built 2026-10-27 (not hand-played)** — files/routing in HANDOFF §0 BATTLEFIELD. **ขั้น 3 built 2026-10-27** (new grass + persistent grass/ground scars + livelier ground). **ขั้น 2 built 2026-10-28** (marks + rubble stay all match, collapse dust — js/44 §3c). **ขั้น 4 built 2026-10-28** (benches/lamps/middle fences break, fallen trees stay). Next: ขั้น 5.
+> Status: **ขั้น 0 done (user picked C). ขั้น 1 built 2026-10-27 (not hand-played)** — files/routing in HANDOFF §0 BATTLEFIELD. **ขั้น 3 built 2026-10-27** (new grass + persistent grass/ground scars + livelier ground). **ขั้น 2 built 2026-10-28** (marks + rubble stay all match, collapse dust — js/44 §3c). **ขั้น 4 built 2026-10-28** (benches/lamps/middle fences break, fallen trees stay). **ขั้น 5 built 2026-10-28** (atmosphere by nearby damage — js/44 §3d). **All steps built — waiting for the user to play-test.**
 
 ## หลักการ
 - แมพเริ่มสวยสะอาด 100% ทุกร่องรอยมาจากการต่อสู้ของผู้เล่นเท่านั้น
@@ -52,7 +52,11 @@
 - รั้ว ลัง ม้านั่ง พังได้ • ต้นไม้ล้มทั้งต้น
 - ⚠ ขวางทาง → โฮสต์ต้องคุม (แก้ระบบออนไลน์ + bump PREFIX) • เลือดของแต่ละชิ้นถามทีมเกมเพลย์
 
-## ขั้น 5 — บรรยากาศตามความพัง (ทีหลัง)
+## ขั้น 5 — บรรยากาศตามความพัง ✅ ทำแล้ว 2026-10-28 (รอเล่นจริง)
+- ✅ นับความพังรอบตัว ~70 ม. (รอยค้าง + ตึกถล่ม + ซากกรุ่น) → ยิ่งพัง หมอกควันเข้าใกล้ สีหม่นอมน้ำตาล ภาพมืดลงนิด สีซีด ขอบจอมืด เถ้าลอย (มีถ่านไฟถ้ามีรอยไหม้ใกล้)
+- ✅ เสียงสร้างจากโค้ด (ไม่ต้องใช้ไฟล์): ไฟปะทุใกล้ซากไหม้ • เสียงครางต่ำตามความพัง • เศษหล่นกราวตอนตึกถล่ม/เศษตก
+- แมตช์ใหม่หรือออกจากเกม = กลับค่าเดิมทันที
+แผนเดิม:
 - นับความพังของแมพ → ยิ่งพัง ควันในอากาศหนา แสงหม่น เถ้าลอย • เสียงไฟลุก/เศษหล่น (CC0 เท่านั้น)
 
 ## Tech notes (for Claude)

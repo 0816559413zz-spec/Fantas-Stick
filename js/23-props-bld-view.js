@@ -262,7 +262,8 @@ function updateDebris(dt){
     if(q.gy===undefined)q.gy=GY(m.position.x/S3+MW/2,m.position.z/S3+MH/2);
     q.vy-=18*dt;m.position.x+=q.vx*dt;m.position.y+=q.vy*dt;m.position.z+=q.vz*dt;
     const fy=q.gy+(q.big?0.35:0.1);let gnd=false;
-    if(m.position.y<fy){m.position.y=fy;gnd=true;if(q.vy<-4&&q.big&&!q.dust){q.dust=1;const p=simOf(m.position);smoke(p.x,p.y,0.2,3,'#8a7a68',1.4,9,60);}
+    if(m.position.y<fy){m.position.y=fy;gnd=true;if(q.vy<-4&&q.big&&!q.dust){q.dust=1;const p=simOf(m.position);smoke(p.x,p.y,0.2,3,'#8a7a68',1.4,9,60);snd('thud',{x:p.x,y:p.y,vol:0.4});}
+      else if(q.vy<-5&&!q.tick&&Math.random()<0.2){q.tick=1;const p=simOf(m.position);snd('rubble',{x:p.x,y:p.y,vol:0.25});}   // เศษตกกระทบพื้น (สนามรบ ขั้น 5)
       q.vy=Math.abs(q.vy)*0.3;q.vx*=0.6;q.vz*=0.6;q.rx*=0.5;q.rz*=0.5;if(q.vy<0.8)q.vy=0;}
     if(gnd){const f=Math.exp(-5*dt);q.vx*=f;q.vz*=f;q.rx*=f;q.rz*=f;}
     m.rotation.x+=q.rx*dt;m.rotation.z+=q.rz*dt;
