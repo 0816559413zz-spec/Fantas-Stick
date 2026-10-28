@@ -381,11 +381,14 @@ function brkSync(dt){
   if(ch)gl.shadowMap.needsUpdate=true;
   for(let i=BRKV.fall.length-1;i>=0;i--){const f=BRKV.fall[i];f.t+=dt;
     if(f.t<f.T){f.w+=f.acc*dt;f.ang=Math.min(f.max,f.ang+f.w*dt);f.piv.quaternion.setFromAxisAngle(f.ax,f.ang);if(f.ang>=f.max&&!f.hit){f.hit=1;f.T=f.t;if(f.onHit)f.onHit();}}
+    else if(!FXSTUDIO.own&&BF.on){   // สนามรบ: ส่วนบนหล่นจากตอลงนอนราบกับพื้น แล้วค้างทั้งแมตช์ (รวม mesh — bfRest js/44)
+      f.vy=(f.vy||0)+14*dt;f.piv.position.y=Math.max(f.gy+0.15,f.piv.position.y-f.vy*dt);f.ang=Math.min(Math.PI*0.5,f.ang+dt*1.2);f.piv.quaternion.setFromAxisAngle(f.ax,f.ang);
+      if(f.piv.position.y<=f.gy+0.15&&f.ang>=Math.PI*0.5){bfRest(f.piv,false,true);f.piv.traverse(m=>{if(m.isMesh)m.geometry.dispose();});BRKV.fall.splice(i,1);}}
     else{f.piv.position.y-=dt*0.8;if(f.t>f.T+1.6){BRKV.sc.remove(f.piv);f.piv.traverse(m=>{if(m.isMesh)m.geometry.dispose();});BRKV.fall.splice(i,1);}}
     gl.shadowMap.needsUpdate=true;}
 }
 const BRK_ZERO=new THREE.Matrix4().makeScale(0,0,0);
-// ตอนพัง: ส่วนบนเหนือรอยตัดล้มออกจากจุดระเบิด (ox,oy) แล้วจมลงดิน
+// ตอนพัง: ส่วนบนเหนือรอยตัดล้มออกจากจุดระเบิด (ox,oy) แล้วหล่นนอนค้างบนพื้นทั้งแมตช์ (สตูดิโอ VFX = จมลงดินแบบเดิม)
 function brkFall(ev){
   const q=BRKV.grp[ev.i],g=BRK[ev.i];if(!q||!g||!BRKV.sc)return;
   const yc=brkYc(q),cx=tx(g.x),cz=tz(g.y),y=GY(g.x,g.y)+(g.d.vh||g.d.h)*BRKDEF.rub,piv=new THREE.Group();piv.position.set(cx,y,cz);
@@ -393,6 +396,6 @@ function brkFall(ev){
   let dx=g.x-ev.ox,dy=g.y-ev.oy;const dl=Math.hypot(dx,dy);if(dl<1){const a=ev.i*2.4;dx=Math.cos(a);dy=Math.sin(a);}else{dx/=dl;dy/=dl;}
   BRKV.sc.add(piv);
   const tall=(g.d.vh||g.d.h)*(1-BRKDEF.rub);
-  BRKV.fall.push({piv,ax:new THREE.Vector3(dy,0,-dx).normalize(),ang:0,w:0.6,acc:Math.max(3,14/Math.max(1,tall*0.5)),max:Math.PI*0.48,t:0,T:3,
+  BRKV.fall.push({piv,gy:GY(g.x,g.y),ax:new THREE.Vector3(dy,0,-dx).normalize(),ang:0,w:0.6,acc:Math.max(3,14/Math.max(1,tall*0.5)),max:Math.PI*0.48,t:0,T:3,
     onHit(){const lx=g.x+dx*tall*12,ly=g.y+dy*tall*12;fx({k:'brk',t:'land',i:ev.i,mi:ev.mi,col:ev.col,sz:ev.sz,hh:ev.hh,x:Math.round(lx),y:Math.round(ly),h:0.2,r:ev.r});}});
 }

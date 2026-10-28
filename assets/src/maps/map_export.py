@@ -184,6 +184,35 @@ for o in pre("col_", "colv_"):
     for t in range(n + 1):
         d = -L + 2 * L * t / n if n else 0.0
         add_circle(cen.x + ax.x * d, cen.y + ax.y * d, r, top, k, ex_)
+# auto cover (2026-10-28, designs/battlefield.md step 4): small props that have no col_ of their own (bench, fence, crate ...)
+# get collision circles along their footprint + their own brk group, so they block and break like other cover.
+# Fences near the map border (< 10 units) are border decoration and stay as they are; anything < 1 unit from the border is outside play.
+AUTO = ("bench", "fence", "lamp", "lantern", "crate", "barrel", "cart", "sign_")
+AUTO_SKIP = ("rail_posts", "table", "_far")
+auto_n = 0
+for name, (o, fl) in OBJ.items():
+    n = low(o)
+    if o.type != 'MESH' or o.name in brk_used or o.parent or o.children or o.hide_render or "far" in fl: continue
+    if not any(s in n for s in AUTO) or any(s in n for s in AUTO_SKIP) or n.startswith(MARK): continue
+    t = o.matrix_world.translation; ed = min(HW - abs(t.x), HH - abs(t.y))
+    if ed < 1 or ("fence" in n and ed < 10): continue
+    M = o.matrix_world; bb = [Vector(c) for c in o.bound_box]; wb = [M @ v for v in bb]
+    lx0, lx1 = min(v.x for v in bb), max(v.x for v in bb); ly0, ly1 = min(v.y for v in bb), max(v.y for v in bb)
+    ex, ey = (lx1 - lx0) / 2 * M.col[0].xyz.length, (ly1 - ly0) / 2 * M.col[1].xyz.length
+    cen = M @ Vector(((lx0 + lx1) / 2, (ly0 + ly1) / 2, min(v.z for v in bb)))
+    top = max(v.z for v in wb); h = top - gB(cen.x, cen.y)
+    if h < 0.3: continue
+    gi = len(brk); o["brk"] = gi; brk_used.add(o.name); auto_n += 1
+    m = "stone" if any(s in n for s in ("lamp", "lantern")) else "wood"
+    brk.append({"h": round(h, 2), "vh": round(h, 2), "v": round(ex * ey * 4 * h, 1), "m": m, "n": o.name})
+    rz = M.to_euler().z; ax = Vector((math.cos(rz), math.sin(rz)))
+    if ey > ex: ax, ex, ey = Vector((-math.sin(rz), math.cos(rz))), ey, ex
+    r = max(ey, 0.25); L = max(0.0, ex - r)
+    k_ = max(1, int(math.ceil(L / (r * 1.1)))) if L > 0.01 else 0
+    for i in range(k_ + 1):
+        d = -L + 2 * L * i / k_ if k_ else 0.0
+        add_circle(cen.x + ax.x * d, cen.y + ax.y * d, r, top, "col", {"b": gi})
+info["auto_cover"] = auto_n
 if len(obs) > 2000: problems.append("collision circles: %d (heavy, simplify col_)" % len(obs))
 info["col_circles"] = len(obs)
 

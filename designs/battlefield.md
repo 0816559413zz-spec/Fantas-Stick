@@ -2,7 +2,7 @@
 
 > **For Claude:** user plan for a "battlefield" feel. Read this before any work on dust/smoke/debris/scorch/grass.
 > Core rule from the user: **the map starts clean and pretty — every mark comes from players fighting** (no pre-placed wreckage). Marks stay until the match ends; a new match = clean map again.
-> Status: **ขั้น 0 done (user picked C). ขั้น 1 built 2026-10-27 (not hand-played)** — files/routing in HANDOFF §0 BATTLEFIELD. **ขั้น 3 built 2026-10-27** (new grass + persistent grass/ground scars + livelier ground). **ขั้น 2 built 2026-10-28** (marks + rubble stay all match, collapse dust — js/44 §3c). Next: ขั้น 4 / 5.
+> Status: **ขั้น 0 done (user picked C). ขั้น 1 built 2026-10-27 (not hand-played)** — files/routing in HANDOFF §0 BATTLEFIELD. **ขั้น 3 built 2026-10-27** (new grass + persistent grass/ground scars + livelier ground). **ขั้น 2 built 2026-10-28** (marks + rubble stay all match, collapse dust — js/44 §3c). **ขั้น 4 built 2026-10-28** (benches/lamps/middle fences break, fallen trees stay). Next: ขั้น 5.
 
 ## หลักการ
 - แมพเริ่มสวยสะอาด 100% ทุกร่องรอยมาจากการต่อสู้ของผู้เล่นเท่านั้น
@@ -43,7 +43,12 @@
 - ✅ กราฟิกต่ำ = หญ้าน้อยลงเอง (รอยบนพื้นยังอยู่)
 - Tech: `SCAR` ภาพรอยขนาดเท่าแผนที่ (2 ช่อง/หน่วย, R ไหม้ G น้ำแข็ง B ราบ A ทิศล้ม) ใน js/50 • `grassScar(x,y,el,s)` เรียกจาก `bfAfter` js/44 • พื้น = `grLive(mat)` (js/50) ใส่ในวัสดุพื้นหญ้า js/28 + พื้น `ground*` ของแผนที่จากไฟล์ • ล้างเมื่อออกจากหน้าเกม/เปลี่ยนแผนที่ • ภาพล้วน ไม่แตะโปรโตคอล
 
-## ขั้น 4 — ทำลายได้มากขึ้น (ทีหลัง)
+## ขั้น 4 — ทำลายได้มากขึ้น ✅ ทำแล้ว 2026-10-28 (รอเล่นจริง)
+- ✅ ผู้ใช้: รั้วพังได้ยกเว้นรั้วขอบแมพ • ม้านั่ง/เสาไฟ/ลังที่เดินทะลุได้ = ใส่ที่ชน + พังได้ (เลือดตามกฎขนาดเดิม = 100)
+- ✅ ตัวส่งออกแมพ `map_export.py` ทำให้เอง (auto cover) → valley รั้วกลาง 8 • hogsmeade ม้านั่ง 4 (รั้ว 58 = ขอบแมพทั้งหมด) • castle ม้านั่ง 6 • pitch เสาไฟ 20 • meadow รั้วขอบแมพทั้งหมด
+- ✅ ต้นไม้/รั้ว/เสาที่ล้ม: ส่วนบนหล่นนอนกับพื้นค้างทั้งแมตช์ (เดิมจมหายดิน)
+- ลัง/ถัง (prop) พังได้อยู่แล้ว • ต้นไม้แบบ prop ในแมพจากโค้ดยังแค่ราบ ไม่ล้ม
+แผนเดิม:
 - รั้ว ลัง ม้านั่ง พังได้ • ต้นไม้ล้มทั้งต้น
 - ⚠ ขวางทาง → โฮสต์ต้องคุม (แก้ระบบออนไลน์ + bump PREFIX) • เลือดของแต่ละชิ้นถามทีมเกมเพลย์
 
