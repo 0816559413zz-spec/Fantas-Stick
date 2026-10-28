@@ -205,12 +205,13 @@ function cityViewSync(dt){
 }
 // เอฟเฟกต์ของเหตุการณ์เมือง (เรียกจาก fx() js/26)
 function cityDebris(x,y,h,col,ox,oy,n,big){
-  const mt=sMat({color:col,roughness:0.9});
-  for(let k=0;k<n;k++){const m=new THREE.Mesh(sGeo(THREE.BoxGeometry,1,1,1),mt);const s=big?0.5+Math.random()*0.9:0.25+Math.random()*0.5;m.scale.set(s,s*0.6,s*0.8);
+  const mt=sMat({color:col,roughness:0.9}),mc=sMat({color:'#8c8a86',roughness:1}),mr=sMat({color:'#5a4a3c',roughness:0.9});n=Math.round(n*1.8);   // สนามรบ: เศษเยอะ (คอนกรีต/เหล็กเส้น) ค้างทั้งแมตช์
+  for(let k=0;k<n;k++){const t=k%6,m=new THREE.Mesh(sGeo(THREE.BoxGeometry,1,1,1),t<3?mt:t<5?mc:mr);const s=big?0.5+Math.random()*0.9:0.25+Math.random()*0.5;if(t===5)m.scale.set(0.06,0.06,1+Math.random()*1.5);else m.scale.set(s,s*0.6,s*0.8);
     m.castShadow=true;m.position.set(tx(x)+rnd(-1.5,1.5),h+rnd(-1,1),tz(y)+rnd(-1.5,1.5));m.rotation.set(Math.random()*6,Math.random()*6,0);scene.add(m);
     let dx=x-ox,dy=y-oy;const dl=Math.hypot(dx,dy)||1;dx/=dl;dy/=dl;const sp=(big?6:3.5)*(0.6+Math.random()*0.8);
     DEBRIS.push({m,vx:dx*sp+rnd(-1.5,1.5),vz:dy*sp+rnd(-1.5,1.5),vy:1+Math.random()*4,rx:rnd(-8,8),rz:rnd(-8,8),life:3+Math.random()*1.5,s0:m.scale.clone()});}
-  while(DEBRIS.length>180)scene.remove(DEBRIS.shift().m);
+  bfScatter(x,y,big?260:70,big?40:12,[mt,mc],big?1.3:0.8);bfScatter(x,y,big?300:80,big?30:10,'rock',0.7);
+  debrisCap();
 }
 function cityFX(ev,H,near){
   const CV=CITYK.CV;
@@ -222,6 +223,7 @@ function cityFX(ev,H,near){
       if(near){snd('break',ev);shake(3);}}
     else if(ev.e==='c'){const B=r&&r.B;if(B)for(let k=0;k<26;k++){const t=k/26*6.28;smoke(ev.x+Math.cos(t)*B.w*0.6,ev.y+Math.sin(t)*B.d*0.6,1,2,'#8a8070',3,16,160);}
       cityDebris(ev.x,ev.y,4,col,ev.x,ev.y,16,true);
+      if(B)bfCollapse(ev.x,ev.y,B.w,B.d,fire);   // ฝุ่นก้อนใหญ่ + เศษ + รอย (js/44)
       const dd=Math.hypot(tx(ev.x)-cam.position.x,tz(ev.y)-cam.position.z);if(dd<150){snd('boom',{x:ev.x,y:ev.y,vol:1});snd('break',ev);shake(dd<60?12:6);}}
     return;}
   if(ev.k==='cs'){

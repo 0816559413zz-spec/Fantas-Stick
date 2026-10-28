@@ -1,0 +1,15 @@
+{
+ "v": 1,
+ "desc": "รอยสนามรบค้างทั้งแมตช์ (แบบ C): ไหม้ ×2 / สายฟ้า ×2 / พื้นแตก ×2 / น้ำแข็ง ×2 — สีจริง ไม่ย้อม • tools/bf-mark-gen.py • designs/battlefield.md ขั้น 2",
+ "gen": "image",
+ "seed": 3,
+ "px": 256,
+ "cols": 4,
+ "rows": 2,
+ "kind": "loop",
+ "fps": 4,
+ "ramp": "white",
+ "add": false,
+ "rand": true,
+ "p": {}
+}

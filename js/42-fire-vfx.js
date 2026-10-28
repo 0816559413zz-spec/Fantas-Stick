@@ -169,7 +169,7 @@ function fireRune(x,y,h,r,life){const g=new THREE.Group(),m=_decM({map:fruneTex(
   g.position.set(tx(x),h+0.03+GY(x,y),tz(y));const R=r*S3;
   return fireTemp(g,[m,m2],life,(v,k,dt)=>{const t=v.age,inn=Math.min(1,t/0.3),out=t>life-0.4?Math.max(0,(life-t)/0.4):1;g.scale.setScalar(R*(0.85+0.15*inn));g.rotation.y+=dt*0.35;
     m.opacity=inn*out*(0.8+0.2*Math.sin(t*9));m2.opacity=0.45*inn*out;});}
-// เศษหินกระเด็น 3 มิติ (หินดำขอบไฟ) — ตกกระดอนบนพื้นแล้วหดหาย • มีไฟติดตามช่วงแรก
+// เศษหินกระเด็น 3 มิติ (หินดำขอบไฟ) — ตกกระดอนบนพื้นแล้วค้างเป็นซาก (สนามรบ ขั้น 2; สตูดิโอ = หดหาย) • มีไฟติดตามช่วงแรก
 const _rockGeo=new THREE.DodecahedronGeometry(1,0);_rockGeo.userData.keep=true;
 let _rockM=null;
 function rockChunks(x,y,h,n,spd,o){o=o||{};_rockM=_rockM||new THREE.MeshStandardMaterial({color:'#3d3833',roughness:1,flatShading:true});
@@ -177,7 +177,7 @@ function rockChunks(x,y,h,n,spd,o){o=o||{};_rockM=_rockM||new THREE.MeshStandard
   for(let i=0;i<n;i++){const m=new THREE.Mesh(_rockGeo,_rockM),an=rnd(0,6.283),sp=rnd(0.4,1)*spd,s=rnd(0.12,0.3)*(o.s||1);m.scale.set(s*rnd(0.8,1.3),s*rnd(0.6,1),s*rnd(0.8,1.3));
     const r0=rnd(0,(o.r||20))*S3;m.position.set(X+Math.cos(an)*r0,gy+h+0.2,Z+Math.sin(an)*r0);g.add(m);R.push({m,v:new THREE.Vector3(Math.cos(an)*sp,rnd(6,12)*(o.up||1),Math.sin(an)*sp),w:new THREE.Vector3(rnd(-9,9),rnd(-9,9),rnd(-9,9)),s});}
   return fireTemp(g,[],life,(v,k,dt)=>{const t=v.age;for(const c of R){c.v.y-=26*dt;c.m.position.addScaledVector(c.v,dt);if(c.m.position.y<gy+c.s*0.5){c.m.position.y=gy+c.s*0.5;c.v.y=Math.abs(c.v.y)*0.3;c.v.x*=0.55;c.v.z*=0.55;c.w.multiplyScalar(0.6);}
-      c.m.rotation.x+=c.w.x*dt;c.m.rotation.y+=c.w.y*dt;c.m.rotation.z+=c.w.z*dt;if(t>life-0.3)c.m.scale.multiplyScalar(Math.max(0,1-dt*3.5));
+      c.m.rotation.x+=c.w.x*dt;c.m.rotation.y+=c.w.y*dt;c.m.rotation.z+=c.w.z*dt;if(t>life-0.3&&!c.kept){if(c.v.lengthSq()<9&&bfRest(c.m))c.kept=1;else c.m.scale.multiplyScalar(Math.max(0,1-dt*3.5));}   // นิ่งแล้ว = ค้างเป็นซากทั้งแมตช์ (js/44)
       if(t<0.45&&Math.random()<0.5){const q=simOf(c.m.position);flame(q.x,q.y,q.h-0.1,{vh:0.5,life:0.18,size:rnd(3,5),g:0});}}});}
 // เสาไฟพุ่งจากพื้น (กรวย shader 2 ชั้น ชี้ขึ้น): พุ่งเร็ว → ค้างแป๊บ → สลาย • H สูง (หน่วยโลก) W รัศมีฐาน • dl หน่วงเวลา
 function fireGeyser(x,y,h,H,W,life,dl){if(dl>0){later(dl,()=>fireGeyser(x,y,h,H,W,life,0));return;}

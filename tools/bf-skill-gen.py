@@ -158,9 +158,25 @@ def ice_cast():
     ])
 
 
+# ---------- 🏚 house / building collapse (step 2): huge rolling dust cloud + dust column + lingering haze + gravel ----------
+def collapse():
+    return fx("สนามรบ/ตึกถล่ม (แบบ C ขั้น 2): ฝุ่นก้อนการ์ตูนใหญ่กลิ้งออกเป็นวง + เสาฝุ่นพวยขึ้น + ฝุ่นจริงฟุ้งค้าง + เศษกรวด • s = ขนาดตึก (0.8–2.6)", "earth", 9, [
+        em({"id": "roll", "t": "emit", "at": 0.0, "life": 0.25, "burst": 30, "att": "ground", "from": "disc", "fr": 1.6, "dir": "flat", "up": [0.1, 0.5],
+            "speed": [6, 13], "plife": [2.2, 3.4], "size": [22, 34], "col": "#a39582", "c2": "#7d7262", "gravity": -0.05, "drag": 1.8, "grow": 0.6}, TOON),
+        em({"id": "column", "t": "emit", "at": 0.1, "life": 0.6, "burst": 18, "att": "ground", "from": "disc", "fr": 1.0, "dir": "up", "spread": 0.45,
+            "speed": [2.5, 5.5], "plife": [2.6, 3.8], "size": [24, 36], "col": "#968a78", "c2": "#6a6054", "gravity": -0.25, "drag": 1.4, "grow": 0.55}, TOON),
+        em({"id": "haze", "t": "emit", "at": 0.3, "life": 6, "rate": {"0": 9, "1": 0}, "att": "ground", "from": "disc", "fr": 1.8, "dir": "up", "spread": 0.8,
+            "speed": [0.3, 0.9], "plife": [3.5, 5], "size": [26, 40], "col": "#a89a86", "c2": "#857a6a", "gravity": -0.08, "drag": 1.2, "grow": 0.5, "x": True}, DUST),
+        rocks("#7a6e60", "#4a4238", 26, size=(0.12, 0.34)),
+        {"id": "gravel", "t": "emit", "at": 0, "life": 0.3, "burst": 40, "att": "ground", "from": "disc", "fr": 1.2, "dir": "up", "spread": 0.9,
+         "speed": [4, 10], "plife": [2.5, 3.5], "look": "model", "model": "rock_chunk", "mmat": "solid", "msize": [0.04, 0.1], "bounce": 0.15,
+         "mspin": 700, "col": "#6e6254", "c2": "#3a332b", "gravity": 18, "drag": 0.6, "x": True},
+    ])
+
+
 for name, fn in (("bf_fire", fire), ("bf_fire_air", fire_air), ("bf_fire_trail", fire_trail), ("bf_fire_cast", fire_cast),
                  ("bf_storm", storm), ("bf_storm_air", storm_air), ("bf_earth", earth), ("bf_earth_air", earth_air),
-                 ("bf_ice", ice), ("bf_ice_air", ice_air), ("bf_ice_trail", ice_trail), ("bf_ice_cast", ice_cast)):
+                 ("bf_ice", ice), ("bf_ice_air", ice_air), ("bf_ice_trail", ice_trail), ("bf_ice_cast", ice_cast), ("bf_collapse", collapse)):
     with open(os.path.join(OUT, name + ".fx.json"), "w", encoding="utf8") as f:
         json.dump(fn(), f, ensure_ascii=False, indent=1)
     print("wrote", name)

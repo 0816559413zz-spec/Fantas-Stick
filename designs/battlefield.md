@@ -2,7 +2,7 @@
 
 > **For Claude:** user plan for a "battlefield" feel. Read this before any work on dust/smoke/debris/scorch/grass.
 > Core rule from the user: **the map starts clean and pretty — every mark comes from players fighting** (no pre-placed wreckage). Marks stay until the match ends; a new match = clean map again.
-> Status: **ขั้น 0 done (user picked C). ขั้น 1 built 2026-10-27 (not hand-played)** — files/routing in HANDOFF §0 BATTLEFIELD. **ขั้น 3 built 2026-10-27** (new grass + persistent grass/ground scars + livelier ground). Next: ขั้น 2 (other marks/debris stay all match — the `SCAR` texture in js/50 can carry ground marks for grass maps already).
+> Status: **ขั้น 0 done (user picked C). ขั้น 1 built 2026-10-27 (not hand-played)** — files/routing in HANDOFF §0 BATTLEFIELD. **ขั้น 3 built 2026-10-27** (new grass + persistent grass/ground scars + livelier ground). **ขั้น 2 built 2026-10-28** (marks + rubble stay all match, collapse dust — js/44 §3c). Next: ขั้น 4 / 5.
 
 ## หลักการ
 - แมพเริ่มสวยสะอาด 100% ทุกร่องรอยมาจากการต่อสู้ของผู้เล่นเท่านั้น
@@ -26,7 +26,12 @@
 | ⛰️ หิน | ฝุ่นตอนหินโผล่/พุ่ง | ฝุ่นก้อนใหญ่ เศษกรวด พื้นแตก |
 | ❄️ น้ำแข็ง | ไอเย็นสีขาวไหลลงต่ำ | คราบน้ำแข็ง + ไอเย็นค้าง |
 
-## ขั้น 2 — ร่องรอยค้างบนพื้น + เศษซาก
+## ขั้น 2 — ร่องรอยค้างบนพื้น + เศษซาก ✅ ทำแล้ว 2026-10-28 (รอเล่นจริง)
+- ✅ รอยค้างทุกแมพ (ไม่ใช่แค่หญ้า): ไหม้ / สายฟ้าแตกแขนง / ดินแตก / น้ำแข็ง — ภาพ `assets/fx/tex/bf_marks.png` (`tools/bf-mark-gen.py`) • จุดเดิมซ้ำ = เข้มขึ้น • เก็บตำแหน่งไว้ทำหลุมจริงทีหลัง
+- ✅ เศษบ้าน/ตึก/หิน ตกแล้วค้างทั้งแมตช์ เยอะ + รก (ไม้คาน อิฐ หิน เหล็กเส้น กรวด) • ทุกสกิลที่โดนพื้นโปรยเศษตามธาตุ (หิน/เศษไหม้/เกล็ดน้ำแข็ง)
+- ✅ บ้าน/ตึกถล่มทั้งหลัง = ฝุ่นก้อนใหญ่ (`env/bf_collapse`) • ซากที่โดนไฟ = ควันกรุ่นสักพัก
+- ยังไม่ทำ: ตอไม้ไหม้/ต้นไม้ (รอขั้น 4 ต้นไม้ล้ม)
+แผนเดิม:
 - รอย (ยังไม่เป็นหลุมจริง — ผู้ใช้: "ในอนาคตจะทำเพิ่ม" → ออกแบบให้เปลี่ยนเป็นหลุมจริงได้ทีหลัง) ค้างทั้งแมตช์ หน้าตาตามธาตุ
 - เศษบ้าน/หิน/ไม้กองค้าง ไม่หาย (ตอนนี้หายใน 3–4 วิ)
 - บ้านถล่ม = ฝุ่นก้อนใหญ่ฟุ้ง • ของที่โดนเผาไฟค้างสักพัก → ตอไหม้/เถ้า

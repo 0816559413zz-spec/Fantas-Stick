@@ -191,12 +191,13 @@ function syncBld(dt){
   }
   BLDV.g.visible=true;
   for(const q of BLDV.list){
-    if(BLDG[q.b.i]&&q.b!==BLDG[q.b.i]){q.b=BLDG[q.b.i];q.key='';if(DEBRIS.length)clearDebris();}   // เริ่มเกมใหม่ แผนที่เดิม → สถานะชุดใหม่
+    if(BLDG[q.b.i]&&q.b!==BLDG[q.b.i]){q.b=BLDG[q.b.i];q.key='';q.gone=undefined;if(DEBRIS.length)clearDebris();}   // เริ่มเกมใหม่ แผนที่เดิม → สถานะชุดใหม่
     if(farCull(q.b.o.x,q.b.o.y,q.b.o.w)){if(q.g)q.g.visible=false;continue;}   // ไกลเกินหมอก: ซ่อน (ยังไม่เคยเห็น = ยังไม่สร้าง)
     if(q.g)q.g.visible=true;
     const file=MODELS.ready.has(q.b.D.model);   // แต่ละหลังใช้ไฟล์ของชนิดตัวเอง (บ้านหิมะ / บ้านลอนดอน)
     let key=file?'F':'C';for(const p of q.b.pc)key+=(p.fl&3)+'.'+p.cb+',';
     if(key!==q.key){
+      const gone=bldGone(q.b);if(gone&&q.gone===false)bfCollapse(q.b.o.x,q.b.o.y,q.b.o.w,q.b.o.d,q.b.pc.some(p=>p.fl&2));q.gone=gone;   // เพิ่งถล่มทั้งหลัง = ฝุ่นก้อนใหญ่ (js/44)
       q.key=key;if(q.g){BLDV.g.remove(q.g);disposeTree(q.g);}
       const r=bldBuild(q.b,file);q.g=r.g;q.ice=r.ice;BLDV.g.add(q.g);gl.shadowMap.needsUpdate=true;
     }
@@ -220,21 +221,26 @@ function bldDebris(ev){
   if(ck)bldChunkFall(b,j,ev.c,C,ev,fire,blast,fall);
   const M=bldMats(b),file=MODELS.ready.get(roof?'debris_wood':'debris_stone'),pool=[];
   if(file)file.scene.traverse(o=>{if(o.isMesh)pool.push(o);});
-  const n=ck?(blast?9:fall?3:6):blast?22:ice?16:12;
+  const n=ck?(blast?16:fall?7:11):blast?32:ice?22:20;   // สนามรบ: เศษเยอะ ๆ (ตกแล้วค้างทั้งแมตช์ — updateDebris → bfRest js/44)
   for(let k=0;k<n;k++){
     const lx=R[0]+(Math.random()*2-1)*R[2],ly=R[1]+(Math.random()*2-1)*R[3],[x,y]=bldWorld(b,lx,ly);
     const h=ck?C[4]+Math.random()*(C[5]-C[4]):roof?D.wh+Math.random()*D.rh*0.5:0.3+Math.random()*D.wh;
     let m;
     if(ice&&k%2===0)m=new THREE.Mesh(sGeo(THREE.OctahedronGeometry,0.35,0),bldIceMat());
     else if(pool.length){const src=pool[k%pool.length];m=new THREE.Mesh(src.geometry,src.material);}
-    else{m=new THREE.Mesh(sGeo(THREE.BoxGeometry,1,1,1),roof?(k%2?M.roof:M.beam):(k%3?M.wall:M.beam));m.scale.set(0.25+Math.random()*0.55,0.15+Math.random()*0.35,0.25+Math.random()*0.5);}
+    else{const t=k%5;m=new THREE.Mesh(sGeo(THREE.BoxGeometry,1,1,1),roof?(k%2?M.roof:M.beam):t<2?M.wall:t<4?M.beam:M.stone);
+      if(t===2||t===3)m.scale.set(0.12+Math.random()*0.1,0.1+Math.random()*0.08,0.9+Math.random()*1.6);   // ไม้คาน/แผ่นไม้ยาว
+      else m.scale.set(0.2+Math.random()*0.55,0.12+Math.random()*0.3,0.2+Math.random()*0.5);}
     if(fire&&m.material!==_bldIce)m.material=charMat(m.material);
     m.castShadow=true;m.position.set(tx(x),h+GY(x,y),tz(y));m.rotation.set(Math.random()*6,Math.random()*6,0);scene.add(m);
     let dx=x-ev.ox,dy=y-ev.oy;const dl=Math.hypot(dx,dy)||1;dx/=dl;dy/=dl;
     const sp=(blast?9:ice?5:3.5)*(0.6+Math.random()*0.8);
-    DEBRIS.push({m,vx:dx*sp+rnd(-1.5,1.5),vz:dy*sp+rnd(-1.5,1.5),vy:(blast?5:roof?0:2.5)+Math.random()*4,rx:rnd(-8,8),rz:rnd(-8,8),life:3+Math.random()*1.5,s0:m.scale.clone()});
+    DEBRIS.push({m,vx:dx*sp+rnd(-1.5,1.5),vz:dy*sp+rnd(-1.5,1.5),vy:(blast?5:roof?0:2.5)+Math.random()*4,rx:rnd(-8,8),rz:rnd(-8,8),life:3+Math.random()*1.5,s0:m.scale.clone(),fire});
   }
-  while(DEBRIS.length>180)scene.remove(DEBRIS.shift().m);
+  // เศษเล็กโปรยนิ่งรอบโคนผนัง (กรวด/อิฐ/ไม้) — ให้พื้นรอบบ้านรก ๆ
+  const sm=[M.wall,M.stone,M.beam].map(q=>fire?charMat(q):q),[bx,by]=bldWorld(b,R[0],R[1]);
+  bfScatter(bx,by,Math.max(R[2],R[3])+30,ck?(blast?10:6):16,sm,0.8);bfScatter(bx,by,Math.max(R[2],R[3])+40,ck?6:12,fire?'char':'rock',0.6);
+  debrisCap();
 }
 // ชิ้นย่อยที่พัง: ก๊อปชิ้นจริงจากไฟล์ (หรือกล่องสีผนัง) แล้วให้ร่วง/กระเด็นหมุนลงพื้น — เฉพาะเครื่องนี้
 function bldChunkFall(b,j,k,C,ev,fire,blast,fall){
@@ -247,18 +253,26 @@ function bldChunkFall(b,j,k,C,ev,fire,blast,fall){
   piv.position.set(tx(x),zc+GY(x,y),tz(y));piv.rotation.y=b.o.ry||0;scene.add(piv);
   let dx=x-ev.ox,dy=y-ev.oy;const dl=Math.hypot(dx,dy)||1;dx/=dl;dy/=dl;
   const sp=fall?0.6:blast?7:3;
-  DEBRIS.push({m:piv,vx:dx*sp+rnd(-0.6,0.6),vz:dy*sp+rnd(-0.6,0.6),vy:fall?0:blast?4:1.5,rx:rnd(-3,3)*(fall?0.5:1),rz:rnd(-3,3)*(fall?0.5:1),life:2.6+Math.random(),s0:piv.scale.clone(),big:1});
+  DEBRIS.push({m:piv,vx:dx*sp+rnd(-0.6,0.6),vz:dy*sp+rnd(-0.6,0.6),vy:fall?0:blast?4:1.5,rx:rnd(-3,3)*(fall?0.5:1),rz:rnd(-3,3)*(fall?0.5:1),life:2.6+Math.random(),s0:piv.scale.clone(),big:1,fire});
 }
+// ตก/กระดอน/ไถลบนพื้น (ระดับพื้นจริง GY) → หมดเวลาแล้วนิ่ง = ย้ายเข้ากองซากค้างทั้งแมตช์ (bfRest js/44) • สตูดิโอ VFX = หดหายแบบเดิม
 function updateDebris(dt){
   for(let i=DEBRIS.length-1;i>=0;i--){
     const q=DEBRIS[i],m=q.m;q.life-=dt;
+    if(q.gy===undefined)q.gy=GY(m.position.x/S3+MW/2,m.position.z/S3+MH/2);
     q.vy-=18*dt;m.position.x+=q.vx*dt;m.position.y+=q.vy*dt;m.position.z+=q.vz*dt;
-    const fy=q.big?0.35:0.1;if(m.position.y<fy){m.position.y=fy;q.vy=Math.abs(q.vy)*0.3;q.vx*=0.6;q.vz*=0.6;q.rx*=0.5;q.rz*=0.5;}
+    const fy=q.gy+(q.big?0.35:0.1);let gnd=false;
+    if(m.position.y<fy){m.position.y=fy;gnd=true;if(q.vy<-4&&q.big&&!q.dust){q.dust=1;const p=simOf(m.position);smoke(p.x,p.y,0.2,3,'#8a7a68',1.4,9,60);}
+      q.vy=Math.abs(q.vy)*0.3;q.vx*=0.6;q.vz*=0.6;q.rx*=0.5;q.rz*=0.5;if(q.vy<0.8)q.vy=0;}
+    if(gnd){const f=Math.exp(-5*dt);q.vx*=f;q.vz*=f;q.rx*=f;q.rz*=f;}
     m.rotation.x+=q.rx*dt;m.rotation.z+=q.rz*dt;
-    if(q.life<0.6)m.scale.copy(q.s0).multiplyScalar(Math.max(0.01,q.life/0.6));
-    if(q.life<=0){scene.remove(m);DEBRIS.splice(i,1);}
+    if(q.life<=0&&(q.keep||(q.keep=(gnd&&Math.hypot(q.vx,q.vz)<0.5)||q.life<-2?1:0))){DEBRIS.splice(i,1);debrisDrop(q);continue;}
   }
 }
+// ชิ้นที่จบแล้ว: ค้างเป็นซาก (ไฟไหม้ = มีควันกรุ่น) • ค้างไม่ได้ (สตูดิโอ) = ลบ
+function debrisDrop(q){if(!bfRest(q.m,q.fire,q.big))scene.remove(q.m);}
+// เศษที่กำลังบินเกินเพดาน: ทิ้งเศษเล็กเก่าสุดก่อน (ชิ้นผนังใหญ่เก็บไว้ให้ตกถึงพื้น) — ยังไม่ตกถึงพื้น = ลบ ไม่ค้างกลางอากาศ
+function debrisCap(){while(DEBRIS.length>260){let i=DEBRIS.findIndex(q=>!q.big);if(i<0)i=0;const q=DEBRIS.splice(i,1)[0];if(q.keep)debrisDrop(q);else scene.remove(q.m);}}
 function clearDebris(){for(const q of DEBRIS)scene.remove(q.m);DEBRIS.length=0;}
 function drawPropHint(me){
   const o=nearUseProp(me.x,me.y);if(!o)return;
