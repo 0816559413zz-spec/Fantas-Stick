@@ -95,7 +95,7 @@ function windDash(p,inp,pr,dt,setCd){
   const a=p.ang,ca=Math.cos(a),sa=Math.sin(a);p.shieldOn=false;
   for(const t of foesOf(p.team)){const dx=t.x-p.x,dy=t.y-p.y,d=Math.hypot(dx,dy);if(d>W_DS.reach+(t.r||PR)||Math.abs(angDiff(Math.atan2(dy,dx),a))>W_DS.cone||Math.abs(cH(t)-(p.z+1.1))>3.5)continue;
     knock(t,t.x-ca*10,t.y-sa*10,W_DS.push);t.wpush=0.8;t.wdk=0.8;t.wdkSrc=p.id;t.wdkN=t.solN|0;emit({k:'efx',z:'wndshit',x:Math.round(t.x),y:Math.round(t.y),h:cH(t)});}
-  p.vx=(p.vx||0)-ca*W_DS.back;p.vy=(p.vy||0)-sa*W_DS.back;p.vz=Math.max(p.vz||0,W_DS.vz);p.inv=Math.max(p.inv||0,0.15);
+  p.vx=(p.vx||0)-ca*W_DS.back;p.vy=(p.vy||0)-sa*W_DS.back;p.vz=Math.max(p.vz||0,W_DS.vz);   // (ไม่ใส่อมตะ: ตัวละครจะกะพริบหาย แต่ปีกยังอยู่ = ดูเหมือนปีกไม่ตามตัว)
   setCd('dodge',W_DS.cd*p.buffs.cdr);
   emit({k:'efx',z:'wnds',x:Math.round(p.x),y:Math.round(p.y),h:p.z,a:Math.round(a*100)/100,id:p.id});
   return false;}
@@ -120,12 +120,12 @@ function windDmg(t,amt,srcId){if(!(t.wwW>0)||!(t.stun>0)||srcId==null)return;con
   if(w.acc>=W_WL.boom)windWallBoom(w);}
 // กระสุนศัตรูชนกำแพงลม = หายไป + กำแพงเสีย HP (ศัตรูตีพังได้) • กระสุนพวกเดียวกันทะลุ (ผู้ใช้ 2026-10-28)
 function windProjHit(pr){if(!G.wwl)return false;
-  for(const w of G.wwl){if(w.dead||pr.team===w.team||pr.h>9)continue;if(wSeg(w,pr.x,pr.y).d<w.r+pr.r){emit({k:'efx',z:'wnwblk',x:Math.round(pr.x),y:Math.round(pr.y),h:pr.h,n:w.id});windWallHurt(w,pr.dmg||5);return true;}}
+  for(const w of G.wwl){if(w.dead||pr.team===w.team||pr.h>4.6)continue;if(wSeg(w,pr.x,pr.y).d<w.r+pr.r){emit({k:'efx',z:'wnwblk',x:Math.round(pr.x),y:Math.round(pr.y),h:pr.h,n:w.id});windWallHurt(w,pr.dmg||5);return true;}}
   return false;}
 function windWallHurt(w,n){if(w.dead||w.hp===undefined)return;w.hp-=n;if(w.hp<=0){w.dead=1;emit({k:'efx',z:'wnwboom',x:Math.round(w.x),y:Math.round(w.y),a:Math.round(w.a*100)/100,n:w.id,m:1});}}
 // ศัตรูเดินผ่านกำแพงลมไม่ได้ (พวกเดียวกันผ่านได้) — เรียกจาก collideWorld
 function windCollide(o,r,z){if(!G||!G.wwl||!G.wwl.length||o.team===undefined)return 0;let n=0;
-  for(const w of G.wwl){if(w.dead||w.team===o.team||z>=8.5||w.mv>0)continue;   // กำแพงที่กำลังดันทะลุผ่านคนconst s=wSeg(w,o.x,o.y),m=w.r+r;if(s.d>=m)continue;
+  for(const w of G.wwl){if(w.dead||w.team===o.team||z>=4.2||w.mv>0)continue;const s=wSeg(w,o.x,o.y),m=w.r+r;if(s.d>=m)continue;   // กำแพงที่กำลังดันทะลุผ่านคน
     if(s.d>0.001){o.x=s.qx+(o.x-s.qx)/s.d*m;o.y=s.qy+(o.y-s.qy)/s.d*m;}else{const sg=s.s>=0?1:-1;o.x=s.qx+Math.cos(w.a)*m*sg;o.y=s.qy+Math.sin(w.a)*m*sg;}
     n++;}
   return n;}
@@ -142,7 +142,7 @@ function updateWind(dt){
       // ดันไปข้างหน้า: กวาดศัตรูที่อยู่หน้ากำแพงไปด้วย หยุดเมื่อสุดระยะ
       if(w.mv>0){const st=Math.min(w.mv,W_WL.spd*dt),nx=Math.cos(w.a),ny=Math.sin(w.a);w.x+=nx*st;w.y+=ny*st;w.mv-=st;
         // ผู้ใช้ 2026-10-28: ดันแล้วไม่พาศัตรูไป — กำแพงทะลุผ่านศัตรูในทาง แต่ละคนโดนครั้งเดียว: สตัน 0.5 + 10 ดาเมจ
-        for(const t of foesOf(w.team)){if(w.pass[t.id])continue;const s=wSeg(w,t.x,t.y);if(s.d>w.r+(t.r||PR)+st||Math.abs(cH(t)-0)>8.5)continue;
+        for(const t of foesOf(w.team)){if(w.pass[t.id])continue;const s=wSeg(w,t.x,t.y);if(s.d>w.r+(t.r||PR)+st||cH(t)>4.6)continue;
           w.pass[t.id]=1;const o=G.players[w.owner];if(o)aoeHit(o,t,W_WL.pdmg,t=>addStun(t,W_WL.pstun));emit({k:'efx',z:'wnwpass',x:Math.round(t.x),y:Math.round(t.y),h:cH(t),a:Math.round(w.a*100)/100,n:w.id});}
         if(w.mv<=0)windWallStop(w);}
       // ศัตรูที่โดนผลัก (ความเร็วกระเด็นสูง) วิ่งชนกำแพง = สตัน 0.5 วิ

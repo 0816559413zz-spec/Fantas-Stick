@@ -68,7 +68,7 @@ rc=Image.new('RGBA',(CW,CH),(255,255,255,0));rc.putalpha(cur);rc.save(ROOT/'asse
 save(ROOT/'assets/fx/tex/wind_wall_curtain.tex.json',{'v':1,'desc':'ม่านเส้นลมกำแพง: เส้นตั้งจากพื้น ยอดสูงต่ำ จางหายก่อนขอบบน (เลื่อนแนวนอนได้ ห้ามเลื่อนแนวตั้ง)','gen':'image','seed':13,'px':1024,'cols':1,'rows':1,'kind':'loop','fps':24,'ramp':'white','add':True,'p':{}})
 
 # ---- รูปทรง: ผนังโค้ง (ปลายสองข้างโค้งเข้าหาผู้ร่าย +z) ยอดมนตรงปลาย ----
-R=10.9;AMAX=math.radians(35);HMAX=8.0   # กว้างรวม ~12.5 ม. = 250 หน่วยในเกม
+R=10.9;AMAX=math.radians(35);HMAX=4.2   # กว้างรวม ~12.5 ม. = 250 หน่วยในเกม
 def arc_wall(name,r,a0,a1,hmax,n=240,lift=0,seed=1):
     V=[];F=[];rg=random.Random(seed);jag=[1.0 for _ in range(n+1)]   # ยอดสูงต่ำมาจากภาพม่านแล้ว (ตัดรูปทรง = เห็นรอยตัด)
     for i in range(n+1):
@@ -110,7 +110,7 @@ save(ROOT/'assets/fx/mesh/wind_wall_line.mesh.json',{'v':1,'desc':'เส้น�
   {'id':'thin','k':'ribbon','path':[[round(c,4) for c in p] for p in ground_path(R-.22,.3)],'w':.025,'seg':160}]})
 
 # ---- เอฟเฟกต์ ----
-DUR=12.0   # ผู้ใช้ 2026-10-28: อยู่ 12 วิ (เดิม 6) • สูงกว่าตัวผู้เล่น (HMAX 3.4 → 5.0 → 8.0)
+DUR=12.0   # ผู้ใช้ 2026-10-28: อยู่ 12 วิ (เดิม 6) • สูงกว่าตัวผู้เล่น (HMAX 3.4 → 5.0 → 8.0 → 4.2: ผู้ใช้ 'ส่วนทึบสูง 2 เท่าตัวผู้เล่น' + ทึบขึ้น)
 grow={'0':[1,.02,1],'0.045':[1,1.08,1],'0.07':[1,1,1],'0.93':[1,1,1],'1':[1,.02,1]}
 fade=lambda pk:{'0':0,'0.03':pk,'0.94':pk,'1':0}
 def flick(seed,lo=.45,hi=.92,step=.22):
@@ -122,9 +122,9 @@ def flick(seed,lo=.45,hi=.92,step=.22):
         k[str(u)]=[1,round(max(.02,v*g),3),1];t+=step*rg.uniform(.7,1.3)
     k['1']=[1,.02,1];return k
 L=[]
-L.append({'id':'back','t':'mesh','at':0,'life':DUR,'att':'ground','pos':[0,0,R],'shape':'model','model':'wind_wall_back','mat':'tex','tex':'tex/wind_wall_curtain','col':'#4fd07a','col2':'#14663c','rim':0,'uvTile':[72.0,.96],'uvScroll':[-.015,0],'op':fade(.32),'scale':flick(4,.8,1.0,.27),'fade':0})
-L.append({'id':'body','t':'mesh','at':0,'life':DUR,'att':'ground','pos':[0,0,R],'shape':'model','model':'wind_wall_body','mat':'tex','tex':'tex/wind_wall_curtain','col':'#c9fff0','col2':'#3aa58a','rim':0,'uvTile':[51.4,.96],'uvScroll':[.01,0],'op':fade(.34),'scale':flick(3,.82,1.0,.3),'fade':0})
-L.append({'id':'body2','t':'mesh','at':0,'life':DUR,'att':'ground','pos':[0,0,R],'shape':'model','model':'wind_wall_body','mat':'tex','tex':'tex/wind_wall_curtain','col':'#ffffff','col2':'#c9fff0','rim':0,'uvTile':[30.9,.96],'uvScroll':[.02,0],'op':fade(.12),'scale':grow,'fade':0})
+L.append({'id':'back','t':'mesh','at':0,'life':DUR,'att':'ground','pos':[0,0,R],'shape':'model','model':'wind_wall_back','mat':'tex','tex':'tex/wind_wall_curtain','col':'#4fd07a','col2':'#14663c','rim':0,'uvTile':[72.0,.96],'uvScroll':[-.015,0],'op':fade(.5),'scale':flick(4,.8,1.0,.27),'fade':0})
+L.append({'id':'body','t':'mesh','at':0,'life':DUR,'att':'ground','pos':[0,0,R],'shape':'model','model':'wind_wall_body','mat':'tex','tex':'tex/wind_wall_curtain','col':'#c9fff0','col2':'#3aa58a','rim':0,'uvTile':[51.4,.96],'uvScroll':[.01,0],'op':fade(.62),'scale':flick(3,.82,1.0,.3),'fade':0})
+L.append({'id':'body2','t':'mesh','at':0,'life':DUR,'att':'ground','pos':[0,0,R],'shape':'model','model':'wind_wall_body','mat':'tex','tex':'tex/wind_wall_curtain','col':'#ffffff','col2':'#c9fff0','rim':0,'uvTile':[30.9,.96],'uvScroll':[.02,0],'op':fade(.25),'scale':grow,'fade':0})
 # ยอดเส้นลมขยับขึ้นลงตลอดเหมือนเปลวไฟ (ผู้ใช้ 2026-10-27): 6 ชั้นปลายเส้น แต่ละชั้นสูง-ต่ำสุ่มคนละจังหวะ แตะเพดานนาน ๆ ครั้ง
 for j,(col,c2,tile,sx,pk) in enumerate([('#c9fff0','#4fd07a',[7,1],.03,.45),('#4fd07a','#14663c',[11,.9],-.02,.38),('#ffffff','#c9fff0',[5,1],.05,.3),
                                          ('#7fe8b0','#2fae5e',[9,1.1],-.04,.36),('#c9fff0','#3aa58a',[13,.95],.02,.32),('#4fd07a','#14663c',[6,1.05],-.03,.34)]):
