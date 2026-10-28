@@ -8,4 +8,4 @@ Cropped (background removed) and recoloured white; otherwise unmodified.
 - **sbed**: poison-cloud
 
 - **Fantas Stick (self-made, 2026-10-20, same licence as the game)**: p_earth, b_earth, sh_earth, dsh_earth, stonebreaker, mudswamp, tectoniccrush, dustburst, terraauger, wrath, cb_earth, tectoniccrush_sq — simple shapes drawn for the Earth path.
-
+- **Fantas Stick (self-made, 2026-10-28, same licence as the game)**: p_wind, b_wind, sh_wind, dsh_wind, aegisgale, windrift, vortexbind, voidspheres, featherwing, eyeofheaven — simple shapes drawn for the Wind path.
