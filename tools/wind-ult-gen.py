@@ -99,14 +99,14 @@ L.append({'id':'a_light','t':'light','at':0,'life':T_SLAM+.2,'att':'feet','pos':
 
 # ---------- B: wand planted — impact wave over the whole zone, everyone floats, the wall rises after ----------
 SP=[0,.05,.9]
-L.append({'id':'b_flash','t':'flash','at':T_SLAM,'life':.14,'att':'feet','pos':[0,.4,.9],'col':G['inner'],'size0':.5,'size':3,'k':.8})
+L.append({'id':'b_flash','t':'flash','at':T_SLAM,'life':.14,'att':'feet','pos':[0,.4,.9],'col':G['inner'],'size0':.4,'size':1.8,'k':.6})
 L.append({'id':'b_shock','t':'warp','at':T_SLAM,'life':.45,'att':'feet','pos':[0,.15,.9],'kind':'shock','flat':True,'size':{'0':.5,'1':R},'str':1,'op':{'0':1,'1':0},'col':G['inner'],'glow':.05})
-for k,(col,c2,inn,dl) in enumerate([(G['hi'],G['neon'],.94,0),(G['mid'],G['outer'],.9,.06)]):
+for k,(col,c2,inn,dl) in enumerate([(G['hi'],G['neon'],.975,0),(G['mid'],G['outer'],.96,.06)]):
     L.append({'id':f'b_ring{k}','t':'mesh','at':round(T_SLAM+dl,3),'life':.5,'att':'feet','shape':'ring','inner':inn,'mat':'energy','rim':0,'col':col,'col2':c2,'pos':[0,.08+k*.03,.9],
-        'scale':{'0':.5,'1':R,'ease':'out'},'op':{'0':1,'0.7':.8,'1':0},'fade':0})
+        'scale':{'0':.5,'1':R,'ease':'out'},'op':{'0':.8,'0.6':.5,'1':0},'fade':0})
 L.append({'id':'b_streaks','t':'emit','at':T_SLAM,'life':.05,'att':'feet','pos':SP,'burst':80,'rate':0,'from':'ring','fr':.6,'dir':'flat','speed':[26,36],'up':[0,.8],
     'plife':[.4,.55],'look':'streak','size':[1.4,2.6],'col':G['inner'],'c2':G['mid'],'gravity':0,'drag':.8,'curl':False})
-for k,(tex,col,sc,sp) in enumerate([('wind_swoosh_a_hi',G['hi'],3.5,520),('wind_swoosh_b',G['mid'],5,-420)]):
+for k,(tex,col,sc,sp) in enumerate([('wind_swoosh_a_hi',G['hi'],2.2,520),('wind_swoosh_b',G['mid'],3,-420)]):
     L.append({'id':f'b_swirl{k}','t':'mesh','at':T_SLAM,'life':.55,'att':'feet','shape':'model','model':'wind_groundswirl','mat':'tex','tex':T(tex),'col':col,'col2':'#000000','rim':0,
         'uvTile':[1,1],'uvScroll':[0,0],'pos':[0,.06+k*.03,.9],'rot':[0,k*90,0],'scale':{'0':sc*.2,'1':sc,'ease':'out'},'spin':sp,'op':{'0':0,'0.1':.95,'1':0},'fade':0})
 L.append({'id':'b_dust','t':'emit','at':T_SLAM,'life':.08,'att':'feet','pos':SP,'burst':20,'rate':0,'from':'ring','fr':1,'dir':'flat','speed':[4,7],'up':[.2,.8],
@@ -130,22 +130,71 @@ for i,(a,r) in enumerate(ENS):
         'uvTile':[1,1],'uvScroll':[0,0],'pos':{'0':[x,.1,z],'0.3':[x,1.1,z],'1':[x,1.3,z]},'scale':.9,'spin':300,'op':{'0':0,'0.15':.8,'0.9':.8,'1':0},'fade':0})
     L.append({'id':f'b_floatmotes{i}','t':'emit','at':T_SLAM+.05,'life':round(T_IMP-T_SLAM,3),'att':'feet','pos':{'0':[x,.8,z],'0.3':[x,2,z],'1':[x,2.2,z]},'rate':20,'from':'ring','fr':.7,'dir':'tangent',
         'speed':[1,2],'plife':[.4,.6],'look':'glow','size':[.6,1],'col':G['neon'],'c2':G['outer'],'gravity':0,'drag':0})
-# the round wind wall rises after everyone floats — 8 pieces (bright seams), curtain of falling wind, glowing ground line
-WK={'0':[R,.01,R],'0.06':[R,WH*1.08,R],'0.09':[R,WH,R],'0.94':[R,WH,R],'1':[R,.01,R]}
-WL=round(WALL_END+.4-T_WALL,3)
-for k,(col,c2,til,scr,o) in enumerate([('#4fd07a','#14663c',300,-.006,.55),('#c9fff0','#3aa58a',220,.004,.4),('#ffffff','#c9fff0',140,.008,.18)]):
-    L.append({'id':f'w_curtain{k}','t':'mesh','at':T_WALL,'life':WL,'att':'ground','shape':'cylinder','mat':'tex','tex':T('wind_wall_curtain'),'col':col,'col2':c2,'rim':0,
-        'uvTile':[til,.96],'uvScroll':[scr,0],'pos':[0,0,0],'scale':{kk:[v[0]*(1+k*.006),v[1],v[2]*(1+k*.006)] for kk,v in WK.items()},'op':{'0':0,'0.04':o,'0.93':o,'1':0},'fade':0})
-L.append({'id':'w_fall','t':'mesh','at':T_WALL,'life':WL,'att':'ground','shape':'cylinder','mat':'tex','tex':T('wind_wall_fall'),'col':G['inner'],'col2':G['mid'],'rim':0,
-    'uvTile':[90,1],'uvScroll':[0,-.9],'pos':[0,0,0],'scale':{kk:[v[0]*.995,v[1],v[2]*.995] for kk,v in WK.items()},'op':{'0':0,'0.04':.5,'0.93':.5,'1':0},'fade':0})
-L.append({'id':'w_line','t':'mesh','at':T_WALL,'life':WL,'att':'ground','shape':'ring','inner':.98,'mat':'energy','rim':0,'col':G['inner'],'col2':G['mid'],'pos':[0,.04,0],'scale':R*1.01,
-    'op':{'0':0,'0.03':1,'0.94':.9,'1':0},'fade':0})
-for s in range(8):
-    a=math.radians(s*45+22.5);x,z=round(R*math.sin(a),2),round(R*math.cos(a),2)
-    L.append({'id':f'w_seam{s}','t':'mesh','at':T_WALL,'life':WL,'att':'ground','shape':'cylinder','mat':'tex','tex':T('wind_wall_fall'),'col':G['hi'],'col2':G['neon'],'rim':0,
-        'uvTile':[2,1],'uvScroll':[0,-1.4],'pos':[x,0,z],'scale':{kk:[.35,v[1]*1.04,.35] for kk,v in WK.items()},'op':{'0':0,'0.04':.9,'0.93':.85,'1':0},'fade':0})
-L.append({'id':'w_rise','t':'emit','at':T_WALL,'life':.3,'att':'ground','pos':[0,.1,0],'rate':200,'from':'ring','fr':R,'dir':'up','spread':.1,'speed':[10,16],'plife':[.25,.4],
-    'look':'streak','size':[1.2,2.2],'col':G['inner'],'c2':G['mid'],'gravity':0,'drag':1,'curl':False})
+# the round wind wall rises after everyone floats — 8 real Aegis Gale wall pieces in a circle (user: "same like the wind
+# wall we designed"). Ring meshes wind_ringwall_* = the wall's own arc shapes (tools/wind-wall-gen.py) rebuilt at radius R,
+# 8 arcs of 42° (each ≈ one normal wall, 13 m) with small gaps; the layers are the approved wind/wall layers, retimed.
+WA=math.radians(21);WHM=3.4;RW=R
+def _rot(p,th):x,y,z=p;return [round(x*math.cos(th)+z*math.sin(th),4),round(y,4),round(-x*math.sin(th)+z*math.cos(th),4)]
+SEGA=[math.radians(s*45+22.5) for s in range(8)]
+def ring_wall(name,r,a0,a1,hmax,n=60,lift=0):
+    parts=[]
+    for k,th in enumerate(SEGA):
+        V=[];F=[]
+        for i in range(n+1):
+            a=a0+(a1-a0)*i/n;e=abs(a)/WA;h=hmax*max(.08,(1-e**6))**.5
+            V+=[_rot([r*math.sin(a),lift,-r*math.cos(a)],th),_rot([r*math.sin(a),lift+h,-r*math.cos(a)],th)]
+            if i<n:F.append([2*i,2*i+2,2*i+3,2*i+1])
+        parts.append({'id':f'{name}{k}','k':'poly','v':V,'f':F})
+    return parts
+def ring_band(name,r,y0,y1,a0,a1,n=12):
+    parts=[]
+    for k,th in enumerate(SEGA):
+        V=[];F=[]
+        for i in range(n+1):
+            a=a0+(a1-a0)*i/n;e=abs(a)/WA;sc=max(.08,(1-e**6))**.5
+            V+=[_rot([r*math.sin(a),y0*sc,-r*math.cos(a)],th),_rot([r*math.sin(a),y1*sc,-r*math.cos(a)],th)]
+            if i<n:F.append([2*i,2*i+2,2*i+3,2*i+1])
+        parts.append({'id':f'{name}{k}','k':'poly','v':V,'f':F})
+    return parts
+def ring_line(r,curl):
+    out=[]
+    for k,th in enumerate(SEGA):
+        P=[[r*math.sin(-WA+2*WA*i/16),.02,-r*math.cos(-WA+2*WA*i/16)] for i in range(17)]
+        def tail(sg):
+            a=sg*WA;cx=r*math.sin(a);cz=-r*math.cos(a);o=[]
+            for q in range(1,9):
+                t=q/8;ang=t*math.pi*1.6;rr=curl*(1-t*.75)
+                o.append([cx+sg*(math.sin(ang)*rr*.8)+sg*t*.25,.02,cz+(1-math.cos(ang))*rr])
+            return o
+        pts=[p for p in reversed(tail(-1))]+P+tail(1)
+        out.append([_rot(p,th) for p in pts])
+    return out
+MESH=ROOT/'assets/fx/mesh'
+def msave(n,d,parts):(MESH/f'{n}.mesh.json').write_text(json.dumps({'v':1,'desc':d,'pal':'wind','mat':'solid','parts':parts},ensure_ascii=False),encoding='utf-8')
+msave('wind_ringwall_body','อัลติ: กำแพงลมวงกลม 8 ชิ้น (ผิวหลัก) รูปเดียวกับกำแพงลม',ring_wall('body',RW,-WA,WA,WHM))
+msave('wind_ringwall_back','อัลติ: กำแพงลมวงกลม 8 ชิ้น (ชั้นหลัง)',ring_wall('back',RW+.18,-WA,WA,WHM*1.04))
+NSEG=14;OVL=.35
+for q in range(NSEG):
+    w=2*WA/NSEG;a0=-WA+q*w-w*OVL;a1=-WA+(q+1)*w+w*OVL
+    msave(f'wind_ringwall_tips{q}',f'อัลติ: แถบปลายเส้นลมยอดกำแพงวง ช่วง {q}',ring_band('tips',RW+.04+.01*(q%3),1.35,3.7,max(-WA,a0),min(WA,a1)))
+E=math.radians(5)
+msave('wind_ringwall_ends','อัลติ: ปลายกำแพงวงทั้ง 16 ข้าง (สว่าง)',ring_wall('endL',RW-.06,-WA,-WA+E,WHM,6)+ring_wall('endR',RW-.06,WA-E,WA,WHM,6))
+(MESH/'wind_ringwall_line.mesh.json').write_text(json.dumps({'v':1,'desc':'อัลติ: เส้นพื้นกำแพงวง ปลายม้วน','pal':'wind','mat':'glow','parts':
+    [{'id':f'main{k}','k':'ribbon','path':[[round(c,4) for c in p] for p in pts],'w':.07,'seg':80} for k,pts in enumerate(ring_line(RW+.05,.55))]+
+    [{'id':f'thin{k}','k':'ribbon','path':[[round(c,4) for c in p] for p in pts],'w':.025,'seg':80} for k,pts in enumerate(ring_line(RW-.22,.3))]},ensure_ascii=False),encoding='utf-8')
+WALLFX=json.loads((ROOT/'assets/fx/wind/wall.fx.json').read_text(encoding='utf-8'))
+WL=round(WALL_END+.4-T_WALL,3);KW=WL/WALLFX.get('dur',6.0)
+for w in WALLFX['layers']:
+    if w.get('loop') or (w['t']=='emit' and isinstance(w.get('pos'),list) and w['pos']!=[0,0,10.9] and not w.get('of')):continue   # gusts / end wisps belong to one straight wall
+    if w['t']=='mesh' and not str(w.get('model','')).startswith('wind_wall_'):continue
+    n=json.loads(json.dumps(w));n['id']='w_'+w['id']
+    if 'of' in n:n['of']='w_'+n['of']
+    if n['t']=='mesh':n['model']=n['model'].replace('wind_wall_','wind_ringwall_')
+    if 'pos' in n:n['pos']=[0,0,0]
+    n['at']=round(T_WALL+w.get('at',0)*KW,3);n['life']=round(w.get('life',.4)*KW,3)
+    if n['t']=='emit' and n.get('rate'):n['rate']=min(200,round(n['rate']*1.6))      # 8 pieces of wall to cover
+    if n['t']=='emit' and n.get('burst'):n['burst']=min(80,n['burst']*2)
+    L.append(n)
 L.append({'id':'w_end','t':'emit','at':WALL_END,'life':.35,'att':'ground','pos':[0,1.5,0],'rate':200,'from':'ring','fr':R,'dir':'up','spread':.3,'speed':[4,8],'plife':[.4,.7],
     'look':'model','model':'wind_wing_airchip','mmat':'glow','msize':[.12,.26],'col':G['mid'],'c2':G['outer'],'mspin':400,'gravity':-1,'drag':1,'bounce':0})
 L.append({'id':'w_endstreak','t':'emit','at':WALL_END,'life':.35,'att':'ground','pos':[0,.5,0],'rate':200,'from':'ring','fr':R,'dir':'up','spread':.15,'speed':[8,14],'plife':[.3,.5],
@@ -158,19 +207,19 @@ L.append({'id':'c_suck','t':'emit','at':T_WRAP+.15,'life':round(T_IMP-T_WRAP-.15
 L.append({'id':'c_glow','t':'emit','at':T_WRAP+.1,'life':round(T_IMP-T_WRAP-.1,3),'att':'feet','pos':CP,'rate':60,'from':'sphere','fr':1.1,'dir':'out','speed':[.3,1],'plife':[.25,.4],
     'look':'glow','size':[2,3.5],'col':G['neon'],'c2':G['outer'],'gravity':0,'drag':2})
 L.append({'id':'c_light','t':'light','at':T_WRAP,'life':round(T_IMP-T_WRAP+.5,3),'att':'feet','pos':CP,'col':G['neon'],'int':{'0':.5,'0.7':2.5,'0.75':2.5,'1':0},'dist':12})
-L.append({'id':'c_flash','t':'flash','at':T_IMP,'life':.16,'att':'feet','pos':CP,'col':G['inner'],'size0':.8,'size':5,'k':.9})
-L.append({'id':'c_shock','t':'warp','at':T_IMP,'life':.4,'att':'feet','pos':CP,'kind':'shock','size':{'0':.5,'1':9},'str':1,'op':{'0':1,'1':0},'col':G['inner'],'glow':.05})
+L.append({'id':'c_flash','t':'flash','at':T_IMP,'life':.16,'att':'feet','pos':CP,'col':G['inner'],'size0':.5,'size':2.6,'k':.7})
+L.append({'id':'c_shock','t':'warp','at':T_IMP,'life':.4,'att':'feet','pos':CP,'kind':'shock','size':{'0':.4,'1':4.5},'str':.8,'op':{'0':1,'1':0},'col':G['inner'],'glow':.05})
 L.append({'id':'c_shockfloor','t':'warp','at':T_IMP,'life':.4,'att':'feet','pos':[0,.15,0],'kind':'shock','flat':True,'size':{'0':1,'1':R},'str':1,'op':{'0':1,'1':0},'col':G['inner'],'glow':.04})
 for k,(col,c2,inn,y,dl) in enumerate([(G['hi'],G['neon'],.9,CP[1],0),(G['mid'],G['outer'],.86,CP[1]-.6,.04),(G['inner'],G['mid'],.94,.1,.02)]):
     L.append({'id':f'c_ring{k}','t':'mesh','at':round(T_IMP+dl,3),'life':.36,'att':'feet','shape':'ring','inner':inn,'mat':'energy','rim':0,'col':col,'col2':c2,'pos':[0,round(y,2),0],
-        'scale':{'0':1,'1':R-.3,'ease':'out'},'op':{'0':1,'0.75':.85,'1':0},'fade':0})
+        'scale':{'0':1,'1':(R-.3) if k==2 else 9,'ease':'out'},'op':{'0':.9 if k==2 else .7,'0.75':.6,'1':0},'fade':0})
 # 16 wind curls racing outward in every direction (fast)
-for j in range(16):
-    a=j*22.5+(7 if j%2 else 0);sa,ca=math.sin(math.radians(a)),math.cos(math.radians(a));y=[.7,1.6,2.4][j%3]
+for j in range(10):
+    a=j*36+(9 if j%2 else 0);sa,ca=math.sin(math.radians(a)),math.cos(math.radians(a));y=[.7,1.6,2.4][j%3]
     for k,(tex,col,m) in enumerate([('wind_swoosh_a_hi',G['hi'],1.0),('wind_swoosh_b',[G['mid'],G['aqua'],G['neon']][j%3],1.3)]):
         L.append({'id':f'c_curl{j}_{k}','t':'mesh','at':round(T_IMP+(j%4)*.012,3),'life':.5,'att':'feet','shape':'model','model':f'wind_pieces{(j+k)%3}','mat':'tex','tex':T(tex),'col':col,'col2':'#000000','rim':0,
             'uvTile':[1,1],'uvScroll':[0,0],'pos':{'0':[round(1.2*sa,2),y,round(1.2*ca,2)],'0.6':[round((R-2)*sa,2),y,round((R-2)*ca,2)],'1':[round((R-.8)*sa,2),y+.3,round((R-.8)*ca,2)],'ease':'out'},
-            'rot':[0,round(a+90,1),j*25],'scale':{'0':[.5*m,.2,.5*m],'0.5':[1.3*m,.3,1.3*m],'1':[1.8*m,.2,1.8*m],'ease':'out'},'spin':(-700 if j%2 else 700),'op':{'0':0,'0.06':.95,'0.7':.6,'1':0},'fade':0})
+            'rot':[0,round(a+90,1),j*25],'scale':{'0':[.4*m,.2,.4*m],'0.5':[.85*m,.25,.85*m],'1':[1.1*m,.2,1.1*m],'ease':'out'},'spin':(-700 if j%2 else 700),'op':{'0':0,'0.06':.95,'0.7':.6,'1':0},'fade':0})
 L.append({'id':'c_blast','t':'emit','at':T_IMP,'life':.05,'att':'feet','pos':CP,'burst':80,'rate':0,'from':'sphere','fr':.8,'dir':'flat','speed':[30,42],'up':[-2,2],'plife':[.35,.5],
     'look':'streak','size':[1.6,3],'col':G['inner'],'c2':G['mid'],'gravity':0,'drag':.6,'curl':False})
 L.append({'id':'c_floor','t':'emit','at':T_IMP,'life':.05,'att':'feet','pos':[0,.1,0],'burst':80,'rate':0,'from':'ring','fr':1,'dir':'flat','speed':[28,38],'up':[0,.6],'plife':[.4,.55],
@@ -183,7 +232,7 @@ L.append({'id':'c_chips','t':'emit','at':T_IMP,'life':.05,'att':'feet','pos':CP,
     'look':'model','model':'wind_wing_airchip','mmat':'glow','msize':[.14,.3],'col':G['neon'],'c2':G['outer'],'mspin':600,'gravity':1,'drag':1,'bounce':0})
 L.append({'id':'c_dust','t':'emit','at':T_IMP+.05,'life':.1,'att':'feet','pos':[0,.2,0],'burst':40,'rate':0,'from':'ring','fr':3,'dir':'flat','speed':[10,16],'up':[0,1],'plife':[.7,1.1],
     'look':'smoke','size':[7,12],'grow':1,'col':'#d9e3dc','c2':'#8a9690','gravity':-.2,'drag':1.5,'x':True})
-L.append({'id':'c_shake','t':'screen','at':T_IMP,'life':.3,'shake':3,'own':True})
+L.append({'id':'c_shake','t':'screen','at':T_IMP,'life':.3,'shake':2,'own':True})
 L.append({'id':'c_shake2','t':'screen','at':T_IMP,'life':.2,'shake':1.4,'other':True})
 
 # ---------- enemies slam into the wall: ripples, cracks, stun 3 s (sample enemies) ----------
