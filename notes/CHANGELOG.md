@@ -1,5 +1,6 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
 
+- 2026-10-28 — **Featherwing VFX approved (user)** — `wind/featherwing` approved as it is (wings 1.6× while flying). Not bound in game yet; the Featherwing skill code does not exist.
 - 2026-10-28 — **Featherwing: bigger wings while flying (user)** — the wings grow to 1.6× during take-off, stay big through the flight and the flick, and shrink back to normal after landing. The tip wind and the flick centre were moved out and up to match.
 - 2026-10-28 — **Wind Featherwing VFX draft (user design)** — new `wind/featherwing` from `tools/wind-featherwing-gen.py`: take-off flap + ground ring; mostly gliding with rare light flaps; charge with an instant neon glow, then a forward wing flick that sends a wind fan down to the ground; fall back to the open-wing pose. No ink. Waiting for the user's review.
 - 2026-10-28 — **Void Spheres VFX approved (user)** — `wind/void_spheres` and `wind/void_orb` approved as they are. Not bound in game yet; the Void Spheres skill code does not exist.
