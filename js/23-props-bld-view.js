@@ -127,11 +127,16 @@ function bldFallbackChunks(b,j,q){
     m.scale.set(C[2]*2*S3,C[5]-C[4],C[3]*2*S3);m.position.set(C[0]*S3,(C[4]+C[5])/2,C[1]*S3);g.add(m);}
   return g;
 }
-// เศษกองที่โคนผนังตรงชิ้นที่พัง (ติดกับบ้าน รวม mesh ไปด้วย)
+// เศษกองที่โคนผนังตรงชิ้นที่พัง (ติดกับบ้าน รวม mesh ไปด้วย) • ชิ้นแถวล่าง = เนินซากเตี้ย ๆ (ก้อนหยาบ + อิฐ/คาน) ทั้งในและนอกบ้าน — ภาพล้วน ไม่มีที่ชน
 function bldRubble(b,j,k,g,M){
-  const C=bldChunk(b,j,k),R=mulberry(b.i*131+j*17+k*7+3),n=C[4]<0.1?3:1;
-  for(let i=0;i<n;i++){const m=new THREE.Mesh(sGeo(THREE.BoxGeometry,1,1,1),i%2?M.beam:M.stone);
-    m.scale.set(0.3+R()*0.5,0.15+R()*0.25,0.3+R()*0.45);m.position.set((C[0]+(R()*2-1)*C[2])*S3+(j===2?-1:j===3?1:0)*R()*0.8,0.1,(C[1]+(R()*2-1)*C[3])*S3+(j===0?1:j===1?-1:0)*R()*0.8);m.rotation.set(R()*0.6,R()*3,R()*0.6);g.add(m);}
+  const C=bldChunk(b,j,k),R=mulberry(b.i*131+j*17+k*7+3),low=C[4]<0.1,out=[j===0?0:j===1?0:j===2?-1:1,j===0?1:j===1?-1:0];   // ทิศออกนอกบ้าน (local)
+  if(low)for(const sd of [1,-0.6]){const m=new THREE.Mesh(sGeo(THREE.DodecahedronGeometry,1,1),R()<0.5?M.stone:M.wall);
+    const sz=(C[2]+C[3])*S3;m.scale.set(sz*(0.9+R()*0.4),0.35+R()*0.3,sz*(0.8+R()*0.4));
+    m.position.set((C[0]+out[0]*(C[2]+12)*sd)*S3,0,(C[1]+out[1]*(C[3]+12)*sd)*S3);m.rotation.y=R()*3;g.add(m);}
+  const n=low?5:2;
+  for(let i=0;i<n;i++){const m=new THREE.Mesh(sGeo(THREE.BoxGeometry,1,1,1),i%3===2?M.beam:i%2?M.wall:M.stone),sd=R()<0.7?1:-0.6;
+    if(i%3===2)m.scale.set(0.16,0.14,0.9+R()*1.2);else m.scale.set(0.3+R()*0.5,0.15+R()*0.25,0.3+R()*0.45);
+    m.position.set((C[0]+(R()*2-1)*C[2]+out[0]*R()*40*sd)*S3,0.15+(low?R()*0.3:0),(C[1]+(R()*2-1)*C[3]+out[1]*R()*40*sd)*S3);m.rotation.set(R()*0.7,R()*3,R()*0.7);g.add(m);}
 }
 // เนินกองซาก: ผิวเนินตามสูตรเดียวกับฝั่งโฮสต์ (bldMoundAt) + ผิวขรุขระนิดหน่อย + ไม้คาน/ก้อนหิน/ชิ้นผนัง/แผ่นหลังคาโผล่บนผิว
 let _moundMat=null;
@@ -148,7 +153,7 @@ function bldMound(b,M,charred){
   if(!_moundMat)_moundMat=new THREE.MeshStandardMaterial({vertexColors:true,roughness:0.95,flatShading:true});
   G3.add(new THREE.Mesh(geo,_moundMat));
   const mats=[M.beam,M.beam,M.stone,M.stone,M.wall,M.roof].map(m=>charred?charMat(m):m);
-  for(let k=0;k<56;k++){const r=Math.sqrt(R())*0.9,a=R()*Math.PI*2,x=Math.cos(a)*A*r,z=Math.sin(a)*C*r,t=k%6,m=new THREE.Mesh(sGeo(THREE.BoxGeometry,1,1,1),mats[t]);
+  for(let k=0;k<80;k++){const r=Math.sqrt(R())*0.9,a=R()*Math.PI*2,x=Math.cos(a)*A*r,z=Math.sin(a)*C*r,t=k%6,m=new THREE.Mesh(sGeo(THREE.BoxGeometry,1,1,1),mats[t]);
     let tilt=0.9;
     if(t<2){m.scale.set(0.22,0.22,1.6+R()*2.6);if(k%4===0)tilt=2.2;}            // คาน (บางอันเสียบเอียงขึ้นฟ้า)
     else if(t<4)m.scale.set(0.35+R()*0.6,0.25+R()*0.4,0.35+R()*0.6);              // ก้อนหิน
@@ -221,7 +226,7 @@ function bldDebris(ev){
   if(ck)bldChunkFall(b,j,ev.c,C,ev,fire,blast,fall);
   const M=bldMats(b),file=MODELS.ready.get(roof?'debris_wood':'debris_stone'),pool=[];
   if(file)file.scene.traverse(o=>{if(o.isMesh)pool.push(o);});
-  const n=ck?(blast?16:fall?7:11):blast?32:ice?22:20;   // สนามรบ: เศษเยอะ ๆ (ตกแล้วค้างทั้งแมตช์ — updateDebris → bfRest js/44)
+  const n=ck?(blast?11:fall?5:8):blast?22:ice?15:14;   // สนามรบ: เศษพอประมาณ (ผู้ใช้ 2026-10-28: น้อยลงนิด เนินเพิ่ม) ตกแล้วค้างทั้งแมตช์ — updateDebris → bfRest js/44
   for(let k=0;k<n;k++){
     const lx=R[0]+(Math.random()*2-1)*R[2],ly=R[1]+(Math.random()*2-1)*R[3],[x,y]=bldWorld(b,lx,ly);
     const h=ck?C[4]+Math.random()*(C[5]-C[4]):roof?D.wh+Math.random()*D.rh*0.5:0.3+Math.random()*D.wh;
@@ -239,7 +244,7 @@ function bldDebris(ev){
   }
   // เศษเล็กโปรยนิ่งรอบโคนผนัง (กรวด/อิฐ/ไม้) — ให้พื้นรอบบ้านรก ๆ
   const sm=[M.wall,M.stone,M.beam].map(q=>fire?charMat(q):q),[bx,by]=bldWorld(b,R[0],R[1]);
-  bfScatter(bx,by,Math.max(R[2],R[3])+30,ck?(blast?10:6):16,sm,0.8);bfScatter(bx,by,Math.max(R[2],R[3])+40,ck?6:12,fire?'char':'rock',0.6);
+  bfScatter(bx,by,Math.max(R[2],R[3])+30,ck?(blast?6:4):10,sm,0.8);bfScatter(bx,by,Math.max(R[2],R[3])+40,ck?4:8,fire?'char':'rock',0.6);
   debrisCap();
 }
 // ชิ้นย่อยที่พัง: ก๊อปชิ้นจริงจากไฟล์ (หรือกล่องสีผนัง) แล้วให้ร่วง/กระเด็นหมุนลงพื้น — เฉพาะเครื่องนี้

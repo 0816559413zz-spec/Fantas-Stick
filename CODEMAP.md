@@ -11,18 +11,18 @@ CITY_PLAN:6 CITY_ZN:11 CITY_PLAZA:12 genCity:13 cityProps:125
 ## js/02-citytest.js (28) — แมพทดสอบเมืองใหญ่ (กล่องเทา) — ใช้วัดความลื่นของเครื่องยนต์ก่อนสร้างเ…
 CITY_N:4 CITY_B:4 CITY_ROAD:4 genCityTest:5 cityTestProps:19
 
-## js/02-data.js (371) — 
+## js/02-data.js (372) — 
 W:4 H:4 PR:4 PILLARS:6 SPAWNF:7 mulberry:9 genForest:10 genPitch:27 genHogsmeade:36
 §54 แผนที่โล่ง 3 แบบ (ผู้ใช้: ป่ามืดไม่สนุก อยากได้ที่โล่งๆ)
 genMeadow:55 genLake:61 genRuins:66
 §73 Test Place (ห้องฝึก): พื้นโล่งไม่มีสิ่งกีดขวาง
-TEST_W:75 TEST_H:75 TEST_C:75 TEST_VIL:75 TEST_GW:77 TEST_Z:78 TEST_ST:85 TEST_PH:86 testWalls:88 testDummySpots:90 testFences:92 genTest:105 testProps:120 trZone:132 trBotPad:133 genGreatHall:134 MAPS:142 MAP_OFF:155 RANDOM_MAPS:156 MAPID:157 MW:157 MH:157 OBS:157 setMapVars:158
-§159 แผนที่จากไฟล์ (Blender → assets/maps/<id>.json + .glb, สคริปต์ assets…
-FMAPS:162 b64i16:163 regFileMap:164 loadMapData:176 loadAllMapData:184 mapReady:187 mapOkFor:188
-§189 ของประกอบฉากที่พังได้ / ใช้ได้ (prop)
-PROPDEF:193 PROP_OFF_MODES:200 PROP_USE:202 PROPS:203 PROPON:203 genProps:204
-§224 ตัวละคร: บ้านฮอกวอตส์ + หน้าตา
-HOUSES:226 HAIRC:231 HAIRSTY:233 WOODC:236 WOODN:237 WCOREC:238 WCOREN:239 WANDSTY:240 WANDN:245 WANDNN:260 EYEC:261 SKINC:262 CLOAKC:263 TIESTY:264 LOOKK:265 LOOKN:265 lookStr:266 parseLook:267 randLook:268 LOOKS:269 LOOKP:269 KITS:269 getKit:270 getLook:271 CREST_SH:272 CREST_PAT:273 starPts:278 CREST_ANI:280 crestSVG:286 houseColor:294 TEAMC:295 TEAMN:295 NOBROOM:297 MODES:298 PDEF:309 EDEF:336 POOLS:348 CDK:358 BUFFS:361 BRAR:370 rollRar:371
+TEST_W:75 TEST_H:75 TEST_C:75 TEST_VIL:75 TEST_GW:77 TEST_Z:78 TEST_ST:85 TEST_PH:86 testWalls:88 testDummySpots:90 testFences:92 genTest:105 testProps:120 trZone:133 trBotPad:134 genGreatHall:135 MAPS:143 MAP_OFF:156 RANDOM_MAPS:157 MAPID:158 MW:158 MH:158 OBS:158 setMapVars:159
+§160 แผนที่จากไฟล์ (Blender → assets/maps/<id>.json + .glb, สคริปต์ assets…
+FMAPS:163 b64i16:164 regFileMap:165 loadMapData:177 loadAllMapData:185 mapReady:188 mapOkFor:189
+§190 ของประกอบฉากที่พังได้ / ใช้ได้ (prop)
+PROPDEF:194 PROP_OFF_MODES:201 PROP_USE:203 PROPS:204 PROPON:204 genProps:205
+§225 ตัวละคร: บ้านฮอกวอตส์ + หน้าตา
+HOUSES:227 HAIRC:232 HAIRSTY:234 WOODC:237 WOODN:238 WCOREC:239 WCOREN:240 WANDSTY:241 WANDN:246 WANDNN:261 EYEC:262 SKINC:263 CLOAKC:264 TIESTY:265 LOOKK:266 LOOKN:266 lookStr:267 parseLook:268 randLook:269 LOOKS:270 LOOKP:270 KITS:270 getKit:271 getLook:272 CREST_SH:273 CREST_PAT:274 starPts:279 CREST_ANI:281 crestSVG:287 houseColor:295 TEAMC:296 TEAMN:296 NOBROOM:298 MODES:299 PDEF:310 EDEF:337 POOLS:349 CDK:359 BUFFS:362 BRAR:371 rollRar:372
 
 ## js/03-spells-core.js (222) — 
 ICONS:8 ICOALIAS:9 hasIco:10 ICOBASE:12 icoURL:13 ICO:14 icoTint:15 icoHTML:24 PATHS:25 SPELL_LIST:34 SPELLS:34 defSpell:35 SLOTK:36 BRMAP:36 KITP:37 parseKit:38 cleanKit:54 setKit:55 pathReset:58
@@ -90,7 +90,7 @@ MIND:66 summonMin:72 minTarget:81 minShoot:88 updateMins:93 aimTarget:133
 §180 ร่ายคาถา
 castSlot:181 castUlt:196
 
-## js/10-net.js (183) — เครือข่าย (PeerJS / WebRTC)
+## js/10-net.js (183) — 
 PREFIX:4 NET:5 RC:9 TURN_SERVERS:12 ICE:13 PEER_OPT:14 TURN_URL:16 ICE_READY:18 JN:22 LAG:24 lagDo:25 hostSend:26 LOBBY:27 genCode:28 sendAll:29 NETD_KEYS:33 NETD:33 netDeltaReset:34 netDelta:35 NETU:47 netUndelta:48 setStatus:54 hostGame:56 hostPeer:64 netConnect:83 joinWatch:94 joinFail:109 netLost:115 joinGame:130 joinPeer:141 clientOnData:156 leave:171 leaveRoom:173
 
 ## js/11-host.js (388) — 
@@ -98,12 +98,12 @@ G:4 EVL:4 EVN:4 hostLast:4 tickN:4 emit:5 feed:6 banner:7 plist:8 cleanName:9 fr
 §209 ลูปหลักฝั่งโฮสต์
 hostTick:210 angDiff:224 cH:226 vR:227 updatePlayer:229 hitProp:375 damagePropsIn:382 nearUseProp:383 useProp:384
 
-## js/12-buildings.js (477) — สิ่งปลูกสร้างที่พังเป็นชิ้นย่อย (บ้าน) แบบ Battlefield — คู่มือเต็ม: …
-BLDDEF:8 BLD_PIECES:10 BLD_GRID:11 BLD_FIRE:12 BLD_ICE:12 BLD_ROOF_MIN:12 BLDG:13 BLDON:13 genBldg:14 bldRect:24 bldChunk:26 bldAlive:33 bldLocal:34 bldWorld:35 rectDist:36 bldNear:37 BLD_MOUND:40 bldGone:41 bldMoundAt:42 bldMoundH:43 hitBldPiece:45 breakBldChunk:56 bldSupport:64 damageEnv:84 bldRay:99 aimClip:107 aimRay3:114 bldPieceAt:129 projEl:139 bldPush:144 collideBld:150 updateBldg:165 bldSnap:178 bldParse:184
-§188 ของบังในแผนที่ไฟล์ที่พังได้ (หิน เสา รูปปั้น ต้นไม้ โคมไฟ ลัง ...) — …
-BRKDEF:192 BRK_M:192 BRK_MCOL:192 BRK:193 genBrk:194 brkApply:201 brkStage:205 hitBrk:206 damageBrkIn:214 brkSnap:220 brkParse:221
-§222 ตารางช่อง (spatial grid) สำหรับแมพใหญ่: หาเฉพาะของใกล้ ๆ แทนวนทุกชิ้น…
-SG:225 sgObs:226 sgProps:226 sgGrid:228 sgNear:235 _sgCR:240 _sgCW:240 _sgCB:240 _sgCO:240 _sgPO:240 _sgPB:240 _sgPP:240 _sgM:240 _sgE:240 _sgA:240 collideWorld:241 shoot:274 eShoot:295 foesOf:302 breakShield:309 ULT_RATE:311 ultActive:312 gainUlt:313 lifesteal:314 damage:316 playerDown:372 killProj:393 explode:402 hitTarget:414 updateProjectiles:430
+## js/12-buildings.js (483) — สิ่งปลูกสร้างที่พังเป็นชิ้นย่อย (บ้าน) แบบ Battlefield — คู่มือเต็ม: …
+BLDDEF:8 BLD_PIECES:10 BLD_GRID:11 BLD_DOOR:13 BLD_FIRE:14 BLD_ICE:14 BLD_ROOF_MIN:14 BLDG:15 BLDON:15 genBldg:16 bldRect:26 bldChunk:28 bldAlive:35 bldLocal:36 bldWorld:37 rectDist:38 bldNear:39 BLD_MOUND:42 bldGone:43 bldMoundAt:44 bldMoundH:45 hitBldPiece:47 breakBldChunk:58 bldSupport:66 damageEnv:86 bldRay:101 aimClip:109 aimRay3:116 bldPieceAt:131 projEl:142 bldPush:147 collideBld:153 updateBldg:171 bldSnap:184 bldParse:190
+§194 ของบังในแผนที่ไฟล์ที่พังได้ (หิน เสา รูปปั้น ต้นไม้ โคมไฟ ลัง ...) — …
+BRKDEF:198 BRK_M:198 BRK_MCOL:198 BRK:199 genBrk:200 brkApply:207 brkStage:211 hitBrk:212 damageBrkIn:220 brkSnap:226 brkParse:227
+§228 ตารางช่อง (spatial grid) สำหรับแมพใหญ่: หาเฉพาะของใกล้ ๆ แทนวนทุกชิ้น…
+SG:231 sgObs:232 sgProps:232 sgGrid:234 sgNear:241 _sgCR:246 _sgCW:246 _sgCB:246 _sgCO:246 _sgPO:246 _sgPB:246 _sgPP:246 _sgM:246 _sgE:246 _sgA:246 collideWorld:247 shoot:280 eShoot:301 foesOf:308 breakShield:315 ULT_RATE:317 ultActive:318 gainUlt:319 lifesteal:320 damage:322 playerDown:378 killProj:399 explode:408 hitTarget:420 updateProjectiles:436
 
 ## js/12-city-dmg.js (110) — เมืองพังได้ (designs/city-bot-battle.md ขั้น 4) — ข้อมูลที่ทุกเครื่อง…
 CITY_FL:8 CITY_PW:8 CDMG:9 CITYD:12 cityOn:13 cityLayout:15 cityReset:25 cityApplyBox:37 cityApplyItem:38 cityHex:39 cityMark:40 cityPanelAt:42 cityHitPanel:47 cityHitItem:57 cityHitObs:66 _sgCD:71 cityDamageIn:73 cityTick:81 _sgCM:91 cityMoundH:92 citySnapB:99 citySnapS:100 cityParse:102
@@ -180,12 +180,12 @@ ANIM_ALT:48 makeAnimator:49 animResolve:54 animPlay:55 animTick:64 lookTint:82 t
 §149 VFX จากไฟล์ (รายละเอียดฝั่งคนทำอยู่ใน ASSETS.md)
 VFXL:155 FLIPL:155 FLIPS:155 prefetchFx:156 playVfx:157 vfxSeq:203 flipTex:208 playFlip:216 fileFx:231 zoneFx:238 clearVfx:239 updateVfx:240
 
-## js/23-props-bld-view.js (402) — prop ฝั่งแสดงผล
+## js/23-props-bld-view.js (407) — prop ฝั่งแสดงผล
 PROPV:2 propFallback:4 farCull:33 syncProps:34
 §51 บ้านพังเป็นชิ้น ฝั่งแสดงผล
-BLDV:54 CHARM:54 DEBRIS:54 BLD_WALLC:55 _bldIce:56 _halfRoof:56 charMat:57 bldIceMat:61 halfRoofGeo:63 bldMats:71 bldFallback:77 bldFilePiece:113 bldHasChunks:121 bldFallbackChunks:123 bldRubble:131 _moundMat:137 bldMound:138 BLD_RUBBLE_H:160 bldBuild:161 syncBld:185 bldDebris:218 bldChunkFall:246 updateDebris:259 debrisDrop:274 debrisCap:276 clearDebris:277 drawPropHint:278 syncWalls:286
-§304 ของบังในแผนที่ไฟล์ที่พังได้ ฝั่งแสดงผล (สถานะจาก BRK[].st — host js/1…
-BRKV:307 BRK_COL:307 brkSetup:308 BRK_CM:326 brkCrackMat:327 brkClip:343 brkYc:358 brkStump:360 brkSync:370 BRK_ZERO:391 brkFall:393
+BLDV:54 CHARM:54 DEBRIS:54 BLD_WALLC:55 _bldIce:56 _halfRoof:56 charMat:57 bldIceMat:61 halfRoofGeo:63 bldMats:71 bldFallback:77 bldFilePiece:113 bldHasChunks:121 bldFallbackChunks:123 bldRubble:131 _moundMat:142 bldMound:143 BLD_RUBBLE_H:165 bldBuild:166 syncBld:190 bldDebris:223 bldChunkFall:251 updateDebris:264 debrisDrop:279 debrisCap:281 clearDebris:282 drawPropHint:283 syncWalls:291
+§309 ของบังในแผนที่ไฟล์ที่พังได้ ฝั่งแสดงผล (สถานะจาก BRK[].st — host js/1…
+BRKV:312 BRK_COL:312 brkSetup:313 BRK_CM:331 brkCrackMat:332 brkClip:348 brkYc:363 brkStump:365 brkSync:375 BRK_ZERO:396 brkFall:398
 
 ## js/24-minions-view.js (68) — สัตว์เวท: โมเดลโปร่งแสง + ซิงก์จาก snapshot (MN)
 MM3:2 makeMinion:3 syncMins:36 drawMinBars:58
@@ -428,7 +428,7 @@ RAG:10 RAGJ:23 RAGB:29 RAGS:33 RAGMIN:37 RAGHINGE:39 _rv1:40 _rv2:40 _rv3:40 _rq
 ## js/49-cloth.js (120) — 
 CLOTH:10 CL_ROWS:22 CL_NC:22 CL_GAP:22 CL_IN:22 _clV:23 _clA:23 _clB:23 clPinK:25 clBind:27 clothSetup:30 clTargets:63 clReset:67 clCapsule:69 _clO:73 clWorld:74 clWorldHit:83 clStep:88 clDraw:100 clothTick:107
 
-## js/50-grass.js (288) — 
+## js/50-grass.js (294) — 
 AIR:10 AIR_MAP:17 airGust:19 airGs:22 airMark:24 airForMap:27 _airV:28 airAt:29 airGv:35 airTick:36
 §39 ต่อเข้ากับเอฟเฟกต์เดิม (ไม่ต้องแก้ทุกสกิล): แสงวาบ = ลมกระโชก • วงคลื…
 CLW:48
@@ -437,7 +437,7 @@ GRASS:52
 §53 รอยสนามรบบนหญ้า + พื้น (อยู่ทั้งแมตช์ — designs/battlefield.md ขั้น 3)
 SCAR:56 scarReset:58 scarPaint:65 grassScar:80
 §85 พื้นหญ้ามีชีวิต: สีเป็นหย่อม (เขียวเข้ม / แห้งเหลือง / ดินโผล่) + จุด…
-GR_NOISE:88 GR_LIVE:93 grLive:111 GR_GLSL_V:118 GR_BEGIN:123 grassMat:169 grassBuild:187 _grBasic:201 grassBake:202 grassCount:252 grassTick:257
+GR_NOISE:88 GR_LIVE:93 grLive:111 GR_GLSL_V:118 GR_BEGIN:123 grassMat:169 grassBuild:187 _grBasic:201 grassBake:202 grassCount:258 grassTick:263
 
 ## js/51-warmup.js (109) — 
 WARM:11 WARM_FXDIR:12 WARM_COMMON:12 WARM_X:13 WARM_Y:13 warmKeep:15 warmCompile:21 WARM_SKIP:24 warmFx:25 warmFxEnd:33 warmGather:35 warmPaths:37 warmStep:39 warmTick:54
@@ -578,4 +578,4 @@ BACKDROP:8
 §66 noise เล็ก ๆ (คงที่ต่อ seed)
 bdHash:67 bdNoise:68 bdFbm:69 bdEdge:71 bdRing:73 bdPaint:79 bdTree:82 buildBackdrop:89 bdTower:135 backdropHide:139
 
-(74 files, 17626 lines)
+(74 files, 17644 lines)

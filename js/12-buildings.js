@@ -9,6 +9,8 @@ const BLDDEF={house:{model:'bld_house',bw:8,bd:6.5,wh:4.2,rh:3.4,th:14,hp:{wall:
 BLDDEF.ldn=Object.assign({},BLDDEF.house,{model:'bld_house_ldn',wallc:['#8a4a3a','#7a4232','#94553f','#7c4232'],roofc:'#4a4e58'});   // บ้านอิฐลอนดอน (แมพ city, OBS bt:'ldn') — โครง/ชิ้นเหมือนบ้านหิมะทุกอย่าง
 const BLD_PIECES=['wall_front','wall_back','wall_left','wall_right','roof_left','roof_right'];
 const BLD_GRID=[[4,3],[4,3],[3,3],[3,3],[3,2],[3,2]];      // [คอลัมน์, แถว] ต่อส่วน — ต้องตรงกับ house_chunks.py
+// ช่องประตูผนังหน้า (wall_front) เปิดตั้งแต่เริ่ม — ต้องตรงกับ DOOR_HW/DOOR_H ใน assets/src/house_build.py • hw = ครึ่งกว้าง px (1.1 ม.; คนกว้าง 2×PR = 36 px) • h = สูง (หน่วย 3D)
+const BLD_DOOR={hw:22,h:2.7};
 const BLD_FIRE={burn:5,dps:6},BLD_ICE={frz:6},BLD_ROOF_MIN=0.35;   // หลังคาถล่มเมื่อผนังแถวบนที่รองรับเหลือน้อยกว่า 35%
 let BLDG=[],BLDON=false;
 function genBldg(id){
@@ -37,7 +39,7 @@ function rectDist(R,lx,ly){return Math.hypot(Math.max(Math.abs(lx-R[0])-R[2],0),
 function bldNear(b,x,y,pad){return Math.abs(x-b.o.x)<b.o.w*0.75+pad&&Math.abs(y-b.o.y)<b.o.w*0.75+pad;}
 // บ้านพังครบทั้งหลัง (ทั้ง 6 ส่วน) → เนินกองซาก: เป็น "พื้นเพิ่ม" ใน groundH (เดินปีนขึ้นยืนบนยอดได้) + กระสุนที่ต่ำกว่าผิวเนินชนเนิน
 // ผู้ใช้เลือก 2026-10-21: สูง ~1.5 ม. • เป็นเนินเมื่อพังครบทั้งหลังเท่านั้น • ทรงวงรีคลุมตัวบ้าน + pad ต่อด้าน (px), ยอดแบนกลางเนิน
-const BLD_MOUND={h:1.5,pad:30};
+const BLD_MOUND={h:1.8,pad:40};   // 2026-10-28: ผู้ใช้ขอเนินเพิ่มนิดนึง (เดิม 1.5 / 30)
 function bldGone(b){return b.pc.every(q=>q.fl&1);}
 function bldMoundAt(b,x,y){const [lx,ly]=bldLocal(b,x,y),e=(lx/(b.o.w/2+BLD_MOUND.pad))**2+(ly/(b.o.d/2+BLD_MOUND.pad))**2;return e<1?BLD_MOUND.h*Math.min(1,1.6*(1-e)):0;}
 function bldMoundH(x,y){let g=cityMoundH(x,y);if(!BLDG.length)return g;for(const b of sgNear(sgBld(),x,y,BLD_MOUND.pad,_sgM))if(bldNear(b,x,y,BLD_MOUND.pad)&&bldGone(b)){const v=bldMoundAt(b,x,y);if(v>g)g=v;}return g;}
@@ -129,7 +131,8 @@ function aimRay3(p,h0,range){
 function bldPieceAt(b,x,y,h,r){
   const [lx,ly]=bldLocal(b,x,y),D=b.D,hw=b.o.w/2,hd=b.o.d/2;
   if(h<D.wh){const row=clamp(Math.floor(h/(D.wh/3)),0,2);let best=-1,bd=r;
-    for(let j=0;j<4;j++){const q=b.pc[j];if(q.fl&1)continue;for(let c=0;c<q.nc;c++){const k=row*q.nc+c;if(!bldAlive(q,k))continue;const d=rectDist(bldChunk(b,j,k),lx,ly);if(d<bd){bd=d;best=j*100+k;}}}
+    const door=h<BLD_DOOR.h&&Math.abs(lx)<BLD_DOOR.hw-r*0.5&&ly>0;   // ลอดช่องประตูหน้าบ้าน
+    for(let j=0;j<4;j++){const q=b.pc[j];if(q.fl&1||(door&&j===0))continue;for(let c=0;c<q.nc;c++){const k=row*q.nc+c;if(!bldAlive(q,k))continue;const d=rectDist(bldChunk(b,j,k),lx,ly);if(d<bd){bd=d;best=j*100+k;}}}
     return best;}
   if(h<D.wh+D.rh&&Math.abs(lx)<hw&&Math.abs(ly)<hd&&h<D.wh+D.rh*(1-Math.max(Math.abs(lx)/hw,Math.abs(ly)/hd))){
     const j=lx<0?4:5,q=b.pc[j],c=clamp(Math.floor((ly+hd)/(2*hd)*3),0,2),k=(Math.abs(lx)<hw/2?3:0)+c;
@@ -156,7 +159,10 @@ function collideBld(b,o,r,z){
     for(let c=0;c<=q.nc;c++){
       let bl=false;if(c<q.nc)for(let rr=0;rr<q.nr;rr++){const z0=rr*D.wh/3,z1=z0+D.wh/3;if(z1>z&&z0<z+1.9&&bldAlive(q,rr*q.nc+c)){bl=true;break;}}
       if(bl&&run<0)run=c;
-      if(!bl&&run>=0){const A=bldChunk(b,j,run),B=bldChunk(b,j,c-1);push(j<2?[(A[0]+B[0])/2,A[1],(B[0]-A[0])/2+A[2],A[3]]:[A[0],(A[1]+B[1])/2,A[2],(B[1]-A[1])/2+A[3]]);run=-1;}
+      if(!bl&&run>=0){const A=bldChunk(b,j,run),B=bldChunk(b,j,c-1);
+        if(j===0&&z<BLD_DOOR.h){const x0=A[0]-A[2],x1=B[0]+B[2],dw=BLD_DOOR.hw;   // ผนังหน้า: เว้นช่องประตูกลางผนัง
+          if(x0<-dw)push([(x0+Math.min(x1,-dw))/2,A[1],(Math.min(x1,-dw)-x0)/2,A[3]]);if(x1>dw)push([(Math.max(x0,dw)+x1)/2,A[1],(x1-Math.max(x0,dw))/2,A[3]]);}
+        else push(j<2?[(A[0]+B[0])/2,A[1],(B[0]-A[0])/2+A[2],A[3]]:[A[0],(A[1]+B[1])/2,A[2],(B[1]-A[1])/2+A[3]]);run=-1;}
     }
   }
   if(z>=D.wh-0.3&&z<D.wh+D.rh)for(const j of [4,5]){const q=b.pc[j];if(q.fl&1)continue;for(let k=0;k<q.nc*q.nr;k++)if(bldAlive(q,k))push(bldChunk(b,j,k));}

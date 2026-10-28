@@ -232,6 +232,12 @@ function grassBake(){
     R[k]=r;Gc[k]=g;B[k]=b;Y[k]=has?y:ground;D[k]=green;
     // ผิวบนสูงกว่าพื้น: เขียว + สูง ≥2 = พุ่มไม้ (ใต้นั้นยังมีหญ้า เติมจากรอบ ๆ) / อื่น ๆ (หลังคา กำแพง หิน) = ไม่มีหญ้า
     st[k]=has&&y>ground+0.9?(green>0.3&&y>ground+2?1:2):0;if(st[k]===2)D[k]=0;}
+  // ในบ้าน/ตึก = ไม่มีหญ้า (เดินเข้าบ้านได้แล้ว 2026-10-28 • บ้านสร้างทีหลังการถ่าย เลยไม่ติดในภาพ) — กรอบบ้านหมุนได้ / กล่องตึกเมือง
+  const noGrass=(x0,y0,x1,y1,inside)=>{const i0=Math.max(0,Math.floor(((x0-MW/2)*S3+hx)/(2*hx)*rw)),i1=Math.min(rw-1,Math.ceil(((x1-MW/2)*S3+hx)/(2*hx)*rw)),
+      j0=Math.max(0,Math.floor((hz-(y1-MH/2)*S3)/(2*hz)*rh)),j1=Math.min(rh-1,Math.ceil((hz-(y0-MH/2)*S3)/(2*hz)*rh));
+    for(let j=j0;j<=j1;j++)for(let i=i0;i<=i1;i++){const x=(-hx+(i+0.5)/rw*2*hx)/S3+MW/2,y=(hz-(j+0.5)/rh*2*hz)/S3+MH/2;if(inside(x,y)){D[j*rw+i]=0;st[j*rw+i]=2;}}};
+  for(const b of BLDG){const r=Math.hypot(b.o.w,b.o.d)/2+6;noGrass(b.o.x-r,b.o.y-r,b.o.x+r,b.o.y+r,(x,y)=>{const [lx,ly]=bldLocal(b,x,y);return Math.abs(lx)<b.o.w/2+6&&Math.abs(ly)<b.o.d/2+6;});}
+  for(const B of (MAPS[MAPID]&&MAPS[MAPID].boxes)||[])noGrass(B.x,B.y,B.x+B.w,B.y+B.d,()=>true);
   // เติมใต้พุ่มไม้: ค่อย ๆ ลามสี/ความสูง/ความหนาแน่นจากช่องข้าง ๆ เข้าไป (พุ่มใหญ่เกินไปตรงกลางยังว่าง)
   for(let it=0;it<24;it++){const fill=[];
     for(let j=1;j<rh-1;j++)for(let i=1;i<rw-1;i++){const k=j*rw+i;if(st[k]!==1)continue;let c=0,r=0,g=0,b=0,y=0,d=0;

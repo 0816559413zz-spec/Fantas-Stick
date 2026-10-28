@@ -34,6 +34,7 @@ def wall_intact(kind):
     p = Piece('wall_' + kind)
     f = Frame(p, kind)
     L = f.L
+    f.cut = kind == 'front'                                     # ช่องประตูเปิด (house_build.py Frame.B / doorway)
     f.B(0, 0.04, 0.3, 2 * L, 0.84, 0.6, STONE2)                 # ฐานหิน
     f.B(0, 0, 2.4, 2 * L, T, 3.6, PLASTER)                       # ผนังอิฐ
     f.B(0, 0.41, 4.05, 2 * L, 0.18, 0.3, STONE)                  # บัวบน
@@ -70,6 +71,8 @@ def wall_intact(kind):
             for k in range(6):
                 z = 0.75 + k * 0.58
                 f.B(e * D2, 0.05, z, 0.62 if k % 2 else 0.42, 0.82, 0.3, STONE)
+    if kind == 'front':
+        f.doorway(DOOR)
     return p
 
 

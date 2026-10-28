@@ -122,7 +122,8 @@ function testProps(){
   const free=(x,y,r)=>!MAPS.test.obs.some(o=>Math.abs(x-o.x)<(o.w||o.r*2)/2+r+40&&Math.abs(y-o.y)<(o.w||o.r*2)/2+r+40)&&!out.some(o=>Math.hypot(o.x-x,o.y-y)<o.r+r+30);
   for(const [cx,cy,n] of [[V.x,V.y-900,26],[V.x,V.y+900,26],[V.x+650,V.y-1250,10],[V.x+650,V.y+1250,10]])
     for(let t=0,k=0;k<n&&t<400;t++){const x=cx+(R()-0.5)*1300,y=cy+(R()-0.5)*520;if(!free(x,y,24))continue;add(R()<0.5?'ptree':'ppine',x,y);k++;}
-  for(let i=0;i<5;i++){add('ptree',V.x-760+i*360,V.y-130);add('ppine',V.x-580+i*360,V.y+130);}                         // ต้นไม้ริมถนน
+  const inHouse=(x,y)=>MAPS.test.obs.some(o=>o.k==='house'&&Math.abs(x-o.x)<o.w/2+40&&Math.abs(y-o.y)<o.d/2+40);   // บ้านเข้าได้แล้ว (2026-10-28) → ห้ามมีต้นไม้ในบ้าน
+  for(let i=0;i<5;i++){if(!inHouse(V.x-760+i*360,V.y-130))add('ptree',V.x-760+i*360,V.y-130);if(!inHouse(V.x-580+i*360,V.y+130))add('ppine',V.x-580+i*360,V.y+130);}   // ต้นไม้ริมถนน
   for(let i=0;i<4;i++)for(const s of [-1,1]){const x=V.x-600+i*360+(R()-0.5)*80,y=V.y+s*190;if(free(x,y,20))add(R()<0.5?'pcrate':'pbarrel',x,y);}
   add('pchest',V.x-820,V.y);add('pchest',V.x+900,V.y-420);
   for(let i=0;i<8;i++){const x=V.x+900+(i%4)*55,y=V.y+380+Math.floor(i/4)*55;add(i%2?'pbarrel':'pcrate',x,y);}            // กองลังไว้ทดสอบระเบิด

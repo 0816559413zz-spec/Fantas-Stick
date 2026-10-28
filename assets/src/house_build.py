@@ -111,6 +111,7 @@ class Piece:
 
 # ---- wall frames: u = along the wall, v = outward from the wall centre line, z = up ----
 W2, D2, WH, T = 4.0, 3.25, 4.2, 0.7
+DOOR_HW, DOOR_H = 1.1, 2.7   # doorway on wall_front (half width, height) — open from match start; must match BLD_DOOR in js/12-buildings.js (player is 1.8 m wide)
 WALLS = {
     'front': dict(ax='X', c=-D2, o=-1, L=W2 + 0.35),
     'back':  dict(ax='X', c=D2,  o=1,  L=W2 + 0.35),
@@ -134,7 +135,23 @@ class Frame:
         return (0, -a, 0) if s.k['ax'] == 'X' else (a, 0, 0)
 
     def B(s, u, v, z, su, sv, sz, sw, a=0.0):
+        # front wall with s.cut: boxes on the wall that cross the doorway are split around it (left / right / above),
+        # boxes fully inside it (old door, trims) are dropped. Low steps outside (top < 0.2) stay.
+        if getattr(s, 'cut', False) and a == 0.0:
+            u0, u1, z0, z1 = u - su / 2, u + su / 2, z - sz / 2, z + sz / 2
+            if u0 < DOOR_HW and u1 > -DOOR_HW and z0 < DOOR_H and z1 > 0.2 and v - sv / 2 < T / 2 + 0.5:
+                for a0, a1, b0, b1 in ((u0, -DOOR_HW, z0, z1), (DOOR_HW, u1, z0, z1), (max(u0, -DOOR_HW), min(u1, DOOR_HW), DOOR_H, z1)):
+                    if a1 - a0 > 0.06 and b1 - b0 > 0.06:
+                        s.p.box(s.P((a0 + a1) / 2, v, (b0 + b1) / 2), s.S(a1 - a0, sv, b1 - b0), sw)
+                return
         s.p.box(s.P(u, v, z), s.S(su, sv, sz), sw, s.R(a))
+
+    def doorway(s, sw):
+        # open double door: leaves swung inward against the reveal + lintel beam (call after the wall is built)
+        s.cut = False
+        for e in (-1, 1):
+            s.B(e * (DOOR_HW - 0.05), -(T / 2 + 0.55), DOOR_H / 2, 0.08, 1.05, DOOR_H - 0.1, sw)
+        s.B(0, 0.42, DOOR_H + 0.12, 2 * DOOR_HW + 0.5, 0.16, 0.24, BEAM)
 
     def brace(s, u0, z0, u1, z1, v=0.41):
         L = math.hypot(u1 - u0, z1 - z0)
@@ -154,6 +171,7 @@ def wall_intact(kind):
     p = Piece('wall_' + kind)
     f = Frame(p, kind)
     L = f.L
+    f.cut = kind == 'front'
     f.B(0, 0.04, 0.3, 2 * L, 0.84, 0.6, STONE)
     f.B(0, 0, 2.4, 2 * L, T, 3.6, PLASTER)
     f.B(0, 0.41, 4.08, 2 * L, 0.14, 0.3, BEAM)
@@ -194,6 +212,8 @@ def wall_intact(kind):
         f.window(0, 2.65, 1.0, 1.1)
         f.brace(1.0, 0.78, 2.9, 3.95)
         f.brace(-2.9, 3.95, -1.0, 0.78)
+    if kind == 'front':
+        f.doorway(DOOR)
     return p
 
 def wall_broken(kind, seed):
