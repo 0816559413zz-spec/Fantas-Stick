@@ -163,14 +163,15 @@ function cityFacade(B,S,zones,w,d,x,z,kput,R){
 const CITYK={W:null,g:[],CV:null};
 const _cZ=new THREE.Matrix4().makeScale(0,0,0),_cT=new THREE.Matrix4(),_cR=new THREE.Matrix4(),_cC=new THREE.Color();
 function cityKitLoad(KI,CV){
-  const W0=world,holes=[...new Set(Object.values(CITY_STY).map(S=>S.hole))],names=[...new Set([...Object.keys(KI),...holes])],tmp=new THREE.Matrix4();
+  const W0=world,holes=[...new Set(Object.values(CITY_STY).flatMap(S=>[S.hole,S.hole+'o']))],   // <hole>o = รูโล่ง (ชั้นที่เดินเข้าได้ — ไม่มีแผ่นดำด้านหลัง)
+       names=[...new Set([...Object.keys(KI),...holes])],tmp=new THREE.Matrix4();
   CITYK.W=W0;CITYK.g=[];CITYK.CV=CV;CV.mesh={};CV.pool={};CV.anims=[];CV.ready=false;
   if(window.WD&&!WD.city)Object.defineProperty(WD,'city',{get:()=>({K:CITYK,D:CITYD})});   // ดีบัก: WD.city.K.CV / WD.city.D
   for(let c=0;c<CITY_N*CITY_N;c++){const g=new THREE.Group();g.userData.cx=tx((c%CITY_N+0.5)*CITY_B);g.userData.cz=tz((Math.floor(c/CITY_N)+0.5)*CITY_B);W0.add(g);CITYK.g.push(g);}
   Promise.all(names.map(n=>loadModel('city_'+n))).then(rs=>{
     if(world!==W0||CITYK.W!==W0)return;   // เปลี่ยนแผนที่ไปแล้ว
     rs.forEach((r,j)=>{if(!r)return;const n=names[j];r.scene.updateMatrixWorld(true);
-      if(holes.includes(n)){let cap=0;for(const b of CV.b)if(b&&b.sty.hole===n)cap+=b.P.length;if(!cap)return;
+      if(holes.includes(n)){let cap=0;for(const b of CV.b)if(b&&(b.sty.hole===n||b.sty.hole+'o'===n))cap+=b.P.length;if(!cap)return;
         const ims=[];r.scene.traverse(o=>{if(!o.isMesh)return;const im=new THREE.InstancedMesh(o.geometry,o.material,cap);im.count=0;im.frustumCulled=false;im.castShadow=im.receiveShadow=true;im.userData.om=o.matrixWorld.clone();W0.add(im);ims.push(im);});
         CV.pool[n]=ims;return;}
       const veh=CITY_VEH.has(n);CV.mesh[n]={};
@@ -195,7 +196,8 @@ function cityTint(CV,ref,col,veh){const L=CV.mesh[ref.n]&&CV.mesh[ref.n][ref.ch]
   for(const im of L){if(!im.instanceColor)continue;const paint=[].concat(im.material)[0].name==='city_paint';im.setColorAt(ref.ix,_cC.set(col||(paint&&ref.col)||'#ffffff'));im.instanceColor.needsUpdate=true;}}
 function cityPools(CV,names){
   for(const n of names){const ims=CV.pool[n];if(!ims)continue;let k=0;
-    CITYD.b.forEach((d,i)=>{const r=CV.b[i];if(!r||r.sty.hole!==n||d.cl||!d.nb)return;for(let p=0;p<d.br.length;p++)if(d.br[p]){for(const im of ims){_cT.multiplyMatrices(r.P[p].M,im.userData.om);im.setMatrixAt(k,_cT);}k++;}});
+    const op=n.endsWith('o');   // รูโล่ง = แผ่นในชั้นที่เดินเข้าได้ • รูทึบ = ชั้นบนที่ข้างในยังทึบ
+    CITYD.b.forEach((d,i)=>{const r=CV.b[i];if(!r||r.sty.hole!==(op?n.slice(0,-1):n)||d.cl||!d.nb)return;for(let p=0;p<d.br.length;p++)if(d.br[p]&&op===!!(d.I&&d.L.P[p].f<d.I.nf)){for(const im of ims){_cT.multiplyMatrices(r.P[p].M,im.userData.om);im.setMatrixAt(k,_cT);}k++;}});
     for(const im of ims){im.count=k;im.instanceMatrix.needsUpdate=true;}}
 }
 function cityShowBld(CV,r,off){
@@ -218,7 +220,7 @@ const CITY_FALL=1.1;   // วินาทีที่เสา/ตู้ล้�
 function cityViewSync(dt){
   const CV=CITYK.CV;if(!CV||!CV.ready||CITYK.W!==world||!cityOn())return;
   const pd=new Set();
-  CITYD.b.forEach((d,i)=>{const r=CV.b[i];if(!r||r.v===d.v)return;const live=r.v!==-1;r.v=d.v;pd.add(r.sty.hole);
+  CITYD.b.forEach((d,i)=>{const r=CV.b[i];if(!r||r.v===d.v)return;const live=r.v!==-1;r.v=d.v;pd.add(r.sty.hole);pd.add(r.sty.hole+'o');
     if(d.cl){if(r.cl)return;r.cl=1;if(live)CV.anims.push({r,t:0});else{cityShowBld(CV,r,null);r.rub=cityRubble(r);}return;}
     if(r.cl){r.cl=0;if(r.rub){world.remove(r.rub);disposeTree(r.rub);r.rub=null;}CV.anims=CV.anims.filter(a=>a.r!==r);cityShowBld(CV,r,0);}
     for(let p=0;p<r.P.length;p++)citySet(CV,r.P[p],d.br[p]||(d.I&&d.I.door.has(p))?_cZ:r.P[p].M);
@@ -251,7 +253,7 @@ function cityViewSync(dt){
 // เอฟเฟกต์ของเหตุการณ์เมือง (เรียกจาก fx() js/26)
 function cityDebris(x,y,h,col,ox,oy,n,big){
   const mt=sMat({color:col,roughness:0.9}),mc=sMat({color:'#8c8a86',roughness:1}),mr=sMat({color:'#5a4a3c',roughness:0.9});n=Math.round(n*1.8);   // สนามรบ: เศษเยอะ (คอนกรีต/เหล็กเส้น) ค้างทั้งแมตช์
-  for(let k=0;k<n;k++){const t=k%6,m=new THREE.Mesh(sGeo(THREE.BoxGeometry,1,1,1),t<3?mt:t<5?mc:mr);const s=big?0.5+Math.random()*0.9:0.25+Math.random()*0.5;if(t===5)m.scale.set(0.06,0.06,1+Math.random()*1.5);else m.scale.set(s,s*0.6,s*0.8);
+  for(let k=0;k<n;k++){const t=k%6,m=new THREE.Mesh(sGeo(THREE.BoxGeometry,1,1,1),t<3?mt:t<5?mc:mr);const s=big?0.6+Math.random()*1.0:0.45+Math.random()*0.9;if(t===5)m.scale.set(0.06,0.06,1+Math.random()*1.5);else if(t<2)m.scale.set(s*1.6,s*0.3,s*1.2);else m.scale.set(s,s*0.6,s*0.8);   // t<2 = แผ่นผนังชิ้นใหญ่ (ผู้ใช้ 2026-10-28)
     m.castShadow=true;m.position.set(tx(x)+rnd(-1.5,1.5),h+rnd(-1,1),tz(y)+rnd(-1.5,1.5));m.rotation.set(Math.random()*6,Math.random()*6,0);scene.add(m);
     let dx=x-ox,dy=y-oy;const dl=Math.hypot(dx,dy)||1;dx/=dl;dy/=dl;const sp=(big?6:3.5)*(0.6+Math.random()*0.8);
     DEBRIS.push({m,vx:dx*sp+rnd(-1.5,1.5),vz:dy*sp+rnd(-1.5,1.5),vy:1+Math.random()*4,rx:rnd(-8,8),rz:rnd(-8,8),life:3+Math.random()*1.5,s0:m.scale.clone()});}

@@ -209,12 +209,12 @@ QUAL:143 QUAL_NAME:144 qualPR:145 applyQuality:151 qualTick:169 texCanvas:180 gl
 §239 เงาตามผู้เล่น
 SHD:243 _shF:244 _shR:244 _shU:244 _shC:244 _shY:244 shadowFollow:245 LPOOL:264
 
-## js/28-city-build.js (278) — เมืองมักเกิ้ล (ลอนดอน) — ภาพ • ข้อมูลอยู่ js/02-city.js • โมเดลจาก as…
+## js/28-city-build.js (280) — เมืองมักเกิ้ล (ลอนดอน) — ภาพ • ข้อมูลอยู่ js/02-city.js • โมเดลจาก as…
 CITY_WIN:4 cityWinTex:5 cityEmTex:10 cityBoxGeo:16 buildCity:21
 §97 ข้างในตึกกลวง (ภาพ — ผัง I จาก cityInterior js/12-city-dmg)
 cityInteriorView:100 cityMoundView:127
 §138 ชุดโมเดลลอนดอน (assets/city/*.glb จาก assets/src/city_kit_build.py)
-CITY_STY:143 CITY_VEH:150 cityFacade:152 CITYK:163 _cZ:164 _cT:164 _cR:164 _cC:164 cityKitLoad:165 cityCull:186 citySet:192 cityTint:194 cityPools:196 cityShowBld:201 cityRubble:208 CITY_FALL:216 cityViewSync:218 cityDebris:252 cityFX:261
+CITY_STY:143 CITY_VEH:150 cityFacade:152 CITYK:163 _cZ:164 _cT:164 _cR:164 _cC:164 cityKitLoad:165 cityCull:187 citySet:193 cityTint:195 cityPools:197 cityShowBld:203 cityRubble:210 CITY_FALL:218 cityViewSync:220 cityDebris:254 cityFX:263
 
 ## js/28-maps-build.js (762) — สร้างแผนที่
 CANDLESYS:2 builtMap:3 builtKey:3 world:3 TORCHES:3 CANDLES:3 FIREFLIES:3 CRYSTAL:3 RUNE:3 SNITCH:3 BANNERS:3 SNOW:3 WCACHE:5 WCACHE_MAX:5 wkey:7 buildWorld:8 addW:41 _prewarmed:43 prewarmShaders:44 batchStatic:63 makeCandles:88 updateCandles:97 buildCastle:106 buildHogsmeade:172 buildGreatHall:260 buildForest:330
@@ -583,4 +583,4 @@ BACKDROP:8
 §66 noise เล็ก ๆ (คงที่ต่อ seed)
 bdHash:67 bdNoise:68 bdFbm:69 bdEdge:71 bdRing:73 bdPaint:79 bdTree:82 buildBackdrop:89 bdTower:135 backdropHide:139
 
-(74 files, 17771 lines)
+(74 files, 17773 lines)

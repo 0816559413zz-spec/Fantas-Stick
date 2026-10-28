@@ -319,23 +319,43 @@
     },
     "city_cc_hole": {
       "file": "city/cc_hole.glb",
-      "v": 2
+      "v": 3
     },
     "city_cg_hole": {
       "file": "city/cg_hole.glb",
-      "v": 2
+      "v": 3
     },
     "city_co_hole": {
       "file": "city/co_hole.glb",
-      "v": 2
+      "v": 3
     },
     "city_ct_hole": {
       "file": "city/ct_hole.glb",
-      "v": 2
+      "v": 3
     },
     "city_cw_hole": {
       "file": "city/cw_hole.glb",
-      "v": 2
+      "v": 3
+    },
+    "city_ct_holeo": {
+      "file": "city/ct_holeo.glb",
+      "v": 1
+    },
+    "city_co_holeo": {
+      "file": "city/co_holeo.glb",
+      "v": 1
+    },
+    "city_cg_holeo": {
+      "file": "city/cg_holeo.glb",
+      "v": 1
+    },
+    "city_cw_holeo": {
+      "file": "city/cw_holeo.glb",
+      "v": 1
+    },
+    "city_cc_holeo": {
+      "file": "city/cc_holeo.glb",
+      "v": 1
     }
   },
   "maps": {
