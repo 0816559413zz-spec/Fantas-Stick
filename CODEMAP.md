@@ -91,39 +91,41 @@ MIND:66 summonMin:72 minTarget:81 minShoot:88 updateMins:93 aimTarget:133
 §180 ร่ายคาถา
 castSlot:181 castUlt:196
 
-## js/09-wind.js (226) — สายลม 🌪️ (ผู้ใช้ออกแบบทั้งหมด — designs/wind.md "คอนเซ็ปต์ใหม่") • ฝั่งโฮสต์ • ขั้นที่ 1…
+## js/09-wind.js (248) — สายลม 🌪️ (ผู้ใช้ออกแบบทั้งหมด — designs/wind.md "คอนเซ็ปต์ใหม่") • ฝั่งโฮสต์ • ขั้นที่ 1…
 WINDP:8 W_BA:9
-§21 ตัวช่วย
-wOn:22 wGain:23 wSeg:25 wFoeNear:26
-§28 ทุกเฟรมของผู้เล่นสายลม (เรียกจาก updatePlayer หลังส่วนโล่)
-windTick:29 windSpd:49 windFlyZ:51 windReset:54
-§56 ท่าพื้นฐาน (คลิกซ้าย): ใบมีดลม / ดูดลมชาร์จเกจ / GaleBurst
-windBasic:57 windGaleBurst:76 windGBTick:79
-§85 โล่ปีก
-windShieldBurst:86
-§90 Dash: ผลักศัตรูข้างหน้า + ดีดตัวเราถอยหลังลอยกลางอากาศ
-windDash:91
-§101 กำแพงลม Aegis Gale
-windWallMake:102 windWallStop:109 windWallBoom:110 windDmg:115 windProjHit:119
-§123 ทั้งสนาม: GaleBurst / กำแพงลม / ชนกำแพง
-updateWind:124
-§147 Windrift: ชาร์จปีก → พุ่ง 200 แบบ Jett → ลงท่าฮีโร่ → 1 วิต่อมาลมแรงต…
-windDriftTick:148 windDriftWind:155
-§162 Vortex Bind: ทอร์นาโด 3 อันโค้ง 45° ห่าง 200 → 0.6 วิ ดึงกลับมาหยุด 6…
-windVortexTick:163
-§173 Void Spheres: ลูกหลุมดำลม 3 ลูก ลากศัตรูตามทาง (ไม่เกิน 200) ชนกำแพงล…
-windVoidFire:174 windVoidTick:176
-§188 Featherwing: บิน 5 วิ → กดอีกครั้งสะบัดปีกไปข้างหน้า (เอียงลงพื้น) → …
-windFlyTick:189 windFlick:191 windSnapP:198 windSnapW:199
-§202 สกิล
+§22 ตัวช่วย
+wOn:23 wGain:24 wSeg:26 wFoeNear:27
+§29 ทุกเฟรมของผู้เล่นสายลม (เรียกจาก updatePlayer หลังส่วนโล่)
+windTick:30 windSpd:51 windFlyZ:53 windReset:56
+§58 ท่าพื้นฐาน (คลิกซ้าย): ใบมีดลม / ดูดลมชาร์จเกจ / GaleBurst
+windBasic:59 windGaleBurst:78 windGBTick:81
+§87 โล่ปีก
+windShieldBurst:88
+§92 Dash: ผลักศัตรูข้างหน้า + ดีดตัวเราถอยหลังลอยกลางอากาศ
+windDash:93
+§103 กำแพงลม Aegis Gale
+windWallMake:104 windWallStop:111 windWallBoom:112 windDmg:117 windProjHit:121
+§125 ทั้งสนาม: GaleBurst / กำแพงลม / ชนกำแพง
+updateWind:126
+§149 Windrift: ชาร์จปีก → พุ่ง 200 แบบ Jett → ลงท่าฮีโร่ → 1 วิต่อมาลมแรงต…
+windDriftTick:150 windDriftWind:157
+§164 Vortex Bind: ทอร์นาโด 3 อันโค้ง 45° ห่าง 200 → 0.6 วิ ดึงกลับมาหยุด 6…
+windVortexTick:165
+§175 Void Spheres: ลูกหลุมดำลม 3 ลูก ลากศัตรูตามทาง (ไม่เกิน 200) ชนกำแพงล…
+windVoidFire:176 windVoidTick:178
+§190 Featherwing: บิน 5 วิ → กดอีกครั้งสะบัดปีกไปข้างหน้า (เอียงลงพื้น) → …
+windFlyTick:191 windFlick:193
+§199 อัลติ Eye of Heaven
+windUltTick:202 windFloatZ:216 windSnapP:219 windSnapW:220
+§223 สกิล
 
 ## js/10-net.js (183) — เครือข่าย (PeerJS / WebRTC)
 PREFIX:4 NET:5 RC:9 TURN_SERVERS:12 ICE:13 PEER_OPT:14 TURN_URL:16 ICE_READY:18 JN:22 LAG:24 lagDo:25 hostSend:26 LOBBY:27 genCode:28 sendAll:29 NETD_KEYS:33 NETD:33 netDeltaReset:34 netDelta:35 NETU:47 netUndelta:48 setStatus:54 hostGame:56 hostPeer:64 netConnect:83 joinWatch:94 joinFail:109 netLost:115 joinGame:130 joinPeer:141 clientOnData:156 leave:171 leaveRoom:173
 
-## js/11-host.js (390) — ฝั่งโฮสต์: สถานะเกมทั้งหมดคำนวณที่นี่ (server-authoritative)
+## js/11-host.js (391) — ฝั่งโฮสต์: สถานะเกมทั้งหมดคำนวณที่นี่ (server-authoritative)
 G:4 EVL:4 EVN:4 hostLast:4 tickN:4 emit:5 feed:6 banner:7 plist:8 cleanName:9 freshStats:11 newPlayer:18 emptyInput:21 frameOk:23 addPlayer:24 initHostLobby:33 lobbyMsg:40 broadcastLobby:41 INPN:43 hostOnData:44 hostDrop:74 hostRemove:83 validate:96 hostStart:107 hostToLobby:133 MIDJOIN:140 midJoin:141 CHATT:157 chatRelay:158 emoHost:166 resetBody:168 fmap:174 spawnPts:175 teamPts:177 placeAll:178 respawn:190
 §209 ลูปหลักฝั่งโฮสต์
-hostTick:210 angDiff:224 cH:226 vR:227 updatePlayer:229 hitProp:377 damagePropsIn:384 nearUseProp:385 useProp:386
+hostTick:210 angDiff:224 cH:226 vR:227 updatePlayer:229 hitProp:378 damagePropsIn:385 nearUseProp:386 useProp:387
 
 ## js/12-buildings.js (487) — สิ่งปลูกสร้างที่พังเป็นชิ้นย่อย (บ้าน) แบบ Battlefield — คู่มือเต็ม: …
 BLDDEF:8 BLD_PIECES:10 BLD_GRID:11 BLD_DOOR:13 BLD_FIRE:14 BLD_ICE:14 BLD_ROOF_MIN:14 BLDG:15 BLDON:15 genBldg:16 bldRect:26 bldChunk:28 bldAlive:35 bldLocal:36 bldWorld:37 rectDist:38 bldNear:39 BLD_MOUND:42 bldGone:43 bldMoundAt:44 bldMoundH:45 hitBldPiece:47 breakBldChunk:58 bldSupport:66 damageEnv:86 bldRay:101 aimClip:109 aimRay3:116 bldPieceAt:131 projEl:142 bldPush:147 collideBld:153 updateBldg:171 bldSnap:184 bldParse:190
@@ -612,7 +614,7 @@ BACKDROP:8
 §66 noise เล็ก ๆ (คงที่ต่อ seed)
 bdHash:67 bdNoise:68 bdFbm:69 bdEdge:71 bdRing:73 bdPaint:79 bdTree:82 buildBackdrop:89 bdTower:135 backdropHide:139
 
-## js/68-wind-view.js (79) — สายลม 🌪️ — ภาพฝั่งเครื่องเล่น (ขั้นที่ 1) • ตรรกะอยู่ js/09-wind.js • ไฟล์นี้มีแต่นิยามฟ…
+## js/68-wind-view.js (82) — สายลม 🌪️ — ภาพฝั่งเครื่องเล่น (ขั้นที่ 1) • ตรรกะอยู่ js/09-wind.js • ไฟล์นี้มีแต่นิยามฟ…
 WV:6 wvState:7 wvAlive:8
 §9 ทุกเฟรมของผู้เล่นสายลม: ปีกติดหลัง / ปีกห่อตอนยกโล่ / ดูดลมชาร์จเกจ
 windFX:10
@@ -620,7 +622,7 @@ windFX:10
 syncWind:26 wvWall:36
 §37 เหตุการณ์ (efx z 'wn…')
 windEfx:38
-§72 HUD รอบเป้าเล็ง: เกจ GaleBurst (โค้งซ้าย) + ชาร์จกำแพงลม (จุด 3 จุดใต…
-drawWindHud:73
+§75 HUD รอบเป้าเล็ง: เกจ GaleBurst (โค้งซ้าย) + ชาร์จกำแพงลม (จุด 3 จุดใต…
+drawWindHud:76
 
-(76 files, 18084 lines)
+(76 files, 18110 lines)

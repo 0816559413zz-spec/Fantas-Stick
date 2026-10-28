@@ -48,7 +48,7 @@ function windEfx(ev){
     case 'wndswall':fxPlay('wind/wall_hit',{x,y,h:0,a:Math.random()*6.283});return true;
     case 'wnwaim':if(mine)toast('กำแพงลม: คลิกซ้าย = ดันไปข้างหน้า • คลิกขวา = วางตรงจุดเล็ง');return true;
     case 'wnwaimoff':return true;
-    case 'wnwup':{const o={x,y,a,I:fxPlay('wind/wall',{x,y,h:0,a}),P:ev.m?fxPlay('wind/wall_push',{x,y,h:0,a}):null};WV.wl.set(ev.n,o);return true;}
+    case 'wnwup':{const o={x,y,a,I:ev.m===2?null:fxPlay('wind/wall',{x,y,h:0,a}),P:ev.m?fxPlay('wind/wall_push',{x,y,h:0,a}):null};WV.wl.set(ev.n,o);return true;}
     case 'wnwstop':{const o=wvWall(ev.n);if(o&&o.P){fxStop(o.P);o.P=null;}fxPlay('wind/wall_stop',{x,y,h:0,a});return true;}
     case 'wnwhit':fxPlay('wind/wall_hit',{x,y,h:0,a:a+Math.PI});if(near)snd('hit',ev);return true;
     case 'wnwuns':{const o=wvWall(ev.n);if(o)o.U=fxPlay('wind/wall_unstable',{x,y,h:0,a});return true;}
@@ -65,6 +65,9 @@ function windEfx(ev){
     case 'wnfw':fxPlay('wind/fw_takeoff',{x,y,h:H,aim:false});return true;
     case 'wnfwflick':fxPlay('wind/fw_flick',{x,y,h:Math.max(0,H-3.2),a});if(near)shake(0.2);return true;
     case 'wnfwend':case 'wnfwland':return true;
+    case 'wnult':fxPlay('wind/eye_of_heaven',{x,y,h:H,a,aim:false});if(near)snd('cast_pull',ev);return true;
+    case 'wnulslam':if(near)shake(0.3);return true;
+    case 'wnulimp':if(near){shake(0.5);snd('break',ev);}return true;
     case 'wnsoon':if(mine)toast('สกิลนี้ของสายลมยังทำไม่เสร็จ (ขั้นที่ 2-3)');return true;
   }
   return false;

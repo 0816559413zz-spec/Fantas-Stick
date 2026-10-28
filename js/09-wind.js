@@ -3,7 +3,7 @@
 //  "ผู้ผลัก" เล่นกับกำแพงลม: ผลักศัตรูชนกำแพงลม = สตัน 0.5 วิ • ตีศัตรูที่ติดกำแพงครบ 70 = กำแพงแตกระเบิด 50 + กระเด็นไกล
 //  เกจ GaleBurst p.wg 0-100: BA โดน +12 • กดค้างคลิกซ้ายดูดลม +8/วิ • โล่โดนตี +10 • เต็ม = BA ถัดไปเป็นทอร์นาโดนอน
 //  กำแพงลม G.wwl: {x,y ศูนย์กลาง, a ทิศหน้ากำแพง, L ครึ่งความกว้าง, mv ระยะดันที่เหลือ, acc ดาเมจสะสม}
-//  ขั้นที่ 2 (2026-10-28): Windrift / Vortex Bind / Void Spheres / Featherwing • ขั้นที่ 3 (อัลติ) ยังเป็นตัวว่าง
+//  ขั้นที่ 2: Windrift / Vortex Bind / Void Spheres / Featherwing • ขั้นที่ 3: อัลติ Eye of Heaven (2026-10-28)
 // =====================================================================
 const WINDP=PATHS.length;
 const W_BA={dmg:5,cd:0.30,gain:12,hold:0.35,chg:8},                       // ใบมีดลม: ระยะ 400 (spd 1400 × life 0.286)
@@ -14,6 +14,7 @@ const W_BA={dmg:5,cd:0.30,gain:12,hold:0.35,chg:8},                       // ใ
   W_VX={far:200,near:60,arc:Math.PI/8,hold:0.6,pull:0.35,r:40,dmg:20,cd:10},   // Vortex Bind: 3 อันโค้ง 45° (±22.5°) • รัศมีจับ ⚠ 40
   W_VO={n:3,gap:0.18,spd:700,range:400,carry:200,r:22,dmg:10,cd:12},   // Void Spheres: ⚠ ยิงห่างกัน 0.18 วิ เร็ว 700
   W_FW={t:5,hgt:6,vz:3.5,spd:1.3,range:250,cone:Math.PI*0.28,push:1800,dmg:15,glide:2.2,cd:14},   // Featherwing: บิน 5 วิ สูงสุด 6 ม. • สะบัด 250 ผลัก 300 15 ดาเมจ • ร่อนลง ⚠ 2.2 ม./วิ
+  W_UL={r:350,slam:1.0,wall:1.15,imp:2.38,end:2.7,float:1.5,fz:2.2,dmg:30,stun:3,wlife:6.25,seg:8},   // Eye of Heaven: เขต/กำแพงวงรัศมี 350 • ลอยค้าง 1.5 วิ • กระแทก 30 ชนกำแพงวง = สตัน 3 วิ • กำแพงอยู่ 5 วิหลังกระแทก • ความสูงที่ลอย ⚠ 2.2 ม. (เวลาตรงกับ wind/eye_of_heaven)
   W_WL={L:125,r:14,life:6,charge:8,max:3,push:400,spd:600,place:500,stun:0.5,boom:70,bdmg:50,bpush:2400,brad:110,aim:4};   // กำแพงลม Aegis Gale
 PATHS.push({id:'wind',n:'สายลม',ic:'🌪️',col:'#8dff65',d:'ผู้ผลัก — สร้างกำแพงลม ผลักศัตรูไปชนให้สตัน ตีต่อจนกำแพงแตกระเบิด คุมตำแหน่งศัตรูแล้วคิดตาต่อไป',
   combo:'BA ใบมีดลมเก็บเกจ GaleBurst → เต็มแล้วยิงทอร์นาโดนอนผลัก • ผลักศัตรูชนกำแพงลม = สตัน 0.5 วิ • ตีศัตรูที่ติดกำแพงครบ 70 = กำแพงแตก ระเบิด 50 กระเด็นไกล • Dash ดีดถอยหลังผลักศัตรูชนกำแพง 20 • ใช้สกิลกลางอากาศได้'});
@@ -43,15 +44,16 @@ function windTick(p,dt){
   if(p.wsbL>0)p.wsbL-=dt;
   if(p.wdr)windDriftTick(p,dt);
   if(p.wfw)windFlyTick(p,dt);
+  if(p.wult)windUltTick(p,dt);
   if(p.wvs){const V=p.wvs;V.t-=dt;if(V.t<=0&&V.n>0){V.n--;V.t=W_VO.gap;windVoidFire(p);}if(V.n<=0)p.wvs=null;}
 }
 // ความเร็วเดินพิเศษ: ชาร์จ Windrift ยืนนิ่ง • บิน Featherwing 1.3 เท่า
-function windSpd(p){return p.wdr&&p.wdr.ph==='chg'?0:p.wfw&&p.wfw.ph==='fly'?W_FW.spd:1;}
+function windSpd(p){return p.wult?0:p.wdr&&p.wdr.ph==='chg'?0:p.wfw&&p.wfw.ph==='fly'?W_FW.spd:1;}
 // ความสูงตอนบิน (แทนแรงโน้มถ่วง) — เรียกจาก updatePlayer
 function windFlyZ(p,dt){const F=p.wfw,gh=groundH(p.x,p.y,p.z);
   if(F.ph==='fly'){const top=gh+W_FW.hgt;p.vz=p.z<top-0.05?Math.min(W_FW.vz,(top-p.z)*4):0;p.z+=p.vz*dt;}
   else{p.vz=Math.max(-W_FW.glide,Math.min(p.vz||0,0)-6*dt);p.z+=p.vz*dt;if(p.z<=gh){p.z=gh;p.vz=0;p.wfw=null;emit({k:'efx',z:'wnfwland',x:Math.round(p.x),y:Math.round(p.y),h:p.z,id:p.id});}}}
-function windReset(p){p.wdr=null;p.wfw=null;p.wvs=null;p.wg=0;p.wwc=W_WL.max;p.wwr=0;p.wwAim=null;p.wsb=null;p.wsbL=0;p.wchg=0;p.wfHeld=0;}
+function windReset(p){p.wult=null;p.wflt=0;p.wus=0;p.wdr=null;p.wfw=null;p.wvs=null;p.wg=0;p.wwc=W_WL.max;p.wwr=0;p.wwAim=null;p.wsb=null;p.wsbL=0;p.wchg=0;p.wfHeld=0;}
 
 // ---------- ท่าพื้นฐาน (คลิกซ้าย): ใบมีดลม / ดูดลมชาร์จเกจ / GaleBurst ----------
 function windBasic(p,inp,dt,setCd){
@@ -136,11 +138,11 @@ function updateWind(dt){
       // ศัตรูที่โดนผลัก (ความเร็วกระเด็นสูง) วิ่งชนกำแพง = สตัน 0.5 วิ
       for(const t of foesOf(w.team)){if(w.hitT[t.id])continue;const sp=Math.hypot(t.vx||0,t.vy||0);if(sp<150&&!(t.wpush>0&&sp>60))continue;
         const s=wSeg(w,t.x,t.y);if(s.d>w.r+(t.r||PR))continue;
-        w.hitT[t.id]=0.8;addStun(t,W_WL.stun);t.wwW=w.id;t.vx*=0.1;t.vy*=0.1;emit({k:'efx',z:'wnwhit',x:Math.round(t.x),y:Math.round(t.y),h:cH(t),a:Math.round(w.a*100)/100,n:w.id});
+        w.hitT[t.id]=0.8;addStun(t,t.wus>0?W_UL.stun:W_WL.stun);t.wus=0;t.wwW=w.id;t.vx*=0.1;t.vy*=0.1;emit({k:'efx',z:'wnwhit',x:Math.round(t.x),y:Math.round(t.y),h:cH(t),a:Math.round(w.a*100)/100,n:w.id});
         if(t.wdk>0&&t.wdkSrc!=null){t.wdk=0;const o=G.players[t.wdkSrc];if(o)damage(t,W_DS.wall,o.id,'proj');}}}
     G.wwl=G.wwl.filter(w=>!w.dead);}
   // Dash ผลักศัตรูชนกำแพงแผนที่/สิ่งก่อสร้าง = 20 ดาเมจ + สตัน (ชนกำแพง = สตันตามกติกาสาย ⚠ 0.5 วิ)
-  for(const t of foesOf(-99)){if(t.wpush>0)t.wpush-=dt;
+  for(const t of foesOf(-99)){if(t.wpush>0)t.wpush-=dt;if(t.wus>0)t.wus-=dt;if(t.wflt>0)t.wflt-=dt;
     if(t.wdk>0){t.wdk-=dt;if((t.solN|0)>(t.wdkN|0)&&Math.hypot(t.vx||0,t.vy||0)>120){t.wdk=0;const o=G.players[t.wdkSrc];if(o)damage(t,W_DS.wall,o.id,'proj');addStun(t,W_WL.stun);emit({k:'efx',z:'wndswall',x:Math.round(t.x),y:Math.round(t.y),h:cH(t)});}}
     if(t.wwW&&!(t.stun>0))t.wwW=0;}
 }
@@ -194,6 +196,25 @@ function windFlick(p){const F=p.wfw;if(!F||F.ph!=='fly')return;F.ph='glide';cons
     aoeHit(p,t,W_FW.dmg,t=>{knock(t,t.x-Math.cos(a)*10,t.y-Math.sin(a)*10,W_FW.push);t.wpush=0.8;});}
   emit({k:'efx',z:'wnfwflick',x:Math.round(p.x),y:Math.round(p.y),h:p.z,a:Math.round(a*100)/100,id:p.id});}
 
+// ---------- อัลติ Eye of Heaven ----------
+// 0 ชูไม้ → 1.0 ปักไม้ลงพื้น: ทุกคนในรัศมี 350 ลอยค้าง 1.5 วิ (ทำอะไรไม่ได้) → 1.15 กำแพงลมวงกลม 8 ชิ้นขึ้น
+// → 2.38 สะบัดปีก: ลมกระแทก 30 ผลักทุกคนออกไปชนกำแพงวง = สตัน 3 วิ • กำแพงวงแต่ละชิ้นแตกได้แบบกำแพงปกติ (70 → ระเบิด 50) ชิ้นอื่นอยู่ต่อ
+function windUltTick(p,dt){const U=p.wult;U.t+=dt;
+  if(!p.alive){p.wult=null;return;}
+  if(!U.slam&&U.t>=W_UL.slam){U.slam=1;
+    for(const t of foesOf(p.team)){if(Math.hypot(t.x-U.x,t.y-U.y)>W_UL.r+(t.r||PR))continue;t.stun=Math.max(t.stun||0,W_UL.float);t.wflt=W_UL.float;U.fl.add(t);}
+    emit({k:'efx',z:'wnulslam',x:Math.round(U.x),y:Math.round(U.y),h:p.z,id:p.id});}
+  if(!U.wall&&U.t>=W_UL.wall){U.wall=1;const n=W_UL.seg,L=W_UL.r*Math.tan(Math.PI/n);
+    for(let i=0;i<n;i++){const th=(i+0.5)*Math.PI*2/n,w={id:++G.zid,owner:p.id,team:p.team,x:U.x+Math.cos(th)*W_UL.r,y:U.y+Math.sin(th)*W_UL.r,a:th,L,r:W_WL.r,t:W_UL.wlife,mv:0,acc:0,uns:0,hitT:{},ring:1};
+      (G.wwl||(G.wwl=[])).push(w);emit({k:'efx',z:'wnwup',x:Math.round(w.x),y:Math.round(w.y),a:Math.round(th*100)/100,id:p.id,n:w.id,m:2});}}
+  if(!U.imp&&U.t>=W_UL.imp){U.imp=1;
+    for(const t of foesOf(p.team)){const d=Math.hypot(t.x-U.x,t.y-U.y);if(d>W_UL.r+(t.r||PR))continue;
+      aoeHit(p,t,W_UL.dmg,t=>{const f=Math.max(900,(W_UL.r-d+80)*6.5);knock(t,U.x,U.y,f);t.wus=1.2;t.wpush=1.2;});}
+    emit({k:'efx',z:'wnulimp',x:Math.round(U.x),y:Math.round(U.y),h:p.z,id:p.id});}
+  if(U.t>=W_UL.end)p.wult=null;}
+// คนที่ลอยค้าง: ลอยขึ้นจากพื้นค้างไว้ (เรียกแทนแรงโน้มถ่วงใน updatePlayer)
+function windFloatZ(p,dt){const gh=groundH(p.x,p.y,p.z);p.z+=(gh+W_UL.fz-p.z)*Math.min(1,4*dt);p.vz=0;}
+
 // สำหรับ snapshot: [เกจ, ดูดลม, ชาร์จกำแพง, เลือกวางกำแพง, ชาร์จระเบิดปีก]
 function windSnapP(p){if(!wOn(p))return undefined;return [Math.floor(p.wg||0),p.wchg?1:0,p.wwc|0,p.wwAim?1:0,p.wsb?1:0,p.wfw?(p.wfw.ph==='fly'?1:2):0,p.wdr?(p.wdr.ph==='chg'?1:2):0];}
 function windSnapW(){const o={};if(G.wwl&&G.wwl.length)o.WW=G.wwl.map(w=>[w.id,Math.round(w.x),Math.round(w.y),Math.round(w.a*100)/100,w.L,Math.round(w.t*10)/10,w.mv>0?1:0,w.team,w.owner]);
@@ -213,7 +234,8 @@ defSpell(WINDP,{id:'voidspheres',role:'control',n:'Void Spheres',ic:'⚫',cd:W_V
 defSpell(WINDP,{id:'featherwing',role:'utility',n:'Featherwing',ic:'🪽',cd:W_FW.cd,d:'บินด้วยปีก 5 วิ สูงสุด ~6 ม. เร็ว 1.3 เท่า (ใช้ BA / กำแพงลม / Windrift / Void Spheres ได้) • กดสกิลอีกครั้ง = สะบัดปีกไปข้างหน้า 250 เอียงลงพื้น ผลัก 300 15 ดาเมจ แล้วร่อนลง',
   toggle(p){if(p.wfw&&p.wfw.ph==='fly'){windFlick(p);return true;}return false;},
   cast(p){if(p.wfw)return false;p.wfw={ph:'fly',t:W_FW.t};p.vz=W_FW.vz;emit({k:'efx',z:'wnfw',x:Math.round(p.x),y:Math.round(p.y),h:p.z,id:p.id});}});
-defSpell(WINDP,{id:'eyeofheaven',role:'ult',ult:true,n:'Eye of Heaven',ic:'👁️',cd:0,d:'(กำลังทำ — ขั้นที่ 3) เขตไร้แรงโน้มถ่วงรัศมี 350 ศัตรูลอยค้าง 1.5 วิ → ลมกระแทก 30 ผลักชนกำแพงลมวงกลม 8 ชิ้น = สตัน 3 วิ • กำแพงวงอยู่ 5 วิ ทำแตกได้ทีละชิ้น',cast(p){emit({k:'efx',z:'wnsoon',x:p.x,y:p.y,h:p.z+2.2,id:p.id});p.ult=100;}});
+defSpell(WINDP,{id:'eyeofheaven',role:'ult',ult:true,n:'Eye of Heaven',ic:'👁️',cd:0,d:'ชูไม้ขึ้นฟ้า แล้วปักลงพื้น: ทุกคนในรัศมี 350 ลอยค้าง 1.5 วิ (ทำอะไรไม่ได้) • กำแพงลมวงกลม 8 ชิ้นขึ้นรอบเขต • สะบัดปีก = ลมกระแทก 30 ผลักทุกคนไปชนกำแพงวง สตัน 3 วิ • กำแพงวงอยู่ 5 วิ แต่ละชิ้นตีแตกได้แบบกำแพงลมปกติ (ระเบิด 50) ชิ้นอื่นยังอยู่',
+  cast(p){p.wult={t:0,x:p.x,y:p.y,fl:new Set()};p.shieldOn=false;p.wfw=null;p.wdr=null;emit({k:'efx',z:'wnult',x:Math.round(p.x),y:Math.round(p.y),h:p.z,a:Math.round(p.ang*100)/100,id:p.id});}});
 
 // ท่าพื้นฐาน + โล่ + Dash ของสาย (PBASIC ต้องอยู่ช่องเดียวกับลำดับใน PATHS)
 PBASIC.push({id:'b_wind',type:'wblade',n:'ใบมีดลม / GaleBurst',d:'คลิก = ใบมีดลม 5 ดาเมจ ทุก 0.3 วิ ระยะ 400 โดนแล้วเกจ GaleBurst +12% • กดค้าง (เกจยังไม่เต็ม) = ดูดลมรอบตัว +8%/วิ • เกจเต็ม = คลิกถัดไปยิงทอร์นาโดนอน 12 ม. 25 ดาเมจ ผลัก 250',

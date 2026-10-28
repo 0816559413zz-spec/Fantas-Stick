@@ -288,6 +288,7 @@ function updatePlayer(p,dt,acting){
   else if(p.sdome)stormDomeTick(p,inp,dt);
   else if(p.wr&&p.wr.ph!=='trans'){}   // Wrath: ลอยบนฟ้า (earthWrathTick คุมความสูง)
   else if(p.wfw)windFlyZ(p,dt);   // สายลม Featherwing: บิน/ร่อนลง
+  else if(p.wflt>0)windFloatZ(p,dt);   // โดนอัลติสายลม: ลอยค้าง
   else gravity();
 
   // โล่
