@@ -138,10 +138,10 @@
 .h4Cd.sel .fc{translate:0 -20px;box-shadow:inset 0 0 0 2px #fff,inset 0 0 0 4px #0a0c18,0 0 26px var(--c2);animation:h4Sel .9s ease-in-out infinite alternate}
 .h4Cd.drag{z-index:9;transition:none}
 .h4Cd.drag .fc{transition:none;box-shadow:inset 0 0 0 2px #fff,0 18px 30px rgba(0,0,0,.7),0 0 26px var(--c1);cursor:grabbing}
-.h4Tip{position:absolute;z-index:3;left:16px;bottom:284px;display:none;padding:3px 10px;border-radius:4px;font:500 12px 'Kanit',sans-serif;color:var(--c2);background:rgba(6,9,20,.75);box-shadow:0 0 0 1px color-mix(in srgb,var(--c1) 50%,transparent);white-space:nowrap}
+.h4Tip{position:absolute;z-index:3;left:16px;bottom:250px;display:none;padding:3px 10px;border-radius:4px;font:500 12px 'Kanit',sans-serif;color:var(--c2);background:rgba(6,9,20,.75);box-shadow:0 0 0 1px color-mix(in srgb,var(--c1) 50%,transparent);white-space:nowrap}
 #h4.edit .h4Tip{display:block}
 /* ---------- ไพ่อัลติใบใหญ่ หลังไพ่ 4 ใบ (ผู้ใช้ 2026-10-28): เศษไพ่ขาด .sd ประกอบเข้าตามเกจ (--g = ส่วนที่ยังขาด) • เต็ม = สมบูรณ์ + ออร่า ---------- */
-.h4UC{position:absolute;z-index:1;left:161px;bottom:62px;width:150px;height:215px;rotate:-2deg}
+.h4UC{position:absolute;z-index:1;left:161px;bottom:26px;width:150px;height:215px;rotate:-2deg;translate:0 calc(var(--g,1)*80px);transition:translate .6s cubic-bezier(.3,1.3,.5,1)}   /* เกจน้อย = โผล่นิดเดียว • เต็ม = โผล่ครึ่งใบเหนือไพ่ 4 ใบ (ผู้ใช้ 2026-10-28) */
 .h4UC .stk{position:absolute;inset:0;border-radius:12px;background:linear-gradient(160deg,#1a1d33,#0a0c18);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--c1) 45%,transparent),0 6px 16px rgba(0,0,0,.5);transform:translate(7px,5px) rotate(4deg)}
 .h4UC .stk.b{transform:translate(-6px,7px) rotate(-5deg);opacity:.8}
 .h4UC .fc{position:absolute;inset:0}
