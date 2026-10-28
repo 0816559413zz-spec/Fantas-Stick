@@ -5,26 +5,26 @@
 import json,math
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
-DUR=1.6;LIFE=1.45;T_PULL=0.6;T_ARR=0.95;FAR=10.0;NEAR=3.0;S=1.15
+DUR=1.4;LIFE=1.2;T_PULL=0.6;T_ARR=0.95;FAR=10.0;NEAR=3.0;S=1.15
 W,LG,G,DG,LN='#ffffff','#efffe8','#8dff65','#2ec772','#1a7a45'
 k=lambda t:str(round(t/LIFE,3))
 def path(a,y=0.0):
     sx,cz=math.sin(a),math.cos(a)
     P=lambda d:[round(sx*d,2),y,round(cz*d,2)]
     return {'0':P(FAR),k(T_PULL):P(FAR),k(T_PULL+.12):P(FAR-1.2),k(T_ARR):P(NEAR),'1':P(NEAR)}
-def grow(s,end=.35):   # โผล่จากพื้น → ค้าง → หมุนสลายตอนจบ
-    return {'0':round(.15*s,3),k(.2):round(s,3),k(T_ARR):round(s,3),k(T_ARR+.12):round(1.12*s,3),'1':round(end*s,3)}
+def grow(s,end=.15):   # โผล่จากพื้น → ค้าง → ตอนดึงหดเล็กลง (ถูกดูดเข้าหาเรา ไม่บังจอในเกม — ผู้ใช้ 2026-10-28) → ยุบลงพื้น
+    return {'0':round(.15*s,3),k(.2):round(s,3),k(T_PULL):round(s,3),k(T_ARR):round(.62*s,3),k(T_ARR+.1):round(.5*s,3),'1':round(end*s,3)}
 OP=lambda o:{'0':0,k(.06):o,k(T_ARR+.1):o,'1':0}
 L=[]
 for n,a in enumerate([math.radians(-22.5),0.0,math.radians(22.5)]):
     p=f't{n}_';P=path(a);at=round(n*.04,2)
     # ตัวทอร์นาโด: เกลียวเส้นยาวพันขึ้น 3 ชั้น (ขาวใน / เขียว / เส้นเข้มนอก) — ลด rim/glow ลง (ผู้ใช้: สะท้อนแสงน้อยลง)
-    L.append({'id':p+'helix','t':'mesh','at':at,'life':LIFE,'att':'feet','shape':'model','model':'wind_helix','mat':'glow','col':LG,'int':.75,'pos':P,'spin':600,'scale':grow(S),'op':OP(.95),'fade':0})
+    L.append({'id':p+'helix','t':'mesh','at':at,'life':LIFE,'att':'feet','shape':'model','model':'wind_helix','mat':'glow','col':LG,'int':.5,'pos':P,'spin':600,'scale':grow(S),'op':OP(.95),'fade':0})
     L.append({'id':p+'helix2','t':'mesh','at':at,'life':LIFE,'att':'feet','shape':'model','model':'wind_helix','mat':'energy','col':G,'col2':DG,'rot':[0,45,0],'pos':P,'spin':420,'scale':grow(S*1.12),'rim':.3,'op':OP(.85),'fade':0})
     L.append({'id':p+'helix3','t':'mesh','at':at,'life':LIFE,'att':'feet','shape':'model','model':'wind_helix','mat':'solid','col':DG,'col2':LN,'rot':[0,100,0],'pos':P,'spin':-380,'scale':grow(S*1.22),'rim':0,'op':OP(.7),'fade':0})
     # แกนขาวเรือง ใหญ่ขึ้น ขึ้นพร้อมทอร์นาโด
     L.append({'id':p+'core','t':'mesh','at':at,'life':LIFE,'att':'feet','shape':'model','model':'wind_core','mat':'tex','tex':'tex/wind_streaks','col':W,'col2':'#000000','rim':0,'uvTile':[2,3],'uvScroll':[-2.5,-.8],'pos':P,'spin':700,
-              'scale':{kk:[round(v*.75,3),round(v*.8,3),round(v*.75,3)] for kk,v in grow(S).items()},'int':1.3,'op':OP(.9),'fade':0})
+              'scale':{kk:[round(v*.75,3),round(v*.8,3),round(v*.75,3)] for kk,v in grow(S).items()},'int':1.0,'op':OP(.9),'fade':0})
     # เอฟเฟกต์รอบ ๆ: แถบสโตรกพู่กันวนรอบกลางลำ 2 ชั้น
     for j,(y,tex,col,sp,sc) in enumerate([(1.0,'tex/wind_swoosh_a_hi',W,560,1.25),(2.2,'tex/wind_swoosh_b',G,-480,1.55)]):
         L.append({'id':p+f'band{j}','t':'mesh','at':at+.05,'life':LIFE-.05,'att':'feet','shape':'model','model':f'wind_pieces{j}','mat':'tex','tex':tex,'col':col,'col2':'#000000','rim':0,'uvTile':[1,1],'uvScroll':[0,0],

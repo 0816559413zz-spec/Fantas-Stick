@@ -13,9 +13,9 @@ function windFX(o,p,pz,now,dt){
   const s=wvState(p.id),alive=p.al&&!p.dn,guard=alive&&p.sh,h=o.zs||0;
   // ปีกติดหลังตลอดเวลา (ท่ากางเกือบนิ่ง) — ซ่อนตอนยกโล่ (ปีกห่อแทน)
   const big=A[5]===1;   // Featherwing บินอยู่: ปีกใหญ่ 1.6 เท่า (ผู้ใช้)
-  if(alive&&!guard){if(!wvAlive(s.wing)||s.wingBig!==big){if(s.wing)fxKill(s.wing);s.wing=fxPlay('wind/wing_idle',{x:p.x,y:p.y,h,s:big?1.6:1,follow:p.id,aim:false});s.wingBig=big;}}
+  if(alive&&!guard){if(!wvAlive(s.wing)||s.wingBig!==big){if(s.wing)fxKill(s.wing);s.wing=fxPlay('wind/wing_idle',{x:p.x,y:p.y,h,s:big?1.6:1,follow:p.id});s.wingBig=big;}}
   else if(s.wing){fxStop(s.wing);s.wing=null;}
-  if(guard){if(!wvAlive(s.guard))s.guard=fxPlay('wind/shield_guard',{x:p.x,y:p.y,h,follow:p.id,aim:false});}
+  if(guard){if(!wvAlive(s.guard))s.guard=fxPlay('wind/shield_guard',{x:p.x,y:p.y,h,follow:p.id});}
   else if(s.guard){fxKill(s.guard);s.guard=null;}   // ห่อปีกยาว 9.5 วิ → ตัดทิ้งทันทีตอนลดโล่
   // ดูดลมชาร์จเกจ: ละอองลมไหลเข้าหาตัว
   if(alive&&A[1]&&Math.random()<0.8){const a=Math.random()*6.283,r=rnd(60,110);burst(p.x+Math.cos(a)*r,p.y+Math.sin(a)*r,Math.random()<0.5?'#8dff65':'#efffe8',1,-r*2.2,0.4,2.2,{h:h+rnd(0.4,1.8),g:0});}
@@ -43,7 +43,7 @@ function windEfx(ev){
     case 'wngbfull':fxPlay('wind/ba_hit',{x,y,h:H+1.2,a:0});ring(x,y,'#8dff65',30,0.3,H+0.1);if(mine)toast('GaleBurst พร้อม! คลิกซ้าย = ทอร์นาโด');return true;
     case 'wnchg':return true;
     case 'wnsbchg':ring(x,y,'#b8ff85',60,0.3,H+1);return true;
-    case 'wnsb':fxPlay('wind/shield_burst',{x,y,h:H,follow:ev.id,aim:false});if(near)shake(0.25);return true;
+    case 'wnsb':fxPlay('wind/shield_burst',{x,y,h:H,follow:ev.id});if(near)shake(0.25);return true;
     case 'wnds':fxPlay('wind/dash_push',{x,y,h:H,a});return true;
     case 'wndswall':fxPlay('wind/wall_hit',{x,y,h:0,a:Math.random()*6.283});return true;
     case 'wnwaim':if(mine)toast('กำแพงลม: คลิกซ้าย = ดันไปข้างหน้า • คลิกขวา = วางตรงจุดเล็ง');return true;
@@ -58,7 +58,8 @@ function windEfx(ev){
     case 'wndr':fxPlay('wind/windrift',{x,y,h:H,a});if(near)snd('cast_pull',ev);return true;
     case 'wndrslow':ring(x,y,'#8dff65',26,0.35,H+0.2);return true;
     case 'wndrland':case 'wndrwind':return true;   // ลงท่า/ลมตามมา อยู่ในเอฟเฟกต์ windrift แล้ว
-    case 'wnvx':fxPlay('wind/vortex_bind',{x,y,h:H,a});if(near)snd('cast_pull',ev);return true;
+    case 'wnvx':fxPlay('wind/vortex_bind',{x,y,h:H,a});later(0.6,()=>{if(near)shake(0.12);});if(near)snd('cast_pull',ev);return true;
+    case 'wnvxstun':fxPlay('wind/wall_hit',{x,y,h:0,a:Math.random()*6.283});if(near)shake(0.15);return true;   // ลมรัดตัว = สตัน 0.5 วิ
     case 'wnvxcap':case 'wnvohit':fxPlay('wind/ba_hit',{x,y,h:Math.max(0,H-0.2),a:Math.random()*6.283});return true;
     case 'wnvofire':if(near)snd('cast_pull',ev);return true;
     case 'wnvoend':burst(x,y,'#8dff65',8,90,0.3,2,{h:H,g:0});return true;
