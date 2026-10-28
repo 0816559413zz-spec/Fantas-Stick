@@ -173,6 +173,11 @@ const FILES=['01-core','02-data','02-citytest','02-city','03-spells-core','04-fr
 const STUDIO_ON=new URLSearchParams(location.search).has('studio');
 const SRCS=FILES.map(f=>'js/'+f+'.js').concat(STUDIO_ON?['tools/fx-lint.js','studio/studio.js','studio/texgen.js','studio/maker.js','studio/meshedit.js']:[]).concat(new URLSearchParams(location.search).has('rec')?['studio/rec.js']:[]);   // ?rec = อัดท่าตัวละครให้สตอรี่บอร์ด (studio/rec.js)
 if(STUDIO_ON){const l=document.createElement('link');l.rel='stylesheet';l.href='studio/studio.css';document.head.append(l);document.title='VFX Studio — Fantas Stick';}
+// CSS: <link> ปกติโดนแคชเบราว์เซอร์ค้าง (JS ใหม่แต่ CSS เก่า = HUD ซ้อนกัน, ผู้ใช้ 2026-10-28) → ดึงสดแบบ no-cache เหมือน JS
+// แล้วเปลี่ยนลิงก์เป็น ?h=<แฮชเนื้อหา> (เนื้อหาไม่เปลี่ยน = URL เดิม = ใช้แคชได้) • ใส่ลิงก์ใหม่ก่อน แล้วค่อยลบอันเก่า (ไม่กระพริบ)
+for(const l of document.querySelectorAll('link[rel=stylesheet][href^="css/"]'))fetch(l.getAttribute('href'),{cache:'no-cache'}).then(r=>r.ok?r.text():null).then(t=>{if(t==null)return;
+  let h=0;for(let i=0;i<t.length;i++)h=(h*31+t.charCodeAt(i))|0;const u=l.getAttribute('href').split('?')[0]+'?h='+(h>>>0).toString(36);
+  const n=l.cloneNode();n.href=u;n.onload=()=>l.remove();l.after(n);}).catch(()=>{});
 try{
   const src=await Promise.all(SRCS.map(f=>fetch(f,{cache:'no-cache'}).then(r=>{if(!r.ok)throw new Error(f+' '+r.status);return r.text();})));
   const B='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
