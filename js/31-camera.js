@@ -65,11 +65,13 @@ function aimFromCrosshair(me,P,E){
     if(t<=tMin||t>=T)return;
     const y=o.y+dy*t;if(y>=y0&&y<=y1)T=t;
   };
-  for(const q of OBS){if(q.k==='tfence'||q.bi!==undefined&&BLDG[q.bi]&&BLDG[q.bi].pc.some(p=>p.fl&1))continue;{const g0=GY(q.x,q.y);cyl(tx(q.x),tz(q.y),q.r*S3,q.top!==undefined?-50:g0,q.top!==undefined?q.top:g0+(q.hgt||9));}}
+  for(const q of OBS){if(q.k==='tfence'||q.bi!==undefined&&BLDG[q.bi]&&BLDG[q.bi].pc.some(p=>p.fl&1)||q.bot>=q.hgt)continue;{const g0=GY(q.x,q.y);cyl(tx(q.x),tz(q.y),q.r*S3,q.top!==undefined?-50:g0+(q.bot||0),q.top!==undefined?q.top:g0+(q.hgt||9));}}
   if(PROPON)for(const q of PROPS)if(q.st!==1){const g0=GY(q.x,q.y);cyl(tx(q.x),tz(q.y),q.r*S3,g0,g0+q.hgt);}
   for(const q of P||[])if(q.id!==me.id&&q.al&&!q.dn&&!q.gh){const g0=GY(q.x,q.y)+(q.z||0);cyl(tx(q.x),tz(q.y),0.55,g0,g0+2);}
   for(const e of E||[]){const D=EDEF[e.t];if(D){const g0=GY(e.x,e.y)+(e.h||0);cyl(tx(e.x),tz(e.y),Math.max(0.4,D.r*S3),g0,g0+D.ch+0.8);}}
   // เส้นเล็งลงพื้นก่อนชนอะไร = ยิงไปจุดนั้นบนพื้นตรงเป้า (ล็อกเป้าอัตโนมัติใน shoot() ยังช่วยถ้าเล็งใกล้ศัตรู)
+  if(MAPID==='city')for(let t=tMin;t<T;t+=0.4){const X=o.x+dx*t,Z=o.z+dz*t;if(citySolidAt(X/S3+MW/2,Z/S3+MH/2,o.y+dy*t)){T=t;break;}}   // ตึกในเมือง (ผนังที่ยังไม่แตก/ส่วนทึบ)
+  const tw=T;   // ระยะถึงสิ่งที่ชนก่อนพื้น (ใช้จำกัดจุดวางสกิลบนพื้นด้วย)
   const tg=TERR?rayTerr(o,_aimD,tMin,T):(dy<-1e-4?-o.y/dy:1e9);if(tg>tMin&&tg<T)T=tg;
   let X=o.x+dx*T,Z=o.z+dz*T,Y=Math.max(TW(X,Z)+0.1,o.y+dy*T);
   // จุดเล็งอยู่ใกล้/ข้างหลังตัวเกินไป (ก้มมองเท้า) ให้ยิงตรงไปข้างหน้าระดับอกแทน
@@ -78,7 +80,7 @@ function aimFromCrosshair(me,P,E){
   // จุดที่เป้ากลางจอชนพื้น (ใช้กับคาถาวางพื้น / หน้าไม้ของร่างยักษ์)
   const tgG=TERR?rayTerr(o,_aimD,0,90):1e9;
   if(TERR&&tgG<90){INPUT.gx=(o.x+_aimD.x*tgG)*20+MW/2;INPUT.gy=(o.z+_aimD.z*tgG)*20+MH/2;}
-  else if(!TERR&&_aimD.y<-0.01){const t=(o.y-0.05)/-_aimD.y;INPUT.gx=(o.x+_aimD.x*t)*20+MW/2;INPUT.gy=(o.z+_aimD.z*t)*20+MH/2;}else{INPUT.gx=INPUT.gy=-1;}
+  else if(!TERR&&_aimD.y<-0.01){const t=Math.min((o.y-0.05)/-_aimD.y,tw<60?tw:1e9);INPUT.gx=(o.x+_aimD.x*t)*20+MW/2;INPUT.gy=(o.z+_aimD.z*t)*20+MH/2;}else{INPUT.gx=INPUT.gy=-1;}   // จุดบนพื้น ไม่เลยผนังที่เส้นเล็งชนก่อน
 }
 let AIMZ=0;
 // สายดิน: ซูมออก + เลื่อนกล้องไปซ้ายตอนกดค้าง BA ชาร์จ / ตอนรอปาเสาอัลติบนฟ้า (Stand ใหญ่ไม่บังจอ) — ผู้ใช้ 2026-10-21

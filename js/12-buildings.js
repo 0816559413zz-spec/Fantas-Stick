@@ -99,12 +99,14 @@ function damageEnv(x,y,rad,dmg,by,el,h){
 }
 // เส้นจาก (x0,y0,h0) → (x1,y1,h1) ชนชิ้นบ้านแรกตรงไหน (ก้าวละ 10 px) • null = ไม่ชน
 function bldRay(x0,y0,h0,x1,y1,h1){
-  if(!BLDON)return null;const L=Math.hypot(x1-x0,y1-y0),mx=(x0+x1)/2,my=(y0+y1)/2,near=BLDG.filter(b=>bldNear(b,mx,my,L/2+20));
-  if(!near.length)return null;const n=Math.max(1,Math.ceil(L/10));
-  for(let i=1;i<=n;i++){const t=i/n,x=lerp(x0,x1,t),y=lerp(y0,y1,t),h=lerp(h0,h1,t);
+  const c=cityRay(x0,y0,h0,x1,y1,h1);   // ตึกในเมือง (js/12-city-dmg) — ชนก่อนบ้านไหม
+  if(!BLDON)return c;const L=Math.hypot(x1-x0,y1-y0),mx=(x0+x1)/2,my=(y0+y1)/2,near=sgNear(sgBld(),mx,my,L/2+20,_sgRB).filter(b=>bldNear(b,mx,my,L/2+20));
+  if(!near.length)return c;const n=Math.max(1,Math.ceil(L/10));
+  for(let i=1;i<=n;i++){const t=i/n;if(c&&t>c.t)return c;const x=lerp(x0,x1,t),y=lerp(y0,y1,t),h=lerp(h0,h1,t);
     for(const b of near)if(bldNear(b,x,y,8)&&bldPieceAt(b,x,y,h,6)>=0)return {x,y,h,t};}
-  return null;
+  return c;
 }
+const _sgRB=[];
 // ท่าที่พุ่ง/ยิงลงจุดเล็ง: จุดลงหยุดที่ผนัง/หลังคาบ้านที่ขวางอยู่ (ไม่ทะลุ) • ถอยออกจากผนัง back px • คืน {x,y,h} (h = ความสูงจุดชน หรือพื้น)
 function aimClip(x0,y0,h0,o,back){
   const g=groundH(o.x,o.y),c=bldRay(x0,y0,h0,o.x,o.y,g);if(!c)return {x:o.x,y:o.y,h:g,hit:false};
@@ -123,6 +125,7 @@ function aimRay3(p,h0,range){
     if(nx<40||nx>MW-40||ny<40||ny>MH-40)return {x,y,h,hit:'edge'};
     const g=groundH(nx,ny);if(nh<=g)return {x:nx,y:ny,h:g,hit:'ground'};
     if(BLDON)for(const b of sgNear(sgBld(),nx,ny,8,_sgA))if(bldNear(b,nx,ny,8)&&bldPieceAt(b,nx,ny,nh,6)>=0)return {x:nx,y:ny,h:nh,hit:'bld'};
+    if(citySolidAt(nx,ny,nh))return {x:nx,y:ny,h:nh,hit:'bld'};   // ตึกในเมือง
     x=nx;y=ny;h=nh;
   }
   return {x,y,h,hit:'air'};
@@ -244,9 +247,13 @@ function sgNear(g,x,y,r,out){
   return out;
 }
 const _sgCR=[],_sgCW=[],_sgCB=[],_sgCO=[],_sgPO=[],_sgPB=[],_sgPP=[],_sgM=[],_sgE=[],_sgA=[];
+// ขยับไกลในทีเดียว (ท่าพุ่ง/วาร์ปสั้น/โดนกระเด็น ≥ 10 px ต่อครั้ง): ไล่เส้นจากตำแหน่งก่อนหน้า ชนผนังบ้าน/ตึกตรงไหน หยุดหน้าผนัง — กันทะลุผนังบาง • ไกลเกิน 400 px = วาร์ป/เกิดใหม่ ไม่เช็ก
+const _cwLast=new WeakMap();
 function collideWorld(o,r,z){
   z=z||0;const sx=o.x,sy=o.y;let sol=0;
   o.x=clamp(o.x,r+20,MW-r-20);o.y=clamp(o.y,r+20,MH-r-20);if(o.x!==sx||o.y!==sy)sol++;
+  {const L=_cwLast.get(o);if(L){const dl=Math.hypot(o.x-L.x,o.y-L.y);if(dl>=10&&dl<400){const c=bldRay(L.x,L.y,z+1,o.x,o.y,z+1);
+    if(c){const k=Math.max(0,c.t-(r+2)/dl);o.x=L.x+(o.x-L.x)*k;o.y=L.y+(o.y-L.y)*k;sol++;}}}}
   if(PROPON)for(const c of sgNear(sgProps(),o.x,o.y,r,_sgCW)){
     if(c.st===1||c.hgt<=z)continue;
     if(Math.abs(o.x-c.x)>c.r+r||Math.abs(o.y-c.y)>c.r+r)continue;
@@ -276,6 +283,7 @@ function collideWorld(o,r,z){
     const L=o.x-b.x,Rr=b.x+b.w-o.x,T=o.y-b.y,Bt=b.y+b.d-o.y,m=Math.min(L,Rr,T,Bt);
     if(m===L)o.x=b.x-r;else if(m===Rr)o.x=b.x+b.w+r;else if(m===T)o.y=b.y-r;else o.y=b.y+b.d+r;sol++;}
   if(sol)o.solN=(o.solN|0)+1;   // ชนของแข็ง (Stonebreaker ใช้ทำคอมโบชนกำแพง)
+  {const L=_cwLast.get(o);if(L){L.x=o.x;L.y=o.y;}else _cwLast.set(o,{x:o.x,y:o.y});}
 }
 
 function shoot(p,type,o){

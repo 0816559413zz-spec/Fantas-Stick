@@ -186,15 +186,17 @@ function updateSpells(dt){updateStorm(dt);updateEarth(dt);updateWind(dt);updateZ
 // จุดเล็งของคาถาวางพื้น: ถ้ามีศัตรูอยู่ในแนวเล็งให้วางที่ตัวมัน ไม่งั้นวางที่ระยะ 75% ของพิสัย
 function aimPoint(p,range){
   // ผู้เล่นจริง: วางตรงจุดที่เป้ากลางจอชี้พื้น (ไม่เกินพิสัย)
-  if(p.inp&&!p.bot&&p.inp.gx>=0&&typeof p.inp.ah==='number'){const dx=p.inp.gx-p.x,dy=p.inp.gy-p.y,d=Math.hypot(dx,dy)||1,k=Math.min(1,range/d);return {x:clamp(p.x+dx*k,40,MW-40),y:clamp(p.y+dy*k,40,MH-40)};}
+  if(p.inp&&!p.bot&&p.inp.gx>=0&&typeof p.inp.ah==='number'){const dx=p.inp.gx-p.x,dy=p.inp.gy-p.y,d=Math.hypot(dx,dy)||1,k=Math.min(1,range/d);return aimWall(p,{x:clamp(p.x+dx*k,40,MW-40),y:clamp(p.y+dy*k,40,MH-40)});}
   let best=null,bs=1e9;
   for(const t of foesOf(p.team)){
     const dx=t.x-p.x,dy=t.y-p.y,dd=Math.hypot(dx,dy);if(dd>range||dd<1)continue;
     const da=Math.abs(angDiff(Math.atan2(dy,dx),p.ang));if(da<0.35&&da+dd/4000<bs){bs=da+dd/4000;best=t;}
   }
   const o=best?{x:best.x,y:best.y}:{x:p.x+Math.cos(p.ang)*range*0.75,y:p.y+Math.sin(p.ang)*range*0.75};
-  o.x=clamp(o.x,40,MW-40);o.y=clamp(o.y,40,MH-40);return o;
+  o.x=clamp(o.x,40,MW-40);o.y=clamp(o.y,40,MH-40);return aimWall(p,o);
 }
+// จุดวางสกิลอยู่หลังผนังบ้าน/ตึก (เส้นจากอกผู้ใช้ถึงจุดนั้นชนผนัง) → ย้ายมาวางหน้าผนัง — ไม่วางทะลุตึก
+function aimWall(p,o){const c=aimClip(p.x,p.y,(p.z||0)+1.2,o,PR+6);return {x:c.x,y:c.y};}
 
 // ---------- ตัวช่วยคอมโบ (ทุกสายใช้หลักเดียวกัน: ตั้งต้น → ต่อยอด → ปิดจบ) ----------
 // สายไฟ = ความร้อน (heat 0-3) • สายน้ำแข็ง = ความเย็น (chl) • สายฟ้า = ช็อต (shk) • ธรรมชาติ = พิษ (psn) • คำสาป = ตรา (mrk) • อัญเชิญ = สัตว์เวท

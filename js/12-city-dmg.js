@@ -160,6 +160,18 @@ function cityProjIn(pr,dt){if(!cityOn())return false;const x0=pr.x-pr.vx*dt,y0=p
       for(const S of I.slabs)if(pr.h<S.z&&pr.h>S.z-CIN.slab-0.2&&!cinHole(S.hole,pr.x,pr.y))return true;
       for(const R of I.ramps){const h=cinRampH(R,pr.x,pr.y);if(h>=0&&pr.h<h&&pr.h>h-0.6)return true;}}}
   return false;}
+// จุด (x,y ที่สูง h จากพื้น) ทึบไหม — ใช้กับเล็ง/ท่าพุ่ง (ตึกกลวง: ผนังนอกที่ยังไม่แตก ยกเว้นช่องประตู + พื้นชั้นบน + ส่วนทึบด้านบน • กล่องทึบอื่น: ทั้งกล่อง)
+const _sgCS=[];
+function citySolidAt(x,y,h){if(!cityOn())return false;
+  for(const B of sgNear(cityBoxGrid(),x,y,0,_sgCS)){if(x<=B.x||x>=B.x+B.w||y<=B.y||y>=B.y+B.d||h>=B.h||h<0)continue;const d=CITYD.b[B.i],I=d.I;
+    if(!I)return true;if(h>=I.top-CIN.slab)return true;
+    if(!cinIn(I,x,y,0)){const p=cityPanelAt(d,x,y,h);if(d.br[p])return false;if(I.door.has(p)){const P=d.L.P[p];return !(h<CIN.dh&&Math.abs(x-P.x)+Math.abs(y-P.y)<CIN.door);}return true;}
+    for(const S of I.slabs)if(h<S.z&&h>S.z-CIN.slab&&!cinHole(S.hole,x,y))return true;
+    return false;}
+  return false;}
+// เส้นตรง 3 มิติ (x0,y0,h0) → (x1,y1,h1) ชนตึกเมืองตรงไหน (ก้าวละ 8 px) • คืน {x,y,h,t} หรือ null
+function cityRay(x0,y0,h0,x1,y1,h1){if(!cityOn())return null;const n=Math.max(1,Math.ceil(Math.hypot(x1-x0,y1-y0)/8));
+  for(let i=1;i<=n;i++){const t=i/n,x=x0+(x1-x0)*t,y=y0+(y1-y0)*t,h=h0+(h1-h0)*t;if(citySolidAt(x,y,h))return {x,y,h,t};}return null;}
 // ห้องรอบตัว (ใช้กับกล้อง): ตึกกลวงชั้นที่เท้าอยู่ {x0,y0,x1,y1 px, z0 พื้น, z1 เพดาน (ม.)} หรือ null
 function cityRoomBox(x,y,z){const d=cityRoomAt(x,y,0);if(!d||z>=d.I.top)return null;const I=d.I;return {x0:I.x0,y0:I.y0,x1:I.x1,y1:I.y1,z0:cityFloorH(x,y,z),z1:cityCeilH(x,y,z)};}
 function citySnapB(){if(!cityOn())return '';let any=false;const s=CITYD.b.map(d=>{if(d.s)any=true;return d.s;});return any?s.join('|'):'';}

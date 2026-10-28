@@ -125,7 +125,7 @@ function cityInteriorView(CV){
 }
 // เนินเศษที่โคนผนังตรงแผ่นที่แตก (ผัง d.mo จาก cityMounds — ที่ชนเดินขึ้นได้อยู่ใน cityMoundH) • สร้างใหม่ทุกครั้งที่สถานะตึกเปลี่ยน
 function cityMoundView(r,d){
-  if(r.mg){world.remove(r.mg);disposeTree(r.mg);r.mg=null;}if(!d.mo||!d.mo.length)return;
+  if(r.mg){world.remove(r.mg);disposeTree(r.mg);r.mg=null;}if(!d.nb)return;
   const g=new THREE.Group(),R=mulberry(d.B.i*31+d.nb),m1=sMat({color:r.sty.col,roughness:0.95}),m2=sMat({color:'#5a554e',roughness:1}),m3=sMat({color:'#7a746a',roughness:1}),rb=sMat({color:'#3a3634',roughness:0.6,metalness:0.4});
   for(const q of d.mo){const along=q.rx>q.ry,L=along?q.rx:q.ry,Wd=along?q.ry:q.rx,cx=tx(q.x),cz=tz(q.y);   // เนิน = ก้อนหยาบหลายก้อนเรียงตามแนวผนัง + อิฐ/คอนกรีต + เหล็กเส้น
     for(let k=0;k<4;k++){const lump=new THREE.Mesh(sGeo(THREE.DodecahedronGeometry,1,0),[m2,m1,m3][k%3]),u=(k/3-0.5)*L*S3*1.1+(R()-0.5)*0.6,sc=0.45+R()*0.35;
@@ -133,6 +133,14 @@ function cityMoundView(r,d){
     for(let k=0;k<12;k++){const c=new THREE.Mesh(sGeo(THREE.BoxGeometry,1,1,1),[m1,m2,m3][k%3]),s=0.2+R()*0.6,u=(R()-0.5)*L*S3*1.6,v=(R()-0.5)*Wd*S3*1.6;c.scale.set(s,s*(0.4+R()*0.4),s*(0.6+R()));
       c.position.set(cx+(along?u:v),q.h*(0.3+R()*0.7),cz+(along?v:u));c.rotation.set(R()*2,R()*3,R()*2);g.add(c);}
     for(let k=0;k<2;k++){const b=new THREE.Mesh(sGeo(THREE.BoxGeometry,1,1,1),rb);b.scale.set(0.05,0.05,1.2+R()*1.5);b.position.set(cx+(R()-0.5)*L*S3,q.h*0.8,cz+(R()-0.5)*Wd*S3);b.rotation.set(R()*1.2,R()*3,R()*0.6);g.add(b);}}
+  // ขอบพื้นชั้นบนหักห้อย: แผ่นผนังที่แตกในชั้นที่เข้าได้ → แผ่นพื้นเหนือรูหักงอลงข้างนอก (แตกทั้งบน-ล่าง = หักยาว ห้อยชันกว่า) + เหล็กเส้น — ภาพล้วน
+  const I=d.I,Lt=d.L;
+  if(I)Lt.F.forEach((F,fi)=>{const pw=CITY_PW*F.sx,nx=fi===2?1:fi===3?-1:0,nz=fi===0?1:fi===1?-1:0;
+    for(let k=0;k<F.k;k++)for(let f=0;f<Math.min(I.nf,Lt.n-1);f++){const p=F.s0+k*Lt.n+f;if(!d.br[p])continue;const up=d.br[p+1],P=Lt.P[p],y=(f+1)*I.fh,len=up?1.9:1.1,an=(up?0.55:0.28)+R()*0.15;
+      const s=new THREE.Mesh(sGeo(THREE.BoxGeometry,1,1,1),m3);s.scale.set(nz?pw*(0.55+R()*0.3):len,0.28,nz?len:pw*(0.55+R()*0.3));
+      const piv=new THREE.Group();piv.position.set(tx(P.x)-nx*0.6,y-0.15,tz(P.y)-nz*0.6);piv.rotation.set(nz*an,0,-nx*an);s.position.set(nx*len/2,0,nz*len/2);piv.add(s);
+      for(let j=0;j<3;j++){const b=new THREE.Mesh(sGeo(THREE.BoxGeometry,1,1,1),rb);b.scale.set(nz?0.04:0.9,0.04,nz?0.9:0.04);b.position.set(nx*(len+0.2)+(nz?(R()-0.5)*pw*0.6:0),0.05,nz*(len+0.2)+(nx?(R()-0.5)*pw*0.6:0));b.rotation.y=(R()-0.5)*0.5;piv.add(b);}
+      g.add(piv);}});
   shadowAll(g);world.add(g);r.mg=g;
 }
 // ---------- ชุดโมเดลลอนดอน (assets/city/*.glb จาก assets/src/city_kit_build.py) ----------
@@ -150,13 +158,15 @@ CITY_STY.shop=CITY_STY.station=CITY_STY.brick;
 const CITY_VEH=new Set(['cp_car','cp_van','cp_taxi','cp_bus']);
 // แผ่นผนังตามผัง cityLayout (ลำดับ P ตรงกับโฮสต์) • คืน {P:[ที่อยู่แผ่น], X:[ขอบดาดฟ้า/มุม/ปล่องไฟ], L, B}
 function cityFacade(B,S,zones,w,d,x,z,kput,R){
-  const L=cityLayout(B,zones),P=[],X=[];
-  for(const p of L.P){const F=L.F[p.fi],nm=p.f>0?S.u(R,B,p.f,L.n):p.fi===L.front?S.g(p.i,B,F.k):S.s(R,B);
+  const L=cityLayout(B,zones),P=[],X=[],XP=[];   // XP[j] = แผ่นผนังที่ชิ้นโครง X[j] เกาะอยู่ (แผ่นไหนแตก = ชิ้นโครงนั้นหักหายไปด้วย — cityViewSync)
+  L.P.forEach((p,pi)=>{const F=L.F[p.fi],nm=p.f>0?S.u(R,B,p.f,L.n):p.fi===L.front?S.g(p.i,B,F.k):S.s(R,B);
     P.push(kput(nm,tx(p.x),p.z0,tz(p.y),F.a,F.sx,L.sy));
-    if(p.f===L.n-1)X.push(kput(S.top,tx(p.x),B.h,tz(p.y),F.a,F.sx));}
-  for(const [sx2,sz2] of [[-1,-1],[1,-1],[-1,1],[1,1]])for(let f=0;f<L.n;f++)X.push(kput(S.c,x+sx2*w/2,f*CITY_FL*L.sy,z+sz2*d/2,0,1,L.sy));
+    if(p.f===L.n-1){X.push(kput(S.top,tx(p.x),B.h,tz(p.y),F.a,F.sx));XP.push([pi]);}});
+  for(const [sx2,sz2] of [[-1,-1],[1,-1],[-1,1],[1,1]]){const cx=B.x+(sx2>0?B.w:0),cy=B.y+(sz2>0?B.d:0);
+    for(let f=0;f<L.n;f++){X.push(kput(S.c,x+sx2*w/2,f*CITY_FL*L.sy,z+sz2*d/2,0,1,L.sy));   // เสามุม: เกาะแผ่นปลายสุดของสองด้านที่มาชนกันที่มุมนี้ (ชั้นเดียวกัน)
+      const adj=[];L.P.forEach((q,pi)=>{if(q.f===f&&Math.hypot(q.x-cx,q.y-cy)<CITY_PW*L.F[q.fi].sx*10+8)adj.push(pi);});XP.push(adj);}}
   if(S.ch){const nc=1+Math.floor(R()*2);for(let i=0;i<nc;i++)X.push(kput('ct_chimney',x+(R()-0.5)*(w-3),B.h,z+(R()-0.5)*(d-3),R()<0.5?0:Math.PI/2));}
-  return {P,X,L,B};
+  return {P,X,XP,L,B};
 }
 // สร้าง InstancedMesh ต่อ (ชิ้น × ก้อน × วัสดุ) เมื่อไฟล์โหลดเสร็จ • city_paint / รถ = ย้อมสีต่อชิ้น (instanceColor) • ก้อนละกลุ่ม → cityCull ซ่อน/แสดง
 // + กองแผ่นแตก (pool) ต่อชนิดตึก: จำนวนที่วาด = จำนวนแผ่นที่แตกตอนนี้
@@ -224,6 +234,8 @@ function cityViewSync(dt){
     if(d.cl){if(r.cl)return;r.cl=1;if(live)CV.anims.push({r,t:0});else{cityShowBld(CV,r,null);r.rub=cityRubble(r);}return;}
     if(r.cl){r.cl=0;if(r.rub){world.remove(r.rub);disposeTree(r.rub);r.rub=null;}CV.anims=CV.anims.filter(a=>a.r!==r);cityShowBld(CV,r,0);}
     for(let p=0;p<r.P.length;p++)citySet(CV,r.P[p],d.br[p]||(d.I&&d.I.door.has(p))?_cZ:r.P[p].M);
+    if(r.XP){r.xg=r.xg||[];r.XP.forEach((adj,j)=>{const g=adj.some(p=>d.br[p]);if(g===!!r.xg[j])return;r.xg[j]=g;citySet(CV,r.X[j],g?_cZ:r.X[j].M);   // โครงนอก (เสามุม/ขอบดาดฟ้า) หักตามแผ่นข้าง ๆ
+      if(g&&live){const v=r.X[j].M.elements;cityDebris(v[12]/S3+MW/2,v[14]/S3+MH/2,v[13]+1.5,r.sty.col,d.B.x+d.B.w/2,d.B.y+d.B.d/2,3,true);}});}
     if(r.lin){for(const [p,ix] of r.lin)CV.lin.setMatrixAt(ix,d.br[p]?_cZ:CV.linM[ix]);CV.lin.instanceMatrix.needsUpdate=true;}
     cityMoundView(r,d);});
   if(pd.size)cityPools(CV,pd);
