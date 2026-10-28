@@ -45,18 +45,18 @@ function h4Build(me,v){
   let R=`<div class="h4Sh"></div>`+h4Parts(E,16,(a,b)=>[20+a*480,40+b*200]);
   cards.forEach(s=>{R+=`<div class="h4Cd" data-ci="${s[3]}"><div class="fc"><i class="art"></i>${h4Ico(s[1],62)}<b class="nm">${esc(s[2]||'')}</b><span class="k"></span>${h4Glass(s[3])}</div></div>`;});
   R+=`<div class="h4Ic">`+gems.map(s=>`<div class="h4Gm" data-ci="${s[3]}">${h4Ico(s[1],26)}<i class="sh"></i><b class="n"></b><span class="k">${esc(h4Key(s[0]))}</span></div>`).join('')+`</div><div class="h4Tip">ลากไพ่เพื่อสลับตำแหน่ง • ระหว่างเล่น: กด Alt ค้าง + ปุ่มสกิล 2 ปุ่ม</div>`;
-  // ออร่าธาตุรอบอัลติ (โชว์เฉพาะตอนเต็ม: .h4M.full) — วงแสงหมุน 2 ชั้น + อนุภาคธาตุรอบลูกแก้ว
+  // ไพ่อัลติใบใหญ่ด้านหลังไพ่ 4 ใบ (ผู้ใช้ 2026-10-28): เศษไพ่ขาด 7 ชิ้น ประกอบเข้าทีละชิ้นตามเกจ (h4UltCard) • เต็ม = ไพ่สมบูรณ์ + ออร่าธาตุ
   const au=`<div class="h4Au ${E.pt}"><i class="fl"></i><i class="fl b"></i>${h4AuBits(E.pt)}${h4Parts(E,18,(a,b)=>{const t=a*Math.PI*2,r=50+b*16;return [58+Math.cos(t)*r,58+Math.sin(t)*r];})}</div>`;
-  const M=au+`<div class="h4U"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="48" fill="none" stroke="rgba(255,255,255,.15)" stroke-width="3"/><circle class="ua" cx="50" cy="50" r="48" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-dasharray="301.6" stroke-dashoffset="301.6" transform="rotate(-90 50 50)"/></svg>
-    <div class="tx"><i class="ui">${U?icoHTML(U.id,'#fff',58):''}</i><b class="up">0%</b></div><span class="k">${esc(slotKey('X'))}</span></div>`;
+  const uFace=`<i class="art"></i>${U?icoHTML(U.id,'#fff',72):''}<b class="nm">${esc(U?U.n:'')}</b>`;
+  R=R.replace('<div class="h4Ic">',h4UltCard(uFace,au)+'<div class="h4Ic">');
   let L=`<div class="h4Sh"></div>`+h4Parts(E,10,(a,b)=>[20+a*260,-30-b*180]);
   L+=`<div class="h4Me"><div class="h4Por"><div class="tk"></div><div class="rg"><i class="fc">${icoHTML('p_'+P.id,E.c1,54)}</i></div><div class="el">${icoHTML('p_'+P.id,E.c1,21)}</div><div class="lv">LV ${typeof progLv==='function'?progLv().L:1}</div></div>
     <div class="h4Hp"><div class="h4Nm">${esc(me.n||'')}<small>${E.n}</small></div><div class="h4Num"><span class="hp">0</span><small class="mh">/ 0</small><em class="xh"></em></div><div class="h4Seg"></div>
     <div class="h4Sub"><i><b></b></i><small></small></div><div class="h4Chips"></div></div></div>`;
-  root.innerHTML=`<div class="h4L">${L}</div><div class="h4R">${R}</div><div class="h4M">${M}</div>`;   // h4M = อัลติกลางล่าง (ผู้ใช้ 2026-10-27)
+  root.innerHTML=`<div class="h4L">${L}</div><div class="h4R">${R}</div>`;
   H4.el=root;H4.cache={};H4.rdy={};H4.segN=0;H4.uFull=false;
   H4.q={hp:root.querySelector('.hp'),mh:root.querySelector('.mh'),xh:root.querySelector('.xh'),seg:root.querySelector('.h4Seg'),sub:root.querySelector('.h4Sub'),subB:root.querySelector('.h4Sub b'),subT:root.querySelector('.h4Sub small'),
-    chips:root.querySelector('.h4Chips'),m:root.querySelector('.h4M'),u:root.querySelector('.h4U'),ua:root.querySelector('.ua'),up:root.querySelector('.up'),fc:root.querySelector('.fc'),
+    chips:root.querySelector('.h4Chips'),uc:root.querySelector('.h4UC'),ufc:root.querySelector('.h4UC .fc'),up:root.querySelector('.h4UC .up'),uFace,sd:[...root.querySelectorAll('.h4UC .sd')].map(el=>({el,th:+el.dataset.th})),fc:root.querySelector('.fc'),
     slots:[...root.querySelectorAll('.h4Cd,.h4Gm')].map(el=>({el,ci:+el.dataset.ci,sh:el.querySelector('.sh'),n:el.querySelector('.n'),fc:el.querySelector('.fc'),k:el.querySelector('.k'),gem:el.classList.contains('h4Gm')}))};
   h4CardWire(root);h4Place();
   if(H4.face&&H4.faceFor===me.id+'|'+k.path)h4FaceSet();
@@ -100,8 +100,9 @@ function hud4Draw(me,v){
     H4.rdy[S.ci]=ok;}
   // อัลติ
   const u=Math.min(100,me.u|0),full=u>=100;
-  h4Set('u',u,x=>{Q.ua.setAttribute('stroke-dashoffset',(301.6*(1-x/100)).toFixed(1));Q.up.textContent=x>=100?'READY':x+'%';});
-  if(full!==H4.uFull){H4.uFull=full;Q.u.classList.toggle('full',full);Q.m.classList.toggle('full',full);if(full){Q.u.classList.remove('burst');void Q.u.offsetWidth;Q.u.classList.add('burst');}}
+  h4Set('u',u,x=>{Q.uc.style.setProperty('--g',(1-x/100).toFixed(3));Q.up.textContent=x>=100?'READY':x+'%';for(const d of Q.sd)d.el.classList.toggle('on',x>=d.th);});
+  h4Set('ud',!!slotState(me,v,-2).dim,x=>Q.uc.classList.toggle('dim',x));
+  if(full!==H4.uFull){if(H4.uFull&&!full)h4UltUse();H4.uFull=full;Q.uc.classList.toggle('full',full);if(full){Q.uc.classList.remove('burst');void Q.uc.offsetWidth;Q.uc.classList.add('burst');}}
   if(!H4.face||H4.faceFor!==me.id+'|'+k.path)h4FaceShot(me,k);
 }
 // ---------- ไพ่สกิล: นาฬิกาทราย / ท่าใช้ / สลับตำแหน่ง ----------
@@ -151,6 +152,18 @@ function h4CardWire(root){let drag=null;
     if(moved){if(to>=0)h4Swap(me,to);h4Pick(null);}
     else if(H4.pick!=null&&H4.pick!==me){h4Swap(H4.pick,me);h4Pick(null);}else h4Pick(H4.pick===me?null:me);};
   root.addEventListener('pointerup',up);root.addEventListener('pointercancel',up);}
+// ---------- ไพ่อัลติ ----------
+// เศษไพ่ (เปอร์เซ็นต์ของไพ่) เรียงตามลำดับที่ประกอบเข้า: ล่าง → บน • ชิ้นที่ยังไม่ได้ = เงาจาง • ช่องว่างระหว่างเศษ (--g) หดลงจนชิดเมื่อเกจเต็ม
+const H4SH=[[[0,80],[42,72],[58,70],[100,78],[100,100],[0,100]],[[0,55],[50,48],[42,72],[0,80]],[[50,48],[100,52],[100,78],[58,70],[42,72]],
+  [[0,30],[38,22],[62,26],[50,48],[0,55]],[[62,26],[100,18],[100,52],[50,48]],[[0,0],[45,0],[38,22],[0,30]],[[45,0],[100,0],[100,18],[62,26],[38,22]]];
+function h4UltCard(face,au){
+  const sd=H4SH.map((P,i)=>{const cx=P.reduce((a,p)=>a+p[0],0)/P.length-50,cy=P.reduce((a,p)=>a+p[1],0)/P.length-50,l=Math.hypot(cx,cy)||1;
+    return `<div class="sd" data-th="${Math.round((i+1)*100/8)}" style="--dx:${(cx/l*12).toFixed(1)}px;--dy:${(cy/l*12).toFixed(1)}px;--rt:${((i%2?1:-1)*(4+i)).toFixed(0)}deg"><div class="si" style="clip-path:polygon(${P.map(p=>p[0]+'% '+p[1]+'%').join(',')})">${face}</div></div>`;}).join('');
+  return `<div class="h4UC" data-ci="-2">${au}<i class="stk"></i><i class="stk b"></i><div class="fc">${sd}<i class="edge"></i></div><span class="k">${esc(h4Key(slotKey('X')))}</span><b class="up">0%</b></div>`;}
+// กดอัลติ: ไพ่สมบูรณ์ถูกดึงออกจากกอง ลอยขึ้น แล้วไหม้สลาย (เหมือนไพ่สกิล) • กองเหลือแต่เงาเศษไพ่ เริ่มสะสมใหม่
+function h4UltUse(){const Q=H4.q;
+  h4Fx(Q.uc,'h4Gh',`<div class="fc gf"><div class="si">${Q.uFace}</div></div><div class="bits">${h4Bits(22)}</div>`,1100);
+  Q.ufc.classList.remove('draw');void Q.ufc.offsetWidth;Q.ufc.classList.add('draw');}
 // เรียกท้ายทุกเฟรมจาก render loop: เฟรมนี้ไม่ได้วาด HUD (ชนะ/แพ้, โหมด imp, ไม่มีตัวเรา) = ซ่อน
 function hud4Frame(){if(H4.el&&!H4.drawn&&!H4.el.hidden)H4.el.hidden=true;H4.drawn=false;}
 function hud4Hide(){try{if(H4.el)H4.el.hidden=true;}catch(e){}}   // setScreen เรียกได้ตั้งแต่ตอนโหลดไฟล์ (H4 ยังไม่พร้อม)

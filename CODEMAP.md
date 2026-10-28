@@ -603,10 +603,12 @@ BKICO:377 buffShow:381
 §400 จอมืดตอนเริ่มแมตช์ (ผู้ใช้ 2026-10-23: กระตุกตอนเริ่มแมตช์แรก)
 gameCover:403
 
-## js/66-hud4.js (172) — HUD รอบ 4 (ผู้ใช้ 2026-10-23, designs/hud-full-mock.html)
+## js/66-hud4.js (185) — HUD รอบ 4 (ผู้ใช้ 2026-10-23, designs/hud-full-mock.html)
 H4E:5 H4:11 h4Pal:12 hud4Col:14 h4Parts:16 h4AuBits:21 h4Key:36 h4Ico:37 h4Build:38 h4Set:65 hud4Draw:66
-§107 ไพ่สกิล: นาฬิกาทราย / ท่าใช้ / สลับตำแหน่ง
-h4Glass:109 h4Bits:115 h4Fx:117 h4CardUse:119 h4GlassOut:123 h4Place:127 h4OrdKey:130 h4OrdLoad:131 h4Swap:134 h4Pick:137 h4AltKey:139 h4CardWire:143 hud4Frame:155 hud4Hide:156 _h4RT:158 _h4Cam:158 h4FaceShot:159 h4FaceSet:172
+§108 ไพ่สกิล: นาฬิกาทราย / ท่าใช้ / สลับตำแหน่ง
+h4Glass:110 h4Bits:116 h4Fx:118 h4CardUse:120 h4GlassOut:124 h4Place:128 h4OrdKey:131 h4OrdLoad:132 h4Swap:135 h4Pick:138 h4AltKey:140 h4CardWire:144
+§155 ไพ่อัลติ
+H4SH:157 h4UltCard:159 h4UltUse:164 hud4Frame:168 hud4Hide:169 _h4RT:171 _h4Cam:171 h4FaceShot:172 h4FaceSet:185
 
 ## js/67-backdrop.js (139) — 
 BACKDROP:8
@@ -626,4 +628,4 @@ drawWindHud:78
 §85 ตัวช่วยเล็งกำแพงลม (เห็นเฉพาะเรา): เส้นโค้งเรืองที่จุดวาง (คลิกขวา) +…
 wvAimGhost:86
 
-(76 files, 18219 lines)
+(76 files, 18232 lines)
