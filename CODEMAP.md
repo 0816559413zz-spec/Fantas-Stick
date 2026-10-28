@@ -118,7 +118,7 @@ windFlyTick:200 windFlick:202
 windUltTick:211 windFloatZ:225 windSnapP:228 windSnapW:229
 §232 สกิล
 
-## js/10-net.js (183) — 
+## js/10-net.js (183) — เครือข่าย (PeerJS / WebRTC)
 PREFIX:4 NET:5 RC:9 TURN_SERVERS:12 ICE:13 PEER_OPT:14 TURN_URL:16 ICE_READY:18 JN:22 LAG:24 lagDo:25 hostSend:26 LOBBY:27 genCode:28 sendAll:29 NETD_KEYS:33 NETD:33 netDeltaReset:34 netDelta:35 NETU:47 netUndelta:48 setStatus:54 hostGame:56 hostPeer:64 netConnect:83 joinWatch:94 joinFail:109 netLost:115 joinGame:130 joinPeer:141 clientOnData:156 leave:171 leaveRoom:173
 
 ## js/11-host.js (391) — 
@@ -133,10 +133,10 @@ BRKDEF:201 BRK_M:201 BRK_MCOL:201 BRK:202 genBrk:203 brkApply:210 brkStage:214 h
 §231 ตารางช่อง (spatial grid) สำหรับแมพใหญ่: หาเฉพาะของใกล้ ๆ แทนวนทุกชิ้น…
 SG:234 sgObs:235 sgProps:235 sgGrid:237 sgNear:244 _sgCR:249 _sgCW:249 _sgCB:249 _sgCO:249 _sgPO:249 _sgPB:249 _sgPP:249 _sgM:249 _sgE:249 _sgA:249 _cwLast:251 collideWorld:252 shoot:290 eShoot:311 foesOf:318 breakShield:325 ULT_RATE:327 ultActive:328 gainUlt:329 lifesteal:330 damage:332 playerDown:389 killProj:410 explode:419 hitTarget:431 updateProjectiles:447
 
-## js/12-city-dmg.js (188) — เมืองพังได้ (designs/city-bot-battle.md ขั้น 4) — ข้อมูลที่ทุกเครื่อง…
-CITY_FL:8 CITY_PW:8 CDMG:9 CITYD:12 cityOn:13 cityLayout:15 cityReset:25 cityApplyBox:38 cityApplyItem:39 cityHex:40 cityMark:41 cityPanelAt:43 cityHitPanel:48 cityHitItem:57 cityHitObs:66 _sgCD:71 cityDamageIn:73 cityTick:81 _sgCM:91 cityMoundH:92 cityMounds:99
-§105 ข้างในตึก (2026-10-28 ผู้ใช้: เดินเข้าได้ 1–3 ชั้น มีทางขึ้น • ผนังนอ…
-CIN:109 cityInterior:110 cinIn:122 cinHole:123 cinRampH:124 _sgCI:125 cityBoxGrid:126 cityRoomAt:127 cityFloorH:129 cityCeilH:134 cinWallRect:138 cityCollideIn:141 cityProjIn:150 _sgCS:164 citySolidAt:165 cityRay:173 cityRoomBox:176 citySnapB:177 citySnapS:178 cityParse:180
+## js/12-city-dmg.js (209) — เมืองพังได้ (designs/city-bot-battle.md ขั้น 4) — ข้อมูลที่ทุกเครื่อง…
+CITY_FL:8 CITY_PW:8 CDMG:9 CITYD:12 cityOn:13 cityLayout:15 cityReset:25 cityApplyBox:39 cityApplyItem:40 cityHex:41 cityMark:42 cityPanelAt:44 cityHitPanel:49 cityHitItem:60 cityHitObs:69 _sgCD:74 cityDamageIn:76 cityTick:85 _sgCM:95 cityMoundH:96 cityMounds:104
+§110 ข้างในตึก (2026-10-28 ผู้ใช้: เดินเข้าได้ 1–3 ชั้น มีทางขึ้น • ผนังนอ…
+CIN:114 cityInterior:115 cinSlabOn:135 cinOpenPanel:137 cinSecAt:138 citySecHit:140 cinIn:142 cinHole:143 cinRampH:144 _sgCI:145 cityBoxGrid:146 cityRoomAt:147 cityFloorH:149 cityCeilH:154 cinWallRect:158 cityCollideIn:161 cityProjIn:170 _sgCS:184 citySolidAt:185 cityRay:193 cityRoomBox:196 citySnapB:197 citySnapS:198 cityParse:200
 
 ## js/13-enemies.js (168) — ศัตรู (โหมด Co-op)
 spawnEnemy:2 setupWave:19 bossPhase:36 enemySlam:44 updateEnemies:55
@@ -237,12 +237,12 @@ QUAL:143 QUAL_NAME:144 qualPR:145 applyQuality:151 qualTick:169 texCanvas:180 gl
 §239 เงาตามผู้เล่น
 SHD:243 _shF:244 _shR:244 _shU:244 _shC:244 _shY:244 shadowFollow:245 LPOOL:264
 
-## js/28-city-build.js (292) — เมืองมักเกิ้ล (ลอนดอน) — ภาพ • ข้อมูลอยู่ js/02-city.js • โมเดลจาก as…
+## js/28-city-build.js (298) — เมืองมักเกิ้ล (ลอนดอน) — ภาพ • ข้อมูลอยู่ js/02-city.js • โมเดลจาก as…
 CITY_WIN:4 cityWinTex:5 cityEmTex:10 cityBoxGeo:16 buildCity:21
 §97 ข้างในตึกกลวง (ภาพ — ผัง I จาก cityInterior js/12-city-dmg)
-cityInteriorView:100 cityMoundView:127
-§146 ชุดโมเดลลอนดอน (assets/city/*.glb จาก assets/src/city_kit_build.py)
-CITY_STY:151 CITY_VEH:158 cityFacade:160 CITYK:173 _cZ:174 _cT:174 _cR:174 _cC:174 cityKitLoad:175 cityCull:197 citySet:203 cityTint:205 cityPools:207 cityShowBld:213 cityRubble:220 CITY_FALL:228 cityViewSync:230 cityDebris:266 cityFX:275
+cityInteriorView:100 cityHideIn:135 cityMoundView:139
+§150 ชุดโมเดลลอนดอน (assets/city/*.glb จาก assets/src/city_kit_build.py)
+CITY_STY:155 CITY_VEH:162 cityFacade:164 CITYK:177 _cZ:178 _cT:178 _cR:178 _cC:178 cityKitLoad:179 cityCull:201 citySet:207 cityTint:209 cityPools:211 cityShowBld:217 cityRubble:224 CITY_FALL:232 cityViewSync:234 cityDebris:271 cityFX:280
 
 ## js/28-maps-build.js (762) — สร้างแผนที่
 CANDLESYS:2 builtMap:3 builtKey:3 world:3 TORCHES:3 CANDLES:3 FIREFLIES:3 CRYSTAL:3 RUNE:3 SNITCH:3 BANNERS:3 SNOW:3 WCACHE:5 WCACHE_MAX:5 wkey:7 buildWorld:8 addW:41 _prewarmed:43 prewarmShaders:44 batchStatic:63 makeCandles:88 updateCandles:97 buildCastle:106 buildHogsmeade:172 buildGreatHall:260 buildForest:330
@@ -628,4 +628,4 @@ drawWindHud:78
 §85 ตัวช่วยเล็งกำแพงลม (เห็นเฉพาะเรา): เส้นโค้งเรืองที่จุดวาง (คลิกขวา) +…
 wvAimGhost:86
 
-(76 files, 18219 lines)
+(76 files, 18246 lines)

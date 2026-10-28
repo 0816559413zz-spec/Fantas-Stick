@@ -65,7 +65,7 @@ function buildCity(){
     const w=B.w*S3,d=B.d*S3,x=tx(B.x+B.w/2),z=tz(B.y+B.d/2),st=CITY_STY[B.m];
     if(st){const r=cityFacade(B,st,M.zones,w,d,x,z,kput,KR);r.core=CV.cores.length;r.v=-1;r.sty=st;CV.b[B.i]=r;
       {const I=CITYD&&CITYD.b[B.i]&&CITYD.b[B.i].I,c0=I?Math.min(B.h-CIN.slab,I.top-CIN.slab):0;   // ตึกกลวง: แกนทึบเหลือแค่ส่วนบน (+ แผ่นเพดานห้องชั้นบนสุด)
-      CV.cores.push(new THREE.Matrix4().compose(new THREE.Vector3(x,(c0+B.h)/2,z),_q.set(0,0,0,1),new THREE.Vector3(Math.max(0.2,w-(I?0:0.8)),B.h-c0,Math.max(0.2,d-(I?0:0.8)))));}
+      CV.cores.push(I&&I.ring?new THREE.Matrix4().makeScale(0,0,0):new THREE.Matrix4().compose(new THREE.Vector3(x,(c0+B.h)/2,z),_q.set(0,0,0,1),new THREE.Vector3(Math.max(0.2,w-(I?0:0.8)),B.h-c0,Math.max(0.2,d-(I?0:0.8)))));}
       if(B.hl){r.hl=[];for(const [sx,sz] of [[-1,-1],[1,-1],[-1,1],[1,1]]){const l=addW(new THREE.Sprite(glowMat('#ff3030',2.4)));l.position.set(x+sx*w/2,B.h+2.2,z+sz*d/2);l.scale.set(2,2,1);r.hl.push(l);}}
       continue;}
     if(B.m==='cont'){const lay=B.h>3?2:1;for(let l=0;l<lay;l++)for(const o of [-1,1])kput('cp_container',x,l*2.6,z+o*(d/4),w>d?0:Math.PI/2,Math.max(w,d)/12.2,1,CONT[Math.floor(KR()*CONT.length)]);continue;}
@@ -98,34 +98,46 @@ function buildCity(){
 // พื้นล่าง / พื้นชั้นบน (เว้นรูทางลาด) / ทางลาด / วงกบประตู = mesh รวมต่อวัสดุทั้งเมือง • ผนังด้านใน = InstancedMesh แผ่นละชิ้น (ซ่อนเมื่อแผ่นแตก — cityViewSync)
 // ข้างในมืด (กลางคืน + ใต้พื้นชั้นบน) → วัสดุมีแสงในตัวนิดหน่อยให้เห็นห้อง
 function cityInteriorView(CV){
-  if(!CITYD)return;const T=0.06,L={floor:[],ramp:[]},FR=new Map(),lin=[],_e=new THREE.Euler();
+  if(!CITYD)return;const L={floor:[],roof:[],ramp:[]},lin=[],SI=[[],[]],FRI=[],_e=new THREE.Euler();
+  const bm=(x0,z0,x1,z1,y,h)=>new THREE.Matrix4().compose(new THREE.Vector3((x0+x1)/2,y,(z0+z1)/2),new THREE.Quaternion(),new THREE.Vector3(Math.max(0.01,x1-x0),h,Math.max(0.01,z1-z0)));
+  const cut=(R,H)=>{if(!H||H[0]>=R[2]||H[2]<=R[0]||H[1]>=R[3]||H[3]<=R[1])return [R];const o=[],a=Math.max(R[0],H[0]),b=Math.min(R[2],H[2]);   // สี่เหลี่ยม R ลบรู H
+    if(H[0]>R[0])o.push([R[0],R[1],H[0],R[3]]);if(H[2]<R[2])o.push([H[2],R[1],R[2],R[3]]);if(H[1]>R[1])o.push([a,R[1],b,H[1]]);if(H[3]<R[3])o.push([a,H[3],b,R[3]]);return o;};
   const box=(list,x0,z0,x1,z1,y,h)=>{if(x1-x0<0.05||z1-z0<0.05)return;const g=new THREE.BoxGeometry(x1-x0,h,z1-z0);g.translate((x0+x1)/2,y,(z0+z1)/2);list.push(g);};
   const rect=(list,A,y,h)=>box(list,tx(A[0]),tz(A[1]),tx(A[2]),tz(A[3]),y,h);
   CITYD.b.forEach((d,i)=>{const I=d.I,r=CV.b[i];if(!I||!r)return;const B=d.B,Lt=d.L,R0=[I.x0,I.y0,I.x1,I.y1];
     rect(L.floor,R0,0.08,0.1);   // พื้นล่าง (สูงกว่าทางเท้า/ลานรอบตึก)
-    for(const S of I.slabs){const H=S.hole,y=S.z-CIN.slab/2,h=CIN.slab;   // พื้นชั้นบน = กรอบในลบรูทางลาด (สูงสุด 4 ชิ้น)
-      rect(L.floor,[R0[0],R0[1],H[0],R0[3]],y,h);rect(L.floor,[H[2],R0[1],R0[2],R0[3]],y,h);rect(L.floor,[H[0],R0[1],H[2],H[1]],y,h);rect(L.floor,[H[0],H[3],H[2],R0[3]],y,h);}
+    for(const S of I.slabs){const H=S.hole,y=S.z-CIN.slab/2,h=CIN.slab,dst=S.roof?L.roof:L.floor;   // พื้นชั้นบน/หลังคา = กรอบในลบรูทางลาด
+      if(!S.secs){for(const q of cut(R0,H))rect(dst,q,y,h);continue;}
+      const bd=CIN.band;for(const q of cut([R0[0]+bd,R0[1]+bd,R0[2]-bd,R0[3]-bd],H))rect(dst,q,y,h);   // แกนกลาง (พังไม่ได้)
+      for(const j of S.secs){r.sec=r.sec||[];r.sec[j]=[];for(const q of cut(I.sec[j].r,H)){const L2=SI[S.roof?1:0];r.sec[j].push([S.roof?1:0,L2.length]);L2.push(bm(tx(q[0]),tz(q[1]),tx(q[2]),tz(q[3]),y,h));}}}   // ช่องขอบ (พังได้ — ซ่อนทีละช่อง)
     for(const R of I.ramps){const run=(R.ax==='x'?R.x1-R.x0:R.y1-R.y0)*S3,wd=(R.ax==='x'?R.y1-R.y0:R.x1-R.x0)*S3,rise=R.z1-R.z0,hyp=Math.hypot(run,rise),an=Math.atan2(rise,run);
       const g=new THREE.BoxGeometry(R.ax==='x'?hyp:wd,0.25,R.ax==='x'?wd:hyp);g.applyMatrix4(new THREE.Matrix4().makeRotationFromEuler(_e.set(R.ax==='x'?0:-an*R.dir,0,R.ax==='x'?an*R.dir:0)));
       g.translate(tx((R.x0+R.x1)/2),(R.z0+R.z1)/2-0.13,tz((R.y0+R.y1)/2));L.ramp.push(g);}
-    const col=r.sty.col,fr=FR.get(col)||(FR.set(col,[]),FR.get(col));
+    const col=r.sty.col,fb=(x0,z0,x1,z1,y,h)=>{(r.fr=r.fr||[]).push(FRI.length);FRI.push([bm(x0,z0,x1,z1,y,h),col]);};
     Lt.F.forEach((F,fi)=>{const pw=CITY_PW*F.sx,wt=CIN.wt*S3;
       for(let k=0;k<F.k;k++)for(let f=0;f<I.nf;f++){const p=F.s0+k*Lt.n+f,P=Lt.P[p],cx=tx(P.x),cz=tz(P.y),nx=fi===2?-1:fi===3?1:0,nz=fi===0?-1:fi===1?1:0;
         if(I.door.has(p)){const dw=CIN.door*S3,j=(pw/2-dw),ux=nz?1:0,uz=nx?1:0,ix=cx+nx*wt/2,iz=cz+nz*wt/2;   // วงกบ: เสาสองข้าง + คานบน (สีผนังตึก)
-          for(const s of [-1,1]){const u=s*(dw+j/2);box(fr,ix+ux*u-(ux?j/2:wt/2),iz+uz*u-(uz?j/2:wt/2),ix+ux*u+(ux?j/2:wt/2),iz+uz*u+(uz?j/2:wt/2),I.fh/2,I.fh);}
-          box(fr,ix-(ux?dw:wt/2),iz-(uz?dw:wt/2),ix+(ux?dw:wt/2),iz+(uz?dw:wt/2),(CIN.dh+I.fh)/2,I.fh-CIN.dh);continue;}
+          for(const s of [-1,1]){const u=s*(dw+j/2);fb(ix+ux*u-(ux?j/2:wt/2),iz+uz*u-(uz?j/2:wt/2),ix+ux*u+(ux?j/2:wt/2),iz+uz*u+(uz?j/2:wt/2),I.fh/2,I.fh);}
+          fb(ix-(ux?dw:wt/2),iz-(uz?dw:wt/2),ix+(ux?dw:wt/2),iz+(uz?dw:wt/2),(CIN.dh+I.fh)/2,I.fh-CIN.dh);continue;}
         const m=new THREE.Matrix4().compose(new THREE.Vector3(cx+nx*(wt+0.02),(f+0.5)*I.fh,cz+nz*(wt+0.02)),new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,1,0),Math.atan2(nx,nz)),new THREE.Vector3(pw,I.fh,1));
         (r.lin||(r.lin=new Map())).set(p,lin.length);lin.push(m);}});});
   const mk=(list,mat)=>{if(!list.length)return;const g=mergeGeometries(list,false);list.forEach(q=>q.dispose());const m=addW(new THREE.Mesh(g,mat));m.castShadow=m.receiveShadow=true;};
   mk(L.floor,new THREE.MeshStandardMaterial({color:'#9a8f80',roughness:0.95,emissive:'#3a3128'}));
   mk(L.ramp,new THREE.MeshStandardMaterial({color:'#8a6646',roughness:0.9,emissive:'#33241a'}));
-  for(const [c,list] of FR)mk(list,new THREE.MeshStandardMaterial({color:c,roughness:0.9}));
+  const roofM=new THREE.MeshStandardMaterial({color:'#55575e',roughness:0.95,emissive:'#1a1a1e'});mk(L.roof,roofM);
+  const ub=new THREE.BoxGeometry(1,1,1),imk=(list,mat)=>{const im=new THREE.InstancedMesh(ub,mat,Math.max(1,list.length));list.forEach((m,i)=>im.setMatrixAt(i,m));im.count=list.length;im.userData.M=list;im.castShadow=im.receiveShadow=true;im.computeBoundingSphere();addW(im);return im;};
+  CV.secIm=[imk(SI[0],new THREE.MeshStandardMaterial({color:'#9a8f80',roughness:0.95,emissive:'#3a3128'})),imk(SI[1],roofM)];
+  CV.frIm=imk(FRI.map(q=>q[0]),new THREE.MeshStandardMaterial({color:'#ffffff',roughness:0.9}));FRI.forEach((q,i)=>CV.frIm.setColorAt(i,new THREE.Color(q[1])));
   const lm=new THREE.InstancedMesh(new THREE.PlaneGeometry(1,1),new THREE.MeshStandardMaterial({color:'#d6cdb9',roughness:0.95,emissive:'#5a4e3e'}),Math.max(1,lin.length));
   lin.forEach((m,i)=>lm.setMatrixAt(i,m));lm.count=lin.length;lm.receiveShadow=true;lm.computeBoundingSphere();addW(lm);CV.lin=lm;CV.linM=lin;
 }
+// ตึก 1 ชั้นถล่ม: ซ่อนผนังด้านใน/วงกบประตู/ขอบพื้น (กองซาก cityRubble ทับพื้นล่าง)
+function cityHideIn(CV,r){if(r.lin&&CV.lin){for(const ix of r.lin.values())CV.lin.setMatrixAt(ix,_cZ);CV.lin.instanceMatrix.needsUpdate=true;}
+  if(r.fr&&CV.frIm){for(const ix of r.fr)CV.frIm.setMatrixAt(ix,_cZ);CV.frIm.instanceMatrix.needsUpdate=true;}
+  if(r.sec)for(const L2 of r.sec)if(L2)for(const [w,ix] of L2){CV.secIm[w].setMatrixAt(ix,_cZ);CV.secIm[w].instanceMatrix.needsUpdate=true;}}
 // เนินเศษที่โคนผนังตรงแผ่นที่แตก (ผัง d.mo จาก cityMounds — ที่ชนเดินขึ้นได้อยู่ใน cityMoundH) • สร้างใหม่ทุกครั้งที่สถานะตึกเปลี่ยน
 function cityMoundView(r,d){
-  if(r.mg){world.remove(r.mg);disposeTree(r.mg);r.mg=null;}if(!d.nb)return;
+  if(r.mg){world.remove(r.mg);disposeTree(r.mg);r.mg=null;}if(!d.mo||!d.mo.length)return;
   const g=new THREE.Group(),R=mulberry(d.B.i*31+d.nb),m1=sMat({color:r.sty.col,roughness:0.95}),m2=sMat({color:'#5a554e',roughness:1}),m3=sMat({color:'#7a746a',roughness:1}),rb=sMat({color:'#3a3634',roughness:0.6,metalness:0.4});
   for(const q of d.mo){const along=q.rx>q.ry,L=along?q.rx:q.ry,Wd=along?q.ry:q.rx,cx=tx(q.x),cz=tz(q.y);   // เนิน = ก้อนหยาบหลายก้อนเรียงตามแนวผนัง + อิฐ/คอนกรีต + เหล็กเส้น
     for(let k=0;k<4;k++){const lump=new THREE.Mesh(sGeo(THREE.DodecahedronGeometry,1,0),[m2,m1,m3][k%3]),u=(k/3-0.5)*L*S3*1.1+(R()-0.5)*0.6,sc=0.45+R()*0.35;
@@ -133,14 +145,6 @@ function cityMoundView(r,d){
     for(let k=0;k<12;k++){const c=new THREE.Mesh(sGeo(THREE.BoxGeometry,1,1,1),[m1,m2,m3][k%3]),s=0.2+R()*0.6,u=(R()-0.5)*L*S3*1.6,v=(R()-0.5)*Wd*S3*1.6;c.scale.set(s,s*(0.4+R()*0.4),s*(0.6+R()));
       c.position.set(cx+(along?u:v),q.h*(0.3+R()*0.7),cz+(along?v:u));c.rotation.set(R()*2,R()*3,R()*2);g.add(c);}
     for(let k=0;k<2;k++){const b=new THREE.Mesh(sGeo(THREE.BoxGeometry,1,1,1),rb);b.scale.set(0.05,0.05,1.2+R()*1.5);b.position.set(cx+(R()-0.5)*L*S3,q.h*0.8,cz+(R()-0.5)*Wd*S3);b.rotation.set(R()*1.2,R()*3,R()*0.6);g.add(b);}}
-  // ขอบพื้นชั้นบนหักห้อย: แผ่นผนังที่แตกในชั้นที่เข้าได้ → แผ่นพื้นเหนือรูหักงอลงข้างนอก (แตกทั้งบน-ล่าง = หักยาว ห้อยชันกว่า) + เหล็กเส้น — ภาพล้วน
-  const I=d.I,Lt=d.L;
-  if(I)Lt.F.forEach((F,fi)=>{const pw=CITY_PW*F.sx,nx=fi===2?1:fi===3?-1:0,nz=fi===0?1:fi===1?-1:0;
-    for(let k=0;k<F.k;k++)for(let f=0;f<Math.min(I.nf,Lt.n-1);f++){const p=F.s0+k*Lt.n+f;if(!d.br[p])continue;const up=d.br[p+1],P=Lt.P[p],y=(f+1)*I.fh,len=up?1.9:1.1,an=(up?0.55:0.28)+R()*0.15;
-      const s=new THREE.Mesh(sGeo(THREE.BoxGeometry,1,1,1),m3);s.scale.set(nz?pw*(0.55+R()*0.3):len,0.28,nz?len:pw*(0.55+R()*0.3));
-      const piv=new THREE.Group();piv.position.set(tx(P.x)-nx*0.6,y-0.15,tz(P.y)-nz*0.6);piv.rotation.set(nz*an,0,-nx*an);s.position.set(nx*len/2,0,nz*len/2);piv.add(s);
-      for(let j=0;j<3;j++){const b=new THREE.Mesh(sGeo(THREE.BoxGeometry,1,1,1),rb);b.scale.set(nz?0.04:0.9,0.04,nz?0.9:0.04);b.position.set(nx*(len+0.2)+(nz?(R()-0.5)*pw*0.6:0),0.05,nz*(len+0.2)+(nx?(R()-0.5)*pw*0.6:0));b.rotation.y=(R()-0.5)*0.5;piv.add(b);}
-      g.add(piv);}});
   shadowAll(g);world.add(g);r.mg=g;
 }
 // ---------- ชุดโมเดลลอนดอน (assets/city/*.glb จาก assets/src/city_kit_build.py) ----------
@@ -207,7 +211,7 @@ function cityTint(CV,ref,col,veh){const L=CV.mesh[ref.n]&&CV.mesh[ref.n][ref.ch]
 function cityPools(CV,names){
   for(const n of names){const ims=CV.pool[n];if(!ims)continue;let k=0;
     const op=n.endsWith('o');   // รูโล่ง = แผ่นในชั้นที่เดินเข้าได้ • รูทึบ = ชั้นบนที่ข้างในยังทึบ
-    CITYD.b.forEach((d,i)=>{const r=CV.b[i];if(!r||r.sty.hole!==(op?n.slice(0,-1):n)||d.cl||!d.nb)return;for(let p=0;p<d.br.length;p++)if(d.br[p]&&op===!!(d.I&&d.L.P[p].f<d.I.nf)){for(const im of ims){_cT.multiplyMatrices(r.P[p].M,im.userData.om);im.setMatrixAt(k,_cT);}k++;}});
+    CITYD.b.forEach((d,i)=>{const r=CV.b[i];if(!r||r.sty.hole!==(op?n.slice(0,-1):n)||d.cl||!d.nb)return;for(let p=0;p<d.br.length;p++)if(d.br[p]&&op===!!(d.I&&d.L.P[p].f<d.I.nf)&&!cinOpenPanel(d,p)){for(const im of ims){_cT.multiplyMatrices(r.P[p].M,im.userData.om);im.setMatrixAt(k,_cT);}k++;}});
     for(const im of ims){im.count=k;im.instanceMatrix.needsUpdate=true;}}
 }
 function cityShowBld(CV,r,off){
@@ -231,12 +235,13 @@ function cityViewSync(dt){
   const CV=CITYK.CV;if(!CV||!CV.ready||CITYK.W!==world||!cityOn())return;
   const pd=new Set();
   CITYD.b.forEach((d,i)=>{const r=CV.b[i];if(!r||r.v===d.v)return;const live=r.v!==-1;r.v=d.v;pd.add(r.sty.hole);pd.add(r.sty.hole+'o');
-    if(d.cl){if(r.cl)return;r.cl=1;if(live)CV.anims.push({r,t:0});else{cityShowBld(CV,r,null);r.rub=cityRubble(r);}return;}
+    if(d.cl){if(r.cl)return;r.cl=1;cityHideIn(CV,r);if(live)CV.anims.push({r,t:0});else{cityShowBld(CV,r,null);r.rub=cityRubble(r);}return;}
     if(r.cl){r.cl=0;if(r.rub){world.remove(r.rub);disposeTree(r.rub);r.rub=null;}CV.anims=CV.anims.filter(a=>a.r!==r);cityShowBld(CV,r,0);}
     for(let p=0;p<r.P.length;p++)citySet(CV,r.P[p],d.br[p]||(d.I&&d.I.door.has(p))?_cZ:r.P[p].M);
     if(r.XP){r.xg=r.xg||[];r.XP.forEach((adj,j)=>{const g=adj.some(p=>d.br[p]);if(g===!!r.xg[j])return;r.xg[j]=g;citySet(CV,r.X[j],g?_cZ:r.X[j].M);   // โครงนอก (เสามุม/ขอบดาดฟ้า) หักตามแผ่นข้าง ๆ
       if(g&&live){const v=r.X[j].M.elements;cityDebris(v[12]/S3+MW/2,v[14]/S3+MH/2,v[13]+1.5,r.sty.col,d.B.x+d.B.w/2,d.B.y+d.B.d/2,3,true);}});}
     if(r.lin){for(const [p,ix] of r.lin)CV.lin.setMatrixAt(ix,d.br[p]?_cZ:CV.linM[ix]);CV.lin.instanceMatrix.needsUpdate=true;}
+    if(r.sec)r.sec.forEach((L2,j)=>{if(!L2)return;for(const [w,ix] of L2){const im=CV.secIm[w];im.setMatrixAt(ix,d.sb[j]?_cZ:im.userData.M[ix]);im.instanceMatrix.needsUpdate=true;}});   // ขอบพื้น/หลังคาที่พัง (ตึก 2–4 ชั้น)
     cityMoundView(r,d);});
   if(pd.size)cityPools(CV,pd);
   // ตึกกำลังถล่ม: ทรุดลงทั้งหลัง (เร็วขึ้นเรื่อย ๆ) + ฝุ่นรอบฐาน → จบ = กองซาก
@@ -280,6 +285,7 @@ function cityFX(ev,H,near){
       smoke(ev.x,ev.y,ev.h,10,fire?'#2a2522':'#7a6a58',1.8,9,120);burst(ev.x,ev.y,col,26,200,0.8,3,{h:ev.h,vh:[1,6],g:9});
       if(r&&r.sty.hole==='cg_hole')burst(ev.x,ev.y,'#cfe8ff',30,240,0.9,1.6,{h:ev.h,vh:[0,5],g:10});   // กระจกแตก
       if(near){snd('break',ev);shake(3);}}
+    else if(ev.e==='s'){cityDebris(ev.x,ev.y,ev.h,'#8c857a',ev.x,ev.y,7,true);smoke(ev.x,ev.y,ev.h,8,'#8a8070',1.8,10,90);burst(ev.x,ev.y,'#9a9080',22,180,0.8,3,{h:ev.h,vh:[-2,3],g:9});if(near){snd('break',ev);shake(3);}}   // ขอบพื้น/หลังคาพัง
     else if(ev.e==='c'){const B=r&&r.B;if(B)for(let k=0;k<26;k++){const t=k/26*6.28;smoke(ev.x+Math.cos(t)*B.w*0.6,ev.y+Math.sin(t)*B.d*0.6,1,2,'#8a8070',3,16,160);}
       cityDebris(ev.x,ev.y,4,col,ev.x,ev.y,16,true);
       if(B)bfCollapse(ev.x,ev.y,B.w,B.d,fire);   // ฝุ่นก้อนใหญ่ + เศษ + รอย (js/44)
