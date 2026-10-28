@@ -47,6 +47,7 @@ const CANIM={
   clap:{d:0.6,st:0.4,tr:[0.3,0.6],k:[[0.35,-1.5,-1.3,0,-0.05,-1.5,1.3,0,-0.05,'s'],[0.55,-1.5,0.5,0,0.15,-1.5,-0.5,0,-0.15,'o'],[1,-1.4,0.35,0,0.1,-1.4,-0.35,0,-0.1,'s']],tm:[0.55,0.9]},   // กางแขนกว้างแล้วบีบเข้าหากัน (Tectonic Crush บีบ)
   burst:{d:0.55,st:0,tr:[0.3,0.65],k:[[0.35,-0.9,0.8,0,0.3,-0.9,-0.8,0,-0.25,'s'],[0.55,-2.0,-1.3,0,-0.25,-2.0,1.3,0,0.1,'o'],[1,-1.6,-1.0,0,-0.1,-1.6,1.0,0,0.03,'s']]},   // ห่อตัวแล้วระเบิดกางออก (Dust Burst)
   skycall:{d:0.65,st:0.6,tr:[0.3,0.65],k:[[0.35,-3.1,-0.2,-0.05,-0.2,-0.6,0.5,0,0.05,'s'],[0.6,-1.3,0.1,0.3,0.3,-0.5,0.6,0,-0.12,'o'],[1,-1.4,0.05,0.15,0.15,-0.4,0.5,0,-0.06,'s']]},   // ชูไม้เรียกฟ้า แล้วฟาดชี้ลงจุดเป้า (Triple Strike)
+  wallpush:{two:1,d:0.65,st:0.8,tr:[0.3,0.6],k:[[0.3,-0.7,0.3,0.1,-0.15,-0.7,-0.3,0,-0.08,'s'],[0.55,-1.65,0.15,0,0.25,-1.65,-0.15,0,-0.12,'o'],[1,-1.5,0.1,0,0.15,-1.5,-0.1,0,-0.06,'s']]},   // สายลม Aegis Gale ดัน: ง้างสองมือ แล้วผลักไม้ไปข้างหน้า
   vxpull:{d:1.3,st:0.8,tr:null,k:[[0.1,-1.57,-1.05,1.15,0,-0.4,0.5,0,-0.06,'o'],[0.6,-1.6,-1.1,1.15,0.02,-0.45,0.55,0,-0.08,'s'],[0.7,-1.0,0.75,0.55,-0.14,-0.9,0.3,0,-0.12,'o'],[1,-0.9,0.6,0.4,-0.08,-0.7,0.4,0,-0.08,'s']],tm:[0.15,0.55]},   // สายลม Vortex Bind (ผู้ใช้): ชี้ไม้ไปข้างหน้า ตัวหมุนซ้าย ~70° แขนขวาเหยียดตรง → ตอนดึง (0.6 วิ) พับแขนมาหน้าตัวเหมือนออกแรงดึง
   dome:{two:1,d:0.7,st:0,tr:[0.3,0.75],k:[[0.35,0.2,-0.5,0,0.3,0.2,0.5,0,-0.25,'s'],[0.7,-2.6,-0.8,0,-0.2,-2.6,0.8,0,0.08,'o'],[1,-2.3,-0.7,0,-0.1,-2.3,0.7,0,0.04,'s']]},   // สองมือต่ำแล้วยกกางขึ้นเป็นโดม
 };
@@ -55,7 +56,7 @@ const SKANIM={ringofembers:'sweep',blazeform:'powerup',colossus:'ultraise',kindl
   frostforge:'forge',glacierrend:'rend',permafrost:'slam',cryoshell:'wrap',frostaura:'powerup',mirrorlegion:'summon3',
   thunderline:'line',speedsiphon:'siphon',stormorbs:'orbs',stormdome:'dome',triplestrike:'skycall',railgun:'pullback',godlightning:'ultraise',
   stonebreaker:'punchcmd',mudswamp:'ground',tectoniccrush:'dome',tectoniccrush_2:'clap',dustburst:'burst',terraauger:'pullback',wrath:'ultraise',
-  vortexbind:'vxpull'};
+  vortexbind:'vxpull',aegisgale_push:'wallpush',aegisgale_place:'ground'};
 function skAnim(ev){const o=PM3.get(ev.id),n=SKANIM[ev.s];if(!o||!n)return;o.caN=n;o.caT=0;o.cpT=0;o.cgd=2.2;}
 const _caT=[0,0,0,0,0,0,0,0],_caR=[0,0,0,0,0,0,0,0];
 function skillPose(o,p,dt,now){

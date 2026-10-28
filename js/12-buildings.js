@@ -275,6 +275,7 @@ function collideWorld(o,r,z){
     if(d<m&&d>0.001){o.x=c.x+dx/d*m;o.y=c.y+dy/d*m;}
   }
   sol+=eCollide(o,r,z);   // สิ่งก่อสร้างสายดิน
+  sol+=windCollide(o,r,z);   // กำแพงลมสายลม: กันศัตรูเดินผ่าน
   sol+=cityCollideIn(o,r,z);   // ผนังตึกกลวงในเมือง ทีละแผ่นทีละชั้น (js/12-city-dmg)
   // กล่องตึกทึบ (แมพเมือง MAPS[id].boxes {x,y,w,d,h}): ขอบชนด้วยวงกลม cwall แล้ว — ตรงนี้กันกรณีหลุดเข้าไปข้างใน (วาร์ป/จุดสุ่ม) → ดันออกด้านที่ใกล้สุด
   const BX=MAPS[MAPID]&&MAPS[MAPID].boxes;
