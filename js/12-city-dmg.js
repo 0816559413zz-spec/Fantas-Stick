@@ -28,7 +28,9 @@ function cityReset(){
       return {B,L,st,hp:L?new Float32Array(L.P.length).fill(CDMG.hp[B.m]*(B.hl?CDMG.hl:1)):null,br:L?new Uint8Array(L.P.length):null,nb:0,cl:0,v:0,s:'',ht:0,circ:[]};}),
     it:M.street.map((q,i)=>({q,i,hp:CDMG.ihp[q.m]||0,st:0,t:0,v:0,c:[]}))};
   for(const d of CITYD.b){d.I=d.L&&!CIN.skip.has(d.B.m)?cityInterior(d.B,d.L):null;d.B.top=d.I?d.I.top:0;d.mo=[];
-    const ns=d.I?d.I.sec.length:0;d.sb=new Uint8Array(ns);d.shp=new Float32Array(ns).fill(d.L?CDMG.hp[d.B.m]*(d.B.hl?CDMG.hl:1)*CIN.secHp:0);d.ns=0;}
+    const ns=d.I?d.I.sec.length:0,ni=d.I?d.I.iw.length:0,nr=d.I?d.I.ramps.length:0,hp0=d.L?CDMG.hp[d.B.m]*(d.B.hl?CDMG.hl:1):0;
+    d.sb=new Uint8Array(ns);d.shp=new Float32Array(ns).fill(hp0*CIN.secHp);d.ns=0;
+    d.ib=new Uint8Array(ni);d.ihp=new Float32Array(ni).fill(hp0*CIN.iwHp);d.ni=0;d.rb=new Uint8Array(nr);d.rhp=new Float32Array(nr).fill(hp0*CIN.rampHp);d.nr=0;}
   for(const o of M.obs){
     if(o.k==='cwall'){if(o.h0===undefined)o.h0=o.hgt;o.hgt=o.h0;const d=CITYD.b[o.cb];o.bot=d.I?d.I.top:undefined;d.circ.push(o);}   // ตึกกลวง: วงชนรอบขอบเหลือเฉพาะส่วนทึบด้านบน (bot)
     else if(o.ci!==undefined){if(o.h0===undefined)o.h0=o.hgt;o.hgt=o.h0;CITYD.it[o.ci].c.push(o);}
@@ -39,7 +41,8 @@ MAPS.city.reset=cityReset;
 function cityApplyBox(d){d.B.cl=d.cl;for(const c of d.circ)c.hgt=d.cl?0:c.h0;}
 function cityApplyItem(it){const off=it.st===1;for(const c of it.c)c.hgt=off?0:c.h0;}
 function cityHex(br){let s='';for(let i=0;i<br.length;i+=4)s+=((br[i]|0)|(br[i+1]|0)<<1|(br[i+2]|0)<<2|(br[i+3]|0)<<3).toString(16);return s;}
-function cityMark(d){d.v++;d.s=d.cl||d.nb||d.ns?(d.cl?'x':'')+cityHex(d.br)+(d.ns?':'+cityHex(d.sb):''):'';cityMounds(d);}   // ':' + ขอบพื้น/หลังคาที่พัง (ตึก 2–4 ชั้น)
+function cityMark(d){d.v++;const ex=d.ns||d.ni||d.nr;d.s=d.cl||d.nb||ex?(d.cl?'x':'')+cityHex(d.br)+(ex?':'+cityHex(d.sb)+':'+cityHex(d.ib)+':'+cityHex(d.rb):''):'';cityRampSync(d);cityMounds(d);}   // ':' ขอบพื้น ':' ผนังชั้นใน ':' ทางลาด (ตึก 2–4 ชั้น)
+function cityRampSync(d){if(d.I)for(const R of d.I.ramps)R.br=d.rb[R.j]|0;}   // ':' + ขอบพื้น/หลังคาที่พัง (ตึก 2–4 ชั้น)
 // จุดที่โดน → แผ่นไหน: ด้านที่ใกล้สุด, คอลัมน์ตามตำแหน่งบนด้าน, ชั้นตามความสูง
 function cityPanelAt(d,x,y,h){
   const B=d.B,L=d.L,e=[Math.abs(y-(B.y+B.d)),Math.abs(y-B.y),Math.abs(x-(B.x+B.w)),Math.abs(x-B.x)],fi=e.indexOf(Math.min(...e)),F=L.F[fi];
@@ -47,7 +50,7 @@ function cityPanelAt(d,x,y,h){
   return F.s0+i*L.n+f;
 }
 function cityHitPanel(d,p,dmg,el,ox,oy){
-  if(!d.L||d.cl||d.br[p]||(d.I&&d.I.door.has(p)))return;   // ช่องประตูเปิดอยู่แล้ว พังไม่ได้
+  if(!d.L||d.cl||d.br[p])return;   // ช่องประตูก็พังได้ (วงกบหายไปด้วย — 2026-10-29)
   el=el||'none';d.hp[p]-=dmg*(el.includes('blast')?1.5:el==='ice'?0.7:1);
   const P=d.L.P[p],h=Math.round((P.z0+P.z1)*5)/10;
   if(d.hp[p]>0){if(G.time-d.ht>0.12){d.ht=G.time;emit({k:'cb',e:'h',i:d.B.i,x:Math.round(P.x),y:Math.round(P.y),h,el});}return;}
@@ -76,9 +79,11 @@ const _sgCD=[];
 function cityDamageIn(x,y,rad,dmg,el,h,by){
   if(!BLDON||!cityOn())return;h=h||0;const R=rad/20;
   for(const B of sgNear(sgGrid('r',MAPS.city.boxes,b=>[b.x,b.y,b.x+b.w,b.y+b.d]),x,y,rad,_sgCD)){const d=CITYD.b[B.i];if(!d.L||d.cl)continue;
-    for(let p=0;p<d.L.P.length;p++){if(d.br[p]||(d.I&&d.I.door.has(p)))continue;const P=d.L.P[p],dv=Math.max(0,P.z0-h,h-P.z1),dd=Math.hypot(Math.hypot(P.x-x,P.y-y)/20,dv);
+    for(let p=0;p<d.L.P.length;p++){if(d.br[p])continue;const P=d.L.P[p],dv=Math.max(0,P.z0-h,h-P.z1),dd=Math.hypot(Math.hypot(P.x-x,P.y-y)/20,dv);
       if(dd<R)cityHitPanel(d,p,dmg*(1-0.7*dd/R),el,x,y);if(d.cl)break;}
-    if(d.I&&!d.cl)d.I.sec.forEach((Q,j)=>{if(d.sb[j])return;const S=d.I.slabs[Q.k],dd=Math.hypot(Math.hypot(Q.cx-x,Q.cy-y)/20,S.z-h);if(dd<R)citySecHit(d,j,dmg*(1-0.7*dd/R),el);});}
+    if(d.I&&!d.cl){d.I.sec.forEach((Q,j)=>{if(d.sb[j])return;const S=d.I.slabs[Q.k],dd=Math.hypot(Math.hypot(Q.cx-x,Q.cy-y)/20,S.z-h);if(dd<R)citySecHit(d,j,dmg*(1-0.7*dd/R),el);});
+      d.I.iw.forEach((W,j)=>{if(d.ib[j])return;const z0=W.f*d.I.fh,dd=Math.hypot(Math.hypot(W.cx-x,W.cy-y)/20,Math.max(0,z0-h,h-z0-d.I.fh));if(dd<R)cityIwHit(d,j,dmg*(1-0.7*dd/R),el);});
+      d.I.ramps.forEach(Rp=>{if(Rp.br)return;const dd=Math.hypot(Math.hypot((Rp.x0+Rp.x1)/2-x,(Rp.y0+Rp.y1)/2-y)/20,(Rp.z0+Rp.z1)/2-h);if(dd<R)cityRampHit(d,Rp.j,dmg*(1-0.7*dd/R),el);});}}
   for(const it of CITYD.it){if(it.st!==0||!it.hp)continue;const dd=Math.hypot(it.q.x-x,it.q.y-y);if(dd<rad+20)cityHitItem(it,dmg*(1-0.7*Math.min(1,dd/rad)),by);}
 }
 // ทุกเฟรม (โฮสต์): รถที่ไฟลุกครบเวลา → ระเบิด
@@ -111,16 +116,16 @@ function cityMounds(d){d.mo=[];if(!d.L||!d.nb)return;const L=d.L;
 // I = {nf ชั้นที่เข้าได้, fh สูง/ชั้น (ม.), top (ม.: ต่ำกว่านี้กลวง เหนือนี้ทึบ), x0..y1 ขอบในผนัง (px), door: Set(แผ่นประตู),
 //      slabs:[{z, hole:[x0,y0,x1,y1]}] พื้นชั้นบน (รูตรงทางลาด), ramps:[{x0,y0,x1,y1, ax:'x'|'y', dir ±1, z0,z1}] ทางลาดชั้นละอัน สลับฟันปลาเลียบผนังหลัง}
 // ประตู = แผ่นกลางชั้นล่างด้านหน้า (L.front) • ใช้ทั้งโฮสต์ (ชน/พื้น/กระสุน) และภาพ (js/28 cityInteriorView) — ผลเหมือนกันทุกเครื่อง
-const CIN={ringN:4,band:60,secHp:1.4,nf:3,wt:12,slab:0.3,sw:50,rl:130,pad:24,door:30,dh:2.8,skip:new Set(['garage'])};   // wt = ผนังหนา px • sw/rl = กว้าง/ยาวทางลาด px • door = ครึ่งกว้างช่องประตู px, dh = สูง ม.
+const CIN={ringN:4,band:60,secHp:1.4,iwt:10,iwHp:1,rampHp:2,nf:3,wt:12,slab:0.3,sw:50,rl:130,pad:24,door:30,dh:2.8,skip:new Set(['garage'])};   // wt = ผนังหนา px • sw/rl = กว้าง/ยาวทางลาด px • door = ครึ่งกว้างช่องประตู px, dh = สูง ม.
 function cityInterior(B,L){
   const fh=CITY_FL*L.sy,wt=CIN.wt,x0=B.x+wt,y0=B.y+wt,x1=B.x+B.w-wt,y1=B.y+B.d-wt;
   const back=L.front^1,ax=back<2?'x':'y',len=ax==='x'?x1-x0:y1-y0,inner=ax==='x'?y1-y0:x1-x0;
   let nf=L.n<=CIN.ringN?L.n:Math.min(CIN.nf,L.n);if(nf>1&&(len<CIN.rl+CIN.pad+90||inner<2*CIN.sw+110))nf=1;   // 2–4 ชั้น = เข้าได้ทุกชั้น
-  const I={nf,fh,top:nf>=L.n?B.h:nf*fh,x0,y0,x1,y1,door:new Set(),slabs:[],ramps:[],sec:[],secAt:new Map(),ring:L.n>1&&L.n<=CIN.ringN&&nf===L.n};
+  const I={nf,fh,top:nf>=L.n?B.h:nf*fh,x0,y0,x1,y1,door:new Set(),slabs:[],ramps:[],sec:[],secAt:new Map(),iw:[],ring:L.n>1&&L.n<=CIN.ringN&&nf===L.n};
   const F=L.F[L.front];I.door.add(F.s0+Math.floor(F.k/2)*L.n);
   const vb=back===0?y1:back===1?y0:back===2?x1:x0,vs=back===0||back===2?-1:1,s0=(ax==='x'?x0:y0)+CIN.pad,s1=s0+CIN.rl;
   for(let f=0;f<nf-1;f++){const a=vb+vs*(f%2)*CIN.sw,b=a+vs*CIN.sw,v0=Math.min(a,b),v1=Math.max(a,b);
-    I.ramps.push(ax==='x'?{x0:s0,x1:s1,y0:v0,y1:v1,ax,dir:f%2?-1:1,z0:f*fh,z1:(f+1)*fh}:{x0:v0,x1:v1,y0:s0,y1:s1,ax,dir:f%2?-1:1,z0:f*fh,z1:(f+1)*fh});}
+    I.ramps.push(Object.assign(ax==='x'?{x0:s0,x1:s1,y0:v0,y1:v1}:{x0:v0,x1:v1,y0:s0,y1:s1},{ax,dir:f%2?-1:1,z0:f*fh,z1:(f+1)*fh,j:f,br:0}));}
   for(let f=1;f<nf;f++){const r=I.ramps[f-1];I.slabs.push({z:f*fh,hole:[r.x0,r.y0,r.x1,r.y1]});}
   // ตึก 2–4 ชั้น (ผู้ใช้ 2026-10-29): หลังคา = แผ่นพื้นแผ่นบนสุด • ขอบนอกของทุกแผ่น (กว้าง CIN.band) แบ่งช่องตามแผ่นผนังด้านนั้น = พังได้ทีละช่อง • ตรงกลาง (core) พังไม่ได้
   if(I.ring){I.slabs.push({z:B.h,hole:null,roof:1});const bd=CIN.band;
@@ -128,20 +133,37 @@ function cityInterior(B,L){
       for(let i=0;i<F.k;i++){const P=L.P[F.s0+i*L.n];let r;
         if(fi<2)r=[Math.max(x0,P.x-pw/2),fi===0?y1-bd:y0,Math.min(x1,P.x+pw/2),fi===0?y1:y0+bd];
         else r=[fi===2?x1-bd:x0,Math.max(y0+bd,P.y-pw/2),fi===2?x1:x0+bd,Math.min(y1-bd,P.y+pw/2)];
-        if(r[2]-r[0]<4||r[3]-r[1]<4)continue;I.secAt.set((k*4+fi)*1000+i,I.sec.length);S.secs.push(I.sec.length);I.sec.push({k,fi,i,r,cx:(r[0]+r[2])/2,cy:(r[1]+r[3])/2});}});});}
+        if(r[2]-r[0]<4||r[3]-r[1]<4)continue;I.secAt.set((k*4+fi)*1000+i,I.sec.length);S.secs.push(I.sec.length);I.sec.push({k,fi,i,r,cx:(r[0]+r[2])/2,cy:(r[1]+r[3])/2});}});});
+    // ผนังห้องชั้นใน (ผู้ใช้ 2026-10-29): ตามขอบแกนกลาง ทุกชั้น แบ่งช่องตามแผ่นผนังนอก (พังได้ทีละช่อง) • ช่องประตูตรงประตูหน้า • ผนังหลังเว้นโล่งตรงทางลาด
+    const t=CIN.iwt,cx0=x0+bd,cy0=y0+bd,cx1=x1-bd,cy1=y1-bd,dp=L.P[[...I.door][0]],sA=Math.min(s0,s1)-CIN.sw*0.6,sB=Math.max(s0,s1)+CIN.sw*0.6;
+    L.F.forEach((F,fi)=>{const pw=CITY_PW*F.sx*20;
+      for(let i=0;i<F.k;i++){const P=L.P[F.s0+i*L.n];let r;
+        if(fi<2){const a=Math.max(cx0,P.x-pw/2),b=Math.min(cx1,P.x+pw/2);r=[a,fi===0?cy1-t:cy0,b,fi===0?cy1:cy0+t];}
+        else{const a=Math.max(cy0,P.y-pw/2),b=Math.min(cy1,P.y+pw/2);r=[fi===2?cx1-t:cx0,a,fi===2?cx1:cx0+t,b];}
+        if(r[2]-r[0]<4||r[3]-r[1]<4)continue;
+        const a=fi<2?r[0]:r[1],b=fi<2?r[2]:r[3];if(fi===back&&nf>1&&a<sB&&b>sA)continue;   // ช่องทางลาด
+        for(let f=0;f<nf;f++)I.iw.push({f,fi,i,r,door:f===0&&fi===L.front&&i===Math.floor(F.k/2),cx:(r[0]+r[2])/2,cy:(r[1]+r[3])/2,dp:fi<2?dp.x:dp.y});}});}
   return I;
 }
 // แผ่นพื้น S ตรงจุดนี้ยังอยู่ไหม (ไม่ใช่รูทางลาด และช่องขอบตรงนั้นยังไม่พัง)
 function cinSlabOn(d,S,x,y){if(cinHole(S.hole,x,y))return false;if(S.secs)for(const j of S.secs){if(!d.sb[j])continue;const r=d.I.sec[j].r;if(x>r[0]&&x<r[2]&&y>r[1]&&y<r[3])return false;}return true;}
 // แผ่นผนัง p แตก + ขอบพื้น/หลังคาเหนือแผ่นนั้นพังด้วย = ช่องโล่งทั้งช่อง (ไม่เหลือขอบอิฐ — js/28 cityPools)
 function cinOpenPanel(d,p){const I=d.I;if(!I||!I.ring||!d.br[p])return false;const P=d.L.P[p],j=I.secAt.get((P.f*4+P.fi)*1000+P.i);return j!==undefined&&!!d.sb[j];}
+// ผนังชั้นใน / ทางลาด โดนดาเมจ → พัง (เหตุการณ์ cb:w / cb:r — เศษ js/28) • ผนังช่องประตูก็พังได้ (เหลือแต่ช่องโล่ง)
+function cityIwHit(d,j,dmg,el){if(!d.I||d.cl||d.ib[j])return;el=el||'none';d.ihp[j]-=dmg*(el.includes('blast')?1.5:el==='ice'?0.7:1);if(d.ihp[j]>0)return;
+  d.ib[j]=1;d.ni++;cityMark(d);const W=d.I.iw[j];emit({k:'cb',e:'w',i:d.B.i,j,x:Math.round(W.cx),y:Math.round(W.cy),h:Math.round((W.f+0.5)*d.I.fh*10)/10,el});}
+function cityRampHit(d,j,dmg,el){if(!d.I||d.cl||d.rb[j])return;el=el||'none';d.rhp[j]-=dmg*(el.includes('blast')?1.5:el==='ice'?0.7:1);if(d.rhp[j]>0)return;
+  d.rb[j]=1;d.nr++;cityMark(d);const R=d.I.ramps[j];emit({k:'cb',e:'r',i:d.B.i,j,x:Math.round((R.x0+R.x1)/2),y:Math.round((R.y0+R.y1)/2),h:Math.round((R.z0+R.z1)*5)/10,el});}
+// ผนังชั้นใน j ขวางช่วงตัว z..z+zh ไหม (ยังไม่พัง ชั้นเดียวกัน) • ช่องประตู = เว้นกลางแผ่นกว้าง CIN.door สูง CIN.dh
+const cinIwSegs=(d,W,z,zh)=>{const I=d.I,z0=W.f*I.fh,z1=z0+I.fh-CIN.slab;if(z>=z1||z+zh<=z0)return null;if(!W.door||z>=CIN.dh-zh+0.3)return [[-1e9,1e9]];return [[-1e9,W.dp-CIN.door],[W.dp+CIN.door,1e9]];};
+function cinIwRects(d,W,segs){const r=W.r,h=W.fi<2;return segs.map(([u0,u1])=>{const a=Math.max(h?r[0]:r[1],u0),b=Math.min(h?r[2]:r[3],u1);return b-a<2?null:h?[(a+b)/2,(r[1]+r[3])/2,(b-a)/2,(r[3]-r[1])/2]:[(r[0]+r[2])/2,(a+b)/2,(r[2]-r[0])/2,(b-a)/2];}).filter(Boolean);}
 function cinSecAt(d,S,x,y){if(S.secs)for(const j of S.secs){const r=d.I.sec[j].r;if(x>r[0]&&x<r[2]&&y>r[1]&&y<r[3])return j;}return -1;}
 // ช่องขอบพื้น/หลังคาโดนดาเมจ (เลือดเท่าแผ่นผนัง × CIN.secHp) → พัง = เป็นช่องโล่ง (ตก/ยิงลอดได้) + เหตุการณ์ cb:s (เศษ/ฝุ่น js/28)
 function citySecHit(d,j,dmg,el){if(!d.I||d.cl||d.sb[j])return;el=el||'none';d.shp[j]-=dmg*(el.includes('blast')?1.5:el==='ice'?0.7:1);if(d.shp[j]>0)return;
   d.sb[j]=1;d.ns++;cityMark(d);const Q=d.I.sec[j],S=d.I.slabs[Q.k];emit({k:'cb',e:'s',i:d.B.i,j,x:Math.round(Q.cx),y:Math.round(Q.cy),h:Math.round(S.z*10)/10,el});}
 const cinIn=(I,x,y,m)=>x>I.x0-m&&x<I.x1+m&&y>I.y0-m&&y<I.y1+m;
 const cinHole=(H,x,y)=>H&&x>H[0]&&x<H[2]&&y>H[1]&&y<H[3];
-function cinRampH(R,x,y){if(x<R.x0||x>R.x1||y<R.y0||y>R.y1)return -1;const s=R.ax==='x'?x:y,a=R.ax==='x'?R.x0:R.y0,b=R.ax==='x'?R.x1:R.y1,t=R.dir>0?(s-a)/(b-a):(b-s)/(b-a);return R.z0+t*(R.z1-R.z0);}
+function cinRampH(R,x,y){if(R.br||x<R.x0||x>R.x1||y<R.y0||y>R.y1)return -1;const s=R.ax==='x'?x:y,a=R.ax==='x'?R.x0:R.y0,b=R.ax==='x'?R.x1:R.y1,t=R.dir>0?(s-a)/(b-a):(b-s)/(b-a);return R.z0+t*(R.z1-R.z0);}
 const _sgCI=[];
 const cityBoxGrid=()=>sgGrid('r',MAPS.city.boxes,b=>[b.x,b.y,b.x+b.w,b.y+b.d]);
 function cityRoomAt(x,y,m){if(!cityOn())return null;for(const B of sgNear(cityBoxGrid(),x,y,m||0,_sgCI)){const d=CITYD.b[B.i];if(d.I&&!d.cl&&cinIn(d.I,x,y,m||0))return d;}return null;}
@@ -164,7 +186,8 @@ function cityCollideIn(o,r,z){if(!cityOn())return 0;let n=0;
     for(let fi=0;fi<4;fi++){const F=L.F[fi],pw=CITY_PW*F.sx*20;
       for(let i=0;i<F.k;i++)for(let f=fA;f<=fB;f++){const p=F.s0+i*L.n+f;if(d.br[p])continue;
         const segs=I.door.has(p)&&z<CIN.dh-1.6?[[-pw/2,-CIN.door],[CIN.door,pw/2]]:[[-pw/2,pw/2]];
-        for(const [u0,u1] of segs){const q=bldPush(o.x,o.y,cinWallRect(d,fi,p,u0,u1),r);if(q){o.x=q[0];o.y=q[1];n++;}}}}}
+        for(const [u0,u1] of segs){const q=bldPush(o.x,o.y,cinWallRect(d,fi,p,u0,u1),r);if(q){o.x=q[0];o.y=q[1];n++;}}}}
+    I.iw.forEach((W,j)=>{if(d.ib[j])return;const sg=cinIwSegs(d,W,z,1.9);if(!sg)return;for(const R of cinIwRects(d,W,sg)){const q=bldPush(o.x,o.y,R,r);if(q){o.x=q[0];o.y=q[1];n++;}}});}   // ผนังชั้นใน
   return n;}
 // กระสุนในตึกกลวง: ข้ามขอบตึก (ผนังนอก) → ชนแผ่นนั้น (ยังไม่แตก/ไม่ใช่ช่องประตู) • ชนพื้นชั้นบน/ทางลาด/เพดาน • คืน true = กระสุนหยุด
 function cityProjIn(pr,dt){if(!cityOn())return false;const x0=pr.x-pr.vx*dt,y0=pr.y-pr.vy*dt,h0=pr.h-pr.vh*dt;
@@ -177,6 +200,10 @@ function cityProjIn(pr,dt){if(!cityOn())return false;const x0=pr.x-pr.vx*dt,y0=p
         if(I.door.has(p)){const P=d.L.P[p];if(qh<CIN.dh&&Math.abs(qx-P.x)+Math.abs(qy-P.y)<CIN.door)continue;pr.x=qx;pr.y=qy;pr.h=qh;return true;}}
       pr.x=qx;pr.y=qy;pr.h=qh;cityHitPanel(d,p,pr.dmg||5,projEl(pr),x0,y0);return true;}
     if(b&&cinIn(I,pr.x,pr.y,0)){if(!I.ring&&pr.h>=I.top-CIN.slab)return true;
+      for(let j=0;j<I.iw.length;j++){if(d.ib[j])continue;const W=I.iw[j],sg=cinIwSegs(d,W,pr.h,0.01);if(!sg)continue;   // ผนังชั้นใน: ข้ามแนวผนังในเฟรมนี้ (กันลูกเร็วทะลุ)
+        const hz=W.fi<2,lo=hz?W.r[1]:W.r[0],hi=hz?W.r[3]:W.r[2],c0=hz?y0:x0,c1=hz?pr.y:pr.x,u=hz?pr.x:pr.y;if(Math.max(c0,c1)<lo-pr.r||Math.min(c0,c1)>hi+pr.r)continue;
+        if(!cinIwRects(d,W,sg).some(R=>Math.abs(u-R[hz?0:1])<=R[hz?2:3]))continue;cityIwHit(d,j,pr.dmg||5,projEl(pr));return true;}
+      for(const Rp of I.ramps){if(Rp.br)continue;const h=cinRampH(Rp,pr.x,pr.y);if(h>=0&&pr.h<h&&pr.h>h-0.6){cityRampHit(d,Rp.j,pr.dmg||5,projEl(pr));return true;}}
       for(const S of I.slabs)if(pr.h<S.z&&pr.h>S.z-CIN.slab-0.2&&cinSlabOn(d,S,pr.x,pr.y)){const j=cinSecAt(d,S,pr.x,pr.y);if(j>=0)citySecHit(d,j,pr.dmg||5,projEl(pr));return true;}
       for(const R of I.ramps){const h=cinRampH(R,pr.x,pr.y);if(h>=0&&pr.h<h&&pr.h>h-0.6)return true;}}}
   return false;}
@@ -187,6 +214,7 @@ function citySolidAt(x,y,h){if(!cityOn())return false;
     if(!I)return !d.cl;if(d.cl)return false;if(!I.ring&&h>=I.top-CIN.slab)return true;
     if(!cinIn(I,x,y,0)){const p=cityPanelAt(d,x,y,h);if(d.br[p])return false;if(I.door.has(p)){const P=d.L.P[p];return !(h<CIN.dh&&Math.abs(x-P.x)+Math.abs(y-P.y)<CIN.door);}return true;}
     for(const S of I.slabs)if(h<S.z&&h>S.z-CIN.slab&&cinSlabOn(d,S,x,y))return true;
+    for(let j=0;j<I.iw.length;j++){if(d.ib[j])continue;const W=I.iw[j],sg=cinIwSegs(d,W,h,0.01);if(sg&&cinIwRects(d,W,sg).some(R=>Math.abs(x-R[0])<=R[2]+2&&Math.abs(y-R[1])<=R[3]+2))return true;}
     return false;}
   return false;}
 // เส้นตรง 3 มิติ (x0,y0,h0) → (x1,y1,h1) ชนตึกเมืองตรงไหน (ก้าวละ 8 px) • คืน {x,y,h,t} หรือ null
@@ -200,7 +228,9 @@ function citySnapS(){if(!cityOn())return '';let any=false;const s=CITYD.it.map(i
 function cityParse(cb,cs){
   if(!CITYD||MAPID!=='city')return;
   const H=(cb||'').split('|');
-  CITYD.b.forEach((d,i)=>{const t=H[i]||'';if(t===d.s||!d.L)return;d.s=t;d.cl=t[0]==='x'?1:0;const [hx,sx]=(d.cl?t.slice(1):t).split(':');d.nb=0;d.ns=0;
+  const unhex=(h,A)=>{let n=0;for(let j=0;j<A.length;j++){const v=parseInt((h||'')[j>>2]||'0',16);A[j]=(v>>(j&3))&1;n+=A[j];}return n;};
+  CITYD.b.forEach((d,i)=>{const t=H[i]||'';if(t===d.s||!d.L)return;d.s=t;d.cl=t[0]==='x'?1:0;const [hx,sx,ix,rx]=(d.cl?t.slice(1):t).split(':');d.nb=0;d.ns=0;
+    d.ni=unhex(ix,d.ib);d.nr=unhex(rx,d.rb);cityRampSync(d);
     for(let p=0;p<d.br.length;p++){const v=parseInt(hx[p>>2]||'0',16);d.br[p]=(v>>(p&3))&1;d.nb+=d.br[p];}
     for(let j=0;j<d.sb.length;j++){const v=parseInt((sx||'')[j>>2]||'0',16);d.sb[j]=(v>>(j&3))&1;d.ns+=d.sb[j];}
     d.v++;cityApplyBox(d);cityMounds(d);});

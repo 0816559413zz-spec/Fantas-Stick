@@ -118,7 +118,7 @@ windFlyTick:202 windFlick:204
 windUltTick:213 windFloatZ:227 windSnapP:230 windSnapW:231
 §234 สกิล
 
-## js/10-net.js (183) — 
+## js/10-net.js (183) — เครือข่าย (PeerJS / WebRTC)
 PREFIX:4 NET:5 RC:9 TURN_SERVERS:12 ICE:13 PEER_OPT:14 TURN_URL:16 ICE_READY:18 JN:22 LAG:24 lagDo:25 hostSend:26 LOBBY:27 genCode:28 sendAll:29 NETD_KEYS:33 NETD:33 netDeltaReset:34 netDelta:35 NETU:47 netUndelta:48 setStatus:54 hostGame:56 hostPeer:64 netConnect:83 joinWatch:94 joinFail:109 netLost:115 joinGame:130 joinPeer:141 clientOnData:156 leave:171 leaveRoom:173
 
 ## js/11-host.js (391) — 
@@ -133,10 +133,10 @@ BRKDEF:201 BRK_M:201 BRK_MCOL:201 BRK:202 genBrk:203 brkApply:210 brkStage:214 h
 §231 ตารางช่อง (spatial grid) สำหรับแมพใหญ่: หาเฉพาะของใกล้ ๆ แทนวนทุกชิ้น…
 SG:234 sgObs:235 sgProps:235 sgGrid:237 sgNear:244 _sgCR:249 _sgCW:249 _sgCB:249 _sgCO:249 _sgPO:249 _sgPB:249 _sgPP:249 _sgM:249 _sgE:249 _sgA:249 _cwLast:251 collideWorld:252 shoot:290 eShoot:311 foesOf:318 breakShield:325 ULT_RATE:327 ultActive:328 gainUlt:329 lifesteal:330 damage:332 playerDown:389 killProj:410 explode:419 hitTarget:431 updateProjectiles:447
 
-## js/12-city-dmg.js (209) — เมืองพังได้ (designs/city-bot-battle.md ขั้น 4) — ข้อมูลที่ทุกเครื่อง…
-CITY_FL:8 CITY_PW:8 CDMG:9 CITYD:12 cityOn:13 cityLayout:15 cityReset:25 cityApplyBox:39 cityApplyItem:40 cityHex:41 cityMark:42 cityPanelAt:44 cityHitPanel:49 cityHitItem:60 cityHitObs:69 _sgCD:74 cityDamageIn:76 cityTick:85 _sgCM:95 cityMoundH:96 cityMounds:104
-§110 ข้างในตึก (2026-10-28 ผู้ใช้: เดินเข้าได้ 1–3 ชั้น มีทางขึ้น • ผนังนอ…
-CIN:114 cityInterior:115 cinSlabOn:135 cinOpenPanel:137 cinSecAt:138 citySecHit:140 cinIn:142 cinHole:143 cinRampH:144 _sgCI:145 cityBoxGrid:146 cityRoomAt:147 cityFloorH:149 cityCeilH:154 cinWallRect:158 cityCollideIn:161 cityProjIn:170 _sgCS:184 citySolidAt:185 cityRay:193 cityRoomBox:196 citySnapB:197 citySnapS:198 cityParse:200
+## js/12-city-dmg.js (239) — เมืองพังได้ (designs/city-bot-battle.md ขั้น 4) — ข้อมูลที่ทุกเครื่อง…
+CITY_FL:8 CITY_PW:8 CDMG:9 CITYD:12 cityOn:13 cityLayout:15 cityReset:25 cityApplyBox:41 cityApplyItem:42 cityHex:43 cityMark:44 cityRampSync:45 cityPanelAt:47 cityHitPanel:52 cityHitItem:63 cityHitObs:72 _sgCD:77 cityDamageIn:79 cityTick:90 _sgCM:100 cityMoundH:101 cityMounds:109
+§115 ข้างในตึก (2026-10-28 ผู้ใช้: เดินเข้าได้ 1–3 ชั้น มีทางขึ้น • ผนังนอ…
+CIN:119 cityInterior:120 cinSlabOn:149 cinOpenPanel:151 cityIwHit:153 cityRampHit:155 cinIwSegs:158 cinIwRects:159 cinSecAt:160 citySecHit:162 cinIn:164 cinHole:165 cinRampH:166 _sgCI:167 cityBoxGrid:168 cityRoomAt:169 cityFloorH:171 cityCeilH:176 cinWallRect:180 cityCollideIn:183 cityProjIn:193 _sgCS:211 citySolidAt:212 cityRay:221 cityRoomBox:224 citySnapB:225 citySnapS:226 cityParse:228
 
 ## js/13-enemies.js (168) — ศัตรู (โหมด Co-op)
 spawnEnemy:2 setupWave:19 bossPhase:36 enemySlam:44 updateEnemies:55
@@ -165,7 +165,7 @@ bombTick:320 modeSnap:333
 §355 สร้าง snapshot ส่งให้ทุกเครื่อง
 r1:356 DEFP:358 packP:359 unpackP:360 makeSnap:361 PROF:379 pf:380 hostLoop:381 HLW:395 pingN:405
 
-## js/16-voice.js (89) — ไมค์ (WebRTC audio แบบ mesh: ทุกคนโทรหากันตรงๆ)
+## js/16-voice.js (89) — 
 VOICE:4 rosterIds:5 toggleMic:6 voiceSync:20 teamOn:37 teamOf:38 applyVoiceGates:39 VAC:49 onIncomingCall:50 voiceLevels:62 speakingIds:70 updateVoiceUI:76
 
 ## js/17-input.js (66) — 
@@ -237,12 +237,12 @@ QUAL:143 QUAL_NAME:144 qualPR:145 applyQuality:151 qualTick:169 texCanvas:180 gl
 §239 เงาตามผู้เล่น
 SHD:243 _shF:244 _shR:244 _shU:244 _shC:244 _shY:244 shadowFollow:245 LPOOL:264
 
-## js/28-city-build.js (298) — เมืองมักเกิ้ล (ลอนดอน) — ภาพ • ข้อมูลอยู่ js/02-city.js • โมเดลจาก as…
+## js/28-city-build.js (309) — เมืองมักเกิ้ล (ลอนดอน) — ภาพ • ข้อมูลอยู่ js/02-city.js • โมเดลจาก as…
 CITY_WIN:4 cityWinTex:5 cityEmTex:10 cityBoxGeo:16 buildCity:21
 §97 ข้างในตึกกลวง (ภาพ — ผัง I จาก cityInterior js/12-city-dmg)
-cityInteriorView:100 cityHideIn:135 cityMoundView:139
-§150 ชุดโมเดลลอนดอน (assets/city/*.glb จาก assets/src/city_kit_build.py)
-CITY_STY:155 CITY_VEH:162 cityFacade:164 CITYK:177 _cZ:178 _cT:178 _cR:178 _cC:178 cityKitLoad:179 cityCull:201 citySet:207 cityTint:209 cityPools:211 cityShowBld:217 cityRubble:224 CITY_FALL:232 cityViewSync:234 cityDebris:271 cityFX:280
+cityInteriorView:100 cityHideIn:140 cityMoundView:146
+§157 ชุดโมเดลลอนดอน (assets/city/*.glb จาก assets/src/city_kit_build.py)
+CITY_STY:162 CITY_VEH:169 cityFacade:171 CITYK:184 _cZ:185 _cT:185 _cR:185 _cC:185 cityKitLoad:186 cityCull:208 citySet:214 cityTint:216 cityPools:218 cityShowBld:224 cityRubble:231 CITY_FALL:239 cityViewSync:241 cityDebris:281 cityFX:290
 
 ## js/28-maps-build.js (762) — สร้างแผนที่
 CANDLESYS:2 builtMap:3 builtKey:3 world:3 TORCHES:3 CANDLES:3 FIREFLIES:3 CRYSTAL:3 RUNE:3 SNITCH:3 BANNERS:3 SNOW:3 WCACHE:5 WCACHE_MAX:5 wkey:7 buildWorld:8 addW:41 _prewarmed:43 prewarmShaders:44 batchStatic:63 makeCandles:88 updateCandles:97 buildCastle:106 buildHogsmeade:172 buildGreatHall:260 buildForest:330
@@ -298,7 +298,7 @@ CANIM:30 SKANIM:55 skAnim:60 _caT:61 _caR:61 skillPose:62 _g2:87 wandTwoHand:88 
 §412 ฉายตำแหน่ง 3D ลงจอ (ป้ายชื่อ / ตัวเลขดาเมจ)
 _v:413 toScreen:414 burnNum:421 drawLabels:428 drawTexts:459 HITM:473 DIRI:473 drawXh:475 drawCrosshair:485
 
-## js/36-modes-view.js (164) — ฝั่งแสดงผลของโหมดพิเศษ (บอล / ห่วงแข่ง / วงหด / ไอเทม / ศพ / จุดภารกิจ / ลมหายใจมังกร)
+## js/36-modes-view.js (164) — 
 ROLE:4 KC:4 roleShowT:4 onPriv:5 MO:10 BREATHS:11 clearModeObjs:12 ITEMC:21 makeItem:22 syncModeObjs:34
 §133 หน้าประชุมโหวต (หาลอร์ดโวลเดอมอร์)
 meetKey:134 myVoted:134 castVote:135 syncMeeting:141
@@ -376,7 +376,7 @@ BFA:315 bfWreck:316 updateBfAir:321 bfRumble:344 updateBf:347
 §350 4) เอฟเฟกต์ทั้งจอ (ค่าไปที่ GradePass ใน js/27-world.js)
 SCR:351 screenFlash:352 screenRadial:353 screenKick:354 screenHurt:355 _scv:356 updateScreenFx:357 updateVfxKit:365
 
-## js/45-fx-runtime.js (346) — 
+## js/45-fx-runtime.js (346) — VFX Studio runtime — เล่นเอฟเฟกต์จากไฟล์ข้อมูล assets/fx/<กลุ่ม>/<ชื่อ>.fx.json (แผน desi…
 FXR:9 FXDEG:10
 §11 โหลด
 fxFetch:12 fxDefaults:13 fxBoot:14 fxOverrides:24 fxLoad:27 fxData:31
@@ -632,4 +632,4 @@ BRM:9 BSK:11 BROOM_SK:17 broomVert:38 broomMove:50 broomStrike:68 broomStrikeTic
 §125 ฝั่งจอ
 broomHead:127 BBEAM:134 _bbGeo:135 broomView:136 broomMountFx:165 broomDismountFx:173 broomBeamFx:175 broomSkFx:191 broomStrikeFx:204 broomFlakFx:209 broomHud:214 broomHudT:215 broomTick:224
 
-(77 files, 18506 lines)
+(77 files, 18547 lines)
