@@ -362,7 +362,7 @@ function makeSnap(){
   return {ph:G.ph,sl:G.endT>0?1:0,ot:G.ot&&G.mode==='ffa'?1:0,PT:ffaSnapPots(),mode:G.mode,mp:G.map,PB:PROPON?PROPS.map(o=>o.st).join(''):'',BD:bldSnap(),BK:brkSnap(),CB:citySnapB(),CS:citySnapS(),tm:Math.max(0,Math.ceil(G.timer)),cd:G.cdT||0,wave:G.wave,round:G.round,rw:G.rw,ts:G.teamScore,
     bt:Math.ceil(G.buffT||0),ban:G.banner?G.banner.text:'',res:G.result,el:G.en.length+G.queue.length,
     feed:G.feed.filter(f=>G.time-f.t<6).slice(-5).map(f=>f.text),
-    P:plist().map(p=>({id:p.id,n:p.name,c:p.color,tm:p.team,x:r1(p.x),y:r1(p.y),z:r1(p.z||0),fl:!!p.fly,rt:p.root>0,a:Math.round(p.ang*100)/100,
+    P:plist().map(p=>({id:p.id,n:p.name,c:p.color,tm:p.team,x:r1(p.x),y:r1(p.y),z:r1(p.z||0),fl:!!p.fly,rt:p.root>0,a:Math.round(p.ang*100)/100,fh:p.fly&&p.flyOn?Math.round(p.fh*100)/100:0,
       hp:Math.ceil(p.hp),mh:p.maxHp,aw:p.awayT>0?1:0,wv:p.alive&&!p.downed?p.wSpd|0:0,al:p.alive,dn:p.downed,rv:r1(p.revive),sh:p.shieldOn,se:Math.round(p.shieldE),
       st:p.stun>0,ds:p.dash>0,iv:p.inv>0,bn:p.burn>0,u:Math.floor(p.ult),k:p.kills,d:p.deaths,rs:Math.ceil(p.respawn),
       cd:CDK.map(k=>r1(p.cd[k])),cm:CDK.map(k=>p.cdMax[k]||1),bo:p.bo,bR:p.br,pk:p.picked,bf:p.taken,dmg:Math.round(p.dmgDealt),

@@ -63,7 +63,7 @@ function renderGame(v,P,E,me,dt,now){
   if(!FXSTUDIO.seek){syncPlayers(P,v.mode,now,dt);grassTick(dt);clothTick(dt);}pf('players',t0);   // grassTick = ลม + หญ้า (js/50) • clothTick = ผ้าคลุมจริงของเรา (js/49)
   if(me&&me.al&&!me.fl&&!me.dn){const o=PM3.get(me.id);if(o){const k=Math.floor(o.walk/Math.PI);if(o.stepK!==undefined&&k!==o.stepK)snd('step',{vol:0.35,rev:0.1});o.stepK=k;}}t0=performance.now();
   syncEnemies(E,P,now,dt);pf('enemies',t0);t0=performance.now();
-  syncProj(v,now);syncWalls(v);syncPots(v,now);syncEarth(v,dt,now);syncWind(v,dt,now);syncProps(v);syncBld(dt);cityCull();cityViewSync(dt);brkSync(dt);syncMins(v,now,dt);
+  broomTick(dt);syncProj(v,now);syncWalls(v);syncPots(v,now);syncEarth(v,dt,now);syncWind(v,dt,now);syncProps(v);syncBld(dt);cityCull();cityViewSync(dt);brkSync(dt);syncMins(v,now,dt);
   syncModeObjs(v,P,me,now,dt);pf('projMode',t0);
   KC=Math.max(0,KC-dt);roleShowT=Math.max(0,roleShowT-dt);
   $('#trainEnd').classList.toggle('hidden',!(NET.isHost&&v.mode==='train'&&v.ph!=='over'));

@@ -167,7 +167,7 @@ function emoHost(id,e){const p=G.players[id];e=e|0;if(!p||!p.alive||p.downed||G.
 
 function resetBody(p,x,y){
   Object.assign(p,{x,y,z:0,vz:0,fly:false,flyCd:0,root:0,vx:0,vy:0,hp:p.maxHp,alive:true,downed:false,revive:0,stun:0,burn:0,dash:0,inv:0,
-    shieldOn:false,shieldE:100,shieldBroken:0,respawn:0,slam:false,slam3:null,dashSp:0});   // slam: ตายกลางท่ากระโดดฟาด (น้ำแข็ง) แล้วค้าง = ฟันไม่ได้หลังเกิดใหม่
+    shieldOn:false,shieldE:100,shieldBroken:0,respawn:0,slam:false,slam3:null,dashSp:0,flyOn:false});   // slam: ตายกลางท่ากระโดดฟาด (น้ำแข็ง) แล้วค้าง = ฟันไม่ได้หลังเกิดใหม่
   for(const k of CDK)p.cd[k]=0;clearStatus(p);p.trail=null;earthReset(p);windReset(p);
   p.ang=Math.atan2(MH/2-y,MW/2-x);
 }
@@ -276,14 +276,12 @@ function updatePlayer(p,dt,acting){
   if(pr.b&&canAct&&p.flyCd<=0&&!NOBROOM.has(G.mode)){
     p.fly=!p.fly;p.flyCd=0.8;
     if(p.fly){p.vz=7;p.shieldOn=false;p.dash=0;emit({k:'mount',x:p.x,y:p.y,h:p.z,id:p.id});}
-    else emit({k:'dismount',x:p.x,y:p.y,h:p.z});
+    else emit({k:'dismount',x:p.x,y:p.y,h:p.z,id:p.id});
   }
-  if(p.fly&&(p.stun>0||p.root>0)){p.fly=false;emit({k:'dismount',x:p.x,y:p.y,h:p.z});feed(`🧹 ${p.name} ตกจากไม้กวาด!`);}
-  if(p.fly){
-    const tv=(inp.jh?8:0)-(inp.ch?8:0);
-    p.vz+=(tv-p.vz)*Math.min(1,6*dt);
-    p.z=clamp(p.z+p.vz*dt,0.6,24);
-  }else if(p.colos>0){p.colH=clamp((p.colH||9)+((inp.jh?1:0)-(inp.ch?1:0))*6*dt,5,15);p.z+=(p.colH-p.z)*Math.min(1,9*dt);p.vz=0;}
+  if(p.fly&&(p.stun>0||p.root>0)){p.fly=false;emit({k:'dismount',x:p.x,y:p.y,h:p.z,id:p.id});feed(`🧹 ${p.name} ตกจากไม้กวาด!`);}
+  if(!p.fly)p.flyOn=false;
+  if(p.fly)broomVert(p,inp,dt);   // บินแบบเครื่องบิน: เงยกล้อง = ไต่ (js/69)
+  else if(p.colos>0){p.colH=clamp((p.colH||9)+((inp.jh?1:0)-(inp.ch?1:0))*6*dt,5,15);p.z+=(p.colH-p.z)*Math.min(1,9*dt);p.vz=0;}
   else if(p.dfall)dragonfallTick(p,inp,dt);
   else if(p.sdome)stormDomeTick(p,inp,dt);
   else if(p.wr&&p.wr.ph!=='trans'){}   // Wrath: ลอยบนฟ้า (earthWrathTick คุมความสูง)
@@ -312,7 +310,7 @@ function updatePlayer(p,dt,acting){
   if(!canAct||p.root>0||p.dchgOn||p.cryo>0){mx=my=0;}
   else if(p.fear>0){const fa=Math.atan2(p.y-p.fearY,p.x-p.fearX);mx=Math.cos(fa);my=Math.sin(fa);}
   const spd=(p.fly?540*p.buffs.spd:175*p.buffs.spd*(p.shieldOn?0.5:1))*(p.boost>0?1.45:1)*moveMul(p)*(p.wr||p.aug||p.ecb?earthSpd(p):1)*(p.wdr||p.wfw?windSpd(p):1)*(p.dfall?(p.dfall.ph===2?0.45:0):p.sdome?(p.sdome.ph===2?0.45:0):p.rail?0:(p.kindle>0&&p.hover>0)?0.35:p.breath>0?0.7:(p.snapT>0||p.colos>0||p.grT>0)?0.5:1)*(p.slideT>0?1.8:1+(p.iceB||0));
-  p.wSpd=(p.dash>0||p.slideT>0||p.slip>0||!canAct||p.root>0||p.dchgOn||p.cryo>0||p.fear>0||p.gh)?0:Math.round(spd);   // ความเร็วเดินตอนนี้ → ลูกข่ายใช้ทำนายตัวเอง (0 = อย่าทำนาย)
+  p.wSpd=(p.dash>0||p.slideT>0||p.slip>0||!canAct||p.root>0||p.dchgOn||p.cryo>0||p.fear>0||p.gh||p.fly)?0:Math.round(spd);   // ความเร็วเดินตอนนี้ → ลูกข่ายใช้ทำนายตัวเอง (0 = อย่าทำนาย)
   if(p.dash>0){
     p.dash-=dt;const ds=p.dashSp||900;
     // ก้าวย่อย ≤8 หน่วย + ชนโลกทุกก้าว: กันพุ่งทะลุผนังบ้านบาง (ก้าวเดียวอาจยาว 30+ หน่วย)
@@ -328,6 +326,7 @@ function updatePlayer(p,dt,acting){
     if(p.slideT>0&&!mx&&!my){p.mvx+=(Math.cos(p.ang)*spd-p.mvx)*k*0.5;p.mvy+=(Math.sin(p.ang)*spd-p.mvy)*k*0.5;}
     p.x+=p.mvx*dt;p.y+=p.mvy*dt;
   }
+  else if(p.fly)broomMove(p,mx,my,spd,canAct,dt);
   else{p.x+=mx*spd*dt;p.y+=my*spd*dt;p.mvx=mx*spd;p.mvy=my*spd;}
   if(p.dash>0&&p.ultSlash)for(const t of foesOf(p.team)){if(p.ultSlash.has(t))continue;if(Math.hypot(t.x-p.x,t.y-p.y)<90+(t.r||PR)){p.ultSlash.add(t);p.noMul=true;aoeHit(p,t,75,t=>{t.fslUltT=3;});p.noMul=false;}}
   if(p.dash<=0)p.ultSlash=null;
@@ -348,7 +347,8 @@ function updatePlayer(p,dt,acting){
   p.fireHeld=inp.fire;
   // ควิดดิชและแข่งไม้กวาด ร่ายเวทบนไม้กวาดได้ / โหมดอื่นร่ายไม่ได้ (เหมือนในเกม)
   if(!canAct)p.dchgOn=false;
-  if(!canAct||(p.fly&&G.mode!=='quid'&&G.mode!=='race'))return;
+  if(!canAct)return;
+  if(p.fly&&G.mode!=='quid'&&G.mode!=='race'){broomAct(p,inp,pr,dt);return;}   // บนไม้กวาด: คลิกซ้าย = ลำแสง (js/69)
 
   const cdr=p.buffs.cdr;
   const setCd=(k,v)=>{p.cd[k]=v;p.cdMax[k]=v;};

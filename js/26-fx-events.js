@@ -121,9 +121,10 @@ function fx(ev,raw){   // raw = ภาพเดิมในโค้ดเท่
       break;
     case 'mount':
       for(let i=0;i<36;i++){const a=i/36*Math.PI*4;PARTS.push({x:ev.x+Math.cos(a)*30,y:ev.y+Math.sin(a)*30,h:H+i*0.04,vx:-Math.sin(a)*90,vy:Math.cos(a)*90,vh:2,life:0.7,max:0.7,col:i%2?'#ffe9a8':'#ffffff',size:2,g:0,drag:2});}
-      smoke(ev.x,ev.y,0.2,10,'#6a6470',0.9,6,160);snd('whoosh',ev);
+      smoke(ev.x,ev.y,0.2,10,'#6a6470',0.9,6,160);snd('whoosh',ev);broomMountFx(ev);   // อนิเมชันเรียกไม้กวาด (js/69)
       break;
-    case 'dismount':burst(ev.x,ev.y,'#ffe9a8',14,120,0.5,1.8,{h:H+0.6});snd('dismount',ev);break;
+    case 'dismount':burst(ev.x,ev.y,'#ffe9a8',14,120,0.5,1.8,{h:H+0.6});snd('dismount',ev);broomDismountFx(ev);break;
+    case 'bbm':broomBeamFx(ev);break;   // ลำแสงบนไม้กวาด (js/69)
     case 'land':smoke(ev.x,ev.y,0.15,14,'#5a5048',1,7,200);ring(ev.x,ev.y,'#9a8a7a',45,0.3);snd('thud',ev);break;
     case 'buff':
       if(ev.id===NET.myId)snd('buff');

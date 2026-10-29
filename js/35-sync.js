@@ -151,13 +151,13 @@ function syncPlayers(P,mode,now,dt){
     const x=tx(p.x),z=tz(p.y);
     o.zs=o.zs===undefined?(p.z||0)+GY(p.x,p.y):lerp(o.zs,(p.z||0)+GY(p.x,p.y)+(p.gh?0.6+Math.sin(now/500)*0.2:0),1-Math.exp(-20*dt));
     g.position.set(x,o.zs,z);
-    g.rotation.y=Math.atan2(Math.cos(p.a),Math.sin(p.a));
+    {const A=broomHead(o,p,dt);g.rotation.y=Math.atan2(Math.cos(A),Math.sin(A));}   // บิน = หันตามไม้กวาด (js/69)
     const v=localVel(o,x,z,dt,g.rotation.y);
     if(!p.al){if(ragTick(o,p,v,dt,now))ragHideDead(o,p,now);continue;}   // ตาย = ragdoll ค้างจนเกิดใหม่ (js/48)
     o.hitT=Math.max(0,(o.hitT||0)-dt);
     if(o.anim)animTick(o,{down:!!p.dn,fly:!!p.fl,sp:v.sp,castT:o.castT,hitT:o.hitT},dt);
     updateCloth(o.cloak,v.lvx,v.lvz,v.sp*(p.fl?1.4:1),now,dt);
-    o.broom.visible=!!p.fl;o.cocoon.visible=!!p.rt;
+    o.bsp=v.sp;broomView(o,p,dt,now);o.cocoon.visible=!!p.rt;   // ไม้กวาด: เอียงเลี้ยว + อนิเมชันเรียก/เก็บ (js/69)
     if(p.rt)o.cocoon.rotation.y=now/400;
     o.castT=Math.max(0,o.castT-dt);
     const ck=Math.min(1,o.castT/0.12);
@@ -167,7 +167,7 @@ function syncPlayers(P,mode,now,dt){
       o.legs[0].rotation.x=o.legs[1].rotation.x=-1.25;
       o.armL.rotation.x=-1.05;o.armL.rotation.z=-0.25;o.armR.rotation.x=-1.05;o.armR.rotation.z=0.25;
       o.broom.rotation.x=-0.1+Math.sin(now/300)*0.04;o.broom.rotation.z=clamp(-v.lvx*0.02,-0.4,0.4);
-      if(Math.random()<0.8){const bx=p.x-Math.cos(p.a)*30,by=p.y-Math.sin(p.a)*30;PARTS.push({x:bx+rnd(-4,4),y:by+rnd(-4,4),h:(p.z||0)+0.8+rnd(-0.1,0.1),vx:rnd(-20,20),vy:rnd(-20,20),vh:rnd(-0.3,0.3),life:0.6,max:0.6,col:Math.random()<0.5?'#ffe9a8':'#ffffff',size:1.6,g:0.5});}
+      if(Math.random()<0.8){const ha=o.fhS!==undefined?o.fhS:p.a,bx=p.x-Math.cos(ha)*30,by=p.y-Math.sin(ha)*30;PARTS.push({x:bx+rnd(-4,4),y:by+rnd(-4,4),h:(p.z||0)+0.8+rnd(-0.1,0.1),vx:rnd(-20,20),vy:rnd(-20,20),vh:rnd(-0.3,0.3),life:0.6,max:0.6,col:Math.random()<0.5?'#ffe9a8':'#ffffff',size:1.6,g:0.5});}
     }else{
       o.walk+=dt*v.sp*0.8;
       const sw=Math.sin(o.walk)*Math.min(1,v.sp/5);
