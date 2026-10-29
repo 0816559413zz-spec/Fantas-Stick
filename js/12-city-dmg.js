@@ -116,7 +116,7 @@ function cityMounds(d){d.mo=[];if(!d.L||!d.nb)return;const L=d.L;
 // I = {nf ชั้นที่เข้าได้, fh สูง/ชั้น (ม.), top (ม.: ต่ำกว่านี้กลวง เหนือนี้ทึบ), x0..y1 ขอบในผนัง (px), door: Set(แผ่นประตู),
 //      slabs:[{z, hole:[x0,y0,x1,y1]}] พื้นชั้นบน (รูตรงทางลาด), ramps:[{x0,y0,x1,y1, ax:'x'|'y', dir ±1, z0,z1}] ทางลาดชั้นละอัน สลับฟันปลาเลียบผนังหลัง}
 // ประตู = แผ่นกลางชั้นล่างด้านหน้า (L.front) • ใช้ทั้งโฮสต์ (ชน/พื้น/กระสุน) และภาพ (js/28 cityInteriorView) — ผลเหมือนกันทุกเครื่อง
-const CIN={ringN:4,band:60,secHp:1.4,iwt:10,iwHp:1,rampHp:2,nf:3,wt:12,slab:0.3,sw:50,rl:130,pad:24,door:30,dh:2.8,skip:new Set(['garage'])};   // wt = ผนังหนา px • sw/rl = กว้าง/ยาวทางลาด px • door = ครึ่งกว้างช่องประตู px, dh = สูง ม.
+const CIN={ringN:4,band:60,secHp:1.4,iwt:10,iwHp:1,iwBreak:false,rampHp:2,nf:3,wt:12,slab:0.3,sw:50,rl:130,pad:24,door:30,dh:2.8,skip:new Set(['garage'])};   // wt = ผนังหนา px • sw/rl = กว้าง/ยาวทางลาด px • door = ครึ่งกว้างช่องประตู px, dh = สูง ม.
 function cityInterior(B,L){
   const fh=CITY_FL*L.sy,wt=CIN.wt,x0=B.x+wt,y0=B.y+wt,x1=B.x+B.w-wt,y1=B.y+B.d-wt;
   const back=L.front^1,ax=back<2?'x':'y',len=ax==='x'?x1-x0:y1-y0,inner=ax==='x'?y1-y0:x1-x0;
@@ -150,7 +150,7 @@ function cinSlabOn(d,S,x,y){if(cinHole(S.hole,x,y))return false;if(S.secs)for(co
 // แผ่นผนัง p แตก + ขอบพื้น/หลังคาเหนือแผ่นนั้นพังด้วย = ช่องโล่งทั้งช่อง (ไม่เหลือขอบอิฐ — js/28 cityPools)
 function cinOpenPanel(d,p){const I=d.I;if(!I||!I.ring||!d.br[p])return false;const P=d.L.P[p],j=I.secAt.get((P.f*4+P.fi)*1000+P.i);return j!==undefined&&!!d.sb[j];}
 // ผนังชั้นใน / ทางลาด โดนดาเมจ → พัง (เหตุการณ์ cb:w / cb:r — เศษ js/28) • ผนังช่องประตูก็พังได้ (เหลือแต่ช่องโล่ง)
-function cityIwHit(d,j,dmg,el){if(!d.I||d.cl||d.ib[j])return;el=el||'none';d.ihp[j]-=dmg*(el.includes('blast')?1.5:el==='ice'?0.7:1);if(d.ihp[j]>0)return;
+function cityIwHit(d,j,dmg,el){if(!CIN.iwBreak||!d.I||d.cl||d.ib[j])return;   // ผู้ใช้ 2026-10-29: ผนังชั้นใน = ส่วนของแกนกลาง พังไม่ได้ (ไม่งั้นเหลือพื้นลอย)el=el||'none';d.ihp[j]-=dmg*(el.includes('blast')?1.5:el==='ice'?0.7:1);if(d.ihp[j]>0)return;
   d.ib[j]=1;d.ni++;cityMark(d);const W=d.I.iw[j];emit({k:'cb',e:'w',i:d.B.i,j,x:Math.round(W.cx),y:Math.round(W.cy),h:Math.round((W.f+0.5)*d.I.fh*10)/10,el});}
 function cityRampHit(d,j,dmg,el){if(!d.I||d.cl||d.rb[j])return;el=el||'none';d.rhp[j]-=dmg*(el.includes('blast')?1.5:el==='ice'?0.7:1);if(d.rhp[j]>0)return;
   d.rb[j]=1;d.nr++;cityMark(d);const R=d.I.ramps[j];emit({k:'cb',e:'r',i:d.B.i,j,x:Math.round((R.x0+R.x1)/2),y:Math.round((R.y0+R.y1)/2),h:Math.round((R.z0+R.z1)*5)/10,el});}

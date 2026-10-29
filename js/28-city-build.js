@@ -176,7 +176,7 @@ function cityFacade(B,S,zones,w,d,x,z,kput,R){
   for(const [sx2,sz2] of [[-1,-1],[1,-1],[-1,1],[1,1]]){const cx=B.x+(sx2>0?B.w:0),cy=B.y+(sz2>0?B.d:0);
     for(let f=0;f<L.n;f++){X.push(kput(S.c,x+sx2*w/2,f*CITY_FL*L.sy,z+sz2*d/2,0,1,L.sy));   // เสามุม: เกาะแผ่นปลายสุดของสองด้านที่มาชนกันที่มุมนี้ (ชั้นเดียวกัน)
       const adj=[];L.P.forEach((q,pi)=>{if(q.f===f&&Math.hypot(q.x-cx,q.y-cy)<CITY_PW*L.F[q.fi].sx*10+8)adj.push(pi);});XP.push(adj);}}
-  if(S.ch){const nc=1+Math.floor(R()*2);for(let i=0;i<nc;i++)X.push(kput('ct_chimney',x+(R()-0.5)*(w-3),B.h,z+(R()-0.5)*(d-3),R()<0.5?0:Math.PI/2));}
+  if(S.ch){const nc=1+Math.floor(R()*2);for(let i=0;i<nc;i++)X.push(kput('ct_chimney',x+(R()-0.5)*Math.max(0.5,w-9),B.h,z+(R()-0.5)*Math.max(0.5,d-9),R()<0.5?0:Math.PI/2));}
   return {P,X,XP,L,B};
 }
 // สร้าง InstancedMesh ต่อ (ชิ้น × ก้อน × วัสดุ) เมื่อไฟล์โหลดเสร็จ • city_paint / รถ = ย้อมสีต่อชิ้น (instanceColor) • ก้อนละกลุ่ม → cityCull ซ่อน/แสดง
