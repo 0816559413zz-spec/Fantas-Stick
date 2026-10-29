@@ -154,7 +154,7 @@ function cityMoundView(r,d){
     for(let k=0;k<2;k++){const b=new THREE.Mesh(sGeo(THREE.BoxGeometry,1,1,1),rb);b.scale.set(0.05,0.05,1.2+R()*1.5);b.position.set(cx+(R()-0.5)*L*S3,q.h*0.8,cz+(R()-0.5)*Wd*S3);b.rotation.set(R()*1.2,R()*3,R()*0.6);g.add(b);}}
   // ตึกโดนแหว่ง (ผู้ใช้ 2026-10-29 ภาพอ้างอิง): ขอบพื้นที่พัง = ตอพื้นแหว่งฟันเลื่อยยื่นจากแกนกลาง + เสาคอนกรีตตั้งระหว่างช่อง + เศษบนพื้น — ภาพล้วน
   const I=d.I;
-  if(I&&I.ring&&d.ns){const cm=sMat({color:'#8c867c',roughness:1}),cd=sMat({color:'#6e685f',roughness:1}),t=CIN.slab,pil=new Set();
+  if(I&&I.ring&&d.ns){const cm=sMat({color:'#8c867c',roughness:1}),cd=sMat({color:'#6e685f',roughness:1}),t=CIN.slab,pil=new Map();
     const bx=(a0,a1,p0,p1,y,h,hz,mat,ry)=>{const m=new THREE.Mesh(sGeo(THREE.BoxGeometry,1,1,1),mat);const X0=hz?a0:p0,X1=hz?a1:p1,Y0=hz?p0:a0,Y1=hz?p1:a1;
       m.scale.set(Math.abs(X1-X0)*S3,h,Math.abs(Y1-Y0)*S3);m.position.set(tx((X0+X1)/2),y,tz((Y0+Y1)/2));if(ry)m.rotation.set(ry[0],ry[1],ry[2]);g.add(m);return m;};
     I.sec.forEach((Q,j)=>{if(!d.sb[j])return;const S=I.slabs[Q.k],hz=Q.fi<2,q=Q.r,A=hz?q[0]:q[1],Bb=hz?q[2]:q[3];
@@ -162,8 +162,8 @@ function cityMoundView(r,d){
       for(let u=A;u<Bb-3;){const L=Math.min(Bb-u,10+R()*22),len=6+R()*26,y=S.z-t/2-R()*0.15;   // ตอพื้นฟันเลื่อย
         bx(u,u+L,core,core+out*len,y,t*(0.7+R()*0.3),hz,R()<0.7?cm:cd,[(R()-0.5)*0.12,0,(R()-0.5)*0.12]);u+=L+R()*5;}
       for(let k=0;k<3;k++){const u=A+R()*(Bb-A),v=core+out*(4+R()*14),c=bx(u-4,u+4,v-4,v+4,S.z+0.12,0.25+R()*0.3,hz,[cm,cd][k%2]);c.rotation.y=R()*3;}   // เศษบนตอพื้น
-      for(const e of [A,Bb]){const key=Q.k+'|'+Q.fi+'|'+Math.round(e);if(pil.has(key))continue;pil.add(key);   // เสา: ใต้ปลายช่อง จากพื้นชั้นล่างถึงใต้แผ่นนี้ (ใกล้ขอบนอก)
-        const v=outer-out*14,z0=S.z-I.fh,brk=R()<0.35,h=(I.fh-t)*(brk?0.35+R()*0.4:1);bx(e-7,e+7,v-7,v+7,z0+h/2,h,hz,R()<0.5?cm:cd,brk?[(R()-0.5)*0.25,R(),(R()-0.5)*0.25]:null);}});}   // บางต้นหักครึ่ง เอียงนิด
+      for(const e of [A,Bb]){const key=Q.fi+'|'+Math.round(e),o=pil.get(key);if(!o||S.z>o.z)pil.set(key,{e,z:S.z,v:outer-out*14,hz});}});   // เสา: ต้นเดียวจากพื้นดิน สูงถึงแผ่นที่พังสูงสุดตรงนั้น
+    for(const P of pil.values()){const brk=R()<0.35,h=(P.z-t)*(brk?0.45+R()*0.4:1);bx(P.e-7,P.e+7,P.v-7,P.v+7,h/2,h,P.hz,R()<0.5?cm:cd);}}   // บางต้นหักตอนบน (โคนติดพื้นเสมอ)
   shadowAll(g);world.add(g);r.mg=g;
 }
 // ---------- ชุดโมเดลลอนดอน (assets/city/*.glb จาก assets/src/city_kit_build.py) ----------
