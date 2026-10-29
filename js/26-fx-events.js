@@ -124,7 +124,9 @@ function fx(ev,raw){   // raw = ภาพเดิมในโค้ดเท่
       smoke(ev.x,ev.y,0.2,10,'#6a6470',0.9,6,160);snd('whoosh',ev);broomMountFx(ev);   // อนิเมชันเรียกไม้กวาด (js/69)
       break;
     case 'dismount':burst(ev.x,ev.y,'#ffe9a8',14,120,0.5,1.8,{h:H+0.6});snd('dismount',ev);broomDismountFx(ev);break;
-    case 'bbm':broomBeamFx(ev);break;   // ลำแสงบนไม้กวาด (js/69)
+    case 'bbm':broomBeamFx(ev);break;
+    case 'bls':broomStrikeFx(ev);break;   // Lightning Strike บนไม้กวาด (js/69)
+    case 'bflak':broomFlakFx(ev);break;   // ลำแสงบนไม้กวาด (js/69)
     case 'land':smoke(ev.x,ev.y,0.15,14,'#5a5048',1,7,200);ring(ev.x,ev.y,'#9a8a7a',45,0.3);snd('thud',ev);break;
     case 'buff':
       if(ev.id===NET.myId)snd('buff');

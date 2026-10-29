@@ -154,7 +154,7 @@ function drawHUD(v,me,P){
   drawModeHUD(v,me,P,big);
   if(me&&!me.al&&v.mode==='duel'&&v.ph==='play')big('คุณแพ้รอบนี้',SH*0.45,30,'#ff9a9a');
   if(me&&me.dn)big('คุณล้ม! รอเพื่อนมายืนข้างๆ เพื่อชุบ',SH*0.62,22,'#ff9a9a');
-  if(me&&me.fl&&!showBoard)big(`🧹 บินอยู่ (สูง ${me.z.toFixed(0)} ม.)  •  W เร่ง  •  เมาส์ เลี้ยว/เงยขึ้น-ก้มลง  •  คลิก ยิงลำแสง  •  B ลงจากไม้กวาด`,SH-150,15,'#ffe9a8');
+  if(me&&me.fl&&!showBoard)big(`🧹 บินอยู่ (สูง ${me.z.toFixed(0)} ม.)  •  W เร่ง  •  เมาส์ เลี้ยว/เงยขึ้น-ก้มลง  •  คลิก ยิงลำแสง${broomHud(me)}  •  B ลง`,SH-150,15,'#ffe9a8');
   if(me&&me.rt)big('🕸️ ติดใยแมงมุม! ขยับไม่ได้ชั่วคราว',SH*0.62,20,'#e8e8f0');
 
   if(me)drawBottom(me,v);
