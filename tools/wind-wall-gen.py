@@ -68,7 +68,8 @@ rc=Image.new('RGBA',(CW,CH),(255,255,255,0));rc.putalpha(cur);rc.save(ROOT/'asse
 save(ROOT/'assets/fx/tex/wind_wall_curtain.tex.json',{'v':1,'desc':'ม่านเส้นลมกำแพง: เส้นตั้งจากพื้น ยอดสูงต่ำ จางหายก่อนขอบบน (เลื่อนแนวนอนได้ ห้ามเลื่อนแนวตั้ง)','gen':'image','seed':13,'px':1024,'cols':1,'rows':1,'kind':'loop','fps':24,'ramp':'white','add':True,'p':{}})
 
 # ---- รูปทรง: ผนังโค้ง (ปลายสองข้างโค้งเข้าหาผู้ร่าย +z) ยอดมนตรงปลาย ----
-R=10.9;AMAX=math.radians(35);HMAX=4.5   # กว้างรวม ~12.5 ม. = 250 หน่วยในเกม
+R=10.9;AMAX=math.radians(35);HMAX=5.4   # 2026-10-29 user: a bit taller (was 4.5)
+HK=HMAX/4.5   # กว้างรวม ~12.5 ม. = 250 หน่วยในเกม
 def arc_wall(name,r,a0,a1,hmax,n=240,lift=0,seed=1):
     V=[];F=[];rg=random.Random(seed);jag=[1.0 for _ in range(n+1)]   # ยอดสูงต่ำมาจากภาพม่านแล้ว (ตัดรูปทรง = เห็นรอยตัด)
     for i in range(n+1):
@@ -90,7 +91,7 @@ def arc_band(name,r,y0,y1,n=96,a0=None,a1=None):
 NSEG=14;OVL=.35   # ช่วงซ้อนกันนิดหน่อย กันรอยต่อ
 for s in range(NSEG):
     w=2*AMAX/NSEG;a0=-AMAX+s*w-w*OVL;a1=-AMAX+(s+1)*w+w*OVL
-    save(ROOT/f'assets/fx/mesh/wind_wall_tips{s}.mesh.json',{'v':1,'desc':f'แถบปลายเส้นลมยอดกำแพง ช่วง {s}','pal':'wind','mat':'solid','parts':[arc_band('tips',R+.04+.01*(s%3),1.35,3.7,10,max(-AMAX,a0),min(AMAX,a1))]})
+    save(ROOT/f'assets/fx/mesh/wind_wall_tips{s}.mesh.json',{'v':1,'desc':f'แถบปลายเส้นลมยอดกำแพง ช่วง {s}','pal':'wind','mat':'solid','parts':[arc_band('tips',R+.04+.01*(s%3),1.35*HK,3.7*HK,10,max(-AMAX,a0),min(AMAX,a1))]})
 E=math.radians(8)
 save(ROOT/'assets/fx/mesh/wind_wall_ends.mesh.json',{'v':1,'desc':'ปลายกำแพงสองข้าง (สว่าง)','pal':'wind','mat':'solid','parts':[arc_wall('endL',R-.06,-AMAX,-AMAX+E,HMAX,12),arc_wall('endR',R-.06,AMAX-E,AMAX,HMAX,12)]})
 # เส้นพื้นบอกระยะ: โค้งตามกำแพง ปลายม้วนเข้า
@@ -110,7 +111,8 @@ save(ROOT/'assets/fx/mesh/wind_wall_line.mesh.json',{'v':1,'desc':'เส้น�
   {'id':'thin','k':'ribbon','path':[[round(c,4) for c in p] for p in ground_path(R-.22,.3)],'w':.025,'seg':160}]})
 
 # ---- เอฟเฟกต์ ----
-DUR=12.0   # ผู้ใช้ 2026-10-28: อยู่ 12 วิ (เดิม 6) • สูงกว่าตัวผู้เล่น (HMAX 3.4 → 5.0 → 8.0 → 4.2: ผู้ใช้ 'ส่วนทึบสูง 2 เท่าตัวผู้เล่น' + ทึบขึ้น)
+DUR=18.0   # 2026-10-29 user: lasts longer (was 12)
+#  # ผู้ใช้ 2026-10-28: อยู่ 12 วิ (เดิม 6) • สูงกว่าตัวผู้เล่น (HMAX 3.4 → 5.0 → 8.0 → 4.2: ผู้ใช้ 'ส่วนทึบสูง 2 เท่าตัวผู้เล่น' + ทึบขึ้น)
 grow={'0':[1,.02,1],'0.045':[1,1.08,1],'0.07':[1,1,1],'0.93':[1,1,1],'1':[1,.02,1]}
 fade=lambda pk:{'0':0,'0.03':pk,'0.94':pk,'1':0}
 def flick(seed,lo=.45,hi=.92,step=.22):
@@ -134,7 +136,7 @@ L.append({'id':'ends','t':'mesh','at':0,'life':DUR,'att':'ground','pos':[0,0,R],
 L.append({'id':'line','t':'mesh','at':0,'life':DUR,'att':'ground','pos':[0,0,R],'shape':'model','model':'wind_wall_line','mat':'glow','col':'#c9fff0','col2':'#4fd07a','op':{'0':0,'0.02':1,'0.94':1,'1':0},'scale':{'0':[.2,1,.2],'0.05':[1,1,1]},'fade':0})
 # เศษลมร่วงลงตามกำแพง
 for s,ph in [(-1,0),(1,.5)]:
-    L.append({'id':f'wisp{"LR"[(s+1)//2]}','t':'emit','at':.15,'life':DUR-.4,'att':'ground','pos':[s*R*math.sin(AMAX*.92),2.6,round(R-R*math.cos(AMAX*.92),3)],'rate':10,'from':'sphere','fr':.4,'dir':'down','speed':[1.2,2.4],'plife':[.4,.9],'look':'streak','size':[.5,1.1],'col':'#e6fff4','c2':'#4fd07a','gravity':0,'drag':.5,'curl':False})
+    L.append({'id':f'wisp{"LR"[(s+1)//2]}','t':'emit','at':.15,'life':DUR-.4,'att':'ground','pos':[s*R*math.sin(AMAX*.92),round(2.6*HK,2),round(R-R*math.cos(AMAX*.92),3)],'rate':10,'from':'sphere','fr':.4,'dir':'down','speed':[1.2,2.4],'plife':[.4,.9],'look':'streak','size':[.5,1.1],'col':'#e6fff4','c2':'#4fd07a','gravity':0,'drag':.5,'curl':False})
 for j,(col,c2,rate) in enumerate([('#e6fff4','#4fd07a',70),('#4fd07a','#14663c',55)]):
     L.append({'id':f'fall{j}','t':'emit','at':.1,'life':DUR-.35,'att':'ground','pos':[0,0,R],'from':'mesh','of':'body','rate':rate,'dir':'down','speed':[2.6,4.2],'plife':[.35,.75],'look':'streak','size':[1.6,3.2],'col':col,'c2':c2,'gravity':0,'drag':0,'curl':False})
 L.append({'id':'wispM','t':'emit','at':.15,'life':DUR-.4,'att':'ground','from':'mesh','of':'body','rate':14,'dir':'down','speed':[1,2],'plife':[.5,1],'look':'streak','size':[.4,.9],'col':'#c9fff0','c2':'#3aa58a','gravity':0,'drag':.5,'curl':False})
