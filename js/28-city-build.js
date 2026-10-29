@@ -131,7 +131,7 @@ function cityInteriorView(CV){
   const ub=new THREE.BoxGeometry(1,1,1),imk=(list,mat)=>{const im=new THREE.InstancedMesh(ub,mat,Math.max(1,list.length));list.forEach((m,i)=>im.setMatrixAt(i,m));im.count=list.length;im.userData.M=list;im.castShadow=im.receiveShadow=true;im.computeBoundingSphere();addW(im);return im;};
   CV.secIm=[imk(SI[0],new THREE.MeshStandardMaterial({color:'#9a8f80',roughness:0.95,emissive:'#3a3128'})),imk(SI[1],roofM)];
   CV.rpIm=imk(RPI,new THREE.MeshStandardMaterial({color:'#8a6646',roughness:0.9,emissive:'#33241a'}));
-  CV.iwIm=imk(IWI,new THREE.MeshStandardMaterial({color:'#d6cdb9',roughness:0.95,emissive:'#5a4e3e'}));
+  CV.iwIm=imk(IWI,new THREE.MeshStandardMaterial({color:'#d6cdb9',roughness:0.95,emissive:'#5a4e3e'}));IWI.forEach((m,i)=>CV.iwIm.setColorAt(i,_cC.set('#ffffff')));
   CV.frIm=imk(FRI.map(q=>q[0]),new THREE.MeshStandardMaterial({color:'#ffffff',roughness:0.9}));FRI.forEach((q,i)=>CV.frIm.setColorAt(i,new THREE.Color(q[1])));
   const lm=new THREE.InstancedMesh(new THREE.PlaneGeometry(1,1),new THREE.MeshStandardMaterial({color:'#d6cdb9',roughness:0.95,emissive:'#5a4e3e'}),Math.max(1,lin.length));
   lin.forEach((m,i)=>lm.setMatrixAt(i,m));lm.count=lin.length;lm.receiveShadow=true;lm.computeBoundingSphere();addW(lm);CV.lin=lm;CV.linM=lin;
@@ -144,7 +144,7 @@ function cityHideIn(CV,r){if(r.lin&&CV.lin){for(const ix of r.lin.values())CV.li
   if(r.rp&&CV.rpIm){for(const ix of r.rp)if(ix!==undefined)CV.rpIm.setMatrixAt(ix,_cZ);CV.rpIm.instanceMatrix.needsUpdate=true;}}
 // เนินเศษที่โคนผนังตรงแผ่นที่แตก (ผัง d.mo จาก cityMounds — ที่ชนเดินขึ้นได้อยู่ใน cityMoundH) • สร้างใหม่ทุกครั้งที่สถานะตึกเปลี่ยน
 function cityMoundView(r,d){
-  if(r.mg){world.remove(r.mg);disposeTree(r.mg);r.mg=null;}if(!d.mo||!d.mo.length)return;
+  if(r.mg){world.remove(r.mg);disposeTree(r.mg);r.mg=null;}if(!d.mo||!d.mo.length){if(!d.ns)return;}
   const g=new THREE.Group(),R=mulberry(d.B.i*31+d.nb),m1=sMat({color:r.sty.col,roughness:0.95}),m2=sMat({color:'#5a554e',roughness:1}),m3=sMat({color:'#7a746a',roughness:1}),rb=sMat({color:'#3a3634',roughness:0.6,metalness:0.4});
   for(const q of d.mo){const along=q.rx>q.ry,L=along?q.rx:q.ry,Wd=along?q.ry:q.rx,cx=tx(q.x),cz=tz(q.y);   // เนิน = ก้อนหยาบหลายก้อนเรียงตามแนวผนัง + อิฐ/คอนกรีต + เหล็กเส้น
     for(let k=0;k<4;k++){const lump=new THREE.Mesh(sGeo(THREE.DodecahedronGeometry,1,0),[m2,m1,m3][k%3]),u=(k/3-0.5)*L*S3*1.1+(R()-0.5)*0.6,sc=0.45+R()*0.35;
@@ -152,6 +152,18 @@ function cityMoundView(r,d){
     for(let k=0;k<12;k++){const c=new THREE.Mesh(sGeo(THREE.BoxGeometry,1,1,1),[m1,m2,m3][k%3]),s=0.2+R()*0.6,u=(R()-0.5)*L*S3*1.6,v=(R()-0.5)*Wd*S3*1.6;c.scale.set(s,s*(0.4+R()*0.4),s*(0.6+R()));
       c.position.set(cx+(along?u:v),q.h*(0.3+R()*0.7),cz+(along?v:u));c.rotation.set(R()*2,R()*3,R()*2);g.add(c);}
     for(let k=0;k<2;k++){const b=new THREE.Mesh(sGeo(THREE.BoxGeometry,1,1,1),rb);b.scale.set(0.05,0.05,1.2+R()*1.5);b.position.set(cx+(R()-0.5)*L*S3,q.h*0.8,cz+(R()-0.5)*Wd*S3);b.rotation.set(R()*1.2,R()*3,R()*0.6);g.add(b);}}
+  // ตึกโดนแหว่ง (ผู้ใช้ 2026-10-29 ภาพอ้างอิง): ขอบพื้นที่พัง = ตอพื้นแหว่งฟันเลื่อยยื่นจากแกนกลาง + เสาคอนกรีตตั้งระหว่างช่อง + เศษบนพื้น — ภาพล้วน
+  const I=d.I;
+  if(I&&I.ring&&d.ns){const cm=sMat({color:'#8c867c',roughness:1}),cd=sMat({color:'#6e685f',roughness:1}),t=CIN.slab,pil=new Set();
+    const bx=(a0,a1,p0,p1,y,h,hz,mat,ry)=>{const m=new THREE.Mesh(sGeo(THREE.BoxGeometry,1,1,1),mat);const X0=hz?a0:p0,X1=hz?a1:p1,Y0=hz?p0:a0,Y1=hz?p1:a1;
+      m.scale.set(Math.abs(X1-X0)*S3,h,Math.abs(Y1-Y0)*S3);m.position.set(tx((X0+X1)/2),y,tz((Y0+Y1)/2));if(ry)m.rotation.set(ry[0],ry[1],ry[2]);g.add(m);return m;};
+    I.sec.forEach((Q,j)=>{if(!d.sb[j])return;const S=I.slabs[Q.k],hz=Q.fi<2,q=Q.r,A=hz?q[0]:q[1],Bb=hz?q[2]:q[3];
+      const core=Q.fi===0?q[1]:Q.fi===1?q[3]:Q.fi===2?q[0]:q[2],out=Q.fi===0||Q.fi===2?1:-1,outer=Q.fi===0?q[3]:Q.fi===1?q[1]:Q.fi===2?q[2]:q[0];
+      for(let u=A;u<Bb-3;){const L=Math.min(Bb-u,10+R()*22),len=6+R()*26,y=S.z-t/2-R()*0.15;   // ตอพื้นฟันเลื่อย
+        bx(u,u+L,core,core+out*len,y,t*(0.7+R()*0.3),hz,R()<0.7?cm:cd,[(R()-0.5)*0.12,0,(R()-0.5)*0.12]);u+=L+R()*5;}
+      for(let k=0;k<3;k++){const u=A+R()*(Bb-A),v=core+out*(4+R()*14),c=bx(u-4,u+4,v-4,v+4,S.z+0.12,0.25+R()*0.3,hz,[cm,cd][k%2]);c.rotation.y=R()*3;}   // เศษบนตอพื้น
+      for(const e of [A,Bb]){const key=Q.k+'|'+Q.fi+'|'+Math.round(e);if(pil.has(key))continue;pil.add(key);   // เสา: ใต้ปลายช่อง จากพื้นชั้นล่างถึงใต้แผ่นนี้ (ใกล้ขอบนอก)
+        const v=outer-out*14,z0=S.z-I.fh,brk=R()<0.35,h=(I.fh-t)*(brk?0.35+R()*0.4:1);bx(e-7,e+7,v-7,v+7,z0+h/2,h,hz,R()<0.5?cm:cd,brk?[(R()-0.5)*0.25,R(),(R()-0.5)*0.25]:null);}});}   // บางต้นหักครึ่ง เอียงนิด
   shadowAll(g);world.add(g);r.mg=g;
 }
 // ---------- ชุดโมเดลลอนดอน (assets/city/*.glb จาก assets/src/city_kit_build.py) ----------
@@ -249,7 +261,8 @@ function cityViewSync(dt){
       if(g&&live){const v=r.X[j].M.elements;cityDebris(v[12]/S3+MW/2,v[14]/S3+MH/2,v[13]+1.5,r.sty.col,d.B.x+d.B.w/2,d.B.y+d.B.d/2,3,true);}});}
     if(r.lin){for(const [p,ix] of r.lin)CV.lin.setMatrixAt(ix,d.br[p]?_cZ:CV.linM[ix]);CV.lin.instanceMatrix.needsUpdate=true;}
     if(r.fr&&d.I){const g=d.br[[...d.I.door][0]];for(const ix of r.fr)CV.frIm.setMatrixAt(ix,g?_cZ:CV.frIm.userData.M[ix]);CV.frIm.instanceMatrix.needsUpdate=true;}   // วงกบประตูหายเมื่อแผ่นประตูแตก
-    if(r.iw)r.iw.forEach((ids,j)=>{for(const ix of ids)CV.iwIm.setMatrixAt(ix,d.ib[j]?_cZ:CV.iwIm.userData.M[ix]);CV.iwIm.instanceMatrix.needsUpdate=true;});   // ผนังชั้นใน
+    if(r.iw)r.iw.forEach((ids,j)=>{const W=d.I.iw[j],sj=d.I.secAt.get((W.f*4+W.fi)*1000+W.i),dirty=sj!==undefined&&d.sb[sj];   // ผนังชั้นใน • ขอบพื้นหน้าผนังพัง = คอนกรีตมอ ๆ
+      for(const ix of ids){CV.iwIm.setMatrixAt(ix,d.ib[j]?_cZ:CV.iwIm.userData.M[ix]);CV.iwIm.setColorAt(ix,_cC.set(dirty?'#8a8378':'#ffffff'));}CV.iwIm.instanceMatrix.needsUpdate=true;if(CV.iwIm.instanceColor)CV.iwIm.instanceColor.needsUpdate=true;});
     if(r.rp)r.rp.forEach((ix,j)=>{if(ix===undefined)return;CV.rpIm.setMatrixAt(ix,d.rb[j]?_cZ:CV.rpIm.userData.M[ix]);CV.rpIm.instanceMatrix.needsUpdate=true;});   // ทางลาด
     if(r.sec)r.sec.forEach((L2,j)=>{if(!L2)return;for(const [w,ix] of L2){const im=CV.secIm[w];im.setMatrixAt(ix,d.sb[j]?_cZ:im.userData.M[ix]);im.instanceMatrix.needsUpdate=true;}});   // ขอบพื้น/หลังคาที่พัง (ตึก 2–4 ชั้น)
     cityMoundView(r,d);});
