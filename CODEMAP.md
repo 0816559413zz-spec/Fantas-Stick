@@ -228,21 +228,21 @@ statusFX:3 fx:27
 §208 overlay: เลือกบัฟ / สรุปผล
 choosePick:209 syncOverlays:214 showOver:235
 
-## js/27-world.js (265) — 
-S3:4 tx:4 tz:4 GY:6 TW:6 hdr:7 gl:9 scene:15 cam:17 composer:18
-§19 ท่อภาพ (post-processing): ฉาก → ชั้นเอฟเฟกต์นุ่ม (FXPass) → แสงฟุ้ง →…
-rpass:22 fxScene:24 SOFTU:26 SOFT_GLSL:27 FXMATS:29 fxMat:30 softify:32 HAZE_U:37 AOU:41 GFX:46 AO_ON:47 AO_HEAD:48 AO_CALC:52 AO_COPY:66 AO_RT:82 fxPass:101 bloom:102 GRADEU:107 gradePass:123 aaPass:140
-§142 คุณภาพกราฟิก: auto = ปรับความละเอียดเองตาม FPS / high = สวยสุด / low …
-QUAL:143 QUAL_NAME:144 qualPR:145 applyQuality:151 qualTick:169 texCanvas:180 glowTex:181 stoneTex:182 runeTex:188 glowMats:196 glowMat:197 STONEM:199 stoneMat:200 shadowAll:201 SKY:204 hemi:224 moonL:226 LDIR:230 setSky:231
-§239 เงาตามผู้เล่น
-SHD:243 _shF:244 _shR:244 _shU:244 _shC:244 _shY:244 shadowFollow:245 LPOOL:264
+## js/27-world.js (268) — 
+S3:4 tx:4 tz:4 CITY_KERB:7 cityKerb:8 GY:9 TW:9 hdr:10 gl:12 scene:18 cam:20 composer:21
+§22 ท่อภาพ (post-processing): ฉาก → ชั้นเอฟเฟกต์นุ่ม (FXPass) → แสงฟุ้ง →…
+rpass:25 fxScene:27 SOFTU:29 SOFT_GLSL:30 FXMATS:32 fxMat:33 softify:35 HAZE_U:40 AOU:44 GFX:49 AO_ON:50 AO_HEAD:51 AO_CALC:55 AO_COPY:69 AO_RT:85 fxPass:104 bloom:105 GRADEU:110 gradePass:126 aaPass:143
+§145 คุณภาพกราฟิก: auto = ปรับความละเอียดเองตาม FPS / high = สวยสุด / low …
+QUAL:146 QUAL_NAME:147 qualPR:148 applyQuality:154 qualTick:172 texCanvas:183 glowTex:184 stoneTex:185 runeTex:191 glowMats:199 glowMat:200 STONEM:202 stoneMat:203 shadowAll:204 SKY:207 hemi:227 moonL:229 LDIR:233 setSky:234
+§242 เงาตามผู้เล่น
+SHD:246 _shF:247 _shR:247 _shU:247 _shC:247 _shY:247 shadowFollow:248 LPOOL:267
 
-## js/28-city-build.js (322) — เมืองมักเกิ้ล (ลอนดอน) — ภาพ • ข้อมูลอยู่ js/02-city.js • โมเดลจาก as…
+## js/28-city-build.js (324) — เมืองมักเกิ้ล (ลอนดอน) — ภาพ • ข้อมูลอยู่ js/02-city.js • โมเดลจาก as…
 CITY_WIN:4 cityWinTex:5 cityEmTex:10 cityBoxGeo:16 buildCity:21
 §97 ข้างในตึกกลวง (ภาพ — ผัง I จาก cityInterior js/12-city-dmg)
-cityInteriorView:100 cityHideIn:140 cityMoundView:146
-§169 ชุดโมเดลลอนดอน (assets/city/*.glb จาก assets/src/city_kit_build.py)
-CITY_STY:174 CITY_VEH:181 cityFacade:183 CITYK:196 _cZ:197 _cT:197 _cR:197 _cC:197 cityKitLoad:198 cityCull:220 citySet:226 cityTint:228 cityPools:230 cityShowBld:236 cityRubble:243 CITY_FALL:251 cityViewSync:253 cityDebris:294 cityFX:303
+cityInteriorView:101 cityHideIn:142 cityMoundView:148
+§171 ชุดโมเดลลอนดอน (assets/city/*.glb จาก assets/src/city_kit_build.py)
+CITY_STY:176 CITY_VEH:183 cityFacade:185 CITYK:198 _cZ:199 _cT:199 _cR:199 _cC:199 cityKitLoad:200 cityCull:222 citySet:228 cityTint:230 cityPools:232 cityShowBld:238 cityRubble:245 CITY_FALL:253 cityViewSync:255 cityDebris:296 cityFX:305
 
 ## js/28-maps-build.js (762) — สร้างแผนที่
 CANDLESYS:2 builtMap:3 builtKey:3 world:3 TORCHES:3 CANDLES:3 FIREFLIES:3 CRYSTAL:3 RUNE:3 SNITCH:3 BANNERS:3 SNOW:3 WCACHE:5 WCACHE_MAX:5 wkey:7 buildWorld:8 addW:41 _prewarmed:43 prewarmShaders:44 batchStatic:63 makeCandles:88 updateCandles:97 buildCastle:106 buildHogsmeade:172 buildGreatHall:260 buildForest:330
@@ -632,4 +632,4 @@ BRM:9 BSK:11 BROOM_SK:17 broomVert:38 broomMove:50 broomStrike:68 broomStrikeTic
 §125 ฝั่งจอ
 broomHead:127 BBEAM:134 _bbGeo:135 broomView:136 broomMountFx:165 broomDismountFx:173 broomBeamFx:175 broomSkFx:191 broomStrikeFx:204 broomFlakFx:209 broomHud:214 broomHudT:215 broomTick:224
 
-(77 files, 18560 lines)
+(77 files, 18565 lines)

@@ -3,7 +3,10 @@
 // =====================================================================
 const S3=1/20,tx=x=>(x-MW/2)*S3,tz=y=>(y-MH/2)*S3;
 // ความสูงพื้นจริงในโลก 3D (แผนที่จากไฟล์มีเนิน) — ความสูงจากเกม (z/h) + GY(x,y) = ตำแหน่ง y ในฉาก • TW = แบบพิกัด 3D
-const GY=(x,y)=>TERR?terrT(x,y):0,TW=(X,Z)=>TERR?terrT(X*20+MW/2,Z*20+MH/2):0;
+// ความสูงพื้นที่ใช้วาดภาพ (หน่วย 3D): แมพไฟล์ = ผิวดิน • แมพเมือง = บล็อก (ทางเท้า/ลาน) ยกสูงจากถนน 0.14 ม. — ไม่งั้นกรอบสกิล/เอฟเฟกต์บนพื้นจมใต้ทางเท้า (ผู้ใช้ 2026-10-29)
+const CITY_KERB=0.14;
+function cityKerb(x,y){const Z=MAPID==='city'&&MAPS.city&&MAPS.city.zones;if(!Z)return 0;for(const z of Z)if(x>=z.x&&x<=z.x+z.w&&y>=z.y&&y<=z.y+z.d)return CITY_KERB;return 0;}
+const GY=(x,y)=>TERR?terrT(x,y):cityKerb(x,y),TW=(X,Z)=>TERR?terrT(X*20+MW/2,Z*20+MH/2):cityKerb(X*20+MW/2,Z*20+MH/2);
 const hdr=(c,k)=>new THREE.Color(c).multiplyScalar(k);
 // antialias ปิดไว้: ภาพผ่าน EffectComposer (render target) อยู่แล้ว MSAA ของ canvas จึงไม่ช่วยอะไร แค่กินแรง
 const gl=new THREE.WebGLRenderer({canvas:document.getElementById('gl'),antialias:false,powerPreference:'high-performance'});
