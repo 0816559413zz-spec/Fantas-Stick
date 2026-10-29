@@ -4,11 +4,15 @@
 // =====================================================================
 // ระดับความเก่ง: react = วิที่ใช้คิดใหม่ (เลือกเป้า/ขยับเป้าเล็ง) • err = เล็งพลาดสูงสุด (px) • lead = เล็งดักทางกี่ส่วน
 //   gap = เว้นวิระหว่างสกิล • dodge = โอกาสหลบกระสุนที่พุ่งใส่ • ult = ใช้อัลติตอนเป้าเลือดต่ำกว่านี้ (ส่วน)
+//   blk = โอกาสยกโล่ (Block) รับกระสุนแทนการหลบ • par = ยกโล่ทันจังหวะ Perfect Parry (ใกล้ 1 = แม่น)
 const BOT_LV=[
-  {n:'ง่าย',react:0.5,err:110,lead:0.3,gap:2.6,dodge:0.15,ult:0.35},
-  {n:'กลาง',react:0.28,err:50,lead:0.7,gap:1.1,dodge:0.45,ult:0.6},
-  {n:'ยาก',react:0.12,err:14,lead:1,gap:0.3,dodge:0.85,ult:1},
+  {n:'ง่าย',react:0.5,err:110,lead:0.3,gap:2.6,dodge:0.15,ult:0.35,blk:0.05,par:0.1},
+  {n:'กลาง',react:0.28,err:50,lead:0.7,gap:1.1,dodge:0.45,ult:0.6,blk:0.3,par:0.4},
+  {n:'ยาก',react:0.12,err:14,lead:1,gap:0.3,dodge:0.85,ult:1,blk:0.5,par:0.85},
 ];
+// นิสัยสุ่มต่อตัว (ตอนเสก): บอทหลายตัวจะได้ไม่ขยับ/กดสกิลพร้อมกันเป๊ะ
+//   ph/sp/sd = จังหวะ+ความเร็ว+ทิศส่ายตัว • rng = ชอบยืนใกล้/ไกล (คูณระยะ) • wait = รอเพื่อนบอทที่เพิ่งกดสกิลใส่เป้าเดียวกันกี่วิ
+function botPersona(){return {ph:rnd(0,Math.PI*2),sp:rnd(1.1,2.4),sd:Math.random()<0.5?1:-1,rng:rnd(0.65,1.35),wait:rnd(0.35,0.8)};}
 const BOT_TEAM=50,BOT_MAX=6;   // บอททุกตัวทีมเดียวกัน (ศัตรูของคน) • สูงสุดทั้งห้อง
 function bots(){return plist().filter(p=>p.ai);}
 function humans(){return plist().filter(p=>!p.ai);}
@@ -25,8 +29,9 @@ function spawnBot(path,lv,x,y,zk,owner){
   const P=PATHS[path]&&!PATHS[path].off?path:0,L=clamp(lv|0,0,2),id='bot'+G.botN+'_'+Math.floor(Math.random()*1e6).toString(36);
   const p=addPlayer(id,'🤖 '+PATHS[P].n.replace('สาย','')+' ('+BOT_LV[L].n+')',null,null,String(P));
   Object.assign(p,freshStats());p.kt=p.kit;p.bot=true;p.inp=emptyInput();
-  p.ai={lv:L,zone:zk,home:{x,y},owner,team:BOT_TEAM,thinkT:0,skT:0,errX:0,errY:0,tg:null,dodT:0};
+  p.ai={lv:L,zone:zk,home:{x,y},owner,team:BOT_TEAM,thinkT:rnd(0,BOT_LV[L].react),skT:G.time+rnd(0,BOT_LV[L].gap+0.8),errX:0,errY:0,tg:null,dodT:0,ps:botPersona(),lastSk:-9,blk:null};
   p.team=BOT_TEAM;resetBody(p,x+rnd(-60,60),y+rnd(-60,60));collideWorld(p,PR);p.inv=1;
+  for(const k of SLOTK){p.cd[k]=rnd(0,2.5);p.cdMax[k]=Math.max(1,p.cd[k]);}   // คูลดาวน์เริ่มไม่พร้อมกัน
   emit({k:'revive',x:p.x,y:p.y});
   return p;
 }
@@ -50,28 +55,47 @@ function botPickTarget(p){
 }
 function aiBot(p,dt){
   const A=p.ai,L=BOT_LV[A.lv],inp=p.inp,t=G.time;
-  if(!p.alive||p.downed){inp.fire=0;inp.mx=inp.my=0;inp.sh=0;return;}
+  if(!p.alive||p.downed){inp.fire=0;inp.mx=inp.my=0;inp.sh=0;A.blk=null;return;}
   // คิดใหม่เป็นจังหวะ (ระดับง่าย = ช้า): เลือกเป้า + สุ่มเล็งพลาดใหม่
   A.thinkT-=dt;
   if(A.thinkT<=0){A.thinkT=L.react*rnd(0.7,1.3);A.tg=botPickTarget(p);const a=rnd(0,Math.PI*2),r=L.err*Math.sqrt(Math.random());A.errX=Math.cos(a)*r;A.errY=Math.sin(a)*r;}
   const tg=A.tg&&(A.tg.isE?!A.tg.dead:(A.tg.alive&&!A.tg.downed&&G.players[A.tg.id]))?A.tg:null;
   // ไม่มีเป้า: เดินกลับจุดเกิด แล้วยืนรอ
-  if(!tg){inp.fire=0;inp.sh=0;const dx=A.home.x-p.x,dy=A.home.y-p.y,d=Math.hypot(dx,dy);inp.mx=d>80?dx/d:0;inp.my=d>80?dy/d:0;inp.ax=p.x+Math.cos(p.ang)*300;inp.ay=p.y+Math.sin(p.ang)*300;return;}
+  if(!tg){inp.fire=0;inp.sh=0;A.blk=null;const dx=A.home.x-p.x,dy=A.home.y-p.y,d=Math.hypot(dx,dy);inp.mx=d>80?dx/d:0;inp.my=d>80?dy/d:0;inp.ax=p.x+Math.cos(p.ang)*300;inp.ay=p.y+Math.sin(p.ang)*300;return;}
   // ใช้สมองต่อสู้เดิม (เดินรักษาระยะ / ยิง / เงื่อนไขสกิลแต่ละตัว) แต่กดสกิลได้เฉพาะตอนพ้นช่วงเว้น
   const c0=Object.assign({},inp.c);
   botBrain(p,dt,tg);
   const used=SLOTK.concat(['x']).some(k=>(inp.c[k]|0)!==(c0[k]|0));
-  if(t<A.skT)for(const k of SLOTK.concat(['x']))inp.c[k]=c0[k]|0;
-  else if(used)A.skT=t+L.gap*rnd(0.7,1.3);
+  // ผลัดกัน: เพื่อนบอทที่ตีเป้าเดียวกันเพิ่งกดสกิล → รอแป๊บ (ไม่ปล่อยสกิลซ้อนวินาทีเดียวกัน)
+  const pals=bots().filter(q=>q!==p&&q.ai.tg===tg&&q.alive&&!q.downed);
+  const busy=used&&pals.some(q=>t-q.ai.lastSk<A.ps.wait);
+  if(t<A.skT||busy)for(const k of SLOTK.concat(['x']))inp.c[k]=c0[k]|0;
+  else if(used){A.skT=t+L.gap*rnd(0.6,1.4);A.lastSk=t;}
   // อัลติ: เก็บไว้จนเป้าเลือดน้อย (ระดับยาก = ใช้ทันที)
   if((inp.c.x|0)!==(c0.x|0)&&!tg.isE&&tg.hp>tg.maxHp*L.ult)inp.c.x=c0.x|0;
   // เล็ง: ดักทางตามระดับ + พลาดสุ่ม (botBrain เล็งดักเต็มที่)
   inp.ax=tg.x+(inp.ax-tg.x)*L.lead+A.errX;inp.ay=tg.y+(inp.ay-tg.y)*L.lead+A.errY;
-  // หลบ: กระสุนศัตรูพุ่งเข้าหาในระยะใกล้ → กระโดด หรือ Dash ออกข้าง (สุ่มตามระดับ ครั้งละ 1 วิ)
+  // รุมเป้าเดียวกัน: กระจายตัวไปคนละมุมรอบเป้า (ไม่ยืนกองข้างเดียวกัน)
+  if(pals.length&&!tg.isE){const L2=pals.concat([p]).sort((a,b)=>a.id<b.id?-1:1),n=L2.length,i=L2.indexOf(p);
+    let cx=0,cy=0;for(const q of L2){cx+=q.x;cy+=q.y;}cx/=n;cy/=n;
+    const a0=Math.atan2(cy-tg.y,cx-tg.x),a=a0+(i-(n-1)/2)*Math.min(1.5,3.2/n),R=345*A.ps.rng;
+    const fx=tg.x+Math.cos(a)*R-p.x,fy=tg.y+Math.sin(a)*R-p.y,fd=Math.hypot(fx,fy);
+    if(fd>60){inp.mx=(inp.mx||0)*0.5+fx/fd*0.8;inp.my=(inp.my||0)*0.5+fy/fd*0.8;}}
+  // Block: ยกโล่ค้างไว้ หันหน้าหากระสุน (ระดับยาก = ยกตอนใกล้โดน → Perfect Parry)
+  const canSh=p.pathIdx!==2&&!p.aug&&!p.wwAim&&p.shieldBroken<=0;
+  if(p.pathIdx!==2)inp.sh=0;
+  if(A.blk){const B=A.blk;B.t-=dt;
+    if(B.t<=0||!canSh)A.blk=null;
+    else if(B.t<=B.hold){inp.sh=1;inp.fire=0;const pr=B.pr&&!B.pr.dead?B.pr:null;if(pr){inp.ax=pr.x;inp.ay=pr.y;}else{inp.ax=tg.x;inp.ay=tg.y;}}}
+  // หลบ: กระสุนศัตรูพุ่งเข้าหาในระยะใกล้ → ยกโล่ / กระโดด / Dash ออกข้าง (สุ่มตามระดับ ครั้งละ 1 วิ)
   A.dodT-=dt;
-  if(A.dodT<=0)for(const pr of G.proj){if(pr.team===p.team)continue;const rx=p.x-pr.x,ry=p.y-pr.y,d=Math.hypot(rx,ry);if(d>260||d<1)continue;const sp=Math.hypot(pr.vx,pr.vy)||1;
-    if((rx*pr.vx+ry*pr.vy)/(d*sp)<0.9)continue;A.dodT=1;
-    if(Math.random()<L.dodge){if(Math.random()<0.5||p.cd.dodge>0)inp.c.jp=(inp.c.jp|0)+1;else{const s=Math.random()<0.5?1:-1;inp.mx=-pr.vy/sp*s;inp.my=pr.vx/sp*s;inp.c.sp=(inp.c.sp|0)+1;}}
+  if(A.dodT<=0&&!A.blk)for(const pr of G.proj){if(pr.team===p.team)continue;const rx=p.x-pr.x,ry=p.y-pr.y,d=Math.hypot(rx,ry);if(d>260||d<1)continue;const sp=Math.hypot(pr.vx,pr.vy)||1;
+    if((rx*pr.vx+ry*pr.vy)/(d*sp)<0.9)continue;A.dodT=rnd(0.7,1.3);
+    if(canSh&&p.shieldE>30&&Math.random()<L.blk){
+      // เวลาก่อนโดน − ช่วง Parry (0.28 วิ): ยกแม่น = ยกก่อนโดนนิดเดียว • ไม่แม่น = ยกเร็ว/ช้าไปบ้าง
+      const tti=Math.max(0,(d-PR)/sp),lead=Math.random()<L.par?rnd(0.05,0.2):rnd(0.3,0.8),hold=rnd(0.5,1.1);
+      A.blk={pr,hold,t:hold+Math.max(0,tti-lead)};
+    }else if(Math.random()<L.dodge){if(Math.random()<0.5||p.cd.dodge>0)inp.c.jp=(inp.c.jp|0)+1;else{const s=Math.random()<0.5?1:-1;inp.mx=-pr.vy/sp*s;inp.my=pr.vx/sp*s;inp.c.sp=(inp.c.sp|0)+1;}}
     break;}
   // สายจูง: ห้ามออกนอกโซน — ใกล้ขอบแล้วยังจะเดินออก = หันกลับเข้าหาจุดเกิด
   const nx=p.x+(inp.mx||0)*90,ny=p.y+(inp.my||0)*90;

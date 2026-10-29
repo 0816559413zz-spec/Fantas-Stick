@@ -14,7 +14,8 @@ function botBrain(p,dt,tg0){
   const lead=d/950;inp.ax=tg.x+fvx*lead;inp.ay=tg.y+fvy*lead;
   const close=(p.kitIds.includes('thornburst')&&tg.psn>0);
   const mel=p.pathIdx===1&&p.fmode!==1;
-  const ang=Math.atan2(dy,dx),want=mel?(d>95?1:0):close?(d>140?1:0):d>430?1:d<260?-1:0,st=Math.sin(t*1.7+p.id.length);
+  const P=p.ai&&p.ai.ps,R=P?P.rng:1;   // บอทห้องฝึก: นิสัยสุ่มต่อตัว (botPersona js/15-bot)
+  const ang=Math.atan2(dy,dx),want=mel?(d>95?1:0):close?(d>140?1:0):d>430*R?1:d<260*R?-1:0,st=P?P.sd*Math.sin(t*P.sp+P.ph):Math.sin(t*1.7+p.id.length);
   inp.mx=Math.cos(ang)*want+Math.cos(ang+Math.PI/2)*st*0.8;inp.my=Math.sin(ang)*want+Math.sin(ang+Math.PI/2)*st*0.8;
   inp.fire=mel?(d<150?1:0):d<900?1:0;
   if(p.pathIdx===1&&p.cd.dodge<=0&&d>520)inp.c.sp=(inp.c.sp|0)+1;
