@@ -22,6 +22,7 @@
   <button id="bBack">มุมหลัง</button>
   <button id="bFront">มุมหน้า</button>
   <button id="bBody" class="on">ตัวละคร</button>
+  <button id="bGlitch" class="on">Glitch</button>
 </div>
 <div id="tag">ปีกสายลม · Hologram sci-fi · ลากเมาส์หมุน / scroll ซูม</div>
 <script type="module">
@@ -52,21 +53,28 @@ composer.addPass(bloom);
 composer.addPass(new OutputPass());
 
 // ---------- hologram shader ----------
-const U = { time: { value: 0 } };
+const U = { time: { value: 0 }, glitch: { value: 0 } };
 function holoMat(color, { base = 0.12, rim = 1.2, scan = 0.25, opacity = 1, solid = false } = {}) {
   return new THREE.ShaderMaterial({
-    uniforms: { time: U.time, col: { value: new THREE.Color(color) }, base: { value: base }, px: { value: renderer.getPixelRatio() }, rim: { value: rim }, scan: { value: scan }, op: { value: opacity } },
+    uniforms: { time: U.time, glitch: U.glitch, col: { value: new THREE.Color(color) }, base: { value: base }, px: { value: renderer.getPixelRatio() }, rim: { value: rim }, scan: { value: scan }, op: { value: opacity } },
     vertexShader: `
+      uniform float time, glitch;
       varying vec3 vN; varying vec3 vV; varying vec3 vW; varying vec2 vUv;
+      float hv(float n){ return fract(sin(n)*43758.5453); }
       void main(){
         vec4 w = modelMatrix * vec4(position,1.0);
+        // glitch: horizontal slices jump sideways for a few frames
+        float tk = floor(time*24.0);
+        float sl = floor(w.y*5.0 + hv(tk)*3.0);
+        float r = hv(sl*7.13 + tk);
+        w.x += step(0.75, r) * (hv(sl + tk*1.7) - 0.5) * 0.35 * glitch;
         vW = w.xyz; vUv = uv;
         vN = normalize(mat3(modelMatrix) * normal);
         vV = normalize(cameraPosition - w.xyz);
         gl_Position = projectionMatrix * viewMatrix * w;
       }`,
     fragmentShader: `
-      uniform float time, base, rim, scan, op; uniform vec3 col;
+      uniform float time, base, rim, scan, op, glitch; uniform vec3 col;
       varying vec3 vN; varying vec3 vV; varying vec3 vW; varying vec2 vUv;
       float h(float n){ return fract(sin(n)*43758.5453); }
       uniform float px;
@@ -82,12 +90,18 @@ function holoMat(color, { base = 0.12, rim = 1.2, scan = 0.25, opacity = 1, soli
         float rowR = fract((gl_FragCoord.y + 1.0*px) / (3.0*px));
         float stripeR = mix(0.18, 1.0, step(0.38, rowR));
         float flick = 0.93 + 0.07*h(floor(time*14.0));
+        // glitch: random rows drop out / flare, whole thing stutters
+        float tk = floor(time*30.0);
+        float gRow = h(floor(gl_FragCoord.y/(14.0*px)) + tk*3.1);
+        flick *= mix(1.0, step(0.15, gRow) * (0.7 + 0.6*h(tk)) + step(0.93, gRow)*1.2, glitch);
         // inside = deep teal, edge = bright lime (green take on the teal/orange reference)
         vec3 inner = col * vec3(0.25, 0.75, 1.0) + vec3(0.0, 0.08, 0.14);
         vec3 edge = vec3(0.72, 1.0, 0.32);
         float aIn = (base + lam*scan*1.6) * stripe;
         float aEd = f * rim * stripeR;
         vec3 c = inner*aIn + edge*aEd*1.3;
+        // glitch colour split: rows tint toward cyan / magenta-white
+        c += glitch * step(0.9, gRow) * vec3(0.15, 0.0, 0.25) * (aIn + aEd);
         float a = clamp((aIn + aEd) * flick * op, 0.0, 1.0);
         gl_FragColor = vec4(c * flick * op, a);
       }`,
@@ -230,13 +244,14 @@ grid.position.y = -0.9; grid.material.transparent = true; grid.material.opacity 
 scene.add(grid);
 
 // ---------- UI ----------
-const st = { flap: true, spin: false, open: 1, target: 1 };
+const st = { flap: true, spin: false, open: 1, target: 1, gNext: 1, gEnd: 0, glitchOn: true };
 const btn = id => document.getElementById(id);
 btn('bFlap').onclick = e => { st.flap = !st.flap; e.target.classList.toggle('on', st.flap); };
 btn('bSpin').onclick = e => { st.spin = !st.spin; controls.autoRotate = st.spin; e.target.classList.toggle('on', st.spin); };
 btn('bFold').onclick = () => { st.target = st.target ? 0 : 1; };
 btn('bBack').onclick = () => camera.position.set(0, 1.2, -11);
 btn('bFront').onclick = () => camera.position.set(0, 1.2, 11);
+btn('bGlitch').onclick = e => { st.glitchOn = !st.glitchOn; e.target.classList.toggle('on', st.glitchOn); };
 btn('bBody').onclick = e => { body.visible = !body.visible; e.target.classList.toggle('on', body.visible); };
 const q = new URLSearchParams(location.search);
 if (q.get('view') === 'front') camera.position.set(0, 1.2, 11);
@@ -252,6 +267,11 @@ const clock = new THREE.Clock();
 function tick() {
   const t = clock.getElapsedTime();
   U.time.value = t;
+  // glitch bursts: every 1.2-3.7 s a short 0.06-0.24 s stutter, sometimes a double hit
+  if (t > st.gNext) { st.gEnd = t + 0.06 + Math.random() * 0.18; st.gNext = t + (Math.random() < 0.25 ? 0.15 : 1.2 + Math.random() * 2.5); }
+  const g = t < st.gEnd ? 0.6 + Math.random() * 0.4 : (Math.random() < 0.012 ? 0.5 : 0);
+  U.glitch.value = q.get('glitch') === 'hold' ? 1 : st.glitchOn ? g : 0;
+  lineMat.opacity = 0.55 * (U.glitch.value ? (Math.random() < 0.4 ? 0.1 : 1.3) : 1);
   st.open += (st.target - st.open) * 0.06;
   const o = st.open;
   const flap = st.flap ? Math.sin(t * 2.2) : 0;
