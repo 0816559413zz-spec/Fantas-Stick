@@ -237,7 +237,7 @@ function cityTint(CV,ref,col,veh){const L=CV.mesh[ref.n]&&CV.mesh[ref.n][ref.ch]
 function cityPools(CV,names){
   for(const n of names){const ims=CV.pool[n];if(!ims)continue;let k=0;
     const op=n.endsWith('o');   // รูโล่ง = แผ่นในชั้นที่เดินเข้าได้ • รูทึบ = ชั้นบนที่ข้างในยังทึบ
-    CITYD.b.forEach((d,i)=>{const r=CV.b[i];if(!r||r.sty.hole!==(op?n.slice(0,-1):n)||d.cl||!d.nb)return;for(let p=0;p<d.br.length;p++)if(d.br[p]&&op===!!(d.I&&d.L.P[p].f<d.I.nf)&&!cinOpenPanel(d,p)){for(const im of ims){_cT.multiplyMatrices(r.P[p].M,im.userData.om);im.setMatrixAt(k,_cT);}k++;}});
+    CITYD.b.forEach((d,i)=>{const r=CV.b[i];if(!r||r.sty.hole!==(op?n.slice(0,-1):n)||d.cl||r.tw||!d.nb)return;for(let p=0;p<d.br.length;p++)if(d.br[p]&&op===!!(d.I&&d.L.P[p].f<d.I.nf)&&!cinOpenPanel(d,p)){for(const im of ims){_cT.multiplyMatrices(r.P[p].M,im.userData.om);im.setMatrixAt(k,_cT);}k++;}});
     for(const im of ims){im.count=k;im.instanceMatrix.needsUpdate=true;}}
 }
 function cityShowBld(CV,r,off){
@@ -256,6 +256,37 @@ function cityRubble(r){
   g.position.set(tx(B.x+B.w/2),0,tz(B.y+B.d/2));shadowAll(g);world.add(g);return g;
 }
 const CITY_FALL=1.1;   // วินาทีที่เสา/ตู้ล้มลงพื้น
+// ---------- ตึกไฮไลต์ล้มทั้งตึก (ขั้น 7) ----------
+// event 'T' → ทั้งตึก (แผ่น/ขอบ/มุม/แกน) หมุนรอบขอบฐานด้านที่ล้ม ช้าก่อนแล้วเร็วขึ้น (ease-in) ใช้เวลา CDMG.tower.lean = เท่ากับเวลาที่โฮสต์ใช้ก่อนตกพื้น
+// จบท่า = ซ่อนทั้งตึก + กองซากยาวตามแนวล้ม (cityTowerRubble) • เข้ากลางเกม/พลาด event = วางกองซากทันทีจากสถานะ 'X'
+const _ctA=new THREE.Matrix4(),_ctB=new THREE.Matrix4(),_ctC=new THREE.Matrix4();
+function cityTowerPose(CV,r,ang){
+  const B=r.B,fi=r.tw.fi,px=fi===2?tx(B.x+B.w):fi===3?tx(B.x):0,pz=fi===0?tz(B.y+B.d):fi===1?tz(B.y):0;
+  if(fi<2)_ctB.makeRotationX(fi===0?ang:-ang);else _ctB.makeRotationZ(fi===2?-ang:ang);
+  _ctA.makeTranslation(px,0,pz).multiply(_ctB).multiply(_ctC.makeTranslation(-px,0,-pz));
+  const M=m=>new THREE.Matrix4().multiplyMatrices(_ctA,m);
+  for(const q of r.P)citySet(CV,q,M(q.M));for(const q of r.X)citySet(CV,q,M(q.M));
+  CV.core.setMatrixAt(r.core,M(CV.cores[r.core]));CV.core.instanceMatrix.needsUpdate=true;
+}
+function cityTowerAnim(CV,dt){
+  for(const r of CV.b){if(!r||!r.tw)continue;const T=r.tw,L=CDMG.tower.lean;T.t+=dt;const k=Math.min(1,T.t/L);
+    cityTowerPose(CV,r,Math.PI/2*0.97*Math.pow(k,2.6));
+    if(Math.random()<0.6){const B=r.B,u=Math.random();smoke(B.x+u*B.w,B.y+(Math.random()<0.5?0:B.d),0.5,1,'#8a8070',2.2,10,60);}   // ฝุ่นร่วงจากฐานระหว่างเอียง
+    if(k>=1){r.tw=null;cityShowBld(CV,r,null);if(r.cl&&!r.rub){const d=CITYD.b[r.B.i];r.rub=cityTowerRubble(r,d.fd!=null?d.fd:T.fi);}cityPools(CV,[r.sty.hole,r.sty.hole+'o']);}}
+}
+// กองซากตึกล้ม: ฐานตึก + แนวยาวตามทิศล้ม (สูง CDMG.tower.mound) — ก้อนกระจก/โครงเหล็ก/แผ่นพื้นหักเอียง
+function cityTowerRubble(r,fi){
+  const B=r.B,S=cityTowerStrip(B,fi),T=CDMG.tower,g=new THREE.Group(),R=mulberry(B.i*17+3),m1=sMat({color:r.sty.col,roughness:0.6,metalness:0.3}),m2=sMat({color:'#4a4640',roughness:1}),m3=sMat({color:'#6a6e76',roughness:0.7,metalness:0.4});
+  const add=(x0,y0,x1,y1,h)=>{const w=(x1-x0)*S3,d=(y1-y0)*S3,cx=tx((x0+x1)/2),cz=tz((y0+y1)/2);
+    const base=new THREE.Mesh(sGeo(THREE.BoxGeometry,1,1,1),m2);base.scale.set(w+1,h,d+1);base.position.set(cx,h/2-0.1,cz);g.add(base);
+    const n=Math.min(90,Math.round(w*d/10));
+    for(let k=0;k<n;k++){const m=new THREE.Mesh(sGeo(THREE.BoxGeometry,1,1,1),[m1,m2,m3][k%3]);const s2=0.6+R()*2.6;m.scale.set(s2,0.3+R()*1.1,s2*(0.4+R()));
+      m.position.set(cx+(R()-0.5)*w,h+0.05,cz+(R()-0.5)*d);m.rotation.set((R()-0.5)*0.9,R()*3,(R()-0.5)*0.9);g.add(m);}
+    for(let k=0;k<Math.round(n/6);k++){const m=new THREE.Mesh(sGeo(THREE.BoxGeometry,1,1,1),m3);m.scale.set(5+R()*6,0.35,3+R()*3);   // แผ่นพื้นหักเอียง
+      m.position.set(cx+(R()-0.5)*w*0.8,h*0.8,cz+(R()-0.5)*d*0.8);m.rotation.set((R()-0.5)*0.7,R()*3,(R()-0.5)*0.7);g.add(m);}};
+  add(B.x,B.y,B.x+B.w,B.y+B.d,T.mound*0.8);add(S.x1,S.y1,S.x2,S.y2,T.mound);
+  shadowAll(g);world.add(g);return g;
+}
 // ทุกเฟรม: เทียบสถานะ (CITYD จากโฮสต์/snapshot) กับภาพ แล้วเปลี่ยนเฉพาะที่ต่าง
 // กำแพงล่องหนของพื้นที่เล่น (AREA) ให้เห็นเป็นม่านเรืองแสงบาง ๆ — สร้างใหม่เมื่อโหมด/แผนที่เปลี่ยน
 const CAREA={k:'',g:null};
@@ -276,6 +307,7 @@ function cityViewSync(dt){
   const CV=CITYK.CV;if(!CV||!CV.ready||CITYK.W!==world||!cityOn())return;
   const pd=new Set();
   CITYD.b.forEach((d,i)=>{const r=CV.b[i];if(!r||r.v===d.v)return;const live=r.v!==-1;r.v=d.v;pd.add(r.sty.hole);pd.add(r.sty.hole+'o');
+    if(d.cl&&d.fd!=null){if(r.cl)return;r.cl=1;if(!r.tw){cityShowBld(CV,r,null);r.rub=cityTowerRubble(r,d.fd);}return;}   // ตึกไฮไลต์ล้ม: ท่าล้มจบแล้วค่อยวางกองซาก (cityTowerAnim)
     if(d.cl){if(r.cl)return;r.cl=1;cityHideIn(CV,r);if(live)CV.anims.push({r,t:0});else{cityShowBld(CV,r,null);r.rub=cityRubble(r);}return;}
     if(r.cl){r.cl=0;if(r.rub){world.remove(r.rub);disposeTree(r.rub);r.rub=null;}CV.anims=CV.anims.filter(a=>a.r!==r);cityShowBld(CV,r,0);}
     for(let p=0;p<r.P.length;p++)citySet(CV,r.P[p],d.br[p]||(d.I&&d.I.door.has(p))?_cZ:r.P[p].M);
@@ -295,6 +327,7 @@ function cityViewSync(dt){
     if(Math.random()<0.8){const s=Math.random()*4|0,u=Math.random();const x=s<2?B.x+u*B.w:s===2?B.x:B.x+B.w,y=s<2?(s?B.y+B.d:B.y):B.y+u*B.d;smoke(x,y,0.5,2,'#8a8070',2.4,12,90);}
     if(k>=1){cityShowBld(CV,a.r,null);a.r.rub=cityRubble(a.r);a.done=1;smoke(B.x+B.w/2,B.y+B.d/2,2,18,'#7a7268',3,16,200);}}
   if(CV.anims.length)CV.anims=CV.anims.filter(a=>!a.done);
+  cityTowerAnim(CV,dt);
   const lp=CV.lampPts.attributes.position;let lpd=false;
   CITYD.it.forEach((it,i)=>{const r=CV.it[i];if(!r)return;
     if(r.v!==it.v){const live=r.v!==-1;r.v=it.v;const m=it.q.m,veh=CITY_VEH.has('cp_'+m);
@@ -324,6 +357,15 @@ function cityDebris(x,y,h,col,ox,oy,n,big){
 }
 function cityFX(ev,H,near){
   const CV=CITYK.CV;
+  if(ev.k==='cb'&&(ev.e==='T'||ev.e==='I')){const r=CV&&CV.b[ev.i],dd=Math.hypot(tx(ev.x)-cam.position.x,tz(ev.y)-cam.position.z);
+    if(ev.e==='T'){if(r&&CV.ready&&!r.cl){r.tw={fi:ev.fi,t:0};cityPools(CV,[r.sty.hole,r.sty.hole+'o']);if(r.hl)for(const l of r.hl)l.visible=false;}
+      if(dd<260){snd('break',{x:ev.x,y:ev.y,vol:1});snd('rubble',{x:ev.x,y:ev.y,vol:1});shake(dd<120?5:2);}return;}
+    // ตกพื้น: ฝุ่นใหญ่ตลอดแนวล้ม (VFX Studio city/tower_fall) + รอย/ความพังของบรรยากาศ (bfCollapse) + จอสั่น + เสียง
+    if(r){const S=cityTowerStrip(r.B,ev.fi),hz=ev.fi<2,len=hz?S.y2-S.y1:S.x2-S.x1,wid=hz?S.x2-S.x1:S.y2-S.y1,n=Math.max(2,Math.round(len/(wid*0.9)));
+      for(let k=0;k<n;k++){const u=(k+0.5)/n,x=hz?(S.x1+S.x2)/2:S.x1+u*len,y=hz?S.y1+u*len:(S.y1+S.y2)/2;
+        fxPlay('city/tower_fall',{x,y,h:0,s:clamp(wid/500,1,2.2)});if(k%2===0)bfCollapse(x,y,wid,wid,false);}}
+    if(dd<320){snd('boom',{x:ev.x,y:ev.y,vol:1});snd('rubble',{x:ev.x,y:ev.y,vol:1});shake(dd<160?16:8);}
+    return;}
   if(ev.k==='cb'){const r=CV&&CV.b[ev.i],col=r?r.sty.col:'#8a8070',el=ev.el||'none',fire=el.includes('fire');
     if(ev.e==='h'){burst(ev.x,ev.y,col,8,90,0.45,2.2,{h:ev.h,vh:[0.5,3],g:6});if(near)snd('thud',{x:ev.x,y:ev.y,vol:0.5});}
     else if(ev.e==='b'){cityDebris(ev.x,ev.y,ev.h,col,ev.ox||ev.x,ev.oy||ev.y,el.includes('blast')?10:6,false);

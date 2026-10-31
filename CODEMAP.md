@@ -135,10 +135,10 @@ BRKDEF:201 BRK_M:201 BRK_MCOL:201 BRK:202 genBrk:203 brkApply:210 brkStage:214 h
 §231 ตารางช่อง (spatial grid) สำหรับแมพใหญ่: หาเฉพาะของใกล้ ๆ แทนวนทุกชิ้น…
 SG:234 sgObs:235 sgProps:235 sgGrid:237 sgNear:244 _sgCR:249 _sgCW:249 _sgCB:249 _sgCO:249 _sgPO:249 _sgPB:249 _sgPP:249 _sgM:249 _sgE:249 _sgA:249 _cwLast:251 collideWorld:252 shoot:291 eShoot:312 foesOf:319 breakShield:326 ULT_RATE:328 ultActive:329 gainUlt:330 lifesteal:331 damage:333 playerDown:390 killProj:411 explode:420 hitTarget:432 updateProjectiles:448
 
-## js/12-city-dmg.js (239) — เมืองพังได้ (designs/city-bot-battle.md ขั้น 4) — ข้อมูลที่ทุกเครื่อง…
-CITY_FL:8 CITY_PW:8 CDMG:9 CITYD:12 cityOn:13 cityLayout:15 cityReset:25 cityApplyBox:41 cityApplyItem:42 cityHex:43 cityMark:44 cityRampSync:45 cityPanelAt:47 cityHitPanel:52 cityHitItem:63 cityHitObs:72 _sgCD:77 cityDamageIn:79 cityTick:90 _sgCM:100 cityMoundH:101 cityMounds:109
-§115 ข้างในตึก (2026-10-28 ผู้ใช้: เดินเข้าได้ 1–3 ชั้น มีทางขึ้น • ผนังนอ…
-CIN:119 cityInterior:120 cinSlabOn:149 cinOpenPanel:151 cityIwHit:153 cityRampHit:155 cinIwSegs:158 cinIwRects:159 cinSecAt:160 citySecHit:162 cinIn:164 cinHole:165 cinRampH:166 _sgCI:167 cityBoxGrid:168 cityRoomAt:169 cityFloorH:171 cityCeilH:176 cinWallRect:180 cityCollideIn:183 cityProjIn:193 _sgCS:211 citySolidAt:212 cityRay:221 cityRoomBox:224 citySnapB:225 citySnapS:226 cityParse:228
+## js/12-city-dmg.js (270) — เมืองพังได้ (designs/city-bot-battle.md ขั้น 4) — ข้อมูลที่ทุกเครื่อง…
+CITY_FL:8 CITY_PW:8 CDMG:9 CITYD:16 cityOn:17 cityLayout:19 cityReset:29 cityApplyBox:45 cityApplyItem:46 cityHex:47 cityMark:48 cityRampSync:49 cityPanelAt:51 cityHitPanel:56 cityTowerStart:70 cityTowerStrip:76 cityTowerFall:80 cityHitItem:91 cityHitObs:100 _sgCD:105 cityDamageIn:107 cityTick:118 _sgCM:129 cityMoundH:130 cityMounds:140
+§146 ข้างในตึก (2026-10-28 ผู้ใช้: เดินเข้าได้ 1–3 ชั้น มีทางขึ้น • ผนังนอ…
+CIN:150 cityInterior:151 cinSlabOn:180 cinOpenPanel:182 cityIwHit:184 cityRampHit:186 cinIwSegs:189 cinIwRects:190 cinSecAt:191 citySecHit:193 cinIn:195 cinHole:196 cinRampH:197 _sgCI:198 cityBoxGrid:199 cityRoomAt:200 cityFloorH:202 cityCeilH:207 cinWallRect:211 cityCollideIn:214 cityProjIn:224 _sgCS:242 citySolidAt:243 cityRay:252 cityRoomBox:255 citySnapB:256 citySnapS:257 cityParse:259
 
 ## js/13-enemies.js (168) — ศัตรู (โหมด Co-op)
 spawnEnemy:2 setupWave:19 bossPhase:36 enemySlam:44 updateEnemies:55
@@ -242,12 +242,14 @@ QUAL:146 QUAL_NAME:147 qualPR:148 applyQuality:154 qualTick:172 texCanvas:183 gl
 §242 เงาตามผู้เล่น
 SHD:246 _shF:247 _shR:247 _shU:247 _shC:247 _shY:247 shadowFollow:248 LPOOL:267
 
-## js/28-city-build.js (344) — เมืองมักเกิ้ล (ลอนดอน) — ภาพ • ข้อมูลอยู่ js/02-city.js • โมเดลจาก as…
+## js/28-city-build.js (386) — เมืองมักเกิ้ล (ลอนดอน) — ภาพ • ข้อมูลอยู่ js/02-city.js • โมเดลจาก as…
 CITY_WIN:4 cityWinTex:5 cityEmTex:10 cityBoxGeo:16 buildCity:21
 §102 ข้างในตึกกลวง (ภาพ — ผัง I จาก cityInterior js/12-city-dmg)
 cityInteriorView:106 cityHideIn:147 cityMoundView:153
 §176 ชุดโมเดลลอนดอน (assets/city/*.glb จาก assets/src/city_kit_build.py)
-CITY_STY:181 CITY_VEH:188 cityFacade:190 CITYK:203 _cZ:204 _cT:204 _cR:204 _cC:204 cityKitLoad:205 cityCull:227 citySet:233 cityTint:235 cityPools:237 cityShowBld:243 cityRubble:250 CITY_FALL:258 CAREA:261 cityAreaSync:262 cityViewSync:274 cityDebris:316 cityFX:325
+CITY_STY:181 CITY_VEH:188 cityFacade:190 CITYK:203 _cZ:204 _cT:204 _cR:204 _cC:204 cityKitLoad:205 cityCull:227 citySet:233 cityTint:235 cityPools:237 cityShowBld:243 cityRubble:250 CITY_FALL:258
+§259 ตึกไฮไลต์ล้มทั้งตึก (ขั้น 7)
+_ctA:262 _ctB:262 _ctC:262 cityTowerPose:263 cityTowerAnim:271 cityTowerRubble:278 CAREA:292 cityAreaSync:293 cityViewSync:305 cityDebris:349 cityFX:358
 
 ## js/28-maps-build.js (762) — สร้างแผนที่
 CANDLESYS:2 builtMap:3 builtKey:3 world:3 TORCHES:3 CANDLES:3 FIREFLIES:3 CRYSTAL:3 RUNE:3 SNITCH:3 BANNERS:3 SNOW:3 WCACHE:5 WCACHE_MAX:5 wkey:7 buildWorld:8 addW:41 _prewarmed:43 prewarmShaders:44 batchStatic:63 makeCandles:88 updateCandles:97 buildCastle:106 buildHogsmeade:172 buildGreatHall:260 buildForest:330
@@ -637,4 +639,4 @@ BRM:9 BSK:11 BROOM_SK:17 broomVert:38 broomMove:50 broomStrike:68 broomStrikeTic
 §125 ฝั่งจอ
 broomHead:127 BBEAM:134 _bbGeo:135 broomView:136 broomMountFx:165 broomDismountFx:173 broomBeamFx:175 broomSkFx:191 broomStrikeFx:204 broomFlakFx:209 broomHud:214 broomHudT:215 broomTick:224
 
-(78 files, 18768 lines)
+(78 files, 18841 lines)

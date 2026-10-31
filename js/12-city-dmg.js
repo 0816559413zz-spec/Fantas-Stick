@@ -9,6 +9,10 @@ const CITY_FL=3.5,CITY_PW=4;
 const CDMG={hp:{brick:60,shop:60,station:70,office:90,glass:30,metal:50,garage:120},hl:2.5,fall:0.3,hlFall:0.55,
   ihp:{lamp:40,tlight:40,tube:30,bin:15,bench:25,phone:60,postbox:80,busstop:40,bollard:60,planter:50,bush:20,cone:5,barrier:15,pallet:20,car:80,van:100,taxi:80,bus:200},
   topple:new Set(['lamp','tlight','tube','phone','postbox','busstop']),veh:new Set(['car','van','taxi','bus']),burn:3,boom:{r:150,dmg:35,env:60},mound:1.6,pad:40};
+// ตึกไฮไลต์ (B.hl, ขั้น 7): ชั้นล่างแตก ≥ hlFall → เอียงล้มทั้งตึกไปทางด้านที่ชั้นล่างพังมากสุด ใช้เวลา lean วิ (เตือนทั้งห้อง) → ตกพื้น:
+//   แนวที่ล้มทับ (กว้างเท่าตึก ยาว len × ความสูง) = ดาเมจ dmg กับคน/มอนสเตอร์ + ของในเมือง/ต้นไม้แตก + ตึก/บ้านข้างทางโดนวงระเบิด env • เหลือกองซากยาว (สูง mound ม. เดินปีนได้)
+//   ไม่ให้เดินเข้าข้างใน (ไม่มีห้อง) — ตึกทั้งหลังต้องล้มได้ • ค่าตั้งต้น ให้ทีมเกมเพลย์ปรับ
+CDMG.tower={lean:3.2,len:0.85,dmg:200,env:140,mound:2.2,pad:70};
 let CITYD=null;
 const cityOn=()=>CITYD&&MAPID==='city';   // สถานะเมืองค้างจากแมตช์ก่อนได้ — ใช้เฉพาะตอนอยู่แมพ city
 // ผิวตึก: F = ด้าน [มุม rotation.y, ระยะออกจากกลาง (ม.), ความยาว (ม.), ระยะถึงขอบย่าน] • P = แผ่น {fi,i,f,x,y (px กลางแผ่นบนผิว),z0,z1 (ม.)} เรียง ด้าน→คอลัมน์→ชั้น
@@ -27,7 +31,7 @@ function cityReset(){
   CITYD={b:M.boxes.map(B=>{B.cl=0;const st=B.m in CDMG.hp,L=st?cityLayout(B,M.zones):null;
       return {B,L,st,hp:L?new Float32Array(L.P.length).fill(CDMG.hp[B.m]*(B.hl?CDMG.hl:1)):null,br:L?new Uint8Array(L.P.length):null,nb:0,cl:0,v:0,s:'',ht:0,circ:[]};}),
     it:M.street.map((q,i)=>({q,i,hp:CDMG.ihp[q.m]||0,st:0,t:0,v:0,c:[]}))};
-  for(const d of CITYD.b){d.I=d.L&&!CIN.skip.has(d.B.m)?cityInterior(d.B,d.L):null;d.B.top=d.I?d.I.top:0;d.mo=[];
+  for(const d of CITYD.b){d.I=d.L&&!CIN.skip.has(d.B.m)&&!d.B.hl?cityInterior(d.B,d.L):null;d.tf=null;d.fd=null;d.B.top=d.I?d.I.top:0;d.mo=[];
     const ns=d.I?d.I.sec.length:0,ni=d.I?d.I.iw.length:0,nr=d.I?d.I.ramps.length:0,hp0=d.L?CDMG.hp[d.B.m]*(d.B.hl?CDMG.hl:1):0;
     d.sb=new Uint8Array(ns);d.shp=new Float32Array(ns).fill(hp0*CIN.secHp);d.ns=0;
     d.ib=new Uint8Array(ni);d.ihp=new Float32Array(ni).fill(hp0*CIN.iwHp);d.ni=0;d.rb=new Uint8Array(nr);d.rhp=new Float32Array(nr).fill(hp0*CIN.rampHp);d.nr=0;}
@@ -41,7 +45,7 @@ MAPS.city.reset=cityReset;
 function cityApplyBox(d){d.B.cl=d.cl;for(const c of d.circ)c.hgt=d.cl?0:c.h0;}
 function cityApplyItem(it){const off=it.st===1;for(const c of it.c)c.hgt=off?0:c.h0;}
 function cityHex(br){let s='';for(let i=0;i<br.length;i+=4)s+=((br[i]|0)|(br[i+1]|0)<<1|(br[i+2]|0)<<2|(br[i+3]|0)<<3).toString(16);return s;}
-function cityMark(d){d.v++;const ex=d.ns||d.ni||d.nr;d.s=d.cl||d.nb||ex?(d.cl?'x':'')+cityHex(d.br)+(ex?':'+cityHex(d.sb)+':'+cityHex(d.ib)+':'+cityHex(d.rb):''):'';cityRampSync(d);cityMounds(d);}   // ':' ขอบพื้น ':' ผนังชั้นใน ':' ทางลาด (ตึก 2–4 ชั้น)
+function cityMark(d){d.v++;const ex=d.ns||d.ni||d.nr;d.s=d.cl||d.nb||ex?(d.cl?(d.fd!=null?'X'+d.fd:'x'):'')+cityHex(d.br)+(ex?':'+cityHex(d.sb)+':'+cityHex(d.ib)+':'+cityHex(d.rb):''):'';cityRampSync(d);cityMounds(d);}   // ':' ขอบพื้น ':' ผนังชั้นใน ':' ทางลาด (ตึก 2–4 ชั้น)
 function cityRampSync(d){if(d.I)for(const R of d.I.ramps)R.br=d.rb[R.j]|0;}   // ':' + ขอบพื้น/หลังคาที่พัง (ตึก 2–4 ชั้น)
 // จุดที่โดน → แผ่นไหน: ด้านที่ใกล้สุด, คอลัมน์ตามตำแหน่งบนด้าน, ชั้นตามความสูง
 function cityPanelAt(d,x,y,h){
@@ -59,6 +63,30 @@ function cityHitPanel(d,p,dmg,el,ox,oy){
   // ผู้ใช้ 2026-10-29: ตึก 1 ชั้น (เหมือนบ้าน) ถล่มได้ทั้งหลัง — แผ่นชั้นล่างแตก ≥ CDMG.fall • ตึก 2 ชั้นขึ้นไปไม่ถล่ม (ผนัง/ขอบพื้นพังเป็นช่อง + เนินเศษ)
   if(d.L.n===1){let gb=0;for(let k=0;k<d.L.P.length;k++)if(d.br[k])gb++;
     if(gb>=d.L.g*(d.B.hl?CDMG.hlFall:CDMG.fall)){d.cl=1;cityMark(d);cityApplyBox(d);emit({k:'cb',e:'c',i:d.B.i,x:Math.round(d.B.x+d.B.w/2),y:Math.round(d.B.y+d.B.d/2),h:d.B.h});}}
+  else if(d.B.hl&&!d.tf){const gf=[0,0,0,0];let gb=0;for(let k=0;k<d.L.P.length;k++)if(d.br[k]&&d.L.P[k].f===0){gf[d.L.P[k].fi]++;gb++;}
+    if(gb>=d.L.g*CDMG.hlFall)cityTowerStart(d,gf.indexOf(Math.max(...gf)));}
+}
+// ตึกไฮไลต์เริ่มล้ม (ทิศ fi = ด้านของตึก: 0 +y 1 −y 2 +x 3 −x) — ภาพเริ่มเอียงจาก event 'T' • ตกพื้นใน cityTick
+function cityTowerStart(d,fi){
+  const B=d.B;d.tf={fi,t:CDMG.tower.lean};
+  emit({k:'cb',e:'T',i:B.i,fi,x:Math.round(B.x+B.w/2),y:Math.round(B.y+B.d/2),h:B.h});
+  banner('⚠️ ตึกสูงกำลังล้ม! หนีออกจากแนว',CDMG.tower.lean);
+}
+// แนวที่ตึกล้มทับ (สี่เหลี่ยม px ต่อจากฐานตึกไปทางทิศที่ล้ม)
+function cityTowerStrip(B,fi){
+  const L=B.h*20*CDMG.tower.len,r=fi===0?{x1:B.x,y1:B.y+B.d,x2:B.x+B.w,y2:B.y+B.d+L}:fi===1?{x1:B.x,y1:B.y-L,x2:B.x+B.w,y2:B.y}:fi===2?{x1:B.x+B.w,y1:B.y,x2:B.x+B.w+L,y2:B.y+B.d}:{x1:B.x-L,y1:B.y,x2:B.x,y2:B.y+B.d};
+  r.x1=clamp(r.x1,0,MW);r.x2=clamp(r.x2,0,MW);r.y1=clamp(r.y1,0,MH);r.y2=clamp(r.y2,0,MH);return r;
+}
+function cityTowerFall(d){
+  const B=d.B,fi=d.tf.fi,S=cityTowerStrip(B,fi),T=CDMG.tower,inS=(x,y,m)=>x>S.x1-m&&x<S.x2+m&&y>S.y1-m&&y<S.y2+m;
+  d.tf=null;d.fd=fi;d.cl=1;cityMark(d);cityApplyBox(d);
+  for(const t of plist())if(t.alive&&!t.downed&&(inS(t.x,t.y,PR)||(t.x>B.x&&t.x<B.x+B.w&&t.y>B.y&&t.y<B.y+B.d)))damage(t,T.dmg,null,'aoe');
+  for(const e of G.en)if(!e.dead&&inS(e.x,e.y,e.r||PR))damage(e,T.dmg,null,'aoe');
+  for(const it of CITYD.it)if(it.st===0&&it.hp&&inS(it.q.x,it.q.y,10))cityHitItem(it,1e6,null);
+  if(PROPON)for(const o of PROPS)if(o.st===0&&inS(o.x,o.y,o.r))hitProp(o,1e6,null);
+  const hz=fi<2,len=hz?S.y2-S.y1:S.x2-S.x1,wid=hz?S.x2-S.x1:S.y2-S.y1,n=Math.max(2,Math.ceil(len/(wid*0.7)));
+  for(let k=0;k<n;k++){const u=(k+0.5)/n,x=hz?(S.x1+S.x2)/2:S.x1+u*(S.x2-S.x1),y=hz?S.y1+u*(S.y2-S.y1):(S.y1+S.y2)/2;damageEnv(x,y,wid*0.6,T.env,null,'blast',2);}
+  emit({k:'cb',e:'I',i:B.i,fi,x:Math.round((S.x1+S.x2)/2),y:Math.round((S.y1+S.y2)/2),h:B.h});
 }
 function cityHitItem(it,dmg,by){
   if(!it||!it.hp||it.st!==0)return;
@@ -89,6 +117,7 @@ function cityDamageIn(x,y,rad,dmg,el,h,by){
 // ทุกเฟรม (โฮสต์): รถที่ไฟลุกครบเวลา → ระเบิด
 function cityTick(dt){
   if(!BLDON||!cityOn())return;
+  for(const d of CITYD.b)if(d.tf){d.tf.t-=dt;if(d.tf.t<=0)cityTowerFall(d);}
   for(const it of CITYD.it){if(it.st!==2)continue;it.t-=dt;if(it.t>0)continue;
     it.st=3;it.v++;const q=it.q,B=CDMG.boom;
     emit({k:'boom',x:q.x,y:q.y,h:1});
@@ -100,6 +129,8 @@ function cityTick(dt){
 const _sgCM=[];
 function cityMoundH(x,y){
   if(!cityOn())return 0;let g=0;
+  for(const d of CITYD.b)if(d.fd!=null&&d.cl){const S=cityTowerStrip(d.B,d.fd),T=CDMG.tower,ex=Math.max(S.x1-x,0,x-S.x2),ey=Math.max(S.y1-y,0,y-S.y2),e=Math.hypot(ex,ey);   // กองซากตึกไฮไลต์ที่ล้ม (ยาวตามแนวล้ม)
+    if(e<T.pad){const v=T.mound*(1-e/T.pad);if(v>g)g=v;}}
   for(const B of sgNear(sgGrid('r',MAPS.city.boxes,b=>[b.x,b.y,b.x+b.w,b.y+b.d]),x,y,CDMG.pad+60,_sgCM)){const d=CITYD.b[B.i];
     if(B.cl){const ex=Math.max(B.x-x,0,x-(B.x+B.w)),ey=Math.max(B.y-y,0,y-(B.y+B.d)),e=Math.hypot(ex,ey);if(e<CDMG.pad){const v=CDMG.mound*(1-e/CDMG.pad);if(v>g)g=v;}continue;}   // ตึก 1 ชั้นถล่ม = กองซากทั้งหลัง
     for(const m of d.mo){const e=((x-m.x)/m.rx)**2+((y-m.y)/m.ry)**2;if(e<1){const v=m.h*Math.min(1,1.6*(1-e));if(v>g)g=v;}}}
@@ -229,7 +260,7 @@ function cityParse(cb,cs){
   if(!CITYD||MAPID!=='city')return;
   const H=(cb||'').split('|');
   const unhex=(h,A)=>{let n=0;for(let j=0;j<A.length;j++){const v=parseInt((h||'')[j>>2]||'0',16);A[j]=(v>>(j&3))&1;n+=A[j];}return n;};
-  CITYD.b.forEach((d,i)=>{const t=H[i]||'';if(t===d.s||!d.L)return;d.s=t;d.cl=t[0]==='x'?1:0;const [hx,sx,ix,rx]=(d.cl?t.slice(1):t).split(':');d.nb=0;d.ns=0;
+  CITYD.b.forEach((d,i)=>{const t=H[i]||'';if(t===d.s||!d.L)return;d.s=t;const X=t[0]==='X';d.cl=X||t[0]==='x'?1:0;d.fd=X?+t[1]:null;const [hx,sx,ix,rx]=(X?t.slice(2):d.cl?t.slice(1):t).split(':');d.nb=0;d.ns=0;
     d.ni=unhex(ix,d.ib);d.nr=unhex(rx,d.rb);cityRampSync(d);
     for(let p=0;p<d.br.length;p++){const v=parseInt(hx[p>>2]||'0',16);d.br[p]=(v>>(p&3))&1;d.nb+=d.br[p];}
     for(let j=0;j<d.sb.length;j++){const v=parseInt((sx||'')[j>>2]||'0',16);d.sb[j]=(v>>(j&3))&1;d.ns+=d.sb[j];}

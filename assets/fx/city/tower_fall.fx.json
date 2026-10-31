@@ -1,0 +1,24 @@
+{
+  "v": 1,
+  "desc": "เมือง/ตึกไฮไลต์ล้มทั้งตึก (ขั้น 7, สไตล์ C): ฝุ่นก้อนการ์ตูนกลิ้งออกเป็นวงใหญ่ + กำแพงฝุ่นพวยสูง + ฝุ่นฟุ้งค้างนาน + เศษกระจก/คอนกรีต • เล่นหลายจุดตามแนวที่ล้ม • s = ความกว้างตึก (1–2.2)",
+  "tags": ["env", "battlefield", "city"],
+  "pal": "earth",
+  "dur": 12,
+  "layers": [
+    {"id": "wave", "t": "emit", "at": 0.0, "life": 0.35, "burst": 34, "att": "ground", "from": "disc", "fr": 2.6, "dir": "flat", "up": [0.05, 0.4],
+     "speed": [9, 18], "plife": [2.6, 4.0], "size": [30, 46], "col": "#a39582", "c2": "#7d7262", "gravity": -0.04, "drag": 1.6, "grow": 0.6,
+     "look": "smoke", "fb": "tex/smoke_toon", "fin": 30, "curl": false},
+    {"id": "wall", "t": "emit", "at": 0.05, "life": 0.8, "burst": 26, "att": "ground", "from": "disc", "fr": 2.0, "dir": "up", "spread": 0.35,
+     "speed": [4, 9], "plife": [3.2, 4.6], "size": [32, 48], "col": "#968a78", "c2": "#6a6054", "gravity": -0.3, "drag": 1.2, "grow": 0.55,
+     "look": "smoke", "fb": "tex/smoke_toon", "fin": 30, "curl": false},
+    {"id": "haze", "t": "emit", "at": 0.4, "life": 9, "rate": {"0": 8, "1": 0}, "att": "ground", "from": "disc", "fr": 3.0, "dir": "up", "spread": 0.8,
+     "speed": [0.3, 0.9], "plife": [4.0, 6.0], "size": [34, 52], "col": "#a89a86", "c2": "#857a6a", "gravity": -0.06, "drag": 1.2, "grow": 0.5, "x": true,
+     "look": "smoke", "fb": "tex/smoke_puff"},
+    {"id": "chunks", "t": "emit", "at": 0, "life": 0.1, "burst": 30, "att": "ground", "from": "disc", "fr": 1.6, "dir": "up", "spread": 1.0,
+     "speed": [5, 12], "plife": [2.5, 3.5], "look": "model", "model": "rock_chunk", "mmat": "solid", "msize": [0.2, 0.55], "bounce": 0.25, "mspin": 420,
+     "col": "#7a7268", "c2": "#4a4640", "gravity": 16, "drag": 0.5, "x": true},
+    {"id": "glass", "t": "emit", "at": 0, "life": 0.25, "burst": 40, "att": "ground", "from": "disc", "fr": 1.8, "dir": "up", "spread": 1.0,
+     "speed": [5, 13], "plife": [1.6, 2.6], "look": "model", "model": "rock_chunk", "mmat": "solid", "msize": [0.05, 0.14], "bounce": 0.2, "mspin": 900,
+     "col": "#cfe8ff", "c2": "#8fb8d8", "gravity": 18, "drag": 0.6, "x": true}
+  ]
+}
