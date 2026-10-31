@@ -1,0 +1,110 @@
+{
+ "v": 1,
+ "desc": "ทดสอบทรงน้ำจาก Blender (เสี้ยว/มงกุฎ/คลื่น/ลำน้ำ) + วัสดุ toonwater",
+ "tags": [
+  "water",
+  "test"
+ ],
+ "pal": "ice",
+ "dur": 1,
+ "seed": 1,
+ "layers": [
+  {
+   "id": "crescent",
+   "t": "mesh",
+   "at": 0,
+   "life": 1,
+   "att": "feet",
+   "shape": "glb",
+   "glb": "mesh_water_crescent",
+   "mat": "toonwater",
+   "col": "#22e0e6",
+   "col2": "#1f96ee",
+   "rim": 1,
+   "scroll": 1.5,
+   "pos": [
+    0,
+    1.4,
+    2.5
+   ],
+   "scale": 1.3,
+   "op": 1,
+   "fade": 0,
+   "loop": true,
+   "rot": [
+    0,
+    0,
+    -20
+   ]
+  },
+  {
+   "id": "crown",
+   "t": "mesh",
+   "at": 0,
+   "life": 1,
+   "att": "feet",
+   "shape": "glb",
+   "glb": "mesh_water_crown",
+   "mat": "toonwater",
+   "col": "#22e0e6",
+   "col2": "#1f96ee",
+   "rim": 1,
+   "scroll": 1,
+   "pos": [
+    -3.2,
+    0,
+    0
+   ],
+   "scale": 1.4,
+   "op": 1,
+   "fade": 0,
+   "loop": true
+  },
+  {
+   "id": "wave",
+   "t": "mesh",
+   "at": 0,
+   "life": 1,
+   "att": "feet",
+   "shape": "glb",
+   "glb": "mesh_water_wave",
+   "mat": "toonwater",
+   "col": "#22e0e6",
+   "col2": "#1f96ee",
+   "rim": 1,
+   "scroll": 1,
+   "pos": [
+    0,
+    0,
+    -3.5
+   ],
+   "scale": 0.9,
+   "op": 1,
+   "fade": 0,
+   "loop": true
+  },
+  {
+   "id": "jet",
+   "t": "mesh",
+   "at": 0,
+   "life": 1,
+   "att": "feet",
+   "shape": "glb",
+   "glb": "mesh_water_jet",
+   "mat": "toonwater",
+   "col": "#22e0e6",
+   "col2": "#1f96ee",
+   "rim": 1,
+   "scroll": 1,
+   "pos": [
+    3.2,
+    0,
+    0
+   ],
+   "scale": 1,
+   "op": 1,
+   "fade": 0,
+   "loop": true
+  }
+ ]
+}

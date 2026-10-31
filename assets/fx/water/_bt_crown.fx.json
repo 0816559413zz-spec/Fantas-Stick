@@ -1,0 +1,36 @@
+{
+ "v": 1,
+ "desc": "ทดสอบทรง crown",
+ "tags": [
+  "water",
+  "test"
+ ],
+ "pal": "ice",
+ "dur": 1,
+ "seed": 1,
+ "layers": [
+  {
+   "id": "crown",
+   "t": "mesh",
+   "at": 0,
+   "life": 1,
+   "att": "feet",
+   "shape": "glb",
+   "glb": "mesh_water_crown",
+   "mat": "toonwater",
+   "col": "#22e0e6",
+   "col2": "#1f96ee",
+   "rim": 1,
+   "scroll": 1.2,
+   "pos": [
+    0,
+    0,
+    0
+   ],
+   "scale": 1.4,
+   "op": 1,
+   "fade": 0,
+   "loop": true
+  }
+ ]
+}

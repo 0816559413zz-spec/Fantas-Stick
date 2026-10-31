@@ -2106,6 +2106,83 @@
    "dur": 3.05,
    "n": 11
   },
+  "water/_blender_test": {
+   "v": "72d6b5c5",
+   "desc": "ทดสอบทรงน้ำจาก Blender (เสี้ยว/มงกุฎ/คลื่น/ลำน้ำ) + วัสดุ toonwater",
+   "pal": "ice",
+   "tags": [
+    "water",
+    "test"
+   ],
+   "dur": 1,
+   "n": 4
+  },
+  "water/_bt_crescent": {
+   "v": "543064a4",
+   "desc": "ทดสอบทรง crescent",
+   "pal": "ice",
+   "tags": [
+    "water",
+    "test"
+   ],
+   "dur": 1,
+   "n": 1
+  },
+  "water/_bt_crown": {
+   "v": "908dca7f",
+   "desc": "ทดสอบทรง crown",
+   "pal": "ice",
+   "tags": [
+    "water",
+    "test"
+   ],
+   "dur": 1,
+   "n": 1
+  },
+  "water/_bt_jet": {
+   "v": "20bd51f4",
+   "desc": "ทดสอบทรง jet",
+   "pal": "ice",
+   "tags": [
+    "water",
+    "test"
+   ],
+   "dur": 1,
+   "n": 1
+  },
+  "water/_bt_wave": {
+   "v": "d223d5fa",
+   "desc": "ทดสอบทรง wave",
+   "pal": "ice",
+   "tags": [
+    "water",
+    "test"
+   ],
+   "dur": 1,
+   "n": 1
+  },
+  "water/_neon_a": {
+   "v": "a1f24644",
+   "desc": "ทดสอบน้ำนีออนขาว มีเส้นน้ำเงินเข้ม",
+   "pal": "ice",
+   "tags": [
+    "water",
+    "test"
+   ],
+   "dur": 1,
+   "n": 5
+  },
+  "water/_neon_b": {
+   "v": "bf59790f",
+   "desc": "ทดสอบน้ำนีออนขาว ไม่มีเส้นเข้ม",
+   "pal": "ice",
+   "tags": [
+    "water",
+    "test"
+   ],
+   "dur": 1,
+   "n": 5
+  },
   "water/_toonwater_test": {
    "v": "df424805",
    "desc": "ทดสอบวัสดุน้ำการ์ตูนใหม่ (toonwater) บนลูกกลม โดม มงกุฎน้ำ เสี้ยวน้ำ",
