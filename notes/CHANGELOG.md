@@ -1,5 +1,6 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
 
+- 2026-10-31 — **Game brief written (`design/game-brief.md`, via `/reverse-document design js/`)** — user confirmed: pillar = PvP battleground wizard duels, endless play, core mode FFA, refs Hogwarts Legacy combat + Battlefield 6 destruction, no copied Harry Potter IP.
 - 2026-10-31 — **CCGS /start run** — `project.yaml` now has `project.stage: Concept`, `modes.rigor: minimal`, `modes.automation: guided` (+ `production/stage.txt`). Change with `/settings`.
 - 2026-10-31 — **Fix: CCGS skills failed ("hooks/yaml-helper.sh: No such file")** — added `.claude/hooks/yaml-helper.sh` (config reader the skills/scripts call; it is a helper, not registered as a hook). `.gitignore` shares only that file from `.claude/hooks/`.
 - 2026-10-31 — **Claude Code Game Studios added (user)** — agents (34, engine-specific ones dropped) + 74 skills + rules/docs/scripts from github.com/Donchitos/Claude-Code-Game-Studios (MIT) into `.claude/`, plus `project.yaml`; no hooks/settings. `.gitignore` now shares those `.claude/` folders, `.gitattributes` keeps their `.sh` LF. CLAUDE.md rule 10.
