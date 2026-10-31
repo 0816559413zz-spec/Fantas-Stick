@@ -645,16 +645,16 @@ BACKDROP:8
 §66 noise เล็ก ๆ (คงที่ต่อ seed)
 bdHash:67 bdNoise:68 bdFbm:69 bdEdge:71 bdRing:73 bdPaint:79 bdTree:82 buildBackdrop:89 bdTower:135 backdropHide:139
 
-## js/68-water-view.js (81) — 
-WTV:5 WTC:6 wtState:7 wtStop:8 wtMesh:9 wtAlive:10 wtLoop:12
-§14 ต่อผู้เล่น: โล่ฟองน้ำ/ฮีล • ลูกผู้ช่วยที่ไหล่ • ร่างโคลน + เส้นน้ำ • …
-waterFX:15
-§43 ทั้งเกม: ลูกผู้ช่วยที่กำลังพุ่ง (ล็อกเป้า)
-syncWater:44
-§50 เหตุการณ์ (efx z 'wt…')
-waterEfx:51
-§77 HUD: เกจฮีลโล่ (โค้งซ้ายรอบเป้าเล็ง)
-drawWaterHud:78
+## js/68-water-view.js (114) — 
+WTV:5 WTC:6 wtState:7 wtStop:8 wtMesh:9 _wtV:11 _wtP:11 wtBakeClone:12 wtLineMat:23 WT_SINKD:30 wtSinkOffset:31 wtAlive:38 wtLoop:40
+§42 ต่อผู้เล่น: โล่ฟองน้ำ/ฮีล • ลูกผู้ช่วยที่ไหล่ • ร่างโคลน + เส้นน้ำ • …
+waterFX:43
+§76 ทั้งเกม: ลูกผู้ช่วยที่กำลังพุ่ง (ล็อกเป้า)
+syncWater:77
+§83 เหตุการณ์ (efx z 'wt…')
+waterEfx:84
+§110 HUD: เกจฮีลโล่ (โค้งซ้ายรอบเป้าเล็ง)
+drawWaterHud:111
 
 ## js/68-wind-view.js (97) — 
 WV:6 wvState:7 wvAlive:8
@@ -674,4 +674,4 @@ BRM:9 BSK:11 BROOM_SK:17 broomVert:38 broomMove:50 broomStrike:68 broomStrikeTic
 §125 ฝั่งจอ
 broomHead:127 BBEAM:134 _bbGeo:135 broomView:136 broomMountFx:165 broomDismountFx:173 broomBeamFx:175 broomSkFx:191 broomStrikeFx:204 broomFlakFx:209 broomHud:214 broomHudT:215 broomTick:224
 
-(80 files, 19133 lines)
+(80 files, 19166 lines)
