@@ -1,0 +1,142 @@
+{
+ "v": 1,
+ "desc": "โล่สายน้ำ ตอนฮีล (ตกลงกับผู้ใช้): โดมเรืองขึ้น + สายน้ำเล็ก 3 สายวนเกลียวขึ้นรอบตัว + ฟองน้ำเรืองลอยขึ้น + ประกายเขียวอ่อนจางๆ — วนตลอดที่ยังฮีล",
+ "tags": [
+  "water",
+  "shield",
+  "ingame"
+ ],
+ "pal": "ice",
+ "dur": 1,
+ "seed": 41,
+ "layers": [
+  {
+   "id": "glow",
+   "t": "mesh",
+   "at": 0,
+   "life": 1,
+   "att": "feet",
+   "shape": "dome",
+   "mat": "water",
+   "col": "#9ffbff",
+   "col2": "#5ef0ff",
+   "rim": 1,
+   "scroll": 1.6,
+   "int": 1.7,
+   "disp": 0.5,
+   "pos": [
+    0,
+    0,
+    0
+   ],
+   "scale": [
+    2.1630000000000003,
+    2.4205,
+    2.1630000000000003
+   ],
+   "op": 0.22,
+   "fade": 0,
+   "spin": -40,
+   "loop": true
+  },
+  {
+   "id": "spiral",
+   "t": "mesh",
+   "at": 0,
+   "life": 1,
+   "att": "feet",
+   "shape": "model",
+   "mat": "water",
+   "col": "#5ef0ff",
+   "col2": "#1fc3e6",
+   "rim": 1,
+   "scroll": 2.2,
+   "int": 1.2,
+   "disp": 0.6,
+   "pos": [
+    0,
+    0,
+    0
+   ],
+   "scale": 1,
+   "op": 0.95,
+   "fade": 0,
+   "spin": 160,
+   "model": "water_heal_spiral",
+   "loop": true
+  },
+  {
+   "id": "bubbles",
+   "t": "emit",
+   "at": 0,
+   "life": 1,
+   "att": "feet",
+   "pos": [
+    0,
+    0.2,
+    0
+   ],
+   "rate": 22,
+   "from": "disc",
+   "fr": 0.9,
+   "dir": "up",
+   "spread": 0.15,
+   "speed": [
+    0.8,
+    1.6
+   ],
+   "plife": [
+    0.8,
+    1.2
+   ],
+   "look": "model",
+   "model": "water_blob",
+   "mmat": "ice",
+   "msize": [
+    0.05,
+    0.1
+   ],
+   "col": "#d2fcff",
+   "c2": "#5ef0ff",
+   "mspin": 0,
+   "gravity": -1,
+   "drag": 0.3,
+   "bounce": 0,
+   "loop": true
+  },
+  {
+   "id": "sparkle",
+   "t": "emit",
+   "at": 0,
+   "life": 1,
+   "att": "feet",
+   "pos": [
+    0,
+    1.1,
+    0
+   ],
+   "rate": 12,
+   "from": "sphere",
+   "fr": 1.1,
+   "dir": "up",
+   "speed": [
+    0.4,
+    0.9
+   ],
+   "plife": [
+    0.5,
+    0.8
+   ],
+   "look": "spark",
+   "size": [
+    3,
+    5
+   ],
+   "col": "#b8ffd8",
+   "c2": "#d2fcff",
+   "gravity": -0.3,
+   "drag": 0.5,
+   "loop": true
+  }
+ ]
+}

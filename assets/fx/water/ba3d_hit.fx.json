@@ -1,0 +1,138 @@
+{
+ "v": 1,
+ "desc": "BA สายน้ำ (3D): โดน = น้ำสาดแฉก 3D + หยดน้ำกระเด็น",
+ "tags": [
+  "water",
+  "3d",
+  "ba",
+  "ingame"
+ ],
+ "pal": "ice",
+ "dur": 0.5,
+ "seed": 23,
+ "layers": [
+  {
+   "id": "h_crown",
+   "t": "mesh",
+   "at": 0,
+   "life": 0.45,
+   "att": "point",
+   "shape": "model",
+   "mat": "toon",
+   "col": "#19dbff",
+   "col2": "#3870ff",
+   "rim": 0.55,
+   "pos": [
+    0,
+    -0.4,
+    0
+   ],
+   "scale": {
+    "0": [
+     0.5599999999999999,
+     0.1,
+     0.5599999999999999
+    ],
+    "0.25": [
+     0.8,
+     0.8,
+     0.8
+    ],
+    "0.6": [
+     0.9199999999999999,
+     0.6400000000000001,
+     0.9199999999999999
+    ],
+    "1": [
+     1.04,
+     0.02,
+     1.04
+    ]
+   },
+   "op": 1,
+   "fade": 0,
+   "zw": true,
+   "model": "water_crown",
+   "rot": [
+    0,
+    264.31526836205836,
+    0
+   ]
+  },
+  {
+   "id": "h_drops",
+   "t": "emit",
+   "at": 0,
+   "life": 0.04,
+   "att": "point",
+   "pos": [
+    0,
+    0,
+    0
+   ],
+   "burst": 14,
+   "rate": 0,
+   "from": "sphere",
+   "fr": 0.15,
+   "dir": "out",
+   "up": [
+    2,
+    4
+   ],
+   "speed": [
+    3,
+    6
+   ],
+   "plife": [
+    0.5,
+    0.9
+   ],
+   "look": "model",
+   "model": "water_blob",
+   "mmat": "ice",
+   "msize": [
+    0.07,
+    0.17
+   ],
+   "col": "#12d6ff",
+   "c2": "#2d63ff",
+   "mspin": 0,
+   "gravity": 12,
+   "drag": 0.4,
+   "bounce": 0.2
+  },
+  {
+   "id": "h_spray",
+   "t": "emit",
+   "at": 0,
+   "life": 0.08,
+   "att": "point",
+   "pos": [
+    0,
+    0,
+    0
+   ],
+   "rate": 300,
+   "from": "sphere",
+   "fr": 0.2,
+   "dir": "out",
+   "speed": [
+    3,
+    6
+   ],
+   "plife": [
+    0.25,
+    0.45
+   ],
+   "look": "glow",
+   "size": [
+    1.5,
+    3.0
+   ],
+   "col": "#f4fdff",
+   "c2": "#7ff7ff",
+   "gravity": 6,
+   "drag": 1
+  }
+ ]
+}

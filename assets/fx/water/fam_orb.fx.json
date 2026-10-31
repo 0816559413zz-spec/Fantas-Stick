@@ -1,0 +1,251 @@
+{
+ "v": 1,
+ "desc": "Tidecaller Orb: ลูกน้ำผู้ช่วย (ลูกน้ำการ์ตูนเล็ก + แถบพัน + เส้นขาววน + เรืองฟ้า ให้เห็นชัด) — ที่ไหล่ วนตลอด 10 วิ",
+ "tags": [
+  "water",
+  "tidecaller",
+  "ingame"
+ ],
+ "pal": "ice",
+ "dur": 1,
+ "seed": 11,
+ "layers": [
+  {
+   "id": "ball",
+   "t": "mesh",
+   "at": 0,
+   "life": 1,
+   "att": "point",
+   "shape": "sphere",
+   "mat": "tex",
+   "tex": "tex/water_toon_ball",
+   "col": "#ffffff",
+   "col2": "#b4f1ff",
+   "rim": 0,
+   "uvTile": [
+    1,
+    1
+   ],
+   "uvScroll": [
+    0.3,
+    0
+   ],
+   "pos": [
+    0,
+    0,
+    0
+   ],
+   "scale": 0.3,
+   "op": 1,
+   "fade": 0.15,
+   "loop": true
+  },
+  {
+   "id": "band0",
+   "t": "mesh",
+   "at": 0,
+   "life": 1,
+   "att": "point",
+   "shape": "model",
+   "model": "wind_pieces0",
+   "mat": "tex",
+   "tex": "tex/water_toon_band",
+   "col": "#ffffff",
+   "col2": "#000000",
+   "rim": 0,
+   "uvTile": [
+    1,
+    1
+   ],
+   "uvScroll": [
+    0,
+    0
+   ],
+   "pos": [
+    0,
+    0,
+    0
+   ],
+   "rot": [
+    -2.1,
+    0.0,
+    33.6
+   ],
+   "spin": 620,
+   "scale": [
+    0.38,
+    0.12,
+    0.38
+   ],
+   "op": 0.95,
+   "fade": 0,
+   "loop": true
+  },
+  {
+   "id": "band1",
+   "t": "mesh",
+   "at": 0,
+   "life": 1,
+   "att": "point",
+   "shape": "model",
+   "model": "wind_pieces1",
+   "mat": "tex",
+   "tex": "tex/water_toon_band",
+   "col": "#b4f1ff",
+   "col2": "#000000",
+   "rim": 0,
+   "uvTile": [
+    1,
+    1
+   ],
+   "uvScroll": [
+    0,
+    0
+   ],
+   "pos": [
+    0,
+    0,
+    0
+   ],
+   "rot": [
+    -5.6,
+    180.0,
+    4.6
+   ],
+   "spin": -560,
+   "scale": [
+    0.38,
+    0.12,
+    0.38
+   ],
+   "op": 0.95,
+   "fade": 0,
+   "loop": true
+  },
+  {
+   "id": "arcs0",
+   "t": "mesh",
+   "at": 0,
+   "life": 1,
+   "att": "point",
+   "shape": "plane",
+   "mat": "tex",
+   "tex": "tex/water_white_arcs",
+   "col": "#ffffff",
+   "col2": "#000000",
+   "rim": 0,
+   "uvTile": [
+    1,
+    1
+   ],
+   "uvScroll": [
+    0,
+    0
+   ],
+   "pos": [
+    0,
+    -0.05,
+    0
+   ],
+   "rot": [
+    110,
+    0,
+    0
+   ],
+   "spin": 380,
+   "int": 1.4,
+   "scale": 1.3,
+   "op": 1,
+   "fade": 0,
+   "loop": true
+  },
+  {
+   "id": "stars",
+   "t": "emit",
+   "at": 0,
+   "life": 1,
+   "att": "point",
+   "pos": [
+    0,
+    0,
+    0
+   ],
+   "rate": 10,
+   "burst": 0,
+   "from": "sphere",
+   "fr": 0.45,
+   "dir": "tangent",
+   "speed": [
+    1,
+    3
+   ],
+   "plife": [
+    0.25,
+    0.5
+   ],
+   "look": "spark",
+   "size": [
+    2.0,
+    4.4
+   ],
+   "col": "#ffffff",
+   "c2": "#b4f1ff",
+   "gravity": 0,
+   "drag": 1,
+   "loop": true
+  },
+  {
+   "id": "streak",
+   "t": "emit",
+   "at": 0,
+   "life": 1,
+   "att": "point",
+   "pos": [
+    0,
+    0,
+    0
+   ],
+   "rate": 30,
+   "burst": 0,
+   "from": "ring",
+   "fr": 0.49500000000000005,
+   "dir": "tangent",
+   "speed": [
+    6,
+    10
+   ],
+   "plife": [
+    0.15,
+    0.3
+   ],
+   "look": "streak",
+   "size": [
+    1.5,
+    2.7
+   ],
+   "col": "#ffffff",
+   "c2": "#46c6ff",
+   "gravity": 0,
+   "drag": 0,
+   "curl": false,
+   "loop": true
+  },
+  {
+   "id": "glow",
+   "t": "flash",
+   "at": 0,
+   "life": 1,
+   "att": "point",
+   "pos": [
+    0,
+    0,
+    0
+   ],
+   "col": "#7ff6ff",
+   "size0": 0.9,
+   "size": 0.9,
+   "k": 0.25,
+   "loop": true
+  }
+ ]
+}

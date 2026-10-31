@@ -1,0 +1,264 @@
+{
+ "v": 1,
+ "desc": "โล่สายน้ำ รอบ 3 (รูป shield_orb_ref2): ลูกน้ำลายวนการ์ตูน (เข้มน้อย ฟ้ากลาง+ฟ้าอ่อนเยอะ ยอดขาว ลายไหลทางเดียว) โปร่ง 82% + จานน้ำวนฐาน + เส้นขาววน 3 ชั้น + เส้นลมขาว + ประกายดาว — วนตลอดที่ยกโล่",
+ "tags": [
+  "water",
+  "shield",
+  "ingame"
+ ],
+ "pal": "ice",
+ "dur": 1,
+ "seed": 41,
+ "layers": [
+  {
+   "id": "orb",
+   "t": "mesh",
+   "at": 0,
+   "life": 1,
+   "att": "feet",
+   "shape": "dome",
+   "mat": "tex",
+   "tex": "tex/water_orb_swirl",
+   "col": "#ffffff",
+   "col2": "#000000",
+   "rim": 0,
+   "uvTile": [
+    1,
+    1
+   ],
+   "uvScroll": [
+    0.12,
+    0
+   ],
+   "pos": [
+    0,
+    -0.15,
+    0
+   ],
+   "scale": [
+    2.1,
+    2.35,
+    2.1
+   ],
+   "op": 0.82,
+   "fade": 0,
+   "loop": true
+  },
+  {
+   "id": "disk",
+   "t": "mesh",
+   "at": 0,
+   "life": 1,
+   "att": "feet",
+   "shape": "plane",
+   "mat": "tex",
+   "tex": "tex/water_toon_swirl",
+   "col": "#ffffff",
+   "col2": "#000000",
+   "rim": 0,
+   "uvTile": [
+    1,
+    1
+   ],
+   "uvScroll": [
+    0,
+    0
+   ],
+   "pos": [
+    0,
+    0.05,
+    0
+   ],
+   "rot": [
+    90,
+    0,
+    0
+   ],
+   "spin": 140,
+   "scale": 5.670000000000001,
+   "op": 0.9,
+   "fade": 0,
+   "loop": true
+  },
+  {
+   "id": "arcs0",
+   "t": "mesh",
+   "at": 0,
+   "life": 1,
+   "att": "feet",
+   "shape": "plane",
+   "mat": "tex",
+   "tex": "tex/water_white_arcs",
+   "col": "#ffffff",
+   "col2": "#000000",
+   "rim": 0,
+   "uvTile": [
+    1,
+    1
+   ],
+   "uvScroll": [
+    0,
+    0
+   ],
+   "pos": [
+    0,
+    0.1,
+    0
+   ],
+   "rot": [
+    90,
+    0,
+    0.0
+   ],
+   "spin": 220,
+   "int": 1.3,
+   "scale": 7.14,
+   "op": 1,
+   "fade": 0,
+   "loop": true
+  },
+  {
+   "id": "arcs1",
+   "t": "mesh",
+   "at": 0,
+   "life": 1,
+   "att": "feet",
+   "shape": "plane",
+   "mat": "tex",
+   "tex": "tex/water_white_arcs",
+   "col": "#ffffff",
+   "col2": "#000000",
+   "rim": 0,
+   "uvTile": [
+    1,
+    1
+   ],
+   "uvScroll": [
+    0,
+    0
+   ],
+   "pos": [
+    0,
+    0.3,
+    0
+   ],
+   "rot": [
+    94,
+    50,
+    2.0
+   ],
+   "spin": -260,
+   "int": 1.3,
+   "scale": 6.09,
+   "op": 1,
+   "fade": 0,
+   "loop": true
+  },
+  {
+   "id": "arcs2",
+   "t": "mesh",
+   "at": 0,
+   "life": 1,
+   "att": "feet",
+   "shape": "plane",
+   "mat": "tex",
+   "tex": "tex/water_white_arcs",
+   "col": "#ffffff",
+   "col2": "#000000",
+   "rim": 0,
+   "uvTile": [
+    1,
+    1
+   ],
+   "uvScroll": [
+    0,
+    0
+   ],
+   "pos": [
+    0,
+    1.457,
+    0
+   ],
+   "rot": [
+    100,
+    100,
+    5.0
+   ],
+   "spin": 300,
+   "int": 1.3,
+   "scale": 4.83,
+   "op": 1,
+   "fade": 0,
+   "loop": true
+  },
+  {
+   "id": "streaks",
+   "t": "emit",
+   "at": 0,
+   "life": 1,
+   "att": "feet",
+   "pos": [
+    0,
+    1.2925000000000002,
+    0
+   ],
+   "rate": 30,
+   "from": "ring",
+   "fr": 2.3100000000000005,
+   "dir": "tangent",
+   "speed": [
+    8,
+    12
+   ],
+   "plife": [
+    0.2,
+    0.35
+   ],
+   "look": "streak",
+   "size": [
+    2,
+    3.5
+   ],
+   "col": "#ffffff",
+   "c2": "#bff4ff",
+   "gravity": 0,
+   "drag": 0,
+   "curl": false,
+   "loop": true
+  },
+  {
+   "id": "stars",
+   "t": "emit",
+   "at": 0,
+   "life": 1,
+   "att": "feet",
+   "pos": [
+    0,
+    1.41,
+    0
+   ],
+   "rate": 6,
+   "from": "ring",
+   "fr": 2.625,
+   "dir": "tangent",
+   "speed": [
+    5,
+    8
+   ],
+   "plife": [
+    0.3,
+    0.5
+   ],
+   "look": "spark",
+   "size": [
+    5,
+    8
+   ],
+   "col": "#ffffff",
+   "c2": "#d6f6ff",
+   "gravity": 0,
+   "drag": 0.5,
+   "loop": true
+  }
+ ]
+}

@@ -1,0 +1,68 @@
+{
+ "v": 1,
+ "desc": "Tidecaller Orb: ลูกยิงตามโดน",
+ "tags": [
+  "water",
+  "tidecaller",
+  "ingame"
+ ],
+ "pal": "ice",
+ "dur": 0.13,
+ "seed": 11,
+ "layers": [
+  {
+   "id": "drops",
+   "t": "emit",
+   "at": 0,
+   "life": 0.04,
+   "att": "point",
+   "pos": [
+    0,
+    0,
+    0
+   ],
+   "burst": 8,
+   "rate": 0,
+   "from": "sphere",
+   "fr": 0.1,
+   "dir": "out",
+   "up": [
+    0.75,
+    1.5
+   ],
+   "speed": [
+    2,
+    4
+   ],
+   "plife": [
+    0.35,
+    0.7
+   ],
+   "look": "glow",
+   "size": [
+    0.88,
+    1.75
+   ],
+   "col": "#7ff6ff",
+   "c2": "#1f78ff",
+   "gravity": 9,
+   "drag": 0.5
+  },
+  {
+   "id": "flash",
+   "t": "flash",
+   "at": 0,
+   "life": 0.08,
+   "att": "point",
+   "pos": [
+    0,
+    0,
+    0
+   ],
+   "col": "#7ff6ff",
+   "size0": 0.2,
+   "size": 0.7,
+   "k": 0.35
+  }
+ ]
+}

@@ -1,0 +1,146 @@
+{
+ "v": 1,
+ "desc": "BA สายน้ำ (3D): กระสุนก้อนน้ำ 3D หางน้ำรูปกรวย หยดน้ำ 3D ร่วงตามทาง — ตามกระสุน",
+ "tags": [
+  "water",
+  "3d",
+  "ba",
+  "ingame"
+ ],
+ "pal": "ice",
+ "dur": 1,
+ "seed": 23,
+ "layers": [
+  {
+   "id": "blob",
+   "t": "mesh",
+   "at": 0,
+   "life": 1,
+   "att": "point",
+   "shape": "model",
+   "mat": "toon",
+   "col": "#19dbff",
+   "col2": "#3870ff",
+   "rim": 0.55,
+   "pos": [
+    0,
+    0,
+    0
+   ],
+   "scale": [
+    0.32,
+    0.28,
+    0.42
+   ],
+   "op": 1,
+   "fade": 0,
+   "zw": true,
+   "model": "water_blob",
+   "spin": 300,
+   "loop": true
+  },
+  {
+   "id": "tail",
+   "t": "mesh",
+   "at": 0,
+   "life": 1,
+   "att": "point",
+   "shape": "cone",
+   "mat": "toon",
+   "col": "#0fb1ff",
+   "col2": "#3870ff",
+   "rim": 0.6,
+   "pos": [
+    0,
+    0,
+    -0.35
+   ],
+   "scale": [
+    0.22,
+    0.6,
+    0.22
+   ],
+   "op": 1,
+   "fade": 0,
+   "zw": true,
+   "rot": [
+    -90,
+    0,
+    0
+   ],
+   "loop": true
+  },
+  {
+   "id": "drip",
+   "t": "emit",
+   "at": 0,
+   "life": 1,
+   "att": "point",
+   "pos": [
+    0,
+    0,
+    -0.2
+   ],
+   "rate": 40,
+   "from": "sphere",
+   "fr": 0.12,
+   "dir": "random",
+   "speed": [
+    0.5,
+    1.5
+   ],
+   "plife": [
+    0.3,
+    0.5
+   ],
+   "look": "model",
+   "model": "water_blob",
+   "mmat": "ice",
+   "msize": [
+    0.04,
+    0.09
+   ],
+   "col": "#12d6ff",
+   "c2": "#2d63ff",
+   "mspin": 0,
+   "gravity": 9,
+   "drag": 0.5,
+   "bounce": 0.2,
+   "loop": true
+  },
+  {
+   "id": "m_spray",
+   "t": "emit",
+   "at": 0,
+   "life": 1,
+   "att": "point",
+   "pos": [
+    0,
+    0,
+    -0.1
+   ],
+   "rate": 50,
+   "from": "sphere",
+   "fr": 0.15,
+   "dir": "random",
+   "speed": [
+    0.5,
+    1.5
+   ],
+   "plife": [
+    0.25,
+    0.45
+   ],
+   "look": "glow",
+   "size": [
+    1.5,
+    3.0
+   ],
+   "col": "#f4fdff",
+   "c2": "#7ff7ff",
+   "gravity": 6,
+   "drag": 1,
+   "loop": true
+  }
+ ]
+}

@@ -118,6 +118,7 @@
       "flow": {"type": "vec3", "def": [0, 1, 0], "th": "ทิศไฟไหล"},
       "mode": {"type": "enum", "of": ["auto", "ball", "sheet"], "def": "auto", "th": "แบบไฟ"},
       "bill": {"type": "bool", "def": false, "th": "หันหากล้อง"},
+      "zw": {"type": "bool", "def": false, "th": "ทึบ (toon): เขียนความลึก ไม่วาดด้านหลัง", "en": "Solid (toon): write depth and cull back faces — 3D water volumes don't show their inside through as stripes."},
       "tex": {"type": "str", "def": "", "th": "ภาพ (mat=flip): tex/<ชื่อ> = ภาพที่วาดในสตูดิโอ หรือชื่อใน manifest"},
       "uvTile": {"type": "list", "def": [1,1], "th": "ปูภาพกี่ซ้ำ [u,v] (mat=tex)"},
       "uvScroll": {"type": "list", "def": [0,0], "th": "ภาพไหลกี่รอบ/วิ [u,v] (mat=tex)"},
@@ -213,7 +214,7 @@
       "args": {"type": "obj", "def": {}, "th": "ค่าที่ส่ง"}}}
   },
   "shapes": ["sphere", "dome", "disc", "ring", "cylinder", "cone", "torus", "crescent", "spikes", "beam", "plane", "lathe", "ribbon", "glb", "model"],
-  "mats": ["energy", "fire", "ice", "glow", "solid", "flip", "tex", "toon", "black"],
+  "mats": ["energy", "fire", "ice", "glow", "solid", "flip", "tex", "toon", "black", "water", "toonwater"],
   "froms": ["point", "sphere", "hemisphere", "ring", "disc", "cone", "box", "line", "mesh"],
   "dirs": ["out", "flat", "up", "down", "in", "aim", "tangent", "random"],
   "looks": ["glow", "spark", "streak", "ring", "flake", "smoke", "fire", "ember", "model"],

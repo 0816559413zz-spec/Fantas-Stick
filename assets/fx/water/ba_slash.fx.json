@@ -1,0 +1,528 @@
+{
+ "v": 1,
+ "desc": "BA สายน้ำ (ตกลงกับผู้ใช้): ไม้ลากสายน้ำใสเส้นเดียวตามแนวตวัด 0.2 วิ ค้างกลางอากาศ แล้วบีบเป็นหยด 3 หยด (0.25/0.45/0.65) ตามจังหวะกระสุน • น้ำใสขอบขาว ไฮไลต์ไหล หยดน้ำเล็กร่วง — ตามตัวผู้เล่น",
+ "tags": [
+  "water",
+  "ba",
+  "ingame"
+ ],
+ "pal": "ice",
+ "dur": 0.97,
+ "seed": 31,
+ "layers": [
+  {
+   "id": "stream0",
+   "t": "mesh",
+   "at": 0.0,
+   "life": 0.92,
+   "att": "feet",
+   "shape": "model",
+   "mat": "water",
+   "col": "#5ef0ff",
+   "col2": "#1fc3e6",
+   "rim": 1,
+   "scroll": 1.6,
+   "int": 1.25,
+   "disp": 0.6,
+   "pos": {
+    "0": [
+     0,
+     0,
+     0
+    ],
+    "0.783": [
+     0,
+     0,
+     0
+    ],
+    "1": [
+     0,
+     -1.3,
+     0
+    ]
+   },
+   "scale": {
+    "0": 0.3,
+    "0.105": 1,
+    "0.783": 1,
+    "1": [
+     0.9,
+     0.6,
+     0.9
+    ]
+   },
+   "op": 1,
+   "fade": 0,
+   "model": "water_ba_stream0"
+  },
+  {
+   "id": "foam0",
+   "t": "emit",
+   "at": 0.03,
+   "life": 0.8200000000000001,
+   "att": "feet",
+   "pos": [
+    1.05,
+    2.282,
+    0.6
+   ],
+   "rate": 8,
+   "from": "sphere",
+   "fr": 0.25,
+   "dir": "random",
+   "speed": [
+    0.1,
+    0.4
+   ],
+   "plife": [
+    0.25,
+    0.4
+   ],
+   "look": "model",
+   "model": "water_blob",
+   "mmat": "ice",
+   "msize": [
+    0.03,
+    0.06
+   ],
+   "col": "#d2fcff",
+   "c2": "#5ef0ff",
+   "mspin": 0,
+   "gravity": 0,
+   "drag": 2,
+   "bounce": 0
+  },
+  {
+   "id": "pinch0",
+   "t": "mesh",
+   "at": 0.13,
+   "life": 0.14,
+   "att": "feet",
+   "shape": "sphere",
+   "mat": "water",
+   "col": "#5ef0ff",
+   "col2": "#1fc3e6",
+   "rim": 1,
+   "scroll": 2,
+   "int": 1.25,
+   "disp": 0.6,
+   "pos": [
+    1.05,
+    2.282,
+    0.6
+   ],
+   "scale": {
+    "0": 0.05,
+    "0.75": 0.2,
+    "1": 0.12
+   },
+   "op": 1,
+   "fade": 0
+  },
+  {
+   "id": "drip0",
+   "t": "emit",
+   "at": 0.05,
+   "life": 0.25,
+   "att": "feet",
+   "pos": [
+    1.05,
+    2.282,
+    0.6
+   ],
+   "rate": 10,
+   "from": "sphere",
+   "fr": 0.3,
+   "dir": "down",
+   "speed": [
+    0.2,
+    0.6
+   ],
+   "plife": [
+    0.4,
+    0.6
+   ],
+   "look": "model",
+   "model": "water_blob",
+   "mmat": "ice",
+   "msize": [
+    0.035,
+    0.07
+   ],
+   "col": "#5ef0ff",
+   "c2": "#1fc3e6",
+   "mspin": 0,
+   "gravity": 10,
+   "drag": 0.2,
+   "bounce": 0.25
+  },
+  {
+   "id": "stream1",
+   "t": "mesh",
+   "at": 0.067,
+   "life": 0.853,
+   "att": "feet",
+   "shape": "model",
+   "mat": "water",
+   "col": "#5ef0ff",
+   "col2": "#1fc3e6",
+   "rim": 1,
+   "scroll": 1.6,
+   "int": 1.25,
+   "disp": 0.6,
+   "pos": {
+    "0": [
+     0,
+     0,
+     0
+    ],
+    "0.766": [
+     0,
+     0,
+     0
+    ],
+    "1": [
+     0,
+     -1.3,
+     0
+    ]
+   },
+   "scale": {
+    "0": 0.3,
+    "0.113": 1,
+    "0.766": 1,
+    "1": [
+     0.9,
+     0.6,
+     0.9
+    ]
+   },
+   "op": 1,
+   "fade": 0,
+   "model": "water_ba_stream1"
+  },
+  {
+   "id": "foam1",
+   "t": "emit",
+   "at": 0.097,
+   "life": 0.753,
+   "att": "feet",
+   "pos": [
+    0.0,
+    1.611,
+    1.4
+   ],
+   "rate": 8,
+   "from": "sphere",
+   "fr": 0.25,
+   "dir": "random",
+   "speed": [
+    0.1,
+    0.4
+   ],
+   "plife": [
+    0.25,
+    0.4
+   ],
+   "look": "model",
+   "model": "water_blob",
+   "mmat": "ice",
+   "msize": [
+    0.03,
+    0.06
+   ],
+   "col": "#d2fcff",
+   "c2": "#5ef0ff",
+   "mspin": 0,
+   "gravity": 0,
+   "drag": 2,
+   "bounce": 0
+  },
+  {
+   "id": "pinch1",
+   "t": "mesh",
+   "at": 0.33,
+   "life": 0.14,
+   "att": "feet",
+   "shape": "sphere",
+   "mat": "water",
+   "col": "#5ef0ff",
+   "col2": "#1fc3e6",
+   "rim": 1,
+   "scroll": 2,
+   "int": 1.25,
+   "disp": 0.6,
+   "pos": [
+    0.0,
+    1.611,
+    1.4
+   ],
+   "scale": {
+    "0": 0.05,
+    "0.75": 0.2,
+    "1": 0.12
+   },
+   "op": 1,
+   "fade": 0
+  },
+  {
+   "id": "drip1",
+   "t": "emit",
+   "at": 0.117,
+   "life": 0.383,
+   "att": "feet",
+   "pos": [
+    0.0,
+    1.611,
+    1.4
+   ],
+   "rate": 10,
+   "from": "sphere",
+   "fr": 0.3,
+   "dir": "down",
+   "speed": [
+    0.2,
+    0.6
+   ],
+   "plife": [
+    0.4,
+    0.6
+   ],
+   "look": "model",
+   "model": "water_blob",
+   "mmat": "ice",
+   "msize": [
+    0.035,
+    0.07
+   ],
+   "col": "#5ef0ff",
+   "c2": "#1fc3e6",
+   "mspin": 0,
+   "gravity": 10,
+   "drag": 0.2,
+   "bounce": 0.25
+  },
+  {
+   "id": "stream2",
+   "t": "mesh",
+   "at": 0.133,
+   "life": 0.787,
+   "att": "feet",
+   "shape": "model",
+   "mat": "water",
+   "col": "#5ef0ff",
+   "col2": "#1fc3e6",
+   "rim": 1,
+   "scroll": 1.6,
+   "int": 1.25,
+   "disp": 0.6,
+   "pos": {
+    "0": [
+     0,
+     0,
+     0
+    ],
+    "0.746": [
+     0,
+     0,
+     0
+    ],
+    "1": [
+     0,
+     -1.3,
+     0
+    ]
+   },
+   "scale": {
+    "0": 0.3,
+    "0.123": 1,
+    "0.746": 1,
+    "1": [
+     0.9,
+     0.6,
+     0.9
+    ]
+   },
+   "op": 1,
+   "fade": 0,
+   "model": "water_ba_stream2"
+  },
+  {
+   "id": "foam2",
+   "t": "emit",
+   "at": 0.163,
+   "life": 0.687,
+   "att": "feet",
+   "pos": [
+    -1.05,
+    1.12,
+    0.75
+   ],
+   "rate": 8,
+   "from": "sphere",
+   "fr": 0.25,
+   "dir": "random",
+   "speed": [
+    0.1,
+    0.4
+   ],
+   "plife": [
+    0.25,
+    0.4
+   ],
+   "look": "model",
+   "model": "water_blob",
+   "mmat": "ice",
+   "msize": [
+    0.03,
+    0.06
+   ],
+   "col": "#d2fcff",
+   "c2": "#5ef0ff",
+   "mspin": 0,
+   "gravity": 0,
+   "drag": 2,
+   "bounce": 0
+  },
+  {
+   "id": "pinch2",
+   "t": "mesh",
+   "at": 0.53,
+   "life": 0.14,
+   "att": "feet",
+   "shape": "sphere",
+   "mat": "water",
+   "col": "#5ef0ff",
+   "col2": "#1fc3e6",
+   "rim": 1,
+   "scroll": 2,
+   "int": 1.25,
+   "disp": 0.6,
+   "pos": [
+    -1.05,
+    1.12,
+    0.75
+   ],
+   "scale": {
+    "0": 0.05,
+    "0.75": 0.2,
+    "1": 0.12
+   },
+   "op": 1,
+   "fade": 0
+  },
+  {
+   "id": "drip2",
+   "t": "emit",
+   "at": 0.183,
+   "life": 0.517,
+   "att": "feet",
+   "pos": [
+    -1.05,
+    1.12,
+    0.75
+   ],
+   "rate": 10,
+   "from": "sphere",
+   "fr": 0.3,
+   "dir": "down",
+   "speed": [
+    0.2,
+    0.6
+   ],
+   "plife": [
+    0.4,
+    0.6
+   ],
+   "look": "model",
+   "model": "water_blob",
+   "mmat": "ice",
+   "msize": [
+    0.035,
+    0.07
+   ],
+   "col": "#5ef0ff",
+   "c2": "#1fc3e6",
+   "mspin": 0,
+   "gravity": 10,
+   "drag": 0.2,
+   "bounce": 0.25
+  },
+  {
+   "id": "swish",
+   "t": "emit",
+   "at": 0,
+   "life": 0.2,
+   "att": "wand",
+   "pos": [
+    0,
+    0,
+    0
+   ],
+   "rate": 25,
+   "from": "sphere",
+   "fr": 0.05,
+   "dir": "random",
+   "speed": [
+    0.3,
+    1
+   ],
+   "plife": [
+    0.15,
+    0.25
+   ],
+   "look": "glow",
+   "size": [
+    0.8,
+    1.4
+   ],
+   "col": "#ffffff",
+   "c2": "#d2fcff",
+   "gravity": 0,
+   "drag": 2
+  },
+  {
+   "id": "land",
+   "t": "emit",
+   "at": 0.87,
+   "life": 0.04,
+   "att": "feet",
+   "pos": [
+    0,
+    0.1,
+    0.8
+   ],
+   "burst": 22,
+   "rate": 0,
+   "from": "disc",
+   "fr": 1.1,
+   "dir": "up",
+   "spread": 0.6,
+   "up": [
+    1,
+    2.5
+   ],
+   "speed": [
+    1,
+    2.5
+   ],
+   "plife": [
+    0.3,
+    0.5
+   ],
+   "look": "model",
+   "model": "water_blob",
+   "mmat": "ice",
+   "msize": [
+    0.03,
+    0.07
+   ],
+   "col": "#d2fcff",
+   "c2": "#5ef0ff",
+   "mspin": 0,
+   "gravity": 10,
+   "drag": 0.3,
+   "bounce": 0.2
+  }
+ ]
+}

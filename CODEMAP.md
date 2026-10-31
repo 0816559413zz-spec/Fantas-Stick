@@ -406,7 +406,7 @@ BFA:315 bfWreck:316 updateBfAir:321 bfRumble:344 updateBf:347
 §350 4) เอฟเฟกต์ทั้งจอ (ค่าไปที่ GradePass ใน js/27-world.js)
 SCR:351 screenFlash:352 screenRadial:353 screenKick:354 screenHurt:355 _scv:356 updateScreenFx:357 updateVfxKit:365
 
-## js/45-fx-runtime.js (347) — 
+## js/45-fx-runtime.js (379) — VFX Studio runtime — เล่นเอฟเฟกต์จากไฟล์ข้อมูล assets/fx/<กลุ่ม>/<ชื่อ>.fx.json (แผน desi…
 FXR:9 FXDEG:10
 §11 โหลด
 fxFetch:12 fxDefaults:13 fxBoot:14 fxOverrides:24 fxLoad:27 fxData:31
@@ -423,17 +423,17 @@ fxN:107 fxSpawn:108 fxTick:142 fxEnd:153
 §160 อนุภาค
 _fxrnd:161 fxUnit:162 fxCone:163 fxEmit:165 fxPart:182
 §197 รูปทรง 3D
-FXGEO:198 fxMerge:199 fxRibbon:204 fxGeo:210 fxEnergyMat:230 fxToonMat:242 fxMeshMake:250 fxMeshTick:269 fxFlipTex:284
-§289 หางแสง / รอยฟัน
-fxTrailTick:290
-§296 สายฟ้า
-fxBolt:297
-§303 ฟังก์ชันในโค้ดที่ไฟล์เรียกได้ (ชั้น t:"code")
-FXCODE:304
-§317 ผูกกับ event ของเกม (assets/fx/bind.json) — เรียกจาก fx(ev)
-fxLoopName:319 blzFxName:320 fxLoopKeep:321 fshHitFx:323 fxBind:326
-§337 แม่แบบ playFx เป็นไฟล์ (assets/fx/tpl/*, sig/*, rec/*)
-fxTpl:339
+FXGEO:198 fxMerge:199 fxRibbon:204 fxGeo:210 fxEnergyMat:230 fxWaterMat:245 fxToonWaterMat:258 fxToonMat:272 fxMeshMake:280 fxMeshTick:301 fxFlipTex:316
+§321 หางแสง / รอยฟัน
+fxTrailTick:322
+§328 สายฟ้า
+fxBolt:329
+§335 ฟังก์ชันในโค้ดที่ไฟล์เรียกได้ (ชั้น t:"code")
+FXCODE:336
+§349 ผูกกับ event ของเกม (assets/fx/bind.json) — เรียกจาก fx(ev)
+fxLoopName:351 blzFxName:352 fxLoopKeep:353 fshHitFx:355 fxBind:358
+§369 แม่แบบ playFx เป็นไฟล์ (assets/fx/tpl/*, sig/*, rec/*)
+fxTpl:371
 
 ## js/46-fx-make.js (264) — 
 FXMK:10 MKD:11 mkRng:12 mkHash:13 mkNoise:15 mkL:17 mkR2:18
@@ -501,7 +501,7 @@ SCAR:56 scarReset:58 scarPaint:65 grassScar:80
 §85 พื้นหญ้ามีชีวิต: สีเป็นหย่อม (เขียวเข้ม / แห้งเหลือง / ดินโผล่) + จุด…
 GR_NOISE:88 GR_LIVE:93 grLive:111 GR_GLSL_V:118 GR_BEGIN:123 grassMat:169 grassBuild:187 _grBasic:201 grassBake:202 grassCount:258 grassTick:263
 
-## js/51-warmup.js (109) — อุ่นเครื่องช่วงนับถอยหลัง (ผู้ใช้ 2026-10-21: "ช่วงนับถอยหลังให้โหลดสิ่งที่ต้องใช้ — กดสก…
+## js/51-warmup.js (109) — 
 WARM:11 WARM_FXDIR:12 WARM_COMMON:12 WARM_X:13 WARM_Y:13 warmKeep:15 warmCompile:21 WARM_SKIP:24 warmFx:25 warmFxEnd:33 warmGather:35 warmPaths:37 warmStep:39 warmTick:54
 §63 ภาพจากโค้ดของแต่ละสาย (เฟรมละฟังก์ชัน)
 §72 อุ่นฉากเกมระหว่างรอในห้อง (ผู้ใช้ 2026-10-23: "กระตุกตอนเริ่มแมตช์แรก…
@@ -645,16 +645,16 @@ BACKDROP:8
 §66 noise เล็ก ๆ (คงที่ต่อ seed)
 bdHash:67 bdNoise:68 bdFbm:69 bdEdge:71 bdRing:73 bdPaint:79 bdTree:82 buildBackdrop:89 bdTower:135 backdropHide:139
 
-## js/68-water-view.js (102) — สายน้ำ 💧 — ภาพฝั่งผู้เล่น (ชั่วคราว: ทรงง่ายๆ สีฟ้า ไว้ลองเล่นก่อนทำ VFX จริงทีละสกิล — …
-WTV:5 WTC:6 wtMat:7 wtGlow:8 wtTemp:10 wtState:11 wtKill:12
-§14 ต่อผู้เล่น: ลูกผู้ช่วยที่ไหล่ • ร่างโคลน + เส้นน้ำบนพื้น • ลำน้ำ Abys…
+## js/68-water-view.js (81) — 
+WTV:5 WTC:6 wtState:7 wtStop:8 wtMesh:9 wtAlive:10 wtLoop:12
+§14 ต่อผู้เล่น: โล่ฟองน้ำ/ฮีล • ลูกผู้ช่วยที่ไหล่ • ร่างโคลน + เส้นน้ำ • …
 waterFX:15
-§48 ทั้งเกม: คลื่น Riptide • ลูกผู้ช่วยที่กำลังพุ่ง • ชิ้นชั่วคราว
-syncWater:49
-§64 เหตุการณ์ (efx z 'wt…')
-waterEfx:65
-§98 HUD: เกจฮีลโล่ (โค้งซ้ายรอบเป้าเล็ง)
-drawWaterHud:99
+§43 ทั้งเกม: ลูกผู้ช่วยที่กำลังพุ่ง (ล็อกเป้า)
+syncWater:44
+§50 เหตุการณ์ (efx z 'wt…')
+waterEfx:51
+§77 HUD: เกจฮีลโล่ (โค้งซ้ายรอบเป้าเล็ง)
+drawWaterHud:78
 
 ## js/68-wind-view.js (97) — 
 WV:6 wvState:7 wvAlive:8
@@ -674,4 +674,4 @@ BRM:9 BSK:11 BROOM_SK:17 broomVert:38 broomMove:50 broomStrike:68 broomStrikeTic
 §125 ฝั่งจอ
 broomHead:127 BBEAM:134 _bbGeo:135 broomView:136 broomMountFx:165 broomDismountFx:173 broomBeamFx:175 broomSkFx:191 broomStrikeFx:204 broomFlakFx:209 broomHud:214 broomHudT:215 broomTick:224
 
-(80 files, 19121 lines)
+(80 files, 19132 lines)

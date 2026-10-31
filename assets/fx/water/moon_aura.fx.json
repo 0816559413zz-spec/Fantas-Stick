@@ -1,0 +1,227 @@
+{
+ "v": 1,
+ "desc": "Moonwater Arts: 8 วิ — จานน้ำวน + วงขาวที่เท้า พระจันทร์เสี้ยวน้ำหลังหัว ปลายไม้มีละอองขาว (วน ตามตัว)",
+ "tags": [
+  "water",
+  "moonwater",
+  "ingame"
+ ],
+ "pal": "ice",
+ "dur": 1,
+ "seed": 11,
+ "layers": [
+  {
+   "id": "disk",
+   "t": "mesh",
+   "at": 0,
+   "life": 1,
+   "att": "feet",
+   "shape": "plane",
+   "mat": "tex",
+   "tex": "tex/water_toon_swirl",
+   "col": "#ffffff",
+   "col2": "#000000",
+   "rim": 0,
+   "uvTile": [
+    1,
+    1
+   ],
+   "uvScroll": [
+    0,
+    0
+   ],
+   "pos": [
+    0,
+    0.05,
+    0
+   ],
+   "rot": [
+    90,
+    0,
+    0
+   ],
+   "spin": 140,
+   "scale": 2.4,
+   "op": 0.8,
+   "fade": 0,
+   "loop": true
+  },
+  {
+   "id": "arcs0",
+   "t": "mesh",
+   "at": 0,
+   "life": 1,
+   "att": "feet",
+   "shape": "plane",
+   "mat": "tex",
+   "tex": "tex/water_white_arcs",
+   "col": "#ffffff",
+   "col2": "#000000",
+   "rim": 0,
+   "uvTile": [
+    1,
+    1
+   ],
+   "uvScroll": [
+    0,
+    0
+   ],
+   "pos": [
+    0,
+    0.08,
+    0
+   ],
+   "rot": [
+    90,
+    0,
+    0
+   ],
+   "spin": -220,
+   "int": 1.4,
+   "scale": 3.2,
+   "op": 1,
+   "fade": 0,
+   "loop": true
+  },
+  {
+   "id": "moon",
+   "t": "mesh",
+   "at": 0,
+   "life": 1,
+   "att": "feet",
+   "shape": "crescent",
+   "wk": 0.3,
+   "mat": "glow",
+   "col": "#46c6ff",
+   "col2": "#1f78ff",
+   "rim": 0,
+   "uvTile": [
+    1,
+    1
+   ],
+   "uvScroll": [
+    0,
+    0
+   ],
+   "pos": [
+    0,
+    2.7,
+    -0.45
+   ],
+   "rot": [
+    0,
+    0,
+    30
+   ],
+   "scale": 0.6,
+   "op": 1,
+   "fade": 0,
+   "loop": true
+  },
+  {
+   "id": "mist",
+   "t": "emit",
+   "at": 0,
+   "life": 1,
+   "att": "wand",
+   "pos": [
+    0,
+    0,
+    0
+   ],
+   "rate": 30,
+   "from": "sphere",
+   "fr": 0.12,
+   "dir": "random",
+   "speed": [
+    0.2,
+    0.6
+   ],
+   "plife": [
+    0.3,
+    0.5
+   ],
+   "look": "glow",
+   "size": [
+    1.0,
+    1.75
+   ],
+   "col": "#ffffff",
+   "c2": "#b4f1ff",
+   "gravity": -0.3,
+   "drag": 1,
+   "loop": true
+  },
+  {
+   "id": "stars",
+   "t": "emit",
+   "at": 0,
+   "life": 1,
+   "att": "feet",
+   "pos": [
+    0,
+    1.2,
+    0
+   ],
+   "rate": 8,
+   "burst": 0,
+   "from": "sphere",
+   "fr": 1.1,
+   "dir": "tangent",
+   "speed": [
+    1,
+    3
+   ],
+   "plife": [
+    0.25,
+    0.5
+   ],
+   "look": "spark",
+   "size": [
+    2.0,
+    4.4
+   ],
+   "col": "#ffffff",
+   "c2": "#b4f1ff",
+   "gravity": 0,
+   "drag": 1,
+   "loop": true
+  },
+  {
+   "id": "streak",
+   "t": "emit",
+   "at": 0,
+   "life": 1,
+   "att": "feet",
+   "pos": [
+    0,
+    1.2,
+    0
+   ],
+   "rate": 24,
+   "burst": 0,
+   "from": "ring",
+   "fr": 1.2100000000000002,
+   "dir": "tangent",
+   "speed": [
+    6,
+    10
+   ],
+   "plife": [
+    0.15,
+    0.3
+   ],
+   "look": "streak",
+   "size": [
+    1.5,
+    2.7
+   ],
+   "col": "#ffffff",
+   "c2": "#46c6ff",
+   "gravity": 0,
+   "drag": 0,
+   "curl": false,
+   "loop": true
+  }
+ ]
+}

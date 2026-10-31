@@ -1,0 +1,88 @@
+{
+ "v": 1,
+ "desc": "Dragon of the Deep: วงเล็งรัศมี 11 ม. (จานน้ำวน + เส้นขาว) วนตลอดที่เลือกจุด",
+ "tags": [
+  "water",
+  "dragon",
+  "ult",
+  "ingame"
+ ],
+ "pal": "ice",
+ "dur": 1,
+ "seed": 11,
+ "layers": [
+  {
+   "id": "disk",
+   "t": "mesh",
+   "at": 0,
+   "life": 1,
+   "att": "feet",
+   "shape": "plane",
+   "mat": "tex",
+   "tex": "tex/water_toon_swirl",
+   "col": "#ffffff",
+   "col2": "#000000",
+   "rim": 0,
+   "uvTile": [
+    1,
+    1
+   ],
+   "uvScroll": [
+    0,
+    0
+   ],
+   "pos": [
+    0,
+    0.06,
+    0
+   ],
+   "rot": [
+    90,
+    0,
+    0
+   ],
+   "spin": 90,
+   "scale": 22,
+   "op": 0.45,
+   "fade": 0,
+   "loop": true
+  },
+  {
+   "id": "arcs0",
+   "t": "mesh",
+   "at": 0,
+   "life": 1,
+   "att": "feet",
+   "shape": "plane",
+   "mat": "tex",
+   "tex": "tex/water_white_arcs",
+   "col": "#ffffff",
+   "col2": "#000000",
+   "rim": 0,
+   "uvTile": [
+    1,
+    1
+   ],
+   "uvScroll": [
+    0,
+    0
+   ],
+   "pos": [
+    0,
+    0.1,
+    0
+   ],
+   "rot": [
+    90,
+    0,
+    0
+   ],
+   "spin": -120,
+   "int": 1.4,
+   "scale": 22.5,
+   "op": 1,
+   "fade": 0,
+   "loop": true
+  }
+ ]
+}

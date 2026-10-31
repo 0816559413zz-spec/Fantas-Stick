@@ -1,5 +1,6 @@
 {
- "next": 15,
+ "next": 16,
+ "rev": 128,
  "items": [
   {
    "id": 1,
@@ -87879,7 +87880,344 @@
     "dur": 7.75,
     "clips": "0s idle"
    }
+  },
+  {
+   "id": 15,
+   "title": "Water Ba",
+   "who": "",
+   "skill": "",
+   "status": "draft",
+   "created": "2026-10-31T20:43:20",
+   "updated": "2026-10-31T20:47:23",
+   "overview": "",
+   "mood": [],
+   "colors": [
+    "#ff7a1a",
+    "#ffd27a"
+   ],
+   "refs": [],
+   "fx": "",
+   "reply": "",
+   "shots": [
+    {
+     "id": "mvwgbpvn1",
+     "kind": "charge",
+     "name": "",
+     "dur": 0.5,
+     "overlap": 0,
+     "where": "",
+     "size": 1,
+     "power": 3,
+     "shapes": [],
+     "motion": [],
+     "camera": [],
+     "colors": [],
+     "text": "",
+     "sketches": [],
+     "scene3d": {
+      "v": 1,
+      "objs": [],
+      "cast": {
+       "m": "char_student",
+       "a": "idle"
+      },
+      "targ": {
+       "m": "char_student",
+       "a": "cast"
+      },
+      "at": 0
+     },
+     "refs": [],
+     "result": "",
+     "note": "",
+     "frames": {
+      "fps": 12,
+      "list": [
+       {
+        "id": "mvwggwpj81",
+        "bg": "blank",
+        "base": "storyboard/img/s15_frb_mvwggwoz.jpg",
+        "t": 0,
+        "ops": [],
+        "img": ""
+       },
+       {
+        "id": "mvwggwqh82",
+        "bg": "blank",
+        "base": "storyboard/img/s15_frb_mvwggwq5.jpg",
+        "t": 0.08,
+        "ops": [],
+        "img": ""
+       },
+       {
+        "id": "mvwggwr983",
+        "bg": "blank",
+        "base": "storyboard/img/s15_frb_mvwggwqv.jpg",
+        "t": 0.17,
+        "ops": [],
+        "img": ""
+       },
+       {
+        "id": "mvwggwry84",
+        "bg": "blank",
+        "base": "storyboard/img/s15_frb_mvwggwrn.jpg",
+        "t": 0.25,
+        "ops": [],
+        "img": ""
+       },
+       {
+        "id": "mvwggwso85",
+        "bg": "blank",
+        "base": "storyboard/img/s15_frb_mvwggwsc.jpg",
+        "t": 0.33,
+        "ops": [],
+        "img": ""
+       },
+       {
+        "id": "mvwggwte86",
+        "bg": "blank",
+        "base": "storyboard/img/s15_frb_mvwggwt2.jpg",
+        "t": 0.42,
+        "ops": [],
+        "img": ""
+       },
+       {
+        "id": "mvwggwua87",
+        "bg": "blank",
+        "base": "storyboard/img/s15_frb_mvwggwtv.jpg",
+        "t": 0.5,
+        "ops": [],
+        "img": ""
+       },
+       {
+        "id": "mvwggwvj88",
+        "bg": "blank",
+        "base": "storyboard/img/s15_frb_mvwggwuu.jpg",
+        "t": 0.58,
+        "ops": [],
+        "img": ""
+       },
+       {
+        "id": "mvwggww589",
+        "bg": "blank",
+        "base": "storyboard/img/s15_frb_mvwggwvx.jpg",
+        "t": 0.67,
+        "ops": [],
+        "img": ""
+       },
+       {
+        "id": "mvwggwws90",
+        "bg": "blank",
+        "base": "storyboard/img/s15_frb_mvwggwwh.jpg",
+        "t": 0.75,
+        "ops": [],
+        "img": ""
+       },
+       {
+        "id": "mvwggwxh91",
+        "bg": "blank",
+        "base": "storyboard/img/s15_frb_mvwggwx6.jpg",
+        "t": 0.83,
+        "ops": [],
+        "img": ""
+       },
+       {
+        "id": "mvwggwy292",
+        "bg": "blank",
+        "base": "storyboard/img/s15_frb_mvwggwxt.jpg",
+        "t": 0.92,
+        "ops": [],
+        "img": ""
+       },
+       {
+        "id": "mvwggwyq93",
+        "bg": "blank",
+        "base": "storyboard/img/s15_frb_mvwggwye.jpg",
+        "t": 1,
+        "ops": [],
+        "img": ""
+       },
+       {
+        "id": "mvwggwze94",
+        "bg": "blank",
+        "base": "storyboard/img/s15_frb_mvwggwz5.jpg",
+        "t": 1.08,
+        "ops": [],
+        "img": ""
+       },
+       {
+        "id": "mvwggx0695",
+        "bg": "blank",
+        "base": "storyboard/img/s15_frb_mvwggwzx.jpg",
+        "t": 1.17,
+        "ops": [],
+        "img": ""
+       },
+       {
+        "id": "mvwggx0u96",
+        "bg": "blank",
+        "base": "storyboard/img/s15_frb_mvwggx0k.jpg",
+        "t": 1.25,
+        "ops": [],
+        "img": ""
+       },
+       {
+        "id": "mvwggx2i97",
+        "bg": "blank",
+        "base": "storyboard/img/s15_frb_mvwggx18.jpg",
+        "t": 1.33,
+        "ops": [],
+        "img": ""
+       },
+       {
+        "id": "mvwggx3898",
+        "bg": "blank",
+        "base": "storyboard/img/s15_frb_mvwggx2v.jpg",
+        "t": 1.42,
+        "ops": [],
+        "img": ""
+       },
+       {
+        "id": "mvwggx4899",
+        "bg": "blank",
+        "base": "storyboard/img/s15_frb_mvwggx3l.jpg",
+        "t": 1.5,
+        "ops": [],
+        "img": ""
+       },
+       {
+        "id": "mvwggx4w100",
+        "bg": "blank",
+        "base": "storyboard/img/s15_frb_mvwggx4l.jpg",
+        "t": 1.58,
+        "ops": [],
+        "img": ""
+       },
+       {
+        "id": "mvwggx5m101",
+        "bg": "blank",
+        "base": "storyboard/img/s15_frb_mvwggx58.jpg",
+        "t": 1.67,
+        "ops": [],
+        "img": ""
+       },
+       {
+        "id": "mvwggx6g102",
+        "bg": "blank",
+        "base": "storyboard/img/s15_frb_mvwggx5z.jpg",
+        "t": 1.75,
+        "ops": [],
+        "img": ""
+       },
+       {
+        "id": "mvwggx74103",
+        "bg": "blank",
+        "base": "storyboard/img/s15_frb_mvwggx6v.jpg",
+        "t": 1.83,
+        "ops": [],
+        "img": ""
+       },
+       {
+        "id": "mvwggx7t104",
+        "bg": "blank",
+        "base": "storyboard/img/s15_frb_mvwggx7j.jpg",
+        "t": 1.92,
+        "ops": [],
+        "img": ""
+       },
+       {
+        "id": "mvwggx8y105",
+        "bg": "blank",
+        "base": "storyboard/img/s15_frb_mvwggx8g.jpg",
+        "t": 2,
+        "ops": [],
+        "img": ""
+       }
+      ],
+      "sheet": ""
+     }
+    },
+    {
+     "id": "mvwgbpvn2",
+     "kind": "cast",
+     "name": "",
+     "dur": 0.3,
+     "overlap": 0,
+     "where": "",
+     "size": 1,
+     "power": 3,
+     "shapes": [],
+     "motion": [],
+     "camera": [],
+     "colors": [],
+     "text": "",
+     "sketches": [],
+     "scene3d": null,
+     "refs": [],
+     "result": "",
+     "note": ""
+    },
+    {
+     "id": "mvwgbpvn3",
+     "kind": "travel",
+     "name": "",
+     "dur": 0.3,
+     "overlap": 0,
+     "where": "",
+     "size": 1,
+     "power": 3,
+     "shapes": [],
+     "motion": [],
+     "camera": [],
+     "colors": [],
+     "text": "",
+     "sketches": [],
+     "scene3d": null,
+     "refs": [],
+     "result": "",
+     "note": ""
+    },
+    {
+     "id": "mvwgbpvn4",
+     "kind": "impact",
+     "name": "",
+     "dur": 0.4,
+     "overlap": 0,
+     "where": "",
+     "size": 1,
+     "power": 3,
+     "shapes": [],
+     "motion": [],
+     "camera": [],
+     "colors": [],
+     "text": "",
+     "sketches": [],
+     "scene3d": null,
+     "refs": [],
+     "result": "",
+     "note": ""
+    },
+    {
+     "id": "mvwgbpvn5",
+     "kind": "fade",
+     "name": "",
+     "dur": 0.3,
+     "overlap": 0,
+     "where": "",
+     "size": 1,
+     "power": 3,
+     "shapes": [],
+     "motion": [],
+     "camera": [],
+     "colors": [],
+     "text": "",
+     "sketches": [],
+     "scene3d": null,
+     "refs": [],
+     "result": "",
+     "note": ""
+    }
+   ]
   }
- ],
- "rev": 111
+ ]
 }

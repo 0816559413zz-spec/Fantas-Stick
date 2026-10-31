@@ -239,6 +239,36 @@ function fxEnergyMat(c1,c2,c3){const U={time:FIRE_U.time,uC1:{value:new THREE.Co
       'vec3 c=mix(uC3,uC2,smoothstep(0.2,0.75,n+fr*0.3));c=mix(c,uC1,smoothstep(0.82,1.12,n*0.5+fr*uRim*0.55));c+=uC1*edge*1.4;'+
       'float a=clamp(body+edge,0.0,1.0)*uOp;gl_FragColor=vec4(c*uInt*a,a*0.82);}'});}
 // วัสดุการ์ตูน (cel): เฉดสว่าง col / เงา col2 ตัดคม + ขอบหันข้าง = core • dis = ตัดขอบแหว่งตามลาย noise (ลมต้องสาปแตกเป็นเศษ) • ทึบ (สีดำได้)
+// น้ำใส (สายน้ำ BA ฯลฯ ผู้ใช้ 2026-10-31): กลางโปร่งมองทะลุ ขอบหนาสีฟ้า ขอบนอกสุดขาวคม ไฮไลต์ขาวไหลตามผิว (scroll) จุดแสงสะท้อน
+// น้ำสายเวท (สายน้ำ BA ฯลฯ ผู้ใช้ 2026-10-31): แบบภาพวาดสีสด — ข้างในฟ้าสว่าง ขอบน้ำทะเลเข้ม ริ้วคลื่นฟ้าอ่อน/ขาววิ่งตามสายตลอด (uv.y = ตามสาย)
+// ผิวกระเพื่อมเป็นคลื่นวิ่ง (disp = ความแรง) • col = ข้างใน col2 = ขอบ • scroll = ความเร็วคลื่น
+function fxWaterMat(c1,c2,rim,flow,wav){const U={time:FIRE_U.time,uC1:{value:new THREE.Color(c1)},uC2:{value:new THREE.Color(c2)},uOp:{value:1},uDis:{value:0},uInt:{value:1},uRim:{value:rim===undefined?1:rim},uFlow:{value:flow===undefined?1:flow},uWav:{value:wav||0},uNz:{value:NOISETEX}};
+  return new THREE.ShaderMaterial({uniforms:U,transparent:true,depthWrite:false,side:THREE.FrontSide,
+    vertexShader:'uniform float time,uFlow,uWav;varying vec2 vUv;varying vec3 vN;varying vec3 vV;void main(){vUv=uv;vec3 p=position+normal*uWav*0.035*sin(uv.y*14.0-time*5.0*uFlow);vec4 mv=modelViewMatrix*vec4(p,1.0);vN=normalize(normalMatrix*normal);vV=normalize(-mv.xyz);gl_Position=projectionMatrix*mv;}',
+    fragmentShader:'uniform sampler2D uNz;uniform vec3 uC1,uC2;uniform float time,uOp,uInt,uRim,uFlow;varying vec2 vUv;varying vec3 vN;varying vec3 vV;'+
+      'void main(){vec3 n=normalize(vN),v=normalize(vV);float fr=1.0-abs(dot(n,v));'+
+      'vec3 c=mix(uC1,uC2,smoothstep(0.4,0.95,fr));c+=uC1*pow(1.0-fr,3.0)*0.35;'+
+      'float q=texture2D(uNz,vec2(vUv.x*0.5+sin(vUv.y*4.0+time)*0.06,vUv.y*0.7-time*0.35*uFlow)).r;'+
+      'float ln=(1.0-smoothstep(0.0,0.018,abs(q-0.5)))+(1.0-smoothstep(0.0,0.014,abs(q-0.62)))*0.7;ln*=1.0-smoothstep(0.55,0.9,fr);'+
+      'c=mix(c,vec3(0.72,0.97,1.0),clamp(ln,0.0,1.0)*0.75);'+
+      'c=mix(c,uC1*1.35,smoothstep(0.82,1.0,fr)*0.6*uRim);'+
+      'float a=(0.93+0.07*fr)*uOp;gl_FragColor=vec4(c*uInt,a);}'});}
+// น้ำการ์ตูน (ระบบใหม่ ผู้ใช้ 2026-10-31): สี 3 ขั้นแบบภาพวาด — สว่าง (เยอะ) / กลาง (เยอะ) / เข้ม (น้อย) + ยอดขาวบาง
+// ขั้นสีไหลไปตามผิว (noise เลื่อนตาม uv, scroll = ความเร็ว) + เส้นขาวตรงรอยต่อสีกลาง/สว่าง + ขอบนอกสว่าง • col = สว่าง col2 = กลาง (เข้ม = col2 × 0.72)
+function fxToonWaterMat(c1,c2,rim,flow,band){const U={time:FIRE_U.time,uC1:{value:new THREE.Color(c1)},uC2:{value:new THREE.Color(c2)},uOp:{value:1},uDis:{value:0},uInt:{value:1},uRim:{value:rim===undefined?1:rim},uFlow:{value:flow===undefined?1:flow},uBand:{value:band||1},uNz:{value:NOISETEX}};
+  return new THREE.ShaderMaterial({uniforms:U,transparent:true,depthWrite:false,side:THREE.FrontSide,
+    vertexShader:'varying vec2 vUv;varying vec3 vN;varying vec3 vV;void main(){vUv=uv;vec4 mv=modelViewMatrix*vec4(position,1.0);vN=normalize(normalMatrix*normal);vV=normalize(-mv.xyz);gl_Position=projectionMatrix*mv;}',
+    fragmentShader:'uniform sampler2D uNz;uniform vec3 uC1,uC2;uniform float time,uOp,uInt,uRim,uFlow,uBand;varying vec2 vUv;varying vec3 vN;varying vec3 vV;'+
+      'void main(){vec3 n=normalize(vN),v=normalize(vV);float fr=1.0-abs(dot(n,v));float l=dot(n,normalize(vec3(0.3,0.85,0.45)))*0.5+0.5;'+
+      'float nz=texture2D(uNz,vUv*0.35+vec2(-time*0.03*uFlow,0.0)).r;'+
+      'float sw=sin((vUv.x*2.0+vUv.y*1.3)*6.2832*uBand-time*2.2*uFlow+nz*3.0)*0.5+0.5;'+
+      'float up=n.y*0.5+0.5;float t=l*0.3+(1.0-up)*0.6+(sw-0.5)*0.3;'+
+      'vec3 dk=mix(uC2,vec3(0.16,0.34,0.86),0.55);vec3 c=t<0.4?dk:(t<0.66?uC2:uC1);'+
+      'float q=texture2D(uNz,vec2(vUv.x*0.9,vUv.y*0.6)+vec2(-time*0.08*uFlow,0.0)).r;float vein=(1.0-smoothstep(0.0,0.012,abs(q-0.5)))*(1.0-smoothstep(0.55,0.9,fr));'+
+      'float ln=1.0-smoothstep(0.0,0.014,abs(t-0.66));float foam=step(0.8,up)*step(0.45,fr);'+
+      'c=mix(c,vec3(1.0),max(max(ln*0.7,vein*0.8),foam));'+
+      'c=mix(c,mix(uC1,vec3(1.0),0.45),smoothstep(0.82,0.96,fr)*0.7*uRim);'+
+      'gl_FragColor=vec4(c*uInt,uOp);}'});}
 function fxToonMat(c1,c2,c3,rim){const U={time:FIRE_U.time,uC1:{value:new THREE.Color(c1)},uC2:{value:new THREE.Color(c2)},uC3:{value:new THREE.Color(c3)},uOp:{value:1},uDis:{value:0},uInt:{value:1},uRim:{value:rim===undefined?1:rim},uNz:{value:NOISETEX}};
   return new THREE.ShaderMaterial({uniforms:U,transparent:true,depthWrite:false,side:THREE.DoubleSide,
     vertexShader:'varying vec2 vUv;varying vec3 vN;varying vec3 vV;void main(){vUv=uv;vec4 mv=modelViewMatrix*vec4(position,1.0);vN=normalize(normalMatrix*normal);vV=normalize(-mv.xyz);gl_Position=projectionMatrix*mv;}',
@@ -253,7 +283,9 @@ function fxMeshMake(S,I,w){const L=S.d,g=k=>fxG(L,k),sh=g('shape'),mt=g('mat'),C
       const m=fireMat({mode:ball?'ball':'sheet',flow:g('flow'),speed:(ball?1.2:1.4)*g('scroll'),int:1.15,disp:g('disp'),tint:L.col?C('col'):undefined,side:sh==='plane'});return m;}
     case 'ice':return iceShaderMat({glow:1,rim:g('rim')});
     case 'glow':return new THREE.MeshBasicMaterial({color:hdr(C('col'),1.15),transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide});
-    case 'toon':return fxToonMat(fxCol('$core',I),C('col'),C('col2'),g('rim'));   // การ์ตูน 2 เฉด + ขอบสว่าง + ขอบแหว่งด้วย dis (ลม)
+    case 'toonwater':return fxToonWaterMat(C('col'),C('col2'),g('rim'),g('scroll'),g('heat')>0?1+g('heat')*4:1);   // น้ำการ์ตูน 3 ขั้น (heat = ลายถี่ขึ้น)
+    case 'water':return fxWaterMat(C('col'),C('col2'),g('rim'),g('scroll'),g('disp'));   // น้ำใส ขอบขาว ไฮไลต์ไหล
+    case 'toon':{const m=fxToonMat(fxCol('$core',I),C('col'),C('col2'),g('rim'));if(g('zw')){m.depthWrite=true;m.side=THREE.FrontSide;}return m;}   // zw = ทึบ: เขียนความลึก ไม่วาดด้านหลัง (ก้อนน้ำ 3D ไม่โชว์ด้านในทะลุเป็นลาย)   // การ์ตูน 2 เฉด + ขอบสว่าง + ขอบแหว่งด้วย dis (ลม)
     case 'black':return new THREE.MeshBasicMaterial({color:0x000000,transparent:true,fog:false});   // ดำสนิทไม่รับแสง เขียนความลึก บังของเรืองแสงข้างหลัง (แกนหลุมดำ)
     case 'solid':return new THREE.MeshStandardMaterial({color:C('col'),emissive:C('col2'),emissiveIntensity:0.35,roughness:0.85,metalness:0,flatShading:true,transparent:true});
     case 'tex':return fxTexMat(g('tex'),{col:C('col'),col2:C('col2'),rim:g('rim'),tile:g('uvTile'),scroll:g('uvScroll')});   // ภาพจากสตูดิโอบนผิวรูปทรง (js/46)

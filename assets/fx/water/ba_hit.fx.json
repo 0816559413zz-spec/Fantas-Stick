@@ -1,0 +1,171 @@
+{
+ "v": 1,
+ "desc": "BA สายน้ำ: โดน = หยดน้ำแตกกระจาย หยดเล็กกระเด็นตกพื้น + รอยเปียกจางๆ บนพื้น 1.4 วิ",
+ "tags": [
+  "water",
+  "ba",
+  "ingame"
+ ],
+ "pal": "ice",
+ "dur": 1.7,
+ "seed": 31,
+ "layers": [
+  {
+   "id": "burst",
+   "t": "mesh",
+   "at": 0,
+   "life": 0.18,
+   "att": "point",
+   "shape": "sphere",
+   "mat": "water",
+   "col": "#5ef0ff",
+   "col2": "#1fc3e6",
+   "rim": 1,
+   "scroll": 2,
+   "int": 1.25,
+   "disp": 0.6,
+   "pos": [
+    0,
+    0,
+    0
+   ],
+   "scale": {
+    "0": [
+     0.2,
+     0.2,
+     0.2
+    ],
+    "1": [
+     0.5,
+     0.35,
+     0.5
+    ]
+   },
+   "op": {
+    "0": 1,
+    "1": 0
+   },
+   "fade": 0
+  },
+  {
+   "id": "drops",
+   "t": "emit",
+   "at": 0,
+   "life": 0.04,
+   "att": "point",
+   "pos": [
+    0,
+    0,
+    0
+   ],
+   "burst": 18,
+   "rate": 0,
+   "from": "sphere",
+   "fr": 0.15,
+   "dir": "out",
+   "up": [
+    1,
+    3
+   ],
+   "speed": [
+    2.5,
+    5.5
+   ],
+   "plife": [
+    0.45,
+    0.8
+   ],
+   "look": "model",
+   "model": "water_blob",
+   "mmat": "ice",
+   "msize": [
+    0.04,
+    0.1
+   ],
+   "col": "#5ef0ff",
+   "c2": "#1fc3e6",
+   "mspin": 0,
+   "gravity": 11,
+   "drag": 0.3,
+   "bounce": 0.25
+  },
+  {
+   "id": "mist",
+   "t": "emit",
+   "at": 0,
+   "life": 0.04,
+   "att": "point",
+   "pos": [
+    0,
+    0,
+    0
+   ],
+   "burst": 14,
+   "rate": 0,
+   "from": "sphere",
+   "fr": 0.1,
+   "dir": "out",
+   "speed": [
+    1.5,
+    3
+   ],
+   "plife": [
+    0.15,
+    0.3
+   ],
+   "look": "glow",
+   "size": [
+    2,
+    3.5
+   ],
+   "col": "#ffffff",
+   "c2": "#d2fcff",
+   "gravity": 2,
+   "drag": 3
+  },
+  {
+   "id": "wet",
+   "t": "mesh",
+   "at": 0.25,
+   "life": 1.4,
+   "att": "ground",
+   "shape": "plane",
+   "mat": "tex",
+   "tex": "tex/water_puddle",
+   "col": "#ffffff",
+   "col2": "#000000",
+   "rim": 0,
+   "uvTile": [
+    1,
+    1
+   ],
+   "uvScroll": [
+    0,
+    0
+   ],
+   "pos": [
+    0,
+    0.03,
+    0
+   ],
+   "rot": [
+    90,
+    37,
+    0
+   ],
+   "scale": {
+    "0": 0.3,
+    "0.15": 1.1,
+    "1": 1.2,
+    "ease": "out"
+   },
+   "op": {
+    "0": 0,
+    "0.1": 0.35,
+    "0.6": 0.3,
+    "1": 0
+   },
+   "fade": 0
+  }
+ ]
+}

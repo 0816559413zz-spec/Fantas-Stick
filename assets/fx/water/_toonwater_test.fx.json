@@ -1,0 +1,113 @@
+{
+ "v": 1,
+ "desc": "ทดสอบวัสดุน้ำการ์ตูนใหม่ (toonwater) บนลูกกลม โดม มงกุฎน้ำ เสี้ยวน้ำ",
+ "tags": [
+  "water",
+  "test"
+ ],
+ "pal": "ice",
+ "dur": 1,
+ "seed": 1,
+ "layers": [
+  {
+   "id": "orb",
+   "t": "mesh",
+   "at": 0,
+   "life": 1,
+   "att": "feet",
+   "shape": "sphere",
+   "mat": "toonwater",
+   "col": "#22e0e6",
+   "col2": "#1f96ee",
+   "rim": 1,
+   "scroll": 1.2,
+   "pos": [
+    0,
+    1.6,
+    0
+   ],
+   "scale": 1.2,
+   "op": 1,
+   "fade": 0,
+   "loop": true,
+   "spin": 30
+  },
+  {
+   "id": "dome",
+   "t": "mesh",
+   "at": 0,
+   "life": 1,
+   "att": "feet",
+   "shape": "dome",
+   "mat": "toonwater",
+   "col": "#22e0e6",
+   "col2": "#1f96ee",
+   "rim": 1,
+   "scroll": 0.8,
+   "pos": [
+    3.2,
+    0,
+    0
+   ],
+   "scale": [
+    1.6,
+    1.8,
+    1.6
+   ],
+   "op": 1,
+   "fade": 0,
+   "loop": true
+  },
+  {
+   "id": "crown",
+   "t": "mesh",
+   "at": 0,
+   "life": 1,
+   "att": "feet",
+   "shape": "model",
+   "mat": "toonwater",
+   "col": "#22e0e6",
+   "col2": "#1f96ee",
+   "rim": 1,
+   "scroll": 1.5,
+   "pos": [
+    -3.2,
+    0,
+    0
+   ],
+   "scale": 2.2,
+   "op": 1,
+   "fade": 0,
+   "loop": true,
+   "model": "water_crown"
+  },
+  {
+   "id": "slash",
+   "t": "mesh",
+   "at": 0,
+   "life": 1,
+   "att": "feet",
+   "shape": "model",
+   "mat": "toonwater",
+   "col": "#22e0e6",
+   "col2": "#1f96ee",
+   "rim": 1,
+   "scroll": 2,
+   "pos": [
+    0,
+    1.4,
+    3
+   ],
+   "scale": 1.4,
+   "op": 1,
+   "fade": 0,
+   "loop": true,
+   "model": "water_slash",
+   "rot": [
+    -10,
+    0,
+    -45
+   ]
+  }
+ ]
+}
