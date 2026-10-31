@@ -56,6 +56,19 @@ function onLobby(m){
   if(m.ph==='lobby'){if(screen!=='lobby')setScreen('lobby');renderLobby();}
   voiceSync();updateVoiceUI();
 }
+// ---------- ภาพของโฮสต์ลื่น (ผู้ใช้ 2026-10-31 "ขี่ไม้กวาด/กระโดด กล้องสั่น") ----------
+// ลูปโฮสต์เดินด้วย setInterval 60 Hz แต่ Windows ยิงไม่สม่ำเสมอ (วัดได้ 11–54 ms) ขณะที่จอวาด 60–144 ภาพ/วิ
+// เดิมเลื่อนภาพโดยเดาว่า snapshot ถัดไปมาห่างเท่าครั้งก่อน → มาช้า = ตัวละครหยุด แล้วกระโดดไป = สั่น
+// ใหม่: จำ snapshot ล่าสุดพร้อมเวลาจริง แล้ววาดย้อนหลังเล็กน้อย (HVB.d ≈ ช่วงห่างเฉลี่ย + ความแกว่ง×2.5, 18–70 ms) เลื่อนระหว่าง 2 อันที่รู้เวลาแน่นอน
+const HVB={q:[],gap:16.7,jit:2,d:26},HBOLD=/[?&]hbold/.test(location.search);
+function hbReset(){HVB.q.length=0;}
+function hbPush(s){const n=performance.now(),Q=HVB.q;s._t=n;
+  if(Q.length){const g=n-Q[Q.length-1]._t;if(g>0&&g<250){HVB.gap+=(g-HVB.gap)*0.08;HVB.jit+=(Math.abs(g-HVB.gap)-HVB.jit)*0.08;}}
+  Q.push(s);if(Q.length>12)Q.shift();}
+function hbPair(now){const Q=HVB.q;if(Q.length<2)return null;
+  HVB.d+=(clamp(HVB.gap+HVB.jit*2.5,18,70)-HVB.d)*0.05;const rt=now-HVB.d;
+  let k=Q.findIndex(s=>s._t>rt);if(k<0)return {prev:Q[Q.length-2],cur:Q[Q.length-1],a:1};if(k===0)return {prev:null,cur:Q[0],a:1};
+  const pv=Q[k-1],c=Q[k];return {prev:pv,cur:c,a:clamp((rt-pv._t)/Math.max(1,c._t-pv._t),0,1)};}
 function onSnap(s){
   if(!NET.isHost&&s.T!==undefined&&!NETOLD){sbufPush(s);return;}   // ลูกข่าย: เข้าบัฟเฟอร์ก่อน (ใช้ตอนเรนเดอร์ sbufAdvance)
   snapApply(s,true);
@@ -65,7 +78,7 @@ function snapApply(s,live){
   if(!NET.isHost&&s.mp)AREA=mapArea(s.mp,s.mode);
   PROPON=!!s.PB;if(s.PB)for(let i=0;i<PROPS.length;i++)PROPS[i].st=+(s.PB[i]||0);
   if(!NET.isHost){bldParse(s.BD);brkParse(s.BK);cityParse(s.CB,s.CS);}
-  if(live){VIEW.prev=VIEW.cur;VIEW.tPrev=VIEW.tCur;VIEW.cur=s;VIEW.tCur=performance.now();VIEW.a=VIEW.ex=null;}
+  if(live){VIEW.prev=VIEW.cur;VIEW.tPrev=VIEW.tCur;VIEW.cur=s;VIEW.tCur=performance.now();VIEW.a=VIEW.ex=null;if(NET.isHost)hbPush(s);}
   if(s.ev&&!(NET.isHost&&document.hidden))for(const ev of s.ev)fx(ev);   // โฮสต์ย่อแท็บ: ไม่สร้างเอฟเฟกต์ (ไม่มีใครเห็น กันอนุภาคค้างเต็มหน่วยความจำ)
   syncOverlays(s);
 }

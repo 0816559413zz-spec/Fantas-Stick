@@ -17,7 +17,7 @@ gl.shadowMap.autoUpdate=false; // อัปเดตเงาเองใน ren
 gl.toneMapping=THREE.ACESFilmicToneMapping;gl.toneMappingExposure=1.1;
 const scene=new THREE.Scene();
 scene.fog=new THREE.Fog('#151a33',50,170);
-const cam=new THREE.PerspectiveCamera(62,1,0.1,700);
+const cam=new THREE.PerspectiveCamera(62,1,0.25,700);   // near 0.1 → 0.25: ความละเอียดความลึกดีขึ้น ~2.5 เท่า (ผิวที่ห่างกันน้อย เช่น พื้นในบล็อก/ทางเท้า ไม่กระพริบไกล ๆ)
 const composer=new EffectComposer(gl);
 // ===== ท่อภาพ (post-processing): ฉาก → ชั้นเอฟเฟกต์นุ่ม (FXPass) → แสงฟุ้ง → โทนสี/เอฟเฟกต์ทั้งจอ (GradePass) → จอ =====
 // ความลึกของฉากเก็บเป็นภาพ (depthTexture) ให้อนุภาค/หมอก/หางแสงอ่านได้ → จางลงนุ่ม ๆ ตรงที่แตะพื้น/กำแพง (soft particles)

@@ -31,11 +31,12 @@ function render(dt,now){
     updateParticles(dt);updateShapes(dt);updateLights(dt);
     menuCamera(now);gl.shadowMap.needsUpdate=true;composer.render();return;
   }
-  const a=VIEW.a!==null?VIEW.a:VIEW.prev?clamp((now-VIEW.tCur)/Math.max(8,VIEW.tCur-VIEW.tPrev),0,1):1;
+  let a=VIEW.a!==null?VIEW.a:VIEW.prev?clamp((now-VIEW.tCur)/Math.max(8,VIEW.tCur-VIEW.tPrev),0,1):1,SA=v,SB=VIEW.prev;
+  if(NET.isHost&&!HBOLD){const hp=hbPair(now);if(hp){SA=hp.cur;SB=hp.prev;a=hp.a;}}   // โฮสต์: ตำแหน่งจาก snapshot ที่รู้เวลาแน่นอน (js/19 HVB) • ?hbold = แบบเดิม
   const pm={},em={};
-  if(VIEW.prev){for(const p of VIEW.prev.P)pm[p.id]=p;for(const e of VIEW.prev.E)em[e.id]=e;}
-  const P=v.P.map(p=>{const q=pm[p.id];if(!q||Math.abs(q.x-p.x)+Math.abs(q.y-p.y)>200)return p;return Object.assign({},p,{x:lerp(q.x,p.x,a),y:lerp(q.y,p.y,a),z:lerp(q.z||0,p.z||0,a),a:lerpAng(q.a,p.a,a)});});   // z ด้วย: เดิมความสูงกระโดดขยับเป็นขั้น 30 ครั้ง/วิ → กล้องสั่นตอนกระโดด (ผู้ใช้ 2026-10-26)
-  const E=v.E.map(e=>{const q=em[e.id];if(!q)return e;return Object.assign({},e,{x:lerp(q.x,e.x,a),y:lerp(q.y,e.y,a)});});
+  if(SB){for(const p of SB.P)pm[p.id]=p;for(const e of SB.E)em[e.id]=e;}
+  const P=SA.P.map(p=>{const q=pm[p.id];if(!q||Math.abs(q.x-p.x)+Math.abs(q.y-p.y)>200)return p;return Object.assign({},p,{x:lerp(q.x,p.x,a),y:lerp(q.y,p.y,a),z:lerp(q.z||0,p.z||0,a),a:lerpAng(q.a,p.a,a)});});   // z ด้วย: เดิมความสูงกระโดดขยับเป็นขั้น 30 ครั้ง/วิ → กล้องสั่นตอนกระโดด (ผู้ใช้ 2026-10-26)
+  const E=SA.E.map(e=>{const q=em[e.id];if(!q)return e;return Object.assign({},e,{x:lerp(q.x,e.x,a),y:lerp(q.y,e.y,a)});});
   predictMe(P,dt,now);
   const me=P.find(p=>p.id===NET.myId);
   // เริ่มรอบ: หันกล้องตามทิศเกิด เฉพาะตอนถูกย้ายไปจุดเกิดจริง (เริ่มเกม / รอบใหม่ PvP) — ไม่ใช่ทุกเวฟ Co-op (เดิมกล้องหันเองทุกเวฟ เพราะทิศจากเน็ตช้ากว่าเมาส์)

@@ -65,7 +65,7 @@ function buildCity(){
     const w=B.w*S3,d=B.d*S3,x=tx(B.x+B.w/2),z=tz(B.y+B.d/2),st=CITY_STY[B.m];
     if(st){const r=cityFacade(B,st,M.zones,w,d,x,z,kput,KR);r.core=CV.cores.length;r.v=-1;r.sty=st;CV.b[B.i]=r;
       {const I=CITYD&&CITYD.b[B.i]&&CITYD.b[B.i].I,c0=I?Math.min(B.h-CIN.slab,I.top-CIN.slab):0;   // ตึกกลวง: แกนทึบเหลือแค่ส่วนบน (+ แผ่นเพดานห้องชั้นบนสุด)
-      CV.cores.push(I&&I.ring?new THREE.Matrix4().makeScale(0,0,0):new THREE.Matrix4().compose(new THREE.Vector3(x,(c0+B.h)/2,z),_q.set(0,0,0,1),new THREE.Vector3(Math.max(0.2,w-(I?0:0.8)),B.h-c0,Math.max(0.2,d-(I?0:0.8)))));}
+      CV.cores.push(I&&I.ring?new THREE.Matrix4().makeScale(0,0,0):new THREE.Matrix4().compose(new THREE.Vector3(x,(c0+B.h)/2,z),_q.set(0,0,0,1),new THREE.Vector3(Math.max(0.2,w-(I?0.6:0.8)),B.h-c0,Math.max(0.2,d-(I?0.6:0.8)))));}   // ตึกกลวง: ร่นแกน 0.3 ต่อด้าน (ผนังหนา 0.6) — เดิมเท่าขอบนอกพอดี ผิวแกนสีดำทับผิวผนัง = กระพริบดำสลับผนังในชั้นที่ไม่มีห้อง (ผู้ใช้ 2026-10-31)
       if(B.hl){r.hl=[];for(const [sx,sz] of [[-1,-1],[1,-1],[-1,1],[1,1]]){const l=addW(new THREE.Sprite(glowMat('#ff3030',2.4)));l.position.set(x+sx*w/2,B.h+2.2,z+sz*d/2);l.scale.set(2,2,1);r.hl.push(l);}}
       continue;}
     if(B.m==='cont'){const lay=B.h>3?2:1;for(let l=0;l<lay;l++)for(const o of [-1,1])kput('cp_container',x,l*2.6,z+o*(d/4),w>d?0:Math.PI/2,Math.max(w,d)/12.2,1,CONT[Math.floor(KR()*CONT.length)]);continue;}

@@ -125,7 +125,7 @@ function hostStart(){
   modeInit();if(G.mode==='ffa')ffaInit();else if(G.mode==='tdm')potInit();
   if(G.mode==='coop'){G.wave=1;setupWave();}else if(G.mode!=='imp')banner(MD.name,3);
   hostLast=performance.now();
-  VIEW.prev=VIEW.cur=null;
+  VIEW.prev=VIEW.cur=null;hbReset();
   sendAll({t:'start'});
   broadcastLobby();
   setScreen('game');
