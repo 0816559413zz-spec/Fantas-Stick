@@ -156,6 +156,7 @@ function makeWing() {
 
 const rig = new THREE.Group();
 rig.position.y = 1.4;
+rig.scale.setScalar(0.65); // wing size vs the body
 scene.add(rig);
 const R = makeWing(), L = makeWing();
 L.scale.x = -1;
