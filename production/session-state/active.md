@@ -40,7 +40,7 @@ Task:
 **Blocked on:** nothing
 **Files in progress:** none (verification only)
 **Run result:** OBSERVED — fire shield raised in FFA match on meadow, production/qa/evidence/story-001-core-combat/ffa-shield.jpg
-**Open questions:** criterion 4 says Space = dodge, game default is Left Shift (Space = jump) — fix story text or binding?
+**Open questions:** none
 <!-- /CHECKPOINT -->
 
 ---
