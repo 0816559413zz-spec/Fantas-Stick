@@ -112,12 +112,14 @@ const GREEN = 0x2dffa0, MINT = 0x9dffd8, DEEP = 0x0fbf74;
 const lineMat = new THREE.LineBasicMaterial({ color: 0x7dffc8, transparent: true, opacity: 0.55, blending: THREE.AdditiveBlending, depthWrite: false });
 const lineDim = new THREE.LineBasicMaterial({ color: 0x2fe39a, transparent: true, opacity: 0.2, blending: THREE.AdditiveBlending, depthWrite: false });
 
-function plate(pts, depth, mat, edge = lineMat) {
+// no outlines and no side walls (edge-on walls glow like a frame) - only the
+// front/back faces float, so it reads as a projected digital hologram
+const HIDE = new THREE.MeshBasicMaterial({ visible: false });
+function plate(pts, depth, mat) {
   const s = new THREE.Shape(pts.map(p => new THREE.Vector2(p[0], p[1])));
-  const g = new THREE.ExtrudeGeometry(s, { depth, bevelEnabled: true, bevelSize: 0.025, bevelThickness: 0.025, bevelSegments: 1 });
+  const g = new THREE.ExtrudeGeometry(s, { depth, bevelEnabled: false });
   g.translate(0, 0, -depth / 2);
-  const m = new THREE.Mesh(g, mat);
-  m.add(new THREE.LineSegments(new THREE.EdgesGeometry(g, 25), edge));
+  const m = new THREE.Mesh(g, [mat, HIDE]);
   return m;
 }
 // tapered energy blade along +x
@@ -128,9 +130,9 @@ function blade(L, w) {
 // ---------- one wing (right side, +x outward, +y up) ----------
 function makeWing() {
   const wing = new THREE.Group();
-  const frameMat = holoMat(0x1d5a48, { base: 0.75, rim: 0.5, scan: 0.08, solid: true });
-  const coreMat = holoMat(GREEN, { base: 0.07, rim: 0.35, scan: 0.08 });
-  const hotMat = holoMat(MINT, { base: 0.22, rim: 0.2, scan: 0.06 });
+  const frameMat = holoMat(0x2a9a78, { base: 0.22, rim: 0.4, scan: 0.1 });
+  const coreMat = holoMat(GREEN, { base: 0.28, rim: 0.5, scan: 0.1 });
+  const hotMat = holoMat(MINT, { base: 0.6, rim: 0.3, scan: 0.06 });
 
   // top spars (thin long antenna blades)
   wing.add(plate([[0.2, 0.55], [3.9, 2.55], [4.6, 2.95], [3.85, 2.75], [0.1, 0.78]], 0.06, frameMat));
@@ -160,7 +162,7 @@ function makeWing() {
     const piv = new THREE.Group();
     piv.position.set(0.7, -0.15, -0.05 - i * 0.03);
     const f = plate(blade(L, w), 0.05, coreMat);
-    const core = plate(blade(L * 0.82, w * 0.35).map(p => [p[0] + L * 0.08, p[1]]), 0.07, hotMat, lineDim);
+    const core = plate(blade(L * 0.82, w * 0.35).map(p => [p[0] + L * 0.08, p[1]]), 0.07, hotMat);
     piv.add(f, core);
     piv.userData = { base: THREE.MathUtils.degToRad(deg), i };
     piv.rotation.z = piv.userData.base;
@@ -185,7 +187,6 @@ function makeWing() {
   const hub = new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.32, 0.3, 6), coreMat);
   hub.rotation.x = Math.PI / 2;
   hub.position.set(0.35, 0.0, 0);
-  hub.add(new THREE.LineSegments(new THREE.EdgesGeometry(hub.geometry), lineMat));
   wing.add(hub);
 
   wing.userData.feathers = feathers;
@@ -205,7 +206,6 @@ rig.add(pivR, pivL);
 // back-mount core (wind crystal)
 const crystal = new THREE.Mesh(new THREE.OctahedronGeometry(0.38), holoMat(MINT, { base: 0.3, rim: 0.5 }));
 crystal.scale.y = 1.5;
-crystal.add(new THREE.LineSegments(new THREE.EdgesGeometry(crystal.geometry), lineMat));
 crystal.position.set(0, 0.1, 0.05);
 rig.add(crystal);
 
