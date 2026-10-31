@@ -168,7 +168,7 @@ function emoHost(id,e){const p=G.players[id];e=e|0;if(!p||!p.alive||p.downed||G.
 function resetBody(p,x,y){
   Object.assign(p,{x,y,z:0,vz:0,fly:false,flyCd:0,root:0,vx:0,vy:0,hp:p.maxHp,alive:true,downed:false,revive:0,stun:0,burn:0,dash:0,inv:0,
     shieldOn:false,shieldE:100,shieldBroken:0,respawn:0,slam:false,slam3:null,dashSp:0,flyOn:false});   // slam: ตายกลางท่ากระโดดฟาด (น้ำแข็ง) แล้วค้าง = ฟันไม่ได้หลังเกิดใหม่
-  for(const k of CDK)p.cd[k]=0;clearStatus(p);p.trail=null;earthReset(p);windReset(p);
+  for(const k of CDK)p.cd[k]=0;clearStatus(p);p.trail=null;earthReset(p);windReset(p);waterReset(p);
   p.ang=Math.atan2(MH/2-y,MW/2-x);
 }
 function fmap(){const M=MAPS[MAPID];return M&&(M.fm||(M.fmFor&&G?M.fmFor(G.mode):null));}   // fmFor = แผนที่จากโค้ดที่มีจุดเกิด/ห่วง/ภารกิจต่อโหมด (city)
@@ -300,6 +300,7 @@ function updatePlayer(p,dt,acting){
   if(p.pathIdx===2)stormTick(p,dt);
   if(p.pathIdx===EARTH)earthTick(p,dt);
   if(p.pathIdx===WINDP)windTick(p,dt);
+  if(p.pathIdx===WATERP)waterTick(p,dt);
 
   // เคลื่อนที่
   const ox0=p.x,oy0=p.y,oz0=p.z,onG0=!p.fly&&p.z<=groundH(p.x,p.y,p.z)+0.05;
@@ -309,7 +310,7 @@ function updatePlayer(p,dt,acting){
   const ml=Math.hypot(mx,my);if(ml){mx/=ml;my/=ml;}
   if(!canAct||p.root>0||p.dchgOn||p.cryo>0){mx=my=0;}
   else if(p.fear>0){const fa=Math.atan2(p.y-p.fearY,p.x-p.fearX);mx=Math.cos(fa);my=Math.sin(fa);}
-  const spd=(p.fly?540*p.buffs.spd:175*p.buffs.spd*(p.shieldOn?0.5:1))*(p.boost>0?1.45:1)*moveMul(p)*(p.wr||p.aug||p.ecb?earthSpd(p):1)*(p.wdr||p.wfw?windSpd(p):1)*(p.dfall?(p.dfall.ph===2?0.45:0):p.sdome?(p.sdome.ph===2?0.45:0):p.rail?0:(p.kindle>0&&p.hover>0)?0.35:p.breath>0?0.7:(p.snapT>0||p.colos>0||p.grT>0)?0.5:1)*(p.slideT>0?1.8:1+(p.iceB||0));
+  const spd=(p.fly?540*p.buffs.spd:175*p.buffs.spd*(p.shieldOn&&p.pathIdx!==WATERP?0.5:1))*(p.boost>0?1.45:1)*moveMul(p)*(p.wr||p.aug||p.ecb?earthSpd(p):1)*(p.wdr||p.wfw?windSpd(p):1)*(p.wsk||p.wab?waterSpd(p):1)*(p.dfall?(p.dfall.ph===2?0.45:0):p.sdome?(p.sdome.ph===2?0.45:0):p.rail?0:(p.kindle>0&&p.hover>0)?0.35:p.breath>0?0.7:(p.snapT>0||p.colos>0||p.grT>0)?0.5:1)*(p.slideT>0?1.8:1+(p.iceB||0));
   p.wSpd=(p.dash>0||p.slideT>0||p.slip>0||!canAct||p.root>0||p.dchgOn||p.cryo>0||p.fear>0||p.gh||p.fly)?0:Math.round(spd);   // ความเร็วเดินตอนนี้ → ลูกข่ายใช้ทำนายตัวเอง (0 = อย่าทำนาย)
   if(p.dash>0){
     p.dash-=dt;const ds=p.dashSp||900;

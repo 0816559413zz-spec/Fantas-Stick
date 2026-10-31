@@ -14,7 +14,8 @@ function efxState(ev){
   }}
 function efxFX(ev){
   if(ev.z&&ev.z[0]==='e'&&earthEfx(ev))return;
-  if(ev.z&&ev.z[0]==='w'&&ev.z[1]==='n'&&windEfx(ev))return;   // สายลม (js/68-wind-view.js)   // สายดิน (js/47-earth-view.js)
+  if(ev.z&&ev.z[0]==='w'&&ev.z[1]==='n'&&windEfx(ev))return;
+  if(ev.z&&ev.z[0]==='w'&&ev.z[1]==='t'&&waterEfx(ev))return;   // สายน้ำ (js/68-water-view.js)   // สายลม (js/68-wind-view.js)   // สายดิน (js/47-earth-view.js)
   const x=ev.x,y=ev.y,H=ev.h!==undefined?ev.h:1,me=myPos(),near=!me||Math.hypot(x-me.x,y-me.y)<1000;
   switch(ev.z){
     // ----- สายน้ำแข็ง (ออกแบบโดยผู้เล่น) -----

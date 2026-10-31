@@ -26,7 +26,8 @@ PROPDEF:194 PROP_OFF_MODES:201 PROP_USE:203 PROPS:204 PROPON:204 genProps:205
 §225 ตัวละคร: บ้านฮอกวอตส์ + หน้าตา
 HOUSES:227 HAIRC:232 HAIRSTY:234 WOODC:237 WOODN:238 WCOREC:239 WCOREN:240 WANDSTY:241 WANDN:246 WANDNN:261 EYEC:262 SKINC:263 CLOAKC:264 TIESTY:265 LOOKK:266 LOOKN:266 lookStr:267 parseLook:268 randLook:269 LOOKS:270 LOOKP:270 KITS:270 getKit:271 getLook:272 CREST_SH:273 CREST_PAT:274 starPts:279 CREST_ANI:281 crestSVG:287 houseColor:295 TEAMC:296 TEAMN:296 NOBROOM:298 MODES:299 PDEF:310 EDEF:337 POOLS:350 CDK:360 BUFFS:363 BRAR:372 rollRar:373
 
-## js/03-spells-core.js (224) — 
+## js/03-spells-core.js (224) — ระบบคาถาใหม่: สาย (path) × คาถา (spell) + สถานะ (status effects)
+§6 ไอคอนคาถา: จาก game-icons.net (CC BY 3.0, เครดิตใน "คู่มือ" และ icons…
 ICONS:8 ICOALIAS:9 hasIco:10 ICOBASE:12 icoURL:13 ICO:14 icoTint:15 icoHTML:24 PATHS:25 SPELL_LIST:34 SPELLS:34 defSpell:35 SLOTK:36 BRMAP:36 KITP:37 parseKit:38 cleanKit:54 setKit:55 pathReset:58
 §60 สถานะ (ใช้ได้ทั้งผู้เล่นและศัตรู)
 isBig:61 ccScale:63 ccTouch:64 addStun:65 addRoot:66 addFreeze:67 addSlow:72 addChill:73 ignite:78 shock:86 knock:87 addWard:88 addFrostSlow:90 frostSlow:91 moveMul:98 BRN_MAX:100 addBurn:101 addXBurn:103 addPoison:104 addSil:105 addFear:106 addBlind:107 addMark:108 healT:110 tickStatus:115 clearStatus:135 fxMask:136
@@ -92,6 +93,25 @@ MIND:66 summonMin:72 minTarget:81 minShoot:88 updateMins:93 aimTarget:133
 §180 ร่ายคาถา
 castSlot:181 castUlt:196
 
+## js/09-water.js (158) — สายน้ำ 💧 (ผู้ใช้ออกแบบทั้งหมด — designs/water.md) • ฝั่งโฮสต์ • รอบแรก: ระบบเกมก่อน ภาพช…
+WATERP:7 WT_BA:8 wtOn:21 wtInBeam:23
+§26 ทุกเฟรมของผู้เล่นสายน้ำ (เรียกจาก updatePlayer หลังส่วนโล่)
+waterTick:27 waterSpd:41 waterReset:42
+§44 BA: ตวัดไม้สร้างเส้นน้ำ → ยิง 3 นัดตามเมาส์ • Moonwater = ลำน้ำ
+waterBasic:45 waterLineTick:52 waterMoonBeam:58
+§61 Dash: จมดิน ทิ้งร่างโคลน → โผล่ห่าง 300 ทิศที่หัน • 6 วิกดอีกที = กลั…
+waterDash:62 waterSinkTick:71
+§77 ดาเมจใดๆ ของเรา → ลูกผู้ช่วยยิงตาม (เรียกจาก damage() ใน js/12)
+waterOnHit:78 waterFamTick:80
+§85 Riptide: คลื่นยักษ์วิ่งไปข้างหน้า พัดศัตรูติดไปจนสุดทาง
+waterWaveTick:86
+§94 Abyssal Beam: ร่าย 0.5 วิ → ยิงลำน้ำ 3 วิ (ยืนนิ่ง ลอยนิดหน่อย หมุนตา…
+waterBeamTick:95 waterMBTick:104
+§108 อัลติ Dragon of the Deep
+waterDragonTick:109
+§123 ทุกเฟรม (ทั้งเกม)
+updateWater:124 waterSnapP:130 waterSnapW:132
+
 ## js/09-wind.js (259) — 
 WINDP:8 W_BA:9
 §22 ตัวช่วย
@@ -120,20 +140,20 @@ windFlyTick:202 windFlick:204
 windUltTick:213 windFloatZ:227 windSnapP:230 windSnapW:231
 §234 สกิล
 
-## js/10-net.js (197) — 
+## js/10-net.js (197) — เครือข่าย (PeerJS / WebRTC)
 PREFIX:4 NET:5 RC:9 TURN_SERVERS:12 ICE:13 PEER_OPT:14 TURN_URL:16 ICE_READY:18 JN:22 LAG:24 lagDo:25 hostSend:26 LOBBY:27 genCode:28 sendAll:29 NETD_KEYS:33 NETD:33 netDeltaReset:34 netDelta:35 NET_MAX:49 _netTE:49 netSendSnap:50 NETU:61 netUndelta:62 setStatus:68 hostGame:70 hostPeer:78 netConnect:97 joinWatch:108 joinFail:123 netLost:129 joinGame:144 joinPeer:155 clientOnData:170 leave:185 leaveRoom:187
 
-## js/11-host.js (391) — 
+## js/11-host.js (392) — ฝั่งโฮสต์: สถานะเกมทั้งหมดคำนวณที่นี่ (server-authoritative)
 G:4 EVL:4 EVN:4 hostLast:4 tickN:4 emit:5 feed:6 banner:7 plist:8 cleanName:9 freshStats:11 newPlayer:18 emptyInput:21 frameOk:23 addPlayer:24 initHostLobby:33 lobbyMsg:40 broadcastLobby:41 INPN:43 hostOnData:44 hostDrop:74 hostRemove:83 validate:96 hostStart:107 hostToLobby:133 MIDJOIN:140 midJoin:141 CHATT:157 chatRelay:158 emoHost:166 resetBody:168 fmap:174 spawnPts:175 teamPts:177 placeAll:178 respawn:190
 §209 ลูปหลักฝั่งโฮสต์
-hostTick:210 angDiff:224 cH:226 vR:227 updatePlayer:229 hitProp:378 damagePropsIn:385 nearUseProp:386 useProp:387
+hostTick:210 angDiff:224 cH:226 vR:227 updatePlayer:229 hitProp:379 damagePropsIn:386 nearUseProp:387 useProp:388
 
-## js/12-buildings.js (498) — สิ่งปลูกสร้างที่พังเป็นชิ้นย่อย (บ้าน) แบบ Battlefield — คู่มือเต็ม: …
+## js/12-buildings.js (499) — สิ่งปลูกสร้างที่พังเป็นชิ้นย่อย (บ้าน) แบบ Battlefield — คู่มือเต็ม: …
 BLDDEF:8 BLD_PIECES:10 BLD_GRID:11 BLD_DOOR:13 BLD_FIRE:14 BLD_ICE:14 BLD_ROOF_MIN:14 BLDG:15 BLDON:15 genBldg:16 bldRect:26 bldChunk:28 bldAlive:35 bldLocal:36 bldWorld:37 rectDist:38 bldNear:39 BLD_MOUND:42 bldGone:43 bldMoundAt:44 bldMoundH:45 hitBldPiece:47 breakBldChunk:58 bldSupport:66 damageEnv:86 bldRay:101 _sgRB:109 aimClip:111 aimRay3:118 bldPieceAt:134 projEl:145 bldPush:150 collideBld:156 updateBldg:174 bldSnap:187 bldParse:193
 §197 ของบังในแผนที่ไฟล์ที่พังได้ (หิน เสา รูปปั้น ต้นไม้ โคมไฟ ลัง ...) — …
 BRKDEF:201 BRK_M:201 BRK_MCOL:201 BRK:202 genBrk:203 brkApply:210 brkStage:214 hitBrk:215 damageBrkIn:223 brkSnap:229 brkParse:230
 §231 ตารางช่อง (spatial grid) สำหรับแมพใหญ่: หาเฉพาะของใกล้ ๆ แทนวนทุกชิ้น…
-SG:234 sgObs:235 sgProps:235 sgGrid:237 sgNear:244 _sgCR:249 _sgCW:249 _sgCB:249 _sgCO:249 _sgPO:249 _sgPB:249 _sgPP:249 _sgM:249 _sgE:249 _sgA:249 _cwLast:251 collideWorld:252 shoot:291 eShoot:312 foesOf:319 breakShield:326 ULT_RATE:328 ultActive:329 gainUlt:330 lifesteal:331 damage:333 playerDown:390 killProj:411 explode:420 hitTarget:432 updateProjectiles:448
+SG:234 sgObs:235 sgProps:235 sgGrid:237 sgNear:244 _sgCR:249 _sgCW:249 _sgCB:249 _sgCO:249 _sgPO:249 _sgPB:249 _sgPP:249 _sgM:249 _sgE:249 _sgA:249 _cwLast:251 collideWorld:252 shoot:291 eShoot:312 foesOf:319 breakShield:326 ULT_RATE:328 ultActive:329 gainUlt:330 lifesteal:331 damage:333 playerDown:391 killProj:412 explode:421 hitTarget:433 updateProjectiles:449
 
 ## js/12-city-dmg.js (270) — เมืองพังได้ (designs/city-bot-battle.md ขั้น 4) — ข้อมูลที่ทุกเครื่อง…
 CITY_FL:8 CITY_PW:8 CDMG:9 CITYD:16 cityOn:17 cityLayout:19 cityReset:29 cityApplyBox:45 cityApplyItem:46 cityHex:47 cityMark:48 cityRampSync:49 cityPanelAt:51 cityHitPanel:56 cityTowerStart:70 cityTowerStrip:76 cityTowerFall:80 cityHitItem:91 cityHitObs:100 _sgCD:105 cityDamageIn:107 cityTick:118 _sgCM:129 cityMoundH:130 cityMounds:140
@@ -155,7 +175,8 @@ BOT_LV:8 botPersona:15 BOT_TEAM:16 BOT_MAX:16 bots:17 humans:18 botInZone:20 spa
 ## js/15-botnav.js (135) — 
 NAV_MAPS:14 NAV_EYE:14 NAV:15 navOn:17 navSig:18 navEnsure:25 navBuild:31 navCell:48 navWalk:49 navRay:51 navFree:56 navPath:62 _navFoe:80 botThink:83 botNav:89
 
-## js/15-modes.js (408) — 
+## js/15-modes.js (408) — โหมดพิเศษ: ควิดดิช / แข่งไม้กวาด / แบทเทิลรอยัล / หาลอร์ดโวลเดอมอร์ / ห้องฝึก
+§4 ส่งข้อความลับถึงผู้เล่นคนเดียว (เช่น บทบาทในโหมดหาลอร์ดโวลเดอมอร์)
 sendPriv:5 TASKF:9 taskPts:10 raceRings:11 modeInit:17 spawnDummy:59 trainTick:64 TR_KEYS:81 trTeams:83 trCmd:93 hostEndTraining:111
 §113 ควิดดิช
 quidThrow:114 quidDrop:120 quidArea:126 quidTick:127 snitchTick:163
@@ -227,7 +248,7 @@ BRKV:312 BRK_COL:312 brkSetup:313 BRK_CM:331 brkCrackMat:332 brkClip:348 brkYc:3
 ## js/24-minions-view.js (68) — สัตว์เวท: โมเดลโปร่งแสง + ซิงก์จาก snapshot (MN)
 MM3:2 makeMinion:3 syncMins:36 drawMinBars:58
 
-## js/25-efx.js (300) — efxFX: ภาพของ event "efx" ทุกคาถา (หนึ่ง case ต่อหนึ่งเอฟเฟกต์)
+## js/25-efx.js (301) — efxFX: ภาพของ event "efx" ทุกคาถา (หนึ่ง case ต่อหนึ่งเอฟเฟกต์)
 efxState:4 efxFX:15
 
 ## js/26-fx-events.js (240) — fx(ev): เอฟเฟกต์+เสียงของทุก event จากโฮสต์ • statusFX (สถานะบนตัว) •…
@@ -299,7 +320,7 @@ iceMat:2 iceRim:3 makeIceSword:4 makeIceAxe:23 makeKiteShield:39
 §51 อาวุธน้ำแข็งลอย (ผู้ใช้ 2026-10-22: "ร่ายคาถาให้ดาบฟันเอง ระยะเท่าเดิ…
 FWS:54 FWA:54 _fwM:55 _fwM2:55 _fwX:55 _fwY:55 _fwZ:55 _fwP:55 _fwS:55 _fwQ:55 _eo:56 _ei:56 _ss:56 fwAim:58 fwWeapons:59 FWP:61 FWT:61 fwChop:62 fwSweep:63 FF_RISE:64 fwIdle:65 fwSwing:68 FWL_N:80 fwLink:81 fwMat:84 frostFX:85
 
-## js/35-sync.js (507) — ซิงก์ผู้เล่น/ศัตรู/ลูกเวทจาก snapshot + ฉายตำแหน่งลงจอ (ป้ายชื่อ/ตัวเ…
+## js/35-sync.js (508) — ซิงก์ผู้เล่น/ศัตรู/ลูกเวทจาก snapshot + ฉายตำแหน่งลงจอ (ป้ายชื่อ/ตัวเ…
 §2 ท่าร่ายคาถาแบบนักเวทในหนัง Harry Potter (ผู้ใช้ 2026-10-22: "ยิงปกติท…
 CPOSE_T:7 _ce:7 _cs:7 _cb:7 AMP_B:9 AMP_S:9 CP_BEND:10 CPOSE:12 _cpT:20 _cpR:20 CGUARD:20 CP_STEP:21 CPCOL:22 castStyle:23 castStart:24
 §25 ท่าร่ายสกิล / อัลติ / โล่ (ผู้ใช้ 2026-10-22: "เกือบทุกสกิลควรมีการเห…
@@ -612,17 +633,28 @@ BKICO:377 buffShow:381
 §400 จอมืดตอนเริ่มแมตช์ (ผู้ใช้ 2026-10-23: กระตุกตอนเริ่มแมตช์แรก)
 gameCover:403
 
-## js/66-hud4.js (176) — HUD รอบ 4 (ผู้ใช้ 2026-10-23, designs/hud-full-mock.html)
-H4E:5 H4:11 h4Pal:12 hud4Col:14 h4Parts:16 h4AuBits:21 h4Key:36 h4Ico:37 h4Build:38 h4Set:65 hud4Draw:66
-§113 ไพ่สกิล: นาฬิกาทราย / ท่าใช้ / สลับตำแหน่ง
-h4Glass:115 h4Bits:121 h4Fx:123 h4CardUse:125 h4GlassOut:129 h4Place:133 h4OrdKey:136 h4OrdLoad:137 h4Swap:140 h4Pick:143 h4AltKey:145 h4CardWire:149
-§160 ไพ่อัลติ
-H4SH:162 h4UltCard:164 h4UltUse:169 hud4Frame:173 hud4Hide:174 h4MapBox:176
+## js/66-hud4.js (177) — HUD รอบ 4 (ผู้ใช้ 2026-10-23, designs/hud-full-mock.html)
+H4E:5 H4:12 h4Pal:13 hud4Col:15 h4Parts:17 h4AuBits:22 h4Key:37 h4Ico:38 h4Build:39 h4Set:66 hud4Draw:67
+§114 ไพ่สกิล: นาฬิกาทราย / ท่าใช้ / สลับตำแหน่ง
+h4Glass:116 h4Bits:122 h4Fx:124 h4CardUse:126 h4GlassOut:130 h4Place:134 h4OrdKey:137 h4OrdLoad:138 h4Swap:141 h4Pick:144 h4AltKey:146 h4CardWire:150
+§161 ไพ่อัลติ
+H4SH:163 h4UltCard:165 h4UltUse:170 hud4Frame:174 hud4Hide:175 h4MapBox:177
 
 ## js/67-backdrop.js (139) — 
 BACKDROP:8
 §66 noise เล็ก ๆ (คงที่ต่อ seed)
 bdHash:67 bdNoise:68 bdFbm:69 bdEdge:71 bdRing:73 bdPaint:79 bdTree:82 buildBackdrop:89 bdTower:135 backdropHide:139
+
+## js/68-water-view.js (102) — สายน้ำ 💧 — ภาพฝั่งผู้เล่น (ชั่วคราว: ทรงง่ายๆ สีฟ้า ไว้ลองเล่นก่อนทำ VFX จริงทีละสกิล — …
+WTV:5 WTC:6 wtMat:7 wtGlow:8 wtTemp:10 wtState:11 wtKill:12
+§14 ต่อผู้เล่น: ลูกผู้ช่วยที่ไหล่ • ร่างโคลน + เส้นน้ำบนพื้น • ลำน้ำ Abys…
+waterFX:15
+§48 ทั้งเกม: คลื่น Riptide • ลูกผู้ช่วยที่กำลังพุ่ง • ชิ้นชั่วคราว
+syncWater:49
+§64 เหตุการณ์ (efx z 'wt…')
+waterEfx:65
+§98 HUD: เกจฮีลโล่ (โค้งซ้ายรอบเป้าเล็ง)
+drawWaterHud:99
 
 ## js/68-wind-view.js (97) — 
 WV:6 wvState:7 wvAlive:8
@@ -642,4 +674,4 @@ BRM:9 BSK:11 BROOM_SK:17 broomVert:38 broomMove:50 broomStrike:68 broomStrikeTic
 §125 ฝั่งจอ
 broomHead:127 BBEAM:134 _bbGeo:135 broomView:136 broomMountFx:165 broomDismountFx:173 broomBeamFx:175 broomSkFx:191 broomStrikeFx:204 broomFlakFx:209 broomHud:214 broomHudT:215 broomTick:224
 
-(78 files, 18856 lines)
+(80 files, 19121 lines)

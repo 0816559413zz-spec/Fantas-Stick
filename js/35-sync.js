@@ -56,7 +56,7 @@ const SKANIM={ringofembers:'sweep',blazeform:'powerup',colossus:'ultraise',kindl
   frostforge:'forge',glacierrend:'rend',permafrost:'slam',cryoshell:'wrap',frostaura:'powerup',mirrorlegion:'summon3',
   thunderline:'line',speedsiphon:'siphon',stormorbs:'orbs',stormdome:'dome',triplestrike:'skycall',railgun:'pullback',godlightning:'ultraise',
   stonebreaker:'punchcmd',mudswamp:'ground',tectoniccrush:'dome',tectoniccrush_2:'clap',dustburst:'burst',terraauger:'pullback',wrath:'ultraise',
-  vortexbind:'vxpull',voidspheres:'line',aegisgale_push:'wallpush',aegisgale_place:'ground'};
+  vortexbind:'vxpull',riptide:'sweep',tidecaller:'powerup',aquacage:'line',abyssalbeam:'pullback',moonwater:'powerup',dragondeep:'ultraise',voidspheres:'line',aegisgale_push:'wallpush',aegisgale_place:'ground'};
 function skAnim(ev){const o=PM3.get(ev.id),n=SKANIM[ev.s];if(!o||!n)return;o.caN=n;o.caT=0;o.cpT=0;o.cgd=2.2;}
 const _caT=[0,0,0,0,0,0,0,0],_caR=[0,0,0,0,0,0,0,0];
 function skillPose(o,p,dt,now){
@@ -206,7 +206,7 @@ function syncPlayers(P,mode,now,dt){
     chillFX(o,p,pz,now,dt);
     frostFX(o,p,pz,now,dt);
     earthFX(o,p,pz,now,dt);
-    windFX(o,p,pz,now,dt);
+    windFX(o,p,pz,now,dt);waterFX(o,p,pz,now,dt);
     lateSkillPose(o,p,dt,now);
     if(o.rig)rigSync(o,dt);
     if(ragTick(o,p,v,dt,now))o.tip.scale.setScalar(0.001);   // ล้ม/กระแทกแรง = ragdoll (js/48)
@@ -498,6 +498,7 @@ function drawCrosshair(){
   if(_me&&_me.sm&&_me.al)drawStormHud(x,y,_me.sm);
   if(_me&&_me.ea&&_me.al)drawEarthHud(x,y,_me.ea,_me);
   if(_me&&_me.wn&&_me.al)drawWindHud(x,y,_me.wn,_me);
+  if(_me&&_me.wt&&_me.al)drawWaterHud(x,y,_me.wt,_me);
   if(!locked&&!VIC.on&&!(VIEW.cur&&VIEW.cur.ph==='over')){
     cx.font='600 17px Kanit,sans-serif';cx.textAlign='center';
     const t='🖱️ คลิกที่จอเพื่อบังคับกล้อง (Esc = ปล่อยเมาส์)',w=cx.measureText(t).width+48;

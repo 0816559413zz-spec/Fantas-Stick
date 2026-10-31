@@ -7,7 +7,8 @@ const H4E={
   frost:{c0:'#0a2a5a',c1:'#8fe0ff',c2:'#e6f8ff',cb:'#13305a',pt:'snow',n:'FROST'},
   storm:{c0:'#4a3a06',c1:'#ffe27a',c2:'#fff6c8',cb:'#3a3010',pt:'spark',n:'STORM'},
   earth:{c0:'#3a2410',c1:'#c9a36a',c2:'#f0dcb4',cb:'#3a2a18',pt:'rock',n:'EARTH'},
-  wind:{c0:'#0f3a22',c1:'#8dff65',c2:'#efffe8',cb:'#123a26',pt:'snow',n:'WIND'}};
+  wind:{c0:'#0f3a22',c1:'#8dff65',c2:'#efffe8',cb:'#123a26',pt:'snow',n:'WIND'},
+  water:{c0:'#062a4a',c1:'#4fc3ff',c2:'#e3f7ff',cb:'#0c2c48',pt:'snow',n:'WATER'}};
 const H4={pick:null,ordFor:'',el:null,on:false,drawn:false,pid:'',lay:'',cache:{},rdy:{},seg:[],segN:0,trail:1,hold:0,uFull:false};
 function h4Pal(me){const k=getKit(me.id),P=PATHS[k.path]||PATHS[0];return [P,H4E[P.id]||H4E.frost];}
 // สีของ HUD canvas (js/38) ตามธาตุของเรา — เรียกทุกเฟรมจาก drawHUD

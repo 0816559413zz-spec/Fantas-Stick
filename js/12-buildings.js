@@ -336,7 +336,8 @@ function damage(t,amt,srcId,kind){
   if(src&&kind!=='burn')amt*=src.buffs.dmg;
   if(src&&src.blaze>0)amt*=1.15;   // Blazeform (เนิร์ฟ 2026-10-27: 1.3→1.15)
   if(src&&src.mirror>0&&!src.noMul)amt*=2;
-  if(G.wwl&&G.wwl.length)windDmg(t,amt,srcId);   // สายลม: ดาเมจใส่ศัตรูที่ติดกำแพงลม
+  if(G.wwl&&G.wwl.length)windDmg(t,amt,srcId);
+  if(src&&src.wfam>0)waterOnHit(src,t,kind);   // สายน้ำ Tidecaller Orb: ลูกผู้ช่วยยิงตาม   // สายลม: ดาเมจใส่ศัตรูที่ติดกำแพงลม
   if(t.isM){
     if(t.dead)return;
     if(t.frz>0)amt*=1.15;
@@ -389,7 +390,7 @@ function damage(t,amt,srcId,kind){
 }
 function playerDown(t,srcId){
   t.shieldOn=false;t.burn=0;t.fly=false;
-  t.stS=null;t.sdome=null;t.rail=null;t.slnT=0;t.beam=0;t.sdHit=null;earthReset(t);windReset(t);if(t.god>0){t.god=0;t.xhp=0;}
+  t.stS=null;t.sdome=null;t.rail=null;t.slnT=0;t.beam=0;t.sdHit=null;earthReset(t);windReset(t);waterReset(t);if(t.god>0){t.god=0;t.xhp=0;}
   // ท่าที่ง้าง/ค้างอยู่ตอนล้ม: ไม่งั้นคนล้ม (co-op) ยังปล่อยท่าได้ หรือท่าค้างไว้แล้วออกเองทันทีที่ถูกชุบ
   t.dfall=null;t.snapT=0;t.grT=0;t.slam=false;t.slam3=null;t.dchgOn=false;t.dchg=0;t.chg=0;t.dash=0;t.dashSp=0;t.trail=null;
   if(G.mode==='coop'){
