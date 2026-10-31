@@ -1,12 +1,12 @@
 # Story 001: ระบบต่อสู้หลัก (ยิงเวท, โล่+parry, หลบ, เล็งกลางจอ)
 
 > **Epic**: Fantas Stick MVP
-> **Status**: Ready
+> **Status**: In Progress
 > **Layer**: Core
 > **Type**: Visual/Feel
 > **Estimate**: L
 > **Manifest Version**: N/A (minimal — no control manifest)
-> **Last Updated**: —
+> **Last Updated**: 2026-10-31
 
 ## Context
 
@@ -55,12 +55,10 @@
 
 ## Files
 
-- js/03-spells-core.js
-- js/11-host.js
-- js/17-input.js
-- js/31-camera.js
-
----
+- none changed (verification only)
+- checked: js/03-spells-core.js, js/11-host.js, js/17-input.js, js/31-camera.js, js/12-buildings.js
+- production/qa/evidence/story-001-core-combat/ffa-shield.jpg
+- production/qa/evidence/story-001-core-combat-evidence.md
 
 ## QA Test Cases
 

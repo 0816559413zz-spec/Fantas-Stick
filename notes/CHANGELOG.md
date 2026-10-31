@@ -1,5 +1,6 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
 
+- 2026-10-31 — **Story 001 (core combat) checked via `/dev-story`** — 7 criteria verified in code, no code changed; evidence screenshot + sheet in `production/qa/evidence/`. Open: dodge default key is Left Shift, story said Space.
 - 2026-10-31 — **MVP stories written (`/create-stories`)** — `production/epics/fantas-stick/` EPIC.md + 5 stories from the game brief: core combat, 5 magic paths, destructible map, FFA online 2–6, HUD. Next: `/dev-story` per story.
 - 2026-10-31 — **Game brief written (`design/game-brief.md`, via `/reverse-document design js/`)** — user confirmed: pillar = PvP battleground wizard duels, endless play, core mode FFA, refs Hogwarts Legacy combat + Battlefield 6 destruction, no copied Harry Potter IP.
 - 2026-10-31 — **CCGS /start run** — `project.yaml` now has `project.stage: Concept`, `modes.rigor: minimal`, `modes.automation: guided` (+ `production/stage.txt`). Change with `/settings`.

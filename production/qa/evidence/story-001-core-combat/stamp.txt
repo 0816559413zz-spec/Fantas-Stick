@@ -1,0 +1,5 @@
+Reviewed-Content-Hash: js/03-spells-core.js 47ee7672c83cee8a10b0cb83ba9a6c68f38bbca6
+Reviewed-Content-Hash: js/11-host.js 8b0bfb11dea4f6411bd4d303a2f9b1b79ee6f98a
+Reviewed-Content-Hash: js/17-input.js acd2eeed38c7cea16b345d2e5f6d460522faf602
+Reviewed-Content-Hash: js/31-camera.js 44ec316ae9eec3ced7bf8d50a03d1864568131e2
+Reviewed-Content-Hash: js/12-buildings.js a776a01e3a7f74374f60d67051274f1edd73d49e
