@@ -254,6 +254,7 @@ function fxMeshMake(S,I,w){const L=S.d,g=k=>fxG(L,k),sh=g('shape'),mt=g('mat'),C
     case 'ice':return iceShaderMat({glow:1,rim:g('rim')});
     case 'glow':return new THREE.MeshBasicMaterial({color:hdr(C('col'),1.15),transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide});
     case 'toon':return fxToonMat(fxCol('$core',I),C('col'),C('col2'),g('rim'));   // การ์ตูน 2 เฉด + ขอบสว่าง + ขอบแหว่งด้วย dis (ลม)
+    case 'black':return new THREE.MeshBasicMaterial({color:0x000000,transparent:true,fog:false});   // ดำสนิทไม่รับแสง เขียนความลึก บังของเรืองแสงข้างหลัง (แกนหลุมดำ)
     case 'solid':return new THREE.MeshStandardMaterial({color:C('col'),emissive:C('col2'),emissiveIntensity:0.35,roughness:0.85,metalness:0,flatShading:true,transparent:true});
     case 'tex':return fxTexMat(g('tex'),{col:C('col'),col2:C('col2'),rim:g('rim'),tile:g('uvTile'),scroll:g('uvScroll')});   // ภาพจากสตูดิโอบนผิวรูปทรง (js/46)
     case 'flip':{const t=fxFlipTex(g('tex')),add=!t||t.add!==false;const m=new THREE.MeshBasicMaterial({map:t?t.map:null,color:add?hdr(C('col'),1.2):C('col'),transparent:true,depthWrite:false,blending:add?THREE.AdditiveBlending:THREE.NormalBlending,side:THREE.DoubleSide});if(t)S.flip=t;return m;}

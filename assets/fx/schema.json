@@ -213,7 +213,7 @@
       "args": {"type": "obj", "def": {}, "th": "ค่าที่ส่ง"}}}
   },
   "shapes": ["sphere", "dome", "disc", "ring", "cylinder", "cone", "torus", "crescent", "spikes", "beam", "plane", "lathe", "ribbon", "glb", "model"],
-  "mats": ["energy", "fire", "ice", "glow", "solid", "flip", "tex", "toon"],
+  "mats": ["energy", "fire", "ice", "glow", "solid", "flip", "tex", "toon", "black"],
   "froms": ["point", "sphere", "hemisphere", "ring", "disc", "cone", "box", "line", "mesh"],
   "dirs": ["out", "flat", "up", "down", "in", "aim", "tangent", "random"],
   "looks": ["glow", "spark", "streak", "ring", "flake", "smoke", "fire", "ember", "model"],

@@ -362,7 +362,7 @@ class H(SimpleHTTPRequestHandler):
         self.send_header('Cache-Control', 'no-cache')
         super().end_headers()
     def log_message(self, fmt, *args):
-        if '/api/' in (args[0] if args else ''):
+        if '/api/' in str(args[0] if args else ''):
             super().log_message(fmt, *args)
     def _json(self, code, obj):
         b = json.dumps(obj, ensure_ascii=False).encode('utf-8')
@@ -463,6 +463,7 @@ if __name__ == '__main__':
     port = int(sys.argv[1]) if len(sys.argv) > 1 else 8765
     print(f'Fantas Stick: http://localhost:{port}/  •  VFX Studio: http://localhost:{port}/studio.html  •  Bug Notes: http://localhost:{port}/bugs.html  •  Storyboard: http://localhost:{port}/storyboard.html')
     class Srv(ThreadingHTTPServer):
+        request_queue_size = 128      # default 5 → the game loads hundreds of files at once and Windows refused the rest (Failed to fetch)
         allow_reuse_address = False   # Windows: reuse = เปิดซ้อนพอร์ตเดียวกันได้ 2 ตัว → คำขอสลับไปมา ข้อมูลเพี้ยน
     try:
         srv = Srv(('127.0.0.1', port), H)

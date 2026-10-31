@@ -147,7 +147,7 @@ Play a game sound (names from SFXN in js/18-audio.js).
 | `wk` | num | `0.6` | 0.05–2 |  | ความกว้าง (เสี้ยว/ริบบิ้น) |
 | `prof` | list | `[[0.2,0],[1,0.4],[0.6,1],[0,1.3]]` |  |  | เส้นโปรไฟล์ [รัศมี,สูง] (lathe) |
 | `path` | list | `[[0,0,0],[0,1,2],[0,0,4]]` |  |  | เส้นทาง [x,y,z] (ribbon) |
-| `mat` | enum (energy/fire/ice/glow/solid/flip/tex/toon) | `energy` |  |  | วัสดุ |
+| `mat` | enum (energy/fire/ice/glow/solid/flip/tex/toon/black) | `energy` |  |  | วัสดุ |
 | `col` | col | `$main` |  |  | สีหลัก |
 | `col2` | col | `$deep` |  |  | สีขอบ/ท้าย |
 | `scale` | vec3 | `1` | 0–30 | เส้นโค้ง · สูตร | ขนาด (ม. หรือ [x,y,z]) |
@@ -320,7 +320,7 @@ Escape hatch: call a registered helper (FXCODE in js/45-fx-runtime.js) with args
 
 ## ตัวเลือกของ enum
 - รูปทรง (shape): sphere, dome, disc, ring, cylinder, cone, torus, crescent, spikes, beam, plane, lathe, ribbon, glb, model
-- วัสดุ (mat): energy, fire, ice, glow, solid, flip, tex, toon — energy = ขอบเรือง+ลายไหล (สีจากจาน) • fire = shader ไฟของเกม • ice = shader น้ำแข็ง • glow = สีเรียบบวกแสง • solid = ทึบ • flip = ภาพ flipbook
+- วัสดุ (mat): energy, fire, ice, glow, solid, flip, tex, toon, black — energy = ขอบเรือง+ลายไหล (สีจากจาน) • fire = shader ไฟของเกม • ice = shader น้ำแข็ง • glow = สีเรียบบวกแสง • solid = ทึบ • flip = ภาพ flipbook
 - ปล่อยจาก (from): point, sphere, hemisphere, ring, disc, cone, box, line, mesh
 - ทิศ (dir): out, flat, up, down, in, aim, tangent, random — flat = กระจายแนวนอน (ความเร็วขึ้นจาก up)
 - หน้าตาเม็ด (look): glow, spark, streak, ring, flake, smoke, fire, ember, model

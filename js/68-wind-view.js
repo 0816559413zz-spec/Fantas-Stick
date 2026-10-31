@@ -29,8 +29,7 @@ function syncWind(v,dt,now){
   for(const w of (v.WW||[])){seen.add(w[0]);const o=WV.wl.get(w[0]);if(!o)continue;
     if(o.I){o.I.x=w[1];o.I.y=w[2];}if(o.P){o.P.x=w[1];o.P.y=w[2];if(!w[6]){fxStop(o.P);o.P=null;}}o.x=w[1];o.y=w[2];o.a=w[3];}
   const sv=new Set();
-  for(const o of (v.WO||[])){sv.add(o[0]);let I=WV.vo.get(o[0]);if(!wvAlive(I)){I=fxPlay('wind/void_orb',{x:o[1],y:o[2],h:Math.max(0,o[3]-1.2),aim:false});if(I)WV.vo.set(o[0],I);}
-    if(I){I.x=o[1];I.y=o[2];I.h=Math.max(0,o[3]-1.2);}}
+  for(const o of (v.WO||[])){sv.add(o[0]);const I=WV.vo.get(o[0]);if(I){I.x=o[1];I.y=o[2];}}   // หลุมดำ Void Spheres เลื่อนตามโฮสต์
   for(const [id,I] of WV.vo)if(!sv.has(id)){fxStop(I);WV.vo.delete(id);}
   for(const [id,o] of WV.wl)if(!seen.has(id)&&(o.age=(o.age||0)+dt)>0.5){if(o.I)fxStop(o.I);if(o.P)fxStop(o.P);WV.wl.delete(id);}
 }
@@ -62,9 +61,10 @@ function windEfx(ev){
     case 'wndrland':case 'wndrwind':return true;   // ลงท่า/ลมตามมา อยู่ในเอฟเฟกต์ windrift แล้ว
     case 'wnvx':fxPlay('wind/vortex_bind',{x,y,h:H,a});later(0.8,()=>{if(near)shake(0.18);});if(near)snd('cast_pull',ev);return true;
     case 'wnvxstun':fxPlay('wind/wall_hit',{x,y,h:0,a:Math.random()*6.283});if(near)shake(0.15);return true;   // ลมรัดตัว = สตัน 0.5 วิ
-    case 'wnvxcap':case 'wnvohit':fxPlay('wind/ba_hit',{x,y,h:Math.max(0,H-0.2),a:Math.random()*6.283});return true;
-    case 'wnvofire':if(near)snd('cast_pull',ev);return true;
-    case 'wnvoend':burst(x,y,'#8dff65',8,90,0.3,2,{h:H,g:0});return true;
+    case 'wnvxcap':fxPlay('wind/ba_hit',{x,y,h:Math.max(0,H-0.2),a:Math.random()*6.283});return true;
+    case 'wnvocast':fxPlay('wind/void_matter',{x,y,h:H,a,aim:false});if(near)snd('cast_pull',ev);return true;
+    case 'wnvohole':{const I=fxPlay('wind/void_hole',{x,y,h:H,a,aim:false});if(I)WV.vo.set(ev.n,I);if(near)shake(0.15);return true;}
+    case 'wnvoboom':{const I=WV.vo.get(ev.n);if(I){fxKill(I);WV.vo.delete(ev.n);}fxPlay('wind/void_boom',{x,y,h:H,a,aim:false});if(near){shake(0.6);snd('break',ev);if(ev.c)hitStop(0.08);}return true;}
     case 'wnfw':fxPlay('wind/fw_takeoff',{x,y,h:H,aim:false});return true;
     case 'wnfwflick':fxPlay('wind/fw_flick',{x,y,h:Math.max(0,H-3.2),a});if(near)shake(0.2);return true;
     case 'wnfwend':case 'wnfwland':return true;
