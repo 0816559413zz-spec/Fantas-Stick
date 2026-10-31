@@ -390,7 +390,7 @@ function hostLoop(){
   const t1=performance.now(),base=makeSnap();
   const evl=EVL;EVL=[];
   onSnap(Object.assign({},base,{ev:evl}));pf('snap',t1);
-  if(NET.online&&tickN%2===0){const evn=EVN;EVN=[];sendAll({t:'s',s:Object.assign({},base,{ev:evn,T:Math.round(t),P:packP(base.P)},netDelta(base))});}   // T = เวลาโฮสต์ (ลูกข่ายใช้เรียง/เลื่อนภาพให้นุ่ม)
+  if(NET.online&&tickN%2===0){const evn=EVN;EVN=[];netSendSnap(Object.assign({},base,{ev:evn,T:Math.round(t),P:packP(base.P)},netDelta(base)));}   // T = เวลาโฮสต์ (ลูกข่ายใช้เรียง/เลื่อนภาพให้นุ่ม)
 }
 setInterval(()=>{if(!HLW.on)hostLoop();},1000/60);
 // โฮสต์สลับไปหน้าต่างอื่น: Chrome ชะลอ setInterval ของแท็บที่ซ่อนเหลือ ~1 ครั้ง/วิ → ทั้งห้องค้าง

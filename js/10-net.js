@@ -43,6 +43,20 @@ function netDelta(base){
     o[k]=n*4<B.length?d:cur;}
   return o;
 }
+// ส่ง snapshot ให้ทุกเครื่อง โดยไม่ให้เกินขนาดที่ PeerJS (serialization 'json') ส่งได้ต่อข้อความ (~16 KB — เกิน = error "Message too big" แล้วเครื่องนั้นหลุด)
+// ตอนพังของเยอะ ๆ พร้อมกัน event (เศษ/ควัน/เสียง) พุ่งเป็นร้อย → ตัดทิ้งก่อน: event "โดน" (h) → event ที่เหลือบางส่วน → ทั้งหมด → ลูกเวทบางส่วน
+// สถานะจริง (ตึก/ของพัง/คน) อยู่ในช่องอื่นของ snapshot ไม่หาย — ที่หายคือเอฟเฟกต์บางอันบนเครื่องลูก
+const NET_MAX=15000,_netTE=new TextEncoder();
+function netSendSnap(s){
+  const m={t:'s',s},sz=()=>_netTE.encode(JSON.stringify(m)).length;
+  if(sz()>NET_MAX){
+    s.ev=(s.ev||[]).filter(e=>e.e!=='h');
+    while(sz()>NET_MAX&&s.ev.length)s.ev=s.ev.slice(0,s.ev.length>>1);
+    if(sz()>NET_MAX&&s.J)while(sz()>NET_MAX&&s.J.length)s.J=s.J.slice(0,s.J.length>>1);
+    NETD.trim=(NETD.trim|0)+1;
+  }
+  sendAll(m);
+}
 // ลูกข่าย: เติมกลับเป็นสตริงเต็มก่อนเข้า onSnap (snapApply/bldParse/brkParse ใช้แบบเดิม)
 const NETU={};
 function netUndelta(s){
@@ -70,7 +84,7 @@ function hostPeer(){
   peer.on('connection',conn=>{
     conn.on('data',d=>hostOnData(conn,d));
     conn.on('close',()=>hostDrop(conn.pid||conn.peer,conn));
-    conn.on('error',()=>hostDrop(conn.pid||conn.peer,conn));
+    conn.on('error',e=>{if(e&&/too big/i.test(e.message||''))return console.warn('net: ข้อความใหญ่เกิน ถูกทิ้ง',e.message);hostDrop(conn.pid||conn.peer,conn);});   // ส่งไม่ได้เพราะใหญ่เกิน ≠ เน็ตหลุด
   });
   peer.on('call',onIncomingCall);
   peer.on('disconnected',()=>{try{peer.reconnect();}catch(e){}});
