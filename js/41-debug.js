@@ -15,7 +15,8 @@ function botBrain(p,dt,tg0){
   const close=(p.kitIds.includes('thornburst')&&tg.psn>0);
   const mel=p.pathIdx===1&&p.fmode!==1;
   const P=p.ai&&p.ai.ps,R=P?P.rng:1;   // บอทห้องฝึก: นิสัยสุ่มต่อตัว (botPersona js/15-bot)
-  const ang=Math.atan2(dy,dx),want=mel?(d>95?1:0):close?(d>140?1:0):d>430*R?1:d<260*R?-1:0,st=P?P.sd*Math.sin(t*P.sp+P.ph):Math.sin(t*1.7+p.id.length);
+  const BR=(p.fmode===1?null:BOT_RANGE[p.pathIdx])||[260,430];   // ระยะที่ชอบยืนต่อสาย (js/15-botplay)
+  const ang=Math.atan2(dy,dx),want=mel?(d>95?1:0):close?(d>140?1:0):d>BR[1]*R?1:d<BR[0]*R?-1:0,st=P?P.sd*Math.sin(t*P.sp+P.ph):Math.sin(t*1.7+p.id.length);
   inp.mx=Math.cos(ang)*want+Math.cos(ang+Math.PI/2)*st*0.8;inp.my=Math.sin(ang)*want+Math.sin(ang+Math.PI/2)*st*0.8;
   inp.fire=mel?(d<150?1:0):d<900?1:0;
   if(p.pathIdx===1&&p.cd.dodge<=0&&d>520)inp.c.sp=(inp.c.sp|0)+1;
@@ -32,6 +33,7 @@ function botBrain(p,dt,tg0){
     if(S.id==='kindle'&&p.kindle>0)return;
     if(S.id==='cryoshell'&&(p.hp>p.maxHp*0.35||p.cryo>0))return;
     if(S.melee&&p.fmode===1)return;
+    const w=tg.isE&&!['dragonfall','stonebreaker','voidspheres','aegisgale'].includes(S.id)?undefined:botWant(p,S.id,tg,d);if(w!==undefined){if(w)press(k);return;}   // วิธีเล่นต่อสาย (js/15-botplay)
     if(S.id==='glacialspike'&&!(tg.chl>0||tg.frz>0))return;
     const r=({thunderline:560,speedsiphon:180,triplestrike:560,stormorbs:300,railgun:850,stormdome:560,frostforge:200,glacierrend:420,permafrost:240,cryoshell:9999,frostaura:200,dragonfall:560,ringofembers:360,blazeform:500,ignitionsnap:480,emberburst:170,frostnova:170,terror:210,frostarmor:500,overcharge:600,sporecloud:480,blinddust:500,scorchdash:330,arcblink:330,thornburst:170,soulsiphon:650})[S.id]||900;
     const gap=S.id==='scorchdash'||S.id==='arcblink';
@@ -41,9 +43,10 @@ function botBrain(p,dt,tg0){
   // บอทสายฟ้า: เข้าประชิด ยิงลำค้าง (ปล่อยแว้บเพื่อฟาดสามเหลี่ยม) Dash ทะลุ เปิดโล่ตอนเลือดน้อย
   if(p.pathIdx===2){const w=d>(p.god>0?150:240)?1:0;inp.mx=Math.cos(ang)*w+Math.cos(ang+Math.PI/2)*st*0.5;inp.my=Math.sin(ang)*w+Math.sin(ang+Math.PI/2)*st*0.5;
     inp.fire=d<(p.god>0?190:320)?(p.emp?(Math.floor(G.time*8)%2):1):0;
-    if((p.dch||0)>=1&&d<260&&Math.random()<dt*0.8)press('sp');inp.sh=p.hp<p.maxHp*0.5&&!p.stS&&!(p.stCd>0)&&Math.random()<0.05;}
+    if((p.dch||0)>=1&&d<260&&Math.random()<dt*(p.ai?2.5:0.8))press('sp');inp.sh=p.hp<p.maxHp*0.5&&!p.stS&&!(p.stCd>0)&&Math.random()<0.05;}
   // บอทสายไฟ: กดค้างลูกไฟเป็นระยะ / ยิงตอนเป็นร่างยักษ์
   if(p.pathIdx===0&&!(p.colos>0)){p.bhold=((p.bhold||0)+dt)%4;const c=p.bhold;inp.fire=d>900?0:c<2.1?1:c<2.2?0:(Math.floor(c/0.17)%2);}
+  if(!p.ai)botCombo(p,dt,tg);   // บอทห้องฝึก/ห้องรอ เรียกท้าย aiBot แทน
 }
 let _obsKeep=null;
 function balArena(on){if(on&&!_obsKeep){_obsKeep=OBS;OBS=[];}else if(!on&&_obsKeep){OBS=_obsKeep;_obsKeep=null;}}

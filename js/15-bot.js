@@ -100,6 +100,7 @@ function aiBot(p,dt){
   // สายจูง: ห้ามออกนอกโซน — ใกล้ขอบแล้วยังจะเดินออก = หันกลับเข้าหาจุดเกิด
   const nx=p.x+(inp.mx||0)*90,ny=p.y+(inp.my||0)*90;
   if(!botInZone(A.zone,nx,ny,-60)){const dx=A.home.x-p.x,dy=A.home.y-p.y,d=Math.hypot(dx,dy)||1;inp.mx=dx/d;inp.my=dy/d;}
+  botCombo(p,dt,tg);   // ท่าต่อเนื่องต่อสาย (js/15-botplay) — หลังเช็คจังหวะเว้นสกิล ไม่โดนตัดทิ้ง
 }
 // คำสั่งเสก/ลบบอทจากห้องฝึก (trCmd js/15): จุดเกิด = แท่นเสกบอท
 function trBotCmd(p,d){
