@@ -259,6 +259,27 @@
   "loop:blaze": {
     "fx": "fire/blazeform_b"
   },
+  "loop:colossus": {
+    "fx": "fire/colossus"
+  },
+  "efx:colossus": {
+    "fx": "fire/colossus_cast",
+    "mode": "replace"
+  },
+  "efx:colbolt": {
+    "fx": "fire/colossus_shot",
+    "mode": "replace",
+    "p": {
+      "dx": "(ev.y2-ev.y)/20",
+      "dz": "(ev.x2-ev.x)/20",
+      "dy": "ev.h2-ev.h",
+      "T": "ev.t"
+    }
+  },
+  "efx:colend": {
+    "fx": "fire/colossus_gone",
+    "mode": "replace"
+  },
   "efx:dfrise": {
     "fx": "fire/df_rise_a",
     "mode": "add",

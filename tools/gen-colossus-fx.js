@@ -137,3 +137,46 @@ function build(V){
 }
 W('fire/colossus_a.fx.json',build('a'));
 W('fire/colossus_b.fx.json',build('b'));
+
+// ---------- เวอร์ชันในเกม (ผู้ใช้เลือกแบบ B 2026-10-31) ----------
+// fire/colossus = ร่างตามตัว (bind loop:colossus, เริ่ม/หยุดจาก pyroFX ตอน p.co) • ช่วง 3 วนจน fxStop • ช่วง 4 = end
+// fire/colossus_cast = จุดกระโดดบนพื้น (efx:colossus) • fire/colossus_shot = ลูกไฟปาจากมือซ้ายไปจุดเป้า (efx:colbolt) • fire/colossus_gone = ตอนร่างหาย (efx:colend)
+{const B=build('b'),HOT='#ffd27a',O='#ff6a2a',DEEP='#c2300a';
+ const cast=[],drop=new Set(['s3_ball2','s3_shot','s3_shotTr','s3_shotFl','s3_boom','s3_boomR','s3_boomF','s3_boomD','s3_boomE','s3_boomS','s3_boomSnd','s3_throwSnd']);
+ const L=[];
+ for(const l0 of B.layers){const l=JSON.parse(JSON.stringify(l0));
+  if(['s1_ring','s1_scorch','s1_launch','s1_snd'].includes(l.id)){cast.push(l);continue;}
+  if(drop.has(l.id))continue;
+  if(l.id==='s2_armL')l.rot={'0':[0,0,4],'1':hold};
+  if(l.id==='s2_light'){l.life=0.4;l.int={'0':2.5,'1':1.6};}
+  if(l.id.startsWith('s3_')){l.loop=true;
+   if(l.id==='s3_armL'||l.id==='s3_armLF')l.rot=hold;
+   if(l.id==='s3_ball'){l.rot=hold;l.scale=1;l.life=1;l.op=1;}
+   if(l.id==='s3_haze')l.op={'0':1};
+   if(l.t==='firevol'){l.hgt={'0':1};l.dis={'0':0};l.life=1.5;}}
+  if(l.id.startsWith('s4_')){l.end=true;l.at=r2(Math.max(0,l.at-3.6));}
+  L.push(l);}
+ L.push({id:'s3_light',t:'light',at:0.6,life:1,loop:true,att:'feet',pos:[0,3.4,1],col:'#ff7a2a',int:1.6,dist:16});
+ W('fire/colossus.fx.json',{v:1,desc:'Inferno Colossus ในเกม (แบบ B, สตอรี่บอร์ด #14): เกลียวไฟพันตัวตอนกระโดด → ไฟระเบิดเหนือหัวก่อตัวเป็นร่างยักษ์ไฟ → ลอยตามตัวถือลูกไฟในมือซ้าย (วนจน fxStop) → ไหม้สลาย • bind loop:colossus (pyroFX เล่น/หยุดตาม p.co)',
+  tags:['fire','pyro','ult','colossus','storyboard14','loop'],pal:'fire',dur:3.6,seed:14,layers:L});
+ cast.push({id:'s1_light',t:'light',at:0,life:0.5,att:'ground',pos:[0,1.5,0],col:'#ff7a2a',int:{'0':2.2,'1':0},dist:14});
+ cast.push({id:'s1_shake',t:'screen',at:0,life:0.25,own:true,shake:4});
+ W('fire/colossus_cast.fx.json',{v:1,desc:'Inferno Colossus: จุดกระโดดบนพื้น (วงกระแทก เสาไฟ รอยไหม้ แสง เสียง) • efx:colossus replace',tags:['fire','pyro','ult','colossus','storyboard14'],pal:'fire',dur:3.9,seed:14,layers:cast});
+ // ลูกไฟปา: event colbolt ไม่มีมุม (a=0 → แกน z = x แผนที่, แกน x = y แผนที่) • dx/dz/dy = ระยะไปเป้า (ม.), T = เวลาบิน
+ // จุดเริ่ม = มือซ้ายท่าถือ (handAt(hold) เทียบกับจุด event ที่อยู่หน้าตัว 1.5 ม. สูง 4.2 ม.) หมุนตามทิศไปเป้า
+ const h=handAt(hold),R=r2(h[0]),U=r2(h[1]-4.2),F=r2(h[2]-1.5),N='(sqrt(dx*dx+dz*dz)+0.001)';
+ const st=[`(${R}*dz+${F}*dx)/${N}`,U,`(${-R}*dx+${F}*dz)/${N}`];
+ const P={'0':st,'1':['dx','dy+0.3','dz'],ease:'in'};
+ W('fire/colossus_shot.fx.json',{v:1,desc:'Inferno Colossus: ลูกไฟปาจากมือซ้ายของร่างยักษ์ไปจุดเป้า (หางไฟหนา) • efx:colbolt replace (ระเบิด = colboom โค้ดเดิม)',tags:['fire','pyro','ult','colossus','storyboard14','projectile'],pal:'fire',dur:0.8,seed:14,
+  params:{dx:{def:0,desc:'ไปเป้า แกน y แผนที่ (ม.)'},dz:{def:20,desc:'ไปเป้า แกน x แผนที่ (ม.)'},dy:{def:-6,desc:'ต่างความสูง (ม.)'},T:{def:0.6,desc:'เวลาบิน (วิ)'}},
+  layers:[
+   {id:'flash',t:'flash',at:0,life:0.14,pos:st,col:HOT,size:3.5,k:1.4},
+   {id:'ball',t:'mesh',at:0,life:'T',shape:'sphere',pos:P,scale:1.5,mat:'fire',col:HOT,col2:O,mode:'ball',disp:0.7,heat:0.4,int:1.5,fade:0},
+   {id:'tr',t:'trail',at:0,life:'T',of:'ball',col:HOT,col2:DEEP,w:1.2,tlife:0.3,k:1.5},
+   {id:'fl',t:'emit',at:0,life:'T',pos:P,burst:0,rate:150,from:'sphere',fr:0.6,dir:'random',speed:[0.3,1],plife:[0.3,0.55],look:'fire',size:[10,14],col:HOT,c2:DEEP,gravity:-1.5,drag:2},
+   {id:'lt',t:'light',at:0,life:'T',pos:P,col:'#ff7a2a',int:1.8,dist:10},
+   {id:'snd',t:'sound',at:0,name:'throw',vol:0.8},{id:'snd2',t:'sound',at:0.02,name:'cast_fire',vol:0.6}]});
+ W('fire/colossus_gone.fx.json',{v:1,desc:'Inferno Colossus: ตอนร่างหาย (ถ่านไฟกระจาย + แสงวาบ) — ตัวร่างไหม้สลายอยู่ใน end ของ fire/colossus • efx:colend replace',tags:['fire','pyro','ult','colossus','storyboard14'],pal:'fire',dur:1,seed:14,layers:[
+   {id:'flash',t:'halo',at:0,life:0.4,pos:[0,1.5,0],col:O,size:8,size0:3,k:0.8},
+   {id:'lt',t:'light',at:0,life:0.4,pos:[0,1.5,0],col:'#ff7a2a',int:{'0':2,'1':0},dist:14}]});
+}

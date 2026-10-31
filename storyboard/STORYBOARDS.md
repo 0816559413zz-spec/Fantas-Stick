@@ -2,7 +2,7 @@
 
 > จาก `storyboard.html`. Claude: เปิดไฟล์ `sb-<id>.md` ของเรื่องที่ผู้ใช้บอก.
 
-- [#14 สายไฟ — Inferno Colossus](sb-14.md) — Pyro (ไฟ) • 4 ช่วง • 👀 รอผู้ใช้ดูผล
+- [#14 สายไฟ — Inferno Colossus](sb-14.md) — Pyro (ไฟ) • 4 ช่วง • ✅ ผ่านแล้ว
 - [#13 สายไฟ — โล่ไฟ](sb-13.md) — Pyro (ไฟ) • 3 ช่วง • ✅ ผ่านแล้ว
 - [#12 สายไฟ — Blazeform](sb-12.md) — Pyro (ไฟ) • 4 ช่วง • ✅ ผ่านแล้ว
 - [#9 สายไฟ — Dragonfall](sb-9.md) — Pyro (ไฟ) • 5 ช่วง • ✅ ผ่านแล้ว

@@ -320,6 +320,21 @@
    "dur": 7,
    "n": 29
   },
+  "fire/colossus": {
+   "v": "f86a1517",
+   "desc": "Inferno Colossus ในเกม (แบบ B, สตอรี่บอร์ด #14): เกลียวไฟพันตัวตอนกระโดด → ไฟระเบิดเหนือหัวก่อตัวเป็นร่างยักษ์ไฟ → ลอยตามตัวถือลูกไฟในมือซ้าย (วนจน fxStop) → ไหม้สลาย • bind loop:colossus (pyroFX เล่น/หยุดตาม p.co)",
+   "pal": "fire",
+   "tags": [
+    "fire",
+    "pyro",
+    "ult",
+    "colossus",
+    "storyboard14",
+    "loop"
+   ],
+   "dur": 3.6,
+   "n": 40
+  },
   "fire/colossus_a": {
    "v": "1f71ba8d",
    "desc": "Inferno Colossus แบบ A (สตอรี่บอร์ด #14): ร่างยักษ์เกราะพลังงานไฟโปร่ง ขอบเรืองขาวแบบภาพเรฟ + ไฟเลียตามผิว ท่อนล่างเป็นไฟ 3D • เกลียวไฟตอนกระโดด → ไฟระเบิดเหนือหัวก่อตัวเป็นร่าง → ถือลูกไฟ/ปา → ไหม้สลาย • ยังไม่ผูกกับเกม",
@@ -347,6 +362,49 @@
    ],
    "dur": 3.9,
    "n": 55
+  },
+  "fire/colossus_cast": {
+   "v": "986cfd8e",
+   "desc": "Inferno Colossus: จุดกระโดดบนพื้น (วงกระแทก เสาไฟ รอยไหม้ แสง เสียง) • efx:colossus replace",
+   "pal": "fire",
+   "tags": [
+    "fire",
+    "pyro",
+    "ult",
+    "colossus",
+    "storyboard14"
+   ],
+   "dur": 3.9,
+   "n": 6
+  },
+  "fire/colossus_gone": {
+   "v": "7aec5f96",
+   "desc": "Inferno Colossus: ตอนร่างหาย (ถ่านไฟกระจาย + แสงวาบ) — ตัวร่างไหม้สลายอยู่ใน end ของ fire/colossus • efx:colend replace",
+   "pal": "fire",
+   "tags": [
+    "fire",
+    "pyro",
+    "ult",
+    "colossus",
+    "storyboard14"
+   ],
+   "dur": 1,
+   "n": 2
+  },
+  "fire/colossus_shot": {
+   "v": "687df253",
+   "desc": "Inferno Colossus: ลูกไฟปาจากมือซ้ายของร่างยักษ์ไปจุดเป้า (หางไฟหนา) • efx:colbolt replace (ระเบิด = colboom โค้ดเดิม)",
+   "pal": "fire",
+   "tags": [
+    "fire",
+    "pyro",
+    "ult",
+    "colossus",
+    "storyboard14",
+    "projectile"
+   ],
+   "dur": 0.8,
+   "n": 7
   },
   "fire/dash_go": {
    "v": "95a749b1",

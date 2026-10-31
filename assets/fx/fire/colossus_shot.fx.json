@@ -1,0 +1,167 @@
+{
+ "v": 1,
+ "desc": "Inferno Colossus: ลูกไฟปาจากมือซ้ายของร่างยักษ์ไปจุดเป้า (หางไฟหนา) • efx:colbolt replace (ระเบิด = colboom โค้ดเดิม)",
+ "tags": [
+  "fire",
+  "pyro",
+  "ult",
+  "colossus",
+  "storyboard14",
+  "projectile"
+ ],
+ "pal": "fire",
+ "dur": 0.8,
+ "seed": 14,
+ "params": {
+  "dx": {
+   "def": 0,
+   "desc": "ไปเป้า แกน y แผนที่ (ม.)"
+  },
+  "dz": {
+   "def": 20,
+   "desc": "ไปเป้า แกน x แผนที่ (ม.)"
+  },
+  "dy": {
+   "def": -6,
+   "desc": "ต่างความสูง (ม.)"
+  },
+  "T": {
+   "def": 0.6,
+   "desc": "เวลาบิน (วิ)"
+  }
+ },
+ "layers": [
+  {
+   "id": "flash",
+   "t": "flash",
+   "at": 0,
+   "life": 0.14,
+   "pos": [
+    "(-6.44*dz+-1.63*dx)/(sqrt(dx*dx+dz*dz)+0.001)",
+    2.34,
+    "(6.44*dx+-1.63*dz)/(sqrt(dx*dx+dz*dz)+0.001)"
+   ],
+   "col": "#ffd27a",
+   "size": 3.5,
+   "k": 1.4
+  },
+  {
+   "id": "ball",
+   "t": "mesh",
+   "at": 0,
+   "life": "T",
+   "shape": "sphere",
+   "pos": {
+    "0": [
+     "(-6.44*dz+-1.63*dx)/(sqrt(dx*dx+dz*dz)+0.001)",
+     2.34,
+     "(6.44*dx+-1.63*dz)/(sqrt(dx*dx+dz*dz)+0.001)"
+    ],
+    "1": [
+     "dx",
+     "dy+0.3",
+     "dz"
+    ],
+    "ease": "in"
+   },
+   "scale": 1.5,
+   "mat": "fire",
+   "col": "#ffd27a",
+   "col2": "#ff6a2a",
+   "mode": "ball",
+   "disp": 0.7,
+   "heat": 0.4,
+   "int": 1.5,
+   "fade": 0
+  },
+  {
+   "id": "tr",
+   "t": "trail",
+   "at": 0,
+   "life": "T",
+   "of": "ball",
+   "col": "#ffd27a",
+   "col2": "#c2300a",
+   "w": 1.2,
+   "tlife": 0.3,
+   "k": 1.5
+  },
+  {
+   "id": "fl",
+   "t": "emit",
+   "at": 0,
+   "life": "T",
+   "pos": {
+    "0": [
+     "(-6.44*dz+-1.63*dx)/(sqrt(dx*dx+dz*dz)+0.001)",
+     2.34,
+     "(6.44*dx+-1.63*dz)/(sqrt(dx*dx+dz*dz)+0.001)"
+    ],
+    "1": [
+     "dx",
+     "dy+0.3",
+     "dz"
+    ],
+    "ease": "in"
+   },
+   "burst": 0,
+   "rate": 150,
+   "from": "sphere",
+   "fr": 0.6,
+   "dir": "random",
+   "speed": [
+    0.3,
+    1
+   ],
+   "plife": [
+    0.3,
+    0.55
+   ],
+   "look": "fire",
+   "size": [
+    10,
+    14
+   ],
+   "col": "#ffd27a",
+   "c2": "#c2300a",
+   "gravity": -1.5,
+   "drag": 2
+  },
+  {
+   "id": "lt",
+   "t": "light",
+   "at": 0,
+   "life": "T",
+   "pos": {
+    "0": [
+     "(-6.44*dz+-1.63*dx)/(sqrt(dx*dx+dz*dz)+0.001)",
+     2.34,
+     "(6.44*dx+-1.63*dz)/(sqrt(dx*dx+dz*dz)+0.001)"
+    ],
+    "1": [
+     "dx",
+     "dy+0.3",
+     "dz"
+    ],
+    "ease": "in"
+   },
+   "col": "#ff7a2a",
+   "int": 1.8,
+   "dist": 10
+  },
+  {
+   "id": "snd",
+   "t": "sound",
+   "at": 0,
+   "name": "throw",
+   "vol": 0.8
+  },
+  {
+   "id": "snd2",
+   "t": "sound",
+   "at": 0.02,
+   "name": "cast_fire",
+   "vol": 0.6
+  }
+ ]
+}

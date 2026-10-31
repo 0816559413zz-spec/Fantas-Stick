@@ -250,7 +250,12 @@ function pyroFX(o,p,pz,now,dt){
     if(Math.random()<0.5)LREQ.push({x:tx(p.x),y:pz+1.2,z:tz(p.y),col:'#ff7a2a',int:1.8,dist:9});
   }else{o.blzLast=null;if(o.blzF)o.blzF.forEach(t=>t.visible=false);if(o.blzH)o.blzH.visible=false;}
   // Inferno Colossus
-  if(p.co){
+  // ร่างจากไฟล์เอฟเฟกต์ (สตอรี่บอร์ด #14 แบบ B): bind.json "loop:colossus" เล่นตามตัวตลอดร่าง → ซ่อนเกราะ+หน้าไม้จากโค้ด
+  const coN=p.co?fxLoopName('colossus'):null;
+  if(coN){if(!o.coFx||o.coFxN!==coN){if(o.coFx)fxStop(o.coFx);o.coFx=fxPlay(coN,{x:p.x,y:p.y,h:pz,follow:p.id});o.coFxN=coN;}
+    if(o.colo)o.colo.visible=false;LREQ.push({x:tx(p.x),y:pz+3,z:tz(p.y),col:'#ff6a2a',int:2.5,dist:20});}
+  else if(o.coFx){fxStop(o.coFx);o.coFx=null;o.coFxN=null;}
+  if(p.co&&!coN){
     if(!o.colo){o.colo=makeColossus();o.g.add(o.colo);}
     const c=o.colo,u=c.userData;c.visible=true;c.position.y=-2.4;
     // ตอนแปลงร่าง: เกราะก่อตัวขึ้น (ขยายจากเล็กพร้อมเสาไฟรวมเข้าหาตัว)

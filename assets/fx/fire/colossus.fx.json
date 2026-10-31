@@ -1,0 +1,1227 @@
+{
+ "v": 1,
+ "desc": "Inferno Colossus ในเกม (แบบ B, สตอรี่บอร์ด #14): เกลียวไฟพันตัวตอนกระโดด → ไฟระเบิดเหนือหัวก่อตัวเป็นร่างยักษ์ไฟ → ลอยตามตัวถือลูกไฟในมือซ้าย (วนจน fxStop) → ไหม้สลาย • bind loop:colossus (pyroFX เล่น/หยุดตาม p.co)",
+ "tags": [
+  "fire",
+  "pyro",
+  "ult",
+  "colossus",
+  "storyboard14",
+  "loop"
+ ],
+ "pal": "fire",
+ "dur": 3.6,
+ "seed": 14,
+ "layers": [
+  {
+   "id": "s1_flash",
+   "t": "flash",
+   "at": 0,
+   "life": 0.14,
+   "att": "feet",
+   "pos": [
+    0,
+    1.1,
+    0
+   ],
+   "col": "#ffd27a",
+   "size": 3,
+   "k": 1.6
+  },
+  {
+   "id": "s1_coil",
+   "t": "mesh",
+   "at": 0,
+   "life": 0.5,
+   "att": "feet",
+   "shape": "model",
+   "model": "colossus_coil",
+   "mat": "fire",
+   "col": "#ffd27a",
+   "col2": "#ff6a2a",
+   "mode": "sheet",
+   "disp": 0.3,
+   "int": 1.3,
+   "heat": 0.2,
+   "scale": {
+    "0": [
+     1,
+     0.08,
+     1
+    ],
+    "1": [
+     1.25,
+     1.15,
+     1.25
+    ],
+    "0.35": [
+     1,
+     1,
+     1
+    ],
+    "ease": "out"
+   },
+   "spin": 720,
+   "op": {
+    "0": 1,
+    "1": 0,
+    "0.6": 1
+   },
+   "dis": {
+    "0": 0,
+    "1": 0.9,
+    "0.55": 0
+   },
+   "fade": 0
+  },
+  {
+   "id": "s1_trail",
+   "t": "emit",
+   "at": 0,
+   "life": 0.35,
+   "att": "feet",
+   "pos": [
+    0,
+    0.6,
+    0
+   ],
+   "burst": 0,
+   "rate": 180,
+   "from": "ring",
+   "fr": 0.9,
+   "dir": "tangent",
+   "speed": [
+    1,
+    2.5
+   ],
+   "up": [
+    0,
+    1
+   ],
+   "plife": [
+    0.25,
+    0.5
+   ],
+   "look": "fire",
+   "size": [
+    9,
+    13
+   ],
+   "col": "#ffd27a",
+   "c2": "#c2300a",
+   "gravity": -1,
+   "drag": 2
+  },
+  {
+   "id": "s2_burst",
+   "t": "firevol",
+   "at": 0.18,
+   "life": 0.55,
+   "att": "feet",
+   "pos": [
+    0,
+    1.6,
+    0
+   ],
+   "kind": "shell",
+   "hx": 2.2,
+   "hz": 1.6,
+   "h": 4.6,
+   "hgt": {
+    "0": 0.15,
+    "0.35": 1
+   },
+   "dis": {
+    "0": 0,
+    "1": 1,
+    "0.5": 0
+   },
+   "int": 1.45,
+   "den": 1.2,
+   "spd": 2
+  },
+  {
+   "id": "s2_halo",
+   "t": "halo",
+   "at": 0.2,
+   "life": 0.5,
+   "att": "feet",
+   "pos": [
+    0,
+    3.4,
+    0
+   ],
+   "col": "#ff6a2a",
+   "size": 9,
+   "size0": 2,
+   "k": 1
+  },
+  {
+   "id": "s2_core",
+   "t": "flash",
+   "at": 0.2,
+   "life": 0.18,
+   "att": "feet",
+   "pos": [
+    0,
+    3.4,
+    0.4
+   ],
+   "col": "#fff4e0",
+   "size": 3.5,
+   "k": 1.4
+  },
+  {
+   "id": "s2_torso",
+   "t": "mesh",
+   "at": 0.2,
+   "life": 0.42,
+   "att": "feet",
+   "shape": "model",
+   "model": "colossus_torso",
+   "scale": {
+    "0": 0.3,
+    "1": 1,
+    "ease": "out"
+   },
+   "pos": {
+    "0": [
+     0,
+     2.3,
+     0
+    ],
+    "1": [
+     0,
+     0,
+     0
+    ],
+    "ease": "out"
+   },
+   "dis": {
+    "0": 0.85,
+    "1": 0,
+    "0.8": 0
+   },
+   "op": {
+    "0": 0.3,
+    "1": 0.85
+   },
+   "fade": 0,
+   "mat": "fire",
+   "col": "#ff6a2a",
+   "col2": "#c2300a",
+   "mode": "sheet",
+   "disp": 0.75,
+   "heat": 0.15,
+   "int": 1.2,
+   "flow": [
+    0,
+    1,
+    0
+   ]
+  },
+  {
+   "id": "s2_armL",
+   "t": "mesh",
+   "at": 0.2,
+   "life": 0.42,
+   "att": "feet",
+   "shape": "model",
+   "model": "colossus_arm",
+   "pos": {
+    "0": [
+     -0.7649999999999999,
+     3.4399999999999995,
+     0
+    ],
+    "1": [
+     2.55,
+     3.8,
+     0
+    ],
+    "ease": "out"
+   },
+   "scale": {
+    "0": 0.3,
+    "1": 1,
+    "ease": "out"
+   },
+   "rot": {
+    "0": [
+     0,
+     0,
+     4
+    ],
+    "1": [
+     10,
+     0,
+     -125
+    ]
+   },
+   "dis": {
+    "0": 0.85,
+    "1": 0,
+    "0.8": 0
+   },
+   "op": {
+    "0": 0.3,
+    "1": 0.85
+   },
+   "fade": 0,
+   "mat": "fire",
+   "col": "#ff6a2a",
+   "col2": "#c2300a",
+   "mode": "sheet",
+   "disp": 0.75,
+   "heat": 0.15,
+   "int": 1.2,
+   "flow": [
+    0,
+    1,
+    0
+   ]
+  },
+  {
+   "id": "s2_armR",
+   "t": "mesh",
+   "at": 0.2,
+   "life": 0.42,
+   "att": "feet",
+   "shape": "model",
+   "model": "colossus_arm",
+   "pos": {
+    "0": [
+     0.7649999999999999,
+     3.4399999999999995,
+     0
+    ],
+    "1": [
+     2.55,
+     3.8,
+     0
+    ],
+    "ease": "out"
+   },
+   "scale": {
+    "0": 0.3,
+    "1": 1,
+    "ease": "out"
+   },
+   "rot": {
+    "0": [
+     0,
+     0,
+     -4
+    ],
+    "1": [
+     0,
+     0,
+     -6
+    ]
+   },
+   "dis": {
+    "0": 0.85,
+    "1": 0,
+    "0.8": 0
+   },
+   "op": {
+    "0": 0.3,
+    "1": 0.85
+   },
+   "fade": 0,
+   "mat": "fire",
+   "col": "#ff6a2a",
+   "col2": "#c2300a",
+   "mode": "sheet",
+   "disp": 0.75,
+   "heat": 0.15,
+   "int": 1.2,
+   "flow": [
+    0,
+    1,
+    0
+   ]
+  },
+  {
+   "id": "s2_light",
+   "t": "light",
+   "at": 0.2,
+   "life": 0.4,
+   "att": "feet",
+   "pos": [
+    0,
+    3.4,
+    1
+   ],
+   "col": "#ff7a2a",
+   "int": {
+    "0": 2.5,
+    "1": 1.6
+   },
+   "dist": 16
+  },
+  {
+   "id": "s2_shake",
+   "t": "screen",
+   "at": 0.2,
+   "life": 0.3,
+   "own": true,
+   "shake": 5,
+   "flash": 0.04,
+   "fcol": "#ff6a2a"
+  },
+  {
+   "id": "s2_warp",
+   "t": "warp",
+   "at": 0.2,
+   "life": 0.5,
+   "att": "feet",
+   "pos": [
+    0,
+    3,
+    0
+   ],
+   "kind": "shock",
+   "size": {
+    "0": 2,
+    "1": 14
+   },
+   "str": 1.2,
+   "op": {
+    "0": 1,
+    "1": 0
+   }
+  },
+  {
+   "id": "s2_roar",
+   "t": "sound",
+   "at": 0.22,
+   "name": "roar",
+   "vol": 0.9
+  },
+  {
+   "id": "s3_torso",
+   "t": "mesh",
+   "at": 0.6,
+   "life": 3,
+   "att": "feet",
+   "shape": "model",
+   "model": "colossus_torso",
+   "op": 0.85,
+   "fade": 0,
+   "scale": {
+    "0": 1,
+    "1": 1,
+    "0.5": 1.02
+   },
+   "mat": "fire",
+   "col": "#ff6a2a",
+   "col2": "#c2300a",
+   "mode": "sheet",
+   "disp": 0.75,
+   "heat": 0.15,
+   "int": 1.2,
+   "flow": [
+    0,
+    1,
+    0
+   ],
+   "loop": true
+  },
+  {
+   "id": "s3_torsoF",
+   "t": "mesh",
+   "at": 0.6,
+   "life": 3,
+   "att": "feet",
+   "shape": "model",
+   "model": "colossus_torso",
+   "op": 0.3,
+   "fade": 0,
+   "scale": 1.05,
+   "mat": "energy",
+   "col": "#ffd27a",
+   "col2": "#ff6a2a",
+   "rim": 2.6,
+   "int": 0.8,
+   "scroll": 2,
+   "loop": true
+  },
+  {
+   "id": "s3_armL",
+   "t": "mesh",
+   "at": 0.6,
+   "life": 3,
+   "att": "feet",
+   "shape": "model",
+   "model": "colossus_arm",
+   "pos": [
+    -2.55,
+    3.8,
+    0
+   ],
+   "rot": [
+    10,
+    0,
+    -125
+   ],
+   "op": 0.85,
+   "fade": 0,
+   "mat": "fire",
+   "col": "#ff6a2a",
+   "col2": "#c2300a",
+   "mode": "sheet",
+   "disp": 0.75,
+   "heat": 0.15,
+   "int": 1.2,
+   "flow": [
+    0,
+    1,
+    0
+   ],
+   "loop": true
+  },
+  {
+   "id": "s3_armLF",
+   "t": "mesh",
+   "at": 0.6,
+   "life": 3,
+   "att": "feet",
+   "shape": "model",
+   "model": "colossus_arm",
+   "pos": [
+    -2.55,
+    3.8,
+    0
+   ],
+   "rot": [
+    10,
+    0,
+    -125
+   ],
+   "op": 0.3,
+   "fade": 0,
+   "scale": 1.06,
+   "mat": "energy",
+   "col": "#ffd27a",
+   "col2": "#ff6a2a",
+   "rim": 2.6,
+   "int": 0.8,
+   "scroll": 2,
+   "loop": true
+  },
+  {
+   "id": "s3_armR",
+   "t": "mesh",
+   "at": 0.6,
+   "life": 3,
+   "att": "feet",
+   "shape": "model",
+   "model": "colossus_arm",
+   "pos": [
+    2.55,
+    3.8,
+    0
+   ],
+   "rot": {
+    "0": [
+     0,
+     0,
+     -6
+    ],
+    "1": [
+     0,
+     0,
+     -6
+    ],
+    "0.5": [
+     -8,
+     0,
+     -10
+    ]
+   },
+   "op": 0.85,
+   "fade": 0,
+   "mat": "fire",
+   "col": "#ff6a2a",
+   "col2": "#c2300a",
+   "mode": "sheet",
+   "disp": 0.75,
+   "heat": 0.15,
+   "int": 1.2,
+   "flow": [
+    0,
+    1,
+    0
+   ],
+   "loop": true
+  },
+  {
+   "id": "s3_armRF",
+   "t": "mesh",
+   "at": 0.6,
+   "life": 3,
+   "att": "feet",
+   "shape": "model",
+   "model": "colossus_arm",
+   "pos": [
+    2.55,
+    3.8,
+    0
+   ],
+   "rot": {
+    "0": [
+     0,
+     0,
+     -6
+    ],
+    "1": [
+     0,
+     0,
+     -6
+    ],
+    "0.5": [
+     -8,
+     0,
+     -10
+    ]
+   },
+   "op": 0.3,
+   "fade": 0,
+   "scale": 1.06,
+   "mat": "energy",
+   "col": "#ffd27a",
+   "col2": "#ff6a2a",
+   "rim": 2.6,
+   "int": 0.8,
+   "scroll": 2,
+   "loop": true
+  },
+  {
+   "id": "s3_skirt",
+   "t": "firevol",
+   "at": 0.45,
+   "life": 1.5,
+   "att": "feet",
+   "pos": [
+    0,
+    -1.9,
+    0
+   ],
+   "kind": "shell",
+   "hx": 2.3,
+   "hz": 1.8,
+   "h": 4.4,
+   "hgt": {
+    "0": 1
+   },
+   "dis": {
+    "0": 0
+   },
+   "int": 1.3,
+   "den": 1.3,
+   "spd": 1.4,
+   "loop": true
+  },
+  {
+   "id": "s3_volChest",
+   "t": "firevol",
+   "at": 0.45,
+   "life": 1.5,
+   "att": "feet",
+   "pos": [
+    0,
+    0.6,
+    0
+   ],
+   "kind": "pillar",
+   "hx": 1.5,
+   "hz": 1.05,
+   "h": 4.4,
+   "hgt": {
+    "0": 1
+   },
+   "dis": {
+    "0": 0
+   },
+   "int": 1.25,
+   "den": 1.2,
+   "spd": 1.2,
+   "loop": true
+  },
+  {
+   "id": "s3_volHead",
+   "t": "firevol",
+   "at": 0.45,
+   "life": 1.5,
+   "att": "feet",
+   "pos": [
+    0,
+    4.2,
+    0.1
+   ],
+   "kind": "pillar",
+   "hx": 0.75,
+   "hz": 0.75,
+   "h": 2.6,
+   "hgt": {
+    "0": 1
+   },
+   "dis": {
+    "0": 0
+   },
+   "int": 1.3,
+   "spd": 1.6,
+   "loop": true
+  },
+  {
+   "id": "s3_volArmR",
+   "t": "firevol",
+   "at": 0.45,
+   "life": 1.5,
+   "att": "feet",
+   "pos": [
+    2.8499999999999996,
+    -0.3,
+    0
+   ],
+   "kind": "pillar",
+   "hx": 0.6,
+   "hz": 0.6,
+   "h": 4.6,
+   "hgt": {
+    "0": 1
+   },
+   "dis": {
+    "0": 0
+   },
+   "int": 1.2,
+   "spd": 1.3,
+   "loop": true
+  },
+  {
+   "id": "s3_smoke",
+   "t": "emit",
+   "at": 0.6,
+   "life": 3,
+   "att": "feet",
+   "pos": [
+    0,
+    6.8,
+    -0.3
+   ],
+   "burst": 0,
+   "rate": 4,
+   "from": "disc",
+   "fr": 1.4,
+   "dir": "up",
+   "spread": 0.4,
+   "speed": [
+    0.8,
+    1.6
+   ],
+   "plife": [
+    1,
+    1.6
+   ],
+   "look": "smoke",
+   "size": [
+    8,
+    12
+   ],
+   "col": "#5a4a40",
+   "c2": "#221c1a",
+   "gravity": -0.5,
+   "grow": 1,
+   "drag": 1.5,
+   "x": true,
+   "loop": true
+  },
+  {
+   "id": "s3_core",
+   "t": "halo",
+   "at": 0.6,
+   "life": 3,
+   "att": "feet",
+   "pos": [
+    0,
+    2.9,
+    0.9
+   ],
+   "col": "#ffd27a",
+   "size": 2,
+   "size0": 2.4,
+   "k": 1,
+   "loop": true
+  },
+  {
+   "id": "s3_coreG",
+   "t": "halo",
+   "at": 0.6,
+   "life": 3,
+   "att": "feet",
+   "pos": [
+    0,
+    2.9,
+    0.6
+   ],
+   "col": "#ff6a2a",
+   "size": 6,
+   "size0": 6,
+   "k": 0.7,
+   "loop": true
+  },
+  {
+   "id": "s3_eyeL",
+   "t": "halo",
+   "at": 0.6,
+   "life": 3,
+   "att": "feet",
+   "pos": [
+    -0.3,
+    4.98,
+    0.92
+   ],
+   "col": "#fff2a0",
+   "size": 0.75,
+   "size0": 0.75,
+   "k": 2,
+   "loop": true
+  },
+  {
+   "id": "s3_eyeR",
+   "t": "halo",
+   "at": 0.6,
+   "life": 3,
+   "att": "feet",
+   "pos": [
+    0.3,
+    4.98,
+    0.92
+   ],
+   "col": "#fff2a0",
+   "size": 0.75,
+   "size0": 0.75,
+   "k": 2,
+   "loop": true
+  },
+  {
+   "id": "s3_eyeFl",
+   "t": "emit",
+   "at": 0.6,
+   "life": 3,
+   "att": "feet",
+   "pos": [
+    0,
+    5,
+    0.95
+   ],
+   "burst": 0,
+   "rate": 40,
+   "from": "line",
+   "fh": 0.7,
+   "dir": "up",
+   "spread": 0.5,
+   "speed": [
+    0.6,
+    1.6
+   ],
+   "plife": [
+    0.25,
+    0.45
+   ],
+   "look": "fire",
+   "size": [
+    3,
+    5
+   ],
+   "col": "#ffd27a",
+   "c2": "#ff6a2a",
+   "gravity": -2,
+   "drag": 2,
+   "x": true,
+   "loop": true
+  },
+  {
+   "id": "s3_halo",
+   "t": "mesh",
+   "at": 0.6,
+   "life": 3,
+   "att": "feet",
+   "shape": "torus",
+   "pos": [
+    0,
+    5.1,
+    -0.85
+   ],
+   "rot": [
+    90,
+    0,
+    0
+   ],
+   "scale": {
+    "0": 1.6,
+    "1": 1.6
+   },
+   "mat": "fire",
+   "col": "#ff6a2a",
+   "col2": "#c2300a",
+   "op": 0.9,
+   "int": 1.2,
+   "mode": "sheet",
+   "inner": 0.93,
+   "fade": 0,
+   "spin": 20,
+   "loop": true
+  },
+  {
+   "id": "s3_embers",
+   "t": "emit",
+   "at": 0.6,
+   "life": 3,
+   "att": "feet",
+   "pos": [
+    0,
+    1.8,
+    0
+   ],
+   "burst": 0,
+   "rate": 60,
+   "from": "box",
+   "fr": 2.2,
+   "fh": 4,
+   "dir": "up",
+   "spread": 0.6,
+   "speed": [
+    0.6,
+    2
+   ],
+   "up": [
+    0.5,
+    1.5
+   ],
+   "plife": [
+    0.8,
+    1.5
+   ],
+   "look": "ember",
+   "size": [
+    2,
+    3
+   ],
+   "col": "#ffd27a",
+   "c2": "#ff3a0a",
+   "gravity": -1.2,
+   "x": true,
+   "loop": true
+  },
+  {
+   "id": "s3_haze",
+   "t": "warp",
+   "at": 0.6,
+   "life": 3,
+   "att": "feet",
+   "pos": [
+    0,
+    3,
+    0
+   ],
+   "kind": "haze",
+   "size": 10,
+   "str": 0.9,
+   "op": {
+    "0": 1
+   },
+   "loop": true
+  },
+  {
+   "id": "s3_ball",
+   "t": "mesh",
+   "at": 0.6,
+   "life": 1,
+   "att": "feet",
+   "shape": "model",
+   "model": "colossus_palmball",
+   "pos": [
+    -2.55,
+    3.8,
+    0
+   ],
+   "rot": [
+    10,
+    0,
+    -125
+   ],
+   "mat": "fire",
+   "col": "#ffd27a",
+   "col2": "#ff6a2a",
+   "mode": "ball",
+   "disp": 0.7,
+   "heat": 0.35,
+   "int": 1.4,
+   "op": 1,
+   "fade": 0,
+   "scale": 1,
+   "loop": true
+  },
+  {
+   "id": "s4_torso",
+   "t": "mesh",
+   "at": 0,
+   "life": 0.3,
+   "att": "feet",
+   "shape": "model",
+   "model": "colossus_torso",
+   "dis": {
+    "0": 0,
+    "1": 1
+   },
+   "scale": {
+    "0": 1,
+    "1": 1.1
+   },
+   "pos": {
+    "0": [
+     0,
+     0,
+     0
+    ],
+    "1": [
+     0,
+     0.9,
+     0
+    ]
+   },
+   "op": {
+    "0": 0.85,
+    "1": 0.2
+   },
+   "fade": 0,
+   "mat": "fire",
+   "col": "#ff6a2a",
+   "col2": "#c2300a",
+   "mode": "sheet",
+   "disp": 0.75,
+   "heat": 0.15,
+   "int": 1.2,
+   "flow": [
+    0,
+    1,
+    0
+   ],
+   "end": true
+  },
+  {
+   "id": "s4_armL",
+   "t": "mesh",
+   "at": 0,
+   "life": 0.3,
+   "att": "feet",
+   "shape": "model",
+   "model": "colossus_arm",
+   "pos": {
+    "0": [
+     -2.55,
+     3.8,
+     0
+    ],
+    "1": [
+     -2.805,
+     4.7,
+     0
+    ]
+   },
+   "rot": [
+    10,
+    0,
+    -125
+   ],
+   "dis": {
+    "0": 0,
+    "1": 1
+   },
+   "op": {
+    "0": 0.85,
+    "1": 0.2
+   },
+   "fade": 0,
+   "mat": "fire",
+   "col": "#ff6a2a",
+   "col2": "#c2300a",
+   "mode": "sheet",
+   "disp": 0.75,
+   "heat": 0.15,
+   "int": 1.2,
+   "flow": [
+    0,
+    1,
+    0
+   ],
+   "end": true
+  },
+  {
+   "id": "s4_armR",
+   "t": "mesh",
+   "at": 0,
+   "life": 0.3,
+   "att": "feet",
+   "shape": "model",
+   "model": "colossus_arm",
+   "pos": {
+    "0": [
+     2.55,
+     3.8,
+     0
+    ],
+    "1": [
+     2.805,
+     4.7,
+     0
+    ]
+   },
+   "rot": [
+    0,
+    0,
+    -6
+   ],
+   "dis": {
+    "0": 0,
+    "1": 1
+   },
+   "op": {
+    "0": 0.85,
+    "1": 0.2
+   },
+   "fade": 0,
+   "mat": "fire",
+   "col": "#ff6a2a",
+   "col2": "#c2300a",
+   "mode": "sheet",
+   "disp": 0.75,
+   "heat": 0.15,
+   "int": 1.2,
+   "flow": [
+    0,
+    1,
+    0
+   ],
+   "end": true
+  },
+  {
+   "id": "s4_fire",
+   "t": "firevol",
+   "at": 0,
+   "life": 0.35,
+   "att": "feet",
+   "pos": [
+    0,
+    -0.5,
+    0
+   ],
+   "kind": "shell",
+   "hx": 2.6,
+   "hz": 2,
+   "h": 7.5,
+   "hgt": {
+    "0": 0.6,
+    "0.3": 1
+   },
+   "dis": {
+    "0": 0.1,
+    "1": 1
+   },
+   "int": 1.3,
+   "spd": 2.4,
+   "end": true
+  },
+  {
+   "id": "s4_embers",
+   "t": "emit",
+   "at": 0,
+   "life": 0.06,
+   "att": "feet",
+   "pos": [
+    0,
+    3,
+    0
+   ],
+   "burst": 70,
+   "from": "box",
+   "fr": 2.4,
+   "fh": 5,
+   "dir": "up",
+   "spread": 0.8,
+   "speed": [
+    1.5,
+    4
+   ],
+   "plife": [
+    0.6,
+    1.2
+   ],
+   "look": "ember",
+   "size": [
+    2,
+    3.4
+   ],
+   "col": "#ffd27a",
+   "c2": "#ff3a0a",
+   "gravity": -1.5,
+   "end": true
+  },
+  {
+   "id": "s4_smoke",
+   "t": "emit",
+   "at": 0,
+   "life": 0.06,
+   "att": "feet",
+   "pos": [
+    0,
+    4,
+    0
+   ],
+   "burst": 10,
+   "from": "box",
+   "fr": 2,
+   "fh": 3,
+   "dir": "up",
+   "spread": 0.6,
+   "speed": [
+    0.8,
+    1.6
+   ],
+   "plife": [
+    0.8,
+    1.3
+   ],
+   "look": "smoke",
+   "size": [
+    10,
+    14
+   ],
+   "col": "#5a4a40",
+   "c2": "#221c1a",
+   "gravity": -0.5,
+   "grow": 1,
+   "drag": 1.5,
+   "x": true,
+   "end": true
+  },
+  {
+   "id": "s3_light",
+   "t": "light",
+   "at": 0.6,
+   "life": 1,
+   "loop": true,
+   "att": "feet",
+   "pos": [
+    0,
+    3.4,
+    1
+   ],
+   "col": "#ff7a2a",
+   "int": 1.6,
+   "dist": 16
+  }
+ ]
+}
