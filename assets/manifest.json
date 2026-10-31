@@ -380,6 +380,22 @@
   "mesh_water_ringwave_low": {
    "file": "vfx/water_ringwave_low.glb",
    "v": 1
+  },
+  "mesh_water_slab": {
+   "file": "vfx/water_slab.glb",
+   "v": 1
+  },
+  "mesh_water_wake": {
+   "file": "vfx/water_wake.glb",
+   "v": 1
+  },
+  "mesh_water_curl": {
+   "file": "vfx/water_curl.glb",
+   "v": 1
+  },
+  "mesh_water_curl_body": {
+   "file": "vfx/water_curl_body.glb",
+   "v": 1
   }
  },
  "maps": {

@@ -87,3 +87,4 @@ Riptide • Tidecaller Orb • Aqua Cage • Abyssal Beam • Moonwater Arts •
 
 ## ยังต้องถาม
 - ⚠ คูลดาวน์ที่ Claude ใส่: Tidecaller 15, Moonwater 20 • ⚠ ระยะกระสุน BA (500) • ท่าตัวละครแต่ละสกิล
+- **Riptide VFX (ผู้ใช้ OK 2026-11-01, รูป riptide_ref.png + riptide_ref2.png):** คลื่นทะเลม้วน — ยอดม้วนพุ่งไปข้างหน้า ด้านเว้าหันหาศัตรู (ผู้ใช้: "the FRONT of wave is the curve side") หลังคลื่นนูนหันหาเรา • ผิวฟ้าใสนุ่ม ฐานเขียวอมฟ้า ยอดซีด เส้นใยขาวนุ่ม (ไม่ใช่เส้นแข็ง) • หางน้ำเรียว 2 สี มีเส้นขาวไหล เป็นระลอก ไม่แบน • รอบคลื่น: ฟองยอด, สายน้ำหมุนปลายปีก, เส้นขาวบนหลัง, ฟองฐาน, หยดกระเด็นข้าง, ประกาย • GIF: designs/water_vfx4/riptide_r11.gif

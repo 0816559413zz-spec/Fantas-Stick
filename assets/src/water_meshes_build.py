@@ -6,8 +6,14 @@
 #       assets/vfx/water_crescent.glb  — water blade: thick middle, sharp tips, the outer edge curls up like a wave lip
 #       assets/vfx/water_crown.glb     — splash crown: flared wall, spiky ragged top, droplets off the spike tips
 #       assets/vfx/water_wave.glb      — curling wave sheet, tapering at both ends (Riptide etc.)
+#       assets/vfx/water_slab.glb     — wide flat-topped wave wall, front curls under (Riptide)
+#       assets/vfx/water_wake.glb     — flat tapering water tail, ragged edges (Riptide)
+#       assets/vfx/water_curl.glb     — thin sheet curling over forward, one end taller (Riptide)
+#       assets/vfx/water_curl_body.glb — solid water under the curl (hollow only under the lip)
 #       assets/vfx/water_jet.glb       — rising water column: flared foot, wobbly body, splashing crown on top
-# Units: metres. Blender z = up (exported Y-up). +Y in Blender = forward in the game (+z in fx space) after export.
+# Units: metres. Blender z = up (exported Y-up). ⚠ Blender +Y exports as glTF -Z = BACKWARD in fx space (+z = aim).
+# Shapes below are modelled with their front at +Y, so fx layers that need the front forward use rot [0, 180, 0]
+# (water_wake, water_curl, water_curl_body). Verified 2026-11-01 by measuring vertices in game (Riptide).
 # UV: v = 0 at the base / start → 1 at the top / tip.
 import bpy, bmesh, math, os, random
 from mathutils import Vector
@@ -144,3 +150,72 @@ export(ob, 'water_ringwave.glb')
 clear()
 ob = finish(grid('water_ringwave_low', ringwave(.32), 96, 24, close_u=True), thick=.025, subd=1)
 export(ob, 'water_ringwave_low.glb')
+
+# ---------------- 6. slab wave (Riptide, ref designs/water_ref/riptide_ref.png): wide flat-topped wall of water, the front
+# rounds over and curls down, the back slopes to the ground; square-ish ends. Width along X (±1), profile along Y like the wave.
+clear()
+SLAB = [(-1.6, 0), (-1.2, .55), (-.7, .9), (-.1, 1.0), (.35, .98), (.62, .85), (.72, .6), (.62, .38), (.45, .3)]   # (forward, up) back foot → top → front lip curling under
+def sprof(t):
+    x = t * (len(SLAB) - 1); i = min(int(x), len(SLAB) - 2); f = x - i
+    a, b = SLAB[i], SLAB[i + 1]
+    return a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f
+def slab(u, v):
+    xw = (u - .5) * 2
+    end = max(0.0, 1 - abs(xw) ** 6) ** .5                # square-ish slab, rounded ends
+    f, up = sprof(v)
+    rag = .04 * math.sin(xw * 11 + v * 4) + .03 * math.sin(xw * 23)
+    return Vector((xw, f * (.6 + .4 * end), (up + rag * up) * end))
+ob = finish(grid('water_slab', slab, 64, 32), thick=.05, subd=1)
+export(ob, 'water_slab.glb')
+
+# ---------------- 7. wake (Riptide tail): flat water strip from the origin (y 0, narrow) to y 1 (full width ±1), ragged
+# edges, a gentle crown in the middle and a few ripple bumps. uv.v runs along the length so 'water' flow lines run forward.
+clear()
+def wake(u, v):
+    xw = (u - .5) * 2
+    half = .18 + .82 * v ** .7                            # tapers toward the back
+    rag = 1 + .12 * math.sin(v * 31 + (1 if xw > 0 else 0) * 2) + .07 * math.sin(v * 67)
+    x = xw * half * rag
+    z = (.12 * (1 - xw * xw) + .09 * max(0, math.sin(v * 38 - xw * 2.5)) ** 2) * (1 - xw * xw) * (.4 + .6 * v)   # not flat (user): rolling ripples, higher toward the wave
+    return Vector((x, v, z))
+ob = finish(grid('water_wake', wake, 24, 80), thick=0, subd=1)
+export(ob, 'water_wake.glb')
+
+# ---------------- 8. curl wave (Riptide, refs riptide_ref.png / riptide_ref2.png; user: "the FRONT of the wave is the curve
+# side"): the outer skin of an ocean breaking wave — long back slope, crest, lip throwing FORWARD (+Y) and down over a hollow.
+# Level crest, steep ends; ends run a little ahead of the middle (crescent) so the barrel shows at the wings from behind;
+# leans forward. uv: u across (0..1), v back foot → lip tip (0..1). Width ±1, ~2 tall. In fx: rot [0, 180, 0] (see top).
+clear()
+CURL = [(-1.5, 0), (-1.15, .3), (-.8, .7), (-.5, 1.15), (-.25, 1.6), (-.05, 2.0), (.15, 2.3), (.45, 2.38), (.75, 2.25), (1.0, 1.98), (1.12, 1.62), (1.1, 1.28), (.98, 1.02), (.82, .9)]   # sharp crest, deep forward hook
+LEAN, CRES = .12, .7
+def cprof(t):
+    x = t * (len(CURL) - 1); i = min(int(x), len(CURL) - 2); f = x - i
+    a, b = CURL[i], CURL[i + 1]
+    return a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f
+def wshape(xw, f, up):                                     # shared by the skin and the body so they line up
+    end = max(0.0, 1 - abs(xw) ** 6) ** .5                 # ends come down (a level crest + steep ends read as a box)
+    hi = (1 - .3 * xw * xw) * (1 + .06 * math.sin(xw * 7 + 1))   # uneven crest line, lower ends
+    up = max(0.0, up) * hi * end
+    return Vector((xw, f * (.3 + .7 * end) + LEAN * up + CRES * xw * xw, up))
+def curl(u, v):
+    xw = (u - .5) * 2
+    f, up = cprof(v)
+    return wshape(xw, f + .03 * math.sin(xw * 9 + v * 5), up)
+ob = finish(grid('water_curl', curl, 64, 40), thick=.03, subd=1)
+export(ob, 'water_curl.glb')
+
+# ---------------- 9. curl body: the solid water under the skin — a real wave is only hollow under the lip, so from behind
+# you see a full hump. Closed loop around the cross-section (u): back → crest → under the lip root → concave front face →
+# ground; across the width (v). Same wshape() as the skin. In fx: rot [0, 180, 0].
+clear()
+BODY = [(-1.5, 0), (-1.15, .3), (-.8, .7), (-.5, 1.15), (-.25, 1.6), (-.05, 2.0), (.15, 2.28), (.3, 2.12), (.32, 1.7), (.25, 1.25),
+        (.2, .8), (.28, .4), (.45, .12), (.65, 0), (0, -.02), (-.9, -.02)]   # back → crest → concave front face (the barrel wall) → ground
+def bloop(t):
+    n = len(BODY); x = t * n; i = int(x) % n; f = x - int(x)
+    a, b = BODY[i], BODY[(i + 1) % n]
+    return a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f
+def body(u, v):
+    f, up = bloop(u)
+    return wshape((v - .5) * 2, f, up)
+ob = finish(grid('water_curl_body', body, 70, 40, close_u=True), thick=0, subd=1)
+export(ob, 'water_curl_body.glb')
