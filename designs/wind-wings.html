@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Wind Holo Wings</title>
+<style>
+  html,body{margin:0;height:100%;background:#020806;overflow:hidden;font-family:system-ui,sans-serif;color:#bfffe0}
+  canvas{display:block}
+  #ui{position:fixed;left:12px;top:12px;display:flex;gap:6px;flex-wrap:wrap;max-width:calc(100% - 24px)}
+  #ui button{background:#06241a;border:1px solid #2fe39a;color:#bfffe0;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:13px}
+  #ui button.on{background:#1a7a55}
+  #tag{position:fixed;left:12px;bottom:10px;font-size:12px;opacity:.7}
+</style>
+<script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.160.0/build/three.module.min.js","three/addons/":"https://unpkg.com/three@0.160.0/examples/jsm/"}}</script>
+</head>
+<body>
+<div id="ui">
+  <button id="bFlap" class="on">กระพือปีก</button>
+  <button id="bSpin">หมุนรอบ</button>
+  <button id="bFold">หุบ/กาง</button>
+  <button id="bBack">มุมหลัง</button>
+  <button id="bFront">มุมหน้า</button>
+  <button id="bBody" class="on">ตัวละคร</button>
+</div>
+<div id="tag">ปีกสายลม · Hologram sci-fi · ลากเมาส์หมุน / scroll ซูม</div>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setSize(innerWidth, innerHeight);
+document.body.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x020806);
+const camera = new THREE.PerspectiveCamera(40, innerWidth / innerHeight, 0.1, 100);
+camera.position.set(0, 1.2, -11);
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.target.set(0, 1.0, 0);
+controls.enableDamping = true;
+
+const composer = new EffectComposer(renderer);
+composer.addPass(new RenderPass(scene, camera));
+const bloom = new UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), 0.55, 0.4, 0.5);
+composer.addPass(bloom);
+composer.addPass(new OutputPass());
+
+// ---------- hologram shader ----------
+const U = { time: { value: 0 } };
+function holoMat(color, { base = 0.12, rim = 1.2, scan = 0.25, opacity = 1, solid = false } = {}) {
+  return new THREE.ShaderMaterial({
+    uniforms: { time: U.time, col: { value: new THREE.Color(color) }, base: { value: base }, rim: { value: rim }, scan: { value: scan }, op: { value: opacity } },
+    vertexShader: `
+      varying vec3 vN; varying vec3 vV; varying vec3 vW; varying vec2 vUv;
+      void main(){
+        vec4 w = modelMatrix * vec4(position,1.0);
+        vW = w.xyz; vUv = uv;
+        vN = normalize(mat3(modelMatrix) * normal);
+        vV = normalize(cameraPosition - w.xyz);
+        gl_Position = projectionMatrix * viewMatrix * w;
+      }`,
+    fragmentShader: `
+      uniform float time, base, rim, scan, op; uniform vec3 col;
+      varying vec3 vN; varying vec3 vV; varying vec3 vW; varying vec2 vUv;
+      float h(float n){ return fract(sin(n)*43758.5453); }
+      void main(){
+        float f = pow(1.0 - abs(dot(normalize(vN), vV)), 2.2);
+        float lines = smoothstep(0.55, 1.0, sin(vW.y*70.0 - time*5.0)*0.5+0.5);
+        float band = smoothstep(0.0, 0.08, fract(vW.y*0.35 - time*0.6)) * smoothstep(0.16, 0.08, fract(vW.y*0.35 - time*0.6));
+        float flick = 0.88 + 0.12*h(floor(time*18.0));
+        float a = (base + f*rim + lines*scan + band*0.6) * flick * op;
+        vec3 c = col * (0.6 + f*1.4 + band*1.5) + vec3(0.6,1.0,0.8)*band*0.4;
+        gl_FragColor = vec4(c*a, a);
+      }`,
+    transparent: true, depthWrite: false, side: THREE.DoubleSide, blending: solid ? THREE.NormalBlending : THREE.AdditiveBlending,
+  });
+}
+const GREEN = 0x2dffa0, MINT = 0x9dffd8, DEEP = 0x0fbf74;
+const lineMat = new THREE.LineBasicMaterial({ color: 0x7dffc8, transparent: true, opacity: 0.55, blending: THREE.AdditiveBlending, depthWrite: false });
+const lineDim = new THREE.LineBasicMaterial({ color: 0x2fe39a, transparent: true, opacity: 0.2, blending: THREE.AdditiveBlending, depthWrite: false });
+
+function plate(pts, depth, mat, edge = lineMat) {
+  const s = new THREE.Shape(pts.map(p => new THREE.Vector2(p[0], p[1])));
+  const g = new THREE.ExtrudeGeometry(s, { depth, bevelEnabled: true, bevelSize: 0.025, bevelThickness: 0.025, bevelSegments: 1 });
+  g.translate(0, 0, -depth / 2);
+  const m = new THREE.Mesh(g, mat);
+  m.add(new THREE.LineSegments(new THREE.EdgesGeometry(g, 25), edge));
+  return m;
+}
+// tapered energy blade along +x
+function blade(L, w) {
+  return [[0, -w], [L * 0.7, -w * 0.75], [L, 0], [L * 0.82, w * 0.55], [0, w * 0.8]];
+}
+
+// ---------- one wing (right side, +x outward, +y up) ----------
+function makeWing() {
+  const wing = new THREE.Group();
+  const frameMat = holoMat(0x1d5a48, { base: 0.75, rim: 0.5, scan: 0.08, solid: true });
+  const coreMat = holoMat(GREEN, { base: 0.07, rim: 0.35, scan: 0.08 });
+  const hotMat = holoMat(MINT, { base: 0.22, rim: 0.2, scan: 0.06 });
+
+  // top spars (thin long antenna blades)
+  wing.add(plate([[0.2, 0.55], [3.9, 2.55], [4.6, 2.95], [3.85, 2.75], [0.1, 0.78]], 0.06, frameMat));
+  wing.add(plate([[1.6, 1.55], [3.4, 2.4], [3.55, 2.55], [1.5, 1.7]], 0.04, coreMat));
+
+  // main armour plate (frame) + glowing inset
+  const armour = plate([[0.15, -0.05], [1.0, 0.75], [3.5, 2.05], [4.0, 2.0], [3.3, 1.35], [1.7, 0.2], [0.7, -0.55]], 0.16, frameMat);
+  wing.add(armour);
+  const inset = plate([[0.9, 0.35], [3.2, 1.75], [3.45, 1.7], [1.6, 0.4], [0.95, 0.05]], 0.2, coreMat);
+  wing.add(inset);
+  // circuit lines on armour
+  const cl = [];
+  for (let i = 0; i < 4; i++) {
+    const o = i * 0.12;
+    cl.push(new THREE.Vector3(0.6 + o, 0.05 - o, 0.1), new THREE.Vector3(1.6 + o, 0.55 - o * 0.5, 0.1));
+    cl.push(new THREE.Vector3(1.6 + o, 0.55 - o * 0.5, 0.1), new THREE.Vector3(2.9 - o, 1.25 - o * 0.6, 0.1));
+  }
+  wing.add(new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(cl), lineMat));
+
+  // fan of energy feathers (pivot near root)
+  const feathers = [];
+  const spec = [
+    [12, 3.4, 0.2], [-2, 3.6, 0.22], [-16, 3.2, 0.2], [-30, 2.8, 0.18],
+    [-44, 2.4, 0.16], [-58, 2.0, 0.14],
+  ];
+  spec.forEach(([deg, L, w], i) => {
+    const piv = new THREE.Group();
+    piv.position.set(0.7, -0.15, -0.05 - i * 0.03);
+    const f = plate(blade(L, w), 0.05, coreMat);
+    const core = plate(blade(L * 0.82, w * 0.35).map(p => [p[0] + L * 0.08, p[1]]), 0.07, hotMat, lineDim);
+    piv.add(f, core);
+    piv.userData = { base: THREE.MathUtils.degToRad(deg), i };
+    piv.rotation.z = piv.userData.base;
+    wing.add(piv);
+    feathers.push(piv);
+  });
+
+  // lower armoured blades (long, angled down)
+  [[-56, 3.3, 0.24], [-72, 2.7, 0.2]].forEach(([deg, L, w], i) => {
+    const piv = new THREE.Group();
+    piv.position.set(0.45, -0.35, 0.06);
+    const b = plate([[0, -w], [L * 0.8, -w * 0.5], [L, 0.05], [L * 0.75, w * 0.6], [0.3, w]], 0.1, frameMat);
+    const strip = plate([[0.4, -w * 0.25], [L * 0.75, -w * 0.12], [L * 0.75, w * 0.12], [0.4, w * 0.25]], 0.13, coreMat);
+    piv.add(b, strip);
+    piv.userData = { base: THREE.MathUtils.degToRad(deg), i: 6 + i };
+    piv.rotation.z = piv.userData.base;
+    wing.add(piv);
+    feathers.push(piv);
+  });
+
+  // root joint (hex hub)
+  const hub = new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.32, 0.3, 6), coreMat);
+  hub.rotation.x = Math.PI / 2;
+  hub.position.set(0.35, 0.0, 0);
+  hub.add(new THREE.LineSegments(new THREE.EdgesGeometry(hub.geometry), lineMat));
+  wing.add(hub);
+
+  wing.userData.feathers = feathers;
+  return wing;
+}
+
+const rig = new THREE.Group();
+rig.position.y = 1.3;
+scene.add(rig);
+const R = makeWing(); const L = makeWing();
+L.scale.x = -1; // mirror
+const pivR = new THREE.Group(), pivL = new THREE.Group();
+pivR.position.x = 0.15; pivL.position.x = -0.15;
+pivR.add(R); pivL.add(L);
+rig.add(pivR, pivL);
+
+// back-mount core (wind crystal)
+const crystal = new THREE.Mesh(new THREE.OctahedronGeometry(0.38), holoMat(MINT, { base: 0.3, rim: 0.5 }));
+crystal.scale.y = 1.5;
+crystal.add(new THREE.LineSegments(new THREE.EdgesGeometry(crystal.geometry), lineMat));
+crystal.position.set(0, 0.1, 0.05);
+rig.add(crystal);
+
+// spinning holo ring behind the back
+const ring = new THREE.Mesh(new THREE.RingGeometry(0.75, 0.8, 48, 1, 0, Math.PI * 1.6), holoMat(GREEN, { base: 0.4, rim: 0 }));
+ring.position.set(0, 0.1, 0.12);
+rig.add(ring);
+const ring2 = new THREE.Mesh(new THREE.RingGeometry(1.0, 1.02, 64), holoMat(DEEP, { base: 0.3, rim: 0 }));
+ring2.position.copy(ring.position);
+rig.add(ring2);
+
+// ghost character for scale (wings mount on the back; camera default looks at the back)
+const body = new THREE.Group();
+const ghost = new THREE.MeshBasicMaterial({ color: 0x0c2a20, transparent: true, opacity: 0.55 });
+const torso = new THREE.Mesh(new THREE.CapsuleGeometry(0.42, 1.1, 6, 12), ghost); torso.position.y = 1.0;
+const head = new THREE.Mesh(new THREE.SphereGeometry(0.38, 20, 14), ghost); head.position.y = 2.2;
+const legs = new THREE.Mesh(new THREE.CapsuleGeometry(0.16, 1.1, 4, 8), ghost);
+const legs2 = legs.clone(); legs.position.set(0.22, -0.3, 0); legs2.position.set(-0.22, -0.3, 0);
+body.add(torso, head, legs, legs2);
+body.position.z = 0.55;
+scene.add(body);
+
+// ---------- wind particles: streaks flowing along the feathers ----------
+const N = 420;
+const pGeo = new THREE.BufferGeometry();
+const pos = new Float32Array(N * 3), seed = new Float32Array(N * 4);
+for (let i = 0; i < N; i++) { seed.set([Math.random(), Math.random(), Math.random(), Math.random() < 0.5 ? -1 : 1], i * 4); }
+pGeo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+const pMat = new THREE.PointsMaterial({ color: 0x9dffd8, size: 0.05, transparent: true, opacity: 0.5, blending: THREE.AdditiveBlending, depthWrite: false });
+const pts = new THREE.Points(pGeo, pMat);
+rig.add(pts);
+
+// floor holo grid + emitter disc
+const grid = new THREE.GridHelper(14, 28, 0x1a8f60, 0x0b3d2a);
+grid.position.y = -0.9; grid.material.transparent = true; grid.material.opacity = 0.5;
+scene.add(grid);
+
+// ---------- UI ----------
+const st = { flap: true, spin: false, open: 1, target: 1 };
+const btn = id => document.getElementById(id);
+btn('bFlap').onclick = e => { st.flap = !st.flap; e.target.classList.toggle('on', st.flap); };
+btn('bSpin').onclick = e => { st.spin = !st.spin; controls.autoRotate = st.spin; e.target.classList.toggle('on', st.spin); };
+btn('bFold').onclick = () => { st.target = st.target ? 0 : 1; };
+btn('bBack').onclick = () => camera.position.set(0, 1.2, -11);
+btn('bFront').onclick = () => camera.position.set(0, 1.2, 11);
+btn('bBody').onclick = e => { body.visible = !body.visible; e.target.classList.toggle('on', body.visible); };
+const q = new URLSearchParams(location.search);
+if (q.get('view') === 'front') camera.position.set(0, 1.2, 11);
+if (q.get('view') === 'side') camera.position.set(-9, 2.5, -6);
+
+addEventListener('resize', () => {
+  camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight); composer.setSize(innerWidth, innerHeight);
+});
+
+// ---------- animate ----------
+const clock = new THREE.Clock();
+function tick() {
+  const t = clock.getElapsedTime();
+  U.time.value = t;
+  st.open += (st.target - st.open) * 0.06;
+  const o = st.open;
+  const flap = st.flap ? Math.sin(t * 2.2) : 0;
+
+  // wings sweep back a little and flap; folded = rotate toward the body
+  pivR.rotation.y = -0.25 - flap * 0.18 - (1 - o) * 1.1;
+  pivL.rotation.y = 0.25 + flap * 0.18 + (1 - o) * 1.1;
+  pivR.rotation.z = flap * 0.06 - (1 - o) * 0.5;
+  pivL.rotation.z = -flap * 0.06 + (1 - o) * 0.5;
+  for (const w of [R, L]) for (const f of w.userData.feathers) {
+    const d = f.userData;
+    f.rotation.z = d.base * (0.35 + 0.65 * o) + Math.sin(t * 2.2 - d.i * 0.35) * 0.04;
+  }
+  rig.position.y = 1.3 + Math.sin(t * 1.1) * 0.06;
+  crystal.rotation.y = t * 1.5;
+  ring.rotation.z = -t * 1.2;
+
+  // particles: born at the root, fly outward along a random feather angle, fade
+  for (let i = 0; i < N; i++) {
+    const a = seed[i * 4], b = seed[i * 4 + 1], c = seed[i * 4 + 2], side = seed[i * 4 + 3];
+    const life = (t * (0.35 + c * 0.3) + a) % 1;
+    const ang = THREE.MathUtils.degToRad(30 - b * 105) * (0.35 + 0.65 * o);
+    const r = 0.6 + life * (2.4 + c * 2.4) * o;
+    const swirl = Math.sin(life * 9 + a * 20) * 0.25 * life;
+    pos[i * 3] = side * (0.8 + Math.cos(ang) * r);
+    pos[i * 3 + 1] = Math.sin(ang) * r + swirl;
+    pos[i * 3 + 2] = -0.25 - life * 1.2 * c;
+  }
+  pGeo.attributes.position.needsUpdate = true;
+
+  controls.update();
+  composer.render();
+  requestAnimationFrame(tick);
+}
+tick();
+</script>
+</body>
+</html>
