@@ -21,11 +21,11 @@ function potSpotOk(x,y){const r=40;
   if(PROPON&&PROPS.some(c=>c.st!==1&&Math.hypot(x-c.x,y-c.y)<c.r+r))return false;
   const pr={x:x+0.3,y:y+0.3,z:0};try{collideWorld(pr,r,0);}catch(e){}return Math.hypot(pr.x-x-0.3,pr.y-y-0.3)<=2;}
 function potSpots(){
-  const cx=MW/2,cy=MH/2,out=[];
+  const A=AREA&&!AREA.r?AREA:{x1:0,y1:0,x2:MW,y2:MH},cx=(A.x1+A.x2)/2,cy=(A.y1+A.y2)/2,AW=A.x2-A.x1,AH=A.y2-A.y1,out=[];   // พื้นที่เล่นของโหมด (เมือง) หรือทั้งแผนที่
   const add=(x,y,big)=>{if(out.some(o=>Math.hypot(o.x-x,o.y-y)<320))return false;out.push({x,y,big,has:true,t:0});return true;};
   center:for(let rr=0;rr<=420;rr+=60)for(let k=0;k<(rr?12:1);k++){const a=k/12*Math.PI*2+Math.PI/2,x=cx+Math.cos(a)*rr,y=cy+Math.sin(a)*rr;if(potSpotOk(x,y)){add(x,y,1);break center;}}   // จุดว่างใกล้กลางที่สุด
   for(const [sx,sy] of [[-1,-1],[1,-1],[1,1],[-1,1]])
-    for(let f=0.14;f<=0.34;f+=0.02){const x=cx+sx*(0.5-f)*MW,y=cy+sy*(0.5-f)*MH;if(potSpotOk(x,y)){add(x,y,0);break;}}
+    for(let f=0.14;f<=0.34;f+=0.02){const x=cx+sx*(0.5-f)*AW,y=cy+sy*(0.5-f)*AH;if(potSpotOk(x,y)){add(x,y,0);break;}}
   return out;
 }
 function potInit(){G.potSpots=potSpots();}

@@ -19,7 +19,7 @@ function modeInit(){
   Object.assign(G,{ball:null,snitch:null,rings:null,zone:null,items:null,bodies:[],meet:null,bombs:[],zones:[],strikes:[],walls:[],chan:[],mins:[],erings:[],ices:[],waves:[],glac:[],eso:[],edust:[],mid:0,zid:0,fin:0,qs:[0,0],tp:null,taskDone:0,taskTotal:0});
   ps.forEach(p=>{p.gh=false;p.role=null;p.unl=null;p.doing=null;p.lap=0;p.cp=0;p.fin=0;p.boost=0;});
   if(m==='quid'){
-    G.ball={x:MW/2,y:MH/2,h:6,vx:0,vy:0,vh:0,holder:null,cool:1,thrower:null};
+    const qa=quidArea();G.ball={x:qa.cx,y:qa.cy,h:6,vx:0,vy:0,vh:0,holder:null,cool:1,thrower:null};
     ps.forEach(p=>{p.fly=true;p.z=4;});
   }else if(m==='race'){
     G.rings=raceRings();G.laps=2;G.raceT=0;
@@ -122,6 +122,8 @@ function quidDrop(p){
   Object.assign(b,{holder:null,cool:0.6,thrower:p.id,vx:rnd(-160,160),vy:rnd(-160,160),vh:3});
   emit({k:'fumble',x:p.x,y:p.y,h:p.z+1.4});feed(`💥 ${p.name} ทำบอลหลุด!`);
 }
+// สนามควิดดิช = พื้นที่เล่นของโหมด (เมือง: สนามกีฬา) หรือทั้งแผนที่ (สนามควิดดิชเดิม)
+function quidArea(){const A=AREA&&!AREA.r?AREA:{x1:0,y1:0,x2:MW,y2:MH};return Object.assign({cx:(A.x1+A.x2)/2,cy:(A.y1+A.y2)/2},A);}
 function quidTick(dt){
   const b=G.ball;if(!b)return;
   b.cool=Math.max(0,b.cool-dt);
@@ -134,18 +136,19 @@ function quidTick(dt){
   b.x+=b.vx*dt;b.y+=b.vy*dt;b.h+=b.vh*dt;b.vh-=7*dt;
   const dr=Math.exp(-0.6*dt);b.vx*=dr;b.vy*=dr;
   if(b.h<0.45){b.h=0.45;b.vh=Math.abs(b.vh)*0.45;b.vx*=0.85;b.vy*=0.85;}
-  if(b.x<30||b.x>MW-30){b.vx*=-0.6;b.x=clamp(b.x,30,MW-30);}
-  if(b.y<30||b.y>MH-30){b.vy*=-0.6;b.y=clamp(b.y,30,MH-30);}
+  const qa=quidArea();
+  if(b.x<qa.x1+30||b.x>qa.x2-30){b.vx*=-0.6;b.x=clamp(b.x,qa.x1+30,qa.x2-30);}
+  if(b.y<qa.y1+30||b.y>qa.y2-30){b.vy*=-0.6;b.y=clamp(b.y,qa.y1+30,qa.y2-30);}
   // ลอดห่วง = ได้แต้ม (ทีมฟ้ายิงห่วงขวา ทีมแดงยิงห่วงซ้าย)
   for(const o of OBS){
     if(o.k!=='hoop')continue;
     if((px-o.x)*(b.x-o.x)<=0&&px!==b.x&&Math.abs(b.y-o.y)<34&&Math.abs(b.h-o.ring)<1.7){
-      const team=o.x>MW/2?0:1;
+      const team=o.x>qa.cx?0:1;
       G.qs[team]+=10;
       const sc=G.players[b.thrower];
       feed(`🏟️ ${sc?sc.name:TEAMN[team]} ยิงเข้าห่วง! ${TEAMN[team]} +10`);
       emit({k:'goal',x:o.x,y:o.y,h:o.ring,tm:team});
-      Object.assign(b,{x:MW/2,y:MH/2,h:7,vx:0,vy:0,vh:0,holder:null,cool:1.5,thrower:null});
+      Object.assign(b,{x:qa.cx,y:qa.cy,h:7,vx:0,vy:0,vh:0,holder:null,cool:1.5,thrower:null});
       return;
     }
   }
@@ -159,17 +162,17 @@ function quidTick(dt){
 }
 function snitchTick(dt){
   if(!G.snitch){
-    if(G.timer<=150){G.snitch={x:MW/2,y:MH/2,h:10,tx:MW/2,ty:MH/2,th:8,rt:0};banner('✨ ลูกบอลทองปรากฏแล้ว! จับได้ +50 และจบเกมทันที',3.5);emit({k:'snitch',x:MW/2,y:MH/2,h:10});}
+    if(G.timer<=150){{const qa=quidArea();G.snitch={x:qa.cx,y:qa.cy,h:10,tx:qa.cx,ty:qa.cy,th:8,rt:0};}banner('✨ ลูกบอลทองปรากฏแล้ว! จับได้ +50 และจบเกมทันที',3.5);emit({k:'snitch',x:MW/2,y:MH/2,h:10});}
     return;
   }
   const s=G.snitch;
-  s.rt-=dt;if(s.rt<=0){s.rt=rnd(0.6,1.4);s.tx=rnd(150,MW-150);s.ty=rnd(150,MH-150);s.th=rnd(2,14);}
+  s.rt-=dt;if(s.rt<=0){s.rt=rnd(0.6,1.4);{const qa=quidArea();s.tx=rnd(qa.x1+150,qa.x2-150);s.ty=rnd(qa.y1+150,qa.y2-150);}s.th=rnd(2,14);}
   let near=null,nd=1e9;
   for(const p of plist())if(p.alive){const d=Math.hypot(p.x-s.x,p.y-s.y);if(d<nd){nd=d;near=p;}}
   const dx=s.tx-s.x,dy=s.ty-s.y,d=Math.hypot(dx,dy)||1;
   let vx=dx/d*430,vy=dy/d*430;
   if(near&&nd<220){vx+=(s.x-near.x)/Math.max(nd,1)*260;vy+=(s.y-near.y)/Math.max(nd,1)*260;}
-  s.x=clamp(s.x+vx*dt,60,MW-60);s.y=clamp(s.y+vy*dt,60,MH-60);s.h+=(s.th-s.h)*2*dt;
+  {const qa=quidArea();s.x=clamp(s.x+vx*dt,qa.x1+60,qa.x2-60);s.y=clamp(s.y+vy*dt,qa.y1+60,qa.y2-60);}s.h+=(s.th-s.h)*2*dt;
   for(const p of plist()){
     if(!p.alive)continue;
     if(Math.hypot(p.x-s.x,p.y-s.y)<36&&Math.abs(p.z+1.2-s.h)<1.5){

@@ -5,8 +5,10 @@ Format: `name:line` = top-level function/const/let in that file. `§line title` 
 ## js/01-core.js (22) — แกนกลาง: import Three.js + ฟังก์ชันพื้นฐาน ($ rnd clamp lerp store to…
 $:12 rnd:13 clamp:14 lerp:15 dist2:16 lerpAng:17 esc:18 shuffle:19 store:20 toastT:21 toast:22
 
-## js/02-city.js (137) — เมืองมักเกิ้ล — กล่องเทา (designs/city-bot-battle.md ขั้น 3)
-CITY_PLAN:6 CITY_ZN:11 CITY_PLAZA:12 genCity:13 cityProps:125
+## js/02-city.js (165) — เมืองมักเกิ้ล — กล่องเทา (designs/city-bot-battle.md ขั้น 3)
+CITY_PLAN:6 CITY_ZN:11 CITY_PLAZA:12 genCity:13 cityProps:126
+§138 เล่นได้ทุกโหมด (ขั้น 6): พื้นที่เล่นต่อโหมด (กำแพงล่องหน AREA) + จุดเ…
+CITY_MID:140 CITY_C2:140 cityModeData:141 mapArea:157 AREA:158 areaClamp:160
 
 ## js/02-citytest.js (28) — แมพทดสอบเมืองใหญ่ (กล่องเทา) — ใช้วัดความลื่นของเครื่องยนต์ก่อนสร้างเ…
 CITY_N:4 CITY_B:4 CITY_ROAD:4 genCityTest:5 cityTestProps:19
@@ -126,12 +128,12 @@ G:4 EVL:4 EVN:4 hostLast:4 tickN:4 emit:5 feed:6 banner:7 plist:8 cleanName:9 fr
 §209 ลูปหลักฝั่งโฮสต์
 hostTick:210 angDiff:224 cH:226 vR:227 updatePlayer:229 hitProp:378 damagePropsIn:385 nearUseProp:386 useProp:387
 
-## js/12-buildings.js (497) — สิ่งปลูกสร้างที่พังเป็นชิ้นย่อย (บ้าน) แบบ Battlefield — คู่มือเต็ม: …
+## js/12-buildings.js (498) — สิ่งปลูกสร้างที่พังเป็นชิ้นย่อย (บ้าน) แบบ Battlefield — คู่มือเต็ม: …
 BLDDEF:8 BLD_PIECES:10 BLD_GRID:11 BLD_DOOR:13 BLD_FIRE:14 BLD_ICE:14 BLD_ROOF_MIN:14 BLDG:15 BLDON:15 genBldg:16 bldRect:26 bldChunk:28 bldAlive:35 bldLocal:36 bldWorld:37 rectDist:38 bldNear:39 BLD_MOUND:42 bldGone:43 bldMoundAt:44 bldMoundH:45 hitBldPiece:47 breakBldChunk:58 bldSupport:66 damageEnv:86 bldRay:101 _sgRB:109 aimClip:111 aimRay3:118 bldPieceAt:134 projEl:145 bldPush:150 collideBld:156 updateBldg:174 bldSnap:187 bldParse:193
 §197 ของบังในแผนที่ไฟล์ที่พังได้ (หิน เสา รูปปั้น ต้นไม้ โคมไฟ ลัง ...) — …
 BRKDEF:201 BRK_M:201 BRK_MCOL:201 BRK:202 genBrk:203 brkApply:210 brkStage:214 hitBrk:215 damageBrkIn:223 brkSnap:229 brkParse:230
 §231 ตารางช่อง (spatial grid) สำหรับแมพใหญ่: หาเฉพาะของใกล้ ๆ แทนวนทุกชิ้น…
-SG:234 sgObs:235 sgProps:235 sgGrid:237 sgNear:244 _sgCR:249 _sgCW:249 _sgCB:249 _sgCO:249 _sgPO:249 _sgPB:249 _sgPP:249 _sgM:249 _sgE:249 _sgA:249 _cwLast:251 collideWorld:252 shoot:290 eShoot:311 foesOf:318 breakShield:325 ULT_RATE:327 ultActive:328 gainUlt:329 lifesteal:330 damage:332 playerDown:389 killProj:410 explode:419 hitTarget:431 updateProjectiles:447
+SG:234 sgObs:235 sgProps:235 sgGrid:237 sgNear:244 _sgCR:249 _sgCW:249 _sgCB:249 _sgCO:249 _sgPO:249 _sgPB:249 _sgPP:249 _sgM:249 _sgE:249 _sgA:249 _cwLast:251 collideWorld:252 shoot:291 eShoot:312 foesOf:319 breakShield:326 ULT_RATE:328 ultActive:329 gainUlt:330 lifesteal:331 damage:333 playerDown:390 killProj:411 explode:420 hitTarget:432 updateProjectiles:448
 
 ## js/12-city-dmg.js (239) — เมืองพังได้ (designs/city-bot-battle.md ขั้น 4) — ข้อมูลที่ทุกเครื่อง…
 CITY_FL:8 CITY_PW:8 CDMG:9 CITYD:12 cityOn:13 cityLayout:15 cityReset:25 cityApplyBox:41 cityApplyItem:42 cityHex:43 cityMark:44 cityRampSync:45 cityPanelAt:47 cityHitPanel:52 cityHitItem:63 cityHitObs:72 _sgCD:77 cityDamageIn:79 cityTick:90 _sgCM:100 cityMoundH:101 cityMounds:109
@@ -150,23 +152,23 @@ AR_SIDE:7 AR_TEAM:7 AR_MAX:7 arPads:8 arOn:9 arState:10 arBusy:11 arReady:13 arN
 ## js/15-bot.js (115) — 
 BOT_LV:8 botPersona:15 BOT_TEAM:16 BOT_MAX:16 bots:17 humans:18 botInZone:20 spawnBot:26 OWNED_K:39 clearOwned:40 removeBots:41 botPickTarget:43 aiBot:56 trBotCmd:105 botDebug:115
 
-## js/15-botnav.js (133) — 
-NAV_MAPS:13 NAV_EYE:13 NAV:14 navOn:16 navSig:17 navEnsure:24 navBuild:30 navCell:46 navWalk:47 navRay:49 navFree:54 navPath:60 _navFoe:78 botThink:81 botNav:87
+## js/15-botnav.js (134) — 
+NAV_MAPS:13 NAV_EYE:13 NAV:14 navOn:16 navSig:17 navEnsure:24 navBuild:30 navCell:47 navWalk:48 navRay:50 navFree:55 navPath:61 _navFoe:79 botThink:82 botNav:88
 
-## js/15-modes.js (405) — 
+## js/15-modes.js (408) — 
 sendPriv:5 TASKF:9 taskPts:10 raceRings:11 modeInit:17 spawnDummy:59 trainTick:64 TR_KEYS:81 trTeams:83 trCmd:93 hostEndTraining:111
 §113 ควิดดิช
-quidThrow:114 quidDrop:120 quidTick:125 snitchTick:160
-§183 แข่งไม้กวาด
-raceTick:184 raceRank:206
-§216 แบทเทิลรอยัล
-brTick:217 ITEMN:231 brPick:232
-§241 หาลอร์ดโวลเดอมอร์
-impActions:242 startMeeting:280 hostVote:287 meetTick:292 impCheck:311
-§319 ระเบิดที่ตั้งเวลาไว้ (ลูกไฟมังกร / คลื่นไฟ)
-bombTick:320 modeSnap:333
-§355 สร้าง snapshot ส่งให้ทุกเครื่อง
-r1:356 DEFP:358 packP:359 unpackP:360 makeSnap:361 PROF:379 pf:380 hostLoop:381 HLW:395 pingN:405
+quidThrow:114 quidDrop:120 quidArea:126 quidTick:127 snitchTick:163
+§186 แข่งไม้กวาด
+raceTick:187 raceRank:209
+§219 แบทเทิลรอยัล
+brTick:220 ITEMN:234 brPick:235
+§244 หาลอร์ดโวลเดอมอร์
+impActions:245 startMeeting:283 hostVote:290 meetTick:295 impCheck:314
+§322 ระเบิดที่ตั้งเวลาไว้ (ลูกไฟมังกร / คลื่นไฟ)
+bombTick:323 modeSnap:336
+§358 สร้าง snapshot ส่งให้ทุกเครื่อง
+r1:359 DEFP:361 packP:362 unpackP:363 makeSnap:364 PROF:382 pf:383 hostLoop:384 HLW:398 pingN:408
 
 ## js/16-voice.js (89) — 
 VOICE:4 rosterIds:5 toggleMic:6 voiceSync:20 teamOn:37 teamOf:38 applyVoiceGates:39 VAC:49 onIncomingCall:50 voiceLevels:62 speakingIds:70 updateVoiceUI:76
@@ -183,18 +185,18 @@ MY:204 myDB:205 mySave:206 myLoad:209 myDecodeReady:215 myPlay:216 myNext:228 my
 §250 เพลงประกอบ (สร้างสดตามแผนที่)
 MUSIC:251 THEMES:252 padNote:257 musicTick:264 toggleMusic:293
 
-## js/19-client.js (247) — 
+## js/19-client.js (248) — 
 cv:4 cx:4 DPR:5 SW:5 SH:5 resize:6 VIEW:12 screen:13 lastBuffKey:13 overShown:13 lastCount:13 PARTS:14 TEXTS:14
 §15 งบเอฟเฟกต์ (VFX budget)
 VFXB:20 _apush:21 vfxQual:29 vfxBegin:31 vfxEnd:34 vfxOnce:36 vfxExtra:38 PCOL:39 setScreen:41 onLobby:53 onSnap:59 snapApply:63
-§71 บัฟเฟอร์ snapshot (ลูกข่าย, ผู้ใช้ 2026-10-22 "เล่นออนไลน์ให้ลื่น")
-SBUF:74 NETOLD:75 sbufReset:76 sbufPush:77 sbufAdvance:87
-§99 ทำนายตัวเอง (ลูกข่าย): ตัวเราขยับทันทีที่กด ไม่ต้องรอโฮสต์ตอบ
-PRED:102 predictMe:103 myPos:124
-§126 เอฟเฟกต์
-burst:128 smoke:139 ring:140 floatText:141 shake:142 wandPos:143 impactFX:145 explosionFX:162
-§174 เอฟเฟกต์คาถาใหม่
-ZV:175 COLB:175 WVV:175 GLV:175 ICEV:175 SLV:175 ULTV:175 OBV:175 _iceDisc:177 _iceEdge:178 _iceSpk:179 iceFloorMat:180 _icePlane:181 _icePathMat:182 makeIceFloor:183 updateIceFloors:207 FLASHM:218 FLASHING:219 flashModel:220 endFlash:229 tickFlash:230 GHOSTM:232 SOLIDM:232 ghostOf:233 setGhost:239 hitSparks:247
+§72 บัฟเฟอร์ snapshot (ลูกข่าย, ผู้ใช้ 2026-10-22 "เล่นออนไลน์ให้ลื่น")
+SBUF:75 NETOLD:76 sbufReset:77 sbufPush:78 sbufAdvance:88
+§100 ทำนายตัวเอง (ลูกข่าย): ตัวเราขยับทันทีที่กด ไม่ต้องรอโฮสต์ตอบ
+PRED:103 predictMe:104 myPos:125
+§127 เอฟเฟกต์
+burst:129 smoke:140 ring:141 floatText:142 shake:143 wandPos:144 impactFX:146 explosionFX:163
+§175 เอฟเฟกต์คาถาใหม่
+ZV:176 COLB:176 WVV:176 GLV:176 ICEV:176 SLV:176 ULTV:176 OBV:176 _iceDisc:178 _iceEdge:179 _iceSpk:180 iceFloorMat:181 _icePlane:182 _icePathMat:183 makeIceFloor:184 updateIceFloors:208 FLASHM:219 FLASHING:220 flashModel:221 endFlash:230 tickFlash:231 GHOSTM:233 SOLIDM:233 ghostOf:234 setGhost:240 hitSparks:248
 
 ## js/20-vfx-pyro-storm.js (414) — Dragonfall (ภาพ)
 makeDfCircle:3 DFV:20 dfCracks:21 updateDfCracks:31 dragonfallFX:32
@@ -240,12 +242,12 @@ QUAL:146 QUAL_NAME:147 qualPR:148 applyQuality:154 qualTick:172 texCanvas:183 gl
 §242 เงาตามผู้เล่น
 SHD:246 _shF:247 _shR:247 _shU:247 _shC:247 _shY:247 shadowFollow:248 LPOOL:267
 
-## js/28-city-build.js (324) — เมืองมักเกิ้ล (ลอนดอน) — ภาพ • ข้อมูลอยู่ js/02-city.js • โมเดลจาก as…
+## js/28-city-build.js (344) — เมืองมักเกิ้ล (ลอนดอน) — ภาพ • ข้อมูลอยู่ js/02-city.js • โมเดลจาก as…
 CITY_WIN:4 cityWinTex:5 cityEmTex:10 cityBoxGeo:16 buildCity:21
-§97 ข้างในตึกกลวง (ภาพ — ผัง I จาก cityInterior js/12-city-dmg)
-cityInteriorView:101 cityHideIn:142 cityMoundView:148
-§171 ชุดโมเดลลอนดอน (assets/city/*.glb จาก assets/src/city_kit_build.py)
-CITY_STY:176 CITY_VEH:183 cityFacade:185 CITYK:198 _cZ:199 _cT:199 _cR:199 _cC:199 cityKitLoad:200 cityCull:222 citySet:228 cityTint:230 cityPools:232 cityShowBld:238 cityRubble:245 CITY_FALL:253 cityViewSync:255 cityDebris:296 cityFX:305
+§102 ข้างในตึกกลวง (ภาพ — ผัง I จาก cityInterior js/12-city-dmg)
+cityInteriorView:106 cityHideIn:147 cityMoundView:153
+§176 ชุดโมเดลลอนดอน (assets/city/*.glb จาก assets/src/city_kit_build.py)
+CITY_STY:181 CITY_VEH:188 cityFacade:190 CITYK:203 _cZ:204 _cT:204 _cR:204 _cC:204 cityKitLoad:205 cityCull:227 citySet:233 cityTint:235 cityPools:237 cityShowBld:243 cityRubble:250 CITY_FALL:258 CAREA:261 cityAreaSync:262 cityViewSync:274 cityDebris:316 cityFX:325
 
 ## js/28-maps-build.js (762) — สร้างแผนที่
 CANDLESYS:2 builtMap:3 builtKey:3 world:3 TORCHES:3 CANDLES:3 FIREFLIES:3 CRYSTAL:3 RUNE:3 SNITCH:3 BANNERS:3 SNOW:3 WCACHE:5 WCACHE_MAX:5 wkey:7 buildWorld:8 addW:41 _prewarmed:43 prewarmShaders:44 batchStatic:63 makeCandles:88 updateCandles:97 buildCastle:106 buildHogsmeade:172 buildGreatHall:260 buildForest:330
@@ -588,8 +590,8 @@ skwBurst:259 skwFxStart:263 skwFxTick:268
 §288 เปิด/ปิด
 skwOpen:289 skwClose:299
 
-## js/64-mappick.js (156) — 
-MPK_TXT:7 MPK_SKY:19 MPK_I:21 MPK_DICE:31 MPK:36 mpkE:37 mpkC:37 mpkSnd:38 mpkCut:39 mpkName:40 mpkCardHTML:41 mpkBuild:51 mpkUp:89 mpkMeasure:101 mpkIdx:102 mpkStep:103 mpkTo:104 mpkPick:105 mpkOpen:111 mpkClose:126 mpkLoop:130 mpkTick:132
+## js/64-mappick.js (157) — 
+MPK_TXT:7 MPK_SKY:19 MPK_I:21 MPK_DICE:31 MPK:36 mpkE:37 mpkC:37 mpkSnd:38 mpkCut:39 mpkName:40 mpkCardHTML:41 mpkBuild:51 mpkUp:89 mpkMeasure:101 mpkIdx:102 mpkStep:103 mpkTo:104 mpkPick:105 mpkOpen:111 mpkClose:127 mpkLoop:131 mpkTick:133
 
 ## js/65-ui3.js (409) — 
 UIG:6 uiGalaxy:7 uiGalaxyOn:15 uiGalRaf:16 uiGalT:16 uiGalLoop:17 uiGalDraw:19 uiShow:36 uiHide:37
@@ -635,4 +637,4 @@ BRM:9 BSK:11 BROOM_SK:17 broomVert:38 broomMove:50 broomStrike:68 broomStrikeTic
 §125 ฝั่งจอ
 broomHead:127 BBEAM:134 _bbGeo:135 broomView:136 broomMountFx:165 broomDismountFx:173 broomBeamFx:175 broomSkFx:191 broomStrikeFx:204 broomFlakFx:209 broomHud:214 broomHudT:215 broomTick:224
 
-(78 files, 18698 lines)
+(78 files, 18753 lines)

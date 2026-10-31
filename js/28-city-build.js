@@ -76,6 +76,11 @@ function buildCity(){
     const m=addW(new THREE.Mesh(cityBoxGeo(w,B.h,d),mat));m.position.set(x,B.h/2,z);m.castShadow=m.receiveShadow=true;
     if(B.h>3&&B.m!=='cont'&&B.m!=='train'){flat(w-0.4,d-0.4,roofM,x,z,B.h+0.02);}
   }
+  // ห่วงควิดดิชในสนามกีฬา (ขั้น 6)
+  const goldM=std('#e8c060',{metalness:0.85,roughness:0.25,emissive:'#3a2a08'});
+  for(const o of OBS)if(o.k==='hoop'){const x=tx(o.x),z=tz(o.y);
+    const post=addW(new THREE.Mesh(new THREE.CylinderGeometry(0.28,0.4,o.ring-1.6,12),goldM));post.position.set(x,(o.ring-1.6)/2,z);post.castShadow=true;
+    const rg=addW(new THREE.Mesh(new THREE.TorusGeometry(1.6,0.16,12,40),goldM));rg.position.set(x,o.ring,z);rg.rotation.y=Math.PI/2;rg.castShadow=true;}
   // เสา (ทางด่วน / ไซต์ก่อสร้าง / หลักผูกเรือ) + พื้นทางด่วน (ภาพ)
   const pillM=std('#8c8c90');
   for(const o of OBS)if(o.k==='cpill'){const r=o.r*S3,m=addW(new THREE.Mesh(new THREE.CylinderGeometry(r,r*1.05,o.hgt,12),pillM));m.position.set(tx(o.x),o.hgt/2,tz(o.y));shadowAll(m);}
@@ -252,7 +257,22 @@ function cityRubble(r){
 }
 const CITY_FALL=1.1;   // วินาทีที่เสา/ตู้ล้มลงพื้น
 // ทุกเฟรม: เทียบสถานะ (CITYD จากโฮสต์/snapshot) กับภาพ แล้วเปลี่ยนเฉพาะที่ต่าง
+// กำแพงล่องหนของพื้นที่เล่น (AREA) ให้เห็นเป็นม่านเรืองแสงบาง ๆ — สร้างใหม่เมื่อโหมด/แผนที่เปลี่ยน
+const CAREA={k:'',g:null};
+function cityAreaSync(){
+  const k=MAPID==='city'&&AREA?JSON.stringify(AREA):'';if(k===CAREA.k)return;CAREA.k=k;
+  if(CAREA.g){scene.remove(CAREA.g);disposeTree(CAREA.g);CAREA.g=null;}if(!k)return;
+  const A=AREA,g=new THREE.Group(),H=6,m=new THREE.MeshBasicMaterial({color:'#7fd0ff',transparent:true,opacity:0.16,side:THREE.DoubleSide,depthWrite:false,blending:THREE.AdditiveBlending}),ln=new THREE.MeshBasicMaterial({color:hdr('#9fe0ff',1.6)});
+  if(A.r){const r=A.r*S3,c=new THREE.Mesh(new THREE.CylinderGeometry(r,r,H,96,1,true),m);c.position.set(tx(A.cx),H/2,tz(A.cy));g.add(c);
+    const t=new THREE.Mesh(new THREE.TorusGeometry(r,0.08,4,96),ln);t.rotation.x=-Math.PI/2;t.position.set(tx(A.cx),0.2,tz(A.cy));g.add(t);}
+  else{const x1=tx(A.x1),x2=tx(A.x2),z1=tz(A.y1),z2=tz(A.y2);
+    for(const [cx,cz,w,ry] of [[(x1+x2)/2,z1,x2-x1,0],[(x1+x2)/2,z2,x2-x1,0],[x1,(z1+z2)/2,z2-z1,Math.PI/2],[x2,(z1+z2)/2,z2-z1,Math.PI/2]]){
+      const p=new THREE.Mesh(new THREE.PlaneGeometry(w,H),m);p.position.set(cx,H/2,cz);p.rotation.y=ry;g.add(p);
+      const l=new THREE.Mesh(new THREE.BoxGeometry(w,0.08,0.08),ln);l.position.set(cx,0.2,cz);l.rotation.y=ry;g.add(l);}}
+  scene.add(g);CAREA.g=g;
+}
 function cityViewSync(dt){
+  cityAreaSync();
   const CV=CITYK.CV;if(!CV||!CV.ready||CITYK.W!==world||!cityOn())return;
   const pd=new Set();
   CITYD.b.forEach((d,i)=>{const r=CV.b[i];if(!r||r.v===d.v)return;const live=r.v!==-1;r.v=d.v;pd.add(r.sty.hole);pd.add(r.sty.hole+'o');

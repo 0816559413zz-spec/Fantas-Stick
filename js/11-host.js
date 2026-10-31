@@ -109,11 +109,11 @@ function hostStart(){
   const err=validate();if(err){toast(err);return;}
   // สุ่มแผนที่ทุกครั้งที่เริ่มเกม (ไม่ซ้ำกับรอบที่แล้วถ้าเป็นไปได้)
   const MD=MODES[G.mode];
-  if(MD.map)G.map=MD.map;
+  if(MD.map&&!(G.mode!=='train'&&MAPS[G.mapPick]&&MAPS[G.mapPick].allModes))G.map=MD.map;   // โหมดที่มีแผนที่ประจำ: เลือกแผนที่ allModes (เมือง) แทนได้
   else if(G.mapPick&&MAPS[G.mapPick]&&!MAP_OFF.has(G.mapPick))G.map=G.mapPick;
   else{let ks=RANDOM_MAPS.filter(k=>k!==G.lastMap&&MAPS[k]&&mapOkFor(k,G.mode));if(!ks.length)ks=['castle'];G.map=ks[Math.floor(Math.random()*ks.length)];}
   G.lastMap=G.map;
-  setMapVars(G.map);
+  setMapVars(G.map);AREA=mapArea(G.map,G.mode);
   PROPON=!PROP_OFF_MODES.includes(G.mode);BLDON=PROPON;
   Object.assign(G,{ph:'count',cdT:3,time:0,proj:[],en:[],feed:[],pid:0,eid:0,wave:0,round:1,rw:{},teamScore:[0,0],
     timer:(G.mode==='ffa'||G.mode==='tdm')?480:G.mode==='quid'?360:0,result:null,banner:null,queue:[],slines:[],sorbs:[],fpaths:[],tcells:[],sballs:[],sdomes:[],impWin:null,snitchBy:null,raceEnd:undefined});
@@ -171,7 +171,7 @@ function resetBody(p,x,y){
   for(const k of CDK)p.cd[k]=0;clearStatus(p);p.trail=null;earthReset(p);windReset(p);
   p.ang=Math.atan2(MH/2-y,MW/2-x);
 }
-function fmap(){const M=MAPS[MAPID];return M&&M.fm;}
+function fmap(){const M=MAPS[MAPID];return M&&(M.fm||(M.fmFor&&G?M.fmFor(G.mode):null));}   // fmFor = แผนที่จากโค้ดที่มีจุดเกิด/ห่วง/ภารกิจต่อโหมด (city)
 function spawnPts(){const f=fmap(),sp=f&&f.spawns.filter(s=>s.t===undefined);if(sp&&sp.length)return sp.map(s=>[s.x,s.y]);return SPAWNF.map(f=>[f[0]*MW,f[1]*MH]);}
 // จุดเกิดของทีม t จากไฟล์แผนที่ (ไม่มี = แบ่งจุดเกิดทั่วไปซ้าย/ขวา) — คืน null ถ้าแผนที่ไม่มีจุดเกิดจากไฟล์
 function teamPts(t){const f=fmap();if(!f||!f.spawns.length)return null;let a=f.spawns.filter(s=>s.t===t);if(!a.length){a=f.spawns.filter(s=>t?s.x>MW/2:s.x<=MW/2);if(!a.length)a=f.spawns;}return a.map(s=>[s.x,s.y]);}

@@ -110,7 +110,8 @@ function mpkPick(i){
 }
 function mpkOpen(o){
   o=o||{};if(!MPK.el)mpkBuild();MPK.o=o;
-  const ks=['',...new Set([...RANDOM_MAPS,'forest',...Object.keys(MAPS).filter(k=>MAPS[k].fm||MAPS[k].pick)])].filter(k=>!k||(MAPS[k]&&(!o.mode||mapOkFor(k,o.mode))));
+  const fx=o.mode&&MODES[o.mode]&&MODES[o.mode].map;   // โหมดมีแผนที่ประจำ (ควิดดิช/BR): เลือกได้แค่แผนที่ประจำ หรือแผนที่ที่เล่นได้ทุกโหมด (เมือง)
+  const ks=fx?[fx,...Object.keys(MAPS).filter(k=>MAPS[k].allModes&&k!==fx)]:['',...new Set([...RANDOM_MAPS,'forest',...Object.keys(MAPS).filter(k=>MAPS[k].fm||MAPS[k].pick)])].filter(k=>!k||(MAPS[k]&&(!o.mode||mapOkFor(k,o.mode))));
   MPK.keys=ks;MPK.n=ks.length;MPK.wrap=ks.length>=6;
   MPK.ring.innerHTML=ks.map(mpkCardHTML).join('');
   MPK.cards=[...MPK.ring.children].map((el,i)=>{const c={el,dim:el.querySelector('.mpkDim'),h:0,st:'',cc:null};const im=el.querySelector('.mpkPic');

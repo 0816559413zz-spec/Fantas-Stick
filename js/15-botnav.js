@@ -22,7 +22,7 @@ function navSig(){
   return s;
 }
 function navEnsure(){
-  const key=MAPID+'|'+MW+'|'+MH+'|'+OBS.length;
+  const key=MAPID+'|'+MW+'|'+MH+'|'+OBS.length+'|'+(AREA?JSON.stringify(AREA):'');
   if(NAV.key===key&&G.time-NAV.t<1)return;
   NAV.t=G.time;const sig=navSig();if(NAV.key===key&&sig===NAV.sig)return;
   NAV.key=key;NAV.sig=sig;navBuild();
@@ -42,6 +42,7 @@ function navBuild(){
     cells(b.o.x-e,b.o.y-e,b.o.x+e,b.o.y+e,(k,x,y)=>{const [lx,ly]=bldLocal(b,x,y);if(Math.abs(lx)<b.o.w/2+pad&&Math.abs(ly)<b.o.d/2+pad)w[k]=1;if(Math.abs(lx)<b.o.w/2&&Math.abs(ly)<b.o.d/2)s[k]=1;});}
   if(PROPON)for(const o of PROPS)if(o.st!==1)circ(o,o.r,o.hgt);
   const m=Math.ceil((40+pad)/c);for(let j=0;j<ny;j++)for(let i=0;i<nx;i++)if(i<m||j<m||i>=nx-m||j>=ny-m)w[j*nx+i]=1;
+  if(AREA)for(let j=0;j<ny;j++)for(let i=0;i<nx;i++){const o={x:(i+0.5)*c,y:(j+0.5)*c};if(areaClamp(o,pad))w[j*nx+i]=1;}   // นอกพื้นที่เล่นของโหมด = เดินไม่ได้
 }
 const navCell=(x,y)=>clamp(Math.floor(y/NAV.c),0,NAV.ny-1)*NAV.nx+clamp(Math.floor(x/NAV.c),0,NAV.nx-1);
 const navWalk=(x,y)=>!NAV.w[navCell(x,y)];

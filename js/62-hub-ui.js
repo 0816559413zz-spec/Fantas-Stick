@@ -216,7 +216,7 @@ function hubLobby(){
   const host=NET.isHost,M=MODES[L.mode]||MODES.coop,hm=HMODES.find(x=>x.k===L.mode)||{k:L.mode,en:modeTitle(M),th:'',d:M.d};
   const team=!!M.team,me=L.players.find(p=>p.id===NET.myId);
   const K=parseKit(myKit),P=PATHS[K.path]||PATHS[0],ult=SPELL_LIST[K.ult];
-  const fixed=M.map?M.map:null,mk=fixed||L.mpk||'',img=mk?`url('${HUI_IMG}maps/${mk}.jpg')`:'none';
+  const alt=M.map&&L.mode!=='train'&&MAPS[L.mpk]&&MAPS[L.mpk].allModes,fixed=M.map&&!alt?M.map:null,mk=fixed||L.mpk||'',canAlt=M.map&&L.mode!=='train',img=mk?`url('${HUI_IMG}maps/${mk}.jpg')`:'none';
   const err=host?validate():'';
   const plRow=p=>{const kk=parseKit(p.kt!==undefined?p.kt:'0'),pp=PATHS[kk.path]||PATHS[0];return `<div class="pl ${p.id===NET.myId?'me':''}">${typeof prfAvatar==='function'?prfAvatar(p.n,p.fr,pp.col,30,icoHTML('p_'+pp.id,pp.col,15)):`<span class="em">${icoHTML('p_'+pp.id,pp.col,18)}</span>`}<span class="nm">${esc(p.n)}</span>${p.id===L.host?`<span class="cr" title="โฮสต์">${hSvg('crown')}</span>`:''}${speakingIds().has(p.id)?'<span class="spk">♪</span>':''}</div>`;};
   const slots=L.online?Math.max(0,(M.max||6)-L.players.length):0;
@@ -258,9 +258,9 @@ function hubLobby(){
     </div>`;
   $('#hGo').innerHTML=`
       <div class="rGo">
-        <button class="mapBtn ${fixed||!host?'fixed':''}" id="hrMap" style="--img:${img}">
+        <button class="mapBtn ${(fixed&&!canAlt)||!host?'fixed':''}" id="hrMap" style="--img:${img}">
           <span class="mImg"></span><span class="mShade"></span>
-          <b>${HUI_MAPN(mk)}</b><small>${fixed?'แผนที่ประจำโหมด':host?'Change map':'โฮสต์เป็นคนเลือก'}</small>
+          <b>${HUI_MAPN(mk)}</b><small>${fixed?(canAlt&&host?'แผนที่ประจำโหมด • เปลี่ยนเป็นเมืองได้':'แผนที่ประจำโหมด'):host?'Change map':'โฮสต์เป็นคนเลือก'}</small>
         </button>
         ${host?`<button class="startBtn" id="hrStart" ${err?'disabled':''}><span>เริ่มเกม</span><em>START</em></button>`:'<div class="waitTxt">รอโฮสต์เริ่มเกม<i></i></div>'}
       </div>
@@ -283,7 +283,7 @@ const hubRoomClick=e=>{
   if(id==='hrPtt'){VOICE.ptt=!VOICE.ptt;$('#micMode').value=VOICE.ptt?'ptt':'open';hubLobby();return;}
   if(id==='hrTeamVoice'){VOICE.teamOnly=!VOICE.teamOnly;$('#teamOnly').checked=VOICE.teamOnly;hubLobby();return;}
   if(id==='hrStart'){if(NET.isHost)hostStart();setTimeout(hubLobby,50);return;}
-  if(id==='hrMap'){const L=LOBBY,M=MODES[L.mode];if(!NET.isHost||M.map)return;
+  if(id==='hrMap'){const L=LOBBY,M=MODES[L.mode];if(!NET.isHost||M.map&&L.mode==='train')return;
     mpkOpen({cur:L.mpk||'',mode:L.mode,onPick:k=>{if(NET.isHost&&G&&G.ph==='lobby'){G.mapPick=k;broadcastLobby();}}});return;}
   const rm=b.dataset.rmode;if(rm&&NET.isHost&&G&&G.ph==='lobby'&&G.mode!==rm){G.mode=rm;broadcastLobby();}
 };

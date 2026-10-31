@@ -61,6 +61,7 @@ function genCity(){
       else{for(let i=0;i<7;i++)box(a+80+(i%4)*300,b+200+Math.floor(i/4)*1250,240,100,2.6,'cont');box(a+s-520,b+s-520,460,440,7,'metal');}
     }else if(k==='field'){   // สนามฟุตบอล + อัฒจันทร์
       box(a+120,b+80,s-240,180,4.5,'stand');box(a+120,b+s-260,s-240,180,4.5,'stand');
+      [[-160,13],[0,17],[160,15]].forEach(([dy,h],i)=>{for(const fx of [0.1,0.9])obs.push({x:Math.round(x0+S*fx),y:Math.round(y0+S/2+dy),r:12,k:'hoop',hgt:h+1.6,ring:h,s:i/3});});   // ห่วงควิดดิช (เล่นควิดดิชในเมือง = สนามนี้)
     }else if(k==='plaza'){   // ย่านลานใหญ่: ลานวงกลมแตะมุมบล็อก (keep) + ตึกรอบนอก
       box(a+40,b+40,520,420,17.5,'office');box(a+640,b+40,400,300,10.5,'shop');box(a+40,b+540,360,460,10.5,'brick');
     }
@@ -134,4 +135,31 @@ function cityProps(){
     const c=k*CITY_B+sd*(CITY_ROAD/2+30);for(const [x,y] of [[c,s],[s,c]])if(!hit(x,y,22))add('ptree',x,y);}
   return out;
 }
-MAPS.city=Object.assign({name:'🏙️ เมืองมักเกิ้ล',d:'เมืองยุคปัจจุบัน 480×480 ม. — กล่องเทา (ยังไม่ลงภาพจริง)',props:cityProps,build:'city',pick:1},genCity());
+// ---------- เล่นได้ทุกโหมด (ขั้น 6): พื้นที่เล่นต่อโหมด (กำแพงล่องหน AREA) + จุดเกิด/ห่วง/ภารกิจ/จุดเกิดมอนสเตอร์ต่อโหมด ----------
+// areas[mode] = {x1,y1,x2,y2} หรือ {cx,cy,r} (วงกลม) • ไม่มี = ทั้งเมือง (BR / แข่งไม้กวาด) • fmFor(mode) = รูปแบบเดียวกับข้อมูลแผนที่จากไฟล์ (fm) → โค้ดโหมดเดิมใช้ได้เลย
+const CITY_MID=CITY_N*CITY_B/2,CITY_C2={x1:CITY_B-200,y1:CITY_B-200,x2:3*CITY_B+200,y2:3*CITY_B+200};   // 2×2 บล็อกกลาง + ถนนรอบ
+function cityModeData(M){
+  const B=CITY_B,m=CITY_MID,fz=M.zones.find(z=>z.k==='field');
+  M.areas={duel:{cx:m,cy:m,r:CITY_PLAZA-40},ffa:CITY_C2,tdm:CITY_C2,coop:CITY_C2,imp:CITY_C2,quid:{x1:fz.x,y1:fz.y,x2:fz.x+fz.w,y2:fz.y+fz.d}};
+  const ring=[[m,m,6],[m,B,8],[3*B,B,10],[3*B,m,7],[3*B,3*B,9],[3*B,3.5*B,4],[2.5*B,3.5*B,4],[2*B,3.5*B,4],[2*B,3*B,8],[B,3*B,10],[B,m,6]];   // แข่งไม้กวาด: วนตามถนน ลอดใต้ทางด่วน
+  const tasks=[[m-700,m-300],[m+650,m+350],[m-250,m+760],[m+300,m-760],[1.5*B,B],[2.5*B,B],[3*B,1.5*B],[3*B,2.5*B],[1.5*B,3*B],[B,2.5*B]];
+  const fy=fz.y+fz.d/2;
+  const F={duel:{spawns:[{x:m-700,y:m},{x:m+700,y:m}]},
+    ffa:{spawns:[[1.5*B,B],[2.5*B,B],[3*B,1.5*B],[3*B,2.5*B],[2.5*B,3*B],[1.5*B,3*B],[B,2.5*B],[B,1.5*B]].map(([x,y])=>({x,y}))},
+    tdm:{spawns:[[B,1.5*B,0],[B,m,0],[B,2.5*B,0],[3*B,1.5*B,1],[3*B,m,1],[3*B,2.5*B,1]].map(([x,y,t])=>({x,y,t}))},
+    coop:{spawns:[[m-200,m],[m+200,m],[m,m-200],[m,m+200]].map(([x,y])=>({x,y})),espawn:[[B+300,m],[3*B-300,m],[m,B+300],[m,3*B-300],[B+300,B+300],[3*B-300,3*B-300],[B+300,3*B-300],[3*B-300,B+300]].map(([x,y])=>({x,y}))},
+    quid:{spawns:[0,1].flatMap(t=>[-1,0,1].map(k=>({x:fz.x+(t?fz.w-420:420),y:fy+k*170,t})))},
+    race:{rings:ring.map(([x,y,h])=>({x,y,h}))},
+    imp:{tasks:tasks.map(([x,y])=>({x,y}))}};
+  M.fmFor=mode=>Object.assign({spawns:[],tasks:[],rings:[],espawn:[]},F[mode]||{});
+}
+// พื้นที่เล่นของแผนที่ mp ในโหมด mode (ใช้ทั้งโฮสต์และลูกข่าย) • null = ทั้งแผนที่
+function mapArea(mp,mode){const M=MAPS[mp];return M&&M.areas&&M.areas[mode]||null;}
+let AREA=null;
+// ดันกลับเข้าพื้นที่เล่น (collideWorld เรียก) • r = รัศมีตัว
+function areaClamp(o,r){const A=AREA;if(!A)return false;const x=o.x,y=o.y;
+  if(A.r){const dx=o.x-A.cx,dy=o.y-A.cy,d=Math.hypot(dx,dy),R=A.r-r;if(d>R&&d>0){o.x=A.cx+dx/d*R;o.y=A.cy+dy/d*R;}}
+  else{o.x=clamp(o.x,A.x1+r,A.x2-r);o.y=clamp(o.y,A.y1+r,A.y2-r);}
+  return o.x!==x||o.y!==y;}
+MAPS.city=Object.assign({name:'🏙️ เมืองมักเกิ้ล',d:'เมืองลอนดอนยุคปัจจุบัน 480×480 ม. พังได้ทั้งเมือง — เล่นได้ทุกโหมด',props:cityProps,build:'city',pick:1,allModes:1},genCity());
+cityModeData(MAPS.city);

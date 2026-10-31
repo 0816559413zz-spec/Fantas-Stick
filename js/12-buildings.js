@@ -252,6 +252,7 @@ const _cwLast=new WeakMap();
 function collideWorld(o,r,z){
   z=z||0;const sx=o.x,sy=o.y;let sol=0;
   o.x=clamp(o.x,r+20,MW-r-20);o.y=clamp(o.y,r+20,MH-r-20);if(o.x!==sx||o.y!==sy)sol++;
+  if(AREA&&areaClamp(o,r))sol++;   // พื้นที่เล่นของโหมด (กำแพงล่องหน)
   {const L=_cwLast.get(o);if(L){const dl=Math.hypot(o.x-L.x,o.y-L.y);if(dl>=10&&dl<400){const c=bldRay(L.x,L.y,z+1,o.x,o.y,z+1);
     if(c){const k=Math.max(0,c.t-(r+2)/dl);o.x=L.x+(o.x-L.x)*k;o.y=L.y+(o.y-L.y)*k;sol++;}}}}
   if(PROPON)for(const c of sgNear(sgProps(),o.x,o.y,r,_sgCW)){
