@@ -1,0 +1,4 @@
+# Claude Code Game Studios: bash scripts must keep LF
+.claude/**/*.sh text eol=lf
+.claude/**/*.awk text eol=lf
+.claude/**/*.md text eol=lf

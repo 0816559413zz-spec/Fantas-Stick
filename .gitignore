@@ -1,5 +1,13 @@
 index.2d-backup.html
-.claude/
+.claude/*
+# Claude Code Game Studios (agents + skills), shared through git
+!.claude/agents/
+!.claude/skills/
+!.claude/rules/
+!.claude/docs/
+!.claude/scripts/
+!.claude/CCGS-LICENSE
+.claude/agent-memory/
 *.blend1
 shots/
 assets/src/__pycache__/
