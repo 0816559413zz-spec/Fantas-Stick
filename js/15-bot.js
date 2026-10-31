@@ -111,5 +111,25 @@ function trBotCmd(p,d){
     else toast('บอทเต็มแล้ว (สูงสุด '+BOT_MAX+' ตัว)');
   }else if(d.c==='botclr'){const z=d.z==='arena'?'arena':'bot';if(z==='arena'&&arBusy())return toast('กำลังแข่งอยู่ — รอจบรอบก่อน');const n=bots().filter(q=>q.ai.zone===z).length;removeBots(q=>q.ai.zone===z);if(n){feed('🧹 ลบบอทแล้ว');broadcastLobby();}}
 }
+// ---------- บอทในห้องรอ (ผู้ใช้ 2026-10-31 "สร้างห้องเล่นกับบอทได้") ----------
+// โฮสต์เพิ่มบอทในห้องรอได้ ทั้งเล่นคนเดียวและห้องออนไลน์ (ai.lb) • นับเป็นผู้เล่นของโหมด • อยู่ต่อข้ามแมตช์ (ไม่โดน removeBots ตอนเริ่ม/กลับล็อบบี้)
+//   โหมดที่บอทเล่นเป็น = สู้กัน (BOT_MODES) • ควิดดิช/แข่งไม้กวาด/หาโวลเดอมอร์ = บอทยังไม่รู้กติกา → ห้ามเริ่มจนกว่าจะลบบอท (validate)
+//   ห้องเต็ม 6 แล้วเพื่อนเข้ามา = ลบบอทออก 1 ตัวให้เพื่อน (hostOnData)
+const BOT_MODES=['coop','duel','ffa','tdm','br'];
+function lobbyBots(){return bots().filter(p=>p.ai.lb);}
+function lobbyBotAdd(path,lv){
+  if(!G||G.ph!=='lobby')return;
+  const M=MODES[G.mode]||{};if(plist().length>=Math.min(6,M.max||6))return toast('ห้องเต็มแล้วสำหรับโหมดนี้');
+  const ok=PATHS.map((P,i)=>i).filter(i=>!PATHS[i].off),P=path>=0&&ok.includes(path)?path:ok[Math.floor(Math.random()*ok.length)];
+  const p=spawnBot(P,lv,800,500,null,NET.myId);if(!p)return toast('บอทเต็มแล้ว (สูงสุด '+BOT_MAX+' ตัว)');
+  p.ai.lb=1;EVL.pop();if(NET.online)EVN.pop();   // ไม่เล่นเอฟเฟกต์เกิดในห้องรอ
+  broadcastLobby();
+}
+function lobbyBotCmd(id,c){
+  const p=G&&G.ph==='lobby'&&G.players[id];if(!p||!p.ai||!p.ai.lb)return;
+  if(c==='x')hostRemove(id);else if(c==='t'){p.lteam^=1;broadcastLobby();}
+}
+// ตอนเริ่มแมตช์ (hostStart หลังวางจุดเกิด): ทีมตามโหมด + จุดกลับ = จุดเกิด + ล้างความจำเป้า/ทาง
+function lobbyBotsStart(){for(const p of lobbyBots()){p.ai.team=p.team;p.ai.home={x:p.x,y:p.y};p.ai.tg=null;p.nav=null;p.inp=emptyInput();}}
 // ดีบัก (คอนโซล): WD.bot(path, lv, n, side) = เสกบอทจากชื่อเรา (side 'A'/'B' = บอทสังเวียน) • WD.bot() = ลบบอททั้งหมด
 function botDebug(path,lv,n,side){const me=G&&G.players[NET.myId];if(!me)return;if(path===undefined)return removeBots();trBotCmd(me,side?{c:'bot',p:path,lv,n,side}:{c:'bot',p:path,lv,n});return bots().map(q=>q.name);}

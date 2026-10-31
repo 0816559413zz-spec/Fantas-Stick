@@ -120,13 +120,13 @@ windFlyTick:202 windFlick:204
 windUltTick:213 windFloatZ:227 windSnapP:230 windSnapW:231
 §234 สกิล
 
-## js/10-net.js (197) — 
+## js/10-net.js (197) — เครือข่าย (PeerJS / WebRTC)
 PREFIX:4 NET:5 RC:9 TURN_SERVERS:12 ICE:13 PEER_OPT:14 TURN_URL:16 ICE_READY:18 JN:22 LAG:24 lagDo:25 hostSend:26 LOBBY:27 genCode:28 sendAll:29 NETD_KEYS:33 NETD:33 netDeltaReset:34 netDelta:35 NET_MAX:49 _netTE:49 netSendSnap:50 NETU:61 netUndelta:62 setStatus:68 hostGame:70 hostPeer:78 netConnect:97 joinWatch:108 joinFail:123 netLost:129 joinGame:144 joinPeer:155 clientOnData:170 leave:185 leaveRoom:187
 
-## js/11-host.js (391) — ฝั่งโฮสต์: สถานะเกมทั้งหมดคำนวณที่นี่ (server-authoritative)
-G:4 EVL:4 EVN:4 hostLast:4 tickN:4 emit:5 feed:6 banner:7 plist:8 cleanName:9 freshStats:11 newPlayer:18 emptyInput:21 frameOk:23 addPlayer:24 initHostLobby:33 lobbyMsg:40 broadcastLobby:41 INPN:43 hostOnData:44 hostDrop:74 hostRemove:83 validate:96 hostStart:107 hostToLobby:133 MIDJOIN:140 midJoin:141 CHATT:157 chatRelay:158 emoHost:166 resetBody:168 fmap:174 spawnPts:175 teamPts:177 placeAll:178 respawn:190
-§209 ลูปหลักฝั่งโฮสต์
-hostTick:210 angDiff:224 cH:226 vR:227 updatePlayer:229 hitProp:378 damagePropsIn:385 nearUseProp:386 useProp:387
+## js/11-host.js (393) — ฝั่งโฮสต์: สถานะเกมทั้งหมดคำนวณที่นี่ (server-authoritative)
+G:4 EVL:4 EVN:4 hostLast:4 tickN:4 emit:5 feed:6 banner:7 plist:8 cleanName:9 freshStats:11 newPlayer:18 emptyInput:21 frameOk:23 addPlayer:24 initHostLobby:33 lobbyMsg:40 broadcastLobby:41 INPN:43 hostOnData:44 hostDrop:75 hostRemove:84 validate:97 hostStart:109 hostToLobby:135 MIDJOIN:142 midJoin:143 CHATT:159 chatRelay:160 emoHost:168 resetBody:170 fmap:176 spawnPts:177 teamPts:179 placeAll:180 respawn:192
+§211 ลูปหลักฝั่งโฮสต์
+hostTick:212 angDiff:226 cH:228 vR:229 updatePlayer:231 hitProp:380 damagePropsIn:387 nearUseProp:388 useProp:389
 
 ## js/12-buildings.js (498) — สิ่งปลูกสร้างที่พังเป็นชิ้นย่อย (บ้าน) แบบ Battlefield — คู่มือเต็ม: …
 BLDDEF:8 BLD_PIECES:10 BLD_GRID:11 BLD_DOOR:13 BLD_FIRE:14 BLD_ICE:14 BLD_ROOF_MIN:14 BLDG:15 BLDON:15 genBldg:16 bldRect:26 bldChunk:28 bldAlive:35 bldLocal:36 bldWorld:37 rectDist:38 bldNear:39 BLD_MOUND:42 bldGone:43 bldMoundAt:44 bldMoundH:45 hitBldPiece:47 breakBldChunk:58 bldSupport:66 damageEnv:86 bldRay:101 _sgRB:109 aimClip:111 aimRay3:118 bldPieceAt:134 projEl:145 bldPush:150 collideBld:156 updateBldg:174 bldSnap:187 bldParse:193
@@ -149,8 +149,11 @@ hostPick:2 clearField:10 modeLogic:11 endMatch:80 matchOver:105
 ## js/15-arena.js (71) — 
 AR_SIDE:7 AR_TEAM:7 AR_MAX:7 arPads:8 arOn:9 arState:10 arBusy:11 arReady:13 arNames:21 arenaTick:22 arStart:43 arEnd:51 arReset:57 arAddBots:64
 
-## js/15-bot.js (115) — 
-BOT_LV:8 botPersona:15 BOT_TEAM:16 BOT_MAX:16 bots:17 humans:18 botInZone:20 spawnBot:26 OWNED_K:39 clearOwned:40 removeBots:41 botPickTarget:43 aiBot:56 trBotCmd:105 botDebug:115
+## js/15-bot.js (135) — บอทรุ่นแรก (designs/training-zones.md ขั้น 2): ผู้เล่นปลอมฝั่งโฮสต์ ใช้สกิลผ่านปุ่มเหมือน…
+§5 ระดับความเก่ง: react = วิที่ใช้คิดใหม่ (เลือกเป้า/ขยับเป้าเล็ง) • err…
+BOT_LV:8 botPersona:15 BOT_TEAM:16 BOT_MAX:16 bots:17 humans:18 botInZone:20 spawnBot:26 OWNED_K:39 clearOwned:40 removeBots:41 botPickTarget:43 aiBot:56 trBotCmd:105
+§114 บอทในห้องรอ (ผู้ใช้ 2026-10-31 "สร้างห้องเล่นกับบอทได้")
+BOT_MODES:118 lobbyBots:119 lobbyBotAdd:120 lobbyBotCmd:128 lobbyBotsStart:133 botDebug:135
 
 ## js/15-botnav.js (135) — 
 NAV_MAPS:14 NAV_EYE:14 NAV:15 navOn:17 navSig:18 navEnsure:25 navBuild:31 navCell:48 navWalk:49 navRay:51 navFree:56 navPath:62 _navFoe:80 botThink:83 botNav:89
@@ -566,7 +569,8 @@ PRF3:790 prfSpot:792 hubProfSet:801 hubProfShow:809 hubProfTick:810
 §821 เรนเดอร์ (เรียกจาก renderStage — คืน true = วาดแล้ว)
 hubRender:822
 
-## js/62-hub-ui.js (302) — 
+## js/62-hub-ui.js (307) — เมนูใหม่ — หน้าจอ/ปุ่ม (ผู้ใช้ 2026-10-22 • สเปก designs/ui-menu.md)
+§8 ภาพการ์ด/แผนที่: URL เต็ม — url() ใน CSS var อ่านเทียบไฟล์ css/hub.cs…
 HUI_IMG:9 HMODES:10 HUI:15 HICO:17 hSvg:35 hHex:36 H_STAR:37
 §95 สถานะหน้าจอ: menu / modes / room / off
 hubUiState:96 hubMeChip:104 hubOnScreen:110
@@ -575,8 +579,8 @@ hubJoinGo:122
 §133 การ์ดโหมด
 hubMxJoin:140 hubPickMode:153 hubFlipKill:166 hubRoomRect:167 hubFlip:168 hubLeaveRoom:184 hubUnflip:189 hubFlipEnd:202
 §209 แผงห้อง (การ์ดที่ขยายแล้ว)
-HUI_MAPN:210 hubLobby:211 hubRoomClick:273 hubKitChanged:292
-§294 เริ่มต้น
+HUI_MAPN:210 hubLobby:211 hubRoomClick:275 hubKitChanged:297
+§299 เริ่มต้น
 
 ## js/63-skillwheel.js (317) — 
 SKW:9 SKW_PO:10 SKW_PI:10 SKW_RUNE:11 skwPaths:12 skwKey:13 skwOffN:14 skwChanged:15 skwSnd:16
@@ -644,4 +648,4 @@ BRM:9 BSK:11 BROOM_SK:17 broomVert:38 broomMove:50 broomStrike:68 broomStrikeTic
 §125 ฝั่งจอ
 broomHead:127 BBEAM:134 _bbGeo:135 broomView:136 broomMountFx:165 broomDismountFx:173 broomBeamFx:175 broomSkFx:191 broomStrikeFx:204 broomFlakFx:209 broomHud:214 broomHudT:215 broomTick:224
 
-(78 files, 18966 lines)
+(78 files, 18993 lines)
