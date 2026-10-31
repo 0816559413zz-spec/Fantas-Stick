@@ -1,0 +1,67 @@
+{
+ "v": 1,
+ "desc": "Inferno Colossus: แขนเกราะ 1 ข้าง (จุดหมุนที่ไหล่ ห้อยลง) ต้นแขน ศอก ปลอกแขน กำปั้น",
+ "mat": "energy",
+ "pal": "fire",
+ "tags": [
+  "fire",
+  "colossus",
+  "storyboard14"
+ ],
+ "parts": [
+  {
+   "id": "upper",
+   "k": "cyl",
+   "r0": 0.5,
+   "r1": 0.6,
+   "h": 1.75,
+   "sides": 7,
+   "pos": [
+    0,
+    -1.85,
+    0
+   ],
+   "flat": true
+  },
+  {
+   "id": "elbow",
+   "k": "sphere",
+   "r": 0.52,
+   "seg": 8,
+   "pos": [
+    0,
+    -1.95,
+    0
+   ],
+   "flat": true
+  },
+  {
+   "id": "bracer",
+   "k": "cyl",
+   "r0": 0.5,
+   "r1": 0.66,
+   "h": 1.5,
+   "sides": 6,
+   "pos": [
+    0,
+    -3.5,
+    0.05
+   ],
+   "flat": true
+  },
+  {
+   "id": "fist",
+   "k": "box",
+   "w": 0.85,
+   "h": 0.8,
+   "d": 0.85,
+   "pos": [
+    0,
+    -3.85,
+    0.08
+   ],
+   "noise": 0.05,
+   "flat": true
+  }
+ ]
+}

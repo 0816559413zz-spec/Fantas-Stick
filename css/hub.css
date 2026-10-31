@@ -253,6 +253,10 @@ body.hS-room .hRoom.on{display:block;animation:hRoomIn .45s ease both}
 .pl .em{flex:none;display:grid;place-items:center;width:24px;height:24px;border:1px solid var(--h-line);border-radius:50%}
 .pl .cr{width:15px;height:15px;color:var(--h-gold);flex:none}.pl .cr svg{width:100%;height:100%}
 .pl .spk{color:var(--h-cyan);font-size:13px}
+.pl .bt{flex:none;margin-left:auto;width:24px;height:24px;padding:0;border:1px solid var(--h-line);border-radius:50%;background:none;color:inherit;font-size:12px;cursor:pointer;opacity:.7}.pl .bt+.bt{margin-left:0}.pl .bt:hover{opacity:1;border-color:var(--h-gold)}
+.rBot{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;align-items:center}.rBot select{min-width:0;flex:1 1 110px;padding:6px 8px;background:rgba(20,16,40,.6);color:inherit;border:1px solid var(--h-line);border-radius:6px;font:300 14px var(--h-sans)}
+.rBot button{padding:6px 14px;border:1px solid var(--h-gold);border-radius:6px;background:rgba(255,210,120,.08);color:inherit;font:400 14px var(--h-sans);cursor:pointer}.rBot button:disabled{opacity:.4;cursor:default}
+.rBot.off{font:300 13px var(--h-sans);opacity:.6}
 .pl.empty{color:var(--h-faint);font-style:italic;font-size:13px;border-bottom-style:dashed}
 .teams{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px 22px}
 .tm h4{display:flex;align-items:center;gap:8px;margin:0 0 4px;font:500 11px var(--h-serif);letter-spacing:.32em;color:var(--h-ink)}

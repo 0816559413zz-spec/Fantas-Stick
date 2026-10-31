@@ -37,7 +37,7 @@ function initHostLobby(){
   broadcastLobby();
   setScreen('lobby');
 }
-function lobbyMsg(){return {t:'lobby',ph:G.ph,mode:G.mode,map:G.map,mpk:G.mapPick||'',code:NET.code,online:NET.online,host:NET.myId,players:plist().map(p=>({id:p.id,n:p.name,c:p.color,lk:p.lk,kt:p.kit,tm:p.lteam,fr:p.fr||'b_def'}))};}
+function lobbyMsg(){return {t:'lobby',ph:G.ph,mode:G.mode,map:G.map,mpk:G.mapPick||'',code:NET.code,online:NET.online,host:NET.myId,players:plist().map(p=>({id:p.id,n:p.name,c:p.color,lk:p.lk,kt:p.kit,tm:p.lteam,fr:p.fr||'b_def',b:p.ai?1:0}))};}   // b = บอท (js/15-bot)
 function broadcastLobby(){const m=lobbyMsg();sendAll(m);onLobby(m);}
 
 const INPN=['ax','ay','ah','ap','gx','gy','mx','my'];
@@ -54,6 +54,7 @@ function hostOnData(conn,d){
     if(G.players[id]){conn.send({t:'welcome',id});return;}
     if(G.ph!=='lobby')return midJoin(conn,id,d,tok,reject);   // hello ซ้ำ: อย่าเพิ่มคนเดิมซ้ำ (ไม่งั้นตัวเดินเร็ว 2 เท่า)
     if(humans().length>=6)return reject('ห้องเต็มแล้ว (สูงสุด 6 คน)');
+    if(plist().length>=6){const b=lobbyBots().pop();if(b)hostRemove(b.id);}   // ห้องเต็มเพราะบอท = ให้ที่เพื่อน
     NET.conns.set(id,conn);
     const p=addPlayer(id,cleanName(d.name),null,String(d.look||'').slice(0,40),String(d.kit||'').slice(0,24));p.tok=tok;p.fr=frameOk(d.fr);
     conn.send({t:'welcome',id});
@@ -95,7 +96,8 @@ function hostRemove(id){
 
 function validate(){
   const ps=plist(),M=MODES[G.mode];
-  if(ps.length<M.min)return `โหมดนี้ต้องมีผู้เล่นอย่างน้อย ${M.min} คน`;
+  if(lobbyBots().length&&!BOT_MODES.includes(G.mode))return 'โหมดนี้บอทยังเล่นไม่เป็น — ลบบอทออกก่อน';
+  if(ps.length<M.min)return `โหมดนี้ต้องมีผู้เล่นอย่างน้อย ${M.min} คน (เพิ่มบอทได้)`;
   if(ps.length>M.max)return `โหมดนี้เล่นได้สูงสุด ${M.max} คน`;
   if(M.team){
     const a=ps.filter(p=>p.lteam===0).length,b=ps.length-a;
@@ -105,7 +107,7 @@ function validate(){
   return '';
 }
 function hostStart(){
-  removeBots();
+  removeBots(q=>!q.ai.lb);   // บอทห้องฝึก/สังเวียนหายตอนเริ่ม • บอทห้องรอ (ai.lb) อยู่ต่อ
   const err=validate();if(err){toast(err);return;}
   // สุ่มแผนที่ทุกครั้งที่เริ่มเกม (ไม่ซ้ำกับรอบที่แล้วถ้าเป็นไปได้)
   const MD=MODES[G.mode];
@@ -121,7 +123,7 @@ function hostStart(){
     Object.assign(p,freshStats());
     p.team=(G.mode==='coop'||G.mode==='train')?0:MD.team?p.lteam:10+i;
   });
-  placeAll();
+  placeAll();lobbyBotsStart();
   modeInit();if(G.mode==='ffa')ffaInit();else if(G.mode==='tdm')potInit();
   if(G.mode==='coop'){G.wave=1;setupWave();}else if(G.mode!=='imp')banner(MD.name,3);
   hostLast=performance.now();
@@ -131,10 +133,10 @@ function hostStart(){
   setScreen('game');
 }
 function hostToLobby(){G.ph='lobby';G.proj=[];G.en=[];
-  removeBots();   // บอทห้องฝึกไม่ตามไปล็อบบี้
+  removeBots(q=>!q.ai.lb);   // บอทห้องฝึกไม่ตามไปล็อบบี้ (บอทห้องรออยู่ต่อ)
   for(const p of plist())if(p.awayT>0)hostRemove(p.id);   // หลุดแล้วไม่กลับ = ลบตอนกลับล็อบบี้
   // คนดู → เป็นผู้เล่นในรอบหน้า (ถ้าห้องยังไม่เต็ม)
-  for(const id in (G.spec||{})){const s=G.spec[id],c=NET.conns.get(id);if(!c||humans().length>=6)continue;delete G.spec[id];const p=addPlayer(id,s.name,null,s.look,s.kit);p.tok=s.tok;try{c.send({t:'welcome',id});}catch(e){}}
+  for(const id in (G.spec||{})){const s=G.spec[id],c=NET.conns.get(id);if(!c||humans().length>=6)continue;if(plist().length>=6){const b=lobbyBots().pop();if(b)hostRemove(b.id);}delete G.spec[id];const p=addPlayer(id,s.name,null,s.look,s.kit);p.tok=s.tok;try{c.send({t:'welcome',id});}catch(e){}}
   broadcastLobby();}
 // เข้าห้องกลางเกม: ffa/tdm/ห้องฝึก/co-op = เกิดเลย • โหมดอื่น/ห้องเต็ม 6 คน = เป็นคนดู (สูงสุด 4) แล้วได้เล่นรอบหน้า
 const MIDJOIN=['ffa','tdm','train','coop'];

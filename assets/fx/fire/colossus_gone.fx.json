@@ -1,0 +1,48 @@
+{
+ "v": 1,
+ "desc": "Inferno Colossus: ตอนร่างหาย (ถ่านไฟกระจาย + แสงวาบ) — ตัวร่างไหม้สลายอยู่ใน end ของ fire/colossus • efx:colend replace",
+ "tags": [
+  "fire",
+  "pyro",
+  "ult",
+  "colossus",
+  "storyboard14"
+ ],
+ "pal": "fire",
+ "dur": 1,
+ "seed": 14,
+ "layers": [
+  {
+   "id": "flash",
+   "t": "halo",
+   "at": 0,
+   "life": 0.4,
+   "pos": [
+    0,
+    1.5,
+    0
+   ],
+   "col": "#ff6a2a",
+   "size": 8,
+   "size0": 3,
+   "k": 0.8
+  },
+  {
+   "id": "lt",
+   "t": "light",
+   "at": 0,
+   "life": 0.4,
+   "pos": [
+    0,
+    1.5,
+    0
+   ],
+   "col": "#ff7a2a",
+   "int": {
+    "0": 2,
+    "1": 0
+   },
+   "dist": 14
+  }
+ ]
+}

@@ -1,0 +1,92 @@
+{
+ "v": 1,
+ "desc": "Inferno Colossus: จุดกระโดดบนพื้น (วงกระแทก เสาไฟ รอยไหม้ แสง เสียง) • efx:colossus replace",
+ "tags": [
+  "fire",
+  "pyro",
+  "ult",
+  "colossus",
+  "storyboard14"
+ ],
+ "pal": "fire",
+ "dur": 3.9,
+ "seed": 14,
+ "layers": [
+  {
+   "id": "s1_ring",
+   "t": "ring",
+   "at": 0,
+   "life": 0.45,
+   "att": "ground",
+   "col": "#ff6a2a",
+   "r": 4.5,
+   "op": 0.6
+  },
+  {
+   "id": "s1_scorch",
+   "t": "decal",
+   "at": 0,
+   "life": 3.9,
+   "att": "ground",
+   "kind": "crack",
+   "r": 3.2,
+   "n": 9,
+   "burn": 1.2
+  },
+  {
+   "id": "s1_launch",
+   "t": "firevol",
+   "at": 0.06,
+   "life": 0.5,
+   "att": "ground",
+   "kind": "pillar",
+   "hx": 0.7,
+   "hz": 0.7,
+   "h": 2.4,
+   "hgt": {
+    "0": 0.1,
+    "0.25": 1
+   },
+   "dis": {
+    "0": 0,
+    "1": 1,
+    "0.4": 0
+   },
+   "int": 1.3,
+   "spd": 1.8
+  },
+  {
+   "id": "s1_snd",
+   "t": "sound",
+   "at": 0,
+   "name": "cast_fire",
+   "vol": 0.9
+  },
+  {
+   "id": "s1_light",
+   "t": "light",
+   "at": 0,
+   "life": 0.5,
+   "att": "ground",
+   "pos": [
+    0,
+    1.5,
+    0
+   ],
+   "col": "#ff7a2a",
+   "int": {
+    "0": 2.2,
+    "1": 0
+   },
+   "dist": 14
+  },
+  {
+   "id": "s1_shake",
+   "t": "screen",
+   "at": 0,
+   "life": 0.25,
+   "own": true,
+   "shake": 4
+  }
+ ]
+}
