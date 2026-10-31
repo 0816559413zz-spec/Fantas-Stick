@@ -253,6 +253,7 @@ function pyroFX(o,p,pz,now,dt){
   // ร่างจากไฟล์เอฟเฟกต์ (สตอรี่บอร์ด #14 แบบ B): bind.json "loop:colossus" เล่นตามตัวตลอดร่าง → ซ่อนเกราะ+หน้าไม้จากโค้ด
   const coN=p.co?fxLoopName('colossus'):null;
   if(coN){if(!o.coFx||o.coFxN!==coN){if(o.coFx)fxStop(o.coFx);o.coFx=fxPlay(coN,{x:p.x,y:p.y,h:pz,follow:p.id});o.coFxN=coN;}
+    if(o.coFx)o.coFx.P.tw=o.colShot?(now-o.colShot)/1000:9;   // แขนซ้ายเหวี่ยงปา + ลูกไฟในมือโตใหม่ (สูตรใน fire/colossus ใช้ tw)
     if(o.colo)o.colo.visible=false;LREQ.push({x:tx(p.x),y:pz+3,z:tz(p.y),col:'#ff6a2a',int:2.5,dist:20});}
   else if(o.coFx){fxStop(o.coFx);o.coFx=null;o.coFxN=null;}
   if(p.co&&!coN){

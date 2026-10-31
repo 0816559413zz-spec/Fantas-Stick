@@ -34,12 +34,12 @@
   {
    "id": "flash",
    "t": "flash",
-   "at": 0,
+   "at": 0.1,
    "life": 0.14,
    "pos": [
-    "(-6.44*dz+-1.63*dx)/(sqrt(dx*dx+dz*dz)+0.001)",
-    2.34,
-    "(6.44*dx+-1.63*dz)/(sqrt(dx*dx+dz*dz)+0.001)"
+    "(-7.28*dz+-1.64*dx)/(sqrt(dx*dx+dz*dz)+0.001)",
+    0.12,
+    "(7.28*dx+-1.64*dz)/(sqrt(dx*dx+dz*dz)+0.001)"
    ],
    "col": "#ffd27a",
    "size": 3.5,
@@ -48,21 +48,20 @@
   {
    "id": "ball",
    "t": "mesh",
-   "at": 0,
-   "life": "T",
+   "at": 0.1,
+   "life": "max(0.05,T-0.1)",
    "shape": "sphere",
    "pos": {
     "0": [
-     "(-6.44*dz+-1.63*dx)/(sqrt(dx*dx+dz*dz)+0.001)",
-     2.34,
-     "(6.44*dx+-1.63*dz)/(sqrt(dx*dx+dz*dz)+0.001)"
+     "(-7.28*dz+-1.64*dx)/(sqrt(dx*dx+dz*dz)+0.001)",
+     0.12,
+     "(7.28*dx+-1.64*dz)/(sqrt(dx*dx+dz*dz)+0.001)"
     ],
     "1": [
      "dx",
      "dy+0.3",
      "dz"
-    ],
-    "ease": "in"
+    ]
    },
    "scale": 1.5,
    "mat": "fire",
@@ -77,8 +76,8 @@
   {
    "id": "tr",
    "t": "trail",
-   "at": 0,
-   "life": "T",
+   "at": 0.1,
+   "life": "max(0.05,T-0.1)",
    "of": "ball",
    "col": "#ffd27a",
    "col2": "#c2300a",
@@ -89,20 +88,19 @@
   {
    "id": "fl",
    "t": "emit",
-   "at": 0,
-   "life": "T",
+   "at": 0.1,
+   "life": "max(0.05,T-0.1)",
    "pos": {
     "0": [
-     "(-6.44*dz+-1.63*dx)/(sqrt(dx*dx+dz*dz)+0.001)",
-     2.34,
-     "(6.44*dx+-1.63*dz)/(sqrt(dx*dx+dz*dz)+0.001)"
+     "(-7.28*dz+-1.64*dx)/(sqrt(dx*dx+dz*dz)+0.001)",
+     0.12,
+     "(7.28*dx+-1.64*dz)/(sqrt(dx*dx+dz*dz)+0.001)"
     ],
     "1": [
      "dx",
      "dy+0.3",
      "dz"
-    ],
-    "ease": "in"
+    ]
    },
    "burst": 0,
    "rate": 150,
@@ -130,20 +128,19 @@
   {
    "id": "lt",
    "t": "light",
-   "at": 0,
-   "life": "T",
+   "at": 0.1,
+   "life": "max(0.05,T-0.1)",
    "pos": {
     "0": [
-     "(-6.44*dz+-1.63*dx)/(sqrt(dx*dx+dz*dz)+0.001)",
-     2.34,
-     "(6.44*dx+-1.63*dz)/(sqrt(dx*dx+dz*dz)+0.001)"
+     "(-7.28*dz+-1.64*dx)/(sqrt(dx*dx+dz*dz)+0.001)",
+     0.12,
+     "(7.28*dx+-1.64*dz)/(sqrt(dx*dx+dz*dz)+0.001)"
     ],
     "1": [
      "dx",
      "dy+0.3",
      "dz"
-    ],
-    "ease": "in"
+    ]
    },
    "col": "#ff7a2a",
    "int": 1.8,
@@ -152,7 +149,7 @@
   {
    "id": "snd",
    "t": "sound",
-   "at": 0,
+   "at": 0.05,
    "name": "throw",
    "vol": 0.8
   },

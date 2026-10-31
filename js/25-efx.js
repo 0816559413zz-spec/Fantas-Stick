@@ -9,6 +9,7 @@ function efxState(ev){
     case 'gwave':{if(o&&!ev.cl)o.grDown=0.3;if(!(ev.len>0))break;const fx=fxPlay('frost/rend_slash',{x,y,h:0,a:ev.a}),m=makeWaveBlade();m.rotation.y=-ev.a;scene.add(m);WVV.push({x,y,a:ev.a,len:ev.len,d:0,m,fx,gh:0});break;}
     case 'glacier':if(o)o.grUp=0.5;if(ev.len>0)GLV.push(makeGlacier(x,y,ev.a,ev.len,ev.t));break;
     case 'mirror':ULTV.push({x,y,a:ev.a,d:0,acc:100});break;
+    case 'colbolt':if(o)o.colShot=performance.now();break;   // Colossus: เวลาปาล่าสุด → ท่าเหวี่ยงแขนในไฟล์เอฟเฟกต์ (param tw) แม้ bind แบบ replace
     case 'stri':if(o)castStart(o,'',4);break;     // สายฟ้าสามเหลี่ยม = ฟาดไม้จากเหนือหัว
     case 'epunch':if(o)castStart(o,'',5);break;   // สายดิน: ชี้ไม้สั่ง Stand ต่อย
   }}
