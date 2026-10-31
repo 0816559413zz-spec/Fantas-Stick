@@ -406,7 +406,7 @@ BFA:315 bfWreck:316 updateBfAir:321 bfRumble:344 updateBf:347
 §350 4) เอฟเฟกต์ทั้งจอ (ค่าไปที่ GradePass ใน js/27-world.js)
 SCR:351 screenFlash:352 screenRadial:353 screenKick:354 screenHurt:355 _scv:356 updateScreenFx:357 updateVfxKit:365
 
-## js/45-fx-runtime.js (379) — VFX Studio runtime — เล่นเอฟเฟกต์จากไฟล์ข้อมูล assets/fx/<กลุ่ม>/<ชื่อ>.fx.json (แผน desi…
+## js/45-fx-runtime.js (380) — VFX Studio runtime — เล่นเอฟเฟกต์จากไฟล์ข้อมูล assets/fx/<กลุ่ม>/<ชื่อ>.fx.json (แผน desi…
 FXR:9 FXDEG:10
 §11 โหลด
 fxFetch:12 fxDefaults:13 fxBoot:14 fxOverrides:24 fxLoad:27 fxData:31
@@ -423,17 +423,17 @@ fxN:107 fxSpawn:108 fxTick:142 fxEnd:153
 §160 อนุภาค
 _fxrnd:161 fxUnit:162 fxCone:163 fxEmit:165 fxPart:182
 §197 รูปทรง 3D
-FXGEO:198 fxMerge:199 fxRibbon:204 fxGeo:210 fxEnergyMat:230 fxWaterMat:245 fxToonWaterMat:258 fxToonMat:272 fxMeshMake:280 fxMeshTick:301 fxFlipTex:316
-§321 หางแสง / รอยฟัน
-fxTrailTick:322
-§328 สายฟ้า
-fxBolt:329
-§335 ฟังก์ชันในโค้ดที่ไฟล์เรียกได้ (ชั้น t:"code")
-FXCODE:336
-§349 ผูกกับ event ของเกม (assets/fx/bind.json) — เรียกจาก fx(ev)
-fxLoopName:351 blzFxName:352 fxLoopKeep:353 fshHitFx:355 fxBind:358
-§369 แม่แบบ playFx เป็นไฟล์ (assets/fx/tpl/*, sig/*, rec/*)
-fxTpl:371
+FXGEO:198 fxMerge:199 fxRibbon:204 fxGeo:210 fxEnergyMat:230 fxWaterMat:245 fxToonWaterMat:258 fxToonMat:273 fxMeshMake:281 fxMeshTick:302 fxFlipTex:317
+§322 หางแสง / รอยฟัน
+fxTrailTick:323
+§329 สายฟ้า
+fxBolt:330
+§336 ฟังก์ชันในโค้ดที่ไฟล์เรียกได้ (ชั้น t:"code")
+FXCODE:337
+§350 ผูกกับ event ของเกม (assets/fx/bind.json) — เรียกจาก fx(ev)
+fxLoopName:352 blzFxName:353 fxLoopKeep:354 fshHitFx:356 fxBind:359
+§370 แม่แบบ playFx เป็นไฟล์ (assets/fx/tpl/*, sig/*, rec/*)
+fxTpl:372
 
 ## js/46-fx-make.js (264) — 
 FXMK:10 MKD:11 mkRng:12 mkHash:13 mkNoise:15 mkL:17 mkR2:18
@@ -674,4 +674,4 @@ BRM:9 BSK:11 BROOM_SK:17 broomVert:38 broomMove:50 broomStrike:68 broomStrikeTic
 §125 ฝั่งจอ
 broomHead:127 BBEAM:134 _bbGeo:135 broomView:136 broomMountFx:165 broomDismountFx:173 broomBeamFx:175 broomSkFx:191 broomStrikeFx:204 broomFlakFx:209 broomHud:214 broomHudT:215 broomTick:224
 
-(80 files, 19132 lines)
+(80 files, 19133 lines)

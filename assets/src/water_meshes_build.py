@@ -1,7 +1,9 @@
 # Water VFX shapes (user 2026-10-31: "อัปเกรดระบบ — ปั้นทรงน้ำใน Blender"). The game paints them with the fx material
 # 'toonwater' (js/45: blue top → cyan base, thin white light lines, foam on top), so only the SHAPE matters here.
 # Run:  "C:\Program Files\Blender Foundation\Blender 5.2\blender.exe" -b --factory-startup --python assets/src/water_meshes_build.py
-# Out:  assets/vfx/water_crescent.glb  — water blade: thick middle, sharp tips, the outer edge curls up like a wave lip
+# Out:  assets/vfx/water_ringwave.glb    — ring wall of water round the origin, 3 outward-curling crests (shield base)
+#       assets/vfx/water_ringwave_low.glb — same, shrunk evenly to hug the ground
+#       assets/vfx/water_crescent.glb  — water blade: thick middle, sharp tips, the outer edge curls up like a wave lip
 #       assets/vfx/water_crown.glb     — splash crown: flared wall, spiky ragged top, droplets off the spike tips
 #       assets/vfx/water_wave.glb      — curling wave sheet, tapering at both ends (Riptide etc.)
 #       assets/vfx/water_jet.glb       — rising water column: flared foot, wobbly body, splashing crown on top
@@ -123,3 +125,22 @@ def jet(u, v):
     return Vector((r * math.cos(th), r * math.sin(th), h))
 ob = finish(grid('water_jet', jet, 48, 30, close_u=True), thick=.04, subd=1)
 export(ob, 'water_jet.glb')
+
+# ---------------- 5. ring wave: a wall of water round the origin (radius 1) with 3 crests that curl outward (shield base) ----------------
+clear()
+def crest(th):                                           # 3 crests, uneven, never fully flat between them
+    k = (math.sin(th * 3 + .4 * math.sin(th * 2)) * .5 + .5) ** 1.6
+    return .22 + .78 * k
+def ringwave(sz):
+    def f_(u, v):
+        th = u * 2 * math.pi; k = crest(th)
+        f, up = prof(v)                                  # same curling profile as the wave: forward = outward
+        r = 1.0 + ((f + .9) * .28 * k + .03 * math.sin(th * 9 + v * 5)) * sz
+        return Vector((r * math.cos(th), r * math.sin(th), up * .75 * k * sz))
+    return f_
+ob = finish(grid('water_ringwave', ringwave(1), 96, 24, close_u=True), thick=.05, subd=1)
+export(ob, 'water_ringwave.glb')
+# low version: same wave cross-section shrunk evenly (keeps the steep sides, so the toon shading stays blue, not foam white)
+clear()
+ob = finish(grid('water_ringwave_low', ringwave(.32), 96, 24, close_u=True), thick=.025, subd=1)
+export(ob, 'water_ringwave_low.glb')

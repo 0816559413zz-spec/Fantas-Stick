@@ -372,6 +372,14 @@
   "mesh_water_jet": {
    "file": "vfx/water_jet.glb",
    "v": 1
+  },
+  "mesh_water_ringwave": {
+   "file": "vfx/water_ringwave.glb",
+   "v": 1
+  },
+  "mesh_water_ringwave_low": {
+   "file": "vfx/water_ringwave_low.glb",
+   "v": 1
   }
  },
  "maps": {
