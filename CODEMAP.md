@@ -150,6 +150,9 @@ AR_SIDE:7 AR_TEAM:7 AR_MAX:7 arPads:8 arOn:9 arState:10 arBusy:11 arReady:13 arN
 ## js/15-bot.js (115) — 
 BOT_LV:8 botPersona:15 BOT_TEAM:16 BOT_MAX:16 bots:17 humans:18 botInZone:20 spawnBot:26 OWNED_K:39 clearOwned:40 removeBots:41 botPickTarget:43 aiBot:56 trBotCmd:105 botDebug:115
 
+## js/15-botnav.js (133) — 
+NAV_MAPS:13 NAV_EYE:13 NAV:14 navOn:16 navSig:17 navEnsure:24 navBuild:30 navCell:46 navWalk:47 navRay:49 navFree:54 navPath:60 _navFoe:78 botThink:81 botNav:87
+
 ## js/15-modes.js (405) — 
 sendPriv:5 TASKF:9 taskPts:10 raceRings:11 modeInit:17 spawnDummy:59 trainTick:64 TR_KEYS:81 trTeams:83 trCmd:93 hostEndTraining:111
 §113 ควิดดิช
@@ -632,4 +635,4 @@ BRM:9 BSK:11 BROOM_SK:17 broomVert:38 broomMove:50 broomStrike:68 broomStrikeTic
 §125 ฝั่งจอ
 broomHead:127 BBEAM:134 _bbGeo:135 broomView:136 broomMountFx:165 broomDismountFx:173 broomBeamFx:175 broomSkFx:191 broomStrikeFx:204 broomFlakFx:209 broomHud:214 broomHudT:215 broomTick:224
 
-(77 files, 18565 lines)
+(78 files, 18698 lines)
