@@ -183,11 +183,6 @@ function makeWing() {
     feathers.push(piv);
   });
 
-  // root joint (hex hub)
-  const hub = new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.32, 0.3, 6), coreMat);
-  hub.rotation.x = Math.PI / 2;
-  hub.position.set(0.35, 0.0, 0);
-  wing.add(hub);
 
   wing.userData.feathers = feathers;
   return wing;
@@ -203,11 +198,6 @@ pivR.position.x = 0.15; pivL.position.x = -0.15;
 pivR.add(R); pivL.add(L);
 rig.add(pivR, pivL);
 
-// back-mount core (wind crystal)
-const crystal = new THREE.Mesh(new THREE.OctahedronGeometry(0.38), holoMat(MINT, { base: 0.3, rim: 0.5 }));
-crystal.scale.y = 1.5;
-crystal.position.set(0, 0.1, 0.05);
-rig.add(crystal);
 
 // spinning holo ring behind the back
 const ring = new THREE.Mesh(new THREE.RingGeometry(0.75, 0.8, 48, 1, 0, Math.PI * 1.6), holoMat(GREEN, { base: 0.4, rim: 0 }));
@@ -286,7 +276,6 @@ function tick() {
     f.rotation.z = d.base * (0.35 + 0.65 * o) + Math.sin(t * 2.2 - d.i * 0.35) * 0.04;
   }
   rig.position.y = 1.3 + Math.sin(t * 1.1) * 0.06;
-  crystal.rotation.y = t * 1.5;
   ring.rotation.z = -t * 1.2;
 
   // particles: born at the root, fly outward along a random feather angle, fade
