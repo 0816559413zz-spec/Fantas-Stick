@@ -1,118 +1,121 @@
 {
  "v": 1,
- "desc": "Moonwater Arts ออร่า 8 วิ (รอบ 2): พระจันทร์น้ำสีขาวฟ้าเหนือหัว + เสี้ยวน้ำ + วงน้ำที่เท้า + ดาวระยิบ + แสงลอยขึ้น",
+ "desc": "Moonwater ระหว่าง 8 วิ (รอบ 3): จันทร์เสี้ยวน้ำสีเงินขาวลอยหลังหัว โยกนิด ๆ + แสงจันทร์เย็น + ประกาย + แสงลอยร่วงช้า ๆ",
  "tags": [
   "water",
-  "ingame",
-  "moon"
+  "moon",
+  "ingame"
  ],
  "pal": "ice",
- "dur": 1,
- "seed": 47,
+ "dur": 2,
+ "seed": 53,
  "layers": [
   {
+   "t": "mesh",
+   "att": "feet",
+   "shape": "plane",
+   "mat": "tex",
+   "tex": "tex/water_moon_crescent",
+   "col": "#ffffff",
+   "col2": "#000000",
+   "rim": 0,
+   "uvTile": [
+    1,
+    1
+   ],
+   "uvScroll": [
+    0,
+    0
+   ],
+   "bill": true,
+   "fade": 0,
    "id": "moon",
+   "at": 0,
+   "life": 2,
+   "pos": {
+    "0": [
+     0,
+     2.45,
+     -0.4
+    ],
+    "0.5": [
+     0,
+     2.5300000000000002,
+     -0.4
+    ],
+    "1": [
+     0,
+     2.45,
+     -0.4
+    ]
+   },
+   "scale": 1.1,
+   "rot": {
+    "0": [
+     0,
+     0,
+     -12
+    ],
+    "0.5": [
+     0,
+     0,
+     -6
+    ],
+    "1": [
+     0,
+     0,
+     -12
+    ]
+   },
+   "op": 0.97,
+   "int": 1.15,
+   "loop": true
+  },
+  {
+   "id": "light",
    "t": "mesh",
    "at": 0,
-   "life": 1,
+   "life": 2,
    "att": "feet",
    "shape": "sphere",
-   "mat": "water",
-   "col": "#ffffff",
-   "col2": "#bfeaff",
-   "rim": 1,
-   "scroll": 2.5,
-   "int": 1.2,
-   "disp": 0,
+   "mat": "glow",
+   "col": "#9fc8ff",
    "pos": [
     0,
-    2.7,
-    -0.35
+    2.45,
+    -0.4
    ],
-   "scale": [
-    0.42,
-    0.42,
-    0.08
-   ],
-   "op": 1,
+   "scale": {
+    "0": 0.38,
+    "0.5": 0.46,
+    "1": 0.38
+   },
+   "op": 0.07,
    "fade": 0,
    "loop": true
   },
   {
-   "id": "crescent",
-   "t": "mesh",
-   "at": 0,
-   "life": 1,
-   "att": "feet",
-   "shape": "glb",
-   "glb": "mesh_water_crescent",
-   "mat": "toonwater",
-   "col": "#e6ffff",
-   "col2": "#7fd8ff",
-   "rim": 0.6,
-   "scroll": 1.8,
-   "pos": [
-    0,
-    2.7,
-    -0.3
-   ],
-   "scale": 0.55,
-   "op": 1,
-   "fade": 0,
-   "rot": [
-    90,
-    0,
-    0
-   ],
-   "spin": 40,
-   "loop": true
-  },
-  {
-   "id": "halo",
-   "t": "mesh",
-   "at": 0,
-   "life": 1,
-   "att": "feet",
-   "shape": "glb",
-   "glb": "mesh_water_ringwave_low",
-   "mat": "toonwater",
-   "col": "#e6ffff",
-   "col2": "#7fd8ff",
-   "rim": 0.6,
-   "scroll": 1.8,
-   "pos": [
-    0,
-    -0.03,
-    0
-   ],
-   "scale": 0.8,
-   "op": 1,
-   "fade": 0,
-   "spin": 120,
-   "loop": true
-  },
-  {
-   "id": "stars",
+   "id": "glints",
    "t": "emit",
    "at": 0,
    "life": 1,
    "att": "feet",
    "pos": [
     0,
-    2.2,
-    0
+    2.3,
+    -0.3
    ],
-   "rate": 14,
+   "rate": 10,
    "from": "sphere",
-   "fr": 0.9,
+   "fr": 0.7,
    "dir": "random",
    "speed": [
-    0.3,
-    1
+    0.2,
+    0.8
    ],
    "plife": [
     0.3,
-    0.55
+    0.6
    ],
    "look": "spark",
    "size": [
@@ -120,8 +123,8 @@
     6
    ],
    "col": "#ffffff",
-   "c2": "#c8fbff",
-   "gravity": -0.2,
+   "c2": "#cfe6ff",
+   "gravity": 0,
    "drag": 0.5,
    "loop": true
   },
@@ -133,31 +136,31 @@
    "att": "feet",
    "pos": [
     0,
-    0.3,
-    0
+    2.6,
+    -0.3
    ],
-   "rate": 10,
-   "from": "ring",
-   "fr": 0.8,
-   "dir": "up",
+   "rate": 8,
+   "from": "sphere",
+   "fr": 0.6,
+   "dir": "down",
    "speed": [
-    0.6,
-    1.2
+    0.2,
+    0.5
    ],
    "plife": [
-    0.8,
-    1.2
+    1,
+    1.4
    ],
+   "loop": true,
    "look": "glow",
    "size": [
-    1.2,
-    2
+    1,
+    1.8
    ],
-   "col": "#dff6ff",
-   "c2": "#9fe8ff",
-   "gravity": -0.2,
-   "drag": 0.3,
-   "loop": true
+   "col": "#e6f2ff",
+   "c2": "#9fc8ff",
+   "gravity": 0.3,
+   "drag": 0.4
   }
  ]
 }

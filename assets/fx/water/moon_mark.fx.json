@@ -1,0 +1,155 @@
+{
+ "v": 1,
+ "desc": "Moonwater ตอนเปิด (รอบ 3, รูป moon_mark_ref): ตราดาว 4 แฉก + วงโคจร + จันทร์เล็ก โผล่ใหญ่หน้าตัวแล้วจาง + แสงวาบ + ประกาย + คลื่นวงที่เท้า",
+ "tags": [
+  "water",
+  "moon",
+  "ingame"
+ ],
+ "pal": "ice",
+ "dur": 1,
+ "seed": 53,
+ "layers": [
+  {
+   "t": "mesh",
+   "att": "feet",
+   "shape": "plane",
+   "mat": "tex",
+   "tex": "tex/water_moon_mark",
+   "col": "#ffffff",
+   "col2": "#000000",
+   "rim": 0,
+   "uvTile": [
+    1,
+    1
+   ],
+   "uvScroll": [
+    0,
+    0
+   ],
+   "bill": true,
+   "fade": 0,
+   "id": "mark",
+   "at": 0,
+   "life": 0.9,
+   "pos": [
+    0,
+    1.6,
+    0.5
+   ],
+   "scale": {
+    "0": 0.2,
+    "0.15": 2.9,
+    "0.3": 2.5,
+    "0.75": 2.6,
+    "1": 3.2,
+    "ease": "out"
+   },
+   "rot": {
+    "0": [
+     0,
+     0,
+     -20
+    ],
+    "1": [
+     0,
+     0,
+     25
+    ]
+   },
+   "op": {
+    "0": 1,
+    "0.7": 1,
+    "1": 0
+   },
+   "int": 1.4
+  },
+  {
+   "id": "flash",
+   "t": "mesh",
+   "at": 0,
+   "life": 0.25,
+   "att": "feet",
+   "shape": "sphere",
+   "mat": "glow",
+   "col": "#dff0ff",
+   "pos": [
+    0,
+    1.6,
+    0.5
+   ],
+   "scale": {
+    "0": 0.1,
+    "0.3": 0.45,
+    "1": 0.05
+   },
+   "op": 0.8,
+   "fade": 0
+  },
+  {
+   "id": "burst",
+   "t": "emit",
+   "at": 0,
+   "life": 0.05,
+   "att": "feet",
+   "pos": [
+    0,
+    1.6,
+    0.5
+   ],
+   "rate": 0,
+   "from": "sphere",
+   "fr": 0.4,
+   "dir": "random",
+   "speed": [
+    2,
+    5
+   ],
+   "plife": [
+    0.3,
+    0.6
+   ],
+   "look": "spark",
+   "size": [
+    3,
+    6
+   ],
+   "col": "#ffffff",
+   "c2": "#cfe6ff",
+   "gravity": 0,
+   "drag": 0.5,
+   "burst": 40
+  },
+  {
+   "id": "ring",
+   "t": "mesh",
+   "at": 0,
+   "life": 0.6,
+   "att": "feet",
+   "shape": "glb",
+   "glb": "mesh_water_ringwave_low",
+   "mat": "toonwater",
+   "col": "#e6f4ff",
+   "col2": "#6fa8f0",
+   "rim": 0.6,
+   "scroll": 2,
+   "pos": [
+    0,
+    -0.03,
+    0
+   ],
+   "scale": {
+    "0": 0.3,
+    "1": 2.2,
+    "ease": "out"
+   },
+   "spin": 200,
+   "op": {
+    "0": 1,
+    "0.6": 1,
+    "1": 0
+   },
+   "fade": 0
+  }
+ ]
+}

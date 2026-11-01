@@ -125,7 +125,7 @@ function waterEfx(ev){
     case 'wtcage':fxPlay('water/cage_bubble',{x,y,h:0,follow:ev.n});wtOutline(ev.n,2.4);return true;   // ลูกน้ำทึบ: คนที่ถูกขังมีขอบขาวเห็นทะลุ (ผู้ใช้ 2026-11-01)
     case 'wtab':if(!ev.n)fxPlay('water/beam_cast',{x,y,h:0,follow:ev.id});if(near)snd(ev.n?'break':'cast_pull',ev);if(ev.n&&near)shake(0.12);return true;
     case 'wtaboff':return true;
-    case 'wtmw':fxPlay('water/dash_pop',{x,y,h:0,s:0.6});return true;
+    case 'wtmw':fxPlay('water/moon_mark',{x,y,h:0,follow:ev.id});return true;   // ตราดาวตอนเปิด Moonwater (ผู้ใช้ 2026-11-01)
     case 'wtmwoff':return true;
     case 'wtmb':fxPlay('water/moon_beam',{x,y,h:0,a,aim:false});if(near)snd('break',ev);return true;
     case 'wtdg':fxPlay('water/dragon_intro',{x,y,h:0,follow:ev.id});if(near){shake(0.2);snd('cast_pull',ev);}return true;

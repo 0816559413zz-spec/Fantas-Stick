@@ -1,0 +1,14 @@
+{
+ "v": 1,
+ "desc": "Moonwater จันทร์เสี้ยวน้ำสีเงินขาว ขอบขาว แสงฟ้าเย็นรอบ ๆ",
+ "gen": "image",
+ "seed": 3,
+ "px": 512,
+ "cols": 1,
+ "rows": 1,
+ "kind": "loop",
+ "fps": 24,
+ "ramp": "white",
+ "add": false,
+ "p": {}
+}

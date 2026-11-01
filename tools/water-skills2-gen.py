@@ -40,24 +40,7 @@ LOOP = dict(loop=True)
 # (Abyssal Beam moved to tools/water-beam-gen.py: round 3 with the user ref)
 BY = 1.6
 
-# =================== Moonwater Arts ===================
-L = [wat('moon', 'sphere', 0, 1, [0, 2.7, -.35], [.42, .42, .08], col='#ffffff', col2='#bfeaff', **LOOP),
-     tw('crescent', 'mesh_water_crescent', 0, 1, [0, 2.7, -.3], .55, rot=[90, 0, 0], col='#e6ffff', col2='#7fd8ff', spin=40, **LOOP),
-     tw('halo', 'mesh_water_ringwave_low', 0, 1, [0, -.03, 0], .8, spin=120, col='#e6ffff', col2='#7fd8ff', **LOOP),
-     sparks('stars', 0, 1, [0, 2.2, 0], .9, 14, **LOOP),
-     {'id': 'motes', 't': 'emit', 'at': 0, 'life': 1, 'att': 'feet', 'pos': [0, .3, 0], 'rate': 10, 'from': 'ring', 'fr': .8, 'dir': 'up', 'speed': [.6, 1.2], 'plife': [.8, 1.2],
-      'look': 'glow', 'size': [1.2, 2], 'col': C['moon'], 'c2': '#9fe8ff', 'gravity': -.2, 'drag': .3, **LOOP}]
-save('moon_aura', L, 'Moonwater Arts ออร่า 8 วิ (รอบ 2): พระจันทร์น้ำสีขาวฟ้าเหนือหัว + เสี้ยวน้ำ + วงน้ำที่เท้า + ดาวระยิบ + แสงลอยขึ้น', 1, ('moon',))
-ML = 45.0
-SC = {'0': [1, 1, .05], '0.15': [1, 1, 1], '0.75': [1, 1, 1], '1': [.15, .15, 1]}
-L = [wat('core', 'beam', 0, .65, [0, BY, .7], {k: [v[0] * .3, v[1] * .3, v[2] * ML] for k, v in SC.items()}, col='#ffffff', col2='#bfeaff', scroll=8),
-     {'id': 'shell', 't': 'mesh', 'at': 0, 'life': .65, 'att': 'feet', 'shape': 'beam', 'mat': 'toonwater', 'col': C['moon'], 'col2': '#7fd8ff', 'rim': .8, 'scroll': 6,
-      'pos': [0, BY, .7], 'scale': {k: [v[0] * .55, v[1] * .55, v[2] * ML] for k, v in SC.items()}, 'op': .7, 'fade': 0},
-     tw('flash', 'mesh_water_crescent', 0, .3, [0, BY, 1.0], {'0': .3, '0.3': 1.0, '1': 1.3}, rot=[90, 0, 0], col='#ffffff', col2='#bfeaff', spin=900, op={'0': 1, '1': 0}),
-     streaks('lines', 0, .5, [0, BY, 10], .4, 80, dirn='out', speed=(14, 20)),
-     sparks('stars', 0, .6, [0, BY, 15], 1, 60),
-     drops('endsplash', .05, 24, [0, BY, ML], .5, (2, 4), size=(.05, .1))]
-save('moon_beam', L, 'Moonwater Arts ลำน้ำจันทร์ (รอบ 2): ลำแสงน้ำเรียวยาว 45 ม. แกนขาว เปลือกฟ้าซีด + วงเสี้ยวที่ไม้ + เส้นวิ่ง + ดาว + น้ำสาดปลายทาง (0.6 วิ)', .65, ('moon',))
+# (Moonwater moved to tools/water-moon-gen.py: round 3 with the user ref)
 
 # =================== Dragon of the Deep ===================
 # the Tidecaller serpent (model water_serpent, head forward along +z, model x mirrored) scaled up as the dragon
