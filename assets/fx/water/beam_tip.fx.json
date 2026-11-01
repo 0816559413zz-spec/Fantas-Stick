@@ -10,34 +10,11 @@
  "seed": 22,
  "layers": [
   {
-   "t": "mesh",
-   "att": "feet",
-   "mat": "glow",
-   "fade": 0,
-   "id": "hot",
-   "at": 0,
-   "life": 0.2,
-   "shape": "sphere",
-   "col": "#c8f6ff",
-   "pos": [
-    0,
-    0,
-    0
-   ],
-   "scale": {
-    "0": 0.35,
-    "0.5": 0.6,
-    "1": 0.35
-   },
-   "op": 0.6,
-   "loop": true
-  },
-  {
    "id": "drops",
    "t": "emit",
    "at": 0,
    "life": 1,
-   "att": "feet",
+   "att": "point",
    "pos": [
     0,
     0,
@@ -70,91 +47,11 @@
    "loop": true
   },
   {
-   "id": "fp",
-   "t": "emit",
-   "at": 0,
-   "life": 1,
-   "att": "feet",
-   "pos": [
-    0,
-    0,
-    0
-   ],
-   "rate": 45,
-   "from": "sphere",
-   "fr": 0.3,
-   "dir": "out",
-   "speed": [
-    7,
-    14
-   ],
-   "plife": [
-    0.25,
-    0.42
-   ],
-   "look": "flake",
-   "fb": "tex/water_flake_cells",
-   "size": [
-    16,
-    30
-   ],
-   "grow": 0.8,
-   "spin": 5,
-   "col": "#6fd4ff",
-   "c2": "#1f6dff",
-   "gravity": 7,
-   "drag": 2.2,
-   "curl": false,
-   "fin": 30,
-   "loop": true
-  },
-  {
-   "id": "fan",
-   "t": "emit",
-   "at": 0,
-   "life": 1,
-   "att": "feet",
-   "pos": [
-    0,
-    0,
-    0
-   ],
-   "rate": 90,
-   "from": "sphere",
-   "fr": 0.3,
-   "dir": "aim",
-   "speed": [
-    13,
-    24
-   ],
-   "plife": [
-    0.16,
-    0.32
-   ],
-   "look": "flake",
-   "fb": "tex/water_flake_cells",
-   "size": [
-    16,
-    34
-   ],
-   "grow": 0.8,
-   "spin": 5,
-   "col": "#6fd4ff",
-   "c2": "#1f6dff",
-   "gravity": 4,
-   "drag": 2.2,
-   "curl": false,
-   "fin": 30,
-   "loop": true,
-   "yaw": 180,
-   "spread": 1.05
-  },
-  {
    "id": "mist",
    "t": "emit",
    "at": 0,
    "life": 1,
-   "att": "feet",
+   "att": "point",
    "pos": [
     0,
     0,
@@ -183,6 +80,43 @@
    "c2": "#6fd8ff",
    "gravity": 2,
    "drag": 0,
+   "loop": true
+  },
+  {
+   "t": "mesh",
+   "shape": "plane",
+   "mat": "tex",
+   "tex": "tex/water_beam_burst",
+   "col": "#ffffff",
+   "col2": "#000000",
+   "rim": 0,
+   "uvTile": [
+    1,
+    1
+   ],
+   "uvScroll": [
+    0,
+    0
+   ],
+   "bill": true,
+   "nodepth": true,
+   "fade": 0,
+   "pos": [
+    0,
+    0,
+    0
+   ],
+   "int": 1,
+   "id": "burst",
+   "at": 0,
+   "life": 1,
+   "att": "point",
+   "scale": {
+    "0": 4.6,
+    "0.5": 5.2,
+    "1": 4.6
+   },
+   "op": 1,
    "loop": true
   }
  ]

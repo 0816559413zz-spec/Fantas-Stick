@@ -1,0 +1,132 @@
+{
+ "v": 1,
+ "desc": "Dash ตราที่เท้า: ตราน้ำบนพื้นทั้งที่ตัวเราและร่างโคลน เส้นน้ำเชื่อมสองจุด (js/68)",
+ "tags": [
+  "water",
+  "ingame"
+ ],
+ "pal": "ice",
+ "dur": 1,
+ "seed": 31,
+ "layers": [
+  {
+   "t": "mesh",
+   "att": "feet",
+   "shape": "plane",
+   "mat": "tex",
+   "tex": "tex/water_magic_circle",
+   "col": "#7fe0ff",
+   "col2": "#000000",
+   "rim": 0,
+   "uvTile": [
+    1,
+    1
+   ],
+   "uvScroll": [
+    0,
+    0
+   ],
+   "fade": 0,
+   "id": "mark",
+   "at": 0,
+   "life": 2,
+   "pos": [
+    0,
+    0.06,
+    0
+   ],
+   "rot": {
+    "0": [
+     -90,
+     0,
+     0
+    ],
+    "1": [
+     -90,
+     0,
+     90
+    ]
+   },
+   "scale": 2.1,
+   "op": 0.9,
+   "int": 1.3,
+   "loop": true
+  },
+  {
+   "t": "mesh",
+   "att": "feet",
+   "mat": "toonwater",
+   "col": "#9ff4ff",
+   "col2": "#36b8f5",
+   "rim": 0.5,
+   "scroll": 3,
+   "fade": 0,
+   "id": "wave",
+   "at": 0,
+   "life": 1,
+   "shape": "glb",
+   "glb": "mesh_water_ringwave_low",
+   "pos": [
+    0,
+    -0.03,
+    0
+   ],
+   "scale": {
+    "0": [
+     0.5,
+     0.7,
+     0.5
+    ],
+    "1": [
+     1.3,
+     0.4,
+     1.3
+    ],
+    "ease": "out"
+   },
+   "op": {
+    "0": 0.9,
+    "1": 0
+   },
+   "loop": true
+  },
+  {
+   "id": "drops",
+   "t": "emit",
+   "at": 0,
+   "life": 1,
+   "att": "feet",
+   "pos": [
+    0,
+    0.1,
+    0
+   ],
+   "rate": 10,
+   "from": "ring",
+   "fr": 0.7,
+   "dir": "up",
+   "spread": 0.3,
+   "speed": [
+    0.8,
+    1.6
+   ],
+   "plife": [
+    0.3,
+    0.5
+   ],
+   "look": "model",
+   "model": "water_blob",
+   "mmat": "ice",
+   "msize": [
+    0.04,
+    0.08
+   ],
+   "col": "#e6ffff",
+   "c2": "#7fe8ff",
+   "mspin": 0,
+   "gravity": 6,
+   "drag": 0,
+   "loop": true
+  }
+ ]
+}

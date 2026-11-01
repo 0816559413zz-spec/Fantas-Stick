@@ -68,6 +68,8 @@ wr('beam_cast', d)
 
 # ---------- ตอนยิง: พลังรอบลำ เฉพาะใกล้ตัวเรา ----------
 ly = circles(1, False, loop=True)
+ly.append(dict(TW, id='orb', at=0, life=.3, shape='sphere', pos=[0, Y, 2.8], scale={"0": .68, "0.5": .8, "1": .68}, op=1, loop=True))   # ลูกน้ำหน้าวงเวท ใหญ่กว่าลำ ลำออกจากลูกนี้
+ly.append(dict(GL, id='orbglow', at=0, life=.3, shape='sphere', col='#4fb8ff', pos=[0, Y, 2.8], scale={"0": .95, "0.5": 1.15, "1": .95}, op=.22, loop=True))
 for i in range(3):                                         # วงน้ำวิ่งออกจากตัว แล้วจางก่อนถึง 9 ม.
     ly.append(dict(TW, id=f'ring{i}', at=round(i * .2, 2), life=.6, shape='glb', glb='mesh_water_ringwave_low', pos={"0": [0, Y, 3], "1": [0, Y, 9]}, rot=[90, 0, 0],
                    scale={"0": [1, .9, 1], "0.3": [1.9, 1.1, 1.9], "1": [2.5, .5, 2.5], "ease": "out"}, op={"0": 0, "0.15": .85, "0.7": .6, "1": 0}, loop=True))

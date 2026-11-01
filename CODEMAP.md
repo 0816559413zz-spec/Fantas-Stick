@@ -92,24 +92,24 @@ MIND:66 summonMin:72 minTarget:81 minShoot:88 updateMins:93 aimTarget:133
 §180 ร่ายคาถา
 castSlot:181 castUlt:196
 
-## js/09-water.js (173) — 
+## js/09-water.js (174) — 
 WATERP:7 WT_BA:8 wtOn:23 wtInBeam:25
 §28 ทุกเฟรมของผู้เล่นสายน้ำ (เรียกจาก updatePlayer หลังส่วนโล่)
-waterTick:29 waterSpd:44 waterReset:45
-§47 BA: ตวัดไม้สร้างเส้นน้ำ → ยิง 3 นัดตามเมาส์ • Moonwater = ลำน้ำ
-WT_BA_H:48 waterBasic:49 waterLineTick:56 waterMoonBeam:62
-§65 Dash: จมดิน ทิ้งร่างโคลน → โผล่ห่าง 300 ทิศที่หัน • 6 วิกดอีกที = กลั…
-waterDash:66 waterSinkTick:75
-§81 ดาเมจใดๆ ของเรา → ลูกผู้ช่วยยิงตาม (เรียกจาก damage() ใน js/12)
-waterOnHit:82 waterFamTick:84
-§89 Riptide: คลื่นยักษ์วิ่งไปข้างหน้า พัดศัตรูติดไปจนสุดทาง
-waterWaveTick:90
-§98 Abyssal Beam: ร่าย 0.5 วิ → ยิงลำน้ำ 3 วิ (ยืนนิ่ง ลอยนิดหน่อย หมุนตา…
-waterBeamStop:100 waterBeamTick:108 waterMBTick:119
-§123 อัลติ Dragon of the Deep
-waterDragonTick:124
-§138 ทุกเฟรม (ทั้งเกม)
-updateWater:139 waterSnapP:145 waterSnapW:147
+waterTick:29 waterSpd:45 waterReset:46
+§48 BA: ตวัดไม้สร้างเส้นน้ำ → ยิง 3 นัดตามเมาส์ • Moonwater = ลำน้ำ
+WT_BA_H:49 waterBasic:50 waterLineTick:57 waterMoonBeam:63
+§66 Dash: จมดิน ทิ้งร่างโคลน → โผล่ห่าง 300 ทิศที่หัน • 6 วิกดอีกที = กลั…
+waterDash:67 waterSinkTick:76
+§82 ดาเมจใดๆ ของเรา → ลูกผู้ช่วยยิงตาม (เรียกจาก damage() ใน js/12)
+waterOnHit:83 waterFamTick:85
+§90 Riptide: คลื่นยักษ์วิ่งไปข้างหน้า พัดศัตรูติดไปจนสุดทาง
+waterWaveTick:91
+§99 Abyssal Beam: ร่าย 0.5 วิ → ยิงลำน้ำ 3 วิ (ยืนนิ่ง ลอยนิดหน่อย หมุนตา…
+waterBeamStop:101 waterBeamTick:109 waterMBTick:120
+§124 อัลติ Dragon of the Deep
+waterDragonTick:125
+§139 ทุกเฟรม (ทั้งเกม)
+updateWater:140 waterSnapP:146 waterSnapW:148
 
 ## js/09-wind.js (259) — 
 WINDP:8 W_BA:9
@@ -652,16 +652,16 @@ BACKDROP:8
 §66 noise เล็ก ๆ (คงที่ต่อ seed)
 bdHash:67 bdNoise:68 bdFbm:69 bdEdge:71 bdRing:73 bdPaint:79 bdTree:82 buildBackdrop:89 bdTower:135 backdropHide:139
 
-## js/68-water-view.js (185) — 
-WTV:5 WTC:6 wtState:7 wtStop:8 wtMesh:9 _wtV:11 _wtP:11 wtBakeClone:12 wtLineMat:23 _wtOlMat:30 wtOutline:32 WT_SINKD:38 wtSinkOffset:39 wtAlive:46 wtLoop:48 WT_FR:51 wtFrPath:52 _wtFa:54 _wtFb:54 _wtFs:54 _wtFn:54 wtFamRiseMesh:55 WT_POOL:60 wtFamRise:61 wtFamRiseOff:68 _wtTube:70 WT_BEAM_V:71 WT_BEAM_F:74 WT_BEAM_O:77 wtBeamMesh:79 wtBeamSync:83 wtBeamOff:88
-§90 ต่อผู้เล่น: โล่ฟองน้ำ/ฮีล • ลูกผู้ช่วยที่ไหล่ • ร่างโคลน + เส้นน้ำ • …
-waterFX:91
-§126 ทั้งเกม: ลูกผู้ช่วยที่กำลังพุ่ง (ล็อกเป้า)
-WT_MOUTH:128 _wtA:129 _wtB:129 wtMouth:130 _wtCyl:133 wtBeam:135 syncWater:138 wtPew:145
-§153 เหตุการณ์ (efx z 'wt…')
-waterEfx:154
-§181 HUD: เกจฮีลโล่ (โค้งซ้ายรอบเป้าเล็ง)
-drawWaterHud:182
+## js/68-water-view.js (188) — 
+WTV:5 WTC:6 wtState:7 wtStop:8 wtMesh:9 _wtV:11 _wtP:11 wtBakeClone:12 wtLineMat:23 _wtOlMat:30 wtOutline:32 WT_SINKD:38 wtSinkOffset:39 wtAlive:46 wtLoop:48 WT_FR:51 wtFrPath:52 _wtFa:54 _wtFb:54 _wtFs:54 _wtFn:54 wtFamRiseMesh:55 WT_POOL:60 wtFamRise:61 wtFamRiseOff:68 _wtTube:70 WT_BEAM_V:71 WT_BEAM_F:74 WT_BEAM_O:78 wtBeamMesh:81 wtBeamSync:85 wtBeamOff:90
+§92 ต่อผู้เล่น: โล่ฟองน้ำ/ฮีล • ลูกผู้ช่วยที่ไหล่ • ร่างโคลน + เส้นน้ำ • …
+waterFX:93
+§129 ทั้งเกม: ลูกผู้ช่วยที่กำลังพุ่ง (ล็อกเป้า)
+WT_MOUTH:131 _wtA:132 _wtB:132 wtMouth:133 _wtCyl:136 wtBeam:138 syncWater:141 wtPew:148
+§156 เหตุการณ์ (efx z 'wt…')
+waterEfx:157
+§184 HUD: เกจฮีลโล่ (โค้งซ้ายรอบเป้าเล็ง)
+drawWaterHud:185
 
 ## js/68-wind-view.js (200) — 
 WV:6 wvState:7 wvAlive:8
@@ -690,4 +690,4 @@ dive:186 PA:187 TA:188 DIVE_DOWN:190 DIVE_POUR:190 DIVE_STEP:190 diveDist:191 la
 §443 เล่น
 WDG_YAW:444 wdgGet:445 wdgStart:446 wdgDive:453 wdgKeep:456 wdgEnd:457 wdgTick:458
 
-(82 files, 20028 lines)
+(82 files, 20032 lines)

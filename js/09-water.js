@@ -35,14 +35,15 @@ function waterTick(p,dt){
   if(p.wsk)waterSinkTick(p,dt);
   if(p.wcl&&!p.wsk){p.wcl.t-=dt;if(p.wcl.t<=0||!p.alive){p.wcl=null;p.cd.dodge=p.cdMax.dodge=WT_DS.cd*p.buffs.cdr;emit({k:'efx',z:'wtclend',x:p.x,y:p.y,id:p.id});}}
   if(p.wfmC>0)p.wfmC-=dt;
+  if(p.wmsT>0)p.wmsT-=dt;
   if(p.wfam>0){p.wfam-=dt;if(p.wfam<=0||!p.alive){p.wfam=0;emit({k:'efx',z:'wtfamoff',x:p.x,y:p.y,id:p.id});}}
   if(p.wmw>0){p.wmw-=dt;if(p.wmw<=0)emit({k:'efx',z:'wtmwoff',x:p.x,y:p.y,id:p.id});}
   if(p.wab)waterBeamTick(p,dt);
   if(p.wdg)waterDragonTick(p,dt);
 }
 // ยืนนิ่ง: จมดิน / ร่าย-ยิง Abyssal Beam
-function waterSpd(p){return p.wsk||p.wab?0:1;}
-function waterReset(p){p.wln=null;p.wsk=null;p.wcl=null;p.wfam=0;p.wmw=0;p.wab=null;p.wdg=null;p.whg=WT_SH.gauge;p.whA=0;}
+function waterSpd(p){return p.wsk||p.wab?0:p.wmsT>0?0.55:1;}
+function waterReset(p){p.wln=null;p.wsk=null;p.wcl=null;p.wfam=0;p.wmw=0;p.wab=null;p.wdg=null;p.wmsT=0;p.whg=WT_SH.gauge;p.whA=0;}
 
 // ---------- BA: ตวัดไม้สร้างเส้นน้ำ → ยิง 3 นัดตามเมาส์ • Moonwater = ลำน้ำ ----------
 const WT_BA_H=[2.28,1.61,1.12];   // ความสูงจุดบนรอยฟัน (ตรงกับ pinch ใน water/ba_slash)
@@ -59,7 +60,7 @@ function waterLineTick(p,dt){const L=p.wln;L.t+=dt;
     p.ang=a+rnd(-WT_BA.spr,WT_BA.spr);const pr=shoot(p,'wdrop',{sp:'b_water',dmg:WT_BA.dmg,quiet:1});p.ang=a;
     pr.x+=-Math.sin(a)*side;pr.y+=Math.cos(a)*side;{const h=pr.h;pr.h=p.z+WT_BA_H[L.n-1];pr.vh+=(h-pr.h)*WT_BA.spd/300;}}   // ออกจากรอยฟันเอง (ตรงหยดที่บีบ ซ้ายบน→ขวาล่าง)
   if(L.n>=WT_BA.n&&L.t>=WT_BA.t0+WT_BA.n*WT_BA.gap)p.wln=null;}
-function waterMoonBeam(p){const a=p.ang;(G.wtb||(G.wtb=[])).push({o:p.id,team:p.team,x:p.x,y:p.y,h:p.z+1.3,a,t:0,k:0,len:WT_MW.len,w:WT_MW.w,life:WT_MW.life,tick:WT_MW.tick,dmg:WT_MW.dmg});
+function waterMoonBeam(p){const a=p.ang;p.wmsT=0.45;(G.wtb||(G.wtb=[])).push({o:p.id,team:p.team,x:p.x,y:p.y,h:p.z+1.3,a,t:0,k:0,len:WT_MW.len,w:WT_MW.w,life:WT_MW.life,tick:WT_MW.tick,dmg:WT_MW.dmg});
   emit({k:'efx',z:'wtmb',x:Math.round(p.x),y:Math.round(p.y),h:p.z,a:Math.round(a*100)/100,id:p.id});}
 
 // ---------- Dash: จมดิน ทิ้งร่างโคลน → โผล่ห่าง 300 ทิศที่หัน • 6 วิกดอีกที = กลับไปที่โคลน ----------
@@ -108,7 +109,7 @@ function waterBeamStop(p,a,h){const c=Math.cos(a),s=Math.sin(a);
 function waterBeamTick(p,dt){const B=p.wab;B.t-=dt;
   if(!p.alive||p.stun>0){p.wab=null;emit({k:'efx',z:'wtaboff',x:p.x,y:p.y,id:p.id});return;}
   p.wflt=0.2;p.wfz=WT_AB.lift;
-  const inp=p.inp||{};if(typeof inp.ax==='number'){const want=Math.atan2(inp.ay-p.y,inp.ax-p.x),da=angDiff(want,B.a),m=WT_AB.turn*dt;B.a+=Math.max(-m,Math.min(m,da));}
+  const inp=p.inp||{};if(typeof inp.ax==='number'){const want=Math.atan2(inp.ay-p.y,inp.ax-p.x),da=angDiff(want,B.a),m=WT_AB.turn*dt;B.a+=Math.max(-m,Math.min(m,da));}p.ang=B.a;   // ตัวหันช้าเท่าลำ วงเวทกับลำจึงไปด้วยกัน
   p.ang=B.a;
   if(B.ph==='cast'){if(B.t<=0){B.ph='fire';B.t=WT_AB.t;B.k=0;emit({k:'efx',z:'wtab',x:Math.round(p.x),y:Math.round(p.y),h:p.z,a:Math.round(B.a*100)/100,id:p.id,n:1});}return;}
   // ไม่ทะลุ: ลำหยุดที่คนแรกในแนว โดนแค่คนนั้น (ผู้ใช้ 2026-11-01)

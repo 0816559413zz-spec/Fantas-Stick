@@ -1,0 +1,14 @@
+{
+ "v": 1,
+ "desc": "น้ำแตกการ์ตูนสีอ่อน ขอบหยัก มีรอยแตกและเศษ 4 เฟรม ปลาย Abyssal Beam",
+ "gen": "image",
+ "seed": 12,
+ "px": 256,
+ "cols": 4,
+ "rows": 1,
+ "kind": "loop",
+ "fps": 16,
+ "ramp": "white",
+ "add": false,
+ "p": {}
+}

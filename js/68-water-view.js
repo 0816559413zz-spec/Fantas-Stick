@@ -68,15 +68,17 @@ function wtFamRise(S,o){const k=S.famT/WT_FR.T;if(k>=1){wtFamRiseOff(S);return;}
 function wtFamRiseOff(S){if(S.fr){scene.remove(S.fr);WT_POOL.fr.push(S.fr);S.fr=null;}}
 // ลำ Abyssal Beam (ผู้ใช้ 2026-11-01): ท่อน้ำที่คลื่นวิ่งตลอดความยาว ผิวเป็นชิ้นขาว/ฟ้าการ์ตูน + เปลือกนอกเป็นลิ้นคลื่น • ยาวถึงจุดที่ host บอก (A[6])
 const _wtTube=new THREE.CylinderGeometry(1,1,1,28,110,true).translate(0,0.5,0).rotateX(Math.PI/2);
-const WT_BEAM_V='uniform float time,uLen,uR,uAmp;varying vec2 vQ;varying vec3 vN;varying vec3 vV;void main(){float s=position.z*uLen,z=position.z,a=atan(position.y,position.x),st=smoothstep(0.0,1.5,s);'+
-  'float w=uAmp*(0.1*sin(s*2.2-time*34.0)+0.06*sin(s*5.1-time*52.0+a*2.0));float r=uR*pow(1.0-z,0.7)*(0.72+0.28*st)*(1.0+w*st);'+
+const WT_BEAM_V='uniform float time,uLen,uR,uAmp,uFl;varying vec2 vQ;varying vec3 vN;varying vec3 vV;void main(){float s=position.z*uLen,z=position.z,a=atan(position.y,position.x),st=smoothstep(0.0,1.5,s);'+
+  'float w=uAmp*(0.1*sin(s*2.2-time*34.0)+0.06*sin(s*5.1-time*52.0+a*2.0));float fl=smoothstep(uLen-3.2,uLen,s);float r=uR*(1.0-0.45*z)*(0.72+0.28*st)*(1.0+w*st)*(1.0+uFl*fl*fl);'+
   'vec4 mv=modelViewMatrix*vec4(position.x*r,position.y*r,s,1.0);vQ=vec2(a,s);vN=normalize(normalMatrix*vec3(position.x,position.y,0.0));vV=normalize(-mv.xyz);gl_Position=projectionMatrix*mv;}';
-const WT_BEAM_F='uniform float time;varying vec2 vQ;varying vec3 vN;varying vec3 vV;void main(){float fr=1.0-abs(dot(normalize(vN),normalize(vV))),a=vQ.x,s=vQ.y;'+
+const WT_BEAM_F='uniform float time,uLen;varying vec2 vQ;varying vec3 vN;varying vec3 vV;void main(){float fr=1.0-abs(dot(normalize(vN),normalize(vV))),a=vQ.x,s=vQ.y;'+
+  'if(sin(a*7.0+time*19.0)+sin(a*11.0-time*13.0)>(uLen-s)*1.7)discard;'+
   'float f=sin(a*3.0+s*0.35-time*5.0)+0.8*sin(s*1.05-time*30.0+a*2.0),g=sin(a*2.0-s*0.5+time*9.0);'+
   'vec3 c=g>0.0?vec3(0.05,0.42,0.98):vec3(0.04,0.72,0.9);if(f>0.2)c=vec3(0.16,0.86,0.96);if(f>0.95)c=vec3(0.86,1.0,1.0);if(fr>0.7)c=vec3(0.03,0.22,0.78);gl_FragColor=vec4(c*0.92,1.0);}';
-const WT_BEAM_O='uniform float time;varying vec2 vQ;varying vec3 vN;varying vec3 vV;void main(){float a=vQ.x,s=vQ.y,fr=1.0-abs(dot(normalize(vN),normalize(vV)));'+
+const WT_BEAM_O='uniform float time,uLen;varying vec2 vQ;varying vec3 vN;varying vec3 vV;void main(){float a=vQ.x,s=vQ.y,fr=1.0-abs(dot(normalize(vN),normalize(vV)));'+
+  'if(sin(a*5.0-time*17.0)+sin(a*9.0+time*11.0)>(uLen-s)*1.3)discard;'+
   'float f=sin(s*0.42-time*22.0+a*2.0)+0.6*sin(s*1.3-time*33.0-a*3.0);if(f<0.55)discard;vec3 c=sin(s*0.3-time*8.0)>0.0?vec3(0.1,0.45,1.0):vec3(0.12,0.85,0.9);gl_FragColor=vec4(c,0.8*(1.0-fr*0.4));}';
-function wtBeamMesh(){const U={time:FIRE_U.time,uLen:{value:1},uR:{value:0.34},uAmp:{value:1}},U2={time:FIRE_U.time,uLen:U.uLen,uR:{value:0.5},uAmp:{value:1.6}};
+function wtBeamMesh(){const U={time:FIRE_U.time,uLen:{value:1},uR:{value:0.34},uAmp:{value:1},uFl:{value:3.2}},U2={time:FIRE_U.time,uLen:U.uLen,uR:{value:0.5},uAmp:{value:1.6},uFl:{value:3.6}};
   const m=new THREE.Mesh(_wtTube,new THREE.ShaderMaterial({uniforms:U,vertexShader:WT_BEAM_V,fragmentShader:WT_BEAM_F,side:THREE.DoubleSide,fog:false})),
     o=new THREE.Mesh(_wtTube,new THREE.ShaderMaterial({uniforms:U2,vertexShader:WT_BEAM_V,fragmentShader:WT_BEAM_O,transparent:true,depthWrite:false,side:THREE.DoubleSide,fog:false}));
   m.add(o);m.frustumCulled=o.frustumCulled=false;m.renderOrder=4;o.renderOrder=5;return m;}
@@ -84,13 +86,13 @@ function wtBeamSync(S,o,p,a,L,dt){if(!S.bm){S.bm=WT_POOL.bm.pop()||wtBeamMesh();
   const c=Math.cos(a),n=Math.sin(a),y0=o.g.position.y+1.3,L0=56,ex=p.x+c*S.bL,ey=p.y+n*S.bL,gy=GY(ex,ey)+1.1,len=Math.max(0.1,(S.bL-L0)/20),B=S.bm;
   B.position.set(tx(p.x+c*L0),y0,tz(p.y+n*L0));_wtA.set(tx(ex),Math.min(y0,gy+Math.max(0,y0-gy)*0.35),tz(ey));B.lookAt(_wtA);
   B.material.uniforms.uLen.value=Math.max(0.1,B.position.distanceTo(_wtA));
-  const I=wtLoop(S,'tip','water/beam_tip',{x:ex,y:ey,h:Math.max(0,_wtA.y-GY(ex,ey)),a,aim:false});if(I){I.x=ex;I.y=ey;I.a=a;}}
+  const th=Math.max(0,_wtA.y-GY(ex,ey)),I=wtLoop(S,'tip','water/beam_tip',{x:ex,y:ey,h:th,a,aim:false});if(I){I.x=ex;I.y=ey;I.h=th;I.a=a;}}
 function wtBeamOff(S){if(S.bm){scene.remove(S.bm);WT_POOL.bm.push(S.bm);S.bm=null;}wtStop(S,'tip');}
 
 // ---------- ต่อผู้เล่น: โล่ฟองน้ำ/ฮีล • ลูกผู้ช่วยที่ไหล่ • ร่างโคลน + เส้นน้ำ • ลำน้ำ Abyssal • Moonwater • มังกร ----------
 function waterFX(o,p,pz,now,dt){
   const A=p.wt,s=WTV.st.get(p.id);
-  if(!A){if(s){for(const k of ['sh','heal','fam','jaw','cl','beam','moon','drg','aim'])wtStop(s,k);wtBeamOff(s);wtFamRiseOff(s);wtMesh(s,'ln');wtMesh(s,'cm');s.cmD=s.cmT=0;}return;}
+  if(!A){if(s){for(const k of ['sh','heal','fam','jaw','cl','clmA','clmB','beam','moon','drg','aim'])wtStop(s,k);wtBeamOff(s);wtFamRiseOff(s);wtMesh(s,'ln');wtMesh(s,'cm');s.cmD=s.cmT=0;}return;}
   const S=wtState(p.id),alive=p.al&&!p.dn,a=p.a||0,t=now/1000;
   wtSinkOffset(o,p,dt);
   // โล่ฟองน้ำ + ฮีล (มีเกจ)
@@ -104,16 +106,17 @@ function waterFX(o,p,pz,now,dt){
   // ร่างโคลน + เส้นน้ำบนพื้นจากโคลนถึงตัวเรา
   if(A[4]){const I=wtLoop(S,'cl','water/clone',{x:A[4][0],y:A[4][1],h:0,a,aim:false});if(I){I.x=A[4][0];I.y=A[4][1];}
     const cx=tx(A[4][0]),cz=tz(A[4][1]),cy=GY(A[4][0],A[4][1]),P=o.g.position;
+    wtLoop(S,'clmA','water/clone_mark',{x:p.x,y:p.y,h:0,follow:p.id});{const J=wtLoop(S,'clmB','water/clone_mark',{x:A[4][0],y:A[4][1],h:0,aim:false});if(J){J.x=A[4][0];J.y=A[4][1];}}
     if(!S.cmT){if(S.cm){wtMesh(S,'cm');S.cmD=0;}S.cm=wtBakeClone(o);S.cmT=1;}
     if(S.cm)S.cm.position.set(cx,cy,cz);
     if(!S.ln){const m=wtLineMat();S.ln=new THREE.Mesh(new THREE.PlaneGeometry(0.22,1),m);S.ln.userData.own=1;S.ln.rotation.order='YXZ';S.ln.rotation.x=-Math.PI/2;S.ln.renderOrder=3;scene.add(S.ln);}
     const dx=P.x-cx,dz=P.z-cz,L=Math.hypot(dx,dz)||0.01,u=S.ln.geometry.attributes.uv;S.ln.scale.set(1,L,1);S.ln.position.set((P.x+cx)/2,Math.min(cy,o.zs)+0.06,(P.z+cz)/2);S.ln.rotation.y=Math.atan2(dx,dz);
     for(let k=0;k<4;k++)u.setY(k,u.getY(k)>0.5?L/2:0);u.needsUpdate=true;}   // ลายน้ำซ้ำทุก 2 ม. (ไม่ยืดตามความยาว)
-  else{wtStop(S,'cl');wtMesh(S,'ln');if(S.cm&&!S.cmD)S.cmD=1e-4;S.cmT=0;}
+  else{wtStop(S,'cl');wtStop(S,'clmA');wtStop(S,'clmB');wtMesh(S,'ln');if(S.cm&&!S.cmD)S.cmD=1e-4;S.cmT=0;}
   // ร่างโคลนหมดเวลา/ถูกเรียกกลับ: ยุบละลายลงพื้น 0.3 วิ แล้วหาย
   if(S.cmD){const k=(S.cmD+=dt)/0.3;if(k>=1){wtMesh(S,'cm');S.cmD=0;}else{S.cm.scale.set(1+k*0.3,1-k,1+k*0.3);S.cm.material.uniforms.uOp.value=0.85*(1-k*0.6);}}
   // ลำน้ำ Abyssal Beam (3 วิ) — fx ตามตัว หันตามตัวผู้เล่น (host หมุนตัวตามลำ)
-  if(A[3]!==null&&A[3]!==undefined){wtLoop(S,'beam','water/beam_loop',{x:p.x,y:p.y,h:0,follow:p.id});wtBeamSync(S,o,p,A[3]/100,A[6]||WT_AB.len,dt);}else{wtStop(S,'beam');wtBeamOff(S);}
+  if(A[3]!==null&&A[3]!==undefined){{const I=wtLoop(S,'beam','water/beam_loop',{x:p.x,y:p.y,h:0,follow:p.id,aim:false,a:A[3]/100});if(I)I.a=A[3]/100;}wtBeamSync(S,o,p,A[3]/100,A[6]||WT_AB.len,dt);}else{wtStop(S,'beam');wtBeamOff(S);}
   // Moonwater Arts 8 วิ
   if(alive&&A[2])wtLoop(S,'moon','water/moon_aura',{x:p.x,y:p.y,h:0,follow:p.id});else wtStop(S,'moon');
   // มังกร: ลอยเหนือหัวขวาระหว่างเลือกจุด + วงเล็ง (เฉพาะเรา)

@@ -1,5 +1,6 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
 
+- 2026-11-01 Water รอบเล่นจริง 2 (ยังไม่ commit): Beam ตัวหันพร้อมลำ วงเวท/ลูกน้ำ/ลำไปด้วยกัน ปลายลำบานแตก • Moonwater ยิงจากไม้ มีวงเวทหน้าไม้ ช้าลง 45% ตอนยิง 0.45 วิ • ตรา Moonwater วางที่เท้า น้ำพุ่งจากพื้น • Dash มีตราที่เท้าและที่ร่างโคลน (`water/clone_mark`)
 - 2026-11-01 แก้ดีเลย์ฝั่งโฮสต์/เล่นคนเดียว: โฮสต์เดินเกมก่อนวาดทุกเฟรม (`frame` js/37) แทนวาดย้อนหลัง 18–70 ms จาก `HVB` (วัดได้ 57 ms) • ส่ง snapshot ออนไลน์ตามเวลา ≥30 ms ไม่ผูกจำนวน tick (ยังไม่ commit)
 - 2026-11-01 ลดกระตุก Water: เมช Beam/งูเรียกใช้ซ้ำไม่ dispose (ไม่ compile shader ซ้ำ) • สร้างมังกรล่วงหน้าตอนนับถอยหลัง (`WARM.reg.water`) (ยังไม่ commit)
 - 2026-11-01 ไอคอนสาย Water 10 อันจาก game-icons.net (lorc, CC BY 3.0, เครดิตใน icons/CREDITS.md)
