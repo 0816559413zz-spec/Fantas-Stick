@@ -84,7 +84,7 @@ function aimFromCrosshair(me,P,E){
 }
 let AIMZ=0;
 // สายดิน: ซูมออก + เลื่อนกล้องไปซ้ายตอนกดค้าง BA ชาร์จ / ตอนรอปาเสาอัลติบนฟ้า (Stand ใหญ่ไม่บังจอ) — ผู้ใช้ 2026-10-21
-let EZC=0,ESC=0,WZC=0,BZC=0;   // ESC = โล่ Earth: Stand ทึบอยู่หลังเรา → กล้องเลื่อนไปซ้ายให้เห็นข้างหน้า (ผู้ใช้ 2026-10-21)
+let EZC=0,ESC=0,WZC=0,BZC=0,WBY=null;   // ESC = โล่ Earth: Stand ทึบอยู่หลังเรา → กล้องเลื่อนไปซ้ายให้เห็นข้างหน้า (ผู้ใช้ 2026-10-21)
 // ผู้เล่นอยู่ในห้อง (บ้านที่เดินเข้าได้ / ตึกกลวงในเมือง): ร่นกล้องตามแนวจากจุดโฟกัสให้อยู่ในห้อง (ห่างผนัง 0.3 ม. ต่ำกว่าเพดาน 0.25 ม.) • คืนสัดส่วน 0.12..1
 function camRoomK(me,F,x,y,z){
   const mz=me.z||0;let k=1;const fit=(f,c,lo,hi)=>{if(c<lo&&f>lo)k=Math.min(k,(f-lo)/(f-c));else if(c>hi&&f<hi)k=Math.min(k,(hi-f)/(c-f));};
@@ -97,6 +97,9 @@ function camRoomK(me,F,x,y,z){
   return 1;
 }
 function updateCamera(me,dt){
+  // ร่าย/ยิง Abyssal Beam: กล้องหมุนได้เร็วเท่าลำเท่านั้น (ผู้ใช้ 2026-11-01) เมาส์ยังบังคับทิศลำ
+  if(me.wt&&me.wt[7]&&me.al&&WBY!==null){const m=WT_AB.turn*dt;yaw=WBY+Math.max(-m,Math.min(m,angDiff(yaw,WBY)));}
+  WBY=me.wt&&me.wt[7]&&me.al?yaw:null;
   AIMZ+=(((me.kd>0&&me.hv)?1:0)-AIMZ)*Math.min(1,dt*10);if(AIMZ<0.001)AIMZ=0;
   {const fv=SET.fov*(1-0.25*AIMZ);if(Math.abs(cam.fov-fv)>0.01){cam.fov=fv;cam.updateProjectionMatrix();}}
   const px=tx(me.x),pz=tz(me.y);

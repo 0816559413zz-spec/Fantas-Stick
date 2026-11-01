@@ -143,7 +143,7 @@ function updateWater(dt){
   if(G.wtb&&G.wtb.length)G.wtb=G.wtb.filter(b=>waterMBTick(b,dt));
 }
 // snapshot ต่อผู้เล่น: [เกจฮีล, ลูกผู้ช่วย, Moonwater, ลำน้ำ (มุม×100 | null), ร่างโคลน [x,y] | 0, อัลติ 0/1 intro/2 เล็ง/3 พุ่ง]
-function waterSnapP(p){if(!wtOn(p))return undefined;return [Math.floor(p.whg||0),p.wfam>0?1:0,p.wmw>0?1:0,p.wab&&p.wab.ph==='fire'?Math.round(p.wab.a*100):null,p.wcl?[Math.round(p.wcl.x),Math.round(p.wcl.y)]:0,p.wdg?({intro:1,aim:2,dive:3})[p.wdg.ph]:0,p.wab&&p.wab.ph==='fire'?Math.round(p.wab.L||WT_AB.len):0];}
+function waterSnapP(p){if(!wtOn(p))return undefined;return [Math.floor(p.whg||0),p.wfam>0?1:0,p.wmw>0?1:0,p.wab&&p.wab.ph==='fire'?Math.round(p.wab.a*100):null,p.wcl?[Math.round(p.wcl.x),Math.round(p.wcl.y)]:0,p.wdg?({intro:1,aim:2,dive:3})[p.wdg.ph]:0,p.wab&&p.wab.ph==='fire'?Math.round(p.wab.L||WT_AB.len):0,p.wab?1:0];}
 // snapshot ทั้งเกม: คลื่น WV=[id,x,y,a,k] • ลูกผู้ช่วยที่กำลังพุ่ง WF=[id,x,y,h,เจ้าของ]
 function waterSnapW(){const o={};if(G.wtw&&G.wtw.length)o.WV=G.wtw.map(w=>[w.id,Math.round(w.x),Math.round(w.y),Math.round(w.a*100)/100,Math.round(Math.min(1,w.t/WT_RP.t)*100)/100]);
   if(G.wtf&&G.wtf.length)o.WF=G.wtf.map(f=>[f.id,Math.round(f.x),Math.round(f.y),Math.round(f.h*10)/10,f.o]);return o;}
