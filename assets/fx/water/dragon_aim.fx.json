@@ -1,14 +1,14 @@
 {
  "v": 1,
- "desc": "Dragon of the Deep เล็ง (รอบ 2): วงน้ำบนพื้นรัศมี 11 ม. ขอบเป็นคลื่นเตี้ยหมุน 2 ชั้น + เส้นขาววิ่งรอบ",
+ "desc": "Dragon of the Deep เล็ง (รอบ 6): วงน้ำบนพื้น 11 ม. + ขอบคลื่นเตี้ย + ระลอกวิ่งจากกลางออกขอบ",
  "tags": [
   "water",
-  "ingame",
-  "dragon"
+  "dragon",
+  "ingame"
  ],
  "pal": "ice",
  "dur": 1,
- "seed": 47,
+ "seed": 57,
  "layers": [
   {
    "id": "disc",
@@ -21,8 +21,8 @@
    "col": "#bff2ff",
    "col2": "#36b8f5",
    "rim": 1,
-   "scroll": 2.5,
-   "int": 1.2,
+   "scroll": 1.4,
+   "int": 1.1,
    "disp": 0,
    "pos": [
     0,
@@ -30,7 +30,7 @@
     0
    ],
    "scale": 11.0,
-   "op": 0.28,
+   "op": 0.25,
    "fade": 0,
    "loop": true
   },
@@ -45,21 +45,21 @@
    "mat": "toonwater",
    "col": "#9ff4ff",
    "col2": "#36b8f5",
-   "rim": 0.6,
-   "scroll": 1.8,
+   "rim": 0.5,
+   "scroll": 2,
    "pos": [
     0,
     -0.03,
     0
    ],
    "scale": [
-    10.45,
-    1.4,
-    10.45
+    10.67,
+    1.2,
+    10.67
    ],
    "op": 1,
    "fade": 0,
-   "spin": 60,
+   "spin": 50,
    "loop": true
   },
   {
@@ -73,61 +73,32 @@
    "mat": "toonwater",
    "col": "#9ff4ff",
    "col2": "#36b8f5",
-   "rim": 0.6,
-   "scroll": 1.8,
+   "rim": 0.5,
+   "scroll": 2,
    "pos": [
     0,
     -0.03,
     0
    ],
-   "scale": [
-    6.6,
-    1.1,
-    6.6
-   ],
-   "op": 1,
+   "scale": {
+    "0": [
+     2.2,
+     0.8,
+     2.2
+    ],
+    "1": [
+     9.9,
+     0.8,
+     9.9
+    ]
+   },
+   "op": {
+    "0": 0,
+    "0.2": 1,
+    "1": 0
+   },
    "fade": 0,
-   "spin": -90,
-   "rot": [
-    0,
-    60,
-    0
-   ],
-   "loop": true
-  },
-  {
-   "id": "ring",
-   "t": "emit",
-   "at": 0,
-   "life": 1,
-   "att": "feet",
-   "pos": [
-    0,
-    0.3,
-    0
-   ],
-   "rate": 40,
-   "from": "ring",
-   "fr": 11.0,
-   "dir": "tangent",
-   "speed": [
-    5,
-    8
-   ],
-   "plife": [
-    0.18,
-    0.3
-   ],
-   "look": "streak",
-   "size": [
-    1.6,
-    2.8
-   ],
-   "col": "#ffffff",
-   "c2": "#c8fbff",
-   "gravity": 0,
-   "drag": 0,
-   "curl": false,
+   "spin": -80,
    "loop": true
   }
  ]

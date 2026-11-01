@@ -404,6 +404,14 @@
   "mesh_water_serpent_jaw": {
    "file": "vfx/water_serpent_jaw.glb",
    "v": 1
+  },
+  "mesh_water_dragon": {
+   "file": "vfx/water_dragon.glb",
+   "v": 1
+  },
+  "mesh_water_dragon_dive": {
+   "file": "vfx/water_dragon_dive.glb",
+   "v": 1
   }
  },
  "maps": {

@@ -42,38 +42,4 @@ BY = 1.6
 
 # (Moonwater moved to tools/water-moon-gen.py: round 3 with the user ref)
 
-# =================== Dragon of the Deep ===================
-# the Tidecaller serpent (model water_serpent, head forward along +z, model x mirrored) scaled up as the dragon
-DS = 2.6
-SER = dict(t='mesh', att='feet', shape='glb', glb='mesh_water_serpent', mat='toonwater', col=C['col'], col2=C['col2'], rim=.8, scroll=2.4, heat=.6, zw=True, fade=0)
-L = [dict(SER, id='rise', at=0, life=1, pos={'0': [0, -6, 0], '0.6': [0, .5, 0], '1': [0, 1.5, 0], 'ease': 'out'}, scale=DS, spin=360, op={'0': 1, '0.85': 1, '1': 0}),
-     tw('wave', 'mesh_water_ringwave', 0, .8, [0, -.05, 0], {'0': .5, '1': 3.2, 'ease': 'out'}, spin=300, op={'0': 1, '0.6': 1, '1': 0}),
-     tw('jet', 'mesh_water_jet', 0, .9, [0, -.05, 0], {'0': [1.5, 0, 1.5], '0.3': [2, 3.5, 2], '1': [1.2, 0, 1.2], 'ease': 'out'}, spin=300),
-     drops('burst', .05, 60, [0, 2, 0], 1.5, (4, 8), size=(.07, .15)),
-     streaks('swirl', 0, .9, [0, 2.5, 0], 3, 60)]
-save('dragon_intro', L, 'Dragon of the Deep เรียก (รอบ 2): มังกรน้ำ (งูทะเลขยาย 2.6 เท่า) พุ่งขึ้นจากเสาน้ำ หมุนตัว + คลื่นวงใหญ่ + น้ำสาด', 1.05, ('dragon',))
-HOV = {str(round(k / 8, 3)): [round(1.2 + .3 * math.sin(k / 8 * 6.283), 2), round(1.2 + .35 * math.sin(k / 8 * 12.566), 2), round(-.8 + .2 * math.cos(k / 8 * 6.283), 2)] for k in range(9)}
-L = [dict(SER, id='dragon', at=0, life=2, pos=HOV, scale=DS, op=1, loop=True),
-     drops('drips', 0, 0, [1.5, 4, -.8], 1.5, (.2, .5), rate=10, life=1, dirn='down', loop=True),
-     sparks('glint', 0, 1, [1.5, 4, -.8], 1.8, 12, loop=True),
-     tw('pool', 'mesh_water_ringwave_low', 0, 1, [0, -.03, 0], 1.3, spin=150, loop=True)]
-save('dragon_hover', L, 'Dragon of the Deep รอ (รอบ 2): มังกรน้ำลอยวนเหนือไหล่ขวา ตัวขยับขึ้นลง + หยดน้ำ + ประกาย + วงน้ำที่เท้า', 2, ('dragon',))
-R = 11.0
-L = [wat('disc', 'disc', 0, 1, [0, .04, 0], R, op=.28, col='#bff2ff', col2='#36b8f5', loop=True),
-     tw('rim', 'mesh_water_ringwave_low', 0, 1, [0, -.03, 0], [R * .95, 1.4, R * .95], spin=60, loop=True),
-     tw('rim2', 'mesh_water_ringwave_low', 0, 1, [0, -.03, 0], [R * .6, 1.1, R * .6], spin=-90, rot=[0, 60, 0], loop=True),
-     streaks('ring', 0, 1, [0, .3, 0], R, 40, loop=True)]
-save('dragon_aim', L, 'Dragon of the Deep เล็ง (รอบ 2): วงน้ำบนพื้นรัศมี 11 ม. ขอบเป็นคลื่นเตี้ยหมุน 2 ชั้น + เส้นขาววิ่งรอบ', 1, ('dragon',))
-# dive: rises a little, then plunges head-first into the target and keeps hammering (10 hits in 2 s)
-DIVE = {'0': [3, 9, -4], '0.15': [5, 13, -7], '0.33': [0, 1, 0], '1': [0, -4, 0]}
-L = [dict(SER, id='dragon', at=0, life=1.4, pos=DIVE, scale=DS * 1.2, rot={'0': [-20, 0, 0], '0.15': [-30, 0, 0], '0.33': [70, 0, 0], '1': [80, 0, 0]}, op={'0': 1, '0.85': 1, '1': 0})]
-for k in range(10):
-    t0 = round(.45 + k * .2, 2); a = k * 2.4
-    off = [round(math.cos(a) * 3.5 * (k % 3) / 2, 2), 0, round(math.sin(a) * 3.5 * (k % 3) / 2, 2)]
-    L.append(tw(f'crown{k}', 'mesh_water_crown', t0, .45, off, {'0': [1.2, .5, 1.2], '0.35': [2.4, 2.2, 2.4], '1': [3, .6, 3], 'ease': 'out'}, spin=200, op={'0': 1, '0.6': 1, '1': 0}))
-    L.append(drops(f'hit{k}', t0, 18, [off[0], .5, off[2]], 1.5, (4, 8), size=(.07, .15), dirn='up'))
-L.append(tw('wave', 'mesh_water_ringwave', .45, 2.2, [0, -.05, 0], {'0': 2, '1': R * .9, 'ease': 'out'}, spin=200, op={'0': 1, '0.8': .9, '1': 0}))
-L.append(tw('jet', 'mesh_water_jet', .45, 2.1, [0, -.05, 0], {'0': [2, 0, 2], '0.15': [3, 4, 3], '0.85': [2.6, 3.2, 2.6], '1': [1.5, 0, 1.5]}, spin=400))
-L.append(streaks('swirl', .45, 2, [0, 1, 0], R * .6, 60, dirn='out', speed=(8, 14)))
-L.append(sparks('glint', .45, 2, [0, 2, 0], 5, 40))
-save('dragon_dive', L, 'Dragon of the Deep พุ่งลง (รอบ 2): มังกรน้ำยกตัวแล้วพุ่งหัวทิ่มลงจุดเล็ง • น้ำสาดเป็นมงกุฎ 10 ครั้งใน 2 วิ + เสาน้ำ + คลื่นวงแผ่ทั่ววง 11 ม. + เส้นขาว + ประกาย', 3.05, ('dragon',))
+# (Dragon of the Deep moved to tools/water-dragon-gen.py: round 3 with the user ref)

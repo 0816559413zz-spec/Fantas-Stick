@@ -1,78 +1,227 @@
 {
  "v": 1,
- "desc": "Dragon of the Deep เรียก (รอบ 2): มังกรน้ำ (งูทะเลขยาย 2.6 เท่า) พุ่งขึ้นจากเสาน้ำ หมุนตัว + คลื่นวงใหญ่ + น้ำสาด",
+ "desc": "Dragon of the Deep เรียก (รอบ 6): น้ำวน + เสาน้ำข้างขวา → มังกรตัวยาวหมุนวนพุ่งขึ้นจากน้ำวน เด้งลงนิด แล้วนิ่งในท่ารอ",
  "tags": [
   "water",
-  "ingame",
-  "dragon"
+  "dragon",
+  "ingame"
  ],
  "pal": "ice",
- "dur": 1.05,
- "seed": 47,
+ "dur": 1.35,
+ "seed": 57,
  "layers": [
   {
    "t": "mesh",
    "att": "feet",
-   "shape": "glb",
-   "glb": "mesh_water_serpent",
-   "mat": "toonwater",
-   "col": "#9ff4ff",
-   "col2": "#36b8f5",
-   "rim": 0.8,
-   "scroll": 2.4,
-   "heat": 0.6,
-   "zw": true,
+   "mat": "tex",
+   "tex": "tex/water_dragon_skin",
+   "col": "#ffffff",
+   "col2": "#bfeaff",
+   "rim": 0.3,
+   "uvTile": [
+    1,
+    1
+   ],
+   "uvScroll": [
+    0.12,
+    0
+   ],
    "fade": 0,
-   "id": "rise",
+   "id": "dragon",
    "at": 0,
-   "life": 1,
+   "life": 1.3,
+   "shape": "glb",
+   "glb": "mesh_water_dragon",
    "pos": {
     "0": [
+     2.0,
+     -16,
+     -0.3
+    ],
+    "0.42": [
+     2.0,
+     0.9,
+     -0.3
+    ],
+    "0.56": [
+     2.0,
+     -0.45,
+     -0.3
+    ],
+    "0.68": [
+     2.0,
+     0.2,
+     -0.3
+    ],
+    "0.78": [
+     2.0,
      0,
-     -6,
+     -0.3
+    ],
+    "1": [
+     2.0,
+     0,
+     -0.3
+    ],
+    "ease": "out"
+   },
+   "rot": {
+    "0": [
+     0,
+     -420,
      0
     ],
-    "0.6": [
+    "0.45": [
      0,
-     0.5,
+     -60,
+     0
+    ],
+    "0.7": [
+     0,
+     0,
      0
     ],
     "1": [
      0,
-     1.5,
+     0,
      0
-    ],
-    "ease": "out"
+    ]
    },
-   "scale": 2.6,
-   "spin": 360,
-   "op": {
-    "0": 1,
-    "0.85": 1,
-    "1": 0
-   }
+   "scale": {
+    "0": 0.8,
+    "0.45": 1,
+    "1": 1
+   },
+   "op": 1
   },
   {
-   "id": "wave",
+   "id": "whirl",
    "t": "mesh",
    "at": 0,
-   "life": 0.8,
+   "life": 1.1,
    "att": "feet",
    "shape": "glb",
-   "glb": "mesh_water_ringwave",
+   "glb": "mesh_water_ringwave_low",
    "mat": "toonwater",
    "col": "#9ff4ff",
    "col2": "#36b8f5",
-   "rim": 0.6,
-   "scroll": 1.8,
+   "rim": 0.5,
+   "scroll": 2,
    "pos": [
-    0,
-    -0.05,
-    0
+    4.0,
+    -0.03,
+    -4.3
    ],
    "scale": {
     "0": 0.5,
-    "1": 3.2,
+    "0.3": 3.4,
+    "0.8": 3.6,
+    "1": 2
+   },
+   "op": {
+    "0": 1,
+    "0.75": 1,
+    "1": 0
+   },
+   "fade": 0,
+   "spin": -500
+  },
+  {
+   "id": "whirl2",
+   "t": "mesh",
+   "at": 0.1,
+   "life": 1,
+   "att": "feet",
+   "shape": "glb",
+   "glb": "mesh_water_ringwave_low",
+   "mat": "toonwater",
+   "col": "#9ff4ff",
+   "col2": "#36b8f5",
+   "rim": 0.5,
+   "scroll": 2,
+   "pos": [
+    4.0,
+    -0.03,
+    -4.3
+   ],
+   "scale": {
+    "0": 0.3,
+    "0.4": 2.2,
+    "1": 1.2
+   },
+   "op": {
+    "0": 1,
+    "0.7": 1,
+    "1": 0
+   },
+   "fade": 0,
+   "spin": -700
+  },
+  {
+   "id": "geyser",
+   "t": "mesh",
+   "at": 0,
+   "life": 0.9,
+   "att": "feet",
+   "shape": "glb",
+   "glb": "mesh_water_jet",
+   "mat": "toonwater",
+   "col": "#9ff4ff",
+   "col2": "#36b8f5",
+   "rim": 0.5,
+   "scroll": 2,
+   "pos": [
+    4.0,
+    -0.05,
+    -4.3
+   ],
+   "scale": {
+    "0": [
+     1.4,
+     0,
+     1.4
+    ],
+    "0.25": [
+     1.8,
+     2.2,
+     1.8
+    ],
+    "0.7": [
+     1.6,
+     1.6,
+     1.6
+    ],
+    "1": [
+     1,
+     0,
+     1
+    ]
+   },
+   "op": 1,
+   "fade": 0,
+   "spin": 500
+  },
+  {
+   "id": "feet",
+   "t": "mesh",
+   "at": 0,
+   "life": 0.7,
+   "att": "feet",
+   "shape": "glb",
+   "glb": "mesh_water_ringwave_low",
+   "mat": "toonwater",
+   "col": "#9ff4ff",
+   "col2": "#36b8f5",
+   "rim": 0.5,
+   "scroll": 2,
+   "pos": [
+    0,
+    -0.03,
+    0
+   ],
+   "scale": {
+    "0": 0.4,
+    "1": 1.6,
     "ease": "out"
    },
    "op": {
@@ -84,74 +233,34 @@
    "spin": 300
   },
   {
-   "id": "jet",
-   "t": "mesh",
-   "at": 0,
-   "life": 0.9,
-   "att": "feet",
-   "shape": "glb",
-   "glb": "mesh_water_jet",
-   "mat": "toonwater",
-   "col": "#9ff4ff",
-   "col2": "#36b8f5",
-   "rim": 0.6,
-   "scroll": 1.8,
-   "pos": [
-    0,
-    -0.05,
-    0
-   ],
-   "scale": {
-    "0": [
-     1.5,
-     0,
-     1.5
-    ],
-    "0.3": [
-     2,
-     3.5,
-     2
-    ],
-    "1": [
-     1.2,
-     0,
-     1.2
-    ],
-    "ease": "out"
-   },
-   "op": 1,
-   "fade": 0,
-   "spin": 300
-  },
-  {
-   "id": "burst",
+   "id": "splash",
    "t": "emit",
    "at": 0.05,
-   "life": 0.04,
+   "life": 0.05,
    "att": "feet",
    "pos": [
-    0,
-    2,
-    0
+    4.0,
+    0.5,
+    -4.3
    ],
    "rate": 0,
    "from": "sphere",
    "fr": 1.5,
-   "dir": "random",
+   "dir": "up",
    "speed": [
     4,
     8
    ],
    "plife": [
-    0.35,
-    0.55
+    0.4,
+    0.7
    ],
    "look": "model",
    "model": "water_blob",
    "mmat": "ice",
    "msize": [
-    0.07,
-    0.15
+    0.08,
+    0.16
    ],
    "col": "#e6ffff",
    "c2": "#7fe8ff",
@@ -162,38 +271,110 @@
    "burst": 60
   },
   {
+   "id": "spray",
+   "t": "emit",
+   "at": 0,
+   "life": 0.6,
+   "att": "feet",
+   "pos": [
+    4.0,
+    1.5,
+    -4.3
+   ],
+   "rate": 90,
+   "from": "sphere",
+   "fr": 2.5,
+   "dir": "random",
+   "speed": [
+    1,
+    3
+   ],
+   "plife": [
+    0.4,
+    0.7
+   ],
+   "look": "model",
+   "model": "water_blob",
+   "mmat": "ice",
+   "msize": [
+    0.06,
+    0.12
+   ],
+   "col": "#e6ffff",
+   "c2": "#7fe8ff",
+   "mspin": 0,
+   "gravity": 9,
+   "drag": 0,
+   "bounce": 0
+  },
+  {
    "id": "swirl",
    "t": "emit",
    "at": 0,
-   "life": 0.9,
+   "life": 0.8,
    "att": "feet",
    "pos": [
-    0,
-    2.5,
-    0
+    4.0,
+    0.3,
+    -4.3
    ],
    "rate": 60,
    "from": "ring",
    "fr": 3,
-   "dir": "tangent",
+   "dir": "up",
    "speed": [
-    5,
-    8
+    3,
+    6
    ],
    "plife": [
-    0.18,
-    0.3
+    0.3,
+    0.5
    ],
    "look": "streak",
    "size": [
-    1.6,
-    2.8
+    2,
+    3.5
    ],
    "col": "#ffffff",
    "c2": "#c8fbff",
    "gravity": 0,
-   "drag": 0,
-   "curl": false
+   "drag": 0
+  },
+  {
+   "id": "eye0",
+   "t": "mesh",
+   "at": 1.0,
+   "life": 0.3,
+   "att": "feet",
+   "shape": "sphere",
+   "mat": "glow",
+   "col": "#ff3a3a",
+   "pos": [
+    1.472,
+    6.592,
+    1.629
+   ],
+   "scale": 0.1,
+   "op": 1,
+   "fade": 0
+  },
+  {
+   "id": "eye1",
+   "t": "mesh",
+   "at": 1.0,
+   "life": 0.3,
+   "att": "feet",
+   "shape": "sphere",
+   "mat": "glow",
+   "col": "#ff3a3a",
+   "pos": [
+    2.528,
+    6.592,
+    1.629
+   ],
+   "scale": 0.1,
+   "op": 1,
+   "fade": 0
   }
  ]
 }

@@ -11,6 +11,7 @@
 #       assets/vfx/water_curl.glb     — thin sheet curling over forward, one end taller (Riptide)
 #       assets/vfx/water_curl_body.glb — solid water under the curl (hollow only under the lip)
 #       assets/vfx/water_serpent.glb  — Tidecaller water serpent wrapped round the caster, head at the right shoulder
+#       assets/vfx/water_dragon.glb, water_dragon_dive.glb — Dragon of the Deep (long wait pose / dive pose)
 #       assets/vfx/water_jet.glb       — rising water column: flared foot, wobbly body, splashing crown on top
 # Units: metres. Blender z = up (exported Y-up). ⚠ Blender +Y exports as glTF -Z = BACKWARD in fx space (+z = aim).
 # Shapes below are modelled with their front at +Y, so fx layers that need the front forward use rot [0, 180, 0]
@@ -314,3 +315,68 @@ bpy.ops.object.select_all(action='DESELECT'); jaw.select_set(True); bpy.context.
 jaw = finish(jaw, thick=0, subd=1); export(jaw, 'water_serpent_jaw.glb')
 print('jaw hinge', tuple(round(c, 3) for c in hinge))
 print('head tip', hp[-1])
+
+# ---------------- 11. Dragon of the Deep (user 2026-11-01, refs designs/water_ref/dragon_ref2.jpg, dragon_ref3.webp): big water dragon.
+# water_dragon      — wait pose: long wavy body floating at the caster's right, neck arched, head FORWARD (-Y). Origin = hover anchor.
+# water_dragon_dive — dive pose: head at the origin pointing -Y, body trailing behind in an S (+Y) — fx pitches it down.
+# Painted in game with tex water_dragon_skin (uv v runs tail → head). Uses sweep()/catmull() from §10.
+def dragon_head(neck_end, fwd, S):
+    HR = [.12, .15, .16, .155, .14, .12, .1, .08, .06]
+    hp = [neck_end - fwd * .06 * S + fwd * (.44 * S * k / (len(HR) - 1)) for k in range(len(HR))]
+    head = sweep('dhead', [tuple(p) for p in hp], [r * S for r in HR], sides=14)
+    for v in head.data.vertices:
+        c = neck_end + fwd * max(0, min(.44 * S, (v.co - neck_end).dot(fwd))); d = v.co - c; v.co = c + Vector((d.x, d.y, d.z * .72))
+    parts = [head, sweep('djaw', [tuple(p + Vector((0, 0, (-.075 - .012 * k) * S))) for k, p in enumerate(hp[2:8])], [(.075 - .008 * k) * S for k in range(6)], sides=10)]
+    side = fwd.cross(Vector((0, 0, 1))).normalized(); back = (-fwd + Vector((0, 0, .55))).normalized()
+    def fin(base, d, length, w, bend=.35):
+        pts = [Vector(base) + d * (t * length) + Vector((0, 0, -bend * (t * length) ** 2)) for t in [k / 7 for k in range(8)]]
+        return sweep('dfin', [tuple(p) for p in pts], [w * (1 - k / 7) + .003 for k in range(8)], sides=6)
+    for k in range(9):
+        a = (k - 4) / 4; base = hp[2 + k % 3] + Vector((0, 0, .08 * S)) + side * a * .08 * S
+        d = (back + side * a * .55 + Vector((0, 0, .15 * (1 - abs(a))))).normalized()
+        parts.append(fin(base, d, (.42 + .28 * (1 - abs(a))) * S, (.05 - .012 * abs(a)) * S))
+    for s_ in (-1, 1):   # horns
+        parts.append(fin(hp[3] + side * s_ * .09 * S + Vector((0, 0, .1 * S)), (back + side * s_ * .3 + Vector((0, 0, .5))).normalized(), .5 * S, .035 * S, .1))
+    eyes = [hp[3] + side * s_ * .12 * S + Vector((0, 0, .06 * S)) for s_ in (-1, 1)]
+    return parts, eyes
+def dragon_spikes(pts, rads, outward, every=5, size=.35):
+    out = []
+    for i in range(6, len(pts) - 4, every):
+        p = Vector(pts[i]); o = outward(p).normalized(); t = (Vector(pts[i + 1]) - Vector(pts[i - 1])).normalized()
+        d = (o + t * .5).normalized(); L = size * (.6 + .4 * (i / len(pts)))
+        q = [p + o * rads[i] * .8 + d * (k / 6) * L for k in range(7)]
+        out.append(sweep('dsp', [tuple(v) for v in q], [rads[i] * .28 * (1 - k / 6) + .004 for k in range(7)], sides=5))
+    return out
+def pin_uv(objs, v=.86):   # head / mane / spikes take the pale head-end colours of the along-body skin (round 6)
+    for o in objs:
+        uvl = o.data.uv_layers.active
+        for d in uvl.data: d.uv = (d.uv[0], v)
+def export_join(objs, name):
+    bpy.ops.object.select_all(action='DESELECT')
+    for o in objs: o.select_set(True)
+    bpy.context.view_layer.objects.active = objs[0]; bpy.ops.object.join()
+    ob = finish(bpy.context.view_layer.objects.active, thick=0, subd=1); ob.name = name; export(ob, name + '.glb')
+# wait pose (round 4, user: "waiting pose look donut make it long"): long floating body waving up from the caster's right-back,
+# neck arched, head high and forward, poised to strike. Written in fx coords (x right, y up, z forward) → Blender (-x, -z, y).
+# Origin = the hover anchor (fx sits it at the caster's right).
+FX = lambda x, y, z: (-x, -z, y)
+clear()
+CPh = [FX(7.5, .6, -10), FX(6.2, 2.6, -9.2), FX(4.4, 4.2, -8.6), FX(2.6, 3.4, -7.4), FX(1.8, 1.6, -5.6), FX(2.4, 1.4, -3.6),
+       FX(2.0, 3.0, -2.4), FX(1.0, 5.0, -1.6), FX(.3, 6.5, -.6), FX(0, 6.9, .6), FX(0, 6.5, 1.5)]   # round 5: much longer + thicker
+pts = [Vector(p) for p in catmull(CPh, 16)]
+rads = [.1 + .62 * min(1, (i / (len(pts) - 1)) * 2.6) ** .6 for i in range(len(pts))]
+body = sweep('dbody', [tuple(p) for p in pts], rads, sides=18)
+fwd = Vector((0, -1, -.4)).normalized(); hparts, eyes = dragon_head(pts[-1], fwd, 4.4)
+spikes = dragon_spikes(pts[:-6], rads, lambda p: Vector((0, 0, 1)), every=5, size=.8)
+pin_uv(hparts + spikes); export_join([body] + hparts + spikes, 'water_dragon')
+print('dragon eyes', [tuple(round(c, 3) for c in e) for e in eyes])
+# dive (round 5: ~22 m long, thick): head at the origin pointing -Y, a long wavy body trailing behind (+Y) — fx pitches it down
+clear()
+CPd = [(.8, 22, 1.6), (-1.2, 19, .4), (1.3, 16, -.6), (-1.2, 13, .5), (1.1, 10, -.4), (-.9, 7, .4), (.6, 4.2, -.2), (-.2, 1.8, .1), (0, 0, 0)]
+pts = [Vector(p) for p in catmull(CPd, 16)]
+rads = [.1 + .62 * min(1, (i / (len(pts) - 1)) * 2.6) ** .6 for i in range(len(pts))]
+body = sweep('dbody', [tuple(p) for p in pts], rads, sides=18)
+hparts, eyes = dragon_head(pts[-1], Vector((0, -1, 0)), 4.4)
+spikes = dragon_spikes(pts, rads, lambda p: Vector((0, 0, 1)), every=6, size=.8)
+pin_uv(hparts + spikes); export_join([body] + hparts + spikes, 'water_dragon_dive')
+print('dive eyes', [tuple(round(c, 3) for c in e) for e in eyes])

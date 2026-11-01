@@ -15,7 +15,7 @@ const WT_BA={cd:1.0,n:3,t0:0.25,gap:0.2,dmg:5,spd:1600,range:500,spr:0.06},   //
   WT_AB={cast:0.5,t:3,len:700,w:28,tick:0.3,dmg:10,turn:1.2,lift:1.2,cd:25},   // lift 0.5 → 1.2 (ผู้ใช้ 2026-11-01: ลอยสูงขึ้น)
   // Abyssal Beam: ร่าย 0.5 ยิง 3 วิ โดน 10 ครั้งละ 10 ยาว 700 หมุนตามเมาส์ช้าๆ ลอย 0.5 ม. ยืนนิ่ง
   WT_MW={t:8,cd:28,len:900,w:28,life:0.6,tick:0.2,dmg:10,rate:1.75},         // Moonwater Arts: 8 วิ BA = ลำน้ำ 900 ค้าง 0.6 วิ โดนทุก 0.2 (10×3) ยิงทุก 1.75 วิ • (⚠ คูลดาวน์ 20 หลังหมด = 28 นับจากกด)
-  WT_UL={intro:1,aim:4,range:700,r:220,rise:0.4,n:10,gap:0.2,dmg:15,slow:0.6,slowT:2};   // Dragon of the Deep: intro 1 วิ • เลือกจุด 4 วิ • พุ่งลง 15 × 10 ใน 2 วิ รัศมี 220 ช้า 40%
+  WT_UL={intro:1,aim:4,range:700,r:220,rise:2.2,n:10,gap:0.2,dmg:15,slow:0.6,slowT:2};   // Dragon of the Deep: intro 1 วิ • เลือกจุด 4 วิ • มังกรบินขึ้นม้วนลง 2.2 วิ แล้ว 15 × 10 ใน 2 วิ รัศมี 220 ช้า 40%
 PATHS.push({id:'water',n:'สายน้ำ',ic:'💧',col:'#4fc3ff',d:'เล่นง่าย — ยิงน้ำไกล คลื่นผลัก ฮีลตัวเองด้วยโล่ เคลื่อนที่ไหลลื่นด้วยร่างโคลน',
   combo:'Aqua Cage ขังศัตรู 2 วิ → Abyssal Beam / ลำน้ำ Moonwater ใส่เต็มๆ • Tidecaller Orb ยิงตามทุกครั้งที่เราตีโดน (คู่กับลำน้ำ = ยิงรัว) • Riptide พัดศัตรูออก • Dash ร่างโคลน หนีแล้วกลับที่เดิมได้'});
 Object.assign(PDEF,{wdrop:{spd:WT_BA.spd,r:8,dmg:WT_BA.dmg,life:WT_BA.range/WT_BA.spd,col:'#7fdcff'},

@@ -77,7 +77,7 @@ function waterFX(o,p,pz,now,dt){
   // Moonwater Arts 8 วิ
   if(alive&&A[2])wtLoop(S,'moon','water/moon_aura',{x:p.x,y:p.y,h:0,follow:p.id});else wtStop(S,'moon');
   // มังกร: ลอยเหนือหัวขวาระหว่างเลือกจุด + วงเล็ง (เฉพาะเรา)
-  if(A[5]===2)wtLoop(S,'drg','water/dragon_hover',{x:p.x,y:p.y,h:0,follow:p.id});else wtStop(S,'drg');
+  if(A[5])wdgKeep(p.id);   // มังกรตัวจริงอยู่ js/70
   if(A[5]===2&&p.id===NET.myId){let gx=typeof INPUT.gx==='number'?INPUT.gx:p.x,gy=typeof INPUT.gy==='number'?INPUT.gy:p.y;const d=Math.hypot(gx-p.x,gy-p.y);if(d>700){gx=p.x+(gx-p.x)/d*700;gy=p.y+(gy-p.y)/d*700;}
     const I=wtLoop(S,'aim','water/dragon_aim',{x:gx,y:gy,h:0,aim:false});if(I){I.x=gx;I.y=gy;}}
   else wtStop(S,'aim');
@@ -95,7 +95,7 @@ const _wtCyl=new THREE.CylinderGeometry(1,1,1,14,1,true).translate(0,0.5,0).rota
 function wtBeam(){const g=new THREE.Group(),core=new THREE.MeshBasicMaterial({color:0xffffff,fog:false,transparent:true,blending:THREE.AdditiveBlending,depthWrite:false}),
     glow=new THREE.MeshBasicMaterial({color:0x2fa8ff,fog:false,transparent:true,opacity:0.85,blending:THREE.AdditiveBlending,depthWrite:false});
   const c=new THREE.Mesh(_wtCyl,core),sh=new THREE.Mesh(_wtCyl,glow);c.scale.set(0.35,0.35,1);g.add(c,sh);c.renderOrder=6;sh.renderOrder=5;g.userData.sh=sh;g.userData.mats=[core,glow];scene.add(g);return g;}
-function syncWater(v,dt,now){
+function syncWater(v,dt,now){wdgTick(dt);
   for(let i=WTV.ol.length-1;i>=0;i--){const O=WTV.ol[i];O.t-=dt;if(O.t<=0){for(const c of O.L)if(c.parent)c.parent.remove(c);WTV.ol.splice(i,1);}}
   // ลำน้ำงู: วาดตอน host ยิงโดน (efx wtfamhit) — ปากงู → เป้า สว่างแวบ 0.16 วิ แล้วบางลงหาย
   for(let i=WTV.bm.length-1;i>=0;i--){const B=WTV.bm[i];B.t+=dt;const k=Math.max(0,B.t)/0.16;if(k>=1){scene.remove(B.g);for(const m of B.g.userData.mats)m.dispose();WTV.bm.splice(i,1);continue;}
@@ -128,10 +128,10 @@ function waterEfx(ev){
     case 'wtmw':fxPlay('water/moon_mark',{x,y,h:0,follow:ev.id});return true;   // ตราดาวตอนเปิด Moonwater (ผู้ใช้ 2026-11-01)
     case 'wtmwoff':return true;
     case 'wtmb':fxPlay('water/moon_beam',{x,y,h:0,a,aim:false});if(near)snd('break',ev);return true;
-    case 'wtdg':fxPlay('water/dragon_intro',{x,y,h:0,follow:ev.id});if(near){shake(0.2);snd('cast_pull',ev);}return true;
+    case 'wtdg':wdgStart(ev.id,x,y);if(near){shake(0.2);snd('cast_pull',ev);}return true;
     case 'wtdgaim':return true;
     case 'wtdgdive':{const c=VIEW.cur&&VIEW.cur.P.find(q=>q.id===ev.id),da=c?Math.atan2(y-c.y,x-c.x):0;
-      fxPlay('water/dragon_dive',{x,y,h:0,a:da,aim:false});if(near)snd('break',ev);later(0.7,()=>{if(near)snd('break',ev);});return true;}
+      wdgDive(ev.id,x,y);later(WT_UL.rise-0.4,()=>fxPlay('water/dragon_dive',{x,y,h:0,a:da,aim:false}));if(near)for(let k=0;k<WT_UL.n;k++)later(WT_UL.rise+k*WT_UL.gap,()=>{shake(k?0.3:0.6);if(!(k%2))snd('break',ev);});return true;}
     case 'wtdgend':return true;
   }
   return false;

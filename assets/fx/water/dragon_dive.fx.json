@@ -1,946 +1,28 @@
 {
  "v": 1,
- "desc": "Dragon of the Deep พุ่งลง (รอบ 2): มังกรน้ำยกตัวแล้วพุ่งหัวทิ่มลงจุดเล็ง • น้ำสาดเป็นมงกุฎ 10 ครั้งใน 2 วิ + เสาน้ำ + คลื่นวงแผ่ทั่ววง 11 ม. + เส้นขาว + ประกาย",
+ "desc": "Dragon of the Deep พุ่ง: หัวมังกรถึงพื้นตรงดาเมจแรก (0.4 วิ) • น้ำกระแทกใหญ่ + คลื่นวง ทุก 0.2 วิ รวม 10 ครั้งตรงดาเมจ • แอ่งน้ำเต็มวงดาเมจ มีระลอก ค้างถึงราว 3.9 วิแล้วจาง (ตัวมังกรอยู่ js/70-water-dragon.js)",
  "tags": [
   "water",
-  "ingame",
-  "dragon"
+  "dragon",
+  "ingame"
  ],
  "pal": "ice",
- "dur": 3.05,
- "seed": 47,
+ "dur": 4.2,
+ "seed": 57,
  "layers": [
   {
+   "id": "boom",
    "t": "mesh",
-   "att": "feet",
-   "shape": "glb",
-   "glb": "mesh_water_serpent",
-   "mat": "toonwater",
-   "col": "#9ff4ff",
-   "col2": "#36b8f5",
-   "rim": 0.8,
-   "scroll": 2.4,
-   "heat": 0.6,
-   "zw": true,
-   "fade": 0,
-   "id": "dragon",
-   "at": 0,
-   "life": 1.4,
-   "pos": {
-    "0": [
-     3,
-     9,
-     -4
-    ],
-    "0.15": [
-     5,
-     13,
-     -7
-    ],
-    "0.33": [
-     0,
-     1,
-     0
-    ],
-    "1": [
-     0,
-     -4,
-     0
-    ]
-   },
-   "scale": 3.12,
-   "rot": {
-    "0": [
-     -20,
-     0,
-     0
-    ],
-    "0.15": [
-     -30,
-     0,
-     0
-    ],
-    "0.33": [
-     70,
-     0,
-     0
-    ],
-    "1": [
-     80,
-     0,
-     0
-    ]
-   },
-   "op": {
-    "0": 1,
-    "0.85": 1,
-    "1": 0
-   }
-  },
-  {
-   "id": "crown0",
-   "t": "mesh",
-   "at": 0.45,
-   "life": 0.45,
+   "at": 0.4,
+   "life": 0.8,
    "att": "feet",
    "shape": "glb",
    "glb": "mesh_water_crown",
    "mat": "toonwater",
    "col": "#9ff4ff",
    "col2": "#36b8f5",
-   "rim": 0.6,
-   "scroll": 1.8,
-   "pos": [
-    0.0,
-    0,
-    0.0
-   ],
-   "scale": {
-    "0": [
-     1.2,
-     0.5,
-     1.2
-    ],
-    "0.35": [
-     2.4,
-     2.2,
-     2.4
-    ],
-    "1": [
-     3,
-     0.6,
-     3
-    ],
-    "ease": "out"
-   },
-   "op": {
-    "0": 1,
-    "0.6": 1,
-    "1": 0
-   },
-   "fade": 0,
-   "spin": 200
-  },
-  {
-   "id": "hit0",
-   "t": "emit",
-   "at": 0.45,
-   "life": 0.04,
-   "att": "feet",
-   "pos": [
-    0.0,
-    0.5,
-    0.0
-   ],
-   "rate": 0,
-   "from": "sphere",
-   "fr": 1.5,
-   "dir": "up",
-   "speed": [
-    4,
-    8
-   ],
-   "plife": [
-    0.35,
-    0.55
-   ],
-   "look": "model",
-   "model": "water_blob",
-   "mmat": "ice",
-   "msize": [
-    0.07,
-    0.15
-   ],
-   "col": "#e6ffff",
-   "c2": "#7fe8ff",
-   "mspin": 0,
-   "gravity": 9,
-   "drag": 0,
-   "bounce": 0,
-   "burst": 18
-  },
-  {
-   "id": "crown1",
-   "t": "mesh",
-   "at": 0.65,
-   "life": 0.45,
-   "att": "feet",
-   "shape": "glb",
-   "glb": "mesh_water_crown",
-   "mat": "toonwater",
-   "col": "#9ff4ff",
-   "col2": "#36b8f5",
-   "rim": 0.6,
-   "scroll": 1.8,
-   "pos": [
-    -1.29,
-    0,
-    1.18
-   ],
-   "scale": {
-    "0": [
-     1.2,
-     0.5,
-     1.2
-    ],
-    "0.35": [
-     2.4,
-     2.2,
-     2.4
-    ],
-    "1": [
-     3,
-     0.6,
-     3
-    ],
-    "ease": "out"
-   },
-   "op": {
-    "0": 1,
-    "0.6": 1,
-    "1": 0
-   },
-   "fade": 0,
-   "spin": 200
-  },
-  {
-   "id": "hit1",
-   "t": "emit",
-   "at": 0.65,
-   "life": 0.04,
-   "att": "feet",
-   "pos": [
-    -1.29,
-    0.5,
-    1.18
-   ],
-   "rate": 0,
-   "from": "sphere",
-   "fr": 1.5,
-   "dir": "up",
-   "speed": [
-    4,
-    8
-   ],
-   "plife": [
-    0.35,
-    0.55
-   ],
-   "look": "model",
-   "model": "water_blob",
-   "mmat": "ice",
-   "msize": [
-    0.07,
-    0.15
-   ],
-   "col": "#e6ffff",
-   "c2": "#7fe8ff",
-   "mspin": 0,
-   "gravity": 9,
-   "drag": 0,
-   "bounce": 0,
-   "burst": 18
-  },
-  {
-   "id": "crown2",
-   "t": "mesh",
-   "at": 0.85,
-   "life": 0.45,
-   "att": "feet",
-   "shape": "glb",
-   "glb": "mesh_water_crown",
-   "mat": "toonwater",
-   "col": "#9ff4ff",
-   "col2": "#36b8f5",
-   "rim": 0.6,
-   "scroll": 1.8,
-   "pos": [
-    0.31,
-    0,
-    -3.49
-   ],
-   "scale": {
-    "0": [
-     1.2,
-     0.5,
-     1.2
-    ],
-    "0.35": [
-     2.4,
-     2.2,
-     2.4
-    ],
-    "1": [
-     3,
-     0.6,
-     3
-    ],
-    "ease": "out"
-   },
-   "op": {
-    "0": 1,
-    "0.6": 1,
-    "1": 0
-   },
-   "fade": 0,
-   "spin": 200
-  },
-  {
-   "id": "hit2",
-   "t": "emit",
-   "at": 0.85,
-   "life": 0.04,
-   "att": "feet",
-   "pos": [
-    0.31,
-    0.5,
-    -3.49
-   ],
-   "rate": 0,
-   "from": "sphere",
-   "fr": 1.5,
-   "dir": "up",
-   "speed": [
-    4,
-    8
-   ],
-   "plife": [
-    0.35,
-    0.55
-   ],
-   "look": "model",
-   "model": "water_blob",
-   "mmat": "ice",
-   "msize": [
-    0.07,
-    0.15
-   ],
-   "col": "#e6ffff",
-   "c2": "#7fe8ff",
-   "mspin": 0,
-   "gravity": 9,
-   "drag": 0,
-   "bounce": 0,
-   "burst": 18
-  },
-  {
-   "id": "crown3",
-   "t": "mesh",
-   "at": 1.05,
-   "life": 0.45,
-   "att": "feet",
-   "shape": "glb",
-   "glb": "mesh_water_crown",
-   "mat": "toonwater",
-   "col": "#9ff4ff",
-   "col2": "#36b8f5",
-   "rim": 0.6,
-   "scroll": 1.8,
-   "pos": [
-    0.0,
-    0,
-    0.0
-   ],
-   "scale": {
-    "0": [
-     1.2,
-     0.5,
-     1.2
-    ],
-    "0.35": [
-     2.4,
-     2.2,
-     2.4
-    ],
-    "1": [
-     3,
-     0.6,
-     3
-    ],
-    "ease": "out"
-   },
-   "op": {
-    "0": 1,
-    "0.6": 1,
-    "1": 0
-   },
-   "fade": 0,
-   "spin": 200
-  },
-  {
-   "id": "hit3",
-   "t": "emit",
-   "at": 1.05,
-   "life": 0.04,
-   "att": "feet",
-   "pos": [
-    0.0,
-    0.5,
-    0.0
-   ],
-   "rate": 0,
-   "from": "sphere",
-   "fr": 1.5,
-   "dir": "up",
-   "speed": [
-    4,
-    8
-   ],
-   "plife": [
-    0.35,
-    0.55
-   ],
-   "look": "model",
-   "model": "water_blob",
-   "mmat": "ice",
-   "msize": [
-    0.07,
-    0.15
-   ],
-   "col": "#e6ffff",
-   "c2": "#7fe8ff",
-   "mspin": 0,
-   "gravity": 9,
-   "drag": 0,
-   "bounce": 0,
-   "burst": 18
-  },
-  {
-   "id": "crown4",
-   "t": "mesh",
-   "at": 1.25,
-   "life": 0.45,
-   "att": "feet",
-   "shape": "glb",
-   "glb": "mesh_water_crown",
-   "mat": "toonwater",
-   "col": "#9ff4ff",
-   "col2": "#36b8f5",
-   "rim": 0.6,
-   "scroll": 1.8,
-   "pos": [
-    -1.72,
-    0,
-    -0.31
-   ],
-   "scale": {
-    "0": [
-     1.2,
-     0.5,
-     1.2
-    ],
-    "0.35": [
-     2.4,
-     2.2,
-     2.4
-    ],
-    "1": [
-     3,
-     0.6,
-     3
-    ],
-    "ease": "out"
-   },
-   "op": {
-    "0": 1,
-    "0.6": 1,
-    "1": 0
-   },
-   "fade": 0,
-   "spin": 200
-  },
-  {
-   "id": "hit4",
-   "t": "emit",
-   "at": 1.25,
-   "life": 0.04,
-   "att": "feet",
-   "pos": [
-    -1.72,
-    0.5,
-    -0.31
-   ],
-   "rate": 0,
-   "from": "sphere",
-   "fr": 1.5,
-   "dir": "up",
-   "speed": [
-    4,
-    8
-   ],
-   "plife": [
-    0.35,
-    0.55
-   ],
-   "look": "model",
-   "model": "water_blob",
-   "mmat": "ice",
-   "msize": [
-    0.07,
-    0.15
-   ],
-   "col": "#e6ffff",
-   "c2": "#7fe8ff",
-   "mspin": 0,
-   "gravity": 9,
-   "drag": 0,
-   "bounce": 0,
-   "burst": 18
-  },
-  {
-   "id": "crown5",
-   "t": "mesh",
-   "at": 1.45,
-   "life": 0.45,
-   "att": "feet",
-   "shape": "glb",
-   "glb": "mesh_water_crown",
-   "mat": "toonwater",
-   "col": "#9ff4ff",
-   "col2": "#36b8f5",
-   "rim": 0.6,
-   "scroll": 1.8,
-   "pos": [
-    2.95,
-    0,
-    -1.88
-   ],
-   "scale": {
-    "0": [
-     1.2,
-     0.5,
-     1.2
-    ],
-    "0.35": [
-     2.4,
-     2.2,
-     2.4
-    ],
-    "1": [
-     3,
-     0.6,
-     3
-    ],
-    "ease": "out"
-   },
-   "op": {
-    "0": 1,
-    "0.6": 1,
-    "1": 0
-   },
-   "fade": 0,
-   "spin": 200
-  },
-  {
-   "id": "hit5",
-   "t": "emit",
-   "at": 1.45,
-   "life": 0.04,
-   "att": "feet",
-   "pos": [
-    2.95,
-    0.5,
-    -1.88
-   ],
-   "rate": 0,
-   "from": "sphere",
-   "fr": 1.5,
-   "dir": "up",
-   "speed": [
-    4,
-    8
-   ],
-   "plife": [
-    0.35,
-    0.55
-   ],
-   "look": "model",
-   "model": "water_blob",
-   "mmat": "ice",
-   "msize": [
-    0.07,
-    0.15
-   ],
-   "col": "#e6ffff",
-   "c2": "#7fe8ff",
-   "mspin": 0,
-   "gravity": 9,
-   "drag": 0,
-   "bounce": 0,
-   "burst": 18
-  },
-  {
-   "id": "crown6",
-   "t": "mesh",
-   "at": 1.65,
-   "life": 0.45,
-   "att": "feet",
-   "shape": "glb",
-   "glb": "mesh_water_crown",
-   "mat": "toonwater",
-   "col": "#9ff4ff",
-   "col2": "#36b8f5",
-   "rim": 0.6,
-   "scroll": 1.8,
-   "pos": [
-    -0.0,
-    0,
-    0.0
-   ],
-   "scale": {
-    "0": [
-     1.2,
-     0.5,
-     1.2
-    ],
-    "0.35": [
-     2.4,
-     2.2,
-     2.4
-    ],
-    "1": [
-     3,
-     0.6,
-     3
-    ],
-    "ease": "out"
-   },
-   "op": {
-    "0": 1,
-    "0.6": 1,
-    "1": 0
-   },
-   "fade": 0,
-   "spin": 200
-  },
-  {
-   "id": "hit6",
-   "t": "emit",
-   "at": 1.65,
-   "life": 0.04,
-   "att": "feet",
-   "pos": [
-    -0.0,
-    0.5,
-    0.0
-   ],
-   "rate": 0,
-   "from": "sphere",
-   "fr": 1.5,
-   "dir": "up",
-   "speed": [
-    4,
-    8
-   ],
-   "plife": [
-    0.35,
-    0.55
-   ],
-   "look": "model",
-   "model": "water_blob",
-   "mmat": "ice",
-   "msize": [
-    0.07,
-    0.15
-   ],
-   "col": "#e6ffff",
-   "c2": "#7fe8ff",
-   "mspin": 0,
-   "gravity": 9,
-   "drag": 0,
-   "bounce": 0,
-   "burst": 18
-  },
-  {
-   "id": "crown7",
-   "t": "mesh",
-   "at": 1.85,
-   "life": 0.45,
-   "att": "feet",
-   "shape": "glb",
-   "glb": "mesh_water_crown",
-   "mat": "toonwater",
-   "col": "#9ff4ff",
-   "col2": "#36b8f5",
-   "rim": 0.6,
-   "scroll": 1.8,
-   "pos": [
-    -0.81,
-    0,
-    -1.55
-   ],
-   "scale": {
-    "0": [
-     1.2,
-     0.5,
-     1.2
-    ],
-    "0.35": [
-     2.4,
-     2.2,
-     2.4
-    ],
-    "1": [
-     3,
-     0.6,
-     3
-    ],
-    "ease": "out"
-   },
-   "op": {
-    "0": 1,
-    "0.6": 1,
-    "1": 0
-   },
-   "fade": 0,
-   "spin": 200
-  },
-  {
-   "id": "hit7",
-   "t": "emit",
-   "at": 1.85,
-   "life": 0.04,
-   "att": "feet",
-   "pos": [
-    -0.81,
-    0.5,
-    -1.55
-   ],
-   "rate": 0,
-   "from": "sphere",
-   "fr": 1.5,
-   "dir": "up",
-   "speed": [
-    4,
-    8
-   ],
-   "plife": [
-    0.35,
-    0.55
-   ],
-   "look": "model",
-   "model": "water_blob",
-   "mmat": "ice",
-   "msize": [
-    0.07,
-    0.15
-   ],
-   "col": "#e6ffff",
-   "c2": "#7fe8ff",
-   "mspin": 0,
-   "gravity": 9,
-   "drag": 0,
-   "bounce": 0,
-   "burst": 18
-  },
-  {
-   "id": "crown8",
-   "t": "mesh",
-   "at": 2.05,
-   "life": 0.45,
-   "att": "feet",
-   "shape": "glb",
-   "glb": "mesh_water_crown",
-   "mat": "toonwater",
-   "col": "#9ff4ff",
-   "col2": "#36b8f5",
-   "rim": 0.6,
-   "scroll": 1.8,
-   "pos": [
-    3.29,
-    0,
-    1.2
-   ],
-   "scale": {
-    "0": [
-     1.2,
-     0.5,
-     1.2
-    ],
-    "0.35": [
-     2.4,
-     2.2,
-     2.4
-    ],
-    "1": [
-     3,
-     0.6,
-     3
-    ],
-    "ease": "out"
-   },
-   "op": {
-    "0": 1,
-    "0.6": 1,
-    "1": 0
-   },
-   "fade": 0,
-   "spin": 200
-  },
-  {
-   "id": "hit8",
-   "t": "emit",
-   "at": 2.05,
-   "life": 0.04,
-   "att": "feet",
-   "pos": [
-    3.29,
-    0.5,
-    1.2
-   ],
-   "rate": 0,
-   "from": "sphere",
-   "fr": 1.5,
-   "dir": "up",
-   "speed": [
-    4,
-    8
-   ],
-   "plife": [
-    0.35,
-    0.55
-   ],
-   "look": "model",
-   "model": "water_blob",
-   "mmat": "ice",
-   "msize": [
-    0.07,
-    0.15
-   ],
-   "col": "#e6ffff",
-   "c2": "#7fe8ff",
-   "mspin": 0,
-   "gravity": 9,
-   "drag": 0,
-   "bounce": 0,
-   "burst": 18
-  },
-  {
-   "id": "crown9",
-   "t": "mesh",
-   "at": 2.25,
-   "life": 0.45,
-   "att": "feet",
-   "shape": "glb",
-   "glb": "mesh_water_crown",
-   "mat": "toonwater",
-   "col": "#9ff4ff",
-   "col2": "#36b8f5",
-   "rim": 0.6,
-   "scroll": 1.8,
-   "pos": [
-    -0.0,
-    0,
-    0.0
-   ],
-   "scale": {
-    "0": [
-     1.2,
-     0.5,
-     1.2
-    ],
-    "0.35": [
-     2.4,
-     2.2,
-     2.4
-    ],
-    "1": [
-     3,
-     0.6,
-     3
-    ],
-    "ease": "out"
-   },
-   "op": {
-    "0": 1,
-    "0.6": 1,
-    "1": 0
-   },
-   "fade": 0,
-   "spin": 200
-  },
-  {
-   "id": "hit9",
-   "t": "emit",
-   "at": 2.25,
-   "life": 0.04,
-   "att": "feet",
-   "pos": [
-    -0.0,
-    0.5,
-    0.0
-   ],
-   "rate": 0,
-   "from": "sphere",
-   "fr": 1.5,
-   "dir": "up",
-   "speed": [
-    4,
-    8
-   ],
-   "plife": [
-    0.35,
-    0.55
-   ],
-   "look": "model",
-   "model": "water_blob",
-   "mmat": "ice",
-   "msize": [
-    0.07,
-    0.15
-   ],
-   "col": "#e6ffff",
-   "c2": "#7fe8ff",
-   "mspin": 0,
-   "gravity": 9,
-   "drag": 0,
-   "bounce": 0,
-   "burst": 18
-  },
-  {
-   "id": "wave",
-   "t": "mesh",
-   "at": 0.45,
-   "life": 2.2,
-   "att": "feet",
-   "shape": "glb",
-   "glb": "mesh_water_ringwave",
-   "mat": "toonwater",
-   "col": "#9ff4ff",
-   "col2": "#36b8f5",
-   "rim": 0.6,
-   "scroll": 1.8,
-   "pos": [
-    0,
-    -0.05,
-    0
-   ],
-   "scale": {
-    "0": 2,
-    "1": 9.9,
-    "ease": "out"
-   },
-   "op": {
-    "0": 1,
-    "0.8": 0.9,
-    "1": 0
-   },
-   "fade": 0,
-   "spin": 200
-  },
-  {
-   "id": "jet",
-   "t": "mesh",
-   "at": 0.45,
-   "life": 2.1,
-   "att": "feet",
-   "shape": "glb",
-   "glb": "mesh_water_jet",
-   "mat": "toonwater",
-   "col": "#9ff4ff",
-   "col2": "#36b8f5",
-   "rim": 0.6,
-   "scroll": 1.8,
+   "rim": 0.5,
+   "scroll": 2,
    "pos": [
     0,
     -0.05,
@@ -949,18 +31,184 @@
    "scale": {
     "0": [
      2,
-     0,
+     0.6,
      2
     ],
-    "0.15": [
+    "0.3": [
+     6,
+     5,
+     6
+    ],
+    "1": [
+     7,
+     1,
+     7
+    ],
+    "ease": "out"
+   },
+   "op": {
+    "0": 1,
+    "0.6": 1,
+    "1": 0
+   },
+   "fade": 0,
+   "spin": 150
+  },
+  {
+   "id": "shock",
+   "t": "mesh",
+   "at": 0.4,
+   "life": 0.6,
+   "att": "feet",
+   "shape": "glb",
+   "glb": "mesh_water_ringwave_low",
+   "mat": "toonwater",
+   "col": "#9ff4ff",
+   "col2": "#36b8f5",
+   "rim": 0.5,
+   "scroll": 2,
+   "pos": [
+    0,
+    -0.03,
+    0
+   ],
+   "scale": {
+    "0": [
+     1,
+     2.5,
+     1
+    ],
+    "1": [
+     13.2,
+     1,
+     13.2
+    ],
+    "ease": "out"
+   },
+   "op": {
+    "0": 1,
+    "0.6": 1,
+    "1": 0
+   },
+   "fade": 0,
+   "spin": 200
+  },
+  {
+   "id": "shock2",
+   "t": "mesh",
+   "at": 0.4,
+   "life": 0.7,
+   "att": "feet",
+   "shape": "glb",
+   "glb": "mesh_water_ringwave",
+   "mat": "toonwater",
+   "col": "#9ff4ff",
+   "col2": "#36b8f5",
+   "rim": 0.5,
+   "scroll": 2,
+   "pos": [
+    0,
+    -0.05,
+    0
+   ],
+   "scale": {
+    "0": [
+     1,
+     1.4,
+     1
+    ],
+    "1": [
+     8,
+     1,
+     8
+    ],
+    "ease": "out"
+   },
+   "op": {
+    "0": 1,
+    "0.5": 1,
+    "1": 0
+   },
+   "fade": 0,
+   "spin": -150
+  },
+  {
+   "id": "geyser",
+   "t": "mesh",
+   "at": 0.4,
+   "life": 1.1,
+   "att": "feet",
+   "shape": "glb",
+   "glb": "mesh_water_jet",
+   "mat": "toonwater",
+   "col": "#9ff4ff",
+   "col2": "#36b8f5",
+   "rim": 0.5,
+   "scroll": 2,
+   "pos": [
+    0,
+    -0.05,
+    0
+   ],
+   "scale": {
+    "0": [
      3,
-     4,
+     0,
      3
     ],
-    "0.85": [
-     2.6,
+    "0.15": [
+     5,
+     7,
+     5
+    ],
+    "0.6": [
+     4.5,
+     6,
+     4.5
+    ],
+    "1": [
+     2,
+     0,
+     2
+    ]
+   },
+   "op": 1,
+   "fade": 0,
+   "spin": 400
+  },
+  {
+   "id": "column",
+   "t": "mesh",
+   "at": 0.7,
+   "life": 1.9,
+   "att": "feet",
+   "shape": "glb",
+   "glb": "mesh_water_jet",
+   "mat": "toonwater",
+   "col": "#9ff4ff",
+   "col2": "#36b8f5",
+   "rim": 0.5,
+   "scroll": 2,
+   "pos": [
+    0,
+    -0.05,
+    0
+   ],
+   "scale": {
+    "0": [
+     2,
+     2,
+     2
+    ],
+    "0.1": [
+     3,
+     3.5,
+     3
+    ],
+    "0.9": [
+     2.8,
      3.2,
-     2.6
+     2.8
     ],
     "1": [
      1.5,
@@ -970,74 +218,3603 @@
    },
    "op": 1,
    "fade": 0,
-   "spin": 400
+   "spin": -500
   },
   {
-   "id": "swirl",
+   "id": "boomdrops",
    "t": "emit",
-   "at": 0.45,
-   "life": 2,
+   "at": 0.4,
+   "life": 0.05,
    "att": "feet",
    "pos": [
     0,
     1,
     0
    ],
-   "rate": 60,
-   "from": "ring",
-   "fr": 6.6,
-   "dir": "out",
+   "rate": 0,
+   "from": "sphere",
+   "fr": 2,
+   "dir": "up",
    "speed": [
     8,
     14
    ],
    "plife": [
-    0.18,
-    0.3
+    0.4,
+    0.7
+   ],
+   "look": "model",
+   "model": "water_blob",
+   "mmat": "ice",
+   "msize": [
+    0.12,
+    0.24
+   ],
+   "col": "#e6ffff",
+   "c2": "#7fe8ff",
+   "mspin": 0,
+   "gravity": 9,
+   "drag": 0,
+   "bounce": 0,
+   "burst": 80
+  },
+  {
+   "id": "flash",
+   "t": "mesh",
+   "at": 0.4,
+   "life": 0.2,
+   "att": "feet",
+   "shape": "sphere",
+   "mat": "glow",
+   "col": "#bfeaff",
+   "pos": [
+    0,
+    0.8,
+    0
+   ],
+   "scale": {
+    "0": 0.5,
+    "0.3": 2.4,
+    "1": 0.3
+   },
+   "op": 0.5,
+   "fade": 0
+  },
+  {
+   "id": "lines",
+   "t": "emit",
+   "at": 0.4,
+   "life": 0.1,
+   "att": "feet",
+   "pos": [
+    0,
+    0.6,
+    0
+   ],
+   "burst": 60,
+   "rate": 0,
+   "from": "ring",
+   "fr": 2,
+   "dir": "out",
+   "speed": [
+    16,
+    24
+   ],
+   "plife": [
+    0.25,
+    0.4
    ],
    "look": "streak",
    "size": [
-    1.6,
-    2.8
+    3,
+    5
    ],
    "col": "#ffffff",
    "c2": "#c8fbff",
    "gravity": 0,
-   "drag": 0,
-   "curl": false
+   "drag": 0
   },
   {
-   "id": "glint",
+   "id": "cr1_0",
+   "t": "mesh",
+   "at": 0.6,
+   "life": 0.5,
+   "att": "feet",
+   "shape": "glb",
+   "glb": "mesh_water_crown",
+   "mat": "toonwater",
+   "col": "#9ff4ff",
+   "col2": "#36b8f5",
+   "rim": 0.5,
+   "scroll": 2,
+   "pos": [
+    6.11,
+    -0.05,
+    1.67
+   ],
+   "scale": {
+    "0": [
+     1.21,
+     0.4,
+     1.21
+    ],
+    "0.35": [
+     2.42,
+     2.178,
+     2.42
+    ],
+    "1": [
+     2.904,
+     0.4,
+     2.904
+    ],
+    "ease": "out"
+   },
+   "op": {
+    "0": 1,
+    "0.6": 1,
+    "1": 0
+   },
+   "fade": 0,
+   "spin": 200
+  },
+  {
+   "id": "jt1_0",
+   "t": "mesh",
+   "at": 0.6,
+   "life": 0.45,
+   "att": "feet",
+   "shape": "glb",
+   "glb": "mesh_water_jet",
+   "mat": "toonwater",
+   "col": "#9ff4ff",
+   "col2": "#36b8f5",
+   "rim": 0.5,
+   "scroll": 2,
+   "pos": [
+    6.11,
+    -0.05,
+    1.67
+   ],
+   "scale": {
+    "0": [
+     1.2,
+     0,
+     1.2
+    ],
+    "0.3": [
+     1.6,
+     2.4,
+     1.6
+    ],
+    "1": [
+     1,
+     0,
+     1
+    ]
+   },
+   "op": 1,
+   "fade": 0,
+   "spin": 300
+  },
+  {
+   "id": "cr1_1",
+   "t": "mesh",
+   "at": 0.65,
+   "life": 0.5,
+   "att": "feet",
+   "shape": "glb",
+   "glb": "mesh_water_crown",
+   "mat": "toonwater",
+   "col": "#9ff4ff",
+   "col2": "#36b8f5",
+   "rim": 0.5,
+   "scroll": 2,
+   "pos": [
+    -8.81,
+    -0.05,
+    -0.78
+   ],
+   "scale": {
+    "0": [
+     1.375,
+     0.4,
+     1.375
+    ],
+    "0.35": [
+     2.75,
+     2.475,
+     2.75
+    ],
+    "1": [
+     3.3,
+     0.4,
+     3.3
+    ],
+    "ease": "out"
+   },
+   "op": {
+    "0": 1,
+    "0.6": 1,
+    "1": 0
+   },
+   "fade": 0,
+   "spin": 200
+  },
+  {
+   "id": "jt1_1",
+   "t": "mesh",
+   "at": 0.65,
+   "life": 0.45,
+   "att": "feet",
+   "shape": "glb",
+   "glb": "mesh_water_jet",
+   "mat": "toonwater",
+   "col": "#9ff4ff",
+   "col2": "#36b8f5",
+   "rim": 0.5,
+   "scroll": 2,
+   "pos": [
+    -8.81,
+    -0.05,
+    -0.78
+   ],
+   "scale": {
+    "0": [
+     1.2,
+     0,
+     1.2
+    ],
+    "0.3": [
+     1.6,
+     2.4,
+     1.6
+    ],
+    "1": [
+     1,
+     0,
+     1
+    ]
+   },
+   "op": 1,
+   "fade": 0,
+   "spin": 300
+  },
+  {
+   "id": "cr1_2",
+   "t": "mesh",
+   "at": 0.7,
+   "life": 0.5,
+   "att": "feet",
+   "shape": "glb",
+   "glb": "mesh_water_crown",
+   "mat": "toonwater",
+   "col": "#9ff4ff",
+   "col2": "#36b8f5",
+   "rim": 0.5,
+   "scroll": 2,
+   "pos": [
+    6.55,
+    -0.05,
+    -1.07
+   ],
+   "scale": {
+    "0": [
+     1.73,
+     0.4,
+     1.73
+    ],
+    "0.35": [
+     3.46,
+     3.114,
+     3.46
+    ],
+    "1": [
+     4.152,
+     0.4,
+     4.152
+    ],
+    "ease": "out"
+   },
+   "op": {
+    "0": 1,
+    "0.6": 1,
+    "1": 0
+   },
+   "fade": 0,
+   "spin": 200
+  },
+  {
+   "id": "jt1_2",
+   "t": "mesh",
+   "at": 0.7,
+   "life": 0.45,
+   "att": "feet",
+   "shape": "glb",
+   "glb": "mesh_water_jet",
+   "mat": "toonwater",
+   "col": "#9ff4ff",
+   "col2": "#36b8f5",
+   "rim": 0.5,
+   "scroll": 2,
+   "pos": [
+    6.55,
+    -0.05,
+    -1.07
+   ],
+   "scale": {
+    "0": [
+     1.2,
+     0,
+     1.2
+    ],
+    "0.3": [
+     1.6,
+     2.4,
+     1.6
+    ],
+    "1": [
+     1,
+     0,
+     1
+    ]
+   },
+   "op": 1,
+   "fade": 0,
+   "spin": 300
+  },
+  {
+   "id": "ring1",
+   "t": "mesh",
+   "at": 0.6,
+   "life": 0.6,
+   "att": "feet",
+   "shape": "glb",
+   "glb": "mesh_water_ringwave_low",
+   "mat": "toonwater",
+   "col": "#9ff4ff",
+   "col2": "#36b8f5",
+   "rim": 0.5,
+   "scroll": 2,
+   "pos": [
+    0,
+    -0.03,
+    0
+   ],
+   "scale": {
+    "0": [
+     1.5,
+     1.8,
+     1.5
+    ],
+    "1": [
+     11.0,
+     1,
+     11.0
+    ],
+    "ease": "out"
+   },
+   "op": {
+    "0": 1,
+    "0.6": 0.9,
+    "1": 0
+   },
+   "fade": 0,
+   "spin": 150
+  },
+  {
+   "id": "sp1",
    "t": "emit",
-   "at": 0.45,
-   "life": 2,
+   "at": 0.6,
+   "life": 0.04,
    "att": "feet",
    "pos": [
     0,
-    2,
+    0.4,
     0
    ],
-   "rate": 40,
-   "from": "sphere",
-   "fr": 5,
-   "dir": "random",
+   "rate": 0,
+   "from": "ring",
+   "fr": 7,
+   "dir": "up",
    "speed": [
-    0.3,
-    1
+    4,
+    8
    ],
    "plife": [
-    0.3,
+    0.4,
+    0.7
+   ],
+   "look": "model",
+   "model": "water_blob",
+   "mmat": "ice",
+   "msize": [
+    0.1,
+    0.18
+   ],
+   "col": "#e6ffff",
+   "c2": "#7fe8ff",
+   "mspin": 0,
+   "gravity": 9,
+   "drag": 0,
+   "bounce": 0,
+   "burst": 40
+  },
+  {
+   "id": "cr2_0",
+   "t": "mesh",
+   "at": 0.8,
+   "life": 0.5,
+   "att": "feet",
+   "shape": "glb",
+   "glb": "mesh_water_crown",
+   "mat": "toonwater",
+   "col": "#9ff4ff",
+   "col2": "#36b8f5",
+   "rim": 0.5,
+   "scroll": 2,
+   "pos": [
+    7.23,
+    -0.05,
+    0.9
+   ],
+   "scale": {
+    "0": [
+     1.51,
+     0.4,
+     1.51
+    ],
+    "0.35": [
+     3.02,
+     2.718,
+     3.02
+    ],
+    "1": [
+     3.6239999999999997,
+     0.4,
+     3.6239999999999997
+    ],
+    "ease": "out"
+   },
+   "op": {
+    "0": 1,
+    "0.6": 1,
+    "1": 0
+   },
+   "fade": 0,
+   "spin": 200
+  },
+  {
+   "id": "jt2_0",
+   "t": "mesh",
+   "at": 0.8,
+   "life": 0.45,
+   "att": "feet",
+   "shape": "glb",
+   "glb": "mesh_water_jet",
+   "mat": "toonwater",
+   "col": "#9ff4ff",
+   "col2": "#36b8f5",
+   "rim": 0.5,
+   "scroll": 2,
+   "pos": [
+    7.23,
+    -0.05,
+    0.9
+   ],
+   "scale": {
+    "0": [
+     1.2,
+     0,
+     1.2
+    ],
+    "0.3": [
+     1.6,
+     2.4,
+     1.6
+    ],
+    "1": [
+     1,
+     0,
+     1
+    ]
+   },
+   "op": 1,
+   "fade": 0,
+   "spin": 300
+  },
+  {
+   "id": "cr2_1",
+   "t": "mesh",
+   "at": 0.85,
+   "life": 0.5,
+   "att": "feet",
+   "shape": "glb",
+   "glb": "mesh_water_crown",
+   "mat": "toonwater",
+   "col": "#9ff4ff",
+   "col2": "#36b8f5",
+   "rim": 0.5,
+   "scroll": 2,
+   "pos": [
+    -3.93,
+    -0.05,
+    -3.02
+   ],
+   "scale": {
+    "0": [
+     1.785,
+     0.4,
+     1.785
+    ],
+    "0.35": [
+     3.57,
+     3.213,
+     3.57
+    ],
+    "1": [
+     4.284,
+     0.4,
+     4.284
+    ],
+    "ease": "out"
+   },
+   "op": {
+    "0": 1,
+    "0.6": 1,
+    "1": 0
+   },
+   "fade": 0,
+   "spin": 200
+  },
+  {
+   "id": "jt2_1",
+   "t": "mesh",
+   "at": 0.85,
+   "life": 0.45,
+   "att": "feet",
+   "shape": "glb",
+   "glb": "mesh_water_jet",
+   "mat": "toonwater",
+   "col": "#9ff4ff",
+   "col2": "#36b8f5",
+   "rim": 0.5,
+   "scroll": 2,
+   "pos": [
+    -3.93,
+    -0.05,
+    -3.02
+   ],
+   "scale": {
+    "0": [
+     1.2,
+     0,
+     1.2
+    ],
+    "0.3": [
+     1.6,
+     2.4,
+     1.6
+    ],
+    "1": [
+     1,
+     0,
+     1
+    ]
+   },
+   "op": 1,
+   "fade": 0,
+   "spin": 300
+  },
+  {
+   "id": "cr2_2",
+   "t": "mesh",
+   "at": 0.9,
+   "life": 0.5,
+   "att": "feet",
+   "shape": "glb",
+   "glb": "mesh_water_crown",
+   "mat": "toonwater",
+   "col": "#9ff4ff",
+   "col2": "#36b8f5",
+   "rim": 0.5,
+   "scroll": 2,
+   "pos": [
+    -4.05,
+    -0.05,
+    -5.97
+   ],
+   "scale": {
+    "0": [
+     1.61,
+     0.4,
+     1.61
+    ],
+    "0.35": [
+     3.22,
+     2.898,
+     3.22
+    ],
+    "1": [
+     3.864,
+     0.4,
+     3.864
+    ],
+    "ease": "out"
+   },
+   "op": {
+    "0": 1,
+    "0.6": 1,
+    "1": 0
+   },
+   "fade": 0,
+   "spin": 200
+  },
+  {
+   "id": "jt2_2",
+   "t": "mesh",
+   "at": 0.9,
+   "life": 0.45,
+   "att": "feet",
+   "shape": "glb",
+   "glb": "mesh_water_jet",
+   "mat": "toonwater",
+   "col": "#9ff4ff",
+   "col2": "#36b8f5",
+   "rim": 0.5,
+   "scroll": 2,
+   "pos": [
+    -4.05,
+    -0.05,
+    -5.97
+   ],
+   "scale": {
+    "0": [
+     1.2,
+     0,
+     1.2
+    ],
+    "0.3": [
+     1.6,
+     2.4,
+     1.6
+    ],
+    "1": [
+     1,
+     0,
+     1
+    ]
+   },
+   "op": 1,
+   "fade": 0,
+   "spin": 300
+  },
+  {
+   "id": "ring2",
+   "t": "mesh",
+   "at": 0.8,
+   "life": 0.6,
+   "att": "feet",
+   "shape": "glb",
+   "glb": "mesh_water_ringwave_low",
+   "mat": "toonwater",
+   "col": "#9ff4ff",
+   "col2": "#36b8f5",
+   "rim": 0.5,
+   "scroll": 2,
+   "pos": [
+    0,
+    -0.03,
+    0
+   ],
+   "scale": {
+    "0": [
+     1.5,
+     1.8,
+     1.5
+    ],
+    "1": [
+     11.0,
+     1,
+     11.0
+    ],
+    "ease": "out"
+   },
+   "op": {
+    "0": 1,
+    "0.6": 0.9,
+    "1": 0
+   },
+   "fade": 0,
+   "spin": 150
+  },
+  {
+   "id": "sp2",
+   "t": "emit",
+   "at": 0.8,
+   "life": 0.04,
+   "att": "feet",
+   "pos": [
+    0,
+    0.4,
+    0
+   ],
+   "rate": 0,
+   "from": "ring",
+   "fr": 7,
+   "dir": "up",
+   "speed": [
+    4,
+    8
+   ],
+   "plife": [
+    0.4,
+    0.7
+   ],
+   "look": "model",
+   "model": "water_blob",
+   "mmat": "ice",
+   "msize": [
+    0.1,
+    0.18
+   ],
+   "col": "#e6ffff",
+   "c2": "#7fe8ff",
+   "mspin": 0,
+   "gravity": 9,
+   "drag": 0,
+   "bounce": 0,
+   "burst": 40
+  },
+  {
+   "id": "cr3_0",
+   "t": "mesh",
+   "at": 1.0,
+   "life": 0.5,
+   "att": "feet",
+   "shape": "glb",
+   "glb": "mesh_water_crown",
+   "mat": "toonwater",
+   "col": "#9ff4ff",
+   "col2": "#36b8f5",
+   "rim": 0.5,
+   "scroll": 2,
+   "pos": [
+    -7.46,
+    -0.05,
+    -2.24
+   ],
+   "scale": {
+    "0": [
+     1.57,
+     0.4,
+     1.57
+    ],
+    "0.35": [
+     3.14,
+     2.826,
+     3.14
+    ],
+    "1": [
+     3.768,
+     0.4,
+     3.768
+    ],
+    "ease": "out"
+   },
+   "op": {
+    "0": 1,
+    "0.6": 1,
+    "1": 0
+   },
+   "fade": 0,
+   "spin": 200
+  },
+  {
+   "id": "jt3_0",
+   "t": "mesh",
+   "at": 1.0,
+   "life": 0.45,
+   "att": "feet",
+   "shape": "glb",
+   "glb": "mesh_water_jet",
+   "mat": "toonwater",
+   "col": "#9ff4ff",
+   "col2": "#36b8f5",
+   "rim": 0.5,
+   "scroll": 2,
+   "pos": [
+    -7.46,
+    -0.05,
+    -2.24
+   ],
+   "scale": {
+    "0": [
+     1.2,
+     0,
+     1.2
+    ],
+    "0.3": [
+     1.6,
+     2.4,
+     1.6
+    ],
+    "1": [
+     1,
+     0,
+     1
+    ]
+   },
+   "op": 1,
+   "fade": 0,
+   "spin": 300
+  },
+  {
+   "id": "cr3_1",
+   "t": "mesh",
+   "at": 1.05,
+   "life": 0.5,
+   "att": "feet",
+   "shape": "glb",
+   "glb": "mesh_water_crown",
+   "mat": "toonwater",
+   "col": "#9ff4ff",
+   "col2": "#36b8f5",
+   "rim": 0.5,
+   "scroll": 2,
+   "pos": [
+    -3.12,
+    -0.05,
+    -1.36
+   ],
+   "scale": {
+    "0": [
+     1.535,
+     0.4,
+     1.535
+    ],
+    "0.35": [
+     3.07,
+     2.763,
+     3.07
+    ],
+    "1": [
+     3.6839999999999997,
+     0.4,
+     3.6839999999999997
+    ],
+    "ease": "out"
+   },
+   "op": {
+    "0": 1,
+    "0.6": 1,
+    "1": 0
+   },
+   "fade": 0,
+   "spin": 200
+  },
+  {
+   "id": "jt3_1",
+   "t": "mesh",
+   "at": 1.05,
+   "life": 0.45,
+   "att": "feet",
+   "shape": "glb",
+   "glb": "mesh_water_jet",
+   "mat": "toonwater",
+   "col": "#9ff4ff",
+   "col2": "#36b8f5",
+   "rim": 0.5,
+   "scroll": 2,
+   "pos": [
+    -3.12,
+    -0.05,
+    -1.36
+   ],
+   "scale": {
+    "0": [
+     1.2,
+     0,
+     1.2
+    ],
+    "0.3": [
+     1.6,
+     2.4,
+     1.6
+    ],
+    "1": [
+     1,
+     0,
+     1
+    ]
+   },
+   "op": 1,
+   "fade": 0,
+   "spin": 300
+  },
+  {
+   "id": "cr3_2",
+   "t": "mesh",
+   "at": 1.1,
+   "life": 0.5,
+   "att": "feet",
+   "shape": "glb",
+   "glb": "mesh_water_crown",
+   "mat": "toonwater",
+   "col": "#9ff4ff",
+   "col2": "#36b8f5",
+   "rim": 0.5,
+   "scroll": 2,
+   "pos": [
+    3.57,
+    -0.05,
+    5.21
+   ],
+   "scale": {
+    "0": [
+     1.455,
+     0.4,
+     1.455
+    ],
+    "0.35": [
+     2.91,
+     2.619,
+     2.91
+    ],
+    "1": [
+     3.492,
+     0.4,
+     3.492
+    ],
+    "ease": "out"
+   },
+   "op": {
+    "0": 1,
+    "0.6": 1,
+    "1": 0
+   },
+   "fade": 0,
+   "spin": 200
+  },
+  {
+   "id": "jt3_2",
+   "t": "mesh",
+   "at": 1.1,
+   "life": 0.45,
+   "att": "feet",
+   "shape": "glb",
+   "glb": "mesh_water_jet",
+   "mat": "toonwater",
+   "col": "#9ff4ff",
+   "col2": "#36b8f5",
+   "rim": 0.5,
+   "scroll": 2,
+   "pos": [
+    3.57,
+    -0.05,
+    5.21
+   ],
+   "scale": {
+    "0": [
+     1.2,
+     0,
+     1.2
+    ],
+    "0.3": [
+     1.6,
+     2.4,
+     1.6
+    ],
+    "1": [
+     1,
+     0,
+     1
+    ]
+   },
+   "op": 1,
+   "fade": 0,
+   "spin": 300
+  },
+  {
+   "id": "ring3",
+   "t": "mesh",
+   "at": 1.0,
+   "life": 0.6,
+   "att": "feet",
+   "shape": "glb",
+   "glb": "mesh_water_ringwave_low",
+   "mat": "toonwater",
+   "col": "#9ff4ff",
+   "col2": "#36b8f5",
+   "rim": 0.5,
+   "scroll": 2,
+   "pos": [
+    0,
+    -0.03,
+    0
+   ],
+   "scale": {
+    "0": [
+     1.5,
+     1.8,
+     1.5
+    ],
+    "1": [
+     11.0,
+     1,
+     11.0
+    ],
+    "ease": "out"
+   },
+   "op": {
+    "0": 1,
+    "0.6": 0.9,
+    "1": 0
+   },
+   "fade": 0,
+   "spin": 150
+  },
+  {
+   "id": "sp3",
+   "t": "emit",
+   "at": 1.0,
+   "life": 0.04,
+   "att": "feet",
+   "pos": [
+    0,
+    0.4,
+    0
+   ],
+   "rate": 0,
+   "from": "ring",
+   "fr": 7,
+   "dir": "up",
+   "speed": [
+    4,
+    8
+   ],
+   "plife": [
+    0.4,
+    0.7
+   ],
+   "look": "model",
+   "model": "water_blob",
+   "mmat": "ice",
+   "msize": [
+    0.1,
+    0.18
+   ],
+   "col": "#e6ffff",
+   "c2": "#7fe8ff",
+   "mspin": 0,
+   "gravity": 9,
+   "drag": 0,
+   "bounce": 0,
+   "burst": 40
+  },
+  {
+   "id": "cr4_0",
+   "t": "mesh",
+   "at": 1.2,
+   "life": 0.5,
+   "att": "feet",
+   "shape": "glb",
+   "glb": "mesh_water_crown",
+   "mat": "toonwater",
+   "col": "#9ff4ff",
+   "col2": "#36b8f5",
+   "rim": 0.5,
+   "scroll": 2,
+   "pos": [
+    0.49,
+    -0.05,
+    -6.31
+   ],
+   "scale": {
+    "0": [
+     1.42,
+     0.4,
+     1.42
+    ],
+    "0.35": [
+     2.84,
+     2.556,
+     2.84
+    ],
+    "1": [
+     3.408,
+     0.4,
+     3.408
+    ],
+    "ease": "out"
+   },
+   "op": {
+    "0": 1,
+    "0.6": 1,
+    "1": 0
+   },
+   "fade": 0,
+   "spin": 200
+  },
+  {
+   "id": "jt4_0",
+   "t": "mesh",
+   "at": 1.2,
+   "life": 0.45,
+   "att": "feet",
+   "shape": "glb",
+   "glb": "mesh_water_jet",
+   "mat": "toonwater",
+   "col": "#9ff4ff",
+   "col2": "#36b8f5",
+   "rim": 0.5,
+   "scroll": 2,
+   "pos": [
+    0.49,
+    -0.05,
+    -6.31
+   ],
+   "scale": {
+    "0": [
+     1.2,
+     0,
+     1.2
+    ],
+    "0.3": [
+     1.6,
+     2.4,
+     1.6
+    ],
+    "1": [
+     1,
+     0,
+     1
+    ]
+   },
+   "op": 1,
+   "fade": 0,
+   "spin": 300
+  },
+  {
+   "id": "cr4_1",
+   "t": "mesh",
+   "at": 1.25,
+   "life": 0.5,
+   "att": "feet",
+   "shape": "glb",
+   "glb": "mesh_water_crown",
+   "mat": "toonwater",
+   "col": "#9ff4ff",
+   "col2": "#36b8f5",
+   "rim": 0.5,
+   "scroll": 2,
+   "pos": [
+    -3.9,
+    -0.05,
+    -0.45
+   ],
+   "scale": {
+    "0": [
+     1.79,
+     0.4,
+     1.79
+    ],
+    "0.35": [
+     3.58,
+     3.222,
+     3.58
+    ],
+    "1": [
+     4.296,
+     0.4,
+     4.296
+    ],
+    "ease": "out"
+   },
+   "op": {
+    "0": 1,
+    "0.6": 1,
+    "1": 0
+   },
+   "fade": 0,
+   "spin": 200
+  },
+  {
+   "id": "jt4_1",
+   "t": "mesh",
+   "at": 1.25,
+   "life": 0.45,
+   "att": "feet",
+   "shape": "glb",
+   "glb": "mesh_water_jet",
+   "mat": "toonwater",
+   "col": "#9ff4ff",
+   "col2": "#36b8f5",
+   "rim": 0.5,
+   "scroll": 2,
+   "pos": [
+    -3.9,
+    -0.05,
+    -0.45
+   ],
+   "scale": {
+    "0": [
+     1.2,
+     0,
+     1.2
+    ],
+    "0.3": [
+     1.6,
+     2.4,
+     1.6
+    ],
+    "1": [
+     1,
+     0,
+     1
+    ]
+   },
+   "op": 1,
+   "fade": 0,
+   "spin": 300
+  },
+  {
+   "id": "cr4_2",
+   "t": "mesh",
+   "at": 1.3,
+   "life": 0.5,
+   "att": "feet",
+   "shape": "glb",
+   "glb": "mesh_water_crown",
+   "mat": "toonwater",
+   "col": "#9ff4ff",
+   "col2": "#36b8f5",
+   "rim": 0.5,
+   "scroll": 2,
+   "pos": [
+    3.12,
+    -0.05,
+    -4.0
+   ],
+   "scale": {
+    "0": [
+     1.33,
+     0.4,
+     1.33
+    ],
+    "0.35": [
+     2.66,
+     2.394,
+     2.66
+    ],
+    "1": [
+     3.192,
+     0.4,
+     3.192
+    ],
+    "ease": "out"
+   },
+   "op": {
+    "0": 1,
+    "0.6": 1,
+    "1": 0
+   },
+   "fade": 0,
+   "spin": 200
+  },
+  {
+   "id": "jt4_2",
+   "t": "mesh",
+   "at": 1.3,
+   "life": 0.45,
+   "att": "feet",
+   "shape": "glb",
+   "glb": "mesh_water_jet",
+   "mat": "toonwater",
+   "col": "#9ff4ff",
+   "col2": "#36b8f5",
+   "rim": 0.5,
+   "scroll": 2,
+   "pos": [
+    3.12,
+    -0.05,
+    -4.0
+   ],
+   "scale": {
+    "0": [
+     1.2,
+     0,
+     1.2
+    ],
+    "0.3": [
+     1.6,
+     2.4,
+     1.6
+    ],
+    "1": [
+     1,
+     0,
+     1
+    ]
+   },
+   "op": 1,
+   "fade": 0,
+   "spin": 300
+  },
+  {
+   "id": "ring4",
+   "t": "mesh",
+   "at": 1.2,
+   "life": 0.6,
+   "att": "feet",
+   "shape": "glb",
+   "glb": "mesh_water_ringwave_low",
+   "mat": "toonwater",
+   "col": "#9ff4ff",
+   "col2": "#36b8f5",
+   "rim": 0.5,
+   "scroll": 2,
+   "pos": [
+    0,
+    -0.03,
+    0
+   ],
+   "scale": {
+    "0": [
+     1.5,
+     1.8,
+     1.5
+    ],
+    "1": [
+     11.0,
+     1,
+     11.0
+    ],
+    "ease": "out"
+   },
+   "op": {
+    "0": 1,
+    "0.6": 0.9,
+    "1": 0
+   },
+   "fade": 0,
+   "spin": 150
+  },
+  {
+   "id": "sp4",
+   "t": "emit",
+   "at": 1.2,
+   "life": 0.04,
+   "att": "feet",
+   "pos": [
+    0,
+    0.4,
+    0
+   ],
+   "rate": 0,
+   "from": "ring",
+   "fr": 7,
+   "dir": "up",
+   "speed": [
+    4,
+    8
+   ],
+   "plife": [
+    0.4,
+    0.7
+   ],
+   "look": "model",
+   "model": "water_blob",
+   "mmat": "ice",
+   "msize": [
+    0.1,
+    0.18
+   ],
+   "col": "#e6ffff",
+   "c2": "#7fe8ff",
+   "mspin": 0,
+   "gravity": 9,
+   "drag": 0,
+   "bounce": 0,
+   "burst": 40
+  },
+  {
+   "id": "cr5_0",
+   "t": "mesh",
+   "at": 1.4,
+   "life": 0.5,
+   "att": "feet",
+   "shape": "glb",
+   "glb": "mesh_water_crown",
+   "mat": "toonwater",
+   "col": "#9ff4ff",
+   "col2": "#36b8f5",
+   "rim": 0.5,
+   "scroll": 2,
+   "pos": [
+    -6.27,
+    -0.05,
+    2.21
+   ],
+   "scale": {
+    "0": [
+     1.465,
+     0.4,
+     1.465
+    ],
+    "0.35": [
+     2.93,
+     2.637,
+     2.93
+    ],
+    "1": [
+     3.516,
+     0.4,
+     3.516
+    ],
+    "ease": "out"
+   },
+   "op": {
+    "0": 1,
+    "0.6": 1,
+    "1": 0
+   },
+   "fade": 0,
+   "spin": 200
+  },
+  {
+   "id": "jt5_0",
+   "t": "mesh",
+   "at": 1.4,
+   "life": 0.45,
+   "att": "feet",
+   "shape": "glb",
+   "glb": "mesh_water_jet",
+   "mat": "toonwater",
+   "col": "#9ff4ff",
+   "col2": "#36b8f5",
+   "rim": 0.5,
+   "scroll": 2,
+   "pos": [
+    -6.27,
+    -0.05,
+    2.21
+   ],
+   "scale": {
+    "0": [
+     1.2,
+     0,
+     1.2
+    ],
+    "0.3": [
+     1.6,
+     2.4,
+     1.6
+    ],
+    "1": [
+     1,
+     0,
+     1
+    ]
+   },
+   "op": 1,
+   "fade": 0,
+   "spin": 300
+  },
+  {
+   "id": "cr5_1",
+   "t": "mesh",
+   "at": 1.45,
+   "life": 0.5,
+   "att": "feet",
+   "shape": "glb",
+   "glb": "mesh_water_crown",
+   "mat": "toonwater",
+   "col": "#9ff4ff",
+   "col2": "#36b8f5",
+   "rim": 0.5,
+   "scroll": 2,
+   "pos": [
+    2.64,
+    -0.05,
+    -1.02
+   ],
+   "scale": {
+    "0": [
+     1.405,
+     0.4,
+     1.405
+    ],
+    "0.35": [
+     2.81,
+     2.529,
+     2.81
+    ],
+    "1": [
+     3.372,
+     0.4,
+     3.372
+    ],
+    "ease": "out"
+   },
+   "op": {
+    "0": 1,
+    "0.6": 1,
+    "1": 0
+   },
+   "fade": 0,
+   "spin": 200
+  },
+  {
+   "id": "jt5_1",
+   "t": "mesh",
+   "at": 1.45,
+   "life": 0.45,
+   "att": "feet",
+   "shape": "glb",
+   "glb": "mesh_water_jet",
+   "mat": "toonwater",
+   "col": "#9ff4ff",
+   "col2": "#36b8f5",
+   "rim": 0.5,
+   "scroll": 2,
+   "pos": [
+    2.64,
+    -0.05,
+    -1.02
+   ],
+   "scale": {
+    "0": [
+     1.2,
+     0,
+     1.2
+    ],
+    "0.3": [
+     1.6,
+     2.4,
+     1.6
+    ],
+    "1": [
+     1,
+     0,
+     1
+    ]
+   },
+   "op": 1,
+   "fade": 0,
+   "spin": 300
+  },
+  {
+   "id": "cr5_2",
+   "t": "mesh",
+   "at": 1.5,
+   "life": 0.5,
+   "att": "feet",
+   "shape": "glb",
+   "glb": "mesh_water_crown",
+   "mat": "toonwater",
+   "col": "#9ff4ff",
+   "col2": "#36b8f5",
+   "rim": 0.5,
+   "scroll": 2,
+   "pos": [
+    -2.78,
+    -0.05,
+    -0.29
+   ],
+   "scale": {
+    "0": [
+     1.48,
+     0.4,
+     1.48
+    ],
+    "0.35": [
+     2.96,
+     2.664,
+     2.96
+    ],
+    "1": [
+     3.552,
+     0.4,
+     3.552
+    ],
+    "ease": "out"
+   },
+   "op": {
+    "0": 1,
+    "0.6": 1,
+    "1": 0
+   },
+   "fade": 0,
+   "spin": 200
+  },
+  {
+   "id": "jt5_2",
+   "t": "mesh",
+   "at": 1.5,
+   "life": 0.45,
+   "att": "feet",
+   "shape": "glb",
+   "glb": "mesh_water_jet",
+   "mat": "toonwater",
+   "col": "#9ff4ff",
+   "col2": "#36b8f5",
+   "rim": 0.5,
+   "scroll": 2,
+   "pos": [
+    -2.78,
+    -0.05,
+    -0.29
+   ],
+   "scale": {
+    "0": [
+     1.2,
+     0,
+     1.2
+    ],
+    "0.3": [
+     1.6,
+     2.4,
+     1.6
+    ],
+    "1": [
+     1,
+     0,
+     1
+    ]
+   },
+   "op": 1,
+   "fade": 0,
+   "spin": 300
+  },
+  {
+   "id": "ring5",
+   "t": "mesh",
+   "at": 1.4,
+   "life": 0.6,
+   "att": "feet",
+   "shape": "glb",
+   "glb": "mesh_water_ringwave_low",
+   "mat": "toonwater",
+   "col": "#9ff4ff",
+   "col2": "#36b8f5",
+   "rim": 0.5,
+   "scroll": 2,
+   "pos": [
+    0,
+    -0.03,
+    0
+   ],
+   "scale": {
+    "0": [
+     1.5,
+     1.8,
+     1.5
+    ],
+    "1": [
+     11.0,
+     1,
+     11.0
+    ],
+    "ease": "out"
+   },
+   "op": {
+    "0": 1,
+    "0.6": 0.9,
+    "1": 0
+   },
+   "fade": 0,
+   "spin": 150
+  },
+  {
+   "id": "sp5",
+   "t": "emit",
+   "at": 1.4,
+   "life": 0.04,
+   "att": "feet",
+   "pos": [
+    0,
+    0.4,
+    0
+   ],
+   "rate": 0,
+   "from": "ring",
+   "fr": 7,
+   "dir": "up",
+   "speed": [
+    4,
+    8
+   ],
+   "plife": [
+    0.4,
+    0.7
+   ],
+   "look": "model",
+   "model": "water_blob",
+   "mmat": "ice",
+   "msize": [
+    0.1,
+    0.18
+   ],
+   "col": "#e6ffff",
+   "c2": "#7fe8ff",
+   "mspin": 0,
+   "gravity": 9,
+   "drag": 0,
+   "bounce": 0,
+   "burst": 40
+  },
+  {
+   "id": "cr6_0",
+   "t": "mesh",
+   "at": 1.6,
+   "life": 0.5,
+   "att": "feet",
+   "shape": "glb",
+   "glb": "mesh_water_crown",
+   "mat": "toonwater",
+   "col": "#9ff4ff",
+   "col2": "#36b8f5",
+   "rim": 0.5,
+   "scroll": 2,
+   "pos": [
+    -4.02,
+    -0.05,
+    -1.97
+   ],
+   "scale": {
+    "0": [
+     1.795,
+     0.4,
+     1.795
+    ],
+    "0.35": [
+     3.59,
+     3.231,
+     3.59
+    ],
+    "1": [
+     4.308,
+     0.4,
+     4.308
+    ],
+    "ease": "out"
+   },
+   "op": {
+    "0": 1,
+    "0.6": 1,
+    "1": 0
+   },
+   "fade": 0,
+   "spin": 200
+  },
+  {
+   "id": "jt6_0",
+   "t": "mesh",
+   "at": 1.6,
+   "life": 0.45,
+   "att": "feet",
+   "shape": "glb",
+   "glb": "mesh_water_jet",
+   "mat": "toonwater",
+   "col": "#9ff4ff",
+   "col2": "#36b8f5",
+   "rim": 0.5,
+   "scroll": 2,
+   "pos": [
+    -4.02,
+    -0.05,
+    -1.97
+   ],
+   "scale": {
+    "0": [
+     1.2,
+     0,
+     1.2
+    ],
+    "0.3": [
+     1.6,
+     2.4,
+     1.6
+    ],
+    "1": [
+     1,
+     0,
+     1
+    ]
+   },
+   "op": 1,
+   "fade": 0,
+   "spin": 300
+  },
+  {
+   "id": "cr6_1",
+   "t": "mesh",
+   "at": 1.65,
+   "life": 0.5,
+   "att": "feet",
+   "shape": "glb",
+   "glb": "mesh_water_crown",
+   "mat": "toonwater",
+   "col": "#9ff4ff",
+   "col2": "#36b8f5",
+   "rim": 0.5,
+   "scroll": 2,
+   "pos": [
+    -2.86,
+    -0.05,
+    3.97
+   ],
+   "scale": {
+    "0": [
+     1.555,
+     0.4,
+     1.555
+    ],
+    "0.35": [
+     3.11,
+     2.799,
+     3.11
+    ],
+    "1": [
+     3.7319999999999998,
+     0.4,
+     3.7319999999999998
+    ],
+    "ease": "out"
+   },
+   "op": {
+    "0": 1,
+    "0.6": 1,
+    "1": 0
+   },
+   "fade": 0,
+   "spin": 200
+  },
+  {
+   "id": "jt6_1",
+   "t": "mesh",
+   "at": 1.65,
+   "life": 0.45,
+   "att": "feet",
+   "shape": "glb",
+   "glb": "mesh_water_jet",
+   "mat": "toonwater",
+   "col": "#9ff4ff",
+   "col2": "#36b8f5",
+   "rim": 0.5,
+   "scroll": 2,
+   "pos": [
+    -2.86,
+    -0.05,
+    3.97
+   ],
+   "scale": {
+    "0": [
+     1.2,
+     0,
+     1.2
+    ],
+    "0.3": [
+     1.6,
+     2.4,
+     1.6
+    ],
+    "1": [
+     1,
+     0,
+     1
+    ]
+   },
+   "op": 1,
+   "fade": 0,
+   "spin": 300
+  },
+  {
+   "id": "cr6_2",
+   "t": "mesh",
+   "at": 1.7,
+   "life": 0.5,
+   "att": "feet",
+   "shape": "glb",
+   "glb": "mesh_water_crown",
+   "mat": "toonwater",
+   "col": "#9ff4ff",
+   "col2": "#36b8f5",
+   "rim": 0.5,
+   "scroll": 2,
+   "pos": [
+    -0.51,
+    -0.05,
+    5.54
+   ],
+   "scale": {
+    "0": [
+     1.295,
+     0.4,
+     1.295
+    ],
+    "0.35": [
+     2.59,
+     2.331,
+     2.59
+    ],
+    "1": [
+     3.1079999999999997,
+     0.4,
+     3.1079999999999997
+    ],
+    "ease": "out"
+   },
+   "op": {
+    "0": 1,
+    "0.6": 1,
+    "1": 0
+   },
+   "fade": 0,
+   "spin": 200
+  },
+  {
+   "id": "jt6_2",
+   "t": "mesh",
+   "at": 1.7,
+   "life": 0.45,
+   "att": "feet",
+   "shape": "glb",
+   "glb": "mesh_water_jet",
+   "mat": "toonwater",
+   "col": "#9ff4ff",
+   "col2": "#36b8f5",
+   "rim": 0.5,
+   "scroll": 2,
+   "pos": [
+    -0.51,
+    -0.05,
+    5.54
+   ],
+   "scale": {
+    "0": [
+     1.2,
+     0,
+     1.2
+    ],
+    "0.3": [
+     1.6,
+     2.4,
+     1.6
+    ],
+    "1": [
+     1,
+     0,
+     1
+    ]
+   },
+   "op": 1,
+   "fade": 0,
+   "spin": 300
+  },
+  {
+   "id": "ring6",
+   "t": "mesh",
+   "at": 1.6,
+   "life": 0.6,
+   "att": "feet",
+   "shape": "glb",
+   "glb": "mesh_water_ringwave_low",
+   "mat": "toonwater",
+   "col": "#9ff4ff",
+   "col2": "#36b8f5",
+   "rim": 0.5,
+   "scroll": 2,
+   "pos": [
+    0,
+    -0.03,
+    0
+   ],
+   "scale": {
+    "0": [
+     1.5,
+     1.8,
+     1.5
+    ],
+    "1": [
+     11.0,
+     1,
+     11.0
+    ],
+    "ease": "out"
+   },
+   "op": {
+    "0": 1,
+    "0.6": 0.9,
+    "1": 0
+   },
+   "fade": 0,
+   "spin": 150
+  },
+  {
+   "id": "sp6",
+   "t": "emit",
+   "at": 1.6,
+   "life": 0.04,
+   "att": "feet",
+   "pos": [
+    0,
+    0.4,
+    0
+   ],
+   "rate": 0,
+   "from": "ring",
+   "fr": 7,
+   "dir": "up",
+   "speed": [
+    4,
+    8
+   ],
+   "plife": [
+    0.4,
+    0.7
+   ],
+   "look": "model",
+   "model": "water_blob",
+   "mmat": "ice",
+   "msize": [
+    0.1,
+    0.18
+   ],
+   "col": "#e6ffff",
+   "c2": "#7fe8ff",
+   "mspin": 0,
+   "gravity": 9,
+   "drag": 0,
+   "bounce": 0,
+   "burst": 40
+  },
+  {
+   "id": "cr7_0",
+   "t": "mesh",
+   "at": 1.8,
+   "life": 0.5,
+   "att": "feet",
+   "shape": "glb",
+   "glb": "mesh_water_crown",
+   "mat": "toonwater",
+   "col": "#9ff4ff",
+   "col2": "#36b8f5",
+   "rim": 0.5,
+   "scroll": 2,
+   "pos": [
+    6.53,
+    -0.05,
+    2.39
+   ],
+   "scale": {
+    "0": [
+     1.365,
+     0.4,
+     1.365
+    ],
+    "0.35": [
+     2.73,
+     2.457,
+     2.73
+    ],
+    "1": [
+     3.276,
+     0.4,
+     3.276
+    ],
+    "ease": "out"
+   },
+   "op": {
+    "0": 1,
+    "0.6": 1,
+    "1": 0
+   },
+   "fade": 0,
+   "spin": 200
+  },
+  {
+   "id": "jt7_0",
+   "t": "mesh",
+   "at": 1.8,
+   "life": 0.45,
+   "att": "feet",
+   "shape": "glb",
+   "glb": "mesh_water_jet",
+   "mat": "toonwater",
+   "col": "#9ff4ff",
+   "col2": "#36b8f5",
+   "rim": 0.5,
+   "scroll": 2,
+   "pos": [
+    6.53,
+    -0.05,
+    2.39
+   ],
+   "scale": {
+    "0": [
+     1.2,
+     0,
+     1.2
+    ],
+    "0.3": [
+     1.6,
+     2.4,
+     1.6
+    ],
+    "1": [
+     1,
+     0,
+     1
+    ]
+   },
+   "op": 1,
+   "fade": 0,
+   "spin": 300
+  },
+  {
+   "id": "cr7_1",
+   "t": "mesh",
+   "at": 1.85,
+   "life": 0.5,
+   "att": "feet",
+   "shape": "glb",
+   "glb": "mesh_water_crown",
+   "mat": "toonwater",
+   "col": "#9ff4ff",
+   "col2": "#36b8f5",
+   "rim": 0.5,
+   "scroll": 2,
+   "pos": [
+    2.22,
+    -0.05,
+    3.54
+   ],
+   "scale": {
+    "0": [
+     1.45,
+     0.4,
+     1.45
+    ],
+    "0.35": [
+     2.9,
+     2.61,
+     2.9
+    ],
+    "1": [
+     3.48,
+     0.4,
+     3.48
+    ],
+    "ease": "out"
+   },
+   "op": {
+    "0": 1,
+    "0.6": 1,
+    "1": 0
+   },
+   "fade": 0,
+   "spin": 200
+  },
+  {
+   "id": "jt7_1",
+   "t": "mesh",
+   "at": 1.85,
+   "life": 0.45,
+   "att": "feet",
+   "shape": "glb",
+   "glb": "mesh_water_jet",
+   "mat": "toonwater",
+   "col": "#9ff4ff",
+   "col2": "#36b8f5",
+   "rim": 0.5,
+   "scroll": 2,
+   "pos": [
+    2.22,
+    -0.05,
+    3.54
+   ],
+   "scale": {
+    "0": [
+     1.2,
+     0,
+     1.2
+    ],
+    "0.3": [
+     1.6,
+     2.4,
+     1.6
+    ],
+    "1": [
+     1,
+     0,
+     1
+    ]
+   },
+   "op": 1,
+   "fade": 0,
+   "spin": 300
+  },
+  {
+   "id": "cr7_2",
+   "t": "mesh",
+   "at": 1.9,
+   "life": 0.5,
+   "att": "feet",
+   "shape": "glb",
+   "glb": "mesh_water_crown",
+   "mat": "toonwater",
+   "col": "#9ff4ff",
+   "col2": "#36b8f5",
+   "rim": 0.5,
+   "scroll": 2,
+   "pos": [
+    4.24,
+    -0.05,
+    5.59
+   ],
+   "scale": {
+    "0": [
+     1.635,
+     0.4,
+     1.635
+    ],
+    "0.35": [
+     3.27,
+     2.943,
+     3.27
+    ],
+    "1": [
+     3.924,
+     0.4,
+     3.924
+    ],
+    "ease": "out"
+   },
+   "op": {
+    "0": 1,
+    "0.6": 1,
+    "1": 0
+   },
+   "fade": 0,
+   "spin": 200
+  },
+  {
+   "id": "jt7_2",
+   "t": "mesh",
+   "at": 1.9,
+   "life": 0.45,
+   "att": "feet",
+   "shape": "glb",
+   "glb": "mesh_water_jet",
+   "mat": "toonwater",
+   "col": "#9ff4ff",
+   "col2": "#36b8f5",
+   "rim": 0.5,
+   "scroll": 2,
+   "pos": [
+    4.24,
+    -0.05,
+    5.59
+   ],
+   "scale": {
+    "0": [
+     1.2,
+     0,
+     1.2
+    ],
+    "0.3": [
+     1.6,
+     2.4,
+     1.6
+    ],
+    "1": [
+     1,
+     0,
+     1
+    ]
+   },
+   "op": 1,
+   "fade": 0,
+   "spin": 300
+  },
+  {
+   "id": "ring7",
+   "t": "mesh",
+   "at": 1.8,
+   "life": 0.6,
+   "att": "feet",
+   "shape": "glb",
+   "glb": "mesh_water_ringwave_low",
+   "mat": "toonwater",
+   "col": "#9ff4ff",
+   "col2": "#36b8f5",
+   "rim": 0.5,
+   "scroll": 2,
+   "pos": [
+    0,
+    -0.03,
+    0
+   ],
+   "scale": {
+    "0": [
+     1.5,
+     1.8,
+     1.5
+    ],
+    "1": [
+     11.0,
+     1,
+     11.0
+    ],
+    "ease": "out"
+   },
+   "op": {
+    "0": 1,
+    "0.6": 0.9,
+    "1": 0
+   },
+   "fade": 0,
+   "spin": 150
+  },
+  {
+   "id": "sp7",
+   "t": "emit",
+   "at": 1.8,
+   "life": 0.04,
+   "att": "feet",
+   "pos": [
+    0,
+    0.4,
+    0
+   ],
+   "rate": 0,
+   "from": "ring",
+   "fr": 7,
+   "dir": "up",
+   "speed": [
+    4,
+    8
+   ],
+   "plife": [
+    0.4,
+    0.7
+   ],
+   "look": "model",
+   "model": "water_blob",
+   "mmat": "ice",
+   "msize": [
+    0.1,
+    0.18
+   ],
+   "col": "#e6ffff",
+   "c2": "#7fe8ff",
+   "mspin": 0,
+   "gravity": 9,
+   "drag": 0,
+   "bounce": 0,
+   "burst": 40
+  },
+  {
+   "id": "cr8_0",
+   "t": "mesh",
+   "at": 2.0,
+   "life": 0.5,
+   "att": "feet",
+   "shape": "glb",
+   "glb": "mesh_water_crown",
+   "mat": "toonwater",
+   "col": "#9ff4ff",
+   "col2": "#36b8f5",
+   "rim": 0.5,
+   "scroll": 2,
+   "pos": [
+    2.73,
+    -0.05,
+    -0.52
+   ],
+   "scale": {
+    "0": [
+     1.39,
+     0.4,
+     1.39
+    ],
+    "0.35": [
+     2.78,
+     2.502,
+     2.78
+    ],
+    "1": [
+     3.336,
+     0.4,
+     3.336
+    ],
+    "ease": "out"
+   },
+   "op": {
+    "0": 1,
+    "0.6": 1,
+    "1": 0
+   },
+   "fade": 0,
+   "spin": 200
+  },
+  {
+   "id": "jt8_0",
+   "t": "mesh",
+   "at": 2.0,
+   "life": 0.45,
+   "att": "feet",
+   "shape": "glb",
+   "glb": "mesh_water_jet",
+   "mat": "toonwater",
+   "col": "#9ff4ff",
+   "col2": "#36b8f5",
+   "rim": 0.5,
+   "scroll": 2,
+   "pos": [
+    2.73,
+    -0.05,
+    -0.52
+   ],
+   "scale": {
+    "0": [
+     1.2,
+     0,
+     1.2
+    ],
+    "0.3": [
+     1.6,
+     2.4,
+     1.6
+    ],
+    "1": [
+     1,
+     0,
+     1
+    ]
+   },
+   "op": 1,
+   "fade": 0,
+   "spin": 300
+  },
+  {
+   "id": "cr8_1",
+   "t": "mesh",
+   "at": 2.05,
+   "life": 0.5,
+   "att": "feet",
+   "shape": "glb",
+   "glb": "mesh_water_crown",
+   "mat": "toonwater",
+   "col": "#9ff4ff",
+   "col2": "#36b8f5",
+   "rim": 0.5,
+   "scroll": 2,
+   "pos": [
+    -3.72,
+    -0.05,
+    -7.07
+   ],
+   "scale": {
+    "0": [
+     1.35,
+     0.4,
+     1.35
+    ],
+    "0.35": [
+     2.7,
+     2.43,
+     2.7
+    ],
+    "1": [
+     3.24,
+     0.4,
+     3.24
+    ],
+    "ease": "out"
+   },
+   "op": {
+    "0": 1,
+    "0.6": 1,
+    "1": 0
+   },
+   "fade": 0,
+   "spin": 200
+  },
+  {
+   "id": "jt8_1",
+   "t": "mesh",
+   "at": 2.05,
+   "life": 0.45,
+   "att": "feet",
+   "shape": "glb",
+   "glb": "mesh_water_jet",
+   "mat": "toonwater",
+   "col": "#9ff4ff",
+   "col2": "#36b8f5",
+   "rim": 0.5,
+   "scroll": 2,
+   "pos": [
+    -3.72,
+    -0.05,
+    -7.07
+   ],
+   "scale": {
+    "0": [
+     1.2,
+     0,
+     1.2
+    ],
+    "0.3": [
+     1.6,
+     2.4,
+     1.6
+    ],
+    "1": [
+     1,
+     0,
+     1
+    ]
+   },
+   "op": 1,
+   "fade": 0,
+   "spin": 300
+  },
+  {
+   "id": "cr8_2",
+   "t": "mesh",
+   "at": 2.1,
+   "life": 0.5,
+   "att": "feet",
+   "shape": "glb",
+   "glb": "mesh_water_crown",
+   "mat": "toonwater",
+   "col": "#9ff4ff",
+   "col2": "#36b8f5",
+   "rim": 0.5,
+   "scroll": 2,
+   "pos": [
+    1.86,
+    -0.05,
+    -2.06
+   ],
+   "scale": {
+    "0": [
+     1.53,
+     0.4,
+     1.53
+    ],
+    "0.35": [
+     3.06,
+     2.754,
+     3.06
+    ],
+    "1": [
+     3.6719999999999997,
+     0.4,
+     3.6719999999999997
+    ],
+    "ease": "out"
+   },
+   "op": {
+    "0": 1,
+    "0.6": 1,
+    "1": 0
+   },
+   "fade": 0,
+   "spin": 200
+  },
+  {
+   "id": "jt8_2",
+   "t": "mesh",
+   "at": 2.1,
+   "life": 0.45,
+   "att": "feet",
+   "shape": "glb",
+   "glb": "mesh_water_jet",
+   "mat": "toonwater",
+   "col": "#9ff4ff",
+   "col2": "#36b8f5",
+   "rim": 0.5,
+   "scroll": 2,
+   "pos": [
+    1.86,
+    -0.05,
+    -2.06
+   ],
+   "scale": {
+    "0": [
+     1.2,
+     0,
+     1.2
+    ],
+    "0.3": [
+     1.6,
+     2.4,
+     1.6
+    ],
+    "1": [
+     1,
+     0,
+     1
+    ]
+   },
+   "op": 1,
+   "fade": 0,
+   "spin": 300
+  },
+  {
+   "id": "ring8",
+   "t": "mesh",
+   "at": 2.0,
+   "life": 0.6,
+   "att": "feet",
+   "shape": "glb",
+   "glb": "mesh_water_ringwave_low",
+   "mat": "toonwater",
+   "col": "#9ff4ff",
+   "col2": "#36b8f5",
+   "rim": 0.5,
+   "scroll": 2,
+   "pos": [
+    0,
+    -0.03,
+    0
+   ],
+   "scale": {
+    "0": [
+     1.5,
+     1.8,
+     1.5
+    ],
+    "1": [
+     11.0,
+     1,
+     11.0
+    ],
+    "ease": "out"
+   },
+   "op": {
+    "0": 1,
+    "0.6": 0.9,
+    "1": 0
+   },
+   "fade": 0,
+   "spin": 150
+  },
+  {
+   "id": "sp8",
+   "t": "emit",
+   "at": 2.0,
+   "life": 0.04,
+   "att": "feet",
+   "pos": [
+    0,
+    0.4,
+    0
+   ],
+   "rate": 0,
+   "from": "ring",
+   "fr": 7,
+   "dir": "up",
+   "speed": [
+    4,
+    8
+   ],
+   "plife": [
+    0.4,
+    0.7
+   ],
+   "look": "model",
+   "model": "water_blob",
+   "mmat": "ice",
+   "msize": [
+    0.1,
+    0.18
+   ],
+   "col": "#e6ffff",
+   "c2": "#7fe8ff",
+   "mspin": 0,
+   "gravity": 9,
+   "drag": 0,
+   "bounce": 0,
+   "burst": 40
+  },
+  {
+   "id": "cr9_0",
+   "t": "mesh",
+   "at": 2.2,
+   "life": 0.5,
+   "att": "feet",
+   "shape": "glb",
+   "glb": "mesh_water_crown",
+   "mat": "toonwater",
+   "col": "#9ff4ff",
+   "col2": "#36b8f5",
+   "rim": 0.5,
+   "scroll": 2,
+   "pos": [
+    3.49,
+    -0.05,
+    0.53
+   ],
+   "scale": {
+    "0": [
+     1.63,
+     0.4,
+     1.63
+    ],
+    "0.35": [
+     3.26,
+     2.9339999999999997,
+     3.26
+    ],
+    "1": [
+     3.9119999999999995,
+     0.4,
+     3.9119999999999995
+    ],
+    "ease": "out"
+   },
+   "op": {
+    "0": 1,
+    "0.6": 1,
+    "1": 0
+   },
+   "fade": 0,
+   "spin": 200
+  },
+  {
+   "id": "jt9_0",
+   "t": "mesh",
+   "at": 2.2,
+   "life": 0.45,
+   "att": "feet",
+   "shape": "glb",
+   "glb": "mesh_water_jet",
+   "mat": "toonwater",
+   "col": "#9ff4ff",
+   "col2": "#36b8f5",
+   "rim": 0.5,
+   "scroll": 2,
+   "pos": [
+    3.49,
+    -0.05,
+    0.53
+   ],
+   "scale": {
+    "0": [
+     1.2,
+     0,
+     1.2
+    ],
+    "0.3": [
+     1.6,
+     2.4,
+     1.6
+    ],
+    "1": [
+     1,
+     0,
+     1
+    ]
+   },
+   "op": 1,
+   "fade": 0,
+   "spin": 300
+  },
+  {
+   "id": "cr9_1",
+   "t": "mesh",
+   "at": 2.25,
+   "life": 0.5,
+   "att": "feet",
+   "shape": "glb",
+   "glb": "mesh_water_crown",
+   "mat": "toonwater",
+   "col": "#9ff4ff",
+   "col2": "#36b8f5",
+   "rim": 0.5,
+   "scroll": 2,
+   "pos": [
+    -7.95,
+    -0.05,
+    2.76
+   ],
+   "scale": {
+    "0": [
+     1.765,
+     0.4,
+     1.765
+    ],
+    "0.35": [
+     3.53,
+     3.177,
+     3.53
+    ],
+    "1": [
+     4.236,
+     0.4,
+     4.236
+    ],
+    "ease": "out"
+   },
+   "op": {
+    "0": 1,
+    "0.6": 1,
+    "1": 0
+   },
+   "fade": 0,
+   "spin": 200
+  },
+  {
+   "id": "jt9_1",
+   "t": "mesh",
+   "at": 2.25,
+   "life": 0.45,
+   "att": "feet",
+   "shape": "glb",
+   "glb": "mesh_water_jet",
+   "mat": "toonwater",
+   "col": "#9ff4ff",
+   "col2": "#36b8f5",
+   "rim": 0.5,
+   "scroll": 2,
+   "pos": [
+    -7.95,
+    -0.05,
+    2.76
+   ],
+   "scale": {
+    "0": [
+     1.2,
+     0,
+     1.2
+    ],
+    "0.3": [
+     1.6,
+     2.4,
+     1.6
+    ],
+    "1": [
+     1,
+     0,
+     1
+    ]
+   },
+   "op": 1,
+   "fade": 0,
+   "spin": 300
+  },
+  {
+   "id": "cr9_2",
+   "t": "mesh",
+   "at": 2.3,
+   "life": 0.5,
+   "att": "feet",
+   "shape": "glb",
+   "glb": "mesh_water_crown",
+   "mat": "toonwater",
+   "col": "#9ff4ff",
+   "col2": "#36b8f5",
+   "rim": 0.5,
+   "scroll": 2,
+   "pos": [
+    -5.63,
+    -0.05,
+    1.97
+   ],
+   "scale": {
+    "0": [
+     1.425,
+     0.4,
+     1.425
+    ],
+    "0.35": [
+     2.85,
+     2.565,
+     2.85
+    ],
+    "1": [
+     3.42,
+     0.4,
+     3.42
+    ],
+    "ease": "out"
+   },
+   "op": {
+    "0": 1,
+    "0.6": 1,
+    "1": 0
+   },
+   "fade": 0,
+   "spin": 200
+  },
+  {
+   "id": "jt9_2",
+   "t": "mesh",
+   "at": 2.3,
+   "life": 0.45,
+   "att": "feet",
+   "shape": "glb",
+   "glb": "mesh_water_jet",
+   "mat": "toonwater",
+   "col": "#9ff4ff",
+   "col2": "#36b8f5",
+   "rim": 0.5,
+   "scroll": 2,
+   "pos": [
+    -5.63,
+    -0.05,
+    1.97
+   ],
+   "scale": {
+    "0": [
+     1.2,
+     0,
+     1.2
+    ],
+    "0.3": [
+     1.6,
+     2.4,
+     1.6
+    ],
+    "1": [
+     1,
+     0,
+     1
+    ]
+   },
+   "op": 1,
+   "fade": 0,
+   "spin": 300
+  },
+  {
+   "id": "ring9",
+   "t": "mesh",
+   "at": 2.2,
+   "life": 0.6,
+   "att": "feet",
+   "shape": "glb",
+   "glb": "mesh_water_ringwave_low",
+   "mat": "toonwater",
+   "col": "#9ff4ff",
+   "col2": "#36b8f5",
+   "rim": 0.5,
+   "scroll": 2,
+   "pos": [
+    0,
+    -0.03,
+    0
+   ],
+   "scale": {
+    "0": [
+     1.5,
+     1.8,
+     1.5
+    ],
+    "1": [
+     11.0,
+     1,
+     11.0
+    ],
+    "ease": "out"
+   },
+   "op": {
+    "0": 1,
+    "0.6": 0.9,
+    "1": 0
+   },
+   "fade": 0,
+   "spin": 150
+  },
+  {
+   "id": "sp9",
+   "t": "emit",
+   "at": 2.2,
+   "life": 0.04,
+   "att": "feet",
+   "pos": [
+    0,
+    0.4,
+    0
+   ],
+   "rate": 0,
+   "from": "ring",
+   "fr": 7,
+   "dir": "up",
+   "speed": [
+    4,
+    8
+   ],
+   "plife": [
+    0.4,
+    0.7
+   ],
+   "look": "model",
+   "model": "water_blob",
+   "mmat": "ice",
+   "msize": [
+    0.1,
+    0.18
+   ],
+   "col": "#e6ffff",
+   "c2": "#7fe8ff",
+   "mspin": 0,
+   "gravity": 9,
+   "drag": 0,
+   "bounce": 0,
+   "burst": 40
+  },
+  {
+   "t": "mesh",
+   "att": "feet",
+   "mat": "toonwater",
+   "col": "#9ff4ff",
+   "col2": "#36b8f5",
+   "rim": 0.5,
+   "scroll": 2,
+   "fade": 0,
+   "id": "hit1",
+   "at": 0.6,
+   "life": 0.55,
+   "shape": "glb",
+   "glb": "mesh_water_crown",
+   "pos": [
+    1.99,
+    -0.05,
     0.55
    ],
-   "look": "spark",
-   "size": [
-    3,
-    6
+   "scale": {
+    "0": [
+     2,
+     0.5,
+     2
+    ],
+    "0.3": [
+     5,
+     4.2,
+     5
+    ],
+    "1": [
+     5.8,
+     0.8,
+     5.8
+    ],
+    "ease": "out"
+   },
+   "op": {
+    "0": 1,
+    "0.6": 0.9,
+    "1": 0
+   }
+  },
+  {
+   "t": "mesh",
+   "att": "feet",
+   "mat": "toonwater",
+   "col": "#9ff4ff",
+   "col2": "#36b8f5",
+   "rim": 0.5,
+   "scroll": 2,
+   "fade": 0,
+   "id": "hit2",
+   "at": 0.8,
+   "life": 0.55,
+   "shape": "glb",
+   "glb": "mesh_water_crown",
+   "pos": [
+    1.79,
+    -0.05,
+    0.22
    ],
-   "col": "#ffffff",
-   "c2": "#c8fbff",
-   "gravity": -0.2,
-   "drag": 0.5
+   "scale": {
+    "0": [
+     2,
+     0.5,
+     2
+    ],
+    "0.3": [
+     5,
+     4.2,
+     5
+    ],
+    "1": [
+     5.8,
+     0.8,
+     5.8
+    ],
+    "ease": "out"
+   },
+   "op": {
+    "0": 1,
+    "0.6": 0.9,
+    "1": 0
+   }
+  },
+  {
+   "t": "mesh",
+   "att": "feet",
+   "mat": "toonwater",
+   "col": "#9ff4ff",
+   "col2": "#36b8f5",
+   "rim": 0.5,
+   "scroll": 2,
+   "fade": 0,
+   "id": "hit3",
+   "at": 1.0,
+   "life": 0.55,
+   "shape": "glb",
+   "glb": "mesh_water_crown",
+   "pos": [
+    1.0,
+    -0.05,
+    -0.15
+   ],
+   "scale": {
+    "0": [
+     2,
+     0.5,
+     2
+    ],
+    "0.3": [
+     5,
+     4.2,
+     5
+    ],
+    "1": [
+     5.8,
+     0.8,
+     5.8
+    ],
+    "ease": "out"
+   },
+   "op": {
+    "0": 1,
+    "0.6": 0.9,
+    "1": 0
+   }
+  },
+  {
+   "t": "mesh",
+   "att": "feet",
+   "mat": "toonwater",
+   "col": "#9ff4ff",
+   "col2": "#36b8f5",
+   "rim": 0.5,
+   "scroll": 2,
+   "fade": 0,
+   "id": "hit4",
+   "at": 1.2,
+   "life": 0.55,
+   "shape": "glb",
+   "glb": "mesh_water_crown",
+   "pos": [
+    2.2,
+    -0.05,
+    -0.37
+   ],
+   "scale": {
+    "0": [
+     2,
+     0.5,
+     2
+    ],
+    "0.3": [
+     5,
+     4.2,
+     5
+    ],
+    "1": [
+     5.8,
+     0.8,
+     5.8
+    ],
+    "ease": "out"
+   },
+   "op": {
+    "0": 1,
+    "0.6": 0.9,
+    "1": 0
+   }
+  },
+  {
+   "t": "mesh",
+   "att": "feet",
+   "mat": "toonwater",
+   "col": "#9ff4ff",
+   "col2": "#36b8f5",
+   "rim": 0.5,
+   "scroll": 2,
+   "fade": 0,
+   "id": "hit5",
+   "at": 1.4,
+   "life": 0.55,
+   "shape": "glb",
+   "glb": "mesh_water_crown",
+   "pos": [
+    0.05,
+    -0.05,
+    -0.05
+   ],
+   "scale": {
+    "0": [
+     2,
+     0.5,
+     2
+    ],
+    "0.3": [
+     5,
+     4.2,
+     5
+    ],
+    "1": [
+     5.8,
+     0.8,
+     5.8
+    ],
+    "ease": "out"
+   },
+   "op": {
+    "0": 1,
+    "0.6": 0.9,
+    "1": 0
+   }
+  },
+  {
+   "t": "mesh",
+   "att": "feet",
+   "mat": "toonwater",
+   "col": "#9ff4ff",
+   "col2": "#36b8f5",
+   "rim": 0.5,
+   "scroll": 2,
+   "fade": 0,
+   "id": "hit6",
+   "at": 1.6,
+   "life": 0.55,
+   "shape": "glb",
+   "glb": "mesh_water_crown",
+   "pos": [
+    -0.17,
+    -0.05,
+    -1.8
+   ],
+   "scale": {
+    "0": [
+     2,
+     0.5,
+     2
+    ],
+    "0.3": [
+     5,
+     4.2,
+     5
+    ],
+    "1": [
+     5.8,
+     0.8,
+     5.8
+    ],
+    "ease": "out"
+   },
+   "op": {
+    "0": 1,
+    "0.6": 0.9,
+    "1": 0
+   }
+  },
+  {
+   "t": "mesh",
+   "att": "feet",
+   "mat": "toonwater",
+   "col": "#9ff4ff",
+   "col2": "#36b8f5",
+   "rim": 0.5,
+   "scroll": 2,
+   "fade": 0,
+   "id": "hit7",
+   "at": 1.8,
+   "life": 0.55,
+   "shape": "glb",
+   "glb": "mesh_water_crown",
+   "pos": [
+    -1.05,
+    -0.05,
+    -0.8
+   ],
+   "scale": {
+    "0": [
+     2,
+     0.5,
+     2
+    ],
+    "0.3": [
+     5,
+     4.2,
+     5
+    ],
+    "1": [
+     5.8,
+     0.8,
+     5.8
+    ],
+    "ease": "out"
+   },
+   "op": {
+    "0": 1,
+    "0.6": 0.9,
+    "1": 0
+   }
+  },
+  {
+   "t": "mesh",
+   "att": "feet",
+   "mat": "toonwater",
+   "col": "#9ff4ff",
+   "col2": "#36b8f5",
+   "rim": 0.5,
+   "scroll": 2,
+   "fade": 0,
+   "id": "hit8",
+   "at": 2.0,
+   "life": 0.55,
+   "shape": "glb",
+   "glb": "mesh_water_crown",
+   "pos": [
+    2.27,
+    -0.05,
+    -0.34
+   ],
+   "scale": {
+    "0": [
+     2,
+     0.5,
+     2
+    ],
+    "0.3": [
+     5,
+     4.2,
+     5
+    ],
+    "1": [
+     5.8,
+     0.8,
+     5.8
+    ],
+    "ease": "out"
+   },
+   "op": {
+    "0": 1,
+    "0.6": 0.9,
+    "1": 0
+   }
+  },
+  {
+   "t": "mesh",
+   "att": "feet",
+   "mat": "toonwater",
+   "col": "#9ff4ff",
+   "col2": "#36b8f5",
+   "rim": 0.5,
+   "scroll": 2,
+   "fade": 0,
+   "id": "hit9",
+   "at": 2.2,
+   "life": 0.55,
+   "shape": "glb",
+   "glb": "mesh_water_crown",
+   "pos": [
+    -0.37,
+    -0.05,
+    -2.36
+   ],
+   "scale": {
+    "0": [
+     2,
+     0.5,
+     2
+    ],
+    "0.3": [
+     5,
+     4.2,
+     5
+    ],
+    "1": [
+     5.8,
+     0.8,
+     5.8
+    ],
+    "ease": "out"
+   },
+   "op": {
+    "0": 1,
+    "0.6": 0.9,
+    "1": 0
+   }
+  },
+  {
+   "id": "puddle",
+   "t": "mesh",
+   "at": 0.42,
+   "life": 3.75,
+   "att": "ground",
+   "shape": "disc",
+   "mat": "water",
+   "col": "#bff2ff",
+   "col2": "#36b8f5",
+   "rim": 1,
+   "scroll": 1.4,
+   "int": 1.1,
+   "disp": 0,
+   "pos": [
+    0,
+    0.03,
+    0
+   ],
+   "scale": {
+    "0": 3,
+    "0.08": 11,
+    "1": 11,
+    "ease": "out"
+   },
+   "op": {
+    "0": 0,
+    "0.05": 0.72,
+    "0.84": 0.72,
+    "1": 0
+   },
+   "fade": 0
+  },
+  {
+   "t": "mesh",
+   "att": "feet",
+   "mat": "toonwater",
+   "col": "#9ff4ff",
+   "col2": "#36b8f5",
+   "rim": 0.5,
+   "scroll": 2,
+   "fade": 0,
+   "id": "ripple0",
+   "at": 2.4,
+   "life": 0.9,
+   "shape": "glb",
+   "glb": "mesh_water_ringwave_low",
+   "pos": [
+    -5.81,
+    0.02,
+    -1.73
+   ],
+   "scale": {
+    "0": [
+     0.6,
+     0.5,
+     0.6
+    ],
+    "1": [
+     5,
+     0.2,
+     5
+    ],
+    "ease": "out"
+   },
+   "op": {
+    "0": 1,
+    "1": 0
+   }
+  },
+  {
+   "t": "mesh",
+   "att": "feet",
+   "mat": "toonwater",
+   "col": "#9ff4ff",
+   "col2": "#36b8f5",
+   "rim": 0.5,
+   "scroll": 2,
+   "fade": 0,
+   "id": "ripple1",
+   "at": 2.7,
+   "life": 0.9,
+   "shape": "glb",
+   "glb": "mesh_water_ringwave_low",
+   "pos": [
+    -3.6,
+    0.02,
+    -3.21
+   ],
+   "scale": {
+    "0": [
+     0.6,
+     0.5,
+     0.6
+    ],
+    "1": [
+     5,
+     0.2,
+     5
+    ],
+    "ease": "out"
+   },
+   "op": {
+    "0": 1,
+    "1": 0
+   }
+  },
+  {
+   "t": "mesh",
+   "att": "feet",
+   "mat": "toonwater",
+   "col": "#9ff4ff",
+   "col2": "#36b8f5",
+   "rim": 0.5,
+   "scroll": 2,
+   "fade": 0,
+   "id": "ripple2",
+   "at": 2.95,
+   "life": 0.9,
+   "shape": "glb",
+   "glb": "mesh_water_ringwave_low",
+   "pos": [
+    3.06,
+    0.02,
+    3.67
+   ],
+   "scale": {
+    "0": [
+     0.6,
+     0.5,
+     0.6
+    ],
+    "1": [
+     5,
+     0.2,
+     5
+    ],
+    "ease": "out"
+   },
+   "op": {
+    "0": 1,
+    "1": 0
+   }
+  },
+  {
+   "t": "mesh",
+   "att": "feet",
+   "mat": "toonwater",
+   "col": "#9ff4ff",
+   "col2": "#36b8f5",
+   "rim": 0.5,
+   "scroll": 2,
+   "fade": 0,
+   "id": "ripple3",
+   "at": 3.2,
+   "life": 0.9,
+   "shape": "glb",
+   "glb": "mesh_water_ringwave_low",
+   "pos": [
+    2.79,
+    0.02,
+    4.07
+   ],
+   "scale": {
+    "0": [
+     0.6,
+     0.5,
+     0.6
+    ],
+    "1": [
+     5,
+     0.2,
+     5
+    ],
+    "ease": "out"
+   },
+   "op": {
+    "0": 1,
+    "1": 0
+   }
   }
  ]
 }
