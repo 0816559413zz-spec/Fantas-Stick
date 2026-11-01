@@ -1,6 +1,6 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
 
-- 2026-11-01 ไอคอนสาย Water 10 อัน (`tools/water-icons-gen.py`)
+- 2026-11-01 ไอคอนสาย Water 10 อันจาก game-icons.net (lorc, CC BY 3.0, เครดิตใน icons/CREDITS.md)
 - 2026-11-01 ยิง Abyssal Beam: กล้องกลางหลังเหนือหัว (`BZC`) • น้ำแตกปลายลำสาดย้อนเป็นพัด (ยังไม่ commit)
 - 2026-11-01 Beam สีเพิ่ม น้ำเงิน ฟ้า เขียวน้ำทะเล • น้ำแตกเปลี่ยนจากภาพหมุนเป็นชิ้นน้ำแยกกันบินออกแล้วตก (`tools/water-flake-gen.py`) (ยังไม่ commit)
 - 2026-11-01 Water: Tidecaller ยิงตามได้ทุก 0.3 วิ • Beam ร่าย 1.5 วิ หยุดที่กำแพง/สิ่งกีดขวาง (`waterBeamStop`) • วงเตือนอัลติศัตรูเห็นแดง (`water/dragon_warn_foe`) • งูเรียกโผล่เร็วขึ้น • แอ่งน้ำอัลติขอบหยัก `water_puddle` (ยังไม่ commit)
