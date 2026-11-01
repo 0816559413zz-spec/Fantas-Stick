@@ -212,6 +212,10 @@ body[data-screen=lobby] #voice{top:84px;left:auto;right:24px;width:340px}
 .guide b{color:var(--gold2);font-weight:600}
 #toast{position:fixed;left:50%;bottom:150px;transform:translateX(-50%);background:var(--corners),var(--fill);border:1px solid var(--line);padding:9px 20px;opacity:0;transition:opacity .3s;pointer-events:none;z-index:9}
 #toast.show{opacity:1}
+#gpuTip{position:fixed;right:16px;bottom:16px;max-width:min(420px,calc(100vw - 32px));background:var(--corners),var(--fill);border:1px solid var(--line);padding:14px 18px;z-index:60;color:var(--text);font-size:14px;line-height:1.5}
+#gpuTip h3{margin:0 0 6px;color:var(--gold2);font-size:16px}#gpuTip p{margin:6px 0}#gpuTip ol{margin:6px 0;padding-left:20px}#gpuTip .m{color:var(--mute);font-size:12px}
+#gpuTip code{font-size:11px;word-break:break-all;color:var(--gold2)}#gpuTip .b{display:flex;gap:8px;justify-content:flex-end;margin-top:8px}
+#gpuTip button{font:inherit;padding:6px 12px;background:transparent;color:var(--text);border:1px solid var(--line);cursor:pointer}#gpuTip button:hover{border-color:var(--gold)}
 #trainEnd{position:fixed;right:12px;top:204px;z-index:5}   /* ใต้แผนที่ย่อ (เดิม top:60 ทับวงแผนที่) — kill feed ห้องฝึกเลื่อนลงให้ใน 38-hud */
 #trOpen{position:fixed;left:12px;top:60px;z-index:5}
 #trPanel,#bpPanel{position:fixed;left:12px;top:60px;z-index:6;width:310px;max-height:calc(100vh - 80px);overflow-y:auto;scrollbar-width:thin;padding:16px 18px;margin:0}

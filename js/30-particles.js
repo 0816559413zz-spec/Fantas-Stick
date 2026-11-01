@@ -168,7 +168,9 @@ function updateParticles(dt){
     S.size[j]=p.size*0.12*(p.fl&&FLAME_STYLE===2?0.45+0.55*k:p.fl&&FLAME_STYLE===3?(0.55+0.45*Math.min(1,(1-k)*5))*(1-0.3*(1-k)*(1-k)):1);S.n++;
   }
   if(dead){let w=0;for(let i=0;i<PARTS.length;i++){const p=PARTS[i];if(p.life>0)PARTS[w++]=p;}PARTS.length=w;}
-  for(const S of [...PSYS,...Object.values(PFB)]){if(!S.geo)continue;S.geo.setDrawRange(0,S.n);const a=S.geo.attributes;a.position.needsUpdate=a.pcol.needsUpdate=a.psize.needsUpdate=true;if(a.page)a.page.needsUpdate=true;if(a.pvar)a.pvar.needsUpdate=true;if(a.pshp){a.pshp.needsUpdate=a.pvel.needsUpdate=true;}}
+  // ส่งขึ้นการ์ดจอเฉพาะช่วงที่ใช้จริง (0..n) — เดิมส่งทั้งบัฟเฟอร์ 5,000 ช่องทุกระบบทุกเฟรม แม้ไม่มีอนุภาคเลย (หลาย MB/เฟรม)
+  for(const S of [...PSYS,...Object.values(PFB)]){if(!S.geo)continue;S.geo.setDrawRange(0,S.n);if(!S.n)continue;
+    const a=S.geo.attributes;for(const k in a){const A=a[k];A.clearUpdateRanges();A.addUpdateRange(0,S.n*A.itemSize);A.needsUpdate=true;}}
 }
 
 // ---------- เอฟเฟกต์รูปทรง: แฟลช / วงแหวน / โดม / รอยไหม้ / สายฟ้า / แสงชั่วคราว ----------

@@ -75,7 +75,10 @@ User's future goals: bigger maps, more and finer breakable things, light from sk
 - [x] Particle removal O(n) compaction instead of per-item `splice`.
 - [x] Additive DoubleSide transparent materials single pass (`forceSinglePass`, js/01).
 - [x] `burnNum` cached canvases (no per-frame shadowBlur).
-- [ ] Auto quality lowers resolution to 0.45 even when the frame is CPU-bound (no gain, just blurry) → only drop scale when GPU is the limit (e.g. compare `render()` JS time with frame time).
+- [x] Auto quality CPU-aware (2026-11-01): `QUAL.cpu` vs frame time; CPU-bound → `lvl` up, resolution kept.
+- [x] Particle uploads only `0..n` (`addUpdateRange`), empty systems skipped (2026-11-01).
+- [ ] Full GPU particle sim (spawn once into fixed slots, shader computes position/colour/size from age): saves the remaining ~3–4% CPU of `updateParticles`, but ~180 `PARTS.push` sites with free-form fields, curl drift and terrain height would change how every approved effect looks → only with the user's OK + VFX re-review.
+- [ ] `drawLabels` (name tags / HP bars, 2D canvas) is now the biggest game-side CPU cost (~6%) → next candidate.
 - [ ] Remaining CPU: three.js render traversal/matrix updates, `getParameters` for 54 normal-blend DoubleSide materials (two-pass), cloth still ~8%, labels/HUD 2D.
 
 ## Benchmarks

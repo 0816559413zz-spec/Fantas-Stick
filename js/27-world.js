@@ -143,7 +143,7 @@ class AAPass extends Pass{
 const aaPass=new AAPass();composer.addPass(aaPass);fxPass.gfx=GFX;
 
 // ---------- คุณภาพกราฟิก: auto = ปรับความละเอียดเองตาม FPS / high = สวยสุด / low = เครื่องช้า ----------
-const QUAL={mode:['auto','high','low'].includes(store('wd_gfx'))?store('wd_gfx'):'auto',scale:1,acc:0,n:0,good:0,frame:0,lvl:0};
+const QUAL={mode:['auto','high','low'].includes(store('wd_gfx'))?store('wd_gfx'):'auto',scale:1,acc:0,n:0,good:0,frame:0,lvl:0,cpu:0,cacc:0};
 const QUAL_NAME={auto:'อัตโนมัติ',high:'สูง',low:'ประหยัด'};
 function qualPR(){
   const dpr=window.devicePixelRatio||1;
@@ -172,10 +172,13 @@ function applyQuality(){
 // ปรับความละเอียดอัตโนมัติ: เฟรมช้า (<~40fps) ลดลงทีละขั้น / ลื่นต่อเนื่องค่อยเพิ่มกลับ
 function qualTick(dt){
   if(QUAL.mode!=='auto'||screen!=='game'||dt>0.2)return;
-  QUAL.acc+=dt;QUAL.n++;
+  QUAL.acc+=dt;QUAL.n++;QUAL.cacc+=QUAL.cpu;
   if(QUAL.acc<2)return;
-  const avg=QUAL.acc/QUAL.n*1000;QUAL.acc=0;QUAL.n=0;
-  // ช้า: ลดความละเอียดก่อน → ปิดแสงฟุ้ง (lvl1) → ปิดเงา (lvl2) / ลื่นต่อเนื่อง: ค่อยๆ คืนกลับทีละขั้น
+  const avg=QUAL.acc/QUAL.n*1000,cpu=QUAL.cacc/QUAL.n;QUAL.acc=0;QUAL.n=0;QUAL.cacc=0;
+  // คอขวดอยู่ที่ CPU (เวลา JS ของเฟรม ≥ 75% ของเวลาเฟรม) → ลดความละเอียดไม่ช่วย ได้แค่ภาพเบลอ: ข้ามไปลดงาน CPU (lvl) แทน และคืนความคมให้ทีละขั้น
+  const cpuBound=cpu>avg*0.75;QUAL.cpuBound=cpuBound;
+  if(avg>24&&cpuBound){QUAL.good=0;if(QUAL.lvl<2)QUAL.lvl++;else if(QUAL.scale<1)QUAL.scale=Math.min(1,+(QUAL.scale+0.15).toFixed(2));else return;applyQuality();return;}
+  // ช้าเพราะการ์ดจอ: ลดความละเอียดก่อน → ปิดแสงฟุ้ง (lvl1) → เงาอัปเดตห่างขึ้น (lvl2) / ลื่นต่อเนื่อง: ค่อยๆ คืนกลับทีละขั้น
   if(avg>24){QUAL.good=0;if(QUAL.scale>0.6)QUAL.scale=Math.max(0.55,+(QUAL.scale-0.15).toFixed(2));else if(QUAL.lvl<2)QUAL.lvl++;else if(QUAL.scale>0.45)QUAL.scale=0.45;applyQuality();}
   else if(avg<16){if(++QUAL.good>=4){QUAL.good=0;if(QUAL.scale<0.7&&QUAL.lvl>0)QUAL.lvl--;else if(QUAL.scale<1)QUAL.scale=Math.min(1,+(QUAL.scale+0.1).toFixed(2));else if(QUAL.lvl>0)QUAL.lvl--;else return;applyQuality();}}
   else QUAL.good=0;

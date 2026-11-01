@@ -11,8 +11,10 @@ function frame(now){
   const dt=Math.min(0.05,(now-lastFrame)/1000);lastFrame=now;
   if(HSTOP.t>0){HSTOP.t-=dt;requestAnimationFrame(frame);return;}
   qualTick(dt);
+  const c0=performance.now();   // เวลา CPU ของเฟรม (เกม + สั่งวาด) → qualTick แยกว่าช้าเพราะ CPU หรือการ์ดจอ
   if(NET.isHost&&screen==='game')hostLoop();
   try{render(dt,now);}catch(e){console.error(e);}
+  QUAL.cpu=performance.now()-c0;
   if(HSTOP.pend>0){HSTOP.t=HSTOP.pend;HSTOP.until=now+(HSTOP.pend+HSTOP.gap)*1000;HSTOP.pend=0;}
   requestAnimationFrame(frame);
 }

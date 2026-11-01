@@ -138,6 +138,29 @@ async function swSetup(){
 }
 swSetup();
 window.WD.SW=SWK;
+// ---------- เช็คการ์ดจอตอนเปิดเกม ----------
+// หน้าเว็บเลือกการ์ดจอเองไม่ได้ (เบราว์เซอร์/Windows เลือก — เราขอ powerPreference:'high-performance' ไว้แล้ว js/27)
+// → ถ้าเบราว์เซอร์ใช้การ์ดออนบอร์ด / ไม่ได้ใช้การ์ดจอเลย ขึ้นป้ายบอกวิธีแก้ (ปิดแล้วไม่ขึ้นอีกสำหรับการ์ดตัวเดิม) • ?nogpucheck = ไม่เช็ค • ?gpucheck=igpu|soft = บังคับขึ้นป้าย (ทดสอบ)
+const GPUC={name:'',kind:'gpu'};
+function gpuCheck(){
+  try{const c=gl.getContext(),e=c.getExtension('WEBGL_debug_renderer_info');GPUC.name=String(e?c.getParameter(e.UNMASKED_RENDERER_WEBGL):c.getParameter(c.RENDERER)||'');}catch(e){return;}
+  const n=GPUC.name;
+  GPUC.kind=/SwiftShader|Basic Render|llvmpipe|softpipe|Software/i.test(n)?'soft':/Intel.*(UHD|HD|Iris|Graphics)|AMD Radeon\(TM\) Graphics|Radeon\(TM\) (Vega|\d{3}M)|Vega \d+ Graphics|Radeon Graphics/i.test(n)?'igpu':'gpu';
+  {const f=/[?&]gpucheck=(soft|igpu)\b/.exec(location.search);if(f)GPUC.kind=f[1];}   // ทดสอบหน้าตาป้าย
+  if(GPUC.kind==='gpu'||/[?&](nogpucheck|studio)\b/.test(location.search)||store('wd_gpuok')===n)return;
+  const win=/Windows/.test(navigator.userAgent),br=/Edg\//.test(navigator.userAgent)?'Edge':'Chrome';
+  const exe=br==='Edge'?'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe':'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
+  const short=n.replace(/^ANGLE \(|\)$/g,'').split(',').slice(0,2).join(',');
+  const body=GPUC.kind==='soft'
+    ?`<p>เบราว์เซอร์<b>ไม่ได้ใช้การ์ดจอ</b> (วาดภาพด้วย CPU) เกมจะช้ามาก</p><ol><li>เปิด ${br} → Settings → System</li><li>เปิด <b>Use graphics acceleration when available</b></li><li>ปิด ${br} ทุกหน้าต่างแล้วเปิดใหม่</li></ol>`
+    :`<p>เกมกำลังใช้<b>การ์ดจอออนบอร์ด</b> — ถ้าเครื่องมี<b>การ์ดจอแยก</b> (NVIDIA / AMD RX) จะลื่นกว่ามาก</p>`+(win?`<ol><li>Windows Settings → System → Display → <b>Graphics</b></li><li>กด <b>Add desktop app</b> แล้วเลือกไฟล์<br><code>${exe}</code></li><li>กดที่ ${br} ในรายการ → เลือก <b>High performance</b></li><li>ปิด ${br} ทุกหน้าต่างแล้วเปิดใหม่</li></ol>`:`<p>ตั้งค่าให้ ${br} ใช้การ์ดจอแยกในการตั้งค่าระบบของเครื่อง แล้วเปิดเบราว์เซอร์ใหม่</p>`)+`<p class="m">ไม่มีการ์ดจอแยก? กด "ไม่ต้องเตือนอีก" ได้เลย</p>`;
+  const d=document.createElement('div');d.id='gpuTip';
+  d.innerHTML=`<h3>🎮 การ์ดจอ</h3>${body}<p class="m">ตอนนี้: ${short.replace(/[<>&]/g,'')}</p><div class="b"><button data-k="ok">ไม่ต้องเตือนอีก</button><button data-k="x">ปิด</button></div>`;
+  d.onclick=ev=>{const k=ev.target.dataset&&ev.target.dataset.k;if(!k)return;if(k==='ok')store('wd_gpuok',n);d.remove();};
+  document.body.appendChild(d);
+}
+setTimeout(gpuCheck,1500);
+window.WD.GPU=GPUC;
 Object.assign(window.WD,{QUAL,applyQuality,fxEv:ev=>fx(ev),HVB,PFB,ptexUse,ptexLoad,CURL,PLIT,PSYS,fireVol,bot:botDebug,bots,ar:()=>G.ar});
 // เทส/วัดผล: เดินลูปโฮสต์ 1 รอบด้วยมือ (hostTick + snapshot + เอฟเฟกต์) — ใช้ตอนหน้าต่างถูกซ่อนแล้ว setInterval ช้า
 // prop / โมเดลจากไฟล์ (ดีบัก)

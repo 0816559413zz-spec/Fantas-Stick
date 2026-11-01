@@ -60,7 +60,7 @@ function onLobby(m){
 // ลูปโฮสต์เดินด้วย setInterval 60 Hz แต่ Windows ยิงไม่สม่ำเสมอ (วัดได้ 11–54 ms) ขณะที่จอวาด 60–144 ภาพ/วิ
 // เดิมเลื่อนภาพโดยเดาว่า snapshot ถัดไปมาห่างเท่าครั้งก่อน → มาช้า = ตัวละครหยุด แล้วกระโดดไป = สั่น
 // ใหม่: จำ snapshot ล่าสุดพร้อมเวลาจริง แล้ววาดย้อนหลังเล็กน้อย (HVB.d ≈ ช่วงห่างเฉลี่ย + ความแกว่ง×2.5, 18–70 ms) เลื่อนระหว่าง 2 อันที่รู้เวลาแน่นอน
-const HVB={q:[],gap:16.7,jit:2,d:26},HBOLD=/[?&]hbold/.test(location.search);
+const HVB={q:[],gap:16.7,jit:2,d:26},HBOLD=/[?&]hbold\b/.test(location.search);
 function hbReset(){HVB.q.length=0;}
 function hbPush(s){const n=performance.now(),Q=HVB.q;s._t=n;
   if(Q.length){const g=n-Q[Q.length-1]._t;if(g>0&&g<250){HVB.gap+=(g-HVB.gap)*0.08;HVB.jit+=(Math.abs(g-HVB.gap)-HVB.jit)*0.08;}}
