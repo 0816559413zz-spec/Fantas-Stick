@@ -2,7 +2,7 @@
 //  สายน้ำ 💧 — ภาพฝั่งผู้เล่น • VFX = assets/fx/water/* (tools/water-vfx-gen.py, สไตล์ designs/water_ref/style_toon_orb.png)
 //  เรียกจาก: efxFX (js/25, z ขึ้นต้น 'wt') • syncPlayers (js/35 waterFX) • render loop (js/37 syncWater) • HUD (js/35 drawWaterHud)
 // =====================================================================
-const WTV={st:new Map(),wf:new Map(),sk:new Map(),bm:[]};   // sk = ตัวละครกำลังจม/โผล่ (Dash) ตาม id
+const WTV={st:new Map(),wf:new Map(),sk:new Map(),bm:[],ol:[]};   // sk = ตัวละครกำลังจม/โผล่ (Dash) ตาม id
 const WTC={hi:'#e3f7ff',main:'#4fc3ff',deep:'#1466c8',neon:'#7ff6ff'};
 function wtState(id){let s=WTV.st.get(id);if(!s){s={};WTV.st.set(id,s);}return s;}
 function wtStop(s,k){if(s[k]){fxStop(s[k]);s[k]=null;}}
@@ -26,6 +26,14 @@ function wtLineMat(){return new THREE.ShaderMaterial({uniforms:{time:FIRE_U.time
     'float c0=0.5+0.26*sin(v*18.0-time*9.0),w=abs(u-c0);float band=1.0-smoothstep(0.12,0.18,w);float crest=1.0-smoothstep(0.0,0.05,abs(w-0.2));'+
     'vec3 c=mix(vec3(0.42,0.92,0.84),vec3(0.03,0.5,0.5),band*0.9);c=mix(c,vec3(1.1),crest);'+
     'float a=(1.0-smoothstep(0.38,0.5,abs(u-0.5)))*0.85;gl_FragColor=vec4(c,a);}'});}
+// ขอบขาวเรืองรอบตัวผู้เล่น (เห็นทะลุลูกน้ำ Aqua Cage): เปลือกกลับด้านพองออกตามผิว วาดทีหลังสุด • หมดเวลาแล้วลบ (syncWater)
+const _wtOlMat=new THREE.MeshBasicMaterial({color:0xffffff,side:THREE.BackSide,fog:false,transparent:true,opacity:0.95,depthWrite:false});
+_wtOlMat.onBeforeCompile=sh=>{sh.vertexShader=sh.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>'+String.fromCharCode(10)+'  transformed += normalize(objectNormal) * 0.07;');};
+function wtOutline(id,dur){const o=PM3.get(id);if(!o||!o.g)return;const L=[];
+  (o.fileModel||o.b||o.g).traverse(m=>{if(!m.isMesh||m.userData.wtOl||m.userData.eOl||!m.parent)return;
+    const c=m.isSkinnedMesh?new THREE.SkinnedMesh(m.geometry,_wtOlMat):new THREE.Mesh(m.geometry,_wtOlMat);if(m.isSkinnedMesh)c.bind(m.skeleton,m.bindMatrix);
+    c.position.copy(m.position);c.quaternion.copy(m.quaternion);c.scale.copy(m.scale);c.userData.wtOl=1;c.renderOrder=999;c.frustumCulled=false;m.parent.add(c);L.push(c);});
+  WTV.ol.push({L,t:dur});}
 // Dash: ตัวละครจมลงพื้น 0.35 วิ (WT_DS.sink) แล้วโผล่ขึ้น 0.25 วิ — เลื่อนโมเดลลง (ของจริงอยู่ที่ host)
 const WT_SINKD=2.4;
 function wtSinkOffset(o,p,dt){const k0=WTV.sk.get(p.id);let d=0;
@@ -88,6 +96,7 @@ function wtBeam(){const g=new THREE.Group(),core=new THREE.MeshBasicMaterial({co
     glow=new THREE.MeshBasicMaterial({color:0x2fa8ff,fog:false,transparent:true,opacity:0.85,blending:THREE.AdditiveBlending,depthWrite:false});
   const c=new THREE.Mesh(_wtCyl,core),sh=new THREE.Mesh(_wtCyl,glow);c.scale.set(0.35,0.35,1);g.add(c,sh);c.renderOrder=6;sh.renderOrder=5;g.userData.sh=sh;g.userData.mats=[core,glow];scene.add(g);return g;}
 function syncWater(v,dt,now){
+  for(let i=WTV.ol.length-1;i>=0;i--){const O=WTV.ol[i];O.t-=dt;if(O.t<=0){for(const c of O.L)if(c.parent)c.parent.remove(c);WTV.ol.splice(i,1);}}
   // ลำน้ำงู: วาดตอน host ยิงโดน (efx wtfamhit) — ปากงู → เป้า สว่างแวบ 0.16 วิ แล้วบางลงหาย
   for(let i=WTV.bm.length-1;i>=0;i--){const B=WTV.bm[i];B.t+=dt;const k=Math.max(0,B.t)/0.16;if(k>=1){scene.remove(B.g);for(const m of B.g.userData.mats)m.dispose();WTV.bm.splice(i,1);continue;}
     if(B.t<0){B.g.visible=false;continue;}B.g.visible=true;
@@ -112,7 +121,7 @@ function waterEfx(ev){
     case 'wtfamoff':return true;
     case 'wtfamhit':wtPew(ev.id,x,y,H);fxPlay('water/fam_hit',{x,y,h:H});return true;
     case 'wtwave':fxPlay('water/riptide',{x,y,h:0,a,aim:false});if(near){shake(0.12);snd('cast_pull',ev);}return true;
-    case 'wtcage':fxPlay('water/cage_bubble',{x,y,h:0,follow:ev.n});return true;
+    case 'wtcage':fxPlay('water/cage_bubble',{x,y,h:0,follow:ev.n});wtOutline(ev.n,2.4);return true;   // ลูกน้ำทึบ: คนที่ถูกขังมีขอบขาวเห็นทะลุ (ผู้ใช้ 2026-11-01)
     case 'wtab':if(!ev.n)fxPlay('water/beam_cast',{x,y,h:0,follow:ev.id});if(near)snd(ev.n?'break':'cast_pull',ev);if(ev.n&&near)shake(0.12);return true;
     case 'wtaboff':return true;
     case 'wtmw':fxPlay('water/dash_pop',{x,y,h:0,s:0.6});return true;

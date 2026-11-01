@@ -35,29 +35,7 @@ def streaks(id, at, life, pos, fr, rate, att='feet', dirn='tangent', speed=(5, 8
     l.update(kw); return l
 LOOP = dict(loop=True)
 
-# =================== Aqua Cage ===================
-# fly: a swirling water orb (different from the BA drop) wrapped by two spinning water crescents, foam spray behind
-L = [tw('orb', 'mesh_water_ringwave_low', 0, 1, [0, 0, 0], .35, att='point', spin=500, **LOOP),
-     wat('core', 'sphere', 0, 1, [0, 0, 0], .32, att='point', **LOOP),
-     tw('wrapA', 'mesh_water_crescent', 0, 1, [0, 0, 0], .42, att='point', spin=720, rot=[90, 0, 0], **LOOP),
-     tw('wrapB', 'mesh_water_crescent', 0, 1, [0, 0, 0], .38, att='point', spin=-600, rot=[0, 0, 90], **LOOP),
-     drops('spray', 0, 0, [0, 0, 0], .25, (.3, 1), att='point', rate=40, life=1, size=(.03, .06), grav=4, **LOOP),
-     sparks('glint', 0, 1, [0, 0, 0], .3, 20, att='point', **LOOP)]
-save('cage_fly', L, 'Aqua Cage (รอบ 2): ลูกน้ำวน มีเสี้ยวน้ำ 2 อันหมุนพันรอบ + ละอองน้ำ + ประกาย — ต่างจากหยดน้ำ BA', 1, ('cage',))
-# bubble: a big clear bubble round the target (they float inside) with water bands swirling over it, bubbles rising, foam at the
-# bottom; pops into a splash at the end
-B = 1.35; L = []
-L.append(wat('ball', 'sphere', 0, 2.4, [0, 1.15, 0], {'0': .3, '0.06': B * 1.08, '0.12': B, '0.94': B * 1.02, '1': B * 1.3}, op={'0': .5, '0.94': .5, '1': 0}, col='#c8f6ff', col2='#36b8f5'))
-for j, (rot, sp, sc) in enumerate([([0, 0, 0], 260, 1.0), ([70, 0, 0], -220, .95), ([0, 0, 70], 300, .9)]):
-    L.append(tw(f'band{j}', 'mesh_water_crescent', .1, 2.2, [0, 1.15, 0], {'0': .3, '0.08': B * sc, '0.95': B * sc, '1': B * 1.4}, rot=rot, spin=sp, op={'0': 0, '0.06': 1, '0.95': 1, '1': 0}))
-L.append(tw('foot', 'mesh_water_ringwave_low', 0, 2.4, [0, -.05, 0], {'0': .2, '0.1': .9, '0.95': .9, '1': 1.5}, spin=200, op={'0': 1, '0.95': 1, '1': 0}))
-L.append({'id': 'bubbles', 't': 'emit', 'at': .1, 'life': 2.2, 'att': 'feet', 'pos': [0, .5, 0], 'rate': 18, 'from': 'disc', 'fr': .8, 'dir': 'up', 'spread': .2, 'speed': [.6, 1.2], 'plife': [.8, 1.2],
-          'look': 'model', 'model': 'water_blob', 'mmat': 'ice', 'msize': [.04, .09], 'col': C['pale'], 'c2': C['tint'], 'mspin': 0, 'gravity': -1, 'drag': .3, 'bounce': 0})
-L.append(streaks('swirl', .1, 2.2, [0, 1.15, 0], B * 1.05, 24))
-L.append(sparks('glint', .1, 2.2, [0, 1.15, 0], B, 10))
-L.append(drops('pop', 2.3, 40, [0, 1.15, 0], B * .9, (2.5, 5), size=(.06, .12)))
-L.append(tw('popcrown', 'mesh_water_crown', 2.3, .45, [0, 0, 0], {'0': [1, .4, 1], '0.4': [1.4, 1.1, 1.4], '1': [1.7, .4, 1.7], 'ease': 'out'}, op={'0': 1, '0.6': 1, '1': 0}))
-save('cage_bubble', L, 'Aqua Cage ฟองขัง (รอบ 2): ฟองน้ำใสใหญ่ครอบตัวเป้า + แถบน้ำ 3 เส้นหมุนรอบ + ฟองลอยขึ้น + เส้นขาววน + คลื่นวงที่เท้า • จบ: ฟองแตกสาด', 2.6, ('cage',))
+# (Aqua Cage moved to tools/water-cage-gen.py: round 3 with the user refs)
 
 # =================== Abyssal Beam ===================
 # helix ribbons along the beam (fx mesh tubes; the beam runs along +z from the wand height)

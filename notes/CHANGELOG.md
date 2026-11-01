@@ -1,5 +1,7 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
 
+- 2026-11-01 — **Water Aqua Cage round 3 (approved, local)** — opaque painted water ball (`water_cage_orb`), free-floating white streaks swirling round it (trails on random tilted circles), floats and bobs, pool + drips under, hard splash-out burst; caged player gets a white see-through outline (js/68 `wtOutline`).
+
 - 2026-11-01 — **HUD portrait in the real profile border** — FFA/TDM portrait is now a circle inside the player's chosen profile frame (js/65 prfAvatar/myFrame) instead of a square box.
 
 - 2026-11-01 — **Water Tidecaller serpent (approved, saved locally)** — orb replaced by a water serpent (Blender `water_serpent` + separate `water_serpent_jaw`), slow slithering summon (`water_serpent_rise` grows tail→head), body keeps moving (toonwater `disp` wave), feet puddle/waves/foam; shot: jaw opens, small magic circle at a random spot round the head (`water_magic_circle`), tiny bright beam drawn on the hit event (`wtPew`), host shot speed 4000, sink/splash on end.
