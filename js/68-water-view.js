@@ -17,14 +17,14 @@ function wtBakeClone(o){const src=o.fileModel||o.b;if(!src)return null;o.g.updat
     if(I)for(let k=0;k<I.count;k++)idx.push(b+I.getX(k));else for(let k=0;k<P.count;k++)idx.push(b+k);});
   if(!pos.length)return null;
   const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));geo.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));geo.setIndex(idx);geo.computeVertexNormals();
-  const mt=fxToonWaterMat('#6cf2e0','#14a89a',1,1.2,1.5,1);   // teal (Dash ใช้โทนนี้)mt.uniforms.uOp.value=0.85;mt.depthWrite=true;
+  const mt=fxToonWaterMat('#9ff4ff','#36b8f5',1,1.2,1.5,1);   // ฟ้าเดียวกับสายน้ำmt.uniforms.uOp.value=0.85;mt.depthWrite=true;
   const me=new THREE.Mesh(geo,mt);me.renderOrder=3;me.userData.own=1;scene.add(me);return me;}
 // เส้นน้ำโคลน→ตัวเรา (ผู้ใช้: บาง + มีคลื่นวิ่งข้างในเป็นสีนิดๆ): พื้นฟ้าอมเขียว + คลื่นสีเข้มกว่าส่ายวิ่งไปหาตัวเรา + ยอดขาวบาง • ขอบจาง
 function wtLineMat(){return new THREE.ShaderMaterial({uniforms:{time:FIRE_U.time},transparent:true,depthWrite:false,side:THREE.DoubleSide,
   vertexShader:'varying vec2 vUv;void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}',
   fragmentShader:'uniform float time;varying vec2 vUv;void main(){float v=vUv.y,u=vUv.x;'+
     'float c0=0.5+0.26*sin(v*18.0-time*9.0),w=abs(u-c0);float band=1.0-smoothstep(0.12,0.18,w);float crest=1.0-smoothstep(0.0,0.05,abs(w-0.2));'+
-    'vec3 c=mix(vec3(0.42,0.92,0.84),vec3(0.03,0.5,0.5),band*0.9);c=mix(c,vec3(1.1),crest);'+
+    'vec3 c=mix(vec3(0.5,0.86,1.0),vec3(0.08,0.38,0.9),band*0.9);c=mix(c,vec3(1.1),crest);'+
     'float a=(1.0-smoothstep(0.38,0.5,abs(u-0.5)))*0.85;gl_FragColor=vec4(c,a);}'});}
 // ขอบขาวเรืองรอบตัวผู้เล่น (เห็นทะลุลูกน้ำ Aqua Cage): เปลือกกลับด้านพองออกตามผิว วาดทีหลังสุด • หมดเวลาแล้วลบ (syncWater)
 const _wtOlMat=new THREE.MeshBasicMaterial({color:0xcffcff,side:THREE.BackSide,fog:false,transparent:true,opacity:1,depthWrite:false});

@@ -92,24 +92,24 @@ MIND:66 summonMin:72 minTarget:81 minShoot:88 updateMins:93 aimTarget:133
 §180 ร่ายคาถา
 castSlot:181 castUlt:196
 
-## js/09-water.js (174) — 
+## js/09-water.js (173) — 
 WATERP:7 WT_BA:8 wtOn:23 wtInBeam:25
 §28 ทุกเฟรมของผู้เล่นสายน้ำ (เรียกจาก updatePlayer หลังส่วนโล่)
-waterTick:29 waterSpd:45 waterReset:46
-§48 BA: ตวัดไม้สร้างเส้นน้ำ → ยิง 3 นัดตามเมาส์ • Moonwater = ลำน้ำ
-WT_BA_H:49 waterBasic:50 waterLineTick:57 waterMoonBeam:63
-§66 Dash: จมดิน ทิ้งร่างโคลน → โผล่ห่าง 300 ทิศที่หัน • 6 วิกดอีกที = กลั…
-waterDash:67 waterSinkTick:76
-§82 ดาเมจใดๆ ของเรา → ลูกผู้ช่วยยิงตาม (เรียกจาก damage() ใน js/12)
-waterOnHit:83 waterFamTick:85
-§90 Riptide: คลื่นยักษ์วิ่งไปข้างหน้า พัดศัตรูติดไปจนสุดทาง
-waterWaveTick:91
-§99 Abyssal Beam: ร่าย 0.5 วิ → ยิงลำน้ำ 3 วิ (ยืนนิ่ง ลอยนิดหน่อย หมุนตา…
-waterBeamStop:101 waterBeamTick:109 waterMBTick:120
-§124 อัลติ Dragon of the Deep
-waterDragonTick:125
-§139 ทุกเฟรม (ทั้งเกม)
-updateWater:140 waterSnapP:146 waterSnapW:148
+waterTick:29 waterSpd:44 waterReset:45
+§47 BA: ตวัดไม้สร้างเส้นน้ำ → ยิง 3 นัดตามเมาส์ • Moonwater = ลำน้ำ
+WT_BA_H:48 waterBasic:49 waterLineTick:56 waterMoonBeam:62
+§65 Dash: จมดิน ทิ้งร่างโคลน → โผล่ห่าง 300 ทิศที่หัน • 6 วิกดอีกที = กลั…
+waterDash:66 waterSinkTick:75
+§81 ดาเมจใดๆ ของเรา → ลูกผู้ช่วยยิงตาม (เรียกจาก damage() ใน js/12)
+waterOnHit:82 waterFamTick:84
+§89 Riptide: คลื่นยักษ์วิ่งไปข้างหน้า พัดศัตรูติดไปจนสุดทาง
+waterWaveTick:90
+§98 Abyssal Beam: ร่าย 0.5 วิ → ยิงลำน้ำ 3 วิ (ยืนนิ่ง ลอยนิดหน่อย หมุนตา…
+waterBeamStop:100 waterBeamTick:108 waterMBTick:119
+§123 อัลติ Dragon of the Deep
+waterDragonTick:124
+§138 ทุกเฟรม (ทั้งเกม)
+updateWater:139 waterSnapP:145 waterSnapW:147
 
 ## js/09-wind.js (259) — 
 WINDP:8 W_BA:9
@@ -690,4 +690,4 @@ dive:186 PA:187 TA:188 DIVE_DOWN:190 DIVE_POUR:190 DIVE_STEP:190 diveDist:191 la
 §443 เล่น
 WDG_YAW:444 wdgGet:445 wdgStart:446 wdgDive:453 wdgKeep:456 wdgEnd:457 wdgTick:458
 
-(82 files, 20035 lines)
+(82 files, 20034 lines)

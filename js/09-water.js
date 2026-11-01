@@ -9,10 +9,10 @@ const WT_BA={cd:1.0,n:3,t0:0.25,gap:0.2,dmg:5,spd:2800,range:500,spr:0.06},   //
   WT_SH={gauge:70,heal:6,reg:3},                                             // โล่ฟองน้ำ: ไม่ช้า • ฮีล 6/วิ จากเกจ 70 • เกจคืน 3/วิ (⚠ ตอนไม่ยกโล่)
   WT_DS={dist:300,sink:0.35,r:120,push:900,back:6,cd:8},                     // Dash: จม 0.35 วิ (อมตะ) โผล่ห่าง 300 ผลักรัศมี 120 (~150) ไม่มีดาเมจ • 6 วิกดกลับโคลน • คูลดาวน์ 8 วิ
   WT_RP={len:400,t:0.8,w:100,dmg:20,cd:10},                                  // Riptide: คลื่นสูง ~4 ม. กว้าง 200 ไกล 400 ใน 0.8 วิ พัดติดไปจนสุด 20 ดาเมจ
-  WT_FM={t:8,dmg:5,spd:4000,cd:15,gap:0.3},   // spd 4000 = ลำน้ำ 'pew' แทบทันที (ผู้ใช้ 2026-11-01)
+  WT_FM={t:8,dmg:5,spd:4000,cd:15},   // spd 4000 = ลำน้ำ 'pew' แทบทันที (ผู้ใช้ 2026-11-01)
                                           // Tidecaller Orb: 8 วิ ทุกครั้งที่เราทำดาเมจ ลูกยิงตามล็อกเป้า 5 (⚠ คูลดาวน์ 15)
   WT_CG={spd:600,range:300,r:14,dmg:0,t:2,lift:0.6,cd:14},                  // Aqua Cage: ฟองขัง 2 วิ ลอยขึ้นนิดหน่อย ไม่มีดาเมจ ตีได้ฟองไม่แตก
-  WT_AB={cast:1.5,t:3,len:500,w:28,tick:0.3,dmg:10,turn:0.6,lift:1.2,cd:25},   // lift 0.5 → 1.2 (ผู้ใช้ 2026-11-01: ลอยสูงขึ้น)
+  WT_AB={cast:1.5,t:3,len:700,w:28,tick:0.3,dmg:10,turn:0.6,lift:1.2,cd:25},   // lift 0.5 → 1.2 (ผู้ใช้ 2026-11-01: ลอยสูงขึ้น)
   // Abyssal Beam: ร่าย 0.5 ยิง 3 วิ โดน 10 ครั้งละ 10 ยาว 700 หมุนตามเมาส์ช้าๆ ลอย 0.5 ม. ยืนนิ่ง
   WT_MW={t:8,cd:20,len:900,w:28,life:0.6,tick:0.2,dmg:10,rate:1.75},         // Moonwater Arts: 8 วิ BA = ลำน้ำ 900 ค้าง 0.6 วิ โดนทุก 0.2 (10×3) ยิงทุก 1.75 วิ • (⚠ คูลดาวน์ 20 หลังหมด = 28 นับจากกด)
   WT_UL={intro:1,aim:4,range:700,r:350,rise:2.2,n:10,gap:0.2,dmg:15,slow:0.6,slowT:2};   // Dragon of the Deep: intro 1 วิ • เลือกจุด 4 วิ • มังกรบินขึ้นม้วนลง 2.2 วิ แล้ว 15 × 10 ใน 2 วิ รัศมี 350 ช้า 40%
@@ -34,7 +34,6 @@ function waterTick(p,dt){
   if(p.wln)waterLineTick(p,dt);
   if(p.wsk)waterSinkTick(p,dt);
   if(p.wcl&&!p.wsk){p.wcl.t-=dt;if(p.wcl.t<=0||!p.alive){p.wcl=null;p.cd.dodge=p.cdMax.dodge=WT_DS.cd*p.buffs.cdr;emit({k:'efx',z:'wtclend',x:p.x,y:p.y,id:p.id});}}
-  if(p.wfmC>0)p.wfmC-=dt;
   if(p.wmsT>0)p.wmsT-=dt;
   if(p.wfam>0){p.wfam-=dt;if(p.wfam<=0||!p.alive){p.wfam=0;emit({k:'efx',z:'wtfamoff',x:p.x,y:p.y,id:p.id});}}
   if(p.wmw>0){p.wmw-=dt;if(p.wmw<=0)emit({k:'efx',z:'wtmwoff',x:p.x,y:p.y,id:p.id});}
@@ -80,7 +79,7 @@ function waterSinkTick(p,dt){const S=p.wsk;S.t-=dt;p.vx=p.vy=0;if(S.t>0)return;
   emit({k:'efx',z:'wtpop',x:Math.round(p.x),y:Math.round(p.y),h:p.z,id:p.id,n:S.back});}
 
 // ---------- ดาเมจใดๆ ของเรา → ลูกผู้ช่วยยิงตาม (เรียกจาก damage() ใน js/12) ----------
-function waterOnHit(src,t,kind){if(!(src.wfam>0)||kind==='wfam'||t===src||(t.team!==undefined&&t.team===src.team)||src.wfmC>0)return;src.wfmC=WT_FM.gap;   // ยิงตามได้ทุก 0.3 วิ
+function waterOnHit(src,t,kind){if(!(src.wfam>0)||kind==='wfam'||t===src||(t.team!==undefined&&t.team===src.team))return;
   (G.wtf||(G.wtf=[])).push({o:src.id,t,x:src.x,y:src.y,h:src.z+2.1,id:++G.zid});}
 function waterFamTick(f,dt){const o=G.players[f.o],t=f.t;if(!o||!t||t.dead||t.alive===false)return false;
   const dx=t.x-f.x,dy=t.y-f.y,dh=cH(t)-f.h,d=Math.hypot(dx,dy,dh*20)||1,st=WT_FM.spd*dt;
@@ -157,7 +156,7 @@ defSpell(WATERP,{id:'aquacage',role:'control',n:'Aqua Cage',ic:'🫧',cd:WT_CG.c
   cast(p){shoot(p,'wcage',{sp:'aquacage'});},
   hit(pr,t){addStun(t,WT_CG.t);t.wflt=WT_CG.t;t.wfz=WT_CG.lift;
     emit({k:'efx',z:'wtcage',x:Math.round(t.x),y:Math.round(t.y),h:cH(t),n:t.id});}});
-defSpell(WATERP,{id:'abyssalbeam',role:'damage',n:'Abyssal Beam',ic:'🔱',cd:WT_AB.cd,d:'ร่าย 1.5 วิ แล้วยิงลำน้ำ 3 วิ ยาว 500 (หมุนตามเมาส์ช้ามาก) ไม่ทะลุ ชนคนแรกหรือสิ่งกีดขวางแล้วหยุด โดน 10 ครั้ง ครั้งละ 10 (ครบ = 100) • ยืนนิ่ง ลอยขึ้นนิดหน่อย • คอมโบกับ Tidecaller Orb',
+defSpell(WATERP,{id:'abyssalbeam',role:'damage',n:'Abyssal Beam',ic:'🔱',cd:WT_AB.cd,d:'ร่าย 1.5 วิ แล้วยิงลำน้ำ 3 วิ ยาว 700 (หมุนตามเมาส์ช้ามาก) ไม่ทะลุ ชนคนแรกหรือสิ่งกีดขวางแล้วหยุด โดน 10 ครั้ง ครั้งละ 10 (ครบ = 100) • ยืนนิ่ง ลอยขึ้นนิดหน่อย • คอมโบกับ Tidecaller Orb',
   cast(p){p.wab={ph:'cast',t:WT_AB.cast,a:p.ang,k:0};p.shieldOn=false;p.wln=null;
     emit({k:'efx',z:'wtab',x:Math.round(p.x),y:Math.round(p.y),h:p.z,a:Math.round(p.ang*100)/100,id:p.id,n:0});}});
 defSpell(WATERP,{id:'moonwater',role:'damage',n:'Moonwater Arts',ic:'🌙',cd:WT_MW.cd,d:'8 วิ: คลิกซ้ายกลายเป็นลำน้ำ ไกล 900 ยิงแล้วหาย โดน 3 ครั้ง 10/10/10 ยิงได้ทุก 1.75 วิ',
