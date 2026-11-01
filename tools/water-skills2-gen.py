@@ -37,41 +37,8 @@ LOOP = dict(loop=True)
 
 # (Aqua Cage moved to tools/water-cage-gen.py: round 3 with the user refs)
 
-# =================== Abyssal Beam ===================
-# helix ribbons along the beam (fx mesh tubes; the beam runs along +z from the wand height)
-LEN = 35.0
-def helix_z(name, n, r, turns, rad, desc):
-    parts = []
-    for j in range(n):
-        ph = j * 2 * math.pi / n; pts = []
-        for i in range(61):
-            u = i / 60; a = ph + u * turns * 2 * math.pi
-            pts.append([round(r * math.cos(a), 3), round(r * math.sin(a), 3), round(LEN * u, 3)])
-        parts.append({'id': f'h{j}', 'k': 'tube', 'path': pts, 'r0': rad, 'r1': rad * .6, 'curve': 1, 'sides': 8, 'seg': 240, 'pos': [0, 0, 0]})
-    (MESH / f'{name}.mesh.json').write_text(json.dumps({'v': 1, 'desc': desc, 'mat': 'solid', 'pal': 'ice', 'tags': ['water'], 'parts': parts}, ensure_ascii=False, indent=1), encoding='utf-8')
-helix_z('water_beam_helix', 2, .95, 9, .07, 'Abyssal Beam: เส้นน้ำขาว 2 เส้นพันเกลียวรอบลำน้ำ ยาว 35 ม. (ตามแนว +z)')
+# (Abyssal Beam moved to tools/water-beam-gen.py: round 3 with the user ref)
 BY = 1.6
-L = []
-L.append(wat('core', 'beam', 0, 1, [0, BY, .7], [.55, .55, LEN], col='#ffffff', col2='#5fd8ff', scroll=6, **LOOP))
-L.append(tw('outer', 'mesh_water_crescent', 0, 1, [0, BY, .9], 1.1, rot=[90, 0, 0], spin=900, **LOOP))   # spinning water collar at the wand
-L.append({'id': 'shell', 't': 'mesh', 'at': 0, 'life': 1, 'att': 'feet', 'shape': 'beam', 'mat': 'toonwater', 'col': C['col'], 'col2': C['col2'], 'rim': .8, 'scroll': 5, 'heat': .8,
-          'pos': [0, BY, .7], 'scale': [1.0, 1.0, LEN], 'op': .75, 'fade': 0, **LOOP})
-L.append({'id': 'helix', 't': 'mesh', 'at': 0, 'life': 1, 'att': 'feet', 'shape': 'model', 'model': 'water_beam_helix', 'mat': 'toon', 'zw': True, 'col': '#ffffff', 'col2': '#c8fbff', 'rim': 1,
-          'pos': [0, BY, .7], 'scale': 1, 'op': 1, 'fade': 0, 'spin': 0, **LOOP})
-L.append(tw('muzzle', 'mesh_water_ringwave_low', 0, 1, [0, BY, 1.0], .9, rot=[90, 0, 0], spin=600, **LOOP))
-L.append(drops('mspray', 0, 0, [0, BY, 1.2], .4, (2, 4), rate=40, life=1, grav=6, **LOOP))
-L.append(tw('end', 'mesh_water_crown', 0, 1, [0, 0, LEN], 1.6, spin=300, **LOOP))
-L.append(drops('endspray', 0, 0, [0, .5, LEN], 1, (3, 6), rate=60, life=1, size=(.07, .14), dirn='up', **LOOP))
-L.append(streaks('lines', 0, 1, [0, BY, 8], .9, 60, dirn='out', speed=(10, 16), **LOOP))
-L.append(sparks('glint', 0, 1, [0, BY, 10], 1.2, 30, **LOOP))
-save('beam_loop', L, 'Abyssal Beam ลำน้ำ (รอบ 2): แกนน้ำขาวเรือง + เปลือกน้ำการ์ตูน + เส้นขาวพันเกลียว 2 เส้น + วงน้ำหมุนที่ไม้ + ปลายลำน้ำสาดเป็นมงกุฎ — ยาว 35 ม. ตามตัว', 1, ('beam',))
-L = [tw('gather', 'mesh_water_ringwave_low', 0, .55, [0, -.03, 0], {'0': 1.6, '1': .4, 'ease': 'in'}, spin=-400, op={'0': 0, '0.2': 1, '1': .4}),
-     {'id': 'spiral', 't': 'mesh', 'at': 0, 'life': .55, 'att': 'feet', 'shape': 'model', 'model': 'water_shield_rise', 'mat': 'toonwater', 'col': C['col'], 'col2': C['col2'], 'rim': .6, 'scroll': 2,
-      'pos': [0, 0, 0], 'scale': {'0': .7, '1': .35}, 'grow': {'0': 0, '0.7': 1}, 'stagger': .8, 'growBy': 'height', 'spin': 400, 'op': {'0': 1, '0.8': 1, '1': 0}, 'fade': 0},
-     wat('ball', 'sphere', .1, .45, [0, BY, .9], {'0': .05, '1': .45, 'ease': 'in'}),
-     drops('suck', 0, 0, [0, 1, 0], 1.5, (.5, 1), rate=40, life=.45, dirn='in', grav=0),
-     sparks('glint', 0, .5, [0, BY, .9], .4, 30)]
-save('beam_cast', L, 'Abyssal Beam ร่าย 0.5 วิ (รอบ 2): น้ำวนเข้าหาตัว + สายน้ำพันขึ้น + ลูกน้ำโตที่ไม้', .6, ('beam',))
 
 # =================== Moonwater Arts ===================
 L = [wat('moon', 'sphere', 0, 1, [0, 2.7, -.35], [.42, .42, .08], col='#ffffff', col2='#bfeaff', **LOOP),

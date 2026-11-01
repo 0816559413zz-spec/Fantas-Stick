@@ -1,5 +1,7 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
 
+- 2026-11-01 — **Water Abyssal Beam round 3 (approved, local)** — blue water magic circles, tapered beam (glow cones blue/cyan/white wobbling out of phase), rings running along it, sparks at the tip; host emits `wtabhit` on every target the beam passes through → `water/beam_hit` splash.
+
 - 2026-11-01 — **Water Aqua Cage round 3 (approved, local)** — opaque painted water ball (`water_cage_orb`), free-floating white streaks swirling round it (trails on random tilted circles), floats and bobs, pool + drips under, hard splash-out burst; caged player gets a white see-through outline (js/68 `wtOutline`).
 
 - 2026-11-01 — **HUD portrait in the real profile border** — FFA/TDM portrait is now a circle inside the player's chosen profile frame (js/65 prfAvatar/myFrame) instead of a square box.

@@ -121,6 +121,7 @@ function waterEfx(ev){
     case 'wtfamoff':return true;
     case 'wtfamhit':wtPew(ev.id,x,y,H);fxPlay('water/fam_hit',{x,y,h:H});return true;
     case 'wtwave':fxPlay('water/riptide',{x,y,h:0,a,aim:false});if(near){shake(0.12);snd('cast_pull',ev);}return true;
+    case 'wtabhit':fxPlay('water/beam_hit',{x,y,h:H});return true;
     case 'wtcage':fxPlay('water/cage_bubble',{x,y,h:0,follow:ev.n});wtOutline(ev.n,2.4);return true;   // ลูกน้ำทึบ: คนที่ถูกขังมีขอบขาวเห็นทะลุ (ผู้ใช้ 2026-11-01)
     case 'wtab':if(!ev.n)fxPlay('water/beam_cast',{x,y,h:0,follow:ev.id});if(near)snd(ev.n?'break':'cast_pull',ev);if(ev.n&&near)shake(0.12);return true;
     case 'wtaboff':return true;

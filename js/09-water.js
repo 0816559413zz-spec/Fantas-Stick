@@ -99,7 +99,7 @@ function waterBeamTick(p,dt){const B=p.wab;B.t-=dt;
   const inp=p.inp||{};if(typeof inp.ax==='number'){const want=Math.atan2(inp.ay-p.y,inp.ax-p.x),da=angDiff(want,B.a),m=WT_AB.turn*dt;B.a+=Math.max(-m,Math.min(m,da));}
   p.ang=B.a;
   if(B.ph==='cast'){if(B.t<=0){B.ph='fire';B.t=WT_AB.t;B.k=0;emit({k:'efx',z:'wtab',x:Math.round(p.x),y:Math.round(p.y),h:p.z,a:Math.round(B.a*100)/100,id:p.id,n:1});}return;}
-  B.k-=dt;if(B.k<=0){B.k+=WT_AB.tick;for(const t of foesOf(p.team))if(wtInBeam(t,p.x,p.y,B.a,WT_AB.len,WT_AB.w,p.z+1.3))aoeHit(p,t,WT_AB.dmg,null);}
+  B.k-=dt;if(B.k<=0){B.k+=WT_AB.tick;for(const t of foesOf(p.team))if(wtInBeam(t,p.x,p.y,B.a,WT_AB.len,WT_AB.w,p.z+1.3)){aoeHit(p,t,WT_AB.dmg,null);emit({k:'efx',z:'wtabhit',x:Math.round(t.x),y:Math.round(t.y),h:cH(t)});}}   // ทะลุทุกคนในแนว • น้ำสาดที่ตัวคนโดน (ผู้ใช้ 2026-11-01)
   if(B.t<=0){p.wab=null;emit({k:'efx',z:'wtaboff',x:p.x,y:p.y,id:p.id});}}
 // ลำน้ำ Moonwater (ยิงแล้วหาย ทิศคงที่)
 function waterMBTick(b,dt){b.t+=dt;b.k-=dt;const p=G.players[b.o];

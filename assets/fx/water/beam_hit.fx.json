@@ -1,0 +1,110 @@
+{
+ "v": 1,
+ "desc": "Abyssal Beam โดน (รอบ 3): น้ำสาดที่ตัวคนโดน + แสงวาบ + มงกุฎน้ำเล็ก (ลำแสงทะลุไปต่อ)",
+ "tags": [
+  "water",
+  "beam",
+  "ingame"
+ ],
+ "pal": "ice",
+ "dur": 0.4,
+ "seed": 51,
+ "layers": [
+  {
+   "id": "splash",
+   "t": "emit",
+   "at": 0,
+   "life": 0.04,
+   "att": "point",
+   "pos": [
+    0,
+    0,
+    0
+   ],
+   "burst": 16,
+   "rate": 0,
+   "from": "sphere",
+   "fr": 0.15,
+   "dir": "random",
+   "speed": [
+    2,
+    4
+   ],
+   "plife": [
+    0.3,
+    0.45
+   ],
+   "look": "model",
+   "model": "water_blob",
+   "mmat": "ice",
+   "msize": [
+    0.05,
+    0.1
+   ],
+   "col": "#e6ffff",
+   "c2": "#7fe8ff",
+   "mspin": 0,
+   "gravity": 9,
+   "drag": 0,
+   "bounce": 0
+  },
+  {
+   "id": "flash",
+   "t": "mesh",
+   "at": 0,
+   "life": 0.15,
+   "att": "point",
+   "shape": "sphere",
+   "mat": "glow",
+   "col": "#bfeaff",
+   "pos": [
+    0,
+    0,
+    0
+   ],
+   "scale": {
+    "0": 0.1,
+    "0.4": 0.45,
+    "1": 0.05
+   },
+   "op": 1,
+   "fade": 0
+  },
+  {
+   "id": "crown",
+   "t": "mesh",
+   "at": 0,
+   "life": 0.3,
+   "att": "point",
+   "shape": "glb",
+   "glb": "mesh_water_crown",
+   "mat": "toonwater",
+   "col": "#9ff4ff",
+   "col2": "#36b8f5",
+   "rim": 0.6,
+   "scroll": 2,
+   "pos": [
+    0,
+    -0.2,
+    0
+   ],
+   "rot": [
+    90,
+    0,
+    0
+   ],
+   "scale": {
+    "0": 0.2,
+    "0.4": 0.55,
+    "1": 0.7,
+    "ease": "out"
+   },
+   "op": {
+    "0": 1,
+    "0.6": 1,
+    "1": 0
+   },
+   "fade": 0
+  }
+ ]
+}
