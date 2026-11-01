@@ -7,7 +7,8 @@ import json, math
 from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]; OUT = ROOT / 'assets/fx/water'
 C = dict(col='#9ff4ff', col2='#36b8f5', pale='#e6ffff', tint='#7fe8ff')
-LEN, BY, Z0 = 35.0, 1.6, .9          # beam length (host WT_AB.len 700 = 35 m), height, start in front of the caster
+LEN, BY, Z0 = 35.0, 1.2, .9          # BY 1.2 + host lift 1.2 = beam ~2.4 m up, tilted down TILT so it reaches chest height further out
+TILT = 3          # beam length (host WT_AB.len 700 = 35 m), height, start in front of the caster
 
 def save(name, L, desc, dur):
     (OUT / f'{name}.fx.json').write_text(json.dumps({'v': 1, 'desc': desc, 'tags': ['water', 'beam', 'ingame'], 'pal': 'ice', 'dur': dur, 'seed': 51, 'layers': L}, ensure_ascii=False, indent=1), encoding='utf-8')
@@ -16,7 +17,7 @@ CIR = dict(t='mesh', att='feet', shape='plane', mat='tex', tex='tex/water_magic_
            col2='#000000', rim=0, uvTile=[1, 1], uvScroll=[0, 0], fade=0)
 def glowcone(id, at, life, r, col, op, wob, ph, loop=True):
     # tapered beam: cone base at the circle, tip LEN away (cone axis y → rot x 90 = forward); wobble = small sway + thickness pulse
-    rot = {str(round(k / 6, 3)): [-90 + wob * math.sin(k / 6 * 6.283 + ph), wob * .8 * math.cos(k / 6 * 6.283 + ph), 0] for k in range(7)}
+    rot = {str(round(k / 6, 3)): [-90 + TILT + wob * math.sin(k / 6 * 6.283 + ph), wob * .8 * math.cos(k / 6 * 6.283 + ph), 0] for k in range(7)}
     sc = {str(round(k / 6, 3)): [round(r * (1 + .18 * math.sin(k / 6 * 12.566 + ph)), 3), LEN, round(r * (1 + .18 * math.sin(k / 6 * 12.566 + ph)), 3)] for k in range(7)}
     l = {'id': id, 't': 'mesh', 'at': at, 'life': life, 'att': 'feet', 'shape': 'cone', 'mat': 'glow', 'col': col, 'pos': [0, BY, Z0], 'rot': rot, 'scale': sc, 'op': op, 'fade': 0}
     if loop: l['loop'] = True

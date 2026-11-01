@@ -93,24 +93,24 @@ MIND:66 summonMin:72 minTarget:81 minShoot:88 updateMins:93 aimTarget:133
 §180 ร่ายคาถา
 castSlot:181 castUlt:196
 
-## js/09-water.js (159) — 
-WATERP:7 WT_BA:8 wtOn:22 wtInBeam:24
-§27 ทุกเฟรมของผู้เล่นสายน้ำ (เรียกจาก updatePlayer หลังส่วนโล่)
-waterTick:28 waterSpd:42 waterReset:43
-§45 BA: ตวัดไม้สร้างเส้นน้ำ → ยิง 3 นัดตามเมาส์ • Moonwater = ลำน้ำ
-waterBasic:46 waterLineTick:53 waterMoonBeam:59
-§62 Dash: จมดิน ทิ้งร่างโคลน → โผล่ห่าง 300 ทิศที่หัน • 6 วิกดอีกที = กลั…
-waterDash:63 waterSinkTick:72
-§78 ดาเมจใดๆ ของเรา → ลูกผู้ช่วยยิงตาม (เรียกจาก damage() ใน js/12)
-waterOnHit:79 waterFamTick:81
-§86 Riptide: คลื่นยักษ์วิ่งไปข้างหน้า พัดศัตรูติดไปจนสุดทาง
-waterWaveTick:87
-§95 Abyssal Beam: ร่าย 0.5 วิ → ยิงลำน้ำ 3 วิ (ยืนนิ่ง ลอยนิดหน่อย หมุนตา…
-waterBeamTick:96 waterMBTick:105
-§109 อัลติ Dragon of the Deep
-waterDragonTick:110
-§124 ทุกเฟรม (ทั้งเกม)
-updateWater:125 waterSnapP:131 waterSnapW:133
+## js/09-water.js (160) — 
+WATERP:7 WT_BA:8 wtOn:23 wtInBeam:25
+§28 ทุกเฟรมของผู้เล่นสายน้ำ (เรียกจาก updatePlayer หลังส่วนโล่)
+waterTick:29 waterSpd:43 waterReset:44
+§46 BA: ตวัดไม้สร้างเส้นน้ำ → ยิง 3 นัดตามเมาส์ • Moonwater = ลำน้ำ
+waterBasic:47 waterLineTick:54 waterMoonBeam:60
+§63 Dash: จมดิน ทิ้งร่างโคลน → โผล่ห่าง 300 ทิศที่หัน • 6 วิกดอีกที = กลั…
+waterDash:64 waterSinkTick:73
+§79 ดาเมจใดๆ ของเรา → ลูกผู้ช่วยยิงตาม (เรียกจาก damage() ใน js/12)
+waterOnHit:80 waterFamTick:82
+§87 Riptide: คลื่นยักษ์วิ่งไปข้างหน้า พัดศัตรูติดไปจนสุดทาง
+waterWaveTick:88
+§96 Abyssal Beam: ร่าย 0.5 วิ → ยิงลำน้ำ 3 วิ (ยืนนิ่ง ลอยนิดหน่อย หมุนตา…
+waterBeamTick:97 waterMBTick:106
+§110 อัลติ Dragon of the Deep
+waterDragonTick:111
+§125 ทุกเฟรม (ทั้งเกม)
+updateWater:126 waterSnapP:132 waterSnapW:134
 
 ## js/09-wind.js (259) — 
 WINDP:8 W_BA:9
@@ -685,4 +685,4 @@ BRM:9 BSK:11 BROOM_SK:17 broomVert:38 broomMove:50 broomStrike:68 broomStrikeTic
 §125 ฝั่งจอ
 broomHead:127 BBEAM:134 _bbGeo:135 broomView:136 broomMountFx:165 broomDismountFx:173 broomBeamFx:175 broomSkFx:191 broomStrikeFx:204 broomFlakFx:209 broomHud:214 broomHudT:215 broomTick:224
 
-(81 files, 19486 lines)
+(81 files, 19487 lines)
