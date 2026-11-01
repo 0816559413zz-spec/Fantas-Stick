@@ -396,6 +396,14 @@
   "mesh_water_curl_body": {
    "file": "vfx/water_curl_body.glb",
    "v": 1
+  },
+  "mesh_water_serpent": {
+   "file": "vfx/water_serpent.glb",
+   "v": 1
+  },
+  "mesh_water_serpent_jaw": {
+   "file": "vfx/water_serpent_jaw.glb",
+   "v": 1
   }
  },
  "maps": {

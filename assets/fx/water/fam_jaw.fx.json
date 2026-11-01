@@ -1,0 +1,39 @@
+{
+ "v": 1,
+ "desc": "Tidecaller: ขากรรไกรงู (แยกชิ้น ให้อ้าได้) — วนตลอด js/68 หยุดตอนอ้าปาก",
+ "tags": [
+  "water",
+  "tidecaller",
+  "ingame"
+ ],
+ "pal": "ice",
+ "dur": 1,
+ "seed": 45,
+ "layers": [
+  {
+   "t": "mesh",
+   "att": "feet",
+   "shape": "glb",
+   "glb": "mesh_water_serpent_jaw",
+   "mat": "toonwater",
+   "col": "#9ff4ff",
+   "col2": "#36b8f5",
+   "rim": 0.8,
+   "scroll": 2.4,
+   "heat": 0.6,
+   "zw": true,
+   "pos": [
+    -0.447,
+    1.816,
+    0.599
+   ],
+   "scale": 1,
+   "fade": 0,
+   "id": "jaw",
+   "at": 0,
+   "life": 1,
+   "op": 1,
+   "loop": true
+  }
+ ]
+}

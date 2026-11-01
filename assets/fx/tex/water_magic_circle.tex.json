@@ -1,0 +1,14 @@
+{
+ "v": 1,
+ "desc": "วงเวทน้ำ (งู Tidecaller ยิง, รูป serpent_circle_ref): เส้นขาวเรืองฟ้า วงคู่นอก แถบอักษรเวท วงกลมเล็ก 8 วง ดาว 6 แฉก",
+ "gen": "image",
+ "seed": 5,
+ "px": 512,
+ "cols": 1,
+ "rows": 1,
+ "kind": "loop",
+ "fps": 24,
+ "ramp": "white",
+ "add": true,
+ "p": {}
+}

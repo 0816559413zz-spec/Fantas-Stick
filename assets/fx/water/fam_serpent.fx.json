@@ -1,0 +1,1030 @@
+{
+ "v": 1,
+ "desc": "Tidecaller งูทะเลน้ำ (ตกลงกับผู้ใช้ 2026-11-01, รูป tidecaller_serpent_ref.png): ตัวยาวบาง พันตัวเรา 1 รอบจากสะโพกถึงไหล่ขวา หัวมังกรครีบน้ำปัดหลัง ตาเรืองฟ้าอ่อน น้ำทั้งตัว สีฟ้าอมเขียว + ละอองที่ครีบ หยดน้ำ ประกาย — ตามตัว หันตามตัว วนตลอด 10 วิ",
+ "tags": [
+  "water",
+  "tidecaller",
+  "ingame"
+ ],
+ "pal": "ice",
+ "dur": 1,
+ "seed": 45,
+ "layers": [
+  {
+   "id": "rise_body",
+   "t": "mesh",
+   "at": 0,
+   "life": 1.3,
+   "att": "feet",
+   "shape": "model",
+   "model": "water_serpent_rise",
+   "mat": "toonwater",
+   "col": "#9ff4ff",
+   "col2": "#36b8f5",
+   "rim": 0.8,
+   "scroll": 2.4,
+   "zw": true,
+   "pos": [
+    0,
+    0,
+    0
+   ],
+   "scale": 1,
+   "grow": {
+    "0": 0,
+    "1": 1
+   },
+   "stagger": 0.9,
+   "growBy": "order",
+   "op": {
+    "0": 1,
+    "0.9": 1,
+    "1": 0
+   },
+   "fade": 0,
+   "loop": false
+  },
+  {
+   "id": "rise_head",
+   "t": "mesh",
+   "at": 0,
+   "life": 1.3,
+   "att": "feet",
+   "shape": "sphere",
+   "mat": "toonwater",
+   "col": "#9ff4ff",
+   "col2": "#36b8f5",
+   "rim": 0.8,
+   "scroll": 2.4,
+   "zw": true,
+   "pos": {
+    "0.0": [
+     0.35,
+     -0.1,
+     0.2
+    ],
+    "0.125": [
+     0.4,
+     0.2,
+     0
+    ],
+    "0.25": [
+     0.52,
+     0.62,
+     -0.3
+    ],
+    "0.375": [
+     0.3,
+     1.0,
+     -0.55
+    ],
+    "0.5": [
+     -0.12,
+     1.3,
+     -0.55
+    ],
+    "0.625": [
+     -0.45,
+     1.62,
+     -0.35
+    ],
+    "0.75": [
+     -0.55,
+     1.9,
+     -0.02
+    ],
+    "0.875": [
+     -0.5,
+     1.98,
+     0.3
+    ],
+    "1.0": [
+     -0.45,
+     1.9,
+     0.55
+    ]
+   },
+   "scale": {
+    "0": 0.08,
+    "0.15": 0.14,
+    "1": 0.15
+   },
+   "op": {
+    "0": 1,
+    "0.9": 1,
+    "1": 0
+   },
+   "fade": 0,
+   "loop": false
+  },
+  {
+   "id": "rise_eye0",
+   "t": "mesh",
+   "at": 0,
+   "life": 1.3,
+   "att": "feet",
+   "shape": "sphere",
+   "mat": "glow",
+   "col": "#ffffff",
+   "pos": {
+    "0.0": [
+     0.24999999999999997,
+     0.0,
+     0.2
+    ],
+    "0.125": [
+     0.30000000000000004,
+     0.30000000000000004,
+     0
+    ],
+    "0.25": [
+     0.42000000000000004,
+     0.72,
+     -0.3
+    ],
+    "0.375": [
+     0.19999999999999998,
+     1.1,
+     -0.55
+    ],
+    "0.5": [
+     -0.22,
+     1.4000000000000001,
+     -0.55
+    ],
+    "0.625": [
+     -0.55,
+     1.7200000000000002,
+     -0.35
+    ],
+    "0.75": [
+     -0.65,
+     2.0,
+     -0.02
+    ],
+    "0.875": [
+     -0.6,
+     2.08,
+     0.3
+    ],
+    "1.0": [
+     -0.55,
+     2.0,
+     0.55
+    ]
+   },
+   "scale": 0.03,
+   "op": {
+    "0": 1,
+    "0.9": 1,
+    "1": 0
+   },
+   "fade": 0,
+   "loop": false
+  },
+  {
+   "id": "rise_eye1",
+   "t": "mesh",
+   "at": 0,
+   "life": 1.3,
+   "att": "feet",
+   "shape": "sphere",
+   "mat": "glow",
+   "col": "#ffffff",
+   "pos": {
+    "0.0": [
+     0.44999999999999996,
+     0.0,
+     0.2
+    ],
+    "0.125": [
+     0.5,
+     0.30000000000000004,
+     0
+    ],
+    "0.25": [
+     0.62,
+     0.72,
+     -0.3
+    ],
+    "0.375": [
+     0.4,
+     1.1,
+     -0.55
+    ],
+    "0.5": [
+     -0.01999999999999999,
+     1.4000000000000001,
+     -0.55
+    ],
+    "0.625": [
+     -0.35,
+     1.7200000000000002,
+     -0.35
+    ],
+    "0.75": [
+     -0.45000000000000007,
+     2.0,
+     -0.02
+    ],
+    "0.875": [
+     -0.4,
+     2.08,
+     0.3
+    ],
+    "1.0": [
+     -0.35,
+     2.0,
+     0.55
+    ]
+   },
+   "scale": 0.03,
+   "op": {
+    "0": 1,
+    "0.9": 1,
+    "1": 0
+   },
+   "fade": 0,
+   "loop": false
+  },
+  {
+   "id": "rise_drops",
+   "t": "emit",
+   "at": 0,
+   "life": 1.3,
+   "att": "feet",
+   "pos": {
+    "0.0": [
+     0.35,
+     -0.1,
+     0.2
+    ],
+    "0.125": [
+     0.4,
+     0.2,
+     0
+    ],
+    "0.25": [
+     0.52,
+     0.62,
+     -0.3
+    ],
+    "0.375": [
+     0.3,
+     1.0,
+     -0.55
+    ],
+    "0.5": [
+     -0.12,
+     1.3,
+     -0.55
+    ],
+    "0.625": [
+     -0.45,
+     1.62,
+     -0.35
+    ],
+    "0.75": [
+     -0.55,
+     1.9,
+     -0.02
+    ],
+    "0.875": [
+     -0.5,
+     1.98,
+     0.3
+    ],
+    "1.0": [
+     -0.45,
+     1.9,
+     0.55
+    ]
+   },
+   "rate": 30,
+   "from": "sphere",
+   "fr": 0.12,
+   "dir": "down",
+   "speed": [
+    0.2,
+    0.6
+   ],
+   "plife": [
+    0.3,
+    0.5
+   ],
+   "loop": false,
+   "look": "model",
+   "model": "water_blob",
+   "mmat": "ice",
+   "msize": [
+    0.03,
+    0.06
+   ],
+   "col": "#e6ffff",
+   "c2": "#7fe8ff",
+   "mspin": 0,
+   "gravity": 9,
+   "drag": 0,
+   "bounce": 0
+  },
+  {
+   "t": "mesh",
+   "att": "feet",
+   "shape": "glb",
+   "glb": "mesh_water_serpent",
+   "mat": "toonwater",
+   "col": "#9ff4ff",
+   "col2": "#36b8f5",
+   "rim": 0.8,
+   "scroll": 2.4,
+   "heat": 0.6,
+   "zw": true,
+   "pos": [
+    0,
+    0,
+    0
+   ],
+   "fade": 0,
+   "id": "rise",
+   "at": 1.066,
+   "life": 0.254,
+   "loop": false,
+   "scale": 1,
+   "op": {
+    "0": 0,
+    "1": 1
+   }
+  },
+  {
+   "id": "rise_splash",
+   "t": "emit",
+   "at": 0,
+   "life": 0.05,
+   "att": "feet",
+   "pos": [
+    0,
+    0.1,
+    0
+   ],
+   "burst": 24,
+   "rate": 0,
+   "from": "ring",
+   "fr": 0.6,
+   "dir": "up",
+   "spread": 0.5,
+   "speed": [
+    2.5,
+    4.5
+   ],
+   "plife": [
+    0.4,
+    0.6
+   ],
+   "loop": false,
+   "look": "model",
+   "model": "water_blob",
+   "mmat": "ice",
+   "msize": [
+    0.05,
+    0.1
+   ],
+   "col": "#e6ffff",
+   "c2": "#7fe8ff",
+   "mspin": 0,
+   "gravity": 9,
+   "drag": 0,
+   "bounce": 0
+  },
+  {
+   "id": "rise_wave",
+   "t": "mesh",
+   "at": 0,
+   "life": 0.45,
+   "att": "feet",
+   "shape": "glb",
+   "glb": "mesh_water_ringwave_low",
+   "mat": "toonwater",
+   "col": "#9ff4ff",
+   "col2": "#36b8f5",
+   "rim": 0.5,
+   "scroll": 1.6,
+   "pos": [
+    0,
+    -0.02,
+    0
+   ],
+   "scale": {
+    "0": 0.3,
+    "1": 1.4,
+    "ease": "out"
+   },
+   "op": {
+    "0": 1,
+    "0.7": 1,
+    "1": 0
+   },
+   "spin": 300,
+   "fade": 0,
+   "loop": false
+  },
+  {
+   "t": "mesh",
+   "att": "feet",
+   "shape": "glb",
+   "glb": "mesh_water_serpent",
+   "mat": "toonwater",
+   "col": "#9ff4ff",
+   "col2": "#36b8f5",
+   "rim": 0.8,
+   "scroll": 2.4,
+   "heat": 0.6,
+   "zw": true,
+   "pos": [
+    0,
+    0,
+    0
+   ],
+   "fade": 0,
+   "id": "sink",
+   "at": 0,
+   "life": 0.15,
+   "end": true,
+   "scale": 1,
+   "op": {
+    "0": 1,
+    "1": 0
+   }
+  },
+  {
+   "id": "sink_stream0",
+   "t": "trail",
+   "at": 0,
+   "life": 0.32,
+   "att": "feet",
+   "pos": {
+    "0.0": [
+     -0.45,
+     1.9,
+     0.55
+    ],
+    "0.125": [
+     -0.5,
+     1.98,
+     0.3
+    ],
+    "0.25": [
+     -0.55,
+     1.9,
+     -0.02
+    ],
+    "0.375": [
+     -0.45,
+     1.62,
+     -0.35
+    ],
+    "0.5": [
+     -0.12,
+     1.3,
+     -0.55
+    ],
+    "0.625": [
+     0.3,
+     1.0,
+     -0.55
+    ],
+    "0.75": [
+     0.52,
+     0.62,
+     -0.3
+    ],
+    "0.875": [
+     0.4,
+     0.2,
+     0
+    ],
+    "1.0": [
+     0.35,
+     -0.1,
+     0.2
+    ],
+    "ease": "in"
+   },
+   "col": "#9ff4ff",
+   "col2": "#36b8f5",
+   "w": 0.32,
+   "tlife": 0.25,
+   "k": 1.3,
+   "end": true
+  },
+  {
+   "id": "sink_stream1",
+   "t": "trail",
+   "at": 0,
+   "life": 0.32,
+   "att": "feet",
+   "pos": {
+    "0.0": [
+     -0.45,
+     1.9,
+     0.55
+    ],
+    "0.125": [
+     -0.5,
+     1.98,
+     0.3
+    ],
+    "0.25": [
+     -0.55,
+     1.9,
+     -0.02
+    ],
+    "0.375": [
+     -0.45,
+     1.62,
+     -0.35
+    ],
+    "0.5": [
+     -0.12,
+     1.3,
+     -0.55
+    ],
+    "0.625": [
+     0.3,
+     1.0,
+     -0.55
+    ],
+    "0.75": [
+     0.52,
+     0.62,
+     -0.3
+    ],
+    "0.875": [
+     0.4,
+     0.2,
+     0
+    ],
+    "1.0": [
+     0.35,
+     -0.1,
+     0.2
+    ],
+    "ease": "in"
+   },
+   "col": "#ffffff",
+   "col2": "#c8fbff",
+   "w": 0.12,
+   "tlife": 0.25,
+   "k": 1.6,
+   "end": true
+  },
+  {
+   "id": "sink_splash",
+   "t": "emit",
+   "at": 0.2,
+   "life": 0.05,
+   "att": "feet",
+   "pos": [
+    0,
+    0.1,
+    0
+   ],
+   "burst": 20,
+   "rate": 0,
+   "from": "ring",
+   "fr": 0.7,
+   "dir": "up",
+   "spread": 0.5,
+   "speed": [
+    1.5,
+    3
+   ],
+   "plife": [
+    0.35,
+    0.5
+   ],
+   "end": true,
+   "look": "model",
+   "model": "water_blob",
+   "mmat": "ice",
+   "msize": [
+    0.05,
+    0.09
+   ],
+   "col": "#e6ffff",
+   "c2": "#7fe8ff",
+   "mspin": 0,
+   "gravity": 9,
+   "drag": 0,
+   "bounce": 0
+  },
+  {
+   "id": "sink_puddle",
+   "t": "mesh",
+   "at": 0.15,
+   "life": 0.5,
+   "att": "feet",
+   "shape": "disc",
+   "mat": "water",
+   "col": "#9ff4ff",
+   "col2": "#36b8f5",
+   "rim": 1,
+   "scroll": 1.4,
+   "int": 1.15,
+   "disp": 0,
+   "end": true,
+   "pos": [
+    0,
+    0.03,
+    0
+   ],
+   "scale": {
+    "0": 1.1,
+    "1": 1.6,
+    "ease": "out"
+   },
+   "op": {
+    "0": 0.8,
+    "1": 0
+   },
+   "fade": 0
+  },
+  {
+   "id": "body",
+   "t": "mesh",
+   "at": 1.3,
+   "life": 2.4,
+   "att": "feet",
+   "shape": "glb",
+   "glb": "mesh_water_serpent",
+   "mat": "toonwater",
+   "col": "#9ff4ff",
+   "col2": "#36b8f5",
+   "rim": 0.8,
+   "scroll": 2.4,
+   "heat": 0.6,
+   "zw": true,
+   "disp": 0.9,
+   "pos": {
+    "0": [
+     0,
+     0,
+     0
+    ],
+    "0.25": [
+     0,
+     0.02,
+     0
+    ],
+    "0.5": [
+     0,
+     0,
+     0
+    ],
+    "0.75": [
+     0,
+     -0.02,
+     0
+    ],
+    "1": [
+     0,
+     0,
+     0
+    ]
+   },
+   "scale": 1,
+   "op": 1,
+   "fade": 0,
+   "loop": true
+  },
+  {
+   "id": "eye0",
+   "t": "mesh",
+   "at": 1.3,
+   "life": 1,
+   "att": "feet",
+   "shape": "sphere",
+   "mat": "glow",
+   "col": "#ffffff",
+   "pos": [
+    -0.564,
+    1.941,
+    0.66
+   ],
+   "scale": 0.03,
+   "op": 0.9,
+   "fade": 0,
+   "loop": true
+  },
+  {
+   "id": "eye1",
+   "t": "mesh",
+   "at": 1.3,
+   "life": 1,
+   "att": "feet",
+   "shape": "sphere",
+   "mat": "glow",
+   "col": "#ffffff",
+   "pos": [
+    -0.324,
+    1.941,
+    0.646
+   ],
+   "scale": 0.03,
+   "op": 0.9,
+   "fade": 0,
+   "loop": true
+  },
+  {
+   "id": "spray",
+   "t": "emit",
+   "at": 1.3,
+   "life": 1,
+   "att": "feet",
+   "pos": [
+    0.45,
+    2.12,
+    0.35000000000000003
+   ],
+   "rate": 14,
+   "from": "sphere",
+   "fr": 0.12,
+   "dir": "up",
+   "spread": 0.5,
+   "speed": [
+    0.3,
+    0.8
+   ],
+   "plife": [
+    0.25,
+    0.4
+   ],
+   "loop": true,
+   "look": "model",
+   "model": "water_blob",
+   "mmat": "ice",
+   "msize": [
+    0.02,
+    0.04
+   ],
+   "col": "#e6ffff",
+   "c2": "#7fe8ff",
+   "mspin": 0,
+   "gravity": 4,
+   "drag": 0.3,
+   "bounce": 0
+  },
+  {
+   "id": "drips",
+   "t": "emit",
+   "at": 1.3,
+   "life": 1,
+   "att": "feet",
+   "pos": [
+    0,
+    1.1,
+    0
+   ],
+   "rate": 6,
+   "from": "ring",
+   "fr": 0.6,
+   "dir": "down",
+   "spread": 0.1,
+   "speed": [
+    0.1,
+    0.3
+   ],
+   "plife": [
+    0.4,
+    0.6
+   ],
+   "loop": true,
+   "look": "model",
+   "model": "water_blob",
+   "mmat": "ice",
+   "msize": [
+    0.025,
+    0.045
+   ],
+   "col": "#e6ffff",
+   "c2": "#7fe8ff",
+   "mspin": 0,
+   "gravity": 9,
+   "drag": 0,
+   "bounce": 0
+  },
+  {
+   "id": "glints",
+   "t": "emit",
+   "at": 1.3,
+   "life": 1,
+   "att": "feet",
+   "pos": [
+    0,
+    1.2,
+    0
+   ],
+   "rate": 5,
+   "from": "ring",
+   "fr": 0.5,
+   "dir": "up",
+   "speed": [
+    0.2,
+    0.5
+   ],
+   "plife": [
+    0.4,
+    0.6
+   ],
+   "loop": true,
+   "look": "spark",
+   "size": [
+    2.5,
+    4
+   ],
+   "col": "#ffffff",
+   "c2": "#c8fbff",
+   "gravity": 0,
+   "drag": 0.5
+  },
+  {
+   "id": "puddle",
+   "t": "mesh",
+   "at": 1.3,
+   "life": 1,
+   "att": "feet",
+   "shape": "disc",
+   "mat": "water",
+   "col": "#9ff4ff",
+   "col2": "#36b8f5",
+   "rim": 1,
+   "scroll": 1.4,
+   "int": 1.15,
+   "disp": 0,
+   "pos": [
+    0,
+    0.03,
+    0
+   ],
+   "scale": 1.1,
+   "op": 0.8,
+   "fade": 0,
+   "loop": true
+  },
+  {
+   "id": "footwave0",
+   "t": "mesh",
+   "at": 1.3,
+   "life": 1,
+   "att": "feet",
+   "shape": "glb",
+   "glb": "mesh_water_ringwave_low",
+   "mat": "toonwater",
+   "col": "#9ff4ff",
+   "col2": "#36b8f5",
+   "rim": 0.5,
+   "scroll": 1.6,
+   "pos": [
+    0,
+    -0.02,
+    0
+   ],
+   "scale": 0.75,
+   "rot": [
+    0,
+    0,
+    0
+   ],
+   "spin": 200,
+   "op": 1,
+   "fade": 0,
+   "loop": true
+  },
+  {
+   "id": "footwave1",
+   "t": "mesh",
+   "at": 1.3,
+   "life": 1,
+   "att": "feet",
+   "shape": "glb",
+   "glb": "mesh_water_ringwave_low",
+   "mat": "toonwater",
+   "col": "#9ff4ff",
+   "col2": "#36b8f5",
+   "rim": 0.5,
+   "scroll": 1.6,
+   "pos": [
+    0,
+    -0.02,
+    0
+   ],
+   "scale": 0.95,
+   "rot": [
+    0,
+    60,
+    0
+   ],
+   "spin": -150,
+   "op": 1,
+   "fade": 0,
+   "loop": true
+  },
+  {
+   "id": "footfoam",
+   "t": "mesh",
+   "at": 1.3,
+   "life": 1,
+   "att": "feet",
+   "shape": "model",
+   "model": "water_dome_foam",
+   "mat": "toon",
+   "zw": true,
+   "col": "#ffffff",
+   "col2": "#d8fbff",
+   "rim": 1,
+   "pos": [
+    0,
+    0,
+    0
+   ],
+   "scale": 0.45,
+   "spin": 70,
+   "op": 1,
+   "fade": 0,
+   "loop": true
+  },
+  {
+   "id": "footswish",
+   "t": "emit",
+   "at": 1.3,
+   "life": 1,
+   "att": "feet",
+   "pos": [
+    0,
+    0.25,
+    0
+   ],
+   "rate": 18,
+   "from": "ring",
+   "fr": 0.9,
+   "dir": "tangent",
+   "speed": [
+    4,
+    6
+   ],
+   "plife": [
+    0.2,
+    0.3
+   ],
+   "loop": true,
+   "look": "streak",
+   "size": [
+    1.5,
+    2.5
+   ],
+   "col": "#ffffff",
+   "c2": "#c8fbff",
+   "gravity": 0,
+   "drag": 0,
+   "curl": false
+  },
+  {
+   "id": "footsplash",
+   "t": "emit",
+   "at": 1.3,
+   "life": 1,
+   "att": "feet",
+   "pos": [
+    0,
+    0.08,
+    0
+   ],
+   "rate": 14,
+   "from": "ring",
+   "fr": 0.7,
+   "dir": "up",
+   "spread": 0.4,
+   "speed": [
+    1.2,
+    2.4
+   ],
+   "plife": [
+    0.35,
+    0.5
+   ],
+   "loop": true,
+   "look": "model",
+   "model": "water_blob",
+   "mmat": "ice",
+   "msize": [
+    0.04,
+    0.08
+   ],
+   "col": "#e6ffff",
+   "c2": "#7fe8ff",
+   "mspin": 0,
+   "gravity": 9,
+   "drag": 0,
+   "bounce": 0
+  }
+ ]
+}

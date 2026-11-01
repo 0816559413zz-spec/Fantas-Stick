@@ -1,0 +1,173 @@
+{
+ "v": 1,
+ "desc": "Tidecaller ยิง (รอบ 4): วงเวทน้ำเล็ก ๆ ขนาดปากงู 2 วง (รอบ 5: เล็กลงมาก) (หันหาเป้า หมุนสวนกัน) + แสงวาบ + ประกายวน — ลำน้ำยิงออกจากวงเวท",
+ "tags": [
+  "water",
+  "tidecaller",
+  "ingame"
+ ],
+ "pal": "ice",
+ "dur": 0.45,
+ "seed": 45,
+ "layers": [
+  {
+   "t": "mesh",
+   "att": "point",
+   "shape": "plane",
+   "mat": "tex",
+   "tex": "tex/water_magic_circle",
+   "col": "#ffffff",
+   "col2": "#000000",
+   "rim": 0,
+   "uvTile": [
+    1,
+    1
+   ],
+   "uvScroll": [
+    0,
+    0
+   ],
+   "fade": 0,
+   "id": "c1",
+   "at": 0,
+   "life": 0.42,
+   "pos": [
+    0,
+    0,
+    0.18
+   ],
+   "scale": {
+    "0": 0.03,
+    "0.18": 0.3,
+    "0.75": 0.3,
+    "1": 0.36,
+    "ease": "out"
+   },
+   "rot": {
+    "0": [
+     0,
+     0,
+     0
+    ],
+    "1": [
+     0,
+     0,
+     120
+    ]
+   },
+   "op": {
+    "0": 1,
+    "0.75": 1,
+    "1": 0
+   },
+   "int": 1.6
+  },
+  {
+   "t": "mesh",
+   "att": "point",
+   "shape": "plane",
+   "mat": "tex",
+   "tex": "tex/water_magic_circle",
+   "col": "#ffffff",
+   "col2": "#000000",
+   "rim": 0,
+   "uvTile": [
+    1,
+    1
+   ],
+   "uvScroll": [
+    0,
+    0
+   ],
+   "fade": 0,
+   "id": "c2",
+   "at": 0.04,
+   "life": 0.38,
+   "pos": [
+    0,
+    0,
+    0.34
+   ],
+   "scale": {
+    "0": 0.02,
+    "0.2": 0.2,
+    "0.75": 0.2,
+    "1": 0.25,
+    "ease": "out"
+   },
+   "rot": {
+    "0": [
+     0,
+     0,
+     0
+    ],
+    "1": [
+     0,
+     0,
+     -160
+    ]
+   },
+   "op": {
+    "0": 1,
+    "0.75": 1,
+    "1": 0
+   },
+   "int": 1.6
+  },
+  {
+   "id": "flash",
+   "t": "mesh",
+   "at": 0.06,
+   "life": 0.14,
+   "att": "point",
+   "shape": "sphere",
+   "mat": "glow",
+   "col": "#ffffff",
+   "pos": [
+    0,
+    0,
+    0.18
+   ],
+   "scale": {
+    "0": 0.03,
+    "0.4": 0.1,
+    "1": 0.02
+   },
+   "op": 1,
+   "fade": 0
+  },
+  {
+   "id": "motes",
+   "t": "emit",
+   "at": 0,
+   "life": 0.3,
+   "att": "point",
+   "pos": [
+    0,
+    0,
+    0.18
+   ],
+   "rate": 40,
+   "from": "ring",
+   "fr": 0.16,
+   "dir": "tangent",
+   "speed": [
+    1,
+    2
+   ],
+   "plife": [
+    0.2,
+    0.35
+   ],
+   "look": "spark",
+   "size": [
+    2.5,
+    4
+   ],
+   "col": "#ffffff",
+   "c2": "#9fe8ff",
+   "gravity": 0,
+   "drag": 0.5
+  }
+ ]
+}

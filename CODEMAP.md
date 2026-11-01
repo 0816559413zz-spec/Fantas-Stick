@@ -65,7 +65,7 @@ stormRailFire:145
 §155 สกิล 6 (3 stacks): ลูกสายฟ้าโดม — ทะยานขึ้น บินเล็ง 3 วิ คลิกยิงลูกสา…
 stormDomeTick:156 stormDomeFire:171 stormDomeSlam:179 updateStorm:184
 
-## js/09-earth.js (245) — 
+## js/09-earth.js (256) — 
 EARTH:10 E_SH:10 E_CRUSH_PUSH:10 E_CRUSH_SLIDE:10 E_ENV:10
 §14 ตัวช่วย
 eOn:15 eStand:16 eNoStand:17 eSegD:19 eAdd:20 eCollide:22 eProjHit:29 eKill:32
@@ -83,9 +83,9 @@ earthCrush:149
 §166 สกิล 5: Terra Auger
 eAugAim:172 earthAugFire:173 earthMound:184
 §187 อัลติ: Wrath (v2)
-earthPillarThrow:195 earthWrathTick:206 earthWrathDrill:217 earthWrathEnd:222
-§225 ทั้งสนาม: สิ่งก่อสร้างพัง / ฝุ่นหมดเวลา / Stonebreaker ชนกำแพง
-updateEarth:226 earthSnapP:235 earthSnapW:237
+earthPillarThrow:196 earthWrathTick:208 earthWrathDrill:219 earthWrathEnd:224 E_WRS:228 earthSpikeTick:229
+§235 ทั้งสนาม: สิ่งก่อสร้างพัง / ฝุ่นหมดเวลา / Stonebreaker ชนกำแพง
+updateEarth:236 earthSnapP:246 earthSnapW:248
 
 ## js/09-other-paths.js (196) — 
 §65 สัตว์เวท (minion): AI ฝั่งโฮสต์
@@ -93,24 +93,24 @@ MIND:66 summonMin:72 minTarget:81 minShoot:88 updateMins:93 aimTarget:133
 §180 ร่ายคาถา
 castSlot:181 castUlt:196
 
-## js/09-water.js (158) — สายน้ำ 💧 (ผู้ใช้ออกแบบทั้งหมด — designs/water.md) • ฝั่งโฮสต์ • รอบแรก: ระบบเกมก่อน ภาพช…
-WATERP:7 WT_BA:8 wtOn:21 wtInBeam:23
-§26 ทุกเฟรมของผู้เล่นสายน้ำ (เรียกจาก updatePlayer หลังส่วนโล่)
-waterTick:27 waterSpd:41 waterReset:42
-§44 BA: ตวัดไม้สร้างเส้นน้ำ → ยิง 3 นัดตามเมาส์ • Moonwater = ลำน้ำ
-waterBasic:45 waterLineTick:52 waterMoonBeam:58
-§61 Dash: จมดิน ทิ้งร่างโคลน → โผล่ห่าง 300 ทิศที่หัน • 6 วิกดอีกที = กลั…
-waterDash:62 waterSinkTick:71
-§77 ดาเมจใดๆ ของเรา → ลูกผู้ช่วยยิงตาม (เรียกจาก damage() ใน js/12)
-waterOnHit:78 waterFamTick:80
-§85 Riptide: คลื่นยักษ์วิ่งไปข้างหน้า พัดศัตรูติดไปจนสุดทาง
-waterWaveTick:86
-§94 Abyssal Beam: ร่าย 0.5 วิ → ยิงลำน้ำ 3 วิ (ยืนนิ่ง ลอยนิดหน่อย หมุนตา…
-waterBeamTick:95 waterMBTick:104
-§108 อัลติ Dragon of the Deep
-waterDragonTick:109
-§123 ทุกเฟรม (ทั้งเกม)
-updateWater:124 waterSnapP:130 waterSnapW:132
+## js/09-water.js (159) — 
+WATERP:7 WT_BA:8 wtOn:22 wtInBeam:24
+§27 ทุกเฟรมของผู้เล่นสายน้ำ (เรียกจาก updatePlayer หลังส่วนโล่)
+waterTick:28 waterSpd:42 waterReset:43
+§45 BA: ตวัดไม้สร้างเส้นน้ำ → ยิง 3 นัดตามเมาส์ • Moonwater = ลำน้ำ
+waterBasic:46 waterLineTick:53 waterMoonBeam:59
+§62 Dash: จมดิน ทิ้งร่างโคลน → โผล่ห่าง 300 ทิศที่หัน • 6 วิกดอีกที = กลั…
+waterDash:63 waterSinkTick:72
+§78 ดาเมจใดๆ ของเรา → ลูกผู้ช่วยยิงตาม (เรียกจาก damage() ใน js/12)
+waterOnHit:79 waterFamTick:81
+§86 Riptide: คลื่นยักษ์วิ่งไปข้างหน้า พัดศัตรูติดไปจนสุดทาง
+waterWaveTick:87
+§95 Abyssal Beam: ร่าย 0.5 วิ → ยิงลำน้ำ 3 วิ (ยืนนิ่ง ลอยนิดหน่อย หมุนตา…
+waterBeamTick:96 waterMBTick:105
+§109 อัลติ Dragon of the Deep
+waterDragonTick:110
+§124 ทุกเฟรม (ทั้งเกม)
+updateWater:125 waterSnapP:131 waterSnapW:133
 
 ## js/09-wind.js (259) — 
 WINDP:8 W_BA:9
@@ -411,7 +411,7 @@ BFA:315 bfWreck:316 updateBfAir:321 bfRumble:344 updateBf:347
 §350 4) เอฟเฟกต์ทั้งจอ (ค่าไปที่ GradePass ใน js/27-world.js)
 SCR:351 screenFlash:352 screenRadial:353 screenKick:354 screenHurt:355 _scv:356 updateScreenFx:357 updateVfxKit:365
 
-## js/45-fx-runtime.js (380) — VFX Studio runtime — เล่นเอฟเฟกต์จากไฟล์ข้อมูล assets/fx/<กลุ่ม>/<ชื่อ>.fx.json (แผน desi…
+## js/45-fx-runtime.js (380) — 
 FXR:9 FXDEG:10
 §11 โหลด
 fxFetch:12 fxDefaults:13 fxBoot:14 fxOverrides:24 fxLoad:27 fxData:31
@@ -462,7 +462,7 @@ fxWarpMake:222 fxWarpTick:234
 §240 ไฟ 3 มิติจากการจำลอง (ชั้น vol) — ไฟล์รูปแบบเดียวกับที่เพื่อน bake จา…
 FXVOL:243 fxVolLoad:244 fxVolTex:248 fxVolSet:251 fxVolReady:252 fxVolMake:253 fxVolTick:256 fxPreAssets:261 fxAssetsWait:263
 
-## js/47-earth-view.js (664) — 
+## js/47-earth-view.js (684) — สายดิน ⛰️ — ภาพฝั่งเครื่องเล่น (Stand / Stand ใหญ่ / กำแพง / เสา / เนิน / ฝุ่น / สว่าน / …
 ECOL:9 EGUARD_BIG:14 EGUARD:14 CB:15 EV:16 eW:17 eYaw:18
 §19 ลายผิว (วาดเองบน canvas: หิน/ทราย + รอยร้าว + ขอบบล็อกแบบ Roblox)
 ETEX:20 eTex:21 eFadeTex:35 eMat:37 eTMat:38 rockGeo:39 _eChunkM:43 eChunks:44
@@ -481,13 +481,13 @@ makePillar:311
 §317 กระสุนหิน
 earthProjMesh:318 SLAB:324 makeSlab:325 eSlabGeo:330 eSlabMats:341 slabCracks:408
 §411 สิ่งก่อสร้าง + ฝุ่น (เรียกจาก render loop)
-earthClear:412 eMakeSO:417 syncEarth:433 earthFog:471 _eCamT:474 eAnim:475 eDebris:476 eWave:478 eAirWave:480 esbImpact:483
-§490 event "efx" ของสายดิน (เรียกจากต้น efxFX) — คืน true = จัดการแล้ว
-earthEfx:491 eWindOut:577 eAirCone:583 eDrillFly:585
-§589 บึงโคลน (Mud Swamp + บึงจากเสาอัลติ): คลื่นกระเพื่อมจากกลางไปขอบ แล้ว…
-earthMudZone:590 earthMudSink:597
-§598 HUD ใต้เป้าเล็ง
-ESM:600 eSmooth:601 ESF:604 eShieldFx:605 eChips:610 eShieldSegs:613 eShieldNum:627 eShieldArc:631 drawEarthHud:644
+earthClear:412 eMakeSO:417 syncEarth:433 earthFog:472 eMudScreen:475 _eOlMat:482 eOutlines:484 _eCamT:491 eAnim:492 eDebris:493 eWave:495 eAirWave:497 esbImpact:500
+§507 event "efx" ของสายดิน (เรียกจากต้น efxFX) — คืน true = จัดการแล้ว
+earthEfx:508 eWindOut:597 eAirCone:603 eDrillFly:605
+§609 บึงโคลน (Mud Swamp + บึงจากเสาอัลติ): คลื่นกระเพื่อมจากกลางไปขอบ แล้ว…
+earthMudZone:610 earthMudSink:617
+§618 HUD ใต้เป้าเล็ง
+ESM:620 eSmooth:621 ESF:624 eShieldFx:625 eChips:630 eShieldSegs:633 eShieldNum:647 eShieldArc:651 drawEarthHud:664
 
 ## js/48-ragdoll.js (227) — 
 RAG:10 RAGJ:23 RAGB:29 RAGS:33 RAGMIN:37 RAGHINGE:39 _rv1:40 _rv2:40 _rv3:40 _rqa:40 _rqb:40 _rm:40 ragBones:41 ragBasis:48 ragTargets:56 ragStart:62 ragBack:88 ragFloor:89 ragStep:90 ragPose:155 ragWrite:170 ragRestore:182 ragEnd:186 ragTick:188 ragHideDead:222
@@ -638,28 +638,32 @@ BKICO:377 buffShow:381
 §400 จอมืดตอนเริ่มแมตช์ (ผู้ใช้ 2026-10-23: กระตุกตอนเริ่มแมตช์แรก)
 gameCover:403
 
-## js/66-hud4.js (177) — HUD รอบ 4 (ผู้ใช้ 2026-10-23, designs/hud-full-mock.html)
+## js/66-hud4.js (207) — HUD รอบ 4 (ผู้ใช้ 2026-10-23, designs/hud-full-mock.html)
 H4E:5 H4:12 h4Pal:13 hud4Col:15 h4Parts:17 h4AuBits:22 h4Key:37 h4Ico:38 h4Build:39 h4Set:66 hud4Draw:67
-§114 ไพ่สกิล: นาฬิกาทราย / ท่าใช้ / สลับตำแหน่ง
-h4Glass:116 h4Bits:122 h4Fx:124 h4CardUse:126 h4GlassOut:130 h4Place:134 h4OrdKey:137 h4OrdLoad:138 h4Swap:141 h4Pick:144 h4AltKey:146 h4CardWire:150
-§161 ไพ่อัลติ
-H4SH:163 h4UltCard:165 h4UltUse:170 hud4Frame:174 hud4Hide:175 h4MapBox:177
+§116 ไพ่สกิล: นาฬิกาทราย / ท่าใช้ / สลับตำแหน่ง
+h4Glass:118 h4Bits:124 h4Fx:126 h4CardUse:128 h4GlassOut:132 h4Place:136 h4OrdKey:139 h4OrdLoad:140 h4Swap:143 h4Pick:146 h4AltKey:148 h4CardWire:152
+§163 ไพ่อัลติ
+H4SH:165 h4UltCard:167 h4UltUse:172 hud4Frame:174 hud4Hide:175
+§176 ไพ่อัลติกลางจอ (ผู้ใช้ 2026-11-01)
+h4UltX:179
+§192 รูปตัวละครเรา (FFA / TDM แทนแผนที่ย่อ)
+H4PF:194 h4PfMode:195 h4Portrait:196 h4MapBox:207
 
 ## js/67-backdrop.js (139) — 
 BACKDROP:8
 §66 noise เล็ก ๆ (คงที่ต่อ seed)
 bdHash:67 bdNoise:68 bdFbm:69 bdEdge:71 bdRing:73 bdPaint:79 bdTree:82 buildBackdrop:89 bdTower:135 backdropHide:139
 
-## js/68-water-view.js (114) — 
+## js/68-water-view.js (134) — 
 WTV:5 WTC:6 wtState:7 wtStop:8 wtMesh:9 _wtV:11 _wtP:11 wtBakeClone:12 wtLineMat:23 WT_SINKD:30 wtSinkOffset:31 wtAlive:38 wtLoop:40
 §42 ต่อผู้เล่น: โล่ฟองน้ำ/ฮีล • ลูกผู้ช่วยที่ไหล่ • ร่างโคลน + เส้นน้ำ • …
 waterFX:43
-§76 ทั้งเกม: ลูกผู้ช่วยที่กำลังพุ่ง (ล็อกเป้า)
-syncWater:77
-§83 เหตุการณ์ (efx z 'wt…')
-waterEfx:84
-§110 HUD: เกจฮีลโล่ (โค้งซ้ายรอบเป้าเล็ง)
-drawWaterHud:111
+§78 ทั้งเกม: ลูกผู้ช่วยที่กำลังพุ่ง (ล็อกเป้า)
+WT_MOUTH:80 _wtA:81 _wtB:81 wtMouth:82 _wtCyl:85 wtBeam:87 syncWater:90 wtPew:96
+§103 เหตุการณ์ (efx z 'wt…')
+waterEfx:104
+§130 HUD: เกจฮีลโล่ (โค้งซ้ายรอบเป้าเล็ง)
+drawWaterHud:131
 
 ## js/68-wind-view.js (200) — 
 WV:6 wvState:7 wvAlive:8
@@ -681,4 +685,4 @@ BRM:9 BSK:11 BROOM_SK:17 broomVert:38 broomMove:50 broomStrike:68 broomStrikeTic
 §125 ฝั่งจอ
 broomHead:127 BBEAM:134 _bbGeo:135 broomView:136 broomMountFx:165 broomDismountFx:173 broomBeamFx:175 broomSkFx:191 broomStrikeFx:204 broomFlakFx:209 broomHud:214 broomHudT:215 broomTick:224
 
-(81 files, 19395 lines)
+(81 files, 19477 lines)

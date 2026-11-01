@@ -1,17 +1,39 @@
 {
  "v": 1,
- "desc": "Tidecaller Orb: ลูกยิงตามโดน",
+ "desc": "Tidecaller รอบ 3: โดนเป้า = แสงวาบเล็ก + ประกาย (ไม่สาด ไม่แตกปลาย)",
  "tags": [
   "water",
   "tidecaller",
   "ingame"
  ],
  "pal": "ice",
- "dur": 0.13,
- "seed": 11,
+ "dur": 0.3,
+ "seed": 45,
  "layers": [
   {
-   "id": "drops",
+   "id": "flash",
+   "t": "mesh",
+   "at": 0,
+   "life": 0.12,
+   "att": "point",
+   "shape": "sphere",
+   "mat": "glow",
+   "col": "#e6ffff",
+   "pos": [
+    0,
+    0,
+    0
+   ],
+   "scale": {
+    "0": 0.06,
+    "0.4": 0.2,
+    "1": 0.03
+   },
+   "op": 1,
+   "fade": 0
+  },
+  {
+   "id": "glint",
    "t": "emit",
    "at": 0,
    "life": 0.04,
@@ -21,48 +43,28 @@
     0,
     0
    ],
-   "burst": 8,
+   "burst": 6,
    "rate": 0,
    "from": "sphere",
-   "fr": 0.1,
-   "dir": "out",
-   "up": [
-    0.75,
-    1.5
-   ],
+   "fr": 0.05,
+   "dir": "random",
    "speed": [
-    2,
-    4
+    0.6,
+    1.4
    ],
    "plife": [
-    0.35,
-    0.7
+    0.15,
+    0.25
    ],
-   "look": "glow",
+   "look": "spark",
    "size": [
-    0.88,
-    1.75
+    2.5,
+    4
    ],
-   "col": "#7ff6ff",
-   "c2": "#1f78ff",
-   "gravity": 9,
+   "col": "#ffffff",
+   "c2": "#c8fbff",
+   "gravity": 0,
    "drag": 0.5
-  },
-  {
-   "id": "flash",
-   "t": "flash",
-   "at": 0,
-   "life": 0.08,
-   "att": "point",
-   "pos": [
-    0,
-    0,
-    0
-   ],
-   "col": "#7ff6ff",
-   "size0": 0.2,
-   "size": 0.7,
-   "k": 0.35
   }
  ]
 }

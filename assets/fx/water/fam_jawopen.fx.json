@@ -1,0 +1,60 @@
+{
+ "v": 1,
+ "desc": "Tidecaller: งูอ้าปากตอนยิง 0.45 วิ",
+ "tags": [
+  "water",
+  "tidecaller",
+  "ingame"
+ ],
+ "pal": "ice",
+ "dur": 0.45,
+ "seed": 45,
+ "layers": [
+  {
+   "t": "mesh",
+   "att": "feet",
+   "shape": "glb",
+   "glb": "mesh_water_serpent_jaw",
+   "mat": "toonwater",
+   "col": "#9ff4ff",
+   "col2": "#36b8f5",
+   "rim": 0.8,
+   "scroll": 2.4,
+   "heat": 0.6,
+   "zw": true,
+   "pos": [
+    -0.447,
+    1.816,
+    0.599
+   ],
+   "scale": 1,
+   "fade": 0,
+   "id": "jaw",
+   "at": 0,
+   "life": 0.45,
+   "rot": {
+    "0": [
+     0,
+     0,
+     0
+    ],
+    "0.22": [
+     30,
+     0,
+     0
+    ],
+    "0.7": [
+     30,
+     0,
+     0
+    ],
+    "1": [
+     0,
+     0,
+     0
+    ]
+   },
+   "op": 1
+  }
+ ]
+}

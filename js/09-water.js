@@ -9,7 +9,8 @@ const WT_BA={cd:1.0,n:3,t0:0.25,gap:0.2,dmg:5,spd:1600,range:500,spr:0.06},   //
   WT_SH={gauge:70,heal:6,reg:3},                                             // โล่ฟองน้ำ: ไม่ช้า • ฮีล 6/วิ จากเกจ 70 • เกจคืน 3/วิ (⚠ ตอนไม่ยกโล่)
   WT_DS={dist:300,sink:0.35,r:120,push:900,back:6,cd:8},                     // Dash: จม 0.35 วิ (อมตะ) โผล่ห่าง 300 ผลักรัศมี 120 (~150) ไม่มีดาเมจ • 6 วิกดกลับโคลน • คูลดาวน์ 8 วิ
   WT_RP={len:400,t:0.8,w:100,dmg:20,cd:10},                                  // Riptide: คลื่นสูง ~4 ม. กว้าง 200 ไกล 400 ใน 0.8 วิ พัดติดไปจนสุด 20 ดาเมจ
-  WT_FM={t:10,dmg:5,spd:1100,cd:15},                                         // Tidecaller Orb: 10 วิ ทุกครั้งที่เราทำดาเมจ ลูกยิงตามล็อกเป้า 5 (⚠ คูลดาวน์ 15)
+  WT_FM={t:10,dmg:5,spd:4000,cd:15},   // spd 4000 = ลำน้ำ 'pew' แทบทันที (ผู้ใช้ 2026-11-01)
+                                          // Tidecaller Orb: 10 วิ ทุกครั้งที่เราทำดาเมจ ลูกยิงตามล็อกเป้า 5 (⚠ คูลดาวน์ 15)
   WT_CG={spd:600,range:450,r:14,dmg:10,t:2,lift:0.6,cd:14},                  // Aqua Cage: ฟองขัง 2 วิ ลอยขึ้นนิดหน่อย 10 ดาเมจ ตีได้ฟองไม่แตก
   WT_AB={cast:0.5,t:3,len:700,w:28,tick:0.3,dmg:10,turn:1.2,lift:0.5,cd:25}, // Abyssal Beam: ร่าย 0.5 ยิง 3 วิ โดน 10 ครั้งละ 10 ยาว 700 หมุนตามเมาส์ช้าๆ ลอย 0.5 ม. ยืนนิ่ง
   WT_MW={t:8,cd:28,len:900,w:28,life:0.6,tick:0.2,dmg:10,rate:1.75},         // Moonwater Arts: 8 วิ BA = ลำน้ำ 900 ค้าง 0.6 วิ โดนทุก 0.2 (10×3) ยิงทุก 1.75 วิ • (⚠ คูลดาวน์ 20 หลังหมด = 28 นับจากกด)
@@ -79,7 +80,7 @@ function waterOnHit(src,t,kind){if(!(src.wfam>0)||kind==='wfam'||t===src||(t.tea
   (G.wtf||(G.wtf=[])).push({o:src.id,t,x:src.x,y:src.y,h:src.z+2.1,id:++G.zid});}
 function waterFamTick(f,dt){const o=G.players[f.o],t=f.t;if(!o||!t||t.dead||t.alive===false)return false;
   const dx=t.x-f.x,dy=t.y-f.y,dh=cH(t)-f.h,d=Math.hypot(dx,dy,dh*20)||1,st=WT_FM.spd*dt;
-  if(d<=st+(t.r||PR)*0.5){damage(t,WT_FM.dmg,o.id,'wfam');emit({k:'efx',z:'wtfamhit',x:Math.round(t.x),y:Math.round(t.y),h:cH(t)});return false;}   // ล็อกเป้า โดน 100%
+  if(d<=st+(t.r||PR)*0.5){damage(t,WT_FM.dmg,o.id,'wfam');emit({k:'efx',z:'wtfamhit',x:Math.round(t.x),y:Math.round(t.y),h:cH(t),id:o.id});return false;}   // ล็อกเป้า โดน 100%
   f.x+=dx/d*st;f.y+=dy/d*st;f.h+=dh*20/d*st/20;return true;}
 
 // ---------- Riptide: คลื่นยักษ์วิ่งไปข้างหน้า พัดศัตรูติดไปจนสุดทาง ----------
@@ -128,9 +129,9 @@ function updateWater(dt){
 }
 // snapshot ต่อผู้เล่น: [เกจฮีล, ลูกผู้ช่วย, Moonwater, ลำน้ำ (มุม×100 | null), ร่างโคลน [x,y] | 0, อัลติ 0/1 intro/2 เล็ง/3 พุ่ง]
 function waterSnapP(p){if(!wtOn(p))return undefined;return [Math.floor(p.whg||0),p.wfam>0?1:0,p.wmw>0?1:0,p.wab&&p.wab.ph==='fire'?Math.round(p.wab.a*100):null,p.wcl?[Math.round(p.wcl.x),Math.round(p.wcl.y)]:0,p.wdg?({intro:1,aim:2,dive:3})[p.wdg.ph]:0];}
-// snapshot ทั้งเกม: คลื่น WV=[id,x,y,a,k] • ลูกผู้ช่วยที่กำลังพุ่ง WF=[id,x,y,h]
+// snapshot ทั้งเกม: คลื่น WV=[id,x,y,a,k] • ลูกผู้ช่วยที่กำลังพุ่ง WF=[id,x,y,h,เจ้าของ]
 function waterSnapW(){const o={};if(G.wtw&&G.wtw.length)o.WV=G.wtw.map(w=>[w.id,Math.round(w.x),Math.round(w.y),Math.round(w.a*100)/100,Math.round(Math.min(1,w.t/WT_RP.t)*100)/100]);
-  if(G.wtf&&G.wtf.length)o.WF=G.wtf.map(f=>[f.id,Math.round(f.x),Math.round(f.y),Math.round(f.h*10)/10]);return o;}
+  if(G.wtf&&G.wtf.length)o.WF=G.wtf.map(f=>[f.id,Math.round(f.x),Math.round(f.y),Math.round(f.h*10)/10,f.o]);return o;}
 
 defSpell(WATERP,{id:'riptide',role:'control',n:'Riptide',ic:'🌊',cd:WT_RP.cd,d:'กวาดไม้ → คลื่นน้ำยักษ์สูง ~4 ม. วิ่งไปข้างหน้า กว้าง 200 ไกล 400 • ศัตรูที่โดนถูกพัดติดไปกับคลื่นจนสุดทาง 20 ดาเมจ',
   cast(p){const a=p.ang;(G.wtw||(G.wtw=[])).push({id:++G.zid,o:p.id,team:p.team,x:p.x,y:p.y,h:p.z,a,t:0,c:new Map()});

@@ -10,6 +10,7 @@
 #       assets/vfx/water_wake.glb     — flat tapering water tail, ragged edges (Riptide)
 #       assets/vfx/water_curl.glb     — thin sheet curling over forward, one end taller (Riptide)
 #       assets/vfx/water_curl_body.glb — solid water under the curl (hollow only under the lip)
+#       assets/vfx/water_serpent.glb  — Tidecaller water serpent wrapped round the caster, head at the right shoulder
 #       assets/vfx/water_jet.glb       — rising water column: flared foot, wobbly body, splashing crown on top
 # Units: metres. Blender z = up (exported Y-up). ⚠ Blender +Y exports as glTF -Z = BACKWARD in fx space (+z = aim).
 # Shapes below are modelled with their front at +Y, so fx layers that need the front forward use rot [0, 180, 0]
@@ -219,3 +220,97 @@ def body(u, v):
     return wshape((v - .5) * 2, f, up)
 ob = finish(grid('water_curl_body', body, 70, 40, close_u=True), thick=0, subd=1)
 export(ob, 'water_curl_body.glb')
+
+# ---------------- 10. water serpent (Tidecaller, user 2026-11-01 ref designs/water_ref/tidecaller_serpent_ref.png): small but
+# long, all water. Tail starts at the hip, wraps once round the caster up to the right shoulder, neck rises, dragon-like head
+# beside the head pointing FORWARD = Blender -Y (exports as fx +z, no rot needed). Swept-back spiky water fins on head + neck.
+# Origin = caster's feet. uv: u around the tube, v tail → head.
+clear()
+import mathutils
+def sweep(name, pts, rads, sides=14):
+    """tube along pts with radius per point; parallel-transport frames; capped tail"""
+    me = bpy.data.meshes.new(name); bm = bmesh.new(); uvl = bm.loops.layers.uv.new('UVMap')
+    P = [Vector(p) for p in pts]; n = len(P)
+    T = [(P[min(i + 1, n - 1)] - P[max(i - 1, 0)]).normalized() for i in range(n)]
+    N = T[0].orthogonal().normalized(); rings = []
+    for i in range(n):
+        if i: 
+            axis = T[i - 1].cross(T[i])
+            if axis.length > 1e-6: N = (mathutils.Matrix.Rotation(T[i - 1].angle(T[i]), 3, axis.normalized()) @ N).normalized()
+        B = T[i].cross(N)
+        rings.append([bm.verts.new(P[i] + (N * math.cos(a) + B * math.sin(a)) * rads[i]) for a in [k / sides * 2 * math.pi for k in range(sides)]])
+    for i in range(n - 1):
+        for k in range(sides):
+            q = [rings[i][k], rings[i][(k + 1) % sides], rings[i + 1][(k + 1) % sides], rings[i + 1][k]]
+            f = bm.faces.new(q)
+            for lp, (a, b) in zip(f.loops, [(k / sides, i / (n - 1)), ((k + 1) / sides, i / (n - 1)), ((k + 1) / sides, (i + 1) / (n - 1)), (k / sides, (i + 1) / (n - 1))]): lp[uvl].uv = (a, b)
+    bm.faces.new(list(reversed(rings[0])))
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)   # outward (the fx shader draws front faces only)
+    bm.normal_update(); bm.to_mesh(me); bm.free()
+    ob = bpy.data.objects.new(name, me); bpy.context.collection.objects.link(ob); me.materials.append(mat())
+    for p in me.polygons: p.use_smooth = True
+    return ob
+# body (round 3, user: "โค้งไหลลื่นตามเรา ไม่หักศอก ติดตัวเราได้ หัวออกมาหน่อย"): ONE smooth Catmull-Rom curve hugging the caster —
+# left leg → round the back → up behind the right shoulder → arches over the shoulder → into the head (no kink at the neck).
+# +Y = behind the caster, -Y = forward.
+CP = [(-.4, .0, .2), (-.52, .3, .62), (-.3, .55, 1.0), (.12, .55, 1.3), (.45, .35, 1.62), (.55, .02, 1.9), (.5, -.3, 1.98), (.45, -.55, 1.9)]
+def catmull(P, n):
+    P = [Vector(P[0]) * 2 - Vector(P[1])] + [Vector(p) for p in P] + [Vector(P[-1]) * 2 - Vector(P[-2])]
+    out = []
+    for k in range(1, len(P) - 2):
+        p0, p1, p2, p3 = P[k - 1], P[k], P[k + 1], P[k + 2]
+        for i in range(n):
+            t = i / n
+            out.append(.5 * (2 * p1 + (-p0 + p2) * t + (2 * p0 - 5 * p1 + 4 * p2 - p3) * t * t + (-p0 + 3 * p1 - 3 * p2 + p3) * t ** 3))
+    out.append(Vector(P[-2])); return out
+pts = catmull(CP, 14); NP = len(pts)
+rads = [.02 + .1 * min(1, (i / (NP - 1)) * 2.2) ** .7 + .012 * math.sin(i * .5) for i in range(NP)]
+body = sweep('serpent_body', [tuple(p) for p in pts], rads)
+neck_end = pts[-1]; neck_dir = (pts[-1] - pts[-4]).normalized()
+# head (round 3, ref tidecaller_serpent_ref.png): long elegant dragon head continuing the neck, tilted slightly down; skull a
+# bit wider than the neck, long snout tapering to a rounded nose; flattened; brow ridges; lower jaw; mane of long flowing
+# water spikes sweeping BACK from the top of the head and down the neck
+fwd = Vector((neck_dir.x * .3, -1, -.18)).normalized()
+HR = [.12, .15, .16, .155, .14, .12, .1, .08, .06]   # round 4 (user: mouth/face too long) → shorter, rounder snout
+HL_ = .44
+hp = [neck_end - fwd * .06 + fwd * (HL_ * k / (len(HR) - 1)) for k in range(len(HR))]
+head = sweep('serpent_head', [tuple(p) for p in hp], HR, sides=14)
+bpy.context.view_layer.objects.active = head; head.select_set(True)
+for v in head.data.vertices:                                       # flatten round the head's own axis (keep width, squash height)
+    c = neck_end + fwd * max(0, min(HL_, (v.co - neck_end).dot(fwd)))
+    d = v.co - c; v.co = c + Vector((d.x, d.y, d.z * .72))
+jaw = sweep('serpent_jaw', [tuple(p + Vector((0, 0, -.075 - .012 * k))) for k, p in enumerate(hp[2:8])], [.075 - .008 * k for k in range(6)], sides=10)
+side = fwd.cross(Vector((0, 0, 1))).normalized()
+eyes = [hp[3] + side * s_ * .12 + Vector((0, 0, .06)) for s_ in (-1, 1)]
+brows = [sweep('brow', [tuple(e + fwd * (-.06 + .1 * k / 4) + Vector((0, 0, .03 + .01 * math.sin(k)))) for k in range(5)], [.03, .035, .03, .022, .012], sides=8) for e in eyes]
+fins = list(brows)   # the jaw is exported on its own (water_serpent_jaw) so it can open when the serpent shoots
+def fin(base, d, length, w, bend=.35):
+    pts_ = [Vector(base) + d * (t * length) + Vector((0, 0, -bend * (t * length) ** 2)) for t in [k / 7 for k in range(8)]]
+    return sweep('fin', [tuple(p) for p in pts_], [w * (1 - k / 7) + .003 for k in range(8)], sides=6)
+back = (-fwd + Vector((0, 0, .55))).normalized()
+for k in range(9):                                                # mane: from the top/back of the skull, fanning back
+    a = (k - 4) / 4
+    base = hp[2 + k % 3] + Vector((0, 0, .08)) + side * a * .08
+    d = (back + side * a * .55 + Vector((0, 0, .15 * (1 - abs(a))))).normalized()
+    fins.append(fin(base, d, .42 + .28 * (1 - abs(a)), .05 - .012 * abs(a)))
+for k in range(10):                                               # smaller spikes down the neck and back, also swept back
+    i = NP - 6 - k * 6
+    if i < 10: break
+    p = pts[i]; t_ = (pts[i + 1] - pts[i - 1]).normalized()
+    fins.append(fin(p + Vector((0, 0, rads[i] * .85)), (-t_ + Vector((0, 0, .5))).normalized(), .16 + .04 * (k % 3), .022, .2))
+print('eyes', [tuple(round(c, 3) for c in e) for e in eyes])
+hp = [tuple(p) for p in hp]
+bpy.ops.object.select_all(action='DESELECT')
+for o in [body, head] + fins: o.select_set(True)
+bpy.context.view_layer.objects.active = body; bpy.ops.object.join()
+ob = finish(bpy.context.view_layer.objects.active, thick=0, subd=1)
+ob.name = 'water_serpent'
+export(ob, 'water_serpent.glb')
+# jaw alone, origin at the hinge (back of the jaw) so an fx layer can swing it open with rot x (user 2026-11-01: 'อ้าปาก')
+hinge = Vector(jaw.data.vertices[0].co) * 0
+for v in jaw.data.vertices: hinge = hinge if hinge.length else Vector(hp[2]) + Vector((0, 0, -.075))
+for v in jaw.data.vertices: v.co -= hinge
+bpy.ops.object.select_all(action='DESELECT'); jaw.select_set(True); bpy.context.view_layer.objects.active = jaw
+jaw = finish(jaw, thick=0, subd=1); export(jaw, 'water_serpent_jaw.glb')
+print('jaw hinge', tuple(round(c, 3) for c in hinge))
+print('head tip', hp[-1])
