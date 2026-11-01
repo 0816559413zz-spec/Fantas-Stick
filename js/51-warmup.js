@@ -9,7 +9,7 @@
 //  (ไม่งั้นทุกครั้งที่เอฟเฟกต์จบแล้วกดใหม่ จะ compile ใหม่อีก) • ฝั่ง client ล้วน ไม่เปลี่ยนโปรโตคอล
 // =====================================================================
 const WARM={reg:{},done:new Set(),hold:new THREE.Group(),holdF:new THREE.Group(),key:'',q:[],late:false,busy:false,log:[]};
-const WARM_FXDIR={pyro:'fire',frost:'frost',earth:'earth',wind:'wind',water:'water'},WARM_COMMON=['tpl','sig','rec'];
+const WARM_FXDIR={pyro:'fire',frost:'frost',storm:'storm',earth:'earth',wind:'wind',water:'water'}   // storm เพิ่ม 2026-11-02 (เดิมขาด → เอฟเฟกต์สายฟ้า compile กลางไฟต์),WARM_COMMON=['tpl','sig','rec'];
 const WARM_X=-20000,WARM_Y=-20000;   // นอกแผนที่ ~1 กม. (หมอก/ระยะกล้องซ่อนหมด, ไม่มีเสียงเพราะ nearMe)
 // ย้ายของไป hold ของ scene เดิม (fxScene ไม่มีไฟ → program คนละแบบกับ scene) • วัสดุ dispose = ไม่ทำอะไร • อัปโหลด texture ไว้เลย
 function warmKeep(o,fxs){(o.parent||scene).remove(o);(fxs?WARM.holdF:WARM.hold).add(o);
@@ -61,6 +61,8 @@ function warmTick(v){
   const step=WARM.q.shift();try{warmStep(step);}catch(e){console.warn('warmup',step,e);WARM.busy=false;}
 }
 // ---------- ภาพจากโค้ดของแต่ละสาย (เฟรมละฟังก์ชัน) ----------
+// ไฟ 3 มิติแบบ raymarch (fireVol) — เดิมไม่ได้อุ่น: compile ครั้งแรกกลางไฟต์ (tools/bench-bots.js 2026-11-02)
+WARM.reg.pyro=[()=>{const m=fireVol([{c:[0,0,0],ax:[1,0],hx:1,hz:1,h:2}]);fxScene.add(m);return m;}];
 WARM.reg.earth=[
   ()=>{const S=makeStand(1,false);standOp(S,0.5);return S.g;},
   ()=>{const S=makeStand(1,true);standOp(S,0.5);return S.g;},

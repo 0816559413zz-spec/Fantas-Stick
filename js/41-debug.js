@@ -161,10 +161,10 @@ function gpuCheck(){
 }
 setTimeout(gpuCheck,1500);
 window.WD.GPU=GPUC;
-Object.assign(window.WD,{QUAL,applyQuality,fxEv:ev=>fx(ev),HVB,PFB,ptexUse,ptexLoad,CURL,PLIT,PSYS,fireVol,bot:botDebug,bots,ar:()=>G.ar});
+Object.assign(window.WD,{QUAL,applyQuality,fxEv:ev=>fx(ev),HVB,PFB,ptexUse,ptexLoad,CURL,PLIT,PSYS,fireVol,bot:botDebug,bots,lobbyBotAdd,BOT_LV,ar:()=>G.ar});
 // เทส/วัดผล: เดินลูปโฮสต์ 1 รอบด้วยมือ (hostTick + snapshot + เอฟเฟกต์) — ใช้ตอนหน้าต่างถูกซ่อนแล้ว setInterval ช้า
 // prop / โมเดลจากไฟล์ (ดีบัก)
 Object.defineProperties(window.WD,{TERR:{get:()=>TERR},MAPID:{get:()=>MAPID},OBS:{get:()=>OBS},PROPS:{get:()=>PROPS},PROPON:{get:()=>PROPON},BLDG:{get:()=>BLDG},BRK:{get:()=>BRK},BRKV:{get:()=>BRKV},BLDON:{get:()=>BLDON},HSTOP:{get:()=>HSTOP}});Object.assign(window.WD,{MAPS,RANDOM_MAPS,FMAPS,loadMapData,terrT,groundH,terrSolid,setMapVars,buildWorld,PROPDEF,genProps,MODELS,loadModel,modelManifest,useProp,hitProp,damageEnv,hitBldPiece,breakBldChunk,bldSupport,bldChunk,bldPieceAt,bldRay,aimClip,aimRay3,collideWorld,PM3,EM3,JM3,animTick,playVfx,playFlip,fileFx,zoneFx,VFXL,FLIPL,FLIPS,fx});
 Object.defineProperty(window.WD,"CITYD",{get:()=>CITYD});Object.assign(window.WD,{aimPoint,citySolidAt,cityRoomBox,cityFloorH,cityCeilH,cityCollideIn,groundH});   // ดีบัก: ตึกกลวงในเมือง (js/12-city-dmg)
-window.WD.hostStep=dt=>{hostTick(dt);const b=makeSnap(),ev=EVL;EVL=[];EVN=[];onSnap(Object.assign({},b,{ev}));};
+window.WD.hostStep=dt=>{let t=performance.now();hostTick(dt);pf('hostTick',t);t=performance.now();const b=makeSnap(),ev=EVL;EVL=[];EVN=[];pf('snap',t);t=performance.now();onSnap(Object.assign({},b,{ev}));pf('onSnapFx',t);};
 window.WD.mkStudent=makeStudent;window.WD.scene=scene;window.WD.parseLook=parseLook;   // ดีบัก: ภาพไม้สำเร็จรูป (ทดสอบ headless)

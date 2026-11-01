@@ -6,6 +6,22 @@ const HSTOP={t:0,pend:0,until:0,gap:0.3};
 function hitStop(d){if(screen==='game'&&performance.now()>=HSTOP.until)HSTOP.pend=Math.max(HSTOP.pend,d);}
 // สตูดิโอ VFX (studio/studio.js) ขับเฟรมเอง: own = หยุดลูปนี้ • noDraw = อัปเดตเอฟเฟกต์โดยไม่วาด (กรอเวลา) • seek = กำลังกรอ: ข้ามตัวละคร/หญ้า/ผ้าคลุม (กินเวลา ~85% ของการกรอ)
 const FXSTUDIO={own:false,noDraw:false,seek:false};
+// ---------- เก็บ shader ที่ compile แล้วไว้ตลอดเกม (ผู้ใช้ 2026-11-02 "เล่นกับบอทเต็มห้อง สู้กันนัว ๆ กระตุกมาก") ----------
+// เอฟเฟกต์สร้างวัสดุใหม่ทุกครั้งที่เกิด แล้ว dispose ตอนจบ → ถ้าไม่มีเอฟเฟกต์ชนิดเดียวกันค้างอยู่ three.js ลบ shader program ทิ้ง
+// → บอทกดสกิลนั้นอีก = compile ใหม่ = ค้าง 90–280 ms (วัดจาก tools/bench-bots.js: program ใหม่กลางไฟต์ทุก ๆ 1–5 วิ)
+// แก้: program ทุกตัวที่เพิ่งเกิด เพิ่ม usedTimes 1 ครั้ง → ไม่ถึง 0 = ไม่ถูกลบ (ชนิด shader มีจำกัด ~150–300 ตัว) • เพดาน PINMAX กันกรณี shader สร้างจากตัวเลขสุ่ม
+const PINMAX=600,PINNED=new WeakSet();let pinLen=0;
+// แค่ตรึง program ไม่พอสำหรับ ShaderMaterial: three.js จำ "ซอร์ส shader" แยก (ShaderCache) แล้วลบเมื่อวัสดุสุดท้ายที่ใช้ซอร์สนั้น dispose
+// → ซอร์สเดิมได้เลขใหม่ = cacheKey ใหม่ = compile ใหม่ทั้งที่โค้ดเหมือนเดิม • แก้: วัสดุตัวแรกของแต่ละซอร์สที่เคยวาดแล้ว "ไม่ dispose จริง" (เก็บไว้ 1 ตัวต่อซอร์ส)
+const KEEPSRC=new Set();
+{const _sd=THREE.ShaderMaterial.prototype.dispose;
+  THREE.ShaderMaterial.prototype.dispose=function(){
+    if(KEEPSRC.size<PINMAX){const k=this.vertexShader+''+this.fragmentShader;
+      if(!KEEPSRC.has(k)){const pr=gl.properties&&gl.properties.get(this);if(pr&&pr.currentProgram){KEEPSRC.add(k);this.userData.kept=1;return;}}}
+    return _sd.call(this);};}
+function pinPrograms(){const L=gl.info.programs;if(!L||L.length===pinLen)return;pinLen=L.length;
+  let n=0;for(const pg of L){if(PINNED.has(pg))n++;}
+  for(const pg of L){if(PINNED.has(pg)||n>=PINMAX)continue;PINNED.add(pg);pg.usedTimes++;n++;}}
 function frame(now){
   if(FXSTUDIO.own)return;
   const dt=Math.min(0.05,(now-lastFrame)/1000);lastFrame=now;
@@ -76,7 +92,7 @@ function renderGame(v,P,E,me,dt,now){
   t0=performance.now();updateZV(dt);updateParticles(dt);updateShapes(dt);updateLights(dt);updateVfx(dt);updateDebris(dt);pf('fx',t0);
   QUAL.frame++;gl.shadowMap.needsUpdate=QUAL.mode==='high'||QUAL.frame%(QUAL.mode==='auto'&&QUAL.lvl>=2?4:2)===0;if(gl.shadowMap.needsUpdate)shadowFollow();
   if(FXSTUDIO.noDraw)return;
-  t0=performance.now();composer.render();pf('gpuSubmit',t0);
+  t0=performance.now();composer.render();pf('gpuSubmit',t0);pinPrograms();
   t0=performance.now();const spk=speakingIds();
   drawLabels(P,E,v,me,spk);drawMinBars(v,me);
   drawTexts(dt);

@@ -122,6 +122,7 @@ function ptexUse(name,tex,e){
   softify(mat,e.add?0.5:0.8);
   if(PFB[name]&&PFB[name].pts){fxScene.remove(PFB[name].pts);PFB[name].geo.dispose();}
   const pts=new THREE.Points(geo,mat);pts.frustumCulled=false;pts.renderOrder=e.add?4:2;fxScene.add(pts);
+  if(screen==='game')try{warmCompile([fxScene]);}catch(er){}   // ภาพโหลดเสร็จกลางเกม: compile ล่วงหน้าแบบไม่บล็อก (ไม่ต้องรอเม็ดแรกโผล่แล้วค้าง)
   return PFB[name]={geo,pos,col,size,age,pts,e,fb:true,n:0};
 }
 function ptexLoad(){modelManifest().then(m=>{const P=m.ptex||{};for(const k in P){if(PFB[k])continue;PFB[k]={loading:true};const e=P[k];
