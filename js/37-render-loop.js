@@ -11,6 +11,7 @@ function frame(now){
   const dt=Math.min(0.05,(now-lastFrame)/1000);lastFrame=now;
   if(HSTOP.t>0){HSTOP.t-=dt;requestAnimationFrame(frame);return;}
   qualTick(dt);
+  if(NET.isHost&&screen==='game')hostLoop();
   try{render(dt,now);}catch(e){console.error(e);}
   if(HSTOP.pend>0){HSTOP.t=HSTOP.pend;HSTOP.until=now+(HSTOP.pend+HSTOP.gap)*1000;HSTOP.pend=0;}
   requestAnimationFrame(frame);
@@ -32,7 +33,7 @@ function render(dt,now){
     menuCamera(now);gl.shadowMap.needsUpdate=true;composer.render();return;
   }
   let a=VIEW.a!==null?VIEW.a:VIEW.prev?clamp((now-VIEW.tCur)/Math.max(8,VIEW.tCur-VIEW.tPrev),0,1):1,SA=v,SB=VIEW.prev;
-  if(NET.isHost&&!HBOLD){const hp=hbPair(now);if(hp){SA=hp.cur;SB=hp.prev;a=hp.a;}}   // โฮสต์: ตำแหน่งจาก snapshot ที่รู้เวลาแน่นอน (js/19 HVB) • ?hbold = แบบเดิม
+  if(NET.isHost&&!HBOLD){a=1;SB=null;}   // โฮสต์เดินเกมก่อนวาดเฟรมนี้ (frame) ภาพคือสถานะล่าสุด ไม่หน่วง • ?hbold = แบบเดิม
   const pm={},em={};
   if(SB){for(const p of SB.P)pm[p.id]=p;for(const e of SB.E)em[e.id]=e;}
   const P=SA.P.map(p=>{const q=pm[p.id];if(!q||Math.abs(q.x-p.x)+Math.abs(q.y-p.y)>200)return p;return Object.assign({},p,{x:lerp(q.x,p.x,a),y:lerp(q.y,p.y,a),z:lerp(q.z||0,p.z||0,a),a:lerpAng(q.a,p.a,a)});});   // z ด้วย: เดิมความสูงกระโดดขยับเป็นขั้น 30 ครั้ง/วิ → กล้องสั่นตอนกระโดด (ผู้ใช้ 2026-10-26)

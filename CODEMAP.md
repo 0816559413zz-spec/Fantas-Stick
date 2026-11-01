@@ -179,7 +179,7 @@ NAV_MAPS:14 NAV_EYE:14 NAV:15 navOn:17 navSig:18 navEnsure:25 navBuild:31 navCel
 ## js/15-botplay.js (88) — 
 BOT_RANGE:7 botMem:9 botWallBehind:11 _bspd:21 botSave:23 botWant:25 botCombo:64
 
-## js/15-modes.js (408) — 
+## js/15-modes.js (410) — 
 sendPriv:5 TASKF:9 taskPts:10 raceRings:11 modeInit:17 spawnDummy:59 trainTick:64 TR_KEYS:81 trTeams:83 trCmd:93 hostEndTraining:111
 §113 ควิดดิช
 quidThrow:114 quidDrop:120 quidArea:126 quidTick:127 snitchTick:163
@@ -192,7 +192,7 @@ impActions:245 startMeeting:283 hostVote:290 meetTick:295 impCheck:314
 §322 ระเบิดที่ตั้งเวลาไว้ (ลูกไฟมังกร / คลื่นไฟ)
 bombTick:323 modeSnap:336
 §358 สร้าง snapshot ส่งให้ทุกเครื่อง
-r1:359 DEFP:361 packP:362 unpackP:363 makeSnap:364 PROF:382 pf:383 hostLoop:384 HLW:398 pingN:408
+r1:359 DEFP:361 packP:362 unpackP:363 makeSnap:364 PROF:382 pf:383 hostSent:384 hostLoop:385 HLW:400 pingN:410
 
 ## js/16-voice.js (89) — 
 VOICE:4 rosterIds:5 toggleMic:6 voiceSync:20 teamOn:37 teamOf:38 applyVoiceGates:39 VAC:49 onIncomingCall:50 voiceLevels:62 speakingIds:70 updateVoiceUI:76
@@ -336,8 +336,8 @@ ROLE:4 KC:4 roleShowT:4 onPriv:5 MO:10 BREATHS:11 clearModeObjs:12 ITEMC:21 heal
 §139 หน้าประชุมโหวต (หาลอร์ดโวลเดอมอร์)
 meetKey:140 myVoted:140 castVote:141 syncMeeting:147
 
-## js/37-render-loop.js (82) — ลูปเรนเดอร์
-lastFrame:2 HSTOP:5 hitStop:6 FXSTUDIO:8 frame:9 _fpsAcc:18 _fpsN:18 render:19 renderGame:62
+## js/37-render-loop.js (83) — ลูปเรนเดอร์
+lastFrame:2 HSTOP:5 hitStop:6 FXSTUDIO:8 frame:9 _fpsAcc:19 _fpsN:19 render:20 renderGame:63
 
 ## js/38-hud.js (346) — HUD
 rr:2 SLOTS:3 fmtTime:4
@@ -652,16 +652,16 @@ BACKDROP:8
 §66 noise เล็ก ๆ (คงที่ต่อ seed)
 bdHash:67 bdNoise:68 bdFbm:69 bdEdge:71 bdRing:73 bdPaint:79 bdTree:82 buildBackdrop:89 bdTower:135 backdropHide:139
 
-## js/68-water-view.js (182) — 
-WTV:5 WTC:6 wtState:7 wtStop:8 wtMesh:9 _wtV:11 _wtP:11 wtBakeClone:12 wtLineMat:23 _wtOlMat:30 wtOutline:32 WT_SINKD:38 wtSinkOffset:39 wtAlive:46 wtLoop:48 WT_FR:51 wtFrPath:52 _wtFa:54 _wtFb:54 _wtFs:54 _wtFn:54 wtFamRise:55 wtFamRiseOff:65 _wtTube:67 WT_BEAM_V:68 WT_BEAM_F:71 WT_BEAM_O:74 wtBeamMesh:76 wtBeamSync:80 wtBeamOff:85
-§87 ต่อผู้เล่น: โล่ฟองน้ำ/ฮีล • ลูกผู้ช่วยที่ไหล่ • ร่างโคลน + เส้นน้ำ • …
-waterFX:88
-§123 ทั้งเกม: ลูกผู้ช่วยที่กำลังพุ่ง (ล็อกเป้า)
-WT_MOUTH:125 _wtA:126 _wtB:126 wtMouth:127 _wtCyl:130 wtBeam:132 syncWater:135 wtPew:142
-§150 เหตุการณ์ (efx z 'wt…')
-waterEfx:151
-§178 HUD: เกจฮีลโล่ (โค้งซ้ายรอบเป้าเล็ง)
-drawWaterHud:179
+## js/68-water-view.js (185) — 
+WTV:5 WTC:6 wtState:7 wtStop:8 wtMesh:9 _wtV:11 _wtP:11 wtBakeClone:12 wtLineMat:23 _wtOlMat:30 wtOutline:32 WT_SINKD:38 wtSinkOffset:39 wtAlive:46 wtLoop:48 WT_FR:51 wtFrPath:52 _wtFa:54 _wtFb:54 _wtFs:54 _wtFn:54 wtFamRiseMesh:55 WT_POOL:60 wtFamRise:61 wtFamRiseOff:68 _wtTube:70 WT_BEAM_V:71 WT_BEAM_F:74 WT_BEAM_O:77 wtBeamMesh:79 wtBeamSync:83 wtBeamOff:88
+§90 ต่อผู้เล่น: โล่ฟองน้ำ/ฮีล • ลูกผู้ช่วยที่ไหล่ • ร่างโคลน + เส้นน้ำ • …
+waterFX:91
+§126 ทั้งเกม: ลูกผู้ช่วยที่กำลังพุ่ง (ล็อกเป้า)
+WT_MOUTH:128 _wtA:129 _wtB:129 wtMouth:130 _wtCyl:133 wtBeam:135 syncWater:138 wtPew:145
+§153 เหตุการณ์ (efx z 'wt…')
+waterEfx:154
+§181 HUD: เกจฮีลโล่ (โค้งซ้ายรอบเป้าเล็ง)
+drawWaterHud:182
 
 ## js/68-wind-view.js (200) — 
 WV:6 wvState:7 wvAlive:8
@@ -683,11 +683,11 @@ BRM:9 BSK:11 BROOM_SK:17 broomVert:38 broomMove:50 broomStrike:68 broomStrikeTic
 §125 ฝั่งจอ
 broomHead:127 BBEAM:134 _bbGeo:135 broomView:136 broomMountFx:165 broomDismountFx:173 broomBeamFx:175 broomSkFx:191 broomStrikeFx:204 broomFlakFx:209 broomHud:214 broomHudT:215 broomTick:224
 
-## js/70-water-dragon.js (469) — 
+## js/70-water-dragon.js (473) — 
 WDG:7 wdgBuild:8 T:9 root:9 fixed:9 rings:10 sides:10 geoOf:11 skin:12 faceSkin:40 group:41 head:42 faceTime:44 groundY:44 faceMaterial:45 faceBlue:50 hornBlue:50 ridgeCyan:50 profile:52 headProfile:53 faceGeo:58 fp:58 fc:58 fi:58 faceRings:58 faceSides:58 navy:59 aqua:59 belly:59 flowHi:59 neckBlend:59 headStroke:71 eyePatch:72 waterCrest:87 bodyGeo:113 bodyP:113 bodyUV:113 indices:113 body:119 finShape:121 finGeo:122 finPos:124 finUV:124 finSkin:126 fins:127 limbSkin:129 clawSkin:130 taperedLimb:131 arms:138 bodyLength:148 intro:148 settleWindow:148 tipHz:148 bodyBulk:148 bodyRadius:149 flight:151 quarters:152 step:152 dr:152 dy:152 spiralKnot:153 first:154 entry:154 crest:158 bank:161 corner:161 cruiseEntry:161 quarterHandle:164 leadLength:166 up:170 zAxis:170 yAxis:170 smooth:171 startAt:172 startD:172 startDistance:174 distanceToCruise:174 hoverSpeed:174 fastDuration:174 brakeDuration:174 startRamp:174 fastSpeed:175 progress:176
 §185 ทางบิน: ใช้ระยะทาง (เมตร) ไม่ใช่สัดส่วน เพื่อต่อทางพุ่งลงตอนเล็งเสร็จ…
 dive:186 PA:187 TA:188 DIVE_DOWN:190 DIVE_POUR:190 DIVE_STEP:190 diveDist:191 lastTime:192 lastHeadT:192 headRight:192 bodyState:192 filtered:192 shape:193 gate:246 rune:248 shadowMat:249 shadow:250 ringMat:251 ring:252 glyphMat:253 glyphHi:254 glyphPath:255 water:262 splashGeometry:265 lowWaveGeometry:266 splashBursts:267 pulse:273 outerRing:274 dropletMat:275 drops:275 transform:277 gateAt:278 sprayMaterial:300 spray:300 curlCurve:302 foamMaterial:303 foam:304 particles:305 foamParticles:305 rand:306 bodySprayAt:307 waveSegments:328 waveSheets:328 wavesAt:335 currentConfigs:350 currentMaterial:357 currentSegments:362 currentSides:362 currentMeshes:362 currentPoint:370 currentSpray:377 currentParticles:378 currentsAt:379
 §443 เล่น
 WDG_YAW:444 wdgGet:445 wdgStart:446 wdgDive:453 wdgKeep:456 wdgEnd:457 wdgTick:458
 
-(82 files, 20018 lines)
+(82 files, 20028 lines)

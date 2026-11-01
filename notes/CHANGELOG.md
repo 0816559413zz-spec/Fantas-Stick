@@ -1,5 +1,7 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
 
+- 2026-11-01 แก้ดีเลย์ฝั่งโฮสต์/เล่นคนเดียว: โฮสต์เดินเกมก่อนวาดทุกเฟรม (`frame` js/37) แทนวาดย้อนหลัง 18–70 ms จาก `HVB` (วัดได้ 57 ms) • ส่ง snapshot ออนไลน์ตามเวลา ≥30 ms ไม่ผูกจำนวน tick (ยังไม่ commit)
+- 2026-11-01 ลดกระตุก Water: เมช Beam/งูเรียกใช้ซ้ำไม่ dispose (ไม่ compile shader ซ้ำ) • สร้างมังกรล่วงหน้าตอนนับถอยหลัง (`WARM.reg.water`) (ยังไม่ commit)
 - 2026-11-01 ไอคอนสาย Water 10 อันจาก game-icons.net (lorc, CC BY 3.0, เครดิตใน icons/CREDITS.md)
 - 2026-11-01 ยิง Abyssal Beam: กล้องกลางหลังเหนือหัว (`BZC`) • น้ำแตกปลายลำสาดย้อนเป็นพัด (ยังไม่ commit)
 - 2026-11-01 Beam สีเพิ่ม น้ำเงิน ฟ้า เขียวน้ำทะเล • น้ำแตกเปลี่ยนจากภาพหมุนเป็นชิ้นน้ำแยกกันบินออกแล้วตก (`tools/water-flake-gen.py`) (ยังไม่ commit)

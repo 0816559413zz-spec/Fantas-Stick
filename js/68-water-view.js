@@ -52,17 +52,20 @@ const WT_FR={u0:.16,T:1.3,R:44,N:8,len:.42,end:[-.42,1.95,.55]};WT_FR.a=Math.ata
 function wtFrPath(u0,v){const u=WT_FR.u0+(1-WT_FR.u0)*u0,e=u*u*(3-2*u),q=e*0.6+u*0.4,r=1.5*Math.pow(Math.sin(Math.PI*Math.min(1,q*1.05)),0.8)*(1-0.25*q)+0.3+(WT_FR.rr-0.3)*q*q*q,a=WT_FR.a-(1-q)*1.75*6.283;
   return v.set(r*Math.cos(a),-0.2+(WT_FR.end[1]+0.2)*q+0.35*Math.sin(q*Math.PI),r*Math.sin(a));}
 const _wtFa=new THREE.Vector3(),_wtFb=new THREE.Vector3(),_wtFs=new THREE.Vector3(),_wtFn=new THREE.Vector3();
-function wtFamRise(S,o){const k=S.famT/WT_FR.T;if(k>=1){wtFamRiseOff(S);return;}const R=WT_FR.R,N=WT_FR.N;
-  if(!S.fr){const g=new THREE.BufferGeometry(),n=(R+1)*(N+1),idx=[];for(let i=0;i<R;i++)for(let j=0;j<N;j++){const a=i*(N+1)+j,b=a+N+1;idx.push(a,b,a+1,b,b+1,a+1);}
+function wtFamRiseMesh(){const R=WT_FR.R,N=WT_FR.N;const g=new THREE.BufferGeometry(),n=(R+1)*(N+1),idx=[];for(let i=0;i<R;i++)for(let j=0;j<N;j++){const a=i*(N+1)+j,b=a+N+1;idx.push(a,b,a+1,b,b+1,a+1);}
     const uv=new Float32Array(n*2);for(let i=0;i<=R;i++)for(let j=0;j<=N;j++){uv[(i*(N+1)+j)*2]=j/N;uv[(i*(N+1)+j)*2+1]=i/R*3;}
     g.setAttribute('position',new THREE.BufferAttribute(new Float32Array(n*3),3));g.setAttribute('normal',new THREE.BufferAttribute(new Float32Array(n*3),3));g.setAttribute('uv',new THREE.BufferAttribute(uv,2));g.setIndex(idx);
-    const m=fxToonWaterMat('#9ff4ff','#36b8f5',0.6,3,1,0,0);m.side=THREE.DoubleSide;m.depthWrite=true;S.fr=new THREE.Mesh(g,m);S.fr.frustumCulled=false;S.fr.renderOrder=3;scene.add(S.fr);}
+    const m=fxToonWaterMat('#9ff4ff','#36b8f5',0.6,3,1,0,0);m.side=THREE.DoubleSide;m.depthWrite=true;const M=new THREE.Mesh(g,m);M.frustumCulled=false;M.renderOrder=3;return M;}
+// เมชใช้ซ้ำ ห้าม dispose: วัสดุหาย = three.js ลบ shader แล้ว compile ใหม่ทุกครั้งที่กดสกิล (กระตุก)
+const WT_POOL={fr:[],bm:[]};
+function wtFamRise(S,o){const k=S.famT/WT_FR.T;if(k>=1){wtFamRiseOff(S);return;}const R=WT_FR.R,N=WT_FR.N;
+  if(!S.fr){S.fr=WT_POOL.fr.pop()||wtFamRiseMesh();scene.add(S.fr);}
   const M=S.fr,P=M.geometry.attributes.position.array;M.position.copy(o.g.position);M.rotation.y=o.g.rotation.y;
   for(let i=0;i<=R;i++){const w=i/R,u=Math.max(0,k-WT_FR.len*(1-w));wtFrPath(u,_wtFa);wtFrPath(Math.min(1,u+0.006),_wtFb);_wtFb.sub(_wtFa).normalize();_wtFs.set(_wtFb.z,0,-_wtFb.x);if(_wtFs.lengthSq()<1e-4)_wtFs.set(1,0,0);_wtFs.normalize();_wtFn.crossVectors(_wtFb,_wtFs);
     const r=(0.015+0.15*Math.pow(Math.sin(Math.min(1,w*1.08)*Math.PI*0.5),1.4))*(w>0.93?1+(w-0.93)*7:1)*(w>0.985?0.45:1);
     for(let j=0;j<=N;j++){const t=j/N*6.283,c=Math.cos(t)*r,s=Math.sin(t)*r,n=(i*(N+1)+j)*3;P[n]=_wtFa.x+_wtFs.x*c+_wtFn.x*s;P[n+1]=_wtFa.y+_wtFs.y*c+_wtFn.y*s;P[n+2]=_wtFa.z+_wtFs.z*c+_wtFn.z*s;}}
   M.geometry.attributes.position.needsUpdate=true;M.geometry.computeVertexNormals();}
-function wtFamRiseOff(S){if(S.fr){scene.remove(S.fr);S.fr.geometry.dispose();S.fr.material.dispose();S.fr=null;}}
+function wtFamRiseOff(S){if(S.fr){scene.remove(S.fr);WT_POOL.fr.push(S.fr);S.fr=null;}}
 // ลำ Abyssal Beam (ผู้ใช้ 2026-11-01): ท่อน้ำที่คลื่นวิ่งตลอดความยาว ผิวเป็นชิ้นขาว/ฟ้าการ์ตูน + เปลือกนอกเป็นลิ้นคลื่น • ยาวถึงจุดที่ host บอก (A[6])
 const _wtTube=new THREE.CylinderGeometry(1,1,1,28,110,true).translate(0,0.5,0).rotateX(Math.PI/2);
 const WT_BEAM_V='uniform float time,uLen,uR,uAmp;varying vec2 vQ;varying vec3 vN;varying vec3 vV;void main(){float s=position.z*uLen,z=position.z,a=atan(position.y,position.x),st=smoothstep(0.0,1.5,s);'+
@@ -76,13 +79,13 @@ const WT_BEAM_O='uniform float time;varying vec2 vQ;varying vec3 vN;varying vec3
 function wtBeamMesh(){const U={time:FIRE_U.time,uLen:{value:1},uR:{value:0.34},uAmp:{value:1}},U2={time:FIRE_U.time,uLen:U.uLen,uR:{value:0.5},uAmp:{value:1.6}};
   const m=new THREE.Mesh(_wtTube,new THREE.ShaderMaterial({uniforms:U,vertexShader:WT_BEAM_V,fragmentShader:WT_BEAM_F,side:THREE.DoubleSide,fog:false})),
     o=new THREE.Mesh(_wtTube,new THREE.ShaderMaterial({uniforms:U2,vertexShader:WT_BEAM_V,fragmentShader:WT_BEAM_O,transparent:true,depthWrite:false,side:THREE.DoubleSide,fog:false}));
-  m.add(o);m.frustumCulled=o.frustumCulled=false;m.renderOrder=4;o.renderOrder=5;scene.add(m);return m;}
-function wtBeamSync(S,o,p,a,L,dt){if(!S.bm){S.bm=wtBeamMesh();S.bL=0;}S.bL=Math.min(L,S.bL+dt*2400);if(S.bL>L)S.bL=L;S.bL+=(L-S.bL)*Math.min(1,dt*30);
+  m.add(o);m.frustumCulled=o.frustumCulled=false;m.renderOrder=4;o.renderOrder=5;return m;}
+function wtBeamSync(S,o,p,a,L,dt){if(!S.bm){S.bm=WT_POOL.bm.pop()||wtBeamMesh();scene.add(S.bm);S.bL=0;}S.bL=Math.min(L,S.bL+dt*2400);if(S.bL>L)S.bL=L;S.bL+=(L-S.bL)*Math.min(1,dt*30);
   const c=Math.cos(a),n=Math.sin(a),y0=o.g.position.y+1.3,L0=56,ex=p.x+c*S.bL,ey=p.y+n*S.bL,gy=GY(ex,ey)+1.1,len=Math.max(0.1,(S.bL-L0)/20),B=S.bm;
   B.position.set(tx(p.x+c*L0),y0,tz(p.y+n*L0));_wtA.set(tx(ex),Math.min(y0,gy+Math.max(0,y0-gy)*0.35),tz(ey));B.lookAt(_wtA);
   B.material.uniforms.uLen.value=Math.max(0.1,B.position.distanceTo(_wtA));
   const I=wtLoop(S,'tip','water/beam_tip',{x:ex,y:ey,h:Math.max(0,_wtA.y-GY(ex,ey)),a,aim:false});if(I){I.x=ex;I.y=ey;I.a=a;}}
-function wtBeamOff(S){if(S.bm){scene.remove(S.bm);S.bm.children[0].material.dispose();S.bm.material.dispose();S.bm=null;}wtStop(S,'tip');}
+function wtBeamOff(S){if(S.bm){scene.remove(S.bm);WT_POOL.bm.push(S.bm);S.bm=null;}wtStop(S,'tip');}
 
 // ---------- ต่อผู้เล่น: โล่ฟองน้ำ/ฮีล • ลูกผู้ช่วยที่ไหล่ • ร่างโคลน + เส้นน้ำ • ลำน้ำ Abyssal • Moonwater • มังกร ----------
 function waterFX(o,p,pz,now,dt){

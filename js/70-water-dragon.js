@@ -466,4 +466,8 @@ function wdgTick(dt){
   D.inst.frame(D.t);
  }
 }
+// อุ่นตอนนับถอยหลัง: สร้างมังกรไว้ก่อน กดอัลติแล้วไม่ค้าง
+WARM.reg.water=[()=>{const a=WT_POOL.bm.length?null:wtBeamMesh(),b=WT_POOL.fr.length?null:wtFamRiseMesh();if(a)WT_POOL.bm.push(a);if(b)WT_POOL.fr.push(b);if(a&&b)for(const m of [a,b]){m.position.set(tx(WARM_X),0,tz(WARM_Y));m.scale.setScalar(0.01);scene.add(m);}
+   setTimeout(()=>{for(const m of [a,b])if(m){scene.remove(m);m.scale.setScalar(1);}},5000);},
+  ()=>{if(!WDG.pool.length&&!WDG.warm){WDG.warm=1;wdgGet().then(I=>{for(const m of [I.root,I.fixed])warmKeep(m);WDG.pool.push(I);WDG.warm=0;}).catch(e=>{WDG.warm=0;console.warn('water dragon warm',e);});}}];
 if(typeof WD!=='undefined')WD.WDG=WDG;

@@ -381,6 +381,7 @@ function makeSnap(){
 // ตัววัดเวลาแต่ละส่วน (เปิดด้วย WD.PROF.on=true แล้วดู WD.PROF.t)
 const PROF={on:false,t:{},n:{}};let hostErrN=0;
 function pf(k,t0){if(!PROF.on)return;const d=performance.now()-t0;PROF.t[k]=(PROF.t[k]||0)+d;PROF.n[k]=(PROF.n[k]||0)+1;}
+let hostSent=0;
 function hostLoop(){
   if(!NET.isHost||!G||G.ph==='lobby')return;
   const t=performance.now();
@@ -390,9 +391,10 @@ function hostLoop(){
   const t1=performance.now(),base=makeSnap();
   const evl=EVL;EVL=[];
   onSnap(Object.assign({},base,{ev:evl}));pf('snap',t1);
-  if(NET.online&&tickN%2===0){const evn=EVN;EVN=[];netSendSnap(Object.assign({},base,{ev:evn,T:Math.round(t),P:packP(base.P)},netDelta(base)));}   // T = เวลาโฮสต์ (ลูกข่ายใช้เรียง/เลื่อนภาพให้นุ่ม)
+  if(NET.online&&t-hostSent>=30){hostSent=t;const evn=EVN;EVN=[];netSendSnap(Object.assign({},base,{ev:evn,T:Math.round(t),P:packP(base.P)},netDelta(base)));}   // T = เวลาโฮสต์ (ลูกข่ายใช้เรียง/เลื่อนภาพให้นุ่ม)
 }
-setInterval(()=>{if(!HLW.on)hostLoop();},1000/60);
+// โฮสต์เดินเกมก่อนวาดทุกเฟรม (js/37) ภาพจึงสดและไม่ต้องหน่วงภาพตัวเอง • setInterval เหลือไว้กันเฟรมหยุด (แท็บถูกบัง/ซ่อน)
+setInterval(()=>{if(!HLW.on&&performance.now()-hostLast>40)hostLoop();},1000/60);
 // โฮสต์สลับไปหน้าต่างอื่น: Chrome ชะลอ setInterval ของแท็บที่ซ่อนเหลือ ~1 ครั้ง/วิ → ทั้งห้องค้าง
 // แก้: ตอนเล่นออนไลน์ + แท็บซ่อน ให้นาฬิกาใน Web Worker (ไม่โดนชะลอ) เดินลูปโฮสต์แทน
 const HLW={on:false};
