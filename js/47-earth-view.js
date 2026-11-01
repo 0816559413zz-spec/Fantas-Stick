@@ -465,12 +465,31 @@ function syncEarth(v,dt,now){
     for(let i=0,n=Math.ceil(r/120);i<n;i++){const a=rnd(0,Math.PI*2),rr=r*Math.sqrt(Math.random());smoke(x+Math.cos(a)*rr,y+Math.sin(a)*rr,rnd(0.3,4),1,Math.random()<0.5?ECOL.dust:'#c9b38c',2.6,rnd(10,16),20);}
     if(me&&me.al&&Math.hypot(me.x-x,me.y-y)<r){if(team!==me.tm)inEnemy=true;}}
   earthFog(inEnemy);
+  // เส้นขอบขาว: ติดฝุ่นศัตรู = เห็นทุกคน • คนที่ใช้ฝุ่น (ทีมเดียวกับฝุ่น) = เห็นศัตรูที่อยู่ในฝุ่นของเรา (ผู้ใช้ 2026-11-01)
+  {const ids=[];if(me&&me.al){for(const p of (v.P||[])){if(p.id===NET.myId||!p.al)continue;
+      if(inEnemy||(v.ED||[]).some(d=>d[5]===me.tm&&p.tm!==me.tm&&Math.hypot(p.x-d[1],p.y-d[2])<d[3]))ids.push(p.id);}}
+    eOutlines(ids);}
   for(let i=EV.anims.length-1;i>=0;i--){const a=EV.anims[i];a.t+=dt;if(a.fn(a)===false||a.t>=a.life){if(a.g)disposeObj(a.g);if(a.end)a.end(a);EV.anims.splice(i,1);}}
 }
 // ศัตรูอยู่ในฝุ่น: มองชัดแค่ ~150 รอบตัว ไกลกว่านั้นจางเป็นสีฝุ่น (ใช้ fog ของฉาก)
-function earthFog(on){const F=scene.fog;if(!F)return;
+// + (ผู้ใช้ 2026-11-01) จอเปื้อนดิน: คราบโคลนกระเซ็นติดจอ (ขอบหนา กลางพอมองเห็น ไม่มืดทั้งจอ) • ผู้เล่นคนอื่นมีเส้นขอบขาวเรือง มองเห็นทะลุฝุ่น
+function earthFog(on){const F=scene.fog;eMudScreen(on);if(!F)return;
   if(on){if(!EV.fog)EV.fog={c:F.color.clone(),n:F.near,f:F.far};const cd=cam.position.distanceTo(_eCamT())||6;F.color.set('#9c8664');F.near=cd+7.5;F.far=cd+30;}
   else if(EV.fog){F.color.copy(EV.fog.c);F.near=EV.fog.n;F.far=EV.fog.f;EV.fog=null;}}
+function eMudScreen(on){let el=EV.mud;if(!el){if(!on)return;el=EV.mud=document.createElement('div');el.id='eMud';
+    let h='<i class="tint"></i>';for(let i=0;i<22;i++){const ang=i/22*6.283+Math.sin(i*7.1)*0.3,edge=0.58+((i*37)%10)/30,x=50+Math.cos(ang)*50*edge,y=50+Math.sin(ang)*50*edge,sz=16+((i*53)%9)*3.5;
+      h+=`<i class="sp" style="left:${x.toFixed(1)}%;top:${y.toFixed(1)}%;--sz:${sz}vmin;--r:${(i*47)%360}deg"></i>`;}
+    for(let i=0;i<10;i++){const x=6+i*9.5+((i*29)%7);h+=`<i class="sm" style="left:${x}%;top:${8+((i*41)%30)}%;--sz:${5+(i%3)*2}vmin"></i>`;}
+    for(let i=0;i<7;i++)h+=`<i class="dr" style="left:${6+i*14}%;--du:${(5+(i%3)*2.5).toFixed(1)}s;--de:${(-i*1.3).toFixed(1)}s"></i>`;
+    el.innerHTML=h;document.body.appendChild(el);}
+  el.classList.toggle('on',!!on);}
+const _eOlMat=new THREE.MeshBasicMaterial({color:0xffffff,side:THREE.BackSide,fog:false,transparent:true,opacity:0.95,depthWrite:false});
+_eOlMat.onBeforeCompile=sh=>{sh.vertexShader=sh.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>'+String.fromCharCode(10)+'  transformed += normalize(objectNormal) * 0.07;');};
+function eOutlines(ids){const L=EV.ols||(EV.ols=[]),key=ids.join(',');if(EV.olFor===key)return;
+  for(const m of L)if(m.parent)m.parent.remove(m);L.length=0;EV.olFor=key;
+  for(const id of ids){const o=PM3.get(id);if(!o||!o.g)continue;(o.fileModel||o.b||o.g).traverse(m=>{if(!m.isMesh||m.userData.eOl||!m.parent)return;
+    const c=m.isSkinnedMesh?new THREE.SkinnedMesh(m.geometry,_eOlMat):new THREE.Mesh(m.geometry,_eOlMat);if(m.isSkinnedMesh)c.bind(m.skeleton,m.bindMatrix);
+    c.position.copy(m.position);c.quaternion.copy(m.quaternion);c.scale.copy(m.scale);c.userData.eOl=1;c.renderOrder=999;c.frustumCulled=false;m.parent.add(c);L.push(c);});}}
 function _eCamT(){const me=myPos();return me?eW(me.x,me.y,(me.z||0)+1.2):new THREE.Vector3();}
 function eAnim(o){EV.anims.push(Object.assign({t:0},o));}
 function eDebris(x,y,h,n,sp){burst(x,y,'#7a6446',n,sp||200,0.9,3.2,{h:h||0.3,vh:[2,7],g:14,sh:4,vr:6,c2:'#3a2e22'});smoke(x,y,h||0.3,Math.ceil(n/2),ECOL.dust,1.4,8,sp?sp*0.4:70);eChunks(x,y,h||0.3,Math.ceil(n/5),(sp||200)*0.8,6,0.2);}
@@ -566,6 +585,9 @@ function earthEfx(ev){
       eChunks(x,y,0.5,26,420,10,0.4);FX.flashLight(x,y,2,'#ffcf6a',5,22,0.35);SHAPES_Q.push({k:'decal',x,y,col:'#000000',s1:7,life:8,op:0.7});
       for(let i=0;i<26;i++){const a=rnd(0,6.283),r=rnd(40,260);smoke(x+Math.cos(a)*r,y+Math.sin(a)*r,rnd(0.3,3),1,i%2?ECOL.dust:'#c9b38c',rnd(3,5),rnd(12,20),30);}
       shake(near?1:0.3);if(near){snd('boom',ev);snd('break',ev);}return true;}
+    // หินแหลมในบึง Wrath (ผู้ใช้ 2026-11-01): วงเตือนที่พื้น 0.5 วิ → หินแหลมพุ่งขึ้น 3 แท่ง + เศษหิน
+    case 'espkw':ring(x,y,'#e0b070',55,0.5,0.08);ring(x,y,'#7a5a38',38,0.5,0.06);return true;
+    case 'espk':eSpikes(x,y,22,4);eDebris(x,y,0.2,14,120);eWave(x,y,0.15,70);if(near)snd('boom',ev);return true;
     case 'ewland':eDebris(x,y,0.3,30,260);playFx('earth_impact',x,y,0.4,{s:1.2});shake(0.5);if(near)snd('boom',ev);return true;
     case 'ewdrill':{const s=EV.st.get(ev.id);let from=null;if(s&&s.drills[ev.n])from=s.drills[ev.n].position.clone();eDrillFly(from||eW(ev.x2,ev.y2,4),x,y,3,0.75,ev.h);ring(x,y,'#ff9a4a',80,0.4,0.15);if(near)snd('whoosh',ev);return true;}
     case 'ewend':smoke(x,y,0.5,8,ECOL.dust,1.2,8,80);return true;

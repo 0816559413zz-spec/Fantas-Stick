@@ -1,129 +1,123 @@
 {
  "v": 1,
- "desc": "Aqua Cage: ฟองน้ำพุ่ง (ใสกว่า BA มีฟองเล็กรอบ แถบขาวพัน) — ตามกระสุน",
+ "desc": "Aqua Cage (รอบ 2): ลูกน้ำวน มีเสี้ยวน้ำ 2 อันหมุนพันรอบ + ละอองน้ำ + ประกาย — ต่างจากหยดน้ำ BA",
  "tags": [
   "water",
-  "aquacage",
-  "ingame"
+  "ingame",
+  "cage"
  ],
  "pal": "ice",
  "dur": 1,
- "seed": 11,
+ "seed": 47,
  "layers": [
   {
-   "id": "ball",
+   "id": "orb",
+   "t": "mesh",
+   "at": 0,
+   "life": 1,
+   "att": "point",
+   "shape": "glb",
+   "glb": "mesh_water_ringwave_low",
+   "mat": "toonwater",
+   "col": "#9ff4ff",
+   "col2": "#36b8f5",
+   "rim": 0.6,
+   "scroll": 1.8,
+   "pos": [
+    0,
+    0,
+    0
+   ],
+   "scale": 0.35,
+   "op": 1,
+   "fade": 0,
+   "spin": 500,
+   "loop": true
+  },
+  {
+   "id": "core",
    "t": "mesh",
    "at": 0,
    "life": 1,
    "att": "point",
    "shape": "sphere",
-   "mat": "tex",
-   "tex": "tex/water_toon_ball",
-   "col": "#ffffff",
-   "col2": "#b4f1ff",
-   "rim": 0,
-   "uvTile": [
-    1,
-    1
-   ],
-   "uvScroll": [
-    0.5,
-    0
-   ],
+   "mat": "water",
+   "col": "#e6ffff",
+   "col2": "#36b8f5",
+   "rim": 1,
+   "scroll": 2.5,
+   "int": 1.2,
+   "disp": 0,
    "pos": [
     0,
     0,
     0
    ],
    "scale": 0.32,
-   "op": 0.75,
-   "fade": 0.15,
-   "loop": true
-  },
-  {
-   "id": "band0",
-   "t": "mesh",
-   "at": 0,
-   "life": 1,
-   "att": "point",
-   "shape": "model",
-   "model": "wind_pieces0",
-   "mat": "tex",
-   "tex": "tex/water_toon_band",
-   "col": "#ffffff",
-   "col2": "#000000",
-   "rim": 0,
-   "uvTile": [
-    1,
-    1
-   ],
-   "uvScroll": [
-    0,
-    0
-   ],
-   "pos": [
-    0,
-    0,
-    0
-   ],
-   "rot": [
-    22.3,
-    0.0,
-    -18.4
-   ],
-   "spin": 560,
-   "scale": [
-    0.42,
-    0.13,
-    0.42
-   ],
    "op": 1,
    "fade": 0,
    "loop": true
   },
   {
-   "id": "band1",
+   "id": "wrapA",
    "t": "mesh",
    "at": 0,
    "life": 1,
    "att": "point",
-   "shape": "model",
-   "model": "wind_pieces1",
-   "mat": "tex",
-   "tex": "tex/water_toon_band",
-   "col": "#b4f1ff",
-   "col2": "#000000",
-   "rim": 0,
-   "uvTile": [
-    1,
-    1
-   ],
-   "uvScroll": [
-    0,
-    0
-   ],
+   "shape": "glb",
+   "glb": "mesh_water_crescent",
+   "mat": "toonwater",
+   "col": "#9ff4ff",
+   "col2": "#36b8f5",
+   "rim": 0.6,
+   "scroll": 1.8,
    "pos": [
     0,
     0,
     0
    ],
-   "rot": [
-    -15.1,
-    180.0,
-    -38.8
-   ],
-   "spin": -620,
-   "scale": [
-    0.42,
-    0.13,
-    0.42
-   ],
+   "scale": 0.42,
    "op": 1,
    "fade": 0,
+   "spin": 720,
+   "rot": [
+    90,
+    0,
+    0
+   ],
    "loop": true
   },
   {
-   "id": "bub",
+   "id": "wrapB",
+   "t": "mesh",
+   "at": 0,
+   "life": 1,
+   "att": "point",
+   "shape": "glb",
+   "glb": "mesh_water_crescent",
+   "mat": "toonwater",
+   "col": "#9ff4ff",
+   "col2": "#36b8f5",
+   "rim": 0.6,
+   "scroll": 1.8,
+   "pos": [
+    0,
+    0,
+    0
+   ],
+   "scale": 0.38,
+   "op": 1,
+   "fade": 0,
+   "spin": -600,
+   "rot": [
+    0,
+    0,
+    90
+   ],
+   "loop": true
+  },
+  {
+   "id": "spray",
    "t": "emit",
    "at": 0,
    "life": 1,
@@ -133,27 +127,65 @@
     0,
     0
    ],
-   "rate": 30,
+   "rate": 40,
+   "from": "sphere",
+   "fr": 0.25,
+   "dir": "random",
+   "speed": [
+    0.3,
+    1
+   ],
+   "plife": [
+    0.35,
+    0.55
+   ],
+   "look": "model",
+   "model": "water_blob",
+   "mmat": "ice",
+   "msize": [
+    0.03,
+    0.06
+   ],
+   "col": "#e6ffff",
+   "c2": "#7fe8ff",
+   "mspin": 0,
+   "gravity": 4,
+   "drag": 0,
+   "bounce": 0,
+   "loop": true
+  },
+  {
+   "id": "glint",
+   "t": "emit",
+   "at": 0,
+   "life": 1,
+   "att": "point",
+   "pos": [
+    0,
+    0,
+    0
+   ],
+   "rate": 20,
    "from": "sphere",
    "fr": 0.3,
    "dir": "random",
    "speed": [
     0.3,
-    0.8
+    1
    ],
    "plife": [
-    0.25,
-    0.4
+    0.3,
+    0.55
    ],
-   "look": "ring",
+   "look": "spark",
    "size": [
-    3.0,
-    5.0
+    3,
+    6
    ],
    "col": "#ffffff",
-   "c2": "#b4f1ff",
-   "gravity": 0,
-   "drag": 2,
+   "c2": "#c8fbff",
+   "gravity": -0.2,
+   "drag": 0.5,
    "loop": true
   }
  ]

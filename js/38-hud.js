@@ -158,7 +158,7 @@ function drawHUD(v,me,P){
   if(me&&me.rt)big('🕸️ ติดใยแมงมุม! ขยับไม่ได้ชั่วคราว',SH*0.62,20,'#e8e8f0');
 
   if(me)drawBottom(me,v);
-  if(me&&!showBoard&&SET.mini)drawMinimap(v,me,P);
+  if(me&&!showBoard&&SET.mini&&!h4PfMode(v))drawMinimap(v,me,P);   // FFA/TDM = รูปตัวละครแทน (js/66)
   if(showBoard)drawBoard(v,P);
 }
 function raceRankClient(P){

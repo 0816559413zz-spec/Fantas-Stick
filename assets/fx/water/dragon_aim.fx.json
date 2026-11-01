@@ -1,87 +1,133 @@
 {
  "v": 1,
- "desc": "Dragon of the Deep: วงเล็งรัศมี 11 ม. (จานน้ำวน + เส้นขาว) วนตลอดที่เลือกจุด",
+ "desc": "Dragon of the Deep เล็ง (รอบ 2): วงน้ำบนพื้นรัศมี 11 ม. ขอบเป็นคลื่นเตี้ยหมุน 2 ชั้น + เส้นขาววิ่งรอบ",
  "tags": [
   "water",
-  "dragon",
-  "ult",
-  "ingame"
+  "ingame",
+  "dragon"
  ],
  "pal": "ice",
  "dur": 1,
- "seed": 11,
+ "seed": 47,
  "layers": [
   {
-   "id": "disk",
+   "id": "disc",
    "t": "mesh",
    "at": 0,
    "life": 1,
    "att": "feet",
-   "shape": "plane",
-   "mat": "tex",
-   "tex": "tex/water_toon_swirl",
-   "col": "#ffffff",
-   "col2": "#000000",
-   "rim": 0,
-   "uvTile": [
-    1,
-    1
-   ],
-   "uvScroll": [
-    0,
-    0
-   ],
+   "shape": "disc",
+   "mat": "water",
+   "col": "#bff2ff",
+   "col2": "#36b8f5",
+   "rim": 1,
+   "scroll": 2.5,
+   "int": 1.2,
+   "disp": 0,
    "pos": [
     0,
-    0.06,
+    0.04,
     0
    ],
-   "rot": [
-    90,
-    0,
-    0
-   ],
-   "spin": 90,
-   "scale": 22,
-   "op": 0.45,
+   "scale": 11.0,
+   "op": 0.28,
    "fade": 0,
    "loop": true
   },
   {
-   "id": "arcs0",
+   "id": "rim",
    "t": "mesh",
    "at": 0,
    "life": 1,
    "att": "feet",
-   "shape": "plane",
-   "mat": "tex",
-   "tex": "tex/water_white_arcs",
-   "col": "#ffffff",
-   "col2": "#000000",
-   "rim": 0,
-   "uvTile": [
-    1,
-    1
-   ],
-   "uvScroll": [
-    0,
-    0
-   ],
+   "shape": "glb",
+   "glb": "mesh_water_ringwave_low",
+   "mat": "toonwater",
+   "col": "#9ff4ff",
+   "col2": "#36b8f5",
+   "rim": 0.6,
+   "scroll": 1.8,
    "pos": [
     0,
-    0.1,
+    -0.03,
     0
    ],
-   "rot": [
-    90,
-    0,
-    0
+   "scale": [
+    10.45,
+    1.4,
+    10.45
    ],
-   "spin": -120,
-   "int": 1.4,
-   "scale": 22.5,
    "op": 1,
    "fade": 0,
+   "spin": 60,
+   "loop": true
+  },
+  {
+   "id": "rim2",
+   "t": "mesh",
+   "at": 0,
+   "life": 1,
+   "att": "feet",
+   "shape": "glb",
+   "glb": "mesh_water_ringwave_low",
+   "mat": "toonwater",
+   "col": "#9ff4ff",
+   "col2": "#36b8f5",
+   "rim": 0.6,
+   "scroll": 1.8,
+   "pos": [
+    0,
+    -0.03,
+    0
+   ],
+   "scale": [
+    6.6,
+    1.1,
+    6.6
+   ],
+   "op": 1,
+   "fade": 0,
+   "spin": -90,
+   "rot": [
+    0,
+    60,
+    0
+   ],
+   "loop": true
+  },
+  {
+   "id": "ring",
+   "t": "emit",
+   "at": 0,
+   "life": 1,
+   "att": "feet",
+   "pos": [
+    0,
+    0.3,
+    0
+   ],
+   "rate": 40,
+   "from": "ring",
+   "fr": 11.0,
+   "dir": "tangent",
+   "speed": [
+    5,
+    8
+   ],
+   "plife": [
+    0.18,
+    0.3
+   ],
+   "look": "streak",
+   "size": [
+    1.6,
+    2.8
+   ],
+   "col": "#ffffff",
+   "c2": "#c8fbff",
+   "gravity": 0,
+   "drag": 0,
+   "curl": false,
    "loop": true
   }
  ]

@@ -462,7 +462,7 @@ fxWarpMake:222 fxWarpTick:234
 §240 ไฟ 3 มิติจากการจำลอง (ชั้น vol) — ไฟล์รูปแบบเดียวกับที่เพื่อน bake จา…
 FXVOL:243 fxVolLoad:244 fxVolTex:248 fxVolSet:251 fxVolReady:252 fxVolMake:253 fxVolTick:256 fxPreAssets:261 fxAssetsWait:263
 
-## js/47-earth-view.js (684) — สายดิน ⛰️ — ภาพฝั่งเครื่องเล่น (Stand / Stand ใหญ่ / กำแพง / เสา / เนิน / ฝุ่น / สว่าน / …
+## js/47-earth-view.js (686) — สายดิน ⛰️ — ภาพฝั่งเครื่องเล่น (Stand / Stand ใหญ่ / กำแพง / เสา / เนิน / ฝุ่น / สว่าน / …
 ECOL:9 EGUARD_BIG:14 EGUARD:14 CB:15 EV:16 eW:17 eYaw:18
 §19 ลายผิว (วาดเองบน canvas: หิน/ทราย + รอยร้าว + ขอบบล็อกแบบ Roblox)
 ETEX:20 eTex:21 eFadeTex:35 eMat:37 eTMat:38 rockGeo:39 _eChunkM:43 eChunks:44
@@ -481,13 +481,13 @@ makePillar:311
 §317 กระสุนหิน
 earthProjMesh:318 SLAB:324 makeSlab:325 eSlabGeo:330 eSlabMats:341 slabCracks:408
 §411 สิ่งก่อสร้าง + ฝุ่น (เรียกจาก render loop)
-earthClear:412 eMakeSO:417 syncEarth:433 earthFog:472 eMudScreen:475 _eOlMat:482 eOutlines:484 _eCamT:491 eAnim:492 eDebris:493 eWave:495 eAirWave:497 esbImpact:500
-§507 event "efx" ของสายดิน (เรียกจากต้น efxFX) — คืน true = จัดการแล้ว
-earthEfx:508 eWindOut:597 eAirCone:603 eDrillFly:605
-§609 บึงโคลน (Mud Swamp + บึงจากเสาอัลติ): คลื่นกระเพื่อมจากกลางไปขอบ แล้ว…
-earthMudZone:610 earthMudSink:617
-§618 HUD ใต้เป้าเล็ง
-ESM:620 eSmooth:621 ESF:624 eShieldFx:625 eChips:630 eShieldSegs:633 eShieldNum:647 eShieldArc:651 drawEarthHud:664
+earthClear:412 eMakeSO:417 syncEarth:433 earthFog:476 eMudScreen:479 _eOlMat:486 eOutlines:488 _eCamT:493 eAnim:494 eDebris:495 eWave:497 eAirWave:499 esbImpact:502
+§509 event "efx" ของสายดิน (เรียกจากต้น efxFX) — คืน true = จัดการแล้ว
+earthEfx:510 eWindOut:599 eAirCone:605 eDrillFly:607
+§611 บึงโคลน (Mud Swamp + บึงจากเสาอัลติ): คลื่นกระเพื่อมจากกลางไปขอบ แล้ว…
+earthMudZone:612 earthMudSink:619
+§620 HUD ใต้เป้าเล็ง
+ESM:622 eSmooth:623 ESF:626 eShieldFx:627 eChips:632 eShieldSegs:635 eShieldNum:649 eShieldArc:653 drawEarthHud:666
 
 ## js/48-ragdoll.js (227) — 
 RAG:10 RAGJ:23 RAGB:29 RAGS:33 RAGMIN:37 RAGHINGE:39 _rv1:40 _rv2:40 _rv3:40 _rqa:40 _rqb:40 _rm:40 ragBones:41 ragBasis:48 ragTargets:56 ragStart:62 ragBack:88 ragFloor:89 ragStep:90 ragPose:155 ragWrite:170 ragRestore:182 ragEnd:186 ragTick:188 ragHideDead:222
@@ -638,7 +638,7 @@ BKICO:377 buffShow:381
 §400 จอมืดตอนเริ่มแมตช์ (ผู้ใช้ 2026-10-23: กระตุกตอนเริ่มแมตช์แรก)
 gameCover:403
 
-## js/66-hud4.js (207) — HUD รอบ 4 (ผู้ใช้ 2026-10-23, designs/hud-full-mock.html)
+## js/66-hud4.js (201) — HUD รอบ 4 (ผู้ใช้ 2026-10-23, designs/hud-full-mock.html)
 H4E:5 H4:12 h4Pal:13 hud4Col:15 h4Parts:17 h4AuBits:22 h4Key:37 h4Ico:38 h4Build:39 h4Set:66 hud4Draw:67
 §116 ไพ่สกิล: นาฬิกาทราย / ท่าใช้ / สลับตำแหน่ง
 h4Glass:118 h4Bits:124 h4Fx:126 h4CardUse:128 h4GlassOut:132 h4Place:136 h4OrdKey:139 h4OrdLoad:140 h4Swap:143 h4Pick:146 h4AltKey:148 h4CardWire:152
@@ -646,8 +646,8 @@ h4Glass:118 h4Bits:124 h4Fx:126 h4CardUse:128 h4GlassOut:132 h4Place:136 h4OrdKe
 H4SH:165 h4UltCard:167 h4UltUse:172 hud4Frame:174 hud4Hide:175
 §176 ไพ่อัลติกลางจอ (ผู้ใช้ 2026-11-01)
 h4UltX:179
-§192 รูปตัวละครเรา (FFA / TDM แทนแผนที่ย่อ)
-H4PF:194 h4PfMode:195 h4Portrait:196 h4MapBox:207
+§186 รูปตัวละครเรา (FFA / TDM แทนแผนที่ย่อ)
+H4PF:188 h4PfMode:189 h4Portrait:190 h4MapBox:201
 
 ## js/67-backdrop.js (139) — 
 BACKDROP:8
@@ -685,4 +685,4 @@ BRM:9 BSK:11 BROOM_SK:17 broomVert:38 broomMove:50 broomStrike:68 broomStrikeTic
 §125 ฝั่งจอ
 broomHead:127 BBEAM:134 _bbGeo:135 broomView:136 broomMountFx:165 broomDismountFx:173 broomBeamFx:175 broomSkFx:191 broomStrikeFx:204 broomFlakFx:209 broomHud:214 broomHudT:215 broomTick:224
 
-(81 files, 19477 lines)
+(81 files, 19473 lines)

@@ -49,16 +49,16 @@ function h4Build(me,v){
   // ไพ่อัลติใบใหญ่ด้านหลังไพ่ 4 ใบ (ผู้ใช้ 2026-10-28): เศษไพ่ขาด 7 ชิ้น ประกอบเข้าทีละชิ้นตามเกจ (h4UltCard) • เต็ม = ไพ่สมบูรณ์ + ออร่าธาตุ
   const au=`<div class="h4Au ${E.pt}"><i class="fl"></i><i class="fl b"></i>${h4AuBits(E.pt)}${h4Parts(E,18,(a,b)=>{const t=a*Math.PI*2,r=50+b*16;return [58+Math.cos(t)*r,58+Math.sin(t)*r];})}</div>`;
   const uFace=`<i class="art"></i>${U?icoHTML(U.id,'#fff',72):''}<b class="nm">${esc(U?U.n:'')}</b>`;
-  R=R.replace('<div class="h4Ic">',h4UltCard(uFace,au)+'<div class="h4Ic">');
+  // ไพ่อัลติย้ายไปกลางล่าง (ผู้ใช้ 2026-11-01) — h4UltX: เติมธาตุจากล่างขึ้นตาม % • เต็ม = พลิกเห็นโลโก้ + เอฟเฟกต์ธาตุ
   let L=`<div class="h4Sh"></div>`+h4Parts(E,10,(a,b)=>[20+a*260,-30-b*180]);
   // ซ้ายล่าง: กรอบแผนที่ย่อ | รายชื่อทีม (.h4Sq) • ชื่อเรา • โล่ (.h4Sub) • เลือด (.h4Seg + ตัวเลข)
-  L+=`<div class="h4Me"><div class="h4Map"><i class="c a"></i><i class="c b"></i><i class="c d"></i><i class="c e"></i></div>
+  L+=`<div class="h4Me"><div class="h4Map"><canvas class="h4Pf" width="176" height="176"></canvas><i class="pfr"></i><i class="c a"></i><i class="c b"></i><i class="c d"></i><i class="c e"></i></div>
     <div class="h4Hp"><div class="h4Sq"></div><div class="h4Chips"></div><div class="h4Nm">${esc(me.n||'')}<small>${E.n}</small><em>LV ${typeof progLv==='function'?progLv().L:1}</em></div>
     <div class="h4Sub"><i><b></b></i><small></small></div><div class="h4HpR"><div class="h4Seg"></div><div class="h4Num"><span class="hp">0</span><small class="mh">/ 0</small><em class="xh"></em></div></div></div></div>`;
-  root.innerHTML=`<div class="h4L">${L}</div><div class="h4R">${R}</div>`;
+  root.innerHTML=`<div class="h4L">${L}</div><div class="h4R">${R}</div>${h4UltX(P.id,U,au)}`;
   H4.el=root;H4.cache={};H4.rdy={};H4.segN=0;H4.uFull=false;
   H4.q={hp:root.querySelector('.hp'),mh:root.querySelector('.mh'),xh:root.querySelector('.xh'),seg:root.querySelector('.h4Seg'),sub:root.querySelector('.h4Sub'),subB:root.querySelector('.h4Sub b'),subT:root.querySelector('.h4Sub small'),
-    chips:root.querySelector('.h4Chips'),sq:root.querySelector('.h4Sq'),map:root.querySelector('.h4Map'),uc:root.querySelector('.h4UC'),ufc:root.querySelector('.h4UC .fc'),up:root.querySelector('.h4UC .up'),uFace,sd:[...root.querySelectorAll('.h4UC .sd')].map(el=>({el,th:+el.dataset.th})),
+    chips:root.querySelector('.h4Chips'),sq:root.querySelector('.h4Sq'),map:root.querySelector('.h4Map'),pf:root.querySelector('.h4Pf'),uc:root.querySelector('.h4UX'),uFill:root.querySelector('.h4UX .fill'),up:root.querySelector('.h4UX .pct'),ubar:root.querySelector('.h4UX .gb b'),uFace,
     slots:[...root.querySelectorAll('.h4Cd,.h4Gm')].map(el=>({el,ci:+el.dataset.ci,sh:el.querySelector('.sh'),n:el.querySelector('.n'),fc:el.querySelector('.fc'),k:el.querySelector('.k'),gem:el.classList.contains('h4Gm')}))};
   h4CardWire(root);h4Place();
 }
@@ -101,7 +101,7 @@ function hud4Draw(me,v){
     H4.rdy[S.ci]=ok;}
   // อัลติ
   const u=Math.min(100,me.u|0),full=u>=100;
-  h4Set('u',u,x=>{Q.uc.style.setProperty('--g',(1-x/100).toFixed(3));Q.up.textContent=x>=100?'READY':x+'%';for(const d of Q.sd)d.el.classList.toggle('on',x>=d.th);});
+  h4Set('u',u,x=>{Q.uc.style.setProperty('--p',(x/100).toFixed(3));Q.up.textContent=x+'%';Q.ubar.style.width=x+'%';});
   h4Set('ud',!!slotState(me,v,-2).dim,x=>Q.uc.classList.toggle('dim',x));
   if(full!==H4.uFull){if(H4.uFull&&!full)h4UltUse();H4.uFull=full;Q.uc.classList.toggle('full',full);if(full){Q.uc.classList.remove('burst');void Q.uc.offsetWidth;Q.uc.classList.add('burst');}}
   // รายชื่อทีม: โหมดทีม = คนทีมเดียวกัน • ดันเจียน = ทุกคน • อื่น ๆ = ว่าง (ระบบ Squad ยังไม่มี — แสดงเส้นว่าง)
@@ -109,7 +109,9 @@ function hud4Draw(me,v){
     h4Set('sqL',L.map(p=>p.id+':'+(p.n||'')).join('|'),()=>{Q.sq.innerHTML=Array.from({length:4},(_,i)=>{const p=L[i];
       return p?`<div class="r" data-id="${esc(p.id)}"><b>${esc(p.n||'')}</b><i><u></u></i></div>`:`<div class="r e"><i></i></div>`;}).join('');});
     for(const p of L){const r=Q.sq.querySelector(`[data-id="${CSS.escape(p.id)}"]`);if(!r)continue;h4Set('sq'+p.id,p.al?clamp(p.hp/p.mh,0,1).toFixed(2):'x',x=>{r.classList.toggle('dead',x==='x');r.querySelector('u').style.width=(x==='x'?0:x*100)+'%';});}}
-  h4Set('mini',!!SET.mini,x=>Q.map.classList.toggle('off',!x));
+  // FFA / TDM: แผนที่ย่อ → รูปตัวละครเรา (ผู้ใช้ 2026-11-01)
+  const pf=h4PfMode(v);h4Set('pf',pf,x=>Q.map.classList.toggle('pf',x));if(pf)h4Portrait(me,Q.pf);
+  h4Set('mini',!!SET.mini||pf,x=>Q.map.classList.toggle('off',!x));
 }
 // ---------- ไพ่สกิล: นาฬิกาทราย / ท่าใช้ / สลับตำแหน่ง ----------
 // นาฬิกาทราย: ทรายบน = เวลาคูลดาวน์ที่เหลือ (--r ของไพ่) ไหลลงล่าง • ตัวเลขวินาทีใต้แก้ว
@@ -167,11 +169,33 @@ function h4UltCard(face,au){
     return `<div class="sd" data-th="${Math.round((i+1)*100/8)}" style="--dx:${(cx/l*12).toFixed(1)}px;--dy:${(cy/l*12).toFixed(1)}px;--rt:${((i%2?1:-1)*(4+i)).toFixed(0)}deg"><div class="si" style="clip-path:polygon(${P.map(p=>p[0]+'% '+p[1]+'%').join(',')})">${face}</div></div>`;}).join('');
   return `<div class="h4UC" data-ci="-2">${au}<i class="stk"></i><i class="stk b"></i><div class="fc">${sd}<i class="edge"></i></div><span class="k">${esc(h4Key(slotKey('X')))}</span><b class="up">0%</b></div>`;}
 // กดอัลติ: ไพ่สมบูรณ์ถูกดึงออกจากกอง ลอยขึ้น แล้วไหม้สลาย (เหมือนไพ่สกิล) • กองเหลือแต่เงาเศษไพ่ เริ่มสะสมใหม่
-function h4UltUse(){const Q=H4.q;
-  h4Fx(Q.uc,'h4Gh',`<div class="fc gf"><div class="si">${Q.uFace}</div></div><div class="bits">${h4Bits(22)}</div>`,1100);
-  Q.ufc.classList.remove('draw');void Q.ufc.offsetWidth;Q.ufc.classList.add('draw');}
+function h4UltUse(){const Q=H4.q;h4Fx(Q.uc,'h4UXuse',`<div class="bits">${h4Bits(26)}</div>`,1100);Q.uc.classList.remove('used');void Q.uc.offsetWidth;Q.uc.classList.add('used');}
 // เรียกท้ายทุกเฟรมจาก render loop: เฟรมนี้ไม่ได้วาด HUD (ชนะ/แพ้, โหมด imp, ไม่มีตัวเรา) = ซ่อน
 function hud4Frame(){if(H4.el&&!H4.drawn&&!H4.el.hidden)H4.el.hidden=true;H4.drawn=false;}
 function hud4Hide(){try{if(H4.el)H4.el.hidden=true;}catch(e){}}   // setScreen เรียกได้ตั้งแต่ตอนโหลดไฟล์ (H4 ยังไม่พร้อม)
+// ---------- ไพ่อัลติกลางจอ (ผู้ใช้ 2026-11-01) ----------
+// หน้า (ยังไม่เต็ม): ธาตุเติมจากล่างขึ้นตาม --p (ไฟลุก / น้ำแข็งเกาะ / ไฟฟ้าเหลืองมีสายฟ้า / ดินถม / ลมเขียวหมุน / น้ำคลื่น) •
+// ไอคอนอัลติจางดำ + ตัวเลข % ใหญ่ • หลัง (เต็ม): พลิกไพ่ → โลโก้อัลติเรือง + ออร่าธาตุ (h4AuBits เดิม) • แถบเกจใต้ไพ่
+function h4UltX(el,U,au){const ic=U?icoHTML(U.id,'#fff',64):'',big=U?icoHTML(U.id,'#fff',86):'';let fx='';
+  // round 2 (ผู้ใช้: แบบเติมเดิม 'look so ugly'): พลังงานเหลวเรืองสีธาตุ เนียน ๆ + ผิวบนเป็นเส้นสว่าง + ประกายเล็กลอยขึ้น — ธาตุต่างกันที่สีและลายข้างในเบา ๆ
+  for(let i=0;i<9;i++)fx+=`<i class="pt" style="left:${(8+i*37%84)}%;--du:${(2.2+(i*31%7)*.3).toFixed(2)}s;--de:${(-i*.41).toFixed(2)}s;--sz:${2+(i%3)}px"></i>`;
+  return `<div class="h4UX e-${el}" data-ci="-2"><div class="flip"><div class="face fr"><div class="fill"><i class="bd"></i>${fx}<i class="top"></i></div>
+    <div class="ic">${ic}</div><b class="pct">0%</b><span class="k">${esc(h4Key(slotKey('X')))}</span></div>
+    <div class="face bk">${au}<i class="glow"></i><div class="ic">${big}</div><b class="nm">${esc(U?U.n:'')}</b><b class="rd">READY</b><span class="k">${esc(h4Key(slotKey('X')))}</span></div></div>
+    <div class="gb"><b></b><i class="tk"></i></div></div>`;}
+// ---------- รูปตัวละครเรา (FFA / TDM แทนแผนที่ย่อ) ----------
+// ถ่ายฉากจริงจากกล้องหน้าหน้าตัวละคร (local +Z = ทิศหันหน้า) ลง render target ทุก 0.5 วิ แล้ววาดลง canvas ในกรอบ
+const H4PF={rt:null,cam:null,img:null,buf:null,t:0,N:176};
+const h4PfMode=v=>v.mode==='ffa'||v.mode==='tdm';
+function h4Portrait(me,cv){const now=performance.now();if(!cv||now-H4PF.t<500)return;H4PF.t=now;
+  const o=PM3.get(me.id);if(!o||!o.g)return;const N=H4PF.N;
+  try{
+    if(!H4PF.rt){H4PF.rt=new THREE.WebGLRenderTarget(N,N);H4PF.rt.texture.colorSpace=THREE.SRGBColorSpace;H4PF.cam=new THREE.PerspectiveCamera(26,1,0.05,8);H4PF.buf=new Uint8Array(N*N*4);H4PF.img=cv.getContext('2d').createImageData(N,N);}
+    const g=o.g,ry=g.rotation.y,fx=Math.sin(ry),fz=Math.cos(ry),P=g.position,c=H4PF.cam;
+    c.position.set(P.x+fx*1.55-fz*0.35,P.y+1.95,P.z+fz*1.55+fx*0.35);c.lookAt(P.x,P.y+1.75,P.z);
+    const was=gl.getRenderTarget();gl.setRenderTarget(H4PF.rt);gl.render(scene,c);gl.readRenderTargetPixels(H4PF.rt,0,0,N,N,H4PF.buf);gl.setRenderTarget(was);
+    const d=H4PF.img.data,b=H4PF.buf;for(let y=0;y<N;y++)d.set(b.subarray((N-1-y)*N*4,(N-y)*N*4),y*N*4);
+    cv.getContext('2d').putImageData(H4PF.img,0,0);
+  }catch(e){}}
 // กรอบแผนที่ย่อ (พิกัดจอ px) — js/38 drawMinimap วาดลงตรงนี้ • ตรงกับ .h4Me/.h4Map ใน css (left 24, bottom 24, กว้าง 176 × --hs)
 function h4MapBox(){const hs=Math.max(0.62,Math.min(1.15,SH/900,SW/1400)),S=176*hs;return {x:24*hs,y:SH-24*hs-S,S};}

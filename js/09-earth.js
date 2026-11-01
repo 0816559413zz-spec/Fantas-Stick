@@ -186,8 +186,9 @@ function earthMound(p,x,y,ult){if(!ult)for(const w of G.eso||[])if(w.k==='mound'
 
 // ---------- อัลติ: Wrath (v2) ----------
 // ลอยขึ้นฟ้า (ขยับซ้าย/ขวาได้ ขึ้นลงไม่ได้ สูงสุด 5 วิ) • Stand ใหญ่ถือเสายักษ์ท่าพุ่งแหลน • คลิก = ปาลงจุดเล็ง (หมดเวลา = ปาเองที่จุดเล็ง)
-// เสาปักตามองศาที่ตก HP 300 อยู่จนพัง • โดนตรง 50 + กระเด็น • บึงโคลน r400 8 วิ (เหมือน Mud Swamp) • ลงพื้นแล้วมีสว่านชาร์จเต็ม 5 อันลอยหลัง 10 วิ คลิกซ้ายยิงทีละอัน 120 + เนินทุกอัน
-defSpell(EARTH,{id:'wrath',role:'ult',ult:true,n:'Wrath',ic:'🗿',cd:0,d:'ลอยขึ้นฟ้า (ขยับได้แค่ซ้าย/ขวา สูงสุด 5 วิ) Stand ใหญ่ถือเสาหินยักษ์ คลิก = ปาลงจุดเล็ง • เสาปักลงพื้น (HP 300) พื้นรอบ ๆ รัศมี 400 กลายเป็นบึงโคลน 8 วิ',fx:'เสาโดนตรง 50 + กระเด็น • บึงโคลน: ศัตรูช้า 50% ใช้ Dash ไม่ได้ • ลงพื้นแล้วมีสว่านชาร์จเต็ม 5 อันลอยหลัง 10 วิ คลิกซ้ายยิงทีละอัน (ขวา → ซ้าย) อันละ 120 + เนินดินทุกอัน • ไม่ติดช้า • ใช้ได้แม้ Stand แตก (Stand กลับมาทันที โล่เต็ม)',
+// เสาปักตามองศาที่ตก HP 300 อยู่จนพัง • แรงกระแทก 100 ทั้งบึง (r400, โล่กันได้) + กระเด็น • บึงโคลน r400 8 วิ • ทุก 2 วิ หินแหลมพุ่งขึ้นใต้ศัตรูในบึง 30 (ผู้ใช้ 2026-11-01)
+// (เลิกสว่าน 5 อันหลังลงพื้นแล้ว — ผู้ใช้: 'no more residue skill coming up after ult')
+defSpell(EARTH,{id:'wrath',role:'ult',ult:true,n:'Wrath',ic:'🗿',cd:0,d:'ลอยขึ้นฟ้า (ขยับได้แค่ซ้าย/ขวา สูงสุด 5 วิ) Stand ใหญ่ถือเสาหินยักษ์ คลิก = ปาลงจุดเล็ง • เสาปักลงพื้น (HP 300) แรงกระแทก 100 ทั้งบริเวณ (โล่กันได้) พื้นรัศมี 400 กลายเป็นบึงโคลน 8 วิ • ทุก 2 วิ หินแหลมพุ่งขึ้นใต้ศัตรูในบึง 30',fx:'แรงกระแทก 100 + กระเด็น ทั้งบึง (โล่กันได้) • บึงโคลน: ศัตรูช้า 50% ใช้ Dash ไม่ได้ • ทุก 2 วิ หินแหลมพุ่งขึ้นใต้ศัตรูในบึง (มีวงเตือน 0.5 วิ) 30 • ลงพื้นแล้วจบ ไม่มีสว่านต่อ • ไม่ติดช้า • ใช้ได้แม้ Stand แตก (Stand กลับมาทันที โล่เต็ม)',
   cast(p){if(p.aug)p.aug=null;if(p.ramp)earthRampEnd(p,true);p.crush=null;p.ecb=null;
     if(p.stdB>0){p.stdB=0;p.ehp=E_SH;emit({k:'efx',z:'estdon',x:p.x,y:p.y,h:p.z,id:p.id});}
     p.wr={ph:'sky',t:0,a0:p.ang,nd:0};p.shieldOn=false;
@@ -198,10 +199,11 @@ function earthPillarThrow(p){const W=p.wr;if(!W||W.ph!=='sky')return;
   const x=clamp(o.x,50,MW-50),y=clamp(o.y,50,MH-50),a=Math.atan2(y-p.y,x-p.x);W.ph='land';W.lt=0.9;
   emit({k:'efx',z:'epilthrow',x:Math.round(p.x),y:Math.round(p.y),h:Math.round(p.z*10)/10,x2:Math.round(x),y2:Math.round(y),id:p.id});
   G.strikes.push({x,y,t:0.45,fn(){
-    for(const t of foesIn(p.team,x,y,70,30))aoeHit(p,t,50,t=>knock(t,x,y,900));damageEnv(x,y,90,50*E_ENV,p.id,'rock',0.6);
+    for(const t of foesIn(p.team,x,y,E_WRS.r,30))aoeHit(p,t,E_WRS.hit,t=>knock(t,x,y,900));damageEnv(x,y,90,50*E_ENV,p.id,'rock',0.6);   // แรงกระแทกทั้งบึง (aoeHit = โล่กันได้)
     // เสาเอียงตามทิศที่ตก: เก็บทิศไว้ในปลายเส้นสั้น ๆ (x2,y2)
     eAdd({k:'pil',x1:x,y1:y,x2:x+Math.cos(a)*0.5,y2:y+Math.sin(a)*0.5,r:35,hgt:9,hp:300,maxHp:300,team:p.team,owner:p.id});
-    addZone({x,y,r:400,t:8,tick:0.15,owner:p.id,team:p.team,kind:'mud',hit(t){addSlow(t,0.5,0.3);t.mudT=Math.max(t.mudT||0,0.3);}});
+    addZone({x,y,r:E_WRS.r,t:8,tick:0.15,owner:p.id,team:p.team,kind:'mud',hit(t){addSlow(t,0.5,0.3);t.mudT=Math.max(t.mudT||0,0.3);}});
+    (G.espk||(G.espk=[])).push({x,y,t:8,nx:E_WRS.every,owner:p.id,team:p.team});
     emit({k:'efx',z:'epilland',x:Math.round(x),y:Math.round(y),h:0,a:Math.round(a*100)/100});}});}
 function earthWrathTick(p,dt){const W=p.wr;W.t+=dt;
   if(W.ph==='sky'){p.z+=(14-p.z)*Math.min(1,5*dt);p.vz=0;
@@ -211,7 +213,7 @@ function earthWrathTick(p,dt){const W=p.wr;W.t+=dt;
     if(Math.abs(m)>0.1){const k=Math.sign(m)*Math.min(1,Math.abs(m))*240*dt;p.x=clamp(p.x+px*k,40,MW-40);p.y=clamp(p.y+py*k,40,MH-40);}
     if(W.t>=5)earthPillarThrow(p);
     return;}
-  if(W.ph==='land'){W.lt-=dt;if(W.lt<=0){W.ph='trans';W.nd=5;W.dt=10;p.vz=-10;emit({k:'efx',z:'ewland',x:Math.round(p.x),y:Math.round(p.y),h:0,id:p.id});}return;}
+  if(W.ph==='land'){W.lt-=dt;if(W.lt<=0){p.vz=-10;emit({k:'efx',z:'ewland',x:Math.round(p.x),y:Math.round(p.y),h:0,id:p.id});earthWrathEnd(p);}return;}   // ลงพื้น = จบ (ไม่มีสว่านต่อแล้ว)
   W.dt-=dt;if(W.dt<=0||W.nd<=0)earthWrathEnd(p);}
 // คลิกซ้ายตอนมีสว่าน: ยิงทีละอัน (ขวา → ซ้าย) = Terra Auger ระดับ 3
 function earthWrathDrill(p){const W=p.wr;if(!W||W.nd<=0)return;W.nd--;const o=eAugAim(p,700),oh=Math.round(o.h*10)/10,i=W.nd;
@@ -222,8 +224,17 @@ function earthWrathDrill(p){const W=p.wr;if(!W||W.nd<=0)return;W.nd--;const o=eA
 function earthWrathEnd(p){const W=p.wr;p.wr=null;if(!W)return;
   emit({k:'efx',z:'ewend',x:Math.round(p.x),y:Math.round(p.y),h:p.z,id:p.id});}
 
+// หินแหลมในบึง Wrath: ทุก 2 วิ พุ่งขึ้นใต้ศัตรูทุกคนในบึง (เตือนวงที่พื้น 0.5 วิ หลบได้) + จุดสุ่มอีก 3 จุด • โดน = 30 (โล่กันได้) + เด้งขึ้นนิดหน่อย
+const E_WRS={r:400,hit:100,every:2,spk:30,warn:0.5,sr:55};
+function earthSpikeTick(S,dt){S.t-=dt;S.nx-=dt;if(S.nx>0)return;S.nx=E_WRS.every;const o=G.players[S.owner];if(!o)return;
+  const pts=foesIn(S.team,S.x,S.y,E_WRS.r,30).map(t=>({x:t.x+(Math.random()-0.5)*20,y:t.y+(Math.random()-0.5)*20}));
+  for(let i=0;i<3;i++){const a=Math.random()*6.283,d=Math.sqrt(Math.random())*E_WRS.r*0.9;pts.push({x:S.x+Math.cos(a)*d,y:S.y+Math.sin(a)*d});}
+  for(const q of pts){const x=clamp(q.x,40,MW-40),y=clamp(q.y,40,MH-40);emit({k:'efx',z:'espkw',x:Math.round(x),y:Math.round(y),h:0});
+    G.strikes.push({x,y,t:E_WRS.warn,fn(){for(const t of foesIn(S.team,x,y,E_WRS.sr,30))aoeHit(o,t,E_WRS.spk,t=>{t.vz=Math.max(t.vz||0,6);});emit({k:'efx',z:'espk',x:Math.round(x),y:Math.round(y),h:0});}});}}
+
 // ---------- ทั้งสนาม: สิ่งก่อสร้างพัง / ฝุ่นหมดเวลา / Stonebreaker ชนกำแพง ----------
 function updateEarth(dt){
+  if(G.espk){for(const S of G.espk)earthSpikeTick(S,dt);G.espk=G.espk.filter(S=>S.t>0);}
   if(G.eso){for(const w of G.eso)if(!w.dead&&(w.hp<=0||w.life!==undefined&&(w.life-=dt)<=0))eKill(w,w.k==='mound');G.eso=G.eso.filter(w=>!w.dead);}
   if(G.edust){for(const d of G.edust)d.t-=dt;G.edust=G.edust.filter(d=>d.t>0);}
   for(const t of foesOf(-99)){if(t.mudT>0)t.mudT-=dt;
