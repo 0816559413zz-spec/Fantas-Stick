@@ -52,7 +52,7 @@ function h4Build(me,v){
   // ไพ่อัลติย้ายไปกลางล่าง (ผู้ใช้ 2026-11-01) — h4UltX: เติมธาตุจากล่างขึ้นตาม % • เต็ม = พลิกเห็นโลโก้ + เอฟเฟกต์ธาตุ
   let L=`<div class="h4Sh"></div>`+h4Parts(E,10,(a,b)=>[20+a*260,-30-b*180]);
   // ซ้ายล่าง: กรอบแผนที่ย่อ | รายชื่อทีม (.h4Sq) • ชื่อเรา • โล่ (.h4Sub) • เลือด (.h4Seg + ตัวเลข)
-  L+=`<div class="h4Me"><div class="h4Map"><canvas class="h4Pf" width="176" height="176"></canvas><i class="pfr"></i><i class="c a"></i><i class="c b"></i><i class="c d"></i><i class="c e"></i></div>
+  L+=`<div class="h4Me"><div class="h4Map">${h4PfAvatar(me,E)}<i class="c a"></i><i class="c b"></i><i class="c d"></i><i class="c e"></i></div>
     <div class="h4Hp"><div class="h4Sq"></div><div class="h4Chips"></div><div class="h4Nm">${esc(me.n||'')}<small>${E.n}</small><em>LV ${typeof progLv==='function'?progLv().L:1}</em></div>
     <div class="h4Sub"><i><b></b></i><small></small></div><div class="h4HpR"><div class="h4Seg"></div><div class="h4Num"><span class="hp">0</span><small class="mh">/ 0</small><em class="xh"></em></div></div></div></div>`;
   root.innerHTML=`<div class="h4L">${L}</div><div class="h4R">${R}</div>${h4UltX(P.id,U,au)}`;
@@ -187,6 +187,9 @@ function h4UltX(el,U,au){const ic=U?icoHTML(U.id,'#fff',64):'',big=U?icoHTML(U.i
 // ถ่ายฉากจริงจากกล้องหน้าหน้าตัวละคร (local +Z = ทิศหันหน้า) ลง render target ทุก 0.5 วิ แล้ววาดลง canvas ในกรอบ
 const H4PF={rt:null,cam:null,img:null,buf:null,t:0,N:176};
 const h4PfMode=v=>v.mode==='ffa'||v.mode==='tdm';
+// กรอบรูป = กรอบโปรไฟล์จริงที่ผู้เล่นเลือก (js/65 prfAvatar + myFrame, ผู้ใช้ 2026-11-01: 'use actual profile border') — รูปวงกลมข้างใน
+function h4PfAvatar(me,E){const cv='<canvas class="h4Pf" width="176" height="176"></canvas>';
+  try{return `<span class="h4PfW">${prfAvatar(me.n||'',myFrame(),E.c1,118,cv)}</span>`;}catch(e){return `<span class="h4PfW">${cv}</span>`;}}
 function h4Portrait(me,cv){const now=performance.now();if(!cv||now-H4PF.t<500)return;H4PF.t=now;
   const o=PM3.get(me.id);if(!o||!o.g)return;const N=H4PF.N;
   try{

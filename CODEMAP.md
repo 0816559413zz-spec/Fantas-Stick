@@ -638,7 +638,7 @@ BKICO:377 buffShow:381
 §400 จอมืดตอนเริ่มแมตช์ (ผู้ใช้ 2026-10-23: กระตุกตอนเริ่มแมตช์แรก)
 gameCover:403
 
-## js/66-hud4.js (201) — HUD รอบ 4 (ผู้ใช้ 2026-10-23, designs/hud-full-mock.html)
+## js/66-hud4.js (204) — HUD รอบ 4 (ผู้ใช้ 2026-10-23, designs/hud-full-mock.html)
 H4E:5 H4:12 h4Pal:13 hud4Col:15 h4Parts:17 h4AuBits:22 h4Key:37 h4Ico:38 h4Build:39 h4Set:66 hud4Draw:67
 §116 ไพ่สกิล: นาฬิกาทราย / ท่าใช้ / สลับตำแหน่ง
 h4Glass:118 h4Bits:124 h4Fx:126 h4CardUse:128 h4GlassOut:132 h4Place:136 h4OrdKey:139 h4OrdLoad:140 h4Swap:143 h4Pick:146 h4AltKey:148 h4CardWire:152
@@ -647,7 +647,7 @@ H4SH:165 h4UltCard:167 h4UltUse:172 hud4Frame:174 hud4Hide:175
 §176 ไพ่อัลติกลางจอ (ผู้ใช้ 2026-11-01)
 h4UltX:179
 §186 รูปตัวละครเรา (FFA / TDM แทนแผนที่ย่อ)
-H4PF:188 h4PfMode:189 h4Portrait:190 h4MapBox:201
+H4PF:188 h4PfMode:189 h4PfAvatar:191 h4Portrait:193 h4MapBox:204
 
 ## js/67-backdrop.js (139) — 
 BACKDROP:8
@@ -685,4 +685,4 @@ BRM:9 BSK:11 BROOM_SK:17 broomVert:38 broomMove:50 broomStrike:68 broomStrikeTic
 §125 ฝั่งจอ
 broomHead:127 BBEAM:134 _bbGeo:135 broomView:136 broomMountFx:165 broomDismountFx:173 broomBeamFx:175 broomSkFx:191 broomStrikeFx:204 broomFlakFx:209 broomHud:214 broomHudT:215 broomTick:224
 
-(81 files, 19473 lines)
+(81 files, 19476 lines)

@@ -294,10 +294,13 @@
 .h4UX.e-wind .fill .bd::before{background:repeating-linear-gradient(90deg,transparent 0 18px,rgba(255,255,255,.12) 24px,transparent 32px);animation-duration:1.6s}
 .h4UX.e-water .fill .bd::before{background:repeating-radial-gradient(ellipse at 50% 120%,transparent 0 10px,rgba(255,255,255,.1) 12px,transparent 15px);animation-duration:4s}
 /* รูปตัวละคร (FFA/TDM แทนแผนที่ย่อ) */
-.h4Map .h4Pf{position:absolute;inset:0;width:100%;height:100%;display:none;border-radius:2px}
-.h4Map .pfr{position:absolute;inset:-4px;display:none;border:2px solid var(--c2);box-shadow:0 0 0 1px var(--c0),0 0 14px var(--c1),inset 0 0 16px rgba(0,0,0,.6);pointer-events:none}
-.h4Map.pf{background:radial-gradient(circle at 50% 35%,color-mix(in srgb,var(--c1) 45%,#0a0c18),#06080f 80%)}
-.h4Map.pf .h4Pf,.h4Map.pf .pfr{display:block}
+/* round 4: วงกลมในกรอบโปรไฟล์จริง (prfAvatar) แทนกรอบสี่เหลี่ยม */
+.h4Map .h4PfW{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:none}
+.h4Map .h4PfW .pbIn{overflow:hidden;background:radial-gradient(circle at 50% 35%,color-mix(in srgb,var(--c1) 45%,#0a0c18),#06080f 80%)}
+.h4Map .h4Pf{width:100%;height:100%;border-radius:50%;display:block}
+.h4Map.pf{border:0;background:none;box-shadow:none}
+.h4Map.pf .c{display:none}
+.h4Map.pf .h4PfW{display:block}
 
 /* ---------- จอเปื้อนดิน (ศัตรูอยู่ในฝุ่น Dust Burst — js/47 eMudScreen, ผู้ใช้ 2026-11-01): คราบโคลนกระเซ็นหนาที่ขอบ กลางจอยังพอมองเห็น ---------- */
 #eMud{position:fixed;inset:0;z-index:1;pointer-events:none;opacity:0;transition:opacity .35s ease;overflow:hidden}
@@ -313,7 +316,7 @@
 @keyframes eMudDrip{from{transform:translateY(0) scaleY(.6)}to{transform:translateY(30vh) scaleY(1.2);opacity:.2}}
 
 /* round 3 (ผู้ใช้ 2026-11-01: รูปตัวละครใหญ่ไป / ไพ่อัลติรกไป): รูปเล็กลง • ไพ่อัลติเล็กลง ตัดแถบเกจใต้ไพ่ ตัวเลขเล็กลง แสงรอบไพ่เบาลง */
-.h4Map.pf{width:108px;height:108px}
+.h4Map.pf{width:118px;height:118px}
 .h4UX{width:92px;height:128px;margin-left:-46px;bottom:calc(22px*var(--hs))}
 .h4UX .gb{display:none}
 .h4UX .pct{font-size:22px;bottom:10px}
