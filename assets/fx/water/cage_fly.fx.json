@@ -11,53 +11,51 @@
  "seed": 49,
  "layers": [
   {
-   "id": "core",
+   "id": "bub",
    "t": "mesh",
    "at": 0,
    "life": 1,
    "att": "point",
-   "shape": "sphere",
-   "mat": "solid",
-   "col": "#1d66d8",
-   "col2": "#2a8ef0",
-   "pos": [
-    0,
-    0,
-    0
-   ],
-   "scale": 0.28,
-   "op": 1,
-   "fade": 0,
-   "loop": true
-  },
-  {
-   "t": "mesh",
-   "shape": "sphere",
+   "shape": "plane",
    "mat": "tex",
-   "tex": "tex/water_cage_orb",
+   "tex": "tex/water_cage_toon",
    "col": "#ffffff",
-   "col2": "#bff4ff",
-   "rim": 0.7,
+   "col2": "#000000",
+   "rim": 0,
    "uvTile": [
-    2,
+    1,
     1
    ],
    "uvScroll": [
-    0.06,
+    0,
     0
    ],
+   "bill": true,
+   "int": 1,
    "fade": 0,
-   "id": "ball",
-   "at": 0,
-   "life": 1,
-   "att": "point",
    "pos": [
     0,
     0,
     0
    ],
-   "scale": 0.3,
-   "spin": 360,
+   "scale": {
+    "0": [
+     1.3,
+     1.2,
+     1.3
+    ],
+    "0.5": [
+     1.2,
+     1.3,
+     1.2
+    ],
+    "1": [
+     1.3,
+     1.2,
+     1.3
+    ]
+   },
+   "op": 1,
    "loop": true
   },
   {
@@ -256,40 +254,6 @@
    "gravity": 3,
    "drag": 0.4,
    "bounce": 0,
-   "loop": true
-  },
-  {
-   "id": "glint",
-   "t": "emit",
-   "at": 0,
-   "life": 1,
-   "att": "point",
-   "pos": [
-    0,
-    0,
-    0
-   ],
-   "rate": 16,
-   "from": "sphere",
-   "fr": 0.3,
-   "dir": "random",
-   "speed": [
-    0.2,
-    0.7
-   ],
-   "plife": [
-    0.3,
-    0.6
-   ],
-   "look": "spark",
-   "size": [
-    3,
-    6
-   ],
-   "col": "#ffffff",
-   "c2": "#c8fbff",
-   "gravity": 0,
-   "drag": 0.5,
    "loop": true
   }
  ]

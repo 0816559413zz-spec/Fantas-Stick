@@ -305,6 +305,7 @@ function syncProj(v,now){
     o.lines.forEach(L=>jag(L.geometry,_a.set(0,0,0),_b.set(0,0,-2.4),0.22));
     LREQ.push({x:X,y:H,z:Z,col,int:vt==='fire'?2.4:1.6,dist:vt==='fire'?11:8});
     switch(vt){
+      case 'wdrop':case 'wcage':o.core.visible=o.inner.visible=o.tail.visible=o.halo.visible=false;o.lp=[x,y,H];break;   // น้ำ: เห็นแค่ fx ไม่มีลูกแสงขาว
       case 'icicle':
         if(o.fx){o.core.visible=o.inner.visible=o.tail.visible=false;o.halo.scale.setScalar(r*2);o.lp=[x,y,H];break;}   // แบบ B: เข็มพลังงานจากไฟล์ fx
         // แท่งน้ำแข็งแหลม: ยาวตามทิศที่พุ่ง

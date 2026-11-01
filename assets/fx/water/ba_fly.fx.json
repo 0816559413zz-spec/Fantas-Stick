@@ -1,6 +1,6 @@
 {
  "v": 1,
- "desc": "BA สายน้ำ: กระสุนน้ำเม็ดเล็กพุ่งเร็ว ตามกระสุน",
+ "desc": "BA สายน้ำ: เข็มน้ำเล็กสีฟ้า ยืดตามความเร็ว + หางน้ำสั้น (ไม่มีลูกแสงขาว)",
  "tags": [
   "water",
   "ba",
@@ -17,12 +17,11 @@
    "life": 1,
    "att": "point",
    "shape": "sphere",
-   "mat": "water",
-   "col": "#5ef0ff",
-   "col2": "#1fc3e6",
-   "rim": 1,
+   "mat": "toonwater",
+   "col": "#6fd8ff",
+   "col2": "#1466c8",
+   "rim": 0.5,
    "scroll": 3,
-   "int": 1.25,
    "disp": 0.6,
    "pos": [
     0,
@@ -30,9 +29,9 @@
     0
    ],
    "scale": [
-    0.055,
-    0.055,
-    0.2
+    0.085,
+    0.085,
+    0.8
    ],
    "op": 1,
    "fade": 0,
@@ -45,22 +44,21 @@
    "life": 1,
    "att": "point",
    "shape": "sphere",
-   "mat": "water",
-   "col": "#d2fcff",
-   "col2": "#5ef0ff",
-   "rim": 0,
+   "mat": "toonwater",
+   "col": "#d8f7ff",
+   "col2": "#4fb8ff",
+   "rim": 0.3,
    "scroll": 3,
-   "int": 1.25,
    "disp": 0.6,
    "pos": [
     0,
-    0,
-    0.05
+    0.02,
+    0.06
    ],
    "scale": [
-    0.03,
-    0.03,
-    0.11
+    0.04,
+    0.04,
+    0.5
    ],
    "op": 0.8,
    "fade": 0,
@@ -105,40 +103,17 @@
    "loop": true
   },
   {
-   "id": "glint",
-   "t": "emit",
+   "id": "wake",
+   "t": "trail",
    "at": 0,
    "life": 1,
    "att": "point",
-   "pos": [
-    0,
-    0,
-    -0.2
-   ],
-   "rate": 15.0,
-   "from": "sphere",
-   "fr": 0.05,
-   "dir": "aim",
-   "yaw": 180,
-   "spread": 0.15,
-   "speed": [
-    1,
-    2
-   ],
-   "plife": [
-    0.08,
-    0.14
-   ],
-   "look": "streak",
-   "size": [
-    0.63,
-    0.99
-   ],
-   "col": "#ffffff",
-   "c2": "#d2fcff",
-   "gravity": 0,
-   "drag": 2,
-   "curl": false,
+   "of": "drop",
+   "col": "#bfeeff",
+   "col2": "#2f8cf0",
+   "w": 0.09,
+   "tlife": 0.09,
+   "k": 1.2,
    "loop": true
   }
  ]

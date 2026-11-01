@@ -1,0 +1,14 @@
+{
+ "v": 1,
+ "desc": "น้ำแตกกระจายลายการ์ตูน ปลาย Abyssal Beam",
+ "gen": "image",
+ "seed": 21,
+ "px": 512,
+ "cols": 1,
+ "rows": 1,
+ "kind": "loop",
+ "fps": 24,
+ "ramp": "white",
+ "add": false,
+ "p": {}
+}

@@ -183,7 +183,7 @@ function fxTexMat(name,o){const X=FXMK.tex.get(name);if(!X)fxTexNeed(name);
     vertexShader:'varying vec2 vUv;varying vec3 vN;varying vec3 vV;void main(){vUv=uv;vec4 mv=modelViewMatrix*vec4(position,1.0);vN=normalize(normalMatrix*normal);vV=normalize(-mv.xyz);gl_Position=projectionMatrix*mv;}',
     fragmentShader:'uniform sampler2D uMap,uNz;uniform vec2 uGrid,uRep,uScr;uniform vec3 uC1,uC2;uniform float uFr,time,uRim,uOp,uInt,uDis,uAdd,uHas;varying vec2 vUv;varying vec3 vN;varying vec3 vV;'+
       'void main(){vec2 uv=vUv*uRep+uScr*time;float N=uGrid.x*uGrid.y;vec4 t=vec4(1.0);'+
-      'if(uHas>0.5){if(N>1.5){uv=fract(uv);float f0=mod(floor(uFr),N);uv=vec2((mod(f0,uGrid.x)+uv.x)/uGrid.x,1.0-(floor(f0/uGrid.x)+1.0-uv.y)/uGrid.y);}t=texture2D(uMap,uv);}'+
+      'if(uHas>0.5){if(N>1.5){uv=fract(uv);float f0=mod(floor(uFr),N);uv=vec2((mod(f0,uGrid.x)+uv.x)/uGrid.x,1.0-(floor(f0/uGrid.x)+1.0-uv.y)/uGrid.y);}t=texture2D(uMap,uv);}else discard;'+
       'float fr=1.0-abs(dot(normalize(vN),normalize(vV))),rim=pow(fr,2.0)*uRim;float n=texture2D(uNz,vUv*vec2(2.0,1.0)).r;if(n<uDis)discard;float edge=uDis>0.001?1.0-smoothstep(uDis,uDis+0.06,n):0.0;'+
       'vec3 c=t.rgb*uC1*uInt+uC2*(rim+edge*1.5);float a=clamp(t.a+rim*0.5+edge,0.0,1.0)*uOp;gl_FragColor=vec4(c*a,a*(uAdd>0.5?0.35:1.0));}'});
   m.userData.tex=name;fxTexMatBind(m);return m;}

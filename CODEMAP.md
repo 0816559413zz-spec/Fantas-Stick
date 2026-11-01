@@ -93,24 +93,24 @@ MIND:66 summonMin:72 minTarget:81 minShoot:88 updateMins:93 aimTarget:133
 §180 ร่ายคาถา
 castSlot:181 castUlt:196
 
-## js/09-water.js (161) — 
+## js/09-water.js (173) — 
 WATERP:7 WT_BA:8 wtOn:23 wtInBeam:25
 §28 ทุกเฟรมของผู้เล่นสายน้ำ (เรียกจาก updatePlayer หลังส่วนโล่)
-waterTick:29 waterSpd:43 waterReset:44
-§46 BA: ตวัดไม้สร้างเส้นน้ำ → ยิง 3 นัดตามเมาส์ • Moonwater = ลำน้ำ
-WT_BA_H:47 waterBasic:48 waterLineTick:55 waterMoonBeam:61
-§64 Dash: จมดิน ทิ้งร่างโคลน → โผล่ห่าง 300 ทิศที่หัน • 6 วิกดอีกที = กลั…
-waterDash:65 waterSinkTick:74
-§80 ดาเมจใดๆ ของเรา → ลูกผู้ช่วยยิงตาม (เรียกจาก damage() ใน js/12)
-waterOnHit:81 waterFamTick:83
-§88 Riptide: คลื่นยักษ์วิ่งไปข้างหน้า พัดศัตรูติดไปจนสุดทาง
-waterWaveTick:89
-§97 Abyssal Beam: ร่าย 0.5 วิ → ยิงลำน้ำ 3 วิ (ยืนนิ่ง ลอยนิดหน่อย หมุนตา…
-waterBeamTick:98 waterMBTick:107
-§111 อัลติ Dragon of the Deep
-waterDragonTick:112
-§126 ทุกเฟรม (ทั้งเกม)
-updateWater:127 waterSnapP:133 waterSnapW:135
+waterTick:29 waterSpd:44 waterReset:45
+§47 BA: ตวัดไม้สร้างเส้นน้ำ → ยิง 3 นัดตามเมาส์ • Moonwater = ลำน้ำ
+WT_BA_H:48 waterBasic:49 waterLineTick:56 waterMoonBeam:62
+§65 Dash: จมดิน ทิ้งร่างโคลน → โผล่ห่าง 300 ทิศที่หัน • 6 วิกดอีกที = กลั…
+waterDash:66 waterSinkTick:75
+§81 ดาเมจใดๆ ของเรา → ลูกผู้ช่วยยิงตาม (เรียกจาก damage() ใน js/12)
+waterOnHit:82 waterFamTick:84
+§89 Riptide: คลื่นยักษ์วิ่งไปข้างหน้า พัดศัตรูติดไปจนสุดทาง
+waterWaveTick:90
+§98 Abyssal Beam: ร่าย 0.5 วิ → ยิงลำน้ำ 3 วิ (ยืนนิ่ง ลอยนิดหน่อย หมุนตา…
+waterBeamStop:100 waterBeamTick:108 waterMBTick:119
+§123 อัลติ Dragon of the Deep
+waterDragonTick:124
+§138 ทุกเฟรม (ทั้งเกม)
+updateWater:139 waterSnapP:145 waterSnapW:147
 
 ## js/09-wind.js (259) — 
 WINDP:8 W_BA:9
@@ -140,7 +140,7 @@ windFlyTick:202 windFlick:204
 windUltTick:213 windFloatZ:227 windSnapP:230 windSnapW:231
 §234 สกิล
 
-## js/10-net.js (197) — เครือข่าย (PeerJS / WebRTC)
+## js/10-net.js (197) — 
 PREFIX:4 NET:5 RC:9 TURN_SERVERS:12 ICE:13 PEER_OPT:14 TURN_URL:16 ICE_READY:18 JN:22 LAG:24 lagDo:25 hostSend:26 LOBBY:27 genCode:28 sendAll:29 NETD_KEYS:33 NETD:33 netDeltaReset:34 netDelta:35 NET_MAX:49 _netTE:49 netSendSnap:50 NETU:61 netUndelta:62 setStatus:68 hostGame:70 hostPeer:78 netConnect:97 joinWatch:108 joinFail:123 netLost:129 joinGame:144 joinPeer:155 clientOnData:170 leave:185 leaveRoom:187
 
 ## js/11-host.js (394) — 
@@ -303,8 +303,8 @@ FLAME_STYLE:48 PTIME:49 NOISETEX:51 FLAMETEX_V1:57 FLAMETEX_V2:62 PSYS:72 FLAMEL
 §172 เอฟเฟกต์รูปทรง: แฟลช / วงแหวน / โดม / รอยไหม้ / สายฟ้า / แสงชั่วคราว
 SHAPES_Q:173 SHAPES:173 FLASHL:173 LINES:173 LREQ:174 ringGeo:175 ringVGeo:176 arcGeo:177 domeGeo:178 fullGeo:179 discGeo:180 decalTex:181 FX:182 jag:196 spawnShape:204 updateShapes:231 _cp:250 updateLights:251
 
-## js/31-camera.js (133) — กล้องมุมหลังไหล่ (แบบ Hogwarts Legacy)
-yaw:2 pitch:2 lastPh:2 locked:2 CAMRS:3 SENS:4 saveSet:5 applySettings:6 camPos:14 camLook:14 overlayOpen:17 showPause:18 hidePause:19 MAPCAM:20 PLACE:22 placeKey:23 updatePlaceGhost:31 _aimD:45 rayTerr:47 aimFromCrosshair:53 AIMZ:85 EZC:87 ESC:87 WZC:87 camRoomK:89 updateCamera:99 menuCamera:129
+## js/31-camera.js (135) — กล้องมุมหลังไหล่ (แบบ Hogwarts Legacy)
+yaw:2 pitch:2 lastPh:2 locked:2 CAMRS:3 SENS:4 saveSet:5 applySettings:6 camPos:14 camLook:14 overlayOpen:17 showPause:18 hidePause:19 MAPCAM:20 PLACE:22 placeKey:23 updatePlaceGhost:31 _aimD:45 rayTerr:47 aimFromCrosshair:53 AIMZ:85 EZC:87 ESC:87 WZC:87 BZC:87 camRoomK:89 updateCamera:99 menuCamera:131
 
 ## js/32-stage.js (313) — เวทีเมนู/ล็อบบี้: ห้องโถงมืด แท่นวงเวททอง เทียนลอย (ฉากแยกจากแผนที่)
 stage:2 STAGE:5 STAGE_Y:6 stageSpots:58 stageChar:74 POSES:81 stageIdle:87
@@ -324,13 +324,13 @@ iceMat:2 iceRim:3 makeIceSword:4 makeIceAxe:23 makeKiteShield:39
 §51 อาวุธน้ำแข็งลอย (ผู้ใช้ 2026-10-22: "ร่ายคาถาให้ดาบฟันเอง ระยะเท่าเดิ…
 FWS:54 FWA:54 _fwM:55 _fwM2:55 _fwX:55 _fwY:55 _fwZ:55 _fwP:55 _fwS:55 _fwQ:55 _eo:56 _ei:56 _ss:56 fwAim:58 fwWeapons:59 FWP:61 FWT:61 fwChop:62 fwSweep:63 FF_RISE:64 fwIdle:65 fwSwing:68 FWL_N:80 fwLink:81 fwMat:84 frostFX:85
 
-## js/35-sync.js (508) — ซิงก์ผู้เล่น/ศัตรู/ลูกเวทจาก snapshot + ฉายตำแหน่งลงจอ (ป้ายชื่อ/ตัวเ…
+## js/35-sync.js (509) — ซิงก์ผู้เล่น/ศัตรู/ลูกเวทจาก snapshot + ฉายตำแหน่งลงจอ (ป้ายชื่อ/ตัวเ…
 §2 ท่าร่ายคาถาแบบนักเวทในหนัง Harry Potter (ผู้ใช้ 2026-10-22: "ยิงปกติท…
 CPOSE_T:7 _ce:7 _cs:7 _cb:7 AMP_B:9 AMP_S:9 CP_BEND:10 CPOSE:12 _cpT:20 _cpR:20 CGUARD:20 CP_STEP:21 CPCOL:22 castStyle:23 castStart:24
 §25 ท่าร่ายสกิล / อัลติ / โล่ (ผู้ใช้ 2026-10-22: "เกือบทุกสกิลควรมีการเห…
-CANIM:30 SKANIM:55 skAnim:60 _caT:61 _caR:61 skillPose:62 _g2:87 wandTwoHand:88 CBLOCK:95 blockPose:96 castPose:101 lateSkillPose:107 castPose0:108 syncPlayers:137 syncEnemies:220 projGeo:258 tailGeo:259 _t1:260 makeProj:261 _a:281 _b:281 PJFX:283 syncProj:284 _awT:370 animateWorld:371
-§412 ฉายตำแหน่ง 3D ลงจอ (ป้ายชื่อ / ตัวเลขดาเมจ)
-_v:413 toScreen:414 burnNum:421 drawLabels:428 drawTexts:459 HITM:473 DIRI:473 drawXh:475 drawCrosshair:485
+CANIM:30 SKANIM:55 skAnim:60 _caT:61 _caR:61 skillPose:62 _g2:87 wandTwoHand:88 CBLOCK:95 blockPose:96 castPose:101 lateSkillPose:107 castPose0:108 syncPlayers:137 syncEnemies:220 projGeo:258 tailGeo:259 _t1:260 makeProj:261 _a:281 _b:281 PJFX:283 syncProj:284 _awT:371 animateWorld:372
+§413 ฉายตำแหน่ง 3D ลงจอ (ป้ายชื่อ / ตัวเลขดาเมจ)
+_v:414 toScreen:415 burnNum:422 drawLabels:429 drawTexts:460 HITM:474 DIRI:474 drawXh:476 drawCrosshair:486
 
 ## js/36-modes-view.js (170) — 
 ROLE:4 KC:4 roleShowT:4 onPriv:5 MO:10 BREATHS:11 clearModeObjs:12 ITEMC:21 healTex:22 makeItem:23 syncModeObjs:39
@@ -653,16 +653,16 @@ BACKDROP:8
 §66 noise เล็ก ๆ (คงที่ต่อ seed)
 bdHash:67 bdNoise:68 bdFbm:69 bdEdge:71 bdRing:73 bdPaint:79 bdTree:82 buildBackdrop:89 bdTower:135 backdropHide:139
 
-## js/68-water-view.js (144) — 
-WTV:5 WTC:6 wtState:7 wtStop:8 wtMesh:9 _wtV:11 _wtP:11 wtBakeClone:12 wtLineMat:23 _wtOlMat:30 wtOutline:32 WT_SINKD:38 wtSinkOffset:39 wtAlive:46 wtLoop:48
-§50 ต่อผู้เล่น: โล่ฟองน้ำ/ฮีล • ลูกผู้ช่วยที่ไหล่ • ร่างโคลน + เส้นน้ำ • …
-waterFX:51
-§86 ทั้งเกม: ลูกผู้ช่วยที่กำลังพุ่ง (ล็อกเป้า)
-WT_MOUTH:88 _wtA:89 _wtB:89 wtMouth:90 _wtCyl:93 wtBeam:95 syncWater:98 wtPew:105
-§112 เหตุการณ์ (efx z 'wt…')
-waterEfx:113
-§140 HUD: เกจฮีลโล่ (โค้งซ้ายรอบเป้าเล็ง)
-drawWaterHud:141
+## js/68-water-view.js (182) — 
+WTV:5 WTC:6 wtState:7 wtStop:8 wtMesh:9 _wtV:11 _wtP:11 wtBakeClone:12 wtLineMat:23 _wtOlMat:30 wtOutline:32 WT_SINKD:38 wtSinkOffset:39 wtAlive:46 wtLoop:48 WT_FR:51 wtFrPath:52 _wtFa:54 _wtFb:54 _wtFs:54 _wtFn:54 wtFamRise:55 wtFamRiseOff:65 _wtTube:67 WT_BEAM_V:68 WT_BEAM_F:71 WT_BEAM_O:74 wtBeamMesh:76 wtBeamSync:80 wtBeamOff:85
+§87 ต่อผู้เล่น: โล่ฟองน้ำ/ฮีล • ลูกผู้ช่วยที่ไหล่ • ร่างโคลน + เส้นน้ำ • …
+waterFX:88
+§123 ทั้งเกม: ลูกผู้ช่วยที่กำลังพุ่ง (ล็อกเป้า)
+WT_MOUTH:125 _wtA:126 _wtB:126 wtMouth:127 _wtCyl:130 wtBeam:132 syncWater:135 wtPew:142
+§150 เหตุการณ์ (efx z 'wt…')
+waterEfx:151
+§178 HUD: เกจฮีลโล่ (โค้งซ้ายรอบเป้าเล็ง)
+drawWaterHud:179
 
 ## js/68-wind-view.js (200) — 
 WV:6 wvState:7 wvAlive:8
@@ -691,4 +691,4 @@ dive:186 PA:187 TA:188 DIVE_DOWN:190 DIVE_POUR:190 DIVE_STEP:190 diveDist:191 la
 §443 เล่น
 WDG_YAW:444 wdgGet:445 wdgStart:446 wdgDive:453 wdgKeep:456 wdgEnd:457 wdgTick:458
 
-(82 files, 19965 lines)
+(82 files, 20018 lines)
