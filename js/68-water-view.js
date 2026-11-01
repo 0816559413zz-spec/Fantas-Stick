@@ -27,10 +27,10 @@ function wtLineMat(){return new THREE.ShaderMaterial({uniforms:{time:FIRE_U.time
     'vec3 c=mix(vec3(0.42,0.92,0.84),vec3(0.03,0.5,0.5),band*0.9);c=mix(c,vec3(1.1),crest);'+
     'float a=(1.0-smoothstep(0.38,0.5,abs(u-0.5)))*0.85;gl_FragColor=vec4(c,a);}'});}
 // ขอบขาวเรืองรอบตัวผู้เล่น (เห็นทะลุลูกน้ำ Aqua Cage): เปลือกกลับด้านพองออกตามผิว วาดทีหลังสุด • หมดเวลาแล้วลบ (syncWater)
-const _wtOlMat=new THREE.MeshBasicMaterial({color:0xffffff,side:THREE.BackSide,fog:false,transparent:true,opacity:0.95,depthWrite:false});
-_wtOlMat.onBeforeCompile=sh=>{sh.vertexShader=sh.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>'+String.fromCharCode(10)+'  transformed += normalize(objectNormal) * 0.07;');};
+const _wtOlMat=new THREE.MeshBasicMaterial({color:0xcffcff,side:THREE.BackSide,fog:false,transparent:true,opacity:1,depthWrite:false});
+_wtOlMat.onBeforeCompile=sh=>{sh.vertexShader=sh.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>'+String.fromCharCode(10)+'  transformed += normalize(objectNormal) * 0.1;');};
 function wtOutline(id,dur){const o=PM3.get(id);if(!o||!o.g)return;const L=[];
-  (o.fileModel||o.b||o.g).traverse(m=>{if(!m.isMesh||m.userData.wtOl||m.userData.eOl||!m.parent)return;
+  o.g.traverse(m=>{if(!m.isMesh||m.userData.wtOl||m.userData.eOl||!m.parent||!m.visible||m.material.transparent)return;
     const c=m.isSkinnedMesh?new THREE.SkinnedMesh(m.geometry,_wtOlMat):new THREE.Mesh(m.geometry,_wtOlMat);if(m.isSkinnedMesh)c.bind(m.skeleton,m.bindMatrix);
     c.position.copy(m.position);c.quaternion.copy(m.quaternion);c.scale.copy(m.scale);c.userData.wtOl=1;c.renderOrder=999;c.frustumCulled=false;m.parent.add(c);L.push(c);});
   WTV.ol.push({L,t:dur});}
@@ -113,7 +113,7 @@ function wtPew(oid,x,y,h){if(oid==null||!wtMouth(oid,_wtA))return;const p=new TH
 function waterEfx(ev){
   const z=ev.z,x=ev.x,y=ev.y,H=ev.h!==undefined?ev.h:0,me=myPos(),near=!me||Math.hypot(x-me.x,y-me.y)<1100,a=ev.a||0;
   switch(z){
-    case 'wtslash':fxPlay('water/ba_slash',{x,y,h:0,follow:ev.id});if(near)snd('cast_pull',ev);return true;
+    case 'wtslash':{fxPlay('water/ba_slash',{x,y,h:0,follow:ev.id});const o=ev.id&&PM3.get(ev.id);if(o){o.castT=0.3;castStart(o,'wdrop');}if(near)snd('cast_pull',ev);return true;}   // ตวัดครั้งเดียว กระสุนออกจากรอยฟันเอง
     case 'wtsink':fxPlay('water/dash_sink',{x,y,h:0});if(ev.id!=null)WTV.sk.set(ev.id,{k:'s',e:0});if(near)snd('cast_pull',ev);return true;
     case 'wtpop':fxPlay('water/dash_pop',{x,y,h:0});if(ev.id!=null)WTV.sk.set(ev.id,{k:'p',e:0});if(near)shake(0.15);return true;
     case 'wtclend':return true;
@@ -131,7 +131,7 @@ function waterEfx(ev){
     case 'wtdg':wdgStart(ev.id,x,y);if(near){shake(0.2);snd('cast_pull',ev);}return true;
     case 'wtdgaim':return true;
     case 'wtdgdive':{const c=VIEW.cur&&VIEW.cur.P.find(q=>q.id===ev.id),da=c?Math.atan2(y-c.y,x-c.x):0;
-      wdgDive(ev.id,x,y);later(WT_UL.rise-0.4,()=>fxPlay('water/dragon_dive',{x,y,h:0,a:da,aim:false}));if(near)for(let k=0;k<WT_UL.n;k++)later(WT_UL.rise+k*WT_UL.gap,()=>{shake(k?0.3:0.6);if(!(k%2))snd('break',ev);});return true;}
+      wdgDive(ev.id,x,y);fxPlay('water/dragon_warn',{x,y,h:0,aim:false});later(WT_UL.rise-0.4,()=>fxPlay('water/dragon_dive',{x,y,h:0,a:da,aim:false}));if(near)for(let k=0;k<WT_UL.n;k++)later(WT_UL.rise+k*WT_UL.gap,()=>{shake(k?0.3:0.6);if(!(k%2))snd('break',ev);});return true;}
     case 'wtdgend':return true;
   }
   return false;

@@ -84,7 +84,7 @@ function aimFromCrosshair(me,P,E){
 }
 let AIMZ=0;
 // สายดิน: ซูมออก + เลื่อนกล้องไปซ้ายตอนกดค้าง BA ชาร์จ / ตอนรอปาเสาอัลติบนฟ้า (Stand ใหญ่ไม่บังจอ) — ผู้ใช้ 2026-10-21
-let EZC=0,ESC=0;   // ESC = โล่ Earth: Stand ทึบอยู่หลังเรา → กล้องเลื่อนไปซ้ายให้เห็นข้างหน้า (ผู้ใช้ 2026-10-21)
+let EZC=0,ESC=0,WZC=0;   // ESC = โล่ Earth: Stand ทึบอยู่หลังเรา → กล้องเลื่อนไปซ้ายให้เห็นข้างหน้า (ผู้ใช้ 2026-10-21)
 // ผู้เล่นอยู่ในห้อง (บ้านที่เดินเข้าได้ / ตึกกลวงในเมือง): ร่นกล้องตามแนวจากจุดโฟกัสให้อยู่ในห้อง (ห่างผนัง 0.3 ม. ต่ำกว่าเพดาน 0.25 ม.) • คืนสัดส่วน 0.12..1
 function camRoomK(me,F,x,y,z){
   const mz=me.z||0;let k=1;const fit=(f,c,lo,hi)=>{if(c<lo&&f>lo)k=Math.min(k,(f-lo)/(f-c));else if(c>hi&&f<hi)k=Math.min(k,(hi-f)/(c-f));};
@@ -103,8 +103,10 @@ function updateCamera(me,dt){
   const fx=Math.cos(yaw),fz=Math.sin(yaw),rx=-fz,rz=fx;
   const eu=me.ea&&me.al?(me.ea[3]===1?1:me.ea[9]>0?0.45:0):0;EZC+=(eu-EZC)*Math.min(1,dt*(eu>EZC?4:2.5));
   const es=me.ea&&me.al&&me.sh&&!(me.ea[0]>0)&&eu===0?1:0;ESC+=(es-ESC)*Math.min(1,dt*(es>ESC?5:3));
-  const big=me.co>0,dist=(big?13:me.fl?7.4:5.6)*(1-0.35*AIMZ)+EZC*9+ESC*1.5,cp=Math.cos(pitch),sp=Math.sin(pitch),side=(big?4.2:0.85+0.3*AIMZ)-EZC*3-ESC*2.6;
-  const focus=new THREE.Vector3(px+rx*side,GY(me.x,me.y)+(me.z||0)+(big?3.4:2.05)+EZC*1.5+ESC*0.4,pz+rz*side);
+  // อัลติมังกรน้ำ: ซูมออกทันทีตอนกด เห็นมังกรทั้งตัว
+  const wu=me.wt&&me.wt[5]&&me.al?1:0;WZC+=(wu-WZC)*Math.min(1,dt*(wu>WZC?14:2.5));
+  const big=me.co>0,dist=(big?13:me.fl?7.4:5.6)*(1-0.35*AIMZ)+EZC*9+ESC*1.5+WZC*11,cp=Math.cos(pitch),sp=Math.sin(pitch),side=(big?4.2:0.85+0.3*AIMZ)-EZC*3-ESC*2.6;
+  const focus=new THREE.Vector3(px+rx*side,GY(me.x,me.y)+(me.z||0)+(big?3.4:2.05)+EZC*1.5+ESC*0.4+WZC*2.5,pz+rz*side);
   // กล้องอยู่หลังผู้เล่น: ถ้าหลังชนขอบแผนที่ ให้ "ร่นกล้องเข้าหาตัว + ยกสูงขึ้น" แทนการบีบพิกัดทีละแกน (เดิมกล้องไปทับหัวตัวละคร)
   // กล้องล้ำเข้าไปในตัวกำแพงได้ (กำแพงหนา ~1.6 หน่วย ฝั่งหลังกำแพงโปร่ง มองทะลุเห็นตัวละคร) เกินกว่านั้นให้ร่นกล้องเข้าหาตัว
   const cfg=MAPCAM[MAPID]||MAPCAM.castle,hx=MW*S3/2,hz=MH*S3/2,bx=hx-1.2+cfg.m,bz=hz-1.2+cfg.m,ox=-fx*dist*cp,oz=-fz*dist*cp;

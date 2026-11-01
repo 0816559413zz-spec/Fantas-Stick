@@ -231,7 +231,7 @@ function brTick(dt){
   G.items=G.items.filter(i=>!i.got);
   if(plist().filter(p=>p.alive).length<=1)endMatch();
 }
-const ITEMN={fire:'🔓 คาถาช่อง Q',stun:'🔓 คาถาช่อง E',push:'🔓 คาถาช่อง R',pull:'🔓 คาถาช่อง F',hp:'❤️ ยาฟื้นเลือด',sh:'🛡️ ยาโล่',ult:'🌟 พลังโบราณ'};
+const ITEMN={fire:'🔓 คาถาช่อง Q',stun:'🔓 คาถาช่อง E',push:'🔓 คาถาช่อง R',pull:'🔓 คาถาช่อง F',hp:'💚 ลูกไฟฟื้นเลือด',sh:'🛡️ ยาโล่',ult:'🌟 พลังโบราณ'};
 function brPick(p,it){
   const k=it.k;
   if(['fire','stun','push','pull'].includes(k))p.unl[k]=1;

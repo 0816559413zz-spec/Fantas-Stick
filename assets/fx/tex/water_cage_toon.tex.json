@@ -1,0 +1,14 @@
+{
+ "v": 1,
+ "desc": "ฟอง Aqua Cage ลายการ์ตูน ใส เห็นคนข้างใน ขอบขาวหนา (รูป ref3d_bubble_prison)",
+ "gen": "image",
+ "seed": 8,
+ "px": 512,
+ "cols": 1,
+ "rows": 1,
+ "kind": "loop",
+ "fps": 24,
+ "ramp": "white",
+ "add": false,
+ "p": {}
+}

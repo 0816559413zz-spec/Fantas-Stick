@@ -18,9 +18,14 @@ function clearModeObjs(){
   MO.tasks.forEach(o=>scene.remove(o));MO.tasks=[];MO.taskKey='';
   BREATHS.length=0;
 }
-const ITEMC={fire:'#ff6a2a',stun:'#5ad1ff',push:'#cfe8ff',pull:'#c77dff',hp:'#ff4060',sh:'#7ff0ff',ult:'#ffd86b'};
+const ITEMC={fire:'#ff6a2a',stun:'#5ad1ff',push:'#cfe8ff',pull:'#c77dff',hp:'#6fffd0',sh:'#7ff0ff',ult:'#ffd86b'};
+let healTex=null;
 function makeItem(k){
   const g=new THREE.Group(),col=ITEMC[k]||'#ffffff';
+  if(k==='hp'){   // เลือด: ลูกแก้วแตกในเปลวเขียว (รูปผู้ใช้ tools/heal-pack-tex.py)
+    if(!healTex){healTex=new THREE.TextureLoader().load('assets/fx/tex/heal_pack.png');healTex.colorSpace=THREE.SRGBColorSpace;}
+    const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:healTex,transparent:true,depthWrite:false,fog:false}));sp.scale.set(1.45,1.8,1);sp.position.y=0.45;g.add(sp);g.userData.heal=sp;
+    scene.add(g);return g;}
   if(['fire','stun','push','pull'].includes(k)){
     const sc=new THREE.Mesh(new THREE.CylinderGeometry(0.13,0.13,0.75,12),new THREE.MeshStandardMaterial({color:'#f0e0b0',roughness:0.8}));sc.rotation.z=Math.PI/2;g.add(sc);
     const rb=new THREE.Mesh(new THREE.TorusGeometry(0.14,0.035,6,16),new THREE.MeshBasicMaterial({color:hdr(col,1.6)}));rb.rotation.y=Math.PI/2;g.add(rb);
@@ -89,6 +94,7 @@ function syncModeObjs(v,P,me,now,dt){
     seen.add(id);let o=MO.items.get(id);
     if(!o){o=makeItem(k);MO.items.set(id,o);}
     o.position.set(tx(x),0.9+Math.sin(now/400+id)*0.2+GY(x,y),tz(y));o.rotation.y=now/600+id;
+    if(o.userData.heal){const w=1+0.05*Math.sin(now/260+id);o.userData.heal.scale.set(1.45*w,1.8/w,1);}
   }
   for(const [id,o] of MO.items)if(!seen.has(id)){scene.remove(o);MO.items.delete(id);}
   // ศพ (หาลอร์ดโวลเดอมอร์)

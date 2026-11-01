@@ -306,7 +306,7 @@ function shoot(p,type,o){
     r:d.r,dmg:d.dmg,life:d.life,owner:p.id,team:p.team,src:'p'};
   if(o)Object.assign(pr,o);
   G.proj.push(pr);
-  emit({k:'cast',t:type,x:p.x,y:p.y,h:h+0.05,a:Math.round(a*100)/100,id:p.id});
+  if(!(o&&o.quiet))emit({k:'cast',t:type,x:p.x,y:p.y,h:h+0.05,a:Math.round(a*100)/100,id:p.id});   // quiet = ไม่เล่นท่าร่ายซ้ำ (BA น้ำ: ตวัดครั้งเดียว)
   return pr;
 }
 function eShoot(e,type,t,off){
