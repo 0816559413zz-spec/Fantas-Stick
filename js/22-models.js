@@ -107,6 +107,7 @@ function useFileModel(o,name,tint,look){
     o.b.traverse(m=>{if(m.isMesh||m.isSprite||m.isPoints||m.isLine)m.layers.set(31);});
     if(look&&o.tip)o.tip.layers.set(0);
     if(look&&o.wnG)o.wnG.traverse(m=>m.layers.set(0));     // ไม้สำเร็จรูป (โค้ด) แทนไม้ในไฟล์                       // แสงปลายไม้ยังโชว์ (อยู่ที่แขนโค้ดซึ่งตามแขนโมเดล)
+    if(look&&o.wWings)o.wWings.traverse(m=>m.layers.set(0));   // ปีกเป็นของติดตัว ไม่ใช่ร่างชั่วคราวที่ต้องซ่อนเมื่อ GLB โหลดเสร็จ
     (look?o.b:o.g).add(inst);o.fileModel=inst;
     if(r.animations.length)o.anim=makeAnimator(inst,r.animations);
     if(look){rigBind(o,inst);fileBroom(o);}

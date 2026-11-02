@@ -13,7 +13,11 @@ const HL=window.HL={errs:[]};
 window.addEventListener('error',e=>HL.errs.push(String(e.message)));
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));HL.sleep=sleep;
 let now=performance.now(),camMode=null,camOpt={};
-HL.freeze=()=>{window.requestAnimationFrame=()=>0;for(let i=1;i<20000;i++){clearInterval(i);}};
+HL.freeze=()=>{window.requestAnimationFrame=()=>0;
+  // clearInterval รับ id ของ timeout ได้ด้วย: กวาดเลขทั้งหมดจะฆ่าการโหลด/อุ่น shader ที่ยังรออยู่
+  if(window.__hlIntervals)for(const id of [...window.__hlIntervals])clearInterval(id);
+  else for(let i=1;i<20000;i++)clearInterval(i);   // ตัวช่วยเก่าที่ฉีดด้วยมือ ไม่มีทะเบียน interval
+};
 HL.solo=async(o={})=>{
   o=Object.assign({mode:'train'},o);
   if(o.kit!==undefined)try{localStorage.setItem('wd_kit2',String(o.kit));}catch(e){}

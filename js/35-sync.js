@@ -51,12 +51,35 @@ const CANIM={
   vxpull:{d:1.3,st:0.8,tr:null,k:[[0.1,-1.57,-1.05,1.15,0,-0.4,0.5,0,-0.06,'o'],[0.6,-1.6,-1.1,1.15,0.02,-0.45,0.55,0,-0.08,'s'],[0.7,-1.0,0.75,0.55,-0.14,-0.9,0.3,0,-0.12,'o'],[1,-0.9,0.6,0.4,-0.08,-0.7,0.4,0,-0.08,'s']],tm:[0.15,0.55]},   // สายลม Vortex Bind (ผู้ใช้): ชี้ไม้ไปข้างหน้า ตัวหมุนซ้าย ~70° แขนขวาเหยียดตรง → ตอนดึง (0.6 วิ) พับแขนมาหน้าตัวเหมือนออกแรงดึง
   dome:{two:1,d:0.7,st:0,tr:[0.3,0.75],k:[[0.35,0.2,-0.5,0,0.3,0.2,0.5,0,-0.25,'s'],[0.7,-2.6,-0.8,0,-0.2,-2.6,0.8,0,0.08,'o'],[1,-2.3,-0.7,0,-0.1,-2.3,0.7,0,0.04,'s']]},   // สองมือต่ำแล้วยกกางขึ้นเป็นโดม
 };
+// ท่าเฉพาะธาตุ: ง้าง/ปล่อย/ตามแรง/คืนท่า ไม่เปลี่ยนเวลาคาถาหรือการเคลื่อนที่ของ host
+Object.assign(CANIM,{
+  tidecall:{d:0.95,st:0.2,ci:[0.05,0.55],k:[[0.25,-1.8,-0.7,-0.35,-0.08,-1.15,0.45,0.04,-0.08,'s'],[0.6,-2.65,0.15,0.25,-0.12,-1.7,-0.35,-0.04,0.02,'s'],[0.78,-1.7,-0.1,0.08,0.08,-1.35,0.15,0,-0.04,'o'],[1,-1.35,-0.1,0,0,-0.6,0.35,0,0,'s']]},
+  wavecast:{d:0.8,st:0.9,tr:[0.05,0.65],k:[[0.15,-1.4,0.8,0.55,-0.08,-1.0,0.55,0.08,-0.12,'s'],[0.43,-1.55,-1.0,-0.65,0.22,-1.4,-0.5,-0.09,-0.17,'o'],[0.7,-1.5,-0.7,-0.3,0.1,-0.9,-0.3,-0.04,-0.04,'s'],[1,-1.0,-0.1,-0.05,0,-0.3,0.25,0,0,'s']]},
+  cagecast:{d:0.68,st:0.75,k:[[0.14,-1.05,-0.5,-0.4,-0.12,-1.2,0.35,0.04,-0.1,'s'],[0.32,-1.65,-0.02,0.28,0.2,-1.4,-0.2,-0.04,-0.15,'o'],[0.7,-1.5,-0.05,0.1,0.08,-0.9,0.1,0,-0.05,'s'],[1,-1.0,-0.1,0,0,-0.35,0.3,0,0,'s']]},
+  moonarts:{d:1.0,st:0.25,tr:[0.05,0.65],ci:[0.05,0.55],k:[[0.25,-1.6,0.7,0.4,-0.08,-1.5,-0.6,0.04,-0.08,'s'],[0.6,-2.45,-0.35,-0.3,-0.12,-1.8,0.4,-0.06,0.02,'s'],[0.8,-1.55,-0.05,0.1,0.1,-1.45,-0.25,0,-0.08,'o'],[1,-1.0,-0.1,0,0,-0.4,0.3,0,0,'s']]},
+  dragoncall:{d:1.0,st:0.65,tr:[0.1,0.65],k:[[0.22,-1.1,-0.6,-0.35,0.18,-1.3,0.55,0.06,-0.18,'s'],[0.6,-3.05,-0.1,0.2,-0.18,-2.1,0.35,-0.04,0.07,'s'],[0.8,-2.2,-0.15,0.1,-0.08,-1.65,0.1,0,0.02,'o'],[1,-1.65,-0.1,0,0,-1.1,0.35,0,0,'s']]},
+  dragoncommand:{d:0.8,st:0.8,tr:[0.1,0.5],k:[[0.16,-2.6,-0.25,-0.2,-0.12,-1.3,0.4,0,-0.04,'s'],[0.38,-0.95,-0.05,0.25,0.35,-0.7,0.25,-0.05,-0.22,'o'],[0.7,-1.25,-0.05,0.12,0.16,-0.55,0.3,0,-0.08,'s'],[1,-1.0,-0.1,0,0,-0.3,0.3,0,0,'s']]},
+  fireflare:{d:0.85,st:0.2,k:[[0.22,-0.55,0.7,0.15,0.24,-0.55,-0.7,0,-0.24,'s'],[0.48,-2.0,-0.9,-0.12,-0.22,-2.0,0.9,0,0.08,'o'],[0.75,-1.5,-0.55,-0.05,-0.06,-1.5,0.55,0,0.02,'s'],[1,-0.8,-0.15,0,0,-0.4,0.35,0,0,'s']]},
+  frostbreath:{d:0.9,st:0,k:[[0.25,-1.3,0.85,0,0.15,-1.3,-0.85,0,-0.13,'s'],[0.52,-2.05,-0.75,0,-0.16,-2.05,0.75,0,0.03,'s'],[0.78,-1.55,-0.5,0,-0.05,-1.55,0.5,0,-0.03,'s'],[1,-0.8,-0.1,0,0,-0.45,0.3,0,0,'s']]},
+  godcall:{d:0.9,st:0.6,k:[[0.2,-1.0,-0.4,-0.25,0.12,-0.6,0.4,0.03,-0.15,'s'],[0.5,-3.1,-0.1,0,-0.2,-1.8,0.5,0,0.08,'o'],[0.73,-2.0,-0.55,0.2,-0.12,-1.75,0.65,-0.04,0.04,'o'],[1,-1.0,-0.2,0,0,-0.65,0.35,0,0,'s']]},
+  windlaunch:{d:0.72,st:0.8,k:[[0.2,-0.6,-0.5,-0.2,0.28,-0.65,0.5,0,-0.25,'s'],[0.4,-1.7,-0.1,0.15,0.4,0.5,0.5,-0.03,-0.1,'o'],[0.75,-1.2,-0.2,0.05,0.16,0.3,0.4,0,-0.08,'s'],[1,-1.0,-0.1,0,0,-0.3,0.3,0,0,'s']]},
+  wingrise:{d:0.9,st:0.35,k:[[0.22,-0.7,0.6,0,0.2,-0.7,-0.6,0,-0.2,'s'],[0.52,-1.75,-1.0,0,-0.15,-1.75,1.0,0,0.07,'o'],[0.76,-1.4,-0.6,0,-0.04,-1.35,0.6,0,0.03,'s'],[1,-1.0,-0.25,0,0,-0.7,0.4,0,0,'s']]},
+  windvoid:{d:0.75,st:0.7,ci:[0.03,0.3],k:[[0.2,-1.2,-0.7,-0.5,-0.12,-1.4,0.25,0.06,-0.12,'s'],[0.42,-1.68,-0.05,0.35,0.25,-1.0,-0.4,-0.06,-0.15,'o'],[0.72,-1.5,-0.12,0.16,0.08,-0.6,0.2,-0.02,-0.04,'s'],[1,-1.0,-0.1,0,0,-0.3,0.3,0,0,'s']]},
+  heavenslam:{d:3.1,st:0.8,two:[0,0.36],k:[[0.20,-3.0,0.1,0,-0.14,-2.6,-0.1,0,0.04,'s'],[1/3.1,-0.7,0.15,0.1,0.45,-0.8,-0.1,0,-0.28,'o'],[0.45,-1.35,0.35,0,0.1,-1.35,-0.35,0,-0.12,'s'],[0.7,-1.5,0.7,0,0.2,-1.5,-0.7,0,-0.2,'s'],[2.38/3.1,-1.9,-0.8,0,-0.18,-1.9,0.8,0,0.05,'o'],[1,-1.0,-0.1,0,0,-0.4,0.3,0,0,'s']]},
+  wingflick:{d:0.95,st:0.6,k:[[0.25,0.15,-0.6,-0.1,-0.18,0.15,0.6,0,-0.12,'s'],[0.4,-1.75,-0.05,0.12,0.28,-1.65,0.05,0,-0.18,'o'],[0.7,-1.35,-0.2,0.05,0.15,-1.2,0.2,0,-0.06,'s'],[1,-1.0,-0.1,0,0,-0.4,0.3,0,0,'s']]}
+});
+CANIM.railrelease={d:0.65,st:0.6,two:[0,0.45],k:[[0.12,-1.45,-0.08,-0.16,-0.22,-1.5,-0.1,0.04,-0.12,'o'],[0.42,-1.58,-0.05,0.12,0.1,-1.4,-0.15,-0.03,-0.06,'s'],[1,-1.0,-0.1,0,0,-0.4,0.3,0,0,'s']]};
+CANIM.dragonland={d:0.7,st:0,k:[[0.12,-0.8,-0.1,0.12,0.34,-0.55,0.65,0.06,-0.28,'o'],[0.45,-1.1,-0.1,0.06,0.12,-0.5,0.4,0.02,-0.1,'s'],[1,-1.0,-0.1,0,0,-0.3,0.3,0,0,'s']]};
+// ขาแยก/ก้าว/ลงน้ำหนักต่างกันตามท่า (เฉพาะตอนหยุดเดิน; ไม่แย่งท่าวิ่ง)
+const SKFEET={sweep:[0.25,-0.5,0.1,-0.12],powerup:[-0.25,-0.15,0.16,-0.16],ultraise:[0.25,-0.4,0.13,-0.12],rend:[-0.45,0.25,0.1,-0.06],slam:[-0.65,-0.35,0.18,-0.18],wrap:[-0.4,-0.25,0.08,-0.08],forge:[0.3,-0.4,0.1,-0.1],line:[-0.5,0.3,0.1,-0.08],siphon:[0.35,-0.3,0.15,-0.15],orbs:[0.25,-0.25,0.1,-0.1],upflick:[-0.45,0.3,0.1,-0.08],snap:[0.3,-0.4,0.12,-0.08],pullback:[0.35,-0.45,0.12,-0.12],summon3:[-0.2,-0.2,0.18,-0.18],punchcmd:[-0.5,0.35,0.1,-0.1],ground:[-0.6,0.25,0.15,-0.1],clap:[-0.25,-0.25,0.2,-0.2],burst:[-0.45,-0.25,0.2,-0.2],skycall:[0.3,-0.45,0.1,-0.1],wallpush:[-0.55,0.3,0.15,-0.12],vxpull:[0.5,-0.4,0.14,-0.14],dome:[-0.35,-0.25,0.2,-0.2],tidecall:[0.3,-0.25,0.1,-0.12],wavecast:[0.3,-0.6,0.14,-0.12],cagecast:[-0.5,0.3,0.1,-0.1],moonarts:[0.2,-0.3,0.12,-0.12],dragoncall:[0.25,-0.5,0.13,-0.13],dragoncommand:[-0.5,0.35,0.12,-0.1],fireflare:[-0.35,-0.2,0.2,-0.2],frostbreath:[-0.25,-0.25,0.14,-0.14],godcall:[0.25,-0.4,0.15,-0.15],windlaunch:[-0.6,0.35,0.12,-0.12],wingrise:[-0.3,-0.2,0.18,-0.18],windvoid:[-0.45,0.3,0.12,-0.12],heavenslam:[-0.6,-0.25,0.18,-0.18]};
 // รอบ 2: ใส่ให้สกิลที่เดิมมีแต่ท่าค้าง (ไม่เหวี่ยง) ด้วย — ท่านี้เล่นหลังไฟล์สาย (lateSkillPose) จึงทับท่าค้างช่วงสั้น ๆ แล้วกลับท่าเดิม
-const SKANIM={ringofembers:'sweep',blazeform:'powerup',colossus:'ultraise',kindle:'upflick',ignitionsnap:'snap',
-  frostforge:'forge',glacierrend:'rend',permafrost:'slam',cryoshell:'wrap',frostaura:'powerup',mirrorlegion:'summon3',
-  thunderline:'line',speedsiphon:'siphon',stormorbs:'orbs',stormdome:'dome',triplestrike:'skycall',railgun:'pullback',godlightning:'ultraise',
+const SKANIM={ringofembers:'sweep',blazeform:'fireflare',colossus:'ultraise',kindle:'upflick',ignitionsnap:'snap',
+  frostforge:'forge',glacierrend:'rend',permafrost:'slam',cryoshell:'wrap',frostaura:'frostbreath',mirrorlegion:'summon3',
+  thunderline:'line',speedsiphon:'siphon',stormorbs:'orbs',stormdome:'dome',triplestrike:'skycall',railgun:'pullback',godlightning:'godcall',
   stonebreaker:'punchcmd',mudswamp:'ground',tectoniccrush:'dome',tectoniccrush_2:'clap',dustburst:'burst',terraauger:'pullback',wrath:'ultraise',
-  vortexbind:'vxpull',riptide:'sweep',tidecaller:'powerup',aquacage:'line',abyssalbeam:'pullback',moonwater:'powerup',dragondeep:'ultraise',voidspheres:'line',aegisgale_push:'wallpush',aegisgale_place:'ground'};
+  vortexbind:'vxpull',riptide:'wavecast',tidecaller:'tidecall',aquacage:'cagecast',abyssalbeam:'pullback',moonwater:'moonarts',dragondeep:'dragoncall',dragondeep_dive:'dragoncommand',voidspheres:'windvoid',aegisgale_push:'wallpush',aegisgale_place:'ground',windrift:'windlaunch',featherwing:'wingrise',featherwing_2:'wingflick',eyeofheaven:'heavenslam'};
+SKANIM.railgun_release='railrelease';SKANIM.terraauger_release='ground';
+SKANIM.dragonfall_land='dragonland';SKFEET.dragonland=[-0.8,0.3,0.12,-0.1];SKFEET.wingflick=[-0.45,0.3,0.12,-0.12];
 function skAnim(ev){const o=PM3.get(ev.id),n=SKANIM[ev.s];if(!o||!n)return;o.caN=n;o.caT=0;o.cpT=0;o.cgd=2.2;}
 const _caT=[0,0,0,0,0,0,0,0],_caR=[0,0,0,0,0,0,0,0];
 function skillPose(o,p,dt,now){
@@ -74,9 +97,10 @@ function skillPose(o,p,dt,now){
   if(A.tm&&u>A.tm[0]&&u<A.tm[1]){const tr=(Math.sin(now/23)+Math.sin(now/37))*0.03*w;_caT[0]+=tr;_caT[4]+=tr;_caT[3]+=tr*0.3;}   // เกร็งสั่น (ออกแรง)
   const r=Math.min(1,dt*30);for(let i=0;i<8;i++)c[i]+=(_caT[i]-c[i])*r;
   R.x=c[0];R.z=c[1];o.b.rotation.y=c[2];o.b.rotation.x+=c[3];L.x=c[4];L.z=c[5];o.b.rotation.z=c[6];o.b.position.y+=c[7];
-  if(A.two)wandTwoHand(o,w);   // ท่าสองมือ = มือซ้ายจับด้ามไม้ด้วย
+  if(A.two&&(!Array.isArray(A.two)||u>=A.two[0]&&u<=A.two[1]))wandTwoHand(o,w);   // ท่าสองมือ: ปล่อยมือได้เมื่อพ้นช่วงจับไม้
   const ks=A.k[0][0],st=A.st*w*(u<ks?0:Math.min(1,(u-ks)/0.15));
   if(st>0.01&&(o.vsp||0)<0.6){o.legs[1].rotation.x=-0.42*st;o.legs[0].rotation.x=0.3*st;}
+  const feet=SKFEET[o.caN];if(feet&&(o.vsp||0)<0.6){const fw=w*_cs(Math.min(1,u/0.16));o.legs[0].rotation.x=lerp(o.legs[0].rotation.x,feet[0],fw);o.legs[1].rotation.x=lerp(o.legs[1].rotation.x,feet[1],fw);o.legs[0].rotation.z=feet[2]*fw;o.legs[1].rotation.z=feet[3]*fw;}
   if(A.tr&&u>A.tr[0]&&u<A.tr[1]){if(!o.ctr){const col=CPCOL[getKit(p.id).path]||'#ffffff';o.ctr=trailNew({col:'#ffffff',col2:col,w:0.06,life:0.2,k:1.3});}
     o.tip.updateWorldMatrix(true,false);o.tip.getWorldPosition(_tv1);trailPoint(o.ctr,_tv1.x,_tv1.y,_tv1.z);}
   else if(o.ctr){trailStop(o.ctr);o.ctr=null;}
@@ -91,12 +115,22 @@ function wandTwoHand(o,w){
   const z=Math.asin(clamp(_g2.x,-1,1)),cz=Math.max(1e-4,Math.cos(z)),x=Math.atan2(-_g2.z/cz,-_g2.y/cz);
   L.rotation.x=lerp(L.rotation.x,x,w);L.rotation.z=lerp(L.rotation.z,z,w);
 }
+// ท่าค้าง/ท่าจบ ใช้หลังท่าประจำสายแล้วค่อยส่งให้กระดูก (8ช่องเหมือน CANIM)
+function characterPoseMix(out,a,b,k){for(let i=0;i<8;i++)out[i]=lerp(a[i],b[i],k);return out;}
+function characterStance(o,P,feet,w){
+  const R=o.armR.rotation,L=o.armL.rotation;w=clamp(w,0,1);
+  R.x=lerp(R.x,P[0],w);R.z=lerp(R.z,P[1],w);L.x=lerp(L.x,P[4],w);L.z=lerp(L.z,P[5],w);
+  o.b.rotation.y=lerp(o.b.rotation.y,P[2],w);o.b.rotation.x=lerp(o.b.rotation.x,P[3],w);o.b.rotation.z=lerp(o.b.rotation.z,P[6],w);o.b.position.y+=P[7]*w;o.bz=1;
+  if(feet){for(let i=0;i<2;i++){o.legs[i].rotation.x=lerp(o.legs[i].rotation.x,feet[i],w);o.legs[i].rotation.z=lerp(o.legs[i].rotation.z,feet[i+2],w);}}
+}
 // ยกโล่ (คลิกขวาค้าง): ไม้ขวางหน้าอก มือซ้ายดันออก ย่อตัวรับแรง หายใจ/สั่นนิด ๆ — สายดินใช้ Stand กันเลยไม่ใส่
 const CBLOCK=[-1.45,0.55,-0.15,0.12,-1.35,-0.15];
+const CBLOCK_PATH={0:[-1.25,0.35,-0.08,0.08,-1.15,-0.4],1:[-1.25,0.1,-0.18,0.13,-1.65,-0.1],7:[-1.1,0.55,-0.08,0.18,-1.1,-0.55],8:[-1.4,0.25,-0.1,0.08,-1.45,-0.25]};
 function blockPose(o,p,dt,now){
   const on=!!p.sh&&!p.ea&&!p.fl&&!p.dn;o.bkw=(o.bkw||0)+((on?1:0)-(o.bkw||0))*Math.min(1,dt*(on?14:6));const w=o.bkw;if(w<0.005)return;
-  const R=o.armR.rotation,L=o.armL.rotation,br=Math.sin(now/420)*0.03,B=CBLOCK;
+  const R=o.armR.rotation,L=o.armL.rotation,br=Math.sin(now/420)*0.03,B=CBLOCK_PATH[getKit(p.id).path]||CBLOCK;
   R.x=lerp(R.x,B[0]+br,w);R.z=lerp(R.z,B[1],w);o.b.rotation.y+=B[2]*w;o.b.rotation.x+=(B[3]+br*0.5)*w;L.x=lerp(L.x,B[4]-br,w);L.z=lerp(L.z,B[5],w);o.b.position.y-=0.1*w;
+  if(!(p.wv>1)){o.legs[0].rotation.x=lerp(o.legs[0].rotation.x,0.22,w);o.legs[1].rotation.x=lerp(o.legs[1].rotation.x,-0.3,w);o.legs[0].rotation.z=0.1*w;o.legs[1].rotation.z=-0.1*w;}
 }
 function castPose(o,p,v,dt,now){
   if(o.emo&&!o.caN&&!(o.cpT>0)){o.vsp=v.sp;if(emotePose(o,p,dt))return;}   // อีโมต (js/52)
@@ -134,12 +168,21 @@ function castPose0(o,p,v,dt,now){
     o.tip.updateWorldMatrix(true,false);o.tip.getWorldPosition(_tv1);trailPoint(o.ctr,_tv1.x,_tv1.y,_tv1.z);}
   else if(o.ctr){trailStop(o.ctr);o.ctr=null;}
 }
+function clearCharacterCast(o){
+  o.caN=null;o.cpT=0;o.castT=0;o.cgd=0;o.gw=0;o.bz=1;o.wBeamPose=null;o.wnPose=null;
+  if(o.ctr){trailStop(o.ctr);o.ctr=null;}
+  if(o.wWings){const d=o.wWings.userData;d.ul=d.fk=-1;}
+}
 function syncPlayers(P,mode,now,dt){
   const seen=new Set(),myP=P.find(q=>q.id===NET.myId),meGhost=!!(myP&&myP.gh);
   for(const p of P){
     seen.add(p.id);
     let o=PM3.get(p.id);
     if(!o){o=makeStudent(getLook(p.id),p.id);PM3.set(p.id,o);{const L=getLook(p.id);useFileModel(o,'char_student',lookTint(L),L);}}
+    const posePath=getKit(p.id).path;
+    // ทำก่อนทางแยกคนตาย: ช่วง ragdoll ไม่เดินนาฬิกาท่าร่าย มิฉะนั้นจะเล่นท่าเดิมต่อเมื่อเกิดใหม่
+    if(!p.al||p.dn||o.posePath!==undefined&&o.posePath!==posePath||p.st&&!o.poseStunned)clearCharacterCast(o);
+    o.posePath=posePath;o.poseStunned=!!p.st;
     const g=o.g;
     g.visible=p.al&&!(p.iv&&!p.ds&&!(p.fr&&(p.fr[3]&2))&&Math.floor(now/80)%2===0);
     // ผี (หาลอร์ดโวลเดอมอร์): คนเป็นมองไม่เห็นผี / ผีเห็นกันเป็นเงาจางๆ
@@ -174,6 +217,7 @@ function syncPlayers(P,mode,now,dt){
       if(p.dn){o.b.rotation.x=-1.4;o.b.position.y=0.4;}
       else{o.b.rotation.x=p.ds?0.4:Math.min(0.12,v.sp*0.01);o.b.position.y=Math.abs(Math.cos(o.walk))*0.05*Math.min(1,v.sp/5);}
       o.legs[0].rotation.x=sw*0.75;o.legs[1].rotation.x=-sw*0.75;
+      o.legs[0].rotation.z=o.legs[1].rotation.z=0;
       o.armL.rotation.x=-sw*0.55;o.armL.rotation.z=0.15;
       o.armR.rotation.x=o.cpT>0?-0.35+sw*0.4:lerp(-0.35+sw*0.4,-1.55,ck);o.armR.rotation.z=-0.12;o.b.rotation.y=0;
     }
@@ -208,6 +252,7 @@ function syncPlayers(P,mode,now,dt){
     earthFX(o,p,pz,now,dt);
     windFX(o,p,pz,now,dt);waterFX(o,p,pz,now,dt);
     lateSkillPose(o,p,dt,now);
+    waterCharacterPose(o,p,dt,now);windCharacterPose(o,p,dt,now);
     if(o.rig)rigSync(o,dt);
     if(ragTick(o,p,v,dt,now))o.tip.scale.setScalar(0.001);   // ล้ม/กระแทกแรง = ragdoll (js/48)
     if(p.bn&&Math.random()<0.7)burst(p.x,p.y,'#ff6a2a',1,30,0.45,3.5,{h:pz+rnd(0.3,1.8),vh:[1,2.5],g:-1});

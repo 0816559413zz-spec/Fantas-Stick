@@ -8,26 +8,59 @@
 //  ของที่ใช้อุ่นเก็บไว้ใน hold ตลอด และวัสดุของมัน "ไม่ dispose" — three.js ลบ shader program ทิ้งเมื่อวัสดุสุดท้ายที่ใช้มันถูก dispose
 //  (ไม่งั้นทุกครั้งที่เอฟเฟกต์จบแล้วกดใหม่ จะ compile ใหม่อีก) • ฝั่ง client ล้วน ไม่เปลี่ยนโปรโตคอล
 // =====================================================================
-const WARM={reg:{},done:new Set(),hold:new THREE.Group(),holdF:new THREE.Group(),key:'',q:[],late:false,busy:false,log:[]};
-const WARM_FXDIR={pyro:'fire',frost:'frost',storm:'storm',earth:'earth',wind:'wind',water:'water'}   // storm เพิ่ม 2026-11-02 (เดิมขาด → เอฟเฟกต์สายฟ้า compile กลางไฟต์),WARM_COMMON=['tpl','sig','rec'];
+const WARM={reg:{},done:new Set(),prepared:new Set(),hold:new THREE.Group(),holdF:new THREE.Group(),rt:null,key:'',q:[],late:false,busy:false,log:[]};
+const WARM_FXDIR={pyro:'fire',frost:'frost',storm:'storm',earth:'earth',wind:'wind',water:'water'},WARM_COMMON=['tpl','sig','rec'];   // storm เพิ่ม 2026-11-02 (เดิมขาด → เอฟเฟกต์สายฟ้า compile กลางไฟต์)
 const WARM_X=-20000,WARM_Y=-20000;   // นอกแผนที่ ~1 กม. (หมอก/ระยะกล้องซ่อนหมด, ไม่มีเสียงเพราะ nearMe)
 // ย้ายของไป hold ของ scene เดิม (fxScene ไม่มีไฟ → program คนละแบบกับ scene) • วัสดุ dispose = ไม่ทำอะไร • อัปโหลด texture ไว้เลย
 function warmKeep(o,fxs){(o.parent||scene).remove(o);(fxs?WARM.holdF:WARM.hold).add(o);
   o.traverse(q=>{if(!q.material)return;for(const m of [].concat(q.material)){if(!m||m.userData.warm)continue;m.userData.warm=1;m.dispose=()=>{};
     for(const k in m){const v=m[k];if(v&&v.isTexture&&v.image)try{gl.initTexture(v);}catch(e){}}
     if(m.uniforms)for(const k in m.uniforms){const v=m.uniforms[k]&&m.uniforms[k].value;if(v&&v.isTexture&&v.image)try{gl.initTexture(v);}catch(e){}}}});}
+// บ้านไกลถูก syncBld สร้างเมื่อกล้องเข้าใกล้ จึงอาจไม่มีอยู่ตอน compile ฉากรอบแรก
+// อุ่นต้นแบบจากไฟล์ทันทีที่โหลดเสร็จ โดยไม่สร้างบ้านจริงทุกหลังหรือเปิดเงาที่ซ่อนอยู่
+function warmStaticModels(names){for(const name of new Set(names.filter(Boolean))){
+  const key='model:'+name;if(WARM.done.has(key))continue;WARM.done.add(key);
+  loadModel(name).then(r=>{if(!r)return;const o=r.scene.clone(true);o.position.set(tx(WARM_X),-1000,tz(WARM_Y));warmKeep(o);
+    if(!WARM.q.includes('compile'))WARM.q.push('compile');
+  }).catch(e=>console.warn('warm model',name,e));
+}}
 // compile ลง render target ของ composer — เกมวาดผ่าน RT (srgb-linear, ไม่ tone map) ไม่ใช่ลงจอตรง
 // (compile ตอน RT = null ได้ program อีกแบบ (srgb + ACES) ที่เกมไม่ได้ใช้ → ยังกระตุกตอนใช้จริงอยู่ดี)
 function warmCompile(scenes){const prev=gl.getRenderTarget();gl.setRenderTarget(composer.renderTarget1);
   try{return scenes.map(sc=>gl.compileAsync(sc,cam));}finally{gl.setRenderTarget(prev);}}
+// compile อย่างเดียวไม่ส่ง vertex/index buffer ขึ้น GPU: วาดลงภาพเล็กที่ไม่แสดงไว้ด้วย
+function warmDraw(){
+  WARM.rt=WARM.rt||new THREE.WebGLRenderTarget(32,32,{type:composer.renderTarget1.texture.type,colorSpace:composer.renderTarget1.texture.colorSpace});
+  const prev=gl.getRenderTarget(),hidden=[],culled=[],auto=gl.shadowMap.autoUpdate,needs=gl.shadowMap.needsUpdate;
+  scene.add(WARM.hold);fxScene.add(WARM.holdF);
+  for(const sc of [scene,fxScene])sc.traverse(o=>{if(!o.visible&&!o.isLight){hidden.push(o);o.visible=true;}});
+  for(const root of [WARM.hold,WARM.holdF])root.traverse(o=>{if(o.isMesh||o.isPoints){culled.push([o,o.frustumCulled]);o.frustumCulled=false;}});
+  try{gl.shadowMap.autoUpdate=false;gl.shadowMap.needsUpdate=false;gl.setRenderTarget(WARM.rt);gl.render(scene,cam);gl.render(fxScene,cam);}
+  finally{gl.setRenderTarget(prev);gl.shadowMap.autoUpdate=auto;gl.shadowMap.needsUpdate=needs;for(const o of hidden)o.visible=false;for(const [o,c] of culled)o.frustumCulled=c;scene.remove(WARM.hold);fxScene.remove(WARM.holdF);}
+}
 // ไฟล์เอฟเฟกต์: สร้างทุกชั้นพร้อมกัน → ของที่สร้างย้ายไป hold แล้วตัดออกจาก instance (fxKill จะได้ไม่ลบทิ้ง)
 const WARM_SKIP=new Set(['sound','screen','light','code','use']);
+// fetch FX/โมเดล/ภาพให้ครบก่อนสร้างตัวอย่าง มิฉะนั้นคิวที่เริ่มเร็วจะจบด้วย fx:<สาย> 0ms
+// แล้วถูกทำเครื่องหมาย done ทั้งที่ยังไม่มีชั้นใดถูกเตรียมเลย
+async function warmAssets(dirs){
+  const names=Object.keys(FXR.index.fx).filter(n=>dirs.includes(n.split('/')[0]));
+  const data=await Promise.all(names.map(n=>fxLoad(n))),jobs=[];
+  for(const d of data)for(const L of d&&d.layers||[]){
+    if(L.model&&((L.t==='mesh'&&L.shape==='model')||(L.t==='emit'&&L.look==='model')))jobs.push(fxMeshLoad(L.model));
+    if(L.t==='mesh'&&L.shape==='glb'&&L.glb)jobs.push(loadModel(L.glb));
+    for(const n of [L.tex,L.fb])if(typeof n==='string'&&n.startsWith('tex/'))jobs.push(fxTexLoad(n));
+  }
+  await Promise.all(jobs);
+}
 function warmFx(dirs){const out=[];if(!FXR.ready)return out;const p0=PARTS.length;
   for(const n in FXR.index.fx){if(!dirs.includes(n.split('/')[0]))continue;const d=fxData(n);if(!d)continue;
     const I=fxStart(d,{x:WARM_X,y:WARM_Y,h:0,gh:0},n);if(!I)continue;
     for(const S of I.L){const L=S.d;if(WARM_SKIP.has(L.t)){S.st=2;continue;}
       S.st=1;S.life=Math.max(0.02,fxV(fxG(L,'life'),I,0));S.age=0;S.dt=1/60;
-      try{fxSpawn(S,I,fxPos(I,S,0));}catch(e){S.st=2;}}
+      try{fxSpawn(S,I,fxPos(I,S,0));
+        // emit แบบ rate ไม่มี burst: ยังไม่เกิดเม็ดตอนเริ่ม จึงต้องเตรียมวัสดุ instanced ไว้เอง
+        if(L.t==='emit'&&fxG(L,'look')==='model'){const c=fxCol(fxG(L,'col'),I),c2=fxCol(fxG(L,'c2'),I);fxMPGroup(fxG(L,'model'),fxG(L,'mmat'),c,c2||c);}
+      }catch(e){S.st=2;}}
     out.push(I);}
   PARTS.length=Math.min(PARTS.length,p0);return out;}
 function warmFxEnd(fxI){for(const I of fxI){for(const S of I.L){if(S.d.t==='trail'&&S.obj)trailStop(S.obj);S.obj=null;S.mats=null;}fxKill(I);}}
@@ -39,12 +72,22 @@ function warmPaths(v){const s=new Set();for(const p of (v&&v.P)||[]){const k=get
 function warmStep(step){
   if(step==='compile'){WARM.busy=true;scene.add(WARM.hold);fxScene.add(WARM.holdF);const t0=performance.now(),hid=[];
     for(const sc of [scene,fxScene])sc.traverse(o=>{if(!o.visible&&!o.isLight){o.visible=true;hid.push(o);}});   // ไฟที่ซ่อนอยู่ห้ามเปิด (จำนวนไฟเปลี่ยน = เชดเดอร์คนละชุดกับตอนเล่นจริง) • ของซ่อน (ระบบอนุภาค/ของรอใช้) — compile ปกติข้ามไป
-    const fin=()=>{WARM.busy=false;WARM.log.push('compile '+(performance.now()-t0).toFixed(0)+'ms');};let ps=[];
+    const fin=()=>{try{warmDraw();}catch(e){console.warn('warm draw',e);}WARM.busy=false;WARM.log.push('compile/upload '+(performance.now()-t0).toFixed(0)+'ms');};let ps=[];
     // compileAsync สร้าง program ทันที (ส่วน async แค่รอ GPU) → คืนค่า visible + เอา hold ออกได้เลย ไม่มีเฟรมไหนวาดของพวกนี้
     try{ps=warmCompile([scene,fxScene]);}finally{for(const o of hid)o.visible=false;scene.remove(WARM.hold);fxScene.remove(WARM.holdF);}
     Promise.race([Promise.all(ps),new Promise(r=>setTimeout(r,4000))]).then(fin,fin);return;}
-  if(WARM.done.has(step))return;WARM.done.add(step);const t0=performance.now();
-  if(step==='common'){const T=trailLayer();if(!T.mesh.parent)WARM.holdF.add(T.mesh);const fxI=warmFx(WARM_COMMON);warmGather();warmFxEnd(fxI);}
+  if(WARM.done.has(step))return;
+  if((step==='common'||step.startsWith('fx:'))&&!WARM.prepared.has(step)){
+    if(!FXR.ready){WARM.q.unshift(step);return;}
+    WARM.busy=true;
+    const finish=()=>{WARM.prepared.add(step);WARM.q.unshift(step);WARM.busy=false;};
+    warmAssets(step==='common'?WARM_COMMON:[WARM_FXDIR[step.slice(3)]]).then(finish,e=>{console.warn('warm assets',step,e);finish();});return;
+  }
+  WARM.done.add(step);const t0=performance.now();
+  if(step==='common'){const T=trailLayer();if(!T.mesh.parent)WARM.holdF.add(T.mesh);
+    // เศษหินใช้ได้ทุกสาย (ไฟ/ของพังด้วย) ทั้ง mesh เดี่ยวและ instanced ไม่ใช่เฉพาะ Earth
+    for(const o of [new THREE.Mesh(_rockGeo,_rockMat()),new THREE.InstancedMesh(_rockGeo,_rockMat(),1)]){o.position.set(tx(WARM_X),-1000,tz(WARM_Y));warmKeep(o);}
+    const fxI=warmFx(WARM_COMMON);warmGather();warmFxEnd(fxI);}
   else if(step.startsWith('fx:')){const fxI=warmFx([WARM_FXDIR[step.slice(3)]]);warmGather();warmFxEnd(fxI);}
   else if(step.startsWith('reg:')){const [,id,i]=step.split(':'),f=WARM.reg[id][+i];
     for(const o of [].concat(f()||[]))if(o&&o.isObject3D){if(!o.parent)scene.add(o);o.position.set(tx(WARM_X),0,tz(WARM_Y));}

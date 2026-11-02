@@ -4,6 +4,24 @@
 //  เรียกจาก: efxFX (js/25, z ขึ้นต้น 'wn') • syncPlayers (js/35 windFX) • render loop (js/37 syncWind)
 // =====================================================================
 const WV={st:new Map(),wl:new Map(),vo:new Map()};
+const WN_BODY={charge:[-0.7,-0.3,-0.12,0.3,-0.7,0.3,0,-0.2],dash:[0.65,-0.2,0,0.68,0.8,0.3,0,-0.05],hover:[-1.0,-0.35,0,-0.08,-0.75,0.45,0,-0.03]},WN_AIR_FEET=[-0.45,0.25,0.12,-0.12];
+WN_BODY.wallAim=[-1.55,-0.08,0.1,0.08,-1.2,0.35,0,-0.04];WN_BODY.gather=[-1.8,-0.45,-0.15,-0.08,-1.35,0.45,0,-0.08];WN_BODY.shieldCharge=[-1.2,0.6,0,0.2,-1.2,-0.6,0,-0.18];
+function windCharacterPose(o,p,dt,now){
+  const A=p.wn;if(!A||!p.al||p.dn||p.fl||p.st){o.wnPose=null;return;}
+  let s=o.wnPose;if(!s)s=o.wnPose={phase:0,t:0,w:0,P:WN_BODY.hover.slice(),hover:0};
+  if(A[6]){
+    if(s.phase!==A[6]){s.phase=A[6];s.t=0;}s.t+=dt;s.w=Math.min(1,s.w+dt*14);
+    const target=A[6]===1?WN_BODY.charge:WN_BODY.dash;for(let i=0;i<8;i++)s.P[i]=target[i];
+    characterStance(o,s.P,WN_AIR_FEET,s.w);return;
+  }
+  if(s.phase){s.phase=0;s.t=0;}
+  if(s.w>0){s.t+=dt;s.w=Math.max(0,1-_cs(Math.min(1,s.t/0.35)));if(!p.sh&&!o.caN&&!(o.cpT>0))characterStance(o,s.P,p.wv>1?null:WN_AIR_FEET,s.w);}
+  const idle=A[5]===1&&!p.sh&&!o.caN&&!(o.cpT>0);s.hover+=((idle?1:0)-s.hover)*(1-Math.exp(-10*dt));
+  if(idle){for(let i=0;i<8;i++)s.P[i]=WN_BODY.hover[i];s.P[6]=Math.sin(now/600)*0.025;characterStance(o,s.P,WN_AIR_FEET,s.hover*0.8);}
+  if(A[4])characterStance(o,WN_BODY.shieldCharge,p.wv>1?null:WN_AIR_FEET,0.9);
+  else if(A[3]&&!o.caN)characterStance(o,WN_BODY.wallAim,p.wv>1?null:WN_AIR_FEET,0.8);
+  else if(A[1]&&!o.caN&&!p.sh)characterStance(o,WN_BODY.gather,p.wv>1?null:WN_AIR_FEET,0.8);
+}
 const wvState=id=>{let s=WV.st.get(id);if(!s){s={};WV.st.set(id,s);}return s;};
 const wvAlive=I=>!!I&&FXR.inst.indexOf(I)>=0;
 // ---------- ทุกเฟรมของผู้เล่นสายลม: ปีกติดหลัง / ปีกห่อตอนยกโล่ / ดูดลมชาร์จเกจ ----------
