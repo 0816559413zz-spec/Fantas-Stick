@@ -145,12 +145,24 @@ function Seed(){const g=new T.Group();add(g);mesh(new T.SphereGeometry(.13,12,10
     const s=g.position.clone();tr.push([s.clone().add(V3(0,.05,0)),s.clone().add(V3(0,-.05,0))]);}};}
 function sprout(p,n=1){dirt(p,14*n,3.2);leaves(p,10*n,3);sparks(p.clone().add(V3(0,.3,0)),16*n,3.5,'#fff7b0','#8ee05a');}
 // ---------- พืชป้อมยิง (ต้นกล้าฝักยิงหนาม) ----------
-function Turret(){const g=new T.Group();add(g);const base=new T.Group();g.add(base);
-  const mound=mesh(new T.SphereGeometry(.42,16,8,0,Math.PI*2,0,Math.PI/2),M.dirt,base);mound.scale.y=.35;
-  for(let i=0;i<5;i++){const l=mesh(leafGeo,M.leafD,base);l.scale.set(.75,1,.75);l.rotation.set(-Math.PI/2+.35,i/5*Math.PI*2,0);l.position.set(Math.sin(i/5*6.28)*.18,.08,Math.cos(i/5*6.28)*.18);l.rotation.order='YXZ';l.rotation.y=i/5*Math.PI*2+Math.PI/2;}
+function Turret(wall=false){const g=new T.Group();add(g);const base=new T.Group();g.add(base);
+  // รากเกาะพื้นผิวโดยตรง ทั้งพื้นและผนัง ไม่สร้างก้อนดิน
+  for(let i=0;i<5;i++){const a=i/5*Math.PI*2,r=new T.Vector3(Math.cos(a),0,Math.sin(a));
+    const c=new T.CatmullRomCurve3([V3(0,.06,0),r.clone().multiplyScalar(.18).add(V3(0,.04,0)),r.clone().multiplyScalar(.43).add(V3(0,.015,0))]);mesh(new T.TubeGeometry(c,8,.025,5,false),M.stem,base);}
+  // ใบโคนทรงยาวปลายเรียว โค้งขึ้นเล็กน้อยและมีเส้นกลางใบ แทนแผ่นเหลี่ยมรูปดาว
+  const lp=[],li=[];for(let i=0;i<=16;i++){const u=i/16,w=.20*Math.sin(Math.PI*u)**.9,y=.025+.11*Math.sin(Math.PI*u),z=.72*u;lp.push(-w,y,z,0,y+.035*Math.sin(Math.PI*u),z,w,y,z);if(i<16){const a=i*3,b=a+3;li.push(a,b,a+1,a+1,b,b+1,a+1,b+1,a+2,a+2,b+1,b+2);}}
+  const leafBaseGeo=new T.BufferGeometry();leafBaseGeo.setAttribute('position',new T.Float32BufferAttribute(lp,3));leafBaseGeo.setIndex(li);leafBaseGeo.computeVertexNormals();
+  for(let i=0;i<5;i++){const group=new T.Group();group.rotation.y=i/5*Math.PI*2;group.scale.setScalar(i%2?.82:1);base.add(group);mesh(leafBaseGeo,i%2?M.leafD:M.leaf,group);
+    const mid=new T.CatmullRomCurve3([V3(0,.03,0),V3(0,.16,.34),V3(0,.04,.69)]);mesh(new T.TubeGeometry(mid,8,.008,5),M.stem,group);}
+  const wallRoots=new T.Group();g.add(wallRoots);wallRoots.visible=wall;base.visible=!wall;
+  const wallLeaves=base.clone();wallLeaves.visible=wall;wallLeaves.rotation.z=-Math.PI/2;wallLeaves.position.x=.025;g.add(wallLeaves);
+  if(wall)for(let i=0;i<7;i++){const a=i/7*Math.PI*2,dy=Math.sin(a),dz=Math.cos(a),c=new T.CatmullRomCurve3([V3(.018,0,0),V3(.018,dy*.22,dz*.22),V3(.018,dy*.48,dz*.48)]);mesh(new T.TubeGeometry(c,8,.025,5,false),M.stem,wallRoots);}
   const stemC=new T.CatmullRomCurve3([V3(0,0,0),V3(0,.35,-.05),V3(0,.7,.02),V3(0,.95,0)]);
-  const stem=mesh(new T.TubeGeometry(stemC,12,.055,7),M.stem,g);
-  const head=new T.Group();head.position.y=.95;g.add(head);
+  const body=new T.Group();g.add(body);body.rotation.z=wall?-.23:0;
+  const stem=mesh(new T.TubeGeometry(stemC,16,.085,9),M.stem,body);stem.position.x=wall?.12:0;
+  for(let i=0;i<2;i++){const s=i?1:-1,l=mesh(leafGeo,i?M.leaf:M.leafD,stem);l.position.set(s*.16,.30+i*.27,.01);l.rotation.z=s*.6;l.scale.set(.60,.85,.6);}
+  for(let j=0;j<2;j++){const points=[];for(let i=0;i<=24;i++){const u=i/24,a=u*Math.PI*2+j*Math.PI;points.push(V3(Math.cos(a)*.087,u*.88,Math.sin(a)*.087-.02));}mesh(new T.TubeGeometry(new T.CatmullRomCurve3(points),24,.012,5),M.leafD,stem);}
+  const head=new T.Group();head.position.set(wall?.12:0,.95,0);body.add(head);
   // ฝักทรงหยดน้ำ (lathe) หัวชี้ไปข้างหน้า (+z)
   const prof=[];for(let i=0;i<=14;i++){const u=i/14;prof.push(new T.Vector2(Math.sin(Math.PI*Math.pow(u,.8))*.26*(1-.55*u)+.0001,u*.72-.25));}
   const podG=new T.LatheGeometry(prof,16);podG.rotateX(Math.PI/2);const pod=mesh(podG,M.pod,head);
@@ -158,8 +170,8 @@ function Turret(){const g=new T.Group();add(g);const base=new T.Group();g.add(ba
   const noz=mesh(new T.CylinderGeometry(.07,.1,.14,10,1,true),M.podDark,head);noz.rotation.x=Math.PI/2;noz.position.z=.5;
   const tipG=glow(GLOWG,.45,head);tipG.position.z=.56;
   const wings=[];for(const s of [-1,1]){const w=mesh(leafGeo,M.leaf,head);w.scale.set(1.25,1.6,1.25);w.rotation.order='YXZ';w.position.set(s*.2,.02,-.05);wings.push({w,s});}
-  g.scale.setScalar(.001);const SC=1.45;
-  return {g,head,pod,tipG,wings,stem,grow(k){const e=k<.7?outQ(k/.7)*1.15:lerp(1.15,1,(k-.7)/.3);g.scale.setScalar(Math.max(.001,e*SC));},
+  g.scale.setScalar(1.45);
+  return {g,head,pod,tipG,wings,stem,grow(k){const rise=ease(phase(k,0,.8)),open=ease(phase(k,.25,1)),root=ease(phase(k,0,.5));g.visible=k>0;stem.scale.y=Math.max(.001,rise);head.position.y=.95*rise;head.scale.setScalar(Math.max(.001,open*1.3));base.scale.setScalar(Math.max(.001,root));wallRoots.scale.setScalar(Math.max(.001,root));wallLeaves.scale.setScalar(Math.max(.001,root));},
     pose(t,aimYaw,recoil,wall){head.rotation.set(-.1+Math.sin(t*2)*.04,aimYaw,0);pod.scale.set(1+recoil*.25,1+recoil*.25,1-recoil*.3);head.position.z=-recoil*.08;
       wings.forEach(({w,s},i)=>{w.rotation.set(.2+Math.sin(t*6+i)*.12,s*1.05,s*(.5+Math.sin(t*5+i*2)*.15));});tipG.scale.setScalar(.45+recoil*.6);}};}
 // กระสุนหนามของป้อม
@@ -293,21 +305,20 @@ SKS.shield={dur:3.4,still:1.7,setup(){const me=pup('3.1.0.2.1.0.0.1.0.0',0,0,0),
 SKS.turret={dur:5.2,still:3.75,setup(){const me=pup('3.1.0.2.1.0.0.1.0.0',0,0,0),foe=pup('1.3.2.0.0.2.1.0.0.0',9,-5,-Math.PI*.7,'enemy');
     cam.p.copy(W(.5,-1.2,3.4));cam.l.copy(W(6.5,1.2,1));
     const wall=mesh(new T.BoxGeometry(.6,3.2,4),M.stone);wall.position.copy(W(6.5,3.6,1.6));wall.receiveShadow=true;
-    const t1=Turret(),t2=Turret(),s1=Seed(),s2=Seed(),SP=Spikes();t1.g.position.copy(W(5,-.6,0));
+    const t1=Turret(),t2=Turret(true),s1=Seed(),s2=Seed(),SP=Spikes();t1.g.position.copy(W(5,-.6,0));
     t2.g.position.copy(W(6.5,3.3,1.7));t2.g.rotation.set(0,0,0);t2.g.rotation.order='YXZ';
     return (t,dt)=>{idle(foe,t);idle(me,t);
       const th1=phase(t,.05,.35),th2=phase(t,2.1,2.4);me.armR.rotation.set(-.4-1.6*Math.sin(Math.PI*Math.max(th1,th2)),0,0);
       s1.fly(tipW(me),t1.g.position,phase(t,.3,.85));s2.fly(tipW(me),W(6.5,3.3,1.7),phase(t,2.35,2.85),1.4);
-      if(t>=.85&&!this.a){this.a=1;sprout(t1.g.position);}if(t>=2.85&&!this.b){this.b=1;sprout(W(6.3,3.3,1.7));}
       t1.grow(phase(t,.85,1.35));t2.grow(phase(t,2.85,3.35));
-      // ป้อมบนกำแพง: ฐานแปะข้างกำแพง ลำต้นยื่นออกแนวนอน
-      t2.g.rotation.set(0,-Math.PI/2,Math.PI/2);
+      // รากยึดผนัง ลำต้นตั้งขึ้นในแนวโลก
+      t2.g.rotation.set(0,0,0);
       const ft=chestW(foe);for(const [k,tu,t0] of [[0,t1,1.4],[1,t2,3.4]]){if(t<t0){tu.pose(t,0,0);continue;}
         tu.head.updateMatrixWorld(true);const hp=tu.head.getWorldPosition(V3()),loc=tu.g.worldToLocal(ft.clone()),hl=tu.g.worldToLocal(hp.clone());
         const yaw=Math.atan2(loc.x-hl.x,loc.z-hl.z),st=(t-t0)%.7,rc=Math.max(0,1-st/.18);tu.pose(t,yaw,rc);
         const n=Math.floor((t-t0)/.7);if(n!==tu.n){tu.n=n;const nz=tu.head.localToWorld(V3(0,0,.55));SP.shoot(nz,ft.clone().add(V3(rnd(-.2,.2),rnd(-.2,.2),0)));sparks(nz,6,2,'#f4ffb0','#7ee05a');}}
       SP.upd(dt);
-      label=t<2.1?'พืชป้อมยิง · โยนเมล็ด (ไกล 15 ม.) → งอกทันที → ยิงหนามหาศัตรูใกล้สุด 5 ดาเมจ ทุก 0.7 วิ ระยะ 20 ม.':'พืชป้อมยิง · ต้นที่ 2 ติดกำแพงเรียบได้ (งอกออกข้างกำแพง) · วางได้สูงสุด 2 ต้น 60 HP อยู่ 20 วิ';};}};
+      label=t<2.1?'พืชป้อมยิง · โยนเมล็ด (ไกล 15 ม.) → งอกทันที → ยิงหนามหาศัตรูใกล้สุด 5 ดาเมจ ทุก 0.7 วิ ระยะ 20 ม.':'พืชป้อมยิง · รากเกาะกำแพง ลำต้นตั้งขึ้น · วางได้สูงสุด 2 ต้น 60 HP อยู่ 20 วิ';};}};
 // 5) ดอกบัว — ต้นใหญ่ 100 HP วง 8 ม. ฮีล 5/วิ • บัฟยิงเร็ว 4 วิ หลังปลูก • สปอร์ทุก 5 วิ ลอยข้างไหล่ → แส้โดน = สปอร์บินไประเบิดพิษ
 SKS.lotus={dur:6.0,still:2.6,setup(){const me=pup('3.1.0.2.1.0.0.1.0.0',0,0,0),foe=pup('1.3.2.0.0.2.1.0.0.0',4.8,2.4,Math.PI*.95,'enemy'),tu=Turret();tu.g.position.copy(W(2.2,-3.2,0));tu.grow(1);
     cam.p.copy(W(-4.2,-6.8,5.2));cam.l.copy(W(3.2,-2,1));
