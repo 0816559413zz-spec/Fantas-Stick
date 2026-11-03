@@ -185,20 +185,65 @@ function Spikes(){const L=[],geo=new T.ConeGeometry(.045,.42,6);geo.rotateX(Math
       if(s.t>=1&&!s.done){s.done=1;s.m.visible=false;sparks(s.b,14,3,'#f4ffb0','#6ed04a');leaves(s.b,4,2);}
       if(s.t>1.6){S.remove(s.m);S.remove(s.tr);L.splice(i,1);}}}};}
 // ---------- ดอกบัว ----------
-function Lotus(scale=1){const g=new T.Group();add(g);
-  const pads=[];for(let i=0;i<4;i++){const p=mesh(new T.CircleGeometry(.55,24,.3,Math.PI*2-.6),M.leafD,g);p.rotation.x=-Math.PI/2;p.rotation.z=i*1.6;p.position.set(Math.sin(i*1.6)*.6,.05,Math.cos(i*1.6)*.6);pads.push(p);}
-  const stemC=new T.CatmullRomCurve3([V3(0,0,0),V3(.08,.8,0),V3(-.05,1.6,.03),V3(0,2.3,0)]);
-  const stem=mesh(new T.TubeGeometry(stemC,16,.11,8),M.stem,g);
-  const bloom=new T.Group();bloom.position.y=2.3;g.add(bloom);
-  const cup=mesh(new T.SphereGeometry(.32,16,10,0,Math.PI*2,Math.PI/2,Math.PI/2),M.stem,bloom);cup.scale.y=.5;
-  const petG=new T.SphereGeometry(.5,12,10);petG.translate(0,.5,0);petG.scale(.42,1,.13);
+// ต้นบัว (ผู้ใช้ 2026-11-04, ref designs/nature_ref/lotus_ref.png): ต้นไม้สีเขียวสูง ~3.5 ม. ยอดเป็นดอกบัวชมพู แกนเหลืองเรือง
+// อยู่ในฟองแก้วเรืองแสงสีเขียว หยดน้ำเขียวไหลจากใต้ฟองลงตามลำต้น → แอ่งเรืองแสงที่โคน
+// วงออร่าต้นบัว (ผู้ใช้ 2026-11-04 "aura or circle make it alot better"): วาดลง canvas — พื้นไล่สีเขียวจางจากขอบ,
+// ขอบเถาวัลย์คู่เรืองแสง, ใบไม้+กลีบบัวชมพูเรียงรอบขอบ, วงลวดลายด้านในหมุนสวน, จุดเกสรทอง
+function auraTex(kind){const N=1024,c=document.createElement('canvas');c.width=c.height=N;const x=c.getContext('2d'),C=N/2;
+  if(kind==='base'){const g=x.createRadialGradient(C,C,0,C,C,C);g.addColorStop(0,'rgba(70,200,100,.0)');g.addColorStop(.5,'rgba(70,200,100,.12)');g.addColorStop(.88,'rgba(50,185,85,.38)');g.addColorStop(.965,'rgba(40,160,70,.6)');g.addColorStop(1,'rgba(0,0,0,0)');x.fillStyle=g;x.fillRect(0,0,N,N);
+    x.lineCap='round';for(const [r,w,a,cl] of [[.955,12,.95,'30,130,55'],[.955,5,1,'200,255,170'],[.925,4,.85,'40,150,60']]){x.strokeStyle=`rgba(${cl},${a})`;x.lineWidth=w;x.beginPath();for(let i=0;i<=360;i++){const t=i/360*Math.PI*2,rr=(r+.008*Math.sin(t*24))*C;i?x.lineTo(C+Math.cos(t)*rr,C+Math.sin(t)*rr):x.moveTo(C+Math.cos(t)*rr,C+Math.sin(t)*rr);}x.stroke();}
+    const leaf=(t,r,L,W,col)=>{x.save();x.translate(C+Math.cos(t)*r*C,C+Math.sin(t)*r*C);x.rotate(t);x.fillStyle=col;x.beginPath();x.moveTo(0,0);x.quadraticCurveTo(L*.5,-W,L,0);x.quadraticCurveTo(L*.5,W,0,0);x.fill();x.restore();};
+    for(let i=0;i<28;i++){const t=i/28*Math.PI*2;leaf(t+.06,.935,-46,13,'rgba(150,255,120,.85)');leaf(t-.06,.935,-40,11,'rgba(90,210,90,.8)');}
+    for(let i=0;i<8;i++){const t=i/8*Math.PI*2+.2;for(let k=-2;k<=2;k++)leaf(t+k*.05,.9,-60+Math.abs(k)*10,16,`rgba(255,${150+Math.abs(k)*25},210,.9)`);x.fillStyle='rgba(255,220,90,1)';x.beginPath();x.arc(C+Math.cos(t)*.9*C,C+Math.sin(t)*.9*C,7,0,7);x.fill();}
+  }else{x.strokeStyle='rgba(40,150,60,.85)';x.lineWidth=5;x.setLineDash([26,14]);x.beginPath();x.arc(C,C,.62*C,0,7);x.stroke();x.setLineDash([]);x.lineWidth=2;x.beginPath();x.arc(C,C,.66*C,0,7);x.stroke();
+    for(let i=0;i<16;i++){const t=i/16*Math.PI*2;x.save();x.translate(C+Math.cos(t)*.64*C,C+Math.sin(t)*.64*C);x.rotate(t+Math.PI/2);x.strokeStyle='rgba(40,150,60,.9)';x.lineWidth=4;x.beginPath();x.moveTo(-10,0);x.quadraticCurveTo(0,-16,10,0);x.quadraticCurveTo(0,16,-10,0);x.stroke();x.restore();}
+    for(let i=0;i<40;i++){const t=Math.random()*7,r=(.3+Math.random()*.6)*C;x.fillStyle='rgba(255,240,150,.8)';x.beginPath();x.arc(C+Math.cos(t)*r,C+Math.sin(t)*r,2+Math.random()*3,0,7);x.fill();}}
+  const tx=new T.CanvasTexture(c);tx.colorSpace=T.SRGBColorSpace;return tx;}
+function LotusAura(R){const g=new T.Group();add(g);const mk=(tex,r,y)=>{const m=new T.Mesh(new T.PlaneGeometry(r*2,r*2),new T.MeshBasicMaterial({map:tex,transparent:true,depthWrite:false}));m.rotation.x=-Math.PI/2;m.position.y=y;g.add(m);return m;};
+  const base=mk(auraTex('base'),R,.03),inner=mk(auraTex('inner'),R,.04);
+  const wall=new T.Mesh(new T.CylinderGeometry(R*.97,R*.97,.7,64,1,true),new T.MeshBasicMaterial({map:glowWallTex(),transparent:true,depthWrite:false,blending:T.AdditiveBlending,side:T.DoubleSide,color:'#8cff8a'}));wall.position.y=.35;g.add(wall);
+  return {g,set(k,t){g.scale.setScalar(Math.max(.001,k));base.rotation.z=t*.05;inner.rotation.z=-t*.15;inner.material.opacity=.7+.3*Math.sin(t*2);wall.material.opacity=(.35+.15*Math.sin(t*3))*k;}};}
+function glowWallTex(){const c=document.createElement('canvas');c.width=4;c.height=64;const x=c.getContext('2d'),g=x.createLinearGradient(0,64,0,0);g.addColorStop(0,'rgba(255,255,255,.9)');g.addColorStop(1,'rgba(255,255,255,0)');x.fillStyle=g;x.fillRect(0,0,4,64);return new T.CanvasTexture(c);}
+const M_BUB=new T.MeshPhysicalMaterial({color:'#9dffc0',emissive:'#1f8a4a',emissiveIntensity:.35,roughness:.05,transmission:0,transparent:true,opacity:.14,side:T.DoubleSide,depthWrite:false});
+const M_BUBRIM=new T.MeshBasicMaterial({color:'#7dffa8',transparent:true,opacity:.22,blending:T.AdditiveBlending,depthWrite:false,side:T.BackSide});
+const M_DRIP=STD('#7dffb0',{roughness:.15,emissive:'#20c060',emissiveIntensity:.8,transparent:true,opacity:.85});
+const M_POOL=new T.MeshBasicMaterial({color:'#4dff90',transparent:true,opacity:.35,blending:T.AdditiveBlending,depthWrite:false});
+for(const m of [M_BUB,M_BUBRIM,M_DRIP,M_POOL])m.userData.keep=true;
+function Lotus(scale=1){const g=new T.Group();add(g);const H=4.2;   // ผู้ใช้: ลำต้นยาวขึ้นอีกหน่อย (เดิม 3.3)
+  // ลำต้นโค้งนิด ๆ + ใบใหญ่ที่โคน + เถาพันแนบลำต้น (สไตล์เดียวกับต้นยิง)
+  const stemC=new T.CatmullRomCurve3([V3(0,0,0),V3(.18,1.3,0),V3(-.12,2.7,.05),V3(0,H,0)]);
+  const stem=mesh(new T.TubeGeometry(stemC,24,.16,10),M.stem,g);
+  const tr=mesh(new T.CylinderGeometry(.16,.42,.7,12),M.stem,g);tr.position.y=.3;
+  // รากใหญ่แผ่บนพื้น 7 เส้น (ผู้ใช้: root bigger)
+  for(let i=0;i<7;i++){const a=i/7*Math.PI*2+.2,L=1.3+(i%3)*.35,c=new T.CatmullRomCurve3([V3(0,.45,0),V3(Math.cos(a)*.4,.18,Math.sin(a)*.4),V3(Math.cos(a+.2)*L*.7,.06,Math.sin(a+.2)*L*.7),V3(Math.cos(a+.3)*L,.02,Math.sin(a+.3)*L)]);
+    const rt=new T.TubeGeometry(c,16,.11,7);mesh(rt,M.stem,g);}
+  const leaves=[];for(let i=0;i<5;i++){const pv=new T.Group();pv.rotation.order='YXZ';pv.rotation.y=i/5*Math.PI*2+.3;pv.position.y=.08;g.add(pv);
+    const l=mesh(leafGeo,i%2?M.leaf:M.leafD,pv);l.scale.set(2,1.4,1);l.position.x=1.0;l.rotation.x=-Math.PI/2;leaves.push(pv);}
+  for(let i=0;i<3;i++){const u=.3+i*.2,c=stemC.getPoint(u),pv=new T.Group(),s=i%2?1:-1;pv.position.copy(c);pv.rotation.set(0,i*2.1,s*.6);g.add(pv);const l=mesh(leafGeo,M.leaf,pv);l.scale.set(.6,.6,.6);l.position.x=s*.3;}
+  for(let j=0;j<2;j++){const pts=[];for(let i=0;i<=30;i++){const u=i/30,a=u*Math.PI*5+j*Math.PI,c=stemC.getPoint(u*.95);pts.push(V3(c.x+Math.cos(a)*.17,c.y,c.z+Math.sin(a)*.17));}mesh(new T.TubeGeometry(new T.CatmullRomCurve3(pts),40,.025,5),M.leafD,g);}
+  // ดอกบัวบนยอด: กลีบชมพู 3 ชั้น + แกนเหลืองเรือง
+  const bloom=new T.Group();bloom.position.y=H;g.add(bloom);
+  const cup=mesh(new T.SphereGeometry(.38,16,10,0,Math.PI*2,Math.PI/2,Math.PI/2),M.stem,bloom);cup.scale.y=.5;
+  const petG=new T.SphereGeometry(.5,12,10);petG.translate(0,.5,0);petG.scale(.45,1.15,.13);
   const petals=[];for(let r=0;r<3;r++){const n=[10,8,6][r];for(let i=0;i<n;i++){const piv=new T.Group();piv.rotation.order='YXZ';piv.rotation.y=i/n*Math.PI*2+r*.3;bloom.add(piv);
-    const m=mesh(petG,r===2?M.petalIn:M.petal,piv);m.scale.setScalar([1,.85,.68][r]);petals.push({piv,r,open:[1.25,.85,.45][r]});}}
-  const core=mesh(new T.CylinderGeometry(.2,.16,.14,16),M.core,bloom);core.position.y=.12;
-  const cg=glow(GLOWT,1.6,bloom);cg.position.y=.25;
+    const m=mesh(petG,r===2?M.petalIn:M.petal,piv);m.scale.setScalar([1.15,.95,.75][r]);petals.push({piv,r,open:[1.2,.8,.42][r]});}}
+  const core=mesh(new T.SphereGeometry(.2,16,10),M.core,bloom);core.position.y=.18;core.scale.y=.7;
+  const cg=glow(GLOWT,1.2,bloom);cg.position.y=.3;
+  // ฟองแก้วเรืองแสงครอบดอก
+  const bub=new T.Group();bub.position.y=H+.45;g.add(bub);
+  const ball=mesh(new T.SphereGeometry(1.05,32,20),M_BUB,bub),rim=mesh(new T.SphereGeometry(1.08,32,20),M_BUBRIM,bub);
+  const bg=glow(GLOWG,2.4,bub);bg.material.opacity=.18;
+  // หยดน้ำไหลลงตามลำต้น + แอ่งเรืองแสงที่โคน
+  const drips=[];for(let i=0;i<6;i++){const d=mesh(new T.SphereGeometry(.07,8,6),M_DRIP,g);d.scale.y=1.6;drips.push({d,o:i/6});}
+  const pool=mesh(new T.CircleGeometry(1.4,32),M_POOL,g);pool.rotation.x=-Math.PI/2;pool.position.y=.03;
+  const pool2=mesh(new T.RingGeometry(1.1,1.5,32),M_POOL,g);pool2.rotation.x=-Math.PI/2;pool2.position.y=.035;
   g.scale.setScalar(.001);
   return {g,bloom,petals,core,cg,stem,set(grow,open,t){g.scale.setScalar(Math.max(.001,scale*grow));
-      petals.forEach(({piv,r,open:o},i)=>{piv.rotation.x=lerp(.12,o,open)+Math.sin(t*1.4+i)*.03*open;});cg.scale.setScalar((.8+Math.sin(t*3)*.15)*open*1.8+.01);}};}
+      petals.forEach(({piv,r,open:o},i)=>{piv.rotation.x=lerp(.12,o,open)+Math.sin(t*1.4+i)*.03*open;});cg.scale.setScalar((.8+Math.sin(t*3)*.15)*open*1.8+.01);
+      bloom.rotation.z=Math.sin(t*.9)*.04*open;
+      const bk=ease(phase(open,.4,1));bub.scale.setScalar(Math.max(.001,bk*(1+Math.sin(t*2.2)*.025)));bub.visible=bk>.01;
+      for(const {d,o} of drips){const k=(t*.45+o)%1,c=stemC.getPoint(1-k*.97);d.position.set(c.x+.17,c.y,c.z);d.visible=bk>.5;}
+      const pk=ease(phase(open,.6,1));pool.scale.setScalar(Math.max(.001,pk));pool2.scale.setScalar(Math.max(.001,pk*(1+.08*Math.sin(t*3))));}};}
 // สปอร์ (ลูกเกสรเรืองแสง)
 function Spore(big){const g=new T.Group();add(g);mesh(new T.IcosahedronGeometry(big?.15:.11,1),M.core,g);glow(GLOWG,big?.9:.6,g);
   for(let i=0;i<5;i++){const s=mesh(new T.ConeGeometry(.025,.12,4),M.leaf,g);const a=i/5*6.28;s.position.set(Math.cos(a)*.12,0,Math.sin(a)*.12);s.lookAt(V3(Math.cos(a)*1,0,Math.sin(a)));s.rotateX(Math.PI/2);}
@@ -325,13 +370,12 @@ SKS.turret={dur:5.2,still:3.75,setup(){const me=pup('3.1.0.2.1.0.0.1.0.0',0,0,0)
       label=t<2.1?'พืชป้อมยิง · โยนเมล็ด (ไกล 15 ม.) → งอกทันที → ยิงหนามหาศัตรูใกล้สุด 5 ดาเมจ ทุก 0.7 วิ ระยะ 20 ม.':'พืชป้อมยิง · รากเกาะกำแพง ลำต้นตั้งขึ้น · วางได้สูงสุด 2 ต้น 60 HP อยู่ 20 วิ';};}};
 // 5) ดอกบัว — ต้นใหญ่ 100 HP วง 8 ม. ฮีล 5/วิ • บัฟยิงเร็ว 4 วิ หลังปลูก • สปอร์ทุก 5 วิ ลอยข้างไหล่ → แส้โดน = สปอร์บินไประเบิดพิษ
 SKS.lotus={dur:6.0,still:2.6,setup(){const me=pup('3.1.0.2.1.0.0.1.0.0',0,0,0),foe=pup('1.3.2.0.0.2.1.0.0.0',4.8,2.4,Math.PI*.95,'enemy'),tu=Turret();tu.g.position.copy(W(2.2,-3.2,0));tu.grow(1);
-    cam.p.copy(W(-4.2,-6.8,5.2));cam.l.copy(W(3.2,-2,1));
-    const L=Lotus(1),sd=Seed();L.g.position.copy(W(4,-4,0));const area=ring(7.6,8,'#9cff6a',.5),fill=disc(7.6,'#6cd04a',.12);area.position.copy(W(4,-4,.04));fill.position.copy(W(4,-4,.03));
+    if(Q.has('top')){cam.p.copy(W(-6,-15,13));cam.l.copy(W(4,-4,0));}else{cam.p.copy(W(-2.6,-9.5,3.6));cam.l.copy(W(3.6,-3.6,2.2));}
+    const L=Lotus(1),sd=Seed();L.g.position.copy(W(4,-4,0));const AU=LotusAura(8);AU.g.position.copy(W(4,-4,0));
     const sp=Spore(false),wh=Whip(),buff=ring(.5,.62,'#ffd23f',.8);
     return (t,dt)=>{idle(me,t);idle(foe,t);const th=phase(t,.05,.35);me.armR.rotation.set(-.4-1.6*Math.sin(Math.PI*th),0,0);
       sd.fly(tipW(me),L.g.position,phase(t,.3,.85));if(t>=.85&&!this.s){this.s=1;sprout(L.g.position,1.6);shock(L.g.position,'#b4ff70',6,.6);}
-      const gr=phase(t,.85,1.5),op=phase(t,1.3,2.1);L.set(outQ(gr),ease(op),t);const ak=ease(phase(t,1.2,1.8));area.scale.setScalar(Math.max(.01,ak));fill.scale.setScalar(Math.max(.01,ak));
-      area.material.opacity=.45+.15*Math.sin(t*4);
+      const gr=phase(t,.85,1.5),op=phase(t,1.3,2.1);L.set(outQ(gr),ease(op),t);const ak=ease(phase(t,1.2,1.8));AU.set(ak,t);
       // ฮีลลอยขึ้นในวง + พัลส์
       if(t>1.6){for(let i=0;i<3;i++){const a=rnd(0,6.28),r=Math.sqrt(rnd(0,1))*7.4,p=L.g.position.clone().add(V3(Math.cos(a)*r,.1,Math.sin(a)*r));SPK.add({p,v:V3(0,rnd(.6,1.3),0),life:1.6,size:.06,col:'#e6ffd0',c2:'#5bff7a',add:1,g:-.2,sx:1});}
         if(Math.floor((t-1.6)/1.2)!==this.pl){this.pl=Math.floor((t-1.6)/1.2);shock(L.g.position,'#8cff7a',15,1);}}
