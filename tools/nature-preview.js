@@ -158,10 +158,13 @@ function Turret(wall=false){const g=new T.Group();add(g);const base=new T.Group(
   const wallLeaves=base.clone();wallLeaves.visible=wall;wallLeaves.rotation.z=-Math.PI/2;wallLeaves.position.x=.025;g.add(wallLeaves);
   if(wall)for(let i=0;i<7;i++){const a=i/7*Math.PI*2,dy=Math.sin(a),dz=Math.cos(a),c=new T.CatmullRomCurve3([V3(.018,0,0),V3(.018,dy*.22,dz*.22),V3(.018,dy*.48,dz*.48)]);mesh(new T.TubeGeometry(c,8,.025,5,false),M.stem,wallRoots);}
   const stemC=new T.CatmullRomCurve3([V3(0,0,0),V3(0,.35,-.05),V3(0,.7,.02),V3(0,.95,0)]);
-  const body=new T.Group();g.add(body);body.rotation.z=wall?-.23:0;
+  const body=new T.Group();g.add(body);body.rotation.z=wall?-.45:0;   // ผู้ใช้ 2026-11-04: เฉียงหัวออกจากกำแพงมากขึ้น (เดิม -.23)
   const stem=mesh(new T.TubeGeometry(stemC,16,.085,9),M.stem,body);stem.position.x=wall?.12:0;
-  for(let i=0;i<2;i++){const s=i?1:-1,l=mesh(leafGeo,i?M.leaf:M.leafD,stem);l.position.set(s*.16,.30+i*.27,.01);l.rotation.z=s*.6;l.scale.set(.60,.85,.6);}
-  for(let j=0;j<2;j++){const points=[];for(let i=0;i<=24;i++){const u=i/24,a=u*Math.PI*2+j*Math.PI;points.push(V3(Math.cos(a)*.087,u*.88,Math.sin(a)*.087-.02));}mesh(new T.TubeGeometry(new T.CatmullRomCurve3(points),24,.012,5),M.leafD,stem);}
+  // ใบลำต้น: โคนใบติดผิวลำต้นพอดี (pivot ที่ผิว แล้วเลื่อนใบออกครึ่งความยาว) — ผู้ใช้ 2026-11-04: เดิมใบลอยข้างลำต้นเหมือนก้านที่สอง
+  for(let i=0;i<2;i++){const s=i?1:-1,y=.30+i*.27,c=stemC.getPoint(y/.95),pv=new T.Group();pv.position.set(c.x+s*.07,c.y,c.z);pv.rotation.z=s*.55;stem.add(pv);
+    const l=mesh(leafGeo,i?M.leaf:M.leafD,pv);l.scale.set(.5,.7,.6);l.position.x=s*.25;}
+  // เถาพัน 2 เส้นแนบลำต้นตามเส้นโค้ง stemC (ผู้ใช้ 2026-11-04: เดิมเป็นเกลียวตรง ลอยออกจากลำต้น)
+  for(let j=0;j<2;j++){const points=[];for(let i=0;i<=24;i++){const u=i/24,a=u*Math.PI*2+j*Math.PI;const c=stemC.getPoint(u*.93);points.push(V3(c.x+Math.cos(a)*.092,c.y,c.z+Math.sin(a)*.092));}mesh(new T.TubeGeometry(new T.CatmullRomCurve3(points),24,.012,5),M.leafD,stem);}
   const head=new T.Group();head.position.set(wall?.12:0,.95,0);body.add(head);
   // ฝักทรงหยดน้ำ (lathe) หัวชี้ไปข้างหน้า (+z)
   const prof=[];for(let i=0;i<=14;i++){const u=i/14;prof.push(new T.Vector2(Math.sin(Math.PI*Math.pow(u,.8))*.26*(1-.55*u)+.0001,u*.72-.25));}
@@ -169,11 +172,12 @@ function Turret(wall=false){const g=new T.Group();add(g);const base=new T.Group(
   for(let i=0;i<4;i++){const s=mesh(new T.TorusGeometry(.2-.03*i,.012,5,18),M.podDark,head);s.position.z=-.12+i*.12;s.scale.setScalar(1-i*.12);}
   const noz=mesh(new T.CylinderGeometry(.07,.1,.14,10,1,true),M.podDark,head);noz.rotation.x=Math.PI/2;noz.position.z=.5;
   const tipG=glow(GLOWG,.45,head);tipG.position.z=.56;
-  const wings=[];for(const s of [-1,1]){const w=mesh(leafGeo,M.leaf,head);w.scale.set(1.25,1.6,1.25);w.rotation.order='YXZ';w.position.set(s*.2,.02,-.05);wings.push({w,s});}
+  // ปีกใบ: กางสองข้างหัวแบบเดิม แต่โคนติดผิวข้างฝักพอดี ไม่ทับหัว (ผู้ใช้ 2026-11-04)
+  const wings=[];for(const s of [-1,1]){const w=new T.Group();w.rotation.order='YXZ';w.position.set(s*.19,.04,-.05);head.add(w);const l=mesh(leafGeo,M.leaf,w);l.scale.set(.9,1.1,.9);l.position.x=s*.43;wings.push({w,s});}
   g.scale.setScalar(1.45);
   return {g,head,pod,tipG,wings,stem,grow(k){const rise=ease(phase(k,0,.8)),open=ease(phase(k,.25,1)),root=ease(phase(k,0,.5));g.visible=k>0;stem.scale.y=Math.max(.001,rise);head.position.y=.95*rise;head.scale.setScalar(Math.max(.001,open*1.3));base.scale.setScalar(Math.max(.001,root));wallRoots.scale.setScalar(Math.max(.001,root));wallLeaves.scale.setScalar(Math.max(.001,root));},
     pose(t,aimYaw,recoil,wall){head.rotation.set(-.1+Math.sin(t*2)*.04,aimYaw,0);pod.scale.set(1+recoil*.25,1+recoil*.25,1-recoil*.3);head.position.z=-recoil*.08;
-      wings.forEach(({w,s},i)=>{w.rotation.set(.2+Math.sin(t*6+i)*.12,s*1.05,s*(.5+Math.sin(t*5+i*2)*.15));});tipG.scale.setScalar(.45+recoil*.6);}};}
+      wings.forEach(({w,s},i)=>{w.rotation.set(.2+Math.sin(t*6+i)*.12,s*.5,s*(.5+Math.sin(t*5+i*2)*.15));});tipG.scale.setScalar(.45+recoil*.6);}};}
 // กระสุนหนามของป้อม
 function Spikes(){const L=[],geo=new T.ConeGeometry(.045,.42,6);geo.rotateX(Math.PI/2);
   return {shoot(a,b,col){const m=mesh(geo,M.thornTip);const tr=TrailRibbon(8,col||'#a8ff60');L.push({m,tr,a:a.clone(),b:b.clone(),t:0});},
