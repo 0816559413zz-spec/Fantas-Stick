@@ -104,20 +104,27 @@ function hitFlinch(o,k){o.b.rotation.x=-.25*k;o.b.position.z=-.08*k;}
 // ---------- แส้หนาม (BA) ----------
 // โคนถูกมือพา → ลำตัวตามมุมที่หน่วงตามระยะ → ปลายหน่วงที่สุดแล้วสะบัดเกินแล้วดีดกลับ (ไม่ใช้ฟิสิกส์ — เดินเวลาแน่นอนทุกเฟรม)
 const WHIP_N=26,WHIP_L=6,WHIP_LAG=.16;
-function Whip(){const tube=Tube(WHIP_N,7,M.bark),th=Thorns(60,1),trail=TrailRibbon(18,'#b8f060');
+function Whip(length=WHIP_L,curled=false){const tube=Tube(WHIP_N,7,M.bark),th=Thorns(60,1),trail=TrailRibbon(18,'#b8f060');
   return {tube,th,trail,upd(o,t,sw){ // sw = {t0, dir(+1 ซ้าย→ขวา), aimYaw}
-      const st=t-sw.t0,show=st>0&&st<.82;tube.visible=th.visible=show;if(!show){trail.push(null);return null;}
-      const grow=outQ(st/.12)*(1-inQ((st-.66)/.16)),s=sw.dir;
+      const st=t-sw.t0,show=st>0&&st<(curled?.78:.82);tube.visible=th.visible=show;if(!show){trail.push(null);return null;}
+      const grow=curled?(.34+.66*ease((st-.08)/.19))*(1-ease((st-.62)/.16)):outQ(st/.12)*(1-inQ((st-.66)/.16)),s=sw.dir;
+      const curl=curled?1-ease((st-.06)/.23):0;
       // มุมโคน (เทียบทิศที่หัน): ง้าง→กวาด→เลยไปนิด
-      const ang=(x)=>{const a=1.45*s,b=-1.45*s;if(x<.1)return lerp(a*.85,a,x/.1);const k=(x-.1)/.36;if(k<1)return lerp(a,b,ease(k));const z=x-.46;return b+(-.22*s)*Math.sin(z*14)*Math.exp(-z*6);};
+      const ang=(x)=>{if(curled){const reverse=s<0,q=clamp((x-.04)/(reverse?.27:.25),0,1);return s*lerp(reverse?1.49:1.55,reverse?-1.73:-1.78,q*q*q*(q*(q*6-15)+10));}const a=1.45*s,b=-1.45*s;if(x<.1)return lerp(a*.85,a,x/.1);const k=(x-.1)/.36;if(k<1)return lerp(a,b,ease(k));const z=x-.46;return b+(-.22*s)*Math.sin(z*14)*Math.exp(-z*6);};
       const armYaw=ang(st);o.armR.rotation.set(-1.25+.25*Math.sin(Math.min(1,st/.46)*Math.PI),armYaw*.55,.0);o.b.rotation.y=armYaw*.28;
-      const P0=tipW(o),yaw=o.g.rotation.y,pts=[P0.clone()],seg=WHIP_L*grow/(WHIP_N-1);let p=P0.clone();
-      for(let i=1;i<WHIP_N;i++){const u=i/(WHIP_N-1),a=yaw+ang(Math.max(0,st-WHIP_LAG*u))*1.08,pitch=-.06-.22*u*u+.06*Math.sin(u*9-st*20)*(1-u),cp=Math.cos(pitch);
+      const P0=tipW(o),yaw=o.g.rotation.y,pts=[P0.clone()],seg=length*grow/(WHIP_N-1);let p=P0.clone();
+      for(let i=1;i<WHIP_N;i++){const u=i/(WHIP_N-1),delay=(curled?(s<0?.18:.17):WHIP_LAG)*u;
+        // ขณะมือเบรก ปลายยังมีแรงส่ง จึงสะบัดเลยโคนก่อนค่อยคลายกลับ (ภาพประมาณแรงเหวี่ยง ไม่ใช่ตัวจำลองฟิสิกส์)
+        const follow=curled?Math.sin(Math.PI*phase(st,.22,.68))*u*u:0;
+        // ช่วงจบปลายยังพับเป็น U อยู่ ไม่ปล่อยคลื่นผ่านปลายจนแส้กลับไปตรง
+        const front=lerp(.22,.50,ease((st-.17)/.31));
+        const loop=curled?ease((st-.13)/.11)*ease((u-front)/.32):0;
+        const a=yaw+ang(Math.max(0,st-delay))*1.08+curl*s*(s<0?3.8:4.0)*u*u-s*(.35*follow+2.4*loop),pitch=-.06-.22*u*u+.06*Math.sin(u*9-st*20)*(1-u)+(curled?curl*.35*Math.sin(u*Math.PI)*Math.sin(u*5.5+st*3):0),cp=Math.cos(pitch);
         p=p.clone().add(V3(Math.sin(a)*cp,Math.sin(pitch),Math.cos(a)*cp).multiplyScalar(seg));if(p.y<O.y+.12)p.y=O.y+.12;pts.push(p);}
       const rad=(u)=>(.085*(1-u)+.018)*(.6+.4*grow);
       tube.set(pts,rad,(u,c)=>c.set('#4a3218').lerp(new T.Color('#5c9a2e'),Math.min(1,u*1.4)).lerp(new T.Color('#b6e45a'),Math.max(0,u-.7)*1.8));
       th.put(thornsAlong(pts,rad,2,grow*1.35));
-      const sweeping=st>.1&&st<.6;trail.push(sweeping?[pts[Math.floor(WHIP_N*.72)],pts[WHIP_N-1]]:null);
+      const sweeping=!curled&&st>.1&&st<.6;trail.push(sweeping?[pts[Math.floor(WHIP_N*.72)],pts[WHIP_N-1]]:null);
       return {pts,tip:pts[WHIP_N-1],st};}};}
 // ริบบิ้นทางเหวี่ยง (บวกแสง จางตามอายุ)
 function TrailRibbon(n,col){const g=new T.BufferGeometry(),pos=new Float32Array(n*2*3),cl=new Float32Array(n*2*3),idx=[];
@@ -190,7 +197,7 @@ const cam={p:W(-5,-4,3),l:W(4,0,1),shake:0};
 WD.camHook=c=>{c.position.copy(cam.p);if(cam.shake>0){c.position.x+=rnd(-1,1)*cam.shake;c.position.y+=rnd(-1,1)*cam.shake;}c.lookAt(cam.l);};
 let HOOK=null;const comp=WD.composer,origR=comp.render.bind(comp);
 comp.render=function(...a){try{ME.g.visible=false;if(WD.EM3)for(const [,e] of WD.EM3)if(e&&e.g)e.g.visible=false;HOOK&&HOOK();}catch(e){HL.errs.push('hook: '+(e.stack||e.message).slice(0,300));}return origR(...a);};
-const FPS=20,DT=1/FPS;let now=performance.now();
+const FPS=(SK==='whip'||SK==='dash')?30:20,DT=1/FPS;let now=performance.now();
 const out=document.createElement('canvas');out.width=720;out.height=450;const ox=out.getContext('2d');
 const images={};let label='';
 function frame(name,still){now+=DT*1000;WD.render(DT,now);
@@ -199,41 +206,58 @@ function frame(name,still){now+=DT*1000;WD.render(DT,now);
 function bar(x,w,fs){x.fillStyle='rgba(8,22,10,.78)';x.fillRect(10,10,w-20,fs+16);x.fillStyle='#eaffd8';x.font=fs+'px Tahoma';x.fillText(label,22,10+fs+3);}
 // ======================================================================================
 const SKS={};
-// 1) BA แส้หนาม — ตวัดซ้าย→ขวา / ขวา→ซ้าย ห่างกัน 0.8 วิ ระยะ 6 ม. โดนทุกคนในวงโค้งหน้า
-SKS.whip={dur:3.0,still:.45,setup(){const me=pup('3.1.0.2.1.0.0.1.0.0',0,0,0);const e1=pup('1.3.2.0.0.2.1.0.0.0',4.6,1.2,Math.PI,'enemy'),e2=pup('2.0.1.1.0.1.2.0.0.0',4.2,-1.8,Math.PI,'enemy');
-    const wh=Whip();cam.p.copy(W(-2.6,-4.2,5.6));cam.l.copy(W(2.6,0,.5));
-    const SW=[{t0:.15,dir:1},{t0:.95,dir:-1},{t0:1.75,dir:1}],hit=new Set();
-    return (t,dt)=>{idle(me,t);idle(e1,t);idle(e2,t);const r=wh.upd(me,t,SW.find(s=>t-s.t0>0&&t-s.t0<.82)||{t0:-9,dir:1});
-      label='BA แส้หนาม · ตวัดซ้าย↔ขวา ทุก 0.8 วิ · ระยะ 6 ม. · 7 ดาเมจ (โดนทุกคนในวงโค้ง)';
-      for(const [k,e] of [[0,e1],[1,e2]]){SW.forEach((sw,si)=>{const key=si*10+k;if(!r||hit.has(key))return;const c=chestW(e);if(r.tip.distanceTo(c)<1.3||r.pts[18].distanceTo(c)<1.1){hit.add(key);e.hitT=t;sparks(c,22,4.5,'#f6ffb0','#62d04a');leaves(c,8,3);}});
+// 1) BA แส้หนาม — hit sector 280 game units = 14m, 120 degrees; visible swing may continue beyond it.
+SKS.whip={dur:3.0,still:.45,setup(){const me=pup('3.1.0.2.1.0.0.1.0.0',0,0,0);const e1=pup('1.3.2.0.0.2.1.0.0.0',10.5,3,Math.PI,'enemy'),e2=pup('2.0.1.1.0.1.2.0.0.0',11,-3.6,Math.PI,'enemy');
+    const wh=Whip(14,true);cam.p.copy(W(-14,0,19));cam.l.copy(W(4,0,.5));
+    const SW=[{t0:.3,dir:1},{t0:1.1,dir:-1}],hit=new Set();
+    return (t,dt)=>{idle(me,t);idle(e1,t);idle(e2,t);const r=wh.upd(me,t,SW.find(s=>t-s.t0>0&&t-s.t0<.78)||{t0:-9,dir:1});
+      label='BA แส้หนาม · ระยะโจมตี 280 · 120° ด้านหน้า · แส้เหวี่ยงเลยตามแรง';
+      for(const [k,e] of [[0,e1],[1,e2]]){SW.forEach((sw,si)=>{const key=si*10+k;if(!r||Math.abs(t-sw.t0-r.st)>.001||hit.has(key))return;const c=chestW(e),dx=c.x-me.g.position.x,dz=c.z-me.g.position.z,dist=Math.hypot(dx,dz),angle=Math.abs(Math.atan2(dx,dz)-me.g.rotation.y);if(dist<=14&&angle<=Math.PI/3&&r.pts.some(p=>p.distanceTo(c)<1.3)){hit.add(key);e.hitT=t;sparks(c,22,4.5,'#f6ffb0','#62d04a');leaves(c,8,3);}});
         if(e.hitT!==undefined)hitFlinch(e,Math.max(0,1-(t-e.hitT)/.3));}};}};
 // 2) Dash — เถาวัลย์เกี่ยว: เพื่อน = หนามพันฮีล • ศัตรู = หนามพันพิษ+ช้า • ดึงตัวเราเข้าไป
-SKS.dash={dur:4.6,still:.62,setup(){const me=pup('3.1.0.2.1.0.0.1.0.0',0,0,0),ally=pup('0.2.3.1.0.3.1.0.0.0',11,2.2,Math.PI*.9,'ally'),foe=pup('1.3.2.0.0.2.1.0.0.0',11,-3.4,Math.PI*1.1,'enemy');
+SKS.dash={dur:4.6,still:.88,setup(){const me=pup('3.1.0.2.1.0.0.1.0.0',0,0,0),foe=pup('1.3.2.0.0.2.1.0.0.0',11,-3.4,Math.PI*1.1,'enemy');
+    const plant=Turret();plant.g.position.copy(W(11,2.2,0));plant.grow(1);
     const vine=Tube(30,6,M.bark),th=Thorns(70,.8),coil=Tube(60,5,M.bark),cth=Thorns(40,.7),speed=TrailRibbon(10,'#3f7a28');
-    cam.p.copy(W(-1,-6.5,3.6));cam.l.copy(W(6.5,-.5,.9));const takes=[{t0:.1,tgt:ally,col:'#7dff9a',kind:'ally'},{t0:2.35,tgt:foe,col:'#b070ff',kind:'foe'}];
-    return (t,dt)=>{idle(ally,t);idle(foe,t);
+    cam.p.copy(W(-10,0,13));cam.l.copy(W(5,3,1));const takes=[{t0:.1,tgt:plant,col:'#b4ff78',kind:'plant'},{t0:2.35,tgt:foe,col:'#b070ff',kind:'foe'}];
+    return (t,dt)=>{idle(foe,t);plant.pose(t,0,0);
       let tk=t<2.3?takes[0]:takes[1],st=t-tk.t0;
       if(t>=2.3&&!tk.reset){tk.reset=1;me.g.position.copy(W(0,0,0));sparks(W(0,0,1),10,2);}
       idle(me,t);const tg=chestW(tk.tgt),start=me.g.position.clone();face(me,tg);
-      const aim=phase(st,0,.15),fly=phase(st,.15,.35),pull=phase(st,.35,.72);
-      me.armR.rotation.set(-1.45*Math.max(aim,1-pull*.6),0,0);me.armL.rotation.set(-.6*aim,0,-.3);
-      if(st>.35&&st<.72){const from=tk.from||(tk.from=me.g.position.clone()),dir=V3().subVectors(tk.tgt.g.position,from),L=dir.length();dir.normalize();
-        me.g.position.copy(from).addScaledVector(dir,(L-1.4)*inQ(pull)*1.0+ (L-1.4)*0*pull);me.b.rotation.x=.55*Math.sin(pull*Math.PI);me.legs[0].rotation.x=-.6;me.legs[1].rotation.x=.5;
+      const aim=phase(st,0,.20),fly=phase(st,.20,.43),pull=phase(st,.73,1.18);
+      // สะบัดไม้ไปด้านข้างก่อน แล้วส่งมือกลับเข้าหาเป้าตอนเถาพุ่ง
+      const sideSwing=Math.sin(Math.PI*ease(phase(st,0,.28)));
+      me.armR.rotation.set(-1.2+.3*sideSwing,-1.05*sideSwing,.25*sideSwing);me.b.rotation.y=-.4*sideSwing;me.armL.rotation.set(-.6*aim,0,-.3);
+      const hitAge=st-.43,tug=hitAge>0?Math.exp(-hitAge*9)*Math.sin(hitAge*32):0;
+      me.armR.rotation.x+=.32*tug;me.b.rotation.x-=.22*tug;me.b.rotation.y+=.12*tug;
+      if(tk.kind==='foe')foe.b.rotation.x+=.20*tug;
+      if(st>.73&&st<1.18){const from=tk.from||(tk.from=me.g.position.clone()),dir=V3().subVectors(tk.tgt.g.position,from),L=dir.length();dir.normalize();
+        me.g.position.copy(from).addScaledVector(dir,(L-1.4)*ease(pull));me.b.rotation.x=.55*Math.sin(pull*Math.PI);me.legs[0].rotation.x=-.6;me.legs[1].rotation.x=.5;
         if(Math.floor(t*FPS)%1===0)leaves(me.g.position.clone().add(V3(0,1,0)),2,1.2,{life:.7});speed.push([me.g.position.clone().add(V3(0,.4,0)),me.g.position.clone().add(V3(0,1.6,0))]);}
       else speed.push(null);
-      if(st>=.72&&!tk.land){tk.land=1;dirt(me.g.position.clone(),16,3);leaves(me.g.position.clone().add(V3(0,.3,0)),10,3);shock(me.g.position,'#c8ff80',4,.4);}
-      // เถาวัลย์จากไม้ → เป้า (ยืดไป 0.2 วิ แล้วหดตามตอนถูกดึง)
-      const tip=tipW(me);vine.visible=th.visible=st>.15&&st<.8;
-      if(vine.visible){const k=fly,pts=[];for(let i=0;i<30;i++){const u=i/29*k,p=V3().lerpVectors(tip,tg,u);p.y+=Math.sin(u*Math.PI)*.4*(1-pull)+Math.sin(u*14-t*20)*.06*(1-pull);pts.push(p);}
+      if(st>=1.18&&!tk.land){tk.land=1;if(tk.from){const dir=V3().subVectors(tk.tgt.g.position,tk.from),L=dir.length();if(L>1.4)me.g.position.copy(tk.from).addScaledVector(dir,(L-1.4)/L);}dirt(me.g.position.clone(),16,3);leaves(me.g.position.clone().add(V3(0,.3,0)),10,3);}
+      // ปลายเถาอ้อมออกด้านข้างก่อนเข้าเป้า; พันแล้วรอสั้น ๆ ก่อนดึง (เวลานี้เพื่อพรีวิวเท่านั้น)
+      const tip=tipW(me);vine.visible=th.visible=st>.02&&st<1.26;
+      if(vine.visible){const k=ease(fly),side=V3(tip.z-tg.z,0,tg.x-tip.x).normalize(),origin=tip.clone().addScaledVector(side,.8*ease(phase(st,0,.18))),control=tip.clone().lerp(tg,.30).addScaledVector(side,25),end=origin.multiplyScalar((1-k)*(1-k)).addScaledVector(control,2*k*(1-k)).addScaledVector(tg,k*k),loose=1-ease(phase(st,.36,.48)),pts=[];
+        if(st>=.43&&!tk.ropeLength)tk.ropeLength=tip.distanceTo(tg);
+        const chord=tip.distanceTo(tg),extra=tk.ropeLength?Math.sqrt(Math.max(0,tk.ropeLength**2-chord**2)):0;
+        const slack=Math.min(2.8,extra*.35)*ease(phase(st,.73,.86));
+        for(let i=0;i<30;i++){const u=i/29,p=V3().lerpVectors(tip,end,u),envelope=Math.sin(u*Math.PI);if(st<.20){const a=u*Math.PI*2.5-st*5,rr=.25*u;p.addScaledVector(side,Math.sin(a)*rr);p.y+=Math.cos(a)*rr+u*.14;}else{
+          const tipBend=Math.exp(-(((u-.80)/.17)**2))*Math.sin(u*5-st*20)*1.9*loose;
+          p.y+=envelope*(.04+.48*loose)-envelope*Math.min(.55,slack*.30)+envelope*.16*Math.sin(u*7-st*25)*loose;
+          const tensionWave=hitAge>0?ease(phase(hitAge,0,.05))*Math.exp(-hitAge*9)*Math.sin(hitAge*32-u*3)*.65:0;
+          p.addScaledVector(side,envelope*(.8*Math.sin(u*5-st*20)*loose+slack+tensionWave)+tipBend*envelope);
+        }pts.push(p);}
         const rad=u=>.05*(1-.4*u)+.012;vine.set(pts,rad,(u,c)=>c.set('#4a3218').lerp(new T.Color('#62a63a'),u));th.put(thornsAlong(pts,rad,2,.8));
-        if(st>=.35&&!tk.hit){tk.hit=1;sparks(tg,20,4,tk.kind==='ally'?'#ffffff':'#f0d0ff',tk.col);leaves(tg,10,3);}}
+        if(st>=.43&&!tk.hit){tk.hit=1;sparks(tg,20,4,tk.kind==='ally'?'#ffffff':'#f0d0ff',tk.col);leaves(tg,10,3);}}
       // หนามพันรอบตัวเป้า 3 วิ (เกลียวขึ้นจากขาถึงอก)
-      const wrap=phase(st,.35,.75),still=st>.35;coil.visible=cth.visible=still;
-      if(still){const P=tk.tgt.g.position,pts=[];for(let i=0;i<60;i++){const u=i/59*wrap,a=u*Math.PI*7+t*.6;pts.push(V3(P.x+Math.cos(a)*.36,P.y+.15+u*1.45,P.z+Math.sin(a)*.36));}
-        const rad=u=>.035;coil.set(pts,rad,(u,c)=>c.set('#3e5a1e').lerp(new T.Color(tk.kind==='ally'?'#8fe060':'#7a4a9a'),.35+.3*Math.sin(u*20)));cth.put(thornsAlong(pts,rad,3,.7,1.7));
-        if(Math.random()<.5){const p=P.clone().add(V3(rnd(-.4,.4),rnd(.3,1.7),rnd(-.4,.4)));if(tk.kind==='ally')sparks(p,1,.6,'#e0ffd8','#4cff7a',{g:-1.5,life:1.6,size:1.4});else puff(p,1,'#9a5ad0',{c2:'#3a7a2a',sp:.4,size:.5});}
+      const wrap=phase(st,.43,.67),still=st>.43;coil.visible=cth.visible=still;
+      if(still){const P=tk.tgt.g.position,pts=[],isPlant=tk.kind==='plant',radius=isPlant?.23:.36,height=isPlant?1.1:1.45;for(let i=0;i<60;i++){const u=i/59*wrap,a=u*Math.PI*7+t*.6;pts.push(V3(P.x+Math.cos(a)*radius,P.y+.15+u*height,P.z+Math.sin(a)*radius));}
+        const rad=u=>.035;coil.set(pts,rad,(u,c)=>c.set('#3e5a1e').lerp(new T.Color(isPlant?'#8fe060':'#7a4a9a'),.35+.3*Math.sin(u*20)));cth.put(thornsAlong(pts,rad,3,.7,1.7));
+        if(Math.random()<.5){const p=P.clone().add(V3(rnd(-.4,.4),rnd(.3,1.7),rnd(-.4,.4)));if(isPlant)sparks(p,1,.6,'#e0ffd8','#4cff7a',{g:-1.5,life:1.6,size:1.4});else puff(p,1,'#9a5ad0',{c2:'#3a7a2a',sp:.4,size:.5});}
         if(tk.kind==='foe'){tk.tgt.legs[0].rotation.x=Math.sin(t*20)*.08;}}
-      label=t<2.3?'Dash เถาวัลย์เกี่ยว · เกี่ยวเพื่อน = ดึงเราไปหา + หนามพันฮีล 10 ทุก 0.5 วิ (3 วิ)':'Dash เถาวัลย์เกี่ยว · เกี่ยวศัตรู = ดึงเราไปหา + หนามพัน พิษ 7/วิ + ช้า 50% (3 วิ)';};}};
+      if(tk.kind==='plant'&&st>.73&&st<1.38)plant.g.rotation.z=.12*Math.sin(phase(st,.73,1.38)*Math.PI*2)*Math.exp(-Math.max(0,st-.93)*4);
+      else plant.g.rotation.z=tk.kind==='plant'?.18*tug:0;
+      label=t<2.3?'Dash เถาวัลย์เกี่ยว · เกี่ยวต้นไม้ของเรา → ดึงตัวเราเข้าหา':'Dash เถาวัลย์เกี่ยว · เกี่ยวศัตรู → หนามพัน + พิษและช้า';};}};
 // 3) โล่หนาม — โล่ปกติด้านหน้า + วงหนามหมุนรอบตัว แทงศัตรูที่เข้าใกล้ 2 ม.
 SKS.shield={dur:3.4,still:1.7,setup(){const me=pup('3.1.0.2.1.0.0.1.0.0',0,0,0),foe=pup('1.3.2.0.0.2.1.0.0.0',3.6,-1.2,Math.PI,'enemy');
     cam.p.copy(W(-3.4,-4.4,3.2));cam.l.copy(W(1.4,0,.9));
@@ -424,6 +448,6 @@ for(let i=0;i<=N;i++){const t=i*DT;upd.call(ctx,t,DT);for(const p of POOLS)p.upd
   if(i===stillI&&FROM===0)frame('nat_'+SK+'_still',true);
   if(i>=TO)break;
   if(!ONLY_STILL&&i>=FROM&&i<TO)frame('nat_'+SK+'_f'+String(i).padStart(3,'0'),false);
-  else if(i>stillI)break;
+  else if(ONLY_STILL&&i>stillI)break;
   if(i%5===4)await new Promise(r=>setTimeout(r,0));}
 return {images,sk:SK,frames:ONLY_STILL?0:N+1,fps:FPS,errs:HL.errs.slice(0,8)};

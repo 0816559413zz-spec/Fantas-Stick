@@ -4,6 +4,7 @@ python tools/nature-pack.py            -> every skill that has frames
 python tools/nature-pack.py whip root  -> only these
 """
 import sys
+import re
 from pathlib import Path
 from PIL import Image
 
@@ -13,7 +14,9 @@ SKILLS = ['whip', 'dash', 'shield', 'turret', 'lotus', 'move', 'ball', 'root', '
 
 
 def pack(sk, width=600, fps=20):
-    files = sorted(SHOTS.glob(f'nat_{sk}_f*.jpg'))
+    if sk in ('whip', 'dash'):
+        fps = 30  # previews render at 30 fps for the fast action
+    files = sorted(f for f in SHOTS.glob(f'nat_{sk}_f*.jpg') if re.fullmatch(rf'nat_{re.escape(sk)}_f\d{{3}}\.jpg', f.name))
     if not files:
         print('no frames for', sk)
         return
