@@ -1,0 +1,148 @@
+{
+ "v": 1,
+ "desc": "กำแพงลม (แบบ A) ตอนดันพุ่ง: คลื่นลมเตี้ยกลิ้งนำหน้าโคนกำแพง + ฝุ่นตลบ + เส้นลมลากไปด้านหลัง + อากาศบิด (วนซ้อนกำแพงขณะวิ่ง)",
+ "tags": [
+  "wind",
+  "wall",
+  "push",
+  "loop"
+ ],
+ "pal": "wind",
+ "dur": 0.6,
+ "seed": 8,
+ "layers": [
+  {
+   "id": "roll",
+   "t": "mesh",
+   "at": 0,
+   "life": 0.6,
+   "loop": true,
+   "att": "ground",
+   "shape": "model",
+   "model": "wind_aegis_roll",
+   "mat": "tex",
+   "tex": "tex/wind_air_band",
+   "col": "#ffffff",
+   "col2": "#000000",
+   "rim": 0,
+   "uvTile": [
+    16.88,
+    1
+   ],
+   "uvScroll": [
+    0.9,
+    0
+   ],
+   "pos": [
+    0,
+    0,
+    -11.094
+   ],
+   "scale": [
+    1,
+    1.2,
+    1
+   ],
+   "op": 0.85,
+   "fade": 0
+  },
+  {
+   "look": "smoke",
+   "col": "#ddd6c3",
+   "c2": "#b3aa92",
+   "curl": true,
+   "fin": 10,
+   "id": "dust",
+   "t": "emit",
+   "at": 0,
+   "life": 0.6,
+   "loop": true,
+   "att": "ground",
+   "pos": [
+    0,
+    0,
+    -11.094
+   ],
+   "from": "mesh",
+   "of": "roll",
+   "rate": 40,
+   "dir": "up",
+   "speed": [
+    0.6,
+    1.6
+   ],
+   "up": [
+    0.3,
+    1
+   ],
+   "plife": [
+    0.6,
+    1.1
+   ],
+   "size": [
+    3,
+    6
+   ],
+   "grow": 0.5,
+   "gravity": 0,
+   "drag": 1.5
+  },
+  {
+   "id": "drag",
+   "t": "emit",
+   "at": 0,
+   "life": 0.6,
+   "loop": true,
+   "att": "ground",
+   "pos": [
+    0,
+    0.6,
+    -11.094
+   ],
+   "from": "mesh",
+   "of": "roll",
+   "rate": 60,
+   "dir": "aim",
+   "yaw": 180,
+   "spread": 0.25,
+   "speed": [
+    4,
+    8
+   ],
+   "plife": [
+    0.25,
+    0.5
+   ],
+   "look": "streak",
+   "size": [
+    1.4,
+    2.8
+   ],
+   "col": "#ffffff",
+   "c2": "#8dff65",
+   "gravity": 0,
+   "drag": 1,
+   "curl": false
+  },
+  {
+   "id": "haze",
+   "t": "warp",
+   "at": 0,
+   "life": 0.6,
+   "loop": true,
+   "att": "ground",
+   "pos": [
+    0,
+    1,
+    0.6
+   ],
+   "kind": "haze",
+   "size": 5,
+   "str": 0.7,
+   "op": 1,
+   "col": "#ffffff",
+   "glow": 0,
+   "x": true
+  }
+ ]
+}

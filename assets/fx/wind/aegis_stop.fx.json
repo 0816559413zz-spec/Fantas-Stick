@@ -1,0 +1,161 @@
+{
+ "v": 1,
+ "desc": "กำแพงลม (แบบ A) หยุดหลังดัน: ฝุ่นพัดออกที่โคน + อากาศบิดวงเตี้ย + เส้นลมพ่นไปข้างหน้า",
+ "tags": [
+  "wind",
+  "wall",
+  "push"
+ ],
+ "pal": "wind",
+ "dur": 0.5,
+ "seed": 9,
+ "layers": [
+  {
+   "id": "probe",
+   "t": "mesh",
+   "at": 0,
+   "life": 0.3,
+   "loop": false,
+   "att": "ground",
+   "shape": "model",
+   "model": "wind_aegis_arc",
+   "mat": "tex",
+   "tex": "tex/wind_air_rise",
+   "col": "#ffffff",
+   "col2": "#000000",
+   "rim": 0,
+   "uvTile": [
+    9.56,
+    1
+   ],
+   "uvScroll": [
+    0,
+    0
+   ],
+   "pos": [
+    0,
+    0,
+    -11.794
+   ],
+   "scale": [
+    1,
+    5.4,
+    1
+   ],
+   "op": {
+    "0": 0.3,
+    "1": 0
+   },
+   "fade": 0
+  },
+  {
+   "id": "ring",
+   "t": "warp",
+   "at": 0,
+   "life": 0.35,
+   "att": "ground",
+   "pos": [
+    0,
+    0.15,
+    0.5
+   ],
+   "kind": "shock",
+   "flat": true,
+   "size": {
+    "0": 2,
+    "1": 8
+   },
+   "str": 0.8,
+   "op": {
+    "0": 1,
+    "1": 0
+   },
+   "col": "#ffffff",
+   "glow": 0
+  },
+  {
+   "look": "smoke",
+   "col": "#ddd6c3",
+   "c2": "#b3aa92",
+   "curl": true,
+   "fin": 10,
+   "id": "dust",
+   "t": "emit",
+   "at": 0,
+   "life": 0.08,
+   "att": "ground",
+   "pos": [
+    0,
+    0.05,
+    -11.794
+   ],
+   "from": "mesh",
+   "of": "probe",
+   "burst": 14,
+   "rate": 0,
+   "dir": "aim",
+   "yaw": 0,
+   "spread": 1,
+   "speed": [
+    2,
+    4
+   ],
+   "up": [
+    0.2,
+    0.8
+   ],
+   "plife": [
+    0.6,
+    1
+   ],
+   "size": [
+    3.5,
+    6
+   ],
+   "grow": 0.6,
+   "gravity": 0,
+   "drag": 1.8
+  },
+  {
+   "id": "spray",
+   "t": "emit",
+   "at": 0,
+   "life": 0.05,
+   "att": "ground",
+   "pos": [
+    0,
+    1.5,
+    0
+   ],
+   "from": "sphere",
+   "fr": 1.5,
+   "burst": 24,
+   "rate": 0,
+   "dir": "aim",
+   "yaw": 0,
+   "spread": 0.9,
+   "speed": [
+    4,
+    8
+   ],
+   "up": [
+    0.5,
+    2
+   ],
+   "plife": [
+    0.25,
+    0.5
+   ],
+   "look": "streak",
+   "size": [
+    1,
+    2.2
+   ],
+   "col": "#ffffff",
+   "c2": "#8dff65",
+   "gravity": 0,
+   "drag": 2,
+   "curl": false
+  }
+ ]
+}

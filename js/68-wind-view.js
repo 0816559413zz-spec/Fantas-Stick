@@ -55,6 +55,7 @@ function syncWind(v,dt,now){
   for(const [id,o] of WV.wl)if(!seen.has(id)&&(o.age=(o.age||0)+dt)>0.5){if(o.I)fxStop(o.I);if(o.P)fxStop(o.P);WV.wl.delete(id);}
 }
 function wvWall(n){return WV.wl.get(n);}
+function wvAimFx(id){const o=WV.wa;if(o&&o.has(id)){fxStop(o.get(id));o.delete(id);}}   // หยุดลมรอบตัวตอนเล็งกำแพง
 // ---------- เหตุการณ์ (efx z 'wn…') ----------
 function windEfx(ev){
   const z=ev.z,x=ev.x,y=ev.y,H=ev.h!==undefined?ev.h:0,me=myPos(),near=!me||Math.hypot(x-me.x,y-me.y)<1100,mine=ev.id===NET.myId,a=ev.a||0;
@@ -67,14 +68,16 @@ function windEfx(ev){
     case 'wnsb':fxPlay('wind/shield_burst',{x,y,h:H,follow:ev.id});if(near)shake(0.25);return true;
     case 'wnds':fxPlay('wind/dash_push',{x,y,h:H,a});return true;
     case 'wndswall':fxPlay('wind/wall_hit',{x,y,h:0,a:Math.random()*6.283});return true;
-    case 'wnwaim':if(mine)toast('กำแพงลม: คลิกซ้าย = ดันไปข้างหน้า • คลิกขวา = วางตรงจุดเล็ง');return true;
-    case 'wnwaimoff':return true;
-    case 'wnwup':{const o={x,y,a,I:ev.m===2?null:fxPlay('wind/wall',{x,y,h:0,a}),P:ev.m?fxPlay('wind/wall_push',{x,y,h:0,a}):null};WV.wl.set(ev.n,o);return true;}
-    case 'wnwstop':{const o=wvWall(ev.n);if(o&&o.P){fxStop(o.P);o.P=null;}fxPlay('wind/wall_stop',{x,y,h:0,a});return true;}
+    case 'wnwaim':{const o=WV.wa||(WV.wa=new Map());if(o.has(ev.id))fxStop(o.get(ev.id));o.set(ev.id,fxPlay('wind/aegis_aim',{x,y,h:H,follow:ev.id,aim:false}));}if(mine)toast('กำแพงลม: คลิกซ้าย = ดันไปข้างหน้า • คลิกขวา = วางตรงจุดเล็ง');return true;
+    case 'wnwaimoff':wvAimFx(ev.id);return true;
+    case 'wnwup':{const A=ev.m!==2;   // กำแพงจากสกิล = แบบ A ลมใส (สตอรี่บอร์ด #16) • m 2 = วงกำแพงของอัลติ ใช้ของเดิม
+      if(A){wvAimFx(ev.id);const c=(VIEW.cur&&VIEW.cur.P||[]).find(p=>p.id===ev.id);if(c)fxPlay('wind/aegis_cast',{x:c.x,y:c.y,h:c.z||0,a:Math.atan2(y-c.y,x-c.x)});}
+      const o={x,y,a,A,I:A?fxPlay('wind/aegis_wall',{x,y,h:0,a}):null,P:ev.m===1?fxPlay('wind/aegis_push',{x,y,h:0,a}):ev.m?fxPlay('wind/wall_push',{x,y,h:0,a}):null};WV.wl.set(ev.n,o);return true;}
+    case 'wnwstop':{const o=wvWall(ev.n);if(o&&o.P){fxStop(o.P);o.P=null;}fxPlay(o&&o.A===false?'wind/wall_stop':'wind/aegis_stop',{x,y,h:0,a});return true;}
     case 'wnwpass':fxPlay('wind/wall_hit',{x,y,h:0,a:a+Math.PI});if(near)snd('hit',ev);return true;
     case 'wnwhit':fxPlay('wind/wall_hit',{x,y,h:0,a:a+Math.PI});if(near)snd('hit',ev);return true;
-    case 'wnwuns':{const o=wvWall(ev.n);if(o)o.U=fxPlay('wind/wall_unstable',{x,y,h:0,a});return true;}
-    case 'wnwboom':{const o=wvWall(ev.n);if(o){if(o.I)fxKill(o.I);if(o.P)fxKill(o.P);if(o.U)fxKill(o.U);WV.wl.delete(ev.n);}fxPlay('wind/wall_break',{x,y,h:0,a});if(near){shake(0.35);snd('break',ev);}return true;}
+    case 'wnwuns':{const o=wvWall(ev.n);if(o)o.U=fxPlay(o.A===false?'wind/wall_unstable':'wind/aegis_unstable',{x,y,h:0,a});return true;}
+    case 'wnwboom':{const o=wvWall(ev.n);if(o){if(o.I)fxKill(o.I);if(o.P)fxKill(o.P);if(o.U)fxKill(o.U);WV.wl.delete(ev.n);}fxPlay(o&&o.A===false?'wind/wall_break':'wind/aegis_break',{x,y,h:0,a});if(near){shake(0.35);snd('break',ev);}return true;}
     case 'wnwend':{const o=wvWall(ev.n);if(o){if(o.I)fxStop(o.I);if(o.P)fxStop(o.P);if(o.U)fxStop(o.U);WV.wl.delete(ev.n);}return true;}
     case 'wnwblk':fxPlay('wind/ba_hit',{x,y,h:Math.max(0,H-0.2),a:Math.random()*6.283});return true;
     case 'wndr':fxPlay('wind/windrift',{x,y,h:H,a});if(near)snd('cast_pull',ev);return true;

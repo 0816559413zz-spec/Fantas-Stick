@@ -1,0 +1,186 @@
+{
+ "v": 1,
+ "desc": "กำแพงลม (แบบ A ลมใส) ตอนเล็ง: วงลมบางหมุนรอบตัว + ฝุ่น/ใบไม้ปลิว + อากาศบิด — วนจนวาง/ยกเลิก (ตามตัวผู้ร่าย)",
+ "tags": [
+  "wind",
+  "wall",
+  "aim",
+  "loop"
+ ],
+ "pal": "wind",
+ "dur": 2,
+ "seed": 3,
+ "layers": [
+  {
+   "id": "loops",
+   "t": "mesh",
+   "at": 0,
+   "life": 2,
+   "loop": true,
+   "att": "ground",
+   "shape": "model",
+   "model": "wind_aegis_gather",
+   "mat": "tex",
+   "tex": "tex/wind_air_band",
+   "col": "#ffffff",
+   "col2": "#000000",
+   "rim": 0,
+   "uvTile": [
+    1,
+    1
+   ],
+   "uvScroll": [
+    -0.6,
+    0
+   ],
+   "spin": -70,
+   "scale": 1,
+   "op": 0.8,
+   "fade": 0
+  },
+  {
+   "id": "curl",
+   "t": "emit",
+   "at": 0,
+   "life": 2,
+   "loop": true,
+   "att": "ground",
+   "pos": [
+    0,
+    0.9,
+    0
+   ],
+   "from": "ring",
+   "fr": 0.9,
+   "rate": 9,
+   "dir": "tangent",
+   "speed": [
+    2,
+    3
+   ],
+   "up": [
+    0.1,
+    0.4
+   ],
+   "plife": [
+    0.3,
+    0.55
+   ],
+   "look": "streak",
+   "size": [
+    0.8,
+    1.4
+   ],
+   "col": "#ffffff",
+   "c2": "#8dff65",
+   "gravity": 0,
+   "drag": 0.3,
+   "curl": true
+  },
+  {
+   "id": "dust",
+   "t": "emit",
+   "at": 0,
+   "life": 2,
+   "loop": true,
+   "att": "ground",
+   "pos": [
+    0,
+    0.05,
+    0
+   ],
+   "from": "ring",
+   "fr": 1.1,
+   "rate": 10,
+   "dir": "tangent",
+   "speed": [
+    0.8,
+    1.6
+   ],
+   "up": [
+    0.1,
+    0.5
+   ],
+   "plife": [
+    0.8,
+    1.4
+   ],
+   "look": "smoke",
+   "size": [
+    3,
+    5.5
+   ],
+   "grow": 0.4,
+   "col": "#d9d2bf",
+   "c2": "#b8b09a",
+   "gravity": -0.1,
+   "drag": 0.6,
+   "curl": true,
+   "fin": 12
+  },
+  {
+   "id": "leaf",
+   "t": "emit",
+   "at": 0,
+   "life": 2,
+   "loop": true,
+   "att": "ground",
+   "pos": [
+    0,
+    0.2,
+    0
+   ],
+   "from": "ring",
+   "fr": 1,
+   "rate": 3,
+   "dir": "tangent",
+   "speed": [
+    1.2,
+    2
+   ],
+   "up": [
+    0.3,
+    0.9
+   ],
+   "plife": [
+    1.2,
+    1.8
+   ],
+   "look": "model",
+   "model": "wind_leaf",
+   "mmat": "solid",
+   "msize": [
+    0.07,
+    0.12
+   ],
+   "mspin": 260,
+   "bounce": 0,
+   "col": "#9fd86a",
+   "c2": "#4c8a2e",
+   "gravity": 0.4,
+   "drag": 0.8,
+   "curl": true,
+   "x": true
+  },
+  {
+   "id": "haze",
+   "t": "warp",
+   "at": 0,
+   "life": 2,
+   "loop": true,
+   "att": "ground",
+   "pos": [
+    0,
+    1.0,
+    0.3
+   ],
+   "kind": "haze",
+   "size": 2.2,
+   "str": 0.45,
+   "op": 1,
+   "col": "#ffffff",
+   "glow": 0,
+   "x": true
+  }
+ ]
+}

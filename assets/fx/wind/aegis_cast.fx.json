@@ -1,0 +1,164 @@
+{
+ "v": 1,
+ "desc": "กำแพงลม (แบบ A ลมใส) ตอนปล่อย: อากาศดันออกจากมือ + เส้นลมสั้นพุ่ง + ฝุ่นที่เท้า + เส้นลมบางวิ่งเลียดพื้นไปข้างหน้า (ที่ตัวผู้ร่าย หันไปทางกำแพง)",
+ "tags": [
+  "wind",
+  "wall",
+  "cast"
+ ],
+ "pal": "wind",
+ "dur": 0.7,
+ "seed": 4,
+ "layers": [
+  {
+   "id": "push",
+   "t": "warp",
+   "at": 0,
+   "life": 0.3,
+   "att": "ground",
+   "pos": [
+    0,
+    1.2,
+    0.9
+   ],
+   "kind": "shock",
+   "size": {
+    "0": 0.4,
+    "1": 2.8
+   },
+   "str": 0.9,
+   "op": {
+    "0": 1,
+    "1": 0
+   },
+   "col": "#ffffff",
+   "glow": 0
+  },
+  {
+   "id": "spray",
+   "t": "emit",
+   "at": 0,
+   "life": 0.06,
+   "att": "ground",
+   "pos": [
+    0,
+    1.2,
+    0.7
+   ],
+   "burst": 22,
+   "rate": 0,
+   "from": "sphere",
+   "fr": 0.2,
+   "dir": "aim",
+   "yaw": 0,
+   "spread": 0.35,
+   "speed": [
+    10,
+    16
+   ],
+   "plife": [
+    0.18,
+    0.3
+   ],
+   "look": "streak",
+   "size": [
+    1.2,
+    2.2
+   ],
+   "col": "#ffffff",
+   "c2": "#8dff65",
+   "gravity": 0,
+   "drag": 1,
+   "curl": false
+  },
+  {
+   "look": "smoke",
+   "col": "#ddd6c3",
+   "c2": "#b3aa92",
+   "curl": true,
+   "fin": 10,
+   "id": "kick",
+   "t": "emit",
+   "at": 0,
+   "life": 0.08,
+   "att": "ground",
+   "pos": [
+    0,
+    0.05,
+    0.4
+   ],
+   "burst": 10,
+   "rate": 0,
+   "from": "disc",
+   "fr": 0.5,
+   "dir": "aim",
+   "yaw": 0,
+   "spread": 0.9,
+   "speed": [
+    2.5,
+    4.5
+   ],
+   "up": [
+    0.2,
+    0.7
+   ],
+   "plife": [
+    0.6,
+    1
+   ],
+   "size": [
+    3.5,
+    6
+   ],
+   "grow": 0.6,
+   "gravity": 0,
+   "drag": 2
+  },
+  {
+   "id": "lines",
+   "t": "mesh",
+   "at": 0.03,
+   "life": 0.55,
+   "att": "ground",
+   "shape": "model",
+   "model": "wind_aegis_flow",
+   "mat": "tex",
+   "tex": "tex/wind_air_band",
+   "col": "#ffffff",
+   "col2": "#000000",
+   "rim": 0,
+   "uvTile": [
+    1,
+    1
+   ],
+   "uvScroll": [
+    -3.2,
+    0
+   ],
+   "scale": {
+    "0": [
+     1,
+     1,
+     0.2
+    ],
+    "0.45": [
+     1,
+     1,
+     1
+    ],
+    "1": [
+     1,
+     1,
+     1
+    ]
+   },
+   "op": {
+    "0": 0,
+    "0.15": 0.75,
+    "0.6": 0.6,
+    "1": 0
+   },
+   "fade": 0
+  }
+ ]
+}

@@ -210,3 +210,95 @@ def build(v):
 for v in 'ab':
     save(ROOT/f'assets/fx/wind/aegis_sb_{v}.fx.json',build(v))
 print('wind/aegis_sb_a, wind/aegis_sb_b + tex wind_air_rise/wind_air_band + mesh wind_aegis_arc/flow/gather')
+
+# =====================================================================
+# IN-GAME pieces of variant A "ลมใส" (user picked A 2026-11-04) — bound from js/68-wind-view.js windEfx
+#  wind/aegis_aim   loop, follows the caster while choosing (wnwaim → stop on wnwup / wnwaimoff)
+#  wind/aegis_cast  one-shot at the caster, a = wall direction (air push + streamlines forward)
+#  wind/aegis_wall  12 s at the wall centre (+z = away from caster): low roll stands up into the curved wall, lingers, fades
+#  wind/aegis_push  loop on top of the wall while it is pushed forward (low rolling front + dust + air dragged behind)
+#  wind/aegis_stop  push ends; wind/aegis_unstable loop (damage >= 70 %); wind/aegis_break  wall bursts forward
+# Arc meshes are centred on the circle centre → every arc layer uses pos z = −RAD (middle of the wall at the event point).
+# =====================================================================
+WALL=12.0;WHG=5.4;ZC=round(-RAD,3)
+SMK=dict(look='smoke',col='#ddd6c3',c2='#b3aa92',curl=True,fin=10)
+def g_aim():
+    L=[]
+    L.append({'id':'loops','t':'mesh','at':0,'life':2,'loop':True,'att':'ground','shape':'model','model':'wind_aegis_gather','mat':'tex','tex':'tex/wind_air_band','col':WHITE,'col2':'#000000','rim':0,
+        'uvTile':[1,1],'uvScroll':[-.6,0],'spin':-70,'scale':1,'op':.8,'fade':0})
+    L.append({'id':'curl','t':'emit','at':0,'life':2,'loop':True,'att':'ground','pos':[0,.9,0],'from':'ring','fr':.9,'rate':9,'dir':'tangent','speed':[2,3],'up':[.1,.4],'plife':[.3,.55],
+        'look':'streak','size':[.8,1.4],'col':WHITE,'c2':GREEN,'gravity':0,'drag':.3,'curl':True})
+    L.append({'id':'dust','t':'emit','at':0,'life':2,'loop':True,'att':'ground','pos':[0,.05,0],'from':'ring','fr':1.1,'rate':10,'dir':'tangent','speed':[.8,1.6],'up':[.1,.5],'plife':[.8,1.4],
+        'look':'smoke','size':[3,5.5],'grow':.4,'col':'#d9d2bf','c2':'#b8b09a','gravity':-.1,'drag':.6,'curl':True,'fin':12})
+    L.append({'id':'leaf','t':'emit','at':0,'life':2,'loop':True,'att':'ground','pos':[0,.2,0],'from':'ring','fr':1,'rate':3,'dir':'tangent','speed':[1.2,2],'up':[.3,.9],'plife':[1.2,1.8],
+        'look':'model','model':'wind_leaf','mmat':'solid','msize':[.07,.12],'mspin':260,'bounce':0,'col':'#9fd86a','c2':'#4c8a2e','gravity':.4,'drag':.8,'curl':True,'x':True})
+    L.append({'id':'haze','t':'warp','at':0,'life':2,'loop':True,'att':'ground','pos':[0,1.0,.3],'kind':'haze','size':2.2,'str':.45,'op':1,'col':WHITE,'glow':0,'x':True})
+    return {'v':1,'desc':'กำแพงลม (แบบ A ลมใส) ตอนเล็ง: วงลมบางหมุนรอบตัว + ฝุ่น/ใบไม้ปลิว + อากาศบิด — วนจนวาง/ยกเลิก (ตามตัวผู้ร่าย)','tags':['wind','wall','aim','loop'],'pal':'wind','dur':2,'seed':3,'layers':L}
+def g_cast():
+    L=[]
+    L.append({'id':'push','t':'warp','at':0,'life':.3,'att':'ground','pos':[0,1.2,.9],'kind':'shock','size':{'0':.4,'1':2.8},'str':.9,'op':{'0':1,'1':0},'col':WHITE,'glow':0})
+    L.append({'id':'spray','t':'emit','at':0,'life':.06,'att':'ground','pos':[0,1.2,.7],'burst':22,'rate':0,'from':'sphere','fr':.2,'dir':'aim','yaw':0,'spread':.35,'speed':[10,16],'plife':[.18,.3],
+        'look':'streak','size':[1.2,2.2],'col':WHITE,'c2':GREEN,'gravity':0,'drag':1,'curl':False})
+    L.append(dict(SMK,id='kick',t='emit',at=0,life=.08,att='ground',pos=[0,.05,.4],burst=10,rate=0,**{'from':'disc'},fr=.5,dir='aim',yaw=0,spread=.9,speed=[2.5,4.5],up=[.2,.7],plife=[.6,1],size=[3.5,6],grow=.6,gravity=0,drag=2))
+    L.append({'id':'lines','t':'mesh','at':.03,'life':.55,'att':'ground','shape':'model','model':'wind_aegis_flow','mat':'tex','tex':'tex/wind_air_band','col':WHITE,'col2':'#000000','rim':0,
+        'uvTile':[1,1],'uvScroll':[-3.2,0],'scale':{'0':[1,1,.2],'0.45':[1,1,1],'1':[1,1,1]},'op':{'0':0,'0.15':.75,'0.6':.6,'1':0},'fade':0})
+    return {'v':1,'desc':'กำแพงลม (แบบ A ลมใส) ตอนปล่อย: อากาศดันออกจากมือ + เส้นลมสั้นพุ่ง + ฝุ่นที่เท้า + เส้นลมบางวิ่งเลียดพื้นไปข้างหน้า (ที่ตัวผู้ร่าย หันไปทางกำแพง)','tags':['wind','wall','cast'],'pal':'wind','dur':.7,'seed':4,'layers':L}
+def arc_layer(lid,life,col,reps,scroll,dz=0,sc=None,at=0,loop=False,opc=1):
+    return {'id':lid,'t':'mesh','at':at,'life':life,'loop':loop,'att':'ground','shape':'model','model':'wind_aegis_arc','mat':'tex','tex':'tex/wind_air_rise','col':col,'col2':'#000000','rim':0,
+        'uvTile':[URep(reps),1],'uvScroll':scroll,'pos':[0,0,round(ZC+dz,3)],'scale':sc if sc is not None else [1,WHG,1],'op':opc,'fade':0}
+def g_wall():
+    L=[];U=lambda t:str(round(t/WALL,4))
+    stand={'0':[1,.08*WHG,1],U(.08):[1,.35*WHG,1],U(.22):[1,1.04*WHG,1],U(.32):[1,WHG,1],U(WALL-.35):[1,WHG,1],'1':[1,.85*WHG,1]}
+    opc=lambda pk:{'0':0,U(.08):pk,U(WALL-.35):pk,'1':0}
+    L.append(arc_layer('wall',WALL,WHITE,1.7,[.03,0],sc=stand,opc=opc(.75)))
+    L.append(arc_layer('wall2',WALL,'#d8ffe0',1.1,[-.05,0],dz=-.35,sc=stand,opc=opc(.4)))
+    L.append(arc_layer('tint',WALL,GREEN,1.1,[.02,0],dz=.3,sc=stand,opc=opc(.22)))
+    L.append({'id':'ring','t':'warp','at':.05,'life':.4,'att':'ground','pos':[0,.15,0],'kind':'shock','flat':True,'size':{'0':2,'1':9},'str':.9,'op':{'0':1,'1':0},'col':WHITE,'glow':0})
+    L.append(dict(SMK,id='dust',t='emit',at=.05,life=.12,att='ground',pos=[0,.05,ZC],**{'from':'mesh'},of='wall',burst=16,rate=0,dir='aim',yaw=0,spread=1.2,speed=[2,4.5],up=[.2,.9],plife=[.6,1.1],size=[3.5,6.5],grow=.6,gravity=0,drag=1.8))
+    L.append({'id':'up','t':'emit','at':.05,'life':.1,'att':'ground','pos':[0,0,ZC],'from':'mesh','of':'wall','burst':40,'rate':0,'dir':'up','speed':[6,10],'plife':[.25,.45],'look':'streak','size':[1.4,2.6],'col':WHITE,'c2':GREEN,'gravity':0,'drag':1.5,'curl':False})
+    L.append({'id':'rise','t':'emit','at':.3,'life':WALL-.7,'att':'ground','pos':[0,0,ZC],'from':'mesh','of':'wall','rate':26,'dir':'up','speed':[2.5,4.5],'plife':[.4,.8],
+        'look':'streak','size':[1,2],'col':WHITE,'c2':GREEN,'gravity':0,'drag':.4,'curl':False})
+    L.append({'id':'wisp','t':'emit','at':.4,'life':WALL-.8,'att':'ground','pos':[0,0,ZC],'from':'mesh','of':'wall','rate':6,'dir':'up','speed':[.6,1.4],'plife':[1,1.6],
+        'look':'smoke','size':[3,5],'grow':.5,'col':'#f2fff6','c2':'#cfe8d6','gravity':-.3,'drag':.6,'curl':True,'fin':14,'x':True})
+    L.append({'id':'base','t':'emit','at':.4,'life':WALL-.8,'att':'ground','pos':[0,.05,ZC],'from':'mesh','of':'wall','rate':8,'dir':'flat','speed':[.5,1.2],'up':[.05,.3],'plife':[1,1.6],
+        'look':'smoke','size':[3,5.5],'grow':.4,'col':'#e3ddcb','c2':'#bdb39c','gravity':0,'drag':1,'curl':True,'fin':14,'x':True})
+    L.append({'id':'haze','t':'warp','at':.15,'life':WALL-.3,'att':'ground','pos':[0,WHG*.5,0],'kind':'haze','size':7,'str':.45,'op':{'0':0,'0.03':1,'0.97':1,'1':0},'col':WHITE,'glow':0,'x':True})
+    L.append({'id':'lift','t':'emit','at':WALL-.3,'life':.12,'att':'ground','pos':[0,0,ZC],'from':'mesh','of':'wall','burst':40,'rate':0,'dir':'up','speed':[1.5,3],'plife':[.4,.7],'look':'streak','size':[1,1.8],'col':WHITE,'c2':GREEN,'gravity':0,'drag':1.2,'curl':True})
+    L.append({'id':'puff','t':'emit','at':WALL-.3,'life':.1,'att':'ground','pos':[0,0,ZC],'from':'mesh','of':'wall','burst':14,'rate':0,'dir':'up','speed':[.8,1.6],'plife':[.6,1],'look':'smoke','size':[3.5,6],'grow':.6,
+        'col':'#f2fff6','c2':'#cfe8d6','gravity':-.4,'drag':.8,'curl':True,'fin':10})
+    return {'v':1,'desc':'กำแพงลม Aegis Gale แบบ A "ลมใส" (ผู้ใช้เลือก 2026-11-04, สตอรี่บอร์ด #16): คลื่นลมเตี้ยยืดตั้งเป็นกำแพงโค้ง 12.5 ม. สูง 5.4 ม. เส้นลมคลื่นไหวลอยขึ้นตลอด ฝุ่นที่โคน อากาศบิด ไม่เรือง (ตรงกลางนูนไปทางศัตรู +z)','tags':['wind','wall','ground'],'pal':'wind','dur':WALL,'seed':11,'layers':L}
+def g_push():
+    L=[]
+    L.append({'id':'roll','t':'mesh','at':0,'life':.6,'loop':True,'att':'ground','shape':'model','model':'wind_aegis_roll','mat':'tex','tex':'tex/wind_air_band','col':WHITE,'col2':'#000000','rim':0,
+        'uvTile':[URep(3),1],'uvScroll':[.9,0],'pos':[0,0,round(ZC+.7,3)],'scale':[1,1.2,1],'op':.85,'fade':0})
+    L.append(dict(SMK,id='dust',t='emit',at=0,life=.6,loop=True,att='ground',pos=[0,0,round(ZC+.7,3)],**{'from':'mesh'},of='roll',rate=40,dir='up',speed=[.6,1.6],up=[.3,1],plife=[.6,1.1],size=[3,6],grow=.5,gravity=0,drag=1.5))
+    L.append({'id':'drag','t':'emit','at':0,'life':.6,'loop':True,'att':'ground','pos':[0,.6,round(ZC+.7,3)],'from':'mesh','of':'roll','rate':60,'dir':'aim','yaw':180,'spread':.25,'speed':[4,8],'plife':[.25,.5],
+        'look':'streak','size':[1.4,2.8],'col':WHITE,'c2':GREEN,'gravity':0,'drag':1,'curl':False})
+    L.append({'id':'haze','t':'warp','at':0,'life':.6,'loop':True,'att':'ground','pos':[0,1,.6],'kind':'haze','size':5,'str':.7,'op':1,'col':WHITE,'glow':0,'x':True})
+    return {'v':1,'desc':'กำแพงลม (แบบ A) ตอนดันพุ่ง: คลื่นลมเตี้ยกลิ้งนำหน้าโคนกำแพง + ฝุ่นตลบ + เส้นลมลากไปด้านหลัง + อากาศบิด (วนซ้อนกำแพงขณะวิ่ง)','tags':['wind','wall','push','loop'],'pal':'wind','dur':.6,'seed':8,'layers':L}
+def g_stop():
+    L=[arc_layer('probe',.3,WHITE,1.7,[0,0],opc={'0':.3,'1':0})]
+    L.append({'id':'ring','t':'warp','at':0,'life':.35,'att':'ground','pos':[0,.15,.5],'kind':'shock','flat':True,'size':{'0':2,'1':8},'str':.8,'op':{'0':1,'1':0},'col':WHITE,'glow':0})
+    L.append(dict(SMK,id='dust',t='emit',at=0,life=.08,att='ground',pos=[0,.05,ZC],**{'from':'mesh'},of='probe',burst=14,rate=0,dir='aim',yaw=0,spread=1,speed=[2,4],up=[.2,.8],plife=[.6,1],size=[3.5,6],grow=.6,gravity=0,drag=1.8))
+    L.append({'id':'spray','t':'emit','at':0,'life':.05,'att':'ground','pos':[0,1.5,0],'from':'sphere','fr':1.5,'burst':24,'rate':0,'dir':'aim','yaw':0,'spread':.9,'speed':[4,8],'up':[.5,2],'plife':[.25,.5],'look':'streak','size':[1,2.2],'col':WHITE,'c2':GREEN,'gravity':0,'drag':2,'curl':False})
+    return {'v':1,'desc':'กำแพงลม (แบบ A) หยุดหลังดัน: ฝุ่นพัดออกที่โคน + อากาศบิดวงเตี้ย + เส้นลมพ่นไปข้างหน้า','tags':['wind','wall','push'],'pal':'wind','dur':.5,'seed':9,'layers':L}
+def g_unstable():
+    L=[arc_layer('shiver',2,'#e6fff4',2.2,[.12,0],loop=True,opc={'0':.25,'0.2':.42,'0.45':.22,'0.7':.45,'1':.25},
+        sc={'0':[1,WHG,1],'0.13':[1.005,WHG*1.05,1],'0.27':[.997,WHG*.96,1],'0.4':[1.004,WHG*1.04,1],'0.55':[.996,WHG*.97,1],'0.7':[1.006,WHG*1.06,1],'0.85':[.998,WHG*.96,1],'1':[1,WHG,1]})]
+    L.append({'id':'rush','t':'emit','at':0,'life':2,'loop':True,'att':'ground','pos':[0,0,ZC],'from':'mesh','of':'shiver','rate':70,'dir':'up','speed':[4,6.5],'plife':[.25,.5],'look':'streak','size':[1.4,2.6],'col':WHITE,'c2':GREEN,'gravity':0,'drag':0,'curl':False})
+    L.append({'id':'chips','t':'emit','at':0,'life':2,'loop':True,'att':'ground','pos':[0,0,ZC],'from':'mesh','of':'shiver','rate':25,'dir':'aim','yaw':0,'spread':.9,'speed':[1.5,3.5],'plife':[.3,.7],'look':'streak','size':[.5,1.1],'col':'#e6fff4','c2':GREEN,'gravity':0,'drag':1.2,'curl':True})
+    L.append(dict(SMK,id='dust',t='emit',at=0,life=2,loop=True,att='ground',pos=[0,.05,ZC],**{'from':'mesh'},of='shiver',rate=12,dir='flat',speed=[1,2],up=[.1,.4],plife=[.8,1.3],size=[3,5],grow=.4,gravity=0,drag=1))
+    return {'v':1,'desc':'กำแพงลม (แบบ A) ใกล้แตก: เส้นลมไหลขึ้นเร็วขึ้น กำแพงสั่น ฝุ่นตลบที่โคน เศษลมหลุดออก (วนซ้อนกำแพงจนแตก)','tags':['wind','wall','loop'],'pal':'wind','dur':2,'seed':6,'layers':L}
+def g_break():
+    L=[arc_layer('contract',.2,WHITE,1.7,[0,0],opc={'0':.6,'0.6':.9,'1':0},sc={'0':[1,WHG,1],'0.6':[.97,WHG*.72,.94],'1':[1.03,WHG*.3,1.1]})]
+    for j,(col,dz,dl,op) in enumerate([(WHITE,7,0,.8),('#d8ffe0',10,.04,.55)]):
+        b=arc_layer(f'blow{j}',.55,col,1.4,[0,-1.5],at=round(.12+dl,2),opc={'0':op,'0.4':round(op*.7,2),'1':0},sc={'0':[1,WHG,1],'0.3':[1.15,round(WHG*.85,2),1.15],'1':[1.4,round(WHG*.45,2),1.4]})
+        b['pos']={'0':[0,0,ZC],'1':[0,0,round(ZC+dz,2)],'ease':'out'};L.append(b)
+    L.append({'id':'shards','t':'emit','at':.12,'life':.05,'att':'ground','pos':[0,0,ZC],'from':'mesh','of':'contract','burst':70,'rate':0,'dir':'aim','yaw':0,'spread':.8,'speed':[7,14],'up':[0,3],'plife':[.35,.8],'look':'streak','size':[1.4,3],'col':WHITE,'c2':GREEN,'gravity':0,'drag':1.4,'curl':False})
+    L.append(dict(SMK,id='dust',t='emit',at=.12,life=.08,att='ground',pos=[0,.05,ZC],**{'from':'mesh'},of='contract',burst=40,rate=0,dir='aim',yaw=0,spread=1,speed=[4,8],up=[.3,1.2],plife=[.8,1.4],size=[4,7],grow=.8,gravity=0,drag=1.6))
+    L.append({'id':'shock','t':'warp','at':.12,'life':.45,'att':'ground','pos':[0,.1,1.5],'kind':'shock','flat':True,'size':{'0':1,'1':14},'str':1.4,'op':{'0':1,'1':0},'col':WHITE,'glow':0})
+    L.append({'id':'shake','t':'screen','at':.12,'life':.3,'shake':7,'flash':.03,'fcol':'#e6fff4'})
+    return {'v':1,'desc':'กำแพงลม (แบบ A) แตกระเบิด: หดเข้าสั้น ๆ แล้วม่านเส้นลมถูกพัดพุ่งออกด้านหน้า + เส้นลมแตกกระจาย + ฝุ่นตลบ + คลื่นอากาศบิดบนพื้น + จอสั่น','tags':['wind','wall','break'],'pal':'wind','dur':1.2,'seed':7,'layers':L}
+for n,f in [('aim',g_aim),('cast',g_cast),('wall',g_wall),('push',g_push),('stop',g_stop),('unstable',g_unstable),('break',g_break)]:
+    save(ROOT/f'assets/fx/wind/aegis_{n}.fx.json',f())
+print('in-game: wind/aegis_aim|cast|wall|push|stop|unstable|break')

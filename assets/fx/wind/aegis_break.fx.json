@@ -1,0 +1,301 @@
+{
+ "v": 1,
+ "desc": "กำแพงลม (แบบ A) แตกระเบิด: หดเข้าสั้น ๆ แล้วม่านเส้นลมถูกพัดพุ่งออกด้านหน้า + เส้นลมแตกกระจาย + ฝุ่นตลบ + คลื่นอากาศบิดบนพื้น + จอสั่น",
+ "tags": [
+  "wind",
+  "wall",
+  "break"
+ ],
+ "pal": "wind",
+ "dur": 1.2,
+ "seed": 7,
+ "layers": [
+  {
+   "id": "contract",
+   "t": "mesh",
+   "at": 0,
+   "life": 0.2,
+   "loop": false,
+   "att": "ground",
+   "shape": "model",
+   "model": "wind_aegis_arc",
+   "mat": "tex",
+   "tex": "tex/wind_air_rise",
+   "col": "#ffffff",
+   "col2": "#000000",
+   "rim": 0,
+   "uvTile": [
+    9.56,
+    1
+   ],
+   "uvScroll": [
+    0,
+    0
+   ],
+   "pos": [
+    0,
+    0,
+    -11.794
+   ],
+   "scale": {
+    "0": [
+     1,
+     5.4,
+     1
+    ],
+    "0.6": [
+     0.97,
+     3.888,
+     0.94
+    ],
+    "1": [
+     1.03,
+     1.62,
+     1.1
+    ]
+   },
+   "op": {
+    "0": 0.6,
+    "0.6": 0.9,
+    "1": 0
+   },
+   "fade": 0
+  },
+  {
+   "id": "blow0",
+   "t": "mesh",
+   "at": 0.12,
+   "life": 0.55,
+   "loop": false,
+   "att": "ground",
+   "shape": "model",
+   "model": "wind_aegis_arc",
+   "mat": "tex",
+   "tex": "tex/wind_air_rise",
+   "col": "#ffffff",
+   "col2": "#000000",
+   "rim": 0,
+   "uvTile": [
+    7.87,
+    1
+   ],
+   "uvScroll": [
+    0,
+    -1.5
+   ],
+   "pos": {
+    "0": [
+     0,
+     0,
+     -11.794
+    ],
+    "1": [
+     0,
+     0,
+     -4.79
+    ],
+    "ease": "out"
+   },
+   "scale": {
+    "0": [
+     1,
+     5.4,
+     1
+    ],
+    "0.3": [
+     1.15,
+     4.59,
+     1.15
+    ],
+    "1": [
+     1.4,
+     2.43,
+     1.4
+    ]
+   },
+   "op": {
+    "0": 0.8,
+    "0.4": 0.56,
+    "1": 0
+   },
+   "fade": 0
+  },
+  {
+   "id": "blow1",
+   "t": "mesh",
+   "at": 0.16,
+   "life": 0.55,
+   "loop": false,
+   "att": "ground",
+   "shape": "model",
+   "model": "wind_aegis_arc",
+   "mat": "tex",
+   "tex": "tex/wind_air_rise",
+   "col": "#d8ffe0",
+   "col2": "#000000",
+   "rim": 0,
+   "uvTile": [
+    7.87,
+    1
+   ],
+   "uvScroll": [
+    0,
+    -1.5
+   ],
+   "pos": {
+    "0": [
+     0,
+     0,
+     -11.794
+    ],
+    "1": [
+     0,
+     0,
+     -1.79
+    ],
+    "ease": "out"
+   },
+   "scale": {
+    "0": [
+     1,
+     5.4,
+     1
+    ],
+    "0.3": [
+     1.15,
+     4.59,
+     1.15
+    ],
+    "1": [
+     1.4,
+     2.43,
+     1.4
+    ]
+   },
+   "op": {
+    "0": 0.55,
+    "0.4": 0.39,
+    "1": 0
+   },
+   "fade": 0
+  },
+  {
+   "id": "shards",
+   "t": "emit",
+   "at": 0.12,
+   "life": 0.05,
+   "att": "ground",
+   "pos": [
+    0,
+    0,
+    -11.794
+   ],
+   "from": "mesh",
+   "of": "contract",
+   "burst": 70,
+   "rate": 0,
+   "dir": "aim",
+   "yaw": 0,
+   "spread": 0.8,
+   "speed": [
+    7,
+    14
+   ],
+   "up": [
+    0,
+    3
+   ],
+   "plife": [
+    0.35,
+    0.8
+   ],
+   "look": "streak",
+   "size": [
+    1.4,
+    3
+   ],
+   "col": "#ffffff",
+   "c2": "#8dff65",
+   "gravity": 0,
+   "drag": 1.4,
+   "curl": false
+  },
+  {
+   "look": "smoke",
+   "col": "#ddd6c3",
+   "c2": "#b3aa92",
+   "curl": true,
+   "fin": 10,
+   "id": "dust",
+   "t": "emit",
+   "at": 0.12,
+   "life": 0.08,
+   "att": "ground",
+   "pos": [
+    0,
+    0.05,
+    -11.794
+   ],
+   "from": "mesh",
+   "of": "contract",
+   "burst": 40,
+   "rate": 0,
+   "dir": "aim",
+   "yaw": 0,
+   "spread": 1,
+   "speed": [
+    4,
+    8
+   ],
+   "up": [
+    0.3,
+    1.2
+   ],
+   "plife": [
+    0.8,
+    1.4
+   ],
+   "size": [
+    4,
+    7
+   ],
+   "grow": 0.8,
+   "gravity": 0,
+   "drag": 1.6
+  },
+  {
+   "id": "shock",
+   "t": "warp",
+   "at": 0.12,
+   "life": 0.45,
+   "att": "ground",
+   "pos": [
+    0,
+    0.1,
+    1.5
+   ],
+   "kind": "shock",
+   "flat": true,
+   "size": {
+    "0": 1,
+    "1": 14
+   },
+   "str": 1.4,
+   "op": {
+    "0": 1,
+    "1": 0
+   },
+   "col": "#ffffff",
+   "glow": 0
+  },
+  {
+   "id": "shake",
+   "t": "screen",
+   "at": 0.12,
+   "life": 0.3,
+   "shake": 7,
+   "flash": 0.03,
+   "fcol": "#e6fff4"
+  }
+ ]
+}
