@@ -406,7 +406,7 @@ SKS.lotus={dur:6.0,still:2.6,setup(){const me=pup('3.1.0.2.1.0.0.1.0.0',0,0,0),f
       if(this.hit&&t>=this.hit+.45&&!this.boom){this.boom=1;sp.visible=false;poisonBurst(chestW(foe),false);}
       if(this.boom&&Math.random()<.5)puff(chestW(foe).add(V3(rnd(-.3,.3),rnd(-.5,.3),0)),1,'#86e05a',{c2:'#3a6a2a',sp:.3,size:.5});
       label=t<2.4?'ดอกบัว · 100 HP · วง 8 ม. ฮีลเรา/เพื่อน/พืช 5/วิ · ป้อมได้บัฟยิงเร็ว 4 วิ หลังปลูก':t<3.5?'ดอกบัว · ทุก 5 วิ สร้างสปอร์ บินมาลอยข้างไหล่ (อยู่ 10 วิ)':'ดอกบัว · แส้โดน 1 ครั้ง = สปอร์ 1 ลูกบินไประเบิดควันพิษ (ไม่มีดาเมจแรก)';};}};
-// 6) ย้ายพืช — พืชทุกต้นมุดดิน → วิ่งใต้ดินมาหาเรา → โผล่จัดวงรอบตัวใหม่ + เลือดเต็ม + บัฟยิงเร็ว 4 วิ
+// 6) ย้ายพืช — มุดลงที่เดิม แล้วโผล่ตำแหน่งใหม่พร้อมคลื่นบัฟจากผู้เล่น
 SKS.move={dur:4.2,still:2.75,setup(){const me=pup('3.1.0.2.1.0.0.1.0.0',0,0,0);me.g.position.copy(W(0,0,0));
     cam.p.copy(W(-6,-5.5,6.2));cam.l.copy(W(3,1.5,0));
     const A=Turret(),B=Turret(),Lo=Lotus(.8);const old=[W(9,4.5,0),W(7,8.5,0),W(11,7,0)],neu=[W(1.6,-2.4,0),W(1.6,2.4,0),W(-2.8,0,0)];
@@ -415,53 +415,53 @@ SKS.move={dur:4.2,still:2.75,setup(){const me=pup('3.1.0.2.1.0.0.1.0.0',0,0,0);m
     const bars=plants.map(()=>{const g=new T.Group();add(g);const bg=mesh(new T.PlaneGeometry(1,.12),new T.MeshBasicMaterial({color:'#202020',depthTest:false}),g);const fg=mesh(new T.PlaneGeometry(1,.12),new T.MeshBasicMaterial({color:'#7dff5a',depthTest:false}),g);fg.position.z=.001;g.fg=fg;return g;});
     const auras=plants.map(()=>ring(.55,.7,'#ffd23f',.8));
     return (t,dt)=>{idle(me,t);const cast=phase(t,0,.3);me.armR.rotation.set(-1.3*Math.sin(Math.PI*cast),0,0);me.armL.rotation.set(-1.3*Math.sin(Math.PI*cast),0,0);
-      if(t<.3&&!this.c){this.c=1;shock(me.g.position,'#c8ff80',5,.5);sparks(me.g.position.clone().add(V3(0,1,0)),20,3);}
+      if(t>=2.0&&!this.c){this.c=1;shock(me.g.position,'#b8ff88',7,.8);sparks(me.g.position.clone().add(V3(0,.45,0)),16,2,'#eaffbe','#77db5c');}
       plants.forEach((q,i)=>{const dive=phase(t,.3+i*.08,.75+i*.08),run=phase(t,.8,1.9),pop=phase(t,2.0+i*.1,2.45+i*.1);
         const P=dive<1?q.o:run<1?null:q.n;const s=dive<1?1-inQ(dive):pop;
-        if(q.k==='t'){q.p.grow(Math.max(.001,dive<1?1-inQ(dive):outQ(pop)));q.p.pose(t,0,0);}else q.p.set(dive<1?1-inQ(dive):outQ(pop),dive<1?1-dive:ease(pop),t);
+        if(q.k==='t'){q.p.grow(Math.max(.001,dive<1?1-inQ(dive):outQ(pop)));q.p.pose(t,0,0,false,ease(phase(pop,.2,.9)));}else q.p.set(dive<1?1-inQ(dive):outQ(pop),dive<1?1-dive:ease(pop),t);
         if(dive<1)q.p.g.position.copy(q.o).add(V3(0,-.6*inQ(dive),0));else if(pop>0)q.p.g.position.copy(q.n);
         if(dive>0&&dive<1&&Math.random()<.6)dirt(q.o,2,2);
-        if(dive>=1&&run>0&&run<1){const p=V3().lerpVectors(q.o,q.n,ease(run));if(Math.random()<.8){dirt(p,2,1.6,{size:.8});puff(p,1,'#a08a6a',{sp:.4,size:.6});}}
         if(pop>0&&!q.popped){q.popped=1;sprout(q.n,1.2);shock(q.n,'#ffd23f',3,.5);}
         const hb=bars[i];hb.visible=pop>.5||dive<.2;hb.position.copy(q.p.g.position).add(V3(0,q.k==='t'?1.7:3.4,0));hb.lookAt(cam.p);const hp=pop>.5?1:.35;hb.fg.scale.x=hp;hb.fg.position.x=-(1-hp)/2;
         const au=auras[i];au.visible=pop>.6&&t<4.1;au.position.copy(q.n).add(V3(0,.05,0));au.scale.setScalar(1+.2*Math.sin(t*12+i));
         if(au.visible&&q.k==='t'&&Math.random()<.3)sparks(q.p.head.getWorldPosition(V3()),2,1.4,'#fff2a0','#ffb000');});
-      label=t<1.9?'ย้ายพืช · พืชทุกต้นมุดลงดิน แล้ววิ่งใต้ดินมาหาเรา':'ย้ายพืช · โผล่จัดวงรอบตัวเราใหม่ + เลือดเต็ม + บัฟยิงเร็ว 4 วิ (ป้อมติดกำแพงได้ / ดอกบัวหาพื้นว่าง)';};}};
+      label=t<1.9?'ย้ายพืช · มุดลงที่ตำแหน่งเดิม':'ย้ายพืช · โผล่รอบตัว พร้อมคลื่นบัฟจากผู้เล่น';};}};
 // 7) ลูกบอลไม้ — ขว้าง → หยุดลอยสั่น → หนามเรียวพุ่งแทงศัตรูรอบ ๆ แล้วดึงเข้ามา → บอลบีบแล้วแตก • กำแพงบังหนาม
-SKS.ball={dur:4.6,still:2.05,setup(){const me=pup('3.1.0.2.1.0.0.1.0.0',0,0,0);const C=W(9,0,1.6);
+SKS.ball={dur:5.2,still:2.05,setup(){const me=pup('3.1.0.2.1.0.0.1.0.0',0,0,0);const C=W(9,0,.025);
     const foes=[pup('1.3.2.0.0.2.1.0.0.0',12.5,-2.2,Math.PI*.8,'enemy'),pup('2.0.1.1.0.1.2.0.0.0',8.2,3.6,-Math.PI*.6,'enemy'),pup('0.2.3.1.0.3.1.0.0.0',6.2,-3.1,Math.PI*.3,'enemy'),pup('1.1.1.0.0.0.0.0.0.0',13,4.2,Math.PI,'enemy')];
     const wall=mesh(new T.BoxGeometry(2.4,2.6,.5),M.stone);wall.position.copy(W(11.2,2.6,1.3));wall.rotation.y=.6;
     cam.p.copy(W(3,-6.2,4.4));cam.l.copy(W(9.5,0,1.1));
     const ball=new T.Group();add(ball);const bg=new T.IcosahedronGeometry(.48,2);{const p=bg.attributes.position;for(let i=0;i<p.count;i++){const v=V3(p.getX(i),p.getY(i),p.getZ(i)),n=v.clone().normalize();const k=1+.12*Math.sin(n.x*9+n.y*5)+.06*Math.sin(n.z*13);v.copy(n).multiplyScalar(.48*k);p.setXYZ(i,v.x,v.y,v.z);}bg.computeVertexNormals();}
-    mesh(bg,M.wood,ball);for(let i=0;i<7;i++){const l=mesh(leafGeo,M.leaf,ball);const n=V3(rnd(-1,1),rnd(-.2,1),rnd(-1,1)).normalize();l.position.copy(n.multiplyScalar(.45));l.lookAt(V3());l.scale.setScalar(.7);}
-    for(let i=0;i<3;i++){const r=mesh(new T.TorusGeometry(.5,.035,5,24),M.bark,ball);r.rotation.set(rnd(0,3),rnd(0,3),0);}
-    const bglow=glow(GLOWG,1.6,ball);const spikes=foes.map(()=>Tube(18,5,M.bark)),sth=Thorns(10,1.1);
+    const colors=[];for(let i=0;i<bg.attributes.position.count;i++){const x=bg.attributes.position.getX(i),y=bg.attributes.position.getY(i),z=bg.attributes.position.getZ(i),v=.5+.5*Math.sin(x*17+y*9+Math.sin(z*12));const c=new T.Color('#402514').lerp(new T.Color('#a36c3f'),v);colors.push(c.r,c.g,c.b);}bg.setAttribute('color',new T.Float32BufferAttribute(colors,3));mesh(bg,STD('#ffffff',{vertexColors:true}),ball);
+    for(let i=0;i<3;i++){const r=mesh(new T.TorusGeometry(.5,.025,5,24),M.wood,ball);r.rotation.set(rnd(0,3),rnd(0,3),0);}
+    const bglow=glow(GLOWG,.01,ball);bglow.visible=false;const spikes=foes.map(()=>Tube(18,5,M.bark)),sth=Thorns(10,1.1);sth.material=M.wood;
     return (t,dt)=>{idle(me,t);foes.forEach((f,i)=>{idle(f,t);});const th=phase(t,.05,.35);me.armR.rotation.set(-.4-1.7*Math.sin(Math.PI*th),0,0);
-      const fl=phase(t,.3,.95);const st=tipW(me);if(t<.95){ball.position.lerpVectors(st,C,outQ(fl));ball.position.y+=Math.sin(fl*Math.PI)*.8;ball.rotation.set(t*12,t*7,0);}
-      const shake=t>.95&&t<1.45?(t-.95)/.5:0;if(t>=.95&&t<2.75){ball.position.copy(C).add(V3(rnd(-1,1),rnd(-1,1),rnd(-1,1)).multiplyScalar(.09*shake+.015));}
-      const fire=phase(t,1.45,1.62),pull=phase(t,1.75,2.25),back=phase(t,2.25,2.5),sq=phase(t,2.5,2.75);
-      ball.scale.setScalar(t<2.5?1+.1*Math.sin(t*40)*shake:1-.45*ease(sq));bglow.scale.setScalar(1.6+shake*1.2+fire*.8);
-      if(t>=2.75&&!this.br){this.br=1;ball.visible=false;chips(C,26,5);leaves(C,24,4.5);puff(C,10,'#b49a6a',{sp:1.6});shock(C,'#c8ff80',4,.5);sparks(C,30,5,'#fff6c0','#7ee05a');}
+      const fl=phase(t,.3,.65);const st=tipW(me);if(t<.65){ball.position.lerpVectors(st,C,outQ(fl));ball.position.y+=Math.sin(fl*Math.PI)*.8;ball.rotation.set(t*12,t*7,0);}
+      if(t>=.65&&!this.land){this.land=1;dirt(C,26,4,{size:1.2,spread:1.4});chips(C,12,3);shock(C,'#b8e684',4,.4);}
+      const shake=t>.65&&t<1.90?(t-.65)/1.25:0;if(t>=.65&&t<3.2){ball.position.copy(C).add(V3(rnd(-1,1),0,rnd(-1,1)).multiplyScalar(.18*shake+.015));}
+      const fire=phase(t,1.90,2.0),pull=phase(t,2.4,2.57),back=phase(t,2.57,2.80),sq=phase(t,2.95,3.2);
+      ball.scale.setScalar(t<2.95?1+.1*Math.sin(t*40)*shake:1-.45*ease(sq));bglow.scale.setScalar(1.6+shake*1.2+fire*.8);
+      if(t>=3.2&&!this.br){this.br=1;ball.visible=false;chips(C,26,5);leaves(C,24,4.5);puff(C,10,'#b49a6a',{sp:1.6});shock(C,'#c8ff80',4,.5);sparks(C,30,5,'#fff6c0','#7ee05a');}
       const tip=[];foes.forEach((f,i)=>{const sp=spikes[i],target=chestW(f),blocked=i===1;
         let reach=fire,endP=V3().lerpVectors(C,target,blocked?.55:1);
-        if(blocked&&fire>=1){reach=1-phase(t,1.62,1.8);if(!this.wb){this.wb=1;sparks(endP,14,3,'#ffffff','#a0a0a0');dirt(endP,6,2);}}
+        if(blocked&&fire>=1){reach=1-phase(t,2.0,2.18);if(!this.wb){this.wb=1;sparks(endP,14,3,'#ffffff','#a0a0a0');dirt(endP,6,2);}}
         const pk=blocked?0:pull;if(!blocked){f.g.position.copy(f.base).lerp(V3(C.x,f.base.y,C.z).add(V3().subVectors(f.base,C).setY(0).normalize().multiplyScalar(1.1)),ease(pk));if(pk>0&&pk<1){f.b.rotation.x=.4;f.legs[0].rotation.x=.6;}
-          if(fire>=1&&!f.hit){f.hit=1;sparks(target,16,3.5,'#e8ffb0','#7ed957');}if(f.hit&&t>2.3&&Math.random()<.35)puff(chestW(f).add(V3(rnd(-.3,.3),rnd(-.6,.2),0)),1,'#86e05a',{c2:'#3a6a2a',sp:.3,size:.45});}
-        const r=blocked?reach:(t<2.25?Math.min(fire,1):1-back),now2=chestW(f),e2=blocked?endP:now2;
-        sp.visible=r>.01;if(sp.visible){const pts=[];for(let k=0;k<18;k++){const u=k/17*r;pts.push(V3().lerpVectors(ball.position,e2,u));}sp.set(pts,u=>.05*(1-u)+.008,(u,c)=>c.set('#4a3218').lerp(new T.Color('#c8e86a'),u));tip.push({p:pts[17],d:V3().subVectors(e2,ball.position).normalize(),s:1});}});
+          if(fire>=1&&!f.hit){f.hit=1;sparks(target,16,3.5,'#e8ffb0','#7ed957');}if(f.hit&&t>2.75&&Math.random()<.35)puff(chestW(f).add(V3(rnd(-.3,.3),rnd(-.6,.2),0)),1,'#86e05a',{c2:'#3a6a2a',sp:.3,size:.45});}
+        const r=blocked?reach:(t<2.57?Math.min(fire,1):1-back),now2=chestW(f),e2=blocked?endP:now2.clone().add(V3().subVectors(now2,ball.position).normalize().multiplyScalar(3.1));
+        sp.visible=r>.01;if(sp.visible){const pts=[];for(let k=0;k<18;k++){const u=k/17*r;pts.push(V3().lerpVectors(ball.position,e2,u));}sp.set(pts,u=>.15*(1-u)+.004,(u,c)=>c.set('#30190d').lerp(new T.Color('#754729'),u*.45));tip.push({p:pts[17],d:V3().subVectors(e2,ball.position).normalize(),s:1});}});
       sth.put(tip);
-      label=t<1.45?'ลูกบอลไม้ · ขว้างไปข้างหน้า → หยุดลอยกลางอากาศแล้วสั่นแรง':t<2.5?'ลูกบอลไม้ · หนามเรียวแหลมแทงศัตรูรอบ ๆ แล้วดึงเข้ามาชิดลูก • กำแพงบังหนาม = หนามหดกลับ':'ลูกบอลไม้ · บีบตัวแวบหนึ่งแล้วแตกเป็นเศษไม้ใบไม้ · คนโดน: พิษ 5 วิ + ช้า 80% 1.5 วิ';};}};
+      label=t<1.90?'ลูกบอลไม้ · ขว้างลงพื้น → สั่น':t<2.95?'หนามไม้แทงเร็ว → พัก → ดึงศัตรูเข้ามาอย่างรวดเร็ว':'ลูกบอลไม้ · หดแล้วแตก';};}};
 // 8) รากยักษ์ — รากโผล่ใกล้ตัวไล่ไปตามแนว (20 ดาเมจ + สตัน 1 วิ) → ยกตั้งตรง ชะลอใกล้แนวดิ่ง → งอกใบ 3 วิเป็นต้นไม้ใหญ่ → กดซ้ำ ล้มลงตามแนว (มีพื้นที่เตือน)
-SKS.root={dur:8.4,still:4.4,setup(){const me=pup('3.1.0.2.1.0.0.1.0.0',0,0,0),foes=[pup('1.3.2.0.0.2.1.0.0.0',6,.4,Math.PI,'enemy'),pup('2.0.1.1.0.1.2.0.0.0',10.5,-.5,Math.PI,'enemy')];
+SKS.root={dur:8.4,still:4.95,setup(){const me=pup('3.1.0.2.1.0.0.1.0.0',0,0,0),foes=[pup('1.3.2.0.0.2.1.0.0.0',6,.4,Math.PI,'enemy'),pup('2.0.1.1.0.1.2.0.0.0',10.5,-.5,Math.PI,'enemy')];
     const LEN=14,N=60,base=W(1.2,0,0),root=Tube(N,10,M.bark),rth=Thorns(80,2.2);
-    const crown=new T.Group();add(crown);const blobs=[];const bcol=['#4f9a35','#62b040','#3f8a2c','#78c24a'];for(let i=0;i<16;i++){const m=mesh(new T.IcosahedronGeometry(1,1),STD(bcol[i%4],{roughness:.75,flatShading:true}),crown);const a=i/16*6.28,r=rnd(.4,2.6);m.position.set(Math.cos(a)*r,rnd(-1,1.6),Math.sin(a)*r);m.userData.s=rnd(1.4,2.4);m.scale.setScalar(.001);blobs.push(m);}
-    const br=[];for(let i=0;i<6;i++)br.push(Tube(10,6,M.bark));
+    const crown=new T.Group();add(crown);const blobs=[];const bcol=['#4f9a35','#62b040','#3f8a2c','#78c24a'];for(let i=0;i<22;i++){const m=mesh(new T.IcosahedronGeometry(1,2),STD(bcol[i%4],{roughness:.9,flatShading:true}),crown);const a=i/22*6.28,r=rnd(.8,3.7);m.position.set(Math.cos(a)*r,rnd(-.4,1.4),Math.sin(a)*r);m.userData.s=rnd(1.5,2.3);m.scale.setScalar(.001);blobs.push(m);}
+    const br=[];for(let i=0;i<8;i++)br.push(Tube(10,6,M.bark));
     const warn=new T.Mesh(new T.PlaneGeometry(3.2,LEN+3),new T.MeshBasicMaterial({color:'#ff4a2a',transparent:true,opacity:0,depthWrite:false}));warn.rotation.x=-Math.PI/2;add(warn);warn.position.copy(W(1.2+(LEN+3)/2,0,.04));
     const stars=foes.map(()=>{const g=new T.Group();add(g);for(let i=0;i<4;i++){const s=glow(GLOWT,.35,g);s.position.set(Math.cos(i*1.57)*.35,0,Math.sin(i*1.57)*.35);}g.visible=false;return g;});
     return (t,dt)=>{idle(me,t);const cast=phase(t,0,.35);me.armR.rotation.set(-1.4*Math.sin(Math.PI*.5*cast)-.1,0,0);me.armL.rotation.set(-1.2*cast,0,0);
       if(t>4.5&&t<5.0){const k=Math.sin(phase(t,4.5,5)*Math.PI);me.armR.rotation.set(-2.6*k,0,0);me.armL.rotation.set(-2.6*k,0,0);}
       // กล้อง: ช่วงแรกมุมข้าง • ช่วงต้นไม้ถอยกว้าง
-      const wide=ease(phase(t,1.0,2.2));cam.p.copy(W(lerp(-2,-6,wide),lerp(-8,-17,wide),lerp(3.2,7.5,wide)));cam.l.copy(W(lerp(6,7,wide),0,lerp(.8,6,wide)));
+      const wide=ease(phase(t,1.0,2.2));cam.p.copy(W(lerp(-2,-10,wide),lerp(-8,-24,wide),lerp(3.2,11,wide)));cam.l.copy(W(lerp(6,7,wide),0,lerp(.8,8,wide)));
       const emerge=phase(t,.25,1.05),lift=phase(t,1.3,2.9),fall=phase(t,5.2,6.1);
       const ang=Math.PI/2*(1-Math.pow(1-lift,2.6))*(1-Math.pow(fall,2.2));   // ยก = ชะลอใกล้แนวดิ่ง • ล้ม = เร่งขึ้น
       const straight=lift;const pts=[];
@@ -469,9 +469,9 @@ SKS.root={dur:8.4,still:4.4,setup(){const me=pup('3.1.0.2.1.0.0.1.0.0',0,0,0),fo
         const wav=(1-straight*.85)*(.35*Math.abs(Math.sin(ss*.75))-.18),side=(1-straight*.7)*.35*Math.sin(ss*.42);
         const lx=ss,ly=wav;   // ในระนาบแนว (lx ไปข้างหน้า, ly ขึ้น)
         const x=lx*Math.cos(ang)-ly*Math.sin(ang),y=lx*Math.sin(ang)+ly*Math.cos(ang);pts.push(V3(base.x-side,base.y+y,base.z+x));}
-      const rad=u=>(.62*(1-u)+.16)*(.75+.25*Math.sin(u*40));
-      root.set(pts,rad,(u,c)=>c.set('#3f2a16').lerp(new T.Color('#6a4a2a'),.5+.5*Math.sin(u*55)).lerp(new T.Color('#4f7a2a'),Math.max(0,u-.75)*1.2));
-      rth.put(thornsAlong(pts,rad,4,2.2,1.9).filter((q,i)=>i%2===0));
+      const rad=u=>(1.12*Math.pow(1-u,.85)+.18)*(1+.035*Math.sin(u*35));
+      root.set(pts,rad,(u,c)=>c.set('#49301a').lerp(new T.Color('#6a4a2a'),.35+.12*Math.sin(u*11)));
+      rth.put(lift<.5?thornsAlong(pts,rad,4,1.3,1.9).filter((q,i)=>i%2===0):[]);
       // ดินแตกตามแนวที่รากโผล่
       const head=pts[N-1];if(emerge>0&&emerge<1&&ang<.2){dirt(head.clone().setY(O.y+.05),3,3.5,{size:1.4});puff(head.clone().setY(O.y+.1),1,'#a08a6a',{sp:1,size:1});}
       foes.forEach((f,i)=>{const fz=f.base.z-O.z;idle(f,t);if(emerge*LEN>fz-1.2&&!f.hit){f.hit=t;sparks(chestW(f),20,4,'#fff6c0','#c08a4a');dirt(f.base,12,4);}
@@ -479,8 +479,8 @@ SKS.root={dur:8.4,still:4.4,setup(){const me=pup('3.1.0.2.1.0.0.1.0.0',0,0,0),fo
       // ใบงอก 3 วิ หลังตั้งตรง
       const top=pts[N-1],leafK=phase(t,2.9,5.0);crown.position.copy(top).add(V3(0,.3,0));crown.rotation.set(-(Math.PI/2-ang),0,0);
       blobs.forEach((b,i)=>{const k=ease(phase(leafK,i/20,i/20+.45));b.scale.setScalar(Math.max(.001,b.userData.s*k));});
-      br.forEach((b,i)=>{const k=ease(phase(t,2.7,3.6));b.visible=k>.02&&t<6.6;if(!b.visible)return;const sIdx=Math.floor(N*(.62+i*.06)),P0=pts[Math.min(N-1,sIdx)],a=i*2.1,len=2.2*k;const d=V3(Math.cos(a)*.8,.9,Math.sin(a)*.8).normalize().applyAxisAngle(V3(1,0,0),-(Math.PI/2-ang));
-        const q=[];for(let j=0;j<10;j++){const u=j/9;q.push(P0.clone().addScaledVector(d,u*len).add(V3(0,u*u*.4,0)));}b.set(q,u=>.15*(1-u)+.03,(u,c)=>c.set('#4a3218'));});
+      br.forEach((b,i)=>{const k=ease(phase(t,2.7,3.6));b.visible=k>.02&&t<6.6;if(!b.visible)return;const sIdx=Math.floor(N*(.62+i*.06)),P0=pts[Math.min(N-1,sIdx)],a=i*2.1,len=3.5*k;const d=V3(Math.cos(a)*.8,.9,Math.sin(a)*.8).normalize().applyAxisAngle(V3(1,0,0),-(Math.PI/2-ang));
+        const q=[];for(let j=0;j<10;j++){const u=j/9;q.push(P0.clone().addScaledVector(d,u*len).add(V3(0,u*u*.4,0)));}b.set(q,u=>.25*(1-u)+.03,(u,c)=>c.set('#4a3218'));});
       if(leafK>0&&leafK<1&&Math.random()<.5)leaves(top.clone().add(V3(rnd(-2,2),rnd(-1,2),rnd(-2,2))),1,1);
       // เตือน → ล้ม → กระแทก
       warn.material.opacity=t>4.6&&t<6.2?.22+.12*Math.sin(t*14):0;

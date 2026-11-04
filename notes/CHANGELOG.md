@@ -1,5 +1,7 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
 
+- 2026-11-04 — Nature reposition and wood-ball previews refined and reviewed; root-tree preview explored, next session create a new editable tree model in VFX Studio. Updated handoff. Preview only; VFX deferred.
+
 - 2026-11-04 — Nature shield preview: green gradient, thorns around shield and animated overhead slam with gradually fading cracks; user satisfied for now, game integration and terrain contact remain to be implemented.
 
 - 2026-11-04 — Nature lotus preview: wider-spreading roots, larger flower and aura above bloom; user accepted current shape for now, VFX deferred.
