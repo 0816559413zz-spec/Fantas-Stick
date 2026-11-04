@@ -46,9 +46,10 @@ function stResize(){const w=Math.max(200,innerWidth-stVar('--sL')-stVar('--sR'))
   gl.setSize(w,hh,false);composer.setSize(w,hh);cam.aspect=w/hh;cam.updateProjectionMatrix();}
 addEventListener('resize',()=>{if(document.body.classList.contains('studio'))setTimeout(stResize,0);});
 // ---------- จุดที่เล่นเอฟเฟกต์ + กล้อง ----------
+if(SQ.has('dist'))ST.orb.dist=ST.dist;if(SQ.has('oyaw'))ST.orb.yaw=+SQ.get('oyaw');if(SQ.has('opitch'))ST.orb.pitch=+SQ.get('opitch');   // กล้อง orbit จาก URL (ภาพ ¾ แบบสตอรี่บอร์ด)
 function stAnchor(){const me=G&&G.players&&G.players.me;if(!me)return null;const a=0,d=ST.at==='far'?600:ST.at==='self'?0:240;return {x:me.x+Math.cos(a)*d,y:me.y+Math.sin(a)*d,h:0,a,follow:ST.at==='self'?'me':undefined};}
 const _stv=new THREE.Vector3();
-function stCam(c){if(ST.cam==='game'||!ST.fx)return;const A=stAnchor();if(!A)return;const T=_stv.set(tx(A.x),GY(A.x,A.y)+1.1,tz(A.y));
+function stCam(c){if(ST.cam==='game'||!ST.fx)return;const A=stAnchor();if(!A)return;const lk=(+SQ.get('look')||0)*20,lx=A.x+Math.cos(A.a)*lk,ly=A.y+Math.sin(A.a)*lk,T=_stv.set(tx(lx),GY(lx,ly)+1.1,tz(ly));   // ?look=<m> = มองไปข้างหน้า N ม. (ภาพสตอรี่บอร์ดที่ผู้ร่าย+เป้าอยู่ในภาพเดียว)
   const f=[Math.cos(A.a),Math.sin(A.a)],r=[-Math.sin(A.a),Math.cos(A.a)];
   if(ST.cam==='side')c.position.set(T.x+r[0]*ST.dist,T.y+2.2*ST.dist/9,T.z+r[1]*ST.dist);
   else if(ST.cam==='front')c.position.set(T.x+f[0]*ST.dist,T.y+2*ST.dist/9,T.z+f[1]*ST.dist);

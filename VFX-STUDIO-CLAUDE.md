@@ -140,6 +140,7 @@ http://localhost:8765/studio.html?fx=storm/railgun&sheet=0.03,0.1,0.2,0.35,0.6,1
   - `at`: `front` (12 m ahead), `self` (on the caster, follows them; for auras, shields, beams and slashes), `far` (30 m)
   - `map`: `test` (bright), `castle` / `greathall` (dark), `meadow`, `lake`
   - `seed`: change it to see another random roll
+  - `look`: camera looks N m ahead of the anchor (storyboard shots with caster + target in one frame, e.g. `at=self&look=6`); `oyaw`/`opitch` + `dist` set the `orbit` camera (¾ view like the sketches: `cam=orbit&oyaw=2.75&opitch=0.42&dist=14`)
 - **Pass/fail rules** (printed in the sheet):
   - **white-out ≤ 8%** of pixels near-white
   - **character cover ≤ 35%** of my character's box washed white

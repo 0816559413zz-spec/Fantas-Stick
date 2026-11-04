@@ -1,0 +1,14 @@
+{
+ "v": 1,
+ "desc": "เส้นลมบางคลื่นไหวลอยขึ้น (flipbook 4×4 วนต่อเนื่อง) จางที่ยอด — กำแพงลม Aegis Gale แบบสมจริง (sb #16)",
+ "gen": "image",
+ "seed": 31,
+ "px": 384,
+ "cols": 4,
+ "rows": 4,
+ "kind": "loop",
+ "fps": 12,
+ "ramp": "white",
+ "add": true,
+ "p": {}
+}
