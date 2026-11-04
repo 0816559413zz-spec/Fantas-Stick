@@ -223,14 +223,14 @@ function Lotus(scale=1){const g=new T.Group();add(g);const H=4.2;   // ผู้
   const stem=mesh(new T.TubeGeometry(stemC,24,.16,10),M.stem,g);
   const tr=mesh(new T.CylinderGeometry(.16,.42,.7,12),M.stem,g);tr.position.y=.3;
   // รากใหญ่แผ่บนพื้น 7 เส้น (ผู้ใช้: root bigger)
-  for(let i=0;i<7;i++){const a=i/7*Math.PI*2+.2,L=1.3+(i%3)*.35,c=new T.CatmullRomCurve3([V3(0,.45,0),V3(Math.cos(a)*.4,.18,Math.sin(a)*.4),V3(Math.cos(a+.2)*L*.7,.06,Math.sin(a+.2)*L*.7),V3(Math.cos(a+.3)*L,.02,Math.sin(a+.3)*L)]);
+  for(let i=0;i<7;i++){const a=i/7*Math.PI*2+.2,L=1.75+(i%3)*.42,c=new T.CatmullRomCurve3([V3(0,.45,0),V3(Math.cos(a)*.4,.18,Math.sin(a)*.4),V3(Math.cos(a+.2)*L*.7,.06,Math.sin(a+.2)*L*.7),V3(Math.cos(a+.3)*L,.02,Math.sin(a+.3)*L)]);
     const rt=new T.TubeGeometry(c,16,.11,7);mesh(rt,M.stem,g);}
   const leaves=[];for(let i=0;i<5;i++){const pv=new T.Group();pv.rotation.order='YXZ';pv.rotation.y=i/5*Math.PI*2+.3;pv.position.y=.08;g.add(pv);
     const l=mesh(leafGeo,i%2?M.leaf:M.leafD,pv);l.scale.set(2,1.4,1);l.position.x=1.0;l.rotation.x=-Math.PI/2;leaves.push(pv);}
   for(let i=0;i<3;i++){const u=.3+i*.2,c=stemC.getPoint(u),pv=new T.Group(),s=i%2?1:-1;pv.position.copy(c);pv.rotation.set(0,i*2.1,s*.6);g.add(pv);const l=mesh(leafGeo,M.leaf,pv);l.scale.set(.6,.6,.6);l.position.x=s*.3;}
   for(let j=0;j<2;j++){const pts=[];for(let i=0;i<=30;i++){const u=i/30,a=u*Math.PI*5+j*Math.PI,c=stemC.getPoint(u*.95);pts.push(V3(c.x+Math.cos(a)*.17,c.y,c.z+Math.sin(a)*.17));}mesh(new T.TubeGeometry(new T.CatmullRomCurve3(pts),40,.025,5),M.leafD,g);}
   // ดอกบัวบนยอด: กลีบชมพู 3 ชั้น + แกนเหลืองเรือง
-  const bloom=new T.Group();bloom.position.y=H;g.add(bloom);
+  const bloom=new T.Group();bloom.position.y=H;bloom.scale.setScalar(1.35);g.add(bloom);
   const cup=mesh(new T.SphereGeometry(.38,16,10,0,Math.PI*2,Math.PI/2,Math.PI/2),M.stem,bloom);cup.scale.y=.5;
   const petG=new T.SphereGeometry(.5,12,10);petG.translate(0,.5,0);petG.scale(.45,1.15,.13);
   const petals=[];for(let r=0;r<3;r++){const n=[10,8,6][r];for(let i=0;i<n;i++){const piv=new T.Group();piv.rotation.order='YXZ';piv.rotation.y=i/n*Math.PI*2+r*.3;bloom.add(piv);
@@ -238,9 +238,12 @@ function Lotus(scale=1){const g=new T.Group();add(g);const H=4.2;   // ผู้
   const core=mesh(new T.SphereGeometry(.2,16,10),M.core,bloom);core.position.y=.18;core.scale.y=.7;
   const cg=glow(GLOWT,1.2,bloom);cg.position.y=.3;
   // ฟองแก้วเรืองแสงครอบดอก
-  const bub=new T.Group();bub.position.y=H+.45;g.add(bub);
-  const ball=mesh(new T.SphereGeometry(1.05,32,20),M_BUB,bub),rim=mesh(new T.SphereGeometry(1.08,32,20),M_BUBRIM,bub);
-  const bg=glow(GLOWG,2.4,bub);bg.material.opacity=.18;
+  const bub=new T.Group();bub.position.y=H+1.05;g.add(bub);
+  const ball=mesh(new T.SphereGeometry(1.7,32,20),M_BUB,bub),rim=mesh(new T.SphereGeometry(1.74,32,20),M_BUBRIM,bub);
+  ball.visible=false;rim.visible=false;
+  const bg=glow(GLOWG,3.0,bub);bg.material.opacity=.10;
+  const haloMat=new T.MeshBasicMaterial({color:'#baffbe',transparent:true,opacity:.16,blending:T.AdditiveBlending,depthWrite:false});const halos=[];for(let i=0;i<2;i++){const h=mesh(new T.TorusGeometry(1.15+i*.17,.009,6,96),haloMat,bub);h.rotation.set(1.15+i*.24,.3+i*.7,0);halos.push(h);}
+  const auraWisps=[];for(let i=0;i<18;i++){const w=glow(i%4===0?GLOWP:GLOWG,.32+(i%3)*.12,bub);w.material.opacity=.14+(i%3)*.035;auraWisps.push(w);}
   // หยดน้ำไหลลงตามลำต้น + แอ่งเรืองแสงที่โคน
   const drips=[];for(let i=0;i<6;i++){const d=mesh(new T.SphereGeometry(.07,8,6),M_DRIP,g);d.scale.y=1.6;drips.push({d,o:i/6});}
   const pool=mesh(new T.CircleGeometry(1.4,32),M_POOL,g);pool.rotation.x=-Math.PI/2;pool.position.y=.03;
@@ -250,6 +253,8 @@ function Lotus(scale=1){const g=new T.Group();add(g);const H=4.2;   // ผู้
       petals.forEach(({piv,r,open:o},i)=>{piv.rotation.x=lerp(.12,o,open)+Math.sin(t*1.4+i)*.03*open;});cg.scale.setScalar((.8+Math.sin(t*3)*.15)*open*1.8+.01);
       bloom.rotation.z=Math.sin(t*.9)*.04*open;
       const bk=ease(phase(open,.4,1));bub.scale.setScalar(Math.max(.001,bk*(1+Math.sin(t*2.2)*.025)));bub.visible=bk>.01;
+      halos.forEach((h,i)=>{h.rotation.z=t*(i?-.25:.2);});
+      auraWisps.forEach((w,i)=>{const a=i*2.4+t*(i%2?-.45:.5),y=((i*.37+t*.22)%2.4)-1.2,r=.68+.48*Math.sin(i*4.1+t*.7)**2;w.position.set(Math.cos(a)*r,y,Math.sin(a)*r);});
       for(const {d,o} of drips){const k=(t*.45+o)%1,c=stemC.getPoint(1-k*.97);d.position.set(c.x+.17,c.y,c.z);d.visible=bk>.5;}
       const pk=ease(phase(open,.6,1));pool.scale.setScalar(Math.max(.001,pk));pool2.scale.setScalar(Math.max(.001,pk*(1+.08*Math.sin(t*3))));}};}
 // สปอร์ (ลูกเกสรเรืองแสง)
@@ -266,7 +271,7 @@ const cam={p:W(-5,-4,3),l:W(4,0,1),shake:0};
 WD.camHook=c=>{c.position.copy(cam.p);if(cam.shake>0){c.position.x+=rnd(-1,1)*cam.shake;c.position.y+=rnd(-1,1)*cam.shake;}c.lookAt(cam.l);};
 let HOOK=null;const comp=WD.composer,origR=comp.render.bind(comp);
 comp.render=function(...a){try{ME.g.visible=false;if(WD.EM3)for(const [,e] of WD.EM3)if(e&&e.g)e.g.visible=false;HOOK&&HOOK();}catch(e){HL.errs.push('hook: '+(e.stack||e.message).slice(0,300));}return origR(...a);};
-const FPS=(SK==='whip'||SK==='dash')?30:20,DT=1/FPS;let now=performance.now();
+const FPS=(SK==='whip'||SK==='dash'||SK==='shield')?30:20,DT=1/FPS;let now=performance.now();
 const out=document.createElement('canvas');out.width=720;out.height=450;const ox=out.getContext('2d');
 const images={};let label='';
 function frame(name,still){now+=DT*1000;WD.render(DT,now);
@@ -507,6 +512,15 @@ SKS.ult={dur:6.4,still:2.9,setup(){const me=pup('3.1.0.2.1.0.0.1.0.0',0,0,0),foe
       if(foe.hitT!==undefined)hitFlinch(foe,Math.max(0,1-(t-foe.hitT)/.3));
       label=t<2.0?'อัลติ · ดอกบัวยักษ์ 400 HP · ฮีลแรงขึ้น วงใหญ่ขึ้น · บัฟต้นไม้ตลอดเวลาที่ยังอยู่':t<3.6?'อัลติ · สร้างสปอร์เร็วขึ้น หลายลูกลอยรอบไหล่':'อัลติ · แส้ตวัดเร็วขึ้น · สปอร์ระเบิดแรงขึ้น: ดาเมจแรกทันที + พิษ';};}};
 // ======================================================================================
+// Nature shield redesign: clear bubble, vines rising from its base, no orbiting thorn ring.
+SKS.shield={dur:6.8,still:1.7,setup(){const me=pup('3.1.0.2.1.0.0.1.0.0',0,0,0),foe=pup('1.3.2.0.0.2.1.0.0.0',4.6,0,Math.PI,'enemy'),foe2=pup('2.0.1.1.0.1.2.0.0.0',3.52,-2.96,Math.PI,'enemy');cam.p.copy(W(6,-8,5));cam.l.copy(W(2,0,1));const sh=new T.Group();add(sh);
+  const shell=mesh(new T.SphereGeometry(1.35,32,24),new T.ShaderMaterial({transparent:true,depthWrite:false,side:T.FrontSide,vertexShader:'varying float h; varying float edge; void main(){h=position.y/2.7+0.5;vec4 mv=modelViewMatrix*vec4(position,1.0);vec3 n=normalize(normalMatrix*normal);edge=pow(1.0-abs(dot(n,normalize(-mv.xyz))),3.0);gl_Position=projectionMatrix*mv;}',fragmentShader:'varying float h; varying float edge; void main(){float t=clamp(h,0.0,1.0);vec3 low=vec3(.001,.012,.001),mid=vec3(.01,.11,.008),high=vec3(.34,.90,.25);vec3 col=mix(mix(low,mid,smoothstep(.20,.72,t)),high,smoothstep(.62,1.0,t));col+=vec3(.14,.30,.09)*edge;gl_FragColor=vec4(col,min(.97,mix(.96,.38,smoothstep(.25,1.0,t))+edge*.15));}'}),sh);
+  const motes=[];for(let i=0;i<24;i++){const m=mesh(new T.OctahedronGeometry(.025+(i%3)*.009),new T.MeshBasicMaterial({color:i%2?'#a8f77c':'#e1ffc4',transparent:true,opacity:.7,depthWrite:false}),sh);motes.push(m);}
+  const energy=[];for(let k=0;k<18;k++){const mat=new T.MeshBasicMaterial({color:k%3?'#7de36a':'#ccff9b',transparent:true,opacity:.22,blending:T.AdditiveBlending,depthWrite:false});const m=mesh(new T.SphereGeometry(.026,8,6),mat,sh);energy.push(m);}
+  const vines=[];for(let k=0;k<9;k++)vines.push({tube:Tube(30,7,M.bark),th:Thorns(40,1.5)});const cracks=new T.Group();add(cracks);const crackMat=new T.MeshBasicMaterial({color:0x14250c,transparent:true,opacity:.85,depthWrite:false,side:T.DoubleSide});for(let i=0;i<12;i++){const f=1.65+i*.24,side=i%2?1:-1,strip=new T.Mesh(new T.PlaneGeometry(.32+(i%3)*.06,.045),crackMat);strip.rotation.x=-Math.PI/2;strip.rotation.z=side*.55;strip.position.copy(W(f,side*.12,.04));cracks.add(strip);}const cracks2=cracks.clone();const crackMat2=crackMat.clone();cracks2.children.forEach(m=>m.material=crackMat2);add(cracks2);cracks2.rotation.y=Math.PI*2/9;cracks2.position.copy(O).sub(O.clone().applyAxisAngle(V3(0,1,0),cracks2.rotation.y));
+  return t=>{idle(me,t);idle(foe,t);idle(foe2,t);me.armL.rotation.set(-1.25,.25,0);sh.position.copy(me.g.localToWorld(V3(0,1.23,0)));motes.forEach((m,i)=>{const a=i*2.4+t*.4,y=((i*.31+t*.25)%2.4)-1.2,r=Math.sqrt(Math.max(.1,1-y*y/1.9))*1.4;m.position.set(Math.sin(a)*r,y,Math.cos(a)*r);});energy.forEach((m,i)=>{const a=i*2.4+t*.15,y=((i*.43+t*.65)%2.3)-1.15,r=Math.sqrt(Math.max(.1,1-y*y/1.9))*1.36;m.position.set(Math.sin(a)*r,y,Math.cos(a)*r);m.scale.set(.7,3.5,.7);});sh.updateMatrixWorld(true);
+    const second=t>=3.0,st2=t-(second?3.0:.65),active=second?1:0,grounded=Math.abs(sh.position.y-1.23-O.y)<.12;[ [cracks,crackMat,t-.65], [cracks2,crackMat2,t-3.0] ].forEach(([group,mat,age])=>{group.visible=grounded&&age>=1.07&&age<3.07;mat.opacity=.85*(1-ease(phase(age,1.07,3.07)));});if(st2>1.03&&st2<1.33)hitFlinch(second?foe2:foe,Math.sin(phase(st2,1.03,1.33)*Math.PI));
+    vines.forEach(({tube,th},k)=>{const pts=[],height=[.70,.57,.77,.66,.49,.73,.62,.80,.60][k];for(let i=0;i<30;i++){const u=i/29,theta=Math.PI-(Math.PI*height*u),a=k*Math.PI*2/9+Math.sin(u*3+k)*.09,r=1.36,p=sh.localToWorld(V3(Math.sin(theta)*Math.sin(a)*r,Math.cos(theta)*r,Math.sin(theta)*Math.cos(a)*r));if(k===active&&st2>0&&st2<1.80){const rise=ease(phase(st2-u*.16,0,.58)),fall=outQ(phase(st2-u*.11,.79,.94)),back=ease(phase(st2-u*.07,1.18,1.63)),base=sh.localToWorld(V3(0,-1.25,0)),angle=fall*Math.PI/2,arc=base.clone().add(V3(0,Math.cos(angle)*4.8*u,Math.sin(angle)*4.6*u+(1-fall)*1.45*Math.sin(Math.PI*u)));arc.y+=Math.sin(u*Math.PI)*(.85*(1-fall));arc.x+=Math.sin(u*6-st2*9)*Math.sin(u*Math.PI)*.60*(1-fall);arc.z+=Math.sin(u*5-st2*7)*u*.32*(1-fall);arc.sub(base).applyAxisAngle(V3(0,1,0),k*Math.PI*2/9).add(base);p.lerp(arc,rise*(1-back)*ease(Math.min(1,u*4)));}pts.push(p);}const rad=u=>.16*Math.pow(1-u,.72)+.002;tube.set(pts,rad,(u,c)=>c.set('#304d20').lerp(new T.Color('#507c2c'),u*.35));const ths=thornsAlong(pts,rad,2,1.25);th.put(ths);ths.forEach((_,i)=>th.setColorAt(i,new T.Color(i%3===0?'#e8ffb3':i%3===1?'#688f41':'#b4dc79')));if(th.instanceColor)th.instanceColor.needsUpdate=true;});label='โล่หนาม • เถารอบโล่ยกแล้วฟาดตามทิศศัตรู';};}};
 SKS.buff={dur:1,still:.5,setup(){const normal=Turret(),powered=Turret();normal.g.position.copy(W(2,1.8,0));powered.g.position.copy(W(2,-1.8,0));normal.grow(1);powered.grow(1);cam.p.copy(W(-4,0,2.6));cam.l.copy(W(2,0,1));return t=>{normal.pose(t,Math.PI,0);powered.pose(t,Math.PI,0,false,true);label='ซ้าย: ร่างบัฟ — ใบปีกหลายชั้น     ขวา: ร่างปกติ';};}};
 SKS.buffanim={dur:5,still:2,setup(){const tu=Turret();tu.g.position.copy(W(2,0,0));tu.grow(1);cam.p.copy(W(-3,0,2.4));cam.l.copy(W(2,0,1));return t=>{const b=outQ(phase(t,.8,1.08))*(1-ease(phase(t,3.5,4.3)));const d=Math.max(0,t-.8),j=t>=.8?Math.sin(d*25)*Math.exp(-d*7):0;tu.pose(t,Math.PI,0,false,b,j);label='ต้นยิง: รับบัฟ → เปลี่ยนร่าง → บัฟหมดกลับร่างปกติ';};}};
 SKS.buffshoot={dur:4,still:1.5,setup(){const tu=Turret(),sp=Spikes(),target=W(-10,0,1);tu.pod.material=tu.pod.material.clone();tu.pod.material.emissiveIntensity=0;tu.pod.material.color.set('#63a83d');tu.g.position.copy(W(2,0,0));tu.grow(1);cam.p.copy(W(-4,-4,2.8));cam.l.copy(W(2,0,1));return (t,dt)=>{const cycle=(t%.47)/.47,recoil=cycle<.24?Math.sin(cycle/.24*Math.PI):0;tu.g.rotation.z=Math.sin(t*7)*.045;tu.pose(t,Math.PI,recoil,false,1);const n=Math.floor(t/.47);if(n!==this.last){this.last=n;tu.head.updateMatrixWorld(true);sp.shoot(tu.head.localToWorld(V3(0,0,.55)),target);}sp.upd(dt);label='ต้นยิงร่างบัฟ: ปีกเอนหลังและขยับเร็ว';};}};

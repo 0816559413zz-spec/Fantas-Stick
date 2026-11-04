@@ -14,7 +14,7 @@ SKILLS = ['whip', 'dash', 'shield', 'turret', 'lotus', 'move', 'ball', 'root', '
 
 
 def pack(sk, width=600, fps=20):
-    if sk in ('whip', 'dash'):
+    if sk in ('whip', 'dash', 'shield'):
         fps = 30  # previews render at 30 fps for the fast action
     files = sorted(f for f in SHOTS.glob(f'nat_{sk}_f*.jpg') if re.fullmatch(rf'nat_{re.escape(sk)}_f\d{{3}}\.jpg', f.name))
     if not files:

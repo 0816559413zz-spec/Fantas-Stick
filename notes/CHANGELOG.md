@@ -1,5 +1,9 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
 
+- 2026-11-04 — Nature shield preview: green gradient, thorns around shield and animated overhead slam with gradually fading cracks; user satisfied for now, game integration and terrain contact remain to be implemented.
+
+- 2026-11-04 — Nature lotus preview: wider-spreading roots, larger flower and aura above bloom; user accepted current shape for now, VFX deferred.
+
 - 2026-11-04 — Nature turret buff preview: layered thin wings, head spikes, smiling normal eyes and cute angry buff eyes, transformation and faster wind-swept wing motion. User approved the look; preview only, not bound to gameplay.
 
 - 2026-11-04 — **Nature ต้นยิง + ต้นบัว preview:** ต้นยิงผ่านแล้ว (ปีกข้างหัวติดฝัก, ต้นบนกำแพงเอนออก ~26°, เถาพัน/ใบติดลำต้น). ต้นบัวใหม่ตาม ref `designs/nature_ref/lotus_ref.png`: ลำต้น 4.2 ม. รากใหญ่ 7 เส้น ดอกบัวชมพูแกนเหลืองในฟองแก้ว หยดน้ำลงแอ่ง วงออร่าวาด (ขอบเถา ใบ กลีบ + วงรูนหมุนสวน) `&top=1` = มุมบน; GIF `shots/nat_lotus.gif` 121 เฟรม. ยังเป็น preview ไม่ผูกเกม `tools/nature-preview.js`, `designs/nature.md`.
