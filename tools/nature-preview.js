@@ -174,10 +174,18 @@ function Turret(wall=false){const g=new T.Group();add(g);const base=new T.Group(
   const tipG=glow(GLOWG,.45,head);tipG.position.z=.56;
   // ปีกใบ: กางสองข้างหัวแบบเดิม แต่โคนติดผิวข้างฝักพอดี ไม่ทับหัว (ผู้ใช้ 2026-11-04)
   const wings=[];for(const s of [-1,1]){const w=new T.Group();w.rotation.order='YXZ';w.position.set(s*.19,.04,-.05);head.add(w);const l=mesh(leafGeo,M.leaf,w);l.scale.set(.9,1.1,.9);l.position.x=s*.43;wings.push({w,s});}
+  const buffLeaves=new T.Group();head.add(buffLeaves);for(let i=0;i<3;i++){const l=mesh(leafGeo,M.leaf,buffLeaves);l.position.set((i-1)*.10,.19,-.04);l.scale.set(.35,.45,.35);l.rotation.set(.5,0,(i-1)*.65);}
+  buffLeaves.visible=false;
+  const leafShape=new T.Shape();leafShape.moveTo(-.5,0);leafShape.lineTo(0,.2);leafShape.lineTo(.5,0);leafShape.lineTo(0,-.2);leafShape.closePath();
+  const wingGeo=new T.ExtrudeGeometry(leafShape,{depth:.018,bevelEnabled:true,bevelThickness:.008,bevelSize:.012,bevelSegments:2,steps:1});wingGeo.computeVertexNormals();
+  const eyeMat=new T.MeshBasicMaterial({color:'#203817'}),eyeParts=[];for(const side of [-1,1]){const eye=mesh(new T.SphereGeometry(.052,12,10),eyeMat,head);eye.position.set(side*.105,.15,.19);eye.scale.set(1,.7,.16);eye.rotation.y=side*.4;const smileCurve=new T.QuadraticBezierCurve3(V3(-.04,0,0),V3(0,.045,0),V3(.04,0,0));const smile=mesh(new T.TubeGeometry(smileCurve,12,.008,6),eyeMat,head);smile.position.copy(eye.position);smile.rotation.y=side*.4;const brow=mesh(new T.CapsuleGeometry(.009,.045,3,6),eyeMat,head);brow.position.set(side*.105,.205,.192);brow.rotation.z=Math.PI/2+side*.35;eyeParts.push({eye,smile,brow,side});}
+  const buffWings=new T.Group(),buffWingParts=[];head.add(buffWings);for(const side of [-1,1])for(let i=0;i<3;i++){const l=mesh(wingGeo,i===1?M.leafD:M.leaf,buffWings);l.position.set(side*(.35+i*.13),.04+i*.16,-.06+i*.07);l.scale.set(1.05-i*.12,.9,1);l.rotation.z=side*(.25+i*.4);buffWingParts.push({l,side,i});}
+  for(let i=0;i<4;i++){const spike=mesh(new T.ConeGeometry(.055,.22-i*.025,6),M.podDark,buffLeaves);spike.position.set(0,.17,-.22+i*.12);spike.rotation.x=-.25;}
+  buffWings.visible=false;
   g.scale.setScalar(1.45);
   return {g,head,pod,tipG,wings,stem,grow(k){const rise=ease(phase(k,0,.8)),open=ease(phase(k,.25,1)),root=ease(phase(k,0,.5));g.visible=k>0;stem.scale.y=Math.max(.001,rise);head.position.y=.95*rise;head.scale.setScalar(Math.max(.001,open*1.3));base.scale.setScalar(Math.max(.001,root));wallRoots.scale.setScalar(Math.max(.001,root));wallLeaves.scale.setScalar(Math.max(.001,root));},
-    pose(t,aimYaw,recoil,wall){head.rotation.set(-.1+Math.sin(t*2)*.04,aimYaw,0);pod.scale.set(1+recoil*.25,1+recoil*.25,1-recoil*.3);head.position.z=-recoil*.08;
-      wings.forEach(({w,s},i)=>{w.rotation.set(.2+Math.sin(t*6+i)*.12,s*.5,s*(.5+Math.sin(t*5+i*2)*.15));});tipG.scale.setScalar(.45+recoil*.6);}};}
+    pose(t,aimYaw,recoil,wall,buffed=false,jolt=0){const b=typeof buffed==='number'?clamp(buffed,0,1):buffed?1:0;head.rotation.set(-.1+Math.sin(t*2)*.04+jolt*.16,aimYaw,jolt*.12);pod.scale.set(1+recoil*.25,1+recoil*.25,1-recoil*.3);head.position.z=-recoil*.08;eyeParts.forEach(({eye,smile,brow,side})=>{eye.visible=b>=.5;smile.visible=b<.5;brow.visible=b>=.5;const cheeky=Q.get('face')==='cheeky';eye.rotation.z=side*(cheeky?.12:.72);eye.scale.set(.98,cheeky?.48:.56,.16);brow.rotation.z=Math.PI/2+side*(cheeky?.12:.38);brow.position.y=cheeky?.194:.205;});buffLeaves.visible=b>.001;buffWings.visible=b>.001;const pop=Math.max(.001,b*(1+Math.max(0,jolt)*.18));buffLeaves.scale.setScalar(pop);buffWings.scale.setScalar(pop);wings.forEach(({w})=>{w.visible=b<.999;w.scale.setScalar(Math.max(.001,1-b));});
+      wings.forEach(({w,s},i)=>{w.rotation.set(.2+Math.sin(t*6+i)*.12,s*.5,s*((buffed?.8:.5)+Math.sin(t*5+i*2)*.15));});buffWingParts.forEach(({l,side,i})=>{l.rotation.y=side*(.65+.18*Math.sin(t*14-i*.35));});tipG.scale.setScalar(.45+recoil*.6);}};}
 // กระสุนหนามของป้อม
 function Spikes(){const L=[],geo=new T.ConeGeometry(.045,.42,6);geo.rotateX(Math.PI/2);
   return {shoot(a,b,col){const m=mesh(geo,M.thornTip);const tr=TrailRibbon(8,col||'#a8ff60');L.push({m,tr,a:a.clone(),b:b.clone(),t:0});},
@@ -381,7 +389,8 @@ SKS.lotus={dur:6.0,still:2.6,setup(){const me=pup('3.1.0.2.1.0.0.1.0.0',0,0,0),f
         if(Math.floor((t-1.6)/1.2)!==this.pl){this.pl=Math.floor((t-1.6)/1.2);shock(L.g.position,'#8cff7a',15,1);}}
       // บัฟยิงเร็ว 4 วิหลังปลูก (ป้อมเรืองทอง + ยิงถี่)
       const bf=t>1.5&&t<5.5;buff.visible=bf;if(bf){buff.position.copy(tu.g.position).add(V3(0,.05,0));buff.scale.setScalar(1+.15*Math.sin(t*10));tu.tipG.material.color.set('#ffd23f');}
-      tu.pose(t,Math.atan2(-2,2.6),bf?Math.max(0,1-((t*3)%1)/.3):0);if(bf&&Math.random()<.25)sparks(tu.head.getWorldPosition(V3()),2,1.5,'#fff2a0','#ffb000');
+      const morph=outQ(phase(t,1.5,1.78))*(1-ease(phase(t,5.5,5.95))),md=Math.max(0,t-1.5),jolt=t>=1.5?Math.sin(md*25)*Math.exp(-md*7):0;
+      tu.pose(t,Math.atan2(-2,2.6),bf?Math.max(0,1-((t*3)%1)/.3):0,false,morph,jolt);if(bf&&Math.random()<.25)sparks(tu.head.getWorldPosition(V3()),2,1.5,'#fff2a0','#ffb000');
       // สปอร์: เกิดที่แกนดอกบัว → บินมาลอยข้างไหล่
       const born=2.4,sh=me.g.localToWorld(V3(-.45,1.75,-.1)),core=L.bloom.getWorldPosition(V3()).add(V3(0,.3,0));
       if(t>born&&t<4.3){sp.visible=true;const k=ease(phase(t,born,3.3));sp.position.lerpVectors(core,sh,k);sp.position.y+=Math.sin(k*Math.PI)*1.6+Math.sin(t*4)*.05*(k>=1);if(Math.random()<.6)sparks(sp.position,1,.4,'#f6ffb0','#7ee05a',{life:.8});}
@@ -498,6 +507,9 @@ SKS.ult={dur:6.4,still:2.9,setup(){const me=pup('3.1.0.2.1.0.0.1.0.0',0,0,0),foe
       if(foe.hitT!==undefined)hitFlinch(foe,Math.max(0,1-(t-foe.hitT)/.3));
       label=t<2.0?'อัลติ · ดอกบัวยักษ์ 400 HP · ฮีลแรงขึ้น วงใหญ่ขึ้น · บัฟต้นไม้ตลอดเวลาที่ยังอยู่':t<3.6?'อัลติ · สร้างสปอร์เร็วขึ้น หลายลูกลอยรอบไหล่':'อัลติ · แส้ตวัดเร็วขึ้น · สปอร์ระเบิดแรงขึ้น: ดาเมจแรกทันที + พิษ';};}};
 // ======================================================================================
+SKS.buff={dur:1,still:.5,setup(){const normal=Turret(),powered=Turret();normal.g.position.copy(W(2,1.8,0));powered.g.position.copy(W(2,-1.8,0));normal.grow(1);powered.grow(1);cam.p.copy(W(-4,0,2.6));cam.l.copy(W(2,0,1));return t=>{normal.pose(t,Math.PI,0);powered.pose(t,Math.PI,0,false,true);label='ซ้าย: ร่างบัฟ — ใบปีกหลายชั้น     ขวา: ร่างปกติ';};}};
+SKS.buffanim={dur:5,still:2,setup(){const tu=Turret();tu.g.position.copy(W(2,0,0));tu.grow(1);cam.p.copy(W(-3,0,2.4));cam.l.copy(W(2,0,1));return t=>{const b=outQ(phase(t,.8,1.08))*(1-ease(phase(t,3.5,4.3)));const d=Math.max(0,t-.8),j=t>=.8?Math.sin(d*25)*Math.exp(-d*7):0;tu.pose(t,Math.PI,0,false,b,j);label='ต้นยิง: รับบัฟ → เปลี่ยนร่าง → บัฟหมดกลับร่างปกติ';};}};
+SKS.buffshoot={dur:4,still:1.5,setup(){const tu=Turret(),sp=Spikes(),target=W(-10,0,1);tu.pod.material=tu.pod.material.clone();tu.pod.material.emissiveIntensity=0;tu.pod.material.color.set('#63a83d');tu.g.position.copy(W(2,0,0));tu.grow(1);cam.p.copy(W(-4,-4,2.8));cam.l.copy(W(2,0,1));return (t,dt)=>{const cycle=(t%.47)/.47,recoil=cycle<.24?Math.sin(cycle/.24*Math.PI):0;tu.g.rotation.z=Math.sin(t*7)*.045;tu.pose(t,Math.PI,recoil,false,1);const n=Math.floor(t/.47);if(n!==this.last){this.last=n;tu.head.updateMatrixWorld(true);sp.shoot(tu.head.localToWorld(V3(0,0,.55)),target);}sp.upd(dt);label='ต้นยิงร่างบัฟ: ปีกเอนหลังและขยับเร็ว';};}};
 const SKD=SKS[SK];if(!SKD)throw new Error('ไม่รู้จัก sk='+SK);
 const upd=SKD.setup.call({});const ctx={};
 const N=Math.round(SKD.dur*FPS),stillI=Math.round(SKD.still*FPS),FROM=+(Q.get('from')||0),TO=+(Q.get('to')||1e9);

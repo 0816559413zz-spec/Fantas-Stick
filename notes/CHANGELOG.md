@@ -1,5 +1,7 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
 
+- 2026-11-04 — Nature turret buff preview: layered thin wings, head spikes, smiling normal eyes and cute angry buff eyes, transformation and faster wind-swept wing motion. User approved the look; preview only, not bound to gameplay.
+
 - 2026-11-04 — **Nature ต้นยิง + ต้นบัว preview:** ต้นยิงผ่านแล้ว (ปีกข้างหัวติดฝัก, ต้นบนกำแพงเอนออก ~26°, เถาพัน/ใบติดลำต้น). ต้นบัวใหม่ตาม ref `designs/nature_ref/lotus_ref.png`: ลำต้น 4.2 ม. รากใหญ่ 7 เส้น ดอกบัวชมพูแกนเหลืองในฟองแก้ว หยดน้ำลงแอ่ง วงออร่าวาด (ขอบเถา ใบ กลีบ + วงรูนหมุนสวน) `&top=1` = มุมบน; GIF `shots/nat_lotus.gif` 121 เฟรม. ยังเป็น preview ไม่ผูกเกม `tools/nature-preview.js`, `designs/nature.md`.
 
 - 2026-11-03 — **Nature ต้นยิง: ร่างโมเดลและ motion ใน preview:** เอาก้อนดินและดินกระเด็นตอนงอกออก รากยึดพื้น/กำแพง ต้นติดกำแพงตั้งขึ้นเอนออกเล็กน้อย หัวฝักใหญ่ขึ้น เพิ่มรายละเอียดลำต้น และออกแบบใบโคนรูปเรียวโค้งใหม่; ตัวอย่างยังรอผู้ใช้รีวิว ยังไม่ได้ผูกเข้าเกม; VFX ของ Nature ทำภายหลัง `tools/nature-preview.js`, `designs/nature.md`.
