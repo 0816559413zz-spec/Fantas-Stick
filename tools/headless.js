@@ -40,6 +40,7 @@ async function main(){
     const cmd=(method,params)=>new Promise((r,j)=>{const i=++id;pend[i]=d=>d.error?j(new Error(method+': '+d.error.message)):r(d.result);ws.send(JSON.stringify({id:i,method,params:params||{}}));});
     const ev=async(js,aw=true)=>{const r=await cmd('Runtime.evaluate',{expression:js,awaitPromise:aw,returnByValue:true});if(r.exceptionDetails)throw new Error((r.exceptionDetails.exception||{}).description||r.exceptionDetails.text);return r.result.value;};
     await cmd('Runtime.enable');
+    await cmd('Page.enable');
     // CDN_DIR=<folder> → serve https://unpkg.com/<pkg>@<ver>/... from <folder>/<pkg>@<ver>/... (cloud sessions where the CDN is blocked; npm tarballs unpacked there)
     const CDN=process.env.CDN_DIR;
     function cdnServe(q){const f=path.join(CDN,decodeURIComponent(new URL(q.request.url).pathname));
@@ -48,6 +49,8 @@ async function main(){
       cmd('Fetch.fulfillRequest',{requestId:q.requestId,responseCode:200,responseHeaders:[{name:'Content-Type',value:ct},{name:'Access-Control-Allow-Origin',value:'*'}],body:fs.readFileSync(f).toString('base64')}).catch(()=>{});}
     if(CDN){await cmd('Network.enable');await cmd('Network.setBypassServiceWorker',{bypass:true});await cmd('Fetch.enable',{patterns:[{urlPattern:'https://unpkg.com/*'}]});}
     await cmd('Emulation.setDeviceMetricsOverride',{width:W,height:H,deviceScaleFactor:1,mobile:false});
+    // แยก interval ออกจาก timeout ให้ HL.freeze หยุดโฮสต์โดยไม่ฆ่างานโหลด/compile เบื้องหลัง
+    await cmd('Page.addScriptToEvaluateOnNewDocument',{source:`(()=>{const ids=window.__hlIntervals=new Set(),start=window.setInterval,stop=window.clearInterval;window.setInterval=function(...a){const id=start.apply(window,a);ids.add(id);return id;};window.clearInterval=function(id){ids.delete(id);return stop.call(window,id);};})()`});
     await cmd('Page.navigate',{url});
     // รอให้หน้าโหลดเสร็จ: เกม = มี window.WD • สตูดิโอ = STUDIO.state.ready
     const isStudio=/studio\.html|\?studio/.test(url),isGame=!isStudio&&/^\/(index\.html)?(\?|#|$)/.test(url.replace(/^https?:\/\/[^/]+/,''));

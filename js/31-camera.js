@@ -82,9 +82,44 @@ function aimFromCrosshair(me,P,E){
   if(TERR&&tgG<90){INPUT.gx=(o.x+_aimD.x*tgG)*20+MW/2;INPUT.gy=(o.z+_aimD.z*tgG)*20+MH/2;}
   else if(!TERR&&_aimD.y<-0.01){const t=Math.min((o.y-0.05)/-_aimD.y,tw<60?tw:1e9);INPUT.gx=(o.x+_aimD.x*t)*20+MW/2;INPUT.gy=(o.z+_aimD.z*t)*20+MH/2;}else{INPUT.gx=INPUT.gy=-1;}   // จุดบนพื้น ไม่เลยผนังที่เส้นเล็งชนก่อน
 }
-let AIMZ=0;
-// สายดิน: ซูมออก + เลื่อนกล้องไปซ้ายตอนกดค้าง BA ชาร์จ / ตอนรอปาเสาอัลติบนฟ้า (Stand ใหญ่ไม่บังจอ) — ผู้ใช้ 2026-10-21
-let EZC=0,ESC=0,WZC=0,BZC=0,WBY=null;   // ESC = โล่ Earth: Stand ทึบอยู่หลังเรา → กล้องเลื่อนไปซ้ายให้เห็นข้างหน้า (ผู้ใช้ 2026-10-21)
+let AIMZ=0,WBY=null;
+// side = สัดส่วนครึ่งความกว้างภาพ: 0.30 ให้ตัวเราอยู่แถว 35% ของจอ แม้ FOV/สัดส่วนจอเปลี่ยน
+// lift ยกตำแหน่งกล้องแยกจากจุดมอง: Earth มองข้าม Stand ได้ โดยไม่ยกเป้าเล็งหนีขึ้นฟ้า
+// กล้องทุกสายใช้ชุดเดียวกัน; เลือกมุมพิเศษจาก snapshot จึงทำงานกับลูกห้องด้วย
+const CAM_FRAMES={
+  base:{dist:6.2,h:2.25,side:0.30},flight:{dist:8,h:2.5,side:0.30},
+  colossus:{dist:14.5,h:4.4,side:0.34},airAim:{dist:8,h:2.6,side:0.32},
+  kindle:{dist:6.2,h:2.45,side:0.36},rail:{dist:6.8,h:2.35,side:0.34},
+  earthBase:{dist:7,h:2.25,side:0,lift:2.4},earthRampage:{dist:9,h:4.1,side:0,lift:3},
+  earthShield:{dist:9,h:2.8,side:0,lift:5.5},earthCharge:{dist:10,h:3,side:0,lift:5},
+  earthAuger:{dist:12,h:3.3,side:0,lift:3.5},earthSky:{dist:15.2,h:3.8,side:0,lift:3},
+  windShield:{dist:7.4,h:2.55,side:0.38},windFlight:{dist:8.6,h:2.65,side:0.32},
+  waterBeam:{dist:7.8,h:3.5,side:0},waterDragon:{dist:17.2,h:4.8,side:0.30}
+};
+const CAM_FRAME={dist:6.2,h:2.25,side:0.30,lift:0},CAM_TRACK={has:false,key:'',x:0,y:0,z:0};
+const _camFocus=new THREE.Vector3(),_camAnchor=new THREE.Vector3(),_camWant=new THREE.Vector3();
+function cameraFrame(me){
+  if(me.al){
+    if(me.co>0)return CAM_FRAMES.colossus;
+    if(me.ea){
+      if(me.ea[3]===1)return CAM_FRAMES.earthSky;
+      if(me.ea[2]>0)return CAM_FRAMES.earthAuger;
+      if(me.ea[9]>0)return CAM_FRAMES.earthCharge;
+      if(me.ea[1])return CAM_FRAMES.earthRampage;
+      if(me.sh&&!(me.ea[0]>0))return CAM_FRAMES.earthShield;
+      return me.fl?CAM_FRAMES.flight:CAM_FRAMES.earthBase;
+    }
+    // Beam คงมุมกลางหลังเหนือหัว ตั้งแต่ร่ายจนยิงจบ; การจำกัดทิศเมาส์อยู่ที่เดิม
+    if(me.wt&&me.wt[7])return CAM_FRAMES.waterBeam;
+    if(me.wt&&me.wt[5])return CAM_FRAMES.waterDragon;
+    if(me.df)return CAM_FRAMES.airAim;
+    if(me.wn&&me.wn[5])return CAM_FRAMES.windFlight;
+    if(me.wn&&me.sh)return CAM_FRAMES.windShield;
+    if(me.sm&&(me.sm[3]&16))return CAM_FRAMES.rail;
+    if(me.kd>0&&me.hv)return CAM_FRAMES.kindle;
+  }
+  return me.fl?CAM_FRAMES.flight:CAM_FRAMES.base;
+}
 // ผู้เล่นอยู่ในห้อง (บ้านที่เดินเข้าได้ / ตึกกลวงในเมือง): ร่นกล้องตามแนวจากจุดโฟกัสให้อยู่ในห้อง (ห่างผนัง 0.3 ม. ต่ำกว่าเพดาน 0.25 ม.) • คืนสัดส่วน 0.12..1
 function camRoomK(me,F,x,y,z){
   const mz=me.z||0;let k=1;const fit=(f,c,lo,hi)=>{if(c<lo&&f>lo)k=Math.min(k,(f-lo)/(f-c));else if(c>hi&&f<hi)k=Math.min(k,(hi-f)/(c-f));};
@@ -104,27 +139,35 @@ function updateCamera(me,dt){
   {const fv=SET.fov*(1-0.25*AIMZ);if(Math.abs(cam.fov-fv)>0.01){cam.fov=fv;cam.updateProjectionMatrix();}}
   const px=tx(me.x),pz=tz(me.y);
   const fx=Math.cos(yaw),fz=Math.sin(yaw),rx=-fz,rz=fx;
-  const eu=me.ea&&me.al?(me.ea[3]===1?1:me.ea[9]>0?0.45:0):0;EZC+=(eu-EZC)*Math.min(1,dt*(eu>EZC?4:2.5));
-  const es=me.ea&&me.al&&me.sh&&!(me.ea[0]>0)&&eu===0?1:0;ESC+=(es-ESC)*Math.min(1,dt*(es>ESC?5:3));
-  // อัลติมังกรน้ำ: ซูมออกทันทีตอนกด เห็นมังกรทั้งตัว
-  // ยิง Abyssal Beam: กล้องกลับมาอยู่กลางหลังตัว เหนือหัว เห็นลำตรงหน้า
-  const bu=me.wt&&me.wt[3]!==null&&me.wt[3]!==undefined&&me.al?1:0;BZC+=(bu-BZC)*Math.min(1,dt*7);
-  const wu=me.wt&&me.wt[5]&&me.al?1:0;WZC+=(wu-WZC)*Math.min(1,dt*(wu>WZC?14:2.5));
-  const big=me.co>0,dist=(big?13:me.fl?7.4:5.6)*(1-0.35*AIMZ)+EZC*9+ESC*1.5+WZC*11+BZC*1.6,cp=Math.cos(pitch),sp=Math.sin(pitch),side=((big?4.2:0.85+0.3*AIMZ)-EZC*3-ESC*2.6)*(1-BZC);
-  const focus=new THREE.Vector3(px+rx*side,GY(me.x,me.y)+(me.z||0)+(big?3.4:2.05)+EZC*1.5+ESC*0.4+WZC*2.5+BZC*1.1,pz+rz*side);
+  const target=cameraFrame(me),key=builtKey+'|'+me.id,ground=GY(me.x,me.y)+(me.z||0),cut=!CAM_TRACK.has||CAM_TRACK.key!==key;
+  const blend=cut?1:1-Math.exp(-(target===CAM_FRAMES.waterDragon?14:8)*dt);
+  for(const k of ['dist','h','side','lift'])CAM_FRAME[k]=lerp(CAM_FRAME[k],target[k]||0,blend);
+  const dist=CAM_FRAME.dist*(1-0.15*AIMZ),cp=Math.cos(pitch),sp=Math.sin(pitch);
+  const side=CAM_FRAME.side*dist*Math.tan(cam.fov*Math.PI/360)*cam.aspect;
+  const focus=_camFocus.set(px+rx*side,ground+CAM_FRAME.h,pz+rz*side);
   // กล้องอยู่หลังผู้เล่น: ถ้าหลังชนขอบแผนที่ ให้ "ร่นกล้องเข้าหาตัว + ยกสูงขึ้น" แทนการบีบพิกัดทีละแกน (เดิมกล้องไปทับหัวตัวละคร)
   // กล้องล้ำเข้าไปในตัวกำแพงได้ (กำแพงหนา ~1.6 หน่วย ฝั่งหลังกำแพงโปร่ง มองทะลุเห็นตัวละคร) เกินกว่านั้นให้ร่นกล้องเข้าหาตัว
   const cfg=MAPCAM[MAPID]||MAPCAM.castle,hx=MW*S3/2,hz=MH*S3/2,bx=hx-1.2+cfg.m,bz=hz-1.2+cfg.m,ox=-fx*dist*cp,oz=-fz*dist*cp;
   const lim=(f,o,b)=>o>1e-6?(b-f)/o:o<-1e-6?(-b-f)/o:1;
   const k=Math.max(0.45,Math.min(1,lim(focus.x,ox,bx),lim(focus.z,oz,bz)));
-  let x=focus.x+ox*k,z=focus.z+oz*k,y=focus.y+dist*sp+(1-k)*dist*0.5;
+  let x=focus.x+ox*k,z=focus.z+oz*k,y=focus.y+dist*sp+CAM_FRAME.lift+(1-k)*dist*0.5;
   x=clamp(x,-bx,bx);z=clamp(z,-bz,bz);
   if(TERR){   // เนินบังกล้อง: ร่นกล้องเข้าหาตัวจนพ้นพื้น
     for(let i=1;i<=10;i++){const f=i/10,X=focus.x+(x-focus.x)*f,Z=focus.z+(z-focus.z)*f,Y=focus.y+(y-focus.y)*f;if(Y<TW(X,Z)+0.4){const f2=Math.max(0.15,(i-1)/10);x=focus.x+(x-focus.x)*f2;z=focus.z+(z-focus.z)*f2;y=focus.y+(y-focus.y)*f2;break;}}
     y=Math.max(TW(x,z)+0.5,y);
   }else y=Math.max(0.5,y);
-  {const k2=camRoomK(me,focus,x,y,z);if(k2<1){x=focus.x+(x-focus.x)*k2;y=focus.y+(y-focus.y)*k2;z=focus.z+(z-focus.z)*k2;}}   // อยู่ในบ้าน/ตึก: กล้องไม่ทะลุผนัง/เพดาน
-  camPos.lerp(new THREE.Vector3(x,y,z),1-Math.exp(-25*dt));
+  // จุดยึดสำหรับตรวจห้องอยู่ที่ตัวเรา ไม่ใช่ไหล่ที่อาจอยู่นอกห้องแคบ
+  const anchor=_camAnchor.set(px,ground+1.35,pz);
+  {const k2=camRoomK(me,anchor,x,y,z);if(k2<1){x=anchor.x+(x-anchor.x)*k2;y=anchor.y+(y-anchor.y)*k2;z=anchor.z+(z-anchor.z)*k2;}}
+  // พุ่ง/เทเลพอร์ต/ทะยาน: พากล้องตามการย้ายตัวก่อนเกลี่ยระยะ ป้องกันกล้องไล่หลังแล้วหันกลับหาตัว
+  if(cut)camPos.set(x,y,z);
+  else{camPos.x+=px-CAM_TRACK.x;camPos.y+=ground-CAM_TRACK.y;camPos.z+=pz-CAM_TRACK.z;}
+  CAM_TRACK.has=true;CAM_TRACK.key=key;CAM_TRACK.x=px;CAM_TRACK.y=ground;CAM_TRACK.z=pz;
+  camPos.lerp(_camWant.set(x,y,z),1-Math.exp(-25*dt));
+  // ตรวจตำแหน่งหลังเกลี่ยด้วย: ตอนเพิ่งเข้าห้อง กล้องเฟรมก่อนอาจยังอยู่นอกผนัง
+  {const roomK=camRoomK(me,anchor,camPos.x,camPos.y,camPos.z);if(roomK<1)camPos.lerpVectors(anchor,camPos,roomK);}
+  camPos.x=clamp(camPos.x,-bx,bx);camPos.z=clamp(camPos.z,-bz,bz);
+  camPos.y=Math.max(TERR?TW(camPos.x,camPos.z)+0.5:0.5,camPos.y);
   cam.position.copy(camPos);
   if(shakeA>0)cam.position.add(new THREE.Vector3(rnd(-1,1),rnd(-1,1),rnd(-1,1)).multiplyScalar(shakeA*0.02));
   camLook.set(focus.x+fx*8*cp,focus.y-8*sp+1.2*sp,focus.z+fz*8*cp);

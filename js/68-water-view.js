@@ -4,6 +4,33 @@
 // =====================================================================
 const WTV={st:new Map(),wf:new Map(),sk:new Map(),bm:[],ol:[]};   // sk = ตัวละครกำลังจม/โผล่ (Dash) ตาม id
 const WTC={hi:'#e3f7ff',main:'#4fc3ff',deep:'#1466c8',neon:'#7ff6ff'};
+// ตัวละครต้องร่าย/รับแรงต่อเนื่องตลอด Beam ไม่กลับไปท่ายืนหลังท่าเปิด0.65วิ
+const WT_BODY={
+  gather:[-0.95,-0.5,-0.28,-0.05,-1.1,0.4,0.03,-0.08],ready:[-2.2,-0.18,-0.12,-0.12,-1.65,0.1,0,-0.05],
+  recoil:[-1.36,-0.06,0.1,-0.24,-1.4,-0.15,-0.03,-0.12],channel:[-1.58,-0.05,0.06,-0.1,-1.4,-0.15,0,-0.05],
+  aim:[-1.85,-0.12,0.06,-0.06,-1.2,0.35,0,-0.03],sink:[-1.0,0.5,0,0.35,-1.0,-0.5,0,-0.28],pop:[-1.7,-0.5,0,-0.12,-1.3,0.5,0,-0.12]
+},WT_BRACE=[0.28,-0.38,0.14,-0.14],WT_DASH_FEET=[-0.6,0.25,0.12,-0.12];
+function waterCharacterPose(o,p,dt,now){
+  const A=p.wt;
+  if(!A||!p.al||p.dn||p.fl||p.st){o.wBeamPose=null;return;}
+  let s=o.wBeamPose;
+  if(A[7]){
+    if(!s)s=o.wBeamPose={phase:0,t:0,w:0,P:WT_BODY.gather.slice()};
+    const phase=A[3]!==null&&A[3]!==undefined?2:1;if(phase!==s.phase){s.phase=phase;s.t=0;}
+    s.t+=dt;s.w=Math.min(1,s.w+dt*10);
+    if(phase===1)characterPoseMix(s.P,WT_BODY.gather,WT_BODY.ready,_cs(Math.min(1,s.t/Math.max(0.1,WT_AB.cast-0.15))));
+    else{characterPoseMix(s.P,WT_BODY.recoil,WT_BODY.channel,_cs(Math.min(1,s.t/0.22)));s.P[0]+=Math.sin(now/43)*0.016;s.P[3]+=Math.sin(now/71)*0.012;}
+    characterStance(o,s.P,WT_BRACE,s.w);wandTwoHand(o,s.w*0.92);return;
+  }
+  if(s&&s.phase!==3){s.phase=3;s.t=0;}
+  if(s&&s.phase===3){s.t+=dt;const w=1-_cs(Math.min(1,s.t/0.45));
+    if(w>0&&!p.sh&&!o.caN){characterStance(o,s.P,p.wv>1?null:WT_BRACE,w);wandTwoHand(o,w*0.75);return;}
+    if(!w)o.wBeamPose=null;
+  }
+  const dash=WTV.sk.get(p.id);
+  if(dash){const w=Math.sin(Math.min(1,dash.e/0.35)*Math.PI)*0.9;characterStance(o,dash.k==='s'?WT_BODY.sink:WT_BODY.pop,WT_DASH_FEET,w);return;}
+  if(A[5]===2&&!p.sh&&!o.caN){characterStance(o,WT_BODY.aim,p.wv>1?null:WT_BRACE,0.8);}
+}
 function wtState(id){let s=WTV.st.get(id);if(!s){s={};WTV.st.set(id,s);}return s;}
 function wtStop(s,k){if(s[k]){fxStop(s[k]);s[k]=null;}}
 function wtMesh(s,k){if(s[k]){scene.remove(s[k]);if(s[k].userData.own)s[k].geometry.dispose();s[k]=null;}}
@@ -157,7 +184,7 @@ if(typeof WD!=='undefined')WD.WTV=WTV;
 function waterEfx(ev){
   const z=ev.z,x=ev.x,y=ev.y,H=ev.h!==undefined?ev.h:0,me=myPos(),near=!me||Math.hypot(x-me.x,y-me.y)<1100,a=ev.a||0;
   switch(z){
-    case 'wtslash':{fxPlay('water/ba_slash',{x,y,h:0,follow:ev.id});const o=ev.id&&PM3.get(ev.id);if(o)castStart(o,'wdrop');if(near)snd('cast_pull',ev);return true;}   // ตวัดครั้งเดียว กระสุนออกจากรอยฟันเอง
+    case 'wtslash':{fxPlay('water/ba_slash',{x,y,h:0,follow:ev.id});const o=ev.id&&PM3.get(ev.id);if(o)castStart(o,'wdrop',0);if(near)snd('cast_pull',ev);return true;}   // ท่าฟันเฉียงตรงรอยฟันเดิมที่ปล่อยหยดน้ำ3นัด
     case 'wtsink':fxPlay('water/dash_sink',{x,y,h:0});if(ev.id!=null)WTV.sk.set(ev.id,{k:'s',e:0});if(near)snd('cast_pull',ev);return true;
     case 'wtpop':fxPlay('water/dash_pop',{x,y,h:0});if(ev.id!=null)WTV.sk.set(ev.id,{k:'p',e:0});if(near)shake(0.15);return true;
     case 'wtclend':return true;
@@ -171,10 +198,11 @@ function waterEfx(ev){
     case 'wtaboff':return true;
     case 'wtmw':fxPlay('water/moon_mark',{x,y,h:0,follow:ev.id});return true;   // ตราดาวตอนเปิด Moonwater (ผู้ใช้ 2026-11-01)
     case 'wtmwoff':return true;
-    case 'wtmb':fxPlay('water/moon_beam',{x,y,h:0,a,aim:false});if(near)snd('break',ev);return true;
+    case 'wtmb':{fxPlay('water/moon_beam',{x,y,h:0,a,aim:false});const o=PM3.get(ev.id);if(o)castStart(o,'wdrop',3);if(near)snd('break',ev);return true;}
     case 'wtdg':wdgStart(ev.id,x,y);if(near){shake(0.2);snd('cast_pull',ev);}return true;
     case 'wtdgaim':return true;
     case 'wtdgdive':{const c=VIEW.cur&&VIEW.cur.P.find(q=>q.id===ev.id),da=c?Math.atan2(y-c.y,x-c.x):0;
+      skAnim({id:ev.id,s:'dragondeep_dive'});
       wdgDive(ev.id,x,y);{const m=VIEW.cur&&VIEW.cur.P.find(q=>q.id===NET.myId);fxPlay(ev.id!==NET.myId&&!(teamOn()&&m&&c&&m.tm===c.tm)?'water/dragon_warn_foe':'water/dragon_warn',{x,y,h:0,aim:false});}later(WT_UL.rise-0.4,()=>fxPlay('water/dragon_dive',{x,y,h:0,a:da,aim:false}));if(near)for(let k=0;k<WT_UL.n;k++)later(WT_UL.rise+k*WT_UL.gap,()=>{shake(k?0.3:0.6);if(!(k%2))snd('break',ev);});return true;}
     case 'wtdgend':return true;
   }

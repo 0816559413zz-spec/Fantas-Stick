@@ -192,7 +192,8 @@ function syncBld(dt){
   if(!BLDV.g||BLDV.g.parent!==world||BLDV.map!==builtMap){
     if(BLDV.g){if(BLDV.g.parent)BLDV.g.parent.remove(BLDV.g);disposeTree(BLDV.g);}
     BLDV.g=new THREE.Group();world.add(BLDV.g);BLDV.map=builtMap;BLDV.list=BLDG.map(b=>({b,key:'',g:null,ice:[]}));
-    prefetchModels([...new Set(BLDG.map(b=>b.D.model)),'debris_wood','debris_stone']);
+    const models=[...new Set(BLDG.map(b=>b.D.model))];
+    prefetchModels([...models,'debris_wood','debris_stone']);warmStaticModels(models);
   }
   BLDV.g.visible=true;
   for(const q of BLDV.list){
