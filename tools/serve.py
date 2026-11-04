@@ -319,13 +319,20 @@ def sb_skills():  # อ่านสกิลจากโค้ดเกมตร
             for ln in body.split('\n')[1:]:
                 if "{id:'" in ln:
                     paths.append({'id': get(ln, 'id'), 'n': get(ln, 'n'), 'ic': get(ln, 'ic'), 'col': get(ln, 'col'), 'd': get(ln, 'd'), 'off': "off:1" in ln})
+        here = None   # สายที่ไฟล์นี้เพิ่ม (const XP=PATHS.length; PATHS.push(...)) — สกิลที่ใช้ชื่อแบบนี้เป็นของสายนี้
         for m in re.finditer(r"PATHS\.push\(\{(.*)", src):
-            ln = m.group(1); paths.append({'id': get(ln, 'id'), 'n': get(ln, 'n'), 'ic': get(ln, 'ic'), 'col': get(ln, 'col'), 'd': get(ln, 'd'), 'off': "off:1" in ln})
+            ln = m.group(1); here = len(paths); paths.append({'id': get(ln, 'id'), 'n': get(ln, 'n'), 'ic': get(ln, 'ic'), 'col': get(ln, 'col'), 'd': get(ln, 'd'), 'off': "off:1" in ln})
+        for m in re.finditer(r'const (\w+)\s*=\s*PATHS\.length\b', src):
+            if here is not None: consts[m.group(1)] = here
         starts = [m for m in re.finditer(r"defSpell\((\w+),\{", src)]
         for k, m in enumerate(starts):
             blk = src[m.end():starts[k + 1].start() if k + 1 < len(starts) else len(src)][:6000]
             pa = m.group(1); pa = int(pa) if pa.isdigit() else consts.get(pa, -1)
-            spells.append({'id': get(blk, 'id'), 'n': get(blk, 'n'), 'ic': get(blk, 'ic'), 'cd': get(blk, 'cd', 1), 'role': get(blk, 'role'),
+            cd = get(blk[:600], 'cd', 1)
+            if cd is None:   # cd:W_DR.cd → หาค่าใน const W_DR={...cd:N...}
+                cm = re.search(r"(?<![\w])cd:(\w+)\.cd", blk[:600]); cv = cm and re.search(r'\b' + cm.group(1) + r'\s*=\s*\{[^}]*?(?<![\w])cd:([\d.]+)', src)
+                cd = float(cv.group(1)) if cv else None
+            spells.append({'id': get(blk, 'id'), 'n': get(blk, 'n'), 'ic': get(blk, 'ic'), 'cd': cd, 'role': get(blk, 'role'),
                            'ult': bool(re.search(r'(?<![\w])ult:true', blk[:400])), 'd': get(blk, 'd'), 'path': pa,
                            'file': 'js/' + fn, 'line': src[:m.start()].count('\n') + 1})
         for m in re.finditer(r"\{id:'(b_\w+)'", src):
