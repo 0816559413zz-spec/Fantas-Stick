@@ -31,6 +31,7 @@ async function stBoot(){
   await stRefreshList();
   const first=SQ.get('fx')||(ST.list['start/explosion']?'start/explosion':Object.keys(ST.list)[0]);
   if(first)await stOpen(first);else stNew('start/ใหม่','');
+  stSkillUI();
   ST.ready=true;requestAnimationFrame(stFrame);setInterval(stPoll,1000);
   await mkInit();   // แท็บ 🧊 โมเดล + 🎞 ภาพ (studio/maker.js)
   if(SQ.has('sheet')){const ts=SQ.get('sheet').split(',').map(Number).filter(x=>!isNaN(x));await stSheet(ts.length?ts:null,SQ.get('save'));}
@@ -61,7 +62,7 @@ function stRender(dt,draw){stVnow+=dt*1000;FXSTUDIO.noDraw=!draw;try{render(dt,s
 function stFlush(){if(ST.I){fxKill(ST.I);ST.I=null;}fxClearAll();for(let i=0;i<34;i++)stRender(0.15,false);PARTS.length=0;SCR.fl.length=0;SCR.rad=null;SCR.chr=0;shakeA=0;}
 function stLayers(){const F=ST.fx;return Object.assign({},F,{layers:(F.layers||[]).filter(L=>!ST.mute[L.id]&&(!ST.solo||ST.solo===L.id))});}
 function stSimKey(){return JSON.stringify(stLayers())+'|'+ST.at+'|'+ST.seed+'|'+ST.map;}
-function stRestart(){ST.simKey=null;if(!ST.fx||!VIEW.cur||MK.ws!=='fx')return;stFlush();Math.random=stRng(ST.seed*7919+13);ST.t=0;ST.acc=0;ST.run={white:0,parts:0,block:0};ST.simKey=stSimKey();
+function stRestart(){ST.simKey=null;if(!ST.fx||!VIEW.cur||MK.ws!=='fx')return;if(ST.skill&&!FXSTUDIO.seek&&!ST.busy)stCastSkill(ST.skill);stFlush();Math.random=stRng(ST.seed*7919+13);ST.t=0;ST.acc=0;ST.run={white:0,parts:0,block:0};ST.simKey=stSimKey();
   const A=stAnchor();if(!A)return;ST.I=fxStart(stLayers(),{x:A.x,y:A.y,h:A.h,a:A.a,follow:A.follow,own:true},ST.name);}
 function stStep(){ST.t+=STD;if(ST.I&&stIsLoop()&&!ST.I.stop&&ST.t>=stDur())fxStop(ST.I);stRender(STD,false);}
 // กรอไปข้างหน้า = เดินต่อจากเวลาเดิม (ไม่เริ่มใหม่) • ถอยหลัง/ไฟล์เปลี่ยน = เริ่มใหม่ • ระหว่างกรอข้ามตัวละคร (FXSTUDIO.seek) — เดิมกรอครั้งละ ~1 วิ
@@ -85,7 +86,7 @@ function stFrame(now){requestAnimationFrame(stFrame);const rdt=Math.min(0.1,(now
   if(MK.ws!=='fx'){mkFrame(rdt);return;}   // แท็บโมเดล / ภาพ วาดจอเอง
   if(ST.seekTo!==null){const t=ST.seekTo;ST.seekTo=null;stSeek(t);stTlTime();return;}
   if(ST.play){ST.acc+=rdt*ST.speed;let n=0;while(ST.acc>=STD&&n<6){ST.acc-=STD;stStep();n++;}if(ST.acc>STD)ST.acc=0;
-    if(ST.t>=stDur()+ST.tail){if(ST.loop)stRestart();else{ST.play=false;stSync();}}}
+    if(ST.t>=stDur()+ST.tail){if(ST.loop){if(!stSkillBusy())stRestart();}else{ST.play=false;stSync();}}}
   stDraw(false);stTlTime();}
 // ---------- แผ่นภาพสรุปทั้งไทม์ไลน์ (สำหรับ Claude: ภาพเดียวเห็นทั้ง ง้าง → กระแทก → สลาย) ----------
 async function stSheet(times,save){if(!ST.fx)return null;ST.busy=true;try{await fxAssetsWait(ST.fx);}catch(e){}const was=ST.play;ST.play=false;
@@ -189,6 +190,8 @@ function stBuildUI(){
     h('span',{className:'time',id:'stTime',title:'เวลาตอนนี้ / ความยาวเอฟเฟกต์ • ← → ทีละเฟรม (Shift = ทีละ 0.1 วิ)'},'0.00'),
     h('span',{className:'mute',style:'font-size:11.5px'},'ความเร็ว'),seg(...[0.1,0.25,0.5,1].map(s=>h('button',{'data-sp':s,id:'stSp'+s,title:'เล่นช้าลงเพื่อดูรายละเอียด',on:{click:()=>{ST.speed=s;stSync();}}},s+'×'))),
     h('span',{className:'sep'}),h('span',{id:'stAdd'},h('button',{id:'stAddB',className:'gold',title:'เพิ่มชั้นใหม่ที่ตำแหน่งหัวเล่น (Shift+A)',on:{click:e=>stAddMenu(e.currentTarget)}},'＋ เพิ่มชั้น')),
+    h('span',{className:'sep'}),h('label',{title:'ท่าจากเกม: ตัวละครทำท่าจริงของสกิลพร้อมกับเอฟเฟกต์ที่แก้อยู่ (เริ่มพร้อมกันทุกครั้งที่เล่นใหม่) — ดูจังหวะให้ตรง',style:'display:flex;gap:4px;align-items:center'},'🎮 ท่า',h('select',{id:'stSkill',style:'max-width:190px',on:{change:e=>{ST.skill=stSkillFind(e.target.value);ST.play=true;stRestart();stSync();}}})),
+    h('label',{className:'mute',style:'display:flex;gap:4px;align-items:center;font-size:11.5px',title:'ซ่อนเอฟเฟกต์เดิมของเกม (efx) ตอนเล่นท่า จะได้เห็นเฉพาะเอฟเฟกต์ที่แก้อยู่'},h('input',{type:'checkbox',id:'stMuteG',checked:true,on:{change:e=>{ST.muteGame=e.target.checked;}}}),'ซ่อนของเดิม'),
     h('span',{className:'grow',style:'flex:1'}),
     h('label',{className:'mute',style:'display:flex;gap:5px;align-items:center;font-size:11.5px',title:'เลขสุ่ม — เปลี่ยนเพื่อดูการสุ่มแบบอื่น (ภาพเดิมทุกครั้งถ้าเลขเดิม)'},'🎲 seed',h('input',{type:'number',id:'stSeed',value:ST.seed,min:1,max:9999,style:'width:62px',on:{change:e=>{ST.seed=+e.target.value||1;stRestart();}}}))),h('div',{id:'stRows'})));
   root.append(h('div',{id:'stInsp'}));
@@ -469,6 +472,33 @@ function stBindPanel(){const box=h('div');let bind=null;
   box.append(list,h('div',{style:'display:flex;gap:4px;flex-wrap:wrap;margin-top:4px'},key,mode,h('button',{on:{click:async()=>{const k=key.value.trim();if(!k||!ST.name){stToast('ใส่ชื่อ event และบันทึกไฟล์ก่อน');return;}const e={fx:ST.name};if(mode.value==='replace')e.mode='replace';bind[k]=bind[k]?[].concat(bind[k],e):e;await saveB();}}},'ผูก')),
     h('datalist',{id:'stDLev'},...[...evs].map(o=>h('option',{value:o}))),h('p',{className:'mute',style:'font-size:11.5px;margin:4px 0 0'},'เพิ่มทับ = เล่นเพิ่มจากภาพเดิมในเกม • แทนที่ = ใช้ไฟล์นี้แทนภาพเดิมของท่านั้นทั้งหมด'));
   load();return box;}
+// ---------- 🎮 ท่าจากเกม: เลือกสกิล (อ่านจากโค้ดเกมสด ๆ: PATHS / PBASIC / SPELL_LIST — สกิลใหม่โผล่เอง) → ตัวเราทำท่าจริงพร้อมเอฟเฟกต์ ----------
+ST.skill=null;ST.muteGame=true;
+function stSkillGroups(){const out=[];PATHS.forEach((P,i)=>{if(P.off)return;const B=PBASIC[i],L=[];
+  if(B){L.push({k:'basic',id:B.id,path:i,n:'🖱 '+(B.n||'ท่าพื้นฐาน')});if(B.shd)L.push({k:'shield',id:B.id,path:i,n:'🛡 '+B.shd.split(':')[0]});if(B.dsd)L.push({k:'dash',id:B.id,path:i,n:'💨 '+B.dsd.split(':')[0]});}
+  for(const S of SPELL_LIST)if(S.path===i)L.push({k:S.ult?'ult':'spell',id:S.id,path:i,n:(S.ic||'✦')+' '+S.n+(S.ult?' (อัลติ)':'')});
+  out.push({P,L});});return out;}
+function stSkillFind(v){if(!v)return null;const [k,id]=v.split(':');for(const g of stSkillGroups())for(const x of g.L)if(x.k===k&&x.id===id)return x;return null;}
+function stSkillUI(){const s=$st('stSkill');if(!s)return;const cur=ST.skill?ST.skill.k+':'+ST.skill.id:'';s.innerHTML='';
+  s.append(h('option',{value:''},'— ไม่มี —'),...stSkillGroups().map(g=>h('optgroup',{label:g.P.ic+' '+g.P.n},...g.L.map(x=>h('option',{value:x.k+':'+x.id},x.n)))));s.value=cur;}
+{const _fx=fx;fx=function(ev,raw){if(ST.muteGame&&ST.skill&&ev&&ev.k==='efx')return;return _fx(ev,raw);};}   // ซ่อนภาพเดิมของเกมตอนเล่นท่า
+function stSkillBusy(){const me=ST.skill&&G&&G.players&&G.players.me;return !!(me&&(me.dfall||me.colos>0||me.sdome||me.wr||me.rail||me.aug||me.ramp||me.snapT>0||me.hover>0||me.dash>0||me.dchgOn||Math.abs(me.z-groundH(me.x,me.y))>0.05));}   // วนเล่น: รอท่าจบก่อนค่อยเริ่มรอบใหม่
+function stCastSkill(o){const me=G&&G.players&&G.players.me;if(!me||!o)return;
+  if(!ST.home)ST.home={x:me.x,y:me.y};
+  clearInterval(ST.skAim);clearTimeout(ST.skRel);
+  for(const k of ['dfall','sdome','rail','aug','ramp','ecb','crush','wr'])if(me[k]&&k!=='wr')me[k]=null;if(me.wr)try{earthWrathEnd(me);}catch(e){}me.colos=0;me.hover=0;me.snapT=0;me.dchgOn=false;
+  resetBody(me,ST.home.x,ST.home.y);me.z=groundH(me.x,me.y);
+  if((me.pathIdx|0)!==o.path){setKit(me,String(o.path));me.kt=me.kit;try{WD.broadcastLobby();}catch(e){}}
+  const I=emptyInput();me.inp=I;const T={x:me.x+2.1/S3*5,y:me.y};   // เป้า: ห่าง 5 ตัวละคร ทางหน้าเรา (+x)
+  const aim=()=>{if(me.inp!==I)me.inp=I;I.gx=T.x;I.gy=T.y;I.ah=0;I.ax=T.x;I.ay=T.y;};aim();ST.skAim=setInterval(aim,16);setTimeout(()=>clearInterval(ST.skAim),15000);
+  me.lst=5;const foe=foesOf(me.team).filter(e=>e.alive!==false).sort((a,b)=>Math.hypot(a.x-T.x,a.y-T.y)-Math.hypot(b.x-T.x,b.y-T.y))[0];if(foe){foe.x=T.x;foe.y=T.y;foe.brn=3;foe.brnT=4;}
+  const rel=(ms,f)=>{ST.skRel=setTimeout(f,ms);};
+  if(o.k==='spell'){me.kitIds[0]=o.id;me.cd.q=0;I.hq=1;castSlot(me,0);if(me.aug)rel(2200,()=>I.hq=0);else I.hq=0;}
+  else if(o.k==='ult'){me.ultId=o.id;me.ult=100;castUlt(me);}
+  else if(o.k==='basic'){I.fire=1;rel(900,()=>I.fire=0);}
+  else if(o.k==='shield'){I.sh=1;rel(1200,()=>I.sh=0);}
+  else if(o.k==='dash'){me.cd.dodge=0;I.c.sp++;I.dh=1;rel(450,()=>I.dh=0);}
+}
 function stTryGame(){if(!ST.name){stToast('บันทึกไฟล์ก่อน');return;}const k=prompt('ผูกกับ event ไหนเพื่อลอง (เช่น efx:dfboom, imp:fire, parry)',ST.tryKey||'efx:');if(!k)return;ST.tryKey=k;
   const mode=confirm('แทนที่ภาพเดิมของท่านั้น? (ตกลง = แทนที่ • ยกเลิก = เพิ่มทับ)')?'replace':'add';
   try{const o=JSON.parse(localStorage.getItem('wd_fxbind')||'{}');o[k]={fx:ST.name,mode};localStorage.setItem('wd_fxbind',JSON.stringify(o));}catch(e){}

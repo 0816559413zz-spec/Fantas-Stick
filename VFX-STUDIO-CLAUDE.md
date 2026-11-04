@@ -58,6 +58,7 @@
 7. **Bind it** in `assets/fx/bind.json`.
    - Start with `"mode": "add"`, which plays on top of the old look.
    - Use `"replace"` only when the old code look should disappear and the user agrees.
+7b. **Time it against the real move:** timeline bar → **🎮 ท่า** picks any move of the game (read live from `PATHS`/`PBASIC`/`SPELL_LIST`, new paths appear by themselves). Every restart casts it on your player (reset to the start point, aimed 5 characters ahead, storm stacks / burning target / hold keys prepared like `studio/rec.js`) together with the effect; **ซ่อนของเดิม** hides the game's old `efx` visuals; loop waits until the move ends. Host runs in real time, so use 1× speed for timing.
 8. **Try it in the real game:** training mode, cast the skill. Or use the studio's 🎮 button, which sets a temporary `localStorage wd_fxbind` override.
 9. **Show the user in VFX Studio (required — user's standing request).** Contact sheets are for *you*; the user wants to *see* it too.
    - Open the effect live in the Claude browser pane: `preview_start {name:"wizardduel"}`, then navigate to `http://localhost:8765/studio.html?fx=<group>/<name>` so it plays in the studio.
