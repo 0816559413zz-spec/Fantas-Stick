@@ -88,10 +88,11 @@ save(ROOT/'assets/fx/mesh/wind_eye_roll.mesh.json',{'v':1,'desc':'Eye of Heaven 
 def ck(t0,t1,t):return str(round(min(1,max(0,(t-t0)/(t1-t0))),4))
 def keys(t0,t1,d):return {ck(t0,t1,t):v for t,v in d}
 
-def build(v):
+def build(v,game=False):
     A,B,C=v=='a',v=='b',v=='c'
+    GM=game   # in-game cut: camera sits inside the zone right behind the caster → eye lower/further, nothing big near the caster
     L=[]
-    EY=[0,8.5 if not C else 9.5,4.5]       # eye in the sky, a bit ahead of the caster (sketch: between caster and target)
+    EY=[0,8.5 if not C else 9.5,4.5] if not GM else [0,5.6,14]       # eye in the sky, a bit ahead of the caster (sketch: between caster and target)
     EW=3.6 if not C else 4.4               # half width (m) → eye 7.2 / 8.8 m wide
     eye_close=1.35 if not C else T_IMP+.12
     E0,E1=0,eye_close+.25
@@ -160,15 +161,16 @@ def build(v):
     rg=random.Random({'a':3,'b':5,'c':7}[v])
     nsw=10 if not B else 7
     for j in range(nsw):
-        a=j/nsw*2*math.pi+rg.uniform(-.3,.3);rr=rg.uniform(4.5,R-5) if j else 0
-        sc=rg.uniform(3.8,5.2) if not B else rg.uniform(5.5,7.5)
+        a=j/nsw*2*math.pi+rg.uniform(-.3,.3);rr=(rg.uniform(4.5,R-5) if j else 0) if not GM else rg.uniform(7,R-4)
+        sc=(rg.uniform(3.8,5.2) if not B else rg.uniform(5.5,7.5))*(1 if not GM else .7)
+        hy=.5 if not GM else .28
         at=round(TB0+.05*j,3);life=round(TB1+.3-at,3)
         L.append({'id':f's2_sw{j}','t':'mesh','at':at,'life':life,'att':'ground','shape':'model','model':'wind_aegis_gather','mat':'tex','tex':'tex/wind_air_band','col':WHITE,'col2':'#000000','rim':0,
             'uvTile':[1,1],'uvScroll':[-.9 if j%2 else -.7,0],'pos':[round(rr*math.sin(a),2),0,round(rr*math.cos(a),2)],
-            'scale':{'0':[sc*.4,.4*sc*.5,sc*.4],'0.18':[sc,sc*.5,sc],'0.85':[sc*1.05,sc*.55,sc*1.05],'1':[sc*1.3,sc*.3,sc*1.3]},'spin':(-110 if j%2 else 95)*(1.4 if B else 1),
+            'scale':{'0':[sc*.4,.4*sc*hy,sc*.4],'0.18':[sc,sc*hy,sc],'0.85':[sc*1.05,sc*hy*1.1,sc*1.05],'1':[sc*1.3,sc*hy*.6,sc*1.3]},'spin':(-110 if j%2 else 95)*(1.4 if B else 1),
             'op':{'0':0,'0.15':1,'0.85':.9,'1':0},'fade':0})
         L.append({'id':f's2_swg{j}','t':'mesh','at':at,'life':life,'att':'ground','shape':'model','model':'wind_aegis_gather','mat':'glow','col':GREEN if j%2 else MINT,'col2':GREEN,
-            'pos':[round(rr*math.sin(a),2),.05,round(rr*math.cos(a),2)],'scale':{'0':[sc*.4,.2*sc*.5,sc*.4],'0.18':[sc*1.03,sc*.5,sc*1.03],'0.85':[sc*1.08,sc*.55,sc*1.08],'1':[sc*1.3,sc*.3,sc*1.3]},
+            'pos':[round(rr*math.sin(a),2),.05,round(rr*math.cos(a),2)],'scale':{'0':[sc*.4,.2*sc*hy,sc*.4],'0.18':[sc*1.03,sc*hy,sc*1.03],'0.85':[sc*1.08,sc*hy*1.1,sc*1.08],'1':[sc*1.3,sc*hy*.6,sc*1.3]},
             'spin':(-110 if j%2 else 95)*(1.4 if B else 1),'op':{'0':0,'0.15':.28 if not C else .35,'0.85':.22,'1':0},'fade':0,'x':True})
     L.append({'id':'s2_haze','t':'warp','at':TB0,'life':round(TB1-TB0,3),'att':'ground','pos':[0,1.5,4],'kind':'haze','size':14,'str':.5,'op':{'0':0,'0.15':1,'0.9':1,'1':0},'col':WHITE,'glow':0,'x':True})
     # ===== the ring wall (game: 8 pieces at 1.15, live 6.25 s) =====
@@ -234,3 +236,61 @@ def build(v):
 for v in 'abc':
     save(ROOT/f'assets/fx/wind/eye_sb_{v}.fx.json',build(v))
 print('wind/eye_sb_a|b|c + mesh wind_eye_lid/iris/disc/vortex/ringwall/roll')
+
+# =====================================================================
+# IN-GAME pieces of variant B "ตาวังวน" (user picked B 2026-11-05) — played from js/68-wind-view.js windEfx
+#  wind/eye_ult   at the caster on 'wnult' (aim:false): rift → vortex eye, slam turbulence, blast at 2.38 (= W_UL.imp)
+#                 (no ring wall / no screen shake here: walls are real objects, shake comes from wnulslam/wnulimp)
+#  wind/eye_wall  per ring segment on 'wnwup' m:2 (at the segment centre, a = outward): low wall → surges
+#                 when the blast reaches it (2.38−1.15 = 1.23 s after it spawns) → lingers → fades at 6.25 s (W_UL.wlife)
+#  break / unstable / hit of a segment = the Aegis "ลมใส" files (wind/aegis_break, aegis_unstable, wall_hit)
+# =====================================================================
+SEG_A=22.5-1.5
+def seg_mesh(n=24,shape=6):
+    V=[];F=[];a0,a1=math.radians(-SEG_A),math.radians(SEG_A)
+    for i in range(n+1):
+        a=a0+(a1-a0)*i/n;e=abs(i/n*2-1);hh=max(.12,1-e**shape)**.5
+        V+=[r3([R*math.sin(a),0,R*math.cos(a)]),r3([R*math.sin(a),hh,R*math.cos(a)])]
+        if i<n:F.append([2*i,2*i+2,2*i+3,2*i+1])
+    return {'id':'w','k':'poly','v':V,'f':F}
+save(ROOT/'assets/fx/mesh/wind_eye_seg.mesh.json',{'v':1,'desc':'Eye of Heaven: กำแพงวง 1 ชิ้น (โค้ง 42° ของวงรัศมี 17.5 ม.) สูง 1 — จุดศูนย์กลางวง = จุด 0 (กลางชิ้นอยู่ z=+17.5)','pal':'wind','mat':'solid','parts':[seg_mesh()]})
+def g_ult():
+    F=build('b',game=True);drop=('s4_','s5_rise','s5_wisp','s5_base','s6_','s3_hit','s3_shake')
+    L=[l for l in F['layers'] if not l['id'].startswith(drop)]
+    for l in L:
+        i=l['id']
+        if i in('s2_curl','s2_lift'):l['size']=[2,3.5];l['pos']=[0,.6,0]
+        if i=='s2_curl':l['rate']={'0':80,'0.3':120,'1':130}
+        if i=='s2_haze':l['size']=9;l['pos']=[0,1.5,9]
+        if i.startswith('s2_sw') and not i.startswith('s2_swg'):l['op']={'0':0,'0.15':.65,'0.85':.55,'1':0}
+        if i.startswith('s2_swg'):l['op']={'0':0,'0.15':.14,'0.85':.1,'1':0}
+        if i in('s3_roll','s3_roll2'):
+            sc=l['scale'];l['scale']={'0':[3.5,sc['0'][1],3.5],'0.5':sc['0.5'],'1':sc['1'],'ease':'out'}
+            l['op']={k:round(v*(.6 if i=='s3_roll' else .7),3) for k,v in l['op'].items()}
+        if i in('s3_flash','s2_flash'):l['k']=.7;l['size']=1.6
+        if i=='s3_rays':l['size']=[3,5];l['pos']=[0,.6,0]
+        if i=='s1_glow':l['int']={'0':0,'0.3':1.2,'0.8':1,'1':0}
+    return {'v':1,'desc':'Eye of Heaven (อัลติสายลม) แบบ B "ตาวังวน" (ผู้ใช้เลือก 2026-11-05, สตอรี่บอร์ด #20): รอยแยกบนฟ้าลืมเป็นตาวังวน → ปักไม้ 1.0 วิ ลมปั่นป่วนทั้งเขต 17.5 ม. → สะบัดปีก 2.38 วิ วงคลื่นลมระเบิดออก • กำแพงวงแยกเป็น wind/eye_wall ต่อชิ้น',
+        'tags':['wind','ult'],'pal':'wind','dur':7.1,'seed':20,'layers':L}
+def g_seg():
+    WH=5.4;LF=T_END-T_WALL;HIT=T_IMP-T_WALL;U=lambda t:str(round(t/LF,4));ZC=-R
+    st={'0':[1,.08*WH,1],U(.2):[1,.36*WH,1],U(HIT+.3):[1,.4*WH,1],U(HIT+.42):[1,1.08*WH,1],U(HIT+.55):[1,WH,1],U(LF-.3):[1,WH,1],'1':[1,.85*WH,1]}
+    def wl(lid,col,op,tile,scroll,sm=1.0):
+        return {'id':lid,'t':'mesh','at':0,'life':round(LF,3),'att':'ground','shape':'model','model':'wind_eye_seg','mat':'tex','tex':'tex/wind_air_rise','col':col,'col2':'#000000','rim':0,
+            'uvTile':[tile,1],'uvScroll':scroll,'pos':[0,0,ZC],'scale':{k:[v[0]*sm,v[1],v[2]*sm] for k,v in st.items()},'op':{'0':0,U(.1):op,U(LF-.3):op,'1':0},'fade':0}
+    L=[wl('wall',WHITE,.75,14,[.03,0]),wl('wall2',MINT,.4,9,[-.05,0],.98),wl('tint',GREEN,.22,9,[.02,0],1.017)]
+    SM=dict(look='smoke',curl=True,fin=10)
+    L.append({'id':'up','t':'emit','at':0,'life':.12,'att':'ground','pos':[0,0,ZC],'from':'mesh','of':'wall','burst':16,'rate':0,'dir':'up','speed':[5,8],'plife':[.25,.45],'look':'streak','size':[1.4,2.6],'col':WHITE,'c2':GREEN,'gravity':0,'drag':1.5,'curl':False})
+    L.append(dict(SM,id='dust',t='emit',at=0,life=.15,att='ground',pos=[0,.05,ZC],**{'from':'mesh'},of='wall',burst=6,rate=0,dir='up',speed=[1,2.5],up=[.2,.8],plife=[.7,1.2],size=[4,7],grow=.6,col='#ddd6c3',c2='#b3aa92',gravity=0,drag=1.6))
+    L.append({'id':'surge','t':'emit','at':round(HIT+.33,3),'life':.12,'att':'ground','pos':[0,0,ZC],'from':'mesh','of':'wall','burst':24,'rate':0,'dir':'up','speed':[7,12],'plife':[.25,.45],'look':'streak','size':[1.6,3],'col':WHITE,'c2':GREEN,'gravity':0,'drag':1.4,'curl':False})
+    L.append(dict(SM,id='sdust',t='emit',at=round(HIT+.33,3),life=.12,att='ground',pos=[0,.05,ZC],**{'from':'mesh'},of='wall',burst=8,rate=0,dir='aim',yaw=0,spread=1,speed=[2,4],up=[.2,.9],plife=[.7,1.1],size=[4,7],grow=.6,col='#ddd6c3',c2='#b3aa92',gravity=0,drag=1.8))
+    LL=round(LF-HIT-.8,3)
+    L.append({'id':'rise','t':'emit','at':round(HIT+.5,3),'life':LL,'att':'ground','pos':[0,0,ZC],'from':'mesh','of':'wall','rate':10,'dir':'up','speed':[2.5,4.5],'plife':[.4,.8],'look':'streak','size':[1,2],'col':WHITE,'c2':GREEN,'gravity':0,'drag':.4,'curl':False})
+    L.append(dict(SM,id='wisp',t='emit',at=round(HIT+.5,3),life=LL,att='ground',pos=[0,0,ZC],**{'from':'mesh'},of='wall',rate=2,dir='up',speed=[.6,1.4],plife=[1,1.6],size=[3,5],grow=.5,col='#f2fff6',c2='#cfe8d6',gravity=-.3,drag=.6,fin=14,x=True))
+    L.append(dict(SM,id='base',t='emit',at=round(HIT+.5,3),life=LL,att='ground',pos=[0,.05,ZC],**{'from':'mesh'},of='wall',rate=3,dir='flat',speed=[.5,1.2],up=[.05,.3],plife=[1,1.6],size=[3,5.5],grow=.4,col='#e3ddcb',c2='#bdb39c',gravity=0,drag=1,fin=14,x=True))
+    L.append({'id':'lift','t':'emit','at':round(LF-.3,3),'life':.12,'att':'ground','pos':[0,0,ZC],'from':'mesh','of':'wall','burst':16,'rate':0,'dir':'up','speed':[1.5,3],'plife':[.4,.7],'look':'streak','size':[1,1.8],'col':WHITE,'c2':GREEN,'gravity':0,'drag':1.2,'curl':True})
+    L.append(dict(SM,id='puff',t='emit',at=round(LF-.3,3),life=.1,att='ground',pos=[0,0,ZC],**{'from':'mesh'},of='wall',burst=6,rate=0,dir='up',speed=[.8,1.6],plife=[.6,1],size=[3.5,6],grow=.6,col='#f2fff6',c2='#cfe8d6',gravity=-.4,drag=.8))
+    return {'v':1,'desc':'Eye of Heaven แบบ B: กำแพงวง 1 ชิ้น (เล่นต่อชิ้น ที่กลางชิ้น a = หันออกนอกวง) ขึ้นเตี้ยก่อน → 1.23 วิ ระเบิดลมมาชนแล้วพุ่งสูง 5.4 ม. → อยู่ถึง 6.25 วิ แล้วยุบจาง • ใช้ภาพลมใสแบบ Aegis',
+        'tags':['wind','ult','wall'],'pal':'wind','dur':round(LF,3),'seed':21,'layers':L}
+save(ROOT/'assets/fx/wind/eye_ult.fx.json',g_ult());save(ROOT/'assets/fx/wind/eye_wall.fx.json',g_seg())
+print('in-game: wind/eye_ult + wind/eye_wall + mesh wind_eye_seg')
