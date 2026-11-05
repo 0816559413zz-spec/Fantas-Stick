@@ -80,7 +80,7 @@ function windEfx(ev){
     case 'wnwboom':{const o=wvWall(ev.n);if(o){if(o.I)fxKill(o.I);if(o.P)fxKill(o.P);if(o.U)fxKill(o.U);WV.wl.delete(ev.n);}fxPlay(o&&o.A===false?'wind/wall_break':'wind/aegis_break',{x,y,h:0,a});if(near){shake(0.35);snd('break',ev);}return true;}
     case 'wnwend':{const o=wvWall(ev.n);if(o){if(o.I)fxStop(o.I);if(o.P)fxStop(o.P);if(o.U)fxStop(o.U);WV.wl.delete(ev.n);}return true;}
     case 'wnwblk':fxPlay('wind/ba_hit',{x,y,h:Math.max(0,H-0.2),a:Math.random()*6.283});return true;
-    case 'wndr':fxPlay('wind/windrift',{x,y,h:H,a});if(near)snd('cast_pull',ev);return true;
+    case 'wndr':fxPlay('wind/windrift_sb_a',{x,y,h:H,a});if(near)snd('cast_pull',ev);return true;
     case 'wndrslow':ring(x,y,'#8dff65',26,0.35,H+0.2);return true;
     case 'wndrland':case 'wndrwind':return true;   // ลงท่า/ลมตามมา อยู่ในเอฟเฟกต์ windrift แล้ว
     case 'wnvx':fxPlay('wind/vortex_bind_sb_a',{x,y,h:H,a});later(0.8,()=>{if(near)shake(0.18);});if(near)snd('cast_pull',ev);return true;
