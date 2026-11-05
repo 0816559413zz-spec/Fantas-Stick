@@ -308,8 +308,11 @@ def sb_skills():  # อ่านสกิลจากโค้ดเกมตร
         m = re.search((r"(?<![\w])" + k + r":([\d.]+)") if num else S(k), blk)
         return (float(m.group(1)) if num else m.group(1).replace("\\'", "'")) if m else None
     paths, spells, basics, consts = [], [], [], {}
-    for fn in sorted(os.listdir(os.path.join(ROOT, 'js'))):
-        if not fn.endswith('.js'):
+    # ลำดับเดียวกับที่เกมโหลด (FILES ใน index.html) — เรียงตามชื่อไฟล์จะได้ 09-water ก่อน 09-wind = เลขสายลม/น้ำสลับกัน (บั๊ก 2026-11-05)
+    fm = re.search(r"const FILES=\[([^\]]*)\]", open(os.path.join(ROOT, 'index.html'), encoding='utf-8').read())
+    order = [x + '.js' for x in re.findall(r"'([^']+)'", fm.group(1))] if fm else sorted(os.listdir(os.path.join(ROOT, 'js')))
+    for fn in order:
+        if not fn.endswith('.js') or not os.path.exists(os.path.join(ROOT, 'js', fn)):
             continue
         src = open(os.path.join(ROOT, 'js', fn), encoding='utf-8').read()
         for m in re.finditer(r'const (\w+)=(\d+)\b', src):

@@ -59,7 +59,7 @@ async function recBoot(){
       if(rel&&t>=rel){I.fire=I.sh=I.dh=I.hq=0;rel=0;}
       if(Math.round(t*60)%2===0)grab(t);
       const p=o.g.position,moved=p.distanceTo(lp);lp.copy(p);
-      const busy=me.dfall||me.colos>0||me.sdome||me.wr||me.rail||me.aug||me.ramp||me.snapT>0||me.hover>0||me.grT>0||rel;
+      const busy=o.dp||me.dfall||me.colos>0||me.sdome||me.wr||me.rail||me.aug||me.ramp||me.snapT>0||me.hover>0||me.grT>0||rel;
       still=(!busy&&moved<0.002&&(!o.anim||o.anim.curName==='idle'))?still+D:0;
       if(t>0.8&&still>0.6)break;
     }
