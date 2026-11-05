@@ -83,6 +83,26 @@ User's future goals: bigger maps, more and finer breakable things, light from sk
 
 > In-game numbers: Settings → ภาพ → ข้อมูลประสิทธิภาพ (F3) + กราฟ FPS (`js/71-perfhud.js`); the 📋 button copies them as text.
 
+## H. Round 2026-11-05 — user's perf report (TDM, valley, 12 players) — record only, nothing fixed yet
+User's F3 report (1920×911, graphics high): **34 FPS, 1% low 11 FPS, worst 101 ms, CPU 23.6 ms/frame (host sim only 1.2)**, 662 draw calls, 1,025k triangles, **243 shaders / 2,433 geometries / 1,209 textures**, JS 218 MB, 1,142 particles, 12 people, net 22 snapshots/s · 88 KB/s per client.
+Reproduced in the hidden pane (`?nosw`, `lobbyBotFill()` → 11 bots, `G.mode='tdm'; G.mapPick='valley'`, frames driven with `WD.hostStep` + `WD.render` + `readPixels`): render-side CPU 19–20 ms/frame, host 0.7 ms, 1.0–1.7 M triangles, 260–1,300 draw calls depending on the fight. `WD.PROF`: **gpuSubmit 10.6 ms** (three.js traversal + draw submit), **fx 6.4 ms** (particles/shapes/lights/vfx/debris), **players 4.9 ms** (syncPlayers + grass + cloth), hud2d 1.1 ms, hostTick 0.6 ms.
+
+**The big one — the game gets slower the longer a session runs (leaks between matches):**
+- [ ] **P1 Skeleton bone-texture leak.** Every skinned character part gets a `Skeleton` with its own bone `DataTexture` (`computeBoneTexture`), but `disposeTree` (js/29 ~427) never calls `skeleton.dispose()` (no `skeleton.dispose` anywhere in `js/`). Measured **+84 textures per match** with 12 players (12 chars × 7 skinned parts of `char_student`): 99 → 182 → 270 → 362 → 447 → 531 → 615 over 6 matches, never going down. This is how the user reached 1,209. Fix: in `disposeTree`, `if(o.isSkinnedMesh&&o.skeleton&&!keep)o.skeleton.dispose()` (careful with skeletons shared by outline copies in js/47 ~491 and js/68 ~61, which `bind(m.skeleton)` to the original).
+- [ ] **P1 Warm-up characters never freed.** `GWARM.chars` (js/51 ~122/131) keeps one hidden `makeStudent` + file model per distinct look forever and adds to it every lobby (bot looks are random per fill, friends add more). Seen: 12 hidden rigs = 604 meshes left in the scene in the lobby. Hidden objects are not drawn, but three.js still updates their matrices every frame and they hold GPU memory. Fix: clear/dispose `GWARM.chars` when the match starts (or cap it, LRU of ~12).
+- [ ] **P2 Hidden code-built body under the file model.** Each player has ~28 visible meshes (7 skinned `char_student` parts + wand/tie/props) and **~23 hidden** code-built fallback parts that are still traversed every frame. Once the file model is ready, remove (or detach) the fallback parts instead of hiding them.
+- [ ] **P2 Check geometry growth too:** geometries went 264 → ~1,250–1,580 over the session (part of it is the `WCACHE` map cache + warm-up chars); re-measure after the two P1 fixes.
+- Draw calls looked higher in later matches (first match 260–420, later 560–1,070) but fight intensity differs between runs — **not proven** to be a leak; re-measure after the fixes with a fixed scripted fight.
+
+**Per-frame cost (not leaks):**
+- [ ] **P2 Players = most draw calls.** 12 players × ~28 visible meshes ≈ 395 draws + ~311 shadow casters. Ideas: merge the 7 skinned `char_student` parts into 1–2 skinned meshes (one material + atlas/vertex colours) in Blender/export; merge the static code-built extras (wand, tie, belt) per player like `mergeBody`; drop `castShadow` on small parts (tie, buttons, wand).
+- [ ] **P2 FX mesh particles are very high-poly.** The 3 biggest single meshes in the scene are FX mesh-particle `InstancedMesh`es (js/46 ~202, ice colours): **198k, 91k, 79k triangles** (≈ 4k triangles per shard × 20–50 instances). Need a triangle budget for `.mesh.json` used as particles (e.g. ≤ 300 tris) — VFX Studio could show tris per instance and warn. Also `water_ringwave_low` ×3 = 38k tris each.
+- [ ] **P2 `fx` 6.4 ms/frame** — split it (`updateParticles` / `updateShapes` / `updateLights` / `updateVfx` / `updateDebris`) with `WD.PROF` sub-timers to find which one.
+- Shadows are not the problem: `shadowMap.autoUpdate` is already off (updated every N frames); turning shadow updates off completely changed render CPU by only ~0–1.6 ms.
+- [ ] **P3 Network for 12 players:** 88 KB/s per client × 11 clients ≈ 1 MB/s upload for the host at 22 snapshots/s. Fine on LAN/fibre, may be too much for a home upload with 12 real players → delta/quantised snapshots, interest management, or a lower snapshot rate for far players.
+
+**Dev-environment note:** once in the pane, a Service Worker from an earlier load stayed in control even with `?nosw` and every same-origin fetch failed (`Failed to fetch`, page stuck without `WD`) while `curl` to the server worked. Unregistering the SW fixed it. Not reproduced; if a player ever reports "the game won't load", check this first.
+
 ## Benchmarks
 `tools/bench-start.js` = match start / map switch hitch (see its header).
 
