@@ -1,5 +1,5 @@
 {
- "next": 19,
+ "next": 20,
  "items": [
   {
    "id": 1,
@@ -101564,13 +101564,13 @@
    }
   },
   {
-   "id": 18,
+   "id": 19,
    "title": "สายลม — Windrift",
    "who": "สายลม",
    "skill": "utility • CD 14 วิ",
    "status": "draft",
-   "created": "2026-11-05T20:57:32",
-   "updated": "2026-11-05T21:31:08",
+   "created": "2026-11-05T21:49:06",
+   "updated": "2026-11-05T21:49:09",
    "overview": "[จากเกม] ชาร์จปีก 0.3 วิ (ลอยนิดหน่อย) แล้วพุ่ง 200 แบบ Jett ลงท่าฮีโร่ • ศัตรูในทางพุ่งช้าลงทันที • 1 วิต่อมาลมแรงตามมา ศัตรูในแนวกว้าง 100 กระเด็น 400 ตามทิศที่พุ่ง 10 ดาเมจ • ใช้กลางอากาศได้",
    "mood": [],
    "colors": [
@@ -101591,7 +101591,7 @@
    },
    "shots": [
     {
-     "id": "mw3m18aw1",
+     "id": "mw3nvje01",
      "kind": "charge",
      "name": "ท่าเตรียม 0.3 วิ (จากเกม)",
      "dur": 0.3,
@@ -101610,7 +101610,7 @@
       "objs": [],
       "cast": {
        "m": "char_student",
-       "rec": "storyboard/rec/windrift_mw3n8fl5.json"
+       "rec": "storyboard/rec/windrift_mw3nvm93.json"
       },
       "targ": {
        "m": "enemy_dummy",
@@ -101620,168 +101620,10 @@
      },
      "refs": [],
      "result": "",
-     "note": "",
-     "frames": {
-      "fps": 6,
-      "list": [
-       {
-        "id": "mw3m4dcd13",
-        "bg": "blank",
-        "base": "storyboard/img/s18_frb_mw3m4dc4.jpg",
-        "t": 0,
-        "ops": [],
-        "img": ""
-       },
-       {
-        "id": "mw3m4ddz14",
-        "bg": "blank",
-        "base": "storyboard/img/s18_frb_mw3m4ddt.jpg",
-        "t": 0.17,
-        "ops": [],
-        "img": ""
-       },
-       {
-        "id": "mw3m4dey15",
-        "bg": "blank",
-        "base": "storyboard/img/s18_frb_mw3m4des.jpg",
-        "t": 0.33,
-        "ops": [],
-        "img": ""
-       },
-       {
-        "id": "mw3m4dg416",
-        "bg": "blank",
-        "base": "storyboard/img/s18_frb_mw3m4dfz.jpg",
-        "t": 0.5,
-        "ops": [],
-        "img": ""
-       },
-       {
-        "id": "mw3m4dh517",
-        "bg": "blank",
-        "base": "storyboard/img/s18_frb_mw3m4dgz.jpg",
-        "t": 0.67,
-        "ops": [],
-        "img": ""
-       },
-       {
-        "id": "mw3m4di318",
-        "bg": "blank",
-        "base": "storyboard/img/s18_frb_mw3m4dhy.jpg",
-        "t": 0.83,
-        "ops": [],
-        "img": ""
-       },
-       {
-        "id": "mw3m4dj119",
-        "bg": "blank",
-        "base": "storyboard/img/s18_frb_mw3m4div.jpg",
-        "t": 1,
-        "ops": [],
-        "img": ""
-       },
-       {
-        "id": "mw3m4djy20",
-        "bg": "blank",
-        "base": "storyboard/img/s18_frb_mw3m4djr.jpg",
-        "t": 1.17,
-        "ops": [],
-        "img": ""
-       },
-       {
-        "id": "mw3m4dkw21",
-        "bg": "blank",
-        "base": "storyboard/img/s18_frb_mw3m4dkq.jpg",
-        "t": 1.33,
-        "ops": [],
-        "img": ""
-       },
-       {
-        "id": "mw3m4dls22",
-        "bg": "blank",
-        "base": "storyboard/img/s18_frb_mw3m4dlm.jpg",
-        "t": 1.5,
-        "ops": [],
-        "img": ""
-       },
-       {
-        "id": "mw3m4dml23",
-        "bg": "blank",
-        "base": "storyboard/img/s18_frb_mw3m4dme.jpg",
-        "t": 1.67,
-        "ops": [],
-        "img": ""
-       },
-       {
-        "id": "mw3m4dnk24",
-        "bg": "blank",
-        "base": "storyboard/img/s18_frb_mw3m4dnc.jpg",
-        "t": 1.83,
-        "ops": [],
-        "img": ""
-       },
-       {
-        "id": "mw3m4dol25",
-        "bg": "blank",
-        "base": "storyboard/img/s18_frb_mw3m4doa.jpg",
-        "t": 2,
-        "ops": [],
-        "img": ""
-       },
-       {
-        "id": "mw3m4dpc26",
-        "bg": "blank",
-        "base": "storyboard/img/s18_frb_mw3m4dp6.jpg",
-        "t": 2.17,
-        "ops": [],
-        "img": ""
-       },
-       {
-        "id": "mw3m4dq827",
-        "bg": "blank",
-        "base": "storyboard/img/s18_frb_mw3m4dq3.jpg",
-        "t": 2.33,
-        "ops": [],
-        "img": ""
-       },
-       {
-        "id": "mw3m4dqt28",
-        "bg": "blank",
-        "base": "storyboard/img/s18_frb_mw3m4dqn.jpg",
-        "t": 2.5,
-        "ops": [],
-        "img": ""
-       },
-       {
-        "id": "mw3m4drq29",
-        "bg": "blank",
-        "base": "storyboard/img/s18_frb_mw3m4drk.jpg",
-        "t": 2.67,
-        "ops": [],
-        "img": ""
-       },
-       {
-        "id": "mw3m4dsj30",
-        "bg": "blank",
-        "base": "storyboard/img/s18_frb_mw3m4dse.jpg",
-        "t": 2.83,
-        "ops": [],
-        "img": ""
-       },
-       {
-        "id": "mw3m4dt731",
-        "bg": "blank",
-        "base": "storyboard/img/s18_frb_mw3m4dt2.jpg",
-        "t": 3,
-        "ops": [],
-        "img": ""
-       }
-      ],
-      "sheet": ""
-     }
+     "note": ""
     },
     {
-     "id": "mw3m18aw2",
+     "id": "mw3nvje02",
      "kind": "cast",
      "name": "ปล่อย",
      "dur": 0.2,
@@ -101800,7 +101642,7 @@
       "objs": [],
       "cast": {
        "m": "char_student",
-       "rec": "storyboard/rec/windrift_mw3n8fl5.json"
+       "rec": "storyboard/rec/windrift_mw3nvm93.json"
       },
       "targ": {
        "m": "enemy_dummy",
@@ -101813,7 +101655,7 @@
      "note": ""
     },
     {
-     "id": "mw3m18aw3",
+     "id": "mw3nvje03",
      "kind": "travel",
      "name": "พุ่ง",
      "dur": 0.3,
@@ -101832,7 +101674,7 @@
       "objs": [],
       "cast": {
        "m": "char_student",
-       "rec": "storyboard/rec/windrift_mw3n8fl5.json"
+       "rec": "storyboard/rec/windrift_mw3nvm93.json"
       },
       "targ": {
        "m": "enemy_dummy",
@@ -101845,7 +101687,7 @@
      "note": ""
     },
     {
-     "id": "mw3m18aw4",
+     "id": "mw3nvje04",
      "kind": "impact",
      "name": "กระทบ",
      "dur": 0.4,
@@ -101864,7 +101706,7 @@
       "objs": [],
       "cast": {
        "m": "char_student",
-       "rec": "storyboard/rec/windrift_mw3n8fl5.json"
+       "rec": "storyboard/rec/windrift_mw3nvm93.json"
       },
       "targ": {
        "m": "enemy_dummy",
@@ -101877,7 +101719,7 @@
      "note": ""
     },
     {
-     "id": "mw3m18aw5",
+     "id": "mw3nvje05",
      "kind": "linger",
      "name": "ค้าง 1 วิ (จากเกม)",
      "dur": 1,
@@ -101896,7 +101738,7 @@
       "objs": [],
       "cast": {
        "m": "char_student",
-       "rec": "storyboard/rec/windrift_mw3n8fl5.json"
+       "rec": "storyboard/rec/windrift_mw3nvm93.json"
       },
       "targ": {
        "m": "enemy_dummy",
@@ -101909,7 +101751,7 @@
      "note": ""
     },
     {
-     "id": "mw3m18aw6",
+     "id": "mw3nvje06",
      "kind": "fade",
      "name": "จางหาย",
      "dur": 0.3,
@@ -101928,7 +101770,7 @@
       "objs": [],
       "cast": {
        "m": "char_student",
-       "rec": "storyboard/rec/windrift_mw3n8fl5.json"
+       "rec": "storyboard/rec/windrift_mw3nvm93.json"
       },
       "targ": {
        "m": "enemy_dummy",
@@ -101942,11 +101784,11 @@
     }
    ],
    "rec": {
-    "file": "storyboard/rec/windrift_mw3n8fl5.json",
+    "file": "storyboard/rec/windrift_mw3nvm93.json",
     "dur": 1.55,
     "clips": "0s idle"
    }
   }
  ],
- "rev": 175
+ "rev": 179
 }
