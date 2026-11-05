@@ -296,12 +296,14 @@ function houseColor(lk){return HOUSES[parseLook(lk).h].c;}
 const TEAMC=['#4da3ff','#ff5a5a'], TEAMN=['ทีมฟ้า','ทีมแดง'];
 // โหมดที่ไม่มีไม้กวาด (กด B ไม่ได้ + ไม่มีไอคอน B บน HUD)
 const NOBROOM=new Set(['imp','ffa']);
+// ห้องรับคนได้สูงสุด 12 (FFA 12 / ทีม 6v6) — โหมดอื่นยังเช็ค max ของโหมดตอนกดเริ่ม (ผู้ใช้ 2026-11-05)
+const ROOM_MAX=12;
 const MODES={
   coop:{name:'🗝️ ดันเจียน Co-op',d:'1-6 คน ฝ่าทีละชั้น บอสเรดทุก 5 ชั้น',min:1,max:6},
   train:{name:'🎯 ห้องฝึก',d:'1-6 คน Test Place: ลองคาถา เสกมอนสเตอร์ ปรับไม่มีคูลดาวน์ได้',min:1,max:6,map:'test'},
   duel:{name:'⚔️ ดวล 1v1',d:'2 คน ชนะ 2 ใน 3 รอบ',min:2,max:2},
-  ffa:{name:'💥 FFA',d:'2-6 คน ใครได้ 10 kill ก่อนชนะ',min:2,max:6},
-  tdm:{name:'🛡️ ทีม 2v2 / 3v3',d:'2-6 คน ทีมไหนได้ 15 kill ก่อนชนะ',min:2,max:6,team:true},
+  ffa:{name:'💥 FFA',d:'2-12 คน ใครได้ 10 kill ก่อนชนะ',min:2,max:12},
+  tdm:{name:'🛡️ ทีม สูงสุด 6v6',d:'2-12 คน ทีมไหนได้ 15 kill ก่อนชนะ',min:2,max:12,team:true,tmax:6},
   quid:{name:'🏟️ ควิดดิช',d:'2-6 คน 2 ทีม บินแย่งบอลโยนเข้าห่วง',min:2,max:6,team:true,map:'pitch'},
   race:{name:'🏁 แข่งไม้กวาด',d:'1-6 คน บินลอดห่วงครบ 2 รอบ',min:1,max:6},
   br:{name:'🌀 แบทเทิลรอยัล',d:'2-6 คน เก็บคาถา วงหด คนสุดท้ายชนะ',min:2,max:6,map:'lake'},

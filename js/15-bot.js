@@ -120,7 +120,7 @@ const BOT_MODES=['coop','duel','ffa','tdm','br'];
 function lobbyBots(){return bots().filter(p=>p.ai.lb);}
 function lobbyBotAdd(path,lv){
   if(!G||G.ph!=='lobby')return;
-  const M=MODES[G.mode]||{};if(plist().length>=Math.min(6,M.max||6))return toast('ห้องเต็มแล้วสำหรับโหมดนี้');
+  const M=MODES[G.mode]||{};if(plist().length>=Math.min(ROOM_MAX,M.max||6))return toast('ห้องเต็มแล้วสำหรับโหมดนี้');
   const ok=PATHS.map((P,i)=>i).filter(i=>!PATHS[i].off),P=path>=0&&ok.includes(path)?path:ok[Math.floor(Math.random()*ok.length)];
   const p=spawnBot(P,lv,800,500,null,NET.myId);if(!p)return toast('บอทเต็มแล้ว (สูงสุด '+BOT_MAX+' ตัว)');
   p.ai.lb=1;EVL.pop();if(NET.online)EVN.pop();   // ไม่เล่นเอฟเฟกต์เกิดในห้องรอ

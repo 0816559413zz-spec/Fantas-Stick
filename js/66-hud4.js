@@ -105,8 +105,8 @@ function hud4Draw(me,v){
   h4Set('ud',!!slotState(me,v,-2).dim,x=>Q.uc.classList.toggle('dim',x));
   if(full!==H4.uFull){if(H4.uFull&&!full)h4UltUse();H4.uFull=full;Q.uc.classList.toggle('full',full);if(full){Q.uc.classList.remove('burst');void Q.uc.offsetWidth;Q.uc.classList.add('burst');}}
   // รายชื่อทีม: โหมดทีม = คนทีมเดียวกัน • ดันเจียน = ทุกคน • อื่น ๆ = ว่าง (ระบบ Squad ยังไม่มี — แสดงเส้นว่าง)
-  {const tm=teamOn(v)||v.mode==='tdm'||v.mode==='quid',L=(v.P||[]).filter(p=>p.id!==me.id&&(v.mode==='coop'||tm&&p.tm===me.tm)).slice(0,4);
-    h4Set('sqL',L.map(p=>p.id+':'+(p.n||'')).join('|'),()=>{Q.sq.innerHTML=Array.from({length:4},(_,i)=>{const p=L[i];
+  {const tm=teamOn(v)||v.mode==='tdm'||v.mode==='quid',L=(v.P||[]).filter(p=>p.id!==me.id&&(v.mode==='coop'||tm&&p.tm===me.tm)).slice(0,5);
+    h4Set('sqL',L.map(p=>p.id+':'+(p.n||'')).join('|'),()=>{Q.sq.innerHTML=Array.from({length:5},(_,i)=>{const p=L[i];
       return p?`<div class="r" data-id="${esc(p.id)}"><b>${esc(p.n||'')}</b><i><u></u></i></div>`:`<div class="r e"><i></i></div>`;}).join('');});
     for(const p of L){const r=Q.sq.querySelector(`[data-id="${CSS.escape(p.id)}"]`);if(!r)continue;h4Set('sq'+p.id,p.al?clamp(p.hp/p.mh,0,1).toFixed(2):'x',x=>{r.classList.toggle('dead',x==='x');r.querySelector('u').style.width=(x==='x'?0:x*100)+'%';});}}
   // FFA / TDM: แผนที่ย่อ → รูปตัวละครเรา (ผู้ใช้ 2026-11-01)
