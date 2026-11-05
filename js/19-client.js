@@ -70,6 +70,7 @@ function hbPair(now){const Q=HVB.q;if(Q.length<2)return null;
   let k=Q.findIndex(s=>s._t>rt);if(k<0)return {prev:Q[Q.length-2],cur:Q[Q.length-1],a:1};if(k===0)return {prev:null,cur:Q[0],a:1};
   const pv=Q[k-1],c=Q[k];return {prev:pv,cur:c,a:clamp((rt-pv._t)/Math.max(1,c._t-pv._t),0,1)};}
 function onSnap(s){
+  PERF.snapIn++;
   if(!NET.isHost&&s.T!==undefined&&!NETOLD){sbufPush(s);return;}   // ลูกข่าย: เข้าบัฟเฟอร์ก่อน (ใช้ตอนเรนเดอร์ sbufAdvance)
   snapApply(s,true);
 }

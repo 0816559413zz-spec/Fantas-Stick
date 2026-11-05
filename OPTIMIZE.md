@@ -81,6 +81,8 @@ User's future goals: bigger maps, more and finer breakable things, light from sk
 - [ ] `drawLabels` (name tags / HP bars, 2D canvas) is now the biggest game-side CPU cost (~6%) → next candidate.
 - [ ] Remaining CPU: three.js render traversal/matrix updates, `getParameters` for 54 normal-blend DoubleSide materials (two-pass), cloth still ~8%, labels/HUD 2D.
 
+> In-game numbers: Settings → ภาพ → ข้อมูลประสิทธิภาพ (F3) + กราฟ FPS (`js/71-perfhud.js`); the 📋 button copies them as text.
+
 ## Benchmarks
 `tools/bench-start.js` = match start / map switch hitch (see its header).
 

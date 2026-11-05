@@ -49,7 +49,8 @@ function netDelta(base){
 const NET_MAX=15000,_netTE=new TextEncoder();
 function netSendSnap(s){
   const m={t:'s',s},sz=()=>_netTE.encode(JSON.stringify(m)).length;
-  if(sz()>NET_MAX){
+  const b0=SET.stats?sz():0;if(SET.stats){PERF.snapN++;PERF.snapB+=b0;}   // ตัววัดเน็ต (js/71) — วัดขนาดเฉพาะตอนเปิดแผง
+  if((SET.stats?b0:sz())>NET_MAX){
     s.ev=(s.ev||[]).filter(e=>e.e!=='h');
     while(sz()>NET_MAX&&s.ev.length)s.ev=s.ev.slice(0,s.ev.length>>1);
     if(sz()>NET_MAX&&s.J)while(sz()>NET_MAX&&s.J.length)s.J=s.J.slice(0,s.J.length>>1);

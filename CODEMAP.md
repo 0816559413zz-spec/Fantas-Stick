@@ -139,8 +139,8 @@ windFlyTick:202 windFlick:204
 windUltTick:213 windFloatZ:227 windSnapP:230 windSnapW:231
 §234 สกิล
 
-## js/10-net.js (197) — 
-PREFIX:4 NET:5 RC:9 TURN_SERVERS:12 ICE:13 PEER_OPT:14 TURN_URL:16 ICE_READY:18 JN:22 LAG:24 lagDo:25 hostSend:26 LOBBY:27 genCode:28 sendAll:29 NETD_KEYS:33 NETD:33 netDeltaReset:34 netDelta:35 NET_MAX:49 _netTE:49 netSendSnap:50 NETU:61 netUndelta:62 setStatus:68 hostGame:70 hostPeer:78 netConnect:97 joinWatch:108 joinFail:123 netLost:129 joinGame:144 joinPeer:155 clientOnData:170 leave:185 leaveRoom:187
+## js/10-net.js (198) — 
+PREFIX:4 NET:5 RC:9 TURN_SERVERS:12 ICE:13 PEER_OPT:14 TURN_URL:16 ICE_READY:18 JN:22 LAG:24 lagDo:25 hostSend:26 LOBBY:27 genCode:28 sendAll:29 NETD_KEYS:33 NETD:33 netDeltaReset:34 netDelta:35 NET_MAX:49 _netTE:49 netSendSnap:50 NETU:62 netUndelta:63 setStatus:69 hostGame:71 hostPeer:79 netConnect:98 joinWatch:109 joinFail:124 netLost:130 joinGame:145 joinPeer:156 clientOnData:171 leave:186 leaveRoom:188
 
 ## js/11-host.js (394) — 
 G:4 EVL:4 EVN:4 hostLast:4 tickN:4 emit:5 feed:6 banner:7 plist:8 cleanName:9 freshStats:11 newPlayer:18 emptyInput:21 frameOk:23 addPlayer:24 initHostLobby:33 lobbyMsg:40 broadcastLobby:41 INPN:43 hostOnData:44 hostDrop:75 hostRemove:84 validate:97 hostStart:109 hostToLobby:135 MIDJOIN:142 midJoin:143 CHATT:159 chatRelay:160 emoHost:168 resetBody:170 fmap:176 spawnPts:177 teamPts:179 placeAll:180 respawn:192
@@ -209,20 +209,20 @@ MY:204 myDB:205 mySave:206 myLoad:209 myDecodeReady:215 myPlay:216 myNext:228 my
 §250 เพลงประกอบ (สร้างสดตามแผนที่)
 MUSIC:251 THEMES:252 padNote:257 musicTick:264 toggleMusic:293
 
-## js/19-client.js (261) — 
+## js/19-client.js (262) — 
 cv:4 cx:4 DPR:5 SW:5 SH:5 resize:6 VIEW:12 screen:13 lastBuffKey:13 overShown:13 lastCount:13 PARTS:14 TEXTS:14
 §15 งบเอฟเฟกต์ (VFX budget)
 VFXB:20 _apush:21 vfxQual:29 vfxBegin:31 vfxEnd:34 vfxOnce:36 vfxExtra:38 PCOL:39 setScreen:41 onLobby:53
 §59 ภาพของโฮสต์ลื่น (ผู้ใช้ 2026-10-31 "ขี่ไม้กวาด/กระโดด กล้องสั่น")
-HVB:63 HBOLD:63 hbReset:64 hbPush:65 hbPair:68 onSnap:72 snapApply:76
-§85 บัฟเฟอร์ snapshot (ลูกข่าย, ผู้ใช้ 2026-10-22 "เล่นออนไลน์ให้ลื่น")
-SBUF:88 NETOLD:89 sbufReset:90 sbufPush:91 sbufAdvance:101
-§113 ทำนายตัวเอง (ลูกข่าย): ตัวเราขยับทันทีที่กด ไม่ต้องรอโฮสต์ตอบ
-PRED:116 predictMe:117 myPos:138
-§140 เอฟเฟกต์
-burst:142 smoke:153 ring:154 floatText:155 shake:156 wandPos:157 impactFX:159 explosionFX:176
-§188 เอฟเฟกต์คาถาใหม่
-ZV:189 COLB:189 WVV:189 GLV:189 ICEV:189 SLV:189 ULTV:189 OBV:189 _iceDisc:191 _iceEdge:192 _iceSpk:193 iceFloorMat:194 _icePlane:195 _icePathMat:196 makeIceFloor:197 updateIceFloors:221 FLASHM:232 FLASHING:233 flashModel:234 endFlash:243 tickFlash:244 GHOSTM:246 SOLIDM:246 ghostOf:247 setGhost:253 hitSparks:261
+HVB:63 HBOLD:63 hbReset:64 hbPush:65 hbPair:68 onSnap:72 snapApply:77
+§86 บัฟเฟอร์ snapshot (ลูกข่าย, ผู้ใช้ 2026-10-22 "เล่นออนไลน์ให้ลื่น")
+SBUF:89 NETOLD:90 sbufReset:91 sbufPush:92 sbufAdvance:102
+§114 ทำนายตัวเอง (ลูกข่าย): ตัวเราขยับทันทีที่กด ไม่ต้องรอโฮสต์ตอบ
+PRED:117 predictMe:118 myPos:139
+§141 เอฟเฟกต์
+burst:143 smoke:154 ring:155 floatText:156 shake:157 wandPos:158 impactFX:160 explosionFX:177
+§189 เอฟเฟกต์คาถาใหม่
+ZV:190 COLB:190 WVV:190 GLV:190 ICEV:190 SLV:190 ULTV:190 OBV:190 _iceDisc:192 _iceEdge:193 _iceSpk:194 iceFloorMat:195 _icePlane:196 _icePathMat:197 makeIceFloor:198 updateIceFloors:222 FLASHM:233 FLASHING:234 flashModel:235 endFlash:244 tickFlash:245 GHOSTM:247 SOLIDM:247 ghostOf:248 setGhost:254 hitSparks:262
 
 ## js/20-vfx-pyro-storm.js (414) — Dragonfall (ภาพ)
 makeDfCircle:3 DFV:20 dfCracks:21 updateDfCracks:31 dragonfallFX:32
@@ -336,10 +336,10 @@ ROLE:4 KC:4 roleShowT:4 onPriv:5 MO:10 BREATHS:11 clearModeObjs:12 ITEMC:21 heal
 §139 หน้าประชุมโหวต (หาลอร์ดโวลเดอมอร์)
 meetKey:140 myVoted:140 castVote:141 syncMeeting:147
 
-## js/37-render-loop.js (101) — ลูปเรนเดอร์
+## js/37-render-loop.js (102) — ลูปเรนเดอร์
 lastFrame:2 HSTOP:5 hitStop:6 FXSTUDIO:8
 §9 เก็บ shader ที่ compile แล้วไว้ตลอดเกม (ผู้ใช้ 2026-11-02 "เล่นกับบอท…
-PINMAX:13 PINNED:13 KEEPSRC:16 pinPrograms:22 frame:25 _fpsAcc:37 _fpsN:37 render:38 renderGame:81
+PINMAX:13 PINNED:13 KEEPSRC:16 pinPrograms:22 frame:25 _fpsAcc:38 _fpsN:38 render:39 renderGame:82
 
 ## js/38-hud.js (346) — HUD
 rr:2 SLOTS:3 fmtTime:4
@@ -693,4 +693,7 @@ dive:186 PA:187 TA:188 DIVE_DOWN:190 DIVE_POUR:190 DIVE_STEP:190 diveDist:191 la
 §443 เล่น
 WDG_YAW:444 wdgGet:445 wdgStart:446 wdgDive:453 wdgKeep:456 wdgEnd:457 wdgTick:458
 
-(82 files, 20285 lines)
+## js/71-perfhud.js (67) — 
+PERF:9 perfFrame:12 perfDom:26 perfStats:34 perfGraph:38 perfRows:49 perfPanel:63 perfText:64
+
+(83 files, 20355 lines)
