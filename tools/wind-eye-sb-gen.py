@@ -254,6 +254,16 @@ def seg_mesh(n=24,shape=6):
         if i<n:F.append([2*i,2*i+2,2*i+3,2*i+1])
     return {'id':'w','k':'poly','v':V,'f':F}
 save(ROOT/'assets/fx/mesh/wind_eye_seg.mesh.json',{'v':1,'desc':'Eye of Heaven: กำแพงวง 1 ชิ้น (โค้ง 42° ของวงรัศมี 17.5 ม.) สูง 1 — จุดศูนย์กลางวง = จุด 0 (กลางชิ้นอยู่ z=+17.5)','pal':'wind','mat':'solid','parts':[seg_mesh()]})
+def base_band(pid,r,w,a0,a1,n=48,y=.04):
+    V=[];F=[]
+    for i in range(n+1):
+        a=a0+(a1-a0)*i/n;s_,c_=math.sin(a),math.cos(a)
+        V+=[r3([s_*(r-w/2),y,c_*(r-w/2)]),r3([s_*(r+w/2),y,c_*(r+w/2)])]
+        if i<n:F.append([2*i,2*i+1,2*i+3,2*i+2])
+    return {'id':pid,'k':'poly','v':V,'f':F}
+_sa=math.radians(SEG_A+.5)
+save(ROOT/'assets/fx/mesh/wind_eye_segbase.mesh.json',{'v':1,'desc':'Eye of Heaven: เส้นฐานกำแพงวง 1 ชิ้นบนพื้น (แถบโค้งแบน กว้าง 0.14 ม.)','pal':'wind','mat':'glow','parts':[base_band('line',R,.14,-_sa,_sa)]})
+save(ROOT/'assets/fx/mesh/wind_eye_segbaseglow.mesh.json',{'v':1,'desc':'Eye of Heaven: แสงนุ่มรอบเส้นฐานกำแพงวง (กว้าง 1.1 ม.)','pal':'wind','mat':'glow','parts':[base_band('glow',R,1.1,-_sa,_sa,y=.03)]})
 def g_ult():
     F=build('b',game=True);drop=('s4_','s5_rise','s5_wisp','s5_base','s6_','s3_hit','s3_shake')
     L=[l for l in F['layers'] if not l['id'].startswith(drop)]
@@ -279,7 +289,12 @@ def g_seg():
         return {'id':lid,'t':'mesh','at':0,'life':round(LF,3),'att':'ground','shape':'model','model':'wind_eye_seg','mat':'tex','tex':'tex/wind_air_rise','col':col,'col2':'#000000','rim':0,
             'uvTile':[tile,1],'uvScroll':scroll,'pos':[0,0,ZC],'scale':{k:[v[0]*sm,v[1],v[2]*sm] for k,v in st.items()},'op':{'0':0,U(.1):op,U(LF-.3):op,'1':0},'fade':0}
     L=[wl('wall',WHITE,.75,14,[.03,0]),wl('wall2',MINT,.4,9,[-.05,0],.98),wl('tint',GREEN,.22,9,[.02,0],1.017)]
+    for bid,model,col,pk in [('gline','wind_eye_segbase','#e6fff0',.85),('gglow','wind_eye_segbaseglow',GREEN,.3)]:
+        L.append({'id':bid,'t':'mesh','at':0,'life':round(LF,3),'att':'ground','shape':'model','model':model,'mat':'glow','col':col,'col2':col,'pos':[0,0,ZC],
+            'op':{'0':0,U(.08):pk,U(HIT+.3):pk,U(HIT+.4):min(1,pk*1.4),U(HIT+.7):pk,U(LF-.3):pk,'1':0},'fade':0})
     SM=dict(look='smoke',curl=True,fin=10)
+    L.append({'id':'gflow','t':'emit','at':.3,'life':round(LF-.6,3),'att':'ground','pos':[0,.08,ZC],'from':'mesh','of':'gline','rate':8,'dir':'flat','speed':[1,2],'up':[0,.2],'plife':[.5,.9],
+        'look':'streak','size':[.8,1.4],'col':WHITE,'c2':GREEN,'gravity':0,'drag':.5,'curl':True,'x':True})
     L.append({'id':'up','t':'emit','at':0,'life':.12,'att':'ground','pos':[0,0,ZC],'from':'mesh','of':'wall','burst':16,'rate':0,'dir':'up','speed':[5,8],'plife':[.25,.45],'look':'streak','size':[1.4,2.6],'col':WHITE,'c2':GREEN,'gravity':0,'drag':1.5,'curl':False})
     L.append(dict(SM,id='dust',t='emit',at=0,life=.15,att='ground',pos=[0,.05,ZC],**{'from':'mesh'},of='wall',burst=6,rate=0,dir='up',speed=[1,2.5],up=[.2,.8],plife=[.7,1.2],size=[4,7],grow=.6,col='#ddd6c3',c2='#b3aa92',gravity=0,drag=1.6))
     L.append({'id':'surge','t':'emit','at':round(HIT+.33,3),'life':.12,'att':'ground','pos':[0,0,ZC],'from':'mesh','of':'wall','burst':24,'rate':0,'dir':'up','speed':[7,12],'plife':[.25,.45],'look':'streak','size':[1.6,3],'col':WHITE,'c2':GREEN,'gravity':0,'drag':1.4,'curl':False})

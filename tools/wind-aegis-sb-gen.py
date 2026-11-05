@@ -123,6 +123,17 @@ for j in range(3):
     gp.append({'id':f'g{j}','k':'ribbon','path':P,'w':.16,'taper':.7,'seg':60})
 save(ROOT/'assets/fx/mesh/wind_aegis_gather.mesh.json',{'v':1,'desc':'Aegis Gale sb#16: วงลมบางรอบตัวผู้ร่ายตอนเล็ง (3 วงเอียง)','pal':'wind','mat':'solid','parts':gp})
 
+
+# ground base mark (user 2026-11-05: "มีเอฟเฟคบอกที่พื้น ว่าฐานของกำแพงอยู่ตรงนี้") — flat arc bands lying on the ground under the wall
+def base_band(pid,r,w,a0,a1,n=64,y=.04):
+    V=[];F=[]
+    for i in range(n+1):
+        a=a0+(a1-a0)*i/n;s_,c_=math.sin(a),math.cos(a)
+        V+=[r3([s_*(r-w/2),y,c_*(r-w/2)]),r3([s_*(r+w/2),y,c_*(r+w/2)])]
+        if i<n:F.append([2*i,2*i+1,2*i+3,2*i+2])
+    return {'id':pid,'k':'poly','v':V,'f':F}
+save(ROOT/'assets/fx/mesh/wind_aegis_base.mesh.json',{'v':1,'desc':'Aegis Gale: เส้นฐานกำแพงบนพื้น (แถบโค้งแบน กว้าง 0.14 ม.) ใต้ wind_aegis_arc — บอกว่ากำแพงตั้งตรงนี้','pal':'wind','mat':'glow','parts':[base_band('line',RAD,.14,-AMAX*1.02,AMAX*1.02)]})
+save(ROOT/'assets/fx/mesh/wind_aegis_baseglow.mesh.json',{'v':1,'desc':'Aegis Gale: แสงนุ่มรอบเส้นฐานกำแพง (แถบโค้งแบน กว้าง 1.1 ม.)','pal':'wind','mat':'glow','parts':[base_band('glow',RAD,1.1,-AMAX*1.02,AMAX*1.02,y=.03)]})
 # ---------------------------------------------------------------- effect builder
 T1,T2,T3,T4,T5,T6,TE=0,3.0,3.2,3.5,3.9,6.9,7.2
 DUR=TE;GREEN='#8dff65';WHITE='#ffffff'
@@ -253,6 +264,11 @@ def g_wall():
     L.append(arc_layer('wall',WALL,WHITE,1.7,[.03,0],sc=stand,opc=opc(.75)))
     L.append(arc_layer('wall2',WALL,'#d8ffe0',1.1,[-.05,0],dz=-.35,sc=stand,opc=opc(.4)))
     L.append(arc_layer('tint',WALL,GREEN,1.1,[.02,0],dz=.3,sc=stand,opc=opc(.22)))
+    for bid,model,col,pk in [('gline','wind_aegis_base','#e6fff0',.85),('gglow','wind_aegis_baseglow',GREEN,.3)]:
+        L.append({'id':bid,'t':'mesh','at':0,'life':WALL,'att':'ground','shape':'model','model':model,'mat':'glow','col':col,'col2':col,'pos':[0,0,ZC],
+            'scale':{'0':[.2,1,.2],U(.15):[1,1,1],'1':[1,1,1]},'op':{'0':0,U(.06):pk,U(.5):pk*.75,U(1):pk,U(1.5):pk*.75,U(2):pk,U(WALL-.35):pk,'1':0},'fade':0})
+    L.append({'id':'gflow','t':'emit','at':.3,'life':WALL-.6,'att':'ground','pos':[0,.08,ZC],'from':'mesh','of':'gline','rate':12,'dir':'flat','speed':[1,2],'up':[0,.2],'plife':[.5,.9],
+        'look':'streak','size':[.8,1.4],'col':WHITE,'c2':GREEN,'gravity':0,'drag':.5,'curl':True,'x':True})
     L.append({'id':'ring','t':'warp','at':.05,'life':.4,'att':'ground','pos':[0,.15,0],'kind':'shock','flat':True,'size':{'0':2,'1':9},'str':.9,'op':{'0':1,'1':0},'col':WHITE,'glow':0})
     L.append(dict(SMK,id='dust',t='emit',at=.05,life=.12,att='ground',pos=[0,.05,ZC],**{'from':'mesh'},of='wall',burst=16,rate=0,dir='aim',yaw=0,spread=1.2,speed=[2,4.5],up=[.2,.9],plife=[.6,1.1],size=[3.5,6.5],grow=.6,gravity=0,drag=1.8))
     L.append({'id':'up','t':'emit','at':.05,'life':.1,'att':'ground','pos':[0,0,ZC],'from':'mesh','of':'wall','burst':40,'rate':0,'dir':'up','speed':[6,10],'plife':[.25,.45],'look':'streak','size':[1.4,2.6],'col':WHITE,'c2':GREEN,'gravity':0,'drag':1.5,'curl':False})
