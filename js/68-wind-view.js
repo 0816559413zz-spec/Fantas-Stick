@@ -9,9 +9,9 @@ WN_BODY.wallAim=[-1.55,-0.08,0.1,0.08,-1.2,0.35,0,-0.04];WN_BODY.gather=[-1.8,-0
 function windCharacterPose(o,p,dt,now){
   const A=p.wn;if(!A||!p.al||p.dn||p.fl||p.st){o.wnPose=null;return;}
   let s=o.wnPose;if(!s)s=o.wnPose={phase:0,t:0,w:0,P:WN_BODY.hover.slice(),hover:0};
-  if(A[6]){
+  if(A[6]===1){   // ชาร์จ Windrift • ช่วงพุ่ง/ลงท่าฮีโร่ = dashPose (js/72)
     if(s.phase!==A[6]){s.phase=A[6];s.t=0;}s.t+=dt;s.w=Math.min(1,s.w+dt*14);
-    const target=A[6]===1?WN_BODY.charge:WN_BODY.dash;for(let i=0;i<8;i++)s.P[i]=target[i];
+    const target=WN_BODY.charge;for(let i=0;i<8;i++)s.P[i]=target[i];
     characterStance(o,s.P,WN_AIR_FEET,s.w);return;
   }
   if(s.phase){s.phase=0;s.t=0;}

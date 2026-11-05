@@ -252,7 +252,7 @@ function syncPlayers(P,mode,now,dt){
     earthFX(o,p,pz,now,dt);
     windFX(o,p,pz,now,dt);waterFX(o,p,pz,now,dt);
     lateSkillPose(o,p,dt,now);
-    waterCharacterPose(o,p,dt,now);windCharacterPose(o,p,dt,now);
+    waterCharacterPose(o,p,dt,now);windCharacterPose(o,p,dt,now);dashPose(o,p,dt,now);   // ท่าพุ่ง (js/72) ทับท่าอื่นตอนพุ่ง
     if(o.rig)rigSync(o,dt);
     if(ragTick(o,p,v,dt,now))o.tip.scale.setScalar(0.001);   // ล้ม/กระแทกแรง = ragdoll (js/48)
     if(p.bn&&Math.random()<0.7)burst(p.x,p.y,'#ff6a2a',1,30,0.45,3.5,{h:pz+rnd(0.3,1.8),vh:[1,2.5],g:-1});
