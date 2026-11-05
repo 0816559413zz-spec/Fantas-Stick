@@ -88225,7 +88225,7 @@
    "skill": "control • CD 0.4 วิ",
    "status": "done",
    "created": "2026-11-04T18:37:54",
-   "updated": "2026-11-04T21:31:41",
+   "updated": "2026-11-05T21:30:57",
    "overview": "[จากเกม] กำแพงลม (ชาร์จ 3 อัน คืน 8 วิ/อัน) — กดสกิลแล้วเลือก: คลิกซ้าย = ดันกำแพงพุ่งไปข้างหน้า 400 ทะลุผ่านศัตรูในทาง: สตัน 0.5 วิ + 10 ดาเมจ (กดสกิลอีกครั้ง = หยุดก่อน) • คลิกขวา = วางตรงจุดเล็ง (ไกลสุด 500) • กว้าง 250 อยู่ 12 วิ • กันศัตรูเดินผ่าน + บล็อกลูกเวทศัตรู (พวกเดียวกันผ่านได้) • ศัตรูยิงพังได้ (200) • ศัตรูโดนผลักชน = สตัน 0.5 วิ • ตีศัตรูที่ติดกำแพงครบ 70 = กำแพงแตก ระเบิด 50 กระเด็นไกล",
    "mood": [],
    "colors": [
@@ -88241,7 +88241,7 @@
     "id": "aegisgale",
     "kind": "spell",
     "path": "wind",
-    "pathI": 8,
+    "pathI": 7,
     "cd": 0.4,
     "file": "js/09-wind.js",
     "line": 235
@@ -88267,7 +88267,7 @@
       "objs": [],
       "cast": {
        "m": "char_student",
-       "rec": "storyboard/rec/aegisgale_mw21lw73.json"
+       "rec": "storyboard/rec/aegisgale_mw3n86rs.json"
       },
       "targ": {
        "m": "enemy_dummy",
@@ -93299,7 +93299,7 @@
       "objs": [],
       "cast": {
        "m": "char_student",
-       "rec": "storyboard/rec/aegisgale_mw21lw73.json"
+       "rec": "storyboard/rec/aegisgale_mw3n86rs.json"
       },
       "targ": {
        "m": "enemy_dummy",
@@ -93331,7 +93331,7 @@
       "objs": [],
       "cast": {
        "m": "char_student",
-       "rec": "storyboard/rec/aegisgale_mw21lw73.json"
+       "rec": "storyboard/rec/aegisgale_mw3n86rs.json"
       },
       "targ": {
        "m": "enemy_dummy",
@@ -93363,7 +93363,7 @@
       "objs": [],
       "cast": {
        "m": "char_student",
-       "rec": "storyboard/rec/aegisgale_mw21lw73.json"
+       "rec": "storyboard/rec/aegisgale_mw3n86rs.json"
       },
       "targ": {
        "m": "enemy_dummy",
@@ -93395,7 +93395,7 @@
       "objs": [],
       "cast": {
        "m": "char_student",
-       "rec": "storyboard/rec/aegisgale_mw21lw73.json"
+       "rec": "storyboard/rec/aegisgale_mw3n86rs.json"
       },
       "targ": {
        "m": "enemy_dummy",
@@ -93427,7 +93427,7 @@
       "objs": [],
       "cast": {
        "m": "char_student",
-       "rec": "storyboard/rec/aegisgale_mw21lw73.json"
+       "rec": "storyboard/rec/aegisgale_mw3n86rs.json"
       },
       "targ": {
        "m": "enemy_dummy",
@@ -93441,7 +93441,7 @@
     }
    ],
    "rec": {
-    "file": "storyboard/rec/aegisgale_mw21lw73.json",
+    "file": "storyboard/rec/aegisgale_mw3n86rs.json",
     "dur": 0.8,
     "clips": "0s idle"
    }
@@ -93453,7 +93453,7 @@
    "skill": "control • CD 10 วิ",
    "status": "review",
    "created": "2026-11-04T21:24:41",
-   "updated": "2026-11-05T08:59:35",
+   "updated": "2026-11-05T21:31:03",
    "overview": "[จากเกม] เสกทอร์นาโด 3 อันเรียงโค้ง 45° ข้างหน้าระยะ 300 → 0.8 วิ ดึงกลับมาหยุดห่างเรา 60 ลากศัตรูที่โดนมาด้วย 20 ดาเมจ แล้วสตัน 0.75 วิ • ระหว่างดึงชนกำแพงลม = สตัน • ใช้กลางอากาศไม่ได้",
    "mood": [],
    "colors": [
@@ -93467,7 +93467,7 @@
     "id": "vortexbind",
     "kind": "spell",
     "path": "wind",
-    "pathI": 8,
+    "pathI": 7,
     "cd": 10,
     "file": "js/09-wind.js",
     "line": 240
@@ -93493,7 +93493,7 @@
       "objs": [],
       "cast": {
        "m": "char_student",
-       "rec": "storyboard/rec/vortexbind_mw27kgol.json"
+       "rec": "storyboard/rec/vortexbind_mw3n8bqj.json"
       },
       "targ": {
        "m": "enemy_dummy",
@@ -101512,7 +101512,7 @@
       "objs": [],
       "cast": {
        "m": "char_student",
-       "rec": "storyboard/rec/vortexbind_mw27kgol.json"
+       "rec": "storyboard/rec/vortexbind_mw3n8bqj.json"
       },
       "targ": {
        "m": "enemy_dummy",
@@ -101544,7 +101544,7 @@
       "objs": [],
       "cast": {
        "m": "char_student",
-       "rec": "storyboard/rec/vortexbind_mw27kgol.json"
+       "rec": "storyboard/rec/vortexbind_mw3n8bqj.json"
       },
       "targ": {
        "m": "enemy_dummy",
@@ -101558,7 +101558,7 @@
     }
    ],
    "rec": {
-    "file": "storyboard/rec/vortexbind_mw27kgol.json",
+    "file": "storyboard/rec/vortexbind_mw3n8bqj.json",
     "dur": 0.8,
     "clips": "0s idle"
    }
@@ -101570,7 +101570,7 @@
    "skill": "utility • CD 14 วิ",
    "status": "draft",
    "created": "2026-11-05T20:57:32",
-   "updated": "2026-11-05T21:00:49",
+   "updated": "2026-11-05T21:31:08",
    "overview": "[จากเกม] ชาร์จปีก 0.3 วิ (ลอยนิดหน่อย) แล้วพุ่ง 200 แบบ Jett ลงท่าฮีโร่ • ศัตรูในทางพุ่งช้าลงทันที • 1 วิต่อมาลมแรงตามมา ศัตรูในแนวกว้าง 100 กระเด็น 400 ตามทิศที่พุ่ง 10 ดาเมจ • ใช้กลางอากาศได้",
    "mood": [],
    "colors": [
@@ -101584,7 +101584,7 @@
     "id": "windrift",
     "kind": "spell",
     "path": "wind",
-    "pathI": 8,
+    "pathI": 7,
     "cd": 14,
     "file": "js/09-wind.js",
     "line": 238
@@ -101610,7 +101610,7 @@
       "objs": [],
       "cast": {
        "m": "char_student",
-       "rec": "storyboard/rec/windrift_mw3m1b90.json"
+       "rec": "storyboard/rec/windrift_mw3n8fl5.json"
       },
       "targ": {
        "m": "enemy_dummy",
@@ -101800,7 +101800,7 @@
       "objs": [],
       "cast": {
        "m": "char_student",
-       "rec": "storyboard/rec/windrift_mw3m1b90.json"
+       "rec": "storyboard/rec/windrift_mw3n8fl5.json"
       },
       "targ": {
        "m": "enemy_dummy",
@@ -101832,13 +101832,13 @@
       "objs": [],
       "cast": {
        "m": "char_student",
-       "rec": "storyboard/rec/windrift_mw3m1b90.json"
+       "rec": "storyboard/rec/windrift_mw3n8fl5.json"
       },
       "targ": {
        "m": "enemy_dummy",
        "a": "idle"
       },
-      "at": 3
+      "at": 0.5
      },
      "refs": [],
      "result": "",
@@ -101864,7 +101864,7 @@
       "objs": [],
       "cast": {
        "m": "char_student",
-       "rec": "storyboard/rec/windrift_mw3m1b90.json"
+       "rec": "storyboard/rec/windrift_mw3n8fl5.json"
       },
       "targ": {
        "m": "enemy_dummy",
@@ -101896,13 +101896,13 @@
       "objs": [],
       "cast": {
        "m": "char_student",
-       "rec": "storyboard/rec/windrift_mw3m1b90.json"
+       "rec": "storyboard/rec/windrift_mw3n8fl5.json"
       },
       "targ": {
        "m": "enemy_dummy",
        "a": "hit"
       },
-      "at": 0.92
+      "at": 1.2
      },
      "refs": [],
      "result": "",
@@ -101928,13 +101928,13 @@
       "objs": [],
       "cast": {
        "m": "char_student",
-       "rec": "storyboard/rec/windrift_mw3m1b90.json"
+       "rec": "storyboard/rec/windrift_mw3n8fl5.json"
       },
       "targ": {
        "m": "enemy_dummy",
        "a": "idle"
       },
-      "at": 0.92
+      "at": 1.55
      },
      "refs": [],
      "result": "",
@@ -101942,11 +101942,11 @@
     }
    ],
    "rec": {
-    "file": "storyboard/rec/windrift_mw3m1b90.json",
-    "dur": 0.917,
+    "file": "storyboard/rec/windrift_mw3n8fl5.json",
+    "dur": 1.55,
     "clips": "0s idle"
    }
   }
  ],
- "rev": 169
+ "rev": 174
 }
