@@ -224,6 +224,99 @@
    "fade": 0
   },
   {
+   "id": "gline",
+   "t": "mesh",
+   "at": 0,
+   "life": 6.25,
+   "att": "ground",
+   "shape": "model",
+   "model": "wind_eye_segbase",
+   "mat": "glow",
+   "col": "#e6fff0",
+   "col2": "#e6fff0",
+   "pos": [
+    0,
+    0,
+    -17.5
+   ],
+   "op": {
+    "0": 0,
+    "0.0128": 0.85,
+    "0.2448": 0.85,
+    "0.2608": 1,
+    "0.3088": 0.85,
+    "0.952": 0.85,
+    "1": 0
+   },
+   "fade": 0
+  },
+  {
+   "id": "gglow",
+   "t": "mesh",
+   "at": 0,
+   "life": 6.25,
+   "att": "ground",
+   "shape": "model",
+   "model": "wind_eye_segbaseglow",
+   "mat": "glow",
+   "col": "#8dff65",
+   "col2": "#8dff65",
+   "pos": [
+    0,
+    0,
+    -17.5
+   ],
+   "op": {
+    "0": 0,
+    "0.0128": 0.3,
+    "0.2448": 0.3,
+    "0.2608": 0.42,
+    "0.3088": 0.3,
+    "0.952": 0.3,
+    "1": 0
+   },
+   "fade": 0
+  },
+  {
+   "id": "gflow",
+   "t": "emit",
+   "at": 0.3,
+   "life": 5.65,
+   "att": "ground",
+   "pos": [
+    0,
+    0.08,
+    -17.5
+   ],
+   "from": "mesh",
+   "of": "gline",
+   "rate": 8,
+   "dir": "flat",
+   "speed": [
+    1,
+    2
+   ],
+   "up": [
+    0,
+    0.2
+   ],
+   "plife": [
+    0.5,
+    0.9
+   ],
+   "look": "streak",
+   "size": [
+    0.8,
+    1.4
+   ],
+   "col": "#ffffff",
+   "c2": "#8dff65",
+   "gravity": 0,
+   "drag": 0.5,
+   "curl": true,
+   "x": true
+  },
+  {
    "id": "up",
    "t": "emit",
    "at": 0,
