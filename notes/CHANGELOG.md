@@ -1,5 +1,25 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
 
+- 2026-11-05 — เซฟคอนเซปต์เกมเพลย์และไอเดียธาตุกับฉากตามคำขอผู้ใช้ พร้อมจุดอ้างอิงใน HANDOFF/PROJECT-GUIDE; แยกสิ่งที่เลือกกับสิ่งที่ยังไม่สรุป ไม่มีการเปลี่ยนระบบเกม
+
+- 2026-11-05 — ผู้ใช้เอนทางพักฟื้นเลือดหลังถอน มีแผนยาฮีลที่อาจซื้อได้ และเปิดแนวคิดซัพพอร์ตหลายสาย; รายละเอียดฮีล/ไอเท็ม/ระบบซื้อยังไม่สรุป ยังไม่แก้เกม
+
+- 2026-11-05 — จดขนาดทีมตั้งต้น 6 ต่อ 6 และแพ้แล้วรวมทีมกลับเข้าสู้ตามคำตอบผู้ใช้; ฮีลระหว่าง/หลังไฟต์ยังไม่ตัดสิน
+
+- 2026-11-05 — ผู้ใช้รับโครงพื้นที่บุก/รับ: ทางหลัก ทางอ้อมใกล้ ๆ จุดได้เปรียบ และชนะไฟต์แล้วได้ความคืบหน้า; รับความคล้าย OW ในโครงนี้ ยังไม่สั่งพัฒนา
+
+- 2026-11-05 — ผู้ใช้เลือกฝ่ายรับชนะเมื่อหมดเวลา เอนทางสลับฝ่าย; อัปเกรดสกิล/ไอเท็มยังไม่ตัดสินและพักไว้คุยภายหลัง บันทึกในร่างเกมเพลย์
+
+- 2026-11-05 — ผู้ใช้เลือกแมตช์ปราสาทเดียว แบ่งบุก/รับ บุกยาวผ่านพื้นที่และสิ่งของในปราสาท ไม่เลือกสองฐานบุกพร้อมกัน; ยังไม่กำหนดการสลับรอบหรือสั่งพัฒนา
+
+- 2026-11-05 — จดไอเดียผู้ใช้: interact ร่ายใส่แกน, ฝ่ายรับในโซนช่วยลดดาเมจ, ผู้ร่าย 1/2/3 คนให้ดาเมจรวม 1×/1.2×/1.4×; ยังไม่พัฒนา
+
+- 2026-11-05 — จดคำตอบผู้ใช้เรื่องแกนปราสาทเป็นลำดับ การสู้ซื้อเวลาทำ objective และการซ่อมจำกัดใน `designs/castle-gameplay-concept.md`; วิธีเปิดแกนและการเปลี่ยนแต่ละช่วงยังคุยอยู่
+
+- 2026-11-05 — บันทึกไอเดียธาตุกับสิ่งแวดล้อมใน `designs/element-environment-ideas.md` ตามคำขอผู้ใช้; กลับไปคุยเกมเพลย์หลักก่อน ยังไม่มีการอนุมัติแนวแมตช์หรือพัฒนาระบบ
+
+- 2026-11-04 — ร่างโมเดล Nature root tree สำหรับรีวิวใน VFX Studio ยังไม่ผูกเกม; ผู้ใช้กำลังทบทวนว่าจะเก็บสกิลหรือไม่
+
 - 2026-11-05 — **Performance overlay: FPS graph + stats panel** (user: "อยากได้ตัววัดอื่น ๆ เพิ่ม เอาไว้เก็บข้อมูล optimize + กราฟ FPS เปิดในการตั้งค่า"): new `js/71-perfhud.js` (FILES after `69-broom`), called every frame from `frame()` (js/37) as `perfFrame(dt,cpu,host)`. Settings → ภาพ: new toggles **กราฟ FPS** (`SET.fpsg`) and **ข้อมูลประสิทธิภาพ (F3)** (`SET.stats`); F3 toggles the panel in-game. Graph = last 240 frames (real time, not the 50 ms-capped game dt), 0–50 ms scale with 60/30 FPS lines, colour by speed, blue part = CPU time. Panel (4×/s): FPS avg / 1% low / worst frame / frames >33 ms, CPU ms (+ host sim ms), draw calls + triangles summed over every pass (`gl.info.autoReset=false` while on, reset each frame), shaders/geometries/textures, render size × pixel ratio + graphics level, JS heap (Chrome), particles / fx / players / enemies / projectiles, map + mode, network (host: snapshots/s + KB/s per peer measured in `netSendSnap` only while the panel is on; client: snapshots/s + ping). 📋 button copies all values as text to paste to Claude. `#perfHud` z-index 9990 (canvas needs its own size rule: global `canvas{position:fixed;100vw}`). Off = zero cost. Debug `WD.perf`. Client only.
 - 2026-11-05 — **Vortex Bind: user picked A + realistic tornado (Aegis "ลมใส" look), bound in game** (user: "A แต่ว่าอยากให้ Tornado เป็นแบบ Ref ของสกิล Wind Aegis … ลมสมจริง"). `tools/wind-vortex-sb-gen.py` variant A now `real=True`: tornado body = 4 lathe cones textured with `tex/wind_air_rise` (thin wavy rising lines, as on the Aegis wall) on new twisted meshes `mesh/wind_vortex_air` (twist 320°) + `wind_vortex_air2` (220°) so the lines read as a rising spiral; smoke dust swirling at the base + dust lifted up the column + wisps at the top; `warp` haze over the column; no glow, no flashes (cast/pull/arrival = warp shock + dust), orbit streaks and sparkles removed, curl/arrow trails thinner. B/C unchanged. **Bound**: `wnvx` in `js/68-wind-view.js` now plays `wind/vortex_bind_sb_a` (old `wind/vortex_bind` kept as a file). Checked: studio sheets greathall + meadow (white-out ≤ 0.6 %), close front view, headless training cast (dummy pulled + stunned, 0 page errors). Storyboard #17 results/notes updated. Visual only, no protocol change.
 - 2026-11-05 — **Vortex Bind from storyboard #17: 3 variants for review** (user: "ทำ VFX ตามสตอรี่บอร์ด #17 … ทำ 2-3 แบบให้เลือก"). New generator `tools/wind-vortex-sb-gen.py` → `wind/vortex_bind_sb_a` (follows the sketch), `_b` (light, clear wind, no dark layer, fewer particles), `_c` (heavy: bigger tornadoes, thicker/more wind, stronger pull + shake). Sequence from the user's frame-by-frame sketch: wavy wind `trail`s fly from the wand along the 3 directions (0–0.22 s) → curl up into spirals at 15 m → tornadoes (same models as `wind/vortex_bind`) grow to full size at 0.75 s → pull back with long wind lines running ahead toward the caster ("พายุดูดกลับเข้ามา") at 0.8–1.05 s (code `W_VX.hold/pull`) → pop. Contact sheets on greathall: white-out ≤ 2.5 %, cover ≤ 12 %. Results + notes written into storyboard #17 (status review). Not bound in game yet (old `wind/vortex_bind` still plays); told the user the game captures enemies from t = 0 while the tornado is fully grown only at 0.75 s. No gameplay change.
