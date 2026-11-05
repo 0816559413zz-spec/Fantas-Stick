@@ -1,5 +1,11 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
 
+- 2026-11-06 — **กระสุนตรง crosshair + กล้องใหม่ + รูปโปรไฟล์ไม่กระตุก (ผู้ใช้):** `shoot()` (js/12) ผู้เล่นจริงยิงไปจุดกลางเป้าตรง ๆ ไม่ล็อกเป้าเองแล้ว (บอทยังล็อก) + คิดความสูงจากจุดเกิดกระสุน — ทดสอบยิง 6 ทิศ: เบี้ยงข้าง 0 สูงต่ำ 0 (เดิมผิดได้ถึง 2.9 ม.). กล้องแบบเกม hero shooter: ใกล้ขึ้น 6.2→4.7 ม. ตัวอยู่ ~37% จากซ้าย, หมุนตามเมาส์ทันที (ไม่หน่วง), ชนผนังหดทันที/ถอยกลับช้า ๆ, ความสูงพื้นตามนุ่ม (js/31 `updateCamera`, `CAM_FRAMES` base/flight/airAim/kindle/rail/windShield). รูปโปรไฟล์ HUD อ่านภาพต้นเฟรมถัดไป (js/66 `h4PfRead`) ไม่ทำให้ CPU รอการ์ดจอ.
+
+- 2026-11-06 — Moonwater free-end v3: user rejected the narrow neck; keep full beam thickness and extend the breakup/splash. Still for review, hit-wall study unchanged.
+
+- 2026-11-06 — Moonwater free-end revision after user rejected the cutoff: continuous tapered body separates into thin water threads and droplets. New still for review; hit-wall study unchanged, no gameplay binding.
+
 - 2026-11-06 — **FPS ค้าง 20 (ผู้ใช้):** วัด 12 คนในแผนที่ valley ~25–31 ms/เฟรม (จอ 60 Hz → ตกเหลือ 20). แก้: ปิดการตรวจ error shader (`?debug` เปิดคืน) — CPU ไม่ต้องรอ compile; ถอดร่างโค้ดที่ซ่อนใต้โมเดลไฟล์ + ทรงผม/เนคไท/ไม้ที่ไม่ได้เลือก, เลิกจำลองผ้าคลุมโค้ดที่ซ่อนอยู่ (วัตถุในฉาก 2,844 → ~2,050); F3 โชว์ชื่อการ์ดจอ + เตือนถ้าเป็นการ์ดในตัว; `tools/headless.js --profile`; ตัวจับเวลาย่อยใน `WD.PROF`. ที่ยังค้าง: shader compile กลางไฟต์ 12 ตัว, รูปโปรไฟล์ HUD อ่านภาพทุก 0.5 วิ (OPTIMIZE §I).
 
 - 2026-11-06 — Moonwater beam-end design studies: free-end breakup and water-fan impact, stills for review. Separate Studio demos only; no gameplay binding or host changes.

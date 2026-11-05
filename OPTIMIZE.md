@@ -112,7 +112,8 @@ Reproduced in the hidden pane (`?nosw`, `lobbyBotFill()` → 11 bots, `G.mode='t
 - [x] Hidden code body + unused file-model variants removed, code cloak not simulated (see §H P2).
 - [x] F3 panel shows the GPU name and warns when it is a built-in GPU (this laptop has Radeon built-in + RTX 3050: Chrome on the built-in one = very slow; fix = Windows Settings → Display → Graphics → Chrome → High performance).
 - [ ] **Shaders still compile mid-fight:** 12 new programs in a 400-frame 12-player brawl (each 50–280 ms freeze): material flag combos (cacheKey index 49–52) not covered by warm-up, point-light count change 10→6 (index 36), earth/water outline materials (`_eOlMat` js/47, `_wtOlMat` js/68) first used mid-fight. Fix = warm these combos in js/51 / keep light count fixed.
-- [ ] `h4Portrait` (js/66) renders the whole scene again + `readRenderTargetPixels` (CPU waits for the GPU) every 0.5 s in FFA/TDM → periodic stall.
+- [x] `h4Portrait` (js/66): readback moved to the start of the next frame (`h4PfRead`, called in `frame()` js/37) — the GPU has finished by then, so no stall.
+- Shader compiles mid-fight, detail (2026-11-06): the new programs are ShaderMaterial **fragment-source variants** not warmed (fireVol `uN.uS.uSim…`, heat haze `hazeMat` ring/plain, a `t.c` shader, an `uOp.uInt.uScale.uFlow…` shader) + a textured MeshStandardMaterial when far buildings stream in. One freeze per variant per session (programs are pinned after), not the cause of steady low FPS.
 - [ ] Draw calls: players' 7 skinned parts + extras per player (see §H P2 players).
 
 ## Benchmarks

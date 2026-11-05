@@ -1,6 +1,6 @@
 # HANDOFF — Fantas Stick (was "Wizard Duel") (repo: Fantas-Stick)
 
-**Moonwater ปลายลำ — ร่างภาพ 2026-11-06:** ผู้ใช้ขอออกแบบปลายลำ ทำ Studio-only สองกรณี `water/moon_end_free_study` / `moon_end_hit_study` โดย `tools/water-moon-end-study.py` และ `tools/capture-moon-end-study.js` → `shots/moon_end_free.jpg`, `moon_end_hit.jpg` รอรีวิวภาพนิ่ง ยังไม่ผูกเกมหรือทำ GIF ปลายสุดระยะคลายเป็นน้ำ/ละออง ส่วนชนเป้าสาดเป็นพัด; ลำสั้น/ผนังใน study เป็นบริบทสาธิตเท่านั้น ไม่แก้ระยะ/การทะลุ/host
+**Moonwater ปลายลำล่าสุด 2026-11-06 — v3 รอรีวิวภาพนิ่ง:** ผู้ใช้ปฏิเสธปลายตัดของรุ่นแรก และไม่ชอบ v2 ที่คอดเล็กก่อนจบ ล่าสุดขอคงความหนาของลำแล้วสาดต่อออกไปยาวขึ้น จึงแก้เฉพาะ `water/moon_end_free_study` เป็นลำเต็มความหนาถึงขอบแตกไม่เสมอกัน แล้วต่อด้วยเส้นน้ำ/ละอองยาว ใช้ `mesh/water_moon_free_breakup` ภาพ `shots/moon_end_free_v3.jpg` ยังไม่ทำ GIF v3; GIF free รุ่นแรกและภาพ v2 ถูกปฏิเสธ ส่วน hit-study ไม่แก้ ตัวสร้าง `tools/water-moon-end-study.py --free`, capture `tools/capture-moon-end-study.js` ใช้ `&only=free&suffix=_v3` เป็น Studio-only ยังไม่ผูกเกม/เปลี่ยนระยะหรือการทะลุ
 
 **Moonwater — หลาย POV/วงเวทชัดขึ้น:** ปรับวงเวทเดิมให้ชัดและค้างตลอดช่วงยิง พร้อมขอบฟ้าบาง ๆ; ส่งภาพนิ่งหลายมุมแล้ว ผู้ใช้ชี้แจง 2026-11-06 ว่าต้องการ GIF หลาย POV ด้วย `tools/capture-moon-pressure-views.js` ใช้ `&motion=1` → `shots/moon_pressure_pov.gif`, `moon_pressure_oblique.gif` (36เฟรม/30fpsต่อมุม) รอรีวิวการเคลื่อนไหว รุ่นนี้เป็นวงเวทล่าสุด ต่างจาก GIF spray รุ่นก่อน ไม่เปลี่ยน gameplay/กล้องเกมจริง
 
@@ -46,7 +46,7 @@
 
 ## อ่านก่อนเริ่มต่อ — วิธีทำงานและสถานะล่าสุด (2026-11-02)
 
-**FPS / lag — ล่าสุด 2026-11-06:** ผู้ใช้บอกบางทีค้าง 20 fps ตลอด. รอบแรกแก้แล้ว (ดู OPTIMIZE §I): ปิด checkShaderErrors, ถอดร่างโค้ดซ่อน/ทรงที่ไม่ได้ใช้, F3 โชว์การ์ดจอ (เครื่องผู้ใช้มี Radeon ในตัว + RTX 3050). ค้างต่อ: shader compile กลางไฟต์, `h4Portrait` readback, draw call ตัวละคร. ผู้ใช้ขอต่อ: optimize ทั้งเกม + กระสุนตรง crosshair 100% + กล้องแบบเกม hero shooter มุมบุคคลที่ 3 (ยังไม่เริ่ม).
+**FPS / lag — ล่าสุด 2026-11-06:** ผู้ใช้บอกบางทีค้าง 20 fps ตลอด. รอบแรกแก้แล้ว (ดู OPTIMIZE §I): ปิด checkShaderErrors, ถอดร่างโค้ดซ่อน/ทรงที่ไม่ได้ใช้, F3 โชว์การ์ดจอ (เครื่องผู้ใช้มี Radeon ในตัว + RTX 3050). ค้างต่อ: shader compile กลางไฟต์, `h4Portrait` readback, draw call ตัวละคร. รอบ 2 (2026-11-06): กระสุนผู้เล่นไปตรงจุดกลางเป้า (ไม่ล็อกเป้า, ทดสอบ `shots/_aim.js`), กล้องใหม่แบบ hero shooter (`CAM_FRAMES.base` 4.7/2.05/0.25, หมุนทันที, ระยะหดทันที-คืนช้า), รูปโปรไฟล์ HUD ไม่ stall. ผู้ใช้ยังไม่ได้ลองเล่นจริง. ค้าง: shader variant ที่ warm-up ไม่ครอบ (OPTIMIZE §I), draw call ตัวละคร.
 
 **Nature ต้นยิง + ต้นบัว — ล่าสุด 2026-11-04:** ต้นยิงผู้ใช้ผ่าน (GIF `shots/nat_turret.gif`). ต้นบัว (`sk=lotus`) ทำตาม ref `designs/nature_ref/lotus_ref.png` รอบ 2 + GIF `shots/nat_lotus.gif` (6 วิ/20 fps = 121 เฟรม, เรนเดอร์ทีละ batch อย่ารันขนานเกิน 2 — รันพร้อมกัน 4 ตัว มีบางตัว error `WD is not defined` ให้รันซ้ำ). ป้ายข้อความต้นบัวใน preview ยังเป็นข้อความเก่า. ค้างออกแบบ: ดอกไม้กินคน (พักไว้), สกิลตามสถานการณ์ 2, ult, ชื่อ, buff ต้นไม้ตอนเกี่ยว Dash. VFX ทำท้ายสุด.
 

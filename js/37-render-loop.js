@@ -27,6 +27,7 @@ function frame(now){
   const dt=Math.min(0.05,(now-lastFrame)/1000);lastFrame=now;
   if(HSTOP.t>0){HSTOP.t-=dt;requestAnimationFrame(frame);return;}
   qualTick(dt);
+  h4PfRead();   // รูปโปรไฟล์ HUD ที่วาดไว้เฟรมก่อน (js/66)
   const c0=performance.now();   // เวลา CPU ของเฟรม (เกม + สั่งวาด) → qualTick แยกว่าช้าเพราะ CPU หรือการ์ดจอ
   if(NET.isHost&&screen==='game')hostLoop();
   const h1=performance.now();
