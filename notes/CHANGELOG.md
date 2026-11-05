@@ -1,5 +1,7 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
 
+- 2026-11-06 — Codex parallel contribution: extend Moonwater breakup further; fix swallowed projectile statement preventing game load; reuse particle curl output buffer with exact-output regression. Leave Claude's HUD/render-loop edits intact. 12-player stress still fails frame budget; evidence and coordination notes in `notes/perf-codex-2026-11-06.md`, no claimed FPS fix.
+
 - 2026-11-06 — **กระสุนตรง crosshair + กล้องใหม่ + รูปโปรไฟล์ไม่กระตุก (ผู้ใช้):** `shoot()` (js/12) ผู้เล่นจริงยิงไปจุดกลางเป้าตรง ๆ ไม่ล็อกเป้าเองแล้ว (บอทยังล็อก) + คิดความสูงจากจุดเกิดกระสุน — ทดสอบยิง 6 ทิศ: เบี้ยงข้าง 0 สูงต่ำ 0 (เดิมผิดได้ถึง 2.9 ม.). กล้องแบบเกม hero shooter: ใกล้ขึ้น 6.2→4.7 ม. ตัวอยู่ ~37% จากซ้าย, หมุนตามเมาส์ทันที (ไม่หน่วง), ชนผนังหดทันที/ถอยกลับช้า ๆ, ความสูงพื้นตามนุ่ม (js/31 `updateCamera`, `CAM_FRAMES` base/flight/airAim/kindle/rail/windShield). รูปโปรไฟล์ HUD อ่านภาพต้นเฟรมถัดไป (js/66 `h4PfRead`) ไม่ทำให้ CPU รอการ์ดจอ.
 
 - 2026-11-06 — Moonwater free-end v3: user rejected the narrow neck; keep full beam thickness and extend the breakup/splash. Still for review, hit-wall study unchanged.
