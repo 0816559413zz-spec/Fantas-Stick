@@ -290,10 +290,10 @@ makeSnow:482 makeFireflies:489 makeSnitch:496 fileMapFx:503
 §513 แผนที่จากไฟล์ Blender (MAP-DESIGN.md)
 terrGeo:515 buildFileMap:523 tickM:561 TRPAD:562 ARPAD:562 signTex:563 testSign:564 buildTest:571 buildRuins:668 buildPitch:693
 
-## js/29-characters.js (436) — ระบบผ้า (เสื้อคลุมพลิ้วตามการเคลื่อนที่)
+## js/29-characters.js (439) — ระบบผ้า (เสื้อคลุมพลิ้วตามการเคลื่อนที่)
 makeCloak:2 updateCloth:10 wandNamed:34 wandSparks:83
 §92 โมเดลนักเรียนเวทมนตร์
-SHGEO:94 SHMAT:94 SHTEX:94 sGeo:95 sMat:96 bMat:99 matKey:101 bodyPatch:107 BODYM:114 bodyMat:115 plainMat:120 mergeBody:121 sStripe:157 hashStr:158 stripeTex:159 shieldMat:160 addStatus:168 makeStudent:174 makeEnemy:281 keepTex:419 keepMatSet:420 disposeMaterial:421 disposeTree:427 disposeObj:434 PM3:435 EM3:435 JM3:435 clearDyn:436
+SHGEO:94 SHMAT:94 SHTEX:94 sGeo:95 sMat:96 bMat:99 matKey:101 bodyPatch:107 BODYM:114 bodyMat:115 plainMat:120 mergeBody:121 sStripe:157 hashStr:158 stripeTex:159 shieldMat:160 addStatus:168 makeStudent:174 makeEnemy:281 keepTex:419 keepMatSet:420 disposeMaterial:421 disposeTree:427 disposeObj:437 PM3:438 EM3:438 JM3:438 clearDyn:439
 
 ## js/30-particles.js (270) — อนุภาค 2 ชั้น: แสงเรือง (additive) + ควัน (normal)
 PMAX:2 PGLOW_OCC:6 PLIT:6 makePointSys:7
@@ -508,11 +508,11 @@ SCAR:56 scarReset:58 scarPaint:65 grassScar:80
 §85 พื้นหญ้ามีชีวิต: สีเป็นหย่อม (เขียวเข้ม / แห้งเหลือง / ดินโผล่) + จุด…
 GR_NOISE:88 GR_LIVE:93 grLive:111 GR_GLSL_V:118 GR_BEGIN:123 grassMat:169 grassBuild:187 _grBasic:201 grassBake:202 grassCount:258 grassTick:263
 
-## js/51-warmup.js (154) — 
+## js/51-warmup.js (163) — 
 WARM:11 WARM_FXDIR:12 WARM_COMMON:12 WARM_X:13 WARM_Y:13 warmKeep:15 warmStaticModels:21 warmCompile:29 warmDraw:32 WARM_SKIP:42 warmAssets:45 warmFx:55 warmFxEnd:66 warmGather:68 warmPaths:70 warmStep:72 warmTick:97
 §106 ภาพจากโค้ดของแต่ละสาย (เฟรมละฟังก์ชัน)
 §117 อุ่นฉากเกมระหว่างรอในห้อง (ผู้ใช้ 2026-10-23: "กระตุกตอนเริ่มแมตช์แรก…
-GWARM:122 gameWarmTick:123
+GWARM:122 gameWarmTick:123 gameWarmFree:156
 
 ## js/52-social.js (172) — 
 §6 แชท: Enter = พิมพ์ / Enter อีกที = ส่ง / Esc = ปิด • ข้อความขึ้นมุมซ้…
@@ -700,4 +700,4 @@ PERF:9 perfFrame:12 perfDom:26 perfStats:34 perfGraph:38 perfRows:49 perfPanel:6
 §10 ช่อง: 0 โน้มตัว(+หน้า) 1 ยกตัว y 2 แขนขวา x(+หลัง) 3 แขนขวา z 4 แขนซ้…
 DPOSE:12 DPT:24 _dpQ:25 _dpX:25 _dpP:25 dpMix:26 dpKnees:28 dpStyle:36 DPDBG:41 dashPose:42 dpApply:74
 
-(84 files, 20452 lines)
+(84 files, 20464 lines)
