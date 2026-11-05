@@ -1,5 +1,5 @@
 {
- "next": 18,
+ "next": 19,
  "items": [
   {
    "id": 1,
@@ -101562,7 +101562,391 @@
     "dur": 0.8,
     "clips": "0s idle"
    }
+  },
+  {
+   "id": 18,
+   "title": "สายลม — Windrift",
+   "who": "สายลม",
+   "skill": "utility • CD 14 วิ",
+   "status": "draft",
+   "created": "2026-11-05T20:57:32",
+   "updated": "2026-11-05T21:00:49",
+   "overview": "[จากเกม] ชาร์จปีก 0.3 วิ (ลอยนิดหน่อย) แล้วพุ่ง 200 แบบ Jett ลงท่าฮีโร่ • ศัตรูในทางพุ่งช้าลงทันที • 1 วิต่อมาลมแรงตามมา ศัตรูในแนวกว้าง 100 กระเด็น 400 ตามทิศที่พุ่ง 10 ดาเมจ • ใช้กลางอากาศได้",
+   "mood": [],
+   "colors": [
+    "#8dff65",
+    "#ffffff"
+   ],
+   "refs": [],
+   "fx": "",
+   "reply": "",
+   "game": {
+    "id": "windrift",
+    "kind": "spell",
+    "path": "wind",
+    "pathI": 8,
+    "cd": 14,
+    "file": "js/09-wind.js",
+    "line": 238
+   },
+   "shots": [
+    {
+     "id": "mw3m18aw1",
+     "kind": "charge",
+     "name": "ท่าเตรียม 0.3 วิ (จากเกม)",
+     "dur": 0.3,
+     "overlap": 0,
+     "where": "มือ / อาวุธ",
+     "size": 1,
+     "power": 3,
+     "shapes": [],
+     "motion": [],
+     "camera": [],
+     "colors": [],
+     "text": "จากเกม: ชาร์จปีก 0.3 วิ",
+     "sketches": [],
+     "scene3d": {
+      "v": 1,
+      "objs": [],
+      "cast": {
+       "m": "char_student",
+       "rec": "storyboard/rec/windrift_mw3m1b90.json"
+      },
+      "targ": {
+       "m": "enemy_dummy",
+       "a": "idle"
+      },
+      "at": 0
+     },
+     "refs": [],
+     "result": "",
+     "note": "",
+     "frames": {
+      "fps": 6,
+      "list": [
+       {
+        "id": "mw3m4dcd13",
+        "bg": "blank",
+        "base": "storyboard/img/s18_frb_mw3m4dc4.jpg",
+        "t": 0,
+        "ops": [],
+        "img": ""
+       },
+       {
+        "id": "mw3m4ddz14",
+        "bg": "blank",
+        "base": "storyboard/img/s18_frb_mw3m4ddt.jpg",
+        "t": 0.17,
+        "ops": [],
+        "img": ""
+       },
+       {
+        "id": "mw3m4dey15",
+        "bg": "blank",
+        "base": "storyboard/img/s18_frb_mw3m4des.jpg",
+        "t": 0.33,
+        "ops": [],
+        "img": ""
+       },
+       {
+        "id": "mw3m4dg416",
+        "bg": "blank",
+        "base": "storyboard/img/s18_frb_mw3m4dfz.jpg",
+        "t": 0.5,
+        "ops": [],
+        "img": ""
+       },
+       {
+        "id": "mw3m4dh517",
+        "bg": "blank",
+        "base": "storyboard/img/s18_frb_mw3m4dgz.jpg",
+        "t": 0.67,
+        "ops": [],
+        "img": ""
+       },
+       {
+        "id": "mw3m4di318",
+        "bg": "blank",
+        "base": "storyboard/img/s18_frb_mw3m4dhy.jpg",
+        "t": 0.83,
+        "ops": [],
+        "img": ""
+       },
+       {
+        "id": "mw3m4dj119",
+        "bg": "blank",
+        "base": "storyboard/img/s18_frb_mw3m4div.jpg",
+        "t": 1,
+        "ops": [],
+        "img": ""
+       },
+       {
+        "id": "mw3m4djy20",
+        "bg": "blank",
+        "base": "storyboard/img/s18_frb_mw3m4djr.jpg",
+        "t": 1.17,
+        "ops": [],
+        "img": ""
+       },
+       {
+        "id": "mw3m4dkw21",
+        "bg": "blank",
+        "base": "storyboard/img/s18_frb_mw3m4dkq.jpg",
+        "t": 1.33,
+        "ops": [],
+        "img": ""
+       },
+       {
+        "id": "mw3m4dls22",
+        "bg": "blank",
+        "base": "storyboard/img/s18_frb_mw3m4dlm.jpg",
+        "t": 1.5,
+        "ops": [],
+        "img": ""
+       },
+       {
+        "id": "mw3m4dml23",
+        "bg": "blank",
+        "base": "storyboard/img/s18_frb_mw3m4dme.jpg",
+        "t": 1.67,
+        "ops": [],
+        "img": ""
+       },
+       {
+        "id": "mw3m4dnk24",
+        "bg": "blank",
+        "base": "storyboard/img/s18_frb_mw3m4dnc.jpg",
+        "t": 1.83,
+        "ops": [],
+        "img": ""
+       },
+       {
+        "id": "mw3m4dol25",
+        "bg": "blank",
+        "base": "storyboard/img/s18_frb_mw3m4doa.jpg",
+        "t": 2,
+        "ops": [],
+        "img": ""
+       },
+       {
+        "id": "mw3m4dpc26",
+        "bg": "blank",
+        "base": "storyboard/img/s18_frb_mw3m4dp6.jpg",
+        "t": 2.17,
+        "ops": [],
+        "img": ""
+       },
+       {
+        "id": "mw3m4dq827",
+        "bg": "blank",
+        "base": "storyboard/img/s18_frb_mw3m4dq3.jpg",
+        "t": 2.33,
+        "ops": [],
+        "img": ""
+       },
+       {
+        "id": "mw3m4dqt28",
+        "bg": "blank",
+        "base": "storyboard/img/s18_frb_mw3m4dqn.jpg",
+        "t": 2.5,
+        "ops": [],
+        "img": ""
+       },
+       {
+        "id": "mw3m4drq29",
+        "bg": "blank",
+        "base": "storyboard/img/s18_frb_mw3m4drk.jpg",
+        "t": 2.67,
+        "ops": [],
+        "img": ""
+       },
+       {
+        "id": "mw3m4dsj30",
+        "bg": "blank",
+        "base": "storyboard/img/s18_frb_mw3m4dse.jpg",
+        "t": 2.83,
+        "ops": [],
+        "img": ""
+       },
+       {
+        "id": "mw3m4dt731",
+        "bg": "blank",
+        "base": "storyboard/img/s18_frb_mw3m4dt2.jpg",
+        "t": 3,
+        "ops": [],
+        "img": ""
+       }
+      ],
+      "sheet": ""
+     }
+    },
+    {
+     "id": "mw3m18aw2",
+     "kind": "cast",
+     "name": "ปล่อย",
+     "dur": 0.2,
+     "overlap": 0,
+     "where": "มือ / อาวุธ",
+     "size": 1,
+     "power": 3,
+     "shapes": [],
+     "motion": [],
+     "camera": [],
+     "colors": [],
+     "text": "",
+     "sketches": [],
+     "scene3d": {
+      "v": 1,
+      "objs": [],
+      "cast": {
+       "m": "char_student",
+       "rec": "storyboard/rec/windrift_mw3m1b90.json"
+      },
+      "targ": {
+       "m": "enemy_dummy",
+       "a": "idle"
+      },
+      "at": 0.3
+     },
+     "refs": [],
+     "result": "",
+     "note": ""
+    },
+    {
+     "id": "mw3m18aw3",
+     "kind": "travel",
+     "name": "พุ่ง",
+     "dur": 0.3,
+     "overlap": 0,
+     "where": "ระหว่างทาง",
+     "size": 1,
+     "power": 3,
+     "shapes": [],
+     "motion": [],
+     "camera": [],
+     "colors": [],
+     "text": "ชาร์จปีก 0.3 วิ (ลอยนิดหน่อย) แล้วพุ่ง 200 แบบ Jett ลงท่าฮีโร่",
+     "sketches": [],
+     "scene3d": {
+      "v": 1,
+      "objs": [],
+      "cast": {
+       "m": "char_student",
+       "rec": "storyboard/rec/windrift_mw3m1b90.json"
+      },
+      "targ": {
+       "m": "enemy_dummy",
+       "a": "idle"
+      },
+      "at": 3
+     },
+     "refs": [],
+     "result": "",
+     "note": ""
+    },
+    {
+     "id": "mw3m18aw4",
+     "kind": "impact",
+     "name": "กระทบ",
+     "dur": 0.4,
+     "overlap": 0,
+     "where": "ที่เป้า",
+     "size": 1,
+     "power": 3,
+     "shapes": [],
+     "motion": [],
+     "camera": [],
+     "colors": [],
+     "text": "1 วิต่อมาลมแรงตามมา ศัตรูในแนวกว้าง 100 กระเด็น 400 ตามทิศที่พุ่ง 10 ดาเมจ",
+     "sketches": [],
+     "scene3d": {
+      "v": 1,
+      "objs": [],
+      "cast": {
+       "m": "char_student",
+       "rec": "storyboard/rec/windrift_mw3m1b90.json"
+      },
+      "targ": {
+       "m": "enemy_dummy",
+       "a": "hit"
+      },
+      "at": 0.8
+     },
+     "refs": [],
+     "result": "",
+     "note": ""
+    },
+    {
+     "id": "mw3m18aw5",
+     "kind": "linger",
+     "name": "ค้าง 1 วิ (จากเกม)",
+     "dur": 1,
+     "overlap": 0,
+     "where": "พื้นรอบเป้า",
+     "size": 1,
+     "power": 3,
+     "shapes": [],
+     "motion": [],
+     "camera": [],
+     "colors": [],
+     "text": "1 วิต่อมาลมแรงตามมา ศัตรูในแนวกว้าง 100 กระเด็น 400 ตามทิศที่พุ่ง 10 ดาเมจ",
+     "sketches": [],
+     "scene3d": {
+      "v": 1,
+      "objs": [],
+      "cast": {
+       "m": "char_student",
+       "rec": "storyboard/rec/windrift_mw3m1b90.json"
+      },
+      "targ": {
+       "m": "enemy_dummy",
+       "a": "hit"
+      },
+      "at": 0.92
+     },
+     "refs": [],
+     "result": "",
+     "note": ""
+    },
+    {
+     "id": "mw3m18aw6",
+     "kind": "fade",
+     "name": "จางหาย",
+     "dur": 0.3,
+     "overlap": 0,
+     "where": "",
+     "size": 1,
+     "power": 3,
+     "shapes": [],
+     "motion": [],
+     "camera": [],
+     "colors": [],
+     "text": "",
+     "sketches": [],
+     "scene3d": {
+      "v": 1,
+      "objs": [],
+      "cast": {
+       "m": "char_student",
+       "rec": "storyboard/rec/windrift_mw3m1b90.json"
+      },
+      "targ": {
+       "m": "enemy_dummy",
+       "a": "idle"
+      },
+      "at": 0.92
+     },
+     "refs": [],
+     "result": "",
+     "note": ""
+    }
+   ],
+   "rec": {
+    "file": "storyboard/rec/windrift_mw3m1b90.json",
+    "dur": 0.917,
+    "clips": "0s idle"
+   }
   }
  ],
- "rev": 163
+ "rev": 169
 }
