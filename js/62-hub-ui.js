@@ -220,7 +220,7 @@ function hubLobby(){
   const err=host?validate():'';
   const plRow=p=>{const kk=parseKit(p.kt!==undefined?p.kt:'0'),pp=PATHS[kk.path]||PATHS[0];return `<div class="pl ${p.id===NET.myId?'me':''}">${typeof prfAvatar==='function'?prfAvatar(p.n,p.fr,pp.col,30,icoHTML('p_'+pp.id,pp.col,15)):`<span class="em">${icoHTML('p_'+pp.id,pp.col,18)}</span>`}<span class="nm">${esc(p.n)}</span>${p.id===L.host?`<span class="cr" title="โฮสต์">${hSvg('crown')}</span>`:''}${speakingIds().has(p.id)?'<span class="spk">♪</span>':''}${p.b&&host?`${team?`<button class="bt" data-bott="${p.id}" title="ย้ายทีม">⇄</button>`:''}<button class="bt" data-botx="${p.id}" title="ลบบอท">✕</button>`:''}</div>`;};
   // เพิ่มบอท (โฮสต์): เลือกธาตุ + ความเก่ง แล้วกด + บอท (js/15-bot lobbyBotAdd) • โหมดที่บอทยังเล่นไม่เป็น = บอกไว้
-  const botBar=!host||L.mode==='train'?'':BOT_MODES.includes(L.mode)?`<div class="rBot"><select id="hrBotP"><option value="-1">🎲 สุ่มธาตุ</option>${PATHS.map((P,i)=>P.off?'':`<option value="${i}" ${HUI.botP===i?'selected':''}>${P.n}</option>`).join('')}</select><select id="hrBotL">${BOT_LV.map((B,i)=>`<option value="${i}" ${HUI.botL===i?'selected':''}>${B.n}</option>`).join('')}</select><button id="hrBotAdd" ${L.players.length>=Math.min(ROOM_MAX,M.max||6)?'disabled':''}>🤖 + บอท</button></div>`:'<div class="rBot off">โหมดนี้บอทยังเล่นไม่เป็น (เล่นกับบอทได้ใน: ดันเจียน, ดวล, FFA, ทีม, แบทเทิลรอยัล)</div>';
+  const botBar=!host||L.mode==='train'?'':BOT_MODES.includes(L.mode)?`<div class="rBot"><select id="hrBotP"><option value="-1">🎲 สุ่มธาตุ</option>${PATHS.map((P,i)=>P.off?'':`<option value="${i}" ${HUI.botP===i?'selected':''}>${P.n}</option>`).join('')}</select><select id="hrBotL">${BOT_LV.map((B,i)=>`<option value="${i}" ${HUI.botL===i?'selected':''}>${B.n}</option>`).join('')}</select><button id="hrBotAdd" ${L.players.length>=Math.min(ROOM_MAX,M.max||6)?'disabled':''}>🤖 + บอท</button><button id="hrBotFill" ${L.players.length>=Math.min(ROOM_MAX,M.max||6)?'disabled':''}>🤖 เติมจนเต็ม</button></div>`:'<div class="rBot off">โหมดนี้บอทยังเล่นไม่เป็น (เล่นกับบอทได้ใน: ดันเจียน, ดวล, FFA, ทีม, แบทเทิลรอยัล)</div>';
   const slots=L.online?Math.max(0,(M.max||6)-L.players.length):0;
   const players=team?`<div class="teams">${[0,1].map(t=>`<div class="tm t${t}"><h4><i style="background:${TEAMC[t]}"></i>${t?'RED':'BLUE'}<span>${TEAMN[t]}</span></h4>${L.players.filter(p=>p.tm===t).map(plRow).join('')||'<div class="pl empty">ว่าง</div>'}</div>`).join('')}</div>
       <button class="hLink" id="hrTeam">⇄ ย้ายทีม</button>`
@@ -285,6 +285,7 @@ const hubRoomClick=e=>{
   if(id==='hrPtt'){VOICE.ptt=!VOICE.ptt;$('#micMode').value=VOICE.ptt?'ptt':'open';hubLobby();return;}
   if(id==='hrTeamVoice'){VOICE.teamOnly=!VOICE.teamOnly;$('#teamOnly').checked=VOICE.teamOnly;hubLobby();return;}
   if(id==='hrBotAdd'){if(NET.isHost)lobbyBotAdd(HUI.botP,HUI.botL);return;}
+  if(id==='hrBotFill'){if(NET.isHost)lobbyBotFill(HUI.botP,HUI.botL);return;}
   if(b.dataset.botx||b.dataset.bott){if(NET.isHost)lobbyBotCmd(b.dataset.botx||b.dataset.bott,b.dataset.botx?'x':'t');return;}
   if(id==='hrStart'){if(NET.isHost)hostStart();setTimeout(hubLobby,50);return;}
   if(id==='hrMap'){const L=LOBBY,M=MODES[L.mode];if(!NET.isHost||M.map&&L.mode==='train')return;
