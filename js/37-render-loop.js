@@ -81,7 +81,7 @@ function render(dt,now){
 // ส่วนที่รันทุกเฟรมในเกม (อยู่ใต้งบเอฟเฟกต์ vfxBegin/vfxEnd)
 function renderGame(v,P,E,me,dt,now){
   let t0=performance.now();
-  if(!FXSTUDIO.seek){syncPlayers(P,v.mode,now,dt);grassTick(dt);clothTick(dt);gameWarmFree(dt);}pf('players',t0);   // grassTick = ลม + หญ้า (js/50) • clothTick = ผ้าคลุมจริงของเรา (js/49)
+  if(!FXSTUDIO.seek){syncPlayers(P,v.mode,now,dt);pf('p.sync',t0);let t1=performance.now();grassTick(dt);pf('p.grass',t1);t1=performance.now();clothTick(dt);pf('p.cloth',t1);gameWarmFree(dt);}pf('players',t0);   // grassTick = ลม + หญ้า (js/50) • clothTick = ผ้าคลุมจริงของเรา (js/49)
   if(me&&me.al&&!me.fl&&!me.dn){const o=PM3.get(me.id);if(o){const k=Math.floor(o.walk/Math.PI);if(o.stepK!==undefined&&k!==o.stepK)snd('step',{vol:0.35,rev:0.1});o.stepK=k;}}t0=performance.now();
   syncEnemies(E,P,now,dt);pf('enemies',t0);t0=performance.now();
   broomTick(dt);syncProj(v,now);syncWalls(v);syncPots(v,now);syncEarth(v,dt,now);syncWind(v,dt,now);syncWater(v,dt,now);syncProps(v);syncBld(dt);cityCull();cityViewSync(dt);brkSync(dt);syncMins(v,now,dt);
@@ -90,12 +90,12 @@ function renderGame(v,P,E,me,dt,now){
   $('#trainEnd').classList.toggle('hidden',!(NET.isHost&&v.mode==='train'&&v.ph!=='over'));
   trSync(v);bpSync(v);
   tickFlash(dt);
-  t0=performance.now();updateZV(dt);updateParticles(dt);updateShapes(dt);updateLights(dt);updateVfx(dt);updateDebris(dt);pf('fx',t0);
+  t0=performance.now();{let t1=t0;updateZV(dt);updateParticles(dt);pf('fx.parts',t1);t1=performance.now();updateShapes(dt);pf('fx.shapes',t1);t1=performance.now();updateLights(dt);pf('fx.lights',t1);t1=performance.now();updateVfx(dt);pf('fx.vfx',t1);t1=performance.now();updateDebris(dt);pf('fx.debris',t1);}pf('fx',t0);
   QUAL.frame++;gl.shadowMap.needsUpdate=QUAL.mode==='high'||QUAL.frame%(QUAL.mode==='auto'&&QUAL.lvl>=2?4:2)===0;if(gl.shadowMap.needsUpdate)shadowFollow();
   if(FXSTUDIO.noDraw)return;
   t0=performance.now();composer.render();pf('gpuSubmit',t0);pinPrograms();
   t0=performance.now();const spk=speakingIds();
-  drawLabels(P,E,v,me,spk);drawMinBars(v,me);
+  drawLabels(P,E,v,me,spk);pf('h.labels',t0);drawMinBars(v,me);
   drawTexts(dt);
   if(me&&me.al&&!me.dn)drawCrosshair();
   if(!VIC.on)drawHUD(v,me,P);drawSocial(P,me,dt,now);drawCombo(v,E,now);drawFFA(v,P,me,now);drawDeathCam(me);if(PROPON&&me&&me.al&&!me.dn&&!showBoard)drawPropHint(me);hud4Frame();pf('hud2d',t0);   // ป้าย VICTORY/DEFEAT = ซ่อน HUD

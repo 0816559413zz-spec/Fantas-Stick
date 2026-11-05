@@ -103,11 +103,15 @@ function useFileModel(o,name,tint,look){
     if(!r||o.fileModel||!o.g.parent)return;
     const inst=modelInst(name);if(!inst)return;
     if(tint)tintModel(inst,tint);
-    if(look)fileVariants(inst,look);
+    if(look){fileVariants(inst,look);const off=[];inst.traverse(m=>{if(!m.visible&&/^(hair|tie|wand)_\d+$/.test(m.name))off.push(m);});for(const m of off)m.parent.remove(m);}   // ทรงที่ไม่ได้เลือก: ถอดทิ้ง (ซ่อนไว้ three ก็ยังคำนวณทุกเฟรม)
     o.b.traverse(m=>{if(m.isMesh||m.isSprite||m.isPoints||m.isLine)m.layers.set(31);});
     if(look&&o.tip)o.tip.layers.set(0);
     if(look&&o.wnG)o.wnG.traverse(m=>m.layers.set(0));     // ไม้สำเร็จรูป (โค้ด) แทนไม้ในไฟล์                       // แสงปลายไม้ยังโชว์ (อยู่ที่แขนโค้ดซึ่งตามแขนโมเดล)
     if(look&&o.wWings)o.wWings.traverse(m=>m.layers.set(0));   // ปีกเป็นของติดตัว ไม่ใช่ร่างชั่วคราวที่ต้องซ่อนเมื่อ GLB โหลดเสร็จ
+    // ร่างโค้ดที่ซ่อนไว้ (layer 31) ไม่ถูกวาดแต่ three ยังคำนวณตำแหน่งทุกเฟรม (~100 ชิ้น/คน, OPTIMIZE §H P2) → ถอดชิ้นปลายทิ้งเลย
+    //   เหลือกลุ่มแขน/ขา/ปลายผ้าพันคอ (คาถาจัดท่า + rigBind ใช้) • ผ้าคลุมโค้ดเก็บไว้ (o.cloak ถูกอ้างที่อื่น) แต่หยุดจำลองใน syncPlayers
+    if(look){const cl=o.cloak||{},drop=[];o.b.traverse(m=>{if(m.layers.mask>>>0===0x80000000&&!m.children.length&&m!==cl.outer&&m!==cl.inner)drop.push(m);});
+      for(const m of drop){m.parent.remove(m);disposeTree(m);}}
     (look?o.b:o.g).add(inst);o.fileModel=inst;
     if(r.animations.length)o.anim=makeAnimator(inst,r.animations);
     if(look){rigBind(o,inst);fileBroom(o);}

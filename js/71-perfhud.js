@@ -46,9 +46,14 @@ function perfGraph(){const cv=PERF.cv,g=cv.getContext('2d'),W=cv.width,H=cv.heig
   const t=`${S.fps.toFixed(0)} FPS  ${S.avg.toFixed(1)} ms  สูงสุด ${S.max.toFixed(0)}`;g.fillText(t,5,4);g.fillStyle='#e8f4e8';g.fillText(t,4,3);
   g.fillStyle='rgba(232,244,232,.6)';g.font='10px Kanit,sans-serif';g.fillText('60',W-14,H-16.7*sc-11);g.fillText('30',W-14,H-33.3*sc-11);}
 // รายการค่าทั้งหมด [หัวข้อ, ค่า] (ใช้ทั้งแผงและปุ่มคัดลอก)
+// ชื่อการ์ดจอที่เบราว์เซอร์ใช้จริง — โน้ตบุ๊ก 2 การ์ด (เช่น Radeon ในตัว + RTX) Windows อาจให้ Chrome ใช้การ์ดในตัว = ช้ามาก
+//   แก้ฝั่งผู้เล่น: Windows ตั้งค่า → ระบบ → จอแสดงผล → กราฟิก → Chrome → ประสิทธิภาพสูง (มีคำเตือนสีส้มในแผงถ้าเจอการ์ดในตัว)
+let _gpuName=null;function gpuName(){if(_gpuName===null){try{const c=gl.getContext(),d=c.getExtension('WEBGL_debug_renderer_info');_gpuName=String(d?c.getParameter(d.UNMASKED_RENDERER_WEBGL):'?').replace(/^ANGLE \(|\)$/g,'').replace(/ Direct3D.*$/,'');}catch(e){_gpuName='?';}}return _gpuName;}
+const gpuIntegrated=()=>/Radeon\(TM\) Graphics|Radeon Graphics|Intel|UHD|Iris|Vega|SwiftShader|llvmpipe/i.test(gpuName())&&!/RX |NVIDIA|GeForce|Arc /i.test(gpuName());
 function perfRows(){const S=perfStats(),I=gl.info,v=VIEW.cur,mem=performance.memory,px=gl.getPixelRatio(),sz=gl.getSize(new THREE.Vector2());
   const rows=[
     ['เฟรม',`${S.fps.toFixed(0)} FPS • เฉลี่ย ${S.avg.toFixed(1)} ms • 1% ต่ำสุด ${S.low1.toFixed(0)} FPS • ช้าสุด ${S.max.toFixed(0)} ms • เฟรม >33ms ${S.slow}/${PERF.n}`],
+    ['การ์ดจอ',gpuName()+(gpuIntegrated()?' <span style="color:#ffa040">⚠ การ์ดจอในตัว — ถ้ามีการ์ดแยก ตั้ง Chrome = ประสิทธิภาพสูง ใน Windows กราฟิก</span>':'')],
     ['CPU',`${S.cpu.toFixed(1)} ms/เฟรม`+(NET.isHost&&screen==='game'?` (โฮสต์คำนวณเกม ${PERF.host.toFixed(1)})`:'')+` • ที่เหลือ ≈ รอการ์ดจอ/เบราว์เซอร์`],
     ['วาด',`${PERF.calls} draw call • ${(PERF.tris/1000).toFixed(0)}k สามเหลี่ยม`],
     ['GPU mem',`${I.programs?I.programs.length:0} shader • ${I.memory.geometries} geometry • ${I.memory.textures} texture`],
@@ -61,7 +66,7 @@ function perfRows(){const S=perfStats(),I=gl.info,v=VIEW.cur,mem=performance.mem
   if(NET.online)rows.push(['เน็ต',NET.isHost?`ส่ง ${PERF.rate.snap.toFixed(0)} snapshot/วิ • ${PERF.rate.kb.toFixed(1)} KB/วิ ต่อคน • ${NET.conns.size} คนต่ออยู่`:`รับ ${PERF.rate.snapIn.toFixed(0)} snapshot/วิ • ปิง ${NET.rtt?Math.round(NET.rtt):'-'} ms`]);
   return rows;}
 function perfPanel(){PERF.pan.innerHTML=perfRows().map(([k,v])=>`<div><b>${k}</b> ${v}</div>`).join('')+'<button type="button" data-pcopy>📋 คัดลอก</button>';}
-function perfText(){return '[Fantas Stick perf '+new Date().toISOString().slice(0,16).replace('T',' ')+' '+navigator.userAgent.replace(/^.*?\) /,'').slice(0,60)+']\n'+perfRows().map(([k,v])=>k+': '+v).join('\n');}
+function perfText(){return '[Fantas Stick perf '+new Date().toISOString().slice(0,16).replace('T',' ')+' '+navigator.userAgent.replace(/^.*?\) /,'').slice(0,60)+']\n'+perfRows().map(([k,v])=>k+': '+String(v).replace(/<[^>]+>/g,'')).join('\n');}
 // F3 = เปิด/ปิดแผงข้อมูล (ไม่ทับปุ่มเกม: F1–F12 ยังไม่ถูกใช้)
 addEventListener('keydown',e=>{if(e.code!=='F3')return;e.preventDefault();SET.stats=SET.stats?0:1;try{saveSet();}catch(_){}});
-if(window.WD)window.WD.perf=PERF;
+if(window.WD){window.WD.perf=PERF;window.WD.perfText=perfText;}

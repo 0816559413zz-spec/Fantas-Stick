@@ -1,5 +1,17 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
 
+- 2026-11-06 — **FPS ค้าง 20 (ผู้ใช้):** วัด 12 คนในแผนที่ valley ~25–31 ms/เฟรม (จอ 60 Hz → ตกเหลือ 20). แก้: ปิดการตรวจ error shader (`?debug` เปิดคืน) — CPU ไม่ต้องรอ compile; ถอดร่างโค้ดที่ซ่อนใต้โมเดลไฟล์ + ทรงผม/เนคไท/ไม้ที่ไม่ได้เลือก, เลิกจำลองผ้าคลุมโค้ดที่ซ่อนอยู่ (วัตถุในฉาก 2,844 → ~2,050); F3 โชว์ชื่อการ์ดจอ + เตือนถ้าเป็นการ์ดในตัว; `tools/headless.js --profile`; ตัวจับเวลาย่อยใน `WD.PROF`. ที่ยังค้าง: shader compile กลางไฟต์ 12 ตัว, รูปโปรไฟล์ HUD อ่านภาพทุก 0.5 วิ (OPTIMIZE §I).
+
+- 2026-11-06 — Moonwater beam-end design studies: free-end breakup and water-fan impact, stills for review. Separate Studio demos only; no gameplay binding or host changes.
+
+- 2026-11-05 — Moonwater review: clearer casting circle through the full shot, thin blue rim, and still captures from caster/oblique/circle views. Awaiting review; gameplay camera unchanged.
+
+- 2026-11-05 — Moonwater jet: add a little more surrounding spray and short peeling water filaments at user's request, keeping the smaller beam. Still-image review only.
+
+- 2026-11-05 — Moonwater water-jet review: user requested still image first, smaller jet and a little more motion. Reduced visual radius ~28%, added surface ripple/rolling foam; new still for review, no new GIF or gameplay changes.
+
+- 2026-11-05 — Moonwater enhanced BA visual: replace additive white beam with quick cyan water jet, moving surface/foam/spray; current wand origin and all host values preserved. Studio still/GIF ready for review; local changes only.
+
 - 2026-11-05 — เซฟคอนเซปต์เกมเพลย์และไอเดียธาตุกับฉากตามคำขอผู้ใช้ พร้อมจุดอ้างอิงใน HANDOFF/PROJECT-GUIDE; แยกสิ่งที่เลือกกับสิ่งที่ยังไม่สรุป ไม่มีการเปลี่ยนระบบเกม
 
 - 2026-11-05 — ผู้ใช้เอนทางพักฟื้นเลือดหลังถอน มีแผนยาฮีลที่อาจซื้อได้ และเปิดแนวคิดซัพพอร์ตหลายสาย; รายละเอียดฮีล/ไอเท็ม/ระบบซื้อยังไม่สรุป ยังไม่แก้เกม

@@ -5,6 +5,7 @@
 //   node tools/headless.js --url "studio.html?fx=frost/slam&sheet=0.1,0.3,0.6&save=x" --wait-shot x     ← รอจน shots/x.jpg ถูกเขียน (contact sheet ของสตูดิโอ)
 //   node tools/headless.js --game --js my-test.js                                                       ← เปิดเกม (?nosw) + โหลด tools/hl-game.js (ตัวช่วย HL) แล้วรันไฟล์ js ในหน้า
 //   node tools/headless.js --game --eval "await HL.solo({kit:'1'});return HL.info()"
+// --profile [ชื่อ]: วัด CPU ช่วง console.profile()..profileEnd() ในสคริปต์ → พิมพ์ฟังก์ชันกินเวลาสุด (+ shots/<ชื่อ>.cpuprofile)
 // ตัวเลือก: --w 1280 --h 720 • --timeout 180 (วินาที) • --shot out.jpg (ถ่ายทั้งจอตอนจบ ลง shots/) • --quiet (ไม่พิมพ์ console log ของหน้า)
 // สคริปต์ (--js/--eval) = body ของ async function ในหน้า: return ค่าอะไรก็ได้ (พิมพ์เป็น JSON) •
 //   ถ้าคืน {images:{ชื่อ:dataURL}} → เขียนเป็น shots/<ชื่อ>.jpg|png ให้ Claude เปิดด้วย Read
@@ -18,6 +19,14 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 const freePort=()=>new Promise(r=>{const s=net.createServer();s.listen(0,'127.0.0.1',()=>{const p=s.address().port;s.close(()=>r(p));});});
 function saveImg(name,data){const m=/^data:image\/(png|jpeg);base64,(.*)$/.exec(data);if(!m)return null;const ext=m[1]==='png'?'png':'jpg';const d=path.join(ROOT,'shots');fs.mkdirSync(d,{recursive:true});
   const f=path.join(d,String(name).replace(/[^\w.\-]/g,'_')+'.'+ext);fs.writeFileSync(f,Buffer.from(m[2],'base64'));return path.relative(ROOT,f).replace(/\\/g,'/');}
+function profSum(pf){
+  const self={},byId={};for(const n of pf.nodes)byId[n.id]=n;
+  const dt=pf.timeDeltas,tot=(pf.endTime-pf.startTime)/1000;const cnt={};for(const s of pf.samples)cnt[s]=(cnt[s]||0)+1;const N=pf.samples.length||1;
+  for(const id in cnt){const c=byId[id].callFrame,k=(c.functionName||'(anon)')+' '+(c.url||'').split('/').pop()+':'+(c.lineNumber+1);self[k]=(self[k]||0)+cnt[id];}
+  console.log('--- profile '+tot.toFixed(0)+' ms, self time top 40 ---');
+  Object.entries(self).sort((a,b)=>b[1]-a[1]).slice(0,40).forEach(([k,v])=>console.log((v/N*100).toFixed(1).padStart(5)+'%  '+k));
+  if(A.profile!==true){const d=path.join(ROOT,'shots');fs.mkdirSync(d,{recursive:true});fs.writeFileSync(path.join(d,String(A.profile)+'.cpuprofile'),JSON.stringify(pf));}
+}
 async function main(){
   if(!CHROME)throw new Error('ไม่พบ Chrome / Edge');
   let url=A.url||(A.game?'index.html?nosw':'');if(!url)throw new Error('ต้องมี --url หรือ --game');
@@ -36,10 +45,13 @@ async function main(){
       if(d.method==='Fetch.requestPaused'){cdnServe(d.params);return;}
       if(d.method==='Runtime.consoleAPICalled'){const t=d.params.type,s=d.params.args.map(a=>a.value!==undefined?(typeof a.value==='string'?a.value:JSON.stringify(a.value)):(a.description||a.type)).join(' ');
         if(t==='error'||t==='assert')errs.push('console.error: '+s.slice(0,400));else if(!A.quiet)logs.push(s.slice(0,300));}
+      if(d.method==='Profiler.consoleProfileFinished')profSum(d.params.profile);
       if(d.method==='Runtime.exceptionThrown'){const e=d.params.exceptionDetails;errs.push('uncaught: '+((e.exception&&e.exception.description)||e.text).slice(0,500));}};
     const cmd=(method,params)=>new Promise((r,j)=>{const i=++id;pend[i]=d=>d.error?j(new Error(method+': '+d.error.message)):r(d.result);ws.send(JSON.stringify({id:i,method,params:params||{}}));});
     const ev=async(js,aw=true)=>{const r=await cmd('Runtime.evaluate',{expression:js,awaitPromise:aw,returnByValue:true});if(r.exceptionDetails)throw new Error((r.exceptionDetails.exception||{}).description||r.exceptionDetails.text);return r.result.value;};
     await cmd('Runtime.enable');
+    // --profile: สคริปต์เรียก console.profile()/console.profileEnd() ครอบช่วงที่อยากวัด → พิมพ์ฟังก์ชันที่กินเวลาเองมากสุด 40 อันดับ + เซฟ shots/<profile>.cpuprofile (เปิดใน DevTools)
+    if(A.profile){await cmd('Profiler.enable');await cmd('Profiler.setSamplingInterval',{interval:200});}
     await cmd('Page.enable');
     // CDN_DIR=<folder> → serve https://unpkg.com/<pkg>@<ver>/... from <folder>/<pkg>@<ver>/... (cloud sessions where the CDN is blocked; npm tarballs unpacked there)
     const CDN=process.env.CDN_DIR;
