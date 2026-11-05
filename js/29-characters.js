@@ -429,6 +429,9 @@ function disposeTree(root){
   root.traverse(o=>{
     if(o.geometry&&o.geometry!==projGeo&&o.geometry!==tailGeo&&!(o.geometry.userData&&o.geometry.userData.keep))o.geometry.dispose();
     if(o.material)for(const m of [].concat(o.material))if(!seen.has(m)){seen.add(m);disposeMaterial(m,keep);}
+    // โครงกระดูกของโมเดลไฟล์ (SkeletonUtils.clone = ของใครของมัน) มี bone texture บนการ์ดจอ — ไม่ทิ้ง = รั่วแมตช์ละ ~84 ชิ้น (OPTIMIZE §H)
+    //   เส้นขอบใน js/47, js/68 ใช้โครงเดียวกับตัวจริง: ทิ้งซ้ำได้ ถ้าตัวจริงยังอยู่ three สร้าง bone texture ใหม่เองตอนวาดเฟรมถัดไป
+    if(o.isSkinnedMesh&&o.skeleton)o.skeleton.dispose();
   });
 }
 function disposeObj(o){scene.remove(o);if(o.userData&&o.userData.extra)for(const e of o.userData.extra){(e.parent||scene).remove(e);disposeTree(e);}disposeTree(o);}

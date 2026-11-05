@@ -327,7 +327,7 @@ function drawBottom(me,v){
   hud4Draw(me,v);   // HUD รอบ 4 (DOM, js/66): ซ้ายล่าง เลือด • ขวาล่าง ไพ่สกิล L2 + อัลติ
 }
 function drawBoard(v,P){
-  const rows=[...P].sort((a,b)=>b.k-a.k),w=Math.min(540,SW-32),h=96+rows.length*32,x=SW/2-w/2,y=SH/2-h/2;
+  const rows=[...P].sort((a,b)=>b.k-a.k),RH=Math.max(22,Math.min(32,Math.floor((SH-150)/Math.max(1,rows.length)))),w=Math.min(540,SW-32),h=96+rows.length*RH,x=SW/2-w/2,y=SH/2-h/2;
   frameBox(x,y,w,h);
   cx.textAlign='center';cx.font='700 20px Cinzel,Kanit,serif';cx.fillStyle=HG2;cx.fillText('ตารางคะแนน',SW/2,y+34);
   const coop=v.mode==='coop',hy=y+64;
@@ -335,8 +335,8 @@ function drawBoard(v,P){
   cx.textAlign='right';cx.fillText(coop?'ฆ่า':'KILLS',x+w-170,hy);cx.fillText(coop?'ล้ม':'DEATHS',x+w-100,hy);cx.fillText('ดาเมจ',x+w-24,hy);
   cx.fillStyle='rgba(217,180,90,0.3)';cx.fillRect(x+16,hy+8,w-32,1);
   rows.forEach((p,i)=>{
-    const yy=hy+32+i*32,me=p.id===NET.myId;
-    if(me){const g=cx.createLinearGradient(x,0,x+w,0);g.addColorStop(0,'rgba(217,180,90,0.2)');g.addColorStop(1,'rgba(217,180,90,0)');cx.fillStyle=g;cx.fillRect(x+16,yy-20,w-32,28);}
+    const yy=hy+RH+i*RH,me=p.id===NET.myId;
+    if(me){const g=cx.createLinearGradient(x,0,x+w,0);g.addColorStop(0,'rgba(217,180,90,0.2)');g.addColorStop(1,'rgba(217,180,90,0)');cx.fillStyle=g;cx.fillRect(x+16,yy-RH*0.62,w-32,RH-4);}
     diaPath(x+30,yy-6,6);cx.fillStyle=p.c;cx.fill();
     cx.textAlign='left';cx.fillStyle=teamOn(v)?TEAMC[p.tm]:me?HG2:'#efe6cf';cx.font=(me?'600 ':'')+'15px Kanit,sans-serif';
     cx.fillText(p.n+(p.bf&&p.bf.length?'  ('+p.bf.length+' บัฟ)':''),x+46,yy);

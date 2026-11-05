@@ -53,8 +53,8 @@ function hostOnData(conn,d){
     if(old){conn.pid=old.id;NET.conns.set(old.id,conn);old.awayT=0;conn.send({t:'welcome',id:old.id});toast(old.name+' ต่อกลับเข้าห้องแล้ว');if(G.ph!=='lobby')feed('📶 '+old.name+' กลับมาแล้ว');broadcastLobby();return;}
     if(G.players[id]){conn.send({t:'welcome',id});return;}
     if(G.ph!=='lobby')return midJoin(conn,id,d,tok,reject);   // hello ซ้ำ: อย่าเพิ่มคนเดิมซ้ำ (ไม่งั้นตัวเดินเร็ว 2 เท่า)
-    if(humans().length>=6)return reject('ห้องเต็มแล้ว (สูงสุด 6 คน)');
-    if(plist().length>=6){const b=lobbyBots().pop();if(b)hostRemove(b.id);}   // ห้องเต็มเพราะบอท = ให้ที่เพื่อน
+    if(humans().length>=ROOM_MAX)return reject(`ห้องเต็มแล้ว (สูงสุด ${ROOM_MAX} คน)`);
+    if(plist().length>=ROOM_MAX){const b=lobbyBots().pop();if(b)hostRemove(b.id);}   // ห้องเต็มเพราะบอท = ให้ที่เพื่อน
     NET.conns.set(id,conn);
     const p=addPlayer(id,cleanName(d.name),null,String(d.look||'').slice(0,40),String(d.kit||'').slice(0,24));p.tok=tok;p.fr=frameOk(d.fr);
     conn.send({t:'welcome',id});
@@ -102,7 +102,7 @@ function validate(){
   if(M.team){
     const a=ps.filter(p=>p.lteam===0).length,b=ps.length-a;
     if(!a||!b)return 'ต้องมีผู้เล่นทั้งสองทีม';
-    if(a>3||b>3)return 'แต่ละทีมมีได้สูงสุด 3 คน';
+    const tm=M.tmax||3;if(a>tm||b>tm)return `แต่ละทีมมีได้สูงสุด ${tm} คน`;
   }
   return '';
 }
@@ -136,13 +136,14 @@ function hostToLobby(){G.ph='lobby';G.proj=[];G.en=[];
   removeBots(q=>!q.ai.lb);   // บอทห้องฝึกไม่ตามไปล็อบบี้ (บอทห้องรออยู่ต่อ)
   for(const p of plist())if(p.awayT>0)hostRemove(p.id);   // หลุดแล้วไม่กลับ = ลบตอนกลับล็อบบี้
   // คนดู → เป็นผู้เล่นในรอบหน้า (ถ้าห้องยังไม่เต็ม)
-  for(const id in (G.spec||{})){const s=G.spec[id],c=NET.conns.get(id);if(!c||humans().length>=6)continue;if(plist().length>=6){const b=lobbyBots().pop();if(b)hostRemove(b.id);}delete G.spec[id];const p=addPlayer(id,s.name,null,s.look,s.kit);p.tok=s.tok;try{c.send({t:'welcome',id});}catch(e){}}
+  for(const id in (G.spec||{})){const s=G.spec[id],c=NET.conns.get(id);if(!c||humans().length>=modeCap())continue;if(plist().length>=modeCap()){const b=lobbyBots().pop();if(b)hostRemove(b.id);}delete G.spec[id];const p=addPlayer(id,s.name,null,s.look,s.kit);p.tok=s.tok;try{c.send({t:'welcome',id});}catch(e){}}
   broadcastLobby();}
-// เข้าห้องกลางเกม: ffa/tdm/ห้องฝึก/co-op = เกิดเลย • โหมดอื่น/ห้องเต็ม 6 คน = เป็นคนดู (สูงสุด 4) แล้วได้เล่นรอบหน้า
+// เข้าห้องกลางเกม: ffa/tdm/ห้องฝึก/co-op = เกิดเลย • โหมดอื่น/ห้องเต็ม (ตาม max ของโหมด) = เป็นคนดู (สูงสุด 4) แล้วได้เล่นรอบหน้า
 const MIDJOIN=['ffa','tdm','train','coop'];
+function modeCap(){return Math.min(ROOM_MAX,(MODES[G.mode]||{}).max||6);}
 function midJoin(conn,id,d,tok,reject){
   const name=cleanName(d.name),look=String(d.look||'').slice(0,40),kit=String(d.kit||'').slice(0,24);
-  if(MIDJOIN.includes(G.mode)&&G.ph!=='over'&&humans().length<6){
+  if(MIDJOIN.includes(G.mode)&&G.ph!=='over'&&humans().length<modeCap()){
     NET.conns.set(id,conn);const p=addPlayer(id,name,null,look,kit);p.tok=tok;p.fr=frameOk(d.fr);Object.assign(p,freshStats());
     const MD=MODES[G.mode];
     if(G.mode==='coop'||G.mode==='train')p.team=0;
@@ -151,7 +152,7 @@ function midJoin(conn,id,d,tok,reject){
     respawn(p);p.inv=2;
     conn.send({t:'welcome',id});toast(p.name+' เข้าห้องกลางเกม');feed('✨ '+p.name+' เข้าร่วมกลางเกม');broadcastLobby();return;
   }
-  if(Object.keys(G.spec||{}).length>=4)return reject('ห้องเต็มแล้ว (ผู้เล่น 6 + คนดู 4)');
+  if(Object.keys(G.spec||{}).length>=4)return reject(`ห้องเต็มแล้ว (ผู้เล่น ${modeCap()} + คนดู 4)`);
   NET.conns.set(id,conn);(G.spec||(G.spec={}))[id]={name,look,kit,tok};
   conn.send({t:'welcome',id,spec:1});feed('👁 '+name+' เข้ามาดู (ได้เล่นรอบหน้า)');
 }
@@ -177,17 +178,19 @@ function fmap(){const M=MAPS[MAPID];return M&&(M.fm||(M.fmFor&&G?M.fmFor(G.mode)
 function spawnPts(){const f=fmap(),sp=f&&f.spawns.filter(s=>s.t===undefined);if(sp&&sp.length)return sp.map(s=>[s.x,s.y]);return SPAWNF.map(f=>[f[0]*MW,f[1]*MH]);}
 // จุดเกิดของทีม t จากไฟล์แผนที่ (ไม่มี = แบ่งจุดเกิดทั่วไปซ้าย/ขวา) — คืน null ถ้าแผนที่ไม่มีจุดเกิดจากไฟล์
 function teamPts(t){const f=fmap();if(!f||!f.spawns.length)return null;let a=f.spawns.filter(s=>s.t===t);if(!a.length){a=f.spawns.filter(s=>t?s.x>MW/2:s.x<=MW/2);if(!a.length)a=f.spawns;}return a.map(s=>[s.x,s.y]);}
+// จุดเกิดซ้ำ (คนมากกว่าจุดเกิด เช่น 12 คน): ขยับออกเป็นวงรอบจุดเดิม ไม่ให้ยืนทับกัน
+function spSpread(q,i,n){const r=Math.floor(i/n);if(!r)return q;const a=(i%n)*2.4+r*1.3;return [q[0]+Math.cos(a)*95*r,q[1]+Math.sin(a)*95*r];}
 function placeAll(){
   const ps=plist(),cx0=MW/2,cy0=MH/2;
   const f=fmap();
-  if(f&&f.spawns.length&&G.mode!=='train'&&!MODES[G.mode].team){const sp=spawnPts();ps.forEach((p,i)=>resetBody(p,sp[i%sp.length][0],sp[i%sp.length][1]));}
-  else if(f&&f.spawns.length&&MODES[G.mode].team){const k=[0,0];ps.forEach(p=>{const a=teamPts(p.team),q=a[k[p.team]++%a.length];resetBody(p,q[0],q[1]);});}
+  if(f&&f.spawns.length&&G.mode!=='train'&&!MODES[G.mode].team){const sp=spawnPts();ps.forEach((p,i)=>{const q=spSpread(sp[i%sp.length],i,sp.length);resetBody(p,q[0],q[1]);collideWorld(p,PR);});}
+  else if(f&&f.spawns.length&&MODES[G.mode].team){const k=[0,0];ps.forEach(p=>{const a=teamPts(p.team),j=k[p.team]++,q=spSpread(a[j%a.length],j,a.length);resetBody(p,q[0],q[1]);collideWorld(p,PR);});}
   else if(G.mode==='coop'||G.mode==='train')ps.forEach((p,i)=>{const a=i/ps.length*Math.PI*2+Math.PI;resetBody(p,cx0+Math.cos(a)*160,cy0+Math.sin(a)*160);collideWorld(p,PR);});
   else if(G.mode==='duel')ps.forEach((p,i)=>resetBody(p,MW*(i?0.86:0.14),cy0));
   else if(MODES[G.mode].team){
     const k=[0,0];
-    ps.forEach(p=>{const t=p.team;resetBody(p,MW*(t?0.9:0.1),cy0+170*(k[t]++-1));});
-  }else{const sp=spawnPts();ps.forEach((p,i)=>resetBody(p,sp[i%6][0],sp[i%6][1]));}
+    ps.forEach(p=>{const t=p.team,j=k[t]++;resetBody(p,MW*(t?0.9:0.1)+(t?-1:1)*140*Math.floor(j/3),cy0+170*(j%3-1));collideWorld(p,PR);});   // 3 คนต่อแถว (6v6 = 2 แถว)
+  }else{const sp=spawnPts();ps.forEach((p,i)=>{const q=spSpread(sp[i%sp.length],i,sp.length);resetBody(p,q[0],q[1]);collideWorld(p,PR);});}
 }
 function respawn(p){
   if(p.arSide&&arBusy()){p.respawn=0.5;return;}   // ตายในสังเวียน = รอจบรอบ (arReset ฟื้นให้)

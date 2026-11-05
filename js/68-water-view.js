@@ -55,7 +55,7 @@ function wtLineMat(){return new THREE.ShaderMaterial({uniforms:{time:FIRE_U.time
     'float a=(1.0-smoothstep(0.38,0.5,abs(u-0.5)))*0.85;gl_FragColor=vec4(c,a);}'});}
 // ขอบขาวเรืองรอบตัวผู้เล่น (เห็นทะลุลูกน้ำ Aqua Cage): เปลือกกลับด้านพองออกตามผิว วาดทีหลังสุด • หมดเวลาแล้วลบ (syncWater)
 const _wtOlMat=new THREE.MeshBasicMaterial({color:0xcffcff,side:THREE.BackSide,fog:false,transparent:true,opacity:1,depthWrite:false});
-_wtOlMat.onBeforeCompile=sh=>{sh.vertexShader=sh.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>'+String.fromCharCode(10)+'  transformed += normalize(objectNormal) * 0.1;');};
+_wtOlMat.onBeforeCompile=sh=>{sh.vertexShader=sh.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>'+String.fromCharCode(10)+'  transformed += normalize(normal) * 0.1;');};
 function wtOutline(id,dur){const o=PM3.get(id);if(!o||!o.g)return;const L=[];
   o.g.traverse(m=>{if(!m.isMesh||m.userData.wtOl||m.userData.eOl||!m.parent||!m.visible||m.material.transparent)return;
     const c=m.isSkinnedMesh?new THREE.SkinnedMesh(m.geometry,_wtOlMat):new THREE.Mesh(m.geometry,_wtOlMat);if(m.isSkinnedMesh)c.bind(m.skeleton,m.bindMatrix);

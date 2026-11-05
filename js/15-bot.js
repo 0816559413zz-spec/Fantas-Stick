@@ -24,7 +24,7 @@ function botInZone(zk,x,y,pad){
 }
 // เสกบอท: path = เลขสาย (PATHS) • lv 0–2 • ใกล้จุด x,y • owner = id คนเสก
 function spawnBot(path,lv,x,y,zk,owner){
-  if(bots().length>=BOT_MAX)return null;
+  if(bots().length>=(G.ph==='lobby'?ROOM_MAX-1:BOT_MAX))return null;   // ห้องรอ: เติมบอทได้จนเต็มห้อง (12) • ห้องฝึก/สังเวียนยัง 6
   G.botN=(G.botN|0)+1;
   const P=PATHS[path]&&!PATHS[path].off?path:0,L=clamp(lv|0,0,2),id='bot'+G.botN+'_'+Math.floor(Math.random()*1e6).toString(36);
   const p=addPlayer(id,'🤖 '+PATHS[P].n.replace('สาย','')+' ('+BOT_LV[L].n+')',null,null,String(P));
@@ -118,13 +118,19 @@ function trBotCmd(p,d){
 //   ห้องเต็ม 6 แล้วเพื่อนเข้ามา = ลบบอทออก 1 ตัวให้เพื่อน (hostOnData)
 const BOT_MODES=['coop','duel','ffa','tdm','br'];
 function lobbyBots(){return bots().filter(p=>p.ai.lb);}
-function lobbyBotAdd(path,lv){
+function lobbyBotAdd(path,lv,quiet){
   if(!G||G.ph!=='lobby')return;
-  const M=MODES[G.mode]||{};if(plist().length>=Math.min(6,M.max||6))return toast('ห้องเต็มแล้วสำหรับโหมดนี้');
+  const M=MODES[G.mode]||{};if(plist().length>=Math.min(ROOM_MAX,M.max||6))return toast('ห้องเต็มแล้วสำหรับโหมดนี้');
   const ok=PATHS.map((P,i)=>i).filter(i=>!PATHS[i].off),P=path>=0&&ok.includes(path)?path:ok[Math.floor(Math.random()*ok.length)];
-  const p=spawnBot(P,lv,800,500,null,NET.myId);if(!p)return toast('บอทเต็มแล้ว (สูงสุด '+BOT_MAX+' ตัว)');
+  const p=spawnBot(P,lv,800,500,null,NET.myId);if(!p)return toast('บอทเต็มแล้ว');
   p.ai.lb=1;EVL.pop();if(NET.online)EVN.pop();   // ไม่เล่นเอฟเฟกต์เกิดในห้องรอ
-  broadcastLobby();
+  if(!quiet)broadcastLobby();return p;
+}
+// เติมบอทจนเต็มห้องตามโหมด (ธาตุ/ความเก่งตามที่เลือก, สุ่มธาตุ = สุ่มทีละตัว) • ทีม: addPlayer แบ่งฝั่งให้เท่ากันเอง
+function lobbyBotFill(path,lv){
+  if(!G||G.ph!=='lobby')return;const M=MODES[G.mode]||{},cap=Math.min(ROOM_MAX,M.max||6);let n=0;
+  while(plist().length<cap&&lobbyBotAdd(path,lv,1))n++;
+  broadcastLobby();toast(n?'เพิ่มบอท '+n+' ตัว — ห้องเต็มแล้ว':'ห้องเต็มแล้วสำหรับโหมดนี้');
 }
 function lobbyBotCmd(id,c){
   const p=G&&G.ph==='lobby'&&G.players[id];if(!p||!p.ai||!p.ai.lb)return;

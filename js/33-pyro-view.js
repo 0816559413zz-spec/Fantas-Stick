@@ -136,7 +136,7 @@ function pyroFX(o,p,pz,now,dt){
   if(p.ds&&o.pyroOn){if(!o.dTail){o.dTail=makeFireTail({speed:4.5,heat:-0.08,int:0.95});o.g.add(o.dTail);}o.dTail.visible=true;o.dTail.position.set(0,1.05,-0.15);o.dTail.scale.set(0.62+0.06*Math.sin(now/40),0.62,3.4+0.4*Math.sin(now/55));
     if(!o.wasDs)fireBlast(p.x-ca*22,p.y-sa*22,pz+0.9,1.5,0.4);}
   else if(o.dTail)o.dTail.visible=false;
-  if(p.ds&&o.pyroOn){o.b.rotation.x=0.55;o.armR.rotation.x=0.9;o.armL.rotation.x=0.9;o.legs[0].rotation.x=0.5;o.legs[1].rotation.x=-0.3;
+  if(p.ds&&o.pyroOn){   // ท่าตัวตอนพุ่ง = dashPose (js/72)
     for(let i=0;i<4;i++)flame(p.x-ca*rnd(10,40)+rnd(-8,8),p.y-sa*rnd(10,40)+rnd(-8,8),pz+rnd(0.3,1.6),{vx:-ca*rnd(100,200),vy:-sa*rnd(100,200),vh:rnd(0.5,2),life:rnd(0.25,0.4),size:rnd(9,13),drag:4});
     for(const sd of [-1,1])for(let i=0;i<2;i++)PARTS.push({x:p.x+rnd(-6,6),y:p.y+rnd(-6,6),h:pz+rnd(0.3,1.5),vx:-sa*sd*rnd(180,320)-ca*80,vy:ca*sd*rnd(180,320)-sa*80,vh:rnd(0,3),life:rnd(0.25,0.45),max:0.45,col:i?'#ffd27a':'#ff7a2a',size:rnd(1.4,2.2),g:6,drag:2});
     LREQ.push({x:tx(p.x),y:pz+1,z:tz(p.y),col:'#ff7a2a',int:3,dist:10});}
