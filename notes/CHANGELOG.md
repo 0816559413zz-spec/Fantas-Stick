@@ -1,5 +1,7 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
 
+- 2026-11-07 — **ลดคำสั่งวาดเอฟเฟกต์:** แผ่นบิดอากาศรวมเป็น instanced ชิ้นเดียว ปีกลมรวมต่อข้าง (`?nofxbatch` = ของเดิม) fx ตอนสู้ 185 เหลือ 63 draw ภาพเหมือนเดิม. ไม่ย้ายการคำนวณเกมไป Worker: วัดแล้วได้ไม่ถึง 1 ms. OPTIMIZE หมวด P.
+
 - 2026-11-07 — User accepts Nature wood-wall r7 as v1. Freeze `nature_wood_wall_v1` geometry/materials with a dedicated reproducible generator and three tracked review stills; retain study model separately. Save Nature concepts/references and opt-in Studio model colour/smooth/bark support. Exclude pending Moonwater work from this save. No gameplay binding, number changes or push. User selects next autonomous work: Loki-inspired Nature ult tree Model with multiple views, plus additional review work while asleep.
 
 - 2026-11-07 — Nature wall r7 following user's reference correction: remove upright seedling-like crown sprigs, arrange low attached three-/five-leaf motifs at crest and upper bough joints, add curved wood thorns at crest and upper-middle wall (visual only). Retain curved wall, ground roots and bark material. Model28,250tris, FX/JS and capture pass; awaiting visual review. No thorn damage/status/collision, gameplay/bind, growth/fire/GIF, commit or push.

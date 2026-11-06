@@ -196,6 +196,11 @@ Next real gains are structural: fewer draw calls per character (merge parts in B
 - Numbers (auto, real loop, PC load ~15%): 12 players huddled 39 fps (p95 43 ms); 5 bots CPU x2 27 fps; 5 bots CPU x4 12 fps; 12 players CPU x2 8 fps in an 8 s window where `cs` had only reached 1. Weak PCs in full lobbies are still not playable.
 - Rest of a frame in a 12-player fight: three.js render ~43%, effects ~9%, players ~8%, host ~6%. Profile is flat. Next structural options: host simulation in a Worker, fewer effect meshes/trails.
 
+## P. Round 2026-11-07 part 2 (user picked: effect draws, far players, worker)
+- Measured a 12-player all-paths fight: 131 warp quads (one material + geometry each) and 68 wing feather meshes were the top two draw sources. `WB` (js/46): all warp planes in one InstancedMesh with per-instance values, same shader; wings merge per side, feather motion in the vertex shader (js/68), 34 -> 4 draws per player. Fight fx draws 185 -> 63. `?nofxbatch` = old path. Compared in the studio (`shots/fxbatch_ab.jpg`) and in game (`shots/wg.jpg`).
+- Far players: nothing added. `animLod` (js/22) already steps animation by distance and shadows only cover the area around the camera (`shadowFollow`).
+- Worker for the host simulation: not done, on purpose. `hostStep` costs about 0.7 ms per frame, snapshot clone 0.08 ms, so the gain is under 1 ms of ~24 ms, for the host only, with one frame of extra delay and online risk. Sim files have no DOM/THREE use, so it stays possible if the sim ever grows.
+
 ## Benchmarks
 Follow-up batching/LOD 2026-11-06: student Skeletons 7→1 per player; compatible skin/iris/scarf trim combines with vertex colour/PBR attributes (2 fewer draws per body per pass). Cloth panels/palette stay separate. Actual high-poly emitted model is `water_blob` (3,968 tris), not frost shards (32). Tiny water particles <=12 physical pixels use a 224-triangle mesh; near particles and hero geometry stay full detail. Visual/animation/lifecycle checks pass. This partially addresses §H player/particle items, not all FPS causes. See `notes/optimize-batching-lod-2026-11-06.md` and `tools/bench-render-audit.js` for actual active instance costs.
 

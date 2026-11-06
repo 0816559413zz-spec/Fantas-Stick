@@ -452,7 +452,7 @@ fxLoopName:356 blzFxName:357 fxLoopKeep:358 fshHitFx:360 fxBind:363
 §374 แม่แบบ playFx เป็นไฟล์ (assets/fx/tpl/*, sig/*, rec/*)
 fxTpl:376
 
-## js/46-fx-make.js (317) — 
+## js/46-fx-make.js (334) — 
 FXMK:10 MKD:11 mkRng:12 mkHash:13 mkNoise:15 mkL:17 mkR2:18
 §19 ที่เก็บจุด/สามเหลี่ยม
 mkG:21 mkPc:22 mkV:23 mkQ:24 mkAppend:25 mkCopy:26 mkFlat:27 _mkv:28 mkXf:29 mkThree:32 mkTRS:34 mkGrid:37
@@ -470,9 +470,9 @@ fxTexMat:215 fxTexMatBind:227 fxTexMatTick:230
 §231 เศษโมเดลกระเด็น (emit look:"model") — หิน ผลึก ขนนก เศษดาบ: หมุน ตกตา…
 FXMP:233 MPLOD:237 MPLOD_PX:237 MPLOD_ON:237 fxMPParticleGeo:238 fxMPMat:243 fxMPGroup:247 _mpM:252 _mpQ:252 _mpE:252 _mpP:252 _mpS:252 fxMPUpdate:253 fxMPClear:267 fxMPSpawn:269
 §273 อากาศบิดเบี้ยว (ชั้น warp) — ไอร้อน / คลื่นกระแทกบิดภาพ / เลนส์โป่ง •…
-fxWarpMake:275 fxWarpTick:287
-§293 ไฟ 3 มิติจากการจำลอง (ชั้น vol) — ไฟล์รูปแบบเดียวกับที่เพื่อน bake จา…
-FXVOL:296 fxVolLoad:297 fxVolTex:301 fxVolSet:304 fxVolReady:305 fxVolMake:306 fxVolTick:309 fxPreAssets:314 fxAssetsWait:316
+WB:276 wbInit:277 wbBegin:287 wbEnd:288 fxWarpMake:289 fxWarpTick:302
+§310 ไฟ 3 มิติจากการจำลอง (ชั้น vol) — ไฟล์รูปแบบเดียวกับที่เพื่อน bake จา…
+FXVOL:313 fxVolLoad:314 fxVolTex:318 fxVolSet:321 fxVolReady:322 fxVolMake:323 fxVolTick:326 fxPreAssets:331 fxAssetsWait:333
 
 ## js/47-earth-view.js (686) — 
 ECOL:9 EGUARD_BIG:14 EGUARD:14 CB:15 EV:16 eW:17 eYaw:18
@@ -678,7 +678,7 @@ waterEfx:184
 §212 HUD: เกจฮีลโล่ (โค้งซ้ายรอบเป้าเล็ง)
 drawWaterHud:213
 
-## js/68-wind-view.js (222) — 
+## js/68-wind-view.js (230) — 
 WV:6 WN_BODY:7 WN_AIR_FEET:7 windCharacterPose:9 wvState:25 wvAlive:26
 §27 ทุกเฟรมของผู้เล่นสายลม: ปีกติดหลัง / ปีกห่อตอนยกโล่ / ดูดลมชาร์จเกจ
 windFX:28
@@ -691,7 +691,7 @@ drawWindHud:104
 §111 ตัวช่วยเล็งกำแพงลม (เห็นเฉพาะเรา): เส้นโค้งเรืองที่จุดวาง (คลิกขวา) +…
 wvAimGhost:112
 §123 ปีกเวทสายลมติดหลัง: ขนนก 8+4 เส้นต่อข้าง ทำจากสายลม (shader) + ริบบิ้…
-WWS:125 WWU:125 WW_NOISE:126 _wwMat:131 wwMats:132 wwFeatherGeo:172 WW_PRI:183 WW_COV:185 WW_RIB:186 _wwGeo:187 makeWindWings:188 wwCue:200 poseWindWings:204
+WWS:125 WWU:125 WW_NOISE:126 _wwMat:131 wwMats:132 wwFeatherGeo:178 WW_PRI:189 WW_COV:191 WW_RIB:192 _wwGeo:193 makeWindWings:194 wwCue:208 poseWindWings:212
 
 ## js/69-broom.js (228) — ไม้กวาด (ผู้ใช้ 2026-10-29): บินแบบเครื่องบิน + ยิงลำแสงตามสาย + อนิเ…
 BRM:9 BSK:11 BROOM_SK:17 broomVert:38 broomMove:50 broomStrike:68 broomStrikeTick:77 broomFlak:85 broomAct:96 broomOff:102 broomBeam:104
@@ -720,4 +720,4 @@ tuneOpenF:80 tuneFmt:81 tuneRow:82 tuneRefresh:85 tuneMsg:93 tuneToggle:94 tuneE
 §122 API สำหรับเครื่องมือแยก tune.html (เปิดเกมใน iframe แล้วเรียกผ่าน WD)
 tuneDump:123 tuneSetKey:124
 
-(85 files, 20956 lines)
+(85 files, 20981 lines)
