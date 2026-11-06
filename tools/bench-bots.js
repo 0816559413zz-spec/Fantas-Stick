@@ -14,11 +14,18 @@ const lv=WD.BOT_LV?WD.BOT_LV.length-1:2;
 const paths=window.__benchPaths||[0,1,2,6,7];   // ไฟ น้ำแข็ง สายฟ้า ดิน ลม (คงที่ = เทียบก่อน/หลังได้)
 if(window.__benchSeed!==false){let sd=4242;Math.random=()=>((sd=(sd*16807)%2147483647)/2147483647);}
 for(const pa of paths)WD.lobbyBotAdd(pa,lv);
-WD.hostStart();await sleep(3000);
+WD.hostStart();
 let now=performance.now();
 const P=()=>Object.values(WD.G.players);
 const huddle=()=>{const L=P(),cx=L[0].x,cy=L[0].y;L.forEach((p,i)=>{if(i){const a=i/L.length*6.283;p.x=cx+Math.cos(a)*140;p.y=cy+Math.sin(a)*140;}});};
-for(let i=0;i<200&&WD.G.ph!=='play';i++){WD.hostStep(1/60);now+=1000/60;WD.render(1/60,now);}
+// Asset preparation and compileAsync finish on later event-loop turns. A fast
+// synchronous countdown otherwise measures loading as part of the fight.
+let ready=false;
+for(let i=0;i<1200;i++){
+  WD.hostStep(1/60);now+=1000/60;WD.render(1/60,now);await sleep(25);
+  if(WD.screen==='game'&&WD.G.ph==='play'&&WD.warm.key&&!WD.warm.busy&&!WD.warm.q.length){ready=true;break;}
+}
+if(!ready)throw new Error('BENCH_WARMUP_TIMEOUT');
 huddle();
 const PR=WD.PROF;PR.on=true;
 const ms=[],rows=[],NEWP={},NEWPF={};let maxParts=0;

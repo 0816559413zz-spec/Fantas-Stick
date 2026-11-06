@@ -508,11 +508,12 @@ SCAR:56 scarReset:58 scarPaint:65 grassScar:80
 §85 พื้นหญ้ามีชีวิต: สีเป็นหย่อม (เขียวเข้ม / แห้งเหลือง / ดินโผล่) + จุด…
 GR_NOISE:88 GR_LIVE:93 grLive:111 GR_GLSL_V:118 GR_BEGIN:123 grassMat:169 grassBuild:187 _grBasic:201 grassBake:202 grassCount:258 grassTick:263
 
-## js/51-warmup.js (163) — 
+## js/51-warmup.js (179) —
 WARM:11 WARM_FXDIR:12 WARM_COMMON:12 WARM_X:13 WARM_Y:13 warmKeep:15 warmStaticModels:21 warmCompile:29 warmDraw:32 WARM_SKIP:42 warmAssets:45 warmFx:55 warmFxEnd:66 warmGather:68 warmPaths:70 warmStep:72 warmTick:97
 §106 ภาพจากโค้ดของแต่ละสาย (เฟรมละฟังก์ชัน)
-§117 อุ่นฉากเกมระหว่างรอในห้อง (ผู้ใช้ 2026-10-23: "กระตุกตอนเริ่มแมตช์แรก…
-GWARM:122 gameWarmTick:123 gameWarmFree:156
+warmOutline:116
+§133 อุ่นฉากเกมระหว่างรอในห้อง (ผู้ใช้ 2026-10-23: "กระตุกตอนเริ่มแมตช์แรก…
+GWARM:138 gameWarmTick:139 gameWarmFree:172
 
 ## js/52-social.js (172) — เล่นกับเพื่อน (ผู้ใช้ 2026-10-22): แชท + อีโมต + ดูเพื่อนเล่น (spectator) + ป้ายต่อเน็ตให…
 §6 แชท: Enter = พิมพ์ / Enter อีกที = ส่ง / Esc = ปิด • ข้อความขึ้นมุมซ้…
@@ -687,7 +688,7 @@ BRM:9 BSK:11 BROOM_SK:17 broomVert:38 broomMove:50 broomStrike:68 broomStrikeTic
 §125 ฝั่งจอ
 broomHead:127 BBEAM:134 _bbGeo:135 broomView:136 broomMountFx:165 broomDismountFx:173 broomBeamFx:175 broomSkFx:191 broomStrikeFx:204 broomFlakFx:209 broomHud:214 broomHudT:215 broomTick:224
 
-## js/70-water-dragon.js (473) — 
+## js/70-water-dragon.js (476) —
 WDG:7 wdgBuild:8 T:9 root:9 fixed:9 rings:10 sides:10 geoOf:11 skin:12 faceSkin:40 group:41 head:42 faceTime:44 groundY:44 faceMaterial:45 faceBlue:50 hornBlue:50 ridgeCyan:50 profile:52 headProfile:53 faceGeo:58 fp:58 fc:58 fi:58 faceRings:58 faceSides:58 navy:59 aqua:59 belly:59 flowHi:59 neckBlend:59 headStroke:71 eyePatch:72 waterCrest:87 bodyGeo:113 bodyP:113 bodyUV:113 indices:113 body:119 finShape:121 finGeo:122 finPos:124 finUV:124 finSkin:126 fins:127 limbSkin:129 clawSkin:130 taperedLimb:131 arms:138 bodyLength:148 intro:148 settleWindow:148 tipHz:148 bodyBulk:148 bodyRadius:149 flight:151 quarters:152 step:152 dr:152 dy:152 spiralKnot:153 first:154 entry:154 crest:158 bank:161 corner:161 cruiseEntry:161 quarterHandle:164 leadLength:166 up:170 zAxis:170 yAxis:170 smooth:171 startAt:172 startD:172 startDistance:174 distanceToCruise:174 hoverSpeed:174 fastDuration:174 brakeDuration:174 startRamp:174 fastSpeed:175 progress:176
 §185 ทางบิน: ใช้ระยะทาง (เมตร) ไม่ใช่สัดส่วน เพื่อต่อทางพุ่งลงตอนเล็งเสร็จ…
 dive:186 PA:187 TA:188 DIVE_DOWN:190 DIVE_POUR:190 DIVE_STEP:190 diveDist:191 lastTime:192 lastHeadT:192 headRight:192 bodyState:192 filtered:192 shape:193 gate:246 rune:248 shadowMat:249 shadow:250 ringMat:251 ring:252 glyphMat:253 glyphHi:254 glyphPath:255 water:262 splashGeometry:265 lowWaveGeometry:266 splashBursts:267 pulse:273 outerRing:274 dropletMat:275 drops:275 transform:277 gateAt:278 sprayMaterial:300 spray:300 curlCurve:302 foamMaterial:303 foam:304 particles:305 foamParticles:305 rand:306 bodySprayAt:307 waveSegments:328 waveSheets:328 wavesAt:335 currentConfigs:350 currentMaterial:357 currentSegments:362 currentSides:362 currentMeshes:362 currentPoint:370 currentSpray:377 currentParticles:378 currentsAt:379

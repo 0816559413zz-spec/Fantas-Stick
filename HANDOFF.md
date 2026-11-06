@@ -1,5 +1,7 @@
 # HANDOFF — Fantas Stick (was "Wizard Duel") (repo: Fantas-Stick)
 
+**Optimize follow-up 2026-11-06:** Added countdown preparation for code-created fire/haze, rigid + skinned Earth/Water outline materials, and water tether. Real Aqua Cage/Dust Burst integration: disabling the new registrations reproduces one first-use outline program per skill; enabled = zero, no page errors. Split `fx.zv` / `fx.particles` while retaining `fx.parts`. Bot benchmark now waits for async warm-up before timing. This addresses specific first-use stalls, not all low-FPS causes; player draw calls, heavy FX particle meshes and remaining shader variants still need work. Evidence/commands: `notes/optimize-followup-2026-11-06.md`. Keep the pending Moonwater edits separate.
+
 **ส่งต่อล่าสุดก่อนผู้ใช้พัก 2026-11-06 — ผู้ใช้สั่ง save / commit / push:** อ่าน `notes/moonwater-vfx-handoff-2026-11-06.md` เป็นสถานะหลักของงานภาพ และ `notes/perf-codex-2026-11-06.md` เป็นผลตรวจแลค
 
 **Moonwater ทำแล้ว:** ลำน้ำแรงดันสูงฟ้า–ไซแอนเล็กลง มีคลื่น/ฟอง/สเปรย์ วงเวทชัดขึ้น ภาพและ GIF หลายมุม ตัวสร้าง `tools/water-moon-pressure-gen.py` และ effect เดิม `water/moon_beam` ใช้ในเกมอยู่แล้ว คงค่ากลไกทั้งหมด

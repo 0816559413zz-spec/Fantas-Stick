@@ -117,6 +117,8 @@ Reproduced in the hidden pane (`?nosw`, `lobbyBotFill()` → 11 bots, `G.mode='t
 - [ ] Draw calls: players' 7 skinned parts + extras per player (see §H P2 players).
 
 ## Benchmarks
+Follow-up 2026-11-06: countdown now registers code-created fire surfaces/heat haze, rigid+skinned Earth/Water outlines, and water tether (`js/51`, `js/70`). Actual Aqua Cage/Dust Burst regression shows one new outline program per skill with these registrations disabled, zero with them enabled. This does not close the general mid-fight shader item above. `fx.zv` / `fx.particles` now separate the old `fx.parts` measurement (which remains for older reports); these timers are nested, not additive. `tools/bench-bots.js` waits for async warm-up before timing; old reports that timed outstanding loading are not directly comparable. See `notes/optimize-followup-2026-11-06.md`.
+
 `tools/bench-start.js` = match start / map switch hitch (see its header).
 
 ## Heavy-scene bench

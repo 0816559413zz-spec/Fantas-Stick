@@ -105,7 +105,22 @@ function warmTick(v){
 }
 // ---------- ภาพจากโค้ดของแต่ละสาย (เฟรมละฟังก์ชัน) ----------
 // ไฟ 3 มิติแบบ raymarch (fireVol) — เดิมไม่ได้อุ่น: compile ครั้งแรกกลางไฟต์ (tools/bench-bots.js 2026-11-02)
-WARM.reg.pyro=[()=>{const m=fireVol([{c:[0,0,0],ax:[1,0],hx:1,hz:1,h:2}]);fxScene.add(m);return m;}];
+// These code-created materials are not covered by the FX JSON layer scan.
+// Keep them in the same scene as the real effect (different lighting = different programs).
+WARM.reg.pyro=[()=>{const m=fireVol([{c:[0,0,0],ax:[1,0],hx:1,hz:1,h:2}]);fxScene.add(m);return m;},
+  ()=>{const out=[new THREE.Mesh(_hzPlane,hazeMat(0)),new THREE.Mesh(_hzRing,hazeMat(1))];for(const m of out)fxScene.add(m);return out;},
+  ()=>[new THREE.Mesh(_fbGeo,fireMat({mode:'ball'})),makeFireBall(),makeFireTail()],
+];
+// Outline shells need both rigid and skinned programs. A tiny one-bone proxy
+// prepares the actual material without creating a player or borrowing its skeleton.
+function warmOutline(mat){
+  const g=new THREE.BoxGeometry(1,1,1),n=g.attributes.position.count,w=new Float32Array(n*4);
+  for(let i=0;i<n;i++)w[i*4]=1;
+  g.setAttribute('skinIndex',new THREE.Uint16BufferAttribute(new Uint16Array(n*4),4));
+  g.setAttribute('skinWeight',new THREE.Float32BufferAttribute(w,4));
+  const root=new THREE.Group(),skin=new THREE.SkinnedMesh(g,mat),bone=new THREE.Bone();
+  skin.add(bone);skin.bind(new THREE.Skeleton([bone]));root.add(new THREE.Mesh(g,mat),skin);return root;
+}
 WARM.reg.earth=[
   ()=>{const S=makeStand(1,false);standOp(S,0.5);return S.g;},
   ()=>{const S=makeStand(1,true);standOp(S,0.5);return S.g;},
@@ -113,6 +128,7 @@ WARM.reg.earth=[
   ()=>[makeSlab(true),makeSlab(false)],
   ()=>{eChunks(WARM_X,WARM_Y,0.3,2,10,1,0.1);},   // เศษหิน (InstancedMesh + ลายหิน) — เดิมไม่ได้อุ่น → กด Dash ครั้งแรก compile shader ใหม่ เกมค้าง
   ()=>{for(const k of [0,1,2,3])eMakeSO([0,k,WARM_X,WARM_Y,WARM_X+200,WARM_Y,30,100]);earthMudZone({x:WARM_X,y:WARM_Y,r:100,t:0.2});},
+  ()=>warmOutline(_eOlMat),
 ];
 // ---------- อุ่นฉากเกมระหว่างรอในห้อง (ผู้ใช้ 2026-10-23: "กระตุกตอนเริ่มแมตช์แรก" ~1.3 วิ) ----------
 // ห้องรอเริ่มวาดฉากของ hub — ฉากเกม (แผนที่ที่สร้างไว้แล้ว + ตัวละคร) ยังไม่เคยถูกวาดเลย → เฟรมแรกของแมตช์ compile ~18 เชดเดอร์

@@ -91,7 +91,7 @@ function renderGame(v,P,E,me,dt,now){
   $('#trainEnd').classList.toggle('hidden',!(NET.isHost&&v.mode==='train'&&v.ph!=='over'));
   trSync(v);bpSync(v);
   tickFlash(dt);
-  t0=performance.now();{let t1=t0;updateZV(dt);updateParticles(dt);pf('fx.parts',t1);t1=performance.now();updateShapes(dt);pf('fx.shapes',t1);t1=performance.now();updateLights(dt);pf('fx.lights',t1);t1=performance.now();updateVfx(dt);pf('fx.vfx',t1);t1=performance.now();updateDebris(dt);pf('fx.debris',t1);}pf('fx',t0);
+  t0=performance.now();{let t1=t0;updateZV(dt);pf('fx.zv',t1);let t2=performance.now();updateParticles(dt);pf('fx.particles',t2);pf('fx.parts',t1);t1=performance.now();updateShapes(dt);pf('fx.shapes',t1);t1=performance.now();updateLights(dt);pf('fx.lights',t1);t1=performance.now();updateVfx(dt);pf('fx.vfx',t1);t1=performance.now();updateDebris(dt);pf('fx.debris',t1);}pf('fx',t0);
   QUAL.frame++;gl.shadowMap.needsUpdate=QUAL.mode==='high'||QUAL.frame%(QUAL.mode==='auto'&&QUAL.lvl>=2?4:2)===0;if(gl.shadowMap.needsUpdate)shadowFollow();
   if(FXSTUDIO.noDraw)return;
   t0=performance.now();composer.render();pf('gpuSubmit',t0);pinPrograms();

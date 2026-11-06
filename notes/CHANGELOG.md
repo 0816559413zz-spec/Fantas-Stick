@@ -1,5 +1,7 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
 
+- 2026-11-06 — Optimize follow-up: warm code-created fire/haze, Earth/Water rigid+skinned outlines and water tether during countdown. Actual Aqua Cage/Dust Burst regression: cold = one new outline program each, warm = zero, no page errors. Separate `fx.zv` and `fx.particles` profiler timings; preserve combined `fx.parts`. Bot stress benchmark waits for async warm-up before timing. Remaining steady low FPS is not declared fixed. See `notes/optimize-followup-2026-11-06.md`.
+
 - 2026-11-06 — Save/publish Moonwater water-jet work, preview tools and particle scratch-buffer optimization per user request. Latest accepted direction is a continuous full-width beam with a soft transparent end; that end redesign is recorded as pending. Rejected end studies remain unbound. See `notes/moonwater-vfx-handoff-2026-11-06.md` for done/missing and workflow.
 
 - 2026-11-06 — Codex parallel contribution: extend Moonwater breakup further; fix swallowed projectile statement preventing game load; reuse particle curl output buffer with exact-output regression. Leave Claude's HUD/render-loop edits intact. 12-player stress still fails frame budget; evidence and coordination notes in `notes/perf-codex-2026-11-06.md`, no claimed FPS fix.
