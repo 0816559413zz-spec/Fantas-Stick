@@ -195,13 +195,13 @@ function fxTexMatTick(m,S,k){fxTexMatBind(m);const u=m.uniforms,N=u.uGrid.value.
 // ทุกเม็ดของโมเดล+วัสดุ+สีเดียวกันวาดรวมเป็น InstancedMesh ก้อนเดียว (เบา) • อยู่ต่อได้หลังชั้นจบ (เหมือนอนุภาค)
 const FXMP={groups:new Map()};
 // Tiny water spray used the hero blob's ~4k triangles per instance. Retain the
-// Particles use a 16-segment sphere (~1k triangles) up close and the 224-triangle
-// recipe at <=12 physical pixels; the 32-segment mesh stays for hero meshes.
-const MPLOD=new WeakMap(),MPLOD_PX=12,MPLOD_ON=!new URLSearchParams(location.search).has('fullParticleDetail');
+// Particles use a 12-segment sphere (~500 triangles) up close and the 224-triangle
+// recipe at <=20 physical pixels; the 32-segment mesh stays for hero meshes.
+const MPLOD=new WeakMap(),MPLOD_PX=20,MPLOD_ON=!new URLSearchParams(location.search).has('fullParticleDetail');
 function fxMPParticleGeo(model,geo){if(!MPLOD_ON||model!=='water_blob')return null;if(MPLOD.has(geo))return MPLOD.get(geo);
   const d=FXMK.mesh.get(model)?.data;if(!d||!d.parts.length||d.parts.some(p=>p.k!=='sphere'||p.off))return null;
   const mk=seg=>{const g=fxMeshBuild({...d,parts:d.parts.map(p=>({...p,seg:Math.min(seg,p.seg||seg)}))});g.userData.keep=true;return g;};
-  const low=mk(8);low.userData.near=mk(16);MPLOD.set(geo,low);return low;
+  const low=mk(8);low.userData.near=mk(12);MPLOD.set(geo,low);return low;
 }
 function fxMPMat(mat,col,col2){switch(mat){
   case 'glow':return new THREE.MeshBasicMaterial({color:hdr(col,1.1),transparent:true,depthWrite:false,blending:THREE.AdditiveBlending});

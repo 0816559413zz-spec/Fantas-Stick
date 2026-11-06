@@ -1,7 +1,7 @@
 """Reduce triangles of a one-primitive GLB without changing its look.
 
 python tools/mesh-simplify.py assets/vfx/water_crown.glb 0.33            -> overwrite the file
-python tools/mesh-simplify.py in.glb 0.33 out.glb                        -> write a copy
+python tools/mesh-simplify.py in.glb 0.33 out.glb [0.5]                  -> write a copy (0.5 = allow sharper bends, default 0.8)
 
 Half-edge collapse (surviving vertices keep their exact position, normal and UV), cost = quadric
 error. Open edges and UV seams stay locked so the shape outline and textures do not crack. Needs numpy only.
@@ -34,7 +34,7 @@ def accessor(j, data, i):
     return arr.reshape(-1, c) if c > 1 else arr.copy()
 
 
-def simplify(P, N, UV, T, ratio):
+def simplify(P, N, UV, T, target, mincos):
     nv = len(P)
     tris = [list(map(int, t)) for t in T]
     alive = [True] * len(tris)
@@ -80,10 +80,9 @@ def simplify(P, N, UV, T, ratio):
         push(a, b)
         push(b, a)
     live = len(tris)
-    target = int(len(tris) * ratio)
 
     def ok(a, b):
-        if N[a].dot(N[b]) < 0.8:
+        if N[a].dot(N[b]) < mincos:
             return False
         na = {v for t in vt[a] for v in tris[t]}
         nb = {v for t in vt[b] for v in tris[t]}
@@ -103,7 +102,7 @@ def simplify(P, N, UV, T, ratio):
             s0 = (u[1, 0] - u[0, 0]) * (u[2, 1] - u[0, 1]) - (u[2, 0] - u[0, 0]) * (u[1, 1] - u[0, 1])
             u = UV[r]
             s1 = (u[1, 0] - u[0, 0]) * (u[2, 1] - u[0, 1]) - (u[2, 0] - u[0, 0]) * (u[1, 1] - u[0, 1])
-            if s0 * s1 <= 0:
+            if abs(s0) > 1e-9 and s0 * s1 <= 0:      # zero-area UV = nothing to protect
                 return False
         return True
 
@@ -176,9 +175,15 @@ def main():
     a = pr['attributes']
     P, N, UV = accessor(j, data, a['POSITION']), accessor(j, data, a['NORMAL']), accessor(j, data, a['TEXCOORD_0'])
     T = accessor(j, data, pr['indices']).reshape(-1, 3)
-    used, nt = simplify(P, N, UV, T, ratio)
-    write_glb(j, dst, pr, P[used], N[used], UV[used], nt)
-    print(Path(src).name, len(T), '->', len(nt), 'tris', len(P), '->', len(used), 'verts')
+    mincos = float(sys.argv[4]) if len(sys.argv) > 4 else 0.8
+    target, n0 = int(len(T) * ratio), len(T)
+    while True:             # moves rejected once are retried on a fresh pass
+        used, nt = simplify(P, N, UV, T, target, mincos)
+        P, N, UV, T, done = P[used], N[used], UV[used], nt, len(nt) <= target or len(nt) > len(T) * 0.97
+        if done:
+            break
+    write_glb(j, dst, pr, P, N, UV, T)
+    print(Path(src).name, n0, '->', len(T), 'tris', len(P), 'verts')
 
 
 main()
