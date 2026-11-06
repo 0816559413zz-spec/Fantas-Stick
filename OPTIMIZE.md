@@ -140,6 +140,29 @@ Brawl bench after round 1 (`tools/bench-bots.js`, meadow, 11 bots paths [0,1,2,6
 
 Round 2 (2026-11-06, same bench): finer `WD.PROF` sections — `zv.*` inside `updateZV` (ice/slash/storm/fire/frost/kit/**fxfile**) and `h.*` inside the 2D HUD (bars/texts/hud/social/ffa/hud4). Findings: VFX Studio runtime `updateFx` was the biggest skill-visual cost (**3.1 ms**) — `fxCurve` rebuilt + sorted the curve key list on every value read → keys now sorted once per curve object (`fxCurveKeys`, WeakMap; off in `?studio` so edits still show) → **2.0 ms**. 2D HUD is now small (drawHUD 0.7–0.9, FFA board 0.3, labels 0.23 ms). Per-player sync 12 players ≈ 2.5 ms (anim 0.4, broom/cloak 0.4, path visuals 0.7). Map prop shadows: map is already merged/instanced, visible map casters ≈ 70 → low value, not changed. Biggest CPU left in a 12-player brawl: particles ~5 ms (~7k alive; next idea = pool particle objects to cut GC / move motion to GPU) and three.js render submit (≈ 2000 scene nodes, ~1200 of them the 12 characters incl. bones).
 
+## J. Round 2026-11-05/06 — "big fights drop from 50 to 20–30 FPS" (user)
+Bench: `tools/bench-fight.js` (TDM valley, 12 players, everyone casts every slot + ult every 1.5 s, seeded `Math.random`, fixed kits; `window.BENCH_KITS=[...]` to pick kits). Hidden pane, 1920×911. Runs still vary ±2–3 ms / ±100 draw calls between runs, so compare draw calls and repeat runs.
+New `WD.PROF` sub-timers (render loop): `fx.zv/fx.parts/fx.shapes/fx.lights/fx.vfx/fx.debris`, `pm.proj/pm.walls/pm.earth/pm.wind/pm.water/pm.props/pm.mins`, `zv.frost1/zv.storm/zv.fire/zv.frost2/zv.kit/zv.fxrt`, `wt.dragon`.
+
+Calm → big fight (render-side CPU per frame): **≈8 → 17–26 ms**, GPU wait 13 → 17–24 ms. Where the extra time goes (ms/frame in the fight):
+| Part | ms | Note |
+|---|---|---|
+| `gpuSubmit` (three.js traverse + draw) | 7–10 (calm 3.5) | 480–900 draw calls; up to ~2,500 visible objects traversed |
+| `fx.parts` (CPU particles) | 3–3.7 | 5,000–6,500 particles |
+| `players` (sync + grass + cloth) | ≈3 | same as calm |
+| `hud2d` (name tags, HP bars, HUD) | 2.2–3 (calm 1.2) | 2D canvas text every frame |
+| `zv.fxrt` (fx.json runtime) | ≈2 | |
+| `wt.dragon` (water dragon) | 0.7–3 | only when a water player is fighting |
+
+- [x] **Code-built shapes batched** (done 2026-11-06, `js/30-particles.js`): ring/ringv/arc/dome/warn/warnr/rune/decal are now one `InstancedMesh` per kind (additive: opacity folded into the instance colour = same picture; decal: per-instance `iOp` alpha). Before, every ring/scorch mark was its own Mesh + new material; one random fight had **493 rings alive at once**. A/B screenshot (warn circles, rune, lava decal) identical. Earth+pyro fight: draw calls 644/722 → 584/702, CPU 17.5/17.8 → 16.8/16.5 ms (small, within noise on mixed kits). Ordering note: decals now draw before other transparent objects (renderOrder −1), glows after (3).
+- [x] `curlAt` no longer allocates an array per particle per frame (less GC).
+- [ ] **P2 Particles on the GPU** (§G item) — still the cleanest big CPU win for fights, but changes how approved effects move → needs the user's OK + VFX re-review.
+- [ ] **P2 HUD text cache** — `drawLabels` redraws every name/HP text each frame; cache per player (re-render only when text/HP changes).
+- [ ] **P2 Earth ult area rings** (`js/47-earth-view.js` ~617): spawns a ring + burst almost every frame for big radii → hundreds alive. Cheap now (batched) but still particles; could be rate-limited (visual change → ask).
+- [ ] **P3 Water dragon tick** (`wdgTick`, js/70) 0.7–3 ms while active — profile inside.
+- [ ] **P3 fx runtime** (`updateFx`) ≈2 ms in fights — profile per layer type.
+- Tip for players: graphics **อัตโนมัติ** lowers effects (×0.7, cap 5,000) and resolution when frames get slow; **สูง** keeps everything on.
+
 ## Benchmarks
 Follow-up batching/LOD 2026-11-06: student Skeletons 7→1 per player; compatible skin/iris/scarf trim combines with vertex colour/PBR attributes (2 fewer draws per body per pass). Cloth panels/palette stay separate. Actual high-poly emitted model is `water_blob` (3,968 tris), not frost shards (32). Tiny water particles <=12 physical pixels use a 224-triangle mesh; near particles and hero geometry stay full detail. Visual/animation/lifecycle checks pass. This partially addresses §H player/particle items, not all FPS causes. See `notes/optimize-batching-lod-2026-11-06.md` and `tools/bench-render-audit.js` for actual active instance costs.
 

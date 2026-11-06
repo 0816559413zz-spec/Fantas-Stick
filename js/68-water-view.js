@@ -165,7 +165,7 @@ const _wtCyl=new THREE.CylinderGeometry(1,1,1,14,1,true).translate(0,0.5,0).rota
 function wtBeam(){const g=new THREE.Group(),core=new THREE.MeshBasicMaterial({color:0xffffff,fog:false,transparent:true,blending:THREE.AdditiveBlending,depthWrite:false}),
     glow=new THREE.MeshBasicMaterial({color:0x2fa8ff,fog:false,transparent:true,opacity:0.85,blending:THREE.AdditiveBlending,depthWrite:false});
   const c=new THREE.Mesh(_wtCyl,core),sh=new THREE.Mesh(_wtCyl,glow);c.scale.set(0.35,0.35,1);g.add(c,sh);c.renderOrder=6;sh.renderOrder=5;g.userData.sh=sh;g.userData.mats=[core,glow];scene.add(g);return g;}
-function syncWater(v,dt,now){wdgTick(dt);
+function syncWater(v,dt,now){const t1=performance.now();wdgTick(dt);pf('wt.dragon',t1);
   for(let i=WTV.ol.length-1;i>=0;i--){const O=WTV.ol[i];O.t-=dt;if(O.t<=0){for(const c of O.L)if(c.parent)c.parent.remove(c);WTV.ol.splice(i,1);}}
   // ลำน้ำงู: วาดตอน host ยิงโดน (efx wtfamhit) — ปากงู → เป้า สว่างแวบ 0.16 วิ แล้วบางลงหาย
   for(let i=WTV.bm.length-1;i>=0;i--){const B=WTV.bm[i];B.t+=dt;const k=Math.max(0,B.t)/0.16;if(k>=1){scene.remove(B.g);for(const m of B.g.userData.mats)m.dispose();WTV.bm.splice(i,1);continue;}

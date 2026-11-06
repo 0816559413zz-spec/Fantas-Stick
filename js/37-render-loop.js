@@ -85,7 +85,10 @@ function renderGame(v,P,E,me,dt,now){
   if(!FXSTUDIO.seek){syncPlayers(P,v.mode,now,dt);pf('p.sync',t0);let t1=performance.now();grassTick(dt);pf('p.grass',t1);t1=performance.now();clothTick(dt);pf('p.cloth',t1);gameWarmFree(dt);}pf('players',t0);   // grassTick = ลม + หญ้า (js/50) • clothTick = ผ้าคลุมจริงของเรา (js/49)
   if(me&&me.al&&!me.fl&&!me.dn){const o=PM3.get(me.id);if(o){const k=Math.floor(o.walk/Math.PI);if(o.stepK!==undefined&&k!==o.stepK)snd('step',{vol:0.35,rev:0.1});o.stepK=k;}}t0=performance.now();
   syncEnemies(E,P,now,dt);pf('enemies',t0);t0=performance.now();
-  broomTick(dt);syncProj(v,now);syncWalls(v);syncPots(v,now);syncEarth(v,dt,now);syncWind(v,dt,now);syncWater(v,dt,now);syncProps(v);syncBld(dt);cityCull();cityViewSync(dt);brkSync(dt);syncMins(v,now,dt);
+  let t1=t0;   // projMode แยกย่อยให้ WD.PROF (pm.proj / pm.earth / ...) — รวมยังเป็น 'projMode' เหมือนเดิม
+  broomTick(dt);syncProj(v,now);pf('pm.proj',t1);t1=performance.now();syncWalls(v);syncPots(v,now);pf('pm.walls',t1);t1=performance.now();
+  syncEarth(v,dt,now);pf('pm.earth',t1);t1=performance.now();syncWind(v,dt,now);pf('pm.wind',t1);t1=performance.now();syncWater(v,dt,now);pf('pm.water',t1);t1=performance.now();
+  syncProps(v);syncBld(dt);cityCull();cityViewSync(dt);brkSync(dt);pf('pm.props',t1);t1=performance.now();syncMins(v,now,dt);pf('pm.mins',t1);t1=performance.now();
   syncModeObjs(v,P,me,now,dt);pf('projMode',t0);
   KC=Math.max(0,KC-dt);roleShowT=Math.max(0,roleShowT-dt);
   $('#trainEnd').classList.toggle('hidden',!(NET.isHost&&v.mode==='train'&&v.ph!=='over'));
