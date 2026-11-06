@@ -167,7 +167,13 @@ function wwMats(){if(_wwMat)return _wwMat;
   for(let k=0;k<6;k++){g.save();g.rotate(k/6*6.283);g.beginPath();g.arc(0,-100,22,0.63,4.71);g.stroke();g.restore();}
   const tex=new THREE.CanvasTexture(cv);tex.colorSpace=THREE.SRGBColorSpace;
   const circle=new THREE.MeshBasicMaterial({map:tex,color:'#3fdf8f',transparent:true,opacity:0.55,depthWrite:false,side:THREE.DoubleSide,blending:THREE.AdditiveBlending});
-  return _wwMat={feather,ribbon,circle};}
+  // รวมขนทั้งปีกเป็นชิ้นเดียว: ท่าพลิ้วของแต่ละเส้น (เดิมหมุน Group รายเส้นใน poseWindWings) ย้ายมาคิดใน shader • ภาพเดิม 34 draw/คน เหลือ 4 • ?nofxbatch = ปิด
+  const featherB=feather.clone();featherB.vertexShader=`attribute float layer;attribute vec2 aRoot;uniform float time,uWT,uWrap;varying vec2 vUv;varying float vL;
+      void main(){vUv=uv;vL=layer;vec3 p=position;float u=uv.x;
+        p.z+=sin(u*7.0-time*5.0+layer*0.9)*0.07*u;p.y+=sin(u*9.0-time*6.5+layer*1.3)*0.045*u*u;
+        float a=sin(uWT*2.0-layer*0.3)*0.03-(layer<10.0?layer*0.07:0.2)*uWrap,c=cos(a),s=sin(a);p.xy=vec2(c*p.x-s*p.y,s*p.x+c*p.y)+aRoot;
+        gl_Position=projectionMatrix*modelViewMatrix*vec4(p,1.0);}`;
+  return _wwMat={feather,ribbon,circle,featherB};}
 // ขน 1 เส้น: เส้นโค้ง bezier P0→C→T กว้าง w ปลายแหลม (uv.x โคน→ปลาย, uv.y −1..1 ขวางขน)
 function wwFeatherGeo(P0,C,T,w,layer,z){
   const N=24,pos=[],uv=[],lay=[],idx=[];
@@ -188,14 +194,16 @@ let _wwGeo=null;
 function makeWindWings(){
   const M=wwMats();
   if(!_wwGeo){const rel=(P0,a)=>[a[0]-P0[0],a[1]-P0[1]],f=(L,z0,off)=>L.map(([P0,C,T,w],i)=>({P0,i:i+off,g:wwFeatherGeo([0,0],rel(P0,C),rel(P0,T),w,i+off,z0+i*0.03)}));
-    _wwGeo={fe:[...f(WW_PRI,0,0),...f(WW_COV,-0.12,10)],rib:WW_RIB.map(([P0,C,T,w],i)=>wwFeatherGeo(P0,C,T,w,20+i,0.15+i*0.02))};}
+    _wwGeo={fe:[...f(WW_PRI,0,0),...f(WW_COV,-0.12,10)],rib:WW_RIB.map(([P0,C,T,w],i)=>wwFeatherGeo(P0,C,T,w,20+i,0.15+i*0.02))};
+    if(WB.on){_wwGeo.feM=mergeGeometries(_wwGeo.fe.map(F=>{const g=F.g.clone(),n=g.attributes.position.count,R=new Float32Array(n*2);for(let i=0;i<n;i++){R[i*2]=F.P0[0];R[i*2+1]=F.P0[1];}g.setAttribute('aRoot',new THREE.BufferAttribute(R,2));return g;}),false);_wwGeo.ribM=mergeGeometries(_wwGeo.rib,false);_wwGeo.feM.userData.keep=_wwGeo.ribM.userData.keep=true;}}
   const W=new THREE.Group(),rig=new THREE.Group(),sides=[],fe=[];rig.scale.setScalar(WWS);W.add(rig);
-  const boost={value:0},mf=M.feather.clone(),mr=M.ribbon.clone();mf.uniforms={time:WWU.time,boost};mr.uniforms={time:WWU.time,boost};   // เรืองต่อคน แต่นาฬิการ่วมกัน
+  const boost={value:0},uWT={value:0},uWrap={value:0},mf=(WB.on?M.featherB:M.feather).clone(),mr=M.ribbon.clone();mf.uniforms={time:WWU.time,boost,uWT,uWrap};mr.uniforms={time:WWU.time,boost};   // เรืองต่อคน แต่นาฬิการ่วมกัน
   for(const sd of [1,-1]){const piv=new THREE.Group(),wing=new THREE.Group();wing.scale.x=sd;piv.position.x=sd*0.2;piv.add(wing);rig.add(piv);sides.push({piv,sd});
+    if(WB.on){for(const [G,M0] of [[_wwGeo.feM,mf],[_wwGeo.ribM,mr]]){const m=new THREE.Mesh(G,M0);m.frustumCulled=false;m.renderOrder=3;wing.add(m);}continue;}
     for(const F of _wwGeo.fe){const fp=new THREE.Group();fp.position.set(F.P0[0],F.P0[1],0);const m=new THREE.Mesh(F.g,mf);m.frustumCulled=false;m.renderOrder=3;fp.add(m);fp.userData.i=F.i;wing.add(fp);fe.push(fp);}
     for(const g of _wwGeo.rib){const m=new THREE.Mesh(g,mr);m.frustumCulled=false;m.renderOrder=3;wing.add(m);}}
   const circle=new THREE.Mesh(new THREE.PlaneGeometry(3.2,3.2),M.circle);circle.position.set(0,0.2,-0.3);circle.renderOrder=2;rig.add(circle);
-  W.userData={sides,fe,circle,boost,t:Math.random()*10,flap:0,wrap:0,fk:-1,ul:-1};return W;}
+  W.userData={sides,fe,circle,boost,uWT,uWrap,t:Math.random()*10,flap:0,wrap:0,fk:-1,ul:-1};return W;}
 // สั่งท่าพิเศษจากเหตุการณ์: 'fk' = Featherwing สะบัดปีก • 'ul' = Eye of Heaven
 function wwCue(id,k){const o=PM3.get(id);if(o&&o.wWings)o.wWings.userData[k]=0;}
 // ท่าปีก: ยืน = กางเกือบนิ่ง (ผู้ใช้ไม่เอากระพือตอนยืน) • บิน Featherwing (big) = ใหญ่ 1.6 เท่า + กระพือ
@@ -218,5 +226,5 @@ function poseWindWings(W,big,dt,guard){
   d.boost.value=boost;
   W.scale.setScalar(sc*(1-0.35*wrap));
   for(const {piv,sd} of d.sides){piv.rotation.y=-sd*(0.3+sw+wrap*1.0+fl);piv.rotation.z=sd*(fl*0.35-wrap*0.45);}
-  for(const f of d.fe){const i=f.userData.i;f.rotation.z=Math.sin(d.t*2.0-i*0.3)*0.03-(i<10?i*0.07:0.2)*wrap;}
+  d.uWT.value=d.t;d.uWrap.value=wrap;for(const f of d.fe){const i=f.userData.i;f.rotation.z=Math.sin(d.t*2.0-i*0.3)*0.03-(i<10?i*0.07:0.2)*wrap;}
   d.circle.rotation.z=d.t*(0.25+boost);d.circle.visible=wrap<0.5;}

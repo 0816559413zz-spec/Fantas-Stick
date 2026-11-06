@@ -272,7 +272,22 @@ function fxMPSpawn(L,q,col,c2,V,g){const G=fxMPGroup(g('model'),g('mmat'),col,c2
     spin:(R()*2-1)*sp,ax:ax/al,ay:ay/al,az:az/al,rx:R()*6.283,ry:R()*6.283,rz:R()*6.283});return true;}
 // ---------- อากาศบิดเบี้ยว (ชั้น warp) — ไอร้อน / คลื่นกระแทกบิดภาพ / เลนส์โป่ง • อ่านภาพฉากจาก FXPass (ใช้ได้ตอนกราฟิกกลาง-สูง เหมือน heat haze ของเกม) ----------
 // kind: haze = อากาศร้อนสั่นไหวขึ้น (แผ่นหันหากล้อง) • shock = วงคลื่นขยายบิดภาพ (flat = นอนบนพื้น) • bulge = เลนส์โป่งดันภาพออก
+// แผ่นบิดอากาศทุกแผ่นวาดรวมครั้งเดียว (ผู้ใช้ 2026-11-07: ไฟต์ใหญ่มีได้ 130+ แผ่น แผ่นละ draw + วัสดุใหม่) • shader เดียวกับด้านล่าง ค่าแต่ละแผ่นเป็นข้อมูลต่อ instance • ?nofxbatch = ปิด
+const WB={on:!/[?&]nofxbatch\b/.test(location.search),m:null,n:0,cap:256,P:null,T:null};
+function wbInit(){if(WB.m)return;const geo=new THREE.PlaneGeometry(1,1);WB.P=new THREE.InstancedBufferAttribute(new Float32Array(WB.cap*4),4);WB.T=new THREE.InstancedBufferAttribute(new Float32Array(WB.cap*4),4);WB.P.setUsage(THREE.DynamicDrawUsage);WB.T.setUsage(THREE.DynamicDrawUsage);geo.setAttribute('aP',WB.P);geo.setAttribute('aT',WB.T);geo.userData.keep=true;
+  const m=new THREE.ShaderMaterial({uniforms:{uScene:HAZE_U.uScene,uNz:{value:NOISETEX},time:FIRE_U.time},transparent:true,depthWrite:false,side:THREE.DoubleSide,
+    vertexShader:'attribute vec4 aP;attribute vec4 aT;varying vec4 vP;varying vec4 vT;varying vec2 vUv;varying float vVZ;void main(){vUv=uv;vP=aP;vT=aT;vec4 mv=modelViewMatrix*instanceMatrix*vec4(position,1.0);vVZ=-mv.z;gl_Position=projectionMatrix*mv;}',
+    fragmentShader:SOFT_GLSL+'uniform sampler2D uScene,uNz;uniform float time;varying vec4 vP;varying vec4 vT;varying vec2 vUv;'+
+      'void main(){float uStr=vP.x,uK=vP.y,uR=vP.z,uOp=vP.w,uGlow=vT.a;vec3 uTint=vT.rgb;vec2 c=vUv-0.5;float r=length(c)*2.0;vec2 dir=r>1e-4?c/(r*0.5):vec2(0.0);vec2 off;float m;'+
+      'if(uK<0.5){m=smoothstep(1.0,0.3,r)*smoothstep(0.0,0.25,vUv.y+0.1);float a=texture2D(uNz,vUv*vec2(1.6,2.2)*0.5+vec2(0.0,-time*0.55)).r,b=texture2D(uNz,vUv*1.8+vec2(0.37,-time*1.0)).r;off=(vec2(a,b)-0.5)*2.0*0.018;}'+
+      'else if(uK<1.5){float d=r-uR,w=0.07+0.08*(1.0-uR);m=exp(-d*d/(w*w))*smoothstep(1.0,0.9,r);off=dir*0.025*(d<0.0?1.0:-0.6);}'+
+      'else{m=smoothstep(1.0,0.0,r);off=-dir*0.03*(1.0-r*r);}'+
+      'm*=uOp;if(m<0.004)discard;m*=softK(0.3);vec2 su=gl_FragCoord.xy/uRes+off*uStr*m;vec3 col=texture2D(uScene,su).rgb+uTint*uGlow*m;gl_FragColor=vec4(col,clamp(m*2.0,0.0,1.0));}'});
+  fxMat(m);m.renderOrder=-1;const o=new THREE.InstancedMesh(geo,m,WB.cap);o.instanceMatrix.setUsage(THREE.DynamicDrawUsage);o.count=0;o.frustumCulled=false;o.renderOrder=-1;fxScene.add(o);WB.m=o;}
+const wbBegin=()=>{WB.n=0;};
+function wbEnd(){const o=WB.m;if(!o)return;o.count=WB.n;o.visible=WB.n>0;if(WB.n){o.instanceMatrix.needsUpdate=true;WB.P.needsUpdate=true;WB.T.needsUpdate=true;}}
 function fxWarpMake(S,I,w,g,V,C){const kind={haze:0,shock:1,bulge:2}[g('kind')]||0;
+  if(WB.on){wbInit();const root=new THREE.Group(),inner=new THREE.Object3D();inner.geometry={dispose(){}};root.add(inner);S.obj=root;S.inner=inner;S.mats=[];S.wb={k:kind,c:new THREE.Color(C('col')),g:g('glow')};fxScene.add(root);return;}
   const U={uScene:HAZE_U.uScene,uNz:{value:NOISETEX},time:FIRE_U.time,uStr:{value:0},uK:{value:kind},uR:{value:0.5},uTint:{value:new THREE.Color(C('col'))},uGlow:{value:g('glow')},uOp:{value:1}};
   const m=new THREE.ShaderMaterial({uniforms:U,transparent:true,depthWrite:false,side:THREE.DoubleSide,
     vertexShader:'varying vec2 vUv;varying float vVZ;void main(){vUv=uv;vec4 mv=modelViewMatrix*vec4(position,1.0);vVZ=-mv.z;gl_Position=projectionMatrix*mv;}',
@@ -284,12 +299,14 @@ function fxWarpMake(S,I,w,g,V,C){const kind={haze:0,shock:1,bulge:2}[g('kind')]|
       'm*=uOp;if(m<0.004)discard;m*=softK(0.3);vec2 su=gl_FragCoord.xy/uRes+off*uStr*m;vec3 col=texture2D(uScene,su).rgb+uTint*uGlow*m;gl_FragColor=vec4(col,clamp(m*2.0,0.0,1.0));}'});
   fxMat(m);m.renderOrder=-1;const geo=new THREE.PlaneGeometry(1,1);const obj=new THREE.Mesh(geo,m);obj.frustumCulled=false;obj.renderOrder=-1;
   const root=new THREE.Group();root.add(obj);S.obj=root;S.inner=obj;S.mats=[m];fxScene.add(root);}
-function fxWarpTick(S,I,k,g,V){if(!S.obj)return;const m=S.mats[0],u=m.uniforms,w=fxPos(I,S,k),sz=Math.max(0.01,V('size')*I.s);
+function fxWarpTick(S,I,k,g,V){if(!S.obj)return;const u=S.wb?null:S.mats[0].uniforms,w=fxPos(I,S,k),sz=Math.max(0.01,V('size')*I.s);
   fxPlace(S.obj,I,S,w,V('yaw')*FXDEG);S.obj.visible=!!SOFTU.uSoftOn.value;
   if(g('flat')){S.inner.rotation.set(-Math.PI/2,0,0);S.obj.rotation.set(0,0,0);}else{S.obj.rotation.set(0,0,0);S.obj.lookAt(cam.position);S.inner.rotation.set(0,0,0);}
   S.inner.scale.set(sz,g('kind')==='haze'?sz*1.4:sz,1);if(g('kind')==='haze')S.inner.position.y=sz*0.55;
-  u.uStr.value=V('str');u.uR.value=g('kind')==='shock'?Math.min(0.95,0.05+k*0.9):0.5;
-  let op;if(S.d.op!==undefined)op=V('op');else{const fd=0.3;op=Math.min(1,S.age/0.05);if(!g('loop')&&k>1-fd)op*=Math.max(0,(1-k)/fd);if(I.stop&&g('loop'))op=0;}u.uOp.value=op;}
+  const str=V('str'),rr=g('kind')==='shock'?Math.min(0.95,0.05+k*0.9):0.5;if(u){u.uStr.value=str;u.uR.value=rr;}
+  let op;if(S.d.op!==undefined)op=V('op');else{const fd=0.3;op=Math.min(1,S.age/0.05);if(!g('loop')&&k>1-fd)op*=Math.max(0,(1-k)/fd);if(I.stop&&g('loop'))op=0;}
+  if(u){u.uOp.value=op;return;}
+  if(!S.obj.visible||!(op>0)||WB.n>=WB.cap)return;S.obj.updateMatrixWorld(true);const n=WB.n++,W=S.wb;WB.m.setMatrixAt(n,S.inner.matrixWorld);WB.P.setXYZW(n,str,W.k,rr,op);WB.T.setXYZW(n,W.c.r,W.c.g,W.c.b,W.g);}
 // ---------- ไฟ 3 มิติจากการจำลอง (ชั้น vol) — ไฟล์รูปแบบเดียวกับที่เพื่อน bake จาก Blender (tools/pack_volseq.py) ----------
 // src: "vol/<ชื่อ>" = ทำในแท็บ 🔥 ไฟ 3D ของสตูดิโอ (assets/fx/vol/<ชื่อ>.bin + .vol.json) • "<ชื่อ>" = ไฟล์ bake จาก Blender ใน assets/vfx (เช่น fire_column, df_impact)
 // เล่นด้วย fireSeqVol (js/42: raymarch ในกล่อง hx×h×hz เมตร) • once:false = วนเฟรม (เสาไฟ เริ่มเฟรมสุ่ม) / once:true = เล่นครั้งเดียว (ระเบิด)

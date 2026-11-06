@@ -132,7 +132,7 @@ function updateOrbShots(dt){
 }
 function updateZV(dt){
   {let t=performance.now();const T=k=>{pf('zv.'+k,t);t=performance.now();};   // แยกเวลาแต่ละส่วน (WD.PROF — ปิดอยู่ = ไม่คิดเวลา)
-  updateGlacierVis(dt);updateIceFloors(dt);T('ice');updateSlashes(dt);updateOrbShots(dt);updateDfCracks(dt);T('slash');updateStormV(dt);T('storm');updateFRV(dt);updateFireV(dt);T('fire');updateFrostV(dt);T('frost');updateVfxKit(dt);T('kit');updateFx(dt);T('fxfile');}
+  updateGlacierVis(dt);updateIceFloors(dt);T('ice');updateSlashes(dt);updateOrbShots(dt);updateDfCracks(dt);T('slash');updateStormV(dt);T('storm');updateFRV(dt);updateFireV(dt);T('fire');updateFrostV(dt);T('frost');updateVfxKit(dt);T('kit');wbBegin();updateFx(dt);wbEnd();T('fxfile');}
   for(let i=WVV.length-1;i>=0;i--){
     const w=WVV[i];const st=Math.min(w.len-w.d,GREND.v.waveSpd*dt);w.d+=st;
     const x=w.x+Math.cos(w.a)*w.d,y=w.y+Math.sin(w.a)*w.d,px=-Math.sin(w.a),py=Math.cos(w.a);
