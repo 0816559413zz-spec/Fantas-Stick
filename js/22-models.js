@@ -131,6 +131,7 @@ function useFileModel(o,name,tint,look){
     if(tint)tintModel(inst,tint);
     if(look){fileVariants(inst,look);const off=[];inst.traverse(m=>{if(!m.visible&&/^(hair|tie|wand)_\d+$/.test(m.name))off.push(m);});for(const m of off)m.parent.remove(m);}   // ทรงที่ไม่ได้เลือก: ถอดทิ้ง (ซ่อนไว้ three ก็ยังคำนวณทุกเฟรม)
     if(name==='char_student'&&!new URLSearchParams(location.search).has('unbatchedStudent')){shareSkinSkeletons(inst);batchStudentSkin(inst);}
+    if(name==='char_student')inst.traverse(m=>{if(m.isMesh&&/^(tie_|wand_|hair_base|char_student_7$)/.test(m.name))m.castShadow=false;});   // ชิ้นเล็กไม่ทอดเงา: เงาแทบไม่เห็น แต่ต้องวาดใน shadow pass ทุกคน (OPTIMIZE §G)
     o.b.traverse(m=>{if(m.isMesh||m.isSprite||m.isPoints||m.isLine)m.layers.set(31);});
     if(look&&o.tip)o.tip.layers.set(0);
     if(look&&o.wnG)o.wnG.traverse(m=>m.layers.set(0));     // ไม้สำเร็จรูป (โค้ด) แทนไม้ในไฟล์                       // แสงปลายไม้ยังโชว์ (อยู่ที่แขนโค้ดซึ่งตามแขนโมเดล)

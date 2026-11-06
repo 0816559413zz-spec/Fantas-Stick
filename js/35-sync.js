@@ -479,6 +479,12 @@ function burnNum(x,y,n){
     if(!c){cx.save();cx.textAlign='center';cx.textBaseline='middle';cx.font=fam;cx.fillStyle='#ff6a1a';cx.fillText(n,x,y);cx.restore();return;}}
   cx.drawImage(c,x-c.cw/2,y-c.ch/2,c.cw,c.ch);
 }
+// ป้ายชื่อ: วาดตัวหนังสือลงภาพเล็กครั้งเดียว แล้วใช้ drawImage ทุกเฟรม (fillText ภาษาไทย 2 ครั้ง/คน/เฟรม แพงตอนห้องเต็ม 12 คน)
+const NAMETAG=new Map();
+function nameTag(txt,col){const key=col+'|'+txt;let c=NAMETAG.get(key);if(c)return c;if(NAMETAG.size>96)NAMETAG.clear();
+  const d=Math.min(2,DPR||1);c=document.createElement('canvas');const g=c.getContext('2d');g.font='600 13px Kanit,sans-serif';const w=Math.ceil(g.measureText(txt).width)+6;
+  c.width=Math.ceil(w*d);c.height=Math.ceil(20*d);c._w=w;c._h=20;g.scale(d,d);g.font='600 13px Kanit,sans-serif';g.textAlign='center';g.textBaseline='alphabetic';
+  g.fillStyle='rgba(0,0,0,0.65)';g.fillText(txt,w/2+1,16);g.fillStyle=col;g.fillText(txt,w/2,15);NAMETAG.set(key,c);return c;}
 function drawLabels(P,E,v,me,spk){
   if(!SET.names){const team=teamOn(v);P=P.filter(p=>team&&me&&p.tm===me.tm);}
   cx.textAlign='center';
@@ -500,8 +506,7 @@ function drawLabels(P,E,v,me,spk){
     if(p.gh&&!meGh)continue;
     const s=toScreen(p.x,(p.z||0)+2.55,p.y);if(!s)continue;
     cx.font='600 13px Kanit,sans-serif';
-    cx.fillStyle='rgba(0,0,0,0.65)';cx.fillText(p.n,s[0]+1,s[1]-7);
-    cx.fillStyle=teamOn(v)?TEAMC[p.tm]:mates.includes(p.id)?'#ff6b6b':'#ffffff';cx.fillText((p.aw?'📶 ':'')+p.n+(p.hb?' 🔴':''),s[0],s[1]-8);   // 📶 = เน็ตหลุด รอต่อกลับ
+    {const tg=nameTag((p.aw?'📶 ':'')+p.n+(p.hb?' 🔴':''),teamOn(v)?TEAMC[p.tm]:mates.includes(p.id)?'#ff6b6b':'#ffffff');cx.drawImage(tg,s[0]-tg._w/2,s[1]-23,tg._w,tg._h);}   // 📶 = เน็ตหลุด รอต่อกลับ
     if(v.mode==='imp')continue;
     if(spk.has(p.id)){cx.font='14px sans-serif';cx.fillText('🔊',s[0]+cx.measureText(p.n).width/2+16,s[1]-8);}
     const bw=50,hr=p.hp/p.mh;

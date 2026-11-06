@@ -181,7 +181,8 @@ function qualTick(dt){
   const cpuBound=cpu>avg*0.75;QUAL.cpuBound=cpuBound;
   if(avg>24&&cpuBound){QUAL.good=0;if(QUAL.lvl<2)QUAL.lvl++;else if(QUAL.scale<1)QUAL.scale=Math.min(1,+(QUAL.scale+0.15).toFixed(2));else return;applyQuality();return;}
   // ช้าเพราะการ์ดจอ: ลดความละเอียดก่อน → ปิดแสงฟุ้ง (lvl1) → เงาอัปเดตห่างขึ้น (lvl2) / ลื่นต่อเนื่อง: ค่อยๆ คืนกลับทีละขั้น
-  if(avg>24){QUAL.good=0;if(QUAL.scale>0.6)QUAL.scale=Math.max(0.55,+(QUAL.scale-0.15).toFixed(2));else if(QUAL.lvl<2)QUAL.lvl++;else if(QUAL.scale>0.45)QUAL.scale=0.45;applyQuality();}
+  // ลำดับใหม่ (2026-11-06): ปิดแสงฟุ้งก่อน → ลดความชัดถึง 0.7 → เงาห่าง/ปิด AO (lvl2) → ค่อยลดถึง 0.55 / 0.45 (เดิมลดความชัดก่อน ภาพเบลอทั้งที่ยังมีเอฟเฟกต์ให้ตัด)
+  if(avg>24){QUAL.good=0;if(QUAL.lvl<1)QUAL.lvl=1;else if(QUAL.scale>0.75)QUAL.scale=Math.max(0.7,+(QUAL.scale-0.15).toFixed(2));else if(QUAL.lvl<2)QUAL.lvl++;else if(QUAL.scale>0.6)QUAL.scale=0.55;else if(QUAL.scale>0.45)QUAL.scale=0.45;applyQuality();}
   else if(avg<16){if(++QUAL.good>=4){QUAL.good=0;if(QUAL.scale<0.7&&QUAL.lvl>0)QUAL.lvl--;else if(QUAL.scale<1)QUAL.scale=Math.min(1,+(QUAL.scale+0.1).toFixed(2));else if(QUAL.lvl>0)QUAL.lvl--;else return;applyQuality();}}
   else QUAL.good=0;
 }

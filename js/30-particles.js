@@ -138,7 +138,7 @@ function curlAt(x,y,T,out){const q=CURL.q,A=q*x+0.6*T,B=1.2*q*y-0.45*T,C=2.3*q*y
 function updateParticles(dt){
   PSYS[0].n=PSYS[1].n=PSYS[2].n=0;for(const k in PFB)PFB[k].n=0;PTIME.value+=dt;
   if(typeof hemi!=='undefined'){const h=hemi.color,k=Math.min(1.15,Math.max(0.55,hemi.intensity*1.25));PLIT.value.setRGB((0.65+0.35*h.r)*k,(0.65+0.35*h.g)*k,(0.65+0.35*h.b)*k);}
-  const T=PTIME.value;
+  const T=PTIME.value,cf=(PTIME.fr=(PTIME.fr|0)+1)&1;   // cf: ม้วนควัน (curl) คำนวณสลับเฟรมละครึ่ง (ก้าว ×2) — ประหยัด sin/cos ครึ่งหนึ่งตอนอนุภาคเป็นพัน
   const cap=Math.min(PMAX*1.6,VFXB.cap);if(PARTS.length>cap)PARTS.splice(0,PARTS.length-cap);   // เพดานตามระดับกราฟิก (ตัดอันเก่าสุดก่อน)
   let dead=0;   // อนุภาคหมดอายุ: นับไว้แล้วบีบอาร์เรย์ทีเดียวท้ายลูป (splice ทีละตัว = ช้ามากตอนมีหลายพันตัว)
   for(let i=PARTS.length-1;i>=0;i--){
@@ -151,9 +151,9 @@ function updateParticles(dt){
     if(p.grow)p.size*=1+p.grow*dt;
     if(p.sd===undefined)p.sd=Math.random()*0.99;
     const k=p.life/p.max;
-    if(!p.nc&&(p.smoke||p.fl||p.g<=0.5)){const A=(p.smoke?CURL.smoke:p.fl?CURL.fl:CURL.glow)*(0.3+0.7*(1-k))*dt,v=curlAt(p.x+p.sd*97,p.y,T,CURL_V);p.x+=v[0]*A;p.y+=v[1]*A;}
+    if(!p.nc&&(i&1)===cf&&(p.smoke||p.fl||p.g<=0.5)){const A=(p.smoke?CURL.smoke:p.fl?CURL.fl:CURL.glow)*(0.3+0.7*(1-k))*dt*2,v=curlAt(p.x+p.sd*97,p.y,T,CURL_V);p.x+=v[0]*A;p.y+=v[1]*A;}
     const fbn=p.fb||(p.smoke?'smoke':p.fl?'fire':null),F=fbn&&PFB[fbn],S=F&&F.fb?F:PSYS[p.fl?2:p.smoke?1:0];if(S.n>=PMAX)continue;
-    const c=col3(p.col),j=S.n;
+    if(p._c===undefined||p._cs!==p.col){p._cs=p.col;p._c=col3(p.col);}const c=p._c,j=S.n;   // จำสีไว้ที่ตัวอนุภาค (ไม่ต้องค้นตารางสีด้วยข้อความทุกเฟรม)
     if(S.age){S.age[j*2]=1-k;S.age[j*2+1]=p.sd;}
     S.pos[j*3]=tx(p.x);S.pos[j*3+1]=p.h+GY(p.x,p.y);S.pos[j*3+2]=tz(p.y);
     if(S.fb){let r=c.r,g=c.g,bb=c.b;if(p.c2){const c2=col3(p.c2),u=1-k;r+=(c2.r-r)*u;g+=(c2.g-g)*u;bb+=(c2.b-bb)*u;}   // สีจากภาพ × สีย้อม (ขาว = สีตามภาพ)

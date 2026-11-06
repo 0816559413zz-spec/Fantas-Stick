@@ -96,7 +96,8 @@ function clStep(C,h,gy,caps,bv,W){const P=C.P,Q=C.Q,T=C.T,pk=C.pk,E=C.E,N=C.N,g=
     for(let e=0;e<E.length;e+=4){const a=E[e]*3,b=E[e+1]*3,wa=pk[E[e]]>=1?0:1,wb=pk[E[e+1]]>=1?0:1;if(!(wa+wb))continue;
       const dx=P[b]-P[a],dy=P[b+1]-P[a+1],dz=P[b+2]-P[a+2],d=Math.sqrt(dx*dx+dy*dy+dz*dz)||1e-6,s=(d-E[e+2])/d*E[e+3]/(wa+wb);
       P[a]+=dx*s*wa;P[a+1]+=dy*s*wa;P[a+2]+=dz*s*wa;P[b]-=dx*s*wb;P[b+1]-=dy*s*wb;P[b+2]-=dz*s*wb;}
-    for(let n=0;n<N;n++){if(pk[n]>=1)continue;const i=n*3;for(const c of caps)clCapsule(P,Q,i,c[0],c[1],c[2]);if(P[i+1]<gy){P[i+1]=gy;Q[i]=lerp(Q[i],P[i],0.6);Q[i+2]=lerp(Q[i+2],P[i+2],0.6);}if(W&&it===CLOTH.IT-1)clWorldHit(P,Q,i,W);}}}
+    const hitB=(it&1)||it===CLOTH.IT-1;   // ชนตัว: รอบเว้นรอบ + รอบสุดท้ายเสมอ (ไม่ทะลุตัว แต่คำนวณน้อยลงเกือบครึ่ง)
+    for(let n=0;n<N;n++){if(pk[n]>=1)continue;const i=n*3;if(hitB)for(const c of caps)clCapsule(P,Q,i,c[0],c[1],c[2]);if(P[i+1]<gy){P[i+1]=gy;Q[i]=lerp(Q[i],P[i],0.6);Q[i+2]=lerp(Q[i+2],P[i+2],0.6);}if(W&&it===CLOTH.IT-1)clWorldHit(P,Q,i,W);}}}
 function clDraw(C){const po=C.mo.geometry.attributes.position,pi=C.mi.geometry.attributes.position;po.array.set(C.P);po.needsUpdate=true;C.mo.geometry.computeVertexNormals();
   // ครั้งแรก: ให้ด้านนอกหันออกจากตัว (กลับลำดับสามเหลี่ยมถ้ากลับด้าน)
   if(!C.flip){C.flip=true;const nm=C.mo.geometry.attributes.normal,n=Math.floor(C.N/2)+3*CL_NC,i=n*3;_clA.set(C.P[i],0,C.P[i+2]);C.o.g.getWorldPosition(_clB);_clA.x-=_clB.x;_clA.z-=_clB.z;
@@ -116,5 +117,5 @@ function clothTick(dt){if(!CLOTH.ON||typeof NET==='undefined')return;const o=PM3
   // ตัวพุ่งเร็วมาก (ลอยขึ้นฟ้าอัลติ / พุ่ง / ตกเร็ว) > 0.5 ม. ต่อเฟรม = ยกผ้าทั้งผืนไปด้วยส่วนที่เกิน (ผ้าไม่ยืดค้าง/พันกัน)
   const dm=dl.length();if(dm>0.5){const k=(dm-0.5)/dm;for(let i=0;i<C.N*3;i+=3){C.P[i]+=dl.x*k;C.P[i+1]+=dl.y*k;C.P[i+2]+=dl.z*k;C.Q[i]+=dl.x*k;C.Q[i+1]+=dl.y*k;C.Q[i+2]+=dl.z*k;}dl.multiplyScalar(0.5/dm);}
   const bv=dl.divideScalar(Math.max(dt,1e-3));const psx=_clV.x/S3+MW/2,psy=_clV.z/S3+MH/2,gy=GY(psx,psy)+0.02,W=clWorld(psx,psy);
-  C.acc=Math.min(C.acc+Math.min(dt,0.1),CLOTH.STEP*4);while(C.acc>=CLOTH.STEP){clStep(C,CLOTH.STEP,gy,caps,bv,W);C.acc-=CLOTH.STEP;}
+  C.acc=Math.min(C.acc+Math.min(dt,0.1),CLOTH.STEP*2);while(C.acc>=CLOTH.STEP){clStep(C,CLOTH.STEP,gy,caps,bv,W);C.acc-=CLOTH.STEP;}   // ≤2 ก้าวต่อเฟรม: เฟรมช้า = ไม่คำนวณผ้าเพิ่ม (เดิม 4 → ยิ่งช้ายิ่งหนัก)
   clDraw(C);}
