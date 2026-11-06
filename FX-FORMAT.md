@@ -338,11 +338,14 @@ Escape hatch: call a registered helper (FXCODE in js/45-fx-runtime.js) with args
 | `mat` | enum (energy/fire/ice/glow/solid) | `energy` |  |  | วัสดุที่แนะนำ (ใช้ตอนดูในสตูดิโอ / ตอนกดใช้ในเอฟเฟกต์) |
 | `pal` | enum (fire/ice/storm/nature/hex/summon/earth/arcane/shield/heal/wind/curse/col) | `arcane` |  |  | ธาตุที่ใช้ดูในสตูดิโอ |
 | `tags` | list | `[]` |  |  | แท็ก |
+| `smooth` | bool | `false` |  |  | แสงผิวโค้ง (solid) — Opt-in smooth vertex-normal lighting for solid model material. Per-part flat geometry still preserves hard edges. Omit to retain legacy flat-shaded material. |
+| `bark` | bool | `false` |  |  | ผิวเปลือกไม้ (solid) — Opt-in procedural bark grain, fissures and subtle relief on solid model materials. Green authored leaf parts retain their colours. UV follows the branch; omit to leave other models unchanged. |
 | `parts` | list | `[]` |  |  | ชิ้นส่วน |
 ### ทุกชิ้นส่วนมีฟิลด์เหล่านี้ (ลำดับตัวแต่ง: เรียว → บิด → โค้ง → ขรุขระ → ขนาด/หมุน/ตำแหน่ง → ทำซ้ำ → กระจก)
 | ฟิลด์ | ชนิด | ค่าเริ่ม | ช่วง | รับ | ความหมาย |
 |---|---|---|---|---|---|
 | `id` | str | `` |  |  | ชื่อชิ้น (ไม่ซ้ำ) |
+| `col` | col | `#ffffff` |  |  | สีชิ้นส่วน (วัสดุ solid) — Optional authored vertex colour. Solid Model preview uses a white base for these colours; clay ignores them. Omit on every part to retain the original palette-only model. |
 | `k` | enum (shard/crown/cluster/burst/blade/fan/spiral/tube/ribbon/lathe/sphere/cyl/torus/disc/star/box/poly) | `shard` |  |  | แบบชิ้นส่วน |
 | `off` | bool | `false` |  |  | ซ่อน (ไม่ใส่ในโมเดล) |
 | `pos` | vec3 | `[0,0,0]` |  |  | ตำแหน่ง [x,y,z] ม. |
@@ -561,6 +564,7 @@ Free-form polygon mesh you shape point by point in the studio (select the part, 
 
 | ฟิลด์ | ชนิด | ค่าเริ่ม | ช่วง | รับ | ความหมาย |
 |---|---|---|---|---|---|
+| `uv` | list | `[]` |  |  | พิกัดผิว [u,v] ต่อจุด — Optional UV per vertex for sub=0. Empty or mismatched length uses the existing automatic mapping. |
 | `v` | list | `[[-0.25,0,-0.25],[0.25,0,-0.25],[0.25,0,0.25],[-0.25,0,0.25],[-0.25,0.5,-0.25],[0.25,0.5,-0.25],[0.25,0.5,0.25],[-0.25,0.5,0.25]]` |  |  | จุด [x,y,z] ม. |
 | `f` | list | `[[0,1,2,3],[4,7,6,5],[3,2,6,7],[1,0,4,5],[2,1,5,6],[0,3,7,4]]` |  |  | หน้า (เลขจุด 3 ตัวขึ้นไป ทวนเข็มเมื่อมองจากด้านนอก) |
 | `sub` | int | `0` | 0–3 |  | ทำให้เนียน (แบ่งหน้าโค้งมน) กี่รอบ |

@@ -139,7 +139,7 @@ async function mkMeshEnsure(){const M=MK.m;if(M.root)return;
 async function mkMeshShow(){await mkMeshEnsure();const M=MK.m;scene.add(M.root);if(M.tc){scene.add(M.tc);M.tc.visible=true;}
   if(!M.d){const first=Object.keys(MK.list.mesh).sort()[0];if(first)await mkMeshOpen(first);else mkMeshNew('my_model','');}else{mkMeshAll();}}
 function mkMeshHide(){const M=MK.m;if(M.root)scene.remove(M.root);if(M.tc){M.tc.detach();scene.remove(M.tc);}}
-async function mkMeshOpen(n){try{const d=await fxFetch('assets/fx/mesh/'+n+'.mesh.json?t='+Date.now());const M=MK.m;Object.assign(M,{name:n,d,saved:JSON.stringify(d),dirty:false,sel:null,undo:[],redo:[]});await mkMeshEnsure();mkMeshAll();mkLibRender();return true;}
+async function mkMeshOpen(n){try{const d=await fxFetch('assets/fx/mesh/'+n+'.mesh.json?t='+Date.now());const M=MK.m;Object.assign(M,{name:n,d,saved:JSON.stringify(d),dirty:false,sel:null,undo:[],redo:[]});if(SQ.get('mview')==='mat')M.view='mat';await mkMeshEnsure();mkMeshAll();mkLibRender();return true;}
   catch(e){stToast('เปิดโมเดลไม่ได้: '+n+' ('+e.message+')');return false;}}
 function mkMeshNew(name,tpl){const M=MK.m;let d=tpl?JSON.parse(JSON.stringify(tpl)):{v:1,desc:'',mat:'energy',pal:'arcane',parts:[{id:'shard',k:'shard'}]};
   Object.assign(M,{name,d,saved:'',dirty:true,sel:null,undo:[],redo:[]});mkMeshAll();mkLibRender();stToast('ยังไม่ได้บันทึก — กด 💾 (Ctrl+S)');}
@@ -158,14 +158,15 @@ function mkMeshRebuild(){const M=MK.m;if(!M.obj||!M.d)return;const rec=[];const 
   if(M.name)FXMK.mesh.set(M.name,{data:JSON.parse(JSON.stringify(M.d)),geo,fail:false,p:Promise.resolve(geo)});   // เอฟเฟกต์ที่ใช้โมเดลนี้เห็นของใหม่ทันที
   mkMeshMat();M.wire.visible=M.wireOn;mkHi();mkMeshStat();}
 function mkPal(){return fxPal((MK.m.d&&MK.m.d.pal)||'arcane');}
-function mkMeshMat(){const M=MK.m,d=M.d,key=M.view+':'+(d.mat||'energy')+':'+(d.pal||'arcane');if(key===M.matK)return;M.matK=key;const P=mkPal(),old=M.obj.material;let m;
+function mkMeshMat(){const M=MK.m,d=M.d,coloured=!!M.obj.geometry.getAttribute('color'),key=M.view+':'+(d.mat||'energy')+':'+(d.pal||'arcane')+':'+coloured+':'+!!d.smooth+':'+!!d.bark;if(key===M.matK)return;M.matK=key;const P=mkPal(),old=M.obj.material;let m;
   if(M.view==='clay')m=new THREE.MeshStandardMaterial({color:0x9c8f7a,roughness:0.7,metalness:0,flatShading:true,side:THREE.DoubleSide});
   else switch(d.mat||'energy'){
     case 'fire':m=fireMat({mode:'ball',speed:1.2,int:1.15});break;
     case 'ice':m=iceShaderMat({glow:1,rim:1});m.uniforms.uFade.value=1;m.uniforms.uGlow.value=0.95;break;
     case 'glow':m=new THREE.MeshBasicMaterial({color:hdr(P.main,1.15),transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide});break;
-    case 'solid':m=new THREE.MeshStandardMaterial({color:P.main,emissive:P.deep,emissiveIntensity:0.35,roughness:0.85,metalness:0,flatShading:true});break;
+    case 'solid':m=new THREE.MeshStandardMaterial({color:coloured?'#ffffff':P.main,emissive:coloured?'#000000':P.deep,emissiveIntensity:0.35,vertexColors:coloured,roughness:0.85,metalness:0,flatShading:!d.smooth});break;
     default:m=fxEnergyMat(P.core,P.main,P.deep);m.uniforms.uOp.value=1;m.uniforms.uInt.value=1;}
+  if(M.view!=='clay'&&d.mat==='solid'&&d.bark)fxModelBark(m);
   M.obj.material=m;if(old&&old.dispose)old.dispose();}
 function mkHi(){if(meHi())return;const M=MK.m,P=M.sel&&M.d.parts.find(p=>p.id===M.sel);if(M.hi.geometry)M.hi.geometry.dispose();
   if(P&&!P.off){M.hi.geometry=fxMeshBuild({parts:[P]});M.hi.visible=true;}else{M.hi.geometry=new THREE.BufferGeometry();M.hi.visible=false;}

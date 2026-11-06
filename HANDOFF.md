@@ -1,5 +1,11 @@
 # HANDOFF — Fantas Stick (was "Wizard Duel") (repo: Fantas-Stick)
 
+**Natureกำแพงv1รับแล้ว / งานยาวถัดไป:** ผู้ใช้รับr7และสั่งsave v1 เก็บแยก `nature_wood_wall_v1` +ตัวสร้างfreeze+ภาพติดgit `designs/nature_vfx/wall_v1_*` ห้ามทับเพื่อทำร่างถัดไป การรับเป็นModelไม่ใช่ใส่เกม/ล็อกตัวเลข ผู้ใช้เลือกงานยาวต้นไม้อัลติNatureตามrefLokiพร้อมภาพหลายมุมและขอทำเพิ่มระหว่างนอน อ่าน `notes/nature-wall-model-handoff.md` ด้านบน เก็บMoonwaterที่ยังค้างแยกจากcommitกำแพง ไม่มีคำสั่งpush
+
+**Natureกำแพงr7 — ยึดใบ/หนามตามref:** ผู้ใช้ไม่ชอบช่อสูงr6 ย้ำref Groot มีหนามบนยอดและกลางบน พร้อมชี้รูปแบบวางใบตามภาพ ร่างr7เอาต้นกล้าสูงออก ใบแนบยอด/ข้อกิ่งเป็นกลุ่ม มีก้านเลื้อยสั้น หนามไม้โค้ง9ยอด+6ช่วงบน (ร่างvisualไม่เพิ่มdamage/status) รูป `shots/nature_wood_wall_r7_crown.jpg` / `_oblique.jpg` รอรีวิว เปิดModel `&mview=mat&rev=7` 28,250triจริง อ่านส่วนr7ของ `notes/nature-wall-model-handoff.md` ไม่ทำเกม/GIF/ไฟ/งอก/commit/push
+
+**Natureกำแพงr6 — ใบยอดมากขึ้น/ไล่สูง:** ผู้ใช้ชอบr5แล้วขอใบยอดมากขึ้นและascendingดีขึ้น จัดcrownใหม่17กลุ่ม ก้านนำสูง+ก้านข้างเตี้ยซ้ายขวาแตกจากjunctionร่วม ใบยอด187ใบ 29,920triจริง คงกำแพง/ราก/ผิวไม้เดิม ร่างรอรีวิว ภาพ `shots/nature_wood_wall_r6_crown.jpg` / `_oblique.jpg` เปิดModel `&mview=mat&rev=6` อ่านส่วนr6ของ `notes/nature-wall-model-handoff.md` ไม่ทำเกม/GIF/งอก/ไฟ/commit/push
+
 **Nature กำแพง r5 ใหม่กว่าr4:** ผู้ใช้ชอบทิศทรงr4แต่ขอแก้texture/รากแตกจากรากหลัก/กำแพงโค้งเข้าผู้เล่น/ใบไม่สุ่มassetซ้ำ ทำร่างแล้ว: วัสดุเปลือกไม้opt-in `bark`, รากแตกจากต้น-กลางราก, ทุกชิ้นโค้งlocal-Zลบเล็กน้อย, ใบโค้งเป็นช่อมีก้านจริง ภาพ `shots/nature_wood_wall_r5_arc.jpg` / `_roots.jpg` / `_crown.jpg` รอรีวิว 29,296trisจริง JS/FX/GPUcompile/integrationผ่าน เปิดModel `&mview=mat&rev=5` อ่านส่วนr5ของ `notes/nature-wall-model-handoff.md` ไม่ทำเกม/งอก/ไฟ/GIF/commit/push
 
 **Nature กำแพง r4 ใหม่กว่า r3:** ผู้ใช้ไม่รับ r3 เพราะไม่เหมือนwall ให้ดู ref Groot เดิมใกล้ ๆ ต้องแผงไม้แน่น รากเล็กแต่กระจายบนพื้นมากขึ้น ใบบนยอดมากขึ้น ปรับโมเดล `nature_wood_wall_study` ตามนี้แล้ว ร่างรอรีวิว ภาพ `shots/nature_wood_wall_r4_oblique.jpg` / `_roots.jpg` อ่านส่วน r4 ใน `notes/nature-wall-model-handoff.md` ห้ามใช้r3เป็นแบบผ่าน ยังไม่ทำเกม/GIF/ไฟ/งอก/commit/push

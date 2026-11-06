@@ -298,7 +298,7 @@ function fxMeshMake(S,I,w){const L=S.d,g=k=>fxG(L,k),sh=g('shape'),mt=g('mat'),C
     default:{const m=fxEnergyMat(fxCol('$core',I),C('col'),C('col2'));m.uniforms.uScroll.value=g('scroll');m.uniforms.uRim.value=g('rim');return m;}}};
   if(sh==='glb'){const nm=g('glb');if(!MODELS.ready.get(nm)){if(nm&&!MODELS.fail.has(nm))loadModel(nm);S.oneshot=1;return;}
     obj=modelInst(nm);const m=mkMat();mats.push(m);obj.traverse(q=>{if(q.isMesh){q.material=m;q.castShadow=false;q.renderOrder=3;}});}
-  else if(sh==='model'){let geo=fxMeshGeo(g('model'));if(!geo){S.oneshot=1;return;}if(L.grow!==undefined)geo=fxGrowInit(S,geo);const m=mkMat();mats.push(m);obj=new THREE.Mesh(geo,m);obj.renderOrder=3;S.geo=geo;}   // โมเดลที่ปั้นในสตูดิโอ (assets/fx/mesh)
+  else if(sh==='model'){let geo=fxMeshGeo(g('model'));if(!geo){S.oneshot=1;return;}if(L.grow!==undefined)geo=fxGrowInit(S,geo);const m=mkMat();if(mt==='solid'){const md=FXMK.mesh.get(g('model'))?.data;if(md?.smooth)m.flatShading=false;if(geo.getAttribute('color')){m.vertexColors=true;if(L.col===undefined)m.color.set('#ffffff');if(L.col2===undefined)m.emissive.set('#000000');}if(md?.bark)fxModelBark(m);}mats.push(m);obj=new THREE.Mesh(geo,m);obj.renderOrder=3;S.geo=geo;}   // โมเดลที่ปั้นในสตูดิโอ (assets/fx/mesh)
   else{const geo=fxGeo(L),m=mkMat();mats.push(m);obj=new THREE.Mesh(geo,m);obj.renderOrder=3;S.geo=geo;}
   const root=new THREE.Group();root.add(obj);S.inner=obj;
   obj.rotation.order='YXZ';

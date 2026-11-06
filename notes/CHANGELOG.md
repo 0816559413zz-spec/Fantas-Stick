@@ -1,5 +1,9 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
 
+- 2026-11-07 — User accepts Nature wood-wall r7 as v1. Freeze `nature_wood_wall_v1` geometry/materials with a dedicated reproducible generator and three tracked review stills; retain study model separately. Save Nature concepts/references and opt-in Studio model colour/smooth/bark support. Exclude pending Moonwater work from this save. No gameplay binding, number changes or push. User selects next autonomous work: Loki-inspired Nature ult tree Model with multiple views, plus additional review work while asleep.
+
+- 2026-11-07 — Nature wall r7 following user's reference correction: remove upright seedling-like crown sprigs, arrange low attached three-/five-leaf motifs at crest and upper bough joints, add curved wood thorns at crest and upper-middle wall (visual only). Retain curved wall, ground roots and bark material. Model28,250tris, FX/JS and capture pass; awaiting visual review. No thorn damage/status/collision, gameplay/bind, growth/fire/GIF, commit or push.
+
 - 2026-11-07 — **ลดแลคเมนู + รอบใหญ่:** นอกเกมล็อกไม่เกินราว 60 fps (จอ 165 Hz เคยวาดห้องนิ่ง 165 ครั้ง/วิ), รวมของนิ่งในห้อง 240 เหลือ 160 draw, เงาห้องทุก 3 เฟรม, คุณภาพอัตโนมัติทำงานในเมนู, warm-up รอ shader แบบไม่ค้าง, ตัวเลขดาเมจแคชเป็นภาพ, พื้นน้ำแข็ง Glacier Rend เป็นภาพขอบขรุขระมีรอยแตก. OPTIMIZE หมวด O.
 
 - 2026-11-07 — Nature wall r6 crown-only follow-up: user asks for more leaves and better ascending arrangement. Replace23 isolated crown sprigs with17 connected clusters (upright leader plus two low side fans), increase crown leaves109→187, vary heights along the wall, retain wall/root/bark direction. Use thin two-sided crown leaf skins to keep the geometry budget close to r5 (29,920tris). Still Model preview awaiting review; no gameplay/bind/growth/fire/GIF/commit/push.

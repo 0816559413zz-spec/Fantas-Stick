@@ -136,10 +136,11 @@ function mkPart(P){const o=mkOpts(P),gen=MKGEN[o.k];if(!gen)return mkG();const R
   return G;}
 // สูตร .mesh.json → BufferGeometry (แกน three ของชั้น mesh: x กลับด้านเหมือน fxRibbon)
 // rec (สตูดิโอ): เก็บช่วงสามเหลี่ยมของแต่ละชิ้น [id, จาก, ถึง] ไว้คลิกเลือกชิ้นบนจอ
-function fxMeshBuild(d,rec){const G=mkG();for(const P of (d&&d.parts)||[]){if(!P||P.off)continue;try{const H=mkPart(P),t0=G.i.length/3;mkAppend(G,H);if(rec)rec.push([P.id,t0,G.i.length/3]);}catch(e){console.warn('mesh part',P.id,e);}}
+function fxMeshBuild(d,rec){const G=mkG(),parts=(d&&d.parts)||[],coloured=parts.some(p=>p&&!p.off&&p.col),cols=[];for(const P of parts){if(!P||P.off)continue;try{const H=mkPart(P),t0=G.i.length/3;mkAppend(G,H);if(coloured){const c=new THREE.Color(fxCol(P.col||'#ffffff',{pal:fxPal(d&&d.pal)}));for(let k=0;k<H.p.length;k+=3)cols.push(c.r,c.g,c.b);}if(rec)rec.push([P.id,t0,G.i.length/3]);}catch(e){console.warn('mesh part',P.id,e);}}
   if(!G.p.length){mkV(G,0,0,0,0,0);mkV(G,0,0,0,0,0);mkV(G,0,0,0,0,0);G.i.push(0,1,2);}mkPc(G);
   for(let k=0;k<G.p.length;k+=3)G.p[k]=-G.p[k];for(let k=0;k<G.i.length;k+=3){const t=G.i[k+1];G.i[k+1]=G.i[k+2];G.i[k+2]=t;}
   const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(G.p,3));g.setAttribute('uv',new THREE.Float32BufferAttribute(G.u,2));
+  if(coloured&&cols.length===G.p.length)g.setAttribute('color',new THREE.Float32BufferAttribute(cols,3));
   // ชิ้นย่อย: aPiv = จุดหมุน (ฐานของชิ้น) • aOrd = ลำดับ [ตามลำดับสร้าง, ระยะจากกลาง, สุ่ม, ความสูง] 0..1 → ชั้น mesh ใช้ทำ grow (งอกทีละชิ้น)
   {const n=G.p.length/3,np=G.piv.length,piv=new Float32Array(n*3),ord=new Float32Array(n*4);let rMax=1e-4,y0=Infinity,y1=-Infinity;
     for(const q of G.piv){rMax=Math.max(rMax,Math.hypot(q[0],q[2]));y0=Math.min(y0,q[1]);y1=Math.max(y1,q[1]);}
@@ -150,6 +151,41 @@ function fxMeshBuild(d,rec){const G=mkG();for(const P of (d&&d.parts)||[]){if(!P
   // จุดที่ติดแต่สามเหลี่ยมพื้นที่ 0 ได้ normal = 0 → shader normalize(0) = NaN → bloom ลามเป็นจอขาว (เจอกับโมเดล tornado มองจากหน้า 2026-10-23) → ใส่ normal ชี้ขึ้นแทน
   {const nm=g.attributes.normal.array;for(let k=0;k<nm.length;k+=3)if(nm[k]*nm[k]+nm[k+1]*nm[k+1]+nm[k+2]*nm[k+2]<1e-12)nm[k+1]=1;}
   g.computeBoundingSphere();g.computeBoundingBox();g.userData.tris=G.i.length/3;return g;}
+// Optional bark surface for authored wood models, shared by Model tab/runtime.
+// Leaf vertex colours bypass the wood treatment. Defaults leave legacy models
+// on their original material and shader path.
+function fxModelBark(m){if(m.userData.fxBark)return m;m.userData.fxBark=true;m.roughness=0.96;
+  const prior=m.onBeforeCompile;
+  m.onBeforeCompile=s=>{if(prior)prior.call(m,s);
+    s.vertexShader='varying vec2 vBarkUv;\n'+s.vertexShader;
+    s.vertexShader=s.vertexShader.replace('#include <uv_vertex>','#include <uv_vertex>\nvBarkUv=uv;');
+    s.fragmentShader='varying vec2 vBarkUv;\n'+
+      'float barkHash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}\n'+
+      'float barkNoise(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.0-2.0*f);return mix(mix(barkHash(i),barkHash(i+vec2(1,0)),f.x),mix(barkHash(i+vec2(0,1)),barkHash(i+vec2(1)),f.x),f.y);}\n'+s.fragmentShader;
+    s.fragmentShader=s.fragmentShader.replace('#include <color_fragment>',`#include <color_fragment>
+      float barkMask=1.0;
+      #ifdef USE_COLOR
+        barkMask=1.0-step(vColor.r*1.15,vColor.g);
+      #endif
+      vec2 bu=vBarkUv;
+      float coarse=barkNoise(bu*vec2(9.0,4.0));
+      vec2 grainUv=bu*vec2(25.0,3.5);
+      grainUv.x+=(barkNoise(bu*vec2(5,7))-0.5)*1.8+sin(bu.y*8.0+bu.x*2.0)*0.35;
+      float ridge=barkNoise(grainUv);
+      float fine=barkNoise(grainUv*vec2(2.3,2.0));
+      float aa=1.0-smoothstep(0.35,1.4,fwidth(grainUv.x));
+      float fissure=smoothstep(0.54,0.78,ridge)*smoothstep(0.2,0.65,fine)*aa;
+      float barkTone=0.80+coarse*0.34-fissure*0.38+(fine-0.5)*0.10*aa;
+      diffuseColor.rgb*=mix(1.0,barkTone,barkMask);
+      float barkHeight=((ridge-0.5)*0.3-fissure*0.7)*aa*barkMask*0.0045;
+    `);
+    s.fragmentShader=s.fragmentShader.replace('#include <normal_fragment_maps>',`#include <normal_fragment_maps>
+      vec3 barkPx=dFdx(-vViewPosition),barkPy=dFdy(-vViewPosition);
+      vec3 barkRx=cross(barkPy,normal),barkRy=cross(normal,barkPx);
+      float barkDet=dot(barkPx,barkRx);
+      if(abs(barkDet)>1e-10)normal=normalize(abs(barkDet)*normal-sign(barkDet)*(dFdx(barkHeight)*barkRx+dFdy(barkHeight)*barkRy));
+    `);
+  };m.customProgramCacheKey=()=> 'fx-model-bark-v2';return m;}
 // ---------- โหลด ----------
 function fxMeshLoad(name){let e=FXMK.mesh.get(name);if(e)return e.p;e={data:null,geo:null,fail:false};FXMK.mesh.set(name,e);const v=((FXR.index.mesh||{})[name]||{}).v||'';
   e.p=fxFetch('assets/fx/mesh/'+name+'.mesh.json'+(v?'?v='+v:'')).then(d=>{e.data=d;e.geo=fxMeshBuild(d);e.geo.userData.keep=true;return e.geo;}).catch(err=>{e.fail=true;console.warn('fx: โหลดโมเดลไม่ได้',name,err.message);return null;});return e.p;}
