@@ -1,0 +1,296 @@
+{
+ "v": 1,
+ "desc": "กำแพงลม แบบ C แตก: ม่านสว่างวาบสั้น แล้วถูกพัดพุ่งออกด้านหน้าและลอยสูงขึ้นจาง + เส้นลมแตกกระจาย + ฝุ่น + คลื่นอากาศบิดบนพื้น",
+ "tags": [
+  "wind",
+  "wall",
+  "break"
+ ],
+ "pal": "wind",
+ "dur": 1.2,
+ "seed": 7,
+ "layers": [
+  {
+   "id": "flare",
+   "t": "mesh",
+   "at": 0,
+   "life": 0.18,
+   "loop": false,
+   "att": "ground",
+   "shape": "model",
+   "model": "wind_aegis_curtain",
+   "mat": "tex",
+   "tex": "tex/wind_air_veil",
+   "col": "#ffffff",
+   "col2": "#000000",
+   "rim": 0,
+   "uvTile": [
+    14.62,
+    1
+   ],
+   "uvScroll": [
+    0,
+    0
+   ],
+   "pos": [
+    0,
+    0,
+    -11.794
+   ],
+   "scale": {
+    "0": [
+     1,
+     5.4,
+     1
+    ],
+    "1": [
+     1.02,
+     5.940000000000001,
+     1.02
+    ]
+   },
+   "op": {
+    "0": 0.8,
+    "0.6": 1,
+    "1": 0
+   },
+   "fade": 0
+  },
+  {
+   "id": "blow0",
+   "t": "mesh",
+   "at": 0.12,
+   "life": 0.6,
+   "loop": false,
+   "att": "ground",
+   "shape": "model",
+   "model": "wind_aegis_curtain",
+   "mat": "tex",
+   "tex": "tex/wind_air_veil",
+   "col": "#ffffff",
+   "col2": "#000000",
+   "rim": 0,
+   "uvTile": [
+    11.25,
+    1
+   ],
+   "uvScroll": [
+    0,
+    -1.2
+   ],
+   "pos": {
+    "0": [
+     0,
+     0,
+     -11.794
+    ],
+    "1": [
+     0,
+     0,
+     -5.79
+    ],
+    "ease": "out"
+   },
+   "scale": {
+    "0": [
+     1,
+     5.4,
+     1
+    ],
+    "0.4": [
+     1.15,
+     6.75,
+     1.15
+    ],
+    "1": [
+     1.4,
+     7.425000000000001,
+     1.4
+    ]
+   },
+   "op": {
+    "0": 0.8,
+    "0.4": 0.55,
+    "1": 0
+   },
+   "fade": 0
+  },
+  {
+   "id": "blow1",
+   "t": "mesh",
+   "at": 0.17,
+   "life": 0.6,
+   "loop": false,
+   "att": "ground",
+   "shape": "model",
+   "model": "wind_aegis_curtain",
+   "mat": "tex",
+   "tex": "tex/wind_air_veil",
+   "col": "#e6fff4",
+   "col2": "#000000",
+   "rim": 0,
+   "uvTile": [
+    11.25,
+    1
+   ],
+   "uvScroll": [
+    0,
+    -1.2
+   ],
+   "pos": {
+    "0": [
+     0,
+     0,
+     -11.794
+    ],
+    "1": [
+     0,
+     0,
+     -2.79
+    ],
+    "ease": "out"
+   },
+   "scale": {
+    "0": [
+     1,
+     5.4,
+     1
+    ],
+    "0.4": [
+     1.15,
+     8.100000000000001,
+     1.15
+    ],
+    "1": [
+     1.4,
+     8.910000000000002,
+     1.4
+    ]
+   },
+   "op": {
+    "0": 0.8,
+    "0.4": 0.55,
+    "1": 0
+   },
+   "fade": 0
+  },
+  {
+   "id": "shards",
+   "t": "emit",
+   "at": 0.12,
+   "life": 0.05,
+   "att": "ground",
+   "pos": [
+    0,
+    0,
+    -11.794
+   ],
+   "from": "mesh",
+   "of": "flare",
+   "burst": 70,
+   "rate": 0,
+   "dir": "aim",
+   "yaw": 0,
+   "spread": 0.9,
+   "speed": [
+    6,
+    12
+   ],
+   "up": [
+    1,
+    4
+   ],
+   "plife": [
+    0.4,
+    0.8
+   ],
+   "look": "streak",
+   "size": [
+    1.4,
+    3
+   ],
+   "col": "#ffffff",
+   "c2": "#8dff65",
+   "gravity": 0,
+   "drag": 1.4,
+   "curl": false
+  },
+  {
+   "id": "dust",
+   "t": "emit",
+   "at": 0.12,
+   "life": 0.08,
+   "att": "ground",
+   "pos": [
+    0,
+    0.05,
+    -11.794
+   ],
+   "from": "mesh",
+   "of": "flare",
+   "burst": 12,
+   "rate": 0,
+   "dir": "aim",
+   "yaw": 0,
+   "spread": 1,
+   "speed": [
+    3,
+    7
+   ],
+   "up": [
+    0.3,
+    1.2
+   ],
+   "plife": [
+    0.6,
+    1.1
+   ],
+   "look": "smoke",
+   "size": [
+    3,
+    5
+   ],
+   "grow": 0.5,
+   "col": "#ddd6c3",
+   "c2": "#b3aa92",
+   "gravity": 0,
+   "drag": 1.6,
+   "curl": true,
+   "fin": 10
+  },
+  {
+   "id": "shock",
+   "t": "warp",
+   "at": 0.12,
+   "life": 0.45,
+   "att": "ground",
+   "pos": [
+    0,
+    0.1,
+    1.5
+   ],
+   "kind": "shock",
+   "flat": true,
+   "size": {
+    "0": 1,
+    "1": 13
+   },
+   "str": 1.2,
+   "op": {
+    "0": 1,
+    "1": 0
+   },
+   "col": "#ffffff",
+   "glow": 0
+  },
+  {
+   "id": "shake",
+   "t": "screen",
+   "at": 0.12,
+   "life": 0.3,
+   "shake": 6,
+   "flash": 0.03,
+   "fcol": "#e6fff4"
+  }
+ ]
+}
