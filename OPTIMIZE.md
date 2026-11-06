@@ -116,6 +116,22 @@ Reproduced in the hidden pane (`?nosw`, `lobbyBotFill()` → 11 bots, `G.mode='t
 - Shader compiles mid-fight, detail (2026-11-06): the new programs are ShaderMaterial **fragment-source variants** not warmed (fireVol `uN.uS.uSim…`, heat haze `hazeMat` ring/plain, a `t.c` shader, an `uOp.uInt.uScale.uFlow…` shader) + a textured MeshStandardMaterial when far buildings stream in. One freeze per variant per session (programs are pinned after), not the cause of steady low FPS.
 - [ ] Draw calls: players' 7 skinned parts + extras per player (see §H P2 players).
 
+## G. 12-player room measurement (2026-11-06, user: "เสกบอทให้เต็มห้อง 12 ตัว เฟรมเรทไม่ถึง 60")
+Setup: solo host, FFA, `lobbyBotFill` → 12 players (11 bots, mixed paths, lv 1), meadow, browser pane 1024×768 @ DPR 1.25, **Intel Iris Xe (integrated)**. Numbers = `WD.PROF` per frame over 5–6 s + perf panel (`js/71-perfhud.js`).
+| Graphics | FPS | frame | CPU (JS) | host sim | draw calls | triangles | render size |
+|---|---|---|---|---|---|---|---|
+| auto (dropped itself to level 2, scale 0.45) | 57 | 17.5 ms | 12.5 ms | 0.5 ms | 207 | 173k | 461×346 (blurry) |
+| high | 29 | 34.8 ms | 19.5 ms | 0.5 ms | 387 | 604k | 1280×960 |
+CPU per frame on **high**: `gpuSubmit` (three.js walking the scene + issuing draws, incl. shadow pass) **8.9 ms** · particles + skill visuals (`fx.parts`: `updateParticles` 2.5 + `updateZV` 2.0) **4.6 ms** · `p.cloth` (own cloak only!) **2.5 ms** · 2D HUD `hud2d` **2.3 ms** + name labels `h.labels` **1.5 ms** · `p.sync` 1.7 ms · host game logic `hostTick` **0.6 ms** + snapshot 0.4 ms. The rest of the frame (~15 ms) = waiting for the GPU.
+Scene: 1473 visible meshes, **744 shadow casters**, 100 skinned meshes (≈8 per character), ~2000 geometries (stable, not growing).
+**Conclusion: WebAssembly would not help** — the game logic is 0.6 ms; the cost is drawing (CPU side of draw calls + GPU) and view-side JS. Wins in order:
+- [ ] **Shadow casters 744 → only characters + big props** (small props, flowers, tufts, fences, debris off) — cuts the shadow pass (draw calls + GPU).
+- [ ] **Merge each character into 1–2 meshes** (8 skinned parts + hair/wand/tie separate today) → ~100 fewer draw calls with 12 players; far characters: update animation every 2nd frame.
+- [ ] **Cloth 2.5 ms** for one cloak — profile `clothTick` (world gather `clWorld` with 12 players nearby? solver iterations) — should be < 0.5 ms.
+- [ ] **2D HUD + labels 3.8 ms** — cache text (name labels as pre-rendered sprites/canvases, redraw only on change).
+- [ ] **Particles on CPU** (~900 alive, 2.5 ms) — cap per effect or move motion to the GPU (shader-driven, like the existing point systems).
+- [ ] GPU side at full res: auto mode drops to scale 0.45 (very soft image) before cutting effects — consider cutting bloom/SSAO/soft particles first, keep resolution ≥ 0.7.
+
 ## Benchmarks
 Follow-up batching/LOD 2026-11-06: student Skeletons 7→1 per player; compatible skin/iris/scarf trim combines with vertex colour/PBR attributes (2 fewer draws per body per pass). Cloth panels/palette stay separate. Actual high-poly emitted model is `water_blob` (3,968 tris), not frost shards (32). Tiny water particles <=12 physical pixels use a 224-triangle mesh; near particles and hero geometry stay full detail. Visual/animation/lifecycle checks pass. This partially addresses §H player/particle items, not all FPS causes. See `notes/optimize-batching-lod-2026-11-06.md` and `tools/bench-render-audit.js` for actual active instance costs.
 
