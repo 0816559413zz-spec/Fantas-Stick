@@ -1,0 +1,13 @@
+{
+  "v": 1,
+  "desc": "ฝุ่น/เมฆพายุทึบนุ่ม (ไม่ใช่แสงบวก) — ใช้กับกำแพงพายุ/เมฆบนฟ้าของ Eye of Heaven แบบสมจริง",
+  "gen": "noise",
+  "seed": 7,
+  "px": 256,
+  "cols": 1,
+  "rows": 1,
+  "kind": "loop",
+  "ramp": "white",
+  "add": false,
+  "p": {"mode":0,"scale":5,"detail":6,"contrast":1.9}
+}
