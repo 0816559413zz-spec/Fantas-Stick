@@ -4,10 +4,10 @@ const PMAX=5000;
 // D) ชั้นเรือง: ผสมแบบ premultiplied (บวกแสง + บังข้างหลังนิดหน่อย PGLOW_OCC) — ซ้อนกันหลายเม็ดแล้วอิ่มเป็นสีของมันเอง ไม่ขาวโพลน
 // E) ควัน: ก้อนควันลาย noise ไหล ขอบแหว่ง ด้านบนสว่าง/ล่างมืด สีคูณแสงของฉาก (PLIT ตามแสงท้องฟ้า hemi)
 const PGLOW_OCC=0.4,PLIT={value:new THREE.Color(1,1,1)};
-// ===== อนุภาคบน GPU (ผู้ใช้ 2026-11-06 เลือกย้าย • ?gpup = เปิด) =====
+// ===== อนุภาคบน GPU (ผู้ใช้ 2026-11-06 ลองเล่นแล้วให้เปิดทุกคน • ?cpup = กลับไปคำนวณบน CPU แบบเดิม) =====
 // ตอนเกิดเขียนค่าตั้งต้นลงช่องในบัฟเฟอร์ครั้งเดียว แล้ว vertex shader คำนวณตำแหน่ง/สี/ขนาดจากอายุเอง CPU ไม่ต้องเดินทุกเม็ดทุกเฟรม
 // PARTS.push(...) ทั้ง 177 จุดเหมือนเดิม • fragment shader เหมือนเดิม • ความสูงพื้นอ่านครั้งเดียวตอนเกิด • ลมหมุน = ประมาณจากจุดปัจจุบัน
-const PGPU=/[?&]gpup\b/.test(location.search),PGPU_F=28,PG_U={uMapS:{value:new THREE.Vector3(1,0,0)},uCur:{value:new THREE.Vector4()}};
+const PGPU=!/[?&]cpup\b/.test(location.search),PGPU_F=28,PG_U={uMapS:{value:new THREE.Vector3(1,0,0)},uCur:{value:new THREE.Vector4()}};
 const PGPU_HEAD='attribute float aG;attribute vec4 aV;attribute vec4 aA;attribute vec4 aB;attribute vec4 aC;attribute vec4 aD;attribute vec4 aE;uniform float time;uniform vec4 uCur;uniform vec3 uMapS;uniform float scale;vec3 pP,pV;float pK,pH,pS,pT;'+
   'bool pSim(){float t=time-aA.z;pT=t;pK=(aA.w-t)/aB.x;if(pK<=0.0||t<0.0)return false;'+
   'float d=aV.w,dr=exp(-d*t);vec2 xz=position.xz+aV.xz*(1.0-dr)/d;'+

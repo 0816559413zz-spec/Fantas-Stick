@@ -305,7 +305,7 @@ SHGEO:94 SHMAT:94 SHTEX:94 sGeo:95 sMat:96 bMat:99 matKey:101 bodyPatch:107 BODY
 
 ## js/30-particles.js (354) — อนุภาค 2 ชั้น: แสงเรือง (additive) + ควัน (normal)
 PMAX:2 PGLOW_OCC:6 PLIT:6
-§7 อนุภาคบน GPU (ผู้ใช้ 2026-11-06 เลือกย้าย • ?gpup = เปิด)
+§7 อนุภาคบน GPU (ผู้ใช้ 2026-11-06 ลองเล่นแล้วให้เปิดทุกคน • ?cpup = กลั…
 PGPU:10 PGPU_F:10 PG_U:10 PGPU_HEAD:11 PGPU_DEAD:18 PGPU_MV:19 pgpuGeo:20 makePointSys:24
 §69 เปลวไฟ: FLAME_STYLE 0 = อนุภาคกลมเรืองแสง (ไม่ใช้รูปเปลว) • 2 = แบบให…
 FLAME_STYLE:71 PTIME:72 NOISETEX:74 FLAMETEX_V1:80 FLAMETEX_V2:85 PSYS:95 FLAMELUT:113 FLAMECOL:116 flame:117 PFB:126 ptexUse:127 ptexLoad:153 colCache:155 col3:156 CURL:159 CURL_V:160 curlAt:161 pgpuSpawn:164 _pgF:178 updateParticlesG:179 updateParticles:194

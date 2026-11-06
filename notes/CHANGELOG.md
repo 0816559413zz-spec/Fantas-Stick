@@ -1,5 +1,7 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
 
+- 2026-11-06 — **อนุภาค GPU เปิดให้ทุกคน** หลังผู้ใช้ลองเล่น `?gpup` แล้วบอกดีขึ้นมาก (`?cpup` = กลับแบบ CPU เดิม).
+
 - 2026-11-06 — **อนุภาคบน GPU (ผู้ใช้เลือก, เปิดด้วย `?gpup`, ค่าเริ่มต้นปิดจนกว่าผู้ใช้รีวิวภาพ):** js/30 คำนวณใน vertex shader, ไม่แก้ 177 จุดที่ push และไม่แก้ fragment shader. 12 คน: updateParticles 3-4 ms เหลือ 0.25 ms, เฟรมรวมเบาลงราว 20%. OPTIMIZE หมวด L.
 
 - 2026-11-06 — Save continued castle concepts and cross-chat design direction at user request: multiple entrances, current-core backcap, side rooms as combat areas with optional staging, quiet footsteps/core-casting audio plus passive core-status UI without warning or attacker counts. Preserve connecting-route sketch as a proposal; pause map details and resume Nature skill design with mode roles in mind. Add root AGENTS.md and shared design-direction note, link from Claude/handoff docs, keep illustrative map HTML reproducible. This commit covers planning/docs/illustration only; separate concurrent game/performance and Moonwater edits are excluded. No push requested.
