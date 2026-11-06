@@ -118,7 +118,7 @@ Reproduced in the hidden pane (`?nosw`, `lobbyBotFill()` → 11 bots, `G.mode='t
 
 - [x] Cloth round 2 (2026-11-06): body-frame cloak + 60 Hz step → 2.4 → 0.65 ms in the 12-player brawl.
 - [ ] Headless can't measure GPU: `gpuWait` ~32 ms unchanged with bloom off or half resolution. Needs a real play session (F3 panel).
-- [ ] Mid-fight shaders still vary per run (custom 61/62, depth variant, flipSided STANDARD): 3-4 per 500 frames, 150-190 ms each.
+- [~] Mid-fight shaders: 3-4 → 0-1 per 500 frames on 4 maps (shadow pass in `warmDraw`, `fireSeqVol`, crack variants). Left: occasional flipSided STANDARD; map lights counted 10 or 6 keep two program sets.
 
 ## G. 12-player room measurement (2026-11-06, user: "เสกบอทให้เต็มห้อง 12 ตัว เฟรมเรทไม่ถึง 60")
 Setup: solo host, FFA, `lobbyBotFill` → 12 players (11 bots, mixed paths, lv 1), meadow, browser pane 1024×768 @ DPR 1.25, **Intel Iris Xe (integrated)**. Numbers = `WD.PROF` per frame over 5–6 s + perf panel (`js/71-perfhud.js`).

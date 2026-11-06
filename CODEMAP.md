@@ -508,12 +508,12 @@ SCAR:56 scarReset:58 scarPaint:65 grassScar:80
 §85 พื้นหญ้ามีชีวิต: สีเป็นหย่อม (เขียวเข้ม / แห้งเหลือง / ดินโผล่) + จุด…
 GR_NOISE:88 GR_LIVE:93 grLive:111 GR_GLSL_V:118 GR_BEGIN:123 grassMat:169 grassBuild:187 _grBasic:201 grassBake:202 grassCount:258 grassTick:263
 
-## js/51-warmup.js (183) — อุ่นเครื่องช่วงนับถอยหลัง (ผู้ใช้ 2026-10-21: "ช่วงนับถอยหลังให้โหลดสิ่งที่ต้องใช้ — กดสก…
-WARM:11 WARM_FXDIR:12 WARM_COMMON:12 WARM_X:13 WARM_Y:13 warmKeep:15 warmStaticModels:21 warmCompile:29 warmDraw:32 WARM_SKIP:42 warmAssets:45 warmFx:55 warmFxEnd:66 warmGather:68 warmPaths:70 warmStep:72 warmTick:101
-§110 ภาพจากโค้ดของแต่ละสาย (เฟรมละฟังก์ชัน)
-warmOutline:120
-§137 อุ่นฉากเกมระหว่างรอในห้อง (ผู้ใช้ 2026-10-23: "กระตุกตอนเริ่มแมตช์แรก…
-GWARM:142 gameWarmTick:143 gameWarmFree:176
+## js/51-warmup.js (186) — อุ่นเครื่องช่วงนับถอยหลัง (ผู้ใช้ 2026-10-21: "ช่วงนับถอยหลังให้โหลดสิ่งที่ต้องใช้ — กดสก…
+WARM:11 WARM_FXDIR:12 WARM_COMMON:12 WARM_X:13 WARM_Y:13 warmKeep:15 warmStaticModels:21 warmCompile:29 warmDraw:32 WARM_SKIP:42 warmAssets:45 warmFx:55 warmFxEnd:66 warmGather:68 warmPaths:70 warmStep:72 warmTick:104
+§113 ภาพจากโค้ดของแต่ละสาย (เฟรมละฟังก์ชัน)
+warmOutline:123
+§140 อุ่นฉากเกมระหว่างรอในห้อง (ผู้ใช้ 2026-10-23: "กระตุกตอนเริ่มแมตช์แรก…
+GWARM:145 gameWarmTick:146 gameWarmFree:179
 
 ## js/52-social.js (172) — 
 §6 แชท: Enter = พิมพ์ / Enter อีกที = ส่ง / Esc = ปิด • ข้อความขึ้นมุมซ้…
@@ -700,4 +700,4 @@ PERF:9 perfFrame:12 perfDom:26 perfStats:34 perfGraph:38 _gpuName:51 gpuIntegrat
 ## js/72-dash-pose.js (84) — 
 DPOSE:12 DPT:24 _dpQ:25 _dpX:25 _dpP:25 dpMix:26 dpKnees:28 dpStyle:36 DPDBG:41 dashPose:42 dpApply:74
 
-(84 files, 20576 lines)
+(84 files, 20579 lines)

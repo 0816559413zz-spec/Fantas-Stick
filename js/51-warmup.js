@@ -31,12 +31,12 @@ function warmCompile(scenes){const prev=gl.getRenderTarget();gl.setRenderTarget(
 // compile อย่างเดียวไม่ส่ง vertex/index buffer ขึ้น GPU: วาดลงภาพเล็กที่ไม่แสดงไว้ด้วย
 function warmDraw(){
   WARM.rt=WARM.rt||new THREE.WebGLRenderTarget(32,32,{type:composer.renderTarget1.texture.type,colorSpace:composer.renderTarget1.texture.colorSpace});
-  const prev=gl.getRenderTarget(),hidden=[],culled=[],auto=gl.shadowMap.autoUpdate,needs=gl.shadowMap.needsUpdate;
+  const prev=gl.getRenderTarget(),hidden=[],culled=[],auto=gl.shadowMap.autoUpdate;
   scene.add(WARM.hold);fxScene.add(WARM.holdF);
   for(const sc of [scene,fxScene])sc.traverse(o=>{if(!o.visible&&!o.isLight){hidden.push(o);o.visible=true;}});
   for(const root of [WARM.hold,WARM.holdF])root.traverse(o=>{if(o.isMesh||o.isPoints){culled.push([o,o.frustumCulled]);o.frustumCulled=false;}});
-  try{gl.shadowMap.autoUpdate=false;gl.shadowMap.needsUpdate=false;gl.setRenderTarget(WARM.rt);gl.render(scene,cam);gl.render(fxScene,cam);}
-  finally{gl.setRenderTarget(prev);gl.shadowMap.autoUpdate=auto;gl.shadowMap.needsUpdate=needs;for(const o of hidden)o.visible=false;for(const [o,c] of culled)o.frustumCulled=c;scene.remove(WARM.hold);fxScene.remove(WARM.holdF);}
+  try{gl.shadowMap.autoUpdate=false;gl.shadowMap.needsUpdate=gl.shadowMap.enabled;gl.setRenderTarget(WARM.rt);gl.render(scene,cam);gl.shadowMap.needsUpdate=false;gl.render(fxScene,cam);}   // ให้เงาวาดด้วย: program ของเงาไม่ถูก compile ล่วงหน้าโดย compileAsync
+  finally{gl.setRenderTarget(prev);gl.shadowMap.autoUpdate=auto;gl.shadowMap.needsUpdate=true;for(const o of hidden)o.visible=false;for(const [o,c] of culled)o.frustumCulled=c;scene.remove(WARM.hold);fxScene.remove(WARM.holdF);}
 }
 // ไฟล์เอฟเฟกต์: สร้างทุกชั้นพร้อมกัน → ของที่สร้างย้ายไป hold แล้วตัดออกจาก instance (fxKill จะได้ไม่ลบทิ้ง)
 const WARM_SKIP=new Set(['sound','screen','light','code','use']);
@@ -88,8 +88,11 @@ function warmStep(step){
     // เศษหินใช้ได้ทุกสาย (ไฟ/ของพังด้วย) ทั้ง mesh เดี่ยวและ instanced ไม่ใช่เฉพาะ Earth
     for(const o of [new THREE.Mesh(_rockGeo,_rockMat()),new THREE.InstancedMesh(_rockGeo,_rockMat(),1)]){o.position.set(tx(WARM_X),-1000,tz(WARM_Y));warmKeep(o);}
     // shader ที่ยังโผล่กลางไฟต์ (วัดจากบอท 12 ตัว 2026-11-06): ซับในเสื้อคลุมของตัวละคร (ด้านหลัง) + รอยร้าวบ้าน 2 ระดับ
-    const warmM=[sMat({color:'#444444',roughness:0.8,side:THREE.BackSide})];let bm=null;scene.traverse(o=>{const m=o.material;if(!bm&&m&&m.isMeshStandardMaterial&&m.map&&!m.transparent)bm=m;});
-    if(bm)warmM.push(brkCrackMat(bm,1),brkCrackMat(bm,2));
+    const warmM=[sMat({color:'#444444',roughness:0.8,side:THREE.BackSide})],bms=new Map();
+    scene.traverse(o=>{for(const m of [].concat(o.material||[])){if(!m||!m.isMeshStandardMaterial||!m.map||m.transparent)continue;const k=[!!m.emissiveMap,!!m.roughnessMap,!!m.metalnessMap,!!m.normalMap,!!m.aoMap,!!m.vertexColors,m.flatShading].join();if(!bms.has(k))bms.set(k,m);}});
+    if(!bms.size){const t=new THREE.DataTexture(new Uint8Array([128,128,128,255]),1,1);t.needsUpdate=true;bms.set('',new THREE.MeshStandardMaterial({map:t}));}
+    for(const bm of bms.values())for(const sd of [THREE.FrontSide,THREE.DoubleSide])for(const em of [false,true]){const b=bm.clone();b.side=sd;if(em)b.emissiveMap=bm.map;warmM.push(brkCrackMat(b,1),brkCrackMat(b,2));}   // ทุกแบบวัสดุในแมพ ทั้งหน้าเดียว/สองหน้า + palette เรืองแสงของแมพไฟล์ (โหลดทีหลังรอบนี้)
+    {const t=new THREE.Data3DTexture(new Uint8Array(1),1,1,1);t.format=THREE.RedFormat;t.needsUpdate=true;const v=fireSeqVol({tex:t,m:{nx:1,frames:1}},{hx:1,h:1,hz:1});v.position.set(tx(WARM_X),0,tz(WARM_Y));fxScene.add(v);}   // ไฟ bake (ใช้แบบเดียวกันทุกไฟล์ จึงไม่ต้องรอไฟล์จริง)
     for(const m of warmM){const o=new THREE.Mesh(_rockGeo,m);o.position.set(tx(WARM_X),-1000,tz(WARM_Y));warmKeep(o);}
     const fxI=warmFx(WARM_COMMON);warmGather();warmFxEnd(fxI);}
   else if(step.startsWith('fx:')){const fxI=warmFx([WARM_FXDIR[step.slice(3)]]);warmGather();warmFxEnd(fxI);}
