@@ -3512,6 +3512,24 @@
    "mat": "solid",
    "n": 27
   },
+  "nature_ult_tree_a": {
+   "v": "76096a90",
+   "desc": "Nature ultimate MODEL DRAFT A: Bundled roots, interwoven trunk, spreading crown. Provisional scale only; no binding, mechanics, animation or particles.",
+   "mat": "solid",
+   "n": 83
+  },
+  "nature_ult_tree_b": {
+   "v": "fdc49535",
+   "desc": "Nature ultimate MODEL DRAFT B: Uneven root bundles framing an open heart. Provisional scale only; no binding, mechanics, animation or particles.",
+   "mat": "solid",
+   "n": 83
+  },
+  "nature_ult_tree_c": {
+   "v": "a23f2fc3",
+   "desc": "Nature ultimate MODEL DRAFT C: Leaning crown held by opposing buttress roots. Provisional scale only; no binding, mechanics, animation or particles.",
+   "mat": "solid",
+   "n": 83
+  },
   "nature_wood_wall_study": {
    "v": "a6529a21",
    "desc": "Nature กำแพงไม้ r7: ใบเกาะแนบตามข้อไม้เป็นกลุ่ม หนามไม้บนยอดและช่วงบนของผนัง; ร่างรอรีวิว",

@@ -259,10 +259,10 @@ function fxWaterMat(c1,c2,rim,flow,wav){const U={time:FIRE_U.time,uC1:{value:new
       'float a=(0.93+0.07*fr)*uOp;gl_FragColor=vec4(c*uInt,a);}'});}
 // น้ำการ์ตูน (ระบบใหม่ ผู้ใช้ 2026-10-31): สี 3 ขั้นแบบภาพวาด — สว่าง (เยอะ) / กลาง (เยอะ) / เข้ม (น้อย) + ยอดขาวบาง
 // ขั้นสีไหลไปตามผิว (noise เลื่อนตาม uv, scroll = ความเร็ว) + เส้นขาวตรงรอยต่อสีกลาง/สว่าง + ขอบนอกสว่าง • col = สว่าง col2 = กลาง (เข้ม = col2 × 0.72)
-function fxToonWaterMat(c1,c2,rim,flow,band,dkl,wav){const U={uWav:{value:wav||0},uDk:{value:dkl||0},time:FIRE_U.time,uC1:{value:new THREE.Color(c1)},uC2:{value:new THREE.Color(c2)},uOp:{value:1},uDis:{value:0},uInt:{value:1},uRim:{value:rim===undefined?1:rim},uFlow:{value:flow===undefined?1:flow},uBand:{value:band||1},uNz:{value:NOISETEX}};
+function fxToonWaterMat(c1,c2,rim,flow,band,dkl,wav,endFrom,endTo){const U={uEndFrom:{value:endFrom||0},uEndTo:{value:endTo||0},uWav:{value:wav||0},uDk:{value:dkl||0},time:FIRE_U.time,uC1:{value:new THREE.Color(c1)},uC2:{value:new THREE.Color(c2)},uOp:{value:1},uDis:{value:0},uInt:{value:1},uRim:{value:rim===undefined?1:rim},uFlow:{value:flow===undefined?1:flow},uBand:{value:band||1},uNz:{value:NOISETEX}};
   return new THREE.ShaderMaterial({uniforms:U,transparent:true,depthWrite:false,side:THREE.FrontSide,
-    vertexShader:'uniform float time,uWav,uFlow;varying vec2 vUv;varying vec3 vN;varying vec3 vV;void main(){vUv=uv;vec3 p=position+normal*uWav*0.06*sin(uv.y*18.0-time*4.0*uFlow);vec4 mv=modelViewMatrix*vec4(p,1.0);vN=normalize(normalMatrix*normal);vV=normalize(-mv.xyz);gl_Position=projectionMatrix*mv;}',
-    fragmentShader:'uniform sampler2D uNz;uniform vec3 uC1,uC2;uniform float time,uOp,uInt,uRim,uFlow,uBand,uDk;varying vec2 vUv;varying vec3 vN;varying vec3 vV;'+
+    vertexShader:'uniform float time,uWav,uFlow;varying float vEndZ;varying vec2 vUv;varying vec3 vN;varying vec3 vV;void main(){vEndZ=position.z;vUv=uv;vec3 p=position+normal*uWav*0.06*sin(uv.y*18.0-time*4.0*uFlow);vec4 mv=modelViewMatrix*vec4(p,1.0);vN=normalize(normalMatrix*normal);vV=normalize(-mv.xyz);gl_Position=projectionMatrix*mv;}',
+    fragmentShader:'uniform sampler2D uNz;uniform vec3 uC1,uC2;uniform float time,uOp,uInt,uRim,uFlow,uBand,uDk,uEndFrom,uEndTo;varying float vEndZ;varying vec2 vUv;varying vec3 vN;varying vec3 vV;'+
       'void main(){vec3 n=normalize(vN),v=normalize(vV);float fr=1.0-abs(dot(n,v));float l=dot(n,normalize(vec3(0.3,0.85,0.45)))*0.5+0.5;'+
       'float nz=texture2D(uNz,vUv*0.35+vec2(-time*0.03*uFlow,0.0)).r;'+
       'float sw=sin((vUv.x*2.0+vUv.y*1.3)*6.2832*uBand-time*2.2*uFlow+nz*3.0)*0.5+0.5;'+
@@ -273,7 +273,7 @@ function fxToonWaterMat(c1,c2,rim,flow,band,dkl,wav){const U={uWav:{value:wav||0
       'float dl=(1.0-smoothstep(0.0,0.022,abs(t-0.36)))*uDk;c=mix(c,vec3(0.1,0.26,0.7),dl*0.8);'+
       'c=mix(c,vec3(1.45),max(max(ln*0.85,vein*0.9),foam));'+
       'c=mix(c,mix(uC1,vec3(1.0),0.55)*1.5,smoothstep(0.8,0.96,fr)*0.85*uRim);'+
-      'gl_FragColor=vec4(c*uInt,uOp);}'});}
+      'float endAlpha=1.0;if(uEndTo>uEndFrom)endAlpha=1.0-smoothstep(uEndFrom,uEndTo,vEndZ);gl_FragColor=vec4(c*uInt,uOp*endAlpha);}'});}
 function fxToonMat(c1,c2,c3,rim){const U={time:FIRE_U.time,uC1:{value:new THREE.Color(c1)},uC2:{value:new THREE.Color(c2)},uC3:{value:new THREE.Color(c3)},uOp:{value:1},uDis:{value:0},uInt:{value:1},uRim:{value:rim===undefined?1:rim},uNz:{value:NOISETEX}};
   return new THREE.ShaderMaterial({uniforms:U,transparent:true,depthWrite:false,side:THREE.DoubleSide,
     vertexShader:'varying vec2 vUv;varying vec3 vN;varying vec3 vV;void main(){vUv=uv;vec4 mv=modelViewMatrix*vec4(position,1.0);vN=normalize(normalMatrix*normal);vV=normalize(-mv.xyz);gl_Position=projectionMatrix*mv;}',
@@ -288,7 +288,7 @@ function fxMeshMake(S,I,w){const L=S.d,g=k=>fxG(L,k),sh=g('shape'),mt=g('mat'),C
       const m=fireMat({mode:ball?'ball':'sheet',flow:g('flow'),speed:(ball?1.2:1.4)*g('scroll'),int:1.15,disp:g('disp'),tint:L.col?C('col'):undefined,side:sh==='plane'});return m;}
     case 'ice':return iceShaderMat({glow:1,rim:g('rim')});
     case 'glow':return new THREE.MeshBasicMaterial({color:hdr(C('col'),1.15),transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide});
-    case 'toonwater':{const m=fxToonWaterMat(C('col'),C('col2'),g('rim'),g('scroll'),g('heat')>0?1+g('heat')*4:1,g('dis')>0.5?1:0,g('disp'));if(g('zw'))m.depthWrite=true;return m;}   // zw = ทึบ ไม่เห็นทะลุ (งู Tidecaller)   // dis ≥ 0.5 = เส้นน้ำเงินเข้มบางๆ   // น้ำการ์ตูน 3 ขั้น (heat = ลายถี่ขึ้น)
+    case 'toonwater':{const m=fxToonWaterMat(C('col'),C('col2'),g('rim'),g('scroll'),g('heat')>0?1+g('heat')*4:1,g('dis')>0.5?1:0,g('disp'),g('endFrom'),g('endTo'));if(g('zw'))m.depthWrite=true;return m;}   // zw = ทึบ ไม่เห็นทะลุ (งู Tidecaller)   // dis ≥ 0.5 = เส้นน้ำเงินเข้มบางๆ   // น้ำการ์ตูน 3 ขั้น (heat = ลายถี่ขึ้น)
     case 'water':return fxWaterMat(C('col'),C('col2'),g('rim'),g('scroll'),g('disp'));   // น้ำใส ขอบขาว ไฮไลต์ไหล
     case 'toon':{const m=fxToonMat(fxCol('$core',I),C('col'),C('col2'),g('rim'));if(g('zw')){m.depthWrite=true;m.side=THREE.FrontSide;}return m;}   // zw = ทึบ: เขียนความลึก ไม่วาดด้านหลัง (ก้อนน้ำ 3D ไม่โชว์ด้านในทะลุเป็นลาย)   // การ์ตูน 2 เฉด + ขอบสว่าง + ขอบแหว่งด้วย dis (ลม)
     case 'black':return new THREE.MeshBasicMaterial({color:0x000000,transparent:true,fog:false});   // ดำสนิทไม่รับแสง เขียนความลึก บังของเรืองแสงข้างหลัง (แกนหลุมดำ)
@@ -298,7 +298,7 @@ function fxMeshMake(S,I,w){const L=S.d,g=k=>fxG(L,k),sh=g('shape'),mt=g('mat'),C
     default:{const m=fxEnergyMat(fxCol('$core',I),C('col'),C('col2'));m.uniforms.uScroll.value=g('scroll');m.uniforms.uRim.value=g('rim');return m;}}};
   if(sh==='glb'){const nm=g('glb');if(!MODELS.ready.get(nm)){if(nm&&!MODELS.fail.has(nm))loadModel(nm);S.oneshot=1;return;}
     obj=modelInst(nm);const m=mkMat();mats.push(m);obj.traverse(q=>{if(q.isMesh){q.material=m;q.castShadow=false;q.renderOrder=3;}});}
-  else if(sh==='model'){let geo=fxMeshGeo(g('model'));if(!geo){S.oneshot=1;return;}if(L.grow!==undefined)geo=fxGrowInit(S,geo);const m=mkMat();if(mt==='solid'){const md=FXMK.mesh.get(g('model'))?.data;if(md?.smooth)m.flatShading=false;if(geo.getAttribute('color')){m.vertexColors=true;if(L.col===undefined)m.color.set('#ffffff');if(L.col2===undefined)m.emissive.set('#000000');}if(md?.bark)fxModelBark(m);}mats.push(m);obj=new THREE.Mesh(geo,m);obj.renderOrder=3;S.geo=geo;}   // โมเดลที่ปั้นในสตูดิโอ (assets/fx/mesh)
+  else if(sh==='model'){let geo=fxMeshGeo(g('model'));if(!geo){S.oneshot=1;return;}if(L.grow!==undefined)geo=fxGrowInit(S,geo);const m=mkMat();if(mt==='solid'){const md=FXMK.mesh.get(g('model'))?.data;if(md?.smooth)m.flatShading=false;if(geo.getAttribute('color')){m.vertexColors=true;if(L.col===undefined)m.color.set('#ffffff');if(L.col2===undefined)m.emissive.set('#000000');}if(md?.bark)fxModelBark(m);if(geo.getAttribute('aEmit'))fxModelEmission(m);}mats.push(m);obj=new THREE.Mesh(geo,m);obj.renderOrder=3;S.geo=geo;}   // โมเดลที่ปั้นในสตูดิโอ (assets/fx/mesh)
   else{const geo=fxGeo(L),m=mkMat();mats.push(m);obj=new THREE.Mesh(geo,m);obj.renderOrder=3;S.geo=geo;}
   const root=new THREE.Group();root.add(obj);S.inner=obj;
   obj.rotation.order='YXZ';

@@ -136,11 +136,12 @@ function mkPart(P){const o=mkOpts(P),gen=MKGEN[o.k];if(!gen)return mkG();const R
   return G;}
 // สูตร .mesh.json → BufferGeometry (แกน three ของชั้น mesh: x กลับด้านเหมือน fxRibbon)
 // rec (สตูดิโอ): เก็บช่วงสามเหลี่ยมของแต่ละชิ้น [id, จาก, ถึง] ไว้คลิกเลือกชิ้นบนจอ
-function fxMeshBuild(d,rec){const G=mkG(),parts=(d&&d.parts)||[],coloured=parts.some(p=>p&&!p.off&&p.col),cols=[];for(const P of parts){if(!P||P.off)continue;try{const H=mkPart(P),t0=G.i.length/3;mkAppend(G,H);if(coloured){const c=new THREE.Color(fxCol(P.col||'#ffffff',{pal:fxPal(d&&d.pal)}));for(let k=0;k<H.p.length;k+=3)cols.push(c.r,c.g,c.b);}if(rec)rec.push([P.id,t0,G.i.length/3]);}catch(e){console.warn('mesh part',P.id,e);}}
+function fxMeshBuild(d,rec){const G=mkG(),parts=(d&&d.parts)||[],coloured=parts.some(p=>p&&!p.off&&p.col),emitting=parts.some(p=>p&&!p.off&&Number.isFinite(p.emit)&&p.emit>0),cols=[],emit=[],seams=[];for(const P of parts){if(!P||P.off)continue;try{const H=mkPart(P),t0=G.i.length/3,v0=G.p.length/3;mkAppend(G,H);if(P.seamNormals&&!P.flat)seams.push([v0,G.p.length/3]);if(coloured){const c=new THREE.Color(fxCol(P.col||'#ffffff',{pal:fxPal(d&&d.pal)}));for(let k=0;k<H.p.length;k+=3)cols.push(c.r,c.g,c.b);}if(emitting){const e=Number.isFinite(P.emit)?Math.max(0,Math.min(5,P.emit)):0;for(let k=0;k<H.p.length;k+=3)emit.push(e);}if(rec)rec.push([P.id,t0,G.i.length/3]);}catch(e){console.warn('mesh part',P.id,e);}}
   if(!G.p.length){mkV(G,0,0,0,0,0);mkV(G,0,0,0,0,0);mkV(G,0,0,0,0,0);G.i.push(0,1,2);}mkPc(G);
   for(let k=0;k<G.p.length;k+=3)G.p[k]=-G.p[k];for(let k=0;k<G.i.length;k+=3){const t=G.i[k+1];G.i[k+1]=G.i[k+2];G.i[k+2]=t;}
   const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(G.p,3));g.setAttribute('uv',new THREE.Float32BufferAttribute(G.u,2));
   if(coloured&&cols.length===G.p.length)g.setAttribute('color',new THREE.Float32BufferAttribute(cols,3));
+  if(emitting&&emit.length===G.p.length/3)g.setAttribute('aEmit',new THREE.Float32BufferAttribute(emit,1));
   // ชิ้นย่อย: aPiv = จุดหมุน (ฐานของชิ้น) • aOrd = ลำดับ [ตามลำดับสร้าง, ระยะจากกลาง, สุ่ม, ความสูง] 0..1 → ชั้น mesh ใช้ทำ grow (งอกทีละชิ้น)
   {const n=G.p.length/3,np=G.piv.length,piv=new Float32Array(n*3),ord=new Float32Array(n*4);let rMax=1e-4,y0=Infinity,y1=-Infinity;
     for(const q of G.piv){rMax=Math.max(rMax,Math.hypot(q[0],q[2]));y0=Math.min(y0,q[1]);y1=Math.max(y1,q[1]);}
@@ -148,6 +149,12 @@ function fxMeshBuild(d,rec){const G=mkG(),parts=(d&&d.parts)||[],coloured=parts.
       ord[v*4]=np>1?pi/(np-1):0;ord[v*4+1]=Math.hypot(q[0],q[2])/rMax;ord[v*4+2]=mkHash(pi,7,3,11);ord[v*4+3]=y1>y0?(q[1]-y0)/(y1-y0):0;}
     g.setAttribute('aPiv',new THREE.BufferAttribute(piv,3));g.setAttribute('aOrd',new THREE.BufferAttribute(ord,4));g.userData.pieces=np;}
   g.setIndex(G.p.length/3>65535?new THREE.Uint32BufferAttribute(G.i,1):new THREE.Uint16BufferAttribute(G.i,1));g.computeVertexNormals();
+  // Opt-in UV-seam smoothing inside one authored part. Keep vertices/UVs and
+  // indices intact; never join independent branches or override flat parts.
+  if(seams.length){const p=g.attributes.position,n=g.attributes.normal;
+    for(const [from,to] of seams){const groups=new Map();
+      for(let i=from;i<to;i++){const key=[p.getX(i),p.getY(i),p.getZ(i)].map(v=>Math.round(v*1e5)).join(',');let q=groups.get(key);if(!q){q={ids:[],n:new THREE.Vector3()};groups.set(key,q);}q.ids.push(i);q.n.x+=n.getX(i);q.n.y+=n.getY(i);q.n.z+=n.getZ(i);}
+      for(const q of groups.values())if(q.ids.length>1){q.n.normalize();for(const i of q.ids)n.setXYZ(i,q.n.x,q.n.y,q.n.z);}}}
   // จุดที่ติดแต่สามเหลี่ยมพื้นที่ 0 ได้ normal = 0 → shader normalize(0) = NaN → bloom ลามเป็นจอขาว (เจอกับโมเดล tornado มองจากหน้า 2026-10-23) → ใส่ normal ชี้ขึ้นแทน
   {const nm=g.attributes.normal.array;for(let k=0;k<nm.length;k+=3)if(nm[k]*nm[k]+nm[k+1]*nm[k+1]+nm[k+2]*nm[k+2]<1e-12)nm[k+1]=1;}
   g.computeBoundingSphere();g.computeBoundingBox();g.userData.tris=G.i.length/3;return g;}
@@ -186,6 +193,17 @@ function fxModelBark(m){if(m.userData.fxBark)return m;m.userData.fxBark=true;m.r
       if(abs(barkDet)>1e-10)normal=normalize(abs(barkDet)*normal-sign(barkDet)*(dFdx(barkHeight)*barkRx+dFdy(barkHeight)*barkRy));
     `);
   };m.customProgramCacheKey=()=> 'fx-model-bark-v2';return m;}
+// Authored per-part emission for solid models. Only geometry carrying aEmit
+// opts in, so old wood/leaf recipes keep their original shader/material path.
+function fxModelEmission(m){if(m.userData.fxEmission)return m;m.userData.fxEmission=true;
+  const prior=m.onBeforeCompile,key=m.customProgramCacheKey();
+  m.onBeforeCompile=s=>{if(prior)prior.call(m,s);
+    s.vertexShader='attribute float aEmit;\nvarying float vModelEmit;\n'+s.vertexShader;
+    s.vertexShader=s.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\nvModelEmit=aEmit;');
+    s.fragmentShader='varying float vModelEmit;\n'+s.fragmentShader;
+    s.fragmentShader=s.fragmentShader.replace('#include <emissivemap_fragment>',
+      '#include <emissivemap_fragment>\ntotalEmissiveRadiance+=diffuseColor.rgb*vModelEmit;');
+  };m.customProgramCacheKey=()=>key+':model-emit-v1';return m;}
 // ---------- โหลด ----------
 function fxMeshLoad(name){let e=FXMK.mesh.get(name);if(e)return e.p;e={data:null,geo:null,fail:false};FXMK.mesh.set(name,e);const v=((FXR.index.mesh||{})[name]||{}).v||'';
   e.p=fxFetch('assets/fx/mesh/'+name+'.mesh.json'+(v?'?v='+v:'')).then(d=>{e.data=d;e.geo=fxMeshBuild(d);e.geo.userData.keep=true;return e.geo;}).catch(err=>{e.fail=true;console.warn('fx: โหลดโมเดลไม่ได้',name,err.message);return null;});return e.p;}

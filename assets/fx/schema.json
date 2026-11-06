@@ -115,6 +115,8 @@
       "scroll": {"type": "num", "def": 1, "min": -6, "max": 6, "step": 0.05, "th": "ความเร็วลายไหล"},
       "rim": {"type": "num", "def": 1, "min": 0, "max": 3, "step": 0.05, "th": "ขอบเรือง"},
       "disp": {"type": "num", "def": 0, "min": 0, "max": 1, "step": 0.01, "th": "ผิวเป็นลิ้นไฟ (ไฟ)"},
+      "endFrom": {"type": "num", "def": 0, "min": 0, "max": 200, "step": 0.1, "th": "เริ่มจางปลายลำ", "desc": "toonwater only: fade alpha along original mesh-local +Z from endFrom to endTo. Does not narrow geometry. Disabled when endTo <= endFrom; static local metres before layer scale/rotation."},
+      "endTo": {"type": "num", "def": 0, "min": 0, "max": 200, "step": 0.1, "th": "ปลายลำโปร่งหมด", "desc": "toonwater only: local +Z at zero opacity. Set greater than endFrom to enable spatial fading; 0 keeps existing materials unchanged."},
       "flow": {"type": "vec3", "def": [0, 1, 0], "th": "ทิศไฟไหล"},
       "mode": {"type": "enum", "of": ["auto", "ball", "sheet"], "def": "auto", "th": "แบบไฟ"},
       "bill": {"type": "bool", "def": false, "th": "หันหากล้อง"},
@@ -235,6 +237,8 @@
     "common": {
       "id": {"type": "str", "def": "", "th": "ชื่อชิ้น (ไม่ซ้ำ)"},
       "col": {"type": "col", "def": "#ffffff", "th": "สีชิ้นส่วน (วัสดุ solid)", "desc": "Optional authored vertex colour. Solid Model preview uses a white base for these colours; clay ignores them. Omit on every part to retain the original palette-only model."},
+      "emit": {"type": "num", "def": 0, "min": 0, "max": 5, "step": 0.05, "th": "แสงในตัวชิ้น (solid)", "desc": "Optional per-part emission in the authored part colour, supported by solid Model preview/runtime. Zero/omitted leaves legacy geometry and shaders unchanged. Does not add a scene light or particles."},
+      "seamNormals": {"type": "bool", "def": false, "th": "เกลี่ยแสงรอยต่อ UV", "desc": "Opt-in smoothing of coincident vertex normals within this part only. Preserves UV seams, positions and indices. Explicit flat parts bypass this; omitted leaves legacy normals unchanged."},
       "k": {"type": "enum", "of": "mkparts", "def": "shard", "th": "แบบชิ้นส่วน"},
       "off": {"type": "bool", "def": false, "th": "ซ่อน (ไม่ใส่ในโมเดล)"},
       "pos": {"type": "vec3", "def": [0,0,0], "th": "ตำแหน่ง [x,y,z] ม."},

@@ -1,0 +1,84 @@
+{
+  "status": "draft-awaiting-user-review",
+  "date": "2026-11-07",
+  "gameplayBound": false,
+  "models": [
+    {
+      "name": "nature_ult_tree_a",
+      "sha256": "9e978f8770ce88c4f47b8dd4279d01e025bd28119499c647506b195c454b0f35"
+    },
+    {
+      "name": "nature_ult_tree_b",
+      "sha256": "2ca76306c1db1fe5579f263d6446f30f43f233e9e8cf4c3e28cc69b1c0f505a1"
+    },
+    {
+      "name": "nature_ult_tree_c",
+      "sha256": "9429d11cd58674a07808ad01bb6f14a1e7adc368928e97f325096bcc838e6384"
+    }
+  ],
+  "images": "Actual Studio-built meshes; *_material_* uses separate neutral review lighting.",
+  "validation": {
+    "legacyUnchanged": [
+      "poly_horn",
+      "nature_wood_wall_v1"
+    ],
+    "mixedEmission": true,
+    "seamNormals": true,
+    "models": [
+      {
+        "name": "nature_ult_tree_a",
+        "parts": 83,
+        "tris": 29356,
+        "emittingParts": 9
+      },
+      {
+        "name": "nature_ult_tree_b",
+        "parts": 83,
+        "tris": 29356,
+        "emittingParts": 9
+      },
+      {
+        "name": "nature_ult_tree_c",
+        "parts": 83,
+        "tris": 29356,
+        "emittingParts": 9
+      }
+    ],
+    "runtime": [
+      "default",
+      "grown"
+    ],
+    "clay": true,
+    "reopenMemory": [
+      {
+        "geometries": 529,
+        "textures": 136
+      },
+      {
+        "geometries": 529,
+        "textures": 136
+      },
+      {
+        "geometries": 529,
+        "textures": 136
+      },
+      {
+        "geometries": 529,
+        "textures": 136
+      },
+      {
+        "geometries": 529,
+        "textures": 136
+      },
+      {
+        "geometries": 529,
+        "textures": 136
+      },
+      {
+        "geometries": 529,
+        "textures": 136
+      }
+    ]
+  },
+  "imageCount": 56
+}

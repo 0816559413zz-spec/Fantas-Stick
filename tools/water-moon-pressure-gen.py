@@ -26,10 +26,10 @@ for i in range(49):
     body_path.append([round(.055 * math.sin(u * 36) * envelope, 5),
                       round(.045 * math.sin(u * 29 + .8) * envelope, 5), round(u * LENGTH, 5)])
 write(FX / 'mesh/water_moon_pressure_jet.mesh.json', {
-    'v': 1, 'desc': 'Moonwater: ลำน้ำแรงดันสูงแบ่งปล้องตามความยาว',
+    'v': 1, 'desc': 'Moonwater: ลำน้ำแรงดันสูงต่อเนื่อง คงความกว้าง',
     'mat': 'solid', 'pal': 'ice', 'tags': ['water', 'moon'],
     'parts': [{'id': 'jet', 'k': 'tube', 'path': body_path,
-               'r0': .18, 'r1': .145, 'sides': 12, 'seg': 96, 'noise': .018, 'nfreq': 2.4, 'seed': 53}]})
+               'r0': .18, 'r1': .18, 'sides': 12, 'seg': 96, 'noise': .018, 'nfreq': 2.4, 'seed': 53}]})
 
 foam_parts = []
 for j in range(2):
@@ -37,7 +37,7 @@ for j in range(2):
     for i in range(97):
         u = i / 96
         angle = u * math.tau * 7 + j * math.pi
-        radius = .205 - .035 * u
+        radius = .205
         path.append([round(math.cos(angle) * radius, 5), round(math.sin(angle) * radius, 5), round(u * LENGTH, 5)])
     foam_parts.append({'id': f'foam_{j}', 'k': 'tube', 'path': path,
                        'r0': .009, 'r1': .0045, 'sides': 5, 'seg': 128})
@@ -55,13 +55,14 @@ circle['op'] = {'0': 0, '.06': 1, '.88': 1, '1': 0}
 
 thickness = {'0': [1, 1, .05], '.10': [1, 1, 1], '.30': [.94, .94, 1],
              '.50': [1.04, 1.04, 1], '.68': [.96, .96, 1], '.82': [1, 1, 1],
-             '1': [.06, .06, 1]}
+             '1': [1, 1, 1]}
 opacity = {'0': .85, '.08': 1, '.88': 1, '1': 0}
 layers = [{
     'id': 'pressure_body', 't': 'mesh', 'at': 0, 'life': .62,
     'att': 'feet', 'shape': 'model', 'model': 'water_moon_pressure_jet',
     'mat': 'toonwater', 'col': '#88eaff', 'col2': '#269edc', 'rim': .12,
     'scroll': 6, 'heat': .8, 'disp': .85, 'int': .8, 'pos': ORIGIN,
+    'endFrom': 33, 'endTo': LENGTH,
     'rot': {'0': [0, 0, 0], '1': [0, 0, 150]},
     'scale': thickness, 'op': opacity, 'fade': 0,
 }, {
@@ -69,6 +70,7 @@ layers = [{
     'att': 'feet', 'shape': 'model', 'model': 'water_moon_pressure_foam',
     'mat': 'toonwater', 'col': '#dcfbff', 'col2': '#51cfe7',
     'rim': .08, 'scroll': 6, 'int': .72, 'pos': ORIGIN,
+    'endFrom': 33, 'endTo': LENGTH,
     'rot': {'0': [0, 0, 0], '1': [0, 0, 240]},
     'scale': thickness, 'op': {'0': .3, '.1': .8, '.85': .7, '1': 0}, 'fade': 0,
 }, {
@@ -136,6 +138,6 @@ layers.append({'id': 'wand_circle_edge', 't': 'mesh', 'att': 'feet',
                'pos': [-.3, 1.35, 1.14], 'rot': [90, 0, 0],
                'scale': {'0': .15, '.08': 1.2, '1': 1.2, 'ease': 'out'},
                'op': {'0': 0, '.06': .75, '.88': .75, '1': 0}, 'fade': 0})
-write(DEST, dict(v=1, desc='Moonwater ยิงจากไม้: ลำน้ำแรงดันสูงเรียวลง คลื่นน้ำขยับและริ้วฟองหมุนไหลเร็ว คงจังหวะโจมตีเดิม',
+write(DEST, dict(v=1, desc='Moonwater ยิงจากไม้: ลำน้ำต่อเนื่องคงความกว้าง จางปลายอย่างนุ่ม คลื่นน้ำและริ้วฟองไหลเร็ว คงจังหวะโจมตีเดิม',
                  tags=['water', 'moon', 'ingame'], pal='ice', dur=.65, seed=53, layers=layers))
 print('water/moon_beam:', len(layers), 'layers; 2 editable Studio models')

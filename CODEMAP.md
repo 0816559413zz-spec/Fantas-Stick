@@ -452,7 +452,7 @@ fxLoopName:356 blzFxName:357 fxLoopKeep:358 fshHitFx:360 fxBind:363
 §374 แม่แบบ playFx เป็นไฟล์ (assets/fx/tpl/*, sig/*, rec/*)
 fxTpl:376
 
-## js/46-fx-make.js (334) — 
+## js/46-fx-make.js (352) —
 FXMK:10 MKD:11 mkRng:12 mkHash:13 mkNoise:15 mkL:17 mkR2:18
 §19 ที่เก็บจุด/สามเหลี่ยม
 mkG:21 mkPc:22 mkV:23 mkQ:24 mkAppend:25 mkCopy:26 mkFlat:27 _mkv:28 mkXf:29 mkThree:32 mkTRS:34 mkGrid:37
@@ -460,19 +460,19 @@ mkG:21 mkPc:22 mkV:23 mkQ:24 mkAppend:25 mkCopy:26 mkFlat:27 _mkv:28 mkXf:29 mkT
 §39 ปั้นเอง (k:"poly"): จุด v + หน้า f (เลขจุด ทวนเข็มเมื่อมองจากด้านนอก)…
 mkCC:40 MKGEN:51
 §113 ตัวแต่ง (ทำตามลำดับ): เรียว → บิด → โค้ง → ขรุขระ → แบน(เหลี่ยม) → ขน…
-mkDeform:114 mkOpts:125 mkPart:126 fxMeshBuild:139 fxModelBark:157
-§189 โหลด
-fxMeshLoad:190 fxMeshGeo:192 fxMeshSet:194 fxTexLoad:196 fxTexUse:199 fxTexNeed:202
-§203 โมเดลงอกทีละชิ้น (ชั้น mesh: grow 0..1 เส้นโค้งได้, stagger, growBy)
-FXGROWBY:205 fxGrowInit:206 fxGrowTick:208
-§213 วัสดุภาพบนรูปทรง (mat:"tex") — ภาพที่วาดในสตูดิโอ (tex/…) ไหลบนผิว + …
-fxTexMat:215 fxTexMatBind:227 fxTexMatTick:230
-§231 เศษโมเดลกระเด็น (emit look:"model") — หิน ผลึก ขนนก เศษดาบ: หมุน ตกตา…
-FXMP:233 MPLOD:237 MPLOD_PX:237 MPLOD_ON:237 fxMPParticleGeo:238 fxMPMat:243 fxMPGroup:247 _mpM:252 _mpQ:252 _mpE:252 _mpP:252 _mpS:252 fxMPUpdate:253 fxMPClear:267 fxMPSpawn:269
-§273 อากาศบิดเบี้ยว (ชั้น warp) — ไอร้อน / คลื่นกระแทกบิดภาพ / เลนส์โป่ง •…
-WB:276 wbInit:277 wbBegin:287 wbEnd:288 fxWarpMake:289 fxWarpTick:302
-§310 ไฟ 3 มิติจากการจำลอง (ชั้น vol) — ไฟล์รูปแบบเดียวกับที่เพื่อน bake จา…
-FXVOL:313 fxVolLoad:314 fxVolTex:318 fxVolSet:321 fxVolReady:322 fxVolMake:323 fxVolTick:326 fxPreAssets:331 fxAssetsWait:333
+mkDeform:114 mkOpts:125 mkPart:126 fxMeshBuild:139 fxModelBark:164 fxModelEmission:198
+§207 โหลด
+fxMeshLoad:208 fxMeshGeo:210 fxMeshSet:212 fxTexLoad:214 fxTexUse:217 fxTexNeed:220
+§221 โมเดลงอกทีละชิ้น (ชั้น mesh: grow 0..1 เส้นโค้งได้, stagger, growBy)
+FXGROWBY:223 fxGrowInit:224 fxGrowTick:226
+§231 วัสดุภาพบนรูปทรง (mat:"tex") — ภาพที่วาดในสตูดิโอ (tex/…) ไหลบนผิว + …
+fxTexMat:233 fxTexMatBind:245 fxTexMatTick:248
+§249 เศษโมเดลกระเด็น (emit look:"model") — หิน ผลึก ขนนก เศษดาบ: หมุน ตกตา…
+FXMP:251 MPLOD:255 MPLOD_PX:255 MPLOD_ON:255 fxMPParticleGeo:256 fxMPMat:261 fxMPGroup:265 _mpM:270 _mpQ:270 _mpE:270 _mpP:270 _mpS:270 fxMPUpdate:271 fxMPClear:285 fxMPSpawn:287
+§291 อากาศบิดเบี้ยว (ชั้น warp) — ไอร้อน / คลื่นกระแทกบิดภาพ / เลนส์โป่ง •…
+WB:294 wbInit:295 wbBegin:305 wbEnd:306 fxWarpMake:307 fxWarpTick:320
+§328 ไฟ 3 มิติจากการจำลอง (ชั้น vol) — ไฟล์รูปแบบเดียวกับที่เพื่อน bake จา…
+FXVOL:331 fxVolLoad:332 fxVolTex:336 fxVolSet:339 fxVolReady:340 fxVolMake:341 fxVolTick:344 fxPreAssets:349 fxAssetsWait:351
 
 ## js/47-earth-view.js (686) — 
 ECOL:9 EGUARD_BIG:14 EGUARD:14 CB:15 EV:16 eW:17 eYaw:18
@@ -720,4 +720,4 @@ tuneOpenF:80 tuneFmt:81 tuneRow:82 tuneRefresh:85 tuneMsg:93 tuneToggle:94 tuneE
 §122 API สำหรับเครื่องมือแยก tune.html (เปิดเกมใน iframe แล้วเรียกผ่าน WD)
 tuneDump:123 tuneSetKey:124
 
-(85 files, 20981 lines)
+(85 files, 20999 lines)

@@ -161,6 +161,8 @@ Play a game sound (names from SFXN in js/18-audio.js).
 | `scroll` | num | `1` | -6–6 |  | ความเร็วลายไหล |
 | `rim` | num | `1` | 0–3 |  | ขอบเรือง |
 | `disp` | num | `0` | 0–1 |  | ผิวเป็นลิ้นไฟ (ไฟ) |
+| `endFrom` | num | `0` | 0–200 |  | เริ่มจางปลายลำ — toonwater only: fade alpha along original mesh-local +Z from endFrom to endTo. Does not narrow geometry. Disabled when endTo <= endFrom; static local metres before layer scale/rotation. |
+| `endTo` | num | `0` | 0–200 |  | ปลายลำโปร่งหมด — toonwater only: local +Z at zero opacity. Set greater than endFrom to enable spatial fading; 0 keeps existing materials unchanged. |
 | `flow` | vec3 | `[0,1,0]` |  |  | ทิศไฟไหล |
 | `mode` | enum (auto/ball/sheet) | `auto` |  |  | แบบไฟ |
 | `bill` | bool | `false` |  |  | หันหากล้อง |
@@ -346,6 +348,8 @@ Escape hatch: call a registered helper (FXCODE in js/45-fx-runtime.js) with args
 |---|---|---|---|---|---|
 | `id` | str | `` |  |  | ชื่อชิ้น (ไม่ซ้ำ) |
 | `col` | col | `#ffffff` |  |  | สีชิ้นส่วน (วัสดุ solid) — Optional authored vertex colour. Solid Model preview uses a white base for these colours; clay ignores them. Omit on every part to retain the original palette-only model. |
+| `emit` | num | `0` | 0–5 |  | แสงในตัวชิ้น (solid) — Optional per-part emission in the authored part colour, supported by solid Model preview/runtime. Zero/omitted leaves legacy geometry and shaders unchanged. Does not add a scene light or particles. |
+| `seamNormals` | bool | `false` |  |  | เกลี่ยแสงรอยต่อ UV — Opt-in smoothing of coincident vertex normals within this part only. Preserves UV seams, positions and indices. Explicit flat parts bypass this; omitted leaves legacy normals unchanged. |
 | `k` | enum (shard/crown/cluster/burst/blade/fan/spiral/tube/ribbon/lathe/sphere/cyl/torus/disc/star/box/poly) | `shard` |  |  | แบบชิ้นส่วน |
 | `off` | bool | `false` |  |  | ซ่อน (ไม่ใส่ในโมเดล) |
 | `pos` | vec3 | `[0,0,0]` |  |  | ตำแหน่ง [x,y,z] ม. |
