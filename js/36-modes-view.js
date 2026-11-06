@@ -61,7 +61,7 @@ function syncModeObjs(v,P,me,now,dt){
     if(M.rings)M.rings.forEach((r,i)=>{
       const g=new THREE.Group();
       const t=new THREE.Mesh(new THREE.TorusGeometry(2.4,0.17,10,48),new THREE.MeshBasicMaterial({color:hdr('#5fd8ff',1.5),transparent:true,opacity:0.8}));g.add(t);
-      const disc=new THREE.Mesh(new THREE.CircleGeometry(2.3,40),new THREE.MeshBasicMaterial({color:'#5fd8ff',transparent:true,opacity:0.08,side:THREE.DoubleSide,depthWrite:false}));g.add(disc);
+      const disc=new THREE.Mesh(new THREE.CircleGeometry(2.3,40),new THREE.MeshBasicMaterial({color:'#5fd8ff',transparent:true,opacity:0.08,side:THREE.DoubleSide,forceSinglePass:true,depthWrite:false}));g.add(disc);
       g.position.set(tx(r[0]),r[2]+GY(r[0],r[1]),tz(r[1]));
       const nx=M.rings[(i+1)%M.rings.length],pv=M.rings[(i-1+M.rings.length)%M.rings.length];
       g.lookAt(tx(nx[0])+tx(r[0])-tx(pv[0]),r[2],tz(nx[1])+tz(r[1])-tz(pv[1]));

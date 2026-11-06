@@ -114,7 +114,7 @@ function _crackGeo(P,w,y){const pos=[],idx=[];
   for(const L of P){const n=L.pts.length;for(let k=0;k<n-1;k++){const [ax,az]=L.pts[k],[bx,bz]=L.pts[k+1],dx=bx-ax,dz=bz-az,d=Math.hypot(dx,dz)||1,w0=w*L.w*(1-k/n*0.75),w1=w*L.w*(1-(k+1)/n*0.75);
     const nx=-dz/d,nz=dx/d,q=pos.length/3;pos.push(ax+nx*w0,y,az+nz*w0, ax-nx*w0,y,az-nz*w0, bx+nx*w1,y,bz+nz*w1, bx-nx*w1,y,bz-nz*w1);idx.push(q,q+1,q+2,q+1,q+3,q+2);}}
   const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));g.setIndex(idx);return g;}
-const _decM=o=>new THREE.MeshBasicMaterial(Object.assign({transparent:true,depthWrite:false,side:THREE.DoubleSide,polygonOffset:true,polygonOffsetFactor:-2,polygonOffsetUnits:-2},o));
+const _decM=o=>new THREE.MeshBasicMaterial(Object.assign({transparent:true,depthWrite:false,side:THREE.DoubleSide,forceSinglePass:true,polygonOffset:true,polygonOffsetFactor:-2,polygonOffsetUnits:-2},o));
 // ม่านไฟตามรอยแตก: แถบตั้งตามเส้นรอยแตกหลัก (uv.x ตามความยาว, uv.y ฐาน→ปลาย) ใช้ shader sheet เดียวกับกำแพง Ring of Embers → ไฟลุกเลียขึ้นตามรอย
 function _crackRibbon(P,H){const pos=[],uv=[],idx=[];let tot=0;const segs=[];
   for(const L of P){if(L.w<0.45)continue;const n=L.pts.length;for(let k=0;k<n-1;k++){const [ax,az]=L.pts[k],[bx,bz]=L.pts[k+1],d=Math.hypot(bx-ax,bz-az);
