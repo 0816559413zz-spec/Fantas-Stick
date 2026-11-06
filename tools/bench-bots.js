@@ -38,6 +38,7 @@ for(let f=0;f<N;f++){
   const sec=Object.values(PR.t).reduce((a,b)=>a+b,0),newProg=gl.info.programs.length-prog0;
   ms.push(d);rows.push(Object.assign({f,ms:+d.toFixed(1),parts:WD.PARTS,gpuWait:+gpu.toFixed(1),other:+(d-gpu-sec).toFixed(1),newProg},Object.fromEntries(Object.entries(PR.t).map(([k,v])=>[k,+v.toFixed(1)]))));
   maxParts=Math.max(maxParts,WD.PARTS);
+  if(window.__benchFrame)window.__benchFrame(f);
   if(f%60===0)await sleep(0);
 }
 const s=[...ms].sort((a,b)=>a-b),med=s[s.length>>1],p95=s[Math.floor(s.length*0.95)],p99=s[Math.floor(s.length*0.99)];

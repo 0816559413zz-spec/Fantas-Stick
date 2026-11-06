@@ -96,6 +96,32 @@ function tintModel(root,tint){
     m.material=Array.isArray(m.material)?m.material.map(one):one(m.material);
   });
 }
+// GLTF material splits have identical bone lists but separate Skeleton objects.
+// Share one per compatible bind layout so the renderer uploads bones once.
+function shareSkinSkeletons(root){const groups=[];
+  root.traverse(m=>{if(!m.isSkinnedMesh)return;const s=m.skeleton;
+    const same=groups.find(q=>q.bones.length===s.bones.length&&q.bones.every((b,i)=>b===s.bones[i]&&q.boneInverses[i].equals(s.boneInverses[i])));
+    if(same){if(same!==s){m.skeleton=same;s.dispose();}}else groups.push(s);
+  });
+}
+// Keep the palette and the two named cloth panels separate. Plain front-facing
+// skin/iris/scarf trim can use the existing per-vertex colour/PBR body shader.
+function batchStudentSkin(root){const groups=new Map();
+  root.traverse(m=>{const mat=m.material,g=m.geometry;
+    if(!m.isSkinnedMesh||!['tint_skin','tint_eyes','tint_house2'].includes(mat&&mat.name)||!mat.isMeshStandardMaterial||mat.transparent||mat.map||mat.side!==THREE.FrontSide||Object.keys(g.morphAttributes).length||m.children.length)return;
+    const key=m.parent.uuid+'|'+m.skeleton.uuid;let L=groups.get(key);if(!L)groups.set(key,L=[]);L.push(m);
+  });
+  for(const L of groups.values()){const first=L[0];if(L.length<2||L.some(m=>!m.matrix.equals(first.matrix)||!m.bindMatrix.equals(first.bindMatrix)||m.castShadow!==first.castShadow||m.receiveShadow!==first.receiveShadow))continue;
+    const geos=L.map(m=>{const g=m.geometry.clone(),n=g.attributes.position.count,c=m.material.color,C=new Float32Array(n*3),R=new Float32Array(n),M=new Float32Array(n);
+      for(let i=0;i<n;i++){C[i*3]=c.r;C[i*3+1]=c.g;C[i*3+2]=c.b;R[i]=m.material.roughness;M[i]=m.material.metalness;}
+      g.setAttribute('color',new THREE.BufferAttribute(C,3));g.setAttribute('aRough',new THREE.BufferAttribute(R,1));g.setAttribute('aMetal',new THREE.BufferAttribute(M,1));return g;});
+    const geo=mergeGeometries(geos,false);geos.forEach(g=>g.dispose());if(!geo)continue;geo.userData={};
+    const mesh=new THREE.SkinnedMesh(geo,bodyMat(THREE.FrontSide));mesh.name='student_skin_batch';mesh.position.copy(first.position);mesh.quaternion.copy(first.quaternion);mesh.scale.copy(first.scale);
+    mesh.bind(first.skeleton,first.bindMatrix);mesh.castShadow=first.castShadow;mesh.receiveShadow=first.receiveShadow;mesh.frustumCulled=first.frustumCulled;
+    first.parent.add(mesh);const unused=new Set(L.map(m=>m.material));for(const m of L)m.parent.remove(m);
+    root.traverse(m=>{for(const mat of [].concat(m.material||[]))unused.delete(mat);});const keep=keepMatSet();for(const mat of unused)disposeMaterial(mat,keep);
+  }
+}
 // ใส่โมเดลไฟล์ให้ตัวละคร/ศัตรูที่สร้างจากโค้ดแล้ว: ซ่อน mesh เดิมด้วย layer 31 (กล้อง/เงาไม่วาด — ไม่ใช้ visible เพราะโค้ดคาถาเปิดปิด visible เอง)
 // look (ผู้เล่น) = เลือกชิ้น hair_N/tie_N/wand_N ตามหน้าตา + ใส่ไว้ใน o.b (ตัวเอน/ล้มตามโค้ด) + ผูกแขนขาโค้ดกับกระดูก (rigBind) + ไม้กวาดจากไฟล์
 function useFileModel(o,name,tint,look){
@@ -104,6 +130,7 @@ function useFileModel(o,name,tint,look){
     const inst=modelInst(name);if(!inst)return;
     if(tint)tintModel(inst,tint);
     if(look){fileVariants(inst,look);const off=[];inst.traverse(m=>{if(!m.visible&&/^(hair|tie|wand)_\d+$/.test(m.name))off.push(m);});for(const m of off)m.parent.remove(m);}   // ทรงที่ไม่ได้เลือก: ถอดทิ้ง (ซ่อนไว้ three ก็ยังคำนวณทุกเฟรม)
+    if(name==='char_student'&&!new URLSearchParams(location.search).has('unbatchedStudent')){shareSkinSkeletons(inst);batchStudentSkin(inst);}
     o.b.traverse(m=>{if(m.isMesh||m.isSprite||m.isPoints||m.isLine)m.layers.set(31);});
     if(look&&o.tip)o.tip.layers.set(0);
     if(look&&o.wnG)o.wnG.traverse(m=>m.layers.set(0));     // ไม้สำเร็จรูป (โค้ด) แทนไม้ในไฟล์                       // แสงปลายไม้ยังโชว์ (อยู่ที่แขนโค้ดซึ่งตามแขนโมเดล)

@@ -117,6 +117,8 @@ Reproduced in the hidden pane (`?nosw`, `lobbyBotFill()` → 11 bots, `G.mode='t
 - [ ] Draw calls: players' 7 skinned parts + extras per player (see §H P2 players).
 
 ## Benchmarks
+Follow-up batching/LOD 2026-11-06: student Skeletons 7→1 per player; compatible skin/iris/scarf trim combines with vertex colour/PBR attributes (2 fewer draws per body per pass). Cloth panels/palette stay separate. Actual high-poly emitted model is `water_blob` (3,968 tris), not frost shards (32). Tiny water particles <=12 physical pixels use a 224-triangle mesh; near particles and hero geometry stay full detail. Visual/animation/lifecycle checks pass. This partially addresses §H player/particle items, not all FPS causes. See `notes/optimize-batching-lod-2026-11-06.md` and `tools/bench-render-audit.js` for actual active instance costs.
+
 Follow-up 2026-11-06: countdown now registers code-created fire surfaces/heat haze, rigid+skinned Earth/Water outlines, and water tether (`js/51`, `js/70`). Actual Aqua Cage/Dust Burst regression shows one new outline program per skill with these registrations disabled, zero with them enabled. This does not close the general mid-fight shader item above. `fx.zv` / `fx.particles` now separate the old `fx.parts` measurement (which remains for older reports); these timers are nested, not additive. `tools/bench-bots.js` waits for async warm-up before timing; old reports that timed outstanding loading are not directly comparable. See `notes/optimize-followup-2026-11-06.md`.
 
 `tools/bench-start.js` = match start / map switch hitch (see its header).

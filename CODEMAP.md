@@ -234,12 +234,12 @@ clawGeo:146 clawRakes:151 updateClaws:165 later:173 stFade:174 stBeam:175 shellP
 ## js/21-vfx-frost.js (205) — น้ำแข็ง (ภาพ): ชิ้นผลึก/หนาม/แผ่นน้ำแข็งชั่วคราว (โผล่ → ค้าง → หด) •…
 FRV:2 _cryG:3 _spkG:3 _plateG:3 _hexG:3 _iceFxM:4 _frostM:4 iceFxM:5 frostM:6 ICEP:8 _im4:8 _iq:8 _ie:8 _ip:8 _is:8 icePool:9 iceBit:10 iceChips:13 updateFRV:14 iceRing:24 chillFX:25 makeSlash:41 _wbGeo:49 crescentGeo:51 makeWaveBlade:54 WGH:68 updateSlashes:69 _glGeo:82 _glMat:82 _glMat2:82 makeGlacier:83 updateGlacierVis:114 updateOrbShots:123 updateZV:133 WM3:205
 
-## js/22-models.js (259) — โมเดลจากไฟล์ (.glb จาก Blender) — ข้อตกลงฝั่งคนปั้นอยู่ใน ASSETS.md
+## js/22-models.js (286) — โมเดลจากไฟล์ (.glb จาก Blender) — ข้อตกลงฝั่งคนปั้นอยู่ใน ASSETS.md
 MODELS:5 modelManifest:6 gltfLoader:11 loadModel:16 modelInst:30 modelOr:31 prefetchModels:43
 §45 Animation จากไฟล์ (Blender Actions) + โมเดลตัวละคร/ศัตรูจากไฟล์
-ANIM_ALT:48 makeAnimator:49 animResolve:54 animPlay:55 animTick:64 lookTint:82 tintModel:86 useFileModel:101 rigStage:124 fileVariants:126 fileBroom:127 _rq:131 _rq2:131 _rq3:131 rigBind:132 rigStd:140 rigSync:141 FILE_MODELS:152
-§154 VFX จากไฟล์ (รายละเอียดฝั่งคนทำอยู่ใน ASSETS.md)
-VFXL:160 FLIPL:160 FLIPS:160 prefetchFx:161 playVfx:162 vfxSeq:208 flipTex:213 playFlip:221 fileFx:236 zoneFx:243 clearVfx:244 updateVfx:245
+ANIM_ALT:48 makeAnimator:49 animResolve:54 animPlay:55 animTick:64 lookTint:82 tintModel:86 shareSkinSkeletons:101 batchStudentSkin:109 useFileModel:127 rigStage:151 fileVariants:153 fileBroom:154 _rq:158 _rq2:158 _rq3:158 rigBind:159 rigStd:167 rigSync:168 FILE_MODELS:179
+§181 VFX จากไฟล์ (รายละเอียดฝั่งคนทำอยู่ใน ASSETS.md)
+VFXL:187 FLIPL:187 FLIPS:187 prefetchFx:188 playVfx:189 vfxSeq:235 flipTex:240 playFlip:248 fileFx:263 zoneFx:270 clearVfx:271 updateVfx:272
 
 ## js/23-props-bld-view.js (408) — prop ฝั่งแสดงผล
 PROPV:2 propFallback:4 farCull:33 syncProps:34
@@ -362,7 +362,7 @@ bpOpen:49 bpOn:49 bpKey:49 bpShow:51 bpSync:53 hovEl:97
 §98 หน้าตั้งค่า
 setRow:99 setTog:100 setTab:101 XHC:102 XHN:102 setOpts:103 SET_ICO:105 SET_EN:108 renderSettings:109 drawXhPrev:131 openSettings:132 closeSettings:134 modeIcon:190 modeTitle:191 renderLobby:192
 
-## js/41-debug.js (170) — 
+## js/41-debug.js (171) —
 botBrain:6 _obsKeep:51 balArena:52 balReset:53 balDuel:57 balTour:72 balCoop:86 balSpellTest:102
 §121 Service Worker (sw.js): เก็บไฟล์เกมไว้ในเครื่อง เปิดครั้งต่อไปเร็วขึ้…
 SWK:122 swSetup:123
@@ -442,7 +442,7 @@ fxLoopName:352 blzFxName:353 fxLoopKeep:354 fshHitFx:356 fxBind:359
 §370 แม่แบบ playFx เป็นไฟล์ (assets/fx/tpl/*, sig/*, rec/*)
 fxTpl:372
 
-## js/46-fx-make.js (264) — 
+## js/46-fx-make.js (278) —
 FXMK:10 MKD:11 mkRng:12 mkHash:13 mkNoise:15 mkL:17 mkR2:18
 §19 ที่เก็บจุด/สามเหลี่ยม
 mkG:21 mkPc:22 mkV:23 mkQ:24 mkAppend:25 mkCopy:26 mkFlat:27 _mkv:28 mkXf:29 mkThree:32 mkTRS:34 mkGrid:37
@@ -458,11 +458,11 @@ FXGROWBY:168 fxGrowInit:169 fxGrowTick:171
 §176 วัสดุภาพบนรูปทรง (mat:"tex") — ภาพที่วาดในสตูดิโอ (tex/…) ไหลบนผิว + …
 fxTexMat:178 fxTexMatBind:190 fxTexMatTick:193
 §194 เศษโมเดลกระเด็น (emit look:"model") — หิน ผลึก ขนนก เศษดาบ: หมุน ตกตา…
-FXMP:196 fxMPMat:197 fxMPGroup:201 _mpM:204 _mpQ:204 _mpE:204 _mpP:204 _mpS:204 fxMPUpdate:205 fxMPClear:214 fxMPSpawn:216
-§220 อากาศบิดเบี้ยว (ชั้น warp) — ไอร้อน / คลื่นกระแทกบิดภาพ / เลนส์โป่ง •…
-fxWarpMake:222 fxWarpTick:234
-§240 ไฟ 3 มิติจากการจำลอง (ชั้น vol) — ไฟล์รูปแบบเดียวกับที่เพื่อน bake จา…
-FXVOL:243 fxVolLoad:244 fxVolTex:248 fxVolSet:251 fxVolReady:252 fxVolMake:253 fxVolTick:256 fxPreAssets:261 fxAssetsWait:263
+FXMP:196 MPLOD:199 MPLOD_PX:199 MPLOD_ON:199 fxMPParticleGeo:200 fxMPMat:204 fxMPGroup:208 _mpM:213 _mpQ:213 _mpE:213 _mpP:213 _mpS:213 fxMPUpdate:214 fxMPClear:228 fxMPSpawn:230
+§234 อากาศบิดเบี้ยว (ชั้น warp) — ไอร้อน / คลื่นกระแทกบิดภาพ / เลนส์โป่ง •…
+fxWarpMake:236 fxWarpTick:248
+§254 ไฟ 3 มิติจากการจำลอง (ชั้น vol) — ไฟล์รูปแบบเดียวกับที่เพื่อน bake จา…
+FXVOL:257 fxVolLoad:258 fxVolTex:262 fxVolSet:265 fxVolReady:266 fxVolMake:267 fxVolTick:270 fxPreAssets:275 fxAssetsWait:277
 
 ## js/47-earth-view.js (686) — 
 ECOL:9 EGUARD_BIG:14 EGUARD:14 CB:15 EV:16 eW:17 eYaw:18

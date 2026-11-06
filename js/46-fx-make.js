@@ -194,24 +194,38 @@ function fxTexMatTick(m,S,k){fxTexMatBind(m);const u=m.uniforms,N=u.uGrid.value.
 // ---------- เศษโมเดลกระเด็น (emit look:"model") — หิน ผลึก ขนนก เศษดาบ: หมุน ตกตามแรงโน้มถ่วง เด้งพื้น ย่อหายตอนท้าย ----------
 // ทุกเม็ดของโมเดล+วัสดุ+สีเดียวกันวาดรวมเป็น InstancedMesh ก้อนเดียว (เบา) • อยู่ต่อได้หลังชั้นจบ (เหมือนอนุภาค)
 const FXMP={groups:new Map()};
+// Tiny water spray used the hero blob's ~4k triangles per instance. Retain the
+// original close-up mesh; only particles <=12 physical pixels use this recipe.
+const MPLOD=new WeakMap(),MPLOD_PX=12,MPLOD_ON=!new URLSearchParams(location.search).has('fullParticleDetail');
+function fxMPParticleGeo(model,geo){if(!MPLOD_ON||model!=='water_blob')return null;if(MPLOD.has(geo))return MPLOD.get(geo);
+  const d=FXMK.mesh.get(model)?.data;if(!d||!d.parts.length||d.parts.some(p=>p.k!=='sphere'||p.off))return null;
+  const low=fxMeshBuild({...d,parts:d.parts.map(p=>({...p,seg:Math.min(8,p.seg||8)}))});low.userData.keep=true;MPLOD.set(geo,low);return low;
+}
 function fxMPMat(mat,col,col2){switch(mat){
   case 'glow':return new THREE.MeshBasicMaterial({color:hdr(col,1.1),transparent:true,depthWrite:false,blending:THREE.AdditiveBlending});
   case 'ice':return new THREE.MeshStandardMaterial({color:col,emissive:col2,emissiveIntensity:0.45,roughness:0.15,metalness:0.1,transparent:true,opacity:0.88,flatShading:true});
   default:return new THREE.MeshStandardMaterial({color:col,emissive:col2,emissiveIntensity:0.12,roughness:0.92,metalness:0,flatShading:true});}}
 function fxMPGroup(model,mat,col,col2){const key=model+'|'+mat+'|'+col+'|'+col2;let G=FXMP.groups.get(key);if(G)return G;const geo=fxMeshGeo(model);if(!geo)return null;
   const N=256,m=new THREE.InstancedMesh(geo,fxMPMat(mat,col,col2),N);m.count=0;m.frustumCulled=false;m.castShadow=mat==='solid';m.renderOrder=2;m.instanceMatrix.setUsage(THREE.DynamicDrawUsage);m.userData.keep=true;
-  scene.add(m);G={mesh:m,list:[],N};FXMP.groups.set(key,G);return G;}
+  const lowGeo=fxMPParticleGeo(model,geo);let low=null;
+  if(lowGeo){low=new THREE.InstancedMesh(lowGeo,m.material,N);low.count=0;low.frustumCulled=false;low.castShadow=m.castShadow;low.renderOrder=m.renderOrder;low.instanceMatrix.setUsage(THREE.DynamicDrawUsage);low.userData.keep=true;scene.add(low);}
+  scene.add(m);G={mesh:m,low,lodRadius:geo.boundingSphere.radius+geo.boundingSphere.center.length(),list:[],N};FXMP.groups.set(key,G);return G;}
 const _mpM=new THREE.Matrix4(),_mpQ=new THREE.Quaternion(),_mpE=new THREE.Euler(),_mpP=new THREE.Vector3(),_mpS=new THREE.Vector3();
 function fxMPUpdate(dt){if(!FXMP.groups.size)return;
-  for(const G of FXMP.groups.values()){const L=G.list;let n=0;if(!L.length&&!G.mesh.count)continue;
+  cam.updateMatrixWorld();
+  const view=cam.matrixWorldInverse.elements,pixelScale=gl.domElement.height*cam.projectionMatrix.elements[5];
+  for(const G of FXMP.groups.values()){const L=G.list;let n=0,nLow=0;if(!L.length&&!G.mesh.count&&(!G.low||!G.low.count))continue;
     for(let i=L.length-1;i>=0;i--){const p=L[i];p.age+=dt;if(p.age>=p.life)L.splice(i,1);}
     for(const p of L){p.x+=p.vx*dt;p.y+=p.vy*dt;p.h+=p.vh*dt;p.vh-=p.g*dt;const dr=Math.exp(-p.drag*dt);p.vx*=dr;p.vy*=dr;
       if(p.h<p.r0){p.h=p.r0;if(p.bounce>0&&p.vh<-1){p.vh=-p.vh*p.bounce;p.vx*=0.7;p.vy*=0.7;p.spin*=0.6;}else{p.vh=0;const f=Math.exp(-7*dt);p.vx*=f;p.vy*=f;p.spin*=Math.exp(-6*dt);}}
       p.rx+=p.spin*p.ax*dt;p.ry+=p.spin*p.ay*dt;p.rz+=p.spin*p.az*dt;
       const k=p.age/p.life,sc=p.s*Math.min(1,p.age/0.05+0.35)*(k>0.75?Math.max(0,(1-k)/0.25):1);
-      _mpP.set(tx(p.x),p.h+GY(p.x,p.y),tz(p.y));_mpQ.setFromEuler(_mpE.set(p.rx,p.ry,p.rz));_mpS.setScalar(Math.max(1e-3,sc));G.mesh.setMatrixAt(n++,_mpM.compose(_mpP,_mpQ,_mpS));}
-    G.mesh.count=n;G.mesh.instanceMatrix.needsUpdate=true;if(!G.mesh.parent)scene.add(G.mesh);}}
-function fxMPClear(){for(const G of FXMP.groups.values()){G.list.length=0;G.mesh.count=0;}}
+      _mpP.set(tx(p.x),p.h+GY(p.x,p.y),tz(p.y));_mpQ.setFromEuler(_mpE.set(p.rx,p.ry,p.rz));_mpS.setScalar(Math.max(1e-3,sc));_mpM.compose(_mpP,_mpQ,_mpS);
+      let small=false;if(G.low){const radius=G.lodRadius*_mpS.x,depth=-(view[2]*_mpP.x+view[6]*_mpP.y+view[10]*_mpP.z+view[14]);small=depth>radius&&radius*pixelScale/(depth-radius)<=MPLOD_PX;}
+      if(small)G.low.setMatrixAt(nLow++,_mpM);else G.mesh.setMatrixAt(n++,_mpM);}
+    G.mesh.count=n;if(n)G.mesh.instanceMatrix.needsUpdate=true;if(!G.mesh.parent)scene.add(G.mesh);
+    if(G.low){G.low.count=nLow;if(nLow)G.low.instanceMatrix.needsUpdate=true;if(!G.low.parent)scene.add(G.low);}}}
+function fxMPClear(){for(const G of FXMP.groups.values()){G.list.length=0;G.mesh.count=0;if(G.low)G.low.count=0;}}
 // q = เม็ดที่ fxPart เตรียมไว้ (ตำแหน่ง/ความเร็วแบบอนุภาค) • คืน false = โมเดลยังไม่โหลด (ใช้เม็ดธรรมดาแทน)
 function fxMPSpawn(L,q,col,c2,V,g){const G=fxMPGroup(g('model'),g('mmat'),col,c2||col);if(!G)return false;const ms=V('msize'),sp=g('mspin')*MKD,R=Math.random;
   const ax=R()-0.5,ay=R()-0.5,az=R()-0.5,al=Math.hypot(ax,ay,az)||1;
@@ -261,4 +275,4 @@ function fxVolTick(S,I,k,g,V){if(!S.obj)return;const u=S.obj.userData.u,N=S.sq.m
 function fxPreAssets(d){for(const L of (d&&d.layers)||[]){if(!L)continue;if(((L.t==='mesh'&&L.shape==='model')||(L.t==='emit'&&L.look==='model'))&&L.model&&!FXMK.mesh.has(L.model))fxMeshLoad(L.model);fxTexNeed(L.tex);fxTexNeed(L.fb);if(L.t==='vol'&&L.src)fxVolReady(L.src);}}
 // รอให้โมเดล/ภาพที่เอฟเฟกต์ใช้โหลดเสร็จ (สตูดิโอใช้ก่อนทำแผ่นภาพสรุป)
 function fxAssetsWait(d){fxPreAssets(d);const ps=[];for(const L of (d&&d.layers)||[]){if(!L)continue;if(L.shape==='model'&&FXMK.mesh.has(L.model))ps.push(FXMK.mesh.get(L.model).p);for(const n of [L.tex,L.fb])if(typeof n==='string'&&FXMK.tex.has(n))ps.push(FXMK.tex.get(n).p);if(L.t==='vol'&&L.src)ps.push(fxVolLoad(L.src));}return Promise.all(ps);}
-Object.assign(window.WD||(window.WD={}),{mk:{build:fxMeshBuild,part:mkPart,gen:MKGEN,mesh:FXMK.mesh,tex:FXMK.tex,meshSet:fxMeshSet,texUse:fxTexUse,texLoad:fxTexLoad}});
+Object.assign(window.WD||(window.WD={}),{mk:{build:fxMeshBuild,part:mkPart,gen:MKGEN,mesh:FXMK.mesh,tex:FXMK.tex,meshSet:fxMeshSet,texUse:fxTexUse,texLoad:fxTexLoad,particles:{state:FXMP,group:fxMPGroup,update:fxMPUpdate,clear:fxMPClear}}});
