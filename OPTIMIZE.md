@@ -163,6 +163,17 @@ Calm → big fight (render-side CPU per frame): **≈8 → 17–26 ms**, GPU wai
 - [ ] **P3 fx runtime** (`updateFx`) ≈2 ms in fights — profile per layer type.
 - Tip for players: graphics **อัตโนมัติ** lowers effects (×0.7, cap 5,000) and resolution when frames get slow; **สูง** keeps everything on.
 
+## K. Round 2026-11-06 (user: "mostly 20 fps in TDM with 5 bots", "what about weaker PCs?")
+Real-time bench (real rAF, not `WD.hostStep`): TDM valley, 5 top-level bots huddled, `node tools/headless.js --url "index.html?nosw" --js <script> --w 1891 --h 942 --quiet --cpu N`. **`--cpu N` (new) = CDP CPU throttling, simulates a slower PC.** Always check machine load first: the same code measured 14 fps while something else ran on this PC, 50–59 fps when idle (other Claude sessions' headless renders, or the game open in Chrome). The main thread was 99% busy in those 14 fps runs and lowering resolution did nothing.
+- "Fixed at 20" was partly the counter: FPS text used `dt`, clamped to 0.05 s, so it could never read below 20. Now real time (js/37). Real frames could be slower than 20.
+- `warmCompile` used `gl.compileAsync`, which throws in r160 (`isReady` of undefined) → warm step waited its 4 s timeout. Now `gl.compile`. Assets created during a 1,500-frame brawl: programs 80 → 3, textures 80 → 5, geometries 465 → 83, network fetches 0.
+- Same bench at CPU ×1: d01b2c3 26–29 fps → b5a683c 42–48 → latest 50.6 → with this round 59 (screen cap), 0 frames over 50 ms in auto.
+- **CPU saving tiers** `qualCS()` (js/27, 0–2; low = 2, auto = `QUAL.cs`, high = 0): `cullTick` hides small world meshes far from the camera (layer 29, radius ≤ 12 only), shadows every 6th/12th frame, particles ×0.5/×0.35 cap 2,500/1,200 (`vfxQual` js/19), cloth every 2nd/3rd frame, HUD portrait every 2 s. Auto raises `cs` after `lvl` 2 when CPU-bound (>24 ms), lowers after 16 s under 18 ms. Picture nearly identical (`shots/low_cmp.jpg`).
+- Label loop no longer sets `cx.font` per player.
+- Result: CPU ×2 33 fps (auto), p95 42 ms. **CPU ×4 still only 12.5 fps** (was 8). Remaining cost at ×4: `renderBufferDirect` 31% (per-draw three.js work, ~600 draws, characters ≈ 135) — the next real gain = fewer draws per character / merged static map pieces, then particles on GPU (§G).
+- [ ] Host sim in a Web Worker would free ~5% of the main thread (bigger refactor).
+- [ ] Bloom-white roofs in valley (seen in `shots/low_cmp.jpg`) are a look issue, not perf.
+
 ## Benchmarks
 Follow-up batching/LOD 2026-11-06: student Skeletons 7→1 per player; compatible skin/iris/scarf trim combines with vertex colour/PBR attributes (2 fewer draws per body per pass). Cloth panels/palette stay separate. Actual high-poly emitted model is `water_blob` (3,968 tris), not frost shards (32). Tiny water particles <=12 physical pixels use a 224-triangle mesh; near particles and hero geometry stay full detail. Visual/animation/lifecycle checks pass. This partially addresses §H player/particle items, not all FPS causes. See `notes/optimize-batching-lod-2026-11-06.md` and `tools/bench-render-audit.js` for actual active instance costs.
 

@@ -190,7 +190,7 @@ const h4PfMode=v=>v.mode==='ffa'||v.mode==='tdm';
 // กรอบรูป = กรอบโปรไฟล์จริงที่ผู้เล่นเลือก (js/65 prfAvatar + myFrame, ผู้ใช้ 2026-11-01: 'use actual profile border') — รูปวงกลมข้างใน
 function h4PfAvatar(me,E){const cv='<canvas class="h4Pf" width="176" height="176"></canvas>';
   try{return `<span class="h4PfW">${prfAvatar(me.n||'',myFrame(),E.c1,118,cv)}</span>`;}catch(e){return `<span class="h4PfW">${cv}</span>`;}}
-function h4Portrait(me,cv){const now=performance.now();if(!cv||now-H4PF.t<500)return;H4PF.t=now;
+function h4Portrait(me,cv){const now=performance.now();if(!cv||now-H4PF.t<(qualCS()?2000:500))return;H4PF.t=now;   // เครื่องอ่อน: วาดฉากซ้ำห่างขึ้น
   const o=PM3.get(me.id);if(!o||!o.g)return;const N=H4PF.N;
   try{
     if(!H4PF.rt){H4PF.rt=new THREE.WebGLRenderTarget(N,N);H4PF.rt.texture.colorSpace=THREE.SRGBColorSpace;H4PF.cam=new THREE.PerspectiveCamera(26,1,0.05,8);H4PF.buf=new Uint8Array(N*N*4);H4PF.img=cv.getContext('2d').createImageData(N,N);}
