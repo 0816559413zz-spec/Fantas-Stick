@@ -1,5 +1,7 @@
 # HANDOFF — Fantas Stick (was "Wizard Duel") (repo: Fantas-Stick)
 
+**ลดแลครอบ P 7พ.ย.2026:** รวมวาดแผ่นบิดอากาศ/ปีกลม (`04b0280`) ไฟต์ fx draw 185→63 ภาพแทบเดิม ปิดด้วย `?nofxbatch` แต่FPSรวมวัดความต่างไม่ออก (12คน 33-36) • คนไกลไม่ต้องทำเพิ่ม • ไม่ย้ายsimไปworkerเพราะhostStepแค่~0.7/24ms รายละเอียด `OPTIMIZE.md` ส่วนP • เทสheadlessในเครื่องเท่านั้น ผู้ใช้ยังไม่ได้เล่นจริง
+
 **ล่าสุด7พ.ย.2026 — ผู้ใช้สั่งsave/commit/pushทุกงาน:** เก็บร่างต้นไม้อัลติNatureA/B/Cและภาพทั้งหมดไว้เป็นงานทดลอง ผู้ใช้ยังไม่เลือกหรือรับแบบ และขอพักเพื่อคิดดีไซน์ต่อเอง อย่าทำแบบหรือเอาเข้าเกมต่ออัตโนมัติ รวมงานMoonwaterปลายโปร่งที่ค้างในworking treeตามคำสั่ง“everything”ด้วย อ่าน`notes/nature-ult-tree-model-handoff.md`และ`notes/moonwater-vfx-handoff-2026-11-06.md` สถานะเก่าที่บอกยังไม่มีคำสั่งcommit/pushเป็นประวัติก่อนคำสั่งล่าสุดนี้
 
 **Natureต้นไม้อัลติ — งานยาว7พ.ย.2026:** ทำร่างModelสามแบบ`nature_ult_tree_a/b/c`ตามLokiไว้รีวิว (Aแนะนำเริ่ม, Bเปิดช่องแกน, Cต้นเอนรากค้ำ) 83ชิ้น/29,356triจริงต่อแบบ ยังไม่รับแบบ/ผูกเกม/ทำGIF/เลือกตัวเลข ภาพหลายมุม+ดินปั้น+ฉากมืดและแสงดูวัสดุแยกที่`designs/nature_vfx/ult_tree_review/` อ่าน`notes/nature-ult-tree-model-handoff.md`ก่อนต่อ พร้อมresearchละเอียดและรายงานข้อค้างNature กำแพงv1ไม่เปลี่ยน เพิ่มวัสดุemitต่อชิ้นแบบopt-in มีcheckgeometryเก่า/compile/runtime/grow/reopenmemoryผ่าน ต้องแยกhunkMoonwaterที่ยังค้างในschema/runtime/format ไม่commit/pushต้นไม้อัตโนมัติ
