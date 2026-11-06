@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="th"><meta charset="utf-8"><title>ภาพอธิบายพื้นที่บุกหนึ่งช่วง</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#101923;color:#ecf1f7;font-family:Tahoma,sans-serif}main{width:1000px;padding:30px}h1{font-size:27px;margin:0 0 12px}p{font-size:17px;color:#b4c4d5;margin:0 0 18px}.tag{color:#ffc36a}svg{display:block;width:940px;height:490px;background:#162432;border:1px solid #334654;border-radius:18px}svg text{font-family:Tahoma,sans-serif;fill:#eaf2fa;font-size:18px}.sub{fill:#b4c4d5;font-size:15px}.legend{display:flex;gap:28px;margin-top:18px;font-size:17px}.gold{color:#ffbc67}.green{color:#65dfc2}.note{margin-top:18px;font-size:16px;line-height:1.7}
+</style><main>
+<h1>หนึ่งพื้นที่บุก — ทางหลัก / ทางอ้อม / ห้องตั้งหลัก</h1>
+<p class="tag">ภาพอธิบายแนวที่คุยกัน • ยังไม่ใช่ผังปราสาทจริง • ไม่อ้างอิงขนาดหรือระยะเดิน</p>
+<svg viewBox="0 0 940 490" role="img" aria-label="ทางหลักตรงสู่ห้องแกน และทางอ้อมผ่านห้องข้างไปเข้าอีกมุม">
+<defs><marker id="a" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#ffbc67"/></marker><marker id="b" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#65dfc2"/></marker></defs>
+<path d="M150 315V110H710V220" fill="none" stroke="#2a4250" stroke-width="70" stroke-linejoin="round"/>
+<path d="M150 315H580" fill="none" stroke="#34404b" stroke-width="85"/>
+<g class="connection" style="display:none">
+<path d="M330 110V315" fill="none" stroke="#2e4558" stroke-width="50"/>
+<path d="M330 128V298" fill="none" stroke="#9abaff" stroke-width="4" stroke-dasharray="9 8"/>
+<text x="348" y="204" style="fill:#b7ceff;font-size:17px">ทางเชื่อม</text>
+<text x="348" y="229" class="sub">เปลี่ยนทาง / ช่วยเพื่อน</text>
+</g>
+<rect x="560" y="204" width="320" height="236" rx="15" fill="#213449" stroke="#506782" stroke-width="3"/>
+<rect x="560" y="286" width="6" height="57" fill="#34404b"/><rect x="680" y="200" width="60" height="7" fill="#2a4250"/>
+<rect x="410" y="52" width="184" height="131" rx="12" fill="#21463e" stroke="#5d9d8b" stroke-width="2"/>
+<rect x="443" y="137" width="34" height="17" rx="3" fill="#567e73"/><rect x="538" y="77" width="31" height="22" rx="3" fill="#567e73"/>
+<text x="502" y="83" text-anchor="middle">ห้องข้าง</text><text x="502" y="109" text-anchor="middle" class="sub">พื้นที่ต่อสู้ / เข้าอีกมุม</text>
+<path d="M92 315H705" stroke="#ffbc67" stroke-width="5" fill="none" marker-end="url(#a)"/>
+<path d="M150 289V110H392M603 110H710V266" stroke="#65dfc2" stroke-width="5" fill="none" marker-end="url(#b)"/>
+<text x="292" y="281" text-anchor="middle" fill="#ffbc67">ทางหลัก • เข้าตรงกว่า</text>
+<text x="278" y="58" text-anchor="middle">ทางอ้อม</text><text x="278" y="82" text-anchor="middle" class="sub">นานกว่า / เข้าถึงยากกว่า</text>
+<circle cx="758" cy="320" r="33" fill="#125b70" stroke="#81eaff" stroke-width="3"/>
+<path d="M758 299L771 320L758 341L745 320Z" fill="#b2f7ff"/>
+<text x="758" y="384" text-anchor="middle">แกนปัจจุบัน</text><text x="758" y="411" text-anchor="middle" class="sub">เข้าอีกมุมได้ถ้าเฝ้าไม่ทั่ว</text>
+<circle cx="92" cy="315" r="12" fill="#ffbc67"/><text x="92" y="368" text-anchor="middle">ฝั่งบุก</text>
+<text x="642" y="240" text-anchor="middle" class="sub">ทางเข้าอีกด้าน</text>
+<text x="296" y="423" text-anchor="middle" class="sub">ทั้งสองทางเกี่ยวกับไฟต์และแกนเดียวกัน</text>
+</svg>
+<div class="legend"><span class="gold">━━ ทางหลัก</span><span class="green">━━ ทางอ้อม / เปลี่ยนมุม</span><span>ห้องข้างเป็นสนามต่อสู้และทางเข้าปะทะได้</span></div>
+<p class="note">ห้องข้างยังไม่มีจุดเกิดหรือฮีลพิเศษ • รูปห้อง จำนวนทาง และตำแหน่งแกนในภาพเป็นตัวอย่าง<br>ยังไม่ได้กำหนดบทบาทธาตุรายจุด รอคลาสเสร็จก่อนลงรายละเอียดร่วมกับแผนที่</p>
+</main>
+<script>
+if(new URLSearchParams(location.search).has('link')){
+ document.querySelector('.connection').style.display='';
+ document.querySelector('h1').textContent='ข้อเสนอถัดไป — เชื่อมทางหลักกับทางอ้อม';
+ document.querySelector('.tag').textContent='เส้นประ = ทางเชื่อมที่เสนอเพิ่ม • ตำแหน่งตัวอย่าง • ยังรอคุย ไม่ล็อกผังจริง';
+}
+</script></html>

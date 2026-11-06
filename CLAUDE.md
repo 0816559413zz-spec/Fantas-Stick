@@ -1,5 +1,7 @@
 # CLAUDE.md
 
+**แนวทางข้ามแชทที่ผู้ใช้สั่งให้เก็บ:** อ่าน `notes/PROJECT-DESIGN-DIRECTION.md` ก่อนออกแบบคลาส/สกิล/โหมด/แผนที่ คิดสกิลโดยมีบทบาทในโหมดปราสาทเป็นบริบท แต่รอคลาสเสร็จก่อน breakdown interaction ละเอียด ยังไม่มีผังปราสาทที่ยืนยัน ใช้ภาพหยาบช่วยคุยเรื่องพื้นที่ ข้อกำหนดนี้และคำสั่งผู้ใช้ล่าสุดมีผลเหนือขั้นอัตโนมัติด้านล่าง
+
 1. **Read `HANDOFF.md` first** — architecture, testing tricks, current status. Then use `CODEMAP.md` to find code: read only the lines you need from the right `js/` file, never whole files (save tokens). Feature history is in `notes/` — open only when relevant.
 2. **After every task:** run `node tools/check.js` (must say OK), `node tools/codemap.js`, and `node tools/fx-check.js` if you touched `assets/fx/` (no ✗ allowed), update `HANDOFF.md` (status, known issues, latest changelog line) + `notes/CHANGELOG.md`, then commit and push with the code.
 3. The user speaks Thai and doesn't code: reply in Thai, keep it simple, and do the work for them.
