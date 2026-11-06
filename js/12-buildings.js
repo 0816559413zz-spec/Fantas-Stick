@@ -337,8 +337,8 @@ function damage(t,amt,srcId,kind){
   if(G.mode==='train'&&G.tr&&G.tr.god&&G.players[t.id]===t)return;   // ห้องฝึก: อมตะ
   const src=srcId!=null?G.players[srcId]:null;
   if(src&&kind!=='burn')amt*=src.buffs.dmg;
-  if(src&&src.blaze>0)amt*=1.15;   // Blazeform (เนิร์ฟ 2026-10-27: 1.3→1.15)
-  if(src&&src.mirror>0&&!src.noMul)amt*=2;
+  if(src&&src.blaze>0)amt*=BLAZEF.v.dmgUp;   // Blazeform (เนิร์ฟ 2026-10-27: 1.3→1.15)
+  if(src&&src.mirror>0&&!src.noMul)amt*=MIRROR.v.dmgMul;
   if(G.wwl&&G.wwl.length)windDmg(t,amt,srcId);
   if(src&&src.wfam>0)waterOnHit(src,t,kind);   // สายน้ำ Tidecaller Orb: ลูกผู้ช่วยยิงตาม   // สายลม: ดาเมจใส่ศัตรูที่ติดกำแพงลม
   if(t.isM){
@@ -372,7 +372,7 @@ function damage(t,amt,srcId,kind){
   }
   if(t.frz>0)amt*=1.15;
   if(t.ovc>0)amt*=1.15;
-  if(t.blaze>0)amt*=1.25;
+  if(t.blaze>0)amt*=BLAZEF.v.taken;
   if(t.mrk>0&&kind!=='burn')amt*=1.12;
   if(t.dr){amt*=t.dr.f;if(src&&src!==t&&kind!=='burn'&&kind!=='zone'&&!(t.drCd>0)){addPoison(src,t.id,1);t.drCd=1;}}
   if(t.xhp>0){const ab=Math.min(t.xhp,amt);t.xhp-=ab;amt-=ab;if(amt<=0.01){emit({k:'block',x:t.x,y:t.y,h:t.z+1.2});return;}}
@@ -418,7 +418,7 @@ function killProj(pr){
   if(pr.type==='fire')explode(pr);
   else if(pr.type==='iceboulder')frostBoom(pr);
   else if(pr.type==='pfireb')pyroBigBoom(pr);
-  if(pr.type==='eslab')damageEnv(pr.x,pr.y,80,40*E_ENV,pr.owner,'rock',pr.h);   // แผ่นหิน Stonebreaker แตก = พังบ้าน/ของ
+  if(pr.type==='eslab')damageEnv(pr.x,pr.y,80,STONEB.v.env*ERV.env,pr.owner,'rock',pr.h);   // แผ่นหิน Stonebreaker แตก = พังบ้าน/ของ
   else emit({k:'pop',x:pr.x,y:pr.y,h:pr.h,t:pr.type});
 }
 function explode(pr){

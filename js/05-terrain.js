@@ -36,7 +36,7 @@ function updateGlaciers(dt){
       s.hitDone=true;const o=G.players[s.owner];
       if(o)for(const t of foesOf(s.team)){
         if(s.grp.has(t))continue;
-        if(Math.hypot(t.x-s.x,t.y-s.y)<s.r+(t.r||PR)){s.grp.add(t);const nx=-Math.sin(s.a),ny=Math.cos(s.a),sd=((t.x-s.x)*nx+(t.y-s.y)*ny)>=0?1:-1;aoeHit(o,t,15,t=>{addFreeze(t,1);knock(t,t.x-nx*sd*10,t.y-ny*sd*10,220);});}
+        if(Math.hypot(t.x-s.x,t.y-s.y)<s.r+(t.r||PR)){s.grp.add(t);const nx=-Math.sin(s.a),ny=Math.cos(s.a),sd=((t.x-s.x)*nx+(t.y-s.y)*ny)>=0?1:-1;aoeHit(o,t,GREND.v.dmg,t=>{addFreeze(t,GREND.v.freeze);knock(t,t.x-nx*sd*10,t.y-ny*sd*10,GREND.v.knock);});}
       }
     }
   }

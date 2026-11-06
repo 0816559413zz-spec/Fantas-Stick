@@ -167,12 +167,12 @@ defSpell(5,{id:'legion',role:'ult',n:'กองทัพวิญญาณ',ic:'
     emit({k:'efx',z:'legion',x:p.x,y:p.y,h:p.z+0.5,r:200});
   }});
 // สายฟ้า: ลูกสายฟ้าโดม (ต่อท้ายสุดเพื่อไม่ให้ลำดับ index ของคาถาสายอื่นเลื่อน — kit ที่บันทึกไว้ยังใช้ได้)
-defSpell(2,{id:'stormdome',role:'control',n:'ลูกสายฟ้าโดม',ic:'🔵',cd:16,d:'ใช้ 3 stacks: ทะยานขึ้นฟ้า บินปรับได้ (WASD ช้า • Space ขึ้น / C ลง) ชูไม้รวมลูกสายฟ้า 3 วิ — คลิกยิงลงจุดเล็ง (ระยะ 600) แล้วเราร่วงลงทันที',fx:'โดมรัศมี 150 ดูดศัตรูเข้ากลาง 2 วิ (5 ดาเมจ ทุก 0.5 วิ) แล้วระเบิด 50 + Shock (รวม 70) • ระหว่างอัลติ: ถือลูกพุ่งทุบลงแบบ Dragonfall ดูด+ระเบิดทันที 80 • ไม่อมตะ โดนสตันระหว่างบิน = ยกเลิก',
+const SDOME=defSpell(2,{id:'stormdome',v:{cost:3,range:600,rise:6,fly:3,r:150,time:2,pull:120,tick:5,boom:50,env:50},vn:{cost:'ใช้ stack',range:'ระยะเล็ง',rise:'บินสูง',fly:'บินเล็งนาน (วิ)',r:'รัศมีโดม',time:'โดมดูดนาน (วิ)',pull:'แรงดูด',tick:'ดาเมจทุก 0.5 วิ',boom:'ระเบิดตอนจบ • ดาเมจ',env:'ระเบิด • ดาเมจใส่บ้าน/ของ'},role:'control',n:'ลูกสายฟ้าโดม',ic:'🔵',cd:16,d:'ใช้ 3 stacks: ทะยานขึ้นฟ้า บินปรับได้ (WASD ช้า • Space ขึ้น / C ลง) ชูไม้รวมลูกสายฟ้า 3 วิ — คลิกยิงลงจุดเล็ง (ระยะ 600) แล้วเราร่วงลงทันที',fx:'โดมรัศมี 150 ดูดศัตรูเข้ากลาง 2 วิ (5 ดาเมจ ทุก 0.5 วิ) แล้วระเบิด 50 + Shock (รวม 70) • ระหว่างอัลติ: ถือลูกพุ่งทุบลงแบบ Dragonfall ดูด+ระเบิดทันที 80 • ไม่อมตะ โดนสตันระหว่างบิน = ยกเลิก',
   cast(p,S){
     if(p.sdome||p.dfall)return false;
-    if(!stSpend(p,3))return false;
-    const g0=groundH(p.x,p.y),q=aimPoint(p,600);
-    p.sdome={ph:1,t:0.35,g0,H:g0+6,tx:q.x,ty:q.y,god:p.god>0};
+    if(!stSpend(p,S.v.cost))return false;
+    const g0=groundH(p.x,p.y),q=aimPoint(p,S.v.range);
+    p.sdome={ph:1,t:0.35,g0,H:g0+S.v.rise,tx:q.x,ty:q.y,god:p.god>0};
     p.stS=null;p.hover=0;p.vz=0;p.beam=0;
     emit({k:'efx',z:'sdrise',x:p.x,y:p.y,h:p.z,id:p.id});
   }});

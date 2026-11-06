@@ -37,58 +37,63 @@ ROLE_N:203 takePoison:204
 §206 ความสามารถพื้นฐาน (คลิกซ้าย) ของแต่ละสาย: สะสมสถานะตั้งต้นให้เองทุกๆ …
 PBASIC:207
 
-## js/04-frost-mech.js (106) — สายน้ำแข็ง: ประชิด/ไกล (V) • ฟันดาบ/ขวาน • ไถลน้ำแข็ง • พื้นน้ำแข็ง/ภ…
-frostBoom:3 meleeHit:10 mirrorPos:21 frostBasic:22 frostSlam3:46 frostSlam:54 frostDash:60 addIce:65 updateIces:66 updateWaves:82 _stO:96 _stL:96 groundH:97
+## js/04-frost-mech.js (112) — สายน้ำแข็ง: ประชิด/ไกล (V) • ฟันดาบ/ขวาน • ไถลน้ำแข็ง • พื้นน้ำแข็ง/ภ…
+FROSTV:3 frostBoom:9 meleeHit:16 mirrorPos:27 frostBasic:28 frostSlam3:52 frostSlam:60 frostDash:66 addIce:71 updateIces:72 updateWaves:88 _stO:102 _stL:102 groundH:103
 
 ## js/05-terrain.js (44) — พื้นสูงต่ำ (แผนที่จากไฟล์ Blender — กติกาฝั่งคนปั้นใน MAP-DESIGN.md)
 TERR:5 TSTEP:6 TSLOPE:6 terrT:7 floorAt:12 terrSolid:14 terrMove:21 updateGlaciers:30
 
-## js/06-pyro.js (185) — สายไฟ: ยิงปกติ 2 โหมด / โล่ระเบิด / พุ่งชาร์จ
-pyroBigBoom:5 pyroBall:13 pyroBasic:14 addOrbs:31 pyroParry:32 pyroBlock:33 launchOrbs:35 pyroDash:42 FPATH:62 pyroPathEnd:63 updateFirePaths:68 DF_R:99 dragonfallDive:100 dragonfallTick:101 dragonfallBoom:116 pyroSnap:137 colossusTick:147 updateERings:166
+## js/06-pyro.js (189) — สายไฟ: ยิงปกติ 2 โหมด / โล่ระเบิด / พุ่งชาร์จ
+PYV:3 pyroBigBoom:11 pyroBall:19 pyroBasic:20 addOrbs:37 pyroParry:38 pyroBlock:39 launchOrbs:41 pyroDash:48 pyroPathEnd:68 updateFirePaths:73 KINDLE:93 DRAGONF:95 dragonfallDive:104 dragonfallTick:105 dragonfallBoom:120 RINGE:125 BLAZEF:132 SNAP:134 COLOS:139 pyroSnap:141 colossusTick:151 updateERings:170
 
 ## js/07-frost-spells.js (33) — 
-frostGlacier:11
+FROSTF:4 GREND:6 frostGlacier:11 PERMA:16 CRYO:18 FAURA:25 MIRROR:27
 
-## js/08-storm.js (214) — 
-ST_MAX:5 stGain:6 stSpend:7 stormCone:9 stormLineFoes:14 stormBasic:18 stormTri:41 stormDash:48 stormDashTick:61 stormShieldBlast:69 stormTick:78
-§87 สกิล 1 (ฟรี): เส้นสายฟ้า — ชี้ขึ้นแล้วกดลง 0.5 วิ จากนั้นสายฟ้าผ่าเป็…
-stormLine:90
-§96 สกิล 2 (1 stack): ดูดความเร็ว
-§105 สกิล 3 (2 stacks): ฟ้าผ่าสามครั้ง — วางจุดครั้งเดียว ฟ้าผ่าจุดเดิม 3 …
-TS_R:122 TS_SPD:122 TS_SEEK:122 updateTCells:123
-§131 สกิล 4 (1 stack): ออร์บสายฟ้าคู่ — ลอยหลังเรา Dash โดนศัตรู = ออร์บพุ…
-SORB_T:135 stormOrbLaunch:136
-§142 สกิล 5 (2 stacks): Railgun — เส้นเตือนเหลือง 0.8 วิ (อัลติ 0.5) แล้วล…
-stormRailFire:145
-§152 อัลติ: ร่างเทพสายฟ้า 10 วิ
-§155 สกิล 6 (3 stacks): ลูกสายฟ้าโดม — ทะยานขึ้น บินเล็ง 3 วิ คลิกยิงลูกสา…
-stormDomeTick:156 stormDomeFire:171 stormDomeSlam:179 updateStorm:184
+## js/08-storm.js (216) — 
+STORMV:6 stGain:10 stSpend:11 stormCone:13 stormLineFoes:18 stormBasic:22 stormTri:45 stormDash:52 stormDashTick:65 stormShieldBlast:73 stormTick:82
+§91 สกิล 1 (ฟรี): เส้นสายฟ้า — ชี้ขึ้นแล้วกดลง 0.5 วิ จากนั้นสายฟ้าผ่าเป็…
+TLINE:92 stormLine:94
+§100 สกิล 2 (1 stack): ดูดความเร็ว
+SIPH:101
+§109 สกิล 3 (2 stacks): ฟ้าผ่าสามครั้ง — วางจุดครั้งเดียว ฟ้าผ่าจุดเดิม 3 …
+TSTR:110 updateTCells:126
+§134 สกิล 4 (1 stack): ออร์บสายฟ้าคู่ — ลอยหลังเรา Dash โดนศัตรู = ออร์บพุ…
+SORBS:135 stormOrbLaunch:138
+§144 สกิล 5 (2 stacks): Railgun — เส้นเตือนเหลือง 0.8 วิ (อัลติ 0.5) แล้วล…
+RAIL:145 stormRailFire:147
+§154 อัลติ: ร่างเทพสายฟ้า 10 วิ
+GODL:155
+§157 สกิล 6 (3 stacks): ลูกสายฟ้าโดม — ทะยานขึ้น บินเล็ง 3 วิ คลิกยิงลูกสา…
+stormDomeTick:158 stormDomeFire:173 stormDomeSlam:181 updateStorm:186
 
-## js/09-earth.js (256) — 
-EARTH:10 E_SH:10 E_CRUSH_PUSH:10 E_CRUSH_SLIDE:10 E_ENV:10
-§14 ตัวช่วย
-eOn:15 eStand:16 eNoStand:17 eSegD:19 eAdd:20 eCollide:22 eProjHit:29 eKill:32
-§34 ทุกเฟรมของผู้เล่นสายดิน (เรียกจาก updatePlayer หลังส่วนโล่)
-earthTick:35 earthSpd:61 earthShHit:63 earthBreak:64 earthReset:66
-§68 ท่าพื้นฐาน (คลิกซ้าย)
-earthBATarget:69 earthBasic:73 earthPunch:82 earthCBStart:88 earthCBSlam:89
-§93 Dash: Stand Rampage / Rock Boost Escape
-earthDash:94 earthRampEnd:113
-§118 สกิล 1: Stonebreaker
-§129 สกิล 2: Mud Swamp
-§134 สกิล 3: Tectonic Crush
-earthCrush:149
-§160 สกิล 4: Dust Burst
-§166 สกิล 5: Terra Auger
-eAugAim:172 earthAugFire:173 earthMound:184
-§187 อัลติ: Wrath (v2)
-earthPillarThrow:196 earthWrathTick:208 earthWrathDrill:219 earthWrathEnd:224 E_WRS:228 earthSpikeTick:229
-§235 ทั้งสนาม: สิ่งก่อสร้างพัง / ฝุ่นหมดเวลา / Stonebreaker ชนกำแพง
-updateEarth:236 earthSnapP:246 earthSnapW:248
+## js/09-earth.js (261) — 
+EARTH:9 ERV:12
+§19 ตัวช่วย
+eOn:20 eStand:21 eNoStand:22 eSegD:24 eAdd:25 eCollide:27 eProjHit:34 eKill:37
+§39 ทุกเฟรมของผู้เล่นสายดิน (เรียกจาก updatePlayer หลังส่วนโล่)
+earthTick:40 earthSpd:66 earthShHit:68 earthBreak:69 earthReset:71
+§73 ท่าพื้นฐาน (คลิกซ้าย)
+earthBATarget:74 earthBasic:78 earthPunch:87 earthCBStart:93 earthCBSlam:94
+§98 Dash: Stand Rampage / Rock Boost Escape
+earthDash:99 earthRampEnd:118
+§123 สกิล 1: Stonebreaker
+STONEB:124
+§134 สกิล 2: Mud Swamp
+MUDS:135
+§139 สกิล 3: Tectonic Crush
+TECT:141 earthCrush:154
+§165 สกิล 4: Dust Burst
+DUSTB:166
+§171 สกิล 5: Terra Auger
+AUGER:173 eAugAim:177 earthAugFire:178 earthMound:189
+§192 อัลติ: Wrath (v2)
+WRATH:196 earthPillarThrow:201 earthWrathTick:213 earthWrathDrill:224 earthWrathEnd:229 E_WRS:233 earthSpikeTick:234
+§240 ทั้งสนาม: สิ่งก่อสร้างพัง / ฝุ่นหมดเวลา / Stonebreaker ชนกำแพง
+updateEarth:241 earthSnapP:251 earthSnapW:253
 
 ## js/09-other-paths.js (196) — 
 §65 สัตว์เวท (minion): AI ฝั่งโฮสต์
-MIND:66 summonMin:72 minTarget:81 minShoot:88 updateMins:93 aimTarget:133
+MIND:66 summonMin:72 minTarget:81 minShoot:88 updateMins:93 aimTarget:133 SDOME:170
 §180 ร่ายคาถา
 castSlot:181 castUlt:196
 
@@ -700,13 +705,13 @@ PERF:9 perfFrame:12 perfDom:26 perfStats:34 perfGraph:38 _gpuName:51 gpuIntegrat
 ## js/72-dash-pose.js (84) — 
 DPOSE:12 DPT:24 _dpQ:25 _dpX:25 _dpP:25 dpMix:26 dpKnees:28 dpStyle:36 DPDBG:41 dashPose:42 dpApply:74
 
-## js/73-tune.js (121) — 
+## js/73-tune.js (125) — 
 TUNE:8 tuneNum:9 tuneBuild:15
-§60 ใช้ / เก็บค่า
-tuneSetVal:61 tuneApplyFile:64 tuneJson:68
-§71 หน้าตา
-tuneOpenF:76 tuneFmt:77 tuneRow:78 tuneRefresh:81 tuneMsg:89 tuneToggle:90 tuneEdit:94
-§118 API สำหรับเครื่องมือแยก tune.html (เปิดเกมใน iframe แล้วเรียกผ่าน WD)
-tuneDump:119 tuneSetKey:120
+§64 ใช้ / เก็บค่า
+tuneSetVal:65 tuneApplyFile:68 tuneJson:72
+§75 หน้าตา
+tuneOpenF:80 tuneFmt:81 tuneRow:82 tuneRefresh:85 tuneMsg:93 tuneToggle:94 tuneEdit:98
+§122 API สำหรับเครื่องมือแยก tune.html (เปิดเกมใน iframe แล้วเรียกผ่าน WD)
+tuneDump:123 tuneSetKey:124
 
-(85 files, 20715 lines)
+(85 files, 20736 lines)

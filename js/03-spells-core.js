@@ -87,15 +87,15 @@ function shock(t,src,d){if(t.shk>0)return;t.shk=Math.min(0.3,d||0.3);t.shkSrc=sr
 function knock(t,x,y,f){const dx=t.x-x,dy=t.y-y,d=Math.hypot(dx,dy)||1;if(isBig(t))f*=0.25;t.vx+=dx/d*f;t.vy+=dy/d*f;}
 function addWard(p,abs,time,thorns){p.ward={abs,t:time,thorns:!!thorns};}
 // สลอว์สายน้ำแข็ง (เป็น %): ยิงปกติสะสมสูงสุด 30 (ทางน้ำแข็งนับรวมในนี้) • ก้อนน้ำแข็งใหญ่ 60 • วงน้ำแข็ง +20 • ออร่า +20 • อัลติ 80 • รวมทุกอย่างไม่เกิน 80
-function addFrostSlow(t,n){t.fsl=Math.min(30,(t.fslT>0?(t.fsl|0):0)+n);t.fslT=3;}
+function addFrostSlow(t,n){t.fsl=Math.min(FROSTV.slowMax,(t.fslT>0?(t.fsl|0):0)+n);t.fslT=FROSTV.slowT;}
 function frostSlow(t){
-  let b=Math.min(30,(t.fslT>0?(t.fsl|0):0)+(t.fslP>0?10:0));
-  if(t.fslBigT>0)b=Math.max(b,60);
-  let s=b+(t.fslR>0?20:0)+(t.fslA>0?20:0);
-  if(t.fslUltT>0)s=80;
-  return Math.min(80,s);
+  let b=Math.min(FROSTV.slowMax,(t.fslT>0?(t.fsl|0):0)+(t.fslP>0?FROSTV.slowPath:0));
+  if(t.fslBigT>0)b=Math.max(b,FROSTF.v.slow);
+  let s=b+(t.fslR>0?PERMA.v.slow:0)+(t.fslA>0?20:0);
+  if(t.fslUltT>0)s=MIRROR.v.slow;
+  return Math.min(Math.max(80,MIRROR.v.slow),s);
 }
-function moveMul(t){let m=1;const fs=frostSlow(t);if(fs>0)m*=1-fs/100;if(t.chl>0)m*=1-0.1*t.chl;if(t.slowT>0)m*=t.slowF;if(t.haste>0)m*=t.hasteF;if(t.blaze>0)m*=1.25;return Math.max(0.25,m);}
+function moveMul(t){let m=1;const fs=frostSlow(t);if(fs>0)m*=1-fs/100;if(t.chl>0)m*=1-0.1*t.chl;if(t.slowT>0)m*=t.slowF;if(t.haste>0)m*=t.hasteF;if(t.blaze>0)m*=BLAZEF.v.spdUp;return Math.max(0.25,m);}
 // Burning (สายไฟ): สูงสุด BRN_MAX ชั้น • เผา 0.3/วิ/ชั้น (แค่ดาเมจเสริม) • ไม่โดนเพิ่ม 6 วิ แล้วลดทีละ 1 ชั้นทุก 1 วิ (เนิร์ฟ 2026-10-27: เดิม 2/วิ, 10 วิ)
 const BRN_MAX=6;
 function addBurn(t,n,src){if(t.dead)return;const was=t.brn|0;t.brn=Math.min(BRN_MAX,was+n);t.brnT=6;t.brnSrc=src;if(!(t.brnTick>0))t.brnTick=0.5;if(t.brn>was)emit({k:'efx',z:'brn',x:t.x,y:t.y,h:cH(t)+0.8,n:t.brn});}
@@ -207,12 +207,12 @@ function takePoison(t){const n=t.psn|0;t.psn=0;t.psnT=0;return n;}
 const PBASIC=[
   {id:'b_pyro',type:'spark',n:'ประกายไฟ / ลูกไฟชาร์จ',d:'คลิก = ยิงประกายไฟ (5 ดาเมจ ทุก 0.3 วิ ระยะ ~400) โดนเป้าเดียวครบ 3 นัด = +1 Burning • กดค้าง = รวบรวมลูกไฟที่ปลายไม้ (ไม่ยิง) ครบ 2 วิ แล้วปล่อย = ลูกไฟ (12 ดาเมจ ระยะ ~900 +1 Burning)',
     shd:'โล่ไฟ: บล็อกปกติ • Parry = ได้ลูกไฟวิญญาณ 2 ลูก (ครั้งเดียวต่อการยกโล่) • บล็อกโดนครบ 3 ครั้ง = ได้ 2 ลูก • สะสมได้สูงสุด 4 ลูก หมุนรอบตัวไม่หายจนกว่าจะใช้ • ลูกไฟ (ชาร์จ/Kindle) โดนศัตรู = ลูกไฟวิญญาณทั้งหมดพุ่งใส่ ลูกละ 4',dsd:'พุ่ง (Shift): กดค้างชาร์จ (สูงสุด 4 วิ ห้ามขยับ ยิ่งชาร์จยิ่งย่อตัวต่ำ) ปล่อย = ระเบิดดันตัวพุ่ง 150-1100 อมตะระหว่างพุ่ง คูลดาวน์ 3 วิ',
-    hit(pr,t){damage(t,pr.dmg,pr.owner,'proj');if((t.spkN=(t.spkN|0)+1)>=3){t.spkN=0;addBurn(t,1,pr.owner);}},
+    hit(pr,t){damage(t,pr.dmg,pr.owner,'proj');if((t.spkN=(t.spkN|0)+1)>=PYV.sparkN){t.spkN=0;addBurn(t,1,pr.owner);}},
     tick:pyroBasic,onParry:pyroParry,onBlock:pyroBlock,dash:pyroDash},
   {id:'b_frost',type:'icicle',n:'ดาบน้ำแข็ง / แท่งน้ำแข็ง',d:'กด V สลับโหมด • ประชิด: ดาบน้ำแข็งคอมโบ 10/10/15 ระยะ ~120 จังหวะ 3 ฮีล 10 เดินได้ระหว่างฟัน • ไกล: แท่งน้ำแข็ง 7 ดาเมจ ทุก 0.3 วิ ระยะ ~700 ช้าลง +10% (สูงสุด 30%) • อยู่สูงกว่า ~4 เมตร + ฟัน = กระโดดฟาดลงพื้น 30',
     shd:'โล่อัศวินน้ำแข็ง: กันเฉพาะด้านหน้า 120° ยกได้นานกว่าปกติ 2 เท่า ฟันดาบระหว่างยกโล่ได้ (ช้าลง) • Parry = ฟันครั้งต่อไปใน 1.5 วิ เป็นจังหวะ 3 ทันที',dsd:'ไถลน้ำแข็ง (Shift) 5 วิ เร็ว +80% (ลื่น หยุดทันทีไม่ได้) ทิ้งทางน้ำแข็ง 4 วิ: ศัตรูเดินทับช้า +10% และลื่น เราเดินทับเร็ว +20% • คูลดาวน์ 6 วิหลังไถลจบ',
     front:true,shDrain:0.5,shieldSwing:true,
-    hit(pr,t){damage(t,pr.dmg,pr.owner,'proj');addFrostSlow(t,10);},
+    hit(pr,t){damage(t,pr.dmg,pr.owner,'proj');addFrostSlow(t,FROSTV.icicleSlow);},
     tick:frostBasic,onParry:p=>{p.ripT=1.5;},dash:frostDash},
   {id:'b_storm',type:'pb2',n:'ลำสายฟ้า / สายฟ้าสามเหลี่ยม',d:'กดค้าง = ลำสายฟ้า (แบบ Winston) ระยะ 300 ล็อกทุกคนในกรวยหน้าอัตโนมัติ คนละ 3 ดาเมจ ทุก 0.4 วิ • ได้ Lightning stack ใหม่ = กดยิงครั้งถัดไปฟาดสายฟ้าจากฟ้าเป็นสามเหลี่ยมด้านหน้า (ยาว 250 ปลายกว้าง 120) 20 ดาเมจ + Shock',
     shd:'โล่สายฟ้า: คลิกขวา = ฟ้าผ่าลงตัวเรา เปิดโล่ 3 วิ ดูดซับดาเมจทุกอย่าง เดินได้ปกติ • คลิกขวาอีกครั้ง / ครบ 3 วิ / ดูดเกิน 90 = ระเบิดรัศมี 150 ดาเมจครึ่งหนึ่งของที่ดูด (สูงสุด 30) + Shock • ระเบิดโดน = +1 stack • ไม่ได้ดูดอะไร = ไม่ระเบิด • คูลดาวน์ 10 วิ',dsd:'Dash 3 ชาร์จ (ฟื้นชาร์จละ 3 วิ) พุ่ง 220 ทะลุศัตรู คนละ 10 ดาเมจ • ทะลุโดน = +1 Lightning stack • ติด Shock = Dash ไม่ได้',
