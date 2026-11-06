@@ -402,7 +402,7 @@ function playerDown(t,srcId){
     emit({k:'die',x:t.x,y:t.y,h:t.z+1,c:t.color});
     return;
   }
-  t.alive=false;t.deaths++;t.respawn=G.mode==='race'||G.mode==='train'?2:G.mode==='br'?1e9:3;
+  t.alive=false;t.deaths++;t.respawn=G.mode==='race'||G.mode==='train'?PLAY.respawnFast:G.mode==='br'?1e9:PLAY.respawn;
   if(G.mode==='br')emit({k:'brout',x:t.x,y:t.y});
   const k=G.players[srcId]||G.players[t.lastHit];
   if(k&&k!==t&&['ffa','tdm','quid'].includes(G.mode))t.respawn=7.5;   // กล้องตอนตาย 3+4 วิ + จอดำ แล้วค่อยเกิด (js/58)

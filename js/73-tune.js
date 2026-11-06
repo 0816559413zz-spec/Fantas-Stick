@@ -41,6 +41,21 @@ function tuneBuild(){
   const SK=['spell','⏱️ คูลดาวน์สกิล'];
   for(const S of SPELL_LIST)if(typeof S.cd==='number'&&S.cd>0){const P=PATHS[S.path];
     tuneNum(SK,(P?P.ic+' '+P.n:'สาย '+S.path),'spell.'+S.id+'.cd',(S.ic||'')+' '+(S.n||S.id)+(S.ult?' (อัลติ)':''),()=>S.cd,v=>{S.cd=v;},{min:0,max:Math.max(60,S.cd*3),step:0.5});}
+  // --- ตัวเลขในสกิล (S.v ใน defSpell — ชื่อไทยใน S.vn) • แต่ละสายเป็นหนึ่งกลุ่ม ---
+  for(const S of SPELL_LIST)if(S.v){const P=PATHS[S.path],g=['sv'+S.path,(P?P.ic+' '+P.n:'สาย '+S.path)+' • ตัวเลขสกิล'];
+    for(const k of Object.keys(S.v))if(typeof S.v[k]==='number')
+      tuneNum(g,(S.ic||'')+' '+(S.n||S.id)+(S.ult?' (อัลติ)':''),'spell.'+S.id+'.'+k,(S.vn&&S.vn[k])||k,()=>S.v[k],v=>{S.v[k]=v;},(S.vo&&S.vo[k])||{});}
+  // --- ผู้เล่น (PLAY js/02) ---
+  const PL=['play','🧙 ผู้เล่น'],PLN={hp:['เลือดสูงสุด',{max:1000,step:5}],walk:['ความเร็วเดิน',{max:600,step:5}],fly:['ความเร็วบิน',{max:1500,step:10}],jump:['แรงกระโดด',{max:25,step:0.5}],shSlow:['ความเร็วตอนถือโล่ (เท่า)',{max:1,step:0.05}],respawn:['เกิดใหม่ (วิ)',{max:20,step:0.5}],respawnFast:['เกิดใหม่ ห้องฝึก/แข่ง (วิ)',{max:20,step:0.5}]};
+  for(const k of Object.keys(PLN))tuneNum(PL,'ค่าพื้นฐาน','play.'+k,PLN[k][0],()=>PLAY[k],v=>{PLAY[k]=v;},PLN[k][1]);
+  // --- บ้าน / ของพังได้ ---
+  const BD=['bld','🏠 บ้าน & ของในแมพ'];
+  tuneNum(BD,'บ้าน','bld.house.wall','เลือดชิ้นกำแพง',()=>BLDDEF.house.hp.wall,v=>{BLDDEF.house.hp.wall=v;},{max:500,step:1});
+  tuneNum(BD,'บ้าน','bld.house.roof','เลือดชิ้นหลังคา',()=>BLDDEF.house.hp.roof,v=>{BLDDEF.house.hp.roof=v;},{max:500,step:1});
+  ['เล็ก','กลาง','ใหญ่'].forEach((n,i)=>tuneNum(BD,'สิ่งก่อสร้างในแมพที่พังได้','bld.brk.hp'+i,'เลือด ขนาด'+n,()=>BRKDEF.hp[i],v=>{BRKDEF.hp[i]=v;},{max:3000,step:10}));
+  for(const id of Object.keys(PROPDEF)){const D=PROPDEF[id];
+    if(typeof D.hp==='number')tuneNum(BD,'ของในแมพ','prop.'+id+'.hp',D.n+' • เลือด',()=>D.hp,v=>{D.hp=v;},{max:500,step:1});
+    if(typeof D.w==='number')tuneNum(BD,'ของในแมพ','prop.'+id+'.w',D.n+' • โอกาสสุ่มลงแมพ',()=>D.w,v=>{D.w=v;},{max:20,step:1});}
 }
 // ---------- ใช้ / เก็บค่า ----------
 function tuneSetVal(it,v,live){v=+v;if(!isFinite(v))return;
@@ -100,4 +115,7 @@ $('#tuSave').onclick=()=>{tuneMsg('กำลังเซฟ…');
 addEventListener('keydown',e=>{if(e.code==='F8'){e.preventDefault();tuneToggle();}});
 document.addEventListener('pointerlockchange',()=>{if(document.pointerLockElement&&tuneOpenF)tuneToggle(false);});   // คลิกเข้าเกม = ปิดแผง (เมาส์ถูกล็อก)
 document.addEventListener('click',e=>{if(e.target.closest&&e.target.closest('[data-tune-open]')){ac&&ac();tuneToggle(true);}});
-window.WD&&Object.assign(window.WD,{TUNE,tuneToggle});
+// ---------- API สำหรับเครื่องมือแยก tune.html (เปิดเกมใน iframe แล้วเรียกผ่าน WD) ----------
+function tuneDump(){return TUNE.groups.map(g=>({id:g.id,name:g.name,items:g.items.map(it=>({key:it.key,label:it.label,sec:it.sec,def:it.def,min:it.min,max:it.max,step:it.step,bool:it.bool,v:it.get(),file:TUNE.file[it.key]}))}));}
+function tuneSetKey(k,v){const it=TUNE.items.get(k);if(!it)return false;tuneSetVal(it,v);tuneRefresh();return true;}
+window.WD&&Object.assign(window.WD,{TUNE,tuneToggle,tuneDump,tuneSetKey,tuneJson,tuneMarkSaved:()=>{TUNE.file=Object.assign({},TUNE.ov);}});

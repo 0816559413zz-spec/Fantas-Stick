@@ -309,6 +309,8 @@ const MODES={
   br:{name:'🌀 แบทเทิลรอยัล',d:'2-6 คน เก็บคาถา วงหด คนสุดท้ายชนะ',min:2,max:6,map:'lake'},
   imp:{name:'🐍 หาลอร์ดโวลเดอมอร์',d:'4-6 คน ทำภารกิจ จับตัวโวลเดอมอร์ (แบบ Among Us)',min:4,max:6}
 };
+// ค่าพื้นฐานผู้เล่น (ปรับได้ในเครื่องมือปรับค่า tune.html / F8) • เลือด, เดิน, บิน, กระโดด, เดินช้าตอนถือโล่, เกิดใหม่ (วิ)
+const PLAY={hp:200,walk:175,fly:540,jump:8,shSlow:0.5,respawn:3,respawnFast:2};
 const PDEF={
   bolt:{spd:950,r:7,dmg:10,life:1.1,col:'#ffe27a'},
   fire:{spd:640,r:12,dmg:20,life:1.6,col:'#ff6a2a'},

@@ -9,7 +9,7 @@ function plist(){return G.order.map(id=>G.players[id]).filter(Boolean);}
 function cleanName(n){n=String(n||'').trim().slice(0,16);return n||'พ่อมด';}
 
 function freshStats(){
-  return {lst:0,emp:0,orbs:0,orbBlk:0,dch:3,stS:null,stCd:0,god:0,sdome:null,rail:null,slnT:0,sorb:null,beam:0,hp:200,maxHp:200,alive:true,downed:false,revive:0,respawn:0,vx:0,vy:0,ang:0,z:0,vz:0,fly:false,flyCd:0,root:0,
+  return {lst:0,emp:0,orbs:0,orbBlk:0,dch:3,stS:null,stCd:0,god:0,sdome:null,rail:null,slnT:0,sorb:null,beam:0,hp:PLAY.hp,maxHp:PLAY.hp,alive:true,downed:false,revive:0,respawn:0,vx:0,vy:0,ang:0,z:0,vz:0,fly:false,flyCd:0,root:0,
     cd:{basic:0,q:0,e:0,r:0,f:0,dodge:0},cdMax:{basic:1,q:1,e:1,r:1,f:1,dodge:1},
     shieldOn:false,shieldE:100,shieldT:0,shieldBroken:0,dash:0,dashX:0,dashY:0,inv:0,stun:0,burn:0,bt:0,burnSrc:null,
     ult:0,kills:0,deaths:0,dmgDealt:0,dmgTaken:0,lastHit:null,bo:null,picked:true,taken:[],dfall:null,
@@ -315,7 +315,7 @@ function updatePlayer(p,dt,acting){
   const ml=Math.hypot(mx,my);if(ml){mx/=ml;my/=ml;}
   if(!canAct||p.root>0||p.dchgOn||p.cryo>0){mx=my=0;}
   else if(p.fear>0){const fa=Math.atan2(p.y-p.fearY,p.x-p.fearX);mx=Math.cos(fa);my=Math.sin(fa);}
-  const spd=(p.fly?540*p.buffs.spd:175*p.buffs.spd*(p.shieldOn&&p.pathIdx!==WATERP?0.5:1))*(p.boost>0?1.45:1)*moveMul(p)*(p.wr||p.aug||p.ecb?earthSpd(p):1)*(p.wdr||p.wfw?windSpd(p):1)*(p.wsk||p.wab||p.wmsT>0?waterSpd(p):1)*(p.dfall?(p.dfall.ph===2?0.45:0):p.sdome?(p.sdome.ph===2?0.45:0):p.rail?0:(p.kindle>0&&p.hover>0)?0.35:p.breath>0?0.7:(p.snapT>0||p.colos>0||p.grT>0)?0.5:1)*(p.slideT>0?1.8:1+(p.iceB||0));
+  const spd=(p.fly?PLAY.fly*p.buffs.spd:PLAY.walk*p.buffs.spd*(p.shieldOn&&p.pathIdx!==WATERP?PLAY.shSlow:1))*(p.boost>0?1.45:1)*moveMul(p)*(p.wr||p.aug||p.ecb?earthSpd(p):1)*(p.wdr||p.wfw?windSpd(p):1)*(p.wsk||p.wab||p.wmsT>0?waterSpd(p):1)*(p.dfall?(p.dfall.ph===2?0.45:0):p.sdome?(p.sdome.ph===2?0.45:0):p.rail?0:(p.kindle>0&&p.hover>0)?0.35:p.breath>0?0.7:(p.snapT>0||p.colos>0||p.grT>0)?0.5:1)*(p.slideT>0?1.8:1+(p.iceB||0));
   p.wSpd=(p.dash>0||p.slideT>0||p.slip>0||!canAct||p.root>0||p.dchgOn||p.cryo>0||p.fear>0||p.gh||p.fly)?0:Math.round(spd);   // ความเร็วเดินตอนนี้ → ลูกข่ายใช้ทำนายตัวเอง (0 = อย่าทำนาย)
   if(p.dash>0){
     p.dash-=dt;const ds=p.dashSp||900;
@@ -362,7 +362,7 @@ function updatePlayer(p,dt,acting){
   const B=PBASIC[p.pathIdx|0]||PBASIC[0];
   if(pr.v&&p.pathIdx===1&&!(p.fmCd>0)&&!(p.cryo>0)&&!(p.mirror>0)){p.fmode=p.fmode===1?0:1;p.fmCd=1;p.cmbT=0;emit({k:'efx',z:'fswap',x:p.x,y:p.y,h:p.z+1,id:p.id,m:p.fmode});}
   // กระโดด (Space) ทุกสาย
-  if(pr.jp&&!(p.cryo>0)&&!(p.mudT>0)&&!(p.wr&&p.wr.ph!=='trans')&&!p.dchgOn&&p.z<=groundH(p.x,p.y,p.z)+0.05&&!(p.colos>0)){p.vz=8;emit({k:'efx',z:'jump',x:p.x,y:p.y,h:p.z,id:p.id});}
+  if(pr.jp&&!(p.cryo>0)&&!(p.mudT>0)&&!(p.wr&&p.wr.ph!=='trans')&&!p.dchgOn&&p.z<=groundH(p.x,p.y,p.z)+0.05&&!(p.colos>0)){p.vz=PLAY.jump;emit({k:'efx',z:'jump',x:p.x,y:p.y,h:p.z,id:p.id});}
   if(p.cryo>0){if(pr.q)castSlot(p,0);if(pr.e)castSlot(p,1);if(pr.r)castSlot(p,2);if(pr.f)castSlot(p,3);return;}
   if(p.dfall||p.sdome||p.shk>0||(p.mudT>0&&!p.ramp)){}else if(B.dash){if(B.dash(p,inp,pr,dt,setCd))return;}
   else if(pr.sp&&p.cd.dodge<=0&&p.z<0.5){
