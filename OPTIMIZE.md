@@ -116,6 +116,10 @@ Reproduced in the hidden pane (`?nosw`, `lobbyBotFill()` → 11 bots, `G.mode='t
 - Shader compiles mid-fight, detail (2026-11-06): the new programs are ShaderMaterial **fragment-source variants** not warmed (fireVol `uN.uS.uSim…`, heat haze `hazeMat` ring/plain, a `t.c` shader, an `uOp.uInt.uScale.uFlow…` shader) + a textured MeshStandardMaterial when far buildings stream in. One freeze per variant per session (programs are pinned after), not the cause of steady low FPS.
 - [ ] Draw calls: players' 7 skinned parts + extras per player (see §H P2 players).
 
+- [x] Cloth round 2 (2026-11-06): body-frame cloak + 60 Hz step → 2.4 → 0.65 ms in the 12-player brawl.
+- [ ] Headless can't measure GPU: `gpuWait` ~32 ms unchanged with bloom off or half resolution. Needs a real play session (F3 panel).
+- [ ] Mid-fight shaders still vary per run (custom 61/62, depth variant, flipSided STANDARD): 3-4 per 500 frames, 150-190 ms each.
+
 ## G. 12-player room measurement (2026-11-06, user: "เสกบอทให้เต็มห้อง 12 ตัว เฟรมเรทไม่ถึง 60")
 Setup: solo host, FFA, `lobbyBotFill` → 12 players (11 bots, mixed paths, lv 1), meadow, browser pane 1024×768 @ DPR 1.25, **Intel Iris Xe (integrated)**. Numbers = `WD.PROF` per frame over 5–6 s + perf panel (`js/71-perfhud.js`).
 | Graphics | FPS | frame | CPU (JS) | host sim | draw calls | triangles | render size |

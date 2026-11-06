@@ -10,9 +10,13 @@
 const CLOTH={
   ON:true,
   G:-16,          // แรงโน้มถ่วงผ้า (หน่วย/วิ²) — หนักขึ้น = ห้อยมากขึ้นตอนวิ่ง
-  DAMP:0.992,     // หน่วงความเร็วต่อขั้น = แรงต้านอากาศ (น้อย = ผ้าปลิวแนวนอนตอนวิ่ง)
+  DAMP:0.96,      // หน่วงความเร็วต่อขั้น (น้อยลง = ผ้าหยุดแกว่งเร็วขึ้น • 0.992 เดิม = แกว่งยาวเป็นชิงช้า)
+  INERT:0.22,     // ส่วนของการเดินที่ผ้ารับรู้ (0 = ผ้าเกาะตัวนิ่ง, 1 = ผ้าอยู่ในโลกจริง แกว่งสุดแรง) — ผู้ใช้ 2026-11-06: ขยับนิดเดียวผ้าแกว่งเหมือนรถไฟเหาะ
+  INERT_R:0.3,    // เหมือนกัน แต่ของการหมุนตัว
+  RMAX:2.2,       // ความเร็วสูงสุดที่ผ้ารับรู้ (หน่วย/วิ) — วิ่ง/พุ่งเร็วแค่ไหน ผ้าก็ไม่กระชากเกินนี้
+  AIR:1.1,        // ลมปะทะตอนวิ่ง: ผ้าไหลไปข้างหลังนิ่ง ๆ ตามความเร็ว (แทนการแกว่ง)
   IT:6,           // รอบแก้แท่งต่อขั้น (มาก = ผ้าตึงขึ้น)
-  STEP:1/90,      // ขั้นจำลอง (วิ)
+  STEP:1/60,      // ขั้นจำลอง (วิ)
   SUB:2,          // แบ่งแถวเพิ่มระหว่างแถวของโมเดล (ผ้าโค้งเนียนขึ้น)
   TORSO:0.2,LEG:0.11,ARM:0.08,   // รัศมีชนลำตัว / ขา / ต้นแขน
   FLUT:0.9,       // ลมพลิ้วเบา ๆ ที่ชายผ้า
@@ -56,7 +60,8 @@ function clothSetup(o){
   const B=n=>o.fileModel.getObjectByName(n);
   const C={o,outer,ref,rf,NR,N,pk,E:new Float64Array(E),mo,mi,P:new Float32Array(N*3),Q:new Float32Array(N*3),T:new Float32Array(N*3),Tm:new Float32Array(CL_ROWS.length*CL_NC*3),
     caps:[['hips','neck','TORSO'],['thigh_L','shin_L','LEG'],['shin_L','foot_L','LEG'],['thigh_R','shin_R','LEG'],['shin_R','foot_R','LEG'],['upper_arm_L','forearm_L','ARM'],['upper_arm_R','forearm_R','ARM']].map(([a,b,k])=>[B(a),B(b),k]).filter(c=>c[0]&&c[1]),
-    init:false,flip:false,t:0,acc:0};
+    init:false,flip:false,t:0,acc:0,air:{x:0,z:0}};
+  C.capV=C.caps.map(()=>[new THREE.Vector3(),new THREE.Vector3(),0]);
   o.g.userData.extra=(o.g.userData.extra||[]).concat([mo,mi]);   // disposeObj(o.g) ทิ้ง mesh ผ้าด้วย
   return C;}
 // ตำแหน่งเป้าของทุกจุด (ตามโมเดลที่ขยับตามกระดูกตอนนี้) → C.T
@@ -90,7 +95,7 @@ function clStep(C,h,gy,caps,bv,W){const P=C.P,Q=C.Q,T=C.T,pk=C.pk,E=C.E,N=C.N,g=
     if(k>=1){P[i]=Q[i]=T[i];P[i+1]=Q[i+1]=T[i+1];P[i+2]=Q[i+2]=T[i+2];continue;}
     const fl=(1-k)*CLOTH.FLUT*h*h*Math.sin(C.t*7+n*0.37);
     let vx=(P[i]-Q[i])*D,vy=(P[i+1]-Q[i+1])*D,vz=(P[i+2]-Q[i+2])*D;const bx=bv.x*h,by=bv.y*h,bz=bv.z*h,rx=vx-bx,ry=vy-by,rz=vz-bz,vm=Math.sqrt(rx*rx+ry*ry+rz*rz),mx=CLOTH.VMAX*h;if(vm>mx){const s=mx/vm;vx=bx+rx*s;vy=by+ry*s;vz=bz+rz*s;}   // จำกัดความเร็วผ้าเทียบกับตัว (วิ่ง/พุ่งเร็วแค่ไหนผ้าก็ตามทัน)
-    const wk=(1-k)*h*h;Q[i]=P[i];Q[i+1]=P[i+1];Q[i+2]=P[i+2];P[i]+=vx+fl+CLW.x*wk;P[i+1]+=vy+g;P[i+2]+=vz+fl+CLW.z*wk;   // CLW = ลม ณ ตัวเรา (js/50)
+    const wk=(1-k)*h*h,ax=C.air.x*wk,az=C.air.z*wk;Q[i]=P[i];Q[i+1]=P[i+1];Q[i+2]=P[i+2];P[i]+=vx+fl+CLW.x*wk+ax;P[i+1]+=vy+g;P[i+2]+=vz+fl+CLW.z*wk+az;   // CLW = ลม ณ ตัวเรา (js/50) • C.air = ลมปะทะตอนวิ่ง
     if(k>0)for(let q=0;q<3;q++)P[i+q]+=(T[i+q]-P[i+q])*k;}
   for(let it=0;it<CLOTH.IT;it++){
     for(let e=0;e<E.length;e+=4){const a=E[e]*3,b=E[e+1]*3,wa=pk[E[e]]>=1?0:1,wb=pk[E[e+1]]>=1?0:1;if(!(wa+wb))continue;
@@ -98,7 +103,7 @@ function clStep(C,h,gy,caps,bv,W){const P=C.P,Q=C.Q,T=C.T,pk=C.pk,E=C.E,N=C.N,g=
       P[a]+=dx*s*wa;P[a+1]+=dy*s*wa;P[a+2]+=dz*s*wa;P[b]-=dx*s*wb;P[b+1]-=dy*s*wb;P[b+2]-=dz*s*wb;}
     const hitB=(it&1)||it===CLOTH.IT-1;   // ชนตัว: รอบเว้นรอบ + รอบสุดท้ายเสมอ (ไม่ทะลุตัว แต่คำนวณน้อยลงเกือบครึ่ง)
     for(let n=0;n<N;n++){if(pk[n]>=1)continue;const i=n*3;if(hitB)for(const c of caps)clCapsule(P,Q,i,c[0],c[1],c[2]);if(P[i+1]<gy){P[i+1]=gy;Q[i]=lerp(Q[i],P[i],0.6);Q[i+2]=lerp(Q[i+2],P[i+2],0.6);}if(W&&it===CLOTH.IT-1)clWorldHit(P,Q,i,W);}}}
-function clDraw(C){const po=C.mo.geometry.attributes.position,pi=C.mi.geometry.attributes.position;po.array.set(C.P);po.needsUpdate=true;C.mo.geometry.computeVertexNormals();
+function clDraw(C){const po=C.mo.geometry.attributes.position,pi=C.mi.geometry.attributes.position;for(let n=0;n<C.N;n++)if(C.pk[n]>=1){const i=n*3;C.P[i]=C.T[i];C.P[i+1]=C.T[i+1];C.P[i+2]=C.T[i+2];}po.array.set(C.P);po.needsUpdate=true;C.mo.geometry.computeVertexNormals();
   // ครั้งแรก: ให้ด้านนอกหันออกจากตัว (กลับลำดับสามเหลี่ยมถ้ากลับด้าน)
   if(!C.flip){C.flip=true;const nm=C.mo.geometry.attributes.normal,n=Math.floor(C.N/2)+3*CL_NC,i=n*3;_clA.set(C.P[i],0,C.P[i+2]);C.o.g.getWorldPosition(_clB);_clA.x-=_clB.x;_clA.z-=_clB.z;
     if(nm.getX(n)*_clA.x+nm.getZ(n)*_clA.z<0){const gi=C.mo.geometry.index.array.slice().reverse(),go=C.mi.geometry.index.array.slice().reverse();C.mo.geometry.setIndex(Array.from(gi));C.mi.geometry.setIndex(Array.from(go));C.mo.geometry.computeVertexNormals();}}
@@ -112,10 +117,16 @@ function clothTick(dt){if(!CLOTH.ON||typeof NET==='undefined')return;const o=PM3
   o.g.updateMatrixWorld(true);clTargets(C);
   if(!C.init)clReset(C);
   else{const i=0;if(Math.hypot(C.T[i]-C.P[i],C.T[i+1]-C.P[i+1],C.T[i+2]-C.P[i+2])>CLOTH.SNAP)clReset(C);}
-  const caps=C.caps.map(([a,b,k])=>[a.getWorldPosition(new THREE.Vector3()),b.getWorldPosition(new THREE.Vector3()),CLOTH[k]]);
-  _clV.setFromMatrixPosition(C.o.g.matrixWorld);if(!C.lp)C.lp=_clV.clone();const dl=_clV.clone().sub(C.lp);C.lp.copy(_clV);
-  // ตัวพุ่งเร็วมาก (ลอยขึ้นฟ้าอัลติ / พุ่ง / ตกเร็ว) > 0.5 ม. ต่อเฟรม = ยกผ้าทั้งผืนไปด้วยส่วนที่เกิน (ผ้าไม่ยืดค้าง/พันกัน)
-  const dm=dl.length();if(dm>0.5){const k=(dm-0.5)/dm;for(let i=0;i<C.N*3;i+=3){C.P[i]+=dl.x*k;C.P[i+1]+=dl.y*k;C.P[i+2]+=dl.z*k;C.Q[i]+=dl.x*k;C.Q[i+1]+=dl.y*k;C.Q[i+2]+=dl.z*k;}dl.multiplyScalar(0.5/dm);}
-  const bv=dl.divideScalar(Math.max(dt,1e-3));const psx=_clV.x/S3+MW/2,psy=_clV.z/S3+MH/2,gy=GY(psx,psy)+0.02,W=clWorld(psx,psy);
-  C.acc=Math.min(C.acc+Math.min(dt,0.1),CLOTH.STEP*2);while(C.acc>=CLOTH.STEP){clStep(C,CLOTH.STEP,gy,caps,bv,W);C.acc-=CLOTH.STEP;}   // ≤2 ก้าวต่อเฟรม: เฟรมช้า = ไม่คำนวณผ้าเพิ่ม (เดิม 4 → ยิ่งช้ายิ่งหนัก)
+  for(let i=0;i<C.caps.length;i++){const q=C.caps[i],c=C.capV[i];q[0].getWorldPosition(c[0]);q[1].getWorldPosition(c[1]);c[2]=CLOTH[q[2]];}
+  _clV.setFromMatrixPosition(C.o.g.matrixWorld);if(!C.lp){C.lp=_clV.clone();C.ly=C.o.g.rotation.y;}
+  const dl=_clB.copy(_clV).sub(C.lp);C.lp.copy(_clV);
+  // ผ้าจำลองในกรอบของตัวละคร: ย้ายทุกจุดตามตัวไปส่วนใหญ่ (ไม่เพิ่มความเร็ว) เหลือแค่เศษ INERT ให้ผ้ารับรู้ — จึงไม่แกว่งตามทุกก้าว/ทุกการหมุน
+  const dm=dl.length(),st=Math.max(dt,1e-3),rs=Math.min(dm*CLOTH.INERT,CLOTH.RMAX*st),mv=dm>1e-6?1-rs/dm:0;
+  let dy=C.o.g.rotation.y-C.ly;C.ly=C.o.g.rotation.y;dy=Math.atan2(Math.sin(dy),Math.cos(dy));const ry=dy*(1-CLOTH.INERT_R),cr=Math.cos(ry),sr=Math.sin(ry),cx=_clV.x,cz=_clV.z,tx0=dl.x*mv,ty0=dl.y*mv,tz0=dl.z*mv;
+  if(mv>0||ry){const P=C.P,Q=C.Q;for(let i=0;i<C.N*3;i+=3){let x=P[i]-cx,z=P[i+2]-cz;P[i]=cx+x*cr+z*sr+tx0;P[i+1]+=ty0;P[i+2]=cz-x*sr+z*cr+tz0;x=Q[i]-cx;z=Q[i+2]-cz;Q[i]=cx+x*cr+z*sr+tx0;Q[i+1]+=ty0;Q[i+2]=cz-x*sr+z*cr+tz0;}}
+  const bv=_clA.copy(dl).multiplyScalar((1-mv)/st);
+  // ลมปะทะ: ความเร็วตัว (กรองนุ่ม) ดันผ้าไปข้างหลังคงที่ ไม่กระชาก
+  const ak=1-Math.exp(-3.5*st);C.air.x+=(-dl.x/st*CLOTH.AIR-C.air.x)*ak;C.air.z+=(-dl.z/st*CLOTH.AIR-C.air.z)*ak;
+  const psx=_clV.x/S3+MW/2,psy=_clV.z/S3+MH/2,gy=GY(psx,psy)+0.02,W=clWorld(psx,psy);
+  C.acc=Math.min(C.acc+Math.min(dt,0.1),CLOTH.STEP*2);while(C.acc>=CLOTH.STEP){clStep(C,CLOTH.STEP,gy,C.capV,bv,W);C.acc-=CLOTH.STEP;}   // ≤2 ก้าวต่อเฟรม: เฟรมช้า = ไม่คำนวณผ้าเพิ่ม (เดิม 4 → ยิ่งช้ายิ่งหนัก)
   clDraw(C);}

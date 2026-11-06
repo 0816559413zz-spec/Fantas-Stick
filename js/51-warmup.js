@@ -87,6 +87,10 @@ function warmStep(step){
   if(step==='common'){const T=trailLayer();if(!T.mesh.parent)WARM.holdF.add(T.mesh);
     // เศษหินใช้ได้ทุกสาย (ไฟ/ของพังด้วย) ทั้ง mesh เดี่ยวและ instanced ไม่ใช่เฉพาะ Earth
     for(const o of [new THREE.Mesh(_rockGeo,_rockMat()),new THREE.InstancedMesh(_rockGeo,_rockMat(),1)]){o.position.set(tx(WARM_X),-1000,tz(WARM_Y));warmKeep(o);}
+    // shader ที่ยังโผล่กลางไฟต์ (วัดจากบอท 12 ตัว 2026-11-06): ซับในเสื้อคลุมของตัวละคร (ด้านหลัง) + รอยร้าวบ้าน 2 ระดับ
+    const warmM=[sMat({color:'#444444',roughness:0.8,side:THREE.BackSide})];let bm=null;scene.traverse(o=>{const m=o.material;if(!bm&&m&&m.isMeshStandardMaterial&&m.map&&!m.transparent)bm=m;});
+    if(bm)warmM.push(brkCrackMat(bm,1),brkCrackMat(bm,2));
+    for(const m of warmM){const o=new THREE.Mesh(_rockGeo,m);o.position.set(tx(WARM_X),-1000,tz(WARM_Y));warmKeep(o);}
     const fxI=warmFx(WARM_COMMON);warmGather();warmFxEnd(fxI);}
   else if(step.startsWith('fx:')){const fxI=warmFx([WARM_FXDIR[step.slice(3)]]);warmGather();warmFxEnd(fxI);}
   else if(step.startsWith('reg:')){const [,id,i]=step.split(':'),f=WARM.reg[id][+i];
