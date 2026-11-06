@@ -106,7 +106,8 @@ const MKGEN={
   poly(o){let V=(o.v||[]).filter(p=>Array.isArray(p)&&p.length===3),F=(o.f||[]).filter(f=>Array.isArray(f)&&f.length>=3&&f.every(i=>i>=0&&i<V.length));
     for(let i=0;i<Math.min(3,o.sub|0);i++)[V,F]=mkCC(V,F);
     const G=mkG();let y0=Infinity,y1=-Infinity;for(const p of V){y0=Math.min(y0,p[1]);y1=Math.max(y1,p[1]);}const H=Math.max(1e-4,y1-y0);
-    for(const p of V)mkV(G,p[0],p[1],p[2],Math.atan2(p[0],p[2])/(Math.PI*2)+0.5,(p[1]-y0)/H);
+    const UV=!o.sub&&Array.isArray(o.uv)&&o.uv.length===V.length?o.uv:null;   // uv:[[u,v]…] ตามจุด = กำหนดเอง (ไม่มี = ห่อรอบแกน y)
+    V.forEach((p,i)=>mkV(G,p[0],p[1],p[2],UV?UV[i][0]:Math.atan2(p[0],p[2])/(Math.PI*2)+0.5,UV?UV[i][1]:(p[1]-y0)/H));
     for(const f of F)for(let i=1;i+1<f.length;i++)G.i.push(f[0],f[i],f[i+1]);return G;},
 };
 // ---------- ตัวแต่ง (ทำตามลำดับ): เรียว → บิด → โค้ง → ขรุขระ → แบน(เหลี่ยม) → ขนาด/หมุน/ตำแหน่ง → ทำซ้ำ (วง/แถว) → กระจกซ้ายขวา ----------

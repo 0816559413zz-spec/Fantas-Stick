@@ -114,15 +114,15 @@ function frostFX(o,p,pz,now,dt){
   fwIdle(P,now,ff,o.fwSeed||(o.fwSeed=rnd(0,6)));o.fwSub=0;
   if(fwOn&&o.mlT>0){const k=1-o.mlT/0.4,w=Math.sin(k*Math.PI*3);fwSweep(P,1.75*w,1.35+0.35*Math.cos(k*Math.PI*3),ff);P.strike=true;P.ax=-1.4;P.az=0.85*w;P.ty=0.35*w;P.tx=0.1;}   // ฟันไป-กลับ 3 ครั้งเฉพาะด้านหน้า (ไม่กวาดผ่านหลัง = ไม่บังกล้อง)
   else if(fwOn&&o.swT>0){const k=clamp(1-o.swT/SWT,0,1);fwSwing(P,o.swC,ff,k);if(P.strike){o.fwSub=1;o.fwKs=[o.fwK0||0,k];}o.fwK0=k;}
-  // Glacier Rend โหมดประชิด: ชาร์จ = อาวุธลอยสูงเหนือหัวเรืองแสง ไม้ชี้ฟ้า / ปล่อย = สับลงแล้วคลื่นพุ่ง
-  if(fwOn&&(flags&32)){fwChop(P,-0.35,ff);P.y+=0.6+Math.sin(now/60)*0.04;P.rate=10;P.strike=false;o.fwSub=0;P.ax=-2.8;P.az=-0.1;P.tx=-0.15;P.ty=0;}
+  // Glacier Rend โหมดประชิด (ผู้ใช้ 2026-11-06): ไม่ชาร์จ • เอาอาวุธลงล่าง ค้างนิดเดียว (nearWind) แล้วฟันงัดขึ้น คลื่นพุ่งตอนงัด
+  if(fwOn&&(flags&32)){fwChop(P,2.35,ff);P.rate=26;P.strike=false;o.fwSub=0;P.ax=-0.3;P.az=-0.1;P.tx=0.3;P.ty=0.25;}
   let ax=P.ax,az=P.az,by=P.ty,bx=P.tx;
   const rpose=!melee&&!p.fl&&((flags&32)||o.grUp>0);
   if(!melee&&!p.fl&&(flags&32)){ax=-1.42;az=0.1;bx=0.12;by=-0.1;}
   if(o.grUp>0){o.grUp-=dt;const k=1-Math.max(0,o.grUp)/0.5;const e=1-Math.pow(1-Math.min(1,k/0.45),3);ax=lerp(-1.42,-3.0,e);az=0.05;bx=lerp(0.12,-0.2,e);by=0;}
   if(o.grDown>0){o.grDown-=dt;const k=1-Math.max(0,o.grDown)/0.3;az=-0.05;by=0;o.fwSub=0;
-    if(k<0.35){const e=Math.pow(k/0.35,2.2);ax=lerp(-2.85,-0.4,e);bx=lerp(-0.2,0.4,e);if(fwOn){fwChop(P,lerp(-0.35,2.05,e),ff);P.strike=true;}}
-    else{const e=1-Math.pow(1-(k-0.35)/0.65,3);ax=lerp(-0.4,-0.95,e);bx=lerp(0.4,0,e);if(fwOn){fwChop(P,2.05-0.3*e,ff);P.strike=false;P.rate=lerp(30,8,e);}}}
+    if(k<0.35){const e=Math.pow(k/0.35,1.4);ax=lerp(-0.3,-2.85,e);bx=lerp(0.3,-0.25,e);if(fwOn){fwChop(P,lerp(2.35,-0.55,e),ff);P.strike=true;}}   // งัดขึ้นเร็ว
+    else{const e=1-Math.pow(1-(k-0.35)/0.65,3);ax=lerp(-2.85,-1.1,e);bx=lerp(-0.25,0,e);if(fwOn){fwChop(P,-0.55+0.5*e,ff);P.strike=false;P.rate=lerp(30,8,e);}}}
   // ฟาดจากที่สูง (กระโดดลง): อาวุธพุ่งนำลงไปข้างหน้า ปลายชี้พื้น
   if(fwOn&&o.slamT>0&&pz>0.2&&!(o.swT>0)){P.x=0;P.y=0.5;P.z=1.4;P.bx=0;P.by=-0.8;P.bz=0.6;P.nx=1;P.ny=0;P.nz=0;P.rate=14;P.strike=false;ax=-0.6;az=-0.1;bx=0.25;}
   // Frostforge เปิด (ผู้ใช้ 2026-10-22 'new animation of axe coming up'): ขวานงอกจากใต้พื้นหน้าขวา หมุนวนขึ้นมาเข้าที่

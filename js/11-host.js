@@ -253,7 +253,7 @@ function updatePlayer(p,dt,acting){
   if(p.auraT>0&&p.alive&&!p.downed){p.auraT-=dt;p.auraTk-=dt;const tk=p.auraTk<=0;if(tk)p.auraTk=0.5;for(const t of foesIn(p.team,p.x,p.y,FAURA.v.r,p.z+3)){if(tk){damage(t,FAURA.v.dmg,p.id,'zone');emit({k:'efx',z:'auhit',x:Math.round(t.x),y:Math.round(t.y),h:cH(t)});}}}
   if(p.mirror>0){p.mirror-=dt;if(p.mirror<=0){p.xhp=0;emit({k:'efx',z:'mirrorend',x:p.x,y:p.y,h:p.z+1,id:p.id});}}
   if(p.grT>0&&p.alive&&p.grM===1){p.grT-=dt;if(p.grT<=0)frostGlacier(p);}
-  else if(p.grT>0&&p.alive){p.grT-=dt;if(p.grT<=0){const c=Math.cos(p.ang),s=Math.sin(p.ang);for(const sd of (p.mirror>0?[0,-1,1]:[0])){const ox=p.x+c*30-s*55*sd,oy=p.y+s*30+c*55*sd;(G.waves||(G.waves=[])).push({x:ox,y:oy,dx:c,dy:s,left:GREND.v.waveLen,acc:0,owner:p.id,team:p.team,hit:new Set()});emit({k:'efx',z:'gwave',x:ox,y:oy,h:p.z+1,a:Math.round(p.ang*1000)/1000,len:GREND.v.waveLen,id:p.id,cl:sd?1:0});}}}
+  else if(p.grT>0&&p.alive){p.grT-=dt;if(p.grT<=0){for(const sd of (p.mirror>0?[0,-1,1]:[0])){const an=p.ang+sd*GREND.v.waveFan*Math.PI/180,c=Math.cos(an),s=Math.sin(an),ox=p.x+c*30,oy=p.y+s*30;(G.waves||(G.waves=[])).push({x:ox,y:oy,dx:c,dy:s,left:GREND.v.waveLen,acc:0,owner:p.id,team:p.team,hit:new Set()});emit({k:'efx',z:'gwave',x:ox,y:oy,h:p.z+1,a:Math.round(an*1000)/1000,len:GREND.v.waveLen,id:p.id,cl:sd?1:0});}}}
   p.flyCd=Math.max(0,p.flyCd-dt);p.root=Math.max(0,p.root-dt);
   if(p.awayT>0){p.awayT-=dt;p.inp=emptyInput();p.inv=Math.max(p.inv,0.1);if(p.awayT<=0){feed('🚪 '+p.name+' ออกจากเกม');hostRemove(p.id);return;}}
   if(!p.alive){

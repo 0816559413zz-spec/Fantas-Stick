@@ -1,0 +1,14 @@
+{
+ "v": 1,
+ "desc": "แสงเรืองกลางรอยคลื่นฟัน",
+ "gen": "image",
+ "seed": 9,
+ "px": 128,
+ "cols": 1,
+ "rows": 1,
+ "kind": "loop",
+ "fps": 1,
+ "ramp": "white",
+ "add": true,
+ "p": {}
+}

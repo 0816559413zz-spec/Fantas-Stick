@@ -195,15 +195,17 @@ const _iceSpk=new THREE.ConeGeometry(1,1,5);_iceSpk.translate(0,0.5,0);_iceSpk.u
 function iceFloorMat(op){return new THREE.MeshStandardMaterial({color:'#bfe6fa',emissive:'#2f7fb8',emissiveIntensity:0.25,roughness:0.9,metalness:0,transparent:true,opacity:op,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-2,polygonOffsetUnits:-2});}
 const _icePlane=new THREE.PlaneGeometry(1,1);_icePlane.rotateX(-Math.PI/2);_icePlane.userData.keep=true;
 let _icePathMat=null;
-function makeIceFloor(x,y,r,t,ring,lx,ly){
+function makeIceFloor(x,y,r,t,ring,lx,ly,wv){
   if(!ring){
     // ทางน้ำแข็งเรียบๆ ต่อเนื่อง: วัสดุทึบ (ซ้อนกันไม่เป็นดวง) • ชิ้นยาวจากจุดก่อนหน้า + ข้อต่อกลม
     if(!_icePathMat){_icePathMat=new THREE.MeshStandardMaterial({color:'#a8d4ec',emissive:'#1f5f90',emissiveIntensity:0.18,roughness:0.85,metalness:0,polygonOffset:true,polygonOffsetFactor:-2,polygonOffsetUnits:-2});_icePathMat.userData.keep=true;}
     const g=new THREE.Group();g.position.set(tx(x),0.03+GY(x,y),tz(y));scene.add(g);
     const w=r*S3*1.6;
     const j=new THREE.Mesh(_iceDisc,_icePathMat);j.scale.setScalar(w/2);g.add(j);
-    if(lx!==undefined){const dx=tx(lx)-tx(x),dz=tz(ly)-tz(y),L=Math.hypot(dx,dz);if(L>0.01&&L<6){const q=new THREE.Mesh(_icePlane,_icePathMat);q.scale.set(L,1,w);q.position.set(dx/2,0,dz/2);q.rotation.y=-Math.atan2(dz,dx);g.add(q);}}
-    return {g,mats:[],spikes:[],age:0,t,path:true};
+    if(lx!==undefined){const dx=tx(lx)-tx(x),dz=tz(ly)-tz(y),L=Math.hypot(dx,dz);if(L>0.01&&L<6){const q=new THREE.Mesh(_icePlane,_icePathMat);q.scale.set(L,1,w);q.position.set(dx/2,0,dz/2);q.rotation.y=-Math.atan2(dz,dx);g.add(q);if(wv)g.userData.q=q;}}
+    // ทางจากคลื่นดาบ (ผู้ใช้ 2026-11-06): งอกช้ากว่าคลื่น เริ่มบางตามปลายหาง แล้วค่อยขยายจนเต็มความกว้าง
+    if(wv){g.visible=false;g.userData.j=j;g.userData.w=w;}
+    return {g,mats:[],spikes:[],age:0,t,path:true,wv:!!wv};
   }
   const g=new THREE.Group();g.position.set(tx(x),0.035+GY(x,y),tz(y));scene.add(g);
   const mats=[];
@@ -219,13 +221,15 @@ function makeIceFloor(x,y,r,t,ring,lx,ly){
   }
   return {g,mats,spikes,age:0,t};
 }
+const ICE_WV={delay:0.16,grow:0.9};   // วิ: ช้ากว่าคลื่นเท่าไร • ขยายนานเท่าไร
 function updateIceFloors(dt){
   for(let i=ICEV.length-1;i>=0;i--){
     const v=ICEV[i];v.age+=dt;
     const k=Math.min(1,v.age/0.2)*Math.min(1,Math.max(0,(v.t-v.age)/0.6));
     for(const [m,op] of v.mats)m.opacity=op*k;
     for(const s of v.spikes){const u=s.userData;s.scale.set(u.rr*k+0.001,u.hh*k+0.001,u.rr*k+0.001);}
-    if(v.path)v.g.scale.set(k+0.001,1,k+0.001);
+    if(v.wv){const U=v.g.userData,e=Math.max(0,Math.min(1,(v.age-ICE_WV.delay)/ICE_WV.grow)),w=U.w*(1-(1-e)*(1-e)*(1-e))*Math.min(1,Math.max(0,(v.t-v.age)/0.6))+0.001;v.g.visible=v.age>=ICE_WV.delay;U.j.scale.setScalar(w/2);if(U.q)U.q.scale.z=w;}
+    else if(v.path)v.g.scale.set(k+0.001,1,k+0.001);
     if(v.age>=v.t){scene.remove(v.g);v.mats.forEach(([m])=>m.dispose());ICEV.splice(i,1);}
   }
 }

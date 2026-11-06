@@ -117,7 +117,8 @@
   "efx:gwave": [
     {
       "fx": "frost/gwave",
-      "mode": "replace"
+      "mode": "replace",
+      "if": "!ev.cl"
     },
     {
       "fx": "frost/rend_path",

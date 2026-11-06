@@ -1,162 +1,315 @@
 {
  "v": 1,
- "desc": "Glacier Rend คลื่นดาบ (ทำใหม่ 2026-10-22 ผู้ใช้: slash ต้องดีขึ้นมาก): ใบเสี้ยวในโค้ด js/21 (ใหญ่ขึ้น + แกนขาวร้อน + เรืองไซยาน 2 ชั้น) + ไฟล์นี้ = หางไซยานยาว + เส้นความเร็วที่ปลายบน/ล่าง + เศษผลึกกระเด็น + ไอเย็น • ติดกับคลื่นจริง วนจนคลื่นหยุด",
+ "desc": "Glacier Rend คลื่นดาบ (ผู้ใช้ 2026-11-06 + ref): ครึ่งเสี้ยวตั้งตรงลากพื้น ขอบหน้าขาวร้อน ไล่ฟ้าน้ำเงิน ออร่าฟุ้งจางนุ่มตามหลัง ประกายดาว เส้นแสง เศษหิน • สร้างจาก tools/frost-wave-gen.py",
  "tags": [
   "frost",
   "slash",
   "projectile"
  ],
  "pal": "ice",
- "dur": 1,
+ "dur": 3.0,
  "layers": [
   {
-   "id": "mid",
+   "id": "aura",
    "t": "mesh",
    "at": 0,
-   "life": 1,
+   "life": 3.0,
    "loop": true,
-   "shape": "sphere",
-   "mat": "glow",
-   "col": "#9fdcff",
+   "shape": "model",
+   "model": "frost_wave_blade",
+   "mat": "tex",
+   "tex": "tex/frost_wave_aura",
+   "col": "#ffffff",
+   "col2": "#000000",
+   "rim": 0,
    "pos": [
     0,
-    1.75,
-    0
+    0,
+    -0.5
    ],
-   "scale": 0.05,
+   "scale": {
+    "0": [
+     0.4,
+     0.4,
+     0.4
+    ],
+    "0.07": [
+     1,
+     1.08,
+     1.35
+    ]
+   },
+   "op": {
+    "0": 0,
+    "0.03": 0,
+    "0.06": 0.9
+   },
    "fade": 0
   },
   {
-   "id": "topT",
+   "id": "body",
    "t": "mesh",
    "at": 0,
-   "life": 1,
+   "life": 3.0,
+   "loop": true,
+   "shape": "model",
+   "model": "frost_wave_blade",
+   "mat": "tex",
+   "tex": "tex/frost_wave_body",
+   "col": "#ffffff",
+   "col2": "#000000",
+   "rim": 0,
+   "pos": [
+    0,
+    0,
+    0
+   ],
+   "scale": {
+    "0": 0.3,
+    "0.07": 1
+   },
+   "op": {
+    "0": 0,
+    "0.03": 0,
+    "0.06": 1
+   },
+   "fade": 0
+  },
+  {
+   "id": "flow",
+   "t": "mesh",
+   "at": 0,
+   "life": 3.0,
+   "loop": true,
+   "shape": "model",
+   "model": "frost_wave_blade",
+   "mat": "tex",
+   "tex": "tex/frost_wave_streak",
+   "col": "#c8f2ff",
+   "col2": "#000000",
+   "rim": 0,
+   "pos": [
+    0,
+    0,
+    0
+   ],
+   "scale": {
+    "0": 0.3,
+    "0.07": 1
+   },
+   "op": {
+    "0": 0,
+    "0.03": 0,
+    "0.06": 0.7
+   },
+   "fade": 0,
+   "uvTile": [
+    1,
+    1
+   ],
+   "uvScroll": [
+    -1.3,
+    0
+   ]
+  },
+  {
+   "id": "gnd",
+   "t": "mesh",
+   "at": 0,
+   "life": 3.0,
    "loop": true,
    "shape": "sphere",
    "mat": "glow",
    "col": "#ffffff",
    "pos": [
     0,
-    3.5,
-    -1.3
+    0.1,
+    1.9
    ],
    "scale": 0.06,
    "fade": 0
   },
   {
-   "id": "botT",
-   "t": "mesh",
+   "id": "gline",
+   "t": "trail",
    "at": 0,
-   "life": 1,
+   "life": 3.0,
    "loop": true,
-   "shape": "sphere",
-   "mat": "glow",
-   "col": "#ffffff",
+   "of": "gnd",
+   "col": "#e8fbff",
+   "col2": "#2f8fe8",
+   "w": 0.14,
+   "tlife": 0.7,
+   "k": 1.25
+  },
+  {
+   "id": "wisps",
+   "t": "emit",
+   "at": 0,
+   "life": 3.0,
+   "loop": true,
+   "rate": 80,
+   "from": "box",
+   "fr": 0.5,
+   "fh": 4.2,
    "pos": [
     0,
     0.2,
-    -1.3
+    -0.6
    ],
-   "scale": 0.06,
-   "fade": 0
+   "dir": "aim",
+   "yaw": 180,
+   "spread": 0.2,
+   "speed": [
+    1,
+    3
+   ],
+   "plife": [
+    0.3,
+    0.6
+   ],
+   "size": [
+    6,
+    11
+   ],
+   "col": "#4fb4ff",
+   "c2": "#1a3fb0",
+   "gravity": -0.5,
+   "drag": 1.2,
+   "fin": 5
   },
   {
-   "id": "tail",
-   "t": "trail",
+   "id": "stars",
+   "t": "emit",
    "at": 0,
-   "life": 1,
+   "life": 3.0,
    "loop": true,
-   "of": "mid",
-   "col": "#5fe8ff",
-   "col2": "#2f7fe0",
-   "w": 1.6,
-   "tlife": 0.3,
-   "k": 1.1
-  },
-  {
-   "id": "topLine",
-   "t": "trail",
-   "at": 0,
-   "life": 1,
-   "loop": true,
-   "of": "topT",
+   "rate": 90,
+   "from": "box",
+   "fr": 0.5,
+   "fh": 4.2,
+   "pos": [
+    0,
+    0.2,
+    -1
+   ],
+   "dir": "random",
+   "spread": 1,
+   "speed": [
+    0.5,
+    3
+   ],
+   "plife": [
+    0.25,
+    0.7
+   ],
+   "look": "spark",
+   "size": [
+    0.8,
+    1.9
+   ],
    "col": "#ffffff",
-   "col2": "#5fe8ff",
-   "w": 0.16,
-   "tlife": 0.22,
-   "k": 2
-  },
-  {
-   "id": "botLine",
-   "t": "trail",
-   "at": 0,
-   "life": 1,
-   "loop": true,
-   "of": "botT",
-   "col": "#ffffff",
-   "col2": "#5fe8ff",
-   "w": 0.16,
-   "tlife": 0.22,
-   "k": 2
+   "c2": "#7fd8ff",
+   "gravity": 0.4,
+   "drag": 1.2
   },
   {
    "id": "lines",
    "t": "emit",
    "at": 0,
-   "life": 1,
+   "life": 3.0,
    "loop": true,
-   "rate": 70,
-   "from": "sphere",
-   "fr": 1.4,
+   "rate": 60,
+   "from": "box",
+   "fr": 0.9,
+   "fh": 4.6,
    "dir": "aim",
    "yaw": 180,
-   "spread": 0.08,
+   "spread": 0.05,
    "speed": [
-    10,
-    16
+    14,
+    26
    ],
    "plife": [
-    0.08,
-    0.14
+    0.14,
+    0.3
    ],
    "look": "streak",
    "size": [
-    2,
-    3
+    2.5,
+    5
    ],
    "col": "#ffffff",
-   "c2": "#5fe8ff",
+   "c2": "#4fb4ff",
    "gravity": 0,
    "drag": 0,
    "pos": [
     0,
-    1.5,
-    0
+    0.3,
+    -0.6
    ]
   },
   {
-   "id": "throw",
+   "id": "sparks",
    "t": "emit",
    "at": 0,
-   "life": 1,
+   "life": 3.0,
    "loop": true,
-   "rate": 60,
+   "rate": 120,
    "from": "sphere",
-   "fr": 1.2,
+   "fr": 0.6,
+   "dir": "random",
+   "spread": 1,
+   "speed": [
+    2,
+    7
+   ],
+   "up": [
+    1,
+    5
+   ],
+   "plife": [
+    0.2,
+    0.55
+   ],
+   "look": "spark",
+   "size": [
+    0.7,
+    1.5
+   ],
+   "col": "#ffffff",
+   "c2": "#6fd8ff",
+   "gravity": 7,
+   "drag": 1.5,
    "pos": [
     0,
-    1.6,
-    -0.4
+    0.15,
+    0.6
+   ]
+  },
+  {
+   "id": "rocks",
+   "t": "emit",
+   "at": 0,
+   "life": 3.0,
+   "loop": true,
+   "rate": 38,
+   "from": "sphere",
+   "fr": 0.8,
+   "pos": [
+    0,
+    0.2,
+    -0.8
    ],
    "dir": "random",
    "spread": 1,
    "speed": [
     1,
-    3
+    4
    ],
    "up": [
-    1,
-    3
+    2,
+    5
    ],
    "plife": [
     0.5,
@@ -166,64 +319,70 @@
    "model": "frost_shard",
    "mmat": "ice",
    "msize": [
-    0.1,
-    0.22
+    0.08,
+    0.2
    ],
    "bounce": 0.3,
    "mspin": 540,
-   "gravity": 9,
+   "gravity": 11,
    "drag": 1.2,
    "col": "#e6f7ff",
    "c2": "#2f7fe0"
   },
   {
-   "id": "mist",
+   "id": "debris",
    "t": "emit",
    "at": 0,
-   "life": 1,
+   "life": 3.0,
    "loop": true,
-   "rate": 35,
+   "rate": 22,
    "from": "sphere",
-   "fr": 1.2,
+   "fr": 0.7,
    "pos": [
     0,
-    1.2,
-    -0.8
+    0.15,
+    -1.2
    ],
    "dir": "random",
-   "spread": 0.6,
+   "spread": 1,
    "speed": [
-    0.2,
-    0.6
+    1,
+    3
+   ],
+   "up": [
+    2,
+    4.5
    ],
    "plife": [
-    0.8,
-    1.2
+    0.6,
+    1
    ],
-   "look": "smoke",
-   "fb": "tex/smoke_puff",
-   "size": [
-    12,
-    18
+   "look": "model",
+   "model": "frost_shard",
+   "mmat": "solid",
+   "msize": [
+    0.07,
+    0.16
    ],
-   "col": "#d6ecff",
-   "c2": "#8fb4d8",
-   "gravity": -0.3,
-   "drag": 1.6,
-   "x": true
+   "bounce": 0.3,
+   "mspin": 400,
+   "gravity": 12,
+   "drag": 1,
+   "col": "#39404e",
+   "c2": "#191d28"
   },
   {
    "id": "light",
    "t": "light",
    "at": 0,
-   "life": 1,
+   "life": 3.0,
    "loop": true,
    "col": "#8fe0ff",
-   "int": 1.6,
-   "dist": 10,
+   "int": 2,
+   "dist": 11,
    "pos": [
     0,
-    1.4,
+    1.6,
     0
    ]
   }

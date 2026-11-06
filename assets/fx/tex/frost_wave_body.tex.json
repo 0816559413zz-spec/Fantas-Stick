@@ -1,0 +1,14 @@
+{
+ "v": 1,
+ "desc": "เนื้อคลื่น Glacier Rend: ขอบซ้ายขาวร้อน ไล่ฟ้า น้ำเงินเข้ม จางขวา มีเส้นใยไหล",
+ "gen": "image",
+ "seed": 41,
+ "px": 512,
+ "cols": 1,
+ "rows": 1,
+ "kind": "loop",
+ "fps": 1,
+ "ramp": "white",
+ "add": false,
+ "p": {}
+}

@@ -68,7 +68,7 @@ function frostDash(p,inp,pr,dt,setCd){
   return false;
 }
 // พื้นน้ำแข็ง (ทางไถล / ทางคลื่นดาบ / วงน้ำแข็ง)
-function addIce(o){const z=Object.assign({t:4},o);(G.ices||(G.ices=[])).push(z);const ev={k:'efx',z:'ice',x:z.x,y:z.y,r:z.r,t:z.t,c:z.kind==='ring'?1:0};if(o.lx!==undefined){ev.lx=Math.round(o.lx);ev.ly=Math.round(o.ly);}emit(ev);return z;}
+function addIce(o){const z=Object.assign({t:4},o);(G.ices||(G.ices=[])).push(z);const ev={k:'efx',z:'ice',x:z.x,y:z.y,r:z.r,t:z.t,c:z.kind==='ring'?1:0};if(o.wv)ev.w=1;if(o.lx!==undefined){ev.lx=Math.round(o.lx);ev.ly=Math.round(o.ly);}emit(ev);return z;}
 function updateIces(dt){
   for(const q of plist())q.iceB=0;
   if(!G.ices||!G.ices.length)return;
@@ -91,7 +91,7 @@ function updateWaves(dt){
     const GV=GREND.v,st=Math.min(w.left,GV.waveSpd*dt);w.x+=w.dx*st;w.y+=w.dy*st;w.left-=st;w.acc+=st;
     const o=G.players[w.owner];
     if(o)for(const t of foesOf(w.team)){if(w.hit.has(t))continue;if(Math.hypot(t.x-w.x,t.y-w.y)<40+(t.r||PR)&&cH(t)<4){w.hit.add(t);aoeHit(o,t,GV.waveDmg,t=>addFrostSlow(t,GV.waveSlow));}}
-    if(w.acc>=50){w.acc=0;addIce({x:w.x,y:w.y,r:72,t:4,team:w.team,kind:'path',lx:w.x-w.dx*50,ly:w.y-w.dy*50});}
+    if(w.acc>=50){w.acc=0;addIce({x:w.x,y:w.y,r:72,t:4,team:w.team,kind:'path',lx:w.x-w.dx*50,ly:w.y-w.dy*50,wv:1});}
     if(w.x<30||w.x>MW-30||w.y<30||w.y>MH-30)w.left=0;
   }
   G.waves=G.waves.filter(w=>w.left>0);

@@ -215,7 +215,7 @@ MY:204 myDB:205 mySave:206 myLoad:209 myDecodeReady:215 myPlay:216 myNext:228 my
 §250 เพลงประกอบ (สร้างสดตามแผนที่)
 MUSIC:251 THEMES:252 padNote:257 musicTick:264 toggleMusic:293
 
-## js/19-client.js (262) — 
+## js/19-client.js (266) — 
 cv:4 cx:4 DPR:5 SW:5 SH:5 resize:6 VIEW:12 screen:13 lastBuffKey:13 overShown:13 lastCount:13 PARTS:14 TEXTS:14
 §15 งบเอฟเฟกต์ (VFX budget)
 VFXB:20 _apush:21 vfxQual:29 vfxBegin:31 vfxEnd:34 vfxOnce:36 vfxExtra:38 PCOL:39 setScreen:41 onLobby:53
@@ -228,7 +228,7 @@ PRED:117 predictMe:118 myPos:139
 §141 เอฟเฟกต์
 burst:143 smoke:154 ring:155 floatText:156 shake:157 wandPos:158 impactFX:160 explosionFX:177
 §189 เอฟเฟกต์คาถาใหม่
-ZV:190 COLB:190 WVV:190 GLV:190 ICEV:190 SLV:190 ULTV:190 OBV:190 _iceDisc:192 _iceEdge:193 _iceSpk:194 iceFloorMat:195 _icePlane:196 _icePathMat:197 makeIceFloor:198 updateIceFloors:222 FLASHM:233 FLASHING:234 flashModel:235 endFlash:244 tickFlash:245 GHOSTM:247 SOLIDM:247 ghostOf:248 setGhost:254 hitSparks:262
+ZV:190 COLB:190 WVV:190 GLV:190 ICEV:190 SLV:190 ULTV:190 OBV:190 _iceDisc:192 _iceEdge:193 _iceSpk:194 iceFloorMat:195 _icePlane:196 _icePathMat:197 makeIceFloor:198 ICE_WV:224 updateIceFloors:225 FLASHM:237 FLASHING:238 flashModel:239 endFlash:248 tickFlash:249 GHOSTM:251 SOLIDM:251 ghostOf:252 setGhost:258 hitSparks:266
 
 ## js/20-vfx-pyro-storm.js (414) — Dragonfall (ภาพ)
 makeDfCircle:3 DFV:20 dfCracks:21 updateDfCracks:31 dragonfallFX:32
@@ -452,27 +452,27 @@ fxLoopName:356 blzFxName:357 fxLoopKeep:358 fshHitFx:360 fxBind:363
 §374 แม่แบบ playFx เป็นไฟล์ (assets/fx/tpl/*, sig/*, rec/*)
 fxTpl:376
 
-## js/46-fx-make.js (280) — 
+## js/46-fx-make.js (317) — 
 FXMK:10 MKD:11 mkRng:12 mkHash:13 mkNoise:15 mkL:17 mkR2:18
 §19 ที่เก็บจุด/สามเหลี่ยม
 mkG:21 mkPc:22 mkV:23 mkQ:24 mkAppend:25 mkCopy:26 mkFlat:27 _mkv:28 mkXf:29 mkThree:32 mkTRS:34 mkGrid:37
 §38 ชิ้นส่วน (k) — พิกัด: ฐานอยู่ที่ y=0 (ยกเว้น sphere/box อยู่กลาง)
 §39 ปั้นเอง (k:"poly"): จุด v + หน้า f (เลขจุด ทวนเข็มเมื่อมองจากด้านนอก)…
 mkCC:40 MKGEN:51
-§112 ตัวแต่ง (ทำตามลำดับ): เรียว → บิด → โค้ง → ขรุขระ → แบน(เหลี่ยม) → ขน…
-mkDeform:113 mkOpts:124 mkPart:125 fxMeshBuild:138
-§152 โหลด
-fxMeshLoad:153 fxMeshGeo:155 fxMeshSet:157 fxTexLoad:159 fxTexUse:162 fxTexNeed:165
-§166 โมเดลงอกทีละชิ้น (ชั้น mesh: grow 0..1 เส้นโค้งได้, stagger, growBy)
-FXGROWBY:168 fxGrowInit:169 fxGrowTick:171
-§176 วัสดุภาพบนรูปทรง (mat:"tex") — ภาพที่วาดในสตูดิโอ (tex/…) ไหลบนผิว + …
-fxTexMat:178 fxTexMatBind:190 fxTexMatTick:193
-§194 เศษโมเดลกระเด็น (emit look:"model") — หิน ผลึก ขนนก เศษดาบ: หมุน ตกตา…
-FXMP:196 MPLOD:200 MPLOD_PX:200 MPLOD_ON:200 fxMPParticleGeo:201 fxMPMat:206 fxMPGroup:210 _mpM:215 _mpQ:215 _mpE:215 _mpP:215 _mpS:215 fxMPUpdate:216 fxMPClear:230 fxMPSpawn:232
-§236 อากาศบิดเบี้ยว (ชั้น warp) — ไอร้อน / คลื่นกระแทกบิดภาพ / เลนส์โป่ง •…
-fxWarpMake:238 fxWarpTick:250
-§256 ไฟ 3 มิติจากการจำลอง (ชั้น vol) — ไฟล์รูปแบบเดียวกับที่เพื่อน bake จา…
-FXVOL:259 fxVolLoad:260 fxVolTex:264 fxVolSet:267 fxVolReady:268 fxVolMake:269 fxVolTick:272 fxPreAssets:277 fxAssetsWait:279
+§113 ตัวแต่ง (ทำตามลำดับ): เรียว → บิด → โค้ง → ขรุขระ → แบน(เหลี่ยม) → ขน…
+mkDeform:114 mkOpts:125 mkPart:126 fxMeshBuild:139 fxModelBark:157
+§189 โหลด
+fxMeshLoad:190 fxMeshGeo:192 fxMeshSet:194 fxTexLoad:196 fxTexUse:199 fxTexNeed:202
+§203 โมเดลงอกทีละชิ้น (ชั้น mesh: grow 0..1 เส้นโค้งได้, stagger, growBy)
+FXGROWBY:205 fxGrowInit:206 fxGrowTick:208
+§213 วัสดุภาพบนรูปทรง (mat:"tex") — ภาพที่วาดในสตูดิโอ (tex/…) ไหลบนผิว + …
+fxTexMat:215 fxTexMatBind:227 fxTexMatTick:230
+§231 เศษโมเดลกระเด็น (emit look:"model") — หิน ผลึก ขนนก เศษดาบ: หมุน ตกตา…
+FXMP:233 MPLOD:237 MPLOD_PX:237 MPLOD_ON:237 fxMPParticleGeo:238 fxMPMat:243 fxMPGroup:247 _mpM:252 _mpQ:252 _mpE:252 _mpP:252 _mpS:252 fxMPUpdate:253 fxMPClear:267 fxMPSpawn:269
+§273 อากาศบิดเบี้ยว (ชั้น warp) — ไอร้อน / คลื่นกระแทกบิดภาพ / เลนส์โป่ง •…
+fxWarpMake:275 fxWarpTick:287
+§293 ไฟ 3 มิติจากการจำลอง (ชั้น vol) — ไฟล์รูปแบบเดียวกับที่เพื่อน bake จา…
+FXVOL:296 fxVolLoad:297 fxVolTex:301 fxVolSet:304 fxVolReady:305 fxVolMake:306 fxVolTick:309 fxPreAssets:314 fxAssetsWait:316
 
 ## js/47-earth-view.js (686) — 
 ECOL:9 EGUARD_BIG:14 EGUARD:14 CB:15 EV:16 eW:17 eYaw:18
@@ -720,4 +720,4 @@ tuneOpenF:80 tuneFmt:81 tuneRow:82 tuneRefresh:85 tuneMsg:93 tuneToggle:94 tuneE
 §122 API สำหรับเครื่องมือแยก tune.html (เปิดเกมใน iframe แล้วเรียกผ่าน WD)
 tuneDump:123 tuneSetKey:124
 
-(85 files, 20873 lines)
+(85 files, 20914 lines)

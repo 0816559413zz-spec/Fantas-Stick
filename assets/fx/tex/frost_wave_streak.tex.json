@@ -1,0 +1,14 @@
+{
+ "v": 1,
+ "desc": "เส้นแสงไหลบนผิวคลื่น Glacier Rend",
+ "gen": "image",
+ "seed": 41,
+ "px": 512,
+ "cols": 1,
+ "rows": 1,
+ "kind": "loop",
+ "fps": 1,
+ "ramp": "white",
+ "add": true,
+ "p": {}
+}

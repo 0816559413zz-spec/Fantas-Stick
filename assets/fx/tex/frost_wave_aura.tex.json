@@ -1,0 +1,14 @@
+{
+ "v": 1,
+ "desc": "ออร่าฟุ้งรอบคลื่น Glacier Rend จางนุ่มทุกขอบ",
+ "gen": "image",
+ "seed": 41,
+ "px": 256,
+ "cols": 1,
+ "rows": 1,
+ "kind": "loop",
+ "fps": 1,
+ "ramp": "white",
+ "add": true,
+ "p": {}
+}

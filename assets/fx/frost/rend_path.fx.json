@@ -7,7 +7,7 @@
   "path"
  ],
  "pal": "ice",
- "dur": 3.2,
+ "dur": 4.4,
  "params": {
   "len": {
    "def": 30,
@@ -18,7 +18,7 @@
   {
    "id": "sp0",
    "t": "crown",
-   "at": "0.1*len/75",
+   "at": "0.1*len/37.5",
    "life": 1.5,
    "att": "ground",
    "pos": [
@@ -28,12 +28,12 @@
    ],
    "r": 1,
    "hy": 1.4,
-   "mist": 3
+   "mist": 0
   },
   {
    "id": "br0",
    "t": "debris",
-   "at": "0.1*len/75+1.35",
+   "at": "0.1*len/37.5+1.35",
    "life": 1.1,
    "att": "ground",
    "pos": [
@@ -51,7 +51,7 @@
   {
    "id": "sp1",
    "t": "crown",
-   "at": "0.24*len/75",
+   "at": "0.24*len/37.5",
    "life": 1.5,
    "att": "ground",
    "pos": [
@@ -61,12 +61,12 @@
    ],
    "r": 0.8,
    "hy": 1.15,
-   "mist": 3
+   "mist": 0
   },
   {
    "id": "br1",
    "t": "debris",
-   "at": "0.24*len/75+1.35",
+   "at": "0.24*len/37.5+1.35",
    "life": 1.1,
    "att": "ground",
    "pos": [
@@ -84,7 +84,7 @@
   {
    "id": "sp2",
    "t": "crown",
-   "at": "0.38*len/75",
+   "at": "0.38*len/37.5",
    "life": 1.5,
    "att": "ground",
    "pos": [
@@ -94,12 +94,12 @@
    ],
    "r": 0.8,
    "hy": 1.4,
-   "mist": 3
+   "mist": 0
   },
   {
    "id": "br2",
    "t": "debris",
-   "at": "0.38*len/75+1.35",
+   "at": "0.38*len/37.5+1.35",
    "life": 1.1,
    "att": "ground",
    "pos": [
@@ -117,7 +117,7 @@
   {
    "id": "sp3",
    "t": "crown",
-   "at": "0.52*len/75",
+   "at": "0.52*len/37.5",
    "life": 1.5,
    "att": "ground",
    "pos": [
@@ -127,12 +127,12 @@
    ],
    "r": 1,
    "hy": 1.15,
-   "mist": 3
+   "mist": 0
   },
   {
    "id": "br3",
    "t": "debris",
-   "at": "0.52*len/75+1.35",
+   "at": "0.52*len/37.5+1.35",
    "life": 1.1,
    "att": "ground",
    "pos": [
@@ -150,7 +150,7 @@
   {
    "id": "sp4",
    "t": "crown",
-   "at": "0.66*len/75",
+   "at": "0.66*len/37.5",
    "life": 1.5,
    "att": "ground",
    "pos": [
@@ -160,12 +160,12 @@
    ],
    "r": 0.8,
    "hy": 1.4,
-   "mist": 3
+   "mist": 0
   },
   {
    "id": "br4",
    "t": "debris",
-   "at": "0.66*len/75+1.35",
+   "at": "0.66*len/37.5+1.35",
    "life": 1.1,
    "att": "ground",
    "pos": [
@@ -183,7 +183,7 @@
   {
    "id": "sp5",
    "t": "crown",
-   "at": "0.8*len/75",
+   "at": "0.8*len/37.5",
    "life": 1.5,
    "att": "ground",
    "pos": [
@@ -193,12 +193,12 @@
    ],
    "r": 0.8,
    "hy": 1.15,
-   "mist": 3
+   "mist": 0
   },
   {
    "id": "br5",
    "t": "debris",
-   "at": "0.8*len/75+1.35",
+   "at": "0.8*len/37.5+1.35",
    "life": 1.1,
    "att": "ground",
    "pos": [
@@ -216,7 +216,7 @@
   {
    "id": "sp6",
    "t": "crown",
-   "at": "0.94*len/75",
+   "at": "0.94*len/37.5",
    "life": 1.5,
    "att": "ground",
    "pos": [
@@ -226,12 +226,12 @@
    ],
    "r": 1,
    "hy": 1.4,
-   "mist": 3
+   "mist": 0
   },
   {
    "id": "br6",
    "t": "debris",
-   "at": "0.94*len/75+1.35",
+   "at": "0.94*len/37.5+1.35",
    "life": 1.1,
    "att": "ground",
    "pos": [
@@ -249,7 +249,7 @@
   {
    "id": "cr0",
    "t": "decal",
-   "at": "0.2*len/75",
+   "at": "0.2*len/37.5",
    "life": 2.4,
    "att": "ground",
    "kind": "icecrack",
@@ -265,7 +265,7 @@
   {
    "id": "cr1",
    "t": "decal",
-   "at": "0.5*len/75",
+   "at": "0.5*len/37.5",
    "life": 2.4,
    "att": "ground",
    "kind": "icecrack",
@@ -281,7 +281,7 @@
   {
    "id": "cr2",
    "t": "decal",
-   "at": "0.8*len/75",
+   "at": "0.8*len/37.5",
    "life": 2.4,
    "att": "ground",
    "kind": "icecrack",
@@ -295,51 +295,311 @@
    ]
   },
   {
-   "id": "mist",
-   "t": "emit",
-   "at": 0.05,
-   "life": 0.6,
-   "rate": 30,
-   "att": "ground",
-   "from": "line",
-   "fh": "len",
-   "dir": "flat",
-   "spread": 1,
-   "speed": [
-    0.4,
-    1
-   ],
-   "up": [
-    0,
-    0.3
-   ],
-   "plife": [
-    1.2,
-    1.8
-   ],
-   "look": "smoke",
-   "fb": "tex/smoke_puff",
-   "size": [
-    12,
-    18
-   ],
-   "col": "#e6f2fa",
-   "c2": "#9fc4e0",
-   "gravity": -0.05,
-   "drag": 1.5,
-   "pos": [
-    0,
-    0.3,
-    0
-   ],
-   "x": true
-  },
-  {
    "id": "snd",
    "t": "sound",
    "at": 0.1,
    "name": "break",
    "vol": 0.45
+  },
+  {
+   "id": "scar0",
+   "t": "mesh",
+   "at": "0*len/37.5",
+   "life": 3.4,
+   "att": "ground",
+   "shape": "model",
+   "model": "frost_wave_scar",
+   "mat": "tex",
+   "tex": "tex/frost_wave_scar",
+   "col": "#ffffff",
+   "col2": "#000000",
+   "rim": 0,
+   "pos": [
+    0,
+    0.09,
+    "len*0"
+   ],
+   "scale": [
+    1.15,
+    1,
+    "len/6"
+   ],
+   "fade": 0.45
+  },
+  {
+   "id": "sgl0",
+   "t": "mesh",
+   "at": "0*len/37.5",
+   "life": 0.95,
+   "att": "ground",
+   "shape": "model",
+   "model": "frost_wave_scar",
+   "mat": "tex",
+   "tex": "tex/frost_wave_scarglow",
+   "col": "#9fe6ff",
+   "col2": "#000000",
+   "rim": 0,
+   "pos": [
+    0,
+    0.11,
+    "len*0"
+   ],
+   "scale": [
+    0.8,
+    1,
+    "len/6"
+   ],
+   "fade": 0.7
+  },
+  {
+   "id": "scar1",
+   "t": "mesh",
+   "at": "0.166667*len/37.5",
+   "life": 3.4,
+   "att": "ground",
+   "shape": "model",
+   "model": "frost_wave_scar",
+   "mat": "tex",
+   "tex": "tex/frost_wave_scar",
+   "col": "#ffffff",
+   "col2": "#000000",
+   "rim": 0,
+   "pos": [
+    0,
+    0.09,
+    "len*0.166667"
+   ],
+   "scale": [
+    1.15,
+    1,
+    "len/6"
+   ],
+   "fade": 0.45
+  },
+  {
+   "id": "sgl1",
+   "t": "mesh",
+   "at": "0.166667*len/37.5",
+   "life": 0.95,
+   "att": "ground",
+   "shape": "model",
+   "model": "frost_wave_scar",
+   "mat": "tex",
+   "tex": "tex/frost_wave_scarglow",
+   "col": "#9fe6ff",
+   "col2": "#000000",
+   "rim": 0,
+   "pos": [
+    0,
+    0.11,
+    "len*0.166667"
+   ],
+   "scale": [
+    0.8,
+    1,
+    "len/6"
+   ],
+   "fade": 0.7
+  },
+  {
+   "id": "scar2",
+   "t": "mesh",
+   "at": "0.333333*len/37.5",
+   "life": 3.4,
+   "att": "ground",
+   "shape": "model",
+   "model": "frost_wave_scar",
+   "mat": "tex",
+   "tex": "tex/frost_wave_scar",
+   "col": "#ffffff",
+   "col2": "#000000",
+   "rim": 0,
+   "pos": [
+    0,
+    0.09,
+    "len*0.333333"
+   ],
+   "scale": [
+    1.15,
+    1,
+    "len/6"
+   ],
+   "fade": 0.45
+  },
+  {
+   "id": "sgl2",
+   "t": "mesh",
+   "at": "0.333333*len/37.5",
+   "life": 0.95,
+   "att": "ground",
+   "shape": "model",
+   "model": "frost_wave_scar",
+   "mat": "tex",
+   "tex": "tex/frost_wave_scarglow",
+   "col": "#9fe6ff",
+   "col2": "#000000",
+   "rim": 0,
+   "pos": [
+    0,
+    0.11,
+    "len*0.333333"
+   ],
+   "scale": [
+    0.8,
+    1,
+    "len/6"
+   ],
+   "fade": 0.7
+  },
+  {
+   "id": "scar3",
+   "t": "mesh",
+   "at": "0.5*len/37.5",
+   "life": 3.4,
+   "att": "ground",
+   "shape": "model",
+   "model": "frost_wave_scar",
+   "mat": "tex",
+   "tex": "tex/frost_wave_scar",
+   "col": "#ffffff",
+   "col2": "#000000",
+   "rim": 0,
+   "pos": [
+    0,
+    0.09,
+    "len*0.5"
+   ],
+   "scale": [
+    1.15,
+    1,
+    "len/6"
+   ],
+   "fade": 0.45
+  },
+  {
+   "id": "sgl3",
+   "t": "mesh",
+   "at": "0.5*len/37.5",
+   "life": 0.95,
+   "att": "ground",
+   "shape": "model",
+   "model": "frost_wave_scar",
+   "mat": "tex",
+   "tex": "tex/frost_wave_scarglow",
+   "col": "#9fe6ff",
+   "col2": "#000000",
+   "rim": 0,
+   "pos": [
+    0,
+    0.11,
+    "len*0.5"
+   ],
+   "scale": [
+    0.8,
+    1,
+    "len/6"
+   ],
+   "fade": 0.7
+  },
+  {
+   "id": "scar4",
+   "t": "mesh",
+   "at": "0.666667*len/37.5",
+   "life": 3.4,
+   "att": "ground",
+   "shape": "model",
+   "model": "frost_wave_scar",
+   "mat": "tex",
+   "tex": "tex/frost_wave_scar",
+   "col": "#ffffff",
+   "col2": "#000000",
+   "rim": 0,
+   "pos": [
+    0,
+    0.09,
+    "len*0.666667"
+   ],
+   "scale": [
+    1.15,
+    1,
+    "len/6"
+   ],
+   "fade": 0.45
+  },
+  {
+   "id": "sgl4",
+   "t": "mesh",
+   "at": "0.666667*len/37.5",
+   "life": 0.95,
+   "att": "ground",
+   "shape": "model",
+   "model": "frost_wave_scar",
+   "mat": "tex",
+   "tex": "tex/frost_wave_scarglow",
+   "col": "#9fe6ff",
+   "col2": "#000000",
+   "rim": 0,
+   "pos": [
+    0,
+    0.11,
+    "len*0.666667"
+   ],
+   "scale": [
+    0.8,
+    1,
+    "len/6"
+   ],
+   "fade": 0.7
+  },
+  {
+   "id": "scar5",
+   "t": "mesh",
+   "at": "0.833333*len/37.5",
+   "life": 3.4,
+   "att": "ground",
+   "shape": "model",
+   "model": "frost_wave_scar",
+   "mat": "tex",
+   "tex": "tex/frost_wave_scar",
+   "col": "#ffffff",
+   "col2": "#000000",
+   "rim": 0,
+   "pos": [
+    0,
+    0.09,
+    "len*0.833333"
+   ],
+   "scale": [
+    1.15,
+    1,
+    "len/6"
+   ],
+   "fade": 0.45
+  },
+  {
+   "id": "sgl5",
+   "t": "mesh",
+   "at": "0.833333*len/37.5",
+   "life": 0.95,
+   "att": "ground",
+   "shape": "model",
+   "model": "frost_wave_scar",
+   "mat": "tex",
+   "tex": "tex/frost_wave_scarglow",
+   "col": "#9fe6ff",
+   "col2": "#000000",
+   "rim": 0,
+   "pos": [
+    0,
+    0.11,
+    "len*0.833333"
+   ],
+   "scale": [
+    0.8,
+    1,
+    "len/6"
+   ],
+   "fade": 0.7
   }
  ]
 }
