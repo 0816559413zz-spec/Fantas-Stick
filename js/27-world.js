@@ -173,7 +173,7 @@ function applyQuality(){
 }
 // ปรับความละเอียดอัตโนมัติ: เฟรมช้า (<~40fps) ลดลงทีละขั้น / ลื่นต่อเนื่องค่อยเพิ่มกลับ
 function qualTick(dt){
-  if(QUAL.mode!=='auto'||screen!=='game'||dt>0.2)return;
+  if(QUAL.mode!=='auto'||(screen!=='game'&&screen!=='menu'&&screen!=='lobby')||dt>0.2)return;   // เมนู/ล็อบบี้ก็ลดเองได้ เครื่องอ่อนจะได้ไม่แลคตั้งแต่หน้าแรก
   QUAL.acc+=dt;QUAL.n++;QUAL.cacc+=QUAL.cpu;
   if(QUAL.acc<2)return;
   const avg=QUAL.acc/QUAL.n*1000,cpu=QUAL.cacc/QUAL.n;QUAL.acc=0;QUAL.n=0;QUAL.cacc=0;

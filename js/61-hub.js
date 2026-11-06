@@ -357,6 +357,7 @@ function hubBuildStudy(){
   F.wandStar=hubStar('#e6f0ff',2.4);F.wandStar.scale.set(0.3,0.3,1);F.wandTip.add(F.wandStar);
   // แสงปลายไม้ไม่ทดสอบความลึก: สไปรต์หันหากล้องตัดกับผิวโต๊ะเป็นเส้นตรง ดูเหมือนปลายไม้จมโต๊ะ (ผู้ใช้ 2026-10-23) • โคลนเพราะ glowMat ใช้ร่วมกัน
   F.wandGlow.material=F.wandGlow.material.clone();for(const sp of [F.wandGlow,F.wandStar]){sp.material.depthTest=false;sp.renderOrder=5;}
+  hubMergeStatic(S,F);
   F.wipe=hubWipeMake();   // ผ้าคลุมสะบัดผ่านกล้อง (วาดหลัง composer ใน hubRender)
   // ฝุ่นละอองลอยในแสงจันทร์
   HUB.ps=hubPS(S,700);
@@ -561,7 +562,7 @@ function hubBurst(ps,p,n,col,sp){for(let i=0;i<n;i++){const a=Math.random()*6.28
 // ---------- สร้างฉาก (ครั้งแรกที่เปิดเมนู) ----------
 function hubBuild(){
   if(HUB.built)return;HUB.built=true;
-  hubBuildStudy();hubBuildLobby();
+  hubBuildStudy();hubBuildLobby();hubMergeStatic(HUBL,HUB.fx);
   HUB.orb=hubMakeOrb(HUBS);
   loadModel('char_student');
 }
@@ -584,7 +585,7 @@ function hubWarm(){
     {const k=(HWARM.keep||[]).filter(q=>q.g.parent===scene);k.forEach(q=>q.g.visible=true);ps.push(...warmCompile([scene]));k.forEach(q=>q.g.visible=false);}   // ตัวละครในฉากเกม (หน้าโปรไฟล์)
     undo.forEach(f=>f());
     for(const q of HWARM.keep||[])q.g.visible=false;
-    if(F.wipe&&c){hubWipeLook(F.wipe,c);const pr=gl.getRenderTarget();gl.setRenderTarget(null);ps.push(gl.compileAsync(F.wipe.S,F.wipe.cam));gl.setRenderTarget(pr);}
+    if(F.wipe&&c){hubWipeLook(F.wipe,c);const pr=gl.getRenderTarget();gl.setRenderTarget(null);gl.compile(F.wipe.S,F.wipe.cam);ps.push(glReady());gl.setRenderTarget(pr);}
     const next=()=>{HWARM.st=2;setTimeout(()=>hubWarmDraw(0),60);};Promise.all(ps).then(next,next);
   }catch(e){console.warn('hubWarm',e);HWARM.st=2;}
 }
@@ -820,6 +821,26 @@ function hubProfTick(dt,now){
 }
 
 // ---------- เรนเดอร์ (เรียกจาก renderStage — คืน true = วาดแล้ว) ----------
+// รวมของตกแต่งที่ไม่ขยับเป็นก้อนเดียว (ผู้ใช้ 2026-11-07 "เมนูยังแลค": 238 draw ต่อเฟรม แทบทุกชิ้นวัสดุของตัวเอง)
+// สี/ความหยาบลงจุดยอด (bodyMat) • ข้ามของที่ F อ้างถึง (โค้ดขยับ/เปลี่ยนค่า) รวมทั้งลูกหลาน • ข้ามวัสดุมีภาพ/โปร่ง/เรืองแสง
+function hubMergeStatic(S,F){
+  const skip=new Set(),seen=new Set(),mark=v=>{if(!v||typeof v!=='object'||seen.has(v))return;seen.add(v);if(v.isObject3D){v.traverse(o=>skip.add(o));return;}if(v.isMaterial||v.isTexture||v.isBufferGeometry)return;if(Array.isArray(v))v.forEach(mark);else if(Object.getPrototypeOf(v)===Object.prototype)for(const k in v)mark(v[k]);};
+  mark(F);S.updateMatrixWorld(true);
+  const G=new Map(),_c=new THREE.Color();
+  S.traverse(m=>{if(!m.isMesh||m.isSkinnedMesh||m.isInstancedMesh||skip.has(m)||m.children.length)return;for(let q=m;q;q=q.parent)if(!q.visible)return;
+    const a=m.material;if(!a||Array.isArray(a)||!a.isMeshStandardMaterial||a.map||a.transparent||a.vertexColors||a.flatShading||a.onBeforeCompile!==THREE.Material.prototype.onBeforeCompile||a.alphaTest||a.envMap||a.normalMap||(a.emissive&&a.emissive.getHex()&&a.emissiveIntensity>0))return;
+    if(Object.keys(m.geometry.morphAttributes).length)return;
+    const k=[a.side,m.castShadow?1:0,m.receiveShadow?1:0].join();let L=G.get(k);if(!L)G.set(k,L=[]);L.push(m);});
+  const inv=new THREE.Matrix4().copy(S.matrixWorld).invert();
+  for(const L of G.values()){if(L.length<3)continue;
+    const geos=[];for(const m of L){const s=m.geometry.index?m.geometry.toNonIndexed():m.geometry.clone();s.applyMatrix4(new THREE.Matrix4().multiplyMatrices(inv,m.matrixWorld));
+      const n=s.attributes.position.count,C=new Float32Array(n*3),Rg=new Float32Array(n),Mt=new Float32Array(n),c=m.material.color,h=new THREE.BufferGeometry();
+      for(let i=0;i<n;i++){C[i*3]=c.r;C[i*3+1]=c.g;C[i*3+2]=c.b;Rg[i]=m.material.roughness;Mt[i]=m.material.metalness;}
+      h.setAttribute('position',s.attributes.position);h.setAttribute('normal',s.attributes.normal);h.setAttribute('color',new THREE.BufferAttribute(C,3));h.setAttribute('aRough',new THREE.BufferAttribute(Rg,1));h.setAttribute('aMetal',new THREE.BufferAttribute(Mt,1));geos.push(h);}
+    const geo=mergeGeometries(geos,false);if(!geo)continue;
+    const M=new THREE.Mesh(geo,bodyMat(L[0].material.side));M.castShadow=L[0].castShadow;M.receiveShadow=L[0].receiveShadow;M.name='hub_static';S.add(M);
+    for(const m of L){m.parent.remove(m);if(!(m.geometry.userData&&m.geometry.userData.keep))m.geometry.dispose();}}
+}
 function hubRender(dt,now){
   const room=screen==='lobby'&&LOBBY&&LOBBY.ph==='lobby';
   if(!HUB.on||crOpen||!(screen==='menu'||room)){if(HUB.fovSet){cam.fov=SET.fov;cam.updateProjectionMatrix();HUB.fovSet=false;}document.body.classList.remove('hubOn');return false;}
@@ -875,7 +896,7 @@ function hubRender(dt,now){
   cam.position.copy(HUB.cam.p).add(_hv.set(mx*par,-my*par*0.5+Math.sin(t*0.5)*0.03,0));
   cam.lookAt(_hv2.copy(HUB.cam.l).add(_hv.set(mx*par*0.3,-my*par*0.2,0)));
   if(HUB.profOn)PRF3.cam.copy(cam.position);
-  rpass.scene=sc;gl.shadowMap.needsUpdate=true;composer.render();rpass.scene=scene;
+  HUB.sf=(HUB.sf|0)+1;rpass.scene=sc;gl.shadowMap.needsUpdate=HUB.sf%3===1;composer.render();rpass.scene=scene;   // เงาในห้องแทบไม่ขยับ: วาดใหม่ทุก 3 เฟรม
   // ผ้าคลุมสะบัดผ่านหน้ากล้อง (ตัดฉากใต้ผ้า) — ชั้นแยกทับภาพที่ post แล้ว
   {const wp=room?-1:hWipeP(tt);if(F.wipe&&wp>0&&wp<1){hubWipeLook(F.wipe,HUB.me);hubWipeDraw(F.wipe,wp,t);}}
   if(lay)hubLabels(lay);

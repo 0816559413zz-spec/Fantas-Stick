@@ -24,6 +24,8 @@ function pinPrograms(){const L=gl.info.programs;if(!L||L.length===pinLen)return;
   for(const pg of L){if(PINNED.has(pg)||n>=PINMAX)continue;PINNED.add(pg);pg.usedTimes++;n++;}}
 function frame(now){
   if(FXSTUDIO.own)return;
+  // นอกเกมไม่ต้องวาดเกิน 60 fps: จอ 165 Hz จะให้การ์ดจอวาดห้องนิ่ง ๆ 165 ครั้ง/วิ (เครื่องร้อน แล้วเข้าเกมยิ่งแลค)
+  if(screen!=='game'&&now-lastFrame<15.5){requestAnimationFrame(frame);return;}
   const dt=Math.min(0.05,(now-lastFrame)/1000);lastFrame=now;
   if(HSTOP.t>0){HSTOP.t-=dt;requestAnimationFrame(frame);return;}
   qualTick(dt);

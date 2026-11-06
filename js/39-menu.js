@@ -243,7 +243,7 @@ function titleLoop(){
     if(!TITLE.slam&&now-TITLE.t0>1500){TITLE.slam=1;const r=$('.inFTA').getBoundingClientRect();titleSpark(TITLE.parts,r.left+r.width*0.72,r.top+r.height*0.12,70,380,'235,230,255');titleSpark(TITLE.parts,r.left+r.width/2,r.top+r.height*0.6,50,300,'185,170,255');}   // ประกายตอนดาวที่ปลายไม้โผล่
     titleDraw(cv,TITLE.parts,dt,30,'220,226,255','170,150,255');
   }
-  if(screen==='menu'&&!crOpen&&!document.hidden)titleDraw($('#menuFx'),TITLE.menuParts,dt,14);
+  if(screen==='menu'&&!crOpen&&!document.hidden){if(!document.body.classList.contains('hubOn'))titleDraw($('#menuFx'),TITLE.menuParts,dt,14);}   // หน้าห้องนักเวท (hub) ซ่อนชั้นนี้ไว้ = ไม่ต้องวาด (อย่าอ่าน clientWidth ทุกเฟรม: บังคับคำนวณเลย์เอาต์)
   requestAnimationFrame(titleLoop);
 }
 function titleGo(){
