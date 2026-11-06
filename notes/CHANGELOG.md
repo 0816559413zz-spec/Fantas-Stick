@@ -1,5 +1,7 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
 
+- 2026-11-06 — **Optimization round 3** (user: "i meant optimizing"): flat ground decals draw in one pass (two-pass draws 21 → 4, `getParameters` 2.3 → 0.8%); far characters/enemies update animation every 2nd/3rd frame (`animLod`, js/22; 35 and 70 units from camera). Headless only, no real GPU number.
+
 - 2026-11-06 — Save castle-mode discussion: side swaps; progression/core HP/completion time scoring; time added on core destruction; both spawns advance; individual respawn timers and player-managed regroup; no duplicate classes; switching classes tentative. Overtime: any defender in zone fully protects core, normal time only reduces damage. Between-core loot phase/time flow saved as a whole-system concept awaiting team discussion, not final rules or implementation authorization. Canonical notes: `designs/castle-gameplay-concept.md`.
 
 - 2026-11-06 — **Optimization round 2** (user: "Do round 2 now"): new profiler sections `zv.*` (inside `updateZV`, js/21) and `h.*` (2D HUD parts, js/37) for `WD.PROF`. Found the VFX Studio runtime re-sorting curve keys on every value read → `fxCurveKeys` caches the sorted key list per curve object (WeakMap; disabled in `?studio`), `updateFx` 3.1 → 2.0 ms in the 12-player brawl bench. HUD (0.7–0.9 ms) and map prop shadows (already merged, ~70 casters) checked — not worth changing. Remaining big items noted in `OPTIMIZE.md`: particles ~5 ms, render submit.

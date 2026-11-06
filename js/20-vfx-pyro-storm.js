@@ -4,7 +4,7 @@ function makeDfCircle(st){
   const g=new THREE.Group(),BL=st?THREE.NormalBlending:THREE.AdditiveBlending;   // สายฟ้า: สีปกติ เห็นชัดแม้บนหิมะ
   const rm=new THREE.MeshBasicMaterial({color:st?'#ffcc00':hdr('#ff5a1a',1.3),transparent:true,opacity:0.75,depthWrite:false,blending:BL,side:THREE.DoubleSide});
   const ring=new THREE.Mesh(new THREE.RingGeometry(st?0.88:0.93,1,56),rm);ring.rotation.x=-Math.PI/2;g.add(ring);
-  const disc=new THREE.Mesh(new THREE.CircleGeometry(0.93,48),new THREE.MeshBasicMaterial({color:st?'#ffd23a':'#ff3a10',transparent:true,opacity:0.13,depthWrite:false,side:THREE.DoubleSide}));disc.rotation.x=-Math.PI/2;g.add(disc);
+  const disc=new THREE.Mesh(new THREE.CircleGeometry(0.93,48),new THREE.MeshBasicMaterial({color:st?'#ffd23a':'#ff3a10',transparent:true,opacity:0.13,depthWrite:false,side:THREE.DoubleSide,forceSinglePass:true}));disc.rotation.x=-Math.PI/2;g.add(disc);
   const inner=new THREE.Mesh(new THREE.RingGeometry(0.9,1,40),new THREE.MeshBasicMaterial({color:st?'#fff6c0':hdr('#ffb347',1.2),transparent:true,opacity:0.55,depthWrite:false,blending:BL,side:THREE.DoubleSide}));inner.rotation.x=-Math.PI/2;g.add(inner);
   const runes=[];const bm=new THREE.MeshBasicMaterial({color:st?'#ffe680':hdr('#ffd27a',1.4),transparent:true,opacity:0.85,depthWrite:false,blending:BL,side:THREE.DoubleSide});
   for(let i=0;i<(st?12:10);i++){const r=new THREE.Mesh(new THREE.PlaneGeometry(0.05,0.22),bm);r.rotation.x=-Math.PI/2;r.userData.a=i/(st?12:10)*Math.PI*2;g.add(r);runes.push(r);

@@ -158,3 +158,5 @@ function frame(){const t=performance.now();WD.render(1/60,t);ctx.readPixels(0,0,
 // around an event: diff gl.info.programs.length and gl.info.memory.{geometries,textures}
 // events: WD.hostStart() · WD.castSlot(p,i) · p.ult=100;WD.castUlt(p) · boss: G.wave=4;G.queue=[];G.en=[] then G.buffT=0
 ```
+
+Round 3 (2026-11-06): measured at frame 200 of the 12-player brawl (hogsmeade): 485 draw calls incl. shadow, 420k triangles, 160 shadow casters, light count steady (no program switches), shadows already every 2nd frame. Flat ground decals (`_decM`, cast discs) marked `forceSinglePass`: two-pass materials 21 → 4 draws, `getParameters` 2.3 → 0.8% of profile. `animTick` takes a `lod` (`animLod`, js/22): other characters and enemies ≥35 units from the camera update bones every 2nd frame, ≥70 every 3rd; own character always every frame. Spread-out bench: `players` ~2.3 → ~2.05 ms, `gpuSubmit` ~9.8 → ~8.1 ms (noisy, two runs vs two runs). Not measured on a real GPU.

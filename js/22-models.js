@@ -61,7 +61,10 @@ function animPlay(A,name,opt){
   a.play();A.cur=a;A.curName=n;return n;
 }
 // st: {down, fly, sp (หน่วย/วินาที), castT (>0 = เพิ่งร่าย), atk (ศัตรูกำลังโจมตี), hitT (>0 = เพิ่งโดน)}
-function animTick(o,st,dt){
+// lod = อัปเดตท่าทุกกี่เฟรม (ตัวไกล 2-3): สะสมเวลาไว้ ความเร็วท่าจึงเท่าเดิม • _animN สลับเฟรมกัน จะได้ไม่ลงเฟรมเดียวกันหมด
+let _animN=0;const ANIM_NEAR=35*35,ANIM_FAR=70*70;
+function animLod(g){const dx=g.position.x-cam.position.x,dz=g.position.z-cam.position.z,d=dx*dx+dz*dz;return d<ANIM_NEAR?1:d<ANIM_FAR?2:3;}
+function animTick(o,st,dt,lod){
   const A=o.anim;if(!A)return;
   A.lockT=Math.max(0,A.lockT-dt);
   if(st.down){animPlay(A,'down',{once:true});A.lockT=0;A.mixer.update(dt);return;}
@@ -76,6 +79,8 @@ function animTick(o,st,dt){
     else if(st.sp>0.6)animPlay(A,'walk',{speed:clamp(st.sp/3.5,0.6,1.6)});
     else animPlay(A,'idle');
   }
+  if(lod>1){A.acc=(A.acc||0)+dt;if(A.skip===undefined)A.skip=_animN++;if(++A.skip%lod)return;dt=A.acc;A.acc=0;}
+  else if(A.acc){dt+=A.acc;A.acc=0;}
   A.mixer.update(dt);
 }
 // สีตามหน้าตาผู้เล่น: วัสดุใน Blender ชื่อ tint_<ช่อง> จะถูกใส่สีให้ (โคลนวัสดุเฉพาะตัวนั้น)
