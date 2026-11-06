@@ -207,46 +207,72 @@ function jag(geo,a,b,amp){
   }
   geo.attributes.position.needsUpdate=true;
 }
+// รูปทรง (ring/ringv/arc/dome/warn/warnr/rune/decal) วาดรวมเป็น InstancedMesh ก้อนเดียวต่อแบบ (ผู้ใช้ 2026-11-05: "สู้นัวๆ เฟรมดรอป", OPTIMIZE §I)
+//   เดิมสร้าง Mesh + วัสดุใหม่ทุกชิ้น → ตอนสู้นัวมีวงแหวน/รอยไหม้ค้างพร้อมกันหลายร้อยชิ้น = หลายร้อย draw call
+//   additive: สี×ความทึบ ให้ผลเท่ากับ opacity เดิม (src×alpha + dst) → พับความทึบเข้าสีของแต่ละชิ้น ภาพเหมือนเดิม
+//   decal (blending ปกติ): ความทึบต่อชิ้นเป็น attribute iOp คูณ alpha
+//   ลำดับวาด: เดิมเรียงตามระยะทีละชิ้น → ตอนนี้ decal วาดก่อนของโปร่งใสอื่น (renderOrder -1), ของเรืองแสงวาดหลัง (3) — ต่างจากเดิมได้เฉพาะตอนซ้อนกับของโปร่งใสแบบปกติ
+//   flashSprite ยังเป็น Sprite ทีละชิ้น (o.m)
+const SHB={},_sbM=new THREE.Matrix4(),_sbQ=new THREE.Quaternion(),_sbE=new THREE.Euler(),_sbS=new THREE.Vector3(),_sbC=new THREE.Color();
+const SHB_GEO={ring:ringGeo,ringv:ringVGeo,arc:arcGeo,dome:domeGeo,full:fullGeo,warn:discGeo,warnr:ringGeo,rune:discGeo,decal:discGeo};
+let _sbDecalMat=null;
+function shbMat(key){
+  if(key==='decal'){   // รอยไหม้: blending ปกติ → ความทึบต่อชิ้นต้องเป็น alpha จริง (attribute iOp) ไม่ใช่พับเข้าสี
+    if(_sbDecalMat)return _sbDecalMat;
+    const mat=new THREE.MeshBasicMaterial({map:decalTex,color:'#ffffff',transparent:true,depthWrite:false});
+    mat.onBeforeCompile=sh=>{sh.vertexShader='attribute float iOp;\nvarying float vOp;\n'+sh.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\nvOp=iOp;');
+      sh.fragmentShader='varying float vOp;\n'+sh.fragmentShader.replace('#include <alphamap_fragment>','#include <alphamap_fragment>\ndiffuseColor.a*=vOp;');};
+    mat.customProgramCacheKey=()=>'shbDecal';return _sbDecalMat=mat;}
+  return key==='rune'?new THREE.MeshBasicMaterial({map:runeTex,color:'#ffffff',transparent:true,depthWrite:false,blending:THREE.AdditiveBlending})
+    :new THREE.MeshBasicMaterial({color:'#ffffff',transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide});
+}
+// สร้าง/ขยายก้อน (ขยายก่อนเริ่มเขียนของเฟรมนั้นเสมอ — ดู updateShapes)
+function shbMake(key,cap){
+  const old=SHB[key],decal=key==='decal';
+  const geo=decal?SHB_GEO[key].clone():SHB_GEO[key];
+  const m=new THREE.InstancedMesh(geo,old?old.m.material:shbMat(key),cap);m.count=0;m.frustumCulled=false;m.visible=false;
+  m.renderOrder=decal?-1:3;   // รอยบนพื้นวาดก่อนของโปร่งใสอื่น • ของเรืองแสงวาดหลัง
+  m.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+  if(decal){const A=new THREE.InstancedBufferAttribute(new Float32Array(cap),1);A.setUsage(THREE.DynamicDrawUsage);geo.setAttribute('iOp',A);m.userData.op=A;}
+  else{m.setColorAt(0,_sbC.setRGB(1,1,1));m.instanceColor.setUsage(THREE.DynamicDrawUsage);}
+  if(old){scene.remove(old.m);if(decal)old.m.geometry.dispose();old.m.dispose();}
+  scene.add(m);return SHB[key]={m,cap,n:0};
+}
+for(const k in SHB_GEO)shbMake(k,64);   // สร้างไว้ตั้งแต่ต้น → warm-up ของห้องรอ compile เชดเดอร์ให้ (ไม่สะดุดตอนวงแรก)
 function spawnShape(s){
-  const add=THREE.AdditiveBlending;
-  let geo,mat,rotY=0;
-  const col=hdr(s.col,s.k==='decal'?1:1.8);
-  switch(s.k){
-    case 'ring':geo=ringGeo;break;
-    case 'ringv':geo=ringVGeo;break;
-    case 'arc':geo=arcGeo;rotY=-s.a;break;
-    case 'dome':geo=s.full?fullGeo:domeGeo;break;
-    case 'decal':geo=discGeo;break;
-    case 'rune':geo=discGeo;break;
-    case 'warn':geo=discGeo;break;
-    case 'warnr':geo=ringGeo;break;
-  }
-  if(s.k==='decal')mat=new THREE.MeshBasicMaterial({map:decalTex,color:'#ffffff',transparent:true,depthWrite:false,opacity:s.op||0.5});
-  else if(s.k==='rune')mat=new THREE.MeshBasicMaterial({map:runeTex,color:col,transparent:true,depthWrite:false,blending:add});
-  else mat=new THREE.MeshBasicMaterial({color:col,transparent:true,depthWrite:false,blending:add,side:THREE.DoubleSide});
-  const m=new THREE.Mesh(geo,mat);
-  m.position.set(tx(s.x),(s.h!==undefined?s.h:(s.k==='decal'?0.025:0.06))+GY(s.x,s.y),tz(s.y));
-  m.rotation.y=rotY;
-  if(s.k==='ringv'){const me=VIEW.cur&&myPos();m.lookAt(cam.position);}
-  m.visible=!s.delay;
-  scene.add(m);
   const fixed=s.k==='decal'||s.k==='rune'||s.k==='warn'||s.k==='warnr';
-  if(s.k==='warn'||s.k==='warnr')m.position.y=0.07;
-  SHAPES.push({m,life:s.life,max:s.life,s0:s.s0!==undefined?s.s0:(fixed?s.s1:0.1),s1:s.s1,op:s.op!==undefined?s.op:0.9,delay:s.delay||0,spin:s.k==='rune',warn:s.k==='warn'||s.k==='warnr'});
+  const o={life:s.life,max:s.life,s0:s.s0!==undefined?s.s0:(fixed?s.s1:0.1),s1:s.s1,op:s.op!==undefined?s.op:0.9,delay:s.delay||0,spin:s.k==='rune',warn:s.k==='warn'||s.k==='warnr'};
+  if(s.k==='decal')o.op=s.op||0.5;
+  else o.col=hdr(s.col,1.8);
+  const y=(s.h!==undefined?s.h:(s.k==='decal'?0.025:0.06))+GY(s.x,s.y);
+  o.b=s.k==='dome'&&s.full?'full':s.k;o.pos=new THREE.Vector3(tx(s.x),o.warn?0.07:y,tz(s.y));o.ry=s.k==='arc'?-s.a:0;
+  if(s.k==='ringv'){const d=new THREE.Object3D();d.position.copy(o.pos);d.lookAt(cam.position);o.q=d.quaternion.clone();}
+  SHAPES.push(o);
 }
 function updateShapes(dt){
   while(SHAPES_Q.length)spawnShape(SHAPES_Q.shift());
+  for(const k in SHB)SHB[k].n=0;
+  for(const o of SHAPES)if(o.b)SHB[o.b].n++;   // นับก่อน → ขยายก้อนที่ไม่พอ (ห้ามขยายกลางลูปเขียน ข้อมูลที่เขียนแล้วจะหาย)
+  for(const k in SHB){const B=SHB[k];if(B.n>B.cap){let c=B.cap;while(c<B.n)c*=2;shbMake(k,c);}SHB[k].n=0;}
   for(let i=SHAPES.length-1;i>=0;i--){
     const o=SHAPES[i];
-    if(o.delay>0){o.delay-=dt;if(o.delay<=0)o.m.visible=true;continue;}
+    if(o.delay>0){o.delay-=dt;if(o.delay<=0&&o.m)o.m.visible=true;continue;}
     o.life-=dt;
-    if(o.life<=0){scene.remove(o.m);o.m.material.dispose();SHAPES.splice(i,1);continue;}
+    if(o.life<=0){if(o.m){scene.remove(o.m);o.m.material.dispose();}SHAPES.splice(i,1);continue;}
     const t=1-o.life/o.max,e=1-Math.pow(1-t,3),s=o.s0+(o.s1-o.s0)*e;
-    o.m.scale.set(s,s,s);
-    o.m.material.opacity=o.op*Math.min(1,o.life/o.max*1.4);
-    if(o.spin)o.m.rotation.y+=dt*1.5;
-    if(o.warn)o.m.material.opacity=0.1+0.4*t+0.1*Math.sin(o.life*30);
+    let op=o.op*Math.min(1,o.life/o.max*1.4);
+    if(o.spin)o.ry=(o.ry||0)+dt*1.5;
+    if(o.warn)op=0.1+0.4*t+0.1*Math.sin(o.life*30);
+    if(o.m){o.m.scale.set(s,s,s);o.m.material.opacity=op;continue;}   // flashSprite
+    const B=SHB[o.b];if(!B.m.parent)scene.add(B.m);
+    if(o.q)_sbQ.copy(o.q);else _sbQ.setFromEuler(_sbE.set(0,o.ry,0));
+    _sbM.compose(o.pos,_sbQ,_sbS.set(s,s,s));B.m.setMatrixAt(B.n,_sbM);
+    if(B.m.userData.op)B.m.userData.op.array[B.n]=op;else B.m.setColorAt(B.n,_sbC.copy(o.col).multiplyScalar(Math.max(0,op)));
+    B.n++;
   }
+  for(const k in SHB){const B=SHB[k],m=B.m;m.count=B.n;m.visible=B.n>0;if(!B.n)continue;
+    m.instanceMatrix.clearUpdateRanges();m.instanceMatrix.addUpdateRange(0,B.n*16);m.instanceMatrix.needsUpdate=true;
+    const C=m.instanceColor||m.userData.op,w=m.instanceColor?3:1;C.clearUpdateRanges();C.addUpdateRange(0,B.n*w);C.needsUpdate=true;}
   for(let i=LINES.length-1;i>=0;i--){
     const L=LINES[i];L.life-=dt;
     if(L.life<=0){scene.remove(L.line);L.line.geometry.dispose();L.line.material.dispose();LINES.splice(i,1);continue;}
