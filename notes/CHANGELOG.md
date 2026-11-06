@@ -1,5 +1,7 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
 
+- 2026-11-06 — **อนุภาคบน GPU (ผู้ใช้เลือก, เปิดด้วย `?gpup`, ค่าเริ่มต้นปิดจนกว่าผู้ใช้รีวิวภาพ):** js/30 คำนวณใน vertex shader, ไม่แก้ 177 จุดที่ push และไม่แก้ fragment shader. 12 คน: updateParticles 3-4 ms เหลือ 0.25 ms, เฟรมรวมเบาลงราว 20%. OPTIMIZE หมวด L.
+
 - 2026-11-06 — Save continued castle concepts and cross-chat design direction at user request: multiple entrances, current-core backcap, side rooms as combat areas with optional staging, quiet footsteps/core-casting audio plus passive core-status UI without warning or attacker counts. Preserve connecting-route sketch as a proposal; pause map details and resume Nature skill design with mode roles in mind. Add root AGENTS.md and shared design-direction note, link from Claude/handoff docs, keep illustrative map HTML reproducible. This commit covers planning/docs/illustration only; separate concurrent game/performance and Moonwater edits are excluded. No push requested.
 
 - 2026-11-06 — **FPS รอบ 3 (ผู้ใช้: 20 fps ใน TDM บอท 5 ตัว, เครื่องอ่อนเล่นได้ไหม):** ตัวเลข FPS ใช้เวลาจริง (เดิมไม่มีทางต่ำกว่า 20), warm-up เลิกใช้ compileAsync ที่พัง (ของสร้างกลางไฟต์ shader 80→3 ภาพ 80→5 โมเดล 465→83), เพิ่มระดับประหยัด CPU `qualCS()` 2 ขั้น (ซ่อนของเล็กไกลตา เงา อนุภาค ผ้าคลุม รูปโปรไฟล์) โหมดประหยัด=ขั้น 2 อัตโนมัติ=เพิ่มเอง, `tools/headless.js --cpu N` จำลองเครื่องช้า. วัด: เครื่องนี้ตอนว่าง 59 fps, ช้า 2 เท่า 33 fps, ช้า 4 เท่า 12.5 fps (ยังไม่พอ). OPTIMIZE §K.

@@ -174,6 +174,11 @@ Real-time bench (real rAF, not `WD.hostStep`): TDM valley, 5 top-level bots hudd
 - [ ] Host sim in a Web Worker would free ~5% of the main thread (bigger refactor).
 - [ ] Bloom-white roofs in valley (seen in `shots/low_cmp.jpg`) are a look issue, not perf.
 
+## L. GPU particles 2026-11-06 (user chose this) — behind `?gpup`, default OFF until the user approves the look
+`js/30-particles.js`: `pgpuSpawn` writes start values into one interleaved buffer once; `PGPU_HEAD` (vertex shader) computes position, colour, size from age. All 177 `PARTS.push` sites and every fragment shader are unchanged; `PARTS` stays for count/cap and is compacted every 6 frames. Nobody keeps a reference to a pushed particle (checked), so this is safe.
+Known differences: ground height read once at spawn (not per frame); curl = approximation at the current point, so smoke swirl differs slightly; `grow` = exp(grow*t). Do not call `clearUpdateRanges` per frame: frames that skip drawing (Studio seek) would lose new particles; three clears ranges after upload.
+Measured: `updateParticles` 3–4 ms → 0.25 ms in a 12-player brawl; whole render-side CPU 21–28 → 17–23 ms; 5 bots CPU x2 30.5 → 33.8 fps (p95 45 → 38 ms), x4 11.8 → 13.8 fps. Contact sheets old/new: `shots/gpup_ab1.jpg`, `gpup_ab2.jpg`. When approved: make PGPU the default, then delete the old CPU path and old vertex shaders.
+
 ## Benchmarks
 Follow-up batching/LOD 2026-11-06: student Skeletons 7→1 per player; compatible skin/iris/scarf trim combines with vertex colour/PBR attributes (2 fewer draws per body per pass). Cloth panels/palette stay separate. Actual high-poly emitted model is `water_blob` (3,968 tris), not frost shards (32). Tiny water particles <=12 physical pixels use a 224-triangle mesh; near particles and hero geometry stay full detail. Visual/animation/lifecycle checks pass. This partially addresses §H player/particle items, not all FPS causes. See `notes/optimize-batching-lod-2026-11-06.md` and `tools/bench-render-audit.js` for actual active instance costs.
 

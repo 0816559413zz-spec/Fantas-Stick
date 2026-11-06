@@ -4,6 +4,8 @@
 
 **แนวทางข้ามแชทจากผู้ใช้ 2026-11-06:** อ่าน `notes/PROJECT-DESIGN-DIRECTION.md` ก่อนออกแบบคลาส/สกิล/โหมด/แผนที่ มีคอนเซปต์ว่าคลาสช่วยโหมดอยู่แล้ว ให้นึกถึงขณะคิดสกิล แต่รอคลาสเสร็จก่อน breakdown interaction ละเอียด ไม่ล็อกฉากตามคลาสก่อนเวลา ผังปราสาทจริงยังไม่ได้ออกแบบ ใช้ภาพผังหยาบช่วยอธิบายก่อนถามเรื่องพื้นที่ มีทางเข้าอ่านจาก AGENTS.md และ CLAUDE.md ด้วย งานคอนเซปต์ไม่ใช่คำสั่งพัฒนา/commit/push
 
+**อนุภาค GPU 2026-11-06:** ทำแล้วหลังสวิตช์ `?gpup` (ปิดเป็นค่าเริ่มต้น) รอผู้ใช้ดูภาพเทียบ `shots/gpup_ab1.jpg`, `gpup_ab2.jpg` แล้วค่อยเปิดจริง + ลบทาง CPU เดิม ดู OPTIMIZE หมวด L.
+
 **FPS ล่าสุด 2026-11-06 รอบ 3:** ดู OPTIMIZE §K. เครื่องผู้ใช้ตอนว่าง TDM บอท 5 ตัว 59 fps; ถ้ามีงานอื่นรันพร้อมกัน (เซสชัน Claude render/bench) ตกได้ถึง 14 fps — วัดต้องเช็กโหลดเครื่องก่อน. เครื่องช้า 2 เท่า 33 fps, ช้า 4 เท่า 12.5 fps ยังต้องลด draw call ตัวละคร/ฉาก (`tools/headless.js --cpu N`). ระดับประหยัด CPU `qualCS()` js/27. ผู้ใช้ยังไม่ได้ยืนยันในเกมจริง.
 
 **หลัง pull e5d21c2 / Moonwater ต่อ 2026-11-06:** ดึง main แบบ ff-only แล้ว พบ soft-end status เก่าไม่ตรง source จึงเพิ่ม `endFrom/endTo` แบบ opt-in ใน toonwater/schema และแก้ pressure generator: ลำคงความกว้าง จางลำ/ฟอง z33..45 ไม่หดเล็กเมื่อหมดเวลา ไม่มีชิ้น splash ต่อปลาย ภาพ `shots/moon_soft_tip_detail.jpg` / `moon_soft_end_close.jpg` และฉากมืด `moon_soft_dark.jpg` ตรวจแล้ว ส่งภาพนิ่งรอผู้ใช้รีวิวก่อน GIF; ยังไม่ commit/push รอบนี้ Check/fx-check ผ่าน, training beam len900 life.6 tick.2 dmg10, page errors0 อ่าน `notes/moonwater-vfx-handoff-2026-11-06.md` ด้านบนใหม่กว่าข้อความประวัติข้างล่าง

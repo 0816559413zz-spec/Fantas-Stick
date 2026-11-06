@@ -4,19 +4,42 @@ const PMAX=5000;
 // D) ชั้นเรือง: ผสมแบบ premultiplied (บวกแสง + บังข้างหลังนิดหน่อย PGLOW_OCC) — ซ้อนกันหลายเม็ดแล้วอิ่มเป็นสีของมันเอง ไม่ขาวโพลน
 // E) ควัน: ก้อนควันลาย noise ไหล ขอบแหว่ง ด้านบนสว่าง/ล่างมืด สีคูณแสงของฉาก (PLIT ตามแสงท้องฟ้า hemi)
 const PGLOW_OCC=0.4,PLIT={value:new THREE.Color(1,1,1)};
+// ===== อนุภาคบน GPU (ผู้ใช้ 2026-11-06 เลือกย้าย • ?gpup = เปิด) =====
+// ตอนเกิดเขียนค่าตั้งต้นลงช่องในบัฟเฟอร์ครั้งเดียว แล้ว vertex shader คำนวณตำแหน่ง/สี/ขนาดจากอายุเอง CPU ไม่ต้องเดินทุกเม็ดทุกเฟรม
+// PARTS.push(...) ทั้ง 177 จุดเหมือนเดิม • fragment shader เหมือนเดิม • ความสูงพื้นอ่านครั้งเดียวตอนเกิด • ลมหมุน = ประมาณจากจุดปัจจุบัน
+const PGPU=/[?&]gpup\b/.test(location.search),PGPU_F=28,PG_U={uMapS:{value:new THREE.Vector3(1,0,0)},uCur:{value:new THREE.Vector4()}};
+const PGPU_HEAD='attribute float aG;attribute vec4 aV;attribute vec4 aA;attribute vec4 aB;attribute vec4 aC;attribute vec4 aD;attribute vec4 aE;uniform float time;uniform vec4 uCur;uniform vec3 uMapS;uniform float scale;vec3 pP,pV;float pK,pH,pS,pT;'+
+  'bool pSim(){float t=time-aA.z;pT=t;pK=(aA.w-t)/aB.x;if(pK<=0.0||t<0.0)return false;'+
+  'float d=aV.w,dr=exp(-d*t);vec2 xz=position.xz+aV.xz*(1.0-dr)/d;'+
+  'pH=max(0.03,position.y+aV.y*t-0.5*aA.x*t*t);pS=aB.z*exp(aA.y*t);'+
+  'if(aB.w>0.0){float m=aB.x,A=aB.w*(0.3*t+0.7*((m-aA.w)*t+0.5*t*t)/m);vec2 g=xz/uMapS.x+uMapS.yz;float gx=g.x+aB.y*97.0,Tm=time-t*0.5,q=uCur.x,a=q*gx+0.6*Tm,b=1.2*q*g.y-0.45*Tm,c=2.3*q*g.y+0.8*Tm+1.7,e=1.9*q*gx-0.3*Tm;'+
+    'xz+=vec2(-sin(a)*sin(b)*1.2+0.5*cos(c)*cos(e)*2.3,-(cos(a)*cos(b)-0.5*sin(c)*sin(e)*1.9))*A*uMapS.x;}'+
+  'pP=vec3(xz.x,pH+aG,xz.y);pV=vec3(aV.x*dr,aV.y-aA.x*t,aV.z*dr);return true;}';
+const PGPU_DEAD='gl_Position=vec4(2.0,2.0,2.0,1.0);gl_PointSize=0.0;vC=vec4(0.0);';
+const PGPU_MV='vec4 mv=modelViewMatrix*vec4(pP,1.0);vC.a*=smoothstep(1.2,5.0,-mv.z);';
+function pgpuGeo(geo,S){const a=new Float32Array(PMAX*PGPU_F),ib=new THREE.InterleavedBuffer(a,PGPU_F);ib.setUsage(THREE.DynamicDrawUsage);
+  const add=(n,k,o)=>geo.setAttribute(n,new THREE.InterleavedBufferAttribute(ib,k,o));
+  add('position',3,0);add('aG',1,3);add('aV',4,4);add('aA',4,8);add('aB',4,12);add('aC',4,16);add('aD',4,20);add('aE',4,24);
+  S.a=a;S.ib=ib;S.head=PMAX;S.top=PMAX;S.low=PMAX;S.die=0;S.rg=[];geo.setDrawRange(0,0);}
 function makePointSys(additive){
   const geo=new THREE.BufferGeometry();
-  const pos=new Float32Array(PMAX*3),col=new Float32Array(PMAX*4),size=new Float32Array(PMAX),age=new Float32Array(PMAX*2);
-  geo.setAttribute('position',new THREE.BufferAttribute(pos,3));
+  const pos=PGPU?null:new Float32Array(PMAX*3),col=PGPU?null:new Float32Array(PMAX*4),size=PGPU?null:new Float32Array(PMAX),age=PGPU?null:new Float32Array(PMAX*2);
+  if(!PGPU){geo.setAttribute('position',new THREE.BufferAttribute(pos,3));
   geo.setAttribute('pcol',new THREE.BufferAttribute(col,4));
   geo.setAttribute('psize',new THREE.BufferAttribute(size,1));
-  geo.setAttribute('page',new THREE.BufferAttribute(age,2));
+  geo.setAttribute('page',new THREE.BufferAttribute(age,2));}
   // ชั้นแสงเรือง: รูปทรงต่ออนุภาค pshp = (รูป, มุม) • 0 กลมเรือง 1 ดาวประกาย 4 แฉก 2 เส้นยืดตามทิศพุ่ง (pvel) 3 วงแหวน 4 เกล็ดผลึก 6 เหลี่ยม
   let shp=null,vel=null;
-  if(additive){shp=new Float32Array(PMAX*2);vel=new Float32Array(PMAX*3);geo.setAttribute('pshp',new THREE.BufferAttribute(shp,2));geo.setAttribute('pvel',new THREE.BufferAttribute(vel,3));}
+  if(additive&&!PGPU){shp=new Float32Array(PMAX*2);vel=new Float32Array(PMAX*3);geo.setAttribute('pshp',new THREE.BufferAttribute(shp,2));geo.setAttribute('pvel',new THREE.BufferAttribute(vel,3));}
   const mat=new THREE.ShaderMaterial({
-    uniforms:{map:{value:glowTex},scale:{value:600},nz:{value:NOISETEX},time:PTIME,lit:PLIT},
-    vertexShader:additive
+    uniforms:{map:{value:glowTex},scale:{value:600},nz:{value:NOISETEX},time:PTIME,lit:PLIT,...PG_U},
+    vertexShader:PGPU?(additive
+      ?'varying vec4 vC;varying vec2 vS;varying vec2 vA;'+PGPU_HEAD+'void main(){vS=vec2(0.0);vA=vec2(1.0,0.0);if(!pSim()){'+PGPU_DEAD+'return;}float k=pK,t1=1.0-k;vec3 c=aC.rgb;'+
+        'if(aD.w>0.5)c=mix(c,aD.rgb,t1);else if(aE.x<0.5){float w=t1<0.15?0.55*(1.0-t1/0.15):0.0,dk=t1>0.65?1.0-0.3*(t1-0.65)/0.35:1.0;c=(c+(1.0-c)*w)*dk;}'+
+        'vC=vec4(c*1.25,aC.a>0.0?min(1.0,t1*aC.a)*k:k);vS=vec2(aE.x,aE.y+aE.z*pT);vA=vec2(t1,aB.y);'+PGPU_MV+'gl_PointSize=pS*0.12*scale/-mv.z;gl_Position=projectionMatrix*mv;'+
+        'if(aE.x>1.5&&aE.x<2.5){vec4 p2=projectionMatrix*modelViewMatrix*vec4(pP+pV*0.05,1.0);vec2 d=p2.xy/p2.w-gl_Position.xy/gl_Position.w;d.x*=projectionMatrix[1][1]/projectionMatrix[0][0];vS.y=atan(d.y,d.x);}}'
+      :'varying vec4 vC;varying vec2 vA;'+PGPU_HEAD+'void main(){vA=vec2(1.0,0.0);if(!pSim()){'+PGPU_DEAD+'return;}float k=pK,t1=1.0-k;vec3 c=aC.rgb;if(aD.w>0.5)c=mix(c,aD.rgb,t1);'+
+        'vC=vec4(c,min(1.0,k*1.5)*min(1.0,pH/(pS*0.05+0.01)));vA=vec2(t1,aB.y);'+PGPU_MV+'gl_PointSize=pS*0.12*scale/-mv.z;gl_Position=projectionMatrix*mv;}'):additive
       ?'attribute vec4 pcol;attribute float psize;attribute vec2 pshp;attribute vec3 pvel;attribute vec2 page;uniform float scale;varying vec4 vC;varying vec2 vS;varying vec2 vA;void main(){vC=pcol;vS=pshp;vA=page;vec4 mv=modelViewMatrix*vec4(position,1.0);vC.a*=smoothstep(1.2,5.0,-mv.z);gl_PointSize=psize*scale/-mv.z;gl_Position=projectionMatrix*mv;'+
         'if(pshp.x>1.5&&pshp.x<2.5){vec4 p2=projectionMatrix*modelViewMatrix*vec4(position+pvel*0.05,1.0);vec2 d=p2.xy/p2.w-gl_Position.xy/gl_Position.w;d.x*=projectionMatrix[1][1]/projectionMatrix[0][0];vS.y=atan(d.y,d.x);}}'
       :'attribute vec4 pcol;attribute float psize;attribute vec2 page;uniform float scale;varying vec4 vC;varying vec2 vA;void main(){vC=pcol;vA=page;vec4 mv=modelViewMatrix*vec4(position,1.0);vC.a*=smoothstep(1.2,5.0,-mv.z);gl_PointSize=psize*scale/-mv.z;gl_Position=projectionMatrix*mv;}',
@@ -40,7 +63,7 @@ function makePointSys(additive){
   });
   softify(mat,additive?0.35:0.8);
   const pts=new THREE.Points(geo,mat);pts.frustumCulled=false;pts.renderOrder=additive?3:2;fxScene.add(pts);
-  return {geo,pos,col,size,shp,vel,age,n:0};
+  const S={geo,pos,col,size,shp,vel,age,n:0};if(PGPU)pgpuGeo(geo,S);return S;
 }
 // เปลวไฟรูปหยดน้ำ (ฐานเหลืองขาว → ส้ม → ปลายแดงจาง) ใช้กับอนุภาค fl:true — ผสมสีปกติ เห็นชัดแม้พื้นสว่าง
 // ===== เปลวไฟ: FLAME_STYLE 0 = อนุภาคกลมเรืองแสง (ไม่ใช้รูปเปลว) • 2 = แบบใหม่ (ลิ้นไฟ 4 แบบ คมปลาย มีแกนสว่าง ไม่กลับหัว หดเล็กและเปลี่ยนสีเหลือง→ส้ม→แดงตามอายุ)
@@ -71,10 +94,11 @@ const FLAMETEX_V2=texCanvas(128,128,(g)=>{
 },false);
 const PSYS=[makePointSys(true),makePointSys(false),makePointSys(false)];
 {const F=PSYS[2],pts=fxScene.children[fxScene.children.length-1];pts.renderOrder=4;
-  F.vari=new Float32Array(PMAX);F.geo.setAttribute('pvar',new THREE.BufferAttribute(F.vari,1));
+  if(!PGPU){F.vari=new Float32Array(PMAX);F.geo.setAttribute('pvar',new THREE.BufferAttribute(F.vari,1));}
   pts.material=new THREE.ShaderMaterial({
-  uniforms:{map:{value:FLAME_STYLE===2?FLAMETEX_V2:FLAMETEX_V1},scale:{value:600},time:PTIME,nz:{value:NOISETEX}},
-  vertexShader:'attribute vec4 pcol;attribute float psize;attribute float pvar;uniform float scale;varying vec4 vC;varying float vV;void main(){vC=pcol;vV=pvar;vec4 mv=modelViewMatrix*vec4(position,1.0);vC.a*=smoothstep(1.2,5.0,-mv.z);gl_PointSize=psize*scale/-mv.z;gl_Position=projectionMatrix*mv;}',
+  uniforms:{map:{value:FLAME_STYLE===2?FLAMETEX_V2:FLAMETEX_V1},scale:{value:600},time:PTIME,nz:{value:NOISETEX},...PG_U,uFL:{value:['#fff6dc','#ffd56a','#ff9a2a','#f2561a','#a8240c','#3a1208','#1a0a06'].map(c=>new THREE.Color(c))},uFT:{value:[0,0.12,0.3,0.5,0.72,0.9,1]}},
+  vertexShader:PGPU?'varying vec4 vC;varying float vV;uniform vec3 uFL[7];uniform float uFT[7];'+PGPU_HEAD+'void main(){vV=0.0;if(!pSim()){'+PGPU_DEAD+'return;}float k=pK,t=1.0-k;vec3 L=uFL[6];for(int i=0;i<6;i++){if(t<=uFT[i+1]){L=mix(uFL[i],uFL[i+1],(t-uFT[i])/(uFT[i+1]-uFT[i]));break;}}'+
+    'vC=vec4(L*aC.rgb,min(1.0,t*16.0)*min(1.0,k*2.2)*(1.0-0.5*clamp((t-0.4)/0.5,0.0,1.0)));vV=floor(8.0*(1.0-clamp((t-0.22)/0.45,0.0,1.0))+0.5)+aB.y;'+PGPU_MV+'gl_PointSize=pS*0.12*(0.55+0.45*min(1.0,t*5.0))*(1.0-0.3*t*t)*scale/-mv.z;gl_Position=projectionMatrix*mv;}':'attribute vec4 pcol;attribute float psize;attribute float pvar;uniform float scale;varying vec4 vC;varying float vV;void main(){vC=pcol;vV=pvar;vec4 mv=modelViewMatrix*vec4(position,1.0);vC.a*=smoothstep(1.2,5.0,-mv.z);gl_PointSize=psize*scale/-mv.z;gl_Position=projectionMatrix*mv;}',
   fragmentShader:FLAME_STYLE===3
     // ก้อนไฟ: ขอบเป็น noise ไหลขึ้น + แกนสว่าง • vV = seed (เศษ) + ระดับบวกแสง (จำนวนเต็ม 0-8) — ไฟใหม่บวกแสง ไฟเก่าทึบ (บังฉากหลัง)
     ?'uniform float time;uniform sampler2D nz;varying vec4 vC;varying float vV;'+
@@ -102,11 +126,12 @@ function flame(x,y,h,o){o=o||{};
 const PFB={};
 function ptexUse(name,tex,e){
   e=Object.assign({cols:8,rows:8,span:1,rand:0,rot:e&&e.add?0:0.6,spin:0,size:1},e||{});
-  const geo=new THREE.BufferGeometry(),pos=new Float32Array(PMAX*3),col=new Float32Array(PMAX*4),size=new Float32Array(PMAX),age=new Float32Array(PMAX*2);
-  geo.setAttribute('position',new THREE.BufferAttribute(pos,3));geo.setAttribute('pcol',new THREE.BufferAttribute(col,4));geo.setAttribute('psize',new THREE.BufferAttribute(size,1));geo.setAttribute('page',new THREE.BufferAttribute(age,2));
+  const geo=new THREE.BufferGeometry(),pos=PGPU?null:new Float32Array(PMAX*3),col=PGPU?null:new Float32Array(PMAX*4),size=PGPU?null:new Float32Array(PMAX),age=PGPU?null:new Float32Array(PMAX*2);
+  if(!PGPU){geo.setAttribute('position',new THREE.BufferAttribute(pos,3));geo.setAttribute('pcol',new THREE.BufferAttribute(col,4));geo.setAttribute('psize',new THREE.BufferAttribute(size,1));geo.setAttribute('page',new THREE.BufferAttribute(age,2));}
   const mat=new THREE.ShaderMaterial({
-    uniforms:{map:{value:tex},grid:{value:new THREE.Vector2(e.cols,e.rows)},cell:{value:new THREE.Vector2(tex.image.width/e.cols,tex.image.height/e.rows)},fp:{value:new THREE.Vector4(e.span,e.rand?1:0,e.rot,e.spin)},scale:{value:600},lit:PLIT},
-    vertexShader:'attribute vec4 pcol;attribute float psize;attribute vec2 page;uniform float scale;varying vec4 vC;varying vec2 vA;varying float vPs;void main(){vC=pcol;vA=page;vec4 mv=modelViewMatrix*vec4(position,1.0);vC.a*=smoothstep(1.2,5.0,-mv.z);gl_PointSize=psize*scale/-mv.z;vPs=gl_PointSize;gl_Position=projectionMatrix*mv;}',
+    uniforms:{map:{value:tex},grid:{value:new THREE.Vector2(e.cols,e.rows)},cell:{value:new THREE.Vector2(tex.image.width/e.cols,tex.image.height/e.rows)},fp:{value:new THREE.Vector4(e.span,e.rand?1:0,e.rot,e.spin)},scale:{value:600},lit:PLIT,time:PTIME,...PG_U},
+    vertexShader:PGPU?'varying vec4 vC;varying vec2 vA;varying float vPs;'+PGPU_HEAD+'void main(){vA=vec2(1.0,0.0);vPs=1.0;if(!pSim()){'+PGPU_DEAD+'return;}float k=pK,t1=1.0-k;vec3 c=aC.rgb;if(aD.w>0.5)c=mix(c,aD.rgb,t1);float fl=aE.w;'+
+      'vC=vec4(c,min(1.0,t1*6.0)*min(1.0,k*2.0)*(mod(fl,2.0)>0.5?min(1.0,pH/(pS*0.05+0.01)):1.0));vA=vec2(t1,aB.y);'+PGPU_MV+'gl_PointSize=pS*0.12*'+(+e.size).toFixed(4)+'*(fl>1.5?1.6:1.0)*scale/-mv.z;vPs=gl_PointSize;gl_Position=projectionMatrix*mv;}':'attribute vec4 pcol;attribute float psize;attribute vec2 page;uniform float scale;varying vec4 vC;varying vec2 vA;varying float vPs;void main(){vC=pcol;vA=page;vec4 mv=modelViewMatrix*vec4(position,1.0);vC.a*=smoothstep(1.2,5.0,-mv.z);gl_PointSize=psize*scale/-mv.z;vPs=gl_PointSize;gl_Position=projectionMatrix*mv;}',
     fragmentShader:'uniform sampler2D map;uniform vec2 grid,cell;uniform vec4 fp;uniform vec3 lit;varying vec4 vC;varying vec2 vA;varying float vPs;void main(){'+
       'float LOD=clamp(log2(cell.x/max(vPs,1.0)),0.0,3.0);'+   // mip สูงจะปนเฟรมข้าง ๆ (ลายจุด) → จำกัด LOD เอง
       
@@ -123,7 +148,7 @@ function ptexUse(name,tex,e){
   if(PFB[name]&&PFB[name].pts){fxScene.remove(PFB[name].pts);PFB[name].geo.dispose();}
   const pts=new THREE.Points(geo,mat);pts.frustumCulled=false;pts.renderOrder=e.add?4:2;fxScene.add(pts);
   if(screen==='game')try{warmCompile([fxScene]);}catch(er){}   // ภาพโหลดเสร็จกลางเกม: compile ล่วงหน้าแบบไม่บล็อก (ไม่ต้องรอเม็ดแรกโผล่แล้วค้าง)
-  return PFB[name]={geo,pos,col,size,age,pts,e,fb:true,n:0};
+  const R={geo,pos,col,size,age,pts,e,fb:true,n:0};if(PGPU)pgpuGeo(geo,R);return PFB[name]=R;
 }
 function ptexLoad(){modelManifest().then(m=>{const P=m.ptex||{};for(const k in P){if(PFB[k])continue;PFB[k]={loading:true};const e=P[k];
   new THREE.TextureLoader().load('assets/'+e.file+'?v='+(e.v||m.v||0),t=>{t.colorSpace=THREE.SRGBColorSpace;t.userData.keep=true;if(e.cards){PFB[k]={tex:t,e,cards:true};return;}ptexUse(k,t,e);},undefined,()=>{PFB[k]={fail:true};});}});}
@@ -135,7 +160,39 @@ const CURL={q:0.03,smoke:42,fl:24,glow:16};
 const CURL_V=[0,0];   // scratch: ใช้ซ้ำในลูปแทนสร้างอาร์เรย์ใหม่ทุกอนุภาค
 function curlAt(x,y,T,out){const q=CURL.q,A=q*x+0.6*T,B=1.2*q*y-0.45*T,C=2.3*q*y+0.8*T+1.7,D=1.9*q*x-0.3*T,sC=Math.sin(C);
   out[0]=-Math.sin(A)*Math.sin(B)*1.2+0.5*Math.cos(C)*Math.cos(D)*2.3;out[1]=-(Math.cos(A)*Math.cos(B)-0.5*sC*Math.sin(D)*1.9);return out;}
+// เขียนอนุภาคใหม่ลงช่อง: ไล่จากท้ายบัฟเฟอร์ลงต้น (ใหม่สุดวาดก่อน เหมือนลำดับแบบเดิมที่เดินจากท้าย PARTS)
+function pgpuSpawn(p,T){
+  if(p.h===undefined){p.h=1.2;p.vh=rnd(-1,3.5);}if(p.g===undefined)p.g=4;if(p.sd===undefined)p.sd=Math.random()*0.99;
+  p.t0=T;if(!(p.life>0))return;
+  const fbn=p.fb||(p.smoke?'smoke':p.fl?'fire':null),F=fbn&&PFB[fbn],S=F&&F.fb?F:PSYS[p.fl?2:p.smoke?1:0];
+  if(--S.head<0){if(S.top>0)S.rg.push(0,S.top);S.head=PMAX-1;S.top=PMAX;S.low=0;}if(S.head<S.low)S.low=S.head;
+  const a=S.a,j=S.head*PGPU_F,c=col3(p.col),m=p.max||p.life,x=p.x,y=p.y,cu=!p.nc&&(p.smoke||p.fl||p.g<=0.5)?(p.smoke?CURL.smoke:p.fl?CURL.fl:CURL.glow):0;
+  a[j]=tx(x);a[j+1]=p.h;a[j+2]=tz(y);a[j+3]=GY(x,y);
+  a[j+4]=(p.vx||0)*S3;a[j+5]=p.vh||0;a[j+6]=(p.vy||0)*S3;a[j+7]=p.drag||3;
+  a[j+8]=p.g;a[j+9]=p.grow||0;a[j+10]=T;a[j+11]=p.life;
+  a[j+12]=m;a[j+13]=p.sd;a[j+14]=p.size;a[j+15]=cu;
+  a[j+16]=c.r;a[j+17]=c.g;a[j+18]=c.b;a[j+19]=p.fin||0;
+  if(p.c2){const d=col3(p.c2);a[j+20]=d.r;a[j+21]=d.g;a[j+22]=d.b;a[j+23]=1;}else a[j+23]=0;
+  a[j+24]=p.sh||0;a[j+25]=p.rot||0;a[j+26]=p.vr||0;a[j+27]=(p.smoke?1:0)+(p.fl?2:0);
+  const e=T+p.life;if(e>S.die)S.die=e;}
+let _pgF=0;
+function updateParticlesG(dt){
+  PTIME.value+=dt;
+  if(typeof hemi!=='undefined'){const h=hemi.color,k=Math.min(1.15,Math.max(0.55,hemi.intensity*1.25));PLIT.value.setRGB((0.65+0.35*h.r)*k,(0.65+0.35*h.g)*k,(0.65+0.35*h.b)*k);}
+  const T=PTIME.value,ALL=[...PSYS,...Object.values(PFB)];PG_U.uMapS.value.set(S3,MW/2,MH/2);PG_U.uCur.value.x=CURL.q;
+  const cap=Math.min(PMAX*1.6,VFXB.cap);if(PARTS.length>cap)PARTS.splice(0,PARTS.length-cap);
+  if(!PARTS.length)for(const S of ALL)if(S.a)S.die=0;   // เคลียร์จากข้างนอก (PARTS.length=0: จบเกม/สตูดิโอกรอเวลา)
+  let i=PARTS.length;while(i>0&&PARTS[i-1].t0===undefined)i--;
+  for(;i<PARTS.length;i++)pgpuSpawn(PARTS[i],T);
+  // PARTS เหลือไว้นับจำนวน/เพดาน: ทิ้งเม็ดหมดอายุทุก 6 เฟรม (GPU ซ่อนเองตามอายุอยู่แล้ว)
+  if(++_pgF%6===0){let w=0;for(let k=0;k<PARTS.length;k++){const p=PARTS[k];if(T-p.t0<p.life)PARTS[w++]=p;}PARTS.length=w;}
+  for(const S of ALL){if(!S.a)continue;
+    if(S.head<S.top)S.rg.push(S.head,S.top-S.head);S.top=S.head;
+    if(S.rg.length){for(let k=0;k<S.rg.length;k+=2)S.ib.addUpdateRange(S.rg[k]*PGPU_F,S.rg[k+1]*PGPU_F);S.ib.needsUpdate=true;S.rg.length=0;}
+    if(T>=S.die){if(S.low<PMAX){S.head=S.top=S.low=PMAX;S.geo.setDrawRange(0,0);}}else S.geo.setDrawRange(S.low,PMAX-S.low);}
+}
 function updateParticles(dt){
+  if(PGPU)return updateParticlesG(dt);
   PSYS[0].n=PSYS[1].n=PSYS[2].n=0;for(const k in PFB)PFB[k].n=0;PTIME.value+=dt;
   if(typeof hemi!=='undefined'){const h=hemi.color,k=Math.min(1.15,Math.max(0.55,hemi.intensity*1.25));PLIT.value.setRGB((0.65+0.35*h.r)*k,(0.65+0.35*h.g)*k,(0.65+0.35*h.b)*k);}
   const T=PTIME.value,cf=(PTIME.fr=(PTIME.fr|0)+1)&1;   // cf: ม้วนควัน (curl) คำนวณสลับเฟรมละครึ่ง (ก้าว ×2) — ประหยัด sin/cos ครึ่งหนึ่งตอนอนุภาคเป็นพัน
