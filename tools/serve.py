@@ -19,7 +19,7 @@ ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 FXD = os.path.join(ROOT, 'assets', 'fx')
 SAVE_OK = [re.compile(r'^assets/fx/[a-z0-9_\-/]+\.fx\.json$'), re.compile(r'^assets/fx/bind\.json$'), re.compile(r'^assets/vfx/[a-z0-9_\-]+\.(glb|png)$'),
            re.compile(r'^assets/fx/mesh/[a-z0-9_\-]+\.mesh\.json$'), re.compile(r'^assets/fx/tex/[a-z0-9_\-]+\.(tex\.json|png)$'),
-           re.compile(r'^assets/fx/vol/[a-z0-9_\-]+\.(vol\.json|bin)$')]
+           re.compile(r'^assets/fx/vol/[a-z0-9_\-]+\.(vol\.json|bin)$'), re.compile(r'^assets/tune\.json$')]
 
 def asset_list(sub, ext):
     out = {}

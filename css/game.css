@@ -504,3 +504,22 @@ body.crOpenB .mver{display:none}
 @keyframes rowIn{from{opacity:0;transform:translateX(-14px)}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion:reduce){body::after,#over::before,#over *,.overlay:not(.hidden),#lobby *{animation:none!important}}
 #bpPanel .trg button.on{background:rgba(217,180,90,.25)}
+
+/* ===== แผงปรับค่า (js/73-tune.js, F8) — แผงข้างขวา เห็นเกมข้างหลังได้ ===== */
+#tune{position:fixed;top:0;right:0;bottom:0;width:min(400px,100vw);z-index:30;display:flex;flex-direction:column;gap:8px;padding:14px 14px 10px;background:linear-gradient(180deg,rgba(15,23,46,.96),rgba(6,10,22,.97));border-left:1px solid var(--line);box-shadow:-10px 0 40px rgba(0,0,0,.5);color:var(--text);font-size:13px}
+#tune.hidden{display:none}
+.tuHead{display:flex;align-items:center;gap:10px}.tuHead b{font-family:var(--fd);color:var(--gold2);font-size:17px}.tuHead span{flex:1;color:var(--mute);font-size:12px}
+#tune button{background:rgba(7,11,24,.9);color:var(--text);border:1px solid var(--line);padding:5px 9px;font:inherit;cursor:pointer}
+#tune button:hover{border-color:var(--gold);color:var(--gold2)}#tune button.pri{background:linear-gradient(180deg,var(--gold),var(--goldD));color:#1a1204;border-color:var(--gold2)}
+#tuQ{background:rgba(7,11,24,.9);color:var(--text);border:1px solid var(--line);padding:7px 9px;font:inherit}
+.tuTabs{display:flex;flex-wrap:wrap;gap:4px}.tuTabs button.on{background:var(--goldD);border-color:var(--gold);color:var(--gold2)}.tuTabs i{font-style:normal;margin-left:5px;background:var(--gold);color:#1a1204;border-radius:8px;padding:0 5px;font-size:11px}
+.tuBody{flex:1;overflow-y:auto;scrollbar-width:thin;padding-right:4px}
+.tuSec{margin:12px 0 4px;color:var(--gold);font-size:12px;letter-spacing:.04em;border-bottom:1px solid var(--line);padding-bottom:2px}
+.tuRow{display:grid;grid-template-columns:1fr 92px 58px 24px;align-items:center;gap:6px;margin:3px 0;padding:2px 4px;border-left:2px solid transparent}
+.tuRow.tog{grid-template-columns:1fr 24px 24px}.tuRow span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tuRow.ch{border-left-color:var(--gold);background:rgba(217,180,90,.08)}.tuRow.ch span{color:var(--gold2)}
+.tuRow input[type=range]{width:100%;accent-color:var(--gold)}
+.tuRow input[type=number]{width:100%;background:rgba(7,11,24,.9);color:var(--text);border:1px solid var(--line);padding:2px 4px;font:inherit}
+.tuRow .tuR{padding:0;visibility:hidden}.tuRow.ch .tuR{visibility:visible}
+.tuFoot{display:flex;gap:6px}.tuFoot .pri{flex:1}
+#tuMsg{color:var(--mute);font-size:11px;min-height:2.6em}
