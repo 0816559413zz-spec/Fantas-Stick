@@ -150,7 +150,7 @@ function updateCamera(me,dt){
   const cfg=MAPCAM[MAPID]||MAPCAM.castle,hx=MW*S3/2,hz=MH*S3/2,bx=hx-1.2+cfg.m,bz=hz-1.2+cfg.m,ox=-fx*dist*cp,oz=-fz*dist*cp;
   const lim=(f,o,b)=>o>1e-6?(b-f)/o:o<-1e-6?(-b-f)/o:1;
   const k=Math.max(0.45,Math.min(1,lim(focus.x,ox,bx),lim(focus.z,oz,bz)));
-  let x=focus.x+ox*k,z=focus.z+oz*k,y=focus.y+dist*sp+CAM_FRAME.lift+(1-k)*dist*0.5;
+  let x=focus.x+ox*k,z=focus.z+oz*k,y=focus.y+dist*sp*k+CAM_FRAME.lift+(1-k)*0.35;   // ร่นเข้าเป็นเส้นตรงหาไหล่ (เดิมยกสูง = หลังชนกำแพงแล้วตัวตกขอบจอล่างเหลือแต่หัว)
   x=clamp(x,-bx,bx);z=clamp(z,-bz,bz);
   if(TERR){   // เนินบังกล้อง: ร่นกล้องเข้าหาตัวจนพ้นพื้น
     for(let i=1;i<=10;i++){const f=i/10,X=focus.x+(x-focus.x)*f,Z=focus.z+(z-focus.z)*f,Y=focus.y+(y-focus.y)*f;if(Y<TW(X,Z)+0.4){const f2=Math.max(0.15,(i-1)/10);x=focus.x+(x-focus.x)*f2;z=focus.z+(z-focus.z)*f2;y=focus.y+(y-focus.y)*f2;break;}}
