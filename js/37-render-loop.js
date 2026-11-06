@@ -36,9 +36,9 @@ function frame(now){
   if(HSTOP.pend>0){HSTOP.t=HSTOP.pend;HSTOP.until=now+(HSTOP.pend+HSTOP.gap)*1000;HSTOP.pend=0;}
   requestAnimationFrame(frame);
 }
-let _fpsAcc=0,_fpsN=0;
+let _fpsAcc=0,_fpsN=0,_fpsLast=performance.now();   // เวลาจริง ไม่ใช่ dt (dt ถูกตัดที่ 0.05 → ตัวเลขเดิมไม่มีทางต่ำกว่า 20 ทำให้ดูเหมือนล็อก 20 fps)
 function render(dt,now){
-  if(SET.fps){_fpsAcc+=dt;_fpsN++;if(_fpsAcc>=0.5){const el=document.getElementById('fps');if(el)el.textContent=Math.round(_fpsN/_fpsAcc)+' FPS';_fpsAcc=0;_fpsN=0;}}
+  if(SET.fps){_fpsAcc+=(now-_fpsLast)/1000;_fpsLast=now;_fpsN++;if(_fpsAcc>=0.5){const el=document.getElementById('fps');if(el)el.textContent=Math.round(_fpsN/_fpsAcc)+' FPS';_fpsAcc=0;_fpsN=0;}}
   cx.setTransform(DPR,0,0,DPR,0,0);
   cx.clearRect(0,0,SW,SH);
   animateWorld(now);

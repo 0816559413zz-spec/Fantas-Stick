@@ -27,7 +27,7 @@ function warmStaticModels(names){for(const name of new Set(names.filter(Boolean)
 // compile ลง render target ของ composer — เกมวาดผ่าน RT (srgb-linear, ไม่ tone map) ไม่ใช่ลงจอตรง
 // (compile ตอน RT = null ได้ program อีกแบบ (srgb + ACES) ที่เกมไม่ได้ใช้ → ยังกระตุกตอนใช้จริงอยู่ดี)
 function warmCompile(scenes){const prev=gl.getRenderTarget();gl.setRenderTarget(composer.renderTarget1);
-  try{return scenes.map(sc=>gl.compileAsync(sc,cam));}finally{gl.setRenderTarget(prev);}}
+  try{for(const sc of scenes)gl.compile(sc,cam);return [];}finally{gl.setRenderTarget(prev);}}   // compile (ไม่ใช่ compileAsync): r160 compileAsync โยน isReady of undefined ถ้าวัสดุไม่มี program → ค้างรอ 4 วิทุกแมตช์ • ไดรเวอร์ compile ขนานอยู่แล้ว
 // compile อย่างเดียวไม่ส่ง vertex/index buffer ขึ้น GPU: วาดลงภาพเล็กที่ไม่แสดงไว้ด้วย
 function warmDraw(){
   WARM.rt=WARM.rt||new THREE.WebGLRenderTarget(32,32,{type:composer.renderTarget1.texture.type,colorSpace:composer.renderTarget1.texture.colorSpace});
@@ -184,3 +184,4 @@ function gameWarmFree(dt){
 }
 if(window.WD)window.WD.warm=WARM;
 if(window.WD)window.WD.gwarm=GWARM;
+if(window.WD)window.WD.WARM=WARM;
