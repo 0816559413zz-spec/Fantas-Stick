@@ -194,7 +194,7 @@ bombTick:323 modeSnap:336
 §358 สร้าง snapshot ส่งให้ทุกเครื่อง
 r1:359 DEFP:361 packP:362 unpackP:363 makeSnap:364 PROF:382 pf:383 hostSent:384 hostLoop:385 HLW:400 pingN:410
 
-## js/16-voice.js (89) — ไมค์ (WebRTC audio แบบ mesh: ทุกคนโทรหากันตรงๆ)
+## js/16-voice.js (89) — 
 VOICE:4 rosterIds:5 toggleMic:6 voiceSync:20 teamOn:37 teamOf:38 applyVoiceGates:39 VAC:49 onIncomingCall:50 voiceLevels:62 speakingIds:70 updateVoiceUI:76
 
 ## js/17-input.js (66) — 
@@ -231,8 +231,8 @@ TBN:87 TBA:87 TBF:87 TBMAX:87 _tv:88 _tt:88 _ts:88 _tw:88 tbLayer:90 TBL:95 TBC:
 §143 รอยกรงเล็บ (อัลติสายฟ้า): รอยข่วน 3 เส้นโค้งปลายแหลมขนานกัน ตั้งขวางห…
 clawGeo:146 clawRakes:151 updateClaws:165 later:173 stFade:174 stBeam:175 shellPt:180 updateStormV:181 _ev:217 GODPTS:219 bWorld:221 stormClawSwipe:225 stormFX:252 STHUD:369 drawStormHud:370
 
-## js/21-vfx-frost.js (205) — น้ำแข็ง (ภาพ): ชิ้นผลึก/หนาม/แผ่นน้ำแข็งชั่วคราว (โผล่ → ค้าง → หด) •…
-FRV:2 _cryG:3 _spkG:3 _plateG:3 _hexG:3 _iceFxM:4 _frostM:4 iceFxM:5 frostM:6 ICEP:8 _im4:8 _iq:8 _ie:8 _ip:8 _is:8 icePool:9 iceBit:10 iceChips:13 updateFRV:14 iceRing:24 chillFX:25 makeSlash:41 _wbGeo:49 crescentGeo:51 makeWaveBlade:54 WGH:68 updateSlashes:69 _glGeo:82 _glMat:82 _glMat2:82 makeGlacier:83 updateGlacierVis:114 updateOrbShots:123 updateZV:133 WM3:205
+## js/21-vfx-frost.js (206) — น้ำแข็ง (ภาพ): ชิ้นผลึก/หนาม/แผ่นน้ำแข็งชั่วคราว (โผล่ → ค้าง → หด) •…
+FRV:2 _cryG:3 _spkG:3 _plateG:3 _hexG:3 _iceFxM:4 _frostM:4 iceFxM:5 frostM:6 ICEP:8 _im4:8 _iq:8 _ie:8 _ip:8 _is:8 icePool:9 iceBit:10 iceChips:13 updateFRV:14 iceRing:24 chillFX:25 makeSlash:41 _wbGeo:49 crescentGeo:51 makeWaveBlade:54 WGH:68 updateSlashes:69 _glGeo:82 _glMat:82 _glMat2:82 makeGlacier:83 updateGlacierVis:114 updateOrbShots:123 updateZV:133 WM3:206
 
 ## js/22-models.js (287) — โมเดลจากไฟล์ (.glb จาก Blender) — ข้อตกลงฝั่งคนปั้นอยู่ใน ASSETS.md
 MODELS:5 modelManifest:6 gltfLoader:11 loadModel:16 modelInst:30 modelOr:31 prefetchModels:43
@@ -336,7 +336,7 @@ ROLE:4 KC:4 roleShowT:4 onPriv:5 MO:10 BREATHS:11 clearModeObjs:12 ITEMC:21 heal
 §139 หน้าประชุมโหวต (หาลอร์ดโวลเดอมอร์)
 meetKey:140 myVoted:140 castVote:141 syncMeeting:147
 
-## js/37-render-loop.js (103) — ลูปเรนเดอร์
+## js/37-render-loop.js (104) — ลูปเรนเดอร์
 lastFrame:2 HSTOP:5 hitStop:6 FXSTUDIO:8
 §9 เก็บ shader ที่ compile แล้วไว้ตลอดเกม (ผู้ใช้ 2026-11-02 "เล่นกับบอท…
 PINMAX:13 PINNED:13 KEEPSRC:16 pinPrograms:22 frame:25 _fpsAcc:39 _fpsN:39 render:40 renderGame:83
@@ -413,34 +413,34 @@ BFA:315 bfWreck:316 updateBfAir:321 bfRumble:344 updateBf:347
 §350 4) เอฟเฟกต์ทั้งจอ (ค่าไปที่ GradePass ใน js/27-world.js)
 SCR:351 screenFlash:352 screenRadial:353 screenKick:354 screenHurt:355 _scv:356 updateScreenFx:357 updateVfxKit:365
 
-## js/45-fx-runtime.js (380) — 
+## js/45-fx-runtime.js (384) — 
 FXR:9 FXDEG:10
 §11 โหลด
 fxFetch:12 fxDefaults:13 fxBoot:14 fxOverrides:24 fxLoad:27 fxData:31
 §32 ค่า: ตัวเลข / สูตร / ช่วงสุ่ม / เส้นโค้ง / สี
-_fxExpr:33 fxExpr:34 fxEval:38 fxV:40 fxIsCurve:47 fxCurve:48 fxG:56 fxCol:57 fxPal:58
-§59 ตำแหน่ง: กรอบของเอฟเฟกต์ (+x ขวา, +y ขึ้น, +z ทิศเล็ง) → พิกัดแผนที่
-_fxw:60 fxAnchor:61 fxBase:64 fxLocal:67 fxDir:68 fxYawV:69 fxPos:70 fxPlace:71
-§72 เล่น / หยุด
-fxPlay:73 fxStart:74 fxStop:83 fxKill:84 fxClearAll:85 fxGate:87
-§89 ทุกเฟรม
-updateFx:90
-§106 สร้างชั้น
-fxN:107 fxSpawn:108 fxTick:142 fxEnd:153
-§160 อนุภาค
-_fxrnd:161 fxUnit:162 fxCone:163 fxEmit:165 fxPart:182
-§197 รูปทรง 3D
-FXGEO:198 fxMerge:199 fxRibbon:204 fxGeo:210 fxEnergyMat:230 fxWaterMat:245 fxToonWaterMat:258 fxToonMat:273 fxMeshMake:281 fxMeshTick:302 fxFlipTex:317
-§322 หางแสง / รอยฟัน
-fxTrailTick:323
-§329 สายฟ้า
-fxBolt:330
-§336 ฟังก์ชันในโค้ดที่ไฟล์เรียกได้ (ชั้น t:"code")
-FXCODE:337
-§350 ผูกกับ event ของเกม (assets/fx/bind.json) — เรียกจาก fx(ev)
-fxLoopName:352 blzFxName:353 fxLoopKeep:354 fshHitFx:356 fxBind:359
-§370 แม่แบบ playFx เป็นไฟล์ (assets/fx/tpl/*, sig/*, rec/*)
-fxTpl:372
+_fxExpr:33 fxExpr:34 fxEval:38 fxV:40 fxIsCurve:47 _fxCK:50 _fxCKon:50 fxCurveKeys:51 fxCurve:52 fxG:60 fxCol:61 fxPal:62
+§63 ตำแหน่ง: กรอบของเอฟเฟกต์ (+x ขวา, +y ขึ้น, +z ทิศเล็ง) → พิกัดแผนที่
+_fxw:64 fxAnchor:65 fxBase:68 fxLocal:71 fxDir:72 fxYawV:73 fxPos:74 fxPlace:75
+§76 เล่น / หยุด
+fxPlay:77 fxStart:78 fxStop:87 fxKill:88 fxClearAll:89 fxGate:91
+§93 ทุกเฟรม
+updateFx:94
+§110 สร้างชั้น
+fxN:111 fxSpawn:112 fxTick:146 fxEnd:157
+§164 อนุภาค
+_fxrnd:165 fxUnit:166 fxCone:167 fxEmit:169 fxPart:186
+§201 รูปทรง 3D
+FXGEO:202 fxMerge:203 fxRibbon:208 fxGeo:214 fxEnergyMat:234 fxWaterMat:249 fxToonWaterMat:262 fxToonMat:277 fxMeshMake:285 fxMeshTick:306 fxFlipTex:321
+§326 หางแสง / รอยฟัน
+fxTrailTick:327
+§333 สายฟ้า
+fxBolt:334
+§340 ฟังก์ชันในโค้ดที่ไฟล์เรียกได้ (ชั้น t:"code")
+FXCODE:341
+§354 ผูกกับ event ของเกม (assets/fx/bind.json) — เรียกจาก fx(ev)
+fxLoopName:356 blzFxName:357 fxLoopKeep:358 fshHitFx:360 fxBind:363
+§374 แม่แบบ playFx เป็นไฟล์ (assets/fx/tpl/*, sig/*, rec/*)
+fxTpl:376
 
 ## js/46-fx-make.js (278) — 
 FXMK:10 MKD:11 mkRng:12 mkHash:13 mkNoise:15 mkL:17 mkR2:18
@@ -494,7 +494,7 @@ ESM:622 eSmooth:623 ESF:626 eShieldFx:627 eChips:632 eShieldSegs:635 eShieldNum:
 ## js/48-ragdoll.js (227) — 
 RAG:10 RAGJ:23 RAGB:29 RAGS:33 RAGMIN:37 RAGHINGE:39 _rv1:40 _rv2:40 _rv3:40 _rqa:40 _rqb:40 _rm:40 ragBones:41 ragBasis:48 ragTargets:56 ragStart:62 ragBack:88 ragFloor:89 ragStep:90 ragPose:155 ragWrite:170 ragRestore:182 ragEnd:186 ragTick:188 ragHideDead:222
 
-## js/49-cloth.js (132) — ผ้าคลุมจริง (cloth sim) — เฉพาะตัวละครของเราเอง • ภาพบนเครื่องตัวเองล้วน ไม่แตะ sim / hit…
+## js/49-cloth.js (132) — 
 CLOTH:10 CL_ROWS:26 CL_NC:26 CL_GAP:26 CL_IN:26 _clV:27 _clA:27 _clB:27 clPinK:29 clBind:31 clothSetup:34 clTargets:68 clReset:72 clCapsule:74 _clO:78 clWorld:79 clWorldHit:88 clStep:93 clDraw:106 clothTick:113
 
 ## js/50-grass.js (294) — 
@@ -508,7 +508,7 @@ SCAR:56 scarReset:58 scarPaint:65 grassScar:80
 §85 พื้นหญ้ามีชีวิต: สีเป็นหย่อม (เขียวเข้ม / แห้งเหลือง / ดินโผล่) + จุด…
 GR_NOISE:88 GR_LIVE:93 grLive:111 GR_GLSL_V:118 GR_BEGIN:123 grassMat:169 grassBuild:187 _grBasic:201 grassBake:202 grassCount:258 grassTick:263
 
-## js/51-warmup.js (186) — อุ่นเครื่องช่วงนับถอยหลัง (ผู้ใช้ 2026-10-21: "ช่วงนับถอยหลังให้โหลดสิ่งที่ต้องใช้ — กดสก…
+## js/51-warmup.js (186) — 
 WARM:11 WARM_FXDIR:12 WARM_COMMON:12 WARM_X:13 WARM_Y:13 warmKeep:15 warmStaticModels:21 warmCompile:29 warmDraw:32 WARM_SKIP:42 warmAssets:45 warmFx:55 warmFxEnd:66 warmGather:68 warmPaths:70 warmStep:72 warmTick:104
 §113 ภาพจากโค้ดของแต่ละสาย (เฟรมละฟังก์ชัน)
 warmOutline:123
@@ -700,4 +700,4 @@ PERF:9 perfFrame:12 perfDom:26 perfStats:34 perfGraph:38 _gpuName:51 gpuIntegrat
 ## js/72-dash-pose.js (84) — 
 DPOSE:12 DPT:24 _dpQ:25 _dpX:25 _dpP:25 dpMix:26 dpKnees:28 dpStyle:36 DPDBG:41 dashPose:42 dpApply:74
 
-(84 files, 20579 lines)
+(84 files, 20585 lines)

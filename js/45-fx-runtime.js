@@ -45,12 +45,16 @@ function fxV(v,I,k){
   if(v&&typeof v==='object')return fxCurve(v,k||0,I);
   return v;}
 function fxIsCurve(v){return v&&typeof v==='object'&&!Array.isArray(v)&&Object.keys(v).some(x=>!isNaN(+x));}
-function fxCurve(c,k,I){const E=Object.keys(c).filter(q=>q.trim()!==''&&!isNaN(+q)).map(q=>[+q,c[q]]).sort((x,y)=>x[0]-y[0]);if(!E.length)return 0;
+// จุดของเส้นโค้งเรียงไว้ครั้งเดียวต่อ object (เดิม Object.keys+filter+map+sort ทุกครั้งที่อ่านค่า = หลายพันครั้ง/เฟรมตอนเอฟเฟกต์เยอะ)
+// เก็บเฉพาะลำดับ key → อ่านค่าจาก c ทุกครั้ง (แก้ค่าในสตูดิโอเห็นผลทันที) • สตูดิโอเพิ่ม/ลบจุดได้ → ในสตูดิโอไม่ใช้ที่จำ
+const _fxCK=new WeakMap(),_fxCKon=!/[?&]studio/.test(location.search);
+function fxCurveKeys(c){let K=_fxCKon&&_fxCK.get(c);if(K)return K;K=Object.keys(c).filter(q=>q.trim()!==''&&!isNaN(+q)).map(q=>[+q,q]).sort((x,y)=>x[0]-y[0]);if(_fxCKon)_fxCK.set(c,K);return K;}
+function fxCurve(c,k,I){const K=fxCurveKeys(c),n=K.length;if(!n)return 0;
   const val=r=>Array.isArray(r)?r.map(z=>fxV(z,I,k)):fxV(r,I,k);let out;
-  if(k<=E[0][0])out=val(E[0][1]);else if(k>=E[E.length-1][0])out=val(E[E.length-1][1]);
-  else{let i=0;while(i<E.length-2&&k>E[i+1][0])i++;let t=(k-E[i][0])/((E[i+1][0]-E[i][0])||1);const e=c.ease;
+  if(k<=K[0][0])out=val(c[K[0][1]]);else if(k>=K[n-1][0])out=val(c[K[n-1][1]]);
+  else{let i=0;while(i<n-2&&k>K[i+1][0])i++;let t=(k-K[i][0])/((K[i+1][0]-K[i][0])||1);const e=c.ease;
     t=e==='in'?t*t:e==='out'?1-(1-t)*(1-t):e==='inout'?t*t*(3-2*t):e==='step'?0:t;
-    const a=val(E[i][1]),b=val(E[i+1][1]);out=Array.isArray(a)?a.map((q,j)=>q+((Array.isArray(b)?b[j]:b)-q)*t):a+((Array.isArray(b)?b[0]:b)-a)*t;}
+    const a=val(c[K[i][1]]),b=val(c[K[i+1][1]]);out=Array.isArray(a)?a.map((q,j)=>q+((Array.isArray(b)?b[j]:b)-q)*t):a+((Array.isArray(b)?b[0]:b)-a)*t;}
   if(c.x!==undefined){const m=fxV(c.x,I,k);out=Array.isArray(out)?out.map((q,j)=>q*(Array.isArray(m)?m[j]:m)):out*(Array.isArray(m)?m[0]:m);}
   return out;}
 function fxG(L,k){return L[k]!==undefined?L[k]:(FXR.def[L.t]||{})[k];}
