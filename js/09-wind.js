@@ -6,19 +6,16 @@
 //  ขั้นที่ 2: Windrift / Vortex Bind / Void Spheres / Featherwing • ขั้นที่ 3: อัลติ Eye of Heaven (2026-10-28)
 // =====================================================================
 const WINDP=PATHS.length;
-const W_BA={dmg:5,cd:0.30,gain:12,hold:0.35,chg:8},                       // ใบมีดลม: ระยะ 400 (spd 1400 × life 0.286)
-  W_GB={len:240,t:0.32,dmg:25,push:1500,r0:6,r1:27},                        // GaleBurst: 12 ม. ตามภาพ (ผู้ใช้ 2026-10-28) • ผลัก 250 (แรง 1500 ÷ แรงเสียดทาน 6)
-  W_SH={mul:100/75,gain:10,chg:0.3,r:200,stun:0.8,push:1500,dmg:20},        // โล่ปีก: รับได้ 75 • ระเบิดปีก ชาร์จ 0.3 วิ ⚠
-  W_DS={back:1800,vz:7,push:1500,reach:150,cone:Math.PI/3,wall:20,cd:8},    // Dash ถอยหลังผลัก: ถอย 300 ผลัก 250 ชนกำแพง 20 • ระยะผลักข้างหน้า 150 / มุม 60° ⚠
-  W_DR={chg:0.3,dist:200,t:0.15,wait:1.0,w:50,push:2400,dmg:10,slow:0.5,slowT:1.2,cd:14},   // Windrift: ชาร์จ 0.3 พุ่ง 200 ลมตามมา 1 วิ แนวกว้าง 100 กระเด็น 400 10 ดาเมจ • slow ทันที ⚠ 50% 1.2 วิ
-  W_VX={far:300,near:60,arc:Math.PI/8,hold:0.8,pull:0.25,r:60,dmg:20,stun:0.75,cd:10},   // ผู้ใช้ 2026-10-28: ดึงมาถึงตัวแล้วสตัน 0.5 วิ   // Vortex Bind: 3 อันโค้ง 45° (±22.5°) • รัศมีจับ ⚠ 40
-  W_VO={fly:0.15,dist:50,wait:0.5,hold:2.5,drift:40,r:150,core:28,pull:500,tick:0.5,tdmg:1,dmg:20,push:2400,spin:14,lift:0.6,cd:22},   // Void Spheres = หลุมดำลูกเดียว (ผู้ใช้ 2026-10-31): สสารมืดพุ่ง 50 → รอ 0.5 → หลุมดำ 2.5 วิ เลื่อนไปหน้า ⚠ 40/วิ ดูดรัศมี 150 หมุนติ้วที่ขอบแกน 1 ดาเมจ/0.5 วิ → ระเบิดผลักไปหน้า 20 (⚠ แรง 2400 ≈ 400)
-  W_FW={t:5,hgt:6,vz:3.5,spd:1.3,range:250,cone:Math.PI*0.28,push:1800,dmg:15,glide:2.2,cd:14},   // Featherwing: บิน 5 วิ สูงสุด 6 ม. • สะบัด 250 ผลัก 300 15 ดาเมจ • ร่อนลง ⚠ 2.2 ม./วิ
-  W_UL={r:350,slam:1.0,wall:1.15,imp:2.38,end:2.7,float:1.5,fz:2.2,dmg:30,stun:3,wlife:6.25,seg:8},   // Eye of Heaven: เขต/กำแพงวงรัศมี 350 • ลอยค้าง 1.5 วิ • กระแทก 30 ชนกำแพงวง = สตัน 3 วิ • กำแพงอยู่ 5 วิหลังกระแทก • ความสูงที่ลอย ⚠ 2.2 ม. (เวลาตรงกับ wind/eye_of_heaven)
-  W_WL={L:125,r:14,life:12,hp:100,charge:8,max:3,push:400,spd:900,place:500,stun:0.5,pdmg:10,pstun:0.5,boom:70,bdmg:50,bpush:2400,brad:110,aim:4};   // กำแพงลม Aegis Gale
+// ตัวเลขทั้งหมดของสายลม: WNV = PATHS[WINDP].v (ใบมีดลม/GaleBurst/โล่ปีก/Dash) + v:{...} ของแต่ละสกิล (W_WL W_DR W_VX W_VO W_FW W_UL = S.v) — ปรับได้ใน tune.html / F8 (js/73-tune.js)
 PATHS.push({id:'wind',n:'สายลม',ic:'🌪️',col:'#8dff65',d:'ผู้ผลัก — สร้างกำแพงลม ผลักศัตรูไปชนให้สตัน ตีต่อจนกำแพงแตกระเบิด คุมตำแหน่งศัตรูแล้วคิดตาต่อไป',
   combo:'BA ใบมีดลมเก็บเกจ GaleBurst → เต็มแล้วยิงทอร์นาโดนอนผลัก • ผลักศัตรูชนกำแพงลม = สตัน 0.5 วิ • ตีศัตรูที่ติดกำแพงครบ 70 = กำแพงแตก ระเบิด 50 กระเด็นไกล • Dash ดีดถอยหลังผลักศัตรูชนกำแพง 20 • ใช้สกิลกลางอากาศได้'});
-Object.assign(PDEF,{wblade:{spd:1400,r:9,dmg:W_BA.dmg,life:0.286,col:'#8dff65'}});
+const WNV=PATHS[WINDP].v={baDmg:5,baCd:0.30,baRange:400,baGain:12,baHold:0.35,baChg:8,gbLen:240,gbT:0.32,gbDmg:25,gbPush:1500,gbR0:6,gbR1:27,gbCd:0.5,
+  shHp:75,shGain:10,shChg:0.3,shR:200,shStun:0.8,shPush:1500,shDmg:20,dsBack:1800,dsVz:7,dsPush:1500,dsReach:150,dsCone:60,dsWall:20,dsCd:8};
+PATHS[WINDP].vn={baDmg:'ใบมีดลม • ดาเมจ',baCd:'ใบมีดลม • เว้น (วิ)',baRange:'ใบมีดลม • ระยะ',baGain:'ใบมีดลม • โดนแล้วเกจ +%',baHold:'ดูดลม • กดค้างกี่วิเริ่ม',baChg:'ดูดลม • เกจ +%/วิ',
+  gbLen:'GaleBurst • ระยะ',gbT:'GaleBurst • เวลาพุ่ง (วิ)',gbDmg:'GaleBurst • ดาเมจ',gbPush:'GaleBurst • แรงผลัก',gbR0:'GaleBurst • กว้างต้นทาง',gbR1:'GaleBurst • กว้างปลาย',gbCd:'GaleBurst • เว้นหลังยิง (วิ)',
+  shHp:'โล่ปีก • รับดาเมจได้',shGain:'โล่ปีก • โดนตีเกจ +%',shChg:'ระเบิดปีก • ชาร์จ (วิ)',shR:'ระเบิดปีก • รัศมี',shStun:'ระเบิดปีก • สตัน (วิ)',shPush:'ระเบิดปีก • แรงผลัก',shDmg:'ระเบิดปีก • ดาเมจ',
+  dsBack:'Dash • แรงดีดถอยหลัง',dsVz:'Dash • แรงลอยขึ้น',dsPush:'Dash • แรงผลักศัตรู',dsReach:'Dash • ระยะผลักข้างหน้า',dsCone:'Dash • มุมผลัก (องศา ครึ่งซ้าย/ขวา)',dsWall:'Dash • ผลักชนกำแพง ดาเมจ',dsCd:'Dash • คูลดาวน์ (วิ)'};
+Object.assign(PDEF,{wblade:{spd:1400,r:9,dmg:WNV.baDmg,life:WNV.baRange/1400,col:'#8dff65'}});
 // ---------- ตัวช่วย ----------
 const wOn=p=>p&&p.pathIdx===WINDP;
 function wGain(p,n){if(!wOn(p))return;const was=p.wg|0;p.wg=Math.min(100,(p.wg||0)+n);if(was<100&&p.wg>=100)emit({k:'efx',z:'wngbfull',x:p.x,y:p.y,h:p.z,id:p.id});}
@@ -59,15 +56,15 @@ function windBasic(p,inp,dt,setCd){
   const prev=p.wfPrev;p.wfPrev=inp.fire;
   if(p.wwAim)return;   // กำลังเลือกวิธีวางกำแพง (คลิกซ้าย = ดัน)
   if(p.shieldOn){   // ระหว่างยกโล่: เกจเต็ม + คลิก = ชาร์จปีกแล้วระเบิด
-    if(inp.fire&&!prev&&p.wg>=100&&!p.wsb){p.wsb={t:W_SH.chg};emit({k:'efx',z:'wnsbchg',x:p.x,y:p.y,h:p.z,id:p.id});}
+    if(inp.fire&&!prev&&p.wg>=100&&!p.wsb){p.wsb={t:WNV.shChg};emit({k:'efx',z:'wnsbchg',x:p.x,y:p.y,h:p.z,id:p.id});}
     p.wchg=0;return;}
   if(inp.fire&&!prev){p.wfHeld=0;
-    if(p.wg>=100&&p.cd.basic<=0){windGaleBurst(p);setCd('basic',0.5);return;}
-    if(p.cd.basic<=0){shoot(p,'wblade',{sp:'b_wind',dmg:W_BA.dmg});setCd('basic',W_BA.cd);}
+    if(p.wg>=100&&p.cd.basic<=0){windGaleBurst(p);setCd('basic',WNV.gbCd);return;}
+    if(p.cd.basic<=0){PDEF.wblade.life=WNV.baRange/PDEF.wblade.spd;shoot(p,'wblade',{sp:'b_wind',dmg:WNV.baDmg});setCd('basic',WNV.baCd);}
     return;}
   if(inp.fire){p.wfHeld=(p.wfHeld||0)+dt;
     // กดค้างตอนเกจยังไม่เต็ม = ดูดลมรอบตัว +8%/วิ (ไม่ยิง) ⚠ เริ่มหลังกดค้าง 0.35 วิ
-    if(p.wfHeld>=W_BA.hold&&p.wg<100){if(!p.wchg)emit({k:'efx',z:'wnchg',x:p.x,y:p.y,h:p.z,id:p.id,n:1});p.wchg=1;wGain(p,W_BA.chg*dt);}
+    if(p.wfHeld>=WNV.baHold&&p.wg<100){if(!p.wchg)emit({k:'efx',z:'wnchg',x:p.x,y:p.y,h:p.z,id:p.id,n:1});p.wchg=1;wGain(p,WNV.baChg*dt);}
     else if(p.wg>=100&&p.wchg){p.wchg=0;emit({k:'efx',z:'wnchg',x:p.x,y:p.y,h:p.z,id:p.id,n:0});}
     return;}
   if(prev&&p.wchg){p.wchg=0;emit({k:'efx',z:'wnchg',x:p.x,y:p.y,h:p.z,id:p.id,n:0});}
@@ -77,25 +74,25 @@ function windBasic(p,inp,dt,setCd){
 function windGaleBurst(p){p.wg=0;const a=p.ang;
   (G.wgb||(G.wgb=[])).push({o:p.id,team:p.team,x:p.x+Math.cos(a)*20,y:p.y+Math.sin(a)*20,h:p.z+1.15,a,t:0,hit:new Set()});
   emit({k:'efx',z:'wngb',x:Math.round(p.x),y:Math.round(p.y),h:p.z,a:Math.round(a*100)/100,id:p.id});}
-function windGBTick(g,dt){g.t+=dt;const p=G.players[g.o],k=Math.min(1,g.t/W_GB.t),len=W_GB.len*Math.pow(k,0.8),ca=Math.cos(g.a),sa=Math.sin(g.a);
+function windGBTick(g,dt){g.t+=dt;const p=G.players[g.o],k=Math.min(1,g.t/WNV.gbT),len=WNV.gbLen*Math.pow(k,0.8),ca=Math.cos(g.a),sa=Math.sin(g.a);
   if(p)for(const t of foesOf(g.team)){if(g.hit.has(t))continue;const dx=t.x-g.x,dy=t.y-g.y,u=dx*ca+dy*sa;if(u<-10||u>len)continue;
-    const r=W_GB.r0+(W_GB.r1-W_GB.r0)*Math.max(0,u)/W_GB.len,side=Math.abs(-dx*sa+dy*ca);if(side>r+(t.r||PR)||Math.abs(cH(t)-g.h+1.1)>3)continue;
-    g.hit.add(t);if(aoeHit(p,t,W_GB.dmg,t=>{knock(t,t.x-ca*10,t.y-sa*10,W_GB.push);t.wpush=0.8;}))emit({k:'efx',z:'wngbhit',x:Math.round(t.x),y:Math.round(t.y),h:cH(t)});}
-  return g.t<W_GB.t+0.05;}
+    const r=WNV.gbR0+(WNV.gbR1-WNV.gbR0)*Math.max(0,u)/WNV.gbLen,side=Math.abs(-dx*sa+dy*ca);if(side>r+(t.r||PR)||Math.abs(cH(t)-g.h+1.1)>3)continue;
+    g.hit.add(t);if(aoeHit(p,t,WNV.gbDmg,t=>{knock(t,t.x-ca*10,t.y-sa*10,WNV.gbPush);t.wpush=0.8;}))emit({k:'efx',z:'wngbhit',x:Math.round(t.x),y:Math.round(t.y),h:cH(t)});}
+  return g.t<WNV.gbT+0.05;}
 
 // ---------- โล่ปีก ----------
 function windShieldBurst(p){if(p.wg<100)return;p.wg=0;p.wsbL=0.6;p.shieldOn=false;p.vz=Math.max(p.vz||0,3);   // ลอยขึ้นนิดเดียว ~0.3 ม. (ผู้ใช้)
-  for(const t of wFoeNear(p,p.x,p.y,W_SH.r))aoeHit(p,t,W_SH.dmg,t=>{addStun(t,W_SH.stun);knock(t,p.x,p.y,W_SH.push);t.wpush=0.8;});
+  for(const t of wFoeNear(p,p.x,p.y,WNV.shR))aoeHit(p,t,WNV.shDmg,t=>{addStun(t,WNV.shStun);knock(t,p.x,p.y,WNV.shPush);t.wpush=0.8;});
   emit({k:'efx',z:'wnsb',x:Math.round(p.x),y:Math.round(p.y),h:p.z,id:p.id});}
 
 // ---------- Dash: ผลักศัตรูข้างหน้า + ดีดตัวเราถอยหลังลอยกลางอากาศ ----------
 function windDash(p,inp,pr,dt,setCd){
   if(!pr.sp||p.cd.dodge>0||p.wwAim)return false;
   const a=p.ang,ca=Math.cos(a),sa=Math.sin(a);p.shieldOn=false;
-  for(const t of foesOf(p.team)){const dx=t.x-p.x,dy=t.y-p.y,d=Math.hypot(dx,dy);if(d>W_DS.reach+(t.r||PR)||Math.abs(angDiff(Math.atan2(dy,dx),a))>W_DS.cone||Math.abs(cH(t)-(p.z+1.1))>3.5)continue;
-    knock(t,t.x-ca*10,t.y-sa*10,W_DS.push);t.wpush=0.8;t.wdk=0.8;t.wdkSrc=p.id;t.wdkN=t.solN|0;emit({k:'efx',z:'wndshit',x:Math.round(t.x),y:Math.round(t.y),h:cH(t)});}
-  p.vx=(p.vx||0)-ca*W_DS.back;p.vy=(p.vy||0)-sa*W_DS.back;p.vz=Math.max(p.vz||0,W_DS.vz);   // (ไม่ใส่อมตะ: ตัวละครจะกะพริบหาย แต่ปีกยังอยู่ = ดูเหมือนปีกไม่ตามตัว)
-  setCd('dodge',W_DS.cd*p.buffs.cdr);
+  for(const t of foesOf(p.team)){const dx=t.x-p.x,dy=t.y-p.y,d=Math.hypot(dx,dy);if(d>WNV.dsReach+(t.r||PR)||Math.abs(angDiff(Math.atan2(dy,dx),a))>(WNV.dsCone*Math.PI/180)||Math.abs(cH(t)-(p.z+1.1))>3.5)continue;
+    knock(t,t.x-ca*10,t.y-sa*10,WNV.dsPush);t.wpush=0.8;t.wdk=0.8;t.wdkSrc=p.id;t.wdkN=t.solN|0;emit({k:'efx',z:'wndshit',x:Math.round(t.x),y:Math.round(t.y),h:cH(t)});}
+  p.vx=(p.vx||0)-ca*WNV.dsBack;p.vy=(p.vy||0)-sa*WNV.dsBack;p.vz=Math.max(p.vz||0,WNV.dsVz);   // (ไม่ใส่อมตะ: ตัวละครจะกะพริบหาย แต่ปีกยังอยู่ = ดูเหมือนปีกไม่ตามตัว)
+  setCd('dodge',WNV.dsCd*p.buffs.cdr);
   emit({k:'efx',z:'wnds',x:Math.round(p.x),y:Math.round(p.y),h:p.z,a:Math.round(a*100)/100,id:p.id});
   return false;}
 
@@ -148,11 +145,11 @@ function updateWind(dt){
       for(const t of foesOf(w.team)){if(w.hitT[t.id])continue;const sp=Math.hypot(t.vx||0,t.vy||0);if(sp<150&&!(t.wpush>0&&sp>60))continue;
         const s=wSeg(w,t.x,t.y);if(s.d>w.r+(t.r||PR))continue;
         w.hitT[t.id]=0.8;addStun(t,t.wus>0?W_UL.stun:W_WL.stun);t.wus=0;t.wwW=w.id;t.vx*=0.1;t.vy*=0.1;emit({k:'efx',z:'wnwhit',x:Math.round(t.x),y:Math.round(t.y),h:cH(t),a:Math.round(w.a*100)/100,n:w.id});
-        if(t.wdk>0&&t.wdkSrc!=null){t.wdk=0;const o=G.players[t.wdkSrc];if(o)damage(t,W_DS.wall,o.id,'proj');}}}
+        if(t.wdk>0&&t.wdkSrc!=null){t.wdk=0;const o=G.players[t.wdkSrc];if(o)damage(t,WNV.dsWall,o.id,'proj');}}}
     G.wwl=G.wwl.filter(w=>!w.dead);}
   // Dash ผลักศัตรูชนกำแพงแผนที่/สิ่งก่อสร้าง = 20 ดาเมจ + สตัน (ชนกำแพง = สตันตามกติกาสาย ⚠ 0.5 วิ)
   for(const t of foesOf(-99)){if(t.wpush>0)t.wpush-=dt;if(t.wus>0)t.wus-=dt;if(t.wflt>0)t.wflt-=dt;
-    if(t.wdk>0){t.wdk-=dt;if((t.solN|0)>(t.wdkN|0)&&Math.hypot(t.vx||0,t.vy||0)>120){t.wdk=0;const o=G.players[t.wdkSrc];if(o)damage(t,W_DS.wall,o.id,'proj');addStun(t,W_WL.stun);emit({k:'efx',z:'wndswall',x:Math.round(t.x),y:Math.round(t.y),h:cH(t)});}}
+    if(t.wdk>0){t.wdk-=dt;if((t.solN|0)>(t.wdkN|0)&&Math.hypot(t.vx||0,t.vy||0)>120){t.wdk=0;const o=G.players[t.wdkSrc];if(o)damage(t,WNV.dsWall,o.id,'proj');addStun(t,W_WL.stun);emit({k:'efx',z:'wndswall',x:Math.round(t.x),y:Math.round(t.y),h:cH(t)});}}
     if(t.wwW&&!(t.stun>0))t.wwW=0;}
 }
 // ---------- Windrift: ชาร์จปีก → พุ่ง 200 แบบ Jett → ลงท่าฮีโร่ → 1 วิต่อมาลมแรงตามมาพัดศัตรูในแนว ----------
@@ -202,7 +199,7 @@ function windVoidTick(o,dt){o.t+=dt;const p=G.players[o.o],ca=Math.cos(o.a),sa=M
 function windFlyTick(p,dt){const F=p.wfw;if(!p.alive){p.wfw=null;return;}
   if(F.ph==='fly'){F.t-=dt;if(F.t<=0||p.stun>0){F.ph='glide';emit({k:'efx',z:'wnfwend',x:Math.round(p.x),y:Math.round(p.y),h:p.z,id:p.id});}}}
 function windFlick(p){const F=p.wfw;if(!F||F.ph!=='fly')return;F.ph='glide';const a=p.ang;
-  for(const t of foesOf(p.team)){const dx=t.x-p.x,dy=t.y-p.y,d=Math.hypot(dx,dy);if(d>W_FW.range+(t.r||PR)||Math.abs(angDiff(Math.atan2(dy,dx),a))>W_FW.cone)continue;
+  for(const t of foesOf(p.team)){const dx=t.x-p.x,dy=t.y-p.y,d=Math.hypot(dx,dy);if(d>W_FW.range+(t.r||PR)||Math.abs(angDiff(Math.atan2(dy,dx),a))>(W_FW.cone*Math.PI/180))continue;
     const dz=cH(t)-p.z;if(dz>2||dz<-(W_FW.hgt+2))continue;   // เอียงลงพื้น: โดนคนที่อยู่ต่ำกว่าเราได้
     aoeHit(p,t,W_FW.dmg,t=>{knock(t,t.x-Math.cos(a)*10,t.y-Math.sin(a)*10,W_FW.push);t.wpush=0.8;});}
   emit({k:'efx',z:'wnfwflick',x:Math.round(p.x),y:Math.round(p.y),h:p.z,a:Math.round(a*100)/100,id:p.id});}
@@ -220,7 +217,7 @@ function windUltTick(p,dt){const U=p.wult;U.t+=dt;
       (G.wwl||(G.wwl=[])).push(w);emit({k:'efx',z:'wnwup',x:Math.round(w.x),y:Math.round(w.y),a:Math.round(th*100)/100,id:p.id,n:w.id,m:2});}}
   if(!U.imp&&U.t>=W_UL.imp){U.imp=1;
     for(const t of foesOf(p.team)){const d=Math.hypot(t.x-U.x,t.y-U.y);if(d>W_UL.r+(t.r||PR))continue;
-      aoeHit(p,t,W_UL.dmg,t=>{const f=Math.max(900,(W_UL.r-d+80)*6.5);knock(t,U.x,U.y,f);t.wus=1.2;t.wpush=1.2;});}
+      aoeHit(p,t,W_UL.dmg,t=>{const f=Math.max(W_UL.kmin,(W_UL.r-d+80)*6.5);knock(t,U.x,U.y,f);t.wus=1.2;t.wpush=1.2;});}
     emit({k:'efx',z:'wnulimp',x:Math.round(U.x),y:Math.round(U.y),h:p.z,id:p.id});}
   if(U.t>=W_UL.end)p.wult=null;}
 // คนที่ลอยค้าง: ลอยขึ้นจากพื้นค้างไว้ (เรียกแทนแรงโน้มถ่วงใน updatePlayer)
@@ -232,28 +229,28 @@ function windSnapW(){const o={};if(G.wwl&&G.wwl.length)o.WW=G.wwl.map(w=>[w.id,M
   if(G.wvh&&G.wvh.length)o.WO=G.wvh.filter(v=>v.on).map(v=>[v.id,Math.round(v.x),Math.round(v.y)]);return o;}
 
 // ---------- สกิล ----------
-defSpell(WINDP,{id:'aegisgale',role:'control',n:'Aegis Gale',ic:'🌬️',cd:0.4,d:'กำแพงลม (ชาร์จ 3 อัน คืน 8 วิ/อัน) — กดสกิลแล้วเลือก: คลิกซ้าย = ดันกำแพงพุ่งไปข้างหน้า 400 ทะลุผ่านศัตรูในทาง: สตัน 0.5 วิ + 10 ดาเมจ (กดสกิลอีกครั้ง = หยุดก่อน) • คลิกขวา = วางตรงจุดเล็ง (ไกลสุด 500) • กว้าง 250 อยู่ 12 วิ • กันศัตรูเดินผ่าน + บล็อกลูกเวทศัตรู (พวกเดียวกันผ่านได้) • ศัตรูยิงพังได้ (200) • ศัตรูโดนผลักชน = สตัน 0.5 วิ • ตีศัตรูที่ติดกำแพงครบ 70 = กำแพงแตก ระเบิด 50 กระเด็นไกล',
+const W_WL=defSpell(WINDP,{id:'aegisgale',v:{L:125,r:14,life:12,hp:100,charge:8,max:3,push:400,spd:900,place:500,stun:0.5,pdmg:10,pstun:0.5,boom:70,bdmg:50,bpush:2400,brad:110,aim:4},vn:{L:'กำแพง • ครึ่งความกว้าง',r:'กำแพง • ความหนา',life:'กำแพง • อยู่ (วิ)',hp:'กำแพง • HP (โดนยิง)',charge:'ชาร์จคืน 1 อัน (วิ)',max:'ชาร์จสูงสุด (อัน)',push:'ดัน • ระยะ',spd:'ดัน • ความเร็ว',place:'วาง • ระยะไกลสุด',stun:'ศัตรูโดนผลักชน • สตัน (วิ)',pdmg:'ดันทะลุศัตรู • ดาเมจ',pstun:'ดันทะลุศัตรู • สตัน (วิ)',boom:'ตีครบเท่านี้ = แตก',bdmg:'แตกระเบิด • ดาเมจ',bpush:'แตกระเบิด • แรงผลัก',brad:'แตกระเบิด • รัศมี',aim:'เวลาเลือกดัน/วาง (วิ)'},role:'control',n:'Aegis Gale',ic:'🌬️',cd:0.4,d:'กำแพงลม (ชาร์จ 3 อัน คืน 8 วิ/อัน) — กดสกิลแล้วเลือก: คลิกซ้าย = ดันกำแพงพุ่งไปข้างหน้า 400 ทะลุผ่านศัตรูในทาง: สตัน 0.5 วิ + 10 ดาเมจ (กดสกิลอีกครั้ง = หยุดก่อน) • คลิกขวา = วางตรงจุดเล็ง (ไกลสุด 500) • กว้าง 250 อยู่ 12 วิ • กันศัตรูเดินผ่าน + บล็อกลูกเวทศัตรู (พวกเดียวกันผ่านได้) • ศัตรูยิงพังได้ (200) • ศัตรูโดนผลักชน = สตัน 0.5 วิ • ตีศัตรูที่ติดกำแพงครบ 70 = กำแพงแตก ระเบิด 50 กระเด็นไกล',
   toggle(p){const w=(G.wwl||[]).find(w=>w.owner===p.id&&w.mv>0&&!w.dead);if(w){windWallStop(w);return true;}if(p.wwAim){p.wwAim=null;p.wwc=Math.min(W_WL.max,p.wwc+1);emit({k:'efx',z:'wnwaimoff',x:p.x,y:p.y,h:p.z,id:p.id});return true;}return false;},
-  cast(p){if((p.wwc|0)<=0)return false;p.wwc--;const inp=p.inp||{};p.wwAim={t:W_WL.aim,f0:inp.fire,s0:inp.sh};emit({k:'efx',z:'wnwaim',x:p.x,y:p.y,h:p.z,id:p.id});}});
-defSpell(WINDP,{id:'windrift',role:'utility',n:'Windrift',ic:'💨',cd:W_DR.cd,d:'ชาร์จปีก 0.3 วิ (ลอยนิดหน่อย) แล้วพุ่ง 200 แบบ Jett ลงท่าฮีโร่ • ศัตรูในทางพุ่งช้าลงทันที • 1 วิต่อมาลมแรงตามมา ศัตรูในแนวกว้าง 100 กระเด็น 400 ตามทิศที่พุ่ง 10 ดาเมจ • ใช้กลางอากาศได้',
-  cast(p){if(p.wdr)return false;p.wdr={ph:'chg',t:W_DR.chg,a:p.ang,x0:p.x,y0:p.y,sl:new Set()};p.vz=Math.max(p.vz||0,2.5);emit({k:'efx',z:'wndr',x:Math.round(p.x),y:Math.round(p.y),h:p.z,a:Math.round(p.ang*100)/100,id:p.id});}});
-defSpell(WINDP,{id:'vortexbind',role:'control',n:'Vortex Bind',ic:'🌀',cd:W_VX.cd,d:'เสกทอร์นาโด 3 อันเรียงโค้ง 45° ข้างหน้าระยะ 300 → 0.8 วิ ดึงกลับมาหยุดห่างเรา 60 ลากศัตรูที่โดนมาด้วย 20 ดาเมจ แล้วสตัน 0.75 วิ • ระหว่างดึงชนกำแพงลม = สตัน • ใช้กลางอากาศไม่ได้',
-  cast(p){if(p.z>groundH(p.x,p.y,p.z)+0.4)return false;const a=p.ang;(G.wvx||(G.wvx=[])).push({o:p.id,team:p.team,x:p.x,y:p.y,h:p.z+1,t:0,as:[a-W_VX.arc,a,a+W_VX.arc],c:[],cap:new Map()});
-    emit({k:'efx',z:'wnvx',x:Math.round(p.x),y:Math.round(p.y),h:p.z,a:Math.round(a*100)/100,id:p.id});}});
-defSpell(WINDP,{id:'voidspheres',role:'control',n:'Void Spheres',ic:'⚫',cd:W_VO.cd,d:'แทงไม้ยิงสสารมืดไป 50 → 0.5 วิ กลายเป็นหลุมดำ 2.5 วิ ค่อยๆ เลื่อนไปข้างหน้า • ดูดศัตรูรัศมี 150 มาลอยหมุนติ้วที่หลุมดำ (ควบคุมตัวไม่ได้ แต่ตีได้) 1 ดาเมจทุก 0.5 วิ • จบ = ระเบิดผลักไปข้างหน้าแรงมาก 20 ดาเมจ (ชนกำแพงลม = สตัน) • ใช้กลางอากาศได้',
-  cast(p){windVoidCast(p);}});
-defSpell(WINDP,{id:'featherwing',role:'utility',n:'Featherwing',ic:'🪽',cd:W_FW.cd,d:'บินด้วยปีก 5 วิ สูงสุด ~6 ม. เร็ว 1.3 เท่า (ใช้ BA / กำแพงลม / Windrift / Void Spheres ได้) • กดสกิลอีกครั้ง = สะบัดปีกไปข้างหน้า 250 เอียงลงพื้น ผลัก 300 15 ดาเมจ แล้วร่อนลง',
+  cast(p){if((p.wwc|0)<=0)return false;p.wwc--;const inp=p.inp||{};p.wwAim={t:W_WL.aim,f0:inp.fire,s0:inp.sh};emit({k:'efx',z:'wnwaim',x:p.x,y:p.y,h:p.z,id:p.id});}}).v;
+const W_DR=defSpell(WINDP,{id:'windrift',v:{chg:0.3,dist:200,t:0.15,wait:1.0,w:50,push:2400,dmg:10,slow:0.5,slowT:1.2},vn:{chg:'ชาร์จ (วิ)',dist:'พุ่ง • ระยะ',t:'พุ่ง • เวลา (วิ)',wait:'ลมตามมาหลัง (วิ)',w:'ลม • ครึ่งความกว้าง',push:'ลม • แรงผลัก',dmg:'ลม • ดาเมจ',slow:'ทางพุ่ง • ช้า (เท่า)',slowT:'ทางพุ่ง • ช้านาน (วิ)'},role:'utility',n:'Windrift',ic:'💨',cd:14,d:'ชาร์จปีก 0.3 วิ (ลอยนิดหน่อย) แล้วพุ่ง 200 แบบ Jett ลงท่าฮีโร่ • ศัตรูในทางพุ่งช้าลงทันที • 1 วิต่อมาลมแรงตามมา ศัตรูในแนวกว้าง 100 กระเด็น 400 ตามทิศที่พุ่ง 10 ดาเมจ • ใช้กลางอากาศได้',
+  cast(p){if(p.wdr)return false;p.wdr={ph:'chg',t:W_DR.chg,a:p.ang,x0:p.x,y0:p.y,sl:new Set()};p.vz=Math.max(p.vz||0,2.5);emit({k:'efx',z:'wndr',x:Math.round(p.x),y:Math.round(p.y),h:p.z,a:Math.round(p.ang*100)/100,id:p.id});}}).v;
+const W_VX=defSpell(WINDP,{id:'vortexbind',v:{far:300,near:60,arc:22.5,hold:0.8,pull:0.25,r:60,dmg:20,stun:0.75},vn:{far:'ทอร์นาโด • ระยะเสก',near:'ดึงกลับมาหยุดห่าง',arc:'มุมห่างแต่ละอัน (องศา)',hold:'ค้างก่อนดึง (วิ)',pull:'เวลาดึง (วิ)',r:'ทอร์นาโด • รัศมีจับ',dmg:'ดาเมจ',stun:'ดึงถึงแล้วสตัน (วิ)'},role:'control',n:'Vortex Bind',ic:'🌀',cd:10,d:'เสกทอร์นาโด 3 อันเรียงโค้ง 45° ข้างหน้าระยะ 300 → 0.8 วิ ดึงกลับมาหยุดห่างเรา 60 ลากศัตรูที่โดนมาด้วย 20 ดาเมจ แล้วสตัน 0.75 วิ • ระหว่างดึงชนกำแพงลม = สตัน • ใช้กลางอากาศไม่ได้',
+  cast(p){if(p.z>groundH(p.x,p.y,p.z)+0.4)return false;const a=p.ang;(G.wvx||(G.wvx=[])).push({o:p.id,team:p.team,x:p.x,y:p.y,h:p.z+1,t:0,as:[a-(W_VX.arc*Math.PI/180),a,a+(W_VX.arc*Math.PI/180)],c:[],cap:new Map()});
+    emit({k:'efx',z:'wnvx',x:Math.round(p.x),y:Math.round(p.y),h:p.z,a:Math.round(a*100)/100,id:p.id});}}).v;
+const W_VO=defSpell(WINDP,{id:'voidspheres',v:{fly:0.15,dist:50,wait:0.5,hold:2.5,drift:40,r:150,core:28,pull:500,tick:0.5,tdmg:1,dmg:20,push:2400,spin:14,lift:0.6},vn:{fly:'สสารมืดพุ่ง (วิ)',dist:'สสารมืด • ระยะ',wait:'รอก่อนเป็นหลุมดำ (วิ)',hold:'หลุมดำอยู่ (วิ)',drift:'หลุมดำเลื่อน (ต่อวิ)',r:'รัศมีดูด',core:'ระยะติดขอบแกน',pull:'แรงดูด (ต่อวิ)',tick:'ดาเมจย่อยทุก (วิ)',tdmg:'ดาเมจย่อย',dmg:'ระเบิด • ดาเมจ',push:'ระเบิด • แรงผลัก',spin:'ความเร็วหมุนติ้ว',lift:'ลอยสูง (ม.)'},role:'control',n:'Void Spheres',ic:'⚫',cd:22,d:'แทงไม้ยิงสสารมืดไป 50 → 0.5 วิ กลายเป็นหลุมดำ 2.5 วิ ค่อยๆ เลื่อนไปข้างหน้า • ดูดศัตรูรัศมี 150 มาลอยหมุนติ้วที่หลุมดำ (ควบคุมตัวไม่ได้ แต่ตีได้) 1 ดาเมจทุก 0.5 วิ • จบ = ระเบิดผลักไปข้างหน้าแรงมาก 20 ดาเมจ (ชนกำแพงลม = สตัน) • ใช้กลางอากาศได้',
+  cast(p){windVoidCast(p);}}).v;
+const W_FW=defSpell(WINDP,{id:'featherwing',v:{t:5,hgt:6,vz:3.5,spd:1.3,range:250,cone:50.4,push:1800,dmg:15,glide:2.2},vn:{t:'บินนาน (วิ)',hgt:'บินสูงสุด (ม.)',vz:'ความเร็วขึ้น',spd:'ความเร็วบิน (เท่า)',range:'สะบัด • ระยะ',cone:'สะบัด • มุม (องศา ครึ่งซ้าย/ขวา)',push:'สะบัด • แรงผลัก',dmg:'สะบัด • ดาเมจ',glide:'ร่อนลง (ม./วิ)'},role:'utility',n:'Featherwing',ic:'🪽',cd:14,d:'บินด้วยปีก 5 วิ สูงสุด ~6 ม. เร็ว 1.3 เท่า (ใช้ BA / กำแพงลม / Windrift / Void Spheres ได้) • กดสกิลอีกครั้ง = สะบัดปีกไปข้างหน้า 250 เอียงลงพื้น ผลัก 300 15 ดาเมจ แล้วร่อนลง',
   toggle(p){if(p.wfw&&p.wfw.ph==='fly'){windFlick(p);return true;}return false;},
-  cast(p){if(p.wfw)return false;p.wfw={ph:'fly',t:W_FW.t};p.vz=W_FW.vz;emit({k:'efx',z:'wnfw',x:Math.round(p.x),y:Math.round(p.y),h:p.z,id:p.id});}});
-defSpell(WINDP,{id:'eyeofheaven',role:'ult',ult:true,n:'Eye of Heaven',ic:'👁️',cd:0,d:'ชูไม้ขึ้นฟ้า แล้วปักลงพื้น: ทุกคนในรัศมี 350 ลอยค้าง 1.5 วิ (ทำอะไรไม่ได้) • กำแพงลมวงกลม 8 ชิ้นขึ้นรอบเขต • สะบัดปีก = ลมกระแทก 30 ผลักทุกคนไปชนกำแพงวง สตัน 3 วิ • กำแพงวงอยู่ 5 วิ แต่ละชิ้นตีแตกได้แบบกำแพงลมปกติ (ระเบิด 50) ชิ้นอื่นยังอยู่',
-  cast(p){p.wult={t:0,x:p.x,y:p.y,fl:new Set()};p.shieldOn=false;p.wfw=null;p.wdr=null;emit({k:'efx',z:'wnult',x:Math.round(p.x),y:Math.round(p.y),h:p.z,a:Math.round(p.ang*100)/100,id:p.id});}});
+  cast(p){if(p.wfw)return false;p.wfw={ph:'fly',t:W_FW.t};p.vz=W_FW.vz;emit({k:'efx',z:'wnfw',x:Math.round(p.x),y:Math.round(p.y),h:p.z,id:p.id});}}).v;
+const W_UL=defSpell(WINDP,{id:'eyeofheaven',v:{r:350,slam:1.0,wall:1.15,imp:2.38,end:2.7,float:1.5,fz:2.2,dmg:30,stun:3,wlife:6.25,seg:8,kmin:900},vn:{r:'รัศมีเขต/กำแพงวง',slam:'ปักไม้ที่ (วิ — ตรงกับภาพ)',wall:'กำแพงขึ้นที่ (วิ — ตรงกับภาพ)',imp:'ลมกระแทกที่ (วิ — ตรงกับภาพ)',end:'จบท่า (วิ)',float:'ลอยค้าง (วิ)',fz:'ลอยสูง (ม.)',dmg:'ลมกระแทก • ดาเมจ',stun:'ชนกำแพงวง • สตัน (วิ)',wlife:'กำแพงวงอยู่ (วิ)',seg:'กำแพงวง • จำนวนชิ้น',kmin:'ลมกระแทก • แรงผลักต่ำสุด'},role:'ult',ult:true,n:'Eye of Heaven',ic:'👁️',cd:0,d:'ชูไม้ขึ้นฟ้า แล้วปักลงพื้น: ทุกคนในรัศมี 350 ลอยค้าง 1.5 วิ (ทำอะไรไม่ได้) • กำแพงลมวงกลม 8 ชิ้นขึ้นรอบเขต • สะบัดปีก = ลมกระแทก 30 ผลักทุกคนไปชนกำแพงวง สตัน 3 วิ • กำแพงวงอยู่ 5 วิ แต่ละชิ้นตีแตกได้แบบกำแพงลมปกติ (ระเบิด 50) ชิ้นอื่นยังอยู่',
+  cast(p){p.wult={t:0,x:p.x,y:p.y,fl:new Set()};p.shieldOn=false;p.wfw=null;p.wdr=null;emit({k:'efx',z:'wnult',x:Math.round(p.x),y:Math.round(p.y),h:p.z,a:Math.round(p.ang*100)/100,id:p.id});}}).v;
 
 // ท่าพื้นฐาน + โล่ + Dash ของสาย (PBASIC ต้องอยู่ช่องเดียวกับลำดับใน PATHS)
 PBASIC.push({id:'b_wind',type:'wblade',n:'ใบมีดลม / GaleBurst',d:'คลิก = ใบมีดลม 5 ดาเมจ ทุก 0.3 วิ ระยะ 400 โดนแล้วเกจ GaleBurst +12% • กดค้าง (เกจยังไม่เต็ม) = ดูดลมรอบตัว +8%/วิ • เกจเต็ม = คลิกถัดไปยิงทอร์นาโดนอน 12 ม. 25 ดาเมจ ผลัก 250',
   shd:'โล่ปีกห่อตัว: กันรอบตัว 360° รับได้ 75 • โดนตีแต่ละครั้ง +10% เกจ • เกจเต็มระหว่างยกโล่ + คลิกซ้าย = ชาร์จปีกแล้วระเบิดรอบตัว รัศมี 200 ผลัก 250 สตัน 0.8 วิ 20 ดาเมจ',
   dsd:'Dash ถอยหลังผลัก (Shift): ผลักศัตรูข้างหน้า 250 ตัวเราดีดถอยหลัง 300 ลอยกลางอากาศ (ใช้สกิลกลางอากาศได้) • ศัตรูที่โดนผลักชนกำแพง = 20 ดาเมจ + สตัน • คูลดาวน์ 8 วิ',
-  shMul:W_SH.mul,shieldSwing:true,
-  hit(pr,t){damage(t,pr.dmg,pr.owner,'proj');const o=G.players[pr.owner];if(o)wGain(o,W_BA.gain);},
-  onBlock(p){wGain(p,W_SH.gain);},
+  get shMul(){return 100/WNV.shHp;},shieldSwing:true,
+  hit(pr,t){damage(t,pr.dmg,pr.owner,'proj');const o=G.players[pr.owner];if(o)wGain(o,WNV.baGain);},
+  onBlock(p){wGain(p,WNV.shGain);},
   tick:windBasic,dash:windDash});
 SPELLS.b_wind=PBASIC[WINDP];
