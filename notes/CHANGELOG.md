@@ -1,5 +1,9 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
 
+- 2026-11-07 — **ลดแลคเมนู + รอบใหญ่:** นอกเกมล็อกไม่เกินราว 60 fps (จอ 165 Hz เคยวาดห้องนิ่ง 165 ครั้ง/วิ), รวมของนิ่งในห้อง 240 เหลือ 160 draw, เงาห้องทุก 3 เฟรม, คุณภาพอัตโนมัติทำงานในเมนู, warm-up รอ shader แบบไม่ค้าง, ตัวเลขดาเมจแคชเป็นภาพ, พื้นน้ำแข็ง Glacier Rend เป็นภาพขอบขรุขระมีรอยแตก. OPTIMIZE หมวด O.
+
+- 2026-11-07 — Nature wall r6 crown-only follow-up: user asks for more leaves and better ascending arrangement. Replace23 isolated crown sprigs with17 connected clusters (upright leader plus two low side fans), increase crown leaves109→187, vary heights along the wall, retain wall/root/bark direction. Use thin two-sided crown leaf skins to keep the geometry budget close to r5 (29,920tris). Still Model preview awaiting review; no gameplay/bind/growth/fire/GIF/commit/push.
+
 - 2026-11-07 — **Glacier Rend คลื่นใหม่ (ผู้ใช้ + รูป ref):** โหมดใกล้ไม่ชาร์จ เอาดาบลงล่าง หน่วง 0.3 วิ แล้วฟันงัดขึ้น (js/34), ความเร็ว 750, อัลติแยกพัด 3 ทิศ ±20° คลื่นละดาเมจเต็ม (js/11), ภาพใหม่ทั้งชุดจาก `tools/frost-wave-gen.py` (mesh สองแผ่นสมมาตร ออร่า ประกาย รอยพื้นตรง), พื้นน้ำแข็งงอกช้ากว่าคลื่นแล้วค่อยขยาย (js/19), เอาควันออกจากคลื่น. mesh `poly` รองรับ `uv` เอง (js/46). ยังไม่ได้ลองในเกมจริงโดยผู้ใช้.
 
 - 2026-11-06 — Nature wall r5 from user feedback: shallow caster-side arc shared by all components, roots branching at early/mid parent junctions, curved leaves on connected sprigs with crown anchors sampled from wood surface, muted wood colours and optional procedural bark grain/fissures/relief shared by solid Model/runtime materials. Legacy materials unchanged by default; authored poly UV schema now matches existing runtime support. Model29,296tris; JS/FX/Model shader compile/legacy geometry+material/runtime tint+grow checks pass. Still Model preview awaiting review; no gameplay/collider/bind, growth/fire/GIF, commit or push.

@@ -194,17 +194,30 @@ const _iceEdge=new THREE.RingGeometry(0.955,1,72);_iceEdge.rotateX(-Math.PI/2);_
 const _iceSpk=new THREE.ConeGeometry(1,1,5);_iceSpk.translate(0,0.5,0);_iceSpk.userData.keep=true;
 function iceFloorMat(op){return new THREE.MeshStandardMaterial({color:'#bfe6fa',emissive:'#2f7fb8',emissiveIntensity:0.25,roughness:0.9,metalness:0,transparent:true,opacity:op,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-2,polygonOffsetUnits:-2});}
 const _icePlane=new THREE.PlaneGeometry(1,1);_icePlane.rotateX(-Math.PI/2);_icePlane.userData.keep=true;
-let _icePathMat=null;
+let _icePathMat=null,_iceWvM=null;
+// พื้นน้ำแข็งจากคลื่นดาบ: ขอบขรุขระ มีรอยแตก ต่อกันแนวยาวได้ไร้รอย (ลายวนตามแกนยาว) แทนแผ่นขอบตรง
+function iceWvMat(){if(_iceWvM)return _iceWvM;
+  const t=texCanvas(256,128,(g,W,H)=>{const P=[[3,.11,.4],[7,.07,1.7],[13,.04,3.1],[23,.02,5]],E=(x,s)=>{let e=.8;for(const [f,a,p] of P)e+=a*Math.sin(x/W*6.2832*f+p*s);return Math.min(.98,e);};
+    const edge=(s)=>{for(let x=0;x<=W;x+=2)g.lineTo(x,H/2+s*E(x,s)*H/2);};
+    g.filter='blur(1.5px)';g.fillStyle='#a9dcf7';g.beginPath();g.moveTo(0,H/2);edge(-1);g.lineTo(W,H/2);for(let x=W;x>=0;x-=2)g.lineTo(x,H/2+E(x,1)*H/2);g.closePath();g.fill();g.filter='none';
+    g.globalCompositeOperation='source-atop';
+    const gr=g.createLinearGradient(0,0,0,H);gr.addColorStop(0,'#e8f8ff');gr.addColorStop(.28,'#8fd0f4');gr.addColorStop(.5,'#6fbcec');gr.addColorStop(.72,'#8fd0f4');gr.addColorStop(1,'#e8f8ff');g.fillStyle=gr;g.fillRect(0,0,W,H);
+    let sd=11;const r=()=>((sd=(sd*16807)%2147483647)/2147483647);
+    for(let i=0;i<46;i++){const x0=r()*W,y0=r()*H;let x=x0,y=y0;g.strokeStyle=i%3?'rgba(255,255,255,.55)':'rgba(30,90,170,.45)';g.lineWidth=.6+r()*1.1;g.beginPath();g.moveTo(x,y);for(let k=0;k<5;k++){x+=8+r()*22;y+=(r()-.5)*20;g.lineTo(x,y);}g.stroke();
+      if(x>W){g.beginPath();g.moveTo(x0-W,y0);let a=x0-W,b=y0;for(let k=0;k<5;k++){a+=14;b+=(r()-.5)*14;g.lineTo(a,b);}g.stroke();}}
+    g.globalCompositeOperation='source-over';});
+  t.wrapS=THREE.RepeatWrapping;t.userData.keep=true;
+  _iceWvM=new THREE.MeshStandardMaterial({map:t,emissive:'#1f6fb8',emissiveIntensity:.22,roughness:.42,metalness:0,transparent:true,opacity:.94,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-2,polygonOffsetUnits:-2});_iceWvM.userData.keep=true;return _iceWvM;}
 function makeIceFloor(x,y,r,t,ring,lx,ly,wv){
   if(!ring){
     // ทางน้ำแข็งเรียบๆ ต่อเนื่อง: วัสดุทึบ (ซ้อนกันไม่เป็นดวง) • ชิ้นยาวจากจุดก่อนหน้า + ข้อต่อกลม
     if(!_icePathMat){_icePathMat=new THREE.MeshStandardMaterial({color:'#a8d4ec',emissive:'#1f5f90',emissiveIntensity:0.18,roughness:0.85,metalness:0,polygonOffset:true,polygonOffsetFactor:-2,polygonOffsetUnits:-2});_icePathMat.userData.keep=true;}
     const g=new THREE.Group();g.position.set(tx(x),0.03+GY(x,y),tz(y));scene.add(g);
     const w=r*S3*1.6;
-    const j=new THREE.Mesh(_iceDisc,_icePathMat);j.scale.setScalar(w/2);g.add(j);
-    if(lx!==undefined){const dx=tx(lx)-tx(x),dz=tz(ly)-tz(y),L=Math.hypot(dx,dz);if(L>0.01&&L<6){const q=new THREE.Mesh(_icePlane,_icePathMat);q.scale.set(L,1,w);q.position.set(dx/2,0,dz/2);q.rotation.y=-Math.atan2(dz,dx);g.add(q);if(wv)g.userData.q=q;}}
+    const j=wv?null:new THREE.Mesh(_iceDisc,_icePathMat);if(j){j.scale.setScalar(w/2);g.add(j);}
+    if(lx!==undefined){const dx=tx(lx)-tx(x),dz=tz(ly)-tz(y),L=Math.hypot(dx,dz);if(L>0.01&&L<6){const q=new THREE.Mesh(_icePlane,wv?iceWvMat():_icePathMat);q.scale.set(L,1,w);q.position.set(dx/2,0,dz/2);q.rotation.y=-Math.atan2(dz,dx);g.add(q);if(wv)g.userData.q=q;}}
     // ทางจากคลื่นดาบ (ผู้ใช้ 2026-11-06): งอกช้ากว่าคลื่น เริ่มบางตามปลายหาง แล้วค่อยขยายจนเต็มความกว้าง
-    if(wv){g.visible=false;g.userData.j=j;g.userData.w=w;}
+    if(wv){g.visible=false;g.userData.w=w;}
     return {g,mats:[],spikes:[],age:0,t,path:true,wv:!!wv};
   }
   const g=new THREE.Group();g.position.set(tx(x),0.035+GY(x,y),tz(y));scene.add(g);
@@ -228,7 +241,7 @@ function updateIceFloors(dt){
     const k=Math.min(1,v.age/0.2)*Math.min(1,Math.max(0,(v.t-v.age)/0.6));
     for(const [m,op] of v.mats)m.opacity=op*k;
     for(const s of v.spikes){const u=s.userData;s.scale.set(u.rr*k+0.001,u.hh*k+0.001,u.rr*k+0.001);}
-    if(v.wv){const U=v.g.userData,e=Math.max(0,Math.min(1,(v.age-ICE_WV.delay)/ICE_WV.grow)),w=U.w*(1-(1-e)*(1-e)*(1-e))*Math.min(1,Math.max(0,(v.t-v.age)/0.6))+0.001;v.g.visible=v.age>=ICE_WV.delay;U.j.scale.setScalar(w/2);if(U.q)U.q.scale.z=w;}
+    if(v.wv){const U=v.g.userData,e=Math.max(0,Math.min(1,(v.age-ICE_WV.delay)/ICE_WV.grow)),w=U.w*(1-(1-e)*(1-e)*(1-e))*Math.min(1,Math.max(0,(v.t-v.age)/0.6))+0.001;v.g.visible=v.age>=ICE_WV.delay;if(U.q)U.q.scale.z=w;}
     else if(v.path)v.g.scale.set(k+0.001,1,k+0.001);
     if(v.age>=v.t){scene.remove(v.g);v.mats.forEach(([m])=>m.dispose());ICEV.splice(i,1);}
   }

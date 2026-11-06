@@ -514,6 +514,12 @@ function drawLabels(P,E,v,me,spk){
     if(p.dn){cx.fillStyle='#ff9a9a';cx.font='600 13px Kanit,sans-serif';cx.fillText(`ล้ม! ไปยืนข้างๆ เพื่อชุบ ${Math.round(p.rv/2.5*100)}%`,s[0],s[1]+40);}
   }
 }
+// ตัวเลขดาเมจ/ข้อความลอย: วาดลงแผ่นเล็กครั้งเดียวแล้วแปะซ้ำ (fillText 2 ครั้งต่อข้อความต่อเฟรม กินเวลามากสุดในโค้ด HUD ตอนสู้กันนัว ๆ)
+const TEXTAG=new Map();
+function textTag(txt,col,size){const key=col+'|'+size+'|'+txt;let c=TEXTAG.get(key);if(c)return c;if(TEXTAG.size>256)TEXTAG.clear();
+  const d=Math.min(2,DPR||1),px=size+2,font='600 '+px+'px Kanit,sans-serif';c=document.createElement('canvas');let g=c.getContext('2d');g.font=font;
+  const w=Math.ceil(g.measureText(txt).width)+6,h=Math.ceil(px*1.5)+2,a=Math.ceil(px*1.1);c.width=Math.ceil(w*d);c.height=Math.ceil(h*d);c._w=w;c._h=h;c._a=a;g=c.getContext('2d');g.scale(d,d);g.font=font;g.textAlign='center';
+  g.fillStyle='rgba(0,0,0,0.7)';g.fillText(txt,w/2+1.5,a+1.5);g.fillStyle=col;g.fillText(txt,w/2,a);TEXTAG.set(key,c);return c;}
 function drawTexts(dt){
   cx.textAlign='center';
   for(let i=TEXTS.length-1;i>=0;i--){
@@ -522,9 +528,7 @@ function drawTexts(dt){
     t.h+=1.6*dt;
     const s=toScreen(t.x,t.h,t.y);if(!s)continue;
     cx.globalAlpha=Math.min(1,t.life/t.max*2);
-    cx.font=`600 ${t.size+2}px Kanit,sans-serif`;
-    cx.fillStyle='rgba(0,0,0,0.7)';cx.fillText(t.t,s[0]+1.5,s[1]+1.5);
-    cx.fillStyle=t.col;cx.fillText(t.t,s[0],s[1]);
+    {const g=textTag(t.t,t.col,t.size);cx.drawImage(g,s[0]-g._w/2,s[1]-g._a,g._w,g._h);}
   }
   cx.globalAlpha=1;
 }
