@@ -1,10 +1,16 @@
 // ---------- สายน้ำแข็ง: ประชิด/ไกล (V) • ฟันดาบ/ขวาน • ไถลน้ำแข็ง • พื้นน้ำแข็ง/ภูเขาน้ำแข็ง ----------
+// ตัวเลขพื้นฐานของสายน้ำแข็งอยู่ใน FROSTV + v:{...} ของแต่ละสกิล (js/07) — ปรับได้ใน tune.html / F8
+const FROSTV=PATHS[1].v={icicleDmg:7,icicleCd:0.3,icicleSlow:10,c1:10,c2:10,c3:15,meleeR:120,swingCd:0.4,swing3Cd:0.85,swingShCd:0.6,heal3:10,slamDmg:30,slamR:150,slamCd:0.6,
+  slideT:5,slideCd:11,slowMax:30,slowT:3,slowPath:10,ripT:1.5};
+PATHS[1].vn={icicleDmg:'แท่งน้ำแข็ง (ไกล) • ดาเมจ',icicleCd:'แท่งน้ำแข็ง • เว้นยิง (วิ)',icicleSlow:'แท่งน้ำแข็ง • สลอว์ต่อนัด (%)',c1:'ดาบ • ดาเมจจังหวะ 1',c2:'ดาบ • ดาเมจจังหวะ 2',c3:'ดาบ • ดาเมจจังหวะ 3',meleeR:'ดาบ • ระยะฟัน',
+  swingCd:'ดาบ • เว้นฟัน (วิ)',swing3Cd:'ดาบ • เว้นหลังจังหวะ 3 (วิ)',swingShCd:'ดาบ • เว้นฟันตอนยกโล่ (วิ)',heal3:'ดาบ • ฮีลจังหวะ 3',slamDmg:'กระโดดฟาดจากที่สูง • ดาเมจ',slamR:'กระโดดฟาด • รัศมี',slamCd:'กระโดดฟาด • เว้น (วิ)',
+  slideT:'ไถลน้ำแข็ง (พุ่ง) • นาน (วิ)',slideCd:'ไถลน้ำแข็ง • คูลดาวน์ (วิ)',slowMax:'สลอว์สะสมสูงสุด (%)',slowT:'สลอว์อยู่นาน (วิ)',slowPath:'ยืนบนทางน้ำแข็ง • สลอว์ (%)',ripT:'Parry • จังหวะ 3 พร้อมใช้ (วิ)'};
 SPELLS.iceboulder={id:'iceboulder',hit(pr,t){}};
 function frostBoom(pr){
-  emit({k:'efx',z:'iceboom',x:pr.x,y:pr.y,h:pr.h,r:100});
+  const V=FROSTF.v;emit({k:'efx',z:'iceboom',x:pr.x,y:pr.y,h:pr.h,r:V.r});
   const o=G.players[pr.owner];if(!o)return;
-  for(const t of foesIn(pr.team,pr.x,pr.y,100,pr.h+3))aoeHit(o,t,20,t=>{t.fslBigT=2;});
-  damageEnv(pr.x,pr.y,100,30,pr.owner,'ice',pr.h);
+  for(const t of foesIn(pr.team,pr.x,pr.y,V.r,pr.h+3))aoeHit(o,t,V.dmg,t=>{t.fslBigT=V.slowT;});
+  damageEnv(pr.x,pr.y,V.r,V.env,pr.owner,'ice',pr.h);
 }
 // ฟันโดนทุกคนในกรวยหน้า (arc = ครึ่งมุม) จากจุด ox,oy
 function meleeHit(p,ox,oy,range,dmg,arc,fn){
@@ -24,41 +30,41 @@ function frostBasic(p,inp,dt,setCd){
   const ff=p.ffT>0;
   if(p.fmode===1){
     if(inp.fire&&p.cd.basic<=0){
-      if(ff){shoot(p,'iceboulder',{sp:'iceboulder',dmg:20});setCd('basic',0.6);}
-      else{shoot(p,'icicle',{sp:'b_frost',dmg:7});setCd('basic',0.3);}
+      if(ff){shoot(p,'iceboulder',{sp:'iceboulder',dmg:FROSTF.v.dmg});setCd('basic',FROSTF.v.cd2);}
+      else{shoot(p,'icicle',{sp:'b_frost',dmg:FROSTV.icicleDmg});setCd('basic',FROSTV.icicleCd);}
     }
     return;
   }
   if(p.cmbT>0)p.cmbT-=dt;
   if(!inp.fire||p.cd.basic>0)return;
   // อยู่สูง (เช่นบนภูเขาน้ำแข็ง) = กระโดดฟาดลงพื้น
-  if(p.z>4){p.slam=true;p.vz=5;p.vx+=Math.cos(p.ang)*420;p.vy+=Math.sin(p.ang)*420;setCd('basic',0.6);emit({k:'efx',z:'slamgo',x:p.x,y:p.y,h:p.z+1,id:p.id});return;}
+  if(p.z>4){p.slam=true;p.vz=5;p.vx+=Math.cos(p.ang)*420;p.vy+=Math.sin(p.ang)*420;setCd('basic',FROSTV.slamCd);emit({k:'efx',z:'slamgo',x:p.x,y:p.y,h:p.z+1,id:p.id});return;}
   let ci=p.cmbT>0?(p.cmbN|0):0;if(p.ripT>0){ci=2;p.ripT=0;}
-  const D=ff?[20,20,40]:[10,10,15],R=ff?160:120;
+  const FV=FROSTF.v,D=ff?[FV.a1,FV.a2,FV.a3]:[FROSTV.c1,FROSTV.c2,FROSTV.c3],R=ff?FV.axeR:FROSTV.meleeR;
   if(ci===2){p.slam3={t:0.32,R,dm:D[2],ff};}
   else{meleeHit(p,p.x,p.y,R,D[ci],1.0);
-  if(p.mirror>0)for(const s of [-1,1]){const q=mirrorPos(p,s);meleeHit(p,q.x,q.y,R,D[ci]*0.5,1.0);}}
+  if(p.mirror>0)for(const s of [-1,1]){const q=mirrorPos(p,s);meleeHit(p,q.x,q.y,R,D[ci]*MIRROR.v.clone,1.0);}}
   p.cmbN=(ci+1)%3;p.cmbT=1;p.swN=((p.swN|0)+1)%250;p.swC=ci;
   emit({k:'efx',z:'swing',x:p.x,y:p.y,h:p.z+1.1,a:Math.round(p.ang*100)/100,c:ci,ax:ff?1:0,r:R,id:p.id,m:p.mirror>0?1:0});
-  setCd('basic',ci===2?0.85:p.shieldOn?0.6:ff?0.5:0.4);
+  setCd('basic',ci===2?FROSTV.swing3Cd:p.shieldOn?FROSTV.swingShCd:ff?FV.axeCd:FROSTV.swingCd);
 }
 // จังหวะ 3: ง้างแล้วฟาดลงพื้นตรงหน้า (ดาเมจออกหลังง้าง 0.32 วิ) + ระเบิดน้ำแข็ง
 function frostSlam3(p){
   const q=p.slam3;p.slam3=null;if(!q||!p.alive||p.downed)return;
   const n=meleeHit(p,p.x,p.y,q.R,q.dm,1.0);
-  if(n>0)healT(p,p.mirror>0?(q.ff?22:15):(q.ff?15:10));
-  if(p.mirror>0)for(const s of [-1,1]){const m=mirrorPos(p,s);meleeHit(p,m.x,m.y,q.R,q.dm*0.5,1.0);}
+  if(n>0)healT(p,p.mirror>0?(q.ff?MIRROR.v.healAxe:MIRROR.v.heal):(q.ff?FROSTF.v.heal3:FROSTV.heal3));
+  if(p.mirror>0)for(const s of [-1,1]){const m=mirrorPos(p,s);meleeHit(p,m.x,m.y,q.R,q.dm*MIRROR.v.clone,1.0);}
   const fx=p.x+Math.cos(p.ang)*q.R*0.6,fy=p.y+Math.sin(p.ang)*q.R*0.6;
   emit({k:'efx',z:'slam3',x:fx,y:fy,h:p.z+0.1,r:q.R*0.75,ax:q.ff?1:0,m:p.mirror>0?1:0,a:Math.round(p.ang*100)/100,id:p.id});
 }
 function frostSlam(p){
-  p.slam=false;const dm=p.ffT>0?50:30;
-  emit({k:'efx',z:'slam',x:p.x,y:p.y,h:p.z+0.2,r:150,id:p.id,ax:p.ffT>0?1:0});
-  for(const t of foesIn(p.team,p.x,p.y,150,p.z+3))aoeHit(p,t,dm);
-  damageEnv(p.x,p.y,150,dm,p.id,'ice',p.z);
+  p.slam=false;const dm=p.ffT>0?FROSTF.v.slamDmg:FROSTV.slamDmg,R=FROSTV.slamR;
+  emit({k:'efx',z:'slam',x:p.x,y:p.y,h:p.z+0.2,r:R,id:p.id,ax:p.ffT>0?1:0});
+  for(const t of foesIn(p.team,p.x,p.y,R,p.z+3))aoeHit(p,t,dm);
+  damageEnv(p.x,p.y,R,dm,p.id,'ice',p.z);
 }
 function frostDash(p,inp,pr,dt,setCd){
-  if(pr.sp&&p.cd.dodge<=0&&!(p.slideT>0)&&!(p.cryo>0)){p.slideT=5;p.slX=p.x;p.slY=p.y;setCd('dodge',11*p.buffs.cdr);emit({k:'efx',z:'slide',x:p.x,y:p.y,h:p.z,id:p.id});}
+  if(pr.sp&&p.cd.dodge<=0&&!(p.slideT>0)&&!(p.cryo>0)){p.slideT=FROSTV.slideT;p.slX=p.x;p.slY=p.y;setCd('dodge',FROSTV.slideCd*p.buffs.cdr);emit({k:'efx',z:'slide',x:p.x,y:p.y,h:p.z,id:p.id});}
   return false;
 }
 // พื้นน้ำแข็ง (ทางไถล / ทางคลื่นดาบ / วงน้ำแข็ง)
@@ -72,7 +78,7 @@ function updateIces(dt){
     for(const t of all){
       if((t.z||t.h||0)>2.5)continue;
       if((t.x-z.x)**2+(t.y-z.y)**2>(z.r+(t.r||PR)*0.5)**2)continue;
-      if(t.team===z.team){if(!t.isE&&!t.isM)t.iceB=Math.max(t.iceB||0,z.kind==='ring'?0.3:0.2);continue;}
+      if(t.team===z.team){if(!t.isE&&!t.isM)t.iceB=Math.max(t.iceB||0,z.kind==='ring'?PERMA.v.selfSpd:0.2);continue;}
       if(z.kind==='ring')t.fslR=0.3;else{t.fslP=0.3;t.slip=0.3;}
     }
   }
@@ -82,9 +88,9 @@ function updateIces(dt){
 function updateWaves(dt){
   if(!G.waves||!G.waves.length)return;
   for(const w of G.waves){
-    const st=Math.min(w.left,1500*dt);w.x+=w.dx*st;w.y+=w.dy*st;w.left-=st;w.acc+=st;
+    const GV=GREND.v,st=Math.min(w.left,GV.waveSpd*dt);w.x+=w.dx*st;w.y+=w.dy*st;w.left-=st;w.acc+=st;
     const o=G.players[w.owner];
-    if(o)for(const t of foesOf(w.team)){if(w.hit.has(t))continue;if(Math.hypot(t.x-w.x,t.y-w.y)<40+(t.r||PR)&&cH(t)<4){w.hit.add(t);aoeHit(o,t,30,t=>addFrostSlow(t,5));}}
+    if(o)for(const t of foesOf(w.team)){if(w.hit.has(t))continue;if(Math.hypot(t.x-w.x,t.y-w.y)<40+(t.r||PR)&&cH(t)<4){w.hit.add(t);aoeHit(o,t,GV.waveDmg,t=>addFrostSlow(t,GV.waveSlow));}}
     if(w.acc>=50){w.acc=0;addIce({x:w.x,y:w.y,r:72,t:4,team:w.team,kind:'path',lx:w.x-w.dx*50,ly:w.y-w.dy*50});}
     if(w.x<30||w.x>MW-30||w.y<30||w.y>MH-30)w.left=0;
   }

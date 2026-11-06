@@ -42,6 +42,10 @@ function tuneBuild(){
   for(const S of SPELL_LIST)if(typeof S.cd==='number'&&S.cd>0){const P=PATHS[S.path];
     tuneNum(SK,(P?P.ic+' '+P.n:'สาย '+S.path),'spell.'+S.id+'.cd',(S.ic||'')+' '+(S.n||S.id)+(S.ult?' (อัลติ)':''),()=>S.cd,v=>{S.cd=v;},{min:0,max:Math.max(60,S.cd*3),step:0.5});}
   // --- ตัวเลขในสกิล (S.v ใน defSpell — ชื่อไทยใน S.vn) • แต่ละสายเป็นหนึ่งกลุ่ม ---
+  // ยิงปกติ / โล่ / พุ่ง ของแต่ละสาย (PATHS[i].v — ชื่อไทยใน PATHS[i].vn)
+  PATHS.forEach((P,i)=>{if(!P.v)return;const g=['sv'+i,P.ic+' '+P.n+' • ตัวเลขสกิล'];
+    for(const k of Object.keys(P.v))if(typeof P.v[k]==='number')
+      tuneNum(g,'พื้นฐาน (ยิงปกติ / โล่ / พุ่ง)','path.'+P.id+'.'+k,(P.vn&&P.vn[k])||k,()=>P.v[k],v=>{P.v[k]=v;},(P.vo&&P.vo[k])||{});});
   for(const S of SPELL_LIST)if(S.v){const P=PATHS[S.path],g=['sv'+S.path,(P?P.ic+' '+P.n:'สาย '+S.path)+' • ตัวเลขสกิล'];
     for(const k of Object.keys(S.v))if(typeof S.v[k]==='number')
       tuneNum(g,(S.ic||'')+' '+(S.n||S.id)+(S.ult?' (อัลติ)':''),'spell.'+S.id+'.'+k,(S.vn&&S.vn[k])||k,()=>S.v[k],v=>{S.v[k]=v;},(S.vo&&S.vo[k])||{});}

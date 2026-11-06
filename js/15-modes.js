@@ -236,7 +236,7 @@ function brPick(p,it){
   const k=it.k;
   if(['fire','stun','push','pull'].includes(k))p.unl[k]=1;
   else if(k==='hp')p.hp=Math.min(p.maxHp,p.hp+40);
-  else if(k==='sh'){p.shieldE=100;p.shieldBroken=0;p.ehp=E_SH;p.stdB=0;}
+  else if(k==='sh'){p.shieldE=100;p.shieldBroken=0;p.ehp=ERV.sh;p.stdB=0;}
   else if(k==='ult')p.ult=Math.min(100,p.ult+50);
   emit({k:'pick',x:it.x,y:it.y,t:k,id:p.id});
 }

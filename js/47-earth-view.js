@@ -447,7 +447,7 @@ function syncEarth(v,dt,now){
   for(let i=EV.crush.length-1;i>=0;i--){const C=EV.crush[i];C.t+=dt;const c=Math.cos(C.a),sn=Math.sin(C.a),nx=-sn,ny=c;
     const G=C.G;G.g.position.copy(eW(C.x+c*178,C.y+sn*178,-0.6));G.g.rotation.y=Math.atan2(-c,-sn);
     standOp(G,C.boom?Math.max(0,1-(C.t-C.boom)/0.5):Math.min(1,C.t/0.15));
-    const strain=Math.min(1,C.t/E_CRUSH_PUSH),close=C.t<E_CRUSH_PUSH?0:Math.min(1,(C.t-E_CRUSH_PUSH)/E_CRUSH_SLIDE);
+    const TV=TECT.v,strain=Math.min(1,C.t/TV.push),close=C.t<TV.push?0:Math.min(1,(C.t-TV.push)/TV.slide);
     standPose(G,{t:now/1000,lean:0.22*strain+0.12*close});if(!C.boom)G.g.position.y+=Math.sin(now/22)*0.03*strain;
     // มือแปะด้านนอกกำแพงแต่ละข้าง (ใกล้ปลายฝั่ง Stand) แล้วดันตามกำแพงที่เลื่อนเข้าหากัน • หลังปัง = ค้างมือที่จุดสุดท้าย
     if(!C.tg)C.tg={};if(!C.boom)for(const o of EV.es.values()){if(o.k!==0||Math.hypot(o.x-C.x,o.y-C.y)>260)continue;const sd=Math.sign((o.x-C.x)*nx+(o.y-C.y)*ny)||1;
