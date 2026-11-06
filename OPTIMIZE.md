@@ -179,6 +179,11 @@ Real-time bench (real rAF, not `WD.hostStep`): TDM valley, 5 top-level bots hudd
 Known differences: ground height read once at spawn (not per frame); curl = approximation at the current point, so smoke swirl differs slightly; `grow` = exp(grow*t). Do not call `clearUpdateRanges` per frame: frames that skip drawing (Studio seek) would lose new particles; three clears ranges after upload.
 Measured: `updateParticles` 3–4 ms → 0.25 ms in a 12-player brawl; whole render-side CPU 21–28 → 17–23 ms; 5 bots CPU x2 30.5 → 33.8 fps (p95 45 → 38 ms), x4 11.8 → 13.8 fps. Contact sheets old/new: `shots/gpup_ab1.jpg`, `gpup_ab2.jpg`. Next cleanup: once no problem reports come in, delete the old CPU path and old vertex shaders.
 
+## M. Remaining lag check 2026-11-06 (user: "a lot better, can it be better?")
+12-player brawl, 1,500 frames, idle PC: median 20.8 ms, p99 70 ms, max 156 ms. Mid-fight creation: programs 4, textures 8, geometries 92, network 0. Spikes (40-80 ms) cluster in the first 2 s of a fight, then rare; the profile is flat, no single hot function.
+Tried and dropped: skipping `updateMatrix` for unmoved objects. `scene.updateMatrixWorld()` costs only ~0.12 ms per frame here, so no gain. Do not retry.
+Next real gains are structural: fewer draw calls per character (merge parts in Blender), shader variants still missed by warm-up (section I), host simulation in a Worker.
+
 ## Benchmarks
 Follow-up batching/LOD 2026-11-06: student Skeletons 7→1 per player; compatible skin/iris/scarf trim combines with vertex colour/PBR attributes (2 fewer draws per body per pass). Cloth panels/palette stay separate. Actual high-poly emitted model is `water_blob` (3,968 tris), not frost shards (32). Tiny water particles <=12 physical pixels use a 224-triangle mesh; near particles and hero geometry stay full detail. Visual/animation/lifecycle checks pass. This partially addresses §H player/particle items, not all FPS causes. See `notes/optimize-batching-lod-2026-11-06.md` and `tools/bench-render-audit.js` for actual active instance costs.
 
