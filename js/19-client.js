@@ -26,7 +26,7 @@ PARTS.push=function(){
     _apush.call(this,p);VFXB.stat.kept++;
     if(k>1&&Math.random()<k-1){const q=Object.assign({},p);q.x+=rnd(-3,3);q.y+=rnd(-3,3);q.life*=rnd(0.6,1);_apush.call(this,q);VFXB.stat.kept++;}}
   return this.length;};
-function vfxQual(){const m=QUAL.mode;return m==='low'?{mul:0.5,cap:3000,up:1}:m==='high'?{mul:1,cap:8000,up:2}:QUAL.lvl>=1||QUAL.scale<0.8?{mul:0.7,cap:5000,up:1}:{mul:1,cap:8000,up:1.5};}
+function vfxQual(){const m=QUAL.mode,cs=qualCS();return cs>=2?{mul:0.35,cap:1200,up:1}:cs?{mul:0.5,cap:2500,up:1}:m==='high'?{mul:1,cap:8000,up:2}:QUAL.lvl>=1||QUAL.scale<0.8?{mul:0.7,cap:5000,up:1}:{mul:1,cap:8000,up:1.5};}
 // เรียกต้น render ในเกม: ตั้งตัวคูณการปล่อยของเฟรมนี้
 function vfxBegin(dt){const q=vfxQual();VFXB.cap=q.cap;VFXB.mul=q.mul;VFXB.up=q.up;
   const fill=PARTS.length/q.cap,soft=fill<0.6?1:Math.max(0.12,(1-fill)/0.4);

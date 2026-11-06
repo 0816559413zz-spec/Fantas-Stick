@@ -63,6 +63,7 @@ async function main(){
     await cmd('Emulation.setDeviceMetricsOverride',{width:W,height:H,deviceScaleFactor:1,mobile:false});
     // แยก interval ออกจาก timeout ให้ HL.freeze หยุดโฮสต์โดยไม่ฆ่างานโหลด/compile เบื้องหลัง
     await cmd('Page.addScriptToEvaluateOnNewDocument',{source:`(()=>{const ids=window.__hlIntervals=new Set(),start=window.setInterval,stop=window.clearInterval;window.setInterval=function(...a){const id=start.apply(window,a);ids.add(id);return id;};window.clearInterval=function(id){ids.delete(id);return stop.call(window,id);};})()`});
+    if(A.cpu)await cmd('Emulation.setCPUThrottlingRate',{rate:+A.cpu});   // --cpu 4 = จำลอง CPU ช้าลง 4 เท่า (เครื่องผู้เล่นอ่อน)
     await cmd('Page.navigate',{url});
     // รอให้หน้าโหลดเสร็จ: เกม = มี window.WD • สตูดิโอ = STUDIO.state.ready
     const isStudio=/studio\.html|\?studio/.test(url),isGame=!isStudio&&/^\/(index\.html)?(\?|#|$)/.test(url.replace(/^https?:\/\/[^/]+/,''));

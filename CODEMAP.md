@@ -182,7 +182,7 @@ BOT_MODES:119 lobbyBots:120 lobbyBotAdd:121 lobbyBotFill:130 lobbyBotCmd:135 lob
 ## js/15-botnav.js (135) — 
 NAV_MAPS:14 NAV_EYE:14 NAV:15 navOn:17 navSig:18 navEnsure:25 navBuild:31 navCell:48 navWalk:49 navRay:51 navFree:56 navPath:62 _navFoe:80 botThink:83 botNav:89
 
-## js/15-botplay.js (88) — วิธีเล่นของบอทแต่ละสาย (ผู้ใช้ 2026-10-31 "บอทไม่รู้วิธีเล่นสายของตัวเอง")
+## js/15-botplay.js (88) — 
 BOT_RANGE:7 botMem:9 botWallBehind:11 _bspd:21 botSave:23 botWant:25 botCombo:64
 
 ## js/15-modes.js (410) — 
@@ -265,14 +265,16 @@ statusFX:3 fx:27
 §208 overlay: เลือกบัฟ / สรุปผล
 choosePick:209 syncOverlays:214 showOver:235
 
-## js/27-world.js (275) — 
+## js/27-world.js (293) — 
 S3:4 tx:4 tz:4 CITY_KERB:7 cityKerb:8 GY:9 TW:9 hdr:10 gl:12 scene:20 cam:22 composer:23
 §24 ท่อภาพ (post-processing): ฉาก → ชั้นเอฟเฟกต์นุ่ม (FXPass) → แสงฟุ้ง →…
 rpass:27 fxScene:29 SOFTU:31 SOFT_GLSL:32 FXMATS:34 fxMat:35 softify:37 HAZE_U:42 AOU:46 GFX:51 AO_ON:52 AO_HEAD:53 AO_CALC:57 AO_COPY:71 AO_RT:87 fxPass:106 bloom:107 GRADEU:112 gradePass:128 aaPass:145
 §147 คุณภาพกราฟิก: auto = ปรับความละเอียดเองตาม FPS / high = สวยสุด / low …
-QUAL:148 QUAL_NAME:149 qualPR:150 applyQuality:156 qualTick:175 texCanvas:190 glowTex:191 stoneTex:192 runeTex:198 glowMats:206 glowMat:207 STONEM:209 stoneMat:210 shadowAll:211 SKY:214 hemi:234 moonL:236 LDIR:240 setSky:241
-§249 เงาตามผู้เล่น
-SHD:253 _shF:254 _shR:254 _shU:254 _shC:254 _shY:254 shadowFollow:255 LPOOL:274
+QUAL:148 QUAL_NAME:149 qualPR:150 applyQuality:156 qualTick:175
+§191 ประหยัด CPU สำหรับเครื่องอ่อน (ผู้ใช้ 2026-11-06 "เครื่องผู้เล่นแย่กว…
+qualCS:195 CULL:196 cullTick:197 texCanvas:208 glowTex:209 stoneTex:210 runeTex:216 glowMats:224 glowMat:225 STONEM:227 stoneMat:228 shadowAll:229 SKY:232 hemi:252 moonL:254 LDIR:258 setSky:259
+§267 เงาตามผู้เล่น
+SHD:271 _shF:272 _shR:272 _shU:272 _shC:272 _shY:272 shadowFollow:273 LPOOL:292
 
 ## js/28-city-build.js (386) — เมืองมักเกิ้ล (ลอนดอน) — ภาพ • ข้อมูลอยู่ js/02-city.js • โมเดลจาก as…
 CITY_WIN:4 cityWinTex:5 cityEmTex:10 cityBoxGeo:16 buildCity:21
@@ -329,13 +331,13 @@ iceMat:2 iceRim:3 makeIceSword:4 makeIceAxe:23 makeKiteShield:39
 §51 อาวุธน้ำแข็งลอย (ผู้ใช้ 2026-10-22: "ร่ายคาถาให้ดาบฟันเอง ระยะเท่าเดิ…
 FWS:54 FWA:54 _fwM:55 _fwM2:55 _fwX:55 _fwY:55 _fwZ:55 _fwP:55 _fwS:55 _fwQ:55 _eo:56 _ei:56 _ss:56 fwAim:58 fwWeapons:59 FWP:61 FWT:61 fwChop:62 fwSweep:63 FF_RISE:64 fwIdle:65 fwSwing:68 FWL_N:80 fwLink:81 fwMat:84 frostFX:85
 
-## js/35-sync.js (567) — ซิงก์ผู้เล่น/ศัตรู/ลูกเวทจาก snapshot + ฉายตำแหน่งลงจอ (ป้ายชื่อ/ตัวเ…
+## js/35-sync.js (566) — ซิงก์ผู้เล่น/ศัตรู/ลูกเวทจาก snapshot + ฉายตำแหน่งลงจอ (ป้ายชื่อ/ตัวเ…
 §2 ท่าร่ายคาถาแบบนักเวทในหนัง Harry Potter (ผู้ใช้ 2026-10-22: "ยิงปกติท…
 CPOSE_T:7 _ce:7 _cs:7 _cb:7 AMP_B:9 AMP_S:9 CP_BEND:10 CPOSE:12 _cpT:20 _cpR:20 CGUARD:20 CP_STEP:21 CPCOL:22 castStyle:23 castStart:24
 §25 ท่าร่ายสกิล / อัลติ / โล่ (ผู้ใช้ 2026-10-22: "เกือบทุกสกิลควรมีการเห…
 CANIM:30 SKFEET:74 SKANIM:76 skAnim:83 _caT:84 _caR:84 skillPose:85 _g2:111 wandTwoHand:112 characterPoseMix:119 characterStance:120 CBLOCK:127 CBLOCK_PATH:128 blockPose:129 castPose:135 lateSkillPose:141 castPose0:142 clearCharacterCast:171 syncPlayers:176 syncEnemies:265 projGeo:303 tailGeo:304 _t1:305 makeProj:306 _a:326 _b:326 PJFX:328 syncProj:329 _awT:416 animateWorld:417
 §458 ฉายตำแหน่ง 3D ลงจอ (ป้ายชื่อ / ตัวเลขดาเมจ)
-_v:459 toScreen:460 BURNC:468 burnNum:469 NAMETAG:483 nameTag:484 drawLabels:488 drawTexts:518 HITM:532 DIRI:532 drawXh:534 drawCrosshair:544
+_v:459 toScreen:460 BURNC:468 burnNum:469 NAMETAG:483 nameTag:484 drawLabels:488 drawTexts:517 HITM:531 DIRI:531 drawXh:533 drawCrosshair:543
 
 ## js/36-modes-view.js (170) — 
 ROLE:4 KC:4 roleShowT:4 onPriv:5 MO:10 BREATHS:11 clearModeObjs:12 ITEMC:21 healTex:22 makeItem:23 syncModeObjs:39
@@ -521,7 +523,7 @@ warmOutline:123
 §140 อุ่นฉากเกมระหว่างรอในห้อง (ผู้ใช้ 2026-10-23: "กระตุกตอนเริ่มแมตช์แรก…
 GWARM:145 gameWarmTick:146 gameWarmFree:179
 
-## js/52-social.js (172) — 
+## js/52-social.js (172) — เล่นกับเพื่อน (ผู้ใช้ 2026-10-22): แชท + อีโมต + ดูเพื่อนเล่น (spectator) + ป้ายต่อเน็ตให…
 §6 แชท: Enter = พิมพ์ / Enter อีกที = ส่ง / Esc = ปิด • ข้อความขึ้นมุมซ้…
 CHAT:7 chatOpen:27 chatClose:32 chatSend:42 chatAdd:47 escH:52 onChat:53 drawSocial:59 drawPing:83
 §89 อีโมต: กด Z ค้าง → วงล้อ 6 แบบ ลากเมาส์ไปทางที่ต้องการ ปล่อย Z = เล่น…
@@ -531,7 +533,7 @@ SPEC:141 specTarget:142 specCycle:152 drawSpecHint:157
 §165 ป้าย "กำลังต่อใหม่..." (ลูกข่ายหลุดจากโฮสต์ js/10 netLost)
 drawNetBanner:166
 
-## js/53-victory.js (165) — 
+## js/53-victory.js (165) — จบเกม (ผู้ใช้ 2026-10-22): VICTORY / DEFEAT แบบ Overwatch แต่เป็นเวทมนตร์ (สายฟ้า + ไฟ) +…
 VIC:6 VPAL:7 vicKind:17 vicStart:25 vicStop:31 vicSkip:32 vicBolt:36 vicLoop:42
 §108 จอสรุป: MVP + จุดเด่น (ใส่ใน showOver js/26)
 overMvp:117 overBar:127
@@ -547,22 +549,23 @@ POT3:81 potBottle:82 potMesh:91 syncPots:108 potFx:125
 §130 ภาพ: ป้ายตอนฆ่า / จอตอนตาย / อันดับ / มงกุฎค่าหัว
 FFAV:131 MULTI:132 MULTI_TH:132 STREAK:133 pName:134 ffaKf:135 kfSound:150 KINDN:151 drawFFA:152
 
-## js/55-podium.js (82) — 
+## js/55-podium.js (82) — โพเดียมธีมฮอกวอตส์ (ผู้ใช้ 2026-10-22 "podium but make it magician theme hogwart theme")
 POD:6 POD_X:7 POD_H:7 POD_C:7 podStart:8 podStop:29 podPose:37 renderPodium:49
 
-## js/56-progress.js (94) — 
+## js/56-progress.js (94) — เลเวล + สถิติ + ของปลดล็อค (ผู้ใช้ 2026-10-22: "more skin wand cloak unlock as lvl" → เลื…
+§7 var/function (ไม่ใช่ const): หน้าสร้างตัวละครอาจเปิดตอนโหลด (?nointro…
 LV_MAX:8 DEV_MAXLV:11 lvNeed:12 UNLOCKS:13 PROF_ITEMS:23 lvRewards:31 lvNextReward:32 PROG:33 progSave:34 lvOf:35 progLv:36 xpMax:37 wandKillNeed:39 lookLock:40 lookClampLocks:41 progXP:43 progAward:44 progBox:56 progOpen:64 progChip:76
 
-## js/57-tutorial.js (44) — 
+## js/57-tutorial.js (44) — วิธีเล่นแต่ละสาย (ผู้ใช้ 2026-10-22 "สอนเล่นแต่ละสาย") — ปุ่ม "📖 วิธีเล่นสายนี้" ในหน้าเ…
 TUTTIPS:7 tutOpen:12 tutTry:31
 
-## js/58-deathcam.js (60) — 
+## js/58-deathcam.js (60) — กล้องตอนตาย (ผู้ใช้ 2026-10-22): "when ded make cam focus on person who kill u at ur ded …
 DCAM_T1:10 DCAM_T2:10 DCAM_FADE:10 DCAM:11 dcamDie:12 _dcP:19 _dcL:19 dcamCam:20 drawDeathCam:47
 
-## js/59-podroom.js (151) — 
+## js/59-podroom.js (151) — ห้องโถงใหญ่ฮอกวอตส์สำหรับโพเดียม (ผู้ใช้ 2026-10-22 "design me a new lobby for background…
 PODS:9 PODR:11 podRoomBuild:12 podRoomTick:142
 
-## js/60-menu3d.js (397) — 
+## js/60-menu3d.js (397) — เมนูแรก = ลานดวลเวทใต้ดาว ที่ "เดินได้" (ผู้ใช้ 2026-10-22, รอบ 2: "redesign the menu by …
 MENUS:14 MN:17 MN_FOV:19 MN_R:19 _mv:20 _mcp:20 _mcl:20 mnCrest:21 mnTone:25 mnHit:30 mnBuild:32 MNPOP:223 mnToast:243
 §244 สั่งพ่อมด
 mnGo:245 mnWalkTo:248 mnUse:249 mnClose:254
@@ -571,7 +574,7 @@ MN_BLOCK:259 mnRay:260 mnPick:261 mnHot:267 mnToy:285
 §290 เรนเดอร์ (เรียกจาก renderStage js/32 — คืน true = จัดการแล้ว)
 mnRestore:291 mnMenuRender:297
 
-## js/61-hub.js (884) — เมนูใหม่ — ฉาก 3D (ผู้ใช้ 2026-10-22 • สเปกเต็ม designs/ui-menu.md • หน้าจอ/ปุ่มอยู่ js/6…
+## js/61-hub.js (884) — 
 HUBS:11 HUBL:11 HUB:14 HB:18 _hq:19 _hq2:19 _hq3:19 _hv:19 _hv2:19 _hv3:19 _hY:19 hEase:20 hSm:21
 §23 อนุภาคเรืองแสงของเมนู (ขนาด/สี/ความจางต่อเม็ด)
 hubPS:24 hCol:50 H_SPARK:51
@@ -632,7 +635,7 @@ skwOpen:289 skwClose:299
 ## js/64-mappick.js (157) — 
 MPK_TXT:7 MPK_SKY:19 MPK_I:21 MPK_DICE:31 MPK:36 mpkE:37 mpkC:37 mpkSnd:38 mpkCut:39 mpkName:40 mpkCardHTML:41 mpkBuild:51 mpkUp:89 mpkMeasure:101 mpkIdx:102 mpkStep:103 mpkTo:104 mpkPick:105 mpkOpen:111 mpkClose:127 mpkLoop:131 mpkTick:133
 
-## js/65-ui3.js (409) — 
+## js/65-ui3.js (409) — UI รอบ 3 (ผู้ใช้ 2026-10-23 — สเปก designs/ui-menu.md "รอบ 3") • สไตล์เดียวกับเมนูใหม่ (c…
 UIG:6 uiGalaxy:7 uiGalaxyOn:15 uiGalRaf:16 uiGalT:16 uiGalLoop:17 uiGalDraw:19 uiShow:36 uiHide:37
 §40 เมนูหยุดเกม
 §44 คู่มือ (แบบ Skill Tree)
@@ -700,11 +703,10 @@ dive:186 PA:187 TA:188 DIVE_DOWN:190 DIVE_POUR:190 DIVE_STEP:190 diveDist:191 la
 §443 เล่น
 WDG_YAW:444 wdgGet:445 wdgStart:446 wdgDive:453 wdgKeep:456 wdgEnd:457 wdgTick:458
 
-## js/71-perfhud.js (72) — 
+## js/71-perfhud.js (72) — ตัววัดประสิทธิภาพบนจอ (ผู้ใช้ 2026-11-05: "อยากได้ตัววัดอื่น ๆ เพิ่ม เอาไว้เก็บข้อมูล opt…
 PERF:9 perfFrame:12 perfDom:26 perfStats:34 perfGraph:38 _gpuName:51 gpuIntegrated:52 perfRows:53 perfPanel:68 perfText:69
 
-## js/72-dash-pose.js (84) — ท่าพุ่ง 3D (ผู้ใช้ 2026-11-05: "บางท่า เช่น Windrift เป็นแบบพุ่งตัว … ตอนนี้ไม่เป็น Anima…
-§10 ช่อง: 0 โน้มตัว(+หน้า) 1 ยกตัว y 2 แขนขวา x(+หลัง) 3 แขนขวา z 4 แขนซ้…
+## js/72-dash-pose.js (84) — 
 DPOSE:12 DPT:24 _dpQ:25 _dpX:25 _dpP:25 dpMix:26 dpKnees:28 dpStyle:36 DPDBG:41 dashPose:42 dpApply:74
 
 ## js/73-tune.js (125) — 
@@ -716,4 +718,4 @@ tuneOpenF:80 tuneFmt:81 tuneRow:82 tuneRefresh:85 tuneMsg:93 tuneToggle:94 tuneE
 §122 API สำหรับเครื่องมือแยก tune.html (เปิดเกมใน iframe แล้วเรียกผ่าน WD)
 tuneDump:123 tuneSetKey:124
 
-(85 files, 20757 lines)
+(85 files, 20774 lines)

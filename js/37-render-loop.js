@@ -82,7 +82,7 @@ function render(dt,now){
 // ส่วนที่รันทุกเฟรมในเกม (อยู่ใต้งบเอฟเฟกต์ vfxBegin/vfxEnd)
 function renderGame(v,P,E,me,dt,now){
   let t0=performance.now();
-  if(!FXSTUDIO.seek){syncPlayers(P,v.mode,now,dt);pf('p.sync',t0);let t1=performance.now();grassTick(dt);pf('p.grass',t1);t1=performance.now();clothTick(dt);pf('p.cloth',t1);gameWarmFree(dt);}pf('players',t0);   // grassTick = ลม + หญ้า (js/50) • clothTick = ผ้าคลุมจริงของเรา (js/49)
+  if(!FXSTUDIO.seek){syncPlayers(P,v.mode,now,dt);pf('p.sync',t0);let t1=performance.now();grassTick(dt);pf('p.grass',t1);t1=performance.now();QUAL.clA+=dt;{const cs=qualCS();if(!cs||QUAL.frame%(cs+1)===0){clothTick(QUAL.clA);QUAL.clA=0;}}pf('p.cloth',t1);gameWarmFree(dt);}pf('players',t0);   // grassTick = ลม + หญ้า (js/50) • clothTick = ผ้าคลุมจริงของเรา (js/49)
   if(me&&me.al&&!me.fl&&!me.dn){const o=PM3.get(me.id);if(o){const k=Math.floor(o.walk/Math.PI);if(o.stepK!==undefined&&k!==o.stepK)snd('step',{vol:0.35,rev:0.1});o.stepK=k;}}t0=performance.now();
   syncEnemies(E,P,now,dt);pf('enemies',t0);t0=performance.now();
   let t1=t0;   // projMode แยกย่อยให้ WD.PROF (pm.proj / pm.earth / ...) — รวมยังเป็น 'projMode' เหมือนเดิม
@@ -95,7 +95,7 @@ function renderGame(v,P,E,me,dt,now){
   trSync(v);bpSync(v);
   tickFlash(dt);
   t0=performance.now();{let t1=t0;updateZV(dt);pf('fx.zv',t1);let t2=performance.now();updateParticles(dt);pf('fx.particles',t2);pf('fx.parts',t1);t1=performance.now();updateShapes(dt);pf('fx.shapes',t1);t1=performance.now();updateLights(dt);pf('fx.lights',t1);t1=performance.now();updateVfx(dt);pf('fx.vfx',t1);t1=performance.now();updateDebris(dt);pf('fx.debris',t1);}pf('fx',t0);
-  QUAL.frame++;gl.shadowMap.needsUpdate=QUAL.mode==='high'||QUAL.frame%(QUAL.mode==='auto'&&QUAL.lvl>=2?4:2)===0;if(gl.shadowMap.needsUpdate)shadowFollow();
+  QUAL.frame++;gl.shadowMap.needsUpdate=QUAL.mode==='high'||QUAL.frame%(QUAL.cs>=2?12:QUAL.cs?6:QUAL.mode==='auto'&&QUAL.lvl>=2?4:2)===0;if(gl.shadowMap.needsUpdate)shadowFollow();cullTick(dt);
   if(FXSTUDIO.noDraw)return;
   t0=performance.now();composer.render();pf('gpuSubmit',t0);pinPrograms();
   t0=performance.now();const spk=speakingIds();

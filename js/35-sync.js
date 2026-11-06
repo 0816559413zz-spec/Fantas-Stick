@@ -505,7 +505,6 @@ function drawLabels(P,E,v,me,spk){
     if(!p.al||p.id===NET.myId)continue;
     if(p.gh&&!meGh)continue;
     const s=toScreen(p.x,(p.z||0)+2.55,p.y);if(!s)continue;
-    cx.font='600 13px Kanit,sans-serif';
     {const tg=nameTag((p.aw?'📶 ':'')+p.n+(p.hb?' 🔴':''),teamOn(v)?TEAMC[p.tm]:mates.includes(p.id)?'#ff6b6b':'#ffffff');cx.drawImage(tg,s[0]-tg._w/2,s[1]-23,tg._w,tg._h);}   // 📶 = เน็ตหลุด รอต่อกลับ
     if(v.mode==='imp')continue;
     if(spk.has(p.id)){cx.font='14px sans-serif';cx.fillText('🔊',s[0]+cx.measureText(p.n).width/2+16,s[1]-8);}

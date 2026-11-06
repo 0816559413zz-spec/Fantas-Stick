@@ -145,7 +145,7 @@ class AAPass extends Pass{
 const aaPass=new AAPass();composer.addPass(aaPass);fxPass.gfx=GFX;
 
 // ---------- คุณภาพกราฟิก: auto = ปรับความละเอียดเองตาม FPS / high = สวยสุด / low = เครื่องช้า ----------
-const QUAL={mode:['auto','high','low'].includes(store('wd_gfx'))?store('wd_gfx'):'auto',scale:1,acc:0,n:0,good:0,frame:0,lvl:0,cpu:0,cacc:0};
+const QUAL={mode:['auto','high','low'].includes(store('wd_gfx'))?store('wd_gfx'):'auto',scale:1,acc:0,n:0,good:0,frame:0,lvl:0,cpu:0,cacc:0,cs:0,clA:0};
 const QUAL_NAME={auto:'อัตโนมัติ',high:'สูง',low:'ประหยัด'};
 function qualPR(){
   const dpr=window.devicePixelRatio||1;
@@ -179,7 +179,8 @@ function qualTick(dt){
   const avg=QUAL.acc/QUAL.n*1000,cpu=QUAL.cacc/QUAL.n;QUAL.acc=0;QUAL.n=0;QUAL.cacc=0;
   // คอขวดอยู่ที่ CPU (เวลา JS ของเฟรม ≥ 75% ของเวลาเฟรม) → ลดความละเอียดไม่ช่วย ได้แค่ภาพเบลอ: ข้ามไปลดงาน CPU (lvl) แทน และคืนความคมให้ทีละขั้น
   const cpuBound=cpu>avg*0.75;QUAL.cpuBound=cpuBound;
-  if(avg>24&&cpuBound){QUAL.good=0;if(QUAL.lvl<2)QUAL.lvl++;else if(QUAL.scale<1)QUAL.scale=Math.min(1,+(QUAL.scale+0.15).toFixed(2));else return;applyQuality();return;}
+  if(avg>24&&cpuBound){QUAL.good=0;if(QUAL.lvl>=2&&QUAL.cs<2){QUAL.cs++;return;}if(QUAL.lvl<2)QUAL.lvl++;else if(QUAL.scale<1)QUAL.scale=Math.min(1,+(QUAL.scale+0.15).toFixed(2));else return;applyQuality();return;}
+  if(QUAL.cs>0&&avg<18){if(++QUAL.good>=8){QUAL.good=0;QUAL.cs--;}return;}   // คืนช้า ๆ (16 วิ) กันแกว่ง • 18 = จอ 60 Hz วัดได้ ~16.7 ไม่มีทางต่ำกว่า 16
   // ช้าเพราะการ์ดจอ: ลดความละเอียดก่อน → ปิดแสงฟุ้ง (lvl1) → เงาอัปเดตห่างขึ้น (lvl2) / ลื่นต่อเนื่อง: ค่อยๆ คืนกลับทีละขั้น
   // ลำดับใหม่ (2026-11-06): ปิดแสงฟุ้งก่อน → ลดความชัดถึง 0.7 → เงาห่าง/ปิด AO (lvl2) → ค่อยลดถึง 0.55 / 0.45 (เดิมลดความชัดก่อน ภาพเบลอทั้งที่ยังมีเอฟเฟกต์ให้ตัด)
   if(avg>24){QUAL.good=0;if(QUAL.lvl<1)QUAL.lvl=1;else if(QUAL.scale>0.75)QUAL.scale=Math.max(0.7,+(QUAL.scale-0.15).toFixed(2));else if(QUAL.lvl<2)QUAL.lvl++;else if(QUAL.scale>0.6)QUAL.scale=0.55;else if(QUAL.scale>0.45)QUAL.scale=0.45;applyQuality();}
@@ -187,6 +188,23 @@ function qualTick(dt){
   else QUAL.good=0;
 }
 
+// ---------- ประหยัด CPU สำหรับเครื่องอ่อน (ผู้ใช้ 2026-11-06 "เครื่องผู้เล่นแย่กว่านี้จะเล่นยังไง") ----------
+// คอขวดเครื่องอ่อนคือ CPU (สั่งวาด ~600 ครั้ง/เฟรม บนคอร์เดียว) ไม่ใช่ความละเอียด: ลดกราฟิกอย่างเดียวไม่ช่วย
+// ขั้น 1–2: ซ่อนของชิ้นเล็กไกลตา • เงาอัปเดตห่างขึ้น (js/37) • อนุภาคน้อยลง (vfxQual js/19) • ผ้าคลุมคำนวณไม่ทุกเฟรม (js/37)
+// ประหยัด = ขั้น 2 เสมอ • อัตโนมัติ = เพิ่มเองเมื่อ CPU ไม่ไหวหลังลดระดับภาพครบ (qualTick) • สูง = ปิด
+const qualCS=()=>QUAL.mode==='low'?2:QUAL.mode==='auto'?QUAL.cs:0;
+const CULL={list:null,key:'',t:0,on:false};
+function cullTick(dt){
+  const cs=qualCS();if(CULL.key!==builtKey){CULL.key=builtKey;CULL.list=null;CULL.on=false;}
+  if(!cs){if(CULL.on){CULL.on=false;for(const c of CULL.list)if(!c.on){c.on=true;c.m.layers.set(0);}}return;}
+  if((CULL.t-=dt)>0||!world)return;CULL.t=0.25;
+  if(!CULL.list){CULL.list=[];world.updateMatrixWorld(true);const sp=new THREE.Sphere();
+    world.traverse(o=>{if(!o.isMesh||o.isInstancedMesh||o.isSkinnedMesh||o.layers.mask!==1||!o.geometry)return;
+      const g=o.geometry;if(!g.boundingSphere)g.computeBoundingSphere();if(!g.boundingSphere)return;
+      sp.copy(g.boundingSphere).applyMatrix4(o.matrixWorld);if(sp.radius<=12)CULL.list.push({m:o,x:sp.center.x,y:sp.center.y,z:sp.center.z,r:sp.radius,on:true});});}
+  CULL.on=true;const K=cs>=2?14:24,B=cs>=2?25:40,P=cam.position;
+  for(const c of CULL.list){const dx=c.x-P.x,dy=c.y-P.y,dz=c.z-P.z,R=B+c.r*K,show=dx*dx+dy*dy+dz*dz<R*R;if(show!==c.on){c.on=show;c.m.layers.set(show?0:29);}}
+}
 function texCanvas(w,h,draw,srgb=true){const c=document.createElement('canvas');c.width=w;c.height=h;draw(c.getContext('2d'),w,h);const t=new THREE.CanvasTexture(c);if(srgb)t.colorSpace=THREE.SRGBColorSpace;return t;}
 const glowTex=texCanvas(64,64,(g,w)=>{const r=g.createRadialGradient(32,32,0,32,32,32);r.addColorStop(0,'rgba(255,255,255,1)');r.addColorStop(0.22,'rgba(255,255,255,0.65)');r.addColorStop(0.5,'rgba(255,255,255,0.18)');r.addColorStop(1,'rgba(255,255,255,0)');g.fillStyle=r;g.fillRect(0,0,w,w);},false);
 const stoneTex=texCanvas(256,256,(g)=>{
