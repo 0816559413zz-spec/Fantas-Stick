@@ -105,8 +105,8 @@ function hud4Draw(me,v){
   h4Set('ud',!!slotState(me,v,-2).dim,x=>Q.uc.classList.toggle('dim',x));
   if(full!==H4.uFull){if(H4.uFull&&!full)h4UltUse();H4.uFull=full;Q.uc.classList.toggle('full',full);if(full){Q.uc.classList.remove('burst');void Q.uc.offsetWidth;Q.uc.classList.add('burst');}}
   // รายชื่อทีม: โหมดทีม = คนทีมเดียวกัน • ดันเจียน = ทุกคน • อื่น ๆ = ว่าง (ระบบ Squad ยังไม่มี — แสดงเส้นว่าง)
-  {const tm=teamOn(v)||v.mode==='tdm'||v.mode==='quid',L=(v.P||[]).filter(p=>p.id!==me.id&&(v.mode==='coop'||tm&&p.tm===me.tm)).slice(0,4);
-    h4Set('sqL',L.map(p=>p.id+':'+(p.n||'')).join('|'),()=>{Q.sq.innerHTML=Array.from({length:4},(_,i)=>{const p=L[i];
+  {const tm=teamOn(v)||v.mode==='tdm'||v.mode==='quid',L=(v.P||[]).filter(p=>p.id!==me.id&&(v.mode==='coop'||tm&&p.tm===me.tm)).slice(0,5);
+    h4Set('sqL',L.map(p=>p.id+':'+(p.n||'')).join('|'),()=>{Q.sq.innerHTML=Array.from({length:5},(_,i)=>{const p=L[i];
       return p?`<div class="r" data-id="${esc(p.id)}"><b>${esc(p.n||'')}</b><i><u></u></i></div>`:`<div class="r e"><i></i></div>`;}).join('');});
     for(const p of L){const r=Q.sq.querySelector(`[data-id="${CSS.escape(p.id)}"]`);if(!r)continue;h4Set('sq'+p.id,p.al?clamp(p.hp/p.mh,0,1).toFixed(2):'x',x=>{r.classList.toggle('dead',x==='x');r.querySelector('u').style.width=(x==='x'?0:x*100)+'%';});}}
   // FFA / TDM: แผนที่ย่อ → รูปตัวละครเรา (ผู้ใช้ 2026-11-01)
@@ -196,9 +196,14 @@ function h4Portrait(me,cv){const now=performance.now();if(!cv||now-H4PF.t<500)re
     if(!H4PF.rt){H4PF.rt=new THREE.WebGLRenderTarget(N,N);H4PF.rt.texture.colorSpace=THREE.SRGBColorSpace;H4PF.cam=new THREE.PerspectiveCamera(26,1,0.05,8);H4PF.buf=new Uint8Array(N*N*4);H4PF.img=cv.getContext('2d').createImageData(N,N);}
     const g=o.g,ry=g.rotation.y,fx=Math.sin(ry),fz=Math.cos(ry),P=g.position,c=H4PF.cam;
     c.position.set(P.x+fx*1.55-fz*0.35,P.y+1.95,P.z+fz*1.55+fx*0.35);c.lookAt(P.x,P.y+1.75,P.z);
-    const was=gl.getRenderTarget();gl.setRenderTarget(H4PF.rt);gl.render(scene,c);gl.readRenderTargetPixels(H4PF.rt,0,0,N,N,H4PF.buf);gl.setRenderTarget(was);
+    const was=gl.getRenderTarget();gl.setRenderTarget(H4PF.rt);gl.render(scene,c);gl.setRenderTarget(was);
+    H4PF.cv=cv;H4PF.pend=true;   // อ่านภาพกลับต้นเฟรมหน้า (h4PfRead) — อ่านทันที = CPU ต้องรอการ์ดจอวาดทั้งเฟรมเสร็จก่อน (กระตุกทุก 0.5 วิ, OPTIMIZE §I)
+  }catch(e){}}
+// เรียกจาก frame() (js/37) ก่อนเริ่มงานเฟรม: ตอนนั้นการ์ดจอวาดเฟรมก่อนเสร็จแล้ว อ่านกลับได้โดยไม่ต้องรอ
+function h4PfRead(){if(!H4PF.pend)return;H4PF.pend=false;const N=H4PF.N;
+  try{gl.readRenderTargetPixels(H4PF.rt,0,0,N,N,H4PF.buf);
     const d=H4PF.img.data,b=H4PF.buf;for(let y=0;y<N;y++)d.set(b.subarray((N-1-y)*N*4,(N-y)*N*4),y*N*4);
-    cv.getContext('2d').putImageData(H4PF.img,0,0);
+    if(H4PF.cv&&H4PF.cv.isConnected)H4PF.cv.getContext('2d').putImageData(H4PF.img,0,0);
   }catch(e){}}
 // กรอบแผนที่ย่อ (พิกัดจอ px) — js/38 drawMinimap วาดลงตรงนี้ • ตรงกับ .h4Me/.h4Map ใน css (left 24, bottom 24, กว้าง 176 × --hs)
 function h4MapBox(){const hs=Math.max(0.62,Math.min(1.15,SH/900,SW/1400)),S=176*hs;return {x:24*hs,y:SH-24*hs-S,S};}

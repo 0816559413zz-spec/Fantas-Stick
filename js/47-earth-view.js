@@ -484,7 +484,7 @@ function eMudScreen(on){let el=EV.mud;if(!el){if(!on)return;el=EV.mud=document.c
     el.innerHTML=h;document.body.appendChild(el);}
   el.classList.toggle('on',!!on);}
 const _eOlMat=new THREE.MeshBasicMaterial({color:0xffffff,side:THREE.BackSide,fog:false,transparent:true,opacity:0.95,depthWrite:false});
-_eOlMat.onBeforeCompile=sh=>{sh.vertexShader=sh.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>'+String.fromCharCode(10)+'  transformed += normalize(objectNormal) * 0.07;');};
+_eOlMat.onBeforeCompile=sh=>{sh.vertexShader=sh.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>'+String.fromCharCode(10)+'  transformed += normalize(normal) * 0.07;');};
 function eOutlines(ids){const L=EV.ols||(EV.ols=[]),key=ids.join(',');if(EV.olFor===key)return;
   for(const m of L)if(m.parent)m.parent.remove(m);L.length=0;EV.olFor=key;
   for(const id of ids){const o=PM3.get(id);if(!o||!o.g)continue;(o.fileModel||o.b||o.g).traverse(m=>{if(!m.isMesh||m.userData.eOl||!m.parent)return;

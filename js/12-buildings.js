@@ -291,8 +291,10 @@ function collideWorld(o,r,z){
 function shoot(p,type,o){
   const d=PDEF[type],a=p.ang,h=p.z+1.35,SP=(o&&o.spd)||d.spd;
   // ล็อกเป้าแนวตั้งอัตโนมัติ: ถ้ามีศัตรูอยู่ในแนวเล็ง คาถาจะเชิดขึ้น/ลงไปหาเอง
+  // ผู้เล่นจริง (มีจุดเล็งจาก crosshair) = ไปตรงจุดเล็ง 100% ไม่ล็อกเป้าเอง (ผู้ใช้ 2026-11-06) • บอท/ไม่มีจุดเล็ง = ล็อกแนวตั้งแบบเดิม
+  const human=p.inp&&typeof p.inp.ah==='number'&&!p.bot;
   let best=null,bs=1e9;
-  for(const t of foesOf(p.team)){
+  if(!human)for(const t of foesOf(p.team)){
     const dx=t.x-p.x,dy=t.y-p.y,dd=Math.hypot(dx,dy);
     if(dd>1300||dd<1)continue;
     const da=Math.abs(angDiff(Math.atan2(dy,dx),a));
@@ -300,7 +302,8 @@ function shoot(p,type,o){
   }
   let vh;
   if(best)vh=(cH(best)+terrT(best.x,best.y)-terrT(p.x,p.y)-h)/(Math.hypot(best.x-p.x,best.y-p.y)/SP);
-  else if(p.inp&&typeof p.inp.ah==='number'&&!p.bot){const dd=Math.max(80,Math.hypot(p.inp.ax-p.x,p.inp.ay-p.y));vh=clamp((p.inp.ah-h)/(dd/SP),-30,30);}
+  else if(human){const dd=Math.max(60,Math.hypot(p.inp.ax-p.x,p.inp.ay-p.y)-26);   // −26 = กระสุนเกิดหน้าตัว 26 หน่วย → ระยะบินจริงถึงจุดเล็ง
+    vh=clamp((p.inp.ah-h)/(dd/SP),-30,30);}
   else vh=Math.tan(clamp((p.inp&&p.inp.ap)||0,-0.9,0.9))*SP/20;
   const pr={id:++G.pid,type,x:p.x+Math.cos(a)*26,y:p.y+Math.sin(a)*26,h,vh,vx:Math.cos(a)*SP,vy:Math.sin(a)*SP,
     r:d.r,dmg:d.dmg,life:d.life,owner:p.id,team:p.team,src:'p'};

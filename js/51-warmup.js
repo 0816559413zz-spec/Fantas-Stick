@@ -150,5 +150,14 @@ function gameWarmTick(dt){
     ch.forEach(g=>g.visible=false);
   }catch(e){console.warn('gameWarm',e);GWARM.busy=false;}
 }
+// ตัวละครอุ่นเครื่องหมดหน้าที่เมื่อแมตช์เริ่มวาดแล้ว (เชดเดอร์ถูก pinPrograms ตรึงไว้, geometry/วัสดุของไฟล์เป็น keep) → ทิ้งหลังเข้าเกม 2 วิ
+// เดิมเก็บไว้ตลอด + เพิ่มทุกลุคใหม่ (บอทสุ่มลุคทุกครั้งที่เติม) → ค้างในฉากหลายร้อย mesh, three ยังคำนวณ matrix ทุกเฟรม (OPTIMIZE §H)
+// รอบหน้าในห้องรอ gameWarmTick สร้างใหม่ตามคนที่อยู่จริง (GWARM.key='' บังคับให้อุ่นใหม่)
+function gameWarmFree(dt){
+  if(!GWARM.chars.size||GWARM.busy||screen!=='game'){GWARM.ft=0;return;}
+  if((GWARM.ft=(GWARM.ft||0)+dt)<2)return;
+  for(const o of GWARM.chars.values())disposeObj(o.g);
+  GWARM.chars.clear();GWARM.key='';GWARM.ft=0;
+}
 if(window.WD)window.WD.warm=WARM;
 if(window.WD)window.WD.gwarm=GWARM;

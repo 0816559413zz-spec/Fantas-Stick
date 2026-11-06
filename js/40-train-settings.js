@@ -114,7 +114,7 @@ function renderSettings(){
     <div class="xhprev"><canvas id="xhPrev" width="120" height="70"></canvas></div>`;
   if(setTab===1)b=`${setRow('เสียงรวม','master',0,100,1,'%')}${setRow('เสียงเอฟเฟกต์','sfx',0,100,1,'%')}${setRow('เพลง','music',0,100,1,'%')}${setTog('เปิดเพลงประกอบ','_music')}<h3 class="sec">ไมค์ (คุยเสียง)</h3>${NET.online?'':'<p class="crnote">ใช้ได้ตอนเล่นออนไลน์กับเพื่อน</p>'}<div id="setVoice"></div>`;
   if(setTab===2)b=`<label class="srow"><span>กราฟิก</span><select id="setGfx">${['auto','high','low'].map(m=>`<option value="${m}" ${QUAL.mode===m?'selected':''}>${QUAL_NAME[m]}${m==='auto'?' (ปรับเองให้ลื่น)':m==='high'?' (เครื่องแรง)':' (ลื่นสุด ไม่มีเงา)'}</option>`).join('')}</select></label>
-    ${setRow('มุมกว้างกล้อง (FOV)','fov',50,95,1,'°')}${setTog('กล้องสั่น','shake')}${setTog('แสดง FPS','fps')}`;
+    ${setRow('มุมกว้างกล้อง (FOV)','fov',50,95,1,'°')}${setTog('กล้องสั่น','shake')}${setTog('แสดง FPS','fps')}${setTog('กราฟ FPS','fpsg')}${setTog('ข้อมูลประสิทธิภาพ (F3)','stats')}`;
   if(setTab===3)b=`${setTog('ตัวเลขดาเมจ','dmg')}${setTog('เครื่องหมายตอนยิงโดน','hitm')}${setTog('บอกทิศที่โดนยิง','dirm')}${setTog('แผนที่ย่อ','mini')}${setTog('ชื่อผู้เล่นเหนือหัว','names')}`;
   if(setTab===4)b=`<p class="crnote" style="margin:4px 0 10px">คลิกปุ่มแล้วกดปุ่มบนคีย์บอร์ดที่ต้องการ (Esc = ยกเลิก)</p><div class="kbind">${KEYACT.map(([a,n])=>`<label class="srow kb"><span>${n}</span><button type="button" class="kbtn ${_rebind===a?'wait':''}" data-bind="${a}">${_rebind===a?'กดปุ่ม...':keyName(KEYS[a])}</button></label>`).join('')}</div>
     <p class="crnote" style="margin-top:10px">คลิกซ้าย = ยิง • คลิกขวา = โล่ • N = เพลงถัดไป • Esc = เมนูหยุดพัก</p>`;

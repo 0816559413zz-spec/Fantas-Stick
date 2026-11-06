@@ -10,6 +10,8 @@ const GY=(x,y)=>TERR?terrT(x,y):cityKerb(x,y),TW=(X,Z)=>TERR?terrT(X*20+MW/2,Z*2
 const hdr=(c,k)=>new THREE.Color(c).multiplyScalar(k);
 // antialias ปิดไว้: ภาพผ่าน EffectComposer (render target) อยู่แล้ว MSAA ของ canvas จึงไม่ช่วยอะไร แค่กินแรง
 const gl=new THREE.WebGLRenderer({canvas:document.getElementById('gl'),antialias:false,powerPreference:'high-performance'});
+// ตรวจ error ของ shader ทุกตัวที่ compile = บังคับ CPU รอการ์ดจอ compile เสร็จ (getProgramInfoLog ~3% ของเฟรมตอนสู้กัน) → ปิด ยกเว้น ?debug
+gl.debug.checkShaderErrors=/[?&]debug/.test(location.search);
 gl.setPixelRatio(Math.min(1,window.devicePixelRatio||1));
 gl.useLegacyLights=true;
 gl.shadowMap.enabled=true;gl.shadowMap.type=THREE.PCFSoftShadowMap; // ขอบเงานุ่ม (เงาตามผู้เล่น shadowFollow ทำให้คมพอจะนุ่มได้)

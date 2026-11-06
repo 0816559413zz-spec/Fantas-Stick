@@ -132,8 +132,9 @@ function col3(c){return colCache[c]||(colCache[c]=new THREE.Color(c));}
 // C) ลมหมุนวน (curl noise): สนามความเร็วไม่มีจุดดูด/จุดพ่น ทำให้ควัน/ไฟ/ประกายลอย ม้วนไปด้วยกันเป็นเกลียว แทนการพุ่งตรง
 //    ψ = sin(ax)cos(by) + ½sin(cy)cos(dx) (ไหลตามเวลา) • ความเร็ว = (∂ψ/∂y, −∂ψ/∂x) • ไม่ใช้กับเศษที่ตกตามแรงโน้มถ่วง (ประกายกระเด็น) หรือ nc:true
 const CURL={q:0.03,smoke:42,fl:24,glow:16};
-function curlAt(x,y,T){const q=CURL.q,A=q*x+0.6*T,B=1.2*q*y-0.45*T,C=2.3*q*y+0.8*T+1.7,D=1.9*q*x-0.3*T,sC=Math.sin(C);
-  return [-Math.sin(A)*Math.sin(B)*1.2+0.5*Math.cos(C)*Math.cos(D)*2.3, -(Math.cos(A)*Math.cos(B)-0.5*sC*Math.sin(D)*1.9)];}
+const CURL_V=[0,0];   // scratch: ใช้ซ้ำในลูปแทนสร้างอาร์เรย์ใหม่ทุกอนุภาค
+function curlAt(x,y,T,out){const q=CURL.q,A=q*x+0.6*T,B=1.2*q*y-0.45*T,C=2.3*q*y+0.8*T+1.7,D=1.9*q*x-0.3*T,sC=Math.sin(C);
+  out[0]=-Math.sin(A)*Math.sin(B)*1.2+0.5*Math.cos(C)*Math.cos(D)*2.3;out[1]=-(Math.cos(A)*Math.cos(B)-0.5*sC*Math.sin(D)*1.9);return out;}
 function updateParticles(dt){
   PSYS[0].n=PSYS[1].n=PSYS[2].n=0;for(const k in PFB)PFB[k].n=0;PTIME.value+=dt;
   if(typeof hemi!=='undefined'){const h=hemi.color,k=Math.min(1.15,Math.max(0.55,hemi.intensity*1.25));PLIT.value.setRGB((0.65+0.35*h.r)*k,(0.65+0.35*h.g)*k,(0.65+0.35*h.b)*k);}
@@ -150,7 +151,7 @@ function updateParticles(dt){
     if(p.grow)p.size*=1+p.grow*dt;
     if(p.sd===undefined)p.sd=Math.random()*0.99;
     const k=p.life/p.max;
-    if(!p.nc&&(p.smoke||p.fl||p.g<=0.5)){const A=(p.smoke?CURL.smoke:p.fl?CURL.fl:CURL.glow)*(0.3+0.7*(1-k))*dt,v=curlAt(p.x+p.sd*97,p.y,T);p.x+=v[0]*A;p.y+=v[1]*A;}
+    if(!p.nc&&(p.smoke||p.fl||p.g<=0.5)){const A=(p.smoke?CURL.smoke:p.fl?CURL.fl:CURL.glow)*(0.3+0.7*(1-k))*dt,v=curlAt(p.x+p.sd*97,p.y,T,CURL_V);p.x+=v[0]*A;p.y+=v[1]*A;}
     const fbn=p.fb||(p.smoke?'smoke':p.fl?'fire':null),F=fbn&&PFB[fbn],S=F&&F.fb?F:PSYS[p.fl?2:p.smoke?1:0];if(S.n>=PMAX)continue;
     const c=col3(p.col),j=S.n;
     if(S.age){S.age[j*2]=1-k;S.age[j*2+1]=p.sd;}

@@ -87,16 +87,16 @@ let AIMZ=0,WBY=null;
 // lift ยกตำแหน่งกล้องแยกจากจุดมอง: Earth มองข้าม Stand ได้ โดยไม่ยกเป้าเล็งหนีขึ้นฟ้า
 // กล้องทุกสายใช้ชุดเดียวกัน; เลือกมุมพิเศษจาก snapshot จึงทำงานกับลูกห้องด้วย
 const CAM_FRAMES={
-  base:{dist:6.2,h:2.25,side:0.30},flight:{dist:8,h:2.5,side:0.30},
-  colossus:{dist:14.5,h:4.4,side:0.34},airAim:{dist:8,h:2.6,side:0.32},
-  kindle:{dist:6.2,h:2.45,side:0.36},rail:{dist:6.8,h:2.35,side:0.34},
+  base:{dist:4.7,h:2.05,side:0.25},flight:{dist:7,h:2.4,side:0.28},   // base: แบบเกม hero shooter มุมบุคคลที่ 3 (ผู้ใช้ 2026-11-06) ใกล้ขึ้น ตัวอยู่ ~37% จากซ้าย (เดิม 6.2/2.25/0.30)
+  colossus:{dist:14.5,h:4.4,side:0.34},airAim:{dist:6.6,h:2.5,side:0.29},
+  kindle:{dist:5,h:2.3,side:0.31},rail:{dist:5.4,h:2.2,side:0.3},
   earthBase:{dist:7,h:2.25,side:0,lift:2.4},earthRampage:{dist:9,h:4.1,side:0,lift:3},
   earthShield:{dist:9,h:2.8,side:0,lift:5.5},earthCharge:{dist:10,h:3,side:0,lift:5},
   earthAuger:{dist:12,h:3.3,side:0,lift:3.5},earthSky:{dist:15.2,h:3.8,side:0,lift:3},
-  windShield:{dist:7.4,h:2.55,side:0.38},windFlight:{dist:8.6,h:2.65,side:0.32},
+  windShield:{dist:6.2,h:2.45,side:0.34},windFlight:{dist:8.6,h:2.65,side:0.32},
   waterBeam:{dist:7.8,h:3.5,side:0},waterDragon:{dist:17.2,h:4.8,side:0.30}
 };
-const CAM_FRAME={dist:6.2,h:2.25,side:0.30,lift:0},CAM_TRACK={has:false,key:'',x:0,y:0,z:0};
+const CAM_FRAME={dist:4.7,h:2.05,side:0.25,lift:0},CAM_TRACK={has:false,key:'',x:0,y:0,z:0,r:0,gy:undefined};
 const _camFocus=new THREE.Vector3(),_camAnchor=new THREE.Vector3(),_camWant=new THREE.Vector3();
 function cameraFrame(me){
   if(me.al){
@@ -160,17 +160,24 @@ function updateCamera(me,dt){
   const anchor=_camAnchor.set(px,ground+1.35,pz);
   {const k2=camRoomK(me,anchor,x,y,z);if(k2<1){x=anchor.x+(x-anchor.x)*k2;y=anchor.y+(y-anchor.y)*k2;z=anchor.z+(z-anchor.z)*k2;}}
   // พุ่ง/เทเลพอร์ต/ทะยาน: พากล้องตามการย้ายตัวก่อนเกลี่ยระยะ ป้องกันกล้องไล่หลังแล้วหันกลับหาตัว
-  if(cut)camPos.set(x,y,z);
-  else{camPos.x+=px-CAM_TRACK.x;camPos.y+=ground-CAM_TRACK.y;camPos.z+=pz-CAM_TRACK.z;}
+  // หมุนตามเมาส์ทันที (เดิมเกลี่ยตำแหน่ง 25/วิ = กล้องลอย ๆ ตามหลังตอนหัน) • เกลี่ยแค่ "ระยะจากจุดมอง":
+  //   ชนผนัง/เนิน = หดเข้าทันที (ไม่ทะลุ) • พ้นแล้ว = ค่อย ๆ ถอยกลับ (ไม่กระตุก) • พื้นสูงต่ำ = ความสูงตามแบบนุ่ม
+  const wd=Math.hypot(x-focus.x,y-focus.y,z-focus.z)||1e-3;
+  if(cut||!(CAM_TRACK.r>0))CAM_TRACK.r=wd;
+  else CAM_TRACK.r=wd<CAM_TRACK.r?wd:CAM_TRACK.r+(wd-CAM_TRACK.r)*(1-Math.exp(-5*dt));
+  const rk=CAM_TRACK.r/wd;
+  if(cut||!(CAM_TRACK.gy!==undefined)||Math.abs(ground-CAM_TRACK.gy)>3)CAM_TRACK.gy=ground;
+  else CAM_TRACK.gy+=(ground-CAM_TRACK.gy)*(1-Math.exp(-18*dt));
+  const gyo=CAM_TRACK.gy-ground;
+  camPos.set(focus.x+(x-focus.x)*rk,focus.y+(y-focus.y)*rk+gyo,focus.z+(z-focus.z)*rk);
   CAM_TRACK.has=true;CAM_TRACK.key=key;CAM_TRACK.x=px;CAM_TRACK.y=ground;CAM_TRACK.z=pz;
-  camPos.lerp(_camWant.set(x,y,z),1-Math.exp(-25*dt));
   // ตรวจตำแหน่งหลังเกลี่ยด้วย: ตอนเพิ่งเข้าห้อง กล้องเฟรมก่อนอาจยังอยู่นอกผนัง
   {const roomK=camRoomK(me,anchor,camPos.x,camPos.y,camPos.z);if(roomK<1)camPos.lerpVectors(anchor,camPos,roomK);}
   camPos.x=clamp(camPos.x,-bx,bx);camPos.z=clamp(camPos.z,-bz,bz);
   camPos.y=Math.max(TERR?TW(camPos.x,camPos.z)+0.5:0.5,camPos.y);
   cam.position.copy(camPos);
   if(shakeA>0)cam.position.add(new THREE.Vector3(rnd(-1,1),rnd(-1,1),rnd(-1,1)).multiplyScalar(shakeA*0.02));
-  camLook.set(focus.x+fx*8*cp,focus.y-8*sp+1.2*sp,focus.z+fz*8*cp);
+  camLook.set(focus.x+fx*8*cp,focus.y+gyo-8*sp+1.2*sp,focus.z+fz*8*cp);
   cam.lookAt(camLook);
   if(window.WD&&window.WD.camHook)window.WD.camHook(cam);
 }

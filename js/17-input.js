@@ -3,7 +3,7 @@
 // =====================================================================
 const INPUT=emptyInput();
 let mouseX=0,mouseY=0,showBoard=false;
-const SET_DEF={sens:100,inv:0,master:90,sfx:100,music:80,fov:62,fps:0,dmg:1,shake:1,hitm:1,dirm:1,mini:1,names:1,xh:0,xhc:0,xhs:100,keys:{}};
+const SET_DEF={sens:100,inv:0,master:90,sfx:100,music:80,fov:62,fps:0,fpsg:0,stats:0,dmg:1,shake:1,hitm:1,dirm:1,mini:1,names:1,xh:0,xhc:0,xhs:100,keys:{}};
 const SET=Object.assign({},SET_DEF,(()=>{try{return JSON.parse(store('wd_set')||'{}');}catch(e){return {};}})());
 // ปุ่มกดตั้งเองได้ (หน้าตั้งค่า > ปุ่มกด) — KMAP = ปุ่มค้าง / PMAP = ปุ่มกดทีละครั้ง
 const KEYACT=[['up','เดินหน้า','KeyW'],['down','ถอยหลัง','KeyS'],['left','ไปซ้าย','KeyA'],['right','ไปขวา','KeyD'],['dash','พุ่ง/หลบ','ShiftLeft'],['jump','กระโดด / บินขึ้น','Space'],['q','คาถา 1','KeyQ'],['e','คาถา 2','KeyE'],['r','คาถา 3','KeyR'],['f','คาถา 4','KeyF'],['ult','เวทโบราณ','KeyX'],['mode','สลับโหมด (สายน้ำแข็ง)','KeyV'],['broom','ไม้กวาด','KeyB'],['use','ใช้ของ / โต้ตอบ','KeyG'],['down2','บินลง','KeyC'],['talk','พูดไมค์','KeyT'],['emote','อีโมต (กดค้าง แล้วลากเมาส์)','KeyZ'],['score','ตารางคะแนน','Tab'],['music','เปิด/ปิดเพลง','KeyM'],['test','เมนูทดลอง (ห้องฝึก)','KeyP']];

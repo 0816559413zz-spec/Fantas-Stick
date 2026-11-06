@@ -1,7 +1,7 @@
 # Water Moonwater Arts VFX round 3 (agreed with the user 2026-11-01, ref designs/water_ref/moon_mark_ref.jpg):
 #   moon_mark — on activation: the mark (long 4-point star + orbits + small moons, tex water_moon_mark) flashes at the caster
 #   moon_aura — 8 s: a silver-white half moon (tex water_moon_crescent) floats behind the head + cool moonlight, glints, motes
-#   moon_beam — every shot: a thin sharp silver-white water beam fires from the half moon, glittering water scales along it
+#   moon_beam — delegated to water-moon-pressure-gen.py: pressure water from the wand (2026-11-05)
 # Run: python tools/water-tex-moon.py && python tools/water-moon-gen.py && node tools/fx-check.js
 import json
 from pathlib import Path
@@ -38,14 +38,6 @@ L = [dict(TEX('water_moon_crescent'), id='moon', at=0, life=2, pos=BOB, scale=1.
 save('moon_aura', L, 'Moonwater ระหว่าง 8 วิ (รอบ 3): จันทร์เสี้ยวน้ำสีเงินขาวลอยหลังหัว โยกนิด ๆ + แสงจันทร์เย็น + ประกาย + แสงลอยร่วงช้า ๆ', 2)
 
 # =================== beam (every shot, 0.6 s) ===================
-SC = {'0': [1, 1, .05], '0.1': [1, 1, 1], '0.75': [1, 1, 1], '1': [.1, .1, 1]}
-def bm(id, r, col, op):
-    return {'id': id, 't': 'mesh', 'at': 0, 'life': .62, 'att': 'feet', 'shape': 'beam', 'mat': 'glow', 'col': col, 'pos': MOON, 'rot': [1.6, 0, 0],
-            'scale': {k: [v[0] * r, v[1] * r, v[2] * ML] for k, v in SC.items()}, 'op': op, 'fade': 0}
-L = [bm('outer', .2, '#5f9cff', .3), bm('mid', .1, '#cfe4ff', .75), bm('core', .04, '#ffffff', 1),
-     {'id': 'flash', 't': 'mesh', 'at': 0, 'life': .2, 'att': 'feet', 'shape': 'sphere', 'mat': 'glow', 'col': '#ffffff', 'pos': MOON, 'scale': {'0': .1, '0.3': .35, '1': .05}, 'op': .9, 'fade': 0}]
-for k, z in enumerate([6, 14, 22, 30, 38]):   # glittering water scales along the beam
-    L.append(sparks(f'scales{k}', .02, .45, [0, MOON[1] - z * .028, MOON[2] + z], .35, 50, col='#ffffff', c2='#bfe0ff', speed=(.3, 1.2), plife=[.15, .35]))
-L.append({'id': 'drops', 't': 'emit', 'at': .02, 'life': .4, 'att': 'feet', 'pos': [0, MOON[1] - .25, MOON[2] + 8], 'rate': 40, 'from': 'box', 'fr': 4, 'dir': 'down', 'speed': [.3, .8], 'plife': [.3, .5],
-          'look': 'model', 'model': 'water_blob', 'mmat': 'ice', 'msize': [.03, .06], 'col': '#eef6ff', 'c2': '#bfe0ff', 'mspin': 0, 'gravity': 8, 'drag': 0, 'bounce': 0})
-save('moon_beam', L, 'Moonwater ลำน้ำ (รอบ 3): ลำน้ำสีเงินขาวเรียวคม ยาว 45 ม. พุ่งจากจันทร์เสี้ยวหลังหัว ก้มลงนิด + แสงวาบที่จันทร์ + เกล็ดน้ำแวววาวตลอดลำ + หยดน้ำ', .65)
+# Keep the current wand origin and water body when regenerating this older set.
+import runpy
+runpy.run_path(str(ROOT / 'tools/water-moon-pressure-gen.py'), run_name='__main__')

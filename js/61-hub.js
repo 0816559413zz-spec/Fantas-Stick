@@ -391,7 +391,7 @@ function hubBuildLobby(){
   // ลำแสงลงที่ยืน (6 จุด) + วงเรืองบนพื้น
   F.spots=[];
   const coneT=texCanvas(8,128,(g,W,H)=>{const r=g.createLinearGradient(0,0,0,H);r.addColorStop(0,'rgba(255,255,255,0)');r.addColorStop(0.25,'rgba(255,255,255,.55)');r.addColorStop(1,'rgba(255,255,255,.05)');g.fillStyle=r;g.fillRect(0,0,W,H);},false);
-  for(let i=0;i<6;i++){const g=new THREE.Group();S.add(g);
+  for(let i=0;i<ROOM_MAX;i++){const g=new THREE.Group();S.add(g);
     const cone=new THREE.Mesh(new THREE.CylinderGeometry(0.25,0.85,6,32,1,true),new THREE.MeshBasicMaterial({map:coneT,color:hdr('#b9a6ff',0.16),transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide,fog:false}));cone.position.y=3.2;g.add(cone);
     const ring=new THREE.Mesh(new THREE.RingGeometry(0.62,0.66,64),new THREE.MeshBasicMaterial({color:hdr('#b9a6ff',1.4),transparent:true,opacity:0.6,depthWrite:false,blending:THREE.AdditiveBlending}));ring.rotation.x=-Math.PI/2;ring.position.y=0.215;g.add(ring);
     const disc=new THREE.Mesh(new THREE.CircleGeometry(0.85,48),new THREE.MeshBasicMaterial({map:glowTex,color:hdr('#8a7dff',0.35),transparent:true,depthWrite:false,blending:THREE.AdditiveBlending}));disc.rotation.x=-Math.PI/2;disc.position.y=0.214;g.add(disc);
@@ -734,13 +734,14 @@ function hubSnapModes(){
 
 // ---------- ล็อบบี้: ใครยืนตรงไหน ท่าอะไร ----------
 // ที่ยืนทั้งหมดอยู่ครึ่งขวาของจอ (แผงห้องบังครึ่งซ้าย ~x < −2) • แถวหน้า/หลังสลับกันไม่ให้บังกัน (ตรวจ 2026-10-23 ที่ 1891×942: เดิมทีมฟ้า 2 คนไปอยู่หลังแผง)
-const HL_SPOTS=[[0.85,1.25],[-1.15,0.45],[2.85,0.4],[-0.15,-1.15],[1.85,-1.15],[3.55,-1.45]];
-const HL_TEAM=[[[-0.85,1.1],[-1.6,-0.4],[0.35,-1.35]],[[2.25,1.1],[3.25,-0.35],[1.55,-1.4]]];
+// 7-12 = แถวหลัง/ช่องว่าง (FFA 12 คน, ทีม 6v6 — 2026-11-05)
+const HL_SPOTS=[[0.85,1.25],[-1.15,0.45],[2.85,0.4],[-0.15,-1.15],[1.85,-1.15],[3.55,-1.45],[0.5,-0.05],[1.95,1.65],[0.85,-2.6],[2.75,-2.75],[-1.4,-2.2],[4.0,0.9]];
+const HL_TEAM=[[[-0.85,1.1],[-1.6,-0.4],[0.35,-1.35],[0.55,0.15],[-0.75,-2.6],[-1.75,-1.9]],[[2.25,1.1],[3.25,-0.35],[1.55,-1.4],[3.95,0.95],[2.65,-2.75],[3.85,-2.35]]];
 function hubLobbyLayout(L){
   const out=[],team=MODES[L.mode]&&MODES[L.mode].team,P=L.players.slice();
   const me=P.findIndex(p=>p.id===NET.myId);if(me>0)P.unshift(P.splice(me,1)[0]);
-  if(team){const n=[0,0];for(const p of P){const tm=p.tm|0,s=HL_TEAM[tm][Math.min(2,n[tm]++)];out.push({p,x:s[0],z:s[1],tm});}}
-  else P.forEach((p,i)=>{const s=HL_SPOTS[Math.min(i,5)];out.push({p,x:s[0],z:s[1],tm:-1});});
+  if(team){const n=[0,0];for(const p of P){const tm=p.tm|0,s=HL_TEAM[tm][Math.min(HL_TEAM[tm].length-1,n[tm]++)];out.push({p,x:s[0],z:s[1],tm});}}
+  else P.forEach((p,i)=>{const s=HL_SPOTS[Math.min(i,HL_SPOTS.length-1)];out.push({p,x:s[0],z:s[1],tm:-1});});
   return out;
 }
 function hubLobbyTick(dt,now){
@@ -760,7 +761,7 @@ function hubLobbyTick(dt,now){
       sp.ring.material.color.copy(hdr(col,1.5));sp.disc.material.color.copy(hdr(col,0.35));sp.cone.material.color.copy(hdr(col,0.12+0.03*Math.sin(now/600+i)));}
     s.c=c;
   });
-  for(let i=lay.length;i<6;i++)if(F.spots[i])F.spots[i].g.visible=false;
+  for(let i=lay.length;i<F.spots.length;i++)if(F.spots[i])F.spots[i].g.visible=false;
   for(const [id,c] of HUB.chars)if(!want.has(id)){HUBL.remove(c.g);disposeTree(c.g);if(c.orb){HUBL.remove(c.orb.g);}HUB.chars.delete(id);}
   const camP=HUB.cam.p;
   for(const s of lay)if(s.c){const c=s.c;hubCharTick(c,dt,now,camP);
