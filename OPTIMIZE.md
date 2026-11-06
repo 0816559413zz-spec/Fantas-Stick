@@ -184,6 +184,9 @@ Measured: `updateParticles` 3–4 ms → 0.25 ms in a 12-player brawl; whole ren
 Tried and dropped: skipping `updateMatrix` for unmoved objects. `scene.updateMatrixWorld()` costs only ~0.12 ms per frame here, so no gain. Do not retry.
 Next real gains are structural: fewer draw calls per character (merge parts in Blender), shader variants still missed by warm-up (section I), host simulation in a Worker.
 
+## N. Character merge 2026-11-06 (user chose)
+`mergeStudent` (js/22): other players' file model becomes one SkinnedMesh with `bodyMat(DoubleSide)`: colours, roughness and metalness per vertex, palette texture sampled into vertices, hair/tie (children of bones) turned into 100% weights on that bone. 10 draws per character down to body + wand. Own player is not merged (cloth in js/49 needs the separate panels); `?unbatchedStudent` = off. 12-player brawl draw calls 514-570 down to 424-474 (timings stay in machine noise). Look compared side by side from the front: `shots/mf_cmp.jpg`.
+
 ## Benchmarks
 Follow-up batching/LOD 2026-11-06: student Skeletons 7→1 per player; compatible skin/iris/scarf trim combines with vertex colour/PBR attributes (2 fewer draws per body per pass). Cloth panels/palette stay separate. Actual high-poly emitted model is `water_blob` (3,968 tris), not frost shards (32). Tiny water particles <=12 physical pixels use a 224-triangle mesh; near particles and hero geometry stay full detail. Visual/animation/lifecycle checks pass. This partially addresses §H player/particle items, not all FPS causes. See `notes/optimize-batching-lod-2026-11-06.md` and `tools/bench-render-audit.js` for actual active instance costs.
 

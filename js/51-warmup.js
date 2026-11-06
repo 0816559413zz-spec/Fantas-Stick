@@ -151,7 +151,7 @@ function gameWarmTick(dt){
   GWARM.t=0;GWARM.key=key;GWARM.busy=true;
   try{
     // ตัวละครตัวอย่างตามลุคของคนในห้อง — เก็บเองซ่อนไว้ (ห้ามใส่ PM3: syncPlayers ลบตัวที่ไม่มีในสแนปช็อต + dispose วัสดุ → program ถูกลบ ต้อง compile ใหม่ตอนเริ่ม)
-    for(const p of LOBBY.players){const L=getLook(p.id),k=lookStr(L);if(GWARM.chars.has(k))continue;const o=makeStudent(L,'warm'+GWARM.chars.size);useFileModel(o,'char_student',lookTint(L),L);GWARM.chars.set(k,o);}
+    for(const p of LOBBY.players){const L=getLook(p.id),k=lookStr(L);if(GWARM.chars.has(k))continue;const o=makeStudent(L,'warm'+GWARM.chars.size);o.bat=GWARM.chars.size>0;useFileModel(o,'char_student',lookTint(L),L);GWARM.chars.set(k,o);}
     const ch=[...GWARM.chars.values()].map(o=>o.g);ch.forEach((g,i)=>{g.visible=true;g.position.set((i-2)*1.5,GY(MW/2,MH/2),0);});
     const hid=[];for(const sc of [scene,fxScene])sc.traverse(o=>{if(!o.visible&&!o.isLight){o.visible=true;hid.push(o);}});
     // compile (ไม่ใช่ compileAsync): three r160 compileAsync พังถ้าวัสดุบางชิ้นไม่มี program (isReady of undefined) • ไดรเวอร์ compile ขนานอยู่แล้ว (KHR_parallel_shader_compile)

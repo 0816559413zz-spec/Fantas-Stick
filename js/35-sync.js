@@ -178,7 +178,7 @@ function syncPlayers(P,mode,now,dt){
   for(const p of P){
     seen.add(p.id);
     let o=PM3.get(p.id);
-    if(!o){o=makeStudent(getLook(p.id),p.id);PM3.set(p.id,o);{const L=getLook(p.id);useFileModel(o,'char_student',lookTint(L),L);}}
+    if(!o){o=makeStudent(getLook(p.id),p.id);PM3.set(p.id,o);o.bat=p.id!==NET.myId;{const L=getLook(p.id);useFileModel(o,'char_student',lookTint(L),L);}}
     const posePath=getKit(p.id).path;
     // ทำก่อนทางแยกคนตาย: ช่วง ragdoll ไม่เดินนาฬิกาท่าร่าย มิฉะนั้นจะเล่นท่าเดิมต่อเมื่อเกิดใหม่
     if(!p.al||p.dn||o.posePath!==undefined&&o.posePath!==posePath||p.st&&!o.poseStunned)clearCharacterCast(o);

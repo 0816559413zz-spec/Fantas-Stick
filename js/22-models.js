@@ -127,6 +127,47 @@ function batchStudentSkin(root){const groups=new Map();
     root.traverse(m=>{for(const mat of [].concat(m.material||[]))unused.delete(mat);});const keep=keepMatSet();for(const mat of unused)disposeMaterial(mat,keep);
   }
 }
+// รวมตัวละครของผู้เล่นคนอื่นทั้งตัวเป็น SkinnedMesh เดียว (ผู้ใช้ 2026-11-06: 10 draw → 2 ต่อคน รวมเงาอีกเท่าตัว)
+// สี/ความหยาบลงที่จุดยอด (bodyMat) • ผม/เนคไทเดิมเป็นลูกของกระดูก = แปลงเป็นน้ำหนักกระดูกนั้น 100% • ไม้กายสิทธิ์แยกไว้
+// ตัวเราไม่รวม: ผ้าคลุมจำลองจริง (js/49) ต้องใช้แผง tint_cloak/tint_house แยก • ?unbatchedStudent = ปิด
+const _palPx=new Map();
+function palPixels(t){let d=_palPx.get(t);if(d!==undefined)return d;d=null;
+  try{const w=t.image.width,h=t.image.height,c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d',{willReadFrequently:true});x.drawImage(t.image,0,0);d={w,h,a:x.getImageData(0,0,w,h).data};}catch(e){}
+  _palPx.set(t,d);return d;}
+const _s2l=v=>v<=0.04045?v/12.92:Math.pow((v+0.055)/1.055,2.4);
+function mergeStudent(root){
+  root.updateMatrixWorld(true);
+  const parts=[];let first=null;
+  root.traverse(m=>{if(!m.isMesh)return;for(let q=m;q&&q!==root;q=q.parent)if(!q.visible||/^wand_/.test(q.name))return;
+    const mat=m.material;if(!mat||!mat.isMeshStandardMaterial||mat.transparent||mat.emissiveMap||Object.keys(m.geometry.morphAttributes).length)return;
+    if(m.isSkinnedMesh&&!first)first=m;parts.push(m);});
+  if(!first||parts.length<2)return false;
+  const sk=first.skeleton,B=first.bindMatrix,Bi=first.bindMatrixInverse.clone().copy(B).invert(),_i=new THREE.Matrix4(),_m=new THREE.Matrix4(),col=new THREE.Color();
+  const geos=[];
+  for(const m of parts){const mat=m.material;let g=m.geometry.clone();
+    if(m.isSkinnedMesh){if(m.skeleton!==sk||!m.bindMatrix.equals(B)){geos.forEach(q=>q.dispose());g.dispose();return false;}}
+    else{let b=m.parent;while(b&&!b.isBone)b=b.parent;const j=b?sk.bones.indexOf(b):-1;if(j<0){geos.forEach(q=>q.dispose());g.dispose();return false;}
+      _m.copy(b.matrixWorld).invert().multiply(m.matrixWorld);_i.copy(sk.boneInverses[j]).invert();g.applyMatrix4(_m.premultiply(_i).premultiply(Bi));
+      const n=g.attributes.position.count,SI=new Uint16Array(n*4),SW=new Float32Array(n*4);for(let i=0;i<n;i++){SI[i*4]=j;SW[i*4]=1;}
+      g.setAttribute('skinIndex',new THREE.BufferAttribute(SI,4));g.setAttribute('skinWeight',new THREE.BufferAttribute(SW,4));}
+    const P=g.attributes.position,n=P.count,U=g.attributes.uv,C=new Float32Array(n*3),Rg=new Float32Array(n),Mt=new Float32Array(n),px=mat.map&&U?palPixels(mat.map):null;
+    if(mat.map&&!px){geos.forEach(q=>q.dispose());g.dispose();return false;}
+    for(let i=0;i<n;i++){col.copy(mat.color);
+      if(px){const u=U.getX(i),v=U.getY(i),x=Math.min(px.w-1,Math.floor((u-Math.floor(u))*px.w)),y=Math.min(px.h-1,Math.floor((v-Math.floor(v))*px.h)),k=(y*px.w+x)*4;col.r*=_s2l(px.a[k]/255);col.g*=_s2l(px.a[k+1]/255);col.b*=_s2l(px.a[k+2]/255);}
+      C[i*3]=col.r;C[i*3+1]=col.g;C[i*3+2]=col.b;Rg[i]=mat.roughness;Mt[i]=mat.metalness;}
+    const SIo=g.attributes.skinIndex,SWo=g.attributes.skinWeight,SI=new Uint16Array(n*4),SW=new Float32Array(n*4);
+    for(let i=0;i<n;i++){for(let k=0;k<4;k++){SI[i*4+k]=SIo.getComponent(i,k);SW[i*4+k]=SWo.getComponent(i,k);}}
+    const h=new THREE.BufferGeometry();h.setAttribute('position',g.attributes.position);h.setAttribute('normal',g.attributes.normal);
+    h.setAttribute('skinIndex',new THREE.BufferAttribute(SI,4));h.setAttribute('skinWeight',new THREE.BufferAttribute(SW,4));
+    h.setAttribute('color',new THREE.BufferAttribute(C,3));h.setAttribute('aRough',new THREE.BufferAttribute(Rg,1));h.setAttribute('aMetal',new THREE.BufferAttribute(Mt,1));
+    if(g.index)h.setIndex(new THREE.BufferAttribute(Uint32Array.from(g.index.array),1));else{const I=new Uint32Array(n);for(let i=0;i<n;i++)I[i]=i;h.setIndex(new THREE.BufferAttribute(I,1));}
+    geos.push(h);}
+  const geo=mergeGeometries(geos,false);geos.forEach(g=>g.dispose());if(!geo)return false;geo.userData={};
+  const mesh=new THREE.SkinnedMesh(geo,bodyMat(THREE.DoubleSide));mesh.name='student_all_batch';mesh.position.copy(first.position);mesh.quaternion.copy(first.quaternion);mesh.scale.copy(first.scale);
+  mesh.bind(sk,B);mesh.castShadow=first.castShadow;mesh.receiveShadow=first.receiveShadow;mesh.frustumCulled=first.frustumCulled;
+  first.parent.add(mesh);const unused=new Set(parts.map(m=>m.material));for(const m of parts)m.parent.remove(m);
+  root.traverse(m=>{for(const mt of [].concat(m.material||[]))unused.delete(mt);});const keep=keepMatSet();for(const mt of unused)disposeMaterial(mt,keep);
+  return true;}
 // ใส่โมเดลไฟล์ให้ตัวละคร/ศัตรูที่สร้างจากโค้ดแล้ว: ซ่อน mesh เดิมด้วย layer 31 (กล้อง/เงาไม่วาด — ไม่ใช้ visible เพราะโค้ดคาถาเปิดปิด visible เอง)
 // look (ผู้เล่น) = เลือกชิ้น hair_N/tie_N/wand_N ตามหน้าตา + ใส่ไว้ใน o.b (ตัวเอน/ล้มตามโค้ด) + ผูกแขนขาโค้ดกับกระดูก (rigBind) + ไม้กวาดจากไฟล์
 function useFileModel(o,name,tint,look){
@@ -135,7 +176,7 @@ function useFileModel(o,name,tint,look){
     const inst=modelInst(name);if(!inst)return;
     if(tint)tintModel(inst,tint);
     if(look){fileVariants(inst,look);const off=[];inst.traverse(m=>{if(!m.visible&&/^(hair|tie|wand)_\d+$/.test(m.name))off.push(m);});for(const m of off)m.parent.remove(m);}   // ทรงที่ไม่ได้เลือก: ถอดทิ้ง (ซ่อนไว้ three ก็ยังคำนวณทุกเฟรม)
-    if(name==='char_student'&&!new URLSearchParams(location.search).has('unbatchedStudent')){shareSkinSkeletons(inst);batchStudentSkin(inst);}
+    if(name==='char_student'&&!new URLSearchParams(location.search).has('unbatchedStudent')){shareSkinSkeletons(inst);if(!(o.bat&&mergeStudent(inst)))batchStudentSkin(inst);}
     if(name==='char_student')inst.traverse(m=>{if(m.isMesh&&/^(tie_|wand_|hair_base|char_student_7$)/.test(m.name))m.castShadow=false;});   // ชิ้นเล็กไม่ทอดเงา: เงาแทบไม่เห็น แต่ต้องวาดใน shadow pass ทุกคน (OPTIMIZE §G)
     o.b.traverse(m=>{if(m.isMesh||m.isSprite||m.isPoints||m.isLine)m.layers.set(31);});
     if(look&&o.tip)o.tip.layers.set(0);
