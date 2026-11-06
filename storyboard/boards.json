@@ -88235,8 +88235,8 @@
    "refs": [
     "storyboard/img/s16_ref_mw27euzw.png"
    ],
-   "fx": "wind/aegis_wall",
-   "reply": "ผู้ใช้เลือกแบบ A \"ลมใส\" แล้ว ✅ ใส่ในเกมแล้ว: เล็ง = วงลมรอบตัว (wind/aegis_aim) • ปล่อย = ลมดันจากมือ (wind/aegis_cast) • กำแพง = เส้นลมคลื่นไหวลอยขึ้น 12 วิ (wind/aegis_wall) • ดันพุ่ง/หยุด/ใกล้แตก/แตก ทำใหม่ให้เข้ากันหมด • ภาพในเกมจริง: storyboard/img/sb16_game.jpg",
+   "fx": "wind/aegis_c_wall",
+   "reply": "ผู้ใช้เปลี่ยนเป็นแบบ C \"ม่านลมโค้ง\" (2026-11-06) ✅ ใส่ในเกมแล้ว: กำแพง = ม่านเส้นลมนุ่มลอยขึ้น โปร่ง สว่างล่าง + เส้นพื้นปลายม้วน (wind/aegis_c_wall) • ชน = ม่านวาบ (aegis_c_hit) • ใกล้แตก/แตก แบบ C • เล็ง/ปล่อย/ดัน/หยุด ใช้ของแบบ A • ภาพในเกม: storyboard/img/sb16_game_c.jpg",
    "game": {
     "id": "aegisgale",
     "kind": "spell",

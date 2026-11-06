@@ -55,6 +55,7 @@ function syncWind(v,dt,now){
   for(const [id,o] of WV.wl)if(!seen.has(id)&&(o.age=(o.age||0)+dt)>0.5){if(o.I)fxStop(o.I);if(o.P)fxStop(o.P);if(o.U)fxStop(o.U);WV.wl.delete(id);}
 }
 function wvWall(n){return WV.wl.get(n);}
+function wvHitFx(n){const o=wvWall(n);return o&&o.C?'wind/aegis_c_hit':'wind/wall_hit';}   // ศัตรูชน/ทะลุกำแพง: แบบ C = ม่านวาบตรงจุดชน
 function wvAimFx(id){const o=WV.wa;if(o&&o.has(id)){fxStop(o.get(id));o.delete(id);}}   // หยุดลมรอบตัวตอนเล็งกำแพง
 // ---------- เหตุการณ์ (efx z 'wn…') ----------
 function windEfx(ev){
@@ -70,14 +71,14 @@ function windEfx(ev){
     case 'wndswall':fxPlay('wind/wall_hit',{x,y,h:0,a:Math.random()*6.283});return true;
     case 'wnwaim':{const o=WV.wa||(WV.wa=new Map());if(o.has(ev.id))fxStop(o.get(ev.id));o.set(ev.id,fxPlay('wind/aegis_aim',{x,y,h:H,follow:ev.id,aim:false}));}if(mine)toast('กำแพงลม: คลิกซ้าย = ดันไปข้างหน้า • คลิกขวา = วางตรงจุดเล็ง');return true;
     case 'wnwaimoff':wvAimFx(ev.id);return true;
-    case 'wnwup':{const R=ev.m===2;   // กำแพงจากสกิล = แบบ A ลมใส (สตอรี่บอร์ด #16) • m 2 = วงกำแพงของอัลติ = ชิ้นละ wind/eye_wall (สตอรี่บอร์ด #20 แบบ B) แตก/ใกล้แตกใช้ของ Aegis
+    case 'wnwup':{const R=ev.m===2;   // กำแพงจากสกิล = แบบ C ม่านลมโค้ง (ผู้ใช้เลือก 2026-11-06; เล็ง/ปล่อย/ดัน/หยุด ยังเป็นของแบบ A) • m 2 = วงกำแพงของอัลติ = ชิ้นละ wind/eye_wall (สตอรี่บอร์ด #20 แบบ B) แตก/ใกล้แตกใช้ของ Aegis
       if(!R){wvAimFx(ev.id);const c=(VIEW.cur&&VIEW.cur.P||[]).find(p=>p.id===ev.id);if(c)fxPlay('wind/aegis_cast',{x:c.x,y:c.y,h:c.z||0,a:Math.atan2(y-c.y,x-c.x)});}
-      const o={x,y,a,A:true,I:fxPlay(R?'wind/eye_wall':'wind/aegis_wall',{x,y,h:0,a}),P:ev.m===1?fxPlay('wind/aegis_push',{x,y,h:0,a}):null};WV.wl.set(ev.n,o);return true;}
+      const o={x,y,a,A:true,C:!R,I:fxPlay(R?'wind/eye_wall':'wind/aegis_c_wall',{x,y,h:0,a}),P:ev.m===1?fxPlay('wind/aegis_push',{x,y,h:0,a}):null};WV.wl.set(ev.n,o);return true;}
     case 'wnwstop':{const o=wvWall(ev.n);if(o&&o.P){fxStop(o.P);o.P=null;}fxPlay(o&&o.A===false?'wind/wall_stop':'wind/aegis_stop',{x,y,h:0,a});return true;}
-    case 'wnwpass':fxPlay('wind/wall_hit',{x,y,h:0,a:a+Math.PI});if(near)snd('hit',ev);return true;
-    case 'wnwhit':fxPlay('wind/wall_hit',{x,y,h:0,a:a+Math.PI});if(near)snd('hit',ev);return true;
-    case 'wnwuns':{const o=wvWall(ev.n);if(o)o.U=fxPlay(o.A===false?'wind/wall_unstable':'wind/aegis_unstable',{x,y,h:0,a});return true;}
-    case 'wnwboom':{const o=wvWall(ev.n);if(o){if(o.I)fxKill(o.I);if(o.P)fxKill(o.P);if(o.U)fxKill(o.U);WV.wl.delete(ev.n);}fxPlay(o&&o.A===false?'wind/wall_break':'wind/aegis_break',{x,y,h:0,a});if(near){shake(0.35);snd('break',ev);}return true;}
+    case 'wnwpass':fxPlay(wvHitFx(ev.n),{x,y,h:0,a:a+Math.PI});if(near)snd('hit',ev);return true;
+    case 'wnwhit':fxPlay(wvHitFx(ev.n),{x,y,h:0,a:a+Math.PI});if(near)snd('hit',ev);return true;
+    case 'wnwuns':{const o=wvWall(ev.n);if(o)o.U=fxPlay(o.C?'wind/aegis_c_unstable':o.A===false?'wind/wall_unstable':'wind/aegis_unstable',{x,y,h:0,a});return true;}
+    case 'wnwboom':{const o=wvWall(ev.n);if(o){if(o.I)fxKill(o.I);if(o.P)fxKill(o.P);if(o.U)fxKill(o.U);WV.wl.delete(ev.n);}fxPlay(o&&o.C?'wind/aegis_c_break':o&&o.A===false?'wind/wall_break':'wind/aegis_break',{x,y,h:0,a});if(near){shake(0.35);snd('break',ev);}return true;}
     case 'wnwend':{const o=wvWall(ev.n);if(o){if(o.I)fxStop(o.I);if(o.P)fxStop(o.P);if(o.U)fxStop(o.U);WV.wl.delete(ev.n);}return true;}
     case 'wnwblk':fxPlay('wind/ba_hit',{x,y,h:Math.max(0,H-0.2),a:Math.random()*6.283});return true;
     case 'wndr':fxPlay('wind/windrift_sb_a',{x,y,h:H,a});if(near)snd('cast_pull',ev);return true;

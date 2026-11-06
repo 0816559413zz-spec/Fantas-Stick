@@ -1,5 +1,5 @@
 # Aegis Gale — variant C "ม่านลมโค้ง" (curtain wall, user 2026-11-06: "อยากให้นายลองทำ กำแพงลมแบบนี้ ... มาให้ดูก่อน", ref = a game wind-wall screenshot)
-# Studio candidate only — NOT bound in game (the game uses variant A wind/aegis_*).
+# User picked C 2026-11-06 → in game: js/68 windEfx plays aegis_c_wall/hit/unstable/break for skill walls (aim/cast/push/stop stay A's wind/aegis_*).
 # Look: one wide curved, slightly barrel-shaped curtain of SOFT wide vertical streaks rising from the ground, brighter low at the two sides,
 # fading upward, see-through; a thin pale-green line with curled ends on the ground at its base. Same size/shape as the A wall
 # (12.5 m chord, 5.4 m, middle bulges away from the caster). Palette kept wind white + mint/green (not the ref's blue/gold).
@@ -113,7 +113,14 @@ def g_c_break():
     L.append({'id':'shock','t':'warp','at':.12,'life':.45,'att':'ground','pos':[0,.1,1.5],'kind':'shock','flat':True,'size':{'0':1,'1':13},'str':1.2,'op':{'0':1,'1':0},'col':WHITE,'glow':0})
     L.append({'id':'shake','t':'screen','at':.12,'life':.3,'shake':6,'flash':.03,'fcol':'#e6fff4'})
     return {'v':1,'desc':'กำแพงลม แบบ C แตก: ม่านสว่างวาบสั้น แล้วถูกพัดพุ่งออกด้านหน้าและลอยสูงขึ้นจาง + เส้นลมแตกกระจาย + ฝุ่น + คลื่นอากาศบิดบนพื้น','tags':['wind','wall','break'],'pal':'wind','dur':1.2,'seed':7,'layers':L}
+def g_c_unstable():
+    L=[veil('shiver',2,MINT,2.6,[.06,0],{'0':.22,'0.2':.4,'0.45':.2,'0.7':.42,'1':.22},loop=True,dz=.05,
+        sc={'0':[1,WHG,1],'0.13':[1.005,WHG*1.05,1],'0.27':[.997,WHG*.96,1],'0.4':[1.004,WHG*1.04,1],'0.55':[.996,WHG*.97,1],'0.7':[1.006,WHG*1.06,1],'0.85':[.998,WHG*.96,1],'1':[1,WHG,1]})]
+    L.append({'id':'rush','t':'emit','at':0,'life':2,'loop':True,'att':'ground','pos':[0,0,ZC],'from':'mesh','of':'shiver','rate':60,'dir':'up','speed':[4,6.5],'plife':[.25,.5],'look':'streak','size':[1.4,2.6],'col':WHITE,'c2':GREEN,'gravity':0,'drag':0,'curl':False})
+    L.append({'id':'chips','t':'emit','at':0,'life':2,'loop':True,'att':'ground','pos':[0,0,ZC],'from':'mesh','of':'shiver','rate':22,'dir':'aim','yaw':0,'spread':.9,'speed':[1.5,3.5],'plife':[.3,.7],'look':'streak','size':[.5,1.1],'col':MINT,'c2':GREEN,'gravity':0,'drag':1.2,'curl':True})
+    return {'v':1,'desc':'กำแพงลม แบบ C ใกล้แตก: ม่านสั่น สว่างขึ้นเป็นจังหวะ เส้นลมไหลขึ้นเร็ว เศษลมหลุดออก (วนซ้อนม่านจนแตก)','tags':['wind','wall','loop'],'pal':'wind','dur':2,'seed':6,'layers':L}
 save(ROOT/'assets/fx/wind/aegis_c_wall.fx.json',g_c_wall())
+save(ROOT/'assets/fx/wind/aegis_c_unstable.fx.json',g_c_unstable())
 save(ROOT/'assets/fx/wind/aegis_c_hit.fx.json',g_c_hit())
 save(ROOT/'assets/fx/wind/aegis_c_break.fx.json',g_c_break())
 
