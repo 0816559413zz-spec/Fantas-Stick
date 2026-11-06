@@ -61,11 +61,11 @@ function wtOutline(id,dur){const o=PM3.get(id);if(!o||!o.g)return;const L=[];
     const c=m.isSkinnedMesh?new THREE.SkinnedMesh(m.geometry,_wtOlMat):new THREE.Mesh(m.geometry,_wtOlMat);if(m.isSkinnedMesh)c.bind(m.skeleton,m.bindMatrix);
     c.position.copy(m.position);c.quaternion.copy(m.quaternion);c.scale.copy(m.scale);c.userData.wtOl=1;c.renderOrder=999;c.frustumCulled=false;m.parent.add(c);L.push(c);});
   WTV.ol.push({L,t:dur});}
-// Dash: ตัวละครจมลงพื้น 0.35 วิ (WT_DS.sink) แล้วโผล่ขึ้น 0.25 วิ — เลื่อนโมเดลลง (ของจริงอยู่ที่ host)
+// Dash: ตัวละครจมลงพื้น 0.35 วิ (WAV.dsSink) แล้วโผล่ขึ้น 0.25 วิ — เลื่อนโมเดลลง (ของจริงอยู่ที่ host)
 const WT_SINKD=2.4;
 function wtSinkOffset(o,p,dt){const k0=WTV.sk.get(p.id);let d=0;
   if(k0){const e=(k0.e+=dt);
-    if(k0.k==='s'){const k=Math.min(1,e/0.35);d=WT_SINKD*k*k;if(e>1.5)WTV.sk.delete(p.id);}
+    if(k0.k==='s'){const k=Math.min(1,e/WAV.dsSink);d=WT_SINKD*k*k;if(e>1.5)WTV.sk.delete(p.id);}
     else{const k=e/0.25;if(k>=1)WTV.sk.delete(p.id);else d=WT_SINKD*(1-k)*(1-k);}}
   o.g.position.y-=d;
   // ลึกเกินครึ่งตัว = ซ่อนตัว (ผ้าคลุม js/49 ชนพื้น จะกองบนพื้นแทนที่จะจมตาม)

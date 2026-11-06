@@ -97,52 +97,53 @@ MIND:66 summonMin:72 minTarget:81 minShoot:88 updateMins:93 aimTarget:133 SDOME:
 §180 ร่ายคาถา
 castSlot:181 castUlt:196
 
-## js/09-water.js (173) — 
-WATERP:7 WT_BA:8 wtOn:23 wtInBeam:25
-§28 ทุกเฟรมของผู้เล่นสายน้ำ (เรียกจาก updatePlayer หลังส่วนโล่)
-waterTick:29 waterSpd:44 waterReset:45
-§47 BA: ตวัดไม้สร้างเส้นน้ำ → ยิง 3 นัดตามเมาส์ • Moonwater = ลำน้ำ
-WT_BA_H:48 waterBasic:49 waterLineTick:56 waterMoonBeam:62
-§65 Dash: จมดิน ทิ้งร่างโคลน → โผล่ห่าง 300 ทิศที่หัน • 6 วิกดอีกที = กลั…
-waterDash:66 waterSinkTick:75
-§81 ดาเมจใดๆ ของเรา → ลูกผู้ช่วยยิงตาม (เรียกจาก damage() ใน js/12)
-waterOnHit:82 waterFamTick:84
-§89 Riptide: คลื่นยักษ์วิ่งไปข้างหน้า พัดศัตรูติดไปจนสุดทาง
-waterWaveTick:90
-§98 Abyssal Beam: ร่าย 0.5 วิ → ยิงลำน้ำ 3 วิ (ยืนนิ่ง ลอยนิดหน่อย หมุนตา…
-waterBeamStop:100 waterBeamTick:108 waterMBTick:119
-§123 อัลติ Dragon of the Deep
-waterDragonTick:124
-§138 ทุกเฟรม (ทั้งเกม)
-updateWater:139 waterSnapP:145 waterSnapW:147
+## js/09-water.js (167) — 
+WATERP:7 WAV:11 wtOn:17 wtInBeam:19
+§22 ทุกเฟรมของผู้เล่นสายน้ำ (เรียกจาก updatePlayer หลังส่วนโล่)
+waterTick:23 waterSpd:38 waterReset:39
+§41 BA: ตวัดไม้สร้างเส้นน้ำ → ยิง 3 นัดตามเมาส์ • Moonwater = ลำน้ำ
+WT_BA_H:42 waterBasic:43 waterLineTick:50 waterMoonBeam:56
+§59 Dash: จมดิน ทิ้งร่างโคลน → โผล่ห่าง 300 ทิศที่หัน • 6 วิกดอีกที = กลั…
+waterDash:60 waterSinkTick:69
+§75 ดาเมจใดๆ ของเรา → ลูกผู้ช่วยยิงตาม (เรียกจาก damage() ใน js/12)
+waterOnHit:76 waterFamTick:78
+§83 Riptide: คลื่นยักษ์วิ่งไปข้างหน้า พัดศัตรูติดไปจนสุดทาง
+waterWaveTick:84
+§92 Abyssal Beam: ร่าย 0.5 วิ → ยิงลำน้ำ 3 วิ (ยืนนิ่ง ลอยนิดหน่อย หมุนตา…
+waterBeamStop:94 waterBeamTick:102 waterMBTick:113
+§117 อัลติ Dragon of the Deep
+waterDragonTick:118
+§132 ทุกเฟรม (ทั้งเกม)
+updateWater:133 waterSnapP:139 waterSnapW:141 WT_RP:144 WT_FM:147 WT_CG:149 WT_AB:153 WT_MW:156 WT_UL:158
 
-## js/09-wind.js (259) — 
-WINDP:8 W_BA:9
-§22 ตัวช่วย
-wOn:23 wGain:24 wSeg:26 wFoeNear:27
-§29 ทุกเฟรมของผู้เล่นสายลม (เรียกจาก updatePlayer หลังส่วนโล่)
-windTick:30 windSpd:50 windFlyZ:52 windReset:55
-§57 ท่าพื้นฐาน (คลิกซ้าย): ใบมีดลม / ดูดลมชาร์จเกจ / GaleBurst
-windBasic:58 windGaleBurst:77 windGBTick:80
-§86 โล่ปีก
-windShieldBurst:87
-§91 Dash: ผลักศัตรูข้างหน้า + ดีดตัวเราถอยหลังลอยกลางอากาศ
-windDash:92
-§102 กำแพงลม Aegis Gale
-windWallMake:103 windWallStop:111 windWallBoom:112 windDmg:117 windProjHit:121 windWallHurt:124 windCollide:126
-§132 ทั้งสนาม: GaleBurst / กำแพงลม / ชนกำแพง
-updateWind:133
-§158 Windrift: ชาร์จปีก → พุ่ง 200 แบบ Jett → ลงท่าฮีโร่ → 1 วิต่อมาลมแรงต…
-windDriftTick:159 windDriftWind:166
-§173 Vortex Bind: ทอร์นาโด 3 อันโค้ง 45° ห่าง 200 → 0.6 วิ ดึงกลับมาหยุด 6…
-windVortexTick:174
-§185 Void Spheres: หลุมดำลูกเดียว (ผู้ใช้ 2026-10-31, designs/wind.md)
-windVoidCast:188 windVoidTick:190
-§201 Featherwing: บิน 5 วิ → กดอีกครั้งสะบัดปีกไปข้างหน้า (เอียงลงพื้น) → …
-windFlyTick:202 windFlick:204
-§210 อัลติ Eye of Heaven
-windUltTick:213 windFloatZ:227 windSnapP:230 windSnapW:231
-§234 สกิล
+## js/09-wind.js (256) — 
+WINDP:8 WNV:12
+§19 ตัวช่วย
+wOn:20 wGain:21 wSeg:23 wFoeNear:24
+§26 ทุกเฟรมของผู้เล่นสายลม (เรียกจาก updatePlayer หลังส่วนโล่)
+windTick:27 windSpd:47 windFlyZ:49 windReset:52
+§54 ท่าพื้นฐาน (คลิกซ้าย): ใบมีดลม / ดูดลมชาร์จเกจ / GaleBurst
+windBasic:55 windGaleBurst:74 windGBTick:77
+§83 โล่ปีก
+windShieldBurst:84
+§88 Dash: ผลักศัตรูข้างหน้า + ดีดตัวเราถอยหลังลอยกลางอากาศ
+windDash:89
+§99 กำแพงลม Aegis Gale
+windWallMake:100 windWallStop:108 windWallBoom:109 windDmg:114 windProjHit:118 windWallHurt:121 windCollide:123
+§129 ทั้งสนาม: GaleBurst / กำแพงลม / ชนกำแพง
+updateWind:130
+§155 Windrift: ชาร์จปีก → พุ่ง 200 แบบ Jett → ลงท่าฮีโร่ → 1 วิต่อมาลมแรงต…
+windDriftTick:156 windDriftWind:163
+§170 Vortex Bind: ทอร์นาโด 3 อันโค้ง 45° ห่าง 200 → 0.6 วิ ดึงกลับมาหยุด 6…
+windVortexTick:171
+§182 Void Spheres: หลุมดำลูกเดียว (ผู้ใช้ 2026-10-31, designs/wind.md)
+windVoidCast:185 windVoidTick:187
+§198 Featherwing: บิน 5 วิ → กดอีกครั้งสะบัดปีกไปข้างหน้า (เอียงลงพื้น) → …
+windFlyTick:199 windFlick:201
+§207 อัลติ Eye of Heaven
+windUltTick:210 windFloatZ:224 windSnapP:227 windSnapW:228
+§231 สกิล
+W_WL:232 W_DR:235 W_VX:237 W_VO:240 W_FW:242 W_UL:245
 
 ## js/10-net.js (198) — 
 PREFIX:4 NET:5 RC:9 TURN_SERVERS:12 ICE:13 PEER_OPT:14 TURN_URL:16 ICE_READY:18 JN:22 LAG:24 lagDo:25 hostSend:26 LOBBY:27 genCode:28 sendAll:29 NETD_KEYS:33 NETD:33 netDeltaReset:34 netDelta:35 NET_MAX:49 _netTE:49 netSendSnap:50 NETU:62 netUndelta:63 setStatus:69 hostGame:71 hostPeer:79 netConnect:98 joinWatch:109 joinFail:124 netLost:130 joinGame:145 joinPeer:156 clientOnData:171 leave:186 leaveRoom:188
@@ -714,4 +715,4 @@ tuneOpenF:80 tuneFmt:81 tuneRow:82 tuneRefresh:85 tuneMsg:93 tuneToggle:94 tuneE
 §122 API สำหรับเครื่องมือแยก tune.html (เปิดเกมใน iframe แล้วเรียกผ่าน WD)
 tuneDump:123 tuneSetKey:124
 
-(85 files, 20736 lines)
+(85 files, 20727 lines)
