@@ -195,19 +195,21 @@ function fxTexMatTick(m,S,k){fxTexMatBind(m);const u=m.uniforms,N=u.uGrid.value.
 // ทุกเม็ดของโมเดล+วัสดุ+สีเดียวกันวาดรวมเป็น InstancedMesh ก้อนเดียว (เบา) • อยู่ต่อได้หลังชั้นจบ (เหมือนอนุภาค)
 const FXMP={groups:new Map()};
 // Tiny water spray used the hero blob's ~4k triangles per instance. Retain the
-// original close-up mesh; only particles <=12 physical pixels use this recipe.
+// Particles use a 16-segment sphere (~1k triangles) up close and the 224-triangle
+// recipe at <=12 physical pixels; the 32-segment mesh stays for hero meshes.
 const MPLOD=new WeakMap(),MPLOD_PX=12,MPLOD_ON=!new URLSearchParams(location.search).has('fullParticleDetail');
 function fxMPParticleGeo(model,geo){if(!MPLOD_ON||model!=='water_blob')return null;if(MPLOD.has(geo))return MPLOD.get(geo);
   const d=FXMK.mesh.get(model)?.data;if(!d||!d.parts.length||d.parts.some(p=>p.k!=='sphere'||p.off))return null;
-  const low=fxMeshBuild({...d,parts:d.parts.map(p=>({...p,seg:Math.min(8,p.seg||8)}))});low.userData.keep=true;MPLOD.set(geo,low);return low;
+  const mk=seg=>{const g=fxMeshBuild({...d,parts:d.parts.map(p=>({...p,seg:Math.min(seg,p.seg||seg)}))});g.userData.keep=true;return g;};
+  const low=mk(8);low.userData.near=mk(16);MPLOD.set(geo,low);return low;
 }
 function fxMPMat(mat,col,col2){switch(mat){
   case 'glow':return new THREE.MeshBasicMaterial({color:hdr(col,1.1),transparent:true,depthWrite:false,blending:THREE.AdditiveBlending});
   case 'ice':return new THREE.MeshStandardMaterial({color:col,emissive:col2,emissiveIntensity:0.45,roughness:0.15,metalness:0.1,transparent:true,opacity:0.88,flatShading:true});
   default:return new THREE.MeshStandardMaterial({color:col,emissive:col2,emissiveIntensity:0.12,roughness:0.92,metalness:0,flatShading:true});}}
 function fxMPGroup(model,mat,col,col2){const key=model+'|'+mat+'|'+col+'|'+col2;let G=FXMP.groups.get(key);if(G)return G;const geo=fxMeshGeo(model);if(!geo)return null;
-  const N=256,m=new THREE.InstancedMesh(geo,fxMPMat(mat,col,col2),N);m.count=0;m.frustumCulled=false;m.castShadow=mat==='solid';m.renderOrder=2;m.instanceMatrix.setUsage(THREE.DynamicDrawUsage);m.userData.keep=true;
-  const lowGeo=fxMPParticleGeo(model,geo);let low=null;
+  const N=256,lowGeo=fxMPParticleGeo(model,geo),m=new THREE.InstancedMesh(lowGeo?lowGeo.userData.near:geo,fxMPMat(mat,col,col2),N);m.count=0;m.frustumCulled=false;m.castShadow=mat==='solid';m.renderOrder=2;m.instanceMatrix.setUsage(THREE.DynamicDrawUsage);m.userData.keep=true;
+  let low=null;
   if(lowGeo){low=new THREE.InstancedMesh(lowGeo,m.material,N);low.count=0;low.frustumCulled=false;low.castShadow=m.castShadow;low.renderOrder=m.renderOrder;low.instanceMatrix.setUsage(THREE.DynamicDrawUsage);low.userData.keep=true;scene.add(low);}
   scene.add(m);G={mesh:m,low,lodRadius:geo.boundingSphere.radius+geo.boundingSphere.center.length(),list:[],N};FXMP.groups.set(key,G);return G;}
 const _mpM=new THREE.Matrix4(),_mpQ=new THREE.Quaternion(),_mpE=new THREE.Euler(),_mpP=new THREE.Vector3(),_mpS=new THREE.Vector3();

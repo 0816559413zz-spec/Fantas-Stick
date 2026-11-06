@@ -194,7 +194,7 @@ bombTick:323 modeSnap:336
 §358 สร้าง snapshot ส่งให้ทุกเครื่อง
 r1:359 DEFP:361 packP:362 unpackP:363 makeSnap:364 PROF:382 pf:383 hostSent:384 hostLoop:385 HLW:400 pingN:410
 
-## js/16-voice.js (89) — 
+## js/16-voice.js (89) — ไมค์ (WebRTC audio แบบ mesh: ทุกคนโทรหากันตรงๆ)
 VOICE:4 rosterIds:5 toggleMic:6 voiceSync:20 teamOn:37 teamOf:38 applyVoiceGates:39 VAC:49 onIncomingCall:50 voiceLevels:62 speakingIds:70 updateVoiceUI:76
 
 ## js/17-input.js (66) — 
@@ -442,7 +442,7 @@ fxLoopName:356 blzFxName:357 fxLoopKeep:358 fshHitFx:360 fxBind:363
 §374 แม่แบบ playFx เป็นไฟล์ (assets/fx/tpl/*, sig/*, rec/*)
 fxTpl:376
 
-## js/46-fx-make.js (278) — 
+## js/46-fx-make.js (280) — 
 FXMK:10 MKD:11 mkRng:12 mkHash:13 mkNoise:15 mkL:17 mkR2:18
 §19 ที่เก็บจุด/สามเหลี่ยม
 mkG:21 mkPc:22 mkV:23 mkQ:24 mkAppend:25 mkCopy:26 mkFlat:27 _mkv:28 mkXf:29 mkThree:32 mkTRS:34 mkGrid:37
@@ -458,11 +458,11 @@ FXGROWBY:168 fxGrowInit:169 fxGrowTick:171
 §176 วัสดุภาพบนรูปทรง (mat:"tex") — ภาพที่วาดในสตูดิโอ (tex/…) ไหลบนผิว + …
 fxTexMat:178 fxTexMatBind:190 fxTexMatTick:193
 §194 เศษโมเดลกระเด็น (emit look:"model") — หิน ผลึก ขนนก เศษดาบ: หมุน ตกตา…
-FXMP:196 MPLOD:199 MPLOD_PX:199 MPLOD_ON:199 fxMPParticleGeo:200 fxMPMat:204 fxMPGroup:208 _mpM:213 _mpQ:213 _mpE:213 _mpP:213 _mpS:213 fxMPUpdate:214 fxMPClear:228 fxMPSpawn:230
-§234 อากาศบิดเบี้ยว (ชั้น warp) — ไอร้อน / คลื่นกระแทกบิดภาพ / เลนส์โป่ง •…
-fxWarpMake:236 fxWarpTick:248
-§254 ไฟ 3 มิติจากการจำลอง (ชั้น vol) — ไฟล์รูปแบบเดียวกับที่เพื่อน bake จา…
-FXVOL:257 fxVolLoad:258 fxVolTex:262 fxVolSet:265 fxVolReady:266 fxVolMake:267 fxVolTick:270 fxPreAssets:275 fxAssetsWait:277
+FXMP:196 MPLOD:200 MPLOD_PX:200 MPLOD_ON:200 fxMPParticleGeo:201 fxMPMat:206 fxMPGroup:210 _mpM:215 _mpQ:215 _mpE:215 _mpP:215 _mpS:215 fxMPUpdate:216 fxMPClear:230 fxMPSpawn:232
+§236 อากาศบิดเบี้ยว (ชั้น warp) — ไอร้อน / คลื่นกระแทกบิดภาพ / เลนส์โป่ง •…
+fxWarpMake:238 fxWarpTick:250
+§256 ไฟ 3 มิติจากการจำลอง (ชั้น vol) — ไฟล์รูปแบบเดียวกับที่เพื่อน bake จา…
+FXVOL:259 fxVolLoad:260 fxVolTex:264 fxVolSet:267 fxVolReady:268 fxVolMake:269 fxVolTick:272 fxPreAssets:277 fxAssetsWait:279
 
 ## js/47-earth-view.js (686) — 
 ECOL:9 EGUARD_BIG:14 EGUARD:14 CB:15 EV:16 eW:17 eYaw:18
@@ -494,7 +494,7 @@ ESM:622 eSmooth:623 ESF:626 eShieldFx:627 eChips:632 eShieldSegs:635 eShieldNum:
 ## js/48-ragdoll.js (227) — 
 RAG:10 RAGJ:23 RAGB:29 RAGS:33 RAGMIN:37 RAGHINGE:39 _rv1:40 _rv2:40 _rv3:40 _rqa:40 _rqb:40 _rm:40 ragBones:41 ragBasis:48 ragTargets:56 ragStart:62 ragBack:88 ragFloor:89 ragStep:90 ragPose:155 ragWrite:170 ragRestore:182 ragEnd:186 ragTick:188 ragHideDead:222
 
-## js/49-cloth.js (132) — 
+## js/49-cloth.js (132) — ผ้าคลุมจริง (cloth sim) — เฉพาะตัวละครของเราเอง • ภาพบนเครื่องตัวเองล้วน ไม่แตะ sim / hit…
 CLOTH:10 CL_ROWS:26 CL_NC:26 CL_GAP:26 CL_IN:26 _clV:27 _clA:27 _clB:27 clPinK:29 clBind:31 clothSetup:34 clTargets:68 clReset:72 clCapsule:74 _clO:78 clWorld:79 clWorldHit:88 clStep:93 clDraw:106 clothTick:113
 
 ## js/50-grass.js (294) — 
@@ -508,7 +508,7 @@ SCAR:56 scarReset:58 scarPaint:65 grassScar:80
 §85 พื้นหญ้ามีชีวิต: สีเป็นหย่อม (เขียวเข้ม / แห้งเหลือง / ดินโผล่) + จุด…
 GR_NOISE:88 GR_LIVE:93 grLive:111 GR_GLSL_V:118 GR_BEGIN:123 grassMat:169 grassBuild:187 _grBasic:201 grassBake:202 grassCount:258 grassTick:263
 
-## js/51-warmup.js (186) — 
+## js/51-warmup.js (186) — อุ่นเครื่องช่วงนับถอยหลัง (ผู้ใช้ 2026-10-21: "ช่วงนับถอยหลังให้โหลดสิ่งที่ต้องใช้ — กดสก…
 WARM:11 WARM_FXDIR:12 WARM_COMMON:12 WARM_X:13 WARM_Y:13 warmKeep:15 warmStaticModels:21 warmCompile:29 warmDraw:32 WARM_SKIP:42 warmAssets:45 warmFx:55 warmFxEnd:66 warmGather:68 warmPaths:70 warmStep:72 warmTick:104
 §113 ภาพจากโค้ดของแต่ละสาย (เฟรมละฟังก์ชัน)
 warmOutline:123
@@ -700,7 +700,7 @@ PERF:9 perfFrame:12 perfDom:26 perfStats:34 perfGraph:38 _gpuName:51 gpuIntegrat
 ## js/72-dash-pose.js (84) — 
 DPOSE:12 DPT:24 _dpQ:25 _dpX:25 _dpP:25 dpMix:26 dpKnees:28 dpStyle:36 DPDBG:41 dashPose:42 dpApply:74
 
-## js/73-tune.js (121) — แผงปรับค่า 🎚️ (F8 / ปุ่ม "ปรับค่า" ในเมนูพัก และหน้าแรก) — ปรับตัวเลขในเกมสดๆ แล้วเซฟลง …
+## js/73-tune.js (121) — 
 TUNE:8 tuneNum:9 tuneBuild:15
 §60 ใช้ / เก็บค่า
 tuneSetVal:61 tuneApplyFile:64 tuneJson:68
@@ -709,4 +709,4 @@ tuneOpenF:76 tuneFmt:77 tuneRow:78 tuneRefresh:81 tuneMsg:89 tuneToggle:90 tuneE
 §118 API สำหรับเครื่องมือแยก tune.html (เปิดเกมใน iframe แล้วเรียกผ่าน WD)
 tuneDump:119 tuneSetKey:120
 
-(85 files, 20713 lines)
+(85 files, 20715 lines)
