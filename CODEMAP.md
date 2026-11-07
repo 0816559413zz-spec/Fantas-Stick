@@ -183,7 +183,7 @@ BOT_MODES:246 lobbyBots:247 lobbyBotAdd:248 lobbyBotFill:257 lobbyBotCmd:262 lob
 ## js/15-botnav.js (135) — 
 NAV_MAPS:14 NAV_EYE:14 NAV:15 navOn:17 navSig:18 navEnsure:25 navBuild:31 navCell:48 navWalk:49 navRay:51 navFree:56 navPath:62 _navFoe:80 botThink:83 botNav:89
 
-## js/15-botplay.js (88) — 
+## js/15-botplay.js (88) — วิธีเล่นของบอทแต่ละสาย (ผู้ใช้ 2026-10-31 "บอทไม่รู้วิธีเล่นสายของตัวเอง")
 BOT_RANGE:7 botMem:9 botWallBehind:11 _bspd:21 botSave:23 botWant:25 botCombo:64
 
 ## js/15-modes.js (410) — 
@@ -201,7 +201,7 @@ bombTick:323 modeSnap:336
 §358 สร้าง snapshot ส่งให้ทุกเครื่อง
 r1:359 DEFP:361 packP:362 unpackP:363 makeSnap:364 PROF:382 pf:383 hostSent:384 hostLoop:385 HLW:400 pingN:410
 
-## js/16-voice.js (89) — ไมค์ (WebRTC audio แบบ mesh: ทุกคนโทรหากันตรงๆ)
+## js/16-voice.js (89) — 
 VOICE:4 rosterIds:5 toggleMic:6 voiceSync:20 teamOn:37 teamOf:38 applyVoiceGates:39 VAC:49 onIncomingCall:50 voiceLevels:62 speakingIds:70 updateVoiceUI:76
 
 ## js/17-input.js (66) — 
@@ -509,7 +509,7 @@ ESM:622 eSmooth:623 ESF:626 eShieldFx:627 eChips:632 eShieldSegs:635 eShieldNum:
 ## js/48-ragdoll.js (227) — 
 RAG:10 RAGJ:23 RAGB:29 RAGS:33 RAGMIN:37 RAGHINGE:39 _rv1:40 _rv2:40 _rv3:40 _rqa:40 _rqb:40 _rm:40 ragBones:41 ragBasis:48 ragTargets:56 ragStart:62 ragBack:88 ragFloor:89 ragStep:90 ragPose:155 ragWrite:170 ragRestore:182 ragEnd:186 ragTick:188 ragHideDead:222
 
-## js/49-cloth.js (132) — ผ้าคลุมจริง (cloth sim) — เฉพาะตัวละครของเราเอง • ภาพบนเครื่องตัวเองล้วน ไม่แตะ sim / hit…
+## js/49-cloth.js (132) — 
 CLOTH:10 CL_ROWS:26 CL_NC:26 CL_GAP:26 CL_IN:26 _clV:27 _clA:27 _clB:27 clPinK:29 clBind:31 clothSetup:34 clTargets:68 clReset:72 clCapsule:74 _clO:78 clWorld:79 clWorldHit:88 clStep:93 clDraw:106 clothTick:113
 
 ## js/50-grass.js (400) — 
@@ -718,7 +718,8 @@ WDG_YAW:444 wdgGet:445 wdgStart:446 wdgDive:453 wdgKeep:456 wdgEnd:457 wdgTick:4
 ## js/71-perfhud.js (72) — 
 PERF:9 perfFrame:12 perfDom:26 perfStats:34 perfGraph:38 _gpuName:51 gpuIntegrated:52 perfRows:53 perfPanel:68 perfText:69
 
-## js/72-dash-pose.js (84) — 
+## js/72-dash-pose.js (84) — ท่าพุ่ง 3D (ผู้ใช้ 2026-11-05: "บางท่า เช่น Windrift เป็นแบบพุ่งตัว … ตอนนี้ไม่เป็น Anima…
+§10 ช่อง: 0 โน้มตัว(+หน้า) 1 ยกตัว y 2 แขนขวา x(+หลัง) 3 แขนขวา z 4 แขนซ้…
 DPOSE:12 DPT:24 _dpQ:25 _dpX:25 _dpP:25 dpMix:26 dpKnees:28 dpStyle:36 DPDBG:41 dashPose:42 dpApply:74
 
 ## js/73-tune.js (142) — 
