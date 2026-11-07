@@ -3530,6 +3530,30 @@
    "mat": "solid",
    "n": 83
   },
+  "nature_ult_tree_scaffold": {
+   "v": "42c9c339",
+   "desc": "Unapproved taller-body scaffold: raised roots and unchanged spreading crown proportions; no foliage, fibres or gameplay binding.",
+   "mat": "solid",
+   "n": 93
+  },
+  "nature_ult_tree_scaffold_v1": {
+   "v": "42c9c339",
+   "desc": "Unapproved taller-body scaffold: raised roots and unchanged spreading crown proportions; no foliage, fibres or gameplay binding.",
+   "mat": "solid",
+   "n": 93
+  },
+  "nature_ult_tree_weave": {
+   "v": "12da6f21",
+   "desc": "Unapproved woven dark-green energy tree: upright, tall, raised roots and continuous core to crown. Static model only.",
+   "mat": "solid",
+   "n": 180
+  },
+  "nature_ult_tree_woven_v1": {
+   "v": "cb165d31",
+   "desc": "Woven black-green energy tree following frozen tall scaffold v1, with modest trunk flare, unchanged waist and flowing trunk-to-bough transitions. Static visual review; not gameplay bound.",
+   "mat": "solid",
+   "n": 25
+  },
   "nature_wood_wall_study": {
    "v": "a6529a21",
    "desc": "Nature กำแพงไม้ r7: ใบเกาะแนบตามข้อไม้เป็นกลุ่ม หนามไม้บนยอดและช่วงบนของผนัง; ร่างรอรีวิว",
