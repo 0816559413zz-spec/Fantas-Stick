@@ -55,7 +55,7 @@ const CLW={x:0,z:0,K:9};
 
 // ---------- หญ้า ----------
 // DENS = ใบต่อตร.หน่วย • S = ขนาดผืนหญ้ารอบกล้อง (หน่วย 3D) ตามระดับกราฟิก • H = ความสูงใบ • MAXN = จำนวนสูงสุด
-const GRASS={ON:true,DENS:48,H:0.22,W:0.032,MAXN:110000,CAP:110000,gustK:1.8,pushK:2.2,S:{high:46,auto:36,auto1:28},mesh:null,key:'',cache:new Map(),tex:null,box:null,bakeMs:0,n:0,trail:[],trLast:new WeakMap()};
+const GRASS={ON:true,DENS:70,H:0.32,W:0.034,MAXN:160000,CAP:160000,gustK:1.8,pushK:2.2,S:{high:46,auto:36,auto1:28},mesh:null,key:'',cache:new Map(),tex:null,box:null,bakeMs:0,n:0,trail:[],trLast:new WeakMap()};
 // ---------- รอยสนามรบบนหญ้า + พื้น (อยู่ทั้งแมตช์ — designs/battlefield.md ขั้น 3) ----------
 // ภาพรอยขนาดเท่าแผนที่ (RES ช่อง/หน่วย): R = ไหม้ • G = น้ำแข็ง • B = ราบ/หาย • A = ทิศที่ล้ม (0..1 = 0..2π)
 // ล้างเมื่อเข้าหน้าเกม (แมตช์ใหม่ — setScreen js/19) / เปลี่ยนแผนที่ • ทุกเครื่องทาที่จุดเดียวกัน (มาจาก event ของโฮสต์) • ภาพล้วน ไม่แตะโปรโตคอล
