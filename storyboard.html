@@ -288,7 +288,7 @@ h3{margin:0;font:600 11px "Segoe UI",sans-serif;letter-spacing:.6px;color:var(--
 </div>
 <div id="dr">
   <div class="bar">
-    <span class="seg" id="drBg"><button data-bg="side" class="on">ด้านข้าง</button><button data-bg="top">มองจากบน</button><button data-bg="blank">ว่าง</button></span>
+    <span class="seg" id="drBg"><button data-bg="side" class="on">ด้านข้าง</button><button data-bg="sideR" title="ด้านข้างแบบกลับด้าน: ผู้ร่ายอยู่ขวา หันซ้าย">ด้านข้าง (กลับด้าน)</button><button data-bg="top">มองจากบน</button><button data-bg="back" title="ยืนหลังผู้ร่าย มองไปที่เป้า">หลังผู้ร่าย</button><button data-bg="front" title="ยืนหลังเป้า มองกลับมาที่ผู้ร่าย">จากฝั่งเป้า</button><button data-bg="blank">ว่าง</button></span>
     <span style="width:8px"></span>
     <span class="seg" id="drTool"><button data-t="pen" class="on">✏️ ปากกา</button><button data-t="glow">✨ เรืองแสง</button><button data-t="fill">🎨 ป้ายสี</button><button data-t="arrow">➜ ทิศทาง</button><button data-t="text">T ข้อความ</button><button data-t="erase">🧽 ยางลบ</button></span>
     <span style="width:8px"></span>
@@ -309,6 +309,7 @@ h3{margin:0;font:600 11px "Segoe UI",sans-serif;letter-spacing:.6px;color:var(--
     <span style="width:6px"></span>
     <button data-fb="save" class="pri">✔ เสร็จ (บันทึกทุกเฟรม)</button>
   </div>
+  <div class="bar fbo" id="fbAng"></div>
   <div class="wrap"><canvas id="bg"></canvas><canvas id="onion"></canvas><canvas id="ink"></canvas></div>
   <div class="film" id="fbFilm"></div>
   <div class="hint" style="margin-top:6px">ตัวสีขาวซ้าย = ผู้ร่าย (หันขวา) • ตัวแดงขวา = เป้า • ขีดบนพื้น = 1 ตัวละคร • <kbd>Ctrl</kbd>+<kbd>V</kbd> = ใช้รูปที่ก๊อปมาเป็นพื้นหลัง (เช่นภาพจากในเกม) แล้ววาดทับ</div>
@@ -452,7 +453,7 @@ function renderView(){
   if(vMode==='clip'){V.className='fbv';V.dataset.l=JSON.stringify(s.frames.list.map(x=>x.img||x.base).filter(Boolean));V.dataset.fps=s.frames.fps||12;V._l=null;V._pre=null;V._k=-1;V.innerHTML=`<span class="cap">🎞 ${nf} เฟรม • ${s.frames.fps||12} fps — คลิกเพื่อแก้ทีละเฟรม</span>`;}
   else if(vMode==='res'){V.style.backgroundImage=`url('${s.result}')`;V.innerHTML='<span class="cap">✅ ผลที่ Claude ทำ</span>';}
   else if(vMode==='cmp'){V.className='cmp';V.innerHTML=`<div style="background-image:url('${m?m.img:''}')"><span>🖼 ภาพร่าง</span></div><div style="background-image:url('${s.result}')"><span>✅ ผล Claude</span></div>`;}
-  else if(m){V.style.backgroundImage=`url('${m.img}')`;V.innerHTML=`<span class="cap">ภาพ ${(s._sel||0)+1}/${s.sketches.length}${m.view?' • 3D '+esc(m.view):m.kind==='3d'?' • 3D':''}</span>`;}
+  else if(m){V.style.backgroundImage=`url('${m.img}')`;V.innerHTML=`<span class="cap">ภาพ ${(s._sel||0)+1}/${s.sketches.length}${m.kind==='3d'?(m.view?' • 3D '+esc(m.view):' • 3D'):m.view?' • มุม '+esc(m.view):''}</span>`;}
   else{V.className='empty';V.innerHTML='ยังไม่มีภาพร่าง<br><small>✏️ วาดเอง • 🧊 จัดฉาก 3D (มีตัวละคร + ท่าจากเกม) • 🎞 วาดทีละเฟรม</small>';}
   const k=Math.min(s._sel||0,s.sketches.length-1);
   Bar.innerHTML=`<div class="th">${s.sketches.map((x,j)=>`<div class="t ${j===k&&vMode==='sk'?'on':''}" data-sk="${j}" style="background-image:url('${x.img}')"><span>${j+1}${x.view?' '+esc(x.view):x.kind==='3d'?' 3D':''}${x.over&&x.kind==='3d'?' ✏️':''}</span><div class="bt"><button data-skdraw="${j}" title="วาดทับภาพนี้">✏️</button><button data-skdel="${j}" title="ลบภาพนี้">✕</button></div></div>`).join('')||'<span class="hint">ภาพร่างของช่วงนี้จะอยู่ตรงนี้</span>'}</div>
@@ -622,6 +623,12 @@ document.addEventListener('paste',e=>{
 const W=1280,H=720,GY=560,U=150; // พื้นอยู่ที่ y=560, ตัวละครสูง 150px = "1 ตัว"
 const DR={s:null,bg:'side',bgImg:null,tool:'pen',col:'#ff7a1a',size:7,ops:[],base:null};
 const cvB=$('#bg'),cvI=$('#ink');[cvB,cvI].forEach(c=>{c.width=W;c.height=H;});
+const VIEWNAME={side:'ด้านข้าง',sideR:'ด้านข้าง (กลับด้าน)',top:'มองจากบน',back:'หลังผู้ร่าย',front:'จากฝั่งเป้า',blank:'ว่าง'};
+function figure(g,cx,fy,h,col,back){ // ตัวแท่งมองตรงหน้า/หลัง สูง h (เท้าอยู่ที่ fy) ใช้กับมุม back/front
+  const s=h/U;g.save();g.translate(cx,fy);g.scale(s,s);g.strokeStyle=col;g.lineWidth=Math.max(2,6*s)/s;g.lineCap='round';const top=-U;
+  g.beginPath();g.arc(0,top+20,18,0,7);g.stroke();
+  g.beginPath();g.moveTo(0,top+38);g.lineTo(0,-55);g.lineTo(-20,0);g.moveTo(0,-55);g.lineTo(20,0);g.moveTo(0,top+60);g.lineTo(-34,top+88);g.moveTo(0,top+60);g.lineTo(34,top+88);g.stroke();
+  if(!back){g.fillStyle=col;g.beginPath();g.arc(-7,top+18,3,0,7);g.arc(7,top+18,3,0,7);g.fill();}g.restore();}
 function stick(g,x,col,face){ // ตัวละครแท่งไม้ สูง U
   g.strokeStyle=col;g.lineWidth=6;g.lineCap='round';const top=GY-U;
   g.beginPath();g.arc(x,top+20,18,0,7);g.stroke();
@@ -635,17 +642,25 @@ function paintBg(g,D){ // D = {bg, base, bgImg} — ใช้ทั้งหน�
   if(D.bgImg){const im=D.bgImg,s=Math.min(W/im.width,H/im.height);g.drawImage(im,(W-im.width*s)/2,(H-im.height*s)/2,im.width*s,im.height*s);return;}
   if(D.base){g.drawImage(D.base,0,0,W,H);return;}
   g.fillStyle='#8a90996b';g.font='22px Segoe UI, Leelawadee UI, sans-serif';
-  if(D.bg==='side'){
+  if(D.bg==='side'||D.bg==='sideR'){ // sideR = กลับด้าน (ผู้ร่ายอยู่ขวา หันซ้าย)
+    const R=D.bg==='sideR',cx=R?1020:260,tx=R?260:1020,f=R?-1:1;
     g.fillStyle='#22262c';g.fillRect(0,GY,W,H-GY);g.strokeStyle='#5a606b';g.lineWidth=3;g.beginPath();g.moveTo(0,GY);g.lineTo(W,GY);g.stroke();
-    g.fillStyle='#6a707b';for(let x=260,k=0;x<W;x+=U,k++){g.fillRect(x,GY+4,2,14);g.fillText(k,x+5,GY+26);}
-    stick(g,260,'#e6e8ec',1);stick(g,1020,'#e5534b',-1);
-    g.fillStyle='#8a9099';g.fillText('ผู้ร่าย',225,GY+60);g.fillText('เป้า (ห่าง ~5 ตัว)',950,GY+60);
+    g.fillStyle='#6a707b';for(let k=0;;k++){const x=cx+f*k*U;if(x<0||x>W)break;g.fillRect(x,GY+4,2,14);g.fillText(k,x+5,GY+26);}
+    stick(g,cx,'#e6e8ec',f);stick(g,tx,'#e5534b',-f);
+    g.fillStyle='#8a9099';g.fillText('ผู้ร่าย',cx-35,GY+60);g.fillText('เป้า (ห่าง ~5 ตัว)',tx-70,GY+60);
   }else if(D.bg==='top'){
     g.strokeStyle='#2c3038';g.lineWidth=1;for(let x=0;x<W;x+=U/2){g.beginPath();g.moveTo(x,0);g.lineTo(x,H);g.stroke();}for(let y=0;y<H;y+=U/2){g.beginPath();g.moveTo(0,y);g.lineTo(W,y);g.stroke();}
     g.fillStyle='#e6e8ec';g.beginPath();g.arc(300,H/2,22,0,7);g.fill();
     g.strokeStyle='#e6e8ec';g.lineWidth=4;g.setLineDash([10,10]);g.beginPath();g.moveTo(330,H/2);g.lineTo(950,H/2);g.stroke();g.setLineDash([]);
     g.fillStyle='#e5534b';g.beginPath();g.arc(1000,H/2,22,0,7);g.fill();
     g.fillStyle='#8a9099';g.fillText('ผู้ร่าย (มองจากด้านบน, เล็งไปทางขวา)',190,H/2+60);g.fillText('เป้า',985,H/2+60);g.fillText('1 ช่องตาราง = ครึ่งตัวละคร',20,30);
+  }else if(D.bg==='back'||D.bg==='front'){ // มุมมองตามแนวเล็ง: back = ยืนหลังผู้ร่าย, front = ยืนหลังเป้ามองกลับมา
+    const VY=300,B=D.bg==='back';
+    g.fillStyle='#22262c';g.fillRect(0,VY,W,H-VY);g.strokeStyle='#5a606b';g.lineWidth=3;g.beginPath();g.moveTo(0,VY);g.lineTo(W,VY);g.stroke();
+    g.strokeStyle='#2c3038';g.lineWidth=2;for(let i=-6;i<=6;i++){g.beginPath();g.moveTo(640,VY);g.lineTo(640+i*260,H);g.stroke();}
+    figure(g,640,H-20,300,B?'#e6e8ec':'#e5534b',true);figure(g,640,VY+50,60,B?'#e5534b':'#e6e8ec',false);
+    g.fillStyle='#8a9099';g.fillText(B?'ผู้ร่าย (มองจากด้านหลัง)':'เป้า (มองจากด้านหลัง)',700,H-40);g.fillText(B?'เป้า (ไกล ~5 ตัว)':'ผู้ร่าย (ไกล ~5 ตัว)',680,VY+40);
+    g.fillText(B?'มองจากหลังผู้ร่ายไปที่เป้า':'มองจากหลังเป้ากลับมาที่ผู้ร่าย',20,30);
   }
 }
 function drawInk(){const g=cvI.getContext('2d');g.clearRect(0,0,W,H);paintOps(g,DR.ops);}
@@ -691,10 +706,12 @@ async function drBar(e){const t=e.target;if(FB.play&&!t.dataset.fb)return;
   if(t.id==='drClr'){fbMark();DR.ops.length=0;drawInk();fbThumb();}
   if(t.id==='drCancel'){if(FB.on){if(!FB.chg.size||confirm('ปิดโดยไม่บันทึก? ที่วาดในเฟรมจะหาย'))fbClose();}else $('#dr').style.display='none';}
   if(t.dataset.fb)fbCmd(t.dataset.fb);
+  if(t.dataset.ang!=null&&FB.on){if(FB.play)fbStop();fbAngGo(+t.dataset.ang);}
+  if(t.dataset.angdel&&FB.on)fbAngDel();
   if(t.id==='drSave'){
     const c=document.createElement('canvas');c.width=W;c.height=H;const g=c.getContext('2d');g.drawImage(cvB,0,0);g.drawImage(cvI,0,0);
     try{const img=await upload(c.toDataURL('image/jpeg',0.9),'sk'),old=DR.s.sketches[DR.idx];
-      if(old){old.img=img;old.over=1;}else{DR.s.sketches.push({img,kind:'2d'});DR.s._sel=DR.s.sketches.length-1;}
+      if(old){old.img=img;old.over=1;}else{DR.s.sketches.push({img,kind:'2d',...(!DR.base&&!DR.bgImg&&DR.bg!=='blank'&&VIEWNAME[DR.bg]?{view:VIEWNAME[DR.bg]}:{})});DR.s._sel=DR.s.sketches.length-1;}
       touch(1);$('#dr').style.display='none';}catch(err){stat('⚠ เก็บภาพไม่ได้ — เปิดผ่าน "Tools.bat" หรือยัง? '+err,1);}
   }
 }
@@ -702,20 +719,24 @@ $('#drPick').oninput=e=>{DR.col=e.target.value;document.querySelectorAll('#drCol
 cvI.addEventListener('pointerup',()=>fbThumb());
 
 // ===== เฟรมต่อเฟรม: เฟรม = พื้นหลัง (ภาพจากฉาก 3D / ด้านข้าง / มองจากบน / ว่าง) + หมึกที่วาด → เล่นต่อกันเป็นคลิป =====
+// หลายมุมมอง: shot.frames.list = มุมที่ 1 • shot.frames.name = ชื่อมุมที่ 1 • shot.frames.angles = [{id,name,list:[…]}] มุมที่ 2+ (จำนวนเฟรมเท่ากัน เฟรมที่ k ของทุกมุม = เวลาเดียวกัน เล่นพร้อมกัน)
 // shot.frames = {fps, list:[{id, bg, base (ภาพพื้นหลัง), t (เวลาท่าในฉาก 3D), ops (หมึก, แก้ต่อได้), img (ภาพรวมที่บันทึก)}], sheet (ทุกเฟรมในรูปเดียว ให้ Claude อ่าน)}
-const FB={on:false,s:null,list:[],cur:0,fps:12,onion:true,play:0,im:{},cmp:{},chg:new Set()};
+const FB={on:false,s:null,list:[],angles:[],a:0,cur:0,fps:12,onion:true,play:0,im:{},cmp:{},chg:new Set()};
 const cvO=$('#onion');cvO.width=W;cvO.height=H;
 const nFr=s=>s.frames&&s.frames.list?s.frames.list.length:0;
 function fbNew(bg,base,t){return {id:newId(),bg:bg||'side',base:base||'',t:t??null,ops:[],img:''};}
 function fbLoad(p){if(!p||FB.im[p])return Promise.resolve();return new Promise(ok=>{const im=new Image();im.onload=()=>{FB.im[p]=im;ok();};im.onerror=()=>ok();im.src=p;});}
 function fbOpen(s,at){
   s=liveShot(s);FB.on=true;FB.s=s;DR.s=s;FB.play=0;FB.cmp={};
-  const f=s.frames||{fps:12,list:[]};FB.fps=f.fps||12;FB.list=JSON.parse(JSON.stringify(f.list));
-  FB.chg=new Set(FB.list.filter(x=>!x.img).map(x=>x.id)); // เฟรมใหม่จากฉาก 3D ยังไม่มีภาพรวม
-  if(!FB.list.length){FB.list=Array.from({length:6},()=>fbNew('side'));FB.list.forEach(x=>FB.chg.add(x.id));}
+  const f=s.frames||{fps:12,list:[]};FB.fps=f.fps||12;const P=JSON.parse(JSON.stringify(f.list));
+  FB.chg=new Set(P.filter(x=>!x.img).map(x=>x.id)); // เฟรมใหม่จากฉาก 3D ยังไม่มีภาพรวม
+  if(!P.length){for(let i=0;i<6;i++){const n=fbNew('side');P.push(n);FB.chg.add(n.id);}}
+  FB.angles=[{id:'a0',name:f.name||'',list:P}].concat(JSON.parse(JSON.stringify(f.angles||[])));
+  FB.angles.forEach((A,i)=>{while(A.list.length<P.length)A.list.push(fbNew((A.list[A.list.length-1]||{}).bg||'blank','',P[A.list.length].t));A.list.length=P.length;if(!A.name)A.name=VIEWNAME[A.list[0].bg]||('มุม '+(i+1));});
+  FB.a=0;FB.list=P;
   $('#fbFps').value=FB.fps;$('#dr').classList.add('fb');$('#dr').style.display='flex';
   stat('กำลังโหลดเฟรม…');
-  Promise.all(FB.list.map(x=>fbLoad(x.base))).then(()=>{stat('เฟรมต่อเฟรม: วาดทีละเฟรม • ← → เปลี่ยนเฟรม • Space เล่น');fbGo(at||0);});
+  Promise.all(FB.angles.flatMap(A=>A.list).map(x=>fbLoad(x.base))).then(()=>{stat('เฟรมต่อเฟรม: วาดทีละเฟรม • ← → เปลี่ยนเฟรม • Space เล่น');fbGo(at||0);});
 }
 function fbClose(){fbStop();FB.on=false;$('#dr').classList.remove('fb');$('#dr').style.display='none';}
 function fbMark(){if(FB.on){const fr=FB.list[FB.cur];FB.chg.add(fr.id);delete FB.cmp[fr.id];}}
@@ -728,8 +749,24 @@ function fbGo(i){
   const n=FB.list.length;FB.cur=(i+n)%n;const fr=FB.list[FB.cur];
   DR.ops=fr.ops;DR.bg=fr.bg;DR.bgImg=null;DR.base=FB.im[fr.base]||null;
   document.querySelectorAll('#drBg button').forEach(x=>x.classList.toggle('on',!DR.base&&x.dataset.bg===DR.bg));
-  drawBg();drawInk();fbOnion();fbFilm();
+  drawBg();drawInk();fbOnion();fbFilm();fbAngUI();
 }
+function fitDraw(g,c,x,y,w,h){const s=Math.min(w/c.width,h/c.height),dw=c.width*s,dh=c.height*s;g.drawImage(c,x+(w-dw)/2,y+(h-dh)/2,dw,dh);} // วาดภาพให้พอดีกรอบ ไม่บิดสัดส่วน
+function fbFrame(k){ // ภาพของเฟรมที่ k: มุมเดียว = ภาพมุมนั้น • หลายมุม = ทุกมุมวางเรียงกัน (2 มุม = ซ้าย-ขวา, 3–4 = 2×2, 5–6 = 3×2) เล่น/อัด/บันทึกพร้อมกัน
+  const A=FB.angles;if(A.length<2)return fbCompose(A[0].list[k]);
+  const n=A.length,cols=n<=2?n:n<=4?2:3,rows=Math.ceil(n/cols),c=document.createElement('canvas');c.width=cols*640;c.height=rows*360;const g=c.getContext('2d');
+  g.fillStyle='#0b0c0e';g.fillRect(0,0,c.width,c.height);g.font='600 20px Segoe UI, Leelawadee UI, sans-serif';
+  A.forEach((a,i)=>{const ox=(i%cols)*640,oy=Math.floor(i/cols)*360;
+    g.drawImage(fbCompose(a.list[k]),ox,oy,640,360);g.strokeStyle='#000';g.lineWidth=2;g.strokeRect(ox,oy,640,360);
+    const tt=(i+1)+'. '+a.name;g.fillStyle='#000b';g.fillRect(ox,oy,g.measureText(tt).width+16,28);g.fillStyle='#e8b84a';g.fillText(tt,ox+8,oy+21);});
+  return c;}
+function fbAngUI(){const B=$('#fbAng');if(!B)return;
+  B.innerHTML='<span class="hint">มุมมอง (วาดทีละมุม เล่นพร้อมกัน):</span>'+FB.angles.map((A,i)=>`<button data-ang="${i}" class="${i===FB.a?'on':''}" title="คลิก = วาดมุมนี้ • ดับเบิลคลิก = เปลี่ยนชื่อ">${i+1}. ${esc(A.name)}</button>`).join('')
+   +`<select id="fbAngAdd" title="เพิ่มมุมมองใหม่ — ได้เฟรมว่างจำนวนเท่าเดิม วาดแล้วเล่นพร้อมกับมุมอื่น"><option value="">＋ เพิ่มมุม…</option>${Object.entries(VIEWNAME).map(([k,v])=>`<option value="${k}">${esc(v)}</option>`).join('')}</select>`
+   +(FB.angles.length>1?'<button data-angdel="1" style="color:var(--red)" title="ลบมุมที่กำลังวาดอยู่ (เฟรมของมุมนี้หายทั้งหมด)">🗑 ลบมุมนี้</button>':'');}
+function fbAngGo(i){FB.a=i;FB.list=FB.angles[i].list;fbGo(FB.cur);}
+function fbAngAdd(view){const P=FB.angles[0].list;FB.angles.push({id:newId(),name:VIEWNAME[view]||'มุม',list:P.map(f=>fbNew(view,'',f.t))});FB.chg.add('ang');fbAngGo(FB.angles.length-1);stat('เพิ่มมุม "'+VIEWNAME[view]+'" แล้ว — วาดทีละเฟรมเหมือนเดิม กด ▶ เล่นเพื่อดูทุกมุมพร้อมกัน');}
+function fbAngDel(){if(FB.angles.length<2)return;const A=FB.angles[FB.a];if(!confirm(`ลบมุม "${A.name}" ทั้งหมด? (ภาพที่วาดในมุมนี้จะหาย)`))return;FB.angles.splice(FB.a,1);FB.chg.add('ang');fbAngGo(Math.min(FB.a,FB.angles.length-1));}
 function fbOnion(){
   const g=cvO.getContext('2d');g.clearRect(0,0,W,H);
   if(!FB.onion||FB.play||FB.cur===0)return;
@@ -755,29 +792,32 @@ function fbCmd(c){
   if(c==='play'){if(FB.play){fbStop();fbGo(FB.cur);return;}
     $('#dr').classList.add('playing');$('#fbPlay').textContent='⏸ หยุด';cvO.getContext('2d').clearRect(0,0,W,H);cvI.getContext('2d').clearRect(0,0,W,H);
     let k=FB.cur;const g=cvB.getContext('2d');
-    const step=()=>{g.drawImage(fbCompose(FB.list[k]),0,0);$('#fbNo').textContent=(k+1)+'/'+FB.list.length;FB.cur=k;k=(k+1)%FB.list.length;};
+    const step=()=>{g.fillStyle='#0b0c0e';g.fillRect(0,0,W,H);fitDraw(g,fbFrame(k),0,0,W,H);$('#fbNo').textContent=(k+1)+'/'+FB.list.length;FB.cur=k;k=(k+1)%FB.list.length;};
     step();FB.play=setInterval(step,1000/FB.fps);return;}
   if(FB.play)fbStop();
   if(c==='prev')fbGo(FB.cur-1);
   if(c==='next')fbGo(FB.cur+1);
-  if(c==='add'){const n=fbNew(fr.bg,fr.base,fr.t);FB.list.splice(FB.cur+1,0,n);FB.chg.add(n.id);fbGo(FB.cur+1);}
-  if(c==='dup'){const n={...JSON.parse(JSON.stringify(fr)),id:newId(),img:''};FB.list.splice(FB.cur+1,0,n);FB.chg.add(n.id);fbGo(FB.cur+1);}
-  if(c==='del'){if(FB.list.length<2){stat('ต้องมีอย่างน้อย 1 เฟรม',1);return;}FB.list.splice(FB.cur,1);FB.chg.add('del');fbGo(Math.min(FB.cur,FB.list.length-1));}
+  if(c==='add'){FB.angles.forEach(A=>{const f=A.list[FB.cur],n=fbNew(f.bg,f.base,f.t);A.list.splice(FB.cur+1,0,n);FB.chg.add(n.id);});fbGo(FB.cur+1);}
+  if(c==='dup'){FB.angles.forEach(A=>{const n={...JSON.parse(JSON.stringify(A.list[FB.cur])),id:newId(),img:''};A.list.splice(FB.cur+1,0,n);FB.chg.add(n.id);});fbGo(FB.cur+1);}
+  if(c==='del'){if(FB.list.length<2){stat('ต้องมีอย่างน้อย 1 เฟรม',1);return;}FB.angles.forEach(A=>A.list.splice(FB.cur,1));FB.chg.add('del');fbGo(Math.min(FB.cur,FB.list.length-1));}
   if(c==='onion'){FB.onion=!FB.onion;$('#fbBar [data-fb=onion]').classList.toggle('on',FB.onion);fbOnion();}
   if(c==='video')fbVideo();
   if(c==='save')fbSave();
 }
+$('#fbAng').addEventListener('change',e=>{if(e.target.id!=='fbAngAdd'||!e.target.value)return;if(FB.play)fbStop();fbAngAdd(e.target.value);});
+$('#fbAng').addEventListener('dblclick',e=>{const b=e.target.closest('[data-ang]');if(!b||!FB.on)return;const A=FB.angles[+b.dataset.ang],n=prompt('ชื่อมุมมองนี้',A.name);if(n&&n.trim()){A.name=n.trim();FB.chg.add('ang');fbAngUI();}});
 $('#fbFps').onchange=e=>{FB.fps=+e.target.value;FB.chg.add('fps');if(FB.play){fbStop();fbCmd('play');}};
 async function fbSave(){
   if(!online){stat('⚠ บันทึกไม่ได้ — เปิดผ่าน "Tools.bat" ก่อน',1);return;}
-  fbStop();const L=FB.list,n=L.length;
+  fbStop();const L=FB.angles[0].list,n=L.length,multi=FB.angles.length>1,all=FB.chg.has('ang');
   try{
-    for(let k=0;k<n;k++){const fr=L[k];if(fr.img&&!FB.chg.has(fr.id))continue;stat(`กำลังบันทึกเฟรม ${k+1}/${n}…`);fr.img=await upload(fbCompose(fr).toDataURL('image/jpeg',0.86),'fr');}
+    for(let k=0;k<n;k++){const need=!L[k].img||all||FB.angles.some(A=>FB.chg.has(A.list[k].id));if(!need)continue;stat(`กำลังบันทึกเฟรม ${k+1}/${n}…`);L[k].img=await upload(fbFrame(k).toDataURL('image/jpeg',0.86),'fr');} // หลายมุม: img ของมุมที่ 1 = ภาพรวมทุกมุมของเฟรมนั้น
+    FB.angles.slice(1).forEach(A=>A.list.forEach(x=>x.img=''));
     // รูปรวมทุกเฟรม (ให้ Claude ดูทั้งคลิปในภาพเดียว)
-    const cols=Math.min(n,6),w=320,h=180,c=document.createElement('canvas');c.width=cols*w;c.height=Math.ceil(n/cols)*h;const g=c.getContext('2d');
+    const m_=FB.angles.length,cc_=m_<=2?m_:m_<=4?2:3,ar=multi?cc_*640/(Math.ceil(m_/cc_)*360):16/9,cols=Math.min(n,multi?3:6),w=multi?640:320,h=Math.round(w/ar),c=document.createElement('canvas');c.width=cols*w;c.height=Math.ceil(n/cols)*h;const g=c.getContext('2d');
     g.font='600 20px Segoe UI, Leelawadee UI, sans-serif';
-    L.forEach((fr,k)=>{const x=k%cols*w,y=Math.floor(k/cols)*h;g.drawImage(fbCompose(fr),x,y,w,h);const t=`${k+1}${fr.t!=null?' • '+f2(fr.t)+'s'+frSeg(fr.t):''}`;g.fillStyle='#000b';g.fillRect(x,y,g.measureText(t).width+14,28);g.fillStyle='#e8b84a';g.fillText(t,x+7,y+21);g.strokeStyle='#000';g.strokeRect(x+0.5,y+0.5,w-1,h-1);});
-    const s=liveShot(FB.s);s.frames={fps:FB.fps,list:L,sheet:await upload(c.toDataURL('image/jpeg',0.85),'frs')};
+    L.forEach((fr,k)=>{const x=k%cols*w,y=Math.floor(k/cols)*h;fitDraw(g,fbFrame(k),x,y,w,h);const t=`${k+1}${fr.t!=null?' • '+f2(fr.t)+'s'+frSeg(fr.t):''}`;g.fillStyle='#000b';g.fillRect(x,y+h-28,g.measureText(t).width+14,28);g.fillStyle='#e8b84a';g.fillText(t,x+7,y+h-7);g.strokeStyle='#000';g.strokeRect(x+0.5,y+0.5,w-1,h-1);});
+    const s=liveShot(FB.s);s.frames={fps:FB.fps,list:L,name:FB.angles[0].name,angles:FB.angles.slice(1).map(A=>({id:A.id,name:A.name,list:A.list})),sheet:await upload(c.toDataURL('image/jpeg',0.85),'frs')};
     const bd=db.items.find(b=>b.shots.includes(s));if(bd&&bd!==cur){cur=bd;}selShot=s.id;vMode='clip';
     FB.chg.clear();touch(1);fbClose();stat(`บันทึก ${n} เฟรมแล้ว ✓ — ดูคลิปที่จอกลาง (🎞 คลิป) / แก้ต่อ: ปุ่ม 🎞 เฟรม`);
   }catch(e){stat('⚠ เก็บภาพไม่ได้ — เปิดผ่าน "Tools.bat" หรือยัง? '+e,1);}
@@ -789,8 +829,8 @@ function fbVideo(){ // อัดคลิปจากทุกเฟรม 2 ร
   rec.ondataavailable=e=>parts.push(e.data);
   rec.onstop=()=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(parts,{type:'video/webm'}));a.download=`storyboard${cur.id}_shot${cur.shots.indexOf(FB.s)+1}.webm`;a.click();stat('บันทึกวิดีโอแล้ว ✓ (อยู่ในโฟลเดอร์ดาวน์โหลด)');};
   let k=0;const N=FB.list.length*2;stat('กำลังอัดวิดีโอ…');
-  g.drawImage(fbCompose(FB.list[0]),0,0);rec.start();
-  const iv=setInterval(()=>{k++;if(k>=N){clearInterval(iv);rec.stop();return;}g.drawImage(fbCompose(FB.list[k%FB.list.length]),0,0);},1000/FB.fps);
+  fitDraw(g,fbFrame(0),0,0,W,H);rec.start();
+  const iv=setInterval(()=>{k++;if(k>=N){clearInterval(iv);rec.stop();return;}g.fillStyle='#0b0c0e';g.fillRect(0,0,W,H);fitDraw(g,fbFrame(k%FB.list.length),0,0,W,H);},1000/FB.fps);
 }
 // พรีวิวคลิปในการ์ดช่วง (วนเล่นเอง)
 setInterval(()=>{const now=performance.now()/1000;document.querySelectorAll('.fbv').forEach(el=>{
@@ -1233,7 +1273,7 @@ async function frames(){
       list.push({id:SB.newId(),bg:'blank',base,t:r2(at),ops:[],img:''});}
   }catch(e){SB.stat('⚠ เก็บภาพไม่ได้ — เปิดผ่าน "Tools.bat" หรือยัง? '+e,1);done();return;}
   done();
-  const s=SB.liveShot(shot);s.frames={fps,list:mode==='add'?[...s.frames.list,...list]:list,sheet:''};
+  const s=SB.liveShot(shot);s.frames={fps,list:mode==='add'?[...s.frames.list,...list]:list,...(mode==='add'&&s.frames.name?{name:s.frames.name}:{}),...(mode==='add'&&s.frames.angles?{angles:s.frames.angles}:{}),sheet:''};
   close();SB.fbOpen(s,mode==='add'?s.frames.list.length-n:0);
 }
 async function open3D(s){

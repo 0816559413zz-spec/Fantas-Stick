@@ -154,7 +154,7 @@ def sb_md(b):
         if s.get('colors'):
             L.append(f"- สี: {' '.join('`' + c + '`' for c in s['colors'])}")
         for k, sk in enumerate(sb_sketches(s)):
-            L.append(f"- ภาพร่าง {k+1}{' (3D ' + sk['view'] + ')' if sk.get('view') else ' (3D)' if sk.get('kind') == '3d' else ''}{' + วาดทับ' if sk.get('over') and sk.get('kind') == '3d' else ''}: `{sk['img']}`")
+            L.append(f"- ภาพร่าง {k+1}{' (3D ' + sk['view'] + ')' if sk.get('view') and sk.get('kind') == '3d' else ' (3D)' if sk.get('kind') == '3d' else ' (มุม ' + sk['view'] + ')' if sk.get('view') else ''}{' + วาดทับ' if sk.get('over') and sk.get('kind') == '3d' else ''}: `{sk['img']}`")
         S3 = s.get('scene3d') or {}
         objs = S3.get('objs') or []
         for r, th in (('cast', 'ผู้ร่าย'), ('targ', 'เป้า')):
@@ -174,6 +174,10 @@ def sb_md(b):
             fl = fr['list']; fps = float(fr.get('fps') or 12)
             L += ['', f"🎞 **เฟรมต่อเฟรม (ผู้ใช้วาดทีละเฟรม = การเคลื่อนไหวที่ต้องการ):** {len(fl)} เฟรม • {f(fps)} fps • ยาว {f(len(fl) / fps)} วิ"
                   + (f" • รูปรวมทุกเฟรม: `{fr['sheet']}` (อ่านอันนี้ก่อน)" if fr.get('sheet') else '')]
+            if fr.get('angles'):
+                names = [fr.get('name') or 'มุม 1'] + [a_.get('name') or f'มุม {i + 2}' for i, a_ in enumerate(fr['angles'])]
+                L.append(f"  - **หลายมุมมอง {len(names)} มุม (วาดแยกมุม แต่เล่นพร้อมกัน เฟรมที่ k ของทุกมุมคือเวลาเดียวกัน):** " + ' • '.join(f'{i + 1}. {n_}' for i, n_ in enumerate(names))
+                         + ' — รูปของแต่ละเฟรมคือทุกมุมวางเรียงกัน (ซ้ายไปขวา แล้วบนไปล่าง ตามเลขมุม) ใช้เทียบรูปทรง/ทิศทางของเอฟเฟกต์จากหลายด้านให้ตรงกัน')
             for k, x in enumerate(fl):
                 im = x.get('img') or x.get('base')
                 if im:
@@ -290,7 +294,7 @@ def sb_save(db):
         for s in b.get('shots', []):
             fr = s.get('frames') or {}
             used |= {os.path.basename(i) for i in s.get('refs', []) + [k['img'] for k in sb_sketches(s)] + [s.get('result') or '', fr.get('sheet') or '']
-                     + [x.get(k) or '' for x in fr.get('list') or [] for k in ('img', 'base')] if i}
+                     + [x.get(k) or '' for x in (fr.get('list') or []) + [y for an in fr.get('angles') or [] for y in an.get('list') or []] for k in ('img', 'base')] if i}
     recs = set(re.findall(r'storyboard/rec/([\w\-]+\.json)', json.dumps(db, ensure_ascii=False)))
     rd = os.path.join(SBD, 'rec')
     if os.path.isdir(rd):  # ท่าที่อัดไว้แต่ไม่มีบอร์ดไหนใช้แล้ว → ลบ
