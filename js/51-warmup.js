@@ -29,7 +29,7 @@ function warmStaticModels(names){for(const name of new Set(names.filter(Boolean)
 // รอการ์ดจอ compile เสร็จแบบไม่ค้างหน้าจอ (KHR_parallel_shader_compile) แล้วค่อยวาด: วาดก่อนเสร็จ = CPU ค้างรอ 100-300 ms
 function glReady(max){const t0=performance.now();return new Promise(res=>{const chk=()=>{let ok=true;try{ok=gl.info.programs.every(p=>p.isReady());}catch(e){}if(ok||performance.now()-t0>(max||4000))res();else setTimeout(chk,30);};chk();});}
 function warmCompile(scenes){const prev=gl.getRenderTarget();gl.setRenderTarget(composer.renderTarget1);
-  try{for(const sc of scenes)gl.compile(sc,cam);return [glReady()];}finally{gl.setRenderTarget(prev);}}   // compile (ไม่ใช่ compileAsync): r160 compileAsync โยน isReady of undefined ถ้าวัสดุไม่มี program → ค้างรอ 4 วิทุกแมตช์ • ไดรเวอร์ compile ขนานอยู่แล้ว
+  try{for(const sc of scenes){sc.traverse(o=>{if(o.isMesh&&!Array.isArray(o.material))flatMark(o.material,o.geometry);});gl.compile(sc,cam);}return [glReady()];}finally{gl.setRenderTarget(prev);}}   // compile (ไม่ใช่ compileAsync): r160 compileAsync โยน isReady of undefined ถ้าวัสดุไม่มี program → ค้างรอ 4 วิทุกแมตช์ • ไดรเวอร์ compile ขนานอยู่แล้ว
 // compile อย่างเดียวไม่ส่ง vertex/index buffer ขึ้น GPU: วาดลงภาพเล็กที่ไม่แสดงไว้ด้วย
 function warmDraw(){
   WARM.rt=WARM.rt||new THREE.WebGLRenderTarget(32,32,{type:composer.renderTarget1.texture.type,colorSpace:composer.renderTarget1.texture.colorSpace});

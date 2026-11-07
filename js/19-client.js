@@ -231,6 +231,7 @@ function makeIceFloor(x,y,r,t,ring,lx,ly,wv){
     const sm=iceMat(0.85);mats.push([sm,0.85]);
     const n=Math.round(r*S3*2.2);
     for(let i=0;i<n;i++){const a=i/n*Math.PI*2+rnd(-0.05,0.05),m=new THREE.Mesh(_iceSpk,sm);const hh=rnd(0.35,0.9),rr=rnd(0.12,0.22);m.position.set(Math.cos(a)*r*S3,0,Math.sin(a)*r*S3);m.rotation.set(Math.sin(a)*0.35,rnd(0,6),-Math.cos(a)*0.35);m.userData={hh,rr};m.scale.set(0.001,0.001,0.001);g.add(m);spikes.push(m);}
+    spikes.splice(0,spikes.length,...instz(spikes,g));   // หนามรอบวงวาดรวมก้อนเดียว
   }
   return {g,mats,spikes,age:0,t};
 }

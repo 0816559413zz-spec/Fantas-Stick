@@ -40,6 +40,12 @@ function rockGeo(w,h,d,j,seg){const g=new THREE.BoxGeometry(w,h,d,seg||2,seg||2,
   for(let i=0;i<P.count;i++){const key=Math.round(P.getX(i)*1000)+','+Math.round(P.getY(i)*1000)+','+Math.round(P.getZ(i)*1000);let o=m.get(key);   // จุดซ้ำที่มุม/ขอบได้ค่าสุ่มเดียวกัน (คีย์ตัวเลข เร็วกว่า toFixed+join หลายเท่า)
     if(!o){o=[rnd(-k,k)*w,rnd(-k,k)*h,rnd(-k,k)*d];m.set(key,o);}P.setXYZ(i,P.getX(i)+o[0],P.getY(i)+o[1],P.getZ(i)+o[2]);}
   g.computeVertexNormals();return g;}
+// ก้อนหินที่จะถูกรวมเป็นก้อนเดียวอยู่แล้ว (กำแพง/เนิน): ใช้ทรงหินขนาด 1 ที่สุ่มไว้ล่วงหน้า 8 แบบ แล้วยืดด้วย scale (ผลสุ่มเหมือนเดิม: ค่าเบี้ยว = สัดส่วนของขนาด)
+// เดิมสุ่มทรงใหม่ทุกก้อน ~36 ก้อน/กำแพง → กระตุกตอนร่าย (ผู้ใช้ 2026-11-07 "ไฟต์นัวๆกระตุก") • ?norockpool = แบบเดิม
+const ROCKU={on:!/[?&]norockpool\b/.test(location.search),p:new Map(),cone:null};
+function rockMesh(w,h,d,j,seg,mat){if(!ROCKU.on)return new THREE.Mesh(rockGeo(w,h,d,j,seg),mat);const k=(j===undefined?0.12:j)+'|'+(seg||2);let L=ROCKU.p.get(k);if(!L)ROCKU.p.set(k,L=[]);
+  let g;if(L.length<8){g=rockGeo(1,1,1,j,seg);g.userData.keep=true;L.push(g);}else g=L[(Math.random()*L.length)|0];const m=new THREE.Mesh(g,mat);m.scale.set(w,h,d);return m;}
+function coneMesh(r,h,mat){if(!ROCKU.on)return new THREE.Mesh(new THREE.ConeGeometry(r,h,5),mat);if(!ROCKU.cone){ROCKU.cone=new THREE.ConeGeometry(1,1,5);ROCKU.cone.userData.keep=true;}const m=new THREE.Mesh(ROCKU.cone,mat);m.scale.set(r,h,r);return m;}
 // เศษหินกระเด็นแบบมีฟิสิกส์ (ใช้ระบบชิ้นของน้ำแข็ง iceBit กับวัสดุหิน)
 let _eChunkM=null;const _eChunkG=new THREE.DodecahedronGeometry(1,0);
 function eChunks(x,y,h,n,sp,up,sc){if(!_eChunkM){_eChunkM=eTMat('wall');_eChunkM.userData.keep=true;}
@@ -423,22 +429,22 @@ function eMergeKids(g){const by=new Map();
   for(const e of by.values()){if(e.L.length<2)continue;
     const gs=e.L.map(c=>{c.updateMatrix();const q=c.geometry.clone();for(const n of Object.keys(q.attributes))if(!['position','normal','uv'].includes(n))q.deleteAttribute(n);return q.applyMatrix4(c.matrix);});
     const mg=mergeGeometries(gs,false);gs.forEach(q=>q.dispose());if(!mg)continue;
-    for(const c of e.L){g.remove(c);c.geometry.dispose();}
+    for(const c of e.L){g.remove(c);if(!c.geometry.userData.keep)c.geometry.dispose();}
     const M=new THREE.Mesh(mg,e.m);M.castShadow=e.cs;M.receiveShadow=e.rs;g.add(M);}}
 function eMakeSO(w){const k=w[1],x1=w[2],y1=w[3],x2=w[4],y2=w[5],r=w[6],g=new THREE.Group();let mat,mats=null,h=1;
   if(k===0){const L=Math.hypot(x2-x1,y2-y1)*S3,W=r*2*S3;h=6;mat=eTMat('cliff');const m2=eTMat('cliff','#d2c2a8'),dk=eTMat('cliff','#8c7c6a');mats=[mat,m2,dk];
     const n=Math.max(4,Math.round(L/1.7)),cw=L/n;
-    for(let i=0;i<n;i++){const z=-L/2+cw*(i+0.5),hh=h*(i===0||i===n-1?rnd(0.7,0.85):rnd(0.86,1.1)),b=new THREE.Mesh(rockGeo(W*rnd(0.95,1.2),hh,cw*1.3,0.07,3),i%3===1?m2:mat);
+    for(let i=0;i<n;i++){const z=-L/2+cw*(i+0.5),hh=h*(i===0||i===n-1?rnd(0.7,0.85):rnd(0.86,1.1)),b=rockMesh(W*rnd(0.95,1.2),hh,cw*1.3,0.07,3,i%3===1?m2:mat);
       b.position.set(rnd(-0.12,0.12),hh/2-0.15,z);b.rotation.set(rnd(-0.05,0.05),rnd(-0.12,0.12),rnd(-0.06,0.06));b.castShadow=b.receiveShadow=true;g.add(b);
-      const t=new THREE.Mesh(new THREE.ConeGeometry(rnd(0.45,0.75),rnd(0.9,2),5),i%2?mat:m2);t.position.set(rnd(-0.2,0.2),hh-0.15,z+rnd(-0.3,0.3));t.rotation.set(rnd(-0.25,0.25),rnd(0,3),rnd(-0.25,0.25));t.castShadow=true;g.add(t);}
-    for(let i=0;i<n*2;i++){const sd=i%2?1:-1,c=new THREE.Mesh(rockGeo(rnd(0.6,1.25),rnd(0.5,1.05),rnd(0.6,1.25),0.18),dk);c.position.set(sd*(W/2+rnd(0.05,0.5)),rnd(0.1,0.35),-L/2+rnd(0,L));c.rotation.y=rnd(0,3);c.castShadow=true;g.add(c);}
+      const t=coneMesh(rnd(0.45,0.75),rnd(0.9,2),i%2?mat:m2);t.position.set(rnd(-0.2,0.2),hh-0.15,z+rnd(-0.3,0.3));t.rotation.set(rnd(-0.25,0.25),rnd(0,3),rnd(-0.25,0.25));t.castShadow=true;g.add(t);}
+    for(let i=0;i<n*2;i++){const sd=i%2?1:-1,c=rockMesh(rnd(0.6,1.25),rnd(0.5,1.05),rnd(0.6,1.25),0.18,2,dk);c.position.set(sd*(W/2+rnd(0.05,0.5)),rnd(0.1,0.35),-L/2+rnd(0,L));c.rotation.y=rnd(0,3);c.castShadow=true;g.add(c);}
     g.rotation.y=eYaw(x1,y1,x2,y2);}
   else if(k===1){   // เสาอัลติ: ปักเอียงตามทิศที่ตก (ทิศเก็บใน x1,y1 → x2,y2)
     mat=null;const P=makePillar(),a=Math.atan2(y2-y1,x2-x1),d=new THREE.Vector3(Math.cos(a),-1.15,Math.sin(a)).normalize();
     P.position.copy(d.clone().multiplyScalar(-2.4));P.lookAt(P.position.clone().add(d));g.add(P);P.traverse(q=>{if(q.isMesh)q.castShadow=true;});h=7;}
   else if(k===2){   // เนินดิน Terra Auger: โดมดินเตี้ย ๆ เดินข้ามได้ (สูง = รัศมี × 0.032 ตรงกับ groundH) + ก้อนหินเล็กรอบ ๆ
     mat=eTMat('wall','#9a8262');const R=r*S3;h=r*0.032;const d=new THREE.Mesh(new THREE.SphereGeometry(R,18,6,0,Math.PI*2,0,Math.PI/2),mat);d.scale.y=h/R;d.castShadow=d.receiveShadow=true;g.add(d);
-    for(let i=0;i<6;i++){const a=i/6*Math.PI*2+rnd(-0.3,0.3),rr=R*rnd(0.55,0.85),s=R*rnd(0.13,0.2),b=new THREE.Mesh(rockGeo(s*1.4,s,s*1.3,0.2),mat);b.position.set(Math.cos(a)*rr,h*(1-(rr/R)**2)*0.9,Math.sin(a)*rr);b.rotation.y=rnd(0,3);b.castShadow=true;g.add(b);}}
+    for(let i=0;i<6;i++){const a=i/6*Math.PI*2+rnd(-0.3,0.3),rr=R*rnd(0.55,0.85),s=R*rnd(0.13,0.2),b=rockMesh(s*1.4,s,s*1.3,0.2,2,mat);b.position.set(Math.cos(a)*rr,h*(1-(rr/R)**2)*0.9,Math.sin(a)*rr);b.rotation.y=rnd(0,3);b.castShadow=true;g.add(b);}}
   else{mat=new THREE.MeshBasicMaterial({color:hdr('#ffd86b',1.2),transparent:true,opacity:0.18,side:THREE.DoubleSide,depthWrite:false,blending:THREE.AdditiveBlending});const L=Math.hypot(x2-x1,y2-y1)*S3;h=12;const b=new THREE.Mesh(new THREE.PlaneGeometry(L,h),mat);b.position.y=h/2;b.rotation.y=Math.PI/2;g.add(b);g.rotation.y=eYaw(x1,y1,x2,y2);}
   if(k===0||k===2)eMergeKids(g);
   g.position.copy(eW(k===1?x1:(x1+x2)/2,k===1?y1:(y1+y2)/2,0));scene.add(g);return {g,mat,mats:mats||(mat?[mat]:[]),k,h,born:performance.now(),x:k===1?x1:(x1+x2)/2,y:k===1?y1:(y1+y2)/2,hp:w[7],x1,y1,x2,y2,base:g.position.clone()};}
