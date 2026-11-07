@@ -106,7 +106,7 @@ class FXPass extends Pass{
     if(AOU.uAO.value>0.001){r.setRenderTarget(AO_RT);this.ao.render(r);AOU.tAO.value=AO_RT.texture;}
     const F=rpass.scene.fog,e=cam.matrixWorld.elements;AOU.uCamY.value.set(e[1],e[5],e[9],e[13]);
     AOU.uHaze.value=F&&F.isFog?GFX.haze:0;if(F){AOU.uHazeCol.value.copy(F.color);AOU.uHazeD.value.x=GFX.hazeK/Math.max(F.far||1,1);}
-    AOU.uHazeD.value.y=GFX.hazeH;if(typeof lookRaysFrame==='function')lookRaysFrame();
+    AOU.uHazeD.value.y=GFX.hazeH;if(typeof lookRaysFrame==='function')lookRaysFrame();if(typeof ambFrame==='function')ambFrame();   // ฝุ่น/หมอกลอย (js/75)
     AOU.uRim.value=GFX.rim;AOU.uRimCol.value.copy(moonL.color).multiplyScalar(GFX.rim);AOU.uHazeD.value.z=GFX.rimZ;
     this.cp.material.uniforms.t.value=read.texture;HAZE_U.uScene.value=read.texture;r.setRenderTarget(write);this.cp.render(r);r.render(fxScene,cam);r.autoClear=ac;}
 }
