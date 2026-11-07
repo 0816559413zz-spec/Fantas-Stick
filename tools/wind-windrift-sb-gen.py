@@ -1,8 +1,8 @@
 # Windrift — storyboard #19 (user 2026-11-05) → two variants: wind/windrift_sb_a, wind/windrift_sb_b
 # Run: python tools/wind-windrift-sb-gen.py then node tools/fx-check.js • view studio.html?fx=wind/windrift_sb_a
 # Timing follows the CODE (js/09-wind.js W_DR), not the guessed board shots:
-#   charge 0–0.3 (rises a little) • dash 0.3–0.45 (200 = 10 m) • hero landing 0.45 • wind follows 1.0 s later = 1.45
-#   along the dash line (width 100 = ±2.5 m) pushing foes forward (400 = 20 m) • fade by 2.5.
+#   (2026-11-07 faster/farther) charge 0–0.2 • dash 0.2–0.29 (400 = 20 m) • hero landing 0.29 • wind follows 0.6 s later = 0.89
+#   along the dash line (width 100 = ±2.5 m) pushing foes forward (400 = 20 m) • fade by 1.9.
 # The fx is played once at the cast point (no follow), so dash layers move by themselves along +z.
 # Wings are NOT in the fx: the game draws the wind wings on the body (js/68-wind-view.js makeWindWings).
 # Sketch (frames): 1-2 green wind spiral around the caster's legs • 3 white speed lines behind + a big air ring in front (Jett)
@@ -12,14 +12,14 @@ from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 G=dict(hi='#ffffff',inner='#efffe8',mid='#8dff65',outer='#2ec772',deep='#196a40')
 T=lambda n:'tex/'+n
-T_GO,T_LAND,T_WIND=0.3,0.45,1.45
-DASH=10.0
-WEND=16.0          # how far the follow-up wind reaches (foes are blown ~20 m — fade before that)
-DUR=2.5
+T_GO,T_LAND,T_WIND=0.2,0.29,0.89
+DASH=20.0
+WEND=26.0          # how far the follow-up wind reaches (foes are blown ~20 m — fade before that)
+DUR=2.0
 def dash_z(t):
     if t<=T_GO:return 0.0
     if t>=T_LAND:return DASH
-    u=(t-T_GO)/(T_LAND-T_GO);return DASH*(1-(1-u)**2)
+    u=(t-T_GO)/(T_LAND-T_GO);return DASH*(1-(1-u)**3)
 def lift(t):       # small hover while charging (code: vz 2.5), drops on landing
     if t<=T_GO:return 0.5*min(1,t/T_GO)
     if t<=T_LAND:return 0.5*(1-(t-T_GO)/(T_LAND-T_GO))
@@ -48,20 +48,20 @@ def shot1(L,style):
     """charge 0–0.3: green wind spiral wraps the caster from the feet up (sketch frames 1-2)"""
     if style=='a':
         for k,(tx,col,sc,y0,sp) in enumerate([('wind_swoosh_b',G['mid'],1.0,.15,720),('wind_swoosh_a_hi',G['hi'],.8,.55,-720),('wind_swoosh_b',G['mid'],.65,1.0,720)]):
-            L.append(tex(f's1_wrap{k}',k*.03,.33-k*.03,f'wind_pieces{k}',tx,col,{'0':[0,y0,0],'1':[0,y0+.45,0]},rot=[0,k*60,0],
+            L.append(tex(f's1_wrap{k}',k*.02,(.33-k*.03)*(T_GO/.3),f'wind_pieces{k}',tx,col,{'0':[0,y0,0],'1':[0,y0+.45,0]},rot=[0,k*60,0],
                 scale={'0':[sc*1.3,.25,sc*1.3],'0.6':[sc*.75,.4,sc*.75],'1':[sc*.55,.5,sc*.55],'ease':'in'},spin=sp,op={'0':0,'0.2':.95,'0.8':.9,'1':0}))
-        L.append(tex('s1_ground',0,.33,'wind_groundswirl','wind_swoosh_b',G['mid'],[0,.05,0],scale={'0':1.8,'1':.7,'ease':'in'},spin=-540,op={'0':0,'0.2':.85,'1':0}))
+        L.append(tex('s1_ground',0,.33*(T_GO/.3),'wind_groundswirl','wind_swoosh_b',G['mid'],[0,.05,0],scale={'0':1.8,'1':.7,'ease':'in'},spin=-540,op={'0':0,'0.2':.85,'1':0}))
     else:   # B: clear twisting air column (Vortex Bind / Aegis "clear wind" look) around the caster
         for k,(m,col,op,ut,sp) in enumerate([('wind_vortex_air','#ffffff',.85,3,520),('wind_vortex_air2','#d8ffe0',.5,2,-420),('wind_vortex_air','#8dff65',.35,2,640)]):
-            L.append(tex(f's1_air{k}',0,.34,m,'wind_air_rise',col,{'0':[0,0,0],'1':[0,.35,0]},uvTile=[ut,1],uvScroll=[-.5,0],rot=[0,k*60,0],
+            L.append(tex(f's1_air{k}',0,.34*(T_GO/.3),m,'wind_air_rise',col,{'0':[0,0,0],'1':[0,.35,0]},uvTile=[ut,1],uvScroll=[-.5,0],rot=[0,k*60,0],
                 scale={'0':.75,'0.5':.55,'1':.42,'ease':'in'},spin=sp,op={'0':0,'0.25':op,'0.85':op,'1':0}))
-        L.append({'id':'s1_dust','t':'emit','at':0,'life':.28,'att':'feet','pos':[0,.05,0],'rate':90,'from':'ring','fr':1.4,'dir':'in','speed':[2,4],'up':[.3,1],'plife':[.3,.5],
+        L.append({'id':'s1_dust','t':'emit','at':0,'life':.28*(T_GO/.3),'att':'feet','pos':[0,.05,0],'rate':90,'from':'ring','fr':1.4,'dir':'in','speed':[2,4],'up':[.3,1],'plife':[.3,.5],
             'look':'smoke','size':[3,5],'col':'#e2ece4','c2':'#a9bcae','gravity':-.5,'drag':1,'curl':True})
-        L.append({'id':'s1_haze','t':'warp','at':0,'life':.32,'att':'feet','pos':[0,1,0],'kind':'haze','size':2.2,'str':.7,'op':{'0':0,'0.3':1,'1':0},'col':G['inner'],'glow':0})
-    L.append({'id':'s1_in','t':'emit','at':0,'life':.26,'att':'feet','pos':[0,1.2,-.1],'rate':150,'from':'sphere','fr':1.9,'dir':'in','speed':[7,11],'plife':[.12,.18],
+        L.append({'id':'s1_haze','t':'warp','at':0,'life':.32*(T_GO/.3),'att':'feet','pos':[0,1,0],'kind':'haze','size':2.2,'str':.7,'op':{'0':0,'0.3':1,'1':0},'col':G['inner'],'glow':0})
+    L.append({'id':'s1_in','t':'emit','at':0,'life':.26*(T_GO/.3),'att':'feet','pos':[0,1.2,-.1],'rate':150,'from':'sphere','fr':1.9,'dir':'in','speed':[7,11],'plife':[.12,.18],
         'look':'streak','size':[1,1.9],'col':G['hi'],'c2':G['mid'],'gravity':0,'drag':0,'curl':False})
-    L.append({'id':'s1_wingglow','t':'halo','at':.05,'life':.27,'att':'feet','pos':[0,1.55,-.35],'col':G['mid'],'size0':.6,'size':2.0,'k':.5})
-    L.append({'id':'s1_light','t':'light','at':0,'life':.35,'att':'feet','pos':[0,1.6,0],'col':G['mid'],'int':{'0':0,'0.8':1.8,'1':0},'dist':6})
+    L.append({'id':'s1_wingglow','t':'halo','at':.03,'life':.27*(T_GO/.3),'att':'feet','pos':[0,1.55,-.35],'col':G['mid'],'size0':.6,'size':2.0,'k':.5})
+    L.append({'id':'s1_light','t':'light','at':0,'life':.35*(T_GO/.3),'att':'feet','pos':[0,1.6,0],'col':G['mid'],'int':{'0':0,'0.8':1.8,'1':0},'dist':6})
 
 def shot2_ring(L,style):
     """release 0.3: the big air ring punched in front of the caster (sketch frame 3) — the caster flies through it"""
@@ -137,7 +137,7 @@ def shot5_wind(L,rg,style):
     n=26 if style=='a' else 20
     for i in range(n):
         wave=i%3;y=rg.uniform(.2,2.8);x=rg.uniform(-2.2,2.2);t0=T_WIND+wave*.16+rg.uniform(-.02,.06);ln=rg.uniform(4,7);wl=rg.uniform(.5,.65)
-        z0=rg.uniform(-2,2)+wave*1.5;z1=min(WEND+2,z0+rg.uniform(12,15))
+        z0=rg.uniform(-2,2)+wave*3;z1=min(WEND+2,z0+rg.uniform(22,28))
         if style=='a':tx,col=[('wind_swoosh_a_hi',G['hi']),('wind_swoosh_b',G['mid']),('wind_swoosh_a',G['outer']),('wind_swoosh_b',G['mid'])][i%4];op=.9 if wave<2 else .7
         else:tx,col=[('wind_swoosh_a_hi','#ffffff'),('wind_swoosh_b_ln','#d2ffc0')][i%2];op=.85
         L.append(tex(f's5_line{i}',t0,wl,'wind_slashstroke',tx,col,
@@ -146,7 +146,7 @@ def shot5_wind(L,rg,style):
     if style=='a':
         # curls riding the wind front (side-view spirals) — two waves, the second passes the landing point
         for j,(y,sz,dz,wv) in enumerate([(2.2,.9,-2,0),(1.4,.8,-.5,0),(.7,.85,.5,0),(1.8,.6,-3,0),(2.5,.7,-1,1),(1.0,.95,-2.5,1),(.5,.6,0,1)]):
-            zs=3+dz+wv*2;ze=WEND-2+dz*.3+wv
+            zs=3+dz+wv*4;ze=WEND-2+dz*.3+wv
             for k,(tx,col,m) in enumerate([('wind_swoosh_a_hi',G['hi'],1.0),('wind_swoosh_b',G['mid'],1.25)]):
                 L.append(tex(f's5_curl{j}_{k}',T_WIND+.03+j*.025+wv*.25,.6,f'wind_pieces{(j+k)%3}',tx,col,
                     {'0':[0,y,round(zs,2)],'0.4':[0,y,round(ze-1,2)],'1':[0,y+.4,round(ze+.6,2)],'ease':'out'},rot=[0,90,j*40],
@@ -155,7 +155,7 @@ def shot5_wind(L,rg,style):
         # wide air tunnel (GaleBurst helix lying forward) rolls down the dash line and on past the landing
         for k,(col,op,sc,sp) in enumerate([('#ffffff',.7,1.1,420),('#8dff65',.35,1.35,-360)]):
             L.append(tex(f's5_tunnel{k}',T_WIND+k*.05,.72,'wind_gbhelix','wind_swoosh_a_hi' if k==0 else 'wind_swoosh_b',col,
-                {'0':[0,1.3,-2],'1':[0,1.3,WEND-7],'ease':'out'},scale={'0':[sc*.6,sc*.6,3],'0.3':[sc,sc,7],'1':[sc*1.1,sc*1.1,8]},spin=sp,op={'0':0,'0.12':op,'0.65':op*.6,'1':0}))
+                {'0':[0,1.3,-2],'1':[0,1.3,WEND-7],'ease':'out'},scale={'0':[sc*.6,sc*.6,3],'0.3':[sc,sc,12],'1':[sc*1.1,sc*1.1,14]},spin=sp,op={'0':0,'0.12':op,'0.65':op*.6,'1':0}))
         L.append({'id':'s5_dust','t':'emit','at':T_WIND,'life':.6,'att':'feet','pos':{'0':[0,.08,0],'1':[0,.08,WEND-2]},'rate':80,'from':'disc','fr':2.2,'dir':'aim','spread':.3,'up':[.2,1],
             'speed':[6,10],'plife':[.4,.8],'look':'smoke','size':[4,7],'col':'#e2ece4','c2':'#a9bcae','gravity':-.3,'drag':1.5,'curl':True})
     L.append({'id':'s5_gust','t':'emit','at':T_WIND,'life':.75,'att':'feet','pos':{'0':[0,1.3,0],'0.4':[0,1.3,WEND-4],'1':[0,1.3,WEND-2]},'rate':140,'from':'sphere','fr':2.0,'dir':'aim','spread':.08,
@@ -167,7 +167,7 @@ def shot5_wind(L,rg,style):
     L.append({'id':'s5_warp','t':'warp','at':T_WIND,'life':.35,'att':'feet','pos':{'0':[0,1.3,0],'1':[0,1.3,WEND-3]},'kind':'shock','size':{'0':1.5,'1':3.5},'str':.7,'op':{'0':.8,'1':0},'col':G['inner'],'glow':.02})
     L.append({'id':'s5_shake','t':'screen','at':T_WIND+.05,'life':.12,'shake':1,'own':True})
     # shot 6 fade 2.2–2.5: last wisps lift and thin out past the landing point
-    L.append({'id':'s6_wisp','t':'emit','at':2.0,'life':.25,'att':'feet','pos':[0,.6,WEND-4],'rate':50,'from':'disc','fr':2.5,'dir':'up','speed':[1,2],'plife':[.2,.25],
+    L.append({'id':'s6_wisp','t':'emit','at':T_WIND+.8,'life':.25,'att':'feet','pos':[0,.6,WEND-4],'rate':50,'from':'disc','fr':2.5,'dir':'up','speed':[1,2],'plife':[.2,.25],
         'look':'streak','size':[.8,1.4],'col':G['inner'],'c2':G['mid'],'gravity':-.5,'drag':1,'curl':True})
 
 DESC={'a':'Windrift สตอรี่บอร์ด #19 แบบ A "เส้นลมตามภาพร่าง": เกลียวลมเขียวพันขาตอนชาร์จ → วงลมใหญ่ข้างหน้า + เส้นความเร็วขาว/เขียว ตอนพุ่ง 10 ม. → ลงท่าฮีโร่ = เส้นลมงอขอเกี่ยวลอยขึ้น + วงลมพื้น → 1 วิต่อมาลมแรงตามมาตามแนวพุ่ง (เส้นลมยาว + ม้วนลม) พัดไปข้างหน้า',
