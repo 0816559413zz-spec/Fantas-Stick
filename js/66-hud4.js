@@ -196,7 +196,8 @@ function h4Portrait(me,cv){const now=performance.now();if(!cv||now-H4PF.t<(qualC
     if(!H4PF.rt){H4PF.rt=new THREE.WebGLRenderTarget(N,N);H4PF.rt.texture.colorSpace=THREE.SRGBColorSpace;H4PF.cam=new THREE.PerspectiveCamera(26,1,0.05,8);H4PF.buf=new Uint8Array(N*N*4);H4PF.img=cv.getContext('2d').createImageData(N,N);}
     const g=o.g,ry=g.rotation.y,fx=Math.sin(ry),fz=Math.cos(ry),P=g.position,c=H4PF.cam;
     c.position.set(P.x+fx*1.55-fz*0.35,P.y+1.95,P.z+fz*1.55+fx*0.35);c.lookAt(P.x,P.y+1.75,P.z);
-    const was=gl.getRenderTarget();gl.setRenderTarget(H4PF.rt);gl.render(scene,c);gl.setRenderTarget(was);
+    const was=gl.getRenderTarget(),mu=scene.matrixWorldAutoUpdate;scene.matrixWorldAutoUpdate=false;   // ตำแหน่งทุกชิ้นอัปเดตแล้วตอนวาดเฟรมนี้ — ไม่ต้องคำนวณทั้งฉากซ้ำ (~0.7 ms)
+    try{gl.setRenderTarget(H4PF.rt);gl.render(scene,c);}finally{scene.matrixWorldAutoUpdate=mu;gl.setRenderTarget(was);}
     H4PF.cv=cv;H4PF.pend=true;   // อ่านภาพกลับต้นเฟรมหน้า (h4PfRead) — อ่านทันที = CPU ต้องรอการ์ดจอวาดทั้งเฟรมเสร็จก่อน (กระตุกทุก 0.5 วิ, OPTIMIZE §I)
   }catch(e){}}
 // เรียกจาก frame() (js/37) ก่อนเริ่มงานเฟรม: ตอนนั้นการ์ดจอวาดเฟรมก่อนเสร็จแล้ว อ่านกลับได้โดยไม่ต้องรอ

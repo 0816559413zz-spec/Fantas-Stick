@@ -324,7 +324,8 @@ function brkSetup(sc,skip){
       if(o.parent)o.parent.remove(o);}
   });
   for(const e of ims.values()){
-    const im=new THREE.InstancedMesh(e.geo,e.mat,e.list.length);e.list.forEach((p,j)=>im.setMatrixAt(j,p.M));
+    const im=new THREE.InstancedMesh(e.geo,matTwin(e.mat,'inst'),e.list.length);   // วัสดุแฝด: ชิ้นแผนที่อื่นใช้วัสดุเดียวกันแบบไม่ instanced (js/22 matTwin)
+    e.list.forEach((p,j)=>im.setMatrixAt(j,p.M));
     im.castShadow=e.cs;im.receiveShadow=true;im.computeBoundingSphere();sc.add(im);e.im=im;}
   BRKV.sc=sc;
 }

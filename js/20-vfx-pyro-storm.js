@@ -91,7 +91,7 @@ function tbLayer(blend,ro){const V=TBMAX*TBN*2,g=new THREE.BufferGeometry();g.se
   g.setAttribute('color',new THREE.BufferAttribute(new Float32Array(V*4),4).setUsage(THREE.DynamicDrawUsage));
   const idx=new Uint32Array(TBMAX*(TBN-1)*6);let q=0;for(let b=0;b<TBMAX;b++){const o=b*TBN*2;for(let i=0;i<TBN-1;i++){const a=o+i*2;idx[q++]=a;idx[q++]=a+1;idx[q++]=a+2;idx[q++]=a+1;idx[q++]=a+3;idx[q++]=a+2;}}
   g.setIndex(new THREE.BufferAttribute(idx,1));g.setDrawRange(0,0);
-  const m=new THREE.Mesh(g,new THREE.MeshBasicMaterial({vertexColors:true,transparent:true,blending:blend,depthWrite:false,side:THREE.DoubleSide}));m.frustumCulled=false;m.renderOrder=ro;scene.add(m);return m;}
+  const m=new THREE.Mesh(g,new THREE.MeshBasicMaterial({vertexColors:true,transparent:true,blending:blend,depthWrite:false,side:THREE.DoubleSide,forceSinglePass:true}));m.frustumCulled=false;m.renderOrder=ro;scene.add(m);return m;}   // ริบบิ้นหันหากล้อง: รอบเดียวพอ (2 รอบ = three ตั้ง needsUpdate ทุกเฟรม → คำนวณ shader ใหม่)
 let TBL=null;   // สร้างตอนใช้ครั้งแรก (ตอนโหลดไฟล์ scene ยังไม่ถูกสร้าง)
 const TBC={glow:new THREE.Color('#ffb800').multiplyScalar(1.3),body:new THREE.Color('#ffc400'),acc:new THREE.Color('#7fd6ff'),core:new THREE.Color('#fffbe0').multiplyScalar(1.8)};
 const _tcc=new THREE.Color();
@@ -128,7 +128,8 @@ function updateBolts(dt){
     const k=Math.min(1,o.life/o.max*2.2),tp=!!o.path;
     tbWrite(TBL.glow,n,o.pts,o.w*2.6,tp,TBC.glow,0.5*k*o.gk);tbWrite(TBL.body,n,o.pts,o.w,tp,o.acc?TBC.acc:TBC.body,k);tbWrite(TBL.core,n,o.pts,o.w*0.32,tp,o.gk<1?_tcc.copy(TBC.core).multiplyScalar(0.36+0.64*o.gk):TBC.core,k);n++;
   }
-  for(const L of Object.values(TBL)){const g=L.geometry;g.setDrawRange(0,n*(TBN-1)*6);g.attributes.position.needsUpdate=true;g.attributes.color.needsUpdate=true;L.visible=n>0;}
+  for(const L of Object.values(TBL)){const g=L.geometry;g.setDrawRange(0,n*(TBN-1)*6);L.visible=n>0;if(!n)continue;   // ส่งขึ้นการ์ดจอเฉพาะส่วนที่ใช้ (เดิมส่งทั้งก้อน 420 เส้น ≈ 280 KB ต่อชั้นทุกเฟรม)
+    for(const A of [g.attributes.position,g.attributes.color]){A.clearUpdateRanges();A.addUpdateRange(0,n*TBN*2*A.itemSize);A.needsUpdate=true;}}
 }
 const LATER=[],STV=[],SBV=[],SDV=[],TSV=[],CLV=[];
 // ตำแหน่งตัวเป้าในภาพตอนนี้ ('e12' = มอน/หุ่น, อื่น ๆ = ผู้เล่น) → [x,y,h อก] หรือ null

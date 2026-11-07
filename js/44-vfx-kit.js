@@ -46,7 +46,7 @@ function updateTrails(dt){
       for(const q of [v,v+1]){col[q*4]=r;col[q*4+1]=g;col[q*4+2]=b;col[q*4+3]=a;}
       uv[v*2]=u;uv[v*2+1]=0;uv[v*2+2]=u;uv[v*2+3]=1;}
     n=t+1;}
-  L.g.setDrawRange(0,n*(TRPTS-1)*6);L.g.attributes.position.needsUpdate=L.g.attributes.tcol.needsUpdate=L.g.attributes.tuv.needsUpdate=true;
+  L.g.setDrawRange(0,n*(TRPTS-1)*6);if(n)for(const A of [L.g.attributes.position,L.g.attributes.tcol,L.g.attributes.tuv]){A.clearUpdateRanges();A.addUpdateRange(0,n*TRPTS*2*A.itemSize);A.needsUpdate=true;}   // ส่งเฉพาะเส้นที่ใช้ (เดิมส่งทั้งก้อนทุกเฟรม)
 }
 
 // ---------- 2) สูตรเอฟเฟกต์ = จานสี (ธาตุ) × แม่แบบ (ขนาด/ชนิด) ----------
@@ -234,7 +234,7 @@ function bfMarkMesh(){if(BFM.mesh)return BFM.mesh;
   const t=new THREE.TextureLoader().load('assets/fx/tex/bf_marks.png?v='+(((FXR.index.tex||{}).bf_marks||{}).v||''));t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=4;t.userData.keep=true;
   const geo=new THREE.PlaneGeometry(2,2).rotateX(-Math.PI/2);geo.userData.keep=true;
   BFM.attr=new THREE.InstancedBufferAttribute(new Float32Array(BFM.MAX*3),3);geo.setAttribute('aMk',BFM.attr);
-  const m=new THREE.MeshLambertMaterial({map:t,transparent:true,depthWrite:false,side:THREE.DoubleSide,polygonOffset:true,polygonOffsetFactor:-3,polygonOffsetUnits:-3});m.userData.keep=true;
+  const m=new THREE.MeshLambertMaterial({map:t,transparent:true,depthWrite:false,side:THREE.DoubleSide,forceSinglePass:true,polygonOffset:true,polygonOffsetFactor:-3,polygonOffsetUnits:-3});m.userData.keep=true;
   m.onBeforeCompile=s=>{s.vertexShader='attribute vec3 aMk;varying float vMkA;\n'+s.vertexShader.replace('#include <uv_vertex>','#include <uv_vertex>\nvMapUv=vMapUv*vec2(0.25,0.5)+aMk.xy;vMkA=aMk.z;');
     s.fragmentShader='varying float vMkA;\n'+s.fragmentShader.replace('#include <map_fragment>','#include <map_fragment>\ndiffuseColor.a*=vMkA;');};
   const M=new THREE.InstancedMesh(geo,m,BFM.MAX);M.count=0;M.frustumCulled=false;M.receiveShadow=true;M.renderOrder=1;scene.add(M);return BFM.mesh=M;}

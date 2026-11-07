@@ -56,7 +56,7 @@ function clothSetup(o){
   const idx=[];for(let r=0;r<NR-1;r++)for(let j=0;j<CL_NC-1;j++){const a=r*CL_NC+j,b=a+1,c=a+CL_NC,d=c+1;idx.push(a,b,c,b,d,c);}
   const mk=(mat,flip)=>{const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(new Float32Array(N*3),3));g.setIndex(flip?idx.slice().reverse():idx);
     const m=new THREE.Mesh(g,mat);m.frustumCulled=false;m.castShadow=outer.castShadow;m.receiveShadow=outer.receiveShadow;scene.add(m);return m;};
-  const mo=mk(outer.material,false),mi=mk(inner.material,true);
+  const mo=mk(matTwin(outer.material,'rigid'),false),mi=mk(matTwin(inner.material,'rigid'),true);   // วัสดุแฝด: แผงในโมเดลเป็น skinned (js/22 matTwin)
   const B=n=>o.fileModel.getObjectByName(n);
   const C={o,outer,ref,rf,NR,N,pk,E:new Float64Array(E),mo,mi,P:new Float32Array(N*3),Q:new Float32Array(N*3),T:new Float32Array(N*3),Tm:new Float32Array(CL_ROWS.length*CL_NC*3),
     caps:[['hips','neck','TORSO'],['thigh_L','shin_L','LEG'],['shin_L','foot_L','LEG'],['thigh_R','shin_R','LEG'],['shin_R','foot_R','LEG'],['upper_arm_L','forearm_L','ARM'],['upper_arm_R','forearm_R','ARM']].map(([a,b,k])=>[B(a),B(b),k]).filter(c=>c[0]&&c[1]),

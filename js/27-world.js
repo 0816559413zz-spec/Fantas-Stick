@@ -361,6 +361,15 @@ function setSky(mode){
 // ขยับเป็นขั้นเท่าพิกเซลเงาพอดี กันขอบเงาสั่นยิบ ๆ ตอนเดิน/หันกล้อง • on=false → กลับไปแบบคลุมทั้งแผนที่ (ตั้งใน buildWorld)
 const SHD={on:true,r:36,rHigh:48,ahead:0.5};
 const _shF=new THREE.Vector3(),_shR=new THREE.Vector3(),_shU=new THREE.Vector3(),_shC=new THREE.Vector3(),_shY=new THREE.Vector3(0,1,0);
+// เงา: three ใช้ MeshDepthMaterial ตัวเดียวกับทุกชิ้นที่ทอดเงา → สลับ instanced / skinned / ธรรมดา = คำนวณ shader ใหม่ (getParameters) ทุกครั้งที่สลับ
+// (~17 ครั้งต่อเฟรมตอนสู้ 6v6, OPTIMIZE §R) → InstancedMesh / SkinnedMesh ใช้ depth material ของชนิดตัวเอง ภาพเงาเท่าเดิม • ข้ามชิ้นที่ต้องตัดขอบด้วย alpha (three ทำสำเนาให้เอง)
+// เรียกจาก frame() (js/37) ทุก 30 เฟรม — ชิ้นใหม่ระหว่างนั้นแค่ช้าเท่าเดิมไม่กี่เฟรม
+const SHD_DM={};
+function shadowDepthSplit(){if(!gl.shadowMap.enabled)return;
+  scene.traverse(o=>{if(!o.castShadow||o.customDepthMaterial||!(o.isInstancedMesh||o.isSkinnedMesh))return;const m=o.material;
+    if(!m||Array.isArray(m)||m.alphaTest>0||m.alphaMap||m.displacementMap||m.clipShadows)return;
+    const k=(o.isInstancedMesh?'i':'')+(o.isSkinnedMesh?'s':'')+(o.instanceColor?'c':'');
+    o.customDepthMaterial=SHD_DM[k]||(SHD_DM[k]=new THREE.MeshDepthMaterial({depthPacking:THREE.RGBADepthPacking}));});}
 function shadowFollow(){
   if(!gl.shadowMap.enabled)return;
   const c=moonL.shadow.camera,ext=Math.max(MW,MH)*S3/2+12;

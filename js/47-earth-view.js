@@ -37,7 +37,8 @@ function eFadeTex(k){const n=k?'fade2':'fade';if(ETEX[n])return ETEX[n];const c=
 function eMat(col,op){return new THREE.MeshStandardMaterial({color:col||ECOL.stone,roughness:0.95,metalness:0,flatShading:true,emissive:'#24180a',emissiveIntensity:0.45,transparent:op!==undefined,opacity:op===undefined?1:op});}
 function eTMat(kind,col){return new THREE.MeshStandardMaterial({map:eTex(kind),color:col||'#ffffff',roughness:0.92,metalness:0,flatShading:true});}
 function rockGeo(w,h,d,j,seg){const g=new THREE.BoxGeometry(w,h,d,seg||2,seg||2,seg||2),P=g.attributes.position,k=j===undefined?0.12:j,m=new Map();
-  for(let i=0;i<P.count;i++){const key=[P.getX(i),P.getY(i),P.getZ(i)].map(v=>v.toFixed(3)).join();let o=m.get(key);if(!o){o=[rnd(-k,k)*w,rnd(-k,k)*h,rnd(-k,k)*d];m.set(key,o);}P.setXYZ(i,P.getX(i)+o[0],P.getY(i)+o[1],P.getZ(i)+o[2]);}
+  for(let i=0;i<P.count;i++){const key=Math.round(P.getX(i)*1000)+','+Math.round(P.getY(i)*1000)+','+Math.round(P.getZ(i)*1000);let o=m.get(key);   // จุดซ้ำที่มุม/ขอบได้ค่าสุ่มเดียวกัน (คีย์ตัวเลข เร็วกว่า toFixed+join หลายเท่า)
+    if(!o){o=[rnd(-k,k)*w,rnd(-k,k)*h,rnd(-k,k)*d];m.set(key,o);}P.setXYZ(i,P.getX(i)+o[0],P.getY(i)+o[1],P.getZ(i)+o[2]);}
   g.computeVertexNormals();return g;}
 // เศษหินกระเด็นแบบมีฟิสิกส์ (ใช้ระบบชิ้นของน้ำแข็ง iceBit กับวัสดุหิน)
 let _eChunkM=null;const _eChunkG=new THREE.DodecahedronGeometry(1,0);
@@ -414,6 +415,16 @@ function earthClear(){if(!EV)return;   // clearDyn ถูกเรียกต�
   for(const s of EV.st.values()){for(const k of ['stand','giant','cgiant'])if(s[k])disposeObj(s[k].g);for(const k of ['drill','warn','augW','pil'])if(s[k])disposeObj(s[k]);for(const d of s.drills)disposeObj(d);}EV.st.clear();
   for(const c of EV.crush)if(c.G)disposeObj(c.G.g);EV.crush.length=0;if(EV.mark){disposeObj(EV.mark);EV.mark=null;}
   for(const a of EV.anims)if(a.g)disposeObj(a.g);EV.anims.length=0;earthFog(false);}
+// ชิ้นนิ่งในกำแพง/เนิน (หิน+กรวย ~40 ชิ้นต่อกำแพง) รวมเป็น mesh เดียวต่อ (วัสดุ, รับเงา) — ภาพเท่าเดิม แต่ draw call (+เงา) จาก ~40 เหลือ ~4 (OPTIMIZE §R)
+// ใช้ได้เพราะกำแพงขยับ/ยืดทั้งกลุ่ม (g.position, g.scale.y) ไม่เคยขยับชิ้นลูก
+function eMergeKids(g){const by=new Map();
+  for(const c of g.children){if(!c.isMesh||c.children.length||Array.isArray(c.material))return;const gm=c.geometry;if(!gm.index||gm.morphAttributes.position)return;
+    const k=c.material.uuid+'|'+c.receiveShadow+'|'+c.castShadow;let e=by.get(k);if(!e)by.set(k,e={m:c.material,rs:c.receiveShadow,cs:c.castShadow,L:[]});e.L.push(c);}
+  for(const e of by.values()){if(e.L.length<2)continue;
+    const gs=e.L.map(c=>{c.updateMatrix();const q=c.geometry.clone();for(const n of Object.keys(q.attributes))if(!['position','normal','uv'].includes(n))q.deleteAttribute(n);return q.applyMatrix4(c.matrix);});
+    const mg=mergeGeometries(gs,false);gs.forEach(q=>q.dispose());if(!mg)continue;
+    for(const c of e.L){g.remove(c);c.geometry.dispose();}
+    const M=new THREE.Mesh(mg,e.m);M.castShadow=e.cs;M.receiveShadow=e.rs;g.add(M);}}
 function eMakeSO(w){const k=w[1],x1=w[2],y1=w[3],x2=w[4],y2=w[5],r=w[6],g=new THREE.Group();let mat,mats=null,h=1;
   if(k===0){const L=Math.hypot(x2-x1,y2-y1)*S3,W=r*2*S3;h=6;mat=eTMat('cliff');const m2=eTMat('cliff','#d2c2a8'),dk=eTMat('cliff','#8c7c6a');mats=[mat,m2,dk];
     const n=Math.max(4,Math.round(L/1.7)),cw=L/n;
@@ -429,6 +440,7 @@ function eMakeSO(w){const k=w[1],x1=w[2],y1=w[3],x2=w[4],y2=w[5],r=w[6],g=new TH
     mat=eTMat('wall','#9a8262');const R=r*S3;h=r*0.032;const d=new THREE.Mesh(new THREE.SphereGeometry(R,18,6,0,Math.PI*2,0,Math.PI/2),mat);d.scale.y=h/R;d.castShadow=d.receiveShadow=true;g.add(d);
     for(let i=0;i<6;i++){const a=i/6*Math.PI*2+rnd(-0.3,0.3),rr=R*rnd(0.55,0.85),s=R*rnd(0.13,0.2),b=new THREE.Mesh(rockGeo(s*1.4,s,s*1.3,0.2),mat);b.position.set(Math.cos(a)*rr,h*(1-(rr/R)**2)*0.9,Math.sin(a)*rr);b.rotation.y=rnd(0,3);b.castShadow=true;g.add(b);}}
   else{mat=new THREE.MeshBasicMaterial({color:hdr('#ffd86b',1.2),transparent:true,opacity:0.18,side:THREE.DoubleSide,depthWrite:false,blending:THREE.AdditiveBlending});const L=Math.hypot(x2-x1,y2-y1)*S3;h=12;const b=new THREE.Mesh(new THREE.PlaneGeometry(L,h),mat);b.position.y=h/2;b.rotation.y=Math.PI/2;g.add(b);g.rotation.y=eYaw(x1,y1,x2,y2);}
+  if(k===0||k===2)eMergeKids(g);
   g.position.copy(eW(k===1?x1:(x1+x2)/2,k===1?y1:(y1+y2)/2,0));scene.add(g);return {g,mat,mats:mats||(mat?[mat]:[]),k,h,born:performance.now(),x:k===1?x1:(x1+x2)/2,y:k===1?y1:(y1+y2)/2,hp:w[7],x1,y1,x2,y2,base:g.position.clone()};}
 function syncEarth(v,dt,now){
   const seen=new Set();

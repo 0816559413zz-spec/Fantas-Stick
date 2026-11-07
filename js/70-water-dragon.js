@@ -8,6 +8,16 @@ const WDG={pool:[],live:[],loading:false};
 async function wdgBuild(){
 const T=THREE,root=new T.Group(),fixed=new T.Group();
 const rings=150,sides=20;
+// normal ของ geometry ที่มี index — คณิตเดียวกับ three computeVertexNormals ทุกขั้น (ผลเท่ากัน) แต่อ่าน/เขียน typed array ตรง ๆ: เร็วกว่า ~5 เท่า (เรียกทุกเฟรมกับตัว+สายน้ำ)
+function fastNormals(g){const P=g.attributes.position.array,I=g.index.array;let N=g.attributes.normal;
+ if(!N||N.count!==g.attributes.position.count){N=new T.BufferAttribute(new Float32Array(P.length),3);g.setAttribute('normal',N);}
+ const A=N.array;A.fill(0);
+ for(let q=0;q<I.length;q+=3){const a=I[q]*3,b=I[q+1]*3,c=I[q+2]*3;
+  const cx=P[c]-P[b],cy=P[c+1]-P[b+1],cz=P[c+2]-P[b+2],ax=P[a]-P[b],ay=P[a+1]-P[b+1],az=P[a+2]-P[b+2];
+  const nx=cy*az-cz*ay,ny=cz*ax-cx*az,nz=cx*ay-cy*ax;
+  A[a]+=nx;A[a+1]+=ny;A[a+2]+=nz;A[b]+=nx;A[b+1]+=ny;A[b+2]+=nz;A[c]+=nx;A[c+1]+=ny;A[c+2]+=nz;}
+ for(let i=0;i<A.length;i+=3){const x=A[i],y=A[i+1],z=A[i+2],l=Math.sqrt(x*x+y*y+z*z)||1;A[i]=x/l;A[i+1]=y/l;A[i+2]=z/l;}
+ N.needsUpdate=true;}
 const geoOf=n=>{const r=MODELS.ready.get(n);let g=null;if(r)r.scene.traverse(m=>{if(!g&&m.isMesh)g=m.geometry;});return g;};
 let skin=fxTexMat('tex/water_dragon_skin',{col:'#ffffff',col2:'#bfeaff',rim:.3,tile:[1,1],scroll:[.12,0]});
 for(let i=0;i<100&&!skin.uniforms.uHas.value;i++){fxTexMatBind(skin);if(!skin.uniforms.uHas.value)await new Promise(r=>setTimeout(r,50));}   // รอภาพผิวโหลด ไม่งั้นทั้งตัวขาว
@@ -232,7 +242,7 @@ function shape(t){
    bodyP[k]=c0.x+rt.x*ca+vertical.x*sa;bodyP[k+1]=c0.y+rt.y*ca+vertical.y*sa;bodyP[k+2]=c0.z+rt.z*ca+vertical.z*sa;
   }
  }
- bodyGeo.attributes.position.needsUpdate=true;bodyGeo.computeVertexNormals();
+ bodyGeo.attributes.position.needsUpdate=true;fastNormals(bodyGeo);
  const last=rings;head.position.copy(centers[last]).addScaledVector(tangents[last],-.95);head.quaternion.setFromRotationMatrix(new T.Matrix4().makeBasis(rights[last],ups[last],tangents[last]));
  head.visible=centers[last].y>-1.5;   // ตาเป็นวัสดุเรียบ ไม่ถูกตัดที่พื้น → ซ่อนทั้งหัวเมื่อจมลง
  fins.forEach((m,j)=>{const i=Math.round((.10+j*.84/(fins.length-1))*rings),u=i/rings,r=bodyRadius(u),scale=(.24+.94*smooth(u/.70))*(.88+.12*Math.sin(j*1.7));
@@ -246,7 +256,7 @@ function shape(t){
 const gate=new T.Group();gate.position.set(-3.8,.18,.1);fixed.add(gate);
 // Original water-current sigil. No borrowed star texture or polygonal star.
 const rune=new T.Group();gate.add(rune);
-const shadowMat=new T.MeshBasicMaterial({color:'#092957',transparent:true,opacity:.35,depthWrite:false,depthTest:false,side:T.DoubleSide});
+const shadowMat=new T.MeshBasicMaterial({color:'#092957',transparent:true,opacity:.35,depthWrite:false,depthTest:false,side:T.DoubleSide,forceSinglePass:true});   // แผ่นเรียบ: วาดรอบเดียวได้ภาพเท่าเดิม (2 รอบ = three ตั้ง needsUpdate ทุกเฟรม)
 const shadow=new T.Mesh(new T.CircleGeometry(2.85,96),shadowMat);shadow.rotation.x=-Math.PI/2;shadow.position.y=-.015;shadow.renderOrder=0;gate.add(shadow);
 const ringMat=new T.MeshBasicMaterial({color:'#8fecff',transparent:true,opacity:.9,depthWrite:false});
 const ring=new T.Mesh(new T.TorusGeometry(2.85,.035,8,128),ringMat);ring.rotation.x=Math.PI/2;ring.position.y=.025;ring.renderOrder=5;gate.add(ring);
@@ -330,7 +340,7 @@ for(let j=0;j<6;j++){
  const g=new T.BufferGeometry(),p=new Float32Array((waveSegments+1)*6),idx=[];
  for(let i=0;i<waveSegments;i++){const a=i*2;idx.push(a,a+1,a+2,a+1,a+3,a+2);}
  g.setAttribute('position',new T.BufferAttribute(p,3));g.setIndex(idx);
- const m=new T.Mesh(g,new T.MeshBasicMaterial({color:['#d9fbff','#30dce9','#67bbff'][j%3],transparent:true,opacity:.6,depthWrite:false,side:T.DoubleSide}));m.frustumCulled=false;m.renderOrder=4;root.add(m);waveSheets.push(m);
+ const m=new T.Mesh(g,new T.MeshBasicMaterial({color:['#d9fbff','#30dce9','#67bbff'][j%3],transparent:true,opacity:.6,depthWrite:false,side:T.DoubleSide,forceSinglePass:true}));m.frustumCulled=false;m.renderOrder=4;root.add(m);waveSheets.push(m);
 }
 function wavesAt(t){
  const s=bodyState;if(!s)return;
@@ -367,31 +377,37 @@ const currentSegments=72,currentSides=6,currentMeshes=currentConfigs.map(()=>{
  geometry.setAttribute('position',new T.BufferAttribute(positions,3));geometry.setAttribute('uv',new T.Float32BufferAttribute(uv,2));geometry.setIndex(indices);
  const mesh=new T.Mesh(geometry,currentMaterial);mesh.frustumCulled=false;mesh.renderOrder=4;root.add(mesh);return mesh;
 });
-function currentPoint(config,t,k){
+// เขียนผลลง P (จุด) / Rd (ทิศออกจากแกน, null ได้) แทนการสร้าง Vector ใหม่ — คืนค่า mask • คณิตเหมือนเดิมทุกขั้น
+const _cC=new T.Vector3(),_cR=new T.Vector3(),_cV=new T.Vector3(),_cRad=new T.Vector3();
+function currentPointTo(config,t,k,P,Rd){
  const u=config.start+(config.end-config.start)*k,x=u*rings,i=Math.min(rings-1,Math.floor(x)),f=x-i;
- const center=bodyState.centers[i].clone().lerp(bodyState.centers[i+1],f),right=bodyState.rights[i].clone().lerp(bodyState.rights[i+1],f).normalize(),vertical=bodyState.ups[i].clone().lerp(bodyState.ups[i+1],f).normalize();
+ const center=_cC.copy(bodyState.centers[i]).lerp(bodyState.centers[i+1],f),right=_cR.copy(bodyState.rights[i]).lerp(bodyState.rights[i+1],f).normalize(),vertical=_cV.copy(bodyState.ups[i]).lerp(bodyState.ups[i+1],f).normalize();
  const mask=smooth((center.y-1.3)/1.1)*smooth((t-.65)/.6),angle=config.phase+k*config.turns*Math.PI*2+t*.75;
- const radial=right.multiplyScalar(Math.cos(angle)).addScaledVector(vertical,Math.sin(angle)).normalize(),radius=config.radius*(.9+.12*Math.sin(k*Math.PI)+.06*Math.sin(k*9-t*2));
- return{point:center.addScaledVector(radial,radius*mask),radial,mask};
+ const radial=(Rd||_cRad).copy(right).multiplyScalar(Math.cos(angle)).addScaledVector(vertical,Math.sin(angle)).normalize(),radius=config.radius*(.9+.12*Math.sin(k*Math.PI)+.06*Math.sin(k*9-t*2));
+ P.copy(center).addScaledVector(radial,radius*mask);return mask;
 }
+function currentPoint(config,t,k){const point=new T.Vector3(),radial=new T.Vector3(),mask=currentPointTo(config,t,k,point,radial);return{point,radial,mask};}
 const currentSpray=new T.InstancedMesh(new T.SphereGeometry(1,7,5),new T.MeshBasicMaterial({color:'#c8e9f1'}),360);currentSpray.frustumCulled=false;root.add(currentSpray);
 const currentParticles=[];let lastCurrentTime=0,currentEmit=0,currentSeed=0;
+const _cS={p:new T.Vector3(),r:new T.Vector3(),lo:new T.Vector3(),hi:new T.Vector3(),tg:new T.Vector3(),ac:new T.Vector3(),nm:new T.Vector3()};
+const _cCos=[],_cSin=[],_cPow=[];for(let j=0;j<=currentSides;j++){const a=j/currentSides*Math.PI*2;_cCos.push(Math.cos(a));_cSin.push(Math.sin(a));_cPow.push(Math.pow(Math.max(0,Math.sin(a)),5));}
 function currentsAt(t){
  if(!bodyState)return;const dt=Math.max(0,Math.min(.05,t-lastCurrentTime));lastCurrentTime=t;
+ const SP=_cS.p,SR=_cS.r,LO=_cS.lo,HI=_cS.hi,TG=_cS.tg,AC=_cS.ac,NM=_cS.nm;
  for(let c=0;c<currentConfigs.length;c++){
   const config=currentConfigs[c],mesh=currentMeshes[c],arr=mesh.geometry.attributes.position.array;
   for(let i=0;i<=currentSegments;i++){
-   const k=i/currentSegments,sample=currentPoint(config,t,k),lo=currentPoint(config,t,Math.max(0,k-.003)).point,hi=currentPoint(config,t,Math.min(1,k+.003)).point;
-   const tangent=hi.sub(lo).normalize(),across=new T.Vector3().crossVectors(sample.radial,tangent).normalize();
+   const k=i/currentSegments,mask=currentPointTo(config,t,k,SP,SR);currentPointTo(config,t,Math.max(0,k-.003),LO,null);currentPointTo(config,t,Math.min(1,k+.003),HI,null);
+   const tangent=TG.subVectors(HI,LO).normalize(),across=AC.crossVectors(SR,tangent).normalize();
    if(across.lengthSq()<.1)across.copy(bodyState.ups[Math.round((config.start+(config.end-config.start)*k)*rings)]);
-   const normal=new T.Vector3().crossVectors(tangent,across).normalize(),envelope=Math.pow(Math.max(0,Math.sin(k*Math.PI)),.45)*sample.mask;
+   const normal=NM.crossVectors(tangent,across).normalize(),envelope=Math.pow(Math.max(0,Math.sin(k*Math.PI)),.45)*mask;
    const width=config.width*envelope*(.9+.22*Math.sin(k*41-t*5)),thick=config.thickness*envelope;
    const crestHeight=.22*envelope*Math.pow(.5+.5*Math.sin(k*85-t*5+.8*Math.sin(k*21)),7);
    for(let j=0;j<=currentSides;j++){
-    const a=j/currentSides*Math.PI*2,p=sample.point.clone().addScaledVector(across,Math.cos(a)*width).addScaledVector(normal,Math.sin(a)*thick+Math.pow(Math.max(0,Math.sin(a)),5)*crestHeight),index=(i*(currentSides+1)+j)*3;
-    arr[index]=p.x;arr[index+1]=p.y;arr[index+2]=p.z;
+    const ca=_cCos[j]*width,sa=_cSin[j]*thick+_cPow[j]*crestHeight,index=(i*(currentSides+1)+j)*3;
+    arr[index]=SP.x+across.x*ca+normal.x*sa;arr[index+1]=SP.y+across.y*ca+normal.y*sa;arr[index+2]=SP.z+across.z*ca+normal.z*sa;
    }
-  }mesh.geometry.attributes.position.needsUpdate=true;mesh.geometry.computeVertexNormals();
+  }mesh.geometry.attributes.position.needsUpdate=true;fastNormals(mesh.geometry);
  }
  currentEmit+=dt*260*smooth((t-.8)/.5);
  while(currentEmit>=1){
@@ -469,7 +485,10 @@ function wdgTick(dt){
 // อุ่นตอนนับถอยหลัง: สร้างมังกรไว้ก่อน กดอัลติแล้วไม่ค้าง
 WARM.reg.water=[()=>{const a=WT_POOL.bm.length?null:wtBeamMesh(),b=WT_POOL.fr.length?null:wtFamRiseMesh();if(a)WT_POOL.bm.push(a);if(b)WT_POOL.fr.push(b);if(a&&b)for(const m of [a,b]){m.position.set(tx(WARM_X),0,tz(WARM_Y));m.scale.setScalar(0.01);scene.add(m);}
    setTimeout(()=>{for(const m of [a,b])if(m){scene.remove(m);m.scale.setScalar(1);}},5000);},
-  ()=>{if(!WDG.pool.length&&!WDG.warm){WDG.warm=1;wdgGet().then(I=>{for(const m of [I.root,I.fixed])warmKeep(m);WDG.pool.push(I);WDG.warm=0;}).catch(e=>{WDG.warm=0;console.warn('water dragon warm',e);});}},
+  ()=>{   // มังกร 1 ตัวต่อผู้เล่นสายน้ำ (สูงสุด 3): ตัวที่ 2 สร้างกลางสู้ = ค้าง ~10 ms (OPTIMIZE §R)
+    const v=VIEW.cur;let n=0;for(const p of (v&&v.P)||[]){const k=getKit(p.id);if(k&&PATHS[k.path]&&PATHS[k.path].id==='water')n++;}n=Math.min(3,Math.max(1,n));
+    if(WDG.pool.length+WDG.live.length<n&&!WDG.warm){WDG.warm=1;const need=n-WDG.pool.length-WDG.live.length;
+      Promise.all(Array.from({length:need},()=>wdgGet())).then(L=>{for(const I of L){for(const m of [I.root,I.fixed])warmKeep(m);WDG.pool.push(I);}WDG.warm=0;}).catch(e=>{WDG.warm=0;console.warn('water dragon warm',e);});}},
   ()=>warmOutline(_wtOlMat),
   ()=>new THREE.Mesh(_hzPlane,wtLineMat()),
 ];

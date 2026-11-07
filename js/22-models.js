@@ -169,6 +169,11 @@ function mergeStudent(root){
   first.parent.add(mesh);const unused=new Set(parts.map(m=>m.material));for(const m of parts)m.parent.remove(m);
   root.traverse(m=>{for(const mt of [].concat(m.material||[]))unused.delete(mt);});const keep=keepMatSet();for(const mt of unused)disposeMaterial(mt,keep);
   return true;}
+// วัสดุแฝด (สำเนาเดียวต่อวัสดุต่อชนิด): วัสดุเดียวที่ถูกใช้ทั้ง mesh ธรรมดา + InstancedMesh หรือ + SkinnedMesh ทำให้ three คำนวณ shader ใหม่ (getParameters)
+// ทุกครั้งที่สลับชนิดตอนวาด = หลายครั้งต่อเฟรม (OPTIMIZE §R) → ให้ฝั่งหนึ่งใช้สำเนา • เก็บ onBeforeCompile/customProgramCacheKey เดิม (ผิว PBR js/76) ภาพเท่าเดิม
+const _matTw=new WeakMap();
+function matTwin(m,kind){if(!m||Array.isArray(m))return m;let t=_matTw.get(m);if(!t)_matTw.set(m,t={});if(t[kind])return t[kind];
+  const c=m.clone();c.onBeforeCompile=m.onBeforeCompile;c.customProgramCacheKey=m.customProgramCacheKey;return t[kind]=c;}
 // ใส่โมเดลไฟล์ให้ตัวละคร/ศัตรูที่สร้างจากโค้ดแล้ว: ซ่อน mesh เดิมด้วย layer 31 (กล้อง/เงาไม่วาด — ไม่ใช้ visible เพราะโค้ดคาถาเปิดปิด visible เอง)
 // look (ผู้เล่น) = เลือกชิ้น hair_N/tie_N/wand_N ตามหน้าตา + ใส่ไว้ใน o.b (ตัวเอน/ล้มตามโค้ด) + ผูกแขนขาโค้ดกับกระดูก (rigBind) + ไม้กวาดจากไฟล์
 function useFileModel(o,name,tint,look){
@@ -178,7 +183,8 @@ function useFileModel(o,name,tint,look){
     if(tint)tintModel(inst,tint);
     if(look){fileVariants(inst,look);const off=[];inst.traverse(m=>{if(!m.visible&&/^(hair|tie|wand)_\d+$/.test(m.name))off.push(m);});for(const m of off)m.parent.remove(m);}   // ทรงที่ไม่ได้เลือก: ถอดทิ้ง (ซ่อนไว้ three ก็ยังคำนวณทุกเฟรม)
     if(name==='char_student'&&!new URLSearchParams(location.search).has('unbatchedStudent')){shareSkinSkeletons(inst);if(!(o.bat&&mergeStudent(inst)))batchStudentSkin(inst);}
-    if(name==='char_student')inst.traverse(m=>{if(m.isMesh&&/^(tie_|wand_|hair_base|char_student_7$)/.test(m.name))m.castShadow=false;});   // ชิ้นเล็กไม่ทอดเงา: เงาแทบไม่เห็น แต่ต้องวาดใน shadow pass ทุกคน (OPTIMIZE §G)
+    if(name==='char_student')inst.traverse(m=>{if(m.isMesh&&/^(tie_|wand_|hair_base|char_student_7$)/.test(m.name))m.castShadow=false;});
+    if(name==='char_student')inst.traverse(m=>{if(m.isMesh&&!m.isSkinnedMesh)m.material=matTwin(m.material,'rigid');});   // ผม/เนคไท/ไม้ (ไม่ skinned) ใช้วัสดุแฝด: วัสดุเดียวกันอาจเป็น skinned ในตัวเราหรือคนอื่น (student_pal ใช้ร่วมทุกคน) → ไม่สลับทุกเฟรม   // ชิ้นเล็กไม่ทอดเงา: เงาแทบไม่เห็น แต่ต้องวาดใน shadow pass ทุกคน (OPTIMIZE §G)
     o.b.traverse(m=>{if(m.isMesh||m.isSprite||m.isPoints||m.isLine)m.layers.set(31);});
     if(look&&o.tip)o.tip.layers.set(0);
     if(look&&o.wnG)o.wnG.traverse(m=>m.layers.set(0));     // ไม้สำเร็จรูป (โค้ด) แทนไม้ในไฟล์                       // แสงปลายไม้ยังโชว์ (อยู่ที่แขนโค้ดซึ่งตามแขนโมเดล)
