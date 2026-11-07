@@ -514,7 +514,7 @@ RAG:10 RAGJ:23 RAGB:29 RAGS:33 RAGMIN:37 RAGHINGE:39 _rv1:40 _rv2:40 _rv3:40 _rq
 ## js/49-cloth.js (132) — 
 CLOTH:10 CL_ROWS:26 CL_NC:26 CL_GAP:26 CL_IN:26 _clV:27 _clA:27 _clB:27 clPinK:29 clBind:31 clothSetup:34 clTargets:68 clReset:72 clCapsule:74 _clO:78 clWorld:79 clWorldHit:88 clStep:93 clDraw:106 clothTick:113
 
-## js/50-grass.js (363) — ลม + หญ้า 3D (ภาพบนเครื่องตัวเองล้วน ไม่แตะโฮสต์/โปรโตคอล)
+## js/50-grass.js (367) — ลม + หญ้า 3D (ภาพบนเครื่องตัวเองล้วน ไม่แตะโฮสต์/โปรโตคอล)
 AIR:10 AIR_MAP:17 airGust:19 airGs:22 airMark:24 airForMap:27 _airV:28 airAt:29 airGv:35 airTick:36
 §39 ต่อเข้ากับเอฟเฟกต์เดิม (ไม่ต้องแก้ทุกสกิล): แสงวาบ = ลมกระโชก • วงคลื…
 CLW:48
@@ -523,9 +523,9 @@ GRASS:52
 §53 รอยสนามรบบนหญ้า + พื้น (อยู่ทั้งแมตช์ — designs/battlefield.md ขั้น 3)
 SCAR:56 scarReset:58 scarPaint:65 grassScar:80
 §85 ไฟลามหญ้า (ภาพล้วน: ไม่มีดาเมจ ไม่ซิงก์ — แต่ละเครื่องลามไม่เหมือนกัน…
-FIRE:90 GR_FIRE:93 fireReset:95 fireBuild:97 fireLight:104 fireIgnite:106 fireFx:117 fireStep:122 fireTick:146
-§151 พื้นหญ้ามีชีวิต: สีเป็นหย่อม (เขียวเข้ม / แห้งเหลือง / ดินโผล่) + จุด…
-GR_NOISE:154 GR_LIVE:159 grLive:177 GR_GLSL_V:185 GR_BEGIN:190 grassMat:237 grassBuild:255 _grBasic:269 grassBake:270 grassCount:326 grassTick:331
+FIRE:91 GR_FIRE:94 fireReset:96 fireBuild:98 fireLight:105 fireIgnite:107 fireFx:119 fireStep:124 fireTick:148
+§153 พื้นหญ้ามีชีวิต: สีเป็นหย่อม (เขียวเข้ม / แห้งเหลือง / ดินโผล่) + จุด…
+GR_NOISE:156 GR_LIVE:161 grLive:179 GR_GLSL_V:187 GR_BEGIN:192 grassMat:239 grassBuild:257 _grBasic:271 grassBake:272 grassCount:328 grassTick:333
 
 ## js/51-warmup.js (189) — 
 WARM:11 WARM_FXDIR:12 WARM_COMMON:12 WARM_X:13 WARM_Y:13 warmKeep:15 warmStaticModels:21 glReady:30 warmCompile:31 warmDraw:34 WARM_SKIP:44 warmAssets:47 warmFx:57 warmFxEnd:68 warmGather:70 warmPaths:72 warmStep:74 warmTick:106
@@ -719,14 +719,14 @@ PERF:9 perfFrame:12 perfDom:26 perfStats:34 perfGraph:38 _gpuName:51 gpuIntegrat
 ## js/72-dash-pose.js (84) — 
 DPOSE:12 DPT:24 _dpQ:25 _dpX:25 _dpP:25 dpMix:26 dpKnees:28 dpStyle:36 DPDBG:41 dashPose:42 dpApply:74
 
-## js/73-tune.js (130) — แผงปรับค่า 🎚️ (F8 / ปุ่ม "ปรับค่า" ในเมนูพัก และหน้าแรก) — ปรับตัวเลขในเกมสดๆ แล้วเซฟลง …
+## js/73-tune.js (131) — แผงปรับค่า 🎚️ (F8 / ปุ่ม "ปรับค่า" ในเมนูพัก และหน้าแรก) — ปรับตัวเลขในเกมสดๆ แล้วเซฟลง …
 TUNE:8 tuneNum:9 tuneBuild:15
-§69 ใช้ / เก็บค่า
-tuneSetVal:70 tuneApplyFile:73 tuneJson:77
-§80 หน้าตา
-tuneOpenF:85 tuneFmt:86 tuneRow:87 tuneRefresh:90 tuneMsg:98 tuneToggle:99 tuneEdit:103
-§127 API สำหรับเครื่องมือแยก tune.html (เปิดเกมใน iframe แล้วเรียกผ่าน WD)
-tuneDump:128 tuneSetKey:129
+§70 ใช้ / เก็บค่า
+tuneSetVal:71 tuneApplyFile:74 tuneJson:78
+§81 หน้าตา
+tuneOpenF:86 tuneFmt:87 tuneRow:88 tuneRefresh:91 tuneMsg:99 tuneToggle:100 tuneEdit:104
+§128 API สำหรับเครื่องมือแยก tune.html (เปิดเกมใน iframe แล้วเรียกผ่าน WD)
+tuneDump:129 tuneSetKey:130
 
 ## js/74-look.js (79) — Look 🌗 — พรีเซ็ตลุคของฉาก: แสงรอบตัวจากท้องฟ้า (IBL) + ความสว่าง + คอนทราสต์ + ย้อมสีเงา…
 §12 ฟิลด์: sky = ท้องฟ้าที่ถ่ายเป็นแสง ('night'|'sunset') • warm = ทิศย้อ…
@@ -747,4 +747,4 @@ surfSync:48 surfQuality:52
 SURF_VS:54 SURF_VS_BODY:55 SURF_FS:66 SURF_FS_BODY:67 surfOk:97 surfApply:98 surfScene:110
 §111 ปรับค่า (tune.html / F8)
 
-(88 files, 21425 lines)
+(88 files, 21430 lines)
