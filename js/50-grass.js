@@ -16,10 +16,16 @@ const AIR={
 };
 const AIR_MAP={pitch:0.5,meadow:0.5,lake:0.45,ruins:0.45,forest:0.25,castle:0.3,greathall:0,hogsmeade:0.35,test:0.35};
 // เพิ่มลมกระโชกที่จุด (หน่วย 3D) — R = รัศมี, s = แรง (1 ≈ ระเบิดใหญ่)
-function airGust(x,z,R,s){if(!(s>0.02))return;const G=AIR.G;
-  if(G.length>=8){let w=0;for(let i=1;i<G.length;i++)if(airGs(G[i])<airGs(G[w]))w=i;if(airGs(G[w])>s)return;G.splice(w,1);}
-  G.push({x,z,R:Math.min(R,16),s:Math.min(s,2),age:0,life:1.4});}
-function airGs(g){return g.s*Math.exp(-g.age*2.5);}
+// o (ไม่ใส่ก็ได้): sw = หมุนวนรอบจุด (ทอร์นาโด, ลบ = วนกลับ) • dx,dz = ดันไปทางเดียว (หน่วยแรงเดียวกับ s) • s ติดลบ = ดูดเข้าหาจุด • life = อายุ (วิ) • hold = ค้างไว้ไม่จาง จนกว่า airGustOff(id)
+const AIR_NG=12;   // จำนวนช่องลมกระโชกพร้อมกัน (shader วนเฉพาะช่องที่ใช้)
+function airGust(x,z,R,s,o){o=o||{};const sw=o.sw||0,dx=o.dx||0,dz=o.dz||0;if(!(Math.abs(s)>0.02||Math.abs(sw)>0.02||Math.hypot(dx,dz)>0.02))return;const G=AIR.G;
+  const ng={x,z,R:Math.min(R,18),s:Math.max(-2,Math.min(s,2)),sw:Math.max(-2,Math.min(sw,2)),dx,dz,age:0,life:o.life||1.4,hold:!!o.hold,id:o.id};
+  if(o.id!==undefined){const i=G.findIndex(g=>g.id===o.id);if(i>=0){G[i]=ng;return;}}
+  if(G.length>=AIR_NG){let w=0;for(let i=1;i<G.length;i++)if(airGs(G[i])<airGs(G[w]))w=i;if(airGs(G[w])>airGs(ng))return;G.splice(w,1);}
+  G.push(ng);}
+function airGustOff(id){const G=AIR.G;for(let i=G.length-1;i>=0;i--)if(G[i].id===id)G[i].hold=false;}   // ปล่อยให้จางตามปกติ
+function airEnv(g){return g.hold?1:Math.exp(-g.age*2.5);}
+function airGs(g){return Math.max(Math.abs(g.s),Math.abs(g.sw),Math.hypot(g.dx,g.dz))*airEnv(g);}
 // รอยไหม้ (k=1) / น้ำแข็ง (k=-1) บนหญ้า — ตอนนี้เป็นรอยถาวรทั้งแมตช์ (scarPaint ข้างล่าง) • life ไม่ใช้แล้ว
 function airMark(x,z,r,k,life){scarPaint(x,z,Math.min(r,10),k>0?'burn':'frost',0.45);}
 // ลม ณ จุด (สำหรับ CPU: ผ้าคลุม) — สูตรเดียวกับใน shader หญ้าแบบย่อ → {x,z}
@@ -29,12 +35,12 @@ const _airV={x:0,z:0};
 function airAt(x,z){
   const ph=(x*AIR.dir.x+z*AIR.dir.y)*0.25-AIR.t*1.6,w=0.6+0.4*Math.sin(ph)+0.2*Math.sin(ph*2.3+x*0.7);
   let vx=AIR.dir.x*AIR.str*w,vz=AIR.dir.y*AIR.str*w;
-  for(const g of AIR.G){const dx=x-g.x,dz=z-g.z,L=Math.hypot(dx,dz),r=g.R*Math.min(1,g.age/0.18+0.25);if(L>r)continue;const f=airGv(g)*(1-L/r)/(L+0.2);vx+=dx*f;vz+=dz*f;}
+  for(const g of AIR.G){const dx=x-g.x,dz=z-g.z,L=Math.hypot(dx,dz),r=g.R*Math.min(1,g.age/0.18+0.25);if(L>r)continue;const k=1-L/r,f=airGv(g)*k/(L+0.2),e=airEnv(g)*k;vx+=dx*f-dz*g.sw*e/(L+0.2)+g.dx*e;vz+=dz*f+dx*g.sw*e/(L+0.2)+g.dz*e;}
   _airV.x=vx;_airV.z=vz;return _airV;}
 // แรงกระโชกตามเวลา: พุ่งออก แล้วเด้งกลับนิดหน่อย (หญ้าโยกกลับ)
-function airGv(g){return g.s*Math.exp(-g.age*2.5)*Math.cos(Math.min(g.age*5,3.6));}
+function airGv(g){return g.s*airEnv(g)*(g.hold?1:Math.cos(Math.min(g.age*5,3.6)));}
 function airTick(dt){AIR.t+=dt;
-  for(let i=AIR.G.length-1;i>=0;i--){const g=AIR.G[i];g.age+=dt;if(g.age>g.life)AIR.G.splice(i,1);}
+  for(let i=AIR.G.length-1;i>=0;i--){const g=AIR.G[i];g.age+=dt;if(g.age>g.life&&!g.hold)AIR.G.splice(i,1);else if(g.hold&&g.age>12)g.hold=false;}   // hold นานสุด 12 วิ (กันค้างถ้าไม่มี event จบ)
   for(let i=AIR.M.length-1;i>=0;i--){const m=AIR.M[i];m.age+=dt;if(m.age>m.life)AIR.M.splice(i,1);}}
 // ----- ต่อเข้ากับเอฟเฟกต์เดิม (ไม่ต้องแก้ทุกสกิล): แสงวาบ = ลมกระโชก • วงคลื่นบนพื้น = ลมกระโชกกว้าง -----
 {const fl=FX.flashLight;FX.flashLight=function(x,y,h,col,int,dist,life){
@@ -49,7 +55,7 @@ const CLW={x:0,z:0,K:9};
 
 // ---------- หญ้า ----------
 // DENS = ใบต่อตร.หน่วย • S = ขนาดผืนหญ้ารอบกล้อง (หน่วย 3D) ตามระดับกราฟิก • H = ความสูงใบ • MAXN = จำนวนสูงสุด
-const GRASS={ON:true,DENS:18,H:0.46,W:0.05,MAXN:75000,S:{high:60,auto:46,auto1:34},mesh:null,key:'',cache:new Map(),tex:null,box:null,bakeMs:0,n:0,trail:[],trLast:new WeakMap()};
+const GRASS={ON:true,DENS:70,H:0.32,W:0.034,MAXN:160000,CAP:160000,gustK:1.8,pushK:2.2,S:{high:46,auto:36,auto1:28},mesh:null,key:'',cache:new Map(),tex:null,box:null,bakeMs:0,n:0,trail:[],trLast:new WeakMap()};
 // ---------- รอยสนามรบบนหญ้า + พื้น (อยู่ทั้งแมตช์ — designs/battlefield.md ขั้น 3) ----------
 // ภาพรอยขนาดเท่าแผนที่ (RES ช่อง/หน่วย): R = ไหม้ • G = น้ำแข็ง • B = ราบ/หาย • A = ทิศที่ล้ม (0..1 = 0..2π)
 // ล้างเมื่อเข้าหน้าเกม (แมตช์ใหม่ — setScreen js/19) / เปลี่ยนแผนที่ • ทุกเครื่องทาที่จุดเดียวกัน (มาจาก event ของโฮสต์) • ภาพล้วน ไม่แตะโปรโตคอล
@@ -184,7 +190,7 @@ function grLive(m){m.userData.grLive=true;
       .replace('#include <emissivemap_fragment>','#include <emissivemap_fragment>\n'+GR_FIRE);};   // เหลี่ยมพื้นนุ่มลง (เนินดูโค้ง)
   m.customProgramCacheKey=()=>'grlive4';
   return m;}
-const GR_GLSL_V='uniform vec4 uGrMap;uniform sampler2D uGround;uniform vec3 uGrCam;uniform vec4 uWind;uniform vec4 uGust[8];uniform vec4 uPush[16];uniform sampler2D uScar;uniform float uGrH;uniform float uGrW;uniform sampler2D uGroundH;uniform vec3 uSun;uniform vec3 uGrN;uniform sampler2D uFire;'+
+const GR_GLSL_V='uniform vec4 uGrMap;uniform sampler2D uGround;uniform vec3 uGrCam;uniform vec4 uWind;uniform vec2 uGrK;uniform vec4 uGust[12];uniform vec4 uGustB[12];uniform vec4 uPush[16];uniform sampler2D uScar;uniform float uGrH;uniform float uGrW;uniform sampler2D uGroundH;uniform vec3 uSun;uniform vec3 uGrN;uniform sampler2D uFire;'+
   'attribute vec4 aOff;varying vec3 vGC;varying vec2 vMk;varying float vTr;varying vec4 vFl;varying vec2 vHu;varying float vFi;\n'+
   'vec2 grH2(vec2 c){return fract(sin(vec2(dot(c,vec2(127.1,311.7)),dot(c,vec2(269.5,183.3))))*43758.5453);}\n';
 // ใบหญ้า (ทำในการ์ดจอทั้งหมด): ขึ้นเป็นกอ (ดึงเข้าหาจุดกลางกอทุก ~0.9 หน่วย) • 3 แบบปนกัน (ปกติ / ยาวเรียว / สั้นกว้าง) + ดอกไม้เล็ก ~3%
@@ -204,7 +210,7 @@ const GR_BEGIN=
   'vec4 sc=texture2D(uScar,muv);float bu=sc.r,fr=sc.g,fb=sc.b,fa=sc.a*6.2832;vMk=vec2(bu,fr);'+
   'float cl=0.5+0.25*sin(wp.x*0.43+sin(wp.y*0.31)*2.0)+0.25*sin(wp.y*0.57+sin(wp.x*0.23)*2.0);'+   // หย่อมใหญ่สูง/เตี้ย
   // แบบใบ: ปกติ 62% • ยาวเรียว 23% • สั้นกว้าง 13% • ดอกไม้ ~2% (เฉพาะตรงที่หญ้าหนา)
-  'float fl=step(0.976,r3)*step(0.45,gm.a);'+
+  'float fl=step(0.991,r3)*step(0.45,gm.a);'+
   'float tw=r3<0.62?1.0:(r3<0.85?0.62:1.5);float th=r3<0.62?1.0:(r3<0.85?1.32:0.6);'+
   'float hgt=uGrH*(0.55+0.6*r1)*mix(th*(0.7+0.6*ch.x)*(1.0-0.3*smoothstep(0.0,0.45,cd)),1.05+0.3*r1,fl)*(0.5+0.85*cl)*fade*ok*(1.0-0.55*bu)*(1.0-smoothstep(0.62,0.92,fb));'+
   // ลม: คลื่นใหญ่วิ่งตามทิศลม (band) + คลื่นเล็ก + สั่นเล็กน้อย + กระโชก + ตัวละครแหวก
@@ -212,12 +218,12 @@ const GR_BEGIN=
   'float band=smoothstep(-0.1,1.0,sin(dot(wp,wd)*0.24-uWind.w*1.25+sin(dot(wp,vec2(-wd.y,wd.x))*0.11)*1.8));'+
   'vec2 v=wd*uWind.z*(0.4+0.3*sin(ph)+0.15*sin(ph*2.3+wp.x*0.7)+1.0*band);'+
   'v+=vec2(sin(uWind.w*3.1+wp.y*1.7+wp.x),cos(uWind.w*2.7+wp.x*1.3+aOff.w*6.0))*0.07*(uWind.z+0.15);'+
-  'for(int i=0;i<8;i++){if(float(i)>=uGrN.x)break;vec4 g=uGust[i];vec2 dd=wp-g.xy;float L=length(dd);v+=dd/(L+0.2)*g.w*(1.0-smoothstep(g.z*0.6,g.z,L));}'+
-  'for(int i=0;i<16;i++){if(float(i)>=uGrN.y)break;vec4 q=uPush[i];vec2 dd=wp-q.xy;float L=length(dd);v+=dd/(L+0.05)*q.w*(1.0-smoothstep(q.z*0.35,q.z,L))*1.8;}'+
+  'for(int i=0;i<12;i++){if(float(i)>=uGrN.x)break;vec4 g=uGust[i];vec4 gb=uGustB[i];vec2 dd=wp-g.xy;float L=length(dd);float fl2=1.0-smoothstep(g.z*0.6,g.z,L);v+=(dd/(L+0.2)*g.w*fl2+(vec2(-dd.y,dd.x)/(L+0.2)*gb.x+gb.yz)*fl2)*uGrK.x;}'+   // ระเบิด/ดูด (g.w) + หมุนวน (gb.x) + ดันทางเดียว (gb.yz)
+  'float trm=0.0;for(int i=0;i<16;i++){if(float(i)>=uGrN.y)break;vec4 q=uPush[i];vec2 dd=wp-q.xy;float L=length(dd);v+=dd/(L+0.05)*q.w*(1.0-smoothstep(q.z*0.35,q.z,L))*uGrK.y;trm=max(trm,q.w*(1.0-smoothstep(q.z*0.15,q.z*0.8,L)));}hgt*=1.0-0.4*trm;'+   // trm = ถูกเหยียบ/แหวก → หญ้าเตี้ยลงใต้ตัวละคร
   'v*=(1.0-0.8*fr)*(1.0-0.5*bu);v=mix(v,vec2(cos(fa),sin(fa))*1.7,smoothstep(0.12,0.5,fb));'+   // น้ำแข็ง = แข็งไม่ไหว • ไหม้ = ห้อย • ราบ = ล้มออกจากจุดระเบิด
   // ทรงใบ: โค้งไปด้านหน้าใบ (หันออกจากกลางกอ) + เอนออกจากกลางกอ
   'float a=aOff.w*6.2832;vec2 sd=vec2(cos(a),sin(a));vec2 fw=vec2(-sd.y,sd.x);if(dot(fw,tc)<0.0)fw=-fw;'+
-  'vec2 bv=v+(fw*(0.15+0.45*r2)+tc*0.4)*(1.0-0.8*fl);float bl=length(bv);if(bl>1.7){bv*=1.7/bl;bl=1.7;}'+
+  'vec2 bv=v+(fw*(0.15+0.45*r2)+tc*0.4)*(1.0-0.8*fl);float bl=length(bv);if(bl>2.3){bv*=2.3/bl;bl=2.3;}'+
   'float t=position.y,isH=fl*step(0.3,t),tt=mix(t,step(0.3,t),fl);'+
   // หัวดอก = ห้าเหลี่ยม (จุด 2-6) หันหากล้อง เอนไปด้านหลังนิด ๆ — มองจากบนหรือข้างก็เห็นเป็นดอกกลม
   'float R=0.075+0.03*r4;vec2 fwc=normalize(cameraPosition.xz-wp+0.0001);vec3 vax=normalize(vec3(-fwc.x*0.55,0.85,-fwc.y*0.55));'+
@@ -239,7 +245,7 @@ const GR_BEGIN=
 function grassMat(){
   const m=new THREE.MeshLambertMaterial({side:THREE.DoubleSide});
   const U={uGrMap:{value:new THREE.Vector4(0,0,1,1)},uGround:{value:null},uGroundH:{value:null},uGrCam:{value:new THREE.Vector3(0,0,40)},uWind:{value:new THREE.Vector4(1,0,0.3,0)},
-    uGust:{value:Array.from({length:8},()=>new THREE.Vector4(0,0,1,0))},uPush:{value:Array.from({length:16},()=>new THREE.Vector4(0,0,1,0))},uScar:SCAR.U.uScar,uFire:SCAR.U.uFire,uGrH:{value:GRASS.H},uGrW:{value:GRASS.W},
+    uGust:{value:Array.from({length:AIR_NG},()=>new THREE.Vector4(0,0,1,0))},uGustB:{value:Array.from({length:AIR_NG},()=>new THREE.Vector4(0,0,0,0))},uPush:{value:Array.from({length:16},()=>new THREE.Vector4(0,0,1,0))},uScar:SCAR.U.uScar,uFire:SCAR.U.uFire,uGrK:{value:new THREE.Vector2(GRASS.gustK,GRASS.pushK)},uGrH:{value:GRASS.H},uGrW:{value:GRASS.W},
     uSun:{value:new THREE.Vector3(0,1,0)},uGrN:{value:new THREE.Vector3()},uSunC:{value:new THREE.Color(1,1,1)}};
   m.userData.U=U;
   m.onBeforeCompile=sh=>{Object.assign(sh.uniforms,U);
@@ -260,7 +266,7 @@ function grassBuild(){
   g.setAttribute('position',new THREE.Float32BufferAttribute([-1,0,0, 1,0,0, -0.85,0.38,0, 0.85,0.38,0, -0.52,0.72,0, 0.52,0.72,0, 0,1,0],3));
   g.setAttribute('normal',new THREE.Float32BufferAttribute([0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0],3));
   g.setIndex([0,1,2, 1,3,2, 2,3,4, 3,5,4, 4,5,6]);
-  const N=GRASS.MAXN,A=new Float32Array(N*4);
+  const N=GRASS.CAP,A=new Float32Array(N*4);
   // ลำดับกระจายสม่ำเสมอ (R2) → ใช้แค่ n ใบแรกก็ยังกระจายทั่วผืน
   for(let i=0;i<N;i++){A[i*4]=(0.5+i*0.7548776662)%1;A[i*4+1]=(0.5+i*0.5698402910)%1;const h=Math.sin(i*12.9898)*43758.5453;A[i*4+2]=h-Math.floor(h);const h2=Math.sin(i*78.233)*12543.13;A[i*4+3]=h2-Math.floor(h2);}
   g.setAttribute('aOff',new THREE.InstancedBufferAttribute(A,4));
@@ -335,6 +341,7 @@ function grassTick(dt){
   if(!GRASS.mesh)grassBuild();
   const m=GRASS.mesh;
   if(screen!=='game'||!world){m.visible=false;GRASS.trail.length=0;return;}   // ล้างรอยตอนเข้าแมตช์ใหม่ = setScreen (js/19)
+  if(world.userData.grPend){m.visible=false;return;}   // รอ .glb พื้นจริง (js/28 buildFileMap) ก่อนถ่ายแผนที่หญ้า
   if(GRASS.key!==builtKey){GRASS.key=builtKey;const c=GRASS.cache.get(builtKey);
     if(c){Object.assign(GRASS,{tex:c.tex,texH:c.texH,box:c.box,n:c.n});airForMap();}
     else try{grassBake();}catch(e){console.error(e);GRASS.n=0;}}
@@ -350,18 +357,44 @@ function grassTick(dt){
   const U=m.material.userData.U;
   U.uGround.value=GRASS.tex;U.uGroundH.value=GRASS.texH;U.uGrMap.value.set(...GRASS.box);
   U.uGrCam.value.set(cam.position.x,cam.position.z,S);U.uSun.value.copy(LDIR);U.uSunC.value.copy(moonL.color).multiplyScalar(moonL.intensity*0.7);U.uWind.value.set(AIR.dir.x,AIR.dir.y,AIR.str,AIR.t);
-  for(let i=0;i<8;i++){const g=AIR.G[i],u=U.uGust.value[i];if(g)u.set(g.x,g.z,g.R*Math.min(1,g.age/0.18+0.25),airGv(g));else u.w=0;}
+  U.uGrH.value=GRASS.H;U.uGrW.value=GRASS.W;U.uGrK.value.set(GRASS.gustK,GRASS.pushK);
+  for(let i=0;i<AIR_NG;i++){const g=AIR.G[i],u=U.uGust.value[i],b=U.uGustB.value[i];if(g){const e=airEnv(g);u.set(g.x,g.z,g.R*Math.min(1,g.age/0.18+0.25),airGv(g));b.set(g.sw*e,g.dx*e,g.dz*e,0);}else{u.w=0;b.set(0,0,0,0);}}
   // ตัวละคร/ศัตรูใกล้กล้องที่สุด 8 ตัว แหวกหญ้า (บินต่ำ = วงกว้างขึ้น จางตามความสูง) + รอยเท้า: จุดที่เพิ่งเดินผ่าน หญ้าค่อย ๆ เด้งกลับใน ~1.3 วิ
   const L=[],T=GRASS.trail,TL=GRASS.trLast;
   for(let i=T.length-1;i>=0;i--){T[i].age+=dt;if(T[i].age>1.3)T.splice(i,1);}
-  const add=o=>{if(!o||!o.g||!o.g.parent||!o.g.visible)return;const p=o.g.position,dh=p.y-TW(p.x,p.z);if(dh>3)return;const d=Math.hypot(p.x-cam.position.x,p.z-cam.position.z);if(d>S*0.5)return;L.push([d,p.x,p.z,dh<0.6?0.75:1.6,dh<0.6?1:Math.max(0,1-dh/3)*0.8]);
+  const add=o=>{if(!o||!o.g||!o.g.parent||!o.g.visible)return;const p=o.g.position,dh=p.y-TW(p.x,p.z);if(dh>3)return;const d=Math.hypot(p.x-cam.position.x,p.z-cam.position.z);if(d>S*0.5)return;L.push([d,p.x,p.z,dh<0.6?0.95:1.7,dh<0.6?1:Math.max(0,1-dh/3)*0.8]);
     if(dh<0.6){const l=TL.get(o);if(!l)TL.set(o,{x:p.x,z:p.z});else if(Math.hypot(p.x-l.x,p.z-l.z)>0.4){if(T.length<40)T.push({x:l.x,z:l.z,age:0});l.x=p.x;l.z=p.z;}}};
   for(const o of PM3.values())add(o);for(const o of EM3.values())add(o);
   L.sort((a,b)=>a[0]-b[0]);if(L.length>8)L.length=8;
-  const TR=T.map(t=>[Math.hypot(t.x-cam.position.x,t.z-cam.position.z),t.x,t.z,0.6,0.7*Math.pow(1-t.age/1.3,1.5)]).sort((a,b)=>a[0]-b[0]);
+  const TR=T.map(t=>[Math.hypot(t.x-cam.position.x,t.z-cam.position.z),t.x,t.z,0.8,0.7*Math.pow(1-t.age/1.3,1.5)]).sort((a,b)=>a[0]-b[0]);
   for(const t of TR){if(L.length>=16)break;L.push(t);}
   for(let i=0;i<16;i++){const q=L[i],u=U.uPush.value[i];if(q)u.set(q[1],q[2],q[3],q[4]);else u.w=0;}
-  U.uGrN.value.set(Math.min(8,AIR.G.length),L.length,0);   // ลูปใน shader วนเฉพาะช่องที่ใช้
+  U.uGrN.value.set(Math.min(AIR_NG,AIR.G.length),L.length,0);   // ลูปใน shader วนเฉพาะช่องที่ใช้
 }
 
-window.WD&&Object.assign(window.WD,{FIRE,grassScar});   // ทดสอบ/ดีบัก
+window.WD&&Object.assign(window.WD,{FIRE,grassScar,GRASS});   // ทดสอบ/ดีบัก
+
+// ---------- สกิลลม → หญ้า (ภาพล้วน เรียกจาก windEfx js/68) ----------
+// ev.x/y = พิกัดเกม, a = ทิศ (เรเดียน) • รัศมี/แรงเป็นหน่วย 3D (เมตร) / แรงกระโชก (1 ≈ ระเบิดใหญ่) • ทุกท่าแค่ตั้งตาราง ปรับค่าได้ที่นี่
+const WIND_GRASS={
+  wnsb:{R:11,s:1.3},                 // โล่ปีกระเบิด: ลมพุ่งออกรอบตัว
+  wngbhit:{R:4,s:0.5},wndshit:{R:4,s:0.6},wnwblk:{R:4,s:0.5},wnvxcap:{R:5,s:0.7},wnvxstun:{R:5,s:0.7},wndswall:{R:4,s:0.5},
+  wnds:{R:7,s:0.4,dir:1.2},           // Dash ผลัก: ดันไปข้างหน้า
+  wngb:{R:8,s:0.2,dir:1.1,ahead:5,life:0.9},   // ยิงลมต่อเนื่อง (เฉพาะตอนเริ่ม n=1): ดันไปทางยิง
+  wndr:{R:8,s:0.3,dir:1.6,ahead:6,life:1.0},   // Windrift พุ่ง: ลมตามแนวพุ่ง
+  wnvx:{R:9,s:0,sw:1.6,life:1.6},      // Vortex Bind: ทอร์นาโดหมุนวน
+  wnvohole:{R:12,s:-1.0,sw:0.5,hold:1,id:'vo'},   // Void Sphere: ดูดหญ้าเข้าหาหลุม (ค้างจนระเบิด)
+  wnvoboom:{R:14,s:1.8,off:'vo'},      // หลุมระเบิด: พุ่งออก
+  wnwup:{R:6,s:0.3,dir:0.9,life:1.0},wnwboom:{R:9,s:1.1},wnwhit:{R:4,s:0.5},wnwpass:{R:4,s:0.5},   // กำแพงลม
+  wnfw:{R:9,s:1.1},                   // Featherwing เริ่มบิน: ลมกดลงรอบตัว
+  wnfwflick:{R:9,s:0.7,dir:1.4,ahead:4,life:1.0},   // สะบัดปีก: ลมข้างหน้า
+  wnult:{R:16,s:1.0,sw:0.6,life:2.0},wnulslam:{R:18,s:2.0},   // อัลติ Eye of Heaven
+  wnulblade:{R:7,s:0.4,dir:1.2,life:1.0}};
+function airWind(ev){
+  const c=WIND_GRASS[ev.z];if(!c)return;if(ev.z==='wngb'&&ev.n!==1)return;
+  const me=typeof myPos==='function'?myPos():null;if(me&&Math.hypot(ev.x-me.x,ev.y-me.y)>1500)return;   // ไกลมาก = ไม่ต้อง
+  const a=ev.a||0,ca=Math.cos(a),sa=Math.sin(a),ah=c.ahead||0,x=tx(ev.x)+ca*ah,z=tz(ev.y)+sa*ah;
+  if(c.off!==undefined)airGustOff(c.off);
+  airGust(x,z,c.R,c.s,{sw:c.sw,dx:ca*(c.dir||0),dz:sa*(c.dir||0),life:c.life,hold:!!c.hold,id:c.id});}
+window.WD&&Object.assign(window.WD,{AIR,airGust,airWind});
+

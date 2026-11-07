@@ -545,6 +545,7 @@ function buildFileMap(id){
   fileMapFx(F.fx);
   W.userData.lights=(F.lights||[]).map(L=>({abs:1,x:tx(L.x),y:GY(L.x,L.y)+(L.h||2),z:tz(L.y),col:L.col||'#ffb060',int:L.int||2,dist:L.dist||14}));
   if(!F.file)return;
+  W.userData.grPend=1;   // ยังเป็นพื้นสำรอง (เขียว) → ห้ามถ่ายแผนที่หญ้า/ห้ามโชว์หญ้า จนกว่า .glb จริงจะมา (js/50 grassTick) — เดิมถ่ายพื้นสำรอง ทุกแมพเลยมีหญ้าเต็ม (โบสถ์/หิมะ/ทะเลทราย)
   gltfLoader().then(L=>L.loadAsync('assets/'+F.file+'?v='+(F.v||0))).then(gltf=>{
     if(!fb.parent)return;                                       // ฉากถูกทิ้งไปแล้ว
     const sc=gltf.scene,skip=new Set();
@@ -552,12 +553,12 @@ function buildFileMap(id){
       if(/^ground/i.test(o.name))o.material=Array.isArray(o.material)?o.material.map(m=>grLive(m.clone())):grLive(o.material.clone());});   // พื้นหลัก: สีเป็นหย่อม + รอยสนามรบ (js/50)
     if(typeof surfScene==='function')surfScene(sc,true);   // ผิววัสดุ (js/76): แมพนิ่ง = ฉายตามพิกัดโลก
     backdropHide(id,sc);   // ของไกลเดิมที่ฉากหลัง (js/67) มาแทน
-    W.remove(fb);setTimeout(()=>disposeTree(fb),5000);W.add(sc);   // ทิ้งพื้นสำรองทีหลัง (กำลังอุ่นเชดเดอร์อยู่ได้)
+    W.remove(fb);setTimeout(()=>disposeTree(fb),5000);W.add(sc);W.userData.grPend=0;   // ทิ้งพื้นสำรองทีหลัง (กำลังอุ่นเชดเดอร์อยู่ได้)
     brkSetup(sc,skip);   // ของบังที่พังได้: แยกออกจาก batch (js/23)
     batchStatic(sc,skip);
     if(gltf.animations&&gltf.animations.length){const mx=new THREE.AnimationMixer(sc);for(const c of gltf.animations)mx.clipAction(c).play();W.userData.mixer=mx;}
     gl.shadowMap.needsUpdate=true;setTimeout(prewarmShaders,0);
-  }).catch(err=>console.warn('map glb',id,err));
+  }).catch(err=>{W.userData.grPend=0;console.warn('map glb',id,err);});   // โหลดไม่ได้ = ใช้พื้นสำรองต่อ (ถ่ายหญ้าจากพื้นสำรอง)
 }
 // ห้องฝึก: วัสดุขีดระยะ + ป้ายไม้ (ข้อความ 2 บรรทัด) — x,y = พิกัดเกม, ry = หันป้าย
 function tickM(){return new THREE.MeshBasicMaterial({color:'#ffffff',transparent:true,opacity:0.55});}

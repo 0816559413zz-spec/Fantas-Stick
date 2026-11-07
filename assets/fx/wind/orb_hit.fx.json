@@ -1,0 +1,165 @@
+{
+ "v": 1,
+ "desc": "ลูกบอลลมโดน: ลมกระแทกวงเล็ก + ลมแตกกระจาย + ใบไม้ (เบา ยิงรัวไม่รก)",
+ "tags": [
+  "wind",
+  "featherwing",
+  "hit"
+ ],
+ "pal": "wind",
+ "dur": 0.5,
+ "seed": 51,
+ "layers": [
+  {
+   "id": "shock",
+   "t": "warp",
+   "at": 0,
+   "life": 0.25,
+   "att": "point",
+   "pos": [
+    0,
+    0,
+    0
+   ],
+   "kind": "shock",
+   "size": {
+    "0": 0.3,
+    "1": 2.2
+   },
+   "str": 0.7,
+   "op": {
+    "0": 1,
+    "1": 0
+   },
+   "col": "#ffffff",
+   "glow": 0
+  },
+  {
+   "id": "puff",
+   "t": "emit",
+   "at": 0,
+   "life": 0.05,
+   "att": "point",
+   "pos": [
+    0,
+    0,
+    0
+   ],
+   "from": "sphere",
+   "gravity": 0,
+   "drag": 2.2,
+   "burst": 10,
+   "rate": 0,
+   "fr": 0.2,
+   "dir": "out",
+   "speed": [
+    2,
+    5
+   ],
+   "plife": [
+    0.3,
+    0.55
+   ],
+   "size": [
+    1.2,
+    2.2
+   ],
+   "grow": 0.8,
+   "col": "#d6e3d9",
+   "c2": "#a3b5a8",
+   "look": "smoke",
+   "curl": true
+  },
+  {
+   "id": "spray",
+   "t": "emit",
+   "at": 0,
+   "life": 0.05,
+   "att": "point",
+   "pos": [
+    0,
+    0,
+    0
+   ],
+   "from": "sphere",
+   "gravity": 0,
+   "drag": 2.4,
+   "burst": 18,
+   "rate": 0,
+   "fr": 0.2,
+   "dir": "aim",
+   "spread": 0.8,
+   "speed": [
+    5,
+    12
+   ],
+   "plife": [
+    0.12,
+    0.28
+   ],
+   "look": "streak",
+   "size": [
+    1.2,
+    2.4
+   ],
+   "col": "#ffffff",
+   "c2": "#8dff65",
+   "curl": false
+  },
+  {
+   "id": "leaves",
+   "t": "emit",
+   "at": 0,
+   "life": 0.05,
+   "att": "point",
+   "pos": [
+    0,
+    0,
+    0
+   ],
+   "from": "sphere",
+   "gravity": -0.3,
+   "drag": 1.4,
+   "burst": 3,
+   "rate": 0,
+   "fr": 0.2,
+   "dir": "out",
+   "speed": [
+    3,
+    6
+   ],
+   "plife": [
+    0.35,
+    0.6
+   ],
+   "look": "model",
+   "model": "wind_leaf",
+   "mmat": "glow",
+   "msize": [
+    0.06,
+    0.12
+   ],
+   "col": "#8dff65",
+   "c2": "#0f9d55",
+   "mspin": 500,
+   "bounce": 0,
+   "x": true
+  },
+  {
+   "id": "flash",
+   "t": "flash",
+   "at": 0,
+   "life": 0.06,
+   "att": "point",
+   "pos": [
+    0,
+    0,
+    0
+   ],
+   "col": "#d8ffe0",
+   "size0": 0.2,
+   "size": 1.0,
+   "k": 0.5
+  }
+ ]
+}

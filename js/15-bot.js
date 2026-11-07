@@ -12,6 +12,13 @@ const BOT_LV=[
 ];
 // นิสัยสุ่มต่อตัว (ตอนเสก): บอทหลายตัวจะได้ไม่ขยับ/กดสกิลพร้อมกันเป๊ะ
 //   ph/sp/sd = จังหวะ+ความเร็ว+ทิศส่ายตัว • rng = ชอบยืนใกล้/ไกล (คูณระยะ) • wait = รอเพื่อนบอทที่เพิ่งกดสกิลใส่เป้าเดียวกันกี่วิ
+// ชุดคาถาสุ่มต่อบอท (4 ท่าจากสายนั้น ไม่เอาท่าที่ยังสอนบอทไม่ได้) — หลายตัวสายเดียวกันจะได้ไม่เล่นเหมือนกัน
+const BOT_SKIP=['featherwing'];
+function botKit(P){
+  const L=SPELL_LIST.filter(x=>x.path===P&&!x.ult&&!BOT_SKIP.includes(x.id));
+  for(let i=L.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[L[i],L[j]]=[L[j],L[i]];}
+  return P+'.'+L.slice(0,4).map(x=>x.i).join('.');
+}
 function botPersona(){return {ph:rnd(0,Math.PI*2),sp:rnd(1.1,2.4),sd:Math.random()<0.5?1:-1,rng:rnd(0.65,1.35),wait:rnd(0.35,0.8)};}
 const BOT_TEAM=50,BOT_MAX=6;   // บอททุกตัวทีมเดียวกัน (ศัตรูของคน) • สูงสุดทั้งห้อง
 function bots(){return plist().filter(p=>p.ai);}
@@ -27,7 +34,7 @@ function spawnBot(path,lv,x,y,zk,owner){
   if(bots().length>=(G.ph==='lobby'?ROOM_MAX-1:BOT_MAX))return null;   // ห้องรอ: เติมบอทได้จนเต็มห้อง (12) • ห้องฝึก/สังเวียนยัง 6
   G.botN=(G.botN|0)+1;
   const P=PATHS[path]&&!PATHS[path].off?path:0,L=clamp(lv|0,0,2),id='bot'+G.botN+'_'+Math.floor(Math.random()*1e6).toString(36);
-  const p=addPlayer(id,'🤖 '+PATHS[P].n.replace('สาย','')+' ('+BOT_LV[L].n+')',null,null,String(P));
+  const p=addPlayer(id,'🤖 '+PATHS[P].n.replace('สาย','')+' ('+BOT_LV[L].n+')',null,null,botKit(P));
   Object.assign(p,freshStats());p.kt=p.kit;p.bot=true;p.inp=emptyInput();
   p.ai={lv:L,zone:zk,home:{x,y},owner,team:BOT_TEAM,thinkT:rnd(0,BOT_LV[L].react),skT:G.time+rnd(0,BOT_LV[L].gap+0.8),errX:0,errY:0,tg:null,dodT:0,ps:botPersona(),lastSk:-9,blk:null};
   p.team=BOT_TEAM;resetBody(p,x+rnd(-60,60),y+rnd(-60,60));collideWorld(p,PR);p.inv=1;
@@ -53,6 +60,124 @@ function botPickTarget(p){
   for(const e of G.en){if(e.dead||e.type==='dummy'||!botInZone(zk,e.x,e.y,60))continue;const d=(e.x-p.x)**2+(e.y-p.y)**2;if(d<bd){bd=d;best=e;}}
   return best;
 }
+// =====================================================================
+//  วิธีเล่นตามสาย (guides/CLASS-GUIDE.md): เงื่อนไขใช้แต่ละท่า + ท่าต่อเนื่อง (คลิกยืนยัน / กดค้าง / กดซ้ำ) ที่บอททั่วไป (botBrain js/41) ทำไม่เป็น
+//  ใช้กับบอทห้องฝึกที่มี p.ai เท่านั้น • botPlay ทำงานหลัง botBrain: ทิ้งการกดสกิลของ botBrain แล้วตัดสินใจเองตามสายนี้
+//  ตัวเลขระยะเป็น px (20 px = 1 ม.) — เป็นแค่ "ใช้ตอนไหน" ตามไกด์ ไม่ใช่ค่าบาลานซ์
+// =====================================================================
+const BOT_PB={0:1,1:1,2:1,6:1,7:1,8:1};   // เลขสายที่มีวิธีเล่นของตัวเอง (ไฟ น้ำแข็ง สายฟ้า ดิน ลม น้ำ)
+function botPlay(p,dt,tg,c0){
+  const A=p.ai,inp=p.inp,t=G.time,pi=p.pathIdx;
+  for(const k of SLOTK.concat(['x']))inp.c[k]=c0[k]|0;   // ทิ้งการกดของ botBrain
+  inp.hq=inp.he=inp.hr=inp.hf=0;
+  const dx=tg.x-p.x,dy=tg.y-p.y,d=Math.hypot(dx,dy),ang=Math.atan2(dy,dx),hpR=p.hp/p.maxHp;
+  const key=id=>{const i=p.kitIds.indexOf(id);return i<0?null:SLOTK[i];};
+  const rdy=id=>{const k=key(id);return !!k&&p.cd[k]<=0&&!(p.sil>0);};
+  const go=id=>{const k=key(id);if(k)inp.c[k]=(inp.c[k]|0)+1;return k;};
+  const roll=pr=>Math.random()<pr;
+  const dash=()=>{inp.c.sp=(inp.c.sp|0)+1;};
+  A.pf=!A.pf;const pulse=()=>{inp.fire=A.pf?1:0;};   // สลับ 0/1 ทุกเฟรม = มีขอบกดใหม่ (ท่าที่ต้อง "คลิกยืนยัน")
+  const ult=(r)=>{if(p.ult>=100&&d<r)inp.c.x=(inp.c.x|0)+1;};
+  // ---------- 🔥 ไฟ ----------
+  if(pi===0){
+    if(p.dfall){if(p.dfall.ph===2)pulse();return;}                    // Dragonfall: ถึงจุดบินแล้วคลิก = ดิ่งใส่
+    if(p.colos>0){if(p.colN>0)pulse();return;}                        // ร่างยักษ์: ยิงหน้าไม้ทีละนัด
+    if(p.kindle>0&&d<1000)pulse();                                    // Kindle: ลอยอยู่ ยิงลูกไฟใหญ่
+    const burn=tg.brn|0;
+    if(rdy('ignitionsnap')&&(burn>=3||(burn>=2&&tg.hp<tg.maxHp*0.35)))go('ignitionsnap');   // ปิดจบเมื่อมีหลายชั้น
+    else if(rdy('ringofembers')&&d<380&&d>90)go('ringofembers');                              // ขังก่อน แล้วลูกไฟชาร์จ
+    else if(rdy('blazeform')&&d<300&&hpR>0.5&&(burn>=1||roll(0.4)))go('blazeform');
+    else if(rdy('dragonfall')&&d>260&&d<560)go('dragonfall');
+    else if(rdy('kindle')&&d>200&&d<650&&!(p.kindle>0))go('kindle');
+    ult(800);
+    return;
+  }
+  // ---------- ❄️ น้ำแข็ง ----------
+  if(pi===1){
+    if(p.cryo>0){inp.mx=inp.my=0;return;}                             // แช่แข็งตัวเอง: ทำอะไรไม่ได้ รอ
+    if(p.fmode===1&&!(p.fmCd>0)&&!(p.mirror>0)&&d<560)inp.c.v=(inp.c.v|0)+1;   // โหมดไกลเบา → กลับโหมดประชิด
+    if(p.fmode!==1){
+      if(rdy('cryoshell')&&hpR<0.35&&d<400)go('cryoshell');           // รีเซ็ตตัวเองตอนเลือดน้อย
+      else if(rdy('frostforge')&&d<330&&!(p.ffT>0))go('frostforge');
+      else if(rdy('permafrost')&&d<260)go('permafrost');
+      else if(rdy('frostaura')&&d<210)go('frostaura');
+      else if(rdy('glacierrend')&&d<400&&d>100)go('glacierrend');
+    }
+    ult(520);
+    return;
+  }
+  // ---------- ⚡ สายฟ้า ----------
+  if(pi===2){
+    const st=p.lst|0;
+    if(p.sdome){if(p.sdome.ph===2)pulse();return;}                    // โดม: บินถึงแล้วคลิกยิงลง
+    if(p.rail||p.slnT>0)return;                                       // ร่าย Railgun/เส้นสายฟ้าอยู่ ยืนนิ่ง
+    // เก็บ stack: Dash ทะลุศัตรู • stack ครบแล้วเก็บ Dash ไว้หนี
+    if(p.dch>=1&&!(p.dash>0)&&d>150&&d<430&&(st<2||roll(0.2))&&roll(dt*4))dash();
+    if(rdy('stormdome')&&st>=3&&d<560)go('stormdome');
+    else if(rdy('railgun')&&st>=2&&d<850&&d>200)go('railgun');
+    else if(rdy('triplestrike')&&st>=2&&d<560)go('triplestrike');
+    else if(rdy('speedsiphon')&&st>=1&&d<190)go('speedsiphon');
+    else if(rdy('stormorbs')&&st>=1&&!p.sorb&&d<500)go('stormorbs');
+    else if(rdy('thunderline')&&d<580&&st<3)go('thunderline');
+    ult(340);
+    return;
+  }
+  // ---------- ⛰️ ดิน ----------
+  if(pi===6){
+    const stand=!(p.stdB>0);
+    if(p.wr){if(p.wr.ph==='sky'){pulse();inp.mx=Math.sin(t*0.8+A.ps.ph);inp.my=0;}return;}   // Wrath: ลอยบนฟ้า เล็งแล้วคลิกปาเสา
+    if(p.aug){const T=A.augT||2.1;inp['h'+p.aug.k]=p.aug.t<T?1:0;inp.mx=inp.my=0;return;}     // Auger: กดค้างจนครบระดับที่ตั้งใจ แล้วปล่อย
+    if(p.ramp||p.ecb)return;
+    inp.fire=(t%0.8<0.15)?1:0;                                        // Stand ต่อยเป็นจังหวะ (ไม่กดค้างชาร์จ เดินช้า)
+    // Tectonic Crush ซ้ำ: ศัตรูเข้าไปอยู่ระหว่างกำแพงสองแนว → กดอีกครั้ง = หนีบ
+    if(p.tec&&p.tec.ok&&!p.crush&&stand){const T=p.tec,u=dx*Math.cos(T.a)+dy*Math.sin(T.a),v=-dx*Math.sin(T.a)+dy*Math.cos(T.a);
+      if(u>40&&u<340&&Math.abs(v)<110){inp.c[T.k]=(inp.c[T.k]|0)+1;return;}}
+    const slowed=(tg.slow>0)||(tg.stun>0);
+    if(stand&&rdy('stonebreaker')&&d<520&&d>110)go('stonebreaker');
+    else if(rdy('terraauger')&&d<560&&(slowed||roll(0.5))){const k=go('terraauger');A.augT=slowed?rnd(2.2,4.7):rnd(0.1,2.1);inp['h'+k]=1;}
+    else if(stand&&rdy('tectoniccrush')&&d<320&&d>80)go('tectoniccrush');
+    else if(rdy('mudswamp')&&d>140&&d<580)go('mudswamp');
+    else if(stand&&rdy('dustburst')&&d>180&&d<500&&(hpR<0.6||roll(0.3)))go('dustburst');
+    // Dash: Stand ปกติ = Rampage พุ่งชน • Stand แตก = Rock Boost หนี
+    if(p.cd.dodge<=0&&!(p.dash>0)){if(stand&&d>320&&d<800&&roll(dt*0.8))dash();else if(!stand&&hpR<0.4&&d<300&&roll(dt*2))dash();}
+    ult(700);
+    return;
+  }
+  // ---------- 🌪️ ลม ----------
+  if(pi===7){
+    if(p.wult)return;
+    if(p.wwAim){   // เลือกวิธีวางกำแพง: ใกล้ = ดันไปข้างหน้า (คลิกซ้าย) • ไกล = วางหลังตัวศัตรู (คลิกขวา) ให้ท่าผลักหลังจากนี้ไปชน
+      if(p.wwAim.t<W_WL.aim-0.2){
+        if(d<330)pulse();
+        else{inp.sh=A.pf?1:0;A.aimOv={x:tg.x+Math.cos(ang)*110,y:tg.y+Math.sin(ang)*110};}
+      }
+      return;
+    }
+    if(rdy('aegisgale')&&(p.wwc|0)>0&&d<620&&d>80)go('aegisgale');
+    else if(rdy('voidspheres')&&d>220&&d<440)go('voidspheres');
+    else if(rdy('vortexbind')&&d>110&&d<380)go('vortexbind');
+    else if(rdy('windrift')&&d>250&&d<700)go('windrift');
+    if(p.cd.dodge<=0&&d<170&&roll(dt*2))dash();                       // ถอยหลังผลักตอนศัตรูประชิด
+    ult(340);
+    return;
+  }
+  // ---------- 💧 น้ำ ----------
+  if(pi===8){
+    if(p.wdg){if(p.wdg.ph==='aim'){inp.gx=tg.x;inp.gy=tg.y;pulse();}return;}   // มังกรน้ำ: เลือกจุดแล้วคลิกดิ่ง
+    if(p.wab){inp.mx=inp.my=0;return;}                                          // Abyssal Beam: ยืนนิ่งตอนร่าย/ยิง
+    const caged=tg.wflt>0;
+    if(rdy('aquacage')&&d<290&&d>60)go('aquacage');
+    else if(rdy('abyssalbeam')&&d<650&&d>200&&(caged||roll(0.35)))go('abyssalbeam');   // ขังก่อนแล้วเสียบลำน้ำ
+    else if(rdy('moonwater')&&d<850)go('moonwater');
+    else if(rdy('tidecaller')&&d<650)go('tidecaller');
+    else if(rdy('riptide')&&d<400&&d>110)go('riptide');
+    // โล่โดมน้ำฮีลตัวเองเฉพาะตอนมีจังหวะพัก (ไกลศัตรู เลือดไม่เต็ม เกจพอ)
+    if(!A.blk&&hpR<0.7&&d>260&&p.shieldE>20&&p.shieldBroken<=0)inp.sh=1;
+    if(p.cd.dodge<=0&&!(p.dash>0)&&(hpR<0.35||d<110)&&roll(dt*2))dash();       // ร่างโคลนหนี
+    ult(700);
+    return;
+  }
+}
 function aiBot(p,dt){
   const A=p.ai,L=BOT_LV[A.lv],inp=p.inp,t=G.time;
   if(!p.alive||p.downed){inp.fire=0;inp.mx=inp.my=0;inp.sh=0;A.blk=null;return;}
@@ -65,9 +190,10 @@ function aiBot(p,dt){
   // ใช้สมองต่อสู้เดิม (เดินรักษาระยะ / ยิง / เงื่อนไขสกิลแต่ละตัว) แต่กดสกิลได้เฉพาะตอนพ้นช่วงเว้น
   const c0=Object.assign({},inp.c);
   botBrain(p,dt,tg);
+  const pals=bots().filter(q=>q!==p&&q.ai.tg===tg&&q.alive&&!q.downed);
+  if(BOT_PB[p.pathIdx])botPlay(p,dt,tg,c0);
   const used=SLOTK.concat(['x']).some(k=>(inp.c[k]|0)!==(c0[k]|0));
   // ผลัดกัน: เพื่อนบอทที่ตีเป้าเดียวกันเพิ่งกดสกิล → รอแป๊บ (ไม่ปล่อยสกิลซ้อนวินาทีเดียวกัน)
-  const pals=bots().filter(q=>q!==p&&q.ai.tg===tg&&q.alive&&!q.downed);
   const busy=used&&pals.some(q=>t-q.ai.lastSk<A.ps.wait);
   if(t<A.skT||busy)for(const k of SLOTK.concat(['x']))inp.c[k]=c0[k]|0;
   else if(used){A.skT=t+L.gap*rnd(0.6,1.4);A.lastSk=t;}
@@ -75,6 +201,7 @@ function aiBot(p,dt){
   if((inp.c.x|0)!==(c0.x|0)&&!tg.isE&&tg.hp>tg.maxHp*L.ult)inp.c.x=c0.x|0;
   // เล็ง: ดักทางตามระดับ + พลาดสุ่ม (botBrain เล็งดักเต็มที่)
   inp.ax=tg.x+(inp.ax-tg.x)*L.lead+A.errX;inp.ay=tg.y+(inp.ay-tg.y)*L.lead+A.errY;
+  if(A.aimOv){inp.ax=A.aimOv.x;inp.ay=A.aimOv.y;A.aimOv=null;}   // playbook ขอเล็งจุดเฉพาะ (เช่น วางกำแพงลมหลังศัตรู)
   // รุมเป้าเดียวกัน: กระจายตัวไปคนละมุมรอบเป้า (ไม่ยืนกองข้างเดียวกัน)
   if(pals.length&&!tg.isE){const L2=pals.concat([p]).sort((a,b)=>a.id<b.id?-1:1),n=L2.length,i=L2.indexOf(p);
     let cx=0,cy=0;for(const q of L2){cx+=q.x;cy+=q.y;}cx/=n;cy/=n;

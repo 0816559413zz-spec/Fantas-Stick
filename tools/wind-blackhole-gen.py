@@ -12,13 +12,13 @@ ROOT=Path(__file__).resolve().parents[1];FX=ROOT/'assets/fx/wind'
 G=dict(hi='#ffffff',inner='#efffe8',mint='#b8ffe0',mid='#8dff65',lime='#c6ff5a',aqua='#5cf0c8',teal='#21b89a',outer='#2ec772',deep='#0f4a2c',neon='#39ff7a')
 T=lambda n:'tex/'+n
 Y=1.3          # hole centre height (chest of the spinning enemies)
-DIST=2.5       # matter travel (50 units)
-FLY=.15        # matter flight time
-WAIT=.5        # tremble before it turns into the hole
+DIST=20.0      # wind wave travel (400 units) - user 2026-11-07: farther
+FLY=1.0        # the wave flies straight along the aim for 1 s, then bursts into the hole
+WAIT=0.0
 HOLD=2.5       # hole life
 DRIFT=5.0      # hole drifts forward 5 m (100 units) over its life (⚠ 40 units/s)
 ORBIT=2.5      # enemies spin at ~50 units from the core
-SUCK=7.5       # suck radius (150 units)
+SUCK=5.5       # suck radius (110 units) - user 2026-11-07: a bit narrower
 rnd=random.Random(31)
 
 def save(name,layers,desc,tags):
@@ -26,28 +26,33 @@ def save(name,layers,desc,tags):
     (FX/f'{name}.fx.json').write_text(json.dumps({'v':1,'desc':desc,'tags':['wind','void','blackhole']+tags,'pal':'wind','dur':dur,'seed':31,'layers':layers},ensure_ascii=False,indent=1),encoding='utf-8')
     print('wind/'+name,len(layers),'layers dur',dur)
 
-# ---------- matter: thrust kick at the hand, small dark neon orb flies 2.5 m, trembles and sucks in ----------
+# ---------- wind wave (user 2026-11-07): a straight wind wave from the wand along the aim for 1 s (20 m), then it bursts into the hole ----------
+# at the caster, +z = aim. Head = small see-through dark seed with a lens bulge; spiral wind lines (mesh wind_gust_lines, solid so they read on bright maps)
+# trail behind; ground dust is kicked along the path; wind is sucked into the head more and more until the burst at 1.0 s (hole fx starts there)
 M=[]
+def wp(dy=0.0,dx=0.0):
+    """path of a point riding the wave head (linear 0 -> DIST over FLY)"""
+    return {str(round(k/10,2)):[dx,round(Y+dy,3),round(.8+(DIST-.8)*k/10,3)] for k in range(11)}
 H=[0,Y,.8]
-M.append({'id':'kick_flash','t':'flash','at':0,'life':.08,'att':'feet','pos':H,'col':G['mint'],'size0':.2,'size':1.0,'k':.45})
-M.append({'id':'kick_warp','t':'warp','at':0,'life':.16,'att':'feet','pos':H,'kind':'shock','size':{'0':.2,'1':1.8},'str':.6,'op':{'0':1,'1':0},'col':G['inner'],'glow':.03})
-M.append({'id':'kick_wisp','t':'emit','at':0,'life':.04,'att':'feet','pos':H,'burst':14,'rate':0,'from':'disc','fr':.3,'dir':'aim','spread':.35,'speed':[6,10],'plife':[.1,.2],
-    'look':'streak','size':[1,1.6],'col':G['inner'],'c2':G['aqua'],'gravity':0,'drag':4,'curl':False})
-MP={'0':[0,Y,.8],str(round(FLY/(FLY+WAIT),3)):[0,Y,DIST]}
-for i in range(1,9):   # tremble: small jitter around the stop point
-    u=round((FLY+WAIT*i/9)/(FLY+WAIT),3);MP[str(u)]=[round(rnd.uniform(-.06,.06),3),round(Y+rnd.uniform(-.06,.06),3),round(DIST+rnd.uniform(-.06,.06),3)]
-MP['1']=[0,Y,DIST]
-ML=FLY+WAIT
-M.append({'id':'matter_core','t':'mesh','at':0,'life':ML,'att':'feet','shape':'sphere','mat':'toon','col':'#000000','col2':'#000000','rim':1.6,'pos':MP,
-    'scale':{'0':.18,'0.25':.3,'0.85':.42,'1':.2},'op':1,'fade':0})
-M.append({'id':'matter_rim','t':'mesh','at':0,'life':ML,'att':'feet','shape':'plane','mat':'tex','tex':T('wind_void_disk'),'col':'#ffffff','col2':'#000000','rim':0,
-    'uvTile':[1,1],'uvScroll':[0,0],'pos':MP,'rot':[90,0,15],'spin':720,'int':1.1,'scale':{'0':.6,'0.25':1.2,'0.85':1.6,'1':.4},'op':{'0':0,'0.1':1,'0.9':1,'1':0},'fade':0})
-M.append({'id':'matter_tail','t':'trail','at':0,'life':FLY+.02,'att':'feet','pos':{'0':[0,Y,.8],'1':[0,Y,DIST]},'col':G['neon'],'col2':G['deep'],'w':.14,'tlife':.14,'k':1.0})
-M.append({'id':'matter_suck','t':'emit','at':FLY,'life':WAIT,'att':'feet','pos':[0,Y,DIST],'rate':120,'from':'sphere','fr':1.8,'dir':'in','speed':[5,8],'plife':[.12,.22],
-    'look':'streak','size':[.8,1.4],'col':G['lime'],'c2':G['aqua'],'gravity':0,'drag':0,'curl':False})
-M.append({'id':'matter_spark','t':'emit','at':FLY,'life':WAIT,'att':'feet','pos':[0,Y,DIST],'rate':50,'from':'ring','fr':.5,'dir':'tangent','speed':[3,5],'plife':[.15,.3],
-    'look':'glow','size':[.4,.7],'col':G['neon'],'c2':G['teal'],'gravity':0,'drag':1})
-save('void_matter',M,'Void Spheres ① ท่าแทงไม้ + ก้อนสสารมืดขอบนีออน พุ่ง 2.5 ม. (50) แล้วสั่นบีบตัว 0.5 วิ (เกม: ที่ตัวผู้ร่าย a = ทิศเล็ง)',['ingame'])
+M.append({'id':'kick_flash','t':'flash','at':0,'life':.08,'att':'point','pos':H,'col':G['mint'],'size0':.2,'size':1.0,'k':.45})
+M.append({'id':'kick_warp','t':'warp','at':0,'life':.2,'att':'point','pos':H,'kind':'shock','size':{'0':.2,'1':2.4},'str':.7,'op':{'0':1,'1':0},'col':G['inner'],'glow':.03})
+M.append({'id':'seed','t':'mesh','at':0,'life':FLY,'att':'point','shape':'sphere','mat':'tex','tex':T('wind_dust'),'col':'#1a1430','col2':'#000000','rim':0,'uvTile':[2,2],'uvScroll':[.5,.3],
+    'pos':wp(),'scale':{'0':.15,'0.6':.4,'1':.7},'op':{'0':0,'0.1':.55,'1':.6},'fade':0})
+M.append({'id':'lens','t':'warp','at':0,'life':FLY,'att':'point','pos':wp(),'kind':'bulge','size':{'0':1.2,'1':3.6},'str':{'0':.8,'1':1.6},'op':{'0':0,'0.1':1,'1':1},'col':G['aqua'],'glow':.02})
+for k,(col,hi,sc,rl) in enumerate([('#1fae9a','#bffff0',1.5,2),('#24c2a8','#e8fff8',1.25,-3)]):
+    keys={str(round(i/10,2)):[0,0,round(i/10*360*rl,1)] for i in range(11)}
+    M.append({'id':f'lines{k}','t':'mesh','at':0,'life':FLY,'att':'point','shape':'model','model':'wind_gust_lines','mat':'glow' if k else 'toon','col':col if not k else hi,'col2':'#0a5a4c' if not k else col,
+        'pos':wp(),'rot':keys,'scale':sc,'op':.9 if not k else .55,'fade':0})
+M.append({'id':'dust','t':'emit','at':0,'life':FLY,'att':'point','pos':wp(-Y+.1),'rate':70,'from':'disc','fr':.8,'dir':'aim','yaw':180,'spread':.5,'up':[.1,.8],'speed':[2,6],'plife':[.5,.9],
+    'look':'smoke','size':[2.5,4.5],'grow':.6,'col':'#cfc7b0','c2':'#8c846f','gravity':0,'drag':1.4,'curl':True,'x':True})
+M.append({'id':'suck','t':'emit','at':.1,'life':FLY-.1,'att':'point','pos':wp(),'rate':{'0':40,'1':150},'from':'sphere','fr':1.8,'dir':'in','speed':[5,9],'plife':[.12,.22],
+    'look':'streak','size':[.9,1.6],'col':G['aqua'],'c2':G['teal'],'gravity':0,'drag':0,'curl':False})
+M.append({'id':'streak','t':'emit','at':0,'life':FLY,'att':'point','pos':wp(),'rate':80,'from':'sphere','fr':.4,'dir':'aim','yaw':180,'spread':.18,'speed':[10,18],'plife':[.12,.22],
+    'look':'streak','size':[1.6,3],'col':G['mint'],'c2':G['teal'],'gravity':0,'drag':.6,'curl':False})
+M.append({'id':'leaves','t':'emit','at':0,'life':FLY,'att':'point','pos':wp(),'rate':9,'from':'sphere','fr':.4,'dir':'aim','yaw':180,'spread':.6,'speed':[1,3.5],'plife':[.4,.7],
+    'look':'model','model':'wind_leaf','mmat':'glow','msize':[.06,.12],'col':G['lime'],'c2':G['outer'],'mspin':500,'gravity':-.2,'drag':1,'bounce':0,'x':True})
+M.append({'id':'hum','t':'screen','at':0,'life':FLY,'shake':.4,'own':True})
+save('void_wave',M,'Void Spheres 1: คลื่นลมพุ่งตรงตามที่เล็ง 1 วิ (20 ม.) แล้วระเบิดเป็นหลุมดำ: หัวเมล็ดมืดโปร่ง + เลนส์บิดภาพ + เส้นลมเกลียวลากตามหลัง + ฝุ่นพื้น + ลมถูกดูดเข้าหัวแรงขึ้นเรื่อย ๆ (เกม: ที่ตัวผู้ร่าย a = ทิศเล็ง)',['ingame'])
 
 # ---------- the black hole (2.5 s) ----------
 B=[];C=[0,Y,0]
@@ -59,8 +64,12 @@ for j,(tex,sc,tilt,sp,o) in enumerate([('wind_void_disk',4.4,8,620,1),('wind_voi
     B.append({'id':f'disk{j}','t':'mesh','at':0,'life':HOLD,'att':'feet','shape':'plane','mat':'tex','tex':T(tex),'col':['#6fe0a8','#2ec772','#5cf0c8'][j],'col2':'#000000','rim':0,
         'uvTile':[1,1],'uvScroll':[0,0],'pos':C,'rot':[90,j*40,tilt],'spin':sp,'int':.8,
         'scale':{'0':.4,'0.08':sc,'0.92':sc*1.05,'1':.3,'ease':'out'},'op':{k:v*o for k,v in op.items()},'fade':0})
-B.append({'id':'core','t':'mesh','at':0,'life':HOLD,'att':'feet','shape':'sphere','mat':'black','col':'#000000','col2':'#000000','rim':1.2,
-    'pos':C,'scale':{'0':.1,'0.06':1.0,'0.5':1.1,'0.94':1.15,'1':.08},'op':1,'fade':0,'rim':0})
+# user 2026-11-07: see-through hole that bends the image - no solid black core: a dark TRANSLUCENT swirl sphere + lens bulges + haze
+B.append({'id':'core','t':'mesh','at':0,'life':HOLD,'att':'feet','shape':'sphere','mat':'tex','tex':T('wind_dust'),'col':'#120d26','col2':'#000000','rim':0,'uvTile':[2,2],'uvScroll':[.6,.25],'spin':260,
+    'pos':C,'scale':{'0':.1,'0.06':1.0,'0.5':1.1,'0.94':1.15,'1':.08},'op':{'0':0,'0.1':.3,'0.9':.3,'1':0},'fade':0})
+for j,(sz,st,gl) in enumerate([(3.2,2.2,.05),(5.5,1.4,.03),(8.5,.9,.02)]):
+    B.append({'id':f'lens{j}','t':'warp','at':0,'life':HOLD,'att':'feet','pos':C,'kind':'bulge','size':{'0':sz*.3,'0.08':sz,'0.92':sz*1.05,'1':sz*.3},'str':st,'op':{'0':0,'0.1':1,'0.9':1,'1':0},'col':G['aqua'],'glow':gl})
+B.append({'id':'haze_big','t':'warp','at':0,'life':HOLD,'att':'feet','pos':C,'kind':'haze','size':9,'str':.9,'op':{'0':0,'0.1':1,'0.9':1,'1':0},'col':G['inner'],'glow':0})
 # the hole spins on itself (user: "blackhole will spinning around itself too"): swirl arms hugging the core
 for j in range(4):
     B.append({'id':f'arm{j}','t':'mesh','at':0,'life':HOLD,'att':'feet','shape':'model','model':f'wind_pieces{j%3}','mat':'tex','tex':T('wind_swoosh_a_hi'),'col':[G['mint'],G['aqua'],G['lime'],G['mid']][j],'col2':'#000000','rim':0,
@@ -128,13 +137,17 @@ B.append({'id':'updraft','t':'emit','at':.05,'life':HOLD-.15,'att':'feet','pos':
     'look':'streak','size':[1,1.8],'col':G['mint'],'c2':G['teal'],'gravity':0,'drag':0,'curl':False,'x':True})
 # no point light in the hole: it tinted the black core green (user wants it perfectly black)
 B.append({'id':'hum','t':'screen','at':0,'life':.2,'shake':1.2,'own':True})
+for l in B:   # see-through: every wind mesh at ~half strength (the core/lens layers above are already tuned)
+    if l['t']=='mesh' and l['id']!='core' and isinstance(l.get('op'),dict):l['op']={k:round(v*.5,3) for k,v in l['op'].items()}
+    if l['t']=='decal':l['op']=.3
 save('void_hole',B,'Void Spheres ② หลุมดำ 2.5 วิ: แกนดำ + จานลมแนวนอนหลายสี (×3 ของลูกเดิมที่ผ่านแล้ว) + วงลมเอียงสุ่มทิศโผล่แป๊บเดียว + ลมดูดเข้าจากรัศมี 7.5 ม. + เศษลมหมุนวงที่ศัตรูหมุน (เกม: ที่จุดหลุมดำ)',['ingame'])
 
 # ---------- explosion: implode, then a huge blast forward (+z) (user round 3: "make it alot more impact") ----------
 X=[]
 X.append({'id':'implode','t':'emit','at':0,'life':.12,'att':'feet','pos':C,'rate':200,'from':'sphere','fr':4.5,'dir':'in','speed':[30,42],'plife':[.08,.12],
     'look':'streak','size':[1.6,2.8],'col':G['hi'],'c2':G['aqua'],'gravity':0,'drag':0,'curl':False})
-X.append({'id':'crush','t':'mesh','at':0,'life':.13,'att':'feet','shape':'sphere','mat':'black','col':'#000000','col2':'#000000','rim':.6,'pos':C,'scale':{'0':1.2,'1':.15,'ease':'in'},'op':1,'fade':0})
+X.append({'id':'crush','t':'mesh','at':0,'life':.13,'att':'feet','shape':'sphere','mat':'tex','tex':T('wind_dust'),'col':'#120d26','col2':'#000000','rim':0,'uvTile':[2,2],'uvScroll':[0,0],'pos':C,'scale':{'0':1.2,'1':.15,'ease':'in'},'op':.5,'fade':0})
+X.append({'id':'crush_lens','t':'warp','at':0,'life':.13,'att':'feet','pos':C,'kind':'bulge','size':{'0':5,'1':.8},'str':2,'op':1,'col':G['aqua'],'glow':.02})
 t=.12
 X.append({'id':'flash','t':'flash','at':t,'life':.2,'att':'feet','pos':C,'col':G['inner'],'size0':.8,'size':5,'k':.9})
 X.append({'id':'ball','t':'mesh','at':t,'life':.32,'att':'feet','shape':'sphere','mat':'energy','col':G['mint'],'col2':G['outer'],'pos':C,'scale':{'0':.6,'1':7,'ease':'out'},'op':{'0':.9,'1':0},'fade':0,'rim':1.5})
@@ -170,7 +183,7 @@ save('void_boom',X,'Void Spheres ③ หลุมดำระเบิด: ย�
 
 # ---------- whole skill for the studio ----------
 T1=FLY+WAIT;P=[0,0,DIST]
-D=[{'id':'matter','t':'use','at':0,'life':T1+.05,'att':'feet','pos':[0,0,0],'fx':'wind/void_matter'},
+D=[{'id':'matter','t':'use','at':0,'life':T1+.05,'att':'feet','pos':[0,0,0],'fx':'wind/void_wave'},
    
    {'id':'boom','t':'use','at':round(T1+HOLD-.1,3),'life':.8,'att':'feet','pos':[0,0,DIST+DRIFT],'fx':'wind/void_boom'}]
 # 'use' layers can't follow a pos curve, so the demo copies the hole layers in and adds the forward drift to each one

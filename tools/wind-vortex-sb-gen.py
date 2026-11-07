@@ -9,8 +9,8 @@
 import json,math
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
-FAR,NEAR=15.0,3.0                 # W_VX.far 300 / near 60 (px ÷ 20)
-T_ARRIVE,T_FULL,T_PULL,T_ARR,T_END=0.22,0.75,0.8,1.05,1.35
+FAR,NEAR=19.0,3.0                 # W_VX.far 380 / near 60 (px ÷ 20)   (2026-11-07: farther 300→380)
+T_ARRIVE,T_FULL,T_PULL,T_ARR,T_END=0.22,0.75,0.8,1.2,1.5   # pull 0.25→0.4 s (slower). The tornado paths below are LINEAR FAR→NEAR over T_PULL..T_ARR = exactly js/09-wind.js windVortexTick (the pulled foe sits on the tornado centre)
 W,LG,G,DG,LN='#ffffff','#efffe8','#8dff65','#2ec772','#1a7a45'
 WAND=[0.4,1.3,0.6]                # ปลายไม้ (ขวา, สูง, หน้า)
 ANG=[math.radians(-22.5),0.0,math.radians(22.5)]
@@ -30,7 +30,7 @@ def real_body(L,a,p,P,at,lf,grow,OP,path,S):
     cone('air2','wind_vortex_air2','#d8ffe0',.42,[2,1],[-.3,0],220,1.0,60)  # ชั้นนอกบิด อมเขียวจาง
     cone('tint','wind_vortex_air',G,.22,[2,1],[-.6,0],380,.86,120)      # ชั้นใน เขียวบาง ๆ
     cone('inner','wind_core','#f2fff6',.35,[2,1],[-1.5,0],420,1.3)       # แกนเส้นลมแคบ (ไม่เรือง)
-    E0=T_ARRIVE+.1;EL=T_ARR+.05-E0
+    E0=T_ARRIVE+.1;EL=T_ARR-E0
     Pe=lambda y=0.0:{'0':at_dist(a,FAR,y),str(round((T_PULL-E0)/EL,3)):at_dist(a,FAR,y),'1':at_dist(a,NEAR,y)}
     # ฝุ่นวนรอบโคน + ฝุ่นถูกดูดขึ้นตามลำ
     L.append({'id':p+'basedust','t':'emit','at':E0,'life':EL,'att':'feet','pos':Pe(.05),'from':'ring','fr':1.4*S/1.5,'rate':{'0':8,'0.3':26,'1':26},'dir':'tangent','speed':[2,4],'up':[.2,.8],'plife':[.7,1.2],**SMOKE,'size':[3,6],'grow':.5,'drag':.8})
@@ -44,7 +44,7 @@ def build(v):
     life=T_END-T_ARRIVE
     k=lambda t:str(round((t-T_ARRIVE)/life,3))        # เวลาจริง → เวลาในชั้นทอร์นาโด
     def path(a,y=0.0):
-        return {'0':at_dist(a,FAR,y),k(T_PULL):at_dist(a,FAR,y),k(T_PULL+.12):at_dist(a,FAR-1.2,y),k(T_ARR):at_dist(a,NEAR,y),'1':at_dist(a,NEAR,y)}
+        return {'0':at_dist(a,FAR,y),k(T_PULL):at_dist(a,FAR,y),k(T_ARR):at_dist(a,NEAR,y),'1':at_dist(a,NEAR,y)}
     def grow(s,end=.15):   # เกลียวเล็กตอนลมไปถึง → โตเต็มที่ T_FULL → พองนิดก่อนดึง → หดตอนมาถึง → ยุบ
         return {'0':round(.12*s,3),k(.4):round(.35*s,3),k(T_FULL):round(s,3),k(T_PULL):round(1.1*s,3),k(T_ARR):round(.8*s,3),k(T_ARR+.1):round(.6*s,3),'1':round(end*s,3)}
     OP=lambda o:{'0':0,k(.3):o,k(T_ARR+.1):o,'1':0}
@@ -85,7 +85,7 @@ def build(v):
 
     # ---- ตัวทอร์นาโด (แบบ vortex_bind เดิม) ขึ้นตอนลมไปถึง ----
     for n,a in enumerate(ANG):
-        p=f't{n}_';P=path(a);at=round(T_ARRIVE+n*.02,2);lf=round(life-n*.02,2)
+        p=f't{n}_';P=path(a);at=round(T_ARRIVE,2);lf=round(life,2)   # no stagger: the tornado position keys must line up with the game clock
         if v.get('real'):
             real_body(L,a,p,P,at,lf,grow,OP,path,S)
         else:
@@ -102,7 +102,7 @@ def build(v):
               L.append({'id':p+f'gs{j}','t':'mesh','at':at,'life':lf,'att':'feet','shape':'model','model':'wind_groundswirl','mat':'tex','tex':tex,'col':col,'col2':'#000000','rim':0,'uvTile':[1,1],'uvScroll':[0,0],
                         'pos':path(a,.04+j*.02),'rot':[0,j*60,0],'spin':sp,'scale':grow(sc*S),'op':OP(.9*v['op']),'fade':0})
         # อนุภาครอบลำ (เริ่มหลังเกลียวเริ่มโต)
-        E0=T_ARRIVE+.12;EL=T_ARR+.05-E0
+        E0=T_ARRIVE+.12;EL=T_ARR-E0
         Pe=lambda y=0.0:{'0':at_dist(a,FAR,y),str(round((T_PULL-E0)/EL,3)):at_dist(a,FAR,y),'1':at_dist(a,NEAR,y)}
         for j,(y,fr,sp) in enumerate([(0.6,1.9,1),(1.7,2.3,-1),(2.8,2.8,1),(3.8,3.2,-1)][:v['orbits']]):
             L.append({'id':p+f'orbit{j}','t':'emit','at':E0,'life':EL,'att':'feet','pos':Pe(round(y*S/1.5,2)),'rate':int(55*R),'from':'ring','fr':round(fr*S/1.5,2),'dir':'tangent','speed':[7*sp,11*sp],'up':[.3,1.2],'plife':[.25,.45],'look':'streak','size':[1.6,3.0],'col':W,'c2':G,'gravity':0,'drag':.3,'curl':False})
@@ -114,7 +114,7 @@ def build(v):
 
     # ---- ช่วง 3: พายุดูดกลับเข้ามา (ลูกศรในภาพร่างเฟรม 8) ----
     for n,a in enumerate(ANG):
-        p=f'x{n}_';yaw=round((math.degrees(a)+360)%360-180,1);at=round(n*.02,2)
+        p=f'x{n}_';yaw=round((math.degrees(a)+360)%360-180,1);at=0
         if v['chargeFlash']:
             L.append({'id':p+'charge','t':'flash','at':T_PULL-.12+at,'life':.16,'att':'feet','pos':at_dist(a,FAR,1.6*S/1.5),'col':G,'size0':.6,'size':v['chargeFlash'],'k':.7})
         L.append({'id':p+'drag','t':'emit','at':T_PULL+at,'life':T_ARR-T_PULL,'att':'feet','pos':{'0':at_dist(a,FAR,.15),'1':at_dist(a,NEAR,.15)},
@@ -124,12 +124,12 @@ def build(v):
         for j,(y,side) in enumerate(v['arrows']):
             L.append({'id':p+f'arrow{j}','t':'trail','at':T_PULL-.04+at+j*.03,'life':.3,'att':'feet','pos':{'0':at_dist(a,FAR-.5,y,side),'1':at_dist(a,NEAR-.6,y,side*.4)},'col':W,'col2':G,'w':v['arrowW'],'tlife':.25,'k':v.get('curlK',v['trailK'])})
         if v.get('real'):
-            mv={'0':at_dist(a,FAR,.05),'0.2':at_dist(a,FAR-1.2,.05),'0.5':at_dist(a,NEAR,.05),'1':at_dist(a,NEAR,.05)}
+            mv=None
             L.append({'id':p+'dragdust','t':'emit','at':T_PULL+at,'life':T_ARR-T_PULL,'att':'feet','pos':{'0':at_dist(a,FAR,.05),'1':at_dist(a,NEAR,.05)},'rate':int(70*R),'from':'disc','fr':1.2,'dir':'aim','yaw':yaw,'spread':.8,'speed':[3,6],'up':[.2,.8],'plife':[.5,.9],**SMOKE,'size':[3,6],'grow':.5,'drag':1.5})
             L.append({'id':p+'draghaze','t':'warp','at':T_PULL+at,'life':T_ARR-T_PULL+.1,'att':'feet','pos':{'0':at_dist(a,FAR,1.4),'1':at_dist(a,NEAR,1.4)},'kind':'haze','size':4,'str':.8,'op':{'0':0,'0.2':1,'1':0},'col':W,'glow':0})
         for j,(tex,col) in ([] if v.get('real') else enumerate([('tex/wind_swoosh_b',G),('tex/wind_swoosh_a_hi',W)])):
             L.append({'id':p+f'trail{j}','t':'mesh','at':T_PULL+at,'life':T_ARR-T_PULL+.25,'att':'feet','shape':'model','model':'wind_groundswirl','mat':'tex','tex':tex,'col':col,'col2':'#000000','rim':0,'uvTile':[1,1],'uvScroll':[0,0],
-                      'pos':{'0':at_dist(a,FAR,.05+j*.02),'0.2':at_dist(a,FAR-1.2,.05+j*.02),'0.5':at_dist(a,NEAR,.05+j*.02),'1':at_dist(a,NEAR,.05+j*.02)},'rot':[0,j*70,0],'spin':500*(1-2*j),'scale':{'0':1.6*S/1.5,'0.5':2.6*S/1.5,'1':1.2*S/1.5},'op':{'0':0,'0.1':.95*v['op'],'0.7':.8*v['op'],'1':0},'fade':0})
+                      'pos':{'0':at_dist(a,FAR,.05+j*.02),str(round((T_ARR-T_PULL)/(T_ARR-T_PULL+.25),3)):at_dist(a,NEAR,.05+j*.02),'1':at_dist(a,NEAR,.05+j*.02)},'rot':[0,j*70,0],'spin':500*(1-2*j),'scale':{'0':1.6*S/1.5,'0.5':2.6*S/1.5,'1':1.2*S/1.5},'op':{'0':0,'0.1':.95*v['op'],'0.7':.8*v['op'],'1':0},'fade':0})
         E=at_dist(a,NEAR,1.2)
         if v.get('real'):
             L.append({'id':p+'popring','t':'warp','at':T_ARR+at+.05,'life':.4,'att':'feet','pos':at_dist(a,NEAR,.15),'kind':'shock','flat':True,'size':{'0':1,'1':5},'str':.9,'op':{'0':1,'1':0},'col':W,'glow':0})
@@ -142,7 +142,7 @@ def build(v):
     else:
         L.append({'id':'pull','t':'flash','at':T_PULL,'life':.15,'att':'feet','pos':[0,1.2,.5],'col':G,'size0':.2,'size':1.5,'k':1})
     L.append({'id':'shake','t':'screen','at':T_PULL,'life':.12,'shake':v['shake']})
-    return {'v':1,'desc':v['desc'],'tags':['wind','vortex','storyboard'],'pal':'wind','dur':1.6,'seed':21,'layers':L}
+    return {'v':1,'desc':v['desc'],'tags':['wind','vortex','storyboard'],'pal':'wind','dur':1.7,'seed':21,'layers':L}
 
 VAR={
  'a':{'desc':'Vortex Bind สตอรี่บอร์ด #17 แบบ A (ผู้ใช้เลือก) — ตามภาพร่าง + ทอร์นาโดลมสมจริงแบบกำแพง Aegis "ลมใส": ลมพุ่งออกจากไม้ → ม้วนเป็นเกลียว → กรวยเส้นลมบางลอยขึ้นหมุน ฝุ่นวนโคน อากาศบิด ไม่เรือง → ลูกศรลมดูดกลับเข้ามา',

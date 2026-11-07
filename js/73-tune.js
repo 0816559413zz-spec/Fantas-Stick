@@ -21,6 +21,17 @@ function tuneBuild(){
   tuneNum(GF,'ลบขอบหยัก (TAA)','gfx.taa.on','TAA (1 = เปิด • ทำงานเฉพาะกราฟิกสูง แทน FXAA)',()=>TAA.on?1:0,v=>{TAA.on=!!v;},{bool:true,min:0,max:1,step:1});
   tuneNum(GF,'ลบขอบหยัก (TAA)','gfx.taa.alpha','ความไวต่อภาพใหม่ (น้อย = เนียนแต่เกิดเงา)',()=>TAA.alpha,v=>{TAA.alpha=v;},{min:0.03,max:0.5,step:0.01});
   tuneNum(GF,'ลบขอบหยัก (TAA)','gfx.taa.sharp','ความคมชดเชย',()=>TAA.sharp,v=>{TAA.sharp=v;},{min:0,max:1,step:0.01});
+  {const GG=['grass','🌾 หญ้า'],R=(k,l,g,st,o)=>tuneNum(GG,'หญ้า','grass.'+k,l,g,st,o);
+    R('on','หญ้า (1 = เปิด)',()=>GRASS.ON?1:0,v=>{GRASS.ON=!!v;},{bool:true,min:0,max:1,step:1});
+    R('dens','ความหนาแน่น (ใบ/ตร.หน่วย)',()=>GRASS.DENS,v=>{GRASS.DENS=v;},{min:5,max:150,step:1});
+    R('h','ความสูงใบ (เมตร) ข้อเท้า ≈ 0.2',()=>GRASS.H,v=>{GRASS.H=v;},{min:0.05,max:1,step:0.01});
+    R('w','ความกว้างใบ',()=>GRASS.W,v=>{GRASS.W=v;},{min:0.01,max:0.12,step:0.002});
+    R('sHigh','ขนาดผืนรอบกล้อง กราฟิกสูง',()=>GRASS.S.high,v=>{GRASS.S.high=v;},{min:16,max:90,step:1});
+    R('sAuto','ขนาดผืน อัตโนมัติ',()=>GRASS.S.auto,v=>{GRASS.S.auto=v;},{min:16,max:90,step:1});
+    R('sAuto1','ขนาดผืน อัตโนมัติ (เครื่องช้า)',()=>GRASS.S.auto1,v=>{GRASS.S.auto1=v;},{min:12,max:90,step:1});
+    R('gustK','แรงตอบสนองต่อลมสกิล ×',()=>GRASS.gustK,v=>{GRASS.gustK=v;},{min:0,max:5,step:0.1});
+    R('pushK','แรงแหวกตามตัวละคร ×',()=>GRASS.pushK,v=>{GRASS.pushK=v;},{min:0,max:5,step:0.1});
+    R('max','เพดานจำนวนใบ (ไม่เกินที่จองไว้)',()=>GRASS.MAXN,v=>{GRASS.MAXN=Math.min(v,GRASS.CAP);},{min:10000,max:GRASS.CAP,step:5000});}
   tuneNum(GF,'ไฟลามหญ้า','gfx.fire.on','ไฟลามหญ้า (1 = เปิด • ปิดไว้ก่อน)',()=>FIRE.on?1:0,v=>{FIRE.on=!!v;},{bool:true,min:0,max:1,step:1});
   tuneNum(GF,'เงา','gfx.shd.r','พื้นที่เงา (ครึ่งกว้าง) กราฟิกปกติ',()=>SHD.r,v=>{SHD.r=v;},{min:10,max:120,step:1});
   tuneNum(GF,'เงา','gfx.shd.rhigh','พื้นที่เงา กราฟิกสูง',()=>SHD.rHigh,v=>{SHD.rHigh=v;},{min:10,max:160,step:1});

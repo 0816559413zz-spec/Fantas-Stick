@@ -1,0 +1,987 @@
+{
+ "v": 1,
+ "desc": "GaleBurst แบบลมสมจริง (ยิงต่อเนื่องตอนกดค้าง): กรวยอากาศขุ่นสีขาวเทาไหลเร็ว 17 ม. กว้างปลาย ~6 ม. + ฝุ่นพื้นพ่นไปข้างหน้า + เส้นลม + ใบไม้ + อากาศบิด; ตามตัวผู้ร่าย (follow) วนจนสั่งหยุด — ชั้น end ค่อยจาง + พ่นฝุ่นท้าย",
+ "tags": [
+  "wind",
+  "galeburst",
+  "loop"
+ ],
+ "pal": "wind",
+ "dur": 1.2,
+ "seed": 27,
+ "layers": [
+  {
+   "id": "i_dust",
+   "t": "mesh",
+   "at": 0,
+   "life": 0.3,
+   "att": "feet",
+   "shape": "model",
+   "model": "wind_real_cone",
+   "mat": "tex",
+   "tex": "tex/wind_dust",
+   "col": "#e8efea",
+   "col2": "#000000",
+   "rim": 0,
+   "uvTile": [
+    2,
+    3
+   ],
+   "uvScroll": [
+    0.45,
+    -1.6
+   ],
+   "pos": [
+    0.0,
+    1.15,
+    0.5
+   ],
+   "rot": [
+    -90,
+    0,
+    0
+   ],
+   "scale": {
+    "0": [
+     0.9299999999999999,
+     2,
+     0.9299999999999999
+    ],
+    "1": [
+     3.1,
+     17.0,
+     3.1
+    ],
+    "ease": "out"
+   },
+   "op": {
+    "0": 0,
+    "0.35": 0.34,
+    "1": 0.34
+   },
+   "spin": 0,
+   "fade": 0
+  },
+  {
+   "id": "c_dust",
+   "t": "mesh",
+   "at": 0.3,
+   "life": 0.9,
+   "att": "feet",
+   "shape": "model",
+   "model": "wind_real_cone",
+   "mat": "tex",
+   "tex": "tex/wind_dust",
+   "col": "#e8efea",
+   "col2": "#000000",
+   "rim": 0,
+   "uvTile": [
+    2,
+    3
+   ],
+   "uvScroll": [
+    0.45,
+    -1.6
+   ],
+   "pos": [
+    0.0,
+    1.15,
+    0.5
+   ],
+   "rot": [
+    -90,
+    0,
+    0
+   ],
+   "scale": {
+    "0": [
+     3.1,
+     17.0,
+     3.1
+    ],
+    "1": [
+     3.1,
+     17.0,
+     3.1
+    ]
+   },
+   "op": {
+    "0": 0.34,
+    "1": 0.34
+   },
+   "spin": 0,
+   "fade": 0,
+   "loop": true
+  },
+  {
+   "id": "e_dust",
+   "t": "mesh",
+   "at": 0,
+   "life": 0.35,
+   "att": "feet",
+   "shape": "model",
+   "model": "wind_real_cone",
+   "mat": "tex",
+   "tex": "tex/wind_dust",
+   "col": "#e8efea",
+   "col2": "#000000",
+   "rim": 0,
+   "uvTile": [
+    2,
+    3
+   ],
+   "uvScroll": [
+    0.45,
+    -1.6
+   ],
+   "pos": [
+    0.0,
+    1.15,
+    0.5
+   ],
+   "rot": [
+    -90,
+    0,
+    0
+   ],
+   "scale": {
+    "0": [
+     3.1,
+     17.0,
+     3.1
+    ],
+    "1": [
+     3.1,
+     17.0,
+     3.1
+    ]
+   },
+   "op": {
+    "0": 0.34,
+    "1": 0
+   },
+   "spin": 0,
+   "fade": 0,
+   "end": true
+  },
+  {
+   "id": "i_rise",
+   "t": "mesh",
+   "at": 0,
+   "life": 0.3,
+   "att": "feet",
+   "shape": "model",
+   "model": "wind_real_cone",
+   "mat": "tex",
+   "tex": "tex/wind_air_rise",
+   "col": "#ffffff",
+   "col2": "#000000",
+   "rim": 0,
+   "uvTile": [
+    3,
+    4
+   ],
+   "uvScroll": [
+    -0.6,
+    -2.4
+   ],
+   "pos": [
+    0.0,
+    1.15,
+    0.5
+   ],
+   "rot": [
+    -90,
+    0,
+    0
+   ],
+   "scale": {
+    "0": [
+     0.9299999999999999,
+     2,
+     0.9299999999999999
+    ],
+    "1": [
+     3.1,
+     17.0,
+     3.1
+    ],
+    "ease": "out"
+   },
+   "op": {
+    "0": 0,
+    "0.35": 0.5,
+    "1": 0.5
+   },
+   "spin": 0,
+   "fade": 0
+  },
+  {
+   "id": "c_rise",
+   "t": "mesh",
+   "at": 0.3,
+   "life": 0.9,
+   "att": "feet",
+   "shape": "model",
+   "model": "wind_real_cone",
+   "mat": "tex",
+   "tex": "tex/wind_air_rise",
+   "col": "#ffffff",
+   "col2": "#000000",
+   "rim": 0,
+   "uvTile": [
+    3,
+    4
+   ],
+   "uvScroll": [
+    -0.6,
+    -2.4
+   ],
+   "pos": [
+    0.0,
+    1.15,
+    0.5
+   ],
+   "rot": [
+    -90,
+    0,
+    0
+   ],
+   "scale": {
+    "0": [
+     3.1,
+     17.0,
+     3.1
+    ],
+    "1": [
+     3.1,
+     17.0,
+     3.1
+    ]
+   },
+   "op": {
+    "0": 0.5,
+    "1": 0.5
+   },
+   "spin": 0,
+   "fade": 0,
+   "loop": true
+  },
+  {
+   "id": "e_rise",
+   "t": "mesh",
+   "at": 0,
+   "life": 0.35,
+   "att": "feet",
+   "shape": "model",
+   "model": "wind_real_cone",
+   "mat": "tex",
+   "tex": "tex/wind_air_rise",
+   "col": "#ffffff",
+   "col2": "#000000",
+   "rim": 0,
+   "uvTile": [
+    3,
+    4
+   ],
+   "uvScroll": [
+    -0.6,
+    -2.4
+   ],
+   "pos": [
+    0.0,
+    1.15,
+    0.5
+   ],
+   "rot": [
+    -90,
+    0,
+    0
+   ],
+   "scale": {
+    "0": [
+     3.1,
+     17.0,
+     3.1
+    ],
+    "1": [
+     3.1,
+     17.0,
+     3.1
+    ]
+   },
+   "op": {
+    "0": 0.5,
+    "1": 0
+   },
+   "spin": 0,
+   "fade": 0,
+   "end": true
+  },
+  {
+   "id": "i_rise2",
+   "t": "mesh",
+   "at": 0,
+   "life": 0.3,
+   "att": "feet",
+   "shape": "model",
+   "model": "wind_real_cone",
+   "mat": "tex",
+   "tex": "tex/wind_air_rise",
+   "col": "#d8ffe0",
+   "col2": "#000000",
+   "rim": 0,
+   "uvTile": [
+    2,
+    5
+   ],
+   "uvScroll": [
+    0.8,
+    -3.4
+   ],
+   "pos": [
+    0.0,
+    1.15,
+    0.5
+   ],
+   "rot": [
+    -90,
+    0,
+    0
+   ],
+   "scale": {
+    "0": [
+     0.9299999999999999,
+     2,
+     0.9299999999999999
+    ],
+    "1": [
+     3.1,
+     17.0,
+     3.1
+    ],
+    "ease": "out"
+   },
+   "op": {
+    "0": 0,
+    "0.35": 0.28,
+    "1": 0.28
+   },
+   "spin": 0,
+   "fade": 0
+  },
+  {
+   "id": "c_rise2",
+   "t": "mesh",
+   "at": 0.3,
+   "life": 0.9,
+   "att": "feet",
+   "shape": "model",
+   "model": "wind_real_cone",
+   "mat": "tex",
+   "tex": "tex/wind_air_rise",
+   "col": "#d8ffe0",
+   "col2": "#000000",
+   "rim": 0,
+   "uvTile": [
+    2,
+    5
+   ],
+   "uvScroll": [
+    0.8,
+    -3.4
+   ],
+   "pos": [
+    0.0,
+    1.15,
+    0.5
+   ],
+   "rot": [
+    -90,
+    0,
+    0
+   ],
+   "scale": {
+    "0": [
+     3.1,
+     17.0,
+     3.1
+    ],
+    "1": [
+     3.1,
+     17.0,
+     3.1
+    ]
+   },
+   "op": {
+    "0": 0.28,
+    "1": 0.28
+   },
+   "spin": 0,
+   "fade": 0,
+   "loop": true
+  },
+  {
+   "id": "e_rise2",
+   "t": "mesh",
+   "at": 0,
+   "life": 0.35,
+   "att": "feet",
+   "shape": "model",
+   "model": "wind_real_cone",
+   "mat": "tex",
+   "tex": "tex/wind_air_rise",
+   "col": "#d8ffe0",
+   "col2": "#000000",
+   "rim": 0,
+   "uvTile": [
+    2,
+    5
+   ],
+   "uvScroll": [
+    0.8,
+    -3.4
+   ],
+   "pos": [
+    0.0,
+    1.15,
+    0.5
+   ],
+   "rot": [
+    -90,
+    0,
+    0
+   ],
+   "scale": {
+    "0": [
+     3.1,
+     17.0,
+     3.1
+    ],
+    "1": [
+     3.1,
+     17.0,
+     3.1
+    ]
+   },
+   "op": {
+    "0": 0.28,
+    "1": 0
+   },
+   "spin": 0,
+   "fade": 0,
+   "end": true
+  },
+  {
+   "id": "i_tint",
+   "t": "mesh",
+   "at": 0,
+   "life": 0.3,
+   "att": "feet",
+   "shape": "model",
+   "model": "wind_real_cone",
+   "mat": "tex",
+   "tex": "tex/wind_dust",
+   "col": "#cfc7b0",
+   "col2": "#000000",
+   "rim": 0,
+   "uvTile": [
+    1,
+    2
+   ],
+   "uvScroll": [
+    0.3,
+    -1.1
+   ],
+   "pos": [
+    0.0,
+    1.15,
+    0.5
+   ],
+   "rot": [
+    -90,
+    0,
+    0
+   ],
+   "scale": {
+    "0": [
+     0.9299999999999999,
+     2,
+     0.9299999999999999
+    ],
+    "1": [
+     3.1,
+     17.0,
+     3.1
+    ],
+    "ease": "out"
+   },
+   "op": {
+    "0": 0,
+    "0.35": 0.2,
+    "1": 0.2
+   },
+   "spin": 0,
+   "fade": 0
+  },
+  {
+   "id": "c_tint",
+   "t": "mesh",
+   "at": 0.3,
+   "life": 0.9,
+   "att": "feet",
+   "shape": "model",
+   "model": "wind_real_cone",
+   "mat": "tex",
+   "tex": "tex/wind_dust",
+   "col": "#cfc7b0",
+   "col2": "#000000",
+   "rim": 0,
+   "uvTile": [
+    1,
+    2
+   ],
+   "uvScroll": [
+    0.3,
+    -1.1
+   ],
+   "pos": [
+    0.0,
+    1.15,
+    0.5
+   ],
+   "rot": [
+    -90,
+    0,
+    0
+   ],
+   "scale": {
+    "0": [
+     3.1,
+     17.0,
+     3.1
+    ],
+    "1": [
+     3.1,
+     17.0,
+     3.1
+    ]
+   },
+   "op": {
+    "0": 0.2,
+    "1": 0.2
+   },
+   "spin": 0,
+   "fade": 0,
+   "loop": true
+  },
+  {
+   "id": "e_tint",
+   "t": "mesh",
+   "at": 0,
+   "life": 0.35,
+   "att": "feet",
+   "shape": "model",
+   "model": "wind_real_cone",
+   "mat": "tex",
+   "tex": "tex/wind_dust",
+   "col": "#cfc7b0",
+   "col2": "#000000",
+   "rim": 0,
+   "uvTile": [
+    1,
+    2
+   ],
+   "uvScroll": [
+    0.3,
+    -1.1
+   ],
+   "pos": [
+    0.0,
+    1.15,
+    0.5
+   ],
+   "rot": [
+    -90,
+    0,
+    0
+   ],
+   "scale": {
+    "0": [
+     3.1,
+     17.0,
+     3.1
+    ],
+    "1": [
+     3.1,
+     17.0,
+     3.1
+    ]
+   },
+   "op": {
+    "0": 0.2,
+    "1": 0
+   },
+   "spin": 0,
+   "fade": 0,
+   "end": true
+  },
+  {
+   "id": "puff",
+   "t": "emit",
+   "at": 0,
+   "life": 0.9,
+   "att": "feet",
+   "pos": [
+    0.0,
+    1.15,
+    0.5
+   ],
+   "from": "sphere",
+   "gravity": 0,
+   "drag": 1,
+   "fr": 0.25,
+   "dir": "aim",
+   "spread": 0.2,
+   "speed": [
+    14,
+    22
+   ],
+   "plife": [
+    0.45,
+    0.85
+   ],
+   "size": [
+    2.2,
+    4.2
+   ],
+   "grow": 0.6,
+   "col": "#e8efea",
+   "c2": "#b9c4bd",
+   "rate": 60,
+   "look": "smoke",
+   "curl": true,
+   "loop": true
+  },
+  {
+   "id": "dustline",
+   "t": "emit",
+   "at": 0,
+   "life": 0.9,
+   "att": "feet",
+   "pos": [
+    0,
+    0.1,
+    0.8
+   ],
+   "from": "line",
+   "gravity": 0,
+   "drag": 1.4,
+   "fh": 15.5,
+   "dir": "aim",
+   "spread": 0.5,
+   "up": [
+    0.1,
+    0.7
+   ],
+   "speed": [
+    4,
+    9
+   ],
+   "plife": [
+    0.5,
+    1.0
+   ],
+   "size": [
+    3,
+    5.5
+   ],
+   "grow": 0.6,
+   "col": "#cfc7b0",
+   "c2": "#9d957f",
+   "rate": 70,
+   "x": true,
+   "look": "smoke",
+   "curl": true,
+   "loop": true
+  },
+  {
+   "id": "streak",
+   "t": "emit",
+   "at": 0,
+   "life": 0.9,
+   "att": "feet",
+   "pos": [
+    0.0,
+    1.15,
+    0.5
+   ],
+   "from": "sphere",
+   "gravity": 0,
+   "drag": 0.3,
+   "fr": 0.3,
+   "dir": "aim",
+   "spread": 0.14,
+   "speed": [
+    24,
+    38
+   ],
+   "plife": [
+    0.18,
+    0.34
+   ],
+   "look": "streak",
+   "size": [
+    1.4,
+    3
+   ],
+   "col": "#ffffff",
+   "c2": "#d8ffe0",
+   "rate": 110,
+   "curl": false,
+   "loop": true
+  },
+  {
+   "id": "streak2",
+   "t": "emit",
+   "at": 0,
+   "life": 0.9,
+   "att": "feet",
+   "pos": [
+    0.0,
+    1.15,
+    0.5
+   ],
+   "from": "sphere",
+   "gravity": 0,
+   "drag": 0.6,
+   "fr": 0.4,
+   "dir": "aim",
+   "spread": 0.3,
+   "speed": [
+    16,
+    26
+   ],
+   "plife": [
+    0.25,
+    0.45
+   ],
+   "look": "streak",
+   "size": [
+    1.2,
+    2.4
+   ],
+   "col": "#e8efea",
+   "c2": "#8dff65",
+   "rate": 70,
+   "curl": true,
+   "loop": true
+  },
+  {
+   "id": "leaves",
+   "t": "emit",
+   "at": 0,
+   "life": 0.9,
+   "att": "feet",
+   "pos": [
+    0.0,
+    1.15,
+    0.5
+   ],
+   "from": "sphere",
+   "gravity": -0.25,
+   "drag": 0.8,
+   "fr": 0.4,
+   "dir": "aim",
+   "spread": 0.32,
+   "speed": [
+    12,
+    20
+   ],
+   "plife": [
+    0.6,
+    1.0
+   ],
+   "look": "model",
+   "model": "wind_leaf",
+   "mmat": "glow",
+   "msize": [
+    0.1,
+    0.2
+   ],
+   "col": "#8dff65",
+   "c2": "#2ec772",
+   "mspin": 520,
+   "rate": 12,
+   "bounce": 0,
+   "x": true,
+   "loop": true
+  },
+  {
+   "id": "grit",
+   "t": "emit",
+   "at": 0,
+   "life": 0.9,
+   "att": "feet",
+   "pos": [
+    0,
+    0.15,
+    1.0
+   ],
+   "from": "line",
+   "gravity": 2,
+   "drag": 1,
+   "fh": 15.0,
+   "dir": "aim",
+   "spread": 0.6,
+   "up": [
+    0.5,
+    2.2
+   ],
+   "speed": [
+    7,
+    14
+   ],
+   "plife": [
+    0.35,
+    0.7
+   ],
+   "look": "streak",
+   "size": [
+    0.5,
+    1.1
+   ],
+   "col": "#cfc7b0",
+   "c2": "#9d957f",
+   "rate": 40,
+   "curl": false,
+   "x": true,
+   "loop": true
+  },
+  {
+   "id": "haze",
+   "t": "warp",
+   "at": 0,
+   "life": 0.9,
+   "loop": true,
+   "att": "feet",
+   "pos": [
+    0,
+    1.3,
+    7.5
+   ],
+   "kind": "haze",
+   "size": 6,
+   "str": 0.45,
+   "op": 1,
+   "col": "#ffffff",
+   "glow": 0,
+   "x": true
+  },
+  {
+   "id": "muzzle",
+   "t": "halo",
+   "at": 0,
+   "life": 0.9,
+   "loop": true,
+   "att": "feet",
+   "pos": [
+    0.35,
+    1.3,
+    0.7
+   ],
+   "col": "#8dff65",
+   "size0": 0.9,
+   "size": 1.1,
+   "k": 0.5
+  },
+  {
+   "id": "rumble",
+   "t": "screen",
+   "at": 0,
+   "life": 0.9,
+   "loop": true,
+   "shake": 0.5,
+   "own": true
+  },
+  {
+   "id": "x_puff",
+   "t": "emit",
+   "at": 0,
+   "life": 0.12,
+   "att": "feet",
+   "pos": [
+    0.0,
+    1.15,
+    0.5
+   ],
+   "from": "sphere",
+   "gravity": 0,
+   "drag": 1,
+   "fr": 0.3,
+   "dir": "aim",
+   "spread": 0.3,
+   "speed": [
+    10,
+    18
+   ],
+   "plife": [
+    0.5,
+    0.9
+   ],
+   "size": [
+    2.5,
+    4.5
+   ],
+   "grow": 0.6,
+   "col": "#e8efea",
+   "c2": "#b9c4bd",
+   "rate": 140,
+   "look": "smoke",
+   "curl": true,
+   "end": true
+  },
+  {
+   "id": "x_dust",
+   "t": "emit",
+   "at": 0,
+   "life": 0.12,
+   "att": "feet",
+   "pos": [
+    0,
+    0.1,
+    6
+   ],
+   "from": "line",
+   "gravity": 0,
+   "drag": 1.6,
+   "fh": 10,
+   "dir": "out",
+   "spread": 0.8,
+   "up": [
+    0.2,
+    1
+   ],
+   "speed": [
+    2,
+    5
+   ],
+   "plife": [
+    0.8,
+    1.4
+   ],
+   "size": [
+    3,
+    5.5
+   ],
+   "grow": 0.7,
+   "col": "#cfc7b0",
+   "c2": "#9d957f",
+   "rate": 60,
+   "x": true,
+   "look": "smoke",
+   "curl": true,
+   "end": true
+  }
+ ]
+}

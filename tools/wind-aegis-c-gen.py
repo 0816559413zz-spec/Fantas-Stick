@@ -9,7 +9,10 @@
 #        wind/aegis_sb_a2 (same demo timeline with the in-game A pieces, for side-by-side comparison)
 import math,random,runpy,copy
 from pathlib import Path
-from PIL import Image,ImageChops,ImageFilter
+try:
+    from PIL import Image,ImageChops,ImageFilter
+except ImportError:
+    Image=None   # no Pillow: keep the existing wind_air_veil.png, only rewrite the .tex.json
 ROOT=Path(__file__).resolve().parents[1]
 NS=runpy.run_path(str(ROOT/'tools/wind-aegis-sb-gen.py'))
 save,r3,RAD,AMAX,HALF,URep=NS['save'],NS['r3'],NS['RAD'],NS['AMAX'],NS['HALF'],NS['URep']
@@ -31,7 +34,10 @@ def veil_field(W,H,seed):
     for _ in range(10):strand(rg.uniform(0,W),rg.uniform(2.5,5),rg.uniform(.6,1),rg.uniform(2,6),rg.uniform(0,6.3),rg.uniform(.4,.8)*H,rg.uniform(0,H))
     return img.filter(ImageFilter.GaussianBlur(1.6))
 def make_veil():
-    FW,FH,C,R=256,384,4,4;N=C*R;field=veil_field(FW,FH,57)
+    FW,FH,C,R=256,384,4,4;N=C*R
+    if Image is None:
+        save(ROOT/'assets/fx/tex/wind_air_veil.tex.json',{'v':1,'desc':'ม่านลมนุ่ม: เส้นลมกว้างฟุ้งแนวตั้งลอยขึ้น (flipbook 4×4 วนต่อเนื่อง เบลนด์เฟรม) สว่างล่าง จางขึ้นบน — กำแพงลมแบบ C','gen':'image','seed':57,'px':FW,'cols':C,'rows':R,'kind':'loop','fps':14,'blend':True,'ramp':'white','add':True,'p':{}});return
+    field=veil_field(FW,FH,57)
     mask=Image.new('L',(FW,FH),0);mp=mask.load()
     for y in range(FH):
         v=1-y/(FH-1);k=(.55+.45*min(1,v/.25))*min(1,(1-v)/.55)**1.5   # strong low, long soft fade upward (ref)
@@ -41,7 +47,7 @@ def make_veil():
         fr=ImageChops.offset(field,0,-int(round(f*FH/N)));tile=Image.new('RGBA',(FW,FH),(255,255,255,0));tile.putalpha(ImageChops.multiply(fr,mask))
         atlas.paste(tile,((f%C)*FW,(f//C)*FH))
     atlas.save(ROOT/'assets/fx/tex/wind_air_veil.png',optimize=True)
-    save(ROOT/'assets/fx/tex/wind_air_veil.tex.json',{'v':1,'desc':'ม่านลมนุ่ม: เส้นลมกว้างฟุ้งแนวตั้งลอยขึ้น (flipbook 4×4 วนต่อเนื่อง) สว่างล่าง จางขึ้นบน — กำแพงลมแบบ C','gen':'image','seed':57,'px':FW,'cols':C,'rows':R,'kind':'loop','fps':10,'ramp':'white','add':True,'p':{}})
+    save(ROOT/'assets/fx/tex/wind_air_veil.tex.json',{'v':1,'desc':'ม่านลมนุ่ม: เส้นลมกว้างฟุ้งแนวตั้งลอยขึ้น (flipbook 4×4 วนต่อเนื่อง) สว่างล่าง จางขึ้นบน — กำแพงลมแบบ C','gen':'image','seed':57,'px':FW,'cols':C,'rows':R,'kind':'loop','fps':14,'blend':True,'ramp':'white','add':True,'p':{}})   # blend = crossfade frame→frame (smooth, not 10 fps stepping)
 make_veil()
 
 # ---------------------------------------------------------------- meshes: barrel curtain + base line with curls
@@ -77,17 +83,17 @@ def veil(lid,life,col,reps,scroll,op,dz=0,sc=None,at=0,loop=False,tex='tex/wind_
         'uvTile':[URep(reps),1],'uvScroll':scroll,'pos':[0,0,round(ZC+dz,3)],'scale':sc if sc is not None else [1,WHG,1],'op':op,'fade':0}
 def g_c_wall(dur=WALL):
     U=lambda t:str(round(t/dur,4));L=[]
-    rise={'0':[1,.04*WHG,1],U(.12):[1,.4*WHG,1],U(.38):[1,1.02*WHG,1],U(.5):[1,WHG,1],U(dur-.4):[1,WHG,1],'1':[1,1.08*WHG,1]}   # grows up from the ground, at the end drifts up
+    rise={'0':[1,.04*WHG,1],U(.1):[1,.3*WHG,1],U(.22):[1,.68*WHG,1],U(.36):[1,1.03*WHG,1],U(.5):[1,WHG,1],U(.75):[1,1.012*WHG,1],U(1.0):[1,.994*WHG,1],U(1.25):[1,1.01*WHG,1],U(dur-.4):[1,WHG,1],'1':[1,1.08*WHG,1]}   # fast-then-settle rise + tiny breathing   # grows up from the ground, at the end drifts up
     op=lambda pk:{'0':0,U(.1):pk,U(dur-.4):pk,'1':0}
-    L.append(veil('veil',dur,WHITE,2.2,[.015,0],op(.6),sc=rise))
-    L.append(veil('veil2',dur,MINT,1.4,[-.02,0],op(.32),dz=-.3,sc=rise))
-    L.append(veil('tint',dur,GREEN,1.1,[.01,0],op(.14),dz=.25,sc=rise))
-    L.append(veil('hair',dur,WHITE,1.3,[.02,0],op(.22),dz=.1,sc=rise,tex='tex/wind_air_rise'))   # a few thin lines for detail
+    L.append(veil('veil',dur,WHITE,2.2,[.07,0],op(.6),sc=rise))
+    L.append(veil('veil2',dur,MINT,1.4,[-.11,0],op(.34),dz=-.3,sc=rise))
+    L.append(veil('tint',dur,GREEN,1.1,[.05,0],op(.16),dz=.25,sc=rise))
+    L.append(veil('hair',dur,WHITE,1.3,[-.06,0],op(.22),dz=.1,sc=rise,tex='tex/wind_air_rise'))   # a few thin lines for detail
     L.append({'id':'line','t':'mesh','at':0,'life':dur,'att':'ground','pos':[0,0,ZC],'shape':'model','model':'wind_aegis_cline','mat':'glow','col':SOFTG,'col2':GREEN,
         'op':{'0':0,U(.08):.75,U(dur-.4):.75,'1':0},'scale':{'0':[.15,1,1],U(.3):[1,1,1]},'fade':0})
-    L.append({'id':'up','t':'emit','at':0,'life':.35,'att':'ground','pos':[0,0,ZC],'from':'mesh','of':'line','rate':160,'dir':'up','speed':[5,9],'plife':[.3,.6],'look':'streak','size':[1.4,2.8],'col':WHITE,'c2':GREEN,'gravity':0,'drag':1.2,'curl':False})
-    L.append({'id':'wisp','t':'emit','at':.4,'life':dur-.8,'att':'ground','pos':[0,0,ZC],'from':'mesh','of':'veil','rate':14,'dir':'up','speed':[1.5,3],'plife':[.6,1.1],'look':'streak','size':[1.2,2.4],'col':MINT,'c2':GREEN,'gravity':0,'drag':.3,'curl':False})
-    L.append({'id':'base','t':'emit','at':.3,'life':dur-.7,'att':'ground','pos':[0,.05,ZC],'from':'mesh','of':'line','rate':6,'dir':'flat','speed':[.4,1],'up':[.05,.3],'plife':[1,1.6],
+    L.append({'id':'up','t':'emit','at':0,'life':.35,'att':'ground','pos':[0,0,ZC],'from':'mesh','of':'line','rate':260,'dir':'up','speed':[6,11],'plife':[.35,.7],'look':'streak','size':[1.4,2.8],'col':WHITE,'c2':GREEN,'gravity':0,'drag':1.2,'curl':False})
+    L.append({'id':'wisp','t':'emit','at':.3,'life':dur-.7,'att':'ground','pos':[0,0,ZC],'from':'mesh','of':'veil','rate':70,'dir':'up','speed':[2.5,5],'plife':[.5,1.0],'look':'streak','size':[1.2,2.4],'col':MINT,'c2':GREEN,'gravity':0,'drag':.3,'curl':False})
+    L.append({'id':'base','t':'emit','at':.3,'life':dur-.7,'att':'ground','pos':[0,.05,ZC],'from':'mesh','of':'line','rate':12,'dir':'flat','speed':[.5,1.2],'up':[.05,.3],'plife':[1,1.6],
         'look':'smoke','size':[3,5],'grow':.4,'col':'#e3ddcb','c2':'#bdb39c','gravity':0,'drag':1,'curl':True,'fin':14,'x':True})
     L.append({'id':'haze','t':'warp','at':.2,'life':dur-.4,'att':'ground','pos':[0,WHG*.45,0],'kind':'haze','size':7,'str':.4,'op':{'0':0,'0.05':1,'0.95':1,'1':0},'col':WHITE,'glow':0,'x':True})
     L.append({'id':'lift','t':'emit','at':dur-.4,'life':.15,'att':'ground','pos':[0,0,ZC],'from':'mesh','of':'veil','burst':40,'rate':0,'dir':'up','speed':[2,4],'plife':[.4,.8],'look':'streak','size':[1.2,2.2],'col':WHITE,'c2':GREEN,'gravity':0,'drag':1,'curl':True})

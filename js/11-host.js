@@ -278,12 +278,12 @@ function updatePlayer(p,dt,acting){
   if(acting&&(inp.ax||inp.ay))p.ang=Math.atan2(inp.ay-p.y,inp.ax-p.x)+(p.bld>0?rnd(-0.22,0.22):0);
 
   // ไม้กวาด: B ขึ้น/ลง — โดนสตันหรือใยแมงมุมจะตกจากไม้กวาด • โหมดโวลเดอมอร์ + FFA ไม่มีไม้กวาด (ผู้ใช้ 2026-10-27)
-  if(pr.b&&canAct&&p.flyCd<=0&&!NOBROOM.has(G.mode)){
+  if(pr.b&&canAct&&p.flyCd<=0&&!NOBROOM.has(G.mode)&&!p.wfo){
     p.fly=!p.fly;p.flyCd=0.8;
     if(p.fly){p.vz=7;p.shieldOn=false;p.dash=0;emit({k:'mount',x:p.x,y:p.y,h:p.z,id:p.id});}
     else emit({k:'dismount',x:p.x,y:p.y,h:p.z,id:p.id});
   }
-  if(p.fly&&(p.stun>0||p.root>0)){p.fly=false;emit({k:'dismount',x:p.x,y:p.y,h:p.z,id:p.id});feed(`🧹 ${p.name} ตกจากไม้กวาด!`);}
+  if(p.fly&&(p.stun>0||p.root>0)){p.fly=false;if(!p.wfo){emit({k:'dismount',x:p.x,y:p.y,h:p.z,id:p.id});feed(`🧹 ${p.name} ตกจากไม้กวาด!`);}}   // wfo = Featherwing Focus: จบโหมดใน windFlyTick
   if(!p.fly){p.flyOn=false;if(p.bab||p.bwm||p.lsc||p.lsd)broomOff(p);}
   if(p.fly)broomVert(p,inp,dt);   // บินแบบเครื่องบิน: เงยกล้อง = ไต่ (js/69)
   else if(p.colos>0){p.colH=clamp((p.colH||9)+((inp.jh?1:0)-(inp.ch?1:0))*6*dt,5,15);p.z+=(p.colH-p.z)*Math.min(1,9*dt);p.vz=0;}
@@ -315,7 +315,7 @@ function updatePlayer(p,dt,acting){
   const ml=Math.hypot(mx,my);if(ml){mx/=ml;my/=ml;}
   if(!canAct||p.root>0||p.dchgOn||p.cryo>0){mx=my=0;}
   else if(p.fear>0){const fa=Math.atan2(p.y-p.fearY,p.x-p.fearX);mx=Math.cos(fa);my=Math.sin(fa);}
-  const spd=(p.fly?PLAY.fly*p.buffs.spd:PLAY.walk*p.buffs.spd*(p.shieldOn&&p.pathIdx!==WATERP?PLAY.shSlow:1))*(p.boost>0?1.45:1)*moveMul(p)*(p.wr||p.aug||p.ecb?earthSpd(p):1)*(p.wdr||p.wfw?windSpd(p):1)*(p.wsk||p.wab||p.wmsT>0?waterSpd(p):1)*(p.dfall?(p.dfall.ph===2?0.45:0):p.sdome?(p.sdome.ph===2?0.45:0):p.rail?0:(p.kindle>0&&p.hover>0)?0.35:p.breath>0?0.7:(p.snapT>0||p.colos>0||p.grT>0)?0.5:1)*(p.slideT>0?1.8:1+(p.iceB||0));
+  const spd=(p.fly?PLAY.fly*p.buffs.spd:PLAY.walk*p.buffs.spd*(p.shieldOn&&p.pathIdx!==WATERP?PLAY.shSlow:1))*(p.boost>0?1.45:1)*moveMul(p)*(p.wr||p.aug||p.ecb?earthSpd(p):1)*(p.wdr||p.wfw||p.wgs?windSpd(p):1)*(p.wsk||p.wab||p.wmsT>0?waterSpd(p):1)*(p.dfall?(p.dfall.ph===2?0.45:0):p.sdome?(p.sdome.ph===2?0.45:0):p.rail?0:(p.kindle>0&&p.hover>0)?0.35:p.breath>0?0.7:(p.snapT>0||p.colos>0||p.grT>0)?0.5:1)*(p.slideT>0?1.8:1+(p.iceB||0));
   p.wSpd=(p.dash>0||p.slideT>0||p.slip>0||!canAct||p.root>0||p.dchgOn||p.cryo>0||p.fear>0||p.gh||p.fly)?0:Math.round(spd);   // ความเร็วเดินตอนนี้ → ลูกข่ายใช้ทำนายตัวเอง (0 = อย่าทำนาย)
   if(p.dash>0){
     p.dash-=dt;const ds=p.dashSp||900;
