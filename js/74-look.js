@@ -12,10 +12,11 @@
 // ฟิลด์: sky = ท้องฟ้าที่ถ่ายเป็นแสง ('night'|'sunset') • warm = ทิศย้อมสี (false = เงาน้ำเงินเข้ม / true = เงาม่วงน้ำเงิน ไฮไลต์ส้ม)
 //   env/tr/tg/tb = ความแรง + สีคูณของแสงฟ้า • hemi/amb = แสงครึ่งทรงกลม/รอบทิศเดิม • exp = ความสว่างภาพ • con = คอนทราสต์ (1 = เดิม)
 //   split = ย้อมสีเงา/ไฮไลต์ • tone = 0 ACES (สดคม) / 1 AgX (นุ่มสมจริง สีจางกว่า)
+//   rays = ลำแสงจากดวงจันทร์/อาทิตย์ (god rays, 0 = ปิด, เปิดเฉพาะกราฟิกสูง/อัตโนมัติที่เครื่องไหว) • haze/hazeK/hazeH = หมอกตามระยะ: ความเข้ม / ความหนา / ที่ต่ำหนากว่าที่สูงแค่ไหน
 var LOOK={pm:null,env:{},cur:null,amb:null,off:/[?&]nolook\b/.test(location.search),
   P:{
-    night:{sky:'night',warm:false,env:0.9,tr:0.62,tg:0.82,tb:1.35,hemi:0.2,amb:0.1,exp:1.0,con:1.15,split:0.12,tone:0},
-    dusk:{sky:'sunset',warm:true,env:1.0,tr:1.12,tg:1.0,tb:0.82,hemi:0.3,amb:0.1,exp:1.0,con:1.12,split:0.12,tone:0}},
+    night:{sky:'night',warm:false,env:0.9,tr:0.62,tg:0.82,tb:1.35,hemi:0.2,amb:0.1,exp:1.0,con:1.15,split:0.12,tone:0,rays:0.5,haze:0.55,hazeK:1.4,hazeH:0.06},
+    dusk:{sky:'sunset',warm:true,env:1.0,tr:1.12,tg:1.0,tb:0.82,hemi:0.3,amb:0.1,exp:1.0,con:1.12,split:0.12,tone:0,rays:0.7,haze:0.55,hazeK:1.4,hazeH:0.06}},
   map:{}};   // map: {รหัสแมพ:'ชื่อพรีเซ็ต'} — ว่าง = ใช้ค่าเริ่มต้นตามท้องฟ้า
 function lookPreset(name,from,over){LOOK.P[name]=Object.assign({},LOOK.P[from],over||{});if(typeof lookRegister==='function')lookRegister(name);return LOOK.P[name];}
 // แมพนี้ใช้พรีเซ็ตไหน (ถูกเรียกจาก js/28 ก่อน setSky) — เก็บใน globalThis เพราะ setSky รันก่อนไฟล์นี้ตอนโหลดโมดูลครั้งแรก
@@ -43,11 +44,28 @@ function lookApply(day){
   if(P.warm){GRADEU.uLo.value.set(1-sp*0.4,1-sp*0.5,1+sp*0.6);GRADEU.uHi.value.set(1+sp*0.7,1+sp*0.15,1-sp*0.7);}   // เงาอมม่วงน้ำเงิน ไฮไลต์อมส้ม
   else{GRADEU.uLo.value.set(1-sp*0.7,1-sp*0.1,1+sp);GRADEU.uHi.value.set(1+sp*0.3,1+sp*0.1,1-sp*0.2);}   // เงาอมน้ำเงินเข้ม
   gl.toneMapping=P.tone?THREE.AgXToneMapping:THREE.ACESFilmicToneMapping;
+  GFX.haze=P.haze;GFX.hazeK=P.hazeK;GFX.hazeH=P.hazeH;lookRays();
+}
+// ลำแสง: เปิดตามระดับกราฟิกเหมือน SSAO (สูง = เปิด / อัตโนมัติ = เปิดจนกว่าเครื่องเริ่มช้า / ประหยัด = ปิด)
+function lookRays(){
+  if(!LOOK||LOOK.off||!LOOK.cur){AOU.uRay.value=0;return;}
+  const soft=QUAL.mode!=='low'&&!(QUAL.mode==='auto'&&QUAL.lvl>=2);
+  AOU.uRay.value=soft&&(QUAL.mode==='high'||QUAL.lvl<1)?LOOK.P[LOOK.cur].rays:0;
+}
+const _lkV=new THREE.Vector3();
+// ทุกเฟรม (จาก FXPass): ตำแหน่งดวงจันทร์/อาทิตย์บนจอ + ความจางเมื่ออยู่นอกจอ/หลังกล้อง
+function lookRaysFrame(){
+  if(!(AOU.uRay.value>0.001)){AOU.uSunVis.value=0;return;}
+  const o=SKY.day?SKY.sun:SKY.moon;_lkV.copy(o.position).project(cam);
+  const off=Math.max(Math.abs(_lkV.x),Math.abs(_lkV.y));
+  AOU.uSunUV.value.set(_lkV.x*0.5+0.5,_lkV.y*0.5+0.5);AOU.uSunVis.value=_lkV.z<1?Math.max(0,Math.min(1,(1.7-off)/0.9)):0;
+  AOU.uRayCol.value.copy(moonL.color);
 }
 function lookRefresh(){if(LOOK.cur)lookApply(!!SKY.day);}
 // ---- ลงทะเบียนในเครื่องมือปรับค่า (js/73-tune.js): 1 หมวด "🌗 Look" แยกส่วนตามพรีเซ็ต ----
 const LOOK_F={env:['ความแรงแสงฟ้า (IBL)',0,8,0.1],tr:['สีแสงฟ้า แดง',0,2,0.01],tg:['สีแสงฟ้า เขียว',0,2,0.01],tb:['สีแสงฟ้า น้ำเงิน',0,2,0.01],
   hemi:['แสงครึ่งทรงกลมเดิม',0,1.5,0.01],amb:['แสงรอบทิศ',0,1,0.01],exp:['ความสว่างภาพ (exposure)',0.5,2,0.01],con:['คอนทราสต์ (1 = เดิม)',0.8,1.6,0.01],
+  rays:['ลำแสงจันทร์/อาทิตย์ (god rays, 0 = ปิด)',0,2,0.01],haze:['หมอกตามระยะ • ความเข้ม',0,1,0.01],hazeK:['หมอกตามระยะ • ความหนา',0,4,0.05],hazeH:['หมอก • ต่ำหนากว่าสูง (ยิ่งมากยิ่งต่างมาก)',0,0.4,0.005],
   split:['ย้อมสีเงา/ไฮไลต์',0,0.4,0.01],tone:['โทนสี 0 = ACES สดคม / 1 = AgX นุ่มสมจริง',0,1,1]};
 function lookRegister(name){const P=LOOK.P[name],sec='พรีเซ็ต "'+name+'" ('+(P.sky==='sunset'?'ฟ้าเย็น':'ฟ้ากลางคืน')+')';
   for(const f of Object.keys(LOOK_F))tuneNum(['look','🌗 Look (พรีเซ็ตแสง)'],sec,'look.'+name+'.'+f,LOOK_F[f][0],()=>P[f],v=>{P[f]=v;lookRefresh();},{min:LOOK_F[f][1],max:LOOK_F[f][2],step:LOOK_F[f][3]});}
