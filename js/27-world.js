@@ -119,18 +119,18 @@ const AO_COPY=AO_HEAD+'uniform sampler2D t;uniform sampler2D tAO;uniform vec2 uA
     'if(fall>0.002){float ng=fract(52.9829189*fract(dot(gl_FragCoord.xy,vec2(0.06711056,0.00583715))));vec2 st=d*0.6/10.0;float acc=0.0;'+
       'for(int i=0;i<10;i++){vec2 uv=vUv+st*(float(i)+ng);vec2 b=step(vec2(0.0),uv)*step(uv,vec2(1.0));acc+=step(0.99999,texture2D(tD,uv).x)*b.x*b.y;}'+
       'float sky=step(0.99999,texture2D(tD,vUv).x);c.rgb+=uRayCol*(uRay*uSunVis*fall*acc*0.1*mix(1.0,0.3,sky));}}'+
-  'c.a=1.0;gl_FragColor=c;}';
+  '{float q=c.r+c.g+c.b;if(!(q>=0.0&&q<1e4))c.rgb=vec3(0.0);}c.a=1.0;gl_FragColor=c;}';
 // ===== TAA (ลบขอบหยักแบบสะสมหลายเฟรม) — กราฟิกสูงเท่านั้น • ปิดด้วย ?notaa =====
 // ขั้นตอน: taaBegin (js/37) สั่นกล้อง (Halton 8 ค่า ต่ำกว่าพิกเซล) ก่อนวาดฉาก → ใน FXPass ผสมภาพฉากกับประวัติ (ย้อนตำแหน่งด้วยการขยับของกล้อง + ความลึก) แล้วเลิกสั่นก่อนวาดเอฟเฟกต์ (อนุภาค/เอฟเฟกต์ไม่สั่น)
 // กันภาพเงา (ghost): ตรึงประวัติให้อยู่ในช่วงสีของพิกเซลรอบข้าง 3×3 + เทียบความลึกประวัติ (เก็บใน alpha) → วัตถุที่ขยับ/พื้นที่เพิ่งเปิดเห็น = ใช้ภาพใหม่
 const TAA={on:!/[?&]notaa\b/.test(location.search),alpha:0.1,sharp:0.25,jit:false,applied:false,n:0,valid:0,i:0,rt:[null,null],w:0,h:0,quad:null,cur:new THREE.Matrix4(),prev:new THREE.Matrix4(),inv:new THREE.Matrix4()};
-const TAA_FRAG='uniform sampler2D tCur;uniform sampler2D tHist;uniform sampler2D tD;uniform mat4 uInvVP;uniform mat4 uPrevVP;uniform vec2 uPx;uniform float uAlpha;uniform float uSharp;uniform float uValid;uniform float uNear;uniform float uFar;varying vec2 vUv;'+
-  'void main(){vec3 c=texture2D(tCur,vUv).rgb;float dp=texture2D(tD,vUv).x;'+
+const TAA_FRAG='vec3 gd(vec3 v){float q=v.r+v.g+v.b;return (q>=0.0&&q<1e4)?v:vec3(0.0);}uniform sampler2D tCur;uniform sampler2D tHist;uniform sampler2D tD;uniform mat4 uInvVP;uniform mat4 uPrevVP;uniform vec2 uPx;uniform float uAlpha;uniform float uSharp;uniform float uValid;uniform float uNear;uniform float uFar;varying vec2 vUv;'+
+  'void main(){vec3 c=gd(texture2D(tCur,vUv).rgb);float dp=texture2D(tD,vUv).x;'+
   'float z=dp>=0.99999?uFar:(uNear*uFar)/(uFar-dp*(uFar-uNear));'+
   'vec3 mn=c,mx=c,sm=c;'+
-  'for(int i=0;i<8;i++){float a=float(i)*0.7853982;vec2 o=vec2(cos(a),sin(a));o=o/max(abs(o.x),abs(o.y));vec3 n=texture2D(tCur,vUv+o*uPx).rgb;mn=min(mn,n);mx=max(mx,n);sm+=n;}'+
+  'for(int i=0;i<8;i++){float a=float(i)*0.7853982;vec2 o=vec2(cos(a),sin(a));o=o/max(abs(o.x),abs(o.y));vec3 n=gd(texture2D(tCur,vUv+o*uPx).rgb);mn=min(mn,n);mx=max(mx,n);sm+=n;}'+
   'vec4 w=uInvVP*vec4(vUv*2.0-1.0,dp*2.0-1.0,1.0);w/=w.w;vec4 pc=uPrevVP*w;vec2 pu=pc.xy/pc.w*0.5+0.5;'+
-  'vec4 h=texture2D(tHist,pu);'+
+  'vec4 h=texture2D(tHist,pu);h.rgb=gd(h.rgb);'+
   'float ok=uValid*step(0.0,pu.x)*step(pu.x,1.0)*step(0.0,pu.y)*step(pu.y,1.0)*step(0.0,pc.w);'+
   'float rej=dp>=0.99999?0.0:step(0.05*pc.w+0.25,abs(h.a-pc.w));'+   // ความลึกประวัติไม่ตรง = วัตถุขยับ/เพิ่งเปิดเห็น
   'vec3 hc=clamp(h.rgb,mn,mx);'+
@@ -187,6 +187,8 @@ const fxPass=new FXPass();composer.addPass(fxPass);
 const bloom=new UnrealBloomPass(new THREE.Vector2(512,512),0.72,0.5,0.86);
 // เรนเดอร์แสงฟุ้งที่ครึ่งความละเอียด (ดูแทบไม่ต่าง แต่เร็วขึ้นมาก)
 {const bs=bloom.setSize.bind(bloom);bloom.setSize=(w,h)=>bs(Math.max(1,Math.round(w/2)),Math.max(1,Math.round(h/2)));}
+// พิกเซลเสีย (NaN/inf) จุดเดียวจะถูก blur กระจายจนจอดำ/ขาวทั้งจอ → ตัดทิ้งก่อนเข้า bloom
+bloom.materialHighPassFilter.fragmentShader=bloom.materialHighPassFilter.fragmentShader.replace('vec4 texel = texture2D( tDiffuse, vUv );','vec4 texel = texture2D( tDiffuse, vUv );float nq=texel.r+texel.g+texel.b+texel.a;if(!(nq>=0.0&&nq<1e4))texel=vec4(0.0);');
 composer.addPass(bloom);
 // โทนสีทั้งจอ + เอฟเฟกต์ทั้งจอ: แฟลชสี, เบลอพุ่งเข้าหาจุด (radial blur ตอนอัลติ), สีเหลื่อม (chromatic) ตอนกระแทก, ขอบจอมืด/แดงตอนโดนตี
 const GRADEU={tDiffuse:{value:null},uFlash:{value:new THREE.Color(0,0,0)},uRad:{value:0},uCtr:{value:new THREE.Vector2(0.5,0.5)},uChr:{value:0},uVig:{value:0.28},uHurt:{value:0},uSat:{value:1.1},uOn:{value:1},uCon:{value:1},uLo:{value:new THREE.Vector3(1,1,1)},uHi:{value:new THREE.Vector3(1,1,1)}};
