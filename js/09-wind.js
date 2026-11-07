@@ -9,13 +9,13 @@ const WINDP=PATHS.length;
 // ตัวเลขทั้งหมดของสายลม: WNV = PATHS[WINDP].v (ใบมีดลม/GaleBurst/โล่ปีก/Dash) + v:{...} ของแต่ละสกิล (W_WL W_DR W_VX W_VO W_FW W_UL = S.v) — ปรับได้ใน tune.html / F8 (js/73-tune.js)
 PATHS.push({id:'wind',n:'สายลม',ic:'🌪️',col:'#8dff65',d:'ผู้ผลัก — สร้างกำแพงลม ผลักศัตรูไปชนให้สตัน ตีต่อจนกำแพงแตกระเบิด คุมตำแหน่งศัตรูแล้วคิดตาต่อไป',
   combo:'BA ใบมีดลมเก็บเกจ GaleBurst → เต็มแล้วกดค้างยิงลมต่อเนื่องผลักเบา ๆ • ผลักศัตรูชนกำแพงลม = สตัน 0.5 วิ • ตีศัตรูที่ติดกำแพงครบ 70 = กำแพงแตก ระเบิด 50 กระเด็นไกล • Dash ดีดถอยหลังผลักศัตรูชนกำแพง 20 • ใช้สกิลกลางอากาศได้'});
-const WNV=PATHS[WINDP].v={baDmg:5,baCd:0.30,baRange:400,baGain:12,baHold:0.35,baChg:8,gbHold:0.3,gbDur:2.6,gbLen:340,gbR0:10,gbR1:62,gbTick:0.25,gbDmg:5,gbAcc:800,gbMax:120,gbSlow:0.55,gbCd:0.5,
+const WNV=PATHS[WINDP].v={baDmg:5,baCd:0.30,baRange:600,baSpd:1100,baGain:12,baHold:0.35,baChg:8,gbHold:0.3,gbDur:2.6,gbLen:340,gbR0:10,gbR1:62,gbTick:0.25,gbDmg:5,gbAcc:800,gbMax:120,gbSlow:0.55,gbCd:0.5,
   shHp:75,shGain:10,shChg:0.3,shR:200,shStun:0.8,shPush:1500,shDmg:20,dsBack:1800,dsVz:7,dsPush:1500,dsReach:150,dsCone:60,dsWall:20,dsCd:8};
-PATHS[WINDP].vn={baDmg:'ใบมีดลม • ดาเมจ',baCd:'ใบมีดลม • เว้น (วิ)',baRange:'ใบมีดลม • ระยะ',baGain:'ใบมีดลม • โดนแล้วเกจ +%',baHold:'ดูดลม • กดค้างกี่วิเริ่ม',baChg:'ดูดลม • เกจ +%/วิ',
+PATHS[WINDP].vn={baDmg:'ใบมีดลม • ดาเมจ',baCd:'ใบมีดลม • เว้น (วิ)',baRange:'ใบมีดลม • ระยะ',baSpd:'ใบมีดลม • ความเร็ว',baGain:'ใบมีดลม • โดนแล้วเกจ +%',baHold:'ดูดลม • กดค้างกี่วิเริ่ม',baChg:'ดูดลม • เกจ +%/วิ',
   gbHold:'GaleBurst • กดค้างก่อนยิง (วิ)',gbDur:'GaleBurst • ยิงต่อเนื่องได้นาน (วิ เกจเต็ม→หมด)',gbLen:'GaleBurst • ระยะ',gbR0:'GaleBurst • กว้างต้นทาง (รัศมี)',gbR1:'GaleBurst • กว้างปลาย (รัศมี)',gbTick:'GaleBurst • ติดดาเมจทุก (วิ)',gbDmg:'GaleBurst • ดาเมจต่อครั้ง',gbAcc:'GaleBurst • แรงดันศัตรู (เร่ง)',gbMax:'GaleBurst • ความเร็วดันศัตรูสูงสุด',gbSlow:'GaleBurst • ตัวเราเดินช้าลง (เท่า)',gbCd:'GaleBurst • เว้นหลังหยุดยิง (วิ)',
   shHp:'โล่ปีก • รับดาเมจได้',shGain:'โล่ปีก • โดนตีเกจ +%',shChg:'ระเบิดปีก • ชาร์จ (วิ)',shR:'ระเบิดปีก • รัศมี',shStun:'ระเบิดปีก • สตัน (วิ)',shPush:'ระเบิดปีก • แรงผลัก',shDmg:'ระเบิดปีก • ดาเมจ',
   dsBack:'Dash • แรงดีดถอยหลัง',dsVz:'Dash • แรงลอยขึ้น',dsPush:'Dash • แรงผลักศัตรู',dsReach:'Dash • ระยะผลักข้างหน้า',dsCone:'Dash • มุมผลัก (องศา ครึ่งซ้าย/ขวา)',dsWall:'Dash • ผลักชนกำแพง ดาเมจ',dsCd:'Dash • คูลดาวน์ (วิ)'};
-Object.assign(PDEF,{wblade:{spd:1400,r:9,dmg:WNV.baDmg,life:WNV.baRange/1400,col:'#8dff65'}});
+Object.assign(PDEF,{wblade:{spd:WNV.baSpd,r:9,dmg:WNV.baDmg,life:WNV.baRange/WNV.baSpd,col:'#8dff65'}});
 // ---------- ตัวช่วย ----------
 const wOn=p=>p&&p.pathIdx===WINDP;
 function wGain(p,n){if(!wOn(p))return;const was=p.wg|0;p.wg=Math.min(100,(p.wg||0)+n);if(was<100&&p.wg>=100)emit({k:'efx',z:'wngbfull',x:p.x,y:p.y,h:p.z,id:p.id});}
@@ -62,7 +62,7 @@ function windBasic(p,inp,dt,setCd){
   if(p.wgs){windStreamTick(p,inp,dt,setCd);return;}   // กำลังยิงลมต่อเนื่อง (GaleBurst)
   if(inp.fire&&!prev){p.wfHeld=0;p.wgw=0;
     if(p.wg>=100)return;   // เกจเต็ม: ไม่ยิงทันที ต้องกดโจมตีปกติค้างไว้ (ดูด้านล่าง)
-    if(p.cd.basic<=0){PDEF.wblade.life=WNV.baRange/PDEF.wblade.spd;shoot(p,'wblade',{sp:'b_wind',dmg:WNV.baDmg});setCd('basic',WNV.baCd);}
+    if(p.cd.basic<=0){PDEF.wblade.spd=WNV.baSpd;PDEF.wblade.life=WNV.baRange/WNV.baSpd;shoot(p,'wblade',{sp:'b_wind',dmg:WNV.baDmg});setCd('basic',WNV.baCd);}
     return;}
   if(inp.fire){p.wfHeld=(p.wfHeld||0)+dt;
     if(p.wg>=100){   // เกจเต็ม + กดค้าง = เตรียม 0.3 วิ แล้วยิงลมออกไปต่อเนื่องจนปล่อยปุ่มหรือเกจหมด
@@ -277,7 +277,7 @@ const W_UL=defSpell(WINDP,{id:'eyeofheaven',v:{r:350,slam:1.0,wall:1.15,imp:2.38
   cast(p){p.wult={t:0,x:p.x,y:p.y,fl:new Set()};p.shieldOn=false;p.wfw=null;p.wdr=null;emit({k:'efx',z:'wnult',x:Math.round(p.x),y:Math.round(p.y),h:p.z,a:Math.round(p.ang*100)/100,id:p.id});}}).v;
 
 // ท่าพื้นฐาน + โล่ + Dash ของสาย (PBASIC ต้องอยู่ช่องเดียวกับลำดับใน PATHS)
-PBASIC.push({id:'b_wind',type:'wblade',n:'ใบมีดลม / GaleBurst',d:'คลิก = ใบมีดลม 5 ดาเมจ ทุก 0.3 วิ ระยะ 400 โดนแล้วเกจ GaleBurst +12% • กดค้าง (เกจยังไม่เต็ม) = ดูดลมรอบตัว +8%/วิ • เกจเต็ม = กดโจมตีปกติค้าง 0.3 วิ แล้วยิงลมกรวยกว้างต่อเนื่อง 17 ม. นาน 2.6 วิ (ปล่อยปุ่ม = หยุด เกจที่เหลือเก็บไว้) 5 ดาเมจ/0.25 วิ ผลักศัตรูเบา ๆ ตัวเราเดินช้าลง',
+PBASIC.push({id:'b_wind',type:'wblade',n:'ใบมีดลม / GaleBurst',d:'คลิก = ใบมีดลม (ลมพัดไป) 5 ดาเมจ ทุก 0.3 วิ ระยะ 600 ความเร็ว 1100 โดนแล้วเกจ GaleBurst +12% • กดค้าง (เกจยังไม่เต็ม) = ดูดลมรอบตัว +8%/วิ • เกจเต็ม = กดโจมตีปกติค้าง 0.3 วิ แล้วยิงลมกรวยกว้างต่อเนื่อง 17 ม. นาน 2.6 วิ (ปล่อยปุ่ม = หยุด เกจที่เหลือเก็บไว้) 5 ดาเมจ/0.25 วิ ผลักศัตรูเบา ๆ ตัวเราเดินช้าลง',
   shd:'โล่ปีกห่อตัว: กันรอบตัว 360° รับได้ 75 • โดนตีแต่ละครั้ง +10% เกจ • เกจเต็มระหว่างยกโล่ + คลิกซ้าย = ชาร์จปีกแล้วระเบิดรอบตัว รัศมี 200 ผลัก 250 สตัน 0.8 วิ 20 ดาเมจ',
   dsd:'Dash ถอยหลังผลัก (Shift): ผลักศัตรูข้างหน้า 250 ตัวเราดีดถอยหลัง 300 ลอยกลางอากาศ (ใช้สกิลกลางอากาศได้) • ศัตรูที่โดนผลักชนกำแพง = 20 ดาเมจ + สตัน • คูลดาวน์ 8 วิ',
   get shMul(){return 100/WNV.shHp;},shieldSwing:true,

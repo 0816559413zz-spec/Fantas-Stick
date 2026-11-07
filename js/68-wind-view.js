@@ -68,7 +68,7 @@ function windEfx(ev){
     case 'wngbw':fxPlay('wind/gale_charge',{x,y,h:H,a:0,follow:ev.id});if(near)snd('cast_pull',ev);return true;   // เตรียมยิง (กดค้างตอนเกจเต็ม)
     case 'wngb':{const o=WV.gs||(WV.gs=new Map());const old=o.get(ev.id);if(old){fxStop(old);o.delete(ev.id);}   // ยิงลมต่อเนื่อง: เริ่ม (n=1) / หยุด (n=0) ตามตัวผู้ร่าย
       if(ev.n===1){const h=fxPlay('wind/gale_stream',{x,y,h:H,a:ev.a||0,follow:ev.id});if(h)o.set(ev.id,h);if(near)snd('cast_pull',ev);}return true;}
-    case 'wngbhit':case 'wndshit':fxPlay('wind/ba_hit',{x,y,h:Math.max(0,H-0.2),a:Math.random()*6.283});return true;
+    case 'wngbhit':case 'wndshit':fxPlay('wind/ba_gust_hit',{x,y,h:Math.max(0,H-0.2),a:Math.random()*6.283});return true;
     case 'wngbfull':fxPlay('wind/ba_hit',{x,y,h:H+1.2,a:0});ring(x,y,'#8dff65',30,0.3,H+0.1);if(mine)toast('GaleBurst พร้อม! กดโจมตีปกติค้าง = ยิงลมต่อเนื่อง');return true;
     case 'wnchg':return true;
     case 'wnsbchg':ring(x,y,'#b8ff85',60,0.3,H+1);return true;
