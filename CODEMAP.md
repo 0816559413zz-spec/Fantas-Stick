@@ -118,7 +118,7 @@ waterDragonTick:119
 §133 ทุกเฟรม (ทั้งเกม)
 updateWater:134 waterSnapP:140 waterSnapW:142 WT_RP:145 WT_FM:148 WT_CG:150 WT_AB:154 WT_MW:157 WT_UL:159
 
-## js/09-wind.js (306) — 
+## js/09-wind.js (311) — 
 WINDP:8 WNV:12
 §19 ตัวช่วย
 wOn:20 wGain:21 wSeg:23 wFoeNear:24
@@ -143,10 +143,10 @@ windVoidCast:216 windVoidTick:218
 §229 Featherwing: บิน 5 วิ → กดอีกครั้งสะบัดปีกไปข้างหน้า (เอียงลงพื้น) → …
 §230 Featherwing (ผู้ใช้ 2026-11-07, ท่าไฮไลต์): กด → หมุนตัวมีปีกบินวนขึ้…
 windFlyTick:233 windFocusEnd:242 windFlick:243 windFocusAct:249
-§252 อัลติ Eye of Heaven
-windUltTick:255 windFloatZ:269 windSnapP:272 windSnapW:273
-§276 สกิล
-W_WL:277 W_DR:280 W_VX:282 W_VO:285 W_FW:287 W_UL:295
+§252 อัลติ Eye of Heaven (v2 2026-11-07)
+windUltTick:256 windFloatZ:274 windSnapP:277 windSnapW:278
+§281 สกิล
+W_WL:282 W_DR:285 W_VX:287 W_VO:290 W_FW:292 W_UL:300
 
 ## js/10-net.js (198) — 
 PREFIX:4 NET:5 RC:9 TURN_SERVERS:12 ICE:13 PEER_OPT:14 TURN_URL:16 ICE_READY:18 JN:22 LAG:24 lagDo:25 hostSend:26 LOBBY:27 genCode:28 sendAll:29 NETD_KEYS:33 NETD:33 netDeltaReset:34 netDelta:35 NET_MAX:49 _netTE:49 netSendSnap:50 NETU:62 netUndelta:63 setStatus:69 hostGame:71 hostPeer:79 netConnect:98 joinWatch:109 joinFail:124 netLost:130 joinGame:145 joinPeer:156 clientOnData:171 leave:186 leaveRoom:188
@@ -268,20 +268,20 @@ statusFX:3 fx:27
 §208 overlay: เลือกบัฟ / สรุปผล
 choosePick:209 syncOverlays:214 showOver:235
 
-## js/27-world.js (383) — 
+## js/27-world.js (387) — 
 S3:4 tx:4 tz:4 CITY_KERB:7 cityKerb:8 GY:9 TW:9 hdr:10 gl:12
 §20 เงานุ่มแบบ PCSS (contact-hardening): ใกล้จุดสัมผัสคม ไกลจากวัตถุที่บั…
 PCSS:23 scene:50 cam:52 composer:53
 §54 ท่อภาพ (post-processing): ฉาก → ชั้นเอฟเฟกต์นุ่ม (FXPass) → แสงฟุ้ง →…
 rpass:57 fxScene:59 SOFTU:61 SOFT_GLSL:62 FXMATS:64 fxMat:65 softify:67 HAZE_U:72 AOU:76 GFX:82 AO_ON:83 AO_HEAD:84 AO_CALC:88 AO_COPY:102
 §123 TAA (ลบขอบหยักแบบสะสมหลายเฟรม) — กราฟิกสูงเท่านั้น • ปิดด้วย ?notaa
-TAA:126 TAA_FRAG:127 _taaH:142 taaWanted:143 taaBegin:144 taaEnd:152 taaFinish:153 taaResolve:155 AO_RT:165 fxPass:186 bloom:187 GRADEU:194 gradePass:211 aaPass:229
-§231 คุณภาพกราฟิก: auto = ปรับความละเอียดเองตาม FPS / high = สวยสุด / low …
-QUAL:232 QUAL_NAME:233 qualPR:234 applyQuality:240 qualTick:261
-§277 ประหยัด CPU สำหรับเครื่องอ่อน (ผู้ใช้ 2026-11-06 "เครื่องผู้เล่นแย่กว…
-qualCS:281 CULL:282 cullTick:283 texCanvas:294 glowTex:295 stoneTex:296 runeTex:302 glowMats:310 glowMat:311 STONEM:313 stoneMat:314 shadowAll:315 SKY:318 hemi:338 moonL:340 LDIR:344 setSky:345
-§354 เงาตามผู้เล่น
-SHD:358 _shF:359 _shR:359 _shU:359 _shC:359 _shY:359 shadowFollow:360 shadowSoft:380 LPOOL:382
+TAA:126 TAA_FRAG:127 _taaH:142 taaWanted:143 taaBegin:144 taaEnd:152 taaFinish:153 taaResolve:155 AO_RT:165 fxPass:186 bloom:187 GRADEU:194 gradePass:215 aaPass:233
+§235 คุณภาพกราฟิก: auto = ปรับความละเอียดเองตาม FPS / high = สวยสุด / low …
+QUAL:236 QUAL_NAME:237 qualPR:238 applyQuality:244 qualTick:265
+§281 ประหยัด CPU สำหรับเครื่องอ่อน (ผู้ใช้ 2026-11-06 "เครื่องผู้เล่นแย่กว…
+qualCS:285 CULL:286 cullTick:287 texCanvas:298 glowTex:299 stoneTex:300 runeTex:306 glowMats:314 glowMat:315 STONEM:317 stoneMat:318 shadowAll:319 SKY:322 hemi:342 moonL:344 LDIR:348 setSky:349
+§358 เงาตามผู้เล่น
+SHD:362 _shF:363 _shR:363 _shU:363 _shC:363 _shY:363 shadowFollow:364 shadowSoft:384 LPOOL:386
 
 ## js/28-city-build.js (386) — เมืองมักเกิ้ล (ลอนดอน) — ภาพ • ข้อมูลอยู่ js/02-city.js • โมเดลจาก as…
 CITY_WIN:4 cityWinTex:5 cityEmTex:10 cityBoxGeo:16 buildCity:21
@@ -414,7 +414,7 @@ _wpM:108 fileWeapon:109
 §117 Ice circle (Permafrost): ริบบิ้นแสงวนเป็นก้นหอยบนพื้น + ผลึกลอยหมุนรอ…
 SWIRL_FS:118 ICIRC:122 iceCircle:123 updateIceCircles:134
 
-## js/44-vfx-kit.js (365) — 
+## js/44-vfx-kit.js (374) — 
 §8 1) หางแสง
 TRMAX:11 TRPTS:11 TRAILS:11 _trL:12 trailLayer:13 trailNew:22 trailPoint:24 trailStop:27 _tv1:28 _tv2:28 _tv3:28 updateTrails:29
 §52 2) สูตรเอฟเฟกต์ = จานสี (ธาตุ) × แม่แบบ (ขนาด/ชนิด)
@@ -428,7 +428,7 @@ BFM:231 BF_MK:232 BF_MKA:232 BF_MKR:232 bfMarkMesh:233 _bfQ:241 _bfQ2:241 _bfN:2
 §311 3d) สนามรบ ขั้น 5: บรรยากาศตามความพังรอบตัว (designs/battlefield.md)
 BFA:315 bfWreck:316 updateBfAir:321 bfRumble:344 updateBf:347
 §350 4) เอฟเฟกต์ทั้งจอ (ค่าไปที่ GradePass ใน js/27-world.js)
-SCR:351 screenFlash:352 screenRadial:353 screenKick:354 screenHurt:355 _scv:356 updateScreenFx:357 updateVfxKit:365
+SCR:351 impactFrame:354 screenFlash:355 screenRadial:356 screenKick:357 screenHurt:358 _scv:359 updateScreenFx:360 updateVfxKit:374
 
 ## js/45-fx-runtime.js (384) — 
 FXR:9 FXDEG:10
@@ -686,20 +686,22 @@ waterEfx:184
 §212 HUD: เกจฮีลโล่ (โค้งซ้ายรอบเป้าเล็ง)
 drawWaterHud:213
 
-## js/68-wind-view.js (240) — สายลม 🌪️ — ภาพฝั่งเครื่องเล่น (ขั้นที่ 1) • ตรรกะอยู่ js/09-wind.js • ไฟล์นี้มีแต่นิยามฟ…
+## js/68-wind-view.js (248) — 
 WV:6 WN_BODY:8 WN_AIR_FEET:8 windCharacterPose:10 wvState:26 wvAlive:27
 §28 ทุกเฟรมของผู้เล่นสายลม: ปีกติดหลัง / ปีกห่อตอนยกโล่ / ดูดลมชาร์จเกจ
 windFX:29
 §48 กำแพงลมจาก snapshot (ตามตำแหน่ง/ลบเมื่อหมด)
 syncWind:49 wvWall:62 wvHitFx:63 wvAimFx:64
-§65 เหตุการณ์ (efx z 'wn…')
-windEfx:66
-§113 HUD รอบเป้าเล็ง: เกจ GaleBurst (โค้งซ้าย) + ชาร์จกำแพงลม (จุด 3 จุดใต…
-drawWindHud:114
-§121 ตัวช่วยเล็งกำแพงลม (เห็นเฉพาะเรา): เส้นโค้งเรืองที่จุดวาง (คลิกขวา) +…
-wvAimGhost:122
-§133 ปีกเวทสายลมติดหลัง: ขนนก 8+4 เส้นต่อข้าง ทำจากสายลม (shader) + ริบบิ้…
-WWS:135 WWU:135 WW_NOISE:136 _wwMat:141 wwMats:142 wwFeatherGeo:188 WW_PRI:199 WW_COV:201 WW_RIB:202 _wwGeo:203 makeWindWings:204 wwCue:218 poseWindWings:222
+§65 ตา Eye of Heaven: ตำแหน่งตาบนฟ้า (ตรงกับ EYE ใน tools/wind-eye-ult-ge…
+wvEyePos:66 wvEyeSeen:67
+§68 เหตุการณ์ (efx z 'wn…')
+windEfx:69
+§121 HUD รอบเป้าเล็ง: เกจ GaleBurst (โค้งซ้าย) + ชาร์จกำแพงลม (จุด 3 จุดใต…
+drawWindHud:122
+§129 ตัวช่วยเล็งกำแพงลม (เห็นเฉพาะเรา): เส้นโค้งเรืองที่จุดวาง (คลิกขวา) +…
+wvAimGhost:130
+§141 ปีกเวทสายลมติดหลัง: ขนนก 8+4 เส้นต่อข้าง ทำจากสายลม (shader) + ริบบิ้…
+WWS:143 WWU:143 WW_NOISE:144 _wwMat:149 wwMats:150 wwFeatherGeo:196 WW_PRI:207 WW_COV:209 WW_RIB:210 _wwGeo:211 makeWindWings:212 wwCue:226 poseWindWings:230
 
 ## js/69-broom.js (235) — ไม้กวาด (ผู้ใช้ 2026-10-29): บินแบบเครื่องบิน + ยิงลำแสงตามสาย + อนิเ…
 BRM:9 BFW:12 BSK:13 BROOM_SK:19 broomVert:40 broomMove:53 broomStrike:71 broomStrikeTick:80 broomFlak:88 broomAct:99 broomOff:106 broomBeam:108
@@ -747,4 +749,4 @@ surfSync:48 surfQuality:52
 SURF_VS:54 SURF_VS_BODY:55 SURF_FS:66 SURF_FS_BODY:67 surfOk:97 surfApply:98 surfScene:110
 §111 ปรับค่า (tune.html / F8)
 
-(88 files, 21507 lines)
+(88 files, 21533 lines)

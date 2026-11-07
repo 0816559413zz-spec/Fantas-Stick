@@ -249,14 +249,19 @@ function windFlick(p){const F=p.wfw;if(!F||F.ph!=='focus')return;windFocusEnd(p)
 function windFocusAct(p,inp,dt){p.wbCd=Math.max(0,(p.wbCd||0)-dt);p.bbv=0;p.bbf=0;
   if(inp.fire&&p.wbCd<=0){p.wbCd=W_FW.fbCd;const a=p.ang;p.ang+=rnd(-W_FW.fbSpr,W_FW.fbSpr);Object.assign(PDEF.wball,{spd:W_FW.fbSpd,life:W_FW.fbRange/W_FW.fbSpd,dmg:W_FW.fbDmg});shoot(p,'wball',{sp:'b_wind',quiet:1});p.ang=a;}}
 
-// ---------- อัลติ Eye of Heaven ----------
-// 0 ชูไม้ → 1.0 ปักไม้ลงพื้น: ทุกคนในรัศมี 350 ลอยค้าง 1.5 วิ (ทำอะไรไม่ได้) → 1.15 กำแพงลมวงกลม 8 ชิ้นขึ้น
-// → 2.38 สะบัดปีก: ลมกระแทก 30 ผลักทุกคนออกไปชนกำแพงวง = สตัน 3 วิ • กำแพงวงแต่ละชิ้นแตกได้แบบกำแพงปกติ (70 → ระเบิด 50) ชิ้นอื่นอยู่ต่อ
+// ---------- อัลติ Eye of Heaven (v2 2026-11-07) ----------
+// 0 รอยแยกมิติฉีก ตาลืมจากรอยแยก → 1.2 ตาลืมเต็ม = Impact frame (เห็นเฉพาะคนโดน + คนที่มองเห็นตา — js/44 impactFrame): ทุกคนในรัศมี 350 ลอยค้าง (ทำอะไรไม่ได้)
+// → 1.35 กำแพงลมวงกลม 8 ชิ้นขึ้น → 1.45–3.1 ใบมีดลมฟันคนที่ลอยรัว ๆ ทุก 0.1 วิ (ดาเมจเบา 1 ต่อครั้ง)
+// → 3.2 ลมกระแทก 15 ผลักทุกคนออกไปชนกำแพงวง = สตัน 3 วิ • กำแพงวงแต่ละชิ้นแตกได้แบบกำแพงปกติ (70 → ระเบิด 50) ชิ้นอื่นอยู่ต่อ
 function windUltTick(p,dt){const U=p.wult;U.t+=dt;
   if(!p.alive){p.wult=null;return;}
-  if(!U.slam&&U.t>=W_UL.slam){U.slam=1;
-    for(const t of foesOf(p.team)){if(Math.hypot(t.x-U.x,t.y-U.y)>W_UL.r+(t.r||PR))continue;t.stun=Math.max(t.stun||0,W_UL.float);t.wflt=W_UL.float;t.wfz=W_UL.fz;U.fl.add(t);}
-    emit({k:'efx',z:'wnulslam',x:Math.round(U.x),y:Math.round(U.y),h:p.z,id:p.id});}
+  if(!U.slam&&U.t>=W_UL.slam){U.slam=1;const ids=[];
+    for(const t of foesOf(p.team)){if(Math.hypot(t.x-U.x,t.y-U.y)>W_UL.r+(t.r||PR))continue;t.stun=Math.max(t.stun||0,W_UL.float);t.wflt=W_UL.float;t.wfz=W_UL.fz;t.vx*=0.2;t.vy*=0.2;U.fl.add(t);if(t.id!==undefined)ids.push(t.id);}
+    emit({k:'efx',z:'wnulslam',x:Math.round(U.x),y:Math.round(U.y),h:p.z,a:U.a,v:ids,id:p.id});}
+  if(U.slam&&!U.imp&&U.t>=W_UL.b0){U.bk=(U.bk||0)+dt;   // ใบมีดลมฟันรัว: ทุก W_UL.bt วิ ฟันทุกคนที่ลอยอยู่ 1 ครั้ง
+    while(U.bk>=W_UL.bt){U.bk-=W_UL.bt;
+      for(const t of U.fl){if(t.dead||t.alive===false||t.downed||!(t.wflt>0))continue;aoeHit(p,t,W_UL.bdmg,null);
+        emit({k:'efx',z:'wnulblade',x:Math.round(t.x),y:Math.round(t.y),h:cH(t),a:Math.round(rnd(0,6.28)*100)/100,n:(U.bn=((U.bn||0)+1))%3});}}}
   if(!U.wall&&U.t>=W_UL.wall){U.wall=1;const n=W_UL.seg,L=W_UL.r*Math.tan(Math.PI/n);
     for(let i=0;i<n;i++){const th=(i+0.5)*Math.PI*2/n,w={id:++G.zid,owner:p.id,team:p.team,x:U.x+Math.cos(th)*W_UL.r,y:U.y+Math.sin(th)*W_UL.r,a:th,L,r:W_WL.r,t:W_UL.wlife,hp:W_WL.hp,mv:0,acc:0,uns:0,hitT:{},ring:1};
       (G.wwl||(G.wwl=[])).push(w);emit({k:'efx',z:'wnwup',x:Math.round(w.x),y:Math.round(w.y),a:Math.round(th*100)/100,id:p.id,n:w.id,m:2});}}
@@ -292,8 +297,8 @@ const W_FW=defSpell(WINDP,{id:'featherwing',v:{t:16,spinT:1.2,spinR:64,spinH:3.5
   cast(p){if(p.wfw)return false;const inp=p.inp||{},side=inp.l&&!inp.r?-1:1;p.wfw={ph:'spin',t:0,side,x0:p.x,y0:p.y,z0:p.z,a:p.ang};p.shieldOn=false;p.dash=0;p.wsb=null;p.wgs&&windStreamEnd(p,null);
     emit({k:'efx',z:'wnfw',x:Math.round(p.x),y:Math.round(p.y),h:p.z,a:Math.round(p.ang*100)/100,n:side,id:p.id});}}).v;
 Object.assign(PDEF,{wball:{spd:W_FW.fbSpd,r:10,dmg:W_FW.fbDmg,life:W_FW.fbRange/W_FW.fbSpd,col:'#8dff65'}});
-const W_UL=defSpell(WINDP,{id:'eyeofheaven',v:{r:350,slam:1.0,wall:1.15,imp:2.38,end:2.7,float:1.5,fz:2.2,dmg:30,stun:3,wlife:6.25,seg:8,kmin:900},vn:{r:'รัศมีเขต/กำแพงวง',slam:'ปักไม้ที่ (วิ — ตรงกับภาพ)',wall:'กำแพงขึ้นที่ (วิ — ตรงกับภาพ)',imp:'ลมกระแทกที่ (วิ — ตรงกับภาพ)',end:'จบท่า (วิ)',float:'ลอยค้าง (วิ)',fz:'ลอยสูง (ม.)',dmg:'ลมกระแทก • ดาเมจ',stun:'ชนกำแพงวง • สตัน (วิ)',wlife:'กำแพงวงอยู่ (วิ)',seg:'กำแพงวง • จำนวนชิ้น',kmin:'ลมกระแทก • แรงผลักต่ำสุด'},role:'ult',ult:true,n:'Eye of Heaven',ic:'👁️',cd:0,d:'ชูไม้ขึ้นฟ้า แล้วปักลงพื้น: ทุกคนในรัศมี 350 ลอยค้าง 1.5 วิ (ทำอะไรไม่ได้) • กำแพงลมวงกลม 8 ชิ้นขึ้นรอบเขต • สะบัดปีก = ลมกระแทก 30 ผลักทุกคนไปชนกำแพงวง สตัน 3 วิ • กำแพงวงอยู่ 5 วิ แต่ละชิ้นตีแตกได้แบบกำแพงลมปกติ (ระเบิด 50) ชิ้นอื่นยังอยู่',
-  cast(p){p.wult={t:0,x:p.x,y:p.y,fl:new Set()};p.shieldOn=false;p.wfw=null;p.wdr=null;emit({k:'efx',z:'wnult',x:Math.round(p.x),y:Math.round(p.y),h:p.z,a:Math.round(p.ang*100)/100,id:p.id});}}).v;
+const W_UL=defSpell(WINDP,{id:'eyeofheaven',v:{r:350,slam:1.2,wall:1.35,imp:3.2,end:3.5,float:2.12,fz:2.4,dmg:15,b0:1.45,bt:0.1,bdmg:1,stun:3,wlife:6.25,seg:8,kmin:900},vn:{r:'รัศมีเขต/กำแพงวง',slam:'ตาลืมเต็ม + ลอย + Impact frame ที่ (วิ — ตรงกับภาพ)',wall:'กำแพงขึ้นที่ (วิ — ตรงกับภาพ)',imp:'ลมกระแทกที่ (วิ — ตรงกับภาพ)',end:'จบท่า (วิ)',float:'ลอยค้าง (วิ)',fz:'ลอยสูง (ม.)',dmg:'ลมกระแทก • ดาเมจ',b0:'ใบมีดลมเริ่มฟันที่ (วิ)',bt:'ใบมีดลมฟันทุก (วิ)',bdmg:'ใบมีดลม • ดาเมจต่อครั้ง',stun:'ชนกำแพงวง • สตัน (วิ)',wlife:'กำแพงวงอยู่ (วิ)',seg:'กำแพงวง • จำนวนชิ้น',kmin:'ลมกระแทก • แรงผลักต่ำสุด'},role:'ult',ult:true,n:'Eye of Heaven',ic:'👁️',cd:0,d:'รอยแยกมิติฉีกบนฟ้า ตาลืมออกมา 1.2 วิ → Impact frame (เห็นเฉพาะคนโดนและคนที่มองเห็นตา) ทุกคนในรัศมี 350 ลอยค้างทำอะไรไม่ได้ + กำแพงลมวงกลม 8 ชิ้นขึ้นรอบเขต • ใบมีดลมฟันคนที่ลอยรัว ๆ ทุก 0.1 วิ (เบาแต่ถี่ ครั้งละ 1) • 3.2 วิ ลมกระแทก 15 ผลักทุกคนไปชนกำแพงวง สตัน 3 วิ • กำแพงวงอยู่ 6 วิ แต่ละชิ้นตีแตกได้แบบกำแพงลมปกติ (ระเบิด 50) ชิ้นอื่นยังอยู่',
+  cast(p){p.wult={t:0,x:p.x,y:p.y,a:Math.round(p.ang*100)/100,fl:new Set()};p.shieldOn=false;p.wfw=null;p.wdr=null;emit({k:'efx',z:'wnult',x:Math.round(p.x),y:Math.round(p.y),h:p.z,a:Math.round(p.ang*100)/100,id:p.id});}}).v;
 
 // ท่าพื้นฐาน + โล่ + Dash ของสาย (PBASIC ต้องอยู่ช่องเดียวกับลำดับใน PATHS)
 PBASIC.push({id:'b_wind',type:'wblade',n:'ใบมีดลม / GaleBurst',d:'คลิก = ใบมีดลม (ลมพัดไป) 5 ดาเมจ ทุก 0.3 วิ ระยะ 600 ความเร็ว 1100 โดนแล้วเกจ GaleBurst +12% • กดค้าง (เกจยังไม่เต็ม) = ดูดลมรอบตัว +8%/วิ • เกจเต็ม = กดโจมตีปกติค้าง 0.3 วิ แล้วยิงลมกรวยกว้างต่อเนื่อง 17 ม. นาน 2.6 วิ (ปล่อยปุ่ม = หยุด เกจที่เหลือเก็บไว้) 5 ดาเมจ/0.25 วิ ผลักศัตรูเบา ๆ ตัวเราเดินช้าลง',

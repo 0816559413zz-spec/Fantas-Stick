@@ -348,7 +348,10 @@ function updateBf(dt){updateBfMarks(dt);updateBfRest(dt);updateBfAir(dt);}
 if(window.WD)window.WD.bf={BF,BFM,BFRS,BFA,after:bfAfter,play:bfPlay,mark:bfMark,scatter:bfScatter,collapse:bfCollapse,clear:bfClear};   // ทดสอบ: WD.bf.after({k:'imp',t:'fire',x,y,h:1},1) • ปิด: WD.bf.BF.on=false
 
 // ---------- 4) เอฟเฟกต์ทั้งจอ (ค่าไปที่ GradePass ใน js/27-world.js) ----------
-const SCR={fl:[],rad:null,chr:0,hurt:0};
+const SCR={fl:[],rad:null,chr:0,hurt:0,imp:null};
+// Impact frame (อนิเมะ): ภาพกลับขาว-ดำ + เส้นพุ่งออกจากจุด (wx,wy,wh) รวม 0.34 วิ — กลับ (0–40%) → วาบขาว (40–54%) → กลับอีกที (54–90%) → คืนภาพ
+// เรียกจากเหตุการณ์ของท่า (เช่น Eye of Heaven js/68) เฉพาะกับคนที่ควรเห็น • amt 0–1 ความแรง
+function impactFrame(amt,wx,wy,wh){SCR.imp={a:Math.max(0,Math.min(1,amt||1)),t:0,max:0.34,x:tx(wx),y:wh+GY(wx,wy),z:tz(wy)};}
 function screenFlash(col,amt,life){if(QUAL.mode==='low')return;SCR.fl.push({c:new THREE.Color(col),a:amt,t:life,max:life});}
 function screenRadial(x,y,h,amt,life){if(QUAL.mode==='low')return;SCR.rad={x:tx(x),y:h+GY(x,y),z:tz(y),a:amt,t:life,max:life};}
 function screenKick(amt){SCR.chr=Math.max(SCR.chr,amt);}
@@ -359,6 +362,12 @@ function updateScreenFx(dt){
   for(let i=SCR.fl.length-1;i>=0;i--){const f=SCR.fl[i];f.t-=dt;if(f.t<=0){SCR.fl.splice(i,1);continue;}const k=f.a*(f.t/f.max)**2;F.r+=f.c.r*k;F.g+=f.c.g*k;F.b+=f.c.b*k;}
   if(SCR.rad){const R=SCR.rad;R.t-=dt;if(R.t<=0)SCR.rad=null;else{_scv.set(R.x,R.y,R.z).project(cam);GRADEU.uCtr.value.set(clamp(_scv.x*0.5+0.5,0,1),clamp(_scv.y*0.5+0.5,0,1));const u=1-R.t/R.max;GRADEU.uRad.value=R.a*Math.sin(Math.min(1,u*2.5)*Math.PI*0.5)*(1-u);}}
   if(!SCR.rad)GRADEU.uRad.value=0;
+  GRADEU.uImp.value=0;
+  if(SCR.imp){const I=SCR.imp;I.t+=dt;const u=I.t/I.max;
+    if(u>=1)SCR.imp=null;
+    else{_scv.set(I.x,I.y,I.z).project(cam);if(_scv.z<1)GRADEU.uCtr.value.set(clamp(_scv.x*0.5+0.5,0,1),clamp(_scv.y*0.5+0.5,0,1));
+      const on=u<0.4||(u>0.54&&u<0.9);GRADEU.uImp.value=on?I.a:0;
+      if(u>=0.4&&u<=0.54){const k=I.a*0.55*(1-Math.abs(u-0.47)/0.07);F.r+=k;F.g+=k;F.b+=k;}}}
   SCR.chr=Math.max(0,SCR.chr-dt*3);GRADEU.uChr.value=SCR.chr;
   SCR.hurt=Math.max(0,SCR.hurt-dt*1.8);GRADEU.uHurt.value=SCR.hurt*0.55;
 }

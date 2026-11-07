@@ -62,6 +62,9 @@ function syncWind(v,dt,now){
 function wvWall(n){return WV.wl.get(n);}
 function wvHitFx(n){const o=wvWall(n);return o&&o.C?'wind/aegis_c_hit':'wind/wall_hit';}   // ศัตรูชน/ทะลุกำแพง: แบบ C = ม่านวาบตรงจุดชน
 function wvAimFx(id){const o=WV.wa;if(o&&o.has(id)){fxStop(o.get(id));o.delete(id);}}   // หยุดลมรอบตัวตอนเล็งกำแพง
+// ---------- ตา Eye of Heaven: ตำแหน่งตาบนฟ้า (ตรงกับ EYE ใน tools/wind-eye-ult-gen.py: สูง 16 ม. ข้างหน้า 30 ม. ตามทิศร่าย) ----------
+function wvEyePos(x,y,a){return {x:x+Math.cos(a||0)*600,y:y+Math.sin(a||0)*600,h:16};}
+function wvEyeSeen(e){const v=new THREE.Vector3(tx(e.x),e.h+GY(e.x,e.y),tz(e.y));const me=myPos();if(me&&Math.hypot(me.x-e.x,me.y-e.y)>2400)return false;v.project(cam);return v.z<1&&Math.abs(v.x)<1.05&&Math.abs(v.y)<1.05;}
 // ---------- เหตุการณ์ (efx z 'wn…') ----------
 function windEfx(ev){
   const z=ev.z,x=ev.x,y=ev.y,H=ev.h!==undefined?ev.h:0,me=myPos(),near=!me||Math.hypot(x-me.x,y-me.y)<1100,mine=ev.id===NET.myId,a=ev.a||0;
@@ -104,7 +107,12 @@ function windEfx(ev){
     case 'wnfwend':{const o=WV.fo;if(o&&o.get(ev.id)){fxStop(o.get(ev.id));o.delete(ev.id);}return true;}
     case 'wnfwland':return true;
     case 'wnult':fxPlay('wind/eye_ult',{x,y,h:H,a,aim:false});wwCue(ev.id,'ul');if(near)snd('cast_pull',ev);return true;
-    case 'wnulslam':if(near)shake(0.3);return true;
+    case 'wnulslam':{   // ตาลืมเต็ม: คนโดน (ev.v) เห็น Impact frame เต็ม • คนที่ "มองเห็นตา" (ตาอยู่ในจอ) เห็นเบากว่า • ตัวคนโดนมีลมรัดตัว
+      const eye=wvEyePos(x,y,a),vic=!!(ev.v&&ev.v.includes(NET.myId));
+      if(vic)impactFrame(1,eye.x,eye.y,eye.h);else if(wvEyeSeen(eye))impactFrame(0.75,eye.x,eye.y,eye.h);
+      for(const id of ev.v||[]){const c=(VIEW.cur&&VIEW.cur.P||[]).find(q=>q.id===id);if(c)fxPlay('wind/ult_hold',{x:c.x,y:c.y,h:c.z||0,follow:id,aim:false});}
+      if(near)shake(0.3);return true;}
+    case 'wnulblade':fxPlay('wind/ult_blade_'+'abc'[ev.n|0],{x,y,h:H,a});if(near&&Math.random()<0.4)snd('hit',ev);return true;
     case 'wnulimp':if(near){shake(0.5);snd('break',ev);}return true;
     case 'wnsoon':if(mine)toast('สกิลนี้ของสายลมยังทำไม่เสร็จ (ขั้นที่ 2-3)');return true;
   }
@@ -229,9 +237,9 @@ function poseWindWings(W,big,dt,guard){
     else if(k<1.0){const e=(k-0.38)/0.62;sw=-0.7+1.6*Math.min(1,e*5)-0.9*Math.max(0,e-0.2)/0.8;boost=1-e;}
     else d.fk=-1;}
   if(d.ul>=0){const k=d.ul+=dt;
-    if(k>1.2&&k<2.38){const e=Math.min(1,(k-1.2)/0.3);wrap=Math.max(wrap,e);sc=Math.max(sc,1+0.6*e);boost=e;}
-    else if(k>=2.38&&k<3.3){const e=(k-2.38)/0.92;sw=-0.8*Math.sin(Math.min(1,e*4)*Math.PI/2)*(1-e);sc=Math.max(sc,1.6-0.6*e);boost=1-e;}
-    else if(k>=3.3)d.ul=-1;}
+    if(k>1.2&&k<3.2){const e=Math.min(1,(k-1.2)/0.3);wrap=Math.max(wrap,e);sc=Math.max(sc,1+0.6*e);boost=e;}   // 1.2 = W_UL.slam (ตาลืมเต็ม) … 3.2 = W_UL.imp
+    else if(k>=3.2&&k<4.12){const e=(k-3.2)/0.92;sw=-0.8*Math.sin(Math.min(1,e*4)*Math.PI/2)*(1-e);sc=Math.max(sc,1.6-0.6*e);boost=1-e;}
+    else if(k>=4.12)d.ul=-1;}
   const fl=Math.sin(d.t*(big?6:1.2))*(0.04+0.22*d.flap)*(1-wrap);
   d.boost.value=boost;
   W.scale.setScalar(sc*(1-0.35*wrap));

@@ -191,18 +191,22 @@ const bloom=new UnrealBloomPass(new THREE.Vector2(512,512),0.72,0.5,0.86);
 bloom.materialHighPassFilter.fragmentShader=bloom.materialHighPassFilter.fragmentShader.replace('vec4 texel = texture2D( tDiffuse, vUv );','vec4 texel = texture2D( tDiffuse, vUv );float nq=texel.r+texel.g+texel.b+texel.a;if(!(nq>=0.0&&nq<1e4))texel=vec4(0.0);');
 composer.addPass(bloom);
 // โทนสีทั้งจอ + เอฟเฟกต์ทั้งจอ: แฟลชสี, เบลอพุ่งเข้าหาจุด (radial blur ตอนอัลติ), สีเหลื่อม (chromatic) ตอนกระแทก, ขอบจอมืด/แดงตอนโดนตี
-const GRADEU={tDiffuse:{value:null},uFlash:{value:new THREE.Color(0,0,0)},uRad:{value:0},uCtr:{value:new THREE.Vector2(0.5,0.5)},uChr:{value:0},uVig:{value:0.28},uHurt:{value:0},uSat:{value:1.1},uOn:{value:1},uCon:{value:1},uLo:{value:new THREE.Vector3(1,1,1)},uHi:{value:new THREE.Vector3(1,1,1)}};
+const GRADEU={tDiffuse:{value:null},uFlash:{value:new THREE.Color(0,0,0)},uImp:{value:0},uRad:{value:0},uCtr:{value:new THREE.Vector2(0.5,0.5)},uChr:{value:0},uVig:{value:0.28},uHurt:{value:0},uSat:{value:1.1},uOn:{value:1},uCon:{value:1},uLo:{value:new THREE.Vector3(1,1,1)},uHi:{value:new THREE.Vector3(1,1,1)}};
 class GradePass extends Pass{
   constructor(){super();this.needsSwap=true;
     this.q=new FullScreenQuad(new THREE.ShaderMaterial({uniforms:GRADEU,depthTest:false,depthWrite:false,
       vertexShader:'varying vec2 vUv;void main(){vUv=uv;gl_Position=vec4(position.xy,0.0,1.0);}',
-      fragmentShader:'uniform sampler2D tDiffuse;uniform vec3 uFlash;uniform float uRad;uniform vec2 uCtr;uniform float uChr;uniform float uVig;uniform float uHurt;uniform float uSat;uniform float uCon;uniform vec3 uLo;uniform vec3 uHi;varying vec2 vUv;'+
+      fragmentShader:'uniform sampler2D tDiffuse;uniform vec3 uFlash;uniform float uImp;uniform float uRad;uniform vec2 uCtr;uniform float uChr;uniform float uVig;uniform float uHurt;uniform float uSat;uniform float uCon;uniform vec3 uLo;uniform vec3 uHi;varying vec2 vUv;'+
         'void main(){vec2 uv=vUv;vec3 c;'+
         'if(uRad>0.001){vec2 d=uv-uCtr;c=vec3(0.0);for(int i=0;i<10;i++){float t=float(i)/9.0;c+=texture2D(tDiffuse,uCtr+d*(1.0-uRad*0.16*t)).rgb;}c/=10.0;}else c=texture2D(tDiffuse,uv).rgb;'+
         'if(uChr>0.001){vec2 o=(uv-0.5)*uChr*0.006;c.r=mix(c.r,texture2D(tDiffuse,uv+o).r,0.85);c.b=mix(c.b,texture2D(tDiffuse,uv-o).b,0.85);}'+
         'float l=dot(c,vec3(0.2126,0.7152,0.0722));c=max(mix(vec3(l),c,uSat),0.0);'+
         'c=mix(c*vec3(0.9,0.95,1.12),c,smoothstep(0.0,0.35,l));'+   // เงาอมฟ้าเล็กน้อย
         'c=pow(max(c,vec3(0.0))/0.18,vec3(uCon))*0.18;c*=mix(uLo,uHi,smoothstep(0.03,0.8,dot(c,vec3(0.2126,0.7152,0.0722))));'+   // คอนทราสต์รอบเทา 18% + ย้อมสีเงา/ไฮไลต์ (Look js/74)
+        // Impact frame (อนิเมะ): ภาพกลับขาว-ดำคอนทราสต์สูง (ของมืด = ขาว) + เส้นพุ่งออกจากจุดสนใจ uCtr — js/44 impactFrame
+        'if(uImp>0.001){float li=dot(c,vec3(0.2126,0.7152,0.0722));vec2 dd=(uv-uCtr)*vec2(1.7,1.0);float rr=length(dd),an=atan(dd.y,dd.x);'+
+          'float ray=smoothstep(0.62,0.92,fract(sin(floor(an*26.0)*127.1)*43758.5453))*smoothstep(0.06,0.4,rr);'+
+          'float ink=1.0-smoothstep(0.26,0.5,li);vec3 ic=mix(vec3(0.0,0.02,0.015),vec3(0.9,1.0,0.92),max(ink,ray*0.95));c=mix(c,ic,uImp);}'+
         'vec2 q=(uv-0.5)*vec2(1.0,0.82);float v=smoothstep(0.78,0.22,length(q));c*=mix(1.0-uVig,1.0,v);'+
         'c=mix(c,c*0.35+vec3(0.9,0.05,0.05)*0.6,uHurt*(1.0-v));'+
         'c+=uFlash;gl_FragColor=vec4(c,1.0);}'}));}
