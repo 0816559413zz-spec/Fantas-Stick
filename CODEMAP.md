@@ -268,16 +268,20 @@ statusFX:3 fx:27
 §208 overlay: เลือกบัฟ / สรุปผล
 choosePick:209 syncOverlays:214 showOver:235
 
-## js/27-world.js (303) — 
-S3:4 tx:4 tz:4 CITY_KERB:7 cityKerb:8 GY:9 TW:9 hdr:10 gl:12 scene:20 cam:22 composer:23
-§24 ท่อภาพ (post-processing): ฉาก → ชั้นเอฟเฟกต์นุ่ม (FXPass) → แสงฟุ้ง →…
-rpass:27 fxScene:29 SOFTU:31 SOFT_GLSL:32 FXMATS:34 fxMat:35 softify:37 HAZE_U:42 AOU:46 GFX:52 AO_ON:53 AO_HEAD:54 AO_CALC:58 AO_COPY:72 AO_RT:93 fxPass:113 bloom:114 GRADEU:119 gradePass:136 aaPass:153
-§155 คุณภาพกราฟิก: auto = ปรับความละเอียดเองตาม FPS / high = สวยสุด / low …
-QUAL:156 QUAL_NAME:157 qualPR:158 applyQuality:164 qualTick:184
-§200 ประหยัด CPU สำหรับเครื่องอ่อน (ผู้ใช้ 2026-11-06 "เครื่องผู้เล่นแย่กว…
-qualCS:204 CULL:205 cullTick:206 texCanvas:217 glowTex:218 stoneTex:219 runeTex:225 glowMats:233 glowMat:234 STONEM:236 stoneMat:237 shadowAll:238 SKY:241 hemi:261 moonL:263 LDIR:267 setSky:268
-§277 เงาตามผู้เล่น
-SHD:281 _shF:282 _shR:282 _shU:282 _shC:282 _shY:282 shadowFollow:283 LPOOL:302
+## js/27-world.js (380) — 
+S3:4 tx:4 tz:4 CITY_KERB:7 cityKerb:8 GY:9 TW:9 hdr:10 gl:12
+§20 เงานุ่มแบบ PCSS (contact-hardening): ใกล้จุดสัมผัสคม ไกลจากวัตถุที่บั…
+PCSS:23 scene:50 cam:52 composer:53
+§54 ท่อภาพ (post-processing): ฉาก → ชั้นเอฟเฟกต์นุ่ม (FXPass) → แสงฟุ้ง →…
+rpass:57 fxScene:59 SOFTU:61 SOFT_GLSL:62 FXMATS:64 fxMat:65 softify:67 HAZE_U:72 AOU:76 GFX:82 AO_ON:83 AO_HEAD:84 AO_CALC:88 AO_COPY:102
+§123 TAA (ลบขอบหยักแบบสะสมหลายเฟรม) — กราฟิกสูงเท่านั้น • ปิดด้วย ?notaa
+TAA:126 TAA_FRAG:127 _taaH:142 taaWanted:143 taaBegin:144 taaEnd:152 taaFinish:153 taaResolve:155 AO_RT:165 fxPass:186 bloom:187 GRADEU:192 gradePass:209 aaPass:227
+§229 คุณภาพกราฟิก: auto = ปรับความละเอียดเองตาม FPS / high = สวยสุด / low …
+QUAL:230 QUAL_NAME:231 qualPR:232 applyQuality:238 qualTick:258
+§274 ประหยัด CPU สำหรับเครื่องอ่อน (ผู้ใช้ 2026-11-06 "เครื่องผู้เล่นแย่กว…
+qualCS:278 CULL:279 cullTick:280 texCanvas:291 glowTex:292 stoneTex:293 runeTex:299 glowMats:307 glowMat:308 STONEM:310 stoneMat:311 shadowAll:312 SKY:315 hemi:335 moonL:337 LDIR:341 setSky:342
+§351 เงาตามผู้เล่น
+SHD:355 _shF:356 _shR:356 _shU:356 _shC:356 _shY:356 shadowFollow:357 shadowSoft:377 LPOOL:379
 
 ## js/28-city-build.js (386) — เมืองมักเกิ้ล (ลอนดอน) — ภาพ • ข้อมูลอยู่ js/02-city.js • โมเดลจาก as…
 CITY_WIN:4 cityWinTex:5 cityEmTex:10 cityBoxGeo:16 buildCity:21
@@ -713,14 +717,14 @@ PERF:9 perfFrame:12 perfDom:26 perfStats:34 perfGraph:38 _gpuName:51 gpuIntegrat
 ## js/72-dash-pose.js (84) — 
 DPOSE:12 DPT:24 _dpQ:25 _dpX:25 _dpP:25 dpMix:26 dpKnees:28 dpStyle:36 DPDBG:41 dashPose:42 dpApply:74
 
-## js/73-tune.js (125) — แผงปรับค่า 🎚️ (F8 / ปุ่ม "ปรับค่า" ในเมนูพัก และหน้าแรก) — ปรับตัวเลขในเกมสดๆ แล้วเซฟลง …
+## js/73-tune.js (130) — แผงปรับค่า 🎚️ (F8 / ปุ่ม "ปรับค่า" ในเมนูพัก และหน้าแรก) — ปรับตัวเลขในเกมสดๆ แล้วเซฟลง …
 TUNE:8 tuneNum:9 tuneBuild:15
-§64 ใช้ / เก็บค่า
-tuneSetVal:65 tuneApplyFile:68 tuneJson:72
-§75 หน้าตา
-tuneOpenF:80 tuneFmt:81 tuneRow:82 tuneRefresh:85 tuneMsg:93 tuneToggle:94 tuneEdit:98
-§122 API สำหรับเครื่องมือแยก tune.html (เปิดเกมใน iframe แล้วเรียกผ่าน WD)
-tuneDump:123 tuneSetKey:124
+§69 ใช้ / เก็บค่า
+tuneSetVal:70 tuneApplyFile:73 tuneJson:77
+§80 หน้าตา
+tuneOpenF:85 tuneFmt:86 tuneRow:87 tuneRefresh:90 tuneMsg:98 tuneToggle:99 tuneEdit:103
+§127 API สำหรับเครื่องมือแยก tune.html (เปิดเกมใน iframe แล้วเรียกผ่าน WD)
+tuneDump:128 tuneSetKey:129
 
 ## js/74-look.js (79) — Look 🌗 — พรีเซ็ตลุคของฉาก: แสงรอบตัวจากท้องฟ้า (IBL) + ความสว่าง + คอนทราสต์ + ย้อมสีเงา…
 §12 ฟิลด์: sky = ท้องฟ้าที่ถ่ายเป็นแสง ('night'|'sunset') • warm = ทิศย้อ…
@@ -731,4 +735,4 @@ LOOK_F:69 lookRegister:75
 ## js/75-ambient.js (52) — Ambient 🌫️ — ฝุ่นลอย (dust motes) + หมอกลอยต่ำ (mist) ที่ใช้ได้ทุกแมพ ปรับตามพรีเซ็ต Loo…
 AMBX:9 AMBX_V:10 AMBX_F:24 ambMesh:27 ambQual:39 ambFrame:40
 
-(87 files, 21147 lines)
+(87 files, 21229 lines)

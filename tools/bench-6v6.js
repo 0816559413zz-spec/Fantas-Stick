@@ -28,7 +28,7 @@ const cpu=[],calls=[],tris=[];WD.gl.info.autoReset=false;
 for(let f=0;f<N;f++){frameNo=f;if(O.profile&&f===60)console.profile('b6');if(O.profile&&f===N-60)console.profileEnd('b6');
   for(const p of players){const I=p.inp;I.fire=f%45<5?1:0;if(f===30)I.c.q++;if(f===90)I.c.x++;if(f===180)I.c.e++;if(f===300)I.c.r++;if(f===420)I.c.f++;if(f===520)I.c.q++;}
   WD.gl.info.reset();const t=performance.now();HL.step(1);cpu.push(performance.now()-t);calls.push(WD.gl.info.render.calls);tris.push(WD.gl.info.render.triangles);
-  for(let r=1;r<REP;r++){WD.gl.shadowMap.needsUpdate=true;WD.composer.render(1/60);}
+  for(let r=1;r<REP;r++){WD.gl.shadowMap.needsUpdate=true;WD.taaBegin&&WD.taaBegin();WD.composer.render(1/60);WD.taaFinish&&WD.taaFinish();}
   drain();if(f%20===0)await HL.sleep(0);}
 for(let i=0;i<200&&pend.length;i++){await HL.sleep(10);drain();}
 WD.gl.info.autoReset=true;

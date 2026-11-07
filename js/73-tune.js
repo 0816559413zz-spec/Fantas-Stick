@@ -16,6 +16,11 @@ function tuneBuild(){
   // --- กราฟิก / แสงเงา ---
   const GF=['gfx','🌗 แสงเงา'];
   tuneNum(GF,'เงา','gfx.shd.on','เงาตามผู้เล่น (1 = เปิด)',()=>SHD.on?1:0,v=>{SHD.on=!!v;},{bool:true,min:0,max:1,step:1});
+  tuneNum(GF,'เงา','gfx.pcss.on','เงานุ่ม PCSS (1 = เปิด • ทำงานเฉพาะกราฟิกสูง)',()=>PCSS.on?1:0,v=>{PCSS.on=!!v;shadowSoft();},{bool:true,min:0,max:1,step:1});
+  tuneNum(GF,'เงา','gfx.pcss.size','เงานุ่ม PCSS • ขนาดแสง (ยิ่งมากยิ่งนุ่มไกลจากตัวบัง)',()=>PCSS.size,v=>{PCSS.size=v;shadowSoft();},{min:0.005,max:0.2,step:0.005});
+  tuneNum(GF,'ลบขอบหยัก (TAA)','gfx.taa.on','TAA (1 = เปิด • ทำงานเฉพาะกราฟิกสูง แทน FXAA)',()=>TAA.on?1:0,v=>{TAA.on=!!v;},{bool:true,min:0,max:1,step:1});
+  tuneNum(GF,'ลบขอบหยัก (TAA)','gfx.taa.alpha','ความไวต่อภาพใหม่ (น้อย = เนียนแต่เกิดเงา)',()=>TAA.alpha,v=>{TAA.alpha=v;},{min:0.03,max:0.5,step:0.01});
+  tuneNum(GF,'ลบขอบหยัก (TAA)','gfx.taa.sharp','ความคมชดเชย',()=>TAA.sharp,v=>{TAA.sharp=v;},{min:0,max:1,step:0.01});
   tuneNum(GF,'เงา','gfx.shd.r','พื้นที่เงา (ครึ่งกว้าง) กราฟิกปกติ',()=>SHD.r,v=>{SHD.r=v;},{min:10,max:120,step:1});
   tuneNum(GF,'เงา','gfx.shd.rhigh','พื้นที่เงา กราฟิกสูง',()=>SHD.rHigh,v=>{SHD.rHigh=v;},{min:10,max:160,step:1});
   tuneNum(GF,'เงา','gfx.shd.ahead','ดันเงาไปข้างหน้ากล้อง',()=>SHD.ahead,v=>{SHD.ahead=v;},{min:0,max:1,step:0.05});
