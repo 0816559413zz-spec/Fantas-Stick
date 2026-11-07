@@ -12,7 +12,7 @@ WD.hostStart();
 for(let i=0;i<240;i++){HL.step(1);if(i%30===0)await HL.sleep(0);}
 const until=performance.now()+25000;let settled=0;
 while(performance.now()<until&&settled<3){HL.step(2);await HL.sleep(30);settled=!WD.warm.q.length&&!WD.warm.busy?settled+1:0;}
-if(O.noshadow)WD.moonL.castShadow=false;if(O.noao)WD.post.AOU.uAO.value=0;if(O.nobloom)WD.post.bloom.enabled=false;if(O.nofx)WD.post.fxScene.visible=false;if(O.nograde){WD.post.gradePass.enabled=false;}
+if(O.nolook)WD.scene.environment=null;if(O.noshadow)WD.moonL.castShadow=false;if(O.noao)WD.post.AOU.uAO.value=0;if(O.nobloom)WD.post.bloom.enabled=false;if(O.nofx)WD.post.fxScene.visible=false;if(O.nograde){WD.post.gradePass.enabled=false;}
 const players=Object.values(WD.G.players),p0=HL.me(),o={x:p0.x,y:p0.y};HL.aim(0,0.12);
 players.forEach((p,i)=>{const side=p.team===p0.team?-1:1,k=Math.floor(i/2);p.x=o.x+side*130+(Math.random()-0.5)*40;p.y=o.y+(k-3)*50;p.ult=100;p.lst=5;p.wg=100;p.hp=p.maxHp=1e6;
   p.inp={...WD.INPUT,c:{...WD.INPUT.c},mx:0,my:0,u:0,d:0,l:0,r:0,sh:0,dh:0,hq:0,fire:0,ax:p.x-side*300,ay:p.y,ah:1.2,gx:p.x-side*220,gy:p.y};});

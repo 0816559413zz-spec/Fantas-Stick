@@ -268,16 +268,16 @@ statusFX:3 fx:27
 §208 overlay: เลือกบัฟ / สรุปผล
 choosePick:209 syncOverlays:214 showOver:235
 
-## js/27-world.js (293) — 
+## js/27-world.js (295) — 
 S3:4 tx:4 tz:4 CITY_KERB:7 cityKerb:8 GY:9 TW:9 hdr:10 gl:12 scene:20 cam:22 composer:23
 §24 ท่อภาพ (post-processing): ฉาก → ชั้นเอฟเฟกต์นุ่ม (FXPass) → แสงฟุ้ง →…
-rpass:27 fxScene:29 SOFTU:31 SOFT_GLSL:32 FXMATS:34 fxMat:35 softify:37 HAZE_U:42 AOU:46 GFX:51 AO_ON:52 AO_HEAD:53 AO_CALC:57 AO_COPY:71 AO_RT:87 fxPass:106 bloom:107 GRADEU:112 gradePass:128 aaPass:145
-§147 คุณภาพกราฟิก: auto = ปรับความละเอียดเองตาม FPS / high = สวยสุด / low …
-QUAL:148 QUAL_NAME:149 qualPR:150 applyQuality:156 qualTick:175
-§191 ประหยัด CPU สำหรับเครื่องอ่อน (ผู้ใช้ 2026-11-06 "เครื่องผู้เล่นแย่กว…
-qualCS:195 CULL:196 cullTick:197 texCanvas:208 glowTex:209 stoneTex:210 runeTex:216 glowMats:224 glowMat:225 STONEM:227 stoneMat:228 shadowAll:229 SKY:232 hemi:252 moonL:254 LDIR:258 setSky:259
-§267 เงาตามผู้เล่น
-SHD:271 _shF:272 _shR:272 _shU:272 _shC:272 _shY:272 shadowFollow:273 LPOOL:292
+rpass:27 fxScene:29 SOFTU:31 SOFT_GLSL:32 FXMATS:34 fxMat:35 softify:37 HAZE_U:42 AOU:46 GFX:51 AO_ON:52 AO_HEAD:53 AO_CALC:57 AO_COPY:71 AO_RT:87 fxPass:106 bloom:107 GRADEU:112 gradePass:129 aaPass:146
+§148 คุณภาพกราฟิก: auto = ปรับความละเอียดเองตาม FPS / high = สวยสุด / low …
+QUAL:149 QUAL_NAME:150 qualPR:151 applyQuality:157 qualTick:176
+§192 ประหยัด CPU สำหรับเครื่องอ่อน (ผู้ใช้ 2026-11-06 "เครื่องผู้เล่นแย่กว…
+qualCS:196 CULL:197 cullTick:198 texCanvas:209 glowTex:210 stoneTex:211 runeTex:217 glowMats:225 glowMat:226 STONEM:228 stoneMat:229 shadowAll:230 SKY:233 hemi:253 moonL:255 LDIR:259 setSky:260
+§269 เงาตามผู้เล่น
+SHD:273 _shF:274 _shR:274 _shU:274 _shC:274 _shY:274 shadowFollow:275 LPOOL:294
 
 ## js/28-city-build.js (386) — เมืองมักเกิ้ล (ลอนดอน) — ภาพ • ข้อมูลอยู่ js/02-city.js • โมเดลจาก as…
 CITY_WIN:4 cityWinTex:5 cityEmTex:10 cityBoxGeo:16 buildCity:21
@@ -722,4 +722,8 @@ tuneOpenF:80 tuneFmt:81 tuneRow:82 tuneRefresh:85 tuneMsg:93 tuneToggle:94 tuneE
 §122 API สำหรับเครื่องมือแยก tune.html (เปิดเกมใน iframe แล้วเรียกผ่าน WD)
 tuneDump:123 tuneSetKey:124
 
-(85 files, 21005 lines)
+## js/74-look.js (46) — Look 🌗 — แสงรอบตัวจากท้องฟ้า (IBL) + ค่าแสงส่วนรวมของฉาก (เฟส 1 ของแผนกราฟิกสมจริง, note…
+LOOK:9 lookEnvFor:12 lookApply:22 lookRefresh:35
+§36 ลงทะเบียนในเครื่องมือปรับค่า (js/73-tune.js)
+
+(86 files, 21053 lines)

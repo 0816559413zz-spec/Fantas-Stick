@@ -109,17 +109,18 @@ const bloom=new UnrealBloomPass(new THREE.Vector2(512,512),0.72,0.5,0.86);
 {const bs=bloom.setSize.bind(bloom);bloom.setSize=(w,h)=>bs(Math.max(1,Math.round(w/2)),Math.max(1,Math.round(h/2)));}
 composer.addPass(bloom);
 // โทนสีทั้งจอ + เอฟเฟกต์ทั้งจอ: แฟลชสี, เบลอพุ่งเข้าหาจุด (radial blur ตอนอัลติ), สีเหลื่อม (chromatic) ตอนกระแทก, ขอบจอมืด/แดงตอนโดนตี
-const GRADEU={tDiffuse:{value:null},uFlash:{value:new THREE.Color(0,0,0)},uRad:{value:0},uCtr:{value:new THREE.Vector2(0.5,0.5)},uChr:{value:0},uVig:{value:0.28},uHurt:{value:0},uSat:{value:1.1},uOn:{value:1}};
+const GRADEU={tDiffuse:{value:null},uFlash:{value:new THREE.Color(0,0,0)},uRad:{value:0},uCtr:{value:new THREE.Vector2(0.5,0.5)},uChr:{value:0},uVig:{value:0.28},uHurt:{value:0},uSat:{value:1.1},uOn:{value:1},uCon:{value:1},uLo:{value:new THREE.Vector3(1,1,1)},uHi:{value:new THREE.Vector3(1,1,1)}};
 class GradePass extends Pass{
   constructor(){super();this.needsSwap=true;
     this.q=new FullScreenQuad(new THREE.ShaderMaterial({uniforms:GRADEU,depthTest:false,depthWrite:false,
       vertexShader:'varying vec2 vUv;void main(){vUv=uv;gl_Position=vec4(position.xy,0.0,1.0);}',
-      fragmentShader:'uniform sampler2D tDiffuse;uniform vec3 uFlash;uniform float uRad;uniform vec2 uCtr;uniform float uChr;uniform float uVig;uniform float uHurt;uniform float uSat;varying vec2 vUv;'+
+      fragmentShader:'uniform sampler2D tDiffuse;uniform vec3 uFlash;uniform float uRad;uniform vec2 uCtr;uniform float uChr;uniform float uVig;uniform float uHurt;uniform float uSat;uniform float uCon;uniform vec3 uLo;uniform vec3 uHi;varying vec2 vUv;'+
         'void main(){vec2 uv=vUv;vec3 c;'+
         'if(uRad>0.001){vec2 d=uv-uCtr;c=vec3(0.0);for(int i=0;i<10;i++){float t=float(i)/9.0;c+=texture2D(tDiffuse,uCtr+d*(1.0-uRad*0.16*t)).rgb;}c/=10.0;}else c=texture2D(tDiffuse,uv).rgb;'+
         'if(uChr>0.001){vec2 o=(uv-0.5)*uChr*0.006;c.r=mix(c.r,texture2D(tDiffuse,uv+o).r,0.85);c.b=mix(c.b,texture2D(tDiffuse,uv-o).b,0.85);}'+
         'float l=dot(c,vec3(0.2126,0.7152,0.0722));c=max(mix(vec3(l),c,uSat),0.0);'+
         'c=mix(c*vec3(0.9,0.95,1.12),c,smoothstep(0.0,0.35,l));'+   // เงาอมฟ้าเล็กน้อย
+        'c=pow(max(c,vec3(0.0))/0.18,vec3(uCon))*0.18;c*=mix(uLo,uHi,smoothstep(0.03,0.8,dot(c,vec3(0.2126,0.7152,0.0722))));'+   // คอนทราสต์รอบเทา 18% + ย้อมสีเงา/ไฮไลต์ (Look js/74)
         'vec2 q=(uv-0.5)*vec2(1.0,0.82);float v=smoothstep(0.78,0.22,length(q));c*=mix(1.0-uVig,1.0,v);'+
         'c=mix(c,c*0.35+vec3(0.9,0.05,0.05)*0.6,uHurt*(1.0-v));'+
         'c+=uFlash;gl_FragColor=vec4(c,1.0);}'}));}
@@ -263,6 +264,7 @@ function setSky(mode){
   if(day){moonL.color.set('#ffbe8a');moonL.position.set(80,45,-110);gl.toneMappingExposure=1.05;}
   else{moonL.color.set('#c4d2ff');moonL.position.set(-55,95,-70);gl.toneMappingExposure=1.1;}
   LDIR.copy(moonL.position).normalize();
+  SKY.day=day;if(typeof lookApply==='function')lookApply(day);   // แสงรอบตัวจากท้องฟ้า (js/74-look.js)
 }
 // ---------- เงาตามผู้เล่น ----------
 // กล้องเงาครอบแค่พื้นที่รอบ ๆ ที่กล้องมอง (ไม่ใช่ทั้งแผนที่) → เงาคมขึ้นหลายเท่า โดยภาพเงาขนาดเท่าเดิม
