@@ -1,11 +1,18 @@
 """Pack real-game frames from capture-skill-motion.js with one stable palette."""
+import argparse
 import json
-import sys
 from pathlib import Path
 from PIL import Image
 
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument("skills", nargs="+")
+parser.add_argument("--fps", type=int, default=20)
+args = parser.parse_args()
+if not 1 <= args.fps <= 50:
+    parser.error("--fps must be between 1 and 50")
+
 shots = Path(__file__).resolve().parents[1] / "shots"
-for skill in sys.argv[1:]:
+for skill in args.skills:
     files = sorted(shots.glob(f"motion_{skill}_[0-9][0-9][0-9].jpg"))
     if not files:
         raise SystemExit(f"No recorded frames: {skill}")
@@ -17,6 +24,9 @@ for skill in sys.argv[1:]:
     palette = sample.quantize(colors=192)
     packed = [f.quantize(palette=palette, dither=Image.Dither.NONE) for f in frames]
     out = shots / f"motion_{skill}.gif"
-    packed[0].save(out, save_all=True, append_images=packed[1:], duration=50,
+    # GIF stores durations in centiseconds. Round cumulative time to avoid drift.
+    durations = [10 * (round((i + 1) * 100 / args.fps) - round(i * 100 / args.fps))
+                 for i in range(len(frames))]
+    packed[0].save(out, save_all=True, append_images=packed[1:], duration=durations,
                    loop=0, optimize=False, disposal=2)
-    print(json.dumps({"file": str(out), "frames": len(frames), "seconds": len(frames) / 20}))
+    print(json.dumps({"file": str(out), "frames": len(frames), "seconds": sum(durations) / 1000}))

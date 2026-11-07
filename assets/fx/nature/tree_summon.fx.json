@@ -1,0 +1,11 @@
+{
+  "v": 1,
+  "desc": "Nature — อัญเชิญต้นไม้พลังงาน รากแผ่ เส้นเขียวม้วนขึ้นแล้วคลี่กิ่ง (Studio)",
+  "tags": ["nature", "summon", "ultimate"],
+  "pal": "nature",
+  "dur": 4.8,
+  "layers": [
+    {"id": "tree", "t": "mesh", "shape": "model", "model": "nature_ult_tree_branches_v1", "mat": "solid", "at": 0, "life": 4.8, "op": 1},
+    {"id": "weave", "t": "code", "fn": "studio_nature_weave", "at": 0, "life": 4.8, "args": {"layer": "tree", "speed": 1.5}}
+  ]
+}

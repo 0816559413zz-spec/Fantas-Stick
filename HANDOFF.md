@@ -1,5 +1,17 @@
 # HANDOFF — Fantas Stick (was "Wizard Duel") (repo: Fantas-Stick)
 
+**Nature นีออนกลางลำต้น — อนุมัติเป็นค่าเริ่มต้น:** ใช้หน้าตาฝั่งขวาใน `neon_body_comparison.jpg` กับ Model `nature_ult_tree_branches_v1` และเอฟเฟกต์ `nature/tree_summon` ใน Studio ผ่าน shader เดียวกันใน `studio/nature-summon.js` พรีวิวคุ้มครองใช้แบบนี้เป็นค่าเริ่มต้นด้วย ดู `designs/nature_vfx/ult_tree_branches_v1/protection_hit_body_default.gif` รุ่นก่อนยังเปิดได้ด้วย `bodybase=1` และมี GIF เดิม `protection_hit.gif` เก็บไว้ ทรงและข้อมูล mesh อยู่ในไฟล์เดิม
+
+**Nature เทียบนีออนกลางลำต้น:** ผู้ใช้เห็นความต่างจากรอบแรกไม่ชัด จึงขยายช่วงแสงในแกนกลางและเพิ่มสีเขียวเรืองแสงบนเส้นเดิม ภาพซ้ายเป็นรุ่นฐาน ภาพขวาเป็นรุ่นทดลอง ใช้กล้องและเฟรมเดียวกัน ดู `designs/nature_vfx/ult_tree_branches_v1/neon_body_comparison.jpg` จับด้วย `branches=1&protection=1&hitreview=1&neonbody=1&comparebody=1&first=12&count=1` GIF นีออนด้านล่างยังเป็นร่างก่อนปรับรอบนี้
+
+**Nature รุ่นทดลองนีออนรอบแรก:** `designs/nature_vfx/ult_tree_branches_v1/protection_hit_body_neon.gif` เก็บไว้เทียบกับรุ่นฐาน `protection_hit.gif` และรุ่นเร่งนีออนที่อนุมัติด้านบน
+
+**Nature ประกายรากและจังหวะรับแรง — เก็บรุ่นฐานตามที่ผู้ใช้ขอ:** ประกายลอยจากผิวรากแล้วเอนเข้าโคน มีแสงพุ่งตามเส้นจากเพื่อนที่โดนตีและวาบที่คอลำต้น รุ่นฐานคือ `designs/nature_vfx/ult_tree_branches_v1/protection_hit.gif` สร้างจาก `branches=1&protection=1&hitreview=1&first=7&count=26` ในสคริปต์จับภาพ Studio แล้วแพ็กด้วย `python tools/pack-motion-gif.py tree_protection_hit` รุ่นทดลองนีออนเพิ่มแกนสว่างเฉพาะประกายราก เปิดด้วย `neonroots=1` และใช้ชุดเฟรม `tree_protection_hit_neon` แยกจากรุ่นฐาน ถอดพารามิเตอร์นี้เพื่อกลับไปจับภาพรุ่นเดิม
+
+**Nature ภาพสถานะคุ้มครอง:** รุ่นล่าสุดย้ายปลายเส้นมาอยู่ที่คอลำต้นตรงที่กิ่งเริ่มแตก เส้นโค้งออกด้านข้างก่อนเชื่อมเหนือหัวเพื่อนในเขต ขอบเขียวชัดและมีประกายเขียวลอยขึ้นรอบตัว ศัตรูในวงไม่ติดเครื่องหมาย พรีวิวจัดฉากใน Studio ด้วย `tools/capture-nature-ult-woven-v1.js` และ query `branches=1&protection=1` ดู `designs/nature_vfx/ult_tree_branches_v1/protection.jpg` และ `protection_detail.jpg` สำหรับภาพเต็มต้นและภาพใกล้ ตามลำดับ ใช้วงตัวอย่าง 9 ม. เพื่อจัดฉาก เวลารับผลและรัศมีเกมยังเปิดอยู่
+
+**Nature ท่าอัญเชิญเปิดจากแท็บเอฟเฟกต์ได้แล้ว:** เลือก `nature/tree_summon` หรือเปิด `studio.html?fx=nature/tree_summon&map=test` เพื่อเล่นและกรอไทม์ไลน์ 4.8 วิ ไฟล์ FX อ้างโมเดล `nature_ult_tree_branches_v1` และใช้ `studio/nature-summon.js` ขับการก่อตัวบน GPU กับแสงวนและประกายตามเวลาที่อนุมัติ มุมเริ่มต้นจัดให้เห็นเต็มต้น แสงรอบต้นขึ้นกับแผนที่ใน Studio การผูกครั้งนี้อยู่ใน Studio
+
 **จอดำตอนเงยกล้อง (2026-11-07):** พิกเซล NaN/inf จุดเดียวถูก bloom กระจายจนโลกดำทั้งจอ ใส่ตัวกันใน `js/27-world.js` แล้ว (ก่อน bloom, `AO_COPY`, TAA) ทดสอบด้วย mesh NaN บน GPU จริงผ่าน • ยังไม่รู้ว่าวัตถุไหนสร้าง NaN ในเกมของผู้ใช้ ถ้าเห็นปื้นดำเล็ก ๆ ที่เดิมให้ตามตัวนั้น
 
 **Nature tree ท่าอัญเชิญเร็วขึ้น — ผู้ใช้อนุมัติ:** ต้นก่อตัวครบประมาณ 3.4 วิ แสงปลายกิ่งเข้าที่ราว 3.6 วิ แล้วโชว์ idle ต่อจนจบ GIF ที่ 4.8 วิ ใช้ `designs/nature_vfx/ult_tree_branches_v1/summon_fast.gif` เป็นภาพอ้างอิงหลัก ใช้เฟรมชุดเดียวกับร่างแรกแล้วแพ็กด้วย `python tools/pack-motion-gif.py tree_summon --fps 30` การอนุมัติครอบคลุมภาพและจังหวะท่าอัญเชิญใน Studio

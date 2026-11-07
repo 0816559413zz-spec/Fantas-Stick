@@ -49,7 +49,7 @@ addEventListener('resize',()=>{if(document.body.classList.contains('studio'))set
 if(SQ.has('dist'))ST.orb.dist=ST.dist;if(SQ.has('oyaw'))ST.orb.yaw=+SQ.get('oyaw');if(SQ.has('opitch'))ST.orb.pitch=+SQ.get('opitch');   // กล้อง orbit จาก URL (ภาพ ¾ แบบสตอรี่บอร์ด)
 function stAnchor(){const me=G&&G.players&&G.players.me;if(!me)return null;const a=0,d=ST.at==='far'?600:ST.at==='self'?0:240;return {x:me.x+Math.cos(a)*d,y:me.y+Math.sin(a)*d,h:0,a,follow:ST.at==='self'?'me':undefined};}
 const _stv=new THREE.Vector3();
-function stCam(c){if(ST.cam==='game'||!ST.fx)return;const A=stAnchor();if(!A)return;const lk=(+SQ.get('look')||0)*20,lx=A.x+Math.cos(A.a)*lk,ly=A.y+Math.sin(A.a)*lk,T=_stv.set(tx(lx),GY(lx,ly)+1.1,tz(ly));   // ?look=<m> = มองไปข้างหน้า N ม. (ภาพสตอรี่บอร์ดที่ผู้ร่าย+เป้าอยู่ในภาพเดียว)
+function stCam(c){if(ST.cam==='game'||!ST.fx)return;const A=stAnchor();if(!A)return;const lk=(+SQ.get('look')||0)*20,lx=A.x+Math.cos(A.a)*lk,ly=A.y+Math.sin(A.a)*lk,T=_stv.set(tx(lx),GY(lx,ly)+(MK.ws==='fx'&&ST.name===ST_NATURE_SUMMON?13.7:1.1),tz(ly));   // ?look=<m> = มองไปข้างหน้า N ม. (ภาพสตอรี่บอร์ดที่ผู้ร่าย+เป้าอยู่ในภาพเดียว)
   const f=[Math.cos(A.a),Math.sin(A.a)],r=[-Math.sin(A.a),Math.cos(A.a)];
   if(ST.cam==='side')c.position.set(T.x+r[0]*ST.dist,T.y+2.2*ST.dist/9,T.z+r[1]*ST.dist);
   else if(ST.cam==='front')c.position.set(T.x+f[0]*ST.dist,T.y+2*ST.dist/9,T.z+f[1]*ST.dist);
@@ -59,7 +59,7 @@ function stCam(c){if(ST.cam==='game'||!ST.fx)return;const A=stAnchor();if(!A)ret
 // ---------- เล่น / กรอเวลา (จำลองแน่นอน: dt คงที่ + เลขสุ่มมี seed) ----------
 function stDur(){const F=ST.fx;if(!F)return 2;if(F.dur)return F.dur;let e=0.5;for(const L of F.layers||[]){const g=k=>L[k]!==undefined?L[k]:(FXR.def[L.t]||{})[k];const n=v=>typeof v==='number'?v:Array.isArray(v)?+v[1]||0:0;e=Math.max(e,n(g('at'))+n(g('life')));}return e;}
 function stIsLoop(){return (ST.fx&&ST.fx.layers||[]).some(L=>L.loop);}
-function stRender(dt,draw){stVnow+=dt*1000;FXSTUDIO.noDraw=!draw;try{render(dt,stVnow);}catch(e){console.error(e);}finally{FXSTUDIO.noDraw=false;}}
+function stRender(dt,draw){stVnow+=dt*1000;FXSTUDIO.noDraw=!draw;try{if(draw)ST.I?.updateNatureWeave?.();render(dt,stVnow);}catch(e){console.error(e);}finally{FXSTUDIO.noDraw=false;}}
 function stFlush(){if(ST.I){fxKill(ST.I);ST.I=null;}fxClearAll();for(let i=0;i<34;i++)stRender(0.15,false);PARTS.length=0;SCR.fl.length=0;SCR.rad=null;SCR.chr=0;shakeA=0;}
 function stLayers(){const F=ST.fx;return Object.assign({},F,{layers:(F.layers||[]).filter(L=>!ST.mute[L.id]&&(!ST.solo||ST.solo===L.id))});}
 function stSimKey(){return JSON.stringify(stLayers())+'|'+ST.at+'|'+ST.seed+'|'+ST.map;}
@@ -115,6 +115,8 @@ function stShowImg(url){const m=h('div',{className:'stModal',on:{click:e=>{if(e.
 async function stRefreshList(){try{const r=await fetch('/api/fx-list',{cache:'no-cache'});if(r.ok){const j=await r.json();ST.list=j.fx||{};ST.api=true;ST.bindT=j.bind_t;stLibRender();return;}}catch(e){}
   try{const r=await fetch('assets/fx/index.json',{cache:'no-cache'});const j=await r.json();ST.list={};for(const k in j.fx)ST.list[k]=Object.assign({t:0},j.fx[k]);}catch(e){ST.list={};}ST.api=false;stLibRender();}
 async function stOpen(name,keepT){try{const r=await fetch('assets/fx/'+name+'.fx.json',{cache:'no-cache'});if(!r.ok)throw new Error(r.status);const txt=await r.text();const d=JSON.parse(txt);
+    if(name===ST_NATURE_SUMMON){await fxAssetsWait(d);
+      if(!keepT&&!SQ.has('cam')){ST.cam='orbit';ST.orb.dist=+SQ.get('dist')||48;ST.orb.pitch=.10;}}
     ST.fx=d;ST.name=name;ST.saved=JSON.stringify(d);ST.mtime=(ST.list[name]||{}).t||0;ST.dirty=false;ST.undo=[];ST.redo=[];ST.mute={};ST.solo=null;FXR.db.set(name,{data:JSON.parse(txt),fail:false,p:Promise.resolve(null)});
     if(!keepT){ST.sel=null;if(!SQ.has('at')){const tg=d.tags||[];ST.at=tg.some(t=>['self','aura','shield','buff','slash','beam','projectile','melee'].includes(t))?'self':'front';const el=$st('stAt');if(el)el.value=ST.at;}}
     stAfterChange(true,keepT);stLibRender();return true;}catch(e){stToast('เปิดไม่ได้: '+name+' ('+e.message+')');return false;}}

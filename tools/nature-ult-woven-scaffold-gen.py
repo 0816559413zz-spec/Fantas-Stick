@@ -8,6 +8,7 @@ import importlib.util
 import json
 import math
 import random
+import sys
 from pathlib import Path
 
 import numpy as np
@@ -21,11 +22,13 @@ tree = base.Tree('d')
 rng = random.Random(72311)
 TAU = math.tau
 source = json.loads(SOURCE.read_text(encoding='utf-8'))
+branch_study = '--branches' in sys.argv
 
 # Colour lives in the strands, not a bark texture or a separate glowing gem.
 palette = [('#010b06', 0), ('#02170c', 0), ('#032617', .01),
            ('#064025', .05), ('#09552a', .12), ('#13712e', .25),
-           ('#1c8e30', .35), ('#32c637', .8), ('#75db45', 1.2)]
+           ('#1c8e30', .28), ('#25aa35', .38), ('#4dc942', .52),
+           ('#07952c', .58), ('#20c83a', .82)]
 anatomy = []
 
 
@@ -157,7 +160,9 @@ for part in source['parts']:
     # A recessed, near-black fibrous heart fills the bundle without reading as
     # a smooth wooden cylinder between the individual outer strands.
     core = resample(path, max(8, count//2))
-    core[:, 3] *= .86
+    # Keep the crown/root interiors dense. The trunk heart is narrower so its
+    # deeper neon bundle can shine through gaps in the dark outer weave.
+    core[:, 3] *= .30 if is_trunk else .86
     if is_trunk:
         # Once the fibres enter the boughs, retire the old central cone inside
         # that junction rather than exposing a bare shaft between the leaders.
@@ -210,6 +215,43 @@ for part in source['parts']:
 # central opening nor a separate crystal. The brighter current keeps climbing.
 body = next(item for item in anatomy if item[0] == 'trunk')
 _, _, path, n, b = body
+
+# Loki-reference inner energy: a dense neon braid lives behind the dark-green
+# surface fibres. It is strongest through the lower/middle body, then selected
+# currents continue into the crown. This is not a separate gem or surface trim.
+body_u = np.linspace(0, 1, len(path))
+body_y = path[:, 1]
+lower_taper = np.clip((body_y-2.15)/1.35, 0, 1)
+upper_taper = np.clip((14.25-body_y)/2.2, 0, 1)
+neon_profile = lower_taper*upper_taper*(.58+.42*np.exp(-((body_y-7.0)/3.7)**2))
+for k in range(9):
+    phase = k*TAU/9+.15*math.sin(k*2.7)
+    angle = phase+body_u*TAU*(.48+.06*math.sin(k*1.9))
+    angle += .18*np.sin(body_u*9+phase*1.6)
+    offset = n*np.cos(angle)[:, None]+b*np.sin(angle)[:, None]
+    depth = .29+.085*np.sin(body_u*7+phase*2)
+    points = path[:, :3]+offset*(path[:, 3]*depth)[:, None]
+    radius = path[:, 3]*(.060+.025*neon_profile)
+    radius *= (.91+.09*np.sin(body_u*11+k))*np.maximum(.05, neon_profile)
+    if k % 4 == 0:
+        points, radius = flow_into_crown(points, radius, k+121)
+    sweep('body_neon_mass_'+str(k), np.column_stack((points, radius)),
+          10 if k == 4 else 9, sides=5)
+
+for k in range(14):
+    phase = k*TAU/14+.18*math.sin(k*2.7)
+    angle = phase+body_u*TAU*(.72+.09*math.sin(k*1.9))
+    angle += .30*np.sin(body_u*10+phase*1.6)
+    offset = n*np.cos(angle)[:, None]+b*np.sin(angle)[:, None]
+    depth = .53+.10*np.sin(body_u*8+phase*2)+.025*np.sin(body_u*21+k)
+    points = path[:, :3]+offset*(path[:, 3]*depth)[:, None]
+    radius = path[:, 3]*(.022+.022*neon_profile)
+    radius *= (.86+.14*np.sin(body_u*13+k))*np.maximum(.04, neon_profile)
+    if k % 3 == 0:
+        points, radius = flow_into_crown(points, radius, k+101)
+    sweep('body_neon_braid_'+str(k), np.column_stack((points, radius)),
+          10 if k % 7 == 2 else 9, sides=4)
+
 for k in range(11):
     u = np.linspace(0, 1, len(path))
     angle = k*TAU/11 + u*TAU*1.25 + .22*np.sin(u*12+k)
@@ -233,6 +275,50 @@ for k in range(38):
     radius = path[:, 3]*.008*np.minimum(1, .1+u*8)*np.minimum(1, .1+(1-u)*8)
     points, radius = flow_into_crown(points, radius, k+29)
     sweep('body_crossweft_'+str(k), np.column_stack((points, radius)), 6 if k%9==0 else 3, sides=3)
+
+if branch_study:
+    # Recessed currents along parent boughs taper before their endpoints.
+    for j, (name, group, branch, bn, bb) in enumerate(anatomy):
+        if group != 'crown':
+            continue
+        main_branch = name in crown_paths
+        if main_branch:
+            for k in range(3):
+                t = np.linspace(0, 1, len(branch))
+                angle = k*TAU/3+t*2.8
+                offset = bn*np.cos(angle)[:, None]+bb*np.sin(angle)[:, None]
+                pts = branch[:, :3]+offset*(branch[:, 3]*.72)[:, None]
+                widths = np.maximum(.001, branch[:, 3]*.038*(1-t)**1.5)
+                sweep('crown_current_'+name+'_'+str(k), np.column_stack((pts, widths)), 9, sides=3)
+        if not any(word in name for word in ['twig', 'fork']):
+            continue
+        # Sparse clusters leave the branching skeleton legible.
+        if j % 3 != 1:
+            continue
+        anchor = branch[-3, :3]
+        tangent = base.unit(branch[-1, :3]-branch[-4, :3])
+        side = bn[-3]
+        depth = bb[-3]
+        for k in range(3):
+            spread = (k-1)*.65
+            direction = base.unit(tangent*.6+side*spread+np.array([0,.6,0]))
+            length = 1.0+.35*math.sin(j+k*1.8)
+            t = np.linspace(0, 1, 17)
+            stem = anchor+t[:, None]*direction*length
+            stem += (np.sin(t*math.pi)*.20)[:, None]*depth
+            sweep('crown_spray_'+str(j)+'_'+str(k), np.column_stack((stem, .035*(1-t)+.002)), 4, sides=3)
+            # A leaf is a small three-dimensional nest of curved fibres.
+            start = stem[7]
+            leaf_length = .85+.18*math.sin(j+k)
+            for strand in range(7):
+                phase = strand*TAU/7
+                u = np.linspace(0, 1, 19)
+                width = np.sin(u*math.pi)*.23
+                pts = start+u[:, None]*direction*leaf_length
+                pts += side*(width*math.cos(phase))[:, None]
+                pts += depth*(width*.48*math.sin(phase)+.14*np.sin(u*math.pi))[:, None]
+                radii = .012+.014*np.sin(u*math.pi)
+                sweep('crown_leaf_'+str(j)+'_'+str(k)+'_'+str(strand), np.column_stack((pts, radii)), 7 if strand == 1 else 3 if strand%2 else 4, sides=3)
 
 # Modest shoulder/base flare requested after the first material review.
 # Deform the entire local bundle together so fibres, heart, roots and boughs
@@ -269,9 +355,9 @@ for part in tree.parts:
     dest['uv'].extend(part['uv'])
     dest['f'].extend([[i+shift for i in face] for face in part['f']])
 
-data = dict(v=1, desc='Woven black-green energy tree following frozen tall scaffold v1, with modest trunk flare, unchanged waist and flowing trunk-to-bough transitions. Static visual review; not gameplay bound.',
+data = dict(v=1, desc='Woven black-green energy tree following frozen tall scaffold v1, with a recessed neon inner braid, modest trunk flare, unchanged waist and flowing trunk-to-bough transitions. Static visual review; not gameplay bound.',
             pal='nature', mat='solid', smooth=True, bark=False, parts=list(merged.values()))
-target = ROOT / 'assets/fx/mesh/nature_ult_tree_woven_v1.mesh.json'
+target = ROOT / ('assets/fx/mesh/nature_ult_tree_branches_v1.mesh.json' if branch_study else 'assets/fx/mesh/nature_ult_tree_woven_v1.mesh.json')
 target.write_text(json.dumps(data, separators=(',', ':'))+'\n', encoding='utf-8')
 triangles = sum(sum(len(f)-2 for f in p['f']) for p in data['parts'])
 print(f'{target.name}: {len(data["parts"])} material groups, {triangles:,} triangles')

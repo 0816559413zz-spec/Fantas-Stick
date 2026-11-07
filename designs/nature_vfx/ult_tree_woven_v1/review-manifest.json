@@ -1,11 +1,11 @@
 {
-  "status": "Material model review; frozen scaffold chosen as working shape, detailed model not approved yet.",
+  "status": "Approved by user on 2026-11-07: tree body, woven material direction, and recessed neon-green inner energy.",
   "source": "assets/fx/mesh/nature_ult_tree_scaffold_v1.mesh.json",
   "sourceSha256": "16cfab22b7b0242691cc441b246d42f80f484bfb2251ead066bf2219a186fa1e",
   "model": "assets/fx/mesh/nature_ult_tree_woven_v1.mesh.json",
-  "modelSha256": "581dc54b60a79e122ee962da614b6705b9703a8b154efea590825eb3eafd2d27",
-  "triangles": 205644,
-  "materialGroups": 25,
+  "modelSha256": "73a908047a551f9eeca6af33f43c2f7a96aa283c44c9e9d1465425a597a39181",
+  "triangles": 222692,
+  "materialGroups": 27,
   "images": [
     "hero.jpg",
     "front.jpg",
@@ -14,9 +14,12 @@
     "roots.jpg",
     "heart.jpg",
     "crown.jpg",
-    "junction.jpg"
+    "junction.jpg",
+    "neon_front.jpg",
+    "neon_heart.jpg",
+    "neon_junction.jpg"
   ],
-  "capture": "Actual Studio geometry and authored material, separate review lighting. No AI image or gameplay binding.",
+  "capture": "Actual Studio geometry and authored material. Standard views use separate review lighting; neon views add the game's real bloom pass. No AI image or gameplay binding.",
   "checks": {
     "finiteAttributes": true,
     "validIndices": true,
@@ -25,7 +28,7 @@
     "pageErrors": 0,
     "validatedWithBaseCommit": "409ec7c"
   },
-  "revision": "Smooth upper-body flare into main boughs: curved embedded branch bases and continuous body fibres to crown. Waist preserved.",
+  "revision": "Approved revision: recessed green energy mass and finer inner braids behind the dark body weave. Emission stays green through occluding fibres; silhouette and waist are preserved.",
   "flare": {
     "base": 0.2,
     "upper": 0.18,
@@ -35,6 +38,6 @@
     ],
     "localRadiusOnly": true
   },
-  "vertices": 139288,
+  "vertices": 149810,
   "hashNormalization": "UTF-8 file bytes with CRLF normalized to LF for cross-platform Git checkout"
 }

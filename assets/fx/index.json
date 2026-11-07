@@ -1293,6 +1293,18 @@
    "dur": 0.5,
    "n": 3
   },
+  "nature/tree_summon": {
+   "v": "a89e8e80",
+   "desc": "Nature — อัญเชิญต้นไม้พลังงาน รากแผ่ เส้นเขียวม้วนขึ้นแล้วคลี่กิ่ง (Studio)",
+   "pal": "nature",
+   "tags": [
+    "nature",
+    "summon",
+    "ultimate"
+   ],
+   "dur": 4.8,
+   "n": 2
+  },
   "rec/parry": {
    "v": "97994a52",
    "desc": "สูตรเฉพาะ playFx(\"parry\")",
@@ -3523,6 +3535,12 @@
    "desc": "Nature ultimate MODEL DRAFT B: Uneven root bundles framing an open heart. Provisional scale only; no binding, mechanics, animation or particles.",
    "mat": "solid",
    "n": 83
+  },
+  "nature_ult_tree_branches_v1": {
+   "v": "bbc241e5",
+   "desc": "Woven black-green energy tree following frozen tall scaffold v1, with a recessed neon inner braid, modest trunk flare, unchanged waist and flowing trunk-to-bough transitions. Static visual review; not gameplay bound.",
+   "mat": "solid",
+   "n": 28
   },
   "nature_ult_tree_c": {
    "v": "a23f2fc3",

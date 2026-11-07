@@ -158,7 +158,9 @@ function mkMeshRebuild(){const M=MK.m;if(!M.obj||!M.d)return;const rec=[];const 
   if(M.name)FXMK.mesh.set(M.name,{data:JSON.parse(JSON.stringify(M.d)),geo,fail:false,p:Promise.resolve(geo)});   // เอฟเฟกต์ที่ใช้โมเดลนี้เห็นของใหม่ทันที
   mkMeshMat();M.wire.visible=M.wireOn;mkHi();mkMeshStat();}
 function mkPal(){return fxPal((MK.m.d&&MK.m.d.pal)||'arcane');}
-function mkMeshMat(){const M=MK.m,d=M.d,coloured=!!M.obj.geometry.getAttribute('color'),emitting=!!M.obj.geometry.getAttribute('aEmit'),key=M.view+':'+(d.mat||'energy')+':'+(d.pal||'arcane')+':'+coloured+':'+!!d.smooth+':'+!!d.bark+':'+emitting;if(key===M.matK)return;M.matK=key;const P=mkPal(),old=M.obj.material;let m;
+function mkMeshMat(){const M=MK.m,d=M.d,coloured=!!M.obj.geometry.getAttribute('color'),emitting=!!M.obj.geometry.getAttribute('aEmit');
+  const natureWaist=M.name===ST_NATURE_TREE_MODEL&&M.view!=='clay'&&d.mat==='solid'&&emitting;
+  const key=M.view+':'+(d.mat||'energy')+':'+(d.pal||'arcane')+':'+coloured+':'+!!d.smooth+':'+!!d.bark+':'+emitting+':'+natureWaist;if(key===M.matK)return;M.matK=key;const P=mkPal(),old=M.obj.material;let m;
   if(M.view==='clay')m=new THREE.MeshStandardMaterial({color:0x9c8f7a,roughness:0.7,metalness:0,flatShading:true,side:THREE.DoubleSide});
   else switch(d.mat||'energy'){
     case 'fire':m=fireMat({mode:'ball',speed:1.2,int:1.15});break;
@@ -168,6 +170,7 @@ function mkMeshMat(){const M=MK.m,d=M.d,coloured=!!M.obj.geometry.getAttribute('
     default:m=fxEnergyMat(P.core,P.main,P.deep);m.uniforms.uOp.value=1;m.uniforms.uInt.value=1;}
   if(M.view!=='clay'&&d.mat==='solid'&&d.bark)fxModelBark(m);
   if(M.view!=='clay'&&d.mat==='solid'&&emitting)fxModelEmission(m);
+  if(natureWaist)stNatureTreeWaist(m);
   M.obj.material=m;if(old&&old.dispose)old.dispose();}
 function mkHi(){if(meHi())return;const M=MK.m,P=M.sel&&M.d.parts.find(p=>p.id===M.sel);if(M.hi.geometry)M.hi.geometry.dispose();
   if(P&&!P.off){M.hi.geometry=fxMeshBuild({parts:[P]});M.hi.visible=true;}else{M.hi.geometry=new THREE.BufferGeometry();M.hi.visible=false;}
