@@ -118,7 +118,7 @@ waterDragonTick:119
 §133 ทุกเฟรม (ทั้งเกม)
 updateWater:134 waterSnapP:140 waterSnapW:142 WT_RP:145 WT_FM:148 WT_CG:150 WT_AB:154 WT_MW:157 WT_UL:159
 
-## js/09-wind.js (287) — สายลม 🌪️ (ผู้ใช้ออกแบบทั้งหมด — designs/wind.md "คอนเซ็ปต์ใหม่") • ฝั่งโฮสต์ • ขั้นที่ 1…
+## js/09-wind.js (287) — 
 WINDP:8 WNV:12
 §19 ตัวช่วย
 wOn:20 wGain:21 wSeg:23 wFoeNear:24

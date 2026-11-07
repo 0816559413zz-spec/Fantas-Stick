@@ -93,7 +93,7 @@ function windEfx(ev){
     case 'wnvx':fxPlay('wind/vortex_bind_sb_a',{x,y,h:H,a});later(0.8,()=>{if(near)shake(0.18);});if(near)snd('cast_pull',ev);return true;
     case 'wnvxstun':fxPlay('wind/wall_hit',{x,y,h:0,a:Math.random()*6.283});if(near)shake(0.15);return true;   // ลมรัดตัว = สตัน 0.5 วิ
     case 'wnvxcap':fxPlay('wind/ba_hit',{x,y,h:Math.max(0,H-0.2),a:Math.random()*6.283});return true;
-    case 'wnvocast':fxPlay('wind/void_matter',{x,y,h:H,a,aim:false});if(near)snd('cast_pull',ev);return true;
+    case 'wnvocast':fxPlay('wind/void_wave',{x,y,h:H,a,aim:false});if(near)snd('cast_pull',ev);return true;
     case 'wnvohole':{const I=fxPlay('wind/void_hole',{x,y,h:H,a,aim:false});if(I)WV.vo.set(ev.n,I);if(near)shake(0.15);return true;}
     case 'wnvoboom':{const I=WV.vo.get(ev.n);if(I){fxKill(I);WV.vo.delete(ev.n);}fxPlay('wind/void_boom',{x,y,h:H,a,aim:false});if(near){shake(0.6);snd('break',ev);if(ev.c)hitStop(0.08);}return true;}
     case 'wnfw':fxPlay('wind/fw_takeoff',{x,y,h:H,aim:false});return true;
