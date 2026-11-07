@@ -240,12 +240,12 @@ clawGeo:146 clawRakes:151 updateClaws:165 later:173 stFade:174 stBeam:175 shellP
 ## js/21-vfx-frost.js (206) — น้ำแข็ง (ภาพ): ชิ้นผลึก/หนาม/แผ่นน้ำแข็งชั่วคราว (โผล่ → ค้าง → หด) •…
 FRV:2 _cryG:3 _spkG:3 _plateG:3 _hexG:3 _iceFxM:4 _frostM:4 iceFxM:5 frostM:6 ICEP:8 _im4:8 _iq:8 _ie:8 _ip:8 _is:8 icePool:9 iceBit:10 iceChips:13 updateFRV:14 iceRing:24 chillFX:25 makeSlash:41 _wbGeo:49 crescentGeo:51 makeWaveBlade:54 WGH:68 updateSlashes:69 _glGeo:82 _glMat:82 _glMat2:82 makeGlacier:83 updateGlacierVis:114 updateOrbShots:123 updateZV:133 WM3:206
 
-## js/22-models.js (333) — โมเดลจากไฟล์ (.glb จาก Blender) — ข้อตกลงฝั่งคนปั้นอยู่ใน guides/ASSE…
-MODELS:5 modelManifest:6 gltfLoader:11 loadModel:16 modelInst:30 modelOr:31 prefetchModels:43
-§45 Animation จากไฟล์ (Blender Actions) + โมเดลตัวละคร/ศัตรูจากไฟล์
-ANIM_ALT:48 makeAnimator:49 animResolve:54 animPlay:55 _animN:65 animLod:66 animTick:67 lookTint:87 tintModel:91 shareSkinSkeletons:106 batchStudentSkin:114 _palPx:133 palPixels:134 _s2l:137 mergeStudent:138 useFileModel:173 rigStage:198 fileVariants:200 fileBroom:201 _rq:205 _rq2:205 _rq3:205 rigBind:206 rigStd:214 rigSync:215 FILE_MODELS:226
-§228 VFX จากไฟล์ (รายละเอียดฝั่งคนทำอยู่ใน guides/ASSETS.md)
-VFXL:234 FLIPL:234 FLIPS:234 prefetchFx:235 playVfx:236 vfxSeq:282 flipTex:287 playFlip:295 fileFx:310 zoneFx:317 clearVfx:318 updateVfx:319
+## js/22-models.js (334) — โมเดลจากไฟล์ (.glb จาก Blender) — ข้อตกลงฝั่งคนปั้นอยู่ใน guides/ASSE…
+MODELS:5 modelManifest:6 gltfLoader:11 loadModel:16 modelInst:31 modelOr:32 prefetchModels:44
+§46 Animation จากไฟล์ (Blender Actions) + โมเดลตัวละคร/ศัตรูจากไฟล์
+ANIM_ALT:49 makeAnimator:50 animResolve:55 animPlay:56 _animN:66 animLod:67 animTick:68 lookTint:88 tintModel:92 shareSkinSkeletons:107 batchStudentSkin:115 _palPx:134 palPixels:135 _s2l:138 mergeStudent:139 useFileModel:174 rigStage:199 fileVariants:201 fileBroom:202 _rq:206 _rq2:206 _rq3:206 rigBind:207 rigStd:215 rigSync:216 FILE_MODELS:227
+§229 VFX จากไฟล์ (รายละเอียดฝั่งคนทำอยู่ใน guides/ASSETS.md)
+VFXL:235 FLIPL:235 FLIPS:235 prefetchFx:236 playVfx:237 vfxSeq:283 flipTex:288 playFlip:296 fileFx:311 zoneFx:318 clearVfx:319 updateVfx:320
 
 ## js/23-props-bld-view.js (408) — prop ฝั่งแสดงผล
 PROPV:2 propFallback:4 farCull:33 syncProps:34
@@ -265,7 +265,7 @@ statusFX:3 fx:27
 §208 overlay: เลือกบัฟ / สรุปผล
 choosePick:209 syncOverlays:214 showOver:235
 
-## js/27-world.js (382) — 
+## js/27-world.js (383) — 
 S3:4 tx:4 tz:4 CITY_KERB:7 cityKerb:8 GY:9 TW:9 hdr:10 gl:12
 §20 เงานุ่มแบบ PCSS (contact-hardening): ใกล้จุดสัมผัสคม ไกลจากวัตถุที่บั…
 PCSS:23 scene:50 cam:52 composer:53
@@ -274,11 +274,11 @@ rpass:57 fxScene:59 SOFTU:61 SOFT_GLSL:62 FXMATS:64 fxMat:65 softify:67 HAZE_U:7
 §123 TAA (ลบขอบหยักแบบสะสมหลายเฟรม) — กราฟิกสูงเท่านั้น • ปิดด้วย ?notaa
 TAA:126 TAA_FRAG:127 _taaH:142 taaWanted:143 taaBegin:144 taaEnd:152 taaFinish:153 taaResolve:155 AO_RT:165 fxPass:186 bloom:187 GRADEU:194 gradePass:211 aaPass:229
 §231 คุณภาพกราฟิก: auto = ปรับความละเอียดเองตาม FPS / high = สวยสุด / low …
-QUAL:232 QUAL_NAME:233 qualPR:234 applyQuality:240 qualTick:260
-§276 ประหยัด CPU สำหรับเครื่องอ่อน (ผู้ใช้ 2026-11-06 "เครื่องผู้เล่นแย่กว…
-qualCS:280 CULL:281 cullTick:282 texCanvas:293 glowTex:294 stoneTex:295 runeTex:301 glowMats:309 glowMat:310 STONEM:312 stoneMat:313 shadowAll:314 SKY:317 hemi:337 moonL:339 LDIR:343 setSky:344
-§353 เงาตามผู้เล่น
-SHD:357 _shF:358 _shR:358 _shU:358 _shC:358 _shY:358 shadowFollow:359 shadowSoft:379 LPOOL:381
+QUAL:232 QUAL_NAME:233 qualPR:234 applyQuality:240 qualTick:261
+§277 ประหยัด CPU สำหรับเครื่องอ่อน (ผู้ใช้ 2026-11-06 "เครื่องผู้เล่นแย่กว…
+qualCS:281 CULL:282 cullTick:283 texCanvas:294 glowTex:295 stoneTex:296 runeTex:302 glowMats:310 glowMat:311 STONEM:313 stoneMat:314 shadowAll:315 SKY:318 hemi:338 moonL:340 LDIR:344 setSky:345
+§354 เงาตามผู้เล่น
+SHD:358 _shF:359 _shR:359 _shU:359 _shC:359 _shY:359 shadowFollow:360 shadowSoft:380 LPOOL:382
 
 ## js/28-city-build.js (386) — เมืองมักเกิ้ล (ลอนดอน) — ภาพ • ข้อมูลอยู่ js/02-city.js • โมเดลจาก as…
 CITY_WIN:4 cityWinTex:5 cityEmTex:10 cityBoxGeo:16 buildCity:21
@@ -289,7 +289,7 @@ CITY_STY:181 CITY_VEH:188 cityFacade:190 CITYK:203 _cZ:204 _cT:204 _cR:204 _cC:2
 §259 ตึกไฮไลต์ล้มทั้งตึก (ขั้น 7)
 _ctA:262 _ctB:262 _ctC:262 cityTowerPose:263 cityTowerAnim:271 cityTowerRubble:278 CAREA:292 cityAreaSync:293 cityViewSync:305 cityDebris:349 cityFX:358
 
-## js/28-maps-build.js (763) — สร้างแผนที่
+## js/28-maps-build.js (764) — สร้างแผนที่
 CANDLESYS:2 builtMap:3 builtKey:3 world:3 TORCHES:3 CANDLES:3 FIREFLIES:3 CRYSTAL:3 RUNE:3 SNITCH:3 BANNERS:3 SNOW:3 WCACHE:5 WCACHE_MAX:5 wkey:7 buildWorld:8 addW:42 _prewarmed:44 prewarmShaders:45 batchStatic:64 makeCandles:89 updateCandles:98 buildCastle:107 buildHogsmeade:173 buildGreatHall:261 buildForest:331
 §428 ทุ่งหญ้าฮอกวอตส์ (เย็น)
 ringTrees:429 grassTex:438 buildMeadow:439
@@ -300,7 +300,7 @@ buildLake:459
 §482 บรรยากาศที่ใช้ร่วมกัน (แผนที่จากโค้ด + แผนที่จากไฟล์ผ่าน fx ใน guides…
 makeSnow:483 makeFireflies:490 makeSnitch:497 fileMapFx:504
 §514 แผนที่จากไฟล์ Blender (guides/MAP-DESIGN.md)
-terrGeo:516 buildFileMap:524 tickM:562 TRPAD:563 ARPAD:563 signTex:564 testSign:565 buildTest:572 buildRuins:669 buildPitch:694
+terrGeo:516 buildFileMap:524 tickM:563 TRPAD:564 ARPAD:564 signTex:565 testSign:566 buildTest:573 buildRuins:670 buildPitch:695
 
 ## js/29-characters.js (439) — ระบบผ้า (เสื้อคลุมพลิ้วตามการเคลื่อนที่)
 makeCloak:2 updateCloth:10 wandNamed:34 wandSparks:83
@@ -511,7 +511,7 @@ RAG:10 RAGJ:23 RAGB:29 RAGS:33 RAGMIN:37 RAGHINGE:39 _rv1:40 _rv2:40 _rv3:40 _rq
 ## js/49-cloth.js (132) — ผ้าคลุมจริง (cloth sim) — เฉพาะตัวละครของเราเอง • ภาพบนเครื่องตัวเองล้วน ไม่แตะ sim / hit…
 CLOTH:10 CL_ROWS:26 CL_NC:26 CL_GAP:26 CL_IN:26 _clV:27 _clA:27 _clB:27 clPinK:29 clBind:31 clothSetup:34 clTargets:68 clReset:72 clCapsule:74 _clO:78 clWorld:79 clWorldHit:88 clStep:93 clDraw:106 clothTick:113
 
-## js/50-grass.js (294) — 
+## js/50-grass.js (367) — 
 AIR:10 AIR_MAP:17 airGust:19 airGs:22 airMark:24 airForMap:27 _airV:28 airAt:29 airGv:35 airTick:36
 §39 ต่อเข้ากับเอฟเฟกต์เดิม (ไม่ต้องแก้ทุกสกิล): แสงวาบ = ลมกระโชก • วงคลื…
 CLW:48
@@ -519,8 +519,10 @@ CLW:48
 GRASS:52
 §53 รอยสนามรบบนหญ้า + พื้น (อยู่ทั้งแมตช์ — designs/battlefield.md ขั้น 3)
 SCAR:56 scarReset:58 scarPaint:65 grassScar:80
-§85 พื้นหญ้ามีชีวิต: สีเป็นหย่อม (เขียวเข้ม / แห้งเหลือง / ดินโผล่) + จุด…
-GR_NOISE:88 GR_LIVE:93 grLive:111 GR_GLSL_V:118 GR_BEGIN:123 grassMat:169 grassBuild:187 _grBasic:201 grassBake:202 grassCount:258 grassTick:263
+§85 ไฟลามหญ้า (ภาพล้วน: ไม่มีดาเมจ ไม่ซิงก์ — แต่ละเครื่องลามไม่เหมือนกัน…
+FIRE:91 GR_FIRE:94 fireReset:96 fireBuild:98 fireLight:105 fireIgnite:107 fireFx:119 fireStep:124 fireTick:148
+§153 พื้นหญ้ามีชีวิต: สีเป็นหย่อม (เขียวเข้ม / แห้งเหลือง / ดินโผล่) + จุด…
+GR_NOISE:156 GR_LIVE:161 grLive:179 GR_GLSL_V:187 GR_BEGIN:192 grassMat:239 grassBuild:257 _grBasic:271 grassBake:272 grassCount:328 grassTick:333
 
 ## js/51-warmup.js (189) — 
 WARM:11 WARM_FXDIR:12 WARM_COMMON:12 WARM_X:13 WARM_Y:13 warmKeep:15 warmStaticModels:21 glReady:30 warmCompile:31 warmDraw:34 WARM_SKIP:44 warmAssets:47 warmFx:57 warmFxEnd:68 warmGather:70 warmPaths:72 warmStep:74 warmTick:106
@@ -714,14 +716,14 @@ PERF:9 perfFrame:12 perfDom:26 perfStats:34 perfGraph:38 _gpuName:51 gpuIntegrat
 ## js/72-dash-pose.js (84) — 
 DPOSE:12 DPT:24 _dpQ:25 _dpX:25 _dpP:25 dpMix:26 dpKnees:28 dpStyle:36 DPDBG:41 dashPose:42 dpApply:74
 
-## js/73-tune.js (130) — 
+## js/73-tune.js (131) — 
 TUNE:8 tuneNum:9 tuneBuild:15
-§69 ใช้ / เก็บค่า
-tuneSetVal:70 tuneApplyFile:73 tuneJson:77
-§80 หน้าตา
-tuneOpenF:85 tuneFmt:86 tuneRow:87 tuneRefresh:90 tuneMsg:98 tuneToggle:99 tuneEdit:103
-§127 API สำหรับเครื่องมือแยก tune.html (เปิดเกมใน iframe แล้วเรียกผ่าน WD)
-tuneDump:128 tuneSetKey:129
+§70 ใช้ / เก็บค่า
+tuneSetVal:71 tuneApplyFile:74 tuneJson:78
+§81 หน้าตา
+tuneOpenF:86 tuneFmt:87 tuneRow:88 tuneRefresh:91 tuneMsg:99 tuneToggle:100 tuneEdit:104
+§128 API สำหรับเครื่องมือแยก tune.html (เปิดเกมใน iframe แล้วเรียกผ่าน WD)
+tuneDump:129 tuneSetKey:130
 
 ## js/74-look.js (79) — 
 LOOK:17 lookPreset:24 lookMap:26 lookName:27 lookEnvFor:28 lookApply:38 lookRays:53 _lkV:58 lookRaysFrame:60 lookRefresh:67
@@ -731,4 +733,14 @@ LOOK_F:69 lookRegister:75
 ## js/75-ambient.js (52) — 
 AMBX:9 AMBX_V:10 AMBX_F:24 ambMesh:27 ambQual:39 ambFrame:40
 
-(87 files, 21231 lines)
+## js/76-surface.js (124) — 
+SURF:11
+§15 ภาพผิว (ความสูง 4 แบบ) : noise ที่วนซ้ำได้ (ทุกฟังก์ชันรับ x,y ใน [0,…
+_sh:16 _sva:17 _sfb:20 _sfa:21 _SW:22 _swor:23 _SCL:27 SURF_H:28 surfBuild:37
+§47 ส่งค่าเข้า uniform / กราฟิก
+surfSync:48 surfQuality:52
+§53 ใส่ผิวเข้าวัสดุ
+SURF_VS:54 SURF_VS_BODY:55 SURF_FS:66 SURF_FS_BODY:67 surfOk:97 surfApply:98 surfScene:110
+§111 ปรับค่า (tune.html / F8)
+
+(88 files, 21432 lines)

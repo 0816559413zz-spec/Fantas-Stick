@@ -53,14 +53,14 @@ const GRASS={ON:true,DENS:18,H:0.46,W:0.05,MAXN:75000,S:{high:60,auto:46,auto1:3
 // ---------- รอยสนามรบบนหญ้า + พื้น (อยู่ทั้งแมตช์ — designs/battlefield.md ขั้น 3) ----------
 // ภาพรอยขนาดเท่าแผนที่ (RES ช่อง/หน่วย): R = ไหม้ • G = น้ำแข็ง • B = ราบ/หาย • A = ทิศที่ล้ม (0..1 = 0..2π)
 // ล้างเมื่อเข้าหน้าเกม (แมตช์ใหม่ — setScreen js/19) / เปลี่ยนแผนที่ • ทุกเครื่องทาที่จุดเดียวกัน (มาจาก event ของโฮสต์) • ภาพล้วน ไม่แตะโปรโตคอล
-const SCAR={RES:2,w:0,h:0,D:null,tex:null,dirty:false,key:'',clearNext:true,empty:null,U:{uScar:{value:null},uScarMap:{value:new THREE.Vector4(0,0,1,1)},uGrLo:{value:0}}};
-SCAR.empty=new THREE.DataTexture(new Uint8Array(4),1,1);SCAR.empty.needsUpdate=true;SCAR.U.uScar.value=SCAR.empty;
+const SCAR={RES:2,w:0,h:0,D:null,tex:null,dirty:false,key:'',clearNext:true,empty:null,U:{uScar:{value:null},uScarMap:{value:new THREE.Vector4(0,0,1,1)},uGrLo:{value:0},uFire:{value:null}}};
+SCAR.empty=new THREE.DataTexture(new Uint8Array(4),1,1);SCAR.empty.needsUpdate=true;SCAR.U.uScar.value=SCAR.empty;SCAR.U.uFire.value=SCAR.empty;
 function scarReset(){const b=GRASS.box;if(!b)return;
   const w=Math.min(1024,Math.max(8,Math.round(b[2]*SCAR.RES))),h=Math.min(1024,Math.max(8,Math.round(-b[3]*SCAR.RES)));
   if(!SCAR.tex||SCAR.w!==w||SCAR.h!==h){if(SCAR.tex)SCAR.tex.dispose();SCAR.w=w;SCAR.h=h;SCAR.D=new Uint8Array(w*h*4);
     SCAR.tex=new THREE.DataTexture(SCAR.D,w,h,THREE.RGBAFormat);SCAR.tex.magFilter=SCAR.tex.minFilter=THREE.LinearFilter;}
   else SCAR.D.fill(0);
-  SCAR.tex.needsUpdate=true;SCAR.U.uScar.value=SCAR.tex;SCAR.U.uScarMap.value.set(...b);SCAR.dirty=false;}
+  SCAR.tex.needsUpdate=true;SCAR.U.uScar.value=SCAR.tex;SCAR.U.uScarMap.value.set(...b);SCAR.dirty=false;fireReset();}
 // ทารอย ณ จุด (หน่วย 3D) • kind: 'burn' | 'frost' | 'flat' (ล้ม → สูงมาก = หญ้าหาย) • r = รัศมี (หน่วย) • a = ความแรง 0..1 (ทาซ้ำ = เข้มขึ้นจนเต็ม)
 function scarPaint(X,Z,r,kind,a){if(!SCAR.D||!(r>0)||!(a>0))return;
   const b=SCAR.U.uScarMap.value,w=SCAR.w,h=SCAR.h,D=SCAR.D,ch=kind==='burn'?0:kind==='frost'?1:2;
@@ -78,10 +78,78 @@ function scarPaint(X,Z,r,kind,a){if(!SCAR.D||!(r>0)||!(a>0))return;
   SCAR.dirty=true;}
 // รอยจากสกิล (เรียกจาก bfAfter js/44 ตามธาตุ + ขนาด s 0.45–1.8) • x,y = พิกัดเกม
 function grassScar(x,y,el,s){const X=tx(x),Z=tz(y),r=0.8+2.1*s;
-  if(el==='fire'){scarPaint(X,Z,r,'burn',Math.min(1,0.4+0.35*s));if(s>=1.2)scarPaint(X,Z,r*0.5,'flat',0.55);}
+  if(el==='fire'){scarPaint(X,Z,r,'burn',Math.min(1,0.4+0.35*s));fireIgnite(X,Z,r);if(s>=1.2)scarPaint(X,Z,r*0.5,'flat',0.55);}
   else if(el==='storm')scarPaint(X,Z,r*0.75,'burn',0.3+0.2*s);
   else if(el==='ice')scarPaint(X,Z,r*1.1,'frost',Math.min(1,0.45+0.3*s));
   else if(el==='earth'){scarPaint(X,Z,r,'flat',Math.min(1,0.4+0.35*s));if(s>=1)scarPaint(X,Z,r*0.45,'flat',0.7);}}
+// ---------- ไฟลามหญ้า (ภาพล้วน: ไม่มีดาเมจ ไม่ซิงก์ — แต่ละเครื่องลามไม่เหมือนกันเป๊ะได้) ----------
+// ตารางเดียวกับ SCAR (RES ช่อง/หน่วย) • fuel = ความหนาแน่นหญ้าจากภาพถ่ายแผนที่ (คอนกรีต/หลังคา/ในบ้าน = 0 → เป็นแนวกันไฟ)
+// สกิลไฟ (grassScar) จุดไฟรอบรอยกระแทก → ช่องที่ไหม้จุดช่องข้าง ๆ (ตามลมลามเร็วกว่า ทวนลมช้ามาก) • ไหม้ดำ = SCAR.R • เรือง = FIRE.tex (R = ความร้อน 0..1)
+// ช่องหนึ่ง: 0 ยังไม่ไหม้ → 1 ไหม้ (FIRE.burn วิ) → 2 ถ่านคุ (FIRE.ember วิ) → 3 ดับ (ไม่ไหม้ซ้ำ) • สร้างตอนไฟแรกของแมตช์ (ล้างพร้อม SCAR)
+// ปรับ: spread = ความเร็วลาม • burn = ช่องหนึ่งไหม้นานกี่วิ • max = เพดานช่องที่ไหม้พร้อมกัน (กันเฟรมตก)
+// on = สวิตช์หลัก: ปิดไว้ก่อน (ผู้ใช้ 2026-11-07 ขอเอาออกชั่วคราว เผื่อใช้อีก) • เปิดได้ด้วย ?firespread หรือ tune key gfx.fire.on = 1 • ปิด = ไฟไม่ลาม/ไม่เรือง (รอยไหม้ดำจาก grassScar ยังอยู่ตามเดิม)
+const FIRE={on:/[?&]firespread/.test(location.search),w:0,h:0,fuel:null,st:null,age:null,dur:null,D:null,tex:null,list:[],nw:[],acc:0,dirty:false,max:5000,burn:2.6,ember:3.2,spread:0.35,
+  OFF:[[1,0],[-1,0],[0,1],[0,-1],[1,1],[-1,1],[1,-1],[-1,-1],[2,0],[-2,0],[0,2],[0,-2]],rate:new Float32Array(12)};
+// เรืองบนพื้น (ถ่านคุ) — ต่อท้าย emissivemap_fragment ของวัสดุพื้น (grLive)
+const GR_FIRE='{float fh=texture2D(uFire,(vGW.xz-uScarMap.xy)/uScarMap.zw).r*smoothstep(0.5,0.85,vGU);fh*=0.55+0.9*grN(vGW.xz*2.1+7.7);'+
+  'totalEmissiveRadiance+=mix(vec3(1.3,0.3,0.04),vec3(2.0,0.9,0.25),smoothstep(0.6,1.0,fh))*fh*fh*0.9;}';
+function fireReset(){if(FIRE.tex){FIRE.tex.dispose();FIRE.tex=null;}
+  FIRE.fuel=FIRE.st=FIRE.age=FIRE.dur=FIRE.D=null;FIRE.list.length=0;FIRE.nw.length=0;FIRE.acc=0;FIRE.dirty=false;SCAR.U.uFire.value=SCAR.empty;}
+function fireBuild(){
+  const T=GRASS.tex,im=T&&T.image;if(!im||!im.data||!SCAR.D||!SCAR.tex)return false;
+  const w=SCAR.w,h=SCAR.h,gw=im.width,gh=im.height,G=im.data,N=w*h,fu=new Uint8Array(N);
+  for(let j=0;j<h;j++){const r=Math.min(gh-1,((j+0.5)/h*gh)|0)*gw;for(let i=0;i<w;i++){const a=G[(r+Math.min(gw-1,((i+0.5)/w*gw)|0))*4+3];fu[j*w+i]=a>40?a:0;}}
+  FIRE.w=w;FIRE.h=h;FIRE.fuel=fu;FIRE.st=new Uint8Array(N);FIRE.age=new Float32Array(N);FIRE.dur=new Float32Array(N);FIRE.D=new Uint8Array(N*4);
+  FIRE.tex=new THREE.DataTexture(FIRE.D,w,h,THREE.RGBAFormat);FIRE.tex.magFilter=FIRE.tex.minFilter=THREE.LinearFilter;FIRE.tex.needsUpdate=true;
+  SCAR.U.uFire.value=FIRE.tex;FIRE.list.length=0;FIRE.acc=0;return true;}
+function fireLight(k,a0){FIRE.st[k]=1;FIRE.age[k]=a0;FIRE.dur[k]=FIRE.burn*(0.75+0.5*Math.random())*(0.6+0.4*FIRE.fuel[k]/255);}
+// จุดไฟรอบรอยกระแทก (X,Z = หน่วย 3D, r = รัศมี) — เรียกจาก grassScar
+function fireIgnite(X,Z,r){
+  if(!FIRE.on)return;
+  if(!SCAR.D||GRASS.n<=20||!grassCount()[0])return;
+  if(!FIRE.fuel&&!fireBuild())return;
+  const b=SCAR.U.uScarMap.value,w=FIRE.w,h=FIRE.h,fu=FIRE.fuel,st=FIRE.st,S=SCAR.D,L=FIRE.list;
+  const cu=(X-b.x)/b.z*w,cv=(Z-b.y)/b.w*h,rp=r*SCAR.RES;
+  const i0=Math.max(0,Math.floor(cu-rp)),i1=Math.min(w-1,Math.ceil(cu+rp)),j0=Math.max(0,Math.floor(cv-rp)),j1=Math.min(h-1,Math.ceil(cv+rp));
+  for(let j=j0;j<=j1;j++)for(let i=i0;i<=i1;i++){
+    const dd=Math.hypot(i+0.5-cu,j+0.5-cv);if(dd>=rp)continue;
+    const k=j*w+i;if(!fu[k]||st[k]||S[k*4+2]>180||L.length>=FIRE.max)continue;   // ไม่มีหญ้า / ไหม้แล้ว / หญ้าถูกระเบิดหาย
+    if(Math.random()<0.3+0.6*(1-dd/rp)){fireLight(k,-Math.random()*0.5);L.push(k);}}}
+// เปลว + ถ่านลอย + ควัน ณ จุดที่กำลังไหม้ (ใช้ระบบอนุภาคเดิม)
+function fireFx(X,Z){
+  const gx=X*20+MW/2,gy=Z*20+MH/2,wv=AIR.str*25,vx=AIR.dir.x*wv,vy=AIR.dir.y*wv,q=Math.random();
+  flame(gx,gy,0.05,{vh:rnd(0.7,1.5),vx:vx+rnd(-6,6),vy:vy+rnd(-6,6),life:rnd(0.35,0.6),size:rnd(5,9)});
+  if(q<0.3){const l=rnd(0.8,1.6);PARTS.push({x:gx,y:gy,h:0.25,vx:vx*2+rnd(-14,14),vy:vy*2+rnd(-14,14),vh:rnd(1.2,3),life:l,max:l,col:'#ff9a3a',size:1.7,g:1.3,drag:1.2});}
+  else if(q>0.8)smoke(gx,gy,0.5,1,'#2b2724',rnd(1.3,2.0),7,12);}
+function fireStep(dt){
+  const w=FIRE.w,h=FIRE.h,st=FIRE.st,age=FIRE.age,dur=FIRE.dur,fu=FIRE.fuel,D=FIRE.D,S=SCAR.D,L=FIRE.list,NW=FIRE.nw,OFF=FIRE.OFF,R=FIRE.rate;
+  const b=SCAR.U.uScarMap.value,cx=b.z/w,cz=-b.w/h,E=FIRE.ember,cp=cam.position,wx=AIR.dir.x,wz=AIR.dir.y,ws=AIR.str;
+  // โอกาสจุดช่องข้าง ๆ ต่อก้าว (ไกลลดลง • ลมพัดไปทางนั้นแรงขึ้น ทวนลมเกือบไม่ลาม)
+  for(let o=0;o<12;o++){const di=OFF[o][0],dj=OFF[o][1],ln=Math.hypot(di,dj),dot=(di*cx*wx-dj*cz*wz)/Math.hypot(di*cx,dj*cz);
+    R[o]=1-Math.exp(-FIRE.spread/ln*Math.max(0.2,1+2.2*ws*dot)*dt);}
+  const nL=L.length,pf=Math.min(0.5,10/(nL+1)),room=FIRE.max-nL,okFx=PARTS.length<VFXB.cap*0.7;let nF=0,w2=0;NW.length=0;
+  for(let n=0;n<nL;n++){
+    const k=L[n],a=age[k]+dt,p=k*4,T=dur[k];age[k]=a;let ht;
+    if(a<0)ht=0;else if(a<0.3)ht=a/0.3;else if(a<T)ht=1;
+    else if(a<T+E){ht=0.5*Math.pow(1-(a-T)/E,1.4);st[k]=2;}
+    else{st[k]=3;D[p]=0;continue;}   // ดับ → ออกจากรายการ
+    D[p]=ht*255;
+    if(a>0&&a<T){const sv=Math.min(255,a/(T*0.85)*255);if(S[p]<sv){S[p]=sv;SCAR.dirty=true;}if(S[p+1]){S[p+1]=0;SCAR.dirty=true;}}   // ไหม้ดำค่อย ๆ เข้ม + ละลายน้ำแข็ง
+    L[w2++]=k;
+    if(st[k]!==1||a<0.25)continue;
+    const j=(k/w)|0,i=k-j*w;
+    for(let o=0;o<12;o++){const ni=i+OFF[o][0],nj=j+OFF[o][1];if(ni<0||nj<0||ni>=w||nj>=h)continue;
+      const nk=nj*w+ni;if(st[nk]||!fu[nk]||S[nk*4+2]>180||room<=NW.length)continue;
+      if(Math.random()*255<R[o]*fu[nk]){fireLight(nk,0);NW.push(nk);}}
+    if(okFx&&nF<12&&a>0.3&&Math.random()<pf){
+      const X=b.x+(i+0.5)/w*b.z+(Math.random()-0.5)*cx,Z=b.y+(j+0.5)/h*b.w+(Math.random()-0.5)*cz,dx=X-cp.x,dz=Z-cp.z;
+      if(dx*dx+dz*dz<2500){fireFx(X,Z);nF++;}}}   // เปลว/ควันเฉพาะรัศมี 50 หน่วยรอบกล้อง
+  L.length=w2;for(let n=0;n<NW.length;n++)L.push(NW[n]);FIRE.dirty=true;}
+function fireTick(dt){
+  if(FIRE.list.length){FIRE.acc+=Math.min(dt,0.1);const H=1/12;let n=0;
+    while(FIRE.acc>=H&&n<2){FIRE.acc-=H;n++;fireStep(H);}
+    if(FIRE.acc>H)FIRE.acc=0;}
+  if(FIRE.dirty&&FIRE.tex){FIRE.tex.needsUpdate=true;FIRE.dirty=false;}}
 // ---------- พื้นหญ้ามีชีวิต: สีเป็นหย่อม (เขียวเข้ม / แห้งเหลือง / ดินโผล่) + จุดเล็ก ๆ + รอยถาวรบนพื้น (ไหม้ดำ / น้ำแข็งขาว / ดินแตก) ----------
 // ใช้กับวัสดุพื้นหญ้าใน js/28 (grLive(mat)) • พิกัดโลกล้วน ไม่มีลายซ้ำ • ตอนถ่ายแผนที่ (grassBake) ก็ใส่ด้วย → ใบหญ้าได้สีตามหย่อมด้วย
 // noise = อ่านจากภาพ 128² ที่ต่อกันไร้รอยต่อ (1 หน่วยของ p = 1 ช่องตาราง) — ถูกกว่าคำนวณ sin ทุกพิกเซลมาก (เคยกิน ~0.6 ms)
@@ -111,12 +179,13 @@ const GR_LIVE='{vec2 q=vGW.xz;float n1=grN(q*0.031)*0.62+grN(q*0.083+5.1)*0.38,n
 function grLive(m){m.userData.grLive=true;
   m.onBeforeCompile=sh=>{Object.assign(sh.uniforms,SCAR.U);
     sh.vertexShader='varying vec3 vGW;varying float vGU;\n'+sh.vertexShader.replace('#include <project_vertex>','#include <project_vertex>\nvGW=(modelMatrix*vec4(transformed,1.0)).xyz;vGU=normalize(mat3(modelMatrix)*normal).y;');
-    sh.fragmentShader='varying vec3 vGW;varying float vGU;uniform sampler2D uScar;uniform vec4 uScarMap;\n'+GR_NOISE+sh.fragmentShader.replace('#include <color_fragment>','#include <color_fragment>\n'+GR_LIVE)   // หลังสีจุดยอด (แผนที่จากไฟล์ใช้สีจุดยอด)
-      .replace('#include <normal_fragment_begin>','#include <normal_fragment_begin>\nnormal=normalize(mix(normal,(viewMatrix*vec4(0.0,1.0,0.0,0.0)).xyz,0.45*smoothstep(0.5,0.9,vGU)));');};   // เหลี่ยมพื้นนุ่มลง (เนินดูโค้ง)
-  m.customProgramCacheKey=()=>'grlive3';
+    sh.fragmentShader='varying vec3 vGW;varying float vGU;uniform sampler2D uScar;uniform vec4 uScarMap;uniform sampler2D uFire;\n'+GR_NOISE+sh.fragmentShader.replace('#include <color_fragment>','#include <color_fragment>\n'+GR_LIVE)   // หลังสีจุดยอด (แผนที่จากไฟล์ใช้สีจุดยอด)
+      .replace('#include <normal_fragment_begin>','#include <normal_fragment_begin>\nnormal=normalize(mix(normal,(viewMatrix*vec4(0.0,1.0,0.0,0.0)).xyz,0.45*smoothstep(0.5,0.9,vGU)));')
+      .replace('#include <emissivemap_fragment>','#include <emissivemap_fragment>\n'+GR_FIRE);};   // เหลี่ยมพื้นนุ่มลง (เนินดูโค้ง)
+  m.customProgramCacheKey=()=>'grlive4';
   return m;}
-const GR_GLSL_V='uniform vec4 uGrMap;uniform sampler2D uGround;uniform vec3 uGrCam;uniform vec4 uWind;uniform vec4 uGust[8];uniform vec4 uPush[16];uniform sampler2D uScar;uniform float uGrH;uniform float uGrW;uniform sampler2D uGroundH;uniform vec3 uSun;uniform vec3 uGrN;'+
-  'attribute vec4 aOff;varying vec3 vGC;varying vec2 vMk;varying float vTr;varying vec4 vFl;varying vec2 vHu;\n'+
+const GR_GLSL_V='uniform vec4 uGrMap;uniform sampler2D uGround;uniform vec3 uGrCam;uniform vec4 uWind;uniform vec4 uGust[8];uniform vec4 uPush[16];uniform sampler2D uScar;uniform float uGrH;uniform float uGrW;uniform sampler2D uGroundH;uniform vec3 uSun;uniform vec3 uGrN;uniform sampler2D uFire;'+
+  'attribute vec4 aOff;varying vec3 vGC;varying vec2 vMk;varying float vTr;varying vec4 vFl;varying vec2 vHu;varying float vFi;\n'+
   'vec2 grH2(vec2 c){return fract(sin(vec2(dot(c,vec2(127.1,311.7)),dot(c,vec2(269.5,183.3))))*43758.5453);}\n';
 // ใบหญ้า (ทำในการ์ดจอทั้งหมด): ขึ้นเป็นกอ (ดึงเข้าหาจุดกลางกอทุก ~0.9 หน่วย) • 3 แบบปนกัน (ปกติ / ยาวเรียว / สั้นกว้าง) + ดอกไม้เล็ก ~3%
 // โคนเข้ม → ปลายอ่อนออกเหลือง • ใบโค้งออกจากกลางกอ • ลมเป็นคลื่นใหญ่วิ่งผ่านทุ่ง (ยอดคลื่นใบสว่างขึ้น) • ย้อนแสง = แสงทะลุใบ (vTr)
@@ -130,7 +199,7 @@ const GR_BEGIN=
   'float ok=step(0.0,muv.x)*step(muv.x,1.0)*step(0.0,muv.y)*step(muv.y,1.0)*step(aOff.z,gm.a*1.15-0.15);'+
   'float d=length(wp-c);float fade=1.0-smoothstep(S*0.3,S*0.48,d);'+
   // ใบที่ไม่ขึ้น (นอกผืน/ไม่มีหญ้า) = ยุบเป็นจุดเดียว ข้ามลูปลม/รอยทั้งหมด (ประหยัดการ์ดจอ)
-  'if(ok*fade<0.001){transformed=vec3(wp.x,-1000.0,wp.y);vGC=vec3(0.0);vMk=vec2(0.0);vTr=0.0;vFl=vec4(0.0);vHu=vec2(0.0);}else{'+
+  'if(ok*fade<0.001){transformed=vec3(wp.x,-1000.0,wp.y);vGC=vec3(0.0);vMk=vec2(0.0);vTr=0.0;vFl=vec4(0.0);vHu=vec2(0.0);vFi=0.0;}else{'+
   // รอยสนามรบ (ภาพเดียวกับพื้น ขนาดเท่าแผนที่): ไหม้ / น้ำแข็ง / ราบ-หาย + ทิศล้ม
   'vec4 sc=texture2D(uScar,muv);float bu=sc.r,fr=sc.g,fb=sc.b,fa=sc.a*6.2832;vMk=vec2(bu,fr);'+
   'float cl=0.5+0.25*sin(wp.x*0.43+sin(wp.y*0.31)*2.0)+0.25*sin(wp.y*0.57+sin(wp.x*0.23)*2.0);'+   // หย่อมใหญ่สูง/เตี้ย
@@ -164,25 +233,26 @@ const GR_BEGIN=
   'col=mix(col,mix(base*vec3(0.9,0.62,0.32),vec3(0.16,0.09,0.035)*tt,smoothstep(0.35,0.9,bu))*mix(0.35,1.0,tt),smoothstep(0.03,0.4,bu));'+
   'col=mix(col,vec3(0.72,0.84,0.96)*(0.7+0.35*tt),smoothstep(0.05,0.7,fr)*0.88);'+
   'vGC=col;vFl=vec4(fc*clamp(0.3+2.5*dot(gm.rgb,vec3(0.3,0.6,0.1)),0.3,0.8)*(1.0-bu),isH);'+
+  'float hf=texture2D(uFire,muv).r;vFi=hf*(0.3+0.7*tt)*(1.0-isH)*(0.75+0.25*sin(uWind.w*14.0+aOff.w*60.0));'+
   'vec3 V=normalize(transformed-cameraPosition);vTr=(pow(max(dot(V,uSun),0.0),2.0)*1.3+0.08)*tt*tt*(1.0-isH);'+
   '}}';
 function grassMat(){
   const m=new THREE.MeshLambertMaterial({side:THREE.DoubleSide});
   const U={uGrMap:{value:new THREE.Vector4(0,0,1,1)},uGround:{value:null},uGroundH:{value:null},uGrCam:{value:new THREE.Vector3(0,0,40)},uWind:{value:new THREE.Vector4(1,0,0.3,0)},
-    uGust:{value:Array.from({length:8},()=>new THREE.Vector4(0,0,1,0))},uPush:{value:Array.from({length:16},()=>new THREE.Vector4(0,0,1,0))},uScar:SCAR.U.uScar,uGrH:{value:GRASS.H},uGrW:{value:GRASS.W},
+    uGust:{value:Array.from({length:8},()=>new THREE.Vector4(0,0,1,0))},uPush:{value:Array.from({length:16},()=>new THREE.Vector4(0,0,1,0))},uScar:SCAR.U.uScar,uFire:SCAR.U.uFire,uGrH:{value:GRASS.H},uGrW:{value:GRASS.W},
     uSun:{value:new THREE.Vector3(0,1,0)},uGrN:{value:new THREE.Vector3()},uSunC:{value:new THREE.Color(1,1,1)}};
   m.userData.U=U;
   m.onBeforeCompile=sh=>{Object.assign(sh.uniforms,U);
     sh.vertexShader=GR_GLSL_V+sh.vertexShader
       .replace('#include <beginnormal_vertex>','float na=aOff.w*6.2832;vec3 objectNormal=normalize(vec3(-sin(na)*0.3,1.0,cos(na)*0.3));')
       .replace('#include <begin_vertex>',GR_BEGIN);
-    sh.fragmentShader='varying vec3 vGC;varying vec2 vMk;varying float vTr;varying vec4 vFl;varying vec2 vHu;uniform vec3 uSunC;\n'+sh.fragmentShader
+    sh.fragmentShader='varying vec3 vGC;varying vec2 vMk;varying float vTr;varying vec4 vFl;varying vec2 vHu;varying float vFi;uniform vec3 uSunC;\n'+sh.fragmentShader
       .replace('#include <normal_fragment_begin>','#include <normal_fragment_begin>\nnormal=normalize(vNormal);')   // ด้านหลังใบไม่มืด (normal ชี้ขึ้นทั้งสองด้าน)
       .replace('vec4 diffuseColor = vec4( diffuse, opacity );','vec2 hu=vHu-vec2(0.0,0.1);float hr=length(hu),pe=0.75+0.25*cos(5.0*atan(hu.y,hu.x));'+
         'vec3 fh=mix(vFl.rgb*(1.0-0.45*smoothstep(pe*0.75,pe,hr)),vec3(1.0,0.78,0.2)*vFl.rgb.g*1.1,1.0-smoothstep(0.22,0.32,hr));'+
         'vec3 gc=mix(vGC,fh,step(0.985,vFl.a));vec4 diffuseColor=vec4(gc,opacity);')
-      .replace('#include <emissivemap_fragment>','#include <emissivemap_fragment>\ntotalEmissiveRadiance+=gc*vTr*uSunC*(1.0-vMk.x)*(1.0-vMk.y);');};   // แสงทะลุใบ
-  m.customProgramCacheKey=()=>'grass3';
+      .replace('#include <emissivemap_fragment>','#include <emissivemap_fragment>\ntotalEmissiveRadiance+=gc*vTr*uSunC*(1.0-vMk.x)*(1.0-vMk.y);\ntotalEmissiveRadiance+=mix(vec3(1.5,0.36,0.05),vec3(2.4,1.4,0.45),smoothstep(0.55,1.0,vFi))*vFi*vFi*1.3;');};   // แสงทะลุใบ
+  m.customProgramCacheKey=()=>'grass4';
   return m;}
 function grassBuild(){
   // ใบหญ้า: 7 จุด 3 ช่วง (โคนกว้าง → ปลายแหลม ใบโค้งได้นุ่ม) x = ซ้าย/ขวา (-1..1), y = 0 โคน → 1 ปลาย • ดอกไม้ใช้จุด 4-6 เป็นหัวดอก
@@ -275,6 +345,7 @@ function grassTick(dt){
   m.visible=cnt>0&&GRASS.n>20;
   {const me=typeof myPos==='function'?myPos():null;if(me){const w=airAt(tx(me.x),tz(me.y));CLW.x=w.x*CLW.K;CLW.z=w.z*CLW.K;}else CLW.x=CLW.z=0;}
   if(!m.visible)return;
+  fireTick(dt);
   m.geometry.instanceCount=cnt;
   const U=m.material.userData.U;
   U.uGround.value=GRASS.tex;U.uGroundH.value=GRASS.texH;U.uGrMap.value.set(...GRASS.box);
@@ -292,3 +363,5 @@ function grassTick(dt){
   for(let i=0;i<16;i++){const q=L[i],u=U.uPush.value[i];if(q)u.set(q[1],q[2],q[3],q[4]);else u.w=0;}
   U.uGrN.value.set(Math.min(8,AIR.G.length),L.length,0);   // ลูปใน shader วนเฉพาะช่องที่ใช้
 }
+
+window.WD&&Object.assign(window.WD,{FIRE,grassScar});   // ทดสอบ/ดีบัก

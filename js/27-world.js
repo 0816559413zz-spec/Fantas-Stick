@@ -254,6 +254,7 @@ function applyQuality(){
   // เงาตามซอกมุม: สูง = เปิด / อัตโนมัติ = เปิดจนกว่าเครื่องเริ่มช้า (lvl≥1) / ประหยัด = ปิด (ทำงานเฉพาะตอน soft เปิด)
   AOU.uAO.value=soft&&(QUAL.mode==='high'||QUAL.lvl<1)?AO_ON.strength:0;
   if(typeof lookRays==='function')lookRays();   // ลำแสง: เปิดตามกราฟิกเหมือน AO
+  if(typeof surfQuality==='function')surfQuality();   // ผิววัสดุ (js/76): สูง/อัตโนมัติต้น = เปิด
   if(typeof resize==='function'&&SW)resize();
 }
 // ปรับความละเอียดอัตโนมัติ: เฟรมช้า (<~40fps) ลดลงทีละขั้น / ลื่นต่อเนื่องค่อยเพิ่มกลับ

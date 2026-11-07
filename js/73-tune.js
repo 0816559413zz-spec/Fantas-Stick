@@ -21,6 +21,7 @@ function tuneBuild(){
   tuneNum(GF,'ลบขอบหยัก (TAA)','gfx.taa.on','TAA (1 = เปิด • ทำงานเฉพาะกราฟิกสูง แทน FXAA)',()=>TAA.on?1:0,v=>{TAA.on=!!v;},{bool:true,min:0,max:1,step:1});
   tuneNum(GF,'ลบขอบหยัก (TAA)','gfx.taa.alpha','ความไวต่อภาพใหม่ (น้อย = เนียนแต่เกิดเงา)',()=>TAA.alpha,v=>{TAA.alpha=v;},{min:0.03,max:0.5,step:0.01});
   tuneNum(GF,'ลบขอบหยัก (TAA)','gfx.taa.sharp','ความคมชดเชย',()=>TAA.sharp,v=>{TAA.sharp=v;},{min:0,max:1,step:0.01});
+  tuneNum(GF,'ไฟลามหญ้า','gfx.fire.on','ไฟลามหญ้า (1 = เปิด • ปิดไว้ก่อน)',()=>FIRE.on?1:0,v=>{FIRE.on=!!v;},{bool:true,min:0,max:1,step:1});
   tuneNum(GF,'เงา','gfx.shd.r','พื้นที่เงา (ครึ่งกว้าง) กราฟิกปกติ',()=>SHD.r,v=>{SHD.r=v;},{min:10,max:120,step:1});
   tuneNum(GF,'เงา','gfx.shd.rhigh','พื้นที่เงา กราฟิกสูง',()=>SHD.rHigh,v=>{SHD.rHigh=v;},{min:10,max:160,step:1});
   tuneNum(GF,'เงา','gfx.shd.ahead','ดันเงาไปข้างหน้ากล้อง',()=>SHD.ahead,v=>{SHD.ahead=v;},{min:0,max:1,step:0.05});
