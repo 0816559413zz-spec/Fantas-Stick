@@ -67,6 +67,7 @@ function wvEyePos(x,y,a){return {x:x+Math.cos(a||0)*600,y:y+Math.sin(a||0)*600,h
 function wvEyeSeen(e){const v=new THREE.Vector3(tx(e.x),e.h+GY(e.x,e.y),tz(e.y));const me=myPos();if(me&&Math.hypot(me.x-e.x,me.y-e.y)>2400)return false;v.project(cam);return v.z<1&&Math.abs(v.x)<1.05&&Math.abs(v.y)<1.05;}
 // ---------- เหตุการณ์ (efx z 'wn…') ----------
 function windEfx(ev){
+  try{airWind(ev);}catch(e){}   // หญ้า/ลม (js/50): ท่าลมทำให้หญ้าพลิ้ว
   const z=ev.z,x=ev.x,y=ev.y,H=ev.h!==undefined?ev.h:0,me=myPos(),near=!me||Math.hypot(x-me.x,y-me.y)<1100,mine=ev.id===NET.myId,a=ev.a||0;
   switch(z){
     case 'wngbw':fxPlay('wind/gale_charge',{x,y,h:H,a:0,follow:ev.id});if(near)snd('cast_pull',ev);return true;   // เตรียมยิง (กดค้างตอนเกจเต็ม)
