@@ -162,7 +162,7 @@ function stBuildUI(){
   const root=h('div',{id:'st'});document.body.append(root);
   const sel=(id,opts,val,fn)=>h('select',{id,on:{change:e=>fn(e.target.value)}},...opts.map(([v,t])=>h('option',{value:v,selected:v===val},t)));
   const seg=(...k)=>h('span',{className:'stSeg2'},...k);
-  root.append(h('div',{id:'stTop'},h('span',{className:'logo'},h('i',null,'✦'),'VFX Studio'),h('span',{className:'sep'}),
+  root.append(h('div',{id:'stTop'},h('a',{className:'tl-home',href:'hub.html',title:'กลับศูนย์รวม Tool'},'◂ Tool'),window.ToolSound?ToolSound.button():'',h('span',{className:'logo'},h('i',null,'✦'),'VFX Studio'),h('span',{className:'sep'}),
     h('span',{className:'file',id:'stFile',title:'ไฟล์ที่เปิดอยู่ (● สีส้ม = ยังไม่ได้บันทึก)'},'—'),
     seg(h('button',{id:'stBNew',title:'สร้างเอฟเฟกต์ใหม่ โดยเริ่มจากแม่แบบ',on:{click:stNewFrom}},'＋ ใหม่'),h('button',{id:'stBSave',className:'gold',title:'บันทึกลงโปรเจกต์ (Ctrl+S)',on:{click:()=>stSave(false)}},'💾 บันทึก'),
       h('button',{id:'stBSaveAs',title:'บันทึกเป็นชื่อใหม่ (Ctrl+Shift+S)',on:{click:()=>stSave(true)}},'เป็น…')),

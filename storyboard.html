@@ -5,6 +5,8 @@
 <!-- สตอรี่บอร์ด VFX: แบ่งสกิลเป็นช่วง (ชาร์จ → ปล่อย → พุ่ง → กระทบ → ค้าง → จาง) แต่ละช่วงมีเวลา ขนาด รูปทรง สี ภาพร่าง รูปตัวอย่าง
      เก็บใน storyboard/boards.json + storyboard/img/ แล้ว serve.py เขียน storyboard/sb-<id>.md (+ STORYBOARDS.md) ให้ Claude อ่าน
      ต้องเปิดผ่าน tools/serve.py (ดับเบิลคลิก "Storyboard.bat") • Claude: อ่าน storyboard/sb-<id>.md -->
+<link rel="stylesheet" href="hub/tool-ui.css">
+<script src="hub/tool-sound.js"></script>
 <style>
 /* หน้าตาแบบเดียวกับ VFX Studio (studio/studio.css): โทนเทาเข้ม + ฟ้าเป็นสีเน้น
    เลย์เอาต์: แถบบน | ซ้าย = สตอรี่บอร์ด + ช่วง | กลาง = จอภาพร่าง | ขวา = แผงแก้ค่า | ล่าง = ไทม์ไลน์ | แถบสถานะ • ลากเส้นแบ่งเพื่อปรับขนาด */
@@ -207,6 +209,7 @@ h3{margin:0;font:600 11px "Segoe UI",sans-serif;letter-spacing:.6px;color:var(--
 .fbp .fbv:hover{border-color:var(--ac)}
 </style></head><body>
 <header id="top">
+  <a class="tl-home" href="hub.html" title="กลับศูนย์รวม Tool">◂ Tool</a>
   <span class="logo"><i>🎬</i>Storyboard</span>
   <button class="pri" id="bNew" title="สร้างสตอรี่บอร์ดของสกิลใหม่">＋ สกิลใหม่</button>
   <button id="bImp" title="ดึงสกิลที่มีในเกม (ชื่อ เวลา ขนาด ท่าตัวละคร) มาเป็นสตอรี่บอร์ด — ไม่เอา VFX มา ให้ออกแบบเอง">⬇ Import สกิลจากเกม</button>

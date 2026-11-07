@@ -26,6 +26,8 @@
 
 **Nature ล่าสุด 2026-11-06 — กำแพงไม้:** ผู้ใช้ตัดรากยักษ์/ต้นไม้ล้ม เปลี่ยนเป็นกำแพงไม้ให้ธาตุที่ใช้กับไม้ได้โต้ตอบได้ ยังไม่ล็อกผลรายธาตุ รูปทรง การวาง หรือตัวเลข ไม่ทำโมเดลรากเก่าต่อ และไม่ใช้20ดาเมจ/สตัน1วิเดิม ต้นยิงวางแผนลดfirerateลงมากและเน้นคนที่ผู้เล่นโจมตี (ยังไม่เลือกตัวเลข/กติกาย่อย) อ่าน `designs/nature.md` กับส่วนบน `notes/archive/nature-session-2026-11-05.md` งานนี้คุยคอนเซปต์ ยังไม่แก้เกม
 
+**ศูนย์รวม Tool (2026-11-07):** เปิด `Tools.bat` → `hub.html` เลือก Tool (VFX Studio / ปรับค่า / Storyboard / โน้ตปัญหา / คู่มือ / หน้าแบบร่าง) รายการอยู่ `hub/tools.json` (check.js ตรวจว่าหน้า .html ที่รากลงทะเบียนครบ) กฎ UI โทนดำ + เสียงปิดเป็นค่าเริ่มต้น = `guides/TOOL-UI-RULES.md` (`hub/tool-ui.css`, `hub/tool-sound.js`; เกมที่ฝังใน Tool ?studio/?tunetool ปิดเสียงด้วย `masterGain()` ใน `js/18-audio.js`) .bat เดิม 4 ตัวยังอยู่ ใช้ได้เหมือนเดิม
+
 **แผนที่เอกสาร:** ราก = CLAUDE/AGENTS/README/HANDOFF/CODEMAP/PROJECT-GUIDE/VFX-STUDIO-CLAUDE · คู่มือเฉพาะทางอยู่ `guides/` (ASSETS, Destruction, MAP-DESIGN, OPTIMIZE, SKILL-DESIGN, STORYBOARD-SYNC, VFX, FX-FORMAT) · บันทึกเก่าลงวันที่อยู่ `notes/archive/` · ดีไซน์โหมด/ธาตุอยู่ `designs/`
 
 **ลำดับงานออกแบบล่าสุด 2026-11-06:** ผู้ใช้ให้กลับไปเน้นคลาส/สกิล โครงคอนเซปต์โหมดปราสาทมีพอแล้ว พักรายละเอียดผัง/ทางเชื่อม/interaction รายจุด ใช้บทบาทในโหมดเป็นบริบทตอนคิดสกิล อ่าน `notes/PROJECT-DESIGN-DIRECTION.md` และอย่าต่อรายละเอียดแผนที่จากคำว่า next โดยอัตโนมัติ

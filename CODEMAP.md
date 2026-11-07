@@ -209,14 +209,14 @@ VOICE:4 rosterIds:5 toggleMic:6 voiceSync:20 teamOn:37 teamOf:38 applyVoiceGates
 ## js/17-input.js (66) — 
 INPUT:4 mouseX:5 mouseY:5 showBoard:5 SET_DEF:6 SET:7 KEYACT:9 KMAP:10 PMAP:10 SKORD:11 rebuildKeys:12 keyName:22 _rebind:24 MSANE:50 mouseSane:51 cvEl:66
 
-## js/18-audio.js (300) — 
-AC:4 MASTER:4 SFXBUS:4 REVERB:4 NB:4 WIND:4 sfxLast:5 ac:6 outNode:27 tone:42 noiz:48 snd:55 sfx:118
-§120 ไฟล์เสียงจริง (โฟลเดอร์ audio/) — เริ่มโหลดเมื่อ ac() ถูกเรียกครั้งแร…
-SFXN:122 SFXV:123 SFXR:124 SFXSYN:125 BUF:126 AUD:126 loadBuf:127 loadSfx:128 playBuf:133 AMB:141 ambTick:142 MUSF:153 MUSF_VOL:154 STINGERS:154 musicEl:155 fadeMusic:163 stopFileMusic:167 isWin:168 wantTrack:176 fileMusicTick:186
-§203 "เพลงของฉัน": เลือกไฟล์เพลงจากเครื่องตัวเอง เล่นแค่ในเครื่องนี้ (ไม่อ…
-MY:204 myDB:205 mySave:206 myLoad:209 myDecodeReady:215 myPlay:216 myNext:228 myClear:229 myInfo:230 windUpdate:236
-§250 เพลงประกอบ (สร้างสดตามแผนที่)
-MUSIC:251 THEMES:252 padNote:257 musicTick:264 toggleMusic:293
+## js/18-audio.js (306) — 
+AC:4 MASTER:4 SFXBUS:4 REVERB:4 NB:4 WIND:4 TOOL_CTX:6 toolSoundOn:7 masterGain:8 toolSoundApply:9 sfxLast:11 ac:12 outNode:33 tone:48 noiz:54 snd:61 sfx:124
+§126 ไฟล์เสียงจริง (โฟลเดอร์ audio/) — เริ่มโหลดเมื่อ ac() ถูกเรียกครั้งแร…
+SFXN:128 SFXV:129 SFXR:130 SFXSYN:131 BUF:132 AUD:132 loadBuf:133 loadSfx:134 playBuf:139 AMB:147 ambTick:148 MUSF:159 MUSF_VOL:160 STINGERS:160 musicEl:161 fadeMusic:169 stopFileMusic:173 isWin:174 wantTrack:182 fileMusicTick:192
+§209 "เพลงของฉัน": เลือกไฟล์เพลงจากเครื่องตัวเอง เล่นแค่ในเครื่องนี้ (ไม่อ…
+MY:210 myDB:211 mySave:212 myLoad:215 myDecodeReady:221 myPlay:222 myNext:234 myClear:235 myInfo:236 windUpdate:242
+§256 เพลงประกอบ (สร้างสดตามแผนที่)
+MUSIC:257 THEMES:258 padNote:263 musicTick:270 toggleMusic:299
 
 ## js/19-client.js (279) — 
 cv:4 cx:4 DPR:5 SW:5 SH:5 resize:6 VIEW:12 screen:13 lastBuffKey:13 overShown:13 lastCount:13 PARTS:14 TEXTS:14
@@ -722,4 +722,4 @@ tuneOpenF:80 tuneFmt:81 tuneRow:82 tuneRefresh:85 tuneMsg:93 tuneToggle:94 tuneE
 §122 API สำหรับเครื่องมือแยก tune.html (เปิดเกมใน iframe แล้วเรียกผ่าน WD)
 tuneDump:123 tuneSetKey:124
 
-(85 files, 20999 lines)
+(85 files, 21005 lines)

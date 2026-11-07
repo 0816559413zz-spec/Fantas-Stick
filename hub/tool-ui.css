@@ -1,0 +1,30 @@
+/* =====================================================================
+   tool-ui.css — ธีมกลางของ "แอป Tool" ทุกตัว (กฎเต็ม: guides/TOOL-UI-RULES.md)
+   โทนดำเทา แบบ Studio มืออาชีพ (เหมือน Blender / Unity / Figma มืด) — ห้ามใช้ธีมเกม (ทอง/ม่วง/ฟอนต์ Kanit/พื้นหลังดาว)
+   ใช้: <link rel="stylesheet" href="hub/tool-ui.css"> แล้วอ้างตัวแปร var(--bg1) ฯลฯ ไม่ฮาร์ดโค้ดสีเอง
+   ===================================================================== */
+:root{
+  --bg0:#161616;--bg1:#1f1f1f;--bg2:#282828;--bg3:#333333;--bg4:#3f3f3f;--ln:#2d2d2d;--ln2:#474747;
+  --tx:#dedede;--tx2:#9b9b9b;--tx3:#6c6c6c;
+  --acc:#4a8cff;--acc2:#8fb9ff;--accBg:rgba(74,140,255,.18);--hov:rgba(255,255,255,.05);
+  --sok:#6fcf97;--swarn:#f2a35e;--serr:#f06a6a;
+  --ui:'Segoe UI','Noto Sans Thai','Leelawadee UI',Tahoma,system-ui,sans-serif;
+  --fu:'JetBrains Mono',ui-monospace,Consolas,monospace;
+  --r:4px;color-scheme:dark}
+html,body{background:var(--bg0);color:var(--tx);font:13px/1.45 var(--ui)}
+*{box-sizing:border-box}
+::-webkit-scrollbar{width:12px;height:12px}
+::-webkit-scrollbar-thumb{background:var(--bg4);border:3px solid transparent;background-clip:padding-box;border-radius:6px}
+::-webkit-scrollbar-track,::-webkit-scrollbar-corner{background:transparent}
+.tl-btn,.tl-sel,.tl-in{font:inherit;color:var(--tx);background:var(--bg2);border:1px solid var(--ln2);border-radius:var(--r);padding:5px 10px}
+.tl-btn{cursor:pointer}.tl-btn:hover{background:var(--bg3);border-color:var(--tx3)}.tl-btn:active{background:var(--bg4)}
+.tl-btn.pri,.tl-btn.on{background:var(--acc);border-color:var(--acc);color:#fff}
+.tl-bar{display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--bg1);border-bottom:1px solid var(--ln)}
+.tl-bar h1{margin:0 8px 0 0;font-size:15px;font-weight:600}
+.tl-bar .sp{flex:1}
+a.tl-home{color:var(--tx2);text-decoration:none;padding:4px 8px;border:1px solid var(--ln2);border-radius:var(--r);white-space:nowrap}
+a.tl-home:hover{color:var(--tx);background:var(--bg3)}
+/* ปุ่มเสียง (hub/tool-sound.js สร้างให้) — ค่าเริ่มต้น = ปิดเสียง */
+.tl-snd{font:inherit;cursor:pointer;color:var(--tx2);background:var(--bg2);border:1px solid var(--ln2);border-radius:var(--r);padding:4px 9px;white-space:nowrap}
+.tl-snd:hover{background:var(--bg3);color:var(--tx)}
+.tl-snd.on{color:#fff;background:var(--accBg);border-color:var(--acc)}

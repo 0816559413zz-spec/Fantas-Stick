@@ -173,7 +173,7 @@ const FILES=['01-core','02-data','02-citytest','02-city','03-spells-core','04-fr
 // ?studio = VFX Studio (studio.html): ต่อท้ายด้วยตัวตรวจไฟล์เอฟเฟกต์ + โค้ดสตูดิโอ (เกมปกติไม่โหลด)
 const STUDIO_ON=new URLSearchParams(location.search).has('studio');
 const SRCS=FILES.map(f=>'js/'+f+'.js').concat(STUDIO_ON?['tools/fx-lint.js','studio/studio.js','studio/texgen.js','studio/maker.js','studio/meshedit.js']:[]).concat(new URLSearchParams(location.search).has('rec')?['studio/rec.js']:[]);   // ?rec = อัดท่าตัวละครให้สตอรี่บอร์ด (studio/rec.js)
-if(STUDIO_ON){const l=document.createElement('link');l.rel='stylesheet';l.href='studio/studio.css';document.head.append(l);document.title='VFX Studio — Fantas Stick';}
+if(STUDIO_ON){for(const h of ['hub/tool-ui.css','studio/studio.css']){const l=document.createElement('link');l.rel='stylesheet';l.href=h;document.head.append(l);}const ts=document.createElement('script');ts.src='hub/tool-sound.js';document.head.append(ts);document.title='VFX Studio — Fantas Stick';}
 // CSS: <link> ปกติโดนแคชเบราว์เซอร์ค้าง (JS ใหม่แต่ CSS เก่า = HUD ซ้อนกัน, ผู้ใช้ 2026-10-28) → ดึงสดแบบ no-cache เหมือน JS
 // แล้วเปลี่ยนลิงก์เป็น ?h=<แฮชเนื้อหา> (เนื้อหาไม่เปลี่ยน = URL เดิม = ใช้แคชได้) • ใส่ลิงก์ใหม่ก่อน แล้วค่อยลบอันเก่า (ไม่กระพริบ)
 for(const l of document.querySelectorAll('link[rel=stylesheet][href^="css/"]'))fetch(l.getAttribute('href'),{cache:'no-cache'}).then(r=>r.ok?r.text():null).then(t=>{if(t==null)return;

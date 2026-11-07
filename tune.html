@@ -10,6 +10,8 @@
   เซฟ = เขียน assets/tune.json (เก็บเฉพาะค่าที่ต่างจากค่าในโค้ด) ผ่าน /api/save ของ serve.py • เกมทุกเครื่องอ่านไฟล์นี้ตอนเปิด
   เพิ่มค่าที่ปรับได้ = เพิ่มใน tuneBuild() (js/73-tune.js) หรือใส่ v:{...} ใน defSpell ของสกิล — หน้านี้ไม่ต้องแก้
 -->
+<link rel="stylesheet" href="hub/tool-ui.css">
+<script src="hub/tool-sound.js"></script>
 <style>
 :root{--bg:#161616;--bg2:#1e1e1e;--bg3:#262626;--bg4:#2f2f2f;--ln:#3f3f3f;--tx:#e6e6e6;--mu:#9a9a9a;--ac:#4a8cff;--ch:#e8b84a;--ok:#5cc46a;--bad:#ff6a6a;--ui:'Segoe UI','Noto Sans Thai',Tahoma,sans-serif}
 *{box-sizing:border-box}
@@ -54,7 +56,7 @@ input{font:inherit}
 <body>
 <div id="app">
   <div id="top">
-    <h1>🎚️ ปรับค่าเกม</h1><span id="stat">กำลังโหลด…</span><span class="sp"></span><span id="msg"></span>
+    <a class="tl-home" href="hub.html" title="กลับศูนย์รวม Tool">◂ Tool</a><h1>🎚️ ปรับค่าเกม</h1><span id="stat">กำลังโหลด…</span><span class="sp"></span><span id="msg"></span><span data-tool-sound></span>
     <button id="bSave" class="pri" title="Ctrl+S">💾 เซฟ</button><button id="bDl" title="ดาวน์โหลด tune.json (ถ้าเซฟตรงไม่ได้)">⬇</button><button id="bRst" title="คืนทุกค่าเป็นค่าเดิมในโค้ด">↺ คืนทั้งหมด</button><button id="bPv" class="on" title="แสดง/ซ่อนเกมด้านขวา">👁 เกม</button>
   </div>
   <div id="main">

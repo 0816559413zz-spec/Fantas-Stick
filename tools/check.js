@@ -21,3 +21,13 @@ catch (e) {
   if (ln) { let k = 0; while (k + 1 < starts.length && starts[k + 1][0] <= ln) k++; console.error(`js/${starts[k][1]}.js:${ln - starts[k][0] + 1}`); }
   console.error(msg.split('\n').slice(0, 6).join('\n')); process.exit(1);
 }
+// ศูนย์รวม Tool: ทุกหน้าใน hub/tools.json ต้องมีอยู่จริง และหน้า .html ที่รากต้องลงทะเบียน (หรือเป็น hub/index) — กฎ: guides/TOOL-UI-RULES.md
+{
+  const reg = JSON.parse(fs.readFileSync(path.join(ROOT, 'hub', 'tools.json'), 'utf8'));
+  const urls = new Set(), bad = [];
+  for (const g of reg.groups) for (const t of g.tools) { urls.add(t.url); if (!fs.existsSync(path.join(ROOT, t.url))) bad.push('ไม่มีไฟล์ ' + t.url); }
+  for (const i of reg.designs.items) if (!fs.existsSync(path.join(ROOT, i.url))) bad.push('ไม่มีไฟล์ ' + i.url);
+  for (const f of fs.readdirSync(ROOT)) if (f.endsWith('.html') && f !== 'hub.html' && !urls.has(f)) bad.push(f + ' ยังไม่อยู่ใน hub/tools.json');
+  if (bad.length) { console.error('hub/tools.json:', bad.join('\n  ')); process.exit(1); }
+  console.log('OK — hub/tools.json', urls.size, 'tools');
+}

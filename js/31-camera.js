@@ -6,7 +6,7 @@ function saveSet(){store('wd_set',JSON.stringify(SET));}
 function applySettings(){
   SENS=0.0015*SET.sens/100;
   cam.fov=SET.fov;cam.updateProjectionMatrix();
-  if(AC&&MASTER)MASTER.gain.setTargetAtTime(SET.master/100,AC.currentTime,0.05);
+  if(AC&&MASTER)MASTER.gain.setTargetAtTime(masterGain(),AC.currentTime,0.05);
   if(AC&&SFXBUS)SFXBUS.gain.setTargetAtTime(SET.sfx/100,AC.currentTime,0.05);
   if(AC&&MUSIC.bus)MUSIC.bus.gain.setTargetAtTime(MUSIC.on?0.8*SET.music/100:0,AC.currentTime,0.1);
   const f=document.getElementById('fps');if(f)f.style.display=SET.fps?'block':'none';

@@ -2,13 +2,19 @@
 //  เสียง: สังเคราะห์ทั้งหมดด้วย WebAudio (ไม่ต้องใช้ไฟล์) + reverb + เสียงรอบทิศ + เพลงประกอบ
 // =====================================================================
 let AC=null,MASTER=null,SFXBUS=null,REVERB=null,NB=null,WIND=null;
+// เกมที่ฝังใน Tool (?studio / ?tunetool): ปิดเสียงเป็นค่าเริ่มต้น เปิดได้ด้วยปุ่มเสียงของ Tool (hub/tool-sound.js, คีย์ fs_tool_sound) • กฎ: guides/TOOL-UI-RULES.md
+const TOOL_CTX=/[?&](studio|tunetool)(&|=|$)/.test(location.search);
+function toolSoundOn(){try{return localStorage.getItem('fs_tool_sound')==='1';}catch(e){return false;}}
+function masterGain(){return TOOL_CTX&&!toolSoundOn()?0:SET.master/100;}
+function toolSoundApply(){if(AC&&MASTER)MASTER.gain.setTargetAtTime(masterGain(),AC.currentTime,0.05);}
+if(TOOL_CTX){addEventListener('storage',e=>{if(e.key==='fs_tool_sound')toolSoundApply();});addEventListener('message',e=>{if(e.data&&typeof e.data.fsToolSound==='boolean')toolSoundApply();});}
 const sfxLast={};
 function ac(){
   if(!AC){
     try{
       AC=new (window.AudioContext||window.webkitAudioContext)();
       const comp=AC.createDynamicsCompressor();comp.threshold.value=-14;comp.ratio.value=4;comp.connect(AC.destination);
-      MASTER=AC.createGain();MASTER.gain.value=SET.master/100;MASTER.connect(comp);
+      MASTER=AC.createGain();MASTER.gain.value=masterGain();MASTER.connect(comp);
       SFXBUS=AC.createGain();SFXBUS.gain.value=SET.sfx/100;SFXBUS.connect(MASTER);
       // reverb แบบห้องโถงหิน (impulse สร้างจาก noise ที่ค่อยๆ เบาลง)
       const len=AC.sampleRate*2.4,ir=AC.createBuffer(2,len,AC.sampleRate);

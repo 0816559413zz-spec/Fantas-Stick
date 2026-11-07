@@ -1,0 +1,144 @@
+{
+ "_about": "ทะเบียน Tool ทั้งหมด — hub.html อ่านไฟล์นี้ เพิ่ม Tool ใหม่ = เพิ่มรายการที่นี่ (กฎ: guides/TOOL-UI-RULES.md)",
+ "groups": [
+  {
+   "id": "make",
+   "title": "สร้างและปรับแต่ง",
+   "tools": [
+    {
+     "id": "studio",
+     "icon": "✦",
+     "name": "VFX Studio",
+     "desc": "ทำและแก้เอฟเฟกต์สกิล ไทม์ไลน์ โมเดล เท็กซ์เจอร์ ดูผลในเกมจริง",
+     "url": "studio.html",
+     "sound": true
+    },
+    {
+     "id": "tune",
+     "icon": "🎚",
+     "name": "ปรับค่าเกม",
+     "desc": "ดาเมจ คูลดาวน์ เงา ฯลฯ มีเกมจริงอยู่ข้างๆ เซฟลง assets/tune.json",
+     "url": "tune.html",
+     "sound": true
+    },
+    {
+     "id": "storyboard",
+     "icon": "🎬",
+     "name": "Storyboard VFX",
+     "desc": "วางแผนสกิลทีละช็อต วาดสเก็ตช์ ซิงก์ข้ามเครื่องผ่าน git",
+     "url": "storyboard.html"
+    }
+   ]
+  },
+  {
+   "id": "notes",
+   "title": "จดและติดตาม",
+   "tools": [
+    {
+     "id": "bugs",
+     "icon": "🐞",
+     "name": "โน้ตปัญหา",
+     "desc": "จดบั๊กพร้อมรูป แล้วส่งให้ Claude แก้",
+     "url": "bugs.html"
+    }
+   ]
+  },
+  {
+   "id": "docs",
+   "title": "คู่มือและอ้างอิง",
+   "tools": [
+    {
+     "id": "manual",
+     "icon": "📖",
+     "name": "คู่มือ VFX Studio",
+     "desc": "วิธีใช้ VFX Studio แบบมีภาพ",
+     "url": "manual/index.html"
+    },
+    {
+     "id": "game",
+     "icon": "▶",
+     "name": "เปิดเกม",
+     "desc": "กลับไปเล่นเกมปกติ (เสียงเปิดตามปกติ ไม่ผูกกับสวิตช์ของ Tool)",
+     "url": "index.html"
+    }
+   ]
+  }
+ ],
+ "designs": {
+  "title": "หน้าดูแบบร่าง (designs/)",
+  "items": [
+   {
+    "name": "ภาพอธิบายพื้นที่บุกหนึ่งช่วง",
+    "url": "designs\\castle-one-area-concept.html"
+   },
+   {
+    "name": "หญ้าใหม่ — ก่อน/หลัง",
+    "url": "designs\\grass-compare.html"
+   },
+   {
+    "name": "HUD full mock",
+    "url": "designs\\hud-full-mock.html"
+   },
+   {
+    "name": "HUD layout L2 elements",
+    "url": "designs\\hud-layout6-mock.html"
+   },
+   {
+    "name": "Wand concepts",
+    "url": "designs\\wands-concept.html"
+   },
+   {
+    "name": "Water BA Preview",
+    "url": "designs\\water-ba-preview.html"
+   },
+   {
+    "name": "Water VFX Review",
+    "url": "designs\\water-vfx-review.html"
+   },
+   {
+    "name": "Wind BA — สองรูปทรงใน VFX Studio",
+    "url": "designs\\wind-ba-vfx-review.html"
+   },
+   {
+    "name": "Wind — กลับด้านบูมเมอแรง",
+    "url": "designs\\wind-boomerang-direction.html"
+   },
+   {
+    "name": "Wind — บูมเมอแรงแนวนอน",
+    "url": "designs\\wind-boomerang-flat.html"
+   },
+   {
+    "name": "Wind BA tail detail",
+    "url": "designs\\wind-boomerang-tail-detail.html"
+   },
+   {
+    "name": "Wind BA — หางลมและจุดปะทะ",
+    "url": "designs\\wind-boomerang-tail-hit.html"
+   },
+   {
+    "name": "Wind Kit",
+    "url": "designs\\wind-kit.html"
+   },
+   {
+    "name": "Wind — โล่ปีกลม",
+    "url": "designs\\wind-shield-vfx-review.html"
+   },
+   {
+    "name": "Wind Style",
+    "url": "designs\\wind-style.html"
+   },
+   {
+    "name": "Wind — Angular wings",
+    "url": "designs\\wind-wing-vfx-review.html"
+   },
+   {
+    "name": "Wind Magic Wings",
+    "url": "designs\\wind-wings-magic.html"
+   },
+   {
+    "name": "Wind Holo Wings",
+    "url": "designs\\wind-wings.html"
+   }
+  ]
+ }
+}

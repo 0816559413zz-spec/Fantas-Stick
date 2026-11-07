@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tool Hub — Fantas Stick</title>
+<!-- ศูนย์รวม Tool: หน้าแรกของเครื่องมือทั้งหมด • รายการอ่านจาก hub/tools.json • UI ต้องตาม guides/TOOL-UI-RULES.md (โทนดำ Studio ไม่ใช้ธีมเกม) -->
+<link rel="stylesheet" href="hub/tool-ui.css">
+<script src="hub/tool-sound.js"></script>
+<style>
+html,body{margin:0;height:100%}
+body{display:flex;flex-direction:column;overflow:auto}
+main{width:min(1040px,100%);margin:0 auto;padding:28px 20px 48px}
+h2{margin:30px 0 10px;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--tx2)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px}
+a.card{display:flex;gap:12px;padding:14px;background:var(--bg1);border:1px solid var(--ln2);border-radius:6px;color:var(--tx);text-decoration:none}
+a.card:hover{background:var(--bg2);border-color:var(--acc)}
+a.card:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.ic{flex:none;width:36px;height:36px;display:grid;place-items:center;font-size:18px;background:var(--bg3);border-radius:6px}
+.nm{font-weight:600;font-size:14px}
+.ds{margin-top:3px;color:var(--tx2);font-size:12px}
+.tag{display:inline-block;margin-left:6px;font-size:10px;font-weight:600;color:var(--tx2);border:1px solid var(--ln2);border-radius:3px;padding:0 4px;vertical-align:1px}
+#q{width:100%;max-width:360px}
+details{margin-top:6px}summary{cursor:pointer;color:var(--tx2);padding:4px 0}summary:hover{color:var(--tx)}
+.list{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:2px 12px;margin-top:8px}
+.list a{color:var(--tx2);text-decoration:none;padding:4px 6px;border-radius:4px;font-size:12.5px}
+.list a:hover{background:var(--hov);color:var(--tx)}
+.foot{margin-top:36px;color:var(--tx3);font-size:12px}
+.hide{display:none!important}
+#err{color:var(--serr);padding:20px}
+</style>
+</head>
+<body>
+<div class="tl-bar"><h1>🧰 Tool Hub</h1><span style="color:var(--tx2)">Fantas Stick</span><span class="sp"></span><input class="tl-in" id="q" placeholder="ค้นหา Tool…" autocomplete="off"><span data-tool-sound></span></div>
+<main id="m"><div id="err" class="hide"></div></main>
+<script>
+(async()=>{
+  const m=document.getElementById('m'),q=document.getElementById('q');
+  let D;
+  try{D=await (await fetch('hub/tools.json',{cache:'no-cache'})).json();}
+  catch(e){const x=document.getElementById('err');x.textContent='อ่าน hub/tools.json ไม่ได้ — ต้องเปิดผ่านเซิร์ฟเวอร์ (ดับเบิลคลิก Tools.bat)';x.classList.remove('hide');return;}
+  const el=(t,c,x)=>{const e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e;};
+  const cards=[];
+  for(const g of D.groups){
+    const sec=el('section'),h=el('h2',null,g.title),grid=el('div','grid');sec.append(h,grid);
+    for(const t of g.tools){
+      const a=el('a','card');a.href=t.url;
+      const ic=el('div','ic',t.icon),b=el('div'),n=el('div','nm',t.name);
+      if(t.sound)n.append(el('span','tag','มีเสียง (ปิดไว้)'));
+      b.append(n,el('div','ds',t.desc));a.append(ic,b);a._s=(t.name+' '+t.desc).toLowerCase();grid.append(a);cards.push(a);
+    }
+    m.append(sec);
+  }
+  if(D.designs&&D.designs.items.length){
+    const d=el('details'),s=el('summary',null,D.designs.title+' — '+D.designs.items.length+' หน้า'),l=el('div','list');
+    for(const i of D.designs.items){const a=el('a',null,i.name);a.href=i.url;a._s=i.name.toLowerCase();l.append(a);cards.push(a);}
+    d.append(s,l);m.append(d);
+  }
+  m.append(el('div','foot','Tool ทุกตัวปิดเสียงเป็นค่าเริ่มต้น — เปิดได้ที่ปุ่ม 🔇/🔊 มุมขวาบน • เพิ่ม Tool ใหม่: แก้ hub/tools.json • กฎ UI: guides/TOOL-UI-RULES.md'));
+  q.addEventListener('input',()=>{const v=q.value.trim().toLowerCase();let any=false;
+    cards.forEach(c=>c.classList.toggle('hide',!!v&&!c._s.includes(v)));
+    document.querySelectorAll('details').forEach(d=>{if(v)d.open=true;});
+    document.querySelectorAll('section').forEach(s=>s.classList.toggle('hide',!!v&&![...s.querySelectorAll('a')].some(a=>!a.classList.contains('hide'))));});
+})();
+</script>
+</body>
+</html>

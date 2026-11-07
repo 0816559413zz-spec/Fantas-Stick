@@ -471,7 +471,7 @@ if __name__ == '__main__':
     if '--sb-md' in sys.argv:  # Claude แก้ storyboard/boards.json เองแล้ว → เขียน sb-<id>.md ใหม่
         sb_save(sb_load()); print('storyboard/*.md updated'); sys.exit()
     port = int(sys.argv[1]) if len(sys.argv) > 1 else 8765
-    print(f'Fantas Stick: http://localhost:{port}/  •  VFX Studio: http://localhost:{port}/studio.html  •  Bug Notes: http://localhost:{port}/bugs.html  •  Storyboard: http://localhost:{port}/storyboard.html')
+    print(f'Tool Hub: http://localhost:{port}/hub.html  •  Fantas Stick: http://localhost:{port}/  •  VFX Studio: http://localhost:{port}/studio.html  •  Bug Notes: http://localhost:{port}/bugs.html  •  Storyboard: http://localhost:{port}/storyboard.html')
     class Srv(ThreadingHTTPServer):
         request_queue_size = 128      # default 5 → the game loads hundreds of files at once and Windows refused the rest (Failed to fetch)
         allow_reuse_address = False   # Windows: reuse = เปิดซ้อนพอร์ตเดียวกันได้ 2 ตัว → คำขอสลับไปมา ข้อมูลเพี้ยน
