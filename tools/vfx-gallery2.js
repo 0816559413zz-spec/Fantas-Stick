@@ -25,6 +25,6 @@ h1{color:var(--gold);margin:4px 0 8px}h2{color:var(--gold);border-bottom:1px sol
 h3{margin:2px 0 8px;font-size:18px}h3 small{color:var(--mut);font-weight:400;font-size:12px}img{width:100%;border-radius:6px;display:block}ul{list-style:none;padding:0;margin:8px 0 0}li{margin:6px 0;font-size:14px}
 li b{color:var(--gold);display:inline-block;width:18px}.btn{display:inline-block;margin-left:6px;padding:1px 8px;border:1px solid var(--gold);border-radius:12px;color:var(--gold);text-decoration:none;font-size:12px}.btn:hover{background:var(--gold);color:#000}.noimg{color:var(--mut)}</style></head><body>
 <h1>✨ VFX ตัวเลือก รอบ 2 — ไฟ + ดิน อย่างละ 4 แบบ</h1>
-<p class="intro">ยังไม่ได้ใส่เข้าเกม — เลือกแล้วบอก Claude เช่น <i>"Fireball ใช้แบบ 3, Stonebreaker ใช้แบบ 2"</i> • ไฟทุกแบบไม่ใช้เปลวไฟเล็ก ๆ ที่แบนไว้ (ไฟก้อนใหญ่ = ไฟ 3 มิติจริง) • ดูของจริงที่ขยับ: ดับเบิลคลิก <b>VFX Studio.bat</b> แล้วกด "เปิดในสตูดิโอ ▶" • สตูดิโอไม่มีตัว Stand ของสายดิน (ในเกมเป็นโมเดล) ไฟล์นี้คือเอฟเฟกต์รอบ ๆ</p>
+<p class="intro">ยังไม่ได้ใส่เข้าเกม — เลือกแล้วบอก Claude เช่น <i>"Fireball ใช้แบบ 3, Stonebreaker ใช้แบบ 2"</i> • ไฟทุกแบบไม่ใช้เปลวไฟเล็ก ๆ ที่แบนไว้ (ไฟก้อนใหญ่ = ไฟ 3 มิติจริง) • ดูของจริงที่ขยับ: ดับเบิลคลิก <b>Tools.bat</b> แล้วกด "เปิดในสตูดิโอ ▶" • สตูดิโอไม่มีตัว Stand ของสายดิน (ในเกมเป็นโมเดล) ไฟล์นี้คือเอฟเฟกต์รอบ ๆ</p>
 ${body}</body></html>`;
 fs.writeFileSync(path.join(ROOT,'vfx-variants2.html'),html);console.log('vfx-variants2.html');

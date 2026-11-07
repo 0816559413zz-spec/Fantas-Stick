@@ -2,7 +2,7 @@
 <html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>โน้ตปัญหา — Fantas Stick</title>
 <!-- โน้ตปัญหา (Bug Notes): จดปัญหา + แปะรูป → เก็บใน bugs/bugs.json + bugs/img/ แล้ว serve.py เขียน bugs/BUGS.md ให้ Claude อ่าน
-     ต้องเปิดผ่าน tools/serve.py (ดับเบิลคลิก "Bug Notes.bat") • Claude: อ่าน bugs/BUGS.md -->
+     ต้องเปิดผ่าน tools/serve.py (ดับเบิลคลิก "Tools.bat") • Claude: อ่าน bugs/BUGS.md -->
 <link rel="stylesheet" href="hub/tool-ui.css">
 <script src="hub/tool-sound.js"></script>
 <style>
@@ -92,7 +92,7 @@ let db={next:1,items:[]},cur=null,filter='open',saveT=0,dirty=false,online=false
 function stat(t,err){const s=$('#stat');s.textContent=t;s.className=err?'err':'';}
 async function load(){
   try{const r=await fetch('/api/bugs',{cache:'no-store'});if(!r.ok)throw 0;db=await r.json();online=true;stat('พร้อม • บันทึกอัตโนมัติ');}
-  catch(e){online=false;stat('⚠ ต้องเปิดผ่าน "Bug Notes.bat" (tools/serve.py) ถึงจะบันทึกได้',1);}
+  catch(e){online=false;stat('⚠ ต้องเปิดผ่าน "Tools.bat" (tools/serve.py) ถึงจะบันทึกได้',1);}
   if(cur)cur=db.items.find(b=>b.id===cur.id)||null;
   renderList();renderEd();
 }
@@ -100,7 +100,7 @@ function save(now){
   dirty=true;stat('กำลังบันทึก…');clearTimeout(saveT);
   saveT=setTimeout(async()=>{
     try{const r=await fetch('/api/bugs',{method:'POST',body:JSON.stringify(db)});const j=await r.json();if(!j.ok)throw j.err;dirty=false;stat('บันทึกแล้ว ✓ '+new Date().toLocaleTimeString('th-TH'));}
-    catch(e){stat('⚠ บันทึกไม่ได้ — เปิดผ่าน "Bug Notes.bat" หรือยัง?',1);}
+    catch(e){stat('⚠ บันทึกไม่ได้ — เปิดผ่าน "Tools.bat" หรือยัง?',1);}
   },now?0:600);
 }
 function nowISO(){const d=new Date();return new Date(d-d.getTimezoneOffset()*6e4).toISOString().slice(0,19);}
@@ -158,7 +158,7 @@ function canvasData(c){let d=c.toDataURL('image/png');if(d.length>1.4e6)d=c.toDa
 async function upload(data){const r=await fetch('/api/bug-img?name=b'+cur.id+'_'+Date.now().toString(36),{method:'POST',body:data});const j=await r.json();if(!j.ok)throw j.err;return j.path;}
 async function addFiles(fl){
   const fs=[...fl].filter(f=>f.type.startsWith('image/'));if(!fs.length)return;
-  if(!online){stat('⚠ ยังแปะรูปไม่ได้ — เปิดผ่าน "Bug Notes.bat" ก่อน',1);return;}
+  if(!online){stat('⚠ ยังแปะรูปไม่ได้ — เปิดผ่าน "Tools.bat" ก่อน',1);return;}
   if(!cur)newBug();
   stat('กำลังเก็บรูป…');
   try{for(const f of fs){cur.imgs.push(await upload(canvasData(await fileToCanvas(f))));}touch();renderEd();}

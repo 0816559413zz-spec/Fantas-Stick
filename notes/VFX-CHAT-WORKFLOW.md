@@ -65,7 +65,7 @@
 
 ## ทำภาพและ GIF ตัวอย่างเดิมซ้ำ
 
-ทำงานที่ `D:\Fantas-Stick`; ใช้ `python tools/serve.py` เมื่อยังไม่มี server ที่พอร์ต 8765 หรือผู้ใช้เปิด `VFX Studio.bat` ได้ อย่าเปิด server ซ้ำถ้าตัวเดิมทำงานอยู่
+ทำงานที่ `D:\Fantas-Stick`; ใช้ `python tools/serve.py` เมื่อยังไม่มี server ที่พอร์ต 8765 หรือผู้ใช้เปิด `Tools.bat` ได้ อย่าเปิด server ซ้ำถ้าตัวเดิมทำงานอยู่
 
 ```powershell
 # ทุกเฟรมของภาพรวม (สคริปต์เขียน shots/dragon_waterwrap_000.jpg ถึง 269.jpg)

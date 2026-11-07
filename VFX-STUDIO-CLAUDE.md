@@ -16,7 +16,7 @@
 - Client side only. Effect files never change the network protocol, so there's no `PREFIX` bump.
 
 ## 2. Start it
-- The user double-clicks **`VFX Studio.bat`** at the repo root. It starts `tools/serve.py` and opens the browser.
+- The user double-clicks **`Tools.bat`** at the repo root. It starts `tools/serve.py` and opens the browser.
 - You start it with `python tools/serve.py` (port 8765). In the Claude browser pane, `.claude/launch.json` → `wizardduel` already runs serve.py.
 - Then open `http://localhost:8765/studio.html`.
 - You need **serve.py**, not `python -m http.server`, for:
@@ -62,7 +62,7 @@
 8. **Try it in the real game:** training mode, cast the skill. Or use the studio's 🎮 button, which sets a temporary `localStorage wd_fxbind` override.
 9. **Show the user in VFX Studio (required — user's standing request).** Contact sheets are for *you*; the user wants to *see* it too.
    - Open the effect live in the Claude browser pane: `preview_start {name:"wizardduel"}`, then navigate to `http://localhost:8765/studio.html?fx=<group>/<name>` so it plays in the studio.
-   - Also send the best contact sheet (`shots/…png`) in chat, and tell the user (in Thai) how to open it themselves: double-click `VFX Studio.bat`, pick the effect in the list.
+   - Also send the best contact sheet (`shots/…png`) in chat, and tell the user (in Thai) how to open it themselves: double-click `Tools.bat`, pick the effect in the list.
    - Do this every time a look is new or changed, before asking for approval.
 10. **Finish:**
    - Run `node tools/check.js`, `node tools/fx-check.js` and `node tools/codemap.js`.
@@ -71,7 +71,7 @@
    - Pushing to `main` deploys the live site. If the push hangs, the user must log in to GitHub.
 
 ## 4b. When the user gives a storyboard (`storyboard/sb-<id>.md`)
-The user plans a skill's look in **`storyboard.html`** (double-click `Storyboard.bat`, or `http://localhost:8765/storyboard.html` with serve.py running). It splits the skill into **shots** in time order (⏳ charge → ✋ cast → ➜ travel → 💥 impact → 🌫 linger → ✨ fade), each with: start–end seconds, where (hand / at target / ground…), size in **character heights**, strength 1–5, shape / motion / camera chips, colours, **several sketches** (2D drawings over a stick-figure stage: white caster on the left facing right, red target ~5 characters away, ground ticks = 1 character ≈ 2.1 m; and/or 📸 shots from a **🧊 3D draft scene** from several angles — side / game / top / ¾ / from the target), plus reference pictures. If the shot has a 3D scene, the md lists every shape with **position and size in metres** (forward = toward the target, right = caster's right → fx `pos` = [right, up, forward]) — use those numbers for placement/size instead of guessing from the pictures. Data: `storyboard/boards.json`; you read the generated `storyboard/sb-<id>.md`.
+The user plans a skill's look in **`storyboard.html`** (double-click `Tools.bat`, or `http://localhost:8765/storyboard.html` with serve.py running). It splits the skill into **shots** in time order (⏳ charge → ✋ cast → ➜ travel → 💥 impact → 🌫 linger → ✨ fade), each with: start–end seconds, where (hand / at target / ground…), size in **character heights**, strength 1–5, shape / motion / camera chips, colours, **several sketches** (2D drawings over a stick-figure stage: white caster on the left facing right, red target ~5 characters away, ground ticks = 1 character ≈ 2.1 m; and/or 📸 shots from a **🧊 3D draft scene** from several angles — side / game / top / ¾ / from the target), plus reference pictures. If the shot has a 3D scene, the md lists every shape with **position and size in metres** (forward = toward the target, right = caster's right → fx `pos` = [right, up, forward]) — use those numbers for placement/size instead of guessing from the pictures. Data: `storyboard/boards.json`; you read the generated `storyboard/sb-<id>.md`.
 - **⬇ Imported from the game:** a board may come from the Import button (md line "นำเข้าจากเกม" = spell id + code `file:line`). Its shots/sizes were guessed from the in-game description, and its 3D scenes hold a grey disc = the real in-game radius (a size guide, not VFX). Check timing against the code before building, and tell the user if the guess was wrong.
 - **🎬 Recorded motion:** an imported board may have `rec` = the caster's real in-game motion (`storyboard/rec/*.json`, recorded by `studio/rec.js` through `index.html?rec=<id>&kind=&path=`: model root position/rotation + every bone, 30 fps, +x = toward target). The md lists its length and clips; each shot's 3D scene shows that pose at the shot start. Use it for timing (rise/dive/land moments) — it is the truth, the guessed shots are not.
 - **🎭 Game characters:** the 3D scene can use the real game models + animations (Library = every `char_*`/`enemy_*` in `assets/manifest.json` that has clips). The md says which model/clip the caster/target use and at what clip time — match the effect's timing to that clip (e.g. release on the `cast` frame).
@@ -233,7 +233,7 @@ The studio has 4 tabs in the top bar: **✨ เอฟเฟกต์** (effects,
 | Symptom | Fix |
 |---|---|
 | Studio shows nothing / "เปิดไม่ได้" | The file path or name is wrong, or the JSON is broken. Run `node tools/fx-check.js`. |
-| Save says it needs serve.py | You started a plain http.server. Use `VFX Studio.bat` / `python tools/serve.py`. |
+| Save says it needs serve.py | You started a plain http.server. Use `Tools.bat` / `python tools/serve.py`. |
 | Screenshot tool times out (browser pane hidden) | Use `&save=` sheets and Read `shots/…` instead. |
 | Effect is in the studio but not in the game | Not bound (`bind.json`), the event name is wrong (check `z:'…'` in host js), or the file isn't loaded yet (bound files are prefetched at load). |
 | In-game look differs from the studio | Check `att` (`ground` vs `point`) and the event's `h`/`a`; studio `at=self` vs `front`. |

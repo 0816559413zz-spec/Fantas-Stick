@@ -1,5 +1,6 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
 
+- 2026-11-07 — **ลบ .bat เดิมของ Tool ทั้ง 4 ตัว** (VFX Studio / Tune / Storyboard / Bug Notes) เหลือ `Tools.bat` ตัวเดียว (ผู้ใช้สั่ง) แก้ข้อความอ้างถึงในเอกสารและหน้า Tool ให้ชี้ `Tools.bat`; `Update Game.bat` ยังอยู่
 - 2026-11-07 — **ศูนย์รวม Tool + กฎ UI Tool:** เพิ่ม `hub.html` (+`hub/tools.json`, `Tools.bat`) เป็นหน้าแรกของ Tool ทั้งหมด, `hub/tool-ui.css` ธีมโทนดำกลาง, `hub/tool-sound.js` สวิตช์เสียง (ค่าเริ่มต้นปิด); กฎเต็ม `guides/TOOL-UI-RULES.md`; Studio/Tune/Bugs/Storyboard มีปุ่ม ◂ Tool กลับฮับ, Bugs เปลี่ยนเป็นพาเลตเทาเดียวกับ Studio, Studio/Tune เกมที่ฝังไม่มีเสียงจนกดเปิด (`TOOL_CTX` ใน js/18-audio.js, ไม่กระทบเกมปกติ/โปรโตคอล); check.js ตรวจทะเบียน Tool
 - 2026-11-07 — **จัดระเบียบเอกสาร + แก้เอกสารเก่า (ไม่แก้ตรรกะเกม):** ย้าย ASSETS/Destruction/MAP-DESIGN/OPTIMIZE/SKILL-DESIGN/STORYBOARD-SYNC/VFX/FX-FORMAT ไป `guides/`, ย้าย Flame VFX Kadai และบันทึกลงวันที่เก่า 10 ไฟล์ไป `notes/archive/` พร้อมแก้ลิงก์/ชื่ออ้างอิงทั้งโปรเจกต์ (ตรวจลิงก์ .md ไม่ขาด); PROJECT-GUIDE §6 ยืนยันสลับฝ่ายบุก/รับต่อรอบ + ตอบเรื่อง Nature/บทบาท + ทำเครื่องหมาย "ประลองไตรภาคี" ว่าถูกแทนที่; `designs/main-mode-proposal.md` และ `design/game-brief.md` ใส่ป้ายล้าสมัย; README เพิ่มโหมด/แผนที่ที่ขาด
 

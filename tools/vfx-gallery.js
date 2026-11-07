@@ -24,6 +24,6 @@ h3{margin:2px 0 8px;font-size:18px}h3 small{color:var(--mut);font-weight:400;fon
 li b{color:var(--gold);display:inline-block;width:18px}.btn{display:inline-block;margin-left:6px;padding:1px 8px;border:1px solid var(--gold);border-radius:12px;color:var(--gold);text-decoration:none;font-size:12px;white-space:nowrap}.btn:hover{background:var(--gold);color:#000}.noimg{color:var(--mut)}</style></head>
 <body><h1>✨ VFX ตัวเลือก — ทุกท่า อย่างละ 3 แบบ</h1>
 <p class="intro">ยังไม่ได้ใส่เข้าเกม — เป็นตัวเลือกให้เลือก • <b>แบบ A</b> = พรีเมียม (เกลาจากของเดิม) • <b>แบบ B</b> = อนิเมะ (คม แฟลช เส้นความเร็ว) • <b>แบบ C</b> = สมจริง (ไฟ/ควัน/หมอกจริง เศษกระเด็น)<br>
-ดูของจริงที่ขยับ: ดับเบิลคลิก <b>VFX Studio.bat</b> แล้วกด "เปิดในสตูดิโอ ▶" (ปุ่มใช้ได้เมื่อเปิดผ่าน VFX Studio.bat / tools/serve.py)<br>
+ดูของจริงที่ขยับ: ดับเบิลคลิก <b>Tools.bat</b> แล้วกด "เปิดในสตูดิโอ ▶" (ปุ่มใช้ได้เมื่อเปิดผ่าน Tools.bat / tools/serve.py)<br>
 เลือกแล้วบอก Claude เช่น <i>"Kindle ใช้แบบ B, Railgun ใช้แบบ A แต่ขอสีเข้มขึ้น"</i> แล้ว Claude จะใส่เข้าเกมให้</p>${body}</body></html>`;
 fs.writeFileSync(path.join(ROOT,'vfx-variants.html'),html);console.log('✓ vfx-variants.html');

@@ -4,7 +4,7 @@
 <script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.160.0/build/three.module.min.js","three/addons/":"https://unpkg.com/three@0.160.0/examples/jsm/"}}</script>
 <!-- สตอรี่บอร์ด VFX: แบ่งสกิลเป็นช่วง (ชาร์จ → ปล่อย → พุ่ง → กระทบ → ค้าง → จาง) แต่ละช่วงมีเวลา ขนาด รูปทรง สี ภาพร่าง รูปตัวอย่าง
      เก็บใน storyboard/boards.json + storyboard/img/ แล้ว serve.py เขียน storyboard/sb-<id>.md (+ STORYBOARDS.md) ให้ Claude อ่าน
-     ต้องเปิดผ่าน tools/serve.py (ดับเบิลคลิก "Storyboard.bat") • Claude: อ่าน storyboard/sb-<id>.md -->
+     ต้องเปิดผ่าน tools/serve.py (ดับเบิลคลิก "Tools.bat") • Claude: อ่าน storyboard/sb-<id>.md -->
 <link rel="stylesheet" href="hub/tool-ui.css">
 <script src="hub/tool-sound.js"></script>
 <style>
@@ -368,7 +368,7 @@ async function load(){
     const keep=cur&&cur.id,old=new Map(db.items.map(b=>[b.id,b]));
     j.items=j.items.map(b=>{const o=old.get(b.id);return o&&BASE[b.id]===bj(b)&&bj(o)===BASE[b.id]?o:b;});   // บอร์ดที่ไม่เปลี่ยน = ใช้อ็อบเจกต์เดิม
     db=j;fixShots();setBase();if(keep)cur=db.items.find(b=>b.id===keep)||null;stat('พร้อม • บันทึกอัตโนมัติ');} // แก้อะไรไประหว่างโหลด → ไม่ทับ
-  catch(e){online=false;stat('⚠ ต้องเปิดผ่าน "Storyboard.bat" (tools/serve.py) ถึงจะบันทึกได้',1);}
+  catch(e){online=false;stat('⚠ ต้องเปิดผ่าน "Tools.bat" (tools/serve.py) ถึงจะบันทึกได้',1);}
   if(cur)cur=db.items.find(b=>b.id===cur.id)||null;
   renderList();renderEd();
 }
@@ -380,7 +380,7 @@ function save(now){
         if(j.conflict){sbMerge(j.db);stat('มีหน้าต่างอื่นบันทึกก่อน — รวมให้แล้ว กำลังบันทึก…');continue;}
         if(!j.ok)throw j.err;db.rev=j.rev;setBase();dirty=false;clearTimeout(SY.t);SY.t=setTimeout(()=>syncNow(1),180000);stat('บันทึกแล้ว ✓ '+new Date().toLocaleTimeString('th-TH'));if(sbChan)sbChan.postMessage(j.rev);return;}
       throw 'ชนกันหลายรอบ';}
-    catch(e){stat('⚠ บันทึกไม่ได้ — เปิดผ่าน "Storyboard.bat" หรือยัง? ('+e+')',1);}
+    catch(e){stat('⚠ บันทึกไม่ได้ — เปิดผ่าน "Tools.bat" หรือยัง? ('+e+')',1);}
   },now?0:600);
 }
 function touch(re){cur.updated=nowISO();renderList();if(re)renderEd();save();}
@@ -605,7 +605,7 @@ function canvasData(c){let d=c.toDataURL('image/png');if(d.length>1.4e6)d=c.toDa
 async function upload(data,tag){const r=await fetch('/api/sb-img?name=s'+cur.id+'_'+tag+'_'+Date.now().toString(36),{method:'POST',body:data});const j=await r.json();if(!j.ok)throw j.err;return j.path;}
 async function addImgs(fl,arr){
   const fs=[...fl].filter(f=>f.type.startsWith('image/'));if(!fs.length)return;
-  if(!online){stat('⚠ ยังแปะรูปไม่ได้ — เปิดผ่าน "Storyboard.bat" ก่อน',1);return;}
+  if(!online){stat('⚠ ยังแปะรูปไม่ได้ — เปิดผ่าน "Tools.bat" ก่อน',1);return;}
   stat('กำลังเก็บรูป…');
   try{for(const f of fs)arr.push(await upload(canvasData(await fileToCanvas(f)),'ref'));touch(1);}
   catch(e){stat('⚠ เก็บรูปไม่ได้: '+e,1);}
@@ -695,7 +695,7 @@ async function drBar(e){const t=e.target;if(FB.play&&!t.dataset.fb)return;
     const c=document.createElement('canvas');c.width=W;c.height=H;const g=c.getContext('2d');g.drawImage(cvB,0,0);g.drawImage(cvI,0,0);
     try{const img=await upload(c.toDataURL('image/jpeg',0.9),'sk'),old=DR.s.sketches[DR.idx];
       if(old){old.img=img;old.over=1;}else{DR.s.sketches.push({img,kind:'2d'});DR.s._sel=DR.s.sketches.length-1;}
-      touch(1);$('#dr').style.display='none';}catch(err){stat('⚠ เก็บภาพไม่ได้ — เปิดผ่าน "Storyboard.bat" หรือยัง? '+err,1);}
+      touch(1);$('#dr').style.display='none';}catch(err){stat('⚠ เก็บภาพไม่ได้ — เปิดผ่าน "Tools.bat" หรือยัง? '+err,1);}
   }
 }
 $('#drPick').oninput=e=>{DR.col=e.target.value;document.querySelectorAll('#drCols .col').forEach(x=>x.classList.remove('on'));};
@@ -769,7 +769,7 @@ function fbCmd(c){
 }
 $('#fbFps').onchange=e=>{FB.fps=+e.target.value;FB.chg.add('fps');if(FB.play){fbStop();fbCmd('play');}};
 async function fbSave(){
-  if(!online){stat('⚠ บันทึกไม่ได้ — เปิดผ่าน "Storyboard.bat" ก่อน',1);return;}
+  if(!online){stat('⚠ บันทึกไม่ได้ — เปิดผ่าน "Tools.bat" ก่อน',1);return;}
   fbStop();const L=FB.list,n=L.length;
   try{
     for(let k=0;k<n;k++){const fr=L[k];if(fr.img&&!FB.chg.has(fr.id))continue;stat(`กำลังบันทึกเฟรม ${k+1}/${n}…`);fr.img=await upload(fbCompose(fr).toDataURL('image/jpeg',0.86),'fr');}
@@ -780,7 +780,7 @@ async function fbSave(){
     const s=liveShot(FB.s);s.frames={fps:FB.fps,list:L,sheet:await upload(c.toDataURL('image/jpeg',0.85),'frs')};
     const bd=db.items.find(b=>b.shots.includes(s));if(bd&&bd!==cur){cur=bd;}selShot=s.id;vMode='clip';
     FB.chg.clear();touch(1);fbClose();stat(`บันทึก ${n} เฟรมแล้ว ✓ — ดูคลิปที่จอกลาง (🎞 คลิป) / แก้ต่อ: ปุ่ม 🎞 เฟรม`);
-  }catch(e){stat('⚠ เก็บภาพไม่ได้ — เปิดผ่าน "Storyboard.bat" หรือยัง? '+e,1);}
+  }catch(e){stat('⚠ เก็บภาพไม่ได้ — เปิดผ่าน "Tools.bat" หรือยัง? '+e,1);}
 }
 function fbVideo(){ // อัดคลิปจากทุกเฟรม 2 รอบ → ดาวน์โหลด .webm
   if(!window.MediaRecorder){stat('⚠ เบราว์เซอร์นี้อัดวิดีโอไม่ได้',1);return;}
@@ -846,7 +846,7 @@ const WHO_OF={pyro:'Pyro (ไฟ)',frost:'Frost (น้ำแข็ง)',storm:'
 async function impOpen(){
   $('#imp').style.display='flex';
   if(!IMP.data){try{const r=await apiGet('/api/sb-skills');if(!r.ok)throw 0;IMP.data=await r.json();}
-    catch(e){$('#impL').innerHTML='<div class="empty">อ่านสกิลไม่ได้ — เปิดผ่าน "Storyboard.bat" (และปิดเปิดใหม่ถ้าเพิ่งอัปเดต)</div>';return;}}
+    catch(e){$('#impL').innerHTML='<div class="empty">อ่านสกิลไม่ได้ — เปิดผ่าน "Tools.bat" (และปิดเปิดใหม่ถ้าเพิ่งอัปเดต)</div>';return;}}
   impRender();
 }
 function impItems(P){ // ทุกอย่างของสาย: ท่าพื้นฐาน + โล่ + Dash + สกิล + อัลติ
@@ -1028,7 +1028,7 @@ function loadLib(){
 function renderLib(){
   const ks=Object.keys(LIB).sort((a,b)=>(b.startsWith('char')-a.startsWith('char'))||(a<b?-1:1));
   $('#d3Lib').innerHTML=ks.length?ks.map(k=>`<div style="margin:4px 0"><b style="font-size:12px">${LIB[k].th}</b><div class="add" style="margin-top:2px">${Object.keys(LIB[k].clips).map(c=>`<button data-am="${k}" data-aa="${c}" title="${k} • ${c} • ${f2(LIB[k].clips[c].duration)} วิ">${animTh(c)}</button>`).join('')}</div></div>`).join('')
-    +'<button class="sm" data-reset="1" style="margin-top:4px">↺ กลับเป็นหุ่นแท่ง</button>':'<span class="hint">โหลดตัวละครไม่ได้ (เปิดผ่าน Storyboard.bat หรือยัง?)</span>';
+    +'<button class="sm" data-reset="1" style="margin-top:4px">↺ กลับเป็นหุ่นแท่ง</button>':'<span class="hint">โหลดตัวละครไม่ได้ (เปิดผ่าน Tools.bat หรือยัง?)</span>';
 }
 function actor(spec,tint){ // spec = {m: ชื่อโมเดล, a: ชื่อท่า} หรือ {m, rec: ไฟล์ท่าที่อัด} → Group หันไป +x, สูงตามเกม
   if(spec.rec){const D=RECS[spec.rec],L=D&&LIB[D.model||spec.m];if(!L)return null;
@@ -1210,7 +1210,7 @@ async function snap(list){
       shot=SB.liveShot(shot);const an=maxDur()>0;shot.sketches.push({img,kind:'3d',view:VIEWS[k].th+(an?` • ท่า ${f2(at)} วิ`:''),...(an?{t:r2(at)}:{})});shot._sel=shot.sketches.length-1;
     }
     SB.touch();SB.stat('ถ่ายแล้ว '+list.length+' ภาพ ✓ (อยู่ในภาพร่างของช่วงนี้)');
-  }catch(e){SB.stat('⚠ เก็บภาพไม่ได้ — เปิดผ่าน "Storyboard.bat" หรือยัง? '+e,1);}
+  }catch(e){SB.stat('⚠ เก็บภาพไม่ได้ — เปิดผ่าน "Tools.bat" หรือยัง? '+e,1);}
   tc.visible=true;R.setPixelRatio(Math.min(2,devicePixelRatio));fit();
   if(list.length>1){cam.position.copy(keepP);orbit.target.copy(keepT);orbit.update();view=keep;document.querySelectorAll('#d3View button').forEach(b=>b.classList.toggle('on',b.dataset.v===keep));}
 }
@@ -1231,7 +1231,7 @@ async function frames(){
     for(let k=0;k<n;k++){at=f0+k/fps;poseAll();R.render(scene,cam);SB.stat(`กำลังถ่ายเฟรม ${k+1}/${n}…`);
       const base=await SB.upload(R.domElement.toDataURL('image/jpeg',0.88),'frb');
       list.push({id:SB.newId(),bg:'blank',base,t:r2(at),ops:[],img:''});}
-  }catch(e){SB.stat('⚠ เก็บภาพไม่ได้ — เปิดผ่าน "Storyboard.bat" หรือยัง? '+e,1);done();return;}
+  }catch(e){SB.stat('⚠ เก็บภาพไม่ได้ — เปิดผ่าน "Tools.bat" หรือยัง? '+e,1);done();return;}
   done();
   const s=SB.liveShot(shot);s.frames={fps,list:mode==='add'?[...s.frames.list,...list]:list,sheet:''};
   close();SB.fbOpen(s,mode==='add'?s.frames.list.length-n:0);

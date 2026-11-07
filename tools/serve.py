@@ -478,6 +478,6 @@ if __name__ == '__main__':
     try:
         srv = Srv(('127.0.0.1', port), H)
     except OSError:
-        print(f'มีเซิร์ฟเวอร์เปิดอยู่แล้วที่พอร์ต {port} (เช่นเปิด VFX Studio.bat / Storyboard.bat ไว้แล้ว) — ใช้ตัวเดิมได้เลย ปิดหน้าต่างนี้ได้')
+        print(f'มีเซิร์ฟเวอร์เปิดอยู่แล้วที่พอร์ต {port} (เช่นเปิด Tools.bat ไว้แล้ว) — ใช้ตัวเดิมได้เลย ปิดหน้าต่างนี้ได้')
         sys.exit(0)
     srv.serve_forever()

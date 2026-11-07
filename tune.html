@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>ปรับค่าเกม - Fantas Stick</title>
 <!--
-  เครื่องมือปรับค่าเกม (แยกจากเกม) — เปิดด้วย Tune.bat หรือ http://localhost:8765/tune.html (ต้องรันผ่าน python tools/serve.py จึงเซฟได้)
+  เครื่องมือปรับค่าเกม (แยกจากเกม) — เปิดด้วย Tools.bat หรือ http://localhost:8765/tune.html (ต้องรันผ่าน python tools/serve.py จึงเซฟได้)
   ทำงานยังไง: โหลดเกมจริงใน iframe ด้านขวา → อ่านรายการค่าที่ปรับได้จาก WD.tuneDump() (js/73-tune.js) → แก้ค่า = WD.tuneSetKey() เห็นผลในเกมทันที
   เซฟ = เขียน assets/tune.json (เก็บเฉพาะค่าที่ต่างจากค่าในโค้ด) ผ่าน /api/save ของ serve.py • เกมทุกเครื่องอ่านไฟล์นี้ตอนเปิด
   เพิ่มค่าที่ปรับได้ = เพิ่มใน tuneBuild() (js/73-tune.js) หรือใส่ v:{...} ใน defSpell ของสกิล — หน้านี้ไม่ต้องแก้
@@ -73,7 +73,7 @@ const fmt=(v,st)=>st>=1?String(Math.round(v)):String(+(+v).toFixed(st>=0.1?1:st>
 function msg(t,c){const m=$('#msg');m.textContent=t;m.style.color=c||'';m.title=t;}
 function boot(keep){$('#load').classList.remove('hide');const f=$('#game');f.src=GAME+'&t='+Date.now();
   let n=0;const iv=setInterval(()=>{n++;let w=null;try{w=f.contentWindow;}catch(e){}
-    const ok=w&&w.WD&&w.WD.tuneDump&&(w.WD.TUNE.loaded||n>40);if(!ok){if(n>200){clearInterval(iv);$('#load').textContent='❌ เปิดเกมไม่ได้ — เปิดหน้านี้ผ่าน Tune.bat หรือ python tools/serve.py';}return;}
+    const ok=w&&w.WD&&w.WD.tuneDump&&(w.WD.TUNE.loaded||n>40);if(!ok){if(n>200){clearInterval(iv);$('#load').textContent='❌ เปิดเกมไม่ได้ — เปิดหน้านี้ผ่าน Tools.bat หรือ python tools/serve.py';}return;}
     clearInterval(iv);W=w.WD;
     if(keep)for(const k of Object.keys(keep))W.tuneSetKey(k,keep[k]);   // โหลดเกมใหม่: ใส่ค่าที่ยังไม่เซฟกลับเข้าไป
     pull();$('#load').classList.add('hide');},100);}
@@ -113,7 +113,7 @@ function save(){if(!W)return;msg('กำลังเซฟ…');
   fetch('/api/save?path=assets/tune.json',{method:'POST',body:W.tuneJson()}).then(r=>r.json()).then(j=>{
     if(j&&j.ok){W.tuneMarkSaved();file=Object.assign({},W.TUNE.file);render();msg('✅ เซฟลง assets/tune.json แล้ว ('+Object.keys(ov).length+' ค่า) — บอก Claude ให้ commit+push','var(--ok)');}
     else msg('❌ เซฟไม่ได้: '+((j&&j.err)||'?')+' — ใช้ ⬇ แทน','var(--bad)');
-  }).catch(()=>msg('❌ เซฟไม่ได้ — ต้องเปิดผ่าน Tune.bat (serve.py) • ใช้ ⬇ ดาวน์โหลดแทน','var(--bad)'));}
+  }).catch(()=>msg('❌ เซฟไม่ได้ — ต้องเปิดผ่าน Tools.bat (serve.py) • ใช้ ⬇ ดาวน์โหลดแทน','var(--bad)'));}
 $('#bSave').onclick=save;
 addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.code==='KeyS'){e.preventDefault();save();}});
 $('#bDl').onclick=()=>{if(!W)return;const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([W.tuneJson()],{type:'application/json'}));a.download='tune.json';a.click();msg('ดาวน์โหลดแล้ว — วางทับ assets/tune.json');};

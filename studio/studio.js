@@ -248,7 +248,7 @@ function stStatus(){const l=$st('stSLint');if(!l)return;const fx=stWs()==='fx';
   const e=ST.lint.filter(r=>r.lv==='err').length,w=ST.lint.filter(r=>r.lv==='warn').length;l.className=e?'err':w?'warn':'ok';l.textContent=e?'✗ ผิด '+e+(w?' • ⚠ '+w:''):w?'⚠ เตือน '+w:'✓ ตรวจผ่าน';l.style.display=fx?'':'none';
   const s=$st('stSSave');s.className=ST.dirty?'warn':'ok';s.textContent=ST.dirty?'● ยังไม่บันทึก':'✓ บันทึกแล้ว';s.style.display=fx?'':'none';
   const a=$st('stSApi');a.className=ST.api?'ok':'warn';a.textContent=ST.api?'🔌 บันทึกลงโปรเจกต์ได้':'⚠ บันทึกตรงไม่ได้';
-  a.title=ST.api?'เชื่อมกับ tools/serve.py แล้ว — กดบันทึก ไฟล์ลงโปรเจกต์ทันที':'ไม่ได้เปิดผ่าน VFX Studio.bat (serve.py) — บันทึกจะเป็นการดาวน์โหลดไฟล์แทน';
+  a.title=ST.api?'เชื่อมกับ tools/serve.py แล้ว — กดบันทึก ไฟล์ลงโปรเจกต์ทันที':'ไม่ได้เปิดผ่าน Tools.bat (serve.py) — บันทึกจะเป็นการดาวน์โหลดไฟล์แทน';
   if(!$st('stHint').textContent)stHint('');}
 // ---------- เส้นแบ่งปรับขนาดแผง (จำขนาดไว้ในเครื่อง) ----------
 function stLoad(k,d){try{return JSON.parse(localStorage.getItem(k))||d;}catch(e){return d;}}
@@ -520,7 +520,7 @@ function stHelp(){if(document.querySelector('#st .stModal.help'))return;const m=
       row('มุมกล้อง: เกม / ข้าง / หน้า / บน / หมุนเอง','1','–','5'),row('หมุนกล้อง / ซูม','ลากจอ','ล้อเมาส์'),
       h('h4',null,'แก้ชั้น'),row('เพิ่มชั้น','Shift','A'),row('เลือกชั้นบน / ล่าง','↑','↓'),row('เปลี่ยนชื่อชั้น','F2'),row('ทำซ้ำชั้น','Ctrl','D'),row('ซ่อนชั้นชั่วคราว','H'),row('ลบชั้น','Delete'),row('เลิกเลือก / ปิดเมนู','Esc'),
       h('h4',null,'ไฟล์'),row('บันทึก','Ctrl','S'),row('บันทึกเป็นชื่อใหม่','Ctrl','Shift','S'),row('ย้อนกลับ','Ctrl','Z'),row('ทำซ้ำ','Ctrl','Y'),row('หน้านี้','?')),
-    h('p',{className:'mute',style:'margin:0;font-size:11.5px'},'แท็บ 🧊 โมเดล = ปั้นโมเดลของเอฟเฟกต์ • 🎞 ภาพ = วาดภาพ/flipbook • 🔥 ไฟ 3D = จำลองไฟ (กด ? ในแท็บนั้นดูวิธีใช้) • บันทึกตรงลงโปรเจกต์ต้องเปิดผ่าน VFX Studio.bat')));
+    h('p',{className:'mute',style:'margin:0;font-size:11.5px'},'แท็บ 🧊 โมเดล = ปั้นโมเดลของเอฟเฟกต์ • 🎞 ภาพ = วาดภาพ/flipbook • 🔥 ไฟ 3D = จำลองไฟ (กด ? ในแท็บนั้นดูวิธีใช้) • บันทึกตรงลงโปรเจกต์ต้องเปิดผ่าน Tools.bat')));
   $st('st').append(m);m.tabIndex=-1;m.focus();m.addEventListener('keydown',e=>{if(e.key==='Escape')m.remove();});}
 // ---------- API สำหรับ Claude / console ----------
 window.STUDIO={load:n=>stOpen(n),data:()=>ST.fx,name:()=>ST.name,
