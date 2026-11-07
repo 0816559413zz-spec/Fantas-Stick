@@ -550,6 +550,7 @@ function buildFileMap(id){
     const sc=gltf.scene,skip=new Set();
     sc.traverse(o=>{if(/^anim_/i.test(o.name))skip.add(o);if(!o.isMesh)return;o.receiveShadow=true;o.castShadow=!(o.userData&&o.userData.ns);
       if(/^ground/i.test(o.name))o.material=Array.isArray(o.material)?o.material.map(m=>grLive(m.clone())):grLive(o.material.clone());});   // พื้นหลัก: สีเป็นหย่อม + รอยสนามรบ (js/50)
+    if(typeof surfScene==='function')surfScene(sc,true);   // ผิววัสดุ (js/76): แมพนิ่ง = ฉายตามพิกัดโลก
     backdropHide(id,sc);   // ของไกลเดิมที่ฉากหลัง (js/67) มาแทน
     W.remove(fb);setTimeout(()=>disposeTree(fb),5000);W.add(sc);   // ทิ้งพื้นสำรองทีหลัง (กำลังอุ่นเชดเดอร์อยู่ได้)
     brkSetup(sc,skip);   // ของบังที่พังได้: แยกออกจาก batch (js/23)

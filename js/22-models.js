@@ -22,6 +22,7 @@ function loadModel(name){
       // ของจากไฟล์ใช้ร่วมกันทุกชิ้น → ทำเครื่องหมาย keep (disposeTree จะไม่ทิ้ง) • เปิดเงาให้ทุก mesh
       sc.traverse(o=>{if(!o.isMesh)return;o.castShadow=o.receiveShadow=true;if(o.isSkinnedMesh)skinned=true;o.geometry.userData.keep=true;
         for(const mt of [].concat(o.material)){mt.userData.keep=true;for(const k in mt){const v=mt[k];if(v&&v.isTexture)v.userData.keep=true;}}});
+      if(!skinned&&/^(prop_|bld_|city_|debris_)/.test(name)&&typeof surfScene==='function')surfScene(sc,false);   // ผิววัสดุ (js/76): ของประกอบฉากไม่ใช่ตัวละคร/เอฟเฟกต์
       const r={scene:sc,animations:gltf.animations||[],skinned,info:e};MODELS.ready.set(name,r);return r;
     });
   }).catch(err=>{console.warn('model',name,err);MODELS.fail.add(name);return null;});
