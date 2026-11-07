@@ -142,3 +142,6 @@ Latest user reference: `storyboard/img/wind_shield_fold_ref.png`. The narrow col
 - 2026-11-05 Vortex Bind — **user picked variant A**, but the tornado must be realistic wind like the approved Aegis "ลมใส" wall: thin wavy rising lines (`tex/wind_air_rise`) on twisted cones (`mesh/wind_vortex_air*`), dust at the base, warp haze, **no glow, no flashes**. Done and bound (`wnvx` → `wind/vortex_bind_sb_a`); waiting for the user's in-game feedback.
 
 - 2026-11-06 Aegis Gale — **user switched to variant C "ม่านลมโค้ง"** (curtain of soft wide rising streaks, see-through, brighter low, thin pale-green base line with curled ends; ref = a curtain-style wind-wall screenshot, kept our white/mint/green). Generator `tools/wind-aegis-c-gen.py`. A (thin wavy lines) replaced for the wall; A's aim/cast/push/stop kept.
+
+## Water BA — เข็มน้ำ (ผู้ใช้อนุมัติ 2026-11-08)
+- ไม่มีเส้นน้ำ: สะบัดไม้แล้วยิง 3 นัดทันที ห่าง 0.08 วิ • กระสุน = เข็มน้ำเล็กหัวแหลมหางเรียว สีน้ำเงินเข้ม ขอบขาว แกนขาว (รอบแรกเล็ก/ขาวเกินมองไม่ชัด → ผู้ใช้ขอใหญ่ขึ้นแต่ยังแหลม) • ปลายไม้มีหยดน้ำกระเซ็นเล็ก ๆ ทุกนัด

@@ -1,6 +1,6 @@
 {
  "v": 1,
- "desc": "BA สายน้ำ: เข็มน้ำเล็กสีฟ้า ยืดตามความเร็ว + หางน้ำสั้น (ไม่มีลูกแสงขาว)",
+ "desc": "BA สายน้ำ (ผู้ใช้ 2026-11-08): เข็มน้ำหัวแหลม หางเรียว (รอบ 2: ใหญ่ขึ้นให้มองชัด ยังแหลม) + แกนขาวเรือง + หางน้ำ + หยดน้ำหลุดตามทาง",
  "tags": [
   "water",
   "ba",
@@ -11,27 +11,28 @@
  "seed": 31,
  "layers": [
   {
-   "id": "drop",
+   "id": "needle",
    "t": "mesh",
    "at": 0,
    "life": 1,
    "att": "point",
-   "shape": "sphere",
+   "shape": "model",
+   "model": "water_needle",
    "mat": "toonwater",
-   "col": "#6fd8ff",
-   "col2": "#1466c8",
-   "rim": 0.5,
-   "scroll": 3,
-   "disp": 0.6,
+   "col": "#3aa0ff",
+   "col2": "#0b3d9a",
+   "rim": 0.25,
+   "scroll": 4,
+   "disp": 0,
    "pos": [
     0,
     0,
     0
    ],
    "scale": [
-    0.085,
-    0.085,
-    0.8
+    2.1,
+    2.1,
+    1.7
    ],
    "op": 1,
    "fade": 0,
@@ -43,63 +44,49 @@
    "at": 0,
    "life": 1,
    "att": "point",
-   "shape": "sphere",
+   "shape": "model",
+   "model": "water_needle",
    "mat": "toonwater",
-   "col": "#d8f7ff",
-   "col2": "#4fb8ff",
-   "rim": 0.3,
-   "scroll": 3,
-   "disp": 0.6,
+   "col": "#cdf3ff",
+   "col2": "#5fc8ff",
+   "rim": 0.2,
+   "scroll": 4,
+   "disp": 0,
    "pos": [
     0,
-    0.02,
-    0.06
+    0,
+    0.08
    ],
    "scale": [
-    0.04,
-    0.04,
-    0.5
+    0.8,
+    0.8,
+    1.2
    ],
-   "op": 0.8,
+   "op": 0.6,
    "fade": 0,
    "loop": true
   },
   {
-   "id": "tail",
-   "t": "emit",
+   "id": "halo",
+   "t": "mesh",
    "at": 0,
    "life": 1,
    "att": "point",
+   "shape": "sphere",
+   "mat": "glow",
+   "col": "#2a7fff",
    "pos": [
     0,
     0,
-    -0.25
+    0.1
    ],
-   "rate": 22.5,
-   "from": "sphere",
-   "fr": 0.06,
-   "dir": "random",
-   "speed": [
-    0.2,
-    0.8
+   "scale": [
+    0.18,
+    0.18,
+    0.5
    ],
-   "plife": [
-    0.25,
-    0.45
-   ],
-   "look": "model",
-   "model": "water_blob",
-   "mmat": "ice",
-   "msize": [
-    0.011,
-    0.023
-   ],
-   "col": "#5ef0ff",
-   "c2": "#1fc3e6",
-   "mspin": 0,
-   "gravity": 8,
-   "drag": 0.5,
-   "bounce": 0.2,
+   "op": 0.55,
+   "fade": 0,
    "loop": true
   },
   {
@@ -108,12 +95,50 @@
    "at": 0,
    "life": 1,
    "att": "point",
-   "of": "drop",
-   "col": "#bfeeff",
-   "col2": "#2f8cf0",
-   "w": 0.09,
+   "of": "needle",
+   "col": "#7fd4ff",
+   "col2": "#0a4fc0",
+   "w": 0.13,
    "tlife": 0.09,
-   "k": 1.2,
+   "k": 1.4,
+   "loop": true
+  },
+  {
+   "id": "drip",
+   "t": "emit",
+   "at": 0,
+   "life": 1,
+   "att": "point",
+   "pos": [
+    0,
+    0,
+    -0.55
+   ],
+   "rate": 40,
+   "from": "sphere",
+   "fr": 0.04,
+   "dir": "random",
+   "speed": [
+    0.2,
+    0.7
+   ],
+   "plife": [
+    0.2,
+    0.35
+   ],
+   "look": "model",
+   "model": "water_blob",
+   "mmat": "ice",
+   "msize": [
+    0.012,
+    0.026
+   ],
+   "col": "#4fc0ff",
+   "c2": "#0a6fd0",
+   "mspin": 0,
+   "gravity": 8,
+   "drag": 0.5,
+   "bounce": 0.2,
    "loop": true
   }
  ]

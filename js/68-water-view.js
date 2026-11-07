@@ -184,7 +184,7 @@ if(typeof WD!=='undefined')WD.WTV=WTV;
 function waterEfx(ev){
   const z=ev.z,x=ev.x,y=ev.y,H=ev.h!==undefined?ev.h:0,me=myPos(),near=!me||Math.hypot(x-me.x,y-me.y)<1100,a=ev.a||0;
   switch(z){
-    case 'wtslash':{fxPlay('water/ba_slash',{x,y,h:0,follow:ev.id});const o=ev.id&&PM3.get(ev.id);if(o)castStart(o,'wdrop',0);if(near)snd('cast_pull',ev);return true;}   // ท่าฟันเฉียงตรงรอยฟันเดิมที่ปล่อยหยดน้ำ3นัด
+    case 'wtslash':{fxPlay('water/ba_muzzle',{x,y,h:0,follow:ev.id});const o=ev.id&&PM3.get(ev.id);if(o)castStart(o,'wdrop',2);if(near)snd('cast_pull',ev);return true;}   // ท่าฟันเฉียงตรงรอยฟันเดิมที่ปล่อยหยดน้ำ3นัด
     case 'wtsink':fxPlay('water/dash_sink',{x,y,h:0});if(ev.id!=null)WTV.sk.set(ev.id,{k:'s',e:0});if(near)snd('cast_pull',ev);return true;
     case 'wtpop':fxPlay('water/dash_pop',{x,y,h:0});if(ev.id!=null)WTV.sk.set(ev.id,{k:'p',e:0});if(near)shake(0.15);return true;
     case 'wtclend':return true;

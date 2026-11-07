@@ -8,7 +8,7 @@ const WATERP=PATHS.length;
 // ตัวเลขทั้งหมดของสายน้ำ: WAV = PATHS[WATERP].v (เส้นน้ำ/โล่ฟองน้ำ/Dash) + v:{...} ของแต่ละสกิล (WT_RP WT_FM WT_CG WT_AB WT_MW WT_UL = S.v) — ปรับได้ใน tune.html / F8 (js/73-tune.js)
 PATHS.push({id:'water',n:'สายน้ำ',ic:'💧',col:'#4fc3ff',d:'เล่นง่าย — ยิงน้ำไกล คลื่นผลัก ฮีลตัวเองด้วยโล่ เคลื่อนที่ไหลลื่นด้วยร่างโคลน',
   combo:'Aqua Cage ขังศัตรู 2 วิ → Abyssal Beam / ลำน้ำ Moonwater ใส่เต็มๆ • Tidecaller Orb ยิงตามทุกครั้งที่เราตีโดน (คู่กับลำน้ำ = ยิงรัว) • Riptide พัดศัตรูออก • Dash ร่างโคลน หนีแล้วกลับที่เดิมได้'});
-const WAV=PATHS[WATERP].v={baCd:1.0,baN:3,baT0:0.25,baGap:0.2,baDmg:5,baSpd:2800,baRange:500,baSpr:0.06,shGauge:70,shHeal:6,shReg:3,
+const WAV=PATHS[WATERP].v={baCd:1.0,baN:3,baT0:0,baGap:0.08,baDmg:5,baSpd:2800,baRange:500,baSpr:0.06,shGauge:70,shHeal:6,shReg:3,
   dsDist:300,dsSink:0.35,dsR:120,dsPush:900,dsBack:6,dsCd:8};
 PATHS[WATERP].vn={baCd:'เส้นน้ำ • ตวัดทุก (วิ)',baN:'เส้นน้ำ • จำนวนนัด',baT0:'เส้นน้ำ • นัดแรกออกหลัง (วิ)',baGap:'เส้นน้ำ • ห่างแต่ละนัด (วิ)',baDmg:'เส้นน้ำ • ดาเมจต่อนัด',baSpd:'เส้นน้ำ • ความเร็วกระสุน',baRange:'เส้นน้ำ • ระยะ',baSpr:'เส้นน้ำ • กระจาย (เรเดียน)',
   shGauge:'โล่ฟองน้ำ • เกจฮีลเต็ม',shHeal:'โล่ฟองน้ำ • ฮีลต่อวิ',shReg:'โล่ฟองน้ำ • เกจคืนต่อวิ',
@@ -39,8 +39,8 @@ function waterTick(p,dt){
 function waterSpd(p){return p.wsk||p.wab?0:p.wmsT>0?WT_MW.slow:1;}
 function waterReset(p){p.wln=null;p.wsk=null;p.wcl=null;p.wfam=0;p.wmw=0;p.wab=null;p.wdg=null;p.wmsT=0;p.whg=WAV.shGauge;p.whA=0;}
 
-// ---------- BA: ตวัดไม้สร้างเส้นน้ำ → ยิง 3 นัดตามเมาส์ • Moonwater = ลำน้ำ ----------
-const WT_BA_H=[2.28,1.61,1.12];   // ความสูงจุดบนรอยฟัน (ตรงกับ pinch ใน water/ba_slash)
+// ---------- BA: สะบัดไม้ → ยิงเข็มน้ำ 3 นัดทันที ห่างกันนิดเดียว ตามเมาส์ (ผู้ใช้ 2026-11-08: ไม่มีเส้นน้ำแล้ว) • Moonwater = ลำน้ำ ----------
+const WT_BA_SIDE=12,WT_BA_H=1.15;   // กระสุนเกิดขวามือ 0.6 ม. สูง 1.15 ม. (ตรงปลายไม้ในท่าแทง)
 function waterBasic(p,inp,dt,setCd){
   if(p.wdg&&p.wdg.ph==='aim')return;   // อัลติ: คลิกซ้าย = เลือกจุด
   if(p.wab)return;
@@ -50,9 +50,13 @@ function waterBasic(p,inp,dt,setCd){
   emit({k:'efx',z:'wtslash',x:Math.round(p.x),y:Math.round(p.y),h:p.z,a:Math.round(p.ang*100)/100,id:p.id});}
 function waterLineTick(p,dt){const L=p.wln;L.t+=dt;
   if(!p.alive||p.stun>0){p.wln=null;return;}
-  while(L.n<WAV.baN&&L.t>=WAV.baT0+L.n*WAV.baGap){const a=p.ang,side=(L.n-1)*16;L.n++;
-    p.ang=a+rnd(-WAV.baSpr,WAV.baSpr);Object.assign(PDEF.wdrop,{spd:WAV.baSpd,life:WAV.baRange/WAV.baSpd});const pr=shoot(p,'wdrop',{sp:'b_water',dmg:WAV.baDmg,quiet:1});p.ang=a;
-    pr.x+=-Math.sin(a)*side;pr.y+=Math.cos(a)*side;{const h=pr.h;pr.h=p.z+WT_BA_H[Math.min(2,L.n-1)];pr.vh+=(h-pr.h)*WAV.baSpd/300;}}   // ออกจากรอยฟันเอง (ตรงหยดที่บีบ ซ้ายบน→ขวาล่าง)
+  while(L.n<WAV.baN&&L.t>=WAV.baT0+L.n*WAV.baGap){const a=p.ang;L.n++;
+    Object.assign(PDEF.wdrop,{spd:WAV.baSpd,life:WAV.baRange/WAV.baSpd});const pr=shoot(p,'wdrop',{sp:'b_water',dmg:WAV.baDmg,quiet:1});
+    // ออกจากฝั่งไม้คทา (ขวามือ) แล้วเล็งเข้าหาจุด crosshair จากตรงนั้น + กระจายนิด ๆ (ไม่เกาะกลุ่ม)
+    pr.x+=-Math.sin(a)*WT_BA_SIDE;pr.y+=Math.cos(a)*WT_BA_SIDE;
+    let b=a;if(p.inp&&typeof p.inp.ah==='number'&&!p.bot&&Math.hypot(p.inp.ax-pr.x,p.inp.ay-pr.y)>60)b=Math.atan2(p.inp.ay-pr.y,p.inp.ax-pr.x);
+    b+=rnd(-WAV.baSpr,WAV.baSpr);const sp=Math.hypot(pr.vx,pr.vy);pr.vx=Math.cos(b)*sp;pr.vy=Math.sin(b)*sp;
+    pr.h=p.z+WT_BA_H;if(p.inp&&typeof p.inp.ah==='number'&&!p.bot){const dd=Math.max(60,Math.hypot(p.inp.ax-pr.x,p.inp.ay-pr.y));pr.vh=clamp((p.inp.ah-pr.h)/(dd/sp),-sp/5,sp/5);}}
   if(L.n>=WAV.baN&&L.t>=WAV.baT0+WAV.baN*WAV.baGap)p.wln=null;}
 function waterMoonBeam(p){const a=p.ang;p.wmsT=WT_MW.slowT;(G.wtb||(G.wtb=[])).push({o:p.id,team:p.team,x:p.x,y:p.y,h:p.z+1.3,a,t:0,k:0,len:WT_MW.len,w:WT_MW.w,life:WT_MW.life,tick:WT_MW.tick,dmg:WT_MW.dmg});
   emit({k:'efx',z:'wtmb',x:Math.round(p.x),y:Math.round(p.y),h:p.z,a:Math.round(a*100)/100,id:p.id});}
@@ -160,7 +164,7 @@ const WT_UL=defSpell(WATERP,{id:'dragondeep',v:{intro:1,aim:4,range:700,r:350,ri
   cast(p){p.wdg={ph:'intro',t:WT_UL.intro};emit({k:'efx',z:'wtdg',x:Math.round(p.x),y:Math.round(p.y),h:p.z,id:p.id});}}).v;
 
 // ท่าพื้นฐาน + โล่ + Dash ของสาย (PBASIC ต้องอยู่ช่องเดียวกับลำดับใน PATHS)
-PBASIC.push({id:'b_water',type:'wdrop',n:'เส้นน้ำ',d:'คลิก = ตวัดไม้สร้างเส้นน้ำ แล้วเส้นน้ำยิงกระสุนน้ำเร็วมาก 3 นัดตามเมาส์ นัดละ 5 ไกล 500 • ตวัดได้ทุก 1 วิ',
+PBASIC.push({id:'b_water',type:'wdrop',n:'เส้นน้ำ',d:'คลิก = สะบัดไม้ ยิงเข็มน้ำเร็วมาก 3 นัดติดกันตามเมาส์ นัดละ 5 ไกล 500 • ยิงได้ทุก 1 วิ',
   shd:'โล่ฟองน้ำ: กันรอบตัว ไม่ทำให้เดินช้า • ยกโล่ = ฮีล 6/วิ จากเกจฮีล 70 (เกจคืน 3/วิ ตอนไม่ยกโล่) • เกจหมด = กันได้อย่างเดียว',
   dsd:'Dash ร่างโคลน (Shift): จมลงพื้น ทิ้งร่างน้ำไว้ โผล่ห่าง 300 ทิศที่หัน ผลักรอบตัว • 6 วิกด Shift อีกครั้ง = กลับไปที่ร่างโคลน • คูลดาวน์ 8 วิ',
   hit(pr,t){damage(t,pr.dmg,pr.owner,'proj');},

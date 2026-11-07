@@ -1,5 +1,7 @@
 # HANDOFF — Fantas Stick (was "Wizard Duel") (repo: Fantas-Stick)
 
+**Water BA ใหม่ 8พ.ย.2026 (ผู้ใช้อนุมัติ):** สะบัดไม้ยิงเข็มน้ำ 3 นัดทันที ห่าง 0.08 วิ ไม่มีเส้นน้ำ • `water/ba_fly` (เข็ม `water_needle`) + `water/ba_muzzle` • กระสุนเกิดฝั่งไม้แล้วเล็งเข้าหา crosshair (`WT_BA_SIDE`/`WT_BA_H` js/09) • `ba_slash` ไม่ได้ใช้แล้ว
+
 **ลดกระตุกรอบ S 7พ.ย.2026:** แผ่นแบนโปร่งใสวาดรอบเดียว (`flatMark` js/01, `?twopass`), ชิ้นซ้ำวาดรวม `instz` (อักษรวงอัลติสายฟ้า/ไฟ, หนามวงน้ำแข็ง, `?noinstz`), หินกำแพงดินจาก pool (`?norockpool`) • ตอนอัลติสายฟ้า draw 1,283 แทน 1,631–1,955 • ms CPU ยังแกว่งเกินจะยืนยัน • ภาพเทียบแล้วเหมือนเดิม • ที่เหลือ: fx mesh แยกชิ้น ~200 draw, ครีบมังกรน้ำ (shader เอง) — ดู `guides/OPTIMIZE.md` §S
 
 **Nature นีออนกลางลำต้น — อนุมัติเป็นค่าเริ่มต้น:** ใช้หน้าตาฝั่งขวาใน `neon_body_comparison.jpg` กับ Model `nature_ult_tree_branches_v1` และเอฟเฟกต์ `nature/tree_summon` ใน Studio ผ่าน shader เดียวกันใน `studio/nature-summon.js` พรีวิวคุ้มครองใช้แบบนี้เป็นค่าเริ่มต้นด้วย ดู `designs/nature_vfx/ult_tree_branches_v1/protection_hit_body_default.gif` รุ่นก่อนยังเปิดได้ด้วย `bodybase=1` และมี GIF เดิม `protection_hit.gif` เก็บไว้ ทรงและข้อมูล mesh อยู่ในไฟล์เดิม

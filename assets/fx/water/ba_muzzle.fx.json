@@ -1,0 +1,167 @@
+{
+ "v": 1,
+ "desc": "BA สายน้ำ (ผู้ใช้ 2026-11-08): สะบัดไม้แล้วยิงทันที 3 นัด ห่าง 0.08 วิ — น้ำกระเซ็นเล็กที่ปลายไม้ทุกนัด (ไม่มีเส้นน้ำแล้ว)",
+ "tags": [
+  "water",
+  "ba",
+  "ingame"
+ ],
+ "pal": "ice",
+ "dur": 0.45,
+ "seed": 7,
+ "layers": [
+  {
+   "id": "pop1",
+   "t": "mesh",
+   "at": 0,
+   "life": 0.1,
+   "att": "wand",
+   "shape": "sphere",
+   "mat": "glow",
+   "col": "#3aa8ff",
+   "scale": {
+    "0": 0.02,
+    "0.5": 0.05,
+    "1": 0.06,
+    "ease": "out"
+   },
+   "op": {
+    "0": 0.6,
+    "1": 0
+   }
+  },
+  {
+   "id": "spray1",
+   "t": "emit",
+   "at": 0,
+   "life": 0.05,
+   "att": "wand",
+   "burst": 9,
+   "from": "sphere",
+   "fr": 0.03,
+   "dir": "aim",
+   "spread": 0.6,
+   "speed": [
+    2.5,
+    5
+   ],
+   "plife": [
+    0.12,
+    0.25
+   ],
+   "look": "model",
+   "model": "water_blob",
+   "mmat": "ice",
+   "msize": [
+    0.014,
+    0.028
+   ],
+   "col": "#9ff4ff",
+   "c2": "#1fa8e6",
+   "gravity": 9,
+   "drag": 1.5
+  },
+  {
+   "id": "pop2",
+   "t": "mesh",
+   "at": 0.08,
+   "life": 0.1,
+   "att": "wand",
+   "shape": "sphere",
+   "mat": "glow",
+   "col": "#3aa8ff",
+   "scale": {
+    "0": 0.02,
+    "0.5": 0.05,
+    "1": 0.06,
+    "ease": "out"
+   },
+   "op": {
+    "0": 0.6,
+    "1": 0
+   }
+  },
+  {
+   "id": "spray2",
+   "t": "emit",
+   "at": 0.08,
+   "life": 0.05,
+   "att": "wand",
+   "burst": 9,
+   "from": "sphere",
+   "fr": 0.03,
+   "dir": "aim",
+   "spread": 0.6,
+   "speed": [
+    2.5,
+    5
+   ],
+   "plife": [
+    0.12,
+    0.25
+   ],
+   "look": "model",
+   "model": "water_blob",
+   "mmat": "ice",
+   "msize": [
+    0.014,
+    0.028
+   ],
+   "col": "#9ff4ff",
+   "c2": "#1fa8e6",
+   "gravity": 9,
+   "drag": 1.5
+  },
+  {
+   "id": "pop3",
+   "t": "mesh",
+   "at": 0.16,
+   "life": 0.1,
+   "att": "wand",
+   "shape": "sphere",
+   "mat": "glow",
+   "col": "#3aa8ff",
+   "scale": {
+    "0": 0.02,
+    "0.5": 0.05,
+    "1": 0.06,
+    "ease": "out"
+   },
+   "op": {
+    "0": 0.6,
+    "1": 0
+   }
+  },
+  {
+   "id": "spray3",
+   "t": "emit",
+   "at": 0.16,
+   "life": 0.05,
+   "att": "wand",
+   "burst": 9,
+   "from": "sphere",
+   "fr": 0.03,
+   "dir": "aim",
+   "spread": 0.6,
+   "speed": [
+    2.5,
+    5
+   ],
+   "plife": [
+    0.12,
+    0.25
+   ],
+   "look": "model",
+   "model": "water_blob",
+   "mmat": "ice",
+   "msize": [
+    0.014,
+    0.028
+   ],
+   "col": "#9ff4ff",
+   "c2": "#1fa8e6",
+   "gravity": 9,
+   "drag": 1.5
+  }
+ ]
+}
