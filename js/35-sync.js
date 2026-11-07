@@ -204,7 +204,12 @@ function syncPlayers(P,mode,now,dt){
     if(p.rt)o.cocoon.rotation.y=now/400;
     o.castT=Math.max(0,o.castT-dt);
     const ck=Math.min(1,o.castT/0.12);
-    if(p.fl){
+    if(p.fl&&p.wn&&p.wn[7]===2){
+      // Featherwing Focus: บินท่าซูเปอร์แมน — ตัวโน้มไปข้างหน้า มือชี้ไปข้างหน้า ขาเหยียดตามหลัง (ไม่มีไม้กวาด)
+      o.b.rotation.x=1.15+Math.min(0.2,v.sp*0.008);o.b.position.y=-0.15+Math.sin(now/420)*0.04;
+      o.legs[0].rotation.x=o.legs[1].rotation.x=0.2+Math.sin(now/260)*0.08;
+      o.armL.rotation.x=-2.7;o.armL.rotation.z=-0.12;o.armR.rotation.x=-2.7;o.armR.rotation.z=0.12;
+    }else if(p.fl){
       // ท่านั่งไม้กวาด: ขาเหยียดไปหน้า ตัวเอนไปข้างหน้า มือจับด้าม
       o.b.rotation.x=0.18+Math.min(0.25,v.sp*0.012);o.b.position.y=-0.05+Math.sin(now/300)*0.05;
       o.legs[0].rotation.x=o.legs[1].rotation.x=-1.25;
@@ -325,7 +330,7 @@ function makeProj(col,t){
 }
 const _a=new THREE.Vector3(),_b=new THREE.Vector3();
 // กระสุนที่มีเอฟเฟกต์จากไฟล์ติดตัว (ผู้ใช้เลือก VFX 2026-10-22): [ระหว่างบิน (วน), ตอนโดน]
-const PJFX={spark:['fire/spark_fly','fire/spark_hit'],pfire:['fire/fireball_fly',null],icicle:['frost/icicle_fly','frost/icicle_hitb'],wblade:['wind/ba_gust_fly','wind/ba_gust_hit'],wdrop:['water/ba_fly','water/ba_hit'],wcage:['water/cage_fly',null]};
+const PJFX={spark:['fire/spark_fly','fire/spark_hit'],pfire:['fire/fireball_fly',null],icicle:['frost/icicle_fly','frost/icicle_hitb'],wblade:['wind/ba_gust_fly','wind/ba_gust_hit'],wball:['wind/orb_fly','wind/orb_hit'],wdrop:['water/ba_fly','water/ba_hit'],wcage:['water/cage_fly',null]};
 function syncProj(v,now){
   const ex=VIEW.ex!==null?VIEW.ex:Math.min(0.1,(now-VIEW.tCur)/1000),seen=new Set();
   for(const j of v.J){

@@ -4,6 +4,7 @@
 //  เรียกจาก: efxFX (js/25, z ขึ้นต้น 'wn') • syncPlayers (js/35 windFX) • render loop (js/37 syncWind)
 // =====================================================================
 const WV={st:new Map(),wl:new Map(),vo:new Map()};
+Object.assign(PCOL,{wball:'#8dff65'});
 const WN_BODY={charge:[-0.7,-0.3,-0.12,0.3,-0.7,0.3,0,-0.2],dash:[0.65,-0.2,0,0.68,0.8,0.3,0,-0.05],hover:[-1.0,-0.35,0,-0.08,-0.75,0.45,0,-0.03]},WN_AIR_FEET=[-0.45,0.25,0.12,-0.12];
 WN_BODY.wallAim=[-1.55,-0.08,0.1,0.08,-1.2,0.35,0,-0.04];WN_BODY.gather=[-1.8,-0.45,-0.15,-0.08,-1.35,0.45,0,-0.08];WN_BODY.shieldCharge=[-1.2,0.6,0,0.2,-1.2,-0.6,0,-0.18];
 function windCharacterPose(o,p,dt,now){
@@ -30,7 +31,7 @@ function windFX(o,p,pz,now,dt){
   if(!A){if(o.wWings)o.wWings.visible=false;const s=WV.st.get(p.id);if(s){for(const k of ['wing','guard'])if(s[k]){fxKill(s[k]);s[k]=null;}}return;}
   const s=wvState(p.id),alive=p.al&&!p.dn,guard=alive&&p.sh,h=o.zs||0;
   // ปีกติดหลังตลอดเวลา (ท่ากางเกือบนิ่ง) — ซ่อนตอนยกโล่ (ปีกห่อแทน)
-  const big=A[5]===1;   // Featherwing บินอยู่: ปีกใหญ่ 1.6 เท่า (ผู้ใช้)
+  const big=A[5]===1||A[7]>=1;   // Featherwing บินอยู่: ปีกใหญ่ 1.6 เท่า (ผู้ใช้)
   // ปีกเวทสายลม (designs/wind-wings-magic.html ผู้ใช้ผ่าน 2026-10-31) แทน fx wind/wing_idle เดิม
   // ยกโล่ = ปีกเดียวกันห่อตัว (fx shield_guard เหลือแค่ลม/ประกาย — ตัดปีกเก่าด้วย tools/wind-wings-strip.py)
   if(alive){if(!o.wWings){o.wWings=makeWindWings();o.wWings.position.set(0,1.35,-0.25);o.b.add(o.wWings);}
@@ -96,9 +97,12 @@ function windEfx(ev){
     case 'wnvocast':fxPlay('wind/void_wave',{x,y,h:H,a,aim:false});if(near)snd('cast_pull',ev);return true;
     case 'wnvohole':{const I=fxPlay('wind/void_hole',{x,y,h:H,a,aim:false});if(I)WV.vo.set(ev.n,I);if(near)shake(0.15);return true;}
     case 'wnvoboom':{const I=WV.vo.get(ev.n);if(I){fxKill(I);WV.vo.delete(ev.n);}fxPlay('wind/void_boom',{x,y,h:H,a,aim:false});if(near){shake(0.6);snd('break',ev);if(ev.c)hitStop(0.08);}return true;}
-    case 'wnfw':fxPlay('wind/fw_takeoff',{x,y,h:H,aim:false});return true;
+    case 'wnfw':fxPlay('wind/fw_takeoff',{x,y,h:H,aim:false});fxPlay('wind/fw_spin',{x,y,h:H,a,follow:ev.id});if(near)snd('cast_pull',ev);return true;   // เริ่มหมุนตัวบินวนขึ้น (ev.n = ด้าน -1/1)
+    case 'wnfwfocus':{const o=WV.fo||(WV.fo=new Map());const old=o.get(ev.id);if(old){fxStop(old);o.delete(ev.id);}
+      const I=fxPlay('wind/fw_focus',{x,y,h:H,a,follow:ev.id});if(I)o.set(ev.id,I);ring(x,y,'#b8ff85',70,0.4,H+0.5);if(near){shake(0.15);if(mine)toast('โหมด Focus: คลิกซ้ายค้าง = ลูกบอลลมรัว • เมาส์ = ทิศ/ไต่-ดิ่ง • W เร่ง • กดสกิลอีกครั้ง = สะบัดปีกจบ');}return true;}
     case 'wnfwflick':fxPlay('wind/fw_flick',{x,y,h:Math.max(0,H-3.2),a});wwCue(ev.id,'fk');if(near)shake(0.2);return true;
-    case 'wnfwend':case 'wnfwland':return true;
+    case 'wnfwend':{const o=WV.fo;if(o&&o.get(ev.id)){fxStop(o.get(ev.id));o.delete(ev.id);}return true;}
+    case 'wnfwland':return true;
     case 'wnult':fxPlay('wind/eye_ult',{x,y,h:H,a,aim:false});wwCue(ev.id,'ul');if(near)snd('cast_pull',ev);return true;
     case 'wnulslam':if(near)shake(0.3);return true;
     case 'wnulimp':if(near){shake(0.5);snd('break',ev);}return true;

@@ -8,6 +8,8 @@
 //   ลม Maneuver (Shift ค้าง) เลี้ยวแคบ ขึ้นลงไว
 const BRM={acc:1.25,drag:0.85,brake:650,back:-140,side:160,turnLo:2.8,turnHi:1.35,turnK:2.4,turnA:4.5,climb:0.9,dz:0.05,vzMax:13,
   rng:950,cd:0.38,dmg:12,w:22};
+// Featherwing Focus (สายลม): บินแบบไม้กวาดเดิมแต่พริ้วกว่า — เร่ง/ไหลนุ่ม ไถลต่อนานกว่า เลี้ยวโค้งกว้างค่อยเป็นค่อยไป ไต่/ดิ่งนุ่ม
+const BFW={acc:0.95,drag:0.5,brake:420,back:-100,side:200,turnLo:2.3,turnHi:1.5,turnK:1.9,turnA:2.9,climb:1.0,dz:0.05,vzMax:12,vzK:3.2,rng:BRM.rng,cd:BRM.cd,dmg:BRM.dmg,w:BRM.w};
 const BSK={ab:{fuel:100,burn:10,reg:8,regD:1,spd:1.8,acc:3.5},   // Afterburner: ไม่ใช้ 1 วิ แล้วเติมคืน 8/วิ
   ib:{n:10,gap:0.08,cd:6,dmg:6,spr:0.06},   // Ice Barrage
   ls:{chg:1.1,min:0.15,d0:320,d1:1000,t:0.32,dmg:[14,26],r:70,cd:5},   // Lightning Strike: ชาร์จสูงสุด 1.1 วิ → พุ่ง 320-1000 px
@@ -39,10 +41,11 @@ function broomVert(p,inp,dt){
   if(!p.flyOn){p.flyOn=true;p.fh=p.ang;p.fs=0;p.fyr=0;p.fcl=0;p.bab=p.bwm=false;p.lsd=null;p.lsc=0;}
   if(p.lsd)return;   // กำลังพุ่งสายฟ้า: ความสูงคุมใน broomStrikeTick
   const W=p.bwm?BSK.wm.vz:1;
-  let ap=clamp(inp.ap||0,-0.9,0.9);ap=Math.abs(ap)<BRM.dz?0:ap-Math.sign(ap)*BRM.dz;
-  p.fcl=ap*BRM.climb;   // มุมไต่ (เงยกล้อง = ขึ้น)
-  const tv=clamp(Math.max(0,p.fs)/20*Math.sin(p.fcl)*W,-BRM.vzMax*W,BRM.vzMax*W)+((inp.jh?8:0)-(inp.ch?8:0))*W;
-  p.vz+=(tv-p.vz)*Math.min(1,5*W*dt);
+  const K=p.wfo?BFW:BRM;
+  let ap=clamp(inp.ap||0,-0.9,0.9);ap=Math.abs(ap)<K.dz?0:ap-Math.sign(ap)*K.dz;
+  p.fcl=ap*K.climb;   // มุมไต่ (เงยกล้อง = ขึ้น)
+  const tv=clamp(Math.max(0,p.fs)/20*Math.sin(p.fcl)*W,-K.vzMax*W,K.vzMax*W)+((inp.jh?8:0)-(inp.ch?8:0))*W;
+  p.vz+=(tv-p.vz)*Math.min(1,(K.vzK||5)*W*dt);
   p.z=clamp(p.z+p.vz*dt,0.6,24);
   if((p.z<=0.6&&p.vz<0)||(p.z>=24&&p.vz>0))p.vz=0;
 }
@@ -50,18 +53,18 @@ function broomVert(p,inp,dt){
 function broomMove(p,mx,my,spd,canAct,dt){
   if(p.lsd){broomStrikeTick(p,dt);return;}
   const c=Math.cos(p.ang),s=Math.sin(p.ang),f=mx*c+my*s,sd=-mx*s+my*c;
-  const k=clamp(p.fs/Math.max(1,spd),0,1),W=p.bwm?BSK.wm:null;
-  if(canAct){const d=angDiff(p.ang,p.fh),mr=(BRM.turnLo+(BRM.turnHi-BRM.turnLo)*k)*(W?W.turn:1),tr=clamp(d*BRM.turnK*(W?W.turn:1),-mr,mr),ta=BRM.turnA*(W?W.turnA:1);
+  const K=p.wfo?BFW:BRM,k=clamp(p.fs/Math.max(1,spd),0,1),W=p.bwm?BSK.wm:null;
+  if(canAct){const d=angDiff(p.ang,p.fh),mr=(K.turnLo+(K.turnHi-K.turnLo)*k)*(W?W.turn:1),tr=clamp(d*K.turnK*(W?W.turn:1),-mr,mr),ta=K.turnA*(W?W.turnA:1);
     p.fyr+=clamp(tr-p.fyr,-ta*dt,ta*dt);}
   else p.fyr*=Math.exp(-4*dt);
   p.fh=angDiff(p.fh+p.fyr*dt,0);
   if(p.lsc>0)p.fs*=Math.exp(-6*dt);   // ชาร์จสายฟ้า = หยุดลอยอยู่กับที่
   else if(p.bab)p.fs+=(spd*BSK.ab.spd-p.fs)*Math.min(1,BSK.ab.acc*dt);   // Afterburner: พุ่งไปข้างหน้าเองแม้ไม่กด W
-  else if(f>0.2)p.fs+=(spd*f-p.fs)*Math.min(1,BRM.acc*dt);
-  else if(f<-0.2)p.fs=Math.max(BRM.back,p.fs-BRM.brake*dt);
-  else p.fs*=Math.exp(-BRM.drag*dt);
+  else if(f>0.2)p.fs+=(spd*f-p.fs)*Math.min(1,K.acc*dt);
+  else if(f<-0.2)p.fs=Math.max(K.back,p.fs-K.brake*dt);
+  else p.fs*=Math.exp(-K.drag*dt);
   const hv=p.fs*Math.cos(p.fcl||0),hc=Math.cos(p.fh),hs=Math.sin(p.fh);
-  p.mvx=hc*hv-hs*sd*BRM.side;p.mvy=hs*hv+hc*sd*BRM.side;
+  p.mvx=hc*hv-hs*sd*K.side;p.mvy=hs*hv+hc*sd*K.side;
   p.x+=p.mvx*dt;p.y+=p.mvy*dt;
 }
 // Lightning Strike: พุ่งตรงไปจุดเล็ง (รวมขึ้น/ลง) ทะลุศัตรู โดนคนละครั้ง ดาเมจตามชาร์จ + Shock
@@ -94,6 +97,7 @@ function broomFlak(pr){
 }
 // โฮสต์: ทุกเฟรมตอนอยู่บนไม้กวาด (นอกควิดดิช/แข่ง)
 function broomAct(p,inp,pr,dt){
+  if(p.wfo){windFocusAct(p,inp,dt);return;}   // Featherwing Focus: ลูกบอลลมรัว (js/09-wind)
   p.bbCd=Math.max(0,(p.bbCd||0)-dt);
   if(inp.fire&&p.bbCd<=0&&!p.lsd&&!(p.lsc>0)){p.bbCd=BRM.cd;broomBeam(p);}
   const S=BROOM_SK[p.pathIdx|0];
@@ -148,7 +152,9 @@ function broomView(o,p,dt,now){
   }
   o.bzp=o.zs;
   o.bnk=(o.bnk||0)+(bank-(o.bnk||0))*Math.min(1,dt*6);o.bpt=(o.bpt||0)+(pit-(o.bpt||0))*Math.min(1,dt*6);
-  g.rotation.z=o.bnk;g.rotation.x=o.bpt;
+  // Featherwing: หมุนตัวบินวนขึ้น (view-only, A[7]=1) — ม้วนตัวรอบแกนหน้า 2 รอบตลอด 1.2 วิ ตามด้านที่เลือก (A[8])
+  {const A=p.wn,sp=A&&A[7]===1?(A[8]||1):0;o.wroll=(o.wroll||0)+(sp?sp*10.5*dt:0);if(!sp)o.wroll=0;}
+  g.rotation.z=o.bnk+(o.wroll||0);g.rotation.x=o.bpt;
   if(p.fl&&p.al)broomSkFx(o,p,dt,now);
   const B=o.broom;
   if(p.fl&&o.mntT>0){
@@ -161,7 +167,7 @@ function broomView(o,p,dt,now){
   }else if(!p.fl&&o.dmtT>0){
     // ลงจากไม้กวาด: ไม้กวาดหมุนหดหายเป็นประกาย
     const k=1-o.dmtT/0.45;B.visible=true;B.scale.setScalar(Math.max(0.01,1-k*k));B.rotation.y=k*k*Math.PI*4;B.position.y=0.8-0.5*k;
-  }else{B.visible=!!p.fl;B.scale.setScalar(1);B.position.y=0.8;B.rotation.y=0;}
+  }else{B.visible=!!p.fl&&!(p.wn&&p.wn[7]>=1);B.scale.setScalar(1);B.position.y=0.8;B.rotation.y=0;}   // Featherwing Focus = ปีก ไม่มีไม้กวาด
 }
 function broomMountFx(ev){
   const o=PM3.get(ev.id);if(o){o.mntT=0.75;o.dmtT=0;}

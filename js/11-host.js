@@ -278,12 +278,12 @@ function updatePlayer(p,dt,acting){
   if(acting&&(inp.ax||inp.ay))p.ang=Math.atan2(inp.ay-p.y,inp.ax-p.x)+(p.bld>0?rnd(-0.22,0.22):0);
 
   // ไม้กวาด: B ขึ้น/ลง — โดนสตันหรือใยแมงมุมจะตกจากไม้กวาด • โหมดโวลเดอมอร์ + FFA ไม่มีไม้กวาด (ผู้ใช้ 2026-10-27)
-  if(pr.b&&canAct&&p.flyCd<=0&&!NOBROOM.has(G.mode)){
+  if(pr.b&&canAct&&p.flyCd<=0&&!NOBROOM.has(G.mode)&&!p.wfo){
     p.fly=!p.fly;p.flyCd=0.8;
     if(p.fly){p.vz=7;p.shieldOn=false;p.dash=0;emit({k:'mount',x:p.x,y:p.y,h:p.z,id:p.id});}
     else emit({k:'dismount',x:p.x,y:p.y,h:p.z,id:p.id});
   }
-  if(p.fly&&(p.stun>0||p.root>0)){p.fly=false;emit({k:'dismount',x:p.x,y:p.y,h:p.z,id:p.id});feed(`🧹 ${p.name} ตกจากไม้กวาด!`);}
+  if(p.fly&&(p.stun>0||p.root>0)){p.fly=false;if(!p.wfo){emit({k:'dismount',x:p.x,y:p.y,h:p.z,id:p.id});feed(`🧹 ${p.name} ตกจากไม้กวาด!`);}}   // wfo = Featherwing Focus: จบโหมดใน windFlyTick
   if(!p.fly){p.flyOn=false;if(p.bab||p.bwm||p.lsc||p.lsd)broomOff(p);}
   if(p.fly)broomVert(p,inp,dt);   // บินแบบเครื่องบิน: เงยกล้อง = ไต่ (js/69)
   else if(p.colos>0){p.colH=clamp((p.colH||9)+((inp.jh?1:0)-(inp.ch?1:0))*6*dt,5,15);p.z+=(p.colH-p.z)*Math.min(1,9*dt);p.vz=0;}

@@ -118,7 +118,7 @@ waterDragonTick:119
 §133 ทุกเฟรม (ทั้งเกม)
 updateWater:134 waterSnapP:140 waterSnapW:142 WT_RP:145 WT_FM:148 WT_CG:150 WT_AB:154 WT_MW:157 WT_UL:159
 
-## js/09-wind.js (287) — 
+## js/09-wind.js (306) — 
 WINDP:8 WNV:12
 §19 ตัวช่วย
 wOn:20 wGain:21 wSeg:23 wFoeNear:24
@@ -141,11 +141,12 @@ windVortexTick:201
 §213 Void Spheres: หลุมดำลูกเดียว (ผู้ใช้ 2026-10-31, designs/wind.md)
 windVoidCast:216 windVoidTick:218
 §229 Featherwing: บิน 5 วิ → กดอีกครั้งสะบัดปีกไปข้างหน้า (เอียงลงพื้น) → …
-windFlyTick:230 windFlick:232
-§238 อัลติ Eye of Heaven
-windUltTick:241 windFloatZ:255 windSnapP:258 windSnapW:259
-§262 สกิล
-W_WL:263 W_DR:266 W_VX:268 W_VO:271 W_FW:273 W_UL:276
+§230 Featherwing (ผู้ใช้ 2026-11-07, ท่าไฮไลต์): กด → หมุนตัวมีปีกบินวนขึ้…
+windFlyTick:233 windFocusEnd:242 windFlick:243 windFocusAct:249
+§252 อัลติ Eye of Heaven
+windUltTick:255 windFloatZ:269 windSnapP:272 windSnapW:273
+§276 สกิล
+W_WL:277 W_DR:280 W_VX:282 W_VO:285 W_FW:287 W_UL:295
 
 ## js/10-net.js (198) — 
 PREFIX:4 NET:5 RC:9 TURN_SERVERS:12 ICE:13 PEER_OPT:14 TURN_URL:16 ICE_READY:18 JN:22 LAG:24 lagDo:25 hostSend:26 LOBBY:27 genCode:28 sendAll:29 NETD_KEYS:33 NETD:33 netDeltaReset:34 netDelta:35 NET_MAX:49 _netTE:49 netSendSnap:50 NETU:62 netUndelta:63 setStatus:69 hostGame:71 hostPeer:79 netConnect:98 joinWatch:109 joinFail:124 netLost:130 joinGame:145 joinPeer:156 clientOnData:171 leave:186 leaveRoom:188
@@ -339,13 +340,13 @@ iceMat:2 iceRim:3 makeIceSword:4 makeIceAxe:23 makeKiteShield:39
 §51 อาวุธน้ำแข็งลอย (ผู้ใช้ 2026-10-22: "ร่ายคาถาให้ดาบฟันเอง ระยะเท่าเดิ…
 FWS:54 FWA:54 _fwM:55 _fwM2:55 _fwX:55 _fwY:55 _fwZ:55 _fwP:55 _fwS:55 _fwQ:55 _eo:56 _ei:56 _ss:56 fwAim:58 fwWeapons:59 FWP:61 FWT:61 fwChop:62 fwSweep:63 FF_RISE:64 fwIdle:65 fwSwing:68 FWL_N:80 fwLink:81 fwMat:84 frostFX:85
 
-## js/35-sync.js (570) — ซิงก์ผู้เล่น/ศัตรู/ลูกเวทจาก snapshot + ฉายตำแหน่งลงจอ (ป้ายชื่อ/ตัวเ…
+## js/35-sync.js (575) — ซิงก์ผู้เล่น/ศัตรู/ลูกเวทจาก snapshot + ฉายตำแหน่งลงจอ (ป้ายชื่อ/ตัวเ…
 §2 ท่าร่ายคาถาแบบนักเวทในหนัง Harry Potter (ผู้ใช้ 2026-10-22: "ยิงปกติท…
 CPOSE_T:7 _ce:7 _cs:7 _cb:7 AMP_B:9 AMP_S:9 CP_BEND:10 CPOSE:12 _cpT:20 _cpR:20 CGUARD:20 CP_STEP:21 CPCOL:22 castStyle:23 castStart:24
 §25 ท่าร่ายสกิล / อัลติ / โล่ (ผู้ใช้ 2026-10-22: "เกือบทุกสกิลควรมีการเห…
-CANIM:30 SKFEET:74 SKANIM:76 skAnim:83 _caT:84 _caR:84 skillPose:85 _g2:111 wandTwoHand:112 characterPoseMix:119 characterStance:120 CBLOCK:127 CBLOCK_PATH:128 blockPose:129 castPose:135 lateSkillPose:141 castPose0:142 clearCharacterCast:171 syncPlayers:176 syncEnemies:265 projGeo:303 tailGeo:304 _t1:305 makeProj:306 _a:326 _b:326 PJFX:328 syncProj:329 _awT:416 animateWorld:417
-§458 ฉายตำแหน่ง 3D ลงจอ (ป้ายชื่อ / ตัวเลขดาเมจ)
-_v:459 toScreen:460 BURNC:468 burnNum:469 NAMETAG:483 nameTag:484 drawLabels:488 TEXTAG:518 textTag:519 drawTexts:523 HITM:535 DIRI:535 drawXh:537 drawCrosshair:547
+CANIM:30 SKFEET:74 SKANIM:76 skAnim:83 _caT:84 _caR:84 skillPose:85 _g2:111 wandTwoHand:112 characterPoseMix:119 characterStance:120 CBLOCK:127 CBLOCK_PATH:128 blockPose:129 castPose:135 lateSkillPose:141 castPose0:142 clearCharacterCast:171 syncPlayers:176 syncEnemies:270 projGeo:308 tailGeo:309 _t1:310 makeProj:311 _a:331 _b:331 PJFX:333 syncProj:334 _awT:421 animateWorld:422
+§463 ฉายตำแหน่ง 3D ลงจอ (ป้ายชื่อ / ตัวเลขดาเมจ)
+_v:464 toScreen:465 BURNC:473 burnNum:474 NAMETAG:488 nameTag:489 drawLabels:493 TEXTAG:523 textTag:524 drawTexts:528 HITM:540 DIRI:540 drawXh:542 drawCrosshair:552
 
 ## js/36-modes-view.js (170) — 
 ROLE:4 KC:4 roleShowT:4 onPriv:5 MO:10 BREATHS:11 clearModeObjs:12 ITEMC:21 healTex:22 makeItem:23 syncModeObjs:39
@@ -685,25 +686,25 @@ waterEfx:184
 §212 HUD: เกจฮีลโล่ (โค้งซ้ายรอบเป้าเล็ง)
 drawWaterHud:213
 
-## js/68-wind-view.js (236) — 
-WV:6 WN_BODY:7 WN_AIR_FEET:7 windCharacterPose:9 wvState:25 wvAlive:26
-§27 ทุกเฟรมของผู้เล่นสายลม: ปีกติดหลัง / ปีกห่อตอนยกโล่ / ดูดลมชาร์จเกจ
-windFX:28
-§47 กำแพงลมจาก snapshot (ตามตำแหน่ง/ลบเมื่อหมด)
-syncWind:48 wvWall:61 wvHitFx:62 wvAimFx:63
-§64 เหตุการณ์ (efx z 'wn…')
-windEfx:65
-§109 HUD รอบเป้าเล็ง: เกจ GaleBurst (โค้งซ้าย) + ชาร์จกำแพงลม (จุด 3 จุดใต…
-drawWindHud:110
-§117 ตัวช่วยเล็งกำแพงลม (เห็นเฉพาะเรา): เส้นโค้งเรืองที่จุดวาง (คลิกขวา) +…
-wvAimGhost:118
-§129 ปีกเวทสายลมติดหลัง: ขนนก 8+4 เส้นต่อข้าง ทำจากสายลม (shader) + ริบบิ้…
-WWS:131 WWU:131 WW_NOISE:132 _wwMat:137 wwMats:138 wwFeatherGeo:184 WW_PRI:195 WW_COV:197 WW_RIB:198 _wwGeo:199 makeWindWings:200 wwCue:214 poseWindWings:218
+## js/68-wind-view.js (240) — สายลม 🌪️ — ภาพฝั่งเครื่องเล่น (ขั้นที่ 1) • ตรรกะอยู่ js/09-wind.js • ไฟล์นี้มีแต่นิยามฟ…
+WV:6 WN_BODY:8 WN_AIR_FEET:8 windCharacterPose:10 wvState:26 wvAlive:27
+§28 ทุกเฟรมของผู้เล่นสายลม: ปีกติดหลัง / ปีกห่อตอนยกโล่ / ดูดลมชาร์จเกจ
+windFX:29
+§48 กำแพงลมจาก snapshot (ตามตำแหน่ง/ลบเมื่อหมด)
+syncWind:49 wvWall:62 wvHitFx:63 wvAimFx:64
+§65 เหตุการณ์ (efx z 'wn…')
+windEfx:66
+§113 HUD รอบเป้าเล็ง: เกจ GaleBurst (โค้งซ้าย) + ชาร์จกำแพงลม (จุด 3 จุดใต…
+drawWindHud:114
+§121 ตัวช่วยเล็งกำแพงลม (เห็นเฉพาะเรา): เส้นโค้งเรืองที่จุดวาง (คลิกขวา) +…
+wvAimGhost:122
+§133 ปีกเวทสายลมติดหลัง: ขนนก 8+4 เส้นต่อข้าง ทำจากสายลม (shader) + ริบบิ้…
+WWS:135 WWU:135 WW_NOISE:136 _wwMat:141 wwMats:142 wwFeatherGeo:188 WW_PRI:199 WW_COV:201 WW_RIB:202 _wwGeo:203 makeWindWings:204 wwCue:218 poseWindWings:222
 
-## js/69-broom.js (229) — ไม้กวาด (ผู้ใช้ 2026-10-29): บินแบบเครื่องบิน + ยิงลำแสงตามสาย + อนิเ…
-BRM:9 BSK:11 BROOM_SK:17 broomVert:38 broomMove:50 broomStrike:68 broomStrikeTick:77 broomFlak:85 broomAct:96 broomOff:102 broomBeam:104
-§126 ฝั่งจอ
-broomHead:128 BBEAM:135 _bbGeo:136 broomView:137 broomMountFx:166 broomDismountFx:174 broomBeamFx:176 broomSkFx:192 broomStrikeFx:205 broomFlakFx:210 broomHud:215 broomHudT:216 broomTick:225
+## js/69-broom.js (235) — ไม้กวาด (ผู้ใช้ 2026-10-29): บินแบบเครื่องบิน + ยิงลำแสงตามสาย + อนิเ…
+BRM:9 BFW:12 BSK:13 BROOM_SK:19 broomVert:40 broomMove:53 broomStrike:71 broomStrikeTick:80 broomFlak:88 broomAct:99 broomOff:106 broomBeam:108
+§130 ฝั่งจอ
+broomHead:132 BBEAM:139 _bbGeo:140 broomView:141 broomMountFx:172 broomDismountFx:180 broomBeamFx:182 broomSkFx:198 broomStrikeFx:211 broomFlakFx:216 broomHud:221 broomHudT:222 broomTick:231
 
 ## js/70-water-dragon.js (476) — 
 WDG:7 wdgBuild:8 T:9 root:9 fixed:9 rings:10 sides:10 geoOf:11 skin:12 faceSkin:40 group:41 head:42 faceTime:44 groundY:44 faceMaterial:45 faceBlue:50 hornBlue:50 ridgeCyan:50 profile:52 headProfile:53 faceGeo:58 fp:58 fc:58 fi:58 faceRings:58 faceSides:58 navy:59 aqua:59 belly:59 flowHi:59 neckBlend:59 headStroke:71 eyePatch:72 waterCrest:87 bodyGeo:113 bodyP:113 bodyUV:113 indices:113 body:119 finShape:121 finGeo:122 finPos:124 finUV:124 finSkin:126 fins:127 limbSkin:129 clawSkin:130 taperedLimb:131 arms:138 bodyLength:148 intro:148 settleWindow:148 tipHz:148 bodyBulk:148 bodyRadius:149 flight:151 quarters:152 step:152 dr:152 dy:152 spiralKnot:153 first:154 entry:154 crest:158 bank:161 corner:161 cruiseEntry:161 quarterHandle:164 leadLength:166 up:170 zAxis:170 yAxis:170 smooth:171 startAt:172 startD:172 startDistance:174 distanceToCruise:174 hoverSpeed:174 fastDuration:174 brakeDuration:174 startRamp:174 fastSpeed:175 progress:176
@@ -746,4 +747,4 @@ surfSync:48 surfQuality:52
 SURF_VS:54 SURF_VS_BODY:55 SURF_FS:66 SURF_FS_BODY:67 surfOk:97 surfApply:98 surfScene:110
 §111 ปรับค่า (tune.html / F8)
 
-(88 files, 21473 lines)
+(88 files, 21507 lines)
