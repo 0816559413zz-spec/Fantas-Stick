@@ -58,7 +58,7 @@
 
 **Storyboard หลายมุม (2026-11-07):** หน้าวาด 2D มีพื้นหลังเพิ่ม (ด้านข้างกลับด้าน / หลังผู้ร่าย / จากฝั่งเป้า) และภาพร่างเดี่ยวติดป้ายมุม; โหมดเฟรมต่อเฟรมเพิ่ม "มุมมอง" ได้หลายมุมในคลิปเดียว (แถบมุมใต้แถบเครื่องมือ: เพิ่ม/ลบ/ดับเบิลคลิกเปลี่ยนชื่อ วาดทีละมุม ▶ เล่นพร้อมกันทุกมุม) ข้อมูล `frames.name` + `frames.angles[]` (ดู VFX-STUDIO-CLAUDE §4b) เฟรมที่บันทึก/รูปรวม/วิดีโอ = ทุกมุมวางเรียงกัน; แก้ใน `storyboard.html` (`fbFrame`, `fbAng*`, `paintBg`) + `tools/serve.py` (md + ล้างรูปค้าง)
 
-**แผนที่เอกสาร:** ราก = CLAUDE/AGENTS/README/HANDOFF/CODEMAP/PROJECT-GUIDE/VFX-STUDIO-CLAUDE · คู่มือเฉพาะทางอยู่ `guides/` (ASSETS, Destruction, MAP-DESIGN, OPTIMIZE, SKILL-DESIGN, STORYBOARD-SYNC, VFX, FX-FORMAT) · บันทึกเก่าลงวันที่อยู่ `notes/archive/` · ดีไซน์โหมด/ธาตุอยู่ `designs/`
+**แผนที่เอกสาร:** ราก = CLAUDE/AGENTS/README/HANDOFF/CODEMAP/PROJECT-GUIDE/VFX-STUDIO-CLAUDE · คู่มือเฉพาะทางอยู่ `guides/` (ASSETS, Destruction, MAP-DESIGN, OPTIMIZE, SKILL-DESIGN, STORYBOARD-SYNC, VFX, FX-FORMAT, **CLASS-GUIDE** = คลังความรู้/ไกด์ท่าของแต่ละสาย ไม่มีตัวเลข — แก้ท่าสายใดให้แก้หัวข้อสายนั้นที่นี่ด้วย) · บันทึกเก่าลงวันที่อยู่ `notes/archive/` · ดีไซน์โหมด/ธาตุอยู่ `designs/`
 
 **ลำดับงานออกแบบล่าสุด 2026-11-06:** ผู้ใช้ให้กลับไปเน้นคลาส/สกิล โครงคอนเซปต์โหมดปราสาทมีพอแล้ว พักรายละเอียดผัง/ทางเชื่อม/interaction รายจุด ใช้บทบาทในโหมดเป็นบริบทตอนคิดสกิล อ่าน `notes/PROJECT-DESIGN-DIRECTION.md` และอย่าต่อรายละเอียดแผนที่จากคำว่า next โดยอัตโนมัติ
 
