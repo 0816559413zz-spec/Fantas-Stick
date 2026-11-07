@@ -1,0 +1,163 @@
+{
+ "v": 1,
+ "desc": "GaleBurst เตรียมยิง 0.3 วิ: เส้นลม/ฝุ่น/ใบไม้ถูกดูดเข้าหาไม้ แสงเขียวที่ปลายไม้โตขึ้น (ตามตัวผู้ร่าย)",
+ "tags": [
+  "wind",
+  "galeburst",
+  "charge"
+ ],
+ "pal": "wind",
+ "dur": 0.35,
+ "seed": 28,
+ "layers": [
+  {
+   "id": "in",
+   "t": "emit",
+   "at": 0,
+   "life": 0.28,
+   "att": "feet",
+   "pos": [
+    0,
+    1.2,
+    0.4
+   ],
+   "from": "sphere",
+   "gravity": 0,
+   "drag": 0,
+   "fr": 2.2,
+   "dir": "in",
+   "speed": [
+    7,
+    12
+   ],
+   "plife": [
+    0.15,
+    0.28
+   ],
+   "look": "streak",
+   "size": [
+    1.2,
+    2.4
+   ],
+   "col": "#ffffff",
+   "c2": "#8dff65",
+   "rate": 140,
+   "curl": false
+  },
+  {
+   "id": "dust",
+   "t": "emit",
+   "at": 0,
+   "life": 0.28,
+   "att": "feet",
+   "pos": [
+    0,
+    0.08,
+    0.5
+   ],
+   "from": "ring",
+   "gravity": 0,
+   "drag": 1,
+   "fr": 1.8,
+   "dir": "in",
+   "speed": [
+    3,
+    6
+   ],
+   "up": [
+    0.2,
+    0.8
+   ],
+   "plife": [
+    0.3,
+    0.5
+   ],
+   "size": [
+    2.5,
+    4
+   ],
+   "col": "#cfc7b0",
+   "c2": "#9d957f",
+   "rate": 50,
+   "x": true,
+   "look": "smoke",
+   "curl": true
+  },
+  {
+   "id": "leaf",
+   "t": "emit",
+   "at": 0,
+   "life": 0.28,
+   "att": "feet",
+   "pos": [
+    0,
+    1,
+    0.3
+   ],
+   "from": "sphere",
+   "gravity": 0,
+   "drag": 1,
+   "fr": 1.6,
+   "dir": "in",
+   "speed": [
+    4,
+    8
+   ],
+   "plife": [
+    0.2,
+    0.35
+   ],
+   "look": "model",
+   "model": "wind_leaf",
+   "mmat": "glow",
+   "msize": [
+    0.1,
+    0.18
+   ],
+   "col": "#8dff65",
+   "c2": "#2ec772",
+   "mspin": 500,
+   "rate": 14,
+   "x": true
+  },
+  {
+   "id": "glow",
+   "t": "halo",
+   "at": 0,
+   "life": 0.3,
+   "att": "feet",
+   "pos": [
+    0.35,
+    1.3,
+    0.7
+   ],
+   "col": "#8dff65",
+   "size0": 0.2,
+   "size": 1.0,
+   "k": 0.6
+  },
+  {
+   "id": "haze",
+   "t": "warp",
+   "at": 0.05,
+   "life": 0.25,
+   "att": "feet",
+   "pos": [
+    0,
+    1.2,
+    0.8
+   ],
+   "kind": "haze",
+   "size": 2,
+   "str": 0.4,
+   "op": {
+    "0": 0,
+    "0.4": 1,
+    "1": 0
+   },
+   "col": "#ffffff",
+   "glow": 0,
+   "x": true
+  }
+ ]
+}

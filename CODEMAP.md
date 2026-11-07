@@ -118,34 +118,34 @@ waterDragonTick:119
 §133 ทุกเฟรม (ทั้งเกม)
 updateWater:134 waterSnapP:140 waterSnapW:142 WT_RP:145 WT_FM:148 WT_CG:150 WT_AB:154 WT_MW:157 WT_UL:159
 
-## js/09-wind.js (278) — 
+## js/09-wind.js (287) — 
 WINDP:8 WNV:12
 §19 ตัวช่วย
 wOn:20 wGain:21 wSeg:23 wFoeNear:24
 §26 ทุกเฟรมของผู้เล่นสายลม (เรียกจาก updatePlayer หลังส่วนโล่)
-windTick:27 windSpd:47 windFlyZ:49 windReset:52
-§54 ท่าพื้นฐาน (คลิกซ้าย): ใบมีดลม / ดูดลมชาร์จเกจ / GaleBurst
-windBasic:55 windGaleBurst:74 windGBTick:77
-§83 โล่ปีก
-windShieldBurst:84
-§88 Dash: ผลักศัตรูข้างหน้า + ดีดตัวเราถอยหลังลอยกลางอากาศ
-windDash:89
-§99 กำแพงลม Aegis Gale
-windWallMake:100 windWallStop:108 windWallBoom:109 windDmg:114 windRay:118 windBlockLen:126 windProjHit:131 windWallHurt:135 windCollide:137
-§143 ทั้งสนาม: GaleBurst / กำแพงลม / ชนกำแพง
-updateWind:144
-§176 Windrift: ชาร์จปีก 0.2 → พุ่ง 400 (20 ม. ใน 0.09 วิ) แบบ Jett → ลงท่า…
-windDriftTick:177 windDriftWind:184
-§191 Vortex Bind: ทอร์นาโด 3 อันโค้ง 45° ห่าง 200 → 0.6 วิ ดึงกลับมาหยุด 6…
-windVortexTick:192
-§204 Void Spheres: หลุมดำลูกเดียว (ผู้ใช้ 2026-10-31, designs/wind.md)
-windVoidCast:207 windVoidTick:209
-§220 Featherwing: บิน 5 วิ → กดอีกครั้งสะบัดปีกไปข้างหน้า (เอียงลงพื้น) → …
-windFlyTick:221 windFlick:223
-§229 อัลติ Eye of Heaven
-windUltTick:232 windFloatZ:246 windSnapP:249 windSnapW:250
-§253 สกิล
-W_WL:254 W_DR:257 W_VX:259 W_VO:262 W_FW:264 W_UL:267
+windTick:27 windSpd:48 windFlyZ:50 windReset:53
+§55 ท่าพื้นฐาน (คลิกซ้าย): ใบมีดลม / ดูดลมชาร์จเกจ / GaleBurst
+windBasic:56 windStreamStart:81 windStreamEnd:82 windStreamTick:83
+§93 โล่ปีก
+windShieldBurst:94
+§98 Dash: ผลักศัตรูข้างหน้า + ดีดตัวเราถอยหลังลอยกลางอากาศ
+windDash:99
+§109 กำแพงลม Aegis Gale
+windWallMake:110 windWallStop:118 windWallBoom:119 windDmg:124 windRay:128 windBlockLen:136 windProjHit:141 windWallHurt:145 windCollide:147
+§153 ทั้งสนาม: GaleBurst / กำแพงลม / ชนกำแพง
+updateWind:154
+§185 Windrift: ชาร์จปีก 0.2 → พุ่ง 400 (20 ม. ใน 0.09 วิ) แบบ Jett → ลงท่า…
+windDriftTick:186 windDriftWind:193
+§200 Vortex Bind: ทอร์นาโด 3 อันโค้ง 45° ห่าง 200 → 0.6 วิ ดึงกลับมาหยุด 6…
+windVortexTick:201
+§213 Void Spheres: หลุมดำลูกเดียว (ผู้ใช้ 2026-10-31, designs/wind.md)
+windVoidCast:216 windVoidTick:218
+§229 Featherwing: บิน 5 วิ → กดอีกครั้งสะบัดปีกไปข้างหน้า (เอียงลงพื้น) → …
+windFlyTick:230 windFlick:232
+§238 อัลติ Eye of Heaven
+windUltTick:241 windFloatZ:255 windSnapP:258 windSnapW:259
+§262 สกิล
+W_WL:263 W_DR:266 W_VX:268 W_VO:271 W_FW:273 W_UL:276
 
 ## js/10-net.js (198) — 
 PREFIX:4 NET:5 RC:9 TURN_SERVERS:12 ICE:13 PEER_OPT:14 TURN_URL:16 ICE_READY:18 JN:22 LAG:24 lagDo:25 hostSend:26 LOBBY:27 genCode:28 sendAll:29 NETD_KEYS:33 NETD:33 netDeltaReset:34 netDelta:35 NET_MAX:49 _netTE:49 netSendSnap:50 NETU:62 netUndelta:63 setStatus:69 hostGame:71 hostPeer:79 netConnect:98 joinWatch:109 joinFail:124 netLost:130 joinGame:145 joinPeer:156 clientOnData:171 leave:186 leaveRoom:188
@@ -685,7 +685,7 @@ waterEfx:184
 §212 HUD: เกจฮีลโล่ (โค้งซ้ายรอบเป้าเล็ง)
 drawWaterHud:213
 
-## js/68-wind-view.js (234) — 
+## js/68-wind-view.js (236) — 
 WV:6 WN_BODY:7 WN_AIR_FEET:7 windCharacterPose:9 wvState:25 wvAlive:26
 §27 ทุกเฟรมของผู้เล่นสายลม: ปีกติดหลัง / ปีกห่อตอนยกโล่ / ดูดลมชาร์จเกจ
 windFX:28
@@ -693,12 +693,12 @@ windFX:28
 syncWind:48 wvWall:61 wvHitFx:62 wvAimFx:63
 §64 เหตุการณ์ (efx z 'wn…')
 windEfx:65
-§107 HUD รอบเป้าเล็ง: เกจ GaleBurst (โค้งซ้าย) + ชาร์จกำแพงลม (จุด 3 จุดใต…
-drawWindHud:108
-§115 ตัวช่วยเล็งกำแพงลม (เห็นเฉพาะเรา): เส้นโค้งเรืองที่จุดวาง (คลิกขวา) +…
-wvAimGhost:116
-§127 ปีกเวทสายลมติดหลัง: ขนนก 8+4 เส้นต่อข้าง ทำจากสายลม (shader) + ริบบิ้…
-WWS:129 WWU:129 WW_NOISE:130 _wwMat:135 wwMats:136 wwFeatherGeo:182 WW_PRI:193 WW_COV:195 WW_RIB:196 _wwGeo:197 makeWindWings:198 wwCue:212 poseWindWings:216
+§109 HUD รอบเป้าเล็ง: เกจ GaleBurst (โค้งซ้าย) + ชาร์จกำแพงลม (จุด 3 จุดใต…
+drawWindHud:110
+§117 ตัวช่วยเล็งกำแพงลม (เห็นเฉพาะเรา): เส้นโค้งเรืองที่จุดวาง (คลิกขวา) +…
+wvAimGhost:118
+§129 ปีกเวทสายลมติดหลัง: ขนนก 8+4 เส้นต่อข้าง ทำจากสายลม (shader) + ริบบิ้…
+WWS:131 WWU:131 WW_NOISE:132 _wwMat:137 wwMats:138 wwFeatherGeo:184 WW_PRI:195 WW_COV:197 WW_RIB:198 _wwGeo:199 makeWindWings:200 wwCue:214 poseWindWings:218
 
 ## js/69-broom.js (229) — ไม้กวาด (ผู้ใช้ 2026-10-29): บินแบบเครื่องบิน + ยิงลำแสงตามสาย + อนิเ…
 BRM:9 BSK:11 BROOM_SK:17 broomVert:38 broomMove:50 broomStrike:68 broomStrikeTick:77 broomFlak:85 broomAct:96 broomOff:102 broomBeam:104
@@ -746,4 +746,4 @@ surfSync:48 surfQuality:52
 SURF_VS:54 SURF_VS_BODY:55 SURF_FS:66 SURF_FS_BODY:67 surfOk:97 surfApply:98 surfScene:110
 §111 ปรับค่า (tune.html / F8)
 
-(88 files, 21462 lines)
+(88 files, 21473 lines)

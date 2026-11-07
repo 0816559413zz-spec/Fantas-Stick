@@ -1,18 +1,18 @@
 // =====================================================================
 //  สายลม 🌪️ (ผู้ใช้ออกแบบทั้งหมด — designs/wind.md "คอนเซ็ปต์ใหม่") • ฝั่งโฮสต์ • ขั้นที่ 1 (2026-10-28)
 //  "ผู้ผลัก" เล่นกับกำแพงลม: ผลักศัตรูชนกำแพงลม = สตัน 0.5 วิ • ตีศัตรูที่ติดกำแพงครบ 70 = กำแพงแตกระเบิด 50 + กระเด็นไกล
-//  เกจ GaleBurst p.wg 0-100: BA โดน +12 • กดค้างคลิกซ้ายดูดลม +8/วิ • โล่โดนตี +10 • เต็ม = BA ถัดไปเป็นทอร์นาโดนอน
+//  เกจ GaleBurst p.wg 0-100: BA โดน +12 • กดค้างคลิกซ้ายดูดลม +8/วิ • โล่โดนตี +10 • เต็ม = กดโจมตีปกติค้างเพื่อยิงลมกรวยต่อเนื่อง
 //  กำแพงลม G.wwl: {x,y ศูนย์กลาง, a ทิศหน้ากำแพง, L ครึ่งความกว้าง, mv ระยะดันที่เหลือ, acc ดาเมจสะสม}
 //  ขั้นที่ 2: Windrift / Vortex Bind / Void Spheres / Featherwing • ขั้นที่ 3: อัลติ Eye of Heaven (2026-10-28)
 // =====================================================================
 const WINDP=PATHS.length;
 // ตัวเลขทั้งหมดของสายลม: WNV = PATHS[WINDP].v (ใบมีดลม/GaleBurst/โล่ปีก/Dash) + v:{...} ของแต่ละสกิล (W_WL W_DR W_VX W_VO W_FW W_UL = S.v) — ปรับได้ใน tune.html / F8 (js/73-tune.js)
 PATHS.push({id:'wind',n:'สายลม',ic:'🌪️',col:'#8dff65',d:'ผู้ผลัก — สร้างกำแพงลม ผลักศัตรูไปชนให้สตัน ตีต่อจนกำแพงแตกระเบิด คุมตำแหน่งศัตรูแล้วคิดตาต่อไป',
-  combo:'BA ใบมีดลมเก็บเกจ GaleBurst → เต็มแล้วยิงทอร์นาโดนอนผลัก • ผลักศัตรูชนกำแพงลม = สตัน 0.5 วิ • ตีศัตรูที่ติดกำแพงครบ 70 = กำแพงแตก ระเบิด 50 กระเด็นไกล • Dash ดีดถอยหลังผลักศัตรูชนกำแพง 20 • ใช้สกิลกลางอากาศได้'});
-const WNV=PATHS[WINDP].v={baDmg:5,baCd:0.30,baRange:400,baGain:12,baHold:0.35,baChg:8,gbLen:240,gbT:0.32,gbDmg:25,gbPush:1500,gbR0:6,gbR1:27,gbCd:0.5,
+  combo:'BA ใบมีดลมเก็บเกจ GaleBurst → เต็มแล้วกดค้างยิงลมต่อเนื่องผลักเบา ๆ • ผลักศัตรูชนกำแพงลม = สตัน 0.5 วิ • ตีศัตรูที่ติดกำแพงครบ 70 = กำแพงแตก ระเบิด 50 กระเด็นไกล • Dash ดีดถอยหลังผลักศัตรูชนกำแพง 20 • ใช้สกิลกลางอากาศได้'});
+const WNV=PATHS[WINDP].v={baDmg:5,baCd:0.30,baRange:400,baGain:12,baHold:0.35,baChg:8,gbHold:0.3,gbDur:2.6,gbLen:340,gbR0:10,gbR1:62,gbTick:0.25,gbDmg:5,gbAcc:800,gbMax:120,gbSlow:0.55,gbCd:0.5,
   shHp:75,shGain:10,shChg:0.3,shR:200,shStun:0.8,shPush:1500,shDmg:20,dsBack:1800,dsVz:7,dsPush:1500,dsReach:150,dsCone:60,dsWall:20,dsCd:8};
 PATHS[WINDP].vn={baDmg:'ใบมีดลม • ดาเมจ',baCd:'ใบมีดลม • เว้น (วิ)',baRange:'ใบมีดลม • ระยะ',baGain:'ใบมีดลม • โดนแล้วเกจ +%',baHold:'ดูดลม • กดค้างกี่วิเริ่ม',baChg:'ดูดลม • เกจ +%/วิ',
-  gbLen:'GaleBurst • ระยะ',gbT:'GaleBurst • เวลาพุ่ง (วิ)',gbDmg:'GaleBurst • ดาเมจ',gbPush:'GaleBurst • แรงผลัก',gbR0:'GaleBurst • กว้างต้นทาง',gbR1:'GaleBurst • กว้างปลาย',gbCd:'GaleBurst • เว้นหลังยิง (วิ)',
+  gbHold:'GaleBurst • กดค้างก่อนยิง (วิ)',gbDur:'GaleBurst • ยิงต่อเนื่องได้นาน (วิ เกจเต็ม→หมด)',gbLen:'GaleBurst • ระยะ',gbR0:'GaleBurst • กว้างต้นทาง (รัศมี)',gbR1:'GaleBurst • กว้างปลาย (รัศมี)',gbTick:'GaleBurst • ติดดาเมจทุก (วิ)',gbDmg:'GaleBurst • ดาเมจต่อครั้ง',gbAcc:'GaleBurst • แรงดันศัตรู (เร่ง)',gbMax:'GaleBurst • ความเร็วดันศัตรูสูงสุด',gbSlow:'GaleBurst • ตัวเราเดินช้าลง (เท่า)',gbCd:'GaleBurst • เว้นหลังหยุดยิง (วิ)',
   shHp:'โล่ปีก • รับดาเมจได้',shGain:'โล่ปีก • โดนตีเกจ +%',shChg:'ระเบิดปีก • ชาร์จ (วิ)',shR:'ระเบิดปีก • รัศมี',shStun:'ระเบิดปีก • สตัน (วิ)',shPush:'ระเบิดปีก • แรงผลัก',shDmg:'ระเบิดปีก • ดาเมจ',
   dsBack:'Dash • แรงดีดถอยหลัง',dsVz:'Dash • แรงลอยขึ้น',dsPush:'Dash • แรงผลักศัตรู',dsReach:'Dash • ระยะผลักข้างหน้า',dsCone:'Dash • มุมผลัก (องศา ครึ่งซ้าย/ขวา)',dsWall:'Dash • ผลักชนกำแพง ดาเมจ',dsCd:'Dash • คูลดาวน์ (วิ)'};
 Object.assign(PDEF,{wblade:{spd:1400,r:9,dmg:WNV.baDmg,life:WNV.baRange/1400,col:'#8dff65'}});
@@ -39,17 +39,18 @@ function windTick(p,dt){
   // ระเบิดปีก (ชาร์จ 0.3 วิ แล้วระเบิด)
   if(p.wsb){p.wsb.t-=dt;if(!p.alive){p.wsb=null;}else if(p.wsb.t<=0){p.wsb=null;windShieldBurst(p);}}
   if(p.wsbL>0)p.wsbL-=dt;
+  if(p.wgs&&(!p.alive||p.stun>0))windStreamEnd(p,null);
   if(p.wdr)windDriftTick(p,dt);
   if(p.wfw)windFlyTick(p,dt);
   if(p.wult)windUltTick(p,dt);
 }
 // ความเร็วเดินพิเศษ: ชาร์จ Windrift ยืนนิ่ง • บิน Featherwing 1.3 เท่า
-function windSpd(p){return p.wult?0:p.wdr&&p.wdr.ph==='chg'?0:p.wfw&&p.wfw.ph==='fly'?W_FW.spd:1;}
+function windSpd(p){return p.wgs?WNV.gbSlow:p.wult?0:p.wdr&&p.wdr.ph==='chg'?0:p.wfw&&p.wfw.ph==='fly'?W_FW.spd:1;}
 // ความสูงตอนบิน (แทนแรงโน้มถ่วง) — เรียกจาก updatePlayer
 function windFlyZ(p,dt){const F=p.wfw,gh=groundH(p.x,p.y,p.z);
   if(F.ph==='fly'){const top=gh+W_FW.hgt;p.vz=p.z<top-0.05?Math.min(W_FW.vz,(top-p.z)*4):0;p.z+=p.vz*dt;}
   else{p.vz=Math.max(-W_FW.glide,Math.min(p.vz||0,0)-6*dt);p.z+=p.vz*dt;if(p.z<=gh){p.z=gh;p.vz=0;p.wfw=null;emit({k:'efx',z:'wnfwland',x:Math.round(p.x),y:Math.round(p.y),h:p.z,id:p.id});}}}
-function windReset(p){p.wult=null;p.wflt=0;p.wus=0;p.wdr=null;p.wfw=null;p.wg=0;p.wwc=W_WL.max;p.wwr=0;p.wwAim=null;p.wsb=null;p.wsbL=0;p.wchg=0;p.wfHeld=0;}
+function windReset(p){p.wult=null;p.wflt=0;p.wus=0;p.wdr=null;p.wfw=null;p.wg=0;p.wwc=W_WL.max;p.wwr=0;p.wwAim=null;p.wsb=null;p.wsbL=0;p.wchg=0;p.wfHeld=0;if(p.wgs)windStreamEnd(p,null);p.wgw=0;}
 
 // ---------- ท่าพื้นฐาน (คลิกซ้าย): ใบมีดลม / ดูดลมชาร์จเกจ / GaleBurst ----------
 function windBasic(p,inp,dt,setCd){
@@ -58,27 +59,36 @@ function windBasic(p,inp,dt,setCd){
   if(p.shieldOn){   // ระหว่างยกโล่: เกจเต็ม + คลิก = ชาร์จปีกแล้วระเบิด
     if(inp.fire&&!prev&&p.wg>=100&&!p.wsb){p.wsb={t:WNV.shChg};emit({k:'efx',z:'wnsbchg',x:p.x,y:p.y,h:p.z,id:p.id});}
     p.wchg=0;return;}
-  if(inp.fire&&!prev){p.wfHeld=0;
-    if(p.wg>=100&&p.cd.basic<=0){windGaleBurst(p);setCd('basic',WNV.gbCd);return;}
+  if(p.wgs){windStreamTick(p,inp,dt,setCd);return;}   // กำลังยิงลมต่อเนื่อง (GaleBurst)
+  if(inp.fire&&!prev){p.wfHeld=0;p.wgw=0;
+    if(p.wg>=100)return;   // เกจเต็ม: ไม่ยิงทันที ต้องกดโจมตีปกติค้างไว้ (ดูด้านล่าง)
     if(p.cd.basic<=0){PDEF.wblade.life=WNV.baRange/PDEF.wblade.spd;shoot(p,'wblade',{sp:'b_wind',dmg:WNV.baDmg});setCd('basic',WNV.baCd);}
     return;}
   if(inp.fire){p.wfHeld=(p.wfHeld||0)+dt;
+    if(p.wg>=100){   // เกจเต็ม + กดค้าง = เตรียม 0.3 วิ แล้วยิงลมออกไปต่อเนื่องจนปล่อยปุ่มหรือเกจหมด
+      if(p.wchg){p.wchg=0;emit({k:'efx',z:'wnchg',x:p.x,y:p.y,h:p.z,id:p.id,n:0});}
+      if(p.cd.basic<=0){if(!p.wgw)emit({k:'efx',z:'wngbw',x:Math.round(p.x),y:Math.round(p.y),h:p.z,id:p.id});p.wgw=(p.wgw||0)+dt;if(p.wgw>=WNV.gbHold)windStreamStart(p);}
+      return;}
     // กดค้างตอนเกจยังไม่เต็ม = ดูดลมรอบตัว +8%/วิ (ไม่ยิง) ⚠ เริ่มหลังกดค้าง 0.35 วิ
     if(p.wfHeld>=WNV.baHold&&p.wg<100){if(!p.wchg)emit({k:'efx',z:'wnchg',x:p.x,y:p.y,h:p.z,id:p.id,n:1});p.wchg=1;wGain(p,WNV.baChg*dt);}
     else if(p.wg>=100&&p.wchg){p.wchg=0;emit({k:'efx',z:'wnchg',x:p.x,y:p.y,h:p.z,id:p.id,n:0});}
     return;}
   if(prev&&p.wchg){p.wchg=0;emit({k:'efx',z:'wnchg',x:p.x,y:p.y,h:p.z,id:p.id,n:0});}
-  p.wfHeld=0;
+  p.wfHeld=0;p.wgw=0;
 }
-// GaleBurst: ทอร์นาโดนอนพุ่ง 12 ม. ใน 0.32 วิ • กรวยเล็กที่ไม้ (0.3 เท่าตัว) บานถึง 1.5 เท่าตัว • โดนแต่ละคนครั้งเดียว
-function windGaleBurst(p){p.wg=0;const a=p.ang;
-  (G.wgb||(G.wgb=[])).push({o:p.id,team:p.team,x:p.x+Math.cos(a)*20,y:p.y+Math.sin(a)*20,h:p.z+1.15,a,t:0,hit:new Set()});
-  emit({k:'efx',z:'wngb',x:Math.round(p.x),y:Math.round(p.y),h:p.z,a:Math.round(a*100)/100,id:p.id});}
-function windGBTick(g,dt){g.t+=dt;const p=G.players[g.o],k=Math.min(1,g.t/WNV.gbT),len=WNV.gbLen*Math.pow(k,0.8),ca=Math.cos(g.a),sa=Math.sin(g.a);
-  if(p)for(const t of foesOf(g.team)){if(g.hit.has(t))continue;const dx=t.x-g.x,dy=t.y-g.y,u=dx*ca+dy*sa;if(u<-10||u>len)continue;
-    const r=WNV.gbR0+(WNV.gbR1-WNV.gbR0)*Math.max(0,u)/WNV.gbLen,side=Math.abs(-dx*sa+dy*ca);if(side>r+(t.r||PR)||Math.abs(cH(t)-g.h+1.1)>3)continue;
-    g.hit.add(t);if(aoeHit(p,t,WNV.gbDmg,t=>{knock(t,t.x-ca*10,t.y-sa*10,WNV.gbPush);t.wpush=0.8;}))emit({k:'efx',z:'wngbhit',x:Math.round(t.x),y:Math.round(t.y),h:cH(t)});}
-  return g.t<WNV.gbT+0.05;}
+// GaleBurst (ผู้ใช้ 2026-11-07): เกจเต็ม → กดโจมตีปกติค้าง 0.3 วิ → ยิงลมเป็นลำกรวยกว้างต่อเนื่อง (เกจไหลหมดใน 2.6 วิ หรือปล่อยปุ่มก่อน = เกจที่เหลือเก็บไว้)
+// ศัตรูในกรวยถูกดันออกไปเบา ๆ ต่อเนื่อง (เร่งจนความเร็วสูงสุด ~130 ตัวเดินสวนยังไหว) + ติดดาเมจทุก 0.25 วิ • ตัวเราเดินช้าลง
+function windStreamStart(p){if(p.wgs)return;p.wgs={t:0,tk:0};p.wgw=0;p.wchg=0;emit({k:'efx',z:'wngb',x:Math.round(p.x),y:Math.round(p.y),h:p.z,a:Math.round(p.ang*100)/100,id:p.id,n:1});}
+function windStreamEnd(p,setCd){if(!p.wgs)return;p.wgs=null;p.wgw=0;if(setCd)setCd('basic',WNV.gbCd);emit({k:'efx',z:'wngb',x:Math.round(p.x),y:Math.round(p.y),h:p.z,id:p.id,n:0});}
+function windStreamTick(p,inp,dt,setCd){const S=p.wgs;
+  if(!p.alive||p.stun>0||!inp.fire||p.shieldOn||p.wwAim||p.wg<=0){windStreamEnd(p,setCd);return;}
+  S.t+=dt;p.wg=Math.max(0,p.wg-100/WNV.gbDur*dt);
+  const a=p.ang,ca=Math.cos(a),sa=Math.sin(a),ox=p.x+ca*20,oy=p.y+sa*20,len=WNV.gbLen*Math.min(1,S.t/0.15),h=p.z+1.15;
+  S.tk-=dt;const tick=S.tk<=0;if(tick)S.tk+=WNV.gbTick;
+  for(const t of foesOf(p.team)){const dx=t.x-ox,dy=t.y-oy,u=dx*ca+dy*sa;if(u<-10||u>len)continue;
+    const r=WNV.gbR0+(WNV.gbR1-WNV.gbR0)*Math.max(0,u)/WNV.gbLen,side=Math.abs(-dx*sa+dy*ca);if(side>r+(t.r||PR)||Math.abs(cH(t)-h+1.1)>3)continue;
+    {const along=(t.vx||0)*ca+(t.vy||0)*sa,add=Math.min(WNV.gbAcc*dt,Math.max(0,WNV.gbMax-along))*(isBig(t)?0.35:1);t.vx=(t.vx||0)+ca*add;t.vy=(t.vy||0)+sa*add;t.wpush=0.3;}
+    if(tick&&aoeHit(p,t,WNV.gbDmg,null))emit({k:'efx',z:'wngbhit',x:Math.round(t.x),y:Math.round(t.y),h:cH(t)});}}
 
 // ---------- โล่ปีก ----------
 function windShieldBurst(p){if(p.wg<100)return;p.wg=0;p.wsbL=0.6;p.shieldOn=false;p.vz=Math.max(p.vz||0,3);   // ลอยขึ้นนิดเดียว ~0.3 ม. (ผู้ใช้)
@@ -142,7 +152,6 @@ function windCollide(o,r,z){if(!G||!G.wwl||!G.wwl.length||o.team===undefined)ret
 
 // ---------- ทั้งสนาม: GaleBurst / กำแพงลม / ชนกำแพง ----------
 function updateWind(dt){
-  if(G.wgb&&G.wgb.length)G.wgb=G.wgb.filter(g=>windGBTick(g,dt));
   if(G.wdft&&G.wdft.length)G.wdft=G.wdft.filter(g=>{g.t-=dt;if(g.t<=0){windDriftWind(g);return false;}return true;});
   if(G.wvx&&G.wvx.length)G.wvx=G.wvx.filter(V=>windVortexTick(V,dt));
   if(G.wvh&&G.wvh.length)G.wvh=G.wvh.filter(o=>windVoidTick(o,dt));
@@ -268,7 +277,7 @@ const W_UL=defSpell(WINDP,{id:'eyeofheaven',v:{r:350,slam:1.0,wall:1.15,imp:2.38
   cast(p){p.wult={t:0,x:p.x,y:p.y,fl:new Set()};p.shieldOn=false;p.wfw=null;p.wdr=null;emit({k:'efx',z:'wnult',x:Math.round(p.x),y:Math.round(p.y),h:p.z,a:Math.round(p.ang*100)/100,id:p.id});}}).v;
 
 // ท่าพื้นฐาน + โล่ + Dash ของสาย (PBASIC ต้องอยู่ช่องเดียวกับลำดับใน PATHS)
-PBASIC.push({id:'b_wind',type:'wblade',n:'ใบมีดลม / GaleBurst',d:'คลิก = ใบมีดลม 5 ดาเมจ ทุก 0.3 วิ ระยะ 400 โดนแล้วเกจ GaleBurst +12% • กดค้าง (เกจยังไม่เต็ม) = ดูดลมรอบตัว +8%/วิ • เกจเต็ม = คลิกถัดไปยิงทอร์นาโดนอน 12 ม. 25 ดาเมจ ผลัก 250',
+PBASIC.push({id:'b_wind',type:'wblade',n:'ใบมีดลม / GaleBurst',d:'คลิก = ใบมีดลม 5 ดาเมจ ทุก 0.3 วิ ระยะ 400 โดนแล้วเกจ GaleBurst +12% • กดค้าง (เกจยังไม่เต็ม) = ดูดลมรอบตัว +8%/วิ • เกจเต็ม = กดโจมตีปกติค้าง 0.3 วิ แล้วยิงลมกรวยกว้างต่อเนื่อง 17 ม. นาน 2.6 วิ (ปล่อยปุ่ม = หยุด เกจที่เหลือเก็บไว้) 5 ดาเมจ/0.25 วิ ผลักศัตรูเบา ๆ ตัวเราเดินช้าลง',
   shd:'โล่ปีกห่อตัว: กันรอบตัว 360° รับได้ 75 • โดนตีแต่ละครั้ง +10% เกจ • เกจเต็มระหว่างยกโล่ + คลิกซ้าย = ชาร์จปีกแล้วระเบิดรอบตัว รัศมี 200 ผลัก 250 สตัน 0.8 วิ 20 ดาเมจ',
   dsd:'Dash ถอยหลังผลัก (Shift): ผลักศัตรูข้างหน้า 250 ตัวเราดีดถอยหลัง 300 ลอยกลางอากาศ (ใช้สกิลกลางอากาศได้) • ศัตรูที่โดนผลักชนกำแพง = 20 ดาเมจ + สตัน • คูลดาวน์ 8 วิ',
   get shMul(){return 100/WNV.shHp;},shieldSwing:true,
