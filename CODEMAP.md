@@ -288,18 +288,18 @@ CITY_STY:181 CITY_VEH:188 cityFacade:190 CITYK:203 _cZ:204 _cT:204 _cR:204 _cC:2
 §259 ตึกไฮไลต์ล้มทั้งตึก (ขั้น 7)
 _ctA:262 _ctB:262 _ctC:262 cityTowerPose:263 cityTowerAnim:271 cityTowerRubble:278 CAREA:292 cityAreaSync:293 cityViewSync:305 cityDebris:349 cityFX:358
 
-## js/28-maps-build.js (762) — สร้างแผนที่
-CANDLESYS:2 builtMap:3 builtKey:3 world:3 TORCHES:3 CANDLES:3 FIREFLIES:3 CRYSTAL:3 RUNE:3 SNITCH:3 BANNERS:3 SNOW:3 WCACHE:5 WCACHE_MAX:5 wkey:7 buildWorld:8 addW:41 _prewarmed:43 prewarmShaders:44 batchStatic:63 makeCandles:88 updateCandles:97 buildCastle:106 buildHogsmeade:172 buildGreatHall:260 buildForest:330
-§427 ทุ่งหญ้าฮอกวอตส์ (เย็น)
-ringTrees:428 grassTex:437 buildMeadow:438
-§457 ทะเลสาบน้ำแข็ง (กลางคืน)
-buildLake:458
-§479 ซากลานประลอง (เย็น ทราย)
-§480 Test Place (ห้องฝึก): พื้นตารางเรียบๆ กลางวัน + วงโซนเสกมอนสเตอร์
-§481 บรรยากาศที่ใช้ร่วมกัน (แผนที่จากโค้ด + แผนที่จากไฟล์ผ่าน fx ใน guides…
-makeSnow:482 makeFireflies:489 makeSnitch:496 fileMapFx:503
-§513 แผนที่จากไฟล์ Blender (guides/MAP-DESIGN.md)
-terrGeo:515 buildFileMap:523 tickM:561 TRPAD:562 ARPAD:562 signTex:563 testSign:564 buildTest:571 buildRuins:668 buildPitch:693
+## js/28-maps-build.js (763) — สร้างแผนที่
+CANDLESYS:2 builtMap:3 builtKey:3 world:3 TORCHES:3 CANDLES:3 FIREFLIES:3 CRYSTAL:3 RUNE:3 SNITCH:3 BANNERS:3 SNOW:3 WCACHE:5 WCACHE_MAX:5 wkey:7 buildWorld:8 addW:42 _prewarmed:44 prewarmShaders:45 batchStatic:64 makeCandles:89 updateCandles:98 buildCastle:107 buildHogsmeade:173 buildGreatHall:261 buildForest:331
+§428 ทุ่งหญ้าฮอกวอตส์ (เย็น)
+ringTrees:429 grassTex:438 buildMeadow:439
+§458 ทะเลสาบน้ำแข็ง (กลางคืน)
+buildLake:459
+§480 ซากลานประลอง (เย็น ทราย)
+§481 Test Place (ห้องฝึก): พื้นตารางเรียบๆ กลางวัน + วงโซนเสกมอนสเตอร์
+§482 บรรยากาศที่ใช้ร่วมกัน (แผนที่จากโค้ด + แผนที่จากไฟล์ผ่าน fx ใน guides…
+makeSnow:483 makeFireflies:490 makeSnitch:497 fileMapFx:504
+§514 แผนที่จากไฟล์ Blender (guides/MAP-DESIGN.md)
+terrGeo:516 buildFileMap:524 tickM:562 TRPAD:563 ARPAD:563 signTex:564 testSign:565 buildTest:572 buildRuins:669 buildPitch:694
 
 ## js/29-characters.js (439) — ระบบผ้า (เสื้อคลุมพลิ้วตามการเคลื่อนที่)
 makeCloak:2 updateCloth:10 wandNamed:34 wandSparks:83
@@ -722,8 +722,10 @@ tuneOpenF:80 tuneFmt:81 tuneRow:82 tuneRefresh:85 tuneMsg:93 tuneToggle:94 tuneE
 §122 API สำหรับเครื่องมือแยก tune.html (เปิดเกมใน iframe แล้วเรียกผ่าน WD)
 tuneDump:123 tuneSetKey:124
 
-## js/74-look.js (46) — Look 🌗 — แสงรอบตัวจากท้องฟ้า (IBL) + ค่าแสงส่วนรวมของฉาก (เฟส 1 ของแผนกราฟิกสมจริง, note…
-LOOK:9 lookEnvFor:12 lookApply:22 lookRefresh:35
-§36 ลงทะเบียนในเครื่องมือปรับค่า (js/73-tune.js)
+## js/74-look.js (56) — Look 🌗 — พรีเซ็ตลุคของฉาก: แสงรอบตัวจากท้องฟ้า (IBL) + ความสว่าง + คอนทราสต์ + ย้อมสีเงา…
+§12 ฟิลด์: sky = ท้องฟ้าที่ถ่ายเป็นแสง ('night'|'sunset') • warm = ทิศย้อ…
+LOOK:15 lookPreset:20 lookMap:22 lookName:23 lookEnvFor:24 lookApply:34 lookRefresh:47
+§48 ลงทะเบียนในเครื่องมือปรับค่า (js/73-tune.js): 1 หมวด "🌗 Look" แยกส่ว…
+LOOK_F:49 lookRegister:52
 
-(86 files, 21053 lines)
+(86 files, 21064 lines)

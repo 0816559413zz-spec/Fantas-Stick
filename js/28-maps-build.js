@@ -17,6 +17,7 @@ function buildWorld(id){
   clearDyn();clearDebris();
   prefetchModels([...FILE_MODELS(),"mesh_fire_wing","mesh_storm_claw","mesh_ice_burst","mesh_ice_spire","mesh_ice_sword","mesh_ice_axe","mesh_ice_circle"]);prefetchFx();
   const FM=MAPS[id]&&MAPS[id].fm;
+  if(typeof lookMap==='function')lookMap(id,FM);   // พรีเซ็ตแสงของแมพนี้ (js/74-look.js)
   setSky(FM?(FM.sky==='sunset'||FM.sky==='day'?'sunset':'night'):id==='pitch'||id==='meadow'||id==='ruins'||id==='test'?'sunset':'night');
   const cached=WCACHE.get(wkey(id));
   if(cached){
