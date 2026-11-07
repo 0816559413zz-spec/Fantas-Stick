@@ -303,7 +303,7 @@ function shoot(p,type,o){
   let vh;
   if(best)vh=(cH(best)+terrT(best.x,best.y)-terrT(p.x,p.y)-h)/(Math.hypot(best.x-p.x,best.y-p.y)/SP);
   else if(human){const dd=Math.max(60,Math.hypot(p.inp.ax-p.x,p.inp.ay-p.y)-26);   // −26 = กระสุนเกิดหน้าตัว 26 หน่วย → ระยะบินจริงถึงจุดเล็ง
-    vh=clamp((p.inp.ah-h)/(dd/SP),-30,30);}
+    vh=clamp((p.inp.ah-h)/(dd/SP),-Math.max(30,SP/5),Math.max(30,SP/5));}   // ลิมิตแนวตั้งตามความเร็วกระสุน (เดิมตายตัว 30 = ยิงลงจากที่สูงด้วยกระสุนเร็วไม่ถึงเป้า)
   else vh=Math.tan(clamp((p.inp&&p.inp.ap)||0,-0.9,0.9))*SP/20;
   const pr={id:++G.pid,type,x:p.x+Math.cos(a)*26,y:p.y+Math.sin(a)*26,h,vh,vx:Math.cos(a)*SP,vy:Math.sin(a)*SP,
     r:d.r,dmg:d.dmg,life:d.life,owner:p.id,team:p.team,src:'p'};
@@ -451,12 +451,18 @@ function hitTarget(pr,t){
 }
 function updateProjectiles(dt){
   const ps=plist();
-  for(const pr of G.proj){
-    if(pr.dead)continue;
+  for(const pr of G.proj){   // กระสุนเร็วที่พุ่งลงชัน (เช่นลูกบอลลมยิงจากที่สูง) ก้าวทีละไม่เกิน ~1.2 ม.แนวตั้ง กันทะลุตัวเป้า
+    const ns=pr.dead?0:clamp(Math.ceil(Math.abs(pr.vh||0)*dt/1.2),1,8);
+    for(let si=0;si<ns&&!pr.dead;si++)projStep(pr,dt/ns,ps);
+  }
+  G.proj=G.proj.filter(p=>!p.dead);
+}
+function projStep(pr,dt,ps){
+    if(pr.dead)return;
     {const t0=TERR?terrT(pr.x,pr.y):0;pr.x+=pr.vx*dt;pr.y+=pr.vy*dt;pr.h+=pr.vh*dt;if(TERR)pr.h-=terrT(pr.x,pr.y)-t0;}pr.life-=dt;
-    if(pr.flak&&broomFlak(pr))continue;   // Flak บนไม้กวาด: ใกล้ศัตรู = แตกเป็นกรวย (js/69)
-    if(pr.life<=0||pr.x<20||pr.x>MW-20||pr.y<20||pr.y>MH-20||pr.h>40){killProj(pr);continue;}
-    if(pr.h<0.05||(TERR&&terrSolid(pr.x,pr.y,pr.h))||(BLDG.length&&pr.h<bldMoundH(pr.x,pr.y))){pr.h=Math.max(pr.h,0.1);killProj(pr);continue;}   // + ชนเนินซากบ้าน
+    if(pr.flak&&broomFlak(pr))return;   // Flak บนไม้กวาด: ใกล้ศัตรู = แตกเป็นกรวย (js/69)
+    if(pr.life<=0||pr.x<20||pr.x>MW-20||pr.y<20||pr.y>MH-20||pr.h>40){killProj(pr);return;}
+    if(pr.h<0.05||(TERR&&terrSolid(pr.x,pr.y,pr.h))||(BLDG.length&&pr.h<bldMoundH(pr.x,pr.y))){pr.h=Math.max(pr.h,0.1);killProj(pr);return;}   // + ชนเนินซากบ้าน
     let hp=false;
     for(const c of sgNear(sgObs(),pr.x,pr.y,pr.r,_sgPO))if(c.bi===undefined&&!(c.bot!==undefined&&pr.h<c.bot)&&(c.top!==undefined?terrT(pr.x,pr.y)+pr.h<c.top:pr.h<c.hgt)&&(pr.x-c.x)**2+(pr.y-c.y)**2<(c.r+pr.r)**2){hp=true;if(c.cb!==undefined||c.ci!==undefined)cityHitObs(c,pr);break;}
     if(!hp&&BLDG.length)for(const b of sgNear(sgBld(),pr.x,pr.y,pr.r,_sgPB)){if(!bldNear(b,pr.x,pr.y,pr.r))continue;const j=bldPieceAt(b,pr.x,pr.y,pr.h,pr.r);if(j>=0){hitBldPiece(b,j,pr.dmg||5,projEl(pr),pr.x-pr.vx*0.08,pr.y-pr.vy*0.08);hp=true;break;}}
@@ -465,7 +471,7 @@ function updateProjectiles(dt){
     if(!hp&&eProjHit(pr))hp=true;
     if(!hp&&windProjHit(pr,dt))hp=true;
     if(!hp&&cityProjIn(pr,dt))hp=true;   // ตึกกลวงในเมือง: ผนังนอกทีละแผ่น / พื้นชั้นบน / ทางลาด
-    if(hp){killProj(pr);continue;}
+    if(hp){killProj(pr);return;}
     for(const p of ps){
       if(!p.alive||p.downed||p.id===pr.owner||p.team===pr.team)continue;
       if((p.x-pr.x)**2+(p.y-pr.y)**2>(PR+pr.r)**2)continue;
@@ -492,11 +498,9 @@ function updateProjectiles(dt){
       const hc=m.type==='golem'?1.6:m.type==='wolf'?0.8:(m.h||0),tol=(m.type==='golem'?1.7:m.type==='wolf'?0.8:0.55)+pr.r/20;
       if((m.x-pr.x)**2+(m.y-pr.y)**2<(m.r+pr.r)**2&&Math.abs(pr.h-hc)<tol){hitTarget(pr,m);killProj(pr);break;}
     }
-    if(pr.dead||pr.src!=='p')continue;
+    if(pr.dead||pr.src!=='p')return;
     for(const e of G.en){
       if(e.dead)continue;
       if((e.x-pr.x)**2+(e.y-pr.y)**2<(e.r+pr.r)**2&&Math.abs(pr.h-cH(e))<vR(e)+pr.r/20+0.2){hitTarget(pr,e);killProj(pr);break;}
     }
-  }
-  G.proj=G.proj.filter(p=>!p.dead);
 }

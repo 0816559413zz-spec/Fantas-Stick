@@ -238,13 +238,13 @@ function windFlyTick(p,dt){const F=p.wfw;if(!p.alive){if(p.wfo){p.wfo=false;p.fl
   if(F.ph==='spin'){F.t+=dt;const u=Math.min(1,F.t/W_FW.spinT),a=F.a,ca=Math.cos(a),sa=Math.sin(a),rx=-sa*F.side,ry=ca*F.side,
       lat=W_FW.spinR*Math.sin(Math.PI*u),fwd=W_FW.spinR*0.55*Math.sin(2*Math.PI*u),e=u*u*(3-2*u);
     p.x=F.x0+rx*lat+ca*fwd;p.y=F.y0+ry*lat+sa*fwd;p.z=F.z0+W_FW.spinH*e;p.vz=0;p.vx=p.vy=0;p.mvx=p.mvy=0;collideWorld(p,PR,p.z);
-    if(p.stun>0){F.ph='glide';emit({k:'efx',z:'wnfwend',x:Math.round(p.x),y:Math.round(p.y),h:p.z,id:p.id});return;}
+    if(p.stun>0){p.wfw=null;emit({k:'efx',z:'wnfwend',x:Math.round(p.x),y:Math.round(p.y),h:p.z,id:p.id});return;}
     if(u>=1){F.ph='focus';F.t=W_FW.t;F.h=clamp(p.z-groundH(p.x,p.y,p.z),W_FW.hmin,W_FW.hmax);F.b=false;p.wfo=true;p.shieldOn=false;p.dash=0;p.wbCd=0;
       emit({k:'efx',z:'wnfwfocus',x:Math.round(p.x),y:Math.round(p.y),h:p.z,a:Math.round(a*100)/100,id:p.id});}
     return;}
   if(F.ph==='focus'){F.t-=dt;F.b=!!(p.inp&&p.inp.dh)&&p.stun<=0;   // Shift ค้าง = เอนตัวไปหน้า บินไวขึ้น
     if(F.t<=0||p.stun>0)windFocusEnd(p);}}
-function windFocusEnd(p){const F=p.wfw;p.fly=false;p.wfo=false;p.flyOn=false;p.fs=0;p.wbCd=0;if(F)F.ph='glide';emit({k:'efx',z:'wnfwend',x:Math.round(p.x),y:Math.round(p.y),h:p.z,id:p.id});}
+function windFocusEnd(p){const F=p.wfw;p.fly=false;p.wfo=false;p.flyOn=false;p.fs=0;p.wbCd=0;p.wfw=null;emit({k:'efx',z:'wnfwend',x:Math.round(p.x),y:Math.round(p.y),h:p.z,id:p.id});}
 function windFlick(p){const F=p.wfw;if(!F||F.ph!=='focus')return;windFocusEnd(p);const a=p.ang;
   for(const t of foesOf(p.team)){const dx=t.x-p.x,dy=t.y-p.y,d=Math.hypot(dx,dy);if(d>W_FW.range+(t.r||PR)||Math.abs(angDiff(Math.atan2(dy,dx),a))>(W_FW.cone*Math.PI/180))continue;
     const dz=cH(t)-p.z;if(dz>2||dz<-(W_FW.hgt+2))continue;   // เอียงลงพื้น: โดนคนที่อยู่ต่ำกว่าเราได้
