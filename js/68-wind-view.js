@@ -6,7 +6,7 @@
 const WV={st:new Map(),wl:new Map(),vo:new Map()};
 Object.assign(PCOL,{wball:'#8dff65'});
 const WN_BODY={charge:[-0.7,-0.3,-0.12,0.3,-0.7,0.3,0,-0.2],dash:[0.65,-0.2,0,0.68,0.8,0.3,0,-0.05],hover:[-1.0,-0.35,0,-0.08,-0.75,0.45,0,-0.03]},WN_AIR_FEET=[-0.45,0.25,0.12,-0.12];
-WN_BODY.wallAim=[-1.55,-0.08,0.1,0.08,-1.2,0.35,0,-0.04];WN_BODY.gather=[-1.8,-0.45,-0.15,-0.08,-1.35,0.45,0,-0.08];WN_BODY.shieldCharge=[-1.2,0.6,0,0.2,-1.2,-0.6,0,-0.18];
+WN_BODY.dive=[0.5,-0.25,0,0.5,0.55,0.25,0,-0.04];WN_BODY.wallAim=[-1.55,-0.08,0.1,0.08,-1.2,0.35,0,-0.04];WN_BODY.gather=[-1.8,-0.45,-0.15,-0.08,-1.35,0.45,0,-0.08];WN_BODY.shieldCharge=[-1.2,0.6,0,0.2,-1.2,-0.6,0,-0.18];
 function windCharacterPose(o,p,dt,now){
   const A=p.wn;if(!A||!p.al||p.dn||p.fl||p.st){o.wnPose=null;return;}
   let s=o.wnPose;if(!s)s=o.wnPose={phase:0,t:0,w:0,P:WN_BODY.hover.slice(),hover:0};
@@ -18,7 +18,8 @@ function windCharacterPose(o,p,dt,now){
   if(s.phase){s.phase=0;s.t=0;}
   if(s.w>0){s.t+=dt;s.w=Math.max(0,1-_cs(Math.min(1,s.t/0.35)));if(!p.sh&&!o.caN&&!(o.cpT>0))characterStance(o,s.P,p.wv>1?null:WN_AIR_FEET,s.w);}
   const idle=A[5]===1&&!p.sh&&!o.caN&&!(o.cpT>0);s.hover+=((idle?1:0)-s.hover)*(1-Math.exp(-10*dt));
-  if(idle){for(let i=0;i<8;i++)s.P[i]=WN_BODY.hover[i];s.P[6]=Math.sin(now/600)*0.025;characterStance(o,s.P,WN_AIR_FEET,s.hover*0.8);}
+  if(idle){const T=A[9]===1?WN_BODY.dive:WN_BODY.hover,k=1-Math.exp(-9*dt);   // Shift ค้าง (A[9]) = เอนตัวไปหน้า แขนไปข้างหลัง
+    for(let i=0;i<8;i++)s.P[i]+=(T[i]-s.P[i])*k;s.P[6]=A[9]===1?0:Math.sin(now/600)*0.025;characterStance(o,s.P,WN_AIR_FEET,s.hover*0.8);}
   if(A[4])characterStance(o,WN_BODY.shieldCharge,p.wv>1?null:WN_AIR_FEET,0.9);
   else if(A[3]&&!o.caN)characterStance(o,WN_BODY.wallAim,p.wv>1?null:WN_AIR_FEET,0.8);
   else if(A[1]&&!o.caN&&!p.sh)characterStance(o,WN_BODY.gather,p.wv>1?null:WN_AIR_FEET,0.8);
@@ -103,7 +104,7 @@ function windEfx(ev){
     case 'wnvoboom':{const I=WV.vo.get(ev.n);if(I){fxKill(I);WV.vo.delete(ev.n);}fxPlay('wind/void_boom',{x,y,h:H,a,aim:false});if(near){shake(0.6);snd('break',ev);if(ev.c)hitStop(0.08);}return true;}
     case 'wnfw':fxPlay('wind/fw_takeoff',{x,y,h:H,aim:false});fxPlay('wind/fw_spin',{x,y,h:H,a,follow:ev.id});if(near)snd('cast_pull',ev);return true;   // เริ่มหมุนตัวบินวนขึ้น (ev.n = ด้าน -1/1)
     case 'wnfwfocus':{const o=WV.fo||(WV.fo=new Map());const old=o.get(ev.id);if(old){fxStop(old);o.delete(ev.id);}
-      const I=fxPlay('wind/fw_focus',{x,y,h:H,a,follow:ev.id});if(I)o.set(ev.id,I);ring(x,y,'#b8ff85',70,0.4,H+0.5);if(near){shake(0.15);if(mine)toast('โหมด Focus: คลิกซ้ายค้าง = ลูกบอลลมรัว • เมาส์ = ทิศ/ไต่-ดิ่ง • W เร่ง • กดสกิลอีกครั้ง = สะบัดปีกจบ');}return true;}
+      const I=fxPlay('wind/fw_focus',{x,y,h:H,a,follow:ev.id});if(I)o.set(ev.id,I);ring(x,y,'#b8ff85',70,0.4,H+0.5);if(near){shake(0.15);if(mine)toast('โหมด Focus: WASD = ทิศ • Shift = เอนตัวบินไว • Space/Ctrl = สูง/ต่ำ • คลิกซ้ายค้าง = ลูกบอลลม • กดสกิลอีกครั้ง = สะบัดปีกจบ');}return true;}
     case 'wnfwflick':fxPlay('wind/fw_flick',{x,y,h:Math.max(0,H-3.2),a});wwCue(ev.id,'fk');if(near)shake(0.2);return true;
     case 'wnfwend':{const o=WV.fo;if(o&&o.get(ev.id)){fxStop(o.get(ev.id));o.delete(ev.id);}return true;}
     case 'wnfwland':return true;

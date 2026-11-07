@@ -1,4 +1,8 @@
 {
  "v": 1,
- "set": {}
+ "set": {
+  "bld.brk.hp0": 50,
+  "bld.house.roof": 50,
+  "bld.house.wall": 60
+ }
 }
