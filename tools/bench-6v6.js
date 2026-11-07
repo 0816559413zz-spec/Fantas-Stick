@@ -24,7 +24,7 @@ for(const pass of WD.composer.passes){const nm=pass.constructor.name,orig=pass.r
 const gpuFrame={};
 function drain(force){for(let i=0;i<pend.length;){const e=pend[i];if(g2.getQueryParameter(e.q,g2.QUERY_RESULT_AVAILABLE)){if(!g2.getParameter(ext.GPU_DISJOINT_EXT)){const ms=g2.getQueryParameter(e.q,g2.QUERY_RESULT)/1e6;(acc[e.nm]||(acc[e.nm]=[])).push(ms);gpuFrame[e.f]=(gpuFrame[e.f]||0)+ms;}g2.deleteQuery(e.q);pend.splice(i,1);}else i++;}}
 const cpu=[],calls=[],tris=[];WD.gl.info.autoReset=false;
-for(let f=0;f<N;f++){frameNo=f;
+for(let f=0;f<N;f++){frameNo=f;if(O.profile&&f===60)console.profile('b6');if(O.profile&&f===N-60)console.profileEnd('b6');
   for(const p of players){const I=p.inp;I.fire=f%45<5?1:0;if(f===30)I.c.q++;if(f===90)I.c.x++;if(f===180)I.c.e++;if(f===300)I.c.r++;if(f===420)I.c.f++;if(f===520)I.c.q++;}
   WD.gl.info.reset();const t=performance.now();HL.step(1);cpu.push(performance.now()-t);calls.push(WD.gl.info.render.calls);tris.push(WD.gl.info.render.triangles);
   for(let r=1;r<REP;r++){WD.gl.shadowMap.needsUpdate=true;WD.composer.render(1/60);}
