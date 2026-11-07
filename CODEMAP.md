@@ -119,7 +119,7 @@ waterDragonTick:118
 §132 ทุกเฟรม (ทั้งเกม)
 updateWater:133 waterSnapP:139 waterSnapW:141 WT_RP:144 WT_FM:147 WT_CG:149 WT_AB:153 WT_MW:156 WT_UL:158
 
-## js/09-wind.js (256) — 
+## js/09-wind.js (256) — สายลม 🌪️ (ผู้ใช้ออกแบบทั้งหมด — designs/wind.md "คอนเซ็ปต์ใหม่") • ฝั่งโฮสต์ • ขั้นที่ 1…
 WINDP:8 WNV:12
 §19 ตัวช่วย
 wOn:20 wGain:21 wSeg:23 wFoeNear:24
@@ -135,7 +135,7 @@ windDash:89
 windWallMake:100 windWallStop:108 windWallBoom:109 windDmg:114 windProjHit:118 windWallHurt:121 windCollide:123
 §129 ทั้งสนาม: GaleBurst / กำแพงลม / ชนกำแพง
 updateWind:130
-§155 Windrift: ชาร์จปีก → พุ่ง 200 แบบ Jett → ลงท่าฮีโร่ → 1 วิต่อมาลมแรงต…
+§155 Windrift: ชาร์จปีก 0.2 → พุ่ง 400 (20 ม. ใน 0.09 วิ) แบบ Jett → ลงท่า…
 windDriftTick:156 windDriftWind:163
 §170 Vortex Bind: ทอร์นาโด 3 อันโค้ง 45° ห่าง 200 → 0.6 วิ ดึงกลับมาหยุด 6…
 windVortexTick:171

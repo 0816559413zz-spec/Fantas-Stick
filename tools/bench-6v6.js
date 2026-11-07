@@ -15,7 +15,7 @@ while(performance.now()<until&&settled<3){HL.step(2);await HL.sleep(30);settled=
 if(O.nolook)WD.scene.environment=null;for(const [k,v] of Object.entries(O.set||{}))WD.tuneSetKey(k,v);if(O.pre)new Function('WD',O.pre)(WD);   // set = tune keys, pre = JS (e.g. camera facing the moon → worst case for god rays)
 if(O.noshadow)WD.moonL.castShadow=false;if(O.noao)WD.post.AOU.uAO.value=0;if(O.nobloom)WD.post.bloom.enabled=false;if(O.nofx)WD.post.fxScene.visible=false;if(O.nograde){WD.post.gradePass.enabled=false;}
 const players=Object.values(WD.G.players),p0=HL.me(),o={x:p0.x,y:p0.y};HL.aim(0,0.12);
-players.forEach((p,i)=>{const side=p.team===p0.team?-1:1,k=Math.floor(i/2);p.x=o.x+side*130+(Math.random()-0.5)*40;p.y=o.y+(k-3)*50;p.ult=100;p.lst=5;p.wg=100;p.hp=p.maxHp=1e6;
+players.forEach((p,i)=>{const side=p.team===p0.team?-1:1,k=Math.floor(i/2);p.x=o.x+side*130+(Math.random()-0.5)*40;p.y=o.y+(k-3)*50;p.ult=100;p.lst=5;p.wg=100;if(p!==p0)p.hp=p.maxHp=1e6;
   p.inp={...WD.INPUT,c:{...WD.INPUT.c},mx:0,my:0,u:0,d:0,l:0,r:0,sh:0,dh:0,hq:0,fire:0,ax:p.x-side*300,ay:p.y,ah:1.2,gx:p.x-side*220,gy:p.y};});
 // GPU timer queries around every composer pass
 const g2=WD.gl.getContext(),ext=g2.getExtension('EXT_disjoint_timer_query_webgl2');if(!ext)throw new Error('NO_TIMER_QUERY');
@@ -27,7 +27,7 @@ function drain(force){for(let i=0;i<pend.length;){const e=pend[i];if(g2.getQuery
 const cpu=[],calls=[],tris=[];WD.gl.info.autoReset=false;
 for(let f=0;f<N;f++){frameNo=f;if(O.profile&&f===60)console.profile('b6');if(O.profile&&f===N-60)console.profileEnd('b6');
   for(const p of players){const I=p.inp;I.fire=f%45<5?1:0;if(f===30)I.c.q++;if(f===90)I.c.x++;if(f===180)I.c.e++;if(f===300)I.c.r++;if(f===420)I.c.f++;if(f===520)I.c.q++;}
-  WD.gl.info.reset();const t=performance.now();HL.step(1);cpu.push(performance.now()-t);calls.push(WD.gl.info.render.calls);tris.push(WD.gl.info.render.triangles);
+  WD.gl.info.reset();p0.hp=p0.maxHp;const t=performance.now();HL.step(1);cpu.push(performance.now()-t);calls.push(WD.gl.info.render.calls);tris.push(WD.gl.info.render.triangles);
   for(let r=1;r<REP;r++){WD.gl.shadowMap.needsUpdate=true;WD.taaBegin&&WD.taaBegin();WD.composer.render(1/60);WD.taaFinish&&WD.taaFinish();}
   drain();if(f%20===0)await HL.sleep(0);}
 for(let i=0;i<200&&pend.length;i++){await HL.sleep(10);drain();}
