@@ -5,7 +5,7 @@
 //  ภาพ:   assets/fx/tex/<ชื่อ>.png (ตารางเฟรม) + <ชื่อ>.tex.json (สูตรวาด + cols rows add span rand size) — สตูดิโอวาดและบันทึกภาพให้
 //         ใช้ในเอฟเฟกต์: emit {fb:"tex/<ชื่อ>"} (ทุก look) • mesh {mat:"flip", tex:"tex/<ชื่อ>"} (การ์ดภาพ / ภาพบนรูปทรง)
 //  หน่วย: เมตร • +x ขวา +y บน +z หน้า (เหมือน .fx.json) • uv: v = 0 โคน/ใน → 1 ปลาย/นอก (ไฟ/พลังงานไหลตาม v)
-//  ฟิลด์ทั้งหมด + คำอธิบาย: assets/fx/schema.json → "mk" (โมเดล) และ "tx" (ภาพ) • รายละเอียดสำหรับคนทำ: FX-FORMAT.md
+//  ฟิลด์ทั้งหมด + คำอธิบาย: assets/fx/schema.json → "mk" (โมเดล) และ "tx" (ภาพ) • รายละเอียดสำหรับคนทำ: guides/FX-FORMAT.md
 // =====================================================================
 const FXMK={mesh:new Map(),tex:new Map()};
 const MKD=Math.PI/180;

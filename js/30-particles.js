@@ -1,6 +1,6 @@
 // ---------- อนุภาค 2 ชั้น: แสงเรือง (additive) + ควัน (normal) ----------
 const PMAX=5000;
-// อนุภาคสมจริง (VFX.md §1.6, 2026-10-19): page = (อายุ 0→1, seed) ต่อเม็ด → ใช้กัดกร่อนขอบ (erosion) / สุ่มลายไม่ซ้ำ
+// อนุภาคสมจริง (guides/VFX.md §1.6, 2026-10-19): page = (อายุ 0→1, seed) ต่อเม็ด → ใช้กัดกร่อนขอบ (erosion) / สุ่มลายไม่ซ้ำ
 // D) ชั้นเรือง: ผสมแบบ premultiplied (บวกแสง + บังข้างหลังนิดหน่อย PGLOW_OCC) — ซ้อนกันหลายเม็ดแล้วอิ่มเป็นสีของมันเอง ไม่ขาวโพลน
 // E) ควัน: ก้อนควันลาย noise ไหล ขอบแหว่ง ด้านบนสว่าง/ล่างมืด สีคูณแสงของฉาก (PLIT ตามแสงท้องฟ้า hemi)
 const PGLOW_OCC=0.4,PLIT={value:new THREE.Color(1,1,1)};
@@ -118,7 +118,7 @@ function flame(x,y,h,o){o=o||{};
   if(FLAME_STYLE===3){PARTS.push({x,y,h:h+0.1,vx:o.vx||0,vy:o.vy||0,vh:o.vh===undefined?rnd(2,4):o.vh,life:o.life||0.45,max:o.life||0.45,col:o.col||'#ffffff',size:(o.size||6)*0.78,g:o.g===undefined?-1.5:o.g,drag:o.drag===undefined?2:o.drag,grow:o.grow===undefined?0.5:o.grow,fl:true,sd:Math.random()*0.99,fb:o.fb});return;}
   if(FLAME_STYLE===0){PARTS.push({x,y,h:h+0.15,vx:o.vx||0,vy:o.vy||0,vh:o.vh===undefined?rnd(2,4):o.vh,life:o.life||0.45,max:o.life||0.45,col:(o.col&&o.col!=='#ffffff'&&o.col[1]!=='f'?o.col:FLAMECOL[(Math.random()*FLAMECOL.length)|0]),size:(o.size||6)*0.6,g:o.g===undefined?-1.5:o.g,drag:o.drag===undefined?2:o.drag,grow:o.grow===undefined?0.6:o.grow});return;}
   PARTS.push({x,y,h,vx:o.vx||0,vy:o.vy||0,vh:o.vh===undefined?rnd(2,4):o.vh,life:o.life||0.45,max:o.life||0.45,col:o.col||'#ffffff',size:o.size||6,g:o.g===undefined?-1.5:o.g,drag:o.drag===undefined?2:o.drag,grow:o.grow===undefined?(FLAME_STYLE===2?0:0.4):o.grow,fl:true,v:(Math.random()*4)|0});}
-// A) flipbook ต่ออนุภาค (VFX.md §1.6 ข้อ A / §5.1): แต่ละเม็ดเล่นภาพตารางเฟรมจาก Blender ตามอายุของมัน
+// A) flipbook ต่ออนุภาค (guides/VFX.md §1.6 ข้อ A / §5.1): แต่ละเม็ดเล่นภาพตารางเฟรมจาก Blender ตามอายุของมัน
 //    manifest "ptex": {"smoke":{"file":"vfx/tex_smoke.png","v":1,"cols":8,"rows":8}, "fire":{"file":"vfx/tex_fire.png","v":1,"cols":8,"rows":8,"add":true}}
 //    โหลดเสร็จแล้ว: ควันทุกเม็ด → แผ่น smoke, เปลวไฟ (fl) → แผ่น fire อัตโนมัติ • อนุภาคใส่ fb:'ชื่อแผ่น' เลือกเองได้ • ยังไม่มี/โหลดไม่เสร็จ = แบบโค้ดเดิม
 //    "cards":true = โหลดเป็นภาพเฉย ๆ (PFB[k].tex) ไม่สร้างระบบอนุภาค
@@ -221,7 +221,7 @@ function updateParticles(dt){
     else if(p.fl){const u=FLAME_STYLE===2?1-k:0;S.col[j*4]=c.r;S.col[j*4+1]=c.g*(1-0.45*u);S.col[j*4+2]=c.b*(1-0.75*u);S.col[j*4+3]=Math.min(1,(1-k)*7)*Math.min(1,k*1.8);S.vari[j]=p.v|0;}
     else if(p.smoke){let r=c.r,g=c.g,bb=c.b;if(p.c2){const c2=col3(p.c2),u=1-k;r+=(c2.r-r)*u;g+=(c2.g-g)*u;bb+=(c2.b-bb)*u;}S.col[j*4]=r;S.col[j*4+1]=g;S.col[j*4+2]=bb;S.col[j*4+3]=Math.min(1,k*1.5)*Math.min(1,p.h/(p.size*0.05+0.01));}   // ควันจางลงตอนแตะพื้น (soft particle แบบถูก: ไม่เห็นรอยตัดกับพื้น)
     else{const b=1.25;let r=c.r,g=c.g,bb=c.b;if(p.c2){const c2=col3(p.c2),u=1-k;r+=(c2.r-r)*u;g+=(c2.g-g)*u;bb+=(c2.b-bb)*u;}   // c2 = สีตอนท้ายอายุ (ไล่สี)
-      else if(!p.sh){const t=1-k,w=t<0.15?0.55*(1-t/0.15):0,dk=t>0.65?1-0.3*(t-0.65)/0.35:1;r=(r+(1-r)*w)*dk;g=(g+(1-g)*w)*dk;bb=(bb+(1-bb)*w)*dk;}   // B) ไม่มี c2: เกิดร้อนขาว → สีหลัก → เข้มลงก่อนหาย (VFX.md §1.3)
+      else if(!p.sh){const t=1-k,w=t<0.15?0.55*(1-t/0.15):0,dk=t>0.65?1-0.3*(t-0.65)/0.35:1;r=(r+(1-r)*w)*dk;g=(g+(1-g)*w)*dk;bb=(bb+(1-bb)*w)*dk;}   // B) ไม่มี c2: เกิดร้อนขาว → สีหลัก → เข้มลงก่อนหาย (guides/VFX.md §1.3)
       S.col[j*4]=r*b;S.col[j*4+1]=g*b;S.col[j*4+2]=bb*b;S.col[j*4+3]=p.fin?Math.min(1,(1-k)*p.fin)*k:k;
       if(p.sh){if(p.vr)p.rot=(p.rot||0)+p.vr*dt;S.shp[j*2]=p.sh;S.shp[j*2+1]=p.rot||0;if(p.sh===2){S.vel[j*3]=p.vx*S3;S.vel[j*3+1]=p.vh;S.vel[j*3+2]=p.vy*S3;}}else S.shp[j*2]=0;}
     S.size[j]=p.size*0.12*(p.fl&&FLAME_STYLE===2?0.45+0.55*k:p.fl&&FLAME_STYLE===3?(0.55+0.45*Math.min(1,(1-k)*5))*(1-0.3*(1-k)*(1-k)):1);S.n++;

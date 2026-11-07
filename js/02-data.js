@@ -157,7 +157,7 @@ const MAP_OFF=new Set([]);
 const RANDOM_MAPS=['castle','pitch','hogsmeade','greathall','meadow','lake','ruins'];
 let MAPID='castle',MW=W,MH=H,OBS=MAPS.castle.obs;
 function setMapVars(id){if(!MAPS[id])id='castle';MAPID=id;MW=MAPS[id].W;MH=MAPS[id].H;OBS=MAPS[id].obs;TERR=MAPS[id].terr||null;if(MAPS[id].reset)MAPS[id].reset();PROPS=genProps(id);BLDG=genBldg(id);BRK=genBrk(id);}
-// ---------- แผนที่จากไฟล์ (Blender → assets/maps/<id>.json + .glb, สคริปต์ assets/src/map_export.py, กติกา MAP-DESIGN.md) ----------
+// ---------- แผนที่จากไฟล์ (Blender → assets/maps/<id>.json + .glb, สคริปต์ assets/src/map_export.py, กติกา guides/MAP-DESIGN.md) ----------
 // manifest "maps":{id:{file,data,v}} • ไฟล์ .json = ข้อมูลเกม (ทุกเครื่องโหลดไฟล์เดียวกัน → คำนวณตรงกัน) • .glb = หน้าตา (โหลดตอนสร้างฉาก)
 // id ซ้ำกับแผนที่จากโค้ด = แทนที่ของเดิม • โหลดไม่ได้ = ใช้แผนที่จากโค้ดตามเดิม
 const FMAPS={pend:new Map(),fail:new Set()};

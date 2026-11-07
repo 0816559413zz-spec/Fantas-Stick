@@ -68,7 +68,7 @@ python tools/pack-nature-ult-tree.py
 - `js/46-fx-make.js`: buildattributeเฉพาะมีชิ้นที่ไม่offและemit>0, clampค่าถูกต้อง; `fxModelEmission`ต่อshaderหลังbarkด้วยcache keyแยก
 - `studio/maker.js`: material modeใช้แสงต่อชิ้น; clayไม่ใช้ ทั้งไฟล์geometry/วัสดุเก่าที่ไม่ใส่emitยังใช้ทางเดิม
 - `js/45-fx-runtime.js`: solid modelเลือกpatchเมื่อgeometryมีattributeเท่านั้น รวมกรณีgrow
-- `assets/fx/schema.json` / `FX-FORMAT.md`: อธิบายfieldในcommon model parts
+- `assets/fx/schema.json` / `guides/FX-FORMAT.md`: อธิบายfieldในcommon model parts
 
 **เกลี่ยรอยต่อผิว:** เพิ่ม`seamNormals`แบบopt-inต่อpart เฉลี่ยnormalของจุดตำแหน่งเดียวกันภายในชิ้นเดียวเพื่อไม่ให้UV seamเป็นเส้นขอบแข็ง ไม่เปลี่ยนจุด/UV/index ไม่เกลี่ยข้ามกิ่งคนละpart และpartที่ตั้งflat:trueยังคงแบนตามเดิม เปิดเฉพาะต้นไม้ร่างใหม่ กำแพงv1ไม่รับการเกลี่ยนี้ มีfixtureตรวจรอยต่อและflat bypassในcheckเดียวกัน
 

@@ -3,7 +3,7 @@
 # ได้:  assets/chars/student.glb, assets/chars/broom.glb, assets/src/student.blend
 # สัดส่วน/ตำแหน่งพอร์ตจาก makeStudent() ใน js/29-characters.js (ตัวเลขพิกัดในฟังก์ชันรูปทรง = แบบ three.js)
 # ชิ้นที่ผู้เล่นเลือกได้ = object แยก: hair_0..hair_10 (ทรงผม look.hs), tie_0..tie_2 (look.ti, 3 = ไม่มี), wand_0..wand_3 (look.ws)
-#   เกมโชว์เฉพาะชิ้นที่ตรงกับหน้าตาผู้เล่น (fileVariants ใน js/22-models.js) • สีมาจากชื่อวัสดุ tint_* (ASSETS.md §5)
+#   เกมโชว์เฉพาะชิ้นที่ตรงกับหน้าตาผู้เล่น (fileVariants ใน js/22-models.js) • สีมาจากชื่อวัสดุ tint_* (guides/ASSETS.md §5)
 import sys, os, math
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import bpy

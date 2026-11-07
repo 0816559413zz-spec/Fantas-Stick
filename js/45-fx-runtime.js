@@ -1,5 +1,5 @@
 // =====================================================================
-//  VFX Studio runtime — เล่นเอฟเฟกต์จากไฟล์ข้อมูล assets/fx/<กลุ่ม>/<ชื่อ>.fx.json (แผน designs/vfx-studio.md, รูปแบบ FX-FORMAT.md)
+//  VFX Studio runtime — เล่นเอฟเฟกต์จากไฟล์ข้อมูล assets/fx/<กลุ่ม>/<ชื่อ>.fx.json (แผน designs/vfx-studio.md, รูปแบบ guides/FX-FORMAT.md)
 //  ไฟล์ = รายการ "ชั้น" บนเส้นเวลา • สร้างภาพด้วยของที่เกมมีอยู่แล้ว (PARTS, fireMat, fireVol, iceShaderMat, tbolt, trail, ring, light, screen)
 //  ค่าเริ่ม/ช่วง/ป้ายชื่อทุกฟิลด์อยู่ที่ assets/fx/schema.json ที่เดียว • ผูกกับ event ของเกมด้วย assets/fx/bind.json (ไม่ต้องแก้โค้ดสกิล)
 //  ฝั่ง client ล้วน — ไม่เปลี่ยนโปรโตคอล • ไฟล์ยังโหลดไม่เสร็จ = เกมใช้ภาพจากโค้ดเดิม

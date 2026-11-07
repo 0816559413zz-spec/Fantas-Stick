@@ -1,6 +1,6 @@
 # แผนที่: หมู่บ้านในหุบเขา (`valley`)
 
-แบบกรอกตาม `MAP-DESIGN.md` หัวข้อ 1 ตัวเลขทุกตัวเป็นค่าชั่วคราว ทีมเกมเพลย์ปรับได้
+แบบกรอกตาม `guides/MAP-DESIGN.md` หัวข้อ 1 ตัวเลขทุกตัวเป็นค่าชั่วคราว ทีมเกมเพลย์ปรับได้
 ไฟล์ปั้น: `assets/src/maps/valley.blend` (collection `MAP_valley`) สร้างจากสคริปต์ `assets/src/maps/valley_build.py`
 สถานะ: **เล่นในเกมได้แล้ว** (export ด้วย `assets/src/maps/map_export.py` → `assets/maps/valley.json` + `.glb`) น้ำตื้นยังไม่มีผล รอเฟส 2 / อากาศรอเฟส 3
 

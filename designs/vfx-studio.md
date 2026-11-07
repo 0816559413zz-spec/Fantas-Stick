@@ -1,10 +1,10 @@
 # VFX Studio — แผนเครื่องมือทำ VFX ของ Fantas Stick (ร่าง 2026-10-19)
 
 > **สถานะ (2026-10-19):** ✅ ทำแล้วทั้ง 5 ขั้น (ผู้ใช้สั่ง "do it all") — ขั้น 5 ทำส่วนแม่แบบ playFx แล้ว ส่วนย้ายเอฟเฟกต์รายสกิลเป็นงานต่อเนื่อง (เริ่ม Storm)
-> **ใช้งาน:** `python tools/serve.py` → `http://localhost:8765/studio.html` • ไฟล์ทั้งหมด: `assets/fx/` • รูปแบบ: `FX-FORMAT.md` • โค้ด: `js/45-fx-runtime.js` (เกม) + `studio/studio.js` `studio/studio.css` (สตูดิโอ) + `tools/fx-lint.js` `tools/fx-check.js` `tools/serve.py`
+> **ใช้งาน:** `python tools/serve.py` → `http://localhost:8765/studio.html` • ไฟล์ทั้งหมด: `assets/fx/` • รูปแบบ: `guides/FX-FORMAT.md` • โค้ด: `js/45-fx-runtime.js` (เกม) + `studio/studio.js` `studio/studio.css` (สตูดิโอ) + `tools/fx-lint.js` `tools/fx-check.js` `tools/serve.py`
 > **ต่างจากแผนเล็กน้อย:** สตูดิโอเป็น `index.html?studio` (โหลดโค้ดเกมจริง + ไฟล์สตูดิโอต่อท้าย) — `studio.html` แค่พาไปหน้านั้น • ลายบนพื้น/ชิ้นส่วน/หมอก/มงกุฎ/เสาไฟ เป็นชนิดชั้นแยก (`decal` `debris` `mist` `crown` `geyser`) + ไฟ 3 มิติจริงของเพื่อนเป็นชนิด `firevol` • A/B เทียบ = ชั้น `code` → `playFx` + สลับ `WD.fx.R.tpl`
 > **เป้าหมาย:** ทำเอฟเฟกต์ 3D ของเกมนี้ได้ **ง่ายกว่า Blender ~10 เท่า** • เห็นผลทันทีด้วย renderer จริงของเกม (ไม่ต้อง export) • **Claude ของทุกคนทำงานได้เร็ว** (เขียนไฟล์ข้อมูล → ดูภาพ/ตัวเลขตรวจเองได้) และ **คนที่ไม่เขียนโค้ดก็ใช้ได้** (ลากแถบเลื่อน เลือกสี กดเล่น)
-> อ่านคู่กับ `VFX.md` (แนวภาพ + เครื่องมือที่มีอยู่แล้ว)
+> อ่านคู่กับ `guides/VFX.md` (แนวภาพ + เครื่องมือที่มีอยู่แล้ว)
 
 ---
 
@@ -23,7 +23,7 @@ host (จำลองเกม) ──event {k:'efx', z:'dfboom', x,y,h,a,r,...}
 งบ: VFXB ปรับจำนวนอนุภาคตาม FPS/ระดับกราฟิก • vfxOnce / vfxExtra
 ```
 
-**ของใหม่จากเพื่อน (ดึงมา 2026-10-19 ตอนเขียนแผน):** ไฟ 3 มิติจริงแบบ volumetric `fireVol` / `fireVolTemp` (js/42) ใช้กับแนวไฟ เปลือกไฟหุ้มตัว เสาไฟ • ภาพ flipbook ไฟจาก Blender `vfx/tex_fire.png` (manifest `ptex`) + สคริปต์ `assets/src/fire_flipbook_build.py`, `tools/pack_flipbook.py` • กฎใหม่ใน VFX.md: **ไฟก้อนใหญ่/แนวไฟห้ามใช้แผ่นภาพ** (ผู้ใช้บอกว่าดู 2D) → ใช้ `fireVol` — สตูดิโอต้องมีชั้น `mesh` วัสดุ **`volume`** (กล่อง raymarch ของ `fireVol`) ตั้งแต่ขั้น 4 และให้ `emit` เลือก flipbook `fire`/`smoke` ได้
+**ของใหม่จากเพื่อน (ดึงมา 2026-10-19 ตอนเขียนแผน):** ไฟ 3 มิติจริงแบบ volumetric `fireVol` / `fireVolTemp` (js/42) ใช้กับแนวไฟ เปลือกไฟหุ้มตัว เสาไฟ • ภาพ flipbook ไฟจาก Blender `vfx/tex_fire.png` (manifest `ptex`) + สคริปต์ `assets/src/fire_flipbook_build.py`, `tools/pack_flipbook.py` • กฎใหม่ใน guides/VFX.md: **ไฟก้อนใหญ่/แนวไฟห้ามใช้แผ่นภาพ** (ผู้ใช้บอกว่าดู 2D) → ใช้ `fireVol` — สตูดิโอต้องมีชั้น `mesh` วัสดุ **`volume`** (กล่อง raymarch ของ `fireVol`) ตั้งแต่ขั้น 4 และให้ `emit` เลือก flipbook `fire`/`smoke` ได้
 
 **จุดแข็งที่ต้องเก็บไว้:** renderer + post pipeline ดีแล้ว, shader ไฟ/น้ำแข็งสวย, อนุภาคสมจริงขึ้นแล้ว (ramp/erosion/curl/premultiplied), ระบบงบ, `playFx` พิสูจน์แล้วว่า "เอฟเฟกต์เป็นข้อมูล" ใช้ได้
 
@@ -168,7 +168,7 @@ host (จำลองเกม) ──event {k:'efx', z:'dfboom', x,y,h,a,r,...}
 ## 6. ทำให้ Claude ทำงานสะดวกที่สุด
 
 ### 6.1 อ่านน้อย เขียนถูก
-- **`FX-FORMAT.md`** สั้น ๆ: ทุกฟิลด์ หน่วย ค่าเริ่ม ตัวอย่าง 1 บรรทัด + **`tools/fx-schema.json`** (JSON Schema มีคำอธิบายทุกฟิลด์) → Claude อ่านไฟล์เดียวรู้ครบ ไม่ต้องเปิดโค้ด js
+- **`guides/FX-FORMAT.md`** สั้น ๆ: ทุกฟิลด์ หน่วย ค่าเริ่ม ตัวอย่าง 1 บรรทัด + **`tools/fx-schema.json`** (JSON Schema มีคำอธิบายทุกฟิลด์) → Claude อ่านไฟล์เดียวรู้ครบ ไม่ต้องเปิดโค้ด js
 - เอฟเฟกต์ 1 ท่า = ไฟล์เล็ก 30–80 บรรทัด → แก้ทีละไฟล์ ไม่ต้องหาในโค้ด 9,000 บรรทัด
 - `CODEMAP.md` มีหมวด fx: รายชื่อไฟล์ fx + event ที่ผูก (สร้างอัตโนมัติ)
 
@@ -188,7 +188,7 @@ host (จำลองเกม) ──event {k:'efx', z:'dfboom', x,y,h,a,r,...}
 - console API `window.STUDIO`: `load(name)` `play()` `seek(t)` `set('ball.mat.heat',0.3)` `sheet([...])` `metrics()` `shot(name)` `bind(event,fx)`
 
 ### 6.5 แม่แบบคำสั่ง
-- `notes/prompts/fx-template.md`: วิธีแปลง "แบบฟอร์มขอเอฟเฟกต์" (VFX.md §8) → ไฟล์ fx ทีละขั้น: เลือกแม่แบบ → จานสี → ชั้น 3D หลัก → อนุภาค → แสง/จอ → sheet → metrics → ปรับ → bind → ลองในเกม
+- `notes/prompts/fx-template.md`: วิธีแปลง "แบบฟอร์มขอเอฟเฟกต์" (guides/VFX.md §8) → ไฟล์ fx ทีละขั้น: เลือกแม่แบบ → จานสี → ชั้น 3D หลัก → อนุภาค → แสง/จอ → sheet → metrics → ปรับ → bind → ลองในเกม
 
 ---
 
@@ -196,7 +196,7 @@ host (จำลองเกม) ──event {k:'efx', z:'dfboom', x,y,h,a,r,...}
 
 | ขั้น | ทำอะไร | ได้อะไรทันที | ขนาดงาน (ประมาณ) |
 |---|---|---|---|
-| **1. แกนกลาง** | รูปแบบไฟล์ v1 + `js/45-fx-runtime.js` (ชั้น flash/halo/ring/emit/mesh พื้นฐาน sphere·ring·cone·cylinder·crescent/light/screen/use + เส้นโค้ง + สูตร params) + `bind.json` + `fx-check.js` + `FX-FORMAT.md` • แปลงแม่แบบ `VFXTPL` เป็นไฟล์ แล้วพิสูจน์ว่าภาพเท่าเดิม | Claude เขียนเอฟเฟกต์ใหม่เป็นไฟล์ได้ ผูกกับท่าโดยไม่แตะโค้ดสกิล | 1 รอบใหญ่ |
+| **1. แกนกลาง** | รูปแบบไฟล์ v1 + `js/45-fx-runtime.js` (ชั้น flash/halo/ring/emit/mesh พื้นฐาน sphere·ring·cone·cylinder·crescent/light/screen/use + เส้นโค้ง + สูตร params) + `bind.json` + `fx-check.js` + `guides/FX-FORMAT.md` • แปลงแม่แบบ `VFXTPL` เป็นไฟล์ แล้วพิสูจน์ว่าภาพเท่าเดิม | Claude เขียนเอฟเฟกต์ใหม่เป็นไฟล์ได้ ผูกกับท่าโดยไม่แตะโค้ดสกิล | 1 รอบใหญ่ |
 | **2. สตูดิโอแบบดู** | `studio.html` + `js/90-studio.js`: ฉาก คนร่าย หุ่นเป้า กล้อง 5 มุม พื้นสว่าง/มืด, เล่น/หยุด/ลาก, deterministic seek, **sheet + metrics + shot**, เฝ้าไฟล์โหลดใหม่, `tools/serve.py` | **Claude ทำงานได้เต็มความเร็ว**: แก้ไฟล์ → ภาพสรุป → ตัวเลข → ปรับ (ไม่ต้องเข้าเกม) | 1 รอบใหญ่ |
 | **3. สตูดิโอแบบแก้** | ไลบรารี, เส้นเวลาลากได้, แผงแก้ค่า (แถบเลื่อน/สี/เส้นโค้ง/ภาพย่อรูปทรง), ปุ่มธาตุ/ความแรง, แม่แบบ, บันทึกลงโฟลเดอร์, ย้อนกลับ, เตือนงบ, A/B | **คนไม่เขียนโค้ดทำเอฟเฟกต์เองได้** | 1–2 รอบ |
 | **4. 3D เต็มรูปแบบ** | รูปทรงเพิ่ม (spikes, beam, ribbon ตามเส้นทาง, lathe, torus), วัสดุ energy/dissolve/glass/flip, trail/sweep, bolt, decal, debris, mist, follow กระดูก/ไม้กายสิทธิ์, emit จากผิว mesh, ลาก .glb/.png ใส่ | ทำของแบบลูกไฟ กำแพงไฟ หนามน้ำแข็ง รอยฟัน ลำแสง ได้ในสตูดิโอ | 1–2 รอบ |

@@ -52,6 +52,6 @@ node tools/headless.js --url "studio.html?fx=water/moon_beam&cam=orbit&look=1.8&
 
 ## งาน optimize ที่ทำร่วมช่วงนี้
 
-อ่าน `notes/perf-codex-2026-11-06.md` แยกจากงานภาพ มีแพตช์ reuse particle curl buffer และ regression ที่ยืนยันผลคำนวณเดิม แต่ stress12คนยังมีเฟรมช้า ไม่ประกาศว่า FPS หายแล้ว
+อ่าน `notes/archive/perf-codex-2026-11-06.md` แยกจากงานภาพ มีแพตช์ reuse particle curl buffer และ regression ที่ยืนยันผลคำนวณเดิม แต่ stress12คนยังมีเฟรมช้า ไม่ประกาศว่า FPS หายแล้ว
 
 ผู้ใช้สั่งให้เซฟ commit และ push งานที่ทำไว้ พร้อมแยก done/pending ให้ชัด ยังไม่ได้สั่งให้พัฒนาโหมดบุกปราสาท

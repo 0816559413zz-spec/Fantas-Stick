@@ -1,7 +1,7 @@
 # VFX Studio — manual for Claude (any session, any device)
 
 > Read this before doing **any** VFX work in Fantas Stick. Also read `CLAUDE.md` and `HANDOFF.md` §0.
-> Full field reference: `FX-FORMAT.md` (generated from `assets/fx/schema.json`). Design and reasons: `designs/vfx-studio.md`. Art direction: `VFX.md` §1.
+> Full field reference: `guides/FX-FORMAT.md` (generated from `assets/fx/schema.json`). Design and reasons: `designs/vfx-studio.md`. Art direction: `guides/VFX.md` §1.
 > The user is Thai and does not code. Reply in Thai and keep it simple. The user (or a friend) designs the skills, so **never invent mechanics or gameplay numbers**.
 
 ---
@@ -32,7 +32,7 @@
 | `assets/fx/tpl/*`, `sig/*`, `rec/parry` | The old `playFx('fire_impact')` templates, now files (palette × template + element layers). Editing them changes every skill that uses them (`EFXAUG`/`fxAug` in `js/44-vfx-kit.js`). |
 | `assets/fx/bind.json` | Event → effect table. |
 | `assets/fx/index.json` | Generated list and versions. **Don't hand-edit.** |
-| `FX-FORMAT.md` | Generated field docs. **Don't hand-edit.** |
+| `guides/FX-FORMAT.md` | Generated field docs. **Don't hand-edit.** |
 | `js/45-fx-runtime.js` | Runtime: `fxPlay`, `fxStart`, `fxStop`, `fxKill`, `fxBind`, `fxTpl`, `FXCODE` |
 | `assets/fx/mesh/*.mesh.json` | Models made in the 🧊 tab (recipes; the game builds them) — §6b |
 | `assets/fx/tex/*.png` + `*.tex.json` | Textures / flipbooks made in the 🎞 tab — §6b |
@@ -52,8 +52,8 @@
    - Effects are triggered by host events: `{k:'efx', z:'<name>', x, y, h, a, r, id, …}` (spell visuals) or generic events like `cast`, `imp`, `pop`, `boom`, `parry`, `die`.
    - To find names: `grep "z:'" js/0*.js js/1*.js`. Or use the `EFXAUG` keys in `js/44-vfx-kit.js`. `CODEMAP.md` tells you where code lives.
 3. **Start from a template.** Copy `assets/fx/start/<closest>.fx.json` to `assets/fx/<element>/<skill>.fx.json` (e.g. `storm/railgun.fx.json`), or use **＋ ใหม่** in the studio.
-4. **Edit the JSON.** Look up fields in `FX-FORMAT.md` (§5 below has the essentials).
-5. **Check:** `node tools/fx-check.js`. It must print **✗ 0**. It also rewrites `index.json` and `FX-FORMAT.md`.
+4. **Edit the JSON.** Look up fields in `guides/FX-FORMAT.md` (§5 below has the essentials).
+5. **Check:** `node tools/fx-check.js`. It must print **✗ 0**. It also rewrites `index.json` and `guides/FX-FORMAT.md`.
 6. **Look at it** with a contact sheet (§6) and Read the image. Fix, then look again. Check a bright map (`map=test`) **and** a dark one (`map=castle`).
 7. **Bind it** in `assets/fx/bind.json`.
    - Start with `"mode": "add"`, which plays on top of the old look.
@@ -83,7 +83,7 @@ The user plans a skill's look in **`storyboard.html`** (double-click `Storyboard
 5. Write back in `storyboard/boards.json`: board `fx` (e.g. `"earth/tectonic"`), `reply` (short simple Thai), `status:"review"`; per shot `result` (copy the matching contact-sheet crop/frame from `shots/` into `storyboard/img/` and give its path) + `note` (Thai, what you did / what you couldn't do). Then run `python tools/serve.py --sb-md`. The page shows the result next to the sketch.
 6. **Also open the result live in VFX Studio** for the user (§4 step 9) — the storyboard shows still frames, the studio shows how it really moves.
 
-## 5. Format essentials (details in `FX-FORMAT.md`)
+## 5. Format essentials (details in `guides/FX-FORMAT.md`)
 ```json
 {
   "v": 1, "desc": "what it is", "tags": ["impact"], "pal": "storm", "dur": 1.2,
@@ -185,7 +185,7 @@ The studio has 4 tabs in the top bar: **✨ เอฟเฟกต์** (effects,
 
 **Claude workflow for assets (all from the JS tool on the studio tab, needs serve.py):**
 - Open a tab directly: `studio.html?mesh=<name>` or `studio.html?tex=<name>`.
-- Models: write/edit the `.mesh.json` by hand (fields in `FX-FORMAT.md` → "โมเดลที่ปั้นเอง"), run `node tools/fx-check.js`, then look: `STUDIO.mesh.open(n)`, `STUDIO.mesh.view('mat'|'clay')`, `STUDIO.mesh.shot(name)` → `shots/<name>.jpg`, or `STUDIO.mesh.sheetAll(name)` = every model on one sheet. Edit live: `STUDIO.mesh.set('partId.field', v)`, `STUDIO.mesh.add(kind)`, `STUDIO.mesh.save(name)`. `STUDIO.mesh.tris()` (keep ≤ 30000), `STUDIO.mesh.lint()`.
+- Models: write/edit the `.mesh.json` by hand (fields in `guides/FX-FORMAT.md` → "โมเดลที่ปั้นเอง"), run `node tools/fx-check.js`, then look: `STUDIO.mesh.open(n)`, `STUDIO.mesh.view('mat'|'clay')`, `STUDIO.mesh.shot(name)` → `shots/<name>.jpg`, or `STUDIO.mesh.sheetAll(name)` = every model on one sheet. Edit live: `STUDIO.mesh.set('partId.field', v)`, `STUDIO.mesh.add(kind)`, `STUDIO.mesh.save(name)`. `STUDIO.mesh.tris()` (keep ≤ 30000), `STUDIO.mesh.lint()`.
 - Textures: write the `.tex.json`, then bake: open `studio.html?tex=<name>&bake=1` (renders + saves the png) or `studio.html?bakeall=1` (re-bakes every texture). Look: `STUDIO.tex.sheetAll(name)` → frames of every texture on dark + checker backgrounds; `STUDIO.tex.sheet(name)` = one texture's full sheet. Edit live: `STUDIO.tex.set('p.scale', 4)`, `STUDIO.tex.gen('vortex')`, `STUDIO.tex.save(name)`.
 - Fire 3D: `studio.html?vol=<name>` • `STUDIO.vol.newFrom(name,'column'|'wall'|'ring'|'bonfire'|'burst')`, `STUDIO.vol.set('p.size',0.3)`, `await STUDIO.vol.bake()`, `STUDIO.vol.save(name)`, `STUDIO.vol.shot(name)` (call `STUDIO.tick(30)` first so the preview plays).
 - If the browser pane is hidden, animation frames don't run: use `STUDIO.tick(n)` to step the model/texture tab by hand before `shot`.
@@ -215,12 +215,12 @@ The studio has 4 tabs in the top bar: **✨ เอฟเฟกต์** (effects,
   - Keep `light.int` ≤ 2.5 (≤ 1.5 on big effects).
   - Keep screen `flash` ≤ 0.06.
 - **Energy material on bright floors is faint.** Raise `op`, use `$deep` colours, or add a `glow`/`ring` edge.
-- **Big recognisable shapes** (balls, walls, beams, shells, wings) → `mesh`/`firevol`. Use particles only for small scattered bits (VFX.md §1.6).
+- **Big recognisable shapes** (balls, walls, beams, shells, wings) → `mesh`/`firevol`. Use particles only for small scattered bits (guides/VFX.md §1.6).
 - **Budget:** one-shot `burst` ≤ 80 per layer, `rate` ≤ 200/s, ≤ 2–3 lights per effect. The runtime already scales particles by FPS and graphics level.
 - `use` must not nest itself; the checker flags it, and the runtime stops at depth 4.
 - `x`, `own` and `other` are gates. Use `own` for anything that hits the whole screen; `other` + `near` for a smaller shake on players nearby.
 - Code layer `{fn:"ev",args:{k:"efx",z:"…"}}` plays the OLD code visuals of a game event (skips bind.json, cannot nest) — for before/after comparison.
-- Don't touch `index.json` or `FX-FORMAT.md` by hand. Run `node tools/fx-check.js`.
+- Don't touch `index.json` or `guides/FX-FORMAT.md` by hand. Run `node tools/fx-check.js`.
 - The repo is **public**: only use self-made or CC0 images and models.
 - **Need a new 3D shape or texture? Make it in the 🧊 / 🎞 tab first** (§6b). Blender is only for things the part kinds can't build (characters, detailed props).
 - A Blender model (`mesh_*` in `assets/manifest.json`) can still be a shape: `"shape":"glb","glb":"mesh_fire_wing"`.

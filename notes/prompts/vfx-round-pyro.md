@@ -2,7 +2,7 @@
 
 Work on the 🔥 Pyro path visuals in Fantas Stick.
 
-**Read first:** `CLAUDE.md`, `HANDOFF.md`, `VFX.md`, `notes/vfx-notes.md` (Pyro lines), `designs/pyro.md`. Find code with `CODEMAP.md` (Pyro visuals live mostly in `js/33-pyro-view.js`, `js/42-fire-vfx.js`, `js/25-efx.js`, `js/20-vfx-pyro-storm.js`, recipes in `js/44-vfx-kit.js`). Don't read whole files.
+**Read first:** `CLAUDE.md`, `HANDOFF.md`, `guides/VFX.md`, `notes/vfx-notes.md` (Pyro lines), `designs/pyro.md`. Find code with `CODEMAP.md` (Pyro visuals live mostly in `js/33-pyro-view.js`, `js/42-fire-vfx.js`, `js/25-efx.js`, `js/20-vfx-pyro-storm.js`, recipes in `js/44-vfx-kit.js`). Don't read whole files.
 
 **Rules:** visuals only, except the one gameplay change in task 2 (the user's own number). Respect the VFX budget (`vfxOnce`, `vfxExtra`, no new material/geometry per frame). No white-outs.
 

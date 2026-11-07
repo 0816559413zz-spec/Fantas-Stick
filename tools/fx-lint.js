@@ -49,7 +49,7 @@
       const g = k => L[k] !== undefined ? L[k] : (T.fields[k] || S.common[k] || {}).def;
       const tEnd = num(g('at'), 0) + num(g('life'), 0.4); end = Math.max(end, tEnd);
       if (tEnd > 10 && !g('loop')) out.push({ lv: 'warn', at, msg: `จบที่ ${tEnd.toFixed(2)} วิ — ยาวเกิน 10 วิ (ใช้ loop:true ถ้าเป็นออร่า)` });
-      // งบ / ความอ่านออก (VFX.md §1.4–1.5, §6)
+      // งบ / ความอ่านออก (guides/VFX.md §1.4–1.5, §6)
       const W = m => out.push({ lv: 'warn', at, msg: m });
       if (L.t === 'emit') { const b = num(g('burst'), 0) * (fx.k || 1); if (b > 80) W(`burst ${Math.round(b)} เม็ด เกินงบ (≤ 80 ต่อครั้ง)`); if (num(g('rate'), 0) > 200) W('rate เกิน 200 เม็ด/วิ'); if (g('from') === 'mesh' && !fx.layers.some(q => q.id === g('of') && q.t === 'mesh')) out.push({ lv: 'err', at: at + '.of', msg: 'from:"mesh" ต้องชี้ไปที่ชั้น mesh (of)' });
         texRef(g('fb'), at + '.fb');

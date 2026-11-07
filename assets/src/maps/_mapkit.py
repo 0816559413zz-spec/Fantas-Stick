@@ -1,4 +1,4 @@
-# _mapkit.py — ตัวช่วยร่วมของสคริปต์ปั้นแผนที่ (<id>_build.py) ตามกติกา MAP-DESIGN.md (ต่อยอดจาก valley_build.py)
+# _mapkit.py — ตัวช่วยร่วมของสคริปต์ปั้นแผนที่ (<id>_build.py) ตามกติกา guides/MAP-DESIGN.md (ต่อยอดจาก valley_build.py)
 # ใช้:  D:\Blender\blender.exe -b --factory-startup --python assets/src/maps/<id>_build.py
 #   → assets/src/maps/<id>.blend + export ด้วย map_export.py → assets/maps/<id>.json + .glb (+ bump manifest)
 # 1 หน่วย Blender = 1 หน่วยเกม, กลางแผนที่ (0,0,0), ทิศเหนือ = +Y, พื้นปกติ Z = 0

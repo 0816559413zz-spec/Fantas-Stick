@@ -1,6 +1,6 @@
 # house_chunks.py — ตัดบ้าน (house.blend) เป็นชิ้นย่อยแบบ Battlefield แล้ว export assets/buildings/house.glb ใหม่
 # รัน:  D:\Blender\blender.exe -b assets/src/house.blend --python assets/src/house_chunks.py
-# ตาราง (ต้องตรงกับ BLD_GRID ใน js/12-buildings.js — รายละเอียดใน Destruction.md):
+# ตาราง (ต้องตรงกับ BLD_GRID ใน js/12-buildings.js — รายละเอียดใน guides/Destruction.md):
 #   wall_front / wall_back : 4 คอลัมน์ตามแกน X (ขอบ −2, 0, 2) × 3 แถวตามความสูง (ขอบ 1.4, 2.8)
 #   wall_left / wall_right : 3 คอลัมน์ตามแกน Y (คอลัมน์ 0 = ฝั่ง +Y = หลังบ้าน; ขอบ ±1.083) × 3 แถว
 #   roof_left / roof_right : 3 คอลัมน์ตามแกน Y (เหมือนผนังข้าง) × 2 แถว (แถว 0 = ชายคา |X| > 2, แถว 1 = สันหลังคา)

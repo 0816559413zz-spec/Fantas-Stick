@@ -1,4 +1,4 @@
-# Rule checker for a map collection (MAP-DESIGN.md). Run inside Blender with MAP_ID set, e.g.
+# Rule checker for a map collection (guides/MAP-DESIGN.md). Run inside Blender with MAP_ID set, e.g.
 #   MAP_ID = "valley"; exec(open(".../map_check.py").read())
 # Prints/returns a list of problems. Uses a top-down ray cast against the real meshes, so it works for any map.
 import bpy, math

@@ -2,7 +2,7 @@
 
 Work on the ❄️ Frost path visuals in Fantas Stick.
 
-**Read first:** `CLAUDE.md`, `HANDOFF.md`, `VFX.md`, `notes/vfx-notes.md` (Frost lines), `designs/frost.md`. Find code with `CODEMAP.md` (Frost visuals live mostly in `js/34-frost-view.js`, `js/21-vfx-frost.js`, `js/43-frost-vfx.js`, `js/25-efx.js`, recipes in `js/44-vfx-kit.js`). Don't read whole files.
+**Read first:** `CLAUDE.md`, `HANDOFF.md`, `guides/VFX.md`, `notes/vfx-notes.md` (Frost lines), `designs/frost.md`. Find code with `CODEMAP.md` (Frost visuals live mostly in `js/34-frost-view.js`, `js/21-vfx-frost.js`, `js/43-frost-vfx.js`, `js/25-efx.js`, recipes in `js/44-vfx-kit.js`). Don't read whole files.
 
 **Rules:** visuals only — don't change damage, heal, slow, ranges or timings. Respect the VFX budget (`vfxOnce`, `vfxExtra`, no new material/geometry per frame). No white-outs.
 

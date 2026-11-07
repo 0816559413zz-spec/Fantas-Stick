@@ -1,4 +1,4 @@
-# Fire / smoke flipbooks from a real Mantaflow simulation (VFX.md §5.1)
+# Fire / smoke flipbooks from a real Mantaflow simulation (guides/VFX.md §5.1)
 # Run headless:  blender -b -P assets/src/fire_flipbook_build.py -- <mode> <outdir> [res] [frames]
 #   mode = fire  -> <outdir>/fire_####.png  (tall camera 1:2) + fire_sq_####.png (square camera)
 #   mode = wall  -> <outdir>/wall_####.png  (a long continuous line of fire, 2:1 camera) — for fire along edges/cracks

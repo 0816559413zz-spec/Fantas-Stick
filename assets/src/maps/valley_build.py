@@ -1,5 +1,5 @@
 # Map "valley" (หมู่บ้านในหุบเขา) — generator for Blender. Run inside Blender; rebuilds collection MAP_valley.
-# Follows MAP-DESIGN.md naming: ground, floor_, col_, colv_, bounds, spawn_*, enemy_spawn_*, prop_*, bld_house_*,
+# Follows guides/MAP-DESIGN.md naming: ground, floor_, col_, colv_, bounds, spawn_*, enemy_spawn_*, prop_*, bld_house_*,
 # env_water_*, light_*, anim_*, sub-collections deco_far / noshadow. Design form: designs/maps/valley.md
 # 1 Blender unit = 1 game unit, map centre at (0,0,0), north = +Y, ground level Z = 0.
 import bpy, bmesh, math, random

@@ -1,4 +1,4 @@
-# Pack rendered frames into one flipbook atlas (VFX.md §5.1).
+# Pack rendered frames into one flipbook atlas (guides/VFX.md §5.1).
 #   python tools/pack_flipbook.py <framedir> <prefix> <first> <out.png> <cellW> <cellH> [mode] [cols] [rows] [xfade] [keep]
 #   keep = fraction of the frame height kept from the bottom (crop empty sky above short flames), default 1
 #   hfade = soft fade at the left/right ends as a fraction of the width (fire-line segments overlap without seams), default 0

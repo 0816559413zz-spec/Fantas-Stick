@@ -4,9 +4,9 @@
 
 **สถานะล่าสุด 2026-11-03 — Nature:** ทำรูปทรง/แอนิเมชันสกิลทีละส่วน ส่งภาพนิ่งและ GIF จากตัวอย่างจริงในแชท ให้ผู้ใช้รีวิวและแก้ตาม feedback; BA แส้และ Dash motion ได้รับคำว่าโอเค แต่ VFX ทั้งคู่ให้ทำท้ายสุด ต้นยิงกำลังรีวิว: ไม่มีดินบนผนัง/หญ้า, ต้นติดผนังตั้งขึ้นเอนหัวออกเล็กน้อย, ใบโคนออกแบบใหม่ ดู `tools/nature-preview.js`, `designs/nature.md`, `shots/nat_turret_f075.jpg` และ `shots/nat_turret.gif` ไม่ถือว่าผู้ใช้รับภาพจนกว่าจะบอก ภาพใน shots ไม่ถูกติดตามโดย git; user สั่ง commit งานรอบนี้ ไม่ได้สั่ง push
 
-**วิธีทำ motion มังกร:** ผู้ใช้ขอเก็บหลักการให้ใช้ข้ามเซสชัน อ่าน [dragon-smooth-animation-handoff.md](dragon-smooth-animation-handoff.md) ก่อนทำสิ่งมีชีวิตหรือแส้; Nature กำลังร่างกับ Claude ใน `designs/nature.md` ให้อ่านสถานะล่าสุดก่อนเสนอ ไม่ทำแทนการตกลงดีไซน์
+**วิธีทำ motion มังกร:** ผู้ใช้ขอเก็บหลักการให้ใช้ข้ามเซสชัน อ่าน [notes/archive/dragon-smooth-animation-handoff.md](archive/dragon-smooth-animation-handoff.md) ก่อนทำสิ่งมีชีวิตหรือแส้; Nature กำลังร่างกับ Claude ใน `designs/nature.md` ให้อ่านสถานะล่าสุดก่อนเสนอ ไม่ทำแทนการตกลงดีไซน์
 
-**อัปเดตงานปัจจุบัน 2026-11-02:** หลังกล้องและแอนิเมชันทั้ง6สาย ผู้ใช้เลือกงานยาวข้อ2+3: ตรวจบั๊ก/ประสิทธิภาพและสถานะแอนิเมชัน แก้ท่าร่ายค้างข้ามตาย→เกิดใหม่แล้ว ผ่าน7สกิล/55transitions/9โหมดและsoakมังกร16/Beam24รอบ แต่เฟรมช้ายังไม่จบ อ่าน [รายงานคืน](night-audit-2026-11-02.md) **Wind ผู้ใช้บอกว่าส่วนใหญ่ยังไม่ตรงภาพในหัว ต้องคุยใหม่ทีละสกิล ไม่ redesign ระหว่างaudit; SFXทีหลัง** งานกล้อง/ท่ารอบก่อนอยู่ [บันทึกแอนิเมชัน](character-animation-2026-11-01.md) และ [บันทึกกล้อง](camera-aim-2026-11-01.md) Beamกลางหลังเหนือหัว/Earthกลางยกสูงตามผู้ใช้ GIFเกมจริง `shots/motion_abyssalbeam.gif`/`shots/motion_windrift.gif` ยังรอรีวิวความชอบ ไม่ commit/push และไม่อัดทับStoryboardเก่าเอง
+**อัปเดตงานปัจจุบัน 2026-11-02:** หลังกล้องและแอนิเมชันทั้ง6สาย ผู้ใช้เลือกงานยาวข้อ2+3: ตรวจบั๊ก/ประสิทธิภาพและสถานะแอนิเมชัน แก้ท่าร่ายค้างข้ามตาย→เกิดใหม่แล้ว ผ่าน7สกิล/55transitions/9โหมดและsoakมังกร16/Beam24รอบ แต่เฟรมช้ายังไม่จบ อ่าน [รายงานคืน](archive/night-audit-2026-11-02.md) **Wind ผู้ใช้บอกว่าส่วนใหญ่ยังไม่ตรงภาพในหัว ต้องคุยใหม่ทีละสกิล ไม่ redesign ระหว่างaudit; SFXทีหลัง** งานกล้อง/ท่ารอบก่อนอยู่ [บันทึกแอนิเมชัน](archive/character-animation-2026-11-01.md) และ [บันทึกกล้อง](archive/camera-aim-2026-11-01.md) Beamกลางหลังเหนือหัว/Earthกลางยกสูงตามผู้ใช้ GIFเกมจริง `shots/motion_abyssalbeam.gif`/`shots/motion_windrift.gif` ยังรอรีวิวความชอบ ไม่ commit/push และไม่อัดทับStoryboardเก่าเอง
 
 ## การคุยและการเลือกขอบเขต
 
@@ -59,7 +59,7 @@
 
 ข้อที่ต้องรักษา: มังกรทั้งตัวออกจากวงเวทเดียวด้านขวาของเรา วงใหญ่แบบลายน้ำวน/คลื่น ไม่มีดาวหกแฉก ใช้สแปลชเดิม `assets/vfx/water_crown.glb` + `water_ringwave_low.glb`; บินขึ้นวนแล้วโฉบลงอย่างต่อเนื่อง ชะลอก่อนลอยรอ หัวหันทางเดียวกับตัวละคร หางปลายสะบัดเร็ว ไม่กลับไปล็อก S หรือจุดพักเก่า
 
-ภาพอ้างอิงอยู่ใน `designs/water_ref/` แล้ว โดยเฉพาะ `dragon_fins_arms_ref.png`, `dragon_face_eye_ref.png`, `dragon_foam_flow.png`, `dragon_ref2.jpg`, `dragon_ref3.webp`, `dragon_ref4.png` ไม่ต้องให้ผู้ใช้อัปโหลดซ้ำถ้ายังอ่านได้ ประวัติรุ่นที่เคยลองอยู่ใน `notes/water-dragon-preview-history-2026-11-01.md`
+ภาพอ้างอิงอยู่ใน `designs/water_ref/` แล้ว โดยเฉพาะ `dragon_fins_arms_ref.png`, `dragon_face_eye_ref.png`, `dragon_foam_flow.png`, `dragon_ref2.jpg`, `dragon_ref3.webp`, `dragon_ref4.png` ไม่ต้องให้ผู้ใช้อัปโหลดซ้ำถ้ายังอ่านได้ ประวัติรุ่นที่เคยลองอยู่ใน `notes/archive/water-dragon-preview-history-2026-11-01.md`
 
 **สำคัญ:** Studio URL/สคริปต์ headless นี้เป็นตัวอย่างก่อน port; การวัดมังกรที่เล่นจริงต้องผ่าน runtime `js/70-water-dragon.js` ในห้องฝึก สคริปต์ preview ไม่ได้เรียกโค้ด dive/pool รุ่นใหม่ จึงใช้แทนการทดสอบเกมปัจจุบันไม่ได้
 

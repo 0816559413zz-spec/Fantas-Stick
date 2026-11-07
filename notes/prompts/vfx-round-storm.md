@@ -2,7 +2,7 @@
 
 Work on the ⚡ Storm path in Fantas Stick.
 
-**Read first:** `CLAUDE.md`, `HANDOFF.md`, `VFX.md`, `notes/vfx-notes.md` (Storm lines), `designs/storm.md`. Find code with `CODEMAP.md` (Storm host logic is in `js/08-storm.js`; visuals are mostly in `js/20-vfx-pyro-storm.js`, `js/25-efx.js` and the recipes in `js/44-vfx-kit.js`). Don't read whole files.
+**Read first:** `CLAUDE.md`, `HANDOFF.md`, `guides/VFX.md`, `notes/vfx-notes.md` (Storm lines), `designs/storm.md`. Find code with `CODEMAP.md` (Storm host logic is in `js/08-storm.js`; visuals are mostly in `js/20-vfx-pyro-storm.js`, `js/25-efx.js` and the recipes in `js/44-vfx-kit.js`). Don't read whole files.
 
 **Rules:**
 - Visuals only, except the claw numbers in task 3 (the user's own numbers).

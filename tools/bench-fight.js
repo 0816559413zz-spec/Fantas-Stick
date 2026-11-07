@@ -1,4 +1,4 @@
-// Big-fight benchmark (OPTIMIZE.md §I): TDM on valley, 12 players (11 lobby bots), everyone casts every slot when ready + ult every 1.5 s.
+// Big-fight benchmark (guides/OPTIMIZE.md §I): TDM on valley, 12 players (11 lobby bots), everyone casts every slot when ready + ult every 1.5 s.
 // Open http://localhost:<port>/?nosw , then in the console:
 //   eval(await (await fetch("tools/bench-fight.js",{cache:"no-store"})).text()); then read window.__fight after ~60 s
 // Math.random is seeded during the runs so before/after numbers are comparable. Frames are driven by hand (hidden pane throttles rAF):

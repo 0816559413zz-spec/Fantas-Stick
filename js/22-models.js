@@ -1,4 +1,4 @@
-// ---------- โมเดลจากไฟล์ (.glb จาก Blender) — ข้อตกลงฝั่งคนปั้นอยู่ใน ASSETS.md ----------
+// ---------- โมเดลจากไฟล์ (.glb จาก Blender) — ข้อตกลงฝั่งคนปั้นอยู่ใน guides/ASSETS.md ----------
 // assets/manifest.json = {"v":1,"models":{"prop_crate":{"file":"props/crate.glb","v":1}}} (ไม่มีไฟล์/ไม่มีชื่อ = ใช้โมเดลจากโค้ดตามเดิม)
 // loadModel(name) → Promise<{scene,animations,skinned}|null> โหลดครั้งเดียวใช้ซ้ำ • modelOr(name,fallback) → Group โชว์ของสำรองก่อน แล้วสลับเป็นไฟล์เมื่อโหลดเสร็จ
 // GLTFLoader/Draco/Meshopt ถูก import ตอนมีโมเดลให้โหลดจริงเท่านั้น (เปิดหน้าเว็บไม่หนักขึ้น)
@@ -225,7 +225,7 @@ function rigSync(o,dt){
 }
 const FILE_MODELS=()=>['char_student','char_broom',...Object.keys(EDEF).map(t=>'enemy_'+t)];
 
-// ---------- VFX จากไฟล์ (รายละเอียดฝั่งคนทำอยู่ใน ASSETS.md) ----------
+// ---------- VFX จากไฟล์ (รายละเอียดฝั่งคนทำอยู่ใน guides/ASSETS.md) ----------
 // .glb ชื่อ vfx_<event> ใน manifest "models": vfx_<z> = เอฟเฟกต์ของ efx event z (เช่น vfx_swing), vfx_cast_<t> = ตอนร่ายกระสุนชนิด t, proj_<t> = หน้าตากระสุน t
 //   ตัวเลือก: life (วินาที; ไม่ใส่ = ความยาว animation หรือ 1), radius:true (ปั้นที่รัศมี 1 แล้วขยายตามรัศมีของเอฟเฟกต์), scale, loop, fade (สัดส่วนช่วงท้ายที่จาง, ค่าเริ่ม 0.35), mode:"replace" (ไม่เล่นเอฟเฟกต์จากโค้ด; ค่าเริ่ม "add" = เล่นทับกัน)
 //   วัสดุ: ชื่อขึ้นต้น add_ = เรืองแสงแบบบวกแสง • มีคำว่า fade = จางตอนท้าย • ขึ้นต้น tint_ = ใช้สีของคาถา (ถ้า event มีสี)

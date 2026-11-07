@@ -1,4 +1,4 @@
-// Match-start benchmark (OPTIMIZE.md): open http://localhost:8765/?nosw , then in the console:
+// Match-start benchmark (guides/OPTIMIZE.md): open http://localhost:8765/?nosw , then in the console:
 //   eval(await (await fetch("tools/bench-start.js",{cache:"no-store"})).text()); then read window.__start after ~20 s
 // Solo co-op: start → back to lobby → start, cycling maps; measures hostStart + first snapshot (map build) + the worst frame in the next 2 s.
 (async()=>{

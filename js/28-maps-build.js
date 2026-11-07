@@ -478,7 +478,7 @@ function buildLake(){
 }
 // ----- ซากลานประลอง (เย็น ทราย) -----
 // ----- Test Place (ห้องฝึก): พื้นตารางเรียบๆ กลางวัน + วงโซนเสกมอนสเตอร์ -----
-// ----- บรรยากาศที่ใช้ร่วมกัน (แผนที่จากโค้ด + แผนที่จากไฟล์ผ่าน fx ใน MAP-DESIGN.md) -----
+// ----- บรรยากาศที่ใช้ร่วมกัน (แผนที่จากโค้ด + แผนที่จากไฟล์ผ่าน fx ใน guides/MAP-DESIGN.md) -----
 function makeSnow(hw,hh){
   const NS=1500,sp=new Float32Array(NS*3),sv=new Float32Array(NS);
   for(let i=0;i<NS;i++){sp[i*3]=rnd(-hw-15,hw+15);sp[i*3+1]=rnd(0,26);sp[i*3+2]=rnd(-hh-15,hh+15);sv[i]=rnd(1.6,3.6);}
@@ -510,7 +510,7 @@ function fileMapFx(list){
     else if(k==='rune'){const z=+a[1]||19;RUNE=addW(new THREE.Mesh(new THREE.PlaneGeometry(z,z),new THREE.MeshBasicMaterial({map:runeTex,color:hdr(a[0]||'#b58cff',1.3),transparent:true,blending:THREE.AdditiveBlending,depthWrite:false})));RUNE.rotation.x=-Math.PI/2;RUNE.position.y=GY(MW/2,MH/2)+0.05;}
   }
 }
-// ----- แผนที่จากไฟล์ Blender (MAP-DESIGN.md) -----
+// ----- แผนที่จากไฟล์ Blender (guides/MAP-DESIGN.md) -----
 // โชว์พื้นสำรองจากตารางความสูงทันที (เดิน/ทดสอบได้แม้ไม่มี .glb) แล้วสลับเป็นไฟล์ .glb เมื่อโหลดเสร็จ
 function terrGeo(get,nx,ny,c,step){
   const cols=Math.floor((nx-1)/step)+1,rows=Math.floor((ny-1)/step)+1,pos=new Float32Array(cols*rows*3),uv=new Float32Array(cols*rows*2),idx=[];

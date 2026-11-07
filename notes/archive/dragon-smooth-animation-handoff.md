@@ -1,6 +1,6 @@
 # ส่งต่อวิธีทำแอนิเมชันมังกรน้ำให้ลื่น
 
-ผู้ใช้ขอเก็บวิธีทำไว้ให้เซสชันอื่นนำหลักการไปใช้ โดยเฉพาะงาน Nature ที่กำลังออกแบบกับ Claude ตัวอย่างจริงอยู่ `js/70-water-dragon.js` (runtime) และ `tools/water-dragon-freecruise-preview.js` (ต้นแบบ Studio) ประวัติการแก้และ feedback อยู่ `notes/water-dragon-preview-history-2026-11-01.md` ข้อมูลนี้เป็นวิธีทำ ไม่ได้หมายความว่าทุกการเคลื่อนไหวของ Nature ต้องเหมือนมังกร
+ผู้ใช้ขอเก็บวิธีทำไว้ให้เซสชันอื่นนำหลักการไปใช้ โดยเฉพาะงาน Nature ที่กำลังออกแบบกับ Claude ตัวอย่างจริงอยู่ `js/70-water-dragon.js` (runtime) และ `tools/water-dragon-freecruise-preview.js` (ต้นแบบ Studio) ประวัติการแก้และ feedback อยู่ `notes/archive/water-dragon-preview-history-2026-11-01.md` ข้อมูลนี้เป็นวิธีทำ ไม่ได้หมายความว่าทุกการเคลื่อนไหวของ Nature ต้องเหมือนมังกร
 
 ## หลักที่ทำให้ดูเป็นสิ่งมีชีวิต
 

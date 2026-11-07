@@ -1,4 +1,4 @@
-// Heavy-scene benchmark (OPTIMIZE.md): open http://localhost:8765/?nosw , then in the console:
+// Heavy-scene benchmark (guides/OPTIMIZE.md): open http://localhost:8765/?nosw , then in the console:
 //   eval(await (await fetch("tools/bench-heavy.js",{cache:"no-store"})).text()); then read window.__bench after ~30 s
 // Solo + 5 bots, castle, coop wave 5 (dragon boss), all players casting every slot for 300 frames.
 (async()=>{

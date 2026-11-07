@@ -1,4 +1,4 @@
-# props_build.py — ของประกอบฉาก: ถังไม้ (ปกติ/พัง) + หีบสมบัติ (ปิด/เปิดแล้ว)  (ขนาดตาม PROPDEF ใน js/02-data.js / ASSETS.md §3)
+# props_build.py — ของประกอบฉาก: ถังไม้ (ปกติ/พัง) + หีบสมบัติ (ปิด/เปิดแล้ว)  (ขนาดตาม PROPDEF ใน js/02-data.js / guides/ASSETS.md §3)
 # รัน:  D:\Blender\blender.exe -b --factory-startup --python assets/src/props_build.py
 # ได้:  assets/props/barrel.glb, barrel_broken.glb, chest.glb, chest_used.glb + assets/src/props.blend
 import sys, os, math, random

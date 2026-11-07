@@ -1,7 +1,7 @@
 // =====================================================================
 //  VFX Studio — แก้เอฟเฟกต์ .fx.json บน renderer จริงของเกม (เปิด studio.html = index.html?studio)
 //  โหลดต่อท้ายโค้ดเกม (ไฟล์เดียวกันทั้งหมดเป็นโมดูลเดียว) จึงใช้ G / hostStart / render / fxStart ฯลฯ ได้ตรง ๆ
-//  แผน: designs/vfx-studio.md • รูปแบบไฟล์: FX-FORMAT.md • บันทึก/เก็บภาพผ่าน python tools/serve.py
+//  แผน: designs/vfx-studio.md • รูปแบบไฟล์: guides/FX-FORMAT.md • บันทึก/เก็บภาพผ่าน python tools/serve.py
 //  URL: ?fx=<ชื่อ> &map=test|castle|... &cam=game|side|front|top|orbit &at=front|self|far &seed=N &sheet=0.05,0.2,... &save=<ชื่อภาพ> &t=<เวลา>
 //  console: STUDIO.load(n) .data() .set('ball.scale',2) .play() .pause() .seek(t) .sheet([..]) .metrics() .save() .shot(n)
 // =====================================================================
