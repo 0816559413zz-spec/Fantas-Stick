@@ -114,9 +114,23 @@ function windWallBoom(w){if(w.dead)return;w.dead=1;const o=G.players[w.owner],nx
 function windDmg(t,amt,srcId){if(!(t.wwW>0)||!(t.stun>0)||srcId==null)return;const w=(G.wwl||[]).find(w=>w.id===t.wwW&&!w.dead);if(!w||w.owner!==srcId)return;
   w.acc+=amt;if(!w.uns&&w.acc>=W_WL.boom*0.7){w.uns=1;emit({k:'efx',z:'wnwuns',x:Math.round(w.x),y:Math.round(w.y),a:Math.round(w.a*100)/100,n:w.id});}
   if(w.acc>=W_WL.boom)windWallBoom(w);}
-// กระสุนศัตรูชนกำแพงลม = หายไป + กำแพงเสีย HP (ศัตรูตีพังได้) • กระสุนพวกเดียวกันทะลุ (ผู้ใช้ 2026-10-28)
-function windProjHit(pr){if(!G.wwl)return false;
-  for(const w of G.wwl){if(w.dead||pr.team===w.team||pr.h>5.8)continue;if(wSeg(w,pr.x,pr.y).d<w.r+pr.r){emit({k:'efx',z:'wnwblk',x:Math.round(pr.x),y:Math.round(pr.y),h:pr.h,n:w.id});windWallHurt(w,pr.dmg||5);return true;}}
+// เส้นตรง (x0,y0)→(x1,y1) ตัดกำแพงลมของทีมอื่นไหม (รวมความหนา + รัศมีของกระสุน) → {u:0..1, w} จุดแรกที่ชน หรือ null
+function windRay(team,x0,y0,x1,y1,rad,h){if(!G.wwl||!G.wwl.length||(h!==undefined&&h>=5.8))return null;let best=null;
+  for(const w of G.wwl){if(w.dead||w.team===team)continue;const nx=Math.cos(w.a),ny=Math.sin(w.a),T=w.r+(rad||0);
+    const s0=(x0-w.x)*nx+(y0-w.y)*ny,s1=(x1-w.x)*nx+(y1-w.y)*ny;let u;
+    if(Math.abs(s0)<=T)u=0;else{if((s0>0)===(s1>0)&&Math.abs(s1)>T)continue;const d=s1-s0;if(Math.abs(d)<1e-6)continue;u=((s0>0?T:-T)-s0)/d;if(u<0||u>1)continue;}
+    const hx=x0+(x1-x0)*u,hy=y0+(y1-y0)*u;if(Math.abs(-(hx-w.x)*ny+(hy-w.y)*nx)>w.L+(rad||0))continue;
+    if(!best||u<best.u)best={u,w,x:hx,y:hy};}
+  return best;}
+// ลำ/เส้นยิง: ระยะที่ไปได้ก่อนชนกำแพงลมของทีมอื่น (ไม่ชน = len) • dmg>0 = กำแพงเสีย HP (ใช้กับเส้นยิงครั้งเดียว ไม่ใช้กับลำต่อเนื่อง)
+function windBlockLen(team,x,y,a,len,h,dmg){if(!G||!G.wwl||!G.wwl.length)return len;
+  const r=windRay(team,x,y,x+Math.cos(a)*len,y+Math.sin(a)*len,0,h);if(!r)return len;
+  if(dmg>0){emit({k:'efx',z:'wnwblk',x:Math.round(r.x),y:Math.round(r.y),h:h||1,n:r.w.id});windWallHurt(r.w,dmg);}
+  return Math.max(0,len*r.u);}
+// กระสุนศัตรูชนกำแพงลม = หายไป + กำแพงเสีย HP (ศัตรูตีพังได้) • กระสุนพวกเดียวกันทะลุ • ตรวจทั้งเส้นทางที่บินมาในเฟรมนี้ (กระสุนเร็วไม่ทะลุ)
+function windProjHit(pr,dt){if(!G.wwl||!G.wwl.length)return false;
+  const r=windRay(pr.team,pr.x-(pr.vx||0)*(dt||0),pr.y-(pr.vy||0)*(dt||0),pr.x,pr.y,pr.r,pr.h);
+  if(r){pr.x=r.x;pr.y=r.y;emit({k:'efx',z:'wnwblk',x:Math.round(r.x),y:Math.round(r.y),h:pr.h,n:r.w.id});windWallHurt(r.w,pr.dmg||5);return true;}
   return false;}
 function windWallHurt(w,n){if(w.dead||w.hp===undefined)return;w.hp-=n;if(w.hp<=0){w.dead=1;emit({k:'efx',z:'wnwboom',x:Math.round(w.x),y:Math.round(w.y),a:Math.round(w.a*100)/100,n:w.id,m:1});}}
 // ศัตรูเดินผ่านกำแพงลมไม่ได้ (พวกเดียวกันผ่านได้) — เรียกจาก collideWorld
@@ -137,10 +151,17 @@ function updateWind(dt){
       for(const k in w.hitT)if((w.hitT[k]-=dt)<=0)delete w.hitT[k];
       // ดันไปข้างหน้า: กวาดศัตรูที่อยู่หน้ากำแพงไปด้วย หยุดเมื่อสุดระยะ
       if(w.mv>0){const st=Math.min(w.mv,W_WL.spd*dt),nx=Math.cos(w.a),ny=Math.sin(w.a);w.x+=nx*st;w.y+=ny*st;w.mv-=st;
-        // ผู้ใช้ 2026-10-28: ดันแล้วไม่พาศัตรูไป — กำแพงทะลุผ่านศัตรูในทาง แต่ละคนโดนครั้งเดียว: สตัน 0.5 + 10 ดาเมจ
-        for(const t of foesOf(w.team)){if(w.pass[t.id])continue;const s=wSeg(w,t.x,t.y);if(s.d>w.r+(t.r||PR)+st||cH(t)>4.9)continue;
-          w.pass[t.id]=1;const o=G.players[w.owner];if(o)aoeHit(o,t,W_WL.pdmg,t=>addStun(t,W_WL.pstun));emit({k:'efx',z:'wnwpass',x:Math.round(t.x),y:Math.round(t.y),h:cH(t),a:Math.round(w.a*100)/100,n:w.id});}
-        if(w.mv<=0)windWallStop(w);}
+        // ผู้ใช้ 2026-11-07: ศัตรูที่โดนกำแพงตอนดัน ถูกผลักไปตามกำแพงจนสุดทาง (ไม่ทะลุแล้ว) • แต่ละคนโดนครั้งแรก: สตัน 0.5 + 10 ดาเมจ
+        // ถ้าคนที่ถูกผลักติดสิ่งกีดขวาง (กำแพงแผนที่/ตึก) = กำแพงลมหยุดตรงนั้น
+        const carry=[];let blocked=false;
+        for(const t of foesOf(w.team)){if(cH(t)>4.9)continue;const s=wSeg(w,t.x,t.y),m=w.r+(t.r||PR);if(s.d>m+0.5)continue;
+          let tx,ty;if(Math.abs(s.d-Math.abs(s.s))<0.01){tx=s.qx+nx*(m+0.6);ty=s.qy+ny*(m+0.6);}else{const d=s.d>0.001?s.d:1;tx=s.qx+(t.x-s.qx)/d*(m+0.6);ty=s.qy+(t.y-s.qy)/d*(m+0.6);}
+          const tmp={x:tx,y:ty};collideWorld(tmp,t.r||PR,cH(t));if(Math.hypot(tmp.x-tx,tmp.y-ty)>2)blocked=true;
+          carry.push([t,tmp.x,tmp.y,s]);}
+        if(blocked){w.x-=nx*st;w.y-=ny*st;windWallStop(w);}
+        else{for(const [t,tx,ty,s] of carry){t.x=tx;t.y=ty;
+            if(!w.pass[t.id]){w.pass[t.id]=1;const o=G.players[w.owner];if(o)aoeHit(o,t,W_WL.pdmg,t=>addStun(t,W_WL.pstun));emit({k:'efx',z:'wnwpass',x:Math.round(t.x),y:Math.round(t.y),h:cH(t),a:Math.round(w.a*100)/100,n:w.id});}}
+          if(w.mv<=0){w.mv=0.0001;windWallStop(w);}}}
       // ศัตรูที่โดนผลัก (ความเร็วกระเด็นสูง) วิ่งชนกำแพง = สตัน 0.5 วิ
       for(const t of foesOf(w.team)){if(w.hitT[t.id])continue;const sp=Math.hypot(t.vx||0,t.vy||0);if(sp<150&&!(t.wpush>0&&sp>60))continue;
         const s=wSeg(w,t.x,t.y);if(s.d>w.r+(t.r||PR))continue;
@@ -229,7 +250,7 @@ function windSnapW(){const o={};if(G.wwl&&G.wwl.length)o.WW=G.wwl.map(w=>[w.id,M
   if(G.wvh&&G.wvh.length)o.WO=G.wvh.filter(v=>v.on).map(v=>[v.id,Math.round(v.x),Math.round(v.y)]);return o;}
 
 // ---------- สกิล ----------
-const W_WL=defSpell(WINDP,{id:'aegisgale',v:{L:125,r:14,life:12,hp:100,charge:8,max:3,push:400,spd:900,place:500,stun:0.5,pdmg:10,pstun:0.5,boom:70,bdmg:50,bpush:2400,brad:110,aim:4},vn:{L:'กำแพง • ครึ่งความกว้าง',r:'กำแพง • ความหนา',life:'กำแพง • อยู่ (วิ)',hp:'กำแพง • HP (โดนยิง)',charge:'ชาร์จคืน 1 อัน (วิ)',max:'ชาร์จสูงสุด (อัน)',push:'ดัน • ระยะ',spd:'ดัน • ความเร็ว',place:'วาง • ระยะไกลสุด',stun:'ศัตรูโดนผลักชน • สตัน (วิ)',pdmg:'ดันทะลุศัตรู • ดาเมจ',pstun:'ดันทะลุศัตรู • สตัน (วิ)',boom:'ตีครบเท่านี้ = แตก',bdmg:'แตกระเบิด • ดาเมจ',bpush:'แตกระเบิด • แรงผลัก',brad:'แตกระเบิด • รัศมี',aim:'เวลาเลือกดัน/วาง (วิ)'},role:'control',n:'Aegis Gale',ic:'🌬️',cd:0.4,d:'กำแพงลม (ชาร์จ 3 อัน คืน 8 วิ/อัน) — กดสกิลแล้วเลือก: คลิกซ้าย = ดันกำแพงพุ่งไปข้างหน้า 400 ทะลุผ่านศัตรูในทาง: สตัน 0.5 วิ + 10 ดาเมจ (กดสกิลอีกครั้ง = หยุดก่อน) • คลิกขวา = วางตรงจุดเล็ง (ไกลสุด 500) • กว้าง 250 อยู่ 12 วิ • กันศัตรูเดินผ่าน + บล็อกลูกเวทศัตรู (พวกเดียวกันผ่านได้) • ศัตรูยิงพังได้ (200) • ศัตรูโดนผลักชน = สตัน 0.5 วิ • ตีศัตรูที่ติดกำแพงครบ 70 = กำแพงแตก ระเบิด 50 กระเด็นไกล',
+const W_WL=defSpell(WINDP,{id:'aegisgale',v:{L:125,r:14,life:12,hp:100,charge:8,max:3,push:400,spd:900,place:500,stun:0.5,pdmg:10,pstun:0.5,boom:70,bdmg:50,bpush:2400,brad:110,aim:4},vn:{L:'กำแพง • ครึ่งความกว้าง',r:'กำแพง • ความหนา',life:'กำแพง • อยู่ (วิ)',hp:'กำแพง • HP (โดนยิง)',charge:'ชาร์จคืน 1 อัน (วิ)',max:'ชาร์จสูงสุด (อัน)',push:'ดัน • ระยะ',spd:'ดัน • ความเร็ว',place:'วาง • ระยะไกลสุด',stun:'ศัตรูโดนผลักชน • สตัน (วิ)',pdmg:'ดันทะลุศัตรู • ดาเมจ',pstun:'ดันทะลุศัตรู • สตัน (วิ)',boom:'ตีครบเท่านี้ = แตก',bdmg:'แตกระเบิด • ดาเมจ',bpush:'แตกระเบิด • แรงผลัก',brad:'แตกระเบิด • รัศมี',aim:'เวลาเลือกดัน/วาง (วิ)'},role:'control',n:'Aegis Gale',ic:'🌬️',cd:0.4,d:'กำแพงลม (ชาร์จ 3 อัน คืน 8 วิ/อัน) — กดสกิลแล้วเลือก: คลิกซ้าย = ดันกำแพงพุ่งไปข้างหน้า 400 ศัตรูที่โดนถูกผลักไปตามกำแพงจนสุดทาง: สตัน 0.5 วิ + 10 ดาเมจ (ถ้าคนที่ถูกผลักติดสิ่งกีดขวาง กำแพงหยุด) (กดสกิลอีกครั้ง = หยุดก่อน) • คลิกขวา = วางตรงจุดเล็ง (ไกลสุด 500) • กว้าง 250 อยู่ 12 วิ • กันศัตรูเดินผ่าน + บล็อกท่าระยะไกลศัตรูทุกแบบ (กระสุน/BA ที่ยิงมา ลำแสง/เส้นยิง — กระสุนเร็วไม่ทะลุ) (พวกเดียวกันผ่านได้) • ศัตรูยิงพังได้ (200) • ศัตรูโดนผลักชน = สตัน 0.5 วิ • ตีศัตรูที่ติดกำแพงครบ 70 = กำแพงแตก ระเบิด 50 กระเด็นไกล',
   toggle(p){const w=(G.wwl||[]).find(w=>w.owner===p.id&&w.mv>0&&!w.dead);if(w){windWallStop(w);return true;}if(p.wwAim){p.wwAim=null;p.wwc=Math.min(W_WL.max,p.wwc+1);emit({k:'efx',z:'wnwaimoff',x:p.x,y:p.y,h:p.z,id:p.id});return true;}return false;},
   cast(p){if((p.wwc|0)<=0)return false;p.wwc--;const inp=p.inp||{};p.wwAim={t:W_WL.aim,f0:inp.fire,s0:inp.sh};emit({k:'efx',z:'wnwaim',x:p.x,y:p.y,h:p.z,id:p.id});}}).v;
 const W_DR=defSpell(WINDP,{id:'windrift',v:{chg:0.2,dist:400,t:0.09,wait:0.6,w:50,push:2400,dmg:10,slow:0.5,slowT:1.2},vn:{chg:'ชาร์จ (วิ)',dist:'พุ่ง • ระยะ',t:'พุ่ง • เวลา (วิ)',wait:'ลมตามมาหลัง (วิ)',w:'ลม • ครึ่งความกว้าง',push:'ลม • แรงผลัก',dmg:'ลม • ดาเมจ',slow:'ทางพุ่ง • ช้า (เท่า)',slowT:'ทางพุ่ง • ช้านาน (วิ)'},role:'utility',n:'Windrift',ic:'💨',cd:14,d:'ชาร์จปีก 0.2 วิ (ลอยนิดหน่อย) แล้วพุ่ง 400 (20 ม.) เร็วแบบ Jett ลงท่าฮีโร่ • ศัตรูในทางพุ่งช้าลงทันที • 0.6 วิต่อมาลมแรงตามมา ศัตรูในแนวกว้าง 100 กระเด็น 400 ตามทิศที่พุ่ง 10 ดาเมจ • ใช้กลางอากาศได้',

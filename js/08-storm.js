@@ -15,7 +15,7 @@ function stormCone(p,range,arc){const out=[],ph=p.z+1.1;
     if(d>14&&Math.abs(angDiff(Math.atan2(dy,dx),p.ang))>arc)continue;if(Math.abs(cH(t)-ph)>3)continue;out.push(t);}
   return out;}
 // ศัตรูในแนวเส้นตรง (เส้นสายฟ้า / Railgun)
-function stormLineFoes(p,x,y,a,len,half,from){const c=Math.cos(a),sn=Math.sin(a),out=[];
+function stormLineFoes(p,x,y,a,len,half,from){const c=Math.cos(a),sn=Math.sin(a),out=[];len=Math.min(len,windBlockLen(p.team,x,y,a,len,p.z+1.1));   // กำแพงลมศัตรูกันเส้นยิง
   for(const t of foesOf(p.team)){const dx=t.x-x,dy=t.y-y,u=dx*c+dy*sn;if(u<(from||0)-(t.r||PR)||u>len+(t.r||PR))continue;
     if(Math.abs(-dx*sn+dy*c)>half+(t.r||PR))continue;if(Math.abs(cH(t)-(p.z+1.1))>4)continue;out.push(t);}
   return out;}
@@ -147,6 +147,7 @@ const RAIL=defSpell(2,{id:'railgun',v:{cost:2,warn:0.8,warnGod:0.5,len:900,lenGo
 function stormRailFire(p){
   const R=p.rail;p.rail=null;const c=Math.cos(R.a),sn=Math.sin(R.a);let len=R.len;
   for(let d=40;d<=R.len;d+=25){const x=p.x+c*d,y=p.y+sn*d;if(x<20||x>MW-20||y<20||y>MH-20){len=d;break;}}
+  len=Math.min(len,windBlockLen(p.team,p.x,p.y,R.a,len,p.z+1.2,RAIL.v.dmg));   // ชนกำแพงลมศัตรู = ลำหยุดตรงนั้น กำแพงเสีย HP
   for(const t of stormLineFoes(p,p.x,p.y,R.a,len,RAIL.v.w/2,0))aoeHit(p,t,RAIL.v.dmg);
   for(let d=40;d<=len;d+=40)damageEnv(p.x+c*d,p.y+sn*d,30,RAIL.v.env,p.id,'lightning',p.z+1.2);   // ลำทะลุบ้าน/ลัง
   emit({k:'efx',z:'srail',x:Math.round(p.x),y:Math.round(p.y),h:p.z+1.2,a:Math.round(R.a*1000)/1000,len:Math.round(len),id:p.id});

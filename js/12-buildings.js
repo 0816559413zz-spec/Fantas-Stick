@@ -463,7 +463,7 @@ function updateProjectiles(dt){
     if(!hp&&PROPON)for(const c of sgNear(sgProps(),pr.x,pr.y,pr.r,_sgPP))if(c.st!==1&&pr.h<c.hgt&&(pr.x-c.x)**2+(pr.y-c.y)**2<(c.r+pr.r)**2){hitProp(c,pr.dmg||5,pr.owner);hp=true;break;}
     if(!hp)for(const w of G.walls)if(pr.team!==w.team&&pr.h<w.hgt&&(pr.x-w.x)**2+(pr.y-w.y)**2<(w.r+pr.r)**2){w.hp-=pr.dmg||5;hp=true;emit({k:'efx',z:'wallhit',x:pr.x,y:pr.y,h:pr.h});break;}
     if(!hp&&eProjHit(pr))hp=true;
-    if(!hp&&windProjHit(pr))hp=true;
+    if(!hp&&windProjHit(pr,dt))hp=true;
     if(!hp&&cityProjIn(pr,dt))hp=true;   // ตึกกลวงในเมือง: ผนังนอกทีละแผ่น / พื้นชั้นบน / ทางลาด
     if(hp){killProj(pr);continue;}
     for(const p of ps){

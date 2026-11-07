@@ -107,14 +107,15 @@ function broomBeam(p){
   if(r){ex=r.x;ey=r.y;eh=r.h;}
   else{const ap=clamp((p.inp&&p.inp.ap)||0,-0.9,0.9);ex=p.x+Math.cos(p.ang)*R;ey=p.y+Math.sin(p.ang)*R;eh=h0+Math.tan(ap)*R/20;}
   const dx=ex-p.x,dy=ey-p.y,dh=(eh-h0)*20,L2=dx*dx+dy*dy+dh*dh||1;
-  let best=null,bu=2;
+  let best=null,bu=2;const wbr=windRay(p.team,p.x,p.y,ex,ey,0,h0);   // กำแพงลมศัตรูกันลำ
   for(const t of foesOf(p.team)){
     if(t.gh)continue;
     const qx=t.x-p.x,qy=t.y-p.y,qh=(cH(t)-0.3-h0)*20,u=clamp((qx*dx+qy*dy+qh*dh)/L2,0,1);
     const d=Math.hypot(qx-dx*u,qy-dy*u,(qh-dh*u)*0.6);
     if(d<(t.r||PR)+BRM.w&&u<bu){bu=u;best=t;}
   }
-  if(best){ex=p.x+dx*bu;ey=p.y+dy*bu;eh=h0+dh*bu/20;
+  if(wbr&&(!best||wbr.u<=bu)){best=null;ex=wbr.x;ey=wbr.y;windWallHurt(wbr.w,BRM.dmg);emit({k:'efx',z:'wnwblk',x:Math.round(ex),y:Math.round(ey),h:h0,n:wbr.w.id});}
+  else if(best){ex=p.x+dx*bu;ey=p.y+dy*bu;eh=h0+dh*bu/20;
     const pi=p.pathIdx|0;p.baHit=1;
     aoeHit(p,best,BRM.dmg,t=>{if(pi===0)addBurn(t,1,p.id);else if(pi===1)addSlow(t,0.7,1.2);else if(pi===2)shock(t,p.id,0.2);});
     p.baHit=0;}

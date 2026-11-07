@@ -50,8 +50,7 @@ PYV:3 pyroBigBoom:11 pyroBall:19 pyroBasic:20 addOrbs:37 pyroParry:38 pyroBlock:
 ## js/07-frost-spells.js (33) — 
 FROSTF:4 GREND:6 frostGlacier:11 PERMA:16 CRYO:18 FAURA:25 MIRROR:27
 
-## js/08-storm.js (216) — สายสายฟ้า (ผู้เล่นออกแบบทั้งหมด — designs/storm.md)
-§5 ตัวเลขพื้นฐานของสายสายฟ้าอยู่ใน STORMV + v:{...} ของแต่ละสกิล — ปรับไ…
+## js/08-storm.js (217) — 
 STORMV:6 stGain:10 stSpend:11 stormCone:13 stormLineFoes:18 stormBasic:22 stormTri:45 stormDash:52 stormDashTick:65 stormShieldBlast:73 stormTick:82
 §91 สกิล 1 (ฟรี): เส้นสายฟ้า — ชี้ขึ้นแล้วกดลง 0.5 วิ จากนั้นสายฟ้าผ่าเป็…
 TLINE:92 stormLine:94
@@ -63,10 +62,10 @@ TSTR:110 updateTCells:126
 SORBS:135 stormOrbLaunch:138
 §144 สกิล 5 (2 stacks): Railgun — เส้นเตือนเหลือง 0.8 วิ (อัลติ 0.5) แล้วล…
 RAIL:145 stormRailFire:147
-§154 อัลติ: ร่างเทพสายฟ้า 10 วิ
-GODL:155
-§157 สกิล 6 (3 stacks): ลูกสายฟ้าโดม — ทะยานขึ้น บินเล็ง 3 วิ คลิกยิงลูกสา…
-stormDomeTick:158 stormDomeFire:173 stormDomeSlam:181 updateStorm:186
+§155 อัลติ: ร่างเทพสายฟ้า 10 วิ
+GODL:156
+§158 สกิล 6 (3 stacks): ลูกสายฟ้าโดม — ทะยานขึ้น บินเล็ง 3 วิ คลิกยิงลูกสา…
+stormDomeTick:159 stormDomeFire:174 stormDomeSlam:182 updateStorm:187
 
 ## js/09-earth.js (261) — สายดิน ⛰️ (ผู้ใช้ออกแบบทั้งหมด — designs/earth.md §0 FINAL SPEC) • ฝั่งโฮสต์
 §8 Tectonic Crush: Stand ดันช้า (TECT.v.push) แล้วกำแพงปิดเร็ว (TECT.v.s…
@@ -100,26 +99,26 @@ MIND:66 summonMin:72 minTarget:81 minShoot:88 updateMins:93 aimTarget:133 SDOME:
 §180 ร่ายคาถา
 castSlot:181 castUlt:196
 
-## js/09-water.js (167) — 
+## js/09-water.js (168) — 
 WATERP:7 WAV:11 wtOn:17 wtInBeam:19
-§22 ทุกเฟรมของผู้เล่นสายน้ำ (เรียกจาก updatePlayer หลังส่วนโล่)
-waterTick:23 waterSpd:38 waterReset:39
-§41 BA: ตวัดไม้สร้างเส้นน้ำ → ยิง 3 นัดตามเมาส์ • Moonwater = ลำน้ำ
-WT_BA_H:42 waterBasic:43 waterLineTick:50 waterMoonBeam:56
-§59 Dash: จมดิน ทิ้งร่างโคลน → โผล่ห่าง 300 ทิศที่หัน • 6 วิกดอีกที = กลั…
-waterDash:60 waterSinkTick:69
-§75 ดาเมจใดๆ ของเรา → ลูกผู้ช่วยยิงตาม (เรียกจาก damage() ใน js/12)
-waterOnHit:76 waterFamTick:78
-§83 Riptide: คลื่นยักษ์วิ่งไปข้างหน้า พัดศัตรูติดไปจนสุดทาง
-waterWaveTick:84
-§92 Abyssal Beam: ร่าย 0.5 วิ → ยิงลำน้ำ 3 วิ (ยืนนิ่ง ลอยนิดหน่อย หมุนตา…
-waterBeamStop:94 waterBeamTick:102 waterMBTick:113
-§117 อัลติ Dragon of the Deep
-waterDragonTick:118
-§132 ทุกเฟรม (ทั้งเกม)
-updateWater:133 waterSnapP:139 waterSnapW:141 WT_RP:144 WT_FM:147 WT_CG:149 WT_AB:153 WT_MW:156 WT_UL:158
+§23 ทุกเฟรมของผู้เล่นสายน้ำ (เรียกจาก updatePlayer หลังส่วนโล่)
+waterTick:24 waterSpd:39 waterReset:40
+§42 BA: ตวัดไม้สร้างเส้นน้ำ → ยิง 3 นัดตามเมาส์ • Moonwater = ลำน้ำ
+WT_BA_H:43 waterBasic:44 waterLineTick:51 waterMoonBeam:57
+§60 Dash: จมดิน ทิ้งร่างโคลน → โผล่ห่าง 300 ทิศที่หัน • 6 วิกดอีกที = กลั…
+waterDash:61 waterSinkTick:70
+§76 ดาเมจใดๆ ของเรา → ลูกผู้ช่วยยิงตาม (เรียกจาก damage() ใน js/12)
+waterOnHit:77 waterFamTick:79
+§84 Riptide: คลื่นยักษ์วิ่งไปข้างหน้า พัดศัตรูติดไปจนสุดทาง
+waterWaveTick:85
+§93 Abyssal Beam: ร่าย 0.5 วิ → ยิงลำน้ำ 3 วิ (ยืนนิ่ง ลอยนิดหน่อย หมุนตา…
+waterBeamStop:95 waterBeamTick:103 waterMBTick:114
+§118 อัลติ Dragon of the Deep
+waterDragonTick:119
+§133 ทุกเฟรม (ทั้งเกม)
+updateWater:134 waterSnapP:140 waterSnapW:142 WT_RP:145 WT_FM:148 WT_CG:150 WT_AB:154 WT_MW:157 WT_UL:159
 
-## js/09-wind.js (256) — สายลม 🌪️ (ผู้ใช้ออกแบบทั้งหมด — designs/wind.md "คอนเซ็ปต์ใหม่") • ฝั่งโฮสต์ • ขั้นที่ 1…
+## js/09-wind.js (277) — 
 WINDP:8 WNV:12
 §19 ตัวช่วย
 wOn:20 wGain:21 wSeg:23 wFoeNear:24
@@ -132,21 +131,21 @@ windShieldBurst:84
 §88 Dash: ผลักศัตรูข้างหน้า + ดีดตัวเราถอยหลังลอยกลางอากาศ
 windDash:89
 §99 กำแพงลม Aegis Gale
-windWallMake:100 windWallStop:108 windWallBoom:109 windDmg:114 windProjHit:118 windWallHurt:121 windCollide:123
-§129 ทั้งสนาม: GaleBurst / กำแพงลม / ชนกำแพง
-updateWind:130
-§155 Windrift: ชาร์จปีก 0.2 → พุ่ง 400 (20 ม. ใน 0.09 วิ) แบบ Jett → ลงท่า…
-windDriftTick:156 windDriftWind:163
-§170 Vortex Bind: ทอร์นาโด 3 อันโค้ง 45° ห่าง 200 → 0.6 วิ ดึงกลับมาหยุด 6…
-windVortexTick:171
-§182 Void Spheres: หลุมดำลูกเดียว (ผู้ใช้ 2026-10-31, designs/wind.md)
-windVoidCast:185 windVoidTick:187
-§198 Featherwing: บิน 5 วิ → กดอีกครั้งสะบัดปีกไปข้างหน้า (เอียงลงพื้น) → …
-windFlyTick:199 windFlick:201
-§207 อัลติ Eye of Heaven
-windUltTick:210 windFloatZ:224 windSnapP:227 windSnapW:228
-§231 สกิล
-W_WL:232 W_DR:235 W_VX:237 W_VO:240 W_FW:242 W_UL:245
+windWallMake:100 windWallStop:108 windWallBoom:109 windDmg:114 windRay:118 windBlockLen:126 windProjHit:131 windWallHurt:135 windCollide:137
+§143 ทั้งสนาม: GaleBurst / กำแพงลม / ชนกำแพง
+updateWind:144
+§176 Windrift: ชาร์จปีก 0.2 → พุ่ง 400 (20 ม. ใน 0.09 วิ) แบบ Jett → ลงท่า…
+windDriftTick:177 windDriftWind:184
+§191 Vortex Bind: ทอร์นาโด 3 อันโค้ง 45° ห่าง 200 → 0.6 วิ ดึงกลับมาหยุด 6…
+windVortexTick:192
+§203 Void Spheres: หลุมดำลูกเดียว (ผู้ใช้ 2026-10-31, designs/wind.md)
+windVoidCast:206 windVoidTick:208
+§219 Featherwing: บิน 5 วิ → กดอีกครั้งสะบัดปีกไปข้างหน้า (เอียงลงพื้น) → …
+windFlyTick:220 windFlick:222
+§228 อัลติ Eye of Heaven
+windUltTick:231 windFloatZ:245 windSnapP:248 windSnapW:249
+§252 สกิล
+W_WL:253 W_DR:256 W_VX:258 W_VO:261 W_FW:263 W_UL:266
 
 ## js/10-net.js (198) — 
 PREFIX:4 NET:5 RC:9 TURN_SERVERS:12 ICE:13 PEER_OPT:14 TURN_URL:16 ICE_READY:18 JN:22 LAG:24 lagDo:25 hostSend:26 LOBBY:27 genCode:28 sendAll:29 NETD_KEYS:33 NETD:33 netDeltaReset:34 netDelta:35 NET_MAX:49 _netTE:49 netSendSnap:50 NETU:62 netUndelta:63 setStatus:69 hostGame:71 hostPeer:79 netConnect:98 joinWatch:109 joinFail:124 netLost:130 joinGame:145 joinPeer:156 clientOnData:171 leave:186 leaveRoom:188
@@ -459,7 +458,7 @@ fxLoopName:356 blzFxName:357 fxLoopKeep:358 fshHitFx:360 fxBind:363
 §374 แม่แบบ playFx เป็นไฟล์ (assets/fx/tpl/*, sig/*, rec/*)
 fxTpl:376
 
-## js/46-fx-make.js (352) — 
+## js/46-fx-make.js (353) — 
 FXMK:10 MKD:11 mkRng:12 mkHash:13 mkNoise:15 mkL:17 mkR2:18
 §19 ที่เก็บจุด/สามเหลี่ยม
 mkG:21 mkPc:22 mkV:23 mkQ:24 mkAppend:25 mkCopy:26 mkFlat:27 _mkv:28 mkXf:29 mkThree:32 mkTRS:34 mkGrid:37
@@ -473,13 +472,13 @@ fxMeshLoad:208 fxMeshGeo:210 fxMeshSet:212 fxTexLoad:214 fxTexUse:217 fxTexNeed:
 §221 โมเดลงอกทีละชิ้น (ชั้น mesh: grow 0..1 เส้นโค้งได้, stagger, growBy)
 FXGROWBY:223 fxGrowInit:224 fxGrowTick:226
 §231 วัสดุภาพบนรูปทรง (mat:"tex") — ภาพที่วาดในสตูดิโอ (tex/…) ไหลบนผิว + …
-fxTexMat:233 fxTexMatBind:245 fxTexMatTick:248
-§249 เศษโมเดลกระเด็น (emit look:"model") — หิน ผลึก ขนนก เศษดาบ: หมุน ตกตา…
-FXMP:251 MPLOD:255 MPLOD_PX:255 MPLOD_ON:255 fxMPParticleGeo:256 fxMPMat:261 fxMPGroup:265 _mpM:270 _mpQ:270 _mpE:270 _mpP:270 _mpS:270 fxMPUpdate:271 fxMPClear:285 fxMPSpawn:287
-§291 อากาศบิดเบี้ยว (ชั้น warp) — ไอร้อน / คลื่นกระแทกบิดภาพ / เลนส์โป่ง •…
-WB:294 wbInit:295 wbBegin:305 wbEnd:306 fxWarpMake:307 fxWarpTick:320
-§328 ไฟ 3 มิติจากการจำลอง (ชั้น vol) — ไฟล์รูปแบบเดียวกับที่เพื่อน bake จา…
-FXVOL:331 fxVolLoad:332 fxVolTex:336 fxVolSet:339 fxVolReady:340 fxVolMake:341 fxVolTick:344 fxPreAssets:349 fxAssetsWait:351
+fxTexMat:233 fxTexMatBind:246 fxTexMatTick:249
+§250 เศษโมเดลกระเด็น (emit look:"model") — หิน ผลึก ขนนก เศษดาบ: หมุน ตกตา…
+FXMP:252 MPLOD:256 MPLOD_PX:256 MPLOD_ON:256 fxMPParticleGeo:257 fxMPMat:262 fxMPGroup:266 _mpM:271 _mpQ:271 _mpE:271 _mpP:271 _mpS:271 fxMPUpdate:272 fxMPClear:286 fxMPSpawn:288
+§292 อากาศบิดเบี้ยว (ชั้น warp) — ไอร้อน / คลื่นกระแทกบิดภาพ / เลนส์โป่ง •…
+WB:295 wbInit:296 wbBegin:306 wbEnd:307 fxWarpMake:308 fxWarpTick:321
+§329 ไฟ 3 มิติจากการจำลอง (ชั้น vol) — ไฟล์รูปแบบเดียวกับที่เพื่อน bake จา…
+FXVOL:332 fxVolLoad:333 fxVolTex:337 fxVolSet:340 fxVolReady:341 fxVolMake:342 fxVolTick:345 fxPreAssets:350 fxAssetsWait:352
 
 ## js/47-earth-view.js (686) — 
 ECOL:9 EGUARD_BIG:14 EGUARD:14 CB:15 EV:16 eW:17 eYaw:18
@@ -686,25 +685,25 @@ waterEfx:184
 §212 HUD: เกจฮีลโล่ (โค้งซ้ายรอบเป้าเล็ง)
 drawWaterHud:213
 
-## js/68-wind-view.js (230) — 
+## js/68-wind-view.js (234) — 
 WV:6 WN_BODY:7 WN_AIR_FEET:7 windCharacterPose:9 wvState:25 wvAlive:26
 §27 ทุกเฟรมของผู้เล่นสายลม: ปีกติดหลัง / ปีกห่อตอนยกโล่ / ดูดลมชาร์จเกจ
 windFX:28
 §47 กำแพงลมจาก snapshot (ตามตำแหน่ง/ลบเมื่อหมด)
-syncWind:48 wvWall:57 wvHitFx:58 wvAimFx:59
-§60 เหตุการณ์ (efx z 'wn…')
-windEfx:61
-§103 HUD รอบเป้าเล็ง: เกจ GaleBurst (โค้งซ้าย) + ชาร์จกำแพงลม (จุด 3 จุดใต…
-drawWindHud:104
-§111 ตัวช่วยเล็งกำแพงลม (เห็นเฉพาะเรา): เส้นโค้งเรืองที่จุดวาง (คลิกขวา) +…
-wvAimGhost:112
-§123 ปีกเวทสายลมติดหลัง: ขนนก 8+4 เส้นต่อข้าง ทำจากสายลม (shader) + ริบบิ้…
-WWS:125 WWU:125 WW_NOISE:126 _wwMat:131 wwMats:132 wwFeatherGeo:178 WW_PRI:189 WW_COV:191 WW_RIB:192 _wwGeo:193 makeWindWings:194 wwCue:208 poseWindWings:212
+syncWind:48 wvWall:61 wvHitFx:62 wvAimFx:63
+§64 เหตุการณ์ (efx z 'wn…')
+windEfx:65
+§107 HUD รอบเป้าเล็ง: เกจ GaleBurst (โค้งซ้าย) + ชาร์จกำแพงลม (จุด 3 จุดใต…
+drawWindHud:108
+§115 ตัวช่วยเล็งกำแพงลม (เห็นเฉพาะเรา): เส้นโค้งเรืองที่จุดวาง (คลิกขวา) +…
+wvAimGhost:116
+§127 ปีกเวทสายลมติดหลัง: ขนนก 8+4 เส้นต่อข้าง ทำจากสายลม (shader) + ริบบิ้…
+WWS:129 WWU:129 WW_NOISE:130 _wwMat:135 wwMats:136 wwFeatherGeo:182 WW_PRI:193 WW_COV:195 WW_RIB:196 _wwGeo:197 makeWindWings:198 wwCue:212 poseWindWings:216
 
-## js/69-broom.js (228) — ไม้กวาด (ผู้ใช้ 2026-10-29): บินแบบเครื่องบิน + ยิงลำแสงตามสาย + อนิเ…
+## js/69-broom.js (229) — ไม้กวาด (ผู้ใช้ 2026-10-29): บินแบบเครื่องบิน + ยิงลำแสงตามสาย + อนิเ…
 BRM:9 BSK:11 BROOM_SK:17 broomVert:38 broomMove:50 broomStrike:68 broomStrikeTick:77 broomFlak:85 broomAct:96 broomOff:102 broomBeam:104
-§125 ฝั่งจอ
-broomHead:127 BBEAM:134 _bbGeo:135 broomView:136 broomMountFx:165 broomDismountFx:173 broomBeamFx:175 broomSkFx:191 broomStrikeFx:204 broomFlakFx:209 broomHud:214 broomHudT:215 broomTick:224
+§126 ฝั่งจอ
+broomHead:128 BBEAM:135 _bbGeo:136 broomView:137 broomMountFx:166 broomDismountFx:174 broomBeamFx:176 broomSkFx:192 broomStrikeFx:205 broomFlakFx:210 broomHud:215 broomHudT:216 broomTick:225
 
 ## js/70-water-dragon.js (476) — 
 WDG:7 wdgBuild:8 T:9 root:9 fixed:9 rings:10 sides:10 geoOf:11 skin:12 faceSkin:40 group:41 head:42 faceTime:44 groundY:44 faceMaterial:45 faceBlue:50 hornBlue:50 ridgeCyan:50 profile:52 headProfile:53 faceGeo:58 fp:58 fc:58 fi:58 faceRings:58 faceSides:58 navy:59 aqua:59 belly:59 flowHi:59 neckBlend:59 headStroke:71 eyePatch:72 waterCrest:87 bodyGeo:113 bodyP:113 bodyUV:113 indices:113 body:119 finShape:121 finGeo:122 finPos:124 finUV:124 finSkin:126 fins:127 limbSkin:129 clawSkin:130 taperedLimb:131 arms:138 bodyLength:148 intro:148 settleWindow:148 tipHz:148 bodyBulk:148 bodyRadius:149 flight:151 quarters:152 step:152 dr:152 dy:152 spiralKnot:153 first:154 entry:154 crest:158 bank:161 corner:161 cruiseEntry:161 quarterHandle:164 leadLength:166 up:170 zAxis:170 yAxis:170 smooth:171 startAt:172 startD:172 startDistance:174 distanceToCruise:174 hoverSpeed:174 fastDuration:174 brakeDuration:174 startRamp:174 fastSpeed:175 progress:176
@@ -747,4 +746,4 @@ surfSync:48 surfQuality:52
 SURF_VS:54 SURF_VS_BODY:55 SURF_FS:66 SURF_FS_BODY:67 surfOk:97 surfApply:98 surfScene:110
 §111 ปรับค่า (tune.html / F8)
 
-(88 files, 21432 lines)
+(88 files, 21461 lines)

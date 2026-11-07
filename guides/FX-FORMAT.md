@@ -598,6 +598,7 @@ Free-form polygon mesh you shape point by point in the studio (select the part, 
 | `rows` | int | `8` | 1–8 |  | จำนวนแถว |
 | `kind` | enum (loop/life) | `loop` |  |  | loop = เล่นวนต่อเนื่อง • life = เล่นครั้งเดียวตามอายุเม็ด |
 | `fps` | int | `24` | 4–60 |  | เฟรม/วิ (loop บนการ์ดภาพ) |
+| `blend` | bool | `false` |  |  | เบลนด์เฟรมต่อเฟรม (ลื่นขึ้นบนโมเดล mat:tex ตอน fps ต่ำ) — เปิดเมื่อภาพเป็นลายไหลต่อเนื่อง ไม่ใช่ภาพเปลี่ยนทีละช็อต |
 | `ramp` | ramp | `fire` |  |  | สี: ชื่อจาน (ramps) หรือ [[ตำแหน่ง 0-1,"#rrggbb"],...] |
 | `add` | bool | `true` |  |  | เรืองแสง (บวกแสง) — ปิด = ทึบแบบควัน |
 | `span` | num | `1` | 0.25–8 |  | เล่นกี่รอบตลอดอายุเม็ด |

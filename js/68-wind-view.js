@@ -48,7 +48,11 @@ function windFX(o,p,pz,now,dt){
 function syncWind(v,dt,now){
   const seen=new Set();
   for(const w of (v.WW||[])){seen.add(w[0]);const o=WV.wl.get(w[0]);if(!o)continue;
-    if(o.I){o.I.x=w[1];o.I.y=w[2];}if(o.P){o.P.x=w[1];o.P.y=w[2];if(!w[6]){fxStop(o.P);o.P=null;}}o.x=w[1];o.y=w[2];o.a=w[3];}
+    // ตำแหน่งภาพลื่นทุกเฟรม: กำแพงที่กำลังดันเลื่อนต่อด้วยความเร็วเดิมระหว่างรอ snapshot แล้วค่อยดึงเข้าหาค่าจริง (ไม่กระตุกตามอัตรา snapshot)
+    if(o.sx===undefined){o.sx=w[1];o.sy=w[2];}
+    if(w[6]){o.sx+=Math.cos(w[3])*W_WL.spd*dt;o.sy+=Math.sin(w[3])*W_WL.spd*dt;}
+    {const k=Math.min(1,dt*14);o.sx+=(w[1]-o.sx)*k;o.sy+=(w[2]-o.sy)*k;}
+    if(o.I){o.I.x=o.sx;o.I.y=o.sy;}if(o.P){o.P.x=o.sx;o.P.y=o.sy;if(!w[6]){fxStop(o.P);o.P=null;}}o.x=w[1];o.y=w[2];o.a=w[3];}
   const sv=new Set();
   for(const o of (v.WO||[])){sv.add(o[0]);const I=WV.vo.get(o[0]);if(I){I.x=o[1];I.y=o[2];}}   // หลุมดำ Void Spheres เลื่อนตามโฮสต์
   for(const [id,I] of WV.vo)if(!sv.has(id)){fxStop(I);WV.vo.delete(id);}

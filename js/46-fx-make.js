@@ -232,18 +232,19 @@ function fxGrowTick(S,gv,st,by){const G=S.gp;if(!G)return;const key=gv*1000+st*7
 // uvTile [u,v] = ปูกี่ซ้ำ • uvScroll [u,v] = ไหลกี่รอบ/วิ • col = ย้อมสี (#ffffff = สีตามภาพ) • col2 + rim = ขอบเรือง • dis = สลายตัวแบบขอบไหม้
 function fxTexMat(name,o){const X=FXMK.tex.get(name);if(!X)fxTexNeed(name);
   const U={uMap:{value:null},uGrid:{value:new THREE.Vector2(1,1)},uFr:{value:0},uRep:{value:new THREE.Vector2(...(o.tile||[1,1]))},uScr:{value:new THREE.Vector2(...(o.scroll||[0,0]))},time:FIRE_U.time,
-    uC1:{value:new THREE.Color(o.col)},uC2:{value:new THREE.Color(o.col2)},uRim:{value:o.rim},uOp:{value:1},uInt:{value:1},uDis:{value:0},uAdd:{value:1},uNz:{value:NOISETEX},uHas:{value:0}};
+    uC1:{value:new THREE.Color(o.col)},uC2:{value:new THREE.Color(o.col2)},uRim:{value:o.rim},uOp:{value:1},uInt:{value:1},uDis:{value:0},uAdd:{value:1},uBl:{value:0},uNz:{value:NOISETEX},uHas:{value:0}};
   const m=new THREE.ShaderMaterial({uniforms:U,transparent:true,depthWrite:false,side:THREE.DoubleSide,
     blending:THREE.CustomBlending,blendSrc:THREE.OneFactor,blendDst:THREE.OneMinusSrcAlphaFactor,blendSrcAlpha:THREE.OneFactor,blendDstAlpha:THREE.OneMinusSrcAlphaFactor,
     vertexShader:'varying vec2 vUv;varying vec3 vN;varying vec3 vV;void main(){vUv=uv;vec4 mv=modelViewMatrix*vec4(position,1.0);vN=normalize(normalMatrix*normal);vV=normalize(-mv.xyz);gl_Position=projectionMatrix*mv;}',
-    fragmentShader:'uniform sampler2D uMap,uNz;uniform vec2 uGrid,uRep,uScr;uniform vec3 uC1,uC2;uniform float uFr,time,uRim,uOp,uInt,uDis,uAdd,uHas;varying vec2 vUv;varying vec3 vN;varying vec3 vV;'+
+    fragmentShader:'uniform sampler2D uMap,uNz;uniform vec2 uGrid,uRep,uScr;uniform vec3 uC1,uC2;uniform float uFr,time,uRim,uOp,uInt,uDis,uAdd,uHas,uBl;varying vec2 vUv;varying vec3 vN;varying vec3 vV;'+
       'void main(){vec2 uv=vUv*uRep+uScr*time;float N=uGrid.x*uGrid.y;vec4 t=vec4(1.0);'+
-      'if(uHas>0.5){if(N>1.5){uv=fract(uv);float f0=mod(floor(uFr),N);uv=vec2((mod(f0,uGrid.x)+uv.x)/uGrid.x,1.0-(floor(f0/uGrid.x)+1.0-uv.y)/uGrid.y);}t=texture2D(uMap,uv);}else discard;'+
+      'if(uHas>0.5){if(N>1.5){uv=fract(uv);float f0=mod(floor(uFr),N);vec2 q=uv;uv=vec2((mod(f0,uGrid.x)+q.x)/uGrid.x,1.0-(floor(f0/uGrid.x)+1.0-q.y)/uGrid.y);t=texture2D(uMap,uv);'+
+      'if(uBl>0.5){float f1=mod(f0+1.0,N);vec2 u1=vec2((mod(f1,uGrid.x)+q.x)/uGrid.x,1.0-(floor(f1/uGrid.x)+1.0-q.y)/uGrid.y);t=mix(t,texture2D(uMap,u1),fract(uFr));}}else t=texture2D(uMap,uv);}else discard;'+
       'float fr=1.0-abs(dot(normalize(vN),normalize(vV))),rim=pow(fr,2.0)*uRim;float n=texture2D(uNz,vUv*vec2(2.0,1.0)).r;if(n<uDis)discard;float edge=uDis>0.001?1.0-smoothstep(uDis,uDis+0.06,n):0.0;'+
       'vec3 c=t.rgb*uC1*uInt+uC2*(rim+edge*1.5);float a=clamp(t.a+rim*0.5+edge,0.0,1.0)*uOp;gl_FragColor=vec4(c*a,a*(uAdd>0.5?0.35:1.0));}'});
   m.userData.tex=name;fxTexMatBind(m);return m;}
 function fxTexMatBind(m){const u=m.uniforms;if(u.uHas.value)return;const X=FXMK.tex.get(m.userData.tex);if(!X||!X.tex)return;
-  u.uMap.value=X.tex;u.uGrid.value.set(X.o.cols,X.o.rows);u.uAdd.value=X.o.add?1:0;u.uHas.value=1;m.userData.fps=X.meta.kind==='loop'?(X.meta.fps||24):0;m.userData.span=X.o.span||1;
+  u.uMap.value=X.tex;u.uGrid.value.set(X.o.cols,X.o.rows);u.uAdd.value=X.o.add?1:0;u.uBl.value=X.meta.blend?1:0;u.uHas.value=1;m.userData.fps=X.meta.kind==='loop'?(X.meta.fps||24):0;m.userData.span=X.o.span||1;
   if(X.o.cols*X.o.rows===1&&X.tex.wrapS!==THREE.RepeatWrapping){X.tex.wrapS=X.tex.wrapT=THREE.RepeatWrapping;X.tex.needsUpdate=true;}}
 function fxTexMatTick(m,S,k){fxTexMatBind(m);const u=m.uniforms,N=u.uGrid.value.x*u.uGrid.value.y;if(N<=1)return;u.uFr.value=m.userData.fps?S.age*m.userData.fps:Math.min(N-1,k*N*(m.userData.span||1));}
 // ---------- เศษโมเดลกระเด็น (emit look:"model") — หิน ผลึก ขนนก เศษดาบ: หมุน ตกตามแรงโน้มถ่วง เด้งพื้น ย่อหายตอนท้าย ----------

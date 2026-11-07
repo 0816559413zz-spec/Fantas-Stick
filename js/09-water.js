@@ -16,7 +16,8 @@ PATHS[WATERP].vn={baCd:'เส้นน้ำ • ตวัดทุก (วิ)
 Object.assign(PDEF,{wdrop:{spd:WAV.baSpd,r:8,dmg:WAV.baDmg,life:WAV.baRange/WAV.baSpd,col:'#7fdcff'},wcage:{spd:600,r:14,dmg:0,life:0.5,col:'#b9f0ff'}});   // wcage: ค่าจริงตั้งจาก Aqua Cage (WT_CG) ตอนยิง
 const wtOn=p=>p&&p.pathIdx===WATERP;
 // จุดตัดของลำ (เส้นตรงจาก x,y ทิศ a ยาว L กว้าง w) กับเป้า
-function wtInBeam(t,x,y,a,L,w,h){const dx=t.x-x,dy=t.y-y,u=dx*Math.cos(a)+dy*Math.sin(a);if(u<0||u>L)return false;
+function wtInBeam(t,x,y,a,L,w,h,tm){const dx=t.x-x,dy=t.y-y,u=dx*Math.cos(a)+dy*Math.sin(a);if(u<0||u>L)return false;if(tm!==undefined&&u>windBlockLen(tm,x,y,a,L,h))return false;   // เลยกำแพงลมศัตรูไปแล้ว = ไม่โดน
+ 
   return Math.abs(-dx*Math.sin(a)+dy*Math.cos(a))<=w+(t.r||PR)&&Math.abs(cH(t)-h)<3;}
 
 // ---------- ทุกเฟรมของผู้เล่นสายน้ำ (เรียกจาก updatePlayer หลังส่วนโล่) ----------
@@ -98,7 +99,7 @@ function waterBeamStop(p,a,h){const c=Math.cos(a),s=Math.sin(a);
     if(BLDG.length)for(const b of sgNear(sgBld(),x,y,8,_sgPB))if(bldNear(b,x,y,8)&&bldPieceAt(b,x,y,hh,8)>=0)return d;
     for(const w of G.walls)if(p.team!==w.team&&hh<w.hgt&&(x-w.x)**2+(y-w.y)**2<(w.r+8)**2)return d;
     if(citySolidAt(x,y,hh))return d;}
-  return WT_AB.len;}
+  return Math.min(WT_AB.len,windBlockLen(p.team,p.x,p.y,a,WT_AB.len,h));}
 function waterBeamTick(p,dt){const B=p.wab;B.t-=dt;
   if(!p.alive||p.stun>0){p.wab=null;emit({k:'efx',z:'wtaboff',x:p.x,y:p.y,id:p.id});return;}
   p.wflt=0.2;p.wfz=WT_AB.lift;
@@ -106,12 +107,12 @@ function waterBeamTick(p,dt){const B=p.wab;B.t-=dt;
   p.ang=B.a;
   if(B.ph==='cast'){if(B.t<=0){B.ph='fire';B.t=WT_AB.t;B.k=0;emit({k:'efx',z:'wtab',x:Math.round(p.x),y:Math.round(p.y),h:p.z,a:Math.round(B.a*100)/100,id:p.id,n:1});}return;}
   // ไม่ทะลุ: ลำหยุดที่คนแรกในแนว โดนแค่คนนั้น (ผู้ใช้ 2026-11-01)
-  let first=null;B.L=waterBeamStop(p,B.a,p.z+1.3);for(const t of foesOf(p.team))if(wtInBeam(t,p.x,p.y,B.a,WT_AB.len,WT_AB.w,p.z+1.3)){const d=Math.hypot(t.x-p.x,t.y-p.y);if(d<B.L){B.L=d;first=t;}}
+  let first=null;B.L=waterBeamStop(p,B.a,p.z+1.3);for(const t of foesOf(p.team))if(wtInBeam(t,p.x,p.y,B.a,WT_AB.len,WT_AB.w,p.z+1.3,p.team)){const d=Math.hypot(t.x-p.x,t.y-p.y);if(d<B.L){B.L=d;first=t;}}
   B.k-=dt;if(B.k<=0){B.k+=WT_AB.tick;if(first){aoeHit(p,first,WT_AB.dmg,null);emit({k:'efx',z:'wtabhit',x:Math.round(first.x),y:Math.round(first.y),h:cH(first)});}}
   if(B.t<=0){p.wab=null;emit({k:'efx',z:'wtaboff',x:p.x,y:p.y,id:p.id});}}
 // ลำน้ำ Moonwater (ยิงแล้วหาย ทิศคงที่)
 function waterMBTick(b,dt){b.t+=dt;b.k-=dt;const p=G.players[b.o];
-  if(b.k<=0&&p){b.k+=b.tick;for(const t of foesOf(b.team))if(wtInBeam(t,b.x,b.y,b.a,b.len,b.w,b.h))aoeHit(p,t,b.dmg,null);}
+  if(b.k<=0&&p){b.k+=b.tick;for(const t of foesOf(b.team))if(wtInBeam(t,b.x,b.y,b.a,b.len,b.w,b.h,b.team))aoeHit(p,t,b.dmg,null);}
   return b.t<b.life-1e-6;}
 
 // ---------- อัลติ Dragon of the Deep ----------
