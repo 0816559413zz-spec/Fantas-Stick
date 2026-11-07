@@ -335,6 +335,7 @@ function grassTick(dt){
   if(!GRASS.mesh)grassBuild();
   const m=GRASS.mesh;
   if(screen!=='game'||!world){m.visible=false;GRASS.trail.length=0;return;}   // ล้างรอยตอนเข้าแมตช์ใหม่ = setScreen (js/19)
+  if(world.userData.grPend){m.visible=false;return;}   // รอ .glb พื้นจริง (js/28 buildFileMap) ก่อนถ่ายแผนที่หญ้า
   if(GRASS.key!==builtKey){GRASS.key=builtKey;const c=GRASS.cache.get(builtKey);
     if(c){Object.assign(GRASS,{tex:c.tex,texH:c.texH,box:c.box,n:c.n});airForMap();}
     else try{grassBake();}catch(e){console.error(e);GRASS.n=0;}}
@@ -364,4 +365,4 @@ function grassTick(dt){
   U.uGrN.value.set(Math.min(8,AIR.G.length),L.length,0);   // ลูปใน shader วนเฉพาะช่องที่ใช้
 }
 
-window.WD&&Object.assign(window.WD,{FIRE,grassScar});   // ทดสอบ/ดีบัก
+window.WD&&Object.assign(window.WD,{FIRE,grassScar,GRASS});   // ทดสอบ/ดีบัก
