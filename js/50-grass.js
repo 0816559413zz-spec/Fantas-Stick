@@ -94,7 +94,7 @@ function grassScar(x,y,el,s){const X=tx(x),Z=tz(y),r=0.8+2.1*s;
 // ช่องหนึ่ง: 0 ยังไม่ไหม้ → 1 ไหม้ (FIRE.burn วิ) → 2 ถ่านคุ (FIRE.ember วิ) → 3 ดับ (ไม่ไหม้ซ้ำ) • สร้างตอนไฟแรกของแมตช์ (ล้างพร้อม SCAR)
 // ปรับ: spread = ความเร็วลาม • burn = ช่องหนึ่งไหม้นานกี่วิ • max = เพดานช่องที่ไหม้พร้อมกัน (กันเฟรมตก)
 // on = สวิตช์หลัก: ปิดไว้ก่อน (ผู้ใช้ 2026-11-07 ขอเอาออกชั่วคราว เผื่อใช้อีก) • เปิดได้ด้วย ?firespread หรือ tune key gfx.fire.on = 1 • ปิด = ไฟไม่ลาม/ไม่เรือง (รอยไหม้ดำจาก grassScar ยังอยู่ตามเดิม)
-const FIRE={on:/[?&]firespread/.test(location.search),w:0,h:0,fuel:null,st:null,age:null,dur:null,D:null,tex:null,list:[],nw:[],acc:0,dirty:false,max:5000,burn:2.6,ember:3.2,spread:0.35,
+const FIRE={on:/[?&]firespread\b/.test(location.search),w:0,h:0,fuel:null,st:null,age:null,dur:null,D:null,tex:null,list:[],nw:[],acc:0,dirty:false,max:5000,burn:2.6,ember:3.2,spread:0.35,
   OFF:[[1,0],[-1,0],[0,1],[0,-1],[1,1],[-1,1],[1,-1],[-1,-1],[2,0],[-2,0],[0,2],[0,-2]],rate:new Float32Array(12)};
 // เรืองบนพื้น (ถ่านคุ) — ต่อท้าย emissivemap_fragment ของวัสดุพื้น (grLive)
 const GR_FIRE='{float fh=texture2D(uFire,(vGW.xz-uScarMap.xy)/uScarMap.zw).r*smoothstep(0.5,0.85,vGU);fh*=0.55+0.9*grN(vGW.xz*2.1+7.7);'+

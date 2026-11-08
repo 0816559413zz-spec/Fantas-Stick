@@ -841,7 +841,7 @@ function hubMergeStatic(S,F){
     const M=new THREE.Mesh(geo,bodyMat(L[0].material.side));M.castShadow=L[0].castShadow;M.receiveShadow=L[0].receiveShadow;M.name='hub_static';S.add(M);
     for(const m of L){m.parent.remove(m);if(!(m.geometry.userData&&m.geometry.userData.keep))m.geometry.dispose();}}
 }
-const NOHUBIDLE=/[?&]nohubidle/.test(location.search);
+const NOHUBIDLE=/[?&]nohubidle\b/.test(location.search);
 function hubRender(dt,now){
   const room=screen==='lobby'&&LOBBY&&LOBBY.ph==='lobby';
   if(!HUB.on||crOpen||!(screen==='menu'||room)){if(HUB.fovSet){cam.fov=SET.fov;cam.updateProjectionMatrix();HUB.fovSet=false;}document.body.classList.remove('hubOn');return false;}
