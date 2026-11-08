@@ -13,18 +13,18 @@ CITY_MID:140 CITY_C2:140 cityModeData:141 mapArea:157 AREA:158 areaClamp:160
 ## js/02-citytest.js (28) — แมพทดสอบเมืองใหญ่ (กล่องเทา) — ใช้วัดความลื่นของเครื่องยนต์ก่อนสร้างเ…
 CITY_N:4 CITY_B:4 CITY_ROAD:4 genCityTest:5 cityTestProps:19
 
-## js/02-data.js (377) — 
+## js/02-data.js (381) — 
 W:4 H:4 PR:4 PILLARS:6 SPAWNF:7 mulberry:9 genForest:10 genPitch:27 genHogsmeade:36
 §54 แผนที่โล่ง 3 แบบ (ผู้ใช้: ป่ามืดไม่สนุก อยากได้ที่โล่งๆ)
 genMeadow:55 genLake:61 genRuins:66
 §73 Test Place (ห้องฝึก): พื้นโล่งไม่มีสิ่งกีดขวาง
-TEST_W:75 TEST_H:75 TEST_C:75 TEST_VIL:75 TEST_GW:77 TEST_Z:78 TEST_ST:85 TEST_PH:86 testWalls:88 testDummySpots:90 testFences:92 genTest:105 testProps:120 trZone:133 trBotPad:134 genGreatHall:135 MAPS:143 MAP_OFF:156 RANDOM_MAPS:157 MAPID:158 MW:158 MH:158 OBS:158 setMapVars:159
-§160 แผนที่จากไฟล์ (Blender → assets/maps/<id>.json + .glb, สคริปต์ assets…
-FMAPS:163 b64i16:164 regFileMap:165 loadMapData:177 loadAllMapData:185 mapReady:188 mapOkFor:189
-§190 ของประกอบฉากที่พังได้ / ใช้ได้ (prop)
-PROPDEF:194 PROP_OFF_MODES:201 PROP_USE:203 PROPS:204 PROPON:204 genProps:205
-§225 ตัวละคร: บ้านฮอกวอตส์ + หน้าตา
-HOUSES:227 HAIRC:232 HAIRSTY:234 WOODC:237 WOODN:238 WCOREC:239 WCOREN:240 WANDSTY:241 WANDN:246 WANDNN:261 EYEC:262 SKINC:263 CLOAKC:264 TIESTY:265 LOOKK:266 LOOKN:266 lookStr:267 parseLook:268 randLook:269 LOOKS:270 LOOKP:270 KITS:270 getKit:271 getLook:272 CREST_SH:273 CREST_PAT:274 starPts:279 CREST_ANI:281 crestSVG:287 houseColor:295 TEAMC:296 TEAMN:296 NOBROOM:298 ROOM_MAX:300 MODES:301 PLAY:313 PDEF:314 EDEF:341 POOLS:354 CDK:364 BUFFS:367 BRAR:376 rollRar:377
+TEST_W:75 TEST_H:75 TEST_C:75 TEST_VIL:75 TEST_GW:77 TEST_Z:78 TEST_ST:85 TEST_PH:86 testWalls:88 testDummySpots:90 testFences:92 genTest:105 testProps:120 trZone:133 trBotPad:134 trFixSpots:136 trShow:138 genGreatHall:139 MAPS:147 MAP_OFF:160 RANDOM_MAPS:161 MAPID:162 MW:162 MH:162 OBS:162 setMapVars:163
+§164 แผนที่จากไฟล์ (Blender → assets/maps/<id>.json + .glb, สคริปต์ assets…
+FMAPS:167 b64i16:168 regFileMap:169 loadMapData:181 loadAllMapData:189 mapReady:192 mapOkFor:193
+§194 ของประกอบฉากที่พังได้ / ใช้ได้ (prop)
+PROPDEF:198 PROP_OFF_MODES:205 PROP_USE:207 PROPS:208 PROPON:208 genProps:209
+§229 ตัวละคร: บ้านฮอกวอตส์ + หน้าตา
+HOUSES:231 HAIRC:236 HAIRSTY:238 WOODC:241 WOODN:242 WCOREC:243 WCOREN:244 WANDSTY:245 WANDN:250 WANDNN:265 EYEC:266 SKINC:267 CLOAKC:268 TIESTY:269 LOOKK:270 LOOKN:270 lookStr:271 parseLook:272 randLook:273 LOOKS:274 LOOKP:274 KITS:274 getKit:275 getLook:276 CREST_SH:277 CREST_PAT:278 starPts:283 CREST_ANI:285 crestSVG:291 houseColor:299 TEAMC:300 TEAMN:300 NOBROOM:302 ROOM_MAX:304 MODES:305 PLAY:317 PDEF:318 EDEF:345 POOLS:358 CDK:368 BUFFS:371 BRAR:380 rollRar:381
 
 ## js/03-spells-core.js (224) — 
 ICONS:8 ICOALIAS:9 hasIco:10 ICOBASE:12 icoURL:13 ICO:14 icoTint:15 icoHTML:24 PATHS:25 SPELL_LIST:34 SPELLS:34 defSpell:35 SLOTK:36 BRMAP:36 KITP:37 parseKit:38 cleanKit:54 setKit:55 pathReset:58
@@ -184,10 +184,12 @@ hostPick:2 clearField:10 modeLogic:11 endMatch:80 matchOver:105
 ## js/15-arena.js (71) — 
 AR_SIDE:7 AR_TEAM:7 AR_MAX:7 arPads:8 arOn:9 arState:10 arBusy:11 arReady:13 arNames:21 arenaTick:22 arStart:43 arEnd:51 arReset:57 arAddBots:64
 
-## js/15-bot.js (277) — 
-BOT_LV:8 BOT_SKIP:16 botKit:17 botPersona:23 BOT_TEAM:24 BOT_MAX:24 bots:25 humans:26 botInZone:28 spawnBot:34 OWNED_K:47 clearOwned:48 removeBots:49 botPickTarget:51 BOT_PB:69 botPlay:70 aiBot:189 trBotCmd:241
-§250 บอทในห้องรอ (ผู้ใช้ 2026-10-31 "สร้างห้องเล่นกับบอทได้")
-BOT_MODES:254 lobbyBots:255 lobbyBotAdd:256 lobbyBotFill:265 lobbyBotCmd:270 lobbyBotsStart:275 botDebug:277
+## js/15-bot.js (316) — 
+BOT_LV:8 BOT_SKIP:16 botKit:17 botPersona:23 BOT_TEAM:24 BOT_MAX:24 bots:25 humans:26 botInZone:28 spawnBot:35 OWNED_K:49 clearOwned:50 removeBots:51 botPickTarget:53 BOT_PB:71 botPlay:72
+§191 บอทยืนนิ่ง (ห้องฝึก): หุ่นผู้เล่น = ไม่ทำอะไร • บอทโชว์สกิล (ai.show)…
+showName:192 showBot:193 stillBot:194 trShowCmd:209 aiBot:227 trBotCmd:280
+§289 บอทในห้องรอ (ผู้ใช้ 2026-10-31 "สร้างห้องเล่นกับบอทได้")
+BOT_MODES:293 lobbyBots:294 lobbyBotAdd:295 lobbyBotFill:304 lobbyBotCmd:309 lobbyBotsStart:314 botDebug:316
 
 ## js/15-botnav.js (135) — 
 NAV_MAPS:14 NAV_EYE:14 NAV:15 navOn:17 navSig:18 navEnsure:25 navBuild:31 navCell:48 navWalk:49 navRay:51 navFree:56 navPath:62 _navFoe:80 botThink:83 botNav:89
@@ -195,20 +197,20 @@ NAV_MAPS:14 NAV_EYE:14 NAV:15 navOn:17 navSig:18 navEnsure:25 navBuild:31 navCel
 ## js/15-botplay.js (85) — 
 BOT_RANGE:7 botMem:9 botWallBehind:11 _bspd:21 botSave:23 botWant:25 botCombo:61
 
-## js/15-modes.js (410) — 
-sendPriv:5 TASKF:9 taskPts:10 raceRings:11 modeInit:17 spawnDummy:59 trainTick:64 TR_KEYS:81 trTeams:83 trCmd:93 hostEndTraining:111
-§113 ควิดดิช
-quidThrow:114 quidDrop:120 quidArea:126 quidTick:127 snitchTick:163
-§186 แข่งไม้กวาด
-raceTick:187 raceRank:209
-§219 แบทเทิลรอยัล
-brTick:220 ITEMN:234 brPick:235
-§244 หาลอร์ดโวลเดอมอร์
-impActions:245 startMeeting:283 hostVote:290 meetTick:295 impCheck:314
-§322 ระเบิดที่ตั้งเวลาไว้ (ลูกไฟมังกร / คลื่นไฟ)
-bombTick:323 modeSnap:336
-§358 สร้าง snapshot ส่งให้ทุกเครื่อง
-r1:359 DEFP:361 packP:362 unpackP:363 makeSnap:364 PROF:382 pf:383 hostSent:384 hostLoop:385 HLW:400 pingN:410
+## js/15-modes.js (415) — 
+sendPriv:5 TASKF:9 taskPts:10 raceRings:11 modeInit:17 spawnDummy:62 trainTick:67 TR_KEYS:84 trTeams:86 trCmd:96 hostEndTraining:115
+§117 ควิดดิช
+quidThrow:118 quidDrop:124 quidArea:130 quidTick:131 snitchTick:167
+§190 แข่งไม้กวาด
+raceTick:191 raceRank:213
+§223 แบทเทิลรอยัล
+brTick:224 ITEMN:238 brPick:239
+§248 หาลอร์ดโวลเดอมอร์
+impActions:249 startMeeting:287 hostVote:294 meetTick:299 impCheck:318
+§326 ระเบิดที่ตั้งเวลาไว้ (ลูกไฟมังกร / คลื่นไฟ)
+bombTick:327 modeSnap:340
+§363 สร้าง snapshot ส่งให้ทุกเครื่อง
+r1:364 DEFP:366 packP:367 unpackP:368 makeSnap:369 PROF:387 pf:388 hostSent:389 hostLoop:390 HLW:405 pingN:415
 
 ## js/16-voice.js (89) — 
 VOICE:4 rosterIds:5 toggleMic:6 voiceSync:20 teamOn:37 teamOf:38 applyVoiceGates:39 VAC:49 onIncomingCall:50 voiceLevels:62 speakingIds:70 updateVoiceUI:76
@@ -299,7 +301,7 @@ CITY_STY:181 CITY_VEH:188 cityFacade:190 CITYK:203 _cZ:204 _cT:204 _cR:204 _cC:2
 §259 ตึกไฮไลต์ล้มทั้งตึก (ขั้น 7)
 _ctA:262 _ctB:262 _ctC:262 cityTowerPose:263 cityTowerAnim:271 cityTowerRubble:278 CAREA:292 cityAreaSync:293 cityViewSync:305 cityDebris:349 cityFX:358
 
-## js/28-maps-build.js (765) — สร้างแผนที่
+## js/28-maps-build.js (773) — สร้างแผนที่
 CANDLESYS:2 builtMap:3 builtKey:3 world:3 TORCHES:3 CANDLES:3 FIREFLIES:3 CRYSTAL:3 RUNE:3 SNITCH:3 BANNERS:3 SNOW:3 WCACHE:5 WCACHE_MAX:5 wkey:7 buildWorld:8 addW:42 _prewarmed:44 prewarmShaders:45 batchStatic:64 makeCandles:89 updateCandles:98 buildCastle:107 buildHogsmeade:173 buildGreatHall:261 buildForest:331
 §428 ทุ่งหญ้าฮอกวอตส์ (เย็น)
 ringTrees:429 grassTex:438 buildMeadow:439
@@ -310,7 +312,7 @@ buildLake:459
 §482 บรรยากาศที่ใช้ร่วมกัน (แผนที่จากโค้ด + แผนที่จากไฟล์ผ่าน fx ใน guides…
 makeSnow:483 makeFireflies:490 makeSnitch:497 fileMapFx:504
 §514 แผนที่จากไฟล์ Blender (guides/MAP-DESIGN.md)
-terrGeo:516 buildFileMap:524 tickM:564 TRPAD:565 ARPAD:565 signTex:566 testSign:567 buildTest:574 buildRuins:671 buildPitch:696
+terrGeo:516 buildFileMap:524 tickM:564 TRPAD:565 ARPAD:565 SHPAD:565 signTex:566 testSign:567 buildTest:574 buildRuins:679 buildPitch:704
 
 ## js/29-characters.js (439) — ระบบผ้า (เสื้อคลุมพลิ้วตามการเคลื่อนที่)
 makeCloak:2 updateCloth:10 wandNamed:34 wandSparks:83
@@ -379,12 +381,12 @@ ROLE_COL:37 roleTag:38 DESIGNED:39 spellTags:40 spellDescHTML:47 baseDescHTML:51
 §222 ฉากเปิด (#intro) + ประกายบนหน้าเมนู (#menuFx)
 TITLE:225 titleSpark:226 titleDraw:227 titleLoop:238 titleGo:249 JOINQ:257 ovResult:277
 
-## js/40-train-settings.js (221) — เมนูทดลอง (ห้องฝึก / Test Place)
+## js/40-train-settings.js (248) — เมนูทดลอง (ห้องฝึก / Test Place)
 trOpenF:2 trKey:2 trN:2 TR_OPTS:3 trToggle:4 trSend:9 trSync:14
 §48 แท่นเสกบอท (โซนเสกบอท ห้องฝึก, trBotPad js/02): ยืนบนแท่น = เมนูขึ้น …
-bpOpen:49 bpOn:49 bpKey:49 bpShow:51 bpSync:53 hovEl:97
-§98 หน้าตั้งค่า
-setRow:99 setTog:100 setTab:101 XHC:102 XHN:102 setOpts:103 SET_ICO:105 SET_EN:108 renderSettings:109 drawXhPrev:131 openSettings:132 closeSettings:134 modeIcon:190 modeTitle:191 renderLobby:192
+bpOpen:49 bpOn:49 bpKey:49 bpShow:51 bpSync:53 hovEl:124
+§125 หน้าตั้งค่า
+setRow:126 setTog:127 setTab:128 XHC:129 XHN:129 setOpts:130 SET_ICO:132 SET_EN:135 renderSettings:136 drawXhPrev:158 openSettings:159 closeSettings:161 modeIcon:217 modeTitle:218 renderLobby:219
 
 ## js/41-debug.js (171) — เครื่องมือทดสอบสมดุล (ใช้ผ่านคอนโซล WD.bal / WD.dmgTest เท่านั้น ผู้เล่นปกติไม่เห็น)
 §5 บอทต่อสู้แบบง่ายๆ: เล็งนำเป้า เดินรักษาระยะ+ส่ายไปมา ร่ายคาถาทุกครั้ง…
@@ -759,4 +761,4 @@ surfSync:48 surfQuality:52
 SURF_VS:54 SURF_VS_BODY:55 SURF_FS:66 SURF_FS_BODY:67 surfOk:97 surfApply:98 surfScene:110
 §111 ปรับค่า (tune.html / F8)
 
-(88 files, 21980 lines)
+(88 files, 22063 lines)

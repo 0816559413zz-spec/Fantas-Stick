@@ -562,7 +562,7 @@ function buildFileMap(id){
 }
 // ห้องฝึก: วัสดุขีดระยะ + ป้ายไม้ (ข้อความ 2 บรรทัด) — x,y = พิกัดเกม, ry = หันป้าย
 function tickM(){return new THREE.MeshBasicMaterial({color:'#ffffff',transparent:true,opacity:0.55});}
-let TRPAD=null,ARPAD=null;   // แท่นเสกบอท / แท่นเพิ่มบอทสังเวียน (กระพริบตอนยืนบน — bpSync js/40)
+let TRPAD=null,ARPAD=null,SHPAD=null;   // แท่นเสกบอท / แท่นเพิ่มบอทสังเวียน (กระพริบตอนยืนบน — bpSync js/40)
 function signTex(t1,t2){return texCanvas(512,160,g=>{g.fillStyle='#5a3a22';g.fillRect(0,0,512,160);g.strokeStyle='#e8c060';g.lineWidth=8;g.strokeRect(6,6,500,148);g.fillStyle='#f3dc94';g.textAlign='center';g.textBaseline='middle';g.font='bold 54px Kanit, sans-serif';g.fillText(t1,256,62);g.font=(t2.length>30?'24':'30')+'px Kanit, sans-serif';g.fillText(t2,256,118);});}
 function testSign(t1,t2,x,y,ry){
   const st=signTex(t1,t2);
@@ -625,6 +625,14 @@ function buildTest(){
       g.strokeStyle='rgba(190,160,255,0.95)';g.lineWidth=10;g.beginPath();g.arc(0,0,244,0,7);g.stroke();g.lineWidth=4;g.setLineDash([26,16]);g.beginPath();g.arc(0,0,190,0,7);g.stroke();g.setLineDash([]);
       g.fillStyle='rgba(240,232,255,0.95)';g.textAlign='center';g.textBaseline='middle';g.font='bold 56px Kanit, sans-serif';g.fillText('แท่นเสกบอท',0,-14);g.font='32px Kanit, sans-serif';g.fillText('ยืนบนแท่น = เปิดเมนู',0,44);});
     const m=TRPAD=addW(new THREE.Mesh(new THREE.PlaneGeometry(B.r*2*S3,B.r*2*S3),new THREE.MeshBasicMaterial({map:t,transparent:true,depthWrite:false})));m.rotation.x=-Math.PI/2;m.position.set(tx(B.x),0.04,tz(B.y));}
+  {// ลานดูสกิล (trShow js/02): แท่นยืนดู (เมนูสั่งบอทโชว์) + วงจุดยืนบอทโชว์ + วงหุ่นเป้า + เส้นเล็ง
+    const S=trShow(),ring=(P,rgb,t1,t2)=>{const t=texCanvas(512,512,g=>{g.translate(256,256);g.fillStyle=`rgba(${rgb},0.22)`;g.beginPath();g.arc(0,0,250,0,7);g.fill();
+        g.strokeStyle=`rgba(${rgb},0.95)`;g.lineWidth=10;g.beginPath();g.arc(0,0,244,0,7);g.stroke();g.lineWidth=4;g.setLineDash([26,16]);g.beginPath();g.arc(0,0,190,0,7);g.stroke();g.setLineDash([]);
+        g.fillStyle='rgba(255,252,240,0.97)';g.textAlign='center';g.textBaseline='middle';g.font='bold 62px Kanit, sans-serif';g.fillText(t1,0,-14);g.font='34px Kanit, sans-serif';g.fillText(t2,0,44);});
+      const m=addW(new THREE.Mesh(new THREE.PlaneGeometry(P.r*2*S3,P.r*2*S3),new THREE.MeshBasicMaterial({map:t,transparent:true,depthWrite:false})));m.rotation.x=-Math.PI/2;m.position.set(tx(P.x),0.04,tz(P.y));return m;};
+    SHPAD=ring(S.v,'255,200,90','ดูสกิล','ยืนบนแท่น = เมนูสั่งบอท');ring({x:S.c.x,y:S.c.y,r:110},'120,200,255','บอทโชว์','ยืนนิ่ง ใช้สกิลตามสั่ง');ring({x:S.t.x,y:S.t.y,r:110},'255,130,110','เป้า','หุ่นผู้เล่น');
+    const L=Math.hypot(S.t.x-S.c.x,S.t.y-S.c.y),ln=addW(new THREE.Mesh(new THREE.PlaneGeometry(L*S3,0.3),new THREE.MeshBasicMaterial({color:'#ffe9a8',transparent:true,opacity:0.35,depthWrite:false})));
+    ln.rotation.x=-Math.PI/2;ln.rotation.z=-Math.atan2(S.t.y-S.c.y,S.t.x-S.c.x);ln.position.set(tx((S.c.x+S.t.x)/2),0.035,tz((S.c.y+S.t.y)/2));}
   {// รั้วโซน (testFences ใน js/02): เสา + ราว 2 เส้น เป็น InstancedMesh (2 draw call) • ประตู = เสาสูง 2 ต้น + คาน + ป้ายชื่อโซน 2 หน้า
     const F=testFences(),wd=new THREE.MeshStandardMaterial({color:'#8a6238',roughness:0.9}),posts=[],rails=[];
     for(const [x1,y1,x2,y2] of F.segs){const L=Math.hypot(x2-x1,y2-y1),n=Math.max(1,Math.round(L/160)),a=Math.atan2(y2-y1,x2-x1);

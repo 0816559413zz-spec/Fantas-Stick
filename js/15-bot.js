@@ -31,14 +31,16 @@ function botInZone(zk,x,y,pad){
   return x>z.x1-pad&&x<z.x2+pad&&y>z.y1-pad&&y<z.y2+pad;
 }
 // เสกบอท: path = เลขสาย (PATHS) • lv 0–2 • ใกล้จุด x,y • owner = id คนเสก
-function spawnBot(path,lv,x,y,zk,owner){
-  if(bots().length>=(G.ph==='lobby'?ROOM_MAX-1:BOT_MAX))return null;   // ห้องรอ: เติมบอทได้จนเต็มห้อง (12) • ห้องฝึก/สังเวียนยัง 6
+// fx: 1 = หุ่นผู้เล่น (ยืนนิ่ง ไม่โจมตี ทีม 51) • 2 = บอทโชว์สกิล (ยืนนิ่ง ใช้สกิลตามที่สั่ง trShowCmd ทีม 50) — ไม่นับในเพดานบอท
+function spawnBot(path,lv,x,y,zk,owner,fx){
+  if(!fx&&bots().filter(q=>!q.ai.still).length>=(G.ph==='lobby'?ROOM_MAX-1:BOT_MAX))return null;   // ห้องรอ: เติมบอทได้จนเต็มห้อง (12) • ห้องฝึก/สังเวียนยัง 6
   G.botN=(G.botN|0)+1;
-  const P=PATHS[path]&&!PATHS[path].off?path:0,L=clamp(lv|0,0,2),id='bot'+G.botN+'_'+Math.floor(Math.random()*1e6).toString(36);
-  const p=addPlayer(id,'🤖 '+PATHS[P].n.replace('สาย','')+' ('+BOT_LV[L].n+')',null,null,botKit(P));
+  const P=PATHS[path]&&!PATHS[path].off?path:0,L=clamp(lv|0,0,2),id=(fx?'fix':'bot')+G.botN+'_'+Math.floor(Math.random()*1e6).toString(36);
+  const p=addPlayer(id,fx===2?showName(P):fx?'🎯 หุ่นผู้เล่น':'🤖 '+PATHS[P].n.replace('สาย','')+' ('+BOT_LV[L].n+')',null,null,botKit(P));
   Object.assign(p,freshStats());p.kt=p.kit;p.bot=true;p.inp=emptyInput();
-  p.ai={lv:L,zone:zk,home:{x,y},owner,team:BOT_TEAM,thinkT:rnd(0,BOT_LV[L].react),skT:G.time+rnd(0,BOT_LV[L].gap+0.8),errX:0,errY:0,tg:null,dodT:0,ps:botPersona(),lastSk:-9,blk:null};
-  p.team=BOT_TEAM;resetBody(p,x+rnd(-60,60),y+rnd(-60,60));collideWorld(p,PR);p.inv=1;
+  p.ai={lv:L,zone:zk,home:{x,y},owner,team:fx===1?BOT_TEAM+1:BOT_TEAM,thinkT:rnd(0,BOT_LV[L].react),skT:G.time+rnd(0,BOT_LV[L].gap+0.8),errX:0,errY:0,tg:null,dodT:0,ps:botPersona(),lastSk:-9,blk:null};
+  if(fx){p.ai.still=1;p.ai.show=fx===2?1:0;p.ai.nocd=0;p.ai.fT=0;p.ai.fM='h';p.ai.shT=0;p.ai.jhT=0;p.ai.chT=0;p.ai.hold=null;}
+  p.team=p.ai.team;if(fx)resetBody(p,x,y);else resetBody(p,x+rnd(-60,60),y+rnd(-60,60));collideWorld(p,PR);p.inv=1;
   for(const k of SLOTK){p.cd[k]=rnd(0,2.5);p.cdMax[k]=Math.max(1,p.cd[k]);}   // คูลดาวน์เริ่มไม่พร้อมกัน
   emit({k:'revive',x:p.x,y:p.y});
   return p;
@@ -186,8 +188,45 @@ function botPlay(p,dt,tg,c0){
     return;
   }
 }
+// ---------- บอทยืนนิ่ง (ห้องฝึก): หุ่นผู้เล่น = ไม่ทำอะไร • บอทโชว์สกิล (ai.show) = ยืนนิ่ง เล็งหุ่นเป้า แล้วกดสกิลตามคำสั่ง trShowCmd ----------
+function showName(P){return '🎭 บอทโชว์ ('+PATHS[P].n.replace('สาย','')+')';}
+function showBot(){return bots().find(q=>q.ai.show);}
+function stillBot(p,dt){
+  const A=p.ai,inp=p.inp;
+  inp.mx=inp.my=0;inp.fire=0;inp.sh=0;inp.hq=inp.he=inp.hr=inp.hf=0;inp.jh=inp.ch=0;
+  if(!A.show||!p.alive||p.downed){A.fT=A.shT=A.jhT=A.chT=0;A.hold=null;return;}
+  if(A.nocd)for(const k of SLOTK)p.cd[k]=0;
+  // เล็งหุ่นเป้า (ตายอยู่ = เล็งที่เดิมที่จะเกิดใหม่)
+  const S=trShow(),T=plist().find(q=>q!==p&&q.ai&&q.ai.still&&!q.ai.show&&Math.hypot(q.ai.home.x-S.t.x,q.ai.home.y-S.t.y)<5)||{x:S.t.x,y:S.t.y,z:0};
+  inp.ax=T.x;inp.ay=T.y;inp.ah=cH(T)+0.1;inp.dh=0;
+  if(A.fT>0){A.fT-=dt;if(A.fM==='h')inp.fire=1;else{A.pf=!A.pf;inp.fire=A.pf?1:0;}}
+  if(A.shT>0){A.shT-=dt;inp.sh=1;}
+  if(A.jhT>0){A.jhT-=dt;inp.jh=1;}
+  if(A.chT>0){A.chT-=dt;inp.ch=1;}
+  if(A.hold){A.hold.t-=dt;if(A.hold.t<=0)A.hold=null;else inp['h'+A.hold.k]=1;}
+}
+// คำสั่งจากแท่นดูสกิล (trCmd c:'show'): a = path เปลี่ยนสาย • kit สุ่มชุดคาถาใหม่ • tap/hold กดสกิลช่อง k • fire คลิก/ค้าง/รัว • sh โล่ • sp Dash • jp กระโดด • up/dn บินสูง/ต่ำ • ult • heal • nocd • stop
+function trShowCmd(p,d){
+  const b=showBot();if(!b){toast('บอทโชว์ยังไม่เกิด');return;}
+  const A=b.ai,a=d.a,k=SLOTK.includes(d.k)?d.k:null;
+  if(a==='path'){const P=PATHS[d.p|0]&&!PATHS[d.p|0].off?d.p|0:0;setKit(b,botKit(P));b.kt=b.kit;b.name=showName(P);for(const s of SLOTK)b.cd[s]=0;b.ult=0;feed(`🎭 ${p.name} เปลี่ยนบอทโชว์เป็น${PATHS[P].n}`);}
+  else if(a==='kit'){setKit(b,botKit(b.pathIdx));b.kt=b.kit;for(const s of SLOTK)b.cd[s]=0;}
+  else if(a==='tap'&&k)b.inp.c[k]=(b.inp.c[k]|0)+1;
+  else if(a==='hold'&&k)A.hold={k,t:clamp(+d.t||2,0.2,6)};
+  else if(a==='fire'){A.fM=d.m==='p'?'p':'h';A.fT=clamp(+d.t||0.12,0.05,6);}
+  else if(a==='sh')A.shT=clamp(+d.t||2,0.2,6);
+  else if(a==='sp')b.inp.c.sp=(b.inp.c.sp|0)+1;
+  else if(a==='jp')b.inp.c.jp=(b.inp.c.jp|0)+1;
+  else if(a==='up')A.jhT=1.2;
+  else if(a==='dn')A.chT=1.2;
+  else if(a==='ult'){b.ult=100;b.inp.c.x=(b.inp.c.x|0)+1;}
+  else if(a==='heal'){b.hp=b.maxHp;b.shieldE=100;b.shieldBroken=0;for(const s of SLOTK)b.cd[s]=0;b.ult=0;}
+  else if(a==='nocd'){A.nocd=A.nocd?0:1;}
+  else if(a==='stop'){A.fT=A.shT=A.jhT=A.chT=0;A.hold=null;}
+}
 function aiBot(p,dt){
   const A=p.ai,L=BOT_LV[A.lv],inp=p.inp,t=G.time;
+  if(A.still){stillBot(p,dt);return;}
   if(!p.alive||p.downed){inp.fire=0;inp.mx=inp.my=0;inp.sh=0;A.blk=null;return;}
   // คิดใหม่เป็นจังหวะ (ระดับง่าย = ช้า): เลือกเป้า + สุ่มเล็งพลาดใหม่
   A.thinkT-=dt;

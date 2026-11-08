@@ -48,7 +48,10 @@ function modeInit(){
     banner(`🐍 ลอร์ดโวลเดอมอร์${ni>1?'และผู้เสพความตาย':''}แฝงตัวอยู่ในหมู่พวกเรา — ทำภารกิจ แล้วหาตัวให้เจอ!`,4);
   }else if(m==='train'){
     // Test Place: หุ่นซ้อมเรียงเป็นแถว + 1 ตัวไกลๆ ไว้ฝึกยิงระยะไกล • ค่าตั้ง G.tr คงอยู่ข้ามรอบ
-    G.tr=Object.assign({datk:1,mai:1,nocd:0,ult:0,god:0,pvp:0},G.tr||{});G.ar=null;trTeams();
+    G.tr=Object.assign({datk:0,mai:1,nocd:0,ult:0,god:0,pvp:0},G.tr||{});G.ar=null;   // หุ่นซ้อมเริ่มต้นไม่ยิงเรา (datk:0)
+    for(const [x,y] of trFixSpots())spawnBot(0,0,x,y,'fix',null,1);   // หุ่นผู้เล่น (ยืนนิ่ง ฝึกคอมโบ)
+    {const S=trShow();spawnBot(0,0,S.t.x,S.t.y,'fix',null,1);spawnBot(0,0,S.c.x,S.c.y,'fix',null,2);}   // หุ่นเป้า + บอทโชว์สกิล
+    trTeams();
     const cy=MH/2-260;
     for(let i=0;i<5;i++)spawnDummy(MW/2+(i-2)*170,cy);
     spawnDummy(MW/2,MH/2-500);   // ไม่เกินรั้วโซนเทสสกิล (y 2100)
@@ -106,6 +109,7 @@ function trCmd(p,d){
     feed(`🧪 ${p.name} เสก ${EDEF[d.e].name}${cnt>1?' ×'+cnt:''}`);
   }
   else if(d.c==='bot'||d.c==='botclr')trBotCmd(p,d);
+  else if(d.c==='show')trShowCmd(p,d);
   else if(d.c==='clear'){for(const e of G.en)if(e.type!=='dummy'||e.trz){e.dead=true;}G.en=G.en.filter(e=>!e.dead);feed('🧹 ล้างมอนสเตอร์แล้ว');}
 }
 function hostEndTraining(){if(G&&G.mode==='train'&&G.ph!=='over')endMatch();}
@@ -347,6 +351,7 @@ function modeSnap(){
     M.al=plist().filter(p=>p.alive).length;
   }else if(G.mode==='train'&&G.tr){
     M.tr=G.tr;
+    const sb=showBot();if(sb)M.sh={k:sb.kit,p:sb.pathIdx,nc:sb.ai.nocd|0};   // บอทโชว์สกิล: ชุดคาถา/สาย/ไม่มีคูลดาวน์ (เมนูแท่นดูสกิล js/40)
   }else if(G.mode==='imp'){
     M.td=G.taskDone;M.tt=G.taskTotal;
     M.bodies=G.bodies.map(b=>[b.id,Math.round(b.x),Math.round(b.y),b.c]);

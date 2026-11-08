@@ -52,10 +52,28 @@ function bpShow(on){bpOpen=on;$('#bpPanel').classList.toggle('hidden',!on);if(on
 // แท่นที่ยืนอยู่: 'bot' = แท่นโซนเสกบอท • 'arena' = แท่นเพิ่มบอทสังเวียน (เลือกทีม A/B, ฝั่งละไม่เกิน 2)
 function bpSync(v){
   const me=v.mode==='train'&&v.ph!=='over'&&MAPID==='test'&&v.P.find(q=>q.id===NET.myId);
-  let on='';if(me&&me.al)for(const [k,B] of [['bot',trBotPad()],['arena',arPads().bot]])if(Math.hypot(me.x-B.x,me.y-B.y)<B.r)on=k;
+  let on='';if(me&&me.al)for(const [k,B] of [['bot',trBotPad()],['arena',arPads().bot],['show',trShow().v]])if(Math.hypot(me.x-B.x,me.y-B.y)<B.r)on=k;
   if(on!==bpOn){bpOn=on;bpShow(!!on&&!trOpenF);}
-  const pl=0.7+0.3*Math.sin(performance.now()/160);if(TRPAD)TRPAD.material.opacity=on==='bot'?pl:1;if(ARPAD)ARPAD.material.opacity=on==='arena'?pl:1;
+  const pl=0.7+0.3*Math.sin(performance.now()/160);if(TRPAD)TRPAD.material.opacity=on==='bot'?pl:1;if(ARPAD)ARPAD.material.opacity=on==='arena'?pl:1;if(SHPAD)SHPAD.material.opacity=on==='show'?pl:1;
   if(!bpOpen)return;
+  if(on==='show'){   // แท่นดูสกิล: เมนูสั่งบอทโชว์ (path / ใช้สกิล Q E R F / คลิก / โล่ / Dash ...)
+    const sh=(v.M&&v.M.sh)||{},k='show'+JSON.stringify(sh);if(k===bpKey)return;bpKey=k;
+    const kit=sh.k?parseKit(sh.k):null,sp=kit?kit.ids.map(i=>SPELL_LIST[i]):[],ks=['q','e','r','f'],kn=['Q','E','R','F'],ult=kit?SPELL_LIST[kit.ult]:null;
+    $('#bpPanel').innerHTML=`<h2>🎭 บอทโชว์สกิล</h2>
+      <div class="trs">สาย (เปลี่ยนได้)</div>
+      <div class="trg">${PATHS.map((P,i)=>P.off?'':`<button class="${sh.p===i?'on':''}" data-shp="${i}" style="color:${P.col}">${P.ic} ${P.n}</button>`).join('')}</div>
+      <button class="trw" data-sh="kit">🎲 สุ่มชุดคาถาใหม่</button>
+      <div class="trs">สั่งใช้สกิล (กดค้าง = ท่าที่ต้องกดค้าง 2 วิ)</div>
+      ${sp.map((s,i)=>`<div class="trn"><button class="pri" data-sht="${ks[i]}" style="flex:3">${kn[i]} · ${s.ic||''} ${s.n||s.id}</button><button data-shh="${ks[i]}">ค้าง</button></div>`).join('')}
+      ${ult?`<button class="trw" data-sh="ult">🌟 อัลติ · ${ult.ic||''} ${ult.n||ult.id}</button>`:''}
+      <div class="trs">ปุ่มทั่วไป</div>
+      <div class="trn"><button data-shf="c">🖱️ คลิก</button><button data-shf="h">คลิกค้าง</button><button data-shf="p">รัว</button><button data-sh="sh">🛡️ โล่</button></div>
+      <div class="trn"><button data-sh="sp">💨 Dash</button><button data-sh="jp">⤴ กระโดด</button><button data-sh="up">⬆ บินขึ้น</button><button data-sh="dn">⬇ ลง</button></div>
+      <button class="trt ${sh.nc?'on':''}" data-sh="nocd">⏱️ บอทไม่มีคูลดาวน์<b>${sh.nc?'เปิด':'ปิด'}</b></button>
+      <div class="trn"><button data-sh="heal">❤️ ฟื้นบอท</button><button data-sh="stop">⏹ หยุด</button></div>
+      <small>บอทยืนนิ่ง เล็งหุ่นเป้าทางขวา • คลิกจอ = เล่นต่อ (เดินออกแล้วเข้าใหม่ = เมนูกลับมา)</small>`;
+    return;
+  }
   const ar=on==='arena',nb=v.P.filter(q=>String(q.id).startsWith('bot')).length,k=on+JSON.stringify(BP)+'|'+nb;if(k===bpKey)return;bpKey=k;
   if(ar&&BP.n>AR_MAX)BP.n=AR_MAX;
   $('#bpPanel').innerHTML=`<h2>🤖 ${ar?'เพิ่มบอทในสังเวียน':'แท่นเสกบอท'}</h2>
@@ -73,6 +91,15 @@ function bpSync(v){
 $('#bpPanel').addEventListener('click',e=>{
   const b=e.target.closest('button');if(!b)return;ac();
   const ar=bpOn==='arena';
+  if(bpOn==='show'){   // เมนูบอทโชว์
+    const d=b.dataset;
+    if(d.shp!==undefined)trSend({c:'show',a:'path',p:+d.shp});
+    else if(d.sht)trSend({c:'show',a:'tap',k:d.sht});
+    else if(d.shh)trSend({c:'show',a:'hold',k:d.shh,t:2});
+    else if(d.shf)trSend(d.shf==='c'?{c:'show',a:'fire',t:0.12}:{c:'show',a:'fire',m:d.shf,t:d.shf==='h'?2:3});
+    else if(d.sh)trSend({c:'show',a:d.sh});
+    return;
+  }
   if(b.dataset.bpp)BP.p=+b.dataset.bpp;
   else if(b.dataset.bpl)BP.lv=+b.dataset.bpl;
   else if(b.dataset.bpn)BP.n=+b.dataset.bpn;

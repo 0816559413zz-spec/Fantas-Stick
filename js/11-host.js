@@ -197,7 +197,7 @@ function respawn(p){
   let x,y;
   if(MODES[G.mode].team){const a=teamPts(p.team);if(a){const q=a[Math.floor(Math.random()*a.length)];x=q[0];y=q[1];}else{x=MW*(p.team?0.9:0.1);y=MH/2+rnd(-170,170);}}
   else if(G.mode==='race'){const n=G.rings.length,r=G.rings[(p.cp-1+n)%n];resetBody(p,r.x,r.y);p.fly=true;p.z=r.h;p.inv=1;p.ang=Math.atan2(G.rings[p.cp].y-r.y,G.rings[p.cp].x-r.x);emit({k:'revive',x:r.x,y:r.y});return;}
-  else if(G.mode==='train'&&p.ai){x=p.ai.home.x+rnd(-80,80);y=p.ai.home.y+rnd(-80,80);}
+  else if(G.mode==='train'&&p.ai){const j=p.ai.still?0:80;x=p.ai.home.x+rnd(-j,j);y=p.ai.home.y+rnd(-j,j);}   // บอทยืนนิ่งเกิดที่เดิมเป๊ะ
   else if(G.mode==='train'){const pv=G.tr&&G.tr.pvp;if(pv===1){x=MW*(p.team?0.62:0.38);y=MH/2+160;}else if(pv===2){const a=rnd(0,Math.PI*2);x=MW/2+Math.cos(a)*420;y=MH/2+Math.sin(a)*300;}else{x=MW/2;y=MH/2+160;}}
   else{
     let best=-1;
