@@ -116,7 +116,7 @@ waterDragonTick:123
 §137 ทุกเฟรม (ทั้งเกม)
 updateWater:138 waterSnapP:144 waterSnapW:146 WT_RP:149 WT_FM:152 WT_CG:154 WT_AB:158 WT_MW:161 WT_UL:163
 
-## js/09-wind.js (456) — 
+## js/09-wind.js (471) — 
 WINDP:8 WNV:12
 §19 ตัวช่วย
 wOn:20 wGain:21 wSeg:23 wFoeNear:24
@@ -147,13 +147,13 @@ windUpCast:300 windUpTick:307
 §314 Wind Push (เดิม Windrift): ยิงลมแรงไปทางที่เล็ก
 windPushCast:317 windPushHit:320
 §326 Windforce (เดิม Vortex Bind): พุ่งด้วยลม
-windForceCast:329 windForceTick:334
-§352 Windblade (เดิม Void Spheres): ใบมีดลมเล็ก ๆ รัว ๆ
-windBladeCast:354 windBladeTick:355 windBladeHit:359
-§363 อัลติ Sonic Boom Strike (เดิม Eye of Heaven)
-windUltCast:367 windUltTick:370 windUltSweep:393 windFloatZ:401 windSnapP:404 windSnapW:405
-§408 สกิล (ผู้ใช้ 2026-11-08: รีดีไซน์ทั้งชุด — id เดิมไว้ให้ชุดสกิล/tune/…
-W_WL:410 W_DR:416 W_VX:422 W_VO:428 W_FW:434 W_UL:443
+windForceCast:329 windSmash:335 windAheadHit:339 windForceTick:345
+§365 Windblade (เดิม Void Spheres): ใบมีดลมเล็ก ๆ รัว ๆ
+windBladeCast:367 windBladeTick:368 windBladeHit:372
+§376 อัลติ Sonic Boom Strike (เดิม Eye of Heaven)
+windUltCast:380 windUltTick:383 windUltSweep:408 windFloatZ:416 windSnapP:419 windSnapW:420
+§423 สกิล (ผู้ใช้ 2026-11-08: รีดีไซน์ทั้งชุด — id เดิมไว้ให้ชุดสกิล/tune/…
+W_WL:425 W_DR:431 W_VX:437 W_VO:443 W_FW:449 W_UL:458
 
 ## js/10-net.js (198) — เครือข่าย (PeerJS / WebRTC)
 PREFIX:4 NET:5 RC:9 TURN_SERVERS:12 ICE:13 PEER_OPT:14 TURN_URL:16 ICE_READY:18 JN:22 LAG:24 lagDo:25 hostSend:26 LOBBY:27 genCode:28 sendAll:29 NETD_KEYS:33 NETD:33 netDeltaReset:34 netDelta:35 NET_MAX:49 _netTE:49 netSendSnap:50 NETU:62 netUndelta:63 setStatus:69 hostGame:71 hostPeer:79 netConnect:98 joinWatch:109 joinFail:124 netLost:130 joinGame:145 joinPeer:156 clientOnData:171 leave:186 leaveRoom:188
@@ -386,7 +386,8 @@ bpOpen:49 bpOn:49 bpKey:49 bpShow:51 bpSync:53 hovEl:97
 §98 หน้าตั้งค่า
 setRow:99 setTog:100 setTab:101 XHC:102 XHN:102 setOpts:103 SET_ICO:105 SET_EN:108 renderSettings:109 drawXhPrev:131 openSettings:132 closeSettings:134 modeIcon:190 modeTitle:191 renderLobby:192
 
-## js/41-debug.js (171) — 
+## js/41-debug.js (171) — เครื่องมือทดสอบสมดุล (ใช้ผ่านคอนโซล WD.bal / WD.dmgTest เท่านั้น ผู้เล่นปกติไม่เห็น)
+§5 บอทต่อสู้แบบง่ายๆ: เล็งนำเป้า เดินรักษาระยะ+ส่ายไปมา ร่ายคาถาทุกครั้ง…
 botBrain:6 _obsKeep:51 balArena:52 balReset:53 balDuel:57 balTour:72 balCoop:86 balSpellTest:102
 §121 Service Worker (sw.js): เก็บไฟล์เกมไว้ในเครื่อง เปิดครั้งต่อไปเร็วขึ้…
 SWK:122 swSetup:123
@@ -758,4 +759,4 @@ surfSync:48 surfQuality:52
 SURF_VS:54 SURF_VS_BODY:55 SURF_FS:66 SURF_FS_BODY:67 surfOk:97 surfApply:98 surfScene:110
 §111 ปรับค่า (tune.html / F8)
 
-(88 files, 21960 lines)
+(88 files, 21975 lines)
