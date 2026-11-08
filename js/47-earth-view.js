@@ -86,6 +86,7 @@ function makeStand(sc,big){
       const fist=new THREE.Group();fist.position.set(0,-0.72,0);fo.add(fist);Bx(0.68,0.28,0.98,0,-0.1,0.16,fist,fm);for(let i=0;i<3;i++)Bx(0.17,0.15,0.15,-0.21+i*0.21,-0.15,0.68,fist,mat);
       return {up,fo,fist};};
     legs.L=leg(-1);legs.R=leg(1);bow=makeBow();g.add(bow);}
+  {const skip=new Set([lo,ab,head]);eMergePartial(body,skip);for(const A of [L,R])for(const G of [A.up,A.fo,A.fist])eMergePartial(G);if(legs){eMergePartial(legs);for(const A of [legs.L,legs.R])for(const G of [A.up,A.fo,A.fist])eMergePartial(G);}}   // ชิ้นที่ไม่ขยับแยกกันรวมตามวัสดุ ลดจำนวนครั้งวาดต่อ Stand
   g.scale.setScalar(sc||1);g.visible=false;scene.add(g);
   return {g,body,head,L,R,lo,ab,legs,bow,mats:[mat,fm,fade,glow,cry],lmats:[LM.mat,LM.fm,LM.glow],op:0,big:!!big};}
 // ---------- Rampage: เกราะลมหน้า Stand (ผู้ใช้: เหมือนอุกกาบาตตกโลก ต้านลม — เปลือกแรงดันด้านหน้า + เส้นลมไหลจากปลายออกข้าง ๆ) ----------
@@ -423,6 +424,12 @@ function earthClear(){if(!EV)return;   // clearDyn ถูกเรียกต�
   for(const a of EV.anims)if(a.g)disposeObj(a.g);EV.anims.length=0;earthFog(false);}
 // ชิ้นนิ่งในกำแพง/เนิน (หิน+กรวย ~40 ชิ้นต่อกำแพง) รวมเป็น mesh เดียวต่อ (วัสดุ, รับเงา) — ภาพเท่าเดิม แต่ draw call (+เงา) จาก ~40 เหลือ ~4 (OPTIMIZE §R)
 // ใช้ได้เพราะกำแพงขยับ/ยืดทั้งกลุ่ม (g.position, g.scale.y) ไม่เคยขยับชิ้นลูก
+// รวมเฉพาะลูกที่เป็น Mesh ธรรมดา (ข้าม Group และชิ้นใน skip) ต่างจาก eMergeKids ที่ยอมแพ้ทั้งกลุ่มถ้าเจอลูกที่รวมไม่ได้
+function eMergePartial(g,skip){const by=new Map();
+  for(const c of g.children){if(!c.isMesh||c.children.length||Array.isArray(c.material)||(skip&&skip.has(c))||!c.visible||!c.geometry.index)continue;const k=c.material.uuid+'|'+c.receiveShadow+'|'+c.castShadow;let e=by.get(k);if(!e)by.set(k,e={m:c.material,rs:c.receiveShadow,cs:c.castShadow,L:[]});e.L.push(c);}
+  for(const e of by.values()){if(e.L.length<2)continue;const gs=e.L.map(c=>{c.updateMatrix();const q=c.geometry.clone();for(const n of Object.keys(q.attributes))if(!['position','normal','uv'].includes(n))q.deleteAttribute(n);return q.applyMatrix4(c.matrix);});
+    const mg=mergeGeometries(gs,false);gs.forEach(q=>q.dispose());if(!mg)continue;for(const c of e.L){g.remove(c);c.geometry.dispose();}
+    const M=new THREE.Mesh(mg,e.m);M.castShadow=e.cs;M.receiveShadow=e.rs;g.add(M);}}
 function eMergeKids(g){const by=new Map();
   for(const c of g.children){if(!c.isMesh||c.children.length||Array.isArray(c.material))return;const gm=c.geometry;if(!gm.index||gm.morphAttributes.position)return;
     const k=c.material.uuid+'|'+c.receiveShadow+'|'+c.castShadow;let e=by.get(k);if(!e)by.set(k,e={m:c.material,rs:c.receiveShadow,cs:c.castShadow,L:[]});e.L.push(c);}

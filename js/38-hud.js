@@ -100,6 +100,7 @@ function drawHUD(v,me,P){
   else if(v.mode==='quid')top=`🏟️ ${TEAMN[0]} ${(M.qs||[0,0])[0]}   —   ${(M.qs||[0,0])[1]} ${TEAMN[1]}   •   ⏱ ${fmtTime(v.tm)}${M.sn?'   •   ✨ ลูกบอลทองโผล่แล้ว!':''}`;
   else if(v.mode==='race'&&me){const rk=raceRankClient(P).findIndex(p=>p.id===me.id)+1;top=me.fin?`🏁 เข้าเส้นชัยอันดับ ${me.fin}!`:`🏁 รอบ ${Math.min(me.lap+1,M.laps||2)}/${M.laps||2}   •   ห่วง ${me.cp+1}/${(M.rings||[]).length}   •   อันดับ ${rk}/${P.length}   •   ⏱ ${(M.rt||0).toFixed(1)}`+(M.re>=0?`   •   เหลือ ${M.re} วิ`:'');}
   else if(v.mode==='br')top=`🌀 เหลือ ${M.al||0} คน   •   `+(M.zone&&!M.zone.sh?`วงเริ่มหดใน ${M.zone.tl} วิ`:'วงกำลังหด!');
+  else if(v.mode==='siege')top=sgTop(v);
   else if(v.mode==='imp'){const r=ROLE?(ROLE.role==='imp'?'🐍 คุณคือ'+ROLE.title:'⚡ คุณคือนักเรียน'):'';top=`${r}   •   ภารกิจ ${M.td||0}/${M.tt||0}`;}
   else top=`${TEAMN[0]} ${v.ts[0]}   —   ${v.ts[1]} ${TEAMN[1]}   •   ⏱ ${fmtTime(v.tm)}`;
   cx.font='600 16px Kanit,sans-serif';
@@ -149,7 +150,7 @@ function drawHUD(v,me,P){
     big(`พักระหว่างด่าน — เหลือ ${v.bt} วิ`,SH*0.36,24,'#efe9ff');
     if(me&&me.pk&&waiting.length)big('รอ '+waiting.join(', ')+' เลือกพลังเสริม',SH*0.36+34,18,'#a79cc0');
   }
-  if(me&&!me.al&&v.ph==='play'&&['ffa','tdm','quid','race','train'].includes(v.mode))big(`เกิดใหม่ใน ${me.rs}...`,SH*0.45,30,'#ff9a9a');
+  if(me&&!me.al&&v.ph==='play'&&['ffa','tdm','quid','race','train','siege'].includes(v.mode))big(`เกิดใหม่ใน ${me.rs}...`,SH*0.45,30,'#ff9a9a');
   if(me&&!me.al&&v.mode==='br')big('💀 คุณตกรอบแล้ว — ดูคนอื่นสู้ต่อ',SH*0.45,26,'#ff9a9a');
   drawModeHUD(v,me,P,big);
   if(me&&!me.al&&v.mode==='duel'&&v.ph==='play')big('คุณแพ้รอบนี้',SH*0.45,30,'#ff9a9a');
@@ -168,6 +169,7 @@ function raceRankClient(P){
 function drawModeHUD(v,me,P,big){
   const M=v.M||{};
   if(!me)return;
+  if(v.mode==='siege')sgHud(v,me,big);   // บุกปราสาท (js/28-fcs-build)
   if(v.mode==='quid'&&me.hb)big('🔴 ถือบอลอยู่! คลิกซ้าย = โยน (เล็งไปที่ห่วงฝั่งตรงข้าม)',SH-150,16,'#ff9a9a');
   else if(v.mode==='quid'&&!me.fl)big('กด B เพื่อขึ้นไม้กวาด',SH-150,16,'#ffe9a8');
   if(v.mode==='race'&&M.rings&&!me.fin){

@@ -16,7 +16,7 @@ function clearModeObjs(){
   for(const o of MO.items.values())scene.remove(o);MO.items.clear();
   for(const o of MO.bodies.values())disposeObj(o.g);MO.bodies.clear();
   MO.tasks.forEach(o=>scene.remove(o));MO.tasks=[];MO.taskKey='';
-  BREATHS.length=0;
+  BREATHS.length=0;sgClearView();
 }
 const ITEMC={fire:'#ff6a2a',stun:'#5ad1ff',push:'#cfe8ff',pull:'#c77dff',hp:'#6fffd0',sh:'#7ff0ff',ult:'#ffd86b'};
 let healTex=null;
@@ -38,6 +38,7 @@ function makeItem(k){
 }
 function syncModeObjs(v,P,me,now,dt){
   const M=v.M||{};
+  sgSync(v,P,me,now,dt);   // บุกปราสาท (js/28-fcs-build)
   // บอลควิดดิช
   if(M.ball){
     if(!MO.ball){

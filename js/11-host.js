@@ -111,11 +111,11 @@ function hostStart(){
   const err=validate();if(err){toast(err);return;}
   // สุ่มแผนที่ทุกครั้งที่เริ่มเกม (ไม่ซ้ำกับรอบที่แล้วถ้าเป็นไปได้)
   const MD=MODES[G.mode];
-  if(MD.map&&!(G.mode!=='train'&&MAPS[G.mapPick]&&MAPS[G.mapPick].allModes))G.map=MD.map;   // โหมดที่มีแผนที่ประจำ: เลือกแผนที่ allModes (เมือง) แทนได้
+  if(MD.map&&(G.mode==='siege'||!(G.mode!=='train'&&MAPS[G.mapPick]&&MAPS[G.mapPick].allModes)))G.map=MD.map;   // บุกปราสาท = แผนที่ของโหมดเสมอ   // โหมดที่มีแผนที่ประจำ: เลือกแผนที่ allModes (เมือง) แทนได้
   else if(G.mapPick&&MAPS[G.mapPick]&&!MAP_OFF.has(G.mapPick))G.map=G.mapPick;
   else{let ks=RANDOM_MAPS.filter(k=>k!==G.lastMap&&MAPS[k]&&mapOkFor(k,G.mode));if(!ks.length)ks=['castle'];G.map=ks[Math.floor(Math.random()*ks.length)];}
   G.lastMap=G.map;
-  setMapVars(G.map);AREA=mapArea(G.map,G.mode);
+  SGPH=1;setMapVars(G.map);AREA=mapArea(G.map,G.mode);   // SGPH = เฟสบุกปราสาท (js/02-fcs) — เริ่มเฟส 1 ก่อนวางจุดเกิด
   PROPON=!PROP_OFF_MODES.includes(G.mode);BLDON=PROPON;
   Object.assign(G,{ph:'count',cdT:3,time:0,proj:[],en:[],feed:[],pid:0,eid:0,wave:0,round:1,rw:{},teamScore:[0,0],
     timer:(G.mode==='ffa'||G.mode==='tdm')?480:G.mode==='quid'?360:0,result:null,banner:null,queue:[],slines:[],sorbs:[],fpaths:[],tcells:[],sballs:[],sdomes:[],impWin:null,snitchBy:null,raceEnd:undefined});
@@ -139,7 +139,7 @@ function hostToLobby(){G.ph='lobby';G.proj=[];G.en=[];
   for(const id in (G.spec||{})){const s=G.spec[id],c=NET.conns.get(id);if(!c||humans().length>=modeCap())continue;if(plist().length>=modeCap()){const b=lobbyBots().pop();if(b)hostRemove(b.id);}delete G.spec[id];const p=addPlayer(id,s.name,null,s.look,s.kit);p.tok=s.tok;try{c.send({t:'welcome',id});}catch(e){}}
   broadcastLobby();}
 // เข้าห้องกลางเกม: ffa/tdm/ห้องฝึก/co-op = เกิดเลย • โหมดอื่น/ห้องเต็ม (ตาม max ของโหมด) = เป็นคนดู (สูงสุด 4) แล้วได้เล่นรอบหน้า
-const MIDJOIN=['ffa','tdm','train','coop'];
+const MIDJOIN=['ffa','tdm','train','coop','siege'];
 function modeCap(){return Math.min(ROOM_MAX,(MODES[G.mode]||{}).max||6);}
 function midJoin(conn,id,d,tok,reject){
   const name=cleanName(d.name),look=String(d.look||'').slice(0,40),kit=String(d.kit||'').slice(0,24);
@@ -219,7 +219,8 @@ function hostTick(dt){
   g.time+=dt;
   if(g.ph==='count'){g.cdT-=dt;if(g.cdT<=0)g.ph='play';}
   const acting=g.ph==='play';
-  for(const p of plist()){if(p.bot)botThink(p,dt);updatePlayer(p,dt,acting);}   // botThink = สมองบอท + หาทาง (js/15-botnav)
+  // botThink = สมองบอท + หาทาง (js/15-botnav) • พังที่ผู้เล่นคนเดียว = ข้ามคนนั้นเฟรมนี้ (เดิมทั้งเฟรมหยุด → ทุกคนยืนค้าง เอฟเฟกต์เล่นอยู่กับที่ ผู้ใช้ 2026-11-09)
+  for(const p of plist()){try{if(p.bot)botThink(p,dt);updatePlayer(p,dt,acting);}catch(e){if((p._errN=(p._errN|0)+1)%300===1)console.error('player',p.name,e);}}
   if(acting){
     updateProjectiles(dt);updateSpells(dt);updateMins(dt);
     if(g.mode==='coop'||g.mode==='train')updateEnemies(dt);
@@ -239,6 +240,7 @@ function updatePlayer(p,dt,acting){
     if(c!==(p.last[k]|0)){pr[k]=true;p.last[k]=c;}
   }
   if(pr.g&&PROPON&&p.alive&&!p.downed&&!p.gh)useProp(p);
+  if(G.mode==='siege')sgInput(p,pr,inp);   // G = ร่ายทำลายแกน (js/15-siege)
   for(const k of CDK)p.cd[k]=Math.max(0,p.cd[k]-dt*(p.ovc>0?1.3:1));
   p.stun=Math.max(0,p.stun-dt);p.inv=Math.max(0,p.inv-dt);tickStatus(p,dt);
   if(p.breath>0)p.breath-=dt;
@@ -257,7 +259,7 @@ function updatePlayer(p,dt,acting){
   p.flyCd=Math.max(0,p.flyCd-dt);p.root=Math.max(0,p.root-dt);
   if(p.awayT>0){p.awayT-=dt;p.inp=emptyInput();p.inv=Math.max(p.inv,0.1);if(p.awayT<=0){feed('🚪 '+p.name+' ออกจากเกม');hostRemove(p.id);return;}}
   if(!p.alive){
-    if(['ffa','tdm','quid','race','train'].includes(G.mode)&&acting){p.respawn-=dt;if(p.respawn<=0)respawn(p);}
+    if(['ffa','tdm','quid','race','train','siege'].includes(G.mode)&&acting){p.respawn-=dt;if(p.respawn<=0)respawn(p);}
     return;
   }
   p.boost=Math.max(0,(p.boost||0)-dt);

@@ -11,7 +11,7 @@ const hdr=(c,k)=>new THREE.Color(c).multiplyScalar(k);
 // antialias ปิดไว้: ภาพผ่าน EffectComposer (render target) อยู่แล้ว MSAA ของ canvas จึงไม่ช่วยอะไร แค่กินแรง
 const gl=new THREE.WebGLRenderer({canvas:document.getElementById('gl'),antialias:false,powerPreference:'high-performance'});
 // ตรวจ error ของ shader ทุกตัวที่ compile = บังคับ CPU รอการ์ดจอ compile เสร็จ (getProgramInfoLog ~3% ของเฟรมตอนสู้กัน) → ปิด ยกเว้น ?debug
-gl.debug.checkShaderErrors=/[?&]debug/.test(location.search);
+gl.debug.checkShaderErrors=/[?&]debug\b/.test(location.search);
 gl.setPixelRatio(Math.min(1,window.devicePixelRatio||1));
 gl.useLegacyLights=true;
 gl.shadowMap.enabled=true;gl.shadowMap.type=THREE.PCFSoftShadowMap; // ขอบเงานุ่ม (เงาตามผู้เล่น shadowFollow ทำให้คมพอจะนุ่มได้)
@@ -355,6 +355,10 @@ function setSky(mode){
   LDIR.copy(moonL.position).normalize();
   SKY.day=day;if(typeof lookApply==='function')lookApply(day);   // แสงรอบตัวจากท้องฟ้า (js/74-look.js)
 }
+// ท้องฟ้าตามกล้อง (ผู้ใช้ 2026-11-08 "มองฟ้าไกล ๆ มีโดมมืด ทุกแมพ"): ทรงกลมฟ้ารัศมี 600 เคยอยู่กลางแมพ แต่กล้องมองได้ไกลสุด 700
+// → ยืนห่างกลางแมพเกิน 100 หน่วยแล้วหันออก ฟ้าฝั่งไกลเลยระยะกล้อง โดนตัดเป็นวงมืด • ย้ายฟ้า/ดาว/ดวงจันทร์/พระอาทิตย์ตามกล้องทุกเฟรม (ไกลจากกล้องคงที่)
+const SKYB={moon:SKY.moon.position.clone(),sun:SKY.sun.position.clone()};
+function skyFollow(){const p=cam.position;SKY.mesh.position.copy(p);SKY.stars.position.copy(p);SKY.moon.position.copy(SKYB.moon).add(p);SKY.sun.position.copy(SKYB.sun).add(p);}
 // ---------- เงาตามผู้เล่น ----------
 // กล้องเงาครอบแค่พื้นที่รอบ ๆ ที่กล้องมอง (ไม่ใช่ทั้งแผนที่) → เงาคมขึ้นหลายเท่า โดยภาพเงาขนาดเท่าเดิม
 // r = ครึ่งความกว้างพื้นที่เงา (หน่วย 3D, ไม่เกินขนาดแผนที่) • ahead = ดันจุดกลางไปข้างหน้ากล้อง (สัดส่วนของ r)

@@ -277,6 +277,8 @@ function renderStage(dt,now){
     cam.position.set(lerp(1.5,-0.85+sway*0.5+drift,e),lerp(8.5,1.55,e),lerp(17,5.6,e));cam.lookAt(lerp(0,-0.85,e),lerp(3.2,1.12,e),0);
   }
   if(window.__stageCam)window.__stageCam(cam);
+  if(!STAGE.cold){STAGE.cold=1;try{Promise.all(warmCompile([stage])).then(()=>{STAGE.cold=2;},()=>{STAGE.cold=2;});}catch(e){STAGE.cold=2;}}   // ครั้งแรกที่เข้าห้องนี้: คอมไพล์เชดเดอร์แบบไม่บล็อกก่อนวาด (เดิมค้าง ~1 วิ ตอนกดเข้าหน้าสร้างตัวละคร) ภาพเดิมยังค้างบนจอระหว่างรอ
+  if(STAGE.cold<2)return;
   rpass.scene=stage;gl.shadowMap.needsUpdate=true;composer.render();rpass.scene=scene;
   if(lob)drawStageLabels(rows,team);
 }

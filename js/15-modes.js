@@ -46,6 +46,8 @@ function modeInit(){
       sendPriv(p.id,{t:'role',role:p.role,title:p.title,mates:p.role==='imp'?sh.slice(0,ni).filter(q=>q!==p).map(q=>q.id):[],tasks:p.tasks,tdone:[]});
     });
     banner(`🐍 ลอร์ดโวลเดอมอร์${ni>1?'และผู้เสพความตาย':''}แฝงตัวอยู่ในหมู่พวกเรา — ทำภารกิจ แล้วหาตัวให้เจอ!`,4);
+  }else if(m==='siege'){
+    sgInit();   // บุกปราสาท (js/15-siege)
   }else if(m==='train'){
     // Test Place: หุ่นซ้อมเรียงเป็นแถว + 1 ตัวไกลๆ ไว้ฝึกยิงระยะไกล • ค่าตั้ง G.tr คงอยู่ข้ามรอบ
     G.tr=Object.assign({datk:0,mai:1,nocd:0,ult:0,god:0,pvp:0},G.tr||{});G.ar=null;   // หุ่นซ้อมเริ่มต้นไม่ยิงเรา (datk:0)
@@ -352,6 +354,8 @@ function modeSnap(){
   }else if(G.mode==='train'&&G.tr){
     M.tr=G.tr;
     const sb=showBot();if(sb)M.sh={k:sb.kit,p:sb.pathIdx,nc:sb.ai.nocd|0};   // บอทโชว์สกิล: ชุดคาถา/สาย/ไม่มีคูลดาวน์ (เมนูแท่นดูสกิล js/40)
+  }else if(G.mode==='siege'){
+    M.sg=sgSnap();
   }else if(G.mode==='imp'){
     M.td=G.taskDone;M.tt=G.taskTotal;
     M.bodies=G.bodies.map(b=>[b.id,Math.round(b.x),Math.round(b.y),b.c]);
@@ -363,7 +367,7 @@ function modeSnap(){
 // ---------- สร้าง snapshot ส่งให้ทุกเครื่อง ----------
 const r1=v=>Math.round(v*10)/10;
 // ลดขนาด snapshot ที่ส่งออกเน็ต: ช่องของผู้เล่นที่เป็นค่าปกติ (false/0/ว่าง) ไม่ต้องส่ง — ลูกข่ายเติมกลับเป็นค่าเดิมเป๊ะ (unpackP) • โฮสต์ใช้ snapshot เต็มเหมือนเดิม
-const DEFP={fl:false,rt:false,z:0,aw:0,wv:0,al:true,dn:false,rv:0,sh:false,st:false,ds:false,iv:false,bn:false,u:0,k:0,d:0,rs:0,bo:null,bR:null,pk:false,dmg:0,fm:0,gh:false,hb:false,lap:0,cp:0,fin:0,bs:false,br:0,cg:0,dc:0,bm:0,sn:0,co:0,kd:0,hv:0,df:0,sm:0,ob:0,fr:0,xh:0,fs:0,ul:'',tk:0};
+const DEFP={sc:0,fl:false,rt:false,z:0,aw:0,wv:0,al:true,dn:false,rv:0,sh:false,st:false,ds:false,iv:false,bn:false,u:0,k:0,d:0,rs:0,bo:null,bR:null,pk:false,dmg:0,fm:0,gh:false,hb:false,lap:0,cp:0,fin:0,bs:false,br:0,cg:0,dc:0,bm:0,sn:0,co:0,kd:0,hv:0,df:0,sm:0,ob:0,fr:0,xh:0,fs:0,ul:'',tk:0};
 function packP(L){return L.map(p=>{const o={};for(const k in p)if(!(k in DEFP)||p[k]!==DEFP[k])o[k]=p[k];return o;});}
 function unpackP(s){if(s&&s.P)for(const p of s.P)for(const k in DEFP)if(!(k in p))p[k]=DEFP[k];}
 function makeSnap(){
@@ -374,7 +378,7 @@ function makeSnap(){
       hp:Math.ceil(p.hp),mh:p.maxHp,aw:p.awayT>0?1:0,wv:p.alive&&!p.downed?p.wSpd|0:0,al:p.alive,dn:p.downed,rv:r1(p.revive),sh:p.shieldOn,se:Math.round(p.shieldE),
       st:p.stun>0,ds:p.dash>0,iv:p.inv>0,bn:p.burn>0,u:Math.floor(p.ult),k:p.kills,d:p.deaths,rs:Math.ceil(p.respawn),
       cd:CDK.map(k=>r1(p.cd[k])),cm:CDK.map(k=>p.cdMax[k]||1),bo:p.bo,bR:p.br,pk:p.picked,bf:p.taken,dmg:Math.round(p.dmgDealt),
-      fm:fxMask(p),ea:earthSnapP(p),wn:windSnapP(p),wt:waterSnapP(p),gh:!!p.gh,hb:!!(G.ball&&G.ball.holder===p.id),lap:p.lap|0,cp:p.cp|0,fin:p.fin|0,bs:p.boost>0,br:p.brn|0,cg:p.chg>0.25?Math.round(Math.min(1,(p.chg-0.25)/1.25)*20)/20:0,dc:p.dchgOn?Math.round(p.dchg/4*20)/20+0.01:0,bm:p.breath>0?(p.breath>2?1:2):0,sn:p.snapT>0?1:0,co:p.colos>0?(p.colN|0)+1:0,kd:p.kindle|0,hv:p.hover>0?1:0,df:p.dfall?[p.dfall.ph,Math.round(p.dfall.tx),Math.round(p.dfall.ty),Math.round(Math.max(0,p.dfall.t)*100)/100]:p.sdome?[p.sdome.ph,Math.round(p.sdome.tx),Math.round(p.sdome.ty),Math.round(Math.max(0,p.sdome.t)*100)/100,1]:0,sm:p.pathIdx===2?[p.lst|0,(p.god>0?p.cEmp:p.emp)?1:0,Math.round((p.dch===undefined?3:p.dch)*10)/10,(p.beam?1:0)|(p.stS?2:0)|(p.god>0?4:0)|(p.slnT>0?8:0)|(p.rail?16:0),p.stS?Math.round(p.stS.abs):0,p.sorb?p.sorb.n:0,p.rail?[Math.round(p.rail.a*100)/100,Math.round(p.rail.t*100)/100,p.rail.len,p.rail.max]:0,p.bTg||0]:0,ob:p.orbs|0,fr:p.pathIdx===1?[p.fmode|0,p.swN|0,p.swC|0,(p.slideT>0?1:0)|(p.cryo>0?2:0)|(p.auraT>0?4:0)|(p.ffT>0?8:0)|(p.mirror>0?16:0)|(p.grT>0?32:0)]:0,xh:Math.ceil(p.xhp||0),fs:Math.round(frostSlow(p))||0,ul:p.unl?Object.keys(p.unl).join(','):'',tk:p.doing?r1(p.doing.left):0})),
+      fm:fxMask(p),ea:earthSnapP(p),wn:windSnapP(p),wt:waterSnapP(p),gh:!!p.gh,hb:!!(G.ball&&G.ball.holder===p.id),lap:p.lap|0,cp:p.cp|0,fin:p.fin|0,bs:p.boost>0,br:p.brn|0,cg:p.chg>0.25?Math.round(Math.min(1,(p.chg-0.25)/1.25)*20)/20:0,dc:p.dchgOn?Math.round(p.dchg/4*20)/20+0.01:0,bm:p.breath>0?(p.breath>2?1:2):0,sn:p.snapT>0?1:0,co:p.colos>0?(p.colN|0)+1:0,kd:p.kindle|0,hv:p.hover>0?1:0,df:p.dfall?[p.dfall.ph,Math.round(p.dfall.tx),Math.round(p.dfall.ty),Math.round(Math.max(0,p.dfall.t)*100)/100]:p.sdome?[p.sdome.ph,Math.round(p.sdome.tx),Math.round(p.sdome.ty),Math.round(Math.max(0,p.sdome.t)*100)/100,1]:0,sm:p.pathIdx===2?[p.lst|0,(p.god>0?p.cEmp:p.emp)?1:0,Math.round((p.dch===undefined?3:p.dch)*10)/10,(p.beam?1:0)|(p.stS?2:0)|(p.god>0?4:0)|(p.slnT>0?8:0)|(p.rail?16:0),p.stS?Math.round(p.stS.abs):0,p.sorb?p.sorb.n:0,p.rail?[Math.round(p.rail.a*100)/100,Math.round(p.rail.t*100)/100,p.rail.len,p.rail.max]:0,p.bTg||0]:0,ob:p.orbs|0,fr:p.pathIdx===1?[p.fmode|0,p.swN|0,p.swC|0,(p.slideT>0?1:0)|(p.cryo>0?2:0)|(p.auraT>0?4:0)|(p.ffT>0?8:0)|(p.mirror>0?16:0)|(p.grT>0?32:0)]:0,xh:Math.ceil(p.xhp||0),fs:Math.round(frostSlow(p))||0,ul:p.unl?Object.keys(p.unl).join(','):'',tk:p.doing?r1(p.doing.left):0,sc:p.sgc?1:0})),
     M:modeSnap(),
     E:G.en.map(e=>({id:e.id,t:e.type,x:r1(e.x),y:r1(e.y),h:r1(e.h||0),hp:Math.ceil(e.hp),mh:Math.ceil(e.maxHp),sl:e.slam>0,st:e.stun>0,bn:e.burn>0,br:e.brn|0,fm:fxMask(e),lg:e.lunge>0})),
     MN:(G.mins||[]).map(m=>[m.id,m.type,Math.round(m.x),Math.round(m.y),r1(m.h||0),Math.max(1,Math.round(m.hp/m.maxHp*100)),m.owner,m.team,fxMask(m)]),

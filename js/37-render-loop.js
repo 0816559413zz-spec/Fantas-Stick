@@ -99,7 +99,7 @@ function renderGame(v,P,E,me,dt,now){
   t0=performance.now();{let t1=t0;updateZV(dt);pf('fx.zv',t1);let t2=performance.now();updateParticles(dt);pf('fx.particles',t2);pf('fx.parts',t1);t1=performance.now();updateShapes(dt);pf('fx.shapes',t1);t1=performance.now();updateLights(dt);pf('fx.lights',t1);t1=performance.now();updateVfx(dt);pf('fx.vfx',t1);t1=performance.now();updateDebris(dt);pf('fx.debris',t1);}pf('fx',t0);
   QUAL.frame++;gl.shadowMap.needsUpdate=QUAL.mode==='high'||QUAL.frame%(QUAL.cs>=2?12:QUAL.cs?6:QUAL.mode==='auto'&&QUAL.lvl>=2?4:2)===0;if(gl.shadowMap.needsUpdate)shadowFollow();if(QUAL.frame%30===1)shadowDepthSplit();cullTick(dt);
   if(FXSTUDIO.noDraw)return;
-  instzTick();t0=performance.now();taaBegin();composer.render();taaFinish();pf('gpuSubmit',t0);pinPrograms();
+  instzTick();skyFollow();t0=performance.now();taaBegin();composer.render();taaFinish();pf('gpuSubmit',t0);pinPrograms();
   t0=performance.now();const spk=speakingIds();
   drawLabels(P,E,v,me,spk);pf('h.labels',t0);
   {let t1=performance.now();const T=k=>{pf('h.'+k,t1);t1=performance.now();};drawMinBars(v,me);T('bars');

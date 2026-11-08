@@ -9,6 +9,11 @@
 #   POST /api/sb-img?name=<ชื่อ>    → เก็บภาพร่าง/รูปตัวอย่างลง storyboard/img/<ชื่อ>.png|.jpg
 #   POST /api/sb-rec?name=<ชื่อ>    → เก็บท่าตัวละครที่อัดจากเกม (studio/rec.js) ลง storyboard/rec/<ชื่อ>.json
 #   POST /api/sb-sync               → ☁ ซิงก์สตอรี่บอร์ดกับเครื่องอื่นผ่าน GitHub (fetch → รวมรายบอร์ด → commit เฉพาะ storyboard/ → merge → push)
+#   GET  /api/maps                  → รายชื่อแผนที่ (mapedit.html) ใน maps/
+#   GET  /api/map?id=<id>           → ข้อมูลแผนที่ maps/<id>.json
+#   POST /api/map?id=<id>           → บันทึก {map, md, png} → maps/<id>.json + <id>.md + <id>.png แล้วเขียน maps/MAPS.md (ให้ Claude อ่าน)
+#   POST /api/map-del?id=<id>       → ย้ายแผนที่ไป maps/_deleted/ (กู้คืนได้)
+#   POST /api/map-img?name=<ชื่อ>   → เก็บภาพอ้างอิงที่วางใต้แผนที่ลง maps/img/<ชื่อ>.png|.jpg
 #   GET  /api/sb-skills             → รายการสกิลจากโค้ดเกม (js/*.js: PATHS, PBASIC, defSpell) ให้ปุ่ม Import ของสตอรี่บอร์ด — อ่านสดทุกครั้ง ไม่มีไฟล์ค้าง
 # ฟังเฉพาะ 127.0.0.1 (เครื่องตัวเองเท่านั้น)
 import base64, json, os, re, subprocess, sys, time
@@ -354,6 +359,55 @@ def sb_skills():  # อ่านสกิลจากโค้ดเกมตร
         out.append({**pt, 'i': i, 'basic': b, 'spells': [s for s in spells if s['path'] == i]})
     return {'paths': out}
 
+MAPD = os.path.join(ROOT, 'maps')
+MAP_ID = re.compile(r'^[a-z0-9][a-z0-9_\-]{0,40}$')
+
+def map_list():
+    out = []
+    if os.path.isdir(MAPD):
+        for f in sorted(os.listdir(MAPD)):
+            if not f.endswith('.json'):
+                continue
+            p = os.path.join(MAPD, f)
+            try:
+                j = json.load(open(p, encoding='utf-8'))
+                out.append({'id': f[:-5], 'name': j.get('name', f[:-5]), 'w': j.get('w'), 'h': j.get('h'), 't': os.path.getmtime(p)})
+            except Exception as e:
+                out.append({'id': f[:-5], 'name': f[:-5], 'err': str(e), 't': os.path.getmtime(p)})
+    return out
+
+def maps_index():
+    L = ['# แผนที่ (Map Editor)', '',
+         '> เขียนอัตโนมัติจาก `mapedit.html` (ศูนย์รวม Tool → Map Editor). แต่ละแผนที่มี `maps/<id>.md` (อ่านก่อน — ตาราง ของ/Interact/เส้นทาง/ผลตรวจทางเดิน + กริด ASCII), `maps/<id>.png` (ภาพ topdown เปิดด้วย Read) และ `maps/<id>.json` (ข้อมูลดิบ — รูปแบบใน `guides/MAP-FORMAT.md`).',
+         '> แผนที่ในนี้เป็น **ภาพอ้างอิง/แบบร่าง** ไม่ใช่ผังที่ล็อกแล้ว เว้นแต่ผู้ใช้เขียนไว้ในคำอธิบาย.', '']
+    for m in sorted(map_list(), key=lambda m: -m['t']):
+        L.append('- **%s** (`%s`) %s×%s ช่อง — `maps/%s.md` • `maps/%s.png` • แก้ล่าสุด %s' % (m['name'], m['id'], m.get('w'), m.get('h'), m['id'], m['id'], time.strftime('%Y-%m-%d %H:%M', time.localtime(m['t']))))
+    open(os.path.join(MAPD, 'MAPS.md'), 'w', encoding='utf-8').write('\n'.join(L) + '\n')
+
+def map_json_dump(m):  # กริด/รายการเป็นบรรทัดละแถว อ่าน diff ใน git ง่าย
+    lines = ['{']
+    keys = list(m.keys())
+    for i, k in enumerate(keys):
+        v = m[k]; end = ',' if i < len(keys) - 1 else ''
+        if isinstance(v, list) and v and isinstance(v[0], (list, dict)):
+            rows = [json.dumps(r, ensure_ascii=False, separators=(',', ':')) for r in v]
+            lines.append(' %s: [\n  %s\n ]%s' % (json.dumps(k), ',\n  '.join(rows), end))
+        else:
+            lines.append(' %s: %s%s' % (json.dumps(k), json.dumps(v, ensure_ascii=False), end))
+    lines.append('}')
+    return '\n'.join(lines) + '\n'
+
+def img_body(data):
+    ext = 'png'
+    if data[:5] == b'data:':
+        head, b64 = data.split(b',', 1); ext = 'jpg' if b'jpeg' in head else 'png'; data = base64.b64decode(b64)
+    elif data[:3] == b'\xff\xd8\xff': ext = 'jpg'
+    return data, ext
+
+def q_id(u):
+    mid = (parse_qs(u.query).get('id', [''])[0]).strip().lower()
+    return mid if MAP_ID.match(mid) else ''
+
 def fx_list():
     out = {}
     for d, _, fs in os.walk(FXD):
@@ -391,6 +445,14 @@ class H(SimpleHTTPRequestHandler):
             return self._json(200, sb_load())
         if u.path == '/api/sb-skills':
             return self._json(200, sb_skills())
+        if u.path == '/api/maps':
+            return self._json(200, map_list())
+        if u.path == '/api/map':
+            mid = q_id(u)
+            p = os.path.join(MAPD, (mid or '_') + '.json')
+            if not mid or not os.path.exists(p):
+                return self._json(404, {'ok': False, 'err': 'ไม่มีแผนที่นี้'})
+            return self._json(200, json.load(open(p, encoding='utf-8')))
         return super().do_GET()
     def _body(self):
         n = int(self.headers.get('Content-Length', 0))
@@ -467,6 +529,42 @@ class H(SimpleHTTPRequestHandler):
             d = os.path.join(ROOT, sub, 'img'); os.makedirs(d, exist_ok=True)
             with open(os.path.join(d, name + '.' + ext), 'wb') as f: f.write(data)
             return self._json(200, {'ok': True, 'path': sub + '/img/' + name + '.' + ext})
+        if u.path == '/api/map':
+            mid = q_id(u)
+            if not mid:
+                return self._json(400, {'ok': False, 'err': 'id ใช้ได้เฉพาะ a-z 0-9 _ -'})
+            try:
+                b = json.loads(self._body().decode('utf-8')); m = b['map']
+                assert isinstance(m.get('height'), list)
+            except Exception as e:
+                return self._json(400, {'ok': False, 'err': 'ข้อมูลผิดรูปแบบ: ' + str(e)})
+            os.makedirs(MAPD, exist_ok=True)
+            m['id'] = mid
+            open(os.path.join(MAPD, mid + '.json'), 'w', encoding='utf-8').write(map_json_dump(m))
+            if b.get('md'):
+                open(os.path.join(MAPD, mid + '.md'), 'w', encoding='utf-8').write(b['md'])
+            if b.get('png'):
+                data, ext = img_body(b['png'].encode('ascii'))
+                open(os.path.join(MAPD, mid + '.png'), 'wb').write(data)
+            maps_index()
+            return self._json(200, {'ok': True, 'id': mid})
+        if u.path == '/api/map-del':
+            mid = q_id(u)
+            if not mid:
+                return self._json(400, {'ok': False, 'err': 'id ผิด'})
+            d = os.path.join(MAPD, '_deleted'); os.makedirs(d, exist_ok=True); st = time.strftime('%Y%m%d-%H%M%S')
+            for ext in ('.json', '.md', '.png'):
+                p = os.path.join(MAPD, mid + ext)
+                if os.path.exists(p):
+                    os.replace(p, os.path.join(d, mid + '_' + st + ext))
+            maps_index()
+            return self._json(200, {'ok': True})
+        if u.path == '/api/map-img':
+            name = re.sub(r'[^a-zA-Z0-9_\-]', '_', q.get('name', ['img'])[0])[:60] or 'img'
+            data, ext = img_body(self._body())
+            d = os.path.join(MAPD, 'img'); os.makedirs(d, exist_ok=True)
+            with open(os.path.join(d, name + '.' + ext), 'wb') as f: f.write(data)
+            return self._json(200, {'ok': True, 'path': 'maps/img/' + name + '.' + ext})
         return self._json(404, {'ok': False, 'err': 'ไม่มีช่องทางนี้'})
 
 if __name__ == '__main__':
@@ -475,7 +573,7 @@ if __name__ == '__main__':
     if '--sb-md' in sys.argv:  # Claude แก้ storyboard/boards.json เองแล้ว → เขียน sb-<id>.md ใหม่
         sb_save(sb_load()); print('storyboard/*.md updated'); sys.exit()
     port = int(sys.argv[1]) if len(sys.argv) > 1 else 8765
-    print(f'Tool Hub: http://localhost:{port}/hub.html  •  Fantas Stick: http://localhost:{port}/  •  VFX Studio: http://localhost:{port}/studio.html  •  Bug Notes: http://localhost:{port}/bugs.html  •  Storyboard: http://localhost:{port}/storyboard.html')
+    print(f'Tool Hub: http://localhost:{port}/hub.html  •  Fantas Stick: http://localhost:{port}/  •  VFX Studio: http://localhost:{port}/studio.html  •  Bug Notes: http://localhost:{port}/bugs.html  •  Storyboard: http://localhost:{port}/storyboard.html  •  Map Editor: http://localhost:{port}/mapedit.html')
     class Srv(ThreadingHTTPServer):
         request_queue_size = 128      # default 5 → the game loads hundreds of files at once and Windows refused the rest (Failed to fetch)
         allow_reuse_address = False   # Windows: reuse = เปิดซ้อนพอร์ตเดียวกันได้ 2 ตัว → คำขอสลับไปมา ข้อมูลเพี้ยน

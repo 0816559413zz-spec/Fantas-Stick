@@ -841,11 +841,16 @@ function hubMergeStatic(S,F){
     const M=new THREE.Mesh(geo,bodyMat(L[0].material.side));M.castShadow=L[0].castShadow;M.receiveShadow=L[0].receiveShadow;M.name='hub_static';S.add(M);
     for(const m of L){m.parent.remove(m);if(!(m.geometry.userData&&m.geometry.userData.keep))m.geometry.dispose();}}
 }
+const NOHUBIDLE=/[?&]nohubidle\b/.test(location.search);
 function hubRender(dt,now){
   const room=screen==='lobby'&&LOBBY&&LOBBY.ph==='lobby';
   if(!HUB.on||crOpen||!(screen==='menu'||room)){if(HUB.fovSet){cam.fov=SET.fov;cam.updateProjectionMatrix();HUB.fovSet=false;}document.body.classList.remove('hubOn');return false;}
   try{hubBuild();}catch(e){console.error('hub',e);HUB.on=false;return false;}
   document.body.classList.add('hubOn');
+  // ฉากเปิด #intro ทึบทั้งจอ: คอมไพล์เชดเดอร์ห้องแบบไม่บล็อกก่อน (เดิมเฟรมแรกค้าง 2-3 วิ) แล้ววาดห้องแค่ 2 ครั้ง/วิ พอให้พร้อมตอนกดเข้า
+  {const I=HUB.introEl||(HUB.introEl=document.getElementById('intro'));if(I&&!NOHUBIDLE&&!I.classList.contains('go')&&!I.classList.contains('gone')){
+    if(!HUB.cold){HUB.cold=1;try{Promise.all(warmCompile([HUBS])).then(()=>{HUB.cold=2;},()=>{HUB.cold=2;});}catch(e){HUB.cold=2;}}
+    HWARM.t+=dt;HUB.coldT=(HUB.coldT||0)+dt;if(HUB.cold<2||HUB.coldT<0.5)return true;HUB.coldT=0;}}
   dt=Math.min(dt,0.05);const t=now/1000,F=HUB.fx;
   const mx=((mouseX||SW/2)/Math.max(1,SW)-0.5),my=((mouseY||SH/2)/Math.max(1,SH)-0.5);
   let sc=HUBS,lay=null,want,tt=0,fvO=0;

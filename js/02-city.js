@@ -157,7 +157,7 @@ function cityModeData(M){
 function mapArea(mp,mode){const M=MAPS[mp];return M&&M.areas&&M.areas[mode]||null;}
 let AREA=null;
 // ดันกลับเข้าพื้นที่เล่น (collideWorld เรียก) • r = รัศมีตัว
-function areaClamp(o,r){const A=AREA;if(!A)return false;const x=o.x,y=o.y;
+function areaClamp(o,r){const A=AREA;if(!A)return false;if(A.rects)return sgClamp(o,r,A);const x=o.x,y=o.y;   // rects = หลายกรอบรวมกัน (โหมดบุกปราสาท js/02-fcs)
   if(A.r){const dx=o.x-A.cx,dy=o.y-A.cy,d=Math.hypot(dx,dy),R=A.r-r;if(d>R&&d>0){o.x=A.cx+dx/d*R;o.y=A.cy+dy/d*R;}}
   else{o.x=clamp(o.x,A.x1+r,A.x2-r);o.y=clamp(o.y,A.y1+r,A.y2-r);}
   return o.x!==x||o.y!==y;}

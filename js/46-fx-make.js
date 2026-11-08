@@ -205,8 +205,11 @@ function fxModelEmission(m){if(m.userData.fxEmission)return m;m.userData.fxEmiss
       '#include <emissivemap_fragment>\ntotalEmissiveRadiance+=diffuseColor.rgb*vModelEmit;');
   };m.customProgramCacheKey=()=>key+':model-emit-v1';return m;}
 // ---------- โหลด ----------
+// สร้างโมเดลทีละอัน คั่นด้วย macrotask: เดิมตอนโหลด fetch เสร็จพร้อมกันหลายสิบไฟล์แล้วสร้างรวดเดียว ค้าง ~0.5 วิ
+let _fxMQ=Promise.resolve();
+function fxMeshQueue(fn){const r=_fxMQ.then(()=>new Promise(k=>setTimeout(k,0))).then(fn);_fxMQ=r.catch(()=>{});return r;}
 function fxMeshLoad(name){let e=FXMK.mesh.get(name);if(e)return e.p;e={data:null,geo:null,fail:false};FXMK.mesh.set(name,e);const v=((FXR.index.mesh||{})[name]||{}).v||'';
-  e.p=fxFetch('assets/fx/mesh/'+name+'.mesh.json'+(v?'?v='+v:'')).then(d=>{e.data=d;e.geo=fxMeshBuild(d);e.geo.userData.keep=true;return e.geo;}).catch(err=>{e.fail=true;console.warn('fx: โหลดโมเดลไม่ได้',name,err.message);return null;});return e.p;}
+  e.p=fxFetch('assets/fx/mesh/'+name+'.mesh.json'+(v?'?v='+v:'')).then(d=>{e.data=d;return fxMeshQueue(()=>{e.geo=fxMeshBuild(d);e.geo.userData.keep=true;return e.geo;});}).catch(err=>{e.fail=true;console.warn('fx: โหลดโมเดลไม่ได้',name,err.message);return null;});return e.p;}
 function fxMeshGeo(name){if(!name)return null;const e=FXMK.mesh.get(name);if(!e){fxMeshLoad(name);return null;}return e.geo;}
 // สตูดิโอ: ใช้สูตรใหม่ทันที (เอฟเฟกต์ที่ใช้โมเดลนี้เปลี่ยนตาม) — ของเก่าไม่ทิ้งทันทีเพราะอาจมีชิ้นที่ยังแสดงอยู่
 function fxMeshSet(name,d){const e=FXMK.mesh.get(name)||{fail:false};if(e.geo)e.geo.userData.keep=false;e.data=d;e.geo=fxMeshBuild(d);e.geo.userData.keep=true;e.fail=false;e.p=Promise.resolve(e.geo);FXMK.mesh.set(name,e);return e.geo;}

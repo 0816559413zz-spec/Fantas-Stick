@@ -190,7 +190,7 @@ function loadAllMapData(){return modelManifest().then(m=>Promise.all(Object.keys
 // แผนที่ที่ใช้ได้กับโหมดนี้ (ไฟล์แผนที่บอกโหมดเองได้)
 // เครื่องลูก: ยังไม่มีข้อมูลแผนที่นี้ → สั่งโหลดแล้วรอ snapshot ถัดไป (โหลดไม่ได้ = ใช้แผนที่สำรอง)
 function mapReady(id){if(MAPS[id]||FMAPS.fail.has(id))return true;loadMapData(id);return false;}
-function mapOkFor(id,mode){if(MAP_OFF.has(id))return false;const f=MAPS[id]&&MAPS[id].fm;return !f||!f.modes||f.modes.includes(mode);}
+function mapOkFor(id,mode){if(MAP_OFF.has(id))return false;if(MAPS[id]&&MAPS[id].only&&MAPS[id].only!==mode)return false;/* only = แผนที่เฉพาะโหมด (ปราสาท First Castle Strike) */const f=MAPS[id]&&MAPS[id].fm;return !f||!f.modes||f.modes.includes(mode);}
 // ---------- ของประกอบฉากที่พังได้ / ใช้ได้ (prop) ----------
 // ตำแหน่งสุ่มแบบ seed จากชื่อแผนที่ → ทุกเครื่องคำนวณได้ตรงกันเอง ส่งในเน็ตแค่สถานะ (snapshot PB: 1 ตัวต่อชิ้น 0=ปกติ 1=พัง 2=ใช้แล้ว)
 // ตัวเลข (hp/ขนาด/จำนวน/โหมดที่เปิด) เป็นค่าตั้งต้นให้ทีมเกมเพลย์ปรับ • model = ชื่อใน assets/manifest.json (ไม่มีไฟล์ = ใช้โมเดลจากโค้ด)
@@ -299,7 +299,7 @@ ${rib?`<path d="M-2 100L102 100L94 113L102 126L-2 126L6 113Z" fill="#eadcae" str
 function houseColor(lk){return HOUSES[parseLook(lk).h].c;}
 const TEAMC=['#4da3ff','#ff5a5a'], TEAMN=['ทีมฟ้า','ทีมแดง'];
 // โหมดที่ไม่มีไม้กวาด (กด B ไม่ได้ + ไม่มีไอคอน B บน HUD)
-const NOBROOM=new Set(['imp','ffa']);
+const NOBROOM=new Set(['imp','ffa','siege']);   // บุกปราสาท: เอนไปทางไม่มีไม้กวาด (designs/castle-gameplay-concept.md)
 // ห้องรับคนได้สูงสุด 12 (FFA 12 / ทีม 6v6) — โหมดอื่นยังเช็ค max ของโหมดตอนกดเริ่ม (ผู้ใช้ 2026-11-05)
 const ROOM_MAX=12;
 const MODES={
@@ -311,7 +311,8 @@ const MODES={
   quid:{name:'🏟️ ควิดดิช',d:'2-6 คน 2 ทีม บินแย่งบอลโยนเข้าห่วง',min:2,max:6,team:true,map:'pitch'},
   race:{name:'🏁 แข่งไม้กวาด',d:'1-6 คน บินลอดห่วงครบ 2 รอบ',min:1,max:6},
   br:{name:'🌀 แบทเทิลรอยัล',d:'2-6 คน เก็บคาถา วงหด คนสุดท้ายชนะ',min:2,max:6,map:'lake'},
-  imp:{name:'🐍 หาลอร์ดโวลเดอมอร์',d:'4-6 คน ทำภารกิจ จับตัวโวลเดอมอร์ (แบบ Among Us)',min:4,max:6}
+  imp:{name:'🐍 หาลอร์ดโวลเดอมอร์',d:'4-6 คน ทำภารกิจ จับตัวโวลเดอมอร์ (แบบ Among Us)',min:4,max:6},
+  siege:{name:'🏰 บุกปราสาท',d:'2-12 คน ทีมฟ้าบุก ทีมแดงรับ — ร่ายทำลายแกน 3 จุดตามลำดับก่อนหมดเวลา',min:2,max:12,team:true,tmax:6,map:'fcs'}
 };
 // ค่าพื้นฐานผู้เล่น (ปรับได้ในเครื่องมือปรับค่า tune.html / F8) • เลือด, เดิน, บิน, กระโดด, เดินช้าตอนถือโล่, เกิดใหม่ (วิ)
 const PLAY={hp:200,walk:175,fly:540,jump:8,shSlow:0.5,respawn:3,respawnFast:2};
