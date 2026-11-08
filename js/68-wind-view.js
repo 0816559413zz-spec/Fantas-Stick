@@ -125,6 +125,8 @@ function windEfx(ev){
     case 'wnpushsink':fxPlay('wind/push_sink',{x,y,h:0,aim:false});if(near)snd('slam',ev);return true;
     case 'wnpushslam':fxPlay('wind/push_slam',{x,y,h:H,aim:false});if(near)snd('hit',ev);return true;
     case 'wnslam':fxPlay('wind/slam_hit',{x,y,h:0,aim:false});if(near){snd('slam',ev);hitStop(0.05);}return true;
+    case 'wnblcast':fxPlay('wind/blade_cast',{x,y,h:H,a});if(near)snd('cast_pull',ev);return true;
+    case 'wnblhit':fxPlay(ev.m?'wind/blade_hit':'wind/blade_pop',{x,y,h:H,a:Math.random()*6.283});if(ev.n>0)fxPlay('wind/blade_slow',{x,y,h:H,aim:false,p:{t:ev.n}});if(near&&ev.m)snd('hit',ev);return true;
     case 'wnfc':fxPlay(ev.m?'wind/force_dash':'wind/force_dash_g',{x,y,h:H,a,follow:ev.id});if(near)snd('dash',ev);return true;
     case 'wnfchit':fxPlay('wind/force_hit',{x,y,h:H,a});if(near)snd('hit',ev);return true;
     case 'wnfcend':return true;

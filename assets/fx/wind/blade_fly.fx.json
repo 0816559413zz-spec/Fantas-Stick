@@ -1,6 +1,6 @@
 {
  "v": 1,
- "desc": "Windblade ใบมีดลมเล็กตามกระสุน (เบา: ยิง 14 ใบต่อครั้ง): แกนขาวบางยืดยาว + หางเส้นลมเขียวจาง",
+ "desc": "Windblade ใบมีดลมตามกระสุน (แบบ A): ขีดเขียวสั้นมีแกนขาว + ประกายเส้นลมตามหลัง",
  "tags": [
   "wind",
   "blade",
@@ -8,71 +8,57 @@
  ],
  "pal": "wind",
  "dur": 0.3,
- "seed": 61,
+ "seed": 21,
  "layers": [
+  {
+   "id": "body",
+   "t": "mesh",
+   "at": 0,
+   "life": 0.3,
+   "loop": true,
+   "att": "point",
+   "pos": [
+    0,
+    0,
+    0
+   ],
+   "shape": "sphere",
+   "mat": "toon",
+   "col": "#27c765",
+   "col2": "#0f9d55",
+   "fade": 0,
+   "rim": 0,
+   "scale": [
+    0.08,
+    0.08,
+    1.0
+   ],
+   "op": 1
+  },
   {
    "id": "core",
    "t": "mesh",
    "at": 0,
    "life": 0.3,
+   "loop": true,
    "att": "point",
    "pos": [
     0,
     0,
-    0
+    0.05
    ],
+   "shape": "sphere",
    "mat": "glow",
    "col": "#ffffff",
    "col2": "#d8ffe0",
    "fade": 0,
-   "shape": "sphere",
-   "loop": true,
+   "rim": 0,
    "scale": [
-    0.1,
-    0.1,
-    0.55
+    0.04,
+    0.04,
+    0.6
    ],
    "op": 0.95
-  },
-  {
-   "id": "tail",
-   "t": "mesh",
-   "at": 0,
-   "life": 0.3,
-   "att": "point",
-   "pos": [
-    0,
-    0,
-    0.15
-   ],
-   "mat": "tex",
-   "col": "#d8ffe0",
-   "col2": "#000000",
-   "fade": 0,
-   "shape": "model",
-   "model": "wind_real_cone",
-   "tex": "tex/wind_streaks",
-   "rim": 0,
-   "loop": true,
-   "uvTile": [
-    2,
-    1
-   ],
-   "uvScroll": [
-    -6,
-    0
-   ],
-   "rot": [
-    90,
-    0,
-    0
-   ],
-   "scale": [
-    0.34,
-    2.4,
-    0.34
-   ],
-   "op": 0.8
   },
   {
    "id": "streak",
@@ -88,29 +74,29 @@
    "from": "sphere",
    "gravity": 0,
    "drag": 0.6,
+   "curl": false,
+   "loop": true,
    "fr": 0.1,
    "dir": "aim",
    "yaw": 180,
-   "spread": 0.1,
+   "spread": 0.15,
    "speed": [
     8,
     14
    ],
    "plife": [
     0.08,
-    0.16
+    0.14
    ],
    "look": "streak",
    "size": [
-    1,
-    1.8
+    3,
+    5
    ],
    "col": "#ffffff",
-   "c2": "#8dff65",
-   "rate": 26,
-   "curl": false,
-   "x": true,
-   "loop": true
+   "c2": "#27c765",
+   "rate": 30,
+   "x": true
   }
  ]
 }

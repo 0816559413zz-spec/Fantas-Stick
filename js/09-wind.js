@@ -364,13 +364,16 @@ function windForceTick(p,dt){const R=p.wfc,W=W_VX,ca=Math.cos(R.a),sa=Math.sin(R
 
 // ---------- Windblade (เดิม Void Spheres): ใบมีดลมเล็ก ๆ รัว ๆ ----------
 // บิน: ยิงเยอะ ถี่ ไปที่เล็ก ทะลุเป้า — โดน = ช้า 90% + ลดคูลดาวน์ Featherwing 20% (ครั้งเดียวต่อการร่าย) • พื้น: น้อยกว่า เบากว่า
-function windBladeCast(p){if(windSpin(p)||p.wbl)return false;const air=windAir(p),B=W_VO;p.wbl={left:air?B.nA:B.nG,gap:B.gap,t:0,air,hit:0};}
+function windBladeCast(p){if(windSpin(p)||p.wbl)return false;const air=windAir(p),B=W_VO;p.wbl={left:air?B.nA:B.nG,gap:B.gap,t:0,air,hit:0,fx:0,tg:new Set()};
+  emit({k:'efx',z:'wnblcast',x:Math.round(p.x),y:Math.round(p.y),h:p.z,a:Math.round(p.ang*100)/100,m:air?1:0,id:p.id});}
 function windBladeTick(p,dt){const R=p.wbl,B=W_VO;if(!p.alive||p.stun>0){p.wbl=null;return;}R.t-=dt;
   while(R.t<=0&&R.left>0){R.t+=R.gap;R.left--;const a=p.ang;p.ang+=rnd(-B.spr,B.spr);
     const q=shoot(p,'wbl',{sp:'b_wind',quiet:1,spd:B.spd,life:B.range/B.spd,r:B.br,dmg:R.air?B.dmgA:B.dmgG});q.vh+=rnd(-3,3);q.pierce=1;q.hs=new Set();q.air=R.air;q.bl=R;p.ang=a;}
   if(R.left<=0)p.wbl=null;}
 function windBladeHit(pr,t){const o=G.players[pr.owner];if(!o)return;const B=W_VO;
-  aoeHit(o,t,pr.dmg,t=>{windSlow(t,pr.air?B.slowA:B.slowG,pr.air?B.slowTA:B.slowTG);});
+  aoeHit(o,t,pr.dmg,t=>{const sT=pr.air?B.slowTA:B.slowTG;windSlow(t,pr.air?B.slowA:B.slowG,sT);
+    const bl=pr.bl;let first=0,slow=0;if(bl){if(!bl.fx){bl.fx=1;first=1;}if(bl.tg&&!bl.tg.has(t)){bl.tg.add(t);slow=sT;}}
+    emit({k:'efx',z:'wnblhit',x:Math.round(t.x),y:Math.round(t.y),h:cH(t),m:first,n:slow});});
   if(pr.air&&pr.bl&&!pr.bl.hit){pr.bl.hit=1;windCdCut(o,'featherwing',B.cdCut);}}
 
 // ---------- อัลติ Sonic Boom Strike (เดิม Eye of Heaven) ----------

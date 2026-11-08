@@ -1,0 +1,106 @@
+{
+ "v": 1,
+ "desc": "Windblade ใบมีดแต่ละใบโดนเป้า: ประกายขีดสั้น + รอยฟันเล็ก 1 เส้น",
+ "tags": [
+  "wind",
+  "blade",
+  "hit"
+ ],
+ "pal": "wind",
+ "dur": 0.35,
+ "seed": 21,
+ "layers": [
+  {
+   "id": "p_glow",
+   "t": "flash",
+   "at": 0,
+   "life": 0.22,
+   "att": "point",
+   "pos": [
+    0,
+    0,
+    0
+   ],
+   "col": "#8dff65",
+   "size0": 0.27999999999999997,
+   "size": 0.7,
+   "k": 0.9
+  },
+  {
+   "id": "p_burst",
+   "t": "emit",
+   "at": 0,
+   "life": 0.1,
+   "att": "point",
+   "pos": [
+    0,
+    0,
+    0
+   ],
+   "from": "sphere",
+   "gravity": 0,
+   "drag": 2,
+   "curl": false,
+   "burst": 14,
+   "fr": 0.3,
+   "dir": "out",
+   "spread": 1,
+   "speed": [
+    4,
+    9
+   ],
+   "plife": [
+    0.15,
+    0.3
+   ],
+   "look": "streak",
+   "size": [
+    4,
+    6.5
+   ],
+   "col": "#27c765",
+   "c2": "#8dff65"
+  },
+  {
+   "id": "p_cut",
+   "t": "mesh",
+   "at": 0,
+   "life": 0.22,
+   "att": "point",
+   "shape": "sphere",
+   "fade": 0,
+   "rim": 0,
+   "mat": "glow",
+   "col": "#8dff65",
+   "col2": "#ffffff",
+   "pos": {
+    "0": [
+     -0.4,
+     0.4,
+     -0.35
+    ],
+    "1": [
+     0.4,
+     -0.35,
+     0.35
+    ]
+   },
+   "rot": [
+    35.205,
+    48.814,
+    0
+   ],
+   "scale": [
+    0.07,
+    0.07,
+    1.0
+   ],
+   "op": {
+    "0": 0,
+    ".1": 1,
+    ".8": 1,
+    "1": 0
+   }
+  }
+ ]
+}

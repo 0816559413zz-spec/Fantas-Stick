@@ -248,4 +248,4 @@ def sonic():
     W.append({'id':'flash','t':'flash','at':0,'life':.1,'att':'point','pos':[0,0,0],'col':G['mint'],'size0':.3,'size':2,'k':.8})
     save('sonic_wave',W,.5,'Sonic Boom พุ่งผ่าน (บูมตามหลัง): คลื่นเสียงวงบิดอากาศ + วงลม + เส้นลมสาดออกจากเส้นทาง',['sonic','hit'])
 
-windup();push();force();blade();fast();sonic()
+windup();push();force();fast();sonic()   # blade() ไม่เรียกแล้ว: Windblade ใช้แบบ A ของสตอรี่บอร์ด #21 → tools/wind-blade-sb-gen.py
