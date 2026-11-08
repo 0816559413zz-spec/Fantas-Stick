@@ -434,7 +434,7 @@ function explode(pr){
   }
 }
 function hitTarget(pr,t){
-  if(pr.sp&&SPELLS[pr.sp]&&SPELLS[pr.sp].hit){SPELLS[pr.sp].hit(pr,t);if(pr.type!=='fire')emit({k:'imp',x:t.x,y:t.y,h:pr.h,t:pr.type});return;}
+  if(pr.sp&&SPELLS[pr.sp]&&SPELLS[pr.sp].hit){SPELLS[pr.sp].hit(pr,t);if(pr.type!=='fire'&&pr.type!=='wbl')emit({k:'imp',x:t.x,y:t.y,h:pr.h,t:pr.type});return;}
   damage(t,pr.dmg,pr.owner,'proj');
   if(pr.type!=='fire')emit({k:'imp',x:t.x,y:t.y,h:pr.h,t:pr.type});
   const big=t.type==='troll'||t.type==='queen';
@@ -451,8 +451,8 @@ function hitTarget(pr,t){
 }
 function updateProjectiles(dt){
   const ps=plist();
-  for(const pr of G.proj){   // กระสุนเร็วที่พุ่งลงชัน (เช่นลูกบอลลมยิงจากที่สูง) ก้าวทีละไม่เกิน ~1.2 ม.แนวตั้ง กันทะลุตัวเป้า
-    const ns=pr.dead?0:clamp(Math.ceil(Math.abs(pr.vh||0)*dt/1.2),1,8);
+  for(const pr of G.proj){   // กระสุนเร็ว/พุ่งลงชัน ก้าวทีละไม่เกิน ~1.2 ม.แนวตั้ง และไม่เกิน (รัศมี+16) px แนวนอน กันทะลุตัวเป้า (เฟรมช้าด้วย)
+    const ns=pr.dead?0:clamp(Math.max(Math.ceil(Math.abs(pr.vh||0)*dt/1.2),Math.ceil(Math.hypot(pr.vx,pr.vy)*dt/(pr.r+16))),1,8);
     for(let si=0;si<ns&&!pr.dead;si++)projStep(pr,dt/ns,ps);
   }
   G.proj=G.proj.filter(p=>!p.dead);
@@ -473,7 +473,7 @@ function projStep(pr,dt,ps){
     if(!hp&&cityProjIn(pr,dt))hp=true;   // ตึกกลวงในเมือง: ผนังนอกทีละแผ่น / พื้นชั้นบน / ทางลาด
     if(hp){killProj(pr);return;}
     for(const p of ps){
-      if(!p.alive||p.downed||p.id===pr.owner||p.team===pr.team)continue;
+      if(!p.alive||p.downed||p.id===pr.owner||p.team===pr.team||(pr.hs&&pr.hs.has(p)))continue;
       if((p.x-pr.x)**2+(p.y-pr.y)**2>(PR+pr.r)**2)continue;
       if(Math.abs(pr.h-cH(p))>vR(p)+pr.r/20)continue;
       if(p.inv>0)continue;
@@ -491,16 +491,16 @@ function projStep(pr,dt,ps){
         }
         break;
       }
-      hitTarget(pr,p);killProj(pr);break;
+      hitTarget(pr,p);if(pr.pierce){pr.hs.add(p);continue;}killProj(pr);break;
     }
     if(!pr.dead)for(const m of G.mins){
-      if(m.dead||m.team===pr.team)continue;
+      if(m.dead||m.team===pr.team||(pr.hs&&pr.hs.has(m)))continue;
       const hc=m.type==='golem'?1.6:m.type==='wolf'?0.8:(m.h||0),tol=(m.type==='golem'?1.7:m.type==='wolf'?0.8:0.55)+pr.r/20;
-      if((m.x-pr.x)**2+(m.y-pr.y)**2<(m.r+pr.r)**2&&Math.abs(pr.h-hc)<tol){hitTarget(pr,m);killProj(pr);break;}
+      if((m.x-pr.x)**2+(m.y-pr.y)**2<(m.r+pr.r)**2&&Math.abs(pr.h-hc)<tol){hitTarget(pr,m);if(pr.pierce){pr.hs.add(m);continue;}killProj(pr);break;}
     }
     if(pr.dead||pr.src!=='p')return;
     for(const e of G.en){
-      if(e.dead)continue;
-      if((e.x-pr.x)**2+(e.y-pr.y)**2<(e.r+pr.r)**2&&Math.abs(pr.h-cH(e))<vR(e)+pr.r/20+0.2){hitTarget(pr,e);killProj(pr);break;}
+      if(e.dead||(pr.hs&&pr.hs.has(e)))continue;
+      if((e.x-pr.x)**2+(e.y-pr.y)**2<(e.r+pr.r)**2&&Math.abs(pr.h-cH(e))<vR(e)+pr.r/20+0.2){hitTarget(pr,e);if(pr.pierce){pr.hs.add(e);continue;}killProj(pr);break;}
     }
 }

@@ -291,7 +291,8 @@ function updatePlayer(p,dt,acting){
   else if(p.sdome)stormDomeTick(p,inp,dt);
   else if(p.wr&&p.wr.ph!=='trans'){}   // Wrath: ลอยบนฟ้า (earthWrathTick คุมความสูง)
   else if(p.wfw)windFlyZ(p,dt);   // สายลม Featherwing: บิน/ร่อนลง
-  else if(p.wflt>0)windFloatZ(p,dt);   // โดนอัลติสายลม: ลอยค้าง
+  else if(p.wsk>0)windSinkZ(p,dt);   // Wind Push (บิน): จมดิน
+  else if(p.wflt>0)windFloatZ(p,dt);   // Windup / Wind Push (พื้น): ลอยค้าง
   else gravity();
 
   // โล่
@@ -315,8 +316,8 @@ function updatePlayer(p,dt,acting){
   const ml=Math.hypot(mx,my);if(ml){mx/=ml;my/=ml;}
   if(!canAct||p.root>0||p.dchgOn||p.cryo>0){mx=my=0;}
   else if(p.fear>0){const fa=Math.atan2(p.y-p.fearY,p.x-p.fearX);mx=Math.cos(fa);my=Math.sin(fa);}
-  const spd=(p.fly?PLAY.fly*p.buffs.spd:PLAY.walk*p.buffs.spd*(p.shieldOn&&p.pathIdx!==WATERP?PLAY.shSlow:1))*(p.boost>0?1.45:1)*moveMul(p)*(p.wr||p.aug||p.ecb?earthSpd(p):1)*(p.wdr||p.wfw||p.wgs?windSpd(p):1)*(p.wsk||p.wab||p.wmsT>0?waterSpd(p):1)*(p.dfall?(p.dfall.ph===2?0.45:0):p.sdome?(p.sdome.ph===2?0.45:0):p.rail?0:(p.kindle>0&&p.hover>0)?0.35:p.breath>0?0.7:(p.snapT>0||p.colos>0||p.grT>0)?0.5:1)*(p.slideT>0?1.8:1+(p.iceB||0));
-  p.wSpd=(p.dash>0||p.slideT>0||p.slip>0||!canAct||p.root>0||p.dchgOn||p.cryo>0||p.fear>0||p.gh||p.fly)?0:Math.round(spd);   // ความเร็วเดินตอนนี้ → ลูกข่ายใช้ทำนายตัวเอง (0 = อย่าทำนาย)
+  const spd=(p.fly?(p.wfo?W_FW.fastSpd:PLAY.fly)*p.buffs.spd:PLAY.walk*p.buffs.spd*(p.shieldOn&&p.pathIdx!==WATERP?PLAY.shSlow:1))*(p.boost>0?1.45:1)*moveMul(p)*(p.wr||p.aug||p.ecb?earthSpd(p):1)*(p.wdr||p.wfw||p.wgs?windSpd(p):1)*(p.wsk||p.wab||p.wmsT>0?waterSpd(p):1)*(p.dfall?(p.dfall.ph===2?0.45:0):p.sdome?(p.sdome.ph===2?0.45:0):p.rail?0:(p.kindle>0&&p.hover>0)?0.35:p.breath>0?0.7:(p.snapT>0||p.colos>0||p.grT>0)?0.5:1)*(p.slideT>0?1.8:1+(p.iceB||0));
+  p.wSpd=(p.dash>0||p.slideT>0||p.slip>0||!canAct||p.root>0||p.dchgOn||p.cryo>0||p.fear>0||p.gh||p.fly||(p.wfw&&p.wfw.ph==='focus'))?0:Math.round(spd);   // ความเร็วเดินตอนนี้ → ลูกข่ายใช้ทำนายตัวเอง (0 = อย่าทำนาย)
   if(p.dash>0){
     p.dash-=dt;const ds=p.dashSp||900;
     // ก้าวย่อย ≤8 หน่วย + ชนโลกทุกก้าว: กันพุ่งทะลุผนังบ้านบาง (ก้าวเดียวอาจยาว 30+ หน่วย)
@@ -333,6 +334,7 @@ function updatePlayer(p,dt,acting){
     p.x+=p.mvx*dt;p.y+=p.mvy*dt;
   }
   else if(p.fly)broomMove(p,mx,my,spd,canAct,dt);
+  else if(p.wfw&&p.wfw.ph==='focus')windAirMove(p,mx,my,spd,canAct,dt);   // Featherwing บินปกติ: แรงเฉื่อย เลี้ยวเป็นวง
   else{p.x+=mx*spd*dt;p.y+=my*spd*dt;p.mvx=mx*spd;p.mvy=my*spd;}
   if(p.dash>0&&p.ultSlash)for(const t of foesOf(p.team)){if(p.ultSlash.has(t))continue;if(Math.hypot(t.x-p.x,t.y-p.y)<90+(t.r||PR)){p.ultSlash.add(t);p.noMul=true;aoeHit(p,t,MIRROR.v.slash,t=>{t.fslUltT=MIRROR.v.slowT;});p.noMul=false;}}
   if(p.dash<=0)p.ultSlash=null;
@@ -343,7 +345,7 @@ function updatePlayer(p,dt,acting){
   const fr=Math.exp(-6*dt);p.vx*=fr;p.vy*=fr;
   if(!p.gh)collideWorld(p,PR,p.z);else{p.x=clamp(p.x,30,MW-30);p.y=clamp(p.y,30,MH-30);}
   // พื้นสูงต่ำ (เนิน/หน้าผา) + ภูเขาน้ำแข็ง/พื้นชั้นบน: ขั้นต่ำๆ ก้าวขึ้นได้ / สูงเกินไปเป็นกำแพง
-  if(!p.fly&&!(p.colos>0)){
+  if(!p.fly&&!(p.colos>0)&&!(p.wsk>0)){
     p.z=terrMove(p,ox0,oy0,p.z,onG0);
     const gh=groundH(p.x,p.y,p.z);if(gh>p.z+TSTEP){p.x=ox0;p.y=oy0;p.z=oz0;}else if(gh>p.z){p.z=gh;p.vz=0;if(p.slam)frostSlam(p);}
   }
@@ -354,7 +356,7 @@ function updatePlayer(p,dt,acting){
   // ควิดดิชและแข่งไม้กวาด ร่ายเวทบนไม้กวาดได้ / โหมดอื่นร่ายไม่ได้ (เหมือนในเกม)
   if(!canAct)p.dchgOn=false;
   if(!canAct)return;
-  if(p.fly&&G.mode!=='quid'&&G.mode!=='race'){broomAct(p,inp,pr,dt);return;}   // บนไม้กวาด: คลิกซ้าย = ลำแสง (js/69)
+  if(p.fly&&(p.wfo||(G.mode!=='quid'&&G.mode!=='race'))){broomAct(p,inp,pr,dt);return;}   // Featherwing บินเร็ว (p.wfo) = ใช้สกิลไม่ได้ทุกโหมด   // บนไม้กวาด: คลิกซ้าย = ลำแสง (js/69)
 
   const cdr=p.buffs.cdr;
   const setCd=(k,v)=>{p.cd[k]=v;p.cdMax[k]=v;};

@@ -8,8 +8,8 @@
 //   ลม Maneuver (Shift ค้าง) เลี้ยวแคบ ขึ้นลงไว
 const BRM={acc:1.25,drag:0.85,brake:650,back:-140,side:160,turnLo:2.8,turnHi:1.35,turnK:2.4,turnA:4.5,climb:0.9,dz:0.05,vzMax:13,
   rng:950,cd:0.38,dmg:12,w:22};
-// Featherwing Focus (สายลม): บินแบบไม้กวาดเดิมแต่พริ้วกว่า — เร่ง/ไหลนุ่ม ไถลต่อนานกว่า เลี้ยวโค้งกว้างค่อยเป็นค่อยไป ไต่/ดิ่งนุ่ม
-const BFW={acc:0.95,drag:0.5,brake:420,back:-100,side:200,turnLo:2.3,turnHi:1.5,turnK:1.9,turnA:2.9,climb:1.0,dz:0.05,vzMax:12,vzK:3.2,rng:BRM.rng,cd:BRM.cd,dmg:BRM.dmg,w:BRM.w};
+// Featherwing บินเร็ว (Shift ค้าง, 2026-11-08 — ความเร็วสูงสุด W_FW.fastSpd): บินแบบไม้กวาด (เมาส์ = เครื่องบิน) ใช้สกิลไม่ได้ • (ของเดิม: Focus บินแบบไม้กวาดเดิมแต่พริ้วกว่า — เร่ง/ไหลนุ่ม ไถลต่อนานกว่า เลี้ยวโค้งกว้างค่อยเป็นค่อยไป ไต่/ดิ่งนุ่ม
+const BFW={acc:1.6,drag:0.5,brake:600,back:-100,side:200,turnLo:2.2,turnHi:1.2,turnK:2.0,turnA:3.2,climb:1.0,dz:0.05,vzMax:22,vzK:3.2,rng:BRM.rng,cd:BRM.cd,dmg:BRM.dmg,w:BRM.w};
 const BSK={ab:{fuel:100,burn:10,reg:8,regD:1,spd:1.8,acc:3.5},   // Afterburner: ไม่ใช้ 1 วิ แล้วเติมคืน 8/วิ
   ib:{n:10,gap:0.08,cd:6,dmg:6,spr:0.06},   // Ice Barrage
   ls:{chg:1.1,min:0.15,d0:320,d1:1000,t:0.32,dmg:[14,26],r:70,cd:5},   // Lightning Strike: ชาร์จสูงสุด 1.1 วิ → พุ่ง 320-1000 px
@@ -60,6 +60,7 @@ function broomMove(p,mx,my,spd,canAct,dt){
   p.fh=angDiff(p.fh+p.fyr*dt,0);
   if(p.lsc>0)p.fs*=Math.exp(-6*dt);   // ชาร์จสายฟ้า = หยุดลอยอยู่กับที่
   else if(p.bab)p.fs+=(spd*BSK.ab.spd-p.fs)*Math.min(1,BSK.ab.acc*dt);   // Afterburner: พุ่งไปข้างหน้าเองแม้ไม่กด W
+  else if(p.wfo&&f>-0.2)p.fs+=(spd-p.fs)*Math.min(1,K.acc*dt);   // Featherwing บินเร็ว (Shift): เร่งไปข้างหน้าเอง ไม่ต้องกด W (S = เบรก)
   else if(f>0.2)p.fs+=(spd*f-p.fs)*Math.min(1,K.acc*dt);
   else if(f<-0.2)p.fs=Math.max(K.back,p.fs-K.brake*dt);
   else p.fs*=Math.exp(-K.drag*dt);

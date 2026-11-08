@@ -4,13 +4,13 @@
 //  เรียกจาก: efxFX (js/25, z ขึ้นต้น 'wn') • syncPlayers (js/35 windFX) • render loop (js/37 syncWind)
 // =====================================================================
 const WV={st:new Map(),wl:new Map(),vo:new Map()};
-Object.assign(PCOL,{wball:'#8dff65'});
+Object.assign(PCOL,{wball:'#8dff65',wpush:'#8dff65',wbl:'#b8ff85'});
 const WN_BODY={charge:[-0.7,-0.3,-0.12,0.3,-0.7,0.3,0,-0.2],dash:[0.65,-0.2,0,0.68,0.8,0.3,0,-0.05],hover:[-1.0,-0.35,0,-0.08,-0.75,0.45,0,-0.03]},WN_AIR_FEET=[-0.45,0.25,0.12,-0.12];
 WN_BODY.dive=[0.5,-0.25,0,0.5,0.55,0.25,0,-0.04];WN_BODY.wallAim=[-1.55,-0.08,0.1,0.08,-1.2,0.35,0,-0.04];WN_BODY.gather=[-1.8,-0.45,-0.15,-0.08,-1.35,0.45,0,-0.08];WN_BODY.shieldCharge=[-1.2,0.6,0,0.2,-1.2,-0.6,0,-0.18];
 function windCharacterPose(o,p,dt,now){
   const A=p.wn;if(!A||!p.al||p.dn||p.fl||p.st){o.wnPose=null;return;}
   let s=o.wnPose;if(!s)s=o.wnPose={phase:0,t:0,w:0,P:WN_BODY.hover.slice(),hover:0};
-  if(A[6]===1){   // ชาร์จ Windrift • ช่วงพุ่ง/ลงท่าฮีโร่ = dashPose (js/72)
+  if(A[6]===1||A[9]===1){   // ชาร์จอัลติ Sonic Boom (A[9]=1) / (เลิกใช้) ชาร์จ Windrift • ช่วงพุ่ง/ลงท่าฮีโร่ = dashPose (js/72)
     if(s.phase!==A[6]){s.phase=A[6];s.t=0;}s.t+=dt;s.w=Math.min(1,s.w+dt*14);
     const target=WN_BODY.charge;for(let i=0;i<8;i++)s.P[i]=target[i];
     characterStance(o,s.P,WN_AIR_FEET,s.w);return;
@@ -18,8 +18,8 @@ function windCharacterPose(o,p,dt,now){
   if(s.phase){s.phase=0;s.t=0;}
   if(s.w>0){s.t+=dt;s.w=Math.max(0,1-_cs(Math.min(1,s.t/0.35)));if(!p.sh&&!o.caN&&!(o.cpT>0))characterStance(o,s.P,p.wv>1?null:WN_AIR_FEET,s.w);}
   const idle=A[5]===1&&!p.sh&&!o.caN&&!(o.cpT>0);s.hover+=((idle?1:0)-s.hover)*(1-Math.exp(-10*dt));
-  if(idle){const T=A[9]===1?WN_BODY.dive:WN_BODY.hover,k=1-Math.exp(-9*dt);   // Shift ค้าง (A[9]) = เอนตัวไปหน้า แขนไปข้างหลัง
-    for(let i=0;i<8;i++)s.P[i]+=(T[i]-s.P[i])*k;s.P[6]=A[9]===1?0:Math.sin(now/600)*0.025;characterStance(o,s.P,WN_AIR_FEET,s.hover*0.8);}
+  if(idle){const T=WN_BODY.hover,k=1-Math.exp(-9*dt);   // Shift ค้าง (A[9]) = เอนตัวไปหน้า แขนไปข้างหลัง
+    for(let i=0;i<8;i++)s.P[i]+=(T[i]-s.P[i])*k;s.P[6]=Math.sin(now/600)*0.025;characterStance(o,s.P,WN_AIR_FEET,s.hover*0.8);}
   if(A[4])characterStance(o,WN_BODY.shieldCharge,p.wv>1?null:WN_AIR_FEET,0.9);
   else if(A[3]&&!o.caN)characterStance(o,WN_BODY.wallAim,p.wv>1?null:WN_AIR_FEET,0.8);
   else if(A[1]&&!o.caN&&!p.sh)characterStance(o,WN_BODY.gather,p.wv>1?null:WN_AIR_FEET,0.8);
@@ -104,7 +104,7 @@ function windEfx(ev){
     case 'wnvoboom':{const I=WV.vo.get(ev.n);if(I){fxKill(I);WV.vo.delete(ev.n);}fxPlay('wind/void_boom',{x,y,h:H,a,aim:false});if(near){shake(0.6);snd('break',ev);if(ev.c)hitStop(0.08);}return true;}
     case 'wnfw':fxPlay('wind/fw_takeoff',{x,y,h:H,aim:false});fxPlay('wind/fw_spin',{x,y,h:H,a,follow:ev.id});if(near)snd('cast_pull',ev);return true;   // เริ่มหมุนตัวบินวนขึ้น (ev.n = ด้าน -1/1)
     case 'wnfwfocus':{const o=WV.fo||(WV.fo=new Map());const old=o.get(ev.id);if(old){fxStop(old);o.delete(ev.id);}
-      const I=fxPlay('wind/fw_focus',{x,y,h:H,a,follow:ev.id});if(I)o.set(ev.id,I);ring(x,y,'#b8ff85',70,0.4,H+0.5);if(near){shake(0.15);if(mine)toast('โหมด Focus: WASD = ทิศ • Shift = เอนตัวบินไว • Space/Ctrl = สูง/ต่ำ • คลิกซ้ายค้าง = ลูกบอลลม • กดสกิลอีกครั้ง = สะบัดปีกจบ');}return true;}
+      const I=fxPlay('wind/fw_focus',{x,y,h:H,a,follow:ev.id});if(I)o.set(ev.id,I);ring(x,y,'#b8ff85',70,0.4,H+0.5);if(near){shake(0.15);if(mine)toast('บิน: WASD = ทิศ • Space/Ctrl = สูง/ต่ำ • Shift ค้าง = บินเร็ว (เมาส์คุม ใช้สกิลไม่ได้) • สกิลทุกตัวแรงขึ้นตอนบิน • กดสกิลซ้ำ = สะบัดปีกจบ');}return true;}
     case 'wnfwflick':fxPlay('wind/fw_flick',{x,y,h:Math.max(0,H-3.2),a});wwCue(ev.id,'fk');if(near)shake(0.2);return true;
     case 'wnfwend':{const o=WV.fo;if(o&&o.get(ev.id)){fxStop(o.get(ev.id));o.delete(ev.id);}return true;}
     case 'wnfwland':return true;
@@ -116,6 +116,28 @@ function windEfx(ev){
       if(near)shake(0.3);return true;}
     case 'wnulblade':fxPlay('wind/ult_blade_'+'abc'[ev.n|0],{x,y,h:H,a});if(near&&Math.random()<0.4)snd('hit',ev);return true;
     case 'wnulimp':if(near){shake(0.5);snd('break',ev);}return true;
+    // ---- รูปแบบใหม่ 2026-11-08: ภาพชั่วคราวจากโค้ด (ring/burst) — VFX จริงรอทำใน VFX Studio ----
+    case 'wnup':{const r=ev.r||100;ring(x,y,'#8dff65',r,ev.t||0.45,H+0.1);ring(x,y,'#efffe8',r*0.55,ev.t||0.45,H+0.1);burst(x,y,'#b8ff85',10,r*0.9,0.45,1.8,{h:H+0.2,vh:[0.5,2],g:-0.5});if(near)snd('cast_pull',ev);return true;}
+    case 'wnupgo':{const r=ev.r||100;ring(x,y,'#efffe8',r*1.1,0.5,H+0.1);for(let i=0;i<5;i++)later(i*0.06,()=>burst(x+rnd(-r,r)*0.6,y+rnd(-r,r)*0.6,i%2?'#8dff65':'#efffe8',6,40,0.7,2.2,{h:H+0.2,vh:[6,11],g:-0.3,drag:1.5}));if(near){shake(0.25);snd('whoosh',ev);}return true;}
+    case 'wnuphit':burst(x,y,'#efffe8',10,90,0.5,2,{h:H,vh:[3,7],g:0.5});if(near)snd('hit',ev);return true;
+    case 'wnpush':{const ca=Math.cos(a),sa=Math.sin(a);burst(x+ca*30,y+sa*30,'#8dff65',8,200,0.25,2,{h:H+1.3,a,spread:0.4,g:0});ring(x+ca*30,y+sa*30,'#efffe8',34,0.25,H+1.2);if(near)snd('cast_pull',ev);return true;}
+    case 'wnpushup':ring(x,y,'#8dff65',60,0.4,0.15);burst(x,y,'#efffe8',12,120,0.5,2,{h:0.3,vh:[4,9],g:1});if(near){shake(0.2);snd('hit',ev);}return true;
+    case 'wnpushsink':ring(x,y,'#8dff65',70,0.45,0.15);ring(x,y,'#6b5a3a',45,0.5,0.1);burst(x,y,'#7a6a48',16,150,0.6,3,{h:0.2,vh:[1,4],g:6});smoke(x,y,0.3,6,'#6b5a3a',0.9,5,70);if(near){shake(0.3);snd('slam',ev);}return true;
+    case 'wnpushslam':ring(x,y,'#8dff65',40,0.3,H);burst(x,y,'#efffe8',10,100,0.35,2,{h:H,vh:[-8,-3],g:0});if(near)snd('hit',ev);return true;
+    case 'wnslam':ring(x,y,'#efffe8',90,0.4,0.15);burst(x,y,'#8dff65',14,170,0.5,2.4,{h:0.2,vh:[1,5],g:6});smoke(x,y,0.3,5,'#7a7a72',0.9,5,80);if(near){shake(0.4);snd('slam',ev);hitStop(0.05);}return true;
+    case 'wnfc':{const ca=Math.cos(a),sa=Math.sin(a),L=ev.m?520:300;for(let i=0;i<14;i++){const u=i/13;burst(x+ca*L*u,y+sa*L*u,'#bfffd0',2,60,0.4,1.6,{h:H+1,g:0,vh:[-0.3,0.5]});}ring(x,y,'#8dff65',48,0.3,H+0.3);if(near)snd('dash',ev);return true;}
+    case 'wnfchit':ring(x,y,'#8dff65',34,0.3,H);burst(x,y,'#efffe8',8,110,0.35,2,{h:H,g:0});if(near)snd('hit',ev);return true;
+    case 'wnfcend':ring(x,y,'#bfffd0',44,0.3,H+0.3);return true;
+    case 'wnfast':ring(x,y,'#efffe8',ev.n?80:50,0.35,H+0.5);if(ev.n){burst(x,y,'#bfffd0',10,160,0.4,2,{h:H+1,g:0});if(near)snd('whoosh',ev);if(mine)toast('บินเร็ว: เมาส์ = บังคับแบบเครื่องบิน • ใช้สกิลไม่ได้ • ปล่อย Shift = กลับบินปกติ');}return true;
+    case 'wnsochg':{ring(x,y,'#efffe8',110,1.0,H+0.6);for(let i=0;i<10;i++)later(i*0.1,()=>{const b=rnd(0,6.283),r=rnd(90,140);burst(x+Math.cos(b)*r,y+Math.sin(b)*r,'#efffe8',2,-r*2,0.45,2,{h:H+rnd(0.4,1.8),g:0});});if(near)snd('cast_pull',ev);if(mine)toast('Sonic Boom Strike: ชาร์จ 1 วิ แล้วพุ่งไปตามที่เล็ก');return true;}
+    case 'wnsoimp':if(near){impactFrame(1,x,y,H+1.2);shake(0.6);snd('boom',ev);hitStop(0.06);}return true;
+    case 'wnsodash':{const ca=Math.cos(a),sa=Math.sin(a),L=Math.hypot(ev.x2-x,ev.y2-y),n=Math.max(8,Math.ceil(L/60));
+      for(let i=0;i<=n;i++){const u=i/n;burst(x+(ev.x2-x)*u,y+(ev.y2-y)*u,i%2?'#efffe8':'#8dff65',3,90,0.6,2.4,{h:H+1,g:0,vh:[-0.5,0.8]});}
+      ring(x,y,'#efffe8',140,0.45,H+0.6);ring(ev.x2,ev.y2,'#efffe8',110,0.45,H+0.6);if(near){shake(0.7);snd('boom',ev);snd('whoosh',ev);}return true;}
+    case 'wnsohit':burst(x,y,'#efffe8',22,260,0.6,3,{h:H,g:1});ring(x,y,'#ffffff',120,0.4,H);if(near){shake(0.8);snd('break',ev);hitStop(0.1);}return true;
+    case 'wnsowave':ring(x,y,'#8dff65',70,0.4,H);burst(x,y,'#efffe8',10,160,0.4,2,{h:H,g:0});if(near)snd('hit',ev);return true;
+    case 'wnsoend':ring(x,y,'#efffe8',90,0.5,H+0.5);return true;
+    case 'wnsocancel':ring(x,y,'#8dff65',60,0.3,H+0.5);return true;
     case 'wnsoon':if(mine)toast('สกิลนี้ของสายลมยังทำไม่เสร็จ (ขั้นที่ 2-3)');return true;
   }
   return false;
@@ -125,7 +147,7 @@ function drawWindHud(x,y,A,me){const g=Math.max(0,Math.min(100,A[0]))/100,full=g
   cx.lineCap='round';cx.lineWidth=5;cx.strokeStyle='rgba(0,0,0,0.45)';cx.beginPath();cx.arc(x,y,R,a0,a1);cx.stroke();
   if(g>0){cx.strokeStyle=full?`rgba(239,255,232,${0.75+0.25*Math.sin(performance.now()/120)})`:'#8dff65';cx.lineWidth=full?5:3.5;cx.beginPath();cx.arc(x,y,R,a1-(a1-a0)*g,a1);cx.stroke();}
   cx.lineCap='butt';cx.font='600 12px Kanit,sans-serif';cx.textAlign='right';cx.fillStyle=full?'#efffe8':'#b8ff85';cx.fillText(full?'GALE':Math.floor(g*100)+'%',x-R-8,y+4);
-  for(let i=0;i<3;i++){cx.beginPath();cx.arc(x-12+i*12,y+R+8,3.5,0,6.283);cx.fillStyle=i<(A[2]|0)?'#8dff65':'rgba(0,0,0,0.45)';cx.fill();}
+  for(let i=0,N=W_WL.max;i<N;i++){cx.beginPath();cx.arc(x-(N-1)*6+i*12,y+R+8,3.5,0,6.283);cx.fillStyle=i<(A[2]|0)?'#8dff65':'rgba(0,0,0,0.45)';cx.fill();}
   if(A[3]){cx.textAlign='center';cx.font='600 14px Kanit,sans-serif';cx.fillStyle='#efffe8';cx.fillText('คลิกซ้าย = ดันกำแพง • คลิกขวา = วางตรงจุดเล็ง',x,y+R+30);}
 }
 // ---------- ตัวช่วยเล็งกำแพงลม (เห็นเฉพาะเรา): เส้นโค้งเรืองที่จุดวาง (คลิกขวา) + ลูกศรทางดัน (คลิกซ้าย) ----------
