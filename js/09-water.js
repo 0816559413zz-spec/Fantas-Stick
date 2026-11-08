@@ -27,8 +27,8 @@ function waterTick(p,dt){
   if(p.shieldOn&&p.whg>0&&p.hp<p.maxHp){const u=Math.min(p.whg,WAV.shHeal*dt);p.whg-=u;p.whA=(p.whA||0)+u;if(p.whA>=1){healT(p,Math.floor(p.whA));p.whA-=Math.floor(p.whA);}}
   else if(!p.shieldOn)p.whg=Math.min(WAV.shGauge,p.whg+WAV.shReg*dt);
   if(p.wln)waterLineTick(p,dt);
-  if(p.wsk)waterSinkTick(p,dt);
-  if(p.wcl&&!p.wsk){p.wcl.t-=dt;if(p.wcl.t<=0||!p.alive){p.wcl=null;p.cd.dodge=p.cdMax.dodge=WAV.dsCd*p.buffs.cdr;emit({k:'efx',z:'wtclend',x:p.x,y:p.y,id:p.id});}}
+  if(p.wtsk)waterSinkTick(p,dt);
+  if(p.wcl&&!p.wtsk){p.wcl.t-=dt;if(p.wcl.t<=0||!p.alive){p.wcl=null;p.cd.dodge=p.cdMax.dodge=WAV.dsCd*p.buffs.cdr;emit({k:'efx',z:'wtclend',x:p.x,y:p.y,id:p.id});}}
   if(p.wmsT>0)p.wmsT-=dt;
   if(p.wfam>0){p.wfam-=dt;if(p.wfam<=0||!p.alive){p.wfam=0;emit({k:'efx',z:'wtfamoff',x:p.x,y:p.y,id:p.id});}}
   if(p.wmw>0){p.wmw-=dt;if(p.wmw<=0)emit({k:'efx',z:'wtmwoff',x:p.x,y:p.y,id:p.id});}
@@ -36,8 +36,8 @@ function waterTick(p,dt){
   if(p.wdg)waterDragonTick(p,dt);
 }
 // ยืนนิ่ง: จมดิน / ร่าย-ยิง Abyssal Beam
-function waterSpd(p){return p.wsk||p.wab?0:p.wmsT>0?WT_MW.slow:1;}
-function waterReset(p){p.wln=null;p.wsk=null;p.wcl=null;p.wfam=0;p.wmw=0;p.wab=null;p.wdg=null;p.wmsT=0;p.whg=WAV.shGauge;p.whA=0;}
+function waterSpd(p){return p.wtsk||p.wab?0:p.wmsT>0?WT_MW.slow:1;}
+function waterReset(p){p.wln=null;p.wtsk=null;p.wcl=null;p.wfam=0;p.wmw=0;p.wab=null;p.wdg=null;p.wmsT=0;p.whg=WAV.shGauge;p.whA=0;}
 
 // ---------- BA: สะบัดไม้ → ยิงเข็มน้ำ 3 นัดทันที ห่างกันนิดเดียว ตามเมาส์ (ผู้ใช้ 2026-11-08: ไม่มีเส้นน้ำแล้ว) • Moonwater = ลำน้ำ ----------
 const WT_BA_SIDE=12,WT_BA_H=1.15;   // กระสุนเกิดขวามือ 0.6 ม. สูง 1.15 ม. (ตรงปลายไม้ในท่าแทง)
@@ -63,16 +63,17 @@ function waterMoonBeam(p){const a=p.ang;p.wmsT=WT_MW.slowT;(G.wtb||(G.wtb=[])).p
 
 // ---------- Dash: จมดิน ทิ้งร่างโคลน → โผล่ห่าง 300 ทิศที่หัน • 6 วิกดอีกที = กลับไปที่โคลน ----------
 function waterDash(p,inp,pr,dt,setCd){
-  if(!pr.sp||p.wsk||p.wab)return false;
-  if(p.wcl){const c=p.wcl;p.wsk={t:WAV.dsSink,x:c.x,y:c.y,back:1};p.inv=WAV.dsSink+0.05;p.shieldOn=false;
+  if(!pr.sp||p.wtsk||p.wab)return false;
+  if(p.wcl){const c=p.wcl;p.wtsk={t:WAV.dsSink,x:c.x,y:c.y,back:1};p.inv=WAV.dsSink+0.05;p.shieldOn=false;
     emit({k:'efx',z:'wtsink',x:Math.round(p.x),y:Math.round(p.y),h:p.z,id:p.id,n:1});return false;}
   if(p.cd.dodge>0)return false;
   const a=p.ang;let x=p.x+Math.cos(a)*WAV.dsDist,y=p.y+Math.sin(a)*WAV.dsDist;x=Math.max(30,Math.min(MW-30,x));y=Math.max(30,Math.min(MH-30,y));
-  p.wcl={x:p.x,y:p.y,t:WAV.dsBack};p.wsk={t:WAV.dsSink,x,y,back:0};p.inv=WAV.dsSink+0.05;p.shieldOn=false;setCd('dodge',WAV.dsBack+WAV.dsSink);
+  p.wcl={x:p.x,y:p.y,t:WAV.dsBack};p.wtsk={t:WAV.dsSink,x,y,back:0};p.inv=WAV.dsSink+0.05;p.shieldOn=false;setCd('dodge',WAV.dsBack+WAV.dsSink);
   emit({k:'efx',z:'wtsink',x:Math.round(p.x),y:Math.round(p.y),h:p.z,id:p.id,n:0});
   return false;}
-function waterSinkTick(p,dt){const S=p.wsk;S.t-=dt;p.vx=p.vy=0;if(S.t>0)return;
-  p.wsk=null;p.x=S.x;p.y=S.y;collideWorld(p,PR);p.z=Math.max(p.z,groundH(p.x,p.y,p.z));
+// p.wtsk = จังหวะดำน้ำของ Dash สายน้ำ (เดิมชื่อ p.wsk ชนกับตัวจับเวลา Wind Push ของสายลม = ตัวเลข → host พังทุกเฟรม เกมค้างทั้งห้อง, ผู้ใช้ 2026-11-09)
+function waterSinkTick(p,dt){const S=p.wtsk;S.t-=dt;p.vx=p.vy=0;if(S.t>0)return;
+  p.wtsk=null;p.x=S.x;p.y=S.y;collideWorld(p,PR);p.z=Math.max(p.z,groundH(p.x,p.y,p.z));
   for(const t of foesOf(p.team))if(Math.hypot(t.x-p.x,t.y-p.y)<WAV.dsR+(t.r||PR))knock(t,p.x,p.y,WAV.dsPush);   // ผลักรอบตัว ไม่มีดาเมจ
   if(S.back){p.wcl=null;p.cd.dodge=p.cdMax.dodge=WAV.dsCd*p.buffs.cdr;}
   emit({k:'efx',z:'wtpop',x:Math.round(p.x),y:Math.round(p.y),h:p.z,id:p.id,n:S.back});}

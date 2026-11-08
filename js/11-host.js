@@ -219,7 +219,8 @@ function hostTick(dt){
   g.time+=dt;
   if(g.ph==='count'){g.cdT-=dt;if(g.cdT<=0)g.ph='play';}
   const acting=g.ph==='play';
-  for(const p of plist()){if(p.bot)botThink(p,dt);updatePlayer(p,dt,acting);}   // botThink = สมองบอท + หาทาง (js/15-botnav)
+  // botThink = สมองบอท + หาทาง (js/15-botnav) • พังที่ผู้เล่นคนเดียว = ข้ามคนนั้นเฟรมนี้ (เดิมทั้งเฟรมหยุด → ทุกคนยืนค้าง เอฟเฟกต์เล่นอยู่กับที่ ผู้ใช้ 2026-11-09)
+  for(const p of plist()){try{if(p.bot)botThink(p,dt);updatePlayer(p,dt,acting);}catch(e){if((p._errN=(p._errN|0)+1)%300===1)console.error('player',p.name,e);}}
   if(acting){
     updateProjectiles(dt);updateSpells(dt);updateMins(dt);
     if(g.mode==='coop'||g.mode==='train')updateEnemies(dt);
