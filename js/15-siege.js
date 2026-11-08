@@ -10,14 +10,14 @@
 //  ยังไม่ทำ (รอคุยตามเอกสาร): สลับฝั่งรอบสอง, ซ่อมแกน, ช่วงแย่งของ, ยาฮีล/จุดฮีล, เปลี่ยนสายที่จุดเกิด, เสียงร่าย
 // =====================================================================
 const SGV={
-  time0:240,     // เวลาบุกตั้งต้น (วิ)
-  add:150,       // เวลาที่ได้เพิ่มเมื่อทำลายแกน (วิ)
+  time0:330,     // เวลาบุกตั้งต้น (วิ)
+  add:180,       // เวลาที่ได้เพิ่มเมื่อทำลายแกน (วิ)
   prep:20,       // เวลาเตรียมตัวฝ่ายรับก่อนเปิดบุก (วิ)
   coreHp:1000,   // เลือดแกน
   rate:22,       // ดาเมจ/วิ ของคนร่าย 1 คน (~45 วิ ต่อแกนถ้าไม่มีใครขัด)
   mul:[0,1,1.2,1.4],   // ตัวคูณดาเมจรวมตามจำนวนคนร่าย (ผู้ใช้กำหนด)
   defMul:0.5,    // มีฝ่ายรับในเขต: เหลือส่วนนี้ (ช่วงปกติ)
-  zoneR:150,     // รัศมีเขตแกน (px)
+  zoneR:330,     // รัศมีเขตแกน (px)
   wallHp:400,    // เลือดกำแพงพังได้
   grace0:5,graceMin:1,graceT:60,   // ผ่อนผันตอนต่อเวลา: เริ่ม 5 วิ หดเหลือ 1 วิ ภายใน 60 วิของการต่อเวลา
 };
@@ -102,7 +102,7 @@ function sgCoreDown(){
   // ใครอยู่นอกพื้นที่เฟสใหม่ (หรือฝ่ายรับที่อยู่หลังแนว) = ย้ายไปจุดเกิดใหม่ของทีม (เลือดคงเดิม)
   let i=0;
   for(const p of plist()){if(!p.alive||(p.team!==0&&p.team!==1))continue;
-    if(!sgInArea(p.x,p.y,S.ph)){const s=sgSpawn(p.team),a=i*1.047,rr=i%6?55:0,q=[s.x+Math.cos(a)*rr,s.y+Math.sin(a)*rr];i++;p.x=q[0];p.y=q[1];p.z=0;p.vz=0;collideWorld(p,PR);p.inv=Math.max(p.inv,1.5);emit({k:'revive',x:p.x,y:p.y});}}
+    if(!sgInArea(p.x,p.y,S.ph)){const s=sgSpawn(p.team),a=i*1.047,rr=i%6?80:0,q=[s.x+Math.cos(a)*rr,s.y+Math.sin(a)*rr];i++;p.x=q[0];p.y=q[1];p.z=0;p.vz=0;collideWorld(p,PR);p.inv=Math.max(p.inv,1.5);emit({k:'revive',x:p.x,y:p.y});}}
 }
 function sgEnd(w){const S=G.sg;if(S.win>=0)return;S.win=w;endMatch();}
 // ผลจบเกม (endMatch js/14)
@@ -121,7 +121,7 @@ function sgSnap(){
 //  บอทเล่นบุกปราสาท: ฝ่ายบุก = เดินไปแกนแล้วร่าย (เจอศัตรูใกล้ = สู้ก่อน) • ฝ่ายรับ = เฝ้ารอบแกน ไล่คนที่เข้าใกล้แกน
 //  ต่อสู้ใช้สมองเดิม (aiBot + botPlay ตามสาย) • เดินไกลใช้ตารางหาทาง (js/15-botnav)
 // =====================================================================
-const SGB={atkSee:650,defSee:700,defCore:1000,ring:95};   // ระยะสนใจศัตรู (px) • รัศมียืนรอบแกน ⚠ ค่าตั้งต้น
+const SGB={atkSee:800,defSee:850,defCore:2200,ring:200};   // ระยะสนใจศัตรู (px) • รัศมียืนรอบแกน ⚠ ค่าตั้งต้น
 // เป้าที่ "เกี่ยวกับภารกิจ": บุก = ศัตรูใกล้ตัว • รับ = ศัตรูใกล้ตัวหรือใกล้แกน
 function sgBotTarget(p){
   const k=sgCore();let best=null,bd=1e18;
@@ -165,7 +165,7 @@ function sgBotThink(p,dt){
     else{inp.mx=(g.x-p.x)/d;inp.my=(g.y-p.y)/d;}
     inp.ax=p.x+inp.mx*300;inp.ay=p.y+inp.my*300;
     // ไม่มีทาง (กำแพงพังได้ขวาง เช่น ฝ่ายรับเฟส 1 ออกจากห้องโถง) = เดินไปยิงกำแพงพังได้ที่ใกล้ที่สุด
-    if(!P&&S){let bb=null,bd=900;sgF().bw.forEach((b,i)=>{if(S.bw[i]<=0||!sgInArea(b.x+b.w/2,b.y+b.d/2,S.ph))return;const qx=clamp(p.x,b.x,b.x+b.w),qy=clamp(p.y,b.y,b.y+b.d),dd=Math.hypot(qx-p.x,qy-p.y);if(dd<bd){bd=dd;bb={x:qx,y:qy};}});
+    if(!P&&S){let bb=null,bd=3000;sgF().bw.forEach((b,i)=>{if(S.bw[i]<=0||!sgInArea(b.x+b.w/2,b.y+b.d/2,S.ph))return;const qx=clamp(p.x,b.x,b.x+b.w),qy=clamp(p.y,b.y,b.y+b.d),dd=Math.hypot(qx-p.x,qy-p.y);if(dd<bd){bd=dd;bb={x:qx,y:qy};}});
       if(bb){inp.ax=bb.x;inp.ay=bb.y;inp.ah=2;inp.fire=(G.time%0.5<0.25)?1:0;if(bd>260){const P2=navPath(p.x,p.y,bb.x,bb.y);const t=P2&&P2[0]||bb,tx2=t.x-p.x,ty2=t.y-p.y,td=Math.hypot(tx2,ty2)||1;inp.mx=tx2/td;inp.my=ty2/td;}else inp.mx=inp.my=0;
         N.kick=0;}N.br=bb?1:0;}else N.br=0;
   }else{inp.mx=inp.my=0;}

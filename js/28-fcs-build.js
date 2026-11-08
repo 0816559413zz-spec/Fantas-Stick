@@ -40,6 +40,7 @@ function sgViewBuild(){
     const glow=new THREE.Sprite(glowMat('#7fc0ff',1.4));glow.scale.setScalar(4);glow.position.y=2.4;o.add(glow);
     const ring=new THREE.Mesh(new THREE.RingGeometry(SGVZR()*S3-0.25,SGVZR()*S3,64),new THREE.MeshBasicMaterial({color:'#7fc0ff',transparent:true,opacity:0.5,depthWrite:false,side:THREE.DoubleSide}));ring.rotation.x=-Math.PI/2;ring.position.y=0.08;o.add(ring);
     const rub=new THREE.Group();for(let q=0;q<6;q++){const m=new THREE.Mesh(sGeo(THREE.OctahedronGeometry,0.4,0),cm);m.position.set(Math.cos(q)*0.9,0.7,Math.sin(q*1.7)*0.9);m.rotation.set(q,q*2,0);rub.add(m);}rub.visible=false;o.add(rub);
+    for(const ch of [base,cr,glow,rub]){ch.scale.multiplyScalar(1.8);ch.position.y*=1.8;}   // แมพขยาย 3 เท่า → แกนใหญ่ขึ้นให้เห็นจากไกล
     SGV3.cores.push({o,cr,cm,glow,ring,rub});});
   F.bw.forEach((b,i)=>{const cx=b.x+b.w/2,cy=b.y+b.d/2,o=new THREE.Group();o.position.set(tx(cx),GY(cx,cy),tz(cy));g.add(o);
     if(b.k==='gate'){const n=Math.max(2,Math.round(Math.max(b.w,b.d)/20)),horiz=b.w>=b.d;
@@ -73,7 +74,7 @@ function sgSync(v,P,me,now,dt){
   sgBarrier(S.ph);
   SGV3.cores.forEach((c,i)=>{const n=i+1,dead=S.hp[i]<=0,act=n===S.ph,fut=n>S.ph;
     c.cr.visible=c.glow.visible=!dead;c.rub.visible=dead;c.ring.visible=act;
-    c.cr.rotation.y+=dt*(act?1.2:0.3);c.cr.position.y=2.4+Math.sin(now/600+i)*0.15;
+    c.cr.rotation.y+=dt*(act?1.2:0.3);c.cr.position.y=4.3+Math.sin(now/600+i)*0.25;
     const hit=act&&S.atk,col=hit?'#ff6a5a':fut?'#5a6a80':'#9fd8ff';c.cm.color.set(col);c.cm.emissive.set(hit?'#ff2a1a':fut?'#1a2030':'#3a8cff');
     c.ring.material.color.set(hit?'#ff6a5a':S.def?'#ffb060':'#7fc0ff');c.ring.material.opacity=0.35+0.25*Math.sin(now/(hit?120:400));});
   if(S.bw!==SGV3.bwK){const old=SGV3.bwK;SGV3.bwK=S.bw;SGV3.bw.forEach((o,i)=>{o.visible=S.bw[i]!=='1';if(old&&old[i]!=='1'&&S.bw[i]==='1')sgDust(o.position);});gl.shadowMap.needsUpdate=true;}
@@ -81,16 +82,16 @@ function sgSync(v,P,me,now,dt){
   const k=MAPS.fcs.fcs.cores[S.ph-1],seen=new Set();
   if(k)for(const p of P){if(!p.sc||!p.al)continue;seen.add(p.id);let b=SGV3.beams.get(p.id);
     if(!b){b=new THREE.Mesh(new THREE.CylinderGeometry(0.05,0.12,1,6,1,true),new THREE.MeshBasicMaterial({color:hdr('#8fd0ff',2),transparent:true,opacity:0.8,blending:THREE.AdditiveBlending,depthWrite:false}));SGV3.g.add(b);SGV3.beams.set(p.id,b);}
-    const a=new THREE.Vector3(tx(p.x),GY(p.x,p.y)+(p.z||0)+1.3,tz(p.y)),e=new THREE.Vector3(tx(k.x),GY(k.x,k.y)+2.4,tz(k.y)),d=e.clone().sub(a),L=d.length();
+    const a=new THREE.Vector3(tx(p.x),GY(p.x,p.y)+(p.z||0)+1.3,tz(p.y)),e=new THREE.Vector3(tx(k.x),GY(k.x,k.y)+4.3,tz(k.y)),d=e.clone().sub(a),L=d.length();
     b.position.copy(a).addScaledVector(d,0.5);b.scale.set(1,L,1);b.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),d.normalize());b.material.opacity=0.55+0.3*Math.sin(now/70+p.x);
-    if(Math.random()<0.4)PARTS.push({x:k.x+rnd(-14,14),y:k.y+rnd(-14,14),h:GY(k.x,k.y)+2.4+rnd(-0.6,0.6),vx:rnd(-40,40),vy:rnd(-40,40),vh:rnd(0.5,2),life:0.5,max:0.5,col:'#9fd8ff',size:1.6,g:0});}
+    if(Math.random()<0.4)PARTS.push({x:k.x+rnd(-14,14),y:k.y+rnd(-14,14),h:GY(k.x,k.y)+4.3+rnd(-0.8,0.8),vx:rnd(-40,40),vy:rnd(-40,40),vh:rnd(0.5,2),life:0.5,max:0.5,col:'#9fd8ff',size:1.6,g:0});}
   for(const [id,b] of SGV3.beams)if(!seen.has(id)){SGV3.g.remove(b);b.geometry.dispose();b.material.dispose();SGV3.beams.delete(id);}
 }
 function sgDust(pos){const x=pos.x*20+MW/2,y=pos.z*20+MH/2;for(let i=0;i<26;i++)PARTS.push({x:x+rnd(-40,40),y:y+rnd(-40,40),h:rnd(0.3,4),vx:rnd(-60,60),vy:rnd(-60,60),vh:rnd(0.5,3),life:1.4,max:1.4,col:'#b8a488',size:rnd(3,6),g:0,smoke:true,grow:1});}
 function sgFx(ev){
   const me=myPos(),near=!me||Math.hypot(ev.x-me.x,ev.y-me.y)<1400;
   if(ev.k==='sgwall'){if(near)snd('rubble',ev);}
-  else if(ev.k==='sgcore'){for(let i=0;i<40;i++)PARTS.push({x:ev.x+rnd(-20,20),y:ev.y+rnd(-20,20),h:2.4,vx:rnd(-260,260),vy:rnd(-260,260),vh:rnd(1,7),life:1.1,max:1.1,col:'#9fd8ff',size:2.4,g:6});FX.flashLight(ev.x,ev.y,2.4,'#7fc0ff',6,30,0.6);snd('boom',ev);}
+  else if(ev.k==='sgcore'){for(let i=0;i<40;i++)PARTS.push({x:ev.x+rnd(-20,20),y:ev.y+rnd(-20,20),h:4.3,vx:rnd(-260,260),vy:rnd(-260,260),vh:rnd(1,7),life:1.1,max:1.1,col:'#9fd8ff',size:2.4,g:6});FX.flashLight(ev.x,ev.y,4.3,'#7fc0ff',6,30,0.6);snd('boom',ev);}
 }
 // ---------- HUD ----------
 function sgTop(v){const S=v.M&&v.M.sg;if(!S)return '🏰 บุกปราสาท';const i=S.ph-1,pc=Math.ceil(S.hp[i]/S.mx*100);
