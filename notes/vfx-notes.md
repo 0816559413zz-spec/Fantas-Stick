@@ -145,3 +145,5 @@ Latest user reference: `storyboard/img/wind_shield_fold_ref.png`. The narrow col
 
 ## Water BA — เข็มน้ำ (ผู้ใช้อนุมัติ 2026-11-08)
 - ไม่มีเส้นน้ำ: สะบัดไม้แล้วยิง 3 นัดทันที ห่าง 0.08 วิ • กระสุน = เข็มน้ำเล็กหัวแหลมหางเรียว สีน้ำเงินเข้ม ขอบขาว แกนขาว (รอบแรกเล็ก/ขาวเกินมองไม่ชัด → ผู้ใช้ขอใหญ่ขึ้นแต่ยังแหลม) • ปลายไม้มีหยดน้ำกระเซ็นเล็ก ๆ ทุกนัด
+
+- 2026-11-08 Wind redesign VFX pass 1 (`tools/wind-air-gen.py`: `wind/up_zone up_go up_hit push_fly push_sink push_up push_slam slam_hit force_dash force_dash_g force_hit blade_fly fw_fast sonic_charge sonic_dash sonic_dash_g sonic_hit sonic_wave`) — **user accepted these as the interim look ("เอาแบบที่มีตอนนี้ใส่ไปก่อน")**, already bound in `js/68-wind-view.js` / `PJFX`. Not a final approval: the user may later draw storyboards for the new skills and ask for a redo. Open polish list: Sonic Boom direct-hit burst is light, air dash/Sonic VFX are flat (ignore 3D pitch), `wnpush` muzzle is still code particles, Impact frame is the old code.
