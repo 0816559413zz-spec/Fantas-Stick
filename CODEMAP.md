@@ -184,16 +184,16 @@ hostPick:2 clearField:10 modeLogic:11 endMatch:80 matchOver:105
 ## js/15-arena.js (71) — 
 AR_SIDE:7 AR_TEAM:7 AR_MAX:7 arPads:8 arOn:9 arState:10 arBusy:11 arReady:13 arNames:21 arenaTick:22 arStart:43 arEnd:51 arReset:57 arAddBots:64
 
-## js/15-bot.js (269) — 
-BOT_LV:8 BOT_SKIP:16 botKit:17 botPersona:22 BOT_TEAM:23 BOT_MAX:23 bots:24 humans:25 botInZone:27 spawnBot:33 OWNED_K:46 clearOwned:47 removeBots:48 botPickTarget:50 BOT_PB:68 botPlay:69 aiBot:181 trBotCmd:233
-§242 บอทในห้องรอ (ผู้ใช้ 2026-10-31 "สร้างห้องเล่นกับบอทได้")
-BOT_MODES:246 lobbyBots:247 lobbyBotAdd:248 lobbyBotFill:257 lobbyBotCmd:262 lobbyBotsStart:267 botDebug:269
+## js/15-bot.js (277) — 
+BOT_LV:8 BOT_SKIP:16 botKit:17 botPersona:23 BOT_TEAM:24 BOT_MAX:24 bots:25 humans:26 botInZone:28 spawnBot:34 OWNED_K:47 clearOwned:48 removeBots:49 botPickTarget:51 BOT_PB:69 botPlay:70 aiBot:189 trBotCmd:241
+§250 บอทในห้องรอ (ผู้ใช้ 2026-10-31 "สร้างห้องเล่นกับบอทได้")
+BOT_MODES:254 lobbyBots:255 lobbyBotAdd:256 lobbyBotFill:265 lobbyBotCmd:270 lobbyBotsStart:275 botDebug:277
 
 ## js/15-botnav.js (135) — 
 NAV_MAPS:14 NAV_EYE:14 NAV:15 navOn:17 navSig:18 navEnsure:25 navBuild:31 navCell:48 navWalk:49 navRay:51 navFree:56 navPath:62 _navFoe:80 botThink:83 botNav:89
 
-## js/15-botplay.js (88) — วิธีเล่นของบอทแต่ละสาย (ผู้ใช้ 2026-10-31 "บอทไม่รู้วิธีเล่นสายของตัวเอง")
-BOT_RANGE:7 botMem:9 botWallBehind:11 _bspd:21 botSave:23 botWant:25 botCombo:64
+## js/15-botplay.js (85) — 
+BOT_RANGE:7 botMem:9 botWallBehind:11 _bspd:21 botSave:23 botWant:25 botCombo:61
 
 ## js/15-modes.js (410) — 
 sendPriv:5 TASKF:9 taskPts:10 raceRings:11 modeInit:17 spawnDummy:59 trainTick:64 TR_KEYS:81 trTeams:83 trCmd:93 hostEndTraining:111
@@ -759,4 +759,4 @@ surfSync:48 surfQuality:52
 SURF_VS:54 SURF_VS_BODY:55 SURF_FS:66 SURF_FS_BODY:67 surfOk:97 surfApply:98 surfScene:110
 §111 ปรับค่า (tune.html / F8)
 
-(88 files, 21975 lines)
+(88 files, 21980 lines)

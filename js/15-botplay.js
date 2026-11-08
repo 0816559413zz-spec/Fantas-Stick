@@ -4,7 +4,7 @@
 //  botCombo = ท่าต่อเนื่องหลังกด (คลิกดิ่ง / ยืนยัน / กดซ้ำบีบกำแพง / สลับดาบ-ไกล / ทิศกระโดดหนี) — เรียกท้าย aiBot (หลังเช็คจังหวะเว้นสกิล)
 //  BOT_RANGE = ระยะที่ชอบยืนต่อสาย [ใกล้สุด, ไกลสุด] — ตัวเลขตั้งต้น ให้ทีมเกมเพลย์ปรับ
 // =====================================================================
-const BOT_RANGE={0:[340,580],1:[0,95],2:[0,240],6:[300,520],7:[220,420]};
+const BOT_RANGE={0:[340,580],1:[0,95],2:[0,240],6:[300,520],7:[250,480]};
 // ความจำบอทเรื่องท่าต่อเนื่อง (ต่อตัว)
 function botMem(p){return p.bp||(p.bp={away:0,clk:0,wall:null,v:0});}
 // มีของแข็ง (กำแพง/ตึก/กำแพงลม-หินของเรา) อยู่หลังเป้าในแนวที่เราผลักไหม — ใช้กับสกิลผลัก (ดิน/ลม)
@@ -49,15 +49,12 @@ function botWant(p,id,tg,d){
     case 'mudswamp':return d<580;
     case 'tectoniccrush':return d>110&&d<330&&(tg.mudT>0||stuck||Math.random()<0.3);
     case 'dustburst':return d<480;
-    // ---- ลม: วางกำแพงหลังเป้า แล้วผลัก/ดูดใส่กำแพง ----
-    case 'aegisgale':
-      if(p.wwAim)return false;
-      if(d>230&&d<500&&!botWallBehind(p,tg,200)){M.wall='place';return true;}
-      if(d<360){M.wall='push';return true;}
-      return false;
-    case 'windrift':if(hp<0.35&&d<300){M.away=0.4;return true;}return d<260&&botWallBehind(p,tg,300);
-    case 'vortexbind':return d<320&&!(p.z>groundH(p.x,p.y,p.z)+0.4);
-    case 'voidspheres':return d<380&&(botWallBehind(p,tg,320)||stuck);
+    // ---- ลม (รีดีไซน์ 2026-11-08): บอทห้องฝึกใช้ botPlay (js/15-bot) • ตรงนี้สำหรับบอทสมดุล (ไม่มี p.ai) ----
+    case 'featherwing':return !windAir(p)&&!windSpin(p)&&d<1100;
+    case 'aegisgale':return (p.wwc|0)>0&&d<620&&d>60;
+    case 'windrift':return d<900;
+    case 'vortexbind':return windAir(p)?d>120&&d<480:d>220&&d<400;
+    case 'voidspheres':return d<800;
   }
 }
 // ท่าต่อเนื่อง (หลังสมองหลักตัดสินใจแล้ว): เขียนทับ p.inp ตามสถานะของสกิลที่กำลังทำอยู่

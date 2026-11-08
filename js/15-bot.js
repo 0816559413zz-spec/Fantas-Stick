@@ -13,10 +13,11 @@ const BOT_LV=[
 // นิสัยสุ่มต่อตัว (ตอนเสก): บอทหลายตัวจะได้ไม่ขยับ/กดสกิลพร้อมกันเป๊ะ
 //   ph/sp/sd = จังหวะ+ความเร็ว+ทิศส่ายตัว • rng = ชอบยืนใกล้/ไกล (คูณระยะ) • wait = รอเพื่อนบอทที่เพิ่งกดสกิลใส่เป้าเดียวกันกี่วิ
 // ชุดคาถาสุ่มต่อบอท (4 ท่าจากสายนั้น ไม่เอาท่าที่ยังสอนบอทไม่ได้) — หลายตัวสายเดียวกันจะได้ไม่เล่นเหมือนกัน
-const BOT_SKIP=['featherwing'];
+const BOT_SKIP=[];   // ท่าที่ยังสอนบอทไม่ได้ (ตอนนี้สอนครบแล้ว)
 function botKit(P){
   const L=SPELL_LIST.filter(x=>x.path===P&&!x.ult&&!BOT_SKIP.includes(x.id));
   for(let i=L.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[L[i],L[j]]=[L[j],L[i]];}
+  if(P===7){const f=L.findIndex(x=>x.id==='featherwing');if(f>0)L.unshift(L.splice(f,1)[0]);}   // ลม: ต้องมี Featherwing เสมอ (ไม่งั้นบินไม่ได้)
   return P+'.'+L.slice(0,4).map(x=>x.i).join('.');
 }
 function botPersona(){return {ph:rnd(0,Math.PI*2),sp:rnd(1.1,2.4),sd:Math.random()<0.5?1:-1,rng:rnd(0.65,1.35),wait:rnd(0.35,0.8)};}
@@ -143,22 +144,29 @@ function botPlay(p,dt,tg,c0){
     ult(700);
     return;
   }
-  // ---------- 🌪️ ลม ----------
+  // ---------- 🌪️ ลม (รีดีไซน์ 2026-11-08: พื้น = อ่อน, บิน Featherwing = คอมโบ) ----------
+  // พื้น: ขึ้นบินทันทีที่ Featherwing พร้อม • บิน: ลอยสูง ~6 ม. วาง Windup ใส่ → Wind Push กดลง → Windforce พาไป → Windblade ถ่วง → อัลติ (ไม่กด Featherwing ซ้ำตอนบิน = สะบัดปีกจบโหมด, ไม่ใช้ Shift บินเร็ว)
   if(pi===7){
-    if(p.wult)return;
-    if(p.wwAim){   // เลือกวิธีวางกำแพง: ใกล้ = ดันไปข้างหน้า (คลิกซ้าย) • ไกล = วางหลังตัวศัตรู (คลิกขวา) ให้ท่าผลักหลังจากนี้ไปชน
-      if(p.wwAim.t<W_WL.aim-0.2){
-        if(d<330)pulse();
-        else{inp.sh=A.pf?1:0;A.aimOv={x:tg.x+Math.cos(ang)*110,y:tg.y+Math.sin(ang)*110};}
-      }
-      return;
+    if(windSpin(p)){inp.mx=inp.my=0;inp.fire=0;return;}                 // หมุนตัวขึ้น: ทำอะไรไม่ได้
+    const air=windAir(p);inp.ah=cH(tg)+1.1;inp.dh=0;                    // ah = เล็งความสูง (Windforce / อัลติ เอียงขึ้นลงตามเป้า)
+    if(p.wult){inp.mx=inp.my=0;inp.fire=0;inp.jh=inp.ch=0;return;}      // ชาร์จ/พุ่งอัลติ
+    const hit=tg.wsl>0||tg.wsk>0||tg.stun>0.4;                          // เป้าติดคอมโบอยู่แล้ว
+    if(air){
+      const h=p.z-groundH(p.x,p.y,p.z);inp.jh=h<5.3?1:0;inp.ch=h>7.2?1:0;
+      if((p.wwc|0)>0&&rdy('aegisgale')&&d<620&&d>60&&!hit&&!windAirborne(tg))go('aegisgale');
+      else if(rdy('windrift')&&d<1000&&!(tg.wsl>0)&&(windAirborne(tg)||!hit))go('windrift');
+      else if(rdy('vortexbind')&&d>120&&d<480&&!p.wfc)go('vortexbind');
+      else if(rdy('voidspheres')&&d<900&&!p.wbl)go('voidspheres');
+      ult(1200);
+    }else{
+      if(rdy('featherwing')&&d<1100&&!(p.stun>0))go('featherwing');
+      else if((p.wwc|0)>0&&rdy('aegisgale')&&d<450&&d>60&&!hit)go('aegisgale');
+      else if(rdy('windrift')&&d<600)go('windrift');
+      else if(rdy('voidspheres')&&d<500)go('voidspheres');
+      else if(rdy('vortexbind')&&d>220&&d<400)go('vortexbind');
+      if(p.cd.dodge<=0&&d<170&&roll(dt*2))dash();                       // ถอยหลังผลักตอนศัตรูประชิด
+      if(!rdy('featherwing'))ult(900);                                  // อัลติพื้น = รีเซ็ต Featherwing ให้ขึ้นบินต่อ
     }
-    if(rdy('aegisgale')&&(p.wwc|0)>0&&d<620&&d>80)go('aegisgale');
-    else if(rdy('voidspheres')&&d>220&&d<440)go('voidspheres');
-    else if(rdy('vortexbind')&&d>110&&d<380)go('vortexbind');
-    else if(rdy('windrift')&&d>250&&d<700)go('windrift');
-    if(p.cd.dodge<=0&&d<170&&roll(dt*2))dash();                       // ถอยหลังผลักตอนศัตรูประชิด
-    ult(340);
     return;
   }
   // ---------- 💧 น้ำ ----------
