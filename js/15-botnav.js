@@ -11,7 +11,7 @@
 //   - ติดอยู่กับที่ → คิดทางใหม่ + ก้าวข้างสุ่ม
 //  ค่าระยะ/เวลา = ค่าตั้งต้น ให้ทีมเกมเพลย์ปรับ
 // =====================================================================
-const NAV_MAPS=new Set(['city']),NAV_EYE=2.2;
+const NAV_MAPS=new Set(['city','fcs']),NAV_EYE=2.2;
 const NAV={c:60,nx:0,ny:0,w:null,s:null,key:'',sig:-1,t:-9,
   g:null,f:null,par:null,gen:null,cl:null,gn:0,heap:null};
 const navOn=()=>NAV_MAPS.has(MAPID);
@@ -20,6 +20,7 @@ function navSig(){
   if(cityOn()){for(const d of CITYD.b)s+=d.cl*3;for(const it of CITYD.it)if(it.st===1)s++;}
   for(const b of BLDG)if(bldGone(b))s+=1009;
   if(PROPON)for(const o of PROPS)if(o.st===1)s+=7919;
+  if(G&&G.sg)G.sg.bw.forEach((v,i)=>{if(v===0)s+=3301*(i+1);});   // กำแพงพังได้โหมดบุกปราสาท (js/15-siege)
   return s;
 }
 function navEnsure(){
@@ -29,6 +30,7 @@ function navEnsure(){
   NAV.key=key;NAV.sig=sig;navBuild();
 }
 function navBuild(){
+  NAV.c=(MAPS[MAPID]&&MAPS[MAPID].navC)||60;   // แมพที่ทางแคบ (ปราสาท) ใช้ช่องเล็กลง
   const c=NAV.c,nx=Math.ceil(MW/c),ny=Math.ceil(MH/c),N=nx*ny,w=new Uint8Array(N),s=new Uint8Array(N),pad=PR+4;
   Object.assign(NAV,{nx,ny,w,s});
   if(window.WD&&!WD.nav)Object.defineProperty(WD,'nav',{get:()=>({NAV,path:navPath,ray:navRay,build:navBuild})});   // ดีบัก
@@ -43,6 +45,8 @@ function navBuild(){
     cells(b.o.x-e,b.o.y-e,b.o.x+e,b.o.y+e,(k,x,y)=>{const [lx,ly]=bldLocal(b,x,y);if(Math.abs(lx)<b.o.w/2+pad&&Math.abs(ly)<b.o.d/2+pad)w[k]=1;if(Math.abs(lx)<b.o.w/2&&Math.abs(ly)<b.o.d/2)s[k]=1;});}
   if(PROPON)for(const o of PROPS)if(o.st!==1)circ(o,o.r,o.hgt);
   const m=Math.ceil((40+pad)/c);for(let j=0;j<ny;j++)for(let i=0;i<nx;i++)if(i<m||j<m||i>=nx-m||j>=ny-m)w[j*nx+i]=1;
+  if(TERR&&MAPS[MAPID]&&MAPS[MAPID].navTerr){const q=c*0.5,lim=TSLOPE*q/20;   // พื้นสูงต่ำ: ช่องที่ชันเกินเดินขึ้น (หน้าผา/ขอบแท่น) = เดินไม่ได้
+    for(let j=0;j<ny;j++)for(let i=0;i<nx;i++){const x=(i+0.5)*c,y=(j+0.5)*c,t0=terrT(x,y);if([[q,0],[-q,0],[0,q],[0,-q]].some(([a,b])=>Math.abs(terrT(x+a,y+b)-t0)>lim))w[j*nx+i]=1;}}
   if(AREA)for(let j=0;j<ny;j++)for(let i=0;i<nx;i++){const o={x:(i+0.5)*c,y:(j+0.5)*c};if(areaClamp(o,pad))w[j*nx+i]=1;}   // นอกพื้นที่เล่นของโหมด = เดินไม่ได้
 }
 const navCell=(x,y)=>clamp(Math.floor(y/NAV.c),0,NAV.ny-1)*NAV.nx+clamp(Math.floor(x/NAV.c),0,NAV.nx-1);
@@ -81,6 +85,7 @@ const _navFoe=p=>{let b=null,bd=1e18;for(const q of plist()){if(q===p||!q.alive|
   if(!b)for(const e of G.en){if(e.dead||e.type==='dummy')continue;const d=(e.x-p.x)**2+(e.y-p.y)**2;if(d<bd){bd=d;b=e;}}return b;};
 // สมองบอท 1 เฟรม: สมองต่อสู้เดิม + หาทาง (เรียกจาก hostTick)
 function botThink(p,dt){
+  if(G.mode==='siege'&&p.ai&&G.sg&&navOn()){sgBotThink(p,dt);return;}   // บุกปราสาท: เดินตามภารกิจ (js/15-siege)
   if(!navOn()){(p.ai?aiBot:botBrain)(p,dt);return;}
   const c0=Object.assign({},p.inp.c),tg=p.ai?null:_navFoe(p);
   if(p.ai)aiBot(p,dt);else botBrain(p,dt,tg);

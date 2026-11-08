@@ -11,13 +11,15 @@ const HMODES=[
   {k:'ffa',en:'Free For All',th:'ทุกคนคือศัตรู',d:'ใครได้ 10 kill ก่อน ชนะ',n:'2–12'},
   {k:'tdm',en:'Team PvP',th:'สองทีมปะทะกัน',d:'ทีมแรกที่ได้ 15 kill ชนะ',n:'2–12'},
   {k:'coop',en:'Dungeon',th:'ร่วมมือฝ่าดันเจียน',d:'ฝ่าทีละชั้น บอสทุก 5 ชั้น',n:'1–6'},
-  {k:'train',en:'Training',th:'ห้องฝึกคาถา',d:'หุ่นซ้อม ลองคาถา ปิดคูลดาวน์ได้',n:'1–6'}];
+  {k:'train',en:'Training',th:'ห้องฝึกคาถา',d:'หุ่นซ้อม ลองคาถา ปิดคูลดาวน์ได้',n:'1–6'},
+  {k:'siege',en:'Castle Siege',th:'บุกปราสาท',d:'ฟ้าบุก แดงรับ ร่ายทำลายแกน 3 จุด',n:'2–12'}];   // โหมดบุกปราสาท (js/15-siege) — แผนที่ First Castle Strike
 const HUI={st:'',mode:'ffa',hostT:0,flip:null,pend:false,shown:false,botP:-1,botL:1};   // botP/botL = ธาตุ+ความเก่งที่เลือกไว้สำหรับปุ่ม + บอท
 // ไอคอนเส้นบาง (SVG) — กรอบหกเหลี่ยม + ไอคอนโหมด / ปุ่มเล็ก
 const HICO={
   ffa:'<path d="M50 30v40M30 50h40M36 36l28 28M64 36L36 64"/><circle cx="50" cy="50" r="7"/>',
   tdm:'<path d="M36 34l-8 4v12c0 9 6 15 8 16 2-1 8-7 8-16V38z"/><path d="M64 34l-8 4v12c0 9 6 15 8 16 2-1 8-7 8-16V38z"/><path d="M45 60l10-10M45 50l10 10"/>',
   coop:'<path d="M36 68V46a14 14 0 0 1 28 0v22z"/><path d="M50 52v8"/><circle cx="50" cy="50" r="2.5"/><path d="M30 68h40"/>',
+  siege:'<path d="M30 70V40h7v6h6v-6h7v6h6v-6h7v6h7v24z"/><path d="M45 70V58a5 5 0 0 1 10 0v12"/><path d="M50 40V26l9 4-9 4"/>',
   train:'<circle cx="50" cy="50" r="18"/><circle cx="50" cy="50" r="10"/><circle cx="50" cy="50" r="2.5"/><path d="M50 26v8M50 66v8M26 50h8M66 50h8"/>',
   set:'<circle cx="12" cy="12" r="3.2"/><path d="M12 2.8v2.6M12 18.6v2.6M2.8 12h2.6M18.6 12h2.6M5.5 5.5l1.8 1.8M16.7 16.7l1.8 1.8M5.5 18.5l1.8-1.8M16.7 7.3l1.8-1.8"/><circle cx="12" cy="12" r="6.4"/>',
   look:'<path d="M4 19h16"/><path d="M7 19l4.2-14.5c.2-.7 1.2-.7 1.4 0L17 19"/><path d="M8.6 14h6.8"/><path d="M13 4.5l3-1.5"/>',

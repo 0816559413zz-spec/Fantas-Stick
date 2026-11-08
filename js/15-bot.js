@@ -57,6 +57,7 @@ function botPickTarget(p){
     for(const id of G.ar[p.arSide==='A'?'B':'A']){const q=G.players[id];if(!q||!q.alive||q.downed)continue;const d=(q.x-p.x)**2+(q.y-p.y)**2;if(d<bd){bd=d;best=q;}}
     return best;
   }
+  if(G.mode==='siege'&&G.sg)return sgBotTarget(p);   // บุกปราสาท: สนใจเฉพาะศัตรูที่เกี่ยวกับภารกิจ (js/15-siege)
   for(const q of plist()){if(q===p||!q.alive||q.downed||q.team===p.team||q.gh)continue;if(!botInZone(zk,q.x,q.y,120))continue;
     let d=(q.x-p.x)**2+(q.y-p.y)**2;if(q.id===A.owner)d*=0.6;if(q===A.tg)d*=0.8;if(d<bd){bd=d;best=q;}}
   if(best)return best;
@@ -296,7 +297,7 @@ function trBotCmd(p,d){
 // โฮสต์เพิ่มบอทในห้องรอได้ ทั้งเล่นคนเดียวและห้องออนไลน์ (ai.lb) • นับเป็นผู้เล่นของโหมด • อยู่ต่อข้ามแมตช์ (ไม่โดน removeBots ตอนเริ่ม/กลับล็อบบี้)
 //   โหมดที่บอทเล่นเป็น = สู้กัน (BOT_MODES) • ควิดดิช/แข่งไม้กวาด/หาโวลเดอมอร์ = บอทยังไม่รู้กติกา → ห้ามเริ่มจนกว่าจะลบบอท (validate)
 //   ห้องเต็ม 6 แล้วเพื่อนเข้ามา = ลบบอทออก 1 ตัวให้เพื่อน (hostOnData)
-const BOT_MODES=['coop','duel','ffa','tdm','br'];
+const BOT_MODES=['coop','duel','ffa','tdm','br','siege'];
 function lobbyBots(){return bots().filter(p=>p.ai.lb);}
 function lobbyBotAdd(path,lv,quiet){
   if(!G||G.ph!=='lobby')return;

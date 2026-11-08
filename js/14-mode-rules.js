@@ -65,6 +65,7 @@ function modeLogic(dt){
       if(G.ph==='play'){G.timer-=dt;quidTick(dt);if(G.ph==='play')snitchTick(dt);if(G.ph==='play'&&G.timer<=0)endMatch();}
       break;
     case 'race':if(G.ph==='play')raceTick(dt);break;
+    case 'siege':if(G.ph==='play')sgTick(dt);break;   // บุกปราสาท (js/15-siege)
     case 'br':if(G.ph==='play')brTick(dt);break;
     case 'imp':
       if(G.ph==='play')impCheck();
@@ -86,6 +87,7 @@ function endMatch(){
   else if(G.mode==='train'){title='จบการฝึก';sub='ไปลองฝีมือจริงในโหมดอื่นกันเลย!';}
   else if(G.mode==='quid'){const [a,b]=G.qs;if(a===b)draw=true;else win=teamIds(a>b?0:1);title=a===b?'เสมอ!':`🏆 ${TEAMN[a>b?0:1]} ชนะควิดดิช!`;sub=`${TEAMN[0]} ${a} — ${b} ${TEAMN[1]}`+(G.snitchBy?`  •  ✨ ${G.snitchBy} จับลูกบอลทองได้`:'');}
   else if(G.mode==='race'){const r=raceRank();if(r[0])win=[r[0].id];title=r[0]?`🏆 ${r[0].name} ชนะการแข่ง!`:'จบการแข่ง';sub=r.map((p,i)=>`${i+1}. ${p.name}${p.fin?` (${p.finT.toFixed(1)} วิ)`:''}`).join('   ');}
+  else if(G.mode==='siege'){({title,sub,win}=sgResult(ps));}
   else if(G.mode==='br'){const w=ps.find(p=>p.alive);if(w)win=[w.id];title=w?`🏆 ${w.name} รอดเป็นคนสุดท้าย!`:'ไม่มีผู้รอดชีวิต';sub='🌀 แบทเทิลรอยัล';}
   else if(G.mode==='imp'){win=ps.filter(p=>(p.role==='imp')===(G.impWin==='imp')).map(p=>p.id);title=G.impWin==='imp'?'🐍 ฝ่ายโวลเดอมอร์ชนะ! ความมืดครองฮอกวอตส์':'⚡ ฝ่ายนักเรียนฮอกวอตส์ชนะ!';sub='ฝ่ายโวลเดอมอร์คือ: '+ps.filter(p=>p.role==='imp').map(p=>p.name).join(', ');}
   else if(G.mode==='duel'){

@@ -18,7 +18,7 @@ function buildWorld(id){
   prefetchModels([...FILE_MODELS(),"mesh_fire_wing","mesh_storm_claw","mesh_ice_burst","mesh_ice_spire","mesh_ice_sword","mesh_ice_axe","mesh_ice_circle"]);prefetchFx();
   const FM=MAPS[id]&&MAPS[id].fm;
   if(typeof lookMap==='function')lookMap(id,FM);   // พรีเซ็ตแสงของแมพนี้ (js/74-look.js)
-  setSky(FM?(FM.sky==='sunset'||FM.sky==='day'?'sunset':'night'):id==='pitch'||id==='meadow'||id==='ruins'||id==='test'?'sunset':'night');
+  setSky(FM?(FM.sky==='sunset'||FM.sky==='day'?'sunset':'night'):id==='pitch'||id==='meadow'||id==='ruins'||id==='test'||id==='fcs'?'sunset':'night');
   const cached=WCACHE.get(wkey(id));
   if(cached){
     WCACHE.delete(wkey(id));
@@ -27,7 +27,7 @@ function buildWorld(id){
   }else{
     world=new THREE.Group();scene.add(world);
     builtMap=id;builtKey=wkey(id);CANDLESYS=null;TORCHES=[];CANDLES=[];FIREFLIES=null;CRYSTAL=null;RUNE=null;SNITCH=null;BANNERS=[];SNOW=null;
-    if(FM)buildFileMap(id);else if(id==='forest')buildForest();else if(id==='pitch')buildPitch();else if(id==='hogsmeade')buildHogsmeade();else if(id==='greathall')buildGreatHall();else if(id==='meadow')buildMeadow();else if(id==='lake')buildLake();else if(id==='ruins')buildRuins();else if(id==='test')buildTest();else if(MAPS[id]&&MAPS[id].build==='city')buildCity();else buildCastle();
+    if(FM)buildFileMap(id);else if(id==='forest')buildForest();else if(id==='pitch')buildPitch();else if(id==='hogsmeade')buildHogsmeade();else if(id==='greathall')buildGreatHall();else if(id==='meadow')buildMeadow();else if(id==='lake')buildLake();else if(id==='ruins')buildRuins();else if(id==='test')buildTest();else if(MAPS[id]&&MAPS[id].build==='city')buildCity();else if(MAPS[id]&&MAPS[id].build==='fcs')buildFcs();else buildCastle();
     buildBackdrop(id);   // ฉากหลังนอกพื้นที่เล่น (js/67, เฉพาะแผนที่ที่มีใน BACKDROP)
     batchStatic(world,new Set([RUNE,CRYSTAL,SNITCH,FIREFLIES&&FIREFLIES.pts,...CANDLES.map(c=>c.g),...BANNERS.map(b=>b.m)].filter(Boolean)));
     setTimeout(prewarmShaders,0);

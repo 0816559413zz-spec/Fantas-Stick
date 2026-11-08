@@ -13,7 +13,7 @@ CITY_MID:140 CITY_C2:140 cityModeData:141 mapArea:157 AREA:158 areaClamp:160
 ## js/02-citytest.js (28) — แมพทดสอบเมืองใหญ่ (กล่องเทา) — ใช้วัดความลื่นของเครื่องยนต์ก่อนสร้างเ…
 CITY_N:4 CITY_B:4 CITY_ROAD:4 genCityTest:5 cityTestProps:19
 
-## js/02-data.js (381) — 
+## js/02-data.js (382) — 
 W:4 H:4 PR:4 PILLARS:6 SPAWNF:7 mulberry:9 genForest:10 genPitch:27 genHogsmeade:36
 §54 แผนที่โล่ง 3 แบบ (ผู้ใช้: ป่ามืดไม่สนุก อยากได้ที่โล่งๆ)
 genMeadow:55 genLake:61 genRuins:66
@@ -24,7 +24,15 @@ FMAPS:167 b64i16:168 regFileMap:169 loadMapData:181 loadAllMapData:189 mapReady:
 §194 ของประกอบฉากที่พังได้ / ใช้ได้ (prop)
 PROPDEF:198 PROP_OFF_MODES:205 PROP_USE:207 PROPS:208 PROPON:208 genProps:209
 §229 ตัวละคร: บ้านฮอกวอตส์ + หน้าตา
-HOUSES:231 HAIRC:236 HAIRSTY:238 WOODC:241 WOODN:242 WCOREC:243 WCOREN:244 WANDSTY:245 WANDN:250 WANDNN:265 EYEC:266 SKINC:267 CLOAKC:268 TIESTY:269 LOOKK:270 LOOKN:270 lookStr:271 parseLook:272 randLook:273 LOOKS:274 LOOKP:274 KITS:274 getKit:275 getLook:276 CREST_SH:277 CREST_PAT:278 starPts:283 CREST_ANI:285 crestSVG:291 houseColor:299 TEAMC:300 TEAMN:300 NOBROOM:302 ROOM_MAX:304 MODES:305 PLAY:317 PDEF:318 EDEF:345 POOLS:358 CDK:368 BUFFS:371 BRAR:380 rollRar:381
+HOUSES:231 HAIRC:236 HAIRSTY:238 WOODC:241 WOODN:242 WCOREC:243 WCOREN:244 WANDSTY:245 WANDN:250 WANDNN:265 EYEC:266 SKINC:267 CLOAKC:268 TIESTY:269 LOOKK:270 LOOKN:270 lookStr:271 parseLook:272 randLook:273 LOOKS:274 LOOKP:274 KITS:274 getKit:275 getLook:276 CREST_SH:277 CREST_PAT:278 starPts:283 CREST_ANI:285 crestSVG:291 houseColor:299 TEAMC:300 TEAMN:300 NOBROOM:302 ROOM_MAX:304 MODES:305 PLAY:318 PDEF:319 EDEF:346 POOLS:359 CDK:369 BUFFS:372 BRAR:381 rollRar:382
+
+## js/02-fcs-data.js (3) — 
+FCS_DATA:3
+
+## js/02-fcs.js (71) — 
+FCS_C:7 FCS_WH:8 genFcs:9
+§45 พื้นที่เล่นตามเฟส (กำแพงล่องหน) + เขตจุดเกิดปลอดภัย — ใช้ทั้งโฮสต์ (G…
+SGPH:46 SG_SPR:47 _sgAreaC:48 sgArea:49 sgClamp:55 sgInArea:65
 
 ## js/03-spells-core.js (224) — 
 ICONS:8 ICOALIAS:9 hasIco:10 ICOBASE:12 icoURL:13 ICO:14 icoTint:15 icoHTML:24 PATHS:25 SPELL_LIST:34 SPELLS:34 defSpell:35 SLOTK:36 BRMAP:36 KITP:37 parseKit:38 cleanKit:54 setKit:55 pathReset:58
@@ -158,10 +166,10 @@ W_WL:428 W_DR:434 W_VX:440 W_VO:446 W_FW:452 W_UL:461
 ## js/10-net.js (198) — เครือข่าย (PeerJS / WebRTC)
 PREFIX:4 NET:5 RC:9 TURN_SERVERS:12 ICE:13 PEER_OPT:14 TURN_URL:16 ICE_READY:18 JN:22 LAG:24 lagDo:25 hostSend:26 LOBBY:27 genCode:28 sendAll:29 NETD_KEYS:33 NETD:33 netDeltaReset:34 netDelta:35 NET_MAX:49 _netTE:49 netSendSnap:50 NETU:62 netUndelta:63 setStatus:69 hostGame:71 hostPeer:79 netConnect:98 joinWatch:109 joinFail:124 netLost:130 joinGame:145 joinPeer:156 clientOnData:171 leave:186 leaveRoom:188
 
-## js/11-host.js (399) — 
+## js/11-host.js (400) — 
 G:4 EVL:4 EVN:4 hostLast:4 tickN:4 emit:5 feed:6 banner:7 plist:8 cleanName:9 freshStats:11 newPlayer:18 emptyInput:21 frameOk:23 addPlayer:24 initHostLobby:33 lobbyMsg:40 broadcastLobby:41 INPN:43 hostOnData:44 hostDrop:75 hostRemove:84 validate:97 hostStart:109 hostToLobby:135 MIDJOIN:142 modeCap:143 midJoin:144 CHATT:160 chatRelay:161 emoHost:169 resetBody:171 fmap:177 spawnPts:178 teamPts:180 spSpread:182 placeAll:183 respawn:195
 §214 ลูปหลักฝั่งโฮสต์
-hostTick:215 angDiff:229 cH:231 vR:232 updatePlayer:234 hitProp:386 damagePropsIn:393 nearUseProp:394 useProp:395
+hostTick:215 angDiff:229 cH:231 vR:232 updatePlayer:234 hitProp:387 damagePropsIn:394 nearUseProp:395 useProp:396
 
 ## js/12-buildings.js (506) — สิ่งปลูกสร้างที่พังเป็นชิ้นย่อย (บ้าน) แบบ Battlefield — คู่มือเต็ม: …
 BLDDEF:8 BLD_PIECES:10 BLD_GRID:11 BLD_DOOR:13 BLD_FIRE:14 BLD_ICE:14 BLD_ROOF_MIN:14 BLDG:15 BLDON:15 genBldg:16 bldRect:26 bldChunk:28 bldAlive:35 bldLocal:36 bldWorld:37 rectDist:38 bldNear:39 BLD_MOUND:42 bldGone:43 bldMoundAt:44 bldMoundH:45 hitBldPiece:47 breakBldChunk:58 bldSupport:66 damageEnv:86 bldRay:101 _sgRB:109 aimClip:111 aimRay3:118 bldPieceAt:134 projEl:145 bldPush:150 collideBld:156 updateBldg:174 bldSnap:187 bldParse:193
@@ -178,39 +186,42 @@ CIN:150 cityInterior:151 cinSlabOn:180 cinOpenPanel:182 cityIwHit:184 cityRampHi
 ## js/13-enemies.js (168) — ศัตรู (โหมด Co-op)
 spawnEnemy:2 setupWave:19 bossPhase:36 enemySlam:44 updateEnemies:55
 
-## js/14-mode-rules.js (105) — กติกาของแต่ละโหมด
-hostPick:2 clearField:10 modeLogic:11 endMatch:80 matchOver:105
+## js/14-mode-rules.js (107) — กติกาของแต่ละโหมด
+hostPick:2 clearField:10 modeLogic:11 endMatch:81 matchOver:107
 
 ## js/15-arena.js (71) — 
 AR_SIDE:7 AR_TEAM:7 AR_MAX:7 arPads:8 arOn:9 arState:10 arBusy:11 arReady:13 arNames:21 arenaTick:22 arStart:43 arEnd:51 arReset:57 arAddBots:64
 
-## js/15-bot.js (322) — 
-BOT_LV:8 BOT_SKIP:16 botKit:17 botPersona:23 BOT_TEAM:24 BOT_MAX:24 bots:25 humans:26 botInZone:28 spawnBot:35 OWNED_K:49 clearOwned:50 removeBots:51 botPickTarget:53 BOT_PB:71 botPlay:72
-§191 บอทยืนนิ่ง (ห้องฝึก): หุ่นผู้เล่น = ไม่ทำอะไร • บอทโชว์สกิล (ai.show)…
-showName:192 showBot:193 stillBot:194 trShowCmd:209 aiBot:233 trBotCmd:286
-§295 บอทในห้องรอ (ผู้ใช้ 2026-10-31 "สร้างห้องเล่นกับบอทได้")
-BOT_MODES:299 lobbyBots:300 lobbyBotAdd:301 lobbyBotFill:310 lobbyBotCmd:315 lobbyBotsStart:320 botDebug:322
+## js/15-bot.js (323) — 
+BOT_LV:8 BOT_SKIP:16 botKit:17 botPersona:23 BOT_TEAM:24 BOT_MAX:24 bots:25 humans:26 botInZone:28 spawnBot:35 OWNED_K:49 clearOwned:50 removeBots:51 botPickTarget:53 BOT_PB:72 botPlay:73
+§192 บอทยืนนิ่ง (ห้องฝึก): หุ่นผู้เล่น = ไม่ทำอะไร • บอทโชว์สกิล (ai.show)…
+showName:193 showBot:194 stillBot:195 trShowCmd:210 aiBot:234 trBotCmd:287
+§296 บอทในห้องรอ (ผู้ใช้ 2026-10-31 "สร้างห้องเล่นกับบอทได้")
+BOT_MODES:300 lobbyBots:301 lobbyBotAdd:302 lobbyBotFill:311 lobbyBotCmd:316 lobbyBotsStart:321 botDebug:323
 
-## js/15-botnav.js (135) — 
-NAV_MAPS:14 NAV_EYE:14 NAV:15 navOn:17 navSig:18 navEnsure:25 navBuild:31 navCell:48 navWalk:49 navRay:51 navFree:56 navPath:62 _navFoe:80 botThink:83 botNav:89
+## js/15-botnav.js (140) — 
+NAV_MAPS:14 NAV_EYE:14 NAV:15 navOn:17 navSig:18 navEnsure:26 navBuild:32 navCell:52 navWalk:53 navRay:55 navFree:60 navPath:66 _navFoe:84 botThink:87 botNav:94
 
 ## js/15-botplay.js (85) — 
 BOT_RANGE:7 botMem:9 botWallBehind:11 _bspd:21 botSave:23 botWant:25 botCombo:61
 
-## js/15-modes.js (415) — 
-sendPriv:5 TASKF:9 taskPts:10 raceRings:11 modeInit:17 spawnDummy:62 trainTick:67 TR_KEYS:84 trTeams:86 trCmd:96 hostEndTraining:115
-§117 ควิดดิช
-quidThrow:118 quidDrop:124 quidArea:130 quidTick:131 snitchTick:167
-§190 แข่งไม้กวาด
-raceTick:191 raceRank:213
-§223 แบทเทิลรอยัล
-brTick:224 ITEMN:238 brPick:239
-§248 หาลอร์ดโวลเดอมอร์
-impActions:249 startMeeting:287 hostVote:294 meetTick:299 impCheck:318
-§326 ระเบิดที่ตั้งเวลาไว้ (ลูกไฟมังกร / คลื่นไฟ)
-bombTick:327 modeSnap:340
-§363 สร้าง snapshot ส่งให้ทุกเครื่อง
-r1:364 DEFP:366 packP:367 unpackP:368 makeSnap:369 PROF:387 pf:388 hostSent:389 hostLoop:390 HLW:405 pingN:415
+## js/15-modes.js (419) — 
+sendPriv:5 TASKF:9 taskPts:10 raceRings:11 modeInit:17 spawnDummy:64 trainTick:69 TR_KEYS:86 trTeams:88 trCmd:98 hostEndTraining:117
+§119 ควิดดิช
+quidThrow:120 quidDrop:126 quidArea:132 quidTick:133 snitchTick:169
+§192 แข่งไม้กวาด
+raceTick:193 raceRank:215
+§225 แบทเทิลรอยัล
+brTick:226 ITEMN:240 brPick:241
+§250 หาลอร์ดโวลเดอมอร์
+impActions:251 startMeeting:289 hostVote:296 meetTick:301 impCheck:320
+§328 ระเบิดที่ตั้งเวลาไว้ (ลูกไฟมังกร / คลื่นไฟ)
+bombTick:329 modeSnap:342
+§367 สร้าง snapshot ส่งให้ทุกเครื่อง
+r1:368 DEFP:370 packP:371 unpackP:372 makeSnap:373 PROF:391 pf:392 hostSent:393 hostLoop:394 HLW:409 pingN:419
+
+## js/15-siege.js (183) — 
+SGV:12 SG_TEAM:24 sgF:25 sgCore:26 sgInZone:27 sgSpawn:28 sgInit:29 sgWallsApply:38 sgWallDmg:42 sgWallHit:48 sgWallEnv:49 sgInput:54 sgStop:62 sgTick:63 sgCoreDown:94 sgEnd:107 sgResult:109 sgSnap:115 SGB:124 sgBotTarget:126 sgBotGoal:137 sgBotThink:143
 
 ## js/16-voice.js (89) — 
 VOICE:4 rosterIds:5 toggleMic:6 voiceSync:20 teamOn:37 teamOf:38 applyVoiceGates:39 VAC:49 onIncomingCall:50 voiceLevels:62 speakingIds:70 updateVoiceUI:76
@@ -227,20 +238,20 @@ MY:210 myDB:211 mySave:212 myLoad:215 myDecodeReady:221 myPlay:222 myNext:234 my
 §256 เพลงประกอบ (สร้างสดตามแผนที่)
 MUSIC:257 THEMES:258 padNote:263 musicTick:270 toggleMusic:299
 
-## js/19-client.js (280) — 
+## js/19-client.js (281) — 
 cv:4 cx:4 DPR:5 SW:5 SH:5 resize:6 VIEW:12 screen:13 lastBuffKey:13 overShown:13 lastCount:13 PARTS:14 TEXTS:14
 §15 งบเอฟเฟกต์ (VFX budget)
 VFXB:20 _apush:21 vfxQual:29 vfxBegin:31 vfxEnd:34 vfxOnce:36 vfxExtra:38 PCOL:39 setScreen:41 onLobby:53
 §59 ภาพของโฮสต์ลื่น (ผู้ใช้ 2026-10-31 "ขี่ไม้กวาด/กระโดด กล้องสั่น")
 HVB:63 HBOLD:63 hbReset:64 hbPush:65 hbPair:68 onSnap:72 snapApply:77
-§86 บัฟเฟอร์ snapshot (ลูกข่าย, ผู้ใช้ 2026-10-22 "เล่นออนไลน์ให้ลื่น")
-SBUF:89 NETOLD:90 sbufReset:91 sbufPush:92 sbufAdvance:102
-§114 ทำนายตัวเอง (ลูกข่าย): ตัวเราขยับทันทีที่กด ไม่ต้องรอโฮสต์ตอบ
-PRED:117 predictMe:118 myPos:139
-§141 เอฟเฟกต์
-burst:143 smoke:154 ring:155 floatText:156 shake:157 wandPos:158 impactFX:160 explosionFX:177
-§189 เอฟเฟกต์คาถาใหม่
-ZV:190 COLB:190 WVV:190 GLV:190 ICEV:190 SLV:190 ULTV:190 OBV:190 _iceDisc:192 _iceEdge:193 _iceSpk:194 iceFloorMat:195 _icePlane:196 _icePathMat:197 _iceWvM:197 iceWvMat:199 makeIceFloor:211 ICE_WV:238 updateIceFloors:239 FLASHM:251 FLASHING:252 flashModel:253 endFlash:262 tickFlash:263 GHOSTM:265 SOLIDM:265 ghostOf:266 setGhost:272 hitSparks:280
+§87 บัฟเฟอร์ snapshot (ลูกข่าย, ผู้ใช้ 2026-10-22 "เล่นออนไลน์ให้ลื่น")
+SBUF:90 NETOLD:91 sbufReset:92 sbufPush:93 sbufAdvance:103
+§115 ทำนายตัวเอง (ลูกข่าย): ตัวเราขยับทันทีที่กด ไม่ต้องรอโฮสต์ตอบ
+PRED:118 predictMe:119 myPos:140
+§142 เอฟเฟกต์
+burst:144 smoke:155 ring:156 floatText:157 shake:158 wandPos:159 impactFX:161 explosionFX:178
+§190 เอฟเฟกต์คาถาใหม่
+ZV:191 COLB:191 WVV:191 GLV:191 ICEV:191 SLV:191 ULTV:191 OBV:191 _iceDisc:193 _iceEdge:194 _iceSpk:195 iceFloorMat:196 _icePlane:197 _icePathMat:198 _iceWvM:198 iceWvMat:200 makeIceFloor:212 ICE_WV:239 updateIceFloors:240 FLASHM:252 FLASHING:253 flashModel:254 endFlash:263 tickFlash:264 GHOSTM:266 SOLIDM:266 ghostOf:267 setGhost:273 hitSparks:281
 
 ## js/20-vfx-pyro-storm.js (416) — Dragonfall (ภาพ)
 makeDfCircle:3 DFV:21 dfCracks:22 updateDfCracks:32 dragonfallFX:33
@@ -272,10 +283,10 @@ MM3:2 makeMinion:3 syncMins:36 drawMinBars:58
 ## js/25-efx.js (306) — efxFX: ภาพของ event "efx" ทุกคาถา (หนึ่ง case ต่อหนึ่งเอฟเฟกต์)
 efxState:4 efxFX:20
 
-## js/26-fx-events.js (240) — fx(ev): เอฟเฟกต์+เสียงของทุก event จากโฮสต์ • statusFX (สถานะบนตัว) •…
+## js/26-fx-events.js (241) — fx(ev): เอฟเฟกต์+เสียงของทุก event จากโฮสต์ • statusFX (สถานะบนตัว) •…
 statusFX:3 fx:27
-§208 overlay: เลือกบัฟ / สรุปผล
-choosePick:209 syncOverlays:214 showOver:235
+§209 overlay: เลือกบัฟ / สรุปผล
+choosePick:210 syncOverlays:215 showOver:236
 
 ## js/27-world.js (396) — 
 S3:4 tx:4 tz:4 CITY_KERB:7 cityKerb:8 GY:9 TW:9 hdr:10 gl:12
@@ -300,6 +311,13 @@ cityInteriorView:106 cityHideIn:147 cityMoundView:153
 CITY_STY:181 CITY_VEH:188 cityFacade:190 CITYK:203 _cZ:204 _cT:204 _cR:204 _cC:204 cityKitLoad:205 cityCull:227 citySet:233 cityTint:235 cityPools:237 cityShowBld:243 cityRubble:250 CITY_FALL:258
 §259 ตึกไฮไลต์ล้มทั้งตึก (ขั้น 7)
 _ctA:262 _ctB:262 _ctC:262 cityTowerPose:263 cityTowerAnim:271 cityTowerRubble:278 CAREA:292 cityAreaSync:293 cityViewSync:305 cityDebris:349 cityFX:358
+
+## js/28-fcs-build.js (119) — ภาพแผนที่ First Castle Strike (แบบ Basic: กล่อง/ทรงพื้นฐาน ยังไม่มีโมเดลจริง) + ภาพ/HUD โ…
+buildFcs:5
+§31 ภาพโหมด (ลูกข่ายทุกเครื่องจาก snapshot M.sg)
+SGV3:32 sgClearView:33 sgViewBuild:34 SGVZR:52 sgBarrier:54 sgSync:68 sgDust:89 sgFx:90
+§95 HUD
+sgTop:96 sgHud:98
 
 ## js/28-maps-build.js (773) — สร้างแผนที่
 CANDLESYS:2 builtMap:3 builtKey:3 world:3 TORCHES:3 CANDLES:3 FIREFLIES:3 CRYSTAL:3 RUNE:3 SNITCH:3 BANNERS:3 SNOW:3 WCACHE:5 WCACHE_MAX:5 wkey:7 buildWorld:8 addW:42 _prewarmed:44 prewarmShaders:45 batchStatic:64 makeCandles:89 updateCandles:98 buildCastle:107 buildHogsmeade:173 buildGreatHall:261 buildForest:331
@@ -357,20 +375,20 @@ CANIM:30 SKFEET:74 SKANIM:76 skAnim:83 _caT:84 _caR:84 skillPose:85 _g2:111 wand
 §463 ฉายตำแหน่ง 3D ลงจอ (ป้ายชื่อ / ตัวเลขดาเมจ)
 _v:464 toScreen:465 BURNC:473 burnNum:474 NAMETAG:488 nameTag:489 drawLabels:493 TEXTAG:523 textTag:524 drawTexts:528 HITM:540 DIRI:540 drawXh:542 drawCrosshair:552
 
-## js/36-modes-view.js (170) — 
+## js/36-modes-view.js (171) — 
 ROLE:4 KC:4 roleShowT:4 onPriv:5 MO:10 BREATHS:11 clearModeObjs:12 ITEMC:21 healTex:22 makeItem:23 syncModeObjs:39
-§139 หน้าประชุมโหวต (หาลอร์ดโวลเดอมอร์)
-meetKey:140 myVoted:140 castVote:141 syncMeeting:147
+§140 หน้าประชุมโหวต (หาลอร์ดโวลเดอมอร์)
+meetKey:141 myVoted:141 castVote:142 syncMeeting:148
 
 ## js/37-render-loop.js (109) — ลูปเรนเดอร์
 lastFrame:2 HSTOP:5 hitStop:6 FXSTUDIO:8
 §9 เก็บ shader ที่ compile แล้วไว้ตลอดเกม (ผู้ใช้ 2026-11-02 "เล่นกับบอท…
 PINMAX:13 PINNED:13 KEEPSRC:16 pinPrograms:22 frame:25 _fpsAcc:41 _fpsN:41 _fpsLast:41 render:42 renderGame:85
 
-## js/38-hud.js (346) — HUD
+## js/38-hud.js (348) — HUD
 rr:2 SLOTS:3 fmtTime:4
 §5 ชิ้นส่วน HUD ธีมทอง-น้ำเงิน
-HG:6 HG2:6 HUDF:8 hudTick:9 readyPulse:11 diaPath:13 plate:15 frameBox:21 bossTrail:29 drawBossBar:30 spellDia:50 thinBar:79 drawHUD:84 raceRankClient:164 drawModeHUD:168 MM:205 drawMinimap:206 slotKey:279 mySlots:280 STATUS_ICO:289 SLOTS_IMP:290 BR_LOCK:291 CLUSTER:293 E_NEEDSTAND:294 slotState:295 drawBottom:314 drawBoard:329
+HG:6 HG2:6 HUDF:8 hudTick:9 readyPulse:11 diaPath:13 plate:15 frameBox:21 bossTrail:29 drawBossBar:30 spellDia:50 thinBar:79 drawHUD:84 raceRankClient:165 drawModeHUD:169 MM:207 drawMinimap:208 slotKey:281 mySlots:282 STATUS_ICO:291 SLOTS_IMP:292 BR_LOCK:293 CLUSTER:295 E_NEEDSTAND:296 slotState:297 drawBottom:316 drawBoard:331
 
 ## js/39-menu.js (284) — 
 myLook:5 myColor:5 myKit:5 myName:6 renderMyHouse:9
@@ -388,13 +406,12 @@ bpOpen:49 bpOn:49 bpKey:49 bpShow:51 bpSync:53 hovEl:123
 §124 หน้าตั้งค่า
 setRow:125 setTog:126 setTab:127 XHC:128 XHN:128 setOpts:129 SET_ICO:131 SET_EN:134 renderSettings:135 drawXhPrev:157 openSettings:158 closeSettings:160 modeIcon:216 modeTitle:217 renderLobby:218
 
-## js/41-debug.js (171) — เครื่องมือทดสอบสมดุล (ใช้ผ่านคอนโซล WD.bal / WD.dmgTest เท่านั้น ผู้เล่นปกติไม่เห็น)
-§5 บอทต่อสู้แบบง่ายๆ: เล็งนำเป้า เดินรักษาระยะ+ส่ายไปมา ร่ายคาถาทุกครั้ง…
+## js/41-debug.js (173) — 
 botBrain:6 _obsKeep:51 balArena:52 balReset:53 balDuel:57 balTour:72 balCoop:86 balSpellTest:102
-§121 Service Worker (sw.js): เก็บไฟล์เกมไว้ในเครื่อง เปิดครั้งต่อไปเร็วขึ้…
-SWK:122 swSetup:123
-§141 เช็คการ์ดจอตอนเปิดเกม
-GPUC:144 gpuCheck:145
+§123 Service Worker (sw.js): เก็บไฟล์เกมไว้ในเครื่อง เปิดครั้งต่อไปเร็วขึ้…
+SWK:124 swSetup:125
+§143 เช็คการ์ดจอตอนเปิดเกม
+GPUC:146 gpuCheck:147
 
 ## js/42-fire-vfx.js (345) — ไฟแบบใหม่ (2026-10-19): shader ไฟเคลื่อนไหวจริง (noise ไหล) ใช้กับลูก…
 FIRE_U:4 FIRE_GLSL:5 fireMat:24
@@ -625,17 +642,17 @@ PRF3:792 prfSpot:794 hubProfSet:803 hubProfShow:811 hubProfTick:812
 §823 เรนเดอร์ (เรียกจาก renderStage — คืน true = วาดแล้ว)
 hubMergeStatic:826 hubRender:844
 
-## js/62-hub-ui.js (308) — 
-HUI_IMG:9 HMODES:10 HUI:15 HICO:17 hSvg:35 hHex:36 H_STAR:37
-§95 สถานะหน้าจอ: menu / modes / room / off
-hubUiState:96 hubMeChip:104 hubOnScreen:110
-§119 เมนูแรก
-hubJoinGo:122
-§133 การ์ดโหมด
-hubMxJoin:140 hubPickMode:153 hubFlipKill:166 hubRoomRect:167 hubFlip:168 hubLeaveRoom:184 hubUnflip:189 hubFlipEnd:202
-§209 แผงห้อง (การ์ดที่ขยายแล้ว)
-HUI_MAPN:210 hubLobby:211 hubRoomClick:275 hubKitChanged:298
-§300 เริ่มต้น
+## js/62-hub-ui.js (310) — 
+HUI_IMG:9 HMODES:10 HUI:16 HICO:18 hSvg:37 hHex:38 H_STAR:39
+§97 สถานะหน้าจอ: menu / modes / room / off
+hubUiState:98 hubMeChip:106 hubOnScreen:112
+§121 เมนูแรก
+hubJoinGo:124
+§135 การ์ดโหมด
+hubMxJoin:142 hubPickMode:155 hubFlipKill:168 hubRoomRect:169 hubFlip:170 hubLeaveRoom:186 hubUnflip:191 hubFlipEnd:204
+§211 แผงห้อง (การ์ดที่ขยายแล้ว)
+HUI_MAPN:212 hubLobby:213 hubRoomClick:277 hubKitChanged:300
+§302 เริ่มต้น
 
 ## js/63-skillwheel.js (317) — 
 SKW:9 SKW_PO:10 SKW_PI:10 SKW_RUNE:11 skwPaths:12 skwKey:13 skwOffN:14 skwChanged:15 skwSnd:16
@@ -761,4 +778,4 @@ surfSync:48 surfQuality:52
 SURF_VS:54 SURF_VS_BODY:55 SURF_FS:66 SURF_FS_BODY:67 surfOk:97 surfApply:98 surfScene:110
 §111 ปรับค่า (tune.html / F8)
 
-(88 files, 22073 lines)
+(92 files, 22472 lines)
