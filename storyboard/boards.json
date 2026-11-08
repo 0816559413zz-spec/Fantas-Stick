@@ -1,5 +1,5 @@
 {
- "next": 21,
+ "next": 22,
  "items": [
   {
    "id": 1,
@@ -119719,7 +119719,201 @@
     "dur": 0.8,
     "clips": "0s idle"
    }
+  },
+  {
+   "id": 21,
+   "title": "สายลม — Windblade",
+   "who": "สายลม",
+   "skill": "control • CD 0 วิ",
+   "status": "draft",
+   "created": "2026-11-08T17:07:58",
+   "updated": "2026-11-08T17:08:05",
+   "overview": "[จากเกม] ยิงใบมีดลมเล็ก ๆ รัว ๆ ไปที่เล็ก ทะลุเป้า • โหมดบิน: ยิง 14 ใบ โดนแล้วเป้าช้าลง 90% นาน 2 วิ และลดคูลดาวน์ Featherwing 20% (ครั้งเดียวต่อการยิง) • โหมดพื้น: ยิงน้อยกว่า (5 ใบ) เบากว่า ช้าลง 60%",
+   "mood": [],
+   "colors": [
+    "#8dff65",
+    "#ffffff"
+   ],
+   "refs": [],
+   "fx": "",
+   "reply": "",
+   "game": {
+    "id": "voidspheres",
+    "kind": "spell",
+    "path": "wind",
+    "pathI": 7,
+    "cd": 0,
+    "file": "js/09-wind.js",
+    "line": 443
+   },
+   "shots": [
+    {
+     "id": "mw7o5jzn1",
+     "kind": "cast",
+     "name": "ปล่อย",
+     "dur": 0.2,
+     "overlap": 0,
+     "where": "มือ / อาวุธ",
+     "size": 1,
+     "power": 3,
+     "shapes": [],
+     "motion": [],
+     "camera": [],
+     "colors": [],
+     "text": "",
+     "sketches": [],
+     "scene3d": {
+      "v": 1,
+      "objs": [],
+      "cast": {
+       "m": "char_student",
+       "rec": "storyboard/rec/voidspheres_mw7o5pec.json"
+      },
+      "targ": {
+       "m": "enemy_dummy",
+       "a": "idle"
+      },
+      "at": 0
+     },
+     "refs": [],
+     "result": "",
+     "note": ""
+    },
+    {
+     "id": "mw7o5jzn2",
+     "kind": "travel",
+     "name": "พุ่ง",
+     "dur": 0.3,
+     "overlap": 0,
+     "where": "ระหว่างทาง",
+     "size": 1,
+     "power": 3,
+     "shapes": [],
+     "motion": [],
+     "camera": [],
+     "colors": [],
+     "text": "ยิงใบมีดลมเล็ก ๆ รัว ๆ ไปที่เล็ก ทะลุเป้า",
+     "sketches": [],
+     "scene3d": {
+      "v": 1,
+      "objs": [],
+      "cast": {
+       "m": "char_student",
+       "rec": "storyboard/rec/voidspheres_mw7o5pec.json"
+      },
+      "targ": {
+       "m": "enemy_dummy",
+       "a": "idle"
+      },
+      "at": 0.2
+     },
+     "refs": [],
+     "result": "",
+     "note": ""
+    },
+    {
+     "id": "mw7o5jzn3",
+     "kind": "impact",
+     "name": "กระทบ",
+     "dur": 0.4,
+     "overlap": 0,
+     "where": "ที่เป้า",
+     "size": 1,
+     "power": 3,
+     "shapes": [],
+     "motion": [],
+     "camera": [],
+     "colors": [],
+     "text": "โหมดบิน: ยิง 14 ใบ โดนแล้วเป้าช้าลง 90% นาน 2 วิ และลดคูลดาวน์ Featherwing 20% (ครั้งเดียวต่อการยิง)",
+     "sketches": [],
+     "scene3d": {
+      "v": 1,
+      "objs": [],
+      "cast": {
+       "m": "char_student",
+       "rec": "storyboard/rec/voidspheres_mw7o5pec.json"
+      },
+      "targ": {
+       "m": "enemy_dummy",
+       "a": "hit"
+      },
+      "at": 0.5
+     },
+     "refs": [],
+     "result": "",
+     "note": ""
+    },
+    {
+     "id": "mw7o5jzn4",
+     "kind": "linger",
+     "name": "ค้าง 2 วิ (จากเกม)",
+     "dur": 2,
+     "overlap": 0,
+     "where": "พื้นรอบเป้า",
+     "size": 1,
+     "power": 3,
+     "shapes": [],
+     "motion": [],
+     "camera": [],
+     "colors": [],
+     "text": "โหมดบิน: ยิง 14 ใบ โดนแล้วเป้าช้าลง 90% นาน 2 วิ และลดคูลดาวน์ Featherwing 20% (ครั้งเดียวต่อการยิง)",
+     "sketches": [],
+     "scene3d": {
+      "v": 1,
+      "objs": [],
+      "cast": {
+       "m": "char_student",
+       "rec": "storyboard/rec/voidspheres_mw7o5pec.json"
+      },
+      "targ": {
+       "m": "enemy_dummy",
+       "a": "hit"
+      },
+      "at": 0.8
+     },
+     "refs": [],
+     "result": "",
+     "note": ""
+    },
+    {
+     "id": "mw7o5jzn5",
+     "kind": "fade",
+     "name": "จางหาย",
+     "dur": 0.3,
+     "overlap": 0,
+     "where": "",
+     "size": 1,
+     "power": 3,
+     "shapes": [],
+     "motion": [],
+     "camera": [],
+     "colors": [],
+     "text": "",
+     "sketches": [],
+     "scene3d": {
+      "v": 1,
+      "objs": [],
+      "cast": {
+       "m": "char_student",
+       "rec": "storyboard/rec/voidspheres_mw7o5pec.json"
+      },
+      "targ": {
+       "m": "enemy_dummy",
+       "a": "idle"
+      },
+      "at": 0.8
+     },
+     "refs": [],
+     "result": "",
+     "note": ""
+    }
+   ],
+   "rec": {
+    "file": "storyboard/rec/voidspheres_mw7o5pec.json",
+    "dur": 0.8,
+    "clips": "0s idle"
+   }
   }
  ],
- "rev": 204
+ "rev": 207
 }
