@@ -10,6 +10,8 @@
 
 **Wind ทุบบ้าน 2026-11-08:** Windforce ชนบ้าน = ทุบพัง+หยุดทันที, Sonic Boom Strike ทะลวงพังบ้านตามทาง (`windSmash`/`windAheadHit` ใน js/09-wind.js; tune `smash`/`smashR`). ค้าง: ยังไม่เทสต์โหมดบิน/ในเกมจริง (เทสต์ headless โหมดพื้นเท่านั้น).
 
+**Optimize 2026-11-09 (ทั้งเกม + เมนู):** หน้าเปิดเกมคอมไพล์เชดเดอร์แบบไม่บล็อกก่อนวาดห้อง (`hubRender` js/61, `renderStage` js/32) `?nohubidle` = แบบเดิม • ประกาย title เป็น sprite • Stand รวมชิ้นตามวัสดุ • เศษหินใช้ `instz` • ผลวัดและงานที่เหลือ `guides/OPTIMIZE.md` §T
+
 **สายลมรีดีไซน์ 2026-11-08 (ผู้ใช้สั่ง):** อ่านบนสุดของ `designs/wind.md` + changelog บรรทัดล่าสุดของสายลม — ชุดสกิลใหม่ทั้งหมด Featherwing/Windup/Wind Push/Windforce/Windblade/Sonic Boom Strike แบ่งโหมดพื้น(อ่อน)/บิน(พริ้ว) ใน `js/09-wind.js` • ภาพสกิลใหม่ยังเป็นเอฟเฟกต์ชั่วคราวจากโค้ด (ต้องทำ VFX จริงใน VFX Studio ตามสตอรี่บอร์ดของผู้ใช้) • โค้ด/ค่า tune เก่า (กำแพง/Windrift/Vortex/Void/Eye) ยังอยู่แต่ไม่ถูกเรียก ป้าย "(เลิกใช้)" — ลบได้เมื่อผู้ใช้ยืนยัน • ยังไม่ได้เล่นมือจริง.
 
 **Water BA ใหม่ 8พ.ย.2026 (ผู้ใช้อนุมัติ):** สะบัดไม้ยิงเข็มน้ำ 3 นัดทันที ห่าง 0.08 วิ ไม่มีเส้นน้ำ • `water/ba_fly` (เข็ม `water_needle`) + `water/ba_muzzle` • กระสุนเกิดฝั่งไม้แล้วเล็งเข้าหา crosshair (`WT_BA_SIDE`/`WT_BA_H` js/09) • `ba_slash` ไม่ได้ใช้แล้ว

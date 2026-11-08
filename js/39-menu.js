@@ -224,16 +224,18 @@ $('#btnKit').onclick=()=>openCreator(false,3);
 // ข้ามได้ด้วย ?nointro (ทดสอบ / VFX Studio)
 const TITLE={on:false,parts:[],menuParts:[],t0:performance.now()};
 function titleSpark(arr,x,y,n,sp,col){for(let i=0;i<n;i++){const a=Math.random()*6.283,v=sp*(0.3+Math.random());arr.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v-sp*0.2,life:0.8+Math.random()*1.2,max:2,r:1+Math.random()*2.2,col:col||(Math.random()<0.5?'255,214,140':'255,245,220'),g:40});}}
+// ประกายเป็นภาพสำเร็จต่อสี: เดิมสร้าง gradient ใหม่ทุกเม็ดทุกเฟรม (~25% ของ CPU หน้าแรก) • ขนาดจอใช้ innerWidth/Height เพราะ clientWidth บังคับคำนวณเลย์เอาต์ทุกเฟรม
+const TSPR=new Map();
+function titleSprite(col){let c=TSPR.get(col);if(c)return c;c=document.createElement('canvas');c.width=c.height=64;const g=c.getContext('2d'),rg=g.createRadialGradient(32,32,0,32,32,32);rg.addColorStop(0,'rgba('+col+',1)');rg.addColorStop(1,'rgba('+col+',0)');g.fillStyle=rg;g.beginPath();g.arc(32,32,32,0,6.283);g.fill();TSPR.set(col,c);return c;}
 function titleDraw(cv,arr,dt,ambient,c1,c2){
-  const w=cv.clientWidth,h=cv.clientHeight;if(cv.width!==w||cv.height!==h){cv.width=w;cv.height=h;}
+  const w=innerWidth,h=innerHeight;if(cv.width!==w||cv.height!==h){cv.width=w;cv.height=h;}
   const g=cv.getContext('2d');g.clearRect(0,0,w,h);g.globalCompositeOperation='lighter';
   if(Math.random()<ambient*dt)arr.push({x:Math.random()*w,y:h+10,vx:(Math.random()-0.5)*14,vy:-(20+Math.random()*50),life:5+Math.random()*5,max:10,r:0.8+Math.random()*2,col:Math.random()<0.7?(c1||'255,206,120'):(c2||'170,190,255'),g:0,tw:Math.random()*6});
   for(let i=arr.length-1;i>=0;i--){const p=arr[i];p.life-=dt;if(p.life<=0||p.y<-20){arr.splice(i,1);continue;}
     p.vy+=p.g*dt;p.x+=p.vx*dt+Math.sin(performance.now()/900+(p.tw||0))*0.25;p.y+=p.vy*dt;
     const a=Math.min(1,p.life/(p.max*0.35))*(p.tw!==undefined?0.55+0.45*Math.sin(performance.now()/300+p.tw):1);
-    const rg=g.createRadialGradient(p.x,p.y,0,p.x,p.y,p.r*4);rg.addColorStop(0,'rgba('+p.col+','+a+')');rg.addColorStop(1,'rgba('+p.col+',0)');
-    g.fillStyle=rg;g.beginPath();g.arc(p.x,p.y,p.r*4,0,6.283);g.fill();}
-  g.globalCompositeOperation='source-over';
+    const R=p.r*4;g.globalAlpha=Math.max(0,a);g.drawImage(titleSprite(p.col),p.x-R,p.y-R,R*2,R*2);}
+  g.globalAlpha=1;g.globalCompositeOperation='source-over';
 }
 function titleLoop(){
   const now=performance.now(),dt=Math.min(0.05,(now-(TITLE.last||now))/1000);TITLE.last=now;

@@ -38,12 +38,13 @@ function surfBuild(){
   const N=SURF.N,D=new Uint8Array(N*N*4);let row=0;
   const t=new THREE.DataTexture(D,N,N,THREE.RGBAFormat);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.magFilter=THREE.LinearFilter;t.minFilter=THREE.LinearMipmapLinearFilter;t.generateMipmaps=true;
   t.anisotropy=typeof gl!=='undefined'&&gl.capabilities?Math.min(8,gl.capabilities.getMaxAnisotropy()):1;t.userData.keep=true;
-  const step=()=>{const t0=performance.now();   // ทีละช่วงสั้น ๆ ไม่ให้หน้าค้าง (~8 ms ต่อรอบ)
-    while(row<N&&performance.now()-t0<8){for(let i=0;i<N;i++){const x=i/N,y=row/N,p=(row*N+i)*4;for(let k=0;k<4;k++)D[p+k]=Math.round(SURF_H[k](x,y)*255);}row++;}
-    if(row<N){setTimeout(step,0);return;}
+  const later=f=>window.requestIdleCallback?requestIdleCallback(f,{timeout:120}):setTimeout(f,0);   // ทำตอนเบราว์เซอร์ว่าง ไม่แย่งเฟรมเปิดเกม
+  const step=()=>{const t0=performance.now();   // ทีละช่วงสั้น ๆ ไม่ให้หน้าค้าง (~4 ms ต่อรอบ)
+    while(row<N&&performance.now()-t0<4){for(let i=0;i<N;i++){const x=i/N,y=row/N,p=(row*N+i)*4;for(let k=0;k<4;k++)D[p+k]=Math.round(SURF_H[k](x,y)*255);}row++;}
+    if(row<N){later(step);return;}
     t.needsUpdate=true;SURF.U.tSurf.value=t;SURF.ready=true;};
   const ph=new THREE.DataTexture(new Uint8Array([128,128,128,128]),1,1,THREE.RGBAFormat);ph.needsUpdate=true;ph.userData.keep=true;SURF.U.tSurf.value=ph;   // แผ่นเปล่า (เรียบ) ระหว่างรอสร้าง
-  setTimeout(step,50);}
+  setTimeout(()=>later(step),2500);}
 // ----- ส่งค่าเข้า uniform / กราฟิก -----
 function surfSync(){const U=SURF.U,a=SURF.amp;
   U.uSfA.value.set(SURF.on&&SURF.q?1:0,0,SURF.near,Math.max(SURF.near+1,SURF.far));

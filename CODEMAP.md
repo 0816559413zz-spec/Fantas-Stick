@@ -105,7 +105,7 @@ MIND:66 summonMin:72 minTarget:81 minShoot:88 updateMins:93 aimTarget:133 SDOME:
 §180 ร่ายคาถา
 castSlot:181 castUlt:196
 
-## js/09-water.js (173) — สายน้ำ 💧 (ผู้ใช้ออกแบบทั้งหมด — designs/water.md) • ฝั่งโฮสต์ • รอบแรก: ระบบเกมก่อน ภาพช…
+## js/09-water.js (173) — 
 WATERP:7 WAV:11 wtOn:17 wtInBeam:19
 §23 ทุกเฟรมของผู้เล่นสายน้ำ (เรียกจาก updatePlayer หลังส่วนโล่)
 waterTick:24 waterSpd:39 waterReset:40
@@ -163,7 +163,7 @@ windUltCast:383 windUltTick:386 windUltSweep:411 windFloatZ:419 windSnapP:422 wi
 §426 สกิล (ผู้ใช้ 2026-11-08: รีดีไซน์ทั้งชุด — id เดิมไว้ให้ชุดสกิล/tune/…
 W_WL:428 W_DR:434 W_VX:440 W_VO:446 W_FW:452 W_UL:461
 
-## js/10-net.js (198) — เครือข่าย (PeerJS / WebRTC)
+## js/10-net.js (198) — 
 PREFIX:4 NET:5 RC:9 TURN_SERVERS:12 ICE:13 PEER_OPT:14 TURN_URL:16 ICE_READY:18 JN:22 LAG:24 lagDo:25 hostSend:26 LOBBY:27 genCode:28 sendAll:29 NETD_KEYS:33 NETD:33 netDeltaReset:34 netDelta:35 NET_MAX:49 _netTE:49 netSendSnap:50 NETU:62 netUndelta:63 setStatus:69 hostGame:71 hostPeer:79 netConnect:98 joinWatch:109 joinFail:124 netLost:130 joinGame:145 joinPeer:156 clientOnData:171 leave:186 leaveRoom:188
 
 ## js/11-host.js (401) — 
@@ -349,12 +349,12 @@ SHAPES_Q:236 SHAPES:236 FLASHL:236 LINES:236 LREQ:237 ringGeo:238 ringVGeo:239 a
 ## js/31-camera.js (188) — กล้องมุมหลังไหล่ (แบบ Hogwarts Legacy)
 yaw:2 pitch:2 lastPh:2 locked:2 CAMRS:3 SENS:4 saveSet:5 applySettings:6 camPos:14 camLook:14 overlayOpen:17 showPause:18 hidePause:19 MAPCAM:20 PLACE:22 placeKey:23 updatePlaceGhost:31 _aimD:45 rayTerr:47 aimFromCrosshair:53 AIMZ:85 WBY:85 CAM_FRAMES:89 CAM_FRAME:99 CAM_TRACK:99 _camFocus:100 _camAnchor:100 _camWant:100 cameraFrame:101 camRoomK:124 updateCamera:134 menuCamera:184
 
-## js/32-stage.js (313) — เวทีเมนู/ล็อบบี้: ห้องโถงมืด แท่นวงเวททอง เทียนลอย (ฉากแยกจากแผนที่)
+## js/32-stage.js (315) — เวทีเมนู/ล็อบบี้: ห้องโถงมืด แท่นวงเวททอง เทียนลอย (ฉากแยกจากแผนที่)
 stage:2 STAGE:5 STAGE_Y:6 stageSpots:58 stageChar:74 POSES:81 stageIdle:87
 §109 เอฟเฟกต์หน้าเมนู (โชว์เฉพาะหน้าแรก ไม่โชว์ในล็อบบี้/หน้าสร้างตัวละคร)…
 stageMenuFx:135 _sv:146
 §147 ฉากประจำบ้าน (โผล่ตอนเลือกบ้านในหน้าสร้างตัวละคร)
-CRESTTEX:148 crestTex:149 crestBanner:157 buildHouseEnvs:165 TONE0:213 _tc:214 stageTone:215 stageScreen:228 renderStage:229 drawStageLabels:284
+CRESTTEX:148 crestTex:149 crestBanner:157 buildHouseEnvs:165 TONE0:213 _tc:214 stageTone:215 stageScreen:228 renderStage:229 drawStageLabels:286
 
 ## js/33-pyro-view.js (287) — ภาพของสายไฟ (pyroFX: ชาร์จ/พุ่ง/ดีดนิ้ว/กลายร่าง/Dragonfall/Colossus)…
 §2 sync ตัวละคร/ศัตรู/ลูกเวท กับ snapshot
@@ -390,14 +390,14 @@ rr:2 SLOTS:3 fmtTime:4
 §5 ชิ้นส่วน HUD ธีมทอง-น้ำเงิน
 HG:6 HG2:6 HUDF:8 hudTick:9 readyPulse:11 diaPath:13 plate:15 frameBox:21 bossTrail:29 drawBossBar:30 spellDia:50 thinBar:79 drawHUD:84 raceRankClient:165 drawModeHUD:169 MM:207 drawMinimap:208 slotKey:281 mySlots:282 STATUS_ICO:291 SLOTS_IMP:292 BR_LOCK:293 CLUSTER:295 E_NEEDSTAND:296 slotState:297 drawBottom:316 drawBoard:331
 
-## js/39-menu.js (284) — 
+## js/39-menu.js (286) — 
 myLook:5 myColor:5 myKit:5 myName:6 renderMyHouse:9
 §11 หน้าสร้าง/แต่งตัวละคร (2 ขั้น: 1 หน้าตา → 2 เลือกบ้าน)
 crLib:12 crSaved:12 crKitSaved:12 crOpen:12 crStep:12 crTab:12 crFirst:12 crKitOnly:12 crSlot:12 CRTABS:13 sw_:14 bt_:15 nameBox_:16 crPanelSet:17 crRenderStep1:22 crRenderWand:33
 §36 ขั้น 3: สาย + ชุดคาถา
 ROLE_COL:37 roleTag:38 DESIGNED:39 spellTags:40 spellDescHTML:47 baseDescHTML:51 SB_THEME:59 ROLE_ORDER:68 sbFxRun:69 sbFxT:69 sbParts:69 crRenderKit:70 sbStartFx:99 sbFxTick:100 sbBurst:127 crAssign:133 crRenderHouse:142 crGo:149 crSaveName:161 crSetHouse:162 openCreator:163 closeCreator:173 lobbyKitSend:180
 §222 ฉากเปิด (#intro) + ประกายบนหน้าเมนู (#menuFx)
-TITLE:225 titleSpark:226 titleDraw:227 titleLoop:238 titleGo:249 JOINQ:257 ovResult:277
+TITLE:225 titleSpark:226 TSPR:228 titleSprite:229 titleDraw:230 titleLoop:240 titleGo:251 JOINQ:259 ovResult:279
 
 ## js/40-train-settings.js (247) — เมนูทดลอง (ห้องฝึก / Test Place)
 trOpenF:2 trKey:2 trN:2 TR_OPTS:3 trToggle:4 trSend:9 trSync:14
@@ -413,20 +413,20 @@ SWK:124 swSetup:125
 §143 เช็คการ์ดจอตอนเปิดเกม
 GPUC:146 gpuCheck:147
 
-## js/42-fire-vfx.js (345) — ไฟแบบใหม่ (2026-10-19): shader ไฟเคลื่อนไหวจริง (noise ไหล) ใช้กับลูก…
+## js/42-fire-vfx.js (347) — ไฟแบบใหม่ (2026-10-19): shader ไฟเคลื่อนไหวจริง (noise ไหล) ใช้กับลูก…
 FIRE_U:4 FIRE_GLSL:5 fireMat:24
 §55 ชิ้นงานสำเร็จรูป
 _fbGeo:56 _fbGeo2:56 makeFireBall:58 _ftGeo:66 makeFireTail:67 makeFireWall:70 FIREV:78 fireBlast:79 fireTemp:84 updateFireV:85
 §90 ปีกไฟ (Dragonfall) จากไฟล์ Blender mesh_fire_wing (assets/src/fx_mesh…
 makeFireWings:93 poseFireWings:100
 §101 ชิ้นงานพื้น/กระแทก (รอบ Pyro 2026-10-19): พื้นแตกเป็นใย (ดำ + ไฟลุกตา…
-_crackPaths:104 _crackGeo:113 _decM:117 _crackRibbon:119 fireCrackWeb:127 _charTex:149 charTex:150 _discGeo:153 scorch:154 _fruneTex:158 fruneTex:159 fireRune:167 _rockGeo:173 _rockM:174 rockChunks:175 fireGeyser:183 _mv1:191 _mv2:191 fireMeteor:192
-§204 อากาศร้อนบิดเบี้ยว (heat haze) — Blazeform "ออร่าความร้อน" (ผู้เล่น 2…
-HZM:207 hazeMat:208 _hzPlane:218 _hzRing:219 hazeOf:221 fireBurn:226
-§235 ไฟ 3 มิติจริง (volumetric) — ผู้เล่น 2026-10-19: "ไฟดูเป็นภาพ 2D เกิน…
-NOISE3D:240 FIRE3D:249 _fvIdx:254 fireVol:255 fireVolTemp:299
-§300 ไฟ 3 มิติที่ bake จาก Blender ทั้งก้อน (วิธี 1 — ผู้เล่นเลือก 2026-10…
-FSEQ:304 fireSeqLoad:305 fireSeqReady:309 fireSeqVol:310 fireSeqAt:331 _sqA:338 _sqB:338 _sqX:338 _sqY:338 _sqZ:338 _sqM:338 fireSeqLine:339
+_crackPaths:104 _crackGeo:113 _decM:117 _crackRibbon:119 fireCrackWeb:127 _charTex:149 charTex:150 _discGeo:153 scorch:154 _fruneTex:158 fruneTex:159 fireRune:167 _rockGeo:173 _rockM:174 _rockRestProx:175 rockChunks:176 fireGeyser:185 _mv1:193 _mv2:193 fireMeteor:194
+§206 อากาศร้อนบิดเบี้ยว (heat haze) — Blazeform "ออร่าความร้อน" (ผู้เล่น 2…
+HZM:209 hazeMat:210 _hzPlane:220 _hzRing:221 hazeOf:223 fireBurn:228
+§237 ไฟ 3 มิติจริง (volumetric) — ผู้เล่น 2026-10-19: "ไฟดูเป็นภาพ 2D เกิน…
+NOISE3D:242 FIRE3D:251 _fvIdx:256 fireVol:257 fireVolTemp:301
+§302 ไฟ 3 มิติที่ bake จาก Blender ทั้งก้อน (วิธี 1 — ผู้เล่นเลือก 2026-10…
+FSEQ:306 fireSeqLoad:307 fireSeqReady:311 fireSeqVol:312 fireSeqAt:333 _sqA:340 _sqB:340 _sqX:340 _sqY:340 _sqZ:340 _sqM:340 fireSeqLine:341
 
 ## js/43-frost-vfx.js (145) — 
 FROST_U:6
@@ -486,7 +486,7 @@ fxLoopName:356 blzFxName:357 fxLoopKeep:358 fshHitFx:360 fxBind:363
 §374 แม่แบบ playFx เป็นไฟล์ (assets/fx/tpl/*, sig/*, rec/*)
 fxTpl:376
 
-## js/46-fx-make.js (353) — 
+## js/46-fx-make.js (356) — 
 FXMK:10 MKD:11 mkRng:12 mkHash:13 mkNoise:15 mkL:17 mkR2:18
 §19 ที่เก็บจุด/สามเหลี่ยม
 mkG:21 mkPc:22 mkV:23 mkQ:24 mkAppend:25 mkCopy:26 mkFlat:27 _mkv:28 mkXf:29 mkThree:32 mkTRS:34 mkGrid:37
@@ -496,44 +496,44 @@ mkCC:40 MKGEN:51
 §113 ตัวแต่ง (ทำตามลำดับ): เรียว → บิด → โค้ง → ขรุขระ → แบน(เหลี่ยม) → ขน…
 mkDeform:114 mkOpts:125 mkPart:126 fxMeshBuild:139 fxModelBark:164 fxModelEmission:198
 §207 โหลด
-fxMeshLoad:208 fxMeshGeo:210 fxMeshSet:212 fxTexLoad:214 fxTexUse:217 fxTexNeed:220
-§221 โมเดลงอกทีละชิ้น (ชั้น mesh: grow 0..1 เส้นโค้งได้, stagger, growBy)
-FXGROWBY:223 fxGrowInit:224 fxGrowTick:226
-§231 วัสดุภาพบนรูปทรง (mat:"tex") — ภาพที่วาดในสตูดิโอ (tex/…) ไหลบนผิว + …
-fxTexMat:233 fxTexMatBind:246 fxTexMatTick:249
-§250 เศษโมเดลกระเด็น (emit look:"model") — หิน ผลึก ขนนก เศษดาบ: หมุน ตกตา…
-FXMP:252 MPLOD:256 MPLOD_PX:256 MPLOD_ON:256 fxMPParticleGeo:257 fxMPMat:262 fxMPGroup:266 _mpM:271 _mpQ:271 _mpE:271 _mpP:271 _mpS:271 fxMPUpdate:272 fxMPClear:286 fxMPSpawn:288
-§292 อากาศบิดเบี้ยว (ชั้น warp) — ไอร้อน / คลื่นกระแทกบิดภาพ / เลนส์โป่ง •…
-WB:295 wbInit:296 wbBegin:306 wbEnd:307 fxWarpMake:308 fxWarpTick:321
-§329 ไฟ 3 มิติจากการจำลอง (ชั้น vol) — ไฟล์รูปแบบเดียวกับที่เพื่อน bake จา…
-FXVOL:332 fxVolLoad:333 fxVolTex:337 fxVolSet:340 fxVolReady:341 fxVolMake:342 fxVolTick:345 fxPreAssets:350 fxAssetsWait:352
+_fxMQ:209 fxMeshQueue:210 fxMeshLoad:211 fxMeshGeo:213 fxMeshSet:215 fxTexLoad:217 fxTexUse:220 fxTexNeed:223
+§224 โมเดลงอกทีละชิ้น (ชั้น mesh: grow 0..1 เส้นโค้งได้, stagger, growBy)
+FXGROWBY:226 fxGrowInit:227 fxGrowTick:229
+§234 วัสดุภาพบนรูปทรง (mat:"tex") — ภาพที่วาดในสตูดิโอ (tex/…) ไหลบนผิว + …
+fxTexMat:236 fxTexMatBind:249 fxTexMatTick:252
+§253 เศษโมเดลกระเด็น (emit look:"model") — หิน ผลึก ขนนก เศษดาบ: หมุน ตกตา…
+FXMP:255 MPLOD:259 MPLOD_PX:259 MPLOD_ON:259 fxMPParticleGeo:260 fxMPMat:265 fxMPGroup:269 _mpM:274 _mpQ:274 _mpE:274 _mpP:274 _mpS:274 fxMPUpdate:275 fxMPClear:289 fxMPSpawn:291
+§295 อากาศบิดเบี้ยว (ชั้น warp) — ไอร้อน / คลื่นกระแทกบิดภาพ / เลนส์โป่ง •…
+WB:298 wbInit:299 wbBegin:309 wbEnd:310 fxWarpMake:311 fxWarpTick:324
+§332 ไฟ 3 มิติจากการจำลอง (ชั้น vol) — ไฟล์รูปแบบเดียวกับที่เพื่อน bake จา…
+FXVOL:335 fxVolLoad:336 fxVolTex:340 fxVolSet:343 fxVolReady:344 fxVolMake:345 fxVolTick:348 fxPreAssets:353 fxAssetsWait:355
 
-## js/47-earth-view.js (704) — 
+## js/47-earth-view.js (711) — สายดิน ⛰️ — ภาพฝั่งเครื่องเล่น (Stand / Stand ใหญ่ / กำแพง / เสา / เนิน / ฝุ่น / สว่าน / …
 ECOL:9 EGUARD_BIG:14 EGUARD:14 CB:15 EV:16 eW:17 eYaw:18
 §19 ลายผิว (วาดเองบน canvas: หิน/ทราย + รอยร้าว + ขอบบล็อกแบบ Roblox)
 ETEX:20 eTex:21 eFadeTex:35 eMat:37 eTMat:38 rockGeo:39 ROCKU:45 rockMesh:46 coneMesh:48 _eChunkM:50 eChunks:51
 §53 Stand (บล็อกหิน/ทรายครึ่งตัวบน)
 makeStand:55
-§91 Rampage: เกราะลมหน้า Stand (ผู้ใช้: เหมือนอุกกาบาตตกโลก ต้านลม — เปลื…
-makeBow:93 EBOW:102 _RIM:102 eRampWind:103 eSpikes:115 standOp:120 _ikDn:123 eArmIK:124 PK:131 standPose:133 _eRq:159 _eRq2:159 _eRx:159 standRun:160 eState:178 eStandOf:179 eGiantOf:180 eSandFall:182 eAppear:183 eAim:185
-§188 วงเตือนบนพื้น (BA ชาร์จ / จุดปาเสา): วงเข้มก่อน แล้วสีอ่อนค่อย ๆ เติม…
-makeWarn:189 eWarnAt:194
-§195 ทุกเฟรม: ผู้เล่นสายดิน (เรียกจาก syncPlayers)
-earthFX:196
-§289 สว่าน (ref: designs/earth_ref/drill_ref.png): หินแหลมเรียวเป็นตัวหลัก…
-eSteelEnv:291 eHeatTex:296 EDR:301 eDrillGeo:302 makeDrill:308 drillHeat:315
-§317 เสายักษ์ (ref: designs/earth_ref/pillar_ref.png): เสาเหลี่ยมยาว ปลายห…
-makePillar:318
-§324 กระสุนหิน
-earthProjMesh:325 SLAB:331 makeSlab:332 eSlabGeo:337 eSlabMats:348 slabCracks:415
-§418 สิ่งก่อสร้าง + ฝุ่น (เรียกจาก render loop)
-earthClear:419 eMergeKids:426 eMakeSO:434 syncEarth:451 earthFog:494 eMudScreen:497 _eOlMat:504 eOutlines:506 _eCamT:511 eAnim:512 eDebris:513 eWave:515 eAirWave:517 esbImpact:520
-§527 event "efx" ของสายดิน (เรียกจากต้น efxFX) — คืน true = จัดการแล้ว
-earthEfx:528 eWindOut:617 eAirCone:623 eDrillFly:625
-§629 บึงโคลน (Mud Swamp + บึงจากเสาอัลติ): คลื่นกระเพื่อมจากกลางไปขอบ แล้ว…
-earthMudZone:630 earthMudSink:637
-§638 HUD ใต้เป้าเล็ง
-ESM:640 eSmooth:641 ESF:644 eShieldFx:645 eChips:650 eShieldSegs:653 eShieldNum:667 eShieldArc:671 drawEarthHud:684
+§92 Rampage: เกราะลมหน้า Stand (ผู้ใช้: เหมือนอุกกาบาตตกโลก ต้านลม — เปลื…
+makeBow:94 EBOW:103 _RIM:103 eRampWind:104 eSpikes:116 standOp:121 _ikDn:124 eArmIK:125 PK:132 standPose:134 _eRq:160 _eRq2:160 _eRx:160 standRun:161 eState:179 eStandOf:180 eGiantOf:181 eSandFall:183 eAppear:184 eAim:186
+§189 วงเตือนบนพื้น (BA ชาร์จ / จุดปาเสา): วงเข้มก่อน แล้วสีอ่อนค่อย ๆ เติม…
+makeWarn:190 eWarnAt:195
+§196 ทุกเฟรม: ผู้เล่นสายดิน (เรียกจาก syncPlayers)
+earthFX:197
+§290 สว่าน (ref: designs/earth_ref/drill_ref.png): หินแหลมเรียวเป็นตัวหลัก…
+eSteelEnv:292 eHeatTex:297 EDR:302 eDrillGeo:303 makeDrill:309 drillHeat:316
+§318 เสายักษ์ (ref: designs/earth_ref/pillar_ref.png): เสาเหลี่ยมยาว ปลายห…
+makePillar:319
+§325 กระสุนหิน
+earthProjMesh:326 SLAB:332 makeSlab:333 eSlabGeo:338 eSlabMats:349 slabCracks:416
+§419 สิ่งก่อสร้าง + ฝุ่น (เรียกจาก render loop)
+earthClear:420 eMergePartial:428 eMergeKids:433 eMakeSO:441 syncEarth:458 earthFog:501 eMudScreen:504 _eOlMat:511 eOutlines:513 _eCamT:518 eAnim:519 eDebris:520 eWave:522 eAirWave:524 esbImpact:527
+§534 event "efx" ของสายดิน (เรียกจากต้น efxFX) — คืน true = จัดการแล้ว
+earthEfx:535 eWindOut:624 eAirCone:630 eDrillFly:632
+§636 บึงโคลน (Mud Swamp + บึงจากเสาอัลติ): คลื่นกระเพื่อมจากกลางไปขอบ แล้ว…
+earthMudZone:637 earthMudSink:644
+§645 HUD ใต้เป้าเล็ง
+ESM:647 eSmooth:648 ESF:651 eShieldFx:652 eChips:657 eShieldSegs:660 eShieldNum:674 eShieldArc:678 drawEarthHud:691
 
 ## js/48-ragdoll.js (227) — 
 RAG:10 RAGJ:23 RAGB:29 RAGS:33 RAGMIN:37 RAGHINGE:39 _rv1:40 _rv2:40 _rv3:40 _rqa:40 _rqb:40 _rm:40 ragBones:41 ragBasis:48 ragTargets:56 ragStart:62 ragBack:88 ragFloor:89 ragStep:90 ragPose:155 ragWrite:170 ragRestore:182 ragEnd:186 ragTick:188 ragHideDead:222
@@ -613,7 +613,7 @@ MN_BLOCK:259 mnRay:260 mnPick:261 mnHot:267 mnToy:285
 §290 เรนเดอร์ (เรียกจาก renderStage js/32 — คืน true = จัดการแล้ว)
 mnRestore:291 mnMenuRender:297
 
-## js/61-hub.js (905) — 
+## js/61-hub.js (910) — 
 HUBS:11 HUBL:11 HUB:14 HB:18 _hq:19 _hq2:19 _hq3:19 _hv:19 _hv2:19 _hv3:19 _hY:19 hEase:20 hSm:21
 §23 อนุภาคเรืองแสงของเมนู (ขนาด/สี/ความจางต่อเม็ด)
 hubPS:24 hCol:50 H_SPARK:51
@@ -640,7 +640,7 @@ HL_SPOTS:739 HL_TEAM:740 hubLobbyLayout:741 hubLobbyTick:748 hubLabels:774
 §788 หน้าโปรไฟล์ (UI ใน js/65 PRF)
 PRF3:792 prfSpot:794 hubProfSet:803 hubProfShow:811 hubProfTick:812
 §823 เรนเดอร์ (เรียกจาก renderStage — คืน true = วาดแล้ว)
-hubMergeStatic:826 hubRender:844
+hubMergeStatic:826 NOHUBIDLE:844 hubRender:845
 
 ## js/62-hub-ui.js (310) — 
 HUI_IMG:9 HMODES:10 HUI:16 HICO:18 hSvg:37 hHex:38 H_STAR:39
@@ -747,8 +747,7 @@ WDG_YAW:460 wdgGet:461 wdgStart:462 wdgDive:469 wdgKeep:472 wdgEnd:473 wdgTick:4
 ## js/71-perfhud.js (72) — 
 PERF:9 perfFrame:12 perfDom:26 perfStats:34 perfGraph:38 _gpuName:51 gpuIntegrated:52 perfRows:53 perfPanel:68 perfText:69
 
-## js/72-dash-pose.js (84) — ท่าพุ่ง 3D (ผู้ใช้ 2026-11-05: "บางท่า เช่น Windrift เป็นแบบพุ่งตัว … ตอนนี้ไม่เป็น Anima…
-§10 ช่อง: 0 โน้มตัว(+หน้า) 1 ยกตัว y 2 แขนขวา x(+หลัง) 3 แขนขวา z 4 แขนซ้…
+## js/72-dash-pose.js (84) — 
 DPOSE:12 DPT:24 _dpQ:25 _dpX:25 _dpP:25 dpMix:26 dpKnees:28 dpStyle:36 DPDBG:41 dashPose:42 dpApply:74
 
 ## js/73-tune.js (142) — 
@@ -768,14 +767,14 @@ LOOK_F:69 lookRegister:75
 ## js/75-ambient.js (52) — 
 AMBX:9 AMBX_V:10 AMBX_F:24 ambMesh:27 ambQual:39 ambFrame:40
 
-## js/76-surface.js (124) — 
+## js/76-surface.js (125) — 
 SURF:11
 §15 ภาพผิว (ความสูง 4 แบบ) : noise ที่วนซ้ำได้ (ทุกฟังก์ชันรับ x,y ใน [0,…
 _sh:16 _sva:17 _sfb:20 _sfa:21 _SW:22 _swor:23 _SCL:27 SURF_H:28 surfBuild:37
-§47 ส่งค่าเข้า uniform / กราฟิก
-surfSync:48 surfQuality:52
-§53 ใส่ผิวเข้าวัสดุ
-SURF_VS:54 SURF_VS_BODY:55 SURF_FS:66 SURF_FS_BODY:67 surfOk:97 surfApply:98 surfScene:110
-§111 ปรับค่า (tune.html / F8)
+§48 ส่งค่าเข้า uniform / กราฟิก
+surfSync:49 surfQuality:53
+§54 ใส่ผิวเข้าวัสดุ
+SURF_VS:55 SURF_VS_BODY:56 SURF_FS:67 SURF_FS_BODY:68 surfOk:98 surfApply:99 surfScene:111
+§112 ปรับค่า (tune.html / F8)
 
-(92 files, 22499 lines)
+(92 files, 22521 lines)
