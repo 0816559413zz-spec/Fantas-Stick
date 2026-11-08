@@ -1,0 +1,83 @@
+{
+ "v": 1,
+ "desc": "Plume Volley ง้างปีก: เส้นลมไหลเข้าปีกด้านหลัง + ขนนกปลิวตอนปล่อย",
+ "tags": [
+  "wind",
+  "skill"
+ ],
+ "pal": "wind",
+ "dur": 0.5,
+ "seed": 43,
+ "layers": [
+  {
+   "id": "suck",
+   "t": "emit",
+   "at": 0,
+   "life": 0.2,
+   "att": "chest",
+   "pos": [
+    0,
+    0.8,
+    -0.5
+   ],
+   "from": "sphere",
+   "fr": 2.2,
+   "rate": 90,
+   "dir": "in",
+   "gravity": 0,
+   "drag": 0,
+   "speed": [
+    8,
+    12
+   ],
+   "plife": [
+    0.12,
+    0.2
+   ],
+   "look": "streak",
+   "size": [
+    0.8,
+    1.5
+   ],
+   "col": "#e6fff4",
+   "c2": "#39cf8c"
+  },
+  {
+   "id": "rel",
+   "t": "emit",
+   "at": 0.2,
+   "life": 0.05,
+   "att": "chest",
+   "pos": [
+    0,
+    0.8,
+    -0.5
+   ],
+   "from": "sphere",
+   "fr": 1.0,
+   "burst": 12,
+   "rate": 0,
+   "dir": "out",
+   "gravity": -1.5,
+   "drag": 1.5,
+   "speed": [
+    3,
+    7
+   ],
+   "plife": [
+    0.45,
+    0.7
+   ],
+   "look": "model",
+   "model": "wind_feather",
+   "mmat": "glow",
+   "msize": [
+    0.16,
+    0.3
+   ],
+   "col": "#b9ffd9",
+   "c2": "#39cf8c",
+   "mspin": 4
+  }
+ ]
+}

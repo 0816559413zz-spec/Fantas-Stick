@@ -1,32 +1,34 @@
-# Dash สายลม (ถอยหลังผลัก) — ร่าง VFX (⚠ Claude ออกแบบ รอผู้ใช้ดู): ระเบิดลมผลักไปข้างหน้า + ตัวเราดีดถอยหลังลอยกลางอากาศ
-# ใช้: python tools/wind-dash-gen.py • ดู studio.html?fx=wind/dash_push • วางที่จุดร่าย หันตามทิศผู้ร่าย (+z = ข้างหน้า, ตัวเราถอยไป -z ~15 ม.)
-import json
-from pathlib import Path
-ROOT=Path(__file__).resolve().parents[1]
-W,LG,G,DG,LN='#ffffff','#efffe8','#8dff65','#2ec772','#1a7a45'
-T=lambda n:'tex/'+n
-def stroke(id_,at,life,model,tex,col,pos,scale,rot,spin=0,o=1,i=None):
-    d={'id':id_,'t':'mesh','at':at,'life':life,'att':'feet','shape':'model','model':model,'mat':'tex','tex':T(tex),'col':col,'col2':'#000000','rim':0,'uvTile':[1,1],'uvScroll':[0,0],
-       'pos':pos,'rot':rot,'scale':scale,'spin':spin,'op':{'0':0,'0.1':o,'0.6':round(o*.8,2),'1':0},'fade':0}
-    if i:d['int']=i
-    return d
-L=[]
-# ข้างหน้า: คลื่นลมเป็นวงสโตรกพุ่งออก 3 ชั้น (หันหน้าไป +z) ขยาย + เคลื่อนไปข้างหน้า ~6 ม.
-for j,(tex,col,sp,sc,o,i) in enumerate([('wind_swoosh_a_hi',W,620,1.0,1,1.5),('wind_swoosh_b',G,-540,1.2,.9,1.1),('wind_swoosh_b_ln',LN,-540,1.28,.7,None)]):
-    L.append(stroke(f'wave{j}',j*.02,.42,f'wind_pieces{j}',tex,col,{'0':[0,1.1,.8],'1':[0,1.1,6.5]},{'0':[.4*sc,.5,.4*sc],'0.35':[1.5*sc,.6,1.5*sc],'1':[2.6*sc,.3,2.6*sc],'ease':'out'},[-90,0,j*100],sp,o,i))
-L.append(stroke('wave3',.06,.4,'wind_pieces1','wind_swoosh_a_hi',LG,{'0':[0,1.1,.8],'1':[0,1.1,5]},{'0':[.3,.4,.3],'1':[1.8,.3,1.8],'ease':'out'},[-90,0,200],-700,.9,1.3))
-L.append({'id':'blast','t':'emit','at':0,'life':.06,'att':'feet','pos':[0,1.1,.9],'burst':60,'rate':0,'from':'disc','fr':.6,'dir':'aim','yaw':0,'spread':.45,'speed':[10,18],'plife':[.18,.35],'look':'streak','size':[1.4,2.8],'col':W,'c2':G,'gravity':0,'drag':2,'curl':False})
-L.append({'id':'leaves','t':'emit','at':0,'life':.06,'att':'feet','pos':[0,1,1],'burst':14,'rate':0,'from':'sphere','fr':.6,'dir':'aim','yaw':0,'spread':.6,'speed':[6,11],'plife':[.5,.9],'look':'model','model':'wind_leaf','mmat':'solid','msize':[.1,.18],'col':'#6fae5a','c2':'#3f7a3a','gravity':.6,'drag':1.5,'mspin':500,'bounce':0})
-L.append({'id':'flash','t':'flash','at':0,'life':.1,'att':'feet','pos':[0,1.2,.7],'col':LG,'size0':.3,'size':1.8,'k':1})
-L.append({'id':'shock','t':'warp','at':0,'life':.22,'att':'feet','pos':[0,1.1,1.2],'kind':'shock','size':{'0':.3,'1':2.6},'str':1,'op':{'0':1,'1':0},'col':LG,'glow':.04})
-# ตัวเราดีดถอยหลัง: สโตรกลู่ตามทางถอย + เส้นลมยาว + วงลมกระแทกพื้นตอนออกตัว
-for j,(tex,col) in enumerate([('wind_swoosh_a_hi',W),('wind_swoosh_b',G)]):
-    L.append(stroke(f'trail{j}',.02+j*.03,.5,f'wind_pieces{j+1}',tex,col,{'0':[0,1.3,0],'1':[0,1.8,-12]},{'0':[.5,1.4,.5],'1':[.9,2.2,.9]},[90,0,j*120],500*(1-2*j),.85,1.2 if j==0 else None))
-L.append({'id':'streaks','t':'emit','at':0,'life':.45,'att':'feet','pos':{'0':[0,1.3,0],'1':[0,1.8,-12]},'rate':120,'from':'sphere','fr':.5,'dir':'aim','yaw':0,'spread':.2,'speed':[3,6],'plife':[.2,.4],'look':'streak','size':[1.2,2.4],'col':W,'c2':G,'gravity':0,'drag':1,'curl':False})
-for j,(tex,col,sp) in enumerate([('wind_swoosh_b',G,360),('wind_swoosh_a_hi',W,-300)]):
-    L.append(stroke(f'ground{j}',0,.5,'wind_groundswirl',tex,col,[0,.04+j*.02,0],{'0':.4,'0.3':1.6,'1':2.4,'ease':'out'},[0,j*60,0],sp,.9))
-L.append({'id':'dust','t':'emit','at':0,'life':.06,'att':'feet','pos':[0,.15,0],'burst':24,'rate':0,'from':'ring','fr':.6,'dir':'out','speed':[4,8],'up':[.5,2],'plife':[.3,.6],'look':'model','model':'wind_slash','mmat':'solid','msize':[.06,.14],'col':'#5b4a3a','c2':'#8a7560','gravity':6,'mspin':500,'bounce':0})
-L.append({'id':'shake','t':'screen','at':0,'life':.1,'shake':1.5})
-fx={'v':1,'desc':'Dash สายลม (⚠ ร่าง Claude): คลื่นวงสโตรกผลักไปข้างหน้า + เส้นลม/ใบไม้ + ตัวเราดีดถอยหลัง (สโตรกลู่ตามทาง) + วงลมพื้น — เขียวขาวแบบ Windrift','tags':['wind','dash'],'pal':'wind','dur':.7,'seed':5,'layers':L}
-(ROOT/'assets/fx/wind/dash_push.fx.json').write_text(json.dumps(fx,ensure_ascii=False,indent=1),encoding='utf-8')
-print('wind/dash_push',len(L),'layers')
+#!/usr/bin/env python3
+# Wind rework (designs/wind.md, user 2026-11-08): Dash = crouch 0.25 s, wind bursts upward, updraft lifts you 8 m with wings held open, then glide down.
+# Same crisp shader wind as the shield (mat windshell, mode ball = wraps around the column).
+import json, os
+R = os.path.join(os.path.dirname(__file__), '..')
+with open(os.path.join(R, 'assets/fx/mesh/wind_updraft.mesh.json'), 'w', encoding='utf-8') as o:
+    json.dump({"v": 1, "desc": "Dash สายลม: ลำลมพัดขึ้น กว้างขึ้นด้านบน สูง 6.2 ม.", "mat": "glow", "pal": "wind", "tags": ["wind"], "parts": [{"id": "p", "k": "lathe", "seg": 48, "prof": [[0.75, 0], [0.62, 0.8], [0.72, 2.2], [0.95, 4.2], [1.3, 6.2]]}]}, o, ensure_ascii=False, indent=1)
+def col(i, sx, scroll, cc, c2, op, at=0, sy=1.35, life=0.8):
+    return {"id": i, "t": "mesh", "at": at, "life": life, "att": "point", "fade": 0, "shape": "model", "model": "wind_updraft", "mat": "windshell", "mode": "ball", "col": cc, "col2": c2, "scroll": scroll,
+            "scale": {"0": [sx * 0.7, 0.08, sx * 0.7], "0.3": [sx, sy, sx], "1": [sx * 1.15, sy * 1.1, sx * 1.15], "ease": "out"}, "op": {"0": op, "0.55": op, "1": 0}}
+def swirl(i, tex, cc, spin, s0, s1, op, at=0, life=0.5):
+    return {"id": i, "t": "mesh", "at": at, "life": life, "att": "ground", "pos": [0, 0.1, 0], "fade": 0, "shape": "model", "model": "wind_groundswirl", "mat": "tex", "tex": tex, "col": cc, "col2": "#000000", "rim": 0, "spin": spin, "scale": {"0": s0, "1": s1, "ease": "out"}, "op": {"0": op, "1": 0}}
+# ระเบิดขึ้น: ลำลมเดิม + ปากลมบานออกเร็ว ๆ ตอนออกตัว + เส้นลมพุ่งขึ้นหนึ่งชุดใหญ่ + เส้นลมแผ่รอบพื้น + แรงกระแทกบิดภาพ
+fx = {"v": 1, "desc": "Dash สายลม: ระเบิดลมพุ่งขึ้น + ลำลมพัดขึ้น 8 ม. + ลมวนบนพื้น + ขนนกปลิว", "tags": ["wind", "dash"], "pal": "wind", "dur": 0.85, "seed": 21, "layers": [
+ col("c0", 1.0, 2.4, "#f0fff8", "#2bdc88", 0.9), col("c1", 1.3, 1.6, "#9dffc9", "#14b56e", 0.55),
+ col("b0", 2.3, 3.2, "#f0fff8", "#2bdc88", 0.75, sy=0.55, life=0.34), col("b1", 3.2, 2.2, "#9dffc9", "#14b56e", 0.45, at=0.02, sy=0.38, life=0.4),
+ swirl("sw", "tex/wind_swoosh_a_hi", "#7dffb4", 520, 0.5, 3.4, 1), swirl("sw2", "tex/wind_swoosh_b_hi", "#b9ffd9", -380, 0.4, 2.6, 0.9, at=0.03, life=0.42),
+ {"id": "shock", "t": "warp", "at": 0, "life": 0.3, "att": "point", "kind": "shock", "size": {"0": 1.2, "1": 9}, "str": 0.6, "op": {"0": 1, "1": 0}, "col": "#ffffff", "glow": 0},
+ {"id": "blast", "t": "emit", "at": 0, "life": 0.06, "att": "point", "from": "ring", "fr": 1.0, "burst": 60, "rate": 0, "dir": "up", "gravity": 0, "drag": 0.9, "speed": [20, 36], "plife": [0.25, 0.5], "look": "streak", "size": [2.2, 4.2], "col": "#f0fff8", "c2": "#2bdc88", "curl": True},
+ {"id": "side", "t": "emit", "at": 0, "life": 0.06, "att": "ground", "from": "ring", "fr": 0.9, "burst": 34, "rate": 0, "dir": "out", "gravity": 0, "drag": 1.6, "speed": [14, 24], "up": [1, 4], "plife": [0.22, 0.4], "look": "streak", "size": [1.6, 3], "col": "#c9ffe2", "c2": "#12a067", "curl": True},
+ {"id": "up", "t": "emit", "at": 0, "life": 0.5, "att": "point", "from": "ring", "fr": 0.8, "dir": "up", "gravity": 0, "drag": 0.5, "rate": 120, "speed": [12, 22], "plife": [0.2, 0.4], "look": "streak", "size": [1.4, 2.8], "col": "#e6fff4", "c2": "#39cf8c", "curl": True},
+ {"id": "plume", "t": "emit", "at": 0.04, "life": 0.06, "att": "point", "pos": [0, 1.6, -0.3], "from": "sphere", "fr": 0.7, "burst": 14, "rate": 0, "dir": "out", "gravity": -1.5, "drag": 1.3, "speed": [3, 7], "plife": [0.7, 1.2], "look": "model", "model": "wind_feather", "mmat": "glow", "msize": [0.16, 0.3], "col": "#b9ffd9", "c2": "#39cf8c", "mspin": 3},
+]}
+with open(os.path.join(R, 'assets/fx/wind/dash_up.fx.json'), 'w', encoding='utf-8') as o:
+    json.dump(fx, o, ensure_ascii=False, indent=1)
+# ชาร์จ 0.25 วิ: ลมวนหดเข้าเท้า + เส้นลมไหลเข้าหาตัว
+ch = {"v": 1, "desc": "Dash สายลม ชาร์จ 0.25 วิ: ลมวนหดเข้าเท้า + เส้นลมไหลเข้าหาตัว", "tags": ["wind", "dash"], "pal": "wind", "dur": 0.32, "seed": 22, "layers": [
+ {"id": "in0", "t": "mesh", "at": 0, "life": 0.3, "att": "ground", "pos": [0, 0.08, 0], "fade": 0, "shape": "model", "model": "wind_groundswirl", "mat": "tex", "tex": "tex/wind_swoosh_a_hi", "col": "#7dffb4", "col2": "#000000", "rim": 0, "spin": -640, "scale": {"0": 2.7, "1": 0.7, "ease": "in"}, "op": {"0": 0, "0.35": 0.95, "1": 1}},
+ {"id": "in1", "t": "mesh", "at": 0.04, "life": 0.26, "att": "ground", "pos": [0, 0.12, 0], "fade": 0, "shape": "model", "model": "wind_groundswirl", "mat": "tex", "tex": "tex/wind_swoosh_b_hi", "col": "#c9ffe2", "col2": "#000000", "rim": 0, "spin": 480, "scale": {"0": 2.0, "1": 0.45, "ease": "in"}, "op": {"0": 0, "0.4": 0.8, "1": 0.9}},
+ {"id": "suck", "t": "emit", "at": 0, "life": 0.22, "att": "ground", "pos": [0, 0.35, 0], "from": "ring", "fr": 2.4, "dir": "in", "gravity": 0, "drag": 0, "rate": 130, "speed": [7, 11], "plife": [0.14, 0.24], "look": "streak", "size": [0.9, 1.7], "col": "#e6fff4", "c2": "#39cf8c", "curl": True},
+]}
+with open(os.path.join(R, 'assets/fx/wind/dash_charge.fx.json'), 'w', encoding='utf-8') as o:
+    json.dump(ch, o, ensure_ascii=False, indent=1)
+print('ok')

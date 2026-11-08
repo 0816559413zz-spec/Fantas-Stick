@@ -1,0 +1,72 @@
+{
+ "v": 1,
+ "desc": "Slipstream นัดถัดไปพร้อม: ประกายนีออนลอยขึ้นรอบตัว",
+ "tags": [
+  "wind",
+  "buff"
+ ],
+ "pal": "wind",
+ "dur": 0.9,
+ "seed": 52,
+ "layers": [
+  {
+   "id": "rise",
+   "t": "emit",
+   "at": 0,
+   "life": 0.85,
+   "att": "chest",
+   "from": "ring",
+   "fr": 0.8,
+   "rate": 34,
+   "dir": "up",
+   "gravity": 0,
+   "drag": 0.5,
+   "speed": [
+    1.2,
+    2.4
+   ],
+   "plife": [
+    0.35,
+    0.6
+   ],
+   "look": "spark",
+   "size": [
+    0.12,
+    0.24
+   ],
+   "col": "#b8ffda",
+   "c2": "#14ff8c"
+  },
+  {
+   "id": "fth",
+   "t": "emit",
+   "at": 0,
+   "life": 0.85,
+   "att": "chest",
+   "from": "ring",
+   "fr": 0.95,
+   "rate": 5,
+   "dir": "up",
+   "gravity": 0,
+   "drag": 0.5,
+   "speed": [
+    0.7,
+    1.5
+   ],
+   "plife": [
+    0.5,
+    0.8
+   ],
+   "look": "model",
+   "model": "wind_feather",
+   "mmat": "glow",
+   "msize": [
+    0.13,
+    0.2
+   ],
+   "col": "#3dff9e",
+   "c2": "#00e070",
+   "mspin": 2
+  }
+ ]
+}

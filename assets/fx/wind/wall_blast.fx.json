@@ -1,0 +1,165 @@
+{
+ "v": 1,
+ "desc": "กำแพงลมระเบิด: ลมกระจายจากแผ่น + เส้นลมหมุนดูดเข้ากลาง วง 7.5 ม.",
+ "tags": [
+  "wind",
+  "shield"
+ ],
+ "pal": "wind",
+ "dur": 0.75,
+ "seed": 12,
+ "layers": [
+  {
+   "id": "pull0",
+   "t": "mesh",
+   "at": 0.04,
+   "life": 0.55,
+   "att": "point",
+   "fade": 0,
+   "pos": [
+    0,
+    -1.0,
+    0
+   ],
+   "shape": "model",
+   "model": "wind_groundswirl",
+   "mat": "tex",
+   "tex": "tex/wind_swoosh_a_hi",
+   "col": "#5dffa8",
+   "col2": "#000000",
+   "rim": 0,
+   "spin": -620,
+   "scale": {
+    "0": 4.4,
+    "1": 0.7,
+    "ease": "in"
+   },
+   "op": {
+    "0": 0,
+    "0.15": 1,
+    "0.8": 0.9,
+    "1": 0
+   }
+  },
+  {
+   "id": "pull1",
+   "t": "mesh",
+   "at": 0.1,
+   "life": 0.5,
+   "att": "point",
+   "fade": 0,
+   "pos": [
+    0,
+    -0.3,
+    0
+   ],
+   "shape": "model",
+   "model": "wind_groundswirl",
+   "mat": "tex",
+   "tex": "tex/wind_swoosh_b_hi",
+   "col": "#c9ffe2",
+   "col2": "#000000",
+   "rim": 0,
+   "spin": -760,
+   "rot": [
+    0,
+    70,
+    0
+   ],
+   "scale": {
+    "0": 3.8,
+    "1": 0.5,
+    "ease": "in"
+   },
+   "op": {
+    "0": 0,
+    "0.15": 0.95,
+    "0.8": 0.8,
+    "1": 0
+   }
+  },
+  {
+   "id": "in",
+   "t": "emit",
+   "at": 0.03,
+   "life": 0.4,
+   "att": "point",
+   "from": "sphere",
+   "fr": 5.2,
+   "dir": "in",
+   "gravity": 0,
+   "drag": 0.1,
+   "rate": 200,
+   "speed": [
+    12,
+    20
+   ],
+   "plife": [
+    0.18,
+    0.34
+   ],
+   "look": "streak",
+   "size": [
+    1.5,
+    3.0
+   ],
+   "col": "#c9ffe2",
+   "c2": "#14b56e",
+   "curl": true
+  },
+  {
+   "id": "shock",
+   "t": "warp",
+   "at": 0,
+   "life": 0.3,
+   "att": "point",
+   "kind": "shock",
+   "size": {
+    "0": 1.5,
+    "1": 12
+   },
+   "str": 0.7,
+   "op": {
+    "0": 1,
+    "1": 0
+   },
+   "col": "#ffffff",
+   "glow": 0
+  },
+  {
+   "id": "dust",
+   "t": "emit",
+   "at": 0,
+   "life": 0.06,
+   "att": "ground",
+   "from": "ring",
+   "fr": 3.5,
+   "burst": 14,
+   "rate": 0,
+   "dir": "in",
+   "gravity": 0,
+   "drag": 1.2,
+   "speed": [
+    4,
+    8
+   ],
+   "up": [
+    0.3,
+    1.2
+   ],
+   "plife": [
+    0.4,
+    0.7
+   ],
+   "size": [
+    3,
+    5
+   ],
+   "grow": 0.5,
+   "look": "smoke",
+   "curl": true,
+   "col": "#e4e0cf",
+   "c2": "#a39d88"
+  }
+ ]
+}

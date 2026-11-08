@@ -1,0 +1,19 @@
+{
+  "v": 1,
+  "desc": "Nature — ต้นค่อย ๆ สลายจากยอดถึงรากพร้อมออร่าเขียวลอยออก",
+  "tags": [
+    "nature",
+    "ultimate",
+    "study"
+  ],
+  "pal": "nature",
+  "dur": 2.9,
+  "layers": [
+    {"id": "tree", "t": "mesh", "shape": "model", "model": "nature_ult_tree_branches_v1", "mat": "solid", "at": 0, "life": 2.9, "op": 1},
+    {"id": "dissolve", "t": "code", "fn": "studio_nature_ending", "at": 0, "life": 2.9, "args": {"layer": "tree"}},
+    {"id": "crown_aura", "t": "emit", "at": 0.21, "life": 0.48, "from": "ring", "fr": 4.2, "pos": {"0": [0, 24, 0], "1": [0, 17.1, 0]}, "burst": 0, "rate": 82, "dir": "out", "speed": [1.2, 4.4], "up": [1.2, 4.8], "look": "glow", "fb": "tex/wind_air_veil", "size": [14, 26], "plife": [0.72, 1.05], "col": "#8fffa9", "c2": "#37b972", "gravity": -0.6, "grow": 1.05, "drag": 0.92, "spin": 0.45, "fin": 4},
+    {"id": "trunk_aura", "t": "emit", "at": 0.69, "life": 0.84, "from": "ring", "fr": 2.1, "pos": {"0": [0, 17.1, 0], "1": [0, 5.1, 0]}, "burst": 0, "rate": 82, "dir": "out", "speed": [1.2, 4.4], "up": [1.2, 4.8], "look": "glow", "fb": "tex/wind_air_veil", "size": [14, 26], "plife": [0.72, 1.05], "col": "#8fffa9", "c2": "#37b972", "gravity": -0.6, "grow": 1.05, "drag": 0.92, "spin": 0.45, "fin": 4},
+    {"id": "root_aura", "t": "emit", "at": 1.53, "life": 0.31, "from": "ring", "fr": 4.9, "pos": {"0": [0, 5.1, 0], "1": [0, 0.7, 0]}, "burst": 0, "rate": 82, "dir": "out", "speed": [1.2, 4.4], "up": [1.2, 4.8], "look": "glow", "fb": "tex/wind_air_veil", "size": [14, 26], "plife": [0.72, 1.05], "col": "#8fffa9", "c2": "#37b972", "gravity": -0.6, "grow": 1.05, "drag": 0.92, "spin": 0.45, "fin": 4},
+    {"id": "floating_light", "t": "emit", "at": 0.24, "life": 1.6, "from": "ring", "fr": 3.4, "pos": {"0": [0, 23.8, 0], ".50": [0, 12.8, 0], "1": [0, 0.7, 0]}, "burst": 0, "rate": 100, "dir": "out", "speed": [1.7, 5.2], "up": [1.1, 4.2], "look": "glow", "size": [1.5, 5.5], "plife": [0.53, 1.02], "col": "#b6ff9a", "c2": "#2bd15e", "gravity": -1.1, "grow": 0.8, "drag": 1.2}
+  ]
+}

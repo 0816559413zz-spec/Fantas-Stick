@@ -1,5 +1,54 @@
 # HANDOFF — Fantas Stick (was "Wizard Duel") (repo: Fantas-Stick)
 
+**Nature ลูกบอลไม้ — ผู้ใช้อนุมัติท่าโยนรอบสาม** สะบัดไม้จากข้างเอวให้เมล็ดขยายกลางทาง ใช้ `tools/nature-preview.js?sk=ball&wallcast=1&throwv3=1` เก็บ `designs/nature_vfx/ball_throw_approved.gif` จังหวะชนเก็บที่ `designs/nature_vfx/ball_wallcast_approved.gif`
+
+**Nature ผู้ใช้อนุมัติป้อมหมดเวลาและกำแพงไม้งอก** ป้อมหมดเวลาทั้งบนพื้นและผนังใช้ `tools/nature-preview.js?sk=turret_expire` เก็บ `designs/nature_vfx/turret_expire_approved.gif` กำแพงงอกรอบเพิ่มเสี้ยนไม้และใบเก็บ `designs/nature_vfx/wall_growth_approved.gif` ส่วนหน้าตา UI ล็อกเป้า Dash ยังรอภาพอ้างอิงของผู้ใช้
+
+**Nature ป้อมร่างบัฟตอนยิง — ผู้ใช้อนุมัติ** `tools/nature-preview.js?sk=buffshoot_vfx` ฝักรวบแสงทองและสะบัดใบเล็ก ๆ ตอนยิง ใช้หนามและภาพตอนโดนแบบเดิม จังหวะยิงใน GIF ใช้จัดฉาก เก็บ `designs/nature_vfx/turret_buffshot_approved.gif`
+
+**Nature ย้ายป้อมจากพื้นขึ้นผนัง — ผู้ใช้อนุมัติ** `tools/nature-preview.js?sk=move_wall` ป้อมมุดที่เดิม รากแสงวิ่งเลียบพื้นแล้วไต่ผนัง รากใหม่เกาะผิวก่อนป้อมงอกเอนออกและมีใบกับประกาย เก็บ `designs/nature_vfx/move_wall_approved.gif`
+
+**Nature สปอร์ข้างไหล่หมดเวลา — ผู้ใช้อนุมัติ** `tools/nature-preview.js?sk=spore_expire` แสดงช่วงท้ายของสปอร์ที่ลอยรอครบอายุ 10 วิ แกนค่อย ๆ หดและปล่อยเกสรลอยขึ้น อีกลูกยังลอยรอ เก็บ `designs/nature_vfx/spore_expire_approved.gif`
+
+**Nature ต้นไม้อัลติสะสมแสงเมื่อรับดาเมจ — ผู้ใช้อนุมัติรอบเพิ่มความสว่าง** พรีวิว Studio `branches=1&protection=1&hitreview=1&damagebuild=1` ใน `tools/capture-nature-ult-woven-v1.js` ลำต้นและแกนกลางเรืองเขียวนีออนแรงตามดาเมจสะสม รากกับยอดมีแสงเพิ่มเล็กน้อย เก็บ GIF ดาเมจจำลองสามจังหวะที่ `designs/nature_vfx/ult_tree_branches_v1/damage_glow_approved.gif`
+
+**Nature ต้นไม้อัลติรับดาเมจแทนเพื่อน — ผู้ใช้อนุมัติจังหวะภาพ** แสงวิ่งจากเพื่อนตามเส้นเชื่อมแล้ววาบที่คอลำต้น ดู `designs/nature_vfx/ult_tree_branches_v1/protection_hit_body_default.gif` คลิปถ่ายก่อนปรับขอบตัวบาง ให้อ้างอิงขอบตัวจาก `zone_outline_approved.gif`
+
+**Nature ต้นไม้อัลติขณะทำงาน — ผู้ใช้อนุมัติละอองสองแบบ** พรีวิว Studio `branches=1&motion=1` ใน `tools/capture-nature-ult-woven-v1.js` ให้เกสรกลมสีเหลืองอมเขียวลอยออกจากปลายกิ่งและยอดสูง ส่วนเส้นแสงเขียวสั้นไหลวนขึ้นรอบลำต้น เก็บ GIF ที่ `designs/nature_vfx/ult_tree_branches_v1/idle_particles_approved.gif`
+
+**Nature ต้นไม้อัลติหมดเวลา — ผู้ใช้อนุมัติภาพ** ต้นคงทรงแล้วสลายจากยอดลงถึงรากพร้อมม่านแสงเขียวตามแนวที่สลาย ใช้ `nature/tree_expire_study` เก็บ GIF รุ่นที่รีวิวที่ `designs/nature_vfx/ult_tree_branches_v1/expire_approved.gif`
+
+**Nature ดอกบัวหมดเวลา — ผู้ใช้อนุมัติ** `tools/nature-preview.js?sk=lotus_expire` ขอบวงชมพูคงรัศมีแล้วสลายเป็นช่วง ๆ พร้อมต้นที่สลายจากยอดลงถึงราก กลีบกับเกสรลอยออกระหว่างสลาย ดู `designs/nature_vfx/lotus_expire_approved.gif`
+
+**Nature อัลติเขตคุ้มครอง — ผู้ใช้อนุมัติขอบตัวบางรอบสอง** เก็บ GIF ตรงกับรุ่นที่รีวิวที่ `designs/nature_vfx/ult_tree_branches_v1/zone_outline_approved.gif` เส้นเขียวนีออนบางประมาณ 1 พิกเซลอยู่รอบนอกเงาร่างของทุกคนในวง รวมศัตรู ผู้ใช้สังเกตว่าบางช่วงของเส้นเห็นยากตามมุมกล้องและอนุมัติรุ่นนี้ เปิดพรีวิวด้วย `tools/capture-nature-ult-woven-v1.js` และ `branches=1&protection=1&neonbody=1&zoneclose=1`
+
+
+**Nature Dash เกี่ยวเพื่อน — ผู้ใช้อนุมัติรอบคืนเถาสีเขียว** `tools/nature-preview.js?sk=dash&ally=1` คืนหน้าตาและวิถีเหวี่ยงจาก `designs/nature_vfx/dash_hook_approved.gif` ซึ่งตรงกับ `shots/motion_nature_dash_vfx_v2.gif` เก็บท่ามือง้างและตัวกระตุก เถาพันเพื่อนใช้สีเขียวเดิมกับหนามงอย้อน เก็บ `designs/nature_vfx/dash_ally_approved.gif` ผู้ใช้ให้ถามก่อนหากไม่แน่ใจว่าต้องย้อนรุ่นไหนหรือแก้ส่วนใด
+
+**Nature ป้อมยิงเปลี่ยนเป้า — ผู้ใช้อนุมัติภาพ** `tools/nature-preview.js?sk=turret_target` ทดลองจังหวะผู้เล่นฟาดโดนอีกคน ฝักวาบทอง ใบสะบัดและหัวหันไปหาเป้าใหม่ก่อนยิงนัดต่อไป เก็บ `designs/nature_vfx/turret_target_approved.gif` เงื่อนไขสั่งเป้าและเวลายิงยังรอเลือก
+
+**Nature กำแพงไม้หมดเวลา — ผู้ใช้อนุมัติรอบสลาย** `nature/wood_wall_expire_study` ใน VFX Studio คงทรงไว้แล้วให้ผิวไม้พรุนและสลายเป็นหย่อมจากยอดลงถึงราก ขอบเรืองแสงสั้น ๆ เศษเปลือกไม้ ใบ และละอองเขียวลอยออก เก็บ `designs/nature_vfx/wall_expire_approved.gif`
+
+**Nature ป้อมเกาะผนังถูกทำลาย — ผู้ใช้อนุมัติภาพ** เปิด `tools/nature-preview.js?sk=turret_break&onwall=1` ตาเปลี่ยนเป็น X รากเริ่มคลายจากผนัง แล้วต้นหมุนตกทั้งฝักและก้าน พื้นรับแรงด้วยใบและประกายก่อนต้นสลาย เก็บ `designs/nature_vfx/turret_wall_break_approved.gif`
+
+**Nature ป้อมยิงถูกทำลายบนพื้น — ผู้ใช้อนุมัติรอบตา X** `tools/nature-preview.js?sk=turret_break` ลำต้นสะบัดและแสงฝักอ่อนลงเมื่อโดนยิง จังหวะถูกทำลายเปลี่ยนตาเป็น X หัวฝักหลุดตกพร้อมเศษก้านและใบ รากหุบ เก็บ `designs/nature_vfx/turret_break_approved.gif`
+
+**Nature สปอร์ดอกบัว — ผู้ใช้อนุมัติภาพรอบสอง** `tools/nature-preview.js?sk=spore` แสดงสปอร์จากเกสรไปพักข้างไหล่ แส้โดนแล้วส่งออกหนึ่งลูกพร้อมหางเขียว ตอนปะทุมีแสงวาบสั้น สะเก็ดพุ่งเร็ว และละอองพิษเขียวสองชั้น เก็บ `designs/nature_vfx/spore_approved.gif`
+
+**Nature ลูกบอลไม้ดึงศัตรู — อนุมัติร่างแรกสีเดิม** `tools/nature-preview.js?sk=ball` ใช้ทรง ผิว และสีของร่างแรก ภาพอ้างอิงอยู่ที่ `designs/nature_vfx/ball_approved.gif`
+
+**Nature กำแพงไม้ติดไฟ — ผู้ใช้อนุมัติภาพรอบสอง** `nature/wood_wall_burn_study` ใน VFX Studio ให้ไฟเกาะบริเวณที่โดนราว 5 วิ ไม้ค่อย ๆ ดำและทิ้งรอยหลังไฟดับ เก็บ `designs/nature_vfx/wall_burn_approved.gif` ผู้ใช้เลือก Burning แบบ DoT สะสมชั้นได้ ใช้เพดาน DoT รวม 20% ของ HP สูงสุดตลอดอายุแผงตามการตีความรอบนี้ จดใน `designs/nature.md` รอผูกสกิลจริงและกำหนด tick/ค่าต่อชั้น
+
+**Nature ย้ายพืช — ผู้ใช้อนุมัติภาพ** เร่งมุดและวิ่งให้ต้นแรกโผล่ไวขึ้นประมาณ 0.26 วิ แสงรากเขียวนีออนมีแขนงและประกายเลียบพื้น ก่อนพืชงอกพร้อมใบไม้ เก็บ `designs/nature_vfx/move_approved.gif` จากตัวอย่างพื้นราบ
+
+**Nature ต้นบัวฮีลกับบัฟ — ผู้ใช้อนุมัติภาพ** ผู้ใช้ให้ตัดสัญลักษณ์ดอกบัวเล็กจากขอบออร่า ขอบใช้เส้นชมพูโค้งกับเถาใบ ใน `tools/nature-preview.js?sk=lotus` เก็บ `designs/nature_vfx/lotus_approved.gif` และภาพมุมบน `shots/nature_lotus_approved_aura.jpg`
+
+**Nature ป้อมยิง — ผู้ใช้รับภาพ** เก็บ `designs/nature_vfx/turret_approved.gif` จาก `tools/nature-preview.js?sk=turret` เมล็ดแตะพื้นหรือผนังแล้วเกสรกับใบแผ่ออกจากจุดเกาะ แสงไต่ขึ้นตามต้น ฝักเก็บแสงก่อนยิงหนามเขียวมีหางสั้น แล้วแตกเป็นสะเก็ดเมื่อโดนเป้า จังหวะยิงในคลิปใช้รีวิวภาพ
+
+**Nature โล่หนาม — ผู้ใช้อนุมัติภาพ** เก็บ `designs/nature_vfx/shield_thorn_approved.gif` จาก `tools/nature-preview.js?sk=shield` กระสุนชนแล้วแสงแผ่บนผิวพร้อมสะเก็ดใบ เถาฟาดสองทิศพร้อมแสงไล่ปลายและเศษดินกระเด็นตามแนวแตะพื้น
+
+**Nature Dash เถาวัลย์ — ผู้ใช้อนุมัติภาพ** เก็บ `designs/nature_vfx/dash_hook_approved.gif` มีลมสองเสี้ยวตอนออกตัว แล้วลมขาวอมเขียวผ่านไหล่ยืดตามความเร็วขณะถูกเถาดึง
+
 **Test Place หุ่นผู้เล่น + บอทโชว์สกิล 2026-11-08 (ผู้ใช้สั่ง):** หุ่น Dummy เริ่มต้นไม่ยิงเรา (`datk:0`) • หุ่นผู้เล่น 4 ตัว (บอท `ai.still`, เลือด 200, ตายแล้วเกิดที่เดิม 2 วิ, ทีม 51, `trFixSpots`/`trShow` js/02) • บอทโชว์สกิล (`ai.show`) ยืนนิ่งเล็งหุ่นเป้า กดสกิลตามสั่งผ่านเมนูที่แท่นดูสกิล (ยืนบนแท่น = เมนู: เปลี่ยนสาย/คาถาทั้งหมดของสาย (a:'cast' สลับเข้าช่องเอง)/ฟื้น/รีเซ็ต/ค้าง/คลิก/โล่/Dash/บิน/อัลติ/ไม่มีคูลดาวน์) ดู `stillBot`/`trShowCmd` js/15-bot.js, `bpSync` js/40 • บอทกลุ่มนี้ (id `fix…`) ไม่นับเพดาน BOT_MAX • snapshot เพิ่ม `M.sh` (ไม่บัมป์ PREFIX เพราะเพิ่มฟิลด์เฉยๆ) • เทสต์ headless ผ่าน (ใช้สกิล/ตาย/เกิดใหม่/เปลี่ยนสายลม) ยังไม่ได้เล่นมือจริง ค้าง: กล้องหมุนไม่ได้ตอนเมนูเปิด (ต้องคลิกจอแล้วเดินออก-เข้าแท่น).
 
 **Windblade VFX #21 — ผู้ใช้เลือกแบบ A 2026-11-08:** ผูกเข้าเกมแล้ว (`wind/blade_cast/fly/hit/pop/slow` จาก tools/wind-blade-sb-gen.py `pieces()`; event `wnblcast`/`wnblhit`). แบบ B เก็บไว้ที่ `wind/windblade_sb_b`. ค้าง: ยังไม่ได้ดูภาพในเกมจริง.
@@ -13,6 +62,28 @@
 **Water BA ใหม่ 8พ.ย.2026 (ผู้ใช้อนุมัติ):** สะบัดไม้ยิงเข็มน้ำ 3 นัดทันที ห่าง 0.08 วิ ไม่มีเส้นน้ำ • `water/ba_fly` (เข็ม `water_needle`) + `water/ba_muzzle` • กระสุนเกิดฝั่งไม้แล้วเล็งเข้าหา crosshair (`WT_BA_SIDE`/`WT_BA_H` js/09) • `ba_slash` ไม่ได้ใช้แล้ว
 
 **ลดกระตุกรอบ S 7พ.ย.2026:** แผ่นแบนโปร่งใสวาดรอบเดียว (`flatMark` js/01, `?twopass`), ชิ้นซ้ำวาดรวม `instz` (อักษรวงอัลติสายฟ้า/ไฟ, หนามวงน้ำแข็ง, `?noinstz`), หินกำแพงดินจาก pool (`?norockpool`) • ตอนอัลติสายฟ้า draw 1,283 แทน 1,631–1,955 • ms CPU ยังแกว่งเกินจะยืนยัน • ภาพเทียบแล้วเหมือนเดิม • ที่เหลือ: fx mesh แยกชิ้น ~200 draw, ครีบมังกรน้ำ (shader เอง) — ดู `guides/OPTIMIZE.md` §S
+
+**Nature กำแพงไม้พังสามช่วง — ผู้ใช้ยืนยันว่าผ่านแล้ว** ใช้ `nature/wood_wall_break_study` ปริที่กลาง ร้าวเพิ่มสองข้าง แล้วแยกสี่ท่อน เศษเล็กสลายก่อน ท่อนใหญ่แตะพื้นพร้อมฝุ่นแล้วสลายจากขอบรอยแตก เก็บ `designs/nature_vfx/wall_break_approved.gif`
+
+**Nature กำแพงไม้ — ผู้ใช้อนุมัติท่างอกรอบสอง** มีเศษไม้เมื่อผนังขึ้นสุดและใบไม้ลอยแถวยอด ใช้ `nature/wood_wall_growth_study` ใน VFX Studio เก็บ `designs/nature_vfx/wall_growth_approved.gif`
+
+**Nature BA แส้หนาม — ผู้ใช้อนุมัติภาพ** เก็บ GIF ที่ `designs/nature_vfx/ba_whip_approved.gif` ท่าพรีวิวใน `tools/nature-preview.js` หางเขียวหยุดที่จุดเหวี่ยงออกสุด รอยเดิมจางเมื่อแส้ดีดกลับ ใบไม้ปลิวสามระลอกทั้งสองฝั่ง
+
+**Nature รากท่ายืนและงานถัดไป** ผู้ใช้ขอให้รากทอดแนบพื้น มีช่วงโผล่นูนแล้วจมกลับลงพื้น จึงลดฐานลำต้นและโคนรากลงพร้อมกัน แล้วกดรากที่แผ่ออกให้ราบใน `nature_ult_tree_branches_v1` ผ่าน `tools/nature-ult-woven-scaffold-gen.py --branches` ดู `shots/nature_flat_roots_low.jpg` ผู้ใช้ให้ต่อ BA แส้หนามก่อนท่างอกกำแพง ใช้ท่าเหวี่ยงซ้าย–ขวาเดิมจาก `tools/nature-preview.js?sk=whip` และ `shots/nat_whip.gif` เพื่อคุยเอฟเฟกต์
+
+**Nature ภาพเพื่อนรับฮีล** ผู้ใช้ให้แสงขึ้นช้าลงแล้วไปต่อ สายคุ้มครองจางตอนต้นฉีก แสงเริ่มที่เท้าเมื่อขอบโดมถึงตัวอย่างผู้รับและไต่ขึ้นรอบตัวประมาณ 0.78 วิ เก็บภาพที่ `designs/nature_vfx/ult_tree_branches_v1/ally_heal_slow.gif` เป็นจังหวะรีวิวภาพใน Studio งานภาพที่เสนอให้ต่อคือท่างอกของกำแพงไม้ v1
+
+**Nature ท่าต้นแตก รอบ 7 — ผู้ใช้อนุมัติภาพ** ใช้ `nature/tree_break_study` ใน Studio ท่อนบนยกเฉียงเล็กน้อยแล้วผ่อนลงขณะสลาย ปรับแนวออร่าให้ตามท่อนบน เก็บ GIF ต้นฉบับที่ `designs/nature_vfx/ult_tree_branches_v1/break_v7_approved.gif` ขั้นต่อที่เสนอคือดูสายคุ้มครองสิ้นสุดกับภาพบนตัวเพื่อนเมื่อคลื่นฮีลถึงตัว ส่วนกติกาฮีลและรัศมีรอคุยก่อนผูกเกม
+
+**Nature ท่าต้นแตก รอบ 6** ทดลองให้ต้นตอบแรงระเบิดตามที่ผู้ใช้บอกว่าร่างอยู่กับที่ดูไร้ชีวิต แสงวิ่งขึ้นจากราก ยอดงอกลับเล็กน้อยก่อนฉีก แล้วกิ่งสะบัดและคืนตัวตามแรง ขณะที่โคนรากกระตุกและปล่อยประกายพุ่งตามพื้น ทั้งสองท่อนยังสลายจากขอบบนลงล่างพร้อมออร่า ดู `shots/motion_nature_ending_break_v6.gif` สำหรับรีวิว
+
+**Nature ท่าต้นแตก รอบ 5** ทดลองให้สองท่อนอยู่ตำแหน่งเดิมหลังฉีกตามที่ผู้ใช้ขอ และเลื่อนแนวออร่าท่อนบนให้ตรงกับตำแหน่งต้น ดู `shots/motion_nature_ending_break_v5.gif`
+
+**Nature ท่าต้นแตก รอบ 4** กลับมาให้กลางต้นโป่งแล้วฉีกตามที่ผู้ใช้ขอ แสงและสะเก็ดระเบิดจากรอยฉีกพร้อมโดมฮีล ต้นแยกเป็นท่อนยอดกับท่อนราก แต่ละท่อนมีออร่าลอยออกตามแนวสลายจากขอบบนของท่อนนั้นลงไป ดู `shots/motion_nature_ending_break_v4.gif` เป็นพรีวิวใน Studio
+
+**Nature ท่าต้นแตก รอบ 3** ผู้ใช้ให้ต้นลอยออกเพียงเล็กน้อยขณะสลายและขอแรงระเบิดชัดขึ้น จึงลดการโป่งกลางต้น เปลี่ยนแรงสะบัดเป็นการยกตัวและเลื่อนเฉียงทั้งทรง แล้วรวมแสงวาบ สะเก็ด และโดมที่ขยายเร็วไว้จังหวะเดียวกัน GIF อยู่ที่ `shots/motion_nature_ending_break_v3.gif` เป็นพรีวิวใน Studio
+
+**Nature ท่าจบอัลติรอบ 2** ผู้ใช้ขอให้ `nature/tree_break_study` ปริและโป่งที่กลางลำต้นก่อนระเบิดสลาย พร้อมคลื่นฮีลแผ่ออกเป็นโดมกว้าง ส่วน `nature/tree_expire_study` ให้ต้นคงทรงแล้วสลายจากยอดถึงราก โดยมีม่านออร่าและแสงลอยออกตามแนวสลาย GIF รอบนี้อยู่ที่ `shots/motion_nature_ending_break_v2.gif` และ `shots/motion_nature_ending_expire_v2.gif` จังหวะและรัศมีใช้จัดภาพใน Studio เพื่อรีวิว
 
 **Nature นีออนกลางลำต้น — อนุมัติเป็นค่าเริ่มต้น:** ใช้หน้าตาฝั่งขวาใน `neon_body_comparison.jpg` กับ Model `nature_ult_tree_branches_v1` และเอฟเฟกต์ `nature/tree_summon` ใน Studio ผ่าน shader เดียวกันใน `studio/nature-summon.js` พรีวิวคุ้มครองใช้แบบนี้เป็นค่าเริ่มต้นด้วย ดู `designs/nature_vfx/ult_tree_branches_v1/protection_hit_body_default.gif` รุ่นก่อนยังเปิดได้ด้วย `bodybase=1` และมี GIF เดิม `protection_hit.gif` เก็บไว้ ทรงและข้อมูล mesh อยู่ในไฟล์เดิม
 

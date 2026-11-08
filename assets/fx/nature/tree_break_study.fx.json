@@ -1,0 +1,22 @@
+{
+  "v": 1,
+  "desc": "Nature — กลางลำต้นโป่งแล้วฉีก ระเบิดจากรอยฉีกเป็นโดมฮีล ต้นทั้งสองท่อนสลายจากขอบบนพร้อมออร่า",
+  "tags": [
+    "nature",
+    "ultimate",
+    "study"
+  ],
+  "pal": "nature",
+  "dur": 2.75,
+  "layers": [
+    {"id": "tree", "t": "mesh", "shape": "model", "model": "nature_ult_tree_branches_v1", "mat": "solid", "at": 0, "life": 2.75, "op": 1},
+    {"id": "rupture", "t": "code", "fn": "studio_nature_ending", "at": 0, "life": 2.75, "args": {"layer": "tree", "broken": true}},
+    {"id": "rupture_flash", "t": "flash", "at": 0.49, "life": 0.13, "pos": [0, 7.2, 0], "size0": 3.5, "size": 6, "k": 1.5, "col": "#d6ffac"},
+    {"id": "waist_afterglow", "t": "halo", "at": 0.49, "life": 0.28, "pos": [0, 7.2, 0], "size0": 3.2, "size": 10.6, "k": 0.85, "col": "#60ff83"},
+    {"id": "scattered_fibres", "t": "emit", "at": 0.49, "life": 0.09, "pos": [0, 7.2, 0], "from": "sphere", "fr": 2.1, "burst": 72, "dir": "out", "speed": [16, 32], "up": [0.2, 3.6], "look": "streak", "size": [3.8, 8.2], "plife": [0.25, 0.58], "col": "#e3ffa6", "c2": "#25c753", "gravity": 4, "drag": 1.6},
+    {"id": "root_sparks", "t": "emit", "at": 0.56, "life": 0.08, "pos": [0, 0.22, 0], "from": "ring", "fr": 4.3, "burst": 32, "dir": "out", "speed": [13, 22], "up": [0.8, 2.1], "look": "streak", "size": [1.8, 4.1], "plife": [0.44, 0.74], "col": "#aaffad", "c2": "#339f62", "gravity": 1.7, "drag": 1.2},
+    {"id": "heal_dome", "t": "mesh", "shape": "dome", "mat": "energy", "at": 0.49, "life": 0.87, "att": "ground", "pos": [0, 0.14, 0], "col": "#68ff9e", "col2": "#13834c", "rim": 2.2, "scroll": 3.1, "int": 1.10, "scale": {"0": [2.8, 4.2, 2.8], "0.16": [12.2, 8.6, 12.2], "0.46": [21.1, 13.7, 21.1], "1": [26.4, 16.3, 26.4]}, "op": {"0": 0.3, "0.12": 0.72, "0.42": 0.53, "0.8": 0.26, "1": 0}},
+    {"id": "upper_aura", "t": "emit", "at": 0.66, "life": 1.12, "from": "ring", "fr": 3.3, "pos": {"0": [-0.8, 24.6, -0.35], "0.16": [-1.28, 22.9, -0.56], "0.43": [-1.0, 18.9, -0.44], "1": [-0.79, 8.6, -0.35]}, "burst": 0, "rate": 96, "dir": "out", "speed": [0.8, 3.2], "up": [1.4, 4.0], "look": "glow", "fb": "tex/wind_air_veil", "size": [13, 24], "plife": [0.55, 0.88], "col": "#a4ffad", "c2": "#3bbd77", "gravity": -0.5, "drag": 1.2, "spin": 0.5, "fin": 5},
+    {"id": "lower_aura", "t": "emit", "at": 0.66, "life": 0.91, "from": "ring", "fr": 2.8, "pos": {"0": [0, 6.8, 0], "0.56": [0, 3.4, 0], "1": [0, 0.55, 0]}, "burst": 0, "rate": 90, "dir": "out", "speed": [1.1, 3.8], "up": [1.1, 3.4], "look": "glow", "fb": "tex/wind_air_veil", "size": [10, 20], "plife": [0.53, 0.89], "col": "#a4ffad", "c2": "#3bbd77", "gravity": -0.45, "drag": 1.1, "spin": 0.45, "fin": 5}
+  ]
+}

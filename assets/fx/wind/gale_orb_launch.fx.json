@@ -1,0 +1,125 @@
+{
+ "v": 1,
+ "desc": "ตอนเหวี่ยงปล่อยลูกลม: วงลมหน้าไม้ + เส้นลมพุ่งตาม + แรงอากาศกระเพื่อม",
+ "tags": [
+  "wind",
+  "ba"
+ ],
+ "pal": "wind",
+ "dur": 0.45,
+ "seed": 6,
+ "layers": [
+  {
+   "id": "ring",
+   "t": "mesh",
+   "at": 0,
+   "life": 0.3,
+   "att": "point",
+   "fade": 0,
+   "shape": "model",
+   "model": "wind_groundswirl",
+   "mat": "tex",
+   "tex": "tex/wind_swoosh_a_hi",
+   "col": "#5dffa8",
+   "col2": "#000000",
+   "rim": 0,
+   "rot": [
+    90,
+    0,
+    0
+   ],
+   "spin": 500,
+   "scale": {
+    "0": 0.35,
+    "1": 1.5,
+    "ease": "out"
+   },
+   "op": {
+    "0": 1,
+    "1": 0
+   }
+  },
+  {
+   "id": "shock",
+   "t": "warp",
+   "at": 0,
+   "life": 0.22,
+   "att": "point",
+   "kind": "shock",
+   "size": {
+    "0": 0.6,
+    "1": 4.5
+   },
+   "str": 0.6,
+   "op": {
+    "0": 1,
+    "1": 0
+   },
+   "col": "#ffffff",
+   "glow": 0
+  },
+  {
+   "id": "fwd",
+   "t": "emit",
+   "at": 0,
+   "life": 0.05,
+   "att": "point",
+   "from": "sphere",
+   "fr": 0.3,
+   "burst": 16,
+   "rate": 0,
+   "dir": "aim",
+   "spread": 0.45,
+   "gravity": 0,
+   "drag": 1.6,
+   "speed": [
+    10,
+    20
+   ],
+   "plife": [
+    0.14,
+    0.3
+   ],
+   "look": "streak",
+   "size": [
+    1.4,
+    2.8
+   ],
+   "col": "#c9ffe2",
+   "c2": "#14b56e",
+   "curl": true
+  },
+  {
+   "id": "back",
+   "t": "emit",
+   "at": 0,
+   "life": 0.05,
+   "att": "point",
+   "from": "sphere",
+   "fr": 0.3,
+   "burst": 10,
+   "rate": 0,
+   "dir": "aim",
+   "yaw": 180,
+   "spread": 0.7,
+   "gravity": 0,
+   "drag": 2,
+   "speed": [
+    4,
+    9
+   ],
+   "plife": [
+    0.18,
+    0.34
+   ],
+   "look": "streak",
+   "size": [
+    1.0,
+    2.0
+   ],
+   "col": "#8dffc0",
+   "c2": "#14b56e",
+   "curl": true
+  }
+ ]
+}

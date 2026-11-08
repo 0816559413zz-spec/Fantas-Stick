@@ -1,0 +1,20 @@
+{
+  "v": 1,
+  "desc": "Nature — รากแผ่จากกลาง กิ่งไม้ดันขึ้นเกี่ยวกันเป็นกำแพง v1 พร้อมใบไม้สะบัด",
+  "tags": ["nature", "wood", "wall", "study"],
+  "pal": "nature",
+  "dur": 2.4,
+  "layers": [
+    {"id": "wall", "t": "mesh", "shape": "model", "model": "nature_wood_wall_v1", "mat": "solid", "at": 0, "life": 2.4, "op": 1},
+    {"id": "growth", "t": "code", "fn": "studio_nature_wall_growth", "at": 0, "life": 2.4, "args": {"layer": "wall"}},
+    {"id": "central_soil", "t": "emit", "at": 0.09, "life": 0.08, "pos": [0, 0.1, 0], "from": "ring", "fr": 0.48, "burst": 12, "dir": "out", "speed": [1.5, 3.2], "up": [0.8, 1.8], "plife": [0.32, 0.55], "look": "model", "model": "rock_chunk", "mmat": "solid", "msize": [0.07, 0.16], "col": "#765d42", "c2": "#543c2a", "gravity": 9, "bounce": 0.15, "mspin": 230},
+    {"id": "left_soil", "t": "emit", "at": 0.23, "life": 0.07, "pos": [-3.5, 0.1, -0.35], "from": "ring", "fr": 0.6, "burst": 9, "dir": "out", "speed": [1.4, 2.8], "up": [0.6, 1.5], "plife": [0.3, 0.48], "look": "model", "model": "rock_chunk", "mmat": "solid", "msize": [0.06, 0.14], "col": "#765d42", "c2": "#543c2a", "gravity": 9, "bounce": 0.14, "mspin": 210},
+    {"id": "right_soil", "t": "emit", "at": 0.28, "life": 0.07, "pos": [3.7, 0.1, -0.37], "from": "ring", "fr": 0.64, "burst": 9, "dir": "out", "speed": [1.4, 2.8], "up": [0.6, 1.5], "plife": [0.3, 0.48], "look": "model", "model": "rock_chunk", "mmat": "solid", "msize": [0.06, 0.14], "col": "#765d42", "c2": "#543c2a", "gravity": 9, "bounce": 0.14, "mspin": 210},
+    {"id": "central_leaves", "t": "emit", "at": 0.45, "life": 0.1, "pos": [0, 2.90, 0.46], "from": "disc", "fr": 1.5, "burst": 10, "dir": "out", "speed": [0.65, 2.1], "up": [0.65, 1.45], "plife": [0.64, 1.1], "look": "model", "model": "wind_leaf", "mmat": "solid", "msize": [1.25, 2.30], "col": "#9bd963", "c2": "#537e39", "gravity": 1.8, "drag": 1.4, "mspin": 185},
+    {"id": "left_leaves", "t": "emit", "at": 0.60, "life": 0.1, "pos": [-3.7, 2.96, 0.13], "from": "disc", "fr": 1, "burst": 7, "dir": "out", "speed": [0.6, 1.9], "up": [0.65, 1.45], "plife": [0.58, 0.95], "look": "model", "model": "wind_leaf", "mmat": "solid", "msize": [1.15, 2.20], "col": "#9bd963", "c2": "#537e39", "gravity": 1.8, "drag": 1.4, "mspin": 185},
+    {"id": "right_leaves", "t": "emit", "at": 0.65, "life": 0.1, "pos": [3.9, 2.96, 0.09], "from": "disc", "fr": 1, "burst": 7, "dir": "out", "speed": [0.6, 1.9], "up": [0.65, 1.45], "plife": [0.58, 0.95], "look": "model", "model": "wind_leaf", "mmat": "solid", "msize": [1.15, 2.20], "col": "#9bd963", "c2": "#537e39", "gravity": 1.8, "drag": 1.4, "mspin": 185},
+    {"id": "center_splinters", "t": "emit", "at": 0.66, "life": 0.09, "pos": [0, 1.7, 0.52], "from": "disc", "fr": 1.35, "burst": 18, "dir": "out", "speed": [2.4, 4.3], "up": [2.1, 3.6], "plife": [0.51, 0.85], "look": "model", "model": "nature_wood_splinter", "mmat": "solid", "msize": [0.25, 0.55], "col": "#a37040", "c2": "#513321", "gravity": 10, "drag": 0.7, "bounce": 0.17, "mspin": 510},
+    {"id": "left_splinters", "t": "emit", "at": 0.76, "life": 0.09, "pos": [-3.8, 1.9, 0.25], "from": "disc", "fr": 1.15, "burst": 14, "dir": "out", "speed": [2.1, 4.1], "up": [1.6, 3.3], "plife": [0.46, 0.79], "look": "model", "model": "nature_wood_splinter", "mmat": "solid", "msize": [0.21, 0.50], "col": "#a37040", "c2": "#513321", "gravity": 10, "drag": 0.75, "bounce": 0.16, "mspin": 480},
+    {"id": "right_splinters", "t": "emit", "at": 0.80, "life": 0.09, "pos": [3.9, 1.8, 0.19], "from": "disc", "fr": 1.1, "burst": 14, "dir": "out", "speed": [2.1, 4.1], "up": [1.6, 3.3], "plife": [0.46, 0.79], "look": "model", "model": "nature_wood_splinter", "mmat": "solid", "msize": [0.21, 0.50], "col": "#a37040", "c2": "#513321", "gravity": 10, "drag": 0.75, "bounce": 0.16, "mspin": 480}
+  ]
+}

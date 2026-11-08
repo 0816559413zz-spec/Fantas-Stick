@@ -1,0 +1,304 @@
+{
+ "v": 1,
+ "desc": "ลูกลมใหญ่ยิงช้า (BA ตอนบิน): เปลือกลมใสหมุน 2 ชั้น + แกนมิ้นต์ + วงลมหมุนไขว้",
+ "tags": [
+  "wind",
+  "ba"
+ ],
+ "pal": "wind",
+ "dur": 1,
+ "seed": 3,
+ "layers": [
+  {
+   "t": "mesh",
+   "at": 0,
+   "life": 1,
+   "loop": true,
+   "att": "point",
+   "fade": 0,
+   "id": "base",
+   "shape": "sphere",
+   "mat": "energy",
+   "col": "#129a60",
+   "col2": "#0a6b43",
+   "scroll": 2.2,
+   "rim": 0.9,
+   "scale": 0.64,
+   "op": 0.9
+  },
+  {
+   "t": "mesh",
+   "at": 0,
+   "life": 1,
+   "loop": true,
+   "att": "point",
+   "fade": 0,
+   "id": "core",
+   "shape": "sphere",
+   "mat": "glow",
+   "col": "#7dffb4",
+   "scale": 0.12,
+   "op": 0.8
+  },
+  {
+   "t": "mesh",
+   "at": 0,
+   "life": 1,
+   "loop": true,
+   "att": "point",
+   "fade": 0,
+   "id": "in0",
+   "shape": "sphere",
+   "mat": "tex",
+   "tex": "tex/wind_air_rise",
+   "col": "#0b8f58",
+   "col2": "#000000",
+   "rim": 0,
+   "uvTile": [
+    2,
+    4
+   ],
+   "uvScroll": [
+    -3.0,
+    1.4
+   ],
+   "scale": 0.34,
+   "op": 1
+  },
+  {
+   "t": "mesh",
+   "at": 0,
+   "life": 1,
+   "loop": true,
+   "att": "point",
+   "fade": 0,
+   "id": "in1",
+   "shape": "sphere",
+   "mat": "tex",
+   "tex": "tex/wind_air_rise",
+   "col": "#14b56e",
+   "col2": "#000000",
+   "rim": 0,
+   "uvTile": [
+    2,
+    3
+   ],
+   "uvScroll": [
+    2.4,
+    -2.0
+   ],
+   "scale": 0.48,
+   "op": 1
+  },
+  {
+   "t": "mesh",
+   "at": 0,
+   "life": 1,
+   "loop": true,
+   "att": "point",
+   "fade": 0,
+   "id": "in2",
+   "shape": "sphere",
+   "mat": "tex",
+   "tex": "tex/wind_air_rise",
+   "col": "#1fcf7d",
+   "col2": "#000000",
+   "rim": 0,
+   "uvTile": [
+    2,
+    3
+   ],
+   "uvScroll": [
+    -1.8,
+    2.4
+   ],
+   "scale": 0.6,
+   "op": 1
+  },
+  {
+   "t": "mesh",
+   "at": 0,
+   "life": 1,
+   "loop": true,
+   "att": "point",
+   "fade": 0,
+   "id": "shell",
+   "shape": "sphere",
+   "mat": "tex",
+   "tex": "tex/wind_air_rise",
+   "col": "#2bdc88",
+   "col2": "#000000",
+   "rim": 0,
+   "uvTile": [
+    2,
+    2
+   ],
+   "uvScroll": [
+    1.4,
+    -1.8
+   ],
+   "scale": 0.72,
+   "op": 1
+  },
+  {
+   "t": "mesh",
+   "at": 0,
+   "life": 1,
+   "loop": true,
+   "att": "point",
+   "fade": 0,
+   "id": "ring0",
+   "shape": "model",
+   "model": "wind_groundswirl",
+   "mat": "tex",
+   "tex": "tex/wind_swoosh_a_hi",
+   "col": "#5dffa8",
+   "col2": "#000000",
+   "rim": 0,
+   "rot": [
+    62,
+    0,
+    20
+   ],
+   "spin": 640,
+   "scale": 0.56,
+   "op": 1
+  },
+  {
+   "t": "mesh",
+   "at": 0,
+   "life": 1,
+   "loop": true,
+   "att": "point",
+   "fade": 0,
+   "id": "ring1",
+   "shape": "model",
+   "model": "wind_groundswirl",
+   "mat": "tex",
+   "tex": "tex/wind_swoosh_b_hi",
+   "col": "#b9ffd9",
+   "col2": "#000000",
+   "rim": 0,
+   "rot": [
+    -48,
+    0,
+    -40
+   ],
+   "spin": -520,
+   "scale": 0.62,
+   "op": 0.95
+  },
+  {
+   "t": "mesh",
+   "at": 0,
+   "life": 1,
+   "loop": true,
+   "att": "point",
+   "fade": 0,
+   "id": "ring2",
+   "shape": "model",
+   "model": "wind_groundswirl",
+   "mat": "tex",
+   "tex": "tex/wind_swoosh_a_hi",
+   "col": "#2bdc88",
+   "col2": "#000000",
+   "rim": 0,
+   "rot": [
+    12,
+    0,
+    75
+   ],
+   "spin": 430,
+   "scale": 0.6,
+   "op": 0.9
+  },
+  {
+   "id": "wake",
+   "t": "trail",
+   "at": 0,
+   "life": 1,
+   "loop": true,
+   "att": "point",
+   "col": "#7dffb4",
+   "col2": "#12a067",
+   "w": 0.36,
+   "tlife": 0.15,
+   "k": 1.0
+  },
+  {
+   "id": "wake2",
+   "t": "trail",
+   "at": 0,
+   "life": 1,
+   "loop": true,
+   "att": "point",
+   "col": "#2bdc88",
+   "col2": "#0a6b43",
+   "w": 0.6,
+   "tlife": 0.1,
+   "k": 1.0
+  },
+  {
+   "id": "tail",
+   "t": "emit",
+   "at": 0,
+   "life": 1,
+   "loop": true,
+   "att": "point",
+   "from": "sphere",
+   "fr": 0.45,
+   "dir": "aim",
+   "yaw": 180,
+   "spread": 0.3,
+   "gravity": 0,
+   "drag": 0.8,
+   "rate": 70,
+   "speed": [
+    6,
+    12
+   ],
+   "plife": [
+    0.18,
+    0.36
+   ],
+   "look": "streak",
+   "size": [
+    1.4,
+    2.8
+   ],
+   "col": "#b9ffd9",
+   "c2": "#14b56e",
+   "curl": true
+  },
+  {
+   "id": "bits",
+   "t": "emit",
+   "at": 0,
+   "life": 1,
+   "loop": true,
+   "att": "point",
+   "from": "sphere",
+   "fr": 0.95,
+   "dir": "in",
+   "gravity": 0,
+   "drag": 0.5,
+   "rate": 60,
+   "speed": [
+    2,
+    4
+   ],
+   "plife": [
+    0.18,
+    0.32
+   ],
+   "look": "streak",
+   "size": [
+    1.0,
+    2.0
+   ],
+   "col": "#8dffc0",
+   "c2": "#14b56e",
+   "curl": true
+  }
+ ]
+}

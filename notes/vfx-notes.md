@@ -1,4 +1,6 @@
 # Feature & VFX notes archive + old request lists
+
+> **Nature ต้นแตก — ภาพอนุมัติรอบ 7:** กลางลำต้นโป่งและฉีกก่อนปล่อยคลื่นฮีลทรงโดม ท่อนยอดสะบัดยกเฉียงเล็กน้อยแล้วผ่อนลง ออร่าไล่สลายจากขอบบนของแต่ละท่อน ดู `designs/nature_vfx/ult_tree_branches_v1/break_v7_approved.gif`
 > Moved out of HANDOFF.md on 2026-10-19 to save tokens. Function/variable names are still valid; find them with `CODEMAP.md` (old `index.html` line numbers no longer apply — the code now lives in `js/`).
 
 ## 10a. Feature & VFX notes archive (moved out of §0 on 2026-10-19 — still accurate unless a later changelog line says otherwise)

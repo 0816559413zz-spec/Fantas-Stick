@@ -1,0 +1,18 @@
+#!/usr/bin/env python3
+# Wind rework (designs/wind.md, user 2026-11-08): Featherwing take-off. Float up ~2 m like Echo, no spin.
+# Look = the approved clear-air wind (tex/wind_air_rise on a twisted cone), green-white, no ink.
+import json, os
+R = os.path.join(os.path.dirname(__file__), '..')
+fx = {"v": 1, "desc": "Featherwing: ลอยขึ้น 2 ม. ลมใสพัดขึ้นใต้ตัว + วงลมบนพื้น + ขนนกหลุด (ผู้ใช้ 2026-11-08: ไม่หมุนตัว มีเอฟเฟกต์ตอนลอยขึ้น)", "tags": ["wind", "featherwing"], "pal": "wind", "dur": 1.0, "seed": 5, "layers": [
+ {"id": "col", "t": "mesh", "at": 0, "life": 0.9, "att": "feet", "pos": [0, -0.2, 0], "mat": "tex", "col": "#7dffb4", "col2": "#000000", "fade": 0, "shape": "model", "model": "wind_vortex_air", "tex": "tex/wind_air_rise", "rim": 0, "uvTile": [3, 1], "uvScroll": [-0.7, 0], "spin": 120,
+  "scale": {"0": [0.3, 0.25, 0.3], "0.3": [0.5, 0.5, 0.5], "1": [0.6, 0.6, 0.6]}, "op": {"0": 0, "0.15": 1, "0.7": 0.8, "1": 0}},
+ {"id": "disk", "t": "mesh", "at": 0, "life": 0.55, "att": "ground", "pos": [0, 0.08, 0], "mat": "tex", "col": "#8dff65", "col2": "#000000", "fade": 0, "shape": "plane", "tex": "tex/wind_void_disk", "rim": 0, "rot": [90, 0, 0], "spin": 160, "scale": {"0": 0.8, "1": 2.0}, "op": {"0": 0.42, "1": 0}},
+ {"id": "up0", "t": "mesh", "at": 0, "life": 0.5, "att": "ground", "mat": "toon", "col": "#7dffb4", "col2": "#1fbf7a", "rim": 0.6, "fade": 0, "shape": "model", "model": "wind_groundswirl", "spin": 420, "pos": {"0": [0, 0.15, 0], "1": [0, 2.2, 0], "ease": "out"}, "scale": {"0": 0.45, "0.6": 0.8, "1": 1.0}, "op": {"0": 0, "0.2": 0.85, "0.6": 0.6, "1": 0}},
+ {"id": "up1", "t": "mesh", "at": 0.16, "life": 0.5, "att": "ground", "mat": "toon", "col": "#7dffb4", "col2": "#1fbf7a", "rim": 0.6, "fade": 0, "shape": "model", "model": "wind_groundswirl", "spin": 420, "pos": {"0": [0, 0.15, 0], "1": [0, 2.6, 0], "ease": "out"}, "scale": {"0": 0.45, "0.6": 0.8, "1": 1.0}, "op": {"0": 0, "0.2": 0.85, "0.6": 0.6, "1": 0}},
+ {"id": "up2", "t": "mesh", "at": 0.32, "life": 0.5, "att": "ground", "mat": "toon", "col": "#7dffb4", "col2": "#1fbf7a", "rim": 0.6, "fade": 0, "shape": "model", "model": "wind_groundswirl", "spin": 420, "pos": {"0": [0, 0.15, 0], "1": [0, 3.0, 0], "ease": "out"}, "scale": {"0": 0.45, "0.6": 0.8, "1": 1.0}, "op": {"0": 0, "0.2": 0.85, "0.6": 0.6, "1": 0}},
+ {"id": "rise", "t": "emit", "at": 0, "life": 0.7, "att": "feet", "pos": [0, 0, 0], "from": "ring", "gravity": 0, "drag": 0.4, "rate": 55, "fr": 0.42, "dir": "up", "speed": [4, 8], "plife": [0.25, 0.5], "look": "streak", "size": [1.0, 2.1], "col": "#ffffff", "c2": "#8dff65", "curl": True},
+ {"id": "plume", "t": "emit", "at": 0, "life": 0.5, "att": "chest", "pos": [0, 0.3, -0.4], "from": "sphere", "fr": 0.7, "gravity": -1.2, "drag": 1.2, "rate": 22, "dir": "out", "speed": [0.6, 1.8], "plife": [0.7, 1.2], "look": "model", "model": "wind_feather", "mmat": "glow", "msize": [0.16, 0.3], "col": "#b9ffd9", "c2": "#39cf8c", "mspin": 3}
+]}
+with open(os.path.join(R, 'assets/fx/wind/fw_rise.fx.json'), 'w', encoding='utf-8') as o:
+    json.dump(fx, o, ensure_ascii=False, indent=1)
+print('ok')

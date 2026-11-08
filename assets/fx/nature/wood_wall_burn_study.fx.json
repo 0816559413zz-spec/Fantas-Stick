@@ -1,0 +1,19 @@
+{
+  "v": 1,
+  "desc": "Nature — ไฟเกาะจุดกระแทกนานขึ้นจนเนื้อไม้ดำ",
+  "tags": ["nature", "wood", "wall", "fire", "study"],
+  "pal": "fire",
+  "dur": 6.9,
+  "layers": [
+    {"id": "wall", "t": "mesh", "shape": "model", "model": "nature_wood_wall_v1", "mat": "solid", "at": 0, "life": 6.9, "op": 1},
+    {"id": "scorch", "t": "code", "fn": "studio_nature_wall_burn", "at": 0, "life": 6.9, "args": {"layer": "wall", "impact": [0.65, 1.16, 0.68]}},
+    {"id": "incoming", "t": "mesh", "shape": "sphere", "mat": "energy", "at": 0.10, "life": 0.28, "pos": {"0": [0.65, 1.26, 5.2], "1": [0.65, 1.16, 0.78]}, "col": "#ff9b35", "col2": "#ffe7a0", "scale": 0.36, "op": 0.84},
+    {"id": "hit", "t": "flash", "at": 0.38, "life": 0.14, "pos": [0.65, 1.16, 0.76], "size0": 0.48, "size": 1.45, "col": "#ffb45e", "k": 1.06},
+    {"id": "ignition", "t": "vol", "at": 0.39, "life": 5.02, "pos": [0.67, 0.73, 0.60], "src": "vol/fire3d_column", "hx": 0.61, "hz": 0.34, "h": 2.85, "int": {"0": 1.16, "0.56": 1.12, "0.82": 0.86, "1": 0.36}, "den": 1.42, "dis": {"0": 0, "0.77": 0, "1": 1}},
+    {"id": "upper_branch", "t": "vol", "at": 1.20, "life": 3.92, "pos": [-0.20, 1.57, 0.52], "src": "vol/fire3d_column", "hx": 0.45, "hz": 0.29, "h": 2.03, "int": {"0": 0.94, "0.62": 1.03, "1": 0.35}, "den": 1.28, "dis": {"0": 0, "0.72": 0, "1": 1}},
+    {"id": "side_branch", "t": "vol", "at": 1.85, "life": 3.74, "pos": [1.33, 1.68, 0.52], "src": "vol/fire3d_column", "hx": 0.41, "hz": 0.27, "h": 1.62, "int": {"0": 0.83, "0.57": 0.92, "1": 0.32}, "den": 1.20, "dis": {"0": 0, "0.67": 0, "1": 1}},
+    {"id": "sparks", "t": "emit", "at": 0.39, "life": 0.12, "pos": [0.65, 1.18, 0.79], "from": "sphere", "fr": 0.21, "burst": 19, "dir": "out", "speed": [2.3, 5.4], "up": [0.2, 1.1], "plife": [0.26, 0.51], "look": "streak", "size": [1.4, 3.4], "col": "#ffce68", "c2": "#d14813", "gravity": 2, "drag": 1.1},
+    {"id": "embers", "t": "emit", "at": 0.68, "life": 4.58, "pos": [0.62, 2.02, 0.68], "from": "disc", "fr": 0.88, "rate": 14, "dir": "up", "spread": 0.42, "speed": [0.6, 1.7], "up": [0.2, 0.63], "plife": [0.45, 0.80], "look": "ember", "size": [1.7, 3.2], "col": "#ffb84b", "c2": "#a93715", "gravity": -1.1, "drag": 1.2},
+    {"id": "smoke", "t": "emit", "at": 0.94, "life": 4.73, "pos": [0.63, 2.69, 0.53], "from": "disc", "fr": 0.65, "rate": 5, "dir": "up", "spread": 0.36, "speed": [0.5, 1.1], "up": 0.44, "plife": [0.62, 1.04], "look": "smoke", "fb": "tex/smoke_sim", "size": [10, 17], "col": "#7a6c60", "c2": "#514b47", "grow": 0.65, "gravity": -0.38, "drag": 1.25}
+  ]
+}

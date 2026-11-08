@@ -1,0 +1,109 @@
+{
+ "v": 1,
+ "desc": "Dash สายลม ชาร์จ 0.25 วิ: ลมวนหดเข้าเท้า + เส้นลมไหลเข้าหาตัว",
+ "tags": [
+  "wind",
+  "dash"
+ ],
+ "pal": "wind",
+ "dur": 0.32,
+ "seed": 22,
+ "layers": [
+  {
+   "id": "in0",
+   "t": "mesh",
+   "at": 0,
+   "life": 0.3,
+   "att": "ground",
+   "pos": [
+    0,
+    0.08,
+    0
+   ],
+   "fade": 0,
+   "shape": "model",
+   "model": "wind_groundswirl",
+   "mat": "tex",
+   "tex": "tex/wind_swoosh_a_hi",
+   "col": "#7dffb4",
+   "col2": "#000000",
+   "rim": 0,
+   "spin": -640,
+   "scale": {
+    "0": 2.7,
+    "1": 0.7,
+    "ease": "in"
+   },
+   "op": {
+    "0": 0,
+    "0.35": 0.95,
+    "1": 1
+   }
+  },
+  {
+   "id": "in1",
+   "t": "mesh",
+   "at": 0.04,
+   "life": 0.26,
+   "att": "ground",
+   "pos": [
+    0,
+    0.12,
+    0
+   ],
+   "fade": 0,
+   "shape": "model",
+   "model": "wind_groundswirl",
+   "mat": "tex",
+   "tex": "tex/wind_swoosh_b_hi",
+   "col": "#c9ffe2",
+   "col2": "#000000",
+   "rim": 0,
+   "spin": 480,
+   "scale": {
+    "0": 2.0,
+    "1": 0.45,
+    "ease": "in"
+   },
+   "op": {
+    "0": 0,
+    "0.4": 0.8,
+    "1": 0.9
+   }
+  },
+  {
+   "id": "suck",
+   "t": "emit",
+   "at": 0,
+   "life": 0.22,
+   "att": "ground",
+   "pos": [
+    0,
+    0.35,
+    0
+   ],
+   "from": "ring",
+   "fr": 2.4,
+   "dir": "in",
+   "gravity": 0,
+   "drag": 0,
+   "rate": 130,
+   "speed": [
+    7,
+    11
+   ],
+   "plife": [
+    0.14,
+    0.24
+   ],
+   "look": "streak",
+   "size": [
+    0.9,
+    1.7
+   ],
+   "col": "#e6fff4",
+   "c2": "#39cf8c",
+   "curl": true
+  }
+ ]
+}

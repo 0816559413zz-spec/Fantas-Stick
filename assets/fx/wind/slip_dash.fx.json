@@ -1,0 +1,140 @@
+{
+ "v": 1,
+ "desc": "Slipstream: เกลียวลมพันตัว + เส้นลมสะบัด + ขนนกร่วง",
+ "tags": [
+  "wind",
+  "dash"
+ ],
+ "pal": "wind",
+ "dur": 0.55,
+ "seed": 51,
+ "layers": [
+  {
+   "id": "h0",
+   "t": "mesh",
+   "at": 0,
+   "life": 0.3,
+   "att": "feet",
+   "pos": [
+    0,
+    0.15,
+    0
+   ],
+   "fade": 0,
+   "shape": "model",
+   "model": "wind_slip_helix",
+   "mat": "tex",
+   "tex": "tex/wind_swoosh_a_hi",
+   "col": "#3dff9e",
+   "col2": "#000000",
+   "rim": 0,
+   "spin": 980,
+   "scale": {
+    "0": 0.7,
+    "0.4": 1,
+    "1": 1.25,
+    "ease": "out"
+   },
+   "op": {
+    "0": 0,
+    "0.2": 1,
+    "0.65": 1,
+    "1": 0
+   }
+  },
+  {
+   "id": "h1",
+   "t": "mesh",
+   "at": 0,
+   "life": 0.3,
+   "att": "feet",
+   "pos": [
+    0,
+    0.15,
+    0
+   ],
+   "fade": 0,
+   "shape": "model",
+   "model": "wind_slip_helix",
+   "mat": "tex",
+   "tex": "tex/wind_swoosh_b_hi",
+   "col": "#c9ffe2",
+   "col2": "#000000",
+   "rim": 0,
+   "spin": -760,
+   "scale": {
+    "0": 0.854,
+    "0.4": 1.22,
+    "1": 1.525,
+    "ease": "out"
+   },
+   "op": {
+    "0": 0,
+    "0.2": 0.75,
+    "0.65": 0.75,
+    "1": 0
+   }
+  },
+  {
+   "id": "wake",
+   "t": "emit",
+   "at": 0,
+   "life": 0.22,
+   "att": "chest",
+   "from": "sphere",
+   "fr": 0.75,
+   "rate": 180,
+   "dir": "out",
+   "gravity": 0,
+   "drag": 2.5,
+   "speed": [
+    2,
+    5
+   ],
+   "plife": [
+    0.14,
+    0.3
+   ],
+   "look": "streak",
+   "size": [
+    0.9,
+    1.9
+   ],
+   "col": "#c9ffe2",
+   "c2": "#16b872",
+   "curl": true
+  },
+  {
+   "id": "bits",
+   "t": "emit",
+   "at": 0.02,
+   "life": 0.05,
+   "att": "chest",
+   "from": "sphere",
+   "fr": 0.8,
+   "burst": 9,
+   "rate": 0,
+   "dir": "out",
+   "gravity": -1.5,
+   "drag": 1.5,
+   "speed": [
+    2,
+    5
+   ],
+   "plife": [
+    0.5,
+    0.8
+   ],
+   "look": "model",
+   "model": "wind_feather",
+   "mmat": "glow",
+   "msize": [
+    0.14,
+    0.26
+   ],
+   "col": "#b9ffd9",
+   "c2": "#39cf8c",
+   "mspin": 4
+  }
+ ]
+}

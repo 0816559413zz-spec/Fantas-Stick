@@ -1,0 +1,62 @@
+{
+ "v": 1,
+ "desc": "Slipstream ยิงนัด Enhanced: ลมแตกรอบตัว",
+ "tags": [
+  "wind",
+  "ba"
+ ],
+ "pal": "wind",
+ "dur": 0.4,
+ "seed": 53,
+ "layers": [
+  {
+   "id": "out",
+   "t": "emit",
+   "at": 0,
+   "life": 0.05,
+   "att": "chest",
+   "from": "sphere",
+   "fr": 0.5,
+   "burst": 22,
+   "rate": 0,
+   "dir": "out",
+   "gravity": 0,
+   "drag": 2.4,
+   "speed": [
+    8,
+    14
+   ],
+   "plife": [
+    0.14,
+    0.26
+   ],
+   "look": "streak",
+   "size": [
+    1,
+    2
+   ],
+   "col": "#c9ffe2",
+   "c2": "#16b872",
+   "curl": true
+  },
+  {
+   "id": "sh",
+   "t": "warp",
+   "at": 0,
+   "life": 0.18,
+   "att": "chest",
+   "kind": "shock",
+   "size": {
+    "0": 0.8,
+    "1": 4.5
+   },
+   "str": 0.4,
+   "op": {
+    "0": 1,
+    "1": 0
+   },
+   "col": "#ffffff",
+   "glow": 0
+  }
+ ]
+}

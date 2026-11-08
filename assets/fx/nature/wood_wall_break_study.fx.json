@@ -1,0 +1,22 @@
+{
+  "v": 1,
+  "desc": "Nature — รอยร้าวสามแนวแตกเป็นสี่ท่อน กระแทกพื้นแล้วสลายจากขอบแตก",
+  "tags": ["nature", "wood", "wall", "study"],
+  "pal": "nature",
+  "dur": 3.65,
+  "layers": [
+    {"id": "wall", "t": "mesh", "shape": "model", "model": "nature_wood_wall_v1", "mat": "solid", "at": 0, "life": 3.65, "op": 1},
+    {"id": "wall_mid_left", "t": "mesh", "shape": "model", "model": "nature_wood_wall_v1", "mat": "solid", "at": 0, "life": 3.65, "op": 1},
+    {"id": "wall_mid_right", "t": "mesh", "shape": "model", "model": "nature_wood_wall_v1", "mat": "solid", "at": 0, "life": 3.65, "op": 1},
+    {"id": "wall_right", "t": "mesh", "shape": "model", "model": "nature_wood_wall_v1", "mat": "solid", "at": 0, "life": 3.65, "op": 1},
+    {"id": "damage", "t": "code", "fn": "studio_nature_wall_break", "at": 0, "life": 3.65, "args": {"pieces": ["wall", "wall_mid_left", "wall_mid_right", "wall_right"], "crack": 0.42, "strain": 1.24, "breakAt": 2.10}},
+    {"id": "first_splinters", "t": "emit", "at": 0.42, "life": 0.08, "pos": [0.65, 1.6, 0.76], "from": "sphere", "fr": 0.25, "burst": 10, "dir": "out", "speed": [1.7, 3.0], "up": [0.55, 1.45], "plife": [0.28, 0.52], "look": "model", "model": "nature_wood_splinter", "mmat": "solid", "msize": [0.14, 0.31], "col": "#b88a52", "c2": "#57371e", "gravity": 8, "drag": 0.9, "mspin": 410},
+    {"id": "strain_splinters", "t": "emit", "at": 1.24, "life": 0.19, "pos": [0.65, 2.1, 0.72], "from": "sphere", "fr": 0.40, "burst": 13, "dir": "out", "speed": [1.5, 3.2], "up": [0.5, 1.6], "plife": [0.37, 0.59], "look": "model", "model": "nature_wood_splinter", "mmat": "solid", "msize": [0.18, 0.44], "col": "#b88a52", "c2": "#57371e", "gravity": 8, "drag": 0.9, "mspin": 480},
+    {"id": "strain_leaves", "t": "emit", "at": 1.33, "life": 0.38, "pos": [0.64, 3.10, 0.48], "from": "disc", "fr": 1.45, "burst": 10, "rate": 12, "dir": "out", "speed": [0.45, 1.1], "up": [0.04, 0.48], "plife": [0.59, 0.86], "look": "model", "model": "wind_leaf", "mmat": "solid", "msize": [1.15, 1.9], "col": "#84bb48", "c2": "#496930", "gravity": 2.2, "drag": 1.4, "mspin": 185},
+    {"id": "fracture_splinters", "t": "emit", "at": 2.10, "life": 0.09, "pos": [0.65, 1.62, 0.65], "from": "sphere", "fr": 0.55, "burst": 34, "dir": "out", "speed": [3.1, 6.5], "up": [0.7, 3.6], "plife": [0.28, 0.56], "look": "model", "model": "nature_wood_splinter", "mmat": "solid", "msize": [0.25, 0.80], "col": "#b88a52", "c2": "#57371e", "gravity": 10, "drag": 0.75, "bounce": 0.22, "mspin": 560},
+    {"id": "fracture_left", "t": "emit", "at": 2.16, "life": 0.09, "pos": [-2.57, 1.67, 0.55], "from": "sphere", "fr": 0.47, "burst": 20, "dir": "out", "speed": [2.3, 5.0], "up": [0.50, 2.8], "plife": [0.31, 0.57], "look": "model", "model": "nature_wood_splinter", "mmat": "solid", "msize": [0.22, 0.70], "col": "#b88a52", "c2": "#57371e", "gravity": 10, "drag": 0.75, "bounce": 0.20, "mspin": 510},
+    {"id": "fracture_right", "t": "emit", "at": 2.21, "life": 0.09, "pos": [3.03, 1.72, 0.46], "from": "sphere", "fr": 0.47, "burst": 19, "dir": "out", "speed": [2.3, 5.0], "up": [0.50, 2.8], "plife": [0.28, 0.53], "look": "model", "model": "nature_wood_splinter", "mmat": "solid", "msize": [0.22, 0.70], "col": "#b88a52", "c2": "#57371e", "gravity": 10, "drag": 0.75, "bounce": 0.20, "mspin": 510},
+    {"id": "collapse_leaves", "t": "emit", "at": 2.17, "life": 0.09, "pos": [0.45, 2.8, 0.30], "from": "disc", "fr": 2.4, "burst": 21, "dir": "out", "speed": [1.15, 2.8], "up": [0.32, 1.6], "plife": [0.62, 1.05], "look": "model", "model": "wind_leaf", "mmat": "solid", "msize": [1.2, 2.0], "col": "#84bb48", "c2": "#496930", "gravity": 2.8, "drag": 1.1, "mspin": 230},
+    {"id": "collapse_dust", "t": "emit", "at": 2.64, "life": 0.11, "pos": [0.65, 0.16, 0.42], "from": "disc", "fr": 2.6, "burst": 16, "dir": "flat", "speed": [1.25, 3.5], "up": [0.20, 0.62], "plife": [0.26, 0.48], "look": "smoke", "fb": "tex/smoke_puff", "size": [7, 11], "col": "#ae9371", "c2": "#806b56", "gravity": -0.25, "drag": 2}
+  ]
+}

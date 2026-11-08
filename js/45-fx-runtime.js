@@ -274,6 +274,16 @@ function fxToonWaterMat(c1,c2,rim,flow,band,dkl,wav,endFrom,endTo){const U={uEnd
       'c=mix(c,vec3(1.45),max(max(ln*0.85,vein*0.9),foam));'+
       'c=mix(c,mix(uC1,vec3(1.0),0.55)*1.5,smoothstep(0.8,0.96,fr)*0.85*uRim);'+
       'float endAlpha=1.0;if(uEndTo>uEndFrom)endAlpha=1.0-smoothstep(uEndFrom,uEndTo,vEndZ);gl_FragColor=vec4(c*uInt,uOp*endAlpha);}'});}
+// แผ่นลมใส (โล่สายลม): ขอบจางเป็นวงรีไม่เห็นขอบ • คลื่นลมคำนวณจากสูตรทุกพิกเซล คมทุกความละเอียด (ไม่เบลอแบบภาพ) วิ่งไปมาในแผ่น
+function fxWindShellMat(c1,c2,scr,wrap){const U={uWrap:{value:wrap?1:0},time:FIRE_U.time,uC1:{value:new THREE.Color(c1)},uC2:{value:new THREE.Color(c2)},uOp:{value:1},uDis:{value:0},uInt:{value:1},uScr:{value:scr===undefined?1:scr},uNz:{value:NOISETEX}};
+  return new THREE.ShaderMaterial({uniforms:U,transparent:true,depthWrite:false,side:THREE.DoubleSide,forceSinglePass:true,
+    vertexShader:'uniform float time;varying vec2 vUv;varying vec3 vN;varying vec3 vV;void main(){vUv=uv;vec3 P=position+normal*(sin(uv.y*7.0+time*2.4)*0.035+sin(uv.x*9.0-time*1.8)*0.025);vec4 mv=modelViewMatrix*vec4(P,1.0);vN=normalize(normalMatrix*normal);vV=normalize(-mv.xyz);gl_Position=projectionMatrix*mv;}',
+    fragmentShader:'uniform sampler2D uNz;uniform vec3 uC1,uC2;uniform float time,uOp,uDis,uInt,uScr,uWrap;varying vec2 vUv;varying vec3 vN;varying vec3 vV;'+
+      'float wv(vec2 p,float f,float sp,float sh){float w=texture2D(uNz,p*0.35+vec2(time*0.05,-time*sp*0.04)).r;float b=sin(p.y*f+w*9.0+sin(p.x*2.19911+time*sp*0.6)*1.4-time*sp);return pow(0.5+0.5*b,sh);}'+
+      'void main(){vec2 q=(vUv-0.5)*2.0;float r=length(q*vec2(1.0,1.05));float m=1.0-smoothstep(0.45,1.0,r);m*=m;vec2 p=vUv*vec2(3.2,2.0);if(uWrap>0.5){m=smoothstep(0.0,0.16,vUv.y)*(1.0-smoothstep(0.5,1.0,vUv.y));p=vUv*vec2(2.857143,3.0);}else p.x+=0.25*sin(time*0.6);'+
+      'float ch=clamp(uDis,0.0,1.0);m=mix(m,1.0-smoothstep(0.12,0.85,r),ch*0.55);float a1=wv(p,9.0+ch*10.0,2.4*uScr*(1.0+ch*2.0),10.0+ch*8.0),a2=wv(p+3.1,15.0+ch*12.0,3.4*uScr*(1.0+ch*2.0),18.0),a3=wv(p*1.6+1.7,5.0,1.6*uScr,5.0),cr=a1*0.75+a2*0.55;float an=atan(q.y,q.x);cr+=pow(0.5+0.5*sin(an*5.0+r*9.0-time*(7.0+ch*9.0)),8.0)*ch*(1.0-smoothstep(0.1,0.9,r))*1.15;'+
+      'float fr=1.0-abs(dot(normalize(vN),normalize(vV)));if(uWrap>0.5)m*=1.0-smoothstep(0.35,0.85,fr);vec3 c=mix(uC2,uC1,clamp(cr*1.2+a3*0.3+ch*0.35,0.0,1.0));'+
+      'float a=(0.1+ch*0.12+a3*0.16+cr*0.75+fr*fr*0.12)*m*uOp;if(a<0.003)discard;gl_FragColor=vec4(c*uInt,clamp(a,0.0,1.0));}'});}
 function fxToonMat(c1,c2,c3,rim){const U={time:FIRE_U.time,uC1:{value:new THREE.Color(c1)},uC2:{value:new THREE.Color(c2)},uC3:{value:new THREE.Color(c3)},uOp:{value:1},uDis:{value:0},uInt:{value:1},uRim:{value:rim===undefined?1:rim},uNz:{value:NOISETEX}};
   return new THREE.ShaderMaterial({uniforms:U,transparent:true,depthWrite:false,side:THREE.DoubleSide,
     vertexShader:'varying vec2 vUv;varying vec3 vN;varying vec3 vV;void main(){vUv=uv;vec4 mv=modelViewMatrix*vec4(position,1.0);vN=normalize(normalMatrix*normal);vV=normalize(-mv.xyz);gl_Position=projectionMatrix*mv;}',
@@ -289,6 +299,7 @@ function fxMeshMake(S,I,w){const L=S.d,g=k=>fxG(L,k),sh=g('shape'),mt=g('mat'),C
     case 'ice':return iceShaderMat({glow:1,rim:g('rim')});
     case 'glow':return new THREE.MeshBasicMaterial({color:hdr(C('col'),1.15),transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide});
     case 'toonwater':{const m=fxToonWaterMat(C('col'),C('col2'),g('rim'),g('scroll'),g('heat')>0?1+g('heat')*4:1,g('dis')>0.5?1:0,g('disp'),g('endFrom'),g('endTo'));if(g('zw'))m.depthWrite=true;return m;}   // zw = ทึบ ไม่เห็นทะลุ (งู Tidecaller)   // dis ≥ 0.5 = เส้นน้ำเงินเข้มบางๆ   // น้ำการ์ตูน 3 ขั้น (heat = ลายถี่ขึ้น)
+    case 'windshell':return fxWindShellMat(C('col'),C('col2'),g('scroll'),g('mode')==='ball');   // mode ball = หุ้มรอบ (ลายต่อกันรอบวง ไม่จางด้านข้าง)
     case 'water':return fxWaterMat(C('col'),C('col2'),g('rim'),g('scroll'),g('disp'));   // น้ำใส ขอบขาว ไฮไลต์ไหล
     case 'toon':{const m=fxToonMat(fxCol('$core',I),C('col'),C('col2'),g('rim'));if(g('zw')){m.depthWrite=true;m.side=THREE.FrontSide;}return m;}   // zw = ทึบ: เขียนความลึก ไม่วาดด้านหลัง (ก้อนน้ำ 3D ไม่โชว์ด้านในทะลุเป็นลาย)   // การ์ตูน 2 เฉด + ขอบสว่าง + ขอบแหว่งด้วย dis (ลม)
     case 'black':return new THREE.MeshBasicMaterial({color:0x000000,transparent:true,fog:false});   // ดำสนิทไม่รับแสง เขียนความลึก บังของเรืองแสงข้างหลัง (แกนหลุมดำ)

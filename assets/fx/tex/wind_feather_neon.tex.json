@@ -1,0 +1,14 @@
+{
+ "v": 1,
+ "desc": "ขนนกนีออน Plume Volley: ขอบกับเส้นขนเขียวเรือง ก้านขาว ข้างในใส",
+ "gen": "image",
+ "seed": 12,
+ "px": 512,
+ "cols": 1,
+ "rows": 1,
+ "kind": "loop",
+ "fps": 1,
+ "ramp": "white",
+ "add": false,
+ "p": {}
+}

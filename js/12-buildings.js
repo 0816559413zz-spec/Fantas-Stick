@@ -412,7 +412,7 @@ function playerDown(t,srcId){
   emit({k:'die',x:t.x,y:t.y,h:t.z+1,c:t.color,id:t.id,ki:k&&k!==t?k.id:''});   // id/ki = กล้องตอนตาย (js/58)
 }
 
-function killProj(pr){
+function killProj(pr){if(pr.type==='wball'&&!pr.dead){pr.dead=true;windOrbBoom(pr);return;}if(pr.type==='wplume'&&!pr.dead){pr.dead=true;windPlumeBoom(pr);return;}
   if(pr.dead)return;
   pr.dead=true;
   if(pr.type==='fire')explode(pr);
@@ -458,6 +458,7 @@ function updateProjectiles(dt){
   G.proj=G.proj.filter(p=>!p.dead);
 }
 function projStep(pr,dt,ps){
+  if(pr.bz)windCurveStep(pr,dt);   // ขนนกสายลม: วิ่งตามเส้นโค้ง
     if(pr.dead)return;
     {const t0=TERR?terrT(pr.x,pr.y):0;pr.x+=pr.vx*dt;pr.y+=pr.vy*dt;pr.h+=pr.vh*dt;if(TERR)pr.h-=terrT(pr.x,pr.y)-t0;}pr.life-=dt;
     if(pr.flak&&broomFlak(pr))return;   // Flak บนไม้กวาด: ใกล้ศัตรู = แตกเป็นกรวย (js/69)

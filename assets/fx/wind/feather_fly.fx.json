@@ -1,0 +1,54 @@
+{
+ "v": 1,
+ "desc": "BA สายลม (ผู้ใช้ 2026-11-08): ขนนกยิงจากปีก โค้งเข้าหา crosshair — ภาพร่างรอตรวจ",
+ "tags": [
+  "wind",
+  "ba"
+ ],
+ "pal": "wind",
+ "dur": 1,
+ "seed": 11,
+ "layers": [
+  {
+   "at": 0,
+   "life": 1,
+   "att": "point",
+   "loop": true,
+   "fade": 0,
+   "rot": [
+    0,
+    0,
+    40
+   ],
+   "id": "vane",
+   "t": "mesh",
+   "shape": "model",
+   "model": "wind_feather",
+   "mat": "tex",
+   "tex": "tex/wind_feather",
+   "col": "#ffffff",
+   "col2": "#8dffc9",
+   "rim": 0.3,
+   "scale": [
+    1.4,
+    1.4,
+    1.4
+   ],
+   "op": 1
+  },
+  {
+   "at": 0,
+   "life": 1,
+   "att": "point",
+   "loop": true,
+   "id": "wake",
+   "t": "trail",
+   "of": "vane",
+   "col": "#c9ffe2",
+   "col2": "#12a067",
+   "w": 0.09,
+   "tlife": 0.14,
+   "k": 1.1
+  }
+ ]
+}

@@ -1,0 +1,40 @@
+{
+ "v": 1,
+ "desc": "Slipstream: เกลียวลม 2 เส้นพันรอบตัว สูง 2.6 ม.",
+ "mat": "glow",
+ "pal": "wind",
+ "tags": [
+  "wind"
+ ],
+ "parts": [
+  {
+   "id": "a",
+   "k": "spiral",
+   "turns": 1.9,
+   "r0": 0.72,
+   "r1": 0.95,
+   "rise": 2.6,
+   "w": 0.36,
+   "taper": 0.3,
+   "wall": true,
+   "seg": 72
+  },
+  {
+   "id": "b",
+   "k": "spiral",
+   "turns": 1.9,
+   "r0": 0.72,
+   "r1": 0.95,
+   "rise": 2.6,
+   "w": 0.36,
+   "taper": 0.3,
+   "wall": true,
+   "seg": 72,
+   "rot": [
+    0,
+    180,
+    0
+   ]
+  }
+ ]
+}

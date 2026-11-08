@@ -329,6 +329,8 @@ def smoothstep(a, b, value):
 
 
 for part in tree.parts:
+    ground_root = branch_study and part['id'].startswith('roots_')
+    trunk = branch_study and part['id'].startswith('body_')
     for vertex in part['v']:
         x, y, z = vertex
         local = 1-smoothstep(2.1, 5.0, math.hypot(x, z))
@@ -337,6 +339,19 @@ for part in tree.parts:
         scale = 1+local*(base_flare+crown_flare)
         vertex[0] = round(x*scale, 5)
         vertex[2] = round(z*scale, 5)
+        if ground_root or trunk:
+            # Seat the trunk and its root joints together.
+            seated_y = y - 2.24*(1-smoothstep(2.1, 5.8, y))
+        if ground_root:
+            radius = math.hypot(vertex[0], vertex[2])
+            angle = math.atan2(z, x)
+            spread = smoothstep(1.9, 4.1, radius)
+            ridge = .10*math.cos(1.8*radius + 2*angle)
+            buried_tip = .25*smoothstep(7.2, 10.2, radius)
+            ground_y = .10 + .16*y + ridge - buried_tip
+            vertex[1] = round(seated_y*(1-spread) + ground_y*spread, 5)
+        elif trunk:
+            vertex[1] = round(seated_y, 5)
 
 # Combine strands by anatomy/material. This keeps the recipe manageable in
 # Studio while preserving distinct roots/body/crown material groups.

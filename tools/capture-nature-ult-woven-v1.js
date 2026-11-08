@@ -55,13 +55,44 @@ try{
    floor.material.color.set('#18291f');
    rig.background.set('#10241c');
    const zoneRadius=9;
+   const zoneClose=params.has('zoneclose');
    const hitReview=params.has('hitreview');
+   const damageBuild=hitReview&&params.has('damagebuild');
    const neonRoots=params.has('neonroots');
    const waistMix=tree.material.userData.natureWaist;
    const originalMix=waistMix?.value;
    // Keep the older roots-only comparison isolated when explicitly requested.
    if(waistMix&&neonRoots&&!params.has('neonbody'))waistMix.value=0;
    const neonBody=waistMix?.value===1;
+   const damageGlow={value:0};
+   const damageHits=[{start:.35,amount:.23},{start:1.63,amount:.32},{start:2.97,amount:.45}];
+   const hitTravelTime=.52;
+   if(damageBuild){
+    const baseMaterial=tree.material;
+    const chargedMaterial=baseMaterial.clone();
+    chargedMaterial.customProgramCacheKey=()=>baseMaterial.customProgramCacheKey()+':nature-absorbed-glow';
+    chargedMaterial.onBeforeCompile=(shader,renderer)=>{
+     baseMaterial.onBeforeCompile.call(baseMaterial,shader,renderer);
+     shader.uniforms.uAbsorbedGlow=damageGlow;
+     shader.vertexShader='varying float vChargeVeins,vChargeCore;\n'+shader.vertexShader;
+     shader.vertexShader=shader.vertexShader.replace('#include <begin_vertex>',`$&
+      float chargeRadius=length(position.xz);
+      float trunkHeight=smoothstep(2.4,5.0,position.y)*(1.0-smoothstep(11.3,14.0,position.y));
+      float trunkWeight=trunkHeight*(1.0-smoothstep(1.55,2.8,chargeRadius));
+      float chargeVein=smoothstep(0.16,0.65,aEmit);
+      vChargeVeins=chargeVein*mix(0.16,1.35,trunkWeight);
+      float chargeWaist=(position.y-7.3)/3.8;
+      float chargeInner=1.0-0.55*smoothstep(0.65,1.7,chargeRadius);
+      vChargeCore=exp(-chargeWaist*chargeWaist)*chargeInner*trunkWeight*smoothstep(0.22,0.66,aEmit);
+     `);
+     shader.fragmentShader='uniform float uAbsorbedGlow;\nvarying float vChargeVeins,vChargeCore;\n'+shader.fragmentShader;
+     shader.fragmentShader=shader.fragmentShader.replace('#include <emissivemap_fragment>',`$&
+      totalEmissiveRadiance+=uAbsorbedGlow*(vChargeVeins*vec3(0.014,1.0,0.060)
+       +vChargeCore*vec3(0.021,6.2,0.13));
+     `);
+    };
+    tree.material=chargedMaterial;
+   }
    const boundary=new T.Mesh(new T.RingGeometry(zoneRadius-.045,zoneRadius+.045,96),
     new T.MeshBasicMaterial({color:'#399668',transparent:true,opacity:.40,side:T.DoubleSide,depthWrite:false}));
    boundary.rotation.x=-Math.PI/2;
@@ -74,39 +105,57 @@ try{
     {avatar:cloneAvatar(),team:'enemy',x:6.3,z:1.5}
    ];
    me.visible=false;
-   const outlineMat=new T.MeshStandardMaterial({
-    color:0x000000,emissive:'#16ff39',emissiveIntensity:1.45,
-    side:T.BackSide,depthWrite:false
+   const maskScene=new T.Scene();
+   maskScene.background=new T.Color(0x000000);
+   const maskTarget=new T.WebGLRenderTarget(gl.domElement.width,gl.domElement.height,{
+    minFilter:T.NearestFilter,magFilter:T.NearestFilter,stencilBuffer:false
    });
-   const pixelSize=new T.Vector2(6.4/gl.domElement.width,6.4/gl.domElement.height);
-   outlineMat.onBeforeCompile=shader=>{
-    shader.uniforms.uOutlinePixel={value:pixelSize};
-    shader.vertexShader='uniform vec2 uOutlinePixel;\n'+shader.vertexShader;
-    shader.vertexShader=shader.vertexShader.replace('#include <project_vertex>',`
-     #include <project_vertex>
-     vec2 edge=transformedNormal.xy;
-     gl_Position.xy+=edge/max(length(edge),0.0001)*uOutlinePixel*gl_Position.w;
-    `);
-   };
-   const outlineMeshes=avatar=>{
-    const sources=[];
-    avatar.traverse(node=>{
-     if(node.isMesh&&node.geometry?.getAttribute('normal')&&!Array.isArray(node.material)
-       &&node.material?.visible!==false&&(!node.material?.transparent||node.material.opacity>.85)){
-      sources.push(node);
-     }
-    });
-    return sources.map(source=>{
-     const shell=source.clone(false);
-     shell.position.set(0,0,0);
-     shell.quaternion.identity();
-     shell.scale.setScalar(1);
-     shell.material=outlineMat;
-     shell.renderOrder=1;
-     shell.castShadow=false;
-     source.add(shell);
-     return shell;
-    });
+   // Red marks the outlined actors. Green protects all solid silhouettes from the edge pass.
+   const selectedMask=new T.MeshBasicMaterial({color:0xffff00,side:T.DoubleSide,toneMapped:false});
+   const blockedMask=new T.MeshBasicMaterial({color:0x00ff00,side:T.DoubleSide,toneMapped:false});
+   const treeMask=new T.Mesh(tree.geometry,blockedMask);
+   maskScene.add(treeMask);
+   const outlineMat=new T.ShaderMaterial({
+    uniforms:{mask:{value:maskTarget.texture},pixel:{value:new T.Vector2(1/maskTarget.width,1/maskTarget.height)}},
+    depthTest:false,depthWrite:false,transparent:true,toneMapped:false,
+    vertexShader:`varying vec2 vUv;
+     void main(){vUv=uv;gl_Position=vec4(position.xy,0.0,1.0);}`,
+    fragmentShader:`uniform sampler2D mask;
+     uniform vec2 pixel;
+     varying vec2 vUv;
+     void main(){
+      if(texture2D(mask,vUv).g>0.0)discard;
+      float edge=0.0;
+      for(int x=-1;x<=1;x++){
+       for(int y=-1;y<=1;y++){
+        vec2 offset=vec2(float(x),float(y));
+        edge=max(edge,texture2D(mask,vUv+offset*pixel).r/(0.5+length(offset)));
+       }
+      }
+      if(edge==0.0)discard;
+      gl_FragColor=vec4(0.31,1.0,0.34,edge);
+     }`
+   });
+   const outlineScene=new T.Scene();
+   const outlineQuad=new T.Mesh(new T.PlaneGeometry(2,2),outlineMat);
+   outlineQuad.frustumCulled=false;
+   outlineScene.add(outlineQuad);
+   const outlineCamera=new T.Camera();
+   const renderProtection=()=>{
+    const previousTarget=gl.getRenderTarget(),previousAutoClear=gl.autoClear;
+    try{
+     gl.autoClear=true;
+     gl.setRenderTarget(maskTarget);
+     gl.render(maskScene,cam);
+     gl.setRenderTarget(null);
+     comp.render();
+     // Draw after bloom so the thin line cannot wash into the character.
+     gl.autoClear=false;
+     gl.render(outlineScene,outlineCamera);
+    }finally{
+     gl.setRenderTarget(previousTarget);
+     gl.autoClear=previousAutoClear;
+    }
    };
    const auraCanvas=document.createElement('canvas');
    auraCanvas.width=auraCanvas.height=64;
@@ -166,7 +215,20 @@ try{
     rig.add(actor.avatar);
     actor.avatar.position.set(actor.x,0,actor.z);
     actor.avatar.rotation.y=actor.team==='enemy'?-1.8:.1;
-    actor.outline=actor.team==='ally'?outlineMeshes(actor.avatar):[];
+    actor.mask=cloneAvatar();
+    actor.mask.visible=true;
+    actor.mask.quaternion.copy(actor.avatar.quaternion);
+    actor.maskParts=[];
+    actor.mask.traverseVisible(node=>{
+     if(!node.isMesh){if(node.isSprite||node.isLine)node.visible=false;return;}
+     const materials=Array.isArray(node.material)?node.material:[node.material];
+     if(node.geometry.type==='RingGeometry'||materials.every(mat=>mat.visible===false||mat.transparent&&mat.opacity<=.85)){
+      node.visible=false;
+      return;
+     }
+     actor.maskParts.push(node);
+    });
+    maskScene.add(actor.mask);
     if(actor.team==='ally'){
      actor.aura=new T.Sprite(new T.SpriteMaterial({
       map:auraTexture,transparent:true,depthWrite:false,blending:T.AdditiveBlending
@@ -205,6 +267,7 @@ try{
    const setWide=()=>{cam.position.set(2,18.5,52);cam.lookAt(0,13.2,1);};
    const setDetail=()=>{cam.position.set(1,10.5,24);cam.lookAt(.3,3.7,2.8);};
    const setHitView=()=>{cam.position.set(.9,12.2,34);cam.lookAt(0,7.7,2.2);};
+   const setZoneView=()=>{cam.position.set(1,12.5,36);cam.lookAt(0,2.5,1);};
    setWide();
    passes.forEach(p=>p.enabled=['RenderPass','UnrealBloomPass','OutputPass'].includes(p.constructor.name));
    renderPass.scene=rig;renderPass.camera=cam;
@@ -214,8 +277,17 @@ try{
    const last=Math.min(100,first+Number(params.get('count')??100));
    for(let frame=first;frame<last;frame++){
     const t=frame/20;
-    const travel=hitReview?(t-.56)/.52:-2;
-    const flashAge=t-1.08;
+    const activeHit=damageBuild?damageHits.find(hit=>t>=hit.start&&t<hit.start+hitTravelTime+.4):null;
+    const hitStart=damageBuild?(activeHit?.start??Infinity):.56;
+    const travel=hitReview?(t-hitStart)/hitTravelTime:-2;
+    const flashAge=t-hitStart-hitTravelTime;
+    if(damageBuild){
+     damageGlow.value=damageHits.reduce((sum,hit)=>{
+      const elapsed=t-hit.start-hitTravelTime;
+      const rise=Math.max(0,Math.min(1,elapsed/.25));
+      return sum+hit.amount*rise*rise*(3-2*rise);
+     },0);
+    }
     collarFlash.visible=hitReview&&flashAge>=0&&flashAge<.40;
     if(collarFlash.visible){
      collarFlash.scale.set(3.2+flashAge*5,2.2+flashAge*4,1);
@@ -237,16 +309,18 @@ try{
     for(const actor of actors){
      if(actor.moves)actor.avatar.position.x=actor.x+3*(.5-.5*Math.cos(t*Math.PI*2/5));
      const p=actor.avatar.position;
-     const protectedAlly=actor.team==='ally'&&Math.hypot(p.x,p.z)<=zoneRadius;
-     for(const shell of actor.outline)shell.visible=protectedAlly;
+     const inZone=Math.hypot(p.x,p.z)<=zoneRadius;
+     const protectedAlly=actor.team==='ally'&&inZone;
+     actor.mask.position.copy(p);
+     for(const part of actor.maskParts)part.material=inZone?selectedMask:blockedMask;
      if(!actor.thread)continue;
-     actor.aura.visible=protectedAlly;
+     actor.aura.visible=protectedAlly&&!zoneClose;
      const struck=hitReview&&!actor.moves&&travel>=0&&travel<.3;
      actor.aura.material.opacity=.27+.07*Math.sin(t*3.4+(actor.moves?1:0))+(struck?.55*(1-travel/.3):0);
      actor.thread.visible=protectedAlly;
      for(const [i,spark] of actor.sparks.entries()){
-      spark.visible=protectedAlly;
-      if(!protectedAlly)continue;
+      spark.visible=protectedAlly&&!zoneClose;
+      if(!spark.visible)continue;
       const life=.59+(i%4)*.11;
       const age=(t/life+i*.382)%1;
       const angle=i*2.399+age*.61;
@@ -266,14 +340,15 @@ try{
      actor.thread.geometry.dispose();
      actor.thread.geometry=new T.TubeGeometry(path,48,.063,6,false);
      actor.threadMaterial.uniforms.uTime.value=t;
-     actor.threadMaterial.uniforms.uHitProgress.value=actor.moves?-2:travel;
+     actor.threadMaterial.uniforms.uHitProgress.value=actor.moves||!Number.isFinite(travel)?-2:travel;
     }
     protectedCounts.add(count);
-    if(hitReview)setHitView();
+    if(zoneClose)setZoneView();
+    else if(hitReview&&!damageBuild)setHitView();
     else if(params.has('detailonly'))setDetail();
-    rig.updateMatrixWorld(true);comp.render();
+    rig.updateMatrixWorld(true);renderProtection();
     const protectionShot=hitReview?'tree_protection_hit':params.has('detailonly')?'tree_protection_sparks':'tree_protection';
-    const shotName=protectionShot+(neonRoots?'_neon':'')+(neonBody?'_body':'');
+    const shotName=damageBuild?'nature_ult_damage_glow_v3':zoneClose?'nature_ult_zone_outline_v2':protectionShot+(neonRoots?'_neon':'')+(neonBody?'_body':'');
     images['motion_'+shotName+'_'+String(frame).padStart(3,'0')]=gl.domElement.toDataURL('image/jpeg',.93);
     if(waistMix&&params.has('comparebody')){
      const previousMix=waistMix.value;
@@ -288,7 +363,7 @@ try{
      cam.position.set(.4,9.3,27);cam.lookAt(0,6.6,0);
      for(const [index,label] of ['รุ่นฐาน','เร่งนีออนกลางลำต้น'].entries()){
       waistMix.value=index;
-      comp.render();
+      renderProtection();
       const x=index*(panelWidth+gap);
       ctx.drawImage(source,(source.width-panelWidth)/2,0,panelWidth,panelHeight,x,header,panelWidth,panelHeight);
       ctx.fillStyle=index?'#79fca0':'#d5e7d9';ctx.font='bold 19px sans-serif';
@@ -299,14 +374,16 @@ try{
     }
     if(params.has('detail')){
      setDetail();
-     comp.render();
+     renderProtection();
      images['tree_protection_detail_'+String(frame).padStart(3,'0')]=gl.domElement.toDataURL('image/jpeg',.93);
      setWide();
     }
    }
    me.visible=true;
    if(waistMix)waistMix.value=originalMix;
-   outlineMat.dispose();auraTexture.dispose();
+   outlineMat.dispose();outlineQuad.geometry.dispose();maskTarget.dispose();
+   selectedMask.dispose();blockedMask.dispose();auraTexture.dispose();
+   if(damageBuild)tree.material.dispose();
    if(neonRoots)rootTexture.dispose();
    collarFlash.material.dispose();
    rootMotes.forEach(mote=>mote.sprite.material.dispose());
@@ -316,7 +393,8 @@ try{
     actor.sparks?.forEach(spark=>spark.material.dispose());
     rig.remove(actor.avatar);
    }
-   return {images,protectedCounts:[...protectedCounts],enemyOutlined:false};
+   return {images,protectedCounts:[...protectedCounts],enemyOutlined:actors.some(actor=>
+    actor.team==='enemy'&&Math.hypot(actor.avatar.position.x,actor.avatar.position.z)<=zoneRadius)};
   }
   if(params.has('motion')||summon){
    // Static model stays untouched; this review deforms a cloned geometry.
@@ -356,9 +434,58 @@ try{
    gradient.addColorStop(0,'rgba(130,255,100,1)');gradient.addColorStop(.18,'rgba(50,230,65,.65)');gradient.addColorStop(1,'rgba(0,180,40,0)');
    ctx.fillStyle=gradient;ctx.fillRect(0,0,64,64);
    const texture=new T.CanvasTexture(canvas),motes=[];
-   for(let j=0;j<18;j++){
+   for(let j=0;summon&&j<18;j++){
     const sprite=new T.Sprite(new T.SpriteMaterial({map:texture,transparent:true,depthWrite:false,blending:T.AdditiveBlending}));
     rig.add(sprite);motes.push(sprite);
+   }
+   const idleTextures=[],crownPollen=[],bodyStreaks=[];
+   if(!summon){
+    const makeTexture=paint=>{
+     const art=document.createElement('canvas');art.width=art.height=64;
+     paint(art.getContext('2d'));
+     const map=new T.CanvasTexture(art);
+     idleTextures.push(map);
+     return map;
+    };
+    const pollenMap=makeTexture(pen=>{
+     const halo=pen.createRadialGradient(32,32,0,32,32,29);
+     halo.addColorStop(0,'rgba(255,255,255,.82)');
+     halo.addColorStop(.4,'rgba(255,255,255,.34)');
+     halo.addColorStop(1,'rgba(255,255,255,0)');
+     pen.fillStyle=halo;pen.fillRect(0,0,64,64);
+     pen.fillStyle='white';pen.beginPath();pen.ellipse(32,32,7,5,.5,0,Math.PI*2);pen.fill();
+    });
+    const streakMap=makeTexture(pen=>{
+     const light=pen.createLinearGradient(0,8,0,61);
+     light.addColorStop(0,'rgba(255,255,255,0)');
+     light.addColorStop(.23,'white');
+     light.addColorStop(1,'rgba(255,255,255,0)');
+     pen.fillStyle=light;pen.beginPath();pen.moveTo(32,5);
+     pen.quadraticCurveTo(54,16,35,61);pen.quadraticCurveTo(22,30,32,5);pen.fill();
+    });
+    const makeParticle=(map,color)=>{
+     const sprite=new T.Sprite(new T.SpriteMaterial({map,color,transparent:true,depthWrite:false,blending:T.AdditiveBlending}));
+     rig.add(sprite);
+     return sprite;
+    };
+    // Sample the real canopy silhouette so pollen originates from moving branch tips.
+    const tips=Array.from({length:12},()=>({index:-1,score:-Infinity}));
+    const highTips=Array.from({length:4},()=>({index:-1,score:-Infinity}));
+    for(let i=0;i<pos.count;i++){
+     const x=pos.getX(i),y=pos.getY(i),z=pos.getZ(i);
+     if(y<16)continue;
+     const turn=(Math.atan2(z,x)+Math.PI)/(2*Math.PI);
+     const tip=tips[Math.min(tips.length-1,Math.floor(turn*tips.length))];
+     const score=Math.hypot(x,z)+.46*y;
+     if(score>tip.score)Object.assign(tip,{index:i,score});
+     const highTip=highTips[Math.min(highTips.length-1,Math.floor(turn*highTips.length))];
+     if(y>highTip.score)Object.assign(highTip,{index:i,score:y});
+    }
+    for(const index of new Set([...tips,...highTips].map(tip=>tip.index))){
+     if(index<0)continue;
+     for(let j=0;j<4;j++)crownPollen.push({index,sprite:makeParticle(pollenMap,j%3===0?'#fff4aa':'#dcff97')});
+    }
+    for(let i=0;i<27;i++)bodyStreaks.push(makeParticle(streakMap,i%3===0?'#89ff85':'#38ff65'));
    }
    // Each luminous tail wraps behind its moving tip and narrows as it cools.
    const ribbons=[];
@@ -422,6 +549,27 @@ try{
      }
     }
     pos.needsUpdate=true;emit.needsUpdate=true;
+    for(const [i,{index,sprite}] of crownPollen.entries()){
+     const age=(time/2+i*.371)%1;
+     const angle=Math.atan2(pos.getZ(index),pos.getX(index))+Math.sin(i*2.4)*1.3;
+     const drift=age*(1.3+(i%5)*.26);
+     const flutter=.22*age*Math.sin(age*9+i);
+     sprite.position.set(pos.getX(index)+Math.cos(angle)*drift+flutter,
+      pos.getY(index)+age*(.9+(i%4)*.26)-.45*age*age,
+      pos.getZ(index)+Math.sin(angle)*drift-flutter);
+     sprite.material.opacity=Math.sin(Math.PI*age)**1.4*.89;
+     sprite.scale.setScalar(.30+(i%4)*.07);
+    }
+    for(const [i,sprite] of bodyStreaks.entries()){
+     const age=(time/1.5+i*.417)%1;
+     const y=2.0+(i%9)*.99+age*(2.6+(i%3)*.55);
+     const angle=i*2.39996+age*1.9;
+     const radius=weaveRadius(y)+.44+(i%4)*.19;
+     sprite.position.set(Math.cos(angle)*radius,y,Math.sin(angle)*radius);
+     sprite.material.rotation=.43*Math.cos(angle-.55);
+     sprite.material.opacity=Math.sin(Math.PI*age)**1.3*.92;
+     sprite.scale.set(.40+(i%3)*.045,.84+(i%4)*.12,1);
+    }
     for(let j=0;j<motes.length;j++){
      const progress=(time/6+j/18)%1,angle=j*2.399;
      const r=6+(j%5)*1.4;
@@ -444,13 +592,16 @@ try{
      }else if(summon)motes[j].material.opacity*=smooth((time-3.6)/1.2);
     }
     rig.updateMatrixWorld(true);comp.render();
-    images['motion_tree_'+(summon?'summon':close?'crown':'alive')+'_'+String(frame).padStart(3,'0')]=gl.domElement.toDataURL('image/jpeg',.92);
+    images['motion_tree_'+(summon?'summon':close?'crown_particles_v2':'alive_particles_v2')+'_'+String(frame).padStart(3,'0')]=gl.domElement.toDataURL('image/jpeg',.92);
    }
    mg.dispose();texture.dispose();
    motes.forEach(mote=>mote.material.dispose());
+   crownPollen.forEach(({sprite})=>sprite.material.dispose());
+   bodyStreaks.forEach(sprite=>sprite.material.dispose());
+   idleTextures.forEach(map=>map.dispose());
    ribbons.forEach(ribbon=>{ribbon.geometry.dispose();ribbon.material.dispose();});
    if(summon)tree.material.dispose();
-   return {images,note:summon?'7.2-second summon study with a moving weave front, three spiral trails, sparks and idle settle.':'6-second loop, actual model geometry; subtle crown sway, travelling emission and round rising motes.'};
+   return {images,note:summon?'7.2-second summon study with a moving weave front, three spiral trails, sparks and idle settle.':'6-second idle loop with branch-tip pollen and short spiralling trunk streaks.'};
   }
   const views=[['hero',[40,18,52],[0,13.7,0]],['front',[.2,16,64],[0,13.7,0]],
    ['side',[-64,16,.6],[0,13.7,0]],['back',[-40,18,-52],[0,13.7,0]],

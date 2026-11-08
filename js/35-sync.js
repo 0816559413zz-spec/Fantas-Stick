@@ -77,7 +77,7 @@ const SKANIM={ringofembers:'sweep',blazeform:'fireflare',colossus:'ultraise',kin
   frostforge:'forge',glacierrend:'rend',permafrost:'slam',cryoshell:'wrap',frostaura:'frostbreath',mirrorlegion:'summon3',
   thunderline:'line',speedsiphon:'siphon',stormorbs:'orbs',stormdome:'dome',triplestrike:'skycall',railgun:'pullback',godlightning:'godcall',
   stonebreaker:'punchcmd',mudswamp:'ground',tectoniccrush:'dome',tectoniccrush_2:'clap',dustburst:'burst',terraauger:'pullback',wrath:'ultraise',
-  vortexbind:'windlaunch',aegisgale:'ground',riptide:'wavecast',tidecaller:'tidecall',aquacage:'cagecast',abyssalbeam:'pullback',moonwater:'moonarts',dragondeep:'dragoncall',dragondeep_dive:'dragoncommand',voidspheres:'windvoid',aegisgale_push:'wallpush',aegisgale_place:'ground',windrift:'windlaunch',featherwing:'wingrise',featherwing_2:'wingflick',eyeofheaven:'heavenslam'};
+  riptide:'wavecast',tidecaller:'tidecall',aquacage:'cagecast',abyssalbeam:'pullback',moonwater:'moonarts',dragondeep:'dragoncall',dragondeep_dive:'dragoncommand',voidspheres:'windvoid',aegisgale_push:'wallpush',aegisgale_place:'ground',featherwing_2:'wingflick',eyeofheaven:'heavenslam'};
 SKANIM.railgun_release='railrelease';SKANIM.terraauger_release='ground';
 SKANIM.dragonfall_land='dragonland';SKFEET.dragonland=[-0.8,0.3,0.12,-0.1];SKFEET.wingflick=[-0.45,0.3,0.12,-0.12];
 function skAnim(ev){const o=PM3.get(ev.id),n=SKANIM[ev.s];if(!o||!n)return;o.caN=n;o.caT=0;o.cpT=0;o.cgd=2.2;}
@@ -125,7 +125,7 @@ function characterStance(o,P,feet,w){
 }
 // ยกโล่ (คลิกขวาค้าง): ไม้ขวางหน้าอก มือซ้ายดันออก ย่อตัวรับแรง หายใจ/สั่นนิด ๆ — สายดินใช้ Stand กันเลยไม่ใส่
 const CBLOCK=[-1.45,0.55,-0.15,0.12,-1.35,-0.15];
-const CBLOCK_PATH={0:[-1.25,0.35,-0.08,0.08,-1.15,-0.4],1:[-1.25,0.1,-0.18,0.13,-1.65,-0.1],7:[-1.1,0.55,-0.08,0.18,-1.1,-0.55],8:[-1.4,0.25,-0.1,0.08,-1.45,-0.25]};
+const CBLOCK_PATH={0:[-1.25,0.35,-0.08,0.08,-1.15,-0.4],1:[-1.25,0.1,-0.18,0.13,-1.65,-0.1],7:[-1.5,-0.16,0,0.34,-1.5,0.16],8:[-1.4,0.25,-0.1,0.08,-1.45,-0.25]};
 function blockPose(o,p,dt,now){
   const on=!!p.sh&&!p.ea&&!p.fl&&!p.dn;o.bkw=(o.bkw||0)+((on?1:0)-(o.bkw||0))*Math.min(1,dt*(on?14:6));const w=o.bkw;if(w<0.005)return;
   const R=o.armR.rotation,L=o.armL.rotation,br=Math.sin(now/420)*0.03,B=CBLOCK_PATH[getKit(p.id).path]||CBLOCK;
@@ -198,7 +198,7 @@ function syncPlayers(P,mode,now,dt){
     const v=localVel(o,x,z,dt,g.rotation.y);
     if(!p.al){if(ragTick(o,p,v,dt,now))ragHideDead(o,p,now);continue;}   // ตาย = ragdoll ค้างจนเกิดใหม่ (js/48)
     o.hitT=Math.max(0,(o.hitT||0)-dt);
-    if(o.anim)animTick(o,{down:!!p.dn,fly:!!p.fl,sp:v.sp,castT:o.castT,hitT:o.hitT},dt,p.id===NET.myId?1:animLod(g));
+    if(o.anim)animTick(o,{down:!!p.dn,fly:!!p.fl,sp:p.wn&&p.wn[5]>=1?0:v.sp,castT:o.castT,hitT:o.hitT},dt,p.id===NET.myId?1:animLod(g));
     if(!o.fileModel)updateCloth(o.cloak,v.lvx,v.lvz,v.sp*(p.fl?1.4:1),now,dt);   // มีโมเดลไฟล์ = ผ้าคลุมโค้ดซ่อนอยู่ (ผ้าจริงคือ js/49)
     o.bsp=v.sp;broomView(o,p,dt,now);o.cocoon.visible=!!p.rt;   // ไม้กวาด: เอียงเลี้ยว + อนิเมชันเรียก/เก็บ (js/69)
     if(p.rt)o.cocoon.rotation.y=now/400;
@@ -217,10 +217,10 @@ function syncPlayers(P,mode,now,dt){
       o.broom.rotation.x=-0.1+Math.sin(now/300)*0.04;o.broom.rotation.z=clamp(-v.lvx*0.02,-0.4,0.4);
       if(Math.random()<0.8){const ha=o.fhS!==undefined?o.fhS:p.a,bx=p.x-Math.cos(ha)*30,by=p.y-Math.sin(ha)*30;PARTS.push({x:bx+rnd(-4,4),y:by+rnd(-4,4),h:(p.z||0)+0.8+rnd(-0.1,0.1),vx:rnd(-20,20),vy:rnd(-20,20),vh:rnd(-0.3,0.3),life:0.6,max:0.6,col:Math.random()<0.5?'#ffe9a8':'#ffffff',size:1.6,g:0.5});}
     }else{
-      o.walk+=dt*v.sp*0.8;
-      const sw=Math.sin(o.walk)*Math.min(1,v.sp/5);
+      const wfly=p.wn&&p.wn[5]>=1;if(!wfly)o.walk+=dt*v.sp*0.8;   // บิน Featherwing: ไม่ก้าวขา ไม่มีเสียงเท้า
+      const sw=wfly?0:Math.sin(o.walk)*Math.min(1,v.sp/5);
       if(p.dn){o.b.rotation.x=-1.4;o.b.position.y=0.4;}
-      else{o.b.rotation.x=p.ds?0.4:Math.min(0.12,v.sp*0.01);o.b.position.y=Math.abs(Math.cos(o.walk))*0.05*Math.min(1,v.sp/5);}
+      else{o.b.rotation.x=p.ds?0.4:Math.min(0.12,v.sp*0.01);o.b.position.y=wfly?0:Math.abs(Math.cos(o.walk))*0.05*Math.min(1,v.sp/5);}
       o.legs[0].rotation.x=sw*0.75;o.legs[1].rotation.x=-sw*0.75;
       o.legs[0].rotation.z=o.legs[1].rotation.z=0;
       o.armL.rotation.x=-sw*0.55;o.armL.rotation.z=0.15;
@@ -257,8 +257,8 @@ function syncPlayers(P,mode,now,dt){
     earthFX(o,p,pz,now,dt);
     windFX(o,p,pz,now,dt);waterFX(o,p,pz,now,dt);
     lateSkillPose(o,p,dt,now);
-    waterCharacterPose(o,p,dt,now);windCharacterPose(o,p,dt,now);dashPose(o,p,dt,now);   // ท่าพุ่ง (js/72) ทับท่าอื่นตอนพุ่ง
-    if(o.rig)rigSync(o,dt);
+    waterCharacterPose(o,p,dt,now);windCharacterPose(o,p,dt,now,v);windLatePose(o,p,dt);dashPose(o,p,dt,now);   // ท่าพุ่ง (js/72) ทับท่าอื่นตอนพุ่ง
+    if(o.rig){rigSync(o,dt);windForearm(o);}
     if(ragTick(o,p,v,dt,now))o.tip.scale.setScalar(0.001);   // ล้ม/กระแทกแรง = ragdoll (js/48)
     if(p.bn&&Math.random()<0.7)burst(p.x,p.y,'#ff6a2a',1,30,0.45,3.5,{h:pz+rnd(0.3,1.8),vh:[1,2.5],g:-1});
     if(p.u>=100&&Math.random()<0.35)burst(p.x+rnd(-18,18),p.y+rnd(-18,18),'#ffd86b',1,10,0.9,1.8,{h:pz+rnd(0,0.4),vh:[1.5,3],g:-0.3});
@@ -330,7 +330,7 @@ function makeProj(col,t){
 }
 const _a=new THREE.Vector3(),_b=new THREE.Vector3();
 // กระสุนที่มีเอฟเฟกต์จากไฟล์ติดตัว (ผู้ใช้เลือก VFX 2026-10-22): [ระหว่างบิน (วน), ตอนโดน]
-const PJFX={spark:['fire/spark_fly','fire/spark_hit'],pfire:['fire/fireball_fly',null],icicle:['frost/icicle_fly','frost/icicle_hitb'],wblade:['wind/ba_gust_fly','wind/ba_gust_hit'],wpush:['wind/push_fly','wind/ba_gust_hit'],wbl:['wind/blade_fly',null],wball:['wind/orb_fly','wind/orb_hit'],wdrop:['water/ba_fly','water/ba_hit'],wcage:['water/cage_fly',null]};
+const PJFX={spark:['fire/spark_fly','fire/spark_hit'],pfire:['fire/fireball_fly',null],icicle:['frost/icicle_fly','frost/icicle_hitb'],wblade:['wind/feather_fly','wind/ba_gust_hit'],wpush:['wind/push_fly','wind/ba_gust_hit'],wbl:['wind/blade_fly',null],wball:['wind/gale_orb_fly',null],wplume:['wind/plume_fly',null],wdrop:['water/ba_fly','water/ba_hit'],wcage:['water/cage_fly',null]};
 function syncProj(v,now){
   const ex=VIEW.ex!==null?VIEW.ex:clamp((now-VIEW.tCur)/1000,0,0.1),seen=new Set();
   for(const j of v.J){
@@ -353,9 +353,9 @@ function syncProj(v,now){
     o.tail.scale.set(r*1.1,r*1.1,vt==='fire'?2.2:2.8);
     if(o.fileModel){o.core.visible=o.inner.visible=o.tail.visible=false;}
     o.lines.forEach(L=>jag(L.geometry,_a.set(0,0,0),_b.set(0,0,-2.4),0.22));
-    LREQ.push({x:X,y:H,z:Z,col,int:vt==='fire'?2.4:1.6,dist:vt==='fire'?11:8});
+    if(vt!=='wplume')LREQ.push({x:X,y:H,z:Z,col,int:vt==='fire'?2.4:1.6,dist:vt==='fire'?11:8});   // ขนนกยิงทีละหลายอัน แสงรวมกันแล้วพื้นขาว
     switch(vt){
-      case 'wdrop':case 'wcage':o.core.visible=o.inner.visible=o.tail.visible=o.halo.visible=false;o.lp=[x,y,H];break;   // น้ำ: เห็นแค่ fx ไม่มีลูกแสงขาว
+      case 'wball':case 'wplume':case 'wblade':case 'wdrop':case 'wcage':o.core.visible=o.inner.visible=o.tail.visible=o.halo.visible=false;o.lp=[x,y,H];break;   // น้ำ: เห็นแค่ fx ไม่มีลูกแสงขาว
       case 'icicle':
         if(o.fx){o.core.visible=o.inner.visible=o.tail.visible=false;o.halo.scale.setScalar(r*2);o.lp=[x,y,H];break;}   // แบบ B: เข็มพลังงานจากไฟล์ fx
         // แท่งน้ำแข็งแหลม: ยาวตามทิศที่พุ่ง

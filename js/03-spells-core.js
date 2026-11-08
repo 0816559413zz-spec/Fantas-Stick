@@ -146,7 +146,7 @@ function foesIn(team,x,y,r,hMax){
 function shieldFaces(t,x,y){
   if(!t.shieldOn)return false;
   const B=PBASIC[t.pathIdx|0];
-  if(B&&B.front&&x!=null)return Math.abs(angDiff(Math.atan2(y-t.y,x-t.x),t.ang))<=Math.PI/3;
+  if(B&&B.front&&x!=null)return Math.abs(angDiff(Math.atan2(y-t.y,x-t.x),t.ang))<=(B.frontA||Math.PI/3);
   return true;
 }
 function aoeHit(p,t,dmg,fn){
