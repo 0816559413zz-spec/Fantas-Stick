@@ -137,8 +137,27 @@ function sgBotTarget(p){
 function sgBotGoal(p){
   const S=G.sg,k=sgCore();if(!S||!k)return {x:p.x,y:p.y};
   if(p.team===0&&S.prep>0)return sgSpawn(0);
-  const h=hashStr(p.id)%628/100,r=p.team===0?SGB.ring*0.6:SGB.ring+40;
-  return {x:k.x+Math.cos(h)*r,y:k.y+Math.sin(h)*r};
+  if(p.team===0){const h=hashStr(p.id)%628/100,r=SGB.ring*0.6;return {x:k.x+Math.cos(h)*r,y:k.y+Math.sin(h)*r};}
+  // ฝ่ายรับ: เดินลาดตระเวนรอบแกน (เปลี่ยนจุดทุก 4–8 วิ) — เดิมยืนนิ่งจุดเดียวจนดูเหมือนค้าง (ผู้ใช้ 2026-11-08)
+  const A=p.ai;if(!A.pat||A.pat.k!==S.ph||G.time>A.pat.t){
+    for(let n=0;n<12;n++){const a=Math.random()*6.283,r=rnd(SGB.ring*0.5,SGV.zoneR*1.2),x=k.x+Math.cos(a)*r,y=k.y+Math.sin(a)*r;
+      if(sgInArea(x,y,S.ph)&&(!navOn()||!NAV.w||navWalk(x,y))){A.pat={k:S.ph,t:G.time+rnd(4,8),x,y};break;}}
+    if(!A.pat||A.pat.k!==S.ph)A.pat={k:S.ph,t:G.time+2,x:k.x+SGB.ring,y:k.y};}
+  return {x:A.pat.x,y:A.pat.y};
+}
+// กันบอทค้าง (ทุกสถานการณ์ในโหมดนี้): ตั้งใจเดินแต่ 1.2 วิขยับไม่ถึง 25 px = เลี่ยงไปทางที่เดินได้ใกล้ทิศเดิมสุด 0.7 วิ + คิดทางใหม่
+function sgUnstick(p,dt){
+  const inp=p.inp,U=p.sgu||(p.sgu={t:1.2,x:p.x,y:p.y,e:0,ex:0,ey:0});
+  if(U.e>0){U.e-=dt;inp.mx=U.ex;inp.my=U.ey;return;}
+  const m=Math.hypot(inp.mx||0,inp.my||0);U.t-=dt;
+  if(U.t>0)return;
+  const moved=Math.hypot(p.x-U.x,p.y-U.y);U.t=1.2;U.x=p.x;U.y=p.y;
+  if(m<0.3||moved>=25||p.sgc||p.stun>0)return;
+  const a0=Math.atan2(inp.my,inp.mx);let best=null;
+  for(const da of [1.57,-1.57,0.8,-0.8,2.4,-2.4,3.14]){const a=a0+da*(U.sd=U.sd?-U.sd:1);if(!NAV.w||navWalk(p.x+Math.cos(a)*130,p.y+Math.sin(a)*130)){best=a;break;}}
+  if(best===null)best=a0+Math.PI;
+  U.e=0.7;U.ex=Math.cos(best);U.ey=Math.sin(best);inp.mx=U.ex;inp.my=U.ey;
+  if(p.nav){p.nav.path=null;p.nav.rp=0;}if(p.sgn)p.sgn.path=null;
 }
 function sgBotThink(p,dt){
   const A=p.ai,inp=p.inp;
@@ -152,7 +171,7 @@ function sgBotThink(p,dt){
     if(N.rt<=0||N.rtg!==tg){N.rt=1;N.rtg=tg;navEnsure();N.reach=Math.hypot(tg.x-p.x,tg.y-p.y)<220||!!navPath(p.x,p.y,tg.x,tg.y);}
     if(!N.reach){tg=null;for(const kk of SLOTK.concat(['x']))inp.c[kk]=c0[kk]|0;}
   }
-  if(tg){botNav(p,dt,c0,tg);return;}
+  if(tg){botNav(p,dt,c0,tg);sgUnstick(p,dt);return;}
   // ไม่มีศัตรูเกี่ยวข้อง: เดินไปจุดภารกิจตามทาง
   const S=G.sg,g=A.home,d=Math.hypot(g.x-p.x,g.y-p.y);
   inp.fire=0;inp.sh=0;
@@ -180,4 +199,5 @@ function sgBotThink(p,dt){
     if(!p.sgc&&!(p.stun>0)){A.gT=(A.gT||0)-dt;if(A.gT<=0){A.gT=0.6;inp.c.g=(inp.c.g|0)+1;}}
     if(p.sgc){inp.mx=inp.my=0;}
   }
+  sgUnstick(p,dt);
 }
