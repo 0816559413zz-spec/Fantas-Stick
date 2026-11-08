@@ -119725,16 +119725,19 @@
    "title": "สายลม — Windblade",
    "who": "สายลม",
    "skill": "control • CD 0 วิ",
-   "status": "draft",
+   "status": "ready",
    "created": "2026-11-08T17:07:58",
-   "updated": "2026-11-08T17:30:47",
+   "updated": "2026-11-08T17:31:39",
    "overview": "[จากเกม] ยิงใบมีดลมเล็ก ๆ รัว ๆ ไปที่เล็ก ทะลุเป้า • โหมดบิน: ยิง 14 ใบ โดนแล้วเป้าช้าลง 90% นาน 2 วิ และลดคูลดาวน์ Featherwing 20% (ครั้งเดียวต่อการยิง) • โหมดพื้น: ยิงน้อยกว่า (5 ใบ) เบากว่า ช้าลง 60%",
    "mood": [],
    "colors": [
     "#8dff65",
-    "#ffffff"
+    "#ffffff",
+    "#cfcfcf"
    ],
-   "refs": [],
+   "refs": [
+    "storyboard/img/s21_ref_mw7ozyx1.png"
+   ],
    "fx": "",
    "reply": "",
    "game": {
@@ -120459,7 +120462,7 @@
           ]
          }
         ],
-        "img": "storyboard/img/s21_fr_mw7oywr7.jpg"
+        "img": "storyboard/img/s21_fr_mw7ozar1.jpg"
        },
        {
         "id": "mw7ou2uf2",
@@ -121177,7 +121180,7 @@
           ]
          }
         ],
-        "img": "storyboard/img/s21_fr_mw7oyws0.jpg"
+        "img": "storyboard/img/s21_fr_mw7ozare.jpg"
        },
        {
         "id": "mw7ou2vk3",
@@ -122302,41 +122305,11 @@
           "s": "ศัตรูที่โดนที่ตัวจะมีรอยฟัน สีเขียวเรื่องแสงๆ"
          }
         ],
-        "img": "storyboard/img/s21_fr_mw7oywsm.jpg"
+        "img": "storyboard/img/s21_fr_mw7ozarq.jpg"
        }
       ],
       "name": "ว่าง",
       "angles": [
-       {
-        "id": "mw7ou6m020",
-        "name": "ด้านข้าง",
-        "list": [
-         {
-          "id": "mw7ou6m021",
-          "bg": "side",
-          "base": "",
-          "t": 0,
-          "ops": [],
-          "img": ""
-         },
-         {
-          "id": "mw7ou6m022",
-          "bg": "side",
-          "base": "",
-          "t": 0.17,
-          "ops": [],
-          "img": ""
-         },
-         {
-          "id": "mw7ou6m023",
-          "bg": "side",
-          "base": "",
-          "t": 0.33,
-          "ops": [],
-          "img": ""
-         }
-        ]
-       },
        {
         "id": "mw7oxwjh40",
         "name": "มองจากบน",
@@ -123977,7 +123950,7 @@
         ]
        }
       ],
-      "sheet": "storyboard/img/s21_frs_mw7oywte.jpg"
+      "sheet": "storyboard/img/s21_frs_mw7ozas4.jpg"
      }
     },
     {
@@ -124116,5 +124089,5 @@
    }
   }
  ],
- "rev": 220
+ "rev": 234
 }
