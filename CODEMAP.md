@@ -695,7 +695,7 @@ waterEfx:184
 §212 HUD: เกจฮีลโล่ (โค้งซ้ายรอบเป้าเล็ง)
 drawWaterHud:213
 
-## js/68-wind-view.js (272) — 
+## js/68-wind-view.js (270) — 
 WV:6 WN_BODY:8 WN_AIR_FEET:8 windCharacterPose:10 wvState:27 wvAlive:28
 §29 ทุกเฟรมของผู้เล่นสายลม: ปีกติดหลัง / ปีกห่อตอนยกโล่ / ดูดลมชาร์จเกจ
 windFX:30
@@ -705,12 +705,12 @@ syncWind:50 wvWall:63 wvHitFx:64 wvAimFx:65
 wvEyePos:67 wvEyeSeen:68
 §69 เหตุการณ์ (efx z 'wn…')
 windEfx:70
-§145 HUD รอบเป้าเล็ง: เกจ GaleBurst (โค้งซ้าย) + ชาร์จกำแพงลม (จุด 3 จุดใต…
-drawWindHud:146
-§153 ตัวช่วยเล็งกำแพงลม (เห็นเฉพาะเรา): เส้นโค้งเรืองที่จุดวาง (คลิกขวา) +…
-wvAimGhost:154
-§165 ปีกเวทสายลมติดหลัง: ขนนก 8+4 เส้นต่อข้าง ทำจากสายลม (shader) + ริบบิ้…
-WWS:167 WWU:167 WW_NOISE:168 _wwMat:173 wwMats:174 wwFeatherGeo:220 WW_PRI:231 WW_COV:233 WW_RIB:234 _wwGeo:235 makeWindWings:236 wwCue:250 poseWindWings:254
+§143 HUD รอบเป้าเล็ง: เกจ GaleBurst (โค้งซ้าย) + ชาร์จกำแพงลม (จุด 3 จุดใต…
+drawWindHud:144
+§151 ตัวช่วยเล็งกำแพงลม (เห็นเฉพาะเรา): เส้นโค้งเรืองที่จุดวาง (คลิกขวา) +…
+wvAimGhost:152
+§163 ปีกเวทสายลมติดหลัง: ขนนก 8+4 เส้นต่อข้าง ทำจากสายลม (shader) + ริบบิ้…
+WWS:165 WWU:165 WW_NOISE:166 _wwMat:171 wwMats:172 wwFeatherGeo:218 WW_PRI:229 WW_COV:231 WW_RIB:232 _wwGeo:233 makeWindWings:234 wwCue:248 poseWindWings:252
 
 ## js/69-broom.js (236) — ไม้กวาด (ผู้ใช้ 2026-10-29): บินแบบเครื่องบิน + ยิงลำแสงตามสาย + อนิเ…
 BRM:9 BFW:12 BSK:13 BROOM_SK:19 broomVert:40 broomMove:53 broomStrike:72 broomStrikeTick:81 broomFlak:89 broomAct:100 broomOff:107 broomBeam:109
@@ -758,4 +758,4 @@ surfSync:48 surfQuality:52
 SURF_VS:54 SURF_VS_BODY:55 SURF_FS:66 SURF_FS_BODY:67 surfOk:97 surfApply:98 surfScene:110
 §111 ปรับค่า (tune.html / F8)
 
-(88 files, 21962 lines)
+(88 files, 21960 lines)

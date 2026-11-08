@@ -1,0 +1,116 @@
+{
+ "v": 1,
+ "desc": "Windblade ใบมีดลมเล็กตามกระสุน (เบา: ยิง 14 ใบต่อครั้ง): แกนขาวบางยืดยาว + หางเส้นลมเขียวจาง",
+ "tags": [
+  "wind",
+  "blade",
+  "projectile"
+ ],
+ "pal": "wind",
+ "dur": 0.3,
+ "seed": 61,
+ "layers": [
+  {
+   "id": "core",
+   "t": "mesh",
+   "at": 0,
+   "life": 0.3,
+   "att": "point",
+   "pos": [
+    0,
+    0,
+    0
+   ],
+   "mat": "glow",
+   "col": "#ffffff",
+   "col2": "#d8ffe0",
+   "fade": 0,
+   "shape": "sphere",
+   "loop": true,
+   "scale": [
+    0.1,
+    0.1,
+    0.55
+   ],
+   "op": 0.95
+  },
+  {
+   "id": "tail",
+   "t": "mesh",
+   "at": 0,
+   "life": 0.3,
+   "att": "point",
+   "pos": [
+    0,
+    0,
+    0.15
+   ],
+   "mat": "tex",
+   "col": "#d8ffe0",
+   "col2": "#000000",
+   "fade": 0,
+   "shape": "model",
+   "model": "wind_real_cone",
+   "tex": "tex/wind_streaks",
+   "rim": 0,
+   "loop": true,
+   "uvTile": [
+    2,
+    1
+   ],
+   "uvScroll": [
+    -6,
+    0
+   ],
+   "rot": [
+    90,
+    0,
+    0
+   ],
+   "scale": [
+    0.34,
+    2.4,
+    0.34
+   ],
+   "op": 0.8
+  },
+  {
+   "id": "streak",
+   "t": "emit",
+   "at": 0,
+   "life": 0.3,
+   "att": "point",
+   "pos": [
+    0,
+    0,
+    0
+   ],
+   "from": "sphere",
+   "gravity": 0,
+   "drag": 0.6,
+   "fr": 0.1,
+   "dir": "aim",
+   "yaw": 180,
+   "spread": 0.1,
+   "speed": [
+    8,
+    14
+   ],
+   "plife": [
+    0.08,
+    0.16
+   ],
+   "look": "streak",
+   "size": [
+    1,
+    1.8
+   ],
+   "col": "#ffffff",
+   "c2": "#8dff65",
+   "rate": 26,
+   "curl": false,
+   "x": true,
+   "loop": true
+  }
+ ]
+}

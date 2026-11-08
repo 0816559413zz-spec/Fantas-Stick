@@ -106,7 +106,7 @@ function windEfx(ev){
     case 'wnfwfocus':{const o=WV.fo||(WV.fo=new Map());const old=o.get(ev.id);if(old){fxStop(old);o.delete(ev.id);}
       const I=fxPlay('wind/fw_focus',{x,y,h:H,a,follow:ev.id});if(I)o.set(ev.id,I);ring(x,y,'#b8ff85',70,0.4,H+0.5);if(near){shake(0.15);if(mine)toast('บิน: WASD = ทิศ • Space/Ctrl = สูง/ต่ำ • Shift ค้าง = บินเร็ว (เมาส์คุม ใช้สกิลไม่ได้) • สกิลทุกตัวแรงขึ้นตอนบิน • กดสกิลซ้ำ = สะบัดปีกจบ');}return true;}
     case 'wnfwflick':fxPlay('wind/fw_flick',{x,y,h:Math.max(0,H-3.2),a});wwCue(ev.id,'fk');if(near)shake(0.2);return true;
-    case 'wnfwend':{const o=WV.fo;if(o&&o.get(ev.id)){fxStop(o.get(ev.id));o.delete(ev.id);}return true;}
+    case 'wnfwend':{const o=WV.fo;if(o&&o.get(ev.id)){fxStop(o.get(ev.id));o.delete(ev.id);}const f=WV.ff;if(f&&f.get(ev.id)){fxStop(f.get(ev.id));f.delete(ev.id);}return true;}
     case 'wnfwland':return true;
     case 'wnult':fxPlay('wind/eye_ult',{x,y,h:H,a,aim:false});wwCue(ev.id,'ul');if(near)snd('cast_pull',ev);return true;
     case 'wnulslam':{   // ตาลืมเต็ม: คนโดน (ev.v) เห็น Impact frame เต็ม • คนที่ "มองเห็นตา" (ตาอยู่ในจอ) เห็นเบากว่า • ตัวคนโดนมีลมรัดตัว
@@ -116,28 +116,26 @@ function windEfx(ev){
       if(near)shake(0.3);return true;}
     case 'wnulblade':fxPlay('wind/ult_blade_'+'abc'[ev.n|0],{x,y,h:H,a});if(near&&Math.random()<0.4)snd('hit',ev);return true;
     case 'wnulimp':if(near){shake(0.5);snd('break',ev);}return true;
-    // ---- รูปแบบใหม่ 2026-11-08: ภาพชั่วคราวจากโค้ด (ring/burst) — VFX จริงรอทำใน VFX Studio ----
-    case 'wnup':{const r=ev.r||100;ring(x,y,'#8dff65',r,ev.t||0.45,H+0.1);ring(x,y,'#efffe8',r*0.55,ev.t||0.45,H+0.1);burst(x,y,'#b8ff85',10,r*0.9,0.45,1.8,{h:H+0.2,vh:[0.5,2],g:-0.5});if(near)snd('cast_pull',ev);return true;}
-    case 'wnupgo':{const r=ev.r||100;ring(x,y,'#efffe8',r*1.1,0.5,H+0.1);for(let i=0;i<5;i++)later(i*0.06,()=>burst(x+rnd(-r,r)*0.6,y+rnd(-r,r)*0.6,i%2?'#8dff65':'#efffe8',6,40,0.7,2.2,{h:H+0.2,vh:[6,11],g:-0.3,drag:1.5}));if(near){shake(0.25);snd('whoosh',ev);}return true;}
-    case 'wnuphit':burst(x,y,'#efffe8',10,90,0.5,2,{h:H,vh:[3,7],g:0.5});if(near)snd('hit',ev);return true;
+    // ---- รูปแบบใหม่ 2026-11-08 (VFX จาก tools/wind-air-gen.py → assets/fx/wind/{up_*,push_*,slam_hit,force_*,blade_fly,fw_fast,sonic_*}) ----
+    case 'wnup':fxPlay('wind/up_zone',{x,y,h:H,aim:false,p:{r:(ev.r||100)/20,t:ev.t||0.45}});if(near)snd('cast_pull',ev);return true;
+    case 'wnupgo':fxPlay('wind/up_go',{x,y,h:H,aim:false,p:{r:(ev.r||100)/20,a:ev.m?1.0:0.35}});if(near)snd('whoosh',ev);return true;
+    case 'wnuphit':fxPlay('wind/up_hit',{x,y,h:H,aim:false});if(near)snd('hit',ev);return true;
     case 'wnpush':{const ca=Math.cos(a),sa=Math.sin(a);burst(x+ca*30,y+sa*30,'#8dff65',8,200,0.25,2,{h:H+1.3,a,spread:0.4,g:0});ring(x+ca*30,y+sa*30,'#efffe8',34,0.25,H+1.2);if(near)snd('cast_pull',ev);return true;}
-    case 'wnpushup':ring(x,y,'#8dff65',60,0.4,0.15);burst(x,y,'#efffe8',12,120,0.5,2,{h:0.3,vh:[4,9],g:1});if(near){shake(0.2);snd('hit',ev);}return true;
-    case 'wnpushsink':ring(x,y,'#8dff65',70,0.45,0.15);ring(x,y,'#6b5a3a',45,0.5,0.1);burst(x,y,'#7a6a48',16,150,0.6,3,{h:0.2,vh:[1,4],g:6});smoke(x,y,0.3,6,'#6b5a3a',0.9,5,70);if(near){shake(0.3);snd('slam',ev);}return true;
-    case 'wnpushslam':ring(x,y,'#8dff65',40,0.3,H);burst(x,y,'#efffe8',10,100,0.35,2,{h:H,vh:[-8,-3],g:0});if(near)snd('hit',ev);return true;
-    case 'wnslam':ring(x,y,'#efffe8',90,0.4,0.15);burst(x,y,'#8dff65',14,170,0.5,2.4,{h:0.2,vh:[1,5],g:6});smoke(x,y,0.3,5,'#7a7a72',0.9,5,80);if(near){shake(0.4);snd('slam',ev);hitStop(0.05);}return true;
-    case 'wnfc':{const ca=Math.cos(a),sa=Math.sin(a),L=ev.m?520:300;for(let i=0;i<14;i++){const u=i/13;burst(x+ca*L*u,y+sa*L*u,'#bfffd0',2,60,0.4,1.6,{h:H+1,g:0,vh:[-0.3,0.5]});}ring(x,y,'#8dff65',48,0.3,H+0.3);if(near)snd('dash',ev);return true;}
-    case 'wnfchit':ring(x,y,'#8dff65',34,0.3,H);burst(x,y,'#efffe8',8,110,0.35,2,{h:H,g:0});if(near)snd('hit',ev);return true;
-    case 'wnfcend':ring(x,y,'#bfffd0',44,0.3,H+0.3);return true;
-    case 'wnfast':ring(x,y,'#efffe8',ev.n?80:50,0.35,H+0.5);if(ev.n){burst(x,y,'#bfffd0',10,160,0.4,2,{h:H+1,g:0});if(near)snd('whoosh',ev);if(mine)toast('บินเร็ว: เมาส์ = บังคับแบบเครื่องบิน • ใช้สกิลไม่ได้ • ปล่อย Shift = กลับบินปกติ');}return true;
-    case 'wnsochg':{ring(x,y,'#efffe8',110,1.0,H+0.6);for(let i=0;i<10;i++)later(i*0.1,()=>{const b=rnd(0,6.283),r=rnd(90,140);burst(x+Math.cos(b)*r,y+Math.sin(b)*r,'#efffe8',2,-r*2,0.45,2,{h:H+rnd(0.4,1.8),g:0});});if(near)snd('cast_pull',ev);if(mine)toast('Sonic Boom Strike: ชาร์จ 1 วิ แล้วพุ่งไปตามที่เล็ก');return true;}
-    case 'wnsoimp':if(near){impactFrame(1,x,y,H+1.2);shake(0.6);snd('boom',ev);hitStop(0.06);}return true;
-    case 'wnsodash':{const ca=Math.cos(a),sa=Math.sin(a),L=Math.hypot(ev.x2-x,ev.y2-y),n=Math.max(8,Math.ceil(L/60));
-      for(let i=0;i<=n;i++){const u=i/n;burst(x+(ev.x2-x)*u,y+(ev.y2-y)*u,i%2?'#efffe8':'#8dff65',3,90,0.6,2.4,{h:H+1,g:0,vh:[-0.5,0.8]});}
-      ring(x,y,'#efffe8',140,0.45,H+0.6);ring(ev.x2,ev.y2,'#efffe8',110,0.45,H+0.6);if(near){shake(0.7);snd('boom',ev);snd('whoosh',ev);}return true;}
-    case 'wnsohit':burst(x,y,'#efffe8',22,260,0.6,3,{h:H,g:1});ring(x,y,'#ffffff',120,0.4,H);if(near){shake(0.8);snd('break',ev);hitStop(0.1);}return true;
-    case 'wnsowave':ring(x,y,'#8dff65',70,0.4,H);burst(x,y,'#efffe8',10,160,0.4,2,{h:H,g:0});if(near)snd('hit',ev);return true;
-    case 'wnsoend':ring(x,y,'#efffe8',90,0.5,H+0.5);return true;
-    case 'wnsocancel':ring(x,y,'#8dff65',60,0.3,H+0.5);return true;
+    case 'wnpushup':fxPlay('wind/push_up',{x,y,h:H,aim:false});if(near){shake(0.2);snd('hit',ev);}return true;
+    case 'wnpushsink':fxPlay('wind/push_sink',{x,y,h:0,aim:false});if(near)snd('slam',ev);return true;
+    case 'wnpushslam':fxPlay('wind/push_slam',{x,y,h:H,aim:false});if(near)snd('hit',ev);return true;
+    case 'wnslam':fxPlay('wind/slam_hit',{x,y,h:0,aim:false});if(near){snd('slam',ev);hitStop(0.05);}return true;
+    case 'wnfc':fxPlay(ev.m?'wind/force_dash':'wind/force_dash_g',{x,y,h:H,a,follow:ev.id});if(near)snd('dash',ev);return true;
+    case 'wnfchit':fxPlay('wind/force_hit',{x,y,h:H,a});if(near)snd('hit',ev);return true;
+    case 'wnfcend':return true;
+    case 'wnfast':{const o=WV.ff||(WV.ff=new Map());const old=o.get(ev.id);if(old){fxStop(old);o.delete(ev.id);}
+      if(ev.n){const I=fxPlay('wind/fw_fast',{x,y,h:H,a,follow:ev.id});if(I)o.set(ev.id,I);if(near)snd('whoosh',ev);if(mine)toast('บินเร็ว: เมาส์ = บังคับแบบเครื่องบิน • ใช้สกิลไม่ได้ • ปล่อย Shift = กลับบินปกติ');}return true;}
+    case 'wnsochg':fxPlay('wind/sonic_charge',{x,y,h:H,a,follow:ev.id});if(near)snd('cast_pull',ev);if(mine)toast('Sonic Boom Strike: ชาร์จ 1 วิ แล้วพุ่งไปตามที่เล็ง');return true;
+    case 'wnsoimp':if(near){impactFrame(1,x,y,H+1.2);hitStop(0.06);}return true;
+    case 'wnsodash':fxPlay(ev.m?'wind/sonic_dash':'wind/sonic_dash_g',{x,y,h:H,a,follow:ev.id});if(near){snd('boom',ev);snd('whoosh',ev);}return true;
+    case 'wnsohit':fxPlay('wind/sonic_hit',{x,y,h:H,a});if(near){snd('break',ev);hitStop(0.1);}return true;
+    case 'wnsowave':fxPlay('wind/sonic_wave',{x,y,h:H,aim:false});if(near)snd('hit',ev);return true;
+    case 'wnsoend':case 'wnsocancel':return true;
     case 'wnsoon':if(mine)toast('สกิลนี้ของสายลมยังทำไม่เสร็จ (ขั้นที่ 2-3)');return true;
   }
   return false;

@@ -1,0 +1,472 @@
+{
+ "v": 1,
+ "desc": "Windup ② พัดขึ้น: เสาลมเส้นบางหมุนลอยสูง ~7 ม. (ลมใสแบบกำแพง Aegis) + จานเกลียวลมบนพื้น + คลื่นลมวง + เส้นลม/ฝุ่น/ใบไม้ถูกดูดขึ้น — ขนาด p.r (ม.) นาน p.a (วิ)",
+ "tags": [
+  "wind",
+  "windup",
+  "zone"
+ ],
+ "pal": "wind",
+ "dur": 1.2,
+ "seed": 61,
+ "layers": [
+  {
+   "id": "col0",
+   "t": "mesh",
+   "at": 0,
+   "life": "a",
+   "att": "ground",
+   "pos": [
+    0,
+    0,
+    0
+   ],
+   "mat": "tex",
+   "col": "#ffffff",
+   "col2": "#000000",
+   "fade": 0,
+   "shape": "model",
+   "model": "wind_vortex_air",
+   "tex": "tex/wind_air_rise",
+   "rim": 0,
+   "uvTile": [
+    3,
+    1
+   ],
+   "uvScroll": [
+    -0.5,
+    0
+   ],
+   "rot": [
+    0,
+    0,
+    0
+   ],
+   "spin": 320,
+   "scale": {
+    "0": [
+     0.3,
+     0.2,
+     0.3
+    ],
+    "0.2": [
+     1,
+     1,
+     1
+    ],
+    "0.85": [
+     1,
+     1,
+     1
+    ],
+    "1": [
+     0.8,
+     1.1,
+     0.8
+    ],
+    "x": [
+     "r*0.62",
+     4.67,
+     "r*0.62"
+    ]
+   },
+   "op": {
+    "0": 0,
+    "0.12": 0.8,
+    "0.8": 0.8,
+    "1": 0
+   }
+  },
+  {
+   "id": "col1",
+   "t": "mesh",
+   "at": 0,
+   "life": "a",
+   "att": "ground",
+   "pos": [
+    0,
+    0,
+    0
+   ],
+   "mat": "tex",
+   "col": "#d8ffe0",
+   "col2": "#000000",
+   "fade": 0,
+   "shape": "model",
+   "model": "wind_vortex_air2",
+   "tex": "tex/wind_air_rise",
+   "rim": 0,
+   "uvTile": [
+    2,
+    1
+   ],
+   "uvScroll": [
+    -0.35,
+    0
+   ],
+   "rot": [
+    0,
+    60,
+    0
+   ],
+   "spin": -240,
+   "scale": {
+    "0": [
+     0.3,
+     0.2,
+     0.3
+    ],
+    "0.2": [
+     1,
+     1,
+     1
+    ],
+    "0.85": [
+     1,
+     1,
+     1
+    ],
+    "1": [
+     0.8,
+     1.1,
+     0.8
+    ],
+    "x": [
+     "r*0.682",
+     5.13,
+     "r*0.682"
+    ]
+   },
+   "op": {
+    "0": 0,
+    "0.12": 0.45,
+    "0.8": 0.45,
+    "1": 0
+   }
+  },
+  {
+   "id": "col2",
+   "t": "mesh",
+   "at": 0,
+   "life": "a",
+   "att": "ground",
+   "pos": [
+    0,
+    0,
+    0
+   ],
+   "mat": "tex",
+   "col": "#8dff65",
+   "col2": "#000000",
+   "fade": 0,
+   "shape": "model",
+   "model": "wind_vortex_air",
+   "tex": "tex/wind_air_rise",
+   "rim": 0,
+   "uvTile": [
+    2,
+    1
+   ],
+   "uvScroll": [
+    -0.7,
+    0
+   ],
+   "rot": [
+    0,
+    120,
+    0
+   ],
+   "spin": 420,
+   "scale": {
+    "0": [
+     0.3,
+     0.2,
+     0.3
+    ],
+    "0.2": [
+     1,
+     1,
+     1
+    ],
+    "0.85": [
+     1,
+     1,
+     1
+    ],
+    "1": [
+     0.8,
+     1.1,
+     0.8
+    ],
+    "x": [
+     "r*0.527",
+     3.97,
+     "r*0.527"
+    ]
+   },
+   "op": {
+    "0": 0,
+    "0.12": 0.25,
+    "0.8": 0.25,
+    "1": 0
+   }
+  },
+  {
+   "id": "disk",
+   "t": "mesh",
+   "at": 0,
+   "life": "a",
+   "att": "ground",
+   "pos": [
+    0,
+    0.08,
+    0
+   ],
+   "mat": "tex",
+   "col": "#8dff65",
+   "col2": "#000000",
+   "fade": 0,
+   "shape": "plane",
+   "tex": "tex/wind_void_disk",
+   "rim": 0,
+   "rot": [
+    90,
+    0,
+    0
+   ],
+   "spin": 360,
+   "scale": {
+    "0": 1,
+    "1": 1,
+    "x": "r*2"
+   },
+   "op": {
+    "0": 0.9,
+    "0.6": 0.5,
+    "1": 0
+   }
+  },
+  {
+   "id": "shock",
+   "t": "warp",
+   "at": 0,
+   "life": 0.45,
+   "att": "ground",
+   "pos": [
+    0,
+    0.2,
+    0
+   ],
+   "kind": "shock",
+   "size": {
+    "0": 0.5,
+    "1": "r*1.6"
+   },
+   "str": 0.8,
+   "op": {
+    "0": 1,
+    "1": 0
+   },
+   "col": "#ffffff",
+   "glow": 0,
+   "flat": true
+  },
+  {
+   "id": "ring",
+   "t": "ring",
+   "at": 0,
+   "life": 0.45,
+   "att": "ground",
+   "pos": [
+    0,
+    0.12,
+    0
+   ],
+   "col": "#8dff65",
+   "r": "r*1.2",
+   "op": 0.45
+  },
+  {
+   "id": "streaks",
+   "t": "emit",
+   "at": 0,
+   "life": "a",
+   "att": "ground",
+   "pos": [
+    0,
+    0.1,
+    0
+   ],
+   "from": "ring",
+   "gravity": 0,
+   "drag": 0.3,
+   "rate": 90,
+   "fr": "r*0.9",
+   "dir": "up",
+   "spread": 0.15,
+   "speed": [
+    7,
+    13
+   ],
+   "up": [
+    2,
+    5
+   ],
+   "plife": [
+    0.4,
+    0.8
+   ],
+   "look": "streak",
+   "size": [
+    1.6,
+    3.2
+   ],
+   "col": "#ffffff",
+   "c2": "#8dff65",
+   "curl": true
+  },
+  {
+   "id": "dust",
+   "t": "emit",
+   "at": 0,
+   "life": "a",
+   "att": "ground",
+   "pos": [
+    0,
+    0.1,
+    0
+   ],
+   "from": "ring",
+   "gravity": -0.4,
+   "drag": 0.8,
+   "rate": 40,
+   "fr": "r*0.8",
+   "dir": "up",
+   "spread": 0.3,
+   "speed": [
+    2,
+    5
+   ],
+   "plife": [
+    0.7,
+    1.3
+   ],
+   "size": [
+    3,
+    5.5
+   ],
+   "grow": 0.6,
+   "x": true,
+   "look": "smoke",
+   "curl": true,
+   "col": "#d9d3c0",
+   "c2": "#a39d88"
+  },
+  {
+   "id": "leaves",
+   "t": "emit",
+   "at": 0,
+   "life": "a",
+   "att": "ground",
+   "pos": [
+    0,
+    0.2,
+    0
+   ],
+   "from": "ring",
+   "gravity": -0.3,
+   "drag": 0.6,
+   "rate": 14,
+   "fr": "r*0.7",
+   "dir": "up",
+   "spread": 0.4,
+   "speed": [
+    3,
+    7
+   ],
+   "plife": [
+    0.8,
+    1.4
+   ],
+   "look": "model",
+   "model": "wind_leaf",
+   "mmat": "glow",
+   "msize": [
+    0.1,
+    0.22
+   ],
+   "col": "#8dff65",
+   "c2": "#0f9d55",
+   "mspin": 500,
+   "bounce": 0,
+   "x": true
+  },
+  {
+   "id": "burst",
+   "t": "emit",
+   "at": 0,
+   "life": 0.08,
+   "att": "ground",
+   "pos": [
+    0,
+    0.1,
+    0
+   ],
+   "from": "ring",
+   "gravity": 0,
+   "drag": 1.4,
+   "burst": 40,
+   "rate": 0,
+   "fr": "r*0.8",
+   "dir": "up",
+   "spread": 0.2,
+   "speed": [
+    10,
+    16
+   ],
+   "plife": [
+    0.3,
+    0.5
+   ],
+   "look": "streak",
+   "size": [
+    2,
+    3.4
+   ],
+   "col": "#ffffff",
+   "c2": "#8dff65",
+   "curl": false
+  },
+  {
+   "id": "shake",
+   "t": "screen",
+   "at": 0,
+   "life": 0.3,
+   "near": 25,
+   "other": true,
+   "shake": 1.2
+  },
+  {
+   "id": "shake_own",
+   "t": "screen",
+   "at": 0,
+   "life": 0.3,
+   "own": true,
+   "shake": 1.8
+  }
+ ],
+ "params": {
+  "r": {
+   "def": 5,
+   "desc": "รัศมีวง (ม.)"
+  },
+  "t": {
+   "def": 0.45,
+   "desc": "รอก่อนพัด (วิ)"
+  },
+  "a": {
+   "def": 1.0,
+   "desc": "วงพัดอยู่ (วิ)"
+  }
+ }
+}

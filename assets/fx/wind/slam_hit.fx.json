@@ -1,0 +1,167 @@
+{
+ "v": 1,
+ "desc": "ถึงพื้นหลังถูกกดลง (Wind Push): คลื่นกระแทกวง + จานเกลียวลม + ฝุ่นพุ่งเป็นวง + เส้นลมแผ่ราบ",
+ "tags": [
+  "wind",
+  "push",
+  "impact"
+ ],
+ "pal": "wind",
+ "dur": 1.2,
+ "seed": 61,
+ "layers": [
+  {
+   "id": "shock",
+   "t": "warp",
+   "at": 0,
+   "life": 0.4,
+   "att": "ground",
+   "pos": [
+    0,
+    0.2,
+    0
+   ],
+   "kind": "shock",
+   "size": {
+    "0": 0.4,
+    "1": 5
+   },
+   "str": 1,
+   "op": {
+    "0": 1,
+    "1": 0
+   },
+   "col": "#ffffff",
+   "glow": 0,
+   "flat": true
+  },
+  {
+   "id": "ring",
+   "t": "ring",
+   "at": 0,
+   "life": 0.4,
+   "att": "ground",
+   "pos": [
+    0,
+    0.12,
+    0
+   ],
+   "col": "#ffffff",
+   "r": 4,
+   "op": 0.65
+  },
+  {
+   "id": "disk",
+   "t": "mesh",
+   "at": 0,
+   "life": 0.5,
+   "att": "ground",
+   "pos": [
+    0,
+    0.08,
+    0
+   ],
+   "mat": "tex",
+   "col": "#8dff65",
+   "col2": "#000000",
+   "fade": 0,
+   "shape": "plane",
+   "tex": "tex/wind_void_disk",
+   "rim": 0,
+   "rot": [
+    90,
+    0,
+    0
+   ],
+   "spin": 240,
+   "scale": 4.2,
+   "op": {
+    "0": 0.8,
+    "1": 0
+   }
+  },
+  {
+   "id": "dust",
+   "t": "emit",
+   "at": 0,
+   "life": 0.08,
+   "att": "ground",
+   "pos": [
+    0,
+    0.1,
+    0
+   ],
+   "from": "ring",
+   "gravity": 0,
+   "drag": 2,
+   "burst": 46,
+   "rate": 0,
+   "fr": 0.5,
+   "dir": "out",
+   "speed": [
+    5,
+    10
+   ],
+   "up": [
+    0.5,
+    2.5
+   ],
+   "plife": [
+    0.6,
+    1.1
+   ],
+   "size": [
+    3.5,
+    6.5
+   ],
+   "grow": 0.8,
+   "look": "smoke",
+   "curl": true,
+   "col": "#d9d3c0",
+   "c2": "#a39d88"
+  },
+  {
+   "id": "streaks",
+   "t": "emit",
+   "at": 0,
+   "life": 0.06,
+   "att": "ground",
+   "pos": [
+    0,
+    0.3,
+    0
+   ],
+   "from": "ring",
+   "gravity": 0,
+   "drag": 1.6,
+   "burst": 30,
+   "rate": 0,
+   "fr": 0.4,
+   "dir": "flat",
+   "speed": [
+    10,
+    18
+   ],
+   "plife": [
+    0.15,
+    0.3
+   ],
+   "look": "streak",
+   "size": [
+    1.6,
+    3
+   ],
+   "col": "#ffffff",
+   "c2": "#8dff65",
+   "curl": false
+  },
+  {
+   "id": "shake",
+   "t": "screen",
+   "at": 0,
+   "life": 0.3,
+   "near": 25,
+   "shake": 2
+  }
+ ]
+}

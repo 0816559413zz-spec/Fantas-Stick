@@ -1,0 +1,208 @@
+{
+ "v": 1,
+ "desc": "Wind Push (บิน) ตีเป้าบนพื้น = จมดิน: ลมกดลงดิน + หลุมกระแทกเกลียวลม + ฝุ่นกระจายเป็นวง + เศษดิน",
+ "tags": [
+  "wind",
+  "push",
+  "hit"
+ ],
+ "pal": "wind",
+ "dur": 1.0,
+ "seed": 61,
+ "layers": [
+  {
+   "id": "disk",
+   "t": "mesh",
+   "at": 0,
+   "life": 0.7,
+   "att": "ground",
+   "pos": [
+    0,
+    0.08,
+    0
+   ],
+   "mat": "tex",
+   "col": "#8dff65",
+   "col2": "#000000",
+   "fade": 0,
+   "shape": "plane",
+   "tex": "tex/wind_void_disk",
+   "rim": 0,
+   "rot": [
+    90,
+    0,
+    0
+   ],
+   "spin": 300,
+   "scale": 3.4,
+   "op": {
+    "0": 0.9,
+    "0.5": 0.5,
+    "1": 0
+   }
+  },
+  {
+   "id": "shock",
+   "t": "warp",
+   "at": 0,
+   "life": 0.4,
+   "att": "ground",
+   "pos": [
+    0,
+    0.2,
+    0
+   ],
+   "kind": "shock",
+   "size": {
+    "0": 0.4,
+    "1": 4.2
+   },
+   "str": 0.9,
+   "op": {
+    "0": 1,
+    "1": 0
+   },
+   "col": "#ffffff",
+   "glow": 0,
+   "flat": true
+  },
+  {
+   "id": "ring",
+   "t": "ring",
+   "at": 0,
+   "life": 0.4,
+   "att": "ground",
+   "pos": [
+    0,
+    0.12,
+    0
+   ],
+   "col": "#ffffff",
+   "r": 3.2,
+   "op": 0.6
+  },
+  {
+   "id": "dust",
+   "t": "emit",
+   "at": 0,
+   "life": 0.08,
+   "att": "ground",
+   "pos": [
+    0,
+    0.1,
+    0
+   ],
+   "from": "ring",
+   "gravity": 0,
+   "drag": 2,
+   "burst": 40,
+   "rate": 0,
+   "fr": 0.5,
+   "dir": "out",
+   "speed": [
+    4,
+    8
+   ],
+   "up": [
+    0.5,
+    2
+   ],
+   "plife": [
+    0.6,
+    1.1
+   ],
+   "size": [
+    3,
+    6
+   ],
+   "grow": 0.7,
+   "look": "smoke",
+   "curl": true,
+   "col": "#d9d3c0",
+   "c2": "#a39d88"
+  },
+  {
+   "id": "down",
+   "t": "emit",
+   "at": 0,
+   "life": 0.35,
+   "att": "ground",
+   "pos": [
+    0,
+    2.2,
+    0
+   ],
+   "from": "disc",
+   "gravity": 0,
+   "drag": 0.2,
+   "rate": 120,
+   "fr": 0.9,
+   "dir": "down",
+   "spread": 0.1,
+   "speed": [
+    10,
+    16
+   ],
+   "plife": [
+    0.15,
+    0.25
+   ],
+   "look": "streak",
+   "size": [
+    1.8,
+    3.4
+   ],
+   "col": "#ffffff",
+   "c2": "#8dff65",
+   "curl": false
+  },
+  {
+   "id": "chips",
+   "t": "emit",
+   "at": 0,
+   "life": 0.06,
+   "att": "ground",
+   "pos": [
+    0,
+    0.1,
+    0
+   ],
+   "from": "disc",
+   "gravity": 9,
+   "drag": 1,
+   "burst": 10,
+   "rate": 0,
+   "fr": 0.6,
+   "dir": "up",
+   "spread": 0.8,
+   "speed": [
+    3,
+    7
+   ],
+   "plife": [
+    0.5,
+    0.9
+   ],
+   "look": "model",
+   "model": "rock_chunks",
+   "mmat": "solid",
+   "msize": [
+    0.08,
+    0.18
+   ],
+   "col": "#8a7a5a",
+   "c2": "#5c5038",
+   "bounce": 0.25,
+   "mspin": 500,
+   "x": true
+  },
+  {
+   "id": "shake",
+   "t": "screen",
+   "at": 0,
+   "life": 0.25,
+   "near": 25,
+   "shake": 1.2
+  }
+ ]
+}

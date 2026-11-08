@@ -1,0 +1,104 @@
+{
+ "v": 1,
+ "desc": "Sonic Boom พุ่งผ่าน (บูมตามหลัง): คลื่นเสียงวงบิดอากาศ + วงลม + เส้นลมสาดออกจากเส้นทาง",
+ "tags": [
+  "wind",
+  "sonic",
+  "hit"
+ ],
+ "pal": "wind",
+ "dur": 0.5,
+ "seed": 61,
+ "layers": [
+  {
+   "id": "shock",
+   "t": "warp",
+   "at": 0,
+   "life": 0.4,
+   "att": "point",
+   "pos": [
+    0,
+    0,
+    0
+   ],
+   "kind": "shock",
+   "size": {
+    "0": 0.4,
+    "1": 4.2
+   },
+   "str": 0.9,
+   "op": {
+    "0": 1,
+    "1": 0
+   },
+   "col": "#ffffff",
+   "glow": 0
+  },
+  {
+   "id": "ring",
+   "t": "ring",
+   "at": 0,
+   "life": 0.3,
+   "att": "point",
+   "pos": [
+    0,
+    -0.3,
+    0
+   ],
+   "col": "#d8ffe0",
+   "r": 3,
+   "op": 0.55
+  },
+  {
+   "id": "streak",
+   "t": "emit",
+   "at": 0,
+   "life": 0.06,
+   "att": "point",
+   "pos": [
+    0,
+    0,
+    0
+   ],
+   "from": "sphere",
+   "gravity": 0,
+   "drag": 1.6,
+   "burst": 22,
+   "rate": 0,
+   "fr": 0.3,
+   "dir": "out",
+   "speed": [
+    8,
+    16
+   ],
+   "plife": [
+    0.2,
+    0.4
+   ],
+   "look": "streak",
+   "size": [
+    1.6,
+    3.2
+   ],
+   "col": "#ffffff",
+   "c2": "#8dff65",
+   "curl": true
+  },
+  {
+   "id": "flash",
+   "t": "flash",
+   "at": 0,
+   "life": 0.1,
+   "att": "point",
+   "pos": [
+    0,
+    0,
+    0
+   ],
+   "col": "#d8ffe0",
+   "size0": 0.3,
+   "size": 2,
+   "k": 0.8
+  }
+ ]
+}

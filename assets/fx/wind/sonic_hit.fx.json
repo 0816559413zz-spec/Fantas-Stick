@@ -1,0 +1,197 @@
+{
+ "v": 1,
+ "desc": "Sonic Boom ชนตรง: แฟลชขาวใหญ่ + คลื่นช็อก + เส้นลมแผ่รัศมีและพุ่งไปตามทิศพุ่ง + เศษลม",
+ "tags": [
+  "wind",
+  "sonic",
+  "hit"
+ ],
+ "pal": "wind",
+ "dur": 0.7,
+ "seed": 61,
+ "layers": [
+  {
+   "id": "flash",
+   "t": "flash",
+   "at": 0,
+   "life": 0.15,
+   "att": "point",
+   "pos": [
+    0,
+    0,
+    0
+   ],
+   "col": "#ffffff",
+   "size0": 0.5,
+   "size": 4.5,
+   "k": 1.4
+  },
+  {
+   "id": "shock",
+   "t": "warp",
+   "at": 0,
+   "life": 0.4,
+   "att": "point",
+   "pos": [
+    0,
+    0,
+    0
+   ],
+   "kind": "shock",
+   "size": {
+    "0": 0.5,
+    "1": 7
+   },
+   "str": 1,
+   "op": {
+    "0": 1,
+    "1": 0
+   },
+   "col": "#ffffff",
+   "glow": 0
+  },
+  {
+   "id": "ring",
+   "t": "ring",
+   "at": 0,
+   "life": 0.35,
+   "att": "ground",
+   "pos": [
+    0,
+    0.12,
+    0
+   ],
+   "col": "#ffffff",
+   "r": 6,
+   "op": 0.7
+  },
+  {
+   "id": "radial",
+   "t": "emit",
+   "at": 0,
+   "life": 0.06,
+   "att": "point",
+   "pos": [
+    0,
+    0,
+    0
+   ],
+   "from": "sphere",
+   "gravity": 0,
+   "drag": 1.4,
+   "burst": 60,
+   "rate": 0,
+   "fr": 0.2,
+   "dir": "out",
+   "speed": [
+    14,
+    26
+   ],
+   "plife": [
+    0.2,
+    0.45
+   ],
+   "look": "streak",
+   "size": [
+    2,
+    4.2
+   ],
+   "col": "#ffffff",
+   "c2": "#8dff65",
+   "curl": false
+  },
+  {
+   "id": "fwd",
+   "t": "emit",
+   "at": 0,
+   "life": 0.06,
+   "att": "point",
+   "pos": [
+    0,
+    0,
+    0
+   ],
+   "from": "sphere",
+   "gravity": 0,
+   "drag": 0.8,
+   "burst": 30,
+   "rate": 0,
+   "fr": 0.3,
+   "dir": "aim",
+   "spread": 0.35,
+   "speed": [
+    20,
+    34
+   ],
+   "plife": [
+    0.2,
+    0.4
+   ],
+   "look": "streak",
+   "size": [
+    2,
+    4
+   ],
+   "col": "#d8ffe0",
+   "c2": "#3ed486",
+   "curl": false
+  },
+  {
+   "id": "chips",
+   "t": "emit",
+   "at": 0,
+   "life": 0.06,
+   "att": "point",
+   "pos": [
+    0,
+    0,
+    0
+   ],
+   "from": "sphere",
+   "gravity": 1,
+   "drag": 1,
+   "burst": 8,
+   "rate": 0,
+   "fr": 0.3,
+   "dir": "out",
+   "speed": [
+    6,
+    12
+   ],
+   "plife": [
+    0.5,
+    0.9
+   ],
+   "look": "model",
+   "model": "wind_wing_airchip",
+   "mmat": "glow",
+   "msize": [
+    0.08,
+    0.2
+   ],
+   "col": "#d8ffe0",
+   "c2": "#3ed486",
+   "mspin": 700,
+   "bounce": 0,
+   "x": true
+  },
+  {
+   "id": "shake",
+   "t": "screen",
+   "at": 0,
+   "life": 0.4,
+   "near": 30,
+   "shake": 2.5
+  },
+  {
+   "id": "kick",
+   "t": "screen",
+   "at": 0,
+   "life": 0.3,
+   "own": true,
+   "kick": 0.25,
+   "flash": 0.04,
+   "fcol": "#ffffff"
+  }
+ ]
+}

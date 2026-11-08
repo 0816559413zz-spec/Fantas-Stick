@@ -1,0 +1,218 @@
+{
+ "v": 1,
+ "desc": "Windup ① วงลมรอตรงจุดวาง (0.45 วิ ก่อนพัดขึ้น): จานเกลียวลมเขียวหมุนบนพื้น + เส้นลมไหลเข้าหากลางวง + ขอบวงสว่าง — ขนาดตาม p.r (ม.)",
+ "tags": [
+  "wind",
+  "windup",
+  "zone"
+ ],
+ "pal": "wind",
+ "dur": 0.5,
+ "seed": 61,
+ "layers": [
+  {
+   "id": "disk",
+   "t": "mesh",
+   "at": 0,
+   "life": "t",
+   "att": "ground",
+   "pos": [
+    0,
+    0.08,
+    0
+   ],
+   "mat": "tex",
+   "col": "#8dff65",
+   "col2": "#000000",
+   "fade": 0,
+   "shape": "plane",
+   "tex": "tex/wind_void_disk",
+   "rim": 0,
+   "rot": [
+    90,
+    0,
+    0
+   ],
+   "spin": 140,
+   "scale": {
+    "0": 1,
+    "1": 1,
+    "x": "r*1.9"
+   },
+   "op": {
+    "0": 0,
+    "0.25": 0.8,
+    "0.85": 0.9,
+    "1": 0.2
+   }
+  },
+  {
+   "id": "disk2",
+   "t": "mesh",
+   "at": 0,
+   "life": "t",
+   "att": "ground",
+   "pos": [
+    0,
+    0.1,
+    0
+   ],
+   "mat": "tex",
+   "col": "#ffffff",
+   "col2": "#000000",
+   "fade": 0,
+   "shape": "plane",
+   "tex": "tex/wind_void_disk_b",
+   "rim": 0,
+   "rot": [
+    90,
+    0,
+    0
+   ],
+   "spin": -90,
+   "scale": {
+    "0": 0.6,
+    "1": 1,
+    "x": "r*1.5"
+   },
+   "op": {
+    "0": 0,
+    "0.4": 0.55,
+    "1": 0.1
+   }
+  },
+  {
+   "id": "edge",
+   "t": "ring",
+   "at": 0,
+   "life": "t",
+   "att": "ground",
+   "pos": [
+    0,
+    0.12,
+    0
+   ],
+   "col": "#d8ffe0",
+   "r": "r",
+   "op": 0.55
+  },
+  {
+   "id": "inflow",
+   "t": "emit",
+   "at": 0,
+   "life": "t",
+   "att": "ground",
+   "pos": [
+    0,
+    0.2,
+    0
+   ],
+   "from": "ring",
+   "gravity": 0,
+   "drag": 0.4,
+   "rate": 70,
+   "fr": "r",
+   "dir": "in",
+   "speed": [
+    2,
+    5
+   ],
+   "up": [
+    0.3,
+    1.2
+   ],
+   "plife": [
+    0.25,
+    0.4
+   ],
+   "look": "streak",
+   "size": [
+    1.4,
+    2.6
+   ],
+   "col": "#ffffff",
+   "c2": "#8dff65",
+   "curl": false
+  },
+  {
+   "id": "dust",
+   "t": "emit",
+   "at": 0,
+   "life": "t",
+   "att": "ground",
+   "pos": [
+    0,
+    0.1,
+    0
+   ],
+   "from": "ring",
+   "gravity": 0,
+   "drag": 1.2,
+   "rate": 24,
+   "fr": "r",
+   "dir": "tangent",
+   "speed": [
+    1.5,
+    3
+   ],
+   "up": [
+    0.2,
+    0.6
+   ],
+   "plife": [
+    0.5,
+    0.8
+   ],
+   "size": [
+    2.5,
+    4.5
+   ],
+   "grow": 0.5,
+   "x": true,
+   "look": "smoke",
+   "curl": true,
+   "col": "#d9d3c0",
+   "c2": "#a39d88"
+  },
+  {
+   "id": "haze",
+   "t": "warp",
+   "at": 0,
+   "life": "t",
+   "att": "ground",
+   "pos": [
+    0,
+    0.2,
+    0
+   ],
+   "kind": "haze",
+   "size": {
+    "0": 1,
+    "1": "r*0.9"
+   },
+   "str": 0.35,
+   "op": {
+    "0": 0,
+    "0.3": 1,
+    "1": 0.5
+   },
+   "col": "#ffffff",
+   "glow": 0,
+   "x": true
+  }
+ ],
+ "params": {
+  "r": {
+   "def": 5,
+   "desc": "รัศมีวง (ม.)"
+  },
+  "t": {
+   "def": 0.45,
+   "desc": "รอก่อนพัด (วิ)"
+  },
+  "a": {
+   "def": 1.0,
+   "desc": "วงพัดอยู่ (วิ)"
+  }
+ }
+}

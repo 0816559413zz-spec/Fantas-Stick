@@ -1,0 +1,196 @@
+{
+ "v": 1,
+ "desc": "Wind Push (พื้น) ตีเป้าบนพื้น = พัดขึ้น: เสาลมสั้นใต้เท้า + จานเกลียวลม + คลื่นวงบนพื้น + เส้นลมพุ่งขึ้น",
+ "tags": [
+  "wind",
+  "push",
+  "hit"
+ ],
+ "pal": "wind",
+ "dur": 0.6,
+ "seed": 61,
+ "layers": [
+  {
+   "id": "col",
+   "t": "mesh",
+   "at": 0,
+   "life": 0.5,
+   "att": "point",
+   "pos": [
+    0,
+    -1.1,
+    0
+   ],
+   "mat": "tex",
+   "col": "#ffffff",
+   "col2": "#000000",
+   "fade": 0,
+   "shape": "model",
+   "model": "wind_vortex_air",
+   "tex": "tex/wind_air_rise",
+   "rim": 0,
+   "uvTile": [
+    3,
+    1
+   ],
+   "uvScroll": [
+    -0.6,
+    0
+   ],
+   "spin": 400,
+   "scale": {
+    "0": [
+     0.3,
+     0.2,
+     0.3
+    ],
+    "0.3": [
+     0.5,
+     0.6,
+     0.5
+    ],
+    "1": [
+     0.4,
+     0.7,
+     0.4
+    ]
+   },
+   "op": {
+    "0": 0,
+    "0.15": 0.8,
+    "0.7": 0.6,
+    "1": 0
+   }
+  },
+  {
+   "id": "disk",
+   "t": "mesh",
+   "at": 0,
+   "life": 0.4,
+   "att": "ground",
+   "pos": [
+    0,
+    0.08,
+    0
+   ],
+   "mat": "tex",
+   "col": "#8dff65",
+   "col2": "#000000",
+   "fade": 0,
+   "shape": "plane",
+   "tex": "tex/wind_void_disk",
+   "rim": 0,
+   "rot": [
+    90,
+    0,
+    0
+   ],
+   "spin": 300,
+   "scale": 2.2,
+   "op": {
+    "0": 0.9,
+    "1": 0
+   }
+  },
+  {
+   "id": "shock",
+   "t": "warp",
+   "at": 0,
+   "life": 0.3,
+   "att": "ground",
+   "pos": [
+    0,
+    0.2,
+    0
+   ],
+   "kind": "shock",
+   "size": {
+    "0": 0.3,
+    "1": 2.6
+   },
+   "str": 0.7,
+   "op": {
+    "0": 1,
+    "1": 0
+   },
+   "col": "#ffffff",
+   "glow": 0,
+   "flat": true
+  },
+  {
+   "id": "rise",
+   "t": "emit",
+   "at": 0,
+   "life": 0.4,
+   "att": "point",
+   "pos": [
+    0,
+    -1,
+    0
+   ],
+   "from": "ring",
+   "gravity": 0,
+   "drag": 0.4,
+   "rate": 100,
+   "fr": 0.5,
+   "dir": "up",
+   "speed": [
+    6,
+    11
+   ],
+   "plife": [
+    0.25,
+    0.45
+   ],
+   "look": "streak",
+   "size": [
+    1.4,
+    2.8
+   ],
+   "col": "#ffffff",
+   "c2": "#8dff65",
+   "curl": true
+  },
+  {
+   "id": "dust",
+   "t": "emit",
+   "at": 0,
+   "life": 0.06,
+   "att": "point",
+   "pos": [
+    0,
+    -1,
+    0
+   ],
+   "from": "ring",
+   "gravity": 0,
+   "drag": 1.6,
+   "burst": 14,
+   "rate": 0,
+   "fr": 0.4,
+   "dir": "out",
+   "speed": [
+    2,
+    4
+   ],
+   "up": [
+    1,
+    3
+   ],
+   "plife": [
+    0.5,
+    0.9
+   ],
+   "size": [
+    2.5,
+    4.5
+   ],
+   "grow": 0.6,
+   "x": true,
+   "look": "smoke",
+   "curl": true,
+   "col": "#d9d3c0",
+   "c2": "#a39d88"
+  }
+ ]
+}

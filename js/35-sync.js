@@ -330,7 +330,7 @@ function makeProj(col,t){
 }
 const _a=new THREE.Vector3(),_b=new THREE.Vector3();
 // กระสุนที่มีเอฟเฟกต์จากไฟล์ติดตัว (ผู้ใช้เลือก VFX 2026-10-22): [ระหว่างบิน (วน), ตอนโดน]
-const PJFX={spark:['fire/spark_fly','fire/spark_hit'],pfire:['fire/fireball_fly',null],icicle:['frost/icicle_fly','frost/icicle_hitb'],wblade:['wind/ba_gust_fly','wind/ba_gust_hit'],wpush:['wind/ba_gust_fly','wind/ba_gust_hit'],wball:['wind/orb_fly','wind/orb_hit'],wdrop:['water/ba_fly','water/ba_hit'],wcage:['water/cage_fly',null]};
+const PJFX={spark:['fire/spark_fly','fire/spark_hit'],pfire:['fire/fireball_fly',null],icicle:['frost/icicle_fly','frost/icicle_hitb'],wblade:['wind/ba_gust_fly','wind/ba_gust_hit'],wpush:['wind/push_fly','wind/ba_gust_hit'],wbl:['wind/blade_fly',null],wball:['wind/orb_fly','wind/orb_hit'],wdrop:['water/ba_fly','water/ba_hit'],wcage:['water/cage_fly',null]};
 function syncProj(v,now){
   const ex=VIEW.ex!==null?VIEW.ex:clamp((now-VIEW.tCur)/1000,0,0.1),seen=new Set();
   for(const j of v.J){
