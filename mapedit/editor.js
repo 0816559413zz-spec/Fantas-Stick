@@ -107,7 +107,7 @@ const $ = id => document.getElementById(id);
 const cv = $('cv'), ctx = cv.getContext('2d');
 let M = null, online = false, dirty = false, saveT = 0, list = [];
 let tool = 'select';
-const opt = { size: 1, shape: 'brush', hmode: 'raise', hval: 1, surf: 1, wall: 1, walk: 2, obj: 'spawnA', dir: 1, route: 'main' };
+const opt = { size: 1, shape: 'brush', hmode: 'raise', hval: 1, surf: 1, wall: 1, walk: 2, obj: 'spawnA', dir: 1, route: 'main', rauto: 1 };
 const show = { color: 'surf', grid: 1, hnum: 0, ramps: 1, walls: 1, objs: 1, zones: 1, routes: 1, notes: 1, ref: 1, walkov: 0, links: 1 };
 let wstate = 'pre';
 let sel = null; // {k:'obj'|'zone'|'route'|'note', id}
@@ -196,6 +196,49 @@ function cellsFor(o, blk) {
   for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) if ((x === x0 || x === x1 || y === y0 || y === y1) && inb(x, y) && !blk[y * W + x]) r.push(y * W + x);
   return r;
 }
+// ramp rule: a ramp cell at height h only links to the cell in front of it (arrow) when that cell is exactly h+1.
+function rampDead(x, y) {
+  const d = M.ramp[y][x]; if (!d) return false;
+  const nx = x + DIRS[d][0], ny = y + DIRS[d][1];
+  return !(inb(nx, ny) && M.height[ny][nx] === M.height[y][x] + 1);
+}
+function autoDir(x, y, pref) { // direction toward an orthogonal neighbour that is exactly 1 level higher (pref first), 0 if none
+  const h = M.height[y][x];
+  for (const d of [pref, 1, 2, 3, 4]) { if (!d) continue; const nx = x + DIRS[d][0], ny = y + DIRS[d][1]; if (inb(nx, ny) && M.height[ny][nx] === h + 1) return d; }
+  return 0;
+}
+function countDeadRamps() { let n = 0; for (let y = 0; y < M.h; y++) for (let x = 0; x < M.w; x++) if (rampDead(x, y)) n++; return n; }
+function fixRamps(removeRest) { // re-point dead ramps toward the higher neighbour; optionally delete those that still have none
+  pushUndo(); let fixed = 0, left = 0, removed = 0;
+  for (let y = 0; y < M.h; y++) for (let x = 0; x < M.w; x++) {
+    if (!rampDead(x, y)) continue;
+    const d = autoDir(x, y, 0);
+    if (d) { M.ramp[y][x] = d; fixed++; } else if (removeRest) { M.ramp[y][x] = 0; removed++; } else left++;
+  }
+  if (!fixed && !removed) { undo.pop(); stat(left ? `ทางลาดใช้ไม่ได้ ${left} ช่อง แก้ทิศไม่ได้ (ไม่มีช่องสูงกว่า 1 ระดับติดกัน)` : 'ทางลาดใช้ได้ทุกช่องแล้ว ✓', left ? 'warn' : 'ok'); return; }
+  changed(); renderOpts();
+  stat(`แก้ทิศ ${fixed} ช่อง` + (removed ? ` • ลบ ${removed} ช่อง` : '') + (left ? ` • ยังใช้ไม่ได้ ${left} ช่อง` : ''), 'ok');
+}
+// stairs tool: drag from the low end to the high end; height rises 1 per cell, ramp arrows point uphill, last cell is the flat top
+function stairInfo(d) {
+  const [ax, ay] = d.a; if (!inb(ax, ay)) return { n: 0, cells: [], dir: 1, h0: 0 };
+  const ddx = d.b[0] - ax, ddy = d.b[1] - ay, horiz = Math.abs(ddx) >= Math.abs(ddy);
+  const n = horiz ? Math.abs(ddx) : Math.abs(ddy), dir = horiz ? (ddx >= 0 ? 2 : 4) : (ddy >= 0 ? 3 : 1);
+  const s = opt.size, o = Math.floor((s - 1) / 2), cells = [];
+  for (let i = 0; i <= n; i++) for (let k = -o; k < s - o; k++) {
+    const x = horiz ? ax + (ddx >= 0 ? i : -i) : ax + k, y = horiz ? ay + k : ay + (ddy >= 0 ? i : -i);
+    if (inb(x, y)) cells.push([x, y, i]);
+  }
+  return { n, cells, dir, h0: M.height[ay][ax] };
+}
+function applyStairs(d) {
+  const st = stairInfo(d); if (st.n < 1) { undo.pop(); return; }
+  for (const [x, y, i] of st.cells) {
+    if (d.sec) { M.ramp[y][x] = 0; continue; }
+    M.height[y][x] = clamp(st.h0 + i, HMIN, HMAX); M.ramp[y][x] = i < st.n ? st.dir : 0;
+  }
+  changed();
+}
 function stepOk(w, a, b, dx, dy) {
   if (w.blk[b]) return false;
   const dh = w.hg[b] - w.hg[a];
@@ -280,7 +323,7 @@ function analyze() {
     }
     r.islands.sort((a, b) => b.n - a.n);
   }
-  r.walkable = walkable;
+  r.walkable = walkable; r.deadRamps = countDeadRamps();
   // paths between spawns and goals
   const goals = M.objs.filter(o => o.t === 'core' || o.t === 'point');
   const pairs = [];
@@ -291,7 +334,7 @@ function analyze() {
     post: findPath(r.post, cellsFor(a, r.post.blk), cellsFor(b, r.post.blk)) }));
   return r;
 }
-function refreshReport() { clearTimeout(repT); repT = setTimeout(() => { REP = analyze(); WK = REP[wstate]; renderCheck(); req(); }, 120); }
+function refreshReport() { clearTimeout(repT); repT = setTimeout(() => { REP = analyze(); WK = REP[wstate]; renderCheck(); if (tool === 'height' && opt.hmode === 'ramp') renderOpts(); req(); }, 120); }
 function routeLen(rt) { let L = 0; for (let i = 1; i < rt.pts.length; i++) L += Math.hypot(rt.pts[i][0] - rt.pts[i - 1][0], rt.pts[i][1] - rt.pts[i - 1][1]); return L * M.cell; }
 
 // ================= rendering =================
@@ -361,7 +404,9 @@ function render(g, z, ox, oy, VW, VH, live) {
     for (let y = y0; y < y1; y++) for (let x = x0; x < x1; x++) {
       const d = M.ramp[y][x]; if (!d) continue;
       const [dx, dy] = DIRS[d], cx = X(x + 0.5), cy = Y(y + 0.5), s = z * 0.28, px = -dy, py = dx;
-      g.fillStyle = 'rgba(255,255,255,.12)'; g.fillRect(X(x), Y(y), z, z);
+      const dead = rampDead(x, y); // arrow does not lead to a cell exactly 1 level higher
+      g.strokeStyle = dead ? 'rgba(255,70,70,.95)' : 'rgba(255,255,255,.85)';
+      g.fillStyle = dead ? 'rgba(255,60,60,.28)' : 'rgba(255,255,255,.12)'; g.fillRect(X(x), Y(y), z, z);
       for (const off of [-0.18, 0.14]) {
         const bx = cx + dx * off * z, by = cy + dy * off * z;
         g.beginPath(); g.moveTo(bx - dx * s * 0.5 + px * s, by - dy * s * 0.5 + py * s); g.lineTo(bx + dx * s * 0.5, by + dy * s * 0.5); g.lineTo(bx - dx * s * 0.5 - px * s, by - dy * s * 0.5 - py * s); g.stroke();
@@ -467,7 +512,14 @@ function render(g, z, ox, oy, VW, VH, live) {
   // tool preview
   if (live && drag && drag.prev) {
     const p = drag.prev; g.strokeStyle = '#8fb9ff'; g.lineWidth = 2; g.setLineDash([5, 4]);
-    if (p.cells) { g.fillStyle = 'rgba(74,140,255,.3)'; for (const [x, y] of p.cells) g.fillRect(X(x), Y(y), z, z); }
+    if (p.cells) {
+      g.fillStyle = 'rgba(74,140,255,.3)'; for (const [x, y] of p.cells) g.fillRect(X(x), Y(y), z, z);
+      if (drag.st && drag.st.n > 0) { // stairs preview: resulting height per cell
+        const st = drag.st; g.fillStyle = '#fff'; g.font = Math.max(9, Math.min(z * 0.5, 16)) + 'px Consolas,monospace'; g.textAlign = 'center'; g.textBaseline = 'middle';
+        for (const [x, y, i] of st.cells) g.fillText(st.h0 + i, X(x + 0.5), Y(y + 0.5));
+        label(g, `ปลายบนสุด = ระดับ ${st.h0 + st.n} (${st.n} ช่อง)`, X(drag.b[0] + 1) + 8, Y(drag.b[1]), '#8fb9ff', 13, 'left', 'middle', true);
+      }
+    }
     else g.strokeRect(X(p.x0), Y(p.y0), (p.x1 - p.x0 + 1) * z, (p.y1 - p.y0 + 1) * z);
     g.setLineDash([]);
   }
@@ -548,7 +600,11 @@ function paint(x, y, sec, visited, dir) {
   const k = y * M.w + x; if (visited) { if (visited.has(k)) return; visited.add(k); }
   if (tool === 'height') {
     const m = opt.hmode;
-    if (m === 'ramp') { M.ramp[y][x] = sec ? 0 : (dir || opt.dir); return; }
+    if (m === 'ramp') {
+      if (sec) { M.ramp[y][x] = 0; return; }
+      if (opt.rauto) { const a = autoDir(x, y, dir || opt.dir); if (a) M.ramp[y][x] = a; return; } // auto: only cells that have a cell exactly 1 level higher next to them
+      M.ramp[y][x] = dir || opt.dir; return;
+    }
     if (m === 'raise' || m === 'lower') { const up = (m === 'raise') !== !!sec; M.height[y][x] = clamp(M.height[y][x] + (up ? 1 : -1), HMIN, HMAX); return; }
     if (m === 'set') { M.height[y][x] = opt.hval; return; }
     if (m === 'smooth') {
@@ -610,6 +666,7 @@ cv.addEventListener('pointerdown', e => {
   if (tool in LAYER) {
     if (e.altKey || (sec && (tool === 'surf' || (tool === 'height' && opt.hmode === 'set')))) { pick(c.cx, c.cy); return; }
     pushUndo();
+    if (tool === 'height' && opt.hmode === 'stairs') { drag = { shape: 'stairs', a: [c.cx, c.cy], b: [c.cx, c.cy], sec }; updShapePrev(); req(); return; }
     if (opt.shape === 'fill' && tool !== 'height' || (tool === 'height' && opt.shape === 'fill' && opt.hmode !== 'ramp' && opt.hmode !== 'smooth')) {
       for (const [x, y] of floodCells(LAYER[tool], c.cx, c.cy)) paint(x, y, sec, null);
       changed(); drag = null; return;
@@ -658,6 +715,7 @@ function snapPt(c, e) { return e.altKey ? [+c.fx.toFixed(2), +c.fy.toFixed(2)] :
 function updShapePrev() {
   const d = drag; if (!d) return;
   if (d.zone) { d.prev = { x0: Math.min(d.a[0], d.b[0]), y0: Math.min(d.a[1], d.b[1]), x1: Math.max(d.a[0], d.b[0]), y1: Math.max(d.a[1], d.b[1]) }; return; }
+  if (d.shape === 'stairs') { d.st = stairInfo(d); d.prev = { cells: d.st.cells }; return; }
   d.prev = { cells: shapeCells(d) };
 }
 function shapeCells(d) {
@@ -674,7 +732,7 @@ cv.addEventListener('pointermove', e => {
     let dir = 0;
     if (tool === 'height' && opt.hmode === 'ramp') {
       const ddx = c.cx - d.last[0], ddy = c.cy - d.last[1];
-      if (ddx || ddy) { dir = Math.abs(ddx) >= Math.abs(ddy) ? (ddx > 0 ? 2 : 4) : (ddy > 0 ? 3 : 1); d.dir = dir; if (!d.fixed) { d.fixed = 1; for (const k of d.visited) { const x = k % M.w, y = (k / M.w) | 0; if (M.ramp[y][x]) M.ramp[y][x] = dir; } } }
+      if (ddx || ddy) { dir = Math.abs(ddx) >= Math.abs(ddy) ? (ddx > 0 ? 2 : 4) : (ddy > 0 ? 3 : 1); d.dir = dir; if (!d.fixed && !opt.rauto) { d.fixed = 1; for (const k of d.visited) { const x = k % M.w, y = (k / M.w) | 0; if (M.ramp[y][x]) M.ramp[y][x] = dir; } } }
     }
     for (const [x, y] of lineCells(d.last[0], d.last[1], c.cx, c.cy)) for (const [bx, by] of brushCells(x, y)) paint(bx, by, d.sec, d.visited, d.dir);
     d.last = [c.cx, c.cy]; changed(true); return;
@@ -695,7 +753,8 @@ cv.addEventListener('pointermove', e => {
 });
 cv.addEventListener('pointerup', e => {
   const d = drag; drag = null; if (!d || !M) return;
-  if (d.shape) { for (const [x, y] of shapeCells(d)) paint(x, y, d.sec, null); changed(); }
+  if (d.shape === 'stairs') applyStairs(d);
+  else if (d.shape) { for (const [x, y] of shapeCells(d)) paint(x, y, d.sec, null); changed(); }
   else if (d.zone) {
     const p = d.prev; pushUndo();
     const zn = { id: nid('z'), name: 'โซน ' + (M.zones.length + 1), x: clamp(p.x0, 0, M.w - 1), y: clamp(p.y0, 0, M.h - 1), w: p.x1 - p.x0 + 1, h: p.y1 - p.y0 + 1, col: ZCOL[M.zones.length % ZCOL.length], note: '' };
@@ -723,7 +782,7 @@ function status(c) {
   const x = c.cx, y = c.cy;
   $('sCell').textContent = `x ${x}  y ${y}`;
   const parts = [`สูง ${M.height[y][x]} (${(M.height[y][x] * M.lvl).toFixed(1)} ม.)`, SURF[M.surf[y][x]].n];
-  if (M.ramp[y][x]) parts.push('ทางลาดขึ้น ' + DIRN[M.ramp[y][x]]);
+  if (M.ramp[y][x]) parts.push('ทางลาดขึ้น ' + DIRN[M.ramp[y][x]] + (rampDead(x, y) ? ' ⚠ ใช้ไม่ได้ (ช่องหน้าต้องสูงกว่า 1 ระดับ)' : ''));
   if (M.wall[y][x]) parts.push(WALL[M.wall[y][x]].n);
   if (M.walk[y][x]) parts.push(WALK[M.walk[y][x]].n);
   if (WK) parts.push(WK.blk[y * M.w + x] ? '⛔ เดินไม่ได้' : '✓ เดินได้');
@@ -827,7 +886,7 @@ function renderOpts() {
     return;
   }
   if (tool === 'height') {
-    el.append(seg([['raise', '＋ ยก'], ['lower', '－ ลด'], ['set', '＝ ตั้งค่า'], ['smooth', '≈ เกลี่ย'], ['ramp', '⟋ ทางลาด']], opt.hmode, v => { opt.hmode = v; renderOpts(); }));
+    el.append(seg([['raise', '＋ ยก'], ['lower', '－ ลด'], ['set', '＝ ตั้งค่า'], ['smooth', '≈ เกลี่ย'], ['stairs', '⟋ บันได'], ['ramp', '⟋ ทางลาด']], opt.hmode, v => { opt.hmode = v; renderOpts(); }));
     if (opt.hmode === 'set') {
       el.append(h3('ระดับ (0-9 บนคีย์บอร์ด)'));
       const d = document.createElement('div'); d.className = 'row';
@@ -836,13 +895,29 @@ function renderOpts() {
       el.append(d);
       el.insertAdjacentHTML('beforeend', `<p class="mut">1 ระดับ = ${M ? M.lvl : 1} ม. • คลิกขวา/Alt+คลิก = ดูดค่าจากพื้น</p>`);
     }
+    if (opt.hmode === 'stairs') {
+      el.insertAdjacentHTML('beforeend', '<p class="mut"><b>ลากจากปลายล่าง → ปลายบน</b> ในเส้นตรง (แนวนอนหรือแนวตั้ง)<br>ระดับขึ้นทีละ 1 ต่อช่อง เริ่มจากระดับของช่องที่เริ่มลาก ลูกศรชี้ขึ้นให้เอง ช่องบนสุดเป็นพื้นราบ<br>ตัวอย่าง: เริ่มที่พื้นระดับ 0 ลาก 6 ช่อง → ปลายบนเป็นระดับ 6 • ขนาดแปรง = ความกว้างบันได<br>คลิกขวาลาก = ลบลูกศรทางลาด (ไม่แตะระดับ)</p>');
+    }
     if (opt.hmode === 'ramp') {
+      const lb = document.createElement('label'); lb.className = 'chk';
+      lb.innerHTML = `<input type="checkbox" ${opt.rauto ? 'checked' : ''}> หมุนลูกศรชี้ช่องที่สูงกว่า 1 ระดับเอง (แนะนำ)`;
+      lb.firstChild.onchange = e => { opt.rauto = e.target.checked ? 1 : 0; };
+      el.append(lb);
       el.append(h3('ทิศที่ทางลาด "ขึ้น"'));
       el.append(seg([[1, '↑'], [2, '→'], [3, '↓'], [4, '←']], opt.dir, v => { opt.dir = v; renderOpts(); }));
-      el.insertAdjacentHTML('beforeend', '<p class="mut">ลากเมาส์ไปทางที่ขึ้น = ใช้ทิศที่ลากอัตโนมัติ<br>ทางลาดต่อช่องสูงต่างกัน 1 ระดับ (เช่น 0 → 1) ถ้าต่างกัน 2 ให้ทำทางลาด 2 ช่องติดกันแบบขั้นบันได<br>คลิกขวา = ลบทางลาด</p>');
+      el.insertAdjacentHTML('beforeend', '<p class="mut"><b>กฎ:</b> ลูกศรต้องชี้ไปช่องที่สูงกว่าช่องลูกศรอยู่ <b>พอดี 1 ระดับ</b> ไม่งั้นเดินขึ้นไม่ได้ (ช่องแดง = ใช้ไม่ได้)<br>ลูกศรไม่ได้ทำให้พื้นสูงขึ้น — ต้องมีความสูงต่างกันก่อน หรือใช้โหมด "⟋ บันได" ที่ลากแล้วทำระดับให้เลย<br>เปิดหมุนอัตโนมัติ = ระบายทับเนิน/ขอบได้เลย จะวางเฉพาะช่องที่มีช่องสูงกว่า 1 ระดับติดอยู่ • ปิด = ใช้ทิศที่เลือก/ที่ลากเอง • คลิกขวา = ลบทางลาด</p>');
+      const dead = countDeadRamps();
+      if (dead) {
+        el.insertAdjacentHTML('beforeend', `<p class="wn">⚠ ทางลาดใช้ไม่ได้ ${dead} ช่อง (สีแดงบนแผนที่)</p>`);
+        const bb = document.createElement('div'); bb.className = 'btns';
+        bb.innerHTML = '<button class="tl-btn">🔧 แก้ทิศอัตโนมัติ</button><button class="tl-btn dng">ลบอันที่ยังใช้ไม่ได้</button>';
+        bb.children[0].onclick = () => fixRamps(false); bb.children[1].onclick = () => fixRamps(true);
+        el.append(bb);
+      } else el.insertAdjacentHTML('beforeend', '<p class="ok">✓ ทางลาดใช้ได้ทุกช่อง</p>');
     }
     el.append(h3('รูปแบบ'));
-    if (opt.hmode === 'ramp' || opt.hmode === 'smooth') { if (opt.shape === 'fill') opt.shape = 'brush'; el.append(seg([['brush', 'แปรง'], ['rect', 'สี่เหลี่ยม']], opt.shape, v => { opt.shape = v; renderOpts(); })); }
+    if (opt.hmode === 'stairs') { /* size only */ }
+    else if (opt.hmode === 'ramp' || opt.hmode === 'smooth') { if (opt.shape === 'fill') opt.shape = 'brush'; el.append(seg([['brush', 'แปรง'], ['rect', 'สี่เหลี่ยม']], opt.shape, v => { opt.shape = v; renderOpts(); })); }
     else el.append(shapeSeg(false));
     el.append(sizeRow());
     el.insertAdjacentHTML('beforeend', `<h3>สีตามความสูง</h3><div class="pal">${[-4, -2, 0, 2, 4, 6, 8, 10, 12].map(l => `<button style="pointer-events:none"><span class="sw" style="background:${hcol(l)}"></span>ระดับ ${l}</button>`).join('')}</div>`);
@@ -1040,6 +1115,7 @@ function renderCheck() {
   let h = '<div class="seg" id="wsSeg"></div><div class="rep">';
   h += `<div>พื้นที่เดินได้ ${R.walkable} ช่อง (${(R.walkable * M.cell * M.cell).toFixed(0)} ตร.ม.)</div>`;
   if (!sp.length) h += '<div class="wn">ยังไม่มีจุดเกิด — วาง "จุดเกิดฝ่ายบุก/รับ" เพื่อตรวจว่าไปถึงทุกที่ไหม</div>';
+  if (R.deadRamps) h += `<div class="wn">⚠ ทางลาดใช้ไม่ได้ ${R.deadRamps} ช่อง (ลูกศรไม่ชี้ช่องที่สูงกว่าพอดี 1 ระดับ) — เลือก ความสูง → ทางลาด แล้วกด "แก้ทิศอัตโนมัติ"</div>`;
   for (const s of sp) h += `<div>${esc(s.o.lb || odef(s.o)[0])}: ไปถึง ${s.n} ช่อง ${s.n2 !== s.n ? `<span class="ok">(หลัง Interact ${s.n2})</span>` : ''}</div>`;
   if (R.islands.length) {
     h += `<div class="wn" style="margin-top:4px">พื้นที่ที่เดินได้แต่ไปไม่ถึง ${R.islands.length} จุด:</div><ul>`;
@@ -1161,6 +1237,7 @@ function buildMD(R) {
   }
   if (m.notes.length) { L.push('## โน้ตบนแผนที่', ''); for (const n of m.notes) L.push(`- (${fx(n.x)}, ${fx(n.y)}) ${(n.text || '').replace(/\n/g, ' / ')}`); L.push(''); }
   L.push('## ผลตรวจทางเดิน (คำนวณอัตโนมัติ)', '', `- เดินได้ ${R.walkable} ช่อง (สถานะก่อน Interact)`);
+  if (R.deadRamps) L.push(`- ⚠ ทางลาดใช้ไม่ได้ ${R.deadRamps} ช่อง (ลูกศรไม่ชี้ช่องที่สูงกว่าพอดี 1 ระดับ — เดินขึ้นไม่ได้)`);
   if (!R.src.length) L.push('- ยังไม่มีจุดเกิด จึงไม่ได้ตรวจการเข้าถึง');
   for (const s of R.src) L.push(`- จาก ${name(s.o)} ${s.o.id}: ไปถึง ${s.n} ช่อง (หลัง Interact ${s.n2})`);
   if (R.src.length) L.push(R.islands.length ? `- ⚠ พื้นที่เดินได้แต่ไปไม่ถึงจากจุดเกิด: ${R.islands.slice(0, 10).map(i => `x${i.x0}-${i.x1} y${i.y0}-${i.y1} (${i.n} ช่อง)`).join('; ')}` : '- ✓ ทุกช่องที่เดินได้ไปถึงจากจุดเกิด');
