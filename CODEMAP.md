@@ -184,12 +184,12 @@ hostPick:2 clearField:10 modeLogic:11 endMatch:80 matchOver:105
 ## js/15-arena.js (71) — 
 AR_SIDE:7 AR_TEAM:7 AR_MAX:7 arPads:8 arOn:9 arState:10 arBusy:11 arReady:13 arNames:21 arenaTick:22 arStart:43 arEnd:51 arReset:57 arAddBots:64
 
-## js/15-bot.js (316) — 
+## js/15-bot.js (322) — 
 BOT_LV:8 BOT_SKIP:16 botKit:17 botPersona:23 BOT_TEAM:24 BOT_MAX:24 bots:25 humans:26 botInZone:28 spawnBot:35 OWNED_K:49 clearOwned:50 removeBots:51 botPickTarget:53 BOT_PB:71 botPlay:72
 §191 บอทยืนนิ่ง (ห้องฝึก): หุ่นผู้เล่น = ไม่ทำอะไร • บอทโชว์สกิล (ai.show)…
-showName:192 showBot:193 stillBot:194 trShowCmd:209 aiBot:227 trBotCmd:280
-§289 บอทในห้องรอ (ผู้ใช้ 2026-10-31 "สร้างห้องเล่นกับบอทได้")
-BOT_MODES:293 lobbyBots:294 lobbyBotAdd:295 lobbyBotFill:304 lobbyBotCmd:309 lobbyBotsStart:314 botDebug:316
+showName:192 showBot:193 stillBot:194 trShowCmd:209 aiBot:233 trBotCmd:286
+§295 บอทในห้องรอ (ผู้ใช้ 2026-10-31 "สร้างห้องเล่นกับบอทได้")
+BOT_MODES:299 lobbyBots:300 lobbyBotAdd:301 lobbyBotFill:310 lobbyBotCmd:315 lobbyBotsStart:320 botDebug:322
 
 ## js/15-botnav.js (135) — 
 NAV_MAPS:14 NAV_EYE:14 NAV:15 navOn:17 navSig:18 navEnsure:25 navBuild:31 navCell:48 navWalk:49 navRay:51 navFree:56 navPath:62 _navFoe:80 botThink:83 botNav:89
@@ -381,12 +381,12 @@ ROLE_COL:37 roleTag:38 DESIGNED:39 spellTags:40 spellDescHTML:47 baseDescHTML:51
 §222 ฉากเปิด (#intro) + ประกายบนหน้าเมนู (#menuFx)
 TITLE:225 titleSpark:226 titleDraw:227 titleLoop:238 titleGo:249 JOINQ:257 ovResult:277
 
-## js/40-train-settings.js (248) — เมนูทดลอง (ห้องฝึก / Test Place)
+## js/40-train-settings.js (247) — เมนูทดลอง (ห้องฝึก / Test Place)
 trOpenF:2 trKey:2 trN:2 TR_OPTS:3 trToggle:4 trSend:9 trSync:14
 §48 แท่นเสกบอท (โซนเสกบอท ห้องฝึก, trBotPad js/02): ยืนบนแท่น = เมนูขึ้น …
-bpOpen:49 bpOn:49 bpKey:49 bpShow:51 bpSync:53 hovEl:124
-§125 หน้าตั้งค่า
-setRow:126 setTog:127 setTab:128 XHC:129 XHN:129 setOpts:130 SET_ICO:132 SET_EN:135 renderSettings:136 drawXhPrev:158 openSettings:159 closeSettings:161 modeIcon:217 modeTitle:218 renderLobby:219
+bpOpen:49 bpOn:49 bpKey:49 bpShow:51 bpSync:53 hovEl:123
+§124 หน้าตั้งค่า
+setRow:125 setTog:126 setTab:127 XHC:128 XHN:128 setOpts:129 SET_ICO:131 SET_EN:134 renderSettings:135 drawXhPrev:157 openSettings:158 closeSettings:160 modeIcon:216 modeTitle:217 renderLobby:218
 
 ## js/41-debug.js (171) — เครื่องมือทดสอบสมดุล (ใช้ผ่านคอนโซล WD.bal / WD.dmgTest เท่านั้น ผู้เล่นปกติไม่เห็น)
 §5 บอทต่อสู้แบบง่ายๆ: เล็งนำเป้า เดินรักษาระยะ+ส่ายไปมา ร่ายคาถาทุกครั้ง…
@@ -761,4 +761,4 @@ surfSync:48 surfQuality:52
 SURF_VS:54 SURF_VS_BODY:55 SURF_FS:66 SURF_FS_BODY:67 surfOk:97 surfApply:98 surfScene:110
 §111 ปรับค่า (tune.html / F8)
 
-(88 files, 22068 lines)
+(88 files, 22073 lines)

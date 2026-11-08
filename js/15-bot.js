@@ -210,7 +210,11 @@ function trShowCmd(p,d){
   const b=showBot();if(!b){toast('บอทโชว์ยังไม่เกิด');return;}
   const A=b.ai,a=d.a,k=SLOTK.includes(d.k)?d.k:null;
   if(a==='path'){const P=PATHS[d.p|0]&&!PATHS[d.p|0].off?d.p|0:0;setKit(b,botKit(P));b.kt=b.kit;b.name=showName(P);for(const s of SLOTK)b.cd[s]=0;b.ult=0;feed(`🎭 ${p.name} เปลี่ยนบอทโชว์เป็น${PATHS[P].n}`);}
-  else if(a==='kit'){setKit(b,botKit(b.pathIdx));b.kt=b.kit;for(const s of SLOTK)b.cd[s]=0;}
+  else if(a==='cast'){   // ใช้คาถาใดก็ได้ของสายนี้: ไม่อยู่ในช่อง → สลับเข้าช่องหมุนเวียน แล้วกดช่องนั้น (hold = กดค้าง)
+    const sp=SPELL_LIST.find(x=>x.id===d.id&&x.path===b.pathIdx&&!x.ult);if(!sp)return;
+    let i=b.kitIds.indexOf(sp.id);
+    if(i<0){i=(A.rot|0)%4;A.rot=i+1;const ids=parseKit(b.kit).ids.slice();ids[i]=sp.i;setKit(b,[b.pathIdx,...ids].join('.'));b.kt=b.kit;b.cd[SLOTK[i]]=0;}
+    const kk=SLOTK[i];if(d.hold)A.hold={k:kk,t:clamp(+d.t||2,0.2,6)};else b.inp.c[kk]=(b.inp.c[kk]|0)+1;}
   else if(a==='tap'&&k)b.inp.c[k]=(b.inp.c[k]|0)+1;
   else if(a==='hold'&&k)A.hold={k,t:clamp(+d.t||2,0.2,6)};
   else if(a==='fire'){A.fM=d.m==='p'?'p':'h';A.fT=clamp(+d.t||0.12,0.05,6);}
@@ -220,7 +224,9 @@ function trShowCmd(p,d){
   else if(a==='up')A.jhT=1.2;
   else if(a==='dn')A.chT=1.2;
   else if(a==='ult'){b.ult=100;b.inp.c.x=(b.inp.c.x|0)+1;}
-  else if(a==='heal'){b.hp=b.maxHp;b.shieldE=100;b.shieldBroken=0;for(const s of SLOTK)b.cd[s]=0;b.ult=0;}
+  else if(a==='heal'){for(const q of plist())if(q.ai&&q.ai.still&&q.alive){q.hp=q.maxHp;q.shieldE=100;q.shieldBroken=0;q.stun=0;}b.ult=0;for(const s of SLOTK)b.cd[s]=0;feed('❤️ ฟื้นบอท/หุ่นทั้งหมด');}
+  else if(a==='reset'){clearOwned([b.id]);for(const q of plist())if(q.ai&&q.ai.still&&q.alive){if(q.pathIdx!==undefined)pathReset(q);resetBody(q,q.ai.home.x,q.ai.home.y);q.hp=q.maxHp;q.shieldE=100;q.shieldBroken=0;q.inp=emptyInput();}
+    A.fT=A.shT=A.jhT=A.chT=0;A.hold=null;for(const s of SLOTK)b.cd[s]=0;b.ult=0;feed('🔄 รีเซ็ตบอท/หุ่นกลับที่เดิม');}
   else if(a==='nocd'){A.nocd=A.nocd?0:1;}
   else if(a==='stop'){A.fT=A.shT=A.jhT=A.chT=0;A.hold=null;}
 }
