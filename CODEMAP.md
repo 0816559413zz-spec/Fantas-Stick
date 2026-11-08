@@ -290,7 +290,7 @@ statusFX:3 fx:27
 §209 overlay: เลือกบัฟ / สรุปผล
 choosePick:210 syncOverlays:215 showOver:236
 
-## js/27-world.js (396) — 
+## js/27-world.js (400) — 
 S3:4 tx:4 tz:4 CITY_KERB:7 cityKerb:8 GY:9 TW:9 hdr:10 gl:12
 §20 เงานุ่มแบบ PCSS (contact-hardening): ใกล้จุดสัมผัสคม ไกลจากวัตถุที่บั…
 PCSS:23 scene:50 cam:52 composer:53
@@ -301,9 +301,9 @@ TAA:126 TAA_FRAG:127 _taaH:142 taaWanted:143 taaBegin:144 taaEnd:152 taaFinish:1
 §235 คุณภาพกราฟิก: auto = ปรับความละเอียดเองตาม FPS / high = สวยสุด / low …
 QUAL:236 QUAL_NAME:237 qualPR:238 applyQuality:244 qualTick:265
 §281 ประหยัด CPU สำหรับเครื่องอ่อน (ผู้ใช้ 2026-11-06 "เครื่องผู้เล่นแย่กว…
-qualCS:285 CULL:286 cullTick:287 texCanvas:298 glowTex:299 stoneTex:300 runeTex:306 glowMats:314 glowMat:315 STONEM:317 stoneMat:318 shadowAll:319 SKY:322 hemi:342 moonL:344 LDIR:348 setSky:349
-§358 เงาตามผู้เล่น
-SHD:362 _shF:363 _shR:363 _shU:363 _shC:363 _shY:363 SHD_DM:367 shadowDepthSplit:368 shadowFollow:373 shadowSoft:393 LPOOL:395
+qualCS:285 CULL:286 cullTick:287 texCanvas:298 glowTex:299 stoneTex:300 runeTex:306 glowMats:314 glowMat:315 STONEM:317 stoneMat:318 shadowAll:319 SKY:322 hemi:342 moonL:344 LDIR:348 setSky:349 SKYB:360 skyFollow:361
+§362 เงาตามผู้เล่น
+SHD:366 _shF:367 _shR:367 _shU:367 _shC:367 _shY:367 SHD_DM:371 shadowDepthSplit:372 shadowFollow:377 shadowSoft:397 LPOOL:399
 
 ## js/28-city-build.js (386) — เมืองมักเกิ้ล (ลอนดอน) — ภาพ • ข้อมูลอยู่ js/02-city.js • โมเดลจาก as…
 CITY_WIN:4 cityWinTex:5 cityEmTex:10 cityBoxGeo:16 buildCity:21
@@ -780,4 +780,4 @@ surfSync:48 surfQuality:52
 SURF_VS:54 SURF_VS_BODY:55 SURF_FS:66 SURF_FS_BODY:67 surfOk:97 surfApply:98 surfScene:110
 §111 ปรับค่า (tune.html / F8)
 
-(92 files, 22473 lines)
+(92 files, 22477 lines)
