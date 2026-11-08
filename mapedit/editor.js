@@ -329,7 +329,7 @@ function analyze() {
   const pairs = [];
   for (const s of spawns) for (const g of goals) pairs.push([s, g]);
   if (!goals.length) for (let i = 0; i < spawns.length; i++) for (let j = i + 1; j < spawns.length; j++) if (spawns[i].t !== spawns[j].t) pairs.push([spawns[i], spawns[j]]);
-  r.paths = pairs.slice(0, 16).map(([a, b]) => ({ a, b,
+  r.paths = pairs.slice(0, 60).map(([a, b]) => ({ a, b,
     pre: findPath(r.pre, cellsFor(a, r.pre.blk), cellsFor(b, r.pre.blk)),
     post: findPath(r.post, cellsFor(a, r.post.blk), cellsFor(b, r.post.blk)) }));
   return r;
@@ -458,9 +458,10 @@ function render(g, z, ox, oy, VW, VH, live) {
   // zones
   if (show.zones) for (const zn of M.zones) {
     const sx = X(zn.x), sy = Y(zn.y), w = zn.w * z, h = zn.h * z, c = zn.col || ZCOL[0];
-    g.fillStyle = c + '18'; g.fillRect(sx, sy, w, h);
-    g.setLineDash([6, 4]); g.strokeStyle = c; g.lineWidth = isSel('zone', zn.id) ? 2.5 : 1.5; g.strokeRect(sx, sy, w, h); g.setLineDash([]);
-    label(g, zn.name, sx + 4, sy + 3, c, Math.max(10, Math.min(14, z * 0.7)), 'left', 'top');
+    const ph = zn.kind === 'phase'; // phase zone = which areas a Breakthrough phase plays in (solid line); theme zone = area description (dashed)
+    g.fillStyle = c + (ph ? '10' : '18'); g.fillRect(sx, sy, w, h);
+    if (!ph) g.setLineDash([6, 4]); g.strokeStyle = c; g.lineWidth = (ph ? 2.5 : 1.5) + (isSel('zone', zn.id) ? 1 : 0); g.strokeRect(sx, sy, w, h); g.setLineDash([]);
+    label(g, (ph ? '▶ ' : '') + zn.name, sx + 4, sy + 3, c, Math.max(10, Math.min(14, z * 0.7)), 'left', 'top');
     if (isSel('zone', zn.id)) handle(g, sx + w, sy + h);
   }
   // routes
@@ -1079,6 +1080,9 @@ function propObj(box, o) {
 function propZone(box, z) {
   box.append(h3('โซน — ' + z.id));
   box.append(bindIn(field('ชื่อ', `<input class="tl-in" value="${esc(z.name)}">`), z, 'name'));
+  box.append(h3('ชนิดโซน'));
+  box.append(seg([['theme', 'ธีม/คำอธิบายพื้นที่'], ['phase', '▶ พื้นที่เล่นของเฟส']], z.kind === 'phase' ? 'phase' : 'theme', v => { pushUndo(); z.kind = v; changed(); renderSide(); }));
+  box.insertAdjacentHTML('beforeend', '<p class="mut"><b>พื้นที่เล่นของเฟส</b> = ตั้งชื่อเหมือนกัน (เช่น "เฟส 1") หลายกรอบได้ เพื่อบอกว่าเฟสนั้นเล่นในพื้นที่ไหนบ้าง<br><b>ธีม</b> = บอกบรรยากาศ/หน้าที่ของพื้นที่ (เช่น Hall, ป่า) ซ้อนทับกับกรอบเฟสได้ ไม่ใช่ข้อผิดพลาด</p>');
   box.append(field('ตำแหน่ง', `<span style="font:12px var(--fu)">x ${z.x} y ${z.y} • ${z.w}×${z.h} ช่อง (${(z.w * M.cell).toFixed(0)}×${(z.h * M.cell).toFixed(0)} ม.)</span>`));
   const cr = document.createElement('div'); cr.className = 'row'; cr.innerHTML = '<label>สี</label>';
   const sg = document.createElement('div'); sg.className = 'seg';
@@ -1204,11 +1208,15 @@ function buildMD(R) {
     `- กฎเดินที่ใช้ตรวจ: ขึ้นต่างระดับได้เอง ${m.rules.up} ระดับ (มากกว่านั้นต้องมีทางลาด), ลง/กระโดดลงได้ ${m.rules.down} ระดับ, เดินทแยง ${m.rules.diag ? 'ได้' : 'ไม่ได้'}, ความเร็วอ้างอิง ${m.rules.speed} ม./วิ`, '');
   if (m.desc) L.push('## คำอธิบายจากผู้ใช้', '', m.desc, '');
   if (m.zones.length) {
-    L.push('## โซน', '', '| id | ชื่อ | x,y | ขนาด (ช่อง) | ระดับพื้น | โน้ต |', '|---|---|---|---|---|---|');
+    L.push('## โซน', '', '> ชนิด **เฟส** = พื้นที่เล่นของเฟส (ชื่อเดียวกันหลายกรอบ = เฟสนั้นเล่นหลายพื้นที่รวมกัน) • ชนิด **ธีม** = บอกบรรยากาศ/หน้าที่ของพื้นที่ (ซ้อนทับกรอบเฟสได้ตามตั้งใจ)', '');
+    const phs = {}; for (const z of m.zones) if (z.kind === 'phase') (phs[z.name] = phs[z.name] || []).push(z);
+    for (const [n, zs] of Object.entries(phs)) L.push(`- **${n}** เล่นใน: ${zs.map(z => `${z.id} (x${z.x}-${z.x + z.w - 1} y${z.y}-${z.y + z.h - 1})`).join(', ')}`);
+    if (Object.keys(phs).length) L.push('');
+    L.push('| id | ชนิด | ชื่อ | x,y | ขนาด (ช่อง) | ระดับพื้น | โน้ต |', '|---|---|---|---|---|---|---|');
     for (const z of m.zones) {
       const hs = new Set(); for (let y = z.y; y < z.y + z.h; y++) for (let x = z.x; x < z.x + z.w; x++) if (inb(x, y)) hs.add(m.height[y][x]);
       const hl = [...hs].sort((a, b) => a - b);
-      L.push(`| ${z.id} | ${z.name} | ${z.x},${z.y} | ${z.w}×${z.h} | ${hl.length > 3 ? hl[0] + '..' + hl[hl.length - 1] : hl.join(', ')} | ${(z.note || '').replace(/\n/g, ' ')} |`);
+      L.push(`| ${z.id} | ${z.kind === 'phase' ? 'เฟส' : 'ธีม'} | ${z.name} | ${z.x},${z.y} | ${z.w}×${z.h} | ${hl.length > 3 ? hl[0] + '..' + hl[hl.length - 1] : hl.join(', ')} | ${(z.note || '').replace(/\n/g, ' ')} |`);
     }
     L.push('');
   }
