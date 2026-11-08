@@ -27,6 +27,13 @@
      "name": "Storyboard VFX",
      "desc": "วางแผนสกิลทีละช็อต วาดสเก็ตช์ ซิงก์ข้ามเครื่องผ่าน git",
      "url": "storyboard.html"
+    },
+    {
+     "id": "mapedit",
+     "icon": "🗺",
+     "name": "Map Editor",
+     "desc": "วาดแผนที่มุมบน: ความสูงพื้น ทางลาด กำแพง วางของ จุด Interact เส้นทาง ตรวจทางเดิน แล้วส่งให้ Claude (maps/)",
+     "url": "mapedit.html"
     }
    ]
   },
