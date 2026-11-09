@@ -3578,7 +3578,7 @@
    "n": 2
   },
   "wind/slip_side_l": {
-   "v": "ad817008",
+   "v": "9be71d16",
    "desc": "Slipstream แดชซ้าย ตอนบิน หางลมที่ปีก",
    "pal": "wind",
    "tags": [
@@ -3589,7 +3589,7 @@
    "n": 2
   },
   "wind/slip_side_l_g": {
-   "v": "4a91c5b9",
+   "v": "ca726da6",
    "desc": "Slipstream แดชซ้าย ตอนอยู่พื้น หางลมที่ปีก",
    "pal": "wind",
    "tags": [
@@ -3600,7 +3600,7 @@
    "n": 2
   },
   "wind/slip_side_r": {
-   "v": "3e936d88",
+   "v": "c8f8b90a",
    "desc": "Slipstream แดชขวา ตอนบิน หางลมที่ปีก",
    "pal": "wind",
    "tags": [
@@ -3611,7 +3611,7 @@
    "n": 2
   },
   "wind/slip_side_r_g": {
-   "v": "40130d13",
+   "v": "b8cfc461",
    "desc": "Slipstream แดชขวา ตอนอยู่พื้น หางลมที่ปีก",
    "pal": "wind",
    "tags": [
@@ -3858,16 +3858,16 @@
    "n": 3
   },
   "wind/tailwind": {
-   "v": "0e34abe6",
-   "desc": "Tailwind: ร่องลมยาว 30 ม. กว้าง 6 ม. อยู่ 5 วิ ลายลมไหลไปข้างหน้า มีเส้นขอบและเส้นลม",
+   "v": "dabff3a9",
+   "desc": "Tailwind: ร่องลมยาว 30 ม. กว้าง 9 ม. อยู่ 5 วิ ลายลมไหลไปข้างหน้า มีเส้นขอบและเส้นลม",
    "pal": "wind",
    "tags": [
     "wind",
     "zone",
     "buff"
    ],
-   "dur": 5,
-   "n": 10
+   "dur": 5.3,
+   "n": 24
   },
   "wind/ult_blade_a": {
    "v": "a8f398a8",
@@ -5479,15 +5479,27 @@
    "mat": "energy",
    "n": 5
   },
+  "wind_tail_deco": {
+   "v": "c3979684",
+   "desc": "Tailwind: ลายลูกศรและเส้นในตามขอบร่องลม",
+   "mat": "glow",
+   "n": 24
+  },
   "wind_tail_edge": {
-   "v": "bea173ce",
+   "v": "ab9e32d1",
    "desc": "Tailwind: เส้นขอบร่องลมสองข้าง",
    "mat": "glow",
    "n": 2
   },
+  "wind_tail_front": {
+   "v": "1b0385db",
+   "desc": "Tailwind: หัวลมรูปลูกศรวิ่งนำร่องลม",
+   "mat": "glow",
+   "n": 2
+  },
   "wind_tail_lane": {
-   "v": "a6fe169d",
-   "desc": "Tailwind: แผ่นร่องลมแบนบนพื้น ยาว 30 ม. กว้าง 6 ม.",
+   "v": "3cbc06a2",
+   "desc": "Tailwind: แผ่นร่องลมแบนบนพื้น ยาว 30 ม. กว้าง 9 ม.",
    "mat": "glow",
    "n": 1
   },
