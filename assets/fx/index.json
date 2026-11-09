@@ -3577,6 +3577,72 @@
    "dur": 0.4,
    "n": 2
   },
+  "wind/slip_side_l": {
+   "v": "ad817008",
+   "desc": "Slipstream แดชซ้าย ตอนบิน หางลมที่ปีก",
+   "pal": "wind",
+   "tags": [
+    "wind",
+    "dash"
+   ],
+   "dur": 0.7,
+   "n": 2
+  },
+  "wind/slip_side_l_g": {
+   "v": "4a91c5b9",
+   "desc": "Slipstream แดชซ้าย ตอนอยู่พื้น หางลมที่ปีก",
+   "pal": "wind",
+   "tags": [
+    "wind",
+    "dash"
+   ],
+   "dur": 0.7,
+   "n": 2
+  },
+  "wind/slip_side_r": {
+   "v": "3e936d88",
+   "desc": "Slipstream แดชขวา ตอนบิน หางลมที่ปีก",
+   "pal": "wind",
+   "tags": [
+    "wind",
+    "dash"
+   ],
+   "dur": 0.7,
+   "n": 2
+  },
+  "wind/slip_side_r_g": {
+   "v": "40130d13",
+   "desc": "Slipstream แดชขวา ตอนอยู่พื้น หางลมที่ปีก",
+   "pal": "wind",
+   "tags": [
+    "wind",
+    "dash"
+   ],
+   "dur": 0.7,
+   "n": 2
+  },
+  "wind/slip_side_w": {
+   "v": "68aa37a7",
+   "desc": "Slipstream แดชข้าง ตอนบิน คลื่นลมจุดเริ่ม",
+   "pal": "wind",
+   "tags": [
+    "wind",
+    "dash"
+   ],
+   "dur": 0.7,
+   "n": 2
+  },
+  "wind/slip_side_w_g": {
+   "v": "af4c4d09",
+   "desc": "Slipstream แดชข้าง ตอนอยู่พื้น คลื่นลมจุดเริ่ม",
+   "pal": "wind",
+   "tags": [
+    "wind",
+    "dash"
+   ],
+   "dur": 0.7,
+   "n": 4
+  },
   "wind/sonic_charge": {
    "v": "f255d65c",
    "desc": "Sonic Boom Strike ① ชาร์จ 1 วิ (ตามตัว): เส้นลมไหลเข้าหาตัว + เปลือกลมหดเข้า + แกนขาวโตขึ้น + จานเกลียวใต้เท้าหมุนเร็ว + วงสั่งสมพลัง",

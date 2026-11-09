@@ -38,3 +38,30 @@ gnd_flap = [flap("fl", -55, -155, 1.2, 2.4), flap("fr", 55, 155, 1.2, 2.4), wave
 for n, L, d in [("slip_back", air_tail, "ตอนบิน หางลมตามตัว"), ("slip_back_w", air_flap, "ตอนบิน ปีกกระพือ"), ("slip_back_g", gnd_tail, "ตอนอยู่พื้น หางลมตามตัว"), ("slip_back_gw", gnd_flap, "ตอนอยู่พื้น ปีกกระพือ")]:
     with open(os.path.join(R, 'assets/fx/wind', n + '.fx.json'), 'w', encoding='utf-8', newline='\n') as o:
         json.dump({"v": 1, "desc": "Slipstream แดชหลัง " + d, "tags": ["wind", "dash"], "pal": "wind", "dur": 0.6, "seed": 84, "layers": L}, o, ensure_ascii=False, indent=1)
+
+# Slipstream side dashes (user 2026-11-09): trails on the wing tips follow the body turn; wind impact stays where the dash started.
+import math
+def wing_path(side, s, Ts, rise, life):
+    keys = {}
+    for i in range(15):
+        u = i / 14; xs = min(1, u * life / Ts); ph = 2 * math.pi * (1 - (1 - xs) ** 2.2); psi = s * ph
+        xc, zc = side * 1.7 * math.cos(psi) - 0.35 * math.sin(psi), -side * 1.7 * math.sin(psi) - 0.35 * math.cos(psi)   # body left / forward after the turn
+        y = 0.45 + rise * math.sin(math.pi * xs)
+        p = [round(zc, 3), round(y, 3), round(xc, 3)] if s < 0 else [round(-zc, 3), round(y, 3), round(-xc, 3)]   # dash-left: +z is body left • dash-right: +z is body right
+        keys["%.4f" % u] = p
+    return keys
+def wing_tail(i, side, s, Ts, life):
+    return {"id": i, "t": "trail", "at": 0, "life": life, "att": "chest", "pos": wing_path(side, s, Ts, 0.24, life), "col": HI, "col2": MID, "w": 0.26, "tlife": 0.32, "k": 0.8}
+def side_tail(s, Ts):
+    life = Ts
+    return [wing_tail("wl", 1, s, Ts, life), wing_tail("wr", -1, s, Ts, life)]
+def side_impact(ground):
+    y = 0.9 if ground else 1.3
+    L = [wave("wave", y, -0.3, 0.8, 3.6 if ground else 4.8, at=0.0, life=0.3, op=0.55), feathers(y)]
+    if ground:
+        L += [{"id": "kick", "t": "ring", "at": 0.0, "life": 0.3, "att": "ground", "pos": [0, 0.1, 0], "col": HI, "r": 3.2, "op": 0.5},
+              {"id": "dust", "t": "emit", "at": 0.0, "life": 0.08, "att": "ground", "pos": [0, 0.15, 0], "burst": 10, "rate": 0, "from": "disc", "fr": 0.9, "dir": "out", "spread": 0.7, "speed": [2, 5], "up": [0.3, 1], "plife": [0.35, 0.6], "look": "smoke", "size": [5, 8], "col": "#e5efe9", "c2": "#9fb5a8", "gravity": -0.2, "grow": 1.2, "drag": 3}]
+    return L
+for n, L, d in [("slip_side_l", side_tail(-1, 0.52), "แดชซ้าย ตอนบิน หางลมที่ปีก"), ("slip_side_r", side_tail(1, 0.52), "แดชขวา ตอนบิน หางลมที่ปีก"), ("slip_side_l_g", side_tail(-1, 0.48), "แดชซ้าย ตอนอยู่พื้น หางลมที่ปีก"), ("slip_side_r_g", side_tail(1, 0.48), "แดชขวา ตอนอยู่พื้น หางลมที่ปีก"), ("slip_side_w", side_impact(False), "แดชข้าง ตอนบิน คลื่นลมจุดเริ่ม"), ("slip_side_w_g", side_impact(True), "แดชข้าง ตอนอยู่พื้น คลื่นลมจุดเริ่ม")]:
+    with open(os.path.join(R, 'assets/fx/wind', n + '.fx.json'), 'w', encoding='utf-8', newline='\n') as o:
+        json.dump({"v": 1, "desc": "Slipstream " + d, "tags": ["wind", "dash"], "pal": "wind", "dur": 0.7, "seed": 85, "layers": L}, o, ensure_ascii=False, indent=1)
