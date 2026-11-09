@@ -407,7 +407,7 @@ function windSlipCast(p){if(windSpin(p)||(p.wsc|0)<=0||p.wsl||p.dash>0)return fa
   p.wsc--;p.wsl={t:0,T,A,d,s};p.dash=T;p.dashSp=sp;p.dashX=Math.cos(A);p.dashY=Math.sin(A);p.shieldOn=false;p.wbw=undefined;p.wbCh=null;p.cd.basic=0;p.wbCd=0;p.wse=1;
   emit({k:'efx',z:'wnsl',x:Math.round(p.x),y:Math.round(p.y),h:p.z,a:Math.round(A*100)/100,n:d,m:s,t:T,id:p.id});}
 function windSlipTick(p,dt){const S=p.wsl;if(!p.alive||p.stun>0){p.wsl=null;p.dash=0;return;}S.t+=dt;if(S.t>=S.T){p.wsl=null;return;}
-  if(S.d===0){const th=S.A+S.s*0.75*Math.cos(Math.PI*S.t/S.T);p.dashX=Math.cos(th);p.dashY=Math.sin(th);}}   // ไปหน้า: เฉียงออกข้างแล้วโค้งกลับ
+  if(S.d===0){const th=S.A+S.s*0.75*Math.cos(Math.PI*Math.max(0,S.t-dt/2)/S.T);p.dashX=Math.cos(th);p.dashY=Math.sin(th);}}   // ไปหน้า: เฉียงออกข้างแล้วโค้งกลับ
 function windForceCast(p){if(windSpin(p)||p.wfc||p.dash>0)return false;
   const air=windAir(p),W=W_VX,a=p.ang,inp=p.inp||{},D=air?W.distA:W.distG,T=air?W.tA:W.tG;let dv=0;
   if(air&&typeof inp.ah==='number'){const ad=Math.hypot((inp.ax||p.x)-p.x,(inp.ay||p.y)-p.y)/20,dh=inp.ah-(p.z+1.1),pit=clamp(Math.atan2(dh,Math.max(6,ad)),-0.7,0.7);dv=D/20*Math.tan(pit)/T;}

@@ -40,6 +40,7 @@ function dpStyle(p){
 }
 const DPDBG={pose:null};   // ดีบัก: WD.DPDBG.pose='hero' = ค้างท่านั้นทุกตัว (ตรวจท่านิ่ง ๆ)
 function dashPose(o,p,dt,now){
+  if(o.wsl){if(o.dp)o.dp=null;dpKnees(o,0,0);return;}   // Slipstream มีท่า 4 ทิศของตัวเอง (windLatePose)
   if(DPDBG.pose&&DPOSE[DPDBG.pose]){o.dp=null;dpApply(o,DPOSE[DPDBG.pose],1,1,1,0);return;}
   let S=o.dp;
   if(!p.al||p.dn||p.fl||p.st||o.rag||p.gh||(p.ea&&p.ea[1])||p.df){if(S)o.dp=null;dpKnees(o,0,0);return;}   // ขี่ Stand (Rampage) / Dragonfall / บิน มีท่าของตัวเอง
