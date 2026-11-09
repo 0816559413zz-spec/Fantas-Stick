@@ -19,7 +19,7 @@ function meleeHit(p,ox,oy,range,dmg,arc,fn){
     const dx=t.x-ox,dy=t.y-oy,d=Math.hypot(dx,dy);
     if(d>range+(t.r||PR))continue;
     if(d>14&&Math.abs(angDiff(Math.atan2(dy,dx),p.ang))>arc)continue;
-    if(Math.abs(cH(t)-ph)>2.8)continue;
+    if(!aimLineH(p,ph,t,2.8))continue;
     if(aoeHit(p,t,dmg,fn))n++;
   }
   return n;

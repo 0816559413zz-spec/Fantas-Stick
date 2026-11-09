@@ -118,6 +118,8 @@ function aimClip(x0,y0,h0,o,back){
 }
 // เล็งอิสระ 3 มิติ: ยิงจาก (ตัวเรา, สูง h0) ไปตามเส้นเป้ากลางจอ (inp.ax/ay/ah) แล้วเลยต่อไปจนชน พื้น / บ้าน / ขอบแมพ หรือครบ range px
 // คืน {x,y,h,hit:'ground'|'bld'|'edge'|'air'} • null = ไม่มีข้อมูลเล็ง (บอท) ให้ใช้วิธีเดิม
+// Height gate for attacks aimed with the crosshair: t must be near the aim line at its distance, so looking up or down reaches high or low targets.
+function aimLineH(p,h0,t,win){const i=p.inp;if(i&&Number.isFinite(i.ah)&&Number.isFinite(i.ax)){const ad=Math.max(40,Math.hypot(i.ax-p.x,i.ay-p.y)),d=Math.hypot(t.x-p.x,t.y-p.y);return Math.abs(cH(t)-(h0+(i.ah-h0)*d/ad))<=win;}return Math.abs(cH(t)-h0)<=win;}
 function aimRay3(p,h0,range){
   const i=p.inp;if(!i||p.bot||typeof i.ah!=='number')return null;
   let dx=i.ax-p.x,dy=i.ay-p.y,dh=(i.ah-h0)*20;const L=Math.hypot(dx,dy,dh);

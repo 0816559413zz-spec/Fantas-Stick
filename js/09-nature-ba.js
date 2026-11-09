@@ -11,7 +11,7 @@ function natureWhipHit(p,swing){
   try{
     for(const target of foesOf(p.team)){
       const dx=target.x-p.x,dy=target.y-p.y,distance=Math.hypot(dx,dy);
-      if(distance>NATURE_WHIP.range+1e-7||Math.abs(cH(target)-(p.z+1.1))>2.8)continue;
+      if(distance>NATURE_WHIP.range+1e-7||!aimLineH(p,p.z+1.1,target,2.8))continue;
       if(distance>1e-7&&Math.abs(angDiff(Math.atan2(dy,dx),swing.angle))>NATURE_WHIP.halfArc+1e-7)continue;
       if(natureTrace(p,target,p.z+1.1,cH(target),p.team))continue;
       if(aoeHit(p,target,NATURE_WHIP.damage)){

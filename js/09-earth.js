@@ -45,7 +45,7 @@ function earthTick(p,dt){
   const inp=p.inp||{};
   // หมัด Stand: เข้า 0.2 วิ แล้วค่อยโดน (หลบทันได้)
   if(p.epn){p.epn.t-=dt;if(p.epn.t<=0){const P=p.epn;p.epn=null;const t=P.tg;
-    if(t&&!t.dead&&(t.isE||t.isM||(t.alive&&!t.downed))&&Math.hypot(t.x-P.x,t.y-P.y)<60+(t.r||PR)&&Math.abs(cH(t)-(p.z+1.1))<3.5){p.baHit=1;damage(t,ERV.punch,p.id,'melee');p.baHit=0;}}}
+    if(t&&!t.dead&&(t.isE||t.isM||(t.alive&&!t.downed))&&Math.hypot(t.x-P.x,t.y-P.y)<60+(t.r||PR)&&aimLineH(p,p.z+1.1,t,3.5)){p.baHit=1;damage(t,ERV.punch,p.id,'melee');p.baHit=0;}}}
   // Terra Auger: ชาร์จ
   if(p.aug){const A=p.aug,k=A.k;A.t+=dt;
     const shP=inp.sh&&!p.eShPrv;
@@ -72,7 +72,7 @@ function earthReset(p){p.ehp=ERV.sh;p.stdB=0;p.eShT=0;p.epn=null;p.aug=null;p.ra
 
 // ---------- ท่าพื้นฐาน (คลิกซ้าย) ----------
 function earthBATarget(p){let best=null,bs=1e9;
-  for(const t of foesOf(p.team)){const dx=t.x-p.x,dy=t.y-p.y,d=Math.hypot(dx,dy);if(d>ERV.punchR+(t.r||PR)||Math.abs(cH(t)-(p.z+1.1))>4)continue;
+  for(const t of foesOf(p.team)){const dx=t.x-p.x,dy=t.y-p.y,d=Math.hypot(dx,dy);if(d>ERV.punchR+(t.r||PR)||!aimLineH(p,p.z+1.1,t,4))continue;
     const da=Math.abs(angDiff(Math.atan2(dy,dx),p.ang));if(da>1.2)continue;const sc=da+d/1500;if(sc<bs){bs=sc;best=t;}}
   return best;}
 function earthBasic(p,inp,dt,setCd){
@@ -155,7 +155,7 @@ function earthCrush(p){const T=p.tec;p.crush=null;if(!T)return;
   const W=T.ids.map(id=>(G.eso||[]).find(q=>q.id===id&&!q.dead)).filter(Boolean);if(!W.length){emit({k:'efx',z:'ecrushno',x:p.x,y:p.y,h:p.z+2,id:p.id});return;}
   const V=TECT.v,c=Math.cos(T.a),s=Math.sin(T.a),bx=T.cx-c*V.len/2,by=T.cy-s*V.len/2;
   const inside=t=>{const dx=t.x-bx,dy=t.y-by,u=dx*c+dy*s,l=-dx*s+dy*c;return u>-(t.r||PR)&&u<V.len+(t.r||PR)&&Math.abs(l)<V.gap/2;};
-  for(const t of foesOf(p.team)){if(!inside(t)||Math.abs(cH(t)-(p.z+1.1))>4)continue;
+  for(const t of foesOf(p.team)){if(!inside(t)||!aimLineH(p,p.z+1.1,t,4))continue;
     if(W.length>=2)aoeHit(p,t,V.crush2);
     else{const sd=W[0].side;aoeHit(p,t,V.crush1,t=>{t.vx+=s*sd*V.knock1;t.vy+=-c*sd*V.knock1;});}}
   damageEnv(T.cx,T.cy,170,V.envCrush*ERV.env,p.id,'rock',0.5);

@@ -12,12 +12,12 @@ function stSpend(p,n){if((p.lst|0)<n){emit({k:'efx',z:'nostack',x:p.x,y:p.y,h:p.
 // ศัตรูในกรวยหน้า (ใช้กับลำสายฟ้า)
 function stormCone(p,range,arc){const out=[],ph=p.z+1.1;
   for(const t of foesOf(p.team)){const dx=t.x-p.x,dy=t.y-p.y,d=Math.hypot(dx,dy);if(d>range+(t.r||PR))continue;
-    if(d>14&&Math.abs(angDiff(Math.atan2(dy,dx),p.ang))>arc)continue;if(Math.abs(cH(t)-ph)>3)continue;out.push(t);}
+    if(d>14&&Math.abs(angDiff(Math.atan2(dy,dx),p.ang))>arc)continue;if(!aimLineH(p,ph,t,3))continue;out.push(t);}
   return out;}
 // ศัตรูในแนวเส้นตรง (เส้นสายฟ้า / Railgun)
 function stormLineFoes(p,x,y,a,len,half,from){const c=Math.cos(a),sn=Math.sin(a),out=[];len=Math.min(len,windBlockLen(p.team,x,y,a,len,p.z+1.1));   // กำแพงลมศัตรูกันเส้นยิง
   for(const t of foesOf(p.team)){const dx=t.x-x,dy=t.y-y,u=dx*c+dy*sn;if(u<(from||0)-(t.r||PR)||u>len+(t.r||PR))continue;
-    if(Math.abs(-dx*sn+dy*c)>half+(t.r||PR))continue;if(Math.abs(cH(t)-(p.z+1.1))>4)continue;out.push(t);}
+    if(Math.abs(-dx*sn+dy*c)>half+(t.r||PR))continue;if(!aimLineH(p,p.z+1.1,t,4))continue;out.push(t);}
   return out;}
 function stormBasic(p,inp,dt,setCd){
   const prev=p.bfPrev;p.bfPrev=inp.fire;
@@ -45,7 +45,7 @@ function stormBasic(p,inp,dt,setCd){
 function stormTri(p){
   const c=Math.cos(p.ang),sn=Math.sin(p.ang);p.baHit=1;
   for(const t of foesOf(p.team)){const dx=t.x-p.x,dy=t.y-p.y,f=dx*c+dy*sn,l=-dx*sn+dy*c,r=t.r||PR;
-    if(f<-r||f>STORMV.triLen+r)continue;if(Math.abs(l)>STORMV.triW/2*Math.max(0,f)/STORMV.triLen+r*0.7)continue;if(Math.abs(cH(t)-(p.z+1.1))>4)continue;
+    if(f<-r||f>STORMV.triLen+r)continue;if(Math.abs(l)>STORMV.triW/2*Math.max(0,f)/STORMV.triLen+r*0.7)continue;if(!aimLineH(p,p.z+1.1,t,4))continue;
     aoeHit(p,t,STORMV.triDmg,t=>shock(t,p.id,STORMV.shock));}
   p.baHit=0;emit({k:'efx',z:'stri',x:p.x,y:p.y,h:p.z,a:Math.round(p.ang*100)/100,id:p.id});
 }
