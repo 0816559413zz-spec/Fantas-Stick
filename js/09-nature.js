@@ -216,9 +216,9 @@ function natureDash(p,inp,pr,dt,setCd){
   const goalH=best?cH(best):h+dz*NAT.hookRange/20;
   const wall=best?null:natureTrace(p,goal,h,goalH,p.team,true);
   const end=wall||goal;
-  const flight=.10+natureDist(p,end)/2300;
-  natureEmit('hook',{...p,h},{id:p.id,x2:end.x,y2:end.y,h2:wall?.h??goalH,t:flight,hit:!!best,ally:best?.team===p.team});
-  p.natureHook={target:best,at:G.time+flight,end:G.time+flight+1};
+  const flight=.43;   // approved Dash timing: vine reaches the target at .43 s, tension until .73 s, then the pull
+  natureEmit('hook',{...p,h},{id:p.id,x2:end.x,y2:end.y,h2:wall?.h??goalH,t:flight,hit:!!best,ally:best?.team===p.team,tid:best&&!best.isE&&!best.isM?best.id:null,kind:best?(best.natKind?'plant':best.team===p.team?'ally':'foe'):null});
+  p.natureHook={target:best,at:G.time+flight,pull:G.time+flight+.3,end:G.time+flight+1.3};
   return true;
 }
 function natureHookMove(p,dt){
@@ -236,6 +236,7 @@ function natureHookMove(p,dt){
       natureEmit('coil',{...t,h:cH(t)},{id:t.isE||t.isM?null:t.id,ally:t.team===p.team});
     }
   }
+  if(G.time<hook.pull)return true;
   const d=natureDist(p,t),stop=(t.r||PR)+PR+3,step=Math.min(Math.max(0,d-stop),NAT.hookSpeed*dt);
   if(step>0){
     p.x+=(t.x-p.x)*step/d;p.y+=(t.y-p.y)*step/d;
@@ -343,6 +344,7 @@ function natureTurret(o,p){
   G.proj.push(pr);
   o.firedAt=G.time;o.shotBig=big;
   if(big){o.chargeAt=0;o.bigPea=false;o.recoverUntil=G.time+.5;natureEmit('pea_muzzle',pr,{a});}
+  else natureEmit('pea_shot',pr,{a});
 }
 function naturePeaSplash(pr){
   natureEmit('pea_splash',pr,{r:NAT.peaRadius});
