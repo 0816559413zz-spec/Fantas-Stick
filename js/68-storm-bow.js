@@ -80,16 +80,16 @@ function stormStaffCast(ev){const F=natFx(),{V3,Tube,ADD,sparks,T}=F,o=ev.id!=nu
   const base=o?o.g.position.clone():natWorld(ev.x,ev.y,ev.h-1.2);F.O.y=base.y;natShock(base,'#ffe56a',6,.42,.55);natShock(base,'#52e4ff',3.5,.3,.5);sparks(tip(),30,5.5,'#fff3b0','#46dcff',{dir:V3(0,1.2,0),life:.6,size:1.5});sparks(base.clone().add(V3(0,.2,0)),24,4,'#fff3b0','#46dcff',{dir:V3(0,2.4,0),life:.7,size:1.4});
   const L=.3;F.clip(L,t=>{const f=1-t/L,E=tip();b[0].set(sbJag(top,E,24,2.6,V3),()=>.2*f+.02,(u,q)=>q.copy(y).multiplyScalar(1.05*f));for(let i=1;i<3;i++)b[i].set(sbJag(top,E,20,4.2,V3),()=>.05*f+.01,(u,q)=>q.copy(c).multiplyScalar(f));},()=>{b.forEach(q=>F.drop(q));m.dispose();});}
 function stormStaffSwing(ev){const o=ev.id!=null?PM3.get(ev.id):null;if(o)o.stSw={t:0,s:ev.n||1};snd('whoosh',{x:ev.x,y:ev.y,vol:.75});snd('zap',{x:ev.x,y:ev.y,vol:.4});if(ev.id===NET.myId)shake(3.5);}
-// The wave: one curved surface with a soft shader, so there are no cut edges.
-let _sbWaveG=null;
-function sbWaveGeo(){if(_sbWaveG)return _sbWaveG;const U=48,V=18,R=4.3,D=3.2,p=[],uv=[],ix=[];for(let j=0;j<=V;j++){const v=j/V;for(let i=0;i<=U;i++){const u=i/U*2-1,a=u*1.2,r=R-D*v*(1-.35*u*u);p.push(Math.sin(a)*r,.3*Math.sin(u*2.2)*(1-v),Math.cos(a)*r-R);uv.push(u,v);}}for(let j=0;j<V;j++)for(let i=0;i<U;i++){const a=j*(U+1)+i,b=a+U+1;ix.push(a,b,a+1,a+1,b,b+1);}const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(p,3));g.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));g.setIndex(ix);g.userData.keep=true;_sbWaveG=g;return g;}
-const SB_WAVE_F=`uniform float t,fade;varying vec2 q;
-float h(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
-float n(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(h(i),h(i+vec2(1,0)),f.x),mix(h(i+vec2(0,1)),h(i+vec2(1,1)),f.x),f.y);}
-float fb(vec2 p){float a=.5,s=0.;for(int i=0;i<4;i++){s+=a*n(p);p=p*2.03+7.;a*=.5;}return s;}
-void main(){float u=q.x,v=q.y,end=pow(max(0.,1.-u*u*u*u),1.5);float flow=fb(vec2(u*3.2+t*.5,v*6.-t*3.4));float wisp=smoothstep(.52,.74,fb(vec2(u*7.-t*.7,v*16.-t*5.)+flow*1.6));float body=pow(max(0.,1.-v),1.5)*smoothstep(.2,.62,flow+(1.-v)*.42);float rim=exp(-v*v*260.)*end;float halo=exp(-v*16.)*end;
-vec3 c=mix(vec3(.06,.2,.82),vec3(.42,.72,1.),wisp);c=mix(c,vec3(.9,.97,1.),pow(wisp,3.)*.8);c=mix(c,vec3(1.,.68,.18),clamp(halo*.75,0.,1.));c=mix(c,vec3(1.,.9,.55),clamp(rim,0.,1.));
-float a=clamp((body*.95+wisp*body*.7+halo*.5+rim)*end,0.,1.)*fade;gl_FragColor=vec4(c,a);}`;
-function stormWaveMake(o,j){const u={t:{value:Math.random()*40},fade:{value:1}},m=new THREE.ShaderMaterial({transparent:true,depthWrite:false,side:THREE.DoubleSide,toneMapped:false,uniforms:u,vertexShader:'varying vec2 q;void main(){q=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',fragmentShader:SB_WAVE_F}),w=new THREE.Mesh(sbWaveGeo(),m);w.frustumCulled=false;w.rotation.z=(j.id%2?1:-1)*.3;o.g.add(w);o.swv={w,u,age:0,last:performance.now()};}
-function stormWaveTick(o,X,Y,Z){const S=o.swv,now=performance.now(),dt=Math.min(.05,(now-S.last)/1000)||.016;S.last=now;S.age+=dt;S.u.t.value+=dt;const L=SIPH.v.range/SIPH.v.spd;S.u.fade.value=natEase(natPhase(S.age,0,.05))*(1-natEase(natPhase(S.age,L*.72,L)));S.w.scale.setScalar(lerp(.6,1,natOut(natPhase(S.age,0,.14))));
-  if(_natFx&&Math.random()<.7){const F=_natFx,r=F.rnd(-1,1)*3.3;const p=F.V3(X,Y,Z).add(o.g.localToWorld(F.V3(r,0,0)).sub(o.g.position));F.sparks(p,1,.9,Math.random()<.35?'#ffe69a':'#8fd8ff','#3f78ff',{life:.7,size:1.3,g:.1});}}
+// The wave: a ragged front of yellow lightning bolts, redrawn constantly, with thin cyan lines and short shock forks.
+function sbWaveLine(V3,W,u0,u1,back,n,jag){const P=[];const bend=F=>F;for(let i=0;i<n;i++){const t=i/(n-1),u=lerp(u0,u1,t),e=Math.sin(Math.PI*t)**.5;P.push(V3(u*W+(Math.random()-.5)*jag*.5,(Math.random()-.5)*jag*e*1.1,-back-.62*u*u*W+(Math.random()-.5)*jag*e*1.6));}return P;}
+function stormWaveMake(o,j){const F=natFx(),{V3,Tube}=F,mat=new THREE.MeshBasicMaterial({vertexColors:true,transparent:true,depthWrite:false,side:THREE.DoubleSide,toneMapped:false}),G=new THREE.Group();G.rotation.z=(j.id%2?1:-1)*.22;o.g.add(G);
+  const mk=(n,s,k)=>{const m=Tube(n,s,mat,G);m.castShadow=false;m.userData.kind=k;return m;};
+  o.swv={G,mat,main:[mk(18,5,0),mk(18,5,0),mk(16,4,0),mk(14,4,0)],cy:[mk(14,3,1),mk(14,3,1),mk(12,3,1)],fork:[mk(7,3,2),mk(7,3,2),mk(7,3,2),mk(7,3,2),mk(7,3,2)],T:0,age:0,last:performance.now()};}
+function stormWaveTick(o,X,Y,Z){const S=o.swv,now=performance.now(),dt=Math.min(.05,(now-S.last)/1000)||.016;S.last=now;S.age+=dt;const L=SIPH.v.range/SIPH.v.spd,F=natFx(),{V3}=F,W=1.75;
+  S.mat.opacity=natEase(natPhase(S.age,0,.04))*(1-natEase(natPhase(S.age,L*.75,L)));S.G.scale.setScalar(lerp(.5,1,natOut(natPhase(S.age,0,.1))));
+  S.T-=dt;if(S.T<=0){S.T=.035;const Y1=new THREE.Color('#ffd21f'),Y2=new THREE.Color('#fff29a'),C=new THREE.Color('#4fe1ff');
+    S.main.forEach((m,i)=>{const a=-1+Math.random()*.35,b=1-Math.random()*.35,P=sbWaveLine(V3,W,i%2?a:b,i%2?b:a,i*.2+Math.random()*.12,18,.42+i*.08),thick=i?.038:.075;m.set(P,u=>(thick*(.45+Math.random()*.9))*Math.sin(Math.PI*u)**.4+.006,(u,c)=>c.copy(i?Y1:Y2).lerp(Y1,u*.4));});
+    S.cy.forEach((m,i)=>{const a=-.9+Math.random()*.7,P=sbWaveLine(V3,W,a,a+.5+Math.random()*.9,.1+Math.random()*.5,14,.5);m.set(P,()=>.013,(u,c)=>c.copy(C));});
+    S.fork.forEach(m=>{const u=(Math.random()*2-1)*.9,A=V3(u*W,(Math.random()-.5)*.3,-.62*u*u*W),E=A.clone().add(V3((Math.random()-.5)*.9,(Math.random()-.5)*1.2,.25+Math.random()*.9)),P=sbJag(A,E,7,.3,V3),col=Math.random()<.3?C:Y1;m.set(P,u2=>.018*(1-u2)+.004,(u2,c)=>c.copy(col));});
+    if(Math.random()<.8){const r=(Math.random()*2-1)*W;const q=F.V3(X,Y,Z).add(o.g.localToWorld(F.V3(r,0,0)).sub(o.g.position));F.sparks(q,2,1.3,'#ffe05a','#4fe1ff',{life:.45,size:1.05,g:.2});}}
+}
