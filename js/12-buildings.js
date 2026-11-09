@@ -419,7 +419,7 @@ function playerDown(t,srcId){
   emit({k:'die',x:t.x,y:t.y,h:t.z+1,c:t.color,id:t.id,ki:k&&k!==t?k.id:''});   // id/ki = กล้องตอนตาย (js/58)
 }
 
-function killProj(pr){if(pr.type==='wball'&&!pr.dead){pr.dead=true;windOrbBoom(pr);return;}if(pr.type==='wplume'&&!pr.dead){pr.dead=true;windPlumeBoom(pr);return;}
+function killProj(pr){if(pr.type==='wblade'&&!pr.dead){pr.dead=true;windFeatherBoom(pr);return;}if(pr.type==='wball'&&!pr.dead){pr.dead=true;windOrbBoom(pr);return;}if(pr.type==='wplume'&&!pr.dead){pr.dead=true;windPlumeBoom(pr);return;}
   if(pr.dead)return;
   pr.dead=true;
   if(pr.type==='nature_pea'){naturePeaSplash(pr);return;}

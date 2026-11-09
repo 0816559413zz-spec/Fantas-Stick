@@ -419,7 +419,7 @@ function natureClear(){
   for(const g of NAT_MARKS.values())disposeObj(g);
   NAT_VIEW.clear();NAT_MARKS.clear();NAT_MOTION.length=0;
 }
-window.WD.natureClear=natureClear;window.WD.natureEvent=natureEvent;window.WD.natFx=natFx;window.WD.windSuckFx=windSuckFx;
+window.WD.natureClear=natureClear;window.WD.natureEvent=natureEvent;window.WD.natFx=natFx;window.WD.windSuckFx=windSuckFx;window.WD.windDome=windDome;
 
 function natDome(ev){
   const g=new THREE.Group(),radius=ev.r*S3;

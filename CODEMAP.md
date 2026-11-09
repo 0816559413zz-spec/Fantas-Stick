@@ -163,7 +163,7 @@ windTailCast:343 windTailIn:346 windTailTick:347 windDownCast:352 windPressDown:
 windUpCast:371 windUpTick:378
 §385 Wind Push (เดิม Windrift): ยิงลมแรงไปทางที่เล็ก
 §388 Plume Volley (ผู้ใช้ 2026-11-09): ขนนกนีออนจากสองปีกสลับกันทีละอันเร็…
-windVolleyCast:389 windVolleyTick:390 windPlumeShoot:391 windFeatherSplash:401 windPlumeBoom:402 windPushCast:404 windPushHit:407
+windVolleyCast:389 windVolleyTick:390 windPlumeShoot:391 windFeatherBoom:401 windPlumeBoom:402 windPushCast:404 windPushHit:407
 §413 Windforce (เดิม Vortex Bind): พุ่งด้วยลม
 §416 Slipstream (ผู้ใช้ 2026-11-08): แดชหมุนหลบตามทิศเดิน • 2 ชาร์จ 5 วิ/อ…
 windSlipCast:417 windSlipTick:422 windForceCast:423 windSmash:429 windAheadHit:433 windForceTick:439
@@ -738,7 +738,7 @@ waterEfx:184
 §212 HUD: เกจฮีลโล่ (โค้งซ้ายรอบเป้าเล็ง)
 drawWaterHud:213
 
-## js/68-wind-view.js (411) — 
+## js/68-wind-view.js (422) — 
 WV:6 WN_BODY:8 WN_AIR_FEET:8 WF_POSE:12 WF_FEET:12 WF_REF:12 WF_ROLL:12 _wfP:13 _wfF:13 windFlyPose:14 WTLF:24 windTailDraw:25 windTailFeel:31 windCharacterPose:33 wvState:50 wvAlive:51
 §52 ทุกเฟรมของผู้เล่นสายลม: ปีกติดหลัง / ปีกห่อตอนยกโล่ / ดูดลมชาร์จเกจ
 WFE_HOLD:53 WFE_TURN:53 windLatePose:55 _faX:91 _faQ:91 _faT:91 WF_ELBOW:91 windForearm:92 windFX:94
@@ -747,13 +747,13 @@ syncWind:120 wvWall:133 wvHitFx:134 wvAimFx:135
 §136 ตา Eye of Heaven: ตำแหน่งตาบนฟ้า (ตรงกับ EYE ใน tools/wind-eye-ult-ge…
 wvEyePos:137 wvEyeSeen:138
 §139 เหตุการณ์ (efx z 'wn…')
-windSuckFx:141 windEfx:154
-§247 HUD รอบเป้าเล็ง: เกจ GaleBurst (โค้งซ้าย) + ชาร์จกำแพงลม (จุด 3 จุดใต…
-drawWindHud:248
-§256 ตัวช่วยเล็งกำแพงลม (เห็นเฉพาะเรา): เส้นโค้งเรืองที่จุดวาง (คลิกขวา) +…
-wvAimGhost:257
-§268 ปีกเวทสายลมติดหลัง: ขนนก 8+4 เส้นต่อข้าง ทำจากสายลม (shader) + ริบบิ้…
-WWS:270 WWU:270 WW_NOISE:271 _wwMat:276 wwMats:277 wwFeatherGeo:323 WW_PRI:334 WW_COV:336 WW_RIB:337 _wwGeo:338 _wsupG:340 _wsupD:340 windSupDust:341 windSupDustTick:345 windWingSup:346 makeWindWings:367 wwCue:381 poseWindWings:385
+WDOME_G:141 windDome:142 windSuckFx:151 windEfx:164
+§258 HUD รอบเป้าเล็ง: เกจ GaleBurst (โค้งซ้าย) + ชาร์จกำแพงลม (จุด 3 จุดใต…
+drawWindHud:259
+§267 ตัวช่วยเล็งกำแพงลม (เห็นเฉพาะเรา): เส้นโค้งเรืองที่จุดวาง (คลิกขวา) +…
+wvAimGhost:268
+§279 ปีกเวทสายลมติดหลัง: ขนนก 8+4 เส้นต่อข้าง ทำจากสายลม (shader) + ริบบิ้…
+WWS:281 WWU:281 WW_NOISE:282 _wwMat:287 wwMats:288 wwFeatherGeo:334 WW_PRI:345 WW_COV:347 WW_RIB:348 _wwGeo:349 _wsupG:351 _wsupD:351 windSupDust:352 windSupDustTick:356 windWingSup:357 makeWindWings:378 wwCue:392 poseWindWings:396
 
 ## js/69-broom.js (236) — ไม้กวาด (ผู้ใช้ 2026-10-29): บินแบบเครื่องบิน + ยิงลำแสงตามสาย + อนิเ…
 BRM:9 BFW:12 BSK:13 BROOM_SK:19 broomVert:40 broomMove:53 broomStrike:72 broomStrikeTick:81 broomFlak:89 broomAct:100 broomOff:107 broomBeam:109
@@ -800,4 +800,4 @@ surfSync:49 surfQuality:53
 SURF_VS:55 SURF_VS_BODY:56 SURF_FS:67 SURF_FS_BODY:68 surfOk:98 surfApply:99 surfScene:111
 §112 ปรับค่า (tune.html / F8)
 
-(97 files, 24484 lines)
+(97 files, 24495 lines)
