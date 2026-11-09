@@ -290,6 +290,7 @@ function natThorn(from,to,size,material,parent,bend=.2){
   const curve=new THREE.QuadraticBezierCurve3(from,mid,to);
   return natMesh(natTube(curve,size,.83),material,parent);
 }
+const NAT_SHIELD_K=1.07/.23;   // preview strike reaches the floor at 1.07 s; the host hit lands at .23 s
 function natShieldMake(o){
   const g=new THREE.Group();o.g.add(g);
   const hitWave={value:1},hitAxis={value:natV(.42,.16,1).normalize()};
@@ -309,17 +310,17 @@ function natShieldMake(o){
   }));
   const motes=Array.from({length:24},(_,i)=>{const m=natMesh(new THREE.OctahedronGeometry(.025+(i%3)*.009),new THREE.MeshBasicMaterial({color:i%2?'#a8f77c':'#e1ffc4',transparent:true,opacity:.7,depthWrite:false}),g);return m;});
   g.userData.nat={hitWave,hitT:-1e9,motes};
-  shield.position.y=1.10;shield.scale.set(1,.89,1);g.add(shield);
-  for(let i=0;i<8;i++){
-    const a=i*Math.PI/4,h=[1.82,1.39,1.72,1.93,1.52,1.88,1.29,1.71][i],c=Math.cos(a),s=Math.sin(a);
-    const mat=natStd(i%2?'#283f21':'#3d5329');
-    natThorn(natV(c*.61,.14,s*.61),natV(c*1.04,h,s*1.04),.105,mat,g,.19);
-    for(let j=0;j<3;j++){
-      const q=natMesh(new THREE.ConeGeometry(.068-j*.01,.26-j*.03,5),mat,g);
-      q.position.set(c*(.91+j*.072),.54+j*.28,s*(.91+j*.072));
-      q.quaternion.setFromUnitVectors(natV(0,1,0),natV(c,.68,s).normalize());
-    }
-  }
+  shield.position.y=1.23;g.add(shield);
+  const F=natFx(),{V3,Tube,Thorns,thornsAlong,M,T}=F,C=[new T.Color('#e8ffb3'),new T.Color('#688f41'),new T.Color('#b4dc79')],A=new T.Color('#304d20'),B=new T.Color('#507c2c');
+  const vines=Array.from({length:9},(_,k)=>{const tube=Tube(30,7,M.bark,g),th=Thorns(40,1.5,g);tube.castShadow=false;th.castShadow=false;return {tube,th,k,strike:null,built:false};});
+  const rad=u=>.16*Math.pow(1-u,.72)+.002,H=[.70,.57,.77,.66,.49,.73,.62,.80,.60],Y=1.23,SP=NAT_SHIELD_K;
+  const build=(v,st2,angle,reach)=>{const pts=[],k=v.k,base=V3(0,Y-1.25,0);for(let i=0;i<30;i++){const u=i/29,theta=Math.PI-(Math.PI*H[k]*u),a=k*Math.PI*2/9+Math.sin(u*3+k)*.09,r=1.36,p=V3(Math.sin(theta)*Math.sin(a)*r,Y+Math.cos(theta)*r,Math.sin(theta)*Math.cos(a)*r);
+      if(st2>0&&st2<1.80){const rise=natEase(natPhase(st2-u*.16,0,.58)),fall=natOut(natPhase(st2-u*.11,.79,.94)),back=natEase(natPhase(st2-u*.07,1.18,1.63)),ang=fall*Math.PI/2,arc=V3(0,Math.cos(ang)*4.8*u,Math.sin(ang)*reach*u+(1-fall)*1.45*Math.sin(Math.PI*u));arc.y+=Math.sin(u*Math.PI)*(.85*(1-fall));arc.x+=Math.sin(u*6-st2*9)*Math.sin(u*Math.PI)*.60*(1-fall);arc.z+=Math.sin(u*5-st2*7)*u*.32*(1-fall);arc.applyAxisAngle(V3(0,1,0),angle).add(base);p.lerp(arc,rise*(1-back)*natEase(Math.min(1,u*4)));}
+      pts.push(p);}
+    v.tube.set(pts,rad,(u,c)=>c.copy(A).lerp(B,u*.35));const list=thornsAlong(pts,rad,2,1.25);v.th.put(list);list.forEach((_,i)=>v.th.setColorAt(i,C[i%3]));if(v.th.instanceColor)v.th.instanceColor.needsUpdate=true;v.built=true;};
+  g.userData.nat.vines=vines;
+  g.userData.nat.strike=(angle,reach)=>{let best=null,d0=9;for(const v of vines){if(v.strike)continue;let d=Math.abs(angDiff(angle,v.k*Math.PI*2/9));if(d<d0){d0=d;best=v;}}if(best)best.strike={t:0,angle,reach};};
+  g.userData.nat.tick=dt=>{for(const v of vines){if(v.strike){const S=v.strike;S.t+=dt;const st2=S.t<.23?S.t*SP:1.07+(S.t-.23);if(st2>=1.8){v.strike=null;build(v,0,0,4.6);}else build(v,st2,S.angle,S.reach);}else if(!v.built)build(v,0,0,4.6);}};
   return g;
 }
 function natureCharacter(o,p,now){
@@ -328,7 +329,7 @@ function natureCharacter(o,p,now){
   if(native&&p.sh&&p.al&&!p.dn){
     if(!o.natShield)o.natShield=natShieldMake(o);
     o.natShield.visible=true;o.shield.visible=false;
-    {const U=o.natShield.userData.nat,t=now/1000;U.hitWave.value=clamp((now-U.hitT)/360,0,1);U.motes.forEach((m,i)=>{const a=i*2.4+t*.4,y=((i*.31+t*.25)%2.4)-1.2,r=Math.sqrt(Math.max(.1,1-y*y/1.9))*1.4;m.position.set(Math.sin(a)*r,y+1.1,Math.cos(a)*r);});}
+    {const U=o.natShield.userData.nat,t=now/1000;U.hitWave.value=clamp((now-U.hitT)/360,0,1);U.tick(Math.min(.05,(now-(U.lastN||now))/1000));U.lastN=now;U.motes.forEach((m,i)=>{const a=i*2.4+t*.4,y=((i*.31+t*.25)%2.4)-1.2,r=Math.sqrt(Math.max(.1,1-y*y/1.9))*1.4;m.position.set(Math.sin(a)*r,y+1.23,Math.cos(a)*r);});}
   }else if(o.natShield)o.natShield.visible=false;
   const count=p.nt?.[1]||0;
   if(count&&!o.natSpores){
@@ -454,27 +455,8 @@ function natMuzzle(ev){
   }));
 }
 function natSlam(ev){
-  const a=natWorld(ev.x,ev.y,ev.h+.6),b=natWorld(ev.x2,ev.y2,ev.h2+.04),g=new THREE.Group();
-  const mat=natStd('#385729',{emissive:'#519731',emissiveIntensity:.32});
-  const vine=new THREE.Mesh(new THREE.BufferGeometry(),mat);g.add(vine);
-  const barbs=Array.from({length:7},()=>natMesh(new THREE.ConeGeometry(.07,.24,5),mat,g));
-  const d=b.clone().sub(a);d.y=0;d.normalize();
-  natAnimate(g,.53,(k,age)=>{
-    const up=natOut(natPhase(age,0,.16)),down=natPhase(age,.16,.25)**2,back=1-natSmooth(natPhase(age,.29,.53));
-    const tip=a.clone().lerp(b,lerp(.16,.35,up)*(1-down)+down);
-    tip.y+=Math.min(4.9,a.distanceTo(b)*.83)*up*(1-down);
-    const end=a.clone().lerp(tip,back),mid=a.clone().lerp(end,.42).addScaledVector(d,.69*(1-down)*back);
-    mid.y+=.38*(1-down)*back;
-    const curve=new THREE.CatmullRomCurve3([a.clone().addScaledVector(d,.62),mid,end]);
-    vine.geometry.dispose();vine.geometry=new THREE.TubeGeometry(curve,16,.103*back+.006,6,false);
-    for(let i=0;i<barbs.length;i++){
-      const u=(i+1)/(barbs.length+1),barb=barbs[i],normal=curve.getTangent(u).cross(natV(0,1,0)).normalize();
-      if(i%2)normal.negate();
-      curve.getPoint(u,barb.position);barb.position.addScaledVector(normal,.1*back);
-      barb.quaternion.setFromUnitVectors(natV(0,1,0),normal.add(natV(0,.45,0)).normalize());
-      barb.scale.setScalar((1-u*.5)*back);
-    }
-  });
+  const a=natWorld(ev.x,ev.y,ev.h+.6),b=natWorld(ev.x2,ev.y2,ev.h2+.04),caster=ev.id!=null?PM3.get(ev.id):null;
+  if(caster?.natShield){const q=caster.g.worldToLocal(b.clone());caster.natShield.userData.nat.strike(Math.atan2(q.x,q.z),Math.max(1,Math.hypot(q.x,q.z)));}
   later(.23,()=>{
     const {x2:x,y2:y,h2:h}=ev;
     {const F=natFx(),{V3,dirt,leaves,sparks}=F,dd=b.clone().sub(a).setY(0).normalize(),side=V3(dd.z,0,-dd.x);F.O.y=b.y;for(let i=0;i<4;i++){const p=a.clone().lerp(b,.4+i*.2);p.y=b.y+.07;dirt(p,5,2.9,{spread:.42,size:.75});leaves(p,3,1.6,{dir:side.clone().multiplyScalar(i%2?1.65:-1.65),life:.7,size:1.15});sparks(p,3,2.4,'#e9ffa0','#69a83b',{dir:dd,life:.63});}}
@@ -577,6 +559,7 @@ function natShock(p,col,size=6,life=.6){const F=natFx(),r=F.ring(.25,.5,col,.8);
 function natSprout(p,n=1){const F=natFx(),{V3}=F;F.dirt(p,14*n,3.2);F.leaves(p,10*n,3);F.sparks(p.clone().add(V3(0,.3,0)),16*n,3.5,'#fff7b0','#8ee05a');}
 function natHealRims(o){const F=natFx(),{V3,ring,sparks}=F,rims=[ring(.52,.58,'#8dffa9',0),ring(.45,.49,'#d2ffb2',0)];sparks(o.g.position.clone().add(V3(0,.20,0)),6,1.1,'#e1ffc1','#53d67b',{dir:V3(0,1.4,0),g:-.85,life:1.15,size:.9});
   F.clip(.76,t=>{rims.forEach((rim,i)=>{const age=t-i*.09,k=natPhase(age,0,.65);rim.visible=age>=0&&k<1;rim.position.copy(o.g.position).add(V3(0,.08+1.47*natEase(k),0));rim.scale.setScalar(1+.18*Math.sin(k*Math.PI));rim.material.opacity=.78*(1-natEase(k));});},()=>rims.forEach(r=>F.drop(r)));}
+function natWhipHit(ev){const F=natFx(),{V3,leaves,sparks,SPK}=F,p=natWorld(ev.x,ev.y,ev.h),dir=V3((Math.random()<.5?-1:1)*2.4,.65,1);leaves(p,6,2.8,{dir,life:.65});sparks(p,9,4.2,'#edff9d','#62d04a',{dir,life:.6,size:1.4});for(let i=0;i<5;i++){const v=V3(F.rnd(-2,2),F.rnd(0,2.6),F.rnd(-1.6,1.6)).add(dir);SPK.add({p:p.clone(),v,life:F.rnd(.15,.28),size:F.rnd(.08,.14),spin:F.rnd(-12,12),g:5,drag:1,col:'#a4e153',c2:'#375e22',sx:3.2,shrink:1});}}
 const natDirOf=a=>natFx().V3(Math.cos(a||0),0,Math.sin(a||0));
 function natMoment(ev){
   const F=natFx(),{V3,leaves,sparks,dirt,puff,chips}=F,x=ev.x,y=ev.y,h=ev.h,P=natWorld(x,y,h),base=natWorld(x,y,groundH(x,y,h));F.O.y=base.y;

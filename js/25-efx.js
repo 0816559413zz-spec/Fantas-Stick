@@ -24,10 +24,7 @@ function efxFX(ev){
   if(ev.z&&ev.z[0]==='w'&&ev.z[1]==='t'&&waterEfx(ev))return;   // สายน้ำ (js/68-water-view.js)   // สายลม (js/68-wind-view.js)   // สายดิน (js/47-earth-view.js)
   const x=ev.x,y=ev.y,H=ev.h!==undefined?ev.h:1,me=myPos(),near=!me||Math.hypot(x-me.x,y-me.y)<1000;
   switch(ev.z){
-    case 'nature_whip_hit':
-      burst(x,y,'#c9f486',8,98,.30,2.1,{h:H,c2:'#509f3c',g:2.8,sh:4,vr:5});
-      break;
-    // ----- สายน้ำแข็ง (ออกแบบโดยผู้เล่น) -----
+    case 'nature_whip_hit':natWhipHit(ev);break;
     case 'swing':{
       const a=ev.a,R=ev.r||120,big=ev.c===2,col=ev.ax?'#e8f8ff':'#cfefff';
       const pts=[[x,y]];if(ev.m){const c=Math.cos(a),s=Math.sin(a);for(const k of [-1,1])pts.push([x+c*30-s*55*k,y+s*30+c*55*k]);}

@@ -5,6 +5,8 @@ function natFxClear(){if(!_natFx)return;for(const o of _natFx.ALL.splice(0))scen
 function natFxMake(){
 const T=THREE,S=scene,O={y:0};
 let seed=7;const rnd=(a=0,b=1)=>{seed=(seed*16807)%2147483647;return a+(b-a)*(seed/2147483647);};
+const ease=t=>t<0?0:t>1?1:t*t*(3-2*t),outQ=t=>{t=clamp(t,0,1);return 1-(1-t)*(1-t);},inQ=t=>{t=clamp(t,0,1);return t*t;},phase=(t,a,b)=>clamp((t-a)/(b-a),0,1);
+const tipW=o=>{o.g.updateMatrixWorld(true);return o.tip.getWorldPosition(V3());};
 const ALL=[];const add=(o,p)=>{(p||S).add(o);if(!p)ALL.push(o);return o;};
 const mesh=(geo,mat,p)=>{const m=new T.Mesh(geo,mat);m.castShadow=true;m.frustumCulled=false;return add(m,p);};
 const STD=(c,o={})=>new T.MeshStandardMaterial(Object.assign({color:c,roughness:.8,metalness:0},o));
@@ -98,10 +100,74 @@ function TrailRibbon(n,col){const g=new T.BufferGeometry(),pos=new Float32Array(
     g.attributes.position.needsUpdate=true;g.attributes.color.needsUpdate=true;g.computeBoundingSphere();};
   return m;}
 
+const WHIP_N=26,WHIP_L=6,WHIP_LAG=.16;
+function Whip(length=WHIP_L,curled=false){const tube=Tube(WHIP_N,7,M.bark),th=Thorns(60,1),trail=TrailRibbon(curled?5:18,curled?'#a0e74c':'#b8f060');
+  const wake=curled?TrailRibbon(6,'#58da46'):null;
+  const pulse=curled?Tube(WHIP_N,5,ADD('#ffffff',{vertexColors:true})):null;
+  const vineDark=new T.Color('#19371a'),vineLight=new T.Color(curled?'#59833b':'#5c9a2e');
+  const chargeColor=new T.Color(curled?'#b6ff63':'#b6e45a');
+  if(pulse)pulse.castShadow=false;
+  return {tube,th,trail,upd(o,t,sw){ // sw = {t0, dir(+1 ซ้าย→ขวา), aimYaw}
+      const st=t-sw.t0,show=st>0&&st<(curled?.78:.82);tube.visible=th.visible=show;if(pulse)pulse.visible=false;
+      if(!show){trail.push(null);if(wake)wake.push(null);return null;}
+      const grow=curled?outQ(st/.06)*(.34+.66*ease((st-.08)/.15))*(1-ease((st-.61)/.17)):outQ(st/.12)*(1-inQ((st-.66)/.16)),s=sw.dir;
+      const curl=curled?1-ease((st-.06)/.23):0;
+      // มุมโคน (เทียบทิศที่หัน): ง้าง→กวาด→เลยไปนิด
+      const brake=s<0?.31:.29;
+      const ang=(x)=>{if(curled){const q=phase(x,.04,brake);
+          const sweep=lerp(s<0?1.49:1.55,s<0?-1.27:-1.30,q*q*q*(q*(q*6-15)+10));
+          return s*(sweep+.54*ease(phase(x,brake-.02,brake+.24))-.06*Math.sin(Math.PI*phase(x,brake,brake+.10)));
+        }const a=1.45*s,b=-1.45*s;if(x<.1)return lerp(a*.85,a,x/.1);const k=(x-.1)/.36;if(k<1)return lerp(a,b,ease(k));const z=x-.46;return b+(-.22*s)*Math.sin(z*14)*Math.exp(-z*6);};
+      const armYaw=ang(st);
+      const armWeight=curled?ease(phase(st,0,.07))*(1-ease(phase(st,.52,.78))):1;
+      o.armR.rotation.set(lerp(o.armR.rotation.x,-1.25+.25*Math.sin(Math.min(1,st/.46)*Math.PI),armWeight),armYaw*.55*armWeight,lerp(o.armR.rotation.z,0,armWeight));
+      o.b.rotation.y=armYaw*.28*armWeight;
+      const P0=tipW(o),yaw=o.g.rotation.y,pts=[P0.clone()],seg=length*grow/(WHIP_N-1);let p=P0.clone();
+      for(let i=1;i<WHIP_N;i++){const u=i/(WHIP_N-1),delay=(curled?(s<0?.18:.17):WHIP_LAG)*u;
+        // แต่ละช่วงสะบัดคนละจังหวะตามระยะจากมือ แล้วดีดกลับเบา ๆ
+        const bendAge=st-brake-delay+.035;
+        const snap=curled?Math.sin(Math.PI*phase(bendAge,0,.17)):0;
+        const release=curled?Math.sin(Math.PI*phase(bendAge,.17,.35)):0;
+        const bend=(snap*(.18+.58*u)-release*(.12+.26*u))*ease(phase(u,0,.24));
+        const a=yaw+ang(Math.max(0,st-delay))*1.08+s*(curl*(s<0?3.8:4.0)*u*u-bend);
+        const pitch=-.06-.22*u*u+.06*Math.sin(u*9-st*20)*(1-u)
+          +(curled?curl*.35*Math.sin(u*Math.PI)*Math.sin(u*5.5+st*3)+u*(.21*snap-.14*release):0),cp=Math.cos(pitch);
+        p=p.clone().add(V3(Math.sin(a)*cp,Math.sin(pitch),Math.cos(a)*cp).multiplyScalar(seg));if(p.y<O.y+.12)p.y=O.y+.12;pts.push(p);}
+      const rad=(u)=>(.085*(1-u)+.018)*(.6+.4*grow);
+      tube.set(pts,rad,(u,c)=>curled?c.copy(vineDark).lerp(vineLight,.22+.24*u+.10*Math.sin(u*36)):
+        c.set('#4a3218').lerp(vineLight,Math.min(1,u*1.4)).lerp(chargeColor,Math.max(0,u-.7)*1.8));
+      th.put(thornsAlong(pts,rad,2,grow*1.35));
+      const tip=pts[WHIP_N-1],tipAngle=Math.atan2(tip.x-o.g.position.x,tip.z-o.g.position.z)-yaw;
+      const sweeping=curled?st>.15&&st<.42&&Math.abs(tipAngle)<Math.PI/3:st>.1&&st<.6;
+      trail.push(sweeping?[pts[WHIP_N-(curled?4:8)],tip]:null);
+      if(wake){
+        const strength=ease(phase(st,.22,.32));
+        let sample=null;
+        if(strength>0&&sw.lastTip&&!sw.wakeEnded){
+          const lastAngle=Math.atan2(sw.lastTip.x-o.g.position.x,sw.lastTip.z-o.g.position.z)-yaw;
+          const turn=tipAngle-lastAngle;
+          // เมื่อปลายเริ่มดีดกลับ ให้รอยเดิมจางอยู่ที่เดิม
+          if(Math.atan2(Math.sin(turn),Math.cos(turn))*s>=0)sw.wakeEnded=true;
+          else{
+            const across=V3(sw.lastTip.z-tip.z,0,tip.x-sw.lastTip.x).normalize();
+            const edge=tip.clone().addScaledVector(across,.14+.16*strength);
+            sample=[edge,tip];
+          }
+        }
+        wake.push(sample,strength);
+      }
+      if(pulse&&st>=.075&&st<brake+.12){
+        const head=(st-.075)/(brake-.075+.04);
+        const glowAt=u=>ease(1-Math.abs(head-u)/.30);
+        pulse.visible=true;
+        pulse.set(pts,u=>rad(u)+.036*glowAt(u),(u,c)=>c.copy(chargeColor).multiplyScalar(.85*glowAt(u)));   // game bloom is stronger than the preview (was 1.6)
+      }
+      return {pts,tip,st};}};}
+
 const CLIPS=[];
 function tick(dt){for(const p of POOLS)p.upd(dt);for(let i=CLIPS.length-1;i>=0;i--){const c=CLIPS[i];c.t+=dt;if(c.t>=c.dur||c.fn(c.t,dt)===false){CLIPS.splice(i,1);c.end&&c.end();}}}
 function clip(dur,fn,end){CLIPS.push({t:0,dur,fn,end});fn(0,0);}
 function drop(o){S.remove(o);const i=ALL.indexOf(o);if(i>=0)ALL.splice(i,1);o.geometry&&o.geometry.dispose();if(o.material&&!(o.material.userData&&o.material.userData.keep))o.material.dispose();}
-return {T,O,M,ALL,V3,rnd,ADD,STD,add,mesh,glow,ring,GLOWT,GLOWG,GLOWP,GLOWV,Tube,Thorns,thornsAlong,TrailRibbon,leaves,sparks,dirt,puff,chips,POOLS,tick,clip,drop};
+return {Whip,WHIP_N,SPK,T,O,M,ALL,V3,rnd,ADD,STD,add,mesh,glow,ring,GLOWT,GLOWG,GLOWP,GLOWV,Tube,Thorns,thornsAlong,TrailRibbon,leaves,sparks,dirt,puff,chips,POOLS,tick,clip,drop};
 }
 const natFx=()=>_natFx||(_natFx=natFxMake());

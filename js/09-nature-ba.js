@@ -87,70 +87,21 @@ function natureWhipVisualMake(o){
     spike:new THREE.Object3D(),up:new THREE.Vector3(0,1,0),
     worldA:new THREE.Vector3(),worldB:new THREE.Vector3(),swing:null,trail:null,lastSample:-Infinity};
 }
-function natureWhipView(o,swing){
+function natureWhipView(o,swing){   // exact preview whip: natFx().Whip (tools/nature-preview.js SKS.whip)
   let v=o.natureWhipView;
-  if(!swing){
-    if(v){v.vine.visible=false;trailStop(v.trail);v.trail=null;}
-    return;
-  }
-  if(!v)v=o.natureWhipView=natureWhipVisualMake(o);
-  if(v.swing!==swing.start){
-    trailStop(v.trail);v.trail=null;v.swing=swing.start;v.lastSample=-Infinity;v.leafBeat=-1;
-  }
-  const t=swing.age,s=swing.side,brake=s<0?.31:.29;
-  v.vine.visible=t>0;
-  if(t<=0)return;
-  const grow=(1-(1-nwPhase(t,0,.06))**2)*(.34+.66*nwEase(nwPhase(t,.08,.23)))
-    *(1-nwEase(nwPhase(t,.61,NATURE_WHIP.duration)));
-  const curl=1-nwEase(nwPhase(t,.06,.29));
-  const yaw=Math.PI/2-swing.angle-o.g.rotation.y;
-  const {points,positions,tangent,normal,binormal,spike,up,thorns}=v;
-  o.tip.getWorldPosition(points[0]);o.g.worldToLocal(points[0]);
-  const length=NATURE_WHIP.range*S3*grow/(NW_RINGS-1);
-  for(let i=1;i<NW_RINGS;i++){
-    const u=i/(NW_RINGS-1),delay=.17*u;
-    const bendAge=t-brake-delay+.035;
-    const snap=Math.sin(Math.PI*nwPhase(bendAge,0,.17));
-    const release=Math.sin(Math.PI*nwPhase(bendAge,.17,.35));
-    const bend=(snap*(.18+.58*u)-release*(.12+.26*u))*nwEase(nwPhase(u,0,.24));
-    const angle=yaw+nwSwingAngle(Math.max(0,t-delay),s)*1.08+s*(curl*4*u*u-bend);
-    const pitch=-.06-.22*u*u+.06*Math.sin(u*9-t*20)*(1-u)
-      +curl*.35*Math.sin(u*Math.PI)*Math.sin(u*5.5+t*3)+u*(.21*snap-.14*release);
-    const horizontal=Math.cos(pitch)*length;
-    const prev=points[i-1];
-    points[i].set(prev.x+Math.sin(angle)*horizontal,
-      Math.max(.10,prev.y+Math.sin(pitch)*length),prev.z+Math.cos(angle)*horizontal);
-  }
-  for(let i=0;i<NW_RINGS;i++){
-    const p=points[i],u=i/(NW_RINGS-1),radius=(.083*(1-u)+.017)*(.55+.45*grow);
-    tangent.subVectors(points[Math.min(i+1,NW_RINGS-1)],points[Math.max(0,i-1)]).normalize();
-    normal.crossVectors(up,tangent).normalize();
-    binormal.crossVectors(tangent,normal);
-    for(let j=0;j<NW_SIDES;j++){
-      const angle=j*Math.PI*2/NW_SIDES,a=Math.cos(angle)*radius,b=Math.sin(angle)*radius;
-      positions.setXYZ(i*NW_SIDES+j,p.x+a*normal.x+b*binormal.x,p.y+a*normal.y+b*binormal.y,p.z+a*normal.z+b*binormal.z);
+  if(!swing){if(v&&v.idle<25){v.idle++;v.w.upd(o,-1,{t0:0,dir:1});}return;}
+  const F=natFx();
+  if(!v){const w=F.Whip(NATURE_WHIP.range*S3,true);v=o.natureWhipView={w,vine:w.tube,start:null,sw:null,idle:0};}
+  v.idle=0;
+  if(v.start!==swing.start){v.start=swing.start;v.sw={t0:0,dir:swing.side,shed:0};}
+  const sw=v.sw,q=simOf(o.g.position);F.O.y=GY(q.x,q.y);
+  const r=v.w.upd(o,Math.max(.0001,swing.age),sw);
+  if(r){
+    const burst=[[.42,3],[.49,3],[.56,3]][sw.shed];
+    if(burst&&r.st>=burst[0]&&sw.lastTip){
+      const fling=r.tip.clone().sub(sw.lastTip).normalize().multiplyScalar(2.4);fling.y+=.75;
+      F.leaves(r.tip.clone().lerp(r.pts[F.WHIP_N-3],sw.shed===0?.65:.2),burst[1],1.9,{dir:fling,life:.72,size:1.45});sw.shed++;
     }
-    if(i===0||i===NW_RINGS-1)continue;
-    const angle=i*2.39996;
-    normal.multiplyScalar(Math.cos(angle)).addScaledVector(binormal,Math.sin(angle));
-    spike.position.copy(p).addScaledVector(normal,radius*1.35);
-    spike.quaternion.setFromUnitVectors(up,normal.addScaledVector(tangent,-.45).normalize());
-    spike.scale.setScalar((.10-.05*u)*(.5+.5*grow));
-    spike.updateMatrix();thorns.setMatrixAt(i-1,spike.matrix);
+    sw.lastTip=r.tip;
   }
-  positions.needsUpdate=true;v.vine.geometry.computeVertexNormals();thorns.instanceMatrix.needsUpdate=true;
-  if(t>=.15&&t<.43&&t-v.lastSample>=.012){
-    if(!v.trail)v.trail=trailNew({col:'#afff72',col2:'#3fb24c',k:.8,life:.17,sweep:true});
-    v.lastSample=t;
-    o.g.localToWorld(v.worldA.copy(points[NW_RINGS-5]));o.g.localToWorld(v.worldB.copy(points[NW_RINGS-1]));
-    const a=v.worldA,b=v.worldB;
-    trailPoint(v.trail,a.x,a.y,a.z,b.x,b.y,b.z,.72);
-    const beat=Math.floor((t-.15)/.085);
-    if(beat<=2&&beat!==v.leafBeat){
-      v.leafBeat=beat;
-      const x=b.x/S3+MW/2,y=b.z/S3+MH/2;
-      burst(x,y,'#bce778',5,62,.35,2.1,{h:b.y-GY(x,y),c2:'#528f3b',g:1.8,sh:4,vr:6});
-      if(beat===0)snd('whoosh',{x,y,vol:.43});
-    }
-  }else if(t>=.43&&v.trail){trailStop(v.trail);v.trail=null;}
 }

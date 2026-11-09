@@ -99,7 +99,7 @@ WRATH:196 earthPillarThrow:201 earthWrathTick:213 earthWrathDrill:224 earthWrath
 §240 ทั้งสนาม: สิ่งก่อสร้างพัง / ฝุ่นหมดเวลา / Stonebreaker ชนกำแพง
 updateEarth:241 earthSnapP:251 earthSnapW:253
 
-## js/09-nature-ba.js (156) — 
+## js/09-nature-ba.js (107) — 
 NATURE_BA_TEST:2 NATURE_WHIP:3 natureWhipEnabled:4 natureWhipHit:7 natureWhipBasic:29 NW_RINGS:50 NW_SIDES:50 nwPhase:51 nwEase:52 nwSwingAngle:53 natureWhipPose:59 natureWhipVisualMake:68 natureWhipView:90
 
 ## js/09-nature.js (419) — 
@@ -291,7 +291,7 @@ BRKV:313 BRK_COL:313 brkSetup:314 BRK_CM:333 brkCrackMat:334 brkClip:350 brkYc:3
 ## js/24-minions-view.js (68) — สัตว์เวท: โมเดลโปร่งแสง + ซิงก์จาก snapshot (MN)
 MM3:2 makeMinion:3 syncMins:36 drawMinBars:58
 
-## js/25-efx.js (310) — efxFX: ภาพของ event "efx" ทุกคาถา (หนึ่ง case ต่อหนึ่งเอฟเฟกต์)
+## js/25-efx.js (307) — efxFX: ภาพของ event "efx" ทุกคาถา (หนึ่ง case ต่อหนึ่งเอฟเฟกต์)
 efxState:4 efxFX:20
 
 ## js/26-fx-events.js (241) — fx(ev): เอฟเฟกต์+เสียงของทุก event จากโฮสต์ • statusFX (สถานะบนตัว) •…
@@ -719,13 +719,13 @@ bdHash:67 bdNoise:68 bdFbm:69 bdEdge:71 bdRing:73 bdPaint:79 bdTree:82 buildBack
 ## js/68-nature-art.js (171) — 
 naturePlantArt:2 Turret:3 auraTextures:44 auraTex:45 LotusAura:88 glowWallTex:92 M_BUB:95 M_BUBRIM:96 M_DRIP:97 M_POOL:98 lotusPetalVeins:100 Lotus:127
 
-## js/68-nature-fx.js (107) — 
-_natFx:3 natFxClear:4 natFxMake:5 T:6 S:6 O:6 seed:7 ALL:8 mesh:9 STD:10 ADD:11 M:12 glowTex:29 GLOWT:30 GLOWG:30 GLOWP:30 GLOWV:30 glow:31 ring:32 Tube:34 V3:49 Thorns:51 thornsAlong:63
-§67 อนุภาค
-Pool:68 leafGeo:76 LEAF:77 SPK:78 DIRT:79 PUFF:80 CHIP:81 POOLS:82 leafCols:83 leaves:84 sparks:85 dirt:86 puff:87 chips:88 TrailRibbon:90 CLIPS:101 tick:102 clip:103 drop:104 natFx:107
+## js/68-nature-fx.js (173) — 
+_natFx:3 natFxClear:4 natFxMake:5 T:6 S:6 O:6 seed:7 ease:8 outQ:8 inQ:8 phase:8 tipW:9 ALL:10 mesh:11 STD:12 ADD:13 M:14 glowTex:31 GLOWT:32 GLOWG:32 GLOWP:32 GLOWV:32 glow:33 ring:34 Tube:36 V3:51 Thorns:53 thornsAlong:65
+§69 อนุภาค
+Pool:70 leafGeo:78 LEAF:79 SPK:80 DIRT:81 PUFF:82 CHIP:83 POOLS:84 leafCols:85 leaves:86 sparks:87 dirt:88 puff:89 chips:90 TrailRibbon:92 WHIP_N:103 WHIP_L:103 WHIP_LAG:103 Whip:104 CLIPS:167 tick:168 clip:169 drop:170 natFx:173
 
-## js/68-nature-view.js (669) — 
-NAT_VIEW:2 NAT_MARKS:2 NAT_MOTION:2 natV:3 natWorld:4 natPhase:5 natSmooth:6 natEase:7 natOut:8 natStd:9 natAdd:10 natMesh:11 natRing:12 natLeaf:16 natPlantM:19 natGlow:26 natArt:29 natureProjectileModel:31 natSet:37 natAnimate:38 natTube:39 natTrail:50 natSeed:68 natLotus:76 natBall:92 natPlantView:102 natStartStudy:112 natWearWall:130 natTreeGlow:153 natModelTick:173 natMarker:255 natMarks:269 natThorn:288 natShieldMake:293 natureCharacter:325 natOutlineMat:355 natOutline:359 natLinks:371 syncNature:396 natureClear:415 natDome:424 natMuzzle:446 natSlam:456 natHook:492 natCoil:549 natHookPose:570 natShock:576 natSprout:577 natHealRims:578 natDirOf:580 natMoment:581 natureEvent:608
+## js/68-nature-view.js (652) — 
+NAT_VIEW:2 NAT_MARKS:2 NAT_MOTION:2 natV:3 natWorld:4 natPhase:5 natSmooth:6 natEase:7 natOut:8 natStd:9 natAdd:10 natMesh:11 natRing:12 natLeaf:16 natPlantM:19 natGlow:26 natArt:29 natureProjectileModel:31 natSet:37 natAnimate:38 natTube:39 natTrail:50 natSeed:68 natLotus:76 natBall:92 natPlantView:102 natStartStudy:112 natWearWall:130 natTreeGlow:153 natModelTick:173 natMarker:255 natMarks:269 natThorn:288 NAT_SHIELD_K:293 natShieldMake:294 natureCharacter:326 natOutlineMat:356 natOutline:360 natLinks:372 syncNature:397 natureClear:416 natDome:425 natMuzzle:447 natSlam:457 natHook:474 natCoil:531 natHookPose:552 natShock:558 natSprout:559 natHealRims:560 natWhipHit:562 natDirOf:563 natMoment:564 natureEvent:591
 
 ## js/68-water-view.js (216) — สายน้ำ 💧 — ภาพฝั่งผู้เล่น • VFX = assets/fx/water/* (tools/water-vfx-gen.py, สไตล์ desig…
 WTV:5 WTC:6 WT_BODY:8 waterCharacterPose:13 wtState:34 wtStop:35 wtMesh:36 _wtV:38 _wtP:38 wtBakeClone:39 wtLineMat:50 _wtOlMat:57 wtOutline:59 WT_SINKD:65 wtSinkOffset:66 wtAlive:73 wtLoop:75 WT_FR:78 wtFrPath:79 _wtFa:81 _wtFb:81 _wtFs:81 _wtFn:81 wtFamRiseMesh:82 WT_POOL:87 wtFamRise:88 wtFamRiseOff:95 _wtTube:97 WT_BEAM_V:98 WT_BEAM_F:101 WT_BEAM_O:105 wtBeamMesh:108 wtBeamSync:112 wtBeamOff:117
@@ -800,4 +800,4 @@ surfSync:49 surfQuality:53
 SURF_VS:55 SURF_VS_BODY:56 SURF_FS:67 SURF_FS_BODY:68 surfOk:98 surfApply:99 surfScene:111
 §112 ปรับค่า (tune.html / F8)
 
-(97 files, 24498 lines)
+(97 files, 24495 lines)
