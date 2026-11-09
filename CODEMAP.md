@@ -727,8 +727,8 @@ Pool:70 leafGeo:78 LEAF:79 SPK:80 DIRT:81 PUFF:82 CHIP:83 POOLS:84 leafCols:85 l
 ## js/68-nature-view.js (676) — 
 NAT_VIEW:2 NAT_MARKS:2 NAT_MOTION:2 natV:3 natWorld:4 natPhase:5 natSmooth:6 natEase:7 natOut:8 natStd:9 natAdd:10 natMesh:11 natRing:12 natLeaf:16 natPlantM:19 natGlow:26 natArt:29 natureProjectileModel:31 natSet:37 natAnimate:38 natTube:39 natTrail:50 natSeed:68 natLotus:77 natBall:93 natPlantView:103 natStartStudy:113 natWearWall:131 natTreeGlow:154 natModelTick:174 natMarker:257 natMarks:268 natThorn:287 NAT_SHIELD_K:292 natShieldMake:293 natureCharacter:325 natOutlineMat:355 natOutline:359 natLinks:371 syncNature:386 natureClear:405 natDome:414 natMuzzle:436 natSlam:446 natHook:463 natCoil:520 natHookPose:541 natHookArm:549 natShock:551 natSprout:552 natHealRims:553 natWhipHit:555 natBallRange:556 natSummon:558 natTreeAura:565 natAuraDrop:575 NAT_HOLO:577 natHoloMake:578 natHolo:583 natHoloClear:584 natDirOf:585 natMoment:586 natureEvent:615
 
-## js/68-storm-bow.js (95) — 
-SB_FULL:2 _sbShard:3 sbShard:4 sbMat:5 sbJag:6 sbMake:7 stormBowView:18 stormBowFx:35 sbStaffAxis:50 sbStaffMake:51 stormStaffView:67 stormStaffCast:79 stormStaffSwing:82 sbWaveLine:84 stormWaveMake:85 stormWaveTick:88
+## js/68-storm-bow.js (105) — 
+SB_FULL:2 _sbShard:3 sbShard:4 sbMat:5 sbJag:6 sbMake:7 stormBowView:19 stormBowFx:38 sbStaffAxis:53 sbStaffMake:54 stormStaffView:71 stormStaffCast:83 stormStaffSwing:86 _sbWaveG:88 sbWaveGeo:89 SB_WAVE_F:90 stormWaveMake:97 stormWaveTick:100
 
 ## js/68-water-view.js (216) — สายน้ำ 💧 — ภาพฝั่งผู้เล่น • VFX = assets/fx/water/* (tools/water-vfx-gen.py, สไตล์ desig…
 WTV:5 WTC:6 WT_BODY:8 waterCharacterPose:13 wtState:34 wtStop:35 wtMesh:36 _wtV:38 _wtP:38 wtBakeClone:39 wtLineMat:50 _wtOlMat:57 wtOutline:59 WT_SINKD:65 wtSinkOffset:66 wtAlive:73 wtLoop:75 WT_FR:78 wtFrPath:79 _wtFa:81 _wtFb:81 _wtFs:81 _wtFn:81 wtFamRiseMesh:82 WT_POOL:87 wtFamRise:88 wtFamRiseOff:95 _wtTube:97 WT_BEAM_V:98 WT_BEAM_F:101 WT_BEAM_O:105 wtBeamMesh:108 wtBeamSync:112 wtBeamOff:117
@@ -803,4 +803,4 @@ surfSync:49 surfQuality:53
 SURF_VS:55 SURF_VS_BODY:56 SURF_FS:67 SURF_FS_BODY:68 surfOk:98 surfApply:99 surfScene:111
 §112 ปรับค่า (tune.html / F8)
 
-(98 files, 24654 lines)
+(98 files, 24664 lines)
