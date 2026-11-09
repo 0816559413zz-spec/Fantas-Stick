@@ -405,7 +405,7 @@ function windSlipCast(p){if(windSpin(p)||(p.wsc|0)<=0||p.wsl||p.dash>0)return fa
   let mx=typeof inp.mx==='number'?inp.mx:(inp.r?1:0)-(inp.l?1:0),my=typeof inp.my==='number'?inp.my:(inp.d?1:0)-(inp.u?1:0);const A=Math.hypot(mx,my)>0.05?Math.atan2(my,mx):a,f=Math.cos(A-a),r=Math.sin(A-a);
   const d=Math.abs(f)>=Math.abs(r)?(f>=0?0:1):(r>0?3:2),s=r>0?1:-1,D=air?W.sA:W.sG,T=air?W.sTA:W.sTG,sp=D/T;   // 0 หน้า 1 หลัง 2 ซ้าย 3 ขวา
   p.wsc--;p.wsl={t:0,T,A,d,s};p.dash=T;p.dashSp=sp;p.dashX=Math.cos(A);p.dashY=Math.sin(A);p.shieldOn=false;p.wbw=undefined;p.wbCh=null;p.cd.basic=0;p.wbCd=0;p.wse=1;
-  emit({k:'efx',z:'wnsl',x:Math.round(p.x),y:Math.round(p.y),h:p.z,a:Math.round(A*100)/100,n:d,m:d===0?(air?1:0):s,t:T,id:p.id});}
+  emit({k:'efx',z:'wnsl',x:Math.round(p.x),y:Math.round(p.y),h:p.z,a:Math.round(A*100)/100,n:d,m:d<=1?(air?1:0):s,t:T,id:p.id});}
 function windSlipTick(p,dt){const S=p.wsl;if(!p.alive||p.stun>0){p.wsl=null;p.dash=0;return;}S.t+=dt;if(S.t>=S.T)p.wsl=null;}
 function windForceCast(p){if(windSpin(p)||p.wfc||p.dash>0)return false;
   const air=windAir(p),W=W_VX,a=p.ang,inp=p.inp||{},D=air?W.distA:W.distG,T=air?W.tA:W.tG;let dv=0;

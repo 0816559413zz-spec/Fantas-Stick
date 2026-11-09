@@ -3456,6 +3456,50 @@
    "dur": 1.2,
    "n": 6
   },
+  "wind/slip_back": {
+   "v": "41ba44f3",
+   "desc": "Slipstream แดชหลัง ตอนบิน หางลมตามตัว",
+   "pal": "wind",
+   "tags": [
+    "wind",
+    "dash"
+   ],
+   "dur": 0.6,
+   "n": 4
+  },
+  "wind/slip_back_g": {
+   "v": "64f6bd06",
+   "desc": "Slipstream แดชหลัง ตอนอยู่พื้น หางลมตามตัว",
+   "pal": "wind",
+   "tags": [
+    "wind",
+    "dash"
+   ],
+   "dur": 0.6,
+   "n": 4
+  },
+  "wind/slip_back_gw": {
+   "v": "e8987644",
+   "desc": "Slipstream แดชหลัง ตอนอยู่พื้น ปีกกระพือ",
+   "pal": "wind",
+   "tags": [
+    "wind",
+    "dash"
+   ],
+   "dur": 0.6,
+   "n": 6
+  },
+  "wind/slip_back_w": {
+   "v": "1614e9ed",
+   "desc": "Slipstream แดชหลัง ตอนบิน ปีกกระพือ",
+   "pal": "wind",
+   "tags": [
+    "wind",
+    "dash"
+   ],
+   "dur": 0.6,
+   "n": 4
+  },
   "wind/slip_dash": {
    "v": "10d7241f",
    "desc": "Slipstream: เกลียวลมพันตัว + เส้นลมสะบัด + ขนนกร่วง",
