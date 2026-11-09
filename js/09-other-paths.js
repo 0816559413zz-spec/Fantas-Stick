@@ -1,33 +1,12 @@
 // =====================================================================
-//  สายธรรมชาติ — พิษ: สะสมพิษ → ปิดจบด้วยหนามระเบิด (ชั้นละ 9 + ฟื้นเลือดเรา) • รากมัดทำให้พิษแรงขึ้น
+//  สายธรรมชาติ — ป้อมพืช แส้ และการคุ้มครองทีม
 // =====================================================================
-defSpell(3,{id:'poisondart',role:'builder',n:'ลูกดอกพิษ',ic:'🏹',cd:3,d:'ลูกดอกเร็ว ใส่พิษสะสมได้ 3 ชั้น (ชั้นยิ่งสูงยิ่งเจ็บ)',fx:'ใส่เป้าที่ถูกรากมัดอยู่ = พิษ 2 ชั้นทันที',
-  cast(p,S){shoot(p,'dart',{sp:S.id,dmg:10});},
-  hit(pr,t){damage(t,pr.dmg,pr.owner,'proj');addPoison(t,pr.owner,t.root>0?2:1);}});
-defSpell(3,{id:'vinelash',role:'control',n:'เถาวัลย์พันธนาการ',ic:'🌱',cd:7,d:'เถาวัลย์พุ่งไปมัดเป้าหมาย ขยับไม่ได้ 1 วิ (ยังร่ายเวทได้)',fx:'ถ้าเป้ามีพิษ: มัดนานขึ้น (1.4 วิ) และกินพิษ 1 ชั้นเป็นดาเมจ 8',
-  cast(p,S){shoot(p,'vine',{sp:S.id,dmg:10});},
-  hit(pr,t){
-    const n=t.psn|0;damage(t,pr.dmg,pr.owner,'proj');addRoot(t,n>0?1.4:1.0);
-    if(n>0){t.psn=n-1;if(t.psn<=0)t.psnT=0;damage(t,8,pr.owner,'pierce');}
-    emit({k:'efx',z:'vine',x:t.x,y:t.y,h:0.3});
-  }});
-defSpell(3,{id:'sporecloud',role:'control',n:'เมฆสปอร์',ic:'☁️',cd:13,d:'เมฆสปอร์พิษวงกว้าง 5 วิ ใส่พิษสะสมและชะลอทุกคนข้างใน',fx:'ให้พิษลอยขึ้นถึง 3 ชั้นโดยไม่ต้องยิง — เตรียมหนามระเบิด',
-  cast(p,S){const q=aimPoint(p,480);addZone({x:q.x,y:q.y,r:170,t:5,tick:0.8,owner:p.id,team:p.team,kind:'spore',n:0,hit(t,z){damage(t,2,z.owner,'zone');if((z.n=(z.n|0)+1)%2===0)addPoison(t,z.owner,1);addSlow(t,0.85,0.9);}});}});
-defSpell(3,{id:'bloom',role:'utility',n:'ดอกไม้ฟื้นฟู',ic:'🌸',cd:14,d:'สร้างวงดอกไม้ 5 วิ ฟื้นเลือดตัวเองและเพื่อนที่ยืนอยู่ข้างใน + ล้างพิษ',fx:'ยืนนิ่งๆ ได้ประโยชน์สุด',
-  cast(p,S){addZone({x:p.x,y:p.y,r:150,t:5,tick:0.8,owner:p.id,team:p.team,kind:'bloom',allyHit(q,z){q.psn=0;q.psnT=0;healT(q,6);}});}});
-defSpell(3,{id:'thornburst',role:'finisher',n:'หนามระเบิด',ic:'🌵',cd:9,d:'หนามพุ่งรอบตัว: กินพิษทุกชั้นของศัตรูเป็นดาเมจ (ชั้นละ 11) แล้วฟื้นเลือดเรา 30% ของดาเมจที่ทำ',fx:'พิษ ≥2 ชั้น = รากมัด 0.8 วิ ด้วย',
-  cast(p,S){
-    emit({k:'efx',z:'thorn',x:p.x,y:p.y,h:p.z+0.8,r:170});let tot=0;
-    for(const t of foesIn(p.team,p.x,p.y,170,4))aoeHit(p,t,8,t=>{const n=takePoison(t);if(n>0){const dm=11*n;damage(t,dm,p.id,'pierce');tot+=dm;if(n>=2)addRoot(t,0.8);}});
-    if(tot>0)healT(p,tot*0.3);
-  }});
-defSpell(3,{id:'worldtree',role:'ult',n:'ต้นไม้โลก',ic:'🌲',cd:0,ult:true,d:'เวทโบราณสายธรรมชาติ: รากยักษ์พุ่งมัดศัตรูรอบตัว 1.8 วิ ใส่พิษ 3 ชั้น และฟื้นเรา + เพื่อน',fx:'ทิ้งวงดอกไม้ฟื้นฟู 5 วิ',
-  cast(p,S){
-    emit({k:'efx',z:'worldtree',x:p.x,y:p.y,h:p.z+0.5,r:300});
-    for(const t of foesIn(p.team,p.x,p.y,300,6))aoeHit(p,t,t.isE?30:20,t=>{addRoot(t,1.8);t.psn=3;t.psnT=4;t.psnSrc=p.id;if(!(t.psnTick>0))t.psnTick=0.8;});
-    for(const q of plist())if(q.team===p.team&&q.alive&&!q.downed&&Math.hypot(q.x-p.x,q.y-p.y)<300)healT(q,25);
-    addZone({x:p.x,y:p.y,r:200,t:5,tick:0.8,owner:p.id,team:p.team,kind:'bloom',allyHit(q,z){q.psn=0;q.psnT=0;healT(q,7);}});
-  }});
+defSpell(3,{id:'poisondart',ic:'🌱',n:'ป้อมฝักหนาม',role:'utility',cd:10,d:'ปลูกป้อมยิงหนาม 60 HP อยู่ 20 วิ วางได้ 2 ต้น ยิงเร็วขึ้นเมื่อได้บัฟ',cast:p=>natureCastPlant(p,'turret')});
+defSpell(3,{id:'vinelash',ic:'↔',n:'ย้ายพืช',role:'utility',cd:14,d:'ย้ายพืชมาอ้างอิงตำแหน่งเรา ฟื้น HP เต็มและบัฟป้อม 4 วิ',cast:natureMovePlants});
+defSpell(3,{id:'sporecloud',ic:'🌰',n:'บอลไม้หนาม',role:'control',cd:16,d:'โยนบอลไม้ ดึงเป้ารอบจุดตกเข้าหาลูก ใส่พิษและสโลว์',cast:natureBall});
+defSpell(3,{id:'bloom',ic:'🌸',n:'ดอกบัว',role:'utility',cd:22,d:'วางดอกบัว 100 HP นาน 15 วิ ฮีล 5 ต่อวิ กดซ้ำสลับเป็นบัฟป้อมในรัศมี 160 หน่วย',toggle:natureLotusToggle,cast:p=>natureCastPlant(p,'lotus')});
+defSpell(3,{id:'thornburst',ic:'🪵',n:'กำแพงไม้',role:'control',cd:18,d:'สร้างกำแพงไม้ 175 HP อยู่ 8 วิ มี 3 โซนที่ติดไฟได้',cast:natureCastWall});
+defSpell(3,{id:'worldtree',ic:'🌲',ult:true,cd:0,n:'ต้นไม้โลก',role:'ult',d:'ต้นไม้ 350 HP คุ้มครองทีมในระยะ 500 หน่วย 12 วิ รับดาเมจแทน 65% ถ้าต้นแตกจะฮีล 125',cast:natureTree});
 
 // =====================================================================
 //  สายคำสาป — ตรามรณะ: ตีตรา (ดาเมจ +25%) → คำสาปทุกชนิดแรงขึ้นกับคนมีตรา → ดูดวิญญาณปิดจบ

@@ -171,7 +171,7 @@ function emoHost(id,e){const p=G.players[id];e=e|0;if(!p||!p.alive||p.downed||G.
 function resetBody(p,x,y){
   Object.assign(p,{x,y,z:0,vz:0,fly:false,flyCd:0,root:0,vx:0,vy:0,hp:p.maxHp,alive:true,downed:false,revive:0,stun:0,burn:0,dash:0,inv:0,
     shieldOn:false,shieldE:100,shieldBroken:0,respawn:0,slam:false,slam3:null,dashSp:0,flyOn:false});   // slam: ตายกลางท่ากระโดดฟาด (น้ำแข็ง) แล้วค้าง = ฟันไม่ได้หลังเกิดใหม่
-  for(const k of CDK)p.cd[k]=0;clearStatus(p);p.trail=null;earthReset(p);windReset(p);waterReset(p);
+  for(const k of CDK)p.cd[k]=0;clearStatus(p);p.trail=null;natureReset(p);earthReset(p);windReset(p);waterReset(p);
   p.ang=Math.atan2(MH/2-y,MW/2-x);
 }
 function fmap(){const M=MAPS[MAPID];return M&&(M.fm||(M.fmFor&&G?M.fmFor(G.mode):null));}   // fmFor = แผนที่จากโค้ดที่มีจุดเกิด/ห่วง/ภารกิจต่อโหมด (city)
@@ -229,7 +229,7 @@ function hostTick(dt){
 }
 function angDiff(a,b){let d=a-b;while(d>Math.PI)d-=2*Math.PI;while(d<-Math.PI)d+=2*Math.PI;return d;}
 // ความสูงจุดกึ่งกลางตัว / ครึ่งความสูง ของผู้เล่นหรือศัตรู
-function cH(t){return t.isE?(t.h||0)+EDEF[t.type].ch:t.isM?(t.h||0)+0.9:(t.z||0)+1.1;}
+function cH(t){return t.natKind?natureHead(t):t.isE?(t.h||0)+EDEF[t.type].ch:t.isM?(t.h||0)+0.9:(t.z||0)+1.1;}
 function vR(t){return t.isE?EDEF[t.type].vr:t.isM?1:1.15;}
 
 function updatePlayer(p,dt,acting){
@@ -259,6 +259,7 @@ function updatePlayer(p,dt,acting){
   p.flyCd=Math.max(0,p.flyCd-dt);p.root=Math.max(0,p.root-dt);
   if(p.awayT>0){p.awayT-=dt;p.inp=emptyInput();p.inv=Math.max(p.inv,0.1);if(p.awayT<=0){feed('🚪 '+p.name+' ออกจากเกม');hostRemove(p.id);return;}}
   if(!p.alive){
+    if(p.natureWhip)p.natureWhip.cancelled=true;
     if(['ffa','tdm','quid','race','train','siege'].includes(G.mode)&&acting){p.respawn-=dt;if(p.respawn<=0)respawn(p);}
     return;
   }
@@ -266,6 +267,7 @@ function updatePlayer(p,dt,acting){
   // ตกลงพื้นเมื่อไม่ได้บิน
   const gravity=()=>{const gh=groundH(p.x,p.y,p.z);if(p.z>gh||p.vz>0){p.vz-=(p.slam?40:22)*dt;if(p.hover>0&&p.vz<-0.6)p.vz=-0.6;p.z+=p.vz*dt;{const c=cityCeilH(p.x,p.y,gh);if(p.z+1.9>c){p.z=Math.max(gh,c-1.9);if(p.vz>0)p.vz=0;}}if(p.z<=gh){if(p.vz<-12)emit({k:'land',x:p.x,y:p.y});p.z=gh;p.vz=0;if(p.slam)frostSlam(p);}}else p.z=gh;};
   if(p.downed){
+    if(p.natureWhip)p.natureWhip.cancelled=true;
     p.vx=p.vy=0;p.fly=false;gravity();
     let helper=null;
     for(const q of plist())if(q!==p&&q.alive&&!q.downed&&q.z<2&&Math.hypot(q.x-p.x,q.y-p.y)<75){helper=q;break;}
@@ -298,7 +300,7 @@ function updatePlayer(p,dt,acting){
   else gravity();
 
   // โล่
-  const wantSh=canAct&&!p.fly&&G.mode!=='imp'&&!(G.ball&&G.ball.holder===p.id)&&inp.sh&&p.shieldBroken<=0&&p.shieldE>5&&p.dash<=0&&!p.dchgOn&&!(p.colos>0)&&!(p.cryo>0)&&!p.dfall&&p.pathIdx!==2&&!p.aug&&!p.ramp&&!(p.wr&&p.wr.ph!=='trans')&&!(p.wsbL>0)&&!p.wwAim;
+  const wantSh=canAct&&!p.fly&&G.mode!=='imp'&&!(G.ball&&G.ball.holder===p.id)&&inp.sh&&p.shieldBroken<=0&&p.shieldE>5&&p.dash<=0&&!p.natureHook&&!p.dchgOn&&!(p.colos>0)&&!(p.cryo>0)&&!p.dfall&&p.pathIdx!==2&&!p.aug&&!p.ramp&&!(p.wr&&p.wr.ph!=='trans')&&!(p.wsbL>0)&&!p.wwAim;
   if(wantSh&&!p.shieldOn){p.shieldOn=true;p.shieldT=G.time;p.shBlk=0;p.shPar=0;}
   if(!wantSh)p.shieldOn=false;
   if(p.shieldOn){p.shieldE-=12*dt*((PBASIC[p.pathIdx|0]||{}).shDrain||1);if(p.shieldE<=0)breakShield(p);}
@@ -309,6 +311,7 @@ function updatePlayer(p,dt,acting){
   if(p.pathIdx===EARTH)earthTick(p,dt);
   if(p.pathIdx===WINDP)windTick(p,dt);
   if(p.pathIdx===WATERP)waterTick(p,dt);
+  if(p.pathIdx===NATUREP)natureShield(p);
 
   // เคลื่อนที่
   const ox0=p.x,oy0=p.y,oz0=p.z,onG0=!p.fly&&p.z<=groundH(p.x,p.y,p.z)+0.05;
@@ -320,7 +323,9 @@ function updatePlayer(p,dt,acting){
   else if(p.fear>0){const fa=Math.atan2(p.y-p.fearY,p.x-p.fearX);mx=Math.cos(fa);my=Math.sin(fa);}
   const spd=(p.fly?(p.wfo?W_FW.fastSpd:PLAY.fly)*p.buffs.spd:PLAY.walk*p.buffs.spd*(p.shieldOn&&p.pathIdx!==WATERP?PLAY.shSlow:1))*(p.boost>0?1.45:1)*moveMul(p)*(p.wr||p.aug||p.ecb?earthSpd(p):1)*(p.wdr||p.wfw||p.wgs?windSpd(p):1)*(p.wsk||p.wab||p.wmsT>0?waterSpd(p):1)*(p.dfall?(p.dfall.ph===2?0.45:0):p.sdome?(p.sdome.ph===2?0.45:0):p.rail?0:(p.kindle>0&&p.hover>0)?0.35:p.breath>0?0.7:(p.snapT>0||p.colos>0||p.grT>0)?0.5:1)*(p.slideT>0?1.8:1+(p.iceB||0));
   p.wSpd=(p.dash>0||p.slideT>0||p.slip>0||!canAct||p.root>0||p.dchgOn||p.cryo>0||p.fear>0||p.gh||p.fly||(p.wfw&&p.wfw.ph==='focus'))?0:Math.round(spd);   // ความเร็วเดินตอนนี้ → ลูกข่ายใช้ทำนายตัวเอง (0 = อย่าทำนาย)
-  if(p.dash>0){
+  if(p.natureHook&&!canAct)p.natureHook=null;
+  if(p.natureHook&&natureHookMove(p,dt)){p.wSpd=0;p.vx=p.vy=0;}
+  else if(p.dash>0){
     p.dash-=dt;const ds=p.dashSp||900;
     // ก้าวย่อย ≤8 หน่วย + ชนโลกทุกก้าว: กันพุ่งทะลุผนังบ้านบาง (ก้าวเดียวอาจยาว 30+ หน่วย)
     const ns=Math.max(1,Math.ceil(ds*dt/8)),sk=ds*dt/ns;
@@ -355,6 +360,8 @@ function updatePlayer(p,dt,acting){
   // ควิดดิช: ถือบอลอยู่ = คลิกซ้ายเพื่อโยน (ร่ายเวทไม่ได้)
   if(G.ball&&G.ball.holder===p.id){if(canAct&&inp.fire&&!p.fireHeld)quidThrow(p);p.fireHeld=inp.fire;return;}
   p.fireHeld=inp.fire;
+  const natureWhip=p.pathIdx===NATUREP||natureWhipEnabled(p.id);
+  if(natureWhip)natureWhipBasic(p,inp,canAct&&!p.fly&&!p.shieldOn&&!p.gh&&!p.colos&&!p.cryo&&!p.god&&!p.natureHook);
   // ควิดดิชและแข่งไม้กวาด ร่ายเวทบนไม้กวาดได้ / โหมดอื่นร่ายไม่ได้ (เหมือนในเกม)
   if(!canAct)p.dchgOn=false;
   if(!canAct)return;
@@ -375,8 +382,10 @@ function updatePlayer(p,dt,acting){
     emit({k:'dash',x:p.x,y:p.y});
   }
   if(p.shieldOn&&!B.shieldSwing)return;
-  if(B.tick)B.tick(p,inp,dt,setCd);
-  else if(inp.fire&&p.cd.basic<=0){shoot(p,B.type,{sp:B.id});setCd('basic',0.35);}
+  if(!natureWhip){
+    if(B.tick)B.tick(p,inp,dt,setCd);
+    else if(inp.fire&&p.cd.basic<=0){shoot(p,B.type,{sp:B.id});setCd('basic',0.35);}
+  }
   if(p.shieldOn)return;
   if(pr.q)castSlot(p,0);
   if(pr.e)castSlot(p,1);

@@ -85,6 +85,9 @@ function bldSupport(b){
 // ให้คาถาวงกว้างพังสิ่งแวดล้อม: damageEnv(x,y,รัศมี px,ดาเมจ,id,ธาตุ,ความสูงจุดระเบิด) = ลัง/ถัง (prop) + ชิ้นย่อยบ้านในวง (ขอบวง = เหลือ 30%)
 function damageEnv(x,y,rad,dmg,by,el,h){
   damagePropsIn(x,y,rad,dmg,by);damageBrkIn(x,y,rad,dmg,h);sgWallEnv(x,y,rad,dmg);   // กำแพงพังได้โหมดบุกปราสาท (js/15-siege)
+  for(const w of (G?.walls||[]))if(w.wood&&w.team!==G.players[by]?.team&&natureWallContains(w,x,y,h||0,rad)){
+    natureWallDamage(w,dmg,x,y,by,el);
+  }
   if(!BLDON)return;h=h||0;const R=rad/20;
   cityDamageIn(x,y,rad,dmg,el,h,by);   // ตึก/ของในเมือง (js/12-city-dmg)
   for(const b of sgNear(sgBld(),x,y,rad,_sgE)){
@@ -270,6 +273,7 @@ function collideWorld(o,r,z){
     if(d<m&&d>0.001){o.x=c.x+dx/d*m;o.y=c.y+dy/d*m;sol++;}
   }
   if(G&&G.walls)for(const c of G.walls){
+    if(c.wood){sol+=natureWallPush(c,o,r,z,_cwLast.get(o));continue;}
     if(c.hgt<=z)continue;
     if(Math.abs(o.x-c.x)>c.r+r||Math.abs(o.y-c.y)>c.r+r)continue;
     const dx=o.x-c.x,dy=o.y-c.y,d=Math.hypot(dx,dy),m=c.r+r;
@@ -324,12 +328,13 @@ function foesOf(team){
   for(const q of plist())if(q.alive&&!q.downed&&q.team!==team)out.push(q);
   for(const e of G.en)if(!e.dead)out.push(e);
   if(G.mins)for(const m of G.mins)if(!m.dead&&m.team!==team)out.push(m);
+  if(G.nature)for(const o of G.nature)if(o.isM&&o.team!==team&&natureLive(o)&&G.time>=o.ready)out.push(o);
   return out;
 }
 function breakShield(p){if(p.pathIdx===EARTH){if(!(p.stdB>0))earthBreak(p);return;}p.shieldOn=false;p.shieldE=0;p.shieldBroken=1.5;emit({k:'sbreak',x:p.x,y:p.y,h:p.z+1.3});}
 // อัลติ (ผู้ใช้ 2026-10-22): ชาร์จช้าลง 30% ทุกสาย (ULT_RATE) + ระหว่างอัลติยังทำงานอยู่ไม่ได้ชาร์จเพิ่ม (นับใหม่หลังอัลติจบ)
 const ULT_RATE=0.7;
-function ultActive(p){return p.colos>0||p.god>0||!!p.wr||p.mirror>0;}
+function ultActive(p){return p.colos>0||p.god>0||!!p.wr||p.mirror>0||p.pathIdx===NATUREP&&naturePlants(p,'tree').length>0;}
 function gainUlt(p,v){if(ultActive(p))return;p.ult=Math.min(100,p.ult+v*0.5*ULT_RATE*p.buffs.ult);}
 function lifesteal(p,amt){if(p.buffs.life&&p.alive&&!p.downed)healT(p,amt*p.buffs.life);}
 
@@ -339,6 +344,7 @@ function damage(t,amt,srcId,kind){
   if(src&&kind!=='burn')amt*=src.buffs.dmg;
   if(src&&src.blaze>0)amt*=BLAZEF.v.dmgUp;   // Blazeform (เนิร์ฟ 2026-10-27: 1.3→1.15)
   if(src&&src.mirror>0&&!src.noMul)amt*=MIRROR.v.dmgMul;
+  if(t.natKind){natureDamage(t,amt,srcId);return;}
   if(G.wwl&&G.wwl.length)windDmg(t,amt,srcId);
   if(src&&src.wfam>0)waterOnHit(src,t,kind);   // สายน้ำ Tidecaller Orb: ลูกผู้ช่วยยิงตาม   // สายลม: ดาเมจใส่ศัตรูที่ติดกำแพงลม
   if(t.isM){
@@ -383,6 +389,7 @@ function damage(t,amt,srcId,kind){
     if(t.ward.abs<=0)t.ward=null;
     if(amt<=0.01)return;
   }
+  amt=natureGuard(t,amt);
   const real=Math.min(amt,Math.max(0,t.hp));   // ดาเมจจริง (ไม่นับส่วนที่เกินเลือด)
   t.hp-=amt;t.lastHit=srcId;t.dmgTaken=(t.dmgTaken||0)+real;   // สรุปจบเกม: ดาเมจที่รับ
   if(G.mode==='ffa')ffaDmgLog(t,srcId,real,kind);   // assist + จอตอนตาย (js/54)
@@ -393,7 +400,7 @@ function damage(t,amt,srcId,kind){
 }
 function playerDown(t,srcId){
   t.shieldOn=false;t.burn=0;t.fly=false;
-  t.stS=null;t.sdome=null;t.rail=null;t.slnT=0;t.beam=0;t.sdHit=null;earthReset(t);windReset(t);waterReset(t);if(t.god>0){t.god=0;t.xhp=0;}
+  t.stS=null;t.sdome=null;t.rail=null;t.slnT=0;t.beam=0;t.sdHit=null;earthReset(t);windReset(t);waterReset(t);natureReset(t);if(t.god>0){t.god=0;t.xhp=0;}
   // ท่าที่ง้าง/ค้างอยู่ตอนล้ม: ไม่งั้นคนล้ม (co-op) ยังปล่อยท่าได้ หรือท่าค้างไว้แล้วออกเองทันทีที่ถูกชุบ
   t.dfall=null;t.snapT=0;t.grT=0;t.slam=false;t.slam3=null;t.dchgOn=false;t.dchg=0;t.chg=0;t.dash=0;t.dashSp=0;t.trail=null;
   if(G.mode==='coop'){
@@ -415,6 +422,7 @@ function playerDown(t,srcId){
 function killProj(pr){if(pr.type==='wball'&&!pr.dead){pr.dead=true;windOrbBoom(pr);return;}if(pr.type==='wplume'&&!pr.dead){pr.dead=true;windPlumeBoom(pr);return;}
   if(pr.dead)return;
   pr.dead=true;
+  if(pr.type==='nature_pea'){naturePeaSplash(pr);return;}
   if(pr.type==='fire')explode(pr);
   else if(pr.type==='iceboulder')frostBoom(pr);
   else if(pr.type==='pfireb')pyroBigBoom(pr);
@@ -434,6 +442,7 @@ function explode(pr){
   }
 }
 function hitTarget(pr,t){
+  if(pr.type==='nature_pea')return; // The splash applies damage once, including to the direct target.
   if(pr.sp&&SPELLS[pr.sp]&&SPELLS[pr.sp].hit){SPELLS[pr.sp].hit(pr,t);if(pr.type!=='fire'&&pr.type!=='wbl')emit({k:'imp',x:t.x,y:t.y,h:pr.h,t:pr.type});return;}
   damage(t,pr.dmg,pr.owner,'proj');
   if(pr.type!=='fire')emit({k:'imp',x:t.x,y:t.y,h:pr.h,t:pr.type});
@@ -468,7 +477,10 @@ function projStep(pr,dt,ps){
     for(const c of sgNear(sgObs(),pr.x,pr.y,pr.r,_sgPO))if(c.bi===undefined&&!(c.bot!==undefined&&pr.h<c.bot)&&(c.top!==undefined?terrT(pr.x,pr.y)+pr.h<c.top:pr.h<c.hgt)&&(pr.x-c.x)**2+(pr.y-c.y)**2<(c.r+pr.r)**2){hp=true;if(c.cb!==undefined||c.ci!==undefined)cityHitObs(c,pr);if(c.sgw!==undefined)sgWallHit(c,pr);break;}
     if(!hp&&BLDG.length)for(const b of sgNear(sgBld(),pr.x,pr.y,pr.r,_sgPB)){if(!bldNear(b,pr.x,pr.y,pr.r))continue;const j=bldPieceAt(b,pr.x,pr.y,pr.h,pr.r);if(j>=0){hitBldPiece(b,j,pr.dmg||5,projEl(pr),pr.x-pr.vx*0.08,pr.y-pr.vy*0.08);hp=true;break;}}
     if(!hp&&PROPON)for(const c of sgNear(sgProps(),pr.x,pr.y,pr.r,_sgPP))if(c.st!==1&&pr.h<c.hgt&&(pr.x-c.x)**2+(pr.y-c.y)**2<(c.r+pr.r)**2){hitProp(c,pr.dmg||5,pr.owner);hp=true;break;}
-    if(!hp)for(const w of G.walls)if(pr.team!==w.team&&pr.h<w.hgt&&(pr.x-w.x)**2+(pr.y-w.y)**2<(w.r+pr.r)**2){w.hp-=pr.dmg||5;hp=true;emit({k:'efx',z:'wallhit',x:pr.x,y:pr.y,h:pr.h});break;}
+    if(!hp)for(const w of G.walls)if(w.hp>0&&pr.team!==w.team&&natureWallContains(w,pr.x,pr.y,pr.h,pr.r)){
+      if(w.wood)natureWallDamage(w,pr.dmg||5,pr.x,pr.y,pr.owner,projEl(pr));else w.hp-=pr.dmg||5;
+      hp=true;emit({k:'efx',z:'wallhit',x:pr.x,y:pr.y,h:pr.h});break;
+    }
     if(!hp&&eProjHit(pr))hp=true;
     if(!hp&&windProjHit(pr,dt))hp=true;
     if(!hp&&cityProjIn(pr,dt))hp=true;   // ตึกกลวงในเมือง: ผนังนอกทีละแผ่น / พื้นชั้นบน / ทางลาด
@@ -493,6 +505,13 @@ function projStep(pr,dt,ps){
         break;
       }
       hitTarget(pr,p);if(pr.pierce){pr.hs.add(p);continue;}killProj(pr);break;
+    }
+    if(!pr.dead&&G.nature)for(const o of G.nature){
+      if(!o.isM||o.team===pr.team||!natureLive(o)||G.time<o.ready||(pr.hs&&pr.hs.has(o)))continue;
+      const top=o.natKind==='tree'?NAT.treeHeight:o.natKind==='lotus'?5:2;
+      const h=pr.h+terrT(pr.x,pr.y)-natureY(o)-o.h;
+      if(h<-.1||h>top||natureDist(o,pr)>o.r+pr.r)continue;
+      hitTarget(pr,o);if(pr.pierce){pr.hs.add(o);continue;}killProj(pr);break;
     }
     if(!pr.dead)for(const m of G.mins){
       if(m.dead||m.team===pr.team||(pr.hs&&pr.hs.has(m)))continue;

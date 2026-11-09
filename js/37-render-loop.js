@@ -89,7 +89,7 @@ function renderGame(v,P,E,me,dt,now){
   syncEnemies(E,P,now,dt);pf('enemies',t0);t0=performance.now();
   let t1=t0;   // projMode แยกย่อยให้ WD.PROF (pm.proj / pm.earth / ...) — รวมยังเป็น 'projMode' เหมือนเดิม
   broomTick(dt);syncProj(v,now);pf('pm.proj',t1);t1=performance.now();syncWalls(v);syncPots(v,now);pf('pm.walls',t1);t1=performance.now();
-  syncEarth(v,dt,now);pf('pm.earth',t1);t1=performance.now();syncWind(v,dt,now);pf('pm.wind',t1);t1=performance.now();syncWater(v,dt,now);pf('pm.water',t1);t1=performance.now();
+  syncEarth(v,dt,now);pf('pm.earth',t1);t1=performance.now();syncWind(v,dt,now);pf('pm.wind',t1);t1=performance.now();syncWater(v,dt,now);syncNature(v,P,me,dt,now);pf('pm.water',t1);t1=performance.now();
   syncProps(v);syncBld(dt);cityCull();cityViewSync(dt);brkSync(dt);pf('pm.props',t1);t1=performance.now();syncMins(v,now,dt);pf('pm.mins',t1);t1=performance.now();
   syncModeObjs(v,P,me,now,dt);pf('projMode',t0);
   KC=Math.max(0,KC-dt);roleShowT=Math.max(0,roleShowT-dt);

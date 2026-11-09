@@ -27,7 +27,7 @@ const PATHS=[
   {id:'frost',n:'สายน้ำแข็ง',ic:'❄️',col:'#8fe0ff',d:'นักดาบน้ำแข็ง สลับประชิด/ไกลด้วย V — ดาเมจหลักจากดาบ ไกลไว้ติดสลอว์ เน้นคลุกวงใน ทนทาน ดาเมจต่อเนื่อง',combo:'ยิงปกติสะสมสลอว์ (สูงสุด 30%) → Permafrost/Frostbite Aura ซ้อนสลอว์ได้ถึง 80% → ฟันคอมโบจังหวะ 3 ฮีลตัวเอง • Frostforge อัปเกรดอาวุธ • Glacier Rend สร้างทางน้ำแข็ง/ภูเขาน้ำแข็งแล้วกระโดดฟาดลงมา'},
   {id:'storm',n:'สายสายฟ้า',ic:'⚡',col:'#ffe27a',d:'นักสู้ว่องไวแบบ Tracer — ลำสายฟ้าระยะประชิด Dash 3 ชาร์จทะลุศัตรู เก็บ Lightning stack (สูงสุด 5) ไปจ่ายสกิล',combo:'Dash ทะลุศัตรู / เส้นสายฟ้า / ระเบิดโล่ = +1 stack (และยิงครั้งถัดไปเป็นสายฟ้าสามเหลี่ยม) → ใช้ stack ร่ายสกิล: ดูดความเร็ว/ออร์บ 1 • ฟาดสามครั้ง/Railgun 2 • ลูกสายฟ้าโดม 3 • Shock = โคลงสั้นๆ ใช้ Dash ไม่ได้'},
   // off:1 = ซ่อนไว้ก่อน (ผู้ใช้ 2026-10-21 "remove nature curse and summon for now") — โค้ดยังอยู่ เอากลับได้โดยลบ off:1
-  {id:'nature',off:1,n:'สายธรรมชาติ',ic:'🌿',col:'#6fd57f',d:'วางพิษให้สะสม แล้วระเบิดหนาม — ทนทานและยื้อเกม',combo:'ลูกดอกพิษ/เมฆสปอร์สะสมพิษ 3 ชั้น • เถาวัลย์มัดคนมีพิษนานขึ้น (ลูกดอกใส่ 2 ชั้นทันที) → หนามระเบิดกินพิษเป็นดาเมจและฟื้นเลือดเรา'},
+  {id:'nature',n:'สายธรรมชาติ',ic:'🌿',col:'#6fd57f',d:'ใช้แส้หนามและปลูกพืชเพื่อช่วยทีมคุมพื้นที่',combo:'ฟาดแส้เพื่อสั่งป้อมเลือกเป้าและส่งสปอร์ • เกี่ยวป้อมเพื่อเตรียมลูกถั่วใหญ่ • สลับดอกบัวระหว่างฮีลกับบัฟป้อม'},
   {id:'hex',off:1,n:'สายคำสาป',ic:'🌑',col:'#b57dff',d:'ตีตราแล้วคำสาปแรงขึ้น — ควบคุมฝูงชนตัวจริง',combo:'ตรามรณะก่อน → ปิดปาก/มืดบอด/หวาดกลัวนานขึ้นกับคนมีตรา → ดูดวิญญาณกินตราเป็นดาเมจ + ฟื้นเลือดเรา'},
   {id:'summon',off:1,n:'สายอัญเชิญ',ic:'🔮',col:'#ff9ad5',d:'เรียกสัตว์เวทมาช่วยสู้ แล้วจุดระเบิดวิญญาณ',combo:'เรียกหมาป่า/สไปรท์/ยักษ์ → วิญญาณพิทักษ์เสริมพลังสัตว์ที่อยู่ใกล้ • ยิงปกติโดนเป้าไหน สัตว์เวทพุ่งใส่เป้านั้น → ระเบิดวิญญาณจุดสัตว์ทั้งหมดเป็นระเบิดและฟื้นเลือด'}
 ];
@@ -55,7 +55,7 @@ function cleanKit(s){return parseKit(parseKit(s).str).str;}
 function setKit(p,str){const old=p.pathIdx;p.fmode=0;p.orbs=0;p.orbBlk=0;p.kit=cleanKit(str);const k=parseKit(p.kit);p.pathIdx=k.path;p.kitIds=k.ids.map(i=>SPELL_LIST[i].id);p.ultId=SPELL_LIST[k.ult].id;
   if(old!==undefined&&old!==p.pathIdx&&G&&G.ph!=='lobby')pathReset(p);}
 // เปลี่ยนสายกลางเกม (เมนูทดลอง): ล้างท่าค้างของสายเก่า — ไม่งั้นค้างลอยฟ้า (Wrath) / เดินไม่ได้ (Railgun/Auger) / ร่างเทพค้าง
-function pathReset(p){clearStatus(p);earthReset(p);windReset(p);waterReset(p);Object.assign(p,{stS:null,stCd:0,god:0,xhp:0,sdome:null,rail:null,slnT:0,sorb:null,beam:0,sdHit:null,slam:false,slam3:null,chg:0,dash:0,dashSp:0,trail:null,fpath:null,shieldOn:false});}
+function pathReset(p){clearStatus(p);earthReset(p);windReset(p);waterReset(p);natureReset(p);Object.assign(p,{stS:null,stCd:0,god:0,xhp:0,sdome:null,rail:null,slnT:0,sorb:null,beam:0,sdHit:null,slam:false,slam3:null,chg:0,dash:0,dashSp:0,trail:null,fpath:null,shieldOn:false});}
 
 // ---------- สถานะ (ใช้ได้ทั้งผู้เล่นและศัตรู) ----------
 const isBig=t=>t.isE&&(t.type==='troll'||t.type==='queen'||(EDEF[t.type]&&EDEF[t.type].boss));
@@ -95,7 +95,7 @@ function frostSlow(t){
   if(t.fslUltT>0)s=MIRROR.v.slow;
   return Math.min(Math.max(80,MIRROR.v.slow),s);
 }
-function moveMul(t){let m=1;const fs=frostSlow(t);if(fs>0)m*=1-fs/100;if(t.chl>0)m*=1-0.1*t.chl;if(t.slowT>0)m*=t.slowF;if(t.haste>0)m*=t.hasteF;if(t.blaze>0)m*=BLAZEF.v.spdUp;if(t.wtlT>0)m*=W_VO.tlUp;return Math.max(t.wbsT>0?0.08:0.25,m);}
+function moveMul(t){let m=1;const fs=frostSlow(t);if(fs>0)m*=1-fs/100;if(t.chl>0)m*=1-0.1*t.chl;if(t.slowT>0)m*=t.slowF;if(t.haste>0)m*=t.hasteF;if(t.blaze>0)m*=BLAZEF.v.spdUp;if(t.wtlT>0)m*=W_VO.tlUp;return Math.max(t.wbsT>0?0.08:0.25,m)*(t.natureSlow>G.time?2/3:1);}
 // Burning (สายไฟ): สูงสุด BRN_MAX ชั้น • เผา 0.3/วิ/ชั้น (แค่ดาเมจเสริม) • ไม่โดนเพิ่ม 6 วิ แล้วลดทีละ 1 ชั้นทุก 1 วิ (เนิร์ฟ 2026-10-27: เดิม 2/วิ, 10 วิ)
 const BRN_MAX=6;
 function addBurn(t,n,src){if(t.dead)return;const was=t.brn|0;t.brn=Math.min(BRN_MAX,was+n);t.brnT=6;t.brnSrc=src;if(!(t.brnTick>0))t.brnTick=0.5;if(t.brn>was)emit({k:'efx',z:'brn',x:t.x,y:t.y,h:cH(t)+0.8,n:t.brn});}
@@ -113,6 +113,7 @@ function healT(t,amt){
   const a=Math.min(amt,t.maxHp-t.hp);t.hp+=a;emit({k:'heal',x:t.x,y:t.y,h:(t.z||0)+2.2,n:Math.round(a),id:t.id});
 }
 function tickStatus(t,dt){
+  if(t.naturePoison||t.natureWrap)natureStatus(t);
   if(t.brn>0){t.brnTick-=dt;if(t.brnTick<=0){t.brnTick=0.5;damage(t,0.15*t.brn,t.brnSrc,'burn');}t.brnT-=dt;if(t.brnT<=0&&t.brn>0){t.brn--;t.brnT=1;}}
   if(t.xb>0){t.xb-=dt;t.xbTick-=dt;if(t.xbTick<=0){t.xbTick=0.5;damage(t,4,t.xbSrc,'burn');}}
   if(t.blaze>0)t.blaze-=dt;
@@ -134,7 +135,7 @@ function tickStatus(t,dt){
   if(t.ward){t.ward.t-=dt;if(t.ward.t<=0)t.ward=null;}
 }
 function clearStatus(t){for(const k of ['wbsT','slowT','shk','frz','sil','chl','chlT','frzImm','chlImm','rootImm','ccT','ccN','haste','ovc','burn','psn','psnT','fear','bld','mrk','heat','heatT','flare','frostA','wallCd','brn','brnT','xb','blaze','kindle','kindleT','hover','fsl','fslT','fslBigT','fslR','fslA','fslP','fslUltT','slip','ripT','ffT','cryo','auraT','mirror','xhp','slideT','grT','breath','dfall','snapT','colos','dchg','mudT','sbk'])t[k]=0;t.dchgOn=false;t.ward=null;t.dr=null;}
-function fxMask(t){return (t.stun>0?1:0)|(t.burn>0?2:0)|((t.chl>0||t.slowT>0||frostSlow(t)>0)?4:0)|(t.frz>0?8:0)|(t.shk>0?16:0)|(t.root>0?32:0)|(t.sil>0?64:0)|(t.ward?128:0)|(t.haste>0?256:0)|(t.ovc>0?512:0)|(t.psn>0?1024:0)|(t.fear>0?2048:0)|(t.bld>0?4096:0)|(t.mrk>0?8192:0)|(t.dr?16384:0)|((t.heat>0||t.brn>0)?32768:0)|((t.flare>0||t.kindle>0)?65536:0)|(t.blaze>0?131072:0)|(t.xb>0?262144:0)|(t.mudT>0?524288:0);}
+function fxMask(t){return (t.stun>0?1:0)|(t.burn>0?2:0)|((t.chl>0||t.slowT>0||frostSlow(t)>0)?4:0)|(t.frz>0?8:0)|(t.shk>0?16:0)|(t.root>0?32:0)|(t.sil>0?64:0)|(t.ward?128:0)|(t.haste>0?256:0)|(t.ovc>0?512:0)|(t.psn>0||t.naturePoison?1024:0)|(t.fear>0?2048:0)|(t.bld>0?4096:0)|(t.mrk>0?8192:0)|(t.dr?16384:0)|((t.heat>0||t.brn>0)?32768:0)|((t.flare>0||t.kindle>0)?65536:0)|(t.blaze>0?131072:0)|(t.xb>0?262144:0)|(t.mudT>0?524288:0);}
 
 // ---------- วัตถุในสนามที่คาถาสร้าง: โซน / ฟ้าผ่าหน่วงเวลา / กำแพง / ช่องร่ายต่อเนื่อง ----------
 function foesIn(team,x,y,r,hMax){
@@ -176,25 +177,32 @@ function addStrike(o){G.strikes.push(Object.assign({},o));emit({k:'tele',x:o.x,y
 function updateStrikes(dt){for(const s of G.strikes){s.t-=dt;if(s.t<=0){s.done=1;s.fn(s);}}G.strikes=G.strikes.filter(s=>!s.done);}
 function addWall(o){const w=Object.assign({id:++G.zid,hgt:7},o);G.walls.push(w);return w;}
 function updateWalls(dt){
-  for(const w of G.walls)if(w.hp<=0||(w.t-=dt)<=0){w.dead=1;emit({k:'efx',z:'wallbreak',x:w.x,y:w.y,r:w.r});}
+  for(const w of G.walls){
+    if(w.wood&&w.hp>0)natureWallTick(w,dt);
+    w.t-=dt;
+    if(w.hp>0&&w.t>0)continue;
+    w.dead=1;
+    if(w.wood)natureEmit('wall_end',w,{a:w.a,broke:w.hp<=0,burn:w.burn.map(b=>b.total>0)});
+    else emit({k:'efx',z:'wallbreak',x:w.x,y:w.y,r:w.r});
+  }
   G.walls=G.walls.filter(w=>!w.dead);
 }
 function updateChan(dt){
   for(const c of G.chan){c.t-=dt;c.tt-=dt;const p=G.players[c.owner];if(!p||!p.alive||p.downed||(c.stun&&p.stun>0)){c.t=0;if(p&&c.stun)p.breath=0;continue;}if(c.tt<=0){c.tt=c.tick;c.fn(c,p);}}
   G.chan=G.chan.filter(c=>c.t>0);
 }
-function updateSpells(dt){updateStorm(dt);updateEarth(dt);updateWind(dt);updateWater(dt);updateZones(dt);updateFirePaths(dt);updateStrikes(dt);updateWalls(dt);updateChan(dt);updateERings(dt);updateIces(dt);updateWaves(dt);updateGlaciers(dt);updateBldg(dt);}
+function updateSpells(dt){updateStorm(dt);updateEarth(dt);updateWind(dt);updateWater(dt);updateZones(dt);updateFirePaths(dt);updateStrikes(dt);updateWalls(dt);natureUpdate(dt);updateChan(dt);updateERings(dt);updateIces(dt);updateWaves(dt);updateGlaciers(dt);updateBldg(dt);}
 // จุดเล็งของคาถาวางพื้น: ถ้ามีศัตรูอยู่ในแนวเล็งให้วางที่ตัวมัน ไม่งั้นวางที่ระยะ 75% ของพิสัย
-function aimPoint(p,range){
+function aimPoint(p,range,clip=true){
   // ผู้เล่นจริง: วางตรงจุดที่เป้ากลางจอชี้พื้น (ไม่เกินพิสัย)
-  if(p.inp&&!p.bot&&p.inp.gx>=0&&typeof p.inp.ah==='number'){const dx=p.inp.gx-p.x,dy=p.inp.gy-p.y,d=Math.hypot(dx,dy)||1,k=Math.min(1,range/d);return aimWall(p,{x:clamp(p.x+dx*k,40,MW-40),y:clamp(p.y+dy*k,40,MH-40)});}
+  if(p.inp&&!p.bot&&p.inp.gx>=0&&typeof p.inp.ah==='number'){const dx=p.inp.gx-p.x,dy=p.inp.gy-p.y,d=Math.hypot(dx,dy)||1,k=Math.min(1,range/d),o={x:clamp(p.x+dx*k,40,MW-40),y:clamp(p.y+dy*k,40,MH-40)};return clip?aimWall(p,o):o;}
   let best=null,bs=1e9;
   for(const t of foesOf(p.team)){
     const dx=t.x-p.x,dy=t.y-p.y,dd=Math.hypot(dx,dy);if(dd>range||dd<1)continue;
     const da=Math.abs(angDiff(Math.atan2(dy,dx),p.ang));if(da<0.35&&da+dd/4000<bs){bs=da+dd/4000;best=t;}
   }
   const o=best?{x:best.x,y:best.y}:{x:p.x+Math.cos(p.ang)*range*0.75,y:p.y+Math.sin(p.ang)*range*0.75};
-  o.x=clamp(o.x,40,MW-40);o.y=clamp(o.y,40,MH-40);return aimWall(p,o);
+  o.x=clamp(o.x,40,MW-40);o.y=clamp(o.y,40,MH-40);return clip?aimWall(p,o):o;
 }
 // จุดวางสกิลอยู่หลังผนังบ้าน/ตึก (เส้นจากอกผู้ใช้ถึงจุดนั้นชนผนัง) → ย้ายมาวางหน้าผนัง — ไม่วางทะลุตึก
 function aimWall(p,o){const c=aimClip(p.x,p.y,(p.z||0)+1.2,o,PR+6);return {x:c.x,y:c.y};}
@@ -218,7 +226,10 @@ const PBASIC=[
   {id:'b_storm',type:'pb2',n:'ลำสายฟ้า / สายฟ้าสามเหลี่ยม',d:'กดค้าง = ลำสายฟ้า (แบบ Winston) ระยะ 300 ล็อกทุกคนในกรวยหน้าอัตโนมัติ คนละ 3 ดาเมจ ทุก 0.4 วิ • ได้ Lightning stack ใหม่ = กดยิงครั้งถัดไปฟาดสายฟ้าจากฟ้าเป็นสามเหลี่ยมด้านหน้า (ยาว 250 ปลายกว้าง 120) 20 ดาเมจ + Shock',
     shd:'โล่สายฟ้า: คลิกขวา = ฟ้าผ่าลงตัวเรา เปิดโล่ 3 วิ ดูดซับดาเมจทุกอย่าง เดินได้ปกติ • คลิกขวาอีกครั้ง / ครบ 3 วิ / ดูดเกิน 90 = ระเบิดรัศมี 150 ดาเมจครึ่งหนึ่งของที่ดูด (สูงสุด 30) + Shock • ระเบิดโดน = +1 stack • ไม่ได้ดูดอะไร = ไม่ระเบิด • คูลดาวน์ 10 วิ',dsd:'Dash 3 ชาร์จ (ฟื้นชาร์จละ 3 วิ) พุ่ง 220 ทะลุศัตรู คนละ 10 ดาเมจ • ทะลุโดน = +1 Lightning stack • ติด Shock = Dash ไม่ได้',
     hit(pr,t){damage(t,pr.dmg,pr.owner,'proj');},tick:stormBasic,dash:stormDash},
-  {id:'b_nature',type:'pb3',n:'หนามพิษ',d:'ยิงโดนทุกๆ 3 ครั้ง = ใส่พิษ 1 ชั้น',hit(pr,t){damage(t,pr.dmg,pr.owner,'proj');const o=G.players[pr.owner];if(o&&(o.bc=(o.bc|0)+1)%3===0)addPoison(t,pr.owner,1);}},
+  {id:'b_nature',type:'pb3',n:'แส้หนาม',d:'ฟาดทุกเป้าในกรวยหน้า 120° ระยะ 280 หน่วย ดาเมจ 7 คลิกซ้ำหรือกดค้างเพื่อฟาดกลับ แล้วพัก 1 วิ',
+  shd:'โล่ 100 HP เถาหนามฟาดศัตรูในระยะ 180 หน่วย คนละ 10 ดาเมจ ทุก 0.75 วิ',
+  dsd:'เถาเกี่ยวเป้าในระยะ 300 หน่วย คูลดาวน์ 8 วิ เกี่ยวเข้าป้อมของเราเพื่อชาร์จลูกถั่วใหญ่',shMul:1,dash:natureDash,
+  onBlock:p=>natureEmit('shield_block',{x:p.x,y:p.y,h:p.z+1.1})},
   {id:'b_hex',type:'pb4',n:'ประกายคำสาป',d:'ยิงโดนทุกๆ 3 ครั้ง = ตีตรา 2 วิ (ถ้ายังไม่มีตรา)',hit(pr,t){damage(t,pr.dmg,pr.owner,'proj');const o=G.players[pr.owner];if(o&&(o.bc=(o.bc|0)+1)%3===0&&!(t.mrk>0))addMark(t,2);}},
   {id:'b_summon',type:'pb5',n:'ลูกวิญญาณ',d:'ยิงโดนเป้าไหน สัตว์เวททุกตัวจะหันไปโจมตีเป้านั้นนาน 4 วิ',hit(pr,t){damage(t,pr.dmg,pr.owner,'proj');const o=G.players[pr.owner];if(o){o.focusT=t;o.focusUntil=G.time+4;}}}
 ];

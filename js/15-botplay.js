@@ -4,7 +4,7 @@
 //  botCombo = ท่าต่อเนื่องหลังกด (คลิกดิ่ง / ยืนยัน / กดซ้ำบีบกำแพง / สลับดาบ-ไกล / ทิศกระโดดหนี) — เรียกท้าย aiBot (หลังเช็คจังหวะเว้นสกิล)
 //  BOT_RANGE = ระยะที่ชอบยืนต่อสาย [ใกล้สุด, ไกลสุด] — ตัวเลขตั้งต้น ให้ทีมเกมเพลย์ปรับ
 // =====================================================================
-const BOT_RANGE={0:[340,580],1:[0,95],2:[0,240],6:[300,520],7:[250,480]};
+const BOT_RANGE={0:[340,580],1:[0,95],2:[0,240],3:[105,205],6:[300,520],7:[275,480]};
 // ความจำบอทเรื่องท่าต่อเนื่อง (ต่อตัว)
 function botMem(p){return p.bp||(p.bp={away:0,clk:0,wall:null,v:0});}
 // มีของแข็ง (กำแพง/ตึก/กำแพงลม-หินของเรา) อยู่หลังเป้าในแนวที่เราผลักไหม — ใช้กับสกิลผลัก (ดิน/ลม)
@@ -49,12 +49,183 @@ function botWant(p,id,tg,d){
     case 'mudswamp':return d<580;
     case 'tectoniccrush':return d>110&&d<330&&(tg.mudT>0||stuck||Math.random()<0.3);
     case 'dustburst':return d<480;
-    // ---- ลม (รีดีไซน์ 2026-11-08): บอทห้องฝึกใช้ botPlay (js/15-bot) • ตรงนี้สำหรับบอทสมดุล (ไม่มี p.ai) ----
-    case 'featherwing':return !windAir(p)&&!windSpin(p)&&d<1100;
-    case 'aegisgale':return (p.wwc|0)>0&&d<620&&d>60;
-    case 'windrift':return d<900;
-    case 'vortexbind':return windAir(p)?d>120&&d<480:d>220&&d<400;
-    case 'voidspheres':return d<800;
+  }
+}
+
+// Both combat bots and balance bots use these inputs. Combos advance from the actual
+// spell state, so a cast denied by reaction timing, navigation, or a shield is retried.
+const botClassPlanFor=p=>p.pathIdx===WINDP||p.pathIdx===NATUREP;
+function botClassAim(p,t){
+  const h=cH(t)+terrT(t.x,t.y)-terrT(p.x,p.y);
+  Object.assign(p.inp,{ax:t.x,ay:t.y,ah:h});
+  if(p.ai)p.ai.aimOv={x:t.x,y:t.y};
+}
+function botClassGround(inp,x,y){inp.gx=clamp(x,40,MW-40);inp.gy=clamp(y,40,MH-40);}
+function botClassTarget(p,t,wait){
+  const lv=p.ai?BOT_LV[p.ai.lv]:null;
+  const drift=Math.max(.10,wait)*(lv?.lead??1);
+  return {x:t.x+((t.mvx||0)+(t.vx||0))*drift+(p.ai?.errX||0)*.35,
+    y:t.y+((t.mvy||0)+(t.vy||0))*drift+(p.ai?.errY||0)*.35};
+}
+function botClassLane(p,x,y,h=p.z){
+  return botInZone(p.ai?.zone,x,y,-30)&&!natureTrace(p,{x,y},h+.7,h+.7,p.team,true);
+}
+function botClassPlan(p,t){
+  const i=p.inp,dist=natureDist(p,t),dx=t.x-p.x,dy=t.y-p.y,d=dist||1;
+  const ux=dx/d,uy=dy/d,hp=p.hp/p.maxHp;
+  const slot=id=>SLOTK[p.kitIds.indexOf(id)];
+  const ready=id=>!!slot(id)&&p.cd[slot(id)]<=0&&p.sil<=0;
+  const press=k=>{i.c[k]=(i.c[k]|0)+1;};
+  const cast=id=>press(slot(id));
+  i.sh=0;i.jh=0;i.ch=0;i.dh=0;i.gx=-1;i.gy=-1;
+  i.ah=cH(t)+terrT(t.x,t.y)-terrT(p.x,p.y);
+  i.fire=0;
+  if(p.stun>0||p.fly)return;
+  const see=dist<Math.max(W_FW.fbRange,NAT.treeRange)&&natureSight(p,t,p.z+1.5,cH(t));
+  const C={i,dist,ux,uy,hp,slot,ready,press,cast,see};
+  if(p.pathIdx===WINDP)botWindPlan(p,t,C);
+  else botNaturePlan(p,t,C);
+}
+function botWindPlan(p,t,{i,dist,ux,uy,hp,slot,ready,press,cast,see}){
+  if(p.wult||windSpin(p)||p.wdc!==undefined||p.wbw!==undefined){
+    i.mx=i.my=0;
+    if(p.wult?.ph==='chg'){
+      const aim=botClassTarget(p,t,W_UL.impPre);
+      botClassAim(p,t);i.ax=aim.x;i.ay=aim.y;
+      if(p.ai)p.ai.aimOv=aim;
+    }
+    return;
+  }
+  const air=windAir(p),fly=p.wfw;
+  const range=air?W_FW.fbRange:WNV.baRange,volley=slot('windrift');
+  const controlled=(G.wdb||[]).find(o=>o.team===p.team&&natureDist(o,t)<=W_WL.dbR+(t.r||PR));
+  const waiting=controlled&&controlled.t<W_WL.dbTele;
+  const lowShot=air&&i.ah<p.z-2.5&&dist<480;
+  if(air){
+    const h=fly.h??p.z-groundH(p.x,p.y,p.z);
+    const height=clamp(i.ah-groundH(p.x,p.y,p.z)+2.4,3.3,6);
+    i.jh=h<height-.35?1:0;i.ch=h>height+.35?1:0;
+  }
+  i.fire=see&&dist<range&&!waiting?1:0;
+  if(!see)return;
+
+  if(!air&&ready('featherwing')&&dist<Math.min(W_FW.fbRange,850)){
+    cast('featherwing');return;
+  }
+  // A wing blast is a deliberate shield + click, with its own wind-up.
+  if(!air&&!fly&&dist>55&&dist<WNV.wbAhead+WNV.wbR*.65&&p.shieldBroken<=0&&p.shieldE>33&&!(p.wsbC>0)
+    &&(hp<.6||dist<145)){
+    i.sh=1;i.fire=p.wfPrev?0:1;i.mx=-ux;i.my=-uy;return;
+  }
+  if(ready('voidspheres')&&dist>440&&dist<W_VO.tlL&&!controlled&&!(p.wtlT>0)){
+    cast('voidspheres');return;
+  }
+  const place=air?W_WL.placeA:W_WL.placeG;
+  if(!controlled&&ready('aegisgale')&&p.wwc>0&&dist<=place+W_WL.dbR*.45){
+    const q=botClassTarget(p,t,W_WL.dbTele);
+    botClassGround(i,q.x,q.y);cast('aegisgale');return;
+  }
+  if(waiting)return;
+  if(ready('windrift')&&!p.wpv&&dist>145&&dist<W_DR.vRange*.91
+    &&(controlled||dist<W_DR.vRange*.66||!ready('aegisgale'))){
+    cast('windrift');return;
+  }
+
+  // Spend the refresh after using Volley/Downburst, then aim again throughout the charge.
+  const ultRange=air?W_UL.dA:W_UL.dG;
+  const canUlt=!p.ai||t.isE||t.hp<=t.maxHp*BOT_LV[p.ai.lv].ult;
+  const spent=(!volley||p.cd[volley]>0)&&(!slot('aegisgale')||controlled||!(p.wwc>0)||dist>place+W_WL.dbR);
+  if(p.ult>=100&&p.sil<=0&&canUlt&&dist>130&&dist<ultRange*.86&&!p.wpv&&!p.wbCh
+    &&(air?fly.t>W_UL.chg+.30&&(spent||hp<.45):!ready('featherwing')&&(hp<.45||!slot('featherwing')))){
+    i.fire=0;i.mx=i.my=0;press('x');return;
+  }
+  if(air&&fly.t<.52&&!p.wbCh&&dist<W_FW.range&&i.ah-p.z>=-(W_FW.hgt+2)&&i.ah-p.z<=2&&slot('featherwing')){
+    i.fire=0;cast('featherwing');return;
+  }
+  if(ready('vortexbind')&&p.wsc>0&&!p.wsl&&!p.dash&&!p.wse&&!p.wbCh&&dist<range*.91
+    &&(air?p.wbCd>.25:p.cd.basic>.16)){
+    const amount=air?W_VX.sA:W_VX.sG,side=p.ai?.ps.sd||(p.id.length%2?1:-1);
+    for(const turn of [side,-side]){
+      if(!botClassLane(p,p.x-uy*amount*turn,p.y+ux*amount*turn))continue;
+      i.mx=-uy*turn;i.my=ux*turn;cast('vortexbind');return;
+    }
+  }
+  if(ready('voidspheres')&&dist>165&&dist<W_VO.tlL&&!controlled&&!(p.wtlT>0)){
+    cast('voidspheres');return;
+  }
+  if(!air&&!fly&&p.cd.dodge<=0&&!ready('featherwing')&&dist<240&&(hp<.65||!slot('featherwing'))){
+    i.mx=-ux;i.my=-uy;press('sp');return;
+  }
+  if(air&&lowShot&&dist<205){i.mx=-ux;i.my=-uy;}
+}
+
+function botNaturePlan(p,t,{i,dist,ux,uy,hp,slot,ready,press,cast,see}){
+  if(p.natureHook)return;
+  const team=plist().filter(q=>q.team===p.team&&natureLive(q));
+  const plants=naturePlants(p),turrets=plants.filter(o=>o.natKind==='turret');
+  const usable=o=>G.time>=o.ready&&!o.move;
+  const lotus=plants.find(o=>o.natKind==='lotus');
+  const inWhip=see&&dist<=NATURE_WHIP.range&&Math.abs(i.ah-cH(p))<2.75;
+  const swing=p.natureWhip,following=swing&&!swing.second&&!swing.cancelled&&G.time-swing.start<=NATURE_WHIP.window;
+  i.fire=inWhip?1:0;
+
+  // Finish an aimed double whip before spending another input on a different target.
+  if(following&&inWhip)return;
+  const close=see&&dist<=180&&Math.abs(i.ah-cH(p))<2.75;
+  const fresh=t0=>G.time>=(p.natureShieldHits?.get(t0)||0);
+  const pack=close&&foesOf(p.team).some(q=>q!==t&&fresh(q)&&natureDist(p,q)<=180&&Math.abs(cH(q)-cH(p))<2.8
+    &&natureSight(p,q,cH(p),cH(q)));
+  if(close&&fresh(t)&&p.shieldBroken<=0&&p.shieldE>30&&(pack||hp<.43||(p.natureSpores?.length||0)>=2)){
+    i.sh=1;i.fire=0;return;
+  }
+
+  const here=turrets.filter(o=>usable(o)&&natureDist(p,o)<NAT.hookRange);
+  const injured=team.some(q=>natureDist(p,q)<250&&q.hp/q.maxHp<.68);
+  if(p.ult>=100&&p.sil<=0&&!plants.some(o=>o.natKind==='tree')&&dist<490&&(hp<.73||injured||here.length>=2)){
+    botClassGround(i,p.x-ux*60,p.y-uy*60);press('x');return;
+  }
+  if(ready('vinelash')&&plants.some(o=>o.natKind!=='tree'&&usable(o)&&o.end>G.time+2
+    &&(o.hp<o.maxHp*.66||see&&dist<380&&natureDist(o,t)>405))){
+    cast('vinelash');return;
+  }
+  if(ready('poisondart')&&dist<490&&see&&turrets.filter(o=>natureDist(o,t)<400).length<2){
+    const f=dist<130?-65:105,s=p.ai?.ps.sd||1;
+    const x=p.x+ux*f-uy*74*s,y=p.y+uy*f+ux*74*s;
+    if(botClassLane(p,x,y)){botClassGround(i,x,y);cast('poisondart');return;}
+  }
+  if(ready('bloom')&&!lotus&&dist<470&&(here.length||injured||inWhip)){
+    const o=here[0],x=o?lerp(p.x,o.x,.44):p.x-ux*37,y=o?lerp(p.y,o.y,.44):p.y-uy*37;
+    botClassGround(i,x,y);cast('bloom');return;
+  }
+  if(lotus&&slot('bloom')&&p.sil<=0&&usable(lotus)&&lotus.end>G.time+1&&G.time>=(lotus.switchAt||0)){
+    const healing=team.some(q=>q.hp<q.maxHp*(lotus.mode?.70:.87)&&natureDist(lotus,q)<=NAT.lotusRange
+      &&natureSight(lotus,q,natureHead(lotus),cH(q)));
+    const feeds=turrets.some(o=>usable(o)&&natureDist(lotus,o)<=NAT.lotusRange&&natureDist(o,t)<400
+      &&natureSight(lotus,o,natureHead(lotus),natureHead(o)));
+    if(lotus.mode?healing||!feeds:feeds&&!healing){cast('bloom');return;}
+  }
+  if(ready('sporecloud')&&see&&dist<NAT.seedRange+70&&Math.abs(i.ah-p.z)<3.3&&!t.natureSlow){
+    const q=botClassTarget(p,t,.48);
+    botClassGround(i,q.x,q.y);cast('sporecloud');return;
+  }
+  if(ready('thornburst')&&see&&dist>135&&dist<395&&hp<.55&&!G.walls.some(w=>w.wood&&w.owner===p.id)){
+    const away=Math.min(dist*.54,155);
+    botClassGround(i,p.x+ux*away,p.y+uy*away);cast('thornburst');return;
+  }
+  if(p.cd.dodge<=0&&!p.shk&&!p.root&&!p.ai?.blk){
+    const safe=o=>natureDist(o,p)>42&&botInZone(p.ai?.zone,o.x,o.y,-30)
+      &&Math.hypot(natureDist(p,o),(terrT(o.x,o.y)+cH(o)-terrT(p.x,p.y)-p.z-1.35)*20)<=NAT.hookRange
+      &&natureSight(p,o,p.z+1.35,cH(o));
+    const ally=team.filter(q=>q!==p&&q.hp<q.maxHp*.67&&(!see||natureDist(q,t)>dist+45)&&safe(q))
+      .sort((a,b)=>a.hp/a.maxHp-b.hp/b.maxHp)[0];
+    const turret=here.find(o=>!o.bigPea&&o.end>G.time+1&&natureDist(o,t)<380&&safe(o)
+      &&natureSight(o,t,natureHead(o),cH(t))&&(hp>.45||natureDist(o,t)>dist));
+    const enemy=!t.natKind&&see&&dist>190&&hp>.65&&!turrets.some(o=>o.ready>G.time)&&safe(t)?t:null;
+    const hook=ally||turret||enemy;
+    if(hook){botClassAim(p,hook);i.fire=0;press('sp');return;}
+  }
+  if(hp<.68&&lotus&&!lotus.mode&&natureDist(p,lotus)>NAT.lotusRange*.72&&natureDist(lotus,t)>dist-20){
+    const d=natureDist(p,lotus)||1;i.mx=(lotus.x-p.x)/d;i.my=(lotus.y-p.y)/d;
   }
 }
 // ท่าต่อเนื่อง (หลังสมองหลักตัดสินใจแล้ว): เขียนทับ p.inp ตามสถานะของสกิลที่กำลังทำอยู่
@@ -78,7 +249,6 @@ function botCombo(p,dt,tg){
   if(p.wwAim){const a=Math.atan2(tg.y-p.y,tg.x-p.x);inp.ax=tg.x;inp.ay=tg.y;
     if(M.wall==='place'){inp.gx=tg.x+Math.cos(a)*110;inp.gy=tg.y+Math.sin(a)*110;inp.fire=0;inp.sh=M.clk;}
     else{inp.sh=0;click();}}
-  else if(p.pathIdx===7&&inp.gx!==undefined&&!inp.sh){delete inp.gx;delete inp.gy;}
   // น้ำแข็ง: ไกล = สลับไปโหมดไกล (V) • เข้าใกล้ = กลับมาถือดาบ
   if(p.pathIdx===1&&!(p.fmCd>0)&&!(p.ffT>0)&&!(p.mirror>0)&&!(p.cryo>0)){M.v-=dt;
     if(M.v<=0&&(p.fmode!==1&&d>700||p.fmode===1&&d<380)){press('v');M.v=2.5;}}

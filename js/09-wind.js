@@ -63,7 +63,7 @@ function windFlyZ(p,dt){const F=p.wfw,gh=groundH(p.x,p.y,p.z);
       F.h=clamp(F.h+dv*dt,W_FW.hmin,W_FW.hmax+(p.wfc?6:0));
       p.vz=clamp((gh+F.h-p.z)*5,-Math.max(W_FW.vs,Math.abs(dv)*1.2),Math.max(W_FW.vs,Math.abs(dv)*1.2));p.z+=p.vz*dt;}}
   else{p.vz=Math.max(-W_FW.glide,Math.min(p.vz||0,0)-6*dt);p.z+=p.vz*dt;if(p.z<=gh){p.z=gh;p.vz=0;p.wfw=null;emit({k:'efx',z:'wnfwland',x:Math.round(p.x),y:Math.round(p.y),h:p.z,id:p.id});}}}
-function windReset(p){p.wult=null;p.wfc=null;p.wbl=null;p.wflt=0;p.wus=0;p.wdr=null;p.wfw=null;p.wg=0;p.wwc=W_WL.max;p.wwr=0;p.wwAim=null;p.wsb=null;p.wsbL=0;p.wchg=0;p.wfHeld=0;if(p.wgs)windStreamEnd(p,null);p.wgw=0;if(p.wfo){p.wfo=false;p.fly=false;p.flyOn=false;}p.wbCd=0;p.wdc=undefined;p.wpv=null;p.wsl=null;p.wsc=W_VX.sMax;p.wsr=0;p.wse=0;}
+function windReset(p){p.wult=null;p.wfc=null;p.wbl=null;p.wflt=0;p.wus=0;p.wdr=null;p.wfw=null;p.wg=0;p.wwc=W_WL.max;p.wwr=0;p.wwAim=null;p.wsb=null;p.wsbL=0;p.wchg=0;p.wfHeld=0;if(p.wgs)windStreamEnd(p,null);p.wgw=0;if(p.wfo){p.wfo=false;p.fly=false;p.flyOn=false;}p.wbCd=0;p.wbCh=null;p.wbw=undefined;p.wba=undefined;p.wfPrev=0;p.wsbC=0;p.wdc=undefined;p.wpv=null;p.wsl=null;p.wsc=W_VX.sMax;p.wsr=0;p.wse=0;}
 
 // ---------- ท่าพื้นฐาน (คลิกซ้าย): ใบมีดลม / ดูดลมชาร์จเกจ / GaleBurst ----------
 function windBasic(p,inp,dt,setCd){
@@ -101,8 +101,8 @@ function windEnh(p){if(!p.wse)return 1;p.wse=0;return W_VX.sEnh;}   // นัด
 function windEnhExtra(p,k){for(let i=0;i<W_VX.sEx;i++)windFeatherShoot(p,{k,dmg:W_VX.sExD,jit:45});emit({k:'efx',z:'wnse',x:Math.round(p.x),y:Math.round(p.y),h:p.z,id:p.id});}
 function windFeatherShoot(p,opt){const s=p.wfs=-(p.wfs||1),a=p.ang,ca=Math.cos(a),sa=Math.sin(a),rx=-sa,ry=ca,inp=p.inp||{},R=WNV.baRange,SP=WNV.baSpd*(opt&&opt.k||1);
   Object.assign(PDEF.wblade,{spd:SP,life:R/SP});const pr=shoot(p,'wblade',{sp:'b_wind',dmg:opt&&opt.dmg||WNV.baDmg,quiet:1});
-  const x0=p.x-ca*14+rx*s*26,y0=p.y-sa*14+ry*s*26,h0=p.z+2.05,human=typeof inp.ah==='number'&&!p.bot;
-  let tx=human?inp.ax:p.x+ca*R,ty=human?inp.ay:p.y+sa*R,th=human?inp.ah:h0+(pr.vh/SP)*R,d=Math.hypot(tx-x0,ty-y0);
+  const x0=p.x-ca*14+rx*s*26,y0=p.y-sa*14+ry*s*26,h0=p.z+2.05,aimed=Number.isFinite(inp.ah);
+  let tx=aimed?inp.ax:p.x+ca*R,ty=aimed?inp.ay:p.y+sa*R,th=aimed?inp.ah:h0+(pr.vh/SP)*R,d=Math.hypot(tx-x0,ty-y0);
   if(d<140||d>R){const k=clamp(d,140,R)/Math.max(1,d),A=d<1?a:Math.atan2(ty-y0,tx-x0);d=clamp(d,140,R);tx=x0+Math.cos(A)*d;ty=y0+Math.sin(A)*d;if(k>1)th=h0;}
   if(opt&&opt.jit){tx+=(Math.random()-0.5)*opt.jit*2;ty+=(Math.random()-0.5)*opt.jit*2;}
   pr.x=x0;pr.y=y0;pr.h=h0;pr.bz={x0,y0,h0,x1:p.x+ca*Math.min(50,d*0.12)+rx*s*Math.min(210,d*0.6),y1:p.y+sa*Math.min(50,d*0.12)+ry*s*Math.min(210,d*0.6),h1:h0+0.4,x2:tx,y2:ty,h2:th,t:0,T:d*1.3/SP};   // โค้งออกข้างกว้างก่อน (ผู้ใช้ 2026-11-08: โค้งมากกว่านี้)
@@ -332,7 +332,7 @@ function windFocusAct(p,inp,dt){p.wbCd=Math.max(0,(p.wbCd||0)-dt);p.bbv=0;p.bbf=
   if(inp.fire&&p.wbCd<=0){p.wbCd=W_FW.fbCd;const s=p.wbs=-(p.wbs||1);p.wbCh={t:0,s};emit({k:'efx',z:'wnoc',x:Math.round(p.x),y:Math.round(p.y),h:p.z,n:s,id:p.id});}}
 function windOrbLaunch(p,s){const a=p.ang,inp=p.inp||{},enh=windEnh(p),SP=W_FW.fbSpd*enh;Object.assign(PDEF.wball,{spd:SP,life:W_FW.fbRange/SP,dmg:W_FW.fbDmg});const pr=shoot(p,'wball',{sp:'b_wind',quiet:1});
   pr.x+=-Math.sin(a)*s*10;pr.y+=Math.cos(a)*s*10;pr.h=p.z+1.65;
-  if(typeof inp.ah==='number'&&!p.bot){const dx=inp.ax-pr.x,dy=inp.ay-pr.y,d=Math.max(60,Math.hypot(dx,dy)),b=Math.atan2(dy,dx);pr.vx=Math.cos(b)*SP;pr.vy=Math.sin(b)*SP;pr.vh=clamp((inp.ah-pr.h)/(d/SP),-SP/5,SP/5);}
+  if(Number.isFinite(inp.ah)){const dx=inp.ax-pr.x,dy=inp.ay-pr.y,d=Math.max(60,Math.hypot(dx,dy)),b=Math.atan2(dy,dx);pr.vx=Math.cos(b)*SP;pr.vy=Math.sin(b)*SP;pr.vh=clamp((inp.ah-pr.h)/(d/SP),-SP/5,SP/5);}
   emit({k:'efx',z:'wnol',x:Math.round(pr.x),y:Math.round(pr.y),h:Math.round(pr.h*10)/10,a:Math.round(Math.atan2(pr.vy,pr.vx)*100)/100,id:p.id});if(enh>1)windEnhExtra(p,enh);}
 // ลูกลมใหญ่ (BA ตอนบิน, ผู้ใช้ 2026-11-08): ถึงพื้น/โดนผู้เล่น/สุดระยะ = ระเบิด ดาเมจทุกคนในวงเท่ากัน (รวมคนที่โดนตรง)
 function windOrbBoom(pr){const o=G.players[pr.owner],R=W_FW.orbR;if(o)for(const t of foesOf(pr.team)){if(t.dead||t.alive===false||t.downed)continue;if(Math.hypot(t.x-pr.x,t.y-pr.y)>R+(t.r||PR)||Math.abs(cH(t)-pr.h)>R/20+1.2)continue;aoeHit(o,t,W_FW.fbDmg,null);}
@@ -390,8 +390,8 @@ function windVolleyCast(p){if(windSpin(p)||p.wpv)return false;const air=windAir(
 function windVolleyTick(p,dt){const V=p.wpv;if(p.stun>0||!p.alive){p.wpv=null;return;}V.t-=dt;while(V.t<=0&&V.i<V.n){V.t+=W_DR.vGap;const s=V.i%2?-1:1;windPlumeShoot(p,s,V.i);V.i++;emit({k:'efx',z:'wnpf',x:Math.round(p.x),y:Math.round(p.y),h:p.z,n:s,id:p.id});}if(V.i>=V.n)p.wpv=null;}
 function windPlumeShoot(p,s,i){const W=W_DR,a=p.ang,ca=Math.cos(a),sa=Math.sin(a),rx=-sa,ry=ca,inp=p.inp||{},R=W.vRange,SP=W.vSpd;
   Object.assign(PDEF.wplume,{spd:SP,life:R/SP,dmg:W.vDmg});const pr=shoot(p,'wplume',{sp:'b_wind',dmg:W.vDmg,quiet:1});
-  const lane=[0,1,2][(i>>1)%3],LH=[3.15,2.15,1.2][lane],LS=[20,34,28][lane],x0=p.x-ca*16+rx*s*LS,y0=p.y-sa*16+ry*s*LS,h0=p.z+LH+Math.random()*0.2,human=typeof inp.ah==='number'&&!p.bot;
-  let tx=human?inp.ax:p.x+ca*R,ty=human?inp.ay:p.y+sa*R,th=human?inp.ah:h0+(pr.vh/SP)*R,d=Math.hypot(tx-x0,ty-y0);
+  const lane=[0,1,2][(i>>1)%3],LH=[3.15,2.15,1.2][lane],LS=[20,34,28][lane],x0=p.x-ca*16+rx*s*LS,y0=p.y-sa*16+ry*s*LS,h0=p.z+LH+Math.random()*0.2,aimed=Number.isFinite(inp.ah);
+  let tx=aimed?inp.ax:p.x+ca*R,ty=aimed?inp.ay:p.y+sa*R,th=aimed?inp.ah:h0+(pr.vh/SP)*R,d=Math.hypot(tx-x0,ty-y0);
   if(d<200||d>R){const A=d<1?a:Math.atan2(ty-y0,tx-x0);d=clamp(d,200,R);tx=x0+Math.cos(A)*d;ty=y0+Math.sin(A)*d;}
   const ja=Math.random()*Math.PI*2,jr=W.vSpr*Math.sqrt(Math.random());tx+=Math.cos(ja)*jr;ty+=Math.sin(ja)*jr;th+=(Math.random()-0.5)*1.6;   // ไม่ตรง crosshair เป๊ะ
   const out=Math.min([70,150,140][lane],d*0.4)*(0.85+Math.random()*0.3),back=40+Math.random()*50,up=[3.1,0.2,-0.75][lane]+(Math.random()-0.5)*0.3;   // ตำแหน่งบนปีก (ผู้ใช้ 2026-11-09): บน = โค้งขึ้นแล้วไปหน้า • กลาง = ออกซ้ายขวาแล้วไปหน้า • ล่าง = ออกซ้ายขวาต่ำลงแล้วไปหน้า

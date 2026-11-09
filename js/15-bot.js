@@ -17,7 +17,8 @@ const BOT_SKIP=[];   // ท่าที่ยังสอนบอทไม่�
 function botKit(P){
   const L=SPELL_LIST.filter(x=>x.path===P&&!x.ult&&!BOT_SKIP.includes(x.id));
   for(let i=L.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[L[i],L[j]]=[L[j],L[i]];}
-  if(P===7){const f=L.findIndex(x=>x.id==='featherwing');if(f>0)L.unshift(L.splice(f,1)[0]);}   // ลม: ต้องมี Featherwing เสมอ (ไม่งั้นบินไม่ได้)
+  const core=P===WINDP?'featherwing':P===NATUREP?'poisondart':null;
+  const f=L.findIndex(x=>x.id===core);if(f>0)L.unshift(L.splice(f,1)[0]);
   return P+'.'+L.slice(0,4).map(x=>x.i).join('.');
 }
 function botPersona(){return {ph:rnd(0,Math.PI*2),sp:rnd(1.1,2.4),sd:Math.random()<0.5?1:-1,rng:rnd(0.65,1.35),wait:rnd(0.35,0.8)};}
@@ -46,7 +47,7 @@ function spawnBot(path,lv,x,y,zk,owner,fx){
   return p;
 }
 // ลบของที่คนเหล่านี้เสกไว้ (กำแพง/หินดิน/โซน/กระสุน/สัตว์เวท ...) — ใช้ตอนลบบอท และจบรอบสังเวียน
-const OWNED_K=['proj','zones','strikes','walls','chan','mins','erings','ices','waves','glac','eso','edust'];
+const OWNED_K=['proj','zones','strikes','walls','chan','mins','nature','erings','ices','waves','glac','eso','edust'];
 function clearOwned(ids){const S=new Set(ids);for(const k of OWNED_K)if(Array.isArray(G[k]))G[k]=G[k].filter(o=>!S.has(o.owner));}
 function removeBots(filter){const L=bots().filter(p=>!filter||filter(p));if(!L.length)return;clearOwned(L.map(p=>p.id));for(const p of L)hostRemove(p.id);}
 // เป้า: ศัตรูที่ยังสู้ได้ในโซนเดียวกัน (คนก่อน, คนที่เสกได้ก่อนนิดหน่อย) → ไม่มีก็มอนสเตอร์ในโซน (ไม่นับหุ่นซ้อม)
@@ -60,6 +61,9 @@ function botPickTarget(p){
   if(G.mode==='siege'&&G.sg)return sgBotTarget(p);   // บุกปราสาท: สนใจเฉพาะศัตรูที่เกี่ยวกับภารกิจ (js/15-siege)
   for(const q of plist()){if(q===p||!q.alive||q.downed||q.team===p.team||q.gh)continue;if(!botInZone(zk,q.x,q.y,120))continue;
     let d=(q.x-p.x)**2+(q.y-p.y)**2;if(q.id===A.owner)d*=0.6;if(q===A.tg)d*=0.8;if(d<bd){bd=d;best=q;}}
+  for(const o of G.nature||[])if(o.isM&&o.team!==p.team&&natureLive(o)&&G.time>=o.ready&&botInZone(zk,o.x,o.y,60)){
+    const d=dist2(p,o)*1.35;if(d<bd){bd=d;best=o;}
+  }
   if(best)return best;
   for(const e of G.en){if(e.dead||e.type==='dummy'||!botInZone(zk,e.x,e.y,60))continue;const d=(e.x-p.x)**2+(e.y-p.y)**2;if(d<bd){bd=d;best=e;}}
   return best;
@@ -69,7 +73,7 @@ function botPickTarget(p){
 //  ใช้กับบอทห้องฝึกที่มี p.ai เท่านั้น • botPlay ทำงานหลัง botBrain: ทิ้งการกดสกิลของ botBrain แล้วตัดสินใจเองตามสายนี้
 //  ตัวเลขระยะเป็น px (20 px = 1 ม.) — เป็นแค่ "ใช้ตอนไหน" ตามไกด์ ไม่ใช่ค่าบาลานซ์
 // =====================================================================
-const BOT_PB={0:1,1:1,2:1,6:1,7:1,8:1};   // เลขสายที่มีวิธีเล่นของตัวเอง (ไฟ น้ำแข็ง สายฟ้า ดิน ลม น้ำ)
+const BOT_PB={0:1,1:1,2:1,6:1,8:1};   // ไฟ น้ำแข็ง สายฟ้า ดิน น้ำ • ลม/ธรรมชาติใช้ botClassPlan ร่วมกับบอทสมดุล
 function botPlay(p,dt,tg,c0){
   const A=p.ai,inp=p.inp,t=G.time,pi=p.pathIdx;
   for(const k of SLOTK.concat(['x']))inp.c[k]=c0[k]|0;   // ทิ้งการกดของ botBrain
@@ -147,31 +151,6 @@ function botPlay(p,dt,tg,c0){
     ult(700);
     return;
   }
-  // ---------- 🌪️ ลม (รีดีไซน์ 2026-11-08: พื้น = อ่อน, บิน Featherwing = คอมโบ) ----------
-  // พื้น: ขึ้นบินทันทีที่ Featherwing พร้อม • บิน: ลอยสูง ~6 ม. วาง Windup ใส่ → Wind Push กดลง → Windforce พาไป → Windblade ถ่วง → อัลติ (ไม่กด Featherwing ซ้ำตอนบิน = สะบัดปีกจบโหมด, ไม่ใช้ Shift บินเร็ว)
-  if(pi===7){
-    if(windSpin(p)){inp.mx=inp.my=0;inp.fire=0;return;}                 // หมุนตัวขึ้น: ทำอะไรไม่ได้
-    const air=windAir(p);inp.ah=cH(tg)+1.1;inp.dh=0;                    // ah = เล็งความสูง (Windforce / อัลติ เอียงขึ้นลงตามเป้า)
-    if(p.wult){inp.mx=inp.my=0;inp.fire=0;inp.jh=inp.ch=0;return;}      // ชาร์จ/พุ่งอัลติ
-    const hit=tg.wsl>0||tg.wsk>0||tg.stun>0.4;                          // เป้าติดคอมโบอยู่แล้ว
-    if(air){
-      const h=p.z-groundH(p.x,p.y,p.z);inp.jh=h<5.3?1:0;inp.ch=h>7.2?1:0;
-      if((p.wwc|0)>0&&rdy('aegisgale')&&d<620&&d>60&&!hit&&!windAirborne(tg))go('aegisgale');
-      else if(rdy('windrift')&&d<1000&&!(tg.wsl>0)&&(windAirborne(tg)||!hit))go('windrift');
-      else if(rdy('vortexbind')&&d>120&&d<480&&!p.wfc)go('vortexbind');
-      else if(rdy('voidspheres')&&d<900&&!p.wbl)go('voidspheres');
-      ult(1200);
-    }else{
-      if(rdy('featherwing')&&d<1100&&!(p.stun>0))go('featherwing');
-      else if((p.wwc|0)>0&&rdy('aegisgale')&&d<450&&d>60&&!hit)go('aegisgale');
-      else if(rdy('windrift')&&d<600)go('windrift');
-      else if(rdy('voidspheres')&&d<500)go('voidspheres');
-      else if(rdy('vortexbind')&&d>220&&d<400)go('vortexbind');
-      if(p.cd.dodge<=0&&d<170&&roll(dt*2))dash();                       // ถอยหลังผลักตอนศัตรูประชิด
-      if(!rdy('featherwing'))ult(900);                                  // อัลติพื้น = รีเซ็ต Featherwing ให้ขึ้นบินต่อ
-    }
-    return;
-  }
   // ---------- 💧 น้ำ ----------
   if(pi===8){
     if(p.wdg){if(p.wdg.ph==='aim'){inp.gx=tg.x;inp.gy=tg.y;pulse();}return;}   // มังกรน้ำ: เลือกจุดแล้วคลิกดิ่ง
@@ -238,33 +217,42 @@ function aiBot(p,dt){
   // คิดใหม่เป็นจังหวะ (ระดับง่าย = ช้า): เลือกเป้า + สุ่มเล็งพลาดใหม่
   A.thinkT-=dt;
   if(A.thinkT<=0){A.thinkT=L.react*rnd(0.7,1.3);A.tg=botPickTarget(p);const a=rnd(0,Math.PI*2),r=L.err*Math.sqrt(Math.random());A.errX=Math.cos(a)*r;A.errY=Math.sin(a)*r;}
-  const tg=A.tg&&(A.tg.isE?!A.tg.dead:(A.tg.alive&&!A.tg.downed&&G.players[A.tg.id]))?A.tg:null;
+  const tg=A.tg&&natureLive(A.tg)&&(A.tg.isE||A.tg.natKind||G.players[A.tg.id])?A.tg:null;
   // ไม่มีเป้า: เดินกลับจุดเกิด แล้วยืนรอ
-  if(!tg){inp.fire=0;inp.sh=0;A.blk=null;const dx=A.home.x-p.x,dy=A.home.y-p.y,d=Math.hypot(dx,dy);inp.mx=d>80?dx/d:0;inp.my=d>80?dy/d:0;inp.ax=p.x+Math.cos(p.ang)*300;inp.ay=p.y+Math.sin(p.ang)*300;return;}
+  if(!tg){
+    inp.fire=0;inp.sh=0;inp.jh=inp.ch=0;A.blk=null;
+    if(p.wult||p.natureHook){inp.mx=inp.my=0;return;}
+    const dx=A.home.x-p.x,dy=A.home.y-p.y,d=Math.hypot(dx,dy);
+    inp.mx=d>80?dx/d:0;inp.my=d>80?dy/d:0;inp.ax=p.x+Math.cos(p.ang)*300;inp.ay=p.y+Math.sin(p.ang)*300;return;
+  }
   // ใช้สมองต่อสู้เดิม (เดินรักษาระยะ / ยิง / เงื่อนไขสกิลแต่ละตัว) แต่กดสกิลได้เฉพาะตอนพ้นช่วงเว้น
   const c0=Object.assign({},inp.c);
   botBrain(p,dt,tg);
   const pals=bots().filter(q=>q!==p&&q.ai.tg===tg&&q.alive&&!q.downed);
-  if(BOT_PB[p.pathIdx])botPlay(p,dt,tg,c0);
+  const classPlan=botClassPlanFor(p);
+  if(classPlan)botClassPlan(p,tg);
+  else if(BOT_PB[p.pathIdx])botPlay(p,dt,tg,c0);
+  if(!classPlan&&(inp.c.x|0)!==(c0.x|0)&&!tg.isE&&tg.hp>tg.maxHp*L.ult)inp.c.x=c0.x|0;
   const used=SLOTK.concat(['x']).some(k=>(inp.c[k]|0)!==(c0[k]|0));
   // ผลัดกัน: เพื่อนบอทที่ตีเป้าเดียวกันเพิ่งกดสกิล → รอแป๊บ (ไม่ปล่อยสกิลซ้อนวินาทีเดียวกัน)
   const busy=used&&pals.some(q=>t-q.ai.lastSk<A.ps.wait);
   if(t<A.skT||busy)for(const k of SLOTK.concat(['x']))inp.c[k]=c0[k]|0;
   else if(used){A.skT=t+L.gap*rnd(0.6,1.4);A.lastSk=t;}
-  // อัลติ: เก็บไว้จนเป้าเลือดน้อย (ระดับยาก = ใช้ทันที)
-  if((inp.c.x|0)!==(c0.x|0)&&!tg.isE&&tg.hp>tg.maxHp*L.ult)inp.c.x=c0.x|0;
   // เล็ง: ดักทางตามระดับ + พลาดสุ่ม (botBrain เล็งดักเต็มที่)
   inp.ax=tg.x+(inp.ax-tg.x)*L.lead+A.errX;inp.ay=tg.y+(inp.ay-tg.y)*L.lead+A.errY;
-  if(A.aimOv){inp.ax=A.aimOv.x;inp.ay=A.aimOv.y;A.aimOv=null;}   // playbook ขอเล็งจุดเฉพาะ (เช่น วางกำแพงลมหลังศัตรู)
+  if(A.aimOv){inp.ax=A.aimOv.x;inp.ay=A.aimOv.y;A.aimOv=null;}   // จุดเล็งเฉพาะ เช่น ป้อมที่ Dash จะเกี่ยว
+  if(p.wult||p.natureHook)return;
   // รุมเป้าเดียวกัน: กระจายตัวไปคนละมุมรอบเป้า (ไม่ยืนกองข้างเดียวกัน)
-  if(pals.length&&!tg.isE){const L2=pals.concat([p]).sort((a,b)=>a.id<b.id?-1:1),n=L2.length,i=L2.indexOf(p);
+  const slip=p.pathIdx===WINDP&&windSlotOf(p,'vortexbind');
+  const sideDash=slip&&(inp.c[slip]|0)!==(c0[slip]|0);
+  if(pals.length&&!tg.isE&&!sideDash){const L2=pals.concat([p]).sort((a,b)=>a.id<b.id?-1:1),n=L2.length,i=L2.indexOf(p);
     let cx=0,cy=0;for(const q of L2){cx+=q.x;cy+=q.y;}cx/=n;cy/=n;
-    const a0=Math.atan2(cy-tg.y,cx-tg.x),a=a0+(i-(n-1)/2)*Math.min(1.5,3.2/n),R=345*A.ps.rng;
+    const a0=Math.atan2(cy-tg.y,cx-tg.x),a=a0+(i-(n-1)/2)*Math.min(1.5,3.2/n),R=(p.pathIdx===NATUREP?170:345)*A.ps.rng;
     const fx=tg.x+Math.cos(a)*R-p.x,fy=tg.y+Math.sin(a)*R-p.y,fd=Math.hypot(fx,fy);
     if(fd>60){inp.mx=(inp.mx||0)*0.5+fx/fd*0.8;inp.my=(inp.my||0)*0.5+fy/fd*0.8;}}
   // Block: ยกโล่ค้างไว้ หันหน้าหากระสุน (ระดับยาก = ยกตอนใกล้โดน → Perfect Parry)
   const canSh=p.pathIdx!==2&&!p.aug&&!p.wwAim&&p.shieldBroken<=0;
-  if(p.pathIdx!==2)inp.sh=0;
+  if(p.pathIdx!==2&&!classPlan)inp.sh=0;
   if(A.blk){const B=A.blk;B.t-=dt;
     if(B.t<=0||!canSh)A.blk=null;
     else if(B.t<=B.hold){inp.sh=1;inp.fire=0;const pr=B.pr&&!B.pr.dead?B.pr:null;if(pr){inp.ax=pr.x;inp.ay=pr.y;}else{inp.ax=tg.x;inp.ay=tg.y;}}}
@@ -276,7 +264,7 @@ function aiBot(p,dt){
       // เวลาก่อนโดน − ช่วง Parry (0.28 วิ): ยกแม่น = ยกก่อนโดนนิดเดียว • ไม่แม่น = ยกเร็ว/ช้าไปบ้าง
       const tti=Math.max(0,(d-PR)/sp),lead=Math.random()<L.par?rnd(0.05,0.2):rnd(0.3,0.8),hold=rnd(0.5,1.1);
       A.blk={pr,hold,t:hold+Math.max(0,tti-lead)};
-    }else if(Math.random()<L.dodge){if(Math.random()<0.5||p.cd.dodge>0)inp.c.jp=(inp.c.jp|0)+1;else{const s=Math.random()<0.5?1:-1;inp.mx=-pr.vy/sp*s;inp.my=pr.vx/sp*s;inp.c.sp=(inp.c.sp|0)+1;}}
+    }else if(Math.random()<L.dodge){if(p.pathIdx===NATUREP||Math.random()<0.5||p.cd.dodge>0)inp.c.jp=(inp.c.jp|0)+1;else{const s=Math.random()<0.5?1:-1;inp.mx=-pr.vy/sp*s;inp.my=pr.vx/sp*s;inp.c.sp=(inp.c.sp|0)+1;}}
     break;}
   // สายจูง: ห้ามออกนอกโซน — ใกล้ขอบแล้วยังจะเดินออก = หันกลับเข้าหาจุดเกิด
   const nx=p.x+(inp.mx||0)*90,ny=p.y+(inp.my||0)*90;

@@ -277,7 +277,7 @@ FXCODE.studio_nature_wall_burn=(_x,_y,_h,args,instance)=>{
 // Shared by Model view, the summon effect, and the review capture. Keep the
 // original material available through a zero mix for direct comparisons.
 function stNatureTreeWaist(material){
-  const mix={value:SQ.has('bodybase')?0:1};
+  const mix={value:new URLSearchParams(location.search).has('bodybase')?0:1};
   const previous=material.onBeforeCompile;
   const key=material.customProgramCacheKey();
   material.userData.natureWaist=mix;

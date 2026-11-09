@@ -64,6 +64,9 @@ function updateEnemies(dt){
     let t=null,bd=1e12;
     for(const p of ps){const d=dist2(e,p)+((p.z-(e.h||0))*20)**2;if(d<bd){bd=d;t=p;}}
     for(const m of G.mins)if(!m.dead){const d=dist2(e,m)*1.6;if(d<bd){bd=d;t=m;}}
+    for(const o of G.nature||[])if(o.isM&&natureLive(o)&&G.time>=o.ready){
+      const d=dist2(e,o)*1.6+((o.z-(e.h||0))*20)**2;if(d<bd){bd=d;t=o;}
+    }
     if(D.fly&&(!t||e.stun>0))e.h=Math.max(1.5,e.h-(e.stun>0?3:0)*dt);
     if(!t||e.stun>0)continue;
     if(G.mode==='train'&&G.tr&&!G.tr.mai&&e.type!=='dummy')continue;   // ห้องฝึก: มอนสเตอร์ยืนนิ่ง

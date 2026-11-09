@@ -12,23 +12,21 @@ function botBrain(p,dt,tg0){
   const dx=tg.x-p.x,dy=tg.y-p.y,d=Math.hypot(dx,dy),t=G.time;
   const fvx=tg._px===undefined?0:(tg.x-tg._px)/Math.max(dt,0.001),fvy=tg._py===undefined?0:(tg.y-tg._py)/Math.max(dt,0.001);tg._px=tg.x;tg._py=tg.y;
   const lead=d/950;inp.ax=tg.x+fvx*lead;inp.ay=tg.y+fvy*lead;
-  const close=(p.kitIds.includes('thornburst')&&tg.psn>0);
   const mel=p.pathIdx===1&&p.fmode!==1;
   const P=p.ai&&p.ai.ps,R=P?P.rng:1;   // บอทห้องฝึก: นิสัยสุ่มต่อตัว (botPersona js/15-bot)
   const BR=(p.fmode===1?null:BOT_RANGE[p.pathIdx])||[260,430];   // ระยะที่ชอบยืนต่อสาย (js/15-botplay)
-  const ang=Math.atan2(dy,dx),want=mel?(d>95?1:0):close?(d>140?1:0):d>BR[1]*R?1:d<BR[0]*R?-1:0,st=P?P.sd*Math.sin(t*P.sp+P.ph):Math.sin(t*1.7+p.id.length);
+  const ang=Math.atan2(dy,dx),want=mel?(d>95?1:0):d>BR[1]*R?1:d<BR[0]*R?-1:0,st=P?P.sd*Math.sin(t*P.sp+P.ph):Math.sin(t*1.7+p.id.length);
   inp.mx=Math.cos(ang)*want+Math.cos(ang+Math.PI/2)*st*0.8;inp.my=Math.sin(ang)*want+Math.sin(ang+Math.PI/2)*st*0.8;
   inp.fire=mel?(d<150?1:0):d<900?1:0;
+  if(botClassPlanFor(p)){if(!p.ai)botClassPlan(p,tg);return;}
   if(p.pathIdx===1&&p.cd.dodge<=0&&d>520)inp.c.sp=(inp.c.sp|0)+1;
   const press=k=>{inp.c[k]=(inp.c[k]|0)+1;};
   p.kitIds.forEach((id,i)=>{
     const S=SPELLS[id],k=SLOTK[i];if(p.cd[k]>0||p.sil>0)return;
-    if(S.id==='bloom'&&p.hp>p.maxHp*0.75)return;
     if(S.id==='wispheal'&&p.hp>p.maxHp*0.85)return;
     if(['spiritwolf','firesprite','stonegolem'].includes(S.id)&&G.mins.some(m=>m.owner===p.id&&m.type===({spiritwolf:'wolf',firesprite:'sprite',stonegolem:'golem'})[S.id]))return;
     if(S.id==='soulburst'&&G.mins.filter(m=>m.owner===p.id).length<2)return;
     if(S.id==='soulsiphon'&&!(tg.mrk>0))return;
-    if(S.id==='thornburst'&&!(tg.psn>0))return;
     if(S.id==='ignitionsnap'&&!((tg.brn|0)>=3))return;
     if(S.id==='kindle'&&p.kindle>0)return;
     if(S.id==='cryoshell'&&(p.hp>p.maxHp*0.35||p.cryo>0))return;
@@ -52,7 +50,7 @@ let _obsKeep=null;
 function balArena(on){if(on&&!_obsKeep){_obsKeep=OBS;OBS=[];}else if(!on&&_obsKeep){OBS=_obsKeep;_obsKeep=null;}}
 function balReset(a,b){balArena(true);
   for(const p of [a,b]){p.maxHp=200;resetBody(p,p===a?MW*0.14:MW*0.86,MH/2);p.hp=p.maxHp;p.ult=0;p.team=p===a?0:1;p.bot=true;p._px=undefined;p.ang=p===a?0:Math.PI;}
-  G.proj=[];G.zones=[];G.strikes=[];G.walls=[];G.chan=[];G.mins=[];G.erings=[];G.ices=[];G.waves=[];G.glac=[];G.eso=[];G.edust=[];G.en=[];G.ph='play';a.focusT=b.focusT=null;G.rw={};G.round=1;G.banner=null;G.result=null;
+  G.proj=[];G.zones=[];G.strikes=[];G.walls=[];G.chan=[];G.mins=[];G.nature=[];G.wdb=[];G.wtl=[];G.erings=[];G.ices=[];G.waves=[];G.glac=[];G.eso=[];G.edust=[];G.en=[];G.ph='play';a.focusT=b.focusT=null;G.rw={};G.round=1;G.banner=null;G.result=null;
 }
 function balDuel(kA,kB,rounds,maxT){
   const ps=plist(),a=ps[0],b=ps[1],res={a:0,b:0,draw:0,tw:0};

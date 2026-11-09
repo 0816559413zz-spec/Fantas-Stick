@@ -92,7 +92,7 @@ function botThink(p,dt){
   botNav(p,dt,c0,p.ai?p.ai.tg:tg);
 }
 function botNav(p,dt,c0,tg){
-  if(!p.alive||p.downed||!tg)return;
+  if(!p.alive||p.downed||!tg||p.wult||p.natureHook)return;
   navEnsure();
   const inp=p.inp,A=p.nav||(p.nav={path:null,rp:0,gx:0,gy:0,sx:p.x,sy:p.y,st:1.5,cover:null,cvT:0}),lv=p.ai?p.ai.lv:2;
   const d=Math.hypot(tg.x-p.x,tg.y-p.y),see=!navRay(p.x,p.y,tg.x,tg.y,true);
