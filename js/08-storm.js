@@ -27,6 +27,7 @@ function stormBasic(p,inp,dt,setCd){
   p.bTg=0;
   if(p.sdome){if(p.sdome.ph===2&&inp.fire&&!prev)stormDomeFire(p);p.beam=0;return;}
   if(p.rail||p.slnT>0){p.beam=0;return;}
+  if(p.stStaff>0){p.beam=0;if(inp.fire&&p.cd.basic<=0){stormWaveShoot(p);setCd('basic',SIPH.v.cd);}return;}
   if(p.god>0){
     // อัลติ: กรงเล็บสายฟ้า 3 จังหวะ ระยะ 200 (15/15/25 จังหวะ 3 = Shock)
     p.beam=0;if(p.clT>0)p.clT-=dt;if(p.clR>0){p.clR-=dt;if(p.clR<=0)p.clN=0;}
@@ -85,7 +86,7 @@ function stormTick(p,dt){
   p.shieldE=p.stS?100:100*(1-Math.max(0,p.stCd||0)/STORMV.shieldCd);p.shieldBroken=0;
   if(p.god>0){p.god-=dt;if(p.god<=0){p.god=0;p.xhp=0;emit({k:'efx',z:'godoff',x:p.x,y:p.y,h:p.z+1,id:p.id});}}
   if(p.slnT>0){if(p.stun>0){p.slnT=0;}else{p.slnT-=dt;if(p.slnT<=0)stormLine(p);}}
-  if(p.rail)stormBowTick(p,dt);
+  if(p.rail)stormBowTick(p,dt);if(p.stStaff>0)p.stStaff-=dt;
   if(p.sorb){p.sorb.t-=dt;if(p.sorb.t<=0||p.sorb.n<=0){p.sorb=null;emit({k:'efx',z:'sorboff',x:p.x,y:p.y,h:p.z+1.8,id:p.id});}}
 }
 // ----- สกิล 1 (ฟรี): เส้นสายฟ้า — ชี้ขึ้นแล้วกดลง 0.5 วิ จากนั้นสายฟ้าผ่าเป็นแนวจากตัวเราไปสุดระยะ 600 ใน 0.3 วิ -----
@@ -98,14 +99,9 @@ function stormLine(p){
   emit({k:'efx',z:'sline',x:Math.round(p.x),y:Math.round(p.y),h:p.z,a:Math.round(a*1000)/1000,len:Math.round(len),id:p.id});
 }
 // ----- สกิล 2 (1 stack): ดูดความเร็ว -----
-const SIPH=defSpell(2,{id:'speedsiphon',v:{cost:1,r:200,rGod:280,dmg:15,slow:0.8,slowT:3,haste:0.2,hasteN:3,time:3},vn:{cost:'ใช้ stack',r:'รัศมี',rGod:'รัศมี (ระหว่างอัลติ)',dmg:'ดาเมจ',slow:'ศัตรู • ความเร็ว (เท่า)',slowT:'ศัตรู • ช้านาน (วิ)',haste:'เรา • เร็วขึ้นต่อคน',hasteN:'เรา • นับสูงสุดกี่คน',time:'เรา • เร็วนาน (วิ)'},role:'utility',n:'ดูดความเร็ว',ic:'💨',cd:10,d:'ใช้ 1 stack: ดูดสายฟ้าจากศัตรูรอบตัว (รัศมี 200) คนละ 15 ดาเมจ และขโมยความเร็ว 20% นาน 3 วิ',fx:'เราเร็วขึ้น 20% ต่อคนที่โดน (สูงสุด 60%) นาน 3 วิ • ระหว่างอัลติ: รัศมี 280 + Shock',
-  cast(p,S){
-    const V=S.v;if(!stSpend(p,V.cost))return false;
-    const g=p.god>0,R=g?V.rGod:V.r,tg=[];let n=0;
-    for(const t of foesIn(p.team,p.x,p.y,R,p.z+4)){if(aoeHit(p,t,V.dmg,t=>{addSlow(t,V.slow,V.slowT);if(g)shock(t,p.id,STORMV.shock);})){n++;tg.push([Math.round(t.x),Math.round(t.y),Math.round(cH(t)*10)/10]);}}
-    if(n>0){p.haste=V.time;p.hasteF=1+V.haste*Math.min(V.hasteN,n);}
-    emit({k:'efx',z:'ssiph',x:p.x,y:p.y,h:p.z+1.1,id:p.id,r:R,tg:tg.slice(0,6)});
-  }});
+const SIPH=defSpell(2,{id:'speedsiphon',v:{cost:2,time:6,cd:0.7,dmg:25,spd:1500,range:700},vn:{cost:'ใช้ stack',time:'อยู่นาน (วิ)',cd:'เว้นต่อคลื่น (วิ)',dmg:'ดาเมจคลื่น',spd:'ความเร็วคลื่น',range:'ระยะคลื่น'},role:'damage',n:'ไม้เท้าสายฟ้า',ic:'⚡',cd:10,d:'ใช้ 2 stack: ไม้ยาวขึ้นด้วยสายฟ้า 6 วิ โจมตีปกติเปลี่ยนเป็นคลื่นดาบสายฟ้า ระยะ 700 ดาเมจ 25 ทุก 0.7 วิ ตีคนบนฟ้าได้',
+  cast(p,S){if(!stSpend(p,S.v.cost))return false;p.stStaff=S.v.time;emit({k:'efx',z:'ssta',x:Math.round(p.x),y:Math.round(p.y),h:p.z+1.2,id:p.id});}});
+function stormWaveShoot(p){const V=SIPH.v;Object.assign(PDEF.swave,{spd:V.spd,life:V.range/V.spd,dmg:V.dmg});const pr=shoot(p,'swave',{sp:'b_storm',dmg:V.dmg,quiet:1});pr.pierce=1;pr.hs=new Set();pr.hw=70;p.stSide=-(p.stSide||1);emit({k:'efx',z:'sswing',x:Math.round(p.x),y:Math.round(p.y),h:p.z+1.2,n:p.stSide,id:p.id});}
 // ----- สกิล 3 (2 stacks): ฟ้าผ่าสามครั้ง — วางจุดครั้งเดียว ฟ้าผ่าจุดเดิม 3 ครั้ง ห่างกัน 0.5 วิ -----
 const TSTR=defSpell(2,{id:'triplestrike',v:{cost:2,range:600,r:100,dmg:30,env:30,delay:0.6,gap:0.5,spd:40,seek:300,sideR:45,side:110},vn:{cost:'ใช้ stack',range:'ระยะวาง',r:'รัศมีวง',dmg:'ดาเมจต่อครั้ง',env:'ดาเมจใส่บ้าน/ของ',delay:'ผ่าครั้งแรกหลัง (วิ)',gap:'เว้นระหว่างครั้ง (วิ)',spd:'วงเลื่อนหาศัตรู • ความเร็ว',seek:'วงเลื่อนหาศัตรู • มองไกล',sideR:'อัลติ • รัศมีวงข้าง',side:'อัลติ • วงข้างห่าง'},role:'control',n:'ฟ้าผ่าสามครั้ง',ic:'🌩️',cd:12,d:'ใช้ 2 stacks: กดแล้วเลือกจุด (เห็นวงก่อนวาง) กดซ้ำ/คลิกซ้าย = ยืนยัน • ระยะ 600 รัศมี 70 มีวงรูนเตือน แล้วฟ้าผ่าจุดเดิม 3 ครั้ง (0.6 วิ แล้วห่างกัน 0.5 วิ)',fx:'ครั้งละ 30 ดาเมจ (โดนครบ 3 = 90) • ระหว่างอัลติ: มีวงเล็กผ่าซ้าย/ขวาเพิ่มด้วย',
   cast(p,S){
@@ -142,6 +138,7 @@ function stormOrbLaunch(p,x,y,tg){
   emit({k:'efx',z:'sorbgo',x:p.x,y:p.y,h:p.z+1.8,x2:Math.round(x),y2:Math.round(y),n:k,id:p.id,T:SORBS.v.fly,tg:tg?(tg.isE?'e'+tg.id:tg.id):undefined});
 }
 // ----- สกิล 5 (2 stacks): Railgun — เส้นเตือนเหลือง 0.8 วิ (อัลติ 0.5) แล้วลำสายฟ้าทะลุทุกคน -----
+Object.assign(PDEF,{swave:{spd:1500,r:16,dmg:25,life:.47,col:'#8fd8ff'}});
 const RAIL=defSpell(2,{id:'railgun',v:{cost:3,draw:1.8,len:1000,dmg:75,env:45,slow:0.28,shockT:1,w:20},vn:{cost:'ใช้ stack',draw:'ง้างเต็ม (วิ)',len:'ระยะ',dmg:'ดาเมจ',env:'ดาเมจใส่บ้าน/ของ',slow:'เดินตอนเล็ง (เท่า)',shockT:'Shock บินไม่ขึ้น (วิ)',w:'กว้างลูกธนู'},
   n:'ธนูสายฟ้า',d:'เข้าโหมดเล็ง กดซ้ายค้างง้าง 1.8 วิ ง้างไม่เต็มปล่อย = ไม่ยิงและเสีย 3 stack ระยะ 1000 ดาเมจ 75 โดนแล้วฟ้าผ่าลง Shock 1 วิ คนบนฟ้าบินไม่ขึ้น',ic:'🏹',role:'damage',cd:8,
   cast(p,S){if(p.rail)return false;const V=S.v;if(!stSpend(p,V.cost))return false;p.rail={d:0,t:V.draw,max:V.draw,a:p.ang,len:V.len,armed:!p.inp?.fire,s0:!!p.inp?.sh,life:7};emit({k:'efx',z:'srailc',x:p.x,y:p.y,h:p.z+1,id:p.id});}});

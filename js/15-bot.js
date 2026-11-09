@@ -124,7 +124,7 @@ function botPlay(p,dt,tg,c0){
     if(rdy('stormdome')&&st>=3&&d<560)go('stormdome');
     else if(rdy('railgun')&&st>=3&&d<850&&d>200)go('railgun');
     else if(rdy('triplestrike')&&st>=2&&d<560)go('triplestrike');
-    else if(rdy('speedsiphon')&&st>=1&&d<190)go('speedsiphon');
+    else if(rdy('speedsiphon')&&st>=2&&d<600)go('speedsiphon');
     else if(rdy('stormorbs')&&st>=1&&!p.sorb&&d<500)go('stormorbs');
     else if(rdy('thunderline')&&d<580&&st<3)go('thunderline');
     ult(340);

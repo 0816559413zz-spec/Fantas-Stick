@@ -28,6 +28,7 @@ function castStart(o,t,style){o.castN=(o.castN|0)+1;o.cpS=style===undefined?cast
 // ช่อง: [เวลา 0–1, แขนขวา x, แขนขวา z, บิดตัว, เอนตัว, แขนซ้าย x, แขนซ้าย z, ตัวเอียงข้าง, ย่อตัว, ease('o'=ฟาดเร็ว 's'=นุ่ม)]
 // แขน x: ติดลบ = ยกไปหน้า/ขึ้น (-1.57 ชี้ตรง, -3 ชูเหนือหัว) • แขนขวา z บวก = ข้ามตัวไปซ้าย • แขนซ้าย z ลบ = ข้ามตัวไปขวา
 const CANIM={
+  staffup:{d:0.42,st:0.7,tr:[0.2,0.7],k:[[0.35,-2.9,-0.1,0.2,-0.14,-0.5,0.2,0,0.06,'o'],[0.7,-3.05,0,0,-0.18,-0.45,0.2,0,0.1,'s'],[1,-1.3,0.1,0,0,-0.3,0.15,0,0,'s']]},   // Lightning: staff thrown up as it grows
   natthrow:{d:0.62,st:0,tr:null,k:[[0.36,-0.45,0.22,0.6,-0.14,0.85,0.25,0.06,-0.14,'s'],[0.62,-0.55,0.12,-0.75,0.24,-2.35,-0.32,-0.07,-0.02,'o'],[1,-0.4,0.1,-0.25,0.1,-1.05,-0.2,0,-0.06,'s']]},   // Nature: left hand throws the seed, stick stays out of the way
   natraise:{d:0.85,st:0,tr:null,k:[[0.3,-2.95,0.05,0.05,-0.14,-0.5,0.2,0,0.04,'s'],[0.75,-3.05,0.02,0,-0.18,-0.45,0.2,0,0.08,'s'],[1,-1.1,0.1,0,0,-0.3,0.15,0,0,'s']]},   // Nature: stick held high to move plants / grow the wall
   natsummon:{two:1,d:1.3,st:1,tr:[0.3,0.75],k:[[0.25,0.32,-0.22,0.1,0.2,0.32,0.22,0,-0.2,'s'],[0.58,-3.0,0.12,0,-0.2,-3.0,-0.12,0,0.1,'s'],[0.72,-3.05,0.1,0,-0.24,-3.05,-0.1,0,0.12,'s'],[0.86,-0.8,0.2,0,0.3,-0.8,-0.2,0,-0.24,'o'],[1,-0.8,0.15,0,0.16,-0.8,-0.15,0,-0.12,'s']],tm:[0.45,0.7]},   // Nature ult: gather low, both hands overhead, then call the tree down
@@ -78,7 +79,7 @@ const SKFEET={sweep:[0.25,-0.5,0.1,-0.12],powerup:[-0.25,-0.15,0.16,-0.16],ultra
 // รอบ 2: ใส่ให้สกิลที่เดิมมีแต่ท่าค้าง (ไม่เหวี่ยง) ด้วย — ท่านี้เล่นหลังไฟล์สาย (lateSkillPose) จึงทับท่าค้างช่วงสั้น ๆ แล้วกลับท่าเดิม
 const SKANIM={ringofembers:'sweep',blazeform:'fireflare',colossus:'ultraise',kindle:'upflick',ignitionsnap:'snap',
   frostforge:'forge',glacierrend:'rend',permafrost:'slam',cryoshell:'wrap',frostaura:'frostbreath',mirrorlegion:'summon3',
-  thunderline:'line',speedsiphon:'siphon',stormorbs:'orbs',stormdome:'dome',triplestrike:'skycall',godlightning:'godcall',
+  thunderline:'line',speedsiphon:'staffup',stormorbs:'orbs',stormdome:'dome',triplestrike:'skycall',godlightning:'godcall',
   stonebreaker:'punchcmd',mudswamp:'ground',tectoniccrush:'dome',tectoniccrush_2:'clap',dustburst:'burst',terraauger:'pullback',wrath:'ultraise',
   riptide:'wavecast',tidecaller:'tidecall',aquacage:'cagecast',abyssalbeam:'pullback',moonwater:'moonarts',dragondeep:'dragoncall',dragondeep_dive:'dragoncommand',voidspheres:'windvoid',aegisgale_push:'wallpush',aegisgale_place:'ground',featherwing_2:'wingflick',eyeofheaven:'heavenslam'};
 Object.assign(SKANIM,{poisondart:'natthrow',bloom:'natthrow',sporecloud:'natthrow',vinelash:'natraise',thornburst:'natraise',worldtree:'natsummon'});
@@ -262,7 +263,7 @@ function syncPlayers(P,mode,now,dt){
     earthFX(o,p,pz,now,dt);
     windFX(o,p,pz,now,dt);waterFX(o,p,pz,now,dt);
     lateSkillPose(o,p,dt,now);
-    waterCharacterPose(o,p,dt,now);windCharacterPose(o,p,dt,now,v);windLatePose(o,p,dt);stormBowView(o,p,dt,now);dashPose(o,p,dt,now);   // ท่าพุ่ง (js/72) ทับท่าอื่นตอนพุ่ง
+    waterCharacterPose(o,p,dt,now);windCharacterPose(o,p,dt,now,v);windLatePose(o,p,dt);stormBowView(o,p,dt,now);stormStaffView(o,p,dt,now);dashPose(o,p,dt,now);   // ท่าพุ่ง (js/72) ทับท่าอื่นตอนพุ่ง
     const whip=p.nt?.[0];
     const activeWhip=whip&&!p.dn&&!p.fl?{start:whip[0],age:whip[1],side:whip[2],angle:whip[3]}:null;
     if(activeWhip)natureWhipPose(o,activeWhip);
@@ -349,14 +350,15 @@ function syncProj(v,now){
     seen.add(j.id);
     const vt=(j.t==='pfire'||j.t==='pfireb')?'fire':j.t,col=j.rf?'#7ff6ff':PCOL[j.t],r=PDEF[j.t].r*S3*(vt==='fire'?1.4:1);
     let o=JM3.get(j.id);
-    if(!o){o=makeProj(col,j.t);o.pt=j.t;JM3.set(j.id,o);
+    if(!o){o=makeProj(col,j.t);o.pt=j.t;JM3.set(j.id,o);if(j.t==='swave')stormWaveMake(o,j);
       if(PJFX[j.t])o.fx=fxPlay(PJFX[j.t][0],{x:j.x,y:j.y,h:j.h!==undefined?j.h:1.35,a:Math.atan2(j.vy,j.vx)});
       {const bp=pjPal(j.t);if(BF.on&&(bp==='fire'||bp==='ice'))o.bt=fxPlay('env/bf_'+bp+'_trail',{x:j.x,y:j.y,h:j.h!==undefined?j.h:1.35,s:(j.t==='iceboulder'||j.t==='pfireb')?1.8:1});}   // สนามรบ: หางควัน/ไอเย็น (js/44 BF)
-      if(!o.fx){const P=palOf(pjPal(j.t),col),big=j.t==='iceboulder'||j.t==='pfireb';o.tr=trailNew({col:P.hi,col2:P.deep,w:big?0.32:vt==='fire'?0.2:0.11,life:big?0.28:0.17,k:1.7});}}   // หางแสงทุกกระสุน (สีตามธาตุ)
+      if(!o.fx&&j.t!=='swave'){const P=palOf(pjPal(j.t),col),big=j.t==='iceboulder'||j.t==='pfireb';o.tr=trailNew({col:P.hi,col2:P.deep,w:big?0.32:vt==='fire'?0.2:0.11,life:big?0.28:0.17,k:1.7});}}   // หางแสงทุกกระสุน (สีตามธาตุ)
     if(o.col!==col){o.halo.material=glowMat(col,0.9);o.inner.material.color.copy(hdr(col,2.2));o.tail.material.color.copy(hdr(col,1.6));o.col=col;}
     const x=j.x+j.vx*ex,y=j.y+j.vy*ex,X=tx(x),Z=tz(y),H=(j.h!==undefined?j.h:1.35)+(j.vh||0)*ex;
     if(o.fx){o.fx.x=x;o.fx.y=y;o.fx.h=H;o.fx.a=Math.atan2(j.vy,j.vx);}
     if(o.bt){o.bt.x=x;o.bt.y=y;o.bt.h=H;}
+    if(o.swv)stormWaveTick(o,X,H+GY(x,y),Z);
     {const Hw=H+GY(x,y);o.g.position.set(X,Hw,Z);if(o.tr)trailPoint(o.tr,X,Hw,Z);o.g.lookAt(_t1.set(X+j.vx*S3,Hw+(j.vh||0),Z+j.vy*S3));}
     if(j.t==='web'){o.core.material.color.set('#f4f4ff');o.tail.visible=false;if(Math.random()<0.6)PARTS.push({x,y,h:H,vx:rnd(-30,30),vy:rnd(-30,30),vh:rnd(-0.5,0.5),life:0.5,max:0.5,col:'#e8e8f0',size:2.5,g:1,smoke:true});}
     const fl=1+0.15*Math.sin(now/30+j.id);
@@ -365,9 +367,9 @@ function syncProj(v,now){
     o.tail.scale.set(r*1.1,r*1.1,vt==='fire'?2.2:2.8);
     if(o.fileModel){o.core.visible=o.inner.visible=o.tail.visible=false;}
     o.lines.forEach(L=>jag(L.geometry,_a.set(0,0,0),_b.set(0,0,-2.4),0.22));
-    if(vt!=='wplume'&&vt!=='wshp')LREQ.push({x:X,y:H,z:Z,col,int:vt==='fire'?2.4:1.6,dist:vt==='fire'?11:8});   // ขนนกยิงทีละหลายอัน แสงรวมกันแล้วพื้นขาว
+    if(vt!=='wplume'&&vt!=='wshp'&&vt!=='swave')LREQ.push({x:X,y:H,z:Z,col,int:vt==='fire'?2.4:1.6,dist:vt==='fire'?11:8});   // ขนนกยิงทีละหลายอัน แสงรวมกันแล้วพื้นขาว
     switch(vt){
-      case 'wshp':case 'wball':case 'wplume':case 'wblade':case 'wdrop':case 'wcage':o.core.visible=o.inner.visible=o.tail.visible=o.halo.visible=false;o.lp=[x,y,H];break;   // น้ำ: เห็นแค่ fx ไม่มีลูกแสงขาว
+      case 'swave':case 'wshp':case 'wball':case 'wplume':case 'wblade':case 'wdrop':case 'wcage':o.core.visible=o.inner.visible=o.tail.visible=o.halo.visible=false;o.lp=[x,y,H];break;   // น้ำ: เห็นแค่ fx ไม่มีลูกแสงขาว
       case 'icicle':
         if(o.fx){o.core.visible=o.inner.visible=o.tail.visible=false;o.halo.scale.setScalar(r*2);o.lp=[x,y,H];break;}   // แบบ B: เข็มพลังงานจากไฟล์ fx
         // แท่งน้ำแข็งแหลม: ยาวตามทิศที่พุ่ง

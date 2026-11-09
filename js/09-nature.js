@@ -1,6 +1,6 @@
 // Nature combat is simulated by the host. Positions are map units, heights are metres.
 const NATUREP=3;
-const NAT={seedRange:300,hookRange:300,hookSpeed:800,lotusRange:160,treeRange:500,
+const NAT={seedRange:300,hookRange:560,hookSpeed:1700,lotusRange:160,treeRange:500,
   treeHeight:23,treeGrow:3.4,treeLife:12,peaRadius:55,wallHalf:105,wallThick:12,wallHeight:3.6};
 const natureDist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
 const natureItems=()=>G.nature||(G.nature=[]);

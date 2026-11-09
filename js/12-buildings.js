@@ -402,7 +402,7 @@ function damage(t,amt,srcId,kind){
 }
 function playerDown(t,srcId){
   t.shieldOn=false;t.burn=0;t.fly=false;
-  t.stS=null;t.sdome=null;t.rail=null;t.slnT=0;t.beam=0;t.sdHit=null;earthReset(t);windReset(t);waterReset(t);natureReset(t);if(t.god>0){t.god=0;t.xhp=0;}
+  t.stS=null;t.sdome=null;t.rail=null;t.stStaff=0;t.slnT=0;t.beam=0;t.sdHit=null;earthReset(t);windReset(t);waterReset(t);natureReset(t);if(t.god>0){t.god=0;t.xhp=0;}
   // ท่าที่ง้าง/ค้างอยู่ตอนล้ม: ไม่งั้นคนล้ม (co-op) ยังปล่อยท่าได้ หรือท่าค้างไว้แล้วออกเองทันทีที่ถูกชุบ
   t.dfall=null;t.snapT=0;t.grT=0;t.slam=false;t.slam3=null;t.dchgOn=false;t.dchg=0;t.chg=0;t.dash=0;t.dashSp=0;t.trail=null;
   if(G.mode==='coop'){
@@ -489,7 +489,7 @@ function projStep(pr,dt,ps){
     if(hp){killProj(pr);return;}
     for(const p of ps){
       if(!p.alive||p.downed||p.id===pr.owner||p.team===pr.team||(pr.hs&&pr.hs.has(p)))continue;
-      if((p.x-pr.x)**2+(p.y-pr.y)**2>(PR+pr.r)**2)continue;
+      if((p.x-pr.x)**2+(p.y-pr.y)**2>(PR+(pr.hw||pr.r))**2)continue;
       if(Math.abs(pr.h-cH(p))>vR(p)+pr.r/20)continue;
       if(p.inv>0)continue;
       if(p.shieldOn&&shieldFaces(p,pr.x-pr.vx*0.05,pr.y-pr.vy*0.05)){
@@ -512,13 +512,13 @@ function projStep(pr,dt,ps){
       if(!o.isM||o.team===pr.team||!natureLive(o)||G.time<o.ready||(pr.hs&&pr.hs.has(o)))continue;
       const top=o.natKind==='tree'?NAT.treeHeight:o.natKind==='lotus'?5:2;
       const h=pr.h+terrT(pr.x,pr.y)-natureY(o)-o.h;
-      if(h<-.1||h>top||natureDist(o,pr)>o.r+pr.r)continue;
+      if(h<-.1||h>top||natureDist(o,pr)>o.r+(pr.hw||pr.r))continue;
       hitTarget(pr,o);if(pr.pierce){pr.hs.add(o);continue;}killProj(pr);break;
     }
     if(!pr.dead)for(const m of G.mins){
       if(m.dead||m.team===pr.team||(pr.hs&&pr.hs.has(m)))continue;
       const hc=m.type==='golem'?1.6:m.type==='wolf'?0.8:(m.h||0),tol=(m.type==='golem'?1.7:m.type==='wolf'?0.8:0.55)+pr.r/20;
-      if((m.x-pr.x)**2+(m.y-pr.y)**2<(m.r+pr.r)**2&&Math.abs(pr.h-hc)<tol){hitTarget(pr,m);if(pr.pierce){pr.hs.add(m);continue;}killProj(pr);break;}
+      if((m.x-pr.x)**2+(m.y-pr.y)**2<(m.r+(pr.hw||pr.r))**2&&Math.abs(pr.h-hc)<tol){hitTarget(pr,m);if(pr.pierce){pr.hs.add(m);continue;}killProj(pr);break;}
     }
     if(pr.dead||pr.src!=='p')return;
     for(const e of G.en){

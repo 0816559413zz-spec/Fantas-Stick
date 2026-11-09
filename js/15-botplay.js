@@ -39,7 +39,7 @@ function botWant(p,id,tg,d){
     case 'cryoshell':return hp<0.3&&d<450;
     // ---- สายฟ้า: Dash ทะลุเก็บ stack แล้วจ่าย stack ----
     case 'thunderline':return d<560;
-    case 'speedsiphon':return st>=(botSave(p)?3:1)&&d<190;
+    case 'speedsiphon':return st>=(botSave(p)?4:2)&&d<600;
     case 'stormorbs':return st>=(botSave(p)?3:1)&&!p.sorb&&d<450;
     case 'triplestrike':return st>=2&&d<600&&(stuck||st>=4);
     case 'railgun':return st>=3&&d>280&&d<850&&(stuck||hp>0.6);
