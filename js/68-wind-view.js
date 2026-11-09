@@ -4,7 +4,7 @@
 //  เรียกจาก: efxFX (js/25, z ขึ้นต้น 'wn') • syncPlayers (js/35 windFX) • render loop (js/37 syncWind)
 // =====================================================================
 const WV={st:new Map(),wl:new Map(),vo:new Map()};
-Object.assign(PCOL,{wplume:'#8dff65',wball:'#8dff65',wpush:'#8dff65',wbl:'#b8ff85'});
+Object.assign(PCOL,{wshp:'#8dff65',wplume:'#8dff65',wball:'#8dff65',wpush:'#8dff65',wbl:'#b8ff85'});
 const WN_BODY={charge:[-0.7,-0.3,-0.12,0.3,-0.7,0.3,0,-0.2],dash:[0.65,-0.2,0,0.68,0.8,0.3,0,-0.05],hover:[-1.0,-0.35,0,-0.08,-0.75,0.45,0,-0.03]},WN_AIR_FEET=[-0.45,0.25,0.12,-0.12];
 WN_BODY.dive=[0.5,-0.25,0,0.5,0.55,0.25,0,-0.04];WN_BODY.wallAim=[-1.55,-0.08,0.1,0.08,-1.2,0.35,0,-0.04];WN_BODY.gather=[-1.8,-0.45,-0.15,-0.08,-1.35,0.45,0,-0.08];WN_BODY.shieldCharge=[-1.2,0.6,0,0.2,-1.2,-0.6,0,-0.18];
 // ท่าบิน (ผู้ใช้ 2026-11-08): ซ้อนท่าตามทิศที่กำลังไปบนท่าลอยนิ่ง แล้วใช้สปริงให้มีแรงเฉื่อยและเลยนิด ๆ (แนวทาง additive lean + bank ของเกมบิน)
@@ -81,7 +81,7 @@ function windLatePose(o,p,dt){const R=o.armR.rotation;if(!p.wn||!p.al||p.dn||(p.
     R.x=lerp(R.x,-3.05,w);R.z=lerp(R.z,0.08,w);L.x=lerp(L.x,0.28,w);L.z=lerp(L.z,0.2,w);o.b.rotation.x=lerp(o.b.rotation.x,-0.14,w);o.b.rotation.z=lerp(o.b.rotation.z,0,w);for(const l of o.legs){l.rotation.x=lerp(l.rotation.x,0.1,w);l.rotation.z=lerp(l.rotation.z,0,w);}if(u>T+0.3)o.wdu=undefined;}
   if(o.wbk!==undefined){o.wbk+=dt;const u=o.wbk,sl=Math.exp(-6*u),a=_cs(Math.min(1,u/0.1)),w=u<0.3?1:Math.max(0,1-(u-0.3)/0.25),L=o.armL.rotation;R.x=lerp(R.x,lerp(0.25,-1.6,a),w);R.z=lerp(R.z,lerp(-0.18,-0.1,a),w);L.x=lerp(L.x,lerp(0.25,-1.6,a),w);L.z=lerp(L.z,lerp(0.18,0.1,a),w);   // แทงแขนออก: ศอกเหยียดไปพร้อมแขน
     o.b.rotation.x+=0.2*sl;o.legs[0].rotation.x-=0.2*sl;o.legs[1].rotation.x-=0.2*sl;o.faW=1-a;if(u>0.55)o.wbk=undefined;}
-  if(o.wbc!==undefined){o.wbc+=dt;const u=o.wbc,T=0.6,x0=Math.min(1,u/T),k=1-(1-x0)*(1-x0),L=o.armL.rotation;if(u<T){R.x=lerp(R.x,0.25,k);R.z=lerp(R.z,-0.18,k);L.x=lerp(L.x,0.25,k);L.z=lerp(L.z,0.18,k);o.b.rotation.x-=0.3*k;o.legs[0].rotation.x+=0.3*k;o.legs[1].rotation.x+=0.3*k;o.faW=k;}else{o.wbc=undefined;o.wbk=0;}}   // เยื้องตัวบนไปหลัง ขาอยู่ที่เดิม • ศอกงอ ปลายแขนยังชี้หน้า   // ง้าง: ตัวเอนไปหลัง ดึงมือเข้า   // ระเบิดกำแพง: ผลักมือออก ตัวสะท้อนกลับ
+  if(o.wbc!==undefined){o.wbc+=dt;const u=o.wbc,T=0.6,x0=Math.min(1,u/T),k=1-(1-x0)*(1-x0),L=o.armL.rotation;if(u<T){R.x=lerp(R.x,0.25,k);R.z=lerp(R.z,-0.18,k);L.x=lerp(L.x,0.25,k);L.z=lerp(L.z,0.18,k);o.b.rotation.x-=0.3*k;o.legs[0].rotation.x+=0.3*k;o.legs[1].rotation.x+=0.3*k;o.faW=k;if(p.id===NET.myId)o.b.rotation.x+=clamp(pitch,0,1.1)*0.5*k;}else{o.wbc=undefined;o.wbk=0;}}   // เยื้องตัวบนไปหลัง ขาอยู่ที่เดิม • ศอกงอ ปลายแขนยังชี้หน้า   // ง้าง: ตัวเอนไปหลัง ดึงมือเข้า   // ระเบิดกำแพง: ผลักมือออก ตัวสะท้อนกลับ
   if(o.wob){const B=o.wob,T0=0.35;B.t+=dt;const t=B.t,up=t<T0?Math.min(1,t/0.16):1,k=t<T0?0:_cs(Math.min(1,(t-T0)/0.1)),out=t<T0+0.3?1:Math.max(0,1-(t-T0-0.3)/0.25);
     const sx=-2.25,sz=B.s>0?-0.95:1.05,x=lerp(sx,-1.5,k),z=lerp(sz,-0.1,k),w=up*out,L=o.armL.rotation,lx=B.s>0?-1.5:-1.8,lz=B.s>0?-0.75:0.7;
     R.x=lerp(R.x,x,w);R.z=lerp(R.z,z,w);L.x=lerp(L.x,lerp(lx,0.35,k),w);L.z=lerp(L.z,lerp(lz,0.3,k),w);o.b.rotation.y+=lerp(-B.s*0.55,B.s*0.3,k)*w;   // ชาร์จ: บิดตัวไปข้างที่ง้าง มืออีกข้างตามไปประคอง • ปล่อย: บิดสวนมาอีกทาง
@@ -95,7 +95,7 @@ function windForearm(o){const w=o.faW||0;if(w<=0.002)return;o.faW=0;if(o.faB===u
   if(!o.faB)return;_faQ.setFromAxisAngle(_faX,WF_ELBOW);for(const [b,q0] of o.faB){_faT.copy(q0).multiply(_faQ);b.quaternion.slerp(_faT,w);}}
 function windFX(o,p,pz,now,dt){
   const A=p.wn;
-  if(A&&!WV.shPre){WV.shPre=1;fxMeshLoad('wind_wall_shell');}   // โหลดโมเดลโล่ล่วงหน้า ไม่งั้นยกโล่ครั้งแรกไม่เห็นโล่ทั้งครั้ง
+  if(A&&!WV.shPre){WV.shPre=1;fxMeshLoad('wind_wall_shell');window.WD?.fx?.load?.('wind/shield_fly');}   // โหลดโมเดลโล่ล่วงหน้า ไม่งั้นยกโล่ครั้งแรกไม่เห็นโล่ทั้งครั้ง
   if(!A){if(o.wWings)o.wWings.visible=false;const s=WV.st.get(p.id);if(s){for(const k of ['wing','guard'])if(s[k]){fxKill(s[k]);s[k]=null;}}return;}
   const s=wvState(p.id),alive=p.al&&!p.dn,guard=alive&&p.sh&&o.wbc===undefined,h=o.zs||0;
   // ปีกติดหลังตลอดเวลา (ท่ากางเกือบนิ่ง) — ซ่อนตอนยกโล่ (ปีกห่อแทน)
@@ -107,7 +107,7 @@ function windFX(o,p,pz,now,dt){
   else if(o.wWings)o.wWings.visible=false;
   if(alive&&p.sh)o.shield.visible=false;   // ไม่ใช้โล่ลูกแก้วปกติ
   if(alive&&A[11]){if(!wvAlive(s.enh))s.enh=fxPlay('wind/slip_ready',{x:p.x,y:p.y,h,aim:false,follow:p.id});}   // แดชแล้ว นัดถัดไปพร้อม: ขนนกนีออนลอยรอบตัว
-  if(guard){if(!wvAlive(s.guard))s.guard=fxPlay('wind/wall_guard',{x:p.x,y:p.y,h,a:p.a,follow:p.id});else s.guard.a=p.a;}   // โล่ใหม่ = กำแพงลมตรงหน้า ปีกไม่ห่อแล้ว (ผู้ใช้ 2026-11-08)
+  if(guard){if(!wvAlive(s.guard))s.guard=fxPlay('wind/wall_guard',{x:p.x,y:p.y,h,a:p.a,follow:p.id,s:1.3});else s.guard.a=p.a;}   // โล่ใหม่ = กำแพงลมตรงหน้า ปีกไม่ห่อแล้ว (ผู้ใช้ 2026-11-08)
   else if(s.guard){fxKill(s.guard);s.guard=null;}   // ห่อปีกยาว 9.5 วิ → ตัดทิ้งทันทีตอนลดโล่
   if(p.id===NET.myId)wvAimGhost(p,A,h);
   // ยิงขนนก: ชี้ไม้ไปข้างหน้าค้าง + หันตัวเปิดทางให้ปีกที่ยิง (ปีกซ้ายยิง = หันขวา) ค้างแป๊บ ไม่ยิงต่อค่อยกลับ
@@ -208,8 +208,8 @@ function windEfx(ev){
     case 'wnorb':fxPlay('wind/gale_orb_boom',{x,y,h:H,aim:false});if(near){snd('boom',{x,y,vol:0.5});shake(0.25);}return true;
     case 'wnoc':{fxPlay('wind/gale_orb_charge',{x,y,h:H,follow:ev.id});const o=PM3.get(ev.id);if(o)o.wob={s:ev.n,t:0};if(near)snd('cast_pull',{x,y,vol:0.4});return true;}   // ง้างไม้ไปข้าง ลูกลมก่อตัวที่ปลายไม้
     case 'wnol':fxPlay('wind/gale_orb_launch',{x,y,h:H,a,aim:false});if(near)snd('whoosh',{x,y,vol:0.6});return true;
-    case 'wnwc':{fxPlay('wind/wall_launch',{x,y,h:H,a,aim:false,follow:ev.id});const o=PM3.get(ev.id);if(o)o.wbc=0;if(near)snd('cast_pull',{x,y,vol:0.5});return true;}   // ง้างก่อนปล่อยโล่
-    case 'wnwb':{fxPlay('wind/wall_blast',{x,y,h:H,a,aim:false});later(0.1,()=>windSuckFx({x,y,h:H,r:ev.r||W_BLAST_SUCK}));if(near){snd('boom',{x,y,vol:0.45});shake(0.2);}return true;}
+    case 'wnwc':{fxPlay('wind/wall_launch',{x,y,h:H,a,aim:false,follow:ev.id,s:1.3});const o=PM3.get(ev.id);if(o)o.wbc=0;if(near)snd('cast_pull',{x,y,vol:0.5});return true;}   // ง้างก่อนปล่อยโล่
+    case 'wnwb':{fxPlay('wind/wall_blast',{x,y,h:H,a,aim:false});windDome(x,y,H,62,true);later(0.26,()=>windSuckFx({x,y,h:H,r:ev.r||W_BLAST_SUCK}));if(near){snd('boom',{x,y,vol:0.45});shake(0.2);}return true;}
     case 'wnfe':{const o=PM3.get(ev.id);if(o){o.wfe={s:ev.n,t:0};if(o.wWings){const d=o.wWings.userData;(d.fs||(d.fs={}))[-ev.n]={t:0};}}if(near)snd('whoosh',{x,y,vol:0.35});return true;}   // ยิงขนนก: ปีก sd=+1 คือซ้ายของตัวละคร ส่วน n=+1 คือขวา
     case 'wnvocast':fxPlay('wind/void_wave',{x,y,h:H,a,aim:false});if(near)snd('cast_pull',ev);return true;
     case 'wnvohole':{const I=fxPlay('wind/void_hole',{x,y,h:H,a,aim:false});if(I)WV.vo.set(ev.n,I);if(near)shake(0.15);return true;}
@@ -244,7 +244,7 @@ function windEfx(ev){
     case 'wnfcend':return true;
     case 'wnfast':{const o=WV.ff||(WV.ff=new Map());const old=o.get(ev.id);if(old){fxStop(old);o.delete(ev.id);}
       if(ev.n){const I=fxPlay('wind/fw_fast',{x,y,h:H,a,follow:ev.id});if(I)o.set(ev.id,I);if(near)snd('whoosh',ev);if(mine)toast('บินเร็ว: เมาส์ = บังคับแบบเครื่องบิน • ใช้สกิลไม่ได้ • ปล่อย Shift = กลับบินปกติ');}return true;}
-    case 'wnsochg':fxPlay('wind/sonic_charge',{x,y,h:H,a,follow:ev.id});{const o=PM3.get(ev.id);if(o){o.wso=0;o.wsoAir=!!ev.m;o.wld=null;if(o.wWings)o.wWings.userData.sup={t:0,dis:-1};}}if(near)snd('cast_pull',ev);if(mine)toast('Sonic Boom Strike: ชาร์จ 2.4 วิ แล้วพุ่งไปตามที่เล็ง');return true;
+    case 'wnsochg':fxPlay('wind/sonic_charge',{x,y,h:H,a,follow:ev.id});{const o=PM3.get(ev.id);if(o){o.wso=0;o.wsoAir=!!ev.m;o.wld=null;if(o.wWings)o.wWings.userData.sup={t:0,dis:-1};}}if(near)snd('cast_pull',ev);if(mine)toast('Sonic Boom Strike: ชาร์จ 1.7 วิ แล้วพุ่งไปตามที่เล็ง');return true;
     case 'wnsoimp':{const o=PM3.get(ev.id);if(o){o.wso=undefined;o.wud=0;if(o.wWings&&o.wWings.userData.sup)o.wWings.userData.sup.dash=true;}}if(near)impactFrame(1,x,y,H+1.2,W_UL.impT,ev.id);return true;
     case 'wnsodash':fxPlay(ev.m?'wind/sonic_dash':'wind/sonic_dash_g',{x,y,h:H,a,follow:ev.id});{const o=PM3.get(ev.id);if(o){o.wud=undefined;o.wld={t:0,air:!!ev.m};if(o.wWings&&o.wWings.userData.sup){const S=o.wWings.userData.sup;S.dash=false;S.dis=0;}}fxPlay('wind/sonic_end',{x:ev.x2,y:ev.y2,h:H,a});}if(near){snd('boom',ev);snd('whoosh',ev);}return true;
     case 'wnsohit':fxPlay('wind/sonic_hit',{x,y,h:H,a});if(near){snd('break',ev);hitStop(0.1);}return true;
@@ -355,7 +355,7 @@ function windSupDust(S){S.dm=new THREE.PointsMaterial({color:'#6dffc0',size:0.2,
     for(let i=0;i<BN;i++){const b=S.bl[gi*BN+i];for(let k=0;k<12;k++){const r=(k+Math.random())/12,A=b.rotation.z+(Math.random()-0.5)*1.4;D.push({b,r,t0:b.userData.i*0.06+(1-r)*1.1,life:0.6+Math.random()*0.5,vx:Math.cos(A)*(0.8+Math.random()*2),vy:Math.sin(A)*(0.8+Math.random()*2)+1.2,vz:(Math.random()-0.5)*2.6});}}
     S.du.push({P,g,D});});}
 function windSupDustTick(S){for(const U of S.du){U.D.forEach((D,j)=>{const t=S.dis-D.t0,i=j*3,P=U.P;if(t<0||t>D.life){P[i]=P[i+1]=P[i+2]=9999;return;}const b=D.b,a=b.rotation.z,L=b.userData.L*D.r;P[i]=b.position.x+Math.cos(a)*L+D.vx*t;P[i+1]=b.position.y+Math.sin(a)*L+D.vy*t;P[i+2]=b.position.z+D.vz*t;});U.g.attributes.position.needsUpdate=true;}}
-function windWingSup(d,dt){const S=d.sup,C=W_UL.chg;S.t+=dt;if(S.dis>=0)S.dis+=dt;
+function windWingSup(d,dt){const S=d.sup,C=W_UL.chg;S.t+=dt;if(S.dis<0&&S.t>C+1.2)S.dis=0;if(S.dis>=0)S.dis+=dt;   // never stays on the wings if the dash event was missed
   if(!_wsupG){const sh=new THREE.Shape();sh.moveTo(0,-0.05);sh.bezierCurveTo(0.22,-0.17,0.68,-0.13,1,0.02);sh.bezierCurveTo(0.74,0.08,0.34,0.13,0,0.05);sh.closePath();_wsupG=new THREE.ShapeGeometry(sh,14);_wsupG.userData.keep=true;_wsupD=new THREE.OctahedronGeometry(0.16);_wsupD.userData.keep=true;}
   if(!S.bl){const mk=(c,k)=>new THREE.MeshBasicMaterial({color:hdr(c,k),transparent:true,opacity:1,depthWrite:false,depthTest:false,side:THREE.DoubleSide,toneMapped:false});S.ma=mk('#2bffa8',1.3);S.mm=mk('#04b873',0.8);S.md=mk('#036b48',0.8);S.mc=mk('#c8ffe8',0.95);S.rb=S.ma.color.clone();S.bl=[];S.fe=[];S.gs=[];S.bs=[];S.tg=[];S.pm=new THREE.PointsMaterial({color:'#a8ffe0',size:0.17,transparent:true,depthWrite:false,depthTest:false,toneMapped:false});S.tp=[];
     const add=(G,i,x,y,A,L,W,M0)=>{const b=new THREE.Group(),r=new THREE.Mesh(_wsupG,S.ma),m=new THREE.Mesh(_wsupG,M0),c=new THREE.Mesh(_wsupG,S.mc);m.scale.set(0.97,0.74,1);c.scale.set(0.9,0.14,1);r.frustumCulled=m.frustumCulled=c.frustumCulled=false;r.renderOrder=4;m.renderOrder=5;c.renderOrder=6;b.add(r,m,c);b.position.set(x,y,0.12);b.rotation.z=A;b.userData={i,L,W};b.scale.setScalar(0.001);G.add(b);S.bl.push(b);return b;};
@@ -367,8 +367,8 @@ function windWingSup(d,dt){const S=d.sup,C=W_UL.chg;S.t+=dt;if(S.dis>=0)S.dis+=d
       const P=new Float32Array(32*3).fill(9999),g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(P,3));const pts=new THREE.Points(g,S.pm);pts.frustumCulled=false;pts.renderOrder=7;G.add(pts);S.tp.push({P,g,tips,D:Array.from({length:32},(_,j)=>({b:j%tips.length,ph:Math.random(),vx:0.4+Math.random()*1.4,vy:0.8+Math.random()*1.8,vz:(Math.random()-0.5)*1.6}))});
       for(let i=0;i<14;i++){const m=new THREE.Mesh(_wsupG,S.mm);m.frustumCulled=false;m.renderOrder=7;m.visible=false;const A=-0.3+Math.random()*2,E=3+Math.random()*2;m.userData={t0:0.05+i*(C-0.5)/14,to:[Math.cos(A)*E*0.6,Math.sin(A)*E*0.6,0.1],f:[Math.cos(A+1.2)*7,Math.sin(A+1.2)*7-1,(Math.random()-0.5)*5],s:[Math.cos(A+0.6)*7,Math.sin(A+0.6)*7,(Math.random()-0.5)*7]};G.add(m);S.fe.push(m);}}}
   S.ma.color.copy(S.rb).multiplyScalar(1+0.3*Math.sin(S.t*7));
-  for(const m of S.tg){const b=m.userData.b,a=b.rotation.z,L=b.userData.L*(S.dis>=0?0:Math.min(1,S.t/C*1.4))*1.04,bob=Math.sin(S.t*4+a*5)*0.14;m.position.set(b.position.x+Math.cos(a)*L,b.position.y+Math.sin(a)*L+bob,0.2);m.rotation.y=S.t*3;const q=S.dis>=0?0.001:Math.min(1,S.t/0.6);m.scale.setScalar(Math.max(0.001,q));}
-  for(const U of S.tp){U.D.forEach((D,j)=>{const i=j*3,P=U.P;if(S.dis>=0||S.t<0.4){P[i]=P[i+1]=P[i+2]=9999;return;}const u=(S.t*1.4+D.ph)%1,b=U.tips[D.b],a=b.rotation.z,L=b.userData.L*Math.min(1,S.t/C*1.4);P[i]=b.position.x+Math.cos(a)*L+D.vx*u;P[i+1]=b.position.y+Math.sin(a)*L+D.vy*u;P[i+2]=b.position.z+D.vz*u;});U.g.attributes.position.needsUpdate=true;}
+  for(const m of S.tg){const b=m.userData.b,a=b.rotation.z,L=b.userData.L*(S.dis>=0?0:Math.min(1,S.t/C*2))*1.04,bob=Math.sin(S.t*4+a*5)*0.14;m.position.set(b.position.x+Math.cos(a)*L,b.position.y+Math.sin(a)*L+bob,0.2);m.rotation.y=S.t*3;const q=S.dis>=0?0.001:Math.min(1,S.t/0.6);m.scale.setScalar(Math.max(0.001,q));}
+  for(const U of S.tp){U.D.forEach((D,j)=>{const i=j*3,P=U.P;if(S.dis>=0||S.t<0.4){P[i]=P[i+1]=P[i+2]=9999;return;}const u=(S.t*1.4+D.ph)%1,b=U.tips[D.b],a=b.rotation.z,L=b.userData.L*Math.min(1,S.t/C*2);P[i]=b.position.x+Math.cos(a)*L+D.vx*u;P[i+1]=b.position.y+Math.sin(a)*L+D.vy*u;P[i+2]=b.position.z+D.vz*u;});U.g.attributes.position.needsUpdate=true;}
   const pg=Math.min(1,S.t/C),T9=C-0.25;
   for(const b of S.bl){const i=b.userData.i;let g=Math.min(1,Math.max(0,(S.t-i*T9/17)/0.32));if(S.dis>=0)g*=1-Math.min(1,Math.max(0,(S.dis-i*0.06)/1.1));const L=b.userData.L*g;b.scale.set(L,L*b.userData.W,1);}
   for(const m of S.fe){const U=m.userData,u=(S.t-U.t0)/0.55;if(u<0||u>=1||S.dis>=0){m.visible=false;continue;}m.visible=true;const v=1-u,p=(a,b,c)=>v*v*a+2*v*u*b+u*u*c;m.position.set(p(U.f[0],U.s[0],U.to[0]),p(U.f[1],U.s[1],U.to[1]),p(U.f[2],U.s[2],U.to[2]));m.rotation.z=S.t*14+U.t0*9;m.scale.set(0.9,0.75,1);}

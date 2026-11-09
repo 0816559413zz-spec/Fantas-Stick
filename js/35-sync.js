@@ -341,7 +341,7 @@ function makeProj(col,t){
 }
 const _a=new THREE.Vector3(),_b=new THREE.Vector3();
 // กระสุนที่มีเอฟเฟกต์จากไฟล์ติดตัว (ผู้ใช้เลือก VFX 2026-10-22): [ระหว่างบิน (วน), ตอนโดน]
-const PJFX={spark:['fire/spark_fly','fire/spark_hit'],pfire:['fire/fireball_fly',null],icicle:['frost/icicle_fly','frost/icicle_hitb'],wblade:['wind/feather_fly',null],wpush:['wind/push_fly','wind/ba_gust_hit'],wbl:['wind/blade_fly',null],wball:['wind/gale_orb_fly',null],wplume:['wind/plume_fly',null],wdrop:['water/ba_fly','water/ba_hit'],wcage:['water/cage_fly',null]};
+const PJFX={spark:['fire/spark_fly','fire/spark_hit'],pfire:['fire/fireball_fly',null],icicle:['frost/icicle_fly','frost/icicle_hitb'],wblade:['wind/feather_fly',null],wpush:['wind/push_fly','wind/ba_gust_hit'],wbl:['wind/blade_fly',null],wball:['wind/gale_orb_fly',null],wplume:['wind/plume_fly',null],wshp:['wind/shield_fly',null],wdrop:['water/ba_fly','water/ba_hit'],wcage:['water/cage_fly',null]};
 function syncProj(v,now){
   const ex=VIEW.ex!==null?VIEW.ex:clamp((now-VIEW.tCur)/1000,0,0.1),seen=new Set();
   for(const j of v.J){
@@ -364,9 +364,9 @@ function syncProj(v,now){
     o.tail.scale.set(r*1.1,r*1.1,vt==='fire'?2.2:2.8);
     if(o.fileModel){o.core.visible=o.inner.visible=o.tail.visible=false;}
     o.lines.forEach(L=>jag(L.geometry,_a.set(0,0,0),_b.set(0,0,-2.4),0.22));
-    if(vt!=='wplume')LREQ.push({x:X,y:H,z:Z,col,int:vt==='fire'?2.4:1.6,dist:vt==='fire'?11:8});   // ขนนกยิงทีละหลายอัน แสงรวมกันแล้วพื้นขาว
+    if(vt!=='wplume'&&vt!=='wshp')LREQ.push({x:X,y:H,z:Z,col,int:vt==='fire'?2.4:1.6,dist:vt==='fire'?11:8});   // ขนนกยิงทีละหลายอัน แสงรวมกันแล้วพื้นขาว
     switch(vt){
-      case 'wball':case 'wplume':case 'wblade':case 'wdrop':case 'wcage':o.core.visible=o.inner.visible=o.tail.visible=o.halo.visible=false;o.lp=[x,y,H];break;   // น้ำ: เห็นแค่ fx ไม่มีลูกแสงขาว
+      case 'wshp':case 'wball':case 'wplume':case 'wblade':case 'wdrop':case 'wcage':o.core.visible=o.inner.visible=o.tail.visible=o.halo.visible=false;o.lp=[x,y,H];break;   // น้ำ: เห็นแค่ fx ไม่มีลูกแสงขาว
       case 'icicle':
         if(o.fx){o.core.visible=o.inner.visible=o.tail.visible=false;o.halo.scale.setScalar(r*2);o.lp=[x,y,H];break;}   // แบบ B: เข็มพลังงานจากไฟล์ fx
         // แท่งน้ำแข็งแหลม: ยาวตามทิศที่พุ่ง

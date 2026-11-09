@@ -196,11 +196,12 @@ function natureSendSpore(p,t){
   natureEmit('spore_send',{...p,h:p.z+1.45},{x2:t.x,y2:t.y,h2:cH(t)});
 }
 function natureShield(p){
-  if(!p.shieldOn)return;
+  if(!p.shieldOn||G.time-p.shieldT<1.5||G.time<(p.natureSlamAt||0))return;   // thorns finish climbing first, then strike at most two targets per volley
   const last=p.natureShieldHits||(p.natureShieldHits=new Map());
   const targets=foesOf(p.team).filter(t=>natureDist(p,t)<=180&&Math.abs(cH(t)-cH(p))<2.8
     &&G.time>=(last.get(t)||0)&&natureSight(p,t,cH(p),cH(t)));
-  for(const t of targets.sort((a,b)=>natureDist(p,a)-natureDist(p,b))){
+  if(targets.length)p.natureSlamAt=G.time+.9;
+  for(const t of targets.sort((a,b)=>natureDist(p,a)-natureDist(p,b)).slice(0,2)){
     last.set(t,G.time+.75);
     natureEmit('slam',{...p,h:p.z},{id:p.id,x2:t.x,y2:t.y,h2:groundH(t.x,t.y,t.z??t.h)});
     if(aoeHit(p,t,10))natureSendSpore(p,t);

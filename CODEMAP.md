@@ -102,8 +102,8 @@ updateEarth:241 earthSnapP:251 earthSnapW:253
 ## js/09-nature-ba.js (107) — 
 NATURE_BA_TEST:2 NATURE_WHIP:3 natureWhipEnabled:4 natureWhipHit:7 natureWhipBasic:29 NW_RINGS:50 NW_SIDES:50 nwPhase:51 nwEase:52 nwSwingAngle:53 natureWhipPose:59 natureWhipVisualMake:68 natureWhipView:90
 
-## js/09-nature.js (438) — 
-NATUREP:2 NAT:3 natureDist:5 natureItems:6 natureLive:7 naturePlants:8 natureY:9 natureHead:10 natureTreeReady:11 natureEmit:12 natureWallLocal:15 natureWallContains:21 natureWallPush:28 natureBurnWall:36 natureWallDamage:43 natureWallTick:48 natureTrace:57 natureSight:75 natureGround:76 natureAimPoint:82 naturePlace:88 naturePlant:96 natureCastPlant:106 natureLotusToggle:122 natureMovePlants:130 natureAimSpot:141 natureAimStart:142 natureAimDone:143 natureAimTick:146 natureWallBuild:157 natureCastWall:158 naturePoison:165 natureStatus:170 natureSpore:182 natureSendSpore:189 natureShield:198 natureHookCandidates:211 natureDash:215 natureHookMove:241 natureBall:270 natureBallTick:278 natureTree:297 natureTreeReach:302 natureGuardian:307 natureGuard:313 natureDamage:322 natureEnd:328 natureTurret:334 naturePeaSplash:367 natureUpdate:372 natureReset:404 natureSnapP:408 natureLotusCooldown:418 natureSnapW:423
+## js/09-nature.js (439) — 
+NATUREP:2 NAT:3 natureDist:5 natureItems:6 natureLive:7 naturePlants:8 natureY:9 natureHead:10 natureTreeReady:11 natureEmit:12 natureWallLocal:15 natureWallContains:21 natureWallPush:28 natureBurnWall:36 natureWallDamage:43 natureWallTick:48 natureTrace:57 natureSight:75 natureGround:76 natureAimPoint:82 naturePlace:88 naturePlant:96 natureCastPlant:106 natureLotusToggle:122 natureMovePlants:130 natureAimSpot:141 natureAimStart:142 natureAimDone:143 natureAimTick:146 natureWallBuild:157 natureCastWall:158 naturePoison:165 natureStatus:170 natureSpore:182 natureSendSpore:189 natureShield:198 natureHookCandidates:212 natureDash:216 natureHookMove:242 natureBall:271 natureBallTick:279 natureTree:298 natureTreeReach:303 natureGuardian:308 natureGuard:314 natureDamage:323 natureEnd:329 natureTurret:335 naturePeaSplash:368 natureUpdate:373 natureReset:405 natureSnapP:409 natureLotusCooldown:419 natureSnapW:424
 
 ## js/09-other-paths.js (175) — 
 §44 สัตว์เวท (minion): AI ฝั่งโฮสต์
@@ -130,49 +130,49 @@ waterDragonTick:124
 §138 ทุกเฟรม (ทั้งเกม)
 updateWater:139 waterSnapP:145 waterSnapW:147 WT_RP:150 WT_FM:153 WT_CG:155 WT_AB:159 WT_MW:162 WT_UL:164
 
-## js/09-wind.js (568) — สายลม 🌪️ (ผู้ใช้ออกแบบทั้งหมด — designs/wind.md "คอนเซ็ปต์ใหม่") • ฝั่งโฮสต์ • ขั้นที่ 1…
+## js/09-wind.js (571) — สายลม 🌪️ (ผู้ใช้ออกแบบทั้งหมด — designs/wind.md "คอนเซ็ปต์ใหม่") • ฝั่งโฮสต์ • ขั้นที่ 1…
 WINDP:8 WNV:12
 §19 ตัวช่วย
 wOn:20 wGain:21 wSeg:23 wFoeNear:24
 §26 ทุกเฟรมของผู้เล่นสายลม (เรียกจาก updatePlayer หลังส่วนโล่)
 windTick:27 windSpd:55 windFlyZ:57 windReset:66
 §68 ท่าพื้นฐาน (คลิกซ้าย): ใบมีดลม / ดูดลมชาร์จเกจ / GaleBurst
-windBasic:69 windEnh:100 windEnhExtra:101 windFeatherShoot:102 windCurveStep:111 windWallBlast:115 windStreamStart:119 windStreamEnd:120 windStreamTick:121
-§131 โล่ปีก
-windShieldBurst:132
-§136 Dash: ผลักศัตรูข้างหน้า + ดีดตัวเราถอยหลังลอยกลางอากาศ
-windDashGo:137 windDash:140
-§147 กำแพงลม Aegis Gale
-windWallMake:148 windWallStop:156 windWallBoom:157 windDmg:162 windRay:166 windBlockLen:174 windProjHit:179 windWallHurt:183 windCollide:185
-§191 ทั้งสนาม: GaleBurst / กำแพงลม / ชนกำแพง
-updateWind:192
-§229 Windrift: ชาร์จปีก 0.2 → พุ่ง 400 (20 ม. ใน 0.09 วิ) แบบ Jett → ลงท่า…
-windDriftTick:230 windDriftWind:237
-§244 Vortex Bind: ทอร์นาโด 3 อันโค้ง 45° ห่าง 200 → 0.6 วิ ดึงกลับมาหยุด 6…
-windVortexTick:245
-§257 Void Spheres: หลุมดำลูกเดียว (ผู้ใช้ 2026-10-31, designs/wind.md)
-windVoidCast:260 windVoidTick:262
-§273 รูปแบบการเล่นสายลม (ผู้ใช้ 2026-11-08): บนพื้น = อ่อนลงทันที • บิน (F…
-windAir:276 windSpin:276 windAirborne:277 windLift:278 windSink:279 windSlam:280 windSinkZ:282 windTargetZ:283 windSlotOf:287 windCdCut:288 windSlow:289
-§291 Featherwing: กด → หมุนตัวบินวนขึ้น → บิน 8 วิ (ผู้ใช้ 2026-11-08)
-windFlyTick:295 windFastOn:307 windFastOff:310 windFocusEnd:313 windAirMove:315 windFlick:324 windFocusAct:330 windOrbLaunch:333 windOrbBoom:338
-§341 Downburst (ผู้ใช้ 2026-11-08): ลมกดจากฟ้าลงพื้นต่อเนื่อง — วงดาเมจ + …
-§342 Tailwind (เดิม Windblade): ร่องลมจากตัวเราไปตามทิศเล็ง — เพื่อน+ตัวเร…
-windTailCast:343 windTailIn:346 windTailTick:347 windDownCast:352 windPressDown:359 windDownTick:362
-§369 Windup (เดิม Aegis Gale): ลมพัดขึ้น — วางวงลมตรงจุดเล็ง รอ 0.45 วิ แล…
-windUpCast:371 windUpTick:378
-§385 Wind Push (เดิม Windrift): ยิงลมแรงไปทางที่เล็ก
-§388 Plume Volley (ผู้ใช้ 2026-11-09): ขนนกนีออนจากสองปีกสลับกันทีละอันเร็…
-windVolleyCast:389 windVolleyTick:390 windPlumeShoot:391 windFeatherBoom:401 windPlumeBoom:402 windPushCast:404 windPushHit:407
-§413 Windforce (เดิม Vortex Bind): พุ่งด้วยลม
-§416 Slipstream (ผู้ใช้ 2026-11-08): แดชหมุนหลบตามทิศเดิน • 2 ชาร์จ 5 วิ/อ…
-windSlipCast:417 windSlipTick:422 windForceCast:423 windSmash:429 windAheadHit:433 windForceTick:439
-§459 Windblade (เดิม Void Spheres): ใบมีดลมเล็ก ๆ รัว ๆ
-windBladeCast:461 windBladeTick:463 windBladeHit:467
-§473 อัลติ Sonic Boom Strike (เดิม Eye of Heaven)
-windUltCast:477 windUltTick:480 windUltSweep:505 windFloatZ:513 windSnapP:516 windSnapW:517
-§520 สกิล (ผู้ใช้ 2026-11-08: รีดีไซน์ทั้งชุด — id เดิมไว้ให้ชุดสกิล/tune/…
-W_WL:522 W_DR:528 W_VX:534 W_VO:540 W_FW:546 W_UL:555
+windBasic:69 windEnh:100 windEnhExtra:101 windFeatherShoot:102 windCurveStep:111 windShieldShoot:115 windWallBlast:118 windStreamStart:122 windStreamEnd:123 windStreamTick:124
+§134 โล่ปีก
+windShieldBurst:135
+§139 Dash: ผลักศัตรูข้างหน้า + ดีดตัวเราถอยหลังลอยกลางอากาศ
+windDashGo:140 windDash:143
+§150 กำแพงลม Aegis Gale
+windWallMake:151 windWallStop:159 windWallBoom:160 windDmg:165 windRay:169 windBlockLen:177 windProjHit:182 windWallHurt:186 windCollide:188
+§194 ทั้งสนาม: GaleBurst / กำแพงลม / ชนกำแพง
+updateWind:195
+§232 Windrift: ชาร์จปีก 0.2 → พุ่ง 400 (20 ม. ใน 0.09 วิ) แบบ Jett → ลงท่า…
+windDriftTick:233 windDriftWind:240
+§247 Vortex Bind: ทอร์นาโด 3 อันโค้ง 45° ห่าง 200 → 0.6 วิ ดึงกลับมาหยุด 6…
+windVortexTick:248
+§260 Void Spheres: หลุมดำลูกเดียว (ผู้ใช้ 2026-10-31, designs/wind.md)
+windVoidCast:263 windVoidTick:265
+§276 รูปแบบการเล่นสายลม (ผู้ใช้ 2026-11-08): บนพื้น = อ่อนลงทันที • บิน (F…
+windAir:279 windSpin:279 windAirborne:280 windLift:281 windSink:282 windSlam:283 windSinkZ:285 windTargetZ:286 windSlotOf:290 windCdCut:291 windSlow:292
+§294 Featherwing: กด → หมุนตัวบินวนขึ้น → บิน 8 วิ (ผู้ใช้ 2026-11-08)
+windFlyTick:298 windFastOn:310 windFastOff:313 windFocusEnd:316 windAirMove:318 windFlick:327 windFocusAct:333 windOrbLaunch:336 windOrbBoom:341
+§344 Downburst (ผู้ใช้ 2026-11-08): ลมกดจากฟ้าลงพื้นต่อเนื่อง — วงดาเมจ + …
+§345 Tailwind (เดิม Windblade): ร่องลมจากตัวเราไปตามทิศเล็ง — เพื่อน+ตัวเร…
+windTailCast:346 windTailIn:349 windTailTick:350 windDownCast:355 windPressDown:362 windDownTick:365
+§372 Windup (เดิม Aegis Gale): ลมพัดขึ้น — วางวงลมตรงจุดเล็ง รอ 0.45 วิ แล…
+windUpCast:374 windUpTick:381
+§388 Wind Push (เดิม Windrift): ยิงลมแรงไปทางที่เล็ก
+§391 Plume Volley (ผู้ใช้ 2026-11-09): ขนนกนีออนจากสองปีกสลับกันทีละอันเร็…
+windVolleyCast:392 windVolleyTick:393 windPlumeShoot:394 windFeatherBoom:404 windPlumeBoom:405 windPushCast:407 windPushHit:410
+§416 Windforce (เดิม Vortex Bind): พุ่งด้วยลม
+§419 Slipstream (ผู้ใช้ 2026-11-08): แดชหมุนหลบตามทิศเดิน • 2 ชาร์จ 5 วิ/อ…
+windSlipCast:420 windSlipTick:425 windForceCast:426 windSmash:432 windAheadHit:436 windForceTick:442
+§462 Windblade (เดิม Void Spheres): ใบมีดลมเล็ก ๆ รัว ๆ
+windBladeCast:464 windBladeTick:466 windBladeHit:470
+§476 อัลติ Sonic Boom Strike (เดิม Eye of Heaven)
+windUltCast:480 windUltTick:483 windUltSweep:508 windFloatZ:516 windSnapP:519 windSnapW:520
+§523 สกิล (ผู้ใช้ 2026-11-08: รีดีไซน์ทั้งชุด — id เดิมไว้ให้ชุดสกิล/tune/…
+W_WL:525 W_DR:531 W_VX:537 W_VO:543 W_FW:549 W_UL:558
 
 ## js/10-net.js (200) — 
 PREFIX:4 NET:5 RC:9 TURN_SERVERS:12 ICE:13 PEER_OPT:14 TURN_URL:16 ICE_READY:18 JN:22 LAG:24 lagDo:25 hostSend:26 LOBBY:27 genCode:28 sendAll:29 NETD_KEYS:33 NETD:33 netDeltaReset:34 netDelta:35 NET_MAX:49 _netTE:49 netSendSnap:50 NETU:62 netUndelta:63 setStatus:69 hostGame:71 hostPeer:80 netConnect:100 joinWatch:111 joinFail:126 netLost:132 joinGame:147 joinPeer:158 clientOnData:173 leave:188 leaveRoom:190
@@ -800,4 +800,4 @@ surfSync:49 surfQuality:53
 SURF_VS:55 SURF_VS_BODY:56 SURF_FS:67 SURF_FS_BODY:68 surfOk:98 surfApply:99 surfScene:111
 §112 ปรับค่า (tune.html / F8)
 
-(97 files, 24542 lines)
+(97 files, 24546 lines)

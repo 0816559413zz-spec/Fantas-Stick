@@ -193,7 +193,7 @@ function ragTick(o,p,v,dt,now){
   if(!R){
     if(dead&&o.ragWasAl)ragStart(o,p,'dead',now);
     else if(down&&!o.ragWasDn)ragStart(o,p,'down',now);
-    else if(!dead&&!down&&!p.fl&&!p.ds&&o.lhit&&now-o.lhit.t<RAG.KNOCK_WIN*1000&&v&&v.sp>RAG.KNOCK_SP)ragStart(o,p,'knock',now);
+    else if(!dead&&!down&&!p.fl&&!p.ds&&!(p.wn&&p.wn[5]>=1)&&o.lhit&&now-o.lhit.t<RAG.KNOCK_WIN*1000&&v&&v.sp>RAG.KNOCK_SP)ragStart(o,p,'knock',now);
     R=o.rag;
   }else{
     // เปลี่ยนสถานะ: เกิดใหม่ = จบทันที • ตายระหว่างล้ม/กระแทก = เปลี่ยนเป็นศพ • ลุก/กระแทกหมด = ค่อยๆ กลับท่า
