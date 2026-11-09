@@ -1,0 +1,4 @@
+# GitHub Pages only needs the game. Design GIFs and storyboards are large and made deploys time out.
+exclude:
+  - designs
+  - storyboard
