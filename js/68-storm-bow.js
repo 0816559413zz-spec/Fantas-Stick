@@ -28,14 +28,20 @@ function sbMake(o){
 }
 function stormBowView(o,p,dt,now){
   const M=p.sm,R=M&&(M[3]&16)&&p.al&&!p.dn?M[6]:null;
-  if(!R){if(o.sb){o.sb.g.visible=false;o.sb.age=0;o.sb.g.scale.setScalar(.001);for(const h of o.sb.hide)h.visible=true;for(const b of o.sb.body)b.visible=false;}return;}
+  if(!R&&o.sb&&o.sbRel!==undefined){o.sbRel+=dt;const t=o.sbRel,T=.42,k=natEase(natPhase(t,0,.03))*(1-natEase(natPhase(t,.16,T))),snap=Math.exp(-13*t);   // release: the string hand flies back, the bow arm kicks, the whole body rocks
+    if(t>=T){o.sbRel=undefined;}else{const side=1.22*(1-natEase(natPhase(t,.2,T))),aimY=-side*.98,B=o.sb;B.g.visible=true;B.g.scale.setScalar(1-natEase(natPhase(t,.22,T)));B.arrow.visible=false;for(const h of B.hide)h.visible=false;o.b.rotation.y+=side;o.b.rotation.x+=-.34*snap-.1;o.b.position.z-=.2*snap;o.b.position.y-=.1;o.legs[0].rotation.x+=.42*(1-natPhase(t,.2,T));o.legs[1].rotation.x+=-.42*(1-natPhase(t,.2,T));o.armR.rotation.set(-1.57-.42*snap,aimY,-.02);o.armL.rotation.set(-1.75,.42+.75*snap,.3+.3*snap);o.sbDraw=.8*(1-natPhase(t,.1,T));return;}}
+  if(!R){o.sbDraw=0;if(o.sb){o.sb.arrow.visible=true;o.sb.g.visible=false;o.sb.age=0;o.sb.g.scale.setScalar(.001);for(const h of o.sb.hide)h.visible=true;for(const b of o.sb.body)b.visible=false;}return;}
   if(!o.sb)o.sb=sbMake(o);
   const B=o.sb,V3=B.V3;B.g.visible=true;
   const left=Math.max(0,R[1]),max=R[3]||SB_FULL,k=clamp(1-left/max,0,1),full=k>=.999,ap=R[4]||0;
-  B.age+=dt;const intro=natEase(natPhase(B.age,0,.42)),armIn=natEase(natPhase(B.age,.36,.62)),yawT=-.72*armIn,draw=natEase(k);for(const h of B.hide)h.visible=intro<.5;for(const b of B.body)b.visible=true;B.g.scale.setScalar(Math.max(.001,natOut(natPhase(B.age,.1,.5))));
-  o.b.rotation.y+=yawT;o.b.rotation.x+=-ap*.22*armIn;
-  o.armR.rotation.set(lerp(lerp(-.2,-.5,intro),-1.57-ap*.85,armIn),lerp(0,.9*.72,armIn),lerp(lerp(.1,-1.5,intro),-.02,armIn));
-  o.armL.rotation.set(lerp(o.armL.rotation.x,-1.45-ap*.85+.2*draw,armIn),lerp(0,.4+.55*draw,armIn),lerp(o.armL.rotation.z,lerp(-.2,.55,draw),armIn));
+  B.age+=dt;const intro=natEase(natPhase(B.age,0,.42)),armIn=natEase(natPhase(B.age,.36,.62)),draw=natEase(k);for(const h of B.hide)h.visible=intro<.5;for(const b of B.body)b.visible=true;B.g.scale.setScalar(Math.max(.001,natOut(natPhase(B.age,.1,.5))));
+  // Archer's stance: side-on with the bow shoulder toward the target, feet apart, bow arm locked at shoulder height, draw elbow lifted behind the line of the arrow, hand anchored at the jaw.
+  const side=1.22*armIn,aimY=-side*.98,lean=-.1*draw*armIn;
+  o.b.rotation.y+=side;o.b.rotation.x+=(-ap*.3+lean)*armIn;o.b.rotation.z+=.1*armIn*draw;o.b.position.y-=.1*armIn*(.5+.5*draw);
+  o.legs[0].rotation.x+=.42*armIn;o.legs[1].rotation.x+=-.42*armIn;
+  o.armR.rotation.set(lerp(lerp(-.2,-.5,intro),-1.57-ap*.9,armIn),aimY,lerp(lerp(.1,-1.5,intro),-.02,armIn));
+  o.armL.rotation.set(lerp(o.armL.rotation.x,lerp(-1.5,-1.82,draw)-ap*.9,armIn),lerp(0,lerp(aimY-.1,.42,draw),armIn),lerp(o.armL.rotation.z,lerp(-.1,.18,draw),armIn));
+  o.sbDraw=draw*armIn;
   const nock=SB_TIP.y+.95*draw;B.arrow.position.y=nock;B.arrow.scale.setScalar(full?1.3:lerp(.9,1.08,k));B.ring.rotation.y+=dt*(4+9*k);B.ring.scale.setScalar(.8+.5*k);B.halo.scale.setScalar(full?.95+.14*Math.sin(now*.03):lerp(.32,.6,k));B.halo.material.opacity=full?.5:.3;
   const pulse=full?1+.08*Math.sin(now*.03):.92;for(const m of B.mats)m.opacity=clamp(pulse,.2,1);B.hm.color.set(full?'#fff8c0':'#ffe84a').multiplyScalar(full?1.5:1.05);
   B.T-=dt;if(B.T<=0){B.T=.04;const cY=new THREE.Color('#ffd21f'),cW=new THREE.Color('#fff6b0'),cC=new THREE.Color('#2fe0ff'),nk=V3(0,nock,0);
@@ -44,9 +50,11 @@ function stormBowView(o,p,dt,now){
     B.body.forEach((a,i)=>{const b=i/8*6.283+now*.004,r=.5+Math.random()*.22,h=.3+Math.random()*1.45,A=V3(Math.cos(b)*r,h,Math.sin(b)*r),E=V3(Math.cos(b+.7)*(r+.1),h+(Math.random()-.5)*.8,Math.sin(b+.7)*(r+.1)),Q=sbJag(A,E,10,.16,V3),col=i%3?cY:cC;a.set(Q,()=>.015,(u,c)=>c.copy(col).multiplyScalar(.9));});
     const tot=full?12:5;B.arcs.forEach((a,i)=>{a.visible=i<tot;if(!a.visible)return;let A,E;if(i<5){const s=i%2?1:-1,t=Math.random();A=V3((Math.random()-.5)*.18,.05+SB_TIP.y*t,s*(.12+SB_TIP.z*t));E=A.clone().add(V3((Math.random()-.5)*.6,(Math.random()-.5)*.4,s*Math.random()*.6));}else{const u=Math.random()*.85;A=V3(0,nock-1.5*u,0);E=V3((Math.random()-.5)*.5,nock-1.5*(u+.15),(Math.random()-.5)*.5);}const col=full&&i>=5?cC:i%3===0?cC:cY,Q=sbJag(A,E,10,.2,V3);a.set(Q,()=>full?.03:.018,(u,c)=>c.copy(col).multiplyScalar(1.05));});}
 }
+const _sbFaQ=new THREE.Quaternion(),_sbFaT=new THREE.Quaternion(),_sbFaX=new THREE.Vector3(1,0,0);
+function stormBowForearm(o){const w=o.sbDraw||0;if(w<=.002)return;if(o.sbFa===undefined){const a=o.g.getObjectByName('forearm_L');o.sbFa=a?[a,a.quaternion.clone()]:null;}if(!o.sbFa)return;_sbFaQ.setFromAxisAngle(_sbFaX,-2.25);_sbFaT.copy(o.sbFa[1]).multiply(_sbFaQ);o.sbFa[0].quaternion.slerp(_sbFaT,w);}
 function stormBowFx(ev){
   const F=natFx(),{V3,Tube,ADD,sparks,ring,T}=F,o=ev.id!=null?PM3.get(ev.id):null,mine=ev.id===NET.myId,end=natWorld(ev.x2,ev.y2,ev.h2),st=o?o.armR.localToWorld(V3(0,-1.3,0)):natWorld(ev.x,ev.y,ev.h);
-  if(o)o.sb&&(o.sb.T=0);
+  if(o){o.sb&&(o.sb.T=0);o.sbRel=0;}
   snd('boom',{x:ev.x,y:ev.y,vol:1});snd('zap',{x:ev.x2,y:ev.y2,vol:1});
   if(mine){shake(24);hitStop(.05);}else shake(6);
   const mat=ADD('#ffffff',{vertexColors:true}),core=Tube(24,6,mat),arcs=[Tube(20,4,mat),Tube(20,4,mat),Tube(20,4,mat)],all=[core,...arcs];all.forEach(m=>{m.castShadow=false;});

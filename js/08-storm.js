@@ -99,7 +99,7 @@ function stormLine(p){
   emit({k:'efx',z:'sline',x:Math.round(p.x),y:Math.round(p.y),h:p.z,a:Math.round(a*1000)/1000,len:Math.round(len),id:p.id});
 }
 // ----- สกิล 2 (1 stack): ดูดความเร็ว -----
-const SIPH=defSpell(2,{id:'speedsiphon',v:{cost:2,time:6,cd:0.7,dmg:25,spd:1500,range:700},vn:{cost:'ใช้ stack',time:'อยู่นาน (วิ)',cd:'เว้นต่อคลื่น (วิ)',dmg:'ดาเมจคลื่น',spd:'ความเร็วคลื่น',range:'ระยะคลื่น'},role:'damage',n:'ไม้เท้าสายฟ้า',ic:'⚡',cd:10,d:'ใช้ 2 stack: ไม้ยาวขึ้นด้วยสายฟ้า 6 วิ โจมตีปกติเปลี่ยนเป็นคลื่นดาบสายฟ้า ระยะ 700 ดาเมจ 25 ทุก 0.7 วิ ตีคนบนฟ้าได้',
+const SIPH=defSpell(2,{id:'speedsiphon',v:{cost:2,time:6,cd:0.7,dmg:20,spd:1500,range:700},vn:{cost:'ใช้ stack',time:'อยู่นาน (วิ)',cd:'เว้นต่อคลื่น (วิ)',dmg:'ดาเมจคลื่น',spd:'ความเร็วคลื่น',range:'ระยะคลื่น'},role:'damage',n:'ไม้เท้าสายฟ้า',ic:'⚡',cd:10,d:'ใช้ 2 stack: ไม้ยาวขึ้นด้วยสายฟ้า 6 วิ โจมตีปกติเปลี่ยนเป็นคลื่นดาบสายฟ้า ระยะ 700 ดาเมจ 20 ทุก 0.7 วิ ตีคนบนฟ้าได้',
   cast(p,S){if(!stSpend(p,S.v.cost))return false;p.stStaff=S.v.time;emit({k:'efx',z:'ssta',x:Math.round(p.x),y:Math.round(p.y),h:p.z+1.2,id:p.id});}});
 function stormWaveShoot(p){const V=SIPH.v;Object.assign(PDEF.swave,{spd:V.spd,life:V.range/V.spd,dmg:V.dmg});const pr=shoot(p,'swave',{sp:'b_storm',dmg:V.dmg,quiet:1});pr.pierce=1;pr.hs=new Set();pr.hw=40;}
 // ----- สกิล 3 (2 stacks): ฟ้าผ่าสามครั้ง — วางจุดครั้งเดียว ฟ้าผ่าจุดเดิม 3 ครั้ง ห่างกัน 0.5 วิ -----
