@@ -93,6 +93,7 @@ function windForearm(o){const w=o.faW||0;if(w<=0.002)return;o.faW=0;if(o.faB===u
   if(!o.faB)return;_faQ.setFromAxisAngle(_faX,WF_ELBOW);for(const [b,q0] of o.faB){_faT.copy(q0).multiply(_faQ);b.quaternion.slerp(_faT,w);}}
 function windFX(o,p,pz,now,dt){
   const A=p.wn;
+  if(A&&!WV.shPre){WV.shPre=1;fxMeshLoad('wind_wall_shell');}   // โหลดโมเดลโล่ล่วงหน้า ไม่งั้นยกโล่ครั้งแรกไม่เห็นโล่ทั้งครั้ง
   if(!A){if(o.wWings)o.wWings.visible=false;const s=WV.st.get(p.id);if(s){for(const k of ['wing','guard'])if(s[k]){fxKill(s[k]);s[k]=null;}}return;}
   const s=wvState(p.id),alive=p.al&&!p.dn,guard=alive&&p.sh&&o.wbc===undefined,h=o.zs||0;
   // ปีกติดหลังตลอดเวลา (ท่ากางเกือบนิ่ง) — ซ่อนตอนยกโล่ (ปีกห่อแทน)
