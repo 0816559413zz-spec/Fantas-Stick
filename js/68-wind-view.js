@@ -142,7 +142,7 @@ const WDOME_G=new THREE.SphereGeometry(1,24,12,0,Math.PI*2,0,Math.PI/2);WDOME_G.
 function windDome(x,y,h,r){const F=natFx(),{T,V3,sparks}=F,R=r*S3,P=natWorld(x,y,h),u={op:{value:1}};
   const mat=new T.ShaderMaterial({transparent:true,depthWrite:false,blending:T.AdditiveBlending,side:T.DoubleSide,uniforms:u,
     vertexShader:'varying vec3 n,v;varying float h;void main(){vec4 p=modelViewMatrix*vec4(position,1.);n=normalMatrix*normal;v=-p.xyz;h=position.y;gl_Position=projectionMatrix*p;}',
-    fragmentShader:'uniform float op;varying vec3 n,v;varying float h;void main(){float e=pow(1.-abs(dot(normalize(n),normalize(v))),2.2);gl_FragColor=vec4(mix(vec3(.25,1.,.2),vec3(.85,1.,.75),e),(e*.95+.12+.35*(1.-smoothstep(0.,.14,h)))*op);}'});
+    fragmentShader:'uniform float op;varying vec3 n,v;varying float h;void main(){float e=pow(1.-abs(dot(normalize(n),normalize(v))),2.2);gl_FragColor=vec4(mix(vec3(.12,.8,.1),vec3(.4,1.,.3),e),(e*.6+.05+.2*(1.-smoothstep(0.,.14,h)))*op);}'});
   const m=new T.Mesh(WDOME_G,mat);m.position.copy(P);m.frustumCulled=false;F.add(m);
   const L=.26;sparks(P.clone().add(V3(0,.1,0)),5,2.4,'#efffe0','#8dff65',{life:.55,size:1.1});
   F.clip(L,t=>{const k=t/L,e=1-(1-k)**3;m.scale.setScalar(R*(.25+.75*e));u.op.value=1-k*k;},()=>{F.ALL.splice(F.ALL.indexOf(m),1);F.T&&m.parent&&m.parent.remove(m);mat.dispose();});

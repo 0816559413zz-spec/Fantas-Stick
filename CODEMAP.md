@@ -130,7 +130,7 @@ waterDragonTick:124
 §138 ทุกเฟรม (ทั้งเกม)
 updateWater:139 waterSnapP:145 waterSnapW:147 WT_RP:150 WT_FM:153 WT_CG:155 WT_AB:159 WT_MW:162 WT_UL:164
 
-## js/09-wind.js (568) — 
+## js/09-wind.js (568) — สายลม 🌪️ (ผู้ใช้ออกแบบทั้งหมด — designs/wind.md "คอนเซ็ปต์ใหม่") • ฝั่งโฮสต์ • ขั้นที่ 1…
 WINDP:8 WNV:12
 §19 ตัวช่วย
 wOn:20 wGain:21 wSeg:23 wFoeNear:24
@@ -738,7 +738,7 @@ waterEfx:184
 §212 HUD: เกจฮีลโล่ (โค้งซ้ายรอบเป้าเล็ง)
 drawWaterHud:213
 
-## js/68-wind-view.js (422) — 
+## js/68-wind-view.js (422) — สายลม 🌪️ — ภาพฝั่งเครื่องเล่น (ขั้นที่ 1) • ตรรกะอยู่ js/09-wind.js • ไฟล์นี้มีแต่นิยามฟ…
 WV:6 WN_BODY:8 WN_AIR_FEET:8 WF_POSE:12 WF_FEET:12 WF_REF:12 WF_ROLL:12 _wfP:13 _wfF:13 windFlyPose:14 WTLF:24 windTailDraw:25 windTailFeel:31 windCharacterPose:33 wvState:50 wvAlive:51
 §52 ทุกเฟรมของผู้เล่นสายลม: ปีกติดหลัง / ปีกห่อตอนยกโล่ / ดูดลมชาร์จเกจ
 WFE_HOLD:53 WFE_TURN:53 windLatePose:55 _faX:91 _faQ:91 _faT:91 WF_ELBOW:91 windForearm:92 windFX:94
