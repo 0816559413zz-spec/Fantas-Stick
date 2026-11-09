@@ -102,8 +102,8 @@ updateEarth:241 earthSnapP:251 earthSnapW:253
 ## js/09-nature-ba.js (107) — 
 NATURE_BA_TEST:2 NATURE_WHIP:3 natureWhipEnabled:4 natureWhipHit:7 natureWhipBasic:29 NW_RINGS:50 NW_SIDES:50 nwPhase:51 nwEase:52 nwSwingAngle:53 natureWhipPose:59 natureWhipVisualMake:68 natureWhipView:90
 
-## js/09-nature.js (419) — 
-NATUREP:2 NAT:3 natureDist:5 natureItems:6 natureLive:7 naturePlants:8 natureY:9 natureHead:10 natureTreeReady:11 natureEmit:12 natureWallLocal:15 natureWallContains:21 natureWallPush:28 natureBurnWall:36 natureWallDamage:43 natureWallTick:48 natureTrace:57 natureSight:75 natureGround:76 natureAimPoint:82 naturePlace:88 naturePlant:96 natureCastPlant:106 natureLotusToggle:122 natureMovePlants:130 natureCastWall:140 naturePoison:148 natureStatus:153 natureSpore:165 natureSendSpore:172 natureShield:181 natureHookCandidates:194 natureDash:198 natureHookMove:224 natureBall:253 natureBallTick:261 natureTree:280 natureTreeReach:284 natureGuardian:289 natureGuard:295 natureDamage:304 natureEnd:310 natureTurret:316 naturePeaSplash:349 natureUpdate:354 natureReset:386 natureSnapP:390 natureLotusCooldown:399 natureSnapW:404
+## js/09-nature.js (438) — 
+NATUREP:2 NAT:3 natureDist:5 natureItems:6 natureLive:7 naturePlants:8 natureY:9 natureHead:10 natureTreeReady:11 natureEmit:12 natureWallLocal:15 natureWallContains:21 natureWallPush:28 natureBurnWall:36 natureWallDamage:43 natureWallTick:48 natureTrace:57 natureSight:75 natureGround:76 natureAimPoint:82 naturePlace:88 naturePlant:96 natureCastPlant:106 natureLotusToggle:122 natureMovePlants:130 natureAimSpot:141 natureAimStart:142 natureAimDone:143 natureAimTick:146 natureWallBuild:157 natureCastWall:158 naturePoison:165 natureStatus:170 natureSpore:182 natureSendSpore:189 natureShield:198 natureHookCandidates:211 natureDash:215 natureHookMove:241 natureBall:270 natureBallTick:278 natureTree:297 natureTreeReach:302 natureGuardian:307 natureGuard:313 natureDamage:322 natureEnd:328 natureTurret:334 naturePeaSplash:367 natureUpdate:372 natureReset:404 natureSnapP:408 natureLotusCooldown:418 natureSnapW:423
 
 ## js/09-other-paths.js (175) — 
 §44 สัตว์เวท (minion): AI ฝั่งโฮสต์
@@ -177,10 +177,10 @@ W_WL:522 W_DR:528 W_VX:534 W_VO:540 W_FW:546 W_UL:555
 ## js/10-net.js (200) — 
 PREFIX:4 NET:5 RC:9 TURN_SERVERS:12 ICE:13 PEER_OPT:14 TURN_URL:16 ICE_READY:18 JN:22 LAG:24 lagDo:25 hostSend:26 LOBBY:27 genCode:28 sendAll:29 NETD_KEYS:33 NETD:33 netDeltaReset:34 netDelta:35 NET_MAX:49 _netTE:49 netSendSnap:50 NETU:62 netUndelta:63 setStatus:69 hostGame:71 hostPeer:80 netConnect:100 joinWatch:111 joinFail:126 netLost:132 joinGame:147 joinPeer:158 clientOnData:173 leave:188 leaveRoom:190
 
-## js/11-host.js (411) — 
+## js/11-host.js (412) — 
 G:4 EVL:4 EVN:4 hostLast:4 tickN:4 emit:5 feed:6 banner:7 plist:8 cleanName:9 freshStats:11 newPlayer:18 emptyInput:21 frameOk:23 addPlayer:24 initHostLobby:33 lobbyMsg:40 broadcastLobby:41 INPN:43 hostOnData:44 hostDrop:75 hostRemove:84 validate:97 hostStart:110 hostToLobby:136 MIDJOIN:143 modeCap:144 midJoin:145 CHATT:161 chatRelay:162 emoHost:170 resetBody:172 fmap:178 spawnPts:179 teamPts:181 spSpread:183 placeAll:184 respawn:196
 §215 ลูปหลักฝั่งโฮสต์
-hostTick:216 angDiff:231 cH:233 vR:234 updatePlayer:236 hitProp:398 damagePropsIn:405 nearUseProp:406 useProp:407
+hostTick:216 angDiff:231 cH:233 vR:234 updatePlayer:236 hitProp:399 damagePropsIn:406 nearUseProp:407 useProp:408
 
 ## js/12-buildings.js (526) — สิ่งปลูกสร้างที่พังเป็นชิ้นย่อย (บ้าน) แบบ Battlefield — คู่มือเต็ม: …
 BLDDEF:8 BLD_PIECES:10 BLD_GRID:11 BLD_DOOR:13 BLD_FIRE:14 BLD_ICE:14 BLD_ROOF_MIN:14 BLDG:15 BLDON:15 genBldg:16 bldRect:26 bldChunk:28 bldAlive:35 bldLocal:36 bldWorld:37 rectDist:38 bldNear:39 BLD_MOUND:42 bldGone:43 bldMoundAt:44 bldMoundH:45 hitBldPiece:47 breakBldChunk:58 bldSupport:66 damageEnv:86 bldRay:104 _sgRB:112 aimClip:114 aimRay3:121 bldPieceAt:137 projEl:148 bldPush:153 collideBld:159 updateBldg:177 bldSnap:190 bldParse:196
@@ -378,13 +378,13 @@ iceMat:2 iceRim:3 makeIceSword:4 makeIceAxe:23 makeKiteShield:39
 §51 อาวุธน้ำแข็งลอย (ผู้ใช้ 2026-10-22: "ร่ายคาถาให้ดาบฟันเอง ระยะเท่าเดิ…
 FWS:54 FWA:54 _fwM:55 _fwM2:55 _fwX:55 _fwY:55 _fwZ:55 _fwP:55 _fwS:55 _fwQ:55 _eo:56 _ei:56 _ss:56 fwAim:58 fwWeapons:59 FWP:61 FWT:61 fwChop:62 fwSweep:63 FF_RISE:64 fwIdle:65 fwSwing:68 FWL_N:80 fwLink:81 fwMat:84 frostFX:85
 
-## js/35-sync.js (582) — ซิงก์ผู้เล่น/ศัตรู/ลูกเวทจาก snapshot + ฉายตำแหน่งลงจอ (ป้ายชื่อ/ตัวเ…
+## js/35-sync.js (586) — ซิงก์ผู้เล่น/ศัตรู/ลูกเวทจาก snapshot + ฉายตำแหน่งลงจอ (ป้ายชื่อ/ตัวเ…
 §2 ท่าร่ายคาถาแบบนักเวทในหนัง Harry Potter (ผู้ใช้ 2026-10-22: "ยิงปกติท…
 CPOSE_T:7 _ce:7 _cs:7 _cb:7 AMP_B:9 AMP_S:9 CP_BEND:10 CPOSE:12 _cpT:20 _cpR:20 CGUARD:20 CP_STEP:21 CPCOL:22 castStyle:23 castStart:24
 §25 ท่าร่ายสกิล / อัลติ / โล่ (ผู้ใช้ 2026-10-22: "เกือบทุกสกิลควรมีการเห…
-CANIM:30 SKFEET:74 SKANIM:76 skAnim:83 _caT:84 _caR:84 skillPose:85 _g2:111 wandTwoHand:112 characterPoseMix:119 characterStance:120 CBLOCK:127 CBLOCK_PATH:128 blockPose:129 castPose:135 lateSkillPose:141 castPose0:142 clearCharacterCast:171 syncPlayers:176 syncEnemies:276 projGeo:314 tailGeo:315 _t1:316 makeProj:317 _a:338 _b:338 PJFX:340 syncProj:341 _awT:428 animateWorld:429
-§470 ฉายตำแหน่ง 3D ลงจอ (ป้ายชื่อ / ตัวเลขดาเมจ)
-_v:471 toScreen:472 BURNC:480 burnNum:481 NAMETAG:495 nameTag:496 drawLabels:500 TEXTAG:530 textTag:531 drawTexts:535 HITM:547 DIRI:547 drawXh:549 drawCrosshair:559
+CANIM:30 SKFEET:77 SKANIM:79 skAnim:87 _caT:88 _caR:88 skillPose:89 _g2:115 wandTwoHand:116 characterPoseMix:123 characterStance:124 CBLOCK:131 CBLOCK_PATH:132 blockPose:133 castPose:139 lateSkillPose:145 castPose0:146 clearCharacterCast:175 syncPlayers:180 syncEnemies:280 projGeo:318 tailGeo:319 _t1:320 makeProj:321 _a:342 _b:342 PJFX:344 syncProj:345 _awT:432 animateWorld:433
+§474 ฉายตำแหน่ง 3D ลงจอ (ป้ายชื่อ / ตัวเลขดาเมจ)
+_v:475 toScreen:476 BURNC:484 burnNum:485 NAMETAG:499 nameTag:500 drawLabels:504 TEXTAG:534 textTag:535 drawTexts:539 HITM:551 DIRI:551 drawXh:553 drawCrosshair:563
 
 ## js/36-modes-view.js (171) — 
 ROLE:4 KC:4 roleShowT:4 onPriv:5 MO:10 BREATHS:11 clearModeObjs:12 ITEMC:21 healTex:22 makeItem:23 syncModeObjs:39
@@ -724,8 +724,8 @@ _natFx:3 natFxClear:4 natFxMake:5 T:6 S:6 O:6 seed:7 ease:8 outQ:8 inQ:8 phase:8
 §69 อนุภาค
 Pool:70 leafGeo:78 LEAF:79 SPK:80 DIRT:81 PUFF:82 CHIP:83 POOLS:84 leafCols:85 leaves:86 sparks:87 dirt:88 puff:89 chips:90 TrailRibbon:92 WHIP_N:103 WHIP_L:103 WHIP_LAG:103 Whip:104 CLIPS:167 tick:168 clip:169 drop:170 natFx:173
 
-## js/68-nature-view.js (652) — 
-NAT_VIEW:2 NAT_MARKS:2 NAT_MOTION:2 natV:3 natWorld:4 natPhase:5 natSmooth:6 natEase:7 natOut:8 natStd:9 natAdd:10 natMesh:11 natRing:12 natLeaf:16 natPlantM:19 natGlow:26 natArt:29 natureProjectileModel:31 natSet:37 natAnimate:38 natTube:39 natTrail:50 natSeed:68 natLotus:76 natBall:92 natPlantView:102 natStartStudy:112 natWearWall:130 natTreeGlow:153 natModelTick:173 natMarker:255 natMarks:269 natThorn:288 NAT_SHIELD_K:293 natShieldMake:294 natureCharacter:326 natOutlineMat:356 natOutline:360 natLinks:372 syncNature:397 natureClear:416 natDome:425 natMuzzle:447 natSlam:457 natHook:474 natCoil:531 natHookPose:552 natShock:558 natSprout:559 natHealRims:560 natWhipHit:562 natDirOf:563 natMoment:564 natureEvent:591
+## js/68-nature-view.js (676) — 
+NAT_VIEW:2 NAT_MARKS:2 NAT_MOTION:2 natV:3 natWorld:4 natPhase:5 natSmooth:6 natEase:7 natOut:8 natStd:9 natAdd:10 natMesh:11 natRing:12 natLeaf:16 natPlantM:19 natGlow:26 natArt:29 natureProjectileModel:31 natSet:37 natAnimate:38 natTube:39 natTrail:50 natSeed:68 natLotus:77 natBall:93 natPlantView:103 natStartStudy:113 natWearWall:131 natTreeGlow:154 natModelTick:174 natMarker:257 natMarks:268 natThorn:287 NAT_SHIELD_K:292 natShieldMake:293 natureCharacter:325 natOutlineMat:355 natOutline:359 natLinks:371 syncNature:386 natureClear:405 natDome:414 natMuzzle:436 natSlam:446 natHook:463 natCoil:520 natHookPose:541 natHookArm:549 natShock:551 natSprout:552 natHealRims:553 natWhipHit:555 natBallRange:556 natSummon:558 natTreeAura:565 natAuraDrop:575 NAT_HOLO:577 natHoloMake:578 natHolo:583 natHoloClear:584 natDirOf:585 natMoment:586 natureEvent:615
 
 ## js/68-water-view.js (216) — สายน้ำ 💧 — ภาพฝั่งผู้เล่น • VFX = assets/fx/water/* (tools/water-vfx-gen.py, สไตล์ desig…
 WTV:5 WTC:6 WT_BODY:8 waterCharacterPose:13 wtState:34 wtStop:35 wtMesh:36 _wtV:38 _wtP:38 wtBakeClone:39 wtLineMat:50 _wtOlMat:57 wtOutline:59 WT_SINKD:65 wtSinkOffset:66 wtAlive:73 wtLoop:75 WT_FR:78 wtFrPath:79 _wtFa:81 _wtFb:81 _wtFs:81 _wtFn:81 wtFamRiseMesh:82 WT_POOL:87 wtFamRise:88 wtFamRiseOff:95 _wtTube:97 WT_BEAM_V:98 WT_BEAM_F:101 WT_BEAM_O:105 wtBeamMesh:108 wtBeamSync:112 wtBeamOff:117
@@ -800,4 +800,4 @@ surfSync:49 surfQuality:53
 SURF_VS:55 SURF_VS_BODY:56 SURF_FS:67 SURF_FS_BODY:68 surfOk:98 surfApply:99 surfScene:111
 §112 ปรับค่า (tune.html / F8)
 
-(97 files, 24494 lines)
+(97 files, 24542 lines)

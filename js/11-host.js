@@ -362,6 +362,7 @@ function updatePlayer(p,dt,acting){
   if(G.ball&&G.ball.holder===p.id){if(canAct&&inp.fire&&!p.fireHeld)quidThrow(p);p.fireHeld=inp.fire;return;}
   p.fireHeld=inp.fire;
   const natureWhip=p.pathIdx===NATUREP||natureWhipEnabled(p.id);
+  if(p.natAim&&natureAimTick(p,inp,dt,canAct))return;
   if(natureWhip)natureWhipBasic(p,inp,canAct&&!p.fly&&!p.shieldOn&&!p.gh&&!p.colos&&!p.cryo&&!p.god&&!p.natureHook);
   // ควิดดิชและแข่งไม้กวาด ร่ายเวทบนไม้กวาดได้ / โหมดอื่นร่ายไม่ได้ (เหมือนในเกม)
   if(!canAct)p.dchgOn=false;

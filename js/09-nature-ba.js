@@ -1,6 +1,6 @@
 // Thorn whip. The old offline preview URL still works with other kits.
 const NATURE_BA_TEST=new URLSearchParams(location.search).get('natureba')==='1';
-const NATURE_WHIP={damage:7,range:280,halfArc:Math.PI/3,cooldown:1,follow:.28,window:.48,impact:.24,duration:.78};
+const NATURE_WHIP={damage:7,range:280,halfArc:Math.PI/3,cooldown:1,follow:.46,window:.66,impact:.24,duration:.78};
 function natureWhipEnabled(id){
   return NATURE_BA_TEST&&NET.isHost&&!NET.online&&G?.mode==='train'&&id===NET.myId;
 }

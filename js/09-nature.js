@@ -117,7 +117,7 @@ function natureCastPlant(p,kind){
   }
   const delay=.18+natureDist(p,spot)/1200;
   naturePlant(p,kind,spot,delay);
-  natureEmit('seed',{x:p.x,y:p.y,h:p.z+1.35},{x2:spot.x,y2:spot.y,h2:spot.h,t:delay});
+  natureEmit('seed',{x:p.x,y:p.y,h:p.z+1.35},{x2:spot.x,y2:spot.y,h2:spot.h,t:delay,id:p.id});
 }
 function natureLotusToggle(p){
   if(p.sil>0||p.cryo>0||(G.mode==='br'&&!p.unl?.[BRMAP[SLOTK[p.kitIds.indexOf('bloom')]]]))return false;
@@ -135,14 +135,31 @@ function natureMovePlants(p){
     o.move={spot,start:G.time,at:G.time+.34};
     natureEmit('relocate',o,{x2:spot.x,y2:spot.y,h2:spot.h});
   }
-  natureEmit('pulse',{...p,h:p.z},{r:110});
+  natureEmit('pulse',{...p,h:p.z},{r:110,id:p.id});
 }
+// Placement mode for the wall and the ultimate. Wall: hold left click to rotate, quick click to place. Ult: click to place. Right click or pressing the skill again cancels.
+function natureAimSpot(p,A){return naturePlace(p,natureAimPoint(p,A.k==='wall'?260:240),false);}
+function natureAimStart(p,k){if(p.natAim){p.natAim=null;return false;}p.natAim={k,t:G.time,a:p.ang,last:p.ang,hold:0,rotated:false,armed:!p.inp?.fire,s0:!!p.inp?.sh};p.natAim.spot=natureAimSpot(p,p.natAim);return false;}
+function natureAimDone(p,A){const q=A.spot;
+  if(A.k==='wall'){if(natureDist(p,q)<40)return false;natureWallBuild(p,q,A.a);const i=p.kitIds.indexOf('thornburst');if(i>=0){const S=SPELLS.thornburst,k=SLOTK[i],cd=S.cd*p.buffs.cdr;p.cd[k]=cd;p.cdMax[k]=cd;}emit({k:'sk',id:p.id,s:'thornburst'});return true;}
+  if(p.ult<100)return true;p.ult=0;naturePlant(p,'tree',q,.9);natureEmit('summon',{x:p.x,y:p.y,h:p.z},{id:p.id,x2:q.x,y2:q.y,h2:q.h});emit({k:'sk',id:p.id,s:'worldtree'});return true;}
+function natureAimTick(p,inp,dt,canAct){const A=p.natAim;
+  if(!canAct||G.time-A.t>10||(inp.sh&&!A.s0)){p.natAim=null;return true;}
+  A.s0=!!inp.sh;
+  if(!A.armed){if(!inp.fire)A.armed=true;return true;}
+  if(inp.fire){A.hold+=dt;if(A.k==='wall'&&A.hold>.16){A.a+=angDiff(p.ang,A.last);A.rotated=true;}}
+  A.last=p.ang;
+  if(!(A.k==='wall'&&A.hold>.16))A.spot=natureAimSpot(p,A);
+  if(!A.rotated&&A.k==='wall')A.a=p.ang;
+  if(!inp.fire&&A.hold>0){const quick=A.hold<=.16;A.hold=0;if(quick||A.k==='tree'){natureAimDone(p,A);p.natAim=null;}}
+  return true;
+}
+function natureWallBuild(p,q,a){const wall=addWall({...q,a,wood:true,owner:p.id,team:p.team,r:NAT.wallHalf,hgt:NAT.wallHeight,hp:175,maxHp:175,t:8,born:G.time,burn:Array.from({length:3},()=>({end:0,layers:0,total:0}))});natureEmit('wall_grow',wall,{a:wall.a});}
 function natureCastWall(p){
+  if(!p.bot)return natureAimStart(p,'wall');
   const q=naturePlace(p,natureAimPoint(p,260),false);
   if(natureDist(p,q)<40)return false;
-  const wall=addWall({...q,a:p.ang,wood:true,owner:p.id,team:p.team,r:NAT.wallHalf,
-    hgt:NAT.wallHeight,hp:175,maxHp:175,t:8,born:G.time,burn:Array.from({length:3},()=>({end:0,layers:0,total:0}))});
-  natureEmit('wall_grow',wall,{a:wall.a});
+  natureWallBuild(p,q,p.ang);
 }
 
 function naturePoison(t,power,life,owner,source){
@@ -279,6 +296,7 @@ function natureBallTick(o,p,dt){
 
 function natureTree(p){
   if(naturePlants(p,'tree').length)return false;
+  if(!p.bot)return natureAimStart(p,'tree');
   naturePlant(p,'tree',naturePlace(p,natureAimPoint(p,240),false));
 }
 function natureTreeReach(tree,t){
@@ -394,7 +412,8 @@ function natureSnapP(p){
   const coil=Math.max(0,(p.natureCoilEnd||0)-G.time);
   const tree=natureLive(p)?natureGuardian(p):null;
   const zone=!!tree||!!G.nature?.some(o=>natureTreeReady(o)&&natureDist(o,p)<=NAT.treeRange);
-  return swing||spores||coil||zone?[swing,spores,coil,tree?.id||0,zone]:0;
+  const A=p.natAim,aim=A?[A.k==='wall'?1:2,A.spot.x,A.spot.y,A.spot.h||0,A.a]:0;
+  return swing||spores||coil||zone||aim?[swing,spores,coil,tree?.id||0,zone,aim]:0;
 }
 function natureLotusCooldown(p){
   const lotus=p.pathIdx===NATUREP&&naturePlants(p,'lotus')[0];

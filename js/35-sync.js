@@ -28,6 +28,9 @@ function castStart(o,t,style){o.castN=(o.castN|0)+1;o.cpS=style===undefined?cast
 // ช่อง: [เวลา 0–1, แขนขวา x, แขนขวา z, บิดตัว, เอนตัว, แขนซ้าย x, แขนซ้าย z, ตัวเอียงข้าง, ย่อตัว, ease('o'=ฟาดเร็ว 's'=นุ่ม)]
 // แขน x: ติดลบ = ยกไปหน้า/ขึ้น (-1.57 ชี้ตรง, -3 ชูเหนือหัว) • แขนขวา z บวก = ข้ามตัวไปซ้าย • แขนซ้าย z ลบ = ข้ามตัวไปขวา
 const CANIM={
+  natthrow:{d:0.62,st:0,tr:null,k:[[0.36,-0.45,0.22,0.6,-0.14,0.85,0.25,0.06,-0.14,'s'],[0.62,-0.55,0.12,-0.75,0.24,-2.35,-0.32,-0.07,-0.02,'o'],[1,-0.4,0.1,-0.25,0.1,-1.05,-0.2,0,-0.06,'s']]},   // Nature: left hand throws the seed, stick stays out of the way
+  natraise:{d:0.85,st:0,tr:null,k:[[0.3,-2.95,0.05,0.05,-0.14,-0.5,0.2,0,0.04,'s'],[0.75,-3.05,0.02,0,-0.18,-0.45,0.2,0,0.08,'s'],[1,-1.1,0.1,0,0,-0.3,0.15,0,0,'s']]},   // Nature: stick held high to move plants / grow the wall
+  natsummon:{two:1,d:1.3,st:1,tr:[0.3,0.75],k:[[0.25,0.32,-0.22,0.1,0.2,0.32,0.22,0,-0.2,'s'],[0.58,-3.0,0.12,0,-0.2,-3.0,-0.12,0,0.1,'s'],[0.72,-3.05,0.1,0,-0.24,-3.05,-0.1,0,0.12,'s'],[0.86,-0.8,0.2,0,0.3,-0.8,-0.2,0,-0.24,'o'],[1,-0.8,0.15,0,0.16,-0.8,-0.15,0,-0.12,'s']],tm:[0.45,0.7]},   // Nature ult: gather low, both hands overhead, then call the tree down
   sweep:{two:1,d:0.6,st:0.5,tr:[0.2,0.7],k:[[0.25,-1.5,0.9,0.6,0.05,-0.6,0.9,0.05,-0.05,'s'],[0.55,-1.5,-1.2,-0.7,0.1,-1.3,0.2,-0.08,-0.12,'o'],[1,-1.3,-0.9,-0.5,0.05,-0.8,0.5,-0.04,-0.08,'s']]},   // กวาดกว้างแนวนอน (Ring of Embers)
   powerup:{d:0.7,st:0,tr:null,k:[[0.35,0.3,-0.5,0,0.35,0.3,0.5,0,-0.2,'s'],[0.6,-0.9,-1.3,0,-0.2,-0.9,1.3,0,0.05,'o'],[1,-0.6,-0.9,0,-0.1,-0.6,0.9,0,0,'s']],tm:[0.05,0.35]},   // ย่อเกร็ง แล้วกางแขนอกผาย (เพิ่มพลังตัวเอง)
   ultraise:{two:1,d:1.0,st:1,tr:[0.3,0.8],k:[[0.3,-0.5,0.35,0.15,0.25,-0.5,-0.35,0,-0.18,'s'],[0.6,-3.0,0.15,0,-0.25,-3.0,-0.15,0,0.08,'s'],[0.75,-1.2,0.2,0.05,0.4,-1.2,-0.2,0,-0.15,'o'],[1,-1.0,0.1,0,0.25,-1.0,-0.1,0,-0.1,'s']],tm:[0.45,0.6]},   // อัลติ: สองมือรวบไม้ ชูขึ้นฟ้า แล้วฟาดลง
@@ -78,6 +81,7 @@ const SKANIM={ringofembers:'sweep',blazeform:'fireflare',colossus:'ultraise',kin
   thunderline:'line',speedsiphon:'siphon',stormorbs:'orbs',stormdome:'dome',triplestrike:'skycall',railgun:'pullback',godlightning:'godcall',
   stonebreaker:'punchcmd',mudswamp:'ground',tectoniccrush:'dome',tectoniccrush_2:'clap',dustburst:'burst',terraauger:'pullback',wrath:'ultraise',
   riptide:'wavecast',tidecaller:'tidecall',aquacage:'cagecast',abyssalbeam:'pullback',moonwater:'moonarts',dragondeep:'dragoncall',dragondeep_dive:'dragoncommand',voidspheres:'windvoid',aegisgale_push:'wallpush',aegisgale_place:'ground',featherwing_2:'wingflick',eyeofheaven:'heavenslam'};
+Object.assign(SKANIM,{poisondart:'natthrow',bloom:'natthrow',sporecloud:'natthrow',vinelash:'natraise',thornburst:'natraise',worldtree:'natsummon'});
 SKANIM.railgun_release='railrelease';SKANIM.terraauger_release='ground';
 SKANIM.dragonfall_land='dragonland';SKFEET.dragonland=[-0.8,0.3,0.12,-0.1];SKFEET.wingflick=[-0.45,0.3,0.12,-0.12];
 function skAnim(ev){const o=PM3.get(ev.id),n=SKANIM[ev.s];if(!o||!n)return;o.caN=n;o.caT=0;o.cpT=0;o.cgd=2.2;}

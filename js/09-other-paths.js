@@ -5,7 +5,7 @@ defSpell(3,{id:'poisondart',ic:'🌱',n:'ป้อมฝักหนาม',role
 defSpell(3,{id:'vinelash',ic:'↔',n:'ย้ายพืช',role:'utility',cd:14,d:'ย้ายพืชมาอ้างอิงตำแหน่งเรา ฟื้น HP เต็มและบัฟป้อม 4 วิ',cast:natureMovePlants});
 defSpell(3,{id:'sporecloud',ic:'🌰',n:'บอลไม้หนาม',role:'control',cd:16,d:'โยนบอลไม้ ดึงเป้ารอบจุดตกเข้าหาลูก ใส่พิษและสโลว์',cast:natureBall});
 defSpell(3,{id:'bloom',ic:'🌸',n:'ดอกบัว',role:'utility',cd:22,d:'วางดอกบัว 100 HP นาน 15 วิ ฮีล 5 ต่อวิ กดซ้ำสลับเป็นบัฟป้อมในรัศมี 160 หน่วย',toggle:natureLotusToggle,cast:p=>natureCastPlant(p,'lotus')});
-defSpell(3,{id:'thornburst',ic:'🪵',n:'กำแพงไม้',role:'control',cd:18,d:'สร้างกำแพงไม้ 175 HP อยู่ 8 วิ มี 3 โซนที่ติดไฟได้',cast:natureCastWall});
+defSpell(3,{id:'thornburst',ic:'🪵',n:'กำแพงไม้',role:'control',cd:18,d:'เลือกจุดวางกำแพงไม้ กดซ้ายค้างหมุน คลิกยืนยัน 175 HP อยู่ 8 วิ มี 3 โซนที่ติดไฟได้',toggle:p=>{if(p.natAim?.k!=='wall')return false;p.natAim=null;return true;},cast:natureCastWall});
 defSpell(3,{id:'worldtree',ic:'🌲',ult:true,cd:0,n:'ต้นไม้โลก',role:'ult',d:'ต้นไม้ 350 HP คุ้มครองทีมในระยะ 500 หน่วย 12 วิ รับดาเมจแทน 65% ถ้าต้นแตกจะฮีล 125',cast:natureTree});
 
 // =====================================================================
