@@ -54,23 +54,31 @@ function sbStaffMake(o){
   const inner=new THREE.Group();g.add(inner);
   const gold=sbMat('#ffcf3a',.85),pale=sbMat('#ffe998',.95),white=sbMat('#fffbe8',1.05),cyan=sbMat('#46dcff',.9);
   const add=(geo,m,x,y,z,rx=0,ry=0,rz=0,sx=1,sy=1,sz=1)=>{const q=new THREE.Mesh(geo,m);q.position.set(x,y,z);q.rotation.set(rx,ry,rz);q.scale.set(sx,sy,sz);q.frustumCulled=false;inner.add(q);return q;};
-  const L=1.75;add(new THREE.CylinderGeometry(.018,.03,L,8),gold,0,L/2,0);add(new THREE.CylinderGeometry(.008,.012,L*.96,6),cyan,.02,L/2,.012);
+  const L=1.75,arcMat0=ADD('#ffffff',{vertexColors:true}),bolt=[Tube(16,5,arcMat0,inner),Tube(16,4,arcMat0,inner),Tube(16,4,arcMat0,inner)];bolt.forEach(b=>b.castShadow=false);
   add(new THREE.ConeGeometry(.09,.26,6),pale,0,L+.05,0,Math.PI);   // collar
   for(const s of [-1,1]){add(new THREE.BoxGeometry(.05,.3,.05),pale,s*.11,L+.2,0,0,0,s*-.34);add(new THREE.BoxGeometry(.04,.46,.05),gold,s*.15,L+.55,0,0,0,s*.34);add(new THREE.ConeGeometry(.045,.3,5),pale,s*.08,L+.86,0,0,0,s*-.42);add(new THREE.BoxGeometry(.03,.2,.03),cyan,s*.22,L+.04,0,0,0,s*-.7);}
   const gem=add(new THREE.OctahedronGeometry(.17,0),white,0,L+.56,0,0,.4,0,.82,2.5,.82);add(new THREE.OctahedronGeometry(.1,0),cyan,0,L+.56,0,0,0,0,.45,2.9,.45);
   add(new THREE.OctahedronGeometry(.07,0),pale,0,-.0,0,0,0,0,1,1.4,1);
   const arcMat=ADD('#ffffff',{vertexColors:true}),arcs=Array.from({length:7},()=>{const m=Tube(10,4,arcMat,inner);m.castShadow=false;return m;});
-  return {g,inner,gem,arcs,mats:[gold,pale,white,cyan],k:0,T:0,L};
+  const bodyMat=ADD('#ffffff',{vertexColors:true}),body=Array.from({length:6},()=>{const m=Tube(10,4,bodyMat,o.g);m.castShadow=false;return m;});
+  const hide=P.children.filter(c=>c!==g&&c!==o.tip);
+  return {g,inner,gem,arcs,bolt,body,hide,mats:[gold,pale,white,cyan],k:0,T:0,L};
 }
 function stormStaffView(o,p,dt,now){
   const M=p.sm,left=M&&p.al&&!p.dn?(M[8]||0):0;
   if(left>0&&!o.sbS)o.sbS=sbStaffMake(o);
   const S=o.sbS;
-  if(S){S.k+=((left>0?1:0)-S.k)*Math.min(1,dt*(left>0?22:13));S.g.visible=S.k>.015;S.inner.scale.set(1,Math.max(.01,S.k),1);S.gem.rotation.y=now*.002;
-    if(S.g.visible){S.T-=dt;if(S.T<=0){S.T=.05;S.arcs.forEach((a,i)=>{const t=Math.random()*.9,A=natV((Math.random()-.5)*.05,S.L*t,(Math.random()-.5)*.05),E=A.clone().add(natV((Math.random()-.5)*.34,.15+Math.random()*.32,(Math.random()-.5)*.34)),P=sbJag(A,E,10,.15,natV),col=new THREE.Color(i%3?'#6be8ff':'#fff0a0');a.set(P,()=>.012,(u,c)=>c.copy(col).multiplyScalar(.75*S.k));});}}}
-  const W=o.stSw;if(W){W.t+=dt;const T=.46,u=W.t/T;if(u>=1)o.stSw=null;else{const s=W.s,sweep=lerp(1.25,-1.35,natEase(natPhase(u,.04,.4))),w=natEase(natPhase(u,0,.1))*(1-natEase(natPhase(u,.62,1)));o.armR.rotation.x=lerp(o.armR.rotation.x,-1.55,w);o.armR.rotation.y=s*sweep*w;o.armR.rotation.z=lerp(o.armR.rotation.z,-.1,w);o.b.rotation.y+=s*sweep*.42*w;o.armL.rotation.x=lerp(o.armL.rotation.x,.4,w);}}
+  if(S){S.k+=((left>0?1:0)-S.k)*Math.min(1,dt*(left>0?22:13));S.g.visible=S.k>.015;S.inner.scale.set(1,Math.max(.01,S.k),1);S.gem.rotation.y=now*.002;for(const h of S.hide)h.visible=S.k<.5;for(const b of S.body)b.visible=left>0;
+    if(S.g.visible){S.T-=dt;if(S.T<=0){S.T=.05;const y0=natV(0,0,0),yT=natV(0,S.L,0),cW=new THREE.Color('#fff4b4'),cG=new THREE.Color('#ffc92e'),cC=new THREE.Color('#52e4ff');S.bolt.forEach((b,i)=>{const P=sbJag(y0,yT,16,i?.17:.1,natV);b.set(P,u=>(i?.016:.034)*(1-.45*u),(u,c)=>c.copy(i===1?cC:i?cG:cW).multiplyScalar(i?.75:.95));});if(left>0)S.body.forEach((a,i)=>{const b=i/6*6.283+now*.004,r=.5+Math.random()*.2,h=.35+Math.random()*1.3,A=natV(Math.cos(b)*r,h,Math.sin(b)*r),E=natV(Math.cos(b+.7)*(r+.1),h+(Math.random()-.5)*.7,Math.sin(b+.7)*(r+.1)),P=sbJag(A,E,10,.16,natV),col=i%3?cC:cG;a.set(P,()=>.013,(u,c)=>c.copy(col).multiplyScalar(.8));});S.arcs.forEach((a,i)=>{const t=Math.random()*.9,A=natV((Math.random()-.5)*.05,S.L*t,(Math.random()-.5)*.05),E=A.clone().add(natV((Math.random()-.5)*.34,.15+Math.random()*.32,(Math.random()-.5)*.34)),P=sbJag(A,E,10,.15,natV),col=new THREE.Color(i%3?'#6be8ff':'#fff0a0');a.set(P,()=>.012,(u,c)=>c.copy(col).multiplyScalar(.75*S.k));});}}}
+  const W=o.stSw;if(W){W.t+=dt;const T=.62,u=W.t/T;if(u>=1)o.stSw=null;else{const s=W.s,e=natEase,ph=natPhase,coil=e(ph(u,0,.2)),hit=e(ph(u,.2,.42)),fol=e(ph(u,.42,1)),w=e(ph(u,0,.08))*(1-e(ph(u,.72,1)));   // wind up across the body, whip through with the whole torso, settle
+    const twist=s*(lerp(lerp(0,1.45,coil),-1.75,hit)*(1-fol*.92)),arm=s*(lerp(lerp(.3,1.6,coil),-1.5,hit)*(1-fol*.8)),R=o.armR.rotation,L=o.armL.rotation;
+    o.b.rotation.y+=twist*w;o.b.rotation.z+=s*lerp(lerp(0,-.2,coil),.34,hit)*(1-fol)*w;o.b.rotation.x+=lerp(lerp(0,-.16,coil),.42,hit)*(1-fol)*w;o.b.position.y-=(.1*coil+.22*hit)*(1-fol)*w;
+    R.x=lerp(R.x,lerp(lerp(-1.1,-2.15,coil),-1.25,hit),w);R.y=arm*w;R.z=lerp(R.z,lerp(.5,-.55,hit),w);L.x=lerp(L.x,lerp(lerp(.2,-1.15,coil),.85,hit),w);L.y=-arm*.5*w;L.z=lerp(L.z,lerp(.25,-.55,hit),w);o.faW=Math.max(o.faW||0,w*(1-hit*.75));
+    o.legs[0].rotation.x+=lerp(lerp(0,.42,coil),-.72,hit)*(1-fol)*w;o.legs[1].rotation.x+=lerp(lerp(0,-.42,coil),.62,hit)*(1-fol)*w;}}
 }
-function stormStaffCast(ev){const F=natFx(),{V3,sparks}=F,o=ev.id!=null?PM3.get(ev.id):null,p=o?o.tip.getWorldPosition(V3()):natWorld(ev.x,ev.y,ev.h);sparks(p,24,4,'#fff3b0','#46dcff',{dir:V3(0,1.2,0),life:.55,size:1.4});snd('zap',{x:ev.x,y:ev.y,vol:.8});if(ev.id===NET.myId)shake(6);}
+function stormStaffCast(ev){const F=natFx(),{V3,Tube,ADD,sparks,T}=F,o=ev.id!=null?PM3.get(ev.id):null,tip=()=>o?o.tip.getWorldPosition(V3()):natWorld(ev.x,ev.y,ev.h),m=ADD('#ffffff',{vertexColors:true}),b=[Tube(24,6,m),Tube(20,4,m),Tube(20,4,m)],y=new T.Color('#fff4b0'),c=new T.Color('#57e6ff'),top=tip().add(V3(F.rnd(-2,2),30,F.rnd(-2,2)));b.forEach(q=>q.castShadow=false);snd('zap',{x:ev.x,y:ev.y,vol:1});if(ev.id===NET.myId)shake(14);
+  const base=o?o.g.position.clone():natWorld(ev.x,ev.y,ev.h-1.2);F.O.y=base.y;natShock(base,'#ffe56a',6,.42,.55);natShock(base,'#52e4ff',3.5,.3,.5);sparks(tip(),30,5.5,'#fff3b0','#46dcff',{dir:V3(0,1.2,0),life:.6,size:1.5});sparks(base.clone().add(V3(0,.2,0)),24,4,'#fff3b0','#46dcff',{dir:V3(0,2.4,0),life:.7,size:1.4});
+  const L=.3;F.clip(L,t=>{const f=1-t/L,E=tip();b[0].set(sbJag(top,E,24,2.6,V3),()=>.2*f+.02,(u,q)=>q.copy(y).multiplyScalar(1.05*f));for(let i=1;i<3;i++)b[i].set(sbJag(top,E,20,4.2,V3),()=>.05*f+.01,(u,q)=>q.copy(c).multiplyScalar(f));},()=>{b.forEach(q=>F.drop(q));m.dispose();});}
 function stormStaffSwing(ev){const o=ev.id!=null?PM3.get(ev.id):null;if(o)o.stSw={t:0,s:ev.n||1};snd('whoosh',{x:ev.x,y:ev.y,vol:.75});snd('zap',{x:ev.x,y:ev.y,vol:.4});if(ev.id===NET.myId)shake(3.5);}
 // The wave: one curved surface with a soft shader, so there are no cut edges.
 let _sbWaveG=null;

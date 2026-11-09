@@ -27,7 +27,7 @@ function stormBasic(p,inp,dt,setCd){
   p.bTg=0;
   if(p.sdome){if(p.sdome.ph===2&&inp.fire&&!prev)stormDomeFire(p);p.beam=0;return;}
   if(p.rail||p.slnT>0){p.beam=0;return;}
-  if(p.stStaff>0){p.beam=0;if(inp.fire&&p.cd.basic<=0){stormWaveShoot(p);setCd('basic',SIPH.v.cd);}return;}
+  if(p.stStaff>0){p.beam=0;if(p.stWind>0){p.stWind-=dt;if(p.stWind<=0)stormWaveShoot(p);}else if(inp.fire&&p.cd.basic<=0){p.stWind=.13;p.stSide=-(p.stSide||1);emit({k:'efx',z:'sswing',x:Math.round(p.x),y:Math.round(p.y),h:p.z+1.2,n:p.stSide,id:p.id});setCd('basic',SIPH.v.cd);}return;}
   if(p.god>0){
     // อัลติ: กรงเล็บสายฟ้า 3 จังหวะ ระยะ 200 (15/15/25 จังหวะ 3 = Shock)
     p.beam=0;if(p.clT>0)p.clT-=dt;if(p.clR>0){p.clR-=dt;if(p.clR<=0)p.clN=0;}
@@ -101,7 +101,7 @@ function stormLine(p){
 // ----- สกิล 2 (1 stack): ดูดความเร็ว -----
 const SIPH=defSpell(2,{id:'speedsiphon',v:{cost:2,time:6,cd:0.7,dmg:25,spd:1500,range:700},vn:{cost:'ใช้ stack',time:'อยู่นาน (วิ)',cd:'เว้นต่อคลื่น (วิ)',dmg:'ดาเมจคลื่น',spd:'ความเร็วคลื่น',range:'ระยะคลื่น'},role:'damage',n:'ไม้เท้าสายฟ้า',ic:'⚡',cd:10,d:'ใช้ 2 stack: ไม้ยาวขึ้นด้วยสายฟ้า 6 วิ โจมตีปกติเปลี่ยนเป็นคลื่นดาบสายฟ้า ระยะ 700 ดาเมจ 25 ทุก 0.7 วิ ตีคนบนฟ้าได้',
   cast(p,S){if(!stSpend(p,S.v.cost))return false;p.stStaff=S.v.time;emit({k:'efx',z:'ssta',x:Math.round(p.x),y:Math.round(p.y),h:p.z+1.2,id:p.id});}});
-function stormWaveShoot(p){const V=SIPH.v;Object.assign(PDEF.swave,{spd:V.spd,life:V.range/V.spd,dmg:V.dmg});const pr=shoot(p,'swave',{sp:'b_storm',dmg:V.dmg,quiet:1});pr.pierce=1;pr.hs=new Set();pr.hw=70;p.stSide=-(p.stSide||1);emit({k:'efx',z:'sswing',x:Math.round(p.x),y:Math.round(p.y),h:p.z+1.2,n:p.stSide,id:p.id});}
+function stormWaveShoot(p){const V=SIPH.v;Object.assign(PDEF.swave,{spd:V.spd,life:V.range/V.spd,dmg:V.dmg});const pr=shoot(p,'swave',{sp:'b_storm',dmg:V.dmg,quiet:1});pr.pierce=1;pr.hs=new Set();pr.hw=70;}
 // ----- สกิล 3 (2 stacks): ฟ้าผ่าสามครั้ง — วางจุดครั้งเดียว ฟ้าผ่าจุดเดิม 3 ครั้ง ห่างกัน 0.5 วิ -----
 const TSTR=defSpell(2,{id:'triplestrike',v:{cost:2,range:600,r:100,dmg:30,env:30,delay:0.6,gap:0.5,spd:40,seek:300,sideR:45,side:110},vn:{cost:'ใช้ stack',range:'ระยะวาง',r:'รัศมีวง',dmg:'ดาเมจต่อครั้ง',env:'ดาเมจใส่บ้าน/ของ',delay:'ผ่าครั้งแรกหลัง (วิ)',gap:'เว้นระหว่างครั้ง (วิ)',spd:'วงเลื่อนหาศัตรู • ความเร็ว',seek:'วงเลื่อนหาศัตรู • มองไกล',sideR:'อัลติ • รัศมีวงข้าง',side:'อัลติ • วงข้างห่าง'},role:'control',n:'ฟ้าผ่าสามครั้ง',ic:'🌩️',cd:12,d:'ใช้ 2 stacks: กดแล้วเลือกจุด (เห็นวงก่อนวาง) กดซ้ำ/คลิกซ้าย = ยืนยัน • ระยะ 600 รัศมี 70 มีวงรูนเตือน แล้วฟ้าผ่าจุดเดิม 3 ครั้ง (0.6 วิ แล้วห่างกัน 0.5 วิ)',fx:'ครั้งละ 30 ดาเมจ (โดนครบ 3 = 90) • ระหว่างอัลติ: มีวงเล็กผ่าซ้าย/ขวาเพิ่มด้วย',
   cast(p,S){
