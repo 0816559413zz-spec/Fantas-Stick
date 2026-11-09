@@ -73,6 +73,42 @@
    }
   },
   {
+   "id": "open",
+   "t": "emit",
+   "at": 0.2,
+   "life": 0.25,
+   "att": "ground",
+   "pos": [
+    0,
+    0.5,
+    1
+   ],
+   "burst": 0,
+   "rate": 60,
+   "from": "disc",
+   "fr": 4,
+   "dir": "aim",
+   "spread": 0.12,
+   "speed": [
+    18,
+    30
+   ],
+   "plife": [
+    0.5,
+    0.9
+   ],
+   "look": "streak",
+   "size": [
+    3,
+    5
+   ],
+   "col": "#e8fff2",
+   "c2": "#14ff8c",
+   "gravity": 0,
+   "drag": 0.4,
+   "curl": false
+  },
+  {
    "id": "st0",
    "t": "emit",
    "at": 0.232,
@@ -773,90 +809,6 @@
    "gravity": 0,
    "drag": 0.5,
    "mspin": 120
-  },
-  {
-   "id": "veil",
-   "t": "mesh",
-   "at": 0.3,
-   "life": 4.9,
-   "att": "ground",
-   "pos": [
-    0,
-    0,
-    0
-   ],
-   "fade": 0,
-   "shape": "model",
-   "model": "wind_tail_veil",
-   "col": "#c9fff0",
-   "col2": "#3aa58a",
-   "uvTile": [
-    16,
-    0.96
-   ],
-   "uvScroll": [
-    -0.9,
-    0
-   ],
-   "scale": {
-    "0": [
-     1,
-     1,
-     0.01
-    ],
-    "0.05": 1
-   },
-   "op": {
-    "0": 0,
-    "0.04": 0.14,
-    "0.92": 0.14,
-    "1": 0
-   },
-   "mat": "tex",
-   "tex": "tex/wind_wall_curtain",
-   "rim": 0
-  },
-  {
-   "id": "veil2",
-   "t": "mesh",
-   "at": 0.3,
-   "life": 4.9,
-   "att": "ground",
-   "pos": [
-    0,
-    0,
-    0
-   ],
-   "fade": 0,
-   "shape": "model",
-   "model": "wind_tail_veil",
-   "col": "#c9fff0",
-   "col2": "#3aa58a",
-   "uvTile": [
-    9,
-    0.96
-   ],
-   "uvScroll": [
-    -0.55,
-    0
-   ],
-   "scale": {
-    "0": [
-     1,
-     1,
-     0.01
-    ],
-    "0.05": 1
-   },
-   "op": {
-    "0": 0,
-    "0.04": 0.09,
-    "0.92": 0.09,
-    "1": 0
-   },
-   "mat": "tex",
-   "tex": "tex/wind_wall_curtain",
-   "rim": 0
   }
  ]
 }
