@@ -1,5 +1,6 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
 
+- 2026-11-09 — **ไอคอนสายลมครบ:** เพิ่ม Featherwing, Downburst, Plume Volley (`icons/w_*.svg`)
 - 2026-11-09 — **ไอคอนสายลมใหม่ 3 ตัว:** Sonic Boom Strike, Tailwind, Slipstream (`icons/w_*.svg` ชื่อไฟล์ใหม่ เลี่ยงแคชไฟล์เดิมใน Service Worker)
 - 2026-11-09 — **Slipstream แดชข้างบนพื้น:** ไม่หมุนตัวแล้ว เอียงไปทางที่แดช ใช้เอฟเฟกต์ชุดเดียวกับแดชหน้าบนพื้น กลางอากาศยังหมุนเหมือนเดิม
 - 2026-11-09 — **Slipstream ตัวเลข:** เวลาแดชบิน 0.18 วิ พื้น 0.15 วิ ตามที่ผู้ใช้เลือก ระยะเท่าเดิม
