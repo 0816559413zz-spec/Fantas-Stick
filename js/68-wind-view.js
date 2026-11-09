@@ -217,7 +217,7 @@ function windEfx(ev){
     case 'wnfast':{const o=WV.ff||(WV.ff=new Map());const old=o.get(ev.id);if(old){fxStop(old);o.delete(ev.id);}
       if(ev.n){const I=fxPlay('wind/fw_fast',{x,y,h:H,a,follow:ev.id});if(I)o.set(ev.id,I);if(near)snd('whoosh',ev);if(mine)toast('บินเร็ว: เมาส์ = บังคับแบบเครื่องบิน • ใช้สกิลไม่ได้ • ปล่อย Shift = กลับบินปกติ');}return true;}
     case 'wnsochg':fxPlay('wind/sonic_charge',{x,y,h:H,a,follow:ev.id});{const o=PM3.get(ev.id);if(o){o.wso=0;o.wsoAir=!!ev.m;o.wld=null;if(o.wWings)o.wWings.userData.sup={t:0,dis:-1};}}if(near)snd('cast_pull',ev);if(mine)toast('Sonic Boom Strike: ชาร์จ 2.4 วิ แล้วพุ่งไปตามที่เล็ง');return true;
-    case 'wnsoimp':{const o=PM3.get(ev.id);if(o){o.wso=undefined;o.wud=0;if(o.wWings&&o.wWings.userData.sup)o.wWings.userData.sup.dash=true;}}if(near)impactFrame(1,x,y,H+1.2,W_UL.ifr*3,ev.id);return true;
+    case 'wnsoimp':{const o=PM3.get(ev.id);if(o){o.wso=undefined;o.wud=0;if(o.wWings&&o.wWings.userData.sup)o.wWings.userData.sup.dash=true;}}if(near)impactFrame(1,x,y,H+1.2,W_UL.impT,ev.id);return true;
     case 'wnsodash':fxPlay(ev.m?'wind/sonic_dash':'wind/sonic_dash_g',{x,y,h:H,a,follow:ev.id});{const o=PM3.get(ev.id);if(o){o.wud=undefined;o.wld={t:0,air:!!ev.m};if(o.wWings&&o.wWings.userData.sup){const S=o.wWings.userData.sup;S.dash=false;S.dis=0;}}fxPlay('wind/sonic_end',{x:ev.x2,y:ev.y2,h:H,a});}if(near){snd('boom',ev);snd('whoosh',ev);}return true;
     case 'wnsohit':fxPlay('wind/sonic_hit',{x,y,h:H,a});if(near){snd('break',ev);hitStop(0.1);}return true;
     case 'wnsowave':fxPlay('wind/sonic_wave',{x,y,h:H,aim:false});if(near)snd('hit',ev);return true;
