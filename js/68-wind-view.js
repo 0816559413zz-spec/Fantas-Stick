@@ -322,16 +322,22 @@ const WW_RIB=[[[0.3,1.0],[2.4,2.9],[4.0,2.9],0.06],[[0.6,0.6],[3.4,1.1],[4.9,1.9
 let _wwGeo=null;
 // Sonic Boom: ชุดเสริมปีก (ใบมีดแสงงอกทีละใบ + ขนนกลอยโค้งเข้าปีก) ระหว่างชาร์จ • ง้างปีกดุก่อนพุ่ง • จบแดชสลายใน 2 วิ
 let _wsupG=null;
+function windSupDust(S){S.dm=new THREE.PointsMaterial({color:'#6dffc0',size:0.2,transparent:true,depthWrite:false,depthTest:false,toneMapped:false});S.du=[];   // ละอองปีกเทพ: แต่ละจุดหลุดตอนใบมีดสึกจากปลายมาถึงตรงนั้น แล้วลอยออก
+  S.gs.forEach((G,gi)=>{const N=9*12,P=new Float32Array(N*3).fill(9999),g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(P,3));const pts=new THREE.Points(g,S.dm);pts.frustumCulled=false;pts.renderOrder=5;G.add(pts);const D=[];
+    for(let i=0;i<9;i++){const b=S.bl[gi*9+i];for(let k=0;k<12;k++){const r=(k+Math.random())/12,A=b.rotation.z+(Math.random()-0.5)*1.4;D.push({b,r,t0:b.userData.i*0.1+(1-r)*1.1,life:0.6+Math.random()*0.5,vx:Math.cos(A)*(0.8+Math.random()*2),vy:Math.sin(A)*(0.8+Math.random()*2)+1.2,vz:(Math.random()-0.5)*2.6});}}
+    S.du.push({P,g,D});});}
+function windSupDustTick(S){for(const U of S.du){U.D.forEach((D,j)=>{const t=S.dis-D.t0,i=j*3,P=U.P;if(t<0||t>D.life){P[i]=P[i+1]=P[i+2]=9999;return;}const b=D.b,a=b.rotation.z,L=b.userData.L*D.r;P[i]=b.position.x+Math.cos(a)*L+D.vx*t;P[i+1]=b.position.y+Math.sin(a)*L+D.vy*t;P[i+2]=b.position.z+D.vz*t;});U.g.attributes.position.needsUpdate=true;}}
 function windWingSup(d,dt){const S=d.sup,C=W_UL.chg;S.t+=dt;if(S.dis>=0)S.dis+=dt;
   if(!_wsupG){const sh=new THREE.Shape();sh.moveTo(0,-0.09);sh.lineTo(0.72,-0.055);sh.lineTo(1,0);sh.lineTo(0.72,0.055);sh.lineTo(0,0.09);sh.closePath();_wsupG=new THREE.ShapeGeometry(sh);_wsupG.userData.keep=true;}
-  if(!S.bl){const mk=c=>new THREE.MeshBasicMaterial({color:c,transparent:true,opacity:1,depthWrite:false,depthTest:false,side:THREE.DoubleSide,toneMapped:false});S.ma=mk('#10e08c');S.mc=mk('#d8fff0');S.bl=[];S.fe=[];S.gs=[];
-    for(const sd of d.sides){const wing=sd.piv.children[0],G=new THREE.Group();wing.add(G);S.gs.push(G);
+  if(!S.bl){const mk=c=>new THREE.MeshBasicMaterial({color:c,transparent:true,opacity:1,depthWrite:false,depthTest:false,side:THREE.DoubleSide,toneMapped:false});S.ma=mk('#10e08c');S.mc=mk('#d8fff0');S.bl=[];S.fe=[];S.gs=[];S.bs=[];
+    for(const sd of d.sides){const wing=sd.piv.children[0],G=new THREE.Group();S.bs.push(...wing.children);wing.add(G);S.gs.push(G);
       for(let i=0;i<9;i++){const b=new THREE.Group(),m=new THREE.Mesh(_wsupG,S.ma),c=new THREE.Mesh(_wsupG,S.mc);c.scale.set(0.92,0.32,1);c.position.z=0.01;m.frustumCulled=c.frustumCulled=false;m.renderOrder=c.renderOrder=4;b.add(m,c);b.position.set(0.35+i*0.05,0.3,0.12);b.rotation.z=-0.28+i*0.215;b.userData={i,L:lerp(5.6,3.6,Math.abs(i-2)/6)};b.scale.setScalar(0.001);G.add(b);S.bl.push(b);}
       for(let i=0;i<14;i++){const m=new THREE.Mesh(_wsupG,S.ma);m.frustumCulled=false;m.renderOrder=4;m.visible=false;const A=-0.3+Math.random()*2,E=3+Math.random()*2;m.userData={t0:0.05+i*(C-0.5)/14,to:[Math.cos(A)*E*0.6,Math.sin(A)*E*0.6,0.1],f:[Math.cos(A+1.2)*7,Math.sin(A+1.2)*7-1,(Math.random()-0.5)*5],s:[Math.cos(A+0.6)*7,Math.sin(A+0.6)*7,(Math.random()-0.5)*7]};G.add(m);S.fe.push(m);}}}
   const pg=Math.min(1,S.t/C),T9=C-0.25;
   for(const b of S.bl){const i=b.userData.i;let g=Math.min(1,Math.max(0,(S.t-i*T9/9)/0.28));if(S.dis>=0)g*=1-Math.min(1,Math.max(0,(S.dis-i*0.1)/1.1));const L=b.userData.L*g;b.scale.set(L,L*0.42,1);}
   for(const m of S.fe){const U=m.userData,u=(S.t-U.t0)/0.55;if(u<0||u>=1||S.dis>=0){m.visible=false;continue;}m.visible=true;const v=1-u,p=(a,b,c)=>v*v*a+2*v*u*b+u*u*c;m.position.set(p(U.f[0],U.s[0],U.to[0]),p(U.f[1],U.s[1],U.to[1]),p(U.f[2],U.s[2],U.to[2]));m.rotation.z=S.t*14+U.t0*9;m.scale.set(0.9,0.75,1);}
-  if(S.dis>=0){S.ma.opacity=S.mc.opacity=Math.max(0,1-S.dis/2);if(S.dis>=2){for(const G of S.gs)G.parent.remove(G);S.ma.dispose();S.mc.dispose();d.sup=null;return null;}return{sw:lerp(-1.5,-1.1*(1-Math.min(1,S.dis/1.7)),Math.min(1,S.dis/0.15)),sc:1.5-0.5*Math.min(1,S.dis/2),b:Math.max(0,0.3-S.dis/6)};}
+  {const c=x=>{x=Math.max(0,Math.min(1,x));return x*x*(3-2*x);},q=Math.max(0.001,S.dis>=0?c(S.dis/0.5):1-c(S.t/0.6));for(const m of S.bs)m.scale.setScalar(q);}   // ปีกเดิมเก็บตอนปีกเทพงอก ออกมาตอนปีกเทพสลาย
+  if(S.dis>=0){if(!S.dm)windSupDust(S);windSupDustTick(S);if(S.dis>=2.6){for(const G of S.gs)G.parent.remove(G);for(const U of S.du)U.g.dispose();for(const m of S.bs)m.scale.setScalar(1);S.ma.dispose();S.mc.dispose();S.dm.dispose();d.sup=null;return null;}return{add:lerp(-1.5,-1.1*(1-Math.min(1,S.dis/1.7)),Math.min(1,S.dis/0.15)),sc:1.5-0.5*Math.min(1,S.dis/2),b:Math.max(0,0.3-S.dis/6)};}
   if(S.dash)return{sw:-1.5,sc:1.5,b:0.35};
   const pr=Math.max(0,Math.min(1,(S.t-C+0.28)/0.28));return{sw:lerp(-0.15*pg,-1.3,pr),sc:1+0.5*pg,b:0.08+0.27*pg};}
 function makeWindWings(){
@@ -371,7 +377,7 @@ function poseWindWings(W,big,dt,guard){
   if(d.db>=0){const k=d.db+=dt,T=W_WL.dbTele;if(k<T)sw=-0.4*Math.min(1,k/(T*0.7));else if(k<T+0.72){const a=Math.min(1,(k-T)/0.05),h=k<T+0.42?1:1-(k-T-0.42)/0.3;sw=lerp(-0.4,0.6,a)*h;boost=Math.max(boost,(1-a*0.5)*h);}else d.db=-1;}   // Downburst: ปีกง้างขึ้นไปหลัง แล้วตบลงมาด้านหน้าตอนฟาด
   if(d.du>=0){d.du+=dt;if(d.du>WNV.dsCh+WNV.dsUpT+0.1)d.du=-1;}
   d.gl=(d.gl||0)+((d.du>=0||d.gh?1:0)-(d.gl||0))*Math.min(1,dt*9);sw=lerp(sw,-0.3,d.gl);sc*=1+0.1*d.gl;   // Dash + ร่อน: กางปีกออกค้างไว้ ไม่กระพือ (ผู้ใช้ 2026-11-09)
-  if(d.sup){const q=windWingSup(d,dt);if(q){sw=q.sw;sc=Math.max(sc,q.sc);boost=Math.max(boost,q.b);}}
+  if(d.sup){const q=windWingSup(d,dt);if(q){if(q.add!==undefined)sw+=q.add;else sw=q.sw;sc=Math.max(sc,q.sc);boost=Math.max(boost,q.b);}}
   sw+=d.airSw||0;   // ท่าบิน: ไปหน้า ปีกลู่หลัง • ถอยหลัง ปีกมาหน้า
   const fl=Math.sin(d.t*(big?3.2:1.2))*(0.04+0.14*d.flap)*(1-wrap)*(1-d.gl);
   d.boost.value=boost;
