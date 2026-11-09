@@ -24,24 +24,13 @@
    "fade": 0,
    "shape": "model",
    "model": "wind_tail_lane",
-   "mat": "tex",
-   "tex": "tex/wind_swoosh_a_hi",
-   "uvTile": [
-    1,
-    5
-   ],
-   "uvScroll": [
-    0,
-    -1.6
-   ],
-   "col": "#7dffb4",
-   "col2": "#000000",
-   "rim": 0,
+   "mat": "solid",
+   "col": "#2fd08f",
    "scale": 1,
    "op": {
     "0": 0,
-    "0.04": 0.55,
-    "0.92": 0.55,
+    "0.04": 0.3,
+    "0.92": 0.3,
     "1": 0
    }
   },
@@ -59,14 +48,13 @@
    "fade": 0,
    "shape": "model",
    "model": "wind_tail_edge",
-   "mat": "glow",
-   "col": "#b8ffda",
-   "col2": "#14ff8c",
+   "mat": "solid",
+   "col": "#0f9e68",
    "scale": 1,
    "op": {
     "0": 0,
-    "0.04": 0.8,
-    "0.92": 0.8,
+    "0.04": 0.9,
+    "0.92": 0.9,
     "1": 0
    }
   },
@@ -355,13 +343,13 @@
    ],
    "look": "model",
    "model": "wind_feather",
-   "mmat": "glow",
+   "mmat": "solid",
    "msize": [
-    0.14,
-    0.22
+    0.2,
+    0.3
    ],
-   "col": "#3dff9e",
-   "c2": "#00e070",
+   "col": "#17b877",
+   "c2": "#0f9e68",
    "gravity": 0,
    "drag": 0.2,
    "mspin": 120,
