@@ -61,8 +61,12 @@ function windLatePose(o,p,dt){const R=o.armR.rotation;if(!p.wn||!p.al||p.dn||(p.
     if(u<W){const k=sm(u/W);R.x=lerp(R.x,0.35,k);R.z=lerp(R.z,-0.4,k);L.x=lerp(L.x,0.35,k);L.z=lerp(L.z,0.4,k);o.b.rotation.x-=0.18*k;}
     else if(u<E+0.55){const a=sm((u-W)/0.07),h=1-sm((u-E-0.25)/0.3),pu=u<E?Math.abs(Math.sin((u-W)/(G_*2)*Math.PI)):0;R.x=lerp(R.x,lerp(0.35,-1.55,a)-0.1*pu,h);R.z=lerp(R.z,lerp(-0.4,-0.08,a),h);L.x=lerp(L.x,lerp(0.35,-0.85,a),h);L.z=lerp(L.z,lerp(0.4,0.6,a),h);o.b.rotation.x+=(lerp(-0.18,0.14,a)+0.05*pu)*h;V.tw=(V.tw||0)+((u<E?(V.s||0)*0.2:0)-(V.tw||0))*Math.min(1,dt*22);o.b.rotation.y+=V.tw*h;}
     else o.wpv=undefined;}
-  if(o.wso!==undefined){o.wso+=dt;const u=o.wso,L=o.armL.rotation,k=Math.min(1,u/0.22),e=k*k*(3-2*k),sh=Math.sin(u*70)*0.018*Math.min(1,u/W_UL.chg);   // Sonic Boom ชาร์จ: ย่อตัวโน้มไปหน้า ง้างไม้ไปหลังต่ำ มืออีกข้างชี้ทิศพุ่ง สั่นแรงขึ้นจนปล่อย
-    if(u>W_UL.chg+0.1)o.wso=undefined;else{R.x=lerp(R.x,0.7+sh,e);R.z=lerp(R.z,-0.55,e);L.x=lerp(L.x,-1.35+sh,e);L.z=lerp(L.z,0.16,e);o.b.rotation.x+=0.42*e+sh;o.b.position.y-=0.2*e;for(const l of o.legs)l.rotation.x+=0.3*e;}}
+  if(o.wso!==undefined){o.wso+=dt;const u=o.wso,C=W_UL.chg,P=0.28,L=o.armL.rotation,sm=x=>{x=Math.max(0,Math.min(1,x));return x*x*(3-2*x);},e=sm(u/0.3),pr=sm((u-C+P)/P),sh=Math.sin(u*70)*0.03*Math.min(1,u/C)*(1-pr),g=o.wsoAir?0:1;   // Sonic Boom ชาร์จ: ลอยขึ้นนิด (ถ้าอยู่พื้น) มือลงข้างลำตัวสั่น ตัวเอนหลัง → ก่อนพุ่ง โน้มหน้าท่าเตรียมวิ่ง
+    if(u>C+0.1)o.wso=undefined;else{R.x=lerp(R.x,lerp(0.15+sh,1.0,pr),e);R.z=lerp(R.z,lerp(-0.45,-0.35,pr),e);L.x=lerp(L.x,lerp(0.15-sh,-0.9,pr),e);L.z=lerp(L.z,lerp(0.45,0.3,pr),e);o.b.rotation.x+=lerp(-0.22+sh,0.75,pr)*e;o.b.position.y+=(g*0.9-0.15*pr)*e;const a=o.legs[0].position.x>0?o.legs[0]:o.legs[1],b=a===o.legs[0]?o.legs[1]:o.legs[0];a.rotation.x-=0.75*pr;b.rotation.x+=0.45*pr;o.wkn=[0.5*pr,1.1*pr];}}
+  if(o.wud!==undefined){o.wud+=dt;o.g.visible=true;const L=o.armL.rotation;if(o.wud>W_UL.ifr*3+0.1)o.wud=undefined;else{R.x=lerp(R.x,1.1,0.8);R.z=lerp(R.z,-0.3,0.8);L.x=lerp(L.x,1.1,0.8);L.z=lerp(L.z,0.3,0.8);o.b.rotation.x+=1.0;for(const l of o.legs)l.rotation.x+=0.5;}}
+  if(o.wld){o.g.visible=true;const S=o.wld;S.t+=dt;const u=S.t,H=S.air?W_UL.landA:W_UL.land,L=o.armL.rotation,sm=x=>{x=Math.max(0,Math.min(1,x));return x*x*(3-2*x);},w=sm(u/0.08)*(1-sm((u-H)/0.3)),a=o.legs[0].position.x>0?o.legs[0]:o.legs[1],b=a===o.legs[0]?o.legs[1]:o.legs[0];   // จบแดช: พื้น = Superhero landing • บิน = ก้มหน้า คทายื่นไปหน้า ขางอข้างหนึ่ง
+    if(u>H+0.3)o.wld=null;else if(S.air){R.x=lerp(R.x,-1.55,w);R.z=lerp(R.z,0,w);L.x=lerp(L.x,0.3,w);L.z=lerp(L.z,0.4,w);o.b.rotation.x+=0.6*w;a.rotation.x-=0.65*w;b.rotation.x+=0.25*w;o.wkn=[0.2*w,1.3*w];}
+    else{R.x=lerp(R.x,0.2,w);R.z=lerp(R.z,-0.12,w);L.x=lerp(L.x,0.95,w);L.z=lerp(L.z,0.95,w);o.b.rotation.x+=0.55*w;o.b.position.y-=0.78*w;a.rotation.x-=1.3*w;b.rotation.x+=0.6*w;o.wkn=[1.9*w,1.6*w];}}
   if(o.wtl!==undefined){o.wtl+=dt;const u=o.wtl,T=W_VO.tlD,L=o.armL.rotation,sm=x=>{x=Math.max(0,Math.min(1,x));return x*x*(3-2*x);};   // Tailwind: ไขว้ไม้ลงซ้ายล่างระดับเข่า ย่อตัว แล้วตวัดขึ้นเร็ว ปล่อยลม
     if(u<T+0.7){const d=sm(u/(T*0.9)),a=sm((u-T)/0.09),w=d*(1-sm((u-T-0.35)/0.35));R.x=lerp(R.x,lerp(-0.35,-2.7,a),w);R.z=lerp(R.z,lerp(1.0,-0.25,a),w);L.x=lerp(L.x,lerp(0.3,-0.5,a),w);L.z=lerp(L.z,0.4,w);o.b.rotation.y+=lerp(0.5,-0.25,a)*w;o.b.rotation.x+=lerp(0.28,-0.14,a)*w;o.b.position.y-=0.24*(1-a)*w;for(const l of o.legs)l.rotation.x+=0.32*(1-a)*w;}else o.wtl=undefined;}
   if(o.wdb!==undefined){o.wdb+=dt;const u=o.wdb,T=W_WL.dbTele,L=o.armL.rotation,sm=x=>{x=Math.max(0,Math.min(1,x));return x*x*(3-2*x);};   // Downburst: ชูไม้ขึ้นฟ้า ตัวแอ่นมองขึ้น → ฟาดไม้ลงชี้เป้า ตัวโน้ม ย่อขานิด ปีกกดลงมาหน้า → ค้างแป๊บแล้วคืนท่า
@@ -212,12 +216,12 @@ function windEfx(ev){
     case 'wnfcend':return true;
     case 'wnfast':{const o=WV.ff||(WV.ff=new Map());const old=o.get(ev.id);if(old){fxStop(old);o.delete(ev.id);}
       if(ev.n){const I=fxPlay('wind/fw_fast',{x,y,h:H,a,follow:ev.id});if(I)o.set(ev.id,I);if(near)snd('whoosh',ev);if(mine)toast('บินเร็ว: เมาส์ = บังคับแบบเครื่องบิน • ใช้สกิลไม่ได้ • ปล่อย Shift = กลับบินปกติ');}return true;}
-    case 'wnsochg':fxPlay('wind/sonic_charge',{x,y,h:H,a,follow:ev.id});{const o=PM3.get(ev.id);if(o)o.wso=0;}if(near)snd('cast_pull',ev);if(mine)toast('Sonic Boom Strike: ชาร์จ 0.8 วิ แล้วพุ่งไปตามที่เล็ง');return true;
-    case 'wnsoimp':{const o=PM3.get(ev.id);if(o)o.wso=undefined;}if(near){impactFrame(1,x,y,H+1.2,0.15);hitStop(0.06);}return true;
-    case 'wnsodash':fxPlay(ev.m?'wind/sonic_dash':'wind/sonic_dash_g',{x,y,h:H,a,follow:ev.id});if(near){snd('boom',ev);snd('whoosh',ev);}return true;
+    case 'wnsochg':fxPlay('wind/sonic_charge',{x,y,h:H,a,follow:ev.id});{const o=PM3.get(ev.id);if(o){o.wso=0;o.wsoAir=!!ev.m;o.wld=null;if(o.wWings)o.wWings.userData.sup={t:0,dis:-1};}}if(near)snd('cast_pull',ev);if(mine)toast('Sonic Boom Strike: ชาร์จ 1.7 วิ แล้วพุ่งไปตามที่เล็ง');return true;
+    case 'wnsoimp':{const o=PM3.get(ev.id);if(o){o.wso=undefined;o.wud=0;if(o.wWings&&o.wWings.userData.sup)o.wWings.userData.sup.dash=true;}}if(near)impactFrame(1,x,y,H+1.2,W_UL.ifr*3,ev.id);return true;
+    case 'wnsodash':fxPlay(ev.m?'wind/sonic_dash':'wind/sonic_dash_g',{x,y,h:H,a,follow:ev.id});{const o=PM3.get(ev.id);if(o){o.wud=undefined;o.wld={t:0,air:!!ev.m};if(o.wWings&&o.wWings.userData.sup){const S=o.wWings.userData.sup;S.dash=false;S.dis=0;}}fxPlay('wind/sonic_end',{x:ev.x2,y:ev.y2,h:H,a});if(ev.m)fxPlay('wind/sonic_orb',{x:ev.x2,y:ev.y2,h:H,follow:ev.id});}if(near){snd('boom',ev);snd('whoosh',ev);}return true;
     case 'wnsohit':fxPlay('wind/sonic_hit',{x,y,h:H,a});if(near){snd('break',ev);hitStop(0.1);}return true;
     case 'wnsowave':fxPlay('wind/sonic_wave',{x,y,h:H,aim:false});if(near)snd('hit',ev);return true;
-    case 'wnsocancel':{const o=PM3.get(ev.id);if(o)o.wso=undefined;}return true;
+    case 'wnsocancel':{const o=PM3.get(ev.id);if(o){o.wso=undefined;if(o.wWings&&o.wWings.userData.sup)o.wWings.userData.sup.dis=1.9;}}return true;
     case 'wnsoend':return true;
     case 'wntl':{const o=PM3.get(ev.id);if(o)o.wtl=0;(WV.tl||(WV.tl=[])).push({x,y,ca:Math.cos(a),sa:Math.sin(a),t:0,tm:ev.tm});}fxPlay('wind/tailwind',{x,y,h:H,a});if(near)snd('whoosh',ev);return true;
     case 'wnsoon':if(mine)toast('สกิลนี้ของสายลมยังทำไม่เสร็จ (ขั้นที่ 2-3)');return true;
@@ -316,6 +320,20 @@ const WW_PRI=[[[0.35,0.55],[2.7,0.9],[3.3,3.4],0.42],[[0.45,0.4],[2.6,0.55],[4.0
 const WW_COV=[[[0.15,0.35],[1.4,1.15],[2.5,0.95],0.34],[[0.25,0.15],[1.3,0.55],[2.2,0.25],0.3],[[0.35,-0.05],[1.2,-0.05],[1.8,-0.5],0.28],[[0.45,-0.15],[1.0,-0.45],[1.25,-1.05],0.24]];
 const WW_RIB=[[[0.3,1.0],[2.4,2.9],[4.0,2.9],0.06],[[0.6,0.6],[3.4,1.1],[4.9,1.9],0.05],[[0.7,-0.4],[3.4,-0.3],[4.6,0.5],0.05],[[0.8,-0.9],[2.7,-1.7],[3.4,-2.4],0.05],[[0.6,-1.0],[1.2,-2.2],[0.6,-2.9],0.045]];
 let _wwGeo=null;
+// Sonic Boom: ชุดเสริมปีก (ใบมีดแสงงอกทีละใบ + ขนนกลอยโค้งเข้าปีก) ระหว่างชาร์จ • ง้างปีกดุก่อนพุ่ง • จบแดชสลายใน 2 วิ
+let _wsupG=null;
+function windWingSup(d,dt){const S=d.sup,C=W_UL.chg;S.t+=dt;if(S.dis>=0)S.dis+=dt;
+  if(!_wsupG){const sh=new THREE.Shape();sh.moveTo(0,-0.09);sh.lineTo(0.72,-0.055);sh.lineTo(1,0);sh.lineTo(0.72,0.055);sh.lineTo(0,0.09);sh.closePath();_wsupG=new THREE.ShapeGeometry(sh);_wsupG.userData.keep=true;}
+  if(!S.bl){const mk=c=>new THREE.MeshBasicMaterial({color:c,transparent:true,opacity:1,depthWrite:false,depthTest:false,side:THREE.DoubleSide,toneMapped:false});S.ma=mk('#10e08c');S.mc=mk('#d8fff0');S.bl=[];S.fe=[];S.gs=[];
+    for(const sd of d.sides){const wing=sd.piv.children[0],G=new THREE.Group();wing.add(G);S.gs.push(G);
+      for(let i=0;i<9;i++){const b=new THREE.Group(),m=new THREE.Mesh(_wsupG,S.ma),c=new THREE.Mesh(_wsupG,S.mc);c.scale.set(0.92,0.32,1);c.position.z=0.01;m.frustumCulled=c.frustumCulled=false;m.renderOrder=c.renderOrder=4;b.add(m,c);b.position.set(0.35+i*0.05,0.3,0.12);b.rotation.z=-0.28+i*0.215;b.userData={i,L:lerp(5.6,3.6,Math.abs(i-2)/6)};b.scale.setScalar(0.001);G.add(b);S.bl.push(b);}
+      for(let i=0;i<14;i++){const m=new THREE.Mesh(_wsupG,S.ma);m.frustumCulled=false;m.renderOrder=4;m.visible=false;const A=-0.3+Math.random()*2,E=3+Math.random()*2;m.userData={t0:0.05+i*(C-0.5)/14,to:[Math.cos(A)*E*0.6,Math.sin(A)*E*0.6,0.1],f:[Math.cos(A+1.2)*7,Math.sin(A+1.2)*7-1,(Math.random()-0.5)*5],s:[Math.cos(A+0.6)*7,Math.sin(A+0.6)*7,(Math.random()-0.5)*7]};G.add(m);S.fe.push(m);}}}
+  const pg=Math.min(1,S.t/C),T9=C-0.25;
+  for(const b of S.bl){const i=b.userData.i;let g=Math.min(1,Math.max(0,(S.t-i*T9/9)/0.28));if(S.dis>=0)g*=1-Math.min(1,Math.max(0,(S.dis-i*0.1)/1.1));const L=b.userData.L*g;b.scale.set(L,L*0.42,1);}
+  for(const m of S.fe){const U=m.userData,u=(S.t-U.t0)/0.55;if(u<0||u>=1||S.dis>=0){m.visible=false;continue;}m.visible=true;const v=1-u,p=(a,b,c)=>v*v*a+2*v*u*b+u*u*c;m.position.set(p(U.f[0],U.s[0],U.to[0]),p(U.f[1],U.s[1],U.to[1]),p(U.f[2],U.s[2],U.to[2]));m.rotation.z=S.t*14+U.t0*9;m.scale.set(0.9,0.75,1);}
+  if(S.dis>=0){S.ma.opacity=S.mc.opacity=Math.max(0,1-S.dis/2);if(S.dis>=2){for(const G of S.gs)G.parent.remove(G);S.ma.dispose();S.mc.dispose();d.sup=null;return null;}return{sw:-1.1*(1-Math.min(1,S.dis/1.7)),sc:1.5-0.5*Math.min(1,S.dis/2),b:Math.max(0,0.3-S.dis/6)};}
+  if(S.dash)return{sw:-1.5,sc:1.5,b:0.35};
+  const pr=Math.max(0,Math.min(1,(S.t-C+0.28)/0.28));return{sw:lerp(-0.15*pg,-1.3,pr),sc:1+0.5*pg,b:0.08+0.27*pg};}
 function makeWindWings(){
   const M=wwMats();
   if(!_wwGeo){const rel=(P0,a)=>[a[0]-P0[0],a[1]-P0[1]],f=(L,z0,off)=>L.map(([P0,C,T,w],i)=>({P0,i:i+off,g:wwFeatherGeo([0,0],rel(P0,C),rel(P0,T),w,i+off,z0+i*0.03)}));
@@ -353,6 +371,7 @@ function poseWindWings(W,big,dt,guard){
   if(d.db>=0){const k=d.db+=dt,T=W_WL.dbTele;if(k<T)sw=-0.4*Math.min(1,k/(T*0.7));else if(k<T+0.72){const a=Math.min(1,(k-T)/0.05),h=k<T+0.42?1:1-(k-T-0.42)/0.3;sw=lerp(-0.4,0.6,a)*h;boost=Math.max(boost,(1-a*0.5)*h);}else d.db=-1;}   // Downburst: ปีกง้างขึ้นไปหลัง แล้วตบลงมาด้านหน้าตอนฟาด
   if(d.du>=0){d.du+=dt;if(d.du>WNV.dsCh+WNV.dsUpT+0.1)d.du=-1;}
   d.gl=(d.gl||0)+((d.du>=0||d.gh?1:0)-(d.gl||0))*Math.min(1,dt*9);sw=lerp(sw,-0.3,d.gl);sc*=1+0.1*d.gl;   // Dash + ร่อน: กางปีกออกค้างไว้ ไม่กระพือ (ผู้ใช้ 2026-11-09)
+  if(d.sup){const q=windWingSup(d,dt);if(q){sw=q.sw;sc=Math.max(sc,q.sc);boost=Math.max(boost,q.b);}}
   sw+=d.airSw||0;   // ท่าบิน: ไปหน้า ปีกลู่หลัง • ถอยหลัง ปีกมาหน้า
   const fl=Math.sin(d.t*(big?3.2:1.2))*(0.04+0.14*d.flap)*(1-wrap)*(1-d.gl);
   d.boost.value=boost;

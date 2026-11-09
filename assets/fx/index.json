@@ -3679,6 +3679,17 @@
    "dur": 1,
    "n": 37
   },
+  "wind/sonic_end": {
+   "v": "8a144145",
+   "desc": "Sonic Boom จบแดช: ลมตามมาชนแรง",
+   "pal": "wind",
+   "tags": [
+    "wind",
+    "ult"
+   ],
+   "dur": 1.2,
+   "n": 5
+  },
   "wind/sonic_hit": {
    "v": "9f527690",
    "desc": "Sonic Boom ชนตรง: แฟลชขาวใหญ่ + คลื่นช็อก + เส้นลมแผ่รัศมีและพุ่งไปตามทิศพุ่ง + เศษลม",
@@ -3690,6 +3701,17 @@
    ],
    "dur": 0.7,
    "n": 8
+  },
+  "wind/sonic_orb": {
+   "v": "9f1f5fb7",
+   "desc": "Sonic Boom จบกลางอากาศ: ลูกบอลปลายคทา",
+   "pal": "wind",
+   "tags": [
+    "wind",
+    "ult"
+   ],
+   "dur": 0.8,
+   "n": 2
   },
   "wind/sonic_wave": {
    "v": "90f7cd64",
