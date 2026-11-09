@@ -366,7 +366,7 @@ function updateScreenFx(dt){
   if(SCR.imp){const I=SCR.imp;I.t+=dt;const u=I.t/I.max;
     if(u>=1)SCR.imp=null;
     else{if(I.id!=null){const o=PM3.get(I.id);if(o){I.x=o.g.position.x;I.y=o.g.position.y+1.2;I.z=o.g.position.z;}}_scv.set(I.x,I.y,I.z).project(cam);if(_scv.z<1)GRADEU.uCtr.value.set(clamp(_scv.x*0.5+0.5,0,1),clamp(_scv.y*0.5+0.5,0,1));
-      GRADEU.uImpM.value=I.id!=null?1:0;if(I.id!=null){GRADEU.uImp.value=I.a;const f=u*3%1;if(f<0.22){const k=I.a*0.7*(1-f/0.22);F.r+=k;F.g+=k;F.b+=k;}}else{const on=u<0.4||(u>0.54&&u<0.9);GRADEU.uImp.value=on?I.a:0;}
+      GRADEU.uImpM.value=I.id!=null?1:0;if(I.id!=null)GRADEU.uImp.value=I.a;else{const on=u<0.4||(u>0.54&&u<0.9);GRADEU.uImp.value=on?I.a:0;}
       if(I.id==null&&u>=0.4&&u<=0.54){const k=I.a*0.55*(1-Math.abs(u-0.47)/0.07);F.r+=k;F.g+=k;F.b+=k;}}}
   SCR.chr=Math.max(0,SCR.chr-dt*3);GRADEU.uChr.value=SCR.chr;
   SCR.hurt=Math.max(0,SCR.hurt-dt*1.8);GRADEU.uHurt.value=SCR.hurt*0.55;

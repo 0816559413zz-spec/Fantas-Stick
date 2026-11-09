@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Sonic Boom Strike finish (user 2026-11-09): hard wind arrives with you at the end of the dash; air finish keeps a ball on the wand tip.
+# Sonic Boom Strike finish (user 2026-11-09): hard wind arrives with you at the end of the dash.
 # +z = dash direction. Colours are solid/normal-blend so they read on the bright training floor too.
 import json, os
 R = os.path.join(os.path.dirname(__file__), '..')
@@ -15,8 +15,3 @@ END = [
     {"id": "fth", "t": "emit", "at": 0, "life": 0.12, "att": "ground", "pos": [0, 1.2, 0], "burst": 30, "rate": 0, "from": "disc", "fr": 2, "dir": "aim", "spread": 0.6, "speed": [18, 44], "up": [0, 4], "plife": [0.6, 1.1], "look": "model", "model": "wind_feather", "mmat": "solid", "msize": [0.24, 0.38], "col": "#17b877", "c2": "#0f9e68", "gravity": -2, "drag": 1.6, "mspin": 220},
 ]
 save("sonic_end", "Sonic Boom จบแดช: ลมตามมาชนแรง", 1.2, END)
-ORB = [
-    {"id": "core", "t": "mesh", "at": 0, "life": 0.72, "att": "wand", "pos": [0, 0, 0], "fade": 0, "shape": "sphere", "mat": "solid", "col": "#eafff5", "scale": {"0": 0.05, "0.12": 0.32, "0.8": 0.3, "1": 0.02}, "op": 1},
-    {"id": "shell", "t": "mesh", "at": 0, "life": 0.72, "att": "wand", "pos": [0, 0, 0], "fade": 0, "shape": "sphere", "mat": "solid", "col": "#2fd08f", "scale": {"0": 0.05, "0.14": 0.5, "0.8": 0.46, "1": 0.02}, "op": 0.55},
-]
-save("sonic_orb", "Sonic Boom จบกลางอากาศ: ลูกบอลปลายคทา", 0.8, ORB)
