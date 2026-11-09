@@ -93,7 +93,7 @@ const CAM_FRAMES={
   earthBase:{dist:7,h:2.25,side:0,lift:2.4},earthRampage:{dist:9,h:4.1,side:0,lift:3},
   earthShield:{dist:9,h:2.8,side:0,lift:5.5},earthCharge:{dist:10,h:3,side:0,lift:5},
   earthAuger:{dist:12,h:3.3,side:0,lift:3.5},earthSky:{dist:15.2,h:3.8,side:0,lift:3},
-  windShield:{dist:6.2,h:2.45,side:0.34},windFlight:{dist:8.6,h:2.65,side:0.32},
+  windShield:{dist:6.2,h:2.45,side:0.34},windFlight:{dist:10.4,h:4.3,side:0.3},
   waterBeam:{dist:7.8,h:3.5,side:0},waterDragon:{dist:17.2,h:4.8,side:0.30}
 };
 const CAM_FRAME={dist:4.7,h:2.05,side:0.25,lift:0},CAM_TRACK={has:false,key:'',x:0,y:0,z:0,r:0,gy:undefined};
