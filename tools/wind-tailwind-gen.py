@@ -24,6 +24,7 @@ for s, n in ((-1, "l"), (1, "r")):
 mesh('wind_tail_deco', "Tailwind: ลายลูกศรและเส้นในตามขอบร่องลม", "glow", parts)
 arm = lambda n, s: {"id": n, "k": "ribbon", "path": [[s * W / 2, 0, -2.6], [s * W / 4, 0, -1.3], [0, 0, 0]], "w": 0.9, "seg": 8}
 mesh('wind_tail_front', "Tailwind: หัวลมรูปลูกศรวิ่งนำร่องลม", "glow", [arm("l", -1), arm("r", 1)])
+mesh('wind_tail_gust', "Tailwind: เส้นลมโค้งลอยเหนือร่อง", "glow", [{"id": "g", "k": "ribbon", "path": [[0, 0, 0], [0.45, 0.25, 2], [-0.3, 0.55, 4], [0.35, 0.3, 6], [0, 0, 8]], "w": 1.1, "taper": 0.6, "seg": 24}, {"id": "gw", "k": "ribbon", "wall": True, "path": [[0, 0, 0], [0.45, 0.25, 2], [-0.3, 0.55, 4], [0.35, 0.3, 6], [0, 0, 8]], "w": 0.8, "taper": 0.6, "seg": 24}])
 L = [
  {"id": "lane", "t": "mesh", "at": 0, "life": 5, "att": "ground", "pos": [0, 0.08, 0], "fade": 0, "shape": "model", "model": "wind_tail_lane", "mat": "solid", "col": "#2fd08f", "scale": {"0": [1, 1, 0.01], "0.075": 1}, "op": {"0": 0, "0.04": 0.17, "0.92": 0.17, "1": 0}},
  {"id": "edge", "t": "mesh", "at": 0, "life": 5, "att": "ground", "pos": [0, 0.1, 0], "fade": 0, "shape": "model", "model": "wind_tail_edge", "mat": "solid", "col": "#07845a", "scale": {"0": [1, 1, 0.01], "0.075": 1}, "op": {"0": 0, "0.04": 1, "0.92": 1, "1": 0}},
@@ -44,6 +45,12 @@ L.append({"id": "deco", "t": "mesh", "at": 0, "life": 5, "att": "ground", "pos":
 for s in (-1, 1):
     for z in (3, 9, 15, 21, 27):
         L.append({"id": "ef%d%d" % (s + 1, z), "t": "emit", "at": round(z / LEN * RUN, 3), "life": 4.4, "att": "ground", "pos": [s * W / 2, 0.4, z], "burst": 0, "rate": 3, "from": "disc", "fr": 0.6, "dir": "up", "speed": [0.5, 1.5], "up": [1, 2.5], "plife": [0.7, 1.2], "look": "model", "model": "wind_feather", "mmat": "solid", "msize": [0.16, 0.24], "col": "#17b877", "c2": "#0f9e68", "gravity": 0, "drag": 0.5, "mspin": 120})
+# Faint gusts keep blowing above the lane for its whole life (user 2026-11-09).
+XS = [-3.2, 1.6, -0.8, 3.4, -2.2, 0.4, 2.6, -3.6]
+YS = [1.8, 3.0, 2.3, 3.6, 2.0, 3.3, 1.6, 2.7]
+for i in range(16):
+    x, y, z0 = XS[i % 8], YS[(i * 3) % 8], 1 + (i * 7) % 15
+    L.append({"id": "air%d" % i, "t": "mesh", "at": round(0.5 + i * 0.22, 3), "life": 1.2, "att": "ground", "pos": {"0": [x, y, z0], "1": [x, y, z0 + 14]}, "fade": 0, "shape": "model", "model": "wind_tail_gust", "mat": "solid", "col": "#25b57f", "scale": 1, "op": {"0": 0, "0.2": 0.55, "0.8": 0.55, "1": 0}})
 for l in L:
     if l["id"].startswith("st"): l["at"] = round(l["pos"][2] / LEN * RUN, 3)
 for l in L: l["at"] = round(l["at"] + 0.2, 3)
