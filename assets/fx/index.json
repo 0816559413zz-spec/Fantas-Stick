@@ -3858,7 +3858,7 @@
    "n": 3
   },
   "wind/tailwind": {
-   "v": "47dde568",
+   "v": "d78f9533",
    "desc": "Tailwind: ร่องลมยาว 30 ม. กว้าง 9 ม. อยู่ 5 วิ ลายลมไหลไปข้างหน้า มีเส้นขอบและเส้นลม",
    "pal": "wind",
    "tags": [
@@ -3867,7 +3867,7 @@
     "buff"
    ],
    "dur": 5.4,
-   "n": 51
+   "n": 22
   },
   "wind/ult_blade_a": {
    "v": "a8f398a8",
@@ -5491,17 +5491,17 @@
    "mat": "glow",
    "n": 2
   },
-  "wind_tail_gust": {
-   "v": "44beaf63",
-   "desc": "Tailwind: เส้นลมยาวลอยเหนือร่อง",
-   "mat": "glow",
-   "n": 2
-  },
   "wind_tail_lane": {
    "v": "3cbc06a2",
    "desc": "Tailwind: แผ่นร่องลมแบนบนพื้น ยาว 30 ม. กว้าง 9 ม.",
    "mat": "glow",
    "n": 1
+  },
+  "wind_tail_veil": {
+   "v": "e055bad9",
+   "desc": "Tailwind: ม่านลมจาง ๆ ตามยาวร่อง ใช้ลายกำแพงลม",
+   "mat": "glow",
+   "n": 4
   },
   "wind_tornado": {
    "v": "705c00a8",
