@@ -44,7 +44,7 @@ import math
 def wing_path(side, s, Ts, rise, life):
     keys = {}
     for i in range(15):
-        u = i / 14; xs = min(1, u * life / Ts); ph = 2 * math.pi * (1 - (1 - xs) ** 2.2); psi = s * ph
+        u = i / 14; xs = min(1, u * life / Ts); ph = 2 * math.pi * (1 - (1 - xs) ** 1.7); psi = s * ph
         xc, zc = side * 1.7 * math.cos(psi) - 0.35 * math.sin(psi), -side * 1.7 * math.sin(psi) - 0.35 * math.cos(psi)   # body left / forward after the turn
         y = 0.45 + rise * math.sin(math.pi * xs)
         p = [round(zc, 3), round(y, 3), round(xc, 3)] if s < 0 else [round(-zc, 3), round(y, 3), round(-xc, 3)]   # dash-left: +z is body left • dash-right: +z is body right
@@ -62,6 +62,6 @@ def side_impact(ground):
         L += [{"id": "kick", "t": "ring", "at": 0.0, "life": 0.3, "att": "ground", "pos": [0, 0.1, 0], "col": HI, "r": 3.2, "op": 0.5},
               {"id": "dust", "t": "emit", "at": 0.0, "life": 0.08, "att": "ground", "pos": [0, 0.15, 0], "burst": 10, "rate": 0, "from": "disc", "fr": 0.9, "dir": "out", "spread": 0.7, "speed": [2, 5], "up": [0.3, 1], "plife": [0.35, 0.6], "look": "smoke", "size": [5, 8], "col": "#e5efe9", "c2": "#9fb5a8", "gravity": -0.2, "grow": 1.2, "drag": 3}]
     return L
-for n, L, d in [("slip_side_l", side_tail(-1, 0.52), "แดชซ้าย ตอนบิน หางลมที่ปีก"), ("slip_side_r", side_tail(1, 0.52), "แดชขวา ตอนบิน หางลมที่ปีก"), ("slip_side_l_g", side_tail(-1, 0.48), "แดชซ้าย ตอนอยู่พื้น หางลมที่ปีก"), ("slip_side_r_g", side_tail(1, 0.48), "แดชขวา ตอนอยู่พื้น หางลมที่ปีก"), ("slip_side_w", side_impact(False), "แดชข้าง ตอนบิน คลื่นลมจุดเริ่ม"), ("slip_side_w_g", side_impact(True), "แดชข้าง ตอนอยู่พื้น คลื่นลมจุดเริ่ม")]:
+for n, L, d in [("slip_side_l", side_tail(-1, 0.30), "แดชซ้าย ตอนบิน หางลมที่ปีก"), ("slip_side_r", side_tail(1, 0.30), "แดชขวา ตอนบิน หางลมที่ปีก"), ("slip_side_l_g", side_tail(-1, 0.26), "แดชซ้าย ตอนอยู่พื้น หางลมที่ปีก"), ("slip_side_r_g", side_tail(1, 0.26), "แดชขวา ตอนอยู่พื้น หางลมที่ปีก"), ("slip_side_w", side_impact(False), "แดชข้าง ตอนบิน คลื่นลมจุดเริ่ม"), ("slip_side_w_g", side_impact(True), "แดชข้าง ตอนอยู่พื้น คลื่นลมจุดเริ่ม")]:
     with open(os.path.join(R, 'assets/fx/wind', n + '.fx.json'), 'w', encoding='utf-8', newline='\n') as o:
         json.dump({"v": 1, "desc": "Slipstream " + d, "tags": ["wind", "dash"], "pal": "wind", "dur": 0.7, "seed": 85, "layers": L}, o, ensure_ascii=False, indent=1)
