@@ -145,9 +145,9 @@ const RAIL=defSpell(2,{id:'railgun',v:{cost:3,draw:1.8,len:1000,dmg:75,env:45,sl
 function stormBowTick(p,dt){const R=p.rail,V=RAIL.v,inp=p.inp||{};R.a=p.ang;R.life-=dt;
   if(p.stun>0||!p.alive||R.life<=0||(inp.sh&&!R.s0)){p.rail=null;return;}R.s0=!!inp.sh;
   if(p.bot){R.d+=dt;R.t=Math.max(0,V.draw-R.d);if(R.d>=V.draw)stormBowFire(p);return;}
+  R.d+=dt;R.t=Math.max(0,V.draw-R.d);   // charges by itself as soon as the bow is out
   if(!R.armed){if(!inp.fire)R.armed=true;return;}
-  if(inp.fire){R.d+=dt;R.t=Math.max(0,V.draw-R.d);return;}
-  if(R.d>0){if(R.d>=V.draw)stormBowFire(p);else{p.rail=null;emit({k:'efx',z:'sbowfail',x:Math.round(p.x),y:Math.round(p.y),h:p.z+1.4,id:p.id});}}}
+  if(inp.fire){if(R.d>=V.draw)stormBowFire(p);else{p.rail=null;emit({k:'efx',z:'sbowfail',x:Math.round(p.x),y:Math.round(p.y),h:p.z+1.4,id:p.id});}}}
 function stormBowFire(p){const V=RAIL.v;p.rail=null;const h0=p.z+1.5,inp=p.inp||{},r=aimRay3(p,h0,V.len);let ex,ey,eh;
   if(r){ex=r.x;ey=r.y;eh=r.h;}else{const ap=clamp(inp.ap||0,-1.5,1.5);ex=p.x+Math.cos(p.ang)*V.len;ey=p.y+Math.sin(p.ang)*V.len;eh=h0+Math.tan(ap)*V.len/20;}
   const dx=ex-p.x,dy=ey-p.y,dh=(eh-h0)*20,L=Math.max(1,Math.hypot(dx,dy,dh));let best=null,bu=2;

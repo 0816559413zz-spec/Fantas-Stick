@@ -4,17 +4,27 @@ let _sbShard=null;
 function sbShard(){if(_sbShard)return _sbShard;const s=new THREE.Shape();s.moveTo(0,-.05);s.bezierCurveTo(.22,-.17,.68,-.13,1,.02);s.bezierCurveTo(.74,.08,.34,.13,0,.05);s.closePath();_sbShard=new THREE.ShapeGeometry(s,10);_sbShard.userData.keep=true;return _sbShard;}
 function sbMat(c,k,o=1){const m=new THREE.MeshBasicMaterial({color:hdr(c,k),transparent:true,opacity:o,depthWrite:false,side:THREE.DoubleSide,toneMapped:false});return m;}
 function sbJag(a,b,n,amp,V3){const P=[],d=b.clone().sub(a);for(let i=0;i<n;i++){const u=i/(n-1),e=Math.sin(Math.PI*u)*amp;P.push(a.clone().addScaledVector(d,u).add(V3((Math.random()-.5)*e,(Math.random()-.5)*e,(Math.random()-.5)*e)));}return P;}
+// Bow design: two jagged lightning-bolt blades with fanned spikes, faces turned to the shooter so they read from behind; a spinning charge ring at the grip; the string and the arrow are live lightning.
+const SB_TIP={y:.46,z:1.24};
+let _sbBlade=null;
+function sbBlade(){if(_sbBlade)return _sbBlade;const s=new THREE.Shape(),P=[[0,.07],[.44,.12],[.33,.0],[.86,.09],[.74,-.04],[1.3,.0],[.62,-.2],[.72,-.08],[.24,-.15],[.32,-.04],[0,-.08]];s.moveTo(P[0][0],P[0][1]);for(let i=1;i<P.length;i++)s.lineTo(P[i][0],P[i][1]);s.closePath();const g=new THREE.ExtrudeGeometry(s,{depth:.05,bevelEnabled:false,steps:1});g.applyMatrix4(new THREE.Matrix4().makeBasis(new THREE.Vector3(0,0,1),new THREE.Vector3(1,0,0),new THREE.Vector3(0,1,0)));g.translate(0,-.025,0);g.userData.keep=true;_sbBlade=g;return g;}
 function sbMake(o){
-  const F=natFx(),{V3,Tube,ADD}=F,g=new THREE.Group();g.position.set(0,-.62,.02);o.armR.add(g);
-  const yel=sbMat('#ffd93a',.82),wht=sbMat('#ffe98a',.92),cy=sbMat('#38dcff',.9),core=sbMat('#fff2a8',1),shards=[];
-  for(const s of [-1,1])for(let i=0;i<9;i++){const t=i/8,L=lerp(.42,.95,Math.sin(t*2.6+.2)),b=new THREE.Group(),m=new THREE.Mesh(sbShard(),i%3===1?cy:i%2?yel:wht);m.frustumCulled=false;m.scale.set(1,lerp(1.3,2.3,t),1);b.add(m);b.rotation.y=Math.PI/2;b.position.set(0,.02+.42*t*t,s*(.08+1.02*t));b.rotation.x=s*lerp(1.25,.3,t);b.scale.setScalar(L);g.add(b);shards.push(b);}
-  const spine=new THREE.Mesh(new THREE.CylinderGeometry(.018,.03,2.2,6),core);spine.rotation.x=Math.PI/2;spine.frustumCulled=false;g.add(spine);
-  const sMat=new THREE.LineBasicMaterial({color:'#fff4b8',transparent:true,opacity:.95}),sGeo=new THREE.BufferGeometry().setFromPoints([V3(0,.44,1.1),V3(0,.44,0),V3(0,.44,-1.1)]),string=new THREE.Line(sGeo,sMat);string.frustumCulled=false;g.add(string);
-  const arrow=new THREE.Group();g.add(arrow);const arrowMat=sbMat('#b58c3a',.5,.8);const shaft=new THREE.Mesh(new THREE.CylinderGeometry(.018,.03,1.5,6),arrowMat);shaft.position.y=-.75;shaft.frustumCulled=false;arrow.add(shaft);
-  const head=new THREE.Shape();head.moveTo(0,-.62);head.lineTo(.26,.08);head.lineTo(.07,-.02);head.lineTo(-.07,-.02);head.lineTo(-.26,.08);head.closePath();const hg=new THREE.ShapeGeometry(head),h1=new THREE.Mesh(hg,arrowMat);h1.position.y=-1.5;h1.frustumCulled=false;arrow.add(h1);const h2=h1.clone();h2.rotation.y=Math.PI/2;arrow.add(h2);
-  const arcMat=ADD('#ffffff',{vertexColors:true}),arcs=Array.from({length:10},()=>{const m=Tube(10,4,arcMat,g);m.castShadow=false;m.visible=false;return m;});
-  const hide=o.tip.parent.children.filter(c=>c!==o.tip&&c!==g),bodyMat=ADD('#ffffff',{vertexColors:true}),body=Array.from({length:7},()=>{const m=Tube(10,4,bodyMat,o.g);m.castShadow=false;return m;});g.scale.setScalar(.001);
-  return {g,shards,string,sGeo,arrow,arrowMat,arcs,body,hide,mats:[yel,wht,cy,core],T:0,V3,age:0};
+  const F=natFx(),{V3,Tube,ADD,glow,GLOWT}=F,g=new THREE.Group();g.position.set(0,-.62,.02);o.armR.add(g);
+  const gold=sbMat('#ffcc14',1),lemon=sbMat('#fff06a',1.15),cy=sbMat('#28d8ff',1.1),core=sbMat('#fffbd8',1.3);
+  const blade=(par,m,x,y,z,sc,rx=0,ry=0)=>{const q=new THREE.Mesh(sbBlade(),m);q.position.set(x,y,z);q.scale.set(sc,1,sc);q.rotation.set(rx,ry,0);q.frustumCulled=false;par.add(q);return q;};
+  const limbs=[];
+  for(const s of [-1,1]){const L=new THREE.Group();L.position.z=s*.1;L.rotation.x=-s*.36;L.scale.z=s;g.add(L);limbs.push(L);
+    blade(L,gold,0,0,0,1);blade(L,cy,0,-.05,.02,.74);blade(L,lemon,0,.04,.06,.52);
+    blade(L,gold,.02,0,.18,.55,0,.62);blade(L,gold,-.02,0,.18,.55,0,-.62);blade(L,cy,.05,.02,.5,.36,0,.75);blade(L,cy,-.05,.02,.5,.36,0,-.75);}
+  const ring=new THREE.Group();g.add(ring);{const t=new THREE.Mesh(new THREE.TorusGeometry(.2,.022,6,28),lemon);t.frustumCulled=false;ring.add(t);t.rotation.x=Math.PI/2;for(let i=0;i<4;i++){const d=new THREE.Mesh(new THREE.OctahedronGeometry(.06,0),i%2?cy:core);d.position.set(Math.cos(i*Math.PI/2)*.28,0,Math.sin(i*Math.PI/2)*.28);d.scale.y=1.8;d.frustumCulled=false;ring.add(d);}}
+  {const d=new THREE.Mesh(new THREE.OctahedronGeometry(.12,0),core);d.scale.set(.7,1.4,.7);d.frustumCulled=false;g.add(d);}
+  const arcMat=ADD('#ffffff',{vertexColors:true}),T=(n,s)=>{const m=Tube(n,s,arcMat,g);m.castShadow=false;return m;},strA=T(12,4),strB=T(12,4);
+  const arrow=new THREE.Group();g.add(arrow);const hm=sbMat('#fff06a',1.1),hs=new THREE.Shape();hs.moveTo(0,-.72);hs.lineTo(.3,.08);hs.lineTo(.09,.0);hs.lineTo(.14,.2);hs.lineTo(0,.06);hs.lineTo(-.14,.2);hs.lineTo(-.09,.0);hs.lineTo(-.3,.08);hs.closePath();const hg=new THREE.ShapeGeometry(hs),h1=new THREE.Mesh(hg,hm);h1.position.y=-1.5;h1.scale.set(.42,.72,.42);h1.frustumCulled=false;arrow.add(h1);const h2=h1.clone();h2.rotation.y=Math.PI/2;arrow.add(h2);
+  const shaftA=Tube(12,5,arcMat,arrow),shaftB=Tube(12,4,arcMat,arrow);shaftA.castShadow=shaftB.castShadow=false;
+  const halo=glow(GLOWT,.9,arrow);halo.position.y=-1.5;
+  const arcs=Array.from({length:12},()=>{const m=T(10,4);m.visible=false;return m;});
+  const hide=o.tip.parent.children.filter(c=>c!==o.tip&&c!==g),bodyMat=ADD('#ffffff',{vertexColors:true}),body=Array.from({length:8},()=>{const m=Tube(10,4,bodyMat,o.g);m.castShadow=false;return m;});g.scale.setScalar(.001);
+  return {g,limbs,ring,strA,strB,arrow,hm,h1,h2,shaftA,shaftB,halo,arcs,body,hide,mats:[gold,lemon,cy,core],T:0,V3,age:0};
 }
 function stormBowView(o,p,dt,now){
   const M=p.sm,R=M&&(M[3]&16)&&p.al&&!p.dn?M[6]:null;
@@ -23,17 +33,16 @@ function stormBowView(o,p,dt,now){
   const B=o.sb,V3=B.V3;B.g.visible=true;
   const left=Math.max(0,R[1]),max=R[3]||SB_FULL,k=clamp(1-left/max,0,1),full=k>=.999,ap=R[4]||0;
   B.age+=dt;const intro=natEase(natPhase(B.age,0,.42)),armIn=natEase(natPhase(B.age,.36,.62)),yawT=-.72*armIn,draw=natEase(k);for(const h of B.hide)h.visible=intro<.5;for(const b of B.body)b.visible=true;B.g.scale.setScalar(Math.max(.001,natOut(natPhase(B.age,.1,.5))));
-  // summon: the wand arm swings out to the side while lightning wraps it into a bow, then comes up to aim; left hand draws the string
   o.b.rotation.y+=yawT;o.b.rotation.x+=-ap*.22*armIn;
   o.armR.rotation.set(lerp(lerp(-.2,-.5,intro),-1.57-ap*.85,armIn),lerp(0,.9*.72,armIn),lerp(lerp(.1,-1.5,intro),-.02,armIn));
   o.armL.rotation.set(lerp(o.armL.rotation.x,-1.45-ap*.85+.2*draw,armIn),lerp(0,.4+.55*draw,armIn),lerp(o.armL.rotation.z,lerp(-.2,.55,draw),armIn));
-  const nock=.44+.95*draw;B.arrow.position.y=nock;B.arrow.scale.setScalar(full?1.28:lerp(.86,1.06,k));
-  {const a=B.sGeo.attributes.position;a.setY(1,nock);a.needsUpdate=true;}
-  const pulse=full?1+.08*Math.sin(now*.03):.82;B.arrowMat.color.set(full?'#fff0a0':'#b58c3a').multiplyScalar(full?1.25:lerp(.35,.7,k));B.arrowMat.opacity=full?1:lerp(.55,.85,k);for(const m of B.mats)m.opacity=clamp(pulse*.9,.2,1);
-  B.T-=dt;if(B.T<=0){B.T=.045;const tot=full?10:3;{const cY=new THREE.Color('#ffd23a'),cC=new THREE.Color('#58e4ff');B.body.forEach((a,i)=>{const b=i/7*6.283+now*.004,r=.5+Math.random()*.22,h=.3+Math.random()*1.45,A=V3(Math.cos(b)*r,h,Math.sin(b)*r),E=V3(Math.cos(b+.7)*(r+.1),h+(Math.random()-.5)*.8,Math.sin(b+.7)*(r+.1)),Q=sbJag(A,E,10,.16,V3),col=i%3?cY:cC;a.set(Q,()=>.013,(u,c)=>c.copy(col).multiplyScalar(.75));});}B.arcs.forEach((a,i)=>{a.visible=i<tot;if(!a.visible)return;let A,E;
-      if(i%2===0||!full){const s=i%4?1:-1,t=Math.random();A=V3(0,.05+.42*t*t,s*(.08+1.02*t));E=A.clone().add(V3((Math.random()-.5)*.5,.1+Math.random()*.5,s*(Math.random()*.5)));}
-      else{const u=Math.random()*.8;A=V3(0,nock-1.45*u,0);E=V3((Math.random()-.5)*.14,nock-1.45*(u+.2),(Math.random()-.5)*.14);}
-      const col=i%3===0?'#fff0a0':'#7df2ff',P=sbJag(A,E,10,.2,V3),c0=new THREE.Color(col);a.set(P,()=>full?.024:.014,(u,c)=>c.copy(c0).multiplyScalar(full?.75:.5));});}
+  const nock=SB_TIP.y+.95*draw;B.arrow.position.y=nock;B.arrow.scale.setScalar(full?1.3:lerp(.9,1.08,k));B.ring.rotation.y+=dt*(4+9*k);B.ring.scale.setScalar(.8+.5*k);B.halo.scale.setScalar(full?.95+.14*Math.sin(now*.03):lerp(.32,.6,k));B.halo.material.opacity=full?.5:.3;
+  const pulse=full?1+.08*Math.sin(now*.03):.92;for(const m of B.mats)m.opacity=clamp(pulse,.2,1);B.hm.color.set(full?'#fff8c0':'#ffe84a').multiplyScalar(full?1.5:1.05);
+  B.T-=dt;if(B.T<=0){B.T=.04;const cY=new THREE.Color('#ffd21f'),cW=new THREE.Color('#fff6b0'),cC=new THREE.Color('#2fe0ff'),nk=V3(0,nock,0);
+    for(const [str,s] of [[B.strA,1],[B.strB,-1]]){const P=sbJag(V3(0,SB_TIP.y,s*SB_TIP.z),nk,12,.09,V3);str.set(P,()=>.018,(u,c)=>c.copy(full?cC:cW).multiplyScalar(1.05));}
+    B.shaftA.set(sbJag(V3(0,0,0),V3(0,-1.5,0),12,full?.15:.09,V3),()=>full?.045:.03,(u,c)=>c.copy(cW).multiplyScalar(1.15));B.shaftB.set(sbJag(V3(0,0,0),V3(0,-1.5,0),12,full?.26:.14,V3),()=>full?.022:.012,(u,c)=>c.copy(full?cC:cY).multiplyScalar(1.1));
+    B.body.forEach((a,i)=>{const b=i/8*6.283+now*.004,r=.5+Math.random()*.22,h=.3+Math.random()*1.45,A=V3(Math.cos(b)*r,h,Math.sin(b)*r),E=V3(Math.cos(b+.7)*(r+.1),h+(Math.random()-.5)*.8,Math.sin(b+.7)*(r+.1)),Q=sbJag(A,E,10,.16,V3),col=i%3?cY:cC;a.set(Q,()=>.015,(u,c)=>c.copy(col).multiplyScalar(.9));});
+    const tot=full?12:5;B.arcs.forEach((a,i)=>{a.visible=i<tot;if(!a.visible)return;let A,E;if(i<5){const s=i%2?1:-1,t=Math.random();A=V3((Math.random()-.5)*.18,.05+SB_TIP.y*t,s*(.12+SB_TIP.z*t));E=A.clone().add(V3((Math.random()-.5)*.6,(Math.random()-.5)*.4,s*Math.random()*.6));}else{const u=Math.random()*.85;A=V3(0,nock-1.5*u,0);E=V3((Math.random()-.5)*.5,nock-1.5*(u+.15),(Math.random()-.5)*.5);}const col=full&&i>=5?cC:i%3===0?cC:cY,Q=sbJag(A,E,10,.2,V3);a.set(Q,()=>full?.03:.018,(u,c)=>c.copy(col).multiplyScalar(1.05));});}
 }
 function stormBowFx(ev){
   const F=natFx(),{V3,Tube,ADD,sparks,ring,T}=F,o=ev.id!=null?PM3.get(ev.id):null,mine=ev.id===NET.myId,end=natWorld(ev.x2,ev.y2,ev.h2),st=o?o.armR.localToWorld(V3(0,-1.3,0)):natWorld(ev.x,ev.y,ev.h);
@@ -92,14 +101,14 @@ float h(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
 float n(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(h(i),h(i+vec2(1,0)),f.x),mix(h(i+vec2(0,1)),h(i+vec2(1,1)),f.x),f.y);}
 float fb(vec2 p){float a=.5,s=0.;for(int i=0;i<4;i++){s+=a*n(p);p=p*2.03+7.;a*=.5;}return s;}
 void main(){float u=q.x,v=q.y,end=pow(max(0.,1.-u*u*u*u),1.4);float flow=fb(vec2(u*3.+t*.5,v*5.-t*3.2));float wisp=smoothstep(.5,.72,fb(vec2(u*6.5-t*.7,v*13.-t*4.6)+flow*1.7));float body=pow(max(0.,1.-v),1.3)*smoothstep(.16,.58,flow+(1.-v)*.46);float rim=exp(-v*v*220.)*end;float halo=exp(-v*11.)*end;
-vec3 c=mix(vec3(.72,.34,.01),vec3(1.,.72,.05),wisp);c=mix(c,vec3(1.,.93,.42),pow(wisp,3.)*.85);c=mix(c,vec3(.95,.5,.02),clamp(halo*.7,0.,1.));c=mix(c,vec3(1.,.86,.28),clamp(rim,0.,1.));
+vec3 c=mix(vec3(1.,.55,.02),vec3(1.25,.95,.1),wisp);c=mix(c,vec3(1.5,1.35,.6),pow(wisp,3.)*.9);c=mix(c,vec3(1.25,.72,.04),clamp(halo*.7,0.,1.));c=mix(c,vec3(1.6,1.4,.62),clamp(rim,0.,1.));
 float a=clamp((body*1.05+wisp*body*.7+halo*.55+rim)*end,0.,1.)*fade;gl_FragColor=vec4(c,a);}`;
 function stormWaveMake(o,j){const F=natFx(),{Tube}=F,u={t:{value:Math.random()*40},fade:{value:1}},m=new THREE.ShaderMaterial({transparent:true,depthWrite:false,side:THREE.DoubleSide,toneMapped:false,uniforms:u,vertexShader:'varying vec2 q;void main(){q=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',fragmentShader:SB_WAVE_F}),w=new THREE.Mesh(sbWaveGeo(),m);w.frustumCulled=false;w.rotation.z=(j.id%2?1:-1)*.24;o.g.add(w);
-  const mat=new THREE.MeshBasicMaterial({vertexColors:true,transparent:true,depthWrite:false,side:THREE.DoubleSide,toneMapped:false}),mk=(n,k)=>{const q=Tube(n,k,mat,w);q.castShadow=false;return q;},lines=Array.from({length:9},()=>mk(11,3)),self=Array.from({length:7},()=>mk(12,4));
+  const mat=new THREE.MeshBasicMaterial({vertexColors:true,transparent:true,depthWrite:false,side:THREE.DoubleSide,toneMapped:false}),mk=(n,k)=>{const q=Tube(n,k,mat,w);q.castShadow=false;return q;},lines=Array.from({length:9},()=>mk(11,5)),self=Array.from({length:7},()=>mk(12,4));
   o.swv={w,u,mat,lines,self,age:0,T:0,last:performance.now()};}
 function stormWaveTick(o,X,Y,Z){const S=o.swv,now=performance.now(),dt=Math.min(.05,(now-S.last)/1000)||.016,F=natFx(),{V3}=F,R=2.7;S.last=now;S.age+=dt;S.u.t.value+=dt;const L=SIPH.v.range/SIPH.v.spd,f=natEase(natPhase(S.age,0,.05))*(1-natEase(natPhase(S.age,L*.72,L)));S.u.fade.value=f;S.mat.opacity=f;S.w.scale.setScalar(lerp(.6,1,natOut(natPhase(S.age,0,.14))));
-  S.T-=dt;if(S.T<=0){S.T=.035;const C=new THREE.Color('#58e4ff'),Y=new THREE.Color('#ffe45a'),W=new THREE.Color('#fff6c0');
+  S.T-=dt;if(S.T<=0){S.T=.035;const C=new THREE.Color('#1fd8ff'),Y=new THREE.Color('#ffe45a'),W=new THREE.Color('#fff6c0');
     S.u.fade.value=f*(.78+Math.random()*.22);S.w.position.set((Math.random()-.5)*.05,(Math.random()-.5)*.05,0);   // the wave itself flickers with shock
-    S.lines.forEach((q,n)=>{const a0=-1.02+Math.random()*1.7,out=n%3===0?-.45-Math.random()*.55:.12+Math.random()*.55,P=[];for(let i=0;i<11;i++){const t=i/10,a=a0+t*(.28+Math.random()*.02)+.0,e=Math.sin(Math.PI*t),r=R+out*e+(n%3?0:-.3),j=e*.22;P.push(V3(Math.sin(a)*r+(Math.random()-.5)*j,(Math.random()-.5)*j*2.2+e*(n%2?.3:-.3),Math.cos(a)*r-R+(Math.random()-.5)*j));}q.set(P,t=>.016*Math.sin(Math.PI*t)+.004,(u,c)=>c.copy(C));});   // cyan arcs crawl around and off the edges
-    S.self.forEach((q,n)=>{const a0=-.9+Math.random()*1.5,d0=Math.random()*1.4,P=[];for(let i=0;i<12;i++){const t=i/11,a=a0+t*(.2+Math.random()*.25)*(n%2?1:-1),e=Math.sin(Math.PI*t),r=R-d0-t*.5+(Math.random()-.5)*.1,j=e*.2;P.push(V3(Math.sin(a)*r+(Math.random()-.5)*j,(Math.random()-.5)*j*1.5,Math.cos(a)*r-R+(Math.random()-.5)*j));}const col=n%2?Y:W;q.set(P,t=>.026*Math.sin(Math.PI*t)+.005,(u,c)=>c.copy(col));});   // yellow-white shock running over the wave
+    S.lines.forEach((q,n)=>{const a0=-1.02+Math.random()*1.7,out=n%3===0?-.45-Math.random()*.55:.12+Math.random()*.55,P=[];for(let i=0;i<11;i++){const t=i/10,a=a0+t*(.28+Math.random()*.02)+.0,e=Math.sin(Math.PI*t),r=R+out*e+(n%3?0:-.3),j=e*.22;P.push(V3(Math.sin(a)*r+(Math.random()-.5)*j,(Math.random()-.5)*j*2.2+e*(n%2?.3:-.3),Math.cos(a)*r-R+(Math.random()-.5)*j));}q.set(P,t=>.042*Math.sin(Math.PI*t)+.01,(u,c)=>c.copy(C).multiplyScalar(1.45));});   // cyan arcs crawl around and off the edges
+    S.self.forEach((q,n)=>{const a0=-.9+Math.random()*1.5,d0=Math.random()*1.4,P=[];for(let i=0;i<12;i++){const t=i/11,a=a0+t*(.2+Math.random()*.25)*(n%2?1:-1),e=Math.sin(Math.PI*t),r=R-d0-t*.5+(Math.random()-.5)*.1,j=e*.2;P.push(V3(Math.sin(a)*r+(Math.random()-.5)*j,(Math.random()-.5)*j*1.5,Math.cos(a)*r-R+(Math.random()-.5)*j));}const col=n%2?Y:W;q.set(P,t=>.034*Math.sin(Math.PI*t)+.006,(u,c)=>c.copy(col).multiplyScalar(1.4));});   // yellow-white shock running over the wave
     if(Math.random()<.7){const a=(Math.random()*2-1)*.9;const p=F.V3(X,Y,Z).add(o.g.localToWorld(F.V3(Math.sin(a)*R,0,Math.cos(a)*R-R)).sub(o.g.position));F.sparks(p,1,1,Math.random()<.2?'#6fe6ff':'#ffd23a','#c97d10',{life:.5,size:1.15,g:.15});}}}
