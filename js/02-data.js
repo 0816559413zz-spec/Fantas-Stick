@@ -303,7 +303,7 @@ const NOBROOM=new Set(['imp','ffa','siege']);   // บุกปราสาท: 
 // ห้องรับคนได้สูงสุด 12 (FFA 12 / ทีม 6v6) — โหมดอื่นยังเช็ค max ของโหมดตอนกดเริ่ม (ผู้ใช้ 2026-11-05)
 const ROOM_MAX=12;
 const MODES={
-  coop:{name:'🗝️ ดันเจียน Co-op',d:'1-6 คน ฝ่าทีละชั้น บอสเรดทุก 5 ชั้น',min:1,max:6},
+  coop:{name:'🗝️ ดันเจียน Co-op',d:'1-6 คน ฝ่าทีละชั้น บอสเรดทุก 5 ชั้น',min:1,max:6,paused:true},
   train:{name:'🎯 ห้องฝึก',d:'1-6 คน Test Place: ลองคาถา เสกมอนสเตอร์ ปรับไม่มีคูลดาวน์ได้',min:1,max:6,map:'test'},
   duel:{name:'⚔️ ดวล 1v1',d:'2 คน ชนะ 2 ใน 3 รอบ',min:2,max:2},
   ffa:{name:'💥 FFA',d:'2-12 คน ใครได้ 10 kill ก่อนชนะ',min:2,max:12},
@@ -314,6 +314,7 @@ const MODES={
   imp:{name:'🐍 หาลอร์ดโวลเดอมอร์',d:'4-6 คน ทำภารกิจ จับตัวโวลเดอมอร์ (แบบ Among Us)',min:4,max:6},
   siege:{name:'🏰 บุกปราสาท',d:'2-12 คน ทีมฟ้าบุก ทีมแดงรับ — ร่ายทำลายแกน 3 จุดตามลำดับก่อนหมดเวลา',min:2,max:12,team:true,tmax:6,map:'fcs'}
 };
+const hostModeEnabled=mode=>Object.hasOwn(MODES,mode)&&!MODES[mode].paused;
 // ค่าพื้นฐานผู้เล่น (ปรับได้ในเครื่องมือปรับค่า tune.html / F8) • เลือด, เดิน, บิน, กระโดด, เดินช้าตอนถือโล่, เกิดใหม่ (วิ)
 const PLAY={hp:200,walk:175,fly:540,jump:8,shSlow:0.5,respawn:3,respawnFast:2};
 const PDEF={

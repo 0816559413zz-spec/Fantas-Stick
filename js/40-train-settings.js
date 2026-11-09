@@ -187,7 +187,7 @@ $('#btnTeam').onclick=()=>{
 };
 $('#modes').addEventListener('click',e=>{
   const b=e.target.closest('[data-mode]');
-  if(b&&NET.isHost&&G&&G.ph==='lobby'){G.mode=b.dataset.mode;broadcastLobby();}
+  if(b&&NET.isHost&&G&&G.ph==='lobby'&&hostModeEnabled(b.dataset.mode)){G.mode=b.dataset.mode;broadcastLobby();}
   const mb=e.target.closest('[data-map]');
   if(mb&&NET.isHost&&G&&G.ph==='lobby'){G.map=mb.dataset.map;broadcastLobby();}
 });
@@ -217,12 +217,12 @@ function modeIcon(m){return m.name.split(' ')[0];}
 function modeTitle(m){return m.name.split(' ').slice(1).join(' ');}
 function renderLobby(){
   const L=LOBBY;if(!L)return;
-  const host=NET.isHost,M=MODES[L.mode]||MODES.coop;
+  const host=NET.isHost,M=MODES[L.mode]||MODES.train;
   $('#roomChip').classList.toggle('hidden',!L.online);
   $('#roomCode').textContent=L.online?L.code:'';
   $('#roomHint').textContent=L.online?'ส่งรหัสห้องให้เพื่อน → เพื่อนใส่รหัสที่หน้าแรกแล้วกด "เข้าร่วม"':'โหมดออฟไลน์ — เล่นคนเดียว ไม่ต้องใช้อินเทอร์เน็ต';
   $('#pcount').innerHTML=`ผู้เล่น <b>${L.players.length}</b> / 6`;
-  $('#modes').innerHTML=Object.entries(MODES).map(([k,m])=>`<button class="mode ${L.mode===k?'on':''}" data-mode="${k}" ${host?'':'disabled'}><span class="ic"><span>${modeIcon(m)}</span></span><span><b>${modeTitle(m)}</b><small>${m.min===m.max?m.min:m.min+'-'+m.max} คน</small></span></button>`).join('');
+  $('#modes').innerHTML=Object.entries(MODES).filter(([k])=>hostModeEnabled(k)).map(([k,m])=>`<button class="mode ${L.mode===k?'on':''}" data-mode="${k}" ${host?'':'disabled'}><span class="ic"><span>${modeIcon(m)}</span></span><span><b>${modeTitle(m)}</b><small>${m.min===m.max?m.min:m.min+'-'+m.max} คน</small></span></button>`).join('');
   $('#mapNote').textContent='';
   const mapTxt=M.map?(MAPS[M.map]||{name:M.map}).name:L.mpk&&MAPS[L.mpk]?MAPS[L.mpk].name:'🎲 สุ่ม';
   const mapPick=M.map?'':`<div class="mpick">${['',...new Set([...RANDOM_MAPS,'forest',...Object.keys(MAPS).filter(k=>MAPS[k].fm||MAPS[k].pick)])].filter(k=>!MAP_OFF.has(k)).map(k=>`<button type="button" class="mchip ${(L.mpk||'')===k?'on':''}" data-mappick="${k}" ${host?'':'disabled'} title="${k?esc(MAPS[k].d):'สุ่มทุกรอบ'}">${k?MAPS[k].name:'🎲 สุ่ม'}</button>`).join('')}</div>`;

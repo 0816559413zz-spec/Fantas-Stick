@@ -30,8 +30,8 @@ function addPlayer(id,name,color,lk,kit){
   G.players[id]=p;G.order.push(id);
   return p;
 }
-function initHostLobby(){
-  G={mode:'coop',map:'castle',ph:'lobby',players:{},order:[],proj:[],en:[],feed:[],time:0,pid:0,eid:0,wave:0,round:1,rw:{},teamScore:[0,0],timer:0,banner:null,result:null,queue:[],escale:1,espd:1};
+function initHostLobby(mode){
+  G={mode,map:MODES[mode].map||'castle',ph:'lobby',players:{},order:[],proj:[],en:[],feed:[],time:0,pid:0,eid:0,wave:0,round:1,rw:{},teamScore:[0,0],timer:0,banner:null,result:null,queue:[],escale:1,espd:1};
   const me=addPlayer(NET.myId,myName(),myColor,lookStr(myLook),myKit);
   me.inp=INPUT;me.fr=myFrame();
   broadcastLobby();
@@ -95,6 +95,7 @@ function hostRemove(id){
 }
 
 function validate(){
+  if(!hostModeEnabled(G.mode))return 'โหมดนี้ปิดชั่วคราว — เลือกโหมดอื่นก่อนเริ่มเกม';
   const ps=plist(),M=MODES[G.mode];
   if(lobbyBots().length&&!BOT_MODES.includes(G.mode))return 'โหมดนี้บอทยังเล่นไม่เป็น — ลบบอทออกก่อน';
   if(ps.length<M.min)return `โหมดนี้ต้องมีผู้เล่นอย่างน้อย ${M.min} คน (เพิ่มบอทได้)`;

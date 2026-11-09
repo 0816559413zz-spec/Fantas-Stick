@@ -75,8 +75,7 @@ const GUIDE=[
   {k:'frost',en:'Frost',th:'สายน้ำแข็ง',html:()=>GPATH(1)},
   {k:'storm',en:'Storm',th:'สายสายฟ้า',html:()=>GPATH(2)},
   {k:'earth',en:'Earth',th:'สายดิน',html:()=>GPATH(PATHS.findIndex(p=>p.id==='earth'))},
-  {k:'modes',b:'Modes',en:'Game Modes',th:'โหมดเกม',html:()=>`<div class="gModes">${HMODES.map(m=>`<div class="gMode"><b>${esc(m.en)}</b><i>${esc(m.n)} คน</i><span>${esc(m.th)}</span><p>${esc(m.d)}</p></div>`).join('')}</div>
-    <p class="gTip"><b>ดันเจียน</b> ผ่านแต่ละชั้นได้เลือกการ์ดพลังเสริม • ทุก 5 ชั้นเจอบอส</p>`},
+  {k:'modes',b:'Modes',en:'Game Modes',th:'โหมดเกม',html:()=>`<div class="gModes">${HMODES.map(m=>`<div class="gMode"><b>${esc(m.en)}</b><i>${esc(m.n)} คน</i><span>${esc(m.th)}</span><p>${esc(m.d)}</p></div>`).join('')}</div>`},
   {k:'friends',b:'Friends',en:'Play Together',th:'เล่นกับเพื่อน',html:()=>`<ol class="gSteps"><li><b>สร้างห้อง</b>กด เล่น แล้วเลือกการ์ดโหมด — ได้รหัสห้อง 5 ตัว (กดคัดลอกได้)</li><li><b>ส่งรหัส</b>เพื่อนใส่รหัสที่ช่อง <b>เข้าห้องเพื่อน</b> หน้าแรก หรือช่องรหัสมุมขวาล่าง</li><li><b>เริ่มเกม</b>เจ้าของห้องเลือกแผนที่ แล้วกด START</li><li><b>คุยกัน</b>ปุ่มไมค์ในห้อง แล้วกด T ค้างตอนพูด</li></ol>
     <p class="gTip"><b>เข้าไม่ได้?</b> เช็กรหัส • ให้เจ้าของห้องสร้างใหม่ • ปิด VPN • ห้องละไม่เกิน 6 คน</p>`},
   {k:'credits',en:'Credits',th:'เครดิต',html:()=>`<div class="gCred">${$('#gCredits').innerHTML}</div>`},

@@ -68,20 +68,21 @@ function netUndelta(s){
 }
 function setStatus(t){$('#status').textContent=t;const h=document.getElementById('hStatus');if(h)h.textContent=t;}
 
-function hostGame(online){
+function hostGame(online,mode='train'){
   ac();
+  const lobbyMode=hostModeEnabled(mode)?mode:'train';
   NET.isHost=true;NET.online=online;
-  if(!online){NET.myId='me';initHostLobby();return;}
+  if(!online){NET.myId='me';initHostLobby(lobbyMode);return;}
   if(typeof Peer==='undefined'){setStatus('โหลดระบบออนไลน์ไม่ได้ — ต้องต่ออินเทอร์เน็ตตอนสร้าง/เข้าห้อง');return;}
   setStatus('กำลังสร้างห้อง...');
-  ICE_READY.then(()=>hostPeer());
+  ICE_READY.then(()=>hostPeer(lobbyMode));
 }
-function hostPeer(){
+function hostPeer(mode){
   if(!NET.isHost||!NET.online||screen==='lobby')return;   // ระหว่างรอ ถูกเปลี่ยนเป็นเล่นออฟไลน์ไปแล้ว (js/62 fall)
   const code=genCode();
   const peer=new Peer(PREFIX+code,PEER_OPT);
   NET.peer=peer;
-  peer.on('open',id=>{NET.myId=id;NET.code=code;setStatus('');initHostLobby();});
+  peer.on('open',id=>{if(NET.peer!==peer||!NET.online)return;NET.myId=id;NET.code=code;setStatus('');initHostLobby(mode);});
   peer.on('connection',conn=>{
     conn.on('data',d=>hostOnData(conn,d));
     conn.on('close',()=>hostDrop(conn.pid||conn.peer,conn));
@@ -90,7 +91,8 @@ function hostPeer(){
   peer.on('call',onIncomingCall);
   peer.on('disconnected',()=>{try{peer.reconnect();}catch(e){}});
   peer.on('error',e=>{
-    if(e.type==='unavailable-id'&&!G){peer.destroy();hostPeer();}
+    if(NET.peer!==peer||!NET.online)return;
+    if(e.type==='unavailable-id'&&!G){peer.destroy();hostPeer(mode);}
     else setStatus('ผิดพลาด: '+e.type);
   });
 }

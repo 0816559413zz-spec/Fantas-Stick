@@ -12,7 +12,7 @@ const HMODES=[
   {k:'tdm',en:'Team PvP',th:'สองทีมปะทะกัน',d:'ทีมแรกที่ได้ 15 kill ชนะ',n:'2–12'},
   {k:'coop',en:'Dungeon',th:'ร่วมมือฝ่าดันเจียน',d:'ฝ่าทีละชั้น บอสทุก 5 ชั้น',n:'1–6'},
   {k:'train',en:'Training',th:'ห้องฝึกคาถา',d:'หุ่นซ้อม ลองคาถา ปิดคูลดาวน์ได้',n:'1–6'},
-  {k:'siege',en:'Castle Siege',th:'บุกปราสาท',d:'ฟ้าบุก แดงรับ ร่ายทำลายแกน 3 จุด',n:'2–12'}];   // โหมดบุกปราสาท (js/15-siege) — แผนที่ First Castle Strike
+  {k:'siege',en:'Castle Siege',th:'บุกปราสาท',d:'ฟ้าบุก แดงรับ ร่ายทำลายแกน 3 จุด',n:'2–12'}].filter(mode=>hostModeEnabled(mode.k));
 const HUI={st:'',mode:'ffa',hostT:0,flip:null,pend:false,shown:false,botP:-1,botL:1};   // botP/botL = ธาตุ+ความเก่งที่เลือกไว้สำหรับปุ่ม + บอท
 // ไอคอนเส้นบาง (SVG) — กรอบหกเหลี่ยม + ไอคอนโหมด / ปุ่มเล็ก
 const HICO={
@@ -153,16 +153,18 @@ addEventListener('keydown',e=>{
   else if(HUI.st==='menu'&&$('#hJoin').classList.contains('open'))$('#hJoin').classList.remove('open');
 });
 function hubPickMode(k,card){
+  if(!HMODES.some(mode=>mode.k===k))return;
   ac();snd('portal',{vol:0.5});HUI.mode=k;HUI.st='flip';
   document.body.classList.remove('hS-modes');document.body.classList.add('hS-flip');
   document.querySelectorAll('.hCard').forEach(c=>c.classList.toggle('away',c!==card));
   $('#hFade').classList.add('on');
   hubFlip(card,k);
   // เปิดห้องออนไลน์อัตโนมัติ (ไม่มีเน็ต/ต่อไม่ได้ใน 7 วิ = เล่นคนเดียว)
-  store('wd_name',myName());HUI.pend=true;HUI.want=k;
-  const fall=()=>{if(screen==='lobby')return;try{NET.peer&&NET.peer.destroy();}catch(_){}NET.peer=null;hostGame(false);toast('ต่ออินเทอร์เน็ตไม่ได้ — เล่นแบบออฟไลน์');};
-  if(typeof Peer==='undefined')setTimeout(fall,500);
-  else{hostGame(true);clearTimeout(HUI.hostT);HUI.hostT=setTimeout(fall,7000);}
+  store('wd_name',myName());HUI.pend=true;
+  const fall=()=>{if(screen==='lobby'||HUI.st!=='flip')return;try{NET.peer&&NET.peer.destroy();}catch(_){}NET.peer=null;hostGame(false,k);toast('ต่ออินเทอร์เน็ตไม่ได้ — เล่นแบบออฟไลน์');};
+  clearTimeout(HUI.hostT);
+  if(typeof Peer==='undefined')HUI.hostT=setTimeout(fall,500);
+  else{hostGame(true,k);HUI.hostT=setTimeout(fall,7000);}
 }
 // การ์ดพลิก + ขยายเป็นแผงห้อง (ใช้ element ลอยชั่วคราว แล้วสลับเป็นแผงจริงตอนจบ)
 function hubFlipKill(){if(HUI.flip){HUI.flip.remove();HUI.flip=null;}document.body.classList.remove('hS-flip');}
@@ -184,7 +186,7 @@ function hubFlip(card,k){
 // ย้อนการพลิก: แผงห้อง → หดเป็นการ์ดที่ช่องเดิม หมุนกลับด้านหน้า → เฟดดำ แล้วเรียก done (รีโหลดไปหน้าการ์ดโหมด)
 // ออกจากห้อง (หลังการ์ดหดกลับเข้าช่อง + จอมืด): ล้างห้องโดยไม่รีโหลด → ท่าโพส + หน้าการ์ดโหมด → สว่างกลับ
 function hubLeaveRoom(){
-  clearTimeout(HUI.hostT);HUI.want=null;HUI.pend=false;
+  clearTimeout(HUI.hostT);HUI.pend=false;
   leaveRoom();hubSnapModes();hubUiState('modes');
   setTimeout(()=>{document.body.classList.remove('hS-unflip');if(HUI.unflipEl){HUI.unflipEl.remove();HUI.unflipEl=null;}HUI.unflip=false;$('#hFade').classList.remove('on');},140);
 }
@@ -213,16 +215,15 @@ const HUI_MAPN=k=>k&&MAPS[k]?MAPS[k].name.replace(/^[^\p{L}\p{N}]+/u,'').trim():
 function hubLobby(){
   const L=LOBBY,el=$('#hRoom');if(!L||!el)return;
   if(HUI.st==='flip'){if(HUI.flipDone)hubFlipEnd();else return;}
-  if(NET.isHost&&HUI.want&&G&&G.ph==='lobby'&&G.mode!==HUI.want){G.mode=HUI.want;HUI.want=null;clearTimeout(HUI.hostT);broadcastLobby();return;}
   if(NET.isHost)clearTimeout(HUI.hostT);
-  const host=NET.isHost,M=MODES[L.mode]||MODES.coop,hm=HMODES.find(x=>x.k===L.mode)||{k:L.mode,en:modeTitle(M),th:'',d:M.d};
+  const host=NET.isHost,M=MODES[L.mode]||MODES.train,hm=HMODES.find(x=>x.k===L.mode)||{k:L.mode,en:modeTitle(M),th:'',d:M.d};
   const team=!!M.team,me=L.players.find(p=>p.id===NET.myId);
   const K=parseKit(myKit),P=PATHS[K.path]||PATHS[0],ult=SPELL_LIST[K.ult];
   const alt=M.map&&L.mode!=='train'&&MAPS[L.mpk]&&MAPS[L.mpk].allModes,fixed=M.map&&!alt?M.map:null,mk=fixed||L.mpk||'',canAlt=M.map&&L.mode!=='train',img=mk?`url('${HUI_IMG}maps/${mk}.jpg')`:'none';
   const err=host?validate():'';
   const plRow=p=>{const kk=parseKit(p.kt!==undefined?p.kt:'0'),pp=PATHS[kk.path]||PATHS[0];return `<div class="pl ${p.id===NET.myId?'me':''}">${typeof prfAvatar==='function'?prfAvatar(p.n,p.fr,pp.col,30,icoHTML('p_'+pp.id,pp.col,15)):`<span class="em">${icoHTML('p_'+pp.id,pp.col,18)}</span>`}<span class="nm">${esc(p.n)}</span>${p.id===L.host?`<span class="cr" title="โฮสต์">${hSvg('crown')}</span>`:''}${speakingIds().has(p.id)?'<span class="spk">♪</span>':''}${p.b&&host?`${team?`<button class="bt" data-bott="${p.id}" title="ย้ายทีม">⇄</button>`:''}<button class="bt" data-botx="${p.id}" title="ลบบอท">✕</button>`:''}</div>`;};
   // เพิ่มบอท (โฮสต์): เลือกธาตุ + ความเก่ง แล้วกด + บอท (js/15-bot lobbyBotAdd) • โหมดที่บอทยังเล่นไม่เป็น = บอกไว้
-  const botBar=!host||L.mode==='train'?'':BOT_MODES.includes(L.mode)?`<div class="rBot"><select id="hrBotP"><option value="-1">🎲 สุ่มธาตุ</option>${PATHS.map((P,i)=>P.off?'':`<option value="${i}" ${HUI.botP===i?'selected':''}>${P.n}</option>`).join('')}</select><select id="hrBotL">${BOT_LV.map((B,i)=>`<option value="${i}" ${HUI.botL===i?'selected':''}>${B.n}</option>`).join('')}</select><button id="hrBotAdd" ${L.players.length>=Math.min(ROOM_MAX,M.max||6)?'disabled':''}>🤖 + บอท</button><button id="hrBotFill" ${L.players.length>=Math.min(ROOM_MAX,M.max||6)?'disabled':''}>🤖 เติมจนเต็ม</button></div>`:'<div class="rBot off">โหมดนี้บอทยังเล่นไม่เป็น (เล่นกับบอทได้ใน: ดันเจียน, ดวล, FFA, ทีม, แบทเทิลรอยัล)</div>';
+  const botBar=!host||L.mode==='train'?'':BOT_MODES.includes(L.mode)?`<div class="rBot"><select id="hrBotP"><option value="-1">🎲 สุ่มธาตุ</option>${PATHS.map((P,i)=>P.off?'':`<option value="${i}" ${HUI.botP===i?'selected':''}>${P.n}</option>`).join('')}</select><select id="hrBotL">${BOT_LV.map((B,i)=>`<option value="${i}" ${HUI.botL===i?'selected':''}>${B.n}</option>`).join('')}</select><button id="hrBotAdd" ${L.players.length>=Math.min(ROOM_MAX,M.max||6)?'disabled':''}>🤖 + บอท</button><button id="hrBotFill" ${L.players.length>=Math.min(ROOM_MAX,M.max||6)?'disabled':''}>🤖 เติมจนเต็ม</button></div>`:'<div class="rBot off">โหมดนี้ยังไม่รองรับบอท</div>';
   const slots=L.online?Math.max(0,(M.max||6)-L.players.length):0;
   const players=team?`<div class="teams">${[0,1].map(t=>`<div class="tm t${t}"><h4><i style="background:${TEAMC[t]}"></i>${t?'RED':'BLUE'}<span>${TEAMN[t]}</span></h4>${L.players.filter(p=>p.tm===t).map(plRow).join('')||'<div class="pl empty">ว่าง</div>'}</div>`).join('')}</div>
       <button class="hLink" id="hrTeam">⇄ ย้ายทีม</button>`
@@ -292,7 +293,7 @@ const hubRoomClick=e=>{
   if(id==='hrStart'){if(NET.isHost)hostStart();setTimeout(hubLobby,50);return;}
   if(id==='hrMap'){const L=LOBBY,M=MODES[L.mode];if(!NET.isHost||M.map&&L.mode==='train')return;
     mpkOpen({cur:L.mpk||'',mode:L.mode,onPick:k=>{if(NET.isHost&&G&&G.ph==='lobby'){G.mapPick=k;broadcastLobby();}}});return;}
-  const rm=b.dataset.rmode;if(rm&&NET.isHost&&G&&G.ph==='lobby'&&G.mode!==rm){G.mode=rm;broadcastLobby();}
+  const rm=b.dataset.rmode;if(rm&&NET.isHost&&G&&G.ph==='lobby'&&G.mode!==rm&&HMODES.some(mode=>mode.k===rm)){G.mode=rm;broadcastLobby();}
 };
 $('#hRoom').addEventListener('click',hubRoomClick);
 $('#hRoom').addEventListener('change',e=>{const t=e.target;if(t.id==='hrBotP')HUI.botP=+t.value;else if(t.id==='hrBotL')HUI.botL=+t.value;});$('#hGo').addEventListener('click',hubRoomClick);
