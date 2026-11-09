@@ -203,6 +203,7 @@ function windEfx(ev){
     case 'wnsohit':fxPlay('wind/sonic_hit',{x,y,h:H,a});if(near){snd('break',ev);hitStop(0.1);}return true;
     case 'wnsowave':fxPlay('wind/sonic_wave',{x,y,h:H,aim:false});if(near)snd('hit',ev);return true;
     case 'wnsoend':case 'wnsocancel':return true;
+    case 'wntl':fxPlay('wind/tailwind',{x,y,h:H,a});if(near)snd('whoosh',ev);return true;
     case 'wnsoon':if(mine)toast('สกิลนี้ของสายลมยังทำไม่เสร็จ (ขั้นที่ 2-3)');return true;
   }
   return false;
