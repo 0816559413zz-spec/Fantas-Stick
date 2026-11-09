@@ -484,7 +484,7 @@ function windUltTick(p,dt){const U=p.wult,W=W_UL;
       Object.assign(U,{ph:'dash',t:-W.impPre,a,ca:Math.cos(a),sa:Math.sin(a),T,v:D/T,hv:D/T*Math.cos(pit),vv:D/T/20*Math.sin(pit),x0:p.x,y0:p.y,x1:p.x,y1:p.y,r1:U.air?W.r1A:W.r1G,r2:U.air?W.r2A:W.r2G,mul:U.air?1:W.gMul});
       emit({k:'efx',z:'wnsoimp',x:Math.round(p.x),y:Math.round(p.y),h:p.z,a:Math.round(a*100)/100,id:p.id});}
     return;}
-  if(U.ph==='dash'){U.t+=dt;if(U.t<0){p.inv=Math.max(p.inv||0,0.1);p.vz=0;p.mvx=p.mvy=0;p.vx=p.vy=0;return;}const de=Math.min(dt,U.T-U.t+dt),step=U.hv*de,n=Math.max(1,Math.ceil(step/50)),sx=step/n,sz=U.vv*de/n;
+  if(U.ph==='dash'){U.t+=dt;if(U.t<0){p.inv=Math.max(p.inv||0,0.1);p.vz=0;p.mvx=p.mvy=0;p.vx=p.vy=0;return;}const de=U.T;U.t=U.T;const step=U.hv*de,n=Math.max(1,Math.ceil(step/50)),sx=step/n,sz=U.vv*de/n;
     for(let i=0;i<n;i++){const px=p.x,py=p.y,pz=p.z,ex=px+U.ca*sx,ey=py+U.sa*sx;
       windSmash(p,ex+U.ca*70,ey+U.sa*70,pz+1.1,W.smashR,W.smash*U.mul);   // พังบ้าน/กำแพงข้างหน้าก่อนชน → ทะลวงผ่านรูที่เปิด
       p.x=ex;p.y=ey;p.z=Math.max(groundH(ex,ey,p.z)+0.3,Math.min(24,p.z+sz));collideWorld(p,PR,p.z);
