@@ -3578,7 +3578,7 @@
    "n": 2
   },
   "wind/slip_side_l": {
-   "v": "9be71d16",
+   "v": "0b594c8b",
    "desc": "Slipstream แดชซ้าย ตอนบิน หางลมที่ปีก",
    "pal": "wind",
    "tags": [
@@ -3589,7 +3589,7 @@
    "n": 2
   },
   "wind/slip_side_l_g": {
-   "v": "ca726da6",
+   "v": "b4679e3a",
    "desc": "Slipstream แดชซ้าย ตอนอยู่พื้น หางลมที่ปีก",
    "pal": "wind",
    "tags": [
@@ -3600,7 +3600,7 @@
    "n": 2
   },
   "wind/slip_side_r": {
-   "v": "c8f8b90a",
+   "v": "e630f2b1",
    "desc": "Slipstream แดชขวา ตอนบิน หางลมที่ปีก",
    "pal": "wind",
    "tags": [
@@ -3611,7 +3611,7 @@
    "n": 2
   },
   "wind/slip_side_r_g": {
-   "v": "b8cfc461",
+   "v": "b7d0c572",
    "desc": "Slipstream แดชขวา ตอนอยู่พื้น หางลมที่ปีก",
    "pal": "wind",
    "tags": [
