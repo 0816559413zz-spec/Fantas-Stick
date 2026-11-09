@@ -50,6 +50,8 @@ function windLatePose(o,p,dt){const R=o.armR.rotation;if(!p.wn||!p.al||p.dn||(p.
     if(u<W){const k=sm(u/W);R.x=lerp(R.x,0.35,k);R.z=lerp(R.z,-0.4,k);L.x=lerp(L.x,0.35,k);L.z=lerp(L.z,0.4,k);o.b.rotation.x-=0.18*k;}
     else if(u<E+0.55){const a=sm((u-W)/0.07),h=1-sm((u-E-0.25)/0.3),pu=u<E?Math.abs(Math.sin((u-W)/(G_*2)*Math.PI)):0;R.x=lerp(R.x,lerp(0.35,-1.55,a)-0.1*pu,h);R.z=lerp(R.z,lerp(-0.4,-0.08,a),h);L.x=lerp(L.x,lerp(0.35,-0.85,a),h);L.z=lerp(L.z,lerp(0.4,0.6,a),h);o.b.rotation.x+=(lerp(-0.18,0.14,a)+0.05*pu)*h;V.tw=(V.tw||0)+((u<E?(V.s||0)*0.2:0)-(V.tw||0))*Math.min(1,dt*22);o.b.rotation.y+=V.tw*h;}
     else o.wpv=undefined;}
+  if(o.wtl!==undefined){o.wtl+=dt;const u=o.wtl,T=W_VO.tlD,L=o.armL.rotation,sm=x=>{x=Math.max(0,Math.min(1,x));return x*x*(3-2*x);};   // Tailwind: ไขว้ไม้ลงซ้ายล่างระดับเข่า ย่อตัว แล้วตวัดขึ้นเร็ว ปล่อยลม
+    if(u<T+0.7){const d=sm(u/(T*0.9)),a=sm((u-T)/0.09),w=d*(1-sm((u-T-0.35)/0.35));R.x=lerp(R.x,lerp(-0.35,-2.7,a),w);R.z=lerp(R.z,lerp(1.0,-0.25,a),w);L.x=lerp(L.x,lerp(0.3,-0.5,a),w);L.z=lerp(L.z,0.4,w);o.b.rotation.y+=lerp(0.5,-0.25,a)*w;o.b.rotation.x+=lerp(0.28,-0.14,a)*w;o.b.position.y-=0.24*(1-a)*w;for(const l of o.legs)l.rotation.x+=0.32*(1-a)*w;}else o.wtl=undefined;}
   if(o.wdb!==undefined){o.wdb+=dt;const u=o.wdb,T=W_WL.dbTele,L=o.armL.rotation,sm=x=>{x=Math.max(0,Math.min(1,x));return x*x*(3-2*x);};   // Downburst: ชูไม้ขึ้นฟ้า ตัวแอ่นมองขึ้น → ฟาดไม้ลงชี้เป้า ตัวโน้ม ย่อขานิด ปีกกดลงมาหน้า → ค้างแป๊บแล้วคืนท่า
     if(u<T){const k=sm(u/(T*0.8));R.x=lerp(R.x,-3.05,k);R.z=lerp(R.z,0.08,k);L.x=lerp(L.x,-0.5,k);L.z=lerp(L.z,0.55,k);o.b.rotation.x-=0.24*k;}
     else if(u<T+0.72){const a=sm((u-T)/0.05),ov=a*Math.max(0,1-(u-T-0.05)/0.16),h=1-sm((u-T-0.42)/0.3);R.x=lerp(R.x,lerp(-3.05,-0.72,a)+0.42*ov,h);R.z=lerp(R.z,0,h);L.x=lerp(L.x,lerp(-0.5,0.32,a),h);L.z=lerp(L.z,lerp(0.55,0.2,a),h);o.b.rotation.x+=(lerp(-0.24,0.26,a)+0.12*ov)*h;o.b.position.y-=0.06*a*h;for(const l of o.legs)l.rotation.x-=0.14*a*h;}
@@ -203,7 +205,7 @@ function windEfx(ev){
     case 'wnsohit':fxPlay('wind/sonic_hit',{x,y,h:H,a});if(near){snd('break',ev);hitStop(0.1);}return true;
     case 'wnsowave':fxPlay('wind/sonic_wave',{x,y,h:H,aim:false});if(near)snd('hit',ev);return true;
     case 'wnsoend':case 'wnsocancel':return true;
-    case 'wntl':fxPlay('wind/tailwind',{x,y,h:H,a});if(near)snd('whoosh',ev);return true;
+    case 'wntl':{const o=PM3.get(ev.id);if(o)o.wtl=0;}fxPlay('wind/tailwind',{x,y,h:H,a});if(near)snd('whoosh',ev);return true;
     case 'wnsoon':if(mine)toast('สกิลนี้ของสายลมยังทำไม่เสร็จ (ขั้นที่ 2-3)');return true;
   }
   return false;

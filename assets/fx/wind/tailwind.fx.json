@@ -1,19 +1,19 @@
 {
  "v": 1,
- "desc": "Tailwind: ร่องลมยาว 30 ม. กว้าง 6 ม. อยู่ 5 วิ ลายลมไหลไปข้างหน้า มีเส้นขอบและเส้นลม",
+ "desc": "Tailwind: ร่องลมยาว 30 ม. กว้าง 9 ม. อยู่ 5 วิ ลายลมไหลไปข้างหน้า มีเส้นขอบและเส้นลม",
  "tags": [
   "wind",
   "zone",
   "buff"
  ],
  "pal": "wind",
- "dur": 5,
+ "dur": 5.2,
  "seed": 71,
  "layers": [
   {
    "id": "lane",
    "t": "mesh",
-   "at": 0,
+   "at": 0.2,
    "life": 5,
    "att": "ground",
    "pos": [
@@ -29,15 +29,15 @@
    "scale": 1,
    "op": {
     "0": 0,
-    "0.04": 0.3,
-    "0.92": 0.3,
+    "0.04": 0.17,
+    "0.92": 0.17,
     "1": 0
    }
   },
   {
    "id": "edge",
    "t": "mesh",
-   "at": 0,
+   "at": 0.2,
    "life": 5,
    "att": "ground",
    "pos": [
@@ -49,19 +49,19 @@
    "shape": "model",
    "model": "wind_tail_edge",
    "mat": "solid",
-   "col": "#0f9e68",
+   "col": "#07845a",
    "scale": 1,
    "op": {
     "0": 0,
-    "0.04": 0.9,
-    "0.92": 0.9,
+    "0.04": 1,
+    "0.92": 1,
     "1": 0
    }
   },
   {
    "id": "open",
    "t": "emit",
-   "at": 0,
+   "at": 0.2,
    "life": 0.25,
    "att": "ground",
    "pos": [
@@ -72,7 +72,7 @@
    "burst": 0,
    "rate": 60,
    "from": "disc",
-   "fr": 2.6,
+   "fr": 4,
    "dir": "aim",
    "spread": 0.12,
    "speed": [
@@ -97,7 +97,7 @@
   {
    "id": "st0",
    "t": "emit",
-   "at": 0.05,
+   "at": 0.25,
    "life": 4.7,
    "att": "ground",
    "pos": [
@@ -108,7 +108,7 @@
    "burst": 0,
    "rate": 7,
    "from": "disc",
-   "fr": 2.6,
+   "fr": 4,
    "dir": "aim",
    "spread": 0.08,
    "speed": [
@@ -134,7 +134,7 @@
   {
    "id": "st1",
    "t": "emit",
-   "at": 0.05,
+   "at": 0.25,
    "life": 4.7,
    "att": "ground",
    "pos": [
@@ -145,7 +145,7 @@
    "burst": 0,
    "rate": 7,
    "from": "disc",
-   "fr": 2.6,
+   "fr": 4,
    "dir": "aim",
    "spread": 0.08,
    "speed": [
@@ -171,7 +171,7 @@
   {
    "id": "st2",
    "t": "emit",
-   "at": 0.05,
+   "at": 0.25,
    "life": 4.7,
    "att": "ground",
    "pos": [
@@ -182,7 +182,7 @@
    "burst": 0,
    "rate": 7,
    "from": "disc",
-   "fr": 2.6,
+   "fr": 4,
    "dir": "aim",
    "spread": 0.08,
    "speed": [
@@ -208,7 +208,7 @@
   {
    "id": "st3",
    "t": "emit",
-   "at": 0.05,
+   "at": 0.25,
    "life": 4.7,
    "att": "ground",
    "pos": [
@@ -219,7 +219,7 @@
    "burst": 0,
    "rate": 7,
    "from": "disc",
-   "fr": 2.6,
+   "fr": 4,
    "dir": "aim",
    "spread": 0.08,
    "speed": [
@@ -245,7 +245,7 @@
   {
    "id": "st4",
    "t": "emit",
-   "at": 0.05,
+   "at": 0.25,
    "life": 4.7,
    "att": "ground",
    "pos": [
@@ -256,7 +256,7 @@
    "burst": 0,
    "rate": 7,
    "from": "disc",
-   "fr": 2.6,
+   "fr": 4,
    "dir": "aim",
    "spread": 0.08,
    "speed": [
@@ -282,7 +282,7 @@
   {
    "id": "st5",
    "t": "emit",
-   "at": 0.05,
+   "at": 0.25,
    "life": 4.7,
    "att": "ground",
    "pos": [
@@ -293,7 +293,7 @@
    "burst": 0,
    "rate": 7,
    "from": "disc",
-   "fr": 2.6,
+   "fr": 4,
    "dir": "aim",
    "spread": 0.08,
    "speed": [
@@ -319,7 +319,7 @@
   {
    "id": "fth",
    "t": "emit",
-   "at": 0.1,
+   "at": 0.3,
    "life": 4.6,
    "att": "ground",
    "pos": [
@@ -330,7 +330,7 @@
    "burst": 0,
    "rate": 4,
    "from": "disc",
-   "fr": 6,
+   "fr": 9,
    "dir": "aim",
    "spread": 0.2,
    "speed": [
@@ -354,6 +354,80 @@
    "drag": 0.2,
    "mspin": 120,
    "x": true
+  },
+  {
+   "id": "gust",
+   "t": "emit",
+   "at": 0.2,
+   "life": 0.1,
+   "att": "ground",
+   "pos": [
+    0,
+    1,
+    1.5
+   ],
+   "burst": 26,
+   "rate": 0,
+   "from": "disc",
+   "fr": 3,
+   "dir": "aim",
+   "spread": 0.25,
+   "speed": [
+    22,
+    40
+   ],
+   "plife": [
+    0.35,
+    0.6
+   ],
+   "look": "smoke",
+   "size": [
+    5,
+    9
+   ],
+   "col": "#7fe8bd",
+   "c2": "#2fbf88",
+   "gravity": 0,
+   "drag": 2,
+   "grow": 1.4
+  },
+  {
+   "id": "gfth",
+   "t": "emit",
+   "at": 0.2,
+   "life": 0.1,
+   "att": "ground",
+   "pos": [
+    0,
+    1.2,
+    1.5
+   ],
+   "burst": 16,
+   "rate": 0,
+   "from": "disc",
+   "fr": 3,
+   "dir": "aim",
+   "spread": 0.3,
+   "speed": [
+    25,
+    45
+   ],
+   "plife": [
+    0.5,
+    0.9
+   ],
+   "look": "model",
+   "model": "wind_feather",
+   "mmat": "solid",
+   "msize": [
+    0.22,
+    0.34
+   ],
+   "col": "#17b877",
+   "c2": "#0f9e68",
+   "gravity": 0,
+   "drag": 1.5,
+   "mspin": 200
   }
  ]
 }
