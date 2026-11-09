@@ -181,7 +181,7 @@ function windEfx(ev){
     case 'wnsl':{const o=PM3.get(ev.id);if(o){o.wsl={t:0,T:ev.t,d:ev.n,s:ev.m,gs:ev.n>=2&&!ev.w};if(o.wWings){const u=o.wWings.userData;u.sl=0;u.slD=ev.n;u.slT=ev.t;}}if(ev.n===0){fxPlay(ev.m?'wind/slip_fwd':'wind/slip_fwd_g',{x,y,h:H,a,aim:false,follow:ev.id});fxPlay(ev.m?'wind/slip_fwd_w':'wind/slip_fwd_gw',{x,y,h:H,a});}else if(ev.n===1){fxPlay(ev.m?'wind/slip_back':'wind/slip_back_g',{x,y,h:H,a,aim:false,follow:ev.id});fxPlay(ev.m?'wind/slip_back_w':'wind/slip_back_gw',{x,y,h:H,a});}else if(!ev.w){fxPlay('wind/slip_fwd_g',{x,y,h:H,a,aim:false,follow:ev.id});fxPlay('wind/slip_fwd_gw',{x,y,h:H,a});}else{const g=ev.w?'':'_g';fxPlay('wind/slip_side_'+(ev.m<0?'l':'r')+g,{x,y,h:H,a,aim:false,follow:ev.id});fxPlay('wind/slip_side_w'+g,{x,y,h:H,a});}if(near)snd('whoosh',{x,y,vol:0.8});return true;}   // ท่าแดช 4 ทิศ
     case 'wnse':fxPlay('wind/slip_shot',{x,y,h:H,aim:false,follow:ev.id});if(near)snd('whoosh',{x,y,vol:0.6});return true;
     case 'wndome':windDome(x,y,H,ev.r);if(near)snd('hit',{x,y,vol:0.3});return true;
-    case 'wnpb':windDome(x,y,H,ev.r||34,true);fxPlay('wind/plume_pop',{x,y,h:H,aim:false});if(near)snd('hit',{x,y,vol:0.5});return true;
+    case 'wnpb':windDome(x,y,H,ev.r||22,true);fxPlay('wind/plume_pop',{x,y,h:H,aim:false});if(near)snd('hit',{x,y,vol:0.5});return true;
     case 'wndb':fxPlay('wind/downburst',{x,y,h:H,aim:false});wwCue(ev.id,'db');{const o=PM3.get(ev.id);if(o)o.wdb=0;}if(near)snd('cast_pull',ev);return true;   // ชูไม้ แล้วฟาดลง ลมถึงพื้นตอนฟาด
     case 'wndg':if(near){snd('whoosh',{x,y,vol:0.9});shake(0.16);}return true;
     case 'wndt':if(me){const d=Math.hypot(x-me.x,y-me.y);if(d<W_WL.dbR+250)shake(d<W_WL.dbR+30?0.07:0.03);}return true;   // พื้นในวงสั่นเป็นจังหวะตามลมกด
