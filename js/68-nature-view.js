@@ -85,7 +85,9 @@ function natLotus(){
   ].map(([mat,pink,green,light,strength])=>({mat,pink,green:new THREE.Color(green),light:new THREE.Color(light),strength}));
   const g=new THREE.Group();g.add(plant.g,heal.g,buff.g);natAdd(g);
   const glow=natGlow('#a0ff62',1.7,plant.bloom);glow.position.y=.35;
-  return {g,plant,heal,buff,glow,mix,color};
+  const wave=new THREE.Group(),waveMat=new THREE.MeshBasicMaterial({color:'#9dffc1',transparent:true,opacity:0,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide});wave.position.y=.075;g.add(wave);
+  for(let i=0;i<5;i++){const arc=natMesh(new THREE.RingGeometry(.963,1,24,1,i*Math.PI*2/5,1.02),waveMat,wave);arc.rotation.x=-Math.PI/2;}
+  return {g,plant,heal,buff,glow,mix,color,wave,waveMat,lastWave:-1,moteT:0,bloomed:false};
 }
 function natBall(){
   const g=new THREE.Group(),geo=new THREE.IcosahedronGeometry(.44,2),position=geo.attributes.position;
@@ -184,6 +186,13 @@ function natModelTick(v,s,dt){
       }
       v.g.scale.y=Math.max(.04,natOut(natPhase(age,0,s.k==='tree'?NAT.treeGrow:.7)));
     }else if(v.g){disposeObj(v.g);v.g=null;}
+    if(mesh&&s.k==='tree'&&!v.shadowProxy){   // the woven model has 125k faces: draw it once, let a low-poly stand-in cast the shadow
+      mesh.traverse(q=>{if(q.isMesh)q.castShadow=false;});
+      const g=v.shadowProxy=new THREE.Group(),m=new THREE.MeshBasicMaterial({colorWrite:false,depthWrite:false});m.userData.keep=false;
+      natMesh(new THREE.CylinderGeometry(.9,1.7,9,10),m,g).position.y=4.5;const c=natMesh(new THREE.IcosahedronGeometry(6.2,1),m,g);c.position.y=11;c.scale.y=.55;g.traverse(q=>{if(q.isMesh)q.castShadow=true;});
+      v.proxyG=natAdd(g);natSet(g,s.x,s.y,s.h);
+    }
+    if(v.proxyG){const k=natOut(natPhase(age,0,NAT.treeGrow));v.proxyG.scale.setScalar(Math.max(.04,k));}
     if(v.fx){v.fx.t=age;v.fx.updateNatureWeave?.();}
     if(s.k==='wall')natWearWall(v.fx,s.burn);
     else natTreeGlow(v.fx,1-s.hp/s.maxHp);
@@ -234,6 +243,13 @@ function natModelTick(v,s,dt){
   }
   v.plant.cg.material.opacity=1-mix;v.glow.material.opacity=mix*.7;
   v.heal.set(1,age,(1-mix)*grow);v.buff.set(1,age,mix*grow);
+  {const F=natFx(),{V3,sparks,leaves}=F,R=NAT.lotusRange*S3,base=v.g.position,crown=v.plant.core.getWorldPosition(V3()),START=.62;F.O.y=base.y;
+    if(age>=START&&!v.bloomed){v.bloomed=true;sparks(crown,17,2.1,'#fff1b1','#f596ba',{life:1.1,size:1.15,g:-.5});leaves(crown,7,1.6,{col:'#f6a7c7',life:.85,size:1.35});}
+    const idx=Math.floor((age-START)/1.37),front=natPhase(age-(START+idx*1.37),0,.91),radius=.28+(R-.28)*front,healing=mix<.5;
+    v.wave.visible=healing&&idx>=0&&front<1;v.wave.scale.setScalar(radius);v.wave.rotation.y=idx*.32+age*.18;v.waveMat.opacity=.86*natEase(natPhase(front,0,.12))*(1-natEase(natPhase(front,.66,1)));
+    if(v.wave.visible&&idx!==v.lastWave&&radius>2){v.lastWave=idx;v.healedSet=new Set();}
+    if(v.wave.visible&&v.healedSet)for(const p of (VIEW.cur?.P||[])){if(p.tm!==s.team||!p.al||p.dn||v.healedSet.has(p.id))continue;const o=PM3.get(p.id);if(!o||o.g.position.distanceTo(base)>radius)continue;v.healedSet.add(p.id);natHealRims(o);}
+    v.moteT-=dt;if(age>START&&v.moteT<=0){v.moteT=.033;const a=F.rnd(0,6.283),r=Math.sqrt(F.rnd(0,1))*(R-.6);sparks(base.clone().add(V3(Math.cos(a)*r,.1,Math.sin(a)*r)),2,.55,healing?'#d9ffba':'#fff2a0',healing?'#63dd83':'#e9b439',{g:-.7,life:1.45,size:.92});}}
 }
 
 function natMarker(){
@@ -276,18 +292,23 @@ function natThorn(from,to,size,material,parent,bend=.2){
 }
 function natShieldMake(o){
   const g=new THREE.Group();o.g.add(g);
-  const shield=new THREE.Mesh(new THREE.SphereGeometry(1.28,28,18),new THREE.ShaderMaterial({
-    transparent:true,depthWrite:false,uniforms:{},
-    vertexShader:`varying vec3 n,v; varying float h;
-      void main(){vec4 p=modelViewMatrix*vec4(position,1.);n=normalMatrix*normal;v=-p.xyz;h=position.y;
-      gl_Position=projectionMatrix*p;}`,
-    fragmentShader:`varying vec3 n,v; varying float h;
-      void main(){float rim=pow(1.-max(0.,dot(normalize(n),normalize(v))),2.5);
-      vec3 col=mix(vec3(.016,.12,.025),vec3(.31,.77,.14),smoothstep(-.52,1.12,h));
-      gl_FragColor=vec4(col,.22+.43*rim);
+  const hitWave={value:1},hitAxis={value:natV(.42,.16,1).normalize()};
+  const shield=new THREE.Mesh(new THREE.SphereGeometry(1.35,32,24),new THREE.ShaderMaterial({
+    transparent:true,depthWrite:false,side:THREE.FrontSide,uniforms:{hitWave,hitAxis},
+    vertexShader:`varying float h,edge;varying vec3 localNormal;
+      void main(){h=position.y/2.7+0.5;localNormal=normal;vec4 mv=modelViewMatrix*vec4(position,1.0);vec3 n=normalize(normalMatrix*normal);edge=pow(1.0-abs(dot(n,normalize(-mv.xyz))),3.0);gl_Position=projectionMatrix*mv;}`,
+    fragmentShader:`uniform float hitWave;uniform vec3 hitAxis;varying float h,edge;varying vec3 localNormal;
+      void main(){float t=clamp(h,0.0,1.0);vec3 low=vec3(.001,.012,.001),mid=vec3(.01,.11,.008),high=vec3(.34,.90,.25);
+      vec3 col=mix(mix(low,mid,smoothstep(.20,.72,t)),high,smoothstep(.62,1.0,t));col+=vec3(.14,.30,.09)*edge;
+      float d=acos(clamp(dot(normalize(localNormal),hitAxis),-1.0,1.0));float wave=1.0-smoothstep(.025,.11,abs(d-mix(.06,1.64,hitWave)));
+      float impact=pow(1.0-hitWave,1.65)*wave;float flash=(1.0-smoothstep(.03,.28,hitWave))*(1.0-smoothstep(.02,.26,d));
+      col+=vec3(.69,1.0,.32)*impact+vec3(.95,1.0,.55)*flash;
+      gl_FragColor=vec4(col,min(.97,mix(.96,.38,smoothstep(.25,1.0,t))+edge*.15+impact*.34+flash*.27));
       #include <colorspace_fragment>
       }`
   }));
+  const motes=Array.from({length:24},(_,i)=>{const m=natMesh(new THREE.OctahedronGeometry(.025+(i%3)*.009),new THREE.MeshBasicMaterial({color:i%2?'#a8f77c':'#e1ffc4',transparent:true,opacity:.7,depthWrite:false}),g);return m;});
+  g.userData.nat={hitWave,hitT:-1e9,motes};
   shield.position.y=1.10;shield.scale.set(1,.89,1);g.add(shield);
   for(let i=0;i<8;i++){
     const a=i*Math.PI/4,h=[1.82,1.39,1.72,1.93,1.52,1.88,1.29,1.71][i],c=Math.cos(a),s=Math.sin(a);
@@ -307,7 +328,7 @@ function natureCharacter(o,p,now){
   if(native&&p.sh&&p.al&&!p.dn){
     if(!o.natShield)o.natShield=natShieldMake(o);
     o.natShield.visible=true;o.shield.visible=false;
-    if(Math.random()<.19)burst(p.x,p.y,'#a7ec69',1,38,.42,1.4,{h:p.z+.65,vh:[.8,1.6],sh:4,g:-.3});
+    {const U=o.natShield.userData.nat,t=now/1000;U.hitWave.value=clamp((now-U.hitT)/360,0,1);U.motes.forEach((m,i)=>{const a=i*2.4+t*.4,y=((i*.31+t*.25)%2.4)-1.2,r=Math.sqrt(Math.max(.1,1-y*y/1.9))*1.4;m.position.set(Math.sin(a)*r,y+1.1,Math.cos(a)*r);});}
   }else if(o.natShield)o.natShield.visible=false;
   const count=p.nt?.[1]||0;
   if(count&&!o.natSpores){
@@ -381,7 +402,7 @@ function syncNature(v,P,me,dt,now){
     natModelTick(o,s,dt);
   }
   for(const [id,o] of NAT_VIEW)if(!seen.has(id)){
-    if(o.g)disposeObj(o.g);if(o.fx)fxKill(o.fx);NAT_VIEW.delete(id);
+    if(o.g)disposeObj(o.g);if(o.proxyG)disposeObj(o.proxyG);if(o.fx)fxKill(o.fx);NAT_VIEW.delete(id);
   }
   natMarks(v,P,me);natLinks(v,P,now);
   if(_natFx)_natFx.tick(dt);
@@ -398,7 +419,7 @@ function natureClear(){
   for(const g of NAT_MARKS.values())disposeObj(g);
   NAT_VIEW.clear();NAT_MARKS.clear();NAT_MOTION.length=0;
 }
-window.WD.natureClear=natureClear;window.WD.natureEvent=natureEvent;window.WD.natFx=natFx;
+window.WD.natureClear=natureClear;window.WD.natureEvent=natureEvent;window.WD.natFx=natFx;window.WD.windSuckFx=windSuckFx;
 
 function natDome(ev){
   const g=new THREE.Group(),radius=ev.r*S3;
@@ -456,7 +477,7 @@ function natSlam(ev){
   });
   later(.23,()=>{
     const {x2:x,y2:y,h2:h}=ev;
-    burst(x,y,'#a9dc63',10,110,.42,2.5,{h:h+.08,c2:'#67513b',sh:4,g:5});
+    {const F=natFx(),{V3,dirt,leaves,sparks}=F,dd=b.clone().sub(a).setY(0).normalize(),side=V3(dd.z,0,-dd.x);F.O.y=b.y;for(let i=0;i<4;i++){const p=a.clone().lerp(b,.4+i*.2);p.y=b.y+.07;dirt(p,5,2.9,{spread:.42,size:.75});leaves(p,3,1.6,{dir:side.clone().multiplyScalar(i%2?1.65:-1.65),life:.7,size:1.15});sparks(p,3,2.4,'#e9ffa0','#69a83b',{dir:dd,life:.63});}}
     const crack=new THREE.Group(),mat=new THREE.MeshBasicMaterial({color:'#514331',transparent:true,depthWrite:false});
     const position=natWorld(x,y,h+.03),nearGround=natWorld(x,y,groundH(x,y,h));
     if(Math.abs(position.y-nearGround.y)>.12)return;
@@ -554,11 +575,13 @@ function natHookPose(o){
 // Particle moments of the approved previews (tools/nature-preview.js), same calls and numbers.
 function natShock(p,col,size=6,life=.6){const F=natFx(),r=F.ring(.25,.5,col,.8);r.position.set(p.x,F.O.y+.05,p.z);F.clip(life,t=>{const k=t/life;r.scale.setScalar(1+k*size);r.material.opacity=(1-k)*.8;},()=>F.drop(r));}
 function natSprout(p,n=1){const F=natFx(),{V3}=F;F.dirt(p,14*n,3.2);F.leaves(p,10*n,3);F.sparks(p.clone().add(V3(0,.3,0)),16*n,3.5,'#fff7b0','#8ee05a');}
+function natHealRims(o){const F=natFx(),{V3,ring,sparks}=F,rims=[ring(.52,.58,'#8dffa9',0),ring(.45,.49,'#d2ffb2',0)];sparks(o.g.position.clone().add(V3(0,.20,0)),6,1.1,'#e1ffc1','#53d67b',{dir:V3(0,1.4,0),g:-.85,life:1.15,size:.9});
+  F.clip(.76,t=>{rims.forEach((rim,i)=>{const age=t-i*.09,k=natPhase(age,0,.65);rim.visible=age>=0&&k<1;rim.position.copy(o.g.position).add(V3(0,.08+1.47*natEase(k),0));rim.scale.setScalar(1+.18*Math.sin(k*Math.PI));rim.material.opacity=.78*(1-natEase(k));});},()=>rims.forEach(r=>F.drop(r)));}
 const natDirOf=a=>natFx().V3(Math.cos(a||0),0,Math.sin(a||0));
 function natMoment(ev){
   const F=natFx(),{V3,leaves,sparks,dirt,puff,chips}=F,x=ev.x,y=ev.y,h=ev.h,P=natWorld(x,y,h),base=natWorld(x,y,groundH(x,y,h));F.O.y=base.y;
   switch(ev.z){
-    case 'nature_shield_block':{const n=natDirOf(ev.a);sparks(P,15,3.3,'#f5ffb1','#91d84e',{dir:n.clone().multiplyScalar(1.3),life:.75});leaves(P,7,1.9,{dir:n.clone().multiplyScalar(1.6),life:.58,size:1.2});break;}
+    case 'nature_shield_block':{const n=natDirOf(ev.a),so=ev.id!=null?PM3.get(ev.id):null;if(so?.natShield)so.natShield.userData.nat.hitT=performance.now();sparks(P,15,3.3,'#f5ffb1','#91d84e',{dir:n.clone().multiplyScalar(1.3),life:.75});leaves(P,7,1.9,{dir:n.clone().multiplyScalar(1.6),life:.58,size:1.2});break;}
     case 'nature_pea_shot':{const d=natDirOf(ev.a);sparks(P,10,2.45,'#f8ffbb','#70c638',{dir:d.clone().multiplyScalar(1.55),life:.54,size:1.42});leaves(P,3,1.55,{dir:d,life:.60,size:.95});break;}
     case 'nature_pea_muzzle':sparks(P,14,3.4,'#f1ffbc','#82d843',{life:.64,size:.9,dir:natDirOf(ev.a).multiplyScalar(1.7)});break;
     case 'nature_pea_splash':sparks(P,24,5.2,'#f2ffa1','#70ce3d',{size:1.2,life:.76});leaves(P,9,4,{col:'#99ca49',life:.56});break;

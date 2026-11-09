@@ -724,8 +724,8 @@ _natFx:3 natFxClear:4 natFxMake:5 T:6 S:6 O:6 seed:7 ALL:8 mesh:9 STD:10 ADD:11 
 §67 อนุภาค
 Pool:68 leafGeo:76 LEAF:77 SPK:78 DIRT:79 PUFF:80 CHIP:81 POOLS:82 leafCols:83 leaves:84 sparks:85 dirt:86 puff:87 chips:88 TrailRibbon:90 CLIPS:101 tick:102 clip:103 drop:104 natFx:107
 
-## js/68-nature-view.js (646) — 
-NAT_VIEW:2 NAT_MARKS:2 NAT_MOTION:2 natV:3 natWorld:4 natPhase:5 natSmooth:6 natEase:7 natOut:8 natStd:9 natAdd:10 natMesh:11 natRing:12 natLeaf:16 natPlantM:19 natGlow:26 natArt:29 natureProjectileModel:31 natSet:37 natAnimate:38 natTube:39 natTrail:50 natSeed:68 natLotus:76 natBall:90 natPlantView:100 natStartStudy:110 natWearWall:128 natTreeGlow:151 natModelTick:171 natMarker:239 natMarks:253 natThorn:272 natShieldMake:277 natureCharacter:304 natOutlineMat:334 natOutline:338 natLinks:350 syncNature:375 natureClear:394 natDome:403 natMuzzle:425 natSlam:435 natHook:471 natCoil:528 natHookPose:549 natShock:555 natSprout:556 natDirOf:557 natMoment:558 natureEvent:585
+## js/68-nature-view.js (669) — 
+NAT_VIEW:2 NAT_MARKS:2 NAT_MOTION:2 natV:3 natWorld:4 natPhase:5 natSmooth:6 natEase:7 natOut:8 natStd:9 natAdd:10 natMesh:11 natRing:12 natLeaf:16 natPlantM:19 natGlow:26 natArt:29 natureProjectileModel:31 natSet:37 natAnimate:38 natTube:39 natTrail:50 natSeed:68 natLotus:76 natBall:92 natPlantView:102 natStartStudy:112 natWearWall:130 natTreeGlow:153 natModelTick:173 natMarker:255 natMarks:269 natThorn:288 natShieldMake:293 natureCharacter:325 natOutlineMat:355 natOutline:359 natLinks:371 syncNature:396 natureClear:415 natDome:424 natMuzzle:446 natSlam:456 natHook:492 natCoil:549 natHookPose:570 natShock:576 natSprout:577 natHealRims:578 natDirOf:580 natMoment:581 natureEvent:608
 
 ## js/68-water-view.js (216) — สายน้ำ 💧 — ภาพฝั่งผู้เล่น • VFX = assets/fx/water/* (tools/water-vfx-gen.py, สไตล์ desig…
 WTV:5 WTC:6 WT_BODY:8 waterCharacterPose:13 wtState:34 wtStop:35 wtMesh:36 _wtV:38 _wtP:38 wtBakeClone:39 wtLineMat:50 _wtOlMat:57 wtOutline:59 WT_SINKD:65 wtSinkOffset:66 wtAlive:73 wtLoop:75 WT_FR:78 wtFrPath:79 _wtFa:81 _wtFb:81 _wtFs:81 _wtFn:81 wtFamRiseMesh:82 WT_POOL:87 wtFamRise:88 wtFamRiseOff:95 _wtTube:97 WT_BEAM_V:98 WT_BEAM_F:101 WT_BEAM_O:105 wtBeamMesh:108 wtBeamSync:112 wtBeamOff:117
@@ -738,7 +738,7 @@ waterEfx:184
 §212 HUD: เกจฮีลโล่ (โค้งซ้ายรอบเป้าเล็ง)
 drawWaterHud:213
 
-## js/68-wind-view.js (397) — 
+## js/68-wind-view.js (411) — 
 WV:6 WN_BODY:8 WN_AIR_FEET:8 WF_POSE:12 WF_FEET:12 WF_REF:12 WF_ROLL:12 _wfP:13 _wfF:13 windFlyPose:14 WTLF:24 windTailDraw:25 windTailFeel:31 windCharacterPose:33 wvState:50 wvAlive:51
 §52 ทุกเฟรมของผู้เล่นสายลม: ปีกติดหลัง / ปีกห่อตอนยกโล่ / ดูดลมชาร์จเกจ
 WFE_HOLD:53 WFE_TURN:53 windLatePose:55 _faX:91 _faQ:91 _faT:91 WF_ELBOW:91 windForearm:92 windFX:94
@@ -747,13 +747,13 @@ syncWind:120 wvWall:133 wvHitFx:134 wvAimFx:135
 §136 ตา Eye of Heaven: ตำแหน่งตาบนฟ้า (ตรงกับ EYE ใน tools/wind-eye-ult-ge…
 wvEyePos:137 wvEyeSeen:138
 §139 เหตุการณ์ (efx z 'wn…')
-windEfx:140
-§233 HUD รอบเป้าเล็ง: เกจ GaleBurst (โค้งซ้าย) + ชาร์จกำแพงลม (จุด 3 จุดใต…
-drawWindHud:234
-§242 ตัวช่วยเล็งกำแพงลม (เห็นเฉพาะเรา): เส้นโค้งเรืองที่จุดวาง (คลิกขวา) +…
-wvAimGhost:243
-§254 ปีกเวทสายลมติดหลัง: ขนนก 8+4 เส้นต่อข้าง ทำจากสายลม (shader) + ริบบิ้…
-WWS:256 WWU:256 WW_NOISE:257 _wwMat:262 wwMats:263 wwFeatherGeo:309 WW_PRI:320 WW_COV:322 WW_RIB:323 _wwGeo:324 _wsupG:326 _wsupD:326 windSupDust:327 windSupDustTick:331 windWingSup:332 makeWindWings:353 wwCue:367 poseWindWings:371
+windSuckFx:141 windEfx:154
+§247 HUD รอบเป้าเล็ง: เกจ GaleBurst (โค้งซ้าย) + ชาร์จกำแพงลม (จุด 3 จุดใต…
+drawWindHud:248
+§256 ตัวช่วยเล็งกำแพงลม (เห็นเฉพาะเรา): เส้นโค้งเรืองที่จุดวาง (คลิกขวา) +…
+wvAimGhost:257
+§268 ปีกเวทสายลมติดหลัง: ขนนก 8+4 เส้นต่อข้าง ทำจากสายลม (shader) + ริบบิ้…
+WWS:270 WWU:270 WW_NOISE:271 _wwMat:276 wwMats:277 wwFeatherGeo:323 WW_PRI:334 WW_COV:336 WW_RIB:337 _wwGeo:338 _wsupG:340 _wsupD:340 windSupDust:341 windSupDustTick:345 windWingSup:346 makeWindWings:367 wwCue:381 poseWindWings:385
 
 ## js/69-broom.js (236) — ไม้กวาด (ผู้ใช้ 2026-10-29): บินแบบเครื่องบิน + ยิงลำแสงตามสาย + อนิเ…
 BRM:9 BFW:12 BSK:13 BROOM_SK:19 broomVert:40 broomMove:53 broomStrike:72 broomStrikeTick:81 broomFlak:89 broomAct:100 broomOff:107 broomBeam:109
@@ -800,4 +800,4 @@ surfSync:49 surfQuality:53
 SURF_VS:55 SURF_VS_BODY:56 SURF_FS:67 SURF_FS_BODY:68 surfOk:98 surfApply:99 surfScene:111
 §112 ปรับค่า (tune.html / F8)
 
-(97 files, 24447 lines)
+(97 files, 24484 lines)

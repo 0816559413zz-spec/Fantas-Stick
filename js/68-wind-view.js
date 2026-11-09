@@ -137,6 +137,20 @@ function wvAimFx(id){const o=WV.wa;if(o&&o.has(id)){fxStop(o.get(id));o.delete(i
 function wvEyePos(x,y,a){return {x:x+Math.cos(a||0)*600,y:y+Math.sin(a||0)*600,h:16};}
 function wvEyeSeen(e){const v=new THREE.Vector3(tx(e.x),e.h+GY(e.x,e.y),tz(e.y));const me=myPos();if(me&&Math.hypot(me.x-e.x,me.y-e.y)>2400)return false;v.project(cam);return v.z<1&&Math.abs(v.x)<1.05&&Math.abs(v.y)<1.05;}
 // ---------- เหตุการณ์ (efx z 'wn…') ----------
+// Shield block: bright green-white spiral streaks and sparks pulled into the caster, then a small flash.
+function windSuckFx(ev){
+  const F=natFx(),{T,V3,Tube,ADD,glow,GLOWG,sparks}=F,o=ev.id!=null?PM3.get(ev.id):null,fixed=natWorld(ev.x,ev.y,ev.h);
+  const center=()=>(o?o.g.position.clone():fixed.clone()).add(V3(0,1.2,0)),mat=ADD('#ffffff',{vertexColors:true}),N=14,bright=new T.Color('#f2ffe9'),green=new T.Color('#6dff4d'),LIFE=.46;
+  const S=Array.from({length:N},(_,i)=>{const m=Tube(16,5,mat);m.castShadow=false;return {m,a:i/N*6.283+Math.random()*.4,y:-.9+1.9*Math.random(),d:Math.random()*.1,R:3.1+Math.random()*1.3};});
+  const flash=glow(GLOWG,1);flash.visible=false;
+  const c0=center();for(let i=0;i<34;i++){const a=Math.random()*6.283,r=2.2+Math.random()*2,p=c0.clone().add(V3(Math.cos(a)*r,-1+Math.random()*2.2,Math.sin(a)*r));sparks(p,1,.25,'#f2ffe9','#6dff4d',{dir:c0.clone().sub(p).multiplyScalar(2.6),life:1.1,size:1.9,g:.01});}
+  F.clip(LIFE,t=>{const C=center();
+    for(const s of S){const u=clamp((t-s.d)/(LIFE-.1-s.d),0,1),head=1-u*u,pts=[];s.m.visible=u>0&&u<1;if(!s.m.visible)continue;
+      for(let j=0;j<16;j++){const v=j/15,r=(head+v*.42*(1-head*.4))*s.R+.18,a=s.a+(1-head)*2.3+v*.9;pts.push(V3(C.x+Math.cos(a)*r,C.y+s.y*(.25+r*.28),C.z+Math.sin(a)*r));}
+      const fade=Math.sin(Math.PI*u);s.m.set(pts,v=>(.085*(1-v)**1.2+.006)*(.55+fade),(v,c)=>c.copy(bright).lerp(green,v).multiplyScalar(1.5*fade*(1-v*.8)));}
+    const k=(t-LIFE*.6)/(LIFE*.4);flash.visible=k>0;if(flash.visible){flash.position.copy(C);flash.scale.setScalar(1.3+k*1.5);flash.material.opacity=Math.sin(Math.PI*Math.min(1,k))*.85;}
+  },()=>{S.forEach(s=>F.drop(s.m));F.drop(flash);mat.dispose();});
+}
 function windEfx(ev){
   try{airWind(ev);}catch(e){}   // หญ้า/ลม (js/50): ท่าลมทำให้หญ้าพลิ้ว
   const z=ev.z,x=ev.x,y=ev.y,H=ev.h!==undefined?ev.h:0,me=myPos(),near=!me||Math.hypot(x-me.x,y-me.y)<1100,mine=ev.id===NET.myId,a=ev.a||0;
@@ -148,6 +162,7 @@ function windEfx(ev){
     case 'wngbfull':fxPlay('wind/ba_hit',{x,y,h:H+1.2,a:0});ring(x,y,'#8dff65',30,0.3,H+0.1);if(mine)toast('GaleBurst พร้อม! กดโจมตีปกติค้าง = ยิงลมต่อเนื่อง');return true;
     case 'wnchg':return true;
     case 'wnsbchg':ring(x,y,'#b8ff85',60,0.3,H+1);return true;
+    case 'wnsuck':windSuckFx(ev);if(near)snd('whoosh',{x,y,vol:0.35});return true;   // shield took a hit: wind is pulled in (user 2026-11-09)
     case 'wnsb':fxPlay('wind/shield_burst',{x,y,h:H,follow:ev.id});if(near)shake(0.25);return true;
     case 'wnpv':{const o=PM3.get(ev.id);if(o){o.wpv={t:0,n:ev.n};if(o.wWings)o.wWings.userData.pv=0,o.wWings.userData.pvE=W_DR.vWind+W_DR.vGap*ev.n;}fxPlay('wind/plume_cast',{x,y,h:H,aim:false,follow:ev.id});if(near)snd('whoosh',{x,y,vol:0.8});return true;}   // ง้างปีก + กางแขน แล้วดันไปข้างหน้าตอนขนพุ่ง
     case 'wnpf':{const o=PM3.get(ev.id);if(o&&o.wWings){const d=o.wWings.userData;(d.fs||(d.fs={}))[-ev.n]={t:0};}if(o&&o.wpv)o.wpv.s=ev.n;if(near)snd('whoosh',{x,y,vol:0.22});return true;}   // ยิงทีละขน: ปีกข้างนั้นยืดออก (sd=+1 คือซ้าย, n=+1 คือขวา)

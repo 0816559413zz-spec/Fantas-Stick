@@ -229,7 +229,7 @@ const PBASIC=[
   {id:'b_nature',type:'pb3',n:'แส้หนาม',d:'ฟาดทุกเป้าในกรวยหน้า 120° ระยะ 280 หน่วย ดาเมจ 7 คลิกซ้ำหรือกดค้างเพื่อฟาดกลับ แล้วพัก 1 วิ',
   shd:'โล่ 100 HP เถาหนามฟาดศัตรูในระยะ 180 หน่วย คนละ 10 ดาเมจ ทุก 0.75 วิ',
   dsd:'เถาเกี่ยวเป้าในระยะ 300 หน่วย คูลดาวน์ 8 วิ เกี่ยวเข้าป้อมของเราเพื่อชาร์จลูกถั่วใหญ่',shMul:1,dash:natureDash,
-  onBlock:p=>natureEmit('shield_block',{x:p.x,y:p.y,h:p.z+1.1},{a:p.ang})},
+  onBlock:p=>natureEmit('shield_block',{x:p.x,y:p.y,h:p.z+1.1},{a:p.ang,id:p.id})},
   {id:'b_hex',type:'pb4',n:'ประกายคำสาป',d:'ยิงโดนทุกๆ 3 ครั้ง = ตีตรา 2 วิ (ถ้ายังไม่มีตรา)',hit(pr,t){damage(t,pr.dmg,pr.owner,'proj');const o=G.players[pr.owner];if(o&&(o.bc=(o.bc|0)+1)%3===0&&!(t.mrk>0))addMark(t,2);}},
   {id:'b_summon',type:'pb5',n:'ลูกวิญญาณ',d:'ยิงโดนเป้าไหน สัตว์เวททุกตัวจะหันไปโจมตีเป้านั้นนาน 4 วิ',hit(pr,t){damage(t,pr.dmg,pr.owner,'proj');const o=G.players[pr.owner];if(o){o.focusT=t;o.focusUntil=G.time+4;}}}
 ];
