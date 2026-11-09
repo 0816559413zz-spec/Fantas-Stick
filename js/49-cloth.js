@@ -115,7 +115,7 @@ function clothTick(dt){if(!CLOTH.ON||typeof NET==='undefined')return;const o=PM3
   let vis=true;for(let n=C.outer;n;n=n.parent)if(!n.visible){vis=false;break;}
   C.mo.visible=C.mi.visible=vis&&!!o.g.parent;if(!C.mo.visible){C.init=false;return;}
   o.g.updateMatrixWorld(true);clTargets(C);
-  if(!C.init)clReset(C);
+  const wj=o.wud!==undefined||(o.wld&&o.wld.t<0.15);if(!C.init||wj){clReset(C);if(wj)C.lp=null;}   // Sonic Boom พุ่ง: ตัวย้ายแทบทันที ไม่ให้ผ้ารับรู้ความเร็ว ไม่งั้นปลิวค้างหลังจบ
   else{const i=0;if(Math.hypot(C.T[i]-C.P[i],C.T[i+1]-C.P[i+1],C.T[i+2]-C.P[i+2])>CLOTH.SNAP)clReset(C);}
   for(let i=0;i<C.caps.length;i++){const q=C.caps[i],c=C.capV[i];q[0].getWorldPosition(c[0]);q[1].getWorldPosition(c[1]);c[2]=CLOTH[q[2]];}
   _clV.setFromMatrixPosition(C.o.g.matrixWorld);if(!C.lp){C.lp=_clV.clone();C.ly=C.o.g.rotation.y;}
