@@ -116,6 +116,8 @@ function efxFX(ev){
     case 'sorbhit':ring(x,y,'#ffd000',60,0.3,0.15);for(let i=0;i<5;i++){const an=rnd(0,6.283);tbolt(x,y,H,x+Math.cos(an)*rnd(40,65),y+Math.sin(an)*rnd(40,65),H+rnd(-0.4,0.8),0.18,0,0.13);}
       burst(x,y,'#ffd000',22,240,0.35,2.4,{h:H,vh:[1,5],g:5});burst(x,y,'#ffffff',8,180,0.25,1.8,{h:H,g:5});FX.flashSprite(x,y,H,'#ffffff',0.4,2.2,0.12,2.2);FX.flashLight(x,y,H+1,'#ffd23a',5,14,0.25);if(near){snd('zap',ev);shake(2);}break;
     case 'sorboff':burst(x,y,'#ffd000',8,80,0.3,1.6,{h:H,g:0});break;
+    case 'sbow':stormBowFx(ev);break;
+    case 'sbowfail':burst(x,y,'#7df2ff',10,60,.3,1.8,{h:H});if(near)snd('dismount',ev);break;
     case 'srailc':if(near)snd('cast_ebolt',ev);break;
     case 'srail':{const a=ev.a,c=Math.cos(a),sn=Math.sin(a),L=ev.len,ex=x+c*L,ey=y+sn*L;
       const b1=stBeam(x,y,H,a,L,0.2,'#ffffff',1,true);stFade(b1,0.28);const b2=stBeam(x,y,H,a,L,0.42,'#ffd000',0.85,true);stFade(b2,0.32);const b3=stBeam(x,y,H,a,L,0.8,'#ffc800',0.18);stFade(b3,0.35);STV[STV.length-1].grow=0.7;

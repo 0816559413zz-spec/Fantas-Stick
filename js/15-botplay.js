@@ -42,7 +42,7 @@ function botWant(p,id,tg,d){
     case 'speedsiphon':return st>=(botSave(p)?3:1)&&d<190;
     case 'stormorbs':return st>=(botSave(p)?3:1)&&!p.sorb&&d<450;
     case 'triplestrike':return st>=2&&d<600&&(stuck||st>=4);
-    case 'railgun':return st>=2&&d>280&&d<850&&(stuck||hp>0.6);
+    case 'railgun':return st>=3&&d>280&&d<850&&(stuck||hp>0.6);
     case 'stormdome':return st>=3&&d<560;
     // ---- ดิน: ผลักศัตรูชนของแข็ง • โคลน → กำแพงหนีบ ----
     case 'stonebreaker':return d<650&&(botWallBehind(p,tg,260)||d<360);

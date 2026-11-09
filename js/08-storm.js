@@ -85,7 +85,7 @@ function stormTick(p,dt){
   p.shieldE=p.stS?100:100*(1-Math.max(0,p.stCd||0)/STORMV.shieldCd);p.shieldBroken=0;
   if(p.god>0){p.god-=dt;if(p.god<=0){p.god=0;p.xhp=0;emit({k:'efx',z:'godoff',x:p.x,y:p.y,h:p.z+1,id:p.id});}}
   if(p.slnT>0){if(p.stun>0){p.slnT=0;}else{p.slnT-=dt;if(p.slnT<=0)stormLine(p);}}
-  if(p.rail){if(p.stun>0)p.rail=null;else{p.rail.t-=dt;if(p.rail.t<=0)stormRailFire(p);}}
+  if(p.rail)stormBowTick(p,dt);
   if(p.sorb){p.sorb.t-=dt;if(p.sorb.t<=0||p.sorb.n<=0){p.sorb=null;emit({k:'efx',z:'sorboff',x:p.x,y:p.y,h:p.z+1.8,id:p.id});}}
 }
 // ----- สกิล 1 (ฟรี): เส้นสายฟ้า — ชี้ขึ้นแล้วกดลง 0.5 วิ จากนั้นสายฟ้าผ่าเป็นแนวจากตัวเราไปสุดระยะ 600 ใน 0.3 วิ -----
@@ -142,16 +142,22 @@ function stormOrbLaunch(p,x,y,tg){
   emit({k:'efx',z:'sorbgo',x:p.x,y:p.y,h:p.z+1.8,x2:Math.round(x),y2:Math.round(y),n:k,id:p.id,T:SORBS.v.fly,tg:tg?(tg.isE?'e'+tg.id:tg.id):undefined});
 }
 // ----- สกิล 5 (2 stacks): Railgun — เส้นเตือนเหลือง 0.8 วิ (อัลติ 0.5) แล้วลำสายฟ้าทะลุทุกคน -----
-const RAIL=defSpell(2,{id:'railgun',v:{cost:2,warn:0.8,warnGod:0.5,len:900,lenGod:1400,w:30,dmg:45,env:45},vn:{cost:'ใช้ stack',warn:'เตือนก่อนยิง (วิ)',warnGod:'เตือน (ระหว่างอัลติ)',len:'ยาว',lenGod:'ยาว (ระหว่างอัลติ)',w:'กว้าง',dmg:'ดาเมจ',env:'ดาเมจใส่บ้าน/ของ'},role:'finisher',n:'Railgun',ic:'🔱',cd:10,d:'ใช้ 2 stacks: ร่ายวงเวท เส้นนำทางเหลืองแกนขาวลอยกลางอากาศ 0.8 วิ (ยืนนิ่ง กล้องล็อกทิศ) แล้วยิงลำสายฟ้ายาว 900 กว้าง 30 ทะลุทุกคน',fx:'45 ดาเมจ • ระหว่างอัลติ: เตือนแค่ 0.5 วิ ระยะ 1400',
-  cast(p,S){const V=S.v;if(!stSpend(p,V.cost))return false;const g=p.god>0;p.rail={t:g?V.warnGod:V.warn,max:g?V.warnGod:V.warn,a:p.ang,len:g?V.lenGod:V.len};emit({k:'efx',z:'srailc',x:p.x,y:p.y,h:p.z+1,id:p.id});}});
-function stormRailFire(p){
-  const R=p.rail;p.rail=null;const c=Math.cos(R.a),sn=Math.sin(R.a);let len=R.len;
-  for(let d=40;d<=R.len;d+=25){const x=p.x+c*d,y=p.y+sn*d;if(x<20||x>MW-20||y<20||y>MH-20){len=d;break;}}
-  len=Math.min(len,windBlockLen(p.team,p.x,p.y,R.a,len,p.z+1.2,RAIL.v.dmg));   // ชนกำแพงลมศัตรู = ลำหยุดตรงนั้น กำแพงเสีย HP
-  for(const t of stormLineFoes(p,p.x,p.y,R.a,len,RAIL.v.w/2,0))aoeHit(p,t,RAIL.v.dmg);
-  for(let d=40;d<=len;d+=40)damageEnv(p.x+c*d,p.y+sn*d,30,RAIL.v.env,p.id,'lightning',p.z+1.2);   // ลำทะลุบ้าน/ลัง
-  emit({k:'efx',z:'srail',x:Math.round(p.x),y:Math.round(p.y),h:p.z+1.2,a:Math.round(R.a*1000)/1000,len:Math.round(len),id:p.id});
-}
+const RAIL=defSpell(2,{id:'railgun',v:{cost:3,draw:1.8,len:1000,dmg:75,env:45,slow:0.28,shockT:1,w:20},vn:{cost:'ใช้ stack',draw:'ง้างเต็ม (วิ)',len:'ระยะ',dmg:'ดาเมจ',env:'ดาเมจใส่บ้าน/ของ',slow:'เดินตอนเล็ง (เท่า)',shockT:'Shock บินไม่ขึ้น (วิ)',w:'กว้างลูกธนู'},
+  n:'ธนูสายฟ้า',d:'เข้าโหมดเล็ง กดซ้ายค้างง้าง 1.8 วิ ง้างไม่เต็มปล่อย = ไม่ยิงและเสีย 3 stack ระยะ 1000 ดาเมจ 75 โดนแล้วฟ้าผ่าลง Shock 1 วิ คนบนฟ้าบินไม่ขึ้น',ic:'🏹',role:'damage',cd:8,
+  cast(p,S){if(p.rail)return false;const V=S.v;if(!stSpend(p,V.cost))return false;p.rail={d:0,t:V.draw,max:V.draw,a:p.ang,len:V.len,armed:!p.inp?.fire,s0:!!p.inp?.sh,life:7};emit({k:'efx',z:'srailc',x:p.x,y:p.y,h:p.z+1,id:p.id});}});
+function stormBowTick(p,dt){const R=p.rail,V=RAIL.v,inp=p.inp||{};R.a=p.ang;R.life-=dt;
+  if(p.stun>0||!p.alive||R.life<=0||(inp.sh&&!R.s0)){p.rail=null;return;}R.s0=!!inp.sh;
+  if(p.bot){R.d+=dt;R.t=Math.max(0,V.draw-R.d);if(R.d>=V.draw)stormBowFire(p);return;}
+  if(!R.armed){if(!inp.fire)R.armed=true;return;}
+  if(inp.fire){R.d+=dt;R.t=Math.max(0,V.draw-R.d);return;}
+  if(R.d>0){if(R.d>=V.draw)stormBowFire(p);else{p.rail=null;emit({k:'efx',z:'sbowfail',x:Math.round(p.x),y:Math.round(p.y),h:p.z+1.4,id:p.id});}}}
+function stormBowFire(p){const V=RAIL.v;p.rail=null;const h0=p.z+1.5,inp=p.inp||{},r=aimRay3(p,h0,V.len);let ex,ey,eh;
+  if(r){ex=r.x;ey=r.y;eh=r.h;}else{const ap=clamp(inp.ap||0,-1.5,1.5);ex=p.x+Math.cos(p.ang)*V.len;ey=p.y+Math.sin(p.ang)*V.len;eh=h0+Math.tan(ap)*V.len/20;}
+  const dx=ex-p.x,dy=ey-p.y,dh=(eh-h0)*20,L=Math.max(1,Math.hypot(dx,dy,dh));let best=null,bu=2;
+  for(const t of foesOf(p.team)){if(t.dead||t.alive===false||t.downed)continue;const tx0=t.x-p.x,ty0=t.y-p.y,tz0=(cH(t)-h0)*20,u=(tx0*dx+ty0*dy+tz0*dh)/(L*L);if(u<0||u>1||u>=bu)continue;const off=Math.hypot(tx0-dx*u,ty0-dy*u,tz0-dh*u);if(off<=(t.r||PR)+V.w){bu=u;best=t;}}
+  if(best){ex=best.x;ey=best.y;eh=cH(best);aoeHit(p,best,V.dmg,t=>{t.shk=V.shockT;t.shkSrc=p.id;t.boltDown=V.shockT;});}
+  damageEnv(ex,ey,40,V.env,p.id,'lightning',eh);
+  emit({k:'efx',z:'sbow',x:Math.round(p.x),y:Math.round(p.y),h:h0,x2:Math.round(ex),y2:Math.round(ey),h2:Math.round(eh*10)/10,hit:!!best,id:p.id});}
 // ----- อัลติ: ร่างเทพสายฟ้า 10 วิ -----
 const GODL=defSpell(2,{id:'godlightning',v:{time:10,xhp:75,dashRc:1,dashDmg:15,c1:15,c2:15,c3:25,clawR:200,bigR:280,bigDmg:25,slamR:150,slamDmg:80},vn:{time:'อยู่นาน (วิ)',xhp:'HP เสริม',dashRc:'Dash ฟื้นชาร์จละ (วิ)',dashDmg:'Dash • ดาเมจทะลุ',c1:'กรงเล็บ • จังหวะ 1',c2:'กรงเล็บ • จังหวะ 2',c3:'กรงเล็บ • จังหวะ 3',clawR:'กรงเล็บ • ระยะ',bigR:'กรงเล็บใหญ่ • ระยะ',bigDmg:'กรงเล็บใหญ่ • ดาเมจ',slamR:'ลูกสายฟ้าโดม (อัลติ) • รัศมีทุบ',slamDmg:'ลูกสายฟ้าโดม (อัลติ) • ดาเมจทุบ'},role:'ult',n:'ร่างเทพสายฟ้า',ic:'⚡',cd:0,ult:true,d:'แปลงร่างเทพสายฟ้า 10 วิ: HP เสริม 75 • Dash ฟื้นชาร์จละ 1 วิ ทะลุ 15 ดาเมจ • ยิงปกติเป็นกรงเล็บสายฟ้า 3 จังหวะ ระยะ 200 (15/15/25 จังหวะ 3 = Shock) • Dash โดนศัตรู = ฟันครั้งถัดไปเป็นกรงเล็บใหญ่ ระยะ 280 กว้างขึ้น 25 ดาเมจ + Shock • ใช้โล่ไม่ได้',fx:'สกิลเก่งขึ้น: ดูดความเร็วไกลขึ้น+Shock • ออร์บพุ่งพร้อมกัน • Railgun เตือน 0.5 วิ ไกล 1400 • ฟ้าผ่าสามครั้งมีวงซ้าย/ขวา • ลูกสายฟ้าโดมเป็นทุบลงแบบ Dragonfall 80 ดาเมจ • stack ยังใช้เท่าเดิม',
   cast(p,S){p.god=S.v.time;p.xhp=S.v.xhp;p.dch=STORMV.dashN;p.cEmp=0;if(p.stS){p.stS=null;p.stCd=0;}p.clN=0;emit({k:'efx',z:'godon',x:p.x,y:p.y,h:p.z,id:p.id});}});

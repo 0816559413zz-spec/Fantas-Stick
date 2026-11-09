@@ -347,7 +347,7 @@ function stormFX(o,p,pz,now,dt){
   else o.slOn=0;
   // Railgun: ยืนนิ่ง • เส้นนำทางเหลืองแกนขาวลอยกลางอากาศ — หัวนำวิ่งออกไปก่อน (0.25 วิ) แล้วเส้นค้างรอยิง • วงเวทหน้าไม้
   const R=M[6];
-  if(f&16&&R){
+  if(false&&f&16&&R){   // replaced by the lightning bow (js/68-storm-bow.js)
     if(!o.rlOn)o.rlOn=now;const el=(now-o.rlOn)/1000,a=R[0],len=R[2],k=1-Math.max(0,R[1])/(R[3]||0.8),g=Math.min(1,el/0.25);
     o.tip.getWorldPosition(_pw);const q=simOf(_pw),ex=q.x+Math.cos(a)*len*g,ey=q.y+Math.sin(a)*len*g,P=[];
     for(let i=0;i<8;i++){const t=i/7;_tw.set(tx(lerp(q.x,ex,t)),q.h+GY(q.x,q.y),tz(lerp(q.y,ey,t)));P.push(_tw.clone());}

@@ -72,7 +72,7 @@ function render(dt,now){
     const fx=Math.cos(yaw),fy=Math.sin(yaw);
     INPUT.mx=fx*f-fy*s;INPUT.my=fy*f+fx*s;
     INPUT.ax=me.x+fx*2000;INPUT.ay=me.y+fy*2000;
-    INPUT.ap=clamp((0.3-pitch)*1.2,-0.9,0.9);
+    INPUT.ap=clamp((0.3-pitch)*1.2,-1.5,1.5);
     if(!dcamCam(P,me,dt))updateCamera(specTarget(P,me,dt)||me,dt);   // ตายนาน ≥2 วิ = ดูคนอื่น (js/52)
     aimFromCrosshair(me,P,E);
     updatePlaceGhost(me);

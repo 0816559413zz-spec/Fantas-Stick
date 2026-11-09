@@ -122,7 +122,7 @@ function botPlay(p,dt,tg,c0){
     // เก็บ stack: Dash ทะลุศัตรู • stack ครบแล้วเก็บ Dash ไว้หนี
     if(p.dch>=1&&!(p.dash>0)&&d>150&&d<430&&(st<2||roll(0.2))&&roll(dt*4))dash();
     if(rdy('stormdome')&&st>=3&&d<560)go('stormdome');
-    else if(rdy('railgun')&&st>=2&&d<850&&d>200)go('railgun');
+    else if(rdy('railgun')&&st>=3&&d<850&&d>200)go('railgun');
     else if(rdy('triplestrike')&&st>=2&&d<560)go('triplestrike');
     else if(rdy('speedsiphon')&&st>=1&&d<190)go('speedsiphon');
     else if(rdy('stormorbs')&&st>=1&&!p.sorb&&d<500)go('stormorbs');

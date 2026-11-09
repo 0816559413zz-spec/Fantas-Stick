@@ -126,7 +126,7 @@ function tickStatus(t,dt){
   if(t.psnT>0){t.psnT-=dt;t.psnTick-=dt;if(t.psnTick<=0){t.psnTick=0.8;damage(t,2*(t.psn|0),t.psnSrc,'burn');}if(t.psnT<=0)t.psn=0;}
   if(t.fear>0)t.fear-=dt;if(t.bld>0)t.bld-=dt;if(t.mrk>0)t.mrk-=dt;if(t.drCd>0)t.drCd-=dt;
   if(t.dr){t.dr.t-=dt;if(t.dr.t<=0)t.dr=null;}
-  if(t.slowT>0)t.slowT-=dt;if(t.shk>0)t.shk-=dt;if(t.frz>0)t.frz-=dt;if(t.sil>0)t.sil-=dt;
+  if(t.slowT>0)t.slowT-=dt;if(t.shk>0)t.shk-=dt;if(t.boltDown>0)t.boltDown-=dt;if(t.frz>0)t.frz-=dt;if(t.sil>0)t.sil-=dt;
   if(t.chlT>0){t.chlT-=dt;if(t.chlT<=0)t.chl=0;}
   if(t.frzImm>0)t.frzImm-=dt;if(t.chlImm>0)t.chlImm-=dt;if(t.rootImm>0)t.rootImm-=dt;
   if(t.ccT>0){t.ccT-=dt;if(t.ccT<=0)t.ccN=0;}

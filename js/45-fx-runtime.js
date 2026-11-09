@@ -72,7 +72,7 @@ function fxLocal(I,b,p){const c=Math.cos(I.a),s=Math.sin(I.a);return [b[0]+(c*p[
 function fxDir(I,d){const c=Math.cos(I.a),s=Math.sin(I.a);return [(c*d[2]-s*d[0])*20,(s*d[2]+c*d[0])*20,d[1]];}
 function fxYawV(v,yw){if(!yw)return v;const c=Math.cos(yw),s=Math.sin(yw);return [v[0]*c+v[2]*s,v[1],-v[0]*s+v[2]*c];}
 function fxPos(I,S,k){const L=S.d,p=fxV(fxG(L,'pos'),I,k)||[0,0,0],sc=I.s;return fxLocal(I,fxBase(I,fxG(L,'att')),[p[0]*sc,p[1]*sc,p[2]*sc]);}
-function fxPlace(obj,I,S,w,yaw){obj.position.set(tx(w[0]),w[2]+GY(w[0],w[1]),tz(w[1]));const a=I.a+(yaw||0);obj.rotation.order='YXZ';obj.rotation.y=Math.atan2(Math.cos(a),Math.sin(a));}
+function fxPlace(obj,I,S,w,yaw){obj.position.set(tx(w[0]),w[2]+GY(w[0],w[1]),tz(w[1]));const a=I.a+(yaw||0);obj.rotation.order='YXZ';obj.rotation.y=Math.atan2(Math.cos(a),Math.sin(a));obj.rotation.x=I.pitch||0;}
 // ---------- เล่น / หยุด ----------
 function fxPlay(name,o){if(!FXR.ready||!FXR.on)return null;const d=fxData(name);if(!d){FXR.stat.miss++;return null;}return fxStart(d,o,name);}
 function fxStart(F,o,name){o=o||{};if(!FXR.ready||!F||!Array.isArray(F.layers))return null;if(o.x===undefined||o.y===undefined||isNaN(o.x))return null;
