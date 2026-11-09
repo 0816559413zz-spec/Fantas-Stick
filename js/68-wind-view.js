@@ -137,15 +137,17 @@ function wvAimFx(id){const o=WV.wa;if(o&&o.has(id)){fxStop(o.get(id));o.delete(i
 function wvEyePos(x,y,a){return {x:x+Math.cos(a||0)*600,y:y+Math.sin(a||0)*600,h:16};}
 function wvEyeSeen(e){const v=new THREE.Vector3(tx(e.x),e.h+GY(e.x,e.y),tz(e.y));const me=myPos();if(me&&Math.hypot(me.x-e.x,me.y-e.y)>2400)return false;v.project(cam);return v.z<1&&Math.abs(v.x)<1.05&&Math.abs(v.y)<1.05;}
 // ---------- เหตุการณ์ (efx z 'wn…') ----------
-// Small neon splash dome where a feather ends: shared geometry, one short-lived material each.
-const WDOME_G=new THREE.SphereGeometry(1,24,12,0,Math.PI*2,0,Math.PI/2);WDOME_G.userData.keep=true;
-function windDome(x,y,h,r){const F=natFx(),{T,V3,sparks}=F,R=r*S3,P=natWorld(x,y,h),u={op:{value:1}};
-  const mat=new T.ShaderMaterial({transparent:true,depthWrite:false,blending:T.AdditiveBlending,side:T.DoubleSide,uniforms:u,
-    vertexShader:'varying vec3 n,v;varying float h;void main(){vec4 p=modelViewMatrix*vec4(position,1.);n=normalMatrix*normal;v=-p.xyz;h=position.y;gl_Position=projectionMatrix*p;}',
-    fragmentShader:'uniform float op;varying vec3 n,v;varying float h;void main(){float e=pow(1.-abs(dot(normalize(n),normalize(v))),2.2);gl_FragColor=vec4(mix(vec3(.12,.8,.1),vec3(.4,1.,.3),e),(e*.6+.05+.2*(1.-smoothstep(0.,.14,h)))*op);}'});
-  const m=new T.Mesh(WDOME_G,mat);m.position.copy(P);m.frustumCulled=false;F.add(m);
-  const L=.26;sparks(P.clone().add(V3(0,.1,0)),5,2.4,'#efffe0','#8dff65',{life:.55,size:1.1});
-  F.clip(L,t=>{const k=t/L,e=1-(1-k)**3;m.scale.setScalar(R*(.25+.75*e));u.op.value=1-k*k;},()=>{F.ALL.splice(F.ALL.indexOf(m),1);F.T&&m.parent&&m.parent.remove(m);mat.dispose();});
+// Neon splash ball where a feather ends: wind lines swirl around it. Basic attack = one small shell; skill = two shells, a ring and more sparks.
+const WDOME_G=new THREE.SphereGeometry(1,28,18);WDOME_G.userData.keep=true;
+const WDOME_V='varying vec3 n,v,q;void main(){q=position;vec4 p=modelViewMatrix*vec4(position,1.);n=normalMatrix*normal;v=-p.xyz;gl_Position=projectionMatrix*p;}';
+const WDOME_F='uniform float op,spin;varying vec3 n,v,q;void main(){float e=pow(1.-abs(dot(normalize(n),normalize(v))),2.);float a=atan(q.z,q.x);float l1=smoothstep(.72,.97,sin(a*5.+q.y*7.+spin));float l2=smoothstep(.8,.98,sin(a*3.-q.y*9.-spin*1.4+1.7));float l=max(l1,l2*.8);vec3 c=mix(vec3(.1,.75,.1),vec3(.45,1.,.35),e);c=mix(c,vec3(.5,1.,.42),l);gl_FragColor=vec4(c,(e*.5+.02+l*.8)*op);}';
+function windDome(x,y,h,r,skill){const F=natFx(),{T,V3,sparks,ring}=F,R=r*S3,P=natWorld(x,y,Math.max(h,.15)),L=skill?.36:.22;
+  const shell=(delay,scale,opK)=>{const u={op:{value:0},spin:{value:Math.random()*6}},mat=new T.ShaderMaterial({transparent:true,depthWrite:false,side:T.DoubleSide,uniforms:u,vertexShader:WDOME_V,fragmentShader:WDOME_F}),m=new T.Mesh(WDOME_G,mat);m.position.copy(P);m.frustumCulled=false;m.visible=false;F.add(m);m.rotation.set(Math.random()*.6,Math.random()*6,Math.random()*.6);
+    F.clip(L+delay,t=>{const k=(t-delay)/L;m.visible=k>=0;if(k<0)return;const e=1-(1-k)**3;m.scale.setScalar(R*scale*(.25+.75*e));u.spin.value+=.09;u.op.value=(1-k*k)*opK;},()=>{const i=F.ALL.indexOf(m);if(i>=0)F.ALL.splice(i,1);m.parent&&m.parent.remove(m);mat.dispose();});};
+  shell(0,1,1);
+  if(skill){shell(.07,.62,.9);const rr=ring(.86,1,'#b8ff85',.8);rr.position.copy(P);F.clip(L,t=>{const k=t/L;rr.scale.setScalar(R*(.4+.75*(1-(1-k)**2)));rr.material.opacity=.8*(1-k);},()=>F.drop(rr));
+    sparks(P,14,3.6,'#f2ffe2','#8dff65',{life:.72,size:1.3});}
+  else sparks(P,3,1.8,'#efffe0','#8dff65',{life:.45,size:.8});
 }
 // Shield block: bright green-white spiral streaks and sparks pulled into the caster, then a small flash.
 function windSuckFx(ev){
@@ -179,7 +181,7 @@ function windEfx(ev){
     case 'wnsl':{const o=PM3.get(ev.id);if(o){o.wsl={t:0,T:ev.t,d:ev.n,s:ev.m,gs:ev.n>=2&&!ev.w};if(o.wWings){const u=o.wWings.userData;u.sl=0;u.slD=ev.n;u.slT=ev.t;}}if(ev.n===0){fxPlay(ev.m?'wind/slip_fwd':'wind/slip_fwd_g',{x,y,h:H,a,aim:false,follow:ev.id});fxPlay(ev.m?'wind/slip_fwd_w':'wind/slip_fwd_gw',{x,y,h:H,a});}else if(ev.n===1){fxPlay(ev.m?'wind/slip_back':'wind/slip_back_g',{x,y,h:H,a,aim:false,follow:ev.id});fxPlay(ev.m?'wind/slip_back_w':'wind/slip_back_gw',{x,y,h:H,a});}else if(!ev.w){fxPlay('wind/slip_fwd_g',{x,y,h:H,a,aim:false,follow:ev.id});fxPlay('wind/slip_fwd_gw',{x,y,h:H,a});}else{const g=ev.w?'':'_g';fxPlay('wind/slip_side_'+(ev.m<0?'l':'r')+g,{x,y,h:H,a,aim:false,follow:ev.id});fxPlay('wind/slip_side_w'+g,{x,y,h:H,a});}if(near)snd('whoosh',{x,y,vol:0.8});return true;}   // ท่าแดช 4 ทิศ
     case 'wnse':fxPlay('wind/slip_shot',{x,y,h:H,aim:false,follow:ev.id});if(near)snd('whoosh',{x,y,vol:0.6});return true;
     case 'wndome':windDome(x,y,H,ev.r);if(near)snd('hit',{x,y,vol:0.3});return true;
-    case 'wnpb':windDome(x,y,H,ev.r||40);fxPlay('wind/plume_pop',{x,y,h:H,aim:false});if(near)snd('hit',{x,y,vol:0.5});return true;
+    case 'wnpb':windDome(x,y,H,ev.r||34,true);fxPlay('wind/plume_pop',{x,y,h:H,aim:false});if(near)snd('hit',{x,y,vol:0.5});return true;
     case 'wndb':fxPlay('wind/downburst',{x,y,h:H,aim:false});wwCue(ev.id,'db');{const o=PM3.get(ev.id);if(o)o.wdb=0;}if(near)snd('cast_pull',ev);return true;   // ชูไม้ แล้วฟาดลง ลมถึงพื้นตอนฟาด
     case 'wndg':if(near){snd('whoosh',{x,y,vol:0.9});shake(0.16);}return true;
     case 'wndt':if(me){const d=Math.hypot(x-me.x,y-me.y);if(d<W_WL.dbR+250)shake(d<W_WL.dbR+30?0.07:0.03);}return true;   // พื้นในวงสั่นเป็นจังหวะตามลมกด
