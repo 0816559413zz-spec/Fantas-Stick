@@ -137,7 +137,8 @@ function updateCamera(me,dt){
   WBY=me.wt&&me.wt[7]&&me.al?yaw:null;
   AIMZ+=(((me.kd>0&&me.hv)?1:0)-AIMZ)*Math.min(1,dt*10);if(AIMZ<0.001)AIMZ=0;
   {const fv=SET.fov*(1-0.25*AIMZ)+WTLF.fov;if(Math.abs(cam.fov-fv)>0.01){cam.fov=fv;cam.updateProjectionMatrix();}}
-  const px=tx(me.x),pz=tz(me.y);
+  let px=tx(me.x),pz=tz(me.y);
+  if(me.wn&&me.wn[5]&&me.al){const T=CAM_TRACK,k=1-Math.exp(-16*dt);if(T.fk!==builtKey+'|'+me.id||Math.hypot(px-T.fx,pz-T.fz)>6){T.fx=px;T.fz=pz;T.fk=builtKey+'|'+me.id;}else{T.fx+=(px-T.fx)*k;T.fz+=(pz-T.fz)*k;}px=T.fx;pz=T.fz;}else CAM_TRACK.fk='';   // flight: the view follows a smoothed point, so snapshot or prediction jitter does not shake the screen
   const fx=Math.cos(yaw),fz=Math.sin(yaw),rx=-fz,rz=fx;
   const target=cameraFrame(me),key=builtKey+'|'+me.id,ground=GY(me.x,me.y)+(me.z||0),cut=!CAM_TRACK.has||CAM_TRACK.key!==key;
   const blend=cut?1:1-Math.exp(-(target===CAM_FRAMES.waterDragon?14:8)*dt);

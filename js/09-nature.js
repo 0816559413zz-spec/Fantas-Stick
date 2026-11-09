@@ -411,7 +411,7 @@ function natureSnapW(){
       buff:o.buffed,aim:o.aim,turn:o.turnAt?G.time-o.turnAt:99,charge:o.chargeAt?G.time-o.chargeAt:null,
       shot:o.firedAt===undefined?99:G.time-o.firedAt,big:o.shotBig};
   }).filter(Boolean);
-  const walls=G.walls.filter(o=>o.wood&&o.hp>0).map(o=>({id:o.id,k:'wall',x:o.x,y:o.y,h:o.h,a:o.a,age:G.time-o.born,burn:o.burn.map(b=>b.total/(o.maxHp*.2))}));
+  const walls=(G.walls||[]).filter(o=>o.wood&&o.hp>0).map(o=>({id:o.id,k:'wall',x:o.x,y:o.y,h:o.h,a:o.a,age:G.time-o.born,burn:o.burn.map(b=>b.total/(o.maxHp*.2))}));
   return plants.length||walls.length?{NT:[...plants,...walls]}:{};
 }
 

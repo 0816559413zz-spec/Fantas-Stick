@@ -563,6 +563,6 @@ PBASIC.push({id:'b_wind',type:'wblade',n:'ขนนกลม',d:'กดค้า
   dsd:'Dash ถอยหลังผลัก (Shift): ผลักศัตรูข้างหน้า 250 ตัวเราดีดถอยหลัง 300 ลอยกลางอากาศ (ใช้สกิลกลางอากาศได้) • ศัตรูที่โดนผลักชนกำแพง = 20 ดาเมจ + สตัน • คูลดาวน์ 8 วิ',
   get shMul(){return 100/WNV.shHp;},shieldSwing:true,front:true,frontA:80*Math.PI/180,
   hit(pr,t){if(pr.type==='wpush'){windPushHit(pr,t);return;}if(pr.type==='wbl'){windBladeHit(pr,t);return;}if(pr.type==='wball'||pr.type==='wplume')return;damage(t,pr.dmg,pr.owner,'proj');const o=G.players[pr.owner];pr.wbT=t;if(o)wGain(o,WNV.baGain);},   // ลูกบอลลม (Focus): ผลักเบา ๆ ไม่เพิ่มเกจ
-  onBlock(p){wGain(p,WNV.shGain);emit({k:'efx',z:'wnsuck',x:Math.round(p.x),y:Math.round(p.y),h:p.z,id:p.id});},
+  onBlock(p){wGain(p,WNV.shGain);},
   tick:windBasic,dash:windDash});
 SPELLS.b_wind=PBASIC[WINDP];

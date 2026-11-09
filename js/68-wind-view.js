@@ -51,6 +51,7 @@ const wvState=id=>{let s=WV.st.get(id);if(!s){s={};WV.st.set(id,s);}return s;};
 const wvAlive=I=>!!I&&FXR.inst.indexOf(I)>=0;
 // ---------- ทุกเฟรมของผู้เล่นสายลม: ปีกติดหลัง / ปีกห่อตอนยกโล่ / ดูดลมชาร์จเกจ ----------
 const wfeSwing=t=>1-Math.pow(1-Math.min(1,t/0.14),3),wfeTwist=t=>t<0.14?lerp(-0.55,0.72,wfeSwing(t)):lerp(0.72,WFE_TURN,Math.min(1,(t-0.14)/0.26));   // BA body twist: coil, whip through, settle
+const W_BLAST_SUCK=120;
 const WFE_HOLD=0.55,WFE_TURN=0.32;   // วิที่ค้างท่าหลังยิง • มุมหันตัว (เรเดียน)
 // ท่าแขนของสายลมที่ต้องทับท่าบิน: เรียกหลัง windCharacterPose • กด Featherwing = ชูมือถือไม้ตอนลอย แล้วค่อย ๆ ลดลง • ยิงขนนก = ชี้ไม้ไปข้างหน้า
 function windLatePose(o,p,dt){const R=o.armR.rotation;if(!p.wn||!p.al||p.dn||(p.sh&&o.wbc===undefined)){o.wfu=undefined;if(o.wsl&&o.wsl.d>=1){if(o.wsl.d>=2)o.b.rotation.y=0;o.wsl=null;}return;}   // ง้างปล่อยโล่ยังถือโล่อยู่ ต้องให้ท่าทำงานด้วย
@@ -150,19 +151,17 @@ function windDome(x,y,h,r,skill){const F=natFx(),{T,V3,sparks,ring}=F,R=r*S3,P=n
     sparks(P,14,3.6,'#f2ffe2','#8dff65',{life:.72,size:1.3});}
   else sparks(P,3,1.8,'#efffe0','#8dff65',{life:.45,size:.8});
 }
-// Shield block: bright green-white spiral streaks and sparks pulled into the caster, then a small flash.
+// Shield blast hit: green wind bands spiral into the blast point, pulling toward it (user 2026-11-09). Not additive-white.
 function windSuckFx(ev){
-  const F=natFx(),{T,V3,Tube,ADD,glow,GLOWG,sparks}=F,o=ev.id!=null?PM3.get(ev.id):null,fixed=natWorld(ev.x,ev.y,ev.h);
-  const center=()=>(o?o.g.position.clone():fixed.clone()).add(V3(0,1.2,0)),mat=ADD('#ffffff',{vertexColors:true}),N=14,bright=new T.Color('#f2ffe9'),green=new T.Color('#6dff4d'),LIFE=.46;
-  const S=Array.from({length:N},(_,i)=>{const m=Tube(16,5,mat);m.castShadow=false;return {m,a:i/N*6.283+Math.random()*.4,y:-.9+1.9*Math.random(),d:Math.random()*.1,R:3.1+Math.random()*1.3};});
-  const flash=glow(GLOWG,1);flash.visible=false;
-  const c0=center();for(let i=0;i<34;i++){const a=Math.random()*6.283,r=2.2+Math.random()*2,p=c0.clone().add(V3(Math.cos(a)*r,-1+Math.random()*2.2,Math.sin(a)*r));sparks(p,1,.25,'#f2ffe9','#6dff4d',{dir:c0.clone().sub(p).multiplyScalar(2.6),life:1.1,size:1.9,g:.01});}
-  F.clip(LIFE,t=>{const C=center();
-    for(const s of S){const u=clamp((t-s.d)/(LIFE-.1-s.d),0,1),head=1-u*u,pts=[];s.m.visible=u>0&&u<1;if(!s.m.visible)continue;
-      for(let j=0;j<16;j++){const v=j/15,r=(head+v*.42*(1-head*.4))*s.R+.18,a=s.a+(1-head)*2.3+v*.9;pts.push(V3(C.x+Math.cos(a)*r,C.y+s.y*(.25+r*.28),C.z+Math.sin(a)*r));}
-      const fade=Math.sin(Math.PI*u);s.m.set(pts,v=>(.085*(1-v)**1.2+.006)*(.55+fade),(v,c)=>c.copy(bright).lerp(green,v).multiplyScalar(1.5*fade*(1-v*.8)));}
-    const k=(t-LIFE*.6)/(LIFE*.4);flash.visible=k>0;if(flash.visible){flash.position.copy(C);flash.scale.setScalar(1.3+k*1.5);flash.material.opacity=Math.sin(Math.PI*Math.min(1,k))*.85;}
-  },()=>{S.forEach(s=>F.drop(s.m));F.drop(flash);mat.dispose();});
+  const F=natFx(),{T,V3,Tube,ADD,sparks,ring}=F,C=natWorld(ev.x,ev.y,ev.h),R=Math.min(6,ev.r*S3),mat=new T.MeshBasicMaterial({vertexColors:true,transparent:true,depthWrite:false,side:T.DoubleSide,opacity:.85}),N=16,dark=new T.Color('#2dbb3c'),lite=new T.Color('#a9ff8c'),LIFE=.62;
+  const S=Array.from({length:N},(_,i)=>{const m=Tube(18,5,mat);m.castShadow=false;m.visible=false;return {m,a:i/N*6.283+F.rnd(0,.35),y:F.rnd(-.9,1),d:F.rnd(0,.16),R:R*F.rnd(.7,1.05),w:F.rnd(.8,1.3)};});
+  const rr=ring(.9,1,'#7dff6a',.5);rr.position.copy(C);
+  for(let i=0;i<26;i++){const a=F.rnd(0,6.283),r=R*F.rnd(.55,1),p=C.clone().add(V3(Math.cos(a)*r,F.rnd(-.8,1.4),Math.sin(a)*r));sparks(p,1,.2,'#b8ff85','#2dbb3c',{dir:C.clone().sub(p).multiplyScalar(2.1),life:1.2,size:1.5,g:.01});}
+  F.clip(LIFE,t=>{const q=t/LIFE;rr.scale.setScalar(R*(1-q*.92));rr.material.opacity=.5*Math.sin(Math.PI*q);
+    for(const s of S){const u=clamp((t-s.d)/(LIFE-.14-s.d),0,1);s.m.visible=u>0&&u<1;if(!s.m.visible)continue;const head=(1-u)*(1-u),pts=[];
+      for(let j=0;j<18;j++){const v=j/17,r=(head+v*.55*(1-head*.5))*s.R+.2,a=s.a+(1-head)*2.1+v*1.1;pts.push(V3(C.x+Math.cos(a)*r,C.y+s.y*(.2+r*.16),C.z+Math.sin(a)*r));}
+      const fade=Math.sin(Math.PI*u);s.m.set(pts,v=>(.14*Math.pow(1-v,1.3)+.008)*s.w*(.5+.7*fade),(v,c)=>c.copy(lite).lerp(dark,v).multiplyScalar(.55+.6*fade*(1-v)));}
+  },()=>{S.forEach(s=>F.drop(s.m));F.drop(rr);mat.dispose();});
 }
 function windEfx(ev){
   try{airWind(ev);}catch(e){}   // หญ้า/ลม (js/50): ท่าลมทำให้หญ้าพลิ้ว
@@ -175,7 +174,6 @@ function windEfx(ev){
     case 'wngbfull':fxPlay('wind/ba_hit',{x,y,h:H+1.2,a:0});ring(x,y,'#8dff65',30,0.3,H+0.1);if(mine)toast('GaleBurst พร้อม! กดโจมตีปกติค้าง = ยิงลมต่อเนื่อง');return true;
     case 'wnchg':return true;
     case 'wnsbchg':ring(x,y,'#b8ff85',60,0.3,H+1);return true;
-    case 'wnsuck':windSuckFx(ev);if(near)snd('whoosh',{x,y,vol:0.35});return true;   // shield took a hit: wind is pulled in (user 2026-11-09)
     case 'wnsb':fxPlay('wind/shield_burst',{x,y,h:H,follow:ev.id});if(near)shake(0.25);return true;
     case 'wnpv':{const o=PM3.get(ev.id);if(o){o.wpv={t:0,n:ev.n};if(o.wWings)o.wWings.userData.pv=0,o.wWings.userData.pvE=W_DR.vWind+W_DR.vGap*ev.n;}fxPlay('wind/plume_cast',{x,y,h:H,aim:false,follow:ev.id});if(near)snd('whoosh',{x,y,vol:0.8});return true;}   // ง้างปีก + กางแขน แล้วดันไปข้างหน้าตอนขนพุ่ง
     case 'wnpf':{const o=PM3.get(ev.id);if(o&&o.wWings){const d=o.wWings.userData;(d.fs||(d.fs={}))[-ev.n]={t:0};}if(o&&o.wpv)o.wpv.s=ev.n;if(near)snd('whoosh',{x,y,vol:0.22});return true;}   // ยิงทีละขน: ปีกข้างนั้นยืดออก (sd=+1 คือซ้าย, n=+1 คือขวา)
@@ -210,8 +208,8 @@ function windEfx(ev){
     case 'wnorb':fxPlay('wind/gale_orb_boom',{x,y,h:H,aim:false});if(near){snd('boom',{x,y,vol:0.5});shake(0.25);}return true;
     case 'wnoc':{fxPlay('wind/gale_orb_charge',{x,y,h:H,follow:ev.id});const o=PM3.get(ev.id);if(o)o.wob={s:ev.n,t:0};if(near)snd('cast_pull',{x,y,vol:0.4});return true;}   // ง้างไม้ไปข้าง ลูกลมก่อตัวที่ปลายไม้
     case 'wnol':fxPlay('wind/gale_orb_launch',{x,y,h:H,a,aim:false});if(near)snd('whoosh',{x,y,vol:0.6});return true;
-    case 'wnwc':{fxPlay('wind/wall_launch',{x,y,h:H,a,aim:false});const o=PM3.get(ev.id);if(o)o.wbc=0;if(near)snd('cast_pull',{x,y,vol:0.5});return true;}   // ง้างก่อนปล่อยโล่
-    case 'wnwb':{fxPlay('wind/wall_blast',{x,y,h:H,a,aim:false});if(near){snd('boom',{x,y,vol:0.45});shake(0.2);}return true;}
+    case 'wnwc':{fxPlay('wind/wall_launch',{x,y,h:H,a,aim:false,follow:ev.id});const o=PM3.get(ev.id);if(o)o.wbc=0;if(near)snd('cast_pull',{x,y,vol:0.5});return true;}   // ง้างก่อนปล่อยโล่
+    case 'wnwb':{fxPlay('wind/wall_blast',{x,y,h:H,a,aim:false});later(0.1,()=>windSuckFx({x,y,h:H,r:ev.r||W_BLAST_SUCK}));if(near){snd('boom',{x,y,vol:0.45});shake(0.2);}return true;}
     case 'wnfe':{const o=PM3.get(ev.id);if(o){o.wfe={s:ev.n,t:0};if(o.wWings){const d=o.wWings.userData;(d.fs||(d.fs={}))[-ev.n]={t:0};}}if(near)snd('whoosh',{x,y,vol:0.35});return true;}   // ยิงขนนก: ปีก sd=+1 คือซ้ายของตัวละคร ส่วน n=+1 คือขวา
     case 'wnvocast':fxPlay('wind/void_wave',{x,y,h:H,a,aim:false});if(near)snd('cast_pull',ev);return true;
     case 'wnvohole':{const I=fxPlay('wind/void_hole',{x,y,h:H,a,aim:false});if(I)WV.vo.set(ev.n,I);if(near)shake(0.15);return true;}
