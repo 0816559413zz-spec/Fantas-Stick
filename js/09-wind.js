@@ -342,7 +342,7 @@ function windOrbBoom(pr){const o=G.players[pr.owner],R=W_FW.orbR;if(o)for(const 
 // ---------- Tailwind (เดิม Windblade): ร่องลมจากตัวเราไปตามทิศเล็ง — เพื่อน+ตัวเราเร็วขึ้น ศัตรูช้าลง ----------
 function windTailCast(p){if(windSpin(p))return false;const a=p.ang,gh=groundH(p.x,p.y,p.z);
   (G.wtl||(G.wtl=[])).push({team:p.team,x:p.x,y:p.y,gh,ca:Math.cos(a),sa:Math.sin(a),t:-W_VO.tlD});
-  emit({k:'efx',z:'wntl',x:Math.round(p.x),y:Math.round(p.y),h:gh,a:Math.round(a*100)/100,id:p.id});}
+  emit({k:'efx',z:'wntl',x:Math.round(p.x),y:Math.round(p.y),h:gh,a:Math.round(a*100)/100,id:p.id,tm:p.team});}
 function windTailIn(z,t){const dx=t.x-z.x,dy=t.y-z.y,u=dx*z.ca+dy*z.sa,tr=t.r||PR;if(u<-tr||u>W_VO.tlL+tr||Math.abs(dy*z.ca-dx*z.sa)>W_VO.tlW/2+tr)return false;const hh=cH(t)-z.gh;return hh>=-1.5&&hh<=18;}
 function windTailTick(z,dt){z.t+=dt;if(z.t<0)return true;
   for(const t of plist())if(t.alive&&!t.downed&&t.team===z.team&&windTailIn(z,t))t.wtlT=Math.max(t.wtlT||0,0.2);

@@ -367,9 +367,9 @@
     3
    ],
    "burst": 0,
-   "rate": 8,
+   "rate": 14,
    "from": "disc",
-   "fr": 1,
+   "fr": 1.2,
    "dir": "aim",
    "spread": 0.3,
    "speed": [
@@ -382,11 +382,11 @@
    ],
    "look": "smoke",
    "size": [
-    3,
-    5.5
+    4,
+    7.5
    ],
-   "col": "#8fe3bd",
-   "c2": "#57c796",
+   "col": "#62d6a2",
+   "c2": "#2fbf88",
    "gravity": 0,
    "drag": 0.5,
    "grow": 1.3
@@ -403,9 +403,9 @@
     9
    ],
    "burst": 0,
-   "rate": 8,
+   "rate": 14,
    "from": "disc",
-   "fr": 1,
+   "fr": 1.2,
    "dir": "aim",
    "spread": 0.3,
    "speed": [
@@ -418,11 +418,11 @@
    ],
    "look": "smoke",
    "size": [
-    3,
-    5.5
+    4,
+    7.5
    ],
-   "col": "#8fe3bd",
-   "c2": "#57c796",
+   "col": "#62d6a2",
+   "c2": "#2fbf88",
    "gravity": 0,
    "drag": 0.5,
    "grow": 1.3
@@ -439,9 +439,9 @@
     15
    ],
    "burst": 0,
-   "rate": 8,
+   "rate": 14,
    "from": "disc",
-   "fr": 1,
+   "fr": 1.2,
    "dir": "aim",
    "spread": 0.3,
    "speed": [
@@ -454,11 +454,11 @@
    ],
    "look": "smoke",
    "size": [
-    3,
-    5.5
+    4,
+    7.5
    ],
-   "col": "#8fe3bd",
-   "c2": "#57c796",
+   "col": "#62d6a2",
+   "c2": "#2fbf88",
    "gravity": 0,
    "drag": 0.5,
    "grow": 1.3
@@ -475,9 +475,9 @@
     21
    ],
    "burst": 0,
-   "rate": 8,
+   "rate": 14,
    "from": "disc",
-   "fr": 1,
+   "fr": 1.2,
    "dir": "aim",
    "spread": 0.3,
    "speed": [
@@ -490,11 +490,11 @@
    ],
    "look": "smoke",
    "size": [
-    3,
-    5.5
+    4,
+    7.5
    ],
-   "col": "#8fe3bd",
-   "c2": "#57c796",
+   "col": "#62d6a2",
+   "c2": "#2fbf88",
    "gravity": 0,
    "drag": 0.5,
    "grow": 1.3
@@ -511,9 +511,9 @@
     27
    ],
    "burst": 0,
-   "rate": 8,
+   "rate": 14,
    "from": "disc",
-   "fr": 1,
+   "fr": 1.2,
    "dir": "aim",
    "spread": 0.3,
    "speed": [
@@ -526,11 +526,11 @@
    ],
    "look": "smoke",
    "size": [
-    3,
-    5.5
+    4,
+    7.5
    ],
-   "col": "#8fe3bd",
-   "c2": "#57c796",
+   "col": "#62d6a2",
+   "c2": "#2fbf88",
    "gravity": 0,
    "drag": 0.5,
    "grow": 1.3
@@ -547,9 +547,9 @@
     3
    ],
    "burst": 0,
-   "rate": 8,
+   "rate": 14,
    "from": "disc",
-   "fr": 1,
+   "fr": 1.2,
    "dir": "aim",
    "spread": 0.3,
    "speed": [
@@ -562,11 +562,11 @@
    ],
    "look": "smoke",
    "size": [
-    3,
-    5.5
+    4,
+    7.5
    ],
-   "col": "#8fe3bd",
-   "c2": "#57c796",
+   "col": "#62d6a2",
+   "c2": "#2fbf88",
    "gravity": 0,
    "drag": 0.5,
    "grow": 1.3
@@ -583,9 +583,9 @@
     9
    ],
    "burst": 0,
-   "rate": 8,
+   "rate": 14,
    "from": "disc",
-   "fr": 1,
+   "fr": 1.2,
    "dir": "aim",
    "spread": 0.3,
    "speed": [
@@ -598,11 +598,11 @@
    ],
    "look": "smoke",
    "size": [
-    3,
-    5.5
+    4,
+    7.5
    ],
-   "col": "#8fe3bd",
-   "c2": "#57c796",
+   "col": "#62d6a2",
+   "c2": "#2fbf88",
    "gravity": 0,
    "drag": 0.5,
    "grow": 1.3
@@ -619,9 +619,9 @@
     15
    ],
    "burst": 0,
-   "rate": 8,
+   "rate": 14,
    "from": "disc",
-   "fr": 1,
+   "fr": 1.2,
    "dir": "aim",
    "spread": 0.3,
    "speed": [
@@ -634,11 +634,11 @@
    ],
    "look": "smoke",
    "size": [
-    3,
-    5.5
+    4,
+    7.5
    ],
-   "col": "#8fe3bd",
-   "c2": "#57c796",
+   "col": "#62d6a2",
+   "c2": "#2fbf88",
    "gravity": 0,
    "drag": 0.5,
    "grow": 1.3
@@ -655,9 +655,9 @@
     21
    ],
    "burst": 0,
-   "rate": 8,
+   "rate": 14,
    "from": "disc",
-   "fr": 1,
+   "fr": 1.2,
    "dir": "aim",
    "spread": 0.3,
    "speed": [
@@ -670,11 +670,11 @@
    ],
    "look": "smoke",
    "size": [
-    3,
-    5.5
+    4,
+    7.5
    ],
-   "col": "#8fe3bd",
-   "c2": "#57c796",
+   "col": "#62d6a2",
+   "c2": "#2fbf88",
    "gravity": 0,
    "drag": 0.5,
    "grow": 1.3
@@ -691,9 +691,9 @@
     27
    ],
    "burst": 0,
-   "rate": 8,
+   "rate": 14,
    "from": "disc",
-   "fr": 1,
+   "fr": 1.2,
    "dir": "aim",
    "spread": 0.3,
    "speed": [
@@ -706,11 +706,11 @@
    ],
    "look": "smoke",
    "size": [
-    3,
-    5.5
+    4,
+    7.5
    ],
-   "col": "#8fe3bd",
-   "c2": "#57c796",
+   "col": "#62d6a2",
+   "c2": "#2fbf88",
    "gravity": 0,
    "drag": 0.5,
    "grow": 1.3
@@ -748,8 +748,8 @@
     2,
     3.5
    ],
-   "col": "#8fe3bd",
-   "c2": "#57c796",
+   "col": "#62d6a2",
+   "c2": "#2fbf88",
    "gravity": 0,
    "drag": 1,
    "grow": 1.2

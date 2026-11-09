@@ -136,7 +136,7 @@ function updateCamera(me,dt){
   if(me.wt&&me.wt[7]&&me.al&&WBY!==null){const m=WT_AB.turn*dt;yaw=WBY+Math.max(-m,Math.min(m,angDiff(yaw,WBY)));}
   WBY=me.wt&&me.wt[7]&&me.al?yaw:null;
   AIMZ+=(((me.kd>0&&me.hv)?1:0)-AIMZ)*Math.min(1,dt*10);if(AIMZ<0.001)AIMZ=0;
-  {const fv=SET.fov*(1-0.25*AIMZ);if(Math.abs(cam.fov-fv)>0.01){cam.fov=fv;cam.updateProjectionMatrix();}}
+  {const fv=SET.fov*(1-0.25*AIMZ)+WTLF.fov;if(Math.abs(cam.fov-fv)>0.01){cam.fov=fv;cam.updateProjectionMatrix();}}
   const px=tx(me.x),pz=tz(me.y);
   const fx=Math.cos(yaw),fz=Math.sin(yaw),rx=-fz,rz=fx;
   const target=cameraFrame(me),key=builtKey+'|'+me.id,ground=GY(me.x,me.y)+(me.z||0),cut=!CAM_TRACK.has||CAM_TRACK.key!==key;

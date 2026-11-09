@@ -20,7 +20,18 @@ function windFlyPose(o,s,v,dt,now,w,glide){if(!s.fx){s.fx=s.fv=s.rx=s.rv=0;}cons
   const sway=Math.sin(now/620);_wfP[6]=s.rx*WF_ROLL+sway*0.02;_wfP[7]+=Math.sin(now/480)*0.05;_wfP[3]+=Math.sin(now/480+1)*0.015;_wfP[1]-=s.rx*0.15;_wfP[5]-=s.rx*0.15;_wfF[2]+=s.rx*0.12;_wfF[3]+=s.rx*0.12;
   characterStance(o,_wfP,_wfF,w);
   if(o.wWings){o.wWings.userData.airSw=s.fx>0?-0.22*s.fx:-0.2*s.fx;o.wWings.userData.gh=glide?1:0;}}
+// Tailwind ฝั่งจอ (เฉพาะเรา): อยู่ในร่องลมทีมเดียวกัน = ลมวิ่งที่ขอบและมุมจอ + กล้องซูมออกนิด • คำนวณจาก event ไม่เพิ่มข้อมูลใน snapshot
+const WTLF={k:0,fov:0,c:null,x:null,S:[]};
+function windTailDraw(k){let c=WTLF.c;if(k<0.01){if(c&&c.style.display!=='none'){c.style.display='none';}return;}
+  if(!c){c=WTLF.c=document.createElement('canvas');c.id='wtlFx';c.style.cssText='position:fixed;inset:0;width:100vw;height:100vh;z-index:2;pointer-events:none';document.body.appendChild(c);WTLF.x=c.getContext('2d');for(let i=0;i<54;i++)WTLF.S.push({a:Math.random()*6.283,r:0.68+Math.random()*0.5,s:0.9+Math.random()*1.1,l:0.08+Math.random()*0.16,w:1+Math.random()*2.2});}
+  c.style.display='block';const W=innerWidth,H=innerHeight;if(c.width!==W||c.height!==H){c.width=W;c.height=H;}
+  const g=WTLF.x,cx=W/2,cy=H/2,ax=W*0.58,ay=H*0.58;g.clearRect(0,0,W,H);
+  const v=g.createRadialGradient(cx,cy,Math.min(W,H)*0.42,cx,cy,Math.hypot(cx,cy));v.addColorStop(0,'rgba(120,255,190,0)');v.addColorStop(1,'rgba(120,255,190,'+(0.2*k)+')');g.fillStyle=v;g.fillRect(0,0,W,H);
+  g.lineCap='round';for(const s of WTLF.S){const al=Math.min(1,(s.r-0.68)/0.14)*Math.min(1,(1.22-s.r)/0.14)*0.75*k;if(al<=0)continue;const cs=Math.cos(s.a),sn=Math.sin(s.a);g.strokeStyle='rgba(225,255,240,'+al+')';g.lineWidth=s.w;g.beginPath();g.moveTo(cx+cs*ax*s.r,cy+sn*ay*s.r);g.lineTo(cx+cs*ax*(s.r+s.l),cy+sn*ay*(s.r+s.l));g.stroke();}}
+function windTailFeel(p,dt){const Z=WV.tl||[];let on=false;for(let i=Z.length-1;i>=0;i--){const z=Z[i];z.t+=dt;if(z.t>=W_VO.tlD+W_VO.tlT){Z.splice(i,1);continue;}if(z.t<W_VO.tlD||z.tm!==p.tm||on)continue;const dx=p.x-z.x,dy=p.y-z.y,u=dx*z.ca+dy*z.sa;if(u>=-PR&&u<=W_VO.tlL+PR&&Math.abs(dy*z.ca-dx*z.sa)<=W_VO.tlW/2+PR)on=true;}
+  if(!p.al)on=false;WTLF.k+=((on?1:0)-WTLF.k)*Math.min(1,dt*(on?8:4));WTLF.fov=WTLF.k*5;for(const s of WTLF.S){s.r+=s.s*dt;if(s.r>1.22){s.r=0.68;s.a=Math.random()*6.283;}}windTailDraw(WTLF.k);}
 function windCharacterPose(o,p,dt,now,v){
+  if(p.id===NET.myId)windTailFeel(p,dt);
   const A=p.wn;if(!A||!p.al||p.dn||p.fl||p.st){o.wnPose=null;if(o.wWings)o.wWings.userData.gh=0;return;}
   let s=o.wnPose;if(!s)s=o.wnPose={phase:0,t:0,w:0,P:WN_BODY.hover.slice(),hover:0};
   if(A[6]===1||A[9]===1){   // ชาร์จอัลติ Sonic Boom (A[9]=1) / (เลิกใช้) ชาร์จ Windrift • ช่วงพุ่ง/ลงท่าฮีโร่ = dashPose (js/72)
@@ -205,7 +216,7 @@ function windEfx(ev){
     case 'wnsohit':fxPlay('wind/sonic_hit',{x,y,h:H,a});if(near){snd('break',ev);hitStop(0.1);}return true;
     case 'wnsowave':fxPlay('wind/sonic_wave',{x,y,h:H,aim:false});if(near)snd('hit',ev);return true;
     case 'wnsoend':case 'wnsocancel':return true;
-    case 'wntl':{const o=PM3.get(ev.id);if(o)o.wtl=0;}fxPlay('wind/tailwind',{x,y,h:H,a});if(near)snd('whoosh',ev);return true;
+    case 'wntl':{const o=PM3.get(ev.id);if(o)o.wtl=0;(WV.tl||(WV.tl=[])).push({x,y,ca:Math.cos(a),sa:Math.sin(a),t:0,tm:ev.tm});}fxPlay('wind/tailwind',{x,y,h:H,a});if(near)snd('whoosh',ev);return true;
     case 'wnsoon':if(mine)toast('สกิลนี้ของสายลมยังทำไม่เสร็จ (ขั้นที่ 2-3)');return true;
   }
   return false;

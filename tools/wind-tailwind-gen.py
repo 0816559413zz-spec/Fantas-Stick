@@ -21,8 +21,8 @@ L.append({"id": "fth", "t": "emit", "at": 0.1, "life": 4.6, "att": "ground", "po
 # Wind around (user 2026-11-09): soft wisps drift along both lane edges; a swirl circles the caster on release.
 for s in (-1, 1):
     for z in (3, 9, 15, 21, 27):
-        L.append({"id": "wisp%d%d" % (s + 1, z), "t": "emit", "at": 0.05, "life": 4.7, "att": "ground", "pos": [s * W / 2, 0.6, z], "burst": 0, "rate": 8, "from": "disc", "fr": 1, "dir": "aim", "spread": 0.3, "speed": [3, 6], "plife": [0.6, 1], "look": "smoke", "size": [3, 5.5], "col": "#8fe3bd", "c2": "#57c796", "gravity": 0, "drag": 0.5, "grow": 1.3})
-L.append({"id": "swirl", "t": "emit", "at": 0, "life": 0.5, "att": "ground", "pos": [0, 1, 0], "burst": 0, "rate": 50, "from": "disc", "fr": 2.5, "dir": "tangent", "speed": [6, 10], "up": [1, 3], "plife": [0.35, 0.6], "look": "smoke", "size": [2, 3.5], "col": "#8fe3bd", "c2": "#57c796", "gravity": 0, "drag": 1, "grow": 1.2})
+        L.append({"id": "wisp%d%d" % (s + 1, z), "t": "emit", "at": 0.05, "life": 4.7, "att": "ground", "pos": [s * W / 2, 0.6, z], "burst": 0, "rate": 14, "from": "disc", "fr": 1.2, "dir": "aim", "spread": 0.3, "speed": [3, 6], "plife": [0.6, 1], "look": "smoke", "size": [4, 7.5], "col": "#62d6a2", "c2": "#2fbf88", "gravity": 0, "drag": 0.5, "grow": 1.3})
+L.append({"id": "swirl", "t": "emit", "at": 0, "life": 0.5, "att": "ground", "pos": [0, 1, 0], "burst": 0, "rate": 50, "from": "disc", "fr": 2.5, "dir": "tangent", "speed": [6, 10], "up": [1, 3], "plife": [0.35, 0.6], "look": "smoke", "size": [2, 3.5], "col": "#62d6a2", "c2": "#2fbf88", "gravity": 0, "drag": 1, "grow": 1.2})
 # The effect waits for the 0.2 s cast wind-up (W_VO.tlD).
 for l in L: l["at"] = round(l["at"] + 0.2, 3)
 with open(os.path.join(R, 'assets/fx/wind/tailwind.fx.json'), 'w', encoding='utf-8', newline='\n') as o:
