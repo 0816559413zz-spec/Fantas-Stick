@@ -738,22 +738,22 @@ waterEfx:184
 §212 HUD: เกจฮีลโล่ (โค้งซ้ายรอบเป้าเล็ง)
 drawWaterHud:213
 
-## js/68-wind-view.js (424) — สายลม 🌪️ — ภาพฝั่งเครื่องเล่น (ขั้นที่ 1) • ตรรกะอยู่ js/09-wind.js • ไฟล์นี้มีแต่นิยามฟ…
+## js/68-wind-view.js (425) — สายลม 🌪️ — ภาพฝั่งเครื่องเล่น (ขั้นที่ 1) • ตรรกะอยู่ js/09-wind.js • ไฟล์นี้มีแต่นิยามฟ…
 WV:6 WN_BODY:8 WN_AIR_FEET:8 WF_POSE:12 WF_FEET:12 WF_REF:12 WF_ROLL:12 _wfP:13 _wfF:13 windFlyPose:14 WTLF:24 windTailDraw:25 windTailFeel:31 windCharacterPose:33 wvState:50 wvAlive:51
 §52 ทุกเฟรมของผู้เล่นสายลม: ปีกติดหลัง / ปีกห่อตอนยกโล่ / ดูดลมชาร์จเกจ
-WFE_HOLD:53 WFE_TURN:53 windLatePose:55 _faX:91 _faQ:91 _faT:91 WF_ELBOW:91 windForearm:92 windFX:94
-§119 กำแพงลมจาก snapshot (ตามตำแหน่ง/ลบเมื่อหมด)
-syncWind:120 wvWall:133 wvHitFx:134 wvAimFx:135
-§136 ตา Eye of Heaven: ตำแหน่งตาบนฟ้า (ตรงกับ EYE ใน tools/wind-eye-ult-ge…
-wvEyePos:137 wvEyeSeen:138
-§139 เหตุการณ์ (efx z 'wn…')
-WDOME_G:141 WDOME_V:142 WDOME_F:143 windDome:144 windSuckFx:153 windEfx:166
-§260 HUD รอบเป้าเล็ง: เกจ GaleBurst (โค้งซ้าย) + ชาร์จกำแพงลม (จุด 3 จุดใต…
-drawWindHud:261
-§269 ตัวช่วยเล็งกำแพงลม (เห็นเฉพาะเรา): เส้นโค้งเรืองที่จุดวาง (คลิกขวา) +…
-wvAimGhost:270
-§281 ปีกเวทสายลมติดหลัง: ขนนก 8+4 เส้นต่อข้าง ทำจากสายลม (shader) + ริบบิ้…
-WWS:283 WWU:283 WW_NOISE:284 _wwMat:289 wwMats:290 wwFeatherGeo:336 WW_PRI:347 WW_COV:349 WW_RIB:350 _wwGeo:351 _wsupG:353 _wsupD:353 windSupDust:354 windSupDustTick:358 windWingSup:359 makeWindWings:380 wwCue:394 poseWindWings:398
+wfeSwing:53 wfeTwist:53 WFE_HOLD:54 WFE_TURN:54 windLatePose:56 _faX:92 _faQ:92 _faT:92 WF_ELBOW:92 windForearm:93 windFX:95
+§120 กำแพงลมจาก snapshot (ตามตำแหน่ง/ลบเมื่อหมด)
+syncWind:121 wvWall:134 wvHitFx:135 wvAimFx:136
+§137 ตา Eye of Heaven: ตำแหน่งตาบนฟ้า (ตรงกับ EYE ใน tools/wind-eye-ult-ge…
+wvEyePos:138 wvEyeSeen:139
+§140 เหตุการณ์ (efx z 'wn…')
+WDOME_G:142 WDOME_V:143 WDOME_F:144 windDome:145 windSuckFx:154 windEfx:167
+§261 HUD รอบเป้าเล็ง: เกจ GaleBurst (โค้งซ้าย) + ชาร์จกำแพงลม (จุด 3 จุดใต…
+drawWindHud:262
+§270 ตัวช่วยเล็งกำแพงลม (เห็นเฉพาะเรา): เส้นโค้งเรืองที่จุดวาง (คลิกขวา) +…
+wvAimGhost:271
+§282 ปีกเวทสายลมติดหลัง: ขนนก 8+4 เส้นต่อข้าง ทำจากสายลม (shader) + ริบบิ้…
+WWS:284 WWU:284 WW_NOISE:285 _wwMat:290 wwMats:291 wwFeatherGeo:337 WW_PRI:348 WW_COV:350 WW_RIB:351 _wwGeo:352 _wsupG:354 _wsupD:354 windSupDust:355 windSupDustTick:359 windWingSup:360 makeWindWings:381 wwCue:395 poseWindWings:399
 
 ## js/69-broom.js (236) — ไม้กวาด (ผู้ใช้ 2026-10-29): บินแบบเครื่องบิน + ยิงลำแสงตามสาย + อนิเ…
 BRM:9 BFW:12 BSK:13 BROOM_SK:19 broomVert:40 broomMove:53 broomStrike:72 broomStrikeTick:81 broomFlak:89 broomAct:100 broomOff:107 broomBeam:109
@@ -800,4 +800,4 @@ surfSync:49 surfQuality:53
 SURF_VS:55 SURF_VS_BODY:56 SURF_FS:67 SURF_FS_BODY:68 surfOk:98 surfApply:99 surfScene:111
 §112 ปรับค่า (tune.html / F8)
 
-(97 files, 24497 lines)
+(97 files, 24498 lines)

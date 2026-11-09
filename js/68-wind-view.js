@@ -50,6 +50,7 @@ function windCharacterPose(o,p,dt,now,v){
 const wvState=id=>{let s=WV.st.get(id);if(!s){s={};WV.st.set(id,s);}return s;};
 const wvAlive=I=>!!I&&FXR.inst.indexOf(I)>=0;
 // ---------- ทุกเฟรมของผู้เล่นสายลม: ปีกติดหลัง / ปีกห่อตอนยกโล่ / ดูดลมชาร์จเกจ ----------
+const wfeSwing=t=>1-Math.pow(1-Math.min(1,t/0.14),3),wfeTwist=t=>t<0.14?lerp(-0.55,0.72,wfeSwing(t)):lerp(0.72,WFE_TURN,Math.min(1,(t-0.14)/0.26));   // BA body twist: coil, whip through, settle
 const WFE_HOLD=0.55,WFE_TURN=0.32;   // วิที่ค้างท่าหลังยิง • มุมหันตัว (เรเดียน)
 // ท่าแขนของสายลมที่ต้องทับท่าบิน: เรียกหลัง windCharacterPose • กด Featherwing = ชูมือถือไม้ตอนลอย แล้วค่อย ๆ ลดลง • ยิงขนนก = ชี้ไม้ไปข้างหน้า
 function windLatePose(o,p,dt){const R=o.armR.rotation;if(!p.wn||!p.al||p.dn||(p.sh&&o.wbc===undefined)){o.wfu=undefined;if(o.wsl&&o.wsl.d>=1){if(o.wsl.d>=2)o.b.rotation.y=0;o.wsl=null;}return;}   // ง้างปล่อยโล่ยังถือโล่อยู่ ต้องให้ท่าทำงานด้วย
@@ -86,7 +87,7 @@ function windLatePose(o,p,dt){const R=o.armR.rotation;if(!p.wn||!p.al||p.dn||(p.
     if(t>T0){const u=t-T0,r=Math.exp(-9*u)*Math.sin(22*u);o.b.rotation.x-=0.34*r;o.b.position.y+=0.07*r;o.b.position.z-=0.12*r;}   // ปล่อย: แรงกระแทกดันตัวถอยแล้วเด้งกลับ
     if(t>T0+0.55)o.wob=null;return;}
   if(o.wfu!==undefined){o.wfu+=dt;const u=o.wfu,w=u<0.15?u/0.15:u<0.55?1:Math.max(0,1-(u-0.55)/0.3);R.x=lerp(R.x,-3,w);R.z=lerp(R.z,0.12,w);if(u>0.85)o.wfu=undefined;}
-  else if(o.wfeW>0.01){R.x=lerp(R.x,-1.5,o.wfeW);R.z=lerp(R.z,-0.1,o.wfeW);}}
+  else if(o.wfeW>0.01){const w=o.wfeW,E=o.wfe,s=E?E.s:1,t=E?E.t:1,sw=wfeSwing(t),up=Math.sin(Math.PI*Math.min(1,t/0.3)),L=o.armL.rotation;R.x=lerp(R.x,-1.5-0.28*up,w);R.y=s*lerp(-1.15,0.95,sw)*w;R.z=lerp(R.z,-0.1,w);L.x=lerp(L.x,0.42*up,w);L.y=-s*0.5*up*w;L.z=lerp(L.z,0.35,w);}else{R.y=0;o.armL.rotation.y=0;}}   // BA: stick whips across the body, left hand counter-swings
 // งอศอก: แขนโค้ดมีข้อเดียว เลยหมุนกระดูก forearm ของโมเดลตรง ๆ หลัง rigSync (ตั้งเป้าเทียบท่าตรงที่จำไว้ จึงไม่สะสมแม้เฟรมที่ข้าม mixer)
 const _faX=new THREE.Vector3(1,0,0),_faQ=new THREE.Quaternion(),_faT=new THREE.Quaternion(),WF_ELBOW=-1.9;
 function windForearm(o){const w=o.faW||0;if(w<=0.002)return;o.faW=0;if(o.faB===undefined){o.faB=null;const a=o.g.getObjectByName('forearm_R'),b=o.g.getObjectByName('forearm_L');if(a&&b)o.faB=[[a,a.quaternion.clone()],[b,b.quaternion.clone()]];}
@@ -109,7 +110,7 @@ function windFX(o,p,pz,now,dt){
   else if(s.guard){fxKill(s.guard);s.guard=null;}   // ห่อปีกยาว 9.5 วิ → ตัดทิ้งทันทีตอนลดโล่
   if(p.id===NET.myId)wvAimGhost(p,A,h);
   // ยิงขนนก: ชี้ไม้ไปข้างหน้าค้าง + หันตัวเปิดทางให้ปีกที่ยิง (ปีกซ้ายยิง = หันขวา) ค้างแป๊บ ไม่ยิงต่อค่อยกลับ
-  {const E=o.wfe;if(E){E.t+=dt;const on=E.t<WFE_HOLD&&alive&&!guard;o.wfeW=(o.wfeW||0)+((on?1:0)-(o.wfeW||0))*Math.min(1,dt*(on?18:7));o.wfeY=(o.wfeY||0)+((on?E.s*WFE_TURN:0)-(o.wfeY||0))*Math.min(1,dt*(on?14:6));
+  {const E=o.wfe;if(E){E.t+=dt;const on=E.t<WFE_HOLD&&alive&&!guard;o.wfeW=(o.wfeW||0)+((on?1:0)-(o.wfeW||0))*Math.min(1,dt*(on?18:7));o.wfeY=(o.wfeY||0)+((on?E.s*wfeTwist(E.t):0)-(o.wfeY||0))*Math.min(1,dt*(on?45:6));
     o.b.rotation.y+=o.wfeY;const w=o.wfeW;if(!on&&w<0.01&&Math.abs(o.wfeY)<0.01){o.wfe=null;o.wfeW=0;o.wfeY=0;}}}
   // ดูดลมชาร์จเกจ: ละอองลมไหลเข้าหาตัว
   if(alive&&A[1]&&Math.random()<0.8){const a=Math.random()*6.283,r=rnd(60,110);burst(p.x+Math.cos(a)*r,p.y+Math.sin(a)*r,Math.random()<0.5?'#8dff65':'#efffe8',1,-r*2.2,0.4,2.2,{h:h+rnd(0.4,1.8),g:0});}
