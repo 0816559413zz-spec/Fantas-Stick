@@ -481,10 +481,10 @@ function windUltTick(p,dt){const U=p.wult,W=W_UL;
     if(p.stun>0){p.wult=null;p.ult=100;emit({k:'efx',z:'wnsocancel',x:Math.round(p.x),y:Math.round(p.y),h:p.z,id:p.id});return;}   // โดนสตันตอนชาร์จ = ยกเลิก คืนอัลติ
     if(U.t>=W.chg){const inp=p.inp||{},a=p.ang,D=U.air?W.dA:W.dG,T=W.ifr*3;let pit=0;
       if(U.air&&typeof inp.ah==='number'){const ad=Math.hypot((inp.ax||p.x)-p.x,(inp.ay||p.y)-p.y)/20;pit=clamp(Math.atan2(inp.ah-(p.z+1.1),Math.max(6,ad)),-0.8,0.8);}
-      Object.assign(U,{ph:'dash',t:0,a,ca:Math.cos(a),sa:Math.sin(a),T,v:D/T,hv:D/T*Math.cos(pit),vv:D/T/20*Math.sin(pit),x0:p.x,y0:p.y,x1:p.x,y1:p.y,r1:U.air?W.r1A:W.r1G,r2:U.air?W.r2A:W.r2G,mul:U.air?1:W.gMul});
+      Object.assign(U,{ph:'dash',t:-W.impPre,a,ca:Math.cos(a),sa:Math.sin(a),T,v:D/T,hv:D/T*Math.cos(pit),vv:D/T/20*Math.sin(pit),x0:p.x,y0:p.y,x1:p.x,y1:p.y,r1:U.air?W.r1A:W.r1G,r2:U.air?W.r2A:W.r2G,mul:U.air?1:W.gMul});
       emit({k:'efx',z:'wnsoimp',x:Math.round(p.x),y:Math.round(p.y),h:p.z,a:Math.round(a*100)/100,id:p.id});}
     return;}
-  if(U.ph==='dash'){U.t+=dt;const de=Math.min(dt,U.T-U.t+dt),step=U.hv*de,n=Math.max(1,Math.ceil(step/50)),sx=step/n,sz=U.vv*de/n;
+  if(U.ph==='dash'){U.t+=dt;if(U.t<0){p.inv=Math.max(p.inv||0,0.1);p.vz=0;p.mvx=p.mvy=0;p.vx=p.vy=0;return;}const de=Math.min(dt,U.T-U.t+dt),step=U.hv*de,n=Math.max(1,Math.ceil(step/50)),sx=step/n,sz=U.vv*de/n;
     for(let i=0;i<n;i++){const px=p.x,py=p.y,pz=p.z,ex=px+U.ca*sx,ey=py+U.sa*sx;
       windSmash(p,ex+U.ca*70,ey+U.sa*70,pz+1.1,W.smashR,W.smash*U.mul);   // พังบ้าน/กำแพงข้างหน้าก่อนชน → ทะลวงผ่านรูที่เปิด
       p.x=ex;p.y=ey;p.z=Math.max(groundH(ex,ey,p.z)+0.3,Math.min(24,p.z+sz));collideWorld(p,PR,p.z);
@@ -550,8 +550,8 @@ const W_FW=defSpell(WINDP,{id:'featherwing',v:{t:8,rise:2,upT:0.42,aIn:7,aOut:3.
     emit({k:'efx',z:'wnfw',x:Math.round(p.x),y:Math.round(p.y),h:p.z,a:Math.round(p.ang*100)/100,n:side,id:p.id});}}).v;
 Object.assign(PDEF,{wplume:{spd:1300,r:11,dmg:6,life:0.62,col:'#8dff65'},wball:{spd:W_FW.fbSpd,r:14,dmg:W_FW.fbDmg,life:W_FW.fbRange/W_FW.fbSpd,col:'#8dff65'},
   wpush:{spd:W_DR.spdA,r:22,dmg:30,life:W_DR.rangeA/W_DR.spdA,col:'#8dff65'},wbl:{spd:W_VO.spd,r:W_VO.br,dmg:6,life:W_VO.range/W_VO.spd,col:'#b8ff85'}});
-const W_UL=defSpell(WINDP,{id:'eyeofheaven',v:{chg:2.4,ifr:0.0133,impT:0.04,land:0.7,landA:0.45,dA:1000,tA:0.125,dG:700,tG:0.11,r1A:70,r2A:210,r1G:42,r2G:125,hitDmg:100,hitKnock:4200,hitStun:0.8,passDmg:50,passKnock:1100,boomT:0.2,gMul:0.7,ext:6,smash:160,smashR:100},
-  vn:{chg:'ชาร์จ (วิ)',ifr:'พุ่ง • เวลา (วิ) ×3 (ถึงเป้าแทบทันที)',impT:'Impact frame • นาน (วิ)',land:'พื้น • ค้างท่าลงจอด (วิ)',landA:'บิน • ค้างท่าจบ (วิ)',dA:'บิน • ระยะพุ่ง',tA:'(เลิกใช้) บิน • เวลาพุ่ง',dG:'พื้น • ระยะพุ่ง',tG:'(เลิกใช้) พื้น • เวลาพุ่ง',r1A:'บิน • แกนกลางโดนชน (รัศมี)',r2A:'บิน • ทรงกระบอกนอก พุ่งผ่าน (รัศมี)',r1G:'พื้น • แกนกลางโดนชน',r2G:'พื้น • ทรงกระบอกนอก',hitDmg:'โดนชน • ดาเมจ',hitKnock:'โดนชน • knockback ไกลมาก',hitStun:'โดนชน • สตัน (วิ)',passDmg:'พุ่งผ่าน • ดาเมจตามหลัง',passKnock:'พุ่งผ่าน • knockback',boomT:'เสียงบูมตามหลัง (วิ)',gMul:'พื้น • คูณดาเมจ (0.7 = −30%)',ext:'บิน • ต่อเวลา Featherwing (วิ)',smash:'พังบ้าน/กำแพงตามทางพุ่ง • ดาเมจ',smashR:'พังบ้าน/กำแพง • รัศมี'},
+const W_UL=defSpell(WINDP,{id:'eyeofheaven',v:{chg:2.4,ifr:0.0133,impPre:0.05,impT:0.15,land:0.7,landA:0.45,dA:1000,tA:0.125,dG:700,tG:0.11,r1A:70,r2A:210,r1G:42,r2G:125,hitDmg:100,hitKnock:4200,hitStun:0.8,passDmg:50,passKnock:1100,boomT:0.2,gMul:0.7,ext:6,smash:160,smashR:100},
+  vn:{chg:'ชาร์จ (วิ)',ifr:'พุ่ง • เวลา (วิ) ×3 (ถึงเป้าแทบทันที)',impPre:'Impact เริ่มก่อนพุ่ง (วิ)',impT:'Impact frame • นานรวม (วิ)',land:'พื้น • ค้างท่าลงจอด (วิ)',landA:'บิน • ค้างท่าจบ (วิ)',dA:'บิน • ระยะพุ่ง',tA:'(เลิกใช้) บิน • เวลาพุ่ง',dG:'พื้น • ระยะพุ่ง',tG:'(เลิกใช้) พื้น • เวลาพุ่ง',r1A:'บิน • แกนกลางโดนชน (รัศมี)',r2A:'บิน • ทรงกระบอกนอก พุ่งผ่าน (รัศมี)',r1G:'พื้น • แกนกลางโดนชน',r2G:'พื้น • ทรงกระบอกนอก',hitDmg:'โดนชน • ดาเมจ',hitKnock:'โดนชน • knockback ไกลมาก',hitStun:'โดนชน • สตัน (วิ)',passDmg:'พุ่งผ่าน • ดาเมจตามหลัง',passKnock:'พุ่งผ่าน • knockback',boomT:'เสียงบูมตามหลัง (วิ)',gMul:'พื้น • คูณดาเมจ (0.7 = −30%)',ext:'บิน • ต่อเวลา Featherwing (วิ)',smash:'พังบ้าน/กำแพงตามทางพุ่ง • ดาเมจ',smashR:'พังบ้าน/กำแพง • รัศมี'},
   role:'ult',ult:true,n:'Sonic Boom Strike',ic:'👁️',cd:0,d:'ชาร์จ 2.4 วิ → Impact frame ขาวดำ → พุ่งด้วยความเร็วสูงมากตามที่เล็ก เสียง Sonic boom • ศัตรูที่ถูกชนตรง ๆ = ดาเมจแรงมาก knockback ไกลมาก • ศัตรูที่อยู่ในทางพุ่งแต่ไม่โดนชน = knockback พอเปลี่ยนจุดยืน + ดาเมจตามหลัง 50 • โหมดบิน: จบแล้วต่อเวลา Featherwing +6 วิ และรีเซ็ตคูลดาวน์ทุกสกิล • โหมดพื้น: ดาเมจ −30% ระยะสั้นและแคบกว่า จบแล้วรีเซ็ต Featherwing อย่างเดียว • พุ่งทะลวงบ้าน/กำแพงตามทางให้พังหมด',
   cast(p){return windUltCast(p);}}).v;
 
