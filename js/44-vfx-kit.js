@@ -351,7 +351,7 @@ if(window.WD)window.WD.bf={BF,BFM,BFRS,BFA,after:bfAfter,play:bfPlay,mark:bfMark
 const SCR={fl:[],rad:null,chr:0,hurt:0,imp:null};
 // Impact frame (อนิเมะ): ภาพกลับขาว-ดำ + เส้นพุ่งออกจากจุด (wx,wy,wh) รวม 0.34 วิ — กลับ (0–40%) → วาบขาว (40–54%) → กลับอีกที (54–90%) → คืนภาพ
 // เรียกจากเหตุการณ์ของท่า (เช่น Eye of Heaven js/68) เฉพาะกับคนที่ควรเห็น • amt 0–1 ความแรง
-function impactFrame(amt,wx,wy,wh){SCR.imp={a:Math.max(0,Math.min(1,amt||1)),t:0,max:0.34,x:tx(wx),y:wh+GY(wx,wy),z:tz(wy)};}
+function impactFrame(amt,wx,wy,wh,T){SCR.imp={a:Math.max(0,Math.min(1,amt||1)),t:0,max:T||0.34,x:tx(wx),y:wh+GY(wx,wy),z:tz(wy)};}
 function screenFlash(col,amt,life){if(QUAL.mode==='low')return;SCR.fl.push({c:new THREE.Color(col),a:amt,t:life,max:life});}
 function screenRadial(x,y,h,amt,life){if(QUAL.mode==='low')return;SCR.rad={x:tx(x),y:h+GY(x,y),z:tz(y),a:amt,t:life,max:life};}
 function screenKick(amt){SCR.chr=Math.max(SCR.chr,amt);}
