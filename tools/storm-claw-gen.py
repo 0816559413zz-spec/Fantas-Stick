@@ -35,6 +35,19 @@ def mirror(L):
             L[k][0] = neg(L[k][0])
     return L
 
+def narrow(layers, k):   # squeeze the arc sideways to match the hit cone (user 2026-11-10: slash too wide)
+    out = []
+    for L in layers:
+        L = copy.deepcopy(L)
+        if L.get('sweep'):
+            L['a0'], L['a1'] = round(L['a0'] * k, 1), round(L['a1'] * k, 1)
+        for kk in ('pos', 'to'):
+            if isinstance(L.get(kk), list) and len(L[kk]) == 3:
+                x = L[kk][0]
+                L[kk][0] = round(x * k, 4) if isinstance(x, (int, float)) else f'({x})*{k}'
+        out.append(L)
+    return out
+
 def build(name, desc, layers, extra=None):
     fx = copy.deepcopy(SRC)
     fx['desc'] = desc
@@ -52,9 +65,9 @@ for L in SRC['layers']:
         L['acc'] = True          # game bolts: cyan look
     base.append(L)
 
-build('claw_sweep_c', 'ร่างเทพสายฟ้า: กวาดกรงเล็บพิเศษ (สีฟ้าทั้งหมด) — จาก storm/claw_sweep', base)
-build('claw_slash_c0', 'ร่างเทพสายฟ้า: ฟันกรงเล็บจังหวะ 1 (ขวา→ซ้าย) สีฟ้า — คุณภาพเดียวกับท่าพิเศษ', base)
-build('claw_slash_c1', 'ร่างเทพสายฟ้า: ฟันกรงเล็บจังหวะ 2 (ซ้าย→ขวา กลับข้าง) สีฟ้า', [mirror(L) for L in base])
+build('claw_sweep_c', 'ร่างเทพสายฟ้า: กวาดกรงเล็บพิเศษ (สีฟ้าทั้งหมด) — จาก storm/claw_sweep', narrow(base, .79))   # hit cone ±69°
+build('claw_slash_c0', 'ร่างเทพสายฟ้า: ฟันกรงเล็บจังหวะ 1 (ขวา→ซ้าย) สีฟ้า — คุณภาพเดียวกับท่าพิเศษ', narrow(base, .53))   # hit cone ±46°
+build('claw_slash_c1', 'ร่างเทพสายฟ้า: ฟันกรงเล็บจังหวะ 2 (ซ้าย→ขวา กลับข้าง) สีฟ้า', narrow([mirror(L) for L in base], .53))
 fin = []
 for L in base:
     L = copy.deepcopy(L)
@@ -66,4 +79,4 @@ for L in base:
     if L['t'] == 'emit' and 'burst' in L:
         L['burst'] = min(80, int(L['burst'] * 1.4))
     fin.append(L)
-build('claw_slash_c2', 'ร่างเทพสายฟ้า: ฟันกรงเล็บจังหวะ 3 ปิดท้าย (กว้างกว่า แรงกว่า) สีฟ้า', fin)
+build('claw_slash_c2', 'ร่างเทพสายฟ้า: ฟันกรงเล็บจังหวะ 3 ปิดท้าย (กว้างกว่า แรงกว่า) สีฟ้า', narrow(fin, .5))
