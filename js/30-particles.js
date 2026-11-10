@@ -152,8 +152,9 @@ function ptexUse(name,tex,e){
 }
 function ptexLoad(){modelManifest().then(m=>{const P=m.ptex||{};for(const k in P){if(PFB[k])continue;PFB[k]={loading:true};const e=P[k];
   new THREE.TextureLoader().load('assets/'+e.file+'?v='+(e.v||m.v||0),t=>{t.colorSpace=THREE.SRGBColorSpace;t.userData.keep=true;if(e.cards){PFB[k]={tex:t,e,cards:true};return;}ptexUse(k,t,e);},undefined,()=>{PFB[k]={fail:true};});}});}
-const colCache={};
-function col3(c){return colCache[c]||(colCache[c]=new THREE.Color(c));}
+const colCache={},colCacheV={};
+// ลุคภาพวาด (js/77): สีเอฟเฟกต์สดขึ้น (PAINT.vivid) — แคชแยกชุด
+function col3(c){if(typeof PAINT!=='undefined'&&PAINT&&PAINT.cur&&PAINT.vivid)return colCacheV[c]||(colCacheV[c]=paintVivid(new THREE.Color(c)));return colCache[c]||(colCache[c]=new THREE.Color(c));}
 // C) ลมหมุนวน (curl noise): สนามความเร็วไม่มีจุดดูด/จุดพ่น ทำให้ควัน/ไฟ/ประกายลอย ม้วนไปด้วยกันเป็นเกลียว แทนการพุ่งตรง
 //    ψ = sin(ax)cos(by) + ½sin(cy)cos(dx) (ไหลตามเวลา) • ความเร็ว = (∂ψ/∂y, −∂ψ/∂x) • ไม่ใช้กับเศษที่ตกตามแรงโน้มถ่วง (ประกายกระเด็น) หรือ nc:true
 const CURL={q:0.03,smoke:42,fl:24,glow:16};

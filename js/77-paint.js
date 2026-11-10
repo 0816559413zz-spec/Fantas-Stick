@@ -14,7 +14,7 @@ var PAINT={on:!/[?&]nopaint\b/.test(location.search),cur:null,kit:null,
   maps:{forest:{sky:'day',fog:['#9fdccc',30,260],look:'paint',weather:'clear:100',
     back:{near:{col:'#4a8a3c',col2:'#35703a'},trees:{col:['#2f6e3c','#3d8440','#28603a']},mid:{col:'#5f9c88',lit:'#b4dcb0',tint:'#8cc4a6'},
       mist:[{d:235,h:45,col:'#d4f0dc',a:0.6}],far:{col:'#8cbcc0',lit:'#e0f4e0',tint:'#b0dcd0',snow:'#f6fff4'}}}},
-  cel:1,U:{tPt:{value:null},uPt:{value:new THREE.Vector4(1/3.2,1/9,0.5,0.6)},uPtCel:{value:0}},
+  cel:1,vivid:1,bloom:0.42,U:{tPt:{value:null},uPt:{value:new THREE.Vector4(1/3.2,1/9,0.5,0.6)},uPtCel:{value:0}},
   KU:{tDiffuse:{value:null},uPx:{value:new THREE.Vector2(1,1)},uR:{value:1.0},uK:{value:1}}};
 function paintOn(id){return !!(PAINT&&PAINT.on&&PAINT.maps[id]);}
 // ทับค่าของไฟล์แมพก่อนสร้างฉาก (เรียกจาก buildWorld js/28) — เก็บค่าเดิมไว้คืนเมื่อปิด
@@ -30,12 +30,23 @@ function paintMap(id,FM){
 function paintLights(id){
   if(!PAINT)return;PAINT.cur=paintOn(id)?id:null;
   if(PAINT.pass)PAINT.pass.enabled=!!PAINT.cur&&PAINT.kuw>0&&QUAL.mode!=='low';
-  paintGrass();
+  paintGrass();paintVfx();
   if(!PAINT.cur){GRADEU.uSat.value=1.1;PAINT.U.uPtCel.value=0;return;}
   hemi.color.set('#86dcea');hemi.groundColor.set('#4f9a58');hemi.intensity=LOOK.P.paint.hemi;
   moonL.color.set('#fff0bc');moonL.intensity=PAINT.sun;GRADEU.uSat.value=PAINT.sat;
   PAINT.KU.uK.value=PAINT.kuw;PAINT.U.uPtCel.value=PAINT.cel;
 }
+// ---------- VFX สีสด (ทดลอง): บนแมพสว่าง เอฟเฟกต์เรืองแสงเดิมซีดเป็นขาว-เหลืองอ่อน → ดันความสด + กดสีซีดให้เข้ม, ไฟไล่ เหลือง→ส้ม→แดง→ม่วงแดง, แสงฟุ้งเบาลง ----------
+const _ptHSL={h:0,s:0,l:0};
+function paintVivid(c){c.getHSL(_ptHSL,THREE.SRGBColorSpace);let {h,s,l}=_ptHSL;
+  if(s>0.12){s=Math.min(1,s*1.5+0.1);if(l>0.6)l=0.6+(l-0.6)*0.35;c.setHSL(h,s,l,THREE.SRGBColorSpace);}return c;}
+function paintVfx(){
+  if(typeof FLAMELUT==='undefined')return;const on=!!(PAINT.cur&&PAINT.vivid);
+  if(!PAINT.lut0){PAINT.lut0=FLAMELUT.map(c=>c.clone());
+    const st=[[0,'#fff59a'],[0.12,'#ffc814'],[0.3,'#ff7a00'],[0.5,'#ff2e12'],[0.72,'#d80a4a'],[0.9,'#7a0a52'],[1,'#3a0838']].map(([t,c])=>[t,new THREE.Color(c)]);
+    PAINT.lut1=PAINT.lut0.map((_,i)=>{const t=i/63;let k=0;while(k<st.length-2&&st[k+1][0]<t)k++;const [t0,c0]=st[k],[t1,c1]=st[k+1];return c0.clone().lerp(c1,Math.min(1,Math.max(0,(t-t0)/(t1-t0))));});}
+  FLAMELUT.forEach((c,i)=>c.copy(on?PAINT.lut1[i]:PAINT.lut0[i]));
+  if(PAINT.bloom0===undefined)PAINT.bloom0=bloom.strength;bloom.strength=on?PAINT.bloom:PAINT.bloom0;}
 // ใบหญ้า (js/50): ย้อมเขียวเหลืองสว่าง + โคนไม่มืด เฉพาะแมพภาพวาด (mesh หญ้าสร้างทีหลังได้ → PaintPass เรียกซ้ำทุกเฟรม)
 function paintGrass(){const m=typeof GRASS!=='undefined'&&GRASS.mesh;if(!m)return;const u=m.material.userData.U.uGrPt.value,g=PAINT.grass;const c=m.material.userData.U.uGrCl.value;if(PAINT.cur){u.set(g[0],g[1],g[2],1);c.set(0.42,0.93);}else{u.set(1,1,1,0);c.set(0,0.78);}}
 // ---------- ภาพผิว: เปลือกไม้ (ครึ่งซ้าย) + ใบไม้ปาดพู่กัน 4 แบบ (ครึ่งขวา 2×2) ----------
@@ -237,6 +248,8 @@ lookPreset('paint','dusk',{sky:'noon',warm:true,env:0.75,tr:0.86,tg:1.06,tb:1.02
   Rg('stroke','ลายพู่กันบนผิว • ความเข้ม',()=>PAINT.U.uPt.value.z,v=>{PAINT.U.uPt.value.z=v;},{min:0,max:1.5,step:0.05});
   Rg('strokeHue','ลายพู่กันบนผิว • สีอุ่น/เย็น',()=>PAINT.U.uPt.value.w,v=>{PAINT.U.uPt.value.w=v;},{min:0,max:1.5,step:0.05});
   Rg('cel','แสงเงา cel-shade • ความแรง (0 = ไล่เฉดเรียบแบบเดิม)',()=>PAINT.cel,v=>{PAINT.cel=v;},{min:0,max:1,step:0.05});
+  Rg('vivid','VFX สีสด (1 = เปิด)',()=>PAINT.vivid,v=>{PAINT.vivid=v;},{min:0,max:1,step:1});
+  Rg('bloom','แสงฟุ้งบนแมพภาพวาด',()=>PAINT.bloom,v=>{PAINT.bloom=v;},{min:0,max:1.2,step:0.01});
   Rg('sat','ความสดของสี',()=>PAINT.sat,v=>{PAINT.sat=v;},{min:0.8,max:1.6,step:0.01});
   Rg('sun','ความแรงแดด',()=>PAINT.sun,v=>{PAINT.sun=v;},{min:0.5,max:5,step:0.05});})();
 if(typeof builtMap==='string'&&builtMap)paintLights(builtMap);
