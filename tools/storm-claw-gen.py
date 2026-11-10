@@ -48,7 +48,20 @@ def narrow(layers, k):   # squeeze the arc sideways to match the hit cone (user 
         out.append(L)
     return out
 
+def calm(L):   # user 2026-11-10 (approved): a bit less effect
+    L = copy.deepcopy(L)
+    if L['t'] == 'bolt':
+        L['w'] = round(L.get('w', .1) * .8, 3)
+        if 'br' in L: L['br'] = max(0, L['br'] - 1)
+    if L['t'] == 'emit':
+        if 'burst' in L: L['burst'] = max(1, int(L['burst'] * .7))
+        if isinstance(L.get('rate'), (int, float)): L['rate'] = round(L['rate'] * .7, 1)
+    if L['t'] == 'trail' and 'k' in L: L['k'] = round(L['k'] * .85, 2)
+    if L['t'] == 'light' and isinstance(L.get('int'), (int, float)): L['int'] = round(L['int'] * .8, 2)
+    return L
+
 def build(name, desc, layers, extra=None):
+    layers = [calm(L) for L in layers]
     fx = copy.deepcopy(SRC)
     fx['desc'] = desc
     fx['tags'] = sorted(set(fx.get('tags', []) + ['storm', 'ult', 'claw', 'cyan']))
