@@ -130,49 +130,49 @@ waterDragonTick:124
 §138 ทุกเฟรม (ทั้งเกม)
 updateWater:139 waterSnapP:145 waterSnapW:147 WT_RP:150 WT_FM:153 WT_CG:155 WT_AB:159 WT_MW:162 WT_UL:164
 
-## js/09-wind.js (572) — 
+## js/09-wind.js (575) — 
 WINDP:8 WNV:12
 §19 ตัวช่วย
 wOn:20 wGain:21 wSeg:23 wFoeNear:24
 §26 ทุกเฟรมของผู้เล่นสายลม (เรียกจาก updatePlayer หลังส่วนโล่)
-windTick:27 windSpd:55 windFlyZ:57 windReset:66
-§68 ท่าพื้นฐาน (คลิกซ้าย): ใบมีดลม / ดูดลมชาร์จเกจ / GaleBurst
-windBasic:69 windEnh:100 windEnhExtra:101 windFeatherShoot:102 windCurveStep:111 windShieldShoot:115 windWallBlast:118 windStreamStart:122 windStreamEnd:123 windStreamTick:124
-§134 โล่ปีก
-windShieldBurst:135
-§139 Dash: ผลักศัตรูข้างหน้า + ดีดตัวเราถอยหลังลอยกลางอากาศ
-windDashGo:140 windDash:143
-§150 กำแพงลม Aegis Gale
-windWallMake:151 windWallStop:159 windWallBoom:160 windDmg:165 windRay:169 windBlockLen:177 windProjHit:182 windWallHurt:186 windCollide:188
-§194 ทั้งสนาม: GaleBurst / กำแพงลม / ชนกำแพง
-updateWind:195
-§232 Windrift: ชาร์จปีก 0.2 → พุ่ง 400 (20 ม. ใน 0.09 วิ) แบบ Jett → ลงท่า…
-windDriftTick:233 windDriftWind:240
-§247 Vortex Bind: ทอร์นาโด 3 อันโค้ง 45° ห่าง 200 → 0.6 วิ ดึงกลับมาหยุด 6…
-windVortexTick:248
-§260 Void Spheres: หลุมดำลูกเดียว (ผู้ใช้ 2026-10-31, designs/wind.md)
-windVoidCast:263 windVoidTick:265
-§276 รูปแบบการเล่นสายลม (ผู้ใช้ 2026-11-08): บนพื้น = อ่อนลงทันที • บิน (F…
-windAir:279 windSpin:279 windAirborne:280 windLift:281 windSink:282 windSlam:283 windSinkZ:285 windTargetZ:286 windSlotOf:290 windCdCut:291 windSlow:292
-§294 Featherwing: กด → หมุนตัวบินวนขึ้น → บิน 8 วิ (ผู้ใช้ 2026-11-08)
-windFlyTick:298 windFastOn:310 windFastOff:313 windFocusEnd:316 windAirMove:318 windFlick:327 windFocusAct:333 windOrbLaunch:336 windOrbBoom:341
-§344 Downburst (ผู้ใช้ 2026-11-08): ลมกดจากฟ้าลงพื้นต่อเนื่อง — วงดาเมจ + …
-§345 Tailwind (เดิม Windblade): ร่องลมจากตัวเราไปตามทิศเล็ง — เพื่อน+ตัวเร…
-windTailCast:346 windTailIn:349 windTailTick:350 windDownCast:355 windPressDown:362 windDownTick:365
-§372 Windup (เดิม Aegis Gale): ลมพัดขึ้น — วางวงลมตรงจุดเล็ง รอ 0.45 วิ แล…
-windUpCast:374 windUpTick:381
-§388 Wind Push (เดิม Windrift): ยิงลมแรงไปทางที่เล็ก
-§391 Plume Volley (ผู้ใช้ 2026-11-09): ขนนกนีออนจากสองปีกสลับกันทีละอันเร็…
-windVolleyCast:392 windVolleyTick:393 windPlumeShoot:394 windFeatherBoom:404 windPlumeBoom:405 windPushCast:407 windPushHit:410
-§416 Windforce (เดิม Vortex Bind): พุ่งด้วยลม
-§419 Slipstream (ผู้ใช้ 2026-11-08): แดชหมุนหลบตามทิศเดิน • 2 ชาร์จ 5 วิ/อ…
-windSlipCast:420 windSlipTick:425 windForceCast:426 windSmash:432 windAheadHit:436 windForceTick:442
-§462 Windblade (เดิม Void Spheres): ใบมีดลมเล็ก ๆ รัว ๆ
-windBladeCast:464 windBladeTick:466 windBladeHit:470
-§476 อัลติ Sonic Boom Strike (เดิม Eye of Heaven)
-windUltCast:480 windUltTick:483 windUltSweep:508 windFloatZ:516 windSnapP:519 windSnapW:520
-§523 สกิล (ผู้ใช้ 2026-11-08: รีดีไซน์ทั้งชุด — id เดิมไว้ให้ชุดสกิล/tune/…
-W_WL:525 W_DR:531 W_VX:537 W_VO:543 W_FW:549 W_UL:558
+windTick:27 windSpd:56 windFlyZ:58 windReset:67
+§69 ท่าพื้นฐาน (คลิกซ้าย): ใบมีดลม / ดูดลมชาร์จเกจ / GaleBurst
+windBasic:70 windEnh:101 windEnhExtra:102 windFeatherShoot:103 windCurveStep:114 windShieldShoot:118 windWallBlast:121 windStreamStart:125 windStreamEnd:126 windStreamTick:127
+§137 โล่ปีก
+windShieldBurst:138
+§142 Dash: ผลักศัตรูข้างหน้า + ดีดตัวเราถอยหลังลอยกลางอากาศ
+windDashGo:143 windDash:146
+§153 กำแพงลม Aegis Gale
+windWallMake:154 windWallStop:162 windWallBoom:163 windDmg:168 windRay:172 windBlockLen:180 windProjHit:185 windWallHurt:189 windCollide:191
+§197 ทั้งสนาม: GaleBurst / กำแพงลม / ชนกำแพง
+updateWind:198
+§235 Windrift: ชาร์จปีก 0.2 → พุ่ง 400 (20 ม. ใน 0.09 วิ) แบบ Jett → ลงท่า…
+windDriftTick:236 windDriftWind:243
+§250 Vortex Bind: ทอร์นาโด 3 อันโค้ง 45° ห่าง 200 → 0.6 วิ ดึงกลับมาหยุด 6…
+windVortexTick:251
+§263 Void Spheres: หลุมดำลูกเดียว (ผู้ใช้ 2026-10-31, designs/wind.md)
+windVoidCast:266 windVoidTick:268
+§279 รูปแบบการเล่นสายลม (ผู้ใช้ 2026-11-08): บนพื้น = อ่อนลงทันที • บิน (F…
+windAir:282 windSpin:282 windAirborne:283 windLift:284 windSink:285 windSlam:286 windSinkZ:288 windTargetZ:289 windSlotOf:293 windCdCut:294 windSlow:295
+§297 Featherwing: กด → หมุนตัวบินวนขึ้น → บิน 8 วิ (ผู้ใช้ 2026-11-08)
+windFlyTick:301 windFastOn:313 windFastOff:316 windFocusEnd:319 windAirMove:321 windFlick:330 windFocusAct:336 windOrbLaunch:339 windOrbBoom:344
+§347 Downburst (ผู้ใช้ 2026-11-08): ลมกดจากฟ้าลงพื้นต่อเนื่อง — วงดาเมจ + …
+§348 Tailwind (เดิม Windblade): ร่องลมจากตัวเราไปตามทิศเล็ง — เพื่อน+ตัวเร…
+windTailCast:349 windTailIn:352 windTailTick:353 windDownCast:358 windPressDown:365 windDownTick:368
+§375 Windup (เดิม Aegis Gale): ลมพัดขึ้น — วางวงลมตรงจุดเล็ง รอ 0.45 วิ แล…
+windUpCast:377 windUpTick:384
+§391 Wind Push (เดิม Windrift): ยิงลมแรงไปทางที่เล็ก
+§394 Plume Volley (ผู้ใช้ 2026-11-09): ขนนกนีออนจากสองปีกสลับกันทีละอันเร็…
+windVolleyCast:395 windVolleyTick:396 windPlumeShoot:397 windFeatherBoom:407 windPlumeBoom:408 windPushCast:410 windPushHit:413
+§419 Windforce (เดิม Vortex Bind): พุ่งด้วยลม
+§422 Slipstream (ผู้ใช้ 2026-11-08): แดชหมุนหลบตามทิศเดิน • 2 ชาร์จ 5 วิ/อ…
+windSlipCast:423 windSlipTick:428 windForceCast:429 windSmash:435 windAheadHit:439 windForceTick:445
+§465 Windblade (เดิม Void Spheres): ใบมีดลมเล็ก ๆ รัว ๆ
+windBladeCast:467 windBladeTick:469 windBladeHit:473
+§479 อัลติ Sonic Boom Strike (เดิม Eye of Heaven)
+windUltCast:483 windUltTick:486 windUltSweep:511 windFloatZ:519 windSnapP:522 windSnapW:523
+§526 สกิล (ผู้ใช้ 2026-11-08: รีดีไซน์ทั้งชุด — id เดิมไว้ให้ชุดสกิล/tune/…
+W_WL:528 W_DR:534 W_VX:540 W_VO:546 W_FW:552 W_UL:561
 
 ## js/10-net.js (200) — 
 PREFIX:4 NET:5 RC:9 TURN_SERVERS:12 ICE:13 PEER_OPT:14 TURN_URL:16 ICE_READY:18 JN:22 LAG:24 lagDo:25 hostSend:26 LOBBY:27 genCode:28 sendAll:29 NETD_KEYS:33 NETD:33 netDeltaReset:34 netDelta:35 NET_MAX:49 _netTE:49 netSendSnap:50 NETU:62 netUndelta:63 setStatus:69 hostGame:71 hostPeer:80 netConnect:100 joinWatch:111 joinFail:126 netLost:132 joinGame:147 joinPeer:158 clientOnData:173 leave:188 leaveRoom:190
@@ -802,4 +802,4 @@ surfSync:49 surfQuality:53
 SURF_VS:55 SURF_VS_BODY:56 SURF_FS:67 SURF_FS_BODY:68 surfOk:98 surfApply:99 surfScene:111
 §112 ปรับค่า (tune.html / F8)
 
-(98 files, 24688 lines)
+(98 files, 24691 lines)
