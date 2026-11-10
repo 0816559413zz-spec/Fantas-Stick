@@ -338,8 +338,8 @@ function refreshReport() { clearTimeout(repT); repT = setTimeout(() => { REP = a
 function routeLen(rt) { let L = 0; for (let i = 1; i < rt.pts.length; i++) L += Math.hypot(rt.pts[i][0] - rt.pts[i - 1][0], rt.pts[i][1] - rt.pts[i - 1][1]); return L * M.cell; }
 
 // ================= rendering =================
-let raf = 0;
-function req() { if (!raf) raf = requestAnimationFrame(() => { raf = 0; drawMain(); }); }
+let raf = 0, mver = 0; // mver = map data version, the 3D view rebuilds its meshes when it changes
+function req() { if (!raf) raf = requestAnimationFrame(() => { raf = 0; drawMain(); }); if (window.Map3D) window.Map3D.req(); }
 const colCache = new Map();
 function hex(c) { const n = parseInt(c.slice(1), 16); return [n >> 16 & 255, n >> 8 & 255, n & 255]; }
 function rgb(a) { return 'rgb(' + (a[0] | 0) + ',' + (a[1] | 0) + ',' + (a[2] | 0) + ')'; }
@@ -641,11 +641,12 @@ function setSel(s) { sel = s; renderSide(); req(); }
 
 // ================= pointer =================
 cv.addEventListener('contextmenu', e => e.preventDefault());
-cv.addEventListener('pointerdown', e => {
-  if (!M) return;
-  cv.focus(); cv.setPointerCapture(e.pointerId);
-  const c = toCell(e), sec = e.button === 2;
-  if (e.button === 1 || spaceDown) { drag = { pan: 1, sx: e.clientX, sy: e.clientY, ox: view.ox, oy: view.oy }; return; }
+cv.addEventListener('pointerdown', e => { if (!M) return; cv.focus(); cv.setPointerCapture(e.pointerId); pDown(e, toCell(e)); });
+// pDown / pMove / pUp are shared with the 3D view (mapedit/view3d.js): it passes its own cell (from a raycast) and e = {button, sec, altKey, v3d: 1}.
+// pDown returns false when nothing was grabbed in 3D (the 3D view then orbits the camera instead).
+function pDown(e, c) {
+  const sec = e.button === 2 || !!e.sec;
+  if (!e.v3d && (e.button === 1 || spaceDown)) { drag = { pan: 1, sx: e.clientX, sy: e.clientY, ox: view.ox, oy: view.oy }; return; }
   if (linkMode) {
     const h = hit(c.fx, c.fy), src = getSel();
     if (h && h.k === 'obj' && src && h.id !== src.id) { pushUndo(); src.links = src.links || []; const i = src.links.indexOf(h.id); i < 0 ? src.links.push(h.id) : src.links.splice(i, 1); changed(); renderSide(); }
@@ -661,7 +662,7 @@ cv.addEventListener('pointerdown', e => {
     if (h) {
       setSel({ k: h.k, id: h.id }); const it = getSel(); pushUndo();
       drag = { move: it, k: h.k, pt: h.pt, fx: c.fx, fy: c.fy, orig: JSON.parse(JSON.stringify(it)), moved: 0 };
-    } else { setSel(null); drag = { pan: 1, sx: e.clientX, sy: e.clientY, ox: view.ox, oy: view.oy }; }
+    } else { setSel(null); if (e.v3d) return false; drag = { pan: 1, sx: e.clientX, sy: e.clientY, ox: view.ox, oy: view.oy }; }
     return;
   }
   if (tool in LAYER) {
@@ -706,7 +707,7 @@ cv.addEventListener('pointerdown', e => {
     else { measure.b = [c.cx, c.cy]; runMeasure(); }
     req();
   }
-});
+}
 function runMeasure() {
   if (!measure || !measure.b) return;
   const w = walkInfo(wstate);
@@ -723,11 +724,11 @@ function shapeCells(d) {
   if (d.shape === 'line') { const out = new Map(); for (const [x, y] of lineCells(d.a[0], d.a[1], d.b[0], d.b[1])) for (const c of brushCells(x, y)) out.set(c[1] * M.w + c[0], c); return [...out.values()]; }
   return rectCells(d.a, d.b, d.shape === 'frame');
 }
-cv.addEventListener('pointermove', e => {
-  if (!M) return;
-  const c = toCell(e); hover = c; status(c);
+cv.addEventListener('pointermove', e => { if (M) pMove(e, toCell(e)); });
+function pMove(e, c) {
+  hover = c; status(c);
   const d = drag;
-  if (!d) { if (['height', 'surf', 'wall', 'walk'].includes(tool)) req(); return; }
+  if (!d) { if (e.v3d || window.Map3D || ['height', 'surf', 'wall', 'walk'].includes(tool)) req(); return; }
   if (d.pan) { view.ox = d.ox + e.clientX - d.sx; view.oy = d.oy + e.clientY - d.sy; req(); return; }
   if (d.paint) {
     let dir = 0;
@@ -751,8 +752,9 @@ cv.addEventListener('pointermove', e => {
     }
     d.moved = 1; changed(true);
   }
-});
-cv.addEventListener('pointerup', e => {
+}
+cv.addEventListener('pointerup', pUp);
+function pUp() {
   const d = drag; drag = null; if (!d || !M) return;
   if (d.shape === 'stairs') applyStairs(d);
   else if (d.shape) { for (const [x, y] of shapeCells(d)) paint(x, y, d.sec, null); changed(); }
@@ -764,7 +766,13 @@ cv.addEventListener('pointerup', e => {
   else if ((d.move || d.resize) && !d.moved && tool === 'select') undo.pop();
   else if (d.paint || d.move || d.resize) changed();
   req();
-});
+}
+function hlCells() { // cells the 3D view highlights: shape/zone preview while dragging, else the brush under the cursor
+  const d = drag;
+  if (d && d.prev) { const p = d.prev; return p.cells || rectCells([p.x0, p.y0], [p.x1, p.y1], true); }
+  if (!hover || !inb(hover.cx, hover.cy)) return [];
+  return tool in LAYER ? brushCells(hover.cx, hover.cy) : [[hover.cx, hover.cy]];
+}
 cv.addEventListener('dblclick', () => { if (tool === 'route') finishRoute(); });
 cv.addEventListener('pointerleave', () => { hover = null; req(); });
 cv.addEventListener('wheel', e => {
@@ -1159,7 +1167,7 @@ function resizeMap(w, h) {
 
 // ================= change / save =================
 function changed(light) {
-  dirty = true; stat('ยังไม่บันทึก', 'warn');
+  dirty = true; mver++; stat('ยังไม่บันทึก', 'warn');
   if (!light) refreshReport(); else { clearTimeout(repT); repT = setTimeout(() => { REP = analyze(); WK = REP[wstate]; renderCheck(); req(); }, 350); }
   req();
   clearTimeout(saveT); if (online) saveT = setTimeout(save, 2500);
@@ -1289,7 +1297,7 @@ async function openMap(id) {
   try { localStorage.setItem('fs_mapedit_last', id); } catch (e) { }
 }
 function afterLoad(keepView) {
-  sel = sel && getSel() ? sel : null; measure = null; routeDraft = null; colCache.clear();
+  mver++; sel = sel && getSel() ? sel : null; measure = null; routeDraft = null; colCache.clear();
   const src = M.ref && M.ref.src || ''; if (src !== refSrc) { refSrc = src; if (src) refImg.src = src; }
   renderList(); renderSide(); renderOpts(); if (!keepView) fit();
   REP = analyze(); WK = REP[wstate]; renderCheck(); req();
@@ -1396,6 +1404,9 @@ async function start() {
   if (list.length) openMap(list.find(m => m.id === want) ? want : list[0].id);
   else { stat('ยังไม่มีแผนที่ — กด "＋ ใหม่"', 'warn'); newDialog(false); }
 }
-window.__mapedit = { get M() { return M; }, get measure() { return measure; }, get tool() { return tool; }, view, analyze, findPath, walkInfo }; // debug hook (console)
+// debug hook (console) + the API mapedit/view3d.js uses
+window.__mapedit = { get M() { return M; }, get measure() { return measure; }, get tool() { return tool; }, view, analyze, findPath, walkInfo,
+  SURF, OBJ, ROUTE, DIRS, get mver() { return mver; }, get sel() { return sel; }, getSel, hlCells, pDown, pMove, pUp, finishRoute, setTool,
+  leave() { hover = null; req(); } };
 start();
 })();
