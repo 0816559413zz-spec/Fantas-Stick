@@ -1,8 +1,8 @@
 # Map Editor — รูปแบบไฟล์แผนที่ (`maps/<id>.json`)
 
-Tool: `mapedit.html` (ศูนย์รวม Tool → Map Editor) • โค้ด: `mapedit/editor.js` • เซิร์ฟเวอร์: `tools/serve.py` (`/api/maps`, `/api/map`, `/api/map-del`, `/api/map-img`)
+Tool: `mapedit.html` (ศูนย์รวม Tool → Map Editor) • โค้ด: `mapedit/editor.js` + มุมมอง 3D สด `mapedit/view3d.js` (ปุ่ม 2D / 2D + 3D / 3D — แสดงผลจากข้อมูลเดียวกัน ไม่มีฟิลด์เพิ่ม) • เซิร์ฟเวอร์: `tools/serve.py` (`/api/maps`, `/api/map`, `/api/map-del`, `/api/map-img`)
 
-แผนที่เป็น **ภาพอ้างอิงมุมบน (topdown) สำหรับคุยออกแบบ** ไม่ใช่ข้อมูลที่เกมโหลด (ยัง) — ถ้าวันหนึ่งทำ 3D Map Editor ให้ใช้ไฟล์นี้เป็นต้นทาง
+แผนที่เป็น **ภาพอ้างอิงมุมบน (topdown) สำหรับคุยออกแบบ** ไม่ใช่ข้อมูลที่เกมโหลด (ยกเว้น `firstcastlestrike` ด้านล่าง). ใน 3D: กำแพงทึบสูง 3.5 ม. กำแพงเตี้ย/รั้ว 1.1 ม. หลุมลึก 4 ระดับ ของแต่ละชนิดเป็นรูปทรงง่าย ๆ (ค่าใน `mapedit/view3d.js`)
 
 ## Claude อ่านอะไร
 1. `maps/MAPS.md` — รายชื่อแผนที่ทั้งหมด

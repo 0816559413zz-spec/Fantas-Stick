@@ -4,7 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Map Editor — Fantas Stick</title>
+<script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.160.0/build/three.module.min.js","three/addons/":"https://unpkg.com/three@0.160.0/examples/jsm/"}}</script>
 <!-- Map Editor (topdown): วาดความสูงพื้น, พื้นผิว, กำแพง, วางของ, จุด Interact, ทางเดิน/เส้นทาง, โซน, โน้ต แล้วบันทึกลง maps/<id>.json + .md + .png ให้ Claude อ่าน
+     มุมมอง 3D สด (ปุ่ม 2D / 2D + 3D / 3D): mapedit/view3d.js (three.js โหลดเมื่อเปิด 3D ครั้งแรก)
      โค้ด: mapedit/editor.js • รูปแบบไฟล์: guides/MAP-FORMAT.md • กฎ UI: guides/TOOL-UI-RULES.md -->
 <link rel="stylesheet" href="hub/tool-ui.css">
 <style>
@@ -24,7 +26,23 @@ main{flex:1;display:flex;min-height:0}
 #tools hr{width:28px;border:0;border-top:1px solid var(--ln);margin:4px 0}
 #opts{width:212px;background:var(--bg1);border-right:1px solid var(--ln);overflow-y:auto;padding:8px 10px}
 #side{width:300px;background:var(--bg1);border-left:1px solid var(--ln);overflow-y:auto}
-#wrap{flex:1;position:relative;min-width:0;background:var(--bg0)}
+#wrap{flex:1;display:flex;min-width:0;background:var(--bg0)}
+#p2d,#p3d{flex:1;position:relative;min-width:0;min-height:0;overflow:hidden}
+#p3d{border-left:1px solid var(--ln2)}
+.v-2d #p3d,.v-3d #p2d{display:none}
+.v-3d #p3d{border-left:0}
+#cv3{position:absolute;inset:0;width:100%;height:100%;display:block;outline:none;cursor:crosshair}
+#p3d.walk #cv3{cursor:none}
+#v3bar{position:absolute;top:8px;left:8px;display:flex;flex-wrap:wrap;gap:4px 10px;align-items:center;background:var(--bg1);border:1px solid var(--ln2);border-radius:var(--r);padding:4px 8px}
+#v3bar .tl-btn{padding:2px 8px;font-size:12px}
+#v3bar .chk{margin:0;color:var(--tx2)}
+#v3hint{position:absolute;left:8px;bottom:6px;max-width:calc(100% - 16px);font-size:11px;color:var(--tx2);background:var(--bg1);border:1px solid var(--ln);border-radius:var(--r);padding:2px 8px;pointer-events:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#p3d.walk #v3hint .o,#p3d:not(.walk) #v3hint .w{display:none}
+#p3d.walk #v3hint{color:var(--tx)}
+#v3msg{position:absolute;top:50%;left:0;right:0;text-align:center;color:var(--tx2);pointer-events:none}
+#vmode{gap:0}
+#vmode .tl-btn{border-radius:0;margin-left:-1px;padding:5px 9px}
+#vmode .tl-btn:first-child{border-radius:var(--r) 0 0 var(--r);margin-left:0}#vmode .tl-btn:last-child{border-radius:0 var(--r) var(--r) 0}
 #cv{position:absolute;inset:0;width:100%;height:100%;display:block;outline:none}
 #status{display:flex;gap:14px;padding:3px 10px;background:var(--bg1);border-top:1px solid var(--ln);font:12px var(--fu);color:var(--tx2);white-space:nowrap;overflow:hidden}
 #status #hint{font-family:var(--ui);color:var(--tx3);overflow:hidden;text-overflow:ellipsis}
@@ -84,6 +102,9 @@ textarea.tl-in{width:100%;min-height:54px;resize:vertical;padding:4px 6px}
     <button class="tl-btn" id="bRedo" title="ทำซ้ำ (Ctrl+Y)">↷</button>
     <button class="tl-btn" id="bFit" title="ดูทั้งแผนที่ (F)">⤢</button>
   </div>
+  <div class="grp" id="vmode" title="มุมมอง: วาดใน 2D แล้วเห็นเป็น 3D ทันที (คลิกแก้ใน 3D ก็ได้)">
+    <button class="tl-btn" data-v="2d">2D</button><button class="tl-btn" data-v="split">2D + 3D</button><button class="tl-btn" data-v="3d">3D</button>
+  </div>
   <span class="sp"></span>
   <span id="stat">กำลังโหลด…</span>
   <div class="grp">
@@ -96,13 +117,48 @@ textarea.tl-in{width:100%;min-height:54px;resize:vertical;padding:4px 6px}
 <main>
   <div id="tools"></div>
   <div id="opts"></div>
-  <div id="wrap"><canvas id="cv" tabindex="0"></canvas><div id="linkBanner">คลิกของที่จะเชื่อม (คลิกซ้ำ = ยกเลิกเชื่อม) • Esc = เสร็จ</div></div>
+  <div id="wrap">
+    <div id="p2d"><canvas id="cv" tabindex="0"></canvas><div id="linkBanner">คลิกของที่จะเชื่อม (คลิกซ้ำ = ยกเลิกเชื่อม) • Esc = เสร็จ</div></div>
+    <div id="p3d">
+      <canvas id="cv3" tabindex="0"></canvas>
+      <div id="v3bar">
+        <button class="tl-btn" id="v3fit" title="ดูทั้งแผนที่">⤢</button>
+        <button class="tl-btn" id="v3top" title="มองจากด้านบน">บน</button>
+        <button class="tl-btn" id="v3walk" title="เดินดูในแผนที่ ระดับสายตาคนเล่น (เริ่มที่จุดเกิด)">🚶 เดินดู</button>
+        <label class="chk"><input type="checkbox" data-o="labels">ป้าย</label>
+        <label class="chk"><input type="checkbox" data-o="zones">โซน</label>
+        <label class="chk"><input type="checkbox" data-o="routes">เส้นทาง</label>
+        <label class="chk"><input type="checkbox" data-o="shadow">เงา</label>
+      </div>
+      <div id="v3msg">กำลังโหลด 3D…</div>
+      <div id="v3hint"><span class="o">คลิกซ้าย = ใช้เครื่องมือที่เลือก (Shift = ลบ/กลับด้าน) • คลิกขวาลาก = หมุน • คลิกกลางลาก = เลื่อน • ล้อ = ซูม • ดับเบิลคลิก = ตั้งจุดหมุน</span><span class="w">W A S D = เดิน • Shift = วิ่ง • เมาส์ = หันมอง • Esc = ออกจากเดินดู</span></div>
+    </div>
+  </div>
   <div id="side"></div>
 </main>
 <div id="status"><span id="sCell">–</span><span id="sInfo"></span><span id="sZoom"></span><span id="hint"></span></div>
 <div id="modal"><div class="box" id="mbox"></div></div>
 <input type="file" id="fileJson" accept=".json,application/json" hidden>
 <input type="file" id="fileImg" accept="image/*" hidden>
-<script>{const s=document.createElement('script');s.src='mapedit/editor.js?t='+Date.now();document.body.append(s);} /* no stale cache while editing the tool */</script>
+<script>{const s=document.createElement('script');s.src='mapedit/editor.js?t='+Date.now();s.onload=()=>window.__viewMode&&window.__viewMode();document.body.append(s);} /* no stale cache while editing the tool */</script>
+<script>
+// view mode: 2D / 2D + 3D / 3D — the 3D view (mapedit/view3d.js + three.js) is only loaded the first time it is shown
+(() => {
+  const KEY = 'fs_mapedit_view', btns = [...document.querySelectorAll('#vmode [data-v]')]; let mode = 'split', state = 0;
+  try { mode = new URLSearchParams(location.search).get('view') || localStorage.getItem(KEY) || mode; } catch (e) { }
+  if (!btns.find(b => b.dataset.v === mode)) mode = 'split';
+  function apply() {
+    document.body.classList.remove('v-2d', 'v-split', 'v-3d'); document.body.classList.add('v-' + mode);
+    for (const b of btns) b.classList.toggle('on', b.dataset.v === mode);
+    if (mode !== '2d' && !state && window.__mapedit) {
+      state = 1;
+      import('./mapedit/view3d.js?t=' + Date.now()).catch(err => { state = 0; document.getElementById('v3msg').textContent = 'เปิด 3D ไม่ได้ (ครั้งแรกต้องต่ออินเทอร์เน็ตเพื่อโหลด three.js) — ' + err.message; });
+    }
+    dispatchEvent(new Event('resize')); if (window.Map3D) window.Map3D.req();
+  }
+  for (const b of btns) b.onclick = () => { mode = b.dataset.v; try { localStorage.setItem(KEY, mode); } catch (e) { } apply(); };
+  window.__viewMode = apply; apply();
+})();
+</script>
 </body>
 </html>
