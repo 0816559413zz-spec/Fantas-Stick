@@ -264,12 +264,12 @@ burst:144 smoke:155 ring:156 floatText:157 shake:158 wandPos:159 impactFX:161 ex
 §190 เอฟเฟกต์คาถาใหม่
 ZV:191 COLB:191 WVV:191 GLV:191 ICEV:191 SLV:191 ULTV:191 OBV:191 _iceDisc:193 _iceEdge:194 _iceSpk:195 iceFloorMat:196 _icePlane:197 _icePathMat:198 _iceWvM:198 iceWvMat:200 makeIceFloor:212 ICE_WV:239 updateIceFloors:240 FLASHM:252 FLASHING:253 flashModel:254 endFlash:263 tickFlash:264 GHOSTM:266 SOLIDM:266 ghostOf:267 setGhost:273 hitSparks:281
 
-## js/20-vfx-pyro-storm.js (425) — Dragonfall (ภาพ)
+## js/20-vfx-pyro-storm.js (426) — Dragonfall (ภาพ)
 makeDfCircle:3 DFV:21 dfCracks:22 updateDfCracks:32 dragonfallFX:33
 §85 สายฟ้า (ภาพ)
-TBN:88 TBA:88 TBF:88 TBMAX:88 _tv:89 _tt:89 _ts:89 _tw:89 tbLayer:91 TBL:96 TBC:97 _tcc:98 tbGet:99 TBLUE:102 tbolt:103 tboltP:112 tbWrite:113 updateBolts:121 LATER:139 STV:139 SBV:139 SDV:139 TSV:139 CLV:139 stTgPos:141 STCLAW:145
-§149 รอยกรงเล็บ (อัลติสายฟ้า): รอยข่วน 3 เส้นโค้งปลายแหลมขนานกัน ตั้งขวางห…
-clawGeo:152 clawRakes:157 updateClaws:171 later:179 stFade:180 stBeam:181 shellPt:186 updateStormV:187 _ev:223 GODPTS:225 bWorld:227 stormClawSwipe:231 stormFX:258 STHUD:380 drawStormHud:381
+TBN:88 TBA:88 TBF:88 TBMAX:88 _tv:89 _tt:89 _ts:89 _tw:89 tbLayer:91 TBL:96 TBC:97 _tcc:98 tbGet:99 TBLUE:102 tboltB:103 tbolt:104 tboltP:113 tbWrite:114 updateBolts:122 LATER:140 STV:140 SBV:140 SDV:140 TSV:140 CLV:140 stTgPos:142 STCLAW:146
+§150 รอยกรงเล็บ (อัลติสายฟ้า): รอยข่วน 3 เส้นโค้งปลายแหลมขนานกัน ตั้งขวางห…
+clawGeo:153 clawRakes:158 updateClaws:172 later:180 stFade:181 stBeam:182 shellPt:187 updateStormV:188 _ev:224 GODPTS:226 bWorld:228 stormClawSwipe:232 stormFX:259 STHUD:381 drawStormHud:382
 
 ## js/21-vfx-frost.js (206) — น้ำแข็ง (ภาพ): ชิ้นผลึก/หนาม/แผ่นน้ำแข็งชั่วคราว (โผล่ → ค้าง → หด) •…
 FRV:2 _cryG:3 _spkG:3 _plateG:3 _hexG:3 _iceFxM:4 _frostM:4 iceFxM:5 frostM:6 ICEP:8 _im4:8 _iq:8 _ie:8 _ip:8 _is:8 icePool:9 iceBit:10 iceChips:13 updateFRV:14 iceRing:24 chillFX:25 makeSlash:41 _wbGeo:49 crescentGeo:51 makeWaveBlade:54 WGH:68 updateSlashes:69 _glGeo:82 _glMat:82 _glMat2:82 makeGlacier:83 updateGlacierVis:114 updateOrbShots:123 updateZV:133 WM3:206
@@ -700,16 +700,16 @@ BKICO:376 buffShow:380
 §399 จอมืดตอนเริ่มแมตช์ (ผู้ใช้ 2026-10-23: กระตุกตอนเริ่มแมตช์แรก)
 gameCover:402
 
-## js/66-hud4.js (212) — HUD รอบ 4 (ผู้ใช้ 2026-10-23, designs/hud-full-mock.html)
-H4E:5 H4:12 h4Pal:13 hud4Col:15 h4Parts:17 h4AuBits:22 h4Key:37 h4Ico:38 h4Build:39 h4Set:66 hud4Draw:67
-§118 ไพ่สกิล: นาฬิกาทราย / ท่าใช้ / สลับตำแหน่ง
-h4Glass:120 h4Bits:126 h4Fx:128 h4CardUse:130 h4GlassOut:134 h4Place:138 h4OrdKey:141 h4OrdLoad:142 h4Swap:145 h4Pick:148 h4AltKey:150 h4CardWire:154
-§165 ไพ่อัลติ
-H4SH:167 h4UltCard:169 h4UltUse:174 hud4Frame:176 hud4Hide:177
-§178 ไพ่อัลติกลางจอ (ผู้ใช้ 2026-11-01)
-h4UltX:181
-§188 รูปตัวละครเรา (FFA / TDM แทนแผนที่ย่อ)
-H4PF:190 h4PfMode:191 h4PfAvatar:193 h4Portrait:195 h4PfRead:206 h4MapBox:212
+## js/66-hud4.js (214) — HUD รอบ 4 (ผู้ใช้ 2026-10-23, designs/hud-full-mock.html)
+H4E:5 H4:13 h4God:14 h4Pal:15 hud4Col:17 h4Parts:19 h4AuBits:24 h4Key:39 h4Ico:40 h4Build:41 h4Set:68 hud4Draw:69
+§120 ไพ่สกิล: นาฬิกาทราย / ท่าใช้ / สลับตำแหน่ง
+h4Glass:122 h4Bits:128 h4Fx:130 h4CardUse:132 h4GlassOut:136 h4Place:140 h4OrdKey:143 h4OrdLoad:144 h4Swap:147 h4Pick:150 h4AltKey:152 h4CardWire:156
+§167 ไพ่อัลติ
+H4SH:169 h4UltCard:171 h4UltUse:176 hud4Frame:178 hud4Hide:179
+§180 ไพ่อัลติกลางจอ (ผู้ใช้ 2026-11-01)
+h4UltX:183
+§190 รูปตัวละครเรา (FFA / TDM แทนแผนที่ย่อ)
+H4PF:192 h4PfMode:193 h4PfAvatar:195 h4Portrait:197 h4PfRead:208 h4MapBox:214
 
 ## js/67-backdrop.js (139) — 
 BACKDROP:8
@@ -727,8 +727,8 @@ Pool:70 leafGeo:78 LEAF:79 SPK:80 DIRT:81 PUFF:82 CHIP:83 POOLS:84 leafCols:85 l
 ## js/68-nature-view.js (736) — 
 NAT_VIEW:2 NAT_MARKS:2 NAT_MOTION:2 natV:3 natWorld:4 natPhase:5 natSmooth:6 natEase:7 natOut:8 natStd:9 natAdd:10 natMesh:11 natRing:12 natLeaf:16 natPlantM:19 natGlow:26 natArt:29 natureProjectileModel:31 natSet:37 natAnimate:38 natTube:39 natTrail:50 natSeed:68 natLotus:77 natBall:93 natPlantView:103 natStartStudy:113 natWearWall:131 natTreeGlow:154 natModelTick:174 natMarker:257 natMarks:268 natThorn:287 NAT_SHIELD_K:292 natShieldMake:293 natureCharacter:325 natOutlineMat:355 natOutline:359 natLinks:371 syncNature:386 natureClear:405 natDome:414 natMuzzle:436 natSlam:446 natHook:463 natCoil:520 natHookPose:541 natHookArm:549 natShock:551 natSprout:552 natHealRims:553 natWhipHit:555 natBallRange:556 natSummon:558 natTreeAura:565 natAuraDrop:575 NAT_HOLO:577 natHoloMake:578 natHolo:583 natHoloClear:584 natDirOf:585 natMoment:586 natureEvent:615 NTHUD:679 drawNatureHud:680 NPH:701 NPH_IC:702 natPortraitObj:708 natPortrait:709 natPlantHud:721
 
-## js/68-storm-bow.js (122) — 
-SB_FULL:2 _sbShard:3 sbShard:4 sbMat:5 sbJag:6 SB_TIP:8 _sbBlade:9 sbBlade:10 sbMake:11 stormBowView:29 _sbFaQ:53 _sbFaT:53 _sbFaX:53 stormBowForearm:54 stormBowFx:55 sbStaffAxis:70 sbStaffMake:71 stormStaffView:88 stormStaffCast:100 stormStaffSwing:103 _sbWaveG:105 sbWaveGeo:106 SB_WAVE_F:107 stormWaveMake:114 stormWaveTick:117
+## js/68-storm-bow.js (123) — 
+SB_FULL:2 _sbShard:3 sbShard:4 sbMat:5 sbJag:6 SB_TIP:8 _sbBlade:9 sbBlade:10 sbMake:11 stormBowView:29 _sbFaQ:54 _sbFaT:54 _sbFaX:54 stormBowForearm:55 stormBowFx:56 sbStaffAxis:71 sbStaffMake:72 stormStaffView:89 stormStaffCast:101 stormStaffSwing:104 _sbWaveG:106 sbWaveGeo:107 SB_WAVE_F:108 stormWaveMake:115 stormWaveTick:118
 
 ## js/68-water-view.js (216) — 
 WTV:5 WTC:6 WT_BODY:8 waterCharacterPose:13 wtState:34 wtStop:35 wtMesh:36 _wtV:38 _wtP:38 wtBakeClone:39 wtLineMat:50 _wtOlMat:57 wtOutline:59 WT_SINKD:65 wtSinkOffset:66 wtAlive:73 wtLoop:75 WT_FR:78 wtFrPath:79 _wtFa:81 _wtFb:81 _wtFs:81 _wtFn:81 wtFamRiseMesh:82 WT_POOL:87 wtFamRise:88 wtFamRiseOff:95 _wtTube:97 WT_BEAM_V:98 WT_BEAM_F:101 WT_BEAM_O:105 wtBeamMesh:108 wtBeamSync:112 wtBeamOff:117
@@ -803,4 +803,4 @@ surfSync:49 surfQuality:53
 SURF_VS:55 SURF_VS_BODY:56 SURF_FS:67 SURF_FS_BODY:68 surfOk:98 surfApply:99 surfScene:111
 §112 ปรับค่า (tune.html / F8)
 
-(98 files, 24780 lines)
+(98 files, 24784 lines)

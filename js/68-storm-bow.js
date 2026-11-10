@@ -29,18 +29,19 @@ function sbMake(o){
 function stormBowView(o,p,dt,now){
   const M=p.sm,R=M&&(M[3]&16)&&p.al&&!p.dn?M[6]:null;
   if(!R&&o.sb&&o.sbRel!==undefined){o.sbRel+=dt;const t=o.sbRel,T=.42,k=natEase(natPhase(t,0,.03))*(1-natEase(natPhase(t,.16,T))),snap=Math.exp(-13*t);   // release: the string hand flies back, the bow arm kicks, the whole body rocks
-    if(t>=T){o.sbRel=undefined;}else{const side=1.22*(1-natEase(natPhase(t,.2,T))),aimY=-side*.98,B=o.sb;B.g.visible=true;B.g.scale.setScalar(1-natEase(natPhase(t,.22,T)));B.arrow.visible=false;for(const h of B.hide)h.visible=false;o.b.rotation.y+=side;o.b.rotation.x+=-.34*snap-.1;o.b.position.z-=.2*snap;o.b.position.y-=.1;o.legs[0].rotation.x+=.42*(1-natPhase(t,.2,T));o.legs[1].rotation.x+=-.42*(1-natPhase(t,.2,T));o.armR.rotation.set(-1.57-.42*snap,aimY,-.02);o.armL.rotation.set(-1.75,.42+.75*snap,.3+.3*snap);o.sbDraw=.8*(1-natPhase(t,.1,T));return;}}
+    if(t>=T){o.sbRel=undefined;}else{const side=1.22*(1-natEase(natPhase(t,.2,T))),aimY=-side,B=o.sb;B.g.visible=true;B.g.scale.setScalar(1-natEase(natPhase(t,.22,T)));B.arrow.visible=false;for(const h of B.hide)h.visible=false;o.b.rotation.y+=side;o.b.rotation.x+=-.34*snap-.1;o.b.position.z-=.2*snap;o.b.position.y-=.1;o.legs[0].rotation.x+=.42*(1-natPhase(t,.2,T));o.legs[1].rotation.x+=-.42*(1-natPhase(t,.2,T));o.armR.rotation.set(-1.57-.42*snap,aimY,-.02);o.armL.rotation.set(-1.75,.42+.75*snap,.3+.3*snap);o.sbDraw=.8*(1-natPhase(t,.1,T));return;}}
+  if(!R&&o.sbRel===undefined&&o.armR.rotation.order!=='XYZ'){o.armR.rotation.order=o.armL.rotation.order='XYZ';}
   if(!R){o.sbDraw=0;if(o.sb){o.sb.arrow.visible=true;o.sb.g.visible=false;o.sb.age=0;o.sb.g.scale.setScalar(.001);for(const h of o.sb.hide)h.visible=true;for(const b of o.sb.body)b.visible=false;}return;}
   if(!o.sb)o.sb=sbMake(o);
   const B=o.sb,V3=B.V3;B.g.visible=true;
   const left=Math.max(0,R[1]),max=R[3]||SB_FULL,k=clamp(1-left/max,0,1),full=k>=.999,ap=R[4]||0;
   B.age+=dt;const intro=natEase(natPhase(B.age,0,.42)),armIn=natEase(natPhase(B.age,.36,.62)),draw=natEase(k);for(const h of B.hide)h.visible=intro<.5;for(const b of B.body)b.visible=true;B.g.scale.setScalar(Math.max(.001,natOut(natPhase(B.age,.1,.5))));
   // Archer's stance: side-on with the bow shoulder toward the target, feet apart, bow arm locked at shoulder height, draw elbow lifted behind the line of the arrow, hand anchored at the jaw.
-  const side=1.22*armIn,aimY=-side*.98,lean=-.1*draw*armIn;
+  const side=1.22*armIn,aimY=-side,lean=-.1*draw*armIn;o.armR.rotation.order=o.armL.rotation.order='YXZ';   // หมุนแขนแบบ หันก่อนแล้วยก: แขนชี้ตรงเป้าจริง (เดิม XYZ = y กลายเป็นบิดแขน ธนูเอียงทะลุตัว — ผู้ใช้ 2026-11-10)
   o.b.rotation.y+=side;o.b.rotation.x+=(-ap*.3+lean)*armIn;o.b.rotation.z+=.1*armIn*draw;o.b.position.y-=.1*armIn*(.5+.5*draw);
   o.legs[0].rotation.x+=.42*armIn;o.legs[1].rotation.x+=-.42*armIn;
   o.armR.rotation.set(lerp(lerp(-.2,-.5,intro),-1.57-ap*.9,armIn),aimY,lerp(lerp(.1,-1.5,intro),-.02,armIn));
-  o.armL.rotation.set(lerp(o.armL.rotation.x,lerp(-1.5,-1.82,draw)-ap*.9,armIn),lerp(0,lerp(aimY-.1,.42,draw),armIn),lerp(o.armL.rotation.z,lerp(-.1,.18,draw),armIn));
+  o.armL.rotation.set(lerp(o.armL.rotation.x,lerp(-1.55,-1.7,draw)-ap*.9,armIn),lerp(0,lerp(aimY-.35,aimY+.3,draw),armIn),lerp(o.armL.rotation.z,lerp(.05,-.25,draw),armIn));   // มือดึงสาย: ยื่นไปจับสายหน้าอก แล้วดึงกลับมาที่กราม ศอกยกไปหลัง
   o.sbDraw=draw*armIn;
   const nock=SB_TIP.y+.95*draw;B.arrow.position.y=nock;B.arrow.scale.setScalar(full?1.3:lerp(.9,1.08,k));B.ring.rotation.y+=dt*(4+9*k);B.ring.scale.setScalar(.8+.5*k);B.halo.scale.setScalar(full?.95+.14*Math.sin(now*.03):lerp(.32,.6,k));B.halo.material.opacity=full?.5:.3;
   const pulse=full?1+.08*Math.sin(now*.03):.92;for(const m of B.mats)m.opacity=clamp(pulse,.2,1);B.hm.color.set(full?'#fff8c0':'#ffe84a').multiplyScalar(full?1.5:1.05);

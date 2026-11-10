@@ -164,11 +164,11 @@ function efxFX(ev){
       burst(x,y,'#ffd000',50,R*2.4,0.45,2.6,{h:H+0.3,vh:[2,8],g:6});burst(x,y,'#ffffff',20,R*1.6,0.3,2,{h:H+0.3,vh:[3,8],g:5});burst(x,y,'#9fd8ff',14,R*2,0.35,2,{h:H+0.3,vh:[2,6],g:5});
       SHAPES_Q.push({k:'decal',x,y,col:'#000000',s1:R/36,life:3,op:0.4});
       if(near){snd('boom',ev);snd('boom',{x,y,vol:0.6});snd('zap',ev);shake(g?8:6);}break;}
-    case 'godon':{const o=PM3.get(ev.id);if(o)o.godUp=0.55;
-      for(let i=0;i<4;i++)later(i*0.05,()=>tbolt(x+rnd(-18,18),y+rnd(-18,18),H+18,x+rnd(-4,4),y+rnd(-4,4),H+1.2,0.35,0,0.5,3));
-      later(0.12,()=>{FX.flashSprite(x,y,H+1.2,'#ffffff',0.6,5,0.2,2.2);FX.flashLight(x,y,H+2,'#ffd23a',6.5,26,0.5);ring(x,y,'#ffd000',140,0.5,H+0.1);burst(x,y,'#ffd000',60,320,0.6,2.6,{h:H+1,vh:[0,6],g:1});burst(x,y,'#9fd8ff',20,260,0.5,2,{h:H+1,g:1});
-        if(near){snd('nova',ev);snd('zap',ev);shake(6);}});break;}
-    case 'godoff':burst(x,y,'#ffd000',24,160,0.5,2,{h:H,vh:[0,2],g:0});break;
+    case 'godon':{TBLUE=1;try{const o=PM3.get(ev.id);if(o)o.godUp=0.55;
+      for(let i=0;i<4;i++)later(i*0.05,()=>tboltB(x+rnd(-18,18),y+rnd(-18,18),H+18,x+rnd(-4,4),y+rnd(-4,4),H+1.2,0.35,0,0.5,3));
+      later(0.12,()=>{FX.flashSprite(x,y,H+1.2,'#ffffff',0.6,5,0.2,2.2);FX.flashLight(x,y,H+2,'#4cd0ff',6.5,26,0.5);ring(x,y,'#3fdcff',140,0.5,H+0.1);burst(x,y,'#3fdcff',60,320,0.6,2.6,{h:H+1,vh:[0,6],g:1});burst(x,y,'#9fd8ff',20,260,0.5,2,{h:H+1,g:1});
+        if(near){snd('nova',ev);snd('zap',ev);shake(6);}});}finally{TBLUE=0;}break;}
+    case 'godoff':burst(x,y,'#3fdcff',24,160,0.5,2,{h:H,vh:[0,2],g:0});break;
     case 'sclaw':{TBLUE=1;try{const a=ev.a,emp=ev.n===3,big=ev.n>=2,c=Math.cos(a),sn=Math.sin(a);
       // รอยกรงเล็บตั้งขวางหน้าเรา: ท่า 1 ปาดเฉียงลงขวา / ท่า 2 ปาดเฉียงลงซ้าย / ท่า 3 ฟาดลงจากบน / เสริม = รอยใหญ่ 3 เส้นขนาน + ประกายพุ่งไปถึงระยะ 280
       const rot=emp?-0.75:ev.n===0?-0.6:ev.n===1?0.6:-1.45,D=emp?135:105;

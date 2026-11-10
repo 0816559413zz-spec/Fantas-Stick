@@ -94,22 +94,23 @@ function tbLayer(blend,ro){const V=TBMAX*TBN*2,g=new THREE.BufferGeometry();g.se
   g.setIndex(new THREE.BufferAttribute(idx,1));g.setDrawRange(0,0);
   const m=new THREE.Mesh(g,new THREE.MeshBasicMaterial({vertexColors:true,transparent:true,blending:blend,depthWrite:false,side:THREE.DoubleSide,forceSinglePass:true}));m.frustumCulled=false;m.renderOrder=ro;scene.add(m);return m;}   // ริบบิ้นหันหากล้อง: รอบเดียวพอ (2 รอบ = three ตั้ง needsUpdate ทุกเฟรม → คำนวณ shader ใหม่)
 let TBL=null;   // สร้างตอนใช้ครั้งแรก (ตอนโหลดไฟล์ scene ยังไม่ถูกสร้าง)
-const TBC={glow:new THREE.Color('#ffb800').multiplyScalar(1.3),body:new THREE.Color('#ffc400'),acc:new THREE.Color('#3ce8ff').multiplyScalar(1.25),accG:new THREE.Color('#12c4ff').multiplyScalar(1.2),accC:new THREE.Color('#e0fbff').multiplyScalar(1.4),core:new THREE.Color('#fffbe0').multiplyScalar(1.8),bBody:new THREE.Color('#1e9bff'),bGlow:new THREE.Color('#0a5cff').multiplyScalar(1.1),bCore:new THREE.Color('#9fe6ff').multiplyScalar(1.3)};   // b* = ร่างเทพ: ฟ้าเข้ม ไม่ขาวจ้า
+const TBC={glow:new THREE.Color('#ffb800').multiplyScalar(1.3),body:new THREE.Color('#ffc400'),acc:new THREE.Color('#3ce8ff').multiplyScalar(1.25),accG:new THREE.Color('#12c4ff').multiplyScalar(1.2),accC:new THREE.Color('#e0fbff').multiplyScalar(1.4),core:new THREE.Color('#fffbe0').multiplyScalar(1.8),bBody:new THREE.Color('#1fd6ff'),bGlow:new THREE.Color('#0a9cff').multiplyScalar(1.1),bCore:new THREE.Color('#c6f7ff').multiplyScalar(1.3)};   // b* = ร่างเทพ: ฟ้าเข้ม ไม่ขาวจ้า
 const _tcc=new THREE.Color();
 function tbGet(){if(TBA.length>=TBMAX){const old=TBA.shift();TBF.push(old);}let o=TBF.pop();if(!o){o={pts:Array.from({length:TBN},()=>new THREE.Vector3()),A:new THREE.Vector3(),B:new THREE.Vector3(),path:null};}TBA.push(o);return o;}
 // จุด sim (x,y,h) — col ไม่ใช้ (เหลืองเสมอ) ยกเว้น '#9fd8ff' = สีรองฟ้า • w = ความหนา (หน่วยโลก) • br = จำนวนกิ่ง
 // TBLUE = ร่างเทพ (อัลติ): เส้นหลักเป็นฟ้า เส้นคู่เป็นเหลืองเล็ก ๆ (ผู้ใช้ 2026-11-10)
 let TBLUE=0;
+const tboltB=(...a)=>{const was=TBLUE;TBLUE=1;try{return tbolt(...a);}finally{TBLUE=was;}};   // สายฟ้าฟ้า (ใช้ใน later ของร่างเทพ)
 function tbolt(x1,y1,h1,x2,y2,h2,life,col,w,br){
   if(col!=='#9fd8ff'&&!tbolt.cy){tbolt.cy=1;try{const o2=tbolt(x1+rnd(-12,12),y1+rnd(-12,12),h1+rnd(-.3,.3),x2+rnd(-12,12),y2+rnd(-12,12),h2+rnd(-.3,.3),life,'#9fd8ff',(w||.14)*(TBLUE?.5:.75),0);o2.amp*=1.6;}finally{tbolt.cy=0;}}   // every bolt carries a cyan companion beside it (user 2026-11-10: make it visible)
   const o=tbGet();o.A.set(tx(x1),h1+GY(x1,y1),tz(y1));o.B.set(tx(x2),h2+GY(x2,y2),tz(y2));o.path=null;o.life=o.max=life||0.12;o.w=(w||0.14)*(col==='#9fd8ff'?1.2:.85);o.rj=0;o.gk=1;o.blu=TBLUE;   /* ผู้ใช้ 2026-11-10: เส้นเหลืองบางลง (นีออนจัดเท่าเดิม) • ฟ้าเห็นชัดขึ้น */
-  const L=o.A.distanceTo(o.B);o.amp=Math.min(0.55,L*0.11+0.03);o.acc=TBLUE?col!=='#9fd8ff':col==='#9fd8ff';
+  const L=o.A.distanceTo(o.B);o.amp=Math.min(0.55,L*0.11+0.03);o.acc=TBLUE?1:col==='#9fd8ff';   /* ร่างเทพ: ฟ้าทั้งหมด */
   if(br&&L>1.2)for(let i=0;i<br;i++){const k=rnd(0.25,0.75),bx=lerp(x1,x2,k)+rnd(-8,8),by=lerp(y1,y2,k)+rnd(-8,8),bh=lerp(h1,h2,k),an=rnd(0,6.283),bl=L/S3*rnd(0.2,0.4);
     tbolt(bx,by,bh,bx+Math.cos(an)*bl,by+Math.sin(an)*bl,bh+rnd(-0.6,0.6)*L*0.3,life,col,o.w*0.55,0);}
   return o;
 }
 // สายฟ้าตามเส้นทางที่กำหนด (จุดโลก) — ใช้กับหาง/เกลียวรอบ Railgun
-function tboltP(P,life,w,amp,col){if(col!=='#9fd8ff'&&!tboltP.cy){tboltP.cy=1;try{tboltP(P,life,w*(TBLUE?.5:.75),amp*2.2,'#9fd8ff');}finally{tboltP.cy=0;}}const o=tbGet();o.path=P;o.life=o.max=life;o.w=w*(col==='#9fd8ff'?1.2:.85);o.rj=0;o.amp=amp;o.acc=TBLUE?col!=='#9fd8ff':col==='#9fd8ff';o.blu=TBLUE;o.gk=1;return o;}
+function tboltP(P,life,w,amp,col){if(col!=='#9fd8ff'&&!tboltP.cy){tboltP.cy=1;try{tboltP(P,life,w*(TBLUE?.5:.75),amp*2.2,'#9fd8ff');}finally{tboltP.cy=0;}}const o=tbGet();o.path=P;o.life=o.max=life;o.w=w*(col==='#9fd8ff'?1.2:.85);o.rj=0;o.amp=amp;o.acc=TBLUE?1:col==='#9fd8ff';o.blu=TBLUE;o.gk=1;return o;}
 function tbWrite(L,slot,pts,w,taper,c,a){
   const g=L.geometry,P0=g.attributes.position.array,C0=g.attributes.color.array,cp=cam.position,base=slot*TBN*2;
   for(let i=0;i<TBN;i++){const P=pts[i],Pa=pts[Math.max(0,i-1)],Pb=pts[Math.min(TBN-1,i+1)];
@@ -144,7 +145,7 @@ function stTgPos(tg){const v=VIEW.cur;if(!v||tg==null)return null;if(typeof tg==
 // blades = จุดโคน/กลาง/ปลายของใบมีด 3 เล่มในพิกัดของไฟล์ (glTF: x, y=บน, z=หน้า) — ตรงกับ assets/src/fx_meshes_build.py
 const STCLAW={dark:new THREE.MeshStandardMaterial({color:'#17140f',metalness:0.85,roughness:0.32,emissive:'#3a2a00',emissiveIntensity:0.35}),
   edge:new THREE.MeshBasicMaterial({color:'#ffc81e'}),metal:new THREE.MeshStandardMaterial({color:'#2a2621',metalness:0.9,roughness:0.4}),
-  blades:[0,1,2].map(i=>{const x0=(i-1)*0.09,L=i===1?0.82:0.74,sp=(i-1)*0.16,P=t=>[x0+sp*t,-0.06-L*t*(1-0.18*t),0.02+0.55*t*t*L];return [P(0.04),P(0.5),P(0.97)];})};
+  blades:[0,1,2].map(i=>{const x0=(i-1)*0.09,L=i===1?0.82:0.74,sp=(i-1)*0.16,P=t=>[x0+sp*t,-0.06-L*t*(1-0.18*t),0.02-0.55*t*t*L];   /* ปลายเล็บโค้งเข้าหาฝ่ามือ = คมหันลงตอนยื่นแขนตี (ผู้ใช้ 2026-11-10) */return [P(0.04),P(0.5),P(0.97)];})};
 for(const k of ['dark','edge','metal'])STCLAW[k].userData.keep=true;
 // ---------- รอยกรงเล็บ (อัลติสายฟ้า): รอยข่วน 3 เส้นโค้งปลายแหลมขนานกัน ตั้งขวางหน้าเรา ----------
 // รอบปรับ 2026-10-19 (ผู้เล่นขอ "เข้มและมีเอฟเฟกต์สายฟ้า ไม่เรืองแสงเกิน"): ตัวรอยสีเข้มเกือบดำ + ขอบคมเหลืองบาง + แสงเรืองจางลง
