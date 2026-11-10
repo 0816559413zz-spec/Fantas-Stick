@@ -264,12 +264,12 @@ burst:144 smoke:155 ring:156 floatText:157 shake:158 wandPos:159 impactFX:161 ex
 §190 เอฟเฟกต์คาถาใหม่
 ZV:191 COLB:191 WVV:191 GLV:191 ICEV:191 SLV:191 ULTV:191 OBV:191 _iceDisc:193 _iceEdge:194 _iceSpk:195 iceFloorMat:196 _icePlane:197 _icePathMat:198 _iceWvM:198 iceWvMat:200 makeIceFloor:212 ICE_WV:239 updateIceFloors:240 FLASHM:252 FLASHING:253 flashModel:254 endFlash:263 tickFlash:264 GHOSTM:266 SOLIDM:266 ghostOf:267 setGhost:273 hitSparks:281
 
-## js/20-vfx-pyro-storm.js (419) — Dragonfall (ภาพ)
+## js/20-vfx-pyro-storm.js (425) — Dragonfall (ภาพ)
 makeDfCircle:3 DFV:21 dfCracks:22 updateDfCracks:32 dragonfallFX:33
 §85 สายฟ้า (ภาพ)
-TBN:88 TBA:88 TBF:88 TBMAX:88 _tv:89 _tt:89 _ts:89 _tw:89 tbLayer:91 TBL:96 TBC:97 _tcc:98 tbGet:99 tbolt:101 tboltP:110 tbWrite:111 updateBolts:119 LATER:137 STV:137 SBV:137 SDV:137 TSV:137 CLV:137 stTgPos:139 STCLAW:143
-§147 รอยกรงเล็บ (อัลติสายฟ้า): รอยข่วน 3 เส้นโค้งปลายแหลมขนานกัน ตั้งขวางห…
-clawGeo:150 clawRakes:155 updateClaws:169 later:177 stFade:178 stBeam:179 shellPt:184 updateStormV:185 _ev:221 GODPTS:223 bWorld:225 stormClawSwipe:229 stormFX:256 STHUD:374 drawStormHud:375
+TBN:88 TBA:88 TBF:88 TBMAX:88 _tv:89 _tt:89 _ts:89 _tw:89 tbLayer:91 TBL:96 TBC:97 _tcc:98 tbGet:99 TBLUE:102 tbolt:103 tboltP:112 tbWrite:113 updateBolts:121 LATER:139 STV:139 SBV:139 SDV:139 TSV:139 CLV:139 stTgPos:141 STCLAW:145
+§149 รอยกรงเล็บ (อัลติสายฟ้า): รอยข่วน 3 เส้นโค้งปลายแหลมขนานกัน ตั้งขวางห…
+clawGeo:152 clawRakes:157 updateClaws:171 later:179 stFade:180 stBeam:181 shellPt:186 updateStormV:187 _ev:223 GODPTS:225 bWorld:227 stormClawSwipe:231 stormFX:258 STHUD:380 drawStormHud:381
 
 ## js/21-vfx-frost.js (206) — น้ำแข็ง (ภาพ): ชิ้นผลึก/หนาม/แผ่นน้ำแข็งชั่วคราว (โผล่ → ค้าง → หด) •…
 FRV:2 _cryG:3 _spkG:3 _plateG:3 _hexG:3 _iceFxM:4 _frostM:4 iceFxM:5 frostM:6 ICEP:8 _im4:8 _iq:8 _ie:8 _ip:8 _is:8 icePool:9 iceBit:10 iceChips:13 updateFRV:14 iceRing:24 chillFX:25 makeSlash:41 _wbGeo:49 crescentGeo:51 makeWaveBlade:54 WGH:68 updateSlashes:69 _glGeo:82 _glMat:82 _glMat2:82 makeGlacier:83 updateGlacierVis:114 updateOrbShots:123 updateZV:133 WM3:206
@@ -803,4 +803,4 @@ surfSync:49 surfQuality:53
 SURF_VS:55 SURF_VS_BODY:56 SURF_FS:67 SURF_FS_BODY:68 surfOk:98 surfApply:99 surfScene:111
 §112 ปรับค่า (tune.html / F8)
 
-(98 files, 24774 lines)
+(98 files, 24780 lines)

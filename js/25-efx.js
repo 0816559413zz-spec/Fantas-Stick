@@ -169,16 +169,16 @@ function efxFX(ev){
       later(0.12,()=>{FX.flashSprite(x,y,H+1.2,'#ffffff',0.6,5,0.2,2.2);FX.flashLight(x,y,H+2,'#ffd23a',6.5,26,0.5);ring(x,y,'#ffd000',140,0.5,H+0.1);burst(x,y,'#ffd000',60,320,0.6,2.6,{h:H+1,vh:[0,6],g:1});burst(x,y,'#9fd8ff',20,260,0.5,2,{h:H+1,g:1});
         if(near){snd('nova',ev);snd('zap',ev);shake(6);}});break;}
     case 'godoff':burst(x,y,'#ffd000',24,160,0.5,2,{h:H,vh:[0,2],g:0});break;
-    case 'sclaw':{const a=ev.a,emp=ev.n===3,big=ev.n>=2,c=Math.cos(a),sn=Math.sin(a);
+    case 'sclaw':{TBLUE=1;try{const a=ev.a,emp=ev.n===3,big=ev.n>=2,c=Math.cos(a),sn=Math.sin(a);
       // รอยกรงเล็บตั้งขวางหน้าเรา: ท่า 1 ปาดเฉียงลงขวา / ท่า 2 ปาดเฉียงลงซ้าย / ท่า 3 ฟาดลงจากบน / เสริม = รอยใหญ่ 3 เส้นขนาน + ประกายพุ่งไปถึงระยะ 280
       const rot=emp?-0.75:ev.n===0?-0.6:ev.n===1?0.6:-1.45,D=emp?135:105;
       // รอยกรงเล็บ = ริบบิ้นตามปลายใบมีด 3 เล่มระหว่างแขนปาด (stormClawSwipe ใน js/20) • ไม่มีโมเดล = รอยนิ่งแบบเดิม
       {const o=PM3.get(ev.id);if(o&&o.claws)o.clSw={t:0,n:ev.n,dur:emp?0.3:ev.n===2?0.24:0.2,tr:null};else clawRakes(x+c*D,y+sn*D,H+0.55,a,emp?3.3:big?2.7:2.3,rot,emp||big);}
       // เสริมหลัง Dash: รอยกวาดแนวนอนยาว + สายฟ้า = assets/fx/storm/claw_sweep.fx.json (bind.json efx:sclaw ถ้า n==3)
       if(emp){
-        FX.flashSprite(x+c*95,y+sn*95,H,'#fff7b0',0.4,3,0.12,2.2);burst(x+c*230,y+sn*230,'#ffd000',16,240,0.3,2.2,{h:H,g:3});burst(x+c*230,y+sn*230,'#9fd8ff',8,200,0.3,1.8,{h:H,g:3});}
-      for(let i=0;i<(big?6:3);i++){const an=a+rnd(-0.5,0.5),d=rnd(D-20,D+40);burst(x+Math.cos(an)*d,y+Math.sin(an)*d,i%2?'#ffd000':'#ffffff',4,160,0.25,2,{h:H,g:3});}
-      if(near)snd(big?'zap':'whoosh',ev);break;}
+        FX.flashSprite(x+c*95,y+sn*95,H,'#d8f8ff',0.4,3,0.12,2.2);burst(x+c*230,y+sn*230,'#4fd8ff',16,240,0.3,2.2,{h:H,g:3});burst(x+c*230,y+sn*230,'#9fd8ff',8,200,0.3,1.8,{h:H,g:3});}
+      for(let i=0;i<(big?6:3);i++){const an=a+rnd(-0.5,0.5),d=rnd(D-20,D+40);burst(x+Math.cos(an)*d,y+Math.sin(an)*d,i%2?'#4fd8ff':'#ffffff',4,160,0.25,2,{h:H,g:3});}
+      if(near)snd(big?'zap':'whoosh',ev);}finally{TBLUE=0;}break;}
     case 'dfdive':// ดาวหางไฟพุ่งเฉียงลงจุดกระแทก (bake จาก Blender: assets/src/dragonfall_dive_build.py — ตามภาพที่ผู้เล่นวาด 2026-10-20)
       if(ev.x2!==undefined&&getKit(ev.id).path===0)fireSeqLine('df_dive',x,y,H+1,ev.x2,ev.y2,groundH(ev.x2,ev.y2,H)+0.6,{life:0.75,w:2.6,int:1.3,den:1.2});
       burst(x,y,'#ffb347',24,160,0.3,2.6,{h:H+1,vh:[-2,2],g:0});FX.flashSprite(x,y,H+1,'#ffd27a',0.25,3,0.12,2);if(near)snd('whoosh',ev);break;

@@ -11,7 +11,7 @@ const PLAN={   // [เวลา, การกระทำ]
   godlightning:{sec:4.0,acts:[[0.3,'ult'],[2.2,'fire1'],[3.6,'fire0']]}};
 const P=PLAN[id]||{sec:+(q.get('seconds')||2.6),acts:[[0.3,'cast']]};const sec=+(q.get('seconds')||P.sec);
 const kit=S?S.path+'.'+(S.ult?'':S.i):'2';
-await HL.solo({kit:S&&!S.ult?kit:'2'});
+await HL.solo({kit:S&&!S.ult?kit:'2',map:q.get('map')||undefined});
 for(let i=0;i<160;i++){HL.step(1);await HL.sleep(30);if(i>30&&!WD.warm.busy&&!WD.warm.q.length)break;}
 await HL.sleep(500);HL.aim(0,0.05);HL.step(20);
 const p=HL.me();p.ult=100;p.lst=5;
