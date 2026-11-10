@@ -1,5 +1,5 @@
 {
- "next": 9,
+ "next": 10,
  "items": [
   {
    "id": 1,
@@ -176,6 +176,32 @@
     },
     {
      "t": "ท่อนไม้ใต้เป้าเล็งเห็นชัด",
+     "ok": false
+    }
+   ]
+  },
+  {
+   "id": 9,
+   "title": "สายฟ้า: GIF ทุกสกิล (ไม้เท้า/ธนู/เส้นฟ้าคู่สีฟ้า)",
+   "text": "GIF อัดจากเกมจริง shots/motion_storm_<สกิล>.gif — speedsiphon (ไม้เท้า) railgun (ธนู) basic thunderline triplestrike stormorbs shield godlightning • อัดใหม่: node tools/headless.js --game --url \"index.html?nosw&sk=<id>\" --js tools/capture-storm.js แล้ว python tools/pack-motion-gif.py storm_<id> --fps 30",
+   "kind": "VFX/ท่า",
+   "who": "Claude",
+   "status": "wait",
+   "created": "2026-11-10T00:00:00",
+   "updated": "2026-11-10T00:00:00",
+   "imgs": [],
+   "links": [],
+   "checks": [
+    {
+     "t": "ไม้เท้า: เรียก + คลื่น",
+     "ok": false
+    },
+    {
+     "t": "ธนู: เรียก + ง้าง + ยิง",
+     "ok": false
+    },
+    {
+     "t": "เส้นฟ้าคู่สีฟ้าทุกสกิล",
      "ok": false
     }
    ]

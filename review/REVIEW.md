@@ -11,6 +11,17 @@
 
 > **ความเห็นผู้ใช้:** ทำลำใหม่ตามแนวที่คุยไว้ (ลำเดียว ความหนาคงที่ ปลายจางด้วยความโปร่ง ไม่มีท่าจบพิเศษ)
 
+## #9 สายฟ้า: GIF ทุกสกิล (ไม้เท้า/ธนู/เส้นฟ้าคู่สีฟ้า)
+- สถานะ: ⏳ รอผู้ใช้รีวิว • ชนิด: VFX/ท่า • สาย/ส่วน: Claude
+
+**วิธีดู / อะไรรอรีวิว:**
+GIF อัดจากเกมจริง shots/motion_storm_<สกิล>.gif — speedsiphon (ไม้เท้า) railgun (ธนู) basic thunderline triplestrike stormorbs shield godlightning • อัดใหม่: node tools/headless.js --game --url "index.html?nosw&sk=<id>" --js tools/capture-storm.js แล้ว python tools/pack-motion-gif.py storm_<id> --fps 30
+
+**เช็กลิสต์:**
+- [ ] ไม้เท้า: เรียก + คลื่น
+- [ ] ธนู: เรียก + ง้าง + ยิง
+- [ ] เส้นฟ้าคู่สีฟ้าทุกสกิล
+
 ## #8 Nature: HP พืชเหนือไพ่ + กำแพงไม้ 2 ชาร์จ
 - สถานะ: ⏳ รอผู้ใช้รีวิว • ชนิด: UI • สาย/ส่วน: Claude
 

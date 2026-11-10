@@ -1,5 +1,6 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
 
+- 2026-11-10 — **Storm review GIFs + `tools/capture-storm.js` (user: send a GIF of every changed skill)** — the new capture script records any storm skill in the real game at 30 fps (`?sk=basic|shield|thunderline|speedsiphon|triplestrike|stormorbs|railgun|godlightning`, scripted cast / hold fire / shield, two frozen dummies, q34 camera). Pack with `python tools/pack-motion-gif.py storm_<id> --fps 30`. All 8 GIFs were sent to the user and a review board item was added. Rule from the user: every changed skill gets a GIF.
 - 2026-11-10 — **Nature plant HUD: head lifted 6 px above the HP bar (user; layout approved).**
 - 2026-11-10 — **Nature plant HUD: pea portrait faces the camera (face + mouth visible), wall framed closer (user).**
 - 2026-11-10 — **Nature plant HUD round 3 (user)** — bigger head (64 px) with closer framing per kind (turret .5, lotus/wall .62). The HP number is bolder (Kanit 600, 24 px) and the time bigger (21 px). Wall and tree portraits wait for the real fx model (`nature/wood_wall_growth_study` meshes) instead of the temporary box.
