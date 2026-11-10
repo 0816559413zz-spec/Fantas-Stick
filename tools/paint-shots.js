@@ -23,4 +23,4 @@ for(const v of views){
   for(let i=0;i<50;i++){park();me.hp=200;if(v.ang!==undefined)HL.aim(v.ang,v.pitch);HL.step(1);}
   images['pt_'+TAG+'_'+map+'_'+v.n]=HL.snap(1280).toDataURL('image/jpeg',0.92);
 }
-return {map:WD.G.map,MW:WD.MW,MH:WD.MH,me:{x:me.x,y:me.y,ang:me.ang},images,errors:[...new Set(HL.errs)].slice(0,5)};
+return {celOk:WD.PAINT.celOk,map:WD.G.map,MW:WD.MW,MH:WD.MH,me:{x:me.x,y:me.y,ang:me.ang},images,errors:[...new Set(HL.errs)].slice(0,5)};

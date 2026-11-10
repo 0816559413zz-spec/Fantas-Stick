@@ -10,11 +10,11 @@
 //  ค่าปรับได้: tune.html → 🎨 Paint • debug: WD.PAINT
 // =====================================================================
 var PAINT={on:!/[?&]nopaint\b/.test(location.search),cur:null,kit:null,
-  kuw:1,kuwR:1.0,shaft:0.2,grass:[1.3,1.28,0.9],ground:[1.5,1.3,0.55],stroke:0.5,strokeHue:0.6,sat:1.26,sun:3.4,
-  maps:{forest:{sky:'day',fog:['#a9d8b6',30,260],look:'paint',weather:'clear:100',
+  kuw:1,kuwR:1.0,shaft:0.2,grass:[1.3,1.28,0.9],ground:[1.5,1.3,0.55],stroke:0.5,strokeHue:0.6,sat:1.32,sun:3.4,
+  maps:{forest:{sky:'day',fog:['#9fdccc',30,260],look:'paint',weather:'clear:100',
     back:{near:{col:'#4a8a3c',col2:'#35703a'},trees:{col:['#2f6e3c','#3d8440','#28603a']},mid:{col:'#5f9c88',lit:'#b4dcb0',tint:'#8cc4a6'},
       mist:[{d:235,h:45,col:'#d4f0dc',a:0.6}],far:{col:'#8cbcc0',lit:'#e0f4e0',tint:'#b0dcd0',snow:'#f6fff4'}}}},
-  U:{tPt:{value:null},uPt:{value:new THREE.Vector4(1/3.2,1/9,0.5,0.6)}},
+  cel:1,U:{tPt:{value:null},uPt:{value:new THREE.Vector4(1/3.2,1/9,0.5,0.6)},uPtCel:{value:0}},
   KU:{tDiffuse:{value:null},uPx:{value:new THREE.Vector2(1,1)},uR:{value:1.0},uK:{value:1}}};
 function paintOn(id){return !!(PAINT&&PAINT.on&&PAINT.maps[id]);}
 // ทับค่าของไฟล์แมพก่อนสร้างฉาก (เรียกจาก buildWorld js/28) — เก็บค่าเดิมไว้คืนเมื่อปิด
@@ -31,10 +31,10 @@ function paintLights(id){
   if(!PAINT)return;PAINT.cur=paintOn(id)?id:null;
   if(PAINT.pass)PAINT.pass.enabled=!!PAINT.cur&&PAINT.kuw>0&&QUAL.mode!=='low';
   paintGrass();
-  if(!PAINT.cur){GRADEU.uSat.value=1.1;return;}
-  hemi.color.set('#9fe6d6');hemi.groundColor.set('#5a9440');hemi.intensity=LOOK.P.paint.hemi;
+  if(!PAINT.cur){GRADEU.uSat.value=1.1;PAINT.U.uPtCel.value=0;return;}
+  hemi.color.set('#86dcea');hemi.groundColor.set('#4f9a58');hemi.intensity=LOOK.P.paint.hemi;
   moonL.color.set('#fff0bc');moonL.intensity=PAINT.sun;GRADEU.uSat.value=PAINT.sat;
-  PAINT.KU.uK.value=PAINT.kuw;
+  PAINT.KU.uK.value=PAINT.kuw;PAINT.U.uPtCel.value=PAINT.cel;
 }
 // ใบหญ้า (js/50): ย้อมเขียวเหลืองสว่าง + โคนไม่มืด เฉพาะแมพภาพวาด (mesh หญ้าสร้างทีหลังได้ → PaintPass เรียกซ้ำทุกเฟรม)
 function paintGrass(){const m=typeof GRASS!=='undefined'&&GRASS.mesh;if(!m)return;const u=m.material.userData.U.uGrPt.value,g=PAINT.grass;if(PAINT.cur)u.set(g[0],g[1],g[2],1);else u.set(1,1,1,0);}
@@ -42,8 +42,8 @@ function paintGrass(){const m=typeof GRASS!=='undefined'&&GRASS.mesh;if(!m)retur
 function paintAtlas(){
   const W=1024,H=512,c=document.createElement('canvas');c.width=W;c.height=H;const g=c.getContext('2d'),R=mulberry(7701);
   // เปลือกไม้: พื้นน้ำตาลเขียวเข้ม + รอยปาดแนวตั้งหลายโทน + ตะไคร่เขียวเหลืองเป็นจุด ๆ (ต่อกันแนวตั้ง)
-  g.fillStyle='#3b3628';g.fillRect(0,0,512,H);
-  const bark=['#2a251c','#211d17','#4a4430','#57503a','#33301f','#665c40','#1c1a14'];
+  g.fillStyle='#4a3326';g.fillRect(0,0,512,H);
+  const bark=['#33221a','#281a15','#5c3f2c','#6e4a30','#3f2a1f','#80583a','#21161a'];
   for(let i=0;i<520;i++){const x=R()*512,y=R()*H,l=40+R()*150,w=3+R()*11;g.fillStyle=bark[Math.floor(R()*bark.length)];g.globalAlpha=0.35+R()*0.5;
     for(const oy of [0,-H,H]){g.beginPath();g.ellipse(x,y+oy,w,l,(R()-0.5)*0.12,0,6.2832);g.fill();}}
   const moss=['#6f8a3a','#8aa84a','#55702f','#a4bd58'];
@@ -127,7 +127,7 @@ function paintKit(){
   // ใบไหวตามลมเบา ๆ (เฉพาะแผ่นใบ: uv.x > 0.5) — ใช้เวลาเดียวกับลำแสง/ฝุ่น
   mat.onBeforeCompile=sh=>{sh.uniforms.uPtT=PAINT.T;
     sh.vertexShader='uniform float uPtT;\n'+sh.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\n if(uv.x>0.5){float ph=position.x*0.7+position.z*0.9+position.y*0.5;transformed.x+=sin(uPtT*1.3+ph)*0.07;transformed.z+=cos(uPtT*1.1+ph*1.3)*0.07;transformed.y+=sin(uPtT*1.7+ph*0.7)*0.03;}');};
-  mat.customProgramCacheKey=()=>'ptree1';
+  mat.customProgramCacheKey=()=>'ptree1';paintPatch(mat,false);
   const tree=[
     paintTreeGeo({seed:11,H:14.5,r0:0.42,r1:0.14,lean:0.9,stubs:6,ly0:7,ly1:17,blobs:paintCanopy(R,9.2,15.6,3.6,8,2.5,17,2.5)}),
     paintTreeGeo({seed:23,H:12,r0:0.38,r1:0.13,lean:1.4,stubs:4,ly0:6,ly1:14.5,blobs:paintCanopy(R,7.6,13,3.2,7,2.3,16,2.4)}),
@@ -154,17 +154,29 @@ const PT_FS_BODY=`
  pc=mix(pc,pc*vec3(0.7,0.96,1.14),smoothstep(-0.04,-0.26,ps)*uPt.w);
  diffuseColor.rgb=pc;}
 `;
-function paintApply(m){
-  if(!m||!m.isMeshStandardMaterial||m.userData.pt||m.transparent||m.alphaTest||/water|glass|sky|glow|emit|ice|fire|paint_tree/i.test(m.name||''))return m;
-  m.userData.pt=1;
+// แสงแบบ cel-shade: แสงตรง (แดด/ไฟ) ตัดเป็น 2 แถบ (เงา / กลาง / สว่าง) แทนไล่เฉดเรียบ — แก้ในสูตรแสงของวัสดุ Standard, uPtCel = ความแรง (0 = แสงเดิม)
+const PT_CEL_RE=/float dotNL = saturate\( dot\( (geometryNormal|geometry\.normal), directLight\.direction \) \);(\s*)vec3 irradiance = dotNL \* directLight\.color;/;
+const PT_CEL_CHUNK=THREE.ShaderChunk.lights_physical_pars_fragment.replace(PT_CEL_RE,(m,n,ws)=>'float dotNL = dot( '+n+', directLight.direction );dotNL=mix(saturate(dotNL),smoothstep(0.0,0.07,dotNL)*0.6+smoothstep(0.5,0.57,dotNL)*0.4,uPtCel);'+ws+'vec3 irradiance = dotNL * directLight.color;');
+PAINT.celOk=PT_CEL_CHUNK!==THREE.ShaderChunk.lights_physical_pars_fragment;
+// ใส่ลุคภาพวาดให้วัสดุ: strokes = ลายพู่กัน (เฉพาะชิ้นแมพ) • cel ใส่ทุกชิ้น (รวมตัวละคร/ของประกอบฉาก — paintSweep)
+function paintPatch(m,strokes){
+  if(!m||!m.isMeshStandardMaterial||m.userData.pt)return m;
+  if(strokes&&(m.transparent||m.alphaTest||/water|glass|sky|glow|emit|ice|fire|paint_tree/i.test(m.name||'')))strokes=false;
+  m.userData.pt=strokes?2:1;
   const prior=m.onBeforeCompile,def=THREE.Material.prototype.onBeforeCompile,pk=m.customProgramCacheKey,pkDef=THREE.Material.prototype.customProgramCacheKey;
   m.onBeforeCompile=function(sh,r){
     if(prior&&prior!==def)prior.call(this,sh,r);
     Object.assign(sh.uniforms,PAINT.U);
-    sh.vertexShader=PT_VS+sh.vertexShader.replace('#include <project_vertex>','#include <project_vertex>'+PT_VS_BODY);
-    sh.fragmentShader=PT_FS+sh.fragmentShader.replace('#include <alphatest_fragment>',PT_FS_BODY+'#include <alphatest_fragment>');};
-  m.customProgramCacheKey=function(){return (pk&&pk!==pkDef?pk.call(this):(prior&&prior!==def?prior.toString().length:''))+'|pt1';};
+    let f=sh.fragmentShader;
+    if(PAINT.celOk&&f.includes('#include <lights_physical_pars_fragment>'))f='uniform float uPtCel;\n'+f.replace('#include <lights_physical_pars_fragment>',PT_CEL_CHUNK);
+    if(strokes){sh.vertexShader=PT_VS+sh.vertexShader.replace('#include <project_vertex>','#include <project_vertex>'+PT_VS_BODY);
+      f=PT_FS+f.replace('#include <alphatest_fragment>',PT_FS_BODY+'#include <alphatest_fragment>');}
+    sh.fragmentShader=f;};
+  m.customProgramCacheKey=function(){return (pk&&pk!==pkDef?pk.call(this):(prior&&prior!==def?prior.toString().length:''))+'|pt2'+(strokes?'s':'c');};
   m.needsUpdate=true;return m;}
+function paintApply(m){return paintPatch(m,true);}
+// กวาดทั้งฉากเป็นระยะ (เฉพาะตอนอยู่แมพภาพวาด): วัสดุใหม่ที่ยังไม่มี cel (ตัวละคร, prop, ชิ้นที่เกิดทีหลัง) → ใส่
+function paintSweep(){scene.traverse(o=>{if(!o.isMesh)return;const M=o.material;if(Array.isArray(M)){for(const m of M)if(m&&!m.userData.pt)paintPatch(m,false);}else if(M&&!M.userData.pt)paintPatch(M,false);});}
 // ---------- ฉากของแมพ (เรียกจาก buildFileMap ก่อน brkSetup/batchStatic) ----------
 function paintScene(id,sc){
   if(!paintOn(id))return;const K=paintKit();let n=0;
@@ -210,20 +222,21 @@ class PaintPass extends Pass{
         'b=b/max(1.0-dot(b,LW),0.02);if(!(b.r+b.g+b.b>=0.0))b=src;'+
         'gl_FragColor=vec4(mix(src,b,uK),1.0);}'}));}
   render(r,write,read){const U=PAINT.KU;U.tDiffuse.value=read.texture;U.uPx.value.set(1/read.width,1/read.height);U.uR.value=PAINT.kuwR*Math.max(1,read.height/720);U.uK.value=typeof screen==='string'&&screen!=='game'?0:PAINT.kuw;
-    PAINT.T.value=performance.now()*0.001;paintGrass();
+    PAINT.T.value=performance.now()*0.001;paintGrass();if(PAINT.cur&&(PAINT.fr=(PAINT.fr||0)+1)%30===1)paintSweep();
     r.setRenderTarget(this.renderToScreen?null:write);this.q.render(r);}
 }
 PAINT.pass=new PaintPass();PAINT.pass.enabled=false;
 composer.insertPass(PAINT.pass,composer.passes.indexOf(bloom));
 // พรีเซ็ต Look ของลุคภาพวาด: ฟ้ากลางวัน • เงาอมเขียวฟ้า ไฮไลต์อมเหลือง (lo/hi) • ลำแสง + หมอก + ละอองลอย
 lookPreset('paint','dusk',{sky:'noon',warm:true,env:0.75,tr:0.86,tg:1.06,tb:1.02,hemi:0.62,amb:0.08,exp:1.0,con:1.12,split:0.14,tone:0,rays:1.1,haze:0.75,hazeK:1.5,hazeH:0.08,
-  dust:0.6,dustS:0.8,dustK:1.5,mist:0.5,mistA:0.07,mistS:1.1,mistH:2.4,mistL:0.6,mistK:1.4,flow:1,lo:[0.80,1.03,1.15],hi:[1.10,1.07,0.80]});
+  dust:0.6,dustS:0.8,dustK:1.5,mist:0.5,mistA:0.07,mistS:1.1,mistH:2.4,mistL:0.6,mistK:1.4,flow:1,lo:[0.74,1.03,1.2],hi:[1.10,1.08,0.80]});
 // ---------- ปรับค่า (tune.html / F8) ----------
 (function(){const G=['paint','🎨 Paint (ลุคภาพวาด)'],S='ลุคภาพวาด',Rg=(k,l,g,s,o)=>tuneNum(G,S,'paint.'+k,l,g,v=>{s(v);paintLights(PAINT.cur||builtMap);},o);
   Rg('kuw','ฟิลเตอร์ภาพวาด • ความแรง (0 = ปิด)',()=>PAINT.kuw,v=>{PAINT.kuw=v;},{min:0,max:1,step:0.05});
   Rg('kuwR','ฟิลเตอร์ภาพวาด • ขนาดปื้นสี',()=>PAINT.kuwR,v=>{PAINT.kuwR=v;},{min:0.5,max:3,step:0.05});
   Rg('stroke','ลายพู่กันบนผิว • ความเข้ม',()=>PAINT.U.uPt.value.z,v=>{PAINT.U.uPt.value.z=v;},{min:0,max:1.5,step:0.05});
   Rg('strokeHue','ลายพู่กันบนผิว • สีอุ่น/เย็น',()=>PAINT.U.uPt.value.w,v=>{PAINT.U.uPt.value.w=v;},{min:0,max:1.5,step:0.05});
+  Rg('cel','แสงเงา cel-shade • ความแรง (0 = ไล่เฉดเรียบแบบเดิม)',()=>PAINT.cel,v=>{PAINT.cel=v;},{min:0,max:1,step:0.05});
   Rg('sat','ความสดของสี',()=>PAINT.sat,v=>{PAINT.sat=v;},{min:0.8,max:1.6,step:0.01});
   Rg('sun','ความแรงแดด',()=>PAINT.sun,v=>{PAINT.sun=v;},{min:0.5,max:5,step:0.05});})();
 if(typeof builtMap==='string'&&builtMap)paintLights(builtMap);

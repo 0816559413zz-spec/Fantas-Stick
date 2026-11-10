@@ -803,17 +803,17 @@ surfSync:49 surfQuality:53
 SURF_VS:55 SURF_VS_BODY:56 SURF_FS:67 SURF_FS_BODY:68 surfOk:98 surfApply:99 surfScene:111
 §112 ปรับค่า (tune.html / F8)
 
-## js/77-paint.js (230) — Paint 🎨 — ลุค "ภาพวาด" (branch graphics-painterly, ทดลอง): ป่ากลางวันแดดลอดใบไม้แบบภาพอ้…
+## js/77-paint.js (243) — Paint 🎨 — ลุค "ภาพวาด" (branch graphics-painterly, ทดลอง): ป่ากลางวันแดดลอดใบไม้แบบภาพอ้…
 PAINT:12 paintOn:19 paintMap:21 paintLights:30 paintGrass:40
 §41 ภาพผิว: เปลือกไม้ (ครึ่งซ้าย) + ใบไม้ปาดพู่กัน 4 แบบ (ครึ่งขวา 2×2)
 paintAtlas:42 paintStrokeTex:66
 §74 ต้นไม้
 paintTreeGeo:75 paintCanopy:118 paintKit:122
 §145 ลายพู่กันบนผิว (ต่อท้าย onBeforeCompile เดิมของวัสดุ เหมือน js/76)
-PT_VS:146 PT_VS_BODY:147 PT_FS:148 PT_FS_BODY:149 paintApply:157
-§168 ฉากของแมพ (เรียกจาก buildFileMap ก่อน brkSetup/batchStatic)
-paintScene:169 paintShafts:184
-§195 ฟิลเตอร์ภาพวาด (Kuwahara 4 ทิศ, 64 จุด) — เลือกค่าเฉลี่ยของมุมที่สีเร…
-§221 ปรับค่า (tune.html / F8)
+PT_VS:146 PT_VS_BODY:147 PT_FS:148 PT_FS_BODY:149 PT_CEL_RE:158 PT_CEL_CHUNK:159 paintPatch:162 paintApply:177 paintSweep:179
+§180 ฉากของแมพ (เรียกจาก buildFileMap ก่อน brkSetup/batchStatic)
+paintScene:181 paintShafts:196
+§207 ฟิลเตอร์ภาพวาด (Kuwahara 4 ทิศ, 64 จุด) — เลือกค่าเฉลี่ยของมุมที่สีเร…
+§233 ปรับค่า (tune.html / F8)
 
-(99 files, 24929 lines)
+(99 files, 24942 lines)
