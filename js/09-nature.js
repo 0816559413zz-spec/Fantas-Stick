@@ -281,7 +281,7 @@ function natureBallTick(o,p,dt){
   if(G.time<o.stab)return;
   if(!o.targets){
     o.targets=foesOf(o.team).filter(t=>!t.isM&&natureDist(o,t)<=100&&Math.abs(cH(t)-o.h)<2.8
-      &&!shieldFaces(t,o.x,o.y)&&!(t.inv>0)&&natureSight(o,t,o.h+.25,cH(t)));
+      &&!shieldFaces(t,o.x,o.y,o.h)&&!(t.inv>0)&&natureSight(o,t,o.h+.25,cH(t)));
     o.pullAt=G.time+.19;o.end=o.pullAt+.23;
     for(const t of o.targets)natureEmit('ball_spike',{...o,h:o.h+.25},{x2:t.x,y2:t.y,h2:cH(t),target:t.id,enemy:!!t.isE});
   }

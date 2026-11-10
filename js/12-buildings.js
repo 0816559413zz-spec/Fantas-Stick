@@ -372,7 +372,7 @@ function damage(t,amt,srcId,kind){
   if(t.inv>0&&kind!=='burn')return;
   if(G.ball&&G.ball.holder===t.id&&kind!=='burn'&&kind!=='zone')quidDrop(t);
   if(t.stS&&kind!=='burn'){t.stS.abs+=amt;emit({k:'efx',z:'sthit',x:Math.round(t.x),y:Math.round(t.y),h:t.z+1.2,sx:src?Math.round(src.x):undefined,sy:src?Math.round(src.y):undefined,n:Math.round(amt),id:t.id});if(t.stS.abs>90)stormShieldBlast(t);return;}
-  if(t.shieldOn&&(kind==='melee'||kind==='aoe')&&shieldFaces(t,src?src.x:null,src?src.y:null)){
+  if(t.shieldOn&&(kind==='melee'||kind==='aoe')&&shieldFaces(t,src?src.x:null,src?src.y:null,src&&src.z!=null?src.z+1.2:null)){
     if(t.pathIdx===EARTH)earthShHit(t,amt);else{t.shieldE-=amt*((PBASIC[t.pathIdx|0]||{}).shMul||1.5);t.shBlk=(t.shBlk|0)+1;}emit({k:'block',x:t.x,y:t.y,h:t.z+1.2});
     {const B=PBASIC[t.pathIdx|0];if(B&&B.onBlock)B.onBlock(t);}
     if(t.shieldE<=0)breakShield(t);
@@ -492,7 +492,7 @@ function projStep(pr,dt,ps){
       if((p.x-pr.x)**2+(p.y-pr.y)**2>(PR+(pr.hw||pr.r))**2)continue;
       if(Math.abs(pr.h-cH(p))>vR(p)+pr.r/20)continue;
       if(p.inv>0)continue;
-      if(p.shieldOn&&shieldFaces(p,pr.x-pr.vx*0.05,pr.y-pr.vy*0.05)){
+      if(p.shieldOn&&shieldFaces(p,pr.x-pr.vx*0.05,pr.y-pr.vy*0.05,pr.h)){
         if(G.time-p.shieldT<0.28){
           // Perfect Parry: ปัดกระสุนทิ้ง (ไม่สะท้อนกลับแล้ว) ไม่เสียพลังโล่ + ผลพิเศษของแต่ละสาย
           pr.dead=true;

@@ -4,6 +4,7 @@
 
 - 2026-11-10 — **แก้จาก code review:** ประกายไฟตามคลื่นไม้เท้าสายฟ้ากลับมาขึ้น (ตัวแปร `Y` ชนกันใน `stormWaveTick`) • Featherwing สะบัดปีกได้ครั้งเดียวต่อการร่าย (เดิมสลับบินขึ้น/สะบัดซ้ำข้ามคูลดาวน์ได้) บินขึ้นต่อด้วยเวลาที่เหลือยังใช้ได้
 
+- 2026-11-10 — **Wind shield aims in 3D while flying (user)** — before, the shield's block check was flat (2D, 80° in front by yaw only), so pointing it up or down in flight did nothing. `shieldFaces(t,x,y,z)` (js/03) now takes the source height. Paths whose basic has `aim3d(t)` (wind: `t.wfw`, Featherwing flight or glide) block within 80° of the 3D aim vector (yaw + `inp.ap` pitch), so the shield can face nearly any direction, including straight up or down. Callers pass heights (aoe `p.z+1.2`, projectiles `pr.h`, melee `src.z+1.2`, nature `o.h`). Headless check while flying: aim level = front blocked, above/below not; aim down = below blocked; aim up = above blocked. Body tilt toward the aim in flight goes from .55 to .85 (js/68 `windLatePose`). `WD.shieldFaces` and `WD.SPELL_LIST` are exposed for tests.
 - 2026-11-10 — **ธนูสายฟ้าท่ายิงแบบนักธนูจริง** หันข้าง ง้างถึงกราม ปล่อยแล้วตัวสะท้อน • คลื่นไม้เท้าลดเหลือ 20
 
 - 2026-11-10 — **สายฟ้าทั้งชุดมีเส้นฟ้าแทรก, ธนูออกแบบใหม่ ชาร์จเอง ลูกธนูเป็นสายฟ้า, คลื่นนีออนขึ้น**

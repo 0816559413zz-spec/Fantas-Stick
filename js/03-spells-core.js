@@ -145,14 +145,19 @@ function foesIn(team,x,y,r,hMax){
 }
 // ดาเมจวง: โล่/อมตะบล็อกทั้งดาเมจและสถานะ
 // โล่บางสาย (เช่นโล่อัศวินน้ำแข็ง) กันได้เฉพาะด้านหน้า 120°
-function shieldFaces(t,x,y){
+// z = ความสูงต้นทาง (ม.) • โล่ที่ aim3d (สายลมตอนบิน/ร่อน) หันตามเป้าเล็ง 3 มิติ: กันได้ทุกทิศที่เล็งไป รวมบน/ล่าง (ผู้ใช้ 2026-11-10)
+function shieldFaces(t,x,y,z){
   if(!t.shieldOn)return false;
   const B=PBASIC[t.pathIdx|0];
-  if(B&&B.front&&x!=null)return Math.abs(angDiff(Math.atan2(y-t.y,x-t.x),t.ang))<=(B.frontA||Math.PI/3);
+  if(B&&B.front&&x!=null){const A=B.frontA||Math.PI/3;
+    if(B.aim3d&&B.aim3d(t)){const ap=clamp((t.inp&&t.inp.ap)||0,-1.5,1.5),c=Math.cos(ap),ax=c*Math.cos(t.ang),ay=c*Math.sin(t.ang),az=Math.sin(ap);
+      const dx=x-t.x,dy=y-t.y,dz=z!=null?(z-((t.z||0)+1.2))*20:0,L=Math.hypot(dx,dy,dz);if(L<1)return true;
+      return Math.acos(clamp((dx*ax+dy*ay+dz*az)/L,-1,1))<=A;}
+    return Math.abs(angDiff(Math.atan2(y-t.y,x-t.x),t.ang))<=A;}
   return true;
 }
 function aoeHit(p,t,dmg,fn){
-  const blocked=!t.isE&&(shieldFaces(t,p.x,p.y)||t.inv>0);
+  const blocked=!t.isE&&(shieldFaces(t,p.x,p.y,p.z!=null?p.z+1.2:null)||t.inv>0);
   damage(t,dmg,p.id,'aoe');
   if(!blocked&&fn)fn(t);
   return !blocked;

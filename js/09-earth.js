@@ -127,7 +127,7 @@ const STONEB=defSpell(EARTH,{id:'stonebreaker',v:{delay:0.45,knock:1800,wallDmg:
     emit({k:'efx',z:'esbcast',x:Math.round(p.x),y:Math.round(p.y),h:p.z,a:Math.round(p.ang*100)/100,id:p.id});
     G.strikes.push({x:p.x,y:p.y,t:STONEB.v.delay,fn(){if(!p.alive||p.stdB>0)return;const pr=shoot(p,'eslab',{sp:'stonebreaker'});pr.vh=0;pr.h=p.z+1.2;}});},
   hit(pr,t){damage(t,pr.dmg,pr.owner,'proj');const o=G.players[pr.owner];
-    if(!t.isE&&shieldFaces(t,pr.x-pr.vx*0.05,pr.y-pr.vy*0.05))return;
+    if(!t.isE&&shieldFaces(t,pr.x-pr.vx*0.05,pr.y-pr.vy*0.05,pr.h))return;
     const a=Math.atan2(pr.vy,pr.vx);knock(t,t.x-Math.cos(a)*10,t.y-Math.sin(a)*10,STONEB.v.knock);t.sbk=0.7;t.sbkSrc=pr.owner;t.sbkN=t.solN|0;
     emit({k:'efx',z:'esbhit',x:Math.round(t.x),y:Math.round(t.y),h:pr.h,a:Math.round(a*100)/100});}});
 

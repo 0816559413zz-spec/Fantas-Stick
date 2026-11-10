@@ -564,7 +564,8 @@ const W_UL=defSpell(WINDP,{id:'eyeofheaven',v:{chg:1.7,ifr:0.0133,impPre:0.05,im
 PBASIC.push({id:'b_wind',type:'wblade',n:'ขนนกลม',d:'กดค้าง = ยิงขนนกจากปีกสลับซ้าย-ขวา โค้งเข้าหาจุดเล็ง 8 ดาเมจ ทุก 0.45 วิ ระยะ 600 ความเร็ว 1100 • (เดิม) กดค้าง (เกจยังไม่เต็ม) = ดูดลมรอบตัว +8%/วิ • เกจเต็ม = กดโจมตีปกติค้าง 0.3 วิ แล้วยิงลมกรวยกว้างต่อเนื่อง 17 ม. นาน 2.6 วิ (ปล่อยปุ่ม = หยุด เกจที่เหลือเก็บไว้) 5 ดาเมจ/0.25 วิ ผลักศัตรูเบา ๆ ตัวเราเดินช้าลง',
   shd:'โล่ปีกห่อตัว: กันรอบตัว 360° รับได้ 75 • โดนตีแต่ละครั้ง +10% เกจ • เกจเต็มระหว่างยกโล่ + คลิกซ้าย = ชาร์จปีกแล้วระเบิดรอบตัว รัศมี 200 ผลัก 250 สตัน 0.8 วิ 20 ดาเมจ',
   dsd:'Dash ถอยหลังผลัก (Shift): ผลักศัตรูข้างหน้า 250 ตัวเราดีดถอยหลัง 300 ลอยกลางอากาศ (ใช้สกิลกลางอากาศได้) • ศัตรูที่โดนผลักชนกำแพง = 20 ดาเมจ + สตัน • คูลดาวน์ 8 วิ',
-  get shMul(){return 100/WNV.shHp;},shieldSwing:true,front:true,frontA:80*Math.PI/180,
+  get shMul(){return 100/WNV.shHp;},shieldSwing:true,front:true,frontA:80*Math.PI/180,aim3d:t=>!!t.wfw,   // บิน/ร่อน Featherwing = โล่หันตามเป้าเล็ง 3 มิติ ขึ้น-ลงได้เกือบรอบ (ตรงกับภาพ wn[5]>=1 และมุมกล้องตอนบิน)
+  
   hit(pr,t){if(pr.type==='wpush'){windPushHit(pr,t);return;}if(pr.type==='wbl'){windBladeHit(pr,t);return;}if(pr.type==='wball'||pr.type==='wplume'||pr.type==='wshp')return;damage(t,pr.dmg,pr.owner,'proj');const o=G.players[pr.owner];pr.wbT=t;if(o)wGain(o,WNV.baGain);},   // ลูกบอลลม (Focus): ผลักเบา ๆ ไม่เพิ่มเกจ
   onBlock(p){wGain(p,WNV.shGain);},
   tick:windBasic,dash:windDash});
