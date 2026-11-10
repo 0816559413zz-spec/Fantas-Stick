@@ -114,17 +114,17 @@ function natStartStudy(name,s,stay=false){
   const f=fxData(name);
   if(!FXR.ready||!f)return null;
   for(const l of f.layers)if(l.shape==='model'&&!fxMeshGeo(l.model))return null;
-  const isTree=name.includes('tree_'),age=stay?s.age:0;
+  const isTree=name.includes('tree_'),ts=name==='nature/tree_summon'?NAT.treeGrow0/NAT.treeGrow:1,age=(stay?s.age:0)*ts;   // ต้นไม้งอกเร็วขึ้น (ผู้ใช้ 2026-11-10): เล่นเอฟเฟกต์เร็วตาม
   const scale=isTree?NAT.treeHeight/27:1;
   let data=f;
   if(stay)data={...f,layers:f.layers.filter(l=>l.t==='mesh'||l.t==='code'||age<.8).map(l=>
-    l.t==='mesh'||l.t==='code'?{...l,life:Math.max(f.dur,(isTree?NAT.treeGrow+NAT.treeLife:8)-age)+.2}:l)};
+    l.t==='mesh'||l.t==='code'?{...l,life:Math.max(f.dur,(isTree?(NAT.treeGrow+NAT.treeLife)*ts:8)-age)+.2}:l)};
   else if(name==='nature/tree_break_study')data={...f,layers:f.layers.map(l=>{
     if(l.id!=='heal_dome')return l;
     const k=NAT.treeRange*S3/(26.4*scale);
     return {...l,at:0,scale:Object.fromEntries(Object.entries(l.scale).map(([t,[x,y,z]])=>[t,[x*k,y,z*k]]))};
   })};
-  const fx=fxStart(data,{x:s.x,y:s.y,h:s.h,a:s.a,s:scale,p:{healRadius:NAT.treeRange*S3}},name);
+  const fx=fxStart(data,{x:s.x,y:s.y,h:s.h,a:s.a,s:scale,ts,p:{healRadius:NAT.treeRange*S3}},name);
   if(fx)fx.t=age;
   return fx;
 }
@@ -673,4 +673,25 @@ function natureEvent(ev){
     default:return false;
   }
   return true;
+}
+
+// ใต้เป้าเล็ง: ชาร์จกำแพงไม้ 2 อัน เป็นไอคอนท่อนไม้ (แบบ stack สายฟ้า) • อันที่กำลังชาร์จ = ไม้จาง + แถบเติมจากล่าง (ผู้ใช้ 2026-11-10)
+const NTHUD={prev:-1,fl:[0,0],t:0};
+function drawNatureHud(x,y,A){
+  const n=A[6]|0,pr=+A[7]||0,now=performance.now(),dt=Math.min(.1,(now-NTHUD.t)/1000);NTHUD.t=now;
+  if(NTHUD.prev>=0&&n>NTHUD.prev)for(let i=NTHUD.prev;i<n&&i<2;i++)NTHUD.fl[i]=.35;NTHUD.prev=n;
+  const y0=y+67,gap=26;
+  const log=(cx0,cy0,a,fill)=>{const w=18,h=9;
+    cx.save();cx.translate(cx0,cy0);cx.rotate(-.35);
+    cx.globalAlpha=a;cx.fillStyle='rgba(0,0,0,.55)';cx.beginPath();cx.roundRect(-w/2-1.5,-h/2-1.5,w+3,h+3,5);cx.fill();
+    if(fill<1){cx.fillStyle='rgba(120,88,50,.35)';cx.beginPath();cx.roundRect(-w/2,-h/2,w,h,4);cx.fill();}
+    cx.save();cx.beginPath();cx.rect(-w/2,-h/2,w*fill,h);cx.clip();
+    const g=cx.createLinearGradient(0,-h/2,0,h/2);g.addColorStop(0,'#c99a5c');g.addColorStop(1,'#7a5430');cx.fillStyle=g;cx.beginPath();cx.roundRect(-w/2,-h/2,w,h,4);cx.fill();
+    cx.strokeStyle='rgba(60,38,18,.8)';cx.lineWidth=1;cx.beginPath();cx.moveTo(-w/2+3,-1);cx.lineTo(w/2-5,-1);cx.moveTo(-w/2+5,2);cx.lineTo(w/2-7,2);cx.stroke();
+    cx.fillStyle='#e8c690';cx.beginPath();cx.ellipse(w/2-2,0,3,h/2-.5,0,0,Math.PI*2);cx.fill();cx.strokeStyle='#8a6034';cx.beginPath();cx.ellipse(w/2-2,0,1.4,2,0,0,Math.PI*2);cx.stroke();
+    const leaf=(lx,ly,r)=>{cx.fillStyle='#8ee06a';cx.beginPath();cx.ellipse(lx,ly,r,r*.5,-.6,0,Math.PI*2);cx.fill();};leaf(-3,-h/2-1.5,3);
+    cx.restore();cx.restore();};
+  for(let i=0;i<2;i++){const px=x+(i-.5)*gap,have=i<n,fill=have?1:i===n?pr:0;
+    if(NTHUD.fl[i]>0){NTHUD.fl[i]-=dt;cx.save();cx.globalAlpha=Math.max(0,NTHUD.fl[i]/.35)*.8;cx.fillStyle='#fff';cx.shadowColor='#c8ff9a';cx.shadowBlur=14;cx.beginPath();cx.arc(px,y0,11,0,Math.PI*2);cx.fill();cx.restore();}
+    log(px,y0,have?1:.55,fill);}
 }

@@ -92,7 +92,7 @@ function fxGate(L,I,w){if(fxG(L,'x')&&(!vfxExtra()||I.far))return false;if(fxG(L
   const nr=fxG(L,'near');if(nr>0&&cam.position.distanceTo(_fxw.set(tx(w[0]),w[2]+GY(w[0],w[1]),tz(w[1])))>nr)return false;return true;}
 // ---------- ทุกเฟรม ----------
 function updateFx(dt){fxMPUpdate(dt);if(!FXR.inst.length)return;
-  for(let i=FXR.inst.length-1;i>=0;i--){const I=FXR.inst[i];I.t+=dt;if(I.o.follow!=null)fxAnchor(I);
+  for(let i=FXR.inst.length-1;i>=0;i--){const I=FXR.inst[i];I.t+=dt*(I.o.ts||1);if(I.o.follow!=null)fxAnchor(I);
     I.far=cam.position.distanceTo(_fxw.set(tx(I.x),I.h+GY(I.x,I.y),tz(I.y)))>60;
     let alive=false;
     for(const S of I.L){const L=S.d;if(S.st===2)continue;

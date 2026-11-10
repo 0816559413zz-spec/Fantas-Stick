@@ -313,7 +313,7 @@ function updatePlayer(p,dt,acting){
   if(p.pathIdx===EARTH)earthTick(p,dt);
   if(p.pathIdx===WINDP)windTick(p,dt);
   if(p.pathIdx===WATERP)waterTick(p,dt);
-  if(p.pathIdx===NATUREP)natureShield(p);
+  if(p.pathIdx===NATUREP){natureShield(p);natureWallCharges(p,dt);}
 
   // เคลื่อนที่
   const ox0=p.x,oy0=p.y,oz0=p.z,onG0=!p.fly&&p.z<=groundH(p.x,p.y,p.z)+0.05;

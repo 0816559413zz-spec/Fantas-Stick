@@ -579,6 +579,7 @@ function drawCrosshair(){
   if(_me&&_me.sm&&_me.al)drawStormHud(x,y,_me.sm);
   if(_me&&_me.ea&&_me.al)drawEarthHud(x,y,_me.ea,_me);
   if(_me&&_me.wn&&_me.al)drawWindHud(x,y,_me.wn,_me);
+  if(_me&&_me.nt&&_me.nt.length>6&&_me.al)drawNatureHud(x,y,_me.nt);
   if(_me&&_me.wt&&_me.al)drawWaterHud(x,y,_me.wt,_me);
   if(!locked&&!VIC.on&&!(VIEW.cur&&VIEW.cur.ph==='over')){
     cx.font='600 17px Kanit,sans-serif';cx.textAlign='center';

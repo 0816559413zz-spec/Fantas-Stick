@@ -1,7 +1,7 @@
 // Nature combat is simulated by the host. Positions are map units, heights are metres.
 const NATUREP=3;
 const NAT={seedRange:300,hookRange:560,hookSpeed:1700,lotusRange:160,treeRange:500,
-  treeHeight:23,treeGrow:3.4,treeLife:12,peaRadius:55,wallHalf:105,wallThick:12,wallHeight:3.6};
+  treeHeight:23,treeGrow:2.0,treeGrow0:3.4,treeLife:12,peaRadius:55,peaRange:650,ballPull:160,wallHalf:105,wallThick:12,wallHeight:3.6};
 const natureDist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
 const natureItems=()=>G.nature||(G.nature=[]);
 const natureLive=o=>o&&(o.natKind?o.hp>0&&!o.dead&&!o.move:o.isE||o.isM?!o.dead:o.alive&&!o.downed);
@@ -94,7 +94,7 @@ function naturePlace(p,point,onWall){
   return natureGround(wall.x-dx*30,wall.y-dy*30);
 }
 function naturePlant(p,kind,spot,delay=0){
-  const hp={turret:60,lotus:100,tree:350}[kind];
+  const hp={turret:90,lotus:100,tree:350}[kind];
   const life={turret:20,lotus:15,tree:NAT.treeLife}[kind];
   const ready=G.time+delay+(kind==='tree'?NAT.treeGrow:0);
   const o={...spot,z:spot.h,id:++G.zid,isM:true,natKind:kind,type:'nature_'+kind,team:p.team,owner:p.id,
@@ -141,7 +141,7 @@ function natureMovePlants(p){
 function natureAimSpot(p,A){return naturePlace(p,natureAimPoint(p,A.k==='wall'?260:240),false);}
 function natureAimStart(p,k){if(p.natAim){p.natAim=null;return false;}p.natAim={k,t:G.time,a:p.ang,last:p.ang,hold:0,rotated:false,armed:!p.inp?.fire,s0:!!p.inp?.sh};p.natAim.spot=natureAimSpot(p,p.natAim);return false;}
 function natureAimDone(p,A){const q=A.spot;
-  if(A.k==='wall'){if(natureDist(p,q)<40)return false;natureWallBuild(p,q,A.a);const i=p.kitIds.indexOf('thornburst');if(i>=0){const S=SPELLS.thornburst,k=SLOTK[i],cd=S.cd*p.buffs.cdr;p.cd[k]=cd;p.cdMax[k]=cd;}emit({k:'sk',id:p.id,s:'thornburst'});return true;}
+  if(A.k==='wall'){if(natureDist(p,q)<40)return false;natureWallBuild(p,q,A.a);natureWallUse(p);emit({k:'sk',id:p.id,s:'thornburst'});return true;}
   if(p.ult<100)return true;p.ult=0;naturePlant(p,'tree',q,.9);natureEmit('summon',{x:p.x,y:p.y,h:p.z},{id:p.id,x2:q.x,y2:q.y,h2:q.h});emit({k:'sk',id:p.id,s:'worldtree'});return true;}
 function natureAimTick(p,inp,dt,canAct){const A=p.natAim;
   if(!canAct||G.time-A.t>10||(inp.sh&&!A.s0)){p.natAim=null;return true;}
@@ -159,7 +159,16 @@ function natureCastWall(p){
   if(!p.bot)return natureAimStart(p,'wall');
   const q=naturePlace(p,natureAimPoint(p,260),false);
   if(natureDist(p,q)<40)return false;
-  natureWallBuild(p,q,p.ang);
+  natureWallBuild(p,q,p.ang);natureWallUse(p);emit({k:'sk',id:p.id,s:'thornburst'});return false;   // ใช้ชาร์จเอง (ไม่ให้ระบบกลางตั้งคูลดาวน์ทับ)
+}
+// กำแพงไม้ 2 ชาร์จ (ผู้ใช้ 2026-11-10): ชาร์จคืนทีละอันตามคูลดาวน์สกิล • ชาร์จหมด = ไพ่ติดคูลดาวน์ที่เหลือของอันถัดไป
+const NAT_WALLS=2;
+function natureWallUse(p){if(p.nwc===undefined){p.nwc=NAT_WALLS;p.nwr=0;}p.nwc=Math.max(0,p.nwc-1);natureWallCharges(p,0);}
+function natureWallCharges(p,dt){
+  if(p.nwc===undefined){p.nwc=NAT_WALLS;p.nwr=0;}
+  const S=SPELLS.thornburst;if(p.nwc<NAT_WALLS){p.nwr+=dt/(p.buffs.cdr||1);if(p.nwr>=S.cd){p.nwr=0;p.nwc++;}}else p.nwr=0;
+  const i=p.kitIds?p.kitIds.indexOf('thornburst'):-1;if(i<0)return;const k=SLOTK[i];
+  if(p.nwc<=0){const left=(S.cd-p.nwr)*(p.buffs.cdr||1),mx=S.cd*(p.buffs.cdr||1);p.cd[k]=left;p.cdMax[k]=mx;}else if(p.cd[k]>0&&!p.natAim)p.cd[k]=0;
 }
 
 function naturePoison(t,power,life,owner,source){
@@ -225,7 +234,7 @@ function natureDash(p,inp,pr,dt,setCd){
     const th=cH(t),x=t.x-p.x,y=t.y-p.y,z=(natureY(t)+th-natureY(p)-h)*20;
     const d=Math.hypot(x,y,z),along=x*dx+y*dy+z*dz;
     const miss=Math.sqrt(Math.max(0,d*d-along*along));
-    const radius=t.team===p.team?(t.natKind?47:44):Math.max(18,t.r||PR);
+    const radius=t.team===p.team?Math.max(t.natKind?95:90,d*.2):Math.max(18,t.r||PR);   // เพื่อน/พืช: ช่วยเล็งกว้างขึ้น ~11° (ผู้ใช้ 2026-11-10)
     if(d>NAT.hookRange||along<=0||miss>radius||!natureSight(p,t,h,th))continue;
     const value=miss/radius+d/2000;
     if(value<score){score=value;best=t;}
@@ -280,7 +289,7 @@ function natureBallTick(o,p,dt){
   if(!o.landed&&G.time>=o.land){o.landed=true;natureEmit('ball_land',o);}
   if(G.time<o.stab)return;
   if(!o.targets){
-    o.targets=foesOf(o.team).filter(t=>!t.isM&&natureDist(o,t)<=100&&Math.abs(cH(t)-o.h)<2.8
+    o.targets=foesOf(o.team).filter(t=>!t.isM&&natureDist(o,t)<=NAT.ballPull&&Math.abs(cH(t)-o.h)<2.8
       &&!shieldFaces(t,o.x,o.y,o.h)&&!(t.inv>0)&&natureSight(o,t,o.h+.25,cH(t)));
     o.pullAt=G.time+.19;o.end=o.pullAt+.23;
     for(const t of o.targets)natureEmit('ball_spike',{...o,h:o.h+.25},{x2:t.x,y2:t.y,h2:cH(t),target:t.id,enemy:!!t.isE});
@@ -343,7 +352,7 @@ function natureTurret(o,p){
     &&(!o.chargeAt||G.time>=o.chargeAt+.4);
   if((!ready||!o.aimTarget)&&G.time<(o.aimAt||0)&&p.natureFocus===o.focusSeen)return;
   o.aimAt=G.time+.12;o.focusSeen=p.natureFocus;
-  const can=t=>natureLive(t)&&natureDist(o,t)<=400&&natureSight(o,t,natureHead(o),cH(t));
+  const can=t=>natureLive(t)&&natureDist(o,t)<=NAT.peaRange&&natureSight(o,t,natureHead(o),cH(t));
   let target=p.natureFocus;
   if(!can(target))target=foesOf(o.team).filter(can).sort((a,b)=>natureDist(o,a)-natureDist(o,b))[0];
   if(!target){o.aimTarget=null;o.chargeAt=0;return;}
@@ -386,7 +395,7 @@ function natureUpdate(dt){
     }
     if(o.hp<=0||G.time>=o.end){natureEnd(o,o.hp<=0);continue;}
     if(o.move&&G.time>=o.move.at){
-      Object.assign(o,{wall:0,...o.move.spot,z:o.move.spot.h,born:G.time,hp:o.maxHp,boostUntil:G.time+4});o.move=null;
+      Object.assign(o,{wall:0,...o.move.spot,z:o.move.spot.h,born:G.time,hp:Math.min(o.maxHp,o.hp+o.maxHp*.5),boostUntil:G.time+4});o.move=null;
     }
     if(o.move||G.time<o.ready)continue;
     if(o.natKind==='turret'){natureTurret(o,p);continue;}
@@ -404,7 +413,7 @@ function natureUpdate(dt){
 
 function natureReset(p){
   p.natureWhip=p.natureHook=p.natureFocus=p.natureShieldHits=p.natureSpores=p.naturePoison=p.natureWrap=null;
-  p.natureFire=false;p.natureCoilEnd=p.natureSlow=0;
+  p.natureFire=false;p.natureCoilEnd=p.natureSlow=0;p.nwc=NAT_WALLS;p.nwr=0;
 }
 function natureSnapP(p){
   const w=p.natureWhip,age=w?G.time-w.start:0;
@@ -414,7 +423,8 @@ function natureSnapP(p){
   const tree=natureLive(p)?natureGuardian(p):null;
   const zone=!!tree||!!G.nature?.some(o=>natureTreeReady(o)&&natureDist(o,p)<=NAT.treeRange);
   const A=p.natAim,aim=A?[A.k==='wall'?1:2,A.spot.x,A.spot.y,A.spot.h||0,A.a]:0;
-  return swing||spores||coil||zone||aim?[swing,spores,coil,tree?.id||0,zone,aim]:0;
+  const nwc=p.nwc??NAT_WALLS,nwr=nwc<NAT_WALLS?Math.round((p.nwr||0)/SPELLS.thornburst.cd*100)/100:0;
+  return p.pathIdx===NATUREP||swing||spores||coil||zone||aim?[swing,spores,coil,tree?.id||0,zone,aim,nwc,nwr]:0;
 }
 function natureLotusCooldown(p){
   const lotus=p.pathIdx===NATUREP&&naturePlants(p,'lotus')[0];

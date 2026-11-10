@@ -102,8 +102,8 @@ updateEarth:241 earthSnapP:251 earthSnapW:253
 ## js/09-nature-ba.js (107) — 
 NATURE_BA_TEST:2 NATURE_WHIP:3 natureWhipEnabled:4 natureWhipHit:7 natureWhipBasic:29 NW_RINGS:50 NW_SIDES:50 nwPhase:51 nwEase:52 nwSwingAngle:53 natureWhipPose:59 natureWhipVisualMake:68 natureWhipView:90
 
-## js/09-nature.js (439) — 
-NATUREP:2 NAT:3 natureDist:5 natureItems:6 natureLive:7 naturePlants:8 natureY:9 natureHead:10 natureTreeReady:11 natureEmit:12 natureWallLocal:15 natureWallContains:21 natureWallPush:28 natureBurnWall:36 natureWallDamage:43 natureWallTick:48 natureTrace:57 natureSight:75 natureGround:76 natureAimPoint:82 naturePlace:88 naturePlant:96 natureCastPlant:106 natureLotusToggle:122 natureMovePlants:130 natureAimSpot:141 natureAimStart:142 natureAimDone:143 natureAimTick:146 natureWallBuild:157 natureCastWall:158 naturePoison:165 natureStatus:170 natureSpore:182 natureSendSpore:189 natureShield:198 natureHookCandidates:212 natureDash:216 natureHookMove:242 natureBall:271 natureBallTick:279 natureTree:298 natureTreeReach:303 natureGuardian:308 natureGuard:314 natureDamage:323 natureEnd:329 natureTurret:335 naturePeaSplash:368 natureUpdate:373 natureReset:405 natureSnapP:409 natureLotusCooldown:419 natureSnapW:424
+## js/09-nature.js (449) — 
+NATUREP:2 NAT:3 natureDist:5 natureItems:6 natureLive:7 naturePlants:8 natureY:9 natureHead:10 natureTreeReady:11 natureEmit:12 natureWallLocal:15 natureWallContains:21 natureWallPush:28 natureBurnWall:36 natureWallDamage:43 natureWallTick:48 natureTrace:57 natureSight:75 natureGround:76 natureAimPoint:82 naturePlace:88 naturePlant:96 natureCastPlant:106 natureLotusToggle:122 natureMovePlants:130 natureAimSpot:141 natureAimStart:142 natureAimDone:143 natureAimTick:146 natureWallBuild:157 natureCastWall:158 NAT_WALLS:165 natureWallUse:166 natureWallCharges:167 naturePoison:174 natureStatus:179 natureSpore:191 natureSendSpore:198 natureShield:207 natureHookCandidates:221 natureDash:225 natureHookMove:251 natureBall:280 natureBallTick:288 natureTree:307 natureTreeReach:312 natureGuardian:317 natureGuard:323 natureDamage:332 natureEnd:338 natureTurret:344 naturePeaSplash:377 natureUpdate:382 natureReset:414 natureSnapP:418 natureLotusCooldown:429 natureSnapW:434
 
 ## js/09-other-paths.js (175) — 
 §44 สัตว์เวท (minion): AI ฝั่งโฮสต์
@@ -378,7 +378,7 @@ iceMat:2 iceRim:3 makeIceSword:4 makeIceAxe:23 makeKiteShield:39
 §51 อาวุธน้ำแข็งลอย (ผู้ใช้ 2026-10-22: "ร่ายคาถาให้ดาบฟันเอง ระยะเท่าเดิ…
 FWS:54 FWA:54 _fwM:55 _fwM2:55 _fwX:55 _fwY:55 _fwZ:55 _fwP:55 _fwS:55 _fwQ:55 _eo:56 _ei:56 _ss:56 fwAim:58 fwWeapons:59 FWP:61 FWT:61 fwChop:62 fwSweep:63 FF_RISE:64 fwIdle:65 fwSwing:68 FWL_N:80 fwLink:81 fwMat:84 frostFX:85
 
-## js/35-sync.js (589) — ซิงก์ผู้เล่น/ศัตรู/ลูกเวทจาก snapshot + ฉายตำแหน่งลงจอ (ป้ายชื่อ/ตัวเ…
+## js/35-sync.js (590) — ซิงก์ผู้เล่น/ศัตรู/ลูกเวทจาก snapshot + ฉายตำแหน่งลงจอ (ป้ายชื่อ/ตัวเ…
 §2 ท่าร่ายคาถาแบบนักเวทในหนัง Harry Potter (ผู้ใช้ 2026-10-22: "ยิงปกติท…
 CPOSE_T:7 _ce:7 _cs:7 _cb:7 AMP_B:9 AMP_S:9 CP_BEND:10 CPOSE:12 _cpT:20 _cpR:20 CGUARD:20 CP_STEP:21 CPCOL:22 castStyle:23 castStart:24
 §25 ท่าร่ายสกิล / อัลติ / โล่ (ผู้ใช้ 2026-10-22: "เกือบทุกสกิลควรมีการเห…
@@ -723,8 +723,8 @@ _natFx:3 natFxClear:4 natFxMake:5 T:6 S:6 O:6 seed:7 ease:8 outQ:8 inQ:8 phase:8
 §69 อนุภาค
 Pool:70 leafGeo:78 LEAF:79 SPK:80 DIRT:81 PUFF:82 CHIP:83 POOLS:84 leafCols:85 leaves:86 sparks:87 dirt:88 puff:89 chips:90 TrailRibbon:92 WHIP_N:103 WHIP_L:103 WHIP_LAG:103 Whip:104 CLIPS:167 tick:168 clip:169 drop:170 natFx:173
 
-## js/68-nature-view.js (676) — 
-NAT_VIEW:2 NAT_MARKS:2 NAT_MOTION:2 natV:3 natWorld:4 natPhase:5 natSmooth:6 natEase:7 natOut:8 natStd:9 natAdd:10 natMesh:11 natRing:12 natLeaf:16 natPlantM:19 natGlow:26 natArt:29 natureProjectileModel:31 natSet:37 natAnimate:38 natTube:39 natTrail:50 natSeed:68 natLotus:77 natBall:93 natPlantView:103 natStartStudy:113 natWearWall:131 natTreeGlow:154 natModelTick:174 natMarker:257 natMarks:268 natThorn:287 NAT_SHIELD_K:292 natShieldMake:293 natureCharacter:325 natOutlineMat:355 natOutline:359 natLinks:371 syncNature:386 natureClear:405 natDome:414 natMuzzle:436 natSlam:446 natHook:463 natCoil:520 natHookPose:541 natHookArm:549 natShock:551 natSprout:552 natHealRims:553 natWhipHit:555 natBallRange:556 natSummon:558 natTreeAura:565 natAuraDrop:575 NAT_HOLO:577 natHoloMake:578 natHolo:583 natHoloClear:584 natDirOf:585 natMoment:586 natureEvent:615
+## js/68-nature-view.js (697) — 
+NAT_VIEW:2 NAT_MARKS:2 NAT_MOTION:2 natV:3 natWorld:4 natPhase:5 natSmooth:6 natEase:7 natOut:8 natStd:9 natAdd:10 natMesh:11 natRing:12 natLeaf:16 natPlantM:19 natGlow:26 natArt:29 natureProjectileModel:31 natSet:37 natAnimate:38 natTube:39 natTrail:50 natSeed:68 natLotus:77 natBall:93 natPlantView:103 natStartStudy:113 natWearWall:131 natTreeGlow:154 natModelTick:174 natMarker:257 natMarks:268 natThorn:287 NAT_SHIELD_K:292 natShieldMake:293 natureCharacter:325 natOutlineMat:355 natOutline:359 natLinks:371 syncNature:386 natureClear:405 natDome:414 natMuzzle:436 natSlam:446 natHook:463 natCoil:520 natHookPose:541 natHookArm:549 natShock:551 natSprout:552 natHealRims:553 natWhipHit:555 natBallRange:556 natSummon:558 natTreeAura:565 natAuraDrop:575 NAT_HOLO:577 natHoloMake:578 natHolo:583 natHoloClear:584 natDirOf:585 natMoment:586 natureEvent:615 NTHUD:679 drawNatureHud:680
 
 ## js/68-storm-bow.js (122) — 
 SB_FULL:2 _sbShard:3 sbShard:4 sbMat:5 sbJag:6 SB_TIP:8 _sbBlade:9 sbBlade:10 sbMake:11 stormBowView:29 _sbFaQ:53 _sbFaT:53 _sbFaX:53 stormBowForearm:54 stormBowFx:55 sbStaffAxis:70 sbStaffMake:71 stormStaffView:88 stormStaffCast:100 stormStaffSwing:103 _sbWaveG:105 sbWaveGeo:106 SB_WAVE_F:107 stormWaveMake:114 stormWaveTick:117
@@ -802,4 +802,4 @@ surfSync:49 surfQuality:53
 SURF_VS:55 SURF_VS_BODY:56 SURF_FS:67 SURF_FS_BODY:68 surfOk:98 surfApply:99 surfScene:111
 §112 ปรับค่า (tune.html / F8)
 
-(98 files, 24692 lines)
+(98 files, 24724 lines)
