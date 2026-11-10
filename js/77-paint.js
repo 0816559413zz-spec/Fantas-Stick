@@ -37,7 +37,7 @@ function paintLights(id){
   PAINT.KU.uK.value=PAINT.kuw;PAINT.U.uPtCel.value=PAINT.cel;
 }
 // ใบหญ้า (js/50): ย้อมเขียวเหลืองสว่าง + โคนไม่มืด เฉพาะแมพภาพวาด (mesh หญ้าสร้างทีหลังได้ → PaintPass เรียกซ้ำทุกเฟรม)
-function paintGrass(){const m=typeof GRASS!=='undefined'&&GRASS.mesh;if(!m)return;const u=m.material.userData.U.uGrPt.value,g=PAINT.grass;if(PAINT.cur)u.set(g[0],g[1],g[2],1);else u.set(1,1,1,0);}
+function paintGrass(){const m=typeof GRASS!=='undefined'&&GRASS.mesh;if(!m)return;const u=m.material.userData.U.uGrPt.value,g=PAINT.grass;const c=m.material.userData.U.uGrCl.value;if(PAINT.cur){u.set(g[0],g[1],g[2],1);c.set(0.42,0.93);}else{u.set(1,1,1,0);c.set(0,0.78);}}
 // ---------- ภาพผิว: เปลือกไม้ (ครึ่งซ้าย) + ใบไม้ปาดพู่กัน 4 แบบ (ครึ่งขวา 2×2) ----------
 function paintAtlas(){
   const W=1024,H=512,c=document.createElement('canvas');c.width=W;c.height=H;const g=c.getContext('2d'),R=mulberry(7701);
@@ -228,7 +228,7 @@ class PaintPass extends Pass{
 PAINT.pass=new PaintPass();PAINT.pass.enabled=false;
 composer.insertPass(PAINT.pass,composer.passes.indexOf(bloom));
 // พรีเซ็ต Look ของลุคภาพวาด: ฟ้ากลางวัน • เงาอมเขียวฟ้า ไฮไลต์อมเหลือง (lo/hi) • ลำแสง + หมอก + ละอองลอย
-lookPreset('paint','dusk',{sky:'noon',warm:true,env:0.75,tr:0.86,tg:1.06,tb:1.02,hemi:0.62,amb:0.08,exp:1.0,con:1.12,split:0.14,tone:0,rays:1.1,haze:0.75,hazeK:1.5,hazeH:0.08,
+lookPreset('paint','dusk',{sky:'noon',warm:true,env:0.75,tr:0.86,tg:1.06,tb:1.02,hemi:0.82,amb:0.14,exp:1.0,con:1.12,split:0.14,tone:0,rays:1.1,haze:0.75,hazeK:1.5,hazeH:0.08,
   dust:0.6,dustS:0.8,dustK:1.5,mist:0.5,mistA:0.07,mistS:1.1,mistH:2.4,mistL:0.6,mistK:1.4,flow:1,lo:[0.74,1.03,1.2],hi:[1.10,1.08,0.80]});
 // ---------- ปรับค่า (tune.html / F8) ----------
 (function(){const G=['paint','🎨 Paint (ลุคภาพวาด)'],S='ลุคภาพวาด',Rg=(k,l,g,s,o)=>tuneNum(G,S,'paint.'+k,l,g,v=>{s(v);paintLights(PAINT.cur||builtMap);},o);

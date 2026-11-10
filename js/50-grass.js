@@ -190,7 +190,7 @@ function grLive(m){m.userData.grLive=true;
       .replace('#include <emissivemap_fragment>','#include <emissivemap_fragment>\n'+GR_FIRE);};   // เหลี่ยมพื้นนุ่มลง (เนินดูโค้ง)
   m.customProgramCacheKey=()=>'grlive4';
   return m;}
-const GR_GLSL_V='uniform vec4 uGrMap;uniform sampler2D uGround;uniform vec3 uGrCam;uniform vec4 uWind;uniform vec2 uGrK;uniform vec4 uGust[12];uniform vec4 uGustB[12];uniform vec4 uPush[16];uniform sampler2D uScar;uniform float uGrH;uniform float uGrW;uniform sampler2D uGroundH;uniform vec3 uSun;uniform vec3 uGrN;uniform sampler2D uFire;uniform vec4 uGrPt;'+
+const GR_GLSL_V='uniform vec4 uGrMap;uniform sampler2D uGround;uniform vec3 uGrCam;uniform vec4 uWind;uniform vec2 uGrK;uniform vec4 uGust[12];uniform vec4 uGustB[12];uniform vec4 uPush[16];uniform sampler2D uScar;uniform float uGrH;uniform float uGrW;uniform sampler2D uGroundH;uniform vec3 uSun;uniform vec3 uGrN;uniform sampler2D uFire;uniform vec4 uGrPt;uniform vec2 uGrCl;'+
   'attribute vec4 aOff;varying vec3 vGC;varying vec2 vMk;varying float vTr;varying vec4 vFl;varying vec2 vHu;varying float vFi;\n'+
   'vec2 grH2(vec2 c){return fract(sin(vec2(dot(c,vec2(127.1,311.7)),dot(c,vec2(269.5,183.3))))*43758.5453);}\n';
 // ใบหญ้า (ทำในการ์ดจอทั้งหมด): ขึ้นเป็นกอ (ดึงเข้าหาจุดกลางกอทุก ~0.9 หน่วย) • 3 แบบปนกัน (ปกติ / ยาวเรียว / สั้นกว้าง) + ดอกไม้เล็ก ~3%
@@ -200,7 +200,8 @@ const GR_BEGIN=
   'float S=uGrCam.z;vec2 c=uGrCam.xy;vec2 wp=c+(fract(aOff.xy-c/S+0.5)-0.5)*S;'+
   'float r1=fract(aOff.w*7.31),r2=fract(aOff.w*3.7),r3=fract(aOff.w*13.13),r4=fract(aOff.w*29.71);'+
   // กอหญ้า: ใบในช่องเดียวกันถูกดึงเข้าหาจุดกลางกอ (ระหว่างกอเห็นพื้นนิด ๆ)
-  'vec2 ci=floor(wp/0.9);vec2 ch=grH2(ci);vec2 cc=(ci+0.2+0.6*ch)*0.9;vec2 tc=(wp-cc)*0.78;wp=cc+tc;float cd=length(tc);'+
+  'vec2 wo=vec2(sin(wp.y*0.83+sin(wp.x*0.37)*2.0),sin(wp.x*0.71+sin(wp.y*0.43)*2.0))*uGrCl.x;vec2 wq=wp+wo;'+   // uGrCl (ลุคภาพวาด js/77): x = บิดตารางกอให้ไม่เป็นแถวตรง • y = แรงดึงเข้ากลางกอ (เดิม 0.78)
+  'vec2 ci=floor(wq/0.9);vec2 ch=grH2(ci);vec2 cc=(ci+0.2+0.6*ch)*0.9-wo;vec2 tc=(wp-cc)*uGrCl.y;wp=cc+tc;float cd=length(tc);'+
   'vec2 muv=(wp-uGrMap.xy)/uGrMap.zw;vec4 gm=texture2D(uGround,muv);'+
   'float ok=step(0.0,muv.x)*step(muv.x,1.0)*step(0.0,muv.y)*step(muv.y,1.0)*step(aOff.z,gm.a*1.15-0.15);'+
   'float d=length(wp-c);float fade=1.0-smoothstep(S*0.3,S*0.48,d);'+
@@ -233,7 +234,8 @@ const GR_BEGIN=
   'transformed=vec3(wp.x,texture2D(uGroundH,muv).r,wp.y)+p;'+
   // สี: บางกอแห้งออกเหลือง • โคนเข้ม → ปลายอ่อน • ยอดคลื่นลมสว่าง • ดอกไม้ 4 สี (ก้านเขียว สีดอกเฉพาะหัว ใน fragment; แผนที่มืดดอกหม่นลง)
   'vec3 base=gm.rgb*uGrPt.rgb;base=mix(base,vec3(dot(base,vec3(0.4,0.5,0.1)))*vec3(1.3,1.15,0.55),0.4*step(0.8,ch.y));'+
-  'vec3 col=mix(base*mix(vec3(0.3,0.36,0.4),vec3(0.6,0.7,0.5),uGrPt.a),base*vec3(1.25,1.2,0.85)+vec3(0.02,0.022,0.0),pow(tt,0.8))*(0.88+0.24*r2)*(0.9+0.55*band*tt);'+
+  'vec3 col=mix(base*mix(vec3(0.3,0.36,0.4),vec3(0.7,0.8,0.62),uGrPt.a),base*vec3(1.25,1.2,0.85)+vec3(0.02,0.022,0.0),pow(tt,0.8))*(0.88+0.24*r2)*(0.9+0.55*band*tt);'+
+  'col*=mix(vec3(1.0),mix(vec3(0.8,1.0,1.14),vec3(1.2,1.07,0.76),ch.x),uGrPt.a);col+=base*vec3(0.38,0.36,0.1)*smoothstep(0.6,1.0,tt)*uGrPt.a;'+   // ลุคภาพวาด: แต่ละกอสีต่างกัน (อมฟ้า ↔ อมเหลือง) + ปลายใบสว่าง
   'vec3 fc=r4<0.3?vec3(0.92,0.9,0.82):(r4<0.55?vec3(1.0,0.8,0.22):(r4<0.8?vec3(0.92,0.48,0.78):vec3(0.58,0.68,1.0)));'+
   // ไหม้: แห้งน้ำตาล → ดำ (ปลายยังมีถ่านน้ำตาลนิด ๆ) • น้ำแข็ง: ขาวฟ้า ปลายสว่าง
   'col=mix(col,mix(base*vec3(0.9,0.62,0.32),vec3(0.16,0.09,0.035)*tt,smoothstep(0.35,0.9,bu))*mix(0.35,1.0,tt),smoothstep(0.03,0.4,bu));'+
@@ -246,7 +248,7 @@ function grassMat(){
   const m=new THREE.MeshLambertMaterial({side:THREE.DoubleSide});
   const U={uGrMap:{value:new THREE.Vector4(0,0,1,1)},uGround:{value:null},uGroundH:{value:null},uGrCam:{value:new THREE.Vector3(0,0,40)},uWind:{value:new THREE.Vector4(1,0,0.3,0)},
     uGust:{value:Array.from({length:AIR_NG},()=>new THREE.Vector4(0,0,1,0))},uGustB:{value:Array.from({length:AIR_NG},()=>new THREE.Vector4(0,0,0,0))},uPush:{value:Array.from({length:16},()=>new THREE.Vector4(0,0,1,0))},uScar:SCAR.U.uScar,uFire:SCAR.U.uFire,uGrK:{value:new THREE.Vector2(GRASS.gustK,GRASS.pushK)},uGrH:{value:GRASS.H},uGrW:{value:GRASS.W},
-    uGrPt:{value:new THREE.Vector4(1,1,1,0)},uSun:{value:new THREE.Vector3(0,1,0)},uGrN:{value:new THREE.Vector3()},uSunC:{value:new THREE.Color(1,1,1)}};
+    uGrPt:{value:new THREE.Vector4(1,1,1,0)},uGrCl:{value:new THREE.Vector2(0,0.78)},uSun:{value:new THREE.Vector3(0,1,0)},uGrN:{value:new THREE.Vector3()},uSunC:{value:new THREE.Color(1,1,1)}};
   m.userData.U=U;
   m.onBeforeCompile=sh=>{Object.assign(sh.uniforms,U);
     sh.vertexShader=GR_GLSL_V+sh.vertexShader
@@ -258,7 +260,7 @@ function grassMat(){
         'vec3 fh=mix(vFl.rgb*(1.0-0.45*smoothstep(pe*0.75,pe,hr)),vec3(1.0,0.78,0.2)*vFl.rgb.g*1.1,1.0-smoothstep(0.22,0.32,hr));'+
         'vec3 gc=mix(vGC,fh,step(0.985,vFl.a));vec4 diffuseColor=vec4(gc,opacity);')
       .replace('#include <emissivemap_fragment>','#include <emissivemap_fragment>\ntotalEmissiveRadiance+=gc*vTr*uSunC*(1.0-vMk.x)*(1.0-vMk.y);\ntotalEmissiveRadiance+=mix(vec3(1.5,0.36,0.05),vec3(2.4,1.4,0.45),smoothstep(0.55,1.0,vFi))*vFi*vFi*1.3;');};   // แสงทะลุใบ
-  m.customProgramCacheKey=()=>'grass5';
+  m.customProgramCacheKey=()=>'grass6';
   return m;}
 function grassBuild(){
   // ใบหญ้า: 7 จุด 3 ช่วง (โคนกว้าง → ปลายแหลม ใบโค้งได้นุ่ม) x = ซ้าย/ขวา (-1..1), y = 0 โคน → 1 ปลาย • ดอกไม้ใช้จุด 4-6 เป็นหัวดอก
