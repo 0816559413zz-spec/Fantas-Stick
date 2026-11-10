@@ -63,7 +63,7 @@ function windFlyZ(p,dt){const F=p.wfw,gh=groundH(p.x,p.y,p.z);
       F.h=clamp(F.h+dv*dt,W_FW.hmin,W_FW.hmax+(p.wfc?6:0));
       p.vz=clamp((gh+F.h-p.z)*5,-Math.max(W_FW.vs,Math.abs(dv)*1.2),Math.max(W_FW.vs,Math.abs(dv)*1.2));p.z+=p.vz*dt;}}
   else{p.vz=Math.max(-W_FW.glide,Math.min(p.vz||0,0)-6*dt);p.z+=p.vz*dt;if(p.z<=gh){p.z=gh;p.vz=0;p.wfw=null;emit({k:'efx',z:'wnfwland',x:Math.round(p.x),y:Math.round(p.y),h:p.z,id:p.id});}}}
-function windReset(p){p.wfBankEnd=0;p.wult=null;p.wfc=null;p.wbl=null;p.wflt=0;p.wus=0;p.wdr=null;p.wfw=null;p.wg=0;p.wwc=W_WL.max;p.wwr=0;p.wwAim=null;p.wsb=null;p.wsbL=0;p.wchg=0;p.wfHeld=0;if(p.wgs)windStreamEnd(p,null);p.wgw=0;if(p.wfo){p.wfo=false;p.fly=false;p.flyOn=false;}p.wbCd=0;p.wbCh=null;p.wbw=undefined;p.wba=undefined;p.wfPrev=0;p.wsbC=0;p.wdc=undefined;p.wpv=null;p.wsl=null;p.wsc=W_VX.sMax;p.wsr=0;p.wse=0;}
+function windReset(p){p.wfBankEnd=0;p.wfFlk=0;p.wult=null;p.wfc=null;p.wbl=null;p.wflt=0;p.wus=0;p.wdr=null;p.wfw=null;p.wg=0;p.wwc=W_WL.max;p.wwr=0;p.wwAim=null;p.wsb=null;p.wsbL=0;p.wchg=0;p.wfHeld=0;if(p.wgs)windStreamEnd(p,null);p.wgw=0;if(p.wfo){p.wfo=false;p.fly=false;p.flyOn=false;}p.wbCd=0;p.wbCh=null;p.wbw=undefined;p.wba=undefined;p.wfPrev=0;p.wsbC=0;p.wdc=undefined;p.wpv=null;p.wsl=null;p.wsc=W_VX.sMax;p.wsr=0;p.wse=0;}
 
 // ---------- ท่าพื้นฐาน (คลิกซ้าย): ใบมีดลม / ดูดลมชาร์จเกจ / GaleBurst ----------
 function windBasic(p,inp,dt,setCd){
@@ -324,7 +324,7 @@ function windAirMove(p,mx,my,spd,canAct,dt){const K=W_FW,on=(mx||my)&&spd>=1,k=1
     const tgt=spd*(1-K.turnSlow*Math.min(1,Math.abs(angDiff(want,hd))/Math.PI));sp+=(tgt-sp)*Math.min(1,K.acc*dt);}
   else sp*=Math.exp(-K.drag*dt);
   p.mvx=Math.cos(hd)*sp;p.mvy=Math.sin(hd)*sp;p.x+=p.mvx*dt;p.y+=p.mvy*dt;}
-function windFlick(p){const F=p.wfw;if(!F||F.ph!=='focus'||p.fly)return;windFocusEnd(p);const a=p.ang;
+function windFlick(p){const F=p.wfw;if(!F||F.ph!=='focus'||p.fly)return;windFocusEnd(p);if(p.wfFlk)return;p.wfFlk=1;const a=p.ang;   // one wing flick per cast: taking off again with banked time (Featherwing toggle) only lands on the next press, so the flick cannot be repeated without the cooldown
   for(const t of foesOf(p.team)){const dx=t.x-p.x,dy=t.y-p.y,d=Math.hypot(dx,dy);if(d>W_FW.range+(t.r||PR)||Math.abs(angDiff(Math.atan2(dy,dx),a))>(W_FW.cone*Math.PI/180))continue;
     const dz=cH(t)-p.z;if(dz>2||dz<-(W_FW.hgt+2))continue;   // เอียงลงพื้น: โดนคนที่อยู่ต่ำกว่าเราได้
     aoeHit(p,t,W_FW.dmg,t=>{knock(t,t.x-Math.cos(a)*10,t.y-Math.sin(a)*10,W_FW.push);t.wpush=0.8;});}
@@ -551,7 +551,7 @@ const W_FW=defSpell(WINDP,{id:'featherwing',v:{t:12,rise:2,upT:0.42,aIn:7,aOut:3
     fbCd:'ลูกบอลลม • เว้น (วิ)',fbSpd:'ลูกบอลลม • ความเร็ว',fbRange:'ลูกบอลลม • ระยะ',fbDmg:'ลูกบอลลม • ดาเมจ',fbPush:'ลูกบอลลม • แรงผลัก (เบา)',fbSpr:'ลูกบอลลม • ส่ายกระสุน (rad)',fs0:'(เลิกใช้)',boost:'(เลิกใช้)'},
   role:'utility',n:'Featherwing',ic:'🪽',cd:22,d:'กด → หมุนตัวมีปีกบินวนขึ้น (กด A/D ตอนใช้ = เลือกข้าง) แล้วบิน 8 วิ — เร็วมาก มีแรงเฉื่อย เลี้ยวเป็นวง (ไม่กว้างเท่าไม้กวาด) • WASD = ทิศ • Space = สูงขึ้น • Ctrl/C = ต่ำลง • ใช้สกิลได้ครบ (โหมดบิน = สกิลแรงขึ้น พริ้วต่อคอมโบ) • คลิกซ้ายค้าง = ลูกบอลลม • Shift ค้าง = บินเร็วมาก คุมด้วยเมาส์แบบเครื่องบิน ใช้สกิลไม่ได้ (ปล่อย = กลับบินปกติ) • กดสกิลอีกครั้ง (บินปกติ) = สะบัดปีกข้างหน้า 250 15 ดาเมจ จบโหมด • หมดเวลา = ตกลงแบบปกติ',
   toggle(p){if(p.wfw&&p.wfw.ph==='focus'&&!p.fly){windFlick(p);return true;}const left=(p.wfBankEnd||0)-G.time;if(left>.2&&!windSpin(p)&&(!p.wfw||p.wfw.ph==='glide')){p.wfBankEnd=0;p.wfw={ph:'focus',t:left,h:clamp(p.z-groundH(p.x,p.y,p.z)+W_FW.rise,W_FW.hmin,W_FW.hmax),side:1,a:p.ang,up:0,z0:p.z};p.wfo=true;p.wbCd=0;p.mvx=p.mvy=0;emit({k:'efx',z:'wnfwfocus',x:Math.round(p.x),y:Math.round(p.y),h:p.z,a:Math.round(p.ang*100)/100,id:p.id});return true;}return false;},   // flight time left from an early landing: pressing the skill takes off again without waiting for the cooldown
-  cast(p){if(p.wfw&&p.wfw.ph!=='glide')return false;const inp=p.inp||{},side=inp.l&&!inp.r?-1:1;p.wfw={ph:'focus',t:W_FW.t,h:clamp(p.z-groundH(p.x,p.y,p.z)+W_FW.rise,W_FW.hmin,W_FW.hmax),side,a:p.ang,up:0,z0:p.z};p.wfo=true;p.wbCd=0;p.mvx=p.mvy=0;emit({k:'efx',z:'wnfwfocus',x:Math.round(p.x),y:Math.round(p.y),h:p.z,a:Math.round(p.ang*100)/100,id:p.id});p.shieldOn=false;p.dash=0;p.wsb=null;p.wgs&&windStreamEnd(p,null);
+  cast(p){if(p.wfw&&p.wfw.ph!=='glide')return false;p.wfFlk=0;const inp=p.inp||{},side=inp.l&&!inp.r?-1:1;p.wfw={ph:'focus',t:W_FW.t,h:clamp(p.z-groundH(p.x,p.y,p.z)+W_FW.rise,W_FW.hmin,W_FW.hmax),side,a:p.ang,up:0,z0:p.z};p.wfo=true;p.wbCd=0;p.mvx=p.mvy=0;emit({k:'efx',z:'wnfwfocus',x:Math.round(p.x),y:Math.round(p.y),h:p.z,a:Math.round(p.ang*100)/100,id:p.id});p.shieldOn=false;p.dash=0;p.wsb=null;p.wgs&&windStreamEnd(p,null);
     emit({k:'efx',z:'wnfw',x:Math.round(p.x),y:Math.round(p.y),h:p.z,a:Math.round(p.ang*100)/100,n:side,id:p.id});}}).v;
 Object.assign(PDEF,{wshp:{spd:1300,r:48,dmg:15,life:1.23,col:'#8dff65'},wplume:{spd:1300,r:11,dmg:6,life:0.62,col:'#8dff65'},wball:{spd:W_FW.fbSpd,r:14,dmg:W_FW.fbDmg,life:W_FW.fbRange/W_FW.fbSpd,col:'#8dff65'},
   wpush:{spd:W_DR.spdA,r:22,dmg:30,life:W_DR.rangeA/W_DR.spdA,col:'#8dff65'},wbl:{spd:W_VO.spd,r:W_VO.br,dmg:6,life:W_VO.range/W_VO.spd,col:'#b8ff85'}});
