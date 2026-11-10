@@ -173,7 +173,7 @@ function efxFX(ev){
       // รอยกรงเล็บตั้งขวางหน้าเรา: ท่า 1 ปาดเฉียงลงขวา / ท่า 2 ปาดเฉียงลงซ้าย / ท่า 3 ฟาดลงจากบน / เสริม = รอยใหญ่ 3 เส้นขนาน + ประกายพุ่งไปถึงระยะ 280
       const rot=emp?-0.75:ev.n===0?-0.6:ev.n===1?0.6:-1.45,D=emp?GODL.v.bigR*.55:GODL.v.clawR*.55;   // รอยฟันอยู่กลางระยะตีจริง (ผู้ใช้ 2026-11-10)
       // รอยกรงเล็บ = ริบบิ้นตามปลายใบมีด 3 เล่มระหว่างแขนปาด (stormClawSwipe ใน js/20) • ไม่มีโมเดล = รอยนิ่งแบบเดิม
-      {const o=PM3.get(ev.id);if(o&&o.claws)o.clSw={t:0,n:ev.n,dur:emp?0.3:ev.n===2?0.24:0.2,tr:null};clawRakes(x+c*D,y+sn*D,H+0.55,a,(emp?GODL.v.bigR:GODL.v.clawR)/20*.62,rot,emp||big);}   // รอยฟันสายฟ้ายาวถึงระยะตี (ไม่ใช่แค่ปลายเล็บ)
+      {const o=PM3.get(ev.id);if(o&&o.claws)o.clSw={t:0,n:ev.n,dur:emp?0.3:ev.n===2?0.24:0.2,tr:null};}   // รอยฟันระยะตีจริง = fx storm/claw_slash_c0-2 / claw_sweep_c (bind.json) — เลิกใช้ทรงรอยตัดเดิม (ผู้ใช้ 2026-11-10)
       // เสริมหลัง Dash: รอยกวาดแนวนอนยาว + สายฟ้า = assets/fx/storm/claw_sweep.fx.json (bind.json efx:sclaw ถ้า n==3)
       if(emp){
         FX.flashSprite(x+c*95,y+sn*95,H,'#d8f8ff',0.4,3,0.12,2.2);burst(x+c*230,y+sn*230,'#4fd8ff',16,240,0.3,2.2,{h:H,g:3});burst(x+c*230,y+sn*230,'#9fd8ff',8,200,0.3,1.8,{h:H,g:3});}

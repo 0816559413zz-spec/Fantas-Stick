@@ -205,14 +205,40 @@
       "hh": "ev.hh"
     }
   },
-  "efx:sclaw": {
-    "fx": "storm/claw_sweep",
-    "mode": "add",
-    "p": {
-      "r": "6.5"
+  "efx:sclaw": [
+    {
+      "fx": "storm/claw_sweep_c",
+      "mode": "add",
+      "p": {
+        "r": "6.5"
+      },
+      "if": "ev.n==3"
     },
-    "if": "ev.n==3"
-  },
+    {
+      "fx": "storm/claw_slash_c0",
+      "mode": "add",
+      "p": {
+        "r": "7"
+      },
+      "if": "ev.n==0"
+    },
+    {
+      "fx": "storm/claw_slash_c1",
+      "mode": "add",
+      "p": {
+        "r": "7"
+      },
+      "if": "ev.n==1"
+    },
+    {
+      "fx": "storm/claw_slash_c2",
+      "mode": "add",
+      "p": {
+        "r": "8"
+      },
+      "if": "ev.n==2"
+    }
+  ],
   "efx:sdhit": {
     "fx": "storm/claw_sweep",
     "mode": "add",
