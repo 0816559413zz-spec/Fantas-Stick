@@ -334,13 +334,13 @@
 /* HP พืช Nature (ไม่มีกรอบ, มินิมอล) — ลอยเหนือไพ่สกิล: หัวซ้ายบน • HP ขวาบน • แถบล่างยาวตลอด • เวลาลอยออกทางซ้าย กลางแถว */
 #h4pl{position:fixed;right:24px;bottom:150px;z-index:2;pointer-events:none;display:flex;flex-direction:column;align-items:flex-end;gap:8px;font-family:'Kanit',sans-serif;color:#fff}
 #h4pl[hidden]{display:none}
-#h4pl .r{position:relative;display:grid;grid-template-columns:auto 1fr;grid-template-rows:auto 3px;align-items:end;column-gap:8px;row-gap:3px;width:150px;filter:drop-shadow(0 1px 2px rgba(0,0,0,.55))}
-#h4pl .hd{grid-column:1;grid-row:1;width:52px;height:52px;display:grid;place-items:center}
-#h4pl .hd img{width:52px;height:52px;object-fit:contain}
+#h4pl .r{position:relative;display:grid;grid-template-columns:auto 1fr;grid-template-rows:auto 3px;align-items:end;column-gap:8px;row-gap:3px;width:170px;filter:drop-shadow(0 1px 2px rgba(0,0,0,.55))}
+#h4pl .hd{grid-column:1;grid-row:1;width:64px;height:64px;display:grid;place-items:center}
+#h4pl .hd img{width:64px;height:64px;object-fit:contain}
 #h4pl .hd svg{width:34px;height:34px}
-#h4pl b{grid-column:2;grid-row:1;justify-self:end;font-size:22px;font-weight:300;line-height:1;letter-spacing:.5px;margin-bottom:2px}
+#h4pl b{grid-column:2;grid-row:1;justify-self:end;font-size:24px;font-weight:600;line-height:1;letter-spacing:.3px;margin-bottom:2px}
 #h4pl i{grid-column:1/3;grid-row:2;height:3px;background:linear-gradient(90deg,#fff var(--p),rgba(255,255,255,.22) 0);border-radius:2px}
-#h4pl .tm{position:absolute;right:100%;top:50%;transform:translateY(-50%);margin-right:8px;font-size:16px;font-weight:300;white-space:nowrap;opacity:.9}
-#h4pl .tm::after{content:'s';font-size:11px;opacity:.6;margin-left:1px}
+#h4pl .tm{position:absolute;right:100%;top:50%;transform:translateY(-50%);margin-right:8px;font-size:21px;font-weight:500;white-space:nowrap;opacity:.9}
+#h4pl .tm::after{content:'s';font-size:13px;opacity:.6;margin-left:1px}
 #h4pl .low .hd{animation:h4plBlink .7s infinite}
 @keyframes h4plBlink{50%{opacity:.35}}
