@@ -9,7 +9,7 @@ const H4E={
   earth:{c0:'#3a2410',c1:'#c9a36a',c2:'#f0dcb4',cb:'#3a2a18',pt:'rock',n:'EARTH'},
   wind:{c0:'#0f3a22',c1:'#8dff65',c2:'#efffe8',cb:'#123a26',pt:'snow',n:'WIND'},
   water:{c0:'#062a4a',c1:'#4fc3ff',c2:'#e3f7ff',cb:'#0c2c48',pt:'snow',n:'WATER'}};
-const H4={pick:null,ordFor:'',el:null,on:false,drawn:false,pid:'',lay:'',cache:{},rdy:{},seg:[],segN:0,trail:1,hold:0,uFull:false};
+const H4={pick:null,ordFor:'',el:null,on:false,drawn:false,pid:'',lay:'',cache:{},rdy:{},cdp:{},seg:[],segN:0,trail:1,hold:0,uFull:false};
 function h4Pal(me){const k=getKit(me.id),P=PATHS[k.path]||PATHS[0];return [P,H4E[P.id]||H4E.frost];}
 // สีของ HUD canvas (js/38) ตามธาตุของเรา — เรียกทุกเฟรมจาก drawHUD
 function hud4Col(me){if(!me)return;const E=h4Pal(me)[1];HG=E.c1;HG2=E.c2;}
@@ -98,6 +98,7 @@ function hud4Draw(me,v){
       if(!ok&&H4.rdy[S.ci]===true&&!st.dim&&me.cd[S.ci]>0)h4CardUse(S);
       if(ok&&H4.rdy[S.ci]===false)h4GlassOut(S);}
     else if(ok&&H4.rdy[S.ci]===false&&(S.ci>=1||S.ci===-4)){S.el.classList.remove('pop');void S.el.offsetWidth;S.el.classList.add('pop');}
+    {const c=me.cd[S.ci]||0,pc=H4.cdp[S.ci];if(!S.gem&&pc!==undefined&&pc-c>0.3&&c>0){S.el.classList.remove('cut');void S.el.offsetWidth;S.el.classList.add('cut');}H4.cdp[S.ci]=c;}   // คูลดาวน์ถูกลด (เช่นขนนกลมโดน = Featherwing −0.5 วิ) = ไพ่วาบขาวนิดเดียว
     H4.rdy[S.ci]=ok;}
   // อัลติ
   const u=Math.min(100,me.u|0),full=u>=100;

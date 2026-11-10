@@ -699,16 +699,16 @@ BKICO:376 buffShow:380
 §399 จอมืดตอนเริ่มแมตช์ (ผู้ใช้ 2026-10-23: กระตุกตอนเริ่มแมตช์แรก)
 gameCover:402
 
-## js/66-hud4.js (210) — HUD รอบ 4 (ผู้ใช้ 2026-10-23, designs/hud-full-mock.html)
+## js/66-hud4.js (211) — HUD รอบ 4 (ผู้ใช้ 2026-10-23, designs/hud-full-mock.html)
 H4E:5 H4:12 h4Pal:13 hud4Col:15 h4Parts:17 h4AuBits:22 h4Key:37 h4Ico:38 h4Build:39 h4Set:66 hud4Draw:67
-§116 ไพ่สกิล: นาฬิกาทราย / ท่าใช้ / สลับตำแหน่ง
-h4Glass:118 h4Bits:124 h4Fx:126 h4CardUse:128 h4GlassOut:132 h4Place:136 h4OrdKey:139 h4OrdLoad:140 h4Swap:143 h4Pick:146 h4AltKey:148 h4CardWire:152
-§163 ไพ่อัลติ
-H4SH:165 h4UltCard:167 h4UltUse:172 hud4Frame:174 hud4Hide:175
-§176 ไพ่อัลติกลางจอ (ผู้ใช้ 2026-11-01)
-h4UltX:179
-§186 รูปตัวละครเรา (FFA / TDM แทนแผนที่ย่อ)
-H4PF:188 h4PfMode:189 h4PfAvatar:191 h4Portrait:193 h4PfRead:204 h4MapBox:210
+§117 ไพ่สกิล: นาฬิกาทราย / ท่าใช้ / สลับตำแหน่ง
+h4Glass:119 h4Bits:125 h4Fx:127 h4CardUse:129 h4GlassOut:133 h4Place:137 h4OrdKey:140 h4OrdLoad:141 h4Swap:144 h4Pick:147 h4AltKey:149 h4CardWire:153
+§164 ไพ่อัลติ
+H4SH:166 h4UltCard:168 h4UltUse:173 hud4Frame:175 hud4Hide:176
+§177 ไพ่อัลติกลางจอ (ผู้ใช้ 2026-11-01)
+h4UltX:180
+§187 รูปตัวละครเรา (FFA / TDM แทนแผนที่ย่อ)
+H4PF:189 h4PfMode:190 h4PfAvatar:192 h4Portrait:194 h4PfRead:205 h4MapBox:211
 
 ## js/67-backdrop.js (139) — 
 BACKDROP:8
@@ -802,4 +802,4 @@ surfSync:49 surfQuality:53
 SURF_VS:55 SURF_VS_BODY:56 SURF_FS:67 SURF_FS_BODY:68 surfOk:98 surfApply:99 surfScene:111
 §112 ปรับค่า (tune.html / F8)
 
-(98 files, 24691 lines)
+(98 files, 24692 lines)

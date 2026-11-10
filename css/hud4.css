@@ -328,3 +328,6 @@
 .h4UX .bk{box-shadow:0 0 0 1px #fff,0 0 14px var(--c1);animation:none}
 .h4UX .h4Au{transform:scale(1.1)}
 .h4UX .fr{box-shadow:0 6px 14px rgba(0,0,0,.5),inset 0 0 12px rgba(0,0,0,.6)}
+/* คูลดาวน์ถูกลดกลางทาง: ไพ่วาบขาวเบา ๆ (ผู้ใช้ 2026-11-10) */
+#h4 .cut{animation:h4Cut .32s ease-out}
+@keyframes h4Cut{0%{filter:brightness(1.9) drop-shadow(0 0 8px #fff)}100%{filter:none}}

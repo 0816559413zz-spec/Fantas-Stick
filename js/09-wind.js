@@ -9,7 +9,7 @@ const WINDP=PATHS.length;
 // ตัวเลขทั้งหมดของสายลม: WNV = PATHS[WINDP].v (ใบมีดลม/GaleBurst/โล่ปีก/Dash) + v:{...} ของแต่ละสกิล (W_WL W_DR W_VX W_VO W_FW W_UL = S.v) — ปรับได้ใน tune.html / F8 (js/73-tune.js)
 PATHS.push({id:'wind',n:'สายลม',ic:'🌪️',col:'#8dff65',d:'พริ้วไหวกลางอากาศ — บนพื้นอ่อนลงทันที แต่ถ้าบินด้วย Featherwing สกิลทั้งชุดแรงขึ้น: พัดศัตรูลอย กดลง พาไปด้านหน้า ฟันช้า ต่อคอมโบได้ต่อเนื่อง จบด้วย Sonic Boom Strike',
   combo:'บิน Featherwing → Windup พัดศัตรูลอยค้าง → Wind Push กดลงสตัน / Windforce พาไปข้างหน้า / Windblade ฟันช้าแล้วลดคูล Featherwing → Sonic Boom Strike ปิดท้าย (ต่อเวลาบิน + รีเซ็ตคูลทุกสกิล) • BA ใบมีดลมเก็บเกจ GaleBurst เหมือนเดิม'});
-const WNV=PATHS[WINDP].v={baDmg:5,baSpR:14,baSpK:0.4,baCd:0.45,baRange:900,baSpd:1500,baAssist:0.12,baFwCut:0.5,baGain:12,baHold:0.35,baChg:8,gbHold:0.3,gbDur:2.6,gbLen:340,gbR0:10,gbR1:62,gbTick:0.25,gbDmg:5,gbAcc:800,gbMax:120,gbSlow:0.55,gbCd:0.5,
+const WNV=PATHS[WINDP].v={baDmg:5,baSpR:14,baSpK:0.4,baCd:0.45,baRange:750,baSpd:1500,baAssist:0.07,baFwCut:0.5,baGain:12,baHold:0.35,baChg:8,gbHold:0.3,gbDur:2.6,gbLen:340,gbR0:10,gbR1:62,gbTick:0.25,gbDmg:5,gbAcc:800,gbMax:120,gbSlow:0.55,gbCd:0.5,
   shHp:90,wbWind:0.6,wbFly:0.19,wbSpd:1300,wbRange:1600,wbDmg:15,wbR:150,wbCd:8,wbOff:3,wbPull:480,wbAhead:160,shGain:10,shChg:0.3,shR:200,shStun:0.8,shPush:1500,shDmg:20,dsCh:0.25,dsUp:8,dsUpT:0.55,dsBack:1800,dsVz:7,dsPush:1500,dsReach:150,dsCone:60,dsWall:20,dsCd:8};
 PATHS[WINDP].vn={baDmg:'ใบมีดลม • ดาเมจ',baSpR:'ขนนก • รัศมีกระจาย',baSpK:'ขนนก • สัดส่วนดาเมจกระจาย',baCd:'ใบมีดลม • เว้น (วิ)',baRange:'ใบมีดลม • ระยะ',baSpd:'ใบมีดลม • ความเร็ว',baGain:'ใบมีดลม • โดนแล้วเกจ +%',baHold:'ดูดลม • กดค้างกี่วิเริ่ม',baChg:'ดูดลม • เกจ +%/วิ',
   gbHold:'GaleBurst • กดค้างก่อนยิง (วิ)',gbDur:'GaleBurst • ยิงต่อเนื่องได้นาน (วิ เกจเต็ม→หมด)',gbLen:'GaleBurst • ระยะ',gbR0:'GaleBurst • กว้างต้นทาง (รัศมี)',gbR1:'GaleBurst • กว้างปลาย (รัศมี)',gbTick:'GaleBurst • ติดดาเมจทุก (วิ)',gbDmg:'GaleBurst • ดาเมจต่อครั้ง',gbAcc:'GaleBurst • แรงดันศัตรู (เร่ง)',gbMax:'GaleBurst • ความเร็วดันศัตรูสูงสุด',gbSlow:'GaleBurst • ตัวเราเดินช้าลง (เท่า)',gbCd:'GaleBurst • เว้นหลังหยุดยิง (วิ)',
@@ -106,7 +106,7 @@ function windFeatherShoot(p,opt){const s=p.wfs=-(p.wfs||1),a=p.ang,ca=Math.cos(a
   let tx=aimed?inp.ax:p.x+ca*R,ty=aimed?inp.ay:p.y+sa*R,th=aimed?inp.ah:h0+(pr.vh/SP)*R,d=Math.hypot(tx-x0,ty-y0);
   if(d<140||d>R){const k=clamp(d,140,R)/Math.max(1,d),A=d<1?a:Math.atan2(ty-y0,tx-x0);d=clamp(d,140,R);tx=x0+Math.cos(A)*d;ty=y0+Math.sin(A)*d;if(k>1)th=h0;}
   {let best=null,bA=WNV.baAssist;for(const t of foesOf(p.team)){if(!t.alive&&!t.isE)continue;if(t.hp!==undefined&&t.hp<=0)continue;const D=Math.hypot(t.x-p.x,t.y-p.y);if(D>R||D<20)continue;const da=Math.abs(angDiff(Math.atan2(t.y-p.y,t.x-p.x),a));if(da<bA){bA=da;best=t;}}
-    if(best){tx=best.x;ty=best.y;th=(best.isE||best.isM?(best.h||0):(best.z||0))+1.1;d=Math.hypot(tx-x0,ty-y0);}}   // ผู้ใช้ 2026-11-10: ช่วยเล็งนิดหน่อย (เป้าใกล้เส้นเล็ง ≤ ~7°)
+    if(best){tx=best.x;ty=best.y;th=(best.isE||best.isM?(best.h||0):(best.z||0))+1.1;d=Math.hypot(tx-x0,ty-y0);}}   // ผู้ใช้ 2026-11-10: ช่วยเล็งนิดหน่อย (เป้าใกล้เส้นเล็ง ≤ ~4°)
   if(opt&&opt.jit){tx+=(Math.random()-0.5)*opt.jit*2;ty+=(Math.random()-0.5)*opt.jit*2;}
   pr.x=x0;pr.y=y0;pr.h=h0;pr.bz={x0,y0,h0,x1:p.x+ca*Math.min(50,d*0.12)+rx*s*Math.min(18,d*0.04),y1:p.y+sa*Math.min(50,d*0.12)+ry*s*Math.min(18,d*0.04),h1:h0+0.15,x2:tx,y2:ty,h2:th,t:0,T:d*1.3/SP};   // โค้งออกข้างกว้างก่อน (ผู้ใช้ 2026-11-08: โค้งมากกว่านี้)
   pr.life=pr.bz.T+Math.max(0,R-d)/(SP*2.2);windCurveStep(pr,0.0001);
@@ -564,7 +564,7 @@ const W_UL=defSpell(WINDP,{id:'eyeofheaven',v:{chg:0.9,ifr:0.0133,impPre:0.05,im
   cast(p){return windUltCast(p);}}).v;
 
 // ท่าพื้นฐาน + โล่ + Dash ของสาย (PBASIC ต้องอยู่ช่องเดียวกับลำดับใน PATHS)
-PBASIC.push({id:'b_wind',type:'wblade',n:'ขนนกลม',d:'กดค้าง = ยิงขนนกจากปีกสลับซ้าย-ขวา ตรงเข้าจุดเล็ง (ช่วยเล็งนิดหน่อย) 5 ดาเมจ ทุก 0.45 วิ ระยะ 900 ความเร็ว 1500 • โดน = คูล Featherwing ลด 0.5 วิ • (เดิม) กดค้าง (เกจยังไม่เต็ม) = ดูดลมรอบตัว +8%/วิ • เกจเต็ม = กดโจมตีปกติค้าง 0.3 วิ แล้วยิงลมกรวยกว้างต่อเนื่อง 17 ม. นาน 2.6 วิ (ปล่อยปุ่ม = หยุด เกจที่เหลือเก็บไว้) 5 ดาเมจ/0.25 วิ ผลักศัตรูเบา ๆ ตัวเราเดินช้าลง',
+PBASIC.push({id:'b_wind',type:'wblade',n:'ขนนกลม',d:'กดค้าง = ยิงขนนกจากปีกสลับซ้าย-ขวา ตรงเข้าจุดเล็ง (ช่วยเล็งนิดหน่อย) 5 ดาเมจ ทุก 0.45 วิ ระยะ 750 ความเร็ว 1500 • โดน = คูล Featherwing ลด 0.5 วิ • (เดิม) กดค้าง (เกจยังไม่เต็ม) = ดูดลมรอบตัว +8%/วิ • เกจเต็ม = กดโจมตีปกติค้าง 0.3 วิ แล้วยิงลมกรวยกว้างต่อเนื่อง 17 ม. นาน 2.6 วิ (ปล่อยปุ่ม = หยุด เกจที่เหลือเก็บไว้) 5 ดาเมจ/0.25 วิ ผลักศัตรูเบา ๆ ตัวเราเดินช้าลง',
   shd:'โล่ปีกห่อตัว: กันรอบตัว 360° รับได้ 75 • โดนตีแต่ละครั้ง +10% เกจ • เกจเต็มระหว่างยกโล่ + คลิกซ้าย = ชาร์จปีกแล้วระเบิดรอบตัว รัศมี 200 ผลัก 250 สตัน 0.8 วิ 20 ดาเมจ',
   dsd:'Dash ถอยหลังผลัก (Shift): ผลักศัตรูข้างหน้า 250 ตัวเราดีดถอยหลัง 300 ลอยกลางอากาศ (ใช้สกิลกลางอากาศได้) • ศัตรูที่โดนผลักชนกำแพง = 20 ดาเมจ + สตัน • คูลดาวน์ 8 วิ',
   get shMul(){return 100/WNV.shHp;},shieldSwing:true,front:true,frontA:80*Math.PI/180,aim3d:t=>!!t.wfw,   // บิน/ร่อน Featherwing = โล่หันตามเป้าเล็ง 3 มิติ ขึ้น-ลงได้เกือบรอบ (ตรงกับภาพ wn[5]>=1 และมุมกล้องตอนบิน)
