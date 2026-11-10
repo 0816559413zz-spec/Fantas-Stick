@@ -699,16 +699,16 @@ BKICO:376 buffShow:380
 §399 จอมืดตอนเริ่มแมตช์ (ผู้ใช้ 2026-10-23: กระตุกตอนเริ่มแมตช์แรก)
 gameCover:402
 
-## js/66-hud4.js (211) — HUD รอบ 4 (ผู้ใช้ 2026-10-23, designs/hud-full-mock.html)
+## js/66-hud4.js (212) — HUD รอบ 4 (ผู้ใช้ 2026-10-23, designs/hud-full-mock.html)
 H4E:5 H4:12 h4Pal:13 hud4Col:15 h4Parts:17 h4AuBits:22 h4Key:37 h4Ico:38 h4Build:39 h4Set:66 hud4Draw:67
-§117 ไพ่สกิล: นาฬิกาทราย / ท่าใช้ / สลับตำแหน่ง
-h4Glass:119 h4Bits:125 h4Fx:127 h4CardUse:129 h4GlassOut:133 h4Place:137 h4OrdKey:140 h4OrdLoad:141 h4Swap:144 h4Pick:147 h4AltKey:149 h4CardWire:153
-§164 ไพ่อัลติ
-H4SH:166 h4UltCard:168 h4UltUse:173 hud4Frame:175 hud4Hide:176
-§177 ไพ่อัลติกลางจอ (ผู้ใช้ 2026-11-01)
-h4UltX:180
-§187 รูปตัวละครเรา (FFA / TDM แทนแผนที่ย่อ)
-H4PF:189 h4PfMode:190 h4PfAvatar:192 h4Portrait:194 h4PfRead:205 h4MapBox:211
+§118 ไพ่สกิล: นาฬิกาทราย / ท่าใช้ / สลับตำแหน่ง
+h4Glass:120 h4Bits:126 h4Fx:128 h4CardUse:130 h4GlassOut:134 h4Place:138 h4OrdKey:141 h4OrdLoad:142 h4Swap:145 h4Pick:148 h4AltKey:150 h4CardWire:154
+§165 ไพ่อัลติ
+H4SH:167 h4UltCard:169 h4UltUse:174 hud4Frame:176 hud4Hide:177
+§178 ไพ่อัลติกลางจอ (ผู้ใช้ 2026-11-01)
+h4UltX:181
+§188 รูปตัวละครเรา (FFA / TDM แทนแผนที่ย่อ)
+H4PF:190 h4PfMode:191 h4PfAvatar:193 h4Portrait:195 h4PfRead:206 h4MapBox:212
 
 ## js/67-backdrop.js (139) — 
 BACKDROP:8
@@ -723,8 +723,8 @@ _natFx:3 natFxClear:4 natFxMake:5 T:6 S:6 O:6 seed:7 ease:8 outQ:8 inQ:8 phase:8
 §69 อนุภาค
 Pool:70 leafGeo:78 LEAF:79 SPK:80 DIRT:81 PUFF:82 CHIP:83 POOLS:84 leafCols:85 leaves:86 sparks:87 dirt:88 puff:89 chips:90 TrailRibbon:92 WHIP_N:103 WHIP_L:103 WHIP_LAG:103 Whip:104 CLIPS:167 tick:168 clip:169 drop:170 natFx:173
 
-## js/68-nature-view.js (697) — 
-NAT_VIEW:2 NAT_MARKS:2 NAT_MOTION:2 natV:3 natWorld:4 natPhase:5 natSmooth:6 natEase:7 natOut:8 natStd:9 natAdd:10 natMesh:11 natRing:12 natLeaf:16 natPlantM:19 natGlow:26 natArt:29 natureProjectileModel:31 natSet:37 natAnimate:38 natTube:39 natTrail:50 natSeed:68 natLotus:77 natBall:93 natPlantView:103 natStartStudy:113 natWearWall:131 natTreeGlow:154 natModelTick:174 natMarker:257 natMarks:268 natThorn:287 NAT_SHIELD_K:292 natShieldMake:293 natureCharacter:325 natOutlineMat:355 natOutline:359 natLinks:371 syncNature:386 natureClear:405 natDome:414 natMuzzle:436 natSlam:446 natHook:463 natCoil:520 natHookPose:541 natHookArm:549 natShock:551 natSprout:552 natHealRims:553 natWhipHit:555 natBallRange:556 natSummon:558 natTreeAura:565 natAuraDrop:575 NAT_HOLO:577 natHoloMake:578 natHolo:583 natHoloClear:584 natDirOf:585 natMoment:586 natureEvent:615 NTHUD:679 drawNatureHud:680
+## js/68-nature-view.js (719) — 
+NAT_VIEW:2 NAT_MARKS:2 NAT_MOTION:2 natV:3 natWorld:4 natPhase:5 natSmooth:6 natEase:7 natOut:8 natStd:9 natAdd:10 natMesh:11 natRing:12 natLeaf:16 natPlantM:19 natGlow:26 natArt:29 natureProjectileModel:31 natSet:37 natAnimate:38 natTube:39 natTrail:50 natSeed:68 natLotus:77 natBall:93 natPlantView:103 natStartStudy:113 natWearWall:131 natTreeGlow:154 natModelTick:174 natMarker:257 natMarks:268 natThorn:287 NAT_SHIELD_K:292 natShieldMake:293 natureCharacter:325 natOutlineMat:355 natOutline:359 natLinks:371 syncNature:386 natureClear:405 natDome:414 natMuzzle:436 natSlam:446 natHook:463 natCoil:520 natHookPose:541 natHookArm:549 natShock:551 natSprout:552 natHealRims:553 natWhipHit:555 natBallRange:556 natSummon:558 natTreeAura:565 natAuraDrop:575 NAT_HOLO:577 natHoloMake:578 natHolo:583 natHoloClear:584 natDirOf:585 natMoment:586 natureEvent:615 NTHUD:679 drawNatureHud:680 NPH:700 NPH_IC:701 natPlantHud:706
 
 ## js/68-storm-bow.js (122) — 
 SB_FULL:2 _sbShard:3 sbShard:4 sbMat:5 sbJag:6 SB_TIP:8 _sbBlade:9 sbBlade:10 sbMake:11 stormBowView:29 _sbFaQ:53 _sbFaT:53 _sbFaX:53 stormBowForearm:54 stormBowFx:55 sbStaffAxis:70 sbStaffMake:71 stormStaffView:88 stormStaffCast:100 stormStaffSwing:103 _sbWaveG:105 sbWaveGeo:106 SB_WAVE_F:107 stormWaveMake:114 stormWaveTick:117
@@ -802,4 +802,4 @@ surfSync:49 surfQuality:53
 SURF_VS:55 SURF_VS_BODY:56 SURF_FS:67 SURF_FS_BODY:68 surfOk:98 surfApply:99 surfScene:111
 §112 ปรับค่า (tune.html / F8)
 
-(98 files, 24724 lines)
+(98 files, 24747 lines)

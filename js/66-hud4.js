@@ -68,6 +68,7 @@ function hud4Draw(me,v){
   const k=getKit(me.id),lay=me.id+'|'+k.path+'|'+k.ids.join(',')+'|'+k.ult+'|'+(me.ea?1:0)+'|'+(me.fr?me.fr[0]:'')+'|'+(me.ea&&me.ea[0]>0?1:0)+'|'+(me.ea&&me.ea[8]?1:0)+'|'+(NOBROOM.has(v&&v.mode)?1:0);
   h4OrdLoad(k);
   if(!H4.el||H4.lay!==lay){H4.lay=lay;h4Build(me,v);}
+  natPlantHud(me,v);
   H4.drawn=true;if(H4.el.hidden)H4.el.hidden=false;
   const Q=H4.q,t=performance.now();
   h4Set('hs',Math.max(0.62,Math.min(1.15,SH/900,SW/1400)).toFixed(3),s=>H4.el.style.setProperty('--hs',s));
@@ -172,8 +173,8 @@ function h4UltCard(face,au){
 // กดอัลติ: ไพ่สมบูรณ์ถูกดึงออกจากกอง ลอยขึ้น แล้วไหม้สลาย (เหมือนไพ่สกิล) • กองเหลือแต่เงาเศษไพ่ เริ่มสะสมใหม่
 function h4UltUse(){const Q=H4.q;h4Fx(Q.uc,'h4UXuse',`<div class="bits">${h4Bits(26)}</div>`,1100);Q.uc.classList.remove('used');void Q.uc.offsetWidth;Q.uc.classList.add('used');}
 // เรียกท้ายทุกเฟรมจาก render loop: เฟรมนี้ไม่ได้วาด HUD (ชนะ/แพ้, โหมด imp, ไม่มีตัวเรา) = ซ่อน
-function hud4Frame(){if(H4.el&&!H4.drawn&&!H4.el.hidden)H4.el.hidden=true;H4.drawn=false;}
-function hud4Hide(){try{if(H4.el)H4.el.hidden=true;}catch(e){}}   // setScreen เรียกได้ตั้งแต่ตอนโหลดไฟล์ (H4 ยังไม่พร้อม)
+function hud4Frame(){if(H4.el&&!H4.drawn&&!H4.el.hidden){H4.el.hidden=true;if(NPH.el)NPH.el.hidden=true;}H4.drawn=false;}
+function hud4Hide(){try{if(H4.el)H4.el.hidden=true;if(NPH.el)NPH.el.hidden=true;}catch(e){}}   // setScreen เรียกได้ตั้งแต่ตอนโหลดไฟล์ (H4 ยังไม่พร้อม)
 // ---------- ไพ่อัลติกลางจอ (ผู้ใช้ 2026-11-01) ----------
 // หน้า (ยังไม่เต็ม): ธาตุเติมจากล่างขึ้นตาม --p (ไฟลุก / น้ำแข็งเกาะ / ไฟฟ้าเหลืองมีสายฟ้า / ดินถม / ลมเขียวหมุน / น้ำคลื่น) •
 // ไอคอนอัลติจางดำ + ตัวเลข % ใหญ่ • หลัง (เต็ม): พลิกไพ่ → โลโก้อัลติเรือง + ออร่าธาตุ (h4AuBits เดิม) • แถบเกจใต้ไพ่

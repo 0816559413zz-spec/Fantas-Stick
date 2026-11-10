@@ -439,9 +439,9 @@ function natureSnapW(){
     return {id:o.id,k:o.natKind,x:o.x,y:o.y,h:o.h,a:o.a,wall:o.wall,team:o.team,owner:o.owner,hp:o.hp,maxHp:o.maxHp,
       age:G.time-o.born,mode:o.mode,modeAge:o.modeAt?G.time-o.modeAt:99,move:o.move?G.time-o.move.start:null,
       buff:o.buffed,aim:o.aim,turn:o.turnAt?G.time-o.turnAt:99,charge:o.chargeAt?G.time-o.chargeAt:null,
-      shot:o.firedAt===undefined?99:G.time-o.firedAt,big:o.shotBig};
+      shot:o.firedAt===undefined?99:G.time-o.firedAt,big:o.shotBig,left:Math.round(Math.max(0,o.end-Math.max(G.time,o.ready||0))*10)/10};
   }).filter(Boolean);
-  const walls=(G.walls||[]).filter(o=>o.wood&&o.hp>0).map(o=>({id:o.id,k:'wall',x:o.x,y:o.y,h:o.h,a:o.a,age:G.time-o.born,burn:o.burn.map(b=>b.total/(o.maxHp*.2))}));
+  const walls=(G.walls||[]).filter(o=>o.wood&&o.hp>0).map(o=>({id:o.id,k:'wall',x:o.x,y:o.y,h:o.h,a:o.a,age:G.time-o.born,burn:o.burn.map(b=>b.total/(o.maxHp*.2)),owner:o.owner,team:o.team,hp:Math.ceil(o.hp),maxHp:o.maxHp,left:Math.round(Math.max(0,o.t)*10)/10}));
   return plants.length||walls.length?{NT:[...plants,...walls]}:{};
 }
 

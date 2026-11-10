@@ -695,3 +695,25 @@ function drawNatureHud(x,y,A){
     if(NTHUD.fl[i]>0){NTHUD.fl[i]-=dt;cx.save();cx.globalAlpha=Math.max(0,NTHUD.fl[i]/.35)*.8;cx.fillStyle='#fff';cx.shadowColor='#c8ff9a';cx.shadowBlur=14;cx.beginPath();cx.arc(px,y0,11,0,Math.PI*2);cx.fill();cx.restore();}
     log(px,y0,have?1:.55,fill);}
 }
+
+// HP พืชของเรา (ผู้ใช้ 2026-11-10 แบบ A): ลอยเหนือไพ่สกิลขวาล่าง ไม่มีกรอบ • หัวพืชขาวดำ + เลข HP + เวลาที่เหลือ (แบบ Overwatch)
+const NPH={el:null,key:'',t:0};
+const NPH_IC={
+  turret:'<circle cx="12" cy="10" r="6.2" fill="#fff" stroke="#000" stroke-width="1.4"/><rect x="16.2" y="7.6" width="6" height="3.6" rx="1.8" fill="#fff" stroke="#000" stroke-width="1.2"/><circle cx="10.4" cy="8.6" r="1.4" fill="#000"/><path d="M8 3.5c1.5-1.8 3.5-1.8 4.6.2" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/>',
+  lotus:'<path d="M12 4c2.4 3 2.4 6.4 0 9.4-2.4-3-2.4-6.4 0-9.4zM4.5 8.5c3.4.2 5.6 2.4 6.4 5.6-3.4-.2-5.6-2.4-6.4-5.6zM19.5 8.5c-3.4.2-5.6 2.4-6.4 5.6 3.4-.2 5.6-2.4 6.4-5.6z" fill="#fff" stroke="#000" stroke-width="1.2"/><ellipse cx="12" cy="17.4" rx="7.4" ry="2.6" fill="#fff" stroke="#000" stroke-width="1.2"/>',
+  wall:'<rect x="3" y="9" width="18" height="9" rx="2" fill="#fff" stroke="#000" stroke-width="1.3"/><path d="M8.5 9v9M14 9v9" stroke="#000" stroke-width="1.2"/><path d="M5 9l2.2-3.6L9.4 9M13.6 9l2.2-3.6L18 9" fill="#fff" stroke="#000" stroke-width="1.2"/>',
+  tree:'<circle cx="12" cy="9" r="6.5" fill="#fff" stroke="#000" stroke-width="1.3"/><rect x="10.6" y="14" width="2.8" height="7" fill="#fff" stroke="#000" stroke-width="1.2"/>'};
+function natPlantHud(me,v){
+  if(!NPH.el){const d=document.createElement('div');d.id='h4pl';document.body.appendChild(d);NPH.el=d;}
+  const el=NPH.el,list=me&&me.al!==false&&v?(v.NT||[]).filter(o=>o.owner===me.id&&o.hp>0&&NPH_IC[o.k]):[];
+  if(!list.length||(H4.el&&H4.el.hidden)){if(el.innerHTML){el.innerHTML='';NPH.key='';}el.hidden=true;return;}
+  el.hidden=false;
+  const ord={tree:0,turret:1,lotus:2,wall:3};list.sort((a,b)=>(ord[a.k]-ord[b.k])||(a.id-b.id));
+  const key=list.map(o=>o.k+':'+o.id+':'+Math.ceil(o.hp)+':'+Math.ceil(o.left||0)+':'+(o.move!=null?1:0)).join('|');
+  const now=performance.now();if(now-NPH.t>400){NPH.t=now;   // วางตำแหน่งเหนือแถวไพ่
+    const cards=H4.q?H4.q.slots.filter(S=>!S.gem).map(S=>S.el.getBoundingClientRect()).filter(r=>r.width>0):[];
+    if(cards.length){const right=Math.max(...cards.map(r=>r.right)),top=Math.min(...cards.map(r=>r.top));el.style.right=Math.round(innerWidth-right)+'px';el.style.bottom=Math.round(innerHeight-top+8)+'px';}}
+  if(key===NPH.key)return;NPH.key=key;
+  el.innerHTML=list.map(o=>{const hp=Math.ceil(o.hp),low=hp<=o.maxHp*.3,t=Math.ceil(o.left||0);
+    return `<div class="r${low?' low':''}"><svg viewBox="0 0 24 24">${NPH_IC[o.k]}</svg><b>${hp}</b><i style="--p:${Math.round(hp/o.maxHp*100)}%"></i><span>${t}</span></div>`;}).join('');
+}
