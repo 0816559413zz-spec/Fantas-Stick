@@ -15,7 +15,7 @@ await HL.solo({kit:S&&!S.ult?kit:'2'});
 for(let i=0;i<160;i++){HL.step(1);await HL.sleep(30);if(i>30&&!WD.warm.busy&&!WD.warm.q.length)break;}
 await HL.sleep(500);HL.aim(0,0.05);HL.step(20);
 const p=HL.me();p.ult=100;p.lst=5;
-const d=HL.dummy(360,0);if(d){d.spd=0;d.ax=d.x;d.ay=d.y;}const d2=HL.dummy(300,90);if(d2){d2.spd=0;d2.ax=d2.x;d2.ay=d2.y;}
+const dd=id==='basic'?220:360;const d=HL.dummy(dd,0);if(d){d.spd=0;d.ax=d.x;d.ay=d.y;}const d2=HL.dummy(dd-60,90);if(d2){d2.spd=0;d2.ax=d2.x;d2.ay=d2.y;}
 HL.cam(q.get('cam')||'q34',{dist:+(q.get('dist')||6.5),h:1.7,look:[0,1.1,2.2]});
 const images={},tag='storm_'+id,acts=[...P.acts];
 for(let frame=0;frame<Math.ceil(sec*30);frame++){const t=frame/30;

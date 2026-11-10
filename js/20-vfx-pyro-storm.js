@@ -258,7 +258,8 @@ function stormFX(o,p,pz,now,dt){
   if(!M){if(o.sOrbs)o.sOrbs.forEach(q=>q.visible=false);if(o.railC)o.railC.visible=false;if(o.godG)o.godG.visible=false;if(o.godEyes)o.godEyes.forEach(e=>e.visible=false);if(o.stG)o.stG.visible=false;if(o.claws)o.claws.forEach(c=>c.visible=false);return;}
   const f=M[3]|0,isMe=p.id===NET.myId,god=!!(f&4);
   // ลำสายฟ้า (กดค้าง): สายฟ้าหนาจากปลายไม้ไปทุกเป้าที่ล็อก
-  if(f&1&&!god){if(!o.bmFx)o.bmFx=fxPlay('storm/beam_b',{x:p.x,y:p.y,h:pz,follow:p.id});}else if(o.bmFx){fxStop(o.bmFx);o.bmFx=null;}
+  const bmT=f&1&&!god?(M[7]||[]):[];   // ล็อกเป้าแล้ว = ลำหลักวิ่งเข้าหาเป้า ไม่พุ่งตรงไปข้างหน้าอีก (ผู้ใช้ 2026-11-10)
+  if(f&1&&!god&&!bmT.length){if(!o.bmFx)o.bmFx=fxPlay('storm/beam_b',{x:p.x,y:p.y,h:pz,follow:p.id});}else if(o.bmFx){fxStop(o.bmFx);o.bmFx=null;}
   if(f&1&&!god){
     // ท่ายิงลำแสงแบบดวลในหนัง (Priori Incantatem): แขนขวายื่นตรงเกร็ง มือซ้ายจับข้อมือประคอง ตัวเอนหลังต้านแรง ไหล่ขวาออก ขากาง • สั่นตลอด
     {const tr=Math.sin(now/31)*0.06+Math.sin(now/53)*0.035;o.armR.rotation.x=-1.5+tr;o.armR.rotation.z=-0.05+tr*0.5;o.armL.rotation.x=-1.3+tr;o.armL.rotation.z=-0.42;
@@ -266,9 +267,9 @@ function stormFX(o,p,pz,now,dt){
      if((o.vsp||0)<0.6){o.legs[1].rotation.x=-0.3;o.legs[0].rotation.x=0.25;o.legs[1].rotation.z=0.12;o.legs[0].rotation.z=-0.12;}}
     o.bmT=(o.bmT||0)-dt;
     if(o.bmT<=0){o.bmT=0.05;o.tip.getWorldPosition(_pw);const q=simOf(_pw),T=M[7]||[];
-      if(T.length)for(const t of T){tbolt(q.x,q.y,q.h,t[0]+rnd(-5,5),t[1]+rnd(-5,5),t[2]+rnd(-0.2,0.3),0.07,0,0.1,Math.random()<0.4?1:0);
+      if(T.length)for(const t of T){tbolt(q.x,q.y,q.h,t[0]+rnd(-5,5),t[1]+rnd(-5,5),t[2]+rnd(-0.2,0.3),0.07,0,0.13,Math.random()<0.12?1:0);   // ลำหลักเข้าเป้า กิ่งน้อยลง
         for(let j=0;j<4;j++)PARTS.push({x:t[0]+rnd(-6,6),y:t[1]+rnd(-6,6),h:t[2]+rnd(-0.3,0.3),vx:rnd(-90,90),vy:rnd(-90,90),vh:rnd(0,4),life:0.22,max:0.22,col:j%2?'#ffd000':'#ffffff',size:rnd(1.8,2.8),g:6});}
-      else for(let j=0;j<2;j++){const a=(p.a||0)+rnd(-0.55,0.55),d=rnd(55,100);tbolt(q.x,q.y,q.h,q.x+Math.cos(a)*d,q.y+Math.sin(a)*d,q.h+rnd(-0.6,0.4),0.06,0,0.1,1);}
+      else if(Math.random()<.5){const a=(p.a||0)+rnd(-0.45,0.45),d=rnd(55,100);tbolt(q.x,q.y,q.h,q.x+Math.cos(a)*d,q.y+Math.sin(a)*d,q.h+rnd(-0.6,0.4),0.06,0,0.1,0);}   // ไม่มีเป้า: กิ่งรอบปลายไม้น้อยลง
       LREQ.push({abs:1,x:_pw.x,y:_pw.y,z:_pw.z,col:'#ffd23a',int:2.5,dist:8});}
     o.bmS=(o.bmS||0)-dt;if(o.bmS<=0){o.bmS=0.4;snd('zap',{x:p.x,y:p.y,vol:isMe?0.35:0.2});}
   }
