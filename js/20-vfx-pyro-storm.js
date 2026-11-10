@@ -100,7 +100,7 @@ function tbGet(){if(TBA.length>=TBMAX){const old=TBA.shift();TBF.push(old);}let 
 // จุด sim (x,y,h) — col ไม่ใช้ (เหลืองเสมอ) ยกเว้น '#9fd8ff' = สีรองฟ้า • w = ความหนา (หน่วยโลก) • br = จำนวนกิ่ง
 function tbolt(x1,y1,h1,x2,y2,h2,life,col,w,br){
   if(col!=='#9fd8ff'&&!tbolt.cy){tbolt.cy=1;try{tbolt(x1+rnd(-5,5),y1+rnd(-5,5),h1+rnd(-.12,.12),x2+rnd(-5,5),y2+rnd(-5,5),h2+rnd(-.12,.12),life,'#9fd8ff',(w||.14)*.7,0);}finally{tbolt.cy=0;}}   // every bolt carries a thin cyan companion (user 2026-11-10)
-  const o=tbGet();o.A.set(tx(x1),h1+GY(x1,y1),tz(y1));o.B.set(tx(x2),h2+GY(x2,y2),tz(y2));o.path=null;o.life=o.max=life||0.12;o.w=(w||0.14)*(col==='#9fd8ff'?1.2:.85);   // ผู้ใช้ 2026-11-10: เส้นเหลืองบางลง (นีออนจัดเท่าเดิม) • ฟ้าเห็นชัดขึ้นo.rj=0;o.gk=1;
+  const o=tbGet();o.A.set(tx(x1),h1+GY(x1,y1),tz(y1));o.B.set(tx(x2),h2+GY(x2,y2),tz(y2));o.path=null;o.life=o.max=life||0.12;o.w=(w||0.14)*(col==='#9fd8ff'?1.2:.85);o.rj=0;o.gk=1;   /* ผู้ใช้ 2026-11-10: เส้นเหลืองบางลง (นีออนจัดเท่าเดิม) • ฟ้าเห็นชัดขึ้น */
   const L=o.A.distanceTo(o.B);o.amp=Math.min(0.55,L*0.11+0.03);o.acc=col==='#9fd8ff';
   if(br&&L>1.2)for(let i=0;i<br;i++){const k=rnd(0.25,0.75),bx=lerp(x1,x2,k)+rnd(-8,8),by=lerp(y1,y2,k)+rnd(-8,8),bh=lerp(h1,h2,k),an=rnd(0,6.283),bl=L/S3*rnd(0.2,0.4);
     tbolt(bx,by,bh,bx+Math.cos(an)*bl,by+Math.sin(an)*bl,bh+rnd(-0.6,0.6)*L*0.3,life,col,o.w*0.55,0);}
@@ -118,6 +118,7 @@ function tbWrite(L,slot,pts,w,taper,c,a){
 }
 function updateBolts(dt){
   if(!TBL){if(!TBA.length)return;TBL={glow:tbLayer(THREE.AdditiveBlending,1),body:tbLayer(THREE.NormalBlending,2),core:tbLayer(THREE.NormalBlending,3)};}
+  for(const L of Object.values(TBL))if(!L.parent){L.userData.keep=true;scene.add(L);}   // ล้างฉากตอนเริ่มเกม/เปลี่ยนแมปเอาเส้นออก → ใส่คืน (บั๊ก: สายฟ้าทุกเส้นหายทั้งเกม)
   let n=0;
   for(let i=TBA.length-1;i>=0;i--){const o=TBA[i];o.life-=dt;if(o.life<=0){TBA.splice(i,1);TBF.push(o);}}
   for(const o of TBA){
