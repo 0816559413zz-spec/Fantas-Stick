@@ -159,10 +159,10 @@ function clawRakes(x,y,h,a,R,rot,big){
   const g=new THREE.Group();g.position.set(tx(x),h+GY(x,y),tz(y));g.rotation.order='YXZ';g.rotation.y=-a+Math.PI/2;g.rotation.z=rot;scene.add(g);g.updateMatrixWorld(true);
   const arc=big?1.5:1.25,W=(big?0.34:0.26)*R/2,gap=(big?0.42:0.32)*R/2,parts=[],paths=[];
   for(let k=-1;k<=1;k++){const off=k*gap,Rk=R*(1-Math.abs(k)*0.06);
-    const glow=new THREE.Mesh(clawGeo(Rk,arc,W*1.8,off+W*0.4),new THREE.MeshBasicMaterial({color:hdr('#ffb800',0.8),transparent:true,opacity:0.1,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide}));
-    const body=new THREE.Mesh(clawGeo(Rk,arc,W,off),new THREE.MeshBasicMaterial({color:'#100c04',transparent:true,opacity:0.95,depthWrite:false,side:THREE.DoubleSide}));
-    const mid=new THREE.Mesh(clawGeo(Rk,arc,W*0.55,off-W*0.12),new THREE.MeshBasicMaterial({color:'#2c2006',transparent:true,opacity:0.92,depthWrite:false,side:THREE.DoubleSide}));
-    const edge=new THREE.Mesh(clawGeo(Rk,arc,W*0.16,off+0.004),new THREE.MeshBasicMaterial({color:'#ffd23a',transparent:true,opacity:1,depthWrite:false,side:THREE.DoubleSide}));
+    const glow=new THREE.Mesh(clawGeo(Rk,arc,W*1.8,off+W*0.4),new THREE.MeshBasicMaterial({color:hdr('#18b4ff',0.9),transparent:true,opacity:0.14,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide}));
+    const body=new THREE.Mesh(clawGeo(Rk,arc,W,off),new THREE.MeshBasicMaterial({color:'#03101c',transparent:true,opacity:0.9,depthWrite:false,side:THREE.DoubleSide}));
+    const mid=new THREE.Mesh(clawGeo(Rk,arc,W*0.55,off-W*0.12),new THREE.MeshBasicMaterial({color:'#08304a',transparent:true,opacity:0.9,depthWrite:false,side:THREE.DoubleSide}));
+    const edge=new THREE.Mesh(clawGeo(Rk,arc,W*0.16,off+0.004),new THREE.MeshBasicMaterial({color:'#8ff0ff',transparent:true,opacity:1,depthWrite:false,side:THREE.DoubleSide}));
     for(const m of [glow,body,mid,edge])m.position.set(-R*0.86,0,0.01*k);g.add(glow,body,mid,edge);parts.push(glow,body,mid,edge);
     // เส้นทางสายฟ้าตามรอยนี้ (จุดโลก 12 จุด ตามแนวกลางรอย)
     const P=[];for(let i=0;i<=11;i++){const th=-arc/2+arc*i/11,r=Rk+off-W*0.35;P.push(new THREE.Vector3(Math.cos(th)*r-R*0.86,Math.sin(th)*r,0.02*k).applyMatrix4(g.matrixWorld));}paths.push(P);}
@@ -187,7 +187,7 @@ function stBeam(x,y,h,a,len,rad,col,op,nb){
 function shellPt(x,y,h,R,a,e){return [x+Math.cos(a)*R*Math.cos(e),y+Math.sin(a)*R*Math.cos(e),h+R*S3*Math.sin(e)];}
 function updateStormV(dt){
   for(let i=LATER.length-1;i>=0;i--){const L=LATER[i];L.t-=dt;if(L.t<=0){LATER.splice(i,1);try{vfxOnce(L.fn);}catch(e){}}}
-  updateBolts(dt);updateClaws(dt);
+  updateBolts(dt);updateClaws(dt);stormMarkTick(dt);
   for(let i=STV.length-1;i>=0;i--){const v=STV[i];v.age+=dt;v.m.material.opacity=v.op*Math.max(0,1-v.age/v.life);if(v.grow)v.m.scale.multiplyScalar(1+v.grow*dt);if(v.age>=v.life){scene.remove(v.m);v.m.geometry.dispose();v.m.material.dispose();STV.splice(i,1);}}
   for(let i=SBV.length-1;i>=0;i--){const b=SBV[i];if(b.s){b.t+=dt;const T=stTgPos(b.tg)||[b.x2,b.y2,groundH(b.x2,b.y2)+1],k=Math.min(1,b.t/b.max),u=0.2/b.max,dl=Math.hypot(T[0]-b.s[0],T[1]-b.s[1])||1,fw=Math.min(36,dl*0.3),A=[b.s[0]+(T[0]-b.s[0])/dl*fw,b.s[1]+(T[1]-b.s[1])/dl*fw,b.s[2]+1.8];let q;
       if(k<u){const e=1-Math.pow(1-k/u,2);q=[lerp(b.s[0],A[0],e),lerp(b.s[1],A[1],e),lerp(b.s[2],A[2],e)];}   // ลอยขึ้น + เลื่อนออกหน้า (ไม่ลอยค้างหน้ากล้อง)

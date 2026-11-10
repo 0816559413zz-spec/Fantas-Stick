@@ -114,6 +114,7 @@ vec3 c=mix(vec3(1.,.55,.02),vec3(1.25,.95,.1),wisp);c=mix(c,vec3(1.5,1.35,.6),po
 float a=clamp((body*1.05+wisp*body*.7+halo*.55+rim)*end,0.,1.)*fade;gl_FragColor=vec4(c,a);}`;
 function stormWaveMake(o,j){const F=natFx(),{Tube}=F,u={t:{value:Math.random()*40},fade:{value:1}},m=new THREE.ShaderMaterial({transparent:true,depthWrite:false,side:THREE.DoubleSide,toneMapped:false,uniforms:u,vertexShader:'varying vec2 q;void main(){q=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',fragmentShader:SB_WAVE_F}),w=new THREE.Mesh(sbWaveGeo(),m);w.frustumCulled=false;w.rotation.z=(j.id%2?1:-1)*.24;o.g.add(w);
   const mat=new THREE.MeshBasicMaterial({vertexColors:true,transparent:true,depthWrite:false,side:THREE.DoubleSide,toneMapped:false}),mk=(n,k)=>{const q=Tube(n,k,mat,w);q.castShadow=false;return q;},lines=Array.from({length:9},()=>mk(11,5)),self=Array.from({length:7},()=>mk(12,4));
+  w.rotation.x=-.3;   // เอียงขึ้นนิดเดียว (~17°) ยังราบอยู่ แต่มองจากกล้องเห็นชัดขึ้น (ผู้ใช้ 2026-11-10)
   o.swv={w,u,mat,lines,self,age:0,T:0,last:FIRE_U.time.value*1000};}
 function stormWaveTick(o,X,H,Z){const S=o.swv,now=FIRE_U.time.value*1000,dt=Math.min(.05,(now-S.last)/1000)||.016,F=natFx(),{V3}=F,R=2.7;S.last=now;S.age+=dt;S.u.t.value+=dt;const L=SIPH.v.range/SIPH.v.spd,f=natEase(natPhase(S.age,0,.05))*(1-natEase(natPhase(S.age,L*.72,L)));S.u.fade.value=f;S.mat.opacity=f;S.w.scale.setScalar(lerp(.6,1,natOut(natPhase(S.age,0,.14))));
   S.T-=dt;if(S.T<=0){S.T=.035;const C=new THREE.Color('#1fd8ff'),Y=new THREE.Color('#ffe45a'),W=new THREE.Color('#fff6c0');
@@ -121,3 +122,13 @@ function stormWaveTick(o,X,H,Z){const S=o.swv,now=FIRE_U.time.value*1000,dt=Math
     S.lines.forEach((q,n)=>{const a0=-1.02+Math.random()*1.7,out=n%3===0?-.45-Math.random()*.55:.12+Math.random()*.55,P=[];for(let i=0;i<11;i++){const t=i/10,a=a0+t*(.28+Math.random()*.02)+.0,e=Math.sin(Math.PI*t),r=R+out*e+(n%3?0:-.3),j=e*.22;P.push(V3(Math.sin(a)*r+(Math.random()-.5)*j,(Math.random()-.5)*j*2.2+e*(n%2?.3:-.3),Math.cos(a)*r-R+(Math.random()-.5)*j));}q.set(P,t=>.07*Math.sin(Math.PI*t)+.015,(u,c)=>c.copy(C).multiplyScalar(1.45));});   // cyan arcs crawl around and off the edges
     S.self.forEach((q,n)=>{const a0=-.9+Math.random()*1.5,d0=Math.random()*1.4,P=[];for(let i=0;i<12;i++){const t=i/11,a=a0+t*(.2+Math.random()*.25)*(n%2?1:-1),e=Math.sin(Math.PI*t),r=R-d0-t*.5+(Math.random()-.5)*.1,j=e*.2;P.push(V3(Math.sin(a)*r+(Math.random()-.5)*j,(Math.random()-.5)*j*1.5,Math.cos(a)*r-R+(Math.random()-.5)*j));}const col=n%2?Y:W;q.set(P,t=>.06*Math.sin(Math.PI*t)+.012,(u,c)=>c.copy(col).multiplyScalar(1.4));});   // yellow-white shock running over the wave
     if(Math.random()<.7){const a=(Math.random()*2-1)*.9;const p=F.V3(X,H,Z).add(o.g.localToWorld(F.V3(Math.sin(a)*R,0,Math.cos(a)*R-R)).sub(o.g.position));F.sparks(p,1,1,Math.random()<.2?'#6fe6ff':'#ffd23a','#c97d10',{life:.5,size:1.15,g:.15});}}}
+
+// เครื่องหมายคลื่นสายฟ้าบนศัตรู (ผู้ใช้ 2026-11-10): จุดสายฟ้า 1-3 ดวงลอยหมุนเหนือหัว ค้างจนหมดเวลา (6 วิ) หรือระเบิด
+const SMK=new Map();
+function stormMarkSet(id,n){const o=PM3.get(id)||EM3.get(id);if(!o||!o.g)return;let M=SMK.get(id);
+  if(!M){const g=new THREE.Group();const pips=[0,1,2].map(i=>{const s=new THREE.Sprite(glowMat(i<2?'#ffd23a':'#ffd23a',1.6));s.scale.setScalar(.34);const c=new THREE.Sprite(glowMat('#ffffff',2.4));c.scale.setScalar(.12);s.add(c);g.add(s);return s;});o.g.add(g);g.position.y=2.55;M={g,pips,o,n:0,until:0,t:0};SMK.set(id,M);}
+  M.n=n;M.until=FIRE_U.time.value+SIPH.v.markT;M.pop=.18;}
+function stormMarkClear(id){const M=SMK.get(id);if(!M)return;M.g.parent&&M.g.parent.remove(M.g);SMK.delete(id);}
+function stormMarkTick(dt){if(!SMK.size)return;const now=FIRE_U.time.value;for(const [id,M] of SMK){if(now>M.until||!M.g.parent){stormMarkClear(id);continue;}M.t+=dt;if(M.pop>0)M.pop-=dt;
+  const left=M.until-now,blink=left<1.2?(Math.sin(now*22)>0?1:.35):1;
+  M.pips.forEach((s,i)=>{const on=i<M.n,a=M.t*2.6+i*2.094;s.visible=on;if(!on)return;s.position.set(Math.cos(a)*.36,Math.sin(M.t*4+i)*.05,Math.sin(a)*.36);s.scale.setScalar((.3+(M.pop>0&&i===M.n-1?.25:0))*blink);s.material.color.set(M.n>=2?'#ffe46a':'#ffd23a');});}}

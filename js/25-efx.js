@@ -119,9 +119,9 @@ function efxFX(ev){
     case 'sbow':stormBowFx(ev);break;
     case 'ssta':stormStaffCast(ev);break;
     case 'sswing':stormStaffSwing(ev);break;
-    case 'smark':{for(let i=0;i<3;i++){const an=i*2.094+.5,on=i<(ev.n|0);if(!on)continue;tbolt(x+Math.cos(an)*14,y+Math.sin(an)*14,H+.9,x+Math.cos(an)*18,y+Math.sin(an)*18,H-.3,.35,0,.07,0);}
+    case 'smark':{stormMarkSet(ev.id,ev.n|0);for(let i=0;i<3;i++){const an=i*2.094+.5,on=i<(ev.n|0);if(!on)continue;tbolt(x+Math.cos(an)*14,y+Math.sin(an)*14,H+.9,x+Math.cos(an)*18,y+Math.sin(an)*18,H-.3,.35,0,.07,0);}
       ring(x,y,'#ffd000',26+(ev.n|0)*6,.25,.1);floatText(x,y,'⚡'.repeat(ev.n|0),'#fff27a',16,H+1.6);if(near)snd('zap',{x,y,vol:.35});break;}   // เครื่องหมายคลื่นสายฟ้า 1-2/3
-    case 'smkboom':{for(let i=0;i<6;i++){const an=rnd(0,6.283);tbolt(x,y,H,x+Math.cos(an)*rnd(45,75),y+Math.sin(an)*rnd(45,75),H+rnd(-.5,.8),.22,0,.1);}tbolt(x+rnd(-6,6),y+rnd(-6,6),H+9,x,y,H,.25,0,.16,2);
+    case 'smkboom':{stormMarkClear(ev.id);for(let i=0;i<6;i++){const an=rnd(0,6.283);tbolt(x,y,H,x+Math.cos(an)*rnd(45,75),y+Math.sin(an)*rnd(45,75),H+rnd(-.5,.8),.22,0,.1);}tbolt(x+rnd(-6,6),y+rnd(-6,6),H+9,x,y,H,.25,0,.16,2);
       ring(x,y,'#ffd000',80,.35,.18);burst(x,y,'#ffd000',26,260,.4,2.4,{h:H,vh:[1,5],g:5});burst(x,y,'#9fe8ff',10,200,.3,1.8,{h:H,g:5});FX.flashLight(x,y,H+1,'#ffd23a',5,14,.25);if(near){snd('boom',{x,y,vol:.5});snd('zap',ev);shake(2.5);}break;}   // ครบ 3 = ระเบิด + Shock
     case 'sbowfail':burst(x,y,'#7df2ff',10,60,.3,1.8,{h:H});if(near)snd('dismount',ev);break;
     case 'srailc':if(near)snd('cast_ebolt',ev);break;
@@ -171,9 +171,9 @@ function efxFX(ev){
     case 'godoff':burst(x,y,'#3fdcff',24,160,0.5,2,{h:H,vh:[0,2],g:0});break;
     case 'sclaw':{TBLUE=1;try{const a=ev.a,emp=ev.n===3,big=ev.n>=2,c=Math.cos(a),sn=Math.sin(a);
       // รอยกรงเล็บตั้งขวางหน้าเรา: ท่า 1 ปาดเฉียงลงขวา / ท่า 2 ปาดเฉียงลงซ้าย / ท่า 3 ฟาดลงจากบน / เสริม = รอยใหญ่ 3 เส้นขนาน + ประกายพุ่งไปถึงระยะ 280
-      const rot=emp?-0.75:ev.n===0?-0.6:ev.n===1?0.6:-1.45,D=emp?135:105;
+      const rot=emp?-0.75:ev.n===0?-0.6:ev.n===1?0.6:-1.45,D=emp?GODL.v.bigR*.55:GODL.v.clawR*.55;   // รอยฟันอยู่กลางระยะตีจริง (ผู้ใช้ 2026-11-10)
       // รอยกรงเล็บ = ริบบิ้นตามปลายใบมีด 3 เล่มระหว่างแขนปาด (stormClawSwipe ใน js/20) • ไม่มีโมเดล = รอยนิ่งแบบเดิม
-      {const o=PM3.get(ev.id);if(o&&o.claws)o.clSw={t:0,n:ev.n,dur:emp?0.3:ev.n===2?0.24:0.2,tr:null};else clawRakes(x+c*D,y+sn*D,H+0.55,a,emp?3.3:big?2.7:2.3,rot,emp||big);}
+      {const o=PM3.get(ev.id);if(o&&o.claws)o.clSw={t:0,n:ev.n,dur:emp?0.3:ev.n===2?0.24:0.2,tr:null};clawRakes(x+c*D,y+sn*D,H+0.55,a,(emp?GODL.v.bigR:GODL.v.clawR)/20*.62,rot,emp||big);}   // รอยฟันสายฟ้ายาวถึงระยะตี (ไม่ใช่แค่ปลายเล็บ)
       // เสริมหลัง Dash: รอยกวาดแนวนอนยาว + สายฟ้า = assets/fx/storm/claw_sweep.fx.json (bind.json efx:sclaw ถ้า n==3)
       if(emp){
         FX.flashSprite(x+c*95,y+sn*95,H,'#d8f8ff',0.4,3,0.12,2.2);burst(x+c*230,y+sn*230,'#4fd8ff',16,240,0.3,2.2,{h:H,g:3});burst(x+c*230,y+sn*230,'#9fd8ff',8,200,0.3,1.8,{h:H,g:3});}
