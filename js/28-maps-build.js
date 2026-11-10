@@ -17,8 +17,9 @@ function buildWorld(id){
   clearDyn();clearDebris();
   prefetchModels([...FILE_MODELS(),"mesh_fire_wing","mesh_storm_claw","mesh_ice_burst","mesh_ice_spire","mesh_ice_sword","mesh_ice_axe","mesh_ice_circle"]);prefetchFx();
   const FM=MAPS[id]&&MAPS[id].fm;
+  if(typeof paintMap==='function')paintMap(id,FM);   // ลุคภาพวาด (js/77): ทับ sky/fog/look ของแมพ
   if(typeof lookMap==='function')lookMap(id,FM);   // พรีเซ็ตแสงของแมพนี้ (js/74-look.js)
-  setSky(FM?(FM.sky==='sunset'||FM.sky==='day'?'sunset':'night'):id==='pitch'||id==='meadow'||id==='ruins'||id==='test'||id==='fcs'?'sunset':'night');
+  setSky(FM?(FM.sky==='day'&&FM.look==='paint'?'day':FM.sky==='sunset'||FM.sky==='day'?'sunset':'night'):id==='pitch'||id==='meadow'||id==='ruins'||id==='test'||id==='fcs'?'sunset':'night');
   const cached=WCACHE.get(wkey(id));
   if(cached){
     WCACHE.delete(wkey(id));
@@ -32,6 +33,7 @@ function buildWorld(id){
     batchStatic(world,new Set([RUNE,CRYSTAL,SNITCH,FIREFLIES&&FIREFLIES.pts,...CANDLES.map(c=>c.g),...BANNERS.map(b=>b.m)].filter(Boolean)));
     setTimeout(prewarmShaders,0);
   }
+  if(typeof paintLights==='function')paintLights(id);
   gl.shadowMap.needsUpdate=true;
   const ext=Math.max(MW,MH)*S3/2+12;
   Object.assign(moonL.shadow.camera,{left:-ext,right:ext,top:ext,bottom:-ext,near:1,far:400});
@@ -554,6 +556,7 @@ function buildFileMap(id){
     if(typeof surfScene==='function')surfScene(sc,true);   // ผิววัสดุ (js/76): แมพนิ่ง = ฉายตามพิกัดโลก
     backdropHide(id,sc);   // ของไกลเดิมที่ฉากหลัง (js/67) มาแทน
     W.remove(fb);setTimeout(()=>disposeTree(fb),5000);W.add(sc);W.userData.grPend=0;   // ทิ้งพื้นสำรองทีหลัง (กำลังอุ่นเชดเดอร์อยู่ได้)
+    if(typeof paintScene==='function')paintScene(id,sc);   // ลุคภาพวาด: ต้นไม้ใหม่ + ลายพู่กัน (js/77)
     brkSetup(sc,skip);   // ของบังที่พังได้: แยกออกจาก batch (js/23)
     batchStatic(sc,skip);
     if(gltf.animations&&gltf.animations.length){const mx=new THREE.AnimationMixer(sc);for(const c of gltf.animations)mx.clipAction(c).play();W.userData.mixer=mx;}

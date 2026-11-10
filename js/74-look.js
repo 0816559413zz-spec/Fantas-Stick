@@ -31,7 +31,7 @@ function lookEnvFor(name){
   for(const k of Object.keys(LOOK.env))if(k.startsWith(name+'|')){LOOK.env[k].dispose();delete LOOK.env[k];}   // ค่าเก่าของพรีเซ็ตเดียวกัน (ลากสไลเดอร์) ทิ้ง
   if(!LOOK.pm)LOOK.pm=new THREE.PMREMGenerator(gl);
   const s=new THREE.Scene(),k=P.env;
-  const mat=new THREE.MeshBasicMaterial({map:P.sky==='sunset'?SKY.sunset:SKY.night,side:THREE.BackSide,color:new THREE.Color(k*P.tr,k*P.tg,k*P.tb),fog:false});
+  const mat=new THREE.MeshBasicMaterial({map:P.sky==='noon'?SKY.noon:P.sky==='sunset'?SKY.sunset:SKY.night,side:THREE.BackSide,color:new THREE.Color(k*P.tr,k*P.tg,k*P.tb),fog:false});
   const geo=new THREE.SphereGeometry(50,32,16);s.add(new THREE.Mesh(geo,mat));
   const rt=LOOK.pm.fromScene(s,0,0.1,200);geo.dispose();mat.dispose();
   return LOOK.env[key]=rt;}
@@ -46,6 +46,7 @@ function lookApply(day){
   const sp=P.split;GRADEU.uCon.value=P.con;
   if(P.warm){GRADEU.uLo.value.set(1-sp*0.4,1-sp*0.5,1+sp*0.6);GRADEU.uHi.value.set(1+sp*0.7,1+sp*0.15,1-sp*0.7);}   // เงาอมม่วงน้ำเงิน ไฮไลต์อมส้ม
   else{GRADEU.uLo.value.set(1-sp*0.7,1-sp*0.1,1+sp);GRADEU.uHi.value.set(1+sp*0.3,1+sp*0.1,1-sp*0.2);}   // เงาอมน้ำเงินเข้ม
+  if(P.lo&&P.hi){GRADEU.uLo.value.set(P.lo[0],P.lo[1],P.lo[2]);GRADEU.uHi.value.set(P.hi[0],P.hi[1],P.hi[2]);}   // ย้อมสีกำหนดเอง (ลุคภาพวาด js/77)
   gl.toneMapping=P.tone?THREE.AgXToneMapping:THREE.ACESFilmicToneMapping;
   GFX.haze=P.haze;GFX.hazeK=P.hazeK;GFX.hazeH=P.hazeH;lookRays();
 }

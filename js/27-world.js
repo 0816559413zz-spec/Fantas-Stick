@@ -324,6 +324,7 @@ const SKY={};
   const grad=(stops)=>texCanvas(4,256,(g)=>{const r=g.createLinearGradient(0,0,0,256);stops.forEach(([p,c])=>r.addColorStop(p,c));g.fillStyle=r;g.fillRect(0,0,4,256);});
   SKY.night=grad([[0,'#03050f'],[0.45,'#141a3a'],[0.52,'#3a2f55'],[0.6,'#151a33'],[1,'#08090f']]);
   SKY.sunset=grad([[0,'#16234f'],[0.3,'#4a3f86'],[0.44,'#c06a8a'],[0.5,'#ff9a5a'],[0.53,'#ffd08a'],[0.6,'#6a4a5a'],[1,'#2a2030']]);
+  SKY.noon=grad([[0,'#6fb6d4'],[0.3,'#a4dcd0'],[0.44,'#d6f0c8'],[0.5,'#f2f8cc'],[0.54,'#a8d49a'],[0.62,'#5f9a5c'],[1,'#2f5a3a']]);   // กลางวันในป่า (ลุคภาพวาด js/77): ฟ้าอมเขียว ขอบฟ้าสว่างนวล
   SKY.mesh=new THREE.Mesh(new THREE.SphereGeometry(600,32,16),new THREE.MeshBasicMaterial({map:SKY.night,side:THREE.BackSide,fog:false,depthWrite:false}));
   scene.add(SKY.mesh);
   const n=1500,pos=new Float32Array(n*3);
@@ -347,10 +348,11 @@ scene.add(moonL);scene.add(moonL.target);
 // ทิศจากพื้นไปหาแสงหลัก (setSky ตั้ง) — shadowFollow ใช้วางแสงตามผู้เล่น
 const LDIR=new THREE.Vector3(-55,95,-70).normalize();
 function setSky(mode){
-  const day=mode==='sunset';
-  SKY.mesh.material.map=day?SKY.sunset:SKY.night;SKY.mesh.material.needsUpdate=true;
+  const noon=mode==='day',day=noon||mode==='sunset';   // 'day' = กลางวันแดดสูง (ลุคภาพวาด js/77)
+  SKY.mesh.material.map=noon?SKY.noon:day?SKY.sunset:SKY.night;SKY.mesh.material.needsUpdate=true;
   SKY.stars.visible=!day;SKY.moon.visible=!day;SKY.sun.visible=day;
-  if(day){moonL.color.set('#ffbe8a');moonL.position.set(80,45,-110);gl.toneMappingExposure=1.05;}
+  if(noon){moonL.color.set('#fff0bc');moonL.position.set(74,100,-64);gl.toneMappingExposure=1.0;SKYB.sun.copy(moonL.position).normalize().multiplyScalar(520);}
+  else if(day){moonL.color.set('#ffbe8a');moonL.position.set(80,45,-110);gl.toneMappingExposure=1.05;SKYB.sun.set(300,45,-420);}
   else{moonL.color.set('#c4d2ff');moonL.position.set(-55,95,-70);gl.toneMappingExposure=1.1;}
   LDIR.copy(moonL.position).normalize();
   SKY.day=day;if(typeof lookApply==='function')lookApply(day);   // แสงรอบตัวจากท้องฟ้า (js/74-look.js)
