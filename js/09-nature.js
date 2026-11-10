@@ -95,7 +95,7 @@ function naturePlace(p,point,onWall){
 }
 function naturePlant(p,kind,spot,delay=0){
   const hp={turret:90,lotus:100,tree:350}[kind];
-  const life={turret:20,lotus:15,tree:NAT.treeLife}[kind];
+  const life={turret:1e6,lotus:15,tree:NAT.treeLife}[kind];   // ป้อมอยู่ถาวร (ผู้ใช้ 2026-11-10) จนแตก/ปลูกต้นที่ 3 แทนต้นเก่า
   const ready=G.time+delay+(kind==='tree'?NAT.treeGrow:0);
   const o={...spot,z:spot.h,id:++G.zid,isM:true,natKind:kind,type:'nature_'+kind,team:p.team,owner:p.id,
     r:kind==='tree'?37:kind==='lotus'?18:13,hp,maxHp:hp,ready,end:ready+life,

@@ -696,24 +696,41 @@ function drawNatureHud(x,y,A){
     log(px,y0,have?1:.55,fill);}
 }
 
-// HP พืชของเรา (ผู้ใช้ 2026-11-10 แบบ A): ลอยเหนือไพ่สกิลขวาล่าง ไม่มีกรอบ • หัวพืชขาวดำ + เลข HP + เวลาที่เหลือ (แบบ Overwatch)
-const NPH={el:null,key:'',t:0};
+// HP พืชของเรา (ผู้ใช้ 2026-11-10): ลอยเหนือไพ่สกิล ไม่มีกรอบ • ภาพหัวจากโมเดลจริง (ถ่ายครั้งเดียวต่อชนิด) ซ้ายบน • เลข HP ขวาบน
+//   แถบ HP ล่างสุดยาวตลอด • เวลาที่เหลือ (ดอกบัว/กำแพง/ต้นไม้ — ป้อมอยู่ถาวรไม่มีเวลา) ลอยออกทางซ้าย กลางระหว่างหัวกับแถบ
+const NPH={el:null,key:'',t:0,img:{},R:null};
 const NPH_IC={
-  turret:'<circle cx="12" cy="10" r="6.2" fill="#fff" stroke="#000" stroke-width="1.4"/><rect x="16.2" y="7.6" width="6" height="3.6" rx="1.8" fill="#fff" stroke="#000" stroke-width="1.2"/><circle cx="10.4" cy="8.6" r="1.4" fill="#000"/><path d="M8 3.5c1.5-1.8 3.5-1.8 4.6.2" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/>',
-  lotus:'<path d="M12 4c2.4 3 2.4 6.4 0 9.4-2.4-3-2.4-6.4 0-9.4zM4.5 8.5c3.4.2 5.6 2.4 6.4 5.6-3.4-.2-5.6-2.4-6.4-5.6zM19.5 8.5c-3.4.2-5.6 2.4-6.4 5.6 3.4-.2 5.6-2.4 6.4-5.6z" fill="#fff" stroke="#000" stroke-width="1.2"/><ellipse cx="12" cy="17.4" rx="7.4" ry="2.6" fill="#fff" stroke="#000" stroke-width="1.2"/>',
-  wall:'<rect x="3" y="9" width="18" height="9" rx="2" fill="#fff" stroke="#000" stroke-width="1.3"/><path d="M8.5 9v9M14 9v9" stroke="#000" stroke-width="1.2"/><path d="M5 9l2.2-3.6L9.4 9M13.6 9l2.2-3.6L18 9" fill="#fff" stroke="#000" stroke-width="1.2"/>',
+  turret:'<circle cx="12" cy="10" r="6.2" fill="#fff" stroke="#000" stroke-width="1.4"/><rect x="16.2" y="7.6" width="6" height="3.6" rx="1.8" fill="#fff" stroke="#000" stroke-width="1.2"/>',
+  lotus:'<path d="M12 4c2.4 3 2.4 6.4 0 9.4-2.4-3-2.4-6.4 0-9.4zM4.5 8.5c3.4.2 5.6 2.4 6.4 5.6-3.4-.2-5.6-2.4-6.4-5.6zM19.5 8.5c-3.4.2-5.6 2.4-6.4 5.6 3.4-.2 5.6-2.4 6.4-5.6z" fill="#fff" stroke="#000" stroke-width="1.2"/>',
+  wall:'<rect x="3" y="9" width="18" height="9" rx="2" fill="#fff" stroke="#000" stroke-width="1.3"/>',
   tree:'<circle cx="12" cy="9" r="6.5" fill="#fff" stroke="#000" stroke-width="1.3"/><rect x="10.6" y="14" width="2.8" height="7" fill="#fff" stroke="#000" stroke-width="1.2"/>'};
+// ถ่ายภาพหัวจากโมเดลในฉาก: clone โมเดล → ฉากเล็กพื้นหลังใส มีไฟ → renderer เล็กแยก (alpha) → dataURL • ส่วนบน 45% ของโมเดล = หัว
+function natPortraitObj(v,k){if(k==='turret')return v.plant&&v.plant.head||v.g;if(k==='lotus')return v.plant&&v.plant.bloom||v.g;if(v.fx&&v.fx.L){const g=new THREE.Group();for(const L of v.fx.L)if(L.obj&&L.inner&&L.inner.isMesh)g.add(L.obj.clone(true));if(g.children.length)return g;}return v.g||v.proxyG||null;}
+function natPortrait(k,src){
+  try{
+    if(!NPH.R){const r=new THREE.WebGLRenderer({alpha:true,antialias:true,preserveDrawingBuffer:true});r.setPixelRatio(1);r.setSize(128,128);r.setClearColor(0x000000,0);r.outputColorSpace=THREE.SRGBColorSpace;r.toneMapping=THREE.ACESFilmicToneMapping;r.toneMappingExposure=1.1;NPH.R=r;}
+    const S=new THREE.Scene(),c=src.clone(true);c.position.set(0,0,0);c.rotation.set(0,k==='turret'?-Math.PI/2:0,0);c.scale.multiplyScalar(1);c.updateMatrixWorld(true);
+    S.add(c);S.add(new THREE.HemisphereLight(0xffffff,0x445533,1.6));const L=new THREE.DirectionalLight(0xffffff,2.2);L.position.set(2,4,3);S.add(L);
+    const B=new THREE.Box3();c.traverse(q=>{if(!q.isMesh||q.isSprite||!q.visible)return;const m=Array.isArray(q.material)?q.material[0]:q.material;if(m&&(m.blending===THREE.AdditiveBlending||m.transparent&&m.opacity<.5))return;B.expandByObject(q);});   /* แค่เนื้อโมเดล (ไม่นับแสงเรือง/วงออร่า) */if(B.isEmpty()){NPH.dbg=k+':empty';return null;}const sz=B.getSize(new THREE.Vector3()),hf=k==='tree'?.45:1;
+    const top=B.max.y,bot=top-sz.y*hf,cy=(top+bot)/2,cx0=(B.min.x+B.max.x)/2,cz=(B.min.z+B.max.z)/2,R=Math.max(sz.x*.6,sz.z*.6,sz.y*hf*.62);
+    const cam=new THREE.PerspectiveCamera(30,1,.01,500),d=R/Math.tan(15*Math.PI/180)*.92;
+    cam.position.set(cx0+d*.55,cy+d*.18,cz+d*.83);cam.lookAt(cx0,cy,cz);
+    NPH.R.render(S,cam);const url=NPH.R.domElement.toDataURL('image/png');S.remove(c);return url;
+  }catch(e){NPH.dbg=k+':'+e.message;return null;}
+}
 function natPlantHud(me,v){
   if(!NPH.el){const d=document.createElement('div');d.id='h4pl';document.body.appendChild(d);NPH.el=d;}
   const el=NPH.el,list=me&&me.al!==false&&v?(v.NT||[]).filter(o=>o.owner===me.id&&o.hp>0&&NPH_IC[o.k]):[];
   if(!list.length||(H4.el&&H4.el.hidden)){if(el.innerHTML){el.innerHTML='';NPH.key='';}el.hidden=true;return;}
   el.hidden=false;
+  for(const o of list)if(!NPH.img[o.k]&&o.age>(o.k==='tree'?NAT.treeGrow+.3:o.k==='wall'?1.2:1)){const V=NAT_VIEW.get(o.id),src=V&&natPortraitObj(V,o.k);if(src){const u=natPortrait(o.k,src);if(u)NPH.img[o.k]=u;}}
   const ord={tree:0,turret:1,lotus:2,wall:3};list.sort((a,b)=>(ord[a.k]-ord[b.k])||(a.id-b.id));
-  const key=list.map(o=>o.k+':'+o.id+':'+Math.ceil(o.hp)+':'+Math.ceil(o.left||0)+':'+(o.move!=null?1:0)).join('|');
+  const key=list.map(o=>o.k+':'+o.id+':'+Math.ceil(o.hp)+':'+Math.ceil(o.left||0)+':'+(NPH.img[o.k]?1:0)).join('|');
   const now=performance.now();if(now-NPH.t>400){NPH.t=now;   // วางตำแหน่งเหนือแถวไพ่
     const cards=H4.q?H4.q.slots.filter(S=>!S.gem).map(S=>S.el.getBoundingClientRect()).filter(r=>r.width>0):[];
     if(cards.length){const right=Math.max(...cards.map(r=>r.right)),top=Math.min(...cards.map(r=>r.top));el.style.right=Math.round(innerWidth-right)+'px';el.style.bottom=Math.round(innerHeight-top+8)+'px';}}
   if(key===NPH.key)return;NPH.key=key;
-  el.innerHTML=list.map(o=>{const hp=Math.ceil(o.hp),low=hp<=o.maxHp*.3,t=Math.ceil(o.left||0);
-    return `<div class="r${low?' low':''}"><svg viewBox="0 0 24 24">${NPH_IC[o.k]}</svg><b>${hp}</b><i style="--p:${Math.round(hp/o.maxHp*100)}%"></i><span>${t}</span></div>`;}).join('');
+  el.innerHTML=list.map(o=>{const hp=Math.ceil(o.hp),low=hp<=o.maxHp*.3,t=o.left!=null&&o.left<9999?Math.ceil(o.left):null;
+    const head=NPH.img[o.k]?`<img src="${NPH.img[o.k]}">`:`<svg viewBox="0 0 24 24">${NPH_IC[o.k]}</svg>`;
+    return `<div class="r${low?' low':''}">${t!=null?`<span class="tm">${t}</span>`:''}<div class="hd">${head}</div><b>${hp}</b><i style="--p:${Math.round(hp/o.maxHp*100)}%"></i></div>`;}).join('');
 }
