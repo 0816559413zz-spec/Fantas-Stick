@@ -709,11 +709,11 @@ function natPortraitObj(v,k){if(k==='turret')return v.plant&&v.plant.head||v.g;i
 function natPortrait(k,src){
   try{
     if(!NPH.R){const r=new THREE.WebGLRenderer({alpha:true,antialias:true,preserveDrawingBuffer:true});r.setPixelRatio(1);r.setSize(128,128);r.setClearColor(0x000000,0);r.outputColorSpace=THREE.SRGBColorSpace;r.toneMapping=THREE.ACESFilmicToneMapping;r.toneMappingExposure=1.1;NPH.R=r;}
-    const S=new THREE.Scene(),c=src.clone(true);c.position.set(0,0,0);c.rotation.set(0,k==='turret'?-Math.PI/2:0,0);c.scale.multiplyScalar(1);c.updateMatrixWorld(true);
+    const S=new THREE.Scene(),c=src.clone(true);c.position.set(0,0,0);c.rotation.set(0,k==='turret'?Math.PI*.35:0,0);   /* ป้อม: หันปากมาทางกล้อง (เฉียงนิด) */c.scale.multiplyScalar(1);c.updateMatrixWorld(true);
     S.add(c);S.add(new THREE.HemisphereLight(0xffffff,0x445533,1.6));const L=new THREE.DirectionalLight(0xffffff,2.2);L.position.set(2,4,3);S.add(L);
     const B=new THREE.Box3();c.traverse(q=>{if(!q.isMesh||q.isSprite||!q.visible)return;const m=Array.isArray(q.material)?q.material[0]:q.material;if(m&&(m.blending===THREE.AdditiveBlending||m.transparent&&m.opacity<.5))return;B.expandByObject(q);});   /* แค่เนื้อโมเดล (ไม่นับแสงเรือง/วงออร่า) */if(B.isEmpty()){NPH.dbg=k+':empty';return null;}const sz=B.getSize(new THREE.Vector3()),hf=k==='tree'?.45:1;
     const top=B.max.y,bot=top-sz.y*hf,cy=(top+bot)/2,cx0=(B.min.x+B.max.x)/2,cz=(B.min.z+B.max.z)/2,R=Math.max(sz.x*.6,sz.z*.6,sz.y*hf*.62);
-    const cam=new THREE.PerspectiveCamera(30,1,.01,500),d=R/Math.tan(15*Math.PI/180)*({turret:.5,lotus:.62,wall:.62}[k]||.7);
+    const cam=new THREE.PerspectiveCamera(30,1,.01,500),d=R/Math.tan(15*Math.PI/180)*({turret:.5,lotus:.62,wall:.5}[k]||.7);
     cam.position.set(cx0+d*.55,cy+d*.18,cz+d*.83);cam.lookAt(cx0,cy,cz);
     NPH.R.render(S,cam);const url=NPH.R.domElement.toDataURL('image/png');S.remove(c);return url;
   }catch(e){NPH.dbg=k+':'+e.message;return null;}
