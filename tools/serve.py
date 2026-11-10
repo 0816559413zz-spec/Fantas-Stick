@@ -5,6 +5,8 @@
 #   POST /api/shot?name=<ชื่อ>      → เก็บภาพ (data URL หรือไบต์ PNG/JPEG) ลง shots/<ชื่อ>.png|.jpg (git-ignore) ให้ Claude เปิดดูด้วย Read
 #   GET/POST /api/bugs              → โน้ตปัญหา (bugs.html): bugs/bugs.json + เขียน bugs/BUGS.md ให้ Claude อ่าน + ลบรูปที่ไม่ใช้แล้ว
 #   POST /api/bug-img?name=<ชื่อ>   → เก็บรูปของโน้ตลง bugs/img/<ชื่อ>.png|.jpg
+#   GET/POST /api/reviews           → กระดานรอรีวิว (review.html): review/reviews.json + เขียน review/REVIEW.md ให้ Claude อ่าน (`--review-md` = เขียนใหม่)
+#   POST /api/review-img?name=<ชื่อ> → เก็บรูปลง review/img/<ชื่อ>.png|.jpg
 #   GET/POST /api/sb                → สตอรี่บอร์ด VFX (storyboard.html): storyboard/boards.json + เขียน storyboard/sb-<id>.md + STORYBOARDS.md ให้ Claude อ่าน
 #   POST /api/sb-img?name=<ชื่อ>    → เก็บภาพร่าง/รูปตัวอย่างลง storyboard/img/<ชื่อ>.png|.jpg
 #   POST /api/sb-rec?name=<ชื่อ>    → เก็บท่าตัวละครที่อัดจากเกม (studio/rec.js) ลง storyboard/rec/<ชื่อ>.json
@@ -90,6 +92,58 @@ def bugs_save(db):
         f.write(bugs_md(db))
     used = {os.path.basename(i) for b in db.get('items', []) for i in b.get('imgs', [])}
     d = os.path.join(BUGD, 'img')
+    for f in os.listdir(d):
+        if f not in used and time.time() - os.path.getmtime(os.path.join(d, f)) > 120:
+            os.remove(os.path.join(d, f))
+
+RVD = os.path.join(ROOT, 'review')
+RV_ST = {'wait': '⏳ รอผู้ใช้รีวิว', 'ok': '✅ ผ่าน', 'change': '✏️ ขอแก้ (Claude ต้องทำ)', 'drop': '❌ ไม่เอา'}
+
+def rv_load():
+    p = os.path.join(RVD, 'reviews.json')
+    if not os.path.exists(p):
+        return {'next': 1, 'items': []}
+    return json.load(open(p, encoding='utf-8'))
+
+def rv_md(db):
+    L = ['# กระดานรอรีวิว (Review Board)', '',
+         '> เขียนอัตโนมัติจาก `review.html` (ผ่าน `tools/serve.py`) — อย่าแก้ไฟล์นี้ตรง ๆ, แก้ `review/reviews.json` แล้วรัน `python tools/serve.py --review-md`.',
+         '> **Claude:** ทำเฉพาะหัวข้อสถานะ **✏️ ขอแก้** — อ่านความเห็นผู้ใช้ (`ความเห็นผู้ใช้`) + เปิดรูปด้วย Read → แก้ → ตั้ง `status:"wait"` + เขียน `reply` (ไทยสั้น ๆ ว่าแก้อะไร) เพื่อส่งกลับให้ผู้ใช้รีวิวใหม่. อย่าตั้ง `ok` เอง (ผู้ใช้เป็นคนกดผ่าน). งานที่ **⏳ รอ** = รอผู้ใช้ ไม่ต้องทำอะไร', '']
+    order = {'change': 0, 'wait': 1, 'ok': 2, 'drop': 3}
+    items = sorted(db.get('items', []), key=lambda b: (order.get(b.get('status'), 9), -b.get('id', 0)))
+    if not items:
+        L.append('_ยังไม่มีรายการ_')
+    for b in items:
+        L.append(f"## #{b.get('id')} {b.get('title') or '(ไม่มีหัวข้อ)'}")
+        L.append(f"- สถานะ: {RV_ST.get(b.get('status'), b.get('status'))} • ชนิด: {b.get('kind') or '-'} • สาย/ส่วน: {b.get('who') or '-'}")
+        L.append('')
+        if b.get('text'):
+            L += ['**วิธีดู / อะไรรอรีวิว:**', b['text'].strip(), '']
+        for lk in b.get('links', []):
+            L.append(f"- ลิงก์/ไฟล์: `{lk}`")
+        for im in b.get('imgs', []):
+            L.append(f"- รูป: `{im}`")
+        if b.get('links') or b.get('imgs'):
+            L.append('')
+        if b.get('checks'):
+            L.append('**เช็กลิสต์:**')
+            for c in b['checks']:
+                L.append(f"- [{'x' if c.get('ok') else ' '}] {c.get('t')}")
+            L.append('')
+        if b.get('feedback'):
+            L += [f"> **ความเห็นผู้ใช้:** {b['feedback'].strip()}", '']
+        if b.get('reply'):
+            L += [f"> **Claude ตอบ:** {b['reply'].strip()}", '']
+    return '\n'.join(L) + '\n'
+
+def rv_save(db):
+    os.makedirs(os.path.join(RVD, 'img'), exist_ok=True)
+    with open(os.path.join(RVD, 'reviews.json'), 'w', encoding='utf-8') as f:
+        json.dump(db, f, ensure_ascii=False, indent=1)
+    with open(os.path.join(RVD, 'REVIEW.md'), 'w', encoding='utf-8') as f:
+        f.write(rv_md(db))
+    used = {os.path.basename(i) for b in db.get('items', []) for i in b.get('imgs', [])}
+    d = os.path.join(RVD, 'img')
     for f in os.listdir(d):
         if f not in used and time.time() - os.path.getmtime(os.path.join(d, f)) > 120:
             os.remove(os.path.join(d, f))
@@ -441,6 +495,8 @@ class H(SimpleHTTPRequestHandler):
             return self._json(200, fx_list())
         if u.path == '/api/bugs':
             return self._json(200, bugs_load())
+        if u.path == '/api/reviews':
+            return self._json(200, rv_load())
         if u.path == '/api/sb':
             return self._json(200, sb_load())
         if u.path == '/api/sb-skills':
@@ -495,6 +551,14 @@ class H(SimpleHTTPRequestHandler):
                 return self._json(400, {'ok': False, 'err': 'ข้อมูลผิดรูปแบบ: ' + str(e)})
             bugs_save(db)
             return self._json(200, {'ok': True})
+        if u.path == '/api/reviews':
+            try:
+                db = json.loads(self._body().decode('utf-8'))
+                assert isinstance(db.get('items'), list)
+            except Exception as e:
+                return self._json(400, {'ok': False, 'err': 'ข้อมูลผิดรูปแบบ: ' + str(e)})
+            rv_save(db)
+            return self._json(200, {'ok': True})
         if u.path == '/api/sb':
             try:
                 db = json.loads(self._body().decode('utf-8'))
@@ -519,13 +583,13 @@ class H(SimpleHTTPRequestHandler):
             d = os.path.join(SBD, 'rec'); os.makedirs(d, exist_ok=True)
             with open(os.path.join(d, name + '.json'), 'wb') as f: f.write(data)
             return self._json(200, {'ok': True, 'path': 'storyboard/rec/' + name + '.json'})
-        if u.path in ('/api/bug-img', '/api/sb-img'):
+        if u.path in ('/api/bug-img', '/api/sb-img', '/api/review-img'):
             name = re.sub(r'[^a-zA-Z0-9_\-]', '_', q.get('name', ['img'])[0])[:60] or 'img'
             data = self._body(); ext = 'png'
             if data[:5] == b'data:':
                 head, b64 = data.split(b',', 1); ext = 'jpg' if b'jpeg' in head else 'png'; data = base64.b64decode(b64)
             elif data[:3] == b'\xff\xd8\xff': ext = 'jpg'
-            sub = 'bugs' if u.path == '/api/bug-img' else 'storyboard'
+            sub = {'/api/bug-img': 'bugs', '/api/review-img': 'review'}.get(u.path, 'storyboard')
             d = os.path.join(ROOT, sub, 'img'); os.makedirs(d, exist_ok=True)
             with open(os.path.join(d, name + '.' + ext), 'wb') as f: f.write(data)
             return self._json(200, {'ok': True, 'path': sub + '/img/' + name + '.' + ext})
@@ -570,6 +634,8 @@ class H(SimpleHTTPRequestHandler):
 if __name__ == '__main__':
     if '--bugs-md' in sys.argv:  # Claude แก้ bugs/bugs.json เองแล้ว → เขียน BUGS.md ใหม่
         bugs_save(bugs_load()); print('bugs/BUGS.md updated'); sys.exit()
+    if '--review-md' in sys.argv:  # Claude แก้ review/reviews.json เองแล้ว → เขียน REVIEW.md ใหม่
+        rv_save(rv_load()); print('review/REVIEW.md updated'); sys.exit()
     if '--sb-md' in sys.argv:  # Claude แก้ storyboard/boards.json เองแล้ว → เขียน sb-<id>.md ใหม่
         sb_save(sb_load()); print('storyboard/*.md updated'); sys.exit()
     port = int(sys.argv[1]) if len(sys.argv) > 1 else 8765
