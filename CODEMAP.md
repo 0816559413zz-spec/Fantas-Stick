@@ -57,22 +57,22 @@ PYV:3 pyroBigBoom:11 pyroBall:19 pyroBasic:20 addOrbs:37 pyroParry:38 pyroBlock:
 ## js/07-frost-spells.js (33) — 
 FROSTF:4 GREND:6 frostGlacier:11 PERMA:16 CRYO:18 FAURA:25 MIRROR:27
 
-## js/08-storm.js (220) — 
+## js/08-storm.js (224) — 
 STORMV:6 stGain:10 stSpend:11 stormCone:13 stormLineFoes:18 stormBasic:22 stormTri:46 stormDash:53 stormDashTick:66 stormShieldBlast:74 stormTick:83
 §92 สกิล 1 (ฟรี): เส้นสายฟ้า — ชี้ขึ้นแล้วกดลง 0.5 วิ จากนั้นสายฟ้าผ่าเป็…
 TLINE:93 stormLine:95
 §101 สกิล 2 (1 stack): ดูดความเร็ว
-SIPH:102 stormWaveShoot:104
-§105 สกิล 3 (2 stacks): ฟ้าผ่าสามครั้ง — วางจุดครั้งเดียว ฟ้าผ่าจุดเดิม 3 …
-TSTR:106 updateTCells:122
-§130 สกิล 4 (1 stack): ออร์บสายฟ้าคู่ — ลอยหลังเรา Dash โดนศัตรู = ออร์บพุ…
-SORBS:131 stormOrbLaunch:134
-§140 สกิล 5 (2 stacks): Railgun — เส้นเตือนเหลือง 0.8 วิ (อัลติ 0.5) แล้วล…
-RAIL:142 stormBowTick:145 stormBowFire:151
-§158 อัลติ: ร่างเทพสายฟ้า 10 วิ
-GODL:159
-§161 สกิล 6 (3 stacks): ลูกสายฟ้าโดม — ทะยานขึ้น บินเล็ง 3 วิ คลิกยิงลูกสา…
-stormDomeTick:162 stormDomeFire:177 stormDomeSlam:185 updateStorm:190
+SIPH:102 stormWaveShoot:104 stormWaveMark:106
+§109 สกิล 3 (2 stacks): ฟ้าผ่าสามครั้ง — วางจุดครั้งเดียว ฟ้าผ่าจุดเดิม 3 …
+TSTR:110 updateTCells:126
+§134 สกิล 4 (1 stack): ออร์บสายฟ้าคู่ — ลอยหลังเรา Dash โดนศัตรู = ออร์บพุ…
+SORBS:135 stormOrbLaunch:138
+§144 สกิล 5 (2 stacks): Railgun — เส้นเตือนเหลือง 0.8 วิ (อัลติ 0.5) แล้วล…
+RAIL:146 stormBowTick:149 stormBowFire:155
+§162 อัลติ: ร่างเทพสายฟ้า 10 วิ
+GODL:163
+§165 สกิล 6 (3 stacks): ลูกสายฟ้าโดม — ทะยานขึ้น บินเล็ง 3 วิ คลิกยิงลูกสา…
+stormDomeTick:166 stormDomeFire:181 stormDomeSlam:189 updateStorm:194
 
 ## js/09-earth.js (261) — 
 EARTH:9 ERV:12
@@ -234,7 +234,7 @@ r1:368 DEFP:370 packP:371 unpackP:372 makeSnap:373 PROF:391 pf:392 hostSent:393 
 ## js/15-siege.js (203) — 
 SGV:12 SG_TEAM:24 sgF:25 sgCore:26 sgInZone:27 sgSpawn:28 sgInit:29 sgWallsApply:38 sgWallDmg:42 sgWallHit:48 sgWallEnv:49 sgInput:54 sgStop:62 sgTick:63 sgCoreDown:94 sgEnd:107 sgResult:109 sgSnap:115 SGB:124 sgBotTarget:126 sgBotGoal:137 sgUnstick:149 sgBotThink:162
 
-## js/16-voice.js (89) — 
+## js/16-voice.js (89) — ไมค์ (WebRTC audio แบบ mesh: ทุกคนโทรหากันตรงๆ)
 VOICE:4 rosterIds:5 toggleMic:6 voiceSync:20 teamOn:37 teamOf:38 applyVoiceGates:39 VAC:49 onIncomingCall:50 voiceLevels:62 speakingIds:70 updateVoiceUI:76
 
 ## js/17-input.js (66) — 
@@ -291,7 +291,7 @@ BRKV:313 BRK_COL:313 brkSetup:314 BRK_CM:333 brkCrackMat:334 brkClip:350 brkYc:3
 ## js/24-minions-view.js (68) — สัตว์เวท: โมเดลโปร่งแสง + ซิงก์จาก snapshot (MN)
 MM3:2 makeMinion:3 syncMins:36 drawMinBars:58
 
-## js/25-efx.js (311) — efxFX: ภาพของ event "efx" ทุกคาถา (หนึ่ง case ต่อหนึ่งเอฟเฟกต์)
+## js/25-efx.js (315) — efxFX: ภาพของ event "efx" ทุกคาถา (หนึ่ง case ต่อหนึ่งเอฟเฟกต์)
 efxState:4 efxFX:20
 
 ## js/26-fx-events.js (241) — fx(ev): เอฟเฟกต์+เสียงของทุก event จากโฮสต์ • statusFX (สถานะบนตัว) •…
@@ -802,4 +802,4 @@ surfSync:49 surfQuality:53
 SURF_VS:55 SURF_VS_BODY:56 SURF_FS:67 SURF_FS_BODY:68 surfOk:98 surfApply:99 surfScene:111
 §112 ปรับค่า (tune.html / F8)
 
-(98 files, 24764 lines)
+(98 files, 24772 lines)

@@ -101,7 +101,7 @@ function efxFX(ev){
       if(ev.n)floatText(x,y,'⚡'+ev.n,'#fff27a',18,H+2.6);break;}
     case 'slup':if(near)snd('cast_ebolt',ev);break;
     case 'sline':{const a=ev.a,c=Math.cos(a),sn=Math.sin(a),L=ev.len,N=Math.max(4,Math.round(L/55));
-      for(let i=0;i<=N;i++){const d=L*i/N,px=x+c*d,py=y+sn*d;later(0.3*i/N,()=>{tbolt(px+rnd(-15,15),py+rnd(-15,15),H+10,px+rnd(-8,8),py+rnd(-8,8),H+0.1,0.2,0,0.26,1);burst(px,py,'#ffd000',8,160,0.3,2.2,{h:H+0.2,vh:[1,5],g:6});burst(px,py,'#ffffff',3,120,0.2,1.6,{h:H+0.2,g:6});burst(px,py,'#9fd8ff',3,140,0.25,1.6,{h:H+0.2,vh:[1,4],g:6});if(i%3===0)FX.flashLight(px,py,H+1.5,'#ffd23a',3,10,0.2);});}
+      for(let i=0;i<=N;i++){const d=L*i/N,px=x+c*d,py=y+sn*d;later(0.3*i/N,()=>{tbolt(px+rnd(-15,15),py+rnd(-15,15),H+10,px+rnd(-8,8),py+rnd(-8,8),H+0.1,0.2,0,0.17,1);burst(px,py,'#ffd000',8,160,0.3,2.2,{h:H+0.2,vh:[1,5],g:6});burst(px,py,'#ffffff',3,120,0.2,1.6,{h:H+0.2,g:6});burst(px,py,'#9fd8ff',3,140,0.25,1.6,{h:H+0.2,vh:[1,4],g:6});if(i%3===0)FX.flashLight(px,py,H+1.5,'#ffd23a',3,10,0.2);});}
       if(near){snd('zap',ev);later(0.15,()=>snd('boom',{x,y,vol:0.3}));shake(2);}break;}
     case 'ssiph':{const T=ev.tg||[];
       // ผู้ใช้ 2026-10-23: ใช้ตัวเลือกรอบ 3 แบบ 1 (เทสลา) แต่สีเหลือง — ส่วนต่อศัตรู (siphon_y ยืดตามระยะ) + ส่วนรอบตัวเรา (siphon_yself)
@@ -119,6 +119,10 @@ function efxFX(ev){
     case 'sbow':stormBowFx(ev);break;
     case 'ssta':stormStaffCast(ev);break;
     case 'sswing':stormStaffSwing(ev);break;
+    case 'smark':{for(let i=0;i<3;i++){const an=i*2.094+.5,on=i<(ev.n|0);if(!on)continue;tbolt(x+Math.cos(an)*14,y+Math.sin(an)*14,H+.9,x+Math.cos(an)*18,y+Math.sin(an)*18,H-.3,.35,0,.07,0);}
+      ring(x,y,'#ffd000',26+(ev.n|0)*6,.25,.1);floatText(x,y,'⚡'.repeat(ev.n|0),'#fff27a',16,H+1.6);if(near)snd('zap',{x,y,vol:.35});break;}   // เครื่องหมายคลื่นสายฟ้า 1-2/3
+    case 'smkboom':{for(let i=0;i<6;i++){const an=rnd(0,6.283);tbolt(x,y,H,x+Math.cos(an)*rnd(45,75),y+Math.sin(an)*rnd(45,75),H+rnd(-.5,.8),.22,0,.1);}tbolt(x+rnd(-6,6),y+rnd(-6,6),H+9,x,y,H,.25,0,.16,2);
+      ring(x,y,'#ffd000',80,.35,.18);burst(x,y,'#ffd000',26,260,.4,2.4,{h:H,vh:[1,5],g:5});burst(x,y,'#9fe8ff',10,200,.3,1.8,{h:H,g:5});FX.flashLight(x,y,H+1,'#ffd23a',5,14,.25);if(near){snd('boom',{x,y,vol:.5});snd('zap',ev);shake(2.5);}break;}   // ครบ 3 = ระเบิด + Shock
     case 'sbowfail':burst(x,y,'#7df2ff',10,60,.3,1.8,{h:H});if(near)snd('dismount',ev);break;
     case 'srailc':if(near)snd('cast_ebolt',ev);break;
     case 'srail':{const a=ev.a,c=Math.cos(a),sn=Math.sin(a),L=ev.len,ex=x+c*L,ey=y+sn*L;

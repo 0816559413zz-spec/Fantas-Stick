@@ -99,9 +99,13 @@ function stormLine(p){
   emit({k:'efx',z:'sline',x:Math.round(p.x),y:Math.round(p.y),h:p.z,a:Math.round(a*1000)/1000,len:Math.round(len),id:p.id});
 }
 // ----- สกิล 2 (1 stack): ดูดความเร็ว -----
-const SIPH=defSpell(2,{id:'speedsiphon',v:{cost:2,time:6,cd:0.7,dmg:20,spd:1500,range:700},vn:{cost:'ใช้ stack',time:'อยู่นาน (วิ)',cd:'เว้นต่อคลื่น (วิ)',dmg:'ดาเมจคลื่น',spd:'ความเร็วคลื่น',range:'ระยะคลื่น'},role:'damage',n:'ไม้เท้าสายฟ้า',ic:'⚡',cd:10,d:'ใช้ 2 stack: ไม้ยาวขึ้นด้วยสายฟ้า 6 วิ โจมตีปกติเปลี่ยนเป็นคลื่นดาบสายฟ้า ระยะ 700 ดาเมจ 20 ทุก 0.7 วิ ตีคนบนฟ้าได้',
-  cast(p,S){if(!stSpend(p,S.v.cost))return false;p.stStaff=S.v.time;emit({k:'efx',z:'ssta',x:Math.round(p.x),y:Math.round(p.y),h:p.z+1.2,id:p.id});}});
+const SIPH=defSpell(2,{id:'speedsiphon',v:{cost:1,dmg:20,spd:1500,range:700,marks:3,markT:6,boom:15,shockT:1},vn:{cost:'ใช้ stack',dmg:'ดาเมจคลื่น',spd:'ความเร็วคลื่น',range:'ระยะคลื่น',marks:'ติดเครื่องหมายครบ (ครั้ง) = ระเบิด',markT:'เครื่องหมายอยู่นาน (วิ)',boom:'ระเบิด • ดาเมจเพิ่ม',shockT:'ระเบิด • Shock (วิ)'},role:'damage',n:'คลื่นสายฟ้า',ic:'⚡',cd:2,d:'ใช้ 1 stack: ปล่อยคลื่นสายฟ้าตามที่เล็งทันที ดาเมจ 20 ระยะ 700 ทะลุ • โดน = ติดเครื่องหมายสายฟ้า ครบ 3 ครั้ง (ภายใน 6 วิ) = ระเบิด 15 ดาเมจ + Shock 1 วิ และคืน stack ให้เรา 1',
+  cast(p,S){if(!stSpend(p,S.v.cost))return false;p.stSide=-(p.stSide||1);emit({k:'efx',z:'sswing',x:Math.round(p.x),y:Math.round(p.y),h:p.z+1.2,n:p.stSide,id:p.id});stormWaveShoot(p);}});   // ผู้ใช้ 2026-11-10: เลิกโหมดไม้เท้า 6 วิ → คลื่นทันที 1 stack
 function stormWaveShoot(p){const V=SIPH.v;Object.assign(PDEF.swave,{spd:V.spd,life:V.range/V.spd,dmg:V.dmg});const pr=shoot(p,'swave',{sp:'b_storm',dmg:V.dmg,quiet:1});pr.pierce=1;pr.hs=new Set();pr.hw=40;}
+// คลื่นโดน: เครื่องหมายสายฟ้าบนเป้า ครบ 3 = ระเบิด + Shock + คืน stack ให้คนยิง
+function stormWaveMark(pr,t){const V=SIPH.v,o=G.players[pr.owner];if(!t.stMkT||t.stMkT<G.time)t.stMk=0;t.stMk=(t.stMk|0)+1;t.stMkT=G.time+V.markT;
+  if(t.stMk>=V.marks){t.stMk=0;t.stMkT=0;damage(t,V.boom,pr.owner,'aoe');shock(t,pr.owner,V.shockT);if(o)stGain(o);emit({k:'efx',z:'smkboom',x:Math.round(t.x),y:Math.round(t.y),h:(t.z||t.h||0)+1.2,id:t.id});}
+  else emit({k:'efx',z:'smark',x:Math.round(t.x),y:Math.round(t.y),h:(t.z||t.h||0)+1.2,n:t.stMk,id:t.id});}
 // ----- สกิล 3 (2 stacks): ฟ้าผ่าสามครั้ง — วางจุดครั้งเดียว ฟ้าผ่าจุดเดิม 3 ครั้ง ห่างกัน 0.5 วิ -----
 const TSTR=defSpell(2,{id:'triplestrike',v:{cost:2,range:600,r:100,dmg:30,env:30,delay:0.6,gap:0.5,spd:40,seek:300,sideR:45,side:110},vn:{cost:'ใช้ stack',range:'ระยะวาง',r:'รัศมีวง',dmg:'ดาเมจต่อครั้ง',env:'ดาเมจใส่บ้าน/ของ',delay:'ผ่าครั้งแรกหลัง (วิ)',gap:'เว้นระหว่างครั้ง (วิ)',spd:'วงเลื่อนหาศัตรู • ความเร็ว',seek:'วงเลื่อนหาศัตรู • มองไกล',sideR:'อัลติ • รัศมีวงข้าง',side:'อัลติ • วงข้างห่าง'},role:'control',n:'ฟ้าผ่าสามครั้ง',ic:'🌩️',cd:12,d:'ใช้ 2 stacks: กดแล้วเลือกจุด (เห็นวงก่อนวาง) กดซ้ำ/คลิกซ้าย = ยืนยัน • ระยะ 600 รัศมี 70 มีวงรูนเตือน แล้วฟ้าผ่าจุดเดิม 3 ครั้ง (0.6 วิ แล้วห่างกัน 0.5 วิ)',fx:'ครั้งละ 30 ดาเมจ (โดนครบ 3 = 90) • ระหว่างอัลติ: มีวงเล็กผ่าซ้าย/ขวาเพิ่มด้วย',
   cast(p,S){

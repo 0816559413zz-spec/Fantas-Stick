@@ -94,20 +94,20 @@ function tbLayer(blend,ro){const V=TBMAX*TBN*2,g=new THREE.BufferGeometry();g.se
   g.setIndex(new THREE.BufferAttribute(idx,1));g.setDrawRange(0,0);
   const m=new THREE.Mesh(g,new THREE.MeshBasicMaterial({vertexColors:true,transparent:true,blending:blend,depthWrite:false,side:THREE.DoubleSide,forceSinglePass:true}));m.frustumCulled=false;m.renderOrder=ro;scene.add(m);return m;}   // ริบบิ้นหันหากล้อง: รอบเดียวพอ (2 รอบ = three ตั้ง needsUpdate ทุกเฟรม → คำนวณ shader ใหม่)
 let TBL=null;   // สร้างตอนใช้ครั้งแรก (ตอนโหลดไฟล์ scene ยังไม่ถูกสร้าง)
-const TBC={glow:new THREE.Color('#ffb800').multiplyScalar(1.3),body:new THREE.Color('#ffc400'),acc:new THREE.Color('#2fdcff'),accG:new THREE.Color('#10b8ff'),accC:new THREE.Color('#b8f6ff'),core:new THREE.Color('#fffbe0').multiplyScalar(1.8)};
+const TBC={glow:new THREE.Color('#ffb800').multiplyScalar(1.3),body:new THREE.Color('#ffc400'),acc:new THREE.Color('#3ce8ff').multiplyScalar(1.25),accG:new THREE.Color('#12c4ff').multiplyScalar(1.2),accC:new THREE.Color('#e0fbff').multiplyScalar(1.4),core:new THREE.Color('#fffbe0').multiplyScalar(1.8)};
 const _tcc=new THREE.Color();
 function tbGet(){if(TBA.length>=TBMAX){const old=TBA.shift();TBF.push(old);}let o=TBF.pop();if(!o){o={pts:Array.from({length:TBN},()=>new THREE.Vector3()),A:new THREE.Vector3(),B:new THREE.Vector3(),path:null};}TBA.push(o);return o;}
 // จุด sim (x,y,h) — col ไม่ใช้ (เหลืองเสมอ) ยกเว้น '#9fd8ff' = สีรองฟ้า • w = ความหนา (หน่วยโลก) • br = จำนวนกิ่ง
 function tbolt(x1,y1,h1,x2,y2,h2,life,col,w,br){
-  if(col!=='#9fd8ff'&&!tbolt.cy){tbolt.cy=1;try{tbolt(x1+rnd(-5,5),y1+rnd(-5,5),h1+rnd(-.12,.12),x2+rnd(-5,5),y2+rnd(-5,5),h2+rnd(-.12,.12),life,'#9fd8ff',(w||.14)*.62,0);}finally{tbolt.cy=0;}}   // every bolt carries a thin cyan companion (user 2026-11-10)
-  const o=tbGet();o.A.set(tx(x1),h1+GY(x1,y1),tz(y1));o.B.set(tx(x2),h2+GY(x2,y2),tz(y2));o.path=null;o.life=o.max=life||0.12;o.w=(w||0.14)*1.2;o.rj=0;o.gk=1;
+  if(col!=='#9fd8ff'&&!tbolt.cy){tbolt.cy=1;try{tbolt(x1+rnd(-5,5),y1+rnd(-5,5),h1+rnd(-.12,.12),x2+rnd(-5,5),y2+rnd(-5,5),h2+rnd(-.12,.12),life,'#9fd8ff',(w||.14)*.7,0);}finally{tbolt.cy=0;}}   // every bolt carries a thin cyan companion (user 2026-11-10)
+  const o=tbGet();o.A.set(tx(x1),h1+GY(x1,y1),tz(y1));o.B.set(tx(x2),h2+GY(x2,y2),tz(y2));o.path=null;o.life=o.max=life||0.12;o.w=(w||0.14)*(col==='#9fd8ff'?1.2:.85);   // ผู้ใช้ 2026-11-10: เส้นเหลืองบางลง (นีออนจัดเท่าเดิม) • ฟ้าเห็นชัดขึ้นo.rj=0;o.gk=1;
   const L=o.A.distanceTo(o.B);o.amp=Math.min(0.55,L*0.11+0.03);o.acc=col==='#9fd8ff';
   if(br&&L>1.2)for(let i=0;i<br;i++){const k=rnd(0.25,0.75),bx=lerp(x1,x2,k)+rnd(-8,8),by=lerp(y1,y2,k)+rnd(-8,8),bh=lerp(h1,h2,k),an=rnd(0,6.283),bl=L/S3*rnd(0.2,0.4);
     tbolt(bx,by,bh,bx+Math.cos(an)*bl,by+Math.sin(an)*bl,bh+rnd(-0.6,0.6)*L*0.3,life,col,o.w*0.55,0);}
   return o;
 }
 // สายฟ้าตามเส้นทางที่กำหนด (จุดโลก) — ใช้กับหาง/เกลียวรอบ Railgun
-function tboltP(P,life,w,amp,col){if(col!=='#9fd8ff'&&!tboltP.cy){tboltP.cy=1;try{tboltP(P,life,w*.62,amp*1.8,'#9fd8ff');}finally{tboltP.cy=0;}}const o=tbGet();o.path=P;o.life=o.max=life;o.w=w*1.2;o.rj=0;o.amp=amp;o.acc=col==='#9fd8ff';o.gk=1;return o;}
+function tboltP(P,life,w,amp,col){if(col!=='#9fd8ff'&&!tboltP.cy){tboltP.cy=1;try{tboltP(P,life,w*.7,amp*1.8,'#9fd8ff');}finally{tboltP.cy=0;}}const o=tbGet();o.path=P;o.life=o.max=life;o.w=w*(col==='#9fd8ff'?1.2:.85);o.rj=0;o.amp=amp;o.acc=col==='#9fd8ff';o.gk=1;return o;}
 function tbWrite(L,slot,pts,w,taper,c,a){
   const g=L.geometry,P0=g.attributes.position.array,C0=g.attributes.color.array,cp=cam.position,base=slot*TBN*2;
   for(let i=0;i<TBN;i++){const P=pts[i],Pa=pts[Math.max(0,i-1)],Pb=pts[Math.min(TBN-1,i+1)];
@@ -128,7 +128,7 @@ function updateBolts(dt){
         else o.pts[j].lerpVectors(o.A,o.B,t);
         o.pts[j].x+=rnd(-e,e);o.pts[j].y+=rnd(-e,e);o.pts[j].z+=rnd(-e,e);}}
     const k=Math.min(1,o.life/o.max*2.2),tp=!!o.path;
-    tbWrite(TBL.glow,n,o.pts,o.w*2.6,tp,o.acc?TBC.accG:TBC.glow,(o.acc?.32:.5)*k*o.gk);tbWrite(TBL.body,n,o.pts,o.w,tp,o.acc?TBC.acc:TBC.body,k);tbWrite(TBL.core,n,o.pts,o.w*0.32,tp,o.acc?TBC.accC:o.gk<1?_tcc.copy(TBC.core).multiplyScalar(0.36+0.64*o.gk):TBC.core,k);n++;
+    tbWrite(TBL.glow,n,o.pts,o.w*2.6,tp,o.acc?TBC.accG:TBC.glow,(o.acc?.46:.55)*k*o.gk);tbWrite(TBL.body,n,o.pts,o.w,tp,o.acc?TBC.acc:TBC.body,k);tbWrite(TBL.core,n,o.pts,o.w*0.45,tp,o.acc?TBC.accC:o.gk<1?_tcc.copy(TBC.core).multiplyScalar(0.36+0.64*o.gk):TBC.core,k);n++;
   }
   for(const L of Object.values(TBL)){const g=L.geometry;g.setDrawRange(0,n*(TBN-1)*6);L.visible=n>0;if(!n)continue;   // ส่งขึ้นการ์ดจอเฉพาะส่วนที่ใช้ (เดิมส่งทั้งก้อน 420 เส้น ≈ 280 KB ต่อชั้นทุกเฟรม)
     for(const A of [g.attributes.position,g.attributes.color]){A.clearUpdateRanges();A.addUpdateRange(0,n*TBN*2*A.itemSize);A.needsUpdate=true;}}
