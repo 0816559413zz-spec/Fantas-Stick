@@ -74,7 +74,7 @@ function updateMins(dt){
     if(m.dead)continue;
     m.life-=dt;if(m.life<=0){m.dead=true;emit({k:'efx',z:'unsummon',x:m.x,y:m.y,h:(m.h||0)+0.6});continue;}
     tickStatus(m,dt);if(m.od>0)m.od-=dt;
-    if(m.burn>0){m.burn-=dt;m.bt-=dt;if(m.bt<=0){m.bt=0.5;damage(m,4,m.burnSrc,'burn');if(m.dead)continue;}}
+    if(m.burn>0){m.burn-=dt;m.bt-=dt;if(m.bt<=0){m.bt=1;damage(m,4,m.burnSrc,'burn');if(m.dead)continue;}}
     m.ox=m.x;m.oy=m.y;
     m.x+=m.vx*dt;m.y+=m.vy*dt;const fr=Math.exp(-5*dt);m.vx*=fr;m.vy*=fr;
     m.cd-=dt;

@@ -278,7 +278,7 @@ function updatePlayer(p,dt,acting){
     }else p.revive=Math.max(0,p.revive-dt*0.5);
     return;
   }
-  if(p.burn>0){p.burn-=dt;p.bt-=dt;if(p.bt<=0){p.bt=0.5;damage(p,4,p.burnSrc,'burn');if(!p.alive||p.downed)return;}}
+  if(p.burn>0){p.burn-=dt;p.bt-=dt;if(p.bt<=0){p.bt=1;damage(p,4,p.burnSrc,'burn');if(!p.alive||p.downed)return;}}
   const canAct=acting&&p.stun<=0;
   if(acting&&(inp.ax||inp.ay))p.ang=Math.atan2(inp.ay-p.y,inp.ax-p.x)+(p.bld>0?rnd(-0.22,0.22):0);
 

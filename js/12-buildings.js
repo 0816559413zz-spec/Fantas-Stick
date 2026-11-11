@@ -455,7 +455,7 @@ function hitTarget(pr,t){
       const o=G.players[pr.owner];
       if(o){const a=Math.atan2(o.y-t.y,o.x-t.x),f=big?200:620;t.vx+=Math.cos(a)*f;t.vy+=Math.sin(a)*f;t.stun=Math.max(t.stun,0.3);}
       break;}
-    case 'fire':t.burn=2;t.bt=0.5;t.burnSrc=pr.owner;break;
+    case 'fire':t.burn=3;t.bt=1;t.burnSrc=pr.owner;break;
     case 'bolt':{const a=Math.atan2(pr.vy,pr.vx),f=big?20:90;t.vx+=Math.cos(a)*f;t.vy+=Math.sin(a)*f;break;}
     case 'web':if(!t.isE){t.root=Math.max(t.root||0,1.3);}break;
   }

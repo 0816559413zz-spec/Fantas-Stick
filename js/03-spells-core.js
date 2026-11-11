@@ -80,7 +80,7 @@ function ignite(t,src,time){
     t.chl=0;t.chlT=0;if(t.frz>0){t.frz=0;t.stun=Math.min(t.stun||0,0.2);}
     emit({k:'efx',z:'melt',x:t.x,y:t.y,h:cH(t)});damage(t,6,src,'burn');
   }
-  t.burn=Math.max(t.burn||0,time||2);if(!(t.bt>0))t.bt=0.5;t.burnSrc=src;
+  t.burn=Math.max(t.burn||0,time||3);if(!(t.bt>0))t.bt=1;t.burnSrc=src;   // Burning (ผู้ใช้ 2026-11-11): 3 วิ เผาทุก 1 วิ
 }
 // Shock (สายฟ้า, ผู้เล่นออกแบบ): โคลง/กล้องสั่นเบา + ใช้ Dash ไม่ได้ สูงสุด 0.3 วิ • ติดอยู่แล้วไม่ต่อเวลา • ไม่เพิ่มดาเมจ
 function shock(t,src,d){if(t.shk>0)return;t.shk=Math.min(0.3,d||0.3);t.shkSrc=src;}
