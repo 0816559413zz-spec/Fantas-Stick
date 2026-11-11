@@ -14,7 +14,7 @@ var PAINT={on:!/[?&]nopaint\b/.test(location.search),cur:null,kit:null,
   maps:{forest:{sky:'day',fog:['#9fdccc',30,260],look:'paint',weather:'clear:100',
     back:{near:{col:'#4a8a3c',col2:'#35703a'},trees:{col:['#2f6e3c','#3d8440','#28603a']},mid:{col:'#5f9c88',lit:'#b4dcb0',tint:'#8cc4a6'},
       mist:[{d:235,h:45,col:'#d4f0dc',a:0.6}],far:{col:'#8cbcc0',lit:'#e0f4e0',tint:'#b0dcd0',snow:'#f6fff4'}}}},
-  cel:1,vivid:1,fxcel:1,bloom:0.42,U:{tPt:{value:null},uPt:{value:new THREE.Vector4(1/3.2,1/9,0.5,0.6)},uPtCel:{value:0}},
+  cel:1,vivid:1,fxcel:1,blob:1,blobThr:0.42,blobSize:1.45,bloom:0.4,U:{tPt:{value:null},uPt:{value:new THREE.Vector4(1/3.2,1/9,0.5,0.6)},uPtCel:{value:0}},
   KU:{tDiffuse:{value:null},uPx:{value:new THREE.Vector2(1,1)},uR:{value:1.0},uK:{value:1}}};
 function paintOn(id){return !!(PAINT&&PAINT.on&&PAINT.maps[id]);}
 // ทับค่าของไฟล์แมพก่อนสร้างฉาก (เรียกจาก buildWorld js/28) — เก็บค่าเดิมไว้คืนเมื่อปิด
@@ -50,6 +50,31 @@ function paintVfx(){
   const fu=PSYS[2].mat&&PSYS[2].mat.uniforms.uFL;   // ตารางสีเปลวของอนุภาคบน GPU
   if(fu){if(!PAINT.fl0)PAINT.fl0=fu.value.map(c=>c.clone());const V=['#fff59a','#ffc814','#ff7a00','#ff2e12','#e0181a','#b01010','#7a0c0c'];fu.value.forEach((c,i)=>on?c.set(V[i]):c.copy(PAINT.fl0[i]));}
   if(PAINT.bloom0===undefined)PAINT.bloom0=bloom.strength;bloom.strength=on?PAINT.bloom:PAINT.bloom0;}
+// ---------- ไฟก้อนหลอมรวม (blob / metaball) — ภาพอ้างอิงผู้ใช้ 2026-11-11: ไฟเป็นก้อนเดียวขอบโค้งมน แกนขาวเหลืองสว่าง ขอบส้มแดงบาง เรืองแสงรอบ ๆ ----------
+// เม็ดเปลว (PSYS[2] js/30) ไม่วาดตรง ๆ: วาดเป็นก้อนความร้อนนุ่มบวกสะสมลงแผ่นครึ่งความละเอียด (blobFire) แล้วตัดขอบที่ระดับเดียว + ไล่สีตามความลึกเข้าไปในก้อน
+const BLOB={rt:null,on:false,U:{t:{value:null},uB:{value:new THREE.Vector4(0.42,4.0,0,0)}},q:null,cc:new THREE.Color()};
+function blobPre(){const F=PSYS[2];BLOB.on=!!(PAINT&&PAINT.cur&&PAINT.blob&&F&&F.pts);if(F&&F.pts)F.pts.visible=!BLOB.on;}
+function blobFire(r,write){
+  if(!BLOB.on)return;const F=PSYS[2],pts=F.pts,m=F.mat,w=Math.max(1,write.width>>1),h=Math.max(1,write.height>>1);pts.visible=true;
+  if(!F.n&&!PGPU)return;
+  if(!BLOB.rt){BLOB.rt=new THREE.WebGLRenderTarget(w,h,{type:THREE.HalfFloatType,depthBuffer:false});
+    BLOB.q=new FullScreenQuad(new THREE.ShaderMaterial({uniforms:BLOB.U,depthTest:false,depthWrite:false,transparent:true,
+      blending:THREE.CustomBlending,blendSrc:THREE.OneFactor,blendDst:THREE.OneMinusSrcAlphaFactor,blendSrcAlpha:THREE.OneFactor,blendDstAlpha:THREE.OneMinusSrcAlphaFactor,
+      vertexShader:'varying vec2 vUv;void main(){vUv=uv;gl_Position=vec4(position.xy,0.0,1.0);}',
+      fragmentShader:'uniform sampler2D t;uniform vec4 uB;varying vec2 vUv;void main(){vec4 s=texture2D(t,vUv);float d=s.a;if(d<0.02)discard;vec3 base=s.rgb/max(d,1e-3);float thr=uB.x;'+
+        'float e=smoothstep(thr,thr+0.08,d),hh=1.0-exp(-(d-thr)/uB.y),L=dot(base,vec3(0.3,0.5,0.2));'+
+        'float hot=smoothstep(0.12,0.5,L);vec3 hue=base/max(max(base.r,max(base.g,base.b)),1e-3);'+                       // hot = ยังร้อน (เม็ดใหม่) • hue = สีย้อมของเปลว (ไฟสีอื่น)
+        'vec3 col=mix(vec3(0.95,0.2,0.02),vec3(1.0,0.48,0.03),smoothstep(0.03,0.16,hh));col=mix(col,vec3(1.0,0.72,0.08),smoothstep(0.2,0.42,hh));'+   // ขอบแดงส้ม → ส้ม → เหลืองส้ม
+        'col=mix(col,vec3(1.06,0.93,0.36),smoothstep(0.5,0.75,hh)*hot);col=mix(col,vec3(1.12,1.04,0.74),smoothstep(0.86,0.96,hh)*hot);'+             // เหลืองสด → แกนขาวเหลือง (เฉพาะส่วนที่ยังร้อน)
+        'col=mix(col*vec3(0.9,0.42,0.3),col,hot)*mix(vec3(1.0),hue*1.25,0.3);'+                                          // ส่วนที่เย็นแล้ว = ส้มแดงเข้ม
+        'float g=smoothstep(0.03,thr,d)*(1.0-e)*0.14;gl_FragColor=vec4(col*e+col*g,e*0.97);}'}));}
+  if(BLOB.rt.width!==w||BLOB.rt.height!==h)BLOB.rt.setSize(w,h);
+  const vis=[];for(const o of fxScene.children)if(o!==pts&&o.visible){o.visible=false;vis.push(o);}
+  const sc=m.uniforms.scale.value,rx=SOFTU.uRes.value.x,ry=SOFTU.uRes.value.y,bd=m.blendDst,bda=m.blendDstAlpha,ca=r.getClearAlpha();r.getClearColor(BLOB.cc);
+  PBLOB.value=1;m.uniforms.scale.value=sc*0.5*PAINT.blobSize;SOFTU.uRes.value.set(w,h);m.blendDst=m.blendDstAlpha=THREE.OneFactor;
+  r.setRenderTarget(BLOB.rt);r.setClearColor(0x000000,0);r.clear(true,false,false);r.render(fxScene,cam);
+  PBLOB.value=0;m.uniforms.scale.value=sc;SOFTU.uRes.value.set(rx,ry);m.blendDst=bd;m.blendDstAlpha=bda;r.setClearColor(BLOB.cc,ca);for(const o of vis)o.visible=true;
+  BLOB.U.t.value=BLOB.rt.texture;BLOB.U.uB.value.x=PAINT.blobThr;r.setRenderTarget(write);BLOB.q.render(r);}
 // ใบหญ้า (js/50): ย้อมเขียวเหลืองสว่าง + โคนไม่มืด เฉพาะแมพภาพวาด (mesh หญ้าสร้างทีหลังได้ → PaintPass เรียกซ้ำทุกเฟรม)
 function paintGrass(){const m=typeof GRASS!=='undefined'&&GRASS.mesh;if(!m)return;const u=m.material.userData.U.uGrPt.value,g=PAINT.grass;const c=m.material.userData.U.uGrCl.value;if(PAINT.cur){u.set(g[0],g[1],g[2],1);c.set(0.42,0.93);}else{u.set(1,1,1,0);c.set(0,0.78);}}
 // ---------- ภาพผิว: เปลือกไม้ (ครึ่งซ้าย) + ใบไม้ปาดพู่กัน 4 แบบ (ครึ่งขวา 2×2) ----------
@@ -251,6 +276,9 @@ lookPreset('paint','dusk',{sky:'noon',warm:true,env:0.75,tr:0.86,tg:1.06,tb:1.02
   Rg('stroke','ลายพู่กันบนผิว • ความเข้ม',()=>PAINT.U.uPt.value.z,v=>{PAINT.U.uPt.value.z=v;},{min:0,max:1.5,step:0.05});
   Rg('strokeHue','ลายพู่กันบนผิว • สีอุ่น/เย็น',()=>PAINT.U.uPt.value.w,v=>{PAINT.U.uPt.value.w=v;},{min:0,max:1.5,step:0.05});
   Rg('cel','แสงเงา cel-shade • ความแรง (0 = ไล่เฉดเรียบแบบเดิม)',()=>PAINT.cel,v=>{PAINT.cel=v;},{min:0,max:1,step:0.05});
+  Rg('blob','ไฟก้อนหลอมรวม (1 = เปิด)',()=>PAINT.blob,v=>{PAINT.blob=v;},{min:0,max:1,step:1});
+  Rg('blobThr','ไฟก้อน • ระดับตัดขอบ (มาก = ก้อนเล็กลง)',()=>PAINT.blobThr,v=>{PAINT.blobThr=v;},{min:0.1,max:1.5,step:0.01});
+  Rg('blobSize','ไฟก้อน • ขนาดเม็ด ×',()=>PAINT.blobSize,v=>{PAINT.blobSize=v;},{min:0.6,max:3,step:0.05});
   Rg('fxcel','ไฟ/จุดแสงแบบ cel-shade (1 = เปิด)',()=>PAINT.fxcel,v=>{PAINT.fxcel=v;},{min:0,max:1,step:1});
   Rg('vivid','VFX สีสด (1 = เปิด)',()=>PAINT.vivid,v=>{PAINT.vivid=v;},{min:0,max:1,step:1});
   Rg('bloom','แสงฟุ้งบนแมพภาพวาด',()=>PAINT.bloom,v=>{PAINT.bloom=v;},{min:0,max:1.2,step:0.01});

@@ -348,14 +348,14 @@ makeCloak:2 updateCloth:10 wandNamed:34 wandSparks:83
 §92 โมเดลนักเรียนเวทมนตร์
 SHGEO:94 SHMAT:94 SHTEX:94 sGeo:95 sMat:96 bMat:99 matKey:101 bodyPatch:107 BODYM:114 bodyMat:115 plainMat:120 mergeBody:121 sStripe:157 hashStr:158 stripeTex:159 shieldMat:160 addStatus:168 makeStudent:174 makeEnemy:281 keepTex:419 keepMatSet:420 disposeMaterial:421 disposeTree:427 disposeObj:437 PM3:438 EM3:438 JM3:438 clearDyn:439
 
-## js/30-particles.js (363) — อนุภาค 2 ชั้น: แสงเรือง (additive) + ควัน (normal)
+## js/30-particles.js (366) — อนุภาค 2 ชั้น: แสงเรือง (additive) + ควัน (normal)
 PMAX:2 PGLOW_OCC:6 PLIT:6
 §7 อนุภาคบน GPU (ผู้ใช้ 2026-11-06 ลองเล่นแล้วให้เปิดทุกคน • ?cpup = กลั…
 PGPU:10 PGPU_F:10 PG_U:10 PGPU_HEAD:11 PGPU_DEAD:18 PGPU_MV:19 pgpuGeo:20 makePointSys:24
 §72 เปลวไฟ: FLAME_STYLE 0 = อนุภาคกลมเรืองแสง (ไม่ใช้รูปเปลว) • 2 = แบบให…
-PCEL:74 FLAME_STYLE:75 PTIME:76 NOISETEX:78 FLAMETEX_V1:84 FLAMETEX_V2:89 PSYS:99 FLAMELUT:121 FLAMECOL:124 flame:125 PFB:134 ptexUse:135 ptexLoad:161 colCache:163 colCacheV:163 col3:165 CURL:168 CURL_V:169 curlAt:170 pgpuSpawn:173 _pgF:187 updateParticlesG:188 updateParticles:203
-§244 เอฟเฟกต์รูปทรง: แฟลช / วงแหวน / โดม / รอยไหม้ / สายฟ้า / แสงชั่วคราว
-SHAPES_Q:245 SHAPES:245 FLASHL:245 LINES:245 LREQ:246 ringGeo:247 ringVGeo:248 arcGeo:249 domeGeo:250 fullGeo:251 discGeo:252 decalTex:253 FX:254 jag:268 SHB:282 _sbM:282 _sbQ:282 _sbE:282 _sbS:282 _sbC:282 SHB_GEO:283 _sbDecalMat:284 shbMat:285 shbMake:296 spawnShape:308 updateShapes:318 _cp:348 updateLights:349
+PBLOB:74 PCEL:75 FLAME_STYLE:76 PTIME:77 NOISETEX:79 FLAMETEX_V1:85 FLAMETEX_V2:90 PSYS:100 FLAMELUT:124 FLAMECOL:127 flame:128 PFB:137 ptexUse:138 ptexLoad:164 colCache:166 colCacheV:166 col3:168 CURL:171 CURL_V:172 curlAt:173 pgpuSpawn:176 _pgF:190 updateParticlesG:191 updateParticles:206
+§247 เอฟเฟกต์รูปทรง: แฟลช / วงแหวน / โดม / รอยไหม้ / สายฟ้า / แสงชั่วคราว
+SHAPES_Q:248 SHAPES:248 FLASHL:248 LINES:248 LREQ:249 ringGeo:250 ringVGeo:251 arcGeo:252 domeGeo:253 fullGeo:254 discGeo:255 decalTex:256 FX:257 jag:271 SHB:285 _sbM:285 _sbQ:285 _sbE:285 _sbS:285 _sbC:285 SHB_GEO:286 _sbDecalMat:287 shbMat:288 shbMake:299 spawnShape:311 updateShapes:321 _cp:351 updateLights:352
 
 ## js/31-camera.js (189) — กล้องมุมหลังไหล่ (แบบ Hogwarts Legacy)
 yaw:2 pitch:2 lastPh:2 locked:2 CAMRS:3 SENS:4 saveSet:5 applySettings:6 camPos:14 camLook:14 overlayOpen:17 showPause:18 hidePause:19 MAPCAM:20 PLACE:22 placeKey:23 updatePlaceGhost:31 _aimD:45 rayTerr:47 aimFromCrosshair:53 AIMZ:85 WBY:85 CAM_FRAMES:89 CAM_FRAME:99 CAM_TRACK:99 _camFocus:100 _camAnchor:100 _camWant:100 cameraFrame:101 camRoomK:124 updateCamera:134 menuCamera:185
@@ -802,19 +802,21 @@ surfSync:49 surfQuality:53
 SURF_VS:55 SURF_VS_BODY:56 SURF_FS:67 SURF_FS_BODY:68 surfOk:98 surfApply:99 surfScene:111
 §112 ปรับค่า (tune.html / F8)
 
-## js/77-paint.js (260) — 
+## js/77-paint.js (288) — 
 PAINT:12 paintOn:19 paintMap:21 paintLights:30
 §39 VFX สีสด (ทดลอง): บนแมพสว่าง เอฟเฟกต์เรืองแสงเดิมซีดเป็นขาว-เหลืองอ่อ…
-_ptHSL:40 paintVivid:41 paintVfx:43 paintGrass:54
-§55 ภาพผิว: เปลือกไม้ (ครึ่งซ้าย) + ใบไม้ปาดพู่กัน 4 แบบ (ครึ่งขวา 2×2)
-paintAtlas:56 paintStrokeTex:80
-§88 ต้นไม้
-paintTreeGeo:89 paintCanopy:132 paintKit:136
-§159 ลายพู่กันบนผิว (ต่อท้าย onBeforeCompile เดิมของวัสดุ เหมือน js/76)
-PT_VS:160 PT_VS_BODY:161 PT_FS:162 PT_FS_BODY:163 PT_CEL_RE:172 PT_CEL_CHUNK:173 paintPatch:176 paintApply:191 paintSweep:193
-§194 ฉากของแมพ (เรียกจาก buildFileMap ก่อน brkSetup/batchStatic)
-paintScene:195 paintShafts:210
-§221 ฟิลเตอร์ภาพวาด (Kuwahara 4 ทิศ, 64 จุด) — เลือกค่าเฉลี่ยของมุมที่สีเร…
-§247 ปรับค่า (tune.html / F8)
+_ptHSL:40 paintVivid:41 paintVfx:43
+§53 ไฟก้อนหลอมรวม (blob / metaball) — ภาพอ้างอิงผู้ใช้ 2026-11-11: ไฟเป็น…
+BLOB:55 blobPre:56 blobFire:57 paintGrass:79
+§80 ภาพผิว: เปลือกไม้ (ครึ่งซ้าย) + ใบไม้ปาดพู่กัน 4 แบบ (ครึ่งขวา 2×2)
+paintAtlas:81 paintStrokeTex:105
+§113 ต้นไม้
+paintTreeGeo:114 paintCanopy:157 paintKit:161
+§184 ลายพู่กันบนผิว (ต่อท้าย onBeforeCompile เดิมของวัสดุ เหมือน js/76)
+PT_VS:185 PT_VS_BODY:186 PT_FS:187 PT_FS_BODY:188 PT_CEL_RE:197 PT_CEL_CHUNK:198 paintPatch:201 paintApply:216 paintSweep:218
+§219 ฉากของแมพ (เรียกจาก buildFileMap ก่อน brkSetup/batchStatic)
+paintScene:220 paintShafts:235
+§246 ฟิลเตอร์ภาพวาด (Kuwahara 4 ทิศ, 64 จุด) — เลือกค่าเฉลี่ยของมุมที่สีเร…
+§272 ปรับค่า (tune.html / F8)
 
-(99 files, 24976 lines)
+(99 files, 25007 lines)

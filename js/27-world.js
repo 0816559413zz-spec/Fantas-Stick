@@ -181,7 +181,7 @@ class FXPass extends Pass{
     AOU.uHazeD.value.y=GFX.hazeH;if(typeof lookRaysFrame==='function')lookRaysFrame();if(typeof ambFrame==='function')ambFrame();   // ฝุ่น/หมอกลอย (js/75)
     AOU.uRim.value=GFX.rim;AOU.uRimCol.value.copy(moonL.color).multiplyScalar(GFX.rim);AOU.uHazeD.value.z=GFX.rimZ;
     const ta=taaResolve(r,read),src=ta||read.texture;   // TAA: ภาพฉากที่ผสมประวัติแล้ว (กราฟิกสูง)
-    this.cp.material.uniforms.t.value=src;HAZE_U.uScene.value=src;r.setRenderTarget(write);this.cp.render(r);taaEnd();r.render(fxScene,cam);r.autoClear=ac;}
+    this.cp.material.uniforms.t.value=src;HAZE_U.uScene.value=src;r.setRenderTarget(write);this.cp.render(r);taaEnd();if(typeof blobPre==='function')blobPre();r.render(fxScene,cam);if(typeof blobFire==='function')blobFire(r,write);r.autoClear=ac;}   // blob = ไฟก้อนหลอมรวม (js/77)
 }
 const fxPass=new FXPass();composer.addPass(fxPass);
 const bloom=new UnrealBloomPass(new THREE.Vector2(512,512),0.72,0.5,0.86);

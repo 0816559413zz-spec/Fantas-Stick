@@ -20,7 +20,7 @@ float fbm(vec3 p){float f=0.0,a=0.5;for(int i=0;i<3;i++){f+=a*snoise(p);p=p*2.03
 uniform float uFCel;
 vec3 fireRamp(float h){vec3 c=mix(vec3(0.28,0.03,0.0),vec3(0.9,0.2,0.02),smoothstep(0.0,0.35,h));
  c=mix(c,vec3(1.0,0.52,0.08),smoothstep(0.3,0.58,h));c=mix(c,vec3(1.0,0.84,0.42),smoothstep(0.58,0.82,h));c=mix(c,vec3(1.0,0.97,0.86),smoothstep(0.82,1.05,h));
- if(uFCel>0.5){c=vec3(0.6,0.035,0.03);c=mix(c,vec3(1.0,0.2,0.03),smoothstep(0.25,0.275,h));c=mix(c,vec3(1.0,0.55,0.0),smoothstep(0.46,0.485,h));c=mix(c,vec3(1.0,0.88,0.16),smoothstep(0.68,0.705,h));c=mix(c,vec3(1.0,0.98,0.74),smoothstep(0.93,0.955,h));}   // cel: 5 แถบสีแบน แดงเข้ม → แดง → ส้ม → เหลือง → แกนขาวเหลือง
+ if(uFCel>0.5){c=vec3(0.85,0.1,0.02);c=mix(c,vec3(1.0,0.36,0.03),smoothstep(0.17,0.21,h));c=mix(c,vec3(1.0,0.66,0.1),smoothstep(0.26,0.33,h));c=mix(c,vec3(1.0,0.88,0.42),smoothstep(0.38,0.48,h));c=mix(c,vec3(1.06,0.96,0.5),smoothstep(0.56,0.78,h));}   // cel: 5 แถบสีแบน ขอบแดงส้มบาง → เหลือง → แกนขาวเหลืองกว้าง (ตามภาพอ้างอิงผู้ใช้ 2026-11-11)
  return c;}
 `;
 // สีเปลี่ยนได้ด้วย tint (คูณ) • int = ความสว่าง (bloom จับเฉพาะส่วนร้อน) • op = ความทึบรวม
@@ -52,7 +52,7 @@ function fireMat(o){o=o||{};const sheet=o.mode==='sheet';
   float a=smoothstep(0.06,0.32,h)*uOp;float add=smoothstep(0.5,0.92,h);
   vec3 c=fireRamp(h)*uTint*uInt;
   gl_FragColor=vec4(c*a,a*(1.0-add*0.6));
-  if(uFCel>0.5){float ca=smoothstep(0.1,0.13,h)*step(0.25,uOp);gl_FragColor=vec4(fireRamp(h)*uTint*min(uInt,1.08)*ca,ca);}}`;
+  if(uFCel>0.5){float ca=smoothstep(0.1,0.15,h)*step(0.25,uOp);gl_FragColor=vec4(fireRamp(h)*uTint*min(uInt,1.05)*ca,ca);}}`;
   const m=new THREE.ShaderMaterial({uniforms:U,vertexShader:vs,fragmentShader:fs,transparent:true,depthWrite:false,side:o.back?THREE.BackSide:o.single?THREE.FrontSide:THREE.DoubleSide,
     blending:THREE.CustomBlending,blendSrc:THREE.OneFactor,blendDst:THREE.OneMinusSrcAlphaFactor,blendSrcAlpha:THREE.OneFactor,blendDstAlpha:THREE.OneMinusSrcAlphaFactor});
   m.userData.keep=!!o.keep;return m;}
@@ -298,7 +298,7 @@ function fireVol(boxes,o){o=o||{};const n=boxes.length,pos=new Float32Array(n*24
         'float a=1.0-exp(-smoothstep(0.04,0.4,heat)*5.0*uDen*st);vec3 e=fireRamp(min(heat*0.92,1.1))*uInt;'+
         'col+=(1.0-A)*a*e;A+=(1.0-A)*a;if(A>0.97)break;}'+
       // ใกล้กล้องมาก ๆ (เช่น ขอบวงที่กล้องอยู่ข้างใน) จางลง ไม่เป็นหมอกบังจอ
-      'if(uFCel>0.5){float ca=smoothstep(0.16,0.2,mh);col=fireRamp(min(mh*0.8,1.1))*min(uInt,1.08)*ca;A=ca;}'+   // cel: สีจากจุดร้อนสุดบนเส้นมอง = แถบสีแบน ขอบคม
+      'if(uFCel>0.5){float ca=smoothstep(0.16,0.2,mh);col=fireRamp(min(mh*0.5,1.1))*min(uInt,1.05)*ca;A=ca;}'+   // cel: สีจากจุดร้อนสุดบนเส้นมอง = แถบสีแบน ขอบคม
       'float nf=smoothstep(0.8,3.0,tn);col*=nf;A*=nf;if(A<0.004)discard;gl_FragColor=vec4(col,A*uOcc);}'});
   fxMat(m);m.userData.keep=false;FXMATS.delete(m);m.depthTest=false;   // ตัดความลึกเองใน shader (uDepth)
   const mesh=new THREE.Mesh(g,m);mesh.frustumCulled=false;mesh.renderOrder=3;mesh.userData.u=U;mesh.userData.mats=[m];return mesh;}
@@ -330,7 +330,7 @@ function fireSeqVol(S,o){o=o||{};const g=new THREE.BoxGeometry(2*o.hx,o.h,2*o.hz
       'for(int i=0;i<32;i++){vec3 p=ro+rd*(tn+(float(i)+jt)*st);vec3 u=(p-bmin)/(bmax-bmin);if(u.y>uH)continue;'+
         'float v=mix(sv(u,f0),sv(u,f1),fu);float heat=v*1.15-uDis*1.1;mh=max(mh,heat);if(heat<=0.03)continue;'+
         'float al=1.0-exp(-smoothstep(0.03,0.4,heat)*6.0*uDen*st);col+=(1.0-A)*al*fireRamp(min(heat,1.1))*uInt;A+=(1.0-A)*al;if(A>0.97)break;}'+
-      'if(uFCel>0.5){float ca=smoothstep(0.16,0.2,mh);col=fireRamp(min(mh*0.85,1.1))*min(uInt,1.08)*ca;A=ca;}'+
+      'if(uFCel>0.5){float ca=smoothstep(0.16,0.2,mh);col=fireRamp(min(mh*0.55,1.1))*min(uInt,1.05)*ca;A=ca;}'+
       'float nf=smoothstep(0.8,3.0,tn);col*=nf;A*=nf;if(A<0.004)discard;gl_FragColor=vec4(col,A*uOcc);}'});
   fxMat(m);m.userData.keep=false;FXMATS.delete(m);m.depthTest=false;
   const mesh=new THREE.Mesh(g,m);mesh.frustumCulled=false;mesh.renderOrder=3;mesh.userData.u=U;mesh.userData.mats=[m];return mesh;}

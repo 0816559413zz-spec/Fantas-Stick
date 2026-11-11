@@ -214,22 +214,22 @@
   },
   {
    "id": 10,
-   "title": "ไฟทุกสกิลแบบ Cel-shade (branch graphics-painterly)",
-   "text": "ไฟสายไฟทุกสกิลเป็นสีแบนขอบคมแบบ cel บนแมพป่าลุคภาพวาด\nวิธีดู: branch graphics-painterly → เล่นแมพ 🌲 ป่า ด้วยสายไฟ • ภาพ: designs/graphics-painterly/fire-cel-*.jpg • ปิด/เปิด: tune.html → 🎨 Paint → fxcel",
+   "title": "ไฟแบบก้อนหลอมรวม ตามภาพอ้างอิง (branch graphics-painterly)",
+   "text": "ไฟสายไฟทุกสกิลเป็นก้อนไฟขอบโค้งมน แกนขาวเหลือง ขอบส้มแดง ตามภาพที่ผู้ใช้ส่ง\nวิธีดู: branch graphics-painterly → เล่นแมพ 🌲 ป่า ด้วยสายไฟ • ภาพ: designs/graphics-painterly/fire-blob-*.jpg • ปรับ: tune.html → 🎨 Paint → blob / blobThr / blobSize",
    "kind": "VFX",
    "who": "Claude",
    "status": "wait",
    "created": "2026-11-11T00:00:00",
-   "updated": "2026-11-11T00:00:00",
+   "updated": "2026-11-11T12:00:00",
    "imgs": [],
    "links": [],
    "checks": [
     {
-     "t": "สี/แถบสีของไฟ โอเคไหม",
+     "t": "ทรงก้อนไฟ ใกล้ภาพอ้างอิงพอไหม",
      "ok": false
     },
     {
-     "t": "เปลวทรงหยดน้ำ (Q, R) เยอะไป/รกไปไหม",
+     "t": "สี (แกนขาวเหลือง/ขอบส้ม) โอเคไหม",
      "ok": false
     },
     {
@@ -237,7 +237,7 @@
      "ok": false
     },
     {
-     "t": "ลูกไฟปกติเล็กไปไหม",
+     "t": "ควันก้อนดำ มากไป/น้อยไป",
      "ok": false
     }
    ]

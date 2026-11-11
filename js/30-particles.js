@@ -60,7 +60,7 @@ function makePointSys(additive){
         'float a=d*smoothstep(vA.x*0.75-0.05,vA.x*0.75+0.3,d);'+
         'float sh=0.62+0.42*clamp(0.5-c.y*0.55,0.0,1.0)+(n2-0.5)*0.3;'+
         'gl_FragColor=vec4(vC.rgb*lit*sh,min(1.0,a*1.1)*vC.a*0.72);'+
-        'if(uPCel>0.5){float e=smoothstep(0.3,0.34,a)*step(0.18,vC.a);gl_FragColor=vec4(vC.rgb*mix(vec3(1.0),lit,0.5)*(0.78+0.3*step(0.0,-c.y+(n2-0.5)*0.6)),e*0.8);}}',
+        'if(uPCel>0.5){float e=smoothstep(0.3,0.34,a)*step(0.18,vC.a);gl_FragColor=vec4(mix(vC.rgb*mix(vec3(1.0),lit,0.5),vec3(0.035,0.03,0.03),0.72)*(0.8+0.35*step(0.0,-c.y+(n2-0.5)*0.6))*e*0.86,e*0.86);}}',
     depthWrite:false,transparent:true,
     ...(additive?{blending:THREE.CustomBlending,blendSrc:THREE.OneFactor,blendDst:THREE.OneMinusSrcAlphaFactor,blendSrcAlpha:THREE.OneFactor,blendDstAlpha:THREE.OneMinusSrcAlphaFactor}:{blending:THREE.NormalBlending})
   });
@@ -71,6 +71,7 @@ function makePointSys(additive){
 // เปลวไฟรูปหยดน้ำ (ฐานเหลืองขาว → ส้ม → ปลายแดงจาง) ใช้กับอนุภาค fl:true — ผสมสีปกติ เห็นชัดแม้พื้นสว่าง
 // ===== เปลวไฟ: FLAME_STYLE 0 = อนุภาคกลมเรืองแสง (ไม่ใช้รูปเปลว) • 2 = แบบใหม่ (ลิ้นไฟ 4 แบบ คมปลาย มีแกนสว่าง ไม่กลับหัว หดเล็กและเปลี่ยนสีเหลือง→ส้ม→แดงตามอายุ)
 //       FLAME_STYLE 1 = แบบแรก (เปลวหยดน้ำเบลอ) — ผู้ใช้ขอเก็บไว้เผื่อเปลี่ยนกลับ: แก้เลขบรรทัดนี้เป็น 1 =====
+const PBLOB={value:0};   // 1 = กำลังวาดเปลวลงแผ่น 'ความร้อน' ของไฟก้อนหลอมรวม (blobFire js/77)
 const PCEL={value:0};   // 1 = ไฟ/แสงแบบ cel-shade (ลุคภาพวาด js/77): สีแบนเป็นแถบ ขอบคม ไม่ฟุ้ง
 const FLAME_STYLE=3;   // 3 = ก้อนไฟกลมขอบไหว เปลี่ยนสีตามอายุ เหลืองขาว→ส้ม→แดงเข้ม (2026-10-19 รอบอัปเกรดไฟ) • 0 = อนุภาคกลมเรืองแสงแบบเดิม • 1 = เปลวหยดน้ำ • 2 = ลิ้นไฟ
 const PTIME={value:0};
@@ -100,23 +101,25 @@ const PSYS=[makePointSys(true),makePointSys(false),makePointSys(false)];
 {const F=PSYS[2],pts=fxScene.children[fxScene.children.length-1];pts.renderOrder=4;
   if(!PGPU){F.vari=new Float32Array(PMAX);F.geo.setAttribute('pvar',new THREE.BufferAttribute(F.vari,1));}
   pts.material=new THREE.ShaderMaterial({
-  uniforms:{map:{value:FLAME_STYLE===2?FLAMETEX_V2:FLAMETEX_V1},scale:{value:600},time:PTIME,nz:{value:NOISETEX},uPCel:PCEL,...PG_U,uFL:{value:['#fff6dc','#ffd56a','#ff9a2a','#f2561a','#a8240c','#3a1208','#1a0a06'].map(c=>new THREE.Color(c))},uFT:{value:[0,0.12,0.3,0.5,0.72,0.9,1]}},
+  uniforms:{map:{value:FLAME_STYLE===2?FLAMETEX_V2:FLAMETEX_V1},scale:{value:600},time:PTIME,nz:{value:NOISETEX},uPCel:PCEL,uPBlob:PBLOB,...PG_U,uFL:{value:['#fff6dc','#ffd56a','#ff9a2a','#f2561a','#a8240c','#3a1208','#1a0a06'].map(c=>new THREE.Color(c))},uFT:{value:[0,0.12,0.3,0.5,0.72,0.9,1]}},
   vertexShader:PGPU?'varying vec4 vC;varying float vV;uniform vec3 uFL[7];uniform float uFT[7];'+PGPU_HEAD+'void main(){vV=0.0;if(!pSim()){'+PGPU_DEAD+'return;}float k=pK,t=1.0-k;vec3 L=uFL[6];for(int i=0;i<6;i++){if(t<=uFT[i+1]){L=mix(uFL[i],uFL[i+1],(t-uFT[i])/(uFT[i+1]-uFT[i]));break;}}'+
     'vC=vec4(L*aC.rgb,min(1.0,t*16.0)*min(1.0,k*2.2)*(1.0-0.5*clamp((t-0.4)/0.5,0.0,1.0)));vV=floor(8.0*(1.0-clamp((t-0.22)/0.45,0.0,1.0))+0.5)+aB.y;'+PGPU_MV+'gl_PointSize=pS*0.12*(0.55+0.45*min(1.0,t*5.0))*(1.0-0.3*t*t)*scale/-mv.z;gl_Position=projectionMatrix*mv;}':'attribute vec4 pcol;attribute float psize;attribute float pvar;uniform float scale;varying vec4 vC;varying float vV;void main(){vC=pcol;vV=pvar;vec4 mv=modelViewMatrix*vec4(position,1.0);vC.a*=smoothstep(1.2,5.0,-mv.z);gl_PointSize=psize*scale/-mv.z;gl_Position=projectionMatrix*mv;}',
   fragmentShader:FLAME_STYLE===3
     // ก้อนไฟ: ขอบเป็น noise ไหลขึ้น + แกนสว่าง • vV = seed (เศษ) + ระดับบวกแสง (จำนวนเต็ม 0-8) — ไฟใหม่บวกแสง ไฟเก่าทึบ (บังฉากหลัง)
-    ?'uniform float time;uniform float uPCel;uniform sampler2D nz;varying vec4 vC;varying float vV;'+
+    ?'uniform float time;uniform float uPCel;uniform float uPBlob;uniform sampler2D nz;varying vec4 vC;varying float vV;'+
       'void main(){vec2 c=gl_PointCoord*2.0-1.0;float sd=fract(vV),ad=floor(vV)/8.0;float n=texture2D(nz,c*0.28+vec2(sd*7.31,sd*3.17+time*0.33)).r;'+
       'float r=length(vec2(c.x,c.y*0.9-0.06));float m=1.0-smoothstep(0.32,1.0,r+(n-0.5)*0.6);if(m<=0.0)discard;float core=1.0-smoothstep(0.0,0.62,r+(n-0.5)*0.35);'+
       'float a=m*vC.a;vec3 col=vC.rgb*(0.72+0.5*core);gl_FragColor=vec4(col*a,a*(1.0-ad*0.85));'+
       // cel: ก้อนไฟทึบ 3 แถบ (ขอบแดงเข้ม / เนื้อ / แกนเหลือง) ขอบคม • จางตามอายุ = ขอบกัดเข้ามา ไม่ใช่โปร่งขึ้น
       'if(uPCel>0.5){float up=-c.y;float w=0.8*(1.0-0.62*smoothstep(-0.35,1.0,up));float rc=length(vec2((c.x+(n-0.5)*0.35*max(up,0.0))/w,c.y*0.98+0.12));m=1.0-smoothstep(0.3,1.0,rc+(n-0.5)*0.35);'+   // ทรงหยดน้ำปลายแหลมชี้ขึ้น (ลิ้นไฟ) แทนก้อนกลม
         'float th=0.3+(1.0-clamp(vC.a,0.0,1.0))*0.5;float e=smoothstep(th,th+0.045,m);vec3 b=min(vC.rgb,vec3(1.1));'+
-        'vec3 cc=mix(b*vec3(0.7,0.28,0.22),b,smoothstep(th+0.13,th+0.16,m));cc=mix(cc,min(b*1.25+vec3(0.16,0.2,0.0)*max(b.r,b.g),vec3(1.12,1.08,0.9)),smoothstep(0.72,0.75,m));gl_FragColor=vec4(cc*e,e);}}'
+        'vec3 cc=mix(b*vec3(0.7,0.28,0.22),b,smoothstep(th+0.13,th+0.16,m));cc=mix(cc,min(b*1.25+vec3(0.16,0.2,0.0)*max(b.r,b.g),vec3(1.12,1.08,0.9)),smoothstep(0.72,0.75,m));gl_FragColor=vec4(cc*e,e);}'+
+      // blob: เม็ดเปลว = ก้อนความร้อนนุ่ม (สี×น้ำหนัก, น้ำหนัก) บวกสะสมลงแผ่นแยก → blobFire ตัดขอบ/ไล่สีทีเดียวทั้งก้อน
+      'if(uPBlob>0.5){float r2=dot(c,c)*(1.0+(n-0.5)*1.1);float f=max(0.0,1.0-r2);f=f*f*clamp(vC.a*1.4,0.0,1.0);gl_FragColor=vec4(min(vC.rgb,vec3(1.4))*f,f);}}'
     :FLAME_STYLE===2
     ?'uniform sampler2D map;varying vec4 vC;varying float vV;void main(){vec2 c=vec2(mod(vV,2.0),floor(vV/2.0));vec4 t=texture2D(map,vec2((c.x+gl_PointCoord.x)*0.5,1.0-(c.y+gl_PointCoord.y)*0.5));gl_FragColor=vec4(t.rgb*vC.rgb,t.a*vC.a);}'
     :'uniform sampler2D map;varying vec4 vC;varying float vV;void main(){vec4 t=texture2D(map,vec2(gl_PointCoord.x,gl_PointCoord.y));gl_FragColor=vec4(t.rgb*vC.rgb*1.05,t.a*vC.a);}',
-  depthWrite:false,transparent:true,...(FLAME_STYLE===3?{blending:THREE.CustomBlending,blendSrc:THREE.OneFactor,blendDst:THREE.OneMinusSrcAlphaFactor,blendSrcAlpha:THREE.OneFactor,blendDstAlpha:THREE.OneMinusSrcAlphaFactor}:{blending:THREE.NormalBlending})});softify(pts.material,0.5);F.mat=pts.material;}
+  depthWrite:false,transparent:true,...(FLAME_STYLE===3?{blending:THREE.CustomBlending,blendSrc:THREE.OneFactor,blendDst:THREE.OneMinusSrcAlphaFactor,blendSrcAlpha:THREE.OneFactor,blendDstAlpha:THREE.OneMinusSrcAlphaFactor}:{blending:THREE.NormalBlending})});softify(pts.material,0.5);F.mat=pts.material;F.pts=pts;}
 // สีไฟตามอายุ (ตาราง 64 ช่อง สีเชิงเส้น): ใหม่ = เหลืองขาว → เหลืองทอง → ส้ม → แดงส้ม → แดงเข้ม → ถ่านดำ
 const FLAMELUT=(()=>{const st=[[0,'#fff6dc'],[0.12,'#ffd56a'],[0.3,'#ff9a2a'],[0.5,'#f2561a'],[0.72,'#a8240c'],[0.9,'#3a1208'],[1,'#1a0a06']].map(([t,c])=>[t,new THREE.Color(c)]),L=[];
   for(let i=0;i<64;i++){const t=i/63;let k=0;while(k<st.length-2&&st[k+1][0]<t)k++;const [t0,c0]=st[k],[t1,c1]=st[k+1],u=Math.min(1,Math.max(0,(t-t0)/(t1-t0)));L.push(c0.clone().lerp(c1,u));}return L;})();
