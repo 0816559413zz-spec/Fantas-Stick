@@ -122,7 +122,7 @@ function frostFX(o,p,pz,now,dt){
   if(o.grUp>0){o.grUp-=dt;const k=1-Math.max(0,o.grUp)/0.5;const e=1-Math.pow(1-Math.min(1,k/0.45),3);ax=lerp(-1.42,-3.0,e);az=0.05;bx=lerp(0.12,-0.2,e);by=0;}
   if(o.grDown>0){o.grDown-=dt;const k=1-Math.max(0,o.grDown)/0.3;az=-0.05;by=0;o.fwSub=0;
     if(k<0.35){const e=Math.pow(k/0.35,1.4);ax=lerp(-0.3,-2.85,e);bx=lerp(0.3,-0.25,e);if(fwOn){fwChop(P,lerp(2.35,-0.55,e),ff);P.strike=true;}}   // งัดขึ้นเร็ว
-    else{const e=1-Math.pow(1-(k-0.35)/0.65,3);ax=lerp(-2.85,-1.1,e);bx=lerp(-0.25,0,e);if(fwOn){fwChop(P,-0.55+0.5*e,ff);P.strike=false;P.rate=lerp(30,8,e);}}}
+    else{const e=1-Math.pow(1-(k-0.35)/0.65,3),pt=o.grPt||0,th=clamp(Math.PI/2-pt-0.2,0.15,1.75);ax=lerp(-2.85,-1.25-pt*0.9,e);bx=lerp(-0.25,-pt*0.28,e);if(fwOn){fwChop(P,lerp(-0.55,th,e),ff);P.strike=false;P.rate=lerp(30,10,e);}}}   // จบ: ใบชี้ตามแนวเล็ง (ผู้ใช้ 2026-11-11 คลื่นตามเป้า)
   // ฟาดจากที่สูง (กระโดดลง): อาวุธพุ่งนำลงไปข้างหน้า ปลายชี้พื้น
   if(fwOn&&o.slamT>0&&pz>0.2&&!(o.swT>0)){P.x=0;P.y=0.5;P.z=1.4;P.bx=0;P.by=-0.8;P.bz=0.6;P.nx=1;P.ny=0;P.nz=0;P.rate=14;P.strike=false;ax=-0.6;az=-0.1;bx=0.25;}
   // Frostforge เปิด (ผู้ใช้ 2026-10-22 'new animation of axe coming up'): ขวานงอกจากใต้พื้นหน้าขวา หมุนวนขึ้นมาเข้าที่

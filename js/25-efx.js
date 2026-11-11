@@ -6,7 +6,8 @@ function efxState(ev){
   switch(ev.z){
     case 'slamgo':if(o)o.slamT=1.5;break;
     case 'slam':if(o)o.slamT=0;break;
-    case 'gwave':{if(o&&!ev.cl)o.grDown=0.3;if(!(ev.len>0))break;WVV.push({x,y,a:ev.a,len:ev.len,d:0,pt:ev.pt||0,h:ev.h!==undefined?ev.h:1,gnd:0,m:frostSlashGet()});break;}   // คลื่นดาบบางแบบใหม่ (js/21 frostSlash) แทน fx frost/rend_slash
+    case 'gwave':{if(o&&!ev.cl)o.grDown=0.3;if(!(ev.len>0))break;if(o)o.grPt=ev.pt||0;WVV.push({n:ev.n,x,y,a:ev.a,len:ev.len,d:0,pt:ev.pt||0,h:ev.h!==undefined?ev.h:1,gnd:0,m:frostSlashGet()});break;}   // คลื่นดาบบางแบบใหม่ (js/21 frostSlash) แทน fx frost/rend_slash
+    case 'gwend':{const w=WVV.find(q=>q.n===ev.n);if(w){w.x=x;w.y=y;w.h=ev.h??w.h;w.hitWall=1;w.d=w.len;}break;}   // คลื่นดาบชนกำแพงกลางอากาศ
     case 'glacier':if(o)o.grUp=0.5;if(ev.len>0)GLV.push(makeGlacier(x,y,ev.a,ev.len,ev.t));break;
     case 'mirror':ULTV.push({x,y,a:ev.a,d:0,acc:100});break;
     case 'colbolt':if(o)o.colShot=performance.now();break;   // Colossus: เวลาปาล่าสุด → ท่าเหวี่ยงแขนในไฟล์เอฟเฟกต์ (param tw) แม้ bind แบบ replace

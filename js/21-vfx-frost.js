@@ -165,7 +165,7 @@ function updateZV(dt){
     // เศษน้ำแข็งเล็กปลิวตามหลัง (น้อย ไม่บังเส้น)
     for(let q=0;q<2;q++){const s=rnd(-34,34);PARTS.push({x:x+px*s-c*10,y:y+py*s-sn*10,h:(w.gnd?0:w.h)+rnd(0.2,1.8),vx:c*120,vy:sn*120,vh:rnd(0,2),life:0.3,max:0.3,col:q?'#ffffff':'#bfeaff',size:rnd(1.4,2.4),g:4,drag:3});}
     if(w.d>=w.len){if(w.gnd){playFx('ice_impact',x,y,1.2,{s:0.8});iceRing(x,y,30,8,0.9,0.5,{up:0.06,down:0.25});iceChips(x,y,1,8,200,4);}
-      else burst(x,y,'#dff6ff',14,180,0.3,2,{h:w.h,g:1});
+      else{burst(x,y,'#dff6ff',w.hitWall?26:14,w.hitWall?260:180,0.3,2,{h:w.h,g:1});if(w.hitWall){iceChips(x,y,0.8,10,240,4);if(nearMe(x,y,900))snd('break',{x,y,vol:0.5});}}
       frostSlashPut(M);WVV.splice(i,1);}
   }
   for(let i=COLB.length-1;i>=0;i--){
