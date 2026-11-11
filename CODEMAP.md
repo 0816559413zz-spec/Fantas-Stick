@@ -266,12 +266,12 @@ burst:144 smoke:155 ring:156 floatText:157 shake:158 wandPos:159 impactFX:161 ex
 §195 เอฟเฟกต์คาถาใหม่
 ZV:196 COLB:196 WVV:196 GLV:196 ICEV:196 SLV:196 ULTV:196 OBV:196 _iceDisc:198 _iceEdge:199 _iceSpk:200 iceFloorMat:201 _icePlane:202 _icePathMat:203 _iceWvM:203 iceWvMat:205 makeIceFloor:217 ICE_WV:244 updateIceFloors:245 FLASHM:257 FLASHING:258 flashModel:259 endFlash:268 tickFlash:269 GHOSTM:271 SOLIDM:271 ghostOf:272 setGhost:278 hitSparks:286
 
-## js/20-vfx-pyro-storm.js (713) — Dragonfall (ภาพ)
-makeDfCircle:3 DFV:21 dfCracks:22 updateDfCracks:32 _domeAim:33 domeChargeOrb:34 _spearUp:42 _spearDir:42 _spearA:42 _spearB:42 DOME_SPEAR_LEN:43 stormDomePath:44 stormDomeSpearFX:48 stormDomeHoverFX:79 stormDomeReadyFX:100 stormDomeGroundPoint:121 stormDomeFracture:124 stormDomeFloorPullFX:170 stormDomeFieldFX:197 stormDomePose:233 dragonfallFX:297
-§356 สายฟ้า (ภาพ)
-TBN:359 TBA:359 TBF:359 TBMAX:359 _tv:360 _tt:360 _ts:360 _tw:360 tbLayer:362 TBL:367 TBC:368 _tcc:369 domeCyan:370 domeGold:371 tbGet:372 TBLUE:375 TBFIRE:375 tboltB:376 tbolt:377 tboltP:386 tbWrite:387 updateBolts:395 LATER:420 STV:420 SBV:420 SDV:420 TSV:420 CLV:420 stTgPos:422 STCLAW:426
-§430 รอยกรงเล็บ (อัลติสายฟ้า): รอยข่วน 3 เส้นโค้งปลายแหลมขนานกัน ตั้งขวางห…
-clawGeo:433 clawRakes:438 updateClaws:452 later:460 stFade:461 stBeam:462 shellPt:467 updateStormV:468 _ev:511 GODPTS:513 bWorld:515 stormClawSwipe:519 stormFX:546 STHUD:668 drawStormHud:669
+## js/20-vfx-pyro-storm.js (716) — Dragonfall (ภาพ)
+makeDfCircle:3 DFV:21 dfCracks:22 updateDfCracks:32 _domeAim:33 domeChargeOrb:34 _spearUp:42 _spearDir:42 _spearA:42 _spearB:42 DOME_SPEAR_LEN:43 stormDomePath:44 stormDomeSpearFX:48 stormDomeHoverFX:79 stormDomeReadyFX:103 stormDomeGroundPoint:124 stormDomeFracture:127 stormDomeFloorPullFX:173 stormDomeFieldFX:200 stormDomePose:236 dragonfallFX:300
+§359 สายฟ้า (ภาพ)
+TBN:362 TBA:362 TBF:362 TBMAX:362 _tv:363 _tt:363 _ts:363 _tw:363 tbLayer:365 TBL:370 TBC:371 _tcc:372 domeCyan:373 domeGold:374 tbGet:375 TBLUE:378 TBFIRE:378 tboltB:379 tbolt:380 tboltP:389 tbWrite:390 updateBolts:398 LATER:423 STV:423 SBV:423 SDV:423 TSV:423 CLV:423 stTgPos:425 STCLAW:429
+§433 รอยกรงเล็บ (อัลติสายฟ้า): รอยข่วน 3 เส้นโค้งปลายแหลมขนานกัน ตั้งขวางห…
+clawGeo:436 clawRakes:441 updateClaws:455 later:463 stFade:464 stBeam:465 shellPt:470 updateStormV:471 _ev:514 GODPTS:516 bWorld:518 stormClawSwipe:522 stormFX:549 STHUD:671 drawStormHud:672
 
 ## js/21-vfx-frost.js (206) — น้ำแข็ง (ภาพ): ชิ้นผลึก/หนาม/แผ่นน้ำแข็งชั่วคราว (โผล่ → ค้าง → หด) •…
 FRV:2 _cryG:3 _spkG:3 _plateG:3 _hexG:3 _iceFxM:4 _frostM:4 iceFxM:5 frostM:6 ICEP:8 _im4:8 _iq:8 _ie:8 _ip:8 _is:8 icePool:9 iceBit:10 iceChips:13 updateFRV:14 iceRing:24 chillFX:25 makeSlash:41 _wbGeo:49 crescentGeo:51 makeWaveBlade:54 WGH:68 updateSlashes:69 _glGeo:82 _glMat:82 _glMat2:82 makeGlacier:83 updateGlacierVis:114 updateOrbShots:123 updateZV:133 WM3:206
@@ -454,7 +454,7 @@ _wpM:108 fileWeapon:109
 §117 Ice circle (Permafrost): ริบบิ้นแสงวนเป็นก้นหอยบนพื้น + ผลึกลอยหมุนรอ…
 SWIRL_FS:118 ICIRC:122 iceCircle:123 updateIceCircles:134
 
-## js/44-vfx-kit.js (374) — 
+## js/44-vfx-kit.js (390) — 
 §8 1) หางแสง
 TRMAX:11 TRPTS:11 TRAILS:11 _trL:12 trailLayer:13 trailNew:22 trailPoint:24 trailStop:27 _tv1:28 _tv2:28 _tv3:28 updateTrails:29
 §52 2) สูตรเอฟเฟกต์ = จานสี (ธาตุ) × แม่แบบ (ขนาด/ชนิด)
@@ -463,12 +463,12 @@ VFXPAL:56 VFXTPL:72 VFXSIG:84 VFXSIGK:92 VFXR:94 _palCache:97 palOf:98 _pc:101 p
 EFXAUG:147 PJPAL:166 pjPal:168 ULTCOL:169 efxAug:170 VFXAUG_ON:174 fxAug:175
 §195 3b) สนามรบ (designs/battlefield.md ขั้น 1, แบบ C): ทุกสกิลทิ้งควัน/ฝุ…
 BF_EL:198 BF_CLS:198 BF_EXTRA:200 BF:203 bfAfter:204 bfPlay:224
-§228 3c) สนามรบ ขั้น 2: รอยค้างบนพื้น + ซากรก ๆ ค้างทั้งแมตช์ (ล้างเมื่อเร…
-BFM:231 BF_MK:232 BF_MKA:232 BF_MKR:232 bfMarkMesh:233 _bfQ:241 _bfQ2:241 _bfN:241 _bfUp:241 _bfS:241 _bfP:241 _bfMx:241 bfMark:243 updateBfMarks:252 BFRS:257 bfRestPool:258 bfRestAdd:263 bfBinAdd:269 bfBinBuild:273 bfRest:278 bfScatter:284 _rockMat:292 bfCollapse:294 updateBfRest:301 bfClear:307
-§311 3d) สนามรบ ขั้น 5: บรรยากาศตามความพังรอบตัว (designs/battlefield.md)
-BFA:315 bfWreck:316 updateBfAir:321 bfRumble:344 updateBf:347
-§350 4) เอฟเฟกต์ทั้งจอ (ค่าไปที่ GradePass ใน js/27-world.js)
-SCR:351 impactFrame:354 screenFlash:355 screenRadial:356 screenKick:357 screenHurt:358 _scv:359 updateScreenFx:360 updateVfxKit:374
+§228 3c) สนามรบ ขั้น 2: รอยค้างบนพื้น + ซากรก ๆ (หายเองหลัง BF_LIFE วิ, เด…
+BF_LIFE:232 BF_FADE:232 BFM:233 BF_MK:234 BF_MKA:234 BF_MKR:234 bfMarkMesh:235 _bfQ:243 _bfQ2:243 _bfN:243 _bfUp:243 _bfS:243 _bfP:243 _bfMx:243 bfMark:245 bfAge:254 updateBfMarks:267 BFRS:272 bfRestPool:273 bfRestAdd:278 bfBinAdd:285 bfBinBuild:289 bfRest:294 bfScatter:300 _rockMat:308 bfCollapse:310 updateBfRest:317 bfClear:323
+§327 3d) สนามรบ ขั้น 5: บรรยากาศตามความพังรอบตัว (designs/battlefield.md)
+BFA:331 bfWreck:332 updateBfAir:337 bfRumble:360 updateBf:363
+§366 4) เอฟเฟกต์ทั้งจอ (ค่าไปที่ GradePass ใน js/27-world.js)
+SCR:367 impactFrame:370 screenFlash:371 screenRadial:372 screenKick:373 screenHurt:374 _scv:375 updateScreenFx:376 updateVfxKit:390
 
 ## js/45-fx-runtime.js (395) — 
 FXR:9 FXDEG:10
@@ -805,4 +805,4 @@ surfSync:49 surfQuality:53
 SURF_VS:55 SURF_VS_BODY:56 SURF_FS:67 SURF_FS_BODY:68 surfOk:98 surfApply:99 surfScene:111
 §112 ปรับค่า (tune.html / F8)
 
-(98 files, 25377 lines)
+(98 files, 25396 lines)

@@ -225,9 +225,11 @@ function bfPlay(name,el,x,y,h,s){if(!nearMe(x,y,1600))return;
   const k=name+'|'+Math.round(x/40)+'|'+Math.round(y/40),t=performance.now(),o=BF.last.get(k);if(o&&t-o<250)return;
   BF.last.set(k,t);if(BF.last.size>400)BF.last.clear();
   fxPlay('env/'+name,{x,y,h,s});}
-// ---------- 3c) สนามรบ ขั้น 2: รอยค้างบนพื้น + ซากรก ๆ ค้างทั้งแมตช์ (ล้างเมื่อเริ่มแมตช์ใหม่ — bfClear จาก setScreen js/19) ----------
+// ---------- 3c) สนามรบ ขั้น 2: รอยค้างบนพื้น + ซากรก ๆ (หายเองหลัง BF_LIFE วิ, เดิมค้างทั้งแมตช์) (ล้างเมื่อเริ่มแมตช์ใหม่ — bfClear จาก setScreen js/19) ----------
 // รอย = InstancedMesh เดียว ภาพ assets/fx/tex/bf_marks.png (4×2 ช่อง จาก tools/bf-mark-gen.py) • ทุกรอยเก็บ {x,y,el,r} ไว้ใน BFM.at (ไว้เปลี่ยนเป็นหลุมจริงทีหลัง)
 // ซาก = ชิ้นที่ตกนิ่งแล้ว (DEBRIS js/23, rockChunks js/42, bfScatter) ย้ายเข้า InstancedMesh ต่อ (geometry, วัสดุ) → วาดถูก ค้างได้เป็นพัน • สตูดิโอ VFX = ไม่ค้าง (หดหายแบบเดิม)
+// ผู้ใช้ 2026-11-11: รอยและซากบนพื้นหายเองหลัง BF_LIFE วิ (ค้าง แล้วจาง/ยุบลงพื้นใน BF_FADE วิ สุดท้าย) — เดิมค้างทั้งแมตช์
+const BF_LIFE=8,BF_FADE=2;
 const BFM={MAX:300,N:{high:300,auto:190,low:80},mesh:null,attr:null,n:0,head:0,at:[],grow:[]};
 const BF_MK={fire:[0,1],storm:[2,3],earth:[4,5],ice:[6,7]},BF_MKA={fire:0.92,storm:0.88,earth:0.85,ice:0.82},BF_MKR={fire:1,storm:1.1,earth:1.05,ice:1.1};
 function bfMarkMesh(){if(BFM.mesh)return BFM.mesh;
@@ -242,14 +244,27 @@ const _bfQ=new THREE.Quaternion(),_bfQ2=new THREE.Quaternion(),_bfN=new THREE.Ve
 // รอยค้าง ณ จุดเกม x,y (ธาตุ el, ขนาด s 0.45–1.8) • จุดเดิมธาตุเดิมซ้ำ = เข้มขึ้นแทนการซ้อนรอยใหม่ • เอียงตามเนินพื้น
 function bfMark(x,y,el,s){const C=BF_MK[el];if(!C||FXSTUDIO.own)return;const M=bfMarkMesh();
   const r=(0.75+1.9*s)*BF_MKR[el],a=BF_MKA[el]*Math.min(1,0.6+0.3*s);
-  for(let i=0;i<BFM.n;i++){const q=BFM.at[i];if(q&&q.el===el&&q.r>=r*0.75&&Math.hypot(q.x-x,q.y-y)*S3<r*0.45){q.a=Math.min(1,q.a+0.2);if(!BFM.grow.includes(i))BFM.grow.push(i);return;}}
+  for(let i=0;i<BFM.n;i++){const q=BFM.at[i];if(q&&!q.dead&&q.el===el&&q.r>=r*0.75&&Math.hypot(q.x-x,q.y-y)*S3<r*0.45){q.a=Math.min(1,q.a+0.2);q.t0=performance.now();if(!BFM.grow.includes(i))BFM.grow.push(i);return;}}
   const cap=Math.min(BFM.MAX,BFM.N[QUAL.mode]||190);let i;if(BFM.n<cap)i=BFM.n++;else{i=BFM.head%cap;BFM.head=(BFM.head+1)%cap;}
   const d=r/S3,gx=(GY(x+d,y)-GY(x-d,y))/(2*r),gz=(GY(x,y+d)-GY(x,y-d))/(2*r);
   _bfN.set(-gx,1,-gz).normalize();_bfQ.setFromUnitVectors(_bfUp,_bfN);_bfQ2.setFromAxisAngle(_bfUp,Math.random()*6.283);_bfQ.multiply(_bfQ2);
   _bfMx.compose(_bfP.set(tx(x),GY(x,y)+0.015,tz(y)),_bfQ,_bfS.set(r*(Math.random()<0.5?-1:1),1,r));M.setMatrixAt(i,_bfMx);M.instanceMatrix.needsUpdate=true;
   const c=C[Math.random()*C.length|0];BFM.attr.setXYZ(i,(c%4)*0.25,c<4?0.5:0,0);BFM.attr.needsUpdate=true;
-  BFM.at[i]={x,y,el,r,a,a0:0};if(!BFM.grow.includes(i))BFM.grow.push(i);M.count=BFM.n;}
-function updateBfMarks(dt){if(!BFM.grow.length)return;
+  BFM.at[i]={x,y,el,r,a,a0:0,t0:performance.now()};if(!BFM.grow.includes(i))BFM.grow.push(i);M.count=BFM.n;}
+function bfAge(){const now=performance.now(),L=BF_LIFE*1000,F=BF_FADE*1000;
+  // รอย: จางตามอายุ หมดแล้วซ่อน (ช่องนั้นถูกใช้ใหม่ตามรอบเดิม)
+  let ch=false;for(let i=0;i<BFM.n;i++){const q=BFM.at[i];if(!q||q.dead)continue;const age=now-q.t0;if(age<L-F)continue;
+    const k=Math.max(0,(L-age)/F);if(k<=0){q.dead=1;q.a=q.a0=0;}else{q.a=Math.min(q.a,q.a0*0+BF_MKA[q.el]*k);q.a0=Math.min(q.a0,q.a);}BFM.attr.setZ(i,q.a0);ch=true;}
+  if(ch)BFM.attr.needsUpdate=true;
+  // ซากนิ่ง: ยุบลงพื้นช่วงท้าย แล้วซ่อน (ขนาด 0)
+  for(const p of BFRS.pools.values()){if(!p.t)continue;let up=false;const A=p.M.instanceMatrix.array;
+    for(let i=0;i<p.n;i++){const t=p.t[i];if(!t)continue;const age=now-t;if(age<L-F)continue;const k=Math.max(0,(L-age)/F);
+      _bfMx.fromArray(p.b,i*16);_bfMx.decompose(_bfP,_bfQ,_bfS);_bfS.multiplyScalar(k);_bfP.y-=(1-k)*0.25;_bfMx.compose(_bfP,_bfQ,_bfS);_bfMx.toArray(A,i*16);if(k<=0)p.t[i]=0;up=true;}
+    if(up)p.M.instanceMatrix.needsUpdate=true;}
+  // ชิ้นใหญ่ (bin): ครบอายุเอาออกแล้วรวม mesh ใหม่
+  while(BFRS.big.length&&now-BFRS.big[0].t>L){const o=BFRS.big.shift(),q=o.b.geos.shift();if(q)q.dispose();BFRS.dirty=true;}
+  for(let i=BFA.col.length-1;i>=0;i--)if(now-(BFA.col[i].t0||now)>L)BFA.col.splice(i,1);}
+function updateBfMarks(dt){if((BFM.ageT=(BFM.ageT||0)-dt)<=0){BFM.ageT=0.1;bfAge();}if(!BFM.grow.length)return;
   for(let k=BFM.grow.length-1;k>=0;k--){const i=BFM.grow[k],q=BFM.at[i];if(!q){BFM.grow.splice(k,1);continue;}
     q.a0=Math.min(q.a,q.a0+dt*2.2);BFM.attr.setZ(i,q.a0);if(q.a0>=q.a)BFM.grow.splice(k,1);}
   BFM.attr.needsUpdate=true;}
@@ -264,12 +279,13 @@ function bfRestAdd(geo,mat,mx){const p=bfRestPool(geo,mat),max=BFRS.N[QUAL.mode]
   if(p.n>=p.cap&&p.cap<max){const cap=Math.min(max,p.cap*2),M=new THREE.InstancedMesh(geo,mat,cap);M.instanceMatrix.array.set(p.M.instanceMatrix.array);
     M.frustumCulled=false;M.castShadow=p.M.castShadow;M.receiveShadow=true;scene.remove(p.M);p.M.dispose();scene.add(M);p.M=M;p.cap=cap;}
   let i;if(p.n<p.cap)i=p.n++;else{i=p.head;p.head=(p.head+1)%p.cap;}
-  p.M.setMatrixAt(i,mx);p.M.count=p.n;p.M.instanceMatrix.needsUpdate=true;}
+  p.M.setMatrixAt(i,mx);p.M.count=p.n;p.M.instanceMatrix.needsUpdate=true;
+  if(!p.t||p.t.length<p.cap){const t=new Float64Array(p.cap),b=new Float32Array(p.cap*16);if(p.t){t.set(p.t);b.set(p.b);}p.t=t;p.b=b;}p.t[i]=performance.now();mx.toArray(p.b,i*16);}
 // ชิ้นใหญ่รูปทรงไม่ซ้ำ (ชิ้นผนังจากไฟล์บ้าน) = รวม mesh ต่อวัสดุ (bin) สร้างใหม่ทีละช่วงตอนมีชิ้นเพิ่ม • เกินเพดาน = ทิ้งชิ้นเก่าสุด
 function bfBinAdd(m){const g=m.geometry,key=m.material.uuid+'|'+Object.keys(g.attributes).sort().join(',')+'|'+(g.index?1:0);
   let b=BFRS.bins.get(key);if(!b)BFRS.bins.set(key,b={mat:m.material,geos:[],mesh:null});
-  const c=g.clone();for(const k in c.morphAttributes)delete c.morphAttributes[k];c.applyMatrix4(m.matrixWorld);b.geos.push(c);BFRS.big.push(b);BFRS.dirty=true;
-  const max=BFRS.M[QUAL.mode]||250;while(BFRS.big.length>max){const o=BFRS.big.shift(),q=o.geos.shift();if(q)q.dispose();}}
+  const c=g.clone();for(const k in c.morphAttributes)delete c.morphAttributes[k];c.applyMatrix4(m.matrixWorld);b.geos.push(c);BFRS.big.push({b,t:performance.now()});BFRS.dirty=true;
+  const max=BFRS.M[QUAL.mode]||250;while(BFRS.big.length>max){const o=BFRS.big.shift(),q=o.b.geos.shift();if(q)q.dispose();}}
 function bfBinBuild(){BFRS.dirty=false;for(const b of BFRS.bins.values()){
   if(b.mesh){scene.remove(b.mesh);b.mesh.geometry.dispose();b.mesh=null;}if(!b.geos.length)continue;
   const g=mergeGeometries(b.geos,false);if(!g)continue;b.mesh=new THREE.Mesh(g,b.mat);b.mesh.castShadow=QUAL.mode!=='low';b.mesh.receiveShadow=true;scene.add(b.mesh);}}
@@ -278,7 +294,7 @@ function bfBinBuild(){BFRS.dirty=false;for(const b of BFRS.bins.values()){
 function bfRest(o,smo,big){if(FXSTUDIO.own||!BF.on)return false;
   o.updateMatrixWorld(true);o.traverse(m=>{if(m.isMesh&&m.visible&&!Array.isArray(m.material)){if(big)bfBinAdd(m);else bfRestAdd(m.geometry,m.material,m.matrixWorld);}});
   if(o.parent)o.parent.remove(o);
-  if(smo&&BFRS.smoke.length<30){const q=simOf(o.position);BFRS.smoke.push({x:q.x,y:q.y,h:q.h,t:rnd(10,22),acc:Math.random()});}
+  if(smo&&BFRS.smoke.length<30){const q=simOf(o.position);BFRS.smoke.push({x:q.x,y:q.y,h:q.h,t:rnd(5,BF_LIFE),acc:Math.random()});}
   return true;}
 // เศษเล็กโปรยนิ่งรอบจุด (ไม่มีฟิสิกส์ — ใส่ pool ทันที): กรวด/หิน/ไม้/น้ำแข็ง ให้พื้นรก ๆ แบบสนามรบ • kind: 'rock' | 'ice' | 'char' | mats = [วัสดุ...]
 function bfScatter(x,y,R,n,kind,size){if(FXSTUDIO.own||!BF.on||!nearMe(x,y,1800))return;n=Math.round(n*(QUAL.mode==='low'?0.35:QUAL.mode==='high'?1:0.7));
@@ -291,12 +307,12 @@ function bfScatter(x,y,R,n,kind,size){if(FXSTUDIO.own||!BF.on||!nearMe(x,y,1800)
     _bfMx.compose(_bfP.set(tx(px),GY(px,py)+_bfS.y*0.3,tz(py)),_bfQ,_bfS);bfRestAdd(geo,mat,_bfMx);}}
 function _rockMat(){return _rockM||(_rockM=new THREE.MeshStandardMaterial({color:'#3d3833',roughness:1,flatShading:true}));}
 // ฝุ่นก้อนใหญ่ตอนตึก/บ้านถล่มทั้งหลัง (w,d = ขนาดพิกเซลเกม) • charred = เคยโดนไฟ → ควันกรุ่น + รอยไหม้
-function bfCollapse(x,y,w,d,charred){if(!BF.on)return;BFA.col.push({x,y,w:4+Math.max(w,d)/60});if(!nearMe(x,y,2400))return;BFRS.nCol++;
+function bfCollapse(x,y,w,d,charred){if(!BF.on)return;BFA.col.push({x,y,w:4+Math.max(w,d)/60,t0:performance.now()});if(!nearMe(x,y,2400))return;BFRS.nCol++;
   snd('rubble',{x,y,vol:1});const s=clamp(Math.max(w,d)/180,0.8,2.6);
   fxPlay('env/bf_collapse',{x,y,h:0,s});
   const R=Math.max(w,d)*0.6;bfScatter(x,y,R,30*s,'rock',1.2);
   for(let k=0;k<5;k++){const an=Math.random()*6.283,dd=Math.sqrt(Math.random())*R*0.8;bfMark(x+Math.cos(an)*dd,y+Math.sin(an)*dd,charred?'fire':'earth',1.2+Math.random()*0.5);}
-  if(charred)for(let k=0;k<6&&BFRS.smoke.length<46;k++)BFRS.smoke.push({x:x+rnd(-w,w)*0.35,y:y+rnd(-d,d)*0.35,h:1,t:rnd(18,30),acc:Math.random(),big:1});}
+  if(charred)for(let k=0;k<6&&BFRS.smoke.length<46;k++)BFRS.smoke.push({x:x+rnd(-w,w)*0.35,y:y+rnd(-d,d)*0.35,h:1,t:rnd(6,BF_LIFE),acc:Math.random(),big:1});}
 // ควันกรุ่นจากซากที่โดนไฟ (ค่อย ๆ จางจนหมด)
 function updateBfRest(dt){const S=BFRS.smoke;
   if(BFRS.dirty&&(BFRS.reT-=dt)<=0){BFRS.reT=0.4;bfBinBuild();}   // ชิ้นใหญ่ที่เพิ่งนิ่ง → รวม mesh ใหม่ (ไม่เกินทุก 0.4 วิ)

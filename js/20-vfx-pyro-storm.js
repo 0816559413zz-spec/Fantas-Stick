@@ -82,7 +82,10 @@ function stormDomeHoverFX(o,now,power){
   const {x,y,h}=simOf(o.g.position),z=h-GY(x,y),a=now/160;
   for(let i=0;i<2;i++){
     const k=a+i*Math.PI,s=Math.sin(k),c=Math.cos(k),end=k+0.65;
-    tbolt(x+c*8,y+s*8,z+0.12,x+Math.cos(end)*16,y+Math.sin(end)*16,z-rnd(0.65,1.2),0.09,0,0.07,0);
+    const sx=x+c*8,sy=y+s*8,ex=x+Math.cos(end)*16,ey=y+Math.sin(end)*16;
+    const path=[new THREE.Vector3(tx(sx),z+0.12+GY(sx,sy),tz(sy)),
+      new THREE.Vector3(tx(ex),z-rnd(0.65,1.2)+GY(ex,ey),tz(ey))];
+    stormDomePath(path,0.09,0.055,0.09,power>=1?0.72:0.32,i===1);
     const b=k+1.2,dx=Math.cos(b),dy=Math.sin(b),r=rnd(15,24),life=rnd(0.24,0.4);
     PARTS.push({x:x+dx*r,y:y+dy*r,h:z+rnd(0.25,1.75),vx:dx*16,vy:dy*16,vh:rnd(0.3,0.95),life,max:life,col:i?'#9fd8ff':'#ffe482',size:rnd(1.2,2.2),g:1.1});
   }
@@ -99,9 +102,9 @@ function stormDomeHoverFX(o,now,power){
 }
 function stormDomeReadyFX(x,y,h){
   SHAPES_Q.push(
-    {k:'dome',full:1,x,y,h,col:'#ffcf32',s0:0.25,s1:11,life:0.38,op:0.16},
-    {k:'dome',full:1,x,y,h,col:'#28daff',s0:0.2,s1:8.6,life:0.28,op:0.075,delay:0.055},
-    {k:'ring',x,y,h,col:'#ffe665',s0:0.4,s1:11.4,life:0.36,op:0.78}
+    {k:'dome',full:1,x,y,h,col:'#ffb200',s0:0.25,s1:9.8,life:0.36,op:0.055},
+    {k:'dome',full:1,x,y,h,col:'#19c5ff',s0:0.2,s1:8.4,life:0.28,op:0.038,delay:0.045},
+    {k:'ring',x,y,h,col:'#ffc318',s0:0.4,s1:9.9,life:0.35,op:0.25}
   );
   const center=new THREE.Vector3(tx(x),GY(x,y)+h,tz(y));
   for(let i=0;i<28;i++){
@@ -109,12 +112,12 @@ function stormDomeReadyFX(x,y,h){
     const speed=rnd(105,225),vh=rnd(-5,7),life=rnd(0.28,0.62),col=cyan?'#28daff':'#ffd951';
     const sx=x+dx*5,sy=y+dy*5,sz=center.y-GY(sx,sy);
     PARTS.push({x:sx,y:sy,h:sz,vx:dx*speed,vy:dy*speed,vh,life,max:life,col,size:rnd(2.1,3.4),g:4});
-    if(i%3!==2){
+    if(i<12){
       const reach=rnd(2.4,5.1),rise=vh*0.32;
       const path=[center,center.clone().add(new THREE.Vector3(dx*reach*0.42,rise*0.4,dy*reach*0.42)),
         center.clone().add(new THREE.Vector3(dx*reach*0.65-dy*0.28,rise*0.85,dy*reach*0.65+dx*0.28)),
         center.clone().add(new THREE.Vector3(dx*reach,rise,dy*reach))];
-      stormDomePath(path,rnd(0.15,0.25),cyan?0.063:0.09,0.13,1.18,cyan);
+      stormDomePath(path,rnd(0.15,0.25),cyan?0.048:0.065,0.13,0.86,cyan);
     }
   }
 }
@@ -216,8 +219,8 @@ function stormDomeFieldFX(d,age){
       stormDomeGroundPoint(d,d.x+Math.cos(angle+0.40)*d.r*0.71,d.y+Math.sin(angle+0.40)*d.r*0.71)];
     stormDomePath(fork,0.085,0.046,0.017,0.92,true);
   }
-  for(let i=0;i<2;i++){
-    const angle=a+i*2.4,e=rnd(0.4,0.95),path=[];
+  for(let i=0;i<3;i++){
+    const angle=a+i*2.4,e=i===2?rnd(0.92,1.15):rnd(0.4,0.95),path=[];
     for(let j=0;j<5;j++){
       const q=shellPt(d.x,d.y,0,d.r,angle+j*0.19,e+Math.sin(j*1.7)*0.13);
       path.push(new THREE.Vector3(tx(q[0]),d.entry.y+q[2],tz(q[1])));
@@ -227,7 +230,7 @@ function stormDomeFieldFX(d,age){
       path.push(path[4].clone().lerp(floor,0.52).add(new THREE.Vector3(0.3,0,-0.25)),floor);
       burst(q.x,q.y,'#12d9ff',6,52,0.25,2.3,{h:floor.y-GY(q.x,q.y),vh:[0.6,2.3],g:4});
     }
-    stormDomePath(path,0.115,i===0?0.096:0.071,0.13,1.03,i===0);
+    stormDomePath(path,0.115,i===0?0.096:0.071,0.13,i===2?0.78:1.03,i===0);
   }
 }
 function stormDomePose(o,p,pz,now){
@@ -291,7 +294,7 @@ function stormDomePose(o,p,pz,now){
   stormDomeSpearFX(spear,power,length,now);
   const q=simOf(spear.localToWorld(_spearA.set(0,0.5,0))),h=q.h-GY(q.x,q.y);
   if(full&&!o.domeReady){o.domeReady=true;stormDomeReadyFX(q.x,q.y,h);}
-  LREQ.push({x:tx(q.x),y:q.h,z:tz(q.y),col:'#ffd11a',int:full?2.8:lerp(0.15,0.42,power),dist:full?8:4});
+  LREQ.push({x:tx(q.x),y:q.h,z:tz(q.y),col:'#ffd11a',int:full?1.65:lerp(0.15,0.42,power),dist:full?8:4});
   return knee;
 }
 function dragonfallFX(o,p,pz,now,dt){
