@@ -1,5 +1,7 @@
 # HANDOFF — Fantas Stick (was "Wizard Duel") (repo: Fantas-Stick)
 
+**Map Builder (แผนที่จริงเข้าเกม) 2026-11-11:** Tool ใหม่ `mapbuild.html` (`mapbuild/app.js` + `mapbuild/model.js`, คู่มือ `guides/MAP-BUILDER.md`) — ปั้นพื้นเนียนบนตาราง 0.5 ม. (ตารางชนของเกม), ระบายพื้นผิว, กำแพงอิสระ (เส้นตรง/โค้ง พังได้), พื้นชั้นบน/สะพาน/ทางลาด, วาง/โปรยของจากคลัง `assets/mapkit/kit.json` (160 ชิ้น ดึงจาก `assets/maps/*.glb` ด้วย `node tools/mapkit-gen.js` + ผู้ใช้เพิ่ม .glb เองได้), จุดเกิด/ไฟ, ท้องฟ้า/หมอก/โหมด, ตัวตรวจ. ต้นฉบับ `maps/build/<id>.json` → **⬆ ส่งเข้าเกม** เขียน `assets/maps/<id>.json` + `.glb` + manifest (รูปแบบเดียวกับ Blender exporter ผ่าน `/api/mb*` ใน `tools/serve.py`) → **▶ ทดลองเล่น** เปิด `index.html?nosw&playmap=<id>` (ข้ามหน้าเปิด เริ่มห้องฝึกบนแผนที่นั้น; `PLAYMAP` js/02-data/11-host/39-menu/40). ฝั่งเกมแก้แค่: `regFileMap` ส่งต่อ `bot` (วงชนลอย) + `playmap`. ไม่เปลี่ยนโปรโตคอล. **ยังไม่ทำ:** โหมดบุกปราสาทบนแผนที่ Builder (ยังใช้กริดจาก `mapedit.html`), บีบอัด .glb, ปุ่มลบ/ถอดออกจากเกม (มี API แล้ว). ทดสอบแล้วในเบราว์เซอร์: เครื่องมือทุกตัว + ส่งออก + เล่นจริงบนแผนที่ตัวอย่าง `demo-builder` (ยืนบนสะพานสูง 1.2 ตรง, ชนกำแพง). **commit แล้ว ยังไม่ได้ push** (รอผู้ใช้สั่ง).
+
 **Map Editor มีมุมมอง 3D สด 2026-11-10:** ปุ่ม `2D / 2D + 3D / 3D` บนแถบ `mapedit.html` → `mapedit/view3d.js` (three.js โหลดเมื่อเปิด 3D ครั้งแรก) วาดพื้น/หน้าผา/ทางลาด/กำแพง/ของ/โซน/เส้นทางจากแผนที่ที่กำลังแก้ อัปเดตทันทีทุกครั้งที่แก้ • คลิกซ้ายใน 3D = ใช้เครื่องมือเดียวกับ 2D (Shift = คลิกขวา) ผ่าน `pDown/pMove/pUp` ใน `mapedit/editor.js` (`window.__mapedit`) • 🚶 เดินดู = มุมมองบุคคลที่หนึ่ง WASD ชนกำแพง/ขอบสูง • ไม่มีข้อมูลใหม่ในไฟล์แผนที่ • เทส headless (ยกพื้น วางกำแพง วางของ เดิน) ผ่าน รอผู้ใช้ลอง
 
 **กฎผู้ใช้ 2026-11-10: ทุกสกิลที่แก้ ต้องส่ง GIF ให้ดู** — สายฟ้าใช้ `tools/capture-storm.js` (`?sk=<id>`) + `python tools/pack-motion-gif.py storm_<id> --fps 30` • ส่ง GIF สายฟ้าครบ 8 สกิลแล้ว รอผู้ใช้รีวิวและบอกสกิลที่จะปรับ
@@ -656,6 +658,7 @@ Phase 1 (maps from Blender files) is done — `notes/systems.md` §5e. Work in t
 (Minimap done 2026-10-17.) Vents/secret passages for Voldemort, task mini-games, 3-player Voldemort mode, more bosses (basilisk), more maps (Hogsmeade, Great Hall), cosmetics, ranked/MMR, mobile controls.
 
 ## 11. Changelog
+- 2026-11-11 — **Map Builder** (`mapbuild.html`, `mapbuild/`, `guides/MAP-BUILDER.md`, `/api/mb*`, `assets/mapkit/kit.json`, `?playmap=`) — real maps from the browser into the game. See notes/CHANGELOG.md.
 - 2026-11-09 — **Fix whole-match freeze: field clash `p.wsk`** (wind number vs water object → water uses `p.wtsk`); hostTick now try/catch per player so one broken player can't freeze everyone. Watch for other cross-path field name clashes.
 - 2026-11-08 — **Siege bots: defenders patrol around the core, `sgUnstick` escape when blocked** (js/15-siege).
 - 2026-11-08 — **Sky dome follows camera** (`skyFollow` js/27, called in render js/37) — fixes dark clipped disc in the sky when far from map centre (sky radius 600 < cam far 700 + offset).

@@ -16,6 +16,12 @@
 #   POST /api/map?id=<id>           → บันทึก {map, md, png} → maps/<id>.json + <id>.md + <id>.png แล้วเขียน maps/MAPS.md (ให้ Claude อ่าน)
 #   POST /api/map-del?id=<id>       → ย้ายแผนที่ไป maps/_deleted/ (กู้คืนได้)
 #   POST /api/map-img?name=<ชื่อ>   → เก็บภาพอ้างอิงที่วางใต้แผนที่ลง maps/img/<ชื่อ>.png|.jpg
+#   GET  /api/mb-list              → รายชื่อแผนที่จริงของ Map Builder (mapbuild.html) ใน maps/build/
+#   GET/POST /api/mb?id=<id>        → อ่าน/บันทึกไฟล์ต้นฉบับ maps/build/<id>.json (รูปแบบ: guides/MAP-BUILDER.md)
+#   POST /api/mb-export?id=<id>     → ส่งเข้าเกม: {data, glb(base64)} → assets/maps/<id>.json + .glb + เพิ่ม/ขยับเลข v ใน assets/manifest.json
+#   POST /api/mb-unexport?id=<id>   → ถอดแผนที่ออกจากเกม (ลบไฟล์ใน assets/maps + รายการใน manifest) เฉพาะแผนที่ที่มีต้นฉบับใน maps/build/
+#   POST /api/mb-del?id=<id>        → ถอดออกจากเกม + ย้ายต้นฉบับไป maps/build/_deleted/
+#   POST /api/mb-asset?name=<ชื่อ>&label=&cat= → เพิ่ม Asset เอง: เก็บ .glb ลง assets/mapkit/ + ลงทะเบียนใน assets/mapkit/kit.json (user)
 #   GET  /api/sb-skills             → รายการสกิลจากโค้ดเกม (js/*.js: PATHS, PBASIC, defSpell) ให้ปุ่ม Import ของสตอรี่บอร์ด — อ่านสดทุกครั้ง ไม่มีไฟล์ค้าง
 # ฟังเฉพาะ 127.0.0.1 (เครื่องตัวเองเท่านั้น)
 import base64, json, os, re, subprocess, sys, time
@@ -451,6 +457,91 @@ def map_json_dump(m):  # กริด/รายการเป็นบรรท
     lines.append('}')
     return '\n'.join(lines) + '\n'
 
+# ---------- Map Builder (mapbuild.html): แผนที่จริงที่เกมโหลดได้ ----------
+MBD = os.path.join(MAPD, 'build')
+KITD = os.path.join(ROOT, 'assets', 'mapkit')
+MANP = os.path.join(ROOT, 'assets', 'manifest.json')
+
+def mb_list():
+    out = []
+    try: man = json.load(open(MANP, encoding='utf-8')).get('maps', {})
+    except Exception: man = {}
+    if os.path.isdir(MBD):
+        for f in sorted(os.listdir(MBD)):
+            if not f.endswith('.json'):
+                continue
+            fp = os.path.join(MBD, f)
+            try:
+                j = json.load(open(fp, encoding='utf-8'))
+                out.append({'id': f[:-5], 'name': j.get('name', f[:-5]), 'W': j.get('W'), 'H': j.get('H'), 't': os.path.getmtime(fp), 'game': (man.get(f[:-5]) or {}).get('v', 0)})
+            except Exception as e:
+                out.append({'id': f[:-5], 'name': f[:-5], 'err': str(e), 't': os.path.getmtime(fp)})
+    return out
+
+def mb_manifest(fn):  # แก้ส่วน "maps" ของ assets/manifest.json (คงรูปแบบย่อหน้า 1 ช่องเดิม)
+    man = json.load(open(MANP, encoding='utf-8'))
+    r = fn(man.setdefault('maps', {}))
+    with open(MANP, 'w', encoding='utf-8') as f:
+        json.dump(man, f, ensure_ascii=False, indent=1); f.write('\n')
+    return r
+
+def kit_dump(kit):
+    row = lambda L: ',\n  '.join(json.dumps(a, ensure_ascii=False) for a in L)
+    return '{\n "_about": %s,\n "v": 1,\n "assets": [\n  %s\n ],\n "user": [\n  %s\n ]\n}\n' % (json.dumps(kit.get('_about', ''), ensure_ascii=False), row(kit.get('assets', [])), row(kit.get('user', [])))
+
+def mb_post(self, u, q):
+    if u.path == '/api/mb-asset':
+        name = re.sub(r'[^a-z0-9_\-]', '_', q.get('name', ['asset'])[0].lower())[:40] or 'asset'
+        data = self._body()
+        if data[:4] != b'glTF':
+            return self._json(400, {'ok': False, 'err': 'ต้องเป็นไฟล์ .glb'})
+        os.makedirs(KITD, exist_ok=True)
+        with open(os.path.join(KITD, name + '.glb'), 'wb') as f: f.write(data)
+        kp = os.path.join(KITD, 'kit.json')
+        kit = json.load(open(kp, encoding='utf-8')) if os.path.exists(kp) else {'v': 1, 'assets': [], 'user': []}
+        e = {'id': 'user/' + name, 'name': q.get('label', [name])[0][:60] or name, 'cat': 'user', 'src': 'mapkit/' + name + '.glb', 'node': '', 'col': 1, 'brk': 0, 'ns': 0, 'v': int(time.time())}
+        kit['user'] = [a for a in kit.get('user', []) if a.get('id') != e['id']] + [e]
+        open(kp, 'w', encoding='utf-8').write(kit_dump(kit))
+        return self._json(200, {'ok': True, 'asset': e})
+    mid = q_id(u)
+    if not mid:
+        return self._json(400, {'ok': False, 'err': 'id ใช้ได้เฉพาะ a-z 0-9 _ -'})
+    src = os.path.join(MBD, mid + '.json'); ad = os.path.join(ROOT, 'assets', 'maps')
+    if u.path == '/api/mb':
+        try:
+            m = json.loads(self._body().decode('utf-8'))['map']; assert m.get('hg') and m.get('W')
+        except Exception as e:
+            return self._json(400, {'ok': False, 'err': 'ข้อมูลผิดรูปแบบ: ' + str(e)})
+        if not os.path.exists(src) and os.path.exists(os.path.join(ad, mid + '.json')):
+            return self._json(400, {'ok': False, 'err': 'id นี้ซ้ำกับแผนที่เดิมของเกม ใช้ id อื่น'})
+        os.makedirs(MBD, exist_ok=True); m['id'] = mid
+        with open(src + '.tmp', 'w', encoding='utf-8') as f: json.dump(m, f, ensure_ascii=False, separators=(',', ':'))
+        os.replace(src + '.tmp', src)
+        return self._json(200, {'ok': True, 'id': mid})
+    if not os.path.exists(src):  # กันเขียนทับ/ลบแผนที่ที่ปั้นจาก Blender
+        return self._json(400, {'ok': False, 'err': 'ไม่มีต้นฉบับ maps/build/%s.json (บันทึกก่อน)' % mid})
+    if u.path == '/api/mb-export':
+        try:
+            b = json.loads(self._body().decode('utf-8')); d = b['data']; glb = base64.b64decode(b['glb'])
+            assert d.get('fmt') == 1 and d.get('g') and glb[:4] == b'glTF'
+        except Exception as e:
+            return self._json(400, {'ok': False, 'err': 'ข้อมูลผิดรูปแบบ: ' + str(e)})
+        os.makedirs(ad, exist_ok=True); d['id'] = mid
+        with open(os.path.join(ad, mid + '.json'), 'w', encoding='utf-8') as f: json.dump(d, f, ensure_ascii=False, separators=(',', ':'))
+        with open(os.path.join(ad, mid + '.glb'), 'wb') as f: f.write(glb)
+        def bump(mp):
+            v = int((mp.get(mid) or {}).get('v', 0)) + 1
+            mp[mid] = {'file': 'maps/%s.glb' % mid, 'data': 'maps/%s.json' % mid, 'v': v}; return v
+        return self._json(200, {'ok': True, 'v': mb_manifest(bump), 'glb_kb': round(len(glb) / 1024)})
+    for ext in ('.json', '.glb'):  # mb-unexport / mb-del
+        fp = os.path.join(ad, mid + ext)
+        if os.path.exists(fp): os.remove(fp)
+    mb_manifest(lambda mp: mp.pop(mid, None))
+    if u.path == '/api/mb-del':
+        d = os.path.join(MBD, '_deleted'); os.makedirs(d, exist_ok=True)
+        os.replace(src, os.path.join(d, mid + '_' + time.strftime('%Y%m%d-%H%M%S') + '.json'))
+    return self._json(200, {'ok': True})
+
 def img_body(data):
     ext = 'png'
     if data[:5] == b'data:':
@@ -501,6 +592,13 @@ class H(SimpleHTTPRequestHandler):
             return self._json(200, sb_load())
         if u.path == '/api/sb-skills':
             return self._json(200, sb_skills())
+        if u.path == '/api/mb-list':
+            return self._json(200, {'ok': True, 'maps': mb_list()})
+        if u.path == '/api/mb':
+            try:
+                return self._json(200, {'ok': True, 'map': json.load(open(os.path.join(MBD, q_id(u) + '.json'), encoding='utf-8'))})
+            except Exception as e:
+                return self._json(404, {'ok': False, 'err': str(e)})
         if u.path == '/api/maps':
             return self._json(200, map_list())
         if u.path == '/api/map':
@@ -612,6 +710,8 @@ class H(SimpleHTTPRequestHandler):
                 open(os.path.join(MAPD, mid + '.png'), 'wb').write(data)
             maps_index()
             return self._json(200, {'ok': True, 'id': mid})
+        if u.path in ('/api/mb', '/api/mb-export', '/api/mb-unexport', '/api/mb-del', '/api/mb-asset'):
+            return mb_post(self, u, q)
         if u.path == '/api/map-del':
             mid = q_id(u)
             if not mid:

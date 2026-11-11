@@ -13,18 +13,18 @@ CITY_MID:140 CITY_C2:140 cityModeData:141 mapArea:157 AREA:158 areaClamp:160
 ## js/02-citytest.js (28) — แมพทดสอบเมืองใหญ่ (กล่องเทา) — ใช้วัดความลื่นของเครื่องยนต์ก่อนสร้างเ…
 CITY_N:4 CITY_B:4 CITY_ROAD:4 genCityTest:5 cityTestProps:19
 
-## js/02-data.js (383) — 
+## js/02-data.js (384) — ค่าคงที่ของเกม
 W:4 H:4 PR:4 PILLARS:6 SPAWNF:7 mulberry:9 genForest:10 genPitch:27 genHogsmeade:36
 §54 แผนที่โล่ง 3 แบบ (ผู้ใช้: ป่ามืดไม่สนุก อยากได้ที่โล่งๆ)
 genMeadow:55 genLake:61 genRuins:66
 §73 Test Place (ห้องฝึก): พื้นโล่งไม่มีสิ่งกีดขวาง
-TEST_W:75 TEST_H:75 TEST_C:75 TEST_VIL:75 TEST_GW:77 TEST_Z:78 TEST_ST:85 TEST_PH:86 testWalls:88 testDummySpots:90 testFences:92 genTest:105 testProps:120 trZone:133 trBotPad:134 trFixSpots:136 trShow:138 genGreatHall:139 MAPS:147 MAP_OFF:160 RANDOM_MAPS:161 MAPID:162 MW:162 MH:162 OBS:162 setMapVars:163
-§164 แผนที่จากไฟล์ (Blender → assets/maps/<id>.json + .glb, สคริปต์ assets…
-FMAPS:167 b64i16:168 regFileMap:169 loadMapData:181 loadAllMapData:189 mapReady:192 mapOkFor:193
-§194 ของประกอบฉากที่พังได้ / ใช้ได้ (prop)
-PROPDEF:198 PROP_OFF_MODES:205 PROP_USE:207 PROPS:208 PROPON:208 genProps:209
-§229 ตัวละคร: บ้านฮอกวอตส์ + หน้าตา
-HOUSES:231 HAIRC:236 HAIRSTY:238 WOODC:241 WOODN:242 WCOREC:243 WCOREN:244 WANDSTY:245 WANDN:250 WANDNN:265 EYEC:266 SKINC:267 CLOAKC:268 TIESTY:269 LOOKK:270 LOOKN:270 lookStr:271 parseLook:272 randLook:273 LOOKS:274 LOOKP:274 KITS:274 getKit:275 getLook:276 CREST_SH:277 CREST_PAT:278 starPts:283 CREST_ANI:285 crestSVG:291 houseColor:299 TEAMC:300 TEAMN:300 NOBROOM:302 ROOM_MAX:304 MODES:305 hostModeEnabled:317 PLAY:319 PDEF:320 EDEF:347 POOLS:360 CDK:370 BUFFS:373 BRAR:382 rollRar:383
+TEST_W:75 TEST_H:75 TEST_C:75 TEST_VIL:75 TEST_GW:77 TEST_Z:78 TEST_ST:85 TEST_PH:86 testWalls:88 testDummySpots:90 testFences:92 genTest:105 testProps:120 trZone:133 trBotPad:134 trFixSpots:136 trShow:138 genGreatHall:139 MAPS:147 MAP_OFF:160 PLAYMAP:161 RANDOM_MAPS:162 MAPID:163 MW:163 MH:163 OBS:163 setMapVars:164
+§165 แผนที่จากไฟล์ (Blender → assets/maps/<id>.json + .glb, สคริปต์ assets…
+FMAPS:168 b64i16:169 regFileMap:170 loadMapData:182 loadAllMapData:190 mapReady:193 mapOkFor:194
+§195 ของประกอบฉากที่พังได้ / ใช้ได้ (prop)
+PROPDEF:199 PROP_OFF_MODES:206 PROP_USE:208 PROPS:209 PROPON:209 genProps:210
+§230 ตัวละคร: บ้านฮอกวอตส์ + หน้าตา
+HOUSES:232 HAIRC:237 HAIRSTY:239 WOODC:242 WOODN:243 WCOREC:244 WCOREN:245 WANDSTY:246 WANDN:251 WANDNN:266 EYEC:267 SKINC:268 CLOAKC:269 TIESTY:270 LOOKK:271 LOOKN:271 lookStr:272 parseLook:273 randLook:274 LOOKS:275 LOOKP:275 KITS:275 getKit:276 getLook:277 CREST_SH:278 CREST_PAT:279 starPts:284 CREST_ANI:286 crestSVG:292 houseColor:300 TEAMC:301 TEAMN:301 NOBROOM:303 ROOM_MAX:305 MODES:306 hostModeEnabled:318 PLAY:320 PDEF:321 EDEF:348 POOLS:361 CDK:371 BUFFS:374 BRAR:383 rollRar:384
 
 ## js/02-fcs-data.js (3) — 
 FCS_DATA:3
@@ -177,10 +177,10 @@ W_WL:528 W_DR:534 W_VX:540 W_VO:546 W_FW:552 W_UL:561
 ## js/10-net.js (200) — 
 PREFIX:4 NET:5 RC:9 TURN_SERVERS:12 ICE:13 PEER_OPT:14 TURN_URL:16 ICE_READY:18 JN:22 LAG:24 lagDo:25 hostSend:26 LOBBY:27 genCode:28 sendAll:29 NETD_KEYS:33 NETD:33 netDeltaReset:34 netDelta:35 NET_MAX:49 _netTE:49 netSendSnap:50 NETU:62 netUndelta:63 setStatus:69 hostGame:71 hostPeer:80 netConnect:100 joinWatch:111 joinFail:126 netLost:132 joinGame:147 joinPeer:158 clientOnData:173 leave:188 leaveRoom:190
 
-## js/11-host.js (413) — 
-G:4 EVL:4 EVN:4 hostLast:4 tickN:4 emit:5 feed:6 banner:7 plist:8 cleanName:9 freshStats:11 newPlayer:18 emptyInput:21 frameOk:23 addPlayer:24 initHostLobby:33 lobbyMsg:40 broadcastLobby:41 INPN:43 hostOnData:44 hostDrop:75 hostRemove:84 validate:97 hostStart:110 hostToLobby:136 MIDJOIN:143 modeCap:144 midJoin:145 CHATT:161 chatRelay:162 emoHost:170 resetBody:172 fmap:178 spawnPts:179 teamPts:181 spSpread:183 placeAll:184 respawn:196
-§215 ลูปหลักฝั่งโฮสต์
-hostTick:216 angDiff:231 cH:233 vR:234 updatePlayer:236 hitProp:400 damagePropsIn:407 nearUseProp:408 useProp:409
+## js/11-host.js (414) — ฝั่งโฮสต์: สถานะเกมทั้งหมดคำนวณที่นี่ (server-authoritative)
+G:4 EVL:4 EVN:4 hostLast:4 tickN:4 emit:5 feed:6 banner:7 plist:8 cleanName:9 freshStats:11 newPlayer:18 emptyInput:21 frameOk:23 addPlayer:24 initHostLobby:33 lobbyMsg:40 broadcastLobby:41 INPN:43 hostOnData:44 hostDrop:75 hostRemove:84 validate:97 hostStart:110 hostToLobby:137 MIDJOIN:144 modeCap:145 midJoin:146 CHATT:162 chatRelay:163 emoHost:171 resetBody:173 fmap:179 spawnPts:180 teamPts:182 spSpread:184 placeAll:185 respawn:197
+§216 ลูปหลักฝั่งโฮสต์
+hostTick:217 angDiff:232 cH:234 vR:235 updatePlayer:237 hitProp:401 damagePropsIn:408 nearUseProp:409 useProp:410
 
 ## js/12-buildings.js (528) — สิ่งปลูกสร้างที่พังเป็นชิ้นย่อย (บ้าน) แบบ Battlefield — คู่มือเต็ม: …
 BLDDEF:8 BLD_PIECES:10 BLD_GRID:11 BLD_DOOR:13 BLD_FIRE:14 BLD_ICE:14 BLD_ROOF_MIN:14 BLDG:15 BLDON:15 genBldg:16 bldRect:26 bldChunk:28 bldAlive:35 bldLocal:36 bldWorld:37 rectDist:38 bldNear:39 BLD_MOUND:42 bldGone:43 bldMoundAt:44 bldMoundH:45 hitBldPiece:47 breakBldChunk:58 bldSupport:66 damageEnv:86 bldRay:104 _sgRB:112 aimClip:114 aimLineH:122 aimRay3:123 bldPieceAt:139 projEl:150 bldPush:155 collideBld:161 updateBldg:179 bldSnap:192 bldParse:198
@@ -410,7 +410,7 @@ ROLE_COL:37 roleTag:38 DESIGNED:39 spellTags:40 spellDescHTML:47 baseDescHTML:51
 §222 ฉากเปิด (#intro) + ประกายบนหน้าเมนู (#menuFx)
 TITLE:225 titleSpark:226 TSPR:228 titleSprite:229 titleDraw:230 titleLoop:240 titleGo:251 JOINQ:259 ovResult:279
 
-## js/40-train-settings.js (247) — เมนูทดลอง (ห้องฝึก / Test Place)
+## js/40-train-settings.js (249) — เมนูทดลอง (ห้องฝึก / Test Place)
 trOpenF:2 trKey:2 trN:2 TR_OPTS:3 trToggle:4 trSend:9 trSync:14
 §48 แท่นเสกบอท (โซนเสกบอท ห้องฝึก, trBotPad js/02): ยืนบนแท่น = เมนูขึ้น …
 bpOpen:49 bpOn:49 bpKey:49 bpShow:51 bpSync:53 hovEl:123
@@ -775,7 +775,7 @@ PERF:9 perfFrame:12 perfDom:26 perfStats:34 perfGraph:38 _gpuName:51 gpuIntegrat
 ## js/72-dash-pose.js (85) — 
 DPOSE:12 DPT:24 _dpQ:25 _dpX:25 _dpP:25 dpMix:26 dpKnees:28 dpStyle:36 DPDBG:41 dashPose:42 dpApply:75
 
-## js/73-tune.js (142) — 
+## js/73-tune.js (142) — แผงปรับค่า 🎚️ (F8 / ปุ่ม "ปรับค่า" ในเมนูพัก และหน้าแรก) — ปรับตัวเลขในเกมสดๆ แล้วเซฟลง …
 TUNE:8 tuneNum:9 tuneBuild:15
 §81 ใช้ / เก็บค่า
 tuneSetVal:82 tuneApplyFile:85 tuneJson:89
@@ -789,7 +789,7 @@ LOOK:17 lookPreset:24 lookMap:26 lookName:27 lookEnvFor:28 lookApply:38 lookRays
 §68 ลงทะเบียนในเครื่องมือปรับค่า (js/73-tune.js): 1 หมวด "🌗 Look" แยกส่ว…
 LOOK_F:69 lookRegister:75
 
-## js/75-ambient.js (52) — 
+## js/75-ambient.js (52) — Ambient 🌫️ — ฝุ่นลอย (dust motes) + หมอกลอยต่ำ (mist) ที่ใช้ได้ทุกแมพ ปรับตามพรีเซ็ต Loo…
 AMBX:9 AMBX_V:10 AMBX_F:24 ambMesh:27 ambQual:39 ambFrame:40
 
 ## js/76-surface.js (125) — 
@@ -802,4 +802,4 @@ surfSync:49 surfQuality:53
 SURF_VS:55 SURF_VS_BODY:56 SURF_FS:67 SURF_FS_BODY:68 surfOk:98 surfApply:99 surfScene:111
 §112 ปรับค่า (tune.html / F8)
 
-(98 files, 24764 lines)
+(98 files, 24768 lines)
