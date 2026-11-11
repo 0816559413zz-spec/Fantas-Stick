@@ -85,13 +85,19 @@ function updateIces(dt){
   G.ices=G.ices.filter(z=>z.t>0);
 }
 // คลื่นดาบ (Glacier Rend โหมดประชิด) วิ่งไปข้างหน้า ทิ้งทางน้ำแข็ง
+// มุมเงย/ก้มของคลื่นดาบ = ตามเป้ากลางจอ (ผู้ใช้ 2026-11-11) • บอท/ไม่มีข้อมูลเล็ง = ก้มนิดเดียวให้ลงพื้น
+function frostWavePitch(p){const i=p.inp;if(!i||p.bot||typeof i.ah!=='number')return -0.12;
+  const d=Math.hypot(i.ax-p.x,i.ay-p.y);return clamp(Math.atan2((i.ah-(p.z+1))*20,Math.max(1,d)),-1.2,1.35);}
 function updateWaves(dt){
   if(!G.waves||!G.waves.length)return;
   for(const w of G.waves){
-    const GV=GREND.v,st=Math.min(w.left,GV.waveSpd*dt);w.x+=w.dx*st;w.y+=w.dy*st;w.left-=st;w.acc+=st;
+    const GV=GREND.v,st=Math.min(w.left,GV.waveSpd*dt);w.left-=st;
+    // กลางอากาศ: บินตามแนวเล็ง ไม่ทิ้งทางน้ำแข็ง • แตะพื้น = ไถลไปตามพื้น ทิ้งทางน้ำแข็ง (เดิมวิ่งบนพื้นอย่างเดียว)
+    if(!w.gnd&&w.pt!==undefined){const cp=Math.cos(w.pt);w.x+=w.dx*cp*st;w.y+=w.dy*cp*st;w.h+=Math.sin(w.pt)*st/20;if(w.h<=0.25){w.gnd=1;w.h=0;w.acc=50;}}
+    else{w.x+=w.dx*st;w.y+=w.dy*st;w.acc+=st;}
     const o=G.players[w.owner];
-    if(o)for(const t of foesOf(w.team)){if(w.hit.has(t))continue;if(Math.hypot(t.x-w.x,t.y-w.y)<40+(t.r||PR)&&cH(t)<4){w.hit.add(t);aoeHit(o,t,GV.waveDmg,t=>addFrostSlow(t,GV.waveSlow));}}
-    if(w.acc>=50){w.acc=0;addIce({x:w.x,y:w.y,r:72,t:4,team:w.team,kind:'path',lx:w.x-w.dx*50,ly:w.y-w.dy*50,wv:1});}
+    if(o)for(const t of foesOf(w.team)){if(w.hit.has(t))continue;if(Math.hypot(t.x-w.x,t.y-w.y)<40+(t.r||PR)&&(w.gnd||w.pt===undefined?cH(t)<4:Math.abs(cH(t)-w.h)<2.6)){w.hit.add(t);aoeHit(o,t,GV.waveDmg,t=>addFrostSlow(t,GV.waveSlow));}}
+    if((w.gnd||w.pt===undefined)&&w.acc>=50){w.acc=0;addIce({x:w.x,y:w.y,r:72,t:4,team:w.team,kind:'path',lx:w.x-w.dx*50,ly:w.y-w.dy*50,wv:1});}
     if(w.x<30||w.x>MW-30||w.y<30||w.y>MH-30)w.left=0;
   }
   G.waves=G.waves.filter(w=>w.left>0);

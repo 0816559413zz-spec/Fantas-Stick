@@ -23,16 +23,20 @@ function sbMake(o){
   const shaftA=Tube(12,5,arcMat,arrow),shaftB=Tube(12,4,arcMat,arrow);shaftA.castShadow=shaftB.castShadow=false;
   const halo=glow(GLOWT,.9,arrow);halo.position.y=-1.5;
   const cyanGlow=glowMat('#68eaff').map;
+  const ready=new THREE.Mesh(new THREE.RingGeometry(.85,1,40),sbMat('#ffc13a',1,.9));
+  ready.position.y=-1.52;ready.rotation.x=Math.PI/2;ready.visible=false;arrow.add(ready);
   const arcs=Array.from({length:12},()=>{const m=T(10,4);m.visible=false;return m;});
   const hide=o.tip.parent.children.filter(c=>c!==o.tip&&c!==g),bodyMat=ADD('#ffffff',{vertexColors:true}),body=Array.from({length:8},()=>{const m=Tube(10,4,bodyMat,o.g);m.castShadow=false;return m;});g.scale.setScalar(.001);
-  return {g,limbs,ring,strA,strB,arrow,hm,h1,h2,shaftA,shaftB,halo,cyanGlow,warmGlow:GLOWT,arcs,body,hide,mats:[gold,lemon,cy,core],T:0,V3,age:0};
+  return {g,limbs,ring,strA,strB,arrow,hm,h1,h2,shaftA,shaftB,halo,cyanGlow,warmGlow:GLOWT,ready,readyAge:null,arcs,body,hide,mats:[gold,lemon,cy,core],T:0,V3,age:0};
 }
+// ผู้ใช้ 2026-11-11: ง้างธนู แขนท่อนล่างเคยทะลุตัว → มือดึงสายค้างข้างคาง หน้าอก ศอกชี้ไปด้านหลัง-ออกข้าง (IK สองข้อบนกระดูกจริง ดู stormBowForearm)
+const SB_START=new THREE.Vector3(0.04,1.52,0.6),SB_ANCHOR=new THREE.Vector3(0.08,1.66,0.29),SB_POLE=new THREE.Vector3(1,0.2,-0.3).normalize();   // พิกัด o.b: มือจับสายหน้าอก → ข้างคาง (นอกผ้าพันคอ/หัว) • ศอกกางออกข้างและยกสูง (ไม่เข้าอก)
 function stormBowView(o,p,dt,now){
   const M=p.sm,R=M&&(M[3]&16)&&p.al&&!p.dn?M[6]:null;
   if(!R&&o.sb&&o.sbRel!==undefined){o.sbRel+=dt;const t=o.sbRel,T=.42,k=natEase(natPhase(t,0,.03))*(1-natEase(natPhase(t,.16,T))),snap=Math.exp(-13*t);   // release: the string hand flies back, the bow arm kicks, the whole body rocks
     if(t>=T){o.sbRel=undefined;}else{const side=1.22*(1-natEase(natPhase(t,.2,T))),aimY=-side,B=o.sb;B.g.visible=true;B.g.scale.setScalar(1-natEase(natPhase(t,.22,T)));B.arrow.visible=false;for(const h of B.hide)h.visible=false;o.b.rotation.y+=side;o.b.rotation.x+=-.34*snap-.1;o.b.position.z-=.2*snap;o.b.position.y-=.1;o.legs[0].rotation.x+=.42*(1-natPhase(t,.2,T));o.legs[1].rotation.x+=-.42*(1-natPhase(t,.2,T));o.armR.rotation.set(-1.57-.42*snap,aimY,-.02);o.armL.rotation.set(-1.75,.42+.75*snap,.3+.3*snap);o.sbDraw=.8*(1-natPhase(t,.1,T));return;}}
   if(!R&&o.sbRel===undefined&&o.armR.rotation.order!=='XYZ'){o.armR.rotation.order=o.armL.rotation.order='XYZ';}
-  if(!R){o.sbDraw=0;if(o.sb){o.sb.arrow.visible=true;o.sb.g.visible=false;o.sb.age=0;o.sb.g.scale.setScalar(.001);for(const h of o.sb.hide)h.visible=true;for(const b of o.sb.body)b.visible=false;}return;}
+  if(!R){o.sbDraw=0;o.sbArmIn=0;if(o.sb){o.sb.arrow.visible=false;o.sb.g.visible=false;o.sb.age=0;o.sb.drawIn=0;o.sb.readyAge=null;o.sb.ready.visible=false;o.sb.g.scale.setScalar(.001);for(const h of o.sb.hide)h.visible=true;for(const b of o.sb.body)b.visible=false;}return;}
   if(!o.sb)o.sb=sbMake(o);
   const B=o.sb,V3=B.V3,god=!!(M[3]&4);B.g.visible=true;
   if(B.cyan!==god){
@@ -41,26 +45,64 @@ function stormBowView(o,p,dt,now){
     B.mats.forEach((m,i)=>m.color.copy(hdr(colors[i],[1,1.15,1.1,1.3][i])));
     B.halo.material.map=god?B.cyanGlow:B.warmGlow;
     B.halo.material.color.set(god?'#68eaff':'#ffffff');
+    B.ready.material.color.set(god?'#3ddfff':'#ffc13a');
   }
-  const left=Math.max(0,R[1]),max=R[3]||SB_FULL,k=clamp(1-left/max,0,1),full=k>=.999,ap=R[4]||0;
-  B.age+=dt;const intro=natEase(natPhase(B.age,0,.42)),armIn=natEase(natPhase(B.age,.36,.62)),draw=natEase(k);for(const h of B.hide)h.visible=intro<.5;for(const b of B.body)b.visible=true;B.g.scale.setScalar(Math.max(.001,natOut(natPhase(B.age,.1,.5))));
+  const left=Math.max(0,R[1]),max=R[3]||SB_FULL,k=clamp(1-left/max,0,1),drawing=R[5]===undefined?k>0:!!R[5],full=drawing&&left===0,ap=R[4]||0;
+  B.age+=dt;B.drawIn=lerp(B.drawIn||0,drawing?1:0,Math.min(1,dt*15));
+  const intro=natEase(natPhase(B.age,0,.42)),armIn=natEase(natPhase(B.age,.28,.55))*B.drawIn,draw=natEase(k);
+  for(const h of B.hide)h.visible=intro<.5;
+  for(const b of B.body)b.visible=drawing;
+  B.arrow.visible=drawing;
+  B.g.scale.setScalar(Math.max(.001,natOut(natPhase(B.age,.1,.5))));
   // Archer's stance: side-on with the bow shoulder toward the target, feet apart, bow arm locked at shoulder height, draw elbow lifted behind the line of the arrow, hand anchored at the jaw.
   const side=1.22*armIn,aimY=-side,lean=-.1*draw*armIn;o.armR.rotation.order=o.armL.rotation.order='YXZ';   // หมุนแขนแบบ หันก่อนแล้วยก: แขนชี้ตรงเป้าจริง (เดิม XYZ = y กลายเป็นบิดแขน ธนูเอียงทะลุตัว — ผู้ใช้ 2026-11-10)
   o.b.rotation.y+=side;o.b.rotation.x+=(-ap*.3+lean)*armIn;o.b.rotation.z+=.1*armIn*draw;o.b.position.y-=.1*armIn*(.5+.5*draw);
   o.legs[0].rotation.x+=.42*armIn;o.legs[1].rotation.x+=-.42*armIn;
-  o.armR.rotation.set(lerp(lerp(-.2,-.5,intro),-1.57-ap*.9,armIn),aimY,lerp(lerp(.1,-1.5,intro),-.02,armIn));
-  o.armL.rotation.set(lerp(o.armL.rotation.x,lerp(-1.55,-1.7,draw)-ap*.9,armIn),lerp(0,lerp(aimY-.35,aimY+.3,draw),armIn),lerp(o.armL.rotation.z,lerp(.05,-.25,draw),armIn));   // มือดึงสาย: ยื่นไปจับสายหน้าอก แล้วดึงกลับมาที่กราม ศอกยกไปหลัง
+  o.armR.rotation.set(lerp(lerp(-.2,-.85,intro),-1.57-ap*.9,armIn),aimY,lerp(lerp(.1,-.65,intro),-.02,armIn));
+  o.armL.rotation.set(lerp(o.armL.rotation.x,lerp(-1.49,-1.93,draw)-ap*.9,armIn),lerp(0,lerp(aimY+.33,aimY+.56,draw),armIn),lerp(o.armL.rotation.z,0,armIn));   /* มือเริ่มจับสายหน้าอก → ดึงขึ้นมาข้างคาง ไม่ทะลุตัว (ผู้ใช้ 2026-11-11) */   // มือดึงสาย: ยื่นไปจับสายหน้าอก แล้วดึงกลับมาที่กราม ศอกยกไปหลัง
   o.sbDraw=draw*armIn;
-  const nock=SB_TIP.y+.95*draw;B.arrow.position.y=nock;B.arrow.scale.setScalar(full?1.3:lerp(.9,1.08,k));B.ring.rotation.y+=dt*(4+9*k);B.ring.scale.setScalar(.8+.5*k);B.halo.scale.setScalar(full?.95+.14*Math.sin(now*.03):lerp(.32,.6,k));B.halo.material.opacity=full?.5:.3;
-  const pulse=full?1+.08*Math.sin(now*.03):.92;for(const m of B.mats)m.opacity=clamp(pulse,.2,1);B.hm.color.set(god?(full?'#c9faff':'#39dfff'):(full?'#fff8c0':'#ffe84a')).multiplyScalar(full?1.5:1.05);
-  B.T-=dt;if(B.T<=0){B.T=.04;const cY=new THREE.Color(god?'#23d9ff':'#ffd21f'),cW=new THREE.Color(god?'#bdf8ff':'#fff6b0'),cC=new THREE.Color('#2fe0ff'),nk=V3(0,nock,0);
+  // ผู้ใช้ 2026-11-11: มือดึงสายเคยทะลุตัว → มือง้างค้างที่ข้างคาง ด้านหน้าอก (ไม่เข้าตัว) แล้วให้ลูกธนู/สายวิ่งจากคันธนูมาที่มือจริง
+  const nock=SB_TIP.y+.95*draw,nk=B.V3(0,nock,0),wN=armIn*natEase(clamp(draw*1.6,0,1));
+  o.sbIK=draw;o.sbArmIn=armIn;if(o.sbHandW&&wN>.01&&B.g.scale.x>.2)nk.lerp(B.g.worldToLocal(o.sbHandW.clone()),wN);   // มือจริงจากเฟรมก่อน (IK ทำหลัง rigSync)
+  B.arrow.position.copy(nk);B.arrow.quaternion.setFromUnitVectors(B.V3(0,-1,0),nk.clone().negate().normalize());B.nk=nk;B.arrow.scale.setScalar(full?1.3:lerp(.9,1.08,k));B.ring.rotation.y+=dt*(4+9*k);B.ring.scale.setScalar(.8+.5*k);
+  if(full&&B.readyAge===null){
+    B.readyAge=0;
+    const tip=simOf(B.ready.getWorldPosition(V3()));
+    stormDomeReadyFX(tip.x,tip.y,tip.h-GY(tip.x,tip.y),0.82,god);
+  }
+  const readyPhase=full?Math.min(1,B.readyAge/.32):1,flash=(1-readyPhase)**2;
+  B.ready.visible=readyPhase<1;
+  if(B.ready.visible){
+    B.ready.scale.setScalar(lerp(.15,.85,natOut(readyPhase)));
+    B.ready.material.opacity=.92*(1-readyPhase);
+  }
+  B.readyAge=full?Math.min(.32,B.readyAge+dt):null;
+  B.halo.scale.setScalar(full?.95+.11*Math.sin(now*.03)+flash*.52:lerp(.32,.6,k));
+  B.halo.material.opacity=full?.5+flash*.22:.3;
+  const pulse=full?1+.08*Math.sin(now*.03):.92;for(const m of B.mats)m.opacity=clamp(pulse,.2,1);B.hm.color.set(god?(full?'#c9faff':'#39dfff'):(full?'#fff8c0':'#ffe84a')).multiplyScalar(full?1.5+.55*flash:1.05);
+  B.T-=dt;if(B.T<=0){B.T=.04;const cY=new THREE.Color(god?'#23d9ff':'#ffd21f'),cW=new THREE.Color(god?'#bdf8ff':'#fff6b0'),cC=new THREE.Color('#2fe0ff'),nk=B.nk.clone();
     for(const [str,s] of [[B.strA,1],[B.strB,-1]]){const P=sbJag(V3(0,SB_TIP.y,s*SB_TIP.z),nk,12,.09,V3);str.set(P,()=>.018,(u,c)=>c.copy(full?cC:cW).multiplyScalar(1.05));}
     B.shaftA.set(sbJag(V3(0,0,0),V3(0,-1.5,0),12,full?.15:.09,V3),()=>full?.045:.03,(u,c)=>c.copy(cW).multiplyScalar(1.15));B.shaftB.set(sbJag(V3(0,0,0),V3(0,-1.5,0),12,full?.26:.14,V3),()=>full?.022:.012,(u,c)=>c.copy(full?cC:cY).multiplyScalar(1.1));
     B.body.forEach((a,i)=>{const b=i/8*6.283+now*.004,r=.5+Math.random()*.22,h=.3+Math.random()*1.45,A=V3(Math.cos(b)*r,h,Math.sin(b)*r),E=V3(Math.cos(b+.7)*(r+.1),h+(Math.random()-.5)*.8,Math.sin(b+.7)*(r+.1)),Q=sbJag(A,E,10,.16,V3),col=i%3?cY:cC;a.set(Q,()=>.015,(u,c)=>c.copy(col).multiplyScalar(.9));});
-    const tot=full?12:5;B.arcs.forEach((a,i)=>{a.visible=i<tot;if(!a.visible)return;let A,E;if(i<5){const s=i%2?1:-1,t=Math.random();A=V3((Math.random()-.5)*.18,.05+SB_TIP.y*t,s*(.12+SB_TIP.z*t));E=A.clone().add(V3((Math.random()-.5)*.6,(Math.random()-.5)*.4,s*Math.random()*.6));}else{const u=Math.random()*.85;A=V3(0,nock-1.5*u,0);E=V3((Math.random()-.5)*.5,nock-1.5*(u+.15),(Math.random()-.5)*.5);}const col=full&&i>=5?cC:i%3===0?cC:cY,Q=sbJag(A,E,10,.2,V3);a.set(Q,()=>full?.03:.018,(u,c)=>c.copy(col).multiplyScalar(1.05));});}
+    const tot=drawing?(full?12:5):2;B.arcs.forEach((a,i)=>{a.visible=i<tot;if(!a.visible)return;let A,E;if(i<5){const s=i%2?1:-1,t=Math.random();A=V3((Math.random()-.5)*.18,.05+SB_TIP.y*t,s*(.12+SB_TIP.z*t));E=A.clone().add(V3((Math.random()-.5)*.6,(Math.random()-.5)*.4,s*Math.random()*.6));}else{const u=Math.random()*.85;A=V3(0,nock-1.5*u,0);E=V3((Math.random()-.5)*.5,nock-1.5*(u+.15),(Math.random()-.5)*.5);}const col=full&&i>=5?cC:i%3===0?cC:cY,Q=sbJag(A,E,10,.2,V3);a.set(Q,()=>full?.03:.018,(u,c)=>c.copy(col).multiplyScalar(1.05));});}
 }
-const _sbFaQ=new THREE.Quaternion(),_sbFaT=new THREE.Quaternion(),_sbFaX=new THREE.Vector3(1,0,0);
-function stormBowForearm(o){const w=o.sbDraw||0;if(w<=.002)return;if(o.sbFa===undefined){const a=o.g.getObjectByName('forearm_L');o.sbFa=a?[a,a.quaternion.clone()]:null;}if(!o.sbFa)return;_sbFaQ.setFromAxisAngle(_sbFaX,-2.25);_sbFaT.copy(o.sbFa[1]).multiply(_sbFaQ);o.sbFa[0].quaternion.slerp(_sbFaT,w);}
+// IK สองข้อบนกระดูก upper_arm_L / forearm_L: มือไล่จากท่าจับสาย (k=0) ไปค้างที่ SB_ANCHOR (k=1) ศอกไปทาง SB_POLE
+const _ikS=new THREE.Vector3(),_ikE=new THREE.Vector3(),_ikH=new THREE.Vector3(),_ikT=new THREE.Vector3(),_ikP=new THREE.Vector3(),_ikD=new THREE.Vector3(),_ikA=new THREE.Vector3(),_ikQ=new THREE.Quaternion(),_ikQ2=new THREE.Quaternion();
+function sbAim(bone,from,to,cur){   // หมุนกระดูก (พิกัดโลก) ให้ทิศ from→cur กลายเป็น from→to
+  _ikA.subVectors(cur,from).normalize();_ikD.subVectors(to,from).normalize();_ikQ.setFromUnitVectors(_ikA,_ikD);
+  bone.parent.getWorldQuaternion(_ikQ2);const pinv=_ikQ2.clone().invert();bone.getWorldQuaternion(_ikQ2);bone.quaternion.copy(pinv.multiply(_ikQ.multiply(_ikQ2)));bone.updateMatrixWorld(true);}
+function stormBowForearm(o){const w=o.sbArmIn||0;if(w<=.02){o.sbHandW=null;return;}
+  if(o.sbFa===undefined){const u=o.g.getObjectByName('upper_arm_L'),f=o.g.getObjectByName('forearm_L'),h=o.g.getObjectByName('hand_L');o.sbFa=u&&f&&h?{u,f,h}:null;}if(!o.sbFa)return;
+  const {u,f,h}=o.sbFa;u.updateMatrixWorld(true);
+  u.getWorldPosition(_ikS);f.getWorldPosition(_ikE);h.getWorldPosition(_ikH);
+  const l1=_ikS.distanceTo(_ikE),l2=_ikE.distanceTo(_ikH),k=o.sbIK||0;
+  _ikT.lerpVectors(SB_START,SB_ANCHOR,k);o.b.localToWorld(_ikT);if(w<1)_ikT.lerpVectors(_ikH,_ikT,w);   // เป้ามือ: จับสายหน้าอก → ข้างคาง
+  _ikD.subVectors(_ikT,_ikS);const D=Math.min(_ikD.length(),l1+l2-1e-3);_ikD.normalize();_ikT.copy(_ikS).addScaledVector(_ikD,D);
+  const a=(l1*l1-l2*l2+D*D)/(2*D),hh=Math.sqrt(Math.max(0,l1*l1-a*a));
+  _ikP.copy(SB_POLE).transformDirection(o.b.matrixWorld);_ikP.addScaledVector(_ikD,-_ikP.dot(_ikD)).normalize();
+  const El=_ikA.copy(_ikS).addScaledVector(_ikD,a).addScaledVector(_ikP,hh).clone();
+  sbAim(u,_ikS,El,_ikE);f.getWorldPosition(_ikE);h.getWorldPosition(_ikH);sbAim(f,_ikE,_ikT,_ikH);
+  o.sbHandW=h.getWorldPosition(new THREE.Vector3());}
 function stormBowFx(ev){
   const pale=ev.g?'#bdf8ff':'#fff6c0',accent=ev.g?'#23d9ff':'#ffd84a';
   const F=natFx(),{V3,Tube,ADD,sparks,ring,T}=F,o=ev.id!=null?PM3.get(ev.id):null,mine=ev.id===NET.myId,end=natWorld(ev.x2,ev.y2,ev.h2),st=o?o.armR.localToWorld(V3(0,-1.3,0)):natWorld(ev.x,ev.y,ev.h);

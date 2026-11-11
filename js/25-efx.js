@@ -6,7 +6,7 @@ function efxState(ev){
   switch(ev.z){
     case 'slamgo':if(o)o.slamT=1.5;break;
     case 'slam':if(o)o.slamT=0;break;
-    case 'gwave':{if(o&&!ev.cl)o.grDown=0.3;if(!(ev.len>0))break;const fx=fxPlay('frost/rend_slash',{x,y,h:0,a:ev.a});WVV.push({x,y,a:ev.a,len:ev.len,d:0,m:null,fx,gh:0});break;}
+    case 'gwave':{if(o&&!ev.cl)o.grDown=0.3;if(!(ev.len>0))break;WVV.push({x,y,a:ev.a,len:ev.len,d:0,pt:ev.pt||0,h:ev.h!==undefined?ev.h:1,gnd:0,m:frostSlashGet()});break;}   // คลื่นดาบบางแบบใหม่ (js/21 frostSlash) แทน fx frost/rend_slash
     case 'glacier':if(o)o.grUp=0.5;if(ev.len>0)GLV.push(makeGlacier(x,y,ev.a,ev.len,ev.t));break;
     case 'mirror':ULTV.push({x,y,a:ev.a,d:0,acc:100});break;
     case 'colbolt':if(o)o.colShot=performance.now();break;   // Colossus: เวลาปาล่าสุด → ท่าเหวี่ยงแขนในไฟล์เอฟเฟกต์ (param tw) แม้ bind แบบ replace
@@ -103,9 +103,9 @@ function efxFX(ev){
         if(near){snd('boom',ev);snd('zap',ev);shake(5);}});
       if(ev.n)floatText(x,y,'⚡'+ev.n,'#fff27a',18,H+2.6);break;}
     case 'slup':if(near)snd('cast_ebolt',ev);break;
-    case 'sline':{const a=ev.a,c=Math.cos(a),sn=Math.sin(a),L=ev.len,N=Math.max(4,Math.round(L/55));
-      for(let i=0;i<=N;i++){const d=L*i/N,px=x+c*d,py=y+sn*d;later(0.3*i/N,()=>{(ev.g?tboltB:tbolt)(px+rnd(-15,15),py+rnd(-15,15),H+10,px+rnd(-8,8),py+rnd(-8,8),H+0.1,0.2,0,0.17,1);burst(px,py,(ev.g?'#23d9ff':'#ffd000'),8,160,0.3,2.2,{h:H+0.2,vh:[1,5],g:6});burst(px,py,'#ffffff',3,120,0.2,1.6,{h:H+0.2,g:6});burst(px,py,'#9fd8ff',3,140,0.25,1.6,{h:H+0.2,vh:[1,4],g:6});if(i%3===0)FX.flashLight(px,py,H+1.5,(ev.g?'#38dfff':'#ffd23a'),3,10,0.2);});}
-      if(near){snd('zap',ev);later(0.15,()=>snd('boom',{x,y,vol:0.3}));shake(2);}break;}
+    case 'sline':{const a=ev.a,c=Math.cos(a),sn=Math.sin(a),L=ev.len,N=Math.max(3,Math.round(L/110));   // ผู้ใช้ 2026-11-11: ลดเอฟเฟกมาก เส้นบาง ไม่ระเบิดที่พื้น (โดมเล็กจาก storm/line_mix)
+      for(let i=0;i<=N;i++){const d=L*i/N,px=x+c*d,py=y+sn*d;later(0.3*i/N,()=>{(ev.g?tboltB:tbolt)(px+rnd(-10,10),py+rnd(-10,10),H+9,px+rnd(-6,6),py+rnd(-6,6),H+0.1,0.16,0,0.09,0);});}
+      if(near){snd('zap',ev);}break;}
     case 'ssiph':{const T=ev.tg||[];
       // ผู้ใช้ 2026-10-23: ใช้ตัวเลือกรอบ 3 แบบ 1 (เทสลา) แต่สีเหลือง — ส่วนต่อศัตรู (siphon_y ยืดตามระยะ) + ส่วนรอบตัวเรา (siphon_yself)
       for(const t of T){const d=Math.hypot(x-t[0],y-t[1]);if(d>20)fxPlay('storm/siphon_y',{x:t[0],y:t[1],h:t[2],a:Math.atan2(y-t[1],x-t[0]),p:{len:d/20}});}
@@ -207,16 +207,18 @@ function efxFX(ev){
       later(0.12,()=>{FX.flashSprite(x,y,H+1.2,'#ffffff',0.6,5,0.2,2.2);FX.flashLight(x,y,H+2,'#4cd0ff',6.5,26,0.5);ring(x,y,'#3fdcff',140,0.5,H+0.1);burst(x,y,'#3fdcff',60,320,0.6,2.6,{h:H+1,vh:[0,6],g:1});burst(x,y,'#9fd8ff',20,260,0.5,2,{h:H+1,g:1});
         if(near){snd('nova',ev);snd('zap',ev);shake(6);}});}finally{TBLUE=0;}break;}
     case 'godoff':burst(x,y,'#3fdcff',24,160,0.5,2,{h:H,vh:[0,2],g:0});break;
+    case 'sclawgo':{const o=PM3.get(ev.id);if(o)o.clLunge=0.12;if(near)snd('whoosh',ev);break;}
     case 'sclaw':{
-      const o=PM3.get(ev.id),emp=ev.n===3;
-      if(o){stormClawStop(o);o.clSw={t:0,n:ev.n,dur:emp?0.3:ev.n===2?0.24:0.2,tr:null};}
-      if(emp){
-        const c=Math.cos(ev.a),s=Math.sin(ev.a);
-        FX.flashSprite(x+c*95,y+s*95,H,'#bdf8ff',0.4,3,0.12,2.2);
-        burst(x+c*230,y+s*230,'#4fd8ff',16,240,0.3,2.2,{h:H,g:3});
-        burst(x+c*230,y+s*230,'#9fd8ff',8,200,0.3,1.8,{h:H,g:3});
-      }
-      if(near)snd(ev.n>=2?'zap':'whoosh',ev);
+      const o=PM3.get(ev.id),big=ev.n>=4;
+      if(o){stormClawStop(o);o.clSw={t:0,n:ev.n,dur:big?0.2:0.15,tr:null};}
+      stormClawRangeFX(ev,H);
+      if(near)snd(big?'zap':'whoosh',ev);
+      break;}
+    case 'sclawhit':{const big=ev.n>=4,c=Math.cos(ev.a),s=Math.sin(ev.a);
+      FX.flashSprite(x,y,H,'#e6fcff',big?0.55:0.35,big?3.4:2.4,0.1,2.2);
+      burst(x,y,'#2fd6ff',big?18:9,big?260:180,0.28,2,{h:H,g:2});
+      if(big){TBLUE=1;try{for(let i=0;i<3;i++)tbolt(x,y,H,x+c*40+rnd(-30,30),y+s*40+rnd(-30,30),H+rnd(-0.6,0.6),0.12,0,0.06,1);}finally{TBLUE=0;}}
+      if(ev.id===NET.myId)hitStop(big?0.06:0.035);
       break;}
     case 'dfdive':// ดาวหางไฟพุ่งเฉียงลงจุดกระแทก (bake จาก Blender: assets/src/dragonfall_dive_build.py — ตามภาพที่ผู้เล่นวาด 2026-10-20)
       if(!ev.g&&ev.x2!==undefined&&getKit(ev.id).path===0)fireSeqLine('df_dive',x,y,H+1,ev.x2,ev.y2,groundH(ev.x2,ev.y2,H)+0.6,{life:0.75,w:2.6,int:1.3,den:1.2});

@@ -1,5 +1,9 @@
 # HANDOFF — Fantas Stick (was "Wizard Duel") (repo: Fantas-Stick)
 
+**สายฟ้าแหลม+ขอบออร่า / เส้นสายฟ้า+BA เสริมเบาลง / ธนูงอศอก 2026-11-11 (ยังไม่ commit รอรีวิว #21/#20):** ทุกเส้นสายฟ้าผ่าน `tbWrite` (หัวท้ายแหลม) + `tbFalloff` (ขอบจาง) js/20 • `storm/hit_small` แทน `hit_mix` ใน `line_mix`/`tri_mix` • ธนูใช้ IK บนกระดูกจริง `stormBowForearm` js/68 (เป้า `SB_START`→`SB_ANCHOR`, ศอก `SB_POLE` พิกัด o.b) — มือทำจากเฟรมก่อนสำหรับสาย/ลูกธนู (`o.sbHandW`)
+
+**Storm อัลติ BA + ธนูไม่ทะลุตัว 2026-11-11 (ยังไม่ commit รอรีวิว #19/#20):** สเปก BA ใหม่ใน `designs/storm.md` (Ultimate) — โฮสต์ `stormBasic` ส่วน `p.god>0` + `stormClawStrike` js/08 (คิว `p.clQ`, หน้าต่าง Special `p.cEmpT`) • ภาพ js/20 `stormClawRangeFX`/`updateClawFX`/`stormClawSwipe` (n 0/1 = คอมโบ, 4/5 = รอย X) + js/25 `sclawgo/sclaw/sclawhit` • ข้อสังเกต: Dash ทะลุศัตรู ต้องหันกลับเองก่อนกด Special • ธนู: js/68 มือ armL จับสายหน้าอก→ข้างคาง ลูกธนูชี้จากมือไปคันธนู
+
 **กล้องเงยได้ 2026-11-11:** pitch ต่ำสุด −1.35 (js/17 mousemove) กล้องลงไปชิดพื้นหลังตัวแล้วเงยฟ้าได้แบบเกมทั่วไป
 
 **ไฟ BA ชาร์จ 2026-11-11:** เต็มตรงที่ยิงได้แล้ว (`cg` ใน makeSnap ใช้ `PYV.chargeT`) • pfire r 22 • ลูกไฟปลายไม้ระหว่างชาร์จ/เต็ม (js/33, `fireball_hold`/`fireball_ready`) • Kindle ระเบิดเล็กลง • fx-check ✗ 1 เดิมที่ `storm/claw_sweep` (สี `$edge`) ไม่ใช่งานนี้

@@ -130,23 +130,43 @@ function updateOrbShots(dt){
     LREQ.push({x:tx(x),y:H,z:tz(y),col:'#ff8a3a',int:2.5,dist:9});
     if(k>=1){if(b.sp){scene.remove(b.sp);scene.remove(b.cr);}burst(x,y,'#ffb347',12,200,0.35,2.6,{h:H,vh:[0,3],g:1});OBV.splice(i,1);}}
 }
+// ---------- คลื่นดาบน้ำแข็ง (ผู้ใช้ 2026-11-11): เส้นเสี้ยวบางคม ขอบหน้าขาว หางเป็นเส้นตรงเรียวลากไปข้างหลัง ไม่ใช่ครึ่งวงกลมทึบ ----------
+// แผ่นเดียว: แนวโค้งเอียง 26° (ฟันเฉียง) ลากแผ่นหางไปด้านหลัง • shader วาดเส้นหน้า + ริ้วเส้นตรง + ปลายเรียว • ใช้ซ้ำ ไม่ dispose (ไม่ compile shader ใหม่)
+const _fsl=new THREE.Vector3(),FSL={pool:[],geo:null};
+function frostSlashGeo(){if(FSL.geo)return FSL.geo;const N=44,M=8,R=2.6,TL=0.45,P=[],U=[],I=[];
+  for(let a=0;a<=N;a++){const u=a/N*2-1,th=u*1.2,r=R*Math.sin(th),fz=R*(Math.cos(th)-1)*0.75,tl=3.6*(0.25+0.75*(1-u*u));
+    for(let b=0;b<=M;b++){const v=b/M;P.push(Math.sin(TL)*r,Math.cos(TL)*r,fz-tl*v);U.push(u,v);}}
+  for(let a=0;a<N;a++)for(let b=0;b<M;b++){const q=a*(M+1)+b,r=q+M+1;I.push(q,r,q+1,r,r+1,q+1);}
+  const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(P,3));g.setAttribute('uv',new THREE.Float32BufferAttribute(U,2));g.setIndex(I);g.userData.keep=true;return FSL.geo=g;}
+function frostSlashGet(){let m=FSL.pool.pop();if(!m){m=new THREE.Mesh(frostSlashGeo(),new THREE.ShaderMaterial({uniforms:{time:FIRE_U.time,uFade:{value:1},uSeed:{value:0}},transparent:true,depthWrite:false,side:THREE.DoubleSide,fog:false,
+    vertexShader:'varying vec2 vUv;void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}',
+    fragmentShader:'uniform float time,uFade,uSeed;varying vec2 vUv;void main(){float u=vUv.x,v=vUv.y,au=abs(u);float tp=1.0-au*au*au;'+
+      'float line=1.0-smoothstep(0.035,0.085,v);float glow=(1.0-smoothstep(0.06,0.34,v))*0.9;'+
+      'float st=pow(abs(sin(u*31.0+uSeed+2.5*sin(u*9.0+uSeed))),14.0),st2=pow(abs(sin(u*57.0-uSeed*2.0)),22.0);'+
+      'float tail=(st*0.95+st2*0.6)*pow(1.0-v,1.6)*(0.7+0.3*sin(time*34.0+u*40.0-v*18.0));float sheet=0.1*pow(1.0-v,3.0);'+
+      'float a=clamp(line+glow+tail+sheet,0.0,1.0)*tp*uFade;if(a<0.01)discard;'+
+      'vec3 c=mix(vec3(0.05,0.3,0.95),vec3(0.12,0.55,1.0),clamp(1.0-v*1.6,0.0,1.0));c=mix(c,vec3(0.6,0.9,1.0),tail*0.6);c=mix(c,vec3(1.0),line);gl_FragColor=vec4(c,a);}'}));
+    m.material.userData.keep=true;m.frustumCulled=false;m.renderOrder=5;}
+  scene.add(m);return m;}
+function frostSlashPut(m){scene.remove(m);FSL.pool.push(m);}
 function updateZV(dt){
   {let t=performance.now();const T=k=>{pf('zv.'+k,t);t=performance.now();};   // แยกเวลาแต่ละส่วน (WD.PROF — ปิดอยู่ = ไม่คิดเวลา)
   updateGlacierVis(dt);updateIceFloors(dt);T('ice');updateSlashes(dt);updateOrbShots(dt);updateDfCracks(dt);T('slash');updateStormV(dt);blazeVignette(dt);T('storm');updateFRV(dt);updateFireV(dt);T('fire');updateFrostV(dt);T('frost');updateVfxKit(dt);T('kit');wbBegin();updateFx(dt);wbEnd();T('fxfile');}
   for(let i=WVV.length-1;i>=0;i--){
-    const w=WVV[i];const st=Math.min(w.len-w.d,GREND.v.waveSpd*dt);w.d+=st;
-    const x=w.x+Math.cos(w.a)*w.d,y=w.y+Math.sin(w.a)*w.d,px=-Math.sin(w.a),py=Math.cos(w.a);
-    for(let k=0;k<6;k++){const s=rnd(-40,40);PARTS.push({x:x+px*s,y:y+py*s,h:rnd(0.2,1.6),vx:Math.cos(w.a)*200,vy:Math.sin(w.a)*200,vh:rnd(0.5,3),life:0.4,max:0.4,col:k%2?'#ffffff':'#bfeaff',size:rnd(2,3.2),g:4,drag:3});}
-    if(w.fx){w.fx.x=x;w.fx.y=y;}else LREQ.push({x:tx(x),y:1,z:tz(y),col:'#8fe0ff',int:1.6,dist:10});   // คลื่นแบบใหม่ = ไฟล์ frost/rend_slash (มีไฟในตัว)
-    if(w.m){const k=w.d/w.len,grow=Math.min(1,w.d/90);w.m.position.set(tx(x),GY(x,y),tz(y));w.m.scale.setScalar((0.35+0.65*grow)*(1+k*0.25));
-      const fade=k>0.85?(1-k)/0.15:1;const M=w.m.userData.mats;M[0].opacity=0.9*fade;M[1].opacity=fade;M[2].opacity=0.3*fade;if(M[3]){M[3].opacity=fade*(0.8+0.2*Math.sin(w.d*0.3));M[4].opacity=0.18*fade;}
-      // ภาพติดตา (afterimage) ทิ้งไว้ด้านหลังเป็นระยะ
-      w.gh+=st;if(w.gh>=(w.fx?26:38)){w.gh=0;const gm=new THREE.Mesh(_wbGeo[0],new THREE.MeshBasicMaterial({color:hdr('#8fd8ff',0.8),transparent:true,opacity:0.35*fade,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide}));gm.position.copy(w.m.position);gm.position.y=1.75*w.m.scale.y;gm.rotation.y=w.m.rotation.y;gm.scale.set(1.8*w.m.scale.x,2.05*w.m.scale.y,1.6*w.m.scale.z);scene.add(gm);WGH.push({m:gm,age:0,op:0.35*fade});}
-      // เศษน้ำแข็ง + ไอเย็น (ทึบ เห็นบนพื้นสว่าง)
-      if(!w.fx)for(let j=0;j<4;j++)PARTS.push({x:x+px*rnd(-30,30),y:y+py*rnd(-30,30),h:rnd(0.3,3),vx:-Math.cos(w.a)*rnd(60,180)+px*rnd(-80,80),vy:-Math.sin(w.a)*rnd(60,180)+py*rnd(-80,80),vh:rnd(0,2),life:0.45,max:0.45,col:j%2?'#ffffff':'#9fe0ff',size:rnd(1.8,3),g:3,drag:2});
-      if(!w.fx&&Math.random()<0.7)PARTS.push({x:x-Math.cos(w.a)*20+px*rnd(-30,30),y:y-Math.sin(w.a)*20+py*rnd(-30,30),h:rnd(0.2,2.4),vx:0,vy:0,vh:0.3,life:0.7,max:0.7,col:'#e8f6ff',size:7,g:0,smoke:true,grow:1.2});}
-    w.cr=(w.cr||0)+st;if(w.cr>=70){w.cr=0;dfCracks(x,y,0.06,45,'#bfeaff',0.8);}
-    if(w.d>=w.len){if(w.fx)fxStop(w.fx);if(w.m||w.fx){playFx('ice_impact',x,y,1.2,{s:1});iceRing(x,y,30,8,0.9,0.5,{up:0.06,down:0.25});iceChips(x,y,1,8,200,4);iceBurst(x,y,1.1,{life:0.8,hy:0.9});}if(w.m){scene.remove(w.m);w.m.userData.mats.forEach(m=>m.dispose());}WVV.splice(i,1);}
+    const w=WVV[i],st=Math.min(w.len-w.d,GREND.v.waveSpd*dt),c=Math.cos(w.a),sn=Math.sin(w.a);w.d+=st;
+    if(!w.gnd){const cp=Math.cos(w.pt);w.x+=c*cp*st;w.y+=sn*cp*st;w.h+=Math.sin(w.pt)*st/20;
+      if(w.h<=0.25){w.gnd=1;w.h=0;iceRing(w.x,w.y,26,8,0.7,0.4,{up:0.05,down:0.2});iceChips(w.x,w.y,0.6,8,220,4);dfCracks(w.x,w.y,0.06,45,'#bfeaff',0.8);if(nearMe(w.x,w.y,900))snd('break',{x:w.x,y:w.y,vol:0.5});}}
+    else{w.x+=c*st;w.y+=sn*st;w.cr=(w.cr||0)+st;if(w.cr>=70){w.cr=0;dfCracks(w.x,w.y,0.06,45,'#bfeaff',0.8);}}
+    const x=w.x,y=w.y,px=-sn,py=c,k=w.d/w.len,M=w.m,gy=GY(x,y),wy=gy+(w.gnd?1.05:w.h);
+    M.position.set(tx(x),wy,tz(y));
+    if(w.gnd)_fsl.set(tx(x+c*40),wy,tz(y+sn*40));else{const cp=Math.cos(w.pt);_fsl.set(tx(x+c*cp*40),wy+Math.sin(w.pt)*2,tz(y+sn*cp*40));}
+    M.lookAt(_fsl);M.scale.setScalar(0.35+0.65*Math.min(1,w.d/80));M.material.uniforms.uFade.value=k>0.82?(1-k)/0.18:1;M.material.uniforms.uSeed.value=w.len*0.01+i;
+    LREQ.push({x:tx(x),y:wy,z:tz(y),col:'#8fe0ff',int:1.3,dist:8});
+    // เศษน้ำแข็งเล็กปลิวตามหลัง (น้อย ไม่บังเส้น)
+    for(let q=0;q<2;q++){const s=rnd(-34,34);PARTS.push({x:x+px*s-c*10,y:y+py*s-sn*10,h:(w.gnd?0:w.h)+rnd(0.2,1.8),vx:c*120,vy:sn*120,vh:rnd(0,2),life:0.3,max:0.3,col:q?'#ffffff':'#bfeaff',size:rnd(1.4,2.4),g:4,drag:3});}
+    if(w.d>=w.len){if(w.gnd){playFx('ice_impact',x,y,1.2,{s:0.8});iceRing(x,y,30,8,0.9,0.5,{up:0.06,down:0.25});iceChips(x,y,1,8,200,4);}
+      else burst(x,y,'#dff6ff',14,180,0.3,2,{h:w.h,g:1});
+      frostSlashPut(M);WVV.splice(i,1);}
   }
   for(let i=COLB.length-1;i>=0;i--){
     const b=COLB[i];b.t+=dt;const k=Math.min(1,b.t/b.max),x=lerp(b.x,b.x2,k),y=lerp(b.y,b.y2,k),H=lerp(b.h,b.h2!==undefined?b.h2+0.2:0.2,k);
