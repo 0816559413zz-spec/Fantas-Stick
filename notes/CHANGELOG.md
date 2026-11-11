@@ -1,5 +1,6 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
 
+- 2026-11-11 — **Moonwater ท่ายิง:** หันข้างเอาไหล่ข้างถือไม้ไปหน้า ยื่นไม้ตรงไปข้างหน้า ยืนกางขา ค้างตลอดลำ (`waterMoonPose`, `WMB_POSE` ใน `js/68-water-view.js`) แทนท่าร่ายทั่วไป
 - 2026-11-11 — **Moonwater ตอนเริ่มยิง:** วงเวทซ้อน 3 ชั้นหมุนสวนกัน (`wandc_back/front`), พระจันทร์เสี้ยว, วงคลื่นกระแทก, วงนอก, น้ำแตก `water_beam_burst` ที่ปากไม้, น้ำวน 3 เส้น, ละอองกระจายและประกายรอบวง (`tools/water-moon-pressure-gen.py`)
 - 2026-11-11 — **Review #5 Moonwater:** ตรวจแล้วว่าลำเดียวต่อเนื่อง ปลายจาง ไม่มีท่าจบ อยู่ในเกมแล้ว ส่งภาพ+GIF ตั้งสถานะรอรีวิว • เพิ่มรายการรีวิวสายลม (ลองเล่นจริง) • พบว่าลำ Moonwater จางมากบนพื้นขาวห้องฝึก
 - 2026-11-10 — **Storm ult claw slashes APPROVED by the user, with a bit less effect** — `storm-claw-gen.py` `calm()`: bolt width ×.8 and one fewer branch, emitter burst/rate ×.7, trail strength ×.85, light ×.8 on all four slash fx.

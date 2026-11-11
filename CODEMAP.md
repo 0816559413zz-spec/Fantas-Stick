@@ -57,7 +57,7 @@ PYV:3 pyroBigBoom:11 pyroBall:19 pyroBasic:20 addOrbs:37 pyroParry:38 pyroBlock:
 ## js/07-frost-spells.js (33) — 
 FROSTF:4 GREND:6 frostGlacier:11 PERMA:16 CRYO:18 FAURA:25 MIRROR:27
 
-## js/08-storm.js (224) — 
+## js/08-storm.js (239) — 
 STORMV:6 stGain:10 stSpend:11 stormCone:13 stormLineFoes:18 stormBasic:22 stormTri:46 stormDash:53 stormDashTick:66 stormShieldBlast:74 stormTick:83
 §92 สกิล 1 (ฟรี): เส้นสายฟ้า — ชี้ขึ้นแล้วกดลง 0.5 วิ จากนั้นสายฟ้าผ่าเป็…
 TLINE:93 stormLine:95
@@ -71,8 +71,8 @@ SORBS:135 stormOrbLaunch:138
 RAIL:146 stormBowTick:149 stormBowFire:155
 §162 อัลติ: ร่างเทพสายฟ้า 10 วิ
 GODL:163
-§165 สกิล 6 (3 stacks): ลูกสายฟ้าโดม — ทะยานขึ้น บินเล็ง 3 วิ คลิกยิงลูกสา…
-stormDomeTick:166 stormDomeFire:181 stormDomeSlam:189 updateStorm:194
+§165 ลูกสายฟ้าโดม: รวมไฟที่พื้น → ทะยานขึ้น → เล็ง → ฟาดไม้ยิงและค้างชี้เป…
+SDOME_POSE:166 stormDomeCost:167 stormDomeDash:168 stormDomeTick:169 stormDomeFire:198 stormDomeSlam:204 updateStorm:209
 
 ## js/09-earth.js (261) — 
 EARTH:9 ERV:12
@@ -105,11 +105,11 @@ NATURE_BA_TEST:2 NATURE_WHIP:3 natureWhipEnabled:4 natureWhipHit:7 natureWhipBas
 ## js/09-nature.js (449) — 
 NATUREP:2 NAT:3 natureDist:5 natureItems:6 natureLive:7 naturePlants:8 natureY:9 natureHead:10 natureTreeReady:11 natureEmit:12 natureWallLocal:15 natureWallContains:21 natureWallPush:28 natureBurnWall:36 natureWallDamage:43 natureWallTick:48 natureTrace:57 natureSight:75 natureGround:76 natureAimPoint:82 naturePlace:88 naturePlant:96 natureCastPlant:106 natureLotusToggle:122 natureMovePlants:130 natureAimSpot:141 natureAimStart:142 natureAimDone:143 natureAimTick:146 natureWallBuild:157 natureCastWall:158 NAT_WALLS:165 natureWallUse:166 natureWallCharges:167 naturePoison:174 natureStatus:179 natureSpore:191 natureSendSpore:198 natureShield:207 natureHookCandidates:221 natureDash:225 natureHookMove:251 natureBall:280 natureBallTick:288 natureTree:307 natureTreeReach:312 natureGuardian:317 natureGuard:323 natureDamage:332 natureEnd:338 natureTurret:344 naturePeaSplash:377 natureUpdate:382 natureReset:414 natureSnapP:418 natureLotusCooldown:429 natureSnapW:434
 
-## js/09-other-paths.js (175) — 
+## js/09-other-paths.js (176) — 
 §44 สัตว์เวท (minion): AI ฝั่งโฮสต์
 MIND:45 summonMin:51 minTarget:60 minShoot:67 updateMins:72 aimTarget:112 SDOME:149
-§159 ร่ายคาถา
-castSlot:160 castUlt:175
+§160 ร่ายคาถา
+castSlot:161 castUlt:176
 
 ## js/09-water.js (173) — 
 WATERP:7 WAV:11 wtOn:17 wtInBeam:19
@@ -264,12 +264,12 @@ burst:144 smoke:155 ring:156 floatText:157 shake:158 wandPos:159 impactFX:161 ex
 §190 เอฟเฟกต์คาถาใหม่
 ZV:191 COLB:191 WVV:191 GLV:191 ICEV:191 SLV:191 ULTV:191 OBV:191 _iceDisc:193 _iceEdge:194 _iceSpk:195 iceFloorMat:196 _icePlane:197 _icePathMat:198 _iceWvM:198 iceWvMat:200 makeIceFloor:212 ICE_WV:239 updateIceFloors:240 FLASHM:252 FLASHING:253 flashModel:254 endFlash:263 tickFlash:264 GHOSTM:266 SOLIDM:266 ghostOf:267 setGhost:273 hitSparks:281
 
-## js/20-vfx-pyro-storm.js (426) — Dragonfall (ภาพ)
-makeDfCircle:3 DFV:21 dfCracks:22 updateDfCracks:32 dragonfallFX:33
-§85 สายฟ้า (ภาพ)
-TBN:88 TBA:88 TBF:88 TBMAX:88 _tv:89 _tt:89 _ts:89 _tw:89 tbLayer:91 TBL:96 TBC:97 _tcc:98 tbGet:99 TBLUE:102 tboltB:103 tbolt:104 tboltP:113 tbWrite:114 updateBolts:122 LATER:140 STV:140 SBV:140 SDV:140 TSV:140 CLV:140 stTgPos:142 STCLAW:146
-§150 รอยกรงเล็บ (อัลติสายฟ้า): รอยข่วน 3 เส้นโค้งปลายแหลมขนานกัน ตั้งขวางห…
-clawGeo:153 clawRakes:158 updateClaws:172 later:180 stFade:181 stBeam:182 shellPt:187 updateStormV:188 _ev:224 GODPTS:226 bWorld:228 stormClawSwipe:232 stormFX:259 STHUD:381 drawStormHud:382
+## js/20-vfx-pyro-storm.js (482) — Dragonfall (ภาพ)
+makeDfCircle:3 DFV:21 dfCracks:22 updateDfCracks:32 _domeAim:33 domeChargeOrb:34 stormDomePose:42 dragonfallFX:83
+§141 สายฟ้า (ภาพ)
+TBN:144 TBA:144 TBF:144 TBMAX:144 _tv:145 _tt:145 _ts:145 _tw:145 tbLayer:147 TBL:152 TBC:153 _tcc:154 tbGet:155 TBLUE:158 tboltB:159 tbolt:160 tboltP:169 tbWrite:170 updateBolts:178 LATER:196 STV:196 SBV:196 SDV:196 TSV:196 CLV:196 stTgPos:198 STCLAW:202
+§206 รอยกรงเล็บ (อัลติสายฟ้า): รอยข่วน 3 เส้นโค้งปลายแหลมขนานกัน ตั้งขวางห…
+clawGeo:209 clawRakes:214 updateClaws:228 later:236 stFade:237 stBeam:238 shellPt:243 updateStormV:244 _ev:280 GODPTS:282 bWorld:284 stormClawSwipe:288 stormFX:315 STHUD:437 drawStormHud:438
 
 ## js/21-vfx-frost.js (206) — น้ำแข็ง (ภาพ): ชิ้นผลึก/หนาม/แผ่นน้ำแข็งชั่วคราว (โผล่ → ค้าง → หด) •…
 FRV:2 _cryG:3 _spkG:3 _plateG:3 _hexG:3 _iceFxM:4 _frostM:4 iceFxM:5 frostM:6 ICEP:8 _im4:8 _iq:8 _ie:8 _ip:8 _is:8 icePool:9 iceBit:10 iceChips:13 updateFRV:14 iceRing:24 chillFX:25 makeSlash:41 _wbGeo:49 crescentGeo:51 makeWaveBlade:54 WGH:68 updateSlashes:69 _glGeo:82 _glMat:82 _glMat2:82 makeGlacier:83 updateGlacierVis:114 updateOrbShots:123 updateZV:133 WM3:206
@@ -378,13 +378,13 @@ iceMat:2 iceRim:3 makeIceSword:4 makeIceAxe:23 makeKiteShield:39
 §51 อาวุธน้ำแข็งลอย (ผู้ใช้ 2026-10-22: "ร่ายคาถาให้ดาบฟันเอง ระยะเท่าเดิ…
 FWS:54 FWA:54 _fwM:55 _fwM2:55 _fwX:55 _fwY:55 _fwZ:55 _fwP:55 _fwS:55 _fwQ:55 _eo:56 _ei:56 _ss:56 fwAim:58 fwWeapons:59 FWP:61 FWT:61 fwChop:62 fwSweep:63 FF_RISE:64 fwIdle:65 fwSwing:68 FWL_N:80 fwLink:81 fwMat:84 frostFX:85
 
-## js/35-sync.js (590) — ซิงก์ผู้เล่น/ศัตรู/ลูกเวทจาก snapshot + ฉายตำแหน่งลงจอ (ป้ายชื่อ/ตัวเ…
+## js/35-sync.js (591) — ซิงก์ผู้เล่น/ศัตรู/ลูกเวทจาก snapshot + ฉายตำแหน่งลงจอ (ป้ายชื่อ/ตัวเ…
 §2 ท่าร่ายคาถาแบบนักเวทในหนัง Harry Potter (ผู้ใช้ 2026-10-22: "ยิงปกติท…
 CPOSE_T:7 _ce:7 _cs:7 _cb:7 AMP_B:9 AMP_S:9 CP_BEND:10 CPOSE:12 _cpT:20 _cpR:20 CGUARD:20 CP_STEP:21 CPCOL:22 castStyle:23 castStart:24
 §25 ท่าร่ายสกิล / อัลติ / โล่ (ผู้ใช้ 2026-10-22: "เกือบทุกสกิลควรมีการเห…
-CANIM:30 SKFEET:78 SKANIM:80 skAnim:88 _caT:89 _caR:89 skillPose:90 _g2:116 wandTwoHand:117 characterPoseMix:124 characterStance:125 CBLOCK:132 CBLOCK_PATH:133 blockPose:134 castPose:140 lateSkillPose:146 castPose0:147 clearCharacterCast:176 syncPlayers:181 syncEnemies:282 projGeo:320 tailGeo:321 _t1:322 makeProj:323 _a:344 _b:344 PJFX:346 syncProj:347 _awT:435 animateWorld:436
-§477 ฉายตำแหน่ง 3D ลงจอ (ป้ายชื่อ / ตัวเลขดาเมจ)
-_v:478 toScreen:479 BURNC:487 burnNum:488 NAMETAG:502 nameTag:503 drawLabels:507 TEXTAG:537 textTag:538 drawTexts:542 HITM:554 DIRI:554 drawXh:556 drawCrosshair:566
+CANIM:30 SKFEET:78 SKANIM:80 skAnim:88 _caT:89 _caR:89 skillPose:90 _g2:116 wandTwoHand:117 characterPoseMix:124 characterStance:125 CBLOCK:132 CBLOCK_PATH:133 blockPose:134 castPose:140 lateSkillPose:146 castPose0:147 clearCharacterCast:176 syncPlayers:181 syncEnemies:283 projGeo:321 tailGeo:322 _t1:323 makeProj:324 _a:345 _b:345 PJFX:347 syncProj:348 _awT:436 animateWorld:437
+§478 ฉายตำแหน่ง 3D ลงจอ (ป้ายชื่อ / ตัวเลขดาเมจ)
+_v:479 toScreen:480 BURNC:488 burnNum:489 NAMETAG:503 nameTag:504 drawLabels:508 TEXTAG:538 textTag:539 drawTexts:543 HITM:555 DIRI:555 drawXh:557 drawCrosshair:567
 
 ## js/36-modes-view.js (171) — 
 ROLE:4 KC:4 roleShowT:4 onPriv:5 MO:10 BREATHS:11 clearModeObjs:12 ITEMC:21 healTex:22 makeItem:23 syncModeObjs:39
@@ -730,18 +730,18 @@ NAT_VIEW:2 NAT_MARKS:2 NAT_MOTION:2 natV:3 natWorld:4 natPhase:5 natSmooth:6 nat
 ## js/68-storm-bow.js (134) — 
 SB_FULL:2 _sbShard:3 sbShard:4 sbMat:5 sbJag:6 SB_TIP:8 _sbBlade:9 sbBlade:10 sbMake:11 stormBowView:29 _sbFaQ:54 _sbFaT:54 _sbFaX:54 stormBowForearm:55 stormBowFx:56 sbStaffAxis:71 sbStaffMake:72 stormStaffView:89 stormStaffCast:101 stormStaffSwing:104 _sbWaveG:106 sbWaveGeo:107 SB_WAVE_F:108 stormWaveMake:115 stormWaveTick:119 SMK:127 stormMarkSet:128 stormMarkClear:131 stormMarkTick:132
 
-## js/68-water-view.js (216) — 
-WTV:5 WTC:6 WT_BODY:8 waterCharacterPose:13 wtState:34 wtStop:35 wtMesh:36 _wtV:38 _wtP:38 wtBakeClone:39 wtLineMat:50 _wtOlMat:57 wtOutline:59 WT_SINKD:65 wtSinkOffset:66 wtAlive:73 wtLoop:75 WT_FR:78 wtFrPath:79 _wtFa:81 _wtFb:81 _wtFs:81 _wtFn:81 wtFamRiseMesh:82 WT_POOL:87 wtFamRise:88 wtFamRiseOff:95 _wtTube:97 WT_BEAM_V:98 WT_BEAM_F:101 WT_BEAM_O:105 wtBeamMesh:108 wtBeamSync:112 wtBeamOff:117
-§119 ต่อผู้เล่น: โล่ฟองน้ำ/ฮีล • ลูกผู้ช่วยที่ไหล่ • ร่างโคลน + เส้นน้ำ • …
-waterFX:120
-§156 ทั้งเกม: ลูกผู้ช่วยที่กำลังพุ่ง (ล็อกเป้า)
-WT_MOUTH:158 _wtA:159 _wtB:159 wtMouth:160 _wtCyl:163 wtBeam:165 syncWater:168 wtPew:175
-§183 เหตุการณ์ (efx z 'wt…')
-waterEfx:184
-§212 HUD: เกจฮีลโล่ (โค้งซ้ายรอบเป้าเล็ง)
-drawWaterHud:213
+## js/68-water-view.js (222) — 
+WTV:5 WTC:6 WT_BODY:8 WMB_POSE:14 waterMoonPose:15 waterCharacterPose:18 wtState:40 wtStop:41 wtMesh:42 _wtV:44 _wtP:44 wtBakeClone:45 wtLineMat:56 _wtOlMat:63 wtOutline:65 WT_SINKD:71 wtSinkOffset:72 wtAlive:79 wtLoop:81 WT_FR:84 wtFrPath:85 _wtFa:87 _wtFb:87 _wtFs:87 _wtFn:87 wtFamRiseMesh:88 WT_POOL:93 wtFamRise:94 wtFamRiseOff:101 _wtTube:103 WT_BEAM_V:104 WT_BEAM_F:107 WT_BEAM_O:111 wtBeamMesh:114 wtBeamSync:118 wtBeamOff:123
+§125 ต่อผู้เล่น: โล่ฟองน้ำ/ฮีล • ลูกผู้ช่วยที่ไหล่ • ร่างโคลน + เส้นน้ำ • …
+waterFX:126
+§162 ทั้งเกม: ลูกผู้ช่วยที่กำลังพุ่ง (ล็อกเป้า)
+WT_MOUTH:164 _wtA:165 _wtB:165 wtMouth:166 _wtCyl:169 wtBeam:171 syncWater:174 wtPew:181
+§189 เหตุการณ์ (efx z 'wt…')
+waterEfx:190
+§218 HUD: เกจฮีลโล่ (โค้งซ้ายรอบเป้าเล็ง)
+drawWaterHud:219
 
-## js/68-wind-view.js (423) — 
+## js/68-wind-view.js (440) — 
 WV:6 WN_BODY:8 WN_AIR_FEET:8 WF_POSE:12 WF_FEET:12 WF_REF:12 WF_ROLL:12 _wfP:13 _wfF:13 windFlyPose:14 WTLF:24 windTailDraw:25 windTailFeel:31 windCharacterPose:33 wvState:50 wvAlive:51
 §52 ทุกเฟรมของผู้เล่นสายลม: ปีกติดหลัง / ปีกห่อตอนยกโล่ / ดูดลมชาร์จเกจ
 wfeSwing:53 wfeTwist:53 W_BLAST_SUCK:54 WFE_HOLD:55 WFE_TURN:55 windLatePose:57 _faX:93 _faQ:93 _faT:93 WF_ELBOW:93 windForearm:94 windFX:96
@@ -751,12 +751,12 @@ syncWind:122 wvWall:135 wvHitFx:136 wvAimFx:137
 wvEyePos:139 wvEyeSeen:140
 §141 เหตุการณ์ (efx z 'wn…')
 WDOME_G:143 WDOME_V:144 WDOME_F:145 windDome:146 windSuckFx:155 windEfx:166
-§259 HUD รอบเป้าเล็ง: เกจ GaleBurst (โค้งซ้าย) + ชาร์จกำแพงลม (จุด 3 จุดใต…
+§259 HUD รอบเป้าเล็ง: GaleBurst / Downburst / Dash / Slipstream
 drawWindHud:260
-§268 ตัวช่วยเล็งกำแพงลม (เห็นเฉพาะเรา): เส้นโค้งเรืองที่จุดวาง (คลิกขวา) +…
-wvAimGhost:269
-§280 ปีกเวทสายลมติดหลัง: ขนนก 8+4 เส้นต่อข้าง ทำจากสายลม (shader) + ริบบิ้…
-WWS:282 WWU:282 WW_NOISE:283 _wwMat:288 wwMats:289 wwFeatherGeo:335 WW_PRI:346 WW_COV:348 WW_RIB:349 _wwGeo:350 _wsupG:352 _wsupD:352 windSupDust:353 windSupDustTick:357 windWingSup:358 makeWindWings:379 wwCue:393 poseWindWings:397
+§285 ตัวช่วยเล็งกำแพงลม (เห็นเฉพาะเรา): เส้นโค้งเรืองที่จุดวาง (คลิกขวา) +…
+wvAimGhost:286
+§297 ปีกเวทสายลมติดหลัง: ขนนก 8+4 เส้นต่อข้าง ทำจากสายลม (shader) + ริบบิ้…
+WWS:299 WWU:299 WW_NOISE:300 _wwMat:305 wwMats:306 wwFeatherGeo:352 WW_PRI:363 WW_COV:365 WW_RIB:366 _wwGeo:367 _wsupG:369 _wsupD:369 windSupDust:370 windSupDustTick:374 windWingSup:375 makeWindWings:396 wwCue:410 poseWindWings:414
 
 ## js/69-broom.js (236) — ไม้กวาด (ผู้ใช้ 2026-10-29): บินแบบเครื่องบิน + ยิงลำแสงตามสาย + อนิเ…
 BRM:9 BFW:12 BSK:13 BROOM_SK:19 broomVert:40 broomMove:53 broomStrike:72 broomStrikeTick:81 broomFlak:89 broomAct:100 broomOff:107 broomBeam:109
@@ -803,4 +803,4 @@ surfSync:49 surfQuality:53
 SURF_VS:55 SURF_VS_BODY:56 SURF_FS:67 SURF_FS_BODY:68 surfOk:98 surfApply:99 surfScene:111
 §112 ปรับค่า (tune.html / F8)
 
-(98 files, 24795 lines)
+(98 files, 24891 lines)
