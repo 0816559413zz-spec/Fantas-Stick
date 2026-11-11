@@ -313,6 +313,10 @@ function shoot(p,type,o){
   else vh=Math.tan(clamp((p.inp&&p.inp.ap)||0,-0.9,0.9))*SP/20;
   const pr={id:++G.pid,type,x:p.x+Math.cos(a)*26,y:p.y+Math.sin(a)*26,h,vh,vx:Math.cos(a)*SP,vy:Math.sin(a)*SP,
     r:d.r,dmg:d.dmg,life:d.life,owner:p.id,team:p.team,src:'p'};
+  // hand:1 = ออกจากปลายไม้ (มือขวา) แล้ววิ่งไปจุดเล็ง crosshair (ผู้ใช้ 2026-11-11: Kindle/ลูกไฟไม่ตรงกับไม้)
+  if(o&&o.hand){const rx=-Math.sin(a),ry=Math.cos(a);pr.x=p.x+Math.cos(a)*20+rx*9;pr.y=p.y+Math.sin(a)*20+ry*9;pr.h=p.z+1.45;
+    if(human){const A=Math.atan2(p.inp.ay-pr.y,p.inp.ax-pr.x),dd=Math.max(60,Math.hypot(p.inp.ax-pr.x,p.inp.ay-pr.y));pr.vx=Math.cos(A)*SP;pr.vy=Math.sin(A)*SP;pr.vh=clamp((p.inp.ah-pr.h)/(dd/SP),-Math.max(30,SP/5),Math.max(30,SP/5));}
+    delete o.hand;}
   if(o)Object.assign(pr,o);
   G.proj.push(pr);
   if(!(o&&o.quiet))emit({k:'cast',t:type,x:p.x,y:p.y,h:h+0.05,a:Math.round(a*100)/100,id:p.id});   // quiet = ไม่เล่นท่าร่ายซ้ำ (BA น้ำ: ตวัดครั้งเดียว)

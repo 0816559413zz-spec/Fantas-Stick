@@ -16,20 +16,20 @@ function pyroBigBoom(pr){
   for(const t of foesIn(pr.team,pr.x,pr.y,V.r,pr.h+3.5)){aoeHit(o,t,V.dmg,t=>addBurn(t,1,pr.owner));const d=Math.hypot(t.x-pr.x,t.y-pr.y);if(d<bd){bd=d;best=t;}}
   if(best)launchOrbs(o,best);
 }
-function pyroBall(p){shoot(p,'pfire',{sp:'pyroball',dmg:PYV.ballDmg});}   // เนิร์ฟ 2026-10-27: 20→15→12
+function pyroBall(p){shoot(p,'pfire',{sp:'pyroball',dmg:PYV.ballDmg,hand:1});}   // เนิร์ฟ 2026-10-27: 20→15→12
 function pyroBasic(p,inp,dt,setCd){
   const prev=p.bfPrev;p.bfPrev=inp.fire;
   if(p.dfall){if(p.dfall.ph===2&&inp.fire&&!prev)dragonfallDive(p);p.chg=0;return;}
   if(p.breath>0||p.snapT>0){p.chg=0;return;}
   if(inp.fire&&!prev){
     // Kindle: คลิก = ลูกไฟชาร์จเต็มทันที
-    if(p.kindle>0&&p.cd.basic<=0){p.kindle--;if(!p.kindle){p.kindleT=0;p.hover=0;}shoot(p,'pfireb',{sp:'pyrobig',dmg:KINDLE.v.dmg});setCd('basic',PYV.ballCd);p.chg=-1;return;}
+    if(p.kindle>0&&p.cd.basic<=0){p.kindle--;if(!p.kindle){p.kindleT=0;p.hover=0;}shoot(p,'pfireb',{sp:'pyrobig',dmg:KINDLE.v.dmg,hand:1});setCd('basic',PYV.ballCd);p.chg=-1;return;}
     p.chg=0;
   }else if(inp.fire){if(p.chg>=0)p.chg=Math.min(PYV.chargeT,p.chg+dt);}
   else if(prev){
     // ปล่อยคลิก: แตะสั้น = ประกายไฟ / ชาร์จครบ 3 วิ = ลูกไฟ / ระหว่างนั้น = ไม่ยิง
     if(p.chg>=PYV.chargeT){pyroBall(p);setCd('basic',PYV.ballCd);}
-    else if(p.chg>=0&&p.chg<0.25&&p.cd.basic<=0){shoot(p,'spark',{sp:'b_pyro',dmg:PYV.sparkDmg});setCd('basic',PYV.sparkCd);}
+    else if(p.chg>=0&&p.chg<0.25&&p.cd.basic<=0){shoot(p,'spark',{sp:'b_pyro',dmg:PYV.sparkDmg,hand:1});setCd('basic',PYV.sparkCd);}
     p.chg=0;
   }
 }
