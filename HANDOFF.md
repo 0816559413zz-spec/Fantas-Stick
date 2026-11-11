@@ -1,5 +1,7 @@
 # HANDOFF — Fantas Stick (was "Wizard Duel") (repo: Fantas-Stick)
 
+**Storm VFX รอแก้ 2026-11-12:** รายการใน `designs/storm.md` ส่วน "รายการรอแก้ VFX" (ฟ้าผ่าสามครั้งขาวจ้า, Dash แฟลชใหญ่, อัลติขาวเกิน, แสงธนูบังแขน, อัดโดมใหม่) — ผู้ใช้ยังไม่เลือกว่าทำข้อไหน
+
 **สายฟ้าแหลม+ขอบออร่า / เส้นสายฟ้า+BA เสริมเบาลง / ธนูงอศอก 2026-11-11 (ยังไม่ commit รอรีวิว #21/#20):** ทุกเส้นสายฟ้าผ่าน `tbWrite` (หัวท้ายแหลม) + `tbFalloff` (ขอบจาง) js/20 • `storm/hit_small` แทน `hit_mix` ใน `line_mix`/`tri_mix` • ธนูใช้ IK บนกระดูกจริง `stormBowForearm` js/68 (เป้า `SB_START`→`SB_ANCHOR`, ศอก `SB_POLE` พิกัด o.b) — มือทำจากเฟรมก่อนสำหรับสาย/ลูกธนู (`o.sbHandW`)
 
 **Storm อัลติ BA + ธนูไม่ทะลุตัว 2026-11-11 (ยังไม่ commit รอรีวิว #19/#20):** สเปก BA ใหม่ใน `designs/storm.md` (Ultimate) — โฮสต์ `stormBasic` ส่วน `p.god>0` + `stormClawStrike` js/08 (คิว `p.clQ`, หน้าต่าง Special `p.cEmpT`) • ภาพ js/20 `stormClawRangeFX`/`updateClawFX`/`stormClawSwipe` (n 0/1 = คอมโบ, 4/5 = รอย X) + js/25 `sclawgo/sclaw/sclawhit` • ข้อสังเกต: Dash ทะลุศัตรู ต้องหันกลับเองก่อนกด Special • ธนู: js/68 มือ armL จับสายหน้าอก→ข้างคาง ลูกธนูชี้จากมือไปคันธนู
