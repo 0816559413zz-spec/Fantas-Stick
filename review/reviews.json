@@ -1,5 +1,5 @@
 {
- "next": 10,
+ "next": 11,
  "items": [
   {
    "id": 1,
@@ -208,6 +208,36 @@
     },
     {
      "t": "ความสูงกำแพง 3.5 ม. / เตี้ย 1.1 ม. ตรงที่คิดไว้ไหม",
+     "ok": false
+    }
+   ]
+  },
+  {
+   "id": 10,
+   "title": "ไฟทุกสกิลแบบ Cel-shade (branch graphics-painterly)",
+   "text": "ไฟสายไฟทุกสกิลเป็นสีแบนขอบคมแบบ cel บนแมพป่าลุคภาพวาด\nวิธีดู: branch graphics-painterly → เล่นแมพ 🌲 ป่า ด้วยสายไฟ • ภาพ: designs/graphics-painterly/fire-cel-*.jpg • ปิด/เปิด: tune.html → 🎨 Paint → fxcel",
+   "kind": "VFX",
+   "who": "Claude",
+   "status": "wait",
+   "created": "2026-11-11T00:00:00",
+   "updated": "2026-11-11T00:00:00",
+   "imgs": [],
+   "links": [],
+   "checks": [
+    {
+     "t": "สี/แถบสีของไฟ โอเคไหม",
+     "ok": false
+    },
+    {
+     "t": "เปลวทรงหยดน้ำ (Q, R) เยอะไป/รกไปไหม",
+     "ok": false
+    },
+    {
+     "t": "กำแพงไฟ (F) และอัลติ",
+     "ok": false
+    },
+    {
+     "t": "ลูกไฟปกติเล็กไปไหม",
      "ok": false
     }
    ]
