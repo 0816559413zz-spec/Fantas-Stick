@@ -216,7 +216,7 @@
       "args": {"type": "obj", "def": {}, "th": "ค่าที่ส่ง"}}}
   },
   "shapes": ["sphere", "dome", "disc", "ring", "cylinder", "cone", "torus", "crescent", "spikes", "beam", "plane", "lathe", "ribbon", "glb", "model"],
-  "mats": ["energy", "fire", "ice", "glow", "solid", "flip", "tex", "toon", "black", "water", "toonwater", "windshell"],
+  "mats": ["energy", "fire", "ice", "glow", "solid", "flip", "tex", "toon", "black", "water", "toonwater", "windshell", "armor"],
   "froms": ["point", "sphere", "hemisphere", "ring", "disc", "cone", "box", "line", "mesh"],
   "dirs": ["out", "flat", "up", "down", "in", "aim", "tangent", "random"],
   "looks": ["glow", "spark", "streak", "ring", "flake", "smoke", "fire", "ember", "model"],
@@ -227,7 +227,7 @@
     "file": {
       "v": {"type": "int", "def": 1, "th": "เวอร์ชันรูปแบบไฟล์"},
       "desc": {"type": "str", "def": "", "th": "คำอธิบาย"},
-      "mat": {"type": "enum", "of": ["energy", "fire", "ice", "glow", "solid"], "def": "energy", "th": "วัสดุที่แนะนำ (ใช้ตอนดูในสตูดิโอ / ตอนกดใช้ในเอฟเฟกต์)"},
+      "mat": {"type": "enum", "of": ["energy", "fire", "ice", "glow", "solid", "armor"], "def": "energy", "th": "วัสดุที่แนะนำ (ใช้ตอนดูในสตูดิโอ / ตอนกดใช้ในเอฟเฟกต์)"},
       "pal": {"type": "enum", "of": "pals", "def": "arcane", "th": "ธาตุที่ใช้ดูในสตูดิโอ"},
       "tags": {"type": "list", "def": [], "th": "แท็ก"},
       "smooth": {"type": "bool", "def": false, "th": "แสงผิวโค้ง (solid)", "desc": "Opt-in smooth vertex-normal lighting for solid model material. Per-part flat geometry still preserves hard edges. Omit to retain legacy flat-shaded material."},

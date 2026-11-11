@@ -292,6 +292,36 @@ function fxToonMat(c1,c2,c3,rim){const U={time:FIRE_U.time,uC1:{value:new THREE.
       'float nz=texture2D(uNz,vUv*vec2(3.0,1.0)+vec2(time*0.08,-time*0.25)).r;if(nz<uDis)discard;'+
       'vec3 c=l>0.3?uC2:uC3;c=mix(c,uC1,step(0.8,fr*uRim+(l>0.55?0.25:0.0)));c=mix(c,uC1,step(nz,uDis+0.04)*step(0.001,uDis));'+
       'gl_FragColor=vec4(c*uInt,uOp);}'});}
+// เกราะพลังงานแบบภาพวาด (ร่างยักษ์ไฟ, ภาพอ้างอิงสตอรี่บอร์ด #14): เนื้อทองโปร่ง สีแบน 2 เฉดตามหน้าเหลี่ยม + ประกายเม็ดเล็ก + เส้นขอบสว่างทุกสันเหลี่ยม (fxArmorLines)
+// col = สีเนื้อด้านบน • col2 = สีเนื้อด้านล่าง/เงา • $core = สีเส้นขอบ • dis = ไหม้สลายตามลาย noise
+function fxArmorMat(c1,c2,c3){const U={time:FIRE_U.time,uC1:{value:new THREE.Color(c1)},uC2:{value:new THREE.Color(c2)},uC3:{value:new THREE.Color(c3)},uOp:{value:1},uDis:{value:0},uInt:{value:1},uNz:{value:NOISETEX},uY:{value:new THREE.Vector2(0,6)}};
+  return new THREE.ShaderMaterial({uniforms:U,transparent:true,depthWrite:true,side:THREE.FrontSide,polygonOffset:true,polygonOffsetFactor:1,polygonOffsetUnits:2,
+    vertexShader:'varying vec3 vP;varying vec3 vN;varying vec3 vV;void main(){vP=position;vec4 mv=modelViewMatrix*vec4(position,1.0);vN=normalize(normalMatrix*normal);vV=normalize(-mv.xyz);gl_Position=projectionMatrix*mv;}',
+    fragmentShader:'uniform sampler2D uNz;uniform vec3 uC1,uC2,uC3;uniform float time,uOp,uDis,uInt;uniform vec2 uY;varying vec3 vP;varying vec3 vN;varying vec3 vV;'+
+      'void main(){float nz=texture2D(uNz,vP.xy*0.11+vP.z*0.07).r;if(nz<uDis)discard;vec3 n=normalize(vN);float fr=1.0-abs(dot(n,normalize(vV)));'+
+      'float g=clamp((vP.y-uY.x)/(uY.y-uY.x),0.0,1.0);vec3 c=mix(uC3,uC2,smoothstep(0.05,0.75,g));'+
+      'float l=dot(n,normalize(vec3(0.25,0.8,0.55)));c*=l>0.15?1.05:0.74;c=mix(c,uC2*1.2,smoothstep(0.6,0.92,fr)*0.5);'+           // 2 เฉดตามหน้าเหลี่ยม + ขอบหันข้างสว่าง
+      'float sp=texture2D(uNz,vP.xy*1.7+vec2(vP.z*1.3,time*0.02)).r;c+=uC1*smoothstep(0.83,0.9,sp)*(0.5+0.5*sin(time*3.0+sp*40.0))*0.9;'+   // ประกายเม็ดเล็กวิบวับ
+      'float ed=uDis>0.001?1.0-smoothstep(uDis,uDis+0.06,nz):0.0;c+=uC1*ed*1.5;'+
+      'float a=(0.84+0.14*fr)*uOp;gl_FragColor=vec4(c*uInt,a);}'});}
+// เส้นขอบสันเหลี่ยมของโมเดล: แต่ละเส้น = แผ่นสี่เหลี่ยมหันหากล้อง หนาตามระยะ (ไม่ต่ำกว่า ~2 px) — เส้น GL ปกติหนาได้แค่ 1 px
+function fxArmorLines(geo,fill){
+  let eg=geo.userData.armorEdges;
+  if(!eg){const E=new THREE.EdgesGeometry(geo,24).attributes.position.array,n=E.length/6,P=new Float32Array(n*12),O=new Float32Array(n*12),Sd=new Float32Array(n*4),ix=[];
+    for(let i=0;i<n;i++){const a=[E[i*6],E[i*6+1],E[i*6+2]],b=[E[i*6+3],E[i*6+4],E[i*6+5]];
+      [[a,b,1],[a,b,-1],[b,a,-1],[b,a,1]].forEach(([p,o,s],k)=>{P.set(p,(i*4+k)*3);O.set(o,(i*4+k)*3);Sd[i*4+k]=s;});
+      ix.push(i*4,i*4+1,i*4+2,i*4+2,i*4+1,i*4+3);}
+    eg=new THREE.BufferGeometry();eg.setAttribute('position',new THREE.BufferAttribute(P,3));eg.setAttribute('aOther',new THREE.BufferAttribute(O,3));eg.setAttribute('aSide',new THREE.BufferAttribute(Sd,1));
+    eg.setIndex(ix);eg.boundingSphere=geo.boundingSphere;eg.userData.keep=true;geo.userData.armorEdges=eg;}
+  const U={uC1:fill.uniforms.uC1,uOp:{value:1},uDis:{value:0},uInt:{value:1},uNz:{value:NOISETEX},uW:{value:0.055},uRes:SOFTU.uRes};
+  const m=new THREE.ShaderMaterial({uniforms:U,transparent:true,depthWrite:false,side:THREE.DoubleSide,
+    vertexShader:'attribute vec3 aOther;attribute float aSide;uniform float uW;uniform vec2 uRes;varying float vS;varying vec3 vP;'+
+      'void main(){vP=position;vS=aSide;vec4 p0=projectionMatrix*modelViewMatrix*vec4(position,1.0),p1=projectionMatrix*modelViewMatrix*vec4(aOther,1.0);float asp=uRes.x/max(uRes.y,1.0);'+
+      'vec2 d=(p1.xy/max(p1.w,1e-3)-p0.xy/max(p0.w,1e-3))*vec2(asp,1.0);d=normalize(d+vec2(1e-6));vec2 nn=vec2(-d.y,d.x);'+
+      'float wd=max(uW*projectionMatrix[1][1]/max(p0.w,1e-3),4.4/max(uRes.y,1.0));p0.xy+=nn*aSide*wd*vec2(1.0/asp,1.0)*p0.w;gl_Position=p0;}',
+    fragmentShader:'uniform sampler2D uNz;uniform vec3 uC1;uniform float uOp,uDis,uInt;varying float vS;varying vec3 vP;'+
+      'void main(){if(texture2D(uNz,vP.xy*0.11+vP.z*0.07).r<uDis)discard;float a=(1.0-smoothstep(0.45,1.0,abs(vS)))*uOp;gl_FragColor=vec4(uC1*1.5*uInt,a);}'});
+  const L=new THREE.Mesh(eg,m);L.renderOrder=4;L.frustumCulled=false;return L;}
 function fxMeshMake(S,I,w){const L=S.d,g=k=>fxG(L,k),sh=g('shape'),mt=g('mat'),C=k=>fxCol(g(k),I);let obj,mats=[];
   const mkMat=()=>{switch(mt){
     case 'fire':{const ball=g('mode')==='ball'||(g('mode')==='auto'&&['sphere','dome','torus','glb','spikes','model'].includes(sh));
@@ -302,6 +332,7 @@ function fxMeshMake(S,I,w){const L=S.d,g=k=>fxG(L,k),sh=g('shape'),mt=g('mat'),C
     case 'windshell':return fxWindShellMat(C('col'),C('col2'),g('scroll'),g('mode')==='ball');   // mode ball = หุ้มรอบ (ลายต่อกันรอบวง ไม่จางด้านข้าง)
     case 'water':return fxWaterMat(C('col'),C('col2'),g('rim'),g('scroll'),g('disp'));   // น้ำใส ขอบขาว ไฮไลต์ไหล
     case 'toon':{const m=fxToonMat(fxCol('$core',I),C('col'),C('col2'),g('rim'));if(g('zw')){m.depthWrite=true;m.side=THREE.FrontSide;}return m;}   // zw = ทึบ: เขียนความลึก ไม่วาดด้านหลัง (ก้อนน้ำ 3D ไม่โชว์ด้านในทะลุเป็นลาย)   // การ์ตูน 2 เฉด + ขอบสว่าง + ขอบแหว่งด้วย dis (ลม)
+    case 'armor':return fxArmorMat(fxCol('$core',I),C('col'),C('col2'));   // เกราะพลังงานแบบภาพวาด + เส้นขอบ (ร่างยักษ์ไฟ)
     case 'black':return new THREE.MeshBasicMaterial({color:0x000000,transparent:true,fog:false});   // ดำสนิทไม่รับแสง เขียนความลึก บังของเรืองแสงข้างหลัง (แกนหลุมดำ)
     case 'solid':return new THREE.MeshStandardMaterial({color:C('col'),emissive:C('col2'),emissiveIntensity:0.35,roughness:0.85,metalness:0,flatShading:true,transparent:true});
     case 'tex':{const m=fxTexMat(g('tex'),{col:C('col'),col2:C('col2'),rim:g('rim'),tile:g('uvTile'),scroll:g('uvScroll')});if(L.nodepth)m.depthTest=false;return m;}   // ภาพจากสตูดิโอบนผิวรูปทรง (js/46)
@@ -309,7 +340,8 @@ function fxMeshMake(S,I,w){const L=S.d,g=k=>fxG(L,k),sh=g('shape'),mt=g('mat'),C
     default:{const m=fxEnergyMat(fxCol('$core',I),C('col'),C('col2'));m.uniforms.uScroll.value=g('scroll');m.uniforms.uRim.value=g('rim');return m;}}};
   if(sh==='glb'){const nm=g('glb');if(!MODELS.ready.get(nm)){if(nm&&!MODELS.fail.has(nm))loadModel(nm);S.oneshot=1;return;}
     obj=modelInst(nm);const m=mkMat();mats.push(m);obj.traverse(q=>{if(q.isMesh){q.material=m;q.castShadow=false;q.renderOrder=3;}});}
-  else if(sh==='model'){let geo=fxMeshGeo(g('model'));if(!geo){S.oneshot=1;return;}if(L.grow!==undefined)geo=fxGrowInit(S,geo);const m=mkMat();if(mt==='solid'){const md=FXMK.mesh.get(g('model'))?.data;if(md?.smooth)m.flatShading=false;if(geo.getAttribute('color')){m.vertexColors=true;if(L.col===undefined)m.color.set('#ffffff');if(L.col2===undefined)m.emissive.set('#000000');}if(md?.bark)fxModelBark(m);if(geo.getAttribute('aEmit'))fxModelEmission(m);}mats.push(m);obj=new THREE.Mesh(geo,m);obj.renderOrder=3;S.geo=geo;}   // โมเดลที่ปั้นในสตูดิโอ (assets/fx/mesh)
+  else if(sh==='model'){let geo=fxMeshGeo(g('model'));if(!geo){S.oneshot=1;return;}if(L.grow!==undefined)geo=fxGrowInit(S,geo);const m=mkMat();if(mt==='solid'){const md=FXMK.mesh.get(g('model'))?.data;if(md?.smooth)m.flatShading=false;if(geo.getAttribute('color')){m.vertexColors=true;if(L.col===undefined)m.color.set('#ffffff');if(L.col2===undefined)m.emissive.set('#000000');}if(md?.bark)fxModelBark(m);if(geo.getAttribute('aEmit'))fxModelEmission(m);}mats.push(m);obj=new THREE.Mesh(geo,m);obj.renderOrder=3;S.geo=geo;
+    if(mt==='armor'){const bb=geo.boundingBox;if(bb)m.uniforms.uY.value.set(bb.min.y,bb.max.y);const ln=fxArmorLines(geo,m);mats.push(ln.material);obj.add(ln);}}   // โมเดลที่ปั้นในสตูดิโอ (assets/fx/mesh)
   else{const geo=fxGeo(L),m=mkMat();mats.push(m);obj=new THREE.Mesh(geo,m);obj.renderOrder=3;S.geo=geo;}
   const root=new THREE.Group();root.add(obj);S.inner=obj;
   obj.rotation.order='YXZ';

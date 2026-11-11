@@ -468,7 +468,7 @@ BFA:315 bfWreck:316 updateBfAir:321 bfRumble:344 updateBf:347
 §350 4) เอฟเฟกต์ทั้งจอ (ค่าไปที่ GradePass ใน js/27-world.js)
 SCR:351 impactFrame:354 screenFlash:355 screenRadial:356 screenKick:357 screenHurt:358 _scv:359 updateScreenFx:360 updateVfxKit:374
 
-## js/45-fx-runtime.js (395) — 
+## js/45-fx-runtime.js (427) — 
 FXR:9 FXDEG:10
 §11 โหลด
 fxFetch:12 fxDefaults:13 fxBoot:14 fxOverrides:24 fxLoad:27 fxData:31
@@ -485,17 +485,17 @@ fxN:111 fxSpawn:112 fxTick:146 fxEnd:157
 §164 อนุภาค
 _fxrnd:165 fxUnit:166 fxCone:167 fxEmit:169 fxPart:186
 §201 รูปทรง 3D
-FXGEO:202 fxMerge:203 fxRibbon:208 fxGeo:214 fxEnergyMat:234 fxWaterMat:249 fxToonWaterMat:262 fxWindShellMat:278 fxToonMat:287 fxMeshMake:295 fxMeshTick:317 fxFlipTex:332
-§337 หางแสง / รอยฟัน
-fxTrailTick:338
-§344 สายฟ้า
-fxBolt:345
-§351 ฟังก์ชันในโค้ดที่ไฟล์เรียกได้ (ชั้น t:"code")
-FXCODE:352
-§365 ผูกกับ event ของเกม (assets/fx/bind.json) — เรียกจาก fx(ev)
-fxLoopName:367 blzFxName:368 fxLoopKeep:369 fshHitFx:371 fxBind:374
-§385 แม่แบบ playFx เป็นไฟล์ (assets/fx/tpl/*, sig/*, rec/*)
-fxTpl:387
+FXGEO:202 fxMerge:203 fxRibbon:208 fxGeo:214 fxEnergyMat:234 fxWaterMat:249 fxToonWaterMat:262 fxWindShellMat:278 fxToonMat:287 fxArmorMat:297 fxArmorLines:308 fxMeshMake:325 fxMeshTick:349 fxFlipTex:364
+§369 หางแสง / รอยฟัน
+fxTrailTick:370
+§376 สายฟ้า
+fxBolt:377
+§383 ฟังก์ชันในโค้ดที่ไฟล์เรียกได้ (ชั้น t:"code")
+FXCODE:384
+§397 ผูกกับ event ของเกม (assets/fx/bind.json) — เรียกจาก fx(ev)
+fxLoopName:399 blzFxName:400 fxLoopKeep:401 fshHitFx:403 fxBind:406
+§417 แม่แบบ playFx เป็นไฟล์ (assets/fx/tpl/*, sig/*, rec/*)
+fxTpl:419
 
 ## js/46-fx-make.js (356) — 
 FXMK:10 MKD:11 mkRng:12 mkHash:13 mkNoise:15 mkL:17 mkR2:18
@@ -819,4 +819,4 @@ paintScene:220 paintShafts:235
 §246 ฟิลเตอร์ภาพวาด (Kuwahara 4 ทิศ, 64 จุด) — เลือกค่าเฉลี่ยของมุมที่สีเร…
 §272 ปรับค่า (tune.html / F8)
 
-(99 files, 25010 lines)
+(99 files, 25042 lines)

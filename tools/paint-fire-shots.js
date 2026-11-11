@@ -24,7 +24,7 @@ const press=k=>{if(k==='fire')HL.input({fire:true});else WD.INPUT.c[k]=(WD.INPUT
 // warm: fire each once so lazy fx files load
 for(const k of keys){press(k);for(let i=0;i<50;i++){keep();HL.step(1);}HL.input({fire:false});}
 await HL.sleep(5000);for(let i=0;i<240;i++){keep();HL.step(1);}
-HL.cam(O.cam||'q34',{dist:O.dist||7,h:1.6,look:[0,1.4,3]});
+HL.cam(O.cam===0?null:(O.cam||'q34'),{dist:O.dist||7,h:O.h===undefined?1.6:O.h,look:O.look||[0,1.4,3]});
 for(const k of keys){
   for(let i=0;i<150;i++){keep();HL.step(1);}me.x=PX;me.y=PY;me.ang=PA;HL.aim(PA);for(let i=0;i<20;i++){keep();HL.step(1);}
   let fired=false;
