@@ -89,7 +89,8 @@ let AIMZ=0,WBY=null;
 const CAM_FRAMES={
   base:{dist:4.7,h:2.05,side:0.25},flight:{dist:7,h:2.4,side:0.28},   // base: แบบเกม hero shooter มุมบุคคลที่ 3 (ผู้ใช้ 2026-11-06) ใกล้ขึ้น ตัวอยู่ ~37% จากซ้าย (เดิม 6.2/2.25/0.30)
   colossus:{dist:14.5,h:4.4,side:0.34},airAim:{dist:6.6,h:2.5,side:0.29},
-  kindle:{dist:6.4,h:2.5,side:0.31},   // ผู้ใช้ 2026-11-11: ซูมออกนิด (เดิม 5)rail:{dist:5.4,h:2.2,side:0.3},
+  kindle:{dist:6.4,h:2.5,side:0.31},   // ซูมออกนิด (เดิม 5)
+  rail:{dist:5.4,h:2.2,side:0.3},
   earthBase:{dist:7,h:2.25,side:0,lift:2.4},earthRampage:{dist:9,h:4.1,side:0,lift:3},
   earthShield:{dist:9,h:2.8,side:0,lift:5.5},earthCharge:{dist:10,h:3,side:0,lift:5},
   earthAuger:{dist:12,h:3.3,side:0,lift:3.5},earthSky:{dist:15.2,h:3.8,side:0,lift:3},

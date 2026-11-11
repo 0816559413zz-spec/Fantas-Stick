@@ -250,6 +250,7 @@ function efxFX(ev){
       smoke(x,y,H+0.1,12,'#3a2a24',0.6,8,R);
       if(near){snd('boom',ev);snd('boom',{x,y,vol:0.6});shake(8);}break;}
     case 'fblock':break;
+    case 'pflick':{fxPlay('fire/flick',{x,y,h:0,a:ev.a||0,aim:false});const o=PM3.get(ev.id);if(o){o.caN='sweep';o.caT=0;o.cpT=0;o.cgd=2.2;}if(near)snd('cast_fire',ev);break;}   // โล่ไฟ + คลิก = สะบัดวงไฟ (js/06 pyroFlick)
     case 'orbget':{const o=PM3.get(ev.id),a=o?-o.g.rotation.y+Math.PI/2:0;FX.flashSprite(x,y,H,'#ffd27a',0.4,3.5,0.15,2.4);burst(x,y,'#ffb347',14,120,0.4,2.2,{h:H,g:-1});
       // ลูกไฟ 2 ลูกก่อตัวจากโล่ (หน้าตัว) แล้วลอยไปประจำข้างตัว
       for(const sd of [-1,1]){const sx=x+Math.cos(a)*30,sy=y+Math.sin(a)*30,ex=x-Math.sin(a)*sd*36-Math.cos(a)*15,ey=y+Math.cos(a)*sd*36-Math.sin(a)*15;for(let k=0;k<6;k++)later(k*0.04,()=>{const t=k/5;flame(lerp(sx,ex,t),lerp(sy,ey,t),H-0.3,{vh:1,life:0.2,size:6,g:-1});});}

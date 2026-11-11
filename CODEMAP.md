@@ -34,7 +34,8 @@ FCS_C:7 FCS_WH:8 genFcs:9
 §45 พื้นที่เล่นตามเฟส (กำแพงล่องหน) + เขตจุดเกิดปลอดภัย — ใช้ทั้งโฮสต์ (G…
 SGPH:46 SG_SPR:47 _sgAreaC:48 sgArea:49 sgClamp:55 sgInArea:65
 
-## js/03-spells-core.js (245) — 
+## js/03-spells-core.js (245) — ระบบคาถาใหม่: สาย (path) × คาถา (spell) + สถานะ (status effects)
+§6 ไอคอนคาถา: จาก game-icons.net (CC BY 3.0, เครดิตใน "คู่มือ" และ icons…
 ICONS:8 ICOALIAS:9 hasIco:10 ICOBASE:12 icoURL:13 ICO:14 icoTint:15 icoHTML:24 PATHS:25 SPELL_LIST:34 SPELLS:34 defSpell:35 SLOTK:36 BRMAP:36 KITP:37 parseKit:38 cleanKit:54 setKit:55 pathReset:58
 §60 สถานะ (ใช้ได้ทั้งผู้เล่นและศัตรู)
 isBig:61 ccScale:63 ccTouch:64 addStun:65 addRoot:66 addFreeze:67 addSlow:72 addChill:73 ignite:78 shock:86 knock:91 addWard:92 addFrostSlow:94 frostSlow:95 moveMul:102 BRN_MAX:104 addBurn:105 addXBurn:107 addPoison:108 addSil:109 addFear:110 addBlind:111 addMark:112 healT:114 tickStatus:119 clearStatus:141 fxMask:142
@@ -51,8 +52,9 @@ FROSTV:3 frostBoom:9 meleeHit:16 mirrorPos:27 frostBasic:28 frostSlam3:52 frostS
 ## js/05-terrain.js (44) — พื้นสูงต่ำ (แผนที่จากไฟล์ Blender — กติกาฝั่งคนปั้นใน guides/MAP-DESI…
 TERR:5 TSTEP:6 TSLOPE:6 terrT:7 floorAt:12 terrSolid:14 terrMove:21 updateGlaciers:30
 
-## js/06-pyro.js (191) — สายไฟ: ยิงปกติ 2 โหมด / โล่ระเบิด / พุ่งชาร์จ
-PYV:3 pyroBigBoom:11 pyroBall:19 pyroBasic:20 addOrbs:37 pyroParry:38 pyroBlock:39 launchOrbs:41 pyroDash:48 pyroPathEnd:68 updateFirePaths:73 KINDLE:93 DRAGONF:95 dragonfallDive:104 dragonfallTick:105 dragonfallBoom:120 RINGE:125 BLAZEF:132 SNAP:134 COLOS:139 pyroSnap:141 colossusTick:151 updateERings:170
+## js/06-pyro.js (204) — สายไฟ — ความร้อน: สะสมด้วยลูกไฟ/กำแพง/พุ่งเพลิง แล้วจุดระเบิดด้วยระเบิดความร้อน/อุกกาบาต
+§1 สายไฟ: ยิงปกติ 2 โหมด / โล่ระเบิด / พุ่งชาร์จ
+PYV:3 pyroBigBoom:11 pyroBall:19 pyroBasic:20 pyroFlickTick:40 pyroFlick:43 addOrbs:50 pyroParry:51 pyroBlock:52 launchOrbs:54 pyroDash:61 pyroPathEnd:81 updateFirePaths:86 KINDLE:106 DRAGONF:108 dragonfallDive:117 dragonfallTick:118 dragonfallBoom:133 RINGE:138 BLAZEF:145 SNAP:147 COLOS:152 pyroSnap:154 colossusTick:164 updateERings:183
 
 ## js/07-frost-spells.js (33) — 
 FROSTF:4 GREND:6 frostGlacier:11 PERMA:16 CRYO:18 FAURA:25 MIRROR:27
@@ -234,7 +236,7 @@ r1:368 DEFP:370 packP:371 unpackP:372 makeSnap:373 PROF:391 pf:392 hostSent:393 
 ## js/15-siege.js (203) — 
 SGV:12 SG_TEAM:24 sgF:25 sgCore:26 sgInZone:27 sgSpawn:28 sgInit:29 sgWallsApply:38 sgWallDmg:42 sgWallHit:48 sgWallEnv:49 sgInput:54 sgStop:62 sgTick:63 sgCoreDown:94 sgEnd:107 sgResult:109 sgSnap:115 SGB:124 sgBotTarget:126 sgBotGoal:137 sgUnstick:149 sgBotThink:162
 
-## js/16-voice.js (89) — ไมค์ (WebRTC audio แบบ mesh: ทุกคนโทรหากันตรงๆ)
+## js/16-voice.js (89) — 
 VOICE:4 rosterIds:5 toggleMic:6 voiceSync:20 teamOn:37 teamOf:38 applyVoiceGates:39 VAC:49 onIncomingCall:50 voiceLevels:62 speakingIds:70 updateVoiceUI:76
 
 ## js/17-input.js (66) — 
@@ -264,12 +266,12 @@ burst:144 smoke:155 ring:156 floatText:157 shake:158 wandPos:159 impactFX:161 ex
 §195 เอฟเฟกต์คาถาใหม่
 ZV:196 COLB:196 WVV:196 GLV:196 ICEV:196 SLV:196 ULTV:196 OBV:196 _iceDisc:198 _iceEdge:199 _iceSpk:200 iceFloorMat:201 _icePlane:202 _icePathMat:203 _iceWvM:203 iceWvMat:205 makeIceFloor:217 ICE_WV:244 updateIceFloors:245 FLASHM:257 FLASHING:258 flashModel:259 endFlash:268 tickFlash:269 GHOSTM:271 SOLIDM:271 ghostOf:272 setGhost:278 hitSparks:286
 
-## js/20-vfx-pyro-storm.js (701) — Dragonfall (ภาพ)
-makeDfCircle:3 DFV:21 dfCracks:22 updateDfCracks:32 _domeAim:33 domeChargeOrb:34 _spearUp:42 _spearDir:42 _spearA:42 _spearB:42 DOME_SPEAR_LEN:43 stormDomePath:44 stormDomeSpearFX:48 stormDomeHoverFX:78 stormDomeReadyFX:99 stormDomeGroundPoint:109 stormDomeFracture:112 stormDomeFloorPullFX:158 stormDomeFieldFX:185 stormDomePose:221 dragonfallFX:285
-§344 สายฟ้า (ภาพ)
-TBN:347 TBA:347 TBF:347 TBMAX:347 _tv:348 _tt:348 _ts:348 _tw:348 tbLayer:350 TBL:355 TBC:356 _tcc:357 domeCyan:358 domeGold:359 tbGet:360 TBLUE:363 TBFIRE:363 tboltB:364 tbolt:365 tboltP:374 tbWrite:375 updateBolts:383 LATER:408 STV:408 SBV:408 SDV:408 TSV:408 CLV:408 stTgPos:410 STCLAW:414
-§418 รอยกรงเล็บ (อัลติสายฟ้า): รอยข่วน 3 เส้นโค้งปลายแหลมขนานกัน ตั้งขวางห…
-clawGeo:421 clawRakes:426 updateClaws:440 later:448 stFade:449 stBeam:450 shellPt:455 updateStormV:456 _ev:499 GODPTS:501 bWorld:503 stormClawSwipe:507 stormFX:534 STHUD:656 drawStormHud:657
+## js/20-vfx-pyro-storm.js (713) — Dragonfall (ภาพ)
+makeDfCircle:3 DFV:21 dfCracks:22 updateDfCracks:32 _domeAim:33 domeChargeOrb:34 _spearUp:42 _spearDir:42 _spearA:42 _spearB:42 DOME_SPEAR_LEN:43 stormDomePath:44 stormDomeSpearFX:48 stormDomeHoverFX:79 stormDomeReadyFX:100 stormDomeGroundPoint:121 stormDomeFracture:124 stormDomeFloorPullFX:170 stormDomeFieldFX:197 stormDomePose:233 dragonfallFX:297
+§356 สายฟ้า (ภาพ)
+TBN:359 TBA:359 TBF:359 TBMAX:359 _tv:360 _tt:360 _ts:360 _tw:360 tbLayer:362 TBL:367 TBC:368 _tcc:369 domeCyan:370 domeGold:371 tbGet:372 TBLUE:375 TBFIRE:375 tboltB:376 tbolt:377 tboltP:386 tbWrite:387 updateBolts:395 LATER:420 STV:420 SBV:420 SDV:420 TSV:420 CLV:420 stTgPos:422 STCLAW:426
+§430 รอยกรงเล็บ (อัลติสายฟ้า): รอยข่วน 3 เส้นโค้งปลายแหลมขนานกัน ตั้งขวางห…
+clawGeo:433 clawRakes:438 updateClaws:452 later:460 stFade:461 stBeam:462 shellPt:467 updateStormV:468 _ev:511 GODPTS:513 bWorld:515 stormClawSwipe:519 stormFX:546 STHUD:668 drawStormHud:669
 
 ## js/21-vfx-frost.js (206) — น้ำแข็ง (ภาพ): ชิ้นผลึก/หนาม/แผ่นน้ำแข็งชั่วคราว (โผล่ → ค้าง → หด) •…
 FRV:2 _cryG:3 _spkG:3 _plateG:3 _hexG:3 _iceFxM:4 _frostM:4 iceFxM:5 frostM:6 ICEP:8 _im4:8 _iq:8 _ie:8 _ip:8 _is:8 icePool:9 iceBit:10 iceChips:13 updateFRV:14 iceRing:24 chillFX:25 makeSlash:41 _wbGeo:49 crescentGeo:51 makeWaveBlade:54 WGH:68 updateSlashes:69 _glGeo:82 _glMat:82 _glMat2:82 makeGlacier:83 updateGlacierVis:114 updateOrbShots:123 updateZV:133 WM3:206
@@ -291,7 +293,7 @@ BRKV:313 BRK_COL:313 brkSetup:314 BRK_CM:333 brkCrackMat:334 brkClip:350 brkYc:3
 ## js/24-minions-view.js (68) — สัตว์เวท: โมเดลโปร่งแสง + ซิงก์จาก snapshot (MN)
 MM3:2 makeMinion:3 syncMins:36 drawMinBars:58
 
-## js/25-efx.js (353) — efxFX: ภาพของ event "efx" ทุกคาถา (หนึ่ง case ต่อหนึ่งเอฟเฟกต์)
+## js/25-efx.js (354) — efxFX: ภาพของ event "efx" ทุกคาถา (หนึ่ง case ต่อหนึ่งเอฟเฟกต์)
 efxState:4 efxFX:20
 
 ## js/26-fx-events.js (245) — fx(ev): เอฟเฟกต์+เสียงของทุก event จากโฮสต์ • statusFX (สถานะบนตัว) •…
@@ -357,8 +359,8 @@ FLAME_STYLE:71 PTIME:72 NOISETEX:74 FLAMETEX_V1:80 FLAMETEX_V2:85 PSYS:95 FLAMEL
 §235 เอฟเฟกต์รูปทรง: แฟลช / วงแหวน / โดม / รอยไหม้ / สายฟ้า / แสงชั่วคราว
 SHAPES_Q:236 SHAPES:236 FLASHL:236 LINES:236 LREQ:237 ringGeo:238 ringVGeo:239 arcGeo:240 domeGeo:241 fullGeo:242 discGeo:243 decalTex:244 FX:245 jag:259 SHB:273 _sbM:273 _sbQ:273 _sbE:273 _sbS:273 _sbC:273 SHB_GEO:274 _sbDecalMat:275 shbMat:276 shbMake:287 spawnShape:299 updateShapes:309 _cp:339 updateLights:340
 
-## js/31-camera.js (189) — กล้องมุมหลังไหล่ (แบบ Hogwarts Legacy)
-yaw:2 pitch:2 lastPh:2 locked:2 CAMRS:3 SENS:4 saveSet:5 applySettings:6 camPos:14 camLook:14 overlayOpen:17 showPause:18 hidePause:19 MAPCAM:20 PLACE:22 placeKey:23 updatePlaceGhost:31 _aimD:45 rayTerr:47 aimFromCrosshair:53 AIMZ:85 WBY:85 CAM_FRAMES:89 CAM_FRAME:99 CAM_TRACK:99 _camFocus:100 _camAnchor:100 _camWant:100 cameraFrame:101 camRoomK:124 updateCamera:134 menuCamera:185
+## js/31-camera.js (190) — กล้องมุมหลังไหล่ (แบบ Hogwarts Legacy)
+yaw:2 pitch:2 lastPh:2 locked:2 CAMRS:3 SENS:4 saveSet:5 applySettings:6 camPos:14 camLook:14 overlayOpen:17 showPause:18 hidePause:19 MAPCAM:20 PLACE:22 placeKey:23 updatePlaceGhost:31 _aimD:45 rayTerr:47 aimFromCrosshair:53 AIMZ:85 WBY:85 CAM_FRAMES:89 CAM_FRAME:100 CAM_TRACK:100 _camFocus:101 _camAnchor:101 _camWant:101 cameraFrame:102 camRoomK:125 updateCamera:135 menuCamera:186
 
 ## js/32-stage.js (315) — เวทีเมนู/ล็อบบี้: ห้องโถงมืด แท่นวงเวททอง เทียนลอย (ฉากแยกจากแผนที่)
 stage:2 STAGE:5 STAGE_Y:6 stageSpots:58 stageChar:74 POSES:81 stageIdle:87
@@ -417,8 +419,7 @@ bpOpen:49 bpOn:49 bpKey:49 bpShow:51 bpSync:53 hovEl:123
 §124 หน้าตั้งค่า
 setRow:125 setTog:126 setTab:127 XHC:128 XHN:128 setOpts:129 SET_ICO:131 SET_EN:134 renderSettings:135 drawXhPrev:157 openSettings:158 closeSettings:160 modeIcon:216 modeTitle:217 renderLobby:218
 
-## js/41-debug.js (172) — เครื่องมือทดสอบสมดุล (ใช้ผ่านคอนโซล WD.bal / WD.dmgTest เท่านั้น ผู้เล่นปกติไม่เห็น)
-§5 บอทต่อสู้แบบง่ายๆ: เล็งนำเป้า เดินรักษาระยะ+ส่ายไปมา ร่ายคาถาทุกครั้ง…
+## js/41-debug.js (172) — 
 botBrain:6 _obsKeep:49 balArena:50 balReset:51 balDuel:56 balTour:71 balCoop:85 balSpellTest:101
 §122 Service Worker (sw.js): เก็บไฟล์เกมไว้ในเครื่อง เปิดครั้งต่อไปเร็วขึ้…
 SWK:123 swSetup:124
@@ -575,7 +576,7 @@ warmOutline:125
 §142 อุ่นฉากเกมระหว่างรอในห้อง (ผู้ใช้ 2026-10-23: "กระตุกตอนเริ่มแมตช์แรก…
 GWARM:147 gameWarmTick:148 gameWarmFree:181
 
-## js/52-social.js (172) — 
+## js/52-social.js (172) — เล่นกับเพื่อน (ผู้ใช้ 2026-10-22): แชท + อีโมต + ดูเพื่อนเล่น (spectator) + ป้ายต่อเน็ตให…
 §6 แชท: Enter = พิมพ์ / Enter อีกที = ส่ง / Esc = ปิด • ข้อความขึ้นมุมซ้…
 CHAT:7 chatOpen:27 chatClose:32 chatSend:42 chatAdd:47 escH:52 onChat:53 drawSocial:59 drawPing:83
 §89 อีโมต: กด Z ค้าง → วงล้อ 6 แบบ ลากเมาส์ไปทางที่ต้องการ ปล่อย Z = เล่น…
@@ -585,7 +586,7 @@ SPEC:141 specTarget:142 specCycle:152 drawSpecHint:157
 §165 ป้าย "กำลังต่อใหม่..." (ลูกข่ายหลุดจากโฮสต์ js/10 netLost)
 drawNetBanner:166
 
-## js/53-victory.js (165) — 
+## js/53-victory.js (165) — จบเกม (ผู้ใช้ 2026-10-22): VICTORY / DEFEAT แบบ Overwatch แต่เป็นเวทมนตร์ (สายฟ้า + ไฟ) +…
 VIC:6 VPAL:7 vicKind:17 vicStart:25 vicStop:31 vicSkip:32 vicBolt:36 vicLoop:42
 §108 จอสรุป: MVP + จุดเด่น (ใส่ใน showOver js/26)
 overMvp:117 overBar:127
@@ -601,22 +602,23 @@ POT3:81 potBottle:82 potMesh:91 syncPots:108 potFx:125
 §130 ภาพ: ป้ายตอนฆ่า / จอตอนตาย / อันดับ / มงกุฎค่าหัว
 FFAV:131 MULTI:132 MULTI_TH:132 STREAK:133 pName:134 ffaKf:135 kfSound:150 KINDN:151 drawFFA:152
 
-## js/55-podium.js (82) — 
+## js/55-podium.js (82) — โพเดียมธีมฮอกวอตส์ (ผู้ใช้ 2026-10-22 "podium but make it magician theme hogwart theme")
 POD:6 POD_X:7 POD_H:7 POD_C:7 podStart:8 podStop:29 podPose:37 renderPodium:49
 
-## js/56-progress.js (94) — 
+## js/56-progress.js (94) — เลเวล + สถิติ + ของปลดล็อค (ผู้ใช้ 2026-10-22: "more skin wand cloak unlock as lvl" → เลื…
+§7 var/function (ไม่ใช่ const): หน้าสร้างตัวละครอาจเปิดตอนโหลด (?nointro…
 LV_MAX:8 DEV_MAXLV:11 lvNeed:12 UNLOCKS:13 PROF_ITEMS:23 lvRewards:31 lvNextReward:32 PROG:33 progSave:34 lvOf:35 progLv:36 xpMax:37 wandKillNeed:39 lookLock:40 lookClampLocks:41 progXP:43 progAward:44 progBox:56 progOpen:64 progChip:76
 
-## js/57-tutorial.js (44) — 
+## js/57-tutorial.js (44) — วิธีเล่นแต่ละสาย (ผู้ใช้ 2026-10-22 "สอนเล่นแต่ละสาย") — ปุ่ม "📖 วิธีเล่นสายนี้" ในหน้าเ…
 TUTTIPS:7 tutOpen:12 tutTry:31
 
-## js/58-deathcam.js (60) — 
+## js/58-deathcam.js (60) — กล้องตอนตาย (ผู้ใช้ 2026-10-22): "when ded make cam focus on person who kill u at ur ded …
 DCAM_T1:10 DCAM_T2:10 DCAM_FADE:10 DCAM:11 dcamDie:12 _dcP:19 _dcL:19 dcamCam:20 drawDeathCam:47
 
-## js/59-podroom.js (151) — 
+## js/59-podroom.js (151) — ห้องโถงใหญ่ฮอกวอตส์สำหรับโพเดียม (ผู้ใช้ 2026-10-22 "design me a new lobby for background…
 PODS:9 PODR:11 podRoomBuild:12 podRoomTick:142
 
-## js/60-menu3d.js (397) — 
+## js/60-menu3d.js (397) — เมนูแรก = ลานดวลเวทใต้ดาว ที่ "เดินได้" (ผู้ใช้ 2026-10-22, รอบ 2: "redesign the menu by …
 MENUS:14 MN:17 MN_FOV:19 MN_R:19 _mv:20 _mcp:20 _mcl:20 mnCrest:21 mnTone:25 mnHit:30 mnBuild:32 MNPOP:223 mnToast:243
 §244 สั่งพ่อมด
 mnGo:245 mnWalkTo:248 mnUse:249 mnClose:254
@@ -686,7 +688,7 @@ skwOpen:289 skwClose:299
 ## js/64-mappick.js (157) — 
 MPK_TXT:7 MPK_SKY:19 MPK_I:21 MPK_DICE:31 MPK:36 mpkE:37 mpkC:37 mpkSnd:38 mpkCut:39 mpkName:40 mpkCardHTML:41 mpkBuild:51 mpkUp:89 mpkMeasure:101 mpkIdx:102 mpkStep:103 mpkTo:104 mpkPick:105 mpkOpen:111 mpkClose:127 mpkLoop:131 mpkTick:133
 
-## js/65-ui3.js (408) — 
+## js/65-ui3.js (408) — UI รอบ 3 (ผู้ใช้ 2026-10-23 — สเปก designs/ui-menu.md "รอบ 3") • สไตล์เดียวกับเมนูใหม่ (c…
 UIG:6 uiGalaxy:7 uiGalaxyOn:15 uiGalRaf:16 uiGalT:16 uiGalLoop:17 uiGalDraw:19 uiShow:36 uiHide:37
 §40 เมนูหยุดเกม
 §44 คู่มือ (แบบ Skill Tree)
@@ -770,7 +772,7 @@ dive:196 PA:197 TA:198 DIVE_DOWN:200 DIVE_POUR:200 DIVE_STEP:200 diveDist:201 la
 §459 เล่น
 WDG_YAW:460 wdgGet:461 wdgStart:462 wdgDive:469 wdgKeep:472 wdgEnd:473 wdgTick:474
 
-## js/71-perfhud.js (72) — 
+## js/71-perfhud.js (72) — ตัววัดประสิทธิภาพบนจอ (ผู้ใช้ 2026-11-05: "อยากได้ตัววัดอื่น ๆ เพิ่ม เอาไว้เก็บข้อมูล opt…
 PERF:9 perfFrame:12 perfDom:26 perfStats:34 perfGraph:38 _gpuName:51 gpuIntegrated:52 perfRows:53 perfPanel:68 perfText:69
 
 ## js/72-dash-pose.js (85) — 
@@ -803,4 +805,4 @@ surfSync:49 surfQuality:53
 SURF_VS:55 SURF_VS_BODY:56 SURF_FS:67 SURF_FS_BODY:68 surfOk:98 surfApply:99 surfScene:111
 §112 ปรับค่า (tune.html / F8)
 
-(98 files, 25350 lines)
+(98 files, 25377 lines)
