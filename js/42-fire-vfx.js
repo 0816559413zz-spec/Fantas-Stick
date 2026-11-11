@@ -52,7 +52,10 @@ function fireMat(o){o=o||{};const sheet=o.mode==='sheet';
   float a=smoothstep(0.06,0.32,h)*uOp;float add=smoothstep(0.5,0.92,h);
   vec3 c=fireRamp(h)*uTint*uInt;
   gl_FragColor=vec4(c*a,a*(1.0-add*0.6));
-  if(uFCel>0.5){float ca=smoothstep(0.1,0.15,h)*step(0.25,uOp);gl_FragColor=vec4(fireRamp(h)*uTint*min(uInt,1.05)*ca,ca);}}`;
+  if(uFCel>0.5){   // cel: ตัดขอบที่ระดับเดียวกับส่วนที่ 'เห็นชัด' ของไฟเดิม (h≈0.3) → ยังเป็นลิ้นไฟ มีช่องโหว่ ขอบไหว ไม่กลายเป็นแผ่นทึบเต็มชิ้น
+    float ca=smoothstep(0.27,0.33,h)*step(0.25,uOp);float hh=(h-0.27)/0.73;
+    float al=ca*mix(1.0,0.82*uOp,uInv);   // เปลือกขอบ (shell เช่นเกราะยักษ์ไฟ) = โปร่งนิด ๆ เห็นตัวข้างใน
+    gl_FragColor=vec4(fireRamp(hh)*uTint*min(uInt,1.05)*al,al);}}`;
   const m=new THREE.ShaderMaterial({uniforms:U,vertexShader:vs,fragmentShader:fs,transparent:true,depthWrite:false,side:o.back?THREE.BackSide:o.single?THREE.FrontSide:THREE.DoubleSide,
     blending:THREE.CustomBlending,blendSrc:THREE.OneFactor,blendDst:THREE.OneMinusSrcAlphaFactor,blendSrcAlpha:THREE.OneFactor,blendDstAlpha:THREE.OneMinusSrcAlphaFactor});
   m.userData.keep=!!o.keep;return m;}
@@ -280,7 +283,7 @@ function fireVol(boxes,o){o=o||{};const n=boxes.length,pos=new Float32Array(n*24
       'float tn=max(max(tn3.x,tn3.y),max(tn3.z,0.0)),tf=min(min(tf3.x,tf3.y),tf3.z);if(tf<=tn)discard;'+
       'if(uSoftOn>0.5){float dz=texture2D(uDepth,gl_FragCoord.xy/uRes).x;float sz=(uNear*uFar)/(uFar-dz*(uFar-uNear));vec3 fw=-vec3(viewMatrix[0][2],viewMatrix[1][2],viewMatrix[2][2]);'+
         'tf=min(tf,sz/max(dot(rd,fw),1e-3));if(tf<=tn)discard;}'+
-      'float st=(tf-tn)/24.0,jt=fract(sin(dot(gl_FragCoord.xy,vec2(12.9898,78.233)))*43758.5453);vec3 col=vec3(0.0);float A=0.0,mh=0.0;float md=vMd.x,sd=vMd.y;'+
+      'float st=(tf-tn)/24.0,jt=fract(sin(dot(gl_FragCoord.xy,vec2(12.9898,78.233)))*43758.5453);vec3 col=vec3(0.0);float A=0.0,mh=0.0,hs=0.0;float md=vMd.x,sd=vMd.y;'+
       'for(int i=0;i<24;i++){vec3 p=lo+ld*(tn+(float(i)+jt)*st);float v=p.y/H,sh;'+
         // noise ไหลขึ้น 3 ชั้น → บิดความสูง (ลิ้นไฟ) + ridged (เส้นสายเปลว) + บิดขอบหนา (ไม่เป็นกล่อง)
         'vec3 q=vec3(p.x,p.y*0.45,p.z)*uFq-vec3(0.0,time*uSpd,0.0)+vec3(sd);'+
@@ -296,9 +299,9 @@ function fireVol(boxes,o){o=o||{};const n=boxes.length,pos=new Float32Array(n*24
         'float heat=((1.0-vw)*1.35*mix(0.6,1.2,rg)-0.12+uB-uDis*1.3)*sh*smoothstep(1.0,0.8,v);'+
         'mh=max(mh,heat);if(heat<=0.04)continue;'+
         'float a=1.0-exp(-smoothstep(0.04,0.4,heat)*5.0*uDen*st);vec3 e=fireRamp(min(heat*0.92,1.1))*uInt;'+
-        'col+=(1.0-A)*a*e;A+=(1.0-A)*a;if(A>0.97)break;}'+
+        'col+=(1.0-A)*a*e;hs+=(1.0-A)*a*heat;A+=(1.0-A)*a;if(A>0.97)break;}'+
       // ใกล้กล้องมาก ๆ (เช่น ขอบวงที่กล้องอยู่ข้างใน) จางลง ไม่เป็นหมอกบังจอ
-      'if(uFCel>0.5){float ca=smoothstep(0.16,0.2,mh);col=fireRamp(min(mh*0.5,1.1))*min(uInt,1.05)*ca;A=ca;}'+   // cel: สีจากจุดร้อนสุดบนเส้นมอง = แถบสีแบน ขอบคม
+      'if(uFCel>0.5){float ca=smoothstep(0.3,0.38,mh)*smoothstep(0.05,0.3,A);col=fireRamp(min(hs/max(A,1e-3)*0.58,1.1))*min(uInt,1.05)*ca;A=ca;}'+   // cel: ขอบจากจุดร้อนสุดบนเส้นมอง • สีจากความร้อนของผิวหน้าเปลว (เฉลี่ยหน้าไปหลัง) → เห็นลิ้นไฟไหลขึ้นบนผิว ไม่เป็นก้อนสีเดียว
       'float nf=smoothstep(0.8,3.0,tn);col*=nf;A*=nf;if(A<0.004)discard;gl_FragColor=vec4(col,A*uOcc);}'});
   fxMat(m);m.userData.keep=false;FXMATS.delete(m);m.depthTest=false;   // ตัดความลึกเองใน shader (uDepth)
   const mesh=new THREE.Mesh(g,m);mesh.frustumCulled=false;mesh.renderOrder=3;mesh.userData.u=U;mesh.userData.mats=[m];return mesh;}
@@ -326,11 +329,11 @@ function fireSeqVol(S,o){o=o||{};const g=new THREE.BoxGeometry(2*o.hx,o.h,2*o.hz
       'float tn=max(max(a.x,a.y),max(a.z,0.0)),tf=min(min(b.x,b.y),b.z);if(tf<=tn)discard;'+
       'if(uSoftOn>0.5){float dz=texture2D(uDepth,gl_FragCoord.xy/uRes).x;float sz=(uNear*uFar)/(uFar-dz*(uFar-uNear));vec3 fw=-vec3(viewMatrix[0][2],viewMatrix[1][2],viewMatrix[2][2]);tf=min(tf,sz/max(dot(rw,fw),1e-3));if(tf<=tn)discard;}'+
       'float f0=mod(floor(uFr),uG.y),f1=min(f0+1.0,uG.y-1.0),fu=fract(uFr);'+
-      'float st=(tf-tn)/32.0,jt=fract(sin(dot(gl_FragCoord.xy,vec2(12.9898,78.233)))*43758.5453);vec3 col=vec3(0.0);float A=0.0,mh=0.0;'+
+      'float st=(tf-tn)/32.0,jt=fract(sin(dot(gl_FragCoord.xy,vec2(12.9898,78.233)))*43758.5453);vec3 col=vec3(0.0);float A=0.0,mh=0.0,hs=0.0;'+
       'for(int i=0;i<32;i++){vec3 p=ro+rd*(tn+(float(i)+jt)*st);vec3 u=(p-bmin)/(bmax-bmin);if(u.y>uH)continue;'+
         'float v=mix(sv(u,f0),sv(u,f1),fu);float heat=v*1.15-uDis*1.1;mh=max(mh,heat);if(heat<=0.03)continue;'+
-        'float al=1.0-exp(-smoothstep(0.03,0.4,heat)*6.0*uDen*st);col+=(1.0-A)*al*fireRamp(min(heat,1.1))*uInt;A+=(1.0-A)*al;if(A>0.97)break;}'+
-      'if(uFCel>0.5){float ca=smoothstep(0.16,0.2,mh);col=fireRamp(min(mh*0.55,1.1))*min(uInt,1.05)*ca;A=ca;}'+
+        'float al=1.0-exp(-smoothstep(0.03,0.4,heat)*6.0*uDen*st);col+=(1.0-A)*al*fireRamp(min(heat,1.1))*uInt;hs+=(1.0-A)*al*heat;A+=(1.0-A)*al;if(A>0.97)break;}'+
+      'if(uFCel>0.5){float ca=smoothstep(0.3,0.38,mh)*smoothstep(0.05,0.3,A);col=fireRamp(min(hs/max(A,1e-3)*0.62,1.1))*min(uInt,1.05)*ca;A=ca;}'+
       'float nf=smoothstep(0.8,3.0,tn);col*=nf;A*=nf;if(A<0.004)discard;gl_FragColor=vec4(col,A*uOcc);}'});
   fxMat(m);m.userData.keep=false;FXMATS.delete(m);m.depthTest=false;
   const mesh=new THREE.Mesh(g,m);mesh.frustumCulled=false;mesh.renderOrder=3;mesh.userData.u=U;mesh.userData.mats=[m];return mesh;}
