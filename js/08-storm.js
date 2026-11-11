@@ -160,30 +160,49 @@ function stormBowFire(p){const V=RAIL.v;p.rail=null;const h0=p.z+1.5,inp=p.inp||
   damageEnv(ex,ey,40,V.env,p.id,'lightning',eh);
   emit({k:'efx',z:'sbow',x:Math.round(p.x),y:Math.round(p.y),h:h0,x2:Math.round(ex),y2:Math.round(ey),h2:Math.round(eh*10)/10,hit:!!best,id:p.id});}
 // ----- อัลติ: ร่างเทพสายฟ้า 10 วิ -----
-const GODL=defSpell(2,{id:'godlightning',v:{time:10,xhp:75,dashRc:1,dashDmg:15,c1:15,c2:15,c3:25,clawR:200,bigR:280,bigDmg:25,slamR:150,slamDmg:80},vn:{time:'อยู่นาน (วิ)',xhp:'HP เสริม',dashRc:'Dash ฟื้นชาร์จละ (วิ)',dashDmg:'Dash • ดาเมจทะลุ',c1:'กรงเล็บ • จังหวะ 1',c2:'กรงเล็บ • จังหวะ 2',c3:'กรงเล็บ • จังหวะ 3',clawR:'กรงเล็บ • ระยะ',bigR:'กรงเล็บใหญ่ • ระยะ',bigDmg:'กรงเล็บใหญ่ • ดาเมจ',slamR:'ลูกสายฟ้าโดม (อัลติ) • รัศมีทุบ',slamDmg:'ลูกสายฟ้าโดม (อัลติ) • ดาเมจทุบ'},role:'ult',n:'ร่างเทพสายฟ้า',ic:'⚡',cd:0,ult:true,d:'แปลงร่างเทพสายฟ้า 10 วิ: HP เสริม 75 • Dash ฟื้นชาร์จละ 1 วิ ทะลุ 15 ดาเมจ • ยิงปกติเป็นกรงเล็บสายฟ้า 3 จังหวะ ระยะ 200 (15/15/25 จังหวะ 3 = Shock) • Dash โดนศัตรู = ฟันครั้งถัดไปเป็นกรงเล็บใหญ่ ระยะ 280 กว้างขึ้น 25 ดาเมจ + Shock • ใช้โล่ไม่ได้',fx:'สกิลเก่งขึ้น: ดูดความเร็วไกลขึ้น+Shock • ออร์บพุ่งพร้อมกัน • Railgun เตือน 0.5 วิ ไกล 1400 • ฟ้าผ่าสามครั้งมีวงซ้าย/ขวา • ลูกสายฟ้าโดมเป็นทุบลงแบบ Dragonfall 80 ดาเมจ • stack ยังใช้เท่าเดิม',
+const GODL=defSpell(2,{id:'godlightning',v:{time:10,xhp:75,dashRc:1,dashDmg:15,c1:15,c2:15,c3:25,clawR:200,bigR:280,bigDmg:25,slamR:150,slamDmg:80},vn:{time:'อยู่นาน (วิ)',xhp:'HP เสริม',dashRc:'Dash ฟื้นชาร์จละ (วิ)',dashDmg:'Dash • ดาเมจทะลุ',c1:'กรงเล็บ • จังหวะ 1',c2:'กรงเล็บ • จังหวะ 2',c3:'กรงเล็บ • จังหวะ 3',clawR:'กรงเล็บ • ระยะ',bigR:'กรงเล็บใหญ่ • ระยะ',bigDmg:'กรงเล็บใหญ่ • ดาเมจ',slamR:'ลูกสายฟ้าโดม (อัลติ) • รัศมีทุบ',slamDmg:'ลูกสายฟ้าโดม (อัลติ) • ดาเมจทุบ'},role:'ult',n:'ร่างเทพสายฟ้า',ic:'⚡',cd:0,ult:true,d:'แปลงร่างเทพสายฟ้า 10 วิ: HP เสริม 75 • Dash ฟื้นชาร์จละ 1 วิ ทะลุ 15 ดาเมจ • ยิงปกติเป็นกรงเล็บสายฟ้า 3 จังหวะ ระยะ 200 (15/15/25 จังหวะ 3 = Shock) • Dash โดนศัตรู = ฟันครั้งถัดไปเป็นกรงเล็บใหญ่ ระยะ 280 กว้างขึ้น 25 ดาเมจ + Shock • ใช้โล่ไม่ได้',fx:'สกิลเก่งขึ้น: ดูดความเร็วไกลขึ้น+Shock • ออร์บพุ่งพร้อมกัน • Railgun เตือน 0.5 วิ ไกล 1400 • ฟ้าผ่าสามครั้งมีวงซ้าย/ขวา • ลูกสายฟ้าโดมเป็นทุบลงแบบ Dragonfall 80 ดาเมจ • ลูกสายฟ้าโดมใช้ 3 stacks ในร่างเทพ',
   cast(p,S){p.god=S.v.time;p.xhp=S.v.xhp;p.dch=STORMV.dashN;p.cEmp=0;if(p.stS){p.stS=null;p.stCd=0;}p.clN=0;emit({k:'efx',z:'godon',x:p.x,y:p.y,h:p.z,id:p.id});}});
-// ----- สกิล 6 (3 stacks): ลูกสายฟ้าโดม — ทะยานขึ้น บินเล็ง 3 วิ คลิกยิงลูกสายฟ้า → โดมดูด 2 วิ แล้วระเบิด -----
+// ----- ลูกสายฟ้าโดม: รวมไฟที่พื้น → ทะยานขึ้น → เล็ง → ฟาดไม้ยิงและค้างชี้เป้า -----
+const SDOME_POSE={charge:0.26,lift:0.38,swing:0.19,hold:0.38,recover:0.22};
+function stormDomeCost(p){return p.god>0?SDOME.v.godCost:SDOME.v.cost;}
+function stormDomeDash(p){return p.sdome?.ph===2&&!p.sdome.god;}
+function stormDomeCharge(t){return clamp((SDOME.v.fly-t+1e-6)/SDOME.v.charge,0,1);}
 function stormDomeTick(p,inp,dt){
   const D=p.sdome;D.t-=dt;
   if(!p.alive||p.downed){p.sdome=null;return;}
-  if(D.ph<3&&(p.stun>0||p.frz>0)){p.sdome=null;p.vz=0;emit({k:'efx',z:'dfcancel',x:p.x,y:p.y,h:p.z,id:p.id});return;}
-  if(D.ph===1){if(D.t<0.25)p.z+=(D.H-p.z)*Math.min(1,14*dt);p.vz=0;if(D.t<=0){D.ph=2;D.t=SDOME.v.fly;}}
+  if((D.ph<3||D.ph===4&&!D.shot)&&(p.stun>0||p.frz>0)){p.sdome=null;p.vz=0;emit({k:'efx',z:'dfcancel',x:p.x,y:p.y,h:p.z,id:p.id});return;}
+  if(D.ph===1){
+    if(D.god){
+      if(D.t<0.25)p.z+=(D.H-p.z)*Math.min(1,14*dt);
+    }else if(D.t<=SDOME_POSE.lift){
+      const u=clamp(1-D.t/SDOME_POSE.lift,0,1);
+      p.z=lerp(D.z0,D.H,u*u*(3-2*u));
+      if(!D.lifted){D.lifted=true;emit({k:'efx',z:'sdrise',x:p.x,y:p.y,h:p.z,id:p.id,tail:1});}
+    }
+    p.vz=0;
+    if(D.t<=0){D.ph=2;D.t=SDOME.v.fly;}
+  }
   else if(D.ph===2){
     D.H=clamp(D.H+((inp.jh?1:0)-(inp.ch?1:0))*2.5*dt,D.g0+4.5,D.g0+7.5);p.z+=(D.H-p.z)*Math.min(1,6*dt);p.vz=0;
     const q=aimClip(p.x,p.y,p.z,aimPoint(p,SDOME.v.range),PR+6);D.tx=q.x;D.ty=q.y;D.th=q.hit?q.h:null;   // ไม่ทะลุบ้าน
+    if(!D.god)D.landH=groundH(D.tx,D.ty);
     if(D.t<=0)stormDomeFire(p);
-  }else{
+  }else if(D.ph===3){
     const k=1-Math.max(0,D.t)/0.45,gh=D.th!=null?D.th:groundH(D.tx,D.ty);
     p.x=lerp(D.sx,D.tx,k);p.y=lerp(D.sy,D.ty,k);p.z=lerp(D.sz,gh,k*k);p.vz=0;
     if(D.t<=0){p.x=D.tx;p.y=D.ty;p.z=gh;p.sdome=null;stormDomeSlam(p,D.tx,D.ty,gh);}
-  }
+  }else if(!D.shot&&D.t<=SDOME_POSE.hold+SDOME_POSE.recover){
+    D.shot=true;p.vz=-12;
+    const fromX=Math.round(p.x),fromY=Math.round(p.y),fromH=p.z+1.4;
+    (G.sballs||(G.sballs=[])).push({x:D.tx,y:D.ty,t:0.3,owner:p.id,team:p.team,power:D.power,fromX,fromY,fromH});
+    emit({k:'efx',z:'sdball',x:fromX,y:fromY,h:fromH,x2:Math.round(D.tx),y2:Math.round(D.ty),h2:D.landH??0,id:p.id,power:D.power});
+  }else if(D.t<=0)p.sdome=null;
 }
 function stormDomeFire(p){
   const D=p.sdome;
   if(D.god){D.ph=3;D.t=0.45;D.sx=p.x;D.sy=p.y;D.sz=p.z;emit({k:'efx',z:'dfdive',x:p.x,y:p.y,h:p.z,x2:Math.round(D.tx),y2:Math.round(D.ty),id:p.id});return;}
-  p.sdome=null;p.vz=-12;
-  (G.sballs||(G.sballs=[])).push({x:D.tx,y:D.ty,t:0.3,owner:p.id,team:p.team});
-  emit({k:'efx',z:'sdball',x:Math.round(p.x),y:Math.round(p.y),h:p.z+2,x2:Math.round(D.tx),y2:Math.round(D.ty),id:p.id});
+  D.power=stormDomeCharge(D.t);
+  D.ph=4;D.t=SDOME_POSE.swing+SDOME_POSE.hold+SDOME_POSE.recover;
 }
 // อัลติ: ทุบลงพร้อมลูกสายฟ้า — ดูดเข้ากลาง + ระเบิดทันที 80
 function stormDomeSlam(p,x,y,gh){
@@ -206,7 +225,20 @@ function updateStorm(dt){
     G.sorbs=G.sorbs.filter(b=>!b.done);
   }
   if(G.sballs&&G.sballs.length){
-    for(const b of G.sballs){b.t-=dt;if(b.t<=0){b.done=1;const DV=SDOME.v;(G.sdomes||(G.sdomes=[])).push({x:b.x,y:b.y,t:DV.time,tk:0.5,owner:b.owner,team:b.team});emit({k:'efx',z:'sdome',x:Math.round(b.x),y:Math.round(b.y),h:groundH(b.x,b.y),r:DV.r,t:DV.time});}}
+    for(const b of G.sballs){
+      b.t-=dt;if(b.t>0)continue;
+      b.done=1;
+      const DV=SDOME.v,h=groundH(b.x,b.y),impact={k:'efx',x:Math.round(b.x),y:Math.round(b.y),h,r:DV.r};
+      if(b.power<1){
+        const dmg=Math.min(DV.boom-1,Math.round(lerp(DV.partial,DV.boom,b.power))),o=G.players[b.owner];
+        emit({...impact,z:'sdpop',power:b.power});
+        if(o)for(const t of foesIn(b.team,b.x,b.y,DV.r,5))aoeHit(o,t,dmg);
+        damageEnv(b.x,b.y,DV.r,Math.round(DV.env*dmg/DV.boom),b.owner,'lightning',0.5);
+      }else{
+        (G.sdomes||(G.sdomes=[])).push({x:b.x,y:b.y,t:DV.time,tk:0.5,owner:b.owner,team:b.team});
+        emit({...impact,z:'sdome',t:DV.time,id:b.owner,fromX:b.fromX,fromY:b.fromY,fromH:b.fromH});
+      }
+    }
     G.sballs=G.sballs.filter(b=>!b.done);
   }
   if(G.sdomes&&G.sdomes.length){
@@ -217,7 +249,7 @@ function updateStorm(dt){
         if(d>8&&!(t.isE&&isBig(t))){const st=Math.min(d-4,DV.pull*dt);t.x+=dx/d*st;t.y+=dy/d*st;}
         if(tick&&o)aoeHit(o,t,DV.tick);
       }
-      if(D.t<=0){D.done=1;emit({k:'efx',z:'sdboom',x:Math.round(D.x),y:Math.round(D.y),h:groundH(D.x,D.y)+0.08,r:DV.r});if(o)for(const t of foesIn(D.team,D.x,D.y,DV.r,5))aoeHit(o,t,DV.boom,t=>shock(t,o.id,STORMV.shock));damageEnv(D.x,D.y,DV.r,DV.env,D.owner,'lightning',0.5);}
+      if(D.t<=0){D.done=1;emit({k:'efx',z:'sdboom',x:Math.round(D.x),y:Math.round(D.y),h:groundH(D.x,D.y)+0.08,r:DV.r,id:D.owner});if(o)for(const t of foesIn(D.team,D.x,D.y,DV.r,5))aoeHit(o,t,DV.boom,t=>shock(t,o.id,STORMV.shock));damageEnv(D.x,D.y,DV.r,DV.env,D.owner,'lightning',0.5);}
     }
     G.sdomes=G.sdomes.filter(D=>!D.done);
   }

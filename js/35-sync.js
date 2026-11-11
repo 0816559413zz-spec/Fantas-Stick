@@ -85,7 +85,7 @@ const SKANIM={ringofembers:'sweep',blazeform:'fireflare',colossus:'ultraise',kin
 Object.assign(SKANIM,{poisondart:'natthrow',bloom:'natthrow',sporecloud:'natthrow',vinelash:'natraise',thornburst:'natraise',worldtree:'natsummon'});
 SKANIM.railgun_release='railrelease';SKANIM.terraauger_release='ground';
 SKANIM.dragonfall_land='dragonland';SKFEET.dragonland=[-0.8,0.3,0.12,-0.1];SKFEET.wingflick=[-0.45,0.3,0.12,-0.12];
-function skAnim(ev){const o=PM3.get(ev.id),n=SKANIM[ev.s];if(!o||!n)return;o.caN=n;o.caT=0;o.cpT=0;o.cgd=2.2;}
+function skAnim(ev){const o=PM3.get(ev.id),n=SKANIM[ev.s];if(!o||!n)return;if(ev.s==='stormdome'&&!ev.g)return;o.caN=n;o.caT=0;o.cpT=0;o.cgd=2.2;}
 const _caT=[0,0,0,0,0,0,0,0],_caR=[0,0,0,0,0,0,0,0];
 function skillPose(o,p,dt,now){
   const A=CANIM[o.caN];if(!A){o.caN=null;return false;}
@@ -264,11 +264,12 @@ function syncPlayers(P,mode,now,dt){
     windFX(o,p,pz,now,dt);waterFX(o,p,pz,now,dt);
     lateSkillPose(o,p,dt,now);
     waterCharacterPose(o,p,dt,now);windCharacterPose(o,p,dt,now,v);windLatePose(o,p,dt);stormBowView(o,p,dt,now);stormStaffView(o,p,dt,now);dashPose(o,p,dt,now);   // ท่าพุ่ง (js/72) ทับท่าอื่นตอนพุ่ง
+    const domeKnee=stormDomePose(o,p,pz,now);
     const whip=p.nt?.[0];
     const activeWhip=whip&&!p.dn&&!p.fl?{start:whip[0],age:whip[1],side:whip[2],angle:whip[3]}:null;
     if(activeWhip)natureWhipPose(o,activeWhip);
     else if(o.natureWhipView?.vine.visible)o.armR.rotation.y=0;
-    if(o.rig){rigSync(o,dt);windForearm(o);stormBowForearm(o);}
+    if(o.rig){rigSync(o,dt);windForearm(o);stormBowForearm(o);if(domeKnee)dpKnees(o,0,domeKnee);}
     if(activeWhip||o.natureWhipView)natureWhipView(o,activeWhip);
     natureCharacter(o,p,now);
     if(ragTick(o,p,v,dt,now))o.tip.scale.setScalar(0.001);   // ล้ม/กระแทกแรง = ragdoll (js/48)

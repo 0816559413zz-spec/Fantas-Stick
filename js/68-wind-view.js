@@ -256,13 +256,38 @@ function windEfx(ev){
   }
   return false;
 }
-// ---------- HUD รอบเป้าเล็ง: เกจ GaleBurst (โค้งซ้าย) + ชาร์จกำแพงลม (จุด 3 จุดใต้เป้า) ----------
+// ---------- HUD รอบเป้าเล็ง: GaleBurst / Downburst / Dash / Slipstream ----------
 function drawWindHud(x,y,A,me){const g=Math.max(0,Math.min(100,A[0]))/100,full=g>=1,R=34,a0=Math.PI*0.62,a1=Math.PI*1.38;
   cx.lineCap='round';cx.lineWidth=5;cx.strokeStyle='rgba(0,0,0,0.45)';cx.beginPath();cx.arc(x,y,R,a0,a1);cx.stroke();
   if(g>0){cx.strokeStyle=full?`rgba(239,255,232,${0.75+0.25*Math.sin(performance.now()/120)})`:'#8dff65';cx.lineWidth=full?5:3.5;cx.beginPath();cx.arc(x,y,R,a1-(a1-a0)*g,a1);cx.stroke();}
   cx.lineCap='butt';cx.font='600 12px Kanit,sans-serif';cx.textAlign='right';cx.fillStyle=full?'#efffe8':'#b8ff85';cx.fillText(full?'GALE':Math.floor(g*100)+'%',x-R-8,y+4);
-  for(let i=0,N=W_WL.max;i<N;i++){cx.beginPath();cx.arc(x-(N-1)*6+i*12,y+R+8,3.5,0,6.283);cx.fillStyle=i<(A[2]|0)?'#8dff65':'rgba(0,0,0,0.45)';cx.fill();}
-  for(let i=0,N=W_VX.sMax;i<N;i++){cx.beginPath();cx.arc(x-(N-1)*6+i*12,y+R+18,3.5,0,6.283);cx.fillStyle=i<(A[10]|0)?'#c9ffe2':'rgba(0,0,0,0.45)';cx.fill();}
+  for(let i=0,N=W_WL.max;i<N;i++){
+    cx.beginPath();cx.arc(x-(N-1)*6+i*12,y+R+8,4.5,0,6.283);
+    cx.fillStyle='#17332a';cx.fill();cx.lineWidth=1;cx.strokeStyle='#8aca8b';cx.stroke();
+    if(i<(A[2]|0)){cx.beginPath();cx.arc(x-(N-1)*6+i*12,y+R+8,2.8,0,6.283);cx.fillStyle='#a4ff7e';cx.fill();}
+  }
+  const kit=getKit(me.id),slip=kit.ids.indexOf(SPELLS.vortexbind.i),dx=x+R+8,dy=y+4;
+  const dashCd=CDK.indexOf('dodge'),dashFill=1-clamp((me.cd[dashCd]||0)/(me.cm[dashCd]||1),0,1);
+  const dashKey=slotKey('Shift')+' ↑',slipKey=slip<0?'':slotKey(SLOTK[SKORD.indexOf(slip+1)].toUpperCase());
+  cx.textAlign='left';cx.font='600 11px Kanit,sans-serif';
+  const width=Math.max(38,cx.measureText(dashKey).width,slip<0?0:cx.measureText(slipKey).width+7+13*W_VX.sMax);
+  cx.beginPath();cx.roundRect(dx-6,dy-24,width+12,slip<0?23:43,5);
+  cx.fillStyle='rgba(11,29,25,0.82)';cx.fill();
+  cx.fillStyle='#eafff1';cx.fillText(dashKey,dx,dy-12);
+  cx.fillStyle='rgba(0,0,0,0.55)';cx.fillRect(dx,dy-8,38,3);
+  cx.fillStyle='#8dff65';cx.fillRect(dx,dy-8,38*dashFill,3);
+  if(slip>=0){
+    const sx=dx+cx.measureText(slipKey).width+9;
+    cx.fillStyle='#eafff1';cx.fillText(slipKey,dx,dy+13);
+    for(let i=0;i<W_VX.sMax;i++){
+      const px=sx+i*13,py=dy+9,fill=i<A[10]?1:i===A[10]?clamp((A[13]||0)/100,0,1):0;
+      cx.beginPath();cx.moveTo(px,py-4);cx.lineTo(px+4,py);cx.lineTo(px,py+4);
+      cx.lineWidth=4;cx.strokeStyle='rgba(0,0,0,0.65)';cx.stroke();
+      cx.lineWidth=2;cx.strokeStyle='rgba(212,255,235,0.26)';cx.stroke();
+      if(fill>0){cx.save();cx.beginPath();cx.rect(px-1,py-5,6*fill,10);cx.clip();
+        cx.beginPath();cx.moveTo(px,py-4);cx.lineTo(px+4,py);cx.lineTo(px,py+4);cx.strokeStyle='#a5ffe4';cx.stroke();cx.restore();}
+    }
+  }
   if(A[3]){cx.textAlign='center';cx.font='600 14px Kanit,sans-serif';cx.fillStyle='#efffe8';cx.fillText('คลิกซ้าย = ดันกำแพง • คลิกขวา = วางตรงจุดเล็ง',x,y+R+30);}
 }
 // ---------- ตัวช่วยเล็งกำแพงลม (เห็นเฉพาะเรา): เส้นโค้งเรืองที่จุดวาง (คลิกขวา) + ลูกศรทางดัน (คลิกซ้าย) ----------

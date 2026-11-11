@@ -283,7 +283,7 @@ function updatePlayer(p,dt,acting){
   if(acting&&(inp.ax||inp.ay))p.ang=Math.atan2(inp.ay-p.y,inp.ax-p.x)+(p.bld>0?rnd(-0.22,0.22):0);
 
   // ไม้กวาด: B ขึ้น/ลง — โดนสตันหรือใยแมงมุมจะตกจากไม้กวาด • โหมดโวลเดอมอร์ + FFA ไม่มีไม้กวาด (ผู้ใช้ 2026-10-27)
-  if(pr.b&&canAct&&p.flyCd<=0&&!NOBROOM.has(G.mode)&&!p.wfo){
+  if(pr.b&&canAct&&(!p.sdome||p.sdome.god)&&p.flyCd<=0&&!NOBROOM.has(G.mode)&&!p.wfo){
     p.fly=!p.fly;p.flyCd=0.8;
     if(p.fly){p.vz=7;p.shieldOn=false;p.dash=0;emit({k:'mount',x:p.x,y:p.y,h:p.z,id:p.id});}
     else emit({k:'dismount',x:p.x,y:p.y,h:p.z,id:p.id});
@@ -293,7 +293,7 @@ function updatePlayer(p,dt,acting){
   if(p.fly)broomVert(p,inp,dt);   // บินแบบเครื่องบิน: เงยกล้อง = ไต่ (js/69)
   else if(p.colos>0){p.colH=clamp((p.colH||9)+((inp.jh?1:0)-(inp.ch?1:0))*6*dt,5,15);p.z+=(p.colH-p.z)*Math.min(1,9*dt);p.vz=0;}
   else if(p.dfall)dragonfallTick(p,inp,dt);
-  else if(p.sdome)stormDomeTick(p,inp,dt);
+  else if(p.sdome){if(p.sdome.shot)gravity();stormDomeTick(p,inp,dt);}
   else if(p.wr&&p.wr.ph!=='trans'){}   // Wrath: ลอยบนฟ้า (earthWrathTick คุมความสูง)
   else if(p.wfw)windFlyZ(p,dt);   // สายลม Featherwing: บิน/ร่อนลง
   else if(p.wsk>0)windSinkZ(p,dt);   // Wind Push (บิน): จมดิน
@@ -378,7 +378,7 @@ function updatePlayer(p,dt,acting){
   // กระโดด (Space) ทุกสาย
   if(pr.jp&&!(p.cryo>0)&&!(p.mudT>0)&&!(p.wr&&p.wr.ph!=='trans')&&!p.dchgOn&&p.z<=groundH(p.x,p.y,p.z)+0.05&&!(p.colos>0)){p.vz=PLAY.jump;emit({k:'efx',z:'jump',x:p.x,y:p.y,h:p.z,id:p.id});}
   if(p.cryo>0){if(pr.q)castSlot(p,0);if(pr.e)castSlot(p,1);if(pr.r)castSlot(p,2);if(pr.f)castSlot(p,3);return;}
-  if(p.dfall||p.sdome||p.shk>0||(p.mudT>0&&!p.ramp)){}else if(B.dash){if(B.dash(p,inp,pr,dt,setCd))return;}
+  if(p.dfall||(p.sdome&&!stormDomeDash(p))||p.shk>0||(p.mudT>0&&!p.ramp)){}else if(B.dash){if(B.dash(p,inp,pr,dt,setCd))return;}
   else if(pr.sp&&p.cd.dodge<=0&&p.z<0.5){
     let dx=mx,dy=my;if(!dx&&!dy){dx=Math.cos(p.ang);dy=Math.sin(p.ang);}
     p.dash=0.18;p.dashX=dx;p.dashY=dy;p.inv=0.24;p.shieldOn=false;setCd('dodge',2.5*cdr);

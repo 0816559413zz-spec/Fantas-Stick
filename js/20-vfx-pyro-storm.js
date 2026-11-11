@@ -29,15 +29,273 @@ function dfCracks(x,y,h,r,col,life){
   const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));geo.setIndex(idx);
   g.add(new THREE.Mesh(geo,m));scene.add(g);DFV.push({g,m,age:0,life:life||0.5});
 }
-function updateDfCracks(dt){for(let i=DFV.length-1;i>=0;i--){const d=DFV[i];d.age+=dt;d.m.opacity=0.95*Math.max(0,1-d.age/d.life);if(d.age>=d.life){scene.remove(d.g);d.g.traverse(o=>{if(o.geometry)o.geometry.dispose();});d.m.dispose();DFV.splice(i,1);}}}
+function updateDfCracks(dt){for(let i=DFV.length-1;i>=0;i--){const d=DFV[i];d.age+=dt;d.m.opacity=0.95*clamp((1-d.age/d.life)/(d.fracture?0.34:1),0,1);if(d.age>=d.life){scene.remove(d.g);d.g.traverse(o=>{if(o.geometry)o.geometry.dispose();});d.m.dispose();DFV.splice(i,1);}}}
+const _domeAim=new THREE.Vector3();
+function domeChargeOrb(o){
+  if(o.sdBall)return o.sdBall;
+  const g=new THREE.Group(),glow=new THREE.Sprite(glowMat('#ffd23a',1.1)),core=new THREE.Sprite(glowMat('#fff7d0',1.8));
+  glow.material.userData.keep=core.material.userData.keep=true;
+  glow.scale.setScalar(1.3);core.scale.setScalar(0.5);
+  g.add(glow,core);scene.add(g);(o.g.userData.extra||(o.g.userData.extra=[])).push(g);
+  return o.sdBall=g;
+}
+const _spearUp=new THREE.Vector3(0,1,0),_spearDir=new THREE.Vector3(),_spearA=new THREE.Vector3(),_spearB=new THREE.Vector3();
+const DOME_SPEAR_LEN=4.1;
+function stormDomePath(path,life,width,amp,light,cyan){
+  const bolt=tboltP(path,life,width,amp,'#9fd8ff');
+  bolt.domePalette=cyan?domeCyan:domeGold;bolt.gk=light;
+}
+function stormDomeSpearFX(spear,power,length,now){
+  spear.scale.set(lerp(0.1,0.31,power),length,lerp(0.1,0.31,power));
+  if(now<(spear.userData.arcAt||0))return;
+  spear.userData.arcAt=now+31;
+  spear.updateMatrixWorld(true);
+  const bright=lerp(0.74,1.28,power),charged=clamp((power-0.45)/0.55,0,1);
+  for(let i=0,n=4+Math.floor(charged*3);i<n;i++){
+    const cyan=i%3===1,a=now/155+i*2.4,path=[];
+    for(let j=0;j<=7;j++){
+      const k=j/7,taper=j===0||j===7?0:Math.min(1,(1-k)*3.5);
+      const r=taper*(cyan?rnd(0.88,1.38):rnd(0.12,0.74)),b=a+k*2.2;
+      const bend=(j%2?0.22:-0.22)*taper;
+      path.push(new THREE.Vector3(Math.cos(b)*r+bend,k,Math.sin(b)*r).applyMatrix4(spear.matrixWorld));
+    }
+    stormDomePath(path,0.066,lerp(0.058,i===0?0.135:0.086,power),lerp(0.04,0.15,power),bright,cyan);
+  }
+  if(now>=(spear.userData.branchAt||0)){
+    spear.userData.branchAt=now+lerp(142,70,charged);
+    for(let i=0;i<(charged>=0.7?3:charged>=0.32?2:1);i++){
+      const a=now/108+i*2.8,k=rnd(0.24,0.74),dx=Math.cos(a),dy=Math.sin(a);
+      const r=lerp(2.2,4.9,charged),path=[[dx*0.55,k,dy*0.55],[dx*r*0.52,k+0.065,dy*r*0.52],[dx*r,k+0.16,dy*r]];
+      stormDomePath(path.map(v=>new THREE.Vector3(...v).applyMatrix4(spear.matrixWorld)),0.11,lerp(0.044,0.072,charged),0.12,bright,i%2===0);
+    }
+  }
+  for(let i=0,n=1+Math.floor(charged*6);i<n;i++){
+    const a=rnd(0,Math.PI*2),dx=Math.cos(a),dy=Math.sin(a),r=rnd(0.7,lerp(1.9,3.5,charged)),life=rnd(0.22,0.43);
+    const q=simOf(_spearB.set(dx*r,rnd(0.15,0.94),dy*r).applyMatrix4(spear.matrixWorld));
+    PARTS.push({x:q.x,y:q.y,h:q.h-GY(q.x,q.y),vx:dx*rnd(18,55),vy:dy*rnd(18,55),vh:rnd(-0.6,1.45),life,max:life,col:i%2?'#00ddff':'#ffe31b',size:rnd(1.8,3.6),g:1.1});
+  }
+}
+function stormDomeHoverFX(o,now,power){
+  if(now<(o.domeHoverAt||0))return;
+  o.domeHoverAt=now+45;
+  const {x,y,h}=simOf(o.g.position),z=h-GY(x,y),a=now/160;
+  for(let i=0;i<2;i++){
+    const k=a+i*Math.PI,s=Math.sin(k),c=Math.cos(k),end=k+0.65;
+    tbolt(x+c*8,y+s*8,z+0.12,x+Math.cos(end)*16,y+Math.sin(end)*16,z-rnd(0.65,1.2),0.09,0,0.07,0);
+    const b=k+1.2,dx=Math.cos(b),dy=Math.sin(b),r=rnd(15,24),life=rnd(0.24,0.4);
+    PARTS.push({x:x+dx*r,y:y+dy*r,h:z+rnd(0.25,1.75),vx:dx*16,vy:dy*16,vh:rnd(0.3,0.95),life,max:life,col:i?'#9fd8ff':'#ffe482',size:rnd(1.2,2.2),g:1.1});
+  }
+  const charged=clamp((power-0.42)/0.58,0,1);
+  for(let i=0,n=Math.ceil(charged*4);i<n;i++){
+    const k=a+i*2.4,r=lerp(21,39,charged),life=rnd(0.24,0.44),dx=Math.cos(k),dy=Math.sin(k);
+    const sx=x+dx*r,sy=y+dy*r,sz=z+rnd(0.1,1.45);
+    const path=[new THREE.Vector3(tx(sx),sz+GY(sx,sy),tz(sy)),new THREE.Vector3(tx(x+Math.cos(k+0.65)*r),z+1.1+GY(x,y),tz(y+Math.sin(k+0.65)*r)),
+      new THREE.Vector3(tx(x+Math.cos(k+1.18)*r),z+1.92+GY(x,y),tz(y+Math.sin(k+1.18)*r))];
+    const cyan=i===2;
+    stormDomePath(path,0.10,lerp(0.045,cyan?0.069:0.105,charged),0.14,lerp(0.76,1.17,charged),cyan);
+    PARTS.push({x:sx,y:sy,h:sz,vx:dx*38,vy:dy*38,vh:rnd(0.6,2.4),life,max:life,col:cyan?'#36d9ff':'#ffe32b',size:rnd(2.1,3.6),g:0.9});
+  }
+}
+function stormDomeReadyFX(x,y,h){
+  SHAPES_Q.push({k:'dome',full:1,x,y,h,col:'#2aaff5',s0:0.35,s1:9.2,life:0.29,op:0.066});
+  for(let i=0;i<18;i++){
+    const a=i*2.39996,dx=Math.cos(a),dy=Math.sin(a),r=rnd(8,19);
+    const speed=rnd(45,105),vh=rnd(-1.8,3.8),life=rnd(0.28,0.55),col=i%4?'#00c9ff':'#ffcb59';
+    const sx=x+dx*r,sy=y+dy*r,sz=h+rnd(-0.42,0.52);
+    PARTS.push({x:sx,y:sy,h:sz,vx:dx*speed,vy:dy*speed,vh,life,max:life,col,size:rnd(2.1,3.4),g:4});
+    if(i%3===0)tbolt(sx,sy,sz,sx+dx*32,sy+dy*32,sz+vh*0.24,0.13,'#9fd8ff',0.055,1);
+  }
+}
+function stormDomeGroundPoint(d,x,y){
+  return new THREE.Vector3(tx(x),GY(x,y)+groundH(x,y,d.h)+0.085,tz(y));
+}
+function stormDomeFracture(d){
+  const pos=[],colors=[],idx=[],paths=[];
+  const lip=new THREE.Color('#575c66'),gap=new THREE.Color('#121923');
+  function fractureLine(points,width){
+    const base=pos.length/3;
+    paths.push(points.map(([x,y])=>stormDomeGroundPoint(d,x,y)));
+    for(let i=0;i<points.length;i++){
+      const [x,y]=points[i],prev=points[Math.max(0,i-1)],next=points[Math.min(i+1,points.length-1)];
+      const dx=next[0]-prev[0],dy=next[1]-prev[1],n=Math.hypot(dx,dy)||1;
+      const w=width*lerp(1,0.08,i/(points.length-1))*rnd(0.75,1.25);
+      for(const k of [-1,-0.56,0.56,1]){
+        const sx=x-dy/n*w*k,sy=y+dx/n*w*k,v=stormDomeGroundPoint(d,sx,sy);
+        pos.push(v.x,v.y-0.05,v.z);
+        const c=Math.abs(k)===1?lip:gap;colors.push(c.r,c.g,c.b);
+      }
+      if(i>0)for(let j=0;j<3;j++){
+        const k=base+(i-1)*4+j;idx.push(k,k+1,k+4,k+1,k+5,k+4);
+      }
+    }
+  }
+  const turn=rnd(0,Math.PI*2),main=[];
+  for(let i=0;i<7;i++){
+    const angle=turn+i*2*Math.PI/7+rnd(-0.2,0.2),length=d.r*rnd(0.49,0.85),points=[[d.x,d.y]];
+    for(let j=1;j<=5;j++){
+      const a=angle+rnd(-0.22,0.22),r=length*(j/5);
+      points.push([d.x+Math.cos(a)*r,d.y+Math.sin(a)*r]);
+    }
+    fractureLine(points,rnd(3.0,4.8));main.push(points);
+    for(const side of [-1,1]){
+      const root=points[side<0?2:3],fork=angle+side*rnd(0.51,0.87),len=length*rnd(0.23,0.36);
+      fractureLine([root,[root[0]+Math.cos(fork)*len*0.55,root[1]+Math.sin(fork)*len*0.55],
+        [root[0]+Math.cos(fork+side*0.19)*len,root[1]+Math.sin(fork+side*0.19)*len]],rnd(1.4,2.25));
+    }
+  }
+  for(let i=0;i<main.length;i+=2){
+    const a=main[i][2],b=main[(i+1)%main.length][2],f=rnd(0.38,0.68);
+    fractureLine([a,[lerp(a[0],b[0],f)+rnd(-8,8),lerp(a[1],b[1],f)+rnd(-8,8)],b],2.4);
+  }
+  const geo=new THREE.BufferGeometry();
+  geo.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));
+  geo.setAttribute('color',new THREE.Float32BufferAttribute(colors,3));geo.setIndex(idx);
+  const m=new THREE.MeshBasicMaterial({vertexColors:true,side:THREE.DoubleSide,transparent:true,opacity:0.95,depthWrite:false});
+  const g=new THREE.Group();g.add(new THREE.Mesh(geo,m));scene.add(g);
+  DFV.push({g,m,age:0,life:d.max+0.9,fracture:true});
+  return paths;
+}
+function stormDomeFloorPullFX(d,age){
+  if(!d.streams)d.streams=Array.from({length:6},(_,i)=>({angle:i*Math.PI/3+rnd(-0.15,0.15),period:0.61+(i%3)*0.08,delay:i*0.078,lap:-1,trail:null,dustAt:0}));
+  for(let i=0;i<d.streams.length;i++){
+    const s=d.streams[i],time=(age-s.delay)/s.period;
+    if(time<0)continue;
+    const lap=Math.floor(time),u=time-lap;
+    if(s.lap!==lap){
+      trailStop(s.trail);s.lap=lap;s.angle+=lap===0?0:0.32;
+      const cyan=i%3!==0;
+      s.trail=trailNew({col:cyan?'#37eaff':'#ffdf72',col2:cyan?'#0086bb':'#b87920',life:0.225,k:1.68,sweep:true});
+    }
+    const r=d.r*lerp(0.96,0.06,u*(0.58+0.42*u)),a=s.angle+u*0.96;
+    const dx=Math.cos(a),dy=Math.sin(a),x=d.x+dx*r,y=d.y+dy*r;
+    const floor=stormDomeGroundPoint(d,x,y),w=lerp(0.48,0.19,u);
+    const fade=clamp(u/0.12,0,1)*clamp((1-u)/0.12,0,1);
+    trailPoint(s.trail,floor.x-dy*w,floor.y+0.22,floor.z+dx*w,
+      floor.x+dy*w,floor.y+0.27,floor.z-dx*w,fade);
+    if(age>=s.dustAt&&u>0.05&&u<0.92){
+      s.dustAt=age+0.087;
+      const speed=lerp(140,245,u),life=rnd(0.17,0.28),h=floor.y-GY(x,y)+0.025;
+      PARTS.push({x,y,h,vx:-dx*speed-dy*45,vy:-dy*speed+dx*45,vh:0.18,life,max:life,col:'#716972',
+        size:rnd(3.3,5.0),g:0.2,smoke:true,grow:0.9,drag:2.7});
+      PARTS.push({x,y,h:h+0.10,vx:-dx*speed,vy:-dy*speed,vh:0.4,life,max:life,col:i%3?'#20dfff':'#ffc64d',
+        size:rnd(1.7,2.8),g:1.1,drag:2.2});
+    }
+  }
+}
+function stormDomeFieldFX(d,age){
+  if(age<(d.arcAt||0))return;
+  d.arcAt=age+0.077;
+  const a=age*4.1+rnd(-0.7,0.7);
+  const first=Math.floor(age*19);
+  for(let i=0;i<3;i++){
+    const path=d.fractures[(first+i*7)%d.fractures.length];
+    stormDomePath(path,0.108,i===0?0.095:0.058,0.015,1.15,true);
+    const q=simOf(path[path.length-1]);
+    burst(q.x,q.y,'#22dfff',4,45,0.30,2.3,{h:q.h-GY(q.x,q.y),vh:[0.6,2.6],g:6});
+  }
+  for(let i=0;i<2;i++){
+    const angle=a+i*Math.PI+rnd(-0.4,0.4),path=[];
+    for(let j=0;j<=5;j++){
+      const r=d.r*(0.13+j*0.15),an=angle+rnd(-0.21,0.21);
+      path.push(stormDomeGroundPoint(d,d.x+Math.cos(an)*r,d.y+Math.sin(an)*r));
+    }
+    stormDomePath(path,0.105,0.082,0.022,1.03,true);
+    const fork=[path[2],stormDomeGroundPoint(d,d.x+Math.cos(angle+0.28)*d.r*0.57,d.y+Math.sin(angle+0.28)*d.r*0.57),
+      stormDomeGroundPoint(d,d.x+Math.cos(angle+0.40)*d.r*0.71,d.y+Math.sin(angle+0.40)*d.r*0.71)];
+    stormDomePath(fork,0.085,0.046,0.017,0.92,true);
+  }
+  for(let i=0;i<2;i++){
+    const angle=a+i*2.4,e=rnd(0.4,0.95),path=[];
+    for(let j=0;j<5;j++){
+      const q=shellPt(d.x,d.y,0,d.r,angle+j*0.19,e+Math.sin(j*1.7)*0.13);
+      path.push(new THREE.Vector3(tx(q[0]),d.entry.y+q[2],tz(q[1])));
+    }
+    if(i===0){
+      const q=simOf(path[4]),floor=stormDomeGroundPoint(d,q.x,q.y);
+      path.push(path[4].clone().lerp(floor,0.52).add(new THREE.Vector3(0.3,0,-0.25)),floor);
+      burst(q.x,q.y,'#12d9ff',6,52,0.25,2.3,{h:floor.y-GY(q.x,q.y),vh:[0.6,2.3],g:4});
+    }
+    stormDomePath(path,0.115,i===0?0.096:0.071,0.13,1.03,i===0);
+  }
+}
+function stormDomePose(o,p,pz,now){
+  const D=p.df;
+  if(D?.[4]!==1||D[5]!==0){o.domeReady=false;return;}
+  const [ph,x,y,t]=D,T=SDOME_POSE,R=o.armR.rotation,L=o.armL.rotation;
+  const power=ph===1?0:ph===2?stormDomeCharge(t):D[7]||0,full=power>=1;
+  if(ph===1)o.domeReady=false;
+  const smooth=u=>{u=clamp(u,0,1);return u*u*(3-2*u);};
+  const rise=ph===1?smooth(1-t/T.lift):1;
+  const crouch=ph===1?smooth((T.lift+T.charge-t)/T.charge)*(1-rise):0;
+  const swing=ph===4?smooth(1-(t-T.hold-T.recover)/T.swing):0;
+  const weight=ph===4?smooth(t/T.recover):ph===1?clamp(crouch+rise,0,1):1;
+  let knee=0;
+  if(!p.ds||ph===4){
+    const reach=rise*weight*(1-swing),shake=ph===2&&!full?lerp(0.032,0.34,power*power):0;
+    o.b.rotation.x=lerp(o.b.rotation.x,lerp(lerp(0.36,-0.11,rise),0.26,swing),weight);
+    o.b.rotation.z=-0.41*reach+0.083*swing*weight+shake*0.11*Math.sin(now/28);
+    o.bz=1;
+    o.b.position.y+=-0.24*crouch+0.045*reach+shake*0.085*Math.sin(now/26+0.4);
+    o.legs[0].rotation.x=lerp(o.legs[0].rotation.x,lerp(-0.92,0.22,rise),weight*(1-swing));
+    o.legs[1].rotation.x=lerp(o.legs[1].rotation.x,lerp(-1.05,-1.12,rise),weight*(1-swing));
+    o.legs[0].rotation.z-=0.09*reach;
+    o.legs[1].rotation.z+=0.75*reach;
+    knee=0.88*reach;
+    let pitch=lerp(-0.86,-3.12,rise),side=lerp(-0.52,-0.34,rise);
+    if(ph===4){
+      const arm=o.armR;
+      _domeAim.set(tx(x),GY(x,y)+(D[6]??0)+0.15,tz(y));
+      arm.parent.worldToLocal(_domeAim).sub(arm.position).normalize();
+      pitch=lerp(pitch,Math.atan2(-_domeAim.z,-_domeAim.y),swing);
+      side=lerp(side,Math.asin(clamp(_domeAim.x,-1,1)),swing);
+    }
+    R.x=lerp(R.x,pitch,weight)+shake*(Math.sin(now/19)*0.72+Math.sin(now/31)*0.28);
+    R.z=lerp(R.z,side,weight)+shake*0.83*Math.sin(now/23+0.8);
+    L.x=lerp(L.x,lerp(lerp(-0.85,-0.37,rise),-0.32,swing),weight);
+    L.z=lerp(L.z,lerp(lerp(0.58,1.0,rise),0.9,swing),weight);
+    wandTwoHand(o,weight*(1-rise)*0.82);
+  }
+  if(ph===1&&t<=T.lift){
+    const h=pz-GY(p.x,p.y),v=1-t/T.lift;
+    const tail=Math.sin(Math.PI*v*0.8)*3.5;
+    tbolt(p.x,p.y,h+0.45,p.x+rnd(-11,11),p.y+rnd(-11,11),Math.max(0.12,h-tail),0.11,0,0.14,1);
+  }
+  const charging=ph!==4||t>T.hold+T.recover;
+  if(ph>=2&&charging)stormDomeHoverFX(o,now,power);
+  if(!charging||weight<=0.02)return knee;
+  const spear=o.domeSpear||(o.domeSpear=new THREE.Object3D());
+  o.tip.getWorldPosition(spear.position);
+  o.armR.localToWorld(_spearDir.set(0,o.tip.position.y-1,0)).sub(spear.position).normalize();
+  if(ph>=2){
+    _spearA.set(tx(x),GY(x,y)+(D[6]??0),tz(y)).sub(spear.position);
+    const flat=Math.hypot(_spearA.x,_spearA.z);
+    if(flat<0.35)_spearA.set(Math.cos(p.a||0),-0.15,Math.sin(p.a||0));
+    else _spearA.y=lerp(clamp(_spearA.y,-flat*0.125,flat*0.18),_spearA.y,swing);
+    _spearDir.copy(_spearA.normalize());
+  }
+  spear.quaternion.setFromUnitVectors(_spearUp,_spearDir);
+  const length=ph===1?lerp(0.12,0.75,crouch*0.32+rise):lerp(0.75,DOME_SPEAR_LEN,power);
+  spear.position.addScaledVector(_spearDir,-length*0.5);
+  stormDomeSpearFX(spear,power,length,now);
+  const q=simOf(spear.localToWorld(_spearA.set(0,0.5,0))),h=q.h-GY(q.x,q.y);
+  if(full&&!o.domeReady){o.domeReady=true;stormDomeReadyFX(q.x,q.y,h);}
+  LREQ.push({x:tx(q.x),y:q.h,z:tz(q.y),col:'#ffd11a',int:lerp(0.55,2.8,power),dist:8});
+  return knee;
+}
 function dragonfallFX(o,p,pz,now,dt){
   const D=p.df;
   if(o.sdBall&&(!D||D[4]!==1||D[0]===3))o.sdBall.visible=false;
   if(!D){if(o.dfC)o.dfC.visible=false;if(o.fWings)o.fWings.visible=false;o.dfPh=0;return;}
   const ph=D[0],left=ph===1?D[3]+3.45:ph===2?D[3]+0.45:D[3],ca=Math.cos(p.a||0),sa=Math.sin(p.a||0),ST=D[4]===1;
+  const normalDome=ST&&D[5]===0;
+  if(normalDome&&o.sdBall)o.sdBall.visible=false;
+  if(normalDome&&(ph===1||ph===4&&D[3]<=SDOME_POSE.hold+SDOME_POSE.recover)){
+    if(o.dfC)o.dfC.visible=false;
+    return;
+  }
   const c1=ST?'#ffffff':'#fff0b0',c2=ST?'#fff27a':'#ffb347',c3=ST?'#9fd8ff':'#ff5a1a';
   if(!o.dfC){o.dfC=makeDfCircle(ST);(o.g.userData.extra||(o.g.userData.extra=[])).push(o.dfC);}
-  const C=o.dfC,U=C.userData,R=(ST?150:DRAGONF.v.r)*S3;
+  const C=o.dfC,U=C.userData,R=(normalDome?SDOME.v.r:ST?150:DRAGONF.v.r)*S3;
   if(!C.visible){C.visible=true;C.position.set(tx(D[1]),0.07+GY(D[1],D[2]),tz(D[2]));}
   C.position.x+=(tx(D[1])-C.position.x)*Math.min(1,dt*18);C.position.z+=(tz(D[2])-C.position.z)*Math.min(1,dt*18);
   C.scale.set(R,1,R);
@@ -45,6 +303,7 @@ function dragonfallFX(o,p,pz,now,dt){
   U.mats[0].opacity=0.55+0.25*pulse+0.2*conv;U.mats[1].opacity=0.1+0.12*conv;
   U.inner.scale.setScalar(Math.max(0.04,1-conv*0.96));U.mats[2].opacity=0.25+0.5*conv;
   U.runes.forEach((r,i)=>{const an=r.userData.a+now/900,rr=lerp(0.82,0.1,conv);r.position.set(Math.cos(an)*rr,0.01,Math.sin(an)*rr);r.rotation.z=-an;r.scale.set(1/R*R,1+conv*1.5,1);});
+  if(normalDome)return;
   if(!o.dfPh||o.dfPh!==ph)o.dfPh=ph;
   // ท่าทาง + ไฟตามตัว
   if(ph===1&&D[3]>0.25){o.b.position.y=-0.32;o.legs[0].rotation.x=-1.1;o.legs[1].rotation.x=-1.1;o.b.rotation.x=0.35;}
@@ -66,7 +325,7 @@ function dragonfallFX(o,p,pz,now,dt){
     if(ST){// สายฟ้าหนาพัน/พาดผ่านร่างตอนลอย
       for(let j=0;j<2;j++){const a1=rnd(0,6.283),q=shellPt(p.x,p.y,pz+rnd(0,0.5),18,a1,0),q2=shellPt(p.x,p.y,pz+rnd(1.6,2.4),18,a1+rnd(2,4),0);tbolt(q[0],q[1],q[2],q2[0],q2[1],q2[2],0.07,0,0.12,Math.random()<0.4?1:0);}
       // ลูกสายฟ้าที่ปลายไม้ (โตขึ้นตามเวลาบิน)
-      if(!o.sdBall){o.sdBall=new THREE.Group();const a1=new THREE.Sprite(glowMat('#ffd23a',1.1));a1.material.userData.keep=true;a1.scale.setScalar(1.3);const a2=new THREE.Sprite(glowMat('#fff7d0',1.8));a2.material.userData.keep=true;a2.scale.setScalar(0.5);o.sdBall.add(a1,a2);scene.add(o.sdBall);(o.g.userData.extra||(o.g.userData.extra=[])).push(o.sdBall);}
+      domeChargeOrb(o);
       o.tip.getWorldPosition(_pw);o.sdBall.visible=true;o.sdBall.position.set(_pw.x+rnd(-0.08,0.08),_pw.y+0.55+rnd(-0.08,0.08),_pw.z+rnd(-0.08,0.08));const k=ph===1?0.5:0.7+0.5*Math.min(1,(3-D[3])/1.5);o.sdBall.scale.setScalar(k*(0.9+0.15*Math.sin(now/40)));
       {const q=simOf(o.sdBall.position),R=14*k;for(let j=0;j<3;j++){const a1=rnd(0,6.283),e1=rnd(-1,1),b1=shellPt(q.x,q.y,q.h,R,a1,e1),b2=shellPt(q.x,q.y,q.h,R,a1+rnd(1.2,2.8),-e1);tbolt(b1[0],b1[1],b1[2],b2[0],b2[1],b2[2],0.05,0,0.08,j===0?1:0);}
         if(Math.random()<0.5){const an=rnd(0,6.283);tbolt(q.x,q.y,q.h,q.x+Math.cos(an)*rnd(25,50),q.y+Math.sin(an)*rnd(25,50),q.h+rnd(-0.8,0.8),0.06,0,0.09);}}
@@ -96,7 +355,9 @@ function tbLayer(blend,ro){const V=TBMAX*TBN*2,g=new THREE.BufferGeometry();g.se
 let TBL=null;   // สร้างตอนใช้ครั้งแรก (ตอนโหลดไฟล์ scene ยังไม่ถูกสร้าง)
 const TBC={glow:new THREE.Color('#ffb800').multiplyScalar(1.3),body:new THREE.Color('#ffc400'),acc:new THREE.Color('#3ce8ff').multiplyScalar(1.25),accG:new THREE.Color('#12c4ff').multiplyScalar(1.2),accC:new THREE.Color('#e0fbff').multiplyScalar(1.4),core:new THREE.Color('#fffbe0').multiplyScalar(1.8),fBody:new THREE.Color('#ff8a2a').multiplyScalar(1.5),fGlow:new THREE.Color('#ff4a00').multiplyScalar(1.3),fCore:new THREE.Color('#fff2c8').multiplyScalar(1.8),bBody:new THREE.Color('#1fd6ff'),bGlow:new THREE.Color('#0a9cff').multiplyScalar(1.1),bCore:new THREE.Color('#c6f7ff').multiplyScalar(1.3)};   // b* = ร่างเทพ: ฟ้าเข้ม ไม่ขาวจ้า
 const _tcc=new THREE.Color();
-function tbGet(){if(TBA.length>=TBMAX){const old=TBA.shift();TBF.push(old);}let o=TBF.pop();if(!o){o={pts:Array.from({length:TBN},()=>new THREE.Vector3()),A:new THREE.Vector3(),B:new THREE.Vector3(),path:null};}TBA.push(o);return o;}
+const domeCyan={glow:new THREE.Color('#00caff').multiplyScalar(1.4),body:new THREE.Color('#03d6ff').multiplyScalar(1.16),core:new THREE.Color('#59efff').multiplyScalar(1.24)};
+const domeGold={glow:new THREE.Color('#ffbe00').multiplyScalar(1.5),body:new THREE.Color('#ffde00').multiplyScalar(1.18),core:new THREE.Color('#fff07b').multiplyScalar(1.42)};
+function tbGet(){if(TBA.length>=TBMAX){const old=TBA.shift();TBF.push(old);}let o=TBF.pop();if(!o){o={pts:Array.from({length:TBN},()=>new THREE.Vector3()),A:new THREE.Vector3(),B:new THREE.Vector3(),path:null};}o.domePalette=null;TBA.push(o);return o;}
 // จุด sim (x,y,h) — col ไม่ใช้ (เหลืองเสมอ) ยกเว้น '#9fd8ff' = สีรองฟ้า • w = ความหนา (หน่วยโลก) • br = จำนวนกิ่ง
 // TBLUE = ร่างเทพ (อัลติ): เส้นหลักเป็นฟ้า เส้นคู่เป็นเหลืองเล็ก ๆ (ผู้ใช้ 2026-11-10)
 let TBLUE=0,TBFIRE=0;   // TBFIRE = เส้นไฟนีออน (Blazeform) ไม่มีเส้นคู่
@@ -200,24 +461,31 @@ function updateStormV(dt){
       if(k<u){const e=1-Math.pow(1-k/u,2);q=[lerp(b.s[0],A[0],e),lerp(b.s[1],A[1],e),lerp(b.s[2],A[2],e)];}   // ลอยขึ้น + เลื่อนออกหน้า (ไม่ลอยค้างหน้ากล้อง)
       else{const e=(k-u)/(1-u),C=[lerp(A[0],T[0],0.35),lerp(A[1],T[1],0.35),A[2]+1.4],w=1-e;q=[w*w*A[0]+2*w*e*C[0]+e*e*T[0],w*w*A[1]+2*w*e*C[1]+e*e*T[1],w*w*A[2]+2*w*e*C[2]+e*e*T[2]];}   // โค้งลงไล่ตัวเป้า
       if(b.fx){b.fx.x=q[0];b.fx.y=q[1];b.fx.h=q[2];}if(k>=1){if(b.fx)fxStop(b.fx);SBV.splice(i,1);}continue;}
-    b.t+=dt;const k=Math.min(1,b.t/b.max),x=lerp(b.x,b.x2,k),y=lerp(b.y,b.y2,k),h=lerp(b.h,b.h2,k);
+    b.t+=dt;const k=Math.min(1,b.t/b.max);
+    if(b.axis){
+      if(k>=1){SBV.splice(i,1);continue;}
+      b.g.position.lerpVectors(b.start,b.end,k).addScaledVector(b.axis,-b.length*k);
+      stormDomeSpearFX(b.g,b.power,b.length,b.t*1000);
+      continue;
+    }
+    const x=lerp(b.x,b.x2,k),y=lerp(b.y,b.y2,k),h=lerp(b.h,b.h2,k);
     b.g.position.set(tx(x),h+GY(x,y),tz(y));for(let j=0;j<3;j++)PARTS.push({x:x+rnd(-8,8),y:y+rnd(-8,8),h:h+rnd(-0.3,0.3),vx:0,vy:0,vh:rnd(-0.5,0.5),life:0.3,max:0.3,col:j?'#ffd000':'#ffffff',size:rnd(2.5,4),g:0});
     if(Math.random()<0.8){const a1=rnd(0,6.283),e1=rnd(-1,1),R=b.R||16,q=shellPt(x,y,h,R,a1,e1),q2=shellPt(x,y,h,R,a1+rnd(1,2.5),-e1);tbolt(q[0],q[1],q[2],q2[0],q2[1],q2[2],0.05,0,0.08);}
     if(k>=1){scene.remove(b.g);SBV.splice(i,1);}}
-  for(let i=SDV.length-1;i>=0;i--){const d=SDV[i];d.t-=dt;d.m.material.opacity=0.16+0.1*Math.sin(performance.now()/60);d.w.material.opacity=0.45*Math.min(1,d.t*3);d.m.rotation.y+=dt*0.8;d.w.rotation.y-=dt*1.4;
-    for(let j=0;j<2;j++){const a1=rnd(0,6.283),e1=rnd(0,1.3),q=shellPt(d.x,d.y,d.h,d.r,a1,e1),q2=shellPt(d.x,d.y,d.h,d.r,a1+rnd(0.5,1.6),rnd(0,1.3));tbolt(q[0],q[1],q[2],q2[0],q2[1],q2[2],0.08,0,0.13,1);}
-    // อนุภาควนเป็นเกลียวเข้ากลาง + สายฟ้าโค้งวนเข้าหากลาง
-    for(let j=0;j<4;j++){const an=rnd(0,6.283),r=d.r*rnd(0.85,1.05),tg=an+Math.PI/2;PARTS.push({x:d.x+Math.cos(an)*r,y:d.y+Math.sin(an)*r,h:d.h+rnd(0.1,0.8),vx:-Math.cos(an)*140+Math.cos(tg)*110,vy:-Math.sin(an)*140+Math.sin(tg)*110,vh:0,life:0.7,max:0.7,col:j%2?'#ffd000':'#ffffff',size:2.6,g:0,drag:0.6});}
-    if(Math.random()<0.5){const P=[],a0=rnd(0,6.283);for(let j=0;j<=8;j++){const an=a0+j*0.25,r=d.r*(1-j/9);_tw.set(tx(d.x+Math.cos(an)*r),d.h+0.2+GY(d.x,d.y),tz(d.y+Math.sin(an)*r));P.push(_tw.clone());}tboltP(P,0.12,0.1,0.05);}
-    // ลูกสายฟ้าค้างกลางโดม: สั่น + สายฟ้าพันรอบ + สายฟ้าลงพื้น
-    {const ob=d.orb;ob.position.set(tx(d.x)+rnd(-0.08,0.08),d.h+1.3+GY(d.x,d.y)+rnd(-0.08,0.08),tz(d.y)+rnd(-0.08,0.08));ob.scale.setScalar(0.9+0.15*Math.sin(performance.now()/40));
-      for(let j=0;j<3;j++){const a1=rnd(0,6.283),e1=rnd(-1,1),q=shellPt(d.x,d.y,d.h+1.3,20,a1,e1),q2=shellPt(d.x,d.y,d.h+1.3,20,a1+rnd(1.2,2.8),-e1);tbolt(q[0],q[1],q[2],q2[0],q2[1],q2[2],0.05,0,0.08,j===0?1:0);}
-      if(Math.random()<0.4){const an=rnd(0,6.283),r=rnd(30,d.r*0.8);tbolt(d.x,d.y,d.h+1.3,d.x+Math.cos(an)*r,d.y+Math.sin(an)*r,d.h+0.1,0.08,0,0.1);}
-      LREQ.push({x:tx(d.x),y:d.h+1.3,z:tz(d.y),col:'#ffd23a',int:3,dist:12});}
+  for(let i=SDV.length-1;i>=0;i--){
+    const d=SDV[i];d.t-=dt;
+    if(d.t<=0){for(const m of [d.m,d.w,d.pit,...d.rings]){scene.remove(m);m.geometry.dispose();m.material.dispose();}for(const s of d.streams||[])trailStop(s.trail);SDV.splice(i,1);continue;}
+    const age=d.max-d.t,sink=1-Math.pow(1-clamp(age/0.095,0,1),3);
+    d.spear.position.copy(d.entry).addScaledVector(d.axis,-DOME_SPEAR_LEN+0.64*sink);
+    stormDomeSpearFX(d.spear,1,DOME_SPEAR_LEN,age*1000);
+    d.m.material.opacity=0.095+0.045*Math.sin(performance.now()/60);d.w.material.opacity=0.32*Math.min(1,d.t*3);d.m.rotation.y+=dt*0.8;d.w.rotation.y-=dt*1.4;
+    stormDomeFieldFX(d,age);
+    stormDomeFloorPullFX(d,age);
+    LREQ.push({x:d.entry.x,y:d.entry.y+0.45,z:d.entry.z,col:'#ffd23a',int:2.5,dist:12});
     // พื้นพลังงานยุบเข้ากลาง: วงซ้อนหดจากขอบเข้าหากลางวนไปเรื่อยๆ + หลุมมืดตรงกลาง
-    {const tt=(d.max-d.t);for(const r of d.rings){const k=1-((tt*0.9+r.userData.ph)%1);r.scale.setScalar(Math.max(0.02,d.r*S3*k));r.material.opacity=0.6*(1-k*0.3)*Math.min(1,d.t*3);}
+    {const tt=(d.max-d.t);for(const r of d.rings){const k=1-((tt*0.9+r.userData.ph)%1);r.scale.setScalar(Math.max(0.02,d.r*S3*k));r.material.opacity=0.36*(1-k*0.3)*Math.min(1,d.t*3);}
       d.pit.scale.setScalar(d.r*S3*(0.15+0.25*Math.min(1,tt/d.max)));d.pit.material.opacity=0.35*Math.min(1,d.t*3);d.m.scale.set(1,1-0.25*Math.min(1,tt/d.max),1);}
-    if(d.t<=0){for(const m of [d.m,d.w,d.pit,...d.rings]){scene.remove(m);m.geometry.dispose();m.material.dispose();}scene.remove(d.orb);SDV.splice(i,1);}}
+  }
   // วงรูนเตือนฟ้าผ่าสามครั้ง: หมุน + ขีดรูนหุบเข้ากลางก่อนแต่ละครั้ง + วาบตอนฟ้าผ่า
   for(let i=TSV.length-1;i>=0;i--){const v=TSV[i];v.age+=dt;if(v.tgt){const k=Math.min(1,dt*10),p=v.g.position;p.x+=(tx(v.tgt[0])-p.x)*k;p.z+=(tz(v.tgt[1])-p.z)*k;p.y+=(v.tgt[2]+0.07+GY(v.tgt[0],v.tgt[1])-p.y)*k;}
     /* วงเลื่อนหาศัตรู (host ส่ง tsmv) */const U=v.g.userData,T=[0.6,1.1,1.6];let nx=T.find(t=>t>v.age),prev=[0,...T].filter(t=>t<=v.age).pop()||0;

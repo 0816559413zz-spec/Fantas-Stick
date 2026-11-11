@@ -117,11 +117,11 @@ function botPlay(p,dt,tg,c0){
   // ---------- ⚡ สายฟ้า ----------
   if(pi===2){
     const st=p.lst|0;
-    if(p.sdome){if(p.sdome.ph===2)pulse();return;}                    // โดม: บินถึงแล้วคลิกยิงลง
+    if(p.sdome){if(p.sdome.ph===2&&(p.sdome.god||stormDomeCharge(p.sdome.t)>=1))pulse();return;}
     if(p.rail||p.slnT>0)return;                                       // ร่าย Railgun/เส้นสายฟ้าอยู่ ยืนนิ่ง
     // เก็บ stack: Dash ทะลุศัตรู • stack ครบแล้วเก็บ Dash ไว้หนี
     if(p.dch>=1&&!(p.dash>0)&&d>150&&d<430&&(st<2||roll(0.2))&&roll(dt*4))dash();
-    if(rdy('stormdome')&&st>=3&&d<560)go('stormdome');
+    if(rdy('stormdome')&&st>=stormDomeCost(p)&&d<560)go('stormdome');
     else if(rdy('railgun')&&st>=3&&d<850&&d>200)go('railgun');
     else if(rdy('triplestrike')&&st>=2&&d<560)go('triplestrike');
     else if(rdy('speedsiphon')&&st>=2&&d<600)go('speedsiphon');

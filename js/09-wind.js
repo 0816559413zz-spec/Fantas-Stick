@@ -26,7 +26,7 @@ function wFoeNear(p,x,y,r){return foesOf(p.team).filter(t=>Math.hypot(t.x-x,t.y-
 // ---------- ทุกเฟรมของผู้เล่นสายลม (เรียกจาก updatePlayer หลังส่วนโล่) ----------
 function windTick(p,dt){
   if(p.wg===undefined)p.wg=0;
-  if(p.wwc===undefined){p.wwc=W_WL.max;p.wwr=0;}
+  if(p.wwc===undefined||p.wwc>W_WL.max){p.wwc=W_WL.max;p.wwr=0;}
   if(p.wsc===undefined){p.wsc=W_VX.sMax;p.wsr=0;}
   if(p.wsc<W_VX.sMax){p.wsr+=dt/p.buffs.cdr;if(p.wsr>=W_VX.sCh){p.wsr=0;p.wsc++;}}
   {const i=p.kitIds?p.kitIds.indexOf('vortexbind'):-1;if(i>=0&&p.wsc<=0){const k=SLOTK[i],left=W_VX.sCh-p.wsr;if(p.cd[k]<left){p.cd[k]=left;p.cdMax[k]=W_VX.sCh;}}}
@@ -419,7 +419,7 @@ function windPushHit(pr,t){const o=G.players[pr.owner];if(!o)return;const W=W_DR
 // ---------- Windforce (เดิม Vortex Bind): พุ่งด้วยลม ----------
 // บิน: พุ่งไปข้างหน้า (ตามเล็กขึ้น/ลงด้วย) แล้วหยุด — ศัตรูที่พุ่งผ่านถูกพาไปอยู่ด้านหน้า: คนลอยอยู่ = knockback ลอยตามมา • คนบนพื้น = ติดหน้าสไลด์ไปด้วยแล้วไหลต่อนิดเดียว
 // พื้น: พุ่งสั้น ๆ ตามเมาส์ ไม่หยุดทันที ไหลต่อด้วย momentum • ผลักศัตรูในทางออกข้างเบา ๆ
-// ---------- Slipstream (ผู้ใช้ 2026-11-08): แดชหมุนหลบตามทิศเดิน • 2 ชาร์จ 5 วิ/อัน • บิน 200 พื้น 120 • แดชแล้วรีเซ็ต BA และนัดถัดไป Enhanced ----------
+// ---------- Slipstream (ผู้ใช้ 2026-11-08): แดชหมุนหลบตามทิศเดิน • 2 ชาร์จ 5 วิ/อัน • บิน 300 พื้น 160 • แดชแล้วรีเซ็ต BA และนัดถัดไป Enhanced ----------
 function windSlipCast(p){if(windSpin(p)||(p.wsc|0)<=0||p.wsl||p.dash>0)return false;const inp=p.inp||{},W=W_VX,air=windAir(p),a=p.ang;
   let mx=typeof inp.mx==='number'?inp.mx:(inp.r?1:0)-(inp.l?1:0),my=typeof inp.my==='number'?inp.my:(inp.d?1:0)-(inp.u?1:0);const A=Math.hypot(mx,my)>0.05?Math.atan2(my,mx):a,f=Math.cos(A-a),r=Math.sin(A-a);
   const d=Math.abs(f)>=Math.abs(r)?(f>=0?0:1):(r>0?3:2),s=r>0?1:-1,D=air?W.sA:W.sG,T=air?W.sTA:W.sTG,sp=D/T;   // 0 หน้า 1 หลัง 2 ซ้าย 3 ขวา
@@ -519,17 +519,17 @@ function windUltSweep(p,U,x0,y0,h0,x1,y1,h1){const dx=x1-x0,dy=y1-y0,dh=(h1-h0)*
 function windFloatZ(p,dt){const gh=groundH(p.x,p.y,p.z);p.z+=(gh+(p.wfz||2.2)-p.z)*Math.min(1,4*dt);p.vz=0;}
 
 // สำหรับ snapshot: [เกจ, ดูดลม, ชาร์จ Windup, (เลิกใช้), ชาร์จระเบิดปีก, บิน(1)/ร่อน, (เลิกใช้), 1=หมุนขึ้น 2=บิน, ด้านหมุน, 1=ชาร์จอัลติ 2=พุ่ง]
-function windSnapP(p){if(!wOn(p))return undefined;return [Math.floor(p.wg||0),p.wchg?1:0,p.wwc|0,p.wwAim?1:0,p.wsb?1:0,p.wfw?(p.wfw.ph==='spin'||p.wfw.ph==='focus'?1:2):0,p.wdr?(p.wdr.ph==='chg'?1:2):0,p.wfw?(p.wfw.ph==='spin'?1:p.wfw.ph==='focus'?2:0):0,p.wfw&&p.wfw.ph==='spin'?p.wfw.side:0,p.wult?(p.wult.ph==='chg'?1:2):0,p.wsc|0,p.wse?1:0,Math.round(clamp(p.inp?.ap||0,-1.5,1.5)*100)/100];}
+function windSnapP(p){if(!wOn(p))return undefined;return [Math.floor(p.wg||0),p.wchg?1:0,p.wwc|0,p.wwAim?1:0,p.wsb?1:0,p.wfw?(p.wfw.ph==='spin'||p.wfw.ph==='focus'?1:2):0,p.wdr?(p.wdr.ph==='chg'?1:2):0,p.wfw?(p.wfw.ph==='spin'?1:p.wfw.ph==='focus'?2:0):0,p.wfw&&p.wfw.ph==='spin'?p.wfw.side:0,p.wult?(p.wult.ph==='chg'?1:2):0,p.wsc|0,p.wse?1:0,Math.round(clamp(p.inp?.ap||0,-1.5,1.5)*100)/100,Math.round((p.wsr||0)/W_VX.sCh*100)];}
 function windSnapW(){const o={};if(G.wwl&&G.wwl.length)o.WW=G.wwl.map(w=>[w.id,Math.round(w.x),Math.round(w.y),Math.round(w.a*100)/100,w.L,Math.round(w.t*10)/10,w.mv>0?1:0,w.team,w.owner]);
   if(G.wvh&&G.wvh.length)o.WO=G.wvh.filter(v=>v.on).map(v=>[v.id,Math.round(v.x),Math.round(v.y)]);return o;}
 
 // ---------- สกิล (ผู้ใช้ 2026-11-08: รีดีไซน์ทั้งชุด — id เดิมไว้ให้ชุดสกิล/tune/ไอคอนไม่พัง เปลี่ยนแค่ชื่อกับพฤติกรรม) ----------
 // ค่าที่ขึ้นต้น "(เลิกใช้)" = ของเดิม (กำแพง/Windrift/Vortex/Void/Eye) โค้ดเก่ายังอยู่แต่ไม่ถูกเรียกแล้ว
-const W_WL=defSpell(WINDP,{id:'aegisgale',v:{charge:10,max:2,dbR:150,dbT:4,dbDps:4,dbTick:0.5,dbSlow:0.8,dbPress:3,dbTele:0.35,tele:0.45,rG:90,rA:140,actG:0.35,actA:1.0,hangG:1.0,hangA:1.8,liftG:2.0,liftA:3.5,dmgG:3,dmgA:6,placeG:450,placeA:650,
+const W_WL=defSpell(WINDP,{id:'aegisgale',v:{charge:10,max:1,dbR:150,dbT:4,dbDps:4,dbTick:0.5,dbSlow:0.8,dbPress:3,dbTele:0.35,tele:0.45,rG:90,rA:140,actG:0.35,actA:1.0,hangG:1.0,hangA:1.8,liftG:2.0,liftA:3.5,dmgG:3,dmgA:6,placeG:450,placeA:650,
     L:125,r:14,life:12,hp:100,push:400,spd:900,place:500,stun:0.5,pdmg:10,pstun:0.5,boom:70,bdmg:50,bpush:2400,brad:110,aim:4},
   vn:{charge:'ชาร์จคืน 1 อัน (วิ)',max:'ชาร์จสูงสุด (อัน)',dbR:'วง • รัศมี',dbT:'วง • อยู่นาน (วิ)',dbDps:'ดาเมจต่อวิ',dbTick:'โดนทุก (วิ)',dbSlow:'ความเร็วเป้าเหลือ (เท่า)',dbPress:'กดคนบินลง (ม./วิ)',dbTele:'ลมลงถึงพื้นหลังกด (วิ)',tele:'วงลม • รอก่อนพัดขึ้น (วิ)',rG:'พื้น • รัศมีวง',rA:'บิน • รัศมีวง',actG:'พื้น • วงพัดอยู่ (วิ)',actA:'บิน • วงพัดอยู่ (วิ)',hangG:'พื้น • เป้าลอยค้าง (วิ)',hangA:'บิน • เป้าลอยค้าง (วิ)',liftG:'พื้น • ลอยสูง (ม.)',liftA:'บิน • ลอยสูง (ม.)',dmgG:'พื้น • ดาเมจ',dmgA:'บิน • ดาเมจ',placeG:'พื้น • วางไกลสุด',placeA:'บิน • วางไกลสุด',
     L:'(เลิกใช้) กำแพง ครึ่งกว้าง',r:'(เลิกใช้) กำแพง หนา',life:'(เลิกใช้) กำแพง อยู่',hp:'(เลิกใช้) กำแพง HP',push:'(เลิกใช้) ดัน ระยะ',spd:'(เลิกใช้) ดัน เร็ว',place:'(เลิกใช้) วาง ไกลสุด',stun:'(เลิกใช้) ชนสตัน',pdmg:'(เลิกใช้) ทะลุดาเมจ',pstun:'(เลิกใช้) ทะลุสตัน',boom:'(เลิกใช้) แตกเมื่อตี',bdmg:'(เลิกใช้) ระเบิดดาเมจ',bpush:'(เลิกใช้) ระเบิดผลัก',brad:'(เลิกใช้) ระเบิดรัศมี',aim:'(เลิกใช้) เวลาเลือก'},
-  role:'control',n:'Downburst',ic:'🌬️',cd:0.4,d:'ลมกดจากฟ้าลงตรงจุดเล็ง (2 ชาร์จ คืน 10 วิ/อัน) — วง 150 อยู่ 4 วิ • ศัตรูในวงโดน 8 ดาเมจ/วิ และช้าลง 40% • คนบินในวงถูกกดลงค่อย ๆ และโดนด้วย',
+  role:'control',n:'Downburst',ic:'🌬️',cd:0.4,d:'ลมกดจากฟ้าลงตรงจุดเล็ง (1 ชาร์จ คืน 10 วิ) — วง 150 อยู่ 4 วิ • ศัตรูในวงโดน 8 ดาเมจ/วิ และช้าลง 40% • คนบินในวงถูกกดลงค่อย ๆ และโดนด้วย',
   cast(p){return windDownCast(p);}}).v;
 const W_DR=defSpell(WINDP,{id:'windrift',v:{vnG:6,vnA:12,vDmg:5,vR:22,vRange:800,vSpd:1300,vSpr:70,vWind:0.2,vGap:0.08,spdA:3400,rangeA:1100,rA:26,dmgA:18,pushA:500,sinkT:1.5,spdG:2600,rangeG:700,rG:18,dmgG:6,launchT:1.0,launchH:3.2,slamT:2.2,slamDmg:12,
     chg:0.2,dist:400,t:0.09,wait:0.6,w:50,push:2400,dmg:10,slow:0.5,slowT:1.2},
@@ -537,11 +537,11 @@ const W_DR=defSpell(WINDP,{id:'windrift',v:{vnG:6,vnA:12,vDmg:5,vR:22,vRange:800
     chg:'(เลิกใช้) ชาร์จ',dist:'(เลิกใช้) พุ่ง',t:'(เลิกใช้) พุ่งเวลา',wait:'(เลิกใช้) ลมตามมา',w:'(เลิกใช้) ลมกว้าง',push:'(เลิกใช้) ผลัก',dmg:'(เลิกใช้) ดาเมจ',slow:'(เลิกใช้) ช้า',slowT:'(เลิกใช้) ช้านาน'},
   role:'damage',n:'Plume Volley',ic:'🪶',cd:12,d:'ยิงขนนกนีออนจากสองปีกสลับกันรัว ๆ โค้งจากด้านหลังเข้าหาจุดเล็ง ไม่ตรงเป๊ะ — ขนละ 6 ดาเมจ ระเบิดวง 40 • บนพื้น 6 ขน • ตอนบิน 12 ขน',
   cast(p){return windVolleyCast(p);}}).v;
-const W_VX=defSpell(WINDP,{id:'vortexbind',v:{sCh:5,sMax:2,sA:250,sG:120,sTA:0.32,sTG:0.26,sEnh:1.5,sEx:2,sExD:8,distA:520,tA:0.26,distG:300,tG:0.2,w:110,hz:8,gap:60,dmgA:10,dmgG:3,carry:0.5,flowA:700,flowG:350,sideG:300,mom:0.2,slipT:0.9,smash:120,smashR:90,
+const W_VX=defSpell(WINDP,{id:'vortexbind',v:{sCh:5,sMax:2,sA:300,sG:160,sTA:0.48,sTG:0.40,sEnh:1.5,sEx:2,sExD:8,distA:520,tA:0.26,distG:300,tG:0.2,w:110,hz:8,gap:60,dmgA:10,dmgG:3,carry:0.5,flowA:700,flowG:350,sideG:300,mom:0.2,slipT:0.9,smash:120,smashR:90,
     far:380,near:60,arc:22.5,hold:0.8,pull:0.4,r:60,dmg:20,stun:0.75},
   vn:{sCh:'ชาร์จคืน 1 อัน (วิ)',sMax:'ชาร์จสูงสุด',sA:'บิน • ระยะแดช',sG:'พื้น • ระยะแดช',sTA:'บิน • เวลาแดช (วิ)',sTG:'พื้น • เวลาแดช (วิ)',sEnh:'นัดถัดไป • เร็วขึ้น (เท่า)',sEx:'นัดถัดไป • ขนนกแถม',sExD:'นัดถัดไป • ดาเมจขนแถม',distA:'(เลิกใช้) บิน • ระยะพุ่ง',tA:'บิน • เวลาพุ่ง (วิ)',distG:'พื้น • ระยะพุ่ง',tG:'พื้น • เวลาพุ่ง (วิ)',w:'ความกว้างจับเป้า (รัศมี)',hz:'จับเป้า • ต่างความสูงได้ (ม.)',gap:'เป้าติดหน้าเรา • ห่าง',dmgA:'บิน • ดาเมจ',dmgG:'พื้น • ดาเมจ',carry:'บิน • เป้าถูกพา (สตัน วิ)',flowA:'บิน • เป้าลอยไหลต่อ (แรง)',flowG:'บิน • เป้าบนพื้นไหลต่อ (แรง)',sideG:'พื้น • ผลักเป้าออกข้าง',mom:'พื้น • momentum หลังพุ่ง (สัดส่วน)',slipT:'พื้น • ไหลต่อ (วิ)',
     smash:'ชนบ้าน/กำแพง • ดาเมจพัง',smashR:'ชนบ้าน/กำแพง • รัศมีพัง',far:'(เลิกใช้) ทอร์นาโด',near:'(เลิกใช้) ดึง',arc:'(เลิกใช้) มุม',hold:'(เลิกใช้) ค้าง',pull:'(เลิกใช้) ดึงเวลา',r:'(เลิกใช้) รัศมีจับ',dmg:'(เลิกใช้) ดาเมจ',stun:'(เลิกใช้) สตัน'},
-  role:'mobility',n:'Slipstream',ic:'🌀',cd:0.4,d:'แดชหมุนหลบไปทางที่เดิน (2 ชาร์จ คืน 5 วิ/อัน) — กลางอากาศไกล 200 บนพื้นไกล 120 • แดชแล้วยิง BA ได้ทันที และนัดถัดไปเร็วขึ้น 1.5 เท่า + แถมขนนก 2 อัน อันละ 8 ดาเมจ (เก็บได้ 1 นัด)',
+  role:'mobility',n:'Slipstream',ic:'🌀',cd:0.4,d:'แดชหมุนหลบไปทางที่เดิน (2 ชาร์จ คืน 5 วิ/อัน) — กลางอากาศ 300 ใน 0.48 วิ บนพื้น 160 ใน 0.40 วิ • แดชแล้วยิง BA ได้ทันที และนัดถัดไปเร็วขึ้น 1.5 เท่า + แถมขนนก 2 อัน อันละ 8 ดาเมจ (เก็บได้ 1 นัด)',
   cast(p){return windSlipCast(p);}}).v;
 const W_VO=defSpell(WINDP,{id:'voidspheres',v:{tlD:0.2,tlL:600,tlW:260,tlT:5,tlUp:1.4,tlSlow:0.75,nA:14,nG:5,gap:0.04,spr:0.07,spd:2400,range:1200,br:10,dmgA:2.5,dmgG:1.5,slowA:0.1,slowG:0.4,slowTA:2.0,slowTG:1.2,cdCut:0.2,
     fly:1.0,dist:400,wait:0,hold:2.5,drift:40,r:110,core:28,pull:500,tick:0.5,tdmg:1,dmg:20,push:2400,spin:14,lift:0.6},
