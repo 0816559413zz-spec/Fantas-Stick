@@ -265,12 +265,12 @@ burst:144 smoke:155 ring:156 floatText:157 shake:158 wandPos:159 impactFX:161 ex
 §195 เอฟเฟกต์คาถาใหม่
 ZV:196 COLB:196 WVV:196 GLV:196 ICEV:196 SLV:196 ULTV:196 OBV:196 _iceDisc:198 _iceEdge:199 _iceSpk:200 iceFloorMat:201 _icePlane:202 _icePathMat:203 _iceWvM:203 iceWvMat:205 makeIceFloor:217 ICE_WV:244 updateIceFloors:245 FLASHM:257 FLASHING:258 flashModel:259 endFlash:268 tickFlash:269 GHOSTM:271 SOLIDM:271 ghostOf:272 setGhost:278 hitSparks:286
 
-## js/20-vfx-pyro-storm.js (826) — Dragonfall (ภาพ)
+## js/20-vfx-pyro-storm.js (836) — Dragonfall (ภาพ)
 makeDfCircle:3 stormCircleCyan:20 DFV:25 dfCracks:26 updateDfCracks:36 _domeAim:37 domeChargeOrb:38 _spearUp:46 _spearDir:46 _spearA:46 _spearB:46 DOME_SPEAR_LEN:47 stormDomePath:48 stormDomeSpearFX:52 stormDomeHoverFX:83 stormDomeReadyFX:107 stormDomeGroundPoint:128 stormDomeFracture:131 stormDomeFloorPullFX:177 stormDomeFieldFX:204 stormDomePose:240 dragonfallFX:304
 §368 สายฟ้า (ภาพ)
-TBN:371 TBA:371 TBF:371 TBMAX:371 _tv:372 _tt:372 _ts:372 _tw:372 tbFalloff:375 tbLayer:378 TBL:384 TBO_MAX:386 tbOrbLayer:387 TBC:390 _tcc:391 domeCyan:392 domeGold:393 tbGet:394 TBLUE:397 TBFIRE:397 tboltB:398 tbolt:399 tboltP:409 tbWrite:410 updateBolts:418 LATER:448 STV:448 SBV:448 SDV:448 TSV:448 CLV:448 stTgPos:450 STCLAW:454
-§458 รอยกรงเล็บ (อัลติสายฟ้า): รอยข่วน 3 เส้นโค้งปลายแหลมขนานกัน ตั้งขวางห…
-clawGeo:461 clawRakes:466 updateClaws:480 later:488 stFade:489 stBeam:490 shellPt:495 updateStormV:496 _ev:544 GODPTS:546 bWorld:548 stormClawStop:552 CLAWFX:558 stormClawRangeFX:559 updateClawFX:589 stormClawSwipe:602 stormFX:649 STHUD:780 drawStormHud:781
+TBN:371 TBA:371 TBF:371 TBMAX:371 _tv:372 _tt:372 _ts:372 _tw:372 tbFalloff:375 tbLayer:378 TBL:384 TBO_MAX:386 tbOrbLayer:387 TBC:390 _tcc:391 domeCyan:392 domeGold:393 tbGet:394 TBLUE:397 TBFIRE:397 tboltB:398 tbolt:399 tboltP:409 tbWrite:410 updateBolts:418 LATER:451 STV:451 SBV:451 SDV:451 TSV:451 CLV:451 stTgPos:453 STCLAW:457
+§461 รอยกรงเล็บ (อัลติสายฟ้า): รอยข่วน 3 เส้นโค้งปลายแหลมขนานกัน ตั้งขวางห…
+clawGeo:464 clawRakes:469 updateClaws:483 later:491 stFade:492 stBeam:493 shellPt:498 updateStormV:499 _ev:547 GODPTS:549 bWorld:551 stormClawStop:555 CLAWFX:561 stormClawRangeFX:562 updateClawFX:592 stormClawSwipe:605 stormFX:652 STHUD:790 drawStormHud:791
 
 ## js/21-vfx-frost.js (226) — น้ำแข็ง (ภาพ): ชิ้นผลึก/หนาม/แผ่นน้ำแข็งชั่วคราว (โผล่ → ค้าง → หด) •…
 FRV:2 _cryG:3 _spkG:3 _plateG:3 _hexG:3 _iceFxM:4 _frostM:4 iceFxM:5 frostM:6 ICEP:8 _im4:8 _iq:8 _ie:8 _ip:8 _is:8 icePool:9 iceBit:10 iceChips:13 updateFRV:14 iceRing:24 chillFX:25 makeSlash:41 _wbGeo:49 crescentGeo:51 makeWaveBlade:54 WGH:68 updateSlashes:69 _glGeo:82 _glMat:82 _glMat2:82 makeGlacier:83 updateGlacierVis:114 updateOrbShots:123
@@ -806,4 +806,4 @@ surfSync:49 surfQuality:53
 SURF_VS:55 SURF_VS_BODY:56 SURF_FS:67 SURF_FS_BODY:68 surfOk:98 surfApply:99 surfScene:111
 §112 ปรับค่า (tune.html / F8)
 
-(98 files, 25684 lines)
+(98 files, 25694 lines)

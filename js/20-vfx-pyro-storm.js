@@ -391,7 +391,7 @@ const TBC={glow:new THREE.Color('#ffb800').multiplyScalar(1.3),body:new THREE.Co
 const _tcc=new THREE.Color();
 const domeCyan={glow:new THREE.Color('#00caff').multiplyScalar(1.4),body:new THREE.Color('#03d6ff').multiplyScalar(1.16),core:new THREE.Color('#59efff').multiplyScalar(1.24)};
 const domeGold={glow:new THREE.Color('#ffbe00').multiplyScalar(1.5),body:new THREE.Color('#ffde00').multiplyScalar(1.18),core:new THREE.Color('#fff07b').multiplyScalar(1.42)};
-function tbGet(){if(TBA.length>=TBMAX){const old=TBA.shift();TBF.push(old);}let o=TBF.pop();if(!o){o={pts:Array.from({length:TBN},()=>new THREE.Vector3()),A:new THREE.Vector3(),B:new THREE.Vector3(),path:null};}o.domePalette=null;o.fir=0;o.orb=0;TBA.push(o);return o;}
+function tbGet(){if(TBA.length>=TBMAX){const old=TBA.shift();TBF.push(old);}let o=TBF.pop();if(!o){o={pts:Array.from({length:TBN},()=>new THREE.Vector3()),A:new THREE.Vector3(),B:new THREE.Vector3(),path:null};}o.domePalette=null;o.fir=0;o.orb=0;o.len=4;TBA.push(o);return o;}
 // จุด sim (x,y,h) — col ไม่ใช้ (เหลืองเสมอ) ยกเว้น '#9fd8ff' = สีรองฟ้า • w = ความหนา (หน่วยโลก) • br = จำนวนกิ่ง
 // TBLUE = ร่างเทพ (อัลติ): ทั้งเส้นหลักและเส้นคู่ใช้สีไซแอน
 let TBLUE=0,TBFIRE=0;   // TBFIRE = เส้นไฟนีออน (Blazeform) ไม่มีเส้นคู่
@@ -400,7 +400,7 @@ function tbolt(x1,y1,h1,x2,y2,h2,life,col,w,br){
   if(col!=='#9fd8ff'&&!tbolt.cy&&!TBFIRE){tbolt.cy=1;try{const o2=tbolt(x1+rnd(-12,12),y1+rnd(-12,12),h1+rnd(-.3,.3),x2+rnd(-12,12),y2+rnd(-12,12),h2+rnd(-.3,.3),life,'#9fd8ff',(w||.14)*(TBLUE?.5:.75),0);o2.amp*=1.6;}finally{tbolt.cy=0;}}   // every bolt carries a cyan companion beside it (user 2026-11-10: make it visible)
   const o=tbGet();o.A.set(tx(x1),h1+GY(x1,y1),tz(y1));o.B.set(tx(x2),h2+GY(x2,y2),tz(y2));o.path=null;o.life=o.max=life||0.12;o.w=(w||0.14)*(col==='#9fd8ff'?1.2:.85);o.rj=0;o.gk=1;o.blu=TBLUE;o.fir=TBFIRE;   /* ผู้ใช้ 2026-11-10: เส้นเหลืองบางลง (นีออนจัดเท่าเดิม) • ฟ้าเห็นชัดขึ้น */
   const L=o.A.distanceTo(o.B);o.amp=Math.min(0.55,L*0.11+0.03);o.acc=TBLUE?1:col==='#9fd8ff';   /* ร่างเทพ: ฟ้าทั้งหมด */
-  o.orb=!tbolt.cy&&!tbolt.inBr&&o.A.y-o.B.y<3?(w||0.14):0;   // ออร์บต้นเส้นแบบปืนเทสลา (ผู้ใช้ 2026-11-11) — ไม่ใส่ที่กิ่ง/เส้นคู่/ฟ้าผ่าจากฟ้า
+  o.len=L;o.orb=!tbolt.cy&&!tbolt.inBr&&o.A.y-o.B.y<3&&L>3?(w||0.14):0;   // เฉพาะเส้นยาว (>3 ม.) — เส้นสั้นรอบตัว (โล่/ออร์บ) ไม่ใส่ ไม่งั้นรวมกันขาวโพลน   // ออร์บต้นเส้นแบบปืนเทสลา (ผู้ใช้ 2026-11-11) — ไม่ใส่ที่กิ่ง/เส้นคู่/ฟ้าผ่าจากฟ้า
   if(br&&L>1.2)for(let i=0;i<br;i++){const k=rnd(0.25,0.75),bx=lerp(x1,x2,k)+rnd(-8,8),by=lerp(y1,y2,k)+rnd(-8,8),bh=lerp(h1,h2,k),an=rnd(0,6.283),bl=L/S3*rnd(0.2,0.4);
     {tbolt.inBr=1;try{tbolt(bx,by,bh,bx+Math.cos(an)*bl,by+Math.sin(an)*bl,bh+rnd(-0.6,0.6)*L*0.3,life,col,o.w*0.55,0);}finally{tbolt.inBr=0;}}}
   return o;
@@ -416,8 +416,8 @@ function tbWrite(L,slot,pts,w,taper,c,a){
     C0[cc]=C0[cc+4]=c.r;C0[cc+1]=C0[cc+5]=c.g;C0[cc+2]=C0[cc+6]=c.b;C0[cc+3]=C0[cc+7]=a;}
 }
 function updateBolts(dt){
-  if(!TBL){if(!TBA.length)return;TBL={glow:tbLayer(THREE.AdditiveBlending,1,1),body:tbLayer(THREE.NormalBlending,2,2),core:tbLayer(THREE.NormalBlending,3,0)};TBL.orbA=tbOrbLayer(1.5,4);TBL.orbC=tbOrbLayer(0.55,5);}
-  for(const L of [TBL.glow,TBL.body,TBL.core])if(!L.parent){L.userData.keep=true;scene.add(L);}   // ล้างฉากตอนเริ่มเกม/เปลี่ยนแมปเอาเส้นออก → ใส่คืน (บั๊ก: สายฟ้าทุกเส้นหายทั้งเกม)
+  if(!TBL){if(!TBA.length)return;TBL={halo:tbLayer(THREE.NormalBlending,0,1),glow:tbLayer(THREE.AdditiveBlending,1,1),body:tbLayer(THREE.NormalBlending,2,2),core:tbLayer(THREE.NormalBlending,3,0)};TBL.orbA=tbOrbLayer(1.5,4);TBL.orbC=tbOrbLayer(0.55,5);}
+  for(const L of [TBL.halo,TBL.glow,TBL.body,TBL.core])if(!L.parent){L.userData.keep=true;scene.add(L);}   // ล้างฉากตอนเริ่มเกม/เปลี่ยนแมปเอาเส้นออก → ใส่คืน (บั๊ก: สายฟ้าทุกเส้นหายทั้งเกม)
   let n=0;
   for(let i=TBA.length-1;i>=0;i--){const o=TBA[i];o.life-=dt;if(o.life<=0){TBA.splice(i,1);TBF.push(o);}}
   for(const o of TBA){
@@ -430,19 +430,22 @@ function updateBolts(dt){
     const k=Math.min(1,o.life/o.max*2.2),tp=!!o.path;
     if(o.domePalette){
       const light=Math.min(1,k*o.gk),pal=o.domePalette;
+      tbWrite(TBL.halo,n,o.pts,o.w*6,true,pal.body,0.25*light);
       tbWrite(TBL.glow,n,o.pts,o.w*4.6,true,pal.glow,0.82*light);
       tbWrite(TBL.body,n,o.pts,o.w*1.25,true,pal.body,light);
       tbWrite(TBL.core,n,o.pts,o.w*0.42,true,pal.core,light);
       n++;continue;
     }
-    const bl=o.blu&&o.acc,fi=o.fir;tbWrite(TBL.glow,n,o.pts,o.w*4.8,tp,fi?TBC.fGlow:bl?TBC.bGlow:o.acc?TBC.accG:TBC.glow,(fi?.85:bl?.75:o.acc?.8:.95)*k*o.gk);tbWrite(TBL.body,n,o.pts,o.w*1.25,tp,fi?TBC.fBody:bl?TBC.bBody:o.acc?TBC.acc:TBC.body,k);tbWrite(TBL.core,n,o.pts,o.w*(bl?.42:.6),tp,fi?TBC.fCore:bl?TBC.bCore:o.acc?TBC.accC:o.gk<1?_tcc.copy(TBC.core).multiplyScalar(0.36+0.64*o.gk):TBC.core,k);n++;
+    const bl=o.blu&&o.acc,fi=o.fir,au=Math.min(1,Math.max(0,(o.len-1)/3));   /* ออร่ากว้างเฉพาะเส้นยาว — เส้นสั้นรอบตัวรวมกันไม่ขาวโพลน */
+    tbWrite(TBL.halo,n,o.pts,o.w*6,tp,fi?TBC.fBody:bl?TBC.bBody:o.acc?TBC.acc:TBC.body,0.45*au*k*o.gk);   /* ออร่าสีทึบจางๆ ให้เห็นบนพื้นสว่าง (ผู้ใช้ 2026-11-12: BA ออร่าจางไป) */
+    tbWrite(TBL.glow,n,o.pts,o.w*(2.2+2.6*au),tp,fi?TBC.fGlow:bl?TBC.bGlow:o.acc?TBC.accG:TBC.glow,(fi?.85:bl?.75:o.acc?.8:.95)*(0.45+0.55*au)*k*o.gk);tbWrite(TBL.body,n,o.pts,o.w*1.25,tp,fi?TBC.fBody:bl?TBC.bBody:o.acc?TBC.acc:TBC.body,k);tbWrite(TBL.core,n,o.pts,o.w*(bl?.42:.6),tp,fi?TBC.fCore:bl?TBC.bCore:o.acc?TBC.accC:o.gk<1?_tcc.copy(TBC.core).multiplyScalar(0.36+0.64*o.gk):TBC.core,k);n++;
   }
   {let m=0;const PA=TBL.orbA.geometry.attributes,PC=TBL.orbC.geometry.attributes,seen=[];
     for(const o of TBA){if(!o.orb||m>=TBO_MAX)continue;const P=o.pts[0];if(seen.some(q=>q.distanceToSquared(P)<0.04))continue;seen.push(P);   // จุดเดียวกัน (ลำค้างจากปลายไม้) = ออร์บเดียว
       const k=Math.min(1,o.life/o.max*2.2),sz=Math.min(1.6,o.orb/0.14),bl=o.blu,ca=o.fir?TBC.fGlow:bl?TBC.bGlow:TBC.glow,cc=o.fir?TBC.fCore:bl?TBC.bCore:TBC.core;
       PA.position.setXYZ(m,P.x,P.y,P.z);PA.color.setXYZ(m,ca.r*k*.8*sz,ca.g*k*.8*sz,ca.b*k*.8*sz);PC.position.setXYZ(m,P.x,P.y,P.z);PC.color.setXYZ(m,cc.r*k*sz,cc.g*k*sz,cc.b*k*sz);m++;}
     for(const L of [TBL.orbA,TBL.orbC]){L.geometry.setDrawRange(0,m);L.visible=m>0;if(!L.parent)scene.add(L);const A=L.geometry.attributes;A.position.needsUpdate=A.color.needsUpdate=true;}}
-  for(const L of [TBL.glow,TBL.body,TBL.core]){const g=L.geometry;g.setDrawRange(0,n*(TBN-1)*6);L.visible=n>0;if(!n)continue;   // ส่งขึ้นการ์ดจอเฉพาะส่วนที่ใช้ (เดิมส่งทั้งก้อน 420 เส้น ≈ 280 KB ต่อชั้นทุกเฟรม)
+  for(const L of [TBL.halo,TBL.glow,TBL.body,TBL.core]){const g=L.geometry;g.setDrawRange(0,n*(TBN-1)*6);L.visible=n>0;if(!n)continue;   // ส่งขึ้นการ์ดจอเฉพาะส่วนที่ใช้ (เดิมส่งทั้งก้อน 420 เส้น ≈ 280 KB ต่อชั้นทุกเฟรม)
     for(const A of [g.attributes.position,g.attributes.color]){A.clearUpdateRanges();A.addUpdateRange(0,n*TBN*2*A.itemSize);A.needsUpdate=true;}}
 }
 const LATER=[],STV=[],SBV=[],SDV=[],TSV=[],CLV=[];
@@ -763,17 +766,24 @@ function stormFX(o,p,pz,now,dt){
   // ออร์บสายฟ้าคู่: ลูกบอลที่ก่อจากสายฟ้า แกนขาว สายฟ้าหนาพันรอบ สั่นตลอด
   const n=M[5]|0;
   if(n>0||o.sOrbs){
-    if(!o.sOrbs){o.sOrbs=[0,1].map(()=>{const g=new THREE.Group(),a1=new THREE.Sprite(glowMat('#ffc400',0.8)),a2=new THREE.Sprite(glowMat('#fff7d0',1.6));a1.material.userData.keep=true;a2.material.userData.keep=true;a1.scale.setScalar(1.05);a2.scale.setScalar(0.42);g.add(a1,a2);o.g.add(g);return g;});}
+    if(!o.sOrbs){o.sOrbs=[0,1].map(()=>{const g=new THREE.Group(),a1=new THREE.Sprite(glowMat('#ffc400',0.8)),a2=new THREE.Sprite(glowMat('#fff7d0',1.6));a1.material.userData.keep=true;a2.material.userData.keep=true;a1.scale.setScalar(1.05);a2.scale.setScalar(0.36);a1.material.opacity=0.3;a2.material.opacity=0.55;g.add(a1,a2);o.g.add(g);return g;});}   // ผู้ใช้ 2026-11-12: ไม่ใช่ก้อนแสงขาว → แสงจางเล็ก ตัวออร์บคือวงสายฟ้าที่ช็อตตัวเอง
     o.sOrbs.forEach((g,i)=>{g.visible=i<n;if(!g.visible)return;const sd=i?1:-1;
       if(g.userData.cyan!==god){
         g.userData.cyan=god;
         g.children[0].material=glowMat(god?'#24daff':'#ffc400',0.8);
         g.children[1].material=glowMat(god?'#bdf8ff':'#fff7d0',1.6);
-        g.children.forEach(s=>s.material.userData.keep=true);
+        g.children.forEach(s=>s.material.userData.keep=true);g.children[0].material.opacity=0.3;g.children[1].material.opacity=0.55;
       }
       g.position.set(sd*0.65+rnd(-0.04,0.04),1.95+Math.sin(now/260+i*2)*0.12+rnd(-0.04,0.04),-0.55+rnd(-0.04,0.04));
       g.getWorldPosition(_pw);const c=simOf(_pw);
-      for(let j=0;j<3;j++){const a1=rnd(0,6.283),e1=rnd(-1,1),q=shellPt(c.x,c.y,c.h,10,a1,e1),q2=shellPt(c.x,c.y,c.h,10,a1+rnd(1.5,3),-e1);(god?tboltB:tbolt)(q[0],q[1],q[2],q2[0],q2[1],q2[2],0.05,0,0.065);}});
+      // วงสายฟ้า: โค้งตามผิวทรงกลมรัศมี ~0.5 ม. ครั้งละเส้น ไม่ถี่ (ไม่ใช่หลายเส้นทับกันจนขาว)
+      g.userData.bt=(g.userData.bt||0)-dt;
+      if(g.userData.bt<=0){g.userData.bt=rnd(0.035,0.06);
+        _tv.set(rnd(-1,1),rnd(-1,1),rnd(-1,1)).normalize();_tt.set(1,0,0);if(Math.abs(_tv.x)>0.8)_tt.set(0,1,0);_ts.crossVectors(_tv,_tt).normalize();_tt.crossVectors(_tv,_ts);
+        const was=TBLUE;TBLUE=god?1:was;try{for(let r=0;r<2;r++){const R=rnd(0.42,0.55),a0=rnd(0,6.283),span=rnd(1.8,3),P=[];   // ขนาดเท่าเดิม (~1 ม.) แต่เส้นน้อย
+          if(r){_tv.set(rnd(-1,1),rnd(-1,1),rnd(-1,1)).normalize();_tt.set(0,1,0);if(Math.abs(_tv.y)>0.8)_tt.set(1,0,0);_ts.crossVectors(_tv,_tt).normalize();_tt.crossVectors(_tv,_ts);}
+          for(let j=0;j<8;j++){const an=a0+span*j/7;P.push(new THREE.Vector3().copy(_pw).addScaledVector(_ts,Math.cos(an)*R).addScaledVector(_tt,Math.sin(an)*R));}
+          tboltP(P,0.08,0.045,0.04);}}finally{TBLUE=was;}}});
   }
 }
 // UI Storm: ไอคอน Lightning stack ขนาดใหญ่ขึ้นอยู่ใต้เป้าเล็ง; Dash gauge แยกไปทางขวา

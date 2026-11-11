@@ -8,6 +8,8 @@ const PLAN={   // [เวลา, การกระทำ] • ใช้กั�
   blazeform:{sec:3.2,acts:[[0.3,'cast']]},
   kindle:{sec:3.0,acts:[[0.3,'cast'],[1.4,'fire1'],[1.45,'fire0']]},
   basictri:{sec:2.2,acts:[[0.3,'emp'],[0.35,'fire1'],[0.42,'fire0'],[1.2,'emp'],[1.25,'fire1'],[1.32,'fire0']]},   // BA เสริม: สายฟ้าสามเหลี่ยม
+  dash:{sec:2.4,acts:[[0.4,'dash1'],[1.4,'dash1']]},   // Dash ทะลุหุ่น ×2
+  stormdome:{sec:4.4,acts:[[0.3,'cast'],[1.9,'fire1'],[1.95,'fire0']]},   // เรียกหอก → ลอยเล็ง → ทุบ
   basic:{sec:2.6,acts:[[0.3,'fire1'],[2.2,'fire0']]},
   shield:{sec:3.6,acts:[[0.3,'sh1'],[1.2,'sh0']]},
   speedsiphon:{sec:3.4,acts:[[0.3,'cast'],[1.0,'cast'],[1.7,'cast']]},   // คลื่น 3 ครั้ง = เครื่องหมายครบ ระเบิด
@@ -21,7 +23,7 @@ await HL.sleep(500);HL.aim(0,0.05);HL.step(20);
 const p=HL.me();p.ult=100;p.lst=5;
 HL.cam(q.get('cam')||'q34',{dist:+(q.get('dist')||6.5),h:+(q.get('h')||1.7),look:[0,1.1,+(q.get('fwd')||2.2)]});
 HL.step(4);
-const dd=id==='godlightning'?150:id==='basictri'?180:id==='basic'?220:id==='blazeform'?90:360;const d=HL.dummy(dd,0);if(d){d.spd=0;d.ax=d.x;d.ay=d.y;}const d2=id==='godlightning'?null:HL.dummy(dd-60,90);if(d2){d2.spd=0;d2.ax=d2.x;d2.ay=d2.y;}
+const dd=id==='dash'?160:id==='godlightning'?150:id==='basictri'?180:id==='basic'?220:id==='blazeform'?90:360;const d=HL.dummy(dd,0);if(d){d.spd=0;d.ax=d.x;d.ay=d.y;}const d2=id==='godlightning'?null:HL.dummy(dd-60,90);if(d2){d2.spd=0;d2.ax=d2.x;d2.ay=d2.y;}
 const DBG=[],HPLOG=[],images={},tag='storm_'+id,acts=[...P.acts];
 for(let frame=0;frame<Math.ceil(sec*30);frame++){const t=frame/30;
   while(acts.length&&t>=acts[0][0]){const a=acts.shift()[1];
