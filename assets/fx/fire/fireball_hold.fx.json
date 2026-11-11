@@ -1,0 +1,71 @@
+{
+ "v": 1,
+ "desc": "ลูกไฟชาร์จ ระหว่างกดค้าง: ลูกไฟเล็กจาง ๆ ที่ปลายไม้ ค่อย ๆ โตขึ้น (js/33 ตามปลายไม้)",
+ "tags": [
+  "fire",
+  "ingame"
+ ],
+ "pal": "fire",
+ "dur": 1.65,
+ "seed": 51,
+ "layers": [
+  {
+   "att": "point",
+   "pos": [
+    0,
+    0,
+    0
+   ],
+   "fade": 0,
+   "id": "ball",
+   "t": "mesh",
+   "at": 0,
+   "life": 1.65,
+   "shape": "sphere",
+   "mat": "glow",
+   "col": "#ff8a2a",
+   "scale": {
+    "0": 0.06,
+    "1": 0.2,
+    "ease": "out"
+   },
+   "op": {
+    "0": 0.25,
+    "1": 0.55
+   }
+  },
+  {
+   "att": "point",
+   "pos": [
+    0,
+    0,
+    0
+   ],
+   "id": "lick",
+   "t": "emit",
+   "at": 0,
+   "life": 1.65,
+   "rate": 26,
+   "from": "sphere",
+   "fr": 0.08,
+   "dir": "up",
+   "speed": [
+    0.2,
+    0.6
+   ],
+   "plife": [
+    0.18,
+    0.3
+   ],
+   "look": "fire",
+   "size": [
+    3,
+    5
+   ],
+   "col": "#ffb347",
+   "c2": "#ff4a12",
+   "gravity": -1,
+   "drag": 1
+  }
+ ]
+}

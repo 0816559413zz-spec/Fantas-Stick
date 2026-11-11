@@ -56,7 +56,8 @@ function updateTrails(dt){
 const VFXPAL={
   ice:{core:'#ffffff',hi:'#dff6ff',main:'#9fe8ff',deep:'#2f8cff',light:'#8fe0ff',sig:'ice'},
   fire:{core:'#fff6dc',hi:'#ffd56a',main:'#ff9a2a',deep:'#e2440f',light:'#ff8a3a',sig:'fire'},
-  storm:{core:'#ffffff',hi:'#fff6c0',main:'#ffe27a',deep:'#ff9a1a',light:'#ffe27a',sig:'storm'},
+  stormCyan:{core:'#c9faff',hi:'#6deaff',main:'#23d9ff',deep:'#0886d9',light:'#42e5ff',edge:'#0786cf',sig:'storm'},
+  storm:{core:'#ffffff',hi:'#fff6c0',main:'#ffe27a',deep:'#ff9a1a',light:'#ffe27a',edge:'#ff8a00',sig:'storm'},
   nature:{core:'#f4ffe8',hi:'#c8ff9a',main:'#7dff6a',deep:'#2f9a3a',light:'#8ef07a',sig:'nature'},
   hex:{core:'#f6eaff',hi:'#e0b0ff',main:'#b57dff',deep:'#5a1aa8',light:'#b57dff',sig:'hex'},
   summon:{core:'#fff0fa',hi:'#ffc8ea',main:'#ff9ad5',deep:'#b03a8a',light:'#ff9ad5',sig:'hex'},
@@ -128,7 +129,7 @@ function fxLayer(L,x,y,h,s,o,P,m){
       for(let i=0;i<Math.ceil(n/2);i++){const an=rnd(0,6.283),v=rnd(30,120)*s;flame(x+Math.cos(an)*8,y+Math.sin(an)*8,Math.max(0.1,h-0.3),{vx:Math.cos(an)*v,vy:Math.sin(an)*v,vh:rnd(1,3),life:rnd(0.3,0.5),size:rnd(5,8)*Math.sqrt(s),g:-1.5,drag:3});}
       for(let i=0;i<n;i++){const an=rnd(0,6.283),v=rnd(80,320)*s;PARTS.push({x,y,h,vx:Math.cos(an)*v,vy:Math.sin(an)*v,vh:rnd(1,5),life:rnd(0.5,1.1),max:1,col:'#fff0b0',c2:'#ff3a10',size:rnd(1,1.6),g:3,drag:1.6,sh:2,fin:10});}break;}
     case 'crackle':{const n=N(L.n||3);   // สายฟ้า: สายฟ้าสั้นแตกออกจากจุด
-      for(let i=0;i<n;i++){const an=rnd(0,6.283),d=rnd(40,110)*s;tbolt(x,y,h,x+Math.cos(an)*d,y+Math.sin(an)*d,Math.max(0.1,h+rnd(-1,0.6)),rnd(0.08,0.16),0,0.09,1);}break;}
+      for(let i=0;i<n;i++){const an=rnd(0,6.283),d=rnd(40,110)*s;(P===VFXPAL.stormCyan?tboltB:tbolt)(x,y,h,x+Math.cos(an)*d,y+Math.sin(an)*d,Math.max(0.1,h+rnd(-1,0.6)),rnd(0.08,0.16),0,0.09,1);}break;}
     case 'swirl':{const n=N(L.n||6);   // คำสาป: ประกายหมุนวนเข้าหาจุด
       for(let i=0;i<n;i++){const an=rnd(0,6.283),d=rnd(40,90)*s,v=rnd(120,220)*s;PARTS.push({x:x+Math.cos(an)*d,y:y+Math.sin(an)*d,h:h+rnd(-0.3,0.6),vx:-Math.sin(an)*v-Math.cos(an)*v*0.4,vy:Math.cos(an)*v-Math.sin(an)*v*0.4,vh:rnd(0,1),life:rnd(0.5,0.8),max:0.7,col:P.hi,c2:P.deep,size:rnd(2,3),g:0,drag:1.5,sh:1,rot:rnd(0,6.283),vr:rnd(-6,6),fin:6});}break;}
     case 'smoke':smoke(x,y,Math.max(0.2,h-0.4),N(L.n||4),L.col||'#3a3640',1.2,6*Math.sqrt(s),70*s);break;
@@ -149,7 +150,7 @@ const EFXAUG={
   slam:['ice_impact',1],slamgo:['ice_charge',1],auhit:['ice_pop',1],aura:['ice_summon',1],mirrorend:['ice_impact',1],freeze:['ice_hit',0.8],fswap:['ice_pop',1],mirror:['',1,1],
   // สายไฟ
   kindle:['fire_summon',1],dfrise:['fire_charge',1.4,1],dfdive:['fire_charge',1],dfboom:['fire_big',1.2],dfcancel:['fire_pop',1],fblock:['fire_hit',0.9],
-  orbget:['fire_pop',1],orbshot:['fire_pop',0.8],orbhit:['fire_hit',0.9],bigboom:['fire_big',1.2],ering:['fire_impact',1.2],eringhit:['fire_pop',1],
+  orbget:['fire_pop',1],orbshot:['fire_pop',0.8],orbhit:['fire_hit',0.9],bigboom:['fire_impact',0.8],ering:['fire_impact',1.2],eringhit:['fire_pop',1],
   blaze:['fire_summon',1.2,1],snapwind:['fire_charge',1],snap:['fire_hit',1],snapboom:['fire_big',1.1],colossus:['fire_big',1,1],colbolt:['fire_hit',1],
   colboom:['fire_impact',1.2],colend:['fire_impact',1],pboom:['fire_impact',1],ember:['fire_pop',1],inferno:['fire_big',1],melt:['fire_hit',0.8],flare:['fire_impact',1],
   // สายฟ้า
@@ -168,8 +169,11 @@ const PJPAL={fire:'fire',pfire:'fire',pfireb:'fire',spark:'fire',ember:'fire',za
 function pjPal(t){return PJPAL[t]||'col';}
 const ULTCOL={mirror:'#8fe0ff'};
 function efxAug(ev){const A=EFXAUG[ev.z];if(!A)return;const H=ev.h!==undefined?ev.h:1;
-  if(A[0]&&VFXAUG_ON)playFx(A[0],ev.x,ev.y,H,{s:A[1]});
-  if(A[2]&&ev.id!==undefined&&ev.id===NET.myId&&ev.x!==undefined){screenRadial(ev.x,ev.y,H,1,0.55);screenFlash(ULTCOL[ev.z]||palOf(A[0].split('_')[0]).main,0.04,0.3);}}
+  let name=A[0];
+  if(ev.g&&name.startsWith('storm_'))name='stormCyan'+name.slice(5);
+  if(ev.g&&ev.z==='dfdive')name='stormCyan_charge';
+  if(name&&VFXAUG_ON)playFx(name,ev.x,ev.y,H,{s:A[1]});
+  if(A[2]&&ev.id!==undefined&&ev.id===NET.myId&&ev.x!==undefined){screenRadial(ev.x,ev.y,H,1,0.55);screenFlash(ULTCOL[ev.z]||palOf(name.split('_')[0]).main,0.04,0.3);}}
 // เหตุการณ์ทั่วไป: เรียกจาก fx(ev) ทุก event
 let VFXAUG_ON=true;   // ปิดชั่วคราวเพื่อเทียบกับภาพเดิม (WD.vfxAug(false))
 function fxAug(ev,H){if(!VFXAUG_ON&&ev.k!=='hit')return;
@@ -203,7 +207,7 @@ const BF_EXTRA={iceboom:['ice',1.2],glacier:['ice',1],slam3:['ice',1.3],gwave:['
 const BF={on:true,last:new Map()};
 function bfAfter(ev,H){if(!BF.on||ev.x===undefined||isNaN(ev.x))return;
   let el=null,s=1,x=ev.x,y=ev.y,h=H;
-  if(ev.k==='efx'){const X=BF_EXTRA[ev.z];
+  if(ev.k==='efx'){if(ev.z==='dfdive'&&ev.g)return;const X=BF_EXTRA[ev.z];
     if(X){[el,s]=X;if(ev.x2!==undefined){x=ev.x2;y=ev.y2;}if(ev.h===undefined)h=0;}
     else{const A=EFXAUG[ev.z];if(!A||!A[0])return;const [e,c]=A[0].split('_');el=e;
       if(c==='charge'||c==='summon'){if(el==='fire'||el==='ice')bfPlay('bf_'+el+'_cast',el,x,y,h,1);return;}
@@ -219,12 +223,12 @@ function bfAfter(ev,H){if(!BF.on||ev.x===undefined||isNaN(ev.x))return;
     else if(el==='fire'&&s>=0.9)bfScatter(x,y,R,4*s,'char',0.8);
     else if(el==='ice')bfScatter(x,y,R,2+4*s,'ice',0.6+0.4*s);
     else if(el==='storm'&&s>=0.9)bfScatter(x,y,R*0.6,2*s,'char',0.6);}
-  bfPlay('bf_'+el+(h>2.5?'_air':''),el,x,y,h,s);}
+  bfPlay('bf_'+el+(h>2.5?'_air':''),el,x,y,h,s,el==='storm'&&ev.g?'stormCyan':undefined);}
 // กันซ้อนถี่: จุดเดียวกัน (ช่อง 40 px) ธาตุเดียวกัน เล่นได้ทุก 0.25 วิ • ไกลกว่า ~80 ม. ไม่เล่น
-function bfPlay(name,el,x,y,h,s){if(!nearMe(x,y,1600))return;
+function bfPlay(name,el,x,y,h,s,pal){if(!nearMe(x,y,1600))return;
   const k=name+'|'+Math.round(x/40)+'|'+Math.round(y/40),t=performance.now(),o=BF.last.get(k);if(o&&t-o<250)return;
   BF.last.set(k,t);if(BF.last.size>400)BF.last.clear();
-  fxPlay('env/'+name,{x,y,h,s});}
+  fxPlay('env/'+name,{x,y,h,s,pal});}
 // ---------- 3c) สนามรบ ขั้น 2: รอยค้างบนพื้น + ซากรก ๆ (หายเองหลัง BF_LIFE วิ, เดิมค้างทั้งแมตช์) (ล้างเมื่อเริ่มแมตช์ใหม่ — bfClear จาก setScreen js/19) ----------
 // รอย = InstancedMesh เดียว ภาพ assets/fx/tex/bf_marks.png (4×2 ช่อง จาก tools/bf-mark-gen.py) • ทุกรอยเก็บ {x,y,el,r} ไว้ใน BFM.at (ไว้เปลี่ยนเป็นหลุมจริงทีหลัง)
 // ซาก = ชิ้นที่ตกนิ่งแล้ว (DEBRIS js/23, rockChunks js/42, bfScatter) ย้ายเข้า InstancedMesh ต่อ (geometry, วัสดุ) → วาดถูก ค้างได้เป็นพัน • สตูดิโอ VFX = ไม่ค้าง (หดหายแบบเดิม)

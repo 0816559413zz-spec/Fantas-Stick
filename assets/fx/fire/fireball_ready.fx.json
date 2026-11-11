@@ -1,0 +1,116 @@
+{
+ "v": 1,
+ "desc": "ลูกไฟชาร์จเต็ม: ลูกไฟใหญ่ทึบนีออนสว่างที่ปลายไม้ ค้างจนปล่อย (js/33)",
+ "tags": [
+  "fire",
+  "ingame"
+ ],
+ "pal": "fire",
+ "dur": 1,
+ "seed": 52,
+ "layers": [
+  {
+   "att": "point",
+   "pos": [
+    0,
+    0,
+    0
+   ],
+   "fade": 0,
+   "id": "halo",
+   "t": "mesh",
+   "at": 0,
+   "life": 0.5,
+   "shape": "sphere",
+   "mat": "glow",
+   "col": "#ff6a12",
+   "scale": {
+    "0": 0.62,
+    "0.5": 0.7,
+    "1": 0.62
+   },
+   "op": 0.25,
+   "loop": true
+  },
+  {
+   "att": "point",
+   "pos": [
+    0,
+    0,
+    0
+   ],
+   "fade": 0,
+   "id": "body",
+   "t": "mesh",
+   "at": 0,
+   "life": 0.4,
+   "shape": "sphere",
+   "mat": "glow",
+   "col": "#ff8a1f",
+   "scale": {
+    "0": 0.4,
+    "0.5": 0.44,
+    "1": 0.4
+   },
+   "op": 1,
+   "loop": true
+  },
+  {
+   "att": "point",
+   "pos": [
+    0,
+    0,
+    0
+   ],
+   "fade": 0,
+   "id": "core",
+   "t": "mesh",
+   "at": 0,
+   "life": 0.3,
+   "shape": "sphere",
+   "mat": "glow",
+   "col": "#ffd27a",
+   "scale": {
+    "0": 0.22,
+    "0.5": 0.25,
+    "1": 0.22
+   },
+   "op": 1,
+   "loop": true
+  },
+  {
+   "att": "point",
+   "pos": [
+    0,
+    0,
+    0
+   ],
+   "id": "flame",
+   "t": "emit",
+   "at": 0,
+   "life": 1,
+   "rate": 70,
+   "from": "sphere",
+   "fr": 0.3,
+   "dir": "up",
+   "speed": [
+    0.4,
+    1.2
+   ],
+   "plife": [
+    0.2,
+    0.34
+   ],
+   "look": "fire",
+   "size": [
+    6,
+    10
+   ],
+   "col": "#ffd27a",
+   "c2": "#ff4a12",
+   "gravity": -2,
+   "drag": 1.2,
+   "loop": true
+  }
+ ]
+}

@@ -34,8 +34,8 @@
     0,
     "-z0"
    ],
-   "col": "#ffe27a",
-   "col2": "#ff8a00",
+   "col": "$main",
+   "col2": "$edge",
    "tlife": 0.2,
    "k": 0.95
   },

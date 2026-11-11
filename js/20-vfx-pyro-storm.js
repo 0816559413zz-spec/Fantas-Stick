@@ -17,6 +17,10 @@ function makeDfCircle(st){
   g.userData={ring,disc,inner,runes,mats:[rm,disc.material,inner.material,bm]};g.visible=false;scene.add(g);
   return g;
 }
+function stormCircleCyan(g){
+  const colors=['#19d9ff','#008bbf','#a6f6ff','#58e7ff'];
+  g.userData.mats.forEach((m,i)=>m.color.set(colors[i]));
+}
 // รอยแตกไฟบนพื้น (เส้นหักสั้นๆ 8 เส้น) จางหายใน 0.5 วิ แล้วลบทิ้ง
 const DFV=[];
 function dfCracks(x,y,h,r,col,life){
@@ -33,7 +37,7 @@ function updateDfCracks(dt){for(let i=DFV.length-1;i>=0;i--){const d=DFV[i];d.ag
 const _domeAim=new THREE.Vector3();
 function domeChargeOrb(o){
   if(o.sdBall)return o.sdBall;
-  const g=new THREE.Group(),glow=new THREE.Sprite(glowMat('#ffd23a',1.1)),core=new THREE.Sprite(glowMat('#fff7d0',1.8));
+  const g=new THREE.Group(),glow=new THREE.Sprite(glowMat('#23d9ff',1.1)),core=new THREE.Sprite(glowMat('#c2f8ff',1.8));
   glow.material.userData.keep=core.material.userData.keep=true;
   glow.scale.setScalar(1.3);core.scale.setScalar(0.5);
   g.add(glow,core);scene.add(g);(o.g.userData.extra||(o.g.userData.extra=[])).push(g);
@@ -302,15 +306,20 @@ function dragonfallFX(o,p,pz,now,dt){
   if(o.sdBall&&(!D||D[4]!==1||D[0]===3))o.sdBall.visible=false;
   if(!D){if(o.dfC)o.dfC.visible=false;if(o.fWings)o.fWings.visible=false;o.dfPh=0;return;}
   const ph=D[0],left=ph===1?D[3]+3.45:ph===2?D[3]+0.45:D[3],ca=Math.cos(p.a||0),sa=Math.sin(p.a||0),ST=D[4]===1;
-  const normalDome=ST&&D[5]===0;
+  const godDome=ST&&!!D[5],normalDome=ST&&!godDome;
   if(normalDome&&o.sdBall)o.sdBall.visible=false;
   if(normalDome&&(ph===1||ph===4&&D[3]<=SDOME_POSE.hold+SDOME_POSE.recover)){
     if(o.dfC)o.dfC.visible=false;
     return;
   }
-  const c1=ST?'#ffffff':'#fff0b0',c2=ST?'#fff27a':'#ffb347',c3=ST?'#9fd8ff':'#ff5a1a';
+  const c1=ST?'#ffffff':'#fff0b0',c2=ST?'#24daff':'#ffb347',c3=ST?'#9fd8ff':'#ff5a1a';
   if(!o.dfC){o.dfC=makeDfCircle(ST);(o.g.userData.extra||(o.g.userData.extra=[])).push(o.dfC);}
-  const C=o.dfC,U=C.userData,R=(normalDome?SDOME.v.r:ST?150:DRAGONF.v.r)*S3;
+  const C=o.dfC,U=C.userData,R=(normalDome?SDOME.v.r:ST?GODL.v.slamR:DRAGONF.v.r)*S3;
+  if(ST&&U.cyan!==godDome){
+    U.cyan=godDome;
+    if(godDome)stormCircleCyan(C);
+    else U.mats.forEach((m,i)=>m.color.set(['#ffcc00','#ffd23a','#fff6c0','#ffe680'][i]));
+  }
   if(!C.visible){C.visible=true;C.position.set(tx(D[1]),0.07+GY(D[1],D[2]),tz(D[2]));}
   C.position.x+=(tx(D[1])-C.position.x)*Math.min(1,dt*18);C.position.z+=(tz(D[2])-C.position.z)*Math.min(1,dt*18);
   C.scale.set(R,1,R);
@@ -338,22 +347,22 @@ function dragonfallFX(o,p,pz,now,dt){
     for(let i=0;i<2;i++)PARTS.push({x:p.x-ca*rnd(10,30)+rnd(-8,8),y:p.y-sa*rnd(10,30)+rnd(-8,8),h:pz+rnd(0.6,1.6),vx:0,vy:0,vh:rnd(0,0.6),life:0.5,max:0.5,col:i?c3:c2,size:rnd(3,4.5),g:-0.5,grow:0.5});
     if(!ST&&Math.random()<0.4)PARTS.push({x:p.x+rnd(-10,10),y:p.y+rnd(-10,10),h:pz,vx:0,vy:0,vh:-1,life:0.7,max:0.7,col:'#3a2a24',size:6,g:0,smoke:true,grow:1});
     if(ST){// สายฟ้าหนาพัน/พาดผ่านร่างตอนลอย
-      for(let j=0;j<2;j++){const a1=rnd(0,6.283),q=shellPt(p.x,p.y,pz+rnd(0,0.5),18,a1,0),q2=shellPt(p.x,p.y,pz+rnd(1.6,2.4),18,a1+rnd(2,4),0);tbolt(q[0],q[1],q[2],q2[0],q2[1],q2[2],0.07,0,0.12,Math.random()<0.4?1:0);}
+      for(let j=0;j<2;j++){const a1=rnd(0,6.283),q=shellPt(p.x,p.y,pz+rnd(0,0.5),18,a1,0),q2=shellPt(p.x,p.y,pz+rnd(1.6,2.4),18,a1+rnd(2,4),0);tboltB(q[0],q[1],q[2],q2[0],q2[1],q2[2],0.07,0,0.12,Math.random()<0.4?1:0);}
       // ลูกสายฟ้าที่ปลายไม้ (โตขึ้นตามเวลาบิน)
       domeChargeOrb(o);
       o.tip.getWorldPosition(_pw);o.sdBall.visible=true;o.sdBall.position.set(_pw.x+rnd(-0.08,0.08),_pw.y+0.55+rnd(-0.08,0.08),_pw.z+rnd(-0.08,0.08));const k=ph===1?0.5:0.7+0.5*Math.min(1,(3-D[3])/1.5);o.sdBall.scale.setScalar(k*(0.9+0.15*Math.sin(now/40)));
-      {const q=simOf(o.sdBall.position),R=14*k;for(let j=0;j<3;j++){const a1=rnd(0,6.283),e1=rnd(-1,1),b1=shellPt(q.x,q.y,q.h,R,a1,e1),b2=shellPt(q.x,q.y,q.h,R,a1+rnd(1.2,2.8),-e1);tbolt(b1[0],b1[1],b1[2],b2[0],b2[1],b2[2],0.05,0,0.08,j===0?1:0);}
-        if(Math.random()<0.5){const an=rnd(0,6.283);tbolt(q.x,q.y,q.h,q.x+Math.cos(an)*rnd(25,50),q.y+Math.sin(an)*rnd(25,50),q.h+rnd(-0.8,0.8),0.06,0,0.09);}}
+      {const q=simOf(o.sdBall.position),R=14*k;for(let j=0;j<3;j++){const a1=rnd(0,6.283),e1=rnd(-1,1),b1=shellPt(q.x,q.y,q.h,R,a1,e1),b2=shellPt(q.x,q.y,q.h,R,a1+rnd(1.2,2.8),-e1);tboltB(b1[0],b1[1],b1[2],b2[0],b2[1],b2[2],0.05,0,0.08,j===0?1:0);}
+        if(Math.random()<0.5){const an=rnd(0,6.283);tboltB(q.x,q.y,q.h,q.x+Math.cos(an)*rnd(25,50),q.y+Math.sin(an)*rnd(25,50),q.h+rnd(-0.8,0.8),0.06,0,0.09);}}
     }
-    LREQ.push({x:tx(p.x),y:pz+0.5,z:tz(p.y),col:ST?'#ffe27a':'#ff7a2a',int:2.5,dist:10});
+    LREQ.push({x:tx(p.x),y:pz+0.5,z:tz(p.y),col:ST?'#38dfff':'#ff7a2a',int:2.5,dist:10});
   }else{
     // ห่อตัวดิ่งลง: พับปีกเข้าหาตัว + หมุนตัวหนึ่งรอบ (เฉพาะสายไฟ)
     if(!ST){const k=1-Math.max(0,D[3])/0.45;o.b.rotation.y=k*Math.PI*2;if(o.fWings){o.fWings.visible=true;poseFireWings(o.fWings,1,0,Math.min(1,k*3));}
       for(const sd of [-1,1])for(let i=0;i<4;i++){const u=Math.random();_ev.set(sd*lerp(0.2,0.55,u),lerp(1.6,0.9,u),-0.45);o.b.localToWorld(_ev);const q=simOf(_ev);flame(q.x,q.y,q.h-0.2,{vh:2,life:0.15,size:7,g:-1});}}
     o.b.rotation.x=1.05;o.legs[0].rotation.x=-1.4;o.legs[1].rotation.x=-1.2;o.armL.rotation.x=-2.2;o.armR.rotation.x=-2.2;o.armL.rotation.z=0.3;o.armR.rotation.z=-0.3;
-    for(let i=0;i<9;i++)PARTS.push({x:p.x+rnd(-8,8),y:p.y+rnd(-8,8),h:pz+rnd(0.3,1.6),vx:rnd(-20,20),vy:rnd(-20,20),vh:rnd(0,1),life:rnd(0.25,0.4),max:0.4,col:i<3?'#fff0b0':i<6?'#ffb347':'#ff5a1a',size:rnd(3,5),g:-1,grow:0.6});
-    PARTS.push({x:p.x,y:p.y,h:pz+1,vx:0,vy:0,vh:0.3,life:0.4,max:0.4,col:'#ff6a1a',size:5,g:0,smoke:true,grow:0.8});
-    LREQ.push({x:tx(p.x),y:pz+1,z:tz(p.y),col:'#ff8a3a',int:3,dist:12});
+    for(let i=0;i<9;i++)PARTS.push({x:p.x+rnd(-8,8),y:p.y+rnd(-8,8),h:pz+rnd(0.3,1.6),vx:rnd(-20,20),vy:rnd(-20,20),vh:rnd(0,1),life:rnd(0.25,0.4),max:0.4,col:i<3?c1:i<6?c2:c3,size:rnd(3,5),g:-1,grow:0.6});
+    PARTS.push({x:p.x,y:p.y,h:pz+1,vx:0,vy:0,vh:0.3,life:0.4,max:0.4,col:ST?'#27c8ff':'#ff6a1a',size:5,g:0,smoke:true,grow:0.8});
+    LREQ.push({x:tx(p.x),y:pz+1,z:tz(p.y),col:ST?'#38dfff':'#ff8a3a',int:3,dist:12});
   }
 }
 // ---------- สายฟ้า (ภาพ) ----------
@@ -372,9 +381,9 @@ const TBC={glow:new THREE.Color('#ffb800').multiplyScalar(1.3),body:new THREE.Co
 const _tcc=new THREE.Color();
 const domeCyan={glow:new THREE.Color('#00caff').multiplyScalar(1.4),body:new THREE.Color('#03d6ff').multiplyScalar(1.16),core:new THREE.Color('#59efff').multiplyScalar(1.24)};
 const domeGold={glow:new THREE.Color('#ffbe00').multiplyScalar(1.5),body:new THREE.Color('#ffde00').multiplyScalar(1.18),core:new THREE.Color('#fff07b').multiplyScalar(1.42)};
-function tbGet(){if(TBA.length>=TBMAX){const old=TBA.shift();TBF.push(old);}let o=TBF.pop();if(!o){o={pts:Array.from({length:TBN},()=>new THREE.Vector3()),A:new THREE.Vector3(),B:new THREE.Vector3(),path:null};}o.domePalette=null;TBA.push(o);return o;}
+function tbGet(){if(TBA.length>=TBMAX){const old=TBA.shift();TBF.push(old);}let o=TBF.pop();if(!o){o={pts:Array.from({length:TBN},()=>new THREE.Vector3()),A:new THREE.Vector3(),B:new THREE.Vector3(),path:null};}o.domePalette=null;o.fir=0;TBA.push(o);return o;}
 // จุด sim (x,y,h) — col ไม่ใช้ (เหลืองเสมอ) ยกเว้น '#9fd8ff' = สีรองฟ้า • w = ความหนา (หน่วยโลก) • br = จำนวนกิ่ง
-// TBLUE = ร่างเทพ (อัลติ): เส้นหลักเป็นฟ้า เส้นคู่เป็นเหลืองเล็ก ๆ (ผู้ใช้ 2026-11-10)
+// TBLUE = ร่างเทพ (อัลติ): ทั้งเส้นหลักและเส้นคู่ใช้สีไซแอน
 let TBLUE=0,TBFIRE=0;   // TBFIRE = เส้นไฟนีออน (Blazeform) ไม่มีเส้นคู่
 const tboltB=(...a)=>{const was=TBLUE;TBLUE=1;try{return tbolt(...a);}finally{TBLUE=was;}};   // สายฟ้าฟ้า (ใช้ใน later ของร่างเทพ)
 function tbolt(x1,y1,h1,x2,y2,h2,life,col,w,br){
@@ -519,6 +528,10 @@ function bWorld(o,x,y,z){_ev.set(x,y,z);o.b.localToWorld(_ev);return simOf(_ev);
 // แขนปาดกรงเล็บ + รอยข่วนตามปลายใบมีด 3 เล่ม (ผู้ใช้ 2026-10-20: "รอยต้องตามกรงเล็บตอนปาด")
 // รอบ 2026-10-21 (ผู้ใช้ส่งรูปตัวอย่าง): รอยข่วน = เส้นเรืองบางเรียวหัวท้าย ขนานกัน 3 เส้น (แกนขาว + ฟุ้งเหลือง) + ประกายเม็ดเล็กโปรยตามรอย
 // n 0 = แขนขวาปาดเฉียงลง • 1 = แขนซ้าย • 2 = สองแขนฟาดลงจากบน • 3 = สองแขนกวาดแนวนอนขวา→ซ้าย (ท่าเสริม; รอยกวาดใหญ่ = storm/claw_sweep ใน bind.json)
+function stormClawStop(o){
+  for(const T of o.clSw?.tr||[]){if(T.h)trailStop(T.h);trailStop(T.g);}
+  o.clSw=null;
+}
 function stormClawSwipe(o,dt){const S=o.clSw,n=S.n,emp=n===3;S.t+=dt;const k=Math.min(1,S.t/S.dur),e=1-Math.pow(1-k,2.2),R=o.armR,L=o.armL;
   if(n===0){R.rotation.x=lerp(-2.8,-0.45,e);R.rotation.z=lerp(-1.0,0.95,e);}
   else if(n===1){L.rotation.x=lerp(-2.8,-0.45,e);L.rotation.z=lerp(1.0,-0.95,e);}
@@ -531,21 +544,41 @@ function stormClawSwipe(o,dt){const S=o.clSw,n=S.n,emp=n===3;S.t+=dt;const k=Mat
     o.b.rotation.y=lerp(P[0],P[1],e)*w;o.b.rotation.x+=(n===2?lerp(-0.22,P[2],e):P[2]*bell)*w;o.b.rotation.z=P[3]*bell*w;o.bz=1;o.b.position.y-=P[4]*bell*w;
     if((o.vsp||0)<0.6){o.legs[1].rotation.x=-0.5*P[5]*bell*w;o.legs[0].rotation.x=0.35*P[5]*bell*w;}}
   const act=n===0?[o.claws[0]]:n===1?[o.claws[1]]:o.claws,B=STCLAW.blades;
-  if(!S.tr){S.tr=[];for(const c of act)for(let b=0;b<3;b++)S.tr.push({c,b,
-    g:trailNew({col:'#3fd0ff',col2:'#1478ff',w:emp?0.2:0.15,life:emp?0.36:0.32,k:emp?1.1:0.9}),
-    h:trailNew({col:'#ffffff',col2:'#bdf2ff',w:emp?0.065:0.05,life:emp?0.32:0.28,k:emp?2.2:1.9})});}
-  if(k<1){o.g.updateMatrixWorld(true);
-    // จุดปลายใบ (ยื่นเลยปลายไปตามแนวใบ + กางห่างกันขึ้นให้เห็นเป็นเส้นขนาน)
-    for(const T of S.tr){const q0=B[T.b][1],q1=B[T.b][2],ex=emp?0.7:0.45,sp=1.7;
-      _tw.set((q1[0]+(q1[0]-q0[0])*ex)*sp,q1[1]+(q1[1]-q0[1])*ex,q1[2]+(q1[2]-q0[2])*ex);T.c.localToWorld(_tw);
-      trailPoint(T.g,_tw.x,_tw.y,_tw.z);trailPoint(T.h,_tw.x,_tw.y,_tw.z);}
-    // ประกายเม็ดเล็กโปรยตามรอยที่เพิ่งปาดผ่าน (ลอยออกช้า ๆ)
-    for(const T of S.tr){const P=T.h.pts;if(P.length<2)continue;for(let j=0;j<(emp?2:1);j++){const p=P[Math.max(0,P.length-1-((Math.random()*6)|0))],q=simOf(_tw.set(p.x,p.y,p.z));
-      PARTS.push({x:q.x+rnd(-5,5),y:q.y+rnd(-5,5),h:q.h+rnd(-0.12,0.12),vx:rnd(-35,35),vy:rnd(-35,35),vh:rnd(-0.3,1.2),life:rnd(0.25,0.5),max:0.5,col:Math.random()<0.45?'#ffffff':Math.random()<0.5?'#ffe066':'#ffb000',size:rnd(1,emp?2:1.6),g:0.6});}}
-    // สายฟ้าเส้นเล็กแลบตามรอยเป็นครั้งคราว
-    S.bt=(S.bt||0)-dt;if(S.bt<=0){S.bt=emp?0.05:0.08;const T=S.tr[(Math.random()*S.tr.length)|0],P=T.h.pts.slice(-6).map(p=>new THREE.Vector3(p.x,p.y,p.z));
-      if(P.length>=3)tboltP(P,0.035,emp?0.05:0.035,0.03).gk=0.3;}}
-  if(S.t>=S.dur+0.04){for(const T of S.tr||[]){trailStop(T.h);trailStop(T.g);}o.clSw=null;}}
+  if(!S.tr){
+    S.tr=[];
+    for(const c of act)for(const b of (emp?[0,1,2]:[1])){
+      const g=trailNew({col:emp?'#3fd0ff':'#43dfff',col2:emp?'#1478ff':'#0a91bc',w:emp?0.2:0.095,life:emp?0.36:0.15,k:emp?1.1:0.7});
+      const h=emp?trailNew({col:'#e6fcff',col2:'#bdf2ff',w:0.065,life:0.32,k:2.2}):null;
+      S.tr.push({c,b,g,h});
+    }
+  }
+  if(k<1){
+    o.g.updateMatrixWorld(true);
+    for(const T of S.tr){
+      const q0=B[T.b][1],q1=B[T.b][2],ex=emp?0.7:0.16;
+      _tw.set((q1[0]+(q1[0]-q0[0])*ex)*(emp?1.7:1),q1[1]+(q1[1]-q0[1])*ex,q1[2]+(q1[2]-q0[2])*ex);
+      T.c.localToWorld(_tw);
+      trailPoint(T.g,_tw.x,_tw.y,_tw.z);
+      if(T.h)trailPoint(T.h,_tw.x,_tw.y,_tw.z);
+    }
+    if(emp){
+      for(const T of S.tr){
+        const P=T.h.pts;
+        if(P.length<2)continue;
+        const p=P[Math.max(0,P.length-1-((Math.random()*6)|0))],q=simOf(_tw.set(p.x,p.y,p.z));
+        PARTS.push({x:q.x+rnd(-5,5),y:q.y+rnd(-5,5),h:q.h+rnd(-0.12,0.12),vx:rnd(-35,35),vy:rnd(-35,35),vh:rnd(-0.3,1.2),life:0.32,max:0.32,col:Math.random()<0.5?'#bdf8ff':'#26d9ff',size:rnd(1,2),g:0.6});
+      }
+      S.bt=(S.bt||0)-dt;
+      if(S.bt<=0){
+        S.bt=0.05;
+        const T=S.tr[(Math.random()*S.tr.length)|0],P=T.h.pts.slice(-6).map(p=>new THREE.Vector3(p.x,p.y,p.z));
+        if(P.length>=3)tboltP(P,0.035,0.05,0.03).gk=0.3;
+      }
+    }
+  }
+  if(S.t>=S.dur+0.04)stormClawStop(o);
+}
+
 function stormFX(o,p,pz,now,dt){
   if((p.fm|0)&16){o.b.rotation.z+=Math.sin(now/22)*0.2;o.b.rotation.x+=Math.sin(now/31)*0.08;}
   const M=p.sm;
@@ -578,10 +611,10 @@ function stormFX(o,p,pz,now,dt){
   }else if(o.stG)o.stG.visible=false;
   // Dash: สายฟ้าหนาหุ้มตัว + เงาติดตา + ร่องสายฟ้าแตกกิ่งที่จางเร็ว
   if(p.ds){const pv=o.dPrev||[p.x,p.y];
-    for(let j=0;j<2;j++){const a1=rnd(0,6.283),q=shellPt(p.x,p.y,pz+0.3,20,a1,rnd(-0.3,0.3)),q2=shellPt(p.x,p.y,pz+2,20,a1+rnd(2,4),rnd(-0.3,0.3));tbolt(q[0],q[1],q[2],q2[0],q2[1],q2[2],0.06,0,0.13);}
-    if(Math.hypot(p.x-pv[0],p.y-pv[1])>4)tbolt(pv[0],pv[1],pz+1+rnd(-0.4,0.4),p.x,p.y,pz+1+rnd(-0.4,0.4),0.22,0,0.16,2);
-    FX.flashSprite(p.x,p.y,pz+1.1,'#ffd23a',1.9,1.3,0.16,1.4);
-    LREQ.push({x:tx(p.x),y:pz+1,z:tz(p.y),col:'#ffd23a',int:3,dist:9});}
+    for(let j=0;j<2;j++){const a1=rnd(0,6.283),q=shellPt(p.x,p.y,pz+0.3,20,a1,rnd(-0.3,0.3)),q2=shellPt(p.x,p.y,pz+2,20,a1+rnd(2,4),rnd(-0.3,0.3));(god?tboltB:tbolt)(q[0],q[1],q[2],q2[0],q2[1],q2[2],0.06,0,0.13);}
+    if(Math.hypot(p.x-pv[0],p.y-pv[1])>4)(god?tboltB:tbolt)(pv[0],pv[1],pz+1+rnd(-0.4,0.4),p.x,p.y,pz+1+rnd(-0.4,0.4),0.22,0,0.16,2);
+    FX.flashSprite(p.x,p.y,pz+1.1,(god?'#38dfff':'#ffd23a'),1.9,1.3,0.16,1.4);
+    LREQ.push({x:tx(p.x),y:pz+1,z:tz(p.y),col:(god?'#38dfff':'#ffd23a'),int:3,dist:9});}
   o.dPrev=[p.x,p.y];
   // ร่างเทพสายฟ้า (รอบปรับ 2026-10-19: กรงเล็บเข้มจากไฟล์ Blender + สายฟ้าวิ่งตามใบมีดตลอด • ตาแบบเดกุ: ตาสว่าง + สายฟ้าลากเป็นหางออกด้านข้าง/หลัง • ลดแสงเรือง)
   if(god){TBLUE=1;try{
@@ -639,11 +672,11 @@ function stormFX(o,p,pz,now,dt){
     const lp=o.gLast||[p.x,p.y];if(Math.hypot(p.x-lp[0],p.y-lp[1])>18){tbolt(lp[0],lp[1],pz+0.12,p.x,p.y,pz+0.12,0.35,0,0.1,1).gk=0.6;o.gLast=[p.x,p.y];}else if(!o.gLast)o.gLast=[p.x,p.y];
     for(let i=0;i<2;i++)PARTS.push({x:p.x+rnd(-14,14),y:p.y+rnd(-14,14),h:pz+rnd(0,2.4),vx:rnd(-15,15),vy:rnd(-15,15),vh:rnd(1,3),life:rnd(0.3,0.5),max:0.5,col:i?'#7fe6ff':'#ffffff',size:rnd(1.6,2.6),g:-1.5});
     LREQ.push({x:tx(p.x),y:pz+1.5,z:tz(p.y),col:'#4cc8ff',int:2.2,dist:10});
-  }finally{TBLUE=0;}}else{if(o.godG)o.godG.visible=false;if(o.godEyes)o.godEyes.forEach(e=>{e.visible=false;e.userData.core.visible=false;});if(o.eyeH)o.eyeH=[[],[]];if(o.claws){o.claws.forEach(c=>c.visible=false);if(o.wandG&&!o.wandG.visible&&!p.fr)o.wandG.visible=true;o.tip.visible=true;}o.tailH=null;o.gLast=null;}
+  }finally{TBLUE=0;}}else{if(o.clSw)stormClawStop(o);if(o.godG)o.godG.visible=false;if(o.godEyes)o.godEyes.forEach(e=>{e.visible=false;e.userData.core.visible=false;});if(o.eyeH)o.eyeH=[[],[]];if(o.claws){o.claws.forEach(c=>c.visible=false);if(o.wandG&&!o.wandG.visible&&!p.fr)o.wandG.visible=true;o.tip.visible=true;}o.tailH=null;o.gLast=null;}
   // เส้นสายฟ้า: ชูไม้ขึ้น 0.3 วิ แล้วกดลง 0.2 วิ
   if(f&8){if(!o.slOn)o.slOn=now;const el=(now-o.slOn)/1000;o.armR.rotation.x=el<0.3?lerp(-0.4,-3.05,el/0.3):lerp(-3.05,-0.8,Math.min(1,(el-0.3)/0.2));o.armR.rotation.z=-0.1;
-    o.tip.getWorldPosition(_pw);const q=simOf(_pw);for(let i=0;i<2;i++)PARTS.push({x:q.x+rnd(-5,5),y:q.y+rnd(-5,5),h:q.h,vx:rnd(-30,30),vy:rnd(-30,30),vh:rnd(-1,2),life:0.25,max:0.25,col:i?'#ffd000':'#ffffff',size:2.6,g:0});
-    if(el<0.3&&Math.random()<0.5)tbolt(q.x+rnd(-6,6),q.y+rnd(-6,6),q.h+4,q.x,q.y,q.h,0.06,0,0.12);}
+    o.tip.getWorldPosition(_pw);const q=simOf(_pw);for(let i=0;i<2;i++)PARTS.push({x:q.x+rnd(-5,5),y:q.y+rnd(-5,5),h:q.h,vx:rnd(-30,30),vy:rnd(-30,30),vh:rnd(-1,2),life:0.25,max:0.25,col:i?(god?'#23d9ff':'#ffd000'):'#ffffff',size:2.6,g:0});
+    if(el<0.3&&Math.random()<0.5)(god?tboltB:tbolt)(q.x+rnd(-6,6),q.y+rnd(-6,6),q.h+4,q.x,q.y,q.h,0.06,0,0.12);}
   else o.slOn=0;
   // Railgun: ยืนนิ่ง • เส้นนำทางเหลืองแกนขาวลอยกลางอากาศ — หัวนำวิ่งออกไปก่อน (0.25 วิ) แล้วเส้นค้างรอยิง • วงเวทหน้าไม้
   const R=M[6];
@@ -662,15 +695,23 @@ function stormFX(o,p,pz,now,dt){
   const n=M[5]|0;
   if(n>0||o.sOrbs){
     if(!o.sOrbs){o.sOrbs=[0,1].map(()=>{const g=new THREE.Group(),a1=new THREE.Sprite(glowMat('#ffc400',0.8)),a2=new THREE.Sprite(glowMat('#fff7d0',1.6));a1.material.userData.keep=true;a2.material.userData.keep=true;a1.scale.setScalar(1.05);a2.scale.setScalar(0.42);g.add(a1,a2);o.g.add(g);return g;});}
-    o.sOrbs.forEach((g,i)=>{g.visible=i<n;if(!g.visible)return;const sd=i?1:-1;g.position.set(sd*0.65+rnd(-0.04,0.04),1.95+Math.sin(now/260+i*2)*0.12+rnd(-0.04,0.04),-0.55+rnd(-0.04,0.04));
+    o.sOrbs.forEach((g,i)=>{g.visible=i<n;if(!g.visible)return;const sd=i?1:-1;
+      if(g.userData.cyan!==god){
+        g.userData.cyan=god;
+        g.children[0].material=glowMat(god?'#24daff':'#ffc400',0.8);
+        g.children[1].material=glowMat(god?'#bdf8ff':'#fff7d0',1.6);
+        g.children.forEach(s=>s.material.userData.keep=true);
+      }
+      g.position.set(sd*0.65+rnd(-0.04,0.04),1.95+Math.sin(now/260+i*2)*0.12+rnd(-0.04,0.04),-0.55+rnd(-0.04,0.04));
       g.getWorldPosition(_pw);const c=simOf(_pw);
-      for(let j=0;j<3;j++){const a1=rnd(0,6.283),e1=rnd(-1,1),q=shellPt(c.x,c.y,c.h,10,a1,e1),q2=shellPt(c.x,c.y,c.h,10,a1+rnd(1.5,3),-e1);tbolt(q[0],q[1],q[2],q2[0],q2[1],q2[2],0.05,0,0.065);}});
+      for(let j=0;j<3;j++){const a1=rnd(0,6.283),e1=rnd(-1,1),q=shellPt(c.x,c.y,c.h,10,a1,e1),q2=shellPt(c.x,c.y,c.h,10,a1+rnd(1.5,3),-e1);(god?tboltB:tbolt)(q[0],q[1],q[2],q2[0],q2[1],q2[2],0.05,0,0.065);}});
   }
 }
 // UI Storm: ไอคอน Lightning stack ขนาดใหญ่ขึ้นอยู่ใต้เป้าเล็ง; Dash gauge แยกไปทางขวา
 const STHUD={prev:0,fl:[0,0,0,0,0],flow:[],t:performance.now(),dprev:3,dfl:[0,0,0]};
 function drawStormHud(x,y,M){
   const now=performance.now(),dt=Math.min(0.1,(now-STHUD.t)/1000);STHUD.t=now;
+  const god=!!(M[3]&4),color=(gold,cyan)=>god?cyan:gold;
   const n=M[0]|0;if(n>STHUD.prev)for(let i=STHUD.prev;i<n&&i<5;i++){STHUD.fl[i]=0.35;STHUD.flow.push({i,t:0});}STHUD.prev=n;
   const bolt=(cx0,cy0,s)=>{cx.beginPath();cx.moveTo(cx0+4*s,cy0-12*s);cx.lineTo(cx0+0.5*s,cy0-4*s);cx.lineTo(cx0+5*s,cy0-5*s);cx.lineTo(cx0+0.2*s,cy0+1.5*s);cx.lineTo(cx0+2.5*s,cy0+0.5*s);cx.lineTo(cx0-4*s,cy0+12*s);cx.lineTo(cx0-2*s,cy0+4*s);cx.lineTo(cx0-6*s,cy0+5*s);cx.lineTo(cx0-1.2*s,cy0-2.5*s);cx.lineTo(cx0-4.5*s,cy0-1.8*s);cx.lineTo(cx0+1*s,cy0-10*s);cx.closePath();};
   const boltGlint=(cx0,cy0,s)=>{cx.beginPath();cx.moveTo(cx0+1.4*s,cy0-9*s);cx.lineTo(cx0-1.2*s,cy0-3*s);cx.lineTo(cx0+1.3*s,cy0-3.5*s);cx.lineTo(cx0-1.8*s,cy0+3*s);};
@@ -678,23 +719,23 @@ function drawStormHud(x,y,M){
   cx.save();
   // ประกายวิ่งตามแนวแถวไปเติมไอคอนที่เพิ่งได้
   for(let j=STHUD.flow.length-1;j>=0;j--){const f=STHUD.flow[j];f.t+=dt;const k=clamp(f.t/0.22,0,1),sx=x+(f.i===0?-2.85:(f.i-3))*gap,ex=x+(f.i-2)*gap,px=lerp(sx,ex,k),py=y0-Math.sin(k*Math.PI)*3;
-    cx.shadowColor='#fff27a';cx.shadowBlur=8;cx.strokeStyle='rgba(255,213,46,0.95)';cx.lineWidth=1.5;cx.lineCap='round';cx.beginPath();cx.moveTo(sx,y0);cx.lineTo((sx+px)*0.5,y0-3);cx.lineTo(px,py);cx.stroke();
+    cx.shadowColor=color('#fff27a','#58e6ff');cx.shadowBlur=8;cx.strokeStyle=color('rgba(255,213,46,0.95)','rgba(45,218,255,0.95)');cx.lineWidth=1.5;cx.lineCap='round';cx.beginPath();cx.moveTo(sx,y0);cx.lineTo((sx+px)*0.5,y0-3);cx.lineTo(px,py);cx.stroke();
     cx.fillStyle='#ffffff';cx.beginPath();cx.moveTo(px,py-2.8);cx.lineTo(px+2.2,py);cx.lineTo(px,py+2.8);cx.lineTo(px-2.2,py);cx.closePath();cx.fill();cx.shadowBlur=0;
-    if(k>0.9){cx.strokeStyle='rgba(255,244,170,0.9)';cx.lineWidth=1;for(let a=0;a<4;a++){const an=a*Math.PI/2;cx.beginPath();cx.moveTo(ex+Math.cos(an)*3,y0+Math.sin(an)*3);cx.lineTo(ex+Math.cos(an)*6,y0+Math.sin(an)*6);cx.stroke();}}
+    if(k>0.9){cx.strokeStyle=color('rgba(255,244,170,0.9)','rgba(168,244,255,0.9)');cx.lineWidth=1;for(let a=0;a<4;a++){const an=a*Math.PI/2;cx.beginPath();cx.moveTo(ex+Math.cos(an)*3,y0+Math.sin(an)*3);cx.lineTo(ex+Math.cos(an)*6,y0+Math.sin(an)*6);cx.stroke();}}
     if(k>=1)STHUD.flow.splice(j,1);}
   for(let i=0;i<5;i++){
     const on=i<n,fl=STHUD.fl[i]=Math.max(0,STHUD.fl[i]-dt),s=1+fl*0.65;
     let bx=x+(i-2)*gap,by=y0;
     if(on){bx+=rnd(-0.65,0.65);by+=rnd(-0.65,0.65);}
     bolt(bx,by,1.18*s);
-    if(on){cx.shadowColor='#ffbd16';cx.shadowBlur=11+fl*30;const grad=cx.createLinearGradient(bx,by-14*s,bx,by+14*s);grad.addColorStop(0,'#fff5cf');grad.addColorStop(0.25,'#ffd52e');grad.addColorStop(0.68,'#ffad08');grad.addColorStop(1,'#ffe36a');cx.fillStyle=grad;cx.fill();cx.lineWidth=1.25;cx.strokeStyle='#c46d08';cx.stroke();cx.shadowBlur=0;
+    if(on){cx.shadowColor=color('#ffbd16','#22caff');cx.shadowBlur=11+fl*30;const grad=cx.createLinearGradient(bx,by-14*s,bx,by+14*s);grad.addColorStop(0,color('#fff5cf','#dcfbff'));grad.addColorStop(0.25,color('#ffd52e','#54e7ff'));grad.addColorStop(0.68,color('#ffad08','#10acee'));grad.addColorStop(1,color('#ffe36a','#78edff'));cx.fillStyle=grad;cx.fill();cx.lineWidth=1.25;cx.strokeStyle=color('#c46d08','#087ca6');cx.stroke();cx.shadowBlur=0;
       // เส้นไฮไลต์ขาวคม ๆ ตามแนวสายฟ้า อิงภาพอ้างอิง
-      boltGlint(bx,by,1.18*s);cx.lineCap='round';cx.lineJoin='round';cx.lineWidth=1.1*s;cx.strokeStyle='rgba(255,249,225,0.95)';cx.stroke();
-      if(Math.random()<0.42){const a=rnd(0,6.283);cx.strokeStyle='rgba(255,250,200,0.98)';cx.lineWidth=1.2;cx.beginPath();cx.moveTo(bx,by);cx.lineTo(bx+Math.cos(a)*10+rnd(-1,1),by+Math.sin(a)*10);cx.lineTo(bx+Math.cos(a)*16,by+Math.sin(a)*16+rnd(-1,1));cx.stroke();}}
+      boltGlint(bx,by,1.18*s);cx.lineCap='round';cx.lineJoin='round';cx.lineWidth=1.1*s;cx.strokeStyle=color('rgba(255,249,225,0.95)','rgba(224,250,255,0.95)');cx.stroke();
+      if(Math.random()<0.42){const a=rnd(0,6.283);cx.strokeStyle=color('rgba(255,250,200,0.98)','rgba(151,243,255,0.98)');cx.lineWidth=1.2;cx.beginPath();cx.moveTo(bx,by);cx.lineTo(bx+Math.cos(a)*10+rnd(-1,1),by+Math.sin(a)*10);cx.lineTo(bx+Math.cos(a)*16,by+Math.sin(a)*16+rnd(-1,1));cx.stroke();}}
     else{cx.fillStyle='rgba(68,65,58,0.85)';cx.fill();cx.lineWidth=1;cx.strokeStyle='rgba(22,20,18,0.9)';cx.stroke();}
   }
   // ยิงครั้งถัดไป = สายฟ้าสามเหลี่ยม
-  if(M[1]){const tx0=x-3*gap-8,ty0=y0;cx.beginPath();cx.moveTo(tx0-5,ty0-6);cx.lineTo(tx0+6,ty0);cx.lineTo(tx0-5,ty0+6);cx.closePath();cx.shadowColor='#fff27a';cx.shadowBlur=8;cx.fillStyle='#fff27a';cx.fill();cx.shadowBlur=0;}
+  if(M[1]){const tx0=x-3*gap-8,ty0=y0;cx.beginPath();cx.moveTo(tx0-5,ty0-6);cx.lineTo(tx0+6,ty0);cx.lineTo(tx0-5,ty0+6);cx.closePath();cx.shadowColor=color('#fff27a','#58e6ff');cx.shadowBlur=8;cx.fillStyle=color('#fff27a','#58e6ff');cx.fill();cx.shadowBlur=0;}
   // ชาร์จ Dash แบบ Tracer: แถบโค้ง 3 ช่องแยกออกไปทางขวา ไม่ซ้อนกับแถว Lightning stack
   // ใช้ Dash แล้วหายจากบนลงล่าง (ชาร์จที่ i สูงอยู่บน) • ฟื้นจากล่างขึ้นบน
   const dc=M[2]||0,full=Math.floor(dc+1e-6);if(full>STHUD.dprev)for(let i=STHUD.dprev;i<full&&i<3;i++)STHUD.dfl[i]=0.3;STHUD.dprev=full;
@@ -703,14 +744,14 @@ function drawStormHud(x,y,M){
   cx.lineCap='round';cx.lineJoin='round';
   for(let i=0;i<3;i++){const pos=2-i,s0=a0+pos*(seg+gp),k=clamp(dc-i,0,1),fl=STHUD.dfl[i]=Math.max(0,STHUD.dfl[i]-dt);
     cx.beginPath();cx.arc(hx,hy,R,s0,s0+seg);cx.lineWidth=9;cx.strokeStyle='rgba(0,0,0,0.5)';cx.stroke();
-    cx.beginPath();cx.arc(hx,hy,R,s0,s0+seg);cx.lineWidth=5.5;cx.strokeStyle='rgba(58,40,24,0.85)';cx.stroke();
+    cx.beginPath();cx.arc(hx,hy,R,s0,s0+seg);cx.lineWidth=5.5;cx.strokeStyle=color('rgba(58,40,24,0.85)','rgba(17,50,67,0.85)');cx.stroke();
     if(k>0){const on=k>=1,st=on?s0:s0+seg*(1-k),len=seg*k;   // กำลังฟื้น = เติมจากปลายล่างขึ้น
-      if(on){cx.shadowColor='#fff27a';cx.shadowBlur=12+fl*26;}
-      const P=zig(st,len,on?3.6:1.8);cx.lineWidth=(on?4.6:3)+fl*5;cx.strokeStyle=on?(fl>0?'#ffffff':'#ffd400'):'rgba(255,212,0,0.55)';cx.stroke();
-      if(on){zig(st,len,3.2);cx.lineWidth=2.4;cx.strokeStyle='#ffe24a';cx.stroke();zig(st,len,1.6);cx.lineWidth=1.4;cx.strokeStyle='rgba(255,255,235,0.95)';cx.stroke();}
+      if(on){cx.shadowColor=color('#fff27a','#58e6ff');cx.shadowBlur=12+fl*26;}
+      const P=zig(st,len,on?3.6:1.8);cx.lineWidth=(on?4.6:3)+fl*5;cx.strokeStyle=on?(fl>0?'#ffffff':color('#ffd400','#23d9ff')):color('rgba(255,212,0,0.55)','rgba(35,217,255,0.55)');cx.stroke();
+      if(on){zig(st,len,3.2);cx.lineWidth=2.4;cx.strokeStyle=color('#ffe24a','#6eeaff');cx.stroke();zig(st,len,1.6);cx.lineWidth=1.4;cx.strokeStyle=color('rgba(255,255,235,0.95)','rgba(213,251,255,0.95)');cx.stroke();}
       cx.shadowBlur=0;
       if(on){// กิ่งสายฟ้าแตกออกจากแถบ + ประกาย
-        for(let j=0;j<2;j++)if(Math.random()<0.45){const q=P[(Math.random()*P.length)|0],o=q[2]+rnd(-0.9,0.9)+(Math.random()<0.5?0:Math.PI);cx.strokeStyle='rgba(255,236,120,0.95)';cx.lineWidth=1.4;cx.beginPath();cx.moveTo(q[0],q[1]);cx.lineTo(q[0]+Math.cos(o)*6+rnd(-2,2),q[1]+Math.sin(o)*6+rnd(-2,2));cx.lineTo(q[0]+Math.cos(o)*11+rnd(-2,2),q[1]+Math.sin(o)*11+rnd(-2,2));cx.stroke();}
+        for(let j=0;j<2;j++)if(Math.random()<0.45){const q=P[(Math.random()*P.length)|0],o=q[2]+rnd(-0.9,0.9)+(Math.random()<0.5?0:Math.PI);cx.strokeStyle=color('rgba(255,236,120,0.95)','rgba(109,233,255,0.95)');cx.lineWidth=1.4;cx.beginPath();cx.moveTo(q[0],q[1]);cx.lineTo(q[0]+Math.cos(o)*6+rnd(-2,2),q[1]+Math.sin(o)*6+rnd(-2,2));cx.lineTo(q[0]+Math.cos(o)*11+rnd(-2,2),q[1]+Math.sin(o)*11+rnd(-2,2));cx.stroke();}
         if(Math.random()<0.3){const q=P[(Math.random()*P.length)|0];cx.fillStyle='#ffffff';cx.beginPath();cx.arc(q[0]+rnd(-3,3),q[1]+rnd(-3,3),1.3,0,6.283);cx.fill();}}}}
   cx.restore();
 }

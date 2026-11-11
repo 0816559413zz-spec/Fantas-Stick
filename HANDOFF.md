@@ -1,5 +1,7 @@
 # HANDOFF — Fantas Stick (was "Wizard Duel") (repo: Fantas-Stick)
 
+**ไฟ BA ชาร์จ 2026-11-11:** เต็มตรงที่ยิงได้แล้ว (`cg` ใน makeSnap ใช้ `PYV.chargeT`) • pfire r 22 • ลูกไฟปลายไม้ระหว่างชาร์จ/เต็ม (js/33, `fireball_hold`/`fireball_ready`) • Kindle ระเบิดเล็กลง • fx-check ✗ 1 เดิมที่ `storm/claw_sweep` (สี `$edge`) ไม่ใช่งานนี้
+
 **รอย/ซากบนพื้นหายเอง 2026-11-11:** `BF_LIFE=8, BF_FADE=2` js/44 (`bfAge` ทุก 0.1 วิ: รอย `BFM` จาง, ซากใน pool ยุบลงพื้นแล้วขนาด 0, ชิ้นใหญ่ bin ถอดออก, ควันกรุ่นไม่เกิน 8 วิ) • ทดสอบ: 28 ก้อน/3 รอย → 0 หลัง 9 วิ
 
 **โล่ไฟใหม่ 2026-11-11 (รอรีวิว #15):** ไม่มีลูกไฟวิญญาณแล้ว (`PYV.orbMax:0`, โค้ด orb ยังอยู่) • ยกโล่ + คลิก = `pyroFlick` วงไฟเกลียวรัศมี 180 ดาเมจ 10 ช้า 20% ซ้อนได้ 2 ครั้ง นาน 2 วิ 3 ชาร์จคืน 6 วิ ลดโล่ 0.35 วิ (PBASIC pyro `shieldSwing:true`) • fx `fire/flick` จาก `tools/fire-flick-gen.py` • ยังไม่มีตัวนับชาร์จบน HUD และบอทยังไม่ใช้

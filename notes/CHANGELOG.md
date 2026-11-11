@@ -1,5 +1,6 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
 
+- 2026-11-11 ไฟ: แก้ชาร์จเต็มไม่ตรง (snapshot `cg` เต็มที่ 1.5 วิ แต่ยิงได้ 1.9 วิ → ใช้ `PYV.chargeT`) • ลูกไฟชาร์จ hitbox 12→22 สีส้มมีแกน (เดิมขาว) • ระหว่างชาร์จมีลูกไฟเล็กที่ปลายไม้ (`fire/fireball_hold`) เต็ม = ลูกไฟใหญ่นีออน (`fire/fireball_ready`) + คลื่นวงส้มเล็กที่พื้น • Kindle ระเบิดเล็กลง (explosionFX 0.6, fire_impact 0.8)
 - 2026-11-11 สนามรบ: รอยบนพื้น เศษหิน ซากชิ้นใหญ่ ควันกรุ่น หายเองหลัง 8 วิ (ค้าง 6 วิ แล้วจาง/ยุบลงพื้น 2 วิ, `BF_LIFE`/`bfAge` js/44) เดิมค้างทั้งแมตช์ (ผู้ใช้: เกะกะลูกตา)
 - 2026-11-11 โล่ไฟ rework: เอาลูกไฟวิญญาณออก (orbMax 0) • ยกโล่ + คลิก = สะบัดวงไฟเกลียว 3 ชาร์จ คืน 6 วิ ดาเมจ 10 ช้า 20% ซ้อน 2 ครั้ง รัศมี 180 (`pyroFlick`, fx `fire/flick`) รอผู้ใช้รีวิว
 - 2026-11-11 — **Fire shots leave from the wand (user: Kindle not accurate to the wand)** — `shoot(...,{hand:1})` (js/12) spawns the projectile at the right hand (forward 20, right 9, h +1.45) and steers it from there to the crosshair point (yaw and pitch). Used for the spark, the charged ball and the Kindle big ball.

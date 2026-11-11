@@ -22,9 +22,10 @@ function sbMake(o){
   const arrow=new THREE.Group();g.add(arrow);const hm=sbMat('#fff06a',1.1),hs=new THREE.Shape();hs.moveTo(0,-.72);hs.lineTo(.3,.08);hs.lineTo(.09,.0);hs.lineTo(.14,.2);hs.lineTo(0,.06);hs.lineTo(-.14,.2);hs.lineTo(-.09,.0);hs.lineTo(-.3,.08);hs.closePath();const hg=new THREE.ShapeGeometry(hs),h1=new THREE.Mesh(hg,hm);h1.position.y=-1.5;h1.scale.set(.42,.72,.42);h1.frustumCulled=false;arrow.add(h1);const h2=h1.clone();h2.rotation.y=Math.PI/2;arrow.add(h2);
   const shaftA=Tube(12,5,arcMat,arrow),shaftB=Tube(12,4,arcMat,arrow);shaftA.castShadow=shaftB.castShadow=false;
   const halo=glow(GLOWT,.9,arrow);halo.position.y=-1.5;
+  const cyanGlow=glowMat('#68eaff').map;
   const arcs=Array.from({length:12},()=>{const m=T(10,4);m.visible=false;return m;});
   const hide=o.tip.parent.children.filter(c=>c!==o.tip&&c!==g),bodyMat=ADD('#ffffff',{vertexColors:true}),body=Array.from({length:8},()=>{const m=Tube(10,4,bodyMat,o.g);m.castShadow=false;return m;});g.scale.setScalar(.001);
-  return {g,limbs,ring,strA,strB,arrow,hm,h1,h2,shaftA,shaftB,halo,arcs,body,hide,mats:[gold,lemon,cy,core],T:0,V3,age:0};
+  return {g,limbs,ring,strA,strB,arrow,hm,h1,h2,shaftA,shaftB,halo,cyanGlow,warmGlow:GLOWT,arcs,body,hide,mats:[gold,lemon,cy,core],T:0,V3,age:0};
 }
 function stormBowView(o,p,dt,now){
   const M=p.sm,R=M&&(M[3]&16)&&p.al&&!p.dn?M[6]:null;
@@ -33,7 +34,14 @@ function stormBowView(o,p,dt,now){
   if(!R&&o.sbRel===undefined&&o.armR.rotation.order!=='XYZ'){o.armR.rotation.order=o.armL.rotation.order='XYZ';}
   if(!R){o.sbDraw=0;if(o.sb){o.sb.arrow.visible=true;o.sb.g.visible=false;o.sb.age=0;o.sb.g.scale.setScalar(.001);for(const h of o.sb.hide)h.visible=true;for(const b of o.sb.body)b.visible=false;}return;}
   if(!o.sb)o.sb=sbMake(o);
-  const B=o.sb,V3=B.V3;B.g.visible=true;
+  const B=o.sb,V3=B.V3,god=!!(M[3]&4);B.g.visible=true;
+  if(B.cyan!==god){
+    B.cyan=god;
+    const colors=god?['#22d9ff','#6cecff','#28d8ff','#d2fbff']:['#ffcc14','#fff06a','#28d8ff','#fffbd8'];
+    B.mats.forEach((m,i)=>m.color.copy(hdr(colors[i],[1,1.15,1.1,1.3][i])));
+    B.halo.material.map=god?B.cyanGlow:B.warmGlow;
+    B.halo.material.color.set(god?'#68eaff':'#ffffff');
+  }
   const left=Math.max(0,R[1]),max=R[3]||SB_FULL,k=clamp(1-left/max,0,1),full=k>=.999,ap=R[4]||0;
   B.age+=dt;const intro=natEase(natPhase(B.age,0,.42)),armIn=natEase(natPhase(B.age,.36,.62)),draw=natEase(k);for(const h of B.hide)h.visible=intro<.5;for(const b of B.body)b.visible=true;B.g.scale.setScalar(Math.max(.001,natOut(natPhase(B.age,.1,.5))));
   // Archer's stance: side-on with the bow shoulder toward the target, feet apart, bow arm locked at shoulder height, draw elbow lifted behind the line of the arrow, hand anchored at the jaw.
@@ -44,8 +52,8 @@ function stormBowView(o,p,dt,now){
   o.armL.rotation.set(lerp(o.armL.rotation.x,lerp(-1.55,-1.7,draw)-ap*.9,armIn),lerp(0,lerp(aimY-.35,aimY+.3,draw),armIn),lerp(o.armL.rotation.z,lerp(.05,-.25,draw),armIn));   // มือดึงสาย: ยื่นไปจับสายหน้าอก แล้วดึงกลับมาที่กราม ศอกยกไปหลัง
   o.sbDraw=draw*armIn;
   const nock=SB_TIP.y+.95*draw;B.arrow.position.y=nock;B.arrow.scale.setScalar(full?1.3:lerp(.9,1.08,k));B.ring.rotation.y+=dt*(4+9*k);B.ring.scale.setScalar(.8+.5*k);B.halo.scale.setScalar(full?.95+.14*Math.sin(now*.03):lerp(.32,.6,k));B.halo.material.opacity=full?.5:.3;
-  const pulse=full?1+.08*Math.sin(now*.03):.92;for(const m of B.mats)m.opacity=clamp(pulse,.2,1);B.hm.color.set(full?'#fff8c0':'#ffe84a').multiplyScalar(full?1.5:1.05);
-  B.T-=dt;if(B.T<=0){B.T=.04;const cY=new THREE.Color('#ffd21f'),cW=new THREE.Color('#fff6b0'),cC=new THREE.Color('#2fe0ff'),nk=V3(0,nock,0);
+  const pulse=full?1+.08*Math.sin(now*.03):.92;for(const m of B.mats)m.opacity=clamp(pulse,.2,1);B.hm.color.set(god?(full?'#c9faff':'#39dfff'):(full?'#fff8c0':'#ffe84a')).multiplyScalar(full?1.5:1.05);
+  B.T-=dt;if(B.T<=0){B.T=.04;const cY=new THREE.Color(god?'#23d9ff':'#ffd21f'),cW=new THREE.Color(god?'#bdf8ff':'#fff6b0'),cC=new THREE.Color('#2fe0ff'),nk=V3(0,nock,0);
     for(const [str,s] of [[B.strA,1],[B.strB,-1]]){const P=sbJag(V3(0,SB_TIP.y,s*SB_TIP.z),nk,12,.09,V3);str.set(P,()=>.018,(u,c)=>c.copy(full?cC:cW).multiplyScalar(1.05));}
     B.shaftA.set(sbJag(V3(0,0,0),V3(0,-1.5,0),12,full?.15:.09,V3),()=>full?.045:.03,(u,c)=>c.copy(cW).multiplyScalar(1.15));B.shaftB.set(sbJag(V3(0,0,0),V3(0,-1.5,0),12,full?.26:.14,V3),()=>full?.022:.012,(u,c)=>c.copy(full?cC:cY).multiplyScalar(1.1));
     B.body.forEach((a,i)=>{const b=i/8*6.283+now*.004,r=.5+Math.random()*.22,h=.3+Math.random()*1.45,A=V3(Math.cos(b)*r,h,Math.sin(b)*r),E=V3(Math.cos(b+.7)*(r+.1),h+(Math.random()-.5)*.8,Math.sin(b+.7)*(r+.1)),Q=sbJag(A,E,10,.16,V3),col=i%3?cY:cC;a.set(Q,()=>.015,(u,c)=>c.copy(col).multiplyScalar(.9));});
@@ -54,16 +62,17 @@ function stormBowView(o,p,dt,now){
 const _sbFaQ=new THREE.Quaternion(),_sbFaT=new THREE.Quaternion(),_sbFaX=new THREE.Vector3(1,0,0);
 function stormBowForearm(o){const w=o.sbDraw||0;if(w<=.002)return;if(o.sbFa===undefined){const a=o.g.getObjectByName('forearm_L');o.sbFa=a?[a,a.quaternion.clone()]:null;}if(!o.sbFa)return;_sbFaQ.setFromAxisAngle(_sbFaX,-2.25);_sbFaT.copy(o.sbFa[1]).multiply(_sbFaQ);o.sbFa[0].quaternion.slerp(_sbFaT,w);}
 function stormBowFx(ev){
+  const pale=ev.g?'#bdf8ff':'#fff6c0',accent=ev.g?'#23d9ff':'#ffd84a';
   const F=natFx(),{V3,Tube,ADD,sparks,ring,T}=F,o=ev.id!=null?PM3.get(ev.id):null,mine=ev.id===NET.myId,end=natWorld(ev.x2,ev.y2,ev.h2),st=o?o.armR.localToWorld(V3(0,-1.3,0)):natWorld(ev.x,ev.y,ev.h);
   if(o){o.sb&&(o.sb.T=0);o.sbRel=0;}
   snd('boom',{x:ev.x,y:ev.y,vol:1});snd('zap',{x:ev.x2,y:ev.y2,vol:1});
   if(mine){shake(24);hitStop(.05);}else shake(6);
   const mat=ADD('#ffffff',{vertexColors:true}),core=Tube(24,6,mat),arcs=[Tube(20,4,mat),Tube(20,4,mat),Tube(20,4,mat)],all=[core,...arcs];all.forEach(m=>{m.castShadow=false;});
-  const c1=new T.Color('#fff6c0'),c2=new T.Color('#ffd84a'),cy=new T.Color('#7df2ff');sparks(st,18,6,'#fff6c0','#7df2ff',{dir:end.clone().sub(st).normalize().multiplyScalar(6),life:.5,size:1.5});
+  const c1=new T.Color(pale),c2=new T.Color(accent),cy=new T.Color('#7df2ff');sparks(st,18,6,pale,'#7df2ff',{dir:end.clone().sub(st).normalize().multiplyScalar(6),life:.5,size:1.5});
   const L=.17;F.clip(L,t=>{const f=1-t/L,P=[];for(let i=0;i<24;i++)P.push(st.clone().lerp(end,i/23));core.set(P,u=>(.17*(1-u*.35))*f+.015,(u,c)=>c.copy(c1).lerp(c2,u).multiplyScalar(1.15*f));arcs.forEach((a,j)=>{const Q=sbJag(st,end,20,1.1,V3);a.set(Q,()=>.035*f+.008,(u,c)=>c.copy(j===1?c2:cy).multiplyScalar(1.05*f));});},()=>{all.forEach(m=>F.drop(m));mat.dispose();});
   if(!ev.hit)return;
   impactFrame(.7,ev.x2,ev.y2,ev.h2,.09,ev.id);
-  later(.04,()=>{const G2=natFx(),{V3:V,Tube:Tb,ADD:Ad,sparks:sp,T:TH}=G2,top=end.clone().add(V((Math.random()-.5)*3,34,(Math.random()-.5)*3)),m2=Ad('#ffffff',{vertexColors:true}),bolts=[Tb(24,6,m2),Tb(20,4,m2),Tb(20,4,m2)],y1=new TH.Color('#fff4b0'),c3=new TH.Color('#7df2ff'),P0=sbJag(top,end,24,3.2,V);bolts.forEach(b=>b.castShadow=false);G2.O.y=end.y;natShock(end,'#ffe56a',8,.42,.55);natShock(end,'#7df2ff',4,.3,.5);sp(end,34,6.5,'#fff6c0','#7df2ff',{dir:V(0,2.4,0),life:.75,size:1.5});snd('zap',{x:ev.x2,y:ev.y2,vol:1});
+  later(.04,()=>{const G2=natFx(),{V3:V,Tube:Tb,ADD:Ad,sparks:sp,T:TH}=G2,top=end.clone().add(V((Math.random()-.5)*3,34,(Math.random()-.5)*3)),m2=Ad('#ffffff',{vertexColors:true}),bolts=[Tb(24,6,m2),Tb(20,4,m2),Tb(20,4,m2)],y1=new TH.Color(pale),c3=new TH.Color('#7df2ff'),P0=sbJag(top,end,24,3.2,V);bolts.forEach(b=>b.castShadow=false);G2.O.y=end.y;natShock(end,accent,8,.42,.55);natShock(end,'#7df2ff',4,.3,.5);sp(end,34,6.5,pale,'#7df2ff',{dir:V(0,2.4,0),life:.75,size:1.5});snd('zap',{x:ev.x2,y:ev.y2,vol:1});
     const Ls=.34;G2.clip(Ls,t=>{const f=1-t/Ls;bolts[0].set(P0,u=>.24*f+.02,(u,c)=>c.copy(y1).multiplyScalar(1.1*f));for(let i=1;i<3;i++)bolts[i].set(sbJag(top,end,20,5,V),()=>.05*f+.01,(u,c)=>c.copy(c3).multiplyScalar(f));},()=>{bolts.forEach(b=>G2.drop(b));m2.dispose();});});
 }
 
@@ -105,7 +114,7 @@ function stormStaffSwing(ev){const o=ev.id!=null?PM3.get(ev.id):null;if(o)o.stSw
 // เหลืองที่ขอบนำ ไซแอนในเนื้อคลื่นและเส้นสายฟ้าที่แลบตามขอบ
 let _sbWaveG=null;
 function sbWaveGeo(){if(_sbWaveG)return _sbWaveG;const U=48,V=18,R=2.7,D=2.1,p=[],uv=[],ix=[];for(let j=0;j<=V;j++){const v=j/V;for(let i=0;i<=U;i++){const u=i/U*2-1,a=u*.98,r=R-D*v*(1-.4*u*u);p.push(Math.sin(a)*r,.16*Math.sin(u*2.4)*(1-v),Math.cos(a)*r-R);uv.push(u,v);}}for(let j=0;j<V;j++)for(let i=0;i<U;i++){const a=j*(U+1)+i,b=a+U+1;ix.push(a,b,a+1,a+1,b,b+1);}const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(p,3));g.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));g.setIndex(ix);g.userData.keep=true;_sbWaveG=g;return g;}
-const SB_WAVE_F=`uniform float t,fade;varying vec2 q;
+const SB_WAVE_F=`uniform float t,fade,god;varying vec2 q;
 float h(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
 float n(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(h(i),h(i+vec2(1,0)),f.x),mix(h(i+vec2(0,1)),h(i+vec2(1,1)),f.x),f.y);}
 float fb(vec2 p){float a=.5,s=0.;for(int i=0;i<4;i++){s+=a*n(p);p=p*2.03+7.;a*=.5;}return s;}
@@ -113,18 +122,18 @@ void main(){float u=q.x,v=q.y,end=pow(max(0.,1.-u*u*u*u),1.4);float flow=fb(vec2
 float cyan=smoothstep(.10,.29,v)*(.77+.23*wisp);
 vec3 gold=mix(vec3(1.,.56,.025),vec3(1.26,1.04,.18),wisp);
 vec3 blue=mix(vec3(.015,.52,.85),vec3(.12,.99,1.18),wisp);
-vec3 c=mix(gold,blue,cyan);c=mix(c,vec3(1.48,1.25,.36),clamp(rim,0.,1.));
+vec3 c=mix(mix(gold,blue,cyan),blue,god);c=mix(c,mix(vec3(1.48,1.25,.36),vec3(.20,1.15,1.34),god),clamp(rim,0.,1.));
 float a=clamp((body*1.12+wisp*body*.74+halo*.48+rim)*end,0.,1.)*fade;gl_FragColor=vec4(c,a);}`;
-function stormWaveMake(o,j){const F=natFx(),{Tube}=F,u={t:{value:Math.random()*40},fade:{value:1}},m=new THREE.ShaderMaterial({transparent:true,depthWrite:false,side:THREE.DoubleSide,toneMapped:false,uniforms:u,vertexShader:'varying vec2 q;void main(){q=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',fragmentShader:SB_WAVE_F}),w=new THREE.Mesh(sbWaveGeo(),m);w.frustumCulled=false;w.rotation.z=(j.id%2?1:-1)*.24;o.g.add(w);
+function stormWaveMake(o,j){const F=natFx(),{Tube}=F,u={t:{value:Math.random()*40},fade:{value:1},god:{value:j.g?1:0}},m=new THREE.ShaderMaterial({transparent:true,depthWrite:false,side:THREE.DoubleSide,toneMapped:false,uniforms:u,vertexShader:'varying vec2 q;void main(){q=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',fragmentShader:SB_WAVE_F}),w=new THREE.Mesh(sbWaveGeo(),m);w.frustumCulled=false;w.rotation.z=(j.id%2?1:-1)*.24;o.g.add(w);
   const mat=new THREE.MeshBasicMaterial({vertexColors:true,transparent:true,depthWrite:false,side:THREE.DoubleSide,toneMapped:false}),mk=(n,k)=>{const q=Tube(n,k,mat,w);q.castShadow=false;return q;},lines=Array.from({length:9},()=>mk(11,5)),self=Array.from({length:7},()=>mk(12,4));
   w.rotation.x=-.3;   // เอียงขึ้นนิดเดียว (~17°) ยังราบอยู่ แต่มองจากกล้องเห็นชัดขึ้น (ผู้ใช้ 2026-11-10)
   o.swv={w,u,mat,lines,self,age:0,T:0,last:FIRE_U.time.value*1000};}
 function stormWaveTick(o,X,H,Z){const S=o.swv,now=FIRE_U.time.value*1000,dt=Math.min(.05,(now-S.last)/1000)||.016,F=natFx(),{V3}=F,R=2.7;S.last=now;S.age+=dt;S.u.t.value+=dt;const L=SIPH.v.range/SIPH.v.spd,f=natEase(natPhase(S.age,0,.05))*(1-natEase(natPhase(S.age,L*.72,L)));S.u.fade.value=f;S.mat.opacity=f;S.w.scale.setScalar(lerp(.6,1,natOut(natPhase(S.age,0,.14))));
-  S.T-=dt;if(S.T<=0){S.T=.035;const C=new THREE.Color('#00d7ff'),Y=new THREE.Color('#ffe45a');
+  S.T-=dt;if(S.T<=0){S.T=.035;const C=new THREE.Color('#00d7ff'),Y=new THREE.Color(S.u.god.value?'#6feaff':'#ffe45a');
     S.u.fade.value=f*(.78+Math.random()*.22);S.w.position.set((Math.random()-.5)*.05,(Math.random()-.5)*.05,0);   // the wave itself flickers with shock
     S.lines.forEach((q,n)=>{const a0=-1.02+Math.random()*1.7,out=n%3===0?-.45-Math.random()*.55:.12+Math.random()*.55,P=[];for(let i=0;i<11;i++){const t=i/10,a=a0+t*(.30+Math.random()*.07),e=Math.sin(Math.PI*t),r=R+out*e+(n%3?0:-.3),j=e*.22;P.push(V3(Math.sin(a)*r+(Math.random()-.5)*j,(Math.random()-.5)*j*2.2+e*(n%2?.3:-.3),Math.cos(a)*r-R+(Math.random()-.5)*j));}q.set(P,t=>.095*Math.sin(Math.PI*t)+.018,(u,c)=>c.copy(C).multiplyScalar(1.33));});
     S.self.forEach((q,n)=>{const a0=-.9+Math.random()*1.5,d0=Math.random()*1.4,P=[];for(let i=0;i<12;i++){const t=i/11,a=a0+t*(.2+Math.random()*.25)*(n%2?1:-1),e=Math.sin(Math.PI*t),r=R-d0-t*.5+(Math.random()-.5)*.1,j=e*.2;P.push(V3(Math.sin(a)*r+(Math.random()-.5)*j,(Math.random()-.5)*j*1.5,Math.cos(a)*r-R+(Math.random()-.5)*j));}const col=n%3===0?Y:C;q.set(P,t=>.065*Math.sin(Math.PI*t)+.012,(u,c)=>c.copy(col).multiplyScalar(1.23));});
-    if(Math.random()<.7){const a=(Math.random()*2-1)*.9,cyan=Math.random()<.64;const p=F.V3(X,H,Z).add(o.g.localToWorld(F.V3(Math.sin(a)*R,0,Math.cos(a)*R-R)).sub(o.g.position));F.sparks(p,2,1,cyan?'#36e8ff':'#ffd23a',cyan?'#0989bd':'#c97d10',{life:.36,size:1.22,g:.15});}}}
+    if(Math.random()<.7){const a=(Math.random()*2-1)*.9,cyan=S.u.god.value||Math.random()<.64;const p=F.V3(X,H,Z).add(o.g.localToWorld(F.V3(Math.sin(a)*R,0,Math.cos(a)*R-R)).sub(o.g.position));F.sparks(p,2,1,cyan?'#36e8ff':'#ffd23a',cyan?'#0989bd':'#c97d10',{life:.36,size:1.22,g:.15});}}}
 
 // เครื่องหมายและเส้นสายฟ้าของคลื่นยึดรอบลำตัวเป้า
 const SMK=new Map();
@@ -148,11 +157,11 @@ function stormWaveBurst(ev,H){
         const u=j/5,a=angle+rnd(-0.24,0.24);
         points.push(new THREE.Vector3(Math.cos(a)*length*u,clamp(height+lift*u+rnd(-0.09,0.09),-0.95,0.45),Math.sin(a)*length*u));
       }
-      branches.push({points,angle,at:i*0.045+(direction%2)*0.055,cyan:(direction+i)%3===1});
+      branches.push({points,angle,at:i*0.045+(direction%2)*0.055,cyan:!!ev.g||(direction+i)%3===1});
     }
   }
   SWAVE_BURSTS.push({base,g,offset,branches,age:0,next:0});
-  burst(ev.x,ev.y,'#ffdc37',16,118,0.47,2.0,{h:H-0.15,vh:[-0.8,0.46],g:2});
+  burst(ev.x,ev.y,ev.g?'#59e9ff':'#ffdc37',16,118,0.47,2.0,{h:H-0.15,vh:[-0.8,0.46],g:2});
   burst(ev.x,ev.y,'#13dfff',8,115,0.4,2.1,{h:H-0.13,vh:[-0.66,0.38],g:2});
 }
 function stormWaveBurstTick(dt){
@@ -186,7 +195,7 @@ function stormWaveBurstTick(dt){
   }
 }
 const _smkEye=new THREE.Vector3(),_smkRot=new THREE.Quaternion();
-function stormMarkSet(id,n,prime=0){
+function stormMarkSet(id,n,prime=0,god=false){
   const o=PM3.get(id)||EM3.get(id)||MM3.get(id)||NAT_VIEW.get(id);if(!o?.g)return;
   let M=SMK.get(id);
   if(!M){
@@ -200,6 +209,11 @@ function stormMarkSet(id,n,prime=0){
     const mat=new THREE.MeshBasicMaterial({color:hdr('#40dfff',1.55),transparent:true,opacity:.8,depthWrite:false});
     const links=pips.slice(1).map(()=>{const m=new THREE.Mesh(geo,mat);g.add(m);return m;});
     o.g.add(g);M={g,pips,links,geo,mat};SMK.set(id,M);
+  }
+  if(M.cyan!==!!god){
+    M.cyan=!!god;
+    M.pips[0].material=glowMat(god?'#22d9ff':'#ffd23a',1.6);
+    M.pips[0].children[0].material=glowMat(god?'#87f2ff':'#fff0af',1.8);
   }
   M.n=n;M.prime=prime;M.until=FIRE_U.time.value+(prime?prime+.25:SIPH.v.markT);M.pop=.18;
 }

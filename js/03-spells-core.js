@@ -83,10 +83,11 @@ function ignite(t,src,time){
   t.burn=Math.max(t.burn||0,time||3);if(!(t.bt>0))t.bt=1;t.burnSrc=src;   // Burning (ผู้ใช้ 2026-11-11): 3 วิ เผาทุก 1 วิ
 }
 // Shock (สายฟ้า, ผู้เล่นออกแบบ): โคลง/กล้องสั่นเบา + ใช้ Dash ไม่ได้ สูงสุด 0.3 วิ • ติดอยู่แล้วไม่ต่อเวลา • ไม่เพิ่มดาเมจ
-function shock(t,src,d,fullDuration=false){
+const FX_SHOCK_CYAN=1<<20;
+function shock(t,src,d,fullDuration=false,god=G.players[src]?.god>0){
   const duration=fullDuration?(d||0.3):Math.min(0.3,d||0.3);
   if(t.shk>0&&(!fullDuration||t.shk>=duration))return;
-  t.shk=duration;t.shkSrc=src;
+  t.shk=duration;t.shkSrc=src;t.shkGod=god;
 }
 function knock(t,x,y,f){const dx=t.x-x,dy=t.y-y,d=Math.hypot(dx,dy)||1;if(isBig(t))f*=0.25;t.vx+=dx/d*f;t.vy+=dy/d*f;}
 function addWard(p,abs,time,thorns){p.ward={abs,t:time,thorns:!!thorns};}
@@ -139,7 +140,7 @@ function tickStatus(t,dt){
   if(t.ward){t.ward.t-=dt;if(t.ward.t<=0)t.ward=null;}
 }
 function clearStatus(t){for(const k of ['wbsT','slowT','shk','frz','sil','chl','chlT','frzImm','chlImm','rootImm','ccT','ccN','haste','ovc','burn','psn','psnT','fear','bld','mrk','heat','heatT','flare','frostA','wallCd','brn','brnT','xb','blaze','kindle','kindleT','hover','fsl','fslT','fslBigT','fslR','fslA','fslP','fslUltT','slip','ripT','ffT','cryo','auraT','mirror','xhp','slideT','grT','breath','dfall','snapT','colos','dchg','mudT','sbk'])t[k]=0;t.dchgOn=false;t.ward=null;t.dr=null;}
-function fxMask(t){return (t.stun>0?1:0)|(t.burn>0?2:0)|((t.chl>0||t.slowT>0||frostSlow(t)>0)?4:0)|(t.frz>0?8:0)|(t.shk>0?16:0)|(t.root>0?32:0)|(t.sil>0?64:0)|(t.ward?128:0)|(t.haste>0?256:0)|(t.ovc>0?512:0)|(t.psn>0||t.naturePoison?1024:0)|(t.fear>0?2048:0)|(t.bld>0?4096:0)|(t.mrk>0?8192:0)|(t.dr?16384:0)|((t.heat>0||t.brn>0)?32768:0)|((t.flare>0||t.kindle>0)?65536:0)|(t.blaze>0?131072:0)|(t.xb>0?262144:0)|(t.mudT>0?524288:0);}
+function fxMask(t){return (t.stun>0?1:0)|(t.burn>0?2:0)|((t.chl>0||t.slowT>0||frostSlow(t)>0)?4:0)|(t.frz>0?8:0)|(t.shk>0?(16|(t.shkGod?FX_SHOCK_CYAN:0)):0)|(t.root>0?32:0)|(t.sil>0?64:0)|(t.ward?128:0)|(t.haste>0?256:0)|(t.ovc>0?512:0)|(t.psn>0||t.naturePoison?1024:0)|(t.fear>0?2048:0)|(t.bld>0?4096:0)|(t.mrk>0?8192:0)|(t.dr?16384:0)|((t.heat>0||t.brn>0)?32768:0)|((t.flare>0||t.kindle>0)?65536:0)|(t.blaze>0?131072:0)|(t.xb>0?262144:0)|(t.mudT>0?524288:0);}
 
 // ---------- วัตถุในสนามที่คาถาสร้าง: โซน / ฟ้าผ่าหน่วงเวลา / กำแพง / ช่องร่ายต่อเนื่อง ----------
 function foesIn(team,x,y,r,hMax){
@@ -234,7 +235,7 @@ const PBASIC=[
     tick:frostBasic,onParry:p=>{p.ripT=1.5;},dash:frostDash},
   {id:'b_storm',type:'pb2',n:'ลำสายฟ้า / สายฟ้าสามเหลี่ยม',d:'กดค้าง = ลำสายฟ้า (แบบ Winston) ระยะ 300 ล็อกทุกคนในกรวยหน้าอัตโนมัติ คนละ 3 ดาเมจ ทุก 0.4 วิ • ได้ Lightning stack ใหม่ = กดยิงครั้งถัดไปฟาดสายฟ้าจากฟ้าเป็นสามเหลี่ยมด้านหน้า (ยาว 250 ปลายกว้าง 120) 20 ดาเมจ + Shock',
     shd:'โล่สายฟ้า: คลิกขวา = ฟ้าผ่าลงตัวเรา เปิดโล่ 3 วิ ดูดซับดาเมจทุกอย่าง เดินได้ปกติ • คลิกขวาอีกครั้ง / ครบ 3 วิ / ดูดเกิน 90 = ระเบิดรัศมี 150 ดาเมจครึ่งหนึ่งของที่ดูด (สูงสุด 30) + Shock • ระเบิดโดน = +1 stack • ไม่ได้ดูดอะไร = ไม่ระเบิด • คูลดาวน์ 10 วิ',dsd:'Dash 3 ชาร์จ (ฟื้นชาร์จละ 3 วิ) พุ่ง 220 ทะลุศัตรู คนละ 10 ดาเมจ • ทะลุโดน = +1 Lightning stack • ติด Shock = Dash ไม่ได้',
-    hit(pr,t){const wave=pr.type==='swave',hp=t.hp;damage(t,pr.dmg,pr.owner,'proj',wave);if(wave&&t.hp<hp)stormWaveMark(pr.owner,t);},tick:stormBasic,dash:stormDash},
+    hit(pr,t){const wave=pr.type==='swave',hp=t.hp;damage(t,pr.dmg,pr.owner,'proj',wave);if(wave&&t.hp<hp)stormWaveMark(pr.owner,t,true,pr.stGod);},tick:stormBasic,dash:stormDash},
   {id:'b_nature',type:'pb3',n:'แส้หนาม',d:'ฟาดทุกเป้าในกรวยหน้า 120° ระยะ 280 หน่วย ดาเมจ 7 คลิกซ้ำหรือกดค้างเพื่อฟาดกลับ แล้วพัก 1 วิ',
   shd:'โล่ 150 HP เถาหนามฟาดศัตรูในระยะ 180 หน่วย คนละ 10 ดาเมจ ทุก 0.75 วิ',
   dsd:'เถาเกี่ยวเป้าในระยะ 300 หน่วย คูลดาวน์ 8 วิ เกี่ยวเข้าป้อมของเราเพื่อชาร์จลูกถั่วใหญ่',shMul:100/150,dash:natureDash,

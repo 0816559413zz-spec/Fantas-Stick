@@ -50,8 +50,8 @@
     1.6,
     2.4
    ],
-   "col": "#fff6c0",
-   "c2": "#ff9a1a",
+   "col": "$hi",
+   "c2": "$deep",
    "gravity": 12,
    "drag": 1.5
   },
