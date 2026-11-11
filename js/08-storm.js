@@ -7,7 +7,7 @@ const STORMV=PATHS[2].v={stackMax:5,beamR:300,beamArc:0.6,beamDmg:3,beamTick:0.4
   shieldT:3,shieldCd:10,blastMax:30,blastMul:0.5,blastR:150};
 PATHS[2].vn={stackMax:'Lightning stack สูงสุด',beamR:'ลำสายฟ้า • ระยะ',beamArc:'ลำสายฟ้า • ครึ่งมุมกรวย (เรเดียน)',beamDmg:'ลำสายฟ้า • ดาเมจต่อครั้ง',beamTick:'ลำสายฟ้า • ทุก (วิ)',triLen:'สายฟ้าสามเหลี่ยม • ยาว',triW:'สายฟ้าสามเหลี่ยม • ปลายกว้าง',triDmg:'สายฟ้าสามเหลี่ยม • ดาเมจ',
   shock:'Shock • นาน (วิ)',dashN:'Dash • จำนวนชาร์จ',dashRc:'Dash • ฟื้นชาร์จละ (วิ)',dashDist:'Dash • ระยะ',dashT:'Dash • เวลา (วิ)',dashDmg:'Dash • ดาเมจทะลุ',shieldT:'โล่ • เปิดนาน (วิ)',shieldCd:'โล่ • คูลดาวน์ (วิ)',blastMax:'โล่ระเบิด • ดาเมจสูงสุด',blastMul:'โล่ระเบิด • ดาเมจ (เท่าของที่ดูดซับ)',blastR:'โล่ระเบิด • รัศมี'};
-function stGain(p){if(!p||p.pathIdx!==2)return;if((p.lst|0)<STORMV.stackMax)p.lst=(p.lst|0)+1;p.emp=1;emit({k:'efx',z:'stgain',x:p.x,y:p.y,h:p.z+1.6,id:p.id,n:p.lst|0});}
+function stGain(p,n=1){if(!p||p.pathIdx!==2)return;p.lst=Math.min(STORMV.stackMax,(p.lst|0)+n);p.emp=1;emit({k:'efx',z:'stgain',x:p.x,y:p.y,h:p.z+1.6,id:p.id,n:p.lst|0});}
 function stSpend(p,n){if((p.lst|0)<n){emit({k:'efx',z:'nostack',x:p.x,y:p.y,h:p.z+2.2,id:p.id,n});return false;}p.lst-=n;return true;}
 // ศัตรูในกรวยหน้า (ใช้กับลำสายฟ้า)
 function stormCone(p,range,arc){const out=[],ph=p.z+1.1;
@@ -58,7 +58,7 @@ function stormDash(p,inp,pr,dt,setCd){
     let dx,dy;if(typeof inp.mx==='number'){dx=inp.mx;dy=inp.my;}else{dx=(inp.r?1:0)-(inp.l?1:0);dy=(inp.d?1:0)-(inp.u?1:0);}
     const l=Math.hypot(dx,dy);if(l>0.1){dx/=l;dy/=l;}else{dx=Math.cos(p.ang);dy=Math.sin(p.ang);}
     p.dch-=1;p.dash=STORMV.dashT;p.dashSp=STORMV.dashDist/STORMV.dashT;p.dashX=dx;p.dashY=dy;p.sdHit=new Set();p.sdAny=false;p.sdX=p.x;p.sdY=p.y;
-    emit({k:'efx',z:'sdash',x:p.x,y:p.y,h:p.z+1,id:p.id});
+    emit({k:'efx',z:'sdash',x:p.x,y:p.y,h:p.z+1,id:p.id,g:p.god>0?1:0});
   }
   return false;
 }
@@ -67,7 +67,11 @@ function stormDashTick(p){
   if(!p.sdHit)return;
   if(p.dash>0){
     for(const t of foesOf(p.team)){if(p.sdHit.has(t))continue;if(Math.hypot(t.x-p.x,t.y-p.y)>PR+(t.r||PR)+15||Math.abs(cH(t)-(p.z+1.1))>3)continue;
-      p.sdHit.add(t);aoeHit(p,t,p.god>0?GODL.v.dashDmg:STORMV.dashDmg);emit({k:'efx',z:'sdhit',x:Math.round(t.x),y:Math.round(t.y),h:cH(t),a:Math.round(Math.atan2(p.dashY,p.dashX)*100)/100,g:p.god>0?1:0});
+      p.sdHit.add(t);
+      const mark=G.waveMarks?.get(t),advances=!(p.god>0)&&mark&&!mark.primed&&mark.until>G.time,hp=t.hp;
+      damage(t,p.god>0?GODL.v.dashDmg:STORMV.dashDmg,p.id,'aoe',advances);
+      if(advances&&t.hp<hp)stormWaveMark(p.id,t,false);
+      emit({k:'efx',z:'sdhit',x:Math.round(t.x),y:Math.round(t.y),h:cH(t),a:Math.round(Math.atan2(p.dashY,p.dashX)*100)/100,g:p.god>0?1:0,mark:advances&&t.hp<hp?1:undefined});
       if(!p.sdAny){p.sdAny=true;stGain(p);stormOrbLaunch(p,t.x,t.y,t);if(p.god>0)p.cEmp=1;}}
   }else{emit({k:'efx',z:'sdashe',x:Math.round(p.sdX),y:Math.round(p.sdY),h:p.z+1,x2:Math.round(p.x),y2:Math.round(p.y),a:Math.round(Math.atan2(p.y-p.sdY,p.x-p.sdX)*100)/100,len:Math.round(Math.hypot(p.x-p.sdX,p.y-p.sdY)),id:p.id});p.sdHit=null;}
 }
@@ -99,13 +103,43 @@ function stormLine(p){
   emit({k:'efx',z:'sline',x:Math.round(p.x),y:Math.round(p.y),h:p.z,a:Math.round(a*1000)/1000,len:Math.round(len),id:p.id});
 }
 // ----- สกิล 2 (1 stack): ดูดความเร็ว -----
-const SIPH=defSpell(2,{id:'speedsiphon',v:{cost:1,dmg:20,spd:1500,range:700,marks:3,markT:6,boom:15,shockT:1},vn:{cost:'ใช้ stack',dmg:'ดาเมจคลื่น',spd:'ความเร็วคลื่น',range:'ระยะคลื่น',marks:'ติดเครื่องหมายครบ (ครั้ง) = ระเบิด',markT:'เครื่องหมายอยู่นาน (วิ)',boom:'ระเบิด • ดาเมจเพิ่ม',shockT:'ระเบิด • Shock (วิ)'},role:'damage',n:'คลื่นสายฟ้า',ic:'⚡',cd:2,d:'ใช้ 1 stack: ปล่อยคลื่นสายฟ้าตามที่เล็งทันที ดาเมจ 20 ระยะ 700 ทะลุ • โดน = ติดเครื่องหมายสายฟ้า ครบ 3 ครั้ง (ภายใน 6 วิ) = ระเบิด 15 ดาเมจ + Shock 1 วิ และคืน stack ให้เรา 1',
+const SIPH=defSpell(2,{id:'speedsiphon',v:{cost:1,dmg:20,spd:1500,range:700,marks:3,markT:6,primeT:1,boom:15,shockT:0.7,refund:2},vn:{cost:'ใช้ stack',dmg:'ดาเมจคลื่น',spd:'ความเร็วคลื่น',range:'ระยะคลื่น',marks:'เครื่องหมายที่ใช้ระเบิด',markT:'เครื่องหมายอยู่นาน (วิ)',primeT:'เวลารอก่อนระเบิด (วิ)',boom:'ระเบิด • ดาเมจเพิ่ม',shockT:'ระเบิด • Shock (วิ)',refund:'ระเบิด • stack ที่คืน'},role:'damage',n:'คลื่นสายฟ้า',ic:'⚡',cd:2,d:'ใช้ 1 stack: ยิงคลื่นทะลุ ดาเมจ 20 ระยะ 700 ติดเครื่องหมาย 6 วิ • คลื่นหรือ Dash ร่างปกติผ่านเป้าเพิ่มเครื่องหมาย • ครบ 3 รอ 1 วิ แล้วระเบิด 15 ดาเมจ + Shock 0.7 วิ คืน 2 stacks ให้คนที่เติมขีดสุดท้าย',
   cast(p,S){if(!stSpend(p,S.v.cost))return false;p.stSide=-(p.stSide||1);emit({k:'efx',z:'sswing',x:Math.round(p.x),y:Math.round(p.y),h:p.z+1.2,n:p.stSide,id:p.id});stormWaveShoot(p);}});   // ผู้ใช้ 2026-11-10: เลิกโหมดไม้เท้า 6 วิ → คลื่นทันที 1 stack
 function stormWaveShoot(p){const V=SIPH.v;Object.assign(PDEF.swave,{spd:V.spd,life:V.range/V.spd,dmg:V.dmg});const pr=shoot(p,'swave',{sp:'b_storm',dmg:V.dmg,quiet:1});pr.pierce=1;pr.hs=new Set();pr.hw=40;}
-// คลื่นโดน: เครื่องหมายสายฟ้าบนเป้า ครบ 3 = ระเบิด + Shock + คืน stack ให้คนยิง
-function stormWaveMark(pr,t){const V=SIPH.v,o=G.players[pr.owner];if(!t.stMkT||t.stMkT<G.time)t.stMk=0;t.stMk=(t.stMk|0)+1;t.stMkT=G.time+V.markT;
-  if(t.stMk>=V.marks){t.stMk=0;t.stMkT=0;damage(t,V.boom,pr.owner,'aoe');shock(t,pr.owner,V.shockT);if(o)stGain(o);emit({k:'efx',z:'smkboom',x:Math.round(t.x),y:Math.round(t.y),h:(t.z||t.h||0)+1.2,id:t.id});}
-  else emit({k:'efx',z:'smark',x:Math.round(t.x),y:Math.round(t.y),h:(t.z||t.h||0)+1.2,n:t.stMk,id:t.id});}
+function stormWaveTargetLive(t){
+  if(t.natKind)return G.nature.includes(t)&&natureLive(t);
+  if(t.isE)return !t.dead&&G.en.includes(t);
+  if(t.isM)return !t.dead&&G.mins.includes(t);
+  return G.players[t.id]===t&&t.alive&&!t.downed;
+}
+function stormWaveMark(owner,t,opens=true){
+  if(!stormWaveTargetLive(t))return;
+  const V=SIPH.v,marks=G.waveMarks||(G.waveMarks=new Map()),prev=marks.get(t);
+  if(prev?.primed)return;
+  const n=(prev&&prev.until>G.time?prev.n:0)+1;
+  if(n===1&&!opens)return;
+  const primed=n>=V.marks;
+  const duration=primed?V.primeT:V.markT;
+  marks.set(t,{n,owner,primed,until:G.time+duration});
+  emit({k:'efx',z:'smark',x:Math.round(t.x),y:Math.round(t.y),h:(t.z||t.h||0)+1.2,n,id:t.id,prime:primed?duration:undefined});
+}
+function clearStormWaveMarks(){
+  for(const t of G.waveMarks?.keys()||[])emit({k:'efx',z:'smkoff',id:t.id});
+  G.waveMarks?.clear();
+}
+function updateStormWaveMarks(){
+  if(!G.waveMarks?.size)return;
+  for(const [t,M] of G.waveMarks){
+    const live=stormWaveTargetLive(t);
+    if(live&&G.time+1e-6<M.until)continue;
+    G.waveMarks.delete(t);
+    if(!live||!M.primed){emit({k:'efx',z:'smkoff',id:t.id});continue;}
+    damage(t,SIPH.v.boom,M.owner,'aoe',true);
+    shock(t,M.owner,SIPH.v.shockT,true);
+    stGain(G.players[M.owner],SIPH.v.refund);
+    emit({k:'efx',z:'smkboom',x:Math.round(t.x),y:Math.round(t.y),h:(t.z||t.h||0)+1.2,id:t.id});
+  }
+}
 // ----- สกิล 3 (2 stacks): ฟ้าผ่าสามครั้ง — วางจุดครั้งเดียว ฟ้าผ่าจุดเดิม 3 ครั้ง ห่างกัน 0.5 วิ -----
 const TSTR=defSpell(2,{id:'triplestrike',v:{cost:2,range:600,r:100,dmg:30,env:30,delay:0.6,gap:0.5,spd:40,seek:300,sideR:45,side:110},vn:{cost:'ใช้ stack',range:'ระยะวาง',r:'รัศมีวง',dmg:'ดาเมจต่อครั้ง',env:'ดาเมจใส่บ้าน/ของ',delay:'ผ่าครั้งแรกหลัง (วิ)',gap:'เว้นระหว่างครั้ง (วิ)',spd:'วงเลื่อนหาศัตรู • ความเร็ว',seek:'วงเลื่อนหาศัตรู • มองไกล',sideR:'อัลติ • รัศมีวงข้าง',side:'อัลติ • วงข้างห่าง'},role:'control',n:'ฟ้าผ่าสามครั้ง',ic:'🌩️',cd:12,d:'ใช้ 2 stacks: กดแล้วเลือกจุด (เห็นวงก่อนวาง) กดซ้ำ/คลิกซ้าย = ยืนยัน • ระยะ 600 รัศมี 70 มีวงรูนเตือน แล้วฟ้าผ่าจุดเดิม 3 ครั้ง (0.6 วิ แล้วห่างกัน 0.5 วิ)',fx:'ครั้งละ 30 ดาเมจ (โดนครบ 3 = 90) • ระหว่างอัลติ: มีวงเล็กผ่าซ้าย/ขวาเพิ่มด้วย',
   cast(p,S){
@@ -211,6 +245,7 @@ function stormDomeSlam(p,x,y,gh){
   damageEnv(x,y,GV.slamR,GV.slamDmg,p.id,'lightning',gh);
 }
 function updateStorm(dt){
+  updateStormWaveMarks();
   updateTCells(dt);
   if(G.slines&&G.slines.length){
     for(const L of G.slines){

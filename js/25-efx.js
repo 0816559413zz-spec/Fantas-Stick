@@ -79,11 +79,14 @@ function efxFX(ev){
     case 'stri':{const a=ev.a,c=Math.cos(a),sn=Math.sin(a);
       for(let i=0;i<7;i++){const f=rnd(40,250),l=rnd(-1,1)*60*f/250,px=x+c*f-sn*l,py=y+sn*f+c*l;later(i*0.022,()=>{tbolt(px+rnd(-15,15),py+rnd(-15,15),H+10,px,py,H+0.1,0.2,0,0.26,1);burst(px,py,'#ffd000',8,170,0.3,2.2,{h:H+0.2,vh:[1,5],g:6});burst(px,py,'#ffffff',3,120,0.2,1.6,{h:H+0.2,vh:[1,4],g:6});burst(px,py,'#9fd8ff',3,140,0.25,1.6,{h:H+0.2,vh:[1,4],g:6});});}
       FX.flashLight(x+c*140,y+sn*140,H+2,'#ffd23a',5,16,0.25);if(near){snd('zap',ev);snd('boom',{x,y,vol:0.3});}break;}
-    case 'sdash':FX.flashSprite(x,y,H-0.7,'#fff7b0',0.4,3.2,0.12,2.2);ring(x,y,'#ffd000',40,0.2,H-0.9);burst(x,y,'#ffd000',16,200,0.25,2.2,{h:H-0.8,vh:[0,3],g:2});burst(x,y,'#ffffff',8,150,0.2,1.8,{h:H-0.8,g:2});if(near)snd('dash',ev);break;
+    case 'sdash':{if(ev.g)FX.flashSprite(x,y,H-0.7,'#fff7b0',0.4,3.2,0.12,2.2);
+      else FX.flashSprite(x,y,H-0.7,'#ffe466',0.22,1.3,0.09,1.2);
+      ring(x,y,'#ffd000',40,0.2,H-0.9);burst(x,y,'#ffd000',16,200,0.25,2.2,{h:H-0.8,vh:[0,3],g:2});burst(x,y,'#ffffff',8,150,0.2,1.8,{h:H-0.8,g:2});if(near)snd('dash',ev);break;}
     case 'sdashe':{tbolt(x,y,H,ev.x2,ev.y2,H,0.24,0,0.2,3);tbolt(x,y,H+rnd(-0.5,0.5),ev.x2,ev.y2,H+rnd(-0.5,0.5),0.18,0,0.1,1);
       const L=Math.hypot(ev.x2-x,ev.y2-y)||1;for(let d=0;d<L;d+=16)PARTS.push({x:x+(ev.x2-x)*d/L+rnd(-6,6),y:y+(ev.y2-y)*d/L+rnd(-6,6),h:H+rnd(-0.5,0.6),vx:rnd(-30,30),vy:rnd(-30,30),vh:rnd(-0.5,1),life:rnd(0.2,0.35),max:0.35,col:Math.random()<0.6?'#ffd000':'#ffffff',size:rnd(2,3.2),g:0});
       burst(ev.x2,ev.y2,'#ffd000',10,160,0.25,2,{h:H,g:1});break;}
-    case 'sdhit':{FX.flashSprite(x,y,H,'#ffffff',0.5,2.5,0.12,2.2);FX.flashLight(x,y,H,'#ffd23a',3.9,14,0.2);
+    case 'sdhit':{if(ev.mark){FX.flashSprite(x,y,H,'#34ddff',0.26,1.25,0.1,1.1);FX.flashLight(x,y,H,'#41dfff',1.2,6,0.13);}
+      else{FX.flashSprite(x,y,H,'#ffffff',0.5,2.5,0.12,2.2);FX.flashLight(x,y,H,'#ffd23a',3.9,14,0.2);}
       for(let i=0;i<7;i++){const an=rnd(0,6.283);tbolt(x,y,H,x+Math.cos(an)*rnd(35,60),y+Math.sin(an)*rnd(35,60),H+rnd(-0.8,0.8),0.14,0,0.12);}
       burst(x,y,'#ffd000',22,320,0.3,2.4,{h:H,vh:[-1,4],g:3});burst(x,y,'#9fd8ff',8,220,0.25,1.8,{h:H,g:3});if(near)snd('zap',ev);break;}
     case 'ston':for(let i=0;i<3;i++)tbolt(x+rnd(-12,12),y+rnd(-12,12),H+14,x,y,H+1,0.25,0,0.32,2);FX.flashSprite(x,y,H+1.2,'#fff7c0',0.4,1.6,0.12,1.6);FX.flashLight(x,y,H+2,'#ffd23a',2.5,12,0.25);ring(x,y,'#ffd000',60,0.3,H+0.1);if(near){snd('zap',ev);shake(2);}break;
@@ -119,10 +122,10 @@ function efxFX(ev){
     case 'sbow':stormBowFx(ev);break;
     case 'ssta':stormStaffCast(ev);break;
     case 'sswing':stormStaffSwing(ev);break;
-    case 'smark':{stormMarkSet(ev.id,ev.n|0);for(let i=0;i<3;i++){const an=i*2.094+.5,on=i<(ev.n|0);if(!on)continue;tbolt(x+Math.cos(an)*14,y+Math.sin(an)*14,H+.9,x+Math.cos(an)*18,y+Math.sin(an)*18,H-.3,.35,0,.07,0);}
-      ring(x,y,'#ffd000',26+(ev.n|0)*6,.25,.1);floatText(x,y,'⚡'.repeat(ev.n|0),'#fff27a',16,H+1.6);if(near)snd('zap',{x,y,vol:.35});break;}   // เครื่องหมายคลื่นสายฟ้า 1-2/3
-    case 'smkboom':{stormMarkClear(ev.id);for(let i=0;i<6;i++){const an=rnd(0,6.283);tbolt(x,y,H,x+Math.cos(an)*rnd(45,75),y+Math.sin(an)*rnd(45,75),H+rnd(-.5,.8),.22,0,.1);}tbolt(x+rnd(-6,6),y+rnd(-6,6),H+9,x,y,H,.25,0,.16,2);
-      ring(x,y,'#ffd000',80,.35,.18);burst(x,y,'#ffd000',26,260,.4,2.4,{h:H,vh:[1,5],g:5});burst(x,y,'#9fe8ff',10,200,.3,1.8,{h:H,g:5});FX.flashLight(x,y,H+1,'#ffd23a',5,14,.25);if(near){snd('boom',{x,y,vol:.5});snd('zap',ev);shake(2.5);}break;}   // ครบ 3 = ระเบิด + Shock
+    case 'smark':{stormMarkSet(ev.id,ev.n|0,ev.prime);for(let i=0;i<(ev.n|0);i++){const an=i*2.094+.5;tbolt(x+Math.cos(an)*14,y+Math.sin(an)*14,H+.26,x+Math.cos(an)*18,y+Math.sin(an)*18,H-.3,.20,i?'#9fd8ff':0,.065,0);}
+      ring(x,y,'#ffd000',26+(ev.n|0)*6,.25,.1);if(near)snd('zap',{x,y,vol:.35});break;}
+    case 'smkboom':stormWaveBurst(ev,H);if(near){snd('zap',ev);shake(1.4);}break;
+    case 'smkoff':stormMarkClear(ev.id);break;
     case 'sbowfail':burst(x,y,'#7df2ff',10,60,.3,1.8,{h:H});if(near)snd('dismount',ev);break;
     case 'srailc':if(near)snd('cast_ebolt',ev);break;
     case 'srail':{const a=ev.a,c=Math.cos(a),sn=Math.sin(a),L=ev.len,ex=x+c*L,ey=y+sn*L;

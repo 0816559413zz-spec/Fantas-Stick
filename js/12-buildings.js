@@ -344,7 +344,7 @@ function ultActive(p){return p.colos>0||p.god>0||!!p.wr||p.mirror>0||p.pathIdx==
 function gainUlt(p,v){if(ultActive(p))return;p.ult=Math.min(100,p.ult+v*0.5*ULT_RATE*p.buffs.ult);}
 function lifesteal(p,amt){if(p.buffs.life&&p.alive&&!p.downed)healT(p,amt*p.buffs.life);}
 
-function damage(t,amt,srcId,kind){
+function damage(t,amt,srcId,kind,noFlash=false){
   if(G.mode==='train'&&G.tr&&G.tr.god&&G.players[t.id]===t)return;   // ห้องฝึก: อมตะ
   const src=srcId!=null?G.players[srcId]:null;
   if(src&&kind!=='burn')amt*=src.buffs.dmg;
@@ -357,7 +357,7 @@ function damage(t,amt,srcId,kind){
     if(t.dead)return;
     if(t.frz>0)amt*=1.15;
     if(t.mrk>0&&kind!=='burn')amt*=1.12;
-    t.hp-=amt;emit({k:'hit',x:t.x,y:t.y,h:(t.h||0)+1.4,n:Math.round(amt),mn:t.id,s:srcId||undefined,ns:src&&src.baHit?1:undefined,b:kind==='burn'?1:undefined,kl:t.hp<=0?1:undefined,a:(kind==='aoe'||kind==='zone')?1:undefined});
+    t.hp-=amt;emit({k:'hit',x:t.x,y:t.y,h:(t.h||0)+1.4,n:Math.round(amt),nf:noFlash?1:undefined,mn:t.id,s:srcId||undefined,ns:src&&src.baHit?1:undefined,b:kind==='burn'?1:undefined,kl:t.hp<=0?1:undefined,a:(kind==='aoe'||kind==='zone')?1:undefined});
     if(src&&src.alive)gainUlt(src,amt*0.3);
     if(t.hp<=0){t.dead=true;emit({k:'die',x:t.x,y:t.y,h:(t.h||0)+0.8,c:'#9fd0ff',t:'min'});}
     return;
@@ -367,7 +367,7 @@ function damage(t,amt,srcId,kind){
     if(t.frz>0)amt*=1.15;
     if(t.mrk>0&&kind!=='burn')amt*=1.12;
     t.hp-=amt;
-    emit({k:'hit',x:t.x,y:t.y,h:cH(t)+vR(t)+0.4,n:Math.round(amt),e:t.id,s:srcId||undefined,ns:src&&src.baHit?1:undefined,b:kind==='burn'?1:undefined,kl:t.hp<=0?1:undefined,a:(kind==='aoe'||kind==='zone')?1:undefined});
+    emit({k:'hit',x:t.x,y:t.y,h:cH(t)+vR(t)+0.4,n:Math.round(amt),nf:noFlash?1:undefined,e:t.id,s:srcId||undefined,ns:src&&src.baHit?1:undefined,b:kind==='burn'?1:undefined,kl:t.hp<=0?1:undefined,a:(kind==='aoe'||kind==='zone')?1:undefined});
     if(src){gainUlt(src,amt);lifesteal(src,amt);src.dmgDealt+=amt;}
     if(t.hp<=0){t.dead=true;if(src)src.kills++;emit({k:'die',x:t.x,y:t.y,h:cH(t),c:EDEF[t.type].col,t:t.type});}
     return;
@@ -401,7 +401,7 @@ function damage(t,amt,srcId,kind){
   if(G.mode==='ffa')ffaDmgLog(t,srcId,real,kind);   // assist + จอตอนตาย (js/54)
   if(src&&src!==t){gainUlt(src,amt*0.7);lifesteal(src,amt);src.dmgDealt+=amt;}
   gainUlt(t,amt*0.25);
-  emit({k:'hit',x:t.x,y:t.y,h:t.z+2.4,n:Math.round(amt),id:t.id,s:srcId||undefined,ns:src&&src.baHit?1:undefined,b:kind==='burn'?1:undefined,kl:t.hp<=0?1:undefined,sx:src&&src!==t?Math.round(src.x):undefined,sy:src&&src!==t?Math.round(src.y):undefined,a:(kind==='aoe'||kind==='zone')?1:undefined});
+  emit({k:'hit',x:t.x,y:t.y,h:t.z+2.4,n:Math.round(amt),nf:noFlash?1:undefined,id:t.id,s:srcId||undefined,ns:src&&src.baHit?1:undefined,b:kind==='burn'?1:undefined,kl:t.hp<=0?1:undefined,sx:src&&src!==t?Math.round(src.x):undefined,sy:src&&src!==t?Math.round(src.y):undefined,a:(kind==='aoe'||kind==='zone')?1:undefined});
   if(t.hp<=0){t.hp=0;playerDown(t,srcId);}
 }
 function playerDown(t,srcId){

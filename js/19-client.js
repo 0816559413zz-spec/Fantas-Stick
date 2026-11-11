@@ -160,6 +160,11 @@ function wandPos(ev){const a=ev.a||0;return [ev.x+Math.cos(a)*24-Math.sin(a)*6,e
 
 function impactFX(x,y,t,onTarget,H){
   const col=PCOL[t]||'#ffffff';
+  if(t==='swave'){
+    burst(x,y,'#15d5ff',onTarget?10:6,105,0.32,1.9,{h:H,vh:[-0.65,0.55],g:4});
+    if(onTarget)snd('zap',{x,y,vol:0.35});
+    return;
+  }
   if(t==='web'){
     burst(x,y,'#f0f0f8',22,260,0.6,2,{h:H,g:3,smoke:true});
     for(let i=0;i<5;i++){const a=rnd(0,Math.PI*2);FX.bolt(x,y,H,x+Math.cos(a)*40,y+Math.sin(a)*40,H+rnd(-0.6,0.6),0.5,'#f4f4ff');}

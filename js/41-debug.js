@@ -49,6 +49,7 @@ function botBrain(p,dt,tg0){
 let _obsKeep=null;
 function balArena(on){if(on&&!_obsKeep){_obsKeep=OBS;OBS=[];}else if(!on&&_obsKeep){OBS=_obsKeep;_obsKeep=null;}}
 function balReset(a,b){balArena(true);
+  clearStormWaveMarks();
   for(const p of [a,b]){p.maxHp=200;resetBody(p,p===a?MW*0.14:MW*0.86,MH/2);p.hp=p.maxHp;p.ult=0;p.team=p===a?0:1;p.bot=true;p._px=undefined;p.ang=p===a?0:Math.PI;}
   G.proj=[];G.zones=[];G.strikes=[];G.walls=[];G.chan=[];G.mins=[];G.nature=[];G.wdb=[];G.wtl=[];G.erings=[];G.ices=[];G.waves=[];G.glac=[];G.eso=[];G.edust=[];G.en=[];G.ph='play';a.focusT=b.focusT=null;G.rw={};G.round=1;G.banner=null;G.result=null;
 }

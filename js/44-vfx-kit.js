@@ -176,8 +176,8 @@ function fxAug(ev,H){if(!VFXAUG_ON&&ev.k!=='hit')return;
   switch(ev.k){
     case 'efx':efxAug(ev);break;
     case 'cast':if(ev.x!==undefined){const [wx,wy]=wandPos(ev);playFx(pjPal(ev.t)+'_pop',wx,wy,H,{s:0.6,col:PCOL[ev.t]});}break;
-    case 'pop':playFx(pjPal(ev.t)+'_pop',ev.x,ev.y,H,{s:0.9,col:PCOL[ev.t]});break;
-    case 'imp':playFx(pjPal(ev.t)+'_hit',ev.x,ev.y,H,{s:0.9,col:PCOL[ev.t]});break;
+    case 'pop':if(ev.t!=='swave')playFx(pjPal(ev.t)+'_pop',ev.x,ev.y,H,{s:0.9,col:PCOL[ev.t]});break;
+    case 'imp':if(ev.t!=='swave')playFx(pjPal(ev.t)+'_hit',ev.x,ev.y,H,{s:0.9,col:PCOL[ev.t]});break;
     case 'boom':playFx('fire_big',ev.x,ev.y,H,{s:1.1});break;
     case 'parry':playFx('parry',ev.x,ev.y,H);if(nearMe(ev.x,ev.y,500)){screenKick(0.5);screenFlash('#7ff6ff',0.06,0.18);}break;
     case 'block':playFx('shield_pop',ev.x,ev.y,H,{s:1.2});break;

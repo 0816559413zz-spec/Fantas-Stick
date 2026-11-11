@@ -41,9 +41,9 @@ function domeChargeOrb(o){
 }
 const _spearUp=new THREE.Vector3(0,1,0),_spearDir=new THREE.Vector3(),_spearA=new THREE.Vector3(),_spearB=new THREE.Vector3();
 const DOME_SPEAR_LEN=4.1;
-function stormDomePath(path,life,width,amp,light,cyan){
+function stormDomePath(path,life,width,amp,light,cyan,palette){
   const bolt=tboltP(path,life,width,amp,'#9fd8ff');
-  bolt.domePalette=cyan?domeCyan:domeGold;bolt.gk=light;
+  bolt.domePalette=palette||(cyan?domeCyan:domeGold);bolt.gk=light;
 }
 function stormDomeSpearFX(spear,power,length,now){
   spear.scale.set(lerp(0.1,0.31,power),length,lerp(0.1,0.31,power));
@@ -455,7 +455,7 @@ function stBeam(x,y,h,a,len,rad,col,op,nb){
 function shellPt(x,y,h,R,a,e){return [x+Math.cos(a)*R*Math.cos(e),y+Math.sin(a)*R*Math.cos(e),h+R*S3*Math.sin(e)];}
 function updateStormV(dt){
   for(let i=LATER.length-1;i>=0;i--){const L=LATER[i];L.t-=dt;if(L.t<=0){LATER.splice(i,1);try{vfxOnce(L.fn);}catch(e){}}}
-  updateBolts(dt);updateClaws(dt);stormMarkTick(dt);
+  stormWaveBurstTick(dt);updateBolts(dt);updateClaws(dt);stormMarkTick(dt);
   for(let i=STV.length-1;i>=0;i--){const v=STV[i];v.age+=dt;v.m.material.opacity=v.op*Math.max(0,1-v.age/v.life);if(v.grow)v.m.scale.multiplyScalar(1+v.grow*dt);if(v.age>=v.life){scene.remove(v.m);v.m.geometry.dispose();v.m.material.dispose();STV.splice(i,1);}}
   for(let i=SBV.length-1;i>=0;i--){const b=SBV[i];if(b.s){b.t+=dt;const T=stTgPos(b.tg)||[b.x2,b.y2,groundH(b.x2,b.y2)+1],k=Math.min(1,b.t/b.max),u=0.2/b.max,dl=Math.hypot(T[0]-b.s[0],T[1]-b.s[1])||1,fw=Math.min(36,dl*0.3),A=[b.s[0]+(T[0]-b.s[0])/dl*fw,b.s[1]+(T[1]-b.s[1])/dl*fw,b.s[2]+1.8];let q;
       if(k<u){const e=1-Math.pow(1-k/u,2);q=[lerp(b.s[0],A[0],e),lerp(b.s[1],A[1],e),lerp(b.s[2],A[2],e)];}   // ลอยขึ้น + เลื่อนออกหน้า (ไม่ลอยค้างหน้ากล้อง)

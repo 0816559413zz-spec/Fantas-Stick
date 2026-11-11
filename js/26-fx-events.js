@@ -9,7 +9,7 @@ function statusFX(o,fm,x,y,z,sz,now){
     if(Math.random()<0.2)burst(x,y,'#dff6ff',1,30,0.6,1.6,{h:z+rnd(0.2,sz*1.5),vh:[0,0.5],g:0});
   }else if(o.ice)o.ice.visible=false;
   if((fm&4)&&!(fm&8)&&Math.random()<0.25)PARTS.push({x:x+rnd(-14,14),y:y+rnd(-14,14),h:z+rnd(0.1,sz*1.6),vx:rnd(-10,10),vy:rnd(-10,10),vh:rnd(-1,-0.2),life:0.7,max:0.7,col:Math.random()<0.5?'#ffffff':'#9fe8ff',size:2.2,g:0,sh:4,rot:rnd(0,6.283),vr:rnd(-3,3),c2:'#5ab8ff'});
-  if(fm&16){
+  if((fm&16)&&!(o.waveShockUntil>FIRE_U.time.value)){
     if(Math.random()<0.5)PARTS.push({x:x+rnd(-14,14),y:y+rnd(-14,14),h:z+rnd(0.1,sz*1.7),vx:rnd(-60,60),vy:rnd(-60,60),vh:rnd(-1,1),life:0.2,max:0.2,col:'#fff27a',size:2.2,g:0,sh:2});
     if(Math.random()<0.35)tbolt(x+rnd(-8,8),y+rnd(-8,8),z+sz*rnd(0.6,1.6),x+rnd(-26,26),y+rnd(-26,26),z+rnd(0,sz*1.4),0.06,0,0.07);   // Shock: สายฟ้าเหลืองแลบรอบตัว
   }
@@ -52,7 +52,11 @@ function fx(ev,raw){   // raw = ภาพเดิมในโค้ดเท่
     case 'hit':{
       const mine=ev.id===NET.myId;
       if(ev.id!==undefined){const po=PM3.get(ev.id);if(po)po.lhit={sx:ev.sx,sy:ev.sy,t:performance.now()};}   // ทิศที่โดนตี → ragdoll (js/48)
-      if(!ev.b){flashModel(ev.id!==undefined?PM3.get(ev.id):ev.e!==undefined?EM3.get(ev.e):ev.mn!==undefined?MM3.get(ev.mn):null);hitSparks(ev.x,ev.y,H-0.6,ev.n);}
+      if(!ev.b){
+        const o=ev.id!==undefined?PM3.get(ev.id):ev.e!==undefined?EM3.get(ev.e):ev.mn!==undefined?MM3.get(ev.mn):null;
+        if(ev.nf){if(o)o.hitT=0.25;}
+        else{flashModel(o);hitSparks(ev.x,ev.y,H-0.6,ev.n);}
+      }
       if(SET.dmg||mine){if(ev.b)floatText(ev.x,ev.y,ev.n,'#ff9a4a',12,H-0.3);else floatText(ev.x,ev.y,ev.n,mine?'#ff6b6b':ev.s===NET.myId?'#ffe27a':'#ffffff',ev.s===NET.myId?18:16,H);}
       if(mine&&!ev.b){shake(5);snd('hurt');if(ev.sx!==undefined)DIRI.push({a:Math.atan2(ev.sy-myPos().y,ev.sx-myPos().x),t:1});}
       if(ev.s===NET.myId&&!mine&&!ev.b){if(ev.n>=10&&!ev.ns)shake(Math.min(6,ev.n/6));if(ev.n>=15&&!ev.a)hitStop(ev.n>=40||ev.kl?0.08:0.055);}   // AoE/zone (a=1) ไม่หยุดภาพ
