@@ -154,10 +154,10 @@ const EFXAUG={
   blaze:['fire_summon',1.2,1],snapwind:['fire_charge',1],snap:['fire_hit',1],snapboom:['fire_big',1.1],colossus:['fire_big',1,1],colbolt:['fire_hit',1],
   colboom:['fire_impact',1.2],colend:['fire_impact',1],pboom:['fire_impact',1],ember:['fire_pop',1],inferno:['fire_big',1],melt:['fire_hit',0.8],flare:['fire_impact',1],
   // สายฟ้า
-  stgain:['storm_pop',0.8],stri:['',1],sdash:['storm_charge',1],sdashe:['storm_hit',1],sdhit:['storm_hit',1],ston:['storm_summon',1],sthit:['storm_pop',1],
+  stgain:['storm_pop',0.8],stri:['',1],sdash:['',1],sdashe:['',1],sdhit:['storm_pop',0.8],ston:['storm_summon',1],sthit:['storm_pop',1],
   stoff:['storm_pop',1],stblast:['storm_impact',1.1],slup:['storm_pop',0.7],sline:['',1],   /* ผู้ใช้ 2026-11-11: เส้นสายฟ้า/BA เสริม ไม่ระเบิดที่พื้น */ sorbon:['storm_summon',0.8],
-  sorbgo:['storm_pop',1],sorbhit:['storm_hit',1],sorboff:['storm_pop',1],srailc:['storm_charge',1.2],srail:['storm_impact',1.3],tstrike:['storm_impact',1.1],
-  sdrise:['storm_charge',1.4,1],sdball:['storm_summon',1.2],sdboom:['storm_big',1.2],godon:['storm_big',1,1],godoff:['storm_impact',1],
+  sorbgo:['storm_pop',1],sorbhit:['storm_hit',1],sorboff:['storm_pop',1],srailc:['storm_charge',1.2],srail:['storm_impact',1.3],tstrike:['storm_hit',0.9],
+  sdrise:['storm_charge',1.4,1],sdball:['storm_summon',1.2],sdboom:['storm_big',1.2],godon:['storm_impact',0.8],godoff:['storm_impact',1],
   // สายอื่น (ยังเป็นแบบชั่วคราว)
   wallbreak:['earth_impact',1],wallhit:['earth_hit',1],vine:['nature_hit',1],thorn:['nature_impact',1],worldtree:['nature_big',1.2,1],wispheal:['heal_heal',1],
   silence:['hex_hit',1],terror:['hex_impact',1],blind:['hex_hit',1],mark:['hex_pop',1.2],curse:['hex_impact',1],siphon:['hex_hit',1],soulburst:['hex_big',1.2,1],

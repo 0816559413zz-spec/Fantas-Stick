@@ -80,14 +80,13 @@ function efxFX(ev){
     case 'stri':{const a=ev.a,c=Math.cos(a),sn=Math.sin(a);
       for(let i=0;i<7;i++){const f=rnd(40,250),l=rnd(-1,1)*60*f/250,px=x+c*f-sn*l,py=y+sn*f+c*l;later(i*0.022,()=>{tbolt(px+rnd(-15,15),py+rnd(-15,15),H+10,px,py,H+0.1,0.2,0,0.26,1);burst(px,py,'#ffd000',8,170,0.3,2.2,{h:H+0.2,vh:[1,5],g:6});burst(px,py,'#ffffff',3,120,0.2,1.6,{h:H+0.2,vh:[1,4],g:6});burst(px,py,'#9fd8ff',3,140,0.25,1.6,{h:H+0.2,vh:[1,4],g:6});});}
       FX.flashLight(x+c*140,y+sn*140,H+2,'#ffd23a',5,16,0.25);if(near){snd('zap',ev);snd('boom',{x,y,vol:0.3});}break;}
-    case 'sdash':{if(ev.g)FX.flashSprite(x,y,H-0.7,'#bdf8ff',0.4,3.2,0.12,2.2);
-      else FX.flashSprite(x,y,H-0.7,'#ffe466',0.22,1.3,0.09,1.2);
+    case 'sdash':{   // ผู้ใช้ 2026-11-12: ไม่มีแฟลชตอนพุ่ง (เดิมลูกแสงขาวบังตัว)
       ring(x,y,(ev.g?'#23d9ff':'#ffd000'),40,0.2,H-0.9);burst(x,y,(ev.g?'#23d9ff':'#ffd000'),16,200,0.25,2.2,{h:H-0.8,vh:[0,3],g:2});burst(x,y,'#ffffff',8,150,0.2,1.8,{h:H-0.8,g:2});if(near)snd('dash',ev);break;}
-    case 'sdashe':{(ev.g?tboltB:tbolt)(x,y,H,ev.x2,ev.y2,H,0.24,0,0.2,3);(ev.g?tboltB:tbolt)(x,y,H+rnd(-0.5,0.5),ev.x2,ev.y2,H+rnd(-0.5,0.5),0.18,0,0.1,1);
-      const L=Math.hypot(ev.x2-x,ev.y2-y)||1;for(let d=0;d<L;d+=16)PARTS.push({x:x+(ev.x2-x)*d/L+rnd(-6,6),y:y+(ev.y2-y)*d/L+rnd(-6,6),h:H+rnd(-0.5,0.6),vx:rnd(-30,30),vy:rnd(-30,30),vh:rnd(-0.5,1),life:rnd(0.2,0.35),max:0.35,col:Math.random()<0.6?(ev.g?'#23d9ff':'#ffd000'):'#ffffff',size:rnd(2,3.2),g:0});
+    case 'sdashe':{(ev.g?tboltB:tbolt)(x,y,H,ev.x2,ev.y2,H,0.22,0,0.11,2);(ev.g?tboltB:tbolt)(x,y,H+rnd(-0.5,0.5),ev.x2,ev.y2,H+rnd(-0.5,0.5),0.16,0,0.06,1);
+      const L=Math.hypot(ev.x2-x,ev.y2-y)||1;for(let d=0;d<L;d+=30)PARTS.push({x:x+(ev.x2-x)*d/L+rnd(-6,6),y:y+(ev.y2-y)*d/L+rnd(-6,6),h:H+rnd(-0.5,0.6),vx:rnd(-30,30),vy:rnd(-30,30),vh:rnd(-0.5,1),life:rnd(0.18,0.3),max:0.3,col:ev.g?'#23d9ff':'#ffd000',size:rnd(1.2,2),g:0});
       burst(ev.x2,ev.y2,(ev.g?'#23d9ff':'#ffd000'),10,160,0.25,2,{h:H,g:1});break;}
     case 'sdhit':{if(ev.mark){FX.flashSprite(x,y,H,'#34ddff',0.26,1.25,0.1,1.1);FX.flashLight(x,y,H,'#41dfff',1.2,6,0.13);}
-      else{FX.flashSprite(x,y,H,'#ffffff',0.5,2.5,0.12,2.2);FX.flashLight(x,y,H,(ev.g?'#38dfff':'#ffd23a'),3.9,14,0.2);}
+      else{FX.flashSprite(x,y,H,(ev.g?'#38dfff':'#ffd23a'),0.18,0.8,0.08,1);FX.flashLight(x,y,H,(ev.g?'#38dfff':'#ffd23a'),1.2,6,0.12);}
       for(let i=0;i<7;i++){const an=rnd(0,6.283);(ev.g?tboltB:tbolt)(x,y,H,x+Math.cos(an)*rnd(35,60),y+Math.sin(an)*rnd(35,60),H+rnd(-0.8,0.8),0.14,0,0.12);}
       burst(x,y,(ev.g?'#23d9ff':'#ffd000'),22,320,0.3,2.4,{h:H,vh:[-1,4],g:3});burst(x,y,'#9fd8ff',8,220,0.25,1.8,{h:H,g:3});if(near)snd('zap',ev);break;}
     case 'ston':for(let i=0;i<3;i++)tbolt(x+rnd(-12,12),y+rnd(-12,12),H+14,x,y,H+1,0.25,0,0.32,2);FX.flashSprite(x,y,H+1.2,'#fff7c0',0.4,1.6,0.12,1.6);FX.flashLight(x,y,H+2,'#ffd23a',2.5,12,0.25);ring(x,y,'#ffd000',60,0.3,H+0.1);if(near){snd('zap',ev);shake(2);}break;
@@ -142,8 +141,8 @@ function efxFX(ev){
       if(near){snd('boom',ev);snd('zap',ev);shake(5);}break;}
     case 'tswarn':{const g=makeDfCircle(true),R=ev.r*S3;g.visible=true;g.position.set(tx(x),H+0.07+GY(x,y),tz(y));g.scale.set(R,1,R);if(ev.g)stormCircleCyan(g);else g.userData.mats[0].color.set('#ffd000');TSV.push({g,age:0,i:ev.i,tgt:null});if(near)snd('cast_ebolt',ev);break;}
     case 'tsmv':{const v=TSV.find(q=>q.i===ev.i);if(v)v.tgt=[x,y,H];break;}
-    case 'tstrike':{const R=ev.r;for(let i=0;i<3;i++)(ev.g?tboltB:tbolt)(x+rnd(-14,14),y+rnd(-14,14),H+15,x+rnd(-6,6),y+rnd(-6,6),H+0.1,0.22,0,0.36,2);
-      FX.flashSprite(x,y,H+1,'#ffffff',0.6,3.3,0.12,2.2);FX.flashSprite(x,y,H+0.6,(ev.g?'#38dfff':'#ffd23a'),0.8,4.4,0.28,2);FX.flashLight(x,y,H+3,(ev.g?'#38dfff':'#ffd23a'),5.2,24,0.3);
+    case 'tstrike':{const R=ev.r;for(let i=0;i<3;i++)(ev.g?tboltB:tbolt)(x+rnd(-14,14),y+rnd(-14,14),H+15,x+rnd(-6,6),y+rnd(-6,6),H+0.1,0.22,0,0.24,2);   // ผู้ใช้ 2026-11-12: ไม่ขาวจ้าทั้งจอ — เส้นบางลง แฟลชเล็ก สี ไม่มีแฟลชขาว ไฟจุดอ่อนลง
+      FX.flashSprite(x,y,H+0.6,(ev.g?'#38dfff':'#ffd23a'),0.32,2.2,0.18,1.4);FX.flashLight(x,y,H+3,(ev.g?'#38dfff':'#ffd23a'),2.2,12,0.24);
       ring(x,y,(ev.g?'#23d9ff':'#ffd000'),R*1.3,0.3,H+0.1);ring(x,y,'#ffffff',R*0.7,0.2,H+0.1);
       for(let i=0;i<6;i++){const an=rnd(0,6.283);(ev.g?tboltB:tbolt)(x,y,H+0.15,x+Math.cos(an)*R*rnd(0.9,1.5),y+Math.sin(an)*R*rnd(0.9,1.5),H+0.1,0.2,0,0.12);}
       burst(x,y,(ev.g?'#23d9ff':'#ffd000'),34,R*4,0.45,2.4,{h:H+0.3,vh:[2,8],g:8});burst(x,y,'#ffffff',14,R*3,0.3,2,{h:H+0.3,vh:[2,7],g:8});burst(x,y,'#9fd8ff',10,R*3,0.35,1.8,{h:H+0.3,vh:[1,5],g:6});
@@ -204,8 +203,8 @@ function efxFX(ev){
       SHAPES_Q.push({k:'decal',x,y,col:'#000000',s1:R/36,life:3,op:0.4});
       if(near){snd('boom',ev);snd('boom',{x,y,vol:0.6});snd('zap',ev);shake(g?8:6);}break;}
     case 'godon':{TBLUE=1;try{const o=PM3.get(ev.id);if(o)o.godUp=0.55;
-      for(let i=0;i<4;i++)later(i*0.05,()=>tboltB(x+rnd(-18,18),y+rnd(-18,18),H+18,x+rnd(-4,4),y+rnd(-4,4),H+1.2,0.35,0,0.5,3));
-      later(0.12,()=>{FX.flashSprite(x,y,H+1.2,'#ffffff',0.6,5,0.2,2.2);FX.flashLight(x,y,H+2,'#4cd0ff',6.5,26,0.5);ring(x,y,'#3fdcff',140,0.5,H+0.1);burst(x,y,'#3fdcff',60,320,0.6,2.6,{h:H+1,vh:[0,6],g:1});burst(x,y,'#9fd8ff',20,260,0.5,2,{h:H+1,g:1});
+      for(let i=0;i<4;i++)later(i*0.05,()=>{const b=tboltB(x+rnd(-18,18),y+rnd(-18,18),H+18,x+rnd(-4,4),y+rnd(-4,4),H+1.2,0.35,0,0.3,3);if(b)b.gk=0.55;});   // ผู้ใช้ 2026-11-12: เปิดอัลติไม่ขาวทั้งจอ
+      later(0.12,()=>{FX.flashSprite(x,y,H+1.2,'#38dfff',0.3,2.6,0.18,1.4);FX.flashLight(x,y,H+2,'#4cd0ff',2.6,14,0.4);ring(x,y,'#3fdcff',140,0.5,H+0.1);burst(x,y,'#3fdcff',60,320,0.6,2.6,{h:H+1,vh:[0,6],g:1});burst(x,y,'#9fd8ff',20,260,0.5,2,{h:H+1,g:1});
         if(near){snd('nova',ev);snd('zap',ev);shake(6);}});}finally{TBLUE=0;}break;}
     case 'godoff':burst(x,y,'#3fdcff',24,160,0.5,2,{h:H,vh:[0,2],g:0});break;
     case 'sclawgo':{const o=PM3.get(ev.id);if(o)o.clLunge=0.12;if(near)snd('whoosh',ev);break;}

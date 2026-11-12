@@ -45,8 +45,8 @@ ROLE_N:222 takePoison:223
 §225 ความสามารถพื้นฐาน (คลิกซ้าย) ของแต่ละสาย: สะสมสถานะตั้งต้นให้เองทุกๆ …
 PBASIC:226
 
-## js/04-frost-mech.js (118) — สายน้ำแข็ง: ประชิด/ไกล (V) • ฟันดาบ/ขวาน • ไถลน้ำแข็ง • พื้นน้ำแข็ง/ภ…
-FROSTV:3 frostBoom:9 meleeHit:16 mirrorPos:27 frostBasic:28 frostSlam3:52 frostSlam:60 frostDash:66 addIce:71 updateIces:72 frostWavePitch:89 updateWaves:91 _stO:108 _stL:108 groundH:109
+## js/04-frost-mech.js (126) — สายน้ำแข็ง: ประชิด/ไกล (V) • ฟันดาบ/ขวาน • ไถลน้ำแข็ง • พื้นน้ำแข็ง/ภ…
+FROSTV:3 frostBoom:9 meleeHit:16 mirrorPos:27 frostBasic:28 frostSlam3:52 frostSlam:60 frostDash:66 addIce:71 updateIces:72 frostWavePitch:89 frostWaveSolid:92 updateWaves:98 _stO:116 _stL:116 groundH:117
 
 ## js/05-terrain.js (44) — พื้นสูงต่ำ (แผนที่จากไฟล์ Blender — กติกาฝั่งคนปั้นใน guides/MAP-DESI…
 TERR:5 TSTEP:6 TSLOPE:6 terrT:7 floorAt:12 terrSolid:14 terrMove:21 updateGlaciers:30
@@ -265,12 +265,12 @@ burst:144 smoke:155 ring:156 floatText:157 shake:158 wandPos:159 impactFX:161 ex
 §195 เอฟเฟกต์คาถาใหม่
 ZV:196 COLB:196 WVV:196 GLV:196 ICEV:196 SLV:196 ULTV:196 OBV:196 _iceDisc:198 _iceEdge:199 _iceSpk:200 iceFloorMat:201 _icePlane:202 _icePathMat:203 _iceWvM:203 iceWvMat:205 makeIceFloor:217 ICE_WV:244 updateIceFloors:245 FLASHM:257 FLASHING:258 flashModel:259 endFlash:268 tickFlash:269 GHOSTM:271 SOLIDM:271 ghostOf:272 setGhost:278 hitSparks:286
 
-## js/20-vfx-pyro-storm.js (836) — Dragonfall (ภาพ)
+## js/20-vfx-pyro-storm.js (837) — Dragonfall (ภาพ)
 makeDfCircle:3 stormCircleCyan:20 DFV:25 dfCracks:26 updateDfCracks:36 _domeAim:37 domeChargeOrb:38 _spearUp:46 _spearDir:46 _spearA:46 _spearB:46 DOME_SPEAR_LEN:47 stormDomePath:48 stormDomeSpearFX:52 stormDomeHoverFX:83 stormDomeReadyFX:107 stormDomeGroundPoint:128 stormDomeFracture:131 stormDomeFloorPullFX:177 stormDomeFieldFX:204 stormDomePose:240 dragonfallFX:304
 §368 สายฟ้า (ภาพ)
-TBN:371 TBA:371 TBF:371 TBMAX:371 _tv:372 _tt:372 _ts:372 _tw:372 tbFalloff:375 tbLayer:378 TBL:384 TBO_MAX:386 tbOrbLayer:387 TBC:390 _tcc:391 domeCyan:392 domeGold:393 tbGet:394 TBLUE:397 TBFIRE:397 tboltB:398 tbolt:399 tboltP:409 tbWrite:410 updateBolts:418 LATER:451 STV:451 SBV:451 SDV:451 TSV:451 CLV:451 stTgPos:453 STCLAW:457
-§461 รอยกรงเล็บ (อัลติสายฟ้า): รอยข่วน 3 เส้นโค้งปลายแหลมขนานกัน ตั้งขวางห…
-clawGeo:464 clawRakes:469 updateClaws:483 later:491 stFade:492 stBeam:493 shellPt:498 updateStormV:499 _ev:547 GODPTS:549 bWorld:551 stormClawStop:555 CLAWFX:561 stormClawRangeFX:562 updateClawFX:592 stormClawSwipe:605 stormFX:652 STHUD:790 drawStormHud:791
+TBN:371 TBA:371 TBF:371 TBMAX:371 _tv:372 _tt:372 _ts:372 _tw:372 tbFalloff:375 tbLayer:378 TBL:384 TBO_MAX:386 tbOrbLayer:387 TBC:390 _tcc:391 domeCyan:392 domeGold:393 tbGet:394 TBLUE:397 TBFIRE:397 tboltB:398 tbolt:399 tboltP:409 tbWrite:410 updateBolts:418 LATER:452 STV:452 SBV:452 SDV:452 TSV:452 CLV:452 stTgPos:454 STCLAW:458
+§462 รอยกรงเล็บ (อัลติสายฟ้า): รอยข่วน 3 เส้นโค้งปลายแหลมขนานกัน ตั้งขวางห…
+clawGeo:465 clawRakes:470 updateClaws:484 later:492 stFade:493 stBeam:494 shellPt:499 updateStormV:500 _ev:548 GODPTS:550 bWorld:552 stormClawStop:556 CLAWFX:562 stormClawRangeFX:563 updateClawFX:593 stormClawSwipe:606 stormFX:653 STHUD:791 drawStormHud:792
 
 ## js/21-vfx-frost.js (226) — น้ำแข็ง (ภาพ): ชิ้นผลึก/หนาม/แผ่นน้ำแข็งชั่วคราว (โผล่ → ค้าง → หด) •…
 FRV:2 _cryG:3 _spkG:3 _plateG:3 _hexG:3 _iceFxM:4 _frostM:4 iceFxM:5 frostM:6 ICEP:8 _im4:8 _iq:8 _ie:8 _ip:8 _is:8 icePool:9 iceBit:10 iceChips:13 updateFRV:14 iceRing:24 chillFX:25 makeSlash:41 _wbGeo:49 crescentGeo:51 makeWaveBlade:54 WGH:68 updateSlashes:69 _glGeo:82 _glMat:82 _glMat2:82 makeGlacier:83 updateGlacierVis:114 updateOrbShots:123
@@ -295,7 +295,7 @@ BRKV:313 BRK_COL:313 brkSetup:314 BRK_CM:333 brkCrackMat:334 brkClip:350 brkYc:3
 MM3:2 makeMinion:3 syncMins:36 drawMinBars:58
 
 ## js/25-efx.js (357) — efxFX: ภาพของ event "efx" ทุกคาถา (หนึ่ง case ต่อหนึ่งเอฟเฟกต์)
-efxState:4 efxFX:20
+efxState:4 efxFX:21
 
 ## js/26-fx-events.js (246) — fx(ev): เอฟเฟกต์+เสียงของทุก event จากโฮสต์ • statusFX (สถานะบนตัว) •…
 statusFX:3 fx:28
@@ -455,7 +455,7 @@ _wpM:108 fileWeapon:109
 §117 Ice circle (Permafrost): ริบบิ้นแสงวนเป็นก้นหอยบนพื้น + ผลึกลอยหมุนรอ…
 SWIRL_FS:118 ICIRC:122 iceCircle:123 updateIceCircles:134
 
-## js/44-vfx-kit.js (394) — ชุดเครื่องมือ VFX กลาง (ขั้น 2 ของแผนอัปเกรด VFX)
+## js/44-vfx-kit.js (394) — 
 §8 1) หางแสง
 TRMAX:11 TRPTS:11 TRAILS:11 _trL:12 trailLayer:13 trailNew:22 trailPoint:24 trailStop:27 _tv1:28 _tv2:28 _tv3:28 updateTrails:29
 §52 2) สูตรเอฟเฟกต์ = จานสี (ธาตุ) × แม่แบบ (ขนาด/ชนิด)
@@ -806,4 +806,4 @@ surfSync:49 surfQuality:53
 SURF_VS:55 SURF_VS_BODY:56 SURF_FS:67 SURF_FS_BODY:68 surfOk:98 surfApply:99 surfScene:111
 §112 ปรับค่า (tune.html / F8)
 
-(98 files, 25694 lines)
+(98 files, 25703 lines)

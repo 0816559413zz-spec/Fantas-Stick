@@ -1,6 +1,6 @@
 {
  "v": 1,
- "desc": "Storm Dash ออกตัว (A+B): แฟลช + วงพื้นทอง (A) + วงขาวตั้ง + เส้นความเร็วขาว + จอกระตุก (B)",
+ "desc": "Storm Dash ออกตัว (A+B): แฟลช + วงพื้นทอง (A) + วงขาวตั้ง + เส้นความเร็วขาว + จอกระตุก (B) • ผู้ใช้ 2026-11-12: ลดแฟลช/หางขาวที่บังตัวและจอ",
  "tags": [
   "storm",
   "dash"
@@ -8,20 +8,6 @@
  "pal": "storm",
  "dur": 0.6,
  "layers": [
-  {
-   "id": "core",
-   "t": "flash",
-   "at": 0,
-   "life": 0.1,
-   "col": "$core",
-   "size": 1.3,
-   "att": "feet",
-   "pos": [
-    0,
-    1,
-    0
-   ]
-  },
   {
    "id": "ring",
    "t": "ring",
@@ -35,7 +21,7 @@
    ],
    "col": "$main",
    "r": 2.5,
-   "op": 0.5
+   "op": 0.35
   },
   {
    "id": "ringv",
@@ -51,14 +37,14 @@
    "vert": true,
    "col": "#ffffff",
    "r": 1.3,
-   "op": 0.55
+   "op": 0.18
   },
   {
    "id": "lines",
    "t": "emit",
    "at": 0,
    "life": 0.04,
-   "burst": 18,
+   "burst": 7,
    "att": "feet",
    "from": "sphere",
    "fr": 0.4,
@@ -75,10 +61,10 @@
    ],
    "look": "streak",
    "size": [
-    2.6,
-    3.6
+    1.43,
+    1.98
    ],
-   "col": "#ffffff",
+   "col": "#fff2b0",
    "c2": "$main",
    "gravity": 0,
    "drag": 3,
@@ -94,7 +80,7 @@
    "at": 0,
    "life": 0.2,
    "shake": 2,
-   "kick": 0.3,
+   "kick": 0.105,
    "own": true
   }
  ]

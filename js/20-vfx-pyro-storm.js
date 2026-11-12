@@ -398,7 +398,7 @@ let TBLUE=0,TBFIRE=0;   // TBFIRE = เส้นไฟนีออน (Blazeform
 const tboltB=(...a)=>{const was=TBLUE;TBLUE=1;try{return tbolt(...a);}finally{TBLUE=was;}};   // สายฟ้าฟ้า (ใช้ใน later ของร่างเทพ)
 function tbolt(x1,y1,h1,x2,y2,h2,life,col,w,br){
   if(col!=='#9fd8ff'&&!tbolt.cy&&!TBFIRE){tbolt.cy=1;try{const o2=tbolt(x1+rnd(-12,12),y1+rnd(-12,12),h1+rnd(-.3,.3),x2+rnd(-12,12),y2+rnd(-12,12),h2+rnd(-.3,.3),life,'#9fd8ff',(w||.14)*(TBLUE?.5:.75),0);o2.amp*=1.6;}finally{tbolt.cy=0;}}   // every bolt carries a cyan companion beside it (user 2026-11-10: make it visible)
-  const o=tbGet();o.A.set(tx(x1),h1+GY(x1,y1),tz(y1));o.B.set(tx(x2),h2+GY(x2,y2),tz(y2));o.path=null;o.life=o.max=life||0.12;o.w=(w||0.14)*(col==='#9fd8ff'?1.2:.85);o.rj=0;o.gk=1;o.blu=TBLUE;o.fir=TBFIRE;   /* ผู้ใช้ 2026-11-10: เส้นเหลืองบางลง (นีออนจัดเท่าเดิม) • ฟ้าเห็นชัดขึ้น */
+  const o=tbGet();o.A.set(tx(x1),h1+GY(x1,y1),tz(y1));o.B.set(tx(x2),h2+GY(x2,y2),tz(y2));o.path=null;o.life=o.max=life||0.12;o.w=(w||0.14)*(col==='#9fd8ff'?1.2:.85);o.rj=0;o.gk=1;o.gk0=undefined;o.blu=TBLUE;o.fir=TBFIRE;   /* ผู้ใช้ 2026-11-10: เส้นเหลืองบางลง (นีออนจัดเท่าเดิม) • ฟ้าเห็นชัดขึ้น */
   const L=o.A.distanceTo(o.B);o.amp=Math.min(0.55,L*0.11+0.03);o.acc=TBLUE?1:col==='#9fd8ff';   /* ร่างเทพ: ฟ้าทั้งหมด */
   o.len=L;o.orb=!tbolt.cy&&!tbolt.inBr&&o.A.y-o.B.y<3&&L>3?(w||0.14):0;   // เฉพาะเส้นยาว (>3 ม.) — เส้นสั้นรอบตัว (โล่/ออร์บ) ไม่ใส่ ไม่งั้นรวมกันขาวโพลน   // ออร์บต้นเส้นแบบปืนเทสลา (ผู้ใช้ 2026-11-11) — ไม่ใส่ที่กิ่ง/เส้นคู่/ฟ้าผ่าจากฟ้า
   if(br&&L>1.2)for(let i=0;i<br;i++){const k=rnd(0.25,0.75),bx=lerp(x1,x2,k)+rnd(-8,8),by=lerp(y1,y2,k)+rnd(-8,8),bh=lerp(h1,h2,k),an=rnd(0,6.283),bl=L/S3*rnd(0.2,0.4);
@@ -406,7 +406,7 @@ function tbolt(x1,y1,h1,x2,y2,h2,life,col,w,br){
   return o;
 }
 // สายฟ้าตามเส้นทางที่กำหนด (จุดโลก) — ใช้กับหาง/เกลียวรอบ Railgun
-function tboltP(P,life,w,amp,col){if(col!=='#9fd8ff'&&!tboltP.cy){tboltP.cy=1;try{tboltP(P,life,w*(TBLUE?.5:.75),amp*2.2,'#9fd8ff');}finally{tboltP.cy=0;}}const o=tbGet();o.path=P;o.life=o.max=life;o.w=w*(col==='#9fd8ff'?1.2:.85);o.rj=0;o.amp=amp;o.acc=TBLUE?1:col==='#9fd8ff';o.blu=TBLUE;o.gk=1;return o;}
+function tboltP(P,life,w,amp,col){if(col!=='#9fd8ff'&&!tboltP.cy){tboltP.cy=1;try{tboltP(P,life,w*(TBLUE?.5:.75),amp*2.2,'#9fd8ff');}finally{tboltP.cy=0;}}const o=tbGet();o.path=P;o.life=o.max=life;o.w=w*(col==='#9fd8ff'?1.2:.85);o.rj=0;o.amp=amp;o.acc=TBLUE?1:col==='#9fd8ff';o.blu=TBLUE;o.gk=1;o.gk0=undefined;return o;}
 function tbWrite(L,slot,pts,w,taper,c,a){
   const g=L.geometry,P0=g.attributes.position.array,C0=g.attributes.color.array,cp=cam.position,base=slot*TBN*2;
   for(let i=0;i<TBN;i++){const P=pts[i],Pa=pts[Math.max(0,i-1)],Pb=pts[Math.min(TBN-1,i+1)];
@@ -436,7 +436,8 @@ function updateBolts(dt){
       tbWrite(TBL.core,n,o.pts,o.w*0.42,true,pal.core,light);
       n++;continue;
     }
-    const bl=o.blu&&o.acc,fi=o.fir,au=Math.min(1,Math.max(0,(o.len-1)/3));   /* ออร่ากว้างเฉพาะเส้นยาว — เส้นสั้นรอบตัวรวมกันไม่ขาวโพลน */
+    const bl=o.blu&&o.acc,fi=o.fir,au=Math.min(1,Math.max(0,(o.len-1)/3));
+    {const P=o.pts[TBN>>1],cd=P?cam.position.distanceTo(P):9;o.gk=(o.gk0!==undefined?o.gk0:(o.gk0=o.gk))*Math.min(1,Math.max(0.12,(cd-1.2)/5))*(o.len>8?0.62:1);}   /* ผู้ใช้ 2026-11-12: เส้นที่ผ่านใกล้กล้อง (Dash) / เสาฟ้าผ่ายาว ไม่บานขาวเต็มจอ — ลดออร่า+เรือง ไม่ลดตัวเส้น */   /* ออร่ากว้างเฉพาะเส้นยาว — เส้นสั้นรอบตัวรวมกันไม่ขาวโพลน */
     tbWrite(TBL.halo,n,o.pts,o.w*6,tp,fi?TBC.fBody:bl?TBC.bBody:o.acc?TBC.acc:TBC.body,0.45*au*k*o.gk);   /* ออร่าสีทึบจางๆ ให้เห็นบนพื้นสว่าง (ผู้ใช้ 2026-11-12: BA ออร่าจางไป) */
     tbWrite(TBL.glow,n,o.pts,o.w*(2.2+2.6*au),tp,fi?TBC.fGlow:bl?TBC.bGlow:o.acc?TBC.accG:TBC.glow,(fi?.85:bl?.75:o.acc?.8:.95)*(0.45+0.55*au)*k*o.gk);tbWrite(TBL.body,n,o.pts,o.w*1.25,tp,fi?TBC.fBody:bl?TBC.bBody:o.acc?TBC.acc:TBC.body,k);tbWrite(TBL.core,n,o.pts,o.w*(bl?.42:.6),tp,fi?TBC.fCore:bl?TBC.bCore:o.acc?TBC.accC:o.gk<1?_tcc.copy(TBC.core).multiplyScalar(0.36+0.64*o.gk):TBC.core,k);n++;
   }
@@ -682,10 +683,10 @@ function stormFX(o,p,pz,now,dt){
   }else if(o.stG)o.stG.visible=false;
   // Dash: สายฟ้าหนาหุ้มตัว + เงาติดตา + ร่องสายฟ้าแตกกิ่งที่จางเร็ว
   if(p.ds){const pv=o.dPrev||[p.x,p.y];
-    for(let j=0;j<2;j++){const a1=rnd(0,6.283),q=shellPt(p.x,p.y,pz+0.3,20,a1,rnd(-0.3,0.3)),q2=shellPt(p.x,p.y,pz+2,20,a1+rnd(2,4),rnd(-0.3,0.3));(god?tboltB:tbolt)(q[0],q[1],q[2],q2[0],q2[1],q2[2],0.06,0,0.13);}
-    if(Math.hypot(p.x-pv[0],p.y-pv[1])>4)(god?tboltB:tbolt)(pv[0],pv[1],pz+1+rnd(-0.4,0.4),p.x,p.y,pz+1+rnd(-0.4,0.4),0.22,0,0.16,2);
-    FX.flashSprite(p.x,p.y,pz+1.1,(god?'#38dfff':'#ffd23a'),1.9,1.3,0.16,1.4);
-    LREQ.push({x:tx(p.x),y:pz+1,z:tz(p.y),col:(god?'#38dfff':'#ffd23a'),int:3,dist:9});}
+    {const a1=rnd(0,6.283),q=shellPt(p.x,p.y,pz+0.3,20,a1,rnd(-0.3,0.3)),q2=shellPt(p.x,p.y,pz+2,20,a1+rnd(2,4),rnd(-0.3,0.3));(god?tboltB:tbolt)(q[0],q[1],q[2],q2[0],q2[1],q2[2],0.06,0,0.08).gk=0.4;}   // ผู้ใช้ 2026-11-12: สายฟ้าหุ้มตัวน้อยลง ไม่รวมกันเป็นก้อนขาว
+    if(Math.hypot(p.x-pv[0],p.y-pv[1])>4)(god?tboltB:tbolt)(pv[0],pv[1],pz+1+rnd(-0.4,0.4),p.x,p.y,pz+1+rnd(-0.4,0.4),0.22,0,0.1,2).gk=0.6;
+    if(!o.dFl||now-o.dFl>60){o.dFl=now;FX.flashSprite(p.x,p.y,pz+1.1,(god?'#38dfff':'#ffd23a'),0.32,1.0,0.1,1.2);}   // ผู้ใช้ 2026-11-12: เดิมสร้างแฟลช 1.9 ทุกเฟรม ซ้อนกันเป็นลูกแสงขาวบังตัว
+    LREQ.push({x:tx(p.x),y:pz+1,z:tz(p.y),col:(god?'#38dfff':'#ffd23a'),int:1.4,dist:7});}
   o.dPrev=[p.x,p.y];
   // ร่างเทพสายฟ้า (รอบปรับ 2026-10-19: กรงเล็บเข้มจากไฟล์ Blender + สายฟ้าวิ่งตามใบมีดตลอด • ตาแบบเดกุ: ตาสว่าง + สายฟ้าลากเป็นหางออกด้านข้าง/หลัง • ลดแสงเรือง)
   if(god){TBLUE=1;try{
