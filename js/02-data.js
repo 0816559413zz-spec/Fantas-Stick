@@ -335,7 +335,7 @@ const PDEF={
   spark:{spd:1000,r:13,dmg:6,life:0.4,col:'#ffb347'},   // hitbox ใหญ่ขึ้น โดนคนบินง่ายขึ้น (ผู้ใช้ 2026-11-11) ภาพเท่าเดิม
   icicle:{spd:1150,r:7,dmg:7,life:0.61,col:'#bfeaff'},
   iceboulder:{spd:850,r:14,dmg:20,life:0.82,col:'#9fe0ff'},
-  pfire:{spd:2000,r:22,dmg:20,life:0.65,col:'#ff6a2a'},   // ลูกไฟชาร์จ: เร็วขึ้น ไกลขึ้น (ผู้ใช้ 2026-11-11)
+  pfire:{spd:2000,r:22,dmg:20,life:0.35,col:'#ff6a2a'},   // ลูกไฟชาร์จ: ระยะจากปลายไม้ 700 หน่วย
   pfireb:{spd:1300,r:16,dmg:20,life:0.8,col:'#ff5a1a'},
   pb1:{spd:950,r:7,dmg:10,life:1.1,col:'#9fe8ff'},
   pb2:{spd:1100,r:6,dmg:9,life:1.0,col:'#fff27a'},

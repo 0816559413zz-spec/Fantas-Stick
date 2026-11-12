@@ -429,11 +429,12 @@ function killProj(pr){if(pr.type==='wshp'&&!pr.dead){pr.dead=true;if(pr.life>0)w
   if(pr.dead)return;
   pr.dead=true;
   if(pr.type==='nature_pea'){naturePeaSplash(pr);return;}
+  if(pr.type==='efist'||pr.type==='efistc'){earthFistBreak(pr);return;}
   if(pr.type==='fire')explode(pr);
   else if(pr.type==='iceboulder')frostBoom(pr);
   else if(pr.type==='pfireb')pyroBigBoom(pr);
   if(pr.type==='eslab')damageEnv(pr.x,pr.y,80,STONEB.v.env*ERV.env,pr.owner,'rock',pr.h);   // แผ่นหิน Stonebreaker แตก = พังบ้าน/ของ
-  else emit({k:'pop',x:pr.x,y:pr.y,h:pr.h,t:pr.type});
+  else if(!pr.noImpact)emit({k:'pop',x:pr.x,y:pr.y,h:pr.h,t:pr.type});
 }
 function explode(pr){
   emit({k:'boom',x:pr.x,y:pr.y,h:pr.h});
@@ -449,9 +450,9 @@ function explode(pr){
 }
 function hitTarget(pr,t){
   if(pr.type==='nature_pea')return; // The splash applies damage once, including to the direct target.
-  if(pr.sp&&SPELLS[pr.sp]&&SPELLS[pr.sp].hit){SPELLS[pr.sp].hit(pr,t);if(pr.type!=='fire'&&pr.type!=='wbl')emit({k:'imp',x:t.x,y:t.y,h:pr.h,t:pr.type});return;}
-  damage(t,pr.dmg,pr.owner,'proj');
-  if(pr.type!=='fire')emit({k:'imp',x:t.x,y:t.y,h:pr.h,t:pr.type});
+  if(pr.sp&&SPELLS[pr.sp]&&SPELLS[pr.sp].hit){SPELLS[pr.sp].hit(pr,t);if(!pr.noImpact&&pr.type!=='fire'&&pr.type!=='wbl')emit({k:'imp',x:t.x,y:t.y,h:pr.h,t:pr.type});return;}
+  damage(t,pr.dmg,pr.owner,'proj',pr.noImpact);
+  if(!pr.noImpact&&pr.type!=='fire')emit({k:'imp',x:t.x,y:t.y,h:pr.h,t:pr.type});
   const big=t.type==='troll'||t.type==='queen';
   switch(pr.type){
     case 'stun':t.stun=Math.max(t.stun,t.isE?(big?0.4:1.4):0.8);break;
@@ -508,6 +509,7 @@ function projStep(pr,dt,ps){
           {const B=PBASIC[p.pathIdx|0];if(B&&B.onBlock)B.onBlock(p);}
           if(p.shieldE<=0)breakShield(p);
         }
+        if(pr.type==='efist'||pr.type==='efistc')earthFistBreak(pr);
         break;
       }
       hitTarget(pr,p);if(pr.pierce){pr.hs.add(p);continue;}killProj(pr);break;

@@ -133,7 +133,7 @@ function botPlay(p,dt,tg,c0){
   // ---------- ⛰️ ดิน ----------
   if(pi===6){
     const stand=!(p.stdB>0);
-    if(p.wr){if(p.wr.ph==='sky'){pulse();inp.mx=Math.sin(t*0.8+A.ps.ph);inp.my=0;}return;}   // Wrath: ลอยบนฟ้า เล็งแล้วคลิกปาเสา
+    if(p.wr){if(p.wr.ph==='aim')pulse();return;}   // Wrath: เลือกพื้นที่แล้วคลิกให้ Stand ทุ่มเสา
     if(p.aug){const T=A.augT||2.1;inp['h'+p.aug.k]=p.aug.t<T?1:0;inp.mx=inp.my=0;return;}     // Auger: กดค้างจนครบระดับที่ตั้งใจ แล้วปล่อย
     if(p.ramp||p.ecb)return;
     inp.fire=(t%0.8<0.15)?1:0;                                        // Stand ต่อยเป็นจังหวะ (ไม่กดค้างชาร์จ เดินช้า)

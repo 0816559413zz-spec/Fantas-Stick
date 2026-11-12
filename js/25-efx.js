@@ -12,7 +12,6 @@ function efxState(ev){
     case 'mirror':ULTV.push({x,y,a:ev.a,d:0,acc:100});break;
     case 'colbolt':if(o)o.colShot=performance.now();break;   // Colossus: เวลาปาล่าสุด → ท่าเหวี่ยงแขนในไฟล์เอฟเฟกต์ (param tw) แม้ bind แบบ replace
     case 'stri':if(o)castStart(o,'',4);break;     // สายฟ้าสามเหลี่ยม = ฟาดไม้จากเหนือหัว
-    case 'epunch':if(o)castStart(o,'',5);break;   // สายดิน: ชี้ไม้สั่ง Stand ต่อย
     case 'srail':if(o)skAnim({id:ev.id,s:'railgun_release'});break;
     case 'eaugon':if(o)skAnim({id:ev.id,s:'terraauger'});break;
     case 'eaugfire':if(o)skAnim({id:ev.id,s:'terraauger_release'});break;
