@@ -9,13 +9,18 @@
 const EARTH=6;   // ตัวเลขของสายดิน: ERV (ท่าพื้นฐาน/โล่/Dash) + v:{...} ของแต่ละสกิล — ปรับได้ใน tune.html / F8
 PATHS.push({id:'earth',n:'สายดิน',ic:'⛰️',col:'#c9a36a',d:'สถาปนิกสนามรบ — Stand หินต่อยแทนเรา ถือโล่ 300 สร้างกำแพง/เสา/เนิน แล้วผลักศัตรูให้ชนของแข็ง',
   combo:'Stonebreaker ผลักศัตรูชนกำแพง (กำแพงแผนที่ / Tectonic Crush / เสา Wrath / กำแพงโดเมน) = +20 ดาเมจ สตัน 2 วิ • Mud Swamp ช้า 50% ห้าม Dash แล้ว Crush กำแพงหนีบ 80 • Dust Burst บังสายตาศัตรู • Terra Auger ชาร์จ 3 ระดับ • โล่แตก = Stand หาย 15 วิ'});
-const ERV=PATHS[EARTH].v={sh:300,shDelay:3,shRegen:20,standOff:15,punch:10,punchR:300,punchCd:0.8,punchDelay:0.2,rockCd:0.35,cbHold:0.25,cbCharge:2,cbDmg:50,cbR:180,cbStun:0.7,cbCd:6,cbSlow:0.6,
+const ERV=PATHS[EARTH].v={sh:300,shDelay:3,shRegen:20,standOff:15,punch:10,punchR:500,punchCd:0.8,punchDelay:0.34,rockCd:0.35,cbHold:0.25,cbCharge:2,cbDmg:50,cbR:180,cbShardDmg:20,cbStun:0.5,cbCd:6,cbSlow:0.6,
   rampT:1.2,rampSp:500,rampDmg:15,rampStun:0.5,rampKnock:650,rampCd:8,slamR:150,slamDmg:20,slamStun:0.8,boostDist:400,boostR:120,boostKnock:900,boostCd:6,env:2.5};
 PATHS[EARTH].vn={sh:'โล่ Stand • HP',shDelay:'โล่ • เริ่มฟื้นหลังไม่ใช้ (วิ)',shRegen:'โล่ • ฟื้นต่อวิ',standOff:'โล่แตก • Stand หาย (วิ)',punch:'หมัด Stand • ดาเมจ',punchR:'หมัด Stand • ระยะล็อก',punchCd:'หมัด Stand • เว้น (วิ)',punchDelay:'หมัด Stand • หน่วงก่อนโดน (วิ)',rockCd:'หินเล็ก (Stand แตก) • เว้นยิง (วิ)',
-  cbHold:'ทุบชาร์จ • กดค้างกี่วิเริ่มชาร์จ',cbCharge:'ทุบชาร์จ • ชาร์จ (วิ)',cbDmg:'ทุบชาร์จ • ดาเมจ',cbR:'ทุบชาร์จ • รัศมี',cbStun:'ทุบชาร์จ • สตัน (วิ)',cbCd:'ทุบชาร์จ • คูลดาวน์ (วิ)',cbSlow:'ทุบชาร์จ • ความเร็วเดินตอนชาร์จ (เท่า)',
+  cbHold:'หมัดชาร์จ • กดค้างกี่วิเริ่มชาร์จ',cbCharge:'หมัดชาร์จ • ชาร์จ (วิ)',cbDmg:'หมัดชาร์จ • ดาเมจตรง',cbR:'เศษหมัดชาร์จ • ระยะ',cbShardDmg:'เศษหมัดชาร์จ • ดาเมจต่อเป้า',cbStun:'หมัดชาร์จ • สตัน (วิ)',cbCd:'หมัดชาร์จ • คูลดาวน์ (วิ)',cbSlow:'หมัดชาร์จ • ความเร็วเดินตอนชาร์จ (เท่า)',
   rampT:'Rampage • วิ่งนาน (วิ)',rampSp:'Rampage • ความเร็ว',rampDmg:'Rampage • ชนดาเมจ',rampStun:'Rampage • ชนสตัน (วิ)',rampKnock:'Rampage • ชนกระเด็น',rampCd:'Rampage • คูลดาวน์ (วิ)',slamR:'Rampage จบ • รัศมีทุบ',slamDmg:'Rampage จบ • ดาเมจ',slamStun:'Rampage จบ • สตัน (วิ)',
   boostDist:'Rock Boost • ระยะ',boostR:'Rock Boost • รัศมีผลัก',boostKnock:'Rock Boost • แรงผลัก',boostCd:'Rock Boost • คูลดาวน์ (วิ)',env:'ทุกสกิล • ตัวคูณพังบ้าน/ของ'};
 Object.assign(PDEF,{erock:{spd:1100,r:6,dmg:5,life:0.55,col:'#c9a36a'},eslab:{spd:1800,r:24,dmg:25,life:0.39,col:'#d8b47a'}});
+Object.assign(PDEF,{
+  efist:{spd:1150,r:13,col:'#b69160'},
+  efistc:{spd:1380,r:27,col:'#d2a970'},
+  efistshard:{spd:1100,r:7,col:'#b69160'},
+});
 // ---------- ตัวช่วย ----------
 const eOn=p=>p&&p.pathIdx===EARTH;
 const eStand=p=>!(p.stdB>0);
@@ -43,9 +48,7 @@ function earthTick(p,dt){
   if(p.shieldOn)p.eShT=0;else{p.eShT=(p.eShT||0)+dt;if(p.eShT>=ERV.shDelay&&!(p.stdB>0))p.ehp=Math.min(ERV.sh,p.ehp+ERV.shRegen*dt);}
   p.shieldE=p.stdB>0?0:p.ehp/ERV.sh*100;p.shieldBroken=p.stdB>0?p.stdB:0;
   const inp=p.inp||{};
-  // หมัด Stand: เข้า 0.2 วิ แล้วค่อยโดน (หลบทันได้)
-  if(p.epn){p.epn.t-=dt;if(p.epn.t<=0){const P=p.epn;p.epn=null;const t=P.tg;
-    if(t&&!t.dead&&(t.isE||t.isM||(t.alive&&!t.downed))&&Math.hypot(t.x-P.x,t.y-P.y)<60+(t.r||PR)&&aimLineH(p,p.z+1.1,t,3.5)){p.baHit=1;damage(t,ERV.punch,p.id,'melee');p.baHit=0;}}}
+  if(p.epn){p.epn.t+=dt;if(p.epn.t>=ERV.punchDelay){const {left}=p.epn;p.epn=null;if(p.alive&&!p.downed&&eStand(p))earthFistFire(p,false,left);}}
   // Terra Auger: ชาร์จ
   if(p.aug){const A=p.aug,k=A.k;A.t+=dt;
     const shP=inp.sh&&!p.eShPrv;
@@ -59,41 +62,48 @@ function earthTick(p,dt){
   if(p.ramp&&(p.stun>0||!p.alive))earthRampEnd(p,true);
   // BA ชาร์จ: Stand ใหญ่ยกสองมือ 2 วิ แล้วทุบ (สตัน/แช่แข็งไม่ยกเลิก • Stand แตก = ยกเลิก)
   if(p.ecbCd>0)p.ecbCd-=dt;
-  if(p.ecb){if(p.stdB>0||!p.alive){p.ecb=null;emit({k:'efx',z:'ecboff',x:p.x,y:p.y,h:p.z,id:p.id});}else{p.ecb.t+=dt;if(p.ecb.t>=ERV.cbCharge)earthCBSlam(p);}}
+  if(p.ecb){if(p.stdB>0||!p.alive||p.downed){p.ecb=null;emit({k:'efx',z:'ecboff',x:p.x,y:p.y,h:p.z,id:p.id});}else{p.ecb.t+=dt;if(p.ecb.t>=ERV.cbCharge){const {left}=p.ecb;p.ecb=null;p.ecbCd=ERV.cbCd;earthFistFire(p,true,left);}}}
   if(p.wr)earthWrathTick(p,dt);
 }
 // ความเร็วเดินพิเศษของสายดิน
-function earthSpd(p){return p.aug?AUGER.v.slow:p.ecb?ERV.cbSlow:p.wr&&p.wr.ph==='sky'?0:1;}   // Auger ช้า 85% • BA ชาร์จ ช้า 40%
+function earthSpd(p){return p.aug?AUGER.v.slow:p.ecb?ERV.cbSlow:p.wr?(p.wr.ph==='aim'?E_WRS.side/PLAY.walk:0):1;}
 // โดนตีที่โล่ Stand (ลด HP โล่ตรงๆ)
 function earthShHit(p,amt){p.ehp=(p.ehp===undefined?ERV.sh:p.ehp)-amt;p.shBlk=(p.shBlk|0)+1;if(p.ehp<=0)earthBreak(p);else p.shieldE=p.ehp/ERV.sh*100;}
 function earthBreak(p){p.ehp=0;p.stdB=ERV.standOff;p.shieldOn=false;p.shieldE=0;p.crush=null;if(p.ecb){p.ecb=null;emit({k:'efx',z:'ecboff',x:p.x,y:p.y,h:p.z,id:p.id});}if(p.tec)p.tec.ok=false;if(p.ramp)earthRampEnd(p,true);
   emit({k:'efx',z:'estdbreak',x:p.x,y:p.y,h:p.z+1.3,id:p.id});}
-function earthReset(p){p.ehp=ERV.sh;p.stdB=0;p.eShT=0;p.epn=null;p.aug=null;p.ramp=null;p.crush=null;p.ecb=null;p.ecbCd=0;p.eHold=0;p.mudT=0;p.eRamp=null;if(p.wr)earthWrathEnd(p);}
+function earthReset(p){p.ehp=ERV.sh;p.stdB=0;p.eShT=0;p.epn=null;p.esb=null;p.aug=null;p.ramp=null;p.crush=null;p.ecb=null;p.ecbCd=0;p.eHold=0;p.mudT=0;p.eRamp=null;if(p.wr)earthWrathEnd(p);}
 
 // ---------- ท่าพื้นฐาน (คลิกซ้าย) ----------
-function earthBATarget(p){let best=null,bs=1e9;
-  for(const t of foesOf(p.team)){const dx=t.x-p.x,dy=t.y-p.y,d=Math.hypot(dx,dy);if(d>ERV.punchR+(t.r||PR)||!aimLineH(p,p.z+1.1,t,4))continue;
-    const da=Math.abs(angDiff(Math.atan2(dy,dx),p.ang));if(da>1.2)continue;const sc=da+d/1500;if(sc<bs){bs=sc;best=t;}}
-  return best;}
 function earthBasic(p,inp,dt,setCd){
   const prev=p.eFirePrv;p.eFirePrv=inp.fire;
   if(p.aug||p.ramp||p.ecb)return;
-  if(p.wr){if(p.wr.ph==='sky'){if(inp.fire&&!prev)earthPillarThrow(p);return;}if(p.wr.ph==='trans'&&inp.fire&&!prev&&p.cd.basic<=0){earthWrathDrill(p);setCd('basic',0.3);}return;}
+  if(p.wr){if(p.wr.ph==='aim'&&inp.fire&&!prev)earthPillarThrow(p);return;}
   if(p.stdB>0){p.eHold=0;if(inp.fire&&p.cd.basic<=0){shoot(p,'erock',{sp:'b_earth'});setCd('basic',ERV.rockCd);}return;}
   // มี Stand: แตะ (ปล่อยก่อน 0.25 วิ) = หมัด Stand • ค้าง 0.25 วิ = เริ่มชาร์จทุบ (ถ้าคูลดาวน์ 6 วิ ยังไม่ครบ ปล่อยแล้วเป็นหมัดปกติ)
   if(inp.fire){if(p.eHold>=0)p.eHold=(p.eHold||0)+dt;if(p.eHold>=ERV.cbHold&&!(p.ecbCd>0)){p.eHold=-1;earthCBStart(p);}return;}
-  const h=p.eHold||0;p.eHold=0;if(h>0&&p.cd.basic<=0){earthPunch(p);setCd('basic',ERV.punchCd);}
+  const h=p.eHold||0;p.eHold=0;if(h>0&&p.cd.basic<=0){p.epn=earthFistStart(p);emit({k:'efx',z:'epunch',x:p.x,y:p.y,h:p.z,id:p.id});setCd('basic',ERV.punchCd);}
 }
-function earthPunch(p){const t=earthBATarget(p);let x,y,tx2,ty2;
-  if(t){const a=Math.atan2(p.y-t.y,p.x-t.x)+rnd(-1.3,1.3);x=t.x+Math.cos(a)*55;y=t.y+Math.sin(a)*55;tx2=t.x;ty2=t.y;}
-  else{x=p.x+Math.cos(p.ang)*40;y=p.y+Math.sin(p.ang)*40;tx2=p.x+Math.cos(p.ang)*110;ty2=p.y+Math.sin(p.ang)*110;}
-  p.epn={t:ERV.punchDelay,tg:t,x,y};
-  emit({k:'efx',z:'epunch',x:Math.round(x),y:Math.round(y),h:Math.round((p.z||0)*10)/10,x2:Math.round(tx2),y2:Math.round(ty2),id:p.id});}
-// BA ชาร์จ: วงเตือนรัศมี 180 หน้าเรา (ศูนย์กลางห่าง 170) ⚠ ระยะศูนย์กลางเป็นการตีความ • 2 วิ แล้วทุบ 50 + สตัน 0.7 วิ • คูลดาวน์ 6 วิ
-function earthCBStart(p){p.ecb={t:0};p.shieldOn=false;emit({k:'efx',z:'ecbon',x:Math.round(p.x),y:Math.round(p.y),h:p.z,id:p.id});}
-function earthCBSlam(p){p.ecb=null;p.ecbCd=ERV.cbCd;const x=p.x+Math.cos(p.ang)*170,y=p.y+Math.sin(p.ang)*170;
-  emit({k:'efx',z:'ecbslam',x:Math.round(x),y:Math.round(y),h:0,r:ERV.cbR,a:Math.round(p.ang*100)/100,id:p.id});   // ภาพทุบก่อนเสมอ (ถ้าดาเมจ/ทำลายของสะดุด effect ยังขึ้น)
-  for(const t of foesIn(p.team,x,y,ERV.cbR,p.z+5))aoeHit(p,t,ERV.cbDmg,t=>addStun(t,ERV.cbStun));damageEnv(x,y,ERV.cbR,ERV.cbDmg*ERV.env,p.id,'rock',0.6);}
+function earthFistStart(p){const left=!!p.eFistLeft;p.eFistLeft=!left;return {t:0,left};}
+function earthCBStart(p){p.ecb=earthFistStart(p);p.shieldOn=false;emit({k:'efx',z:'ecbon',x:Math.round(p.x),y:Math.round(p.y),h:p.z,id:p.id});}
+function earthFistAim(p,charged){return earthStoneAim(p,charged?47:74,charged?3:1.9);}
+function earthFistFire(p,charged,left){
+  const {x,y,h,a,pt}=earthFistAim(p,charged),type=charged?'efistc':'efist',spd=PDEF[type].spd,flat=spd*Math.cos(pt);
+  shoot(p,type,{x,y,h,vx:flat*Math.cos(a),vy:flat*Math.sin(a),vh:spd*Math.sin(pt)/20,life:ERV.punchR/spd,dmg:charged?ERV.cbDmg:ERV.punch,sp:type,noImpact:1,quiet:1,fistLeft:left});
+  emit({k:'efx',z:'efistfire',x,y,h,a,pt,id:p.id,n:charged?1:0,ox:p.x,oy:p.y,oh:p.z,left});
+}
+SPELLS.efist={hit(pr,t){pr.fistHit=t;damage(t,pr.dmg,pr.owner,'proj',true);}};
+SPELLS.efistc={hit(pr,t){SPELLS.efist.hit(pr,t);addStun(t,ERV.cbStun);}};
+function earthFistBreak(pr){
+  const a=Math.atan2(pr.vy,pr.vx),pt=Math.atan2(pr.vh*20,Math.hypot(pr.vx,pr.vy)),charged=pr.type==='efistc',split=charged&&!!pr.fistHit;
+  emit({k:'efx',z:'efistbreak',x:pr.x,y:pr.y,h:pr.h,a,pt,n:charged?1:0,left:pr.fistLeft});
+  const p=G.players[pr.owner];if(!split||!p)return;
+  const hit=new Set([pr.fistHit]),spd=PDEF.efistshard.spd;
+  for(const [yaw,pitch] of [[0,0],[-.26,0],[.26,0],[-.48,.12],[.48,.12],[-.13,-.2],[.13,.2]]){
+    const b=a+yaw,q=clamp(pt+pitch,-1.55,1.55),flat=spd*Math.cos(q);
+    shoot(p,'efistshard',{x:pr.x,y:pr.y,h:pr.h,vx:flat*Math.cos(b),vy:flat*Math.sin(b),vh:spd*Math.sin(q)/20,life:ERV.cbR/spd,
+      dmg:ERV.cbShardDmg,hs:hit,pierce:1,noImpact:1,quiet:1});
+  }
+}
 
 // ---------- Dash: Stand Rampage / Rock Boost Escape ----------
 function earthDash(p,inp,pr,dt,setCd){
@@ -106,7 +116,7 @@ function earthDash(p,inp,pr,dt,setCd){
     R.env=(R.env||0)-dt;if(R.env<=0){R.env=0.1;damageEnv(p.x+Math.cos(p.ang)*30,p.y+Math.sin(p.ang)*30,60,12*ERV.env,p.id,'rock',p.z+0.5);}   // วิ่งชนบ้าน/ของพังตามทาง
     if(pr.sp||R.t<=0||p.stun>0)earthRampEnd(p,p.stun>0);
     return true;}
-  if(p.aug||p.wr&&p.wr.ph==='sky')return false;
+  if(p.aug||p.wr)return false;
   if(!pr.sp||p.cd.dodge>0||p.mudT>0||p.z>groundH(p.x,p.y,p.z)+0.3)return false;
   if(p.stdB>0){   // Rock Boost Escape: หินดันตัวพุ่งไปข้างหน้า ~400 + ศัตรูรอบจุดเริ่ม (120) กระเด็น ไม่มีดาเมจ
     let dx,dy;if(typeof inp.mx==='number'&&Math.hypot(inp.mx,inp.my)>0.1){dx=inp.mx;dy=inp.my;const l=Math.hypot(dx,dy);dx/=l;dy/=l;}else{dx=Math.cos(p.ang);dy=Math.sin(p.ang);}
@@ -121,15 +131,33 @@ function earthRampEnd(p,quiet){p.ramp=null;p.dash=0;p.dashSp=0;p.eRamp=null;p.cd
   for(const t of foesIn(p.team,p.x,p.y,ERV.slamR,p.z+3))aoeHit(p,t,ERV.slamDmg,t=>addStun(t,ERV.slamStun));}
 
 // ---------- สกิล 1: Stonebreaker ----------
-const STONEB=defSpell(EARTH,{id:'stonebreaker',v:{delay:0.45,knock:1800,wallDmg:20,wallStun:2,env:40},vn:{delay:'แผ่นหินพุ่งหลังกด (วิ)',knock:'แรงกระเด็น',wallDmg:'ชนของแข็ง • ดาเมจเพิ่ม',wallStun:'ชนของแข็ง • สตัน (วิ)',env:'แผ่นหินแตก • ดาเมจใส่บ้าน/ของ (×ตัวคูณ)'},role:'finisher',n:'Stonebreaker',ic:'🧱',cd:8,d:'เสกแผ่นหินใหญ่ตรงหน้า Stand ต่อยกลางแผ่น แผ่นหินพุ่งตรงเร็วมาก ระยะ 700 โดนศัตรูคนแรกแล้วแตก',fx:'25 ดาเมจ + กระเด็นไกล ~300 • กระเด็นไปชนของแข็ง (กำแพงแผนที่ / กำแพง Tectonic / เสา + กำแพงโดเมน Wrath) = +20 ดาเมจ สตัน 2 วิ (โคลน/เนิน Auger ไม่นับ) • ต้องมี Stand',
+function earthStoneAim(p,range=60,origin=2){
+  const i=p.inp,dx=i?.ax-p.x,dy=i?.ay-p.y,dist=Math.hypot(dx,dy);
+  const aimed=!p.bot&&dist>0.01&&Number.isFinite(i?.ah);
+  const a=aimed?Math.atan2(dy,dx):p.ang,h0=p.z+origin;
+  const pt=aimed?Math.atan2((i.ah-h0)*20,dist):0;
+  const reach=pt<0?Math.min(range,Math.max(4,(h0-1.35)*20/-Math.sin(pt))):range;
+  const d=reach*Math.cos(pt),x=p.x+Math.cos(a)*d,y=p.y+Math.sin(a)*d;
+  return {x,y,h:h0+reach*Math.sin(pt)/20+terrT(p.x,p.y)-terrT(x,y),a,pt};
+}
+const STONEB=defSpell(EARTH,{id:'stonebreaker',v:{delay:0.45,knock:1800,wallDmg:20,wallStun:2,env:40},vn:{delay:'แผ่นหินพุ่งหลังกด (วิ)',knock:'แรงกระเด็น',wallDmg:'ชนของแข็ง • ดาเมจเพิ่ม',wallStun:'ชนของแข็ง • สตัน (วิ)',env:'แผ่นหินแตก • ดาเมจใส่บ้าน/ของ (×ตัวคูณ)'},role:'finisher',n:'Stonebreaker',ic:'🧱',cd:8,d:'แผ่นหินลอยตามเป้ากลางจอ Stand อยู่หลังแผ่นแล้วต่อยให้พุ่งตามแนวเล็ง 3 มิติ ระยะ 700 โดนศัตรูคนแรกแล้วแตก',fx:'25 ดาเมจ + กระเด็นไกล ~300 • กระเด็นไปชนของแข็ง (กำแพงแผนที่ / กำแพง Tectonic / เสา + กำแพงโดเมน Wrath) = +20 ดาเมจ สตัน 2 วิ (โคลน/เนิน Auger ไม่นับ) • ต้องมี Stand',
   cast(p){if(!eStand(p))return eNoStand(p);if(p.aug||p.ramp||p.ecb)return false;
     // งัดแผ่นหินขึ้นจากพื้นก่อน → Stand โผล่มาต่อย (รอยร้าว) → แผ่นหินพุ่ง (0.45 วิ หลังกด)
-    emit({k:'efx',z:'esbcast',x:Math.round(p.x),y:Math.round(p.y),h:p.z,a:Math.round(p.ang*100)/100,id:p.id});
-    G.strikes.push({x:p.x,y:p.y,t:STONEB.v.delay,fn(){if(!p.alive||p.stdB>0)return;const pr=shoot(p,'eslab',{sp:'stonebreaker'});pr.vh=0;pr.h=p.z+1.2;}});},
+    const cast=p.esb={at:G.time};
+    const start=earthStoneAim(p);
+    emit({k:'efx',z:'esbcast',x:start.x,y:start.y,id:p.id});
+    G.strikes.push({x:p.x,y:p.y,t:STONEB.v.delay,fn(){
+      if(p.esb!==cast)return;
+      p.esb=null;
+      if(!p.alive||p.downed||!eStand(p))return;
+      const {x,y,h,a,pt}=earthStoneAim(p),spd=PDEF.eslab.spd,flat=spd*Math.cos(pt);
+      shoot(p,'eslab',{sp:'stonebreaker',x,y,h,vx:flat*Math.cos(a),vy:flat*Math.sin(a),vh:spd*Math.sin(pt)/20,quiet:1});
+      emit({k:'efx',z:'esbfire',x,y,h,a,pt,id:p.id});
+    }});},
   hit(pr,t){damage(t,pr.dmg,pr.owner,'proj');const o=G.players[pr.owner];
     if(!t.isE&&shieldFaces(t,pr.x-pr.vx*0.05,pr.y-pr.vy*0.05,pr.h))return;
     const a=Math.atan2(pr.vy,pr.vx);knock(t,t.x-Math.cos(a)*10,t.y-Math.sin(a)*10,STONEB.v.knock);t.sbk=0.7;t.sbkSrc=pr.owner;t.sbkN=t.solN|0;
-    emit({k:'efx',z:'esbhit',x:Math.round(t.x),y:Math.round(t.y),h:pr.h,a:Math.round(a*100)/100});}});
+    emit({k:'efx',z:'esbhit',x:pr.x,y:pr.y,h:pr.h,a,pt:Math.atan2(pr.vh*20,Math.hypot(pr.vx,pr.vy))});}});
 
 // ---------- สกิล 2: Mud Swamp ----------
 const MUDS=defSpell(EARTH,{id:'mudswamp',v:{range:600,r:120,warn:0.5,time:5,slow:0.5},vn:{range:'ระยะเล็ง',r:'รัศมี',warn:'วงเตือน (วิ)',time:'อยู่นาน (วิ)',slow:'ศัตรู • ความเร็ว (เท่า)'},role:'control',n:'Mud Swamp',ic:'🟤',cd:12,d:'เล็งพื้นระยะ 600 วงเตือน 0.5 วิ แล้วเป็นบ่อโคลนรัศมี 120 นาน 5 วิ (โดนเฉพาะศัตรู)',fx:'ศัตรูในโคลน: ช้าลง 50% ใช้ Dash/กระโดดไม่ได้ ขาจมโคลน • ไม่มีดาเมจ • ใช้ได้แม้ Stand แตก',
@@ -189,43 +217,51 @@ function earthAugFire(p){const A=p.aug,V=AUGER.v;p.aug=null;const tier=A.t>=V.t3
 function earthMound(p,x,y,ult){if(!ult)for(const w of G.eso||[])if(w.k==='mound'&&w.owner===p.id&&!w.u)eKill(w);
   eAdd({k:'mound',x1:x-0.01,y1:y,x2:x+0.01,y2:y,r:ult?28:37,hgt:ult?0.9:1.2,team:p.team,owner:p.id,u:ult?1:0,life:ult?15:undefined});}
 
-// ---------- อัลติ: Wrath (v2) ----------
-// ลอยขึ้นฟ้า (ขยับซ้าย/ขวาได้ ขึ้นลงไม่ได้ สูงสุด 5 วิ) • Stand ใหญ่ถือเสายักษ์ท่าพุ่งแหลน • คลิก = ปาลงจุดเล็ง (หมดเวลา = ปาเองที่จุดเล็ง)
-// เสาปักตามองศาที่ตก HP 300 อยู่จนพัง • แรงกระแทก 100 ทั้งบึง (r400, โล่กันได้) + กระเด็น • บึงโคลน r400 8 วิ • ทุก 2 วิ หินแหลมพุ่งขึ้นใต้ศัตรูในบึง 30 (ผู้ใช้ 2026-11-01)
-// (เลิกสว่าน 5 อันหลังลงพื้นแล้ว — ผู้ใช้: 'no more residue skill coming up after ult')
-const WRATH=defSpell(EARTH,{id:'wrath',v:{sky:5,height:14,side:240,range:700,maxRange:900,r:400,hit:100,knock:900,pilHp:300,mud:8,mudSlow:0.5,every:2,spk:30,warn:0.5,sr:55,env:50},vn:{sky:'ลอยบนฟ้านานสุด (วิ)',height:'ลอยสูง',side:'ขยับซ้ายขวา • ความเร็ว',range:'ระยะปาเสา (บอท)',maxRange:'ระยะปาเสาไกลสุด',r:'รัศมีบึงโคลน/แรงกระแทก',hit:'แรงกระแทก • ดาเมจ',knock:'แรงกระแทก • กระเด็น',pilHp:'เสา • HP',mud:'บึงโคลน • นาน (วิ)',mudSlow:'บึงโคลน • ความเร็วศัตรู (เท่า)',every:'หินแหลม • ทุก (วิ)',spk:'หินแหลม • ดาเมจ',warn:'หินแหลม • เตือน (วิ)',sr:'หินแหลม • รัศมี',env:'เสาตก • พังบ้าน/ของ (×ตัวคูณ)'},role:'ult',ult:true,n:'Wrath',ic:'🗿',cd:0,d:'ลอยขึ้นฟ้า (ขยับได้แค่ซ้าย/ขวา สูงสุด 5 วิ) Stand ใหญ่ถือเสาหินยักษ์ คลิก = ปาลงจุดเล็ง • เสาปักลงพื้น (HP 300) แรงกระแทก 100 ทั้งบริเวณ (โล่กันได้) พื้นรัศมี 400 กลายเป็นบึงโคลน 8 วิ • ทุก 2 วิ หินแหลมพุ่งขึ้นใต้ศัตรูในบึง 30',fx:'แรงกระแทก 100 + กระเด็น ทั้งบึง (โล่กันได้) • บึงโคลน: ศัตรูช้า 50% ใช้ Dash ไม่ได้ • ทุก 2 วิ หินแหลมพุ่งขึ้นใต้ศัตรูในบึง (มีวงเตือน 0.5 วิ) 30 • ลงพื้นแล้วจบ ไม่มีสว่านต่อ • ไม่ติดช้า • ใช้ได้แม้ Stand แตก (Stand กลับมาทันที โล่เต็ม)',
-  cast(p){if(p.aug)p.aug=null;if(p.ramp)earthRampEnd(p,true);p.crush=null;p.ecb=null;
+// ---------- อัลติ: Wrath — ชาร์จบนพื้น หินดันผู้เล่นขึ้นฟ้า Stand ปาเสาลงจุดเล็ง ----------
+const WRATH=defSpell(EARTH,{id:'wrath',v:{charge:.65,lift:.58,aimT:5,height:12,side:240,wind:.16,drop:.46,settle:.30,range:700,maxRange:900,r:400,hit:100,knock:900,pilHp:300,mud:8,mudSlow:0.5,every:2,spk:30,warn:0.5,sr:55,env:50},vn:{charge:'ชาร์จบนพื้น (วิ)',lift:'หินดันขึ้น (วิ)',aimT:'เวลาเลือกจุด (วิ)',height:'ความสูงจากจุดเริ่ม',side:'ขยับด้านข้าง • ความเร็ว',wind:'ง้าง (วิ)',drop:'เสาบิน (วิ)',settle:'คืนท่า (วิ)',range:'ระยะปาเสา (บอท)',maxRange:'ระยะปาเสาไกลสุด',r:'รัศมีบึงโคลน/แรงกระแทก',hit:'แรงกระแทก • ดาเมจ',knock:'แรงกระแทก • กระเด็น',pilHp:'เสา • HP',mud:'บึงโคลน • นาน (วิ)',mudSlow:'บึงโคลน • ความเร็วศัตรู (เท่า)',every:'หินแหลม • ทุก (วิ)',spk:'หินแหลม • ดาเมจ',warn:'หินแหลม • เตือน (วิ)',sr:'หินแหลม • รัศมี',env:'เสาตก • พังบ้าน/ของ (×ตัวคูณ)'},role:'ult',ult:true,n:'Wrath',ic:'🗿',cd:0,d:'ชาร์จบนพื้น แล้วหินดันขึ้นฟ้า • เล็งพื้นและคลิกให้ Stand ปาเสาลงจุดที่เลือก • เสาปักพื้น (HP 300) กระแทก 100 ดาเมจในรัศมี 400 แล้วเกิดบึงโคลน 8 วิ พร้อมหนามตามศัตรู',fx:'แรงกระแทก 100 + กระเด็น • บึงโคลนทำให้ศัตรูช้า 50% และใช้ Dash ไม่ได้ • หนามมีวงเตือน 0.5 วิ • ใช้ได้แม้ Stand แตก (Stand กลับมาทันที โล่เต็ม)',
+  cast(p){if(p.fly||p.z>groundH(p.x,p.y,p.z)+.10)return false;
+    if(p.aug)p.aug=null;if(p.ramp)earthRampEnd(p,true);p.crush=null;p.ecb=null;p.epn=null;p.esb=null;p.eHold=0;
     if(p.stdB>0){p.stdB=0;p.ehp=ERV.sh;emit({k:'efx',z:'estdon',x:p.x,y:p.y,h:p.z,id:p.id});}
-    p.wr={ph:'sky',t:0,a0:p.ang,nd:0};p.shieldOn=false;
+    p.wr={ph:'charge',t:0,baseZ:p.z,a0:p.ang,target:earthWrathAim(p)};p.eFirePrv=!!p.inp?.fire;p.shieldOn=false;p.dash=0;
     emit({k:'efx',z:'ewrath',x:Math.round(p.x),y:Math.round(p.y),h:p.z,id:p.id});}});
-function earthPillarThrow(p){const W=p.wr;if(!W||W.ph!=='sky')return;
-  let o;if(p.inp&&!p.bot&&p.inp.gx>=0)o={x:p.inp.gx,y:p.inp.gy};else o=aimPoint(p,E_WRS.range);
-  const dx=o.x-p.x,dy=o.y-p.y,d=Math.hypot(dx,dy)||1,M=E_WRS.maxRange;if(d>M){o.x=p.x+dx/d*M;o.y=p.y+dy/d*M;}
-  const x=clamp(o.x,50,MW-50),y=clamp(o.y,50,MH-50),a=Math.atan2(y-p.y,x-p.x);W.ph='land';W.lt=0.9;
-  emit({k:'efx',z:'epilthrow',x:Math.round(p.x),y:Math.round(p.y),h:Math.round(p.z*10)/10,x2:Math.round(x),y2:Math.round(y),id:p.id});
-  G.strikes.push({x,y,t:0.45,fn(){
+function earthWrathAim(p){return aimPoint(p,p.bot?E_WRS.range:E_WRS.maxRange,false);}
+function earthPillarThrow(p){const W=p.wr;if(!W||W.ph!=='aim')return;
+  W.target=earthWrathAim(p);
+  W.ph='throw';W.t=0;W.ox=p.x;W.oy=p.y;W.oh=p.z;
+  W.a=Math.atan2(W.target.y-p.y,W.target.x-p.x);
+  emit({k:'efx',z:'epilthrow',x:p.x,y:p.y,h:p.z,x2:W.target.x,y2:W.target.y,id:p.id});
+}
+function earthPillarImpact(p,W){
+    const {x,y}=W.target,a=W.a;
     for(const t of foesIn(p.team,x,y,E_WRS.r,30))aoeHit(p,t,E_WRS.hit,t=>knock(t,x,y,E_WRS.knock));damageEnv(x,y,90,E_WRS.env*ERV.env,p.id,'rock',0.6);   // แรงกระแทกทั้งบึง (aoeHit = โล่กันได้)
     // เสาเอียงตามทิศที่ตก: เก็บทิศไว้ในปลายเส้นสั้น ๆ (x2,y2)
     eAdd({k:'pil',x1:x,y1:y,x2:x+Math.cos(a)*0.5,y2:y+Math.sin(a)*0.5,r:35,hgt:9,hp:E_WRS.pilHp,maxHp:E_WRS.pilHp,team:p.team,owner:p.id});
     addZone({x,y,r:E_WRS.r,t:E_WRS.mud,tick:0.15,owner:p.id,team:p.team,kind:'mud',hit(t){addSlow(t,E_WRS.mudSlow,0.3);t.mudT=Math.max(t.mudT||0,0.3);}});
     (G.espk||(G.espk=[])).push({x,y,t:E_WRS.mud,nx:E_WRS.every,owner:p.id,team:p.team});
-    emit({k:'efx',z:'epilland',x:Math.round(x),y:Math.round(y),h:0,a:Math.round(a*100)/100});}});}
+    emit({k:'efx',z:'epilland',x:Math.round(x),y:Math.round(y),h:0,a:Math.round(a*100)/100});}
 function earthWrathTick(p,dt){const W=p.wr;W.t+=dt;
-  if(W.ph==='sky'){p.z+=(E_WRS.height-p.z)*Math.min(1,5*dt);p.vz=0;
-    // ขยับได้แค่ซ้าย/ขวา (ตั้งฉากกับทิศตอนกดอัลติ)
-    const inp=p.inp||{},px=-Math.sin(W.a0),py=Math.cos(W.a0);let m=0;
-    if(typeof inp.mx==='number')m=inp.mx*px+inp.my*py;
-    if(Math.abs(m)>0.1){const k=Math.sign(m)*Math.min(1,Math.abs(m))*E_WRS.side*dt;p.x=clamp(p.x+px*k,40,MW-40);p.y=clamp(p.y+py*k,40,MH-40);}
-    if(W.t>=E_WRS.sky)earthPillarThrow(p);
-    return;}
-  if(W.ph==='land'){W.lt-=dt;if(W.lt<=0){p.vz=-10;emit({k:'efx',z:'ewland',x:Math.round(p.x),y:Math.round(p.y),h:0,id:p.id});earthWrathEnd(p);}return;}   // ลงพื้น = จบ (ไม่มีสว่านต่อแล้ว)
-  W.dt-=dt;if(W.dt<=0||W.nd<=0)earthWrathEnd(p);}
-// คลิกซ้ายตอนมีสว่าน: ยิงทีละอัน (ขวา → ซ้าย) = Terra Auger ระดับ 3
-function earthWrathDrill(p){const W=p.wr;if(!W||W.nd<=0)return;W.nd--;const o=eAugAim(p,700),oh=Math.round(o.h*10)/10,i=W.nd;
-  emit({k:'efx',z:'ewdrill',x:Math.round(o.x),y:Math.round(o.y),h:oh,x2:Math.round(p.x),y2:Math.round(p.y),n:i,id:p.id});
-  G.strikes.push({x:o.x,y:o.y,t:0.35,fn(){
-    for(const t of foesIn(p.team,o.x,o.y,80,o.h+5))if((t.isE?(t.h||0):(t.z||0))>o.h-5)aoeHit(p,t,120);damageEnv(o.x,o.y,80,120*ERV.env,p.id,'rock',o.hit?o.h:0.5);
-    if(!o.hit)earthMound(p,o.x,o.y,true);emit({k:'efx',z:'eaugboom',x:Math.round(o.x),y:Math.round(o.y),h:oh,n:3,r:80});}});}   // รัศมีระเบิดสว่าน 150 → 80 (ผู้ใช้ 2026-10-21)
+  if(W.ph==='charge'){
+    if(W.t>=E_WRS.charge){
+      W.ph='lift';W.t=0;W.baseZ=p.z;W.a0=p.ang;p.vz=0;
+      emit({k:'efx',z:'ewlift',x:p.x,y:p.y,h:p.z,id:p.id});
+    }
+    return;
+  }
+  if(W.ph==='lift'){
+    const k=Math.min(1,W.t/E_WRS.lift);
+    p.z=W.baseZ+E_WRS.height*k*k*(3-2*k);p.vz=0;
+    if(k>=1){W.ph='aim';W.t=0;W.target=earthWrathAim(p);}
+    return;
+  }
+  if(W.ph==='aim'){
+    W.target=earthWrathAim(p);
+    if(W.t>=E_WRS.aimT){p.ult=100;earthWrathEnd(p);}
+    return;
+  }
+  const impact=E_WRS.wind+E_WRS.drop;
+  if(!W.hit&&W.t>=impact){W.hit=true;earthPillarImpact(p,W);}
+  if(W.t>=impact+E_WRS.settle)earthWrathEnd(p);
+}
 function earthWrathEnd(p){const W=p.wr;p.wr=null;if(!W)return;
   emit({k:'efx',z:'ewend',x:Math.round(p.x),y:Math.round(p.y),h:p.z,id:p.id});}
 
@@ -247,14 +283,28 @@ function updateEarth(dt){
       if(o){o.baHit=0;damage(t,STONEB.v.wallDmg,o.id,'proj');}addStun(t,STONEB.v.wallStun);emit({k:'efx',z:'esbwall',x:Math.round(t.x),y:Math.round(t.y),h:cH(t)});}}}
 }
 // สำหรับ snapshot
-// [Stand แตกเหลือ, Rampage, ชาร์จ Auger (วิ), Wrath (1 ฟ้า 2 ลง 3 สว่าน), สว่านเหลือ, เวลาบนฟ้าเหลือ, เวลาสว่านเหลือ, HP โล่, Crush ได้, ชาร์จ BA (วิ), คูลดาวน์ BA ชาร์จ]
+// Wrath: ea[3] = 1 เลือกจุด, 2 ปาเสา, 3 ชาร์จ, 4 ดันขึ้น; ea[13] เวลาและพิกัดสำหรับท่า Stand
 function earthSnapP(p){if(!eOn(p))return undefined;const W=p.wr;
-  return [p.stdB>0?Math.ceil(p.stdB):0,p.ramp?1:0,p.aug?Math.round(p.aug.t*10)/10+0.01:0,W?(W.ph==='sky'?1:W.ph==='land'?2:3):0,W?W.nd|0:0,W&&W.ph==='sky'?Math.max(0,Math.ceil(E_WRS.sky-W.t)):0,W&&W.ph==='trans'?Math.max(0,Math.ceil(W.dt)):0,Math.round(p.ehp||0),p.tec&&p.tec.ok?1:0,p.ecb?Math.round(p.ecb.t*10)/10+0.01:0,p.ecbCd>0?Math.ceil(p.ecbCd):0];}
+  const ea=[p.stdB>0?Math.ceil(p.stdB):0,p.ramp?1:0,p.aug?Math.round(p.aug.t*10)/10+0.01:0,W?{aim:1,throw:2,charge:3,lift:4}[W.ph]:0,0,W?.ph==='aim'?Math.max(0,E_WRS.aimT-W.t):0,0,Math.round(p.ehp||0),p.tec&&p.tec.ok?1:0,p.ecb?Math.round(p.ecb.t*10)/10+0.01:0,p.ecbCd>0?Math.ceil(p.ecbCd):0];
+  const fist=p.ecb||p.epn;
+  if((p.esb||fist)&&p.alive&&!p.downed&&eStand(p)){
+    ea.push(null);
+  }
+  if(ea.length>11&&p.esb){
+    const {x,y,h,a,pt}=earthStoneAim(p);
+    ea[11]=[x,y,h,a,pt,clamp((G.time-p.esb.at)/STONEB.v.delay,0,1)];
+  }
+  if(ea.length>11&&fist){
+    const charged=!!p.ecb,{x,y,h,a,pt}=earthFistAim(p,charged);
+    ea[12]=[x,y,h,a,pt,clamp(fist.t/(charged?ERV.cbCharge:ERV.punchDelay),0,1),charged?1:0,p.x,p.y,p.z,fist.left?1:0];
+  }
+  if(W)ea[13]=[W.t,W.target.x,W.target.y,W.ox??p.x,W.oy??p.y,W.oh??p.z,W.a??p.ang,W.baseZ];
+  return ea;}
 function earthSnapW(){return {ES:(G.eso||[]).map(w=>[w.id,{tec:0,pil:1,mound:2,dom:3}[w.k],Math.round(w.x1),Math.round(w.y1),Math.round(w.x2),Math.round(w.y2),w.r,w.maxHp>1e8?100:Math.max(1,Math.round(w.hp/w.maxHp*100)),w.team,w.owner]),
   ED:(G.edust||[]).map(d=>[d.id,Math.round(d.x),Math.round(d.y),d.r,Math.round(d.t*10)/10,d.team])};}
 
 // ท่าพื้นฐาน + โล่ + Dash ของสาย (PBASIC ต้องอยู่ช่องที่ 6 = ลำดับใน PATHS)
-PBASIC.push({id:'b_earth',type:'erock',n:'หมัด Stand / หินเล็ก',d:'คลิก = Stand ล็อกศัตรูที่ใกล้จุดเล็งที่สุดในระยะ 300 โผล่ข้างเป้า (~0.2 วิ หลบทันได้) ต่อยหมัดเดียว 10 ดาเมจ ทุก 0.8 วิ ไม่มีศัตรู = ต่อยหน้าเรา • กดค้าง = Stand ใหญ่ยกสองมือชาร์จ 2 วิ แล้วทุบวงหน้าเรา (รัศมี 180) 50 + สตัน 0.7 วิ คูลดาวน์ 6 วิ เดินช้า 40% • Stand แตก = ยิงหินเล็ก 5 ดาเมจ ทุก 0.35 วิ เล็งเอง',
+PBASIC.push({id:'b_earth',type:'erock',n:'หมัดหิน Stand / หินเล็ก',d:'คลิก = Stand เล็กด้านหน้าส่งกำปั้นหินตามแนวเล็ง 3 มิติ ระยะ 500 ดาเมจ 10 ทุก 0.8 วิ • กดค้าง = Stand ใหญ่ด้านหลังง้างชาร์จ 2 วิ แล้วยิงหมัดใหญ่ ดาเมจตรง 50 + สตัน 0.5 วิ เศษหินพุ่งเป็นกรวยด้านหลังเป้า ดาเมจ 20 ต่อเป้า คูลดาวน์ 6 วิ เดินช้า 40% • Stand แตก = ยิงหินเล็ก 5 ดาเมจ ทุก 0.35 วิ',
   shd:'โล่ Stand Barrier: Stand ยกโล่หินใหญ่ กันได้รอบตัว 300 HP (มากที่สุดในทุกสาย) • ไม่ได้ใช้ 3 วิ ฟื้น 20/วิ • โล่แตก = Stand หาย 15 วิ (ยิงหินเล็กแทนหมัด, Dash เป็น Rock Boost, สกิลที่ใช้ Stand ใช้ไม่ได้) แล้วกลับมาพร้อมโล่เต็ม 300',
   dsd:'Stand Rampage (Shift): ขี่ Stand วิ่งชาร์จตามทิศเล็ง 1.2 วิ (~600) กด Shift อีกครั้งหยุดก่อน • ชนศัตรู 15 + สตัน 0.5 วิ + กระเด็น • จบด้วยทุบพื้น 20 + สตัน 0.8 วิ รัศมี 150 • ทะลุกำแพง/เสาของเรา พังของศัตรู • คูลดาวน์ 8 วิ • Stand แตก = Rock Boost Escape: หินดันพุ่ง ~400 ศัตรูรอบจุดเริ่ม (120) กระเด็น คูลดาวน์ 6 วิ',
   hit(pr,t){damage(t,pr.dmg,pr.owner,'proj');},tick:earthBasic,dash:earthDash});

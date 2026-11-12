@@ -384,7 +384,7 @@ function makeSnap(){
     MN:(G.mins||[]).map(m=>[m.id,m.type,Math.round(m.x),Math.round(m.y),r1(m.h||0),Math.max(1,Math.round(m.hp/m.maxHp*100)),m.owner,m.team,fxMask(m)]),
     WL:(G.walls||[]).filter(w=>!w.wood).map(w=>[w.id,Math.round(w.x),Math.round(w.y),w.r,Math.round(w.hp),Math.round(w.t*10)/10]),
     ...earthSnapW(),...windSnapW(),...waterSnapW(),...natureSnapW(),
-    J:G.proj.map(p=>({id:p.id,t:p.type,x:r1(p.x),y:r1(p.y),h:r1(p.h),vx:Math.round(p.vx),vy:Math.round(p.vy),vh:r1(p.vh),g:p.stGod||undefined,rf:p.dmg>(PDEF[p.type].dmg*1.2)?1:0}))
+    J:G.proj.map(p=>({id:p.id,t:p.type,x:r1(p.x),y:r1(p.y),h:r1(p.h),vx:Math.round(p.vx),vy:Math.round(p.vy),vh:r1(p.vh),g:p.stGod||undefined,rf:p.dmg>(PDEF[p.type].dmg*1.2)?1:0,lf:p.fistLeft?1:undefined}))
   };
 }
 // ตัววัดเวลาแต่ละส่วน (เปิดด้วย WD.PROF.on=true แล้วดู WD.PROF.t)

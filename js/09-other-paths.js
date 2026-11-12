@@ -160,7 +160,7 @@ const SDOME=defSpell(2,{id:'stormdome',v:{cost:4,godCost:3,range:600,rise:6,fly:
 // ---------- ร่ายคาถา ----------
 function castSlot(p,i){
   const S=SPELLS[p.kitIds[i]];if(!S)return false;
-  if(p.aug||p.ramp||p.ecb||(p.wr&&p.wr.ph!=='trans'))return false;   // สายดิน: ชาร์จ Auger / Rampage / อยู่บนฟ้า (Wrath)
+  if(p.aug||p.ramp||p.ecb||p.wr)return false;   // สายดิน: ชาร์จ Auger / Rampage / ร่าย Wrath
   const k=SLOTK[i];
   if(S.toggle&&S.toggle(p)){emit({k:'sk',id:p.id,s:S.id+'_2'});return true;}   // กดครั้งที่ 2 (เช่น Tectonic Crush บีบ) → ท่าร่าย
   if(S.melee&&p.fmode===1)return false;

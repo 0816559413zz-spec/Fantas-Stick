@@ -75,30 +75,30 @@ GODL:225
 §227 ลูกสายฟ้าโดม: รวมไฟที่พื้น → ทะยานขึ้น → เล็ง → ฟาดไม้ยิงและค้างชี้เป…
 SDOME_POSE:228 stormDomeCost:229 stormDomeDash:230 stormDomeCharge:231 stormDomeTick:232 stormDomeFire:263 stormDomeSlam:270 updateStorm:275
 
-## js/09-earth.js (261) — 
+## js/09-earth.js (311) — 
 EARTH:9 ERV:12
-§19 ตัวช่วย
-eOn:20 eStand:21 eNoStand:22 eSegD:24 eAdd:25 eCollide:27 eProjHit:34 eKill:37
-§39 ทุกเฟรมของผู้เล่นสายดิน (เรียกจาก updatePlayer หลังส่วนโล่)
-earthTick:40 earthSpd:66 earthShHit:68 earthBreak:69 earthReset:71
-§73 ท่าพื้นฐาน (คลิกซ้าย)
-earthBATarget:74 earthBasic:78 earthPunch:87 earthCBStart:93 earthCBSlam:94
-§98 Dash: Stand Rampage / Rock Boost Escape
-earthDash:99 earthRampEnd:118
-§123 สกิล 1: Stonebreaker
-STONEB:124
-§134 สกิล 2: Mud Swamp
-MUDS:135
-§139 สกิล 3: Tectonic Crush
-TECT:141 earthCrush:154
-§165 สกิล 4: Dust Burst
-DUSTB:166
-§171 สกิล 5: Terra Auger
-AUGER:173 eAugAim:177 earthAugFire:178 earthMound:189
-§192 อัลติ: Wrath (v2)
-WRATH:196 earthPillarThrow:201 earthWrathTick:213 earthWrathDrill:224 earthWrathEnd:229 E_WRS:233 earthSpikeTick:234
-§240 ทั้งสนาม: สิ่งก่อสร้างพัง / ฝุ่นหมดเวลา / Stonebreaker ชนกำแพง
-updateEarth:241 earthSnapP:251 earthSnapW:253
+§24 ตัวช่วย
+eOn:25 eStand:26 eNoStand:27 eSegD:29 eAdd:30 eCollide:32 eProjHit:39 eKill:42
+§44 ทุกเฟรมของผู้เล่นสายดิน (เรียกจาก updatePlayer หลังส่วนโล่)
+earthTick:45 earthSpd:69 earthShHit:71 earthBreak:72 earthReset:74
+§76 ท่าพื้นฐาน (คลิกซ้าย)
+earthBasic:77 earthFistStart:86 earthCBStart:87 earthFistAim:88 earthFistFire:89 earthFistBreak:96
+§108 Dash: Stand Rampage / Rock Boost Escape
+earthDash:109 earthRampEnd:128
+§133 สกิล 1: Stonebreaker
+earthStoneAim:134 STONEB:143
+§162 สกิล 2: Mud Swamp
+MUDS:163
+§167 สกิล 3: Tectonic Crush
+TECT:169 earthCrush:182
+§193 สกิล 4: Dust Burst
+DUSTB:194
+§199 สกิล 5: Terra Auger
+AUGER:201 eAugAim:205 earthAugFire:206 earthMound:217
+§220 อัลติ: Wrath — ชาร์จบนพื้น หินดันผู้เล่นขึ้นฟ้า Stand ปาเสาลงจุดเล็ง
+WRATH:221 earthWrathAim:227 earthPillarThrow:228 earthPillarImpact:234 earthWrathTick:242 earthWrathEnd:265 E_WRS:269 earthSpikeTick:270
+§276 ทั้งสนาม: สิ่งก่อสร้างพัง / ฝุ่นหมดเวลา / Stonebreaker ชนกำแพง
+updateEarth:277 earthSnapP:287 earthSnapW:303
 
 ## js/09-nature-ba.js (107) — 
 NATURE_BA_TEST:2 NATURE_WHIP:3 natureWhipEnabled:4 natureWhipHit:7 natureWhipBasic:29 NW_RINGS:50 NW_SIDES:50 nwPhase:51 nwEase:52 nwSwingAngle:53 natureWhipPose:59 natureWhipVisualMake:68 natureWhipView:90
@@ -178,17 +178,17 @@ W_WL:528 W_DR:534 W_VX:540 W_VO:546 W_FW:552 W_UL:561
 ## js/10-net.js (200) — 
 PREFIX:4 NET:5 RC:9 TURN_SERVERS:12 ICE:13 PEER_OPT:14 TURN_URL:16 ICE_READY:18 JN:22 LAG:24 lagDo:25 hostSend:26 LOBBY:27 genCode:28 sendAll:29 NETD_KEYS:33 NETD:33 netDeltaReset:34 netDelta:35 NET_MAX:49 _netTE:49 netSendSnap:50 NETU:62 netUndelta:63 setStatus:69 hostGame:71 hostPeer:80 netConnect:100 joinWatch:111 joinFail:126 netLost:132 joinGame:147 joinPeer:158 clientOnData:173 leave:188 leaveRoom:190
 
-## js/11-host.js (413) — 
+## js/11-host.js (418) — 
 G:4 EVL:4 EVN:4 hostLast:4 tickN:4 emit:5 feed:6 banner:7 plist:8 cleanName:9 freshStats:11 newPlayer:18 emptyInput:21 frameOk:23 addPlayer:24 initHostLobby:33 lobbyMsg:40 broadcastLobby:41 INPN:43 hostOnData:44 hostDrop:75 hostRemove:84 validate:97 hostStart:110 hostToLobby:136 MIDJOIN:143 modeCap:144 midJoin:145 CHATT:161 chatRelay:162 emoHost:170 resetBody:172 fmap:178 spawnPts:179 teamPts:181 spSpread:183 placeAll:184 respawn:196
 §215 ลูปหลักฝั่งโฮสต์
-hostTick:216 angDiff:231 cH:233 vR:234 updatePlayer:236 hitProp:400 damagePropsIn:407 nearUseProp:408 useProp:409
+hostTick:216 angDiff:231 cH:233 vR:234 updatePlayer:236 hitProp:405 damagePropsIn:412 nearUseProp:413 useProp:414
 
-## js/12-buildings.js (532) — สิ่งปลูกสร้างที่พังเป็นชิ้นย่อย (บ้าน) แบบ Battlefield — คู่มือเต็ม: …
+## js/12-buildings.js (534) — สิ่งปลูกสร้างที่พังเป็นชิ้นย่อย (บ้าน) แบบ Battlefield — คู่มือเต็ม: …
 BLDDEF:8 BLD_PIECES:10 BLD_GRID:11 BLD_DOOR:13 BLD_FIRE:14 BLD_ICE:14 BLD_ROOF_MIN:14 BLDG:15 BLDON:15 genBldg:16 bldRect:26 bldChunk:28 bldAlive:35 bldLocal:36 bldWorld:37 rectDist:38 bldNear:39 BLD_MOUND:42 bldGone:43 bldMoundAt:44 bldMoundH:45 hitBldPiece:47 breakBldChunk:58 bldSupport:66 damageEnv:86 bldRay:104 _sgRB:112 aimClip:114 aimLineH:122 aimRay3:123 bldPieceAt:139 projEl:150 bldPush:155 collideBld:161 updateBldg:179 bldSnap:192 bldParse:198
 §202 ของบังในแผนที่ไฟล์ที่พังได้ (หิน เสา รูปปั้น ต้นไม้ โคมไฟ ลัง ...) — …
 BRKDEF:206 BRK_M:206 BRK_MCOL:206 BRK:207 genBrk:208 brkApply:215 brkStage:219 hitBrk:220 damageBrkIn:228 brkSnap:234 brkParse:235
 §236 ตารางช่อง (spatial grid) สำหรับแมพใหญ่: หาเฉพาะของใกล้ ๆ แทนวนทุกชิ้น…
-SG:239 sgObs:240 sgProps:240 sgGrid:242 sgNear:249 _sgCR:254 _sgCW:254 _sgCB:254 _sgCO:254 _sgPO:254 _sgPB:254 _sgPP:254 _sgM:254 _sgE:254 _sgA:254 _cwLast:256 collideWorld:257 shoot:297 eShoot:325 foesOf:332 breakShield:340 ULT_RATE:342 ultActive:343 gainUlt:344 lifesteal:345 damage:347 playerDown:407 killProj:428 explode:438 hitTarget:450 updateProjectiles:467 projStep:475
+SG:239 sgObs:240 sgProps:240 sgGrid:242 sgNear:249 _sgCR:254 _sgCW:254 _sgCB:254 _sgCO:254 _sgPO:254 _sgPB:254 _sgPP:254 _sgM:254 _sgE:254 _sgA:254 _cwLast:256 collideWorld:257 shoot:297 eShoot:325 foesOf:332 breakShield:340 ULT_RATE:342 ultActive:343 gainUlt:344 lifesteal:345 damage:347 playerDown:407 killProj:428 explode:439 hitTarget:451 updateProjectiles:468 projStep:476
 
 ## js/12-city-dmg.js (270) — เมืองพังได้ (designs/city-bot-battle.md ขั้น 4) — ข้อมูลที่ทุกเครื่อง…
 CITY_FL:8 CITY_PW:8 CDMG:9 CITYD:16 cityOn:17 cityLayout:19 cityReset:29 cityApplyBox:45 cityApplyItem:46 cityHex:47 cityMark:48 cityRampSync:49 cityPanelAt:51 cityHitPanel:56 cityTowerStart:70 cityTowerStrip:76 cityTowerFall:80 cityHitItem:91 cityHitObs:100 _sgCD:105 cityDamageIn:107 cityTick:118 _sgCM:129 cityMoundH:130 cityMounds:140
@@ -294,8 +294,8 @@ BRKV:313 BRK_COL:313 brkSetup:314 BRK_CM:333 brkCrackMat:334 brkClip:350 brkYc:3
 ## js/24-minions-view.js (68) — สัตว์เวท: โมเดลโปร่งแสง + ซิงก์จาก snapshot (MN)
 MM3:2 makeMinion:3 syncMins:36 drawMinBars:58
 
-## js/25-efx.js (357) — efxFX: ภาพของ event "efx" ทุกคาถา (หนึ่ง case ต่อหนึ่งเอฟเฟกต์)
-efxState:4 efxFX:21
+## js/25-efx.js (356) — efxFX: ภาพของ event "efx" ทุกคาถา (หนึ่ง case ต่อหนึ่งเอฟเฟกต์)
+efxState:4 efxFX:20
 
 ## js/26-fx-events.js (246) — fx(ev): เอฟเฟกต์+เสียงของทุก event จากโฮสต์ • statusFX (สถานะบนตัว) •…
 statusFX:3 fx:28
@@ -381,13 +381,13 @@ iceMat:2 iceRim:3 makeIceSword:4 makeIceAxe:23 makeKiteShield:39
 §51 อาวุธน้ำแข็งลอย (ผู้ใช้ 2026-10-22: "ร่ายคาถาให้ดาบฟันเอง ระยะเท่าเดิ…
 FWS:54 FWA:54 _fwM:55 _fwM2:55 _fwX:55 _fwY:55 _fwZ:55 _fwP:55 _fwS:55 _fwQ:55 _eo:56 _ei:56 _ss:56 fwAim:58 fwWeapons:59 FWP:61 FWT:61 fwChop:62 fwSweep:63 FF_RISE:64 fwIdle:65 fwSwing:68 FWL_N:80 fwLink:81 fwMat:84 frostFX:85
 
-## js/35-sync.js (591) — ซิงก์ผู้เล่น/ศัตรู/ลูกเวทจาก snapshot + ฉายตำแหน่งลงจอ (ป้ายชื่อ/ตัวเ…
+## js/35-sync.js (593) — ซิงก์ผู้เล่น/ศัตรู/ลูกเวทจาก snapshot + ฉายตำแหน่งลงจอ (ป้ายชื่อ/ตัวเ…
 §2 ท่าร่ายคาถาแบบนักเวทในหนัง Harry Potter (ผู้ใช้ 2026-10-22: "ยิงปกติท…
 CPOSE_T:7 _ce:7 _cs:7 _cb:7 AMP_B:9 AMP_S:9 CP_BEND:10 CPOSE:12 _cpT:20 _cpR:20 CGUARD:20 CP_STEP:21 CPCOL:22 castStyle:23 castStart:24
 §25 ท่าร่ายสกิล / อัลติ / โล่ (ผู้ใช้ 2026-10-22: "เกือบทุกสกิลควรมีการเห…
-CANIM:30 SKFEET:78 SKANIM:80 skAnim:88 _caT:89 _caR:89 skillPose:90 _g2:116 wandTwoHand:117 characterPoseMix:124 characterStance:125 CBLOCK:132 CBLOCK_PATH:133 blockPose:134 castPose:140 lateSkillPose:146 castPose0:147 clearCharacterCast:176 syncPlayers:181 syncEnemies:283 projGeo:321 tailGeo:322 _t1:323 makeProj:324 _a:345 _b:345 PJFX:347 syncProj:348 _awT:436 animateWorld:437
-§478 ฉายตำแหน่ง 3D ลงจอ (ป้ายชื่อ / ตัวเลขดาเมจ)
-_v:479 toScreen:480 BURNC:488 burnNum:489 NAMETAG:503 nameTag:504 drawLabels:508 TEXTAG:538 textTag:539 drawTexts:543 HITM:555 DIRI:555 drawXh:557 drawCrosshair:567
+CANIM:30 SKFEET:78 SKANIM:80 skAnim:88 _caT:89 _caR:89 skillPose:90 _g2:116 wandTwoHand:117 characterPoseMix:124 characterStance:125 CBLOCK:132 CBLOCK_PATH:133 blockPose:134 castPose:140 lateSkillPose:146 castPose0:147 clearCharacterCast:176 syncPlayers:181 syncEnemies:283 projGeo:321 tailGeo:322 _t1:323 makeProj:324 _a:345 _b:345 PJFX:347 syncProj:348 _awT:438 animateWorld:439
+§480 ฉายตำแหน่ง 3D ลงจอ (ป้ายชื่อ / ตัวเลขดาเมจ)
+_v:481 toScreen:482 BURNC:490 burnNum:491 NAMETAG:505 nameTag:506 drawLabels:510 TEXTAG:540 textTag:541 drawTexts:545 HITM:557 DIRI:557 drawXh:559 drawCrosshair:569
 
 ## js/36-modes-view.js (171) — 
 ROLE:4 KC:4 roleShowT:4 onPriv:5 MO:10 BREATHS:11 clearModeObjs:12 ITEMC:21 healTex:22 makeItem:23 syncModeObjs:39
@@ -455,7 +455,7 @@ _wpM:108 fileWeapon:109
 §117 Ice circle (Permafrost): ริบบิ้นแสงวนเป็นก้นหอยบนพื้น + ผลึกลอยหมุนรอ…
 SWIRL_FS:118 ICIRC:122 iceCircle:123 updateIceCircles:134
 
-## js/44-vfx-kit.js (394) — 
+## js/44-vfx-kit.js (395) — 
 §8 1) หางแสง
 TRMAX:11 TRPTS:11 TRAILS:11 _trL:12 trailLayer:13 trailNew:22 trailPoint:24 trailStop:27 _tv1:28 _tv2:28 _tv3:28 updateTrails:29
 §52 2) สูตรเอฟเฟกต์ = จานสี (ธาตุ) × แม่แบบ (ขนาด/ชนิด)
@@ -465,11 +465,11 @@ EFXAUG:148 PJPAL:167 pjPal:169 ULTCOL:170 efxAug:171 VFXAUG_ON:178 fxAug:179
 §199 3b) สนามรบ (designs/battlefield.md ขั้น 1, แบบ C): ทุกสกิลทิ้งควัน/ฝุ…
 BF_EL:202 BF_CLS:202 BF_EXTRA:204 BF:207 bfAfter:208 bfPlay:228
 §232 3c) สนามรบ ขั้น 2: รอยค้างบนพื้น + ซากรก ๆ (หายเองหลัง BF_LIFE วิ, เด…
-BF_LIFE:236 BF_FADE:236 BFM:237 BF_MK:238 BF_MKA:238 BF_MKR:238 bfMarkMesh:239 _bfQ:247 _bfQ2:247 _bfN:247 _bfUp:247 _bfS:247 _bfP:247 _bfMx:247 bfMark:249 bfAge:258 updateBfMarks:271 BFRS:276 bfRestPool:277 bfRestAdd:282 bfBinAdd:289 bfBinBuild:293 bfRest:298 bfScatter:304 _rockMat:312 bfCollapse:314 updateBfRest:321 bfClear:327
-§331 3d) สนามรบ ขั้น 5: บรรยากาศตามความพังรอบตัว (designs/battlefield.md)
-BFA:335 bfWreck:336 updateBfAir:341 bfRumble:364 updateBf:367
-§370 4) เอฟเฟกต์ทั้งจอ (ค่าไปที่ GradePass ใน js/27-world.js)
-SCR:371 impactFrame:374 screenFlash:375 screenRadial:376 screenKick:377 screenHurt:378 _scv:379 updateScreenFx:380 updateVfxKit:394
+BF_LIFE:236 BF_FADE:236 BFM:237 BF_MK:238 BF_MKA:238 BF_MKR:238 bfMarkMesh:239 _bfQ:247 _bfQ2:247 _bfN:247 _bfUp:247 _bfS:247 _bfP:247 _bfMx:247 bfMark:249 bfAge:258 updateBfMarks:271 BFRS:276 bfRestPool:277 bfRestAdd:282 bfBinAdd:289 bfBinBuild:293 bfRest:298 bfScatter:304 _rockMat:312 bfCollapse:314 updateBfRest:321 bfClear:328
+§332 3d) สนามรบ ขั้น 5: บรรยากาศตามความพังรอบตัว (designs/battlefield.md)
+BFA:336 bfWreck:337 updateBfAir:342 bfRumble:365 updateBf:368
+§371 4) เอฟเฟกต์ทั้งจอ (ค่าไปที่ GradePass ใน js/27-world.js)
+SCR:372 impactFrame:375 screenFlash:376 screenRadial:377 screenKick:378 screenHurt:379 _scv:380 updateScreenFx:381 updateVfxKit:395
 
 ## js/45-fx-runtime.js (395) — 
 FXR:9 FXDEG:10
@@ -522,32 +522,32 @@ WB:298 wbInit:299 wbBegin:309 wbEnd:310 fxWarpMake:311 fxWarpTick:324
 §332 ไฟ 3 มิติจากการจำลอง (ชั้น vol) — ไฟล์รูปแบบเดียวกับที่เพื่อน bake จา…
 FXVOL:335 fxVolLoad:336 fxVolTex:340 fxVolSet:343 fxVolReady:344 fxVolMake:345 fxVolTick:348 fxPreAssets:353 fxAssetsWait:355
 
-## js/47-earth-view.js (711) — 
-ECOL:9 EGUARD_BIG:14 EGUARD:14 CB:15 EV:16 eW:17 eYaw:18
+## js/47-earth-view.js (942) — 
+ECOL:9 EGUARD_BIG:14 EGUARD:14 EV:15 eW:16 EARTH_FIST_SCALE:17 eYaw:18
 §19 ลายผิว (วาดเองบน canvas: หิน/ทราย + รอยร้าว + ขอบบล็อกแบบ Roblox)
 ETEX:20 eTex:21 eFadeTex:35 eMat:37 eTMat:38 rockGeo:39 ROCKU:45 rockMesh:46 coneMesh:48 _eChunkM:50 eChunks:51
 §53 Stand (บล็อกหิน/ทรายครึ่งตัวบน)
 makeStand:55
 §92 Rampage: เกราะลมหน้า Stand (ผู้ใช้: เหมือนอุกกาบาตตกโลก ต้านลม — เปลื…
-makeBow:94 EBOW:103 _RIM:103 eRampWind:104 eSpikes:116 standOp:121 _ikDn:124 eArmIK:125 PK:132 standPose:134 _eRq:160 _eRq2:160 _eRx:160 standRun:161 eState:179 eStandOf:180 eGiantOf:181 eSandFall:183 eAppear:184 eAim:186
-§189 วงเตือนบนพื้น (BA ชาร์จ / จุดปาเสา): วงเข้มก่อน แล้วสีอ่อนค่อย ๆ เติม…
-makeWarn:190 eWarnAt:195
-§196 ทุกเฟรม: ผู้เล่นสายดิน (เรียกจาก syncPlayers)
-earthFX:197
-§290 สว่าน (ref: designs/earth_ref/drill_ref.png): หินแหลมเรียวเป็นตัวหลัก…
-eSteelEnv:292 eHeatTex:297 EDR:302 eDrillGeo:303 makeDrill:309 drillHeat:316
-§318 เสายักษ์ (ref: designs/earth_ref/pillar_ref.png): เสาเหลี่ยมยาว ปลายห…
-makePillar:319
-§325 กระสุนหิน
-earthProjMesh:326 SLAB:332 makeSlab:333 eSlabGeo:338 eSlabMats:349 slabCracks:416
-§419 สิ่งก่อสร้าง + ฝุ่น (เรียกจาก render loop)
-earthClear:420 eMergePartial:428 eMergeKids:433 eMakeSO:441 syncEarth:458 earthFog:501 eMudScreen:504 _eOlMat:511 eOutlines:513 _eCamT:518 eAnim:519 eDebris:520 eWave:522 eAirWave:524 esbImpact:527
-§534 event "efx" ของสายดิน (เรียกจากต้น efxFX) — คืน true = จัดการแล้ว
-earthEfx:535 eWindOut:624 eAirCone:630 eDrillFly:632
-§636 บึงโคลน (Mud Swamp + บึงจากเสาอัลติ): คลื่นกระเพื่อมจากกลางไปขอบ แล้ว…
-earthMudZone:637 earthMudSink:644
-§645 HUD ใต้เป้าเล็ง
-ESM:647 eSmooth:648 ESF:651 eShieldFx:652 eChips:657 eShieldSegs:660 eShieldNum:674 eShieldArc:678 drawEarthHud:691
+makeBow:94 EBOW:103 _RIM:103 eRampWind:104 eSpikes:116 standOp:121 _ikDn:124 eArmIK:125 PK:132 standPose:134 _eRq:161 _eRq2:161 _eRx:161 standRun:162 eState:180 eStandOf:181 eGiantOf:182 eSandFall:184 eAppear:185 eAim:187
+§190 วงเตือนบนพื้น (BA ชาร์จ / จุดปาเสา): วงเข้มก่อน แล้วสีอ่อนค่อย ๆ เติม…
+makeWarn:191 eWarnAt:196 eStoneDir:197 eStonePrep:201 eFistCharge:209 eStonePunch:226 eFistEase:238 eFistMotion:239 eFistPose:243 eFistPlayerPose:268 eWrathPillarDir:285 eWrathBoostRock:286 eWrathStand:311 eWrathPlayerPose:345 _eForearmAxis:361 _eForearmQ:361 earthFistForearm:362
+§373 ทุกเฟรม: ผู้เล่นสายดิน (เรียกจาก syncPlayers)
+earthFX:374
+§448 สว่าน (ref: designs/earth_ref/drill_ref.png): หินแหลมเรียวเป็นตัวหลัก…
+eSteelEnv:450 eHeatTex:455 EDR:460 eDrillGeo:461 makeDrill:467 drillHeat:474
+§476 เสายักษ์ (ref: designs/earth_ref/pillar_ref.png): เสาเหลี่ยมยาว ปลายห…
+makePillar:477
+§483 กระสุนหิน
+earthFistMat:485 makeEarthFist:489 eFistCrumble:505 earthProjMesh:528 SLAB:538 makeSlab:539 eSlabGeo:544 eSlabMats:555 slabCracks:622
+§625 สิ่งก่อสร้าง + ฝุ่น (เรียกจาก render loop)
+earthClear:626 eMergePartial:634 eMergeKids:639 eMakeSO:647 syncEarth:664 earthFog:708 eMudScreen:711 _eOlMat:718 eOutlines:720 _eCamT:725 eAnim:726 eDebris:727 eWave:729 eAirWave:731 esbImpact:734
+§741 event "efx" ของสายดิน (เรียกจากต้น efxFX) — คืน true = จัดการแล้ว
+earthEfx:742 eWindOut:858 eAirCone:864 eDrillFly:866
+§870 บึงโคลน (Mud Swamp + บึงจากเสาอัลติ): คลื่นกระเพื่อมจากกลางไปขอบ แล้ว…
+earthMudZone:871 earthMudSink:878
+§879 HUD ใต้เป้าเล็ง
+ESM:881 eSmooth:882 ESF:885 eShieldFx:886 eChips:891 eShieldSegs:894 eShieldNum:908 eShieldArc:912 drawEarthHud:925
 
 ## js/48-ragdoll.js (227) — 
 RAG:10 RAGJ:23 RAGB:29 RAGS:33 RAGMIN:37 RAGHINGE:39 _rv1:40 _rv2:40 _rv3:40 _rqa:40 _rqb:40 _rm:40 ragBones:41 ragBasis:48 ragTargets:56 ragStart:62 ragBack:88 ragFloor:89 ragStep:90 ragPose:155 ragWrite:170 ragRestore:182 ragEnd:186 ragTick:188 ragHideDead:222
@@ -806,4 +806,4 @@ surfSync:49 surfQuality:53
 SURF_VS:55 SURF_VS_BODY:56 SURF_FS:67 SURF_FS_BODY:68 surfOk:98 surfApply:99 surfScene:111
 §112 ปรับค่า (tune.html / F8)
 
-(98 files, 25703 lines)
+(98 files, 25993 lines)

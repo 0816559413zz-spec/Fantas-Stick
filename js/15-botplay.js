@@ -244,7 +244,7 @@ function botCombo(p,dt,tg){
     if(p.sdome.god?M.sd>0.8:stormDomeCharge(p.sdome.t)>=1)click();else inp.fire=0;
   }}else M.sd=0;
   // ดิน: Wrath บนฟ้า = ปาเสาใส่เป้าเรื่อย ๆ
-  if(p.wr&&p.wr.ph==='sky'){inp.ax=tg.x;inp.ay=tg.y;click();}
+  if(p.wr&&p.wr.ph==='aim'){inp.ax=tg.x;inp.ay=tg.y;click();}
   // ดิน: เป้าอยู่ระหว่างกำแพงหินคู่ = กดซ้ำบีบ (Crush)
   if(p.tec&&p.tec.ok&&!p.crush){const T=p.tec,c=Math.cos(T.a),s=Math.sin(T.a),rx=tg.x-(T.cx-c*210),ry=tg.y-(T.cy-s*210),al=rx*c+ry*s,lat=Math.abs(-rx*s+ry*c);
     const i=p.kitIds.indexOf('tectoniccrush');if(i>=0&&al>50&&al<370&&lat<105&&p.cd[SLOTK[i]]>0)press(SLOTK[i]);}

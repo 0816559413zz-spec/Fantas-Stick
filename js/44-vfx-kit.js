@@ -232,8 +232,8 @@ function bfPlay(name,el,x,y,h,s,pal){if(!nearMe(x,y,1600))return;
 // ---------- 3c) สนามรบ ขั้น 2: รอยค้างบนพื้น + ซากรก ๆ (หายเองหลัง BF_LIFE วิ, เดิมค้างทั้งแมตช์) (ล้างเมื่อเริ่มแมตช์ใหม่ — bfClear จาก setScreen js/19) ----------
 // รอย = InstancedMesh เดียว ภาพ assets/fx/tex/bf_marks.png (4×2 ช่อง จาก tools/bf-mark-gen.py) • ทุกรอยเก็บ {x,y,el,r} ไว้ใน BFM.at (ไว้เปลี่ยนเป็นหลุมจริงทีหลัง)
 // ซาก = ชิ้นที่ตกนิ่งแล้ว (DEBRIS js/23, rockChunks js/42, bfScatter) ย้ายเข้า InstancedMesh ต่อ (geometry, วัสดุ) → วาดถูก ค้างได้เป็นพัน • สตูดิโอ VFX = ไม่ค้าง (หดหายแบบเดิม)
-// ผู้ใช้ 2026-11-11: รอยและซากบนพื้นหายเองหลัง BF_LIFE วิ (ค้าง แล้วจาง/ยุบลงพื้นใน BF_FADE วิ สุดท้าย) — เดิมค้างทั้งแมตช์
-const BF_LIFE=8,BF_FADE=2;
+// รอยและซากบนพื้นหายเองหลัง BF_LIFE วิ (จางหรือยุบลงพื้นใน BF_FADE วิสุดท้าย)
+const BF_LIFE=5,BF_FADE=2;
 const BFM={MAX:300,N:{high:300,auto:190,low:80},mesh:null,attr:null,n:0,head:0,at:[],grow:[]};
 const BF_MK={fire:[0,1],storm:[2,3],earth:[4,5],ice:[6,7]},BF_MKA={fire:0.92,storm:0.88,earth:0.85,ice:0.82},BF_MKR={fire:1,storm:1.1,earth:1.05,ice:1.1};
 function bfMarkMesh(){if(BFM.mesh)return BFM.mesh;
@@ -298,7 +298,7 @@ function bfBinBuild(){BFRS.dirty=false;for(const b of BFRS.bins.values()){
 function bfRest(o,smo,big){if(FXSTUDIO.own||!BF.on)return false;
   o.updateMatrixWorld(true);o.traverse(m=>{if(m.isMesh&&m.visible&&!Array.isArray(m.material)){if(big)bfBinAdd(m);else bfRestAdd(m.geometry,m.material,m.matrixWorld);}});
   if(o.parent)o.parent.remove(o);
-  if(smo&&BFRS.smoke.length<30){const q=simOf(o.position);BFRS.smoke.push({x:q.x,y:q.y,h:q.h,t:rnd(5,BF_LIFE),acc:Math.random()});}
+  if(smo&&BFRS.smoke.length<30){const q=simOf(o.position);BFRS.smoke.push({x:q.x,y:q.y,h:q.h,t:rnd(BF_LIFE-3,BF_LIFE),acc:Math.random()});}
   return true;}
 // เศษเล็กโปรยนิ่งรอบจุด (ไม่มีฟิสิกส์ — ใส่ pool ทันที): กรวด/หิน/ไม้/น้ำแข็ง ให้พื้นรก ๆ แบบสนามรบ • kind: 'rock' | 'ice' | 'char' | mats = [วัสดุ...]
 function bfScatter(x,y,R,n,kind,size){if(FXSTUDIO.own||!BF.on||!nearMe(x,y,1800))return;n=Math.round(n*(QUAL.mode==='low'?0.35:QUAL.mode==='high'?1:0.7));
@@ -316,14 +316,15 @@ function bfCollapse(x,y,w,d,charred){if(!BF.on)return;BFA.col.push({x,y,w:4+Math
   fxPlay('env/bf_collapse',{x,y,h:0,s});
   const R=Math.max(w,d)*0.6;bfScatter(x,y,R,30*s,'rock',1.2);
   for(let k=0;k<5;k++){const an=Math.random()*6.283,dd=Math.sqrt(Math.random())*R*0.8;bfMark(x+Math.cos(an)*dd,y+Math.sin(an)*dd,charred?'fire':'earth',1.2+Math.random()*0.5);}
-  if(charred)for(let k=0;k<6&&BFRS.smoke.length<46;k++)BFRS.smoke.push({x:x+rnd(-w,w)*0.35,y:y+rnd(-d,d)*0.35,h:1,t:rnd(6,BF_LIFE),acc:Math.random(),big:1});}
+  if(charred)for(let k=0;k<6&&BFRS.smoke.length<46;k++)BFRS.smoke.push({x:x+rnd(-w,w)*0.35,y:y+rnd(-d,d)*0.35,h:1,t:rnd(BF_LIFE-2,BF_LIFE),acc:Math.random(),big:1});}
 // ควันกรุ่นจากซากที่โดนไฟ (ค่อย ๆ จางจนหมด)
 function updateBfRest(dt){const S=BFRS.smoke;
   if(BFRS.dirty&&(BFRS.reT-=dt)<=0){BFRS.reT=0.4;bfBinBuild();}   // ชิ้นใหญ่ที่เพิ่งนิ่ง → รวม mesh ใหม่ (ไม่เกินทุก 0.4 วิ)
   for(let i=S.length-1;i>=0;i--){const q=S[i];q.t-=dt;if(q.t<=0){S.splice(i,1);continue;}
     q.acc+=dt*(q.big?1.4:0.7)*Math.min(1,q.t/6);if(q.acc<1||!nearMe(q.x,q.y,1400))continue;q.acc-=1;
-    smoke(q.x+rnd(-8,8),q.y+rnd(-8,8),q.h,1,Math.random()<0.5?'#3a3430':'#55504a',q.big?3:2.2,q.big?11:6,12);
-    if(Math.random()<0.25)PARTS.push({x:q.x+rnd(-10,10),y:q.y+rnd(-10,10),h:q.h+0.1,vx:0,vy:0,vh:rnd(0.6,1.4),life:0.9,max:0.9,col:'#ff8a3a',size:2,g:-0.5,drag:2});}}
+    // burst() สุ่มอายุได้สูงสุด 1.2 เท่าของค่าที่ส่ง
+    smoke(q.x+rnd(-8,8),q.y+rnd(-8,8),q.h,1,Math.random()<0.5?'#3a3430':'#55504a',Math.min(q.t/1.2,q.big?3:2.2),q.big?11:6,12);
+    if(Math.random()<0.25){const life=Math.min(q.t,0.9);PARTS.push({x:q.x+rnd(-10,10),y:q.y+rnd(-10,10),h:q.h+0.1,vx:0,vy:0,vh:rnd(0.6,1.4),life,max:life,col:'#ff8a3a',size:2,g:-0.5,drag:2});}}}
 function bfClear(){BFA.col.length=0;BFA.k=BFA.kt=0;BFM.n=BFM.head=0;BFM.at.length=0;BFM.grow.length=0;bfMarkMesh().count=0;   // สร้างไว้ก่อน = ภาพรอยโหลดตั้งแต่เริ่มแมตช์
   for(const e in BF_EL)for(const v of ['','_air'])fxLoad('env/bf_'+e+v);fxLoad('env/bf_collapse');   // โหลดไฟล์ไว้ก่อน (ครั้งแรกจะได้ไม่พลาด)
   for(const p of BFRS.pools.values()){scene.remove(p.M);p.M.dispose();}BFRS.pools.clear();BFRS.smoke.length=0;
