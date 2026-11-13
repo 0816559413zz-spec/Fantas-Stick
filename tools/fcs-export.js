@@ -9,7 +9,7 @@ const ch = v => { v = v | 0; if (v < 0 || v > 35) throw new Error('ค่าเ�
 const grid = g => g.map(r => r.map(ch).join('')).join('');
 // walk override 2 (ห้ามเดิน) = นับเป็นกำแพงทึบ
 const wall = m.wall.map((r, y) => r.map((v, x) => (m.walk[y][x] === 2 && !v ? 1 : v)));
-const T = { spawnA: 'sa', spawnB: 'sb', point: 'pt', breakwall: 'bw', gate: 'gt', pillar: 'pl', tree: 'tr', crate: 'cr' };
+const T = { spawnA: 'sa', spawnB: 'sb', point: 'pt', breakwall: 'bw', gate: 'gt', pillar: 'pl', tree: 'tr', crate: 'cr', rock: 'rk' };
 const objs = [];
 for (const o of m.objs) {
   const t = T[o.t]; if (!t) { console.warn('ข้าม ชนิดที่เกมยังไม่รองรับ:', o.t, o.id); continue; }

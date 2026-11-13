@@ -1,7 +1,7 @@
 // =====================================================================
 //  เครือข่าย (PeerJS / WebRTC)
 // =====================================================================
-const PREFIX='wizduel-th-v74-';   // v74: บุกปราสาท snapshot มีสถานะต้นไม้ (sg.tr)
+const PREFIX='wizduel-th-v75-';   // v75: แผนที่ปราสาท หิน/เสาแทนลัง + ไม่มีของสุ่ม (ที่ชนเปลี่ยน) • v74: snapshot มีสถานะต้นไม้ (sg.tr)
 const NET={peer:null,isHost:false,online:false,myId:'me',conns:new Map(),hostConn:null,code:'',spec:false,rtt:0,
   // token ของแท็บนี้ (อยู่ข้ามการรีเฟรช) — โฮสต์ใช้จำว่า "คนเดิมต่อกลับมา" ตอนเน็ตหลุด
   tok:(()=>{const r=()=>Math.random().toString(36).slice(2,10);try{let t=sessionStorage.getItem('wd_tok');if(!t){t=r();sessionStorage.setItem('wd_tok',t);}return t;}catch(e){return r();}})()};

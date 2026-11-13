@@ -168,6 +168,44 @@ def rubble(m):
         stone(m, R.uniform(0.3, 0.75), R.uniform(0.25, 0.5), R.uniform(0.3, 0.7), R.uniform(-0.9, 0.9), 0.15, R.uniform(-0.5, 0.5), R.choice((1, 2)), 0.25)
 piece('rubble', rubble)
 
+
+# ---------- หินก้อนใหญ่ (กำบัง) — ทรงกลมบิดด้วย noise ตามตำแหน่ง (ขั้วต่อกันสนิท) ก้นแบน ----------
+def boulder(m, sx, sy, sz, x=0.0, z=0.0, ry=0.0, seed=0.0, sw=1, moss=True):
+    rows, closed = g_sphere(1.0, 9, 6)
+    out = []
+    for row in rows:
+        r2 = []
+        for v in row:
+            n = 1 + 0.16 * math.sin(3.1 * v.x + 1.7 * v.y + seed) * math.cos(2.3 * v.z + 0.5 + seed) + 0.09 * math.sin(5.3 * v.y + 2.1 * v.x - seed)
+            y = max(v.y * n, -0.25)
+            r2.append(V((v.x * n * sx, (y + 0.25) * sy, v.z * n * sz)))
+        out.append(r2)
+    M = trs3((x, 0, z), (0, ry, 0))
+    m.grid((out, closed), M, pal, sw, smooth=False)
+    if moss:                                                                  # มอสบนหัว
+        m.grid(g_sphere(1.0, 8, 3, 0, math.tau, 0, 0.75), M @ trs3((0, sy * 1.02, 0), (0, 0, 0), (sx * 0.62, sy * 0.22, sz * 0.6)), pal, 11, smooth=False)
+
+piece('rock1', lambda m: (boulder(m, 1.35, 1.0, 1.1, seed=0.3), boulder(m, 0.55, 0.45, 0.5, 1.25, 0.6, 0.7, 2.1, 2, False)))
+piece('rock2', lambda m: (boulder(m, 0.95, 1.55, 0.85, seed=1.7, sw=2), boulder(m, 0.6, 0.55, 0.55, -0.9, -0.5, 1.1, 4.2, 1, False)))
+piece('rock3', lambda m: (boulder(m, 1.1, 0.85, 0.95, -0.5, 0, 0, 3.3), boulder(m, 0.85, 1.05, 0.8, 0.75, 0.35, 1.2, 5.1, 2), boulder(m, 0.45, 0.35, 0.45, 0.2, -1.0, 0.4, 6.0, 1, False)))
+# หินใหญ่ 2×2 ช่อง (ก้อนหลัก + บริวาร)
+piece('rockbig', lambda m: (boulder(m, 3.0, 2.0, 2.6, seed=7.7), boulder(m, 1.4, 1.2, 1.2, 2.6, 1.4, 0.6, 8.3, 2), boulder(m, 1.0, 0.7, 1.0, -2.4, -1.6, 2.0, 9.1, 1, False)))
+
+
+# ---------- เสาหัก (ซากปรักหักพัง) สูง ~2.6 ม. + ท่อนเสาที่หล่นข้าง ----------
+def colbroken(m):
+    m.box((1.7, 0.45, 1.7), trs3((0, 0.22, 0)), pal, 2)
+    m.box((1.45, 0.3, 1.45), trs3((0, 0.6, 0)), pal, 3)
+    m.grid(g_cyl(0.62, 0.68, 1.8, 12, 1, True), trs3((0, 1.65, 0)), pal, 0)
+    for k in range(12):                                                      # ยอดหักแหว่ง
+        a = k / 12 * math.tau
+        hh = 0.25 + 0.55 * abs(math.sin(k * 1.7 + 0.4))
+        m.box((0.36, hh, 0.32), trs3((math.sin(a) * 0.47, 2.55 + hh / 2 - 0.05, math.cos(a) * 0.47), (0, a, 0)), pal, R.choice((0, 1)))
+    m.grid(g_cyl(0.6, 0.6, 1.4, 12, 1, False), trs3((1.6, 0.6, 0.5), (0, 0.5, math.pi / 2)), pal, 1)   # ท่อนที่ร่วง
+    for k in range(4):
+        stone(m, R.uniform(0.25, 0.45), R.uniform(0.18, 0.3), R.uniform(0.25, 0.45), R.uniform(-1.2, 0.4), 0.1, R.uniform(-1.3, -0.5), 2, 0.25)
+piece('colbroken', colbroken)
+
 print('pieces', [o.name for o in OUT], 'tris', sum(tris(o) for o in OUT))
 print('size', export(OUT, 'assets/fcs/fcs_kit.glb'))
 save_blend('assets/src/fcs_kit.blend')

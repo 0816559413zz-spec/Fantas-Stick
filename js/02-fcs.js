@@ -6,6 +6,11 @@
 // =====================================================================
 const FCS_C=90;   // 1 ช่อง Map Editor = 90 px = 4.5 ม. (ผู้ใช้ 2026-11-08: ขยาย 3 เท่าจาก 30 เพราะสู้กันแล้วแคบ)
 const FCS_WH=[0,6,1.2,1.1];   // ความสูงกำแพง (ม.) ตามชนิด: ทึบ / เตี้ย(กำบัง) / รั้ว
+// หิน (ผู้ใช้ 2026-11-13: "อยากให้มีพวก หิน เสา เพิ่ม เอากล่องสีน้ำตาลออก") — ชิ้น rock1/rock2/rock3/rockbig ใน assets/fcs/fcs_kit.glb
+//   r = วงชน (px) • hgt = ความสูงกำบัง (ม.) • sc = ขยายชิ้นตอนวาง ⚠ ค่าตั้งต้น
+const FCS_ROCK=[{n:'rock1',r:40,hgt:2,sc:1.6},{n:'rock2',r:32,hgt:3,sc:1.6},{n:'rock3',r:42,hgt:2.1,sc:1.6},{n:'rockbig',r:80,hgt:3.1,sc:1.3}];
+// สุ่มตามตำแหน่งช่อง (ทุกเครื่องได้ค่าเดียวกัน) 0..1
+function fcsH(x,y,k){let v=(x*73856093^y*19349663^k*83492791)>>>0;v^=v>>>13;v=Math.imul(v,1274126177)>>>0;return (v>>>0)/4294967296;}
 function genFcs(){
   const D=FCS_DATA,C=FCS_C,w=D.w,h=D.h,W=w*C,H=h*C,obs=[];
   const at=(s,x,y)=>parseInt(s[clamp(y,0,h-1)*w+clamp(x,0,w-1)],36)||0;
@@ -37,7 +42,9 @@ function genFcs(){
       for(let yy=y;yy<y+oh;yy++)for(let xx=x;xx<x+ow;xx++)cell(xx,yy,1,{k:'fcb',sgw:i,hgt:bw[i].h,nb:inR});
     }else if(t==='tr'){obs.push({x:cx,y:cy,r:10,k:'fct',hgt:7,s:0,sgt:trees.length});trees.push({x:cx,y:cy});props.push(['tr',cx,cy]);}
     else if(t==='cr'){obs.push({x:cx,y:cy,r:14,k:'fcc',hgt:1.2,s:0});props.push(['cr',cx,cy]);}
-    else if(t==='pl'){obs.push({x:cx,y:cy,r:13,k:'fcp',hgt:6,s:0});props.push(['pl',cx,cy]);}
+    else if(t==='pl'){const b=fcsH(x,y,6)<0.45?1:0;obs.push({x:cx,y:cy,r:b?15:13,k:'fcp',hgt:b?2.6:6,s:0});props.push(['pl',cx,cy,b]);}   // b = เสาหัก (ซาก) สูง 2.6 ม.
+    else if(t==='rk'){   // หิน: 1 ช่อง = 3 แบบ (สุ่มตามตำแหน่ง) • 2 ช่องขึ้นไป = ก้อนใหญ่ • ขนาด/ความสูงตรงกับชิ้น Blender (FCS_ROCK)
+      const v=Math.max(ow,oh)>=2?3:Math.floor(fcsH(x,y,7)*3),R=FCS_ROCK[v];obs.push({x:cx,y:cy,r:R.r,k:'fcr',hgt:R.hgt,s:0});props.push(['rk',cx,cy,v]);}
   }
   for(const k of cores)obs.push({x:k.x,y:k.y,r:40,k:'fck',hgt:6,s:0});   // ตัวแกน (คริสตัล) ชนได้
   // เฟส: โซนชนิด "เฟส" ชื่อ "เฟส N" หลายกรอบรวมกัน = พื้นที่เล่นของเฟส N
@@ -69,6 +76,7 @@ function sgClamp(o,r,A){
 function sgInArea(x,y,ph){return sgArea(ph).rects.some(q=>x>=q.x1&&x<=q.x2&&y>=q.y1&&y<=q.y2);}
 MAPS.fcs=Object.assign({name:'🏰 ปราสาท First Castle Strike',d:'แผนที่โหมดบุกปราสาท (แบบ Basic) — บุก 3 เฟส ทำลายแกนทีละจุด',build:'fcs',only:'siege',navTerr:1,navC:FCS_C},genFcs());
 MAPS.fcs.areas={get siege(){return sgArea(SGPH);}};
+MAPS.fcs.props=()=>[];   // ไม่สุ่มลัง/ถังพังได้ (genProps js/02-data) — ผู้ใช้ 2026-11-13: "เอากล่องสีน้ำตาลออก" • ที่กำบังของแมพนี้ = หิน/เสา/กำแพงเตี้ยในไฟล์แผนที่
 // จุดเกิดของเฟสปัจจุบัน (teamPts / placeAll / respawn ใช้ผ่าน fmap) • t 0 = ฝ่ายบุก 1 = ฝ่ายรับ
 MAPS.fcs.fmFor=mode=>{const F=MAPS.fcs.fcs,k=clamp(SGPH,1,F.n),a=F.sp.A[k],b=F.sp.B[k];
   const ring=(q,t)=>q?[0,1,2,3,4,5].map(i=>i?{x:q.x+Math.cos(i*1.047)*80,y:q.y+Math.sin(i*1.047)*80,t}:{x:q.x,y:q.y,t}):[];   // 6 จุดชิดกันในเขตจุดเกิด (คนละจุดต่อคน ไม่กระจายข้ามกำแพง)

@@ -29,12 +29,12 @@ HOUSES:232 HAIRC:237 HAIRSTY:239 WOODC:242 WOODN:243 WCOREC:244 WCOREN:245 WANDS
 ## js/02-fcs-data.js (3) — 
 FCS_DATA:3
 
-## js/02-fcs.js (91) — 
-FCS_C:7 FCS_WH:8 genFcs:9
-§49 พื้นที่เล่นตามเฟส (กำแพงล่องหน) + เขตจุดเกิดปลอดภัย — ใช้ทั้งโฮสต์ (G…
-SGPH:50 SG_SPR:51 _sgAreaC:52 sgArea:53 sgClamp:59 sgInArea:69
-§76 ต้นไม้หักล้ม (ผู้ใช้ 2026-11-13: "ต้นไม้หักได้แบบสมจริง" → ล้มเป็นท่อ…
-SGT:79 SGT_ON:80 sgTreeDir:81 sgTreesApply:82
+## js/02-fcs.js (99) — 
+FCS_C:7 FCS_WH:8 FCS_ROCK:11 fcsH:13 genFcs:14
+§56 พื้นที่เล่นตามเฟส (กำแพงล่องหน) + เขตจุดเกิดปลอดภัย — ใช้ทั้งโฮสต์ (G…
+SGPH:57 SG_SPR:58 _sgAreaC:59 sgArea:60 sgClamp:66 sgInArea:76
+§84 ต้นไม้หักล้ม (ผู้ใช้ 2026-11-13: "ต้นไม้หักได้แบบสมจริง" → ล้มเป็นท่อ…
+SGT:87 SGT_ON:88 sgTreeDir:89 sgTreesApply:90
 
 ## js/03-spells-core.js (246) — 
 ICONS:8 ICOALIAS:9 hasIco:10 ICOBASE:12 icoURL:13 ICO:14 icoTint:15 icoHTML:24 PATHS:25 SPELL_LIST:34 SPELLS:34 defSpell:35 SLOTK:36 BRMAP:36 KITP:37 parseKit:38 cleanKit:54 setKit:55 pathReset:58
@@ -176,7 +176,7 @@ windUltCast:483 windUltTick:486 windUltSweep:511 windFloatZ:519 windSnapP:522 wi
 §526 สกิล (ผู้ใช้ 2026-11-08: รีดีไซน์ทั้งชุด — id เดิมไว้ให้ชุดสกิล/tune/…
 W_WL:528 W_DR:534 W_VX:540 W_VO:546 W_FW:552 W_UL:561
 
-## js/10-net.js (200) — 
+## js/10-net.js (200) — เครือข่าย (PeerJS / WebRTC)
 PREFIX:4 NET:5 RC:9 TURN_SERVERS:12 ICE:13 PEER_OPT:14 TURN_URL:16 ICE_READY:18 JN:22 LAG:24 lagDo:25 hostSend:26 LOBBY:27 genCode:28 sendAll:29 NETD_KEYS:33 NETD:33 netDeltaReset:34 netDelta:35 NET_MAX:49 _netTE:49 netSendSnap:50 NETU:62 netUndelta:63 setStatus:69 hostGame:71 hostPeer:80 netConnect:100 joinWatch:111 joinFail:126 netLost:132 joinGame:147 joinPeer:158 clientOnData:173 leave:188 leaveRoom:190
 
 ## js/11-host.js (419) — 
@@ -327,16 +327,16 @@ CITY_STY:181 CITY_VEH:188 cityFacade:190 CITYK:203 _cZ:204 _cT:204 _cR:204 _cC:2
 §259 ตึกไฮไลต์ล้มทั้งตึก (ขั้น 7)
 _ctA:262 _ctB:262 _ctC:262 cityTowerPose:263 cityTowerAnim:271 cityTowerRubble:278 CAREA:292 cityAreaSync:293 cityViewSync:305 cityDebris:349 cityFX:358
 
-## js/28-fcs-build.js (199) — ภาพแผนที่ First Castle Strike (แบบ Basic: กล่อง/ทรงพื้นฐาน ยังไม่มีโมเดลจริง) + ภาพ/HUD โ…
+## js/28-fcs-build.js (200) — ภาพแผนที่ First Castle Strike (แบบ Basic: กล่อง/ทรงพื้นฐาน ยังไม่มีโมเดลจริง) + ภาพ/HUD โ…
 FCSFB:5 buildFcs:6
-§34 ภาพโหมด (ลูกข่ายทุกเครื่องจาก snapshot M.sg)
-SGV3:35 sgClearView:36 sgViewBuild:37 SGVZR:56 sgBarrier:58 sgSync:72 sgDust:94 sgFx:95
-§100 HUD
-sgTop:101 sgHud:103
-§126 ต้นไม้หักล้มได้ (โหมดบุกปราสาท)
-FCT3:128 fcsTreesBuild:129 sgTreesView:143 fcsPaint:164
-§168 ชุดตกแต่งปราสาท (Blender: assets/src/fcs_kit_build.py)
-FCS_KIT_V:171 fcsKitLoad:172
+§35 ภาพโหมด (ลูกข่ายทุกเครื่องจาก snapshot M.sg)
+SGV3:36 sgClearView:37 sgViewBuild:38 SGVZR:57 sgBarrier:59 sgSync:73 sgDust:95 sgFx:96
+§101 HUD
+sgTop:102 sgHud:104
+§127 ต้นไม้หักล้มได้ (โหมดบุกปราสาท)
+FCT3:129 fcsTreesBuild:130 sgTreesView:144 fcsPaint:165
+§169 ชุดตกแต่งปราสาท (Blender: assets/src/fcs_kit_build.py)
+FCS_KIT_V:172 fcsKitLoad:173
 
 ## js/28-maps-build.js (776) — สร้างแผนที่
 CANDLESYS:2 builtMap:3 builtKey:3 world:3 TORCHES:3 CANDLES:3 FIREFLIES:3 CRYSTAL:3 RUNE:3 SNITCH:3 BANNERS:3 SNOW:3 WCACHE:5 WCACHE_MAX:5 wkey:7 buildWorld:8 addW:44 _prewarmed:46 prewarmShaders:47 batchStatic:66 makeCandles:91 updateCandles:100 buildCastle:109 buildHogsmeade:175 buildGreatHall:263 buildForest:333
@@ -828,4 +828,4 @@ paintScene:221 paintShafts:236
 §247 ฟิลเตอร์ภาพวาด (Kuwahara 4 ทิศ, 64 จุด) — เลือกค่าเฉลี่ยของมุมที่สีเร…
 §273 ปรับค่า (tune.html / F8)
 
-(99 files, 26467 lines)
+(99 files, 26476 lines)
