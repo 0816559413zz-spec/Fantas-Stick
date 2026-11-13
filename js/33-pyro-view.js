@@ -103,13 +103,17 @@ function pyroFX(o,p,pz,now,dt){
   // ชาร์จลูกไฟ (กดค้าง): อนุภาคไฟถูกดูดเข้ามารวมเป็นลูกไฟที่ปลายไม้ / Kindle พร้อม: ไฟลุกที่ปลายไม้
   // ชาร์จเต็ม: แฟลชครั้งเดียว + วงไฟ บอกว่าเต็มแล้ว
   const cgFull=(p.cg||0)>=1,dcFull=(p.dc||0)>=1;
-  if(cgFull&&!o.cgFull){o.tip.getWorldPosition(_pw);const s=simOf(_pw);burst(s.x,s.y,'#ffd27a',26,220,0.35,2.4,{h:s.h,g:0});FX.flashLight(s.x,s.y,s.h,'#ffb347',4,10,0.25);if(p.id===NET.myId)snd('buff');
-    o.cgBurst=0.4;ring(p.x,p.y,'#ff8a2a',45,0.3,pz+0.1);for(let i=0;i<12;i++){const an=i/12*6.283;flame(p.x+Math.cos(an)*14,p.y+Math.sin(an)*14,pz+0.05,{vx:Math.cos(an)*70,vy:Math.sin(an)*70,vh:rnd(5,8),life:0.32,size:rnd(7,10),g:-2,drag:3});}}
+  if(cgFull&&!o.cgFull){o.tip.getWorldPosition(_pw);const s=simOf(_pw);burst(s.x,s.y,'#ffd27a',26,220,0.35,2.4,{h:s.h,g:0});FX.flashLight(s.x,s.y,s.h,'#ffb347',1.6,6,0.2);if(p.id===NET.myId)snd('buff');
+    o.cgBurst=0.25;ring(p.x,p.y,'#ff8a2a',45,0.3,pz+0.1);for(let i=0;i<12;i++){const an=i/12*6.283;flame(p.x+Math.cos(an)*14,p.y+Math.sin(an)*14,pz+0.05,{vx:Math.cos(an)*70,vy:Math.sin(an)*70,vh:rnd(5,8),life:0.32,size:rnd(7,10),g:-2,drag:3});}}
   if(dcFull&&!o.dcFull){ring(p.x,p.y,'#ffb347',70,0.4,pz+0.15);burst(p.x,p.y,'#ff7a2a',40,260,0.45,3,{h:pz+0.3,vh:[2,6],g:-1});FX.flashLight(p.x,p.y,pz+0.8,'#ff8a3a',5,12,0.3);if(p.id===NET.myId)snd('buff');}
   o.cgFull=cgFull;o.dcFull=dcFull;
   // ลูกไฟชาร์จแบบ B (ผู้ใช้เลือก 2026-10-22): เส้นแสงดูดเข้า + วงหด (ซ้อนอนุภาคเดิม) • เต็ม = แฟลช/วงช็อกขาว
-  if(p.cg>0&&o.pyroOn){if(!o.cgFx)o.cgFx=fxPlay('fire/fireball_charge',{x:p.x,y:p.y,h:pz,follow:p.id});if(cgFull&&!o.cgFx2)o.cgFx2=fxPlay('fire/fireball_full',{x:p.x,y:p.y,h:pz,follow:p.id})||1;}
-  else{if(o.cgFx){fxStop(o.cgFx);o.cgFx=null;}o.cgFx2=null;}
+  if(p.cg>0&&o.pyroOn){if(!o.cgFx)o.cgFx=fxPlay('fire/fireball_charge',{x:p.x,y:p.y,h:pz,follow:p.id});if(cgFull&&!o.cgFx2)o.cgFx2=fxPlay('fire/fireball_full',{x:p.x,y:p.y,h:pz,follow:p.id})||1;
+    // ลูกไฟที่ปลายไม้ (ผู้ใช้ 2026-11-11): ระหว่างชาร์จเล็กจาง • เต็ม = ใหญ่ ทึบ นีออนสว่าง
+    o.tip.getWorldPosition(_pw);const s=simOf(_pw),k=cgFull?'cgRd':'cgHd';if(cgFull&&o.cgHd){fxStop(o.cgHd);o.cgHd=null;}
+    if(!o[k])o[k]=fxPlay(cgFull?'fire/fireball_ready':'fire/fireball_hold',{x:s.x,y:s.y,h:Math.max(0,s.h-GY(s.x,s.y)),aim:false});
+    const I=o[k];if(I&&I!==1){I.x=s.x;I.y=s.y;I.h=Math.max(0,s.h-GY(s.x,s.y));}}
+  else{if(o.cgFx){fxStop(o.cgFx);o.cgFx=null;}o.cgFx2=null;for(const k of ['cgHd','cgRd'])if(o[k]){fxStop(o[k]);o[k]=null;}}
   // ชาร์จเต็ม: ไฟพุ่งจากใต้เท้าแค่แว้บเดียว ~0.4 วิ ตอนเพิ่งเต็ม แล้วหายไป (ผู้เล่น 2026-10-19: ของเดิมเยอะและนานเกิน) — หลังจากนั้นเหลือแค่ลูกไฟที่ปลายไม้บอกว่าเต็ม
   if(o.cgBurst>0){if(!cgFull)o.cgBurst=0;else{o.cgBurst-=dt;const f=Math.max(0,o.cgBurst/0.4);for(let i=0;i<Math.ceil(4*f);i++){const an=rnd(0,6.283),rr=rnd(6,22);flame(p.x+Math.cos(an)*rr,p.y+Math.sin(an)*rr,pz+0.05,{vh:rnd(5,8)*(0.5+0.5*f),life:rnd(0.22,0.32),size:rnd(6,9)*(0.6+0.4*f),g:-2.5});}}}
   if(dcFull){for(let i=0;i<4;i++){const an=now/120+i*Math.PI/2;PARTS.push({x:p.x+Math.cos(an)*30,y:p.y+Math.sin(an)*30,h:pz+0.15,vx:0,vy:0,vh:rnd(2.5,4.5),life:0.4,max:0.4,col:i%2?'#ffd27a':'#ff6a1a',size:3.5,g:-1});}}
@@ -208,6 +212,7 @@ function pyroFX(o,p,pz,now,dt){
   const blzN=(p.fm|0)&131072?blzFxName():null;
   if(blzN){if(!o.blzFx||o.blzFxN!==blzN){if(o.blzFx)fxStop(o.blzFx);o.blzFx=fxPlay(blzN,{x:p.x,y:p.y,h:pz,follow:p.id,aim:false});o.blzFxN=blzN;}}
   else if(o.blzFx){fxStop(o.blzFx);o.blzFx=null;o.blzFxN=null;}
+  blazeLinks(o,p,pz,now,dt);
   if(((p.fm|0)&131072)&&!blzN){
     // ขอบออร่า = "ออร่าความร้อน" (ผู้เล่น 2026-10-19 รอบ 2): ไฟลุกเตี้ย ๆ หรี่ ๆ แบบกำแพง Ring of Embers + ม่านอากาศร้อนบิดเบี้ยวเหนือขอบ + เส้นขอบส้มจาง → เห็นรัศมีโดยไม่ขาวจ้า
     if(!o.blzR){o.blzR=new THREE.Mesh(_iceEdge,new THREE.MeshBasicMaterial({color:hdr('#ff5a14',1.3),transparent:true,opacity:0.6,depthWrite:false}));o.blzR.scale.setScalar(130*S3);o.g.add(o.blzR);
@@ -230,7 +235,7 @@ function pyroFX(o,p,pz,now,dt){
     hp.forEach(([P,lx,ly,lz],hi)=>{_ev.set(lx,ly,lz);P.localToWorld(_ev);const q=simOf(_ev),ft=hi>=2;for(let k=0;k<(ft?0:1);k++)flame(q.x+rnd(-3,3),q.y+rnd(-3,3),q.h-0.12,{vx:-(o.svx||0)*0.3,vy:-(o.svz||0)*0.3,vh:rnd(1.2,2.4)*(ft?1.5:1),life:rnd(0.2,0.3)*(ft?1.25:1),size:rnd(4,5.5)*(ft?1.35:1),g:-1.5});
       if(Math.random()<0.3)PARTS.push({x:q.x,y:q.y,h:q.h,vx:rnd(-30,30),vy:rnd(-30,30),vh:rnd(0.5,2),life:0.35,max:0.35,col:'#ffd27a',size:1.3,g:-0.5});});
     // ไฟแรงที่เท้า: ขาอยู่ในเสื้อคลุม → จุดไฟรอบชายเสื้อที่พื้นแทน (เห็นชัดว่าเท้าลุกไฟ)
-    if(Math.random()<0.6){const an=rnd(0,6.283),rr=rnd(7,12);flame(p.x+Math.cos(an)*rr,p.y+Math.sin(an)*rr,pz+0.05,{vx:Math.cos(an)*12-(o.svx||0)*0.3,vy:Math.sin(an)*12-(o.svz||0)*0.3,vh:rnd(2,3),life:rnd(0.22,0.3),size:rnd(5,7),g:-1.5,drag:2,col:'#ffb070'});}
+    if(Math.random()<0.3){const an=rnd(0,6.283),rr=rnd(7,12);flame(p.x+Math.cos(an)*rr,p.y+Math.sin(an)*rr,pz+0.05,{vx:Math.cos(an)*12-(o.svx||0)*0.3,vy:Math.sin(an)*12-(o.svz||0)*0.3,vh:rnd(2,3),life:rnd(0.22,0.3),size:rnd(5,7),g:-1.5,drag:2,col:'#ffb070'});}
     // ออร่าความร้อนรอบตัว: อากาศเหนือ/รอบตัวสั่นไหวบิดเบี้ยว (แผ่นหันหากล้อง)
     {const h=hazeOf(o,'blzHzB',()=>{const m=new THREE.Mesh(_hzPlane,hazeMat(0));m.scale.set(2.6,3.8,1);return m;});h.position.set(o.g.position.x,o.g.position.y+1.55,o.g.position.z);h.quaternion.copy(cam.quaternion);}
     // เปลวตามลำตัว (มากขึ้น รอบ Pyro 2026-10-19 แต่ยังไม่ห่อทั้งตัว): ไหล่ หลัง สีข้าง
@@ -285,3 +290,27 @@ function pyroFX(o,p,pz,now,dt){
     LREQ.push({x:tx(p.x),y:pz+2,z:tz(p.y),col:'#ff6a2a',int:3,dist:20});
   }else{if(o.colo)o.colo.visible=false;o.coOn=0;o.coIn=0;}
 }
+
+// Blazeform (ผู้ใช้ 2026-11-11): เส้นไฟนีออนจากตัวเราไปหาศัตรูทุกคนในระยะออร่า • ขอบตัวเรืองส้มแบบอัลติ Nature
+//   • คนที่อยู่ในระยะ (ถ้าเป็นเรา) ขอบจอแดงส้มเบา ๆ
+const BLZV={el:null,t:0,last:0};
+const blzOutlineMat=new THREE.MeshBasicMaterial({color:'#ff7a1a',side:THREE.BackSide,depthWrite:false});blzOutlineMat.userData.keep=true;
+blzOutlineMat.onBeforeCompile=sh=>{sh.vertexShader=sh.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\ntransformed+=normalize(normal)*.035;');};
+function blzOutline(o,on){
+  if(on&&!o.blzOut){const hulls=[];(o.fileModel||o.b).traverse(m=>{if(m.isMesh&&!m.userData.natOutline&&!m.userData.blzOut)hulls.push(m);});
+    o.blzOut=hulls.map(m=>{const c=m.isSkinnedMesh?new THREE.SkinnedMesh(m.geometry,blzOutlineMat):new THREE.Mesh(m.geometry,blzOutlineMat);if(m.isSkinnedMesh)c.bind(m.skeleton,m.bindMatrix);c.userData.blzOut=true;c.renderOrder=997;m.parent.add(c);return {m,c};});}
+  for(const {m,c} of o.blzOut||[]){c.visible=on&&m.visible;c.position.copy(m.position);c.quaternion.copy(m.quaternion);c.scale.copy(m.scale);}
+  if(on)blzOutlineMat.color.setRGB(1,.42+.12*Math.sin(performance.now()/90),.1);}
+function blazeLinks(o,p,pz,now,dt){
+  const on=!!((p.fm|0)&131072)&&p.al!==false;blzOutline(o,on);if(!on)return;
+  const V=VIEW.cur,R=(BLAZEF&&BLAZEF.v.r)||130,team=V&&MODES[V.mode]&&MODES[V.mode].team;
+  const foes=V?[...(V.P||[]).filter(q=>q.id!==p.id&&q.al&&(!team||q.tm!==p.tm)),...(V.E||[])]:[];
+  o.blzLT=(o.blzLT||0)-dt;const draw=o.blzLT<=0;if(draw)o.blzLT=.05;
+  for(const t of foes){if(Math.hypot(t.x-p.x,t.y-p.y)>R+(t.r||PR))continue;
+    if(draw){TBFIRE=1;try{const b=tbolt(p.x,p.y,pz+1.2,t.x,t.y,(t.z||t.h||0)+1.2,.07,0,.13,0);b.amp=.06;}finally{TBFIRE=0;}}
+    if(t.id===NET.myId)BLZV.t=.25;}
+}
+function blazeVignette(dt){
+  if(!BLZV.el){const d=document.createElement('div');d.id='blzVig';d.style.cssText='position:fixed;inset:0;pointer-events:none;z-index:3;opacity:0;transition:none;background:radial-gradient(ellipse at center,rgba(0,0,0,0) 55%,rgba(255,90,20,.35) 82%,rgba(200,20,0,.6) 100%)';document.body.appendChild(d);BLZV.el=d;}
+  BLZV.t=Math.max(0,BLZV.t-dt);const k=BLZV.t>0?1:0;BLZV.cur=(BLZV.cur||0)+(k*(.75+.25*Math.sin(performance.now()/160))-(BLZV.cur||0))*Math.min(1,dt*8);
+  BLZV.el.style.opacity=BLZV.cur.toFixed(3);}

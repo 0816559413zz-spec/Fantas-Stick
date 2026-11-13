@@ -43,7 +43,7 @@ function botWant(p,id,tg,d){
     case 'stormorbs':return st>=(botSave(p)?3:1)&&!p.sorb&&d<450;
     case 'triplestrike':return st>=2&&d<600&&(stuck||st>=4);
     case 'railgun':return st>=3&&d>280&&d<850&&(stuck||hp>0.6);
-    case 'stormdome':return st>=3&&d<560;
+    case 'stormdome':return st>=stormDomeCost(p)&&d<560;
     // ---- ดิน: ผลักศัตรูชนของแข็ง • โคลน → กำแพงหนีบ ----
     case 'stonebreaker':return d<650&&(botWallBehind(p,tg,260)||d<360);
     case 'mudswamp':return d<580;
@@ -239,9 +239,12 @@ function botCombo(p,dt,tg){
   // ไฟ: ดิ่ง Dragonfall ใส่เป้า (บินเล็งตามสักพักก่อน)
   if(p.dfall){inp.ax=tg.x;inp.ay=tg.y;if(p.dfall.ph===2){M.df=(M.df||0)+dt;if(M.df>0.7)click();else inp.fire=0;}}else M.df=0;
   // สายฟ้า: ลูกสายฟ้าโดม = คลิกยิงลงเป้า
-  if(p.sdome){inp.ax=tg.x;inp.ay=tg.y;if(p.sdome.ph===2){M.sd=(M.sd||0)+dt;if(M.sd>0.8)click();else inp.fire=0;}}else M.sd=0;
+  if(p.sdome){inp.ax=tg.x;inp.ay=tg.y;if(p.sdome.ph===2){
+    M.sd=(M.sd||0)+dt;
+    if(p.sdome.god?M.sd>0.8:stormDomeCharge(p.sdome.t)>=1)click();else inp.fire=0;
+  }}else M.sd=0;
   // ดิน: Wrath บนฟ้า = ปาเสาใส่เป้าเรื่อย ๆ
-  if(p.wr&&p.wr.ph==='sky'){inp.ax=tg.x;inp.ay=tg.y;click();}
+  if(p.wr&&p.wr.ph==='aim'){inp.ax=tg.x;inp.ay=tg.y;click();}
   // ดิน: เป้าอยู่ระหว่างกำแพงหินคู่ = กดซ้ำบีบ (Crush)
   if(p.tec&&p.tec.ok&&!p.crush){const T=p.tec,c=Math.cos(T.a),s=Math.sin(T.a),rx=tg.x-(T.cx-c*210),ry=tg.y-(T.cy-s*210),al=rx*c+ry*s,lat=Math.abs(-rx*s+ry*c);
     const i=p.kitIds.indexOf('tectoniccrush');if(i>=0&&al>50&&al<370&&lat<105&&p.cd[SLOTK[i]]>0)press(SLOTK[i]);}

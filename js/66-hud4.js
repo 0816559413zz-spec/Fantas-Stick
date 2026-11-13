@@ -8,9 +8,11 @@ const H4E={
   storm:{c0:'#4a3a06',c1:'#ffe27a',c2:'#fff6c8',cb:'#3a3010',pt:'spark',n:'STORM'},
   earth:{c0:'#3a2410',c1:'#c9a36a',c2:'#f0dcb4',cb:'#3a2a18',pt:'rock',n:'EARTH'},
   wind:{c0:'#0f3a22',c1:'#8dff65',c2:'#efffe8',cb:'#123a26',pt:'snow',n:'WIND'},
-  water:{c0:'#062a4a',c1:'#4fc3ff',c2:'#e3f7ff',cb:'#0c2c48',pt:'snow',n:'WATER'}};
+  water:{c0:'#062a4a',c1:'#4fc3ff',c2:'#e3f7ff',cb:'#0c2c48',pt:'snow',n:'WATER'},
+  stormgod:{c0:'#05304a',c1:'#3fe2ff',c2:'#e0fbff',cb:'#0a2c44',pt:'spark',n:'STORM'}};   // ร่างเทพสายฟ้า: ไพ่/HUD เป็นฟ้า (ผู้ใช้ 2026-11-10)
 const H4={pick:null,ordFor:'',el:null,on:false,drawn:false,pid:'',lay:'',cache:{},rdy:{},cdp:{},seg:[],segN:0,trail:1,hold:0,uFull:false};
-function h4Pal(me){const k=getKit(me.id),P=PATHS[k.path]||PATHS[0];return [P,H4E[P.id]||H4E.frost];}
+const h4God=me=>!!(me&&me.sm&&((me.sm[3]|0)&4));
+function h4Pal(me){const k=getKit(me.id),P=PATHS[k.path]||PATHS[0];return [P,(P.id==='storm'&&h4God(me)?H4E.stormgod:H4E[P.id])||H4E.frost];}
 // สีของ HUD canvas (js/38) ตามธาตุของเรา — เรียกทุกเฟรมจาก drawHUD
 function hud4Col(me){if(!me)return;const E=h4Pal(me)[1];HG=E.c1;HG2=E.c2;}
 // อนุภาคธาตุ: จุดเกิดสุ่มในวง (ซ้ายล่าง: รอบรูป) • การเคลื่อนเป็น CSS animation ล้วน
@@ -65,7 +67,7 @@ function h4Build(me,v){
 // ค่าเปลี่ยนเท่านั้นถึงเขียน DOM
 function h4Set(key,v,fn){if(H4.cache[key]===v)return;H4.cache[key]=v;fn(v);}
 function hud4Draw(me,v){
-  const k=getKit(me.id),lay=me.id+'|'+k.path+'|'+k.ids.join(',')+'|'+k.ult+'|'+(me.ea?1:0)+'|'+(me.fr?me.fr[0]:'')+'|'+(me.ea&&me.ea[0]>0?1:0)+'|'+(me.ea&&me.ea[8]?1:0)+'|'+(NOBROOM.has(v&&v.mode)?1:0);
+  const k=getKit(me.id),lay=me.id+'|'+k.path+'|'+k.ids.join(',')+'|'+k.ult+'|'+(me.ea?1:0)+'|'+(me.fr?me.fr[0]:'')+'|'+(me.ea&&me.ea[0]>0?1:0)+'|'+(me.ea&&me.ea[8]?1:0)+'|'+(NOBROOM.has(v&&v.mode)?1:0)+(h4God(me)?'|g':'');
   h4OrdLoad(k);
   if(!H4.el||H4.lay!==lay){H4.lay=lay;h4Build(me,v);}
   natPlantHud(me,v);

@@ -58,7 +58,7 @@ function updateEnemies(dt){
     if(e.dead)continue;
     const D=EDEF[e.type];
     e.cd-=dt;e.cd2-=dt;e.cd3-=dt;e.stun=Math.max(0,e.stun-dt);e.ph+=dt;tickStatus(e,dt);if(e.dead)continue;
-    if(e.burn>0){e.burn-=dt;e.bt-=dt;if(e.bt<=0){e.bt=0.5;damage(e,4,e.burnSrc,'burn');if(e.dead)continue;}}
+    if(e.burn>0){e.burn-=dt;e.bt-=dt;if(e.bt<=0){e.bt=1;damage(e,4,e.burnSrc,'burn');if(e.dead)continue;}}
     e.ox=e.x;e.oy=e.y;
     e.x+=e.vx*dt;e.y+=e.vy*dt;const fr=Math.exp(-5*dt);e.vx*=fr;e.vy*=fr;
     let t=null,bd=1e12;

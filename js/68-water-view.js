@@ -10,7 +10,13 @@ const WT_BODY={
   recoil:[-1.36,-0.06,0.1,-0.24,-1.4,-0.15,-0.03,-0.12],channel:[-1.58,-0.05,0.06,-0.1,-1.4,-0.15,0,-0.05],
   aim:[-1.85,-0.12,0.06,-0.06,-1.2,0.35,0,-0.03],sink:[-1.0,0.5,0,0.35,-1.0,-0.5,0,-0.28],pop:[-1.7,-0.5,0,-0.12,-1.3,0.5,0,-0.12]
 },WT_BRACE=[0.28,-0.38,0.14,-0.14],WT_DASH_FEET=[-0.6,0.25,0.12,-0.12];
+// Moonwater ยิง (ผู้ใช้ 2026-11-11): หันข้างเอาไหล่ข้างถือไม้ไปหน้า ยื่นไม้ตรงไปข้างหน้า ยืนกางขา ค้างตลอดลำ แล้วคืนท่า
+const WMB_POSE={by:1.1,rx:-1.5,ry:0.0,rz:-1.05};
+function waterMoonPose(o,p,dt){o.wmb+=dt;const u=o.wmb,sm=x=>{x=Math.max(0,Math.min(1,x));return x*x*(3-2*x);},w=sm(u/0.08)*(1-sm((u-0.62)/0.25));if(u>0.9||!p.al){o.wmb=undefined;return false;}
+  const R=o.armR.rotation,L=o.armL.rotation,P=WMB_POSE,a=o.legs[0].position.x>0?o.legs[0]:o.legs[1],b=a===o.legs[0]?o.legs[1]:o.legs[0];
+  o.b.rotation.y=lerp(o.b.rotation.y,P.by,w);R.x=lerp(R.x,P.rx,w);R.y=lerp(R.y,P.ry,w);R.z=lerp(R.z,P.rz,w);L.x=lerp(L.x,0.35,w);L.z=lerp(L.z,0.55,w);a.rotation.x=lerp(a.rotation.x,0.28,w);b.rotation.x=lerp(b.rotation.x,-0.28,w);o.b.rotation.x=lerp(o.b.rotation.x,0.08,w);return true;}
 function waterCharacterPose(o,p,dt,now){
+  if(o.wmb!==undefined&&waterMoonPose(o,p,dt))return;
   const A=p.wt;
   if(!A||!p.al||p.dn||p.fl||p.st){o.wBeamPose=null;return;}
   let s=o.wBeamPose;
@@ -198,7 +204,7 @@ function waterEfx(ev){
     case 'wtaboff':return true;
     case 'wtmw':fxPlay('water/moon_mark',{x,y,h:0,follow:ev.id});return true;   // ตราดาวตอนเปิด Moonwater (ผู้ใช้ 2026-11-01)
     case 'wtmwoff':return true;
-    case 'wtmb':{fxPlay('water/moon_beam',{x,y,h:0,a,aim:false});const o=PM3.get(ev.id);if(o)castStart(o,'wdrop',3);if(near)snd('break',ev);return true;}
+    case 'wtmb':{fxPlay('water/moon_beam',{x,y,h:0,a,aim:false});const o=PM3.get(ev.id);if(o){o.wmb=0;o.caN=null;o.cpT=0;}if(near)snd('break',ev);return true;}
     case 'wtdg':wdgStart(ev.id,x,y);if(near){shake(0.2);snd('cast_pull',ev);}return true;
     case 'wtdgaim':return true;
     case 'wtdgdive':{const c=VIEW.cur&&VIEW.cur.P.find(q=>q.id===ev.id),da=c?Math.atan2(y-c.y,x-c.x):0;

@@ -85,7 +85,7 @@ const SKANIM={ringofembers:'sweep',blazeform:'fireflare',colossus:'ultraise',kin
 Object.assign(SKANIM,{poisondart:'natthrow',bloom:'natthrow',sporecloud:'natthrow',vinelash:'natraise',thornburst:'natraise',worldtree:'natsummon'});
 SKANIM.railgun_release='railrelease';SKANIM.terraauger_release='ground';
 SKANIM.dragonfall_land='dragonland';SKFEET.dragonland=[-0.8,0.3,0.12,-0.1];SKFEET.wingflick=[-0.45,0.3,0.12,-0.12];
-function skAnim(ev){const o=PM3.get(ev.id),n=SKANIM[ev.s];if(!o||!n)return;o.caN=n;o.caT=0;o.cpT=0;o.cgd=2.2;}
+function skAnim(ev){const o=PM3.get(ev.id),n=SKANIM[ev.s];if(!o||!n)return;if(ev.s==='stormdome'&&!ev.g)return;o.caN=n;o.caT=0;o.cpT=0;o.cgd=2.2;}
 const _caT=[0,0,0,0,0,0,0,0],_caR=[0,0,0,0,0,0,0,0];
 function skillPose(o,p,dt,now){
   const A=CANIM[o.caN];if(!A){o.caN=null;return false;}
@@ -264,11 +264,12 @@ function syncPlayers(P,mode,now,dt){
     windFX(o,p,pz,now,dt);waterFX(o,p,pz,now,dt);
     lateSkillPose(o,p,dt,now);
     waterCharacterPose(o,p,dt,now);windCharacterPose(o,p,dt,now,v);windLatePose(o,p,dt);stormBowView(o,p,dt,now);stormStaffView(o,p,dt,now);dashPose(o,p,dt,now);   // ท่าพุ่ง (js/72) ทับท่าอื่นตอนพุ่ง
+    const domeKnee=stormDomePose(o,p,pz,now);
     const whip=p.nt?.[0];
     const activeWhip=whip&&!p.dn&&!p.fl?{start:whip[0],age:whip[1],side:whip[2],angle:whip[3]}:null;
     if(activeWhip)natureWhipPose(o,activeWhip);
     else if(o.natureWhipView?.vine.visible)o.armR.rotation.y=0;
-    if(o.rig){rigSync(o,dt);windForearm(o);stormBowForearm(o);}
+    if(o.rig){rigSync(o,dt);windForearm(o);stormBowForearm(o);earthFistForearm(o);if(domeKnee)dpKnees(o,0,domeKnee);}
     if(activeWhip||o.natureWhipView)natureWhipView(o,activeWhip);
     natureCharacter(o,p,now);
     if(ragTick(o,p,v,dt,now))o.tip.scale.setScalar(0.001);   // ล้ม/กระแทกแรง = ragdoll (js/48)
@@ -320,7 +321,7 @@ function syncEnemies(E,P,now,dt){
 const projGeo=new THREE.SphereGeometry(1,14,10);
 const tailGeo=new THREE.ConeGeometry(1,1,14,1,true);tailGeo.rotateX(-Math.PI/2);tailGeo.translate(0,0,-0.5);
 const _t1=new THREE.Vector3();
-function makeProj(col,t){
+function makeProj(col,t,left=false){
   const g=new THREE.Group();
   const core=new THREE.Mesh(projGeo,new THREE.MeshBasicMaterial({color:hdr('#ffffff',2.2)}));g.add(core);
   const inner=new THREE.Mesh(projGeo,new THREE.MeshBasicMaterial({color:hdr(col,1.6),transparent:true,opacity:0.7,blending:THREE.AdditiveBlending,depthWrite:false}));g.add(inner);
@@ -330,7 +331,7 @@ function makeProj(col,t){
   // หน้าตากระสุนจากไฟล์ proj_<ชนิด> (ปั้นให้ด้านหน้าพุ่งไปทาง −Y ของ Blender) — แสงรอบ (halo) ยังอยู่
   const fm=modelInst('proj_'+t);if(fm){fm.traverse(m=>{if(m.isMesh)m.castShadow=false;});g.add(fm);o.fileModel=fm;}
   // ลูกไฟชาร์จ / Kindle: ลูกไฟ shader (เปลวไหลไปด้านหลัง) + กรวยหางไฟ
-  if(t==='erock'||t==='eslab'||t==='flak'){earthProjMesh(o,t);if(t==='flak')o.fileModel.scale.setScalar(1.9);}
+  if(t==='erock'||t==='eslab'||t==='flak'||t.startsWith('efist')){earthProjMesh(o,t,left);if(t==='flak')o.fileModel.scale.setScalar(1.9);}
   if(t==='pfire'||t==='pfireb'){o.fb=makeFireBall({flow:[0,0,-1]});g.add(o.fb);o.ft=makeFireTail({speed:3.6});g.add(o.ft);}
   if(t==='stun'||t==='zap')for(let i=0;i<2;i++){
     const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.BufferAttribute(new Float32Array(9*3),3));
@@ -348,12 +349,13 @@ function syncProj(v,now){
   const ex=VIEW.ex!==null?VIEW.ex:clamp((now-VIEW.tCur)/1000,0,0.1),seen=new Set();
   for(const j of v.J){
     seen.add(j.id);
-    const vt=(j.t==='pfire'||j.t==='pfireb')?'fire':j.t,col=j.rf?'#7ff6ff':PCOL[j.t],r=PDEF[j.t].r*S3*(vt==='fire'?1.4:1);
+    const vt=(j.t==='pfire'||j.t==='pfireb')?'fire':j.t,col=j.rf?'#7ff6ff':PCOL[j.t],r=PDEF[j.t].r*S3*(vt==='fire'?1.4:1),fist=j.t.startsWith('efist');
     let o=JM3.get(j.id);
-    if(!o){o=makeProj(col,j.t);o.pt=j.t;JM3.set(j.id,o);if(j.t==='swave')stormWaveMake(o,j);
+    if(!o){o=makeProj(col,j.t,!!j.lf);o.pt=j.t;JM3.set(j.id,o);if(j.t==='swave')stormWaveMake(o,j);
       if(PJFX[j.t])o.fx=fxPlay(PJFX[j.t][0],{x:j.x,y:j.y,h:j.h!==undefined?j.h:1.35,a:Math.atan2(j.vy,j.vx)});
       {const bp=pjPal(j.t);if(BF.on&&(bp==='fire'||bp==='ice'))o.bt=fxPlay('env/bf_'+bp+'_trail',{x:j.x,y:j.y,h:j.h!==undefined?j.h:1.35,s:(j.t==='iceboulder'||j.t==='pfireb')?1.8:1});}   // สนามรบ: หางควัน/ไอเย็น (js/44 BF)
-      if(!o.fx&&j.t!=='swave'){const P=palOf(pjPal(j.t),col),big=j.t==='iceboulder'||j.t==='pfireb';o.tr=trailNew({col:P.hi,col2:P.deep,w:big?0.32:vt==='fire'?0.2:0.11,life:big?0.28:0.17,k:1.7});}}   // หางแสงทุกกระสุน (สีตามธาตุ)
+      if(fist)o.tr=trailNew({col:'#bb9569',col2:'#76573b',w:j.t==='efistc'?.13:.065,life:.11,k:.65});
+      else if(!o.fx&&j.t!=='swave'){const P=palOf(pjPal(j.t),col),big=j.t==='iceboulder'||j.t==='pfireb';o.tr=trailNew({col:P.hi,col2:P.deep,w:big?0.32:vt==='fire'?0.2:0.11,life:big?0.28:0.17,k:1.7});}}   // หางแสงทุกกระสุน (สีตามธาตุ)
     if(o.col!==col){o.halo.material=glowMat(col,0.9);o.inner.material.color.copy(hdr(col,2.2));o.tail.material.color.copy(hdr(col,1.6));o.col=col;}
     const x=j.x+j.vx*ex,y=j.y+j.vy*ex,X=tx(x),Z=tz(y),H=(j.h!==undefined?j.h:1.35)+(j.vh||0)*ex;
     if(o.fx){o.fx.x=x;o.fx.y=y;o.fx.h=H;o.fx.a=Math.atan2(j.vy,j.vx);}
@@ -367,8 +369,9 @@ function syncProj(v,now){
     o.tail.scale.set(r*1.1,r*1.1,vt==='fire'?2.2:2.8);
     if(o.fileModel){o.core.visible=o.inner.visible=o.tail.visible=false;}
     o.lines.forEach(L=>jag(L.geometry,_a.set(0,0,0),_b.set(0,0,-2.4),0.22));
-    if(vt!=='wplume'&&vt!=='wshp'&&vt!=='swave')LREQ.push({x:X,y:H,z:Z,col,int:vt==='fire'?2.4:1.6,dist:vt==='fire'?11:8});   // ขนนกยิงทีละหลายอัน แสงรวมกันแล้วพื้นขาว
+    if(!fist&&vt!=='wplume'&&vt!=='wshp'&&vt!=='swave')LREQ.push({x:X,y:H,z:Z,col,int:vt==='fire'?2.4:1.6,dist:vt==='fire'?11:8});   // ขนนกยิงทีละหลายอัน แสงรวมกันแล้วพื้นขาว
     switch(vt){
+      case 'efist':case 'efistc':case 'efistshard':o.halo.visible=false;break;
       case 'swave':case 'wshp':case 'wball':case 'wplume':case 'wblade':case 'wdrop':case 'wcage':o.core.visible=o.inner.visible=o.tail.visible=o.halo.visible=false;o.lp=[x,y,H];break;   // น้ำ: เห็นแค่ fx ไม่มีลูกแสงขาว
       case 'icicle':
         if(o.fx){o.core.visible=o.inner.visible=o.tail.visible=false;o.halo.scale.setScalar(r*2);o.lp=[x,y,H];break;}   // แบบ B: เข็มพลังงานจากไฟล์ fx
@@ -423,7 +426,7 @@ function syncProj(v,now){
   for(const [id,o] of JM3)if(!seen.has(id)){
     if(o.tr)trailStop(o.tr);
     if(o.bt)fxStop(o.bt);
-    if(o.fx){fxStop(o.fx);const hf=PJFX[o.pt]&&PJFX[o.pt][1];if(hf&&o.lp)fxPlay(hf,{x:o.lp[0],y:o.lp[1],h:o.lp[2],a:o.fx.a});}
+    if(o.fx){fxStop(o.fx);const hf=PJFX[o.pt]&&PJFX[o.pt][1];if(hf&&o.lp)fxPlay(hf,{x:o.lp[0],y:o.lp[1],h:o.lp[2],a:o.fx.a,s:o.pt==='spark'?(o.lp[2]<0.8?0.5:0.8):1});}   // ประกายไฟชนพื้น: กระเซ็นเล็กลง (ผู้ใช้ 2026-11-11)
     if(o.lp&&o.pt==='icicle'&&!o.fx){const [x,y,H]=o.lp;playFx('ice_hit',x,y,H,{s:0.8});for(let i=0;i<8;i++){const an=rnd(0,6.283),sp=rnd(100,220);PARTS.push({x,y,h:H,vx:Math.cos(an)*sp,vy:Math.sin(an)*sp,vh:rnd(-1,2.5),life:rnd(0.15,0.3),max:0.3,col:i%2?'#ffffff':'#bfeaff',size:1.4,g:6,drag:4});}FX.flashSprite(x,y,H,'#dff6ff',0.25,1.3,0.25,1.6);}
     if(o.lp&&o.pt==='spark'){const [x,y,H]=o.lp;for(let i=0;i<9;i++){const an=rnd(0,6.283),sp=rnd(120,260);PARTS.push({x,y,h:H,vx:Math.cos(an)*sp,vy:Math.sin(an)*sp,vh:rnd(-1,3),life:rnd(0.12,0.22),max:0.22,col:i%3?'#ffc04a':'#fff6c0',size:1.3,g:6,drag:5});}}
     if(o.lp&&o.pt==='pfire'){const [x,y,H]=o.lp;ring(x,y,'#ff9a3a',70,0.28,Math.max(0.15,H-1));for(let i=0;i<14;i++){const an=i/14*6.283;flame(x+Math.cos(an)*10,y+Math.sin(an)*10,Math.max(0.1,H-0.5),{vx:Math.cos(an)*260,vy:Math.sin(an)*260,vh:rnd(1,3),life:0.3,size:rnd(6,9),drag:5});}

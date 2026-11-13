@@ -55,7 +55,7 @@ function cleanKit(s){return parseKit(parseKit(s).str).str;}
 function setKit(p,str){const old=p.pathIdx;p.fmode=0;p.orbs=0;p.orbBlk=0;p.kit=cleanKit(str);const k=parseKit(p.kit);p.pathIdx=k.path;p.kitIds=k.ids.map(i=>SPELL_LIST[i].id);p.ultId=SPELL_LIST[k.ult].id;
   if(old!==undefined&&old!==p.pathIdx&&G&&G.ph!=='lobby')pathReset(p);}
 // เปลี่ยนสายกลางเกม (เมนูทดลอง): ล้างท่าค้างของสายเก่า — ไม่งั้นค้างลอยฟ้า (Wrath) / เดินไม่ได้ (Railgun/Auger) / ร่างเทพค้าง
-function pathReset(p){clearStatus(p);earthReset(p);windReset(p);waterReset(p);natureReset(p);Object.assign(p,{stS:null,stCd:0,god:0,xhp:0,sdome:null,rail:null,slnT:0,sorb:null,beam:0,sdHit:null,slam:false,slam3:null,chg:0,dash:0,dashSp:0,trail:null,fpath:null,shieldOn:false});}
+function pathReset(p){clearStatus(p);earthReset(p);windReset(p);waterReset(p);natureReset(p);Object.assign(p,{stS:null,stCd:0,god:0,clQ:null,cEmp:0,cEmpT:0,clT:0,xhp:0,sdome:null,rail:null,slnT:0,sorb:null,beam:0,sdHit:null,slam:false,slam3:null,chg:0,dash:0,dashSp:0,trail:null,fpath:null,shieldOn:false});}
 
 // ---------- สถานะ (ใช้ได้ทั้งผู้เล่นและศัตรู) ----------
 const isBig=t=>t.isE&&(t.type==='troll'||t.type==='queen'||(EDEF[t.type]&&EDEF[t.type].boss));
@@ -80,10 +80,15 @@ function ignite(t,src,time){
     t.chl=0;t.chlT=0;if(t.frz>0){t.frz=0;t.stun=Math.min(t.stun||0,0.2);}
     emit({k:'efx',z:'melt',x:t.x,y:t.y,h:cH(t)});damage(t,6,src,'burn');
   }
-  t.burn=Math.max(t.burn||0,time||2);if(!(t.bt>0))t.bt=0.5;t.burnSrc=src;
+  t.burn=Math.max(t.burn||0,time||3);if(!(t.bt>0))t.bt=1;t.burnSrc=src;   // Burning (ผู้ใช้ 2026-11-11): 3 วิ เผาทุก 1 วิ
 }
 // Shock (สายฟ้า, ผู้เล่นออกแบบ): โคลง/กล้องสั่นเบา + ใช้ Dash ไม่ได้ สูงสุด 0.3 วิ • ติดอยู่แล้วไม่ต่อเวลา • ไม่เพิ่มดาเมจ
-function shock(t,src,d){if(t.shk>0)return;t.shk=Math.min(0.3,d||0.3);t.shkSrc=src;}
+const FX_SHOCK_CYAN=1<<20;
+function shock(t,src,d,fullDuration=false,god=G.players[src]?.god>0){
+  const duration=fullDuration?(d||0.3):Math.min(0.3,d||0.3);
+  if(t.shk>0&&(!fullDuration||t.shk>=duration))return;
+  t.shk=duration;t.shkSrc=src;t.shkGod=god;
+}
 function knock(t,x,y,f){const dx=t.x-x,dy=t.y-y,d=Math.hypot(dx,dy)||1;if(isBig(t))f*=0.25;t.vx+=dx/d*f;t.vy+=dy/d*f;}
 function addWard(p,abs,time,thorns){p.ward={abs,t:time,thorns:!!thorns};}
 // สลอว์สายน้ำแข็ง (เป็น %): ยิงปกติสะสมสูงสุด 30 (ทางน้ำแข็งนับรวมในนี้) • ก้อนน้ำแข็งใหญ่ 60 • วงน้ำแข็ง +20 • ออร่า +20 • อัลติ 80 • รวมทุกอย่างไม่เกิน 80
@@ -135,7 +140,7 @@ function tickStatus(t,dt){
   if(t.ward){t.ward.t-=dt;if(t.ward.t<=0)t.ward=null;}
 }
 function clearStatus(t){for(const k of ['wbsT','slowT','shk','frz','sil','chl','chlT','frzImm','chlImm','rootImm','ccT','ccN','haste','ovc','burn','psn','psnT','fear','bld','mrk','heat','heatT','flare','frostA','wallCd','brn','brnT','xb','blaze','kindle','kindleT','hover','fsl','fslT','fslBigT','fslR','fslA','fslP','fslUltT','slip','ripT','ffT','cryo','auraT','mirror','xhp','slideT','grT','breath','dfall','snapT','colos','dchg','mudT','sbk'])t[k]=0;t.dchgOn=false;t.ward=null;t.dr=null;}
-function fxMask(t){return (t.stun>0?1:0)|(t.burn>0?2:0)|((t.chl>0||t.slowT>0||frostSlow(t)>0)?4:0)|(t.frz>0?8:0)|(t.shk>0?16:0)|(t.root>0?32:0)|(t.sil>0?64:0)|(t.ward?128:0)|(t.haste>0?256:0)|(t.ovc>0?512:0)|(t.psn>0||t.naturePoison?1024:0)|(t.fear>0?2048:0)|(t.bld>0?4096:0)|(t.mrk>0?8192:0)|(t.dr?16384:0)|((t.heat>0||t.brn>0)?32768:0)|((t.flare>0||t.kindle>0)?65536:0)|(t.blaze>0?131072:0)|(t.xb>0?262144:0)|(t.mudT>0?524288:0);}
+function fxMask(t){return (t.stun>0?1:0)|(t.burn>0?2:0)|((t.chl>0||t.slowT>0||frostSlow(t)>0)?4:0)|(t.frz>0?8:0)|(t.shk>0?(16|(t.shkGod?FX_SHOCK_CYAN:0)):0)|(t.root>0?32:0)|(t.sil>0?64:0)|(t.ward?128:0)|(t.haste>0?256:0)|(t.ovc>0?512:0)|(t.psn>0||t.naturePoison?1024:0)|(t.fear>0?2048:0)|(t.bld>0?4096:0)|(t.mrk>0?8192:0)|(t.dr?16384:0)|((t.heat>0||t.brn>0)?32768:0)|((t.flare>0||t.kindle>0)?65536:0)|(t.blaze>0?131072:0)|(t.xb>0?262144:0)|(t.mudT>0?524288:0);}
 
 // ---------- วัตถุในสนามที่คาถาสร้าง: โซน / ฟ้าผ่าหน่วงเวลา / กำแพง / ช่องร่ายต่อเนื่อง ----------
 function foesIn(team,x,y,r,hMax){
@@ -219,10 +224,10 @@ function takePoison(t){const n=t.psn|0;t.psn=0;t.psnT=0;return n;}
 
 // ---------- ความสามารถพื้นฐาน (คลิกซ้าย) ของแต่ละสาย: สะสมสถานะตั้งต้นให้เองทุกๆ N ครั้งที่ยิงโดน ----------
 const PBASIC=[
-  {id:'b_pyro',type:'spark',n:'ประกายไฟ / ลูกไฟชาร์จ',d:'คลิก = ยิงประกายไฟ (5 ดาเมจ ทุก 0.3 วิ ระยะ ~400) โดนเป้าเดียวครบ 3 นัด = +1 Burning • กดค้าง = รวบรวมลูกไฟที่ปลายไม้ (ไม่ยิง) ครบ 2 วิ แล้วปล่อย = ลูกไฟ (12 ดาเมจ ระยะ ~900 +1 Burning)',
+  {id:'b_pyro • ยกโล่ + คลิก = สะบัดวงไฟเกลียวรอบตัว (3 ครั้ง คืนทีละ 6 วิ) ดาเมจ 10 ช้า 20% ซ้อนได้ 2 ครั้ง',type:'spark',n:'ประกายไฟ / ลูกไฟชาร์จ',d:'คลิก = ยิงประกายไฟ (5 ดาเมจ ทุก 0.3 วิ ระยะ ~400) โดนเป้าเดียวครบ 3 นัด = +1 Burning • กดค้าง = รวบรวมลูกไฟที่ปลายไม้ (ไม่ยิง) ครบ 2 วิ แล้วปล่อย = ลูกไฟ (12 ดาเมจ ระยะ ~900 +1 Burning)',
     shd:'โล่ไฟ: บล็อกปกติ • Parry = ได้ลูกไฟวิญญาณ 2 ลูก (ครั้งเดียวต่อการยกโล่) • บล็อกโดนครบ 3 ครั้ง = ได้ 2 ลูก • สะสมได้สูงสุด 4 ลูก หมุนรอบตัวไม่หายจนกว่าจะใช้ • ลูกไฟ (ชาร์จ/Kindle) โดนศัตรู = ลูกไฟวิญญาณทั้งหมดพุ่งใส่ ลูกละ 4',dsd:'พุ่ง (Shift): กดค้างชาร์จ (สูงสุด 4 วิ ห้ามขยับ ยิ่งชาร์จยิ่งย่อตัวต่ำ) ปล่อย = ระเบิดดันตัวพุ่ง 150-1100 อมตะระหว่างพุ่ง คูลดาวน์ 3 วิ',
     hit(pr,t){damage(t,pr.dmg,pr.owner,'proj');if((t.spkN=(t.spkN|0)+1)>=PYV.sparkN){t.spkN=0;addBurn(t,1,pr.owner);}},
-    tick:pyroBasic,onParry:pyroParry,onBlock:pyroBlock,dash:pyroDash},
+    tick:pyroBasic,onParry:pyroParry,onBlock:pyroBlock,dash:pyroDash,shieldSwing:true},
   {id:'b_frost',type:'icicle',n:'ดาบน้ำแข็ง / แท่งน้ำแข็ง',d:'กด V สลับโหมด • ประชิด: ดาบน้ำแข็งคอมโบ 10/10/15 ระยะ ~120 จังหวะ 3 ฮีล 10 เดินได้ระหว่างฟัน • ไกล: แท่งน้ำแข็ง 7 ดาเมจ ทุก 0.3 วิ ระยะ ~700 ช้าลง +10% (สูงสุด 30%) • อยู่สูงกว่า ~4 เมตร + ฟัน = กระโดดฟาดลงพื้น 30',
     shd:'โล่อัศวินน้ำแข็ง: กันเฉพาะด้านหน้า 120° ยกได้นานกว่าปกติ 2 เท่า ฟันดาบระหว่างยกโล่ได้ (ช้าลง) • Parry = ฟันครั้งต่อไปใน 1.5 วิ เป็นจังหวะ 3 ทันที',dsd:'ไถลน้ำแข็ง (Shift) 5 วิ เร็ว +80% (ลื่น หยุดทันทีไม่ได้) ทิ้งทางน้ำแข็ง 4 วิ: ศัตรูเดินทับช้า +10% และลื่น เราเดินทับเร็ว +20% • คูลดาวน์ 6 วิหลังไถลจบ',
     front:true,shDrain:0.5,shieldSwing:true,
@@ -230,7 +235,7 @@ const PBASIC=[
     tick:frostBasic,onParry:p=>{p.ripT=1.5;},dash:frostDash},
   {id:'b_storm',type:'pb2',n:'ลำสายฟ้า / สายฟ้าสามเหลี่ยม',d:'กดค้าง = ลำสายฟ้า (แบบ Winston) ระยะ 300 ล็อกทุกคนในกรวยหน้าอัตโนมัติ คนละ 3 ดาเมจ ทุก 0.4 วิ • ได้ Lightning stack ใหม่ = กดยิงครั้งถัดไปฟาดสายฟ้าจากฟ้าเป็นสามเหลี่ยมด้านหน้า (ยาว 250 ปลายกว้าง 120) 20 ดาเมจ + Shock',
     shd:'โล่สายฟ้า: คลิกขวา = ฟ้าผ่าลงตัวเรา เปิดโล่ 3 วิ ดูดซับดาเมจทุกอย่าง เดินได้ปกติ • คลิกขวาอีกครั้ง / ครบ 3 วิ / ดูดเกิน 90 = ระเบิดรัศมี 150 ดาเมจครึ่งหนึ่งของที่ดูด (สูงสุด 30) + Shock • ระเบิดโดน = +1 stack • ไม่ได้ดูดอะไร = ไม่ระเบิด • คูลดาวน์ 10 วิ',dsd:'Dash 3 ชาร์จ (ฟื้นชาร์จละ 3 วิ) พุ่ง 220 ทะลุศัตรู คนละ 10 ดาเมจ • ทะลุโดน = +1 Lightning stack • ติด Shock = Dash ไม่ได้',
-    hit(pr,t){damage(t,pr.dmg,pr.owner,'proj');},tick:stormBasic,dash:stormDash},
+    hit(pr,t){const wave=pr.type==='swave',hp=t.hp;damage(t,pr.dmg,pr.owner,'proj',wave);if(wave&&t.hp<hp)stormWaveMark(pr.owner,t,true,pr.stGod);},tick:stormBasic,dash:stormDash},
   {id:'b_nature',type:'pb3',n:'แส้หนาม',d:'ฟาดทุกเป้าในกรวยหน้า 120° ระยะ 280 หน่วย ดาเมจ 7 คลิกซ้ำหรือกดค้างเพื่อฟาดกลับ แล้วพัก 1 วิ',
   shd:'โล่ 150 HP เถาหนามฟาดศัตรูในระยะ 180 หน่วย คนละ 10 ดาเมจ ทุก 0.75 วิ',
   dsd:'เถาเกี่ยวเป้าในระยะ 300 หน่วย คูลดาวน์ 8 วิ เกี่ยวเข้าป้อมของเราเพื่อชาร์จลูกถั่วใหญ่',shMul:100/150,dash:natureDash,
