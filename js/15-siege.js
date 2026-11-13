@@ -19,7 +19,9 @@ const SGV={
   defMul:0.5,    // มีฝ่ายรับในเขต: เหลือส่วนนี้ (ช่วงปกติ)
   zoneR:330,     // รัศมีเขตแกน (px)
   wallHp:400,    // เลือดกำแพงพังได้
-  grace0:5,graceMin:1,graceT:60,   // ผ่อนผันตอนต่อเวลา: เริ่ม 5 วิ หดเหลือ 1 วิ ภายใน 60 วิของการต่อเวลา
+  grace0:5,graceMin:1,graceT:60,
+  respawn:[8,10],
+  treeHp:150,    // เลือดต้นไม้ (ล้มเป็นท่อนไม้กำบัง) ⚠ ค่าตั้งต้น   // เวลาเกิดใหม่ (วิ) [ฝ่ายบุก, ฝ่ายรับ] — ผู้ใช้เลือก 2026-11-13 (เดิมใช้ค่ากลาง 3 วิ)   // ผ่อนผันตอนต่อเวลา: เริ่ม 5 วิ หดเหลือ 1 วิ ภายใน 60 วิของการต่อเวลา
 };
 const SG_TEAM=['ฝ่ายบุก','ฝ่ายรับ'];
 function sgF(){return MAPS.fcs.fcs;}
@@ -29,6 +31,7 @@ function sgSpawn(t,ph){const s=sgF().sp[t?'B':'A'][ph||G.sg.ph];return s||{x:MW/
 function sgInit(){
   const F=sgF();SGPH=1;
   G.sg={ph:1,prep:SGV.prep,ot:false,otT:0,grace:SGV.grace0,win:-1,atk:0,hp:F.cores.map(()=>SGV.coreHp),bw:F.bw.map(b=>b.k==='gate'?-1:SGV.wallHp),t0:0};
+  G.sg.tr=F.trees.map(()=>SGV.treeHp);G.sg.td=F.trees.map(()=>0);sgTreesApply(sgTreeStr());
   G.timer=SGV.time0;AREA=mapArea(G.map,G.mode);
   sgWallsApply();
   for(const p of plist())p.sgc=0;
@@ -46,8 +49,17 @@ function sgWallDmg(i,dmg,x,y){
 }
 // กระสุนชนวงกำแพงพังได้ (updateProjectiles js/12) • คาถาวงกว้าง (damageEnv)
 function sgWallHit(c,pr){if(G.mode==='siege')sgWallDmg(c.sgw,pr.dmg||8,pr.x,pr.y);}
+// ต้นไม้: ดาเมจจากกระสุน/คาถาวงกว้าง → ล้มไปทางที่ถูกตี (dx,dy = ทิศแรง)
+function sgTreeStr(){const S=G.sg;return S&&S.tr?S.tr.map((h,i)=>h>0?'0':(S.td[i]+1).toString(36)).join(''):'';}
+function sgTreeDmg(i,dmg,dx,dy){
+  const S=G.sg;if(G.mode!=='siege'||!S||!S.tr||!(S.tr[i]>0))return;
+  S.tr[i]-=dmg;if(S.tr[i]>0)return;
+  S.tr[i]=0;const a=dx||dy?Math.atan2(dy,dx):Math.random()*Math.PI*2;S.td[i]=((Math.round(a/(Math.PI*2)*35)%35)+35)%35;
+  sgTreesApply(sgTreeStr());const T=sgF().trees[i];emit({k:'sgtree',i,x:Math.round(T.x),y:Math.round(T.y)});
+}
 function sgWallEnv(x,y,rad,dmg){
   if(G.mode!=='siege'||!G.sg||MAPID!=='fcs')return;
+  sgF().trees.forEach((T,i)=>{if(G.sg.tr[i]>0&&Math.hypot(T.x-x,T.y-y)<rad+10)sgTreeDmg(i,dmg,T.x-x,T.y-y);});
   sgF().bw.forEach((b,i)=>{if(G.sg.bw[i]<=0)return;const dx=Math.max(b.x-x,0,x-(b.x+b.w)),dy=Math.max(b.y-y,0,y-(b.y+b.d));if(Math.hypot(dx,dy)<rad)sgWallDmg(i,dmg,x,y);});
 }
 // ปุ่ม (updatePlayer js/11): G = เริ่ม/หยุดร่ายที่แกน • ยิง/โล่/สกิล/พุ่ง = หยุดร่าย
@@ -115,7 +127,7 @@ function sgResult(ps){
 function sgSnap(){
   const S=G.sg;if(!S)return null;
   return {ph:S.ph,n:sgF().n,pr:Math.ceil(S.prep),hp:S.hp.map(v=>Math.max(0,Math.round(v))),mx:SGV.coreHp,ot:S.ot?1:0,gr:S.ot?Math.round(S.grace*10)/10:0,atk:S.atk|0,def:S.def|0,
-    bw:S.bw.map((v,i)=>sgF().bw[i].k==='gate'?(S.ph>=2?1:0):v<=0?1:0).join(''),zr:SGV.zoneR};
+    bw:S.bw.map((v,i)=>sgF().bw[i].k==='gate'?(S.ph>=2?1:0):v<=0?1:0).join(''),tr:sgTreeStr(),zr:SGV.zoneR};
 }
 // =====================================================================
 //  บอทเล่นบุกปราสาท: ฝ่ายบุก = เดินไปแกนแล้วร่าย (เจอศัตรูใกล้ = สู้ก่อน) • ฝ่ายรับ = เฝ้ารอบแกน ไล่คนที่เข้าใกล้แกน

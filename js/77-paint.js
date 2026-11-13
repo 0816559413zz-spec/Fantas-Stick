@@ -11,7 +11,8 @@
 // =====================================================================
 var PAINT={on:!/[?&]nopaint\b/.test(location.search),cur:null,kit:null,
   kuw:1,kuwR:1.0,shaft:0.2,grass:[1.3,1.28,0.9],ground:[1.5,1.3,0.55],stroke:0.5,strokeHue:0.6,sat:1.32,sun:3.4,
-  maps:{forest:{sky:'day',fog:['#9fdccc',30,260],look:'paint',weather:'clear:100',
+  maps:{fcs:{sky:'day',fog:['#a8dccc',60,520],look:'paint'},   // บุกปราสาท (branch Castle-Strike-Mode-Focus 2026-11-13) — แมพจากโค้ด: ลายพู่กัน/ต้นไม้ใส่ใน buildFcs
+    forest:{sky:'day',fog:['#9fdccc',30,260],look:'paint',weather:'clear:100',
     back:{near:{col:'#4a8a3c',col2:'#35703a'},trees:{col:['#2f6e3c','#3d8440','#28603a']},mid:{col:'#5f9c88',lit:'#b4dcb0',tint:'#8cc4a6'},
       mist:[{d:235,h:45,col:'#d4f0dc',a:0.6}],far:{col:'#8cbcc0',lit:'#e0f4e0',tint:'#b0dcd0',snow:'#f6fff4'}}}},
   cel:1,vivid:1,fxcel:1,blob:1,blobThr:0.42,blobSize:1.45,bloom:0.4,U:{tPt:{value:null},uPt:{value:new THREE.Vector4(1/3.2,1/9,0.5,0.6)},uPtCel:{value:0}},

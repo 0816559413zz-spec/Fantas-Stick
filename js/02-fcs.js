@@ -21,8 +21,12 @@ function genFcs(){
     obs.push(Object.assign({x:(x+0.5)*C,y:(y+0.5)*C,r},o));
     if(same(x+1,y))obs.push(Object.assign({x:(x+1)*C,y:(y+0.5)*C,r},o));
     if(same(x,y+1))obs.push(Object.assign({x:(x+0.5)*C,y:(y+1)*C,r},o));};
-  for(let y=0;y<h;y++)for(let x=0;x<w;x++){const v=wc(x,y);if(v)cell(x,y,v);}
-  const sp={A:{},B:{}},cores=[],bw=[],props=[];
+  // กำแพงเตี้ย (2) / รั้ว (3) = แนวบางตามทิศที่ต่อกัน (เดิมวงกลมเต็มช่อง 4.5 ม. → ชนก่อนถึงตัวกำแพงที่เห็น) • ทิศ: ต่อกันแนวไหนใช้แนวนั้น, ช่องเดี่ยว = แนวตั้ง (กันยิงตามแนวบุก x)
+  const thin=(x,y,v)=>{const hz=wc(x-1,y)===v||wc(x+1,y)===v,r=C*(v===2?0.22:0.12),o={k:'fcw',hgt:FCS_WH[v],s:0,run:hz?0:1};
+    for(let k=0;k<4;k++){const t=k/4;obs.push(Object.assign({x:hz?(x+t)*C:(x+0.5)*C,y:hz?(y+0.5)*C:(y+t)*C,r},o));}
+    if(hz?wc(x+1,y)!==v:wc(x,y+1)!==v)obs.push(Object.assign({x:hz?(x+1)*C-r:(x+0.5)*C,y:hz?(y+0.5)*C:(y+1)*C-r,r},o));};
+  for(let y=0;y<h;y++)for(let x=0;x<w;x++){const v=wc(x,y);if(v===2||v===3)thin(x,y,v);else if(v)cell(x,y,v);}
+  const sp={A:{},B:{}},cores=[],bw=[],props=[],trees=[];
   for(const [t,x,y,ow,oh,n] of D.objs){
     const cx=(x+ow/2)*C,cy=(y+oh/2)*C;
     if(t==='sa'||t==='sb')sp[t==='sa'?'A':'B'][n||1]={x:cx,y:cy};
@@ -31,7 +35,7 @@ function genFcs(){
       const i=bw.length,inR=(px,py)=>px>=x&&px<x+ow&&py>=y&&py<y+oh;
       bw.push({i,k:t==='gt'?'gate':'wall',x:x*C,y:y*C,w:ow*C,d:oh*C,h:t==='gt'?5:FCS_WH[1]});
       for(let yy=y;yy<y+oh;yy++)for(let xx=x;xx<x+ow;xx++)cell(xx,yy,1,{k:'fcb',sgw:i,hgt:bw[i].h,nb:inR});
-    }else if(t==='tr'){obs.push({x:cx,y:cy,r:10,k:'fct',hgt:7,s:0});props.push(['tr',cx,cy]);}
+    }else if(t==='tr'){obs.push({x:cx,y:cy,r:10,k:'fct',hgt:7,s:0,sgt:trees.length});trees.push({x:cx,y:cy});props.push(['tr',cx,cy]);}
     else if(t==='cr'){obs.push({x:cx,y:cy,r:14,k:'fcc',hgt:1.2,s:0});props.push(['cr',cx,cy]);}
     else if(t==='pl'){obs.push({x:cx,y:cy,r:13,k:'fcp',hgt:6,s:0});props.push(['pl',cx,cy]);}
   }
@@ -40,7 +44,7 @@ function genFcs(){
   const phases=[];
   for(const [k,name,x,y,zw,zh] of D.zones){if(k!=='ph')continue;const n=+((String(name).match(/(\d+)/)||[])[1]||0);if(!n)continue;
     (phases[n-1]=phases[n-1]||[]).push({x1:x*C,y1:y*C,x2:(x+zw)*C,y2:(y+zh)*C});}
-  return {W,H,obs,terr,fcs:{sp,cores,bw,props,phases,n:Math.min(cores.length,phases.length)}};
+  return {W,H,obs,terr,fcs:{sp,cores,bw,props,trees,phases,n:Math.min(cores.length,phases.length)}};
 }
 // ---------- พื้นที่เล่นตามเฟส (กำแพงล่องหน) + เขตจุดเกิดปลอดภัย — ใช้ทั้งโฮสต์ (G.sg.ph) และลูกข่าย (snapshot) ----------
 let SGPH=1;
@@ -69,3 +73,19 @@ MAPS.fcs.areas={get siege(){return sgArea(SGPH);}};
 MAPS.fcs.fmFor=mode=>{const F=MAPS.fcs.fcs,k=clamp(SGPH,1,F.n),a=F.sp.A[k],b=F.sp.B[k];
   const ring=(q,t)=>q?[0,1,2,3,4,5].map(i=>i?{x:q.x+Math.cos(i*1.047)*80,y:q.y+Math.sin(i*1.047)*80,t}:{x:q.x,y:q.y,t}):[];   // 6 จุดชิดกันในเขตจุดเกิด (คนละจุดต่อคน ไม่กระจายข้ามกำแพง)
   return {spawns:[...ring(a,0),...ring(b,1)],tasks:[],rings:[],espawn:[]};};
+// ---------- ต้นไม้หักล้ม (ผู้ใช้ 2026-11-13: "ต้นไม้หักได้แบบสมจริง" → ล้มเป็นท่อนไม้กำบัง) ----------
+// สถานะจาก snapshot: ตัวอักษรละ 1 ต้น '0' = ยืน, '1'..'z' = ล้มแล้ว ทิศ (ค่า-1)/35 รอบ • ใช้ทั้งโฮสต์และลูกข่าย (ที่ชนต้องตรงกัน)
+// ล้ม = ต้นเดิมเหลือตอเตี้ย + ท่อนไม้นอนเป็นวงกลมเรียงตามทิศล้ม (สูงพอให้หลบหลังได้ กระโดดข้ามได้)
+const SGT={len:170,r:15,step:20,hgt:1.1,stump:0.7};   // ⚠ ค่าตั้งต้น: ยาว 8.5 ม. • สูง 1.1 ม.
+let SGT_ON='';
+function sgTreeDir(c){return (parseInt(c,36)-1)/35*Math.PI*2;}
+function sgTreesApply(str){
+  const F=MAPS.fcs.fcs,L=MAPS.fcs.obs;str=str||'';if(str===SGT_ON)return;
+  for(let i=0;i<F.trees.length;i++){const was=SGT_ON[i]||'0',now=str[i]||'0';if(was===now)continue;
+    const T=F.trees[i],tr=L.find(o=>o.sgt===i);
+    for(let j=L.length-1;j>=0;j--)if(L[j].sgl===i)L.splice(j,1);
+    if(now==='0'){if(tr)tr.hgt=7;continue;}
+    if(tr)tr.hgt=SGT.stump;const a=sgTreeDir(now),c=Math.cos(a),sn=Math.sin(a);
+    for(let d=SGT.step;d<=SGT.len;d+=SGT.step){const x=T.x+c*d,y=T.y+sn*d;if(x<0||y<0||x>MAPS.fcs.W||y>MAPS.fcs.H)break;L.push({x,y,r:SGT.r,k:'fclog',hgt:SGT.hgt,s:0,sgl:i});}}
+  SGT_ON=str;
+}

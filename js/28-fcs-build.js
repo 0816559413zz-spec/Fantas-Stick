@@ -2,9 +2,11 @@
 //  ภาพแผนที่ First Castle Strike (แบบ Basic: กล่อง/ทรงพื้นฐาน ยังไม่มีโมเดลจริง) + ภาพ/HUD โหมดบุกปราสาท
 //  ฉากนิ่ง buildFcs (รวม batch ได้) • ของที่เปลี่ยนสถานะ (แกน, กำแพงพังได้, ประตู, ขอบพื้นที่เฟส, ลำแสงร่าย) = sgSync ใน scene (ไม่โดน batch)
 // =====================================================================
-function buildFcs(){
+const FCSFB=[];   // กล่องสำรอง (กำแพงเตี้ย/รั้ว/ลัง/เสา) ระหว่างรอชุดตกแต่งโหลด
+function buildFcs(){FCSFB.length=0;
   const M=MAPS.fcs,F=M.fcs,D=FCS_DATA,C=FCS_C,T=TERR,c3=C*S3;
   scene.fog.color.set('#c9b8a0');scene.fog.near=120;scene.fog.far=480;
+  const PT=typeof paintOn==='function'&&paintOn('fcs');if(PT){const f=PAINT.maps.fcs.fog;scene.fog.color.set(f[0]);scene.fog.near=f[1];scene.fog.far=f[2];}
   hemi.color.set('#ffe6c8');hemi.groundColor.set('#4a5a3a');hemi.intensity=0.8;moonL.intensity=1.45;moonL.color.set('#fff0dc');
   const surf=(i,j)=>parseInt(D.S[clamp(Math.floor(j/2),0,D.h-1)*D.w+clamp(Math.floor(i/2),0,D.w-1)],36);
   // พื้น: หญ้าทั้งแผนที่ + พื้นหินปราสาททับตรงช่องพื้นผิวหิน
@@ -14,19 +16,20 @@ function buildFcs(){
   // กำแพงจากตาราง (InstancedMesh ต่อชนิด)
   const m4=new THREE.Matrix4(),cells=[[],[],[],[]];
   for(let y=0;y<D.h;y++)for(let x=0;x<D.w;x++){const v=parseInt(D.W[y*D.w+x],36);if(v)cells[v].push([x,y]);}
-  const inst=(geo,mat,list,fn)=>{if(!list.length)return;const im=new THREE.InstancedMesh(geo,mat,list.length);list.forEach((q,i)=>im.setMatrixAt(i,fn(q)));im.castShadow=im.receiveShadow=true;addW(im);};
+  const inst=(geo,mat,list,fn)=>{if(!list.length)return;const im=new THREE.InstancedMesh(geo,mat,list.length);list.forEach((q,i)=>im.setMatrixAt(i,fn(q)));im.castShadow=im.receiveShadow=true;addW(im);return im;};
   const box=sGeo(THREE.BoxGeometry,1,1,1);
-  inst(box,stoneMat(1,1,'#7a746a'),cells[1],([x,y])=>{const px=(x+0.5)*C,py=(y+0.5)*C,b=GY(px,py);return m4.makeScale(c3,FCS_WH[1],c3).setPosition(tx(px),b+FCS_WH[1]/2,tz(py)).clone();});
-  inst(box,stoneMat(1,1,'#9a8a6a'),cells[2],([x,y])=>{const px=(x+0.5)*C,py=(y+0.5)*C,b=GY(px,py);return m4.makeScale(c3,FCS_WH[2],c3).setPosition(tx(px),b+FCS_WH[2]/2,tz(py)).clone();});
-  inst(box,new THREE.MeshStandardMaterial({color:'#5a4030',roughness:0.9}),cells[3],([x,y])=>{const px=(x+0.5)*C,py=(y+0.5)*C,b=GY(px,py);return m4.makeScale(c3*0.3,FCS_WH[3],c3*0.3).setPosition(tx(px),b+FCS_WH[3]/2,tz(py)).clone();});
+  inst(box,stoneMat(1,1,'#a89e8c'),cells[1],([x,y])=>{const px=(x+0.5)*C,py=(y+0.5)*C,b=GY(px,py);return m4.makeScale(c3,FCS_WH[1],c3).setPosition(tx(px),b+FCS_WH[1]/2,tz(py)).clone();});
+  FCSFB.push(inst(box,stoneMat(1,1,'#9a8a6a'),cells[2],([x,y])=>{const px=(x+0.5)*C,py=(y+0.5)*C,b=GY(px,py);return m4.makeScale(c3,FCS_WH[2],c3).setPosition(tx(px),b+FCS_WH[2]/2,tz(py)).clone();}));
+  FCSFB.push(inst(box,new THREE.MeshStandardMaterial({color:'#5a4030',roughness:0.9}),cells[3],([x,y])=>{const px=(x+0.5)*C,py=(y+0.5)*C,b=GY(px,py);return m4.makeScale(c3*0.3,FCS_WH[3],c3*0.3).setPosition(tx(px),b+FCS_WH[3]/2,tz(py)).clone();}));
+  fcsKitLoad(F,cells);   // ชุดตกแต่งจาก Blender (assets/fcs/fcs_kit.glb) — มาแล้วแทนกล่องสำรอง FCSFB
   // ต้นไม้ / ลัง / เสา
   const P=k=>F.props.filter(q=>q[0]===k);
-  inst(sGeo(THREE.CylinderGeometry,0.22,0.32,1,7),new THREE.MeshStandardMaterial({color:'#5a3f28',roughness:0.95}),P('tr'),([,x,y])=>m4.makeScale(1,3,1).setPosition(tx(x),GY(x,y)+1.5,tz(y)).clone());
-  inst(sGeo(THREE.ConeGeometry,1.5,1,8),new THREE.MeshStandardMaterial({color:'#2f5a2a',roughness:0.9,flatShading:true}),P('tr'),([,x,y])=>m4.makeScale(1,4.5,1).setPosition(tx(x),GY(x,y)+4.6,tz(y)).clone());
-  inst(box,new THREE.MeshStandardMaterial({color:'#8a6238',roughness:0.85}),P('cr'),([,x,y])=>m4.makeScale(1.25,1.2,1.25).setPosition(tx(x),GY(x,y)+0.6,tz(y)).clone());
-  inst(sGeo(THREE.CylinderGeometry,0.65,0.75,1,10),stoneMat(1,1,'#bdb5a5'),P('pl'),([,x,y])=>m4.makeScale(1,6,1).setPosition(tx(x),GY(x,y)+3,tz(y)).clone());
+  fcsTreesBuild(F);   // ต้นไม้ทีละต้น (หักล้มได้ — ดู sgTreesView)
+  FCSFB.push(inst(box,new THREE.MeshStandardMaterial({color:'#8a6238',roughness:0.85}),P('cr'),([,x,y])=>m4.makeScale(1.25,1.2,1.25).setPosition(tx(x),GY(x,y)+0.6,tz(y)).clone()));
+  FCSFB.push(inst(sGeo(THREE.CylinderGeometry,0.65,0.75,1,10),stoneMat(1,1,'#bdb5a5'),P('pl'),([,x,y])=>m4.makeScale(1,6,1).setPosition(tx(x),GY(x,y)+3,tz(y)).clone()));
   // แท่นจุดเกิด (สีทีม)
   for(const [t,L] of [[0,F.sp.A],[1,F.sp.B]])for(const k in L){const s=L[k],m=new THREE.Mesh(new THREE.CircleGeometry(SG_SPR*S3,32),new THREE.MeshBasicMaterial({color:TEAMC[t],transparent:true,opacity:0.18,depthWrite:false}));m.rotation.x=-Math.PI/2;m.position.set(tx(s.x),GY(s.x,s.y)+0.05,tz(s.y));addW(m);}
+  if(PT)fcsPaint(gm);   // ลุคภาพวาด: ลายพู่กันทุกวัสดุ + หญ้าโดนแดด (js/77)
 }
 // ---------- ภาพโหมด (ลูกข่ายทุกเครื่องจาก snapshot M.sg) ----------
 const SGV3={g:null,cores:[],bw:[],bar:null,barK:'',beams:new Map(),bwK:''};
@@ -77,6 +80,7 @@ function sgSync(v,P,me,now,dt){
     c.cr.rotation.y+=dt*(act?1.2:0.3);c.cr.position.y=4.3+Math.sin(now/600+i)*0.25;
     const hit=act&&S.atk,col=hit?'#ff6a5a':fut?'#5a6a80':'#9fd8ff';c.cm.color.set(col);c.cm.emissive.set(hit?'#ff2a1a':fut?'#1a2030':'#3a8cff');
     c.ring.material.color.set(hit?'#ff6a5a':S.def?'#ffb060':'#7fc0ff');c.ring.material.opacity=0.35+0.25*Math.sin(now/(hit?120:400));});
+  sgTreesView(S,dt);   // ต้นไม้หักล้ม
   if(S.bw!==SGV3.bwK){const old=SGV3.bwK;SGV3.bwK=S.bw;SGV3.bw.forEach((o,i)=>{o.visible=S.bw[i]!=='1';if(old&&old[i]!=='1'&&S.bw[i]==='1')sgDust(o.position);});gl.shadowMap.needsUpdate=true;}
   // ลำแสงร่าย: จากมือคนร่ายไปยอดแกน
   const k=MAPS.fcs.fcs.cores[S.ph-1],seen=new Set();
@@ -117,4 +121,79 @@ function sgHud(v,me,big){
     else if(inz)big('กด G เพื่อร่ายทำลายแกน',SH-170,18,'#ffe9a8');}
   if(atk&&S.pr>0)big(`ฝ่ายรับกำลังเตรียมตัว — ประตูเปิดใน ${S.pr} วิ`,SH*0.36,22,'#ffe9a8');
   if(!atk&&S.pr>0)big(`เตรียมแนวป้องกัน — ฝ่ายบุกออกมาใน ${S.pr} วิ`,SH*0.36,22,'#ffe9a8');
+}
+
+// ---------- ต้นไม้หักล้มได้ (โหมดบุกปราสาท) ----------
+// แต่ละต้น = กลุ่มที่โคน: top (ทั้งต้น หมุนรอบโคนตอนล้ม) + stump (ตอ โผล่ตอนหัก) • ลุคภาพวาด = ต้นไม้พู่กันจาก js/77
+const FCT3={list:[],K:'',anim:[]};
+function fcsTreesBuild(F){FCT3.list=[];FCT3.K='';FCT3.anim=[];
+  const pt=typeof paintOn==='function'&&paintOn('fcs'),K=pt?paintKit():null;
+  const trunk=new THREE.MeshStandardMaterial({color:'#5a3f28',roughness:0.95}),leaf=new THREE.MeshStandardMaterial({color:'#2f5a2a',roughness:0.9,flatShading:true});
+  const stumpM=new THREE.MeshStandardMaterial({color:'#6a4a2e',roughness:0.95,flatShading:true}),woodM=new THREE.MeshStandardMaterial({color:'#d8b27a',roughness:0.9,flatShading:true});
+  const stG=new THREE.CylinderGeometry(0.42,0.55,SGT.stump,9),cutG=new THREE.CylinderGeometry(0.36,0.42,0.16,9);
+  F.trees.forEach((T,i)=>{const g=new THREE.Group(),b=GY(T.x,T.y);g.position.set(tx(T.x),b,tz(T.y));g.userData.noBatch=1;
+    const top=new THREE.Group();g.add(top);
+    if(K){const m=new THREE.Mesh(K.tree[(i*7+3)%K.tree.length],K.mat);m.castShadow=m.receiveShadow=true;const sc=0.72+((i*37)%10)/40;m.scale.setScalar(sc);m.rotation.y=i*2.39;top.add(m);}
+    else{const t=new THREE.Mesh(sGeo(THREE.CylinderGeometry,0.22,0.32,1,7),trunk);t.scale.set(1,3,1);t.position.y=1.5;const c=new THREE.Mesh(sGeo(THREE.ConeGeometry,1.5,1,8),leaf);c.scale.set(1,4.5,1);c.position.y=4.6;for(const q of [t,c]){q.castShadow=true;top.add(q);}}
+    const st=new THREE.Group();const s1=new THREE.Mesh(stG,stumpM);s1.position.y=SGT.stump/2;const s2=new THREE.Mesh(cutG,woodM);s2.position.y=SGT.stump+0.02;s2.rotation.z=0.25;st.add(s1,s2);st.visible=false;g.add(st);
+    for(const q of [s1,s2])q.castShadow=true;
+    addW(g);FCT3.list.push({g,top,st,b,x:T.x,y:T.y});});
+}
+// สถานะจาก snapshot (S.tr) → ที่ชน (sgTreesApply, ลูกข่าย) + ภาพล้ม: ช่วงแรกเอนช้า แล้วเร่งตามแรงโน้มถ่วง → กระแทกพื้นเด้งนิด ๆ
+function sgTreesView(S,dt){
+  const str=S.tr||'';if(str!==FCT3.K){const old=FCT3.K;sgTreesApply(str);
+    FCT3.list.forEach((o,i)=>{const was=old[i]||'0',now=str[i]||'0';if(was===now)return;
+      if(now==='0'){o.top.quaternion.identity();o.top.position.y=0;o.st.visible=false;FCT3.anim=FCT3.anim.filter(a=>a.o!==o);return;}
+      const a=sgTreeDir(now),d=new THREE.Vector3(Math.cos(a),0,Math.sin(a));o.st.visible=true;o.top.position.y=SGT.stump;
+      const fresh=!!old;   // เปิดเกมมาแล้วต้นล้มอยู่แล้ว = นอนเลย ไม่เล่นท่าล้ม
+      FCT3.anim.push({o,ax:new THREE.Vector3(d.z,0,-d.x),d,t:fresh?0:9,hit:!fresh});
+      if(fresh){const me=myPos(),near=!me||Math.hypot(o.x-me.x,o.y-me.y)<1400;if(near)snd('break',{x:o.x,y:o.y});
+        for(let k=0;k<22;k++)PARTS.push({x:o.x+rnd(-8,8),y:o.y+rnd(-8,8),h:o.b+SGT.stump+rnd(0,0.3),vx:rnd(-160,160)+d.x*120,vy:rnd(-160,160)+d.z*120,vh:rnd(1,5),life:0.8,max:0.8,col:k%3?'#d8b27a':'#6a4a2e',size:rnd(1.2,2.2),g:12,sh:4,vr:8});}});
+    FCT3.K=str;gl.shadowMap.needsUpdate=true;}
+  const REST=Math.PI/2*0.93,T=1.15;
+  for(let i=FCT3.anim.length-1;i>=0;i--){const A=FCT3.anim[i];A.t+=dt;const k=Math.min(1,A.t/T);let th=REST*k*k*k*(1.6-0.6*k);
+    if(A.t>T){const u=A.t-T;th=REST-0.07*Math.exp(-u*7)*Math.abs(Math.cos(u*17));}
+    A.o.top.quaternion.setFromAxisAngle(A.ax,Math.min(REST,th));
+    if(A.hit&&A.t>=T){A.hit=false;const o=A.o,L=SGT.len*0.75,x=o.x+A.d.x*L,y=o.y+A.d.z*L,me=myPos();
+      if(!me||Math.hypot(x-me.x,y-me.y)<1400){snd('thud',{x,y});if(me&&Math.hypot(x-me.x,y-me.y)<500)shake(0.25);}
+      for(let k=0;k<26;k++){const s=rnd(0.15,1);PARTS.push({x:o.x+A.d.x*SGT.len*s+rnd(-20,20),y:o.y+A.d.z*SGT.len*s+rnd(-20,20),h:o.b+rnd(0.2,1.5),vx:rnd(-90,90),vy:rnd(-90,90),vh:rnd(0.5,3),life:1.3,max:1.3,col:k%2?'#b8a488':'#8fb860',size:rnd(2.5,5),g:0.5,smoke:k%2===0,grow:k%2?0:1});}
+      gl.shadowMap.needsUpdate=true;}
+    if(A.t>T+0.8)FCT3.anim.splice(i,1);}
+}
+// ลุคภาพวาดของแมพนี้ (เหมือน paintScene ของแมพไฟล์ แต่แมพนี้สร้างจากโค้ด): ลายพู่กัน + cel บนทุกวัสดุในฉาก
+function fcsPaint(gm){
+  if(gm&&gm.color&&!gm.userData.ptG){gm.userData.ptG=1;gm.color.multiply(new THREE.Color(PAINT.ground[0],PAINT.ground[1],PAINT.ground[2]));}
+  world.traverse(o=>{if(!o.isMesh)return;for(const m of [].concat(o.material))if(m&&!m.userData.pt&&!m.userData.noSurf)paintApply(m);});
+}
+// ---------- ชุดตกแต่งปราสาท (Blender: assets/src/fcs_kit_build.py) ----------
+// วางตามตารางกำแพงเอง: ขอบกำแพงทึบที่โล่ง = ใบเสมาบน + ฐานหินล่าง (บางขอบ: ค้ำยัน/ธง/คบเพลิง/หินร่วง) • มุมนูน = หอคอย
+// กำแพงเตี้ย/รั้ว/เสา/ลัง = ชิ้นจริงแทนกล่อง • หน้าตาเท่านั้น (ที่ชนอยู่ js/02-fcs) • สุ่มแบบ hash ตำแหน่ง = ทุกเครื่องเหมือนกัน
+const FCS_KIT_V=3;
+function fcsKitLoad(F,cells){
+  const W=world,D=FCS_DATA,C=FCS_C,c3=C*S3,wc=(x,y)=>x<0||y<0||x>=D.w||y>=D.h?-1:parseInt(D.W[y*D.w+x],36)||0;
+  gltfLoader().then(L=>L.loadAsync('assets/fcs/fcs_kit.glb?v='+FCS_KIT_V)).then(gltf=>{
+    if(world!==W||builtMap!=='fcs')return;
+    const K={};gltf.scene.traverse(o=>{if(o.isMesh)K[o.name]=o;});
+    const L={};const put=(n,x,y,yb,rot,sx,sy,sz)=>{(L[n]=L[n]||[]).push([x,y,yb,rot||0,sx||1,sy||sx||1,sz||sx||1]);};
+    const h=(x,y,k)=>{let v=(x*73856093^y*19349663^k*83492791)>>>0;v^=v>>>13;v=Math.imul(v,1274126177)>>>0;return (v>>>0)/4294967296;};
+    const DIRS=[[1,0],[-1,0],[0,1],[0,-1]],TW=[];
+    // กำแพงทึบ: ขอบที่ติดที่โล่ง
+    for(const [x,y] of cells[1]){const cx=(x+0.5)*C,cy=(y+0.5)*C,b=GY(cx,cy),open=DIRS.map(([dx,dy])=>{const v=wc(x+dx,y+dy);return v!==1&&v!==-1;});
+      DIRS.forEach(([dx,dy],k)=>{if(!open[k])return;const ex=cx+dx*C/2,ey=cy+dy*C/2,rot=Math.atan2(dx,dy);   // +z ของชิ้น = ทิศออกนอกกำแพง
+        put('merlon',ex,ey,b+FCS_WH[1],rot);put('plinth',ex,ey,b,rot);const r=h(x,y,k);
+        if(r<0.12)put('buttress',ex,ey,b,rot);else if(r<0.2)put('banner',ex,ey,b+5.3,rot);else if(r<0.27)put('torch',ex,ey,b+3.3,rot);else if(r<0.36)put('rubble',ex+dx*20,ey+dy*20,b,rot+r*9);});
+      // มุมนูน: โล่ง 2 ด้านที่ตั้งฉากกัน + ช่องทแยงโล่ง → หอคอย
+      for(const [a,c] of [[0,2],[0,3],[1,2],[1,3]])if(open[a]&&open[c]){const v=wc(x+DIRS[a][0]+DIRS[c][0],y+DIRS[a][1]+DIRS[c][1]);   // มุมนูนของแนวกำแพงรูปตัว L (กำแพงต่อไปทั้ง 2 ทาง) + ห่างหอคอยอื่น ≥ 6 ช่อง
+        if(v!==1&&v!==-1&&wc(x-DIRS[a][0],y-DIRS[a][1])===1&&wc(x-DIRS[c][0],y-DIRS[c][1])===1&&!TW.some(t=>Math.max(Math.abs(t[0]-x),Math.abs(t[1]-y))<6)){TW.push([x,y]);put('tower',cx,cy,b,h(x,y,5)*6.28);break;}}}
+    // กำแพงเตี้ย / รั้ว: ตามแนวที่ต่อกัน (เหมือนที่ชน js/02-fcs)
+    for(const v of [2,3])for(const [x,y] of cells[v]){const cx=(x+0.5)*C,cy=(y+0.5)*C,hz=wc(x-1,y)===v||wc(x+1,y)===v;put(v===2?'lowwall':'fence',cx,cy,GY(cx,cy),hz?0:Math.PI/2,1,1,v===2?1.45:1);}
+    for(const [t,x,y] of F.props){if(t==='pl')put('column',x,y,GY(x,y),0);else if(t==='cr')put(h(x|0,y|0,3)<0.5?'crate':'crate2',x,y,GY(x,y),h(x|0,y|0,4)*6.28);}
+    const m4=new THREE.Matrix4(),q=new THREE.Quaternion(),Y=new THREE.Vector3(0,1,0),P=new THREE.Vector3(),S=new THREE.Vector3();
+    for(const n in L){const src=K[n];if(!src)continue;const im=new THREE.InstancedMesh(src.geometry,src.material,L[n].length);
+      L[n].forEach(([x,y,yb,rot,sx,sy,sz],i)=>{q.setFromAxisAngle(Y,rot);im.setMatrixAt(i,m4.compose(P.set(tx(x),yb,tz(y)),q,S.set(sx,sy,sz)));});
+      im.castShadow=n!=='rubble'&&n!=='torch';im.receiveShadow=true;im.computeBoundingSphere();W.add(im);}
+    for(const f of FCSFB)if(f){W.remove(f);f.dispose();}FCSFB.length=0;
+    if(typeof paintOn==='function'&&paintOn('fcs'))fcsPaint(null);
+    gl.shadowMap.needsUpdate=true;if(typeof prewarmShaders==='function')setTimeout(prewarmShaders,0);
+  }).catch(e=>console.warn('fcs kit',e));
 }

@@ -19,7 +19,7 @@ function buildWorld(id){
   const FM=MAPS[id]&&MAPS[id].fm;
   if(typeof paintMap==='function')paintMap(id,FM);   // ลุคภาพวาด (js/77): ทับ sky/fog/look ของแมพ
   if(typeof lookMap==='function')lookMap(id,FM);   // พรีเซ็ตแสงของแมพนี้ (js/74-look.js)
-  setSky(FM?(FM.sky==='day'&&FM.look==='paint'?'day':FM.sky==='sunset'||FM.sky==='day'?'sunset':'night'):id==='pitch'||id==='meadow'||id==='ruins'||id==='test'||id==='fcs'?'sunset':'night');
+  setSky(FM?(FM.sky==='day'&&FM.look==='paint'?'day':FM.sky==='sunset'||FM.sky==='day'?'sunset':'night'):id==='fcs'&&typeof paintOn==='function'&&paintOn('fcs')?'day':id==='pitch'||id==='meadow'||id==='ruins'||id==='test'||id==='fcs'?'sunset':'night');
   const cached=WCACHE.get(wkey(id));
   if(cached){
     WCACHE.delete(wkey(id));
@@ -68,7 +68,7 @@ function batchStatic(root,skip){
   const inv=new THREE.Matrix4().copy(root.matrixWorld).invert(),groups=new Map();
   root.traverse(o=>{
     if(!o.isMesh||o.isInstancedMesh||!o.visible||Array.isArray(o.material)||o.material.transparent)return;
-    for(let q=o;q&&q!==root;q=q.parent)if(skip.has(q)||!q.visible)return;
+    for(let q=o;q&&q!==root;q=q.parent)if(skip.has(q)||!q.visible||q.userData.noBatch)return;   // noBatch = ชิ้นที่ขยับเอง (ต้นไม้หักล้ม js/28-fcs)
     if(o.matrixWorld.determinant()<0)return;
     const g=o.geometry;if(g.morphAttributes&&Object.keys(g.morphAttributes).length)return;
     const key=o.material.uuid+'|'+Object.keys(g.attributes).sort().join(',')+'|'+(g.index?1:0)+'|'+o.castShadow+'|'+o.receiveShadow;

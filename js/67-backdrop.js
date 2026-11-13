@@ -31,6 +31,12 @@ var BACKDROP={   // var: buildWorld ถูกเรียกตอนโหล�
     mist:[{d:235,h:40,col:'#2a3456',a:0.5}],
     far:{d:[275,365],h:[70,160],rg:0.75,col:'#151b33',lit:'#5a6c9e',tint:'#36426c',k:0.3,snow:'#b8c8ec'},
     castle:{a:2.2,d:150,s:1.8,col:'#121222',win:'#ffc070'}},
+  fcs:{seed:31,   // บุกปราสาท (กลางวันภาพวาด): ป่าทึบ + เขาเขียวอมฟ้า
+    near:{d:[-4,110],h:[4,24],col:'#4a8a3c',col2:'#35703a'},
+    trees:{n:520,kind:'pine',d:[8,108],s:[2.2,3.8],col:['#2f6e3c','#3d8440','#28603a']},
+    mid:{d:[130,215],h:[24,64],rg:0.3,col:'#5f9c88',lit:'#b4dcb0',tint:'#8cc4a6',k:0.2},
+    mist:[{d:235,h:45,col:'#d4f0dc',a:0.6}],
+    far:{d:[275,365],h:[70,165],rg:0.75,col:'#8cbcc0',lit:'#e0f4e0',tint:'#b0dcd0',k:0.3,snow:'#f6fff4'}},
   forest:{seed:13,
     near:{d:[-4,110],h:[4,24],col:'#16261c',col2:'#101c16'},
     trees:{n:560,kind:'pine',d:[6,108],s:[2.2,3.8],col:['#16301f','#1b3a24','#122a1b']},

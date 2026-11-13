@@ -170,3 +170,4 @@ Object.defineProperty(window.WD,"CITYD",{get:()=>CITYD});Object.assign(window.WD
 window.WD.hostStep=dt=>{let t=performance.now();hostTick(dt);pf('hostTick',t);t=performance.now();const b=makeSnap(),ev=EVL;EVL=[];EVN=[];pf('snap',t);t=performance.now();onSnap(Object.assign({},b,{ev}));pf('onSnapFx',t);};
 window.WD.mkStudent=makeStudent;window.WD.scene=scene;window.WD.parseLook=parseLook;   // ดีบัก: ภาพไม้สำเร็จรูป (ทดสอบ headless)
 window.WD.batchStudent=root=>{shareSkinSkeletons(root);batchStudentSkin(root);};   // diagnostic A/B on the same posed model
+if(window.WD)Object.assign(window.WD,{sgTreeDmg:(...a)=>sgTreeDmg(...a),sgTreeStr:()=>sgTreeStr(),sgTrees:()=>MAPS.fcs.fcs.trees});   // ดีบัก: ต้นไม้บุกปราสาท (js/15-siege)
