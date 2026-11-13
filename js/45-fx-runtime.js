@@ -92,7 +92,7 @@ function fxGate(L,I,w){if(fxG(L,'x')&&(!vfxExtra()||I.far))return false;if(fxG(L
   const nr=fxG(L,'near');if(nr>0&&cam.position.distanceTo(_fxw.set(tx(w[0]),w[2]+GY(w[0],w[1]),tz(w[1])))>nr)return false;return true;}
 // ---------- ทุกเฟรม ----------
 function updateFx(dt){fxMPUpdate(dt);if(!FXR.inst.length)return;
-  for(let i=FXR.inst.length-1;i>=0;i--){const I=FXR.inst[i];I.t+=dt;if(I.o.follow!=null)fxAnchor(I);
+  for(let i=FXR.inst.length-1;i>=0;i--){const I=FXR.inst[i];I.t+=dt*(I.o.ts||1);if(I.o.follow!=null)fxAnchor(I);
     I.far=cam.position.distanceTo(_fxw.set(tx(I.x),I.h+GY(I.x,I.y),tz(I.y)))>60;
     let alive=false;
     for(const S of I.L){const L=S.d;if(S.st===2)continue;
@@ -379,7 +379,7 @@ function fxBolt(S,I,w){const L=S.d,g=q=>fxG(L,q),n=Math.max(1,Math.round(g('n')*
     if(rad>0){const t=_fxrnd(0,6.283);e=[Math.cos(t)*rad,_fxrnd(-0.6,0.6)*rad*0.4,Math.sin(t)*rad];}
     else{const to=fxV(g('to'),I,0)||[0,0,4],j=g('jit');e=[to[0]+_fxrnd(-j,j),to[1]+_fxrnd(-j,j)*0.5,to[2]+_fxrnd(-j,j)];}
     e=fxYawV(e,fxV(g('yaw'),I,0)*FXDEG);const b=fxLocal(I,w,[e[0]*I.s,e[1]*I.s,e[2]*I.s]);
-    tbolt(w[0],w[1],w[2],b[0],b[1],Math.max(0.05,b[2]),g('blife'),g('acc')?'#9fd8ff':0,g('w')*Math.sqrt(I.s),g('br'));}}
+    (I.palName==='stormCyan'?tboltB:tbolt)(w[0],w[1],w[2],b[0],b[1],Math.max(0.05,b[2]),g('blife'),g('acc')?'#9fd8ff':0,g('w')*Math.sqrt(I.s),g('br'));}}
 // ---------- ฟังก์ชันในโค้ดที่ไฟล์เรียกได้ (ชั้น t:"code") ----------
 const FXCODE={
   explosion:(x,y,h,a)=>explosionFX(x,y,h,a.s||1),
@@ -410,7 +410,7 @@ function fxBind(ev,H){if(!FXR.ready||!FXR.on||ev.x===undefined)return false;
       const ctx={P:{ev,s:1,k:1}},ev2=v=>typeof v==='string'?fxEval(v,ctx):v,p={};if(b.if!==undefined&&!ev2(b.if))continue;   // if: เล่นเมื่อสูตรไม่เป็น 0 เช่น "ev.ax*1" (ขวาน), "1-ev.ax*1" (ดาบ)
       if(b.p)for(const q in b.p)p[q]=ev2(b.p[q]);
       const fol=b.follow?(b.follow==='ev.id'?ev.id:ev2(b.follow)):undefined;
-      const I=fxStart(d,{x:ev.x,y:ev.y,h:H,a:ev.a||0,col:ev.col||ev.c,pal:b.pal,s:b.s!==undefined?ev2(b.s):1,p,follow:fol,own:ev.id!==undefined&&ev.id===NET.myId,ev},b.fx);
+      const I=fxStart(d,{x:ev.x,y:ev.y,h:H,a:ev.a||0,col:ev.col||ev.c,pal:b.pal||(ev.g&&d.pal==='storm'?'stormCyan':undefined),s:b.s!==undefined?ev2(b.s):1,p,follow:fol,own:ev.id!==undefined&&ev.id===NET.myId,ev},b.fx);
       if(I&&b.mode==='replace')rep=true;}
     break;}
   return rep;}

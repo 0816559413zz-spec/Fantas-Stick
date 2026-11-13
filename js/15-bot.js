@@ -117,11 +117,11 @@ function botPlay(p,dt,tg,c0){
   // ---------- ⚡ สายฟ้า ----------
   if(pi===2){
     const st=p.lst|0;
-    if(p.sdome){if(p.sdome.ph===2)pulse();return;}                    // โดม: บินถึงแล้วคลิกยิงลง
+    if(p.sdome){if(p.sdome.ph===2&&(p.sdome.god||stormDomeCharge(p.sdome.t)>=1))pulse();return;}
     if(p.rail||p.slnT>0)return;                                       // ร่าย Railgun/เส้นสายฟ้าอยู่ ยืนนิ่ง
     // เก็บ stack: Dash ทะลุศัตรู • stack ครบแล้วเก็บ Dash ไว้หนี
     if(p.dch>=1&&!(p.dash>0)&&d>150&&d<430&&(st<2||roll(0.2))&&roll(dt*4))dash();
-    if(rdy('stormdome')&&st>=3&&d<560)go('stormdome');
+    if(rdy('stormdome')&&st>=stormDomeCost(p)&&d<560)go('stormdome');
     else if(rdy('railgun')&&st>=3&&d<850&&d>200)go('railgun');
     else if(rdy('triplestrike')&&st>=2&&d<560)go('triplestrike');
     else if(rdy('speedsiphon')&&st>=2&&d<600)go('speedsiphon');
@@ -133,7 +133,7 @@ function botPlay(p,dt,tg,c0){
   // ---------- ⛰️ ดิน ----------
   if(pi===6){
     const stand=!(p.stdB>0);
-    if(p.wr){if(p.wr.ph==='sky'){pulse();inp.mx=Math.sin(t*0.8+A.ps.ph);inp.my=0;}return;}   // Wrath: ลอยบนฟ้า เล็งแล้วคลิกปาเสา
+    if(p.wr){if(p.wr.ph==='aim')pulse();return;}   // Wrath: เลือกพื้นที่แล้วคลิกให้ Stand ทุ่มเสา
     if(p.aug){const T=A.augT||2.1;inp['h'+p.aug.k]=p.aug.t<T?1:0;inp.mx=inp.my=0;return;}     // Auger: กดค้างจนครบระดับที่ตั้งใจ แล้วปล่อย
     if(p.ramp||p.ecb)return;
     inp.fire=(t%0.8<0.15)?1:0;                                        // Stand ต่อยเป็นจังหวะ (ไม่กดค้างชาร์จ เดินช้า)

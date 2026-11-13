@@ -29,8 +29,8 @@
     1.5,
     2.2
    ],
-   "col": "#fff6c0",
-   "c2": "#ff9a1a",
+   "col": "$hi",
+   "c2": "$deep",
    "gravity": 9,
    "drag": 1.5
   },

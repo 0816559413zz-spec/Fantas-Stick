@@ -112,14 +112,15 @@ function hostStart(){
   const err=validate();if(err){toast(err);return;}
   // สุ่มแผนที่ทุกครั้งที่เริ่มเกม (ไม่ซ้ำกับรอบที่แล้วถ้าเป็นไปได้)
   const MD=MODES[G.mode];
-  if(MD.map&&(G.mode==='siege'||!(G.mode!=='train'&&MAPS[G.mapPick]&&MAPS[G.mapPick].allModes)))G.map=MD.map;   // บุกปราสาท = แผนที่ของโหมดเสมอ   // โหมดที่มีแผนที่ประจำ: เลือกแผนที่ allModes (เมือง) แทนได้
+  if(PLAYMAP&&MAPS[PLAYMAP]&&G.mode!=='siege')G.map=PLAYMAP;   // ทดลองเล่นจาก Map Builder (ห้องฝึกก็ใช้แผนที่นี้)
+  else if(MD.map&&(G.mode==='siege'||!(G.mode!=='train'&&MAPS[G.mapPick]&&MAPS[G.mapPick].allModes)))G.map=MD.map;   // บุกปราสาท = แผนที่ของโหมดเสมอ   // โหมดที่มีแผนที่ประจำ: เลือกแผนที่ allModes (เมือง) แทนได้
   else if(G.mapPick&&MAPS[G.mapPick]&&!MAP_OFF.has(G.mapPick))G.map=G.mapPick;
   else{let ks=RANDOM_MAPS.filter(k=>k!==G.lastMap&&MAPS[k]&&mapOkFor(k,G.mode));if(!ks.length)ks=['castle'];G.map=ks[Math.floor(Math.random()*ks.length)];}
   G.lastMap=G.map;
   SGPH=1;setMapVars(G.map);AREA=mapArea(G.map,G.mode);   // SGPH = เฟสบุกปราสาท (js/02-fcs) — เริ่มเฟส 1 ก่อนวางจุดเกิด
   PROPON=!PROP_OFF_MODES.includes(G.mode);BLDON=PROPON;
   Object.assign(G,{ph:'count',cdT:3,time:0,proj:[],en:[],feed:[],pid:0,eid:0,wave:0,round:1,rw:{},teamScore:[0,0],
-    timer:(G.mode==='ffa'||G.mode==='tdm')?480:G.mode==='quid'?360:0,result:null,banner:null,queue:[],slines:[],sorbs:[],fpaths:[],tcells:[],sballs:[],sdomes:[],impWin:null,snitchBy:null,raceEnd:undefined});
+    timer:(G.mode==='ffa'||G.mode==='tdm')?480:G.mode==='quid'?360:0,result:null,banner:null,queue:[],slines:[],sorbs:[],fpaths:[],tcells:[],sballs:[],sdomes:[],waveMarks:new Map(),impWin:null,snitchBy:null,raceEnd:undefined});
   plist().forEach((p,i)=>{
     Object.assign(p,freshStats());
     p.team=(G.mode==='coop'||G.mode==='train')?0:MD.team?p.lteam:10+i;
@@ -256,7 +257,7 @@ function updatePlayer(p,dt,acting){
   if(p.auraT>0&&p.alive&&!p.downed){p.auraT-=dt;p.auraTk-=dt;const tk=p.auraTk<=0;if(tk)p.auraTk=0.5;for(const t of foesIn(p.team,p.x,p.y,FAURA.v.r,p.z+3)){if(tk){damage(t,FAURA.v.dmg,p.id,'zone');emit({k:'efx',z:'auhit',x:Math.round(t.x),y:Math.round(t.y),h:cH(t)});}}}
   if(p.mirror>0){p.mirror-=dt;if(p.mirror<=0){p.xhp=0;emit({k:'efx',z:'mirrorend',x:p.x,y:p.y,h:p.z+1,id:p.id});}}
   if(p.grT>0&&p.alive&&p.grM===1){p.grT-=dt;if(p.grT<=0)frostGlacier(p);}
-  else if(p.grT>0&&p.alive){p.grT-=dt;if(p.grT<=0){for(const sd of (p.mirror>0?[0,-1,1]:[0])){const an=p.ang+sd*GREND.v.waveFan*Math.PI/180,c=Math.cos(an),s=Math.sin(an),ox=p.x+c*30,oy=p.y+s*30;(G.waves||(G.waves=[])).push({x:ox,y:oy,dx:c,dy:s,left:GREND.v.waveLen,acc:0,owner:p.id,team:p.team,hit:new Set()});emit({k:'efx',z:'gwave',x:ox,y:oy,h:p.z+1,a:Math.round(an*1000)/1000,len:GREND.v.waveLen,id:p.id,cl:sd?1:0});}}}
+  else if(p.grT>0&&p.alive){p.grT-=dt;if(p.grT<=0){const wpt=frostWavePitch(p);for(const sd of (p.mirror>0?[0,-1,1]:[0])){const an=p.ang+sd*GREND.v.waveFan*Math.PI/180,c=Math.cos(an),s=Math.sin(an),ox=p.x+c*30,oy=p.y+s*30;(G.waves||(G.waves=[])).push({n:++G.zid,h:p.z+1,pt:wpt,gnd:0,x:ox,y:oy,dx:c,dy:s,left:GREND.v.waveLen,acc:0,owner:p.id,team:p.team,hit:new Set()});emit({k:'efx',z:'gwave',n:G.zid,x:ox,y:oy,h:p.z+1,a:Math.round(an*1000)/1000,pt:Math.round(wpt*1000)/1000,len:GREND.v.waveLen,id:p.id,cl:sd?1:0});}}}
   p.flyCd=Math.max(0,p.flyCd-dt);p.root=Math.max(0,p.root-dt);
   if(p.awayT>0){p.awayT-=dt;p.inp=emptyInput();p.inv=Math.max(p.inv,0.1);if(p.awayT<=0){feed('🚪 '+p.name+' ออกจากเกม');hostRemove(p.id);return;}}
   if(!p.alive){
@@ -278,12 +279,13 @@ function updatePlayer(p,dt,acting){
     }else p.revive=Math.max(0,p.revive-dt*0.5);
     return;
   }
-  if(p.burn>0){p.burn-=dt;p.bt-=dt;if(p.bt<=0){p.bt=0.5;damage(p,4,p.burnSrc,'burn');if(!p.alive||p.downed)return;}}
+  if(p.burn>0){p.burn-=dt;p.bt-=dt;if(p.bt<=0){p.bt=1;damage(p,4,p.burnSrc,'burn');if(!p.alive||p.downed)return;}}
   const canAct=acting&&p.stun<=0;
   if(acting&&(inp.ax||inp.ay))p.ang=Math.atan2(inp.ay-p.y,inp.ax-p.x)+(p.bld>0?rnd(-0.22,0.22):0);
+  if(p.wr?.ph==='throw')p.ang=p.wr.a;
 
   // ไม้กวาด: B ขึ้น/ลง — โดนสตันหรือใยแมงมุมจะตกจากไม้กวาด • โหมดโวลเดอมอร์ + FFA ไม่มีไม้กวาด (ผู้ใช้ 2026-10-27)
-  if(pr.b&&canAct&&p.flyCd<=0&&!NOBROOM.has(G.mode)&&!p.wfo){
+  if(pr.b&&canAct&&!p.wr&&(!p.sdome||p.sdome.god)&&p.flyCd<=0&&!NOBROOM.has(G.mode)&&!p.wfo){
     p.fly=!p.fly;p.flyCd=0.8;
     if(p.fly){p.vz=7;p.shieldOn=false;p.dash=0;emit({k:'mount',x:p.x,y:p.y,h:p.z,id:p.id});}
     else emit({k:'dismount',x:p.x,y:p.y,h:p.z,id:p.id});
@@ -293,8 +295,8 @@ function updatePlayer(p,dt,acting){
   if(p.fly)broomVert(p,inp,dt);   // บินแบบเครื่องบิน: เงยกล้อง = ไต่ (js/69)
   else if(p.colos>0){p.colH=clamp((p.colH||9)+((inp.jh?1:0)-(inp.ch?1:0))*6*dt,5,15);p.z+=(p.colH-p.z)*Math.min(1,9*dt);p.vz=0;}
   else if(p.dfall)dragonfallTick(p,inp,dt);
-  else if(p.sdome)stormDomeTick(p,inp,dt);
-  else if(p.wr&&p.wr.ph!=='trans'){}   // Wrath: ลอยบนฟ้า (earthWrathTick คุมความสูง)
+  else if(p.sdome){if(p.sdome.shot)gravity();stormDomeTick(p,inp,dt);}
+  else if(p.wr?.ph==='lift'||p.wr?.ph==='aim'){}   // หินยกตัวและค้างระดับระหว่างเล็ง
   else if(p.wfw)windFlyZ(p,dt);   // สายลม Featherwing: บิน/ร่อนลง
   else if(p.wsk>0)windSinkZ(p,dt);   // Wind Push (บิน): จมดิน
   else if(p.wflt>0)windFloatZ(p,dt);   // Windup / Wind Push (พื้น): ลอยค้าง
@@ -302,7 +304,7 @@ function updatePlayer(p,dt,acting){
   if(p.boltDown>0){const gz=groundH(p.x,p.y,p.z);if(p.z>gz){p.z=Math.max(gz,p.z-11*dt);p.vz=Math.min(p.vz||0,0);}}   // lightning bow: cannot climb while shocked
 
   // โล่
-  const wantSh=canAct&&!p.fly&&G.mode!=='imp'&&!(G.ball&&G.ball.holder===p.id)&&inp.sh&&p.shieldBroken<=0&&p.shieldE>5&&p.dash<=0&&!p.natureHook&&!p.dchgOn&&!(p.colos>0)&&!(p.cryo>0)&&!p.dfall&&p.pathIdx!==2&&!p.aug&&!p.ramp&&!(p.wr&&p.wr.ph!=='trans')&&!(p.wsbL>0)&&!p.wwAim;
+  const wantSh=canAct&&!p.fly&&G.mode!=='imp'&&!(G.ball&&G.ball.holder===p.id)&&inp.sh&&p.shieldBroken<=0&&p.shieldE>5&&p.dash<=0&&!p.natureHook&&!p.dchgOn&&!(p.colos>0)&&!(p.cryo>0)&&!p.dfall&&p.pathIdx!==2&&!p.aug&&!p.ramp&&!p.wr&&!(p.wsbL>0)&&!p.wwAim;
   if(wantSh&&!p.shieldOn){p.shieldOn=true;p.shieldT=G.time;p.shBlk=0;p.shPar=0;}
   if(!wantSh)p.shieldOn=false;
   if(p.shieldOn){p.shieldE-=12*dt*((PBASIC[p.pathIdx|0]||{}).shDrain||1);if(p.shieldE<=0)breakShield(p);}
@@ -313,7 +315,7 @@ function updatePlayer(p,dt,acting){
   if(p.pathIdx===EARTH)earthTick(p,dt);
   if(p.pathIdx===WINDP)windTick(p,dt);
   if(p.pathIdx===WATERP)waterTick(p,dt);
-  if(p.pathIdx===NATUREP)natureShield(p);
+  if(p.pathIdx===NATUREP){natureShield(p);natureWallCharges(p,dt);}
 
   // เคลื่อนที่
   const ox0=p.x,oy0=p.y,oz0=p.z,onG0=!p.fly&&p.z<=groundH(p.x,p.y,p.z)+0.05;
@@ -321,6 +323,10 @@ function updatePlayer(p,dt,acting){
   if(typeof inp.mx==='number'){mx=inp.mx;my=inp.my;}
   else{mx=(inp.r?1:0)-(inp.l?1:0);my=(inp.d?1:0)-(inp.u?1:0);}
   const ml=Math.hypot(mx,my);if(ml){mx/=ml;my/=ml;}
+  if(p.wr?.ph==='aim'){
+    const x=-Math.sin(p.wr.a0),y=Math.cos(p.wr.a0),lateral=mx*x+my*y;
+    mx=x*lateral;my=y*lateral;
+  }
   if(!canAct||p.root>0||p.dchgOn||p.cryo>0){mx=my=0;}
   else if(p.fear>0){const fa=Math.atan2(p.y-p.fearY,p.x-p.fearX);mx=Math.cos(fa);my=Math.sin(fa);}
   const spd=(p.fly?(p.wfo?W_FW.fastSpd:PLAY.fly)*p.buffs.spd:PLAY.walk*p.buffs.spd*(p.shieldOn&&p.pathIdx!==WATERP?PLAY.shSlow:1))*(p.boost>0?1.45:1)*moveMul(p)*(p.wr||p.aug||p.ecb?earthSpd(p):1)*(p.wdr||p.wfw||p.wgs?windSpd(p):1)*(p.wsk||p.wab||p.wmsT>0?waterSpd(p):1)*(p.dfall?(p.dfall.ph===2?0.45:0):p.sdome?(p.sdome.ph===2?0.45:0):p.rail?RAIL.v.slow:(p.kindle>0&&p.hover>0)?0.35:p.breath>0?0.7:(p.snapT>0||p.colos>0||p.grT>0)?0.5:1)*(p.slideT>0?1.8:1+(p.iceB||0));
@@ -376,9 +382,9 @@ function updatePlayer(p,dt,acting){
   const B=PBASIC[p.pathIdx|0]||PBASIC[0];
   if(pr.v&&p.pathIdx===1&&!(p.fmCd>0)&&!(p.cryo>0)&&!(p.mirror>0)){p.fmode=p.fmode===1?0:1;p.fmCd=1;p.cmbT=0;emit({k:'efx',z:'fswap',x:p.x,y:p.y,h:p.z+1,id:p.id,m:p.fmode});}
   // กระโดด (Space) ทุกสาย
-  if(pr.jp&&!(p.cryo>0)&&!(p.mudT>0)&&!(p.wr&&p.wr.ph!=='trans')&&!p.dchgOn&&p.z<=groundH(p.x,p.y,p.z)+0.05&&!(p.colos>0)){p.vz=PLAY.jump;emit({k:'efx',z:'jump',x:p.x,y:p.y,h:p.z,id:p.id});}
+  if(pr.jp&&!(p.cryo>0)&&!(p.mudT>0)&&!p.wr&&!p.dchgOn&&p.z<=groundH(p.x,p.y,p.z)+0.05&&!(p.colos>0)){p.vz=PLAY.jump;emit({k:'efx',z:'jump',x:p.x,y:p.y,h:p.z,id:p.id});}
   if(p.cryo>0){if(pr.q)castSlot(p,0);if(pr.e)castSlot(p,1);if(pr.r)castSlot(p,2);if(pr.f)castSlot(p,3);return;}
-  if(p.dfall||p.sdome||p.shk>0||(p.mudT>0&&!p.ramp)){}else if(B.dash){if(B.dash(p,inp,pr,dt,setCd))return;}
+  if(p.dfall||(p.sdome&&!stormDomeDash(p))||p.shk>0||(p.mudT>0&&!p.ramp)){}else if(B.dash){if(B.dash(p,inp,pr,dt,setCd))return;}
   else if(pr.sp&&p.cd.dodge<=0&&p.z<0.5){
     let dx=mx,dy=my;if(!dx&&!dy){dx=Math.cos(p.ang);dy=Math.sin(p.ang);}
     p.dash=0.18;p.dashX=dx;p.dashY=dy;p.inv=0.24;p.shieldOn=false;setCd('dodge',2.5*cdr);

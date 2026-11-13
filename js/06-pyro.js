@@ -1,6 +1,6 @@
 // ---------- สายไฟ: ยิงปกติ 2 โหมด / โล่ระเบิด / พุ่งชาร์จ ----------
 // ตัวเลขทั้งหมดของสายไฟอยู่ใน PYV (ยิงปกติ/โล่/พุ่ง) และ v:{...} ของแต่ละสกิล — ปรับได้ในเครื่องมือ tune.html / F8 (js/73-tune.js)
-const PYV=PATHS[0].v={sparkDmg:5,sparkCd:0.3,sparkN:3,chargeT:1.5,ballDmg:12,ballCd:0.5,orbMax:4,orbParry:2,orbBlockN:3,orbBlock:2,orbDmg:4,orbSpd:1300,
+const PYV=PATHS[0].v={flN:3,flCd:6,flR:180,flDmg:10,flSlow:0.2,flMax:2,flSlowT:2,flLow:0.35,flGap:0.5,flGrow:0.5,sparkDmg:5,sparkCd:0.3,sparkN:3,chargeT:1.9,ballDmg:12,ballCd:0.5,orbMax:0,orbParry:2,orbBlockN:3,orbBlock:2,orbDmg:4,orbSpd:1300,
   dashT:4,dashD0:150,dashD1:950,dashSp:2000,dashCd:3,pathT:3,pathW:15,pathDps:8};
 PATHS[0].vn={sparkDmg:'ประกายไฟ (แตะ) • ดาเมจ',sparkN:'ประกายไฟ • โดนกี่นัดได้ Burning',sparkCd:'ประกายไฟ • เว้นยิง (วิ)',chargeT:'ลูกไฟชาร์จ • เวลาชาร์จ (วิ)',ballDmg:'ลูกไฟชาร์จ • ดาเมจ',ballCd:'ลูกไฟชาร์จ • เว้นยิง (วิ)',
   orbMax:'โล่ • ลูกไฟวิญญาณสูงสุด',orbParry:'โล่ • ได้ลูกไฟตอน Parry',orbBlockN:'โล่ • บล็อกกี่ครั้งได้ลูกไฟ',orbBlock:'โล่ • ได้ลูกไฟตอนบล็อกครบ',orbDmg:'ลูกไฟวิญญาณ • ดาเมจต่อลูก',orbSpd:'ลูกไฟวิญญาณ • ความเร็ว',
@@ -16,24 +16,37 @@ function pyroBigBoom(pr){
   for(const t of foesIn(pr.team,pr.x,pr.y,V.r,pr.h+3.5)){aoeHit(o,t,V.dmg,t=>addBurn(t,1,pr.owner));const d=Math.hypot(t.x-pr.x,t.y-pr.y);if(d<bd){bd=d;best=t;}}
   if(best)launchOrbs(o,best);
 }
-function pyroBall(p){shoot(p,'pfire',{sp:'pyroball',dmg:PYV.ballDmg});}   // เนิร์ฟ 2026-10-27: 20→15→12
+function pyroBall(p){shoot(p,'pfire',{sp:'pyroball',dmg:PYV.ballDmg,hand:1});}   // เนิร์ฟ 2026-10-27: 20→15→12
 function pyroBasic(p,inp,dt,setCd){
   const prev=p.bfPrev;p.bfPrev=inp.fire;
+  pyroFlickTick(p,dt);
+  if(p.shieldOn||p.flLow>0){if(p.shieldOn&&inp.fire&&!prev)pyroFlick(p);p.chg=0;return;}   // ยกโล่ + คลิก = สะบัดวงไฟ
   if(p.dfall){if(p.dfall.ph===2&&inp.fire&&!prev)dragonfallDive(p);p.chg=0;return;}
   if(p.breath>0||p.snapT>0){p.chg=0;return;}
   if(inp.fire&&!prev){
     // Kindle: คลิก = ลูกไฟชาร์จเต็มทันที
-    if(p.kindle>0&&p.cd.basic<=0){p.kindle--;if(!p.kindle){p.kindleT=0;p.hover=0;}shoot(p,'pfireb',{sp:'pyrobig',dmg:KINDLE.v.dmg});setCd('basic',PYV.ballCd);p.chg=-1;return;}
+    if(p.kindle>0&&p.cd.basic<=0){p.kindle--;if(!p.kindle){p.kindleT=0;p.hover=0;}shoot(p,'pfireb',{sp:'pyrobig',dmg:KINDLE.v.dmg,hand:1});setCd('basic',PYV.ballCd);p.chg=-1;return;}
     p.chg=0;
   }else if(inp.fire){if(p.chg>=0)p.chg=Math.min(PYV.chargeT,p.chg+dt);}
   else if(prev){
     // ปล่อยคลิก: แตะสั้น = ประกายไฟ / ชาร์จครบ 3 วิ = ลูกไฟ / ระหว่างนั้น = ไม่ยิง
     if(p.chg>=PYV.chargeT){pyroBall(p);setCd('basic',PYV.ballCd);}
-    else if(p.chg>=0&&p.chg<0.25&&p.cd.basic<=0){shoot(p,'spark',{sp:'b_pyro',dmg:PYV.sparkDmg});setCd('basic',PYV.sparkCd);}
+    else if(p.chg>=0&&p.chg<0.25&&p.cd.basic<=0){shoot(p,'spark',{sp:'b_pyro',dmg:PYV.sparkDmg,hand:1});setCd('basic',PYV.sparkCd);}
     p.chg=0;
   }
 }
-// โล่สายไฟ: เก็บ "ลูกไฟวิญญาณ" (orb) หมุนรอบตัว — Parry +2 / บล็อกครบ 3 ครั้ง +2 / สูงสุด 4 (ลูกละ 5 — เนิร์ฟ 2026-10-27) ไม่หายจนกว่าจะใช้
+// โล่สายไฟใหม่ (ผู้ใช้ 2026-11-11): ไม่มีลูกไฟวิญญาณแล้ว • ยกโล่ + คลิก = หมุนตัวครึ่งรอบ สะบัดวงไฟเกลียวออกรอบตัว
+// ใช้ได้ flN ครั้ง คืนทีละครั้งทุก flCd วิ • โดน = ดาเมจ flDmg + ช้า flSlow ต่อครั้ง ซ้อนได้ flMax ครั้ง นาน flSlowT วิ • ระหว่างสะบัดโล่ลด flLow วิ
+function pyroFlickTick(p,dt){if(p.flN===undefined){p.flN=PYV.flN;p.flT=0;}
+  if(p.flLow>0){p.flLow-=dt;p.shieldOn=false;}if(p.flGapT>0)p.flGapT-=dt;
+  if(p.flN<PYV.flN){p.flT+=dt;if(p.flT>=PYV.flCd){p.flT=0;p.flN++;}}else p.flT=0;}
+function pyroFlick(p){if(!(p.flN>0)||p.flGapT>0)return;p.flN--;p.flGapT=PYV.flGap;p.flLow=PYV.flLow;p.shieldOn=false;
+  emit({k:'efx',z:'pflick',x:Math.round(p.x),y:Math.round(p.y),h:p.z,a:Math.round(p.ang*100)/100,id:p.id});
+  for(const t of foesIn(p.team,p.x,p.y,PYV.flR,p.z+3.5)){const d=Math.hypot(t.x-p.x,t.y-p.y);
+    G.strikes.push({t:Math.max(0.03,d/PYV.flR*PYV.flGrow),fn:()=>{if(t.dead||(!t.isE&&!t.isM&&(!t.alive||t.downed)))return;
+      const n=t.flE>G.time?Math.min(PYV.flMax,(t.flS|0)+1):1;t.flS=n;t.flE=G.time+PYV.flSlowT;
+      aoeHit(p,t,PYV.flDmg,q=>addSlow(q,1-PYV.flSlow*n,PYV.flSlowT));}});}}
+// (เดิม) โล่สายไฟ: เก็บ "ลูกไฟวิญญาณ" (orb) หมุนรอบตัว — Parry +2 / บล็อกครบ 3 ครั้ง +2 / สูงสุด 4 (ลูกละ 5 — เนิร์ฟ 2026-10-27) ไม่หายจนกว่าจะใช้
 function addOrbs(p,n){const was=p.orbs|0;p.orbs=Math.min(PYV.orbMax,was+n);if(p.orbs>was)emit({k:'efx',z:'orbget',x:p.x,y:p.y,h:p.z+1.2,id:p.id,n:p.orbs});}
 function pyroParry(p){addOrbs(p,PYV.orbParry);}
 function pyroBlock(p){p.orbBlk=(p.orbBlk|0)+1;if(p.orbBlk>=PYV.orbBlockN){p.orbBlk=0;addOrbs(p,PYV.orbBlock);}}

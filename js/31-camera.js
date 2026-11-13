@@ -89,7 +89,8 @@ let AIMZ=0,WBY=null;
 const CAM_FRAMES={
   base:{dist:4.7,h:2.05,side:0.25},flight:{dist:7,h:2.4,side:0.28},   // base: แบบเกม hero shooter มุมบุคคลที่ 3 (ผู้ใช้ 2026-11-06) ใกล้ขึ้น ตัวอยู่ ~37% จากซ้าย (เดิม 6.2/2.25/0.30)
   colossus:{dist:14.5,h:4.4,side:0.34},airAim:{dist:6.6,h:2.5,side:0.29},
-  kindle:{dist:5,h:2.3,side:0.31},rail:{dist:5.4,h:2.2,side:0.3},
+  kindle:{dist:6.4,h:2.5,side:0.31},   // ซูมออกนิด (เดิม 5)
+  rail:{dist:5.4,h:2.2,side:0.3},
   earthBase:{dist:7,h:2.25,side:0,lift:2.4},earthRampage:{dist:9,h:4.1,side:0,lift:3},
   earthShield:{dist:9,h:2.8,side:0,lift:5.5},earthCharge:{dist:10,h:3,side:0,lift:5},
   earthAuger:{dist:12,h:3.3,side:0,lift:3.5},earthSky:{dist:15.2,h:3.8,side:0,lift:3},
@@ -135,7 +136,7 @@ function updateCamera(me,dt){
   // ร่าย/ยิง Abyssal Beam: กล้องหมุนได้เร็วเท่าลำเท่านั้น (ผู้ใช้ 2026-11-01) เมาส์ยังบังคับทิศลำ
   if(me.wt&&me.wt[7]&&me.al&&WBY!==null){const m=WT_AB.turn*dt;yaw=WBY+Math.max(-m,Math.min(m,angDiff(yaw,WBY)));}
   WBY=me.wt&&me.wt[7]&&me.al?yaw:null;
-  AIMZ+=(((me.kd>0&&me.hv)?1:0)-AIMZ)*Math.min(1,dt*10);if(AIMZ<0.001)AIMZ=0;
+  AIMZ+=(((me.kd>0&&me.hv)?.35:0)-AIMZ)*Math.min(1,dt*10);if(AIMZ<0.001)AIMZ=0;
   {const fv=SET.fov*(1-0.25*AIMZ)+WTLF.fov;if(Math.abs(cam.fov-fv)>0.01){cam.fov=fv;cam.updateProjectionMatrix();}}
   let px=tx(me.x),pz=tz(me.y);
   if(me.wn&&me.wn[5]&&me.al){const T=CAM_TRACK,k=1-Math.exp(-16*dt);if(T.fk!==builtKey+'|'+me.id||Math.hypot(px-T.fx,pz-T.fz)>6){T.fx=px;T.fz=pz;T.fk=builtKey+'|'+me.id;}else{T.fx+=(px-T.fx)*k;T.fz+=(pz-T.fz)*k;}px=T.fx;pz=T.fz;}else CAM_TRACK.fk='';   // flight: the view follows a smoothed point, so snapshot or prediction jitter does not shake the screen

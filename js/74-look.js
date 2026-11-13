@@ -18,7 +18,7 @@ var LOOK={pm:null,env:{},cur:null,amb:null,off:/[?&]nolook\b/.test(location.sear
   P:{
     night:{sky:'night',warm:false,env:0.9,tr:0.62,tg:0.82,tb:1.35,hemi:0.2,amb:0.1,exp:1.0,con:1.15,split:0.12,tone:0,rays:0.5,haze:0.55,hazeK:1.4,hazeH:0.06,
       dust:0.45,dustS:0.7,dustK:0.9,mist:0.6,mistA:0.09,mistS:1,mistH:2.2,mistL:0.45,mistK:1.2,flow:1},
-    dusk:{sky:'sunset',warm:true,env:1.0,tr:1.12,tg:1.0,tb:0.82,hemi:0.3,amb:0.1,exp:1.0,con:1.12,split:0.12,tone:0,rays:0.7,haze:0.55,hazeK:1.4,hazeH:0.06,
+    dusk:{sky:'sunset',warm:true,env:1.0,tr:1.12,tg:1.0,tb:0.82,hemi:0.3,amb:0.1,exp:1.0,con:1.12,split:0.12,tone:0,rays:0.23,haze:0.55,hazeK:1.4,hazeH:0.06,
       dust:0.5,dustS:0.7,dustK:1.0,mist:0.4,mistA:0.07,mistS:1,mistH:2.0,mistL:0.3,mistK:1.1,flow:1}},
   map:{}};   // map: {รหัสแมพ:'ชื่อพรีเซ็ต'} — ว่าง = ใช้ค่าเริ่มต้นตามท้องฟ้า
 function lookPreset(name,from,over){LOOK.P[name]=Object.assign({},LOOK.P[from],over||{});if(typeof lookRegister==='function')lookRegister(name);return LOOK.P[name];}

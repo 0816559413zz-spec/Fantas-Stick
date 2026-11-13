@@ -8,9 +8,11 @@ const H4E={
   storm:{c0:'#4a3a06',c1:'#ffe27a',c2:'#fff6c8',cb:'#3a3010',pt:'spark',n:'STORM'},
   earth:{c0:'#3a2410',c1:'#c9a36a',c2:'#f0dcb4',cb:'#3a2a18',pt:'rock',n:'EARTH'},
   wind:{c0:'#0f3a22',c1:'#8dff65',c2:'#efffe8',cb:'#123a26',pt:'snow',n:'WIND'},
-  water:{c0:'#062a4a',c1:'#4fc3ff',c2:'#e3f7ff',cb:'#0c2c48',pt:'snow',n:'WATER'}};
+  water:{c0:'#062a4a',c1:'#4fc3ff',c2:'#e3f7ff',cb:'#0c2c48',pt:'snow',n:'WATER'},
+  stormgod:{c0:'#05304a',c1:'#3fe2ff',c2:'#e0fbff',cb:'#0a2c44',pt:'spark',n:'STORM'}};   // ร่างเทพสายฟ้า: ไพ่/HUD เป็นฟ้า (ผู้ใช้ 2026-11-10)
 const H4={pick:null,ordFor:'',el:null,on:false,drawn:false,pid:'',lay:'',cache:{},rdy:{},cdp:{},seg:[],segN:0,trail:1,hold:0,uFull:false};
-function h4Pal(me){const k=getKit(me.id),P=PATHS[k.path]||PATHS[0];return [P,H4E[P.id]||H4E.frost];}
+const h4God=me=>!!(me&&me.sm&&((me.sm[3]|0)&4));
+function h4Pal(me){const k=getKit(me.id),P=PATHS[k.path]||PATHS[0];return [P,(P.id==='storm'&&h4God(me)?H4E.stormgod:H4E[P.id])||H4E.frost];}
 // สีของ HUD canvas (js/38) ตามธาตุของเรา — เรียกทุกเฟรมจาก drawHUD
 function hud4Col(me){if(!me)return;const E=h4Pal(me)[1];HG=E.c1;HG2=E.c2;}
 // อนุภาคธาตุ: จุดเกิดสุ่มในวง (ซ้ายล่าง: รอบรูป) • การเคลื่อนเป็น CSS animation ล้วน
@@ -65,9 +67,10 @@ function h4Build(me,v){
 // ค่าเปลี่ยนเท่านั้นถึงเขียน DOM
 function h4Set(key,v,fn){if(H4.cache[key]===v)return;H4.cache[key]=v;fn(v);}
 function hud4Draw(me,v){
-  const k=getKit(me.id),lay=me.id+'|'+k.path+'|'+k.ids.join(',')+'|'+k.ult+'|'+(me.ea?1:0)+'|'+(me.fr?me.fr[0]:'')+'|'+(me.ea&&me.ea[0]>0?1:0)+'|'+(me.ea&&me.ea[8]?1:0)+'|'+(NOBROOM.has(v&&v.mode)?1:0);
+  const k=getKit(me.id),lay=me.id+'|'+k.path+'|'+k.ids.join(',')+'|'+k.ult+'|'+(me.ea?1:0)+'|'+(me.fr?me.fr[0]:'')+'|'+(me.ea&&me.ea[0]>0?1:0)+'|'+(me.ea&&me.ea[8]?1:0)+'|'+(NOBROOM.has(v&&v.mode)?1:0)+(h4God(me)?'|g':'');
   h4OrdLoad(k);
   if(!H4.el||H4.lay!==lay){H4.lay=lay;h4Build(me,v);}
+  natPlantHud(me,v);
   H4.drawn=true;if(H4.el.hidden)H4.el.hidden=false;
   const Q=H4.q,t=performance.now();
   h4Set('hs',Math.max(0.62,Math.min(1.15,SH/900,SW/1400)).toFixed(3),s=>H4.el.style.setProperty('--hs',s));
@@ -172,8 +175,8 @@ function h4UltCard(face,au){
 // กดอัลติ: ไพ่สมบูรณ์ถูกดึงออกจากกอง ลอยขึ้น แล้วไหม้สลาย (เหมือนไพ่สกิล) • กองเหลือแต่เงาเศษไพ่ เริ่มสะสมใหม่
 function h4UltUse(){const Q=H4.q;h4Fx(Q.uc,'h4UXuse',`<div class="bits">${h4Bits(26)}</div>`,1100);Q.uc.classList.remove('used');void Q.uc.offsetWidth;Q.uc.classList.add('used');}
 // เรียกท้ายทุกเฟรมจาก render loop: เฟรมนี้ไม่ได้วาด HUD (ชนะ/แพ้, โหมด imp, ไม่มีตัวเรา) = ซ่อน
-function hud4Frame(){if(H4.el&&!H4.drawn&&!H4.el.hidden)H4.el.hidden=true;H4.drawn=false;}
-function hud4Hide(){try{if(H4.el)H4.el.hidden=true;}catch(e){}}   // setScreen เรียกได้ตั้งแต่ตอนโหลดไฟล์ (H4 ยังไม่พร้อม)
+function hud4Frame(){if(H4.el&&!H4.drawn&&!H4.el.hidden){H4.el.hidden=true;if(NPH.el)NPH.el.hidden=true;}H4.drawn=false;}
+function hud4Hide(){try{if(H4.el)H4.el.hidden=true;if(NPH.el)NPH.el.hidden=true;}catch(e){}}   // setScreen เรียกได้ตั้งแต่ตอนโหลดไฟล์ (H4 ยังไม่พร้อม)
 // ---------- ไพ่อัลติกลางจอ (ผู้ใช้ 2026-11-01) ----------
 // หน้า (ยังไม่เต็ม): ธาตุเติมจากล่างขึ้นตาม --p (ไฟลุก / น้ำแข็งเกาะ / ไฟฟ้าเหลืองมีสายฟ้า / ดินถม / ลมเขียวหมุน / น้ำคลื่น) •
 // ไอคอนอัลติจางดำ + ตัวเลข % ใหญ่ • หลัง (เต็ม): พลิกไพ่ → โลโก้อัลติเรือง + ออร่าธาตุ (h4AuBits เดิม) • แถบเกจใต้ไพ่

@@ -336,8 +336,8 @@ const SKY={};
   const mc=new THREE.Mesh(new THREE.CircleGeometry(14,32),new THREE.MeshBasicMaterial({color:hdr('#f4f6ff',1.6),fog:false}));SKY.moon.add(mc);
   SKY.moon.position.set(-190,180,-310);mc.lookAt(190,-180,310);scene.add(SKY.moon);
   SKY.sun=new THREE.Group();
-  const sg2=new THREE.Sprite(new THREE.SpriteMaterial({map:glowTex,color:hdr('#ffb070',1.2),fog:false,depthWrite:false,blending:THREE.AdditiveBlending}));sg2.scale.set(220,220,1);SKY.sun.add(sg2);
-  const sc=new THREE.Mesh(new THREE.CircleGeometry(22,40),new THREE.MeshBasicMaterial({color:hdr('#fff0c0',2.2),fog:false}));SKY.sun.add(sc);
+  const sg2=new THREE.Sprite(new THREE.SpriteMaterial({map:glowTex,color:hdr('#ffb070',0.48),opacity:0.47,transparent:true,fog:false,depthWrite:false,blending:THREE.AdditiveBlending}));sg2.scale.set(125,125,1);SKY.sun.add(sg2);
+  const sc=new THREE.Mesh(new THREE.CircleGeometry(18,40),new THREE.MeshBasicMaterial({color:hdr('#ffd48e',0.91),fog:false}));SKY.sun.add(sc);
   SKY.sun.position.set(300,45,-420);sc.lookAt(-300,-45,420);SKY.sun.visible=false;scene.add(SKY.sun);
 })();
 const hemi=new THREE.HemisphereLight('#8fa6ff','#2a1f1a',0.55);scene.add(hemi);
@@ -351,6 +351,7 @@ function setSky(mode){
   const noon=mode==='day',day=noon||mode==='sunset';   // 'day' = กลางวันแดดสูง (ลุคภาพวาด js/77)
   SKY.mesh.material.map=noon?SKY.noon:day?SKY.sunset:SKY.night;SKY.mesh.material.needsUpdate=true;
   SKY.stars.visible=!day;SKY.moon.visible=!day;SKY.sun.visible=day;
+  moonL.intensity=day?0.82:1;
   if(noon){moonL.color.set('#fff0bc');moonL.position.set(74,100,-64);gl.toneMappingExposure=1.0;SKYB.sun.copy(moonL.position).normalize().multiplyScalar(520);}
   else if(day){moonL.color.set('#ffbe8a');moonL.position.set(80,45,-110);gl.toneMappingExposure=1.05;SKYB.sun.set(300,45,-420);}
   else{moonL.color.set('#c4d2ff');moonL.position.set(-55,95,-70);gl.toneMappingExposure=1.1;}

@@ -131,7 +131,50 @@ for i in range(6):
                    'at': round(.015 + (i % 3) * .025, 3), 'life': .46,
                    'pos': path, 'w': .065, 'tlife': .13, 'k': .75,
                    'col': '#cbf8ff', 'col2': '#35b5e4'})
+# Start of the cast (user 2026-11-11: "magic circle and water at start look too normal"): layered spinning circles,
+# a crescent, a ring shock, a water vortex around the muzzle, a cartoon burst and a crown splash.
+circle['scale'] = {'0': .3, '.07': 2.9, '.16': 2.6, '1': 2.6, 'ease': 'out'}
+circle['rot'] = {'0': [0, 0, 0], '1': [0, 0, 160]}
 layers.append(circle)
+CZ = 1.15
+back = copy.deepcopy(circle)
+back.update({'id': 'wandc_back', 'tex': 'tex/magic_circle_spin', 'col': '#6fdcff', 'int': 1.2,
+             'pos': [-.3, 1.35, CZ - .12], 'scale': {'0': .4, '.09': 4.0, '1': 3.8, 'ease': 'out'},
+             'rot': {'0': [0, 0, 0], '1': [0, 0, -120]}, 'op': {'0': 0, '.08': .7, '.85': .6, '1': 0}})
+layers.append(back)
+front = copy.deepcopy(circle)
+front.update({'id': 'wandc_front', 'pos': [-.3, 1.35, CZ + .22], 'scale': {'0': .2, '.06': 1.45, '1': 1.3, 'ease': 'out'},
+              'rot': {'0': [0, 0, 0], '1': [0, 0, 300]}, 'op': {'0': 0, '.05': .95, '.85': .85, '1': 0}, 'int': 1.6})
+layers.append(front)
+layers.append({'id': 'moon_crescent', 't': 'mesh', 'att': 'feet', 'at': 0, 'life': .62, 'shape': 'crescent',
+               'mat': 'glow', 'col': '#eafcff', 'int': 1.5, 'pos': [-.3, 1.35, CZ + .05],
+               'rot': {'0': [0, 0, -40], '1': [0, 0, 40]}, 'scale': {'0': .05, '.08': .55, '1': .5, 'ease': 'out'},
+               'op': {'0': 0, '.06': .95, '.85': .9, '1': 0}, 'fade': 0})
+layers.append({'id': 'circle_shock', 't': 'mesh', 'att': 'feet', 'at': 0, 'life': .26, 'shape': 'torus', 'inner': .94,
+               'mat': 'glow', 'col': '#bff4ff', 'int': 1.4, 'pos': [-.3, 1.35, CZ], 'rot': [90, 0, 0],
+               'scale': {'0': .4, '1': 3.4, 'ease': 'out'}, 'op': {'0': 1, '1': 0}, 'fade': 0})
+layers.append({'id': 'circle_outer', 't': 'mesh', 'att': 'feet', 'at': .02, 'life': .6, 'shape': 'torus', 'inner': .98,
+               'mat': 'glow', 'col': '#8fe6ff', 'int': 1.2, 'pos': [-.3, 1.35, CZ - .05], 'rot': [90, 0, 0],
+               'scale': {'0': .3, '.1': 2.0, '1': 1.9, 'ease': 'out'}, 'op': {'0': 0, '.08': .7, '.85': .6, '1': 0}, 'fade': 0})
+layers.append({'id': 'muzzle_burst', 't': 'mesh', 'att': 'feet', 'at': 0, 'life': .24, 'shape': 'plane', 'mat': 'tex',
+               'tex': 'tex/water_beam_burst', 'col': '#8fe4ff', 'col2': '#000000', 'rim': 0, 'uvTile': [1, 1], 'uvScroll': [0, 0],
+               'pos': [-.3, 1.35, CZ + .3], 'rot': {'0': [0, 0, 0], '1': [0, 0, 50]},
+               'scale': {'0': .3, '.35': 2.1, '1': 2.5, 'ease': 'out'}, 'op': {'0': 1, '.5': .9, '1': 0}, 'int': 1.2, 'fade': 0})
+layers.append({'id': 'crown_splash', 't': 'emit', 'at': 0, 'life': .08, 'att': 'feet', 'pos': [-.3, 1.35, CZ + .25],
+               'burst': 34, 'rate': 0, 'from': 'sphere', 'fr': .25, 'dir': 'out', 'spread': .4, 'speed': [5, 11],
+               'plife': [.25, .45], 'look': 'spark', 'size': [.9, 1.6], 'col': '#e2fbff', 'c2': '#3cbde6', 'gravity': 7, 'drag': 1.2})
+layers.append({'id': 'circle_glints', 't': 'emit', 'at': .03, 'life': .55, 'att': 'feet', 'pos': [-.3, 1.35, CZ],
+               'burst': 0, 'rate': 46, 'from': 'sphere', 'fr': 1.2, 'dir': 'tangent', 'spread': .2, 'speed': [2, 4],
+               'plife': [.25, .45], 'look': 'spark', 'size': [.5, 1.0], 'col': '#ffffff', 'c2': '#7fe0ff', 'gravity': 0, 'drag': .5})
+for i in range(3):
+    path = {}
+    for j in range(13):
+        u = j / 12
+        ang = i * math.tau / 3 + u * math.tau * 1.6
+        rad = .5 - .3 * u
+        path[f'{u:.3f}'] = [round(ORIGIN[0] + math.cos(ang) * rad, 4), round(ORIGIN[1] + math.sin(ang) * rad, 4), round(ORIGIN[2] + .1 + u * 3.2, 4)]
+    layers.append({'id': f'muzzle_vortex_{i}', 't': 'trail', 'att': 'feet', 'at': round(i * .02, 3), 'life': .3,
+                   'pos': path, 'w': .1, 'tlife': .16, 'k': .8, 'col': '#dffaff', 'col2': '#2fa8e0'})
 layers.append({'id': 'wand_circle_edge', 't': 'mesh', 'att': 'feet',
                'at': 0, 'life': .62, 'shape': 'torus', 'inner': .97,
                'mat': 'glow', 'col': '#75dcff', 'int': 1.1,

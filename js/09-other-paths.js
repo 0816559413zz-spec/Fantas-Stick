@@ -1,11 +1,11 @@
 // =====================================================================
 //  สายธรรมชาติ — ป้อมพืช แส้ และการคุ้มครองทีม
 // =====================================================================
-defSpell(3,{id:'poisondart',ic:'🌱',n:'ป้อมฝักหนาม',role:'utility',cd:10,d:'ปลูกป้อมยิงหนาม 60 HP อยู่ 20 วิ วางได้ 2 ต้น ยิงเร็วขึ้นเมื่อได้บัฟ',cast:p=>natureCastPlant(p,'turret')});
-defSpell(3,{id:'vinelash',ic:'↔',n:'ย้ายพืช',role:'utility',cd:14,d:'ย้ายพืชมาอ้างอิงตำแหน่งเรา ฟื้น HP เต็มและบัฟป้อม 4 วิ',cast:natureMovePlants});
+defSpell(3,{id:'poisondart',ic:'🌱',n:'ป้อมฝักหนาม',role:'utility',cd:10,d:'ปลูกป้อมยิงหนาม 90 HP ยิงไกล 650 อยู่ถาวรจนแตก วางได้ 2 ต้น ยิงเร็วขึ้นเมื่อได้บัฟ',cast:p=>natureCastPlant(p,'turret')});
+defSpell(3,{id:'vinelash',ic:'↔',n:'ย้ายพืช',role:'utility',cd:14,d:'ย้ายพืชมาอ้างอิงตำแหน่งเรา ฟื้น HP 50% และบัฟป้อม 4 วิ',cast:natureMovePlants});
 defSpell(3,{id:'sporecloud',ic:'🌰',n:'บอลไม้หนาม',role:'control',cd:16,d:'โยนบอลไม้ ดึงเป้ารอบจุดตกเข้าหาลูก ใส่พิษและสโลว์',cast:natureBall});
 defSpell(3,{id:'bloom',ic:'🌸',n:'ดอกบัว',role:'utility',cd:22,d:'วางดอกบัว 100 HP นาน 15 วิ ฮีล 5 ต่อวิ กดซ้ำสลับเป็นบัฟป้อมในรัศมี 160 หน่วย',toggle:natureLotusToggle,cast:p=>natureCastPlant(p,'lotus')});
-defSpell(3,{id:'thornburst',ic:'🪵',n:'กำแพงไม้',role:'control',cd:18,d:'เลือกจุดวางกำแพงไม้ กดซ้ายค้างหมุน คลิกยืนยัน 175 HP อยู่ 8 วิ มี 3 โซนที่ติดไฟได้',toggle:p=>{if(p.natAim?.k!=='wall')return false;p.natAim=null;return true;},cast:natureCastWall});
+defSpell(3,{id:'thornburst',ic:'🪵',n:'กำแพงไม้',role:'control',cd:18,d:'เลือกจุดวางกำแพงไม้ (มี 2 ชาร์จ) กดซ้ายค้างหมุน คลิกยืนยัน 175 HP อยู่ 8 วิ มี 3 โซนที่ติดไฟได้',toggle:p=>{if(p.natAim?.k!=='wall')return false;p.natAim=null;return true;},cast:natureCastWall});
 defSpell(3,{id:'worldtree',ic:'🌲',ult:true,cd:0,n:'ต้นไม้โลก',role:'ult',d:'ต้นไม้ 350 HP คุ้มครองทีมในระยะ 500 หน่วย 12 วิ รับดาเมจแทน 65% ถ้าต้นแตกจะฮีล 125',cast:natureTree});
 
 // =====================================================================
@@ -74,7 +74,7 @@ function updateMins(dt){
     if(m.dead)continue;
     m.life-=dt;if(m.life<=0){m.dead=true;emit({k:'efx',z:'unsummon',x:m.x,y:m.y,h:(m.h||0)+0.6});continue;}
     tickStatus(m,dt);if(m.od>0)m.od-=dt;
-    if(m.burn>0){m.burn-=dt;m.bt-=dt;if(m.bt<=0){m.bt=0.5;damage(m,4,m.burnSrc,'burn');if(m.dead)continue;}}
+    if(m.burn>0){m.burn-=dt;m.bt-=dt;if(m.bt<=0){m.bt=1;damage(m,4,m.burnSrc,'burn');if(m.dead)continue;}}
     m.ox=m.x;m.oy=m.y;
     m.x+=m.vx*dt;m.y+=m.vy*dt;const fr=Math.exp(-5*dt);m.vx*=fr;m.vy*=fr;
     m.cd-=dt;
@@ -146,20 +146,21 @@ defSpell(5,{id:'legion',role:'ult',n:'กองทัพวิญญาณ',ic:'
     emit({k:'efx',z:'legion',x:p.x,y:p.y,h:p.z+0.5,r:200});
   }});
 // สายฟ้า: ลูกสายฟ้าโดม (ต่อท้ายสุดเพื่อไม่ให้ลำดับ index ของคาถาสายอื่นเลื่อน — kit ที่บันทึกไว้ยังใช้ได้)
-const SDOME=defSpell(2,{id:'stormdome',v:{cost:3,range:600,rise:6,fly:3,r:150,time:2,pull:120,tick:5,boom:50,env:50},vn:{cost:'ใช้ stack',range:'ระยะเล็ง',rise:'บินสูง',fly:'บินเล็งนาน (วิ)',r:'รัศมีโดม',time:'โดมดูดนาน (วิ)',pull:'แรงดูด',tick:'ดาเมจทุก 0.5 วิ',boom:'ระเบิดตอนจบ • ดาเมจ',env:'ระเบิด • ดาเมจใส่บ้าน/ของ'},role:'control',n:'ลูกสายฟ้าโดม',ic:'🔵',cd:16,d:'ใช้ 3 stacks: ทะยานขึ้นฟ้า บินปรับได้ (WASD ช้า • Space ขึ้น / C ลง) ชูไม้รวมลูกสายฟ้า 3 วิ — คลิกยิงลงจุดเล็ง (ระยะ 600) แล้วเราร่วงลงทันที',fx:'โดมรัศมี 150 ดูดศัตรูเข้ากลาง 2 วิ (5 ดาเมจ ทุก 0.5 วิ) แล้วระเบิด 50 + Shock (รวม 70) • ระหว่างอัลติ: ถือลูกพุ่งทุบลงแบบ Dragonfall ดูด+ระเบิดทันที 80 • ไม่อมตะ โดนสตันระหว่างบิน = ยกเลิก',
+const SDOME=defSpell(2,{id:'stormdome',v:{cost:4,godCost:3,range:600,rise:6,fly:3,charge:2,r:150,time:2,pull:120,tick:5,partial:20,boom:50,env:50},vn:{cost:'ใช้ stack',godCost:'ใช้ stack ในร่างเทพ',range:'ระยะเล็ง',rise:'บินสูง',fly:'บินเล็งนาน (วิ)',charge:'ชาร์จเต็ม (วิ)',r:'รัศมีโดม',time:'โดมดูดนาน (วิ)',pull:'แรงดูด',tick:'ดาเมจทุก 0.5 วิ',partial:'ดาเมจขั้นต่ำของลูกระเบิด',boom:'ระเบิดตอนจบ • ดาเมจ',env:'ระเบิด • ดาเมจใส่บ้าน/ของ'},role:'control',n:'ลูกสายฟ้าโดม',ic:'🔵',cd:16,d:'ใช้ 4 stacks: ชาร์จสั้น ๆ แล้วทะยานขึ้น ชาร์จหอกสายฟ้าเต็มใน 2 วิ เล็งได้สูงสุด 3 วิ (WASD • Space ขึ้น / C ลง • Dash ได้) — คลิกฟาดไม้ยิงลงจุดเล็ง (ระยะ 600)',fx:'ยิงก่อนชาร์จเต็ม: หอกระเบิด 20–49 ดาเมจตามเกจ • ชาร์จเต็ม: โดมรัศมี 150 ดูดศัตรูเข้ากลาง 2 วิ (5 ดาเมจ ทุก 0.5 วิ) แล้วระเบิด 50 + Shock (รวม 70) • ระหว่างอัลติใช้ 3 stacks: ถือลูกพุ่งทุบลงแบบ Dragonfall ดูด+ระเบิดทันที 80 • ไม่อมตะ โดนสตันระหว่างบิน = ยกเลิก',
   cast(p,S){
     if(p.sdome||p.dfall)return false;
-    if(!stSpend(p,S.v.cost))return false;
-    const g0=groundH(p.x,p.y),q=aimPoint(p,S.v.range);
-    p.sdome={ph:1,t:0.35,g0,H:g0+S.v.rise,tx:q.x,ty:q.y,god:p.god>0};
+    if(!stSpend(p,stormDomeCost(p)))return false;
+    const g0=groundH(p.x,p.y),q=aimPoint(p,S.v.range),god=p.god>0;
+    p.sdome={ph:1,t:god?0.35:SDOME_POSE.charge+SDOME_POSE.lift,z0:p.z,g0,H:g0+S.v.rise,tx:q.x,ty:q.y,god};
     p.stS=null;p.hover=0;p.vz=0;p.beam=0;
-    emit({k:'efx',z:'sdrise',x:p.x,y:p.y,h:p.z,id:p.id});
+    if(god)emit({k:'efx',z:'sdrise',x:p.x,y:p.y,h:p.z,id:p.id,g:1});
+    else if(p.fly){p.fly=false;emit({k:'efx',z:'dismount',x:p.x,y:p.y,h:p.z,id:p.id});}
   }});
 
 // ---------- ร่ายคาถา ----------
 function castSlot(p,i){
   const S=SPELLS[p.kitIds[i]];if(!S)return false;
-  if(p.aug||p.ramp||p.ecb||(p.wr&&p.wr.ph!=='trans'))return false;   // สายดิน: ชาร์จ Auger / Rampage / อยู่บนฟ้า (Wrath)
+  if(p.aug||p.ramp||p.ecb||p.wr)return false;   // สายดิน: ชาร์จ Auger / Rampage / ร่าย Wrath
   const k=SLOTK[i];
   if(S.toggle&&S.toggle(p)){emit({k:'sk',id:p.id,s:S.id+'_2'});return true;}   // กดครั้งที่ 2 (เช่น Tectonic Crush บีบ) → ท่าร่าย
   if(S.melee&&p.fmode===1)return false;
@@ -169,7 +170,7 @@ function castSlot(p,i){
   if(G.mode==='br'&&!(p.unl&&p.unl[BRMAP[k]]))return false;
   if(S.cast(p,S,i)===false){p.cd[k]=0.5;p.cdMax[k]=0.5;return false;}
   const cd=S.cd*p.buffs.cdr;p.cd[k]=cd;p.cdMax[k]=cd;
-  emit({k:'sk',id:p.id,s:S.id});   // ภาพ: ท่าร่ายสกิล (js/35 skAnim)
+  emit({k:'sk',id:p.id,s:S.id,...(S.id==='stormdome'&&p.sdome.god?{g:1}:null)});   // ภาพ: ท่าร่ายสกิล (js/35 skAnim)
   return true;
 }
 function castUlt(p){if(p.wr)return false;const S=SPELLS[p.ultId];if(!S||p.ult<100||p.sil>0||p.cryo>0)return false;if(S.cast(p,S)===false)return false;p.ult=0;emit({k:'sk',id:p.id,s:S.id});return true;}

@@ -206,8 +206,9 @@
     }
   },
   "efx:sclaw": {
-    "fx": "storm/claw_sweep",
+    "fx": "storm/claw_sweep_c",
     "mode": "add",
+    "pal": "stormCyan",
     "p": {
       "r": "6.5"
     },
@@ -258,7 +259,7 @@
     "fx": "fire/fshield_parry_c"
   },
   "loop:blaze": {
-    "fx": "fire/blazeform_b"
+    "fx": "fire/blazeform_aura"
   },
   "loop:colossus": {
     "fx": "fire/colossus"

@@ -30,20 +30,75 @@ function clPinK(y){return y>=1.59?1:y>=1.45?0.6:y>=1.25?0.2:y>=1.05?0.05:0;}
 // ตำแหน่งผ้าในโมเดลตอนยืนตรง (bind) ของแถว r (ทศนิยมได้ = แถวแทรก) คอลัมน์ j
 function clBind(rf,j){const r0=Math.min(CL_ROWS.length-2,Math.floor(rf)),k=rf-r0,a=CL_ROWS[r0],b=CL_ROWS[r0+1],rr=lerp(a[0],b[0],k),y=lerp(a[1],b[1],k),ph=-Math.PI+CL_GAP/2+(Math.PI*2-CL_GAP)*j/(CL_NC-1);   // มุม atan2(x,-z): ช่องเปิดอยู่ที่ ±π
   return [rr*Math.sin(ph),y,-rr*Math.cos(ph)];}
+function cloakPanelGrid(P,inset,ref){
+  const mark=new Uint8Array(P.count);
+  for(let i=0;i<P.count;i++){
+    const x=P.getX(i),y=P.getY(i),z=P.getZ(i),radius=Math.hypot(x,z);
+    for(let r=0;r<CL_ROWS.length;r++){
+      const [rr,yy]=CL_ROWS[r];
+      if(Math.abs(y-yy)>0.008||Math.abs(radius-(rr-inset))>0.008)continue;
+      const ph=Math.atan2(x,-z),j=Math.round((ph+Math.PI-CL_GAP/2)/((Math.PI*2-CL_GAP)/(CL_NC-1)));
+      if(j<0||j>=CL_NC)continue;
+      mark[i]=1;if(ref&&ref[r*CL_NC+j]<0)ref[r*CL_NC+j]=i;break;
+    }
+  }
+  return mark;
+}
+function cloakBodyIndices(index,mark){
+  const keep=[];
+  for(let i=0;i<index.count;i+=3){
+    const a=index.getX(i),b=index.getX(i+1),c=index.getX(i+2);
+    if(!(mark[a]&&mark[b]&&mark[c]))keep.push(a,b,c);
+  }
+  return keep;
+}
+// แยกเฉพาะแผงผ้าออกจากโมเดลซึ่งใช้วัสดุเดียวกับแขนเสื้อและขอบแขน
+function stormCape(o,hidden){
+  if(!hidden){
+    if(!o.stormCapeHidden)return;
+    o.stormCapeHidden=false;
+    for(const {mesh,geometry,index} of o.stormCapeParts||[]){
+      if(geometry){mesh.geometry.dispose();mesh.geometry=geometry;}
+      else mesh.geometry.setIndex(index);
+    }
+    o.stormCapeParts=null;o.stormCapeModel=null;
+    if(o.cloak&&!o.fileModel)o.cloak.outer.visible=o.cloak.inner.visible=true;
+    return;
+  }
+  if(o.stormCapeHidden&&o.stormCapeModel===o.fileModel)return;
+  o.stormCapeHidden=true;o.stormCapeModel=o.fileModel;
+  if(o.cloak)o.cloak.outer.visible=o.cloak.inner.visible=false;
+  if(o.cloth){
+    const C=o.cloth;
+    C.mo.visible=C.mi.visible=false;C.init=false;C.lp=null;C.acc=0;C.air.x=C.air.z=0;
+    return;
+  }
+  if(!o.fileModel)return;
+  o.stormCapeParts=[];
+  o.fileModel.traverse(mesh=>{
+    if(!mesh.isSkinnedMesh||!mesh.geometry.index)return;
+    const batched=mesh.name==='student_all_batch',mat=mesh.material.name;
+    if(!batched&&mat!=='tint_cloak'&&mat!=='tint_house')return;
+    const original=mesh.geometry,index=original.index,P=original.attributes.position;
+    const mark=cloakPanelGrid(P,mat==='tint_house'?CL_IN:0);
+    if(batched){const inner=cloakPanelGrid(P,CL_IN);for(let i=0;i<mark.length;i++)mark[i]|=inner[i];}
+    const keep=cloakBodyIndices(index,mark);
+    if(keep.length===index.count)return;
+    // โมเดลรวมของผู้เล่นอื่นมี geometry ของตัวเอง ส่วนโมเดล GLB เดิมใช้ร่วมกัน
+    if(!batched){mesh.geometry=original.clone();mesh.geometry.userData={};}
+    mesh.geometry.setIndex(keep);
+    o.stormCapeParts.push({mesh,geometry:batched?null:original,index});
+  });
+}
 // เตรียมผ้า: หาจุดแผงผ้าในโมเดล (ตามรูปทรงตอนสร้าง) → ตัดสามเหลี่ยมแผงออกจาก geometry ของเรา → สร้าง mesh ผ้าจำลอง
 function clothSetup(o){
   const ms=[];o.fileModel.traverse(m=>{if(m.isSkinnedMesh&&(m.material.name==='tint_cloak'||m.material.name==='tint_house'))ms.push(m);});
   const outer=ms.find(m=>m.material.name==='tint_cloak'),inner=ms.find(m=>m.material.name==='tint_house');if(!outer||!inner)return null;
   const R0=CL_ROWS.length,ref=new Array(R0*CL_NC).fill(-1),grid=new Map();
-  for(const m of [outer,inner]){const P=m.geometry.attributes.position,isIn=m===inner,mark=new Uint8Array(P.count);
-    for(let i=0;i<P.count;i++){const x=P.getX(i),y=P.getY(i),z=P.getZ(i);
-      for(let r=0;r<R0;r++){const [rr,yy]=CL_ROWS[r];if(Math.abs(y-yy)>0.008||Math.abs(Math.hypot(x,z)-(rr-(isIn?CL_IN:0)))>0.008)continue;
-        const ph=Math.atan2(x,-z),j=Math.round((ph+Math.PI-CL_GAP/2)/((Math.PI*2-CL_GAP)/(CL_NC-1)));if(j<0||j>=CL_NC)continue;
-        mark[i]=1;if(!isIn&&ref[r*CL_NC+j]<0)ref[r*CL_NC+j]=i;break;}}
-    grid.set(m,mark);}
+  grid.set(outer,cloakPanelGrid(outer.geometry.attributes.position,0,ref));
+  grid.set(inner,cloakPanelGrid(inner.geometry.attributes.position,CL_IN));
   if(ref.some(i=>i<0))return null;   // โมเดลเปลี่ยนรูปผ้า → ใช้ผ้าเดิมต่อไป
-  for(const m of [outer,inner]){const mark=grid.get(m),g=m.geometry.clone(),I=g.index.array,keep=[];
-    for(let k=0;k<I.length;k+=3)if(!(mark[I[k]]&&mark[I[k+1]]&&mark[I[k+2]]))keep.push(I[k],I[k+1],I[k+2]);g.setIndex(keep);m.geometry=g;}
+  for(const m of [outer,inner]){const g=m.geometry.clone();g.setIndex(cloakBodyIndices(g.index,grid.get(m)));m.geometry=g;}
   // ตารางจำลอง: แถวของโมเดล + แถวแทรก (SUB) • แต่ละจุดจำว่าอยู่ระหว่างจุดโมเดลไหน (ไว้หาตำแหน่งเป้าตามกระดูก)
   const NR=(R0-1)*CLOTH.SUB+1,N=NR*CL_NC,rf=[],pk=new Float32Array(N);
   for(let r=0;r<NR;r++){const f=r/CLOTH.SUB;rf.push(f);for(let j=0;j<CL_NC;j++)pk[r*CL_NC+j]=clPinK(clBind(f,j)[1]);}
@@ -110,7 +165,7 @@ function clDraw(C){const po=C.mo.geometry.attributes.position,pi=C.mi.geometry.a
   const nm=C.mo.geometry.attributes.normal,A=pi.array;for(let i=0;i<C.N*3;i+=3){A[i]=C.P[i]-nm.array[i]*CL_IN;A[i+1]=C.P[i+1]-nm.array[i+1]*CL_IN;A[i+2]=C.P[i+2]-nm.array[i+2]*CL_IN;}
   pi.needsUpdate=true;C.mi.geometry.computeVertexNormals();}
 // ทุกเฟรม (หลัง syncPlayers): ผ้าของเราเอง
-function clothTick(dt){if(!CLOTH.ON||typeof NET==='undefined')return;const o=PM3.get(NET.myId);if(!o||!o.fileModel)return;
+function clothTick(dt){if(!CLOTH.ON||typeof NET==='undefined')return;const o=PM3.get(NET.myId);if(!o||!o.fileModel||o.stormCapeHidden)return;
   if(o.cloth===undefined)o.cloth=clothSetup(o);const C=o.cloth;if(!C)return;
   let vis=true;for(let n=C.outer;n;n=n.parent)if(!n.visible){vis=false;break;}
   C.mo.visible=C.mi.visible=vis&&!!o.g.parent;if(!C.mo.visible){C.init=false;return;}

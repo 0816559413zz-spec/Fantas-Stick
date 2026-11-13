@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="th"><head><meta charset="utf-8"><title>Nature plant HUD mockup</title>
+<style>
+body{margin:0;background:#2b3138 url() center/cover;font-family:Kanit,system-ui,sans-serif;color:#fff;width:1000px;height:560px;overflow:hidden;position:relative}
+.bg{position:absolute;inset:0;background:linear-gradient(#7d8fa3,#4f5c66 55%,#3b4249);}
+.floor{position:absolute;left:0;right:0;bottom:0;height:45%;background:repeating-linear-gradient(90deg,#5d666e 0 80px,#566068 80px 82px),#5a636b}
+h1{position:absolute;left:16px;top:8px;margin:0;font-size:16px;font-weight:600;text-shadow:0 1px 2px #000}
+.lab{position:absolute;font-size:13px;color:#ffe9a8;text-shadow:0 1px 2px #000}
+/* skill cards (rough) */
+.cards{position:absolute;right:26px;bottom:22px;display:flex;gap:8px}
+.card{width:62px;height:86px;border-radius:7px;background:linear-gradient(#3d6b3f,#1f3a24);border:2px solid #9be27a;box-shadow:0 2px 6px #0008;display:grid;place-items:center;font-size:26px}
+/* plant list — A: stacked rows */
+.pl{position:absolute;right:26px;bottom:122px;display:flex;flex-direction:column;gap:5px;align-items:flex-end}
+.row{display:flex;align-items:center;gap:8px;background:rgba(0,0,0,.62);border:1px solid rgba(255,255,255,.18);border-radius:6px;padding:4px 10px 4px 5px;min-width:206px}
+.ic{width:30px;height:30px;border-radius:50%;background:#000;border:2px solid #fff;display:grid;place-items:center;flex:none}
+.ic svg{width:22px;height:22px}
+.hp{flex:1}
+.hp b{font-size:17px;font-weight:700;letter-spacing:.5px}
+.hp small{font-size:11px;opacity:.65;margin-left:2px}
+.bar{height:4px;background:rgba(255,255,255,.18);border-radius:2px;margin-top:2px;overflow:hidden}
+.bar i{display:block;height:100%;background:#fff}
+.tm{font-size:15px;font-weight:600;min-width:38px;text-align:right;opacity:.9}
+.tm::before{content:'';display:inline-block;width:9px;height:9px;border:1.5px solid #fff;border-radius:50%;margin-right:4px;vertical-align:-1px;background:conic-gradient(#fff var(--p),transparent 0)}
+.low b{color:#fff}.low .ic{animation:blink .8s infinite}
+@keyframes blink{50%{border-color:#777}}
+/* B: compact chips above each card */
+.chips{position:absolute;left:40px;bottom:22px;display:flex;gap:8px}
+.chip{width:62px;display:flex;flex-direction:column;align-items:center;gap:3px}
+.cc{display:flex;align-items:center;gap:3px;background:rgba(0,0,0,.65);border:1px solid rgba(255,255,255,.2);border-radius:5px;padding:2px 5px;font-size:12px;font-weight:700}
+.cc .ic{width:18px;height:18px;border-width:1.5px}.cc .ic svg{width:13px;height:13px}
+.cc span{font-weight:500;opacity:.75;font-size:11px}
+</style></head><body>
+<div class="bg"></div><div class="floor"></div>
+<h1>Nature — HP ของพืชที่ปลูก (ขาว-ดำ แบบ Overwatch)</h1>
+<div class="lab" style="right:26px;bottom:325px">แบบ A — แถวซ้อนเหนือไพ่สกิล (ขวาล่าง)</div>
+<div class="pl">
+  <div class="row"><div class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="10" r="6" fill="#fff"/><rect x="11" y="14" width="2" height="8" fill="#fff"/><circle cx="16.5" cy="9" r="1.6" fill="#000"/><rect x="16" y="8.4" width="6" height="2.4" rx="1.2" fill="#fff"/></svg></div>
+    <div class="hp"><b>72</b><small>/ 90</small><div class="bar"><i style="width:80%"></i></div></div><div class="tm" style="--p:65%">13</div></div>
+  <div class="row low"><div class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="10" r="6" fill="#fff"/><rect x="11" y="14" width="2" height="8" fill="#fff"/><circle cx="16.5" cy="9" r="1.6" fill="#000"/><rect x="16" y="8.4" width="6" height="2.4" rx="1.2" fill="#fff"/></svg></div>
+    <div class="hp"><b>18</b><small>/ 90</small><div class="bar"><i style="width:20%"></i></div></div><div class="tm" style="--p:20%">4</div></div>
+  <div class="row"><div class="ic"><svg viewBox="0 0 24 24"><path d="M12 4c2 3 2 6 0 9-2-3-2-6 0-9z M5 9c3 0 5 2 6 5-3 0-5-2-6-5z M19 9c-3 0-5 2-6 5 3 0 5-2 6-5z" fill="#fff"/><ellipse cx="12" cy="17" rx="7" ry="2.5" fill="#fff"/></svg></div>
+    <div class="hp"><b>100</b><small>/ 100</small><div class="bar"><i style="width:100%"></i></div></div><div class="tm" style="--p:80%">12</div></div>
+  <div class="row"><div class="ic"><svg viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="10" rx="2" fill="#fff"/><path d="M8 8v10M13 8v10M18 8v10" stroke="#000" stroke-width="1"/><path d="M6 8l2-3 2 3M14 8l2-3 2 3" fill="#fff"/></svg></div>
+    <div class="hp"><b>140</b><small>/ 175</small><div class="bar"><i style="width:80%"></i></div></div><div class="tm" style="--p:50%">4</div></div>
+</div>
+<div class="cards"><div class="card">🌱</div><div class="card">↔</div><div class="card">🌰</div><div class="card">🪵</div></div>
+
+<div class="lab" style="left:40px;bottom:196px">แบบ B — ป้ายเล็กเหนือไพ่ของสกิลนั้น</div>
+<div class="chips">
+  <div class="chip"><div class="cc"><div class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="10" r="6" fill="#fff"/><rect x="11" y="14" width="2" height="8" fill="#fff"/></svg></div>72<span>13s</span></div>
+    <div class="cc"><div class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="10" r="6" fill="#fff"/><rect x="11" y="14" width="2" height="8" fill="#fff"/></svg></div>18<span>4s</span></div><div class="card">🌱</div></div>
+  <div class="chip"><div class="card" style="margin-top:50px">↔</div></div>
+  <div class="chip"><div class="card" style="margin-top:50px">🌰</div></div>
+  <div class="chip"><div class="cc" style="margin-top:25px"><div class="ic"><svg viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="10" rx="2" fill="#fff"/></svg></div>140<span>4s</span></div><div class="card">🪵</div></div>
+</div>
+</body></html>
