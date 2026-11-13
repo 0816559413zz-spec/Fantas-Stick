@@ -112,7 +112,8 @@ function hostStart(){
   const err=validate();if(err){toast(err);return;}
   // สุ่มแผนที่ทุกครั้งที่เริ่มเกม (ไม่ซ้ำกับรอบที่แล้วถ้าเป็นไปได้)
   const MD=MODES[G.mode];
-  if(MD.map&&(G.mode==='siege'||!(G.mode!=='train'&&MAPS[G.mapPick]&&MAPS[G.mapPick].allModes)))G.map=MD.map;   // บุกปราสาท = แผนที่ของโหมดเสมอ   // โหมดที่มีแผนที่ประจำ: เลือกแผนที่ allModes (เมือง) แทนได้
+  if(PLAYMAP&&MAPS[PLAYMAP]&&G.mode!=='siege')G.map=PLAYMAP;   // ทดลองเล่นจาก Map Builder (ห้องฝึกก็ใช้แผนที่นี้)
+  else if(MD.map&&(G.mode==='siege'||!(G.mode!=='train'&&MAPS[G.mapPick]&&MAPS[G.mapPick].allModes)))G.map=MD.map;   // บุกปราสาท = แผนที่ของโหมดเสมอ   // โหมดที่มีแผนที่ประจำ: เลือกแผนที่ allModes (เมือง) แทนได้
   else if(G.mapPick&&MAPS[G.mapPick]&&!MAP_OFF.has(G.mapPick))G.map=G.mapPick;
   else{let ks=RANDOM_MAPS.filter(k=>k!==G.lastMap&&MAPS[k]&&mapOkFor(k,G.mode));if(!ks.length)ks=['castle'];G.map=ks[Math.floor(Math.random()*ks.length)];}
   G.lastMap=G.map;

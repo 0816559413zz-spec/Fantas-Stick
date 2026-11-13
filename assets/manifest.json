@@ -459,6 +459,11 @@
    "file": "maps/ruins.glb",
    "data": "maps/ruins.json",
    "v": 5
+  },
+  "demo-builder": {
+   "file": "maps/demo-builder.glb",
+   "data": "maps/demo-builder.json",
+   "v": 2
   }
  },
  "ptex": {}

@@ -242,6 +242,8 @@ function renderLobby(){
 resize();
 applyQuality();
 buildWorld('castle');
-loadAllMapData();   // ข้อมูลแผนที่จากไฟล์ (เล็ก) — พร้อมให้สุ่ม/เลือกก่อนเริ่มเกม
+loadAllMapData();
+if(PLAYMAP)loadAllMapData().then(()=>{if(!MAPS[PLAYMAP]){toast('ไม่พบแผนที่ '+PLAYMAP);return;}$('#btnSolo').click();   // ค่าเริ่มต้น = ห้องฝึก (เดินดูอิสระ ไม่มีศัตรู)
+  const t=setInterval(()=>{if(!(G&&G.ph==='lobby'&&NET.isHost))return;clearInterval(t);G.mode=new URLSearchParams(location.search).get('pm')||'train';G.mapPick=PLAYMAP;broadcastLobby();hostStart();},150);});   // ข้อมูลแผนที่จากไฟล์ (เล็ก) — พร้อมให้สุ่ม/เลือกก่อนเริ่มเกม
 setScreen('menu');
 requestAnimationFrame(frame);

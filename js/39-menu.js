@@ -258,7 +258,7 @@ function titleGo(){
 // ลิงก์เชิญ ?join=ABCDE → ใส่รหัสให้ แล้วเข้าห้องเลย (ครั้งแรก = สร้างตัวละครก่อน กดบันทึกแล้วเข้าเอง)
 let JOINQ=(()=>{const m=/[?&]join=([A-Za-z0-9]{5})/.exec(location.search);return m?m[1].toUpperCase():'';})();
 if(JOINQ){$('#codeIn').value=JOINQ;if(store('wd_look')){const c=JOINQ;JOINQ='';setTimeout(()=>joinGame(c),900);}}
-if(/[?&](nointro|studio|join)\b/.test(location.search)){$('#intro').classList.add('gone');STAGE.introT=1;if(!store('wd_look'))openCreator(true);}
+if(/[?&](nointro|studio|join|playmap)\b/.test(location.search)){$('#intro').classList.add('gone');STAGE.introT=1;if(!store('wd_look')&&!PLAYMAP)openCreator(true);}   // playmap = ทดลองเล่นจาก Map Builder: เข้าแผนที่ทันที
 else{$('#intro').addEventListener('pointerdown',titleGo);addEventListener('keydown',e=>{if(!$('#intro').classList.contains('go')&&!e.repeat)titleGo();});}
 requestAnimationFrame(titleLoop);
 $('#btnSolo').onclick=()=>{store('wd_name',myName());hostGame(false);};
