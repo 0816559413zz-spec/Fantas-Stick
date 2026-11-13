@@ -483,8 +483,11 @@ function wdgTick(dt){
  }
 }
 // อุ่นตอนนับถอยหลัง: สร้างมังกรไว้ก่อน กดอัลติแล้วไม่ค้าง
-WARM.reg.water=[()=>{const a=WT_POOL.bm.length?null:wtBeamMesh(),b=WT_POOL.fr.length?null:wtFamRiseMesh();if(a)WT_POOL.bm.push(a);if(b)WT_POOL.fr.push(b);if(a&&b)for(const m of [a,b]){m.position.set(tx(WARM_X),0,tz(WARM_Y));m.scale.setScalar(0.01);scene.add(m);}
-   setTimeout(()=>{for(const m of [a,b])if(m){scene.remove(m);m.scale.setScalar(1);}},5000);},
+WARM.reg.water=[()=>{const a=WT_POOL.bm.length?null:wtBeamMesh(),b=WT_POOL.fr.length?null:wtFamRiseMesh();
+    for(const [m,pool] of [[a,WT_POOL.bm],[b,WT_POOL.fr]])if(m){
+      m.position.set(tx(WARM_X),0,tz(WARM_Y));m.scale.setScalar(0.01);scene.add(m);
+      setTimeout(()=>{scene.remove(m);m.scale.setScalar(1);pool.push(m);},5000);
+    }},
   ()=>{   // มังกร 1 ตัวต่อผู้เล่นสายน้ำ (สูงสุด 3): ตัวที่ 2 สร้างกลางสู้ = ค้าง ~10 ms (OPTIMIZE §R)
     const v=VIEW.cur;let n=0;for(const p of (v&&v.P)||[]){const k=getKit(p.id);if(k&&PATHS[k.path]&&PATHS[k.path].id==='water')n++;}n=Math.min(3,Math.max(1,n));
     if(WDG.pool.length+WDG.live.length<n&&!WDG.warm){WDG.warm=1;const need=n-WDG.pool.length-WDG.live.length;

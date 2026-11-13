@@ -202,7 +202,7 @@ function fxAug(ev,H){if(!VFXAUG_ON&&ev.k!=='hit')return;
 const BF_EL={fire:1,storm:1,earth:1,ice:1},BF_CLS={pop:0.45,hit:0.6,impact:1,big:1.5};
 // ท่าที่ไม่อยู่ใน EFXAUG: [ธาตุ, s] (epunch ใช้จุดหมัด x2,y2)
 const BF_EXTRA={iceboom:['ice',1.2],glacier:['ice',1],slam3:['ice',1.3],gwave:['ice',1],
-  epunch:['earth',0.6],eslam:['earth',1.2],ecbslam:['earth',1.3],ecrush:['earth',1.2],epilland:['earth',1],ewland:['earth',1],eaugboom:['earth',1.3],
+  epunch:['earth',0.6],eslam:['earth',1.2],ecbslam:['earth',1.3],ecrush:['earth',1.2],ewland:['earth',1],eaugboom:['earth',1.3],
   esbhit:['earth',0.8],erhit:['earth',0.6],ewallup:['earth',0.8],estdbreak:['earth',1],ebreakw:['earth',0.8]};
 const BF={on:true,last:new Map()};
 function bfAfter(ev,H){if(!BF.on||ev.x===undefined||isNaN(ev.x))return;

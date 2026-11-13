@@ -240,8 +240,9 @@ function updatePlayer(p,dt,acting){
     const c=(inp.c&&inp.c[k])|0;
     if(c!==(p.last[k]|0)){pr[k]=true;p.last[k]=c;}
   }
-  if(pr.g&&PROPON&&p.alive&&!p.downed&&!p.gh)useProp(p);
-  if(G.mode==='siege')sgInput(p,pr,inp);   // G = ร่ายทำลายแกน (js/15-siege)
+  const cageBusy=waterCageBusy(p);
+  if(pr.g&&PROPON&&p.alive&&!p.downed&&!p.gh&&!cageBusy)useProp(p);
+  if(G.mode==='siege'&&!cageBusy)sgInput(p,pr,inp);   // G = ร่ายทำลายแกน (js/15-siege)
   for(const k of CDK)p.cd[k]=Math.max(0,p.cd[k]-dt*(p.ovc>0?1.3:1));
   p.stun=Math.max(0,p.stun-dt);p.inv=Math.max(0,p.inv-dt);tickStatus(p,dt);
   if(p.breath>0)p.breath-=dt;
@@ -284,7 +285,7 @@ function updatePlayer(p,dt,acting){
   if(p.wr?.ph==='throw')p.ang=p.wr.a;
 
   // ไม้กวาด: B ขึ้น/ลง — โดนสตันหรือใยแมงมุมจะตกจากไม้กวาด • โหมดโวลเดอมอร์ + FFA ไม่มีไม้กวาด (ผู้ใช้ 2026-10-27)
-  if(pr.b&&canAct&&!p.wr&&(!p.sdome||p.sdome.god)&&p.flyCd<=0&&!NOBROOM.has(G.mode)&&!p.wfo){
+  if(pr.b&&canAct&&!p.wr&&!cageBusy&&(!p.sdome||p.sdome.god)&&p.flyCd<=0&&!NOBROOM.has(G.mode)&&!p.wfo){
     p.fly=!p.fly;p.flyCd=0.8;
     if(p.fly){p.vz=7;p.shieldOn=false;p.dash=0;emit({k:'mount',x:p.x,y:p.y,h:p.z,id:p.id});}
     else emit({k:'dismount',x:p.x,y:p.y,h:p.z,id:p.id});
@@ -295,15 +296,16 @@ function updatePlayer(p,dt,acting){
   else if(p.colos>0){p.colH=clamp((p.colH||9)+((inp.jh?1:0)-(inp.ch?1:0))*6*dt,5,15);p.z+=(p.colH-p.z)*Math.min(1,9*dt);p.vz=0;}
   else if(p.dfall)dragonfallTick(p,inp,dt);
   else if(p.sdome){if(p.sdome.shot)gravity();stormDomeTick(p,inp,dt);}
-  else if(p.wr?.ph==='lift'||p.wr?.ph==='aim'){}   // หินยกตัวและค้างระดับระหว่างเล็ง
-  else if(p.wfw)windFlyZ(p,dt);   // สายลม Featherwing: บิน/ร่อนลง
+  else if(p.wr?.ph==='lift'||p.wr?.ph==='aim'||(p.wr?.ph==='throw'&&p.wr.t<E_WRS.wind)){}   // ค้างระดับจนเสาหลุดมือ
+  else if(p.wfw&&(p.wfw.ph!=='glide'||p.wfw.up!==undefined||windGliding(p)))windFlyZ(p,dt);
   else if(p.wsk>0)windSinkZ(p,dt);   // Wind Push (บิน): จมดิน
   else if(p.wflt>0)windFloatZ(p,dt);   // Windup / Wind Push (พื้น): ลอยค้าง
   else gravity();
   if(p.boltDown>0){const gz=groundH(p.x,p.y,p.z);if(p.z>gz){p.z=Math.max(gz,p.z-11*dt);p.vz=Math.min(p.vz||0,0);}}   // lightning bow: cannot climb while shocked
+  if(p.wfw)windLandCheck(p);
 
   // โล่
-  const wantSh=canAct&&!p.fly&&G.mode!=='imp'&&!(G.ball&&G.ball.holder===p.id)&&inp.sh&&p.shieldBroken<=0&&p.shieldE>5&&p.dash<=0&&!p.natureHook&&!p.dchgOn&&!(p.colos>0)&&!(p.cryo>0)&&!p.dfall&&p.pathIdx!==2&&!p.aug&&!p.ramp&&!p.wr&&!(p.wsbL>0)&&!p.wwAim;
+  const wantSh=canAct&&!p.fly&&!cageBusy&&G.mode!=='imp'&&!(G.ball&&G.ball.holder===p.id)&&inp.sh&&p.shieldBroken<=0&&p.shieldE>5&&p.dash<=0&&!p.natureHook&&!p.dchgOn&&!(p.colos>0)&&!(p.cryo>0)&&!p.dfall&&p.pathIdx!==2&&!p.aug&&!p.ramp&&!p.wr&&!(p.wsbL>0)&&!p.wwAim;
   if(wantSh&&!p.shieldOn){p.shieldOn=true;p.shieldT=G.time;p.shBlk=0;p.shPar=0;}
   if(!wantSh)p.shieldOn=false;
   if(p.shieldOn){p.shieldE-=12*dt*((PBASIC[p.pathIdx|0]||{}).shDrain||1);if(p.shieldE<=0)breakShield(p);}
@@ -333,12 +335,13 @@ function updatePlayer(p,dt,acting){
   if(p.natureHook&&!canAct)p.natureHook=null;
   if(p.natureHook&&natureHookMove(p,dt)){p.wSpd=0;p.vx=p.vy=0;}
   else if(p.dash>0){
+    const dashDt=p.wfw?.takeoff?Math.min(dt,p.dash):dt;
     p.dash-=dt;const ds=p.dashSp||900;
     // ก้าวย่อย ≤8 หน่วย + ชนโลกทุกก้าว: กันพุ่งทะลุผนังบ้านบาง (ก้าวเดียวอาจยาว 30+ หน่วย)
-    const ns=Math.max(1,Math.ceil(ds*dt/8)),sk=ds*dt/ns;
+    const ns=Math.max(1,Math.ceil(ds*dashDt/8)),sk=ds*dashDt/ns;
     for(let i=0;i<ns;i++){p.x+=p.dashX*sk;p.y+=p.dashY*sk;if(!p.gh)collideWorld(p,PR,p.z);}
     if(p.trail){p.trail.acc-=dt;if(p.trail.acc<=0){p.trail.acc=0.045;addZone({x:p.x,y:p.y,r:44,t:2.5,tick:0.5,owner:p.id,team:p.team,kind:'fire',hit(t,z){damage(t,2,z.owner,'zone');ignite(t,z.owner,1);}});}}
-    if(p.dash<=0){p.dashSp=0;p.trail=null;}
+    if(p.dash<=1e-6){p.dash=0;p.dashSp=0;p.trail=null;if(p.wfw?.takeoff)p.wfw.takeoff=false;}
   }
   else if(p.slideT>0||p.slip>0){
     // ลื่น: ความเร็วค่อยๆ ตามทิศที่กด หยุดทันทีไม่ได้
@@ -363,6 +366,7 @@ function updatePlayer(p,dt,acting){
     p.z=terrMove(p,ox0,oy0,p.z,onG0);
     const gh=groundH(p.x,p.y,p.z);if(gh>p.z+TSTEP){p.x=ox0;p.y=oy0;p.z=oz0;}else if(gh>p.z){p.z=gh;p.vz=0;if(p.slam)frostSlam(p);}
   }
+  if(cageBusy)return;
   if(G.mode==='imp'){if(acting)impActions(p,pr,inp,dt);return;}
   // ควิดดิช: ถือบอลอยู่ = คลิกซ้ายเพื่อโยน (ร่ายเวทไม่ได้)
   if(G.ball&&G.ball.holder===p.id){if(canAct&&inp.fire&&!p.fireHeld)quidThrow(p);p.fireHeld=inp.fire;return;}

@@ -68,11 +68,14 @@ function fxAnchor(I){const o=I.o;if(o.follow==null)return;const P=PM3.get(o.foll
 function fxBase(I,att){switch(att){case 'ground':return [I.x,I.y,I.o.gh!==undefined?I.o.gh:0];case 'feet':return [I.x,I.y,I.fz];case 'chest':return [I.x,I.y,I.fz+1.2];case 'head':return [I.x,I.y,I.fz+1.9];
   case 'wand':return I.wand?I.wand.slice():[I.x,I.y,I.fz+1.3];default:return [I.x,I.y,I.h];}}
 // local [x,y,z] เมตร → [simX, simY, h]
-function fxLocal(I,b,p){const c=Math.cos(I.a),s=Math.sin(I.a);return [b[0]+(c*p[2]-s*p[0])*20,b[1]+(s*p[2]+c*p[0])*20,b[2]+p[1]];}
-function fxDir(I,d){const c=Math.cos(I.a),s=Math.sin(I.a);return [(c*d[2]-s*d[0])*20,(s*d[2]+c*d[0])*20,d[1]];}
+function fxLocal(I,b,p,pivot=0){const d=fxDir(I,[p[0],p[1]-pivot,p[2]]),x=b[0]+d[0],y=b[1]+d[1];
+  return [x,y,b[2]+d[2]+pivot+(I.o.pivotY!==undefined?GY(b[0],b[1])-GY(x,y):0)];}
+function fxDir(I,d){const c=Math.cos(I.a),s=Math.sin(I.a),pt=I.o.aimPitch;
+  let y=d[1],z=d[2];if(pt){const cp=Math.cos(pt),sp=Math.sin(pt);y=d[1]*cp+d[2]*sp;z=d[2]*cp-d[1]*sp;}
+  return [(c*z-s*d[0])*20,(s*z+c*d[0])*20,y];}
 function fxYawV(v,yw){if(!yw)return v;const c=Math.cos(yw),s=Math.sin(yw);return [v[0]*c+v[2]*s,v[1],-v[0]*s+v[2]*c];}
-function fxPos(I,S,k){const L=S.d,p=fxV(fxG(L,'pos'),I,k)||[0,0,0],sc=I.s;return fxLocal(I,fxBase(I,fxG(L,'att')),[p[0]*sc,p[1]*sc,p[2]*sc]);}
-function fxPlace(obj,I,S,w,yaw){obj.position.set(tx(w[0]),w[2]+GY(w[0],w[1]),tz(w[1]));const a=I.a+(yaw||0);obj.rotation.order='YXZ';obj.rotation.y=Math.atan2(Math.cos(a),Math.sin(a));obj.rotation.x=I.pitch||0;}
+function fxPos(I,S,k){const L=S.d,p=fxV(fxG(L,'pos'),I,k)||[0,0,0],sc=I.s;return fxLocal(I,fxBase(I,fxG(L,'att')),[p[0]*sc,p[1]*sc,p[2]*sc],I.o.pivotY||0);}
+function fxPlace(obj,I,S,w,yaw){obj.position.set(tx(w[0]),w[2]+GY(w[0],w[1]),tz(w[1]));const a=I.a+(yaw||0);obj.rotation.order='YXZ';obj.rotation.y=Math.atan2(Math.cos(a),Math.sin(a));obj.rotation.x=(I.pitch||0)-(I.o.aimPitch||0);}
 // ---------- เล่น / หยุด ----------
 function fxPlay(name,o){if(!FXR.ready||!FXR.on)return null;const d=fxData(name);if(!d){FXR.stat.miss++;return null;}return fxStart(d,o,name);}
 function fxStart(F,o,name){o=o||{};if(!FXR.ready||!F||!Array.isArray(F.layers))return null;if(o.x===undefined||o.y===undefined||isNaN(o.x))return null;
@@ -81,7 +84,7 @@ function fxStart(F,o,name){o=o||{};if(!FXR.ready||!F||!Array.isArray(F.layers))r
   I.P=Object.assign({s:I.s,k:I.k},o.ev?{ev:o.ev}:{});for(const pk in (F.params||{}))I.P[pk]=F.params[pk].def!==undefined?F.params[pk].def:0;
   if(o.p)for(const pk in o.p){const v=o.p[pk];I.P[pk]=typeof v==='string'?fxEval(v,I):v;}
   if(o.follow!=null)fxAnchor(I);
-  if(o.follow==null)I.fz=0;
+  if(o.follow==null)I.fz=o.feetH||0;
   for(const d of F.layers)if(d&&d.t&&FXR.def[d.t]&&!d.mute)I.L.push({d,st:0,obj:null});
   FXR.inst.push(I);FXR.stat.play++;return I;}
 function fxStop(I){if(!I||I.stop)return;I.stop=true;I.stopT=I.t;for(const c of I.kids)fxStop(c);}

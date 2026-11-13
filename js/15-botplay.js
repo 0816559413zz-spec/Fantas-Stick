@@ -97,7 +97,9 @@ function botWindPlan(p,t,{i,dist,ux,uy,hp,slot,ready,press,cast,see}){
     return;
   }
   const air=windAir(p),fly=p.wfw;
-  const range=air?W_FW.fbRange:WNV.baRange,volley=slot('windrift');
+  const glide=fly?.orbGlide&&p.wbAmmo>0&&see&&dist<W_FW.fbRange;
+  if(glide)i.jh=1;
+  const range=air||glide?W_FW.fbRange:WNV.baRange,volley=slot('windrift');
   const controlled=(G.wdb||[]).find(o=>o.team===p.team&&natureDist(o,t)<=W_WL.dbR+(t.r||PR));
   const waiting=controlled&&controlled.t<W_WL.dbTele;
   const lowShot=air&&i.ah<p.z-2.5&&dist<480;

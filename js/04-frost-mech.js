@@ -1,11 +1,17 @@
 // ---------- สายน้ำแข็ง: ประชิด/ไกล (V) • ฟันดาบ/ขวาน • ไถลน้ำแข็ง • พื้นน้ำแข็ง/ภูเขาน้ำแข็ง ----------
 // ตัวเลขพื้นฐานของสายน้ำแข็งอยู่ใน FROSTV + v:{...} ของแต่ละสกิล (js/07) — ปรับได้ใน tune.html / F8
-const FROSTV=PATHS[1].v={icicleDmg:7,icicleCd:0.3,icicleSlow:10,c1:10,c2:10,c3:15,meleeR:120,swingCd:0.4,swing3Cd:0.85,swingShCd:0.6,heal3:10,slamDmg:30,slamR:150,slamCd:0.6,
+const FROSTV=PATHS[1].v={icicleDmg:7,icicleCd:0.3,icicleSlow:10,c1:10,c2:10,c3:15,meleeR:120,swingCd:0.46,swing3Cd:0.93,swingShCd:0.66,heal3:10,slamDmg:30,slamR:150,slamCd:0.6,
   slideT:5,slideCd:11,slowMax:30,slowT:3,slowPath:10,ripT:1.5};
 PATHS[1].vn={icicleDmg:'แท่งน้ำแข็ง (ไกล) • ดาเมจ',icicleCd:'แท่งน้ำแข็ง • เว้นยิง (วิ)',icicleSlow:'แท่งน้ำแข็ง • สลอว์ต่อนัด (%)',c1:'ดาบ • ดาเมจจังหวะ 1',c2:'ดาบ • ดาเมจจังหวะ 2',c3:'ดาบ • ดาเมจจังหวะ 3',meleeR:'ดาบ • ระยะฟัน',
   swingCd:'ดาบ • เว้นฟัน (วิ)',swing3Cd:'ดาบ • เว้นหลังจังหวะ 3 (วิ)',swingShCd:'ดาบ • เว้นฟันตอนยกโล่ (วิ)',heal3:'ดาบ • ฮีลจังหวะ 3',slamDmg:'กระโดดฟาดจากที่สูง • ดาเมจ',slamR:'กระโดดฟาด • รัศมี',slamCd:'กระโดดฟาด • เว้น (วิ)',
   slideT:'ไถลน้ำแข็ง (พุ่ง) • นาน (วิ)',slideCd:'ไถลน้ำแข็ง • คูลดาวน์ (วิ)',slowMax:'สลอว์สะสมสูงสุด (%)',slowT:'สลอว์อยู่นาน (วิ)',slowPath:'ยืนบนทางน้ำแข็ง • สลอว์ (%)',ripT:'Parry • จังหวะ 3 พร้อมใช้ (วิ)'};
 SPELLS.iceboulder={id:'iceboulder',hit(pr,t){}};
+const FROST_SWING3_HIT=0.36;
+function frostShieldPitch(p){
+  const i=p.inp,dist=Math.hypot(i?.ax-p.x,i?.ay-p.y);
+  const pitch=dist>1&&Number.isFinite(i.ah)?Math.atan2((i.ah-p.z-1.2)*20,dist):i?.ap||0;
+  return clamp(pitch,-0.55,1.5);
+}
 function frostBoom(pr){
   const V=FROSTF.v;emit({k:'efx',z:'iceboom',x:pr.x,y:pr.y,h:pr.h,r:V.r});
   const o=G.players[pr.owner];if(!o)return;
@@ -41,7 +47,7 @@ function frostBasic(p,inp,dt,setCd){
   if(p.z>4){p.slam=true;p.vz=5;p.vx+=Math.cos(p.ang)*420;p.vy+=Math.sin(p.ang)*420;setCd('basic',FROSTV.slamCd);emit({k:'efx',z:'slamgo',x:p.x,y:p.y,h:p.z+1,id:p.id});return;}
   let ci=p.cmbT>0?(p.cmbN|0):0;if(p.ripT>0){ci=2;p.ripT=0;}
   const FV=FROSTF.v,D=ff?[FV.a1,FV.a2,FV.a3]:[FROSTV.c1,FROSTV.c2,FROSTV.c3],R=ff?FV.axeR:FROSTV.meleeR;
-  if(ci===2){p.slam3={t:0.32,R,dm:D[2],ff};}
+  if(ci===2){p.slam3={t:FROST_SWING3_HIT,R,dm:D[2],ff};}
   else{meleeHit(p,p.x,p.y,R,D[ci],1.0);
   if(p.mirror>0)for(const s of [-1,1]){const q=mirrorPos(p,s);meleeHit(p,q.x,q.y,R,D[ci]*MIRROR.v.clone,1.0);}}
   p.cmbN=(ci+1)%3;p.cmbT=1;p.swN=((p.swN|0)+1)%250;p.swC=ci;

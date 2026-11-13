@@ -188,8 +188,8 @@ function eAim(p,rg){const R=rg||350;let a=p.a;
   if(p.id===NET.myId){if(INPUT.gx>=0){const dx=INPUT.gx-p.x,dy=INPUT.gy-p.y,d=Math.hypot(dx,dy)||1,k=rg?Math.min(1,rg/d):1;return {x:p.x+dx*k,y:p.y+dy*k};}if(INPUT.ax||INPUT.ay)a=Math.atan2(INPUT.ay-p.y,INPUT.ax-p.x);}
   return {x:p.x+Math.cos(a)*R,y:p.y+Math.sin(a)*R};}
 // ---------- วงเตือนบนพื้น (BA ชาร์จ / จุดปาเสา): วงเข้มก่อน แล้วสีอ่อนค่อย ๆ เติมเต็มวง ----------
-function makeWarn(){const g=new THREE.Group(),dk=new THREE.MeshBasicMaterial({color:'#2a1a0c',transparent:true,opacity:0.45,depthWrite:false}),
-  lt=new THREE.MeshBasicMaterial({color:hdr('#ffcf6a',1.2),transparent:true,opacity:0.35,depthWrite:false,blending:THREE.AdditiveBlending}),
+function makeWarn(fill=1){const g=new THREE.Group(),dk=new THREE.MeshBasicMaterial({color:'#2a1a0c',transparent:true,opacity:0.45*fill,depthWrite:false}),
+  lt=new THREE.MeshBasicMaterial({color:hdr('#ffcf6a',1.2),transparent:true,opacity:0.35*fill,depthWrite:false,blending:THREE.AdditiveBlending}),
   rim=new THREE.MeshBasicMaterial({color:hdr('#ffb04a',1.6),transparent:true,opacity:0.9,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide});
   const d=new THREE.Mesh(new THREE.CircleGeometry(1,48),dk),f=new THREE.Mesh(new THREE.CircleGeometry(1,48),lt),r=new THREE.Mesh(new THREE.RingGeometry(0.95,1,64),rim);
   for(const m of [d,f,r])m.rotation.x=-Math.PI/2;d.position.y=0.03;f.position.y=0.05;r.position.y=0.06;g.add(d,f,r);scene.add(g);g.userData={f,r};return g;}
@@ -282,7 +282,7 @@ function eFistPlayerPose(o,aim,weight){
   o.eFistBend=(.10+.90*fold)*(1-punch)*weight;
   o.eFistLeft=left;
 }
-function eWrathPillarDir(yaw){return eStoneDir(yaw,-1.45);}
+function eWrathPillarDir(yaw,pitch=-1.45){return eStoneDir(yaw,pitch);}
 function eWrathBoostRock(s,p,A,z0){
   const [age,,,,,,,base]=A[13],phase=A[3],V=E_WRS;
   if(phase===2||phase===1&&age>.50){if(s.wrRock)s.wrRock.visible=false;return;}
@@ -312,33 +312,74 @@ function eWrathStand(s,S,p,A,t,z0){
   const [age,x,y,ox,oy,oh,yaw]=A[13],V=E_WRS,phase=A[3],throwing=phase===2;
   const drop=throwing?clamp((age-V.wind)/V.drop,0,1):0;
   const rest=throwing?eFistEase((age-V.wind-V.drop)/V.settle):0;
-  const swing=throwing?eFistEase((age-V.wind+.03)/.20):0,c=Math.cos(yaw),q=Math.sin(yaw);
+  const drawT=Math.max(.01,V.wind-WRATH_THROW_SWING_T);
+  const drawBack=throwing?eFistEase(age/drawT)*(1-eFistEase((age-drawT)/Math.max(.01,V.wind-drawT))):0;
+  const swing=throwing?eFistEase((age-drawT)/Math.max(.01,V.wind-drawT)):0,c=Math.cos(yaw),q=Math.sin(yaw);
+  const follow=throwing?eFistEase((age-V.wind)/V.drop):0;
+  const flight=throwing?earthWrathFlightAngles(x,y,ox,oy,oh,yaw):null;
   const load=phase===3?eFistEase(age/V.charge):1;
-  S.g.position.copy(eW(ox-c*26-q*70,oy-q*26+c*70,(throwing?oh:z0)-2.6-.85*(1-load)-3*rest));
+  S.g.position.copy(eW(ox-c*26-q*70,oy-q*26+c*70,(throwing?oh:z0)-2.6-.85*(1-load)));
   S.g.scale.setScalar(2.6);
   S.g.rotation.set(0,Math.PI/2-yaw,0);
   standPose(S,{t,throwK:swing});
+  // หลังปล่อยให้ค้างปลายท่าไว้ตลอดการจาง แม้โมเดลเสาที่กำลังบินถูกซ่อนแล้ว
+  if(throwing&&s.wrReleased)S.body.position.y=s.wrReleaseY;
+  S.body.rotation.x+=.39*swing-.19*drawBack+.10*follow;
+  S.body.rotation.y+=.48*drawBack-.38*swing-.12*follow;
+  S.body.rotation.z-=.12*drawBack-.15*swing-.035*follow;
+  S.head.rotation.y=-S.body.rotation.y*.58;
+  S.L.up.rotation.x+=.98*swing;
+  S.L.up.rotation.z+=.23*drawBack;
+  // ใช้เวลาเส้นเดียวตั้งแต่หินเริ่มดันจนง้างเสร็จหลังถึงยอด
+  const airborne=phase===4?age:phase===1?V.lift+age:0;
+  const carry=throwing?0:1-eFistEase((airborne-.07)/(V.lift+WRATH_READY_T-.07));
+  if(carry>0){
+    const brace=Math.sin(Math.PI*eFistEase(airborne/V.lift));
+    S.L.up.rotation.x=lerp(S.L.up.rotation.x,-.70-1.18*brace,carry);
+    S.L.up.rotation.z=lerp(S.L.up.rotation.z,.43+.28*brace,carry);
+    S.L.fo.rotation.x=lerp(S.L.fo.rotation.x,-.73,carry);
+    S.body.rotation.set(lerp(S.body.rotation.x,.26-.46*brace,carry),lerp(S.body.rotation.y,-.10,carry),-.13*brace*carry);
+    S.head.rotation.x=-.29*brace*carry;
+  }
   if(!s.pil){s.pil=makePillar();scene.add(s.pil);}
   const P=s.pil;
   P.visible=drop<1;
+  if(!throwing)s.wrReleased=false;
+  // ท่าแขนขวาเดินแยกจากการแสดงผลเสา เพื่อให้ค้างท่าส่งแรงได้ถึงเฟรมสุดท้าย
+  const grip=new THREE.Vector3(lerp(1.36,1.52,carry),lerp(3.69,1.73,carry),lerp(-1.03,.56,carry));
+  grip.y=lerp(grip.y,2.86,swing)+.10*drawBack-.12*follow;
+  grip.z=lerp(grip.z,1.83,swing)-.17*drawBack+.16*follow;
+  const pole=new THREE.Vector3(q,-.45,-c);
+  eArmIK(S.R,S.body.localToWorld(grip),pole.normalize());
   if(P.visible){
-    if(!throwing||drop===0||!s.wrFrom){
+    if(!throwing||!s.wrReleased){
       S.R.fist.getWorldPosition(P.position);
-      P.lookAt(eW(x,y,0));P.translateZ(1.2);
+      // เสาหมุนรอบมือขวาในระนาบด้านข้าง; ค่อยหันเข้าแนวปล่อยหลังเหวี่ยงแขน
+      const sideYaw=yaw-.12,[aimYaw,pitch]=flight||[sideYaw,-.27];
+      const dir=eStoneDir(sideYaw+angDiff(aimYaw,sideYaw)*swing,lerp(lerp(-.08,1.08,carry)+.09*drawBack,pitch,swing));
+      P.lookAt(P.position.clone().add(dir));P.translateZ(1.2);
       (s.wrFrom||(s.wrFrom=new THREE.Vector3())).copy(P.position);
     }
     if(drop>0){
-      const planted=eW(x,y,0).addScaledVector(eWrathPillarDir(yaw),-3.45),start=s.wrFrom;
-      const k=drop**1.45;
-      P.position.copy(start).lerp(planted,k);P.position.y+=1.0*Math.sin(Math.PI*k);
-      const span=planted.clone().sub(start),pitch=Math.atan2(span.y,Math.hypot(span.x,span.z));
-      P.lookAt(P.position.clone().add(eStoneDir(yaw,lerp(pitch,-1.45,eFistEase((drop-.53)/.47)))));
+      const dir=eWrathPillarDir(...flight),planted=eW(x,y,0).addScaledVector(dir,-3.45),start=s.wrFrom;
+      if(!s.wrReleased){
+        s.wrReleased=true;
+        s.wrReleaseY=S.body.position.y;
+        const hand=S.R.fist.getWorldPosition(new THREE.Vector3());
+        eAirWave(hand,dir,2.45,'#ffd6a4',.96,.68);
+        const q=simOf(hand);
+        if(nearMe(q.x,q.y,1100))snd('whoosh',{x:q.x,y:q.y,vol:.87});
+        if(p.id===NET.myId)shake(2.0);
+      }
+      P.position.copy(start).lerp(planted,drop);
+      P.lookAt(P.position.clone().add(dir));
     }
   }
   if(phase===1&&p.id===NET.myId||throwing&&drop<1){
-    if(!s.wrWarn)s.wrWarn=makeWarn();
-    eWarnAt(s.wrWarn,x,y,V.r,phase===1?.065:.10+.75*drop);
-    s.wrWarn.userData.r.material.opacity*=.56;
+    if(!s.wrWarn)s.wrWarn=makeWarn(.56);
+    const progress=throwing?clamp(age/(V.wind+V.drop),0,1):0;
+    eWarnAt(s.wrWarn,x,y,V.r,phase===1?.065:lerp(.16,.96,progress));
+    s.wrWarn.userData.r.material.opacity*=throwing?.55:.30;
   }else if(s.wrWarn)s.wrWarn.visible=false;
   return load*(1-rest);
 }
@@ -346,7 +387,7 @@ function eWrathPlayerPose(o,A){
   const V=E_WRS,age=A[13][0],phase=A[3],throwing=phase===2;
   const load=phase===3?eFistEase(age/V.charge):1;
   const rise=phase===4?eFistEase(age/V.lift):0;
-  const cast=throwing?eFistEase((age-.045)/.19):0;
+  const cast=throwing?eFistEase((age-Math.max(.01,V.wind-WRATH_THROW_SWING_T))/WRATH_THROW_SWING_T):0;
   const weight=load*(throwing?1-eFistEase((age-V.wind-V.drop)/V.settle):1);
   const R=o.armR.rotation,L=o.armL.rotation;
   R.x=lerp(R.x,phase===3?-.68:phase===4?lerp(-.68,-2.45,rise):lerp(-2.45,-1.34,cast),weight);
@@ -474,11 +515,29 @@ function makeDrill(){const g=new THREE.Group(),m=new THREE.MeshStandardMaterial(
 function drillHeat(d,tier,t){const U=d.userData;
   U.m.emissiveIntensity=tier<=1?0:tier===2?0.85+0.1*Math.sin(t*20):1.9+0.25*Math.sin(t*25);U.wm.opacity=tier<=1?0.2:tier===2?0.28:0.35;}
 // ---------- เสายักษ์ (ref: designs/earth_ref/pillar_ref.png): เสาเหลี่ยมยาว ปลายหนึ่งแหลม อีกปลายมีก้อนหินเกาะ • น้ำตาลเข้ม เหลือง-ดำ • ปลายแหลมชี้ +z ----------
+function ePillarVeins(){
+  if(ETEX.pillarVeins)return ETEX.pillarVeins;
+  const base=eTex('pillar'),col=document.createElement('canvas'),relief=document.createElement('canvas');
+  col.width=relief.width=256;col.height=relief.height=256;
+  const c=col.getContext('2d'),r=relief.getContext('2d');
+  c.drawImage(base.image,0,0,256,256);r.fillStyle='#555';r.fillRect(0,0,256,256);
+  for(let face=0;face<4;face++){
+    const x=face*64+25;
+    for(const [ctx,color,width,dx] of [[c,'#4c2e17',8,0],[c,'#aa7633',4,0],[c,'#d8ab62',1,-1],[r,'#999',8,0],[r,'#ccc',3,0]]){
+      ctx.beginPath();ctx.strokeStyle=color;ctx.lineWidth=width;ctx.lineCap='round';
+      ctx.moveTo(x+dx-7,24+face*5);ctx.lineTo(x+dx+3,72);ctx.lineTo(x+dx-4,106);
+      ctx.lineTo(x+dx+6,151);ctx.lineTo(x+dx+3,211+face*4);ctx.stroke();
+    }
+  }
+  const map=new THREE.CanvasTexture(col),bumpMap=new THREE.CanvasTexture(relief);
+  map.colorSpace=THREE.SRGBColorSpace;map.userData.keep=bumpMap.userData.keep=true;
+  return ETEX.pillarVeins={map,bumpMap};
+}
 function makePillar(){const g=new THREE.Group(),m=eTMat('pillar');m.userData.keep=false;
-  const col=new THREE.Mesh(new THREE.CylinderGeometry(0.85,0.95,7,4,1),m);col.rotation.x=Math.PI/2;col.rotation.y=Math.PI/4;col.castShadow=true;g.add(col);
+  const veins=ePillarVeins(),shaft=m.clone();shaft.map=veins.map;shaft.bumpMap=veins.bumpMap;shaft.bumpScale=.095;
+  const col=new THREE.Mesh(new THREE.CylinderGeometry(0.85,0.95,7,4,1),shaft);col.rotation.x=Math.PI/2;col.rotation.y=Math.PI/4;col.castShadow=true;g.add(col);
   const tip=new THREE.Mesh(new THREE.ConeGeometry(0.85,2.2,4),m);tip.rotation.x=Math.PI/2;tip.rotation.y=Math.PI/4;tip.position.z=4.6;g.add(tip);
   for(let i=0;i<8;i++){const r=new THREE.Mesh(rockGeo(rnd(0.7,1.3),rnd(0.6,1.1),rnd(0.7,1.3),0.15),eTMat('pillar','#8a7458'));r.position.set(rnd(-0.9,0.9),rnd(-0.9,0.9),-3.6+rnd(-0.6,0.5));r.rotation.set(rnd(0,3),rnd(0,3),rnd(0,3));r.castShadow=true;g.add(r);}
-  for(let i=0;i<5;i++){const c=new THREE.Mesh(new THREE.BoxGeometry(0.05,0.05,rnd(1.5,3)),new THREE.MeshBasicMaterial({color:hdr('#ffb83a',1.3)}));c.position.set(rnd(-0.6,0.6)>0?0.88:-0.88,rnd(-0.6,0.6),rnd(-2.5,2.5));g.add(c);}
   return g;}
 // ---------- กระสุนหิน ----------
 let _eFistM;
@@ -653,7 +712,7 @@ function eMakeSO(w){const k=w[1],x1=w[2],y1=w[3],x2=w[4],y2=w[5],r=w[6],g=new TH
     for(let i=0;i<n*2;i++){const sd=i%2?1:-1,c=rockMesh(rnd(0.6,1.25),rnd(0.5,1.05),rnd(0.6,1.25),0.18,2,dk);c.position.set(sd*(W/2+rnd(0.05,0.5)),rnd(0.1,0.35),-L/2+rnd(0,L));c.rotation.y=rnd(0,3);c.castShadow=true;g.add(c);}
     g.rotation.y=eYaw(x1,y1,x2,y2);}
   else if(k===1){   // เสาอัลติ: ปักเอียงตามทิศที่ตก (ทิศเก็บใน x1,y1 → x2,y2)
-    mat=null;const P=makePillar(),a=Math.atan2(y2-y1,x2-x1),d=eWrathPillarDir(a);
+    mat=null;const P=makePillar(),d=eWrathPillarDir(...(w[10]||[Math.atan2(y2-y1,x2-x1)]));
     P.position.copy(d.clone().multiplyScalar(-3.45));P.lookAt(P.position.clone().add(d));g.add(P);P.traverse(q=>{if(q.isMesh)q.castShadow=true;});h=7;}
   else if(k===2){   // เนินดิน Terra Auger: โดมดินเตี้ย ๆ เดินข้ามได้ (สูง = รัศมี × 0.032 ตรงกับ groundH) + ก้อนหินเล็กรอบ ๆ
     mat=eTMat('wall','#9a8262');const R=r*S3;h=r*0.032;const d=new THREE.Mesh(new THREE.SphereGeometry(R,18,6,0,Math.PI*2,0,Math.PI/2),mat);d.scale.y=h/R;d.castShadow=d.receiveShadow=true;g.add(d);
@@ -728,7 +787,7 @@ function eDebris(x,y,h,n,sp){burst(x,y,'#7a6446',n,sp||200,0.9,3.2,{h:h||0.3,vh:
 // คลื่นกระแทก (วงสว่างขยายเร็ว + วงฝุ่น) — ใช้ตอนต่อย/ทุบ/ปา
 function eWave(x,y,h,r,col){ring(x,y,col||'#ffe0a0',r,0.35,h||0.2);later(0.06,()=>ring(x,y,ECOL.dust,r*1.25,0.5,(h||0.2)+0.05));SHAPES_Q.push({k:'ringv',x,y,h:(h||0.2)+1.2,col:col||'#fff0c8',s1:r*S3*0.5,life:0.25,op:0.6});}
 // คลื่นกระแทกกลางอากาศ (แผ่นวงหันตามทิศปา)
-function eAirWave(pos,dir,sc,col,op){const O=op||0.6,m=new THREE.Mesh(new THREE.RingGeometry(0.6,1,48),new THREE.MeshBasicMaterial({color:hdr(col||'#ffe2a0',1.1),transparent:true,opacity:O,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide}));
+function eAirWave(pos,dir,sc,col,op,inner=.6){const O=op||0.6,m=new THREE.Mesh(new THREE.RingGeometry(inner,1,48),new THREE.MeshBasicMaterial({color:hdr(col||'#ffe2a0',1.1),transparent:true,opacity:O,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide}));
   m.position.copy(pos);m.lookAt(pos.clone().add(dir));scene.add(m);eAnim({g:m,life:0.3,fn(a){const k=a.t/0.3;m.scale.setScalar((0.5+k*3.5)*(sc||1));m.material.opacity=O*(1-k);}});}
 // ระเบิดตอนหมัดโดนกลางแผ่นหิน: แฟลชขาว + ลูกไฟส้ม + คลื่นกระแทกวงใหญ่ (หน้า/หลังแผ่น) + ประกายพุ่งรอบ + เศษหินกระเด็นจากขอบแผ่น + จอสั่น
 function esbImpact(x,y,h,a,pt,mine){const P=eW(x,y,h),q={x,y},d=eStoneDir(a,pt);
@@ -831,21 +890,11 @@ function earthEfx(ev){
       smoke(x,y,H+.15,11,ECOL.dust,.84,7,145);
       if(near){snd('break',ev);snd('whoosh',{x,y,vol:.66});}
       if(mine)shake(1.8);return true;}
-    case 'epilthrow':{
-      later(E_WRS.wind,()=>{
-        const from=EV.st.get(ev.id)?.wrFrom;if(!from)return;
-        const dir=eW(ev.x2,ev.y2,0).sub(from).normalize();
-        eAirWave(from,dir,1.0,'#d9ae76',.44);
-        if(near)snd('whoosh',{x,y,vol:.78});
-      });
-      return true;}
+    case 'epilthrow':return true;
     case 'epilland':{
-      eDebris(x,y,.35,42,300);dfCracks(x,y,.05,300,'#d8a060',1.4);
-      ring(x,y,'#d6a476',260,.32,.18);
-      later(.09,()=>ring(x,y,'#ae8054',390,.58,.14));
-      eChunks(x,y,.5,18,390,9,.35);FX.flashLight(x,y,1.6,'#ffbe7d',1.6,14,.19);
-      for(let i=0;i<15;i++){const a=rnd(0,6.283),r=rnd(40,260);smoke(x+Math.cos(a)*r,y+Math.sin(a)*r,rnd(.3,2),1,i%2?ECOL.dust:'#c9b38c',rnd(2,3.4),rnd(9,15),30);}
-      shake(near?2:.3);if(near){snd('boom',ev);snd('break',ev);}return true;}
+      dfCracks(x,y,.05,300,'#d8a060',1.4);
+      ring(x,y,'#d6a476',380,.39,.18);
+      shake(near?2:.3);if(near)snd('break',ev);return true;}
     // หินแหลมในบึง Wrath (ผู้ใช้ 2026-11-01): วงเตือนที่พื้น 0.5 วิ → หินแหลมพุ่งขึ้น 3 แท่ง + เศษหิน
     case 'espkw':ring(x,y,'#e0b070',55,0.5,0.08);ring(x,y,'#7a5a38',38,0.5,0.06);return true;
     case 'espk':eSpikes(x,y,22,4);eDebris(x,y,0.2,14,120);eWave(x,y,0.15,70);if(near)snd('boom',ev);return true;
@@ -937,6 +986,6 @@ function drawEarthHud(x,y,A,me){
     for(const m of [2/4.5,1]){const a=-Math.PI/2+m*Math.PI*2;cx.fillStyle='#fff';cx.fillRect(x+Math.cos(a)*40-2,y+Math.sin(a)*40-2,4,4);}
     txt('Terra Auger ระดับ '+tier,'#ffd86b');}
   // อัลติ Wrath: เวลาเหลือเป็นแถบ (บนฟ้า 5 วิ / สว่าน 10 วิ) • สว่านเหลือ = เม็ดเพชร 5 เม็ด
-  if(A[3]===1){txt('🗿 คลิกซ้ายยืนยันจุดทุ่มเสา','#ffd86b');bar(eSmooth('wsky',A[5])/E_WRS.aimT,'#e8a040');}
+  if(A[3]===1&&A[13]?.[0]>=WRATH_READY_T){txt('🗿 คลิกซ้ายยืนยันจุดทุ่มเสา','#ffd86b');bar(eSmooth('wsky',A[5])/E_WRS.aimT,'#e8a040');}
   if(A[8])txt('กดซ้ำ = Crush','#ffc27a');   // ช่องคาถามีเส้นเวลารอบขอบอยู่แล้ว → เหลือคำใบ้สั้น ๆ
 }

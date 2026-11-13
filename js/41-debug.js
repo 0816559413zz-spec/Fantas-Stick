@@ -41,7 +41,7 @@ function botBrain(p,dt,tg0){
   // บอทสายฟ้า: เข้าประชิด ยิงลำค้าง (ปล่อยแว้บเพื่อฟาดสามเหลี่ยม) Dash ทะลุ เปิดโล่ตอนเลือดน้อย
   if(p.pathIdx===2){const w=d>(p.god>0?150:240)?1:0;inp.mx=Math.cos(ang)*w+Math.cos(ang+Math.PI/2)*st*0.5;inp.my=Math.sin(ang)*w+Math.sin(ang+Math.PI/2)*st*0.5;
     inp.fire=d<(p.god>0?190:320)?(p.emp?(Math.floor(G.time*8)%2):1):0;
-    if((p.dch||0)>=1&&d<260&&Math.random()<dt*(p.ai?2.5:0.8))press('sp');inp.sh=p.hp<p.maxHp*0.5&&!p.stS&&!(p.stCd>0)&&Math.random()<0.05;}
+    if(!p.ai&&(p.dch||0)>=1&&d<260&&Math.random()<dt*0.8)press('sp');inp.sh=p.hp<p.maxHp*0.5&&!p.stS&&!(p.stCd>0)&&Math.random()<0.05;}
   // บอทสายไฟ: กดค้างลูกไฟเป็นระยะ / ยิงตอนเป็นร่างยักษ์
   if(p.pathIdx===0&&!(p.colos>0)){p.bhold=((p.bhold||0)+dt)%4;const c=p.bhold;inp.fire=d>900?0:c<2.1?1:c<2.2?0:(Math.floor(c/0.17)%2);}
   if(!p.ai)botCombo(p,dt,tg);   // บอทห้องฝึก/ห้องรอ เรียกท้าย aiBot แทน

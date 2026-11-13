@@ -9,7 +9,7 @@ const WINDP=PATHS.length;
 // ตัวเลขทั้งหมดของสายลม: WNV = PATHS[WINDP].v (ใบมีดลม/GaleBurst/โล่ปีก/Dash) + v:{...} ของแต่ละสกิล (W_WL W_DR W_VX W_VO W_FW W_UL = S.v) — ปรับได้ใน tune.html / F8 (js/73-tune.js)
 PATHS.push({id:'wind',n:'สายลม',ic:'🌪️',col:'#8dff65',d:'พริ้วไหวกลางอากาศ — บนพื้นอ่อนลงทันที แต่ถ้าบินด้วย Featherwing สกิลทั้งชุดแรงขึ้น: พัดศัตรูลอย กดลง พาไปด้านหน้า ฟันช้า ต่อคอมโบได้ต่อเนื่อง จบด้วย Sonic Boom Strike',
   combo:'บิน Featherwing → Windup พัดศัตรูลอยค้าง → Wind Push กดลงสตัน / Windforce พาไปข้างหน้า / Windblade ฟันช้าแล้วลดคูล Featherwing → Sonic Boom Strike ปิดท้าย (ต่อเวลาบิน + รีเซ็ตคูลทุกสกิล) • BA ใบมีดลมเก็บเกจ GaleBurst เหมือนเดิม'});
-const WNV=PATHS[WINDP].v={baDmg:5,baSpR:14,baSpK:0.4,baCd:0.45,baRange:750,baSpd:1500,baAssist:0.07,baFwCut:0.5,baGain:12,baHold:0.35,baChg:8,gbHold:0.3,gbDur:2.6,gbLen:340,gbR0:10,gbR1:62,gbTick:0.25,gbDmg:5,gbAcc:800,gbMax:120,gbSlow:0.55,gbCd:0.5,
+const WNV=PATHS[WINDP].v={baDmg:5,baSpR:14,baSpK:0.4,baCd:0.50,baRange:750,baSpd:1500,baAssist:0.07,baFwCut:0.5,baGain:12,baHold:0.35,baChg:8,gbHold:0.3,gbDur:2.6,gbLen:340,gbR0:10,gbR1:62,gbTick:0.25,gbDmg:5,gbAcc:800,gbMax:120,gbSlow:0.55,gbCd:0.5,
   shHp:90,wbWind:0.6,wbFly:0.19,wbSpd:1300,wbRange:1600,wbDmg:15,wbR:150,wbCd:8,wbOff:3,wbPull:480,wbAhead:160,shGain:10,shChg:0.3,shR:200,shStun:0.8,shPush:1500,shDmg:20,dsCh:0.25,dsUp:8,dsUpT:0.55,dsBack:1800,dsVz:7,dsPush:1500,dsReach:150,dsCone:60,dsWall:20,dsCd:8};
 PATHS[WINDP].vn={baDmg:'ใบมีดลม • ดาเมจ',baSpR:'ขนนก • รัศมีกระจาย',baSpK:'ขนนก • สัดส่วนดาเมจกระจาย',baCd:'ใบมีดลม • เว้น (วิ)',baRange:'ใบมีดลม • ระยะ',baSpd:'ใบมีดลม • ความเร็ว',baGain:'ใบมีดลม • โดนแล้วเกจ +%',baHold:'ดูดลม • กดค้างกี่วิเริ่ม',baChg:'ดูดลม • เกจ +%/วิ',
   gbHold:'GaleBurst • กดค้างก่อนยิง (วิ)',gbDur:'GaleBurst • ยิงต่อเนื่องได้นาน (วิ เกจเต็ม→หมด)',gbLen:'GaleBurst • ระยะ',gbR0:'GaleBurst • กว้างต้นทาง (รัศมี)',gbR1:'GaleBurst • กว้างปลาย (รัศมี)',gbTick:'GaleBurst • ติดดาเมจทุก (วิ)',gbDmg:'GaleBurst • ดาเมจต่อครั้ง',gbAcc:'GaleBurst • แรงดันศัตรู (เร่ง)',gbMax:'GaleBurst • ความเร็วดันศัตรูสูงสุด',gbSlow:'GaleBurst • ตัวเราเดินช้าลง (เท่า)',gbCd:'GaleBurst • เว้นหลังหยุดยิง (วิ)',
@@ -26,6 +26,8 @@ function wFoeNear(p,x,y,r){return foesOf(p.team).filter(t=>Math.hypot(t.x-x,t.y-
 // ---------- ทุกเฟรมของผู้เล่นสายลม (เรียกจาก updatePlayer หลังส่วนโล่) ----------
 function windTick(p,dt){
   if(p.wg===undefined)p.wg=0;
+  p.wbCd=Math.max(0,(p.wbCd||0)-dt);
+  if(p.wbCh&&(p.stun>0||!windOrbStance(p)))p.wbCh=null;
   if(p.wwc===undefined||p.wwc>W_WL.max){p.wwc=W_WL.max;p.wwr=0;}
   if(p.wsc===undefined){p.wsc=W_VX.sMax;p.wsr=0;}
   if(p.wsc<W_VX.sMax){p.wsr+=dt/p.buffs.cdr;if(p.wsr>=W_VX.sCh){p.wsr=0;p.wsc++;}}
@@ -63,8 +65,24 @@ function windFlyZ(p,dt){const F=p.wfw,gh=groundH(p.x,p.y,p.z);
     else{const dv=p.wult?0:p.wfc?p.wfc.dv:((inp.jh?1:0)-(inp.ch?1:0))*W_FW.vs;
       F.h=clamp(F.h+dv*dt,W_FW.hmin,W_FW.hmax+(p.wfc?6:0));
       p.vz=clamp((gh+F.h-p.z)*5,-Math.max(W_FW.vs,Math.abs(dv)*1.2),Math.max(W_FW.vs,Math.abs(dv)*1.2));p.z+=p.vz*dt;}}
-  else{p.vz=Math.max(-W_FW.glide,Math.min(p.vz||0,0)-6*dt);p.z+=p.vz*dt;if(p.z<=gh){p.z=gh;p.vz=0;p.wfw=null;emit({k:'efx',z:'wnfwland',x:Math.round(p.x),y:Math.round(p.y),h:p.z,id:p.id});}}}
-function windReset(p){p.wfBankEnd=0;p.wfFlk=0;p.wult=null;p.wfc=null;p.wbl=null;p.wflt=0;p.wus=0;p.wdr=null;p.wfw=null;p.wg=0;p.wwc=W_WL.max;p.wwr=0;p.wwAim=null;p.wsb=null;p.wsbL=0;p.wchg=0;p.wfHeld=0;if(p.wgs)windStreamEnd(p,null);p.wgw=0;if(p.wfo){p.wfo=false;p.fly=false;p.flyOn=false;}p.wbCd=0;p.wbCh=null;p.wbw=undefined;p.wba=undefined;p.wfPrev=0;p.wsbC=0;p.wdc=undefined;p.wpv=null;p.wsl=null;p.wsc=W_VX.sMax;p.wsr=0;p.wse=0;}
+  else{p.vz=Math.max(-W_FW.glide,Math.min(p.vz||0,0)-6*dt);p.z=Math.max(gh,p.z+p.vz*dt);}}
+function windGliding(p){return p.wfw?.ph==='glide'&&!!p.inp?.jh&&!(p.stun>0);}
+function windOrbStance(p){return windAir(p)||p.wfw?.orbGlide&&windGliding(p);}
+function windLandCheck(p){
+  if(p.wfw?.ph!=='glide'||p.wfw.up!==undefined||p.z>groundH(p.x,p.y,p.z))return;
+  p.wfw=null;p.vz=0;p.wbCh=null;
+  emit({k:'efx',z:'wnfwland',x:Math.round(p.x),y:Math.round(p.y),h:p.z,id:p.id});
+}
+function windTakeoffDash(p){
+  const i=p.inp||{};
+  const mx=i.mx??((i.r?1:0)-(i.l?1:0)),my=i.my??((i.d?1:0)-(i.u?1:0));
+  const length=Math.hypot(mx,my);
+  if(length<=0.05){p.dash=0;p.dashSp=0;return;}
+  p.wfw.takeoff=true;
+  p.dash=W_FW.launchT;p.dashSp=W_FW.launchDist/W_FW.launchT;
+  p.dashX=mx/length;p.dashY=my/length;
+}
+function windReset(p){p.wfBankEnd=0;p.wfFlk=0;p.wult=null;p.wfc=null;p.wbl=null;p.wflt=0;p.wus=0;p.wdr=null;p.wfw=null;p.wg=0;p.wwc=W_WL.max;p.wwr=0;p.wwAim=null;p.wsb=null;p.wsbL=0;p.wchg=0;p.wfHeld=0;if(p.wgs)windStreamEnd(p,null);p.wgw=0;if(p.wfo){p.wfo=false;p.fly=false;p.flyOn=false;}p.wbCd=0;p.wbAmmo=0;p.wbCh=null;p.wbw=undefined;p.wba=undefined;p.wfPrev=0;p.wsbC=0;p.wdc=undefined;p.wpv=null;p.wsl=null;p.wsc=W_VX.sMax;p.wsr=0;p.wse=0;}
 
 // ---------- ท่าพื้นฐาน (คลิกซ้าย): ใบมีดลม / ดูดลมชาร์จเกจ / GaleBurst ----------
 function windBasic(p,inp,dt,setCd){
@@ -72,7 +90,7 @@ function windBasic(p,inp,dt,setCd){
   if(p.wbw!==undefined){const w0=p.wbw;p.wbw+=dt;if(p.stun>0||!p.alive)p.wbw=undefined;else{if(p.wbw>=WNV.wbWind){p.wbw=undefined;p.shieldOn=false;p.shieldBroken=WNV.wbOff;windShieldShoot(p);}}}   // ง้างตัวไปหลังก่อน แล้วค่อยกระแทกโล่ออก
   if(p.wdc!==undefined){p.wdc+=dt;if(p.stun>0||!p.alive)p.wdc=undefined;else if(p.wdc>=WNV.dsCh){p.wdc=undefined;windDashGo(p);}}   // Dash: ย่อตัวชาร์จก่อน แล้วค่อยพุ่ง
   if(p.wwAim)return;   // กำลังเลือกวิธีวางกำแพง (คลิกซ้าย = ดัน)
-  if(p.wfo&&!p.shieldOn){windFocusAct(p,inp,dt);return;}   // บิน Focus: คลิกซ้าย = ลูกบอลลม
+  if(!p.shieldOn&&(p.wfo||windOrbStance(p)&&p.wbAmmo>0)){windFocusAct(p,inp,dt);return;}
   if(p.shieldOn){   // ระหว่างยกโล่: เกจเต็ม + คลิก = ชาร์จปีกแล้วระเบิด
     if(inp.fire&&!prev&&p.wsbC<=0&&p.wbw===undefined){p.wsbC=WNV.wbCd;p.wbw=0;emit({k:'efx',z:'wnwc',x:Math.round(p.x),y:Math.round(p.y),h:p.z,a:Math.round(p.ang*100)/100,id:p.id});}   // คลิกซ้ายระหว่างถือกำแพงลม = ระเบิด (ผู้ใช้ 2026-11-08)
     p.wchg=0;return;}
@@ -169,11 +187,12 @@ function windDmg(t,amt,srcId){if(!(t.wwW>0)||!(t.stun>0)||srcId==null)return;con
   w.acc+=amt;if(!w.uns&&w.acc>=W_WL.boom*0.7){w.uns=1;emit({k:'efx',z:'wnwuns',x:Math.round(w.x),y:Math.round(w.y),a:Math.round(w.a*100)/100,n:w.id});}
   if(w.acc>=W_WL.boom)windWallBoom(w);}
 // เส้นตรง (x0,y0)→(x1,y1) ตัดกำแพงลมของทีมอื่นไหม (รวมความหนา + รัศมีของกระสุน) → {u:0..1, w} จุดแรกที่ชน หรือ null
-function windRay(team,x0,y0,x1,y1,rad,h){if(!G.wwl||!G.wwl.length||(h!==undefined&&h>=5.8))return null;let best=null;
+function windRay(team,x0,y0,x1,y1,rad,h,h1){if(!G.wwl||!G.wwl.length||(h1===undefined&&h!==undefined&&h>=5.8))return null;let best=null;
   for(const w of G.wwl){if(w.dead||w.team===team)continue;const nx=Math.cos(w.a),ny=Math.sin(w.a),T=w.r+(rad||0);
     const s0=(x0-w.x)*nx+(y0-w.y)*ny,s1=(x1-w.x)*nx+(y1-w.y)*ny;let u;
     if(Math.abs(s0)<=T)u=0;else{if((s0>0)===(s1>0)&&Math.abs(s1)>T)continue;const d=s1-s0;if(Math.abs(d)<1e-6)continue;u=((s0>0?T:-T)-s0)/d;if(u<0||u>1)continue;}
     const hx=x0+(x1-x0)*u,hy=y0+(y1-y0)*u;if(Math.abs(-(hx-w.x)*ny+(hy-w.y)*nx)>w.L+(rad||0))continue;
+    if(h1!==undefined){const ht=h+(h1-h)*u+terrT(x0,y0)-terrT(hx,hy);if(ht<0||ht>=5.8)continue;}
     if(!best||u<best.u)best={u,w,x:hx,y:hy};}
   return best;}
 // ลำ/เส้นยิง: ระยะที่ไปได้ก่อนชนกำแพงลมของทีมอื่น (ไม่ชน = len) • dmg>0 = กำแพงเสีย HP (ใช้กับเส้นยิงครั้งเดียว ไม่ใช้กับลำต่อเนื่อง)
@@ -295,7 +314,7 @@ function windCdCut(p,id,frac){const k=windSlotOf(p,id);if(k&&p.cd[k]>0)p.cd[k]=M
 function windSlow(t,f,d){f=Math.max(f,isBig(t)?0.7:0.08);if(!(t.slowT>0)||f<t.slowF)t.slowF=f;t.slowT=Math.max(t.slowT||0,d);t.wbsT=Math.max(t.wbsT||0,d);}   // ช้าได้ถึง 90% (moveMul พื้น 0.08 ตอน wbsT>0)
 
 // ---------- Featherwing: กด → หมุนตัวบินวนขึ้น → บิน 8 วิ (ผู้ใช้ 2026-11-08) ----------
-// บินปกติ: WASD ทิศ (เร็วมาก แต่มีแรงเฉื่อย = เลี้ยวเป็นวง ไม่แคบเท่าไม้กวาด ไม่กว้างเท่าไม้กวาด) • Space สูงขึ้น • Ctrl/C ต่ำลง • คลิกซ้ายค้าง = ลูกบอลลม • สกิลอื่นใช้ได้ (โหมดบิน)
+// บินปกติ: WASD ทิศ (เร็วมาก แต่มีแรงเฉื่อย = เลี้ยวเป็นวง ไม่แคบเท่าไม้กวาด ไม่กว้างเท่าไม้กวาด) • Space สูงขึ้น • Ctrl/C ต่ำลง • คลิกซ้าย = ลูกบอลลม (6 นัดต่อการขึ้นบิน ยิงระหว่างร่อนได้) • สกิลอื่นใช้ได้ (โหมดบิน)
 // Shift ค้าง = โหมดบินเร็ว: คุมด้วยเมาส์แบบเครื่องบิน (ระบบไม้กวาด js/69, BFW) ใช้สกิลไม่ได้ (ยิงลูกบอลลมได้) • ปล่อย Shift = กลับบินปกติ
 // กดสกิลอีกครั้งตอนบินปกติ = สะบัดปีกไปข้างหน้า (ผลัก+ดาเมจ) จบโหมด แล้วตกลงแบบปกติ • หมดเวลา/โดนสตัน = จบโหมด ตกแบบปกติ
 function windFlyTick(p,dt){const F=p.wfw;if(!p.alive){if(p.wfo){p.wfo=false;p.fly=false;p.flyOn=false;}p.wfw=null;return;}
@@ -303,7 +322,7 @@ function windFlyTick(p,dt){const F=p.wfw;if(!p.alive){if(p.wfo){p.wfo=false;p.fl
       lat=W_FW.spinR*Math.sin(Math.PI*u),fwd=W_FW.spinR*0.55*Math.sin(2*Math.PI*u),e=u*u*(3-2*u);
     p.x=F.x0+rx*lat+ca*fwd;p.y=F.y0+ry*lat+sa*fwd;p.z=F.z0+W_FW.spinH*e;p.vz=0;p.vx=p.vy=0;p.mvx=p.mvy=0;collideWorld(p,PR,p.z);
     if(p.stun>0){p.wfw=null;emit({k:'efx',z:'wnfwend',x:Math.round(p.x),y:Math.round(p.y),h:p.z,id:p.id});return;}
-    if(u>=1){F.ph='focus';F.t=W_FW.t;F.h=clamp(p.z-groundH(p.x,p.y,p.z),W_FW.hmin,W_FW.hmax);p.wfo=true;p.shieldOn=false;p.dash=0;p.wbCd=0;p.mvx=p.mvy=0;
+    if(u>=1){F.ph='focus';F.t=W_FW.t;p.wbAmmo=W_FW.fbAmmo;F.h=clamp(p.z-groundH(p.x,p.y,p.z),W_FW.hmin,W_FW.hmax);p.wfo=true;p.shieldOn=false;p.dash=0;p.wbCd=0;p.mvx=p.mvy=0;
       emit({k:'efx',z:'wnfwfocus',x:Math.round(p.x),y:Math.round(p.y),h:p.z,a:Math.round(a*100)/100,id:p.id});}
     return;}
   if(F.ph==='focus'){F.t-=dt;const inp=p.inp||{},want=false;   // เอาบินเร็วออก (ผู้ใช้ 2026-11-08)
@@ -316,7 +335,7 @@ function windFastOn(p){const sp=Math.hypot(p.mvx||0,p.mvy||0),h=sp>20?Math.atan2
 function windFastOff(p){const F=p.wfw;p.fly=false;p.flyOn=false;if(F)F.h=clamp(p.z-groundH(p.x,p.y,p.z),W_FW.hmin,W_FW.hmax);
   p.mvx=Math.cos(p.fh||0)*(p.fs||0);p.mvy=Math.sin(p.fh||0)*(p.fs||0);p.fs=0;p.wbCd=0;
   emit({k:'efx',z:'wnfast',x:Math.round(p.x),y:Math.round(p.y),h:p.z,n:0,id:p.id});}
-function windFocusEnd(p){{const F0=p.wfw;if(F0&&F0.ph==='focus'&&F0.t>.25)p.wfBankEnd=G.time+F0.t;}p.wbCh=null;p.fly=false;p.wfo=false;p.flyOn=false;p.fs=0;p.wbCd=0;p.wfw=p.alive&&p.z>groundH(p.x,p.y,p.z)+.2?{ph:'glide',t:0,side:1,a:p.ang}:null;p.vz=Math.min(p.vz||0,0);emit({k:'efx',z:'wnfwend',x:Math.round(p.x),y:Math.round(p.y),h:p.z,id:p.id});}
+function windFocusEnd(p){{const F0=p.wfw;if(F0&&F0.ph==='focus'&&F0.t>.25)p.wfBankEnd=G.time+F0.t;}p.fly=false;p.wfo=false;p.flyOn=false;p.fs=0;p.wfw=p.alive&&p.z>groundH(p.x,p.y,p.z)+.2?{ph:'glide',orbGlide:true,t:0,side:1,a:p.ang}:null;if(!windGliding(p))p.wbCh=null;p.vz=Math.min(p.vz||0,0);emit({k:'efx',z:'wnfwend',x:Math.round(p.x),y:Math.round(p.y),h:p.z,id:p.id});}
 // บินปกติ: ความเร็วมีแรงเฉื่อย — หมุนทิศวิ่งได้ช้ากว่าที่กด (เร็ว = วงกว้าง) เลี้ยวหักมากจะช้าลงนิด • ไม่กด = ค่อยๆ ชะลอ • เรียกจาก updatePlayer แทนการเดิน
 function windAirMove(p,mx,my,spd,canAct,dt){const K=W_FW,on=(mx||my)&&spd>=1,k=1-Math.exp(-(on?K.aIn:K.aOut)*dt);   // แรงเฉื่อยนิดหน่อย เกือบอิสระ (ผู้ใช้ 2026-11-08) ไปทิศไหนก็ได้ตามปุ่ม
   p.mvx=(p.mvx||0)+((on?mx*spd:0)-(p.mvx||0))*k;p.mvy=(p.mvy||0)+((on?my*spd:0)-(p.mvy||0))*k;p.x+=p.mvx*dt;p.y+=p.mvy*dt;return;
@@ -333,9 +352,9 @@ function windFlick(p){const F=p.wfw;if(!F||F.ph!=='focus'||p.fly)return;windFocu
     aoeHit(p,t,W_FW.dmg,t=>{knock(t,t.x-Math.cos(a)*10,t.y-Math.sin(a)*10,W_FW.push);t.wpush=0.8;});}
   emit({k:'efx',z:'wnfwflick',x:Math.round(p.x),y:Math.round(p.y),h:p.z,a:Math.round(a*100)/100,id:p.id});}
 // บิน: คลิกซ้าย (กดค้างได้) = ลูกบอลลม — เรียกจาก windBasic / broomAct (โหมดบินเร็ว)
-function windFocusAct(p,inp,dt){p.wbCd=Math.max(0,(p.wbCd||0)-dt);p.bbv=0;p.bbf=0;
-  if(p.wbCh){const C=p.wbCh;C.t+=dt;if(p.stun>0){p.wbCh=null;return;}if(C.t>=W_FW.fbWind){p.wbCh=null;windOrbLaunch(p,C.s);}return;}   // ง้างไม้ไปข้าง ลูกลมก่อตัว แล้วค่อยเหวี่ยงปล่อย (ผู้ใช้ 2026-11-08)
-  if(inp.fire&&p.wbCd<=0){p.wbCd=W_FW.fbCd;const s=p.wbs=-(p.wbs||1);p.wbCh={t:0,s};emit({k:'efx',z:'wnoc',x:Math.round(p.x),y:Math.round(p.y),h:p.z,n:s,id:p.id});}}
+function windFocusAct(p,inp,dt){p.bbv=0;p.bbf=0;
+  if(p.wbCh){const C=p.wbCh;C.t+=dt;if(p.stun>0){p.wbCh=null;return;}if(C.t>=W_FW.fbWind){p.wbCh=null;p.wbAmmo--;windOrbLaunch(p,C.s);}return;}
+  if(inp.fire&&p.wbAmmo>0&&p.wbCd<=0){p.wbCd=W_FW.fbCd;const s=p.wbs=-(p.wbs||1);p.wbCh={t:0,s};emit({k:'efx',z:'wnoc',x:Math.round(p.x),y:Math.round(p.y),h:p.z,n:s,id:p.id});}}
 function windOrbLaunch(p,s){const a=p.ang,inp=p.inp||{},enh=windEnh(p),SP=W_FW.fbSpd*enh;Object.assign(PDEF.wball,{spd:SP,life:W_FW.fbRange/SP,dmg:W_FW.fbDmg});const pr=shoot(p,'wball',{sp:'b_wind',quiet:1});
   pr.x+=-Math.sin(a)*s*10;pr.y+=Math.cos(a)*s*10;pr.h=p.z+1.65;
   if(Number.isFinite(inp.ah)){const dx=inp.ax-pr.x,dy=inp.ay-pr.y,d=Math.max(60,Math.hypot(dx,dy)),b=Math.atan2(dy,dx);pr.vx=Math.cos(b)*SP;pr.vy=Math.sin(b)*SP;pr.vh=clamp((inp.ah-pr.h)/(d/SP),-SP/5,SP/5);}
@@ -519,7 +538,7 @@ function windUltSweep(p,U,x0,y0,h0,x1,y1,h1){const dx=x1-x0,dy=y1-y0,dh=(h1-h0)*
 function windFloatZ(p,dt){const gh=groundH(p.x,p.y,p.z);p.z+=(gh+(p.wfz||2.2)-p.z)*Math.min(1,4*dt);p.vz=0;}
 
 // สำหรับ snapshot: [เกจ, ดูดลม, ชาร์จ Windup, (เลิกใช้), ชาร์จระเบิดปีก, บิน(1)/ร่อน, (เลิกใช้), 1=หมุนขึ้น 2=บิน, ด้านหมุน, 1=ชาร์จอัลติ 2=พุ่ง]
-function windSnapP(p){if(!wOn(p))return undefined;return [Math.floor(p.wg||0),p.wchg?1:0,p.wwc|0,p.wwAim?1:0,p.wsb?1:0,p.wfw?(p.wfw.ph==='spin'||p.wfw.ph==='focus'?1:2):0,p.wdr?(p.wdr.ph==='chg'?1:2):0,p.wfw?(p.wfw.ph==='spin'?1:p.wfw.ph==='focus'?2:0):0,p.wfw&&p.wfw.ph==='spin'?p.wfw.side:0,p.wult?(p.wult.ph==='chg'?1:2):0,p.wsc|0,p.wse?1:0,Math.round(clamp(p.inp?.ap||0,-1.5,1.5)*100)/100,Math.round((p.wsr||0)/W_VX.sCh*100)];}
+function windSnapP(p){if(!wOn(p))return undefined;return [Math.floor(p.wg||0),p.wchg?1:0,p.wwc|0,p.wwAim?1:0,p.wsb?1:0,p.wfw&&p.wfw.ph!=='glide'?1:windGliding(p)?2:0,p.wdr?(p.wdr.ph==='chg'?1:2):0,p.wfw?(p.wfw.ph==='spin'?1:p.wfw.ph==='focus'?2:0):0,p.wfw&&p.wfw.ph==='spin'?p.wfw.side:0,p.wult?(p.wult.ph==='chg'?1:2):0,p.wsc|0,p.wse?1:0,Math.round(clamp(p.inp?.ap||0,-1.5,1.5)*100)/100,Math.round((p.wsr||0)/W_VX.sCh*100),windOrbStance(p)?p.wbAmmo|0:0];}
 function windSnapW(){const o={};if(G.wwl&&G.wwl.length)o.WW=G.wwl.map(w=>[w.id,Math.round(w.x),Math.round(w.y),Math.round(w.a*100)/100,w.L,Math.round(w.t*10)/10,w.mv>0?1:0,w.team,w.owner]);
   if(G.wvh&&G.wvh.length)o.WO=G.wvh.filter(v=>v.on).map(v=>[v.id,Math.round(v.x),Math.round(v.y)]);return o;}
 
@@ -549,12 +568,12 @@ const W_VO=defSpell(WINDP,{id:'voidspheres',v:{tlD:0.2,tlL:600,tlW:260,tlT:5,tlU
     fly:'(เลิกใช้) คลื่น',dist:'(เลิกใช้) ระยะ',wait:'(เลิกใช้) รอ',hold:'(เลิกใช้) หลุมดำอยู่',drift:'(เลิกใช้) เลื่อน',r:'(เลิกใช้) รัศมีดูด',core:'(เลิกใช้) ติดแกน',pull:'(เลิกใช้) แรงดูด',tick:'(เลิกใช้) ดาเมจย่อยทุก',tdmg:'(เลิกใช้) ดาเมจย่อย',dmg:'(เลิกใช้) ระเบิด',push:'(เลิกใช้) ผลัก',spin:'(เลิกใช้) หมุน',lift:'(เลิกใช้) ลอย'},
   role:'utility',n:'Tailwind',ic:'💨',cd:14,d:'วาดทางลมจากตัวเราไปตามทิศเล็ง ยาว 600 กว้าง 180 อยู่ 5 วิ • เพื่อนและตัวเราในร่องลมเร็วขึ้น 40% • ศัตรูในร่องลมช้าลง 25% (ไม่ซ้อนกับ Downburst ถือค่าที่ช้ากว่า)',
   cast(p){return windTailCast(p);}}).v;
-const W_FW=defSpell(WINDP,{id:'featherwing',v:{t:8,rise:2,upT:0.42,aIn:7,aOut:3.5,spinT:1.2,spinR:64,spinH:3.5,spd:1.25,omS:6.0,omF:2.6,acc:2.4,drag:1.2,snapSp:60,turnSlow:0.4,fastSpd:1000,hmin:1,hmax:12,vs:2.5,hgt:6,range:250,cone:50.4,push:1800,dmg:15,glide:3,fbCd:1.4,fbWind:0.35,fbSpd:1400,fbRange:1100,fbDmg:30,fbPush:200,orbR:100,fbSpr:0.025,fs0:240,boost:1.6},
-  vn:{t:'บินนาน (วิ)',spinT:'หมุนตัวบินวนขึ้น (วิ)',spinR:'หมุนวน • กว้างข้าง',spinH:'หมุนวน • ลอยขึ้น (ม.)',spd:'บินปกติ • ความเร็ว (เท่าเดิน)',omS:'บินปกติ • หมุนทิศ (rad/วิ) ตอนช้า',omF:'บินปกติ • หมุนทิศ (rad/วิ) ตอนเร็วสุด (ยิ่งน้อย = วงกว้าง)',acc:'บินปกติ • เร่ง',drag:'บินปกติ • ชะลอตอนปล่อยปุ่ม',snapSp:'บินปกติ • ต่ำกว่านี้เลี้ยวทันที',turnSlow:'บินปกติ • เลี้ยวหักแล้วช้าลง (สัดส่วน)',fastSpd:'Shift บินเร็ว • ความเร็วสูงสุด (px/วิ)',hmin:'Ctrl • ต่ำสุดเหนือพื้น (ม.)',hmax:'Space • สูงสุดเหนือพื้น (ม.)',vs:'Space/Ctrl • ขึ้น-ลง (ม./วิ)',hgt:'สะบัดจบ • ลงถึงพื้นได้ลึก (ม.)',range:'สะบัดจบ • ระยะ',cone:'สะบัดจบ • มุม (องศา ครึ่งซ้าย/ขวา)',push:'สะบัดจบ • แรงผลัก',dmg:'สะบัดจบ • ดาเมจ',glide:'(เลิกใช้) ร่อนลง',
+const W_FW=defSpell(WINDP,{id:'featherwing',v:{t:5,rise:2,upT:0.42,launchDist:60,launchT:0.32,aIn:7,aOut:3.5,spinT:1.2,spinR:64,spinH:3.5,spd:1.25,omS:6.0,omF:2.6,acc:2.4,drag:1.2,snapSp:60,turnSlow:0.4,fastSpd:1000,hmin:1,hmax:12,vs:2.5,hgt:6,range:250,cone:50.4,push:1800,dmg:15,glide:3,fbAmmo:6,fbCd:1.55,fbWind:0.35,fbSpd:1400,fbRange:1100,fbDmg:30,fbPush:200,orbR:100,fbSpr:0.025,fs0:240,boost:1.6},
+  vn:{t:'บินนาน (วิ)',launchDist:'พุ่งตอนขึ้นบิน • ระยะ',launchT:'พุ่งตอนขึ้นบิน • เวลา (วิ)',spinT:'หมุนตัวบินวนขึ้น (วิ)',spinR:'หมุนวน • กว้างข้าง',spinH:'หมุนวน • ลอยขึ้น (ม.)',spd:'บินปกติ • ความเร็ว (เท่าเดิน)',omS:'บินปกติ • หมุนทิศ (rad/วิ) ตอนช้า',omF:'บินปกติ • หมุนทิศ (rad/วิ) ตอนเร็วสุด (ยิ่งน้อย = วงกว้าง)',acc:'บินปกติ • เร่ง',drag:'บินปกติ • ชะลอตอนปล่อยปุ่ม',snapSp:'บินปกติ • ต่ำกว่านี้เลี้ยวทันที',turnSlow:'บินปกติ • เลี้ยวหักแล้วช้าลง (สัดส่วน)',fastSpd:'Shift บินเร็ว • ความเร็วสูงสุด (px/วิ)',hmin:'Ctrl • ต่ำสุดเหนือพื้น (ม.)',hmax:'Space • สูงสุดเหนือพื้น (ม.)',vs:'Space/Ctrl • ขึ้น-ลง (ม./วิ)',hgt:'สะบัดจบ • ลงถึงพื้นได้ลึก (ม.)',range:'สะบัดจบ • ระยะ',cone:'สะบัดจบ • มุม (องศา ครึ่งซ้าย/ขวา)',push:'สะบัดจบ • แรงผลัก',dmg:'สะบัดจบ • ดาเมจ',glide:'ร่อน • ความเร็วลงสูงสุด (ม./วิ)',fbAmmo:'ลูกบอลลมต่อการขึ้นบิน',
     fbCd:'ลูกบอลลม • เว้น (วิ)',fbSpd:'ลูกบอลลม • ความเร็ว',fbRange:'ลูกบอลลม • ระยะ',fbDmg:'ลูกบอลลม • ดาเมจ',fbPush:'ลูกบอลลม • แรงผลัก (เบา)',fbSpr:'ลูกบอลลม • ส่ายกระสุน (rad)',fs0:'(เลิกใช้)',boost:'(เลิกใช้)'},
-  role:'utility',n:'Featherwing',ic:'🪽',cd:10,d:'กด → หมุนตัวมีปีกบินวนขึ้น (กด A/D ตอนใช้ = เลือกข้าง) แล้วบิน 8 วิ — เร็วมาก มีแรงเฉื่อย เลี้ยวเป็นวง (ไม่กว้างเท่าไม้กวาด) • WASD = ทิศ • Space = สูงขึ้น • Ctrl/C = ต่ำลง • ใช้สกิลได้ครบ (โหมดบิน = สกิลแรงขึ้น พริ้วต่อคอมโบ) • คลิกซ้ายค้าง = ลูกบอลลม • Shift ค้าง = บินเร็วมาก คุมด้วยเมาส์แบบเครื่องบิน ใช้สกิลไม่ได้ (ปล่อย = กลับบินปกติ) • กดสกิลอีกครั้ง (บินปกติ) = สะบัดปีกข้างหน้า 250 15 ดาเมจ จบโหมด • หมดเวลา = ตกลงแบบปกติ',
-  toggle(p){if(p.wfw&&p.wfw.ph==='focus'&&!p.fly){windFlick(p);return true;}const left=(p.wfBankEnd||0)-G.time;if(left>.2&&!windSpin(p)&&(!p.wfw||p.wfw.ph==='glide')){p.wfBankEnd=0;p.wfw={ph:'focus',t:left,h:clamp(p.z-groundH(p.x,p.y,p.z)+W_FW.rise,W_FW.hmin,W_FW.hmax),side:1,a:p.ang,up:0,z0:p.z};p.wfo=true;p.wbCd=0;p.mvx=p.mvy=0;emit({k:'efx',z:'wnfwfocus',x:Math.round(p.x),y:Math.round(p.y),h:p.z,a:Math.round(p.ang*100)/100,id:p.id});return true;}return false;},   // flight time left from an early landing: pressing the skill takes off again without waiting for the cooldown
-  cast(p){if(p.wfw&&p.wfw.ph!=='glide')return false;p.wfFlk=0;const inp=p.inp||{},side=inp.l&&!inp.r?-1:1;p.wfw={ph:'focus',t:W_FW.t,h:clamp(p.z-groundH(p.x,p.y,p.z)+W_FW.rise,W_FW.hmin,W_FW.hmax),side,a:p.ang,up:0,z0:p.z};p.wfo=true;p.wbCd=0;p.mvx=p.mvy=0;emit({k:'efx',z:'wnfwfocus',x:Math.round(p.x),y:Math.round(p.y),h:p.z,a:Math.round(p.ang*100)/100,id:p.id});p.shieldOn=false;p.dash=0;p.wsb=null;p.wgs&&windStreamEnd(p,null);
+  role:'utility',n:'Featherwing',ic:'🪽',cd:10,d:'กด → พุ่งสั้น ๆ ตามทิศที่เดินพร้อมลอยขึ้น แล้วบิน 5 วิ — เร็วมาก มีแรงเฉื่อย เลี้ยวเป็นวง (ไม่กว้างเท่าไม้กวาด) • WASD = ทิศ • Space = สูงขึ้น • Ctrl/C = ต่ำลง • ใช้สกิลได้ครบ (โหมดบิน = สกิลแรงขึ้น พริ้วต่อคอมโบ) • คลิกซ้าย = ลูกบอลลม (6 นัดต่อการขึ้นบิน ยิงระหว่างร่อนได้) • Shift ค้าง = บินเร็วมาก คุมด้วยเมาส์แบบเครื่องบิน ใช้สกิลไม่ได้ (ปล่อย = กลับบินปกติ) • กดสกิลอีกครั้ง (บินปกติ) = สะบัดปีกข้างหน้า 250 15 ดาเมจ จบโหมด • หมดเวลา = ตกตามแรงโน้มถ่วง • กด Space ค้างเพื่อร่อน',
+  toggle(p){if(p.wfw&&p.wfw.ph==='focus'&&!p.fly){windFlick(p);return true;}const left=(p.wfBankEnd||0)-G.time;if(left>.2&&!windSpin(p)&&(!p.wfw||p.wfw.ph==='glide')){p.wfBankEnd=0;p.wfw={ph:'focus',t:left,h:clamp(p.z-groundH(p.x,p.y,p.z)+W_FW.rise,W_FW.hmin,W_FW.hmax),side:1,a:p.ang,up:0,z0:p.z};p.wfo=true;p.mvx=p.mvy=0;windTakeoffDash(p);emit({k:'efx',z:'wnfwfocus',x:Math.round(p.x),y:Math.round(p.y),h:p.z,a:Math.round(p.ang*100)/100,id:p.id});return true;}return false;},   // flight time left from an early landing: pressing the skill takes off again without waiting for the cooldown
+  cast(p){if(p.wfw&&p.wfw.ph!=='glide')return false;p.wfFlk=0;p.wbAmmo=W_FW.fbAmmo;p.wbCd=0;p.wbCh=null;const inp=p.inp||{},side=inp.l&&!inp.r?-1:1;p.wfw={ph:'focus',t:W_FW.t,h:clamp(p.z-groundH(p.x,p.y,p.z)+W_FW.rise,W_FW.hmin,W_FW.hmax),side,a:p.ang,up:0,z0:p.z};p.wfo=true;p.mvx=p.mvy=0;windTakeoffDash(p);emit({k:'efx',z:'wnfwfocus',x:Math.round(p.x),y:Math.round(p.y),h:p.z,a:Math.round(p.ang*100)/100,id:p.id});p.shieldOn=false;p.wsb=null;p.wgs&&windStreamEnd(p,null);
     emit({k:'efx',z:'wnfw',x:Math.round(p.x),y:Math.round(p.y),h:p.z,a:Math.round(p.ang*100)/100,n:side,id:p.id});}}).v;
 Object.assign(PDEF,{wshp:{spd:1300,r:48,dmg:15,life:1.23,col:'#8dff65'},wplume:{spd:1300,r:11,dmg:6,life:0.62,col:'#8dff65'},wball:{spd:W_FW.fbSpd,r:14,dmg:W_FW.fbDmg,life:W_FW.fbRange/W_FW.fbSpd,col:'#8dff65'},
   wpush:{spd:W_DR.spdA,r:22,dmg:30,life:W_DR.rangeA/W_DR.spdA,col:'#8dff65'},wbl:{spd:W_VO.spd,r:W_VO.br,dmg:6,life:W_VO.range/W_VO.spd,col:'#b8ff85'}});
@@ -564,7 +583,7 @@ const W_UL=defSpell(WINDP,{id:'eyeofheaven',v:{chg:0.9,ifr:0.0133,impPre:0.05,im
   cast(p){return windUltCast(p);}}).v;
 
 // ท่าพื้นฐาน + โล่ + Dash ของสาย (PBASIC ต้องอยู่ช่องเดียวกับลำดับใน PATHS)
-PBASIC.push({id:'b_wind',type:'wblade',n:'ขนนกลม',d:'กดค้าง = ยิงขนนกจากปีกสลับซ้าย-ขวา ตรงเข้าจุดเล็ง (ช่วยเล็งนิดหน่อย) 5 ดาเมจ ทุก 0.45 วิ ระยะ 750 ความเร็ว 1500 • โดน = คูล Featherwing ลด 0.5 วิ • (เดิม) กดค้าง (เกจยังไม่เต็ม) = ดูดลมรอบตัว +8%/วิ • เกจเต็ม = กดโจมตีปกติค้าง 0.3 วิ แล้วยิงลมกรวยกว้างต่อเนื่อง 17 ม. นาน 2.6 วิ (ปล่อยปุ่ม = หยุด เกจที่เหลือเก็บไว้) 5 ดาเมจ/0.25 วิ ผลักศัตรูเบา ๆ ตัวเราเดินช้าลง',
+PBASIC.push({id:'b_wind',type:'wblade',n:'ขนนกลม',d:'กดค้าง = ยิงขนนกจากปีกสลับซ้าย-ขวา ตรงเข้าจุดเล็ง (ช่วยเล็งนิดหน่อย) 5 ดาเมจ ทุก 0.50 วิ ระยะ 750 ความเร็ว 1500 • โดน = คูล Featherwing ลด 0.5 วิ • (เดิม) กดค้าง (เกจยังไม่เต็ม) = ดูดลมรอบตัว +8%/วิ • เกจเต็ม = กดโจมตีปกติค้าง 0.3 วิ แล้วยิงลมกรวยกว้างต่อเนื่อง 17 ม. นาน 2.6 วิ (ปล่อยปุ่ม = หยุด เกจที่เหลือเก็บไว้) 5 ดาเมจ/0.25 วิ ผลักศัตรูเบา ๆ ตัวเราเดินช้าลง',
   shd:'โล่ปีกห่อตัว: กันรอบตัว 360° รับได้ 75 • โดนตีแต่ละครั้ง +10% เกจ • เกจเต็มระหว่างยกโล่ + คลิกซ้าย = ชาร์จปีกแล้วระเบิดรอบตัว รัศมี 200 ผลัก 250 สตัน 0.8 วิ 20 ดาเมจ',
   dsd:'Dash ถอยหลังผลัก (Shift): ผลักศัตรูข้างหน้า 250 ตัวเราดีดถอยหลัง 300 ลอยกลางอากาศ (ใช้สกิลกลางอากาศได้) • ศัตรูที่โดนผลักชนกำแพง = 20 ดาเมจ + สตัน • คูลดาวน์ 8 วิ',
   get shMul(){return 100/WNV.shHp;},shieldSwing:true,front:true,frontA:80*Math.PI/180,aim3d:t=>!!t.wfw,   // บิน/ร่อน Featherwing = โล่หันตามเป้าเล็ง 3 มิติ ขึ้น-ลงได้เกือบรอบ (ตรงกับภาพ wn[5]>=1 และมุมกล้องตอนบิน)

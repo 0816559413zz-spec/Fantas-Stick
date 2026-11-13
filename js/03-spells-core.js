@@ -155,7 +155,7 @@ function shieldFaces(t,x,y,z){
   if(!t.shieldOn)return false;
   const B=PBASIC[t.pathIdx|0];
   if(B&&B.front&&x!=null){const A=B.frontA||Math.PI/3;
-    if(B.aim3d&&B.aim3d(t)){const ap=clamp((t.inp&&t.inp.ap)||0,-1.5,1.5),c=Math.cos(ap),ax=c*Math.cos(t.ang),ay=c*Math.sin(t.ang),az=Math.sin(ap);
+    if(B.aim3d&&B.aim3d(t)){const ap=t.pathIdx===1?frostShieldPitch(t):clamp((t.inp&&t.inp.ap)||0,-1.5,1.5),c=Math.cos(ap),ax=c*Math.cos(t.ang),ay=c*Math.sin(t.ang),az=Math.sin(ap);
       const dx=x-t.x,dy=y-t.y,dz=z!=null?(z-((t.z||0)+1.2))*20:0,L=Math.hypot(dx,dy,dz);if(L<1)return true;
       return Math.acos(clamp((dx*ax+dy*ay+dz*az)/L,-1,1))<=A;}
     return Math.abs(angDiff(Math.atan2(y-t.y,x-t.x),t.ang))<=A;}
@@ -230,7 +230,7 @@ const PBASIC=[
     tick:pyroBasic,onParry:pyroParry,onBlock:pyroBlock,dash:pyroDash,shieldSwing:true},
   {id:'b_frost',type:'icicle',n:'ดาบน้ำแข็ง / แท่งน้ำแข็ง',d:'กด V สลับโหมด • ประชิด: ดาบน้ำแข็งคอมโบ 10/10/15 ระยะ ~120 จังหวะ 3 ฮีล 10 เดินได้ระหว่างฟัน • ไกล: แท่งน้ำแข็ง 7 ดาเมจ ทุก 0.3 วิ ระยะ ~700 ช้าลง +10% (สูงสุด 30%) • อยู่สูงกว่า ~4 เมตร + ฟัน = กระโดดฟาดลงพื้น 30',
     shd:'โล่อัศวินน้ำแข็ง: กันเฉพาะด้านหน้า 120° ยกได้นานกว่าปกติ 2 เท่า ฟันดาบระหว่างยกโล่ได้ (ช้าลง) • Parry = ฟันครั้งต่อไปใน 1.5 วิ เป็นจังหวะ 3 ทันที',dsd:'ไถลน้ำแข็ง (Shift) 5 วิ เร็ว +80% (ลื่น หยุดทันทีไม่ได้) ทิ้งทางน้ำแข็ง 4 วิ: ศัตรูเดินทับช้า +10% และลื่น เราเดินทับเร็ว +20% • คูลดาวน์ 6 วิหลังไถลจบ',
-    front:true,shDrain:0.5,shieldSwing:true,
+    front:true,aim3d:()=>true,shDrain:0.5,shieldSwing:true,
     hit(pr,t){damage(t,pr.dmg,pr.owner,'proj');addFrostSlow(t,FROSTV.icicleSlow);},
     tick:frostBasic,onParry:p=>{p.ripT=1.5;},dash:frostDash},
   {id:'b_storm',type:'pb2',n:'ลำสายฟ้า / สายฟ้าสามเหลี่ยม',d:'กดค้าง = ลำสายฟ้า (แบบ Winston) ระยะ 300 ล็อกทุกคนในกรวยหน้าอัตโนมัติ คนละ 3 ดาเมจ ทุก 0.4 วิ • ได้ Lightning stack ใหม่ = กดยิงครั้งถัดไปฟาดสายฟ้าจากฟ้าเป็นสามเหลี่ยมด้านหน้า (ยาว 250 ปลายกว้าง 120) 20 ดาเมจ + Shock',

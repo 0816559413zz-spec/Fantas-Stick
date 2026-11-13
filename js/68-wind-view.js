@@ -289,6 +289,10 @@ function drawWindHud(x,y,A,me){const g=Math.max(0,Math.min(100,A[0]))/100,full=g
     }
   }
   if(A[3]){cx.textAlign='center';cx.font='600 14px Kanit,sans-serif';cx.fillStyle='#efffe8';cx.fillText('คลิกซ้าย = ดันกำแพง • คลิกขวา = วางตรงจุดเล็ง',x,y+R+30);}
+  if(A[7]===2||A[5]===2&&A[14]>0){
+    cx.textAlign='center';cx.font='600 12px Kanit,sans-serif';cx.fillStyle='#eafff1';
+    cx.fillText('ลูกลม '+(A[14]||0)+'/'+W_FW.fbAmmo,x,y+R+27);
+  }
 }
 // ---------- ตัวช่วยเล็งกำแพงลม (เห็นเฉพาะเรา): เส้นโค้งเรืองที่จุดวาง (คลิกขวา) + ลูกศรทางดัน (คลิกซ้าย) ----------
 function wvAimGhost(p,A,h){

@@ -105,8 +105,8 @@ function frostFX(o,p,pz,now,dt){
   else if(o.axe&&o.axe.scale.x!==1)o.axe.scale.setScalar(1);
   // ---- ท่า: อาวุธลอยฟันเอง + มือขวาร่ายไม้ตามจังหวะ (host ตีทันทีตอนกด / จังหวะ 3 ตีหลัง 0.32 วิ — ภาพฟันจริงอยู่ในช่วงนั้น) ----
   if(o.swN===undefined)o.swN=F[1];
-  if(F[1]!==o.swN){o.swN=F[1];o.swC=F[2];o.swT=o.swC===2?0.62:ff?0.42:0.34;o.fwK0=0;}
-  const SWT=o.swC===2?0.62:ff?0.42:0.34;   // คิดหลังอัปเดตจังหวะ (เดิมคิดก่อน → เฟรมแรกของจังหวะใหม่ k ติดลบ แขน/ตัวกระตุกแรง)
+  if(F[1]!==o.swN){o.swN=F[1];o.swC=F[2];o.swLen=o.swC===2?0.69:ff?0.48:0.40;o.swT=o.swLen;o.fwK0=0;}
+  const SWT=o.swLen||0.40;
   if(o.swT>0)o.swT-=dt;
   if(flags&16){if(!o.mlOn){o.mlOn=1;o.mlT=0.4;}}else o.mlOn=0;   // อัลติเพิ่งเปิด = พุ่งไปพร้อมกวาดฟันรอบตัวรัว ๆ 0.4 วิ
   if(o.mlT>0)o.mlT-=dt;
@@ -187,8 +187,11 @@ function frostFX(o,p,pz,now,dt){
   // โล่อัศวินน้ำแข็ง (แทนโล่ฟองสบู่)
   if(p.sh){
     if(!o.ishield){o.ishield=makeKiteShield();o.g.add(o.ishield);}
-    if(!o.shFx)o.shFx=fxPlay('frost/shield_a',{x:p.x,y:p.y,h:pz,follow:p.id});   // โล่ว่าวคริสตัลแบบ A (ผู้ใช้เลือก 2026-10-22: ยื่นออกหน้าตัวมากขึ้น 0.5 → 0.95 ม.) — ประกาย/เกล็ดจากไฟล์
-    o.ishield.visible=true;o.ishield.position.set(0.12,1.15,0.95);o.ishield.rotation.set(0.08,0,0);
+    const pitch=(F[4]||0)/1000,reach=1.45,size=1.25;
+    if(!o.shFx)o.shFx=fxPlay('frost/shield_a',{x:p.x,y:p.y,h:pz,follow:p.id,s:size,aimPitch:pitch,pivotY:1.15});
+    if(o.shFx)o.shFx.o.aimPitch=pitch;
+    o.ishield.visible=true;o.ishield.position.set(0.12,1.15+Math.sin(pitch)*reach,Math.cos(pitch)*reach);
+    o.ishield.rotation.set(-pitch,0,0);o.ishield.scale.setScalar(size);
     o.armL.rotation.x=-1.3;o.armL.rotation.z=0.5;
     o.shield.visible=!!((p.fm|0)&(128|16384));
     if(Math.random()<0.3){o.ishield.getWorldPosition(_pw);const s=simOf(_pw);PARTS.push({x:s.x+rnd(-8,8),y:s.y+rnd(-8,8),h:s.h+rnd(-0.5,0.5),vx:0,vy:0,vh:0.4,life:0.5,max:0.5,col:'#dff6ff',size:1.6,g:0});}

@@ -160,7 +160,7 @@ const SDOME=defSpell(2,{id:'stormdome',v:{cost:4,godCost:3,range:600,rise:6,fly:
 // ---------- ร่ายคาถา ----------
 function castSlot(p,i){
   const S=SPELLS[p.kitIds[i]];if(!S)return false;
-  if(p.aug||p.ramp||p.ecb||p.wr)return false;   // สายดิน: ชาร์จ Auger / Rampage / ร่าย Wrath
+  if(p.aug||p.ramp||p.ecb||p.wr||waterCageBusy(p))return false;
   const k=SLOTK[i];
   if(S.toggle&&S.toggle(p)){emit({k:'sk',id:p.id,s:S.id+'_2'});return true;}   // กดครั้งที่ 2 (เช่น Tectonic Crush บีบ) → ท่าร่าย
   if(S.melee&&p.fmode===1)return false;
@@ -173,4 +173,4 @@ function castSlot(p,i){
   emit({k:'sk',id:p.id,s:S.id,...(S.id==='stormdome'&&p.sdome.god?{g:1}:null)});   // ภาพ: ท่าร่ายสกิล (js/35 skAnim)
   return true;
 }
-function castUlt(p){if(p.wr)return false;const S=SPELLS[p.ultId];if(!S||p.ult<100||p.sil>0||p.cryo>0)return false;if(S.cast(p,S)===false)return false;p.ult=0;emit({k:'sk',id:p.id,s:S.id});return true;}
+function castUlt(p){if(p.wr||waterCageBusy(p))return false;const S=SPELLS[p.ultId];if(!S||p.ult<100||p.sil>0||p.cryo>0)return false;if(S.cast(p,S)===false)return false;p.ult=0;emit({k:'sk',id:p.id,s:S.id});return true;}

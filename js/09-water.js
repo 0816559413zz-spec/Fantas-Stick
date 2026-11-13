@@ -1,7 +1,7 @@
 // =====================================================================
 //  สายน้ำ 💧 (ผู้ใช้ออกแบบทั้งหมด — designs/water.md) • ฝั่งโฮสต์ • รอบแรก: ระบบเกมก่อน ภาพชั่วคราว (2026-10-31)
 //  เล่นง่าย: BA ตวัดไม้สร้างเส้นน้ำยิง 3 นัด • โล่ฟองน้ำฮีลจากเกจ 70 • Dash จมดินทิ้งร่างโคลน กดอีกที = กลับ
-//  สกิล: Riptide คลื่นพัด • Tidecaller Orb ลูกผู้ช่วยยิงตามเมื่อเราตีโดน • Aqua Cage ฟองขัง • Abyssal Beam ลำน้ำ 3 วิ
+//  สกิล: Riptide คลื่นพัด • Tidecaller Orb ลูกผู้ช่วยยิงตามเมื่อเราตีโดน • Aqua Cage ฟองขัง • Abyssal Beam ลำน้ำ 2.2 วิ
 //        Moonwater Arts BA เป็นลำน้ำ 8 วิ • อัลติ Dragon of the Deep มังกรน้ำพุ่งลงพื้นที่
 // =====================================================================
 const WATERP=PATHS.length;
@@ -13,15 +13,34 @@ const WAV=PATHS[WATERP].v={baCd:1.0,baN:3,baT0:0,baGap:0.08,baDmg:5,baSpd:2800,b
 PATHS[WATERP].vn={baCd:'เส้นน้ำ • ตวัดทุก (วิ)',baN:'เส้นน้ำ • จำนวนนัด',baT0:'เส้นน้ำ • นัดแรกออกหลัง (วิ)',baGap:'เส้นน้ำ • ห่างแต่ละนัด (วิ)',baDmg:'เส้นน้ำ • ดาเมจต่อนัด',baSpd:'เส้นน้ำ • ความเร็วกระสุน',baRange:'เส้นน้ำ • ระยะ',baSpr:'เส้นน้ำ • กระจาย (เรเดียน)',
   shGauge:'โล่ฟองน้ำ • เกจฮีลเต็ม',shHeal:'โล่ฟองน้ำ • ฮีลต่อวิ',shReg:'โล่ฟองน้ำ • เกจคืนต่อวิ',
   dsDist:'Dash • ระยะโผล่',dsSink:'Dash • จมดิน (วิ)',dsR:'Dash • รัศมีผลักตอนโผล่',dsPush:'Dash • แรงผลัก',dsBack:'Dash • กดกลับร่างโคลนได้ (วิ)',dsCd:'Dash • คูลดาวน์ (วิ)'};
-Object.assign(PDEF,{wdrop:{spd:WAV.baSpd,r:8,dmg:WAV.baDmg,life:WAV.baRange/WAV.baSpd,col:'#7fdcff'},wcage:{spd:600,r:14,dmg:0,life:0.5,col:'#b9f0ff'}});   // wcage: ค่าจริงตั้งจาก Aqua Cage (WT_CG) ตอนยิง
+Object.assign(PDEF,{wdrop:{spd:WAV.baSpd,r:8,dmg:WAV.baDmg,life:WAV.baRange/WAV.baSpd,col:'#7fdcff'}});
 const wtOn=p=>p&&p.pathIdx===WATERP;
-// จุดตัดของลำ (เส้นตรงจาก x,y ทิศ a ยาว L กว้าง w) กับเป้า
-function wtInBeam(t,x,y,a,L,w,h,tm){const dx=t.x-x,dy=t.y-y,u=dx*Math.cos(a)+dy*Math.sin(a);if(u<0||u>L)return false;if(tm!==undefined&&u>windBlockLen(tm,x,y,a,L,h))return false;   // เลยกำแพงลมศัตรูไปแล้ว = ไม่โดน
- 
-  return Math.abs(-dx*Math.sin(a)+dy*Math.cos(a))<=w+(t.r||PR)&&Math.abs(cH(t)-h)<3;}
+const WT_BEAM_H=1.3;
+function waterBeamPitch(p,x=p.x,y=p.y,h=p.z+WT_BEAM_H){
+  const i=p.inp;
+  if(!Number.isFinite(i?.ah)||!Number.isFinite(i.ax)||!Number.isFinite(i.ay))return clamp(i?.ap||0,-1.5,1.5);
+  return clamp(Math.atan2((i.ah-h+terrT(p.x,p.y)-terrT(x,y))*20,
+    Math.hypot(i.ax-x,i.ay-y)),-1.5,1.5);
+}
+function waterBeamTarget(t,b){
+  const c=Math.cos(b.a),s=Math.sin(b.a),dx=t.x-b.x,dy=t.y-b.y;
+  const flat=dx*c+dy*s,up=(cH(t)+terrT(t.x,t.y)-b.h-terrT(b.x,b.y))*20;
+  const cp=Math.cos(b.pt),sp=Math.sin(b.pt),d=flat*cp+up*sp;
+  if(d<0||d>b.L||Math.abs(dy*c-dx*s)>b.w+(t.r||PR)||Math.abs(up*cp-flat*sp)>b.w+vR(t)*20)return Infinity;
+  return d;
+}
+function waterBeamWindLimit(b,len){
+  const flat=len*Math.cos(b.pt),x=b.x+Math.cos(b.a)*flat,y=b.y+Math.sin(b.a)*flat;
+  const hit=windRay(b.team,b.x,b.y,x,y,0,b.h,b.h+Math.sin(b.pt)*len/20);
+  return hit?len*hit.u:len;
+}
 
 // ---------- ทุกเฟรมของผู้เล่นสายน้ำ (เรียกจาก updatePlayer หลังส่วนโล่) ----------
 function waterTick(p,dt){
+  if(p.wcCharge){
+    if(p.stun>0||p.sil>0)p.wcCharge=0;
+    else if((p.wcCharge+=dt)>=WT_CG.charge)waterCageLaunch(p);
+  }
   if(p.whg===undefined)p.whg=WAV.shGauge;
   // โล่ฟองน้ำ: ฮีลจากเกจ • ไม่ยกโล่ = เกจคืน
   if(p.shieldOn&&p.whg>0&&p.hp<p.maxHp){const u=Math.min(p.whg,WAV.shHeal*dt);p.whg-=u;p.whA=(p.whA||0)+u;if(p.whA>=1){healT(p,Math.floor(p.whA));p.whA-=Math.floor(p.whA);}}
@@ -37,7 +56,32 @@ function waterTick(p,dt){
 }
 // ยืนนิ่ง: จมดิน / ร่าย-ยิง Abyssal Beam
 function waterSpd(p){return p.wtsk||p.wab?0:p.wmsT>0?WT_MW.slow:1;}
-function waterReset(p){p.wln=null;p.wtsk=null;p.wcl=null;p.wfam=0;p.wmw=0;p.wab=null;p.wdg=null;p.wmsT=0;p.whg=WAV.shGauge;p.whA=0;}
+const waterCageBusy=p=>!!(p.wcCharge||p.wcOrb&&!p.wcOrb.dead);
+function waterReset(p){if(p.wcOrb)p.wcOrb.dead=true;p.wcOrb=null;p.wcCharge=0;p.wln=null;p.wtsk=null;p.wcl=null;p.wfam=0;p.wmw=0;p.wmb=null;p.wab=null;p.wdg=null;p.wmsT=0;p.whg=WAV.shGauge;p.whA=0;}
+
+function waterCageLaunch(p){
+  p.wcCharge=0;
+  const V=WT_CG,a=p.ang,h=p.z+1.45,pt=waterBeamPitch(p,p.x,p.y,h);
+  const pr=shoot(p,'wcage',{sp:'aquacage',spd:V.spd,r:V.r,dmg:V.dmg,life:V.range/V.spd,quiet:1,h,cageYaw:a,cagePitch:pt});
+  p.wcOrb=pr;
+  waterCageSteer(pr,0);
+  emit({k:'efx',z:'wtcagetoss',x:pr.x,y:pr.y,h:pr.h,id:p.id});
+}
+function waterCageSteer(pr,dt){
+  const p=G.players[pr.owner],i=p?.inp,V=WT_CG;
+  if(p?.alive&&!(p.stun>0)&&Number.isFinite(i?.ax)&&Number.isFinite(i.ay)&&Number.isFinite(i.ah)){
+    const dx=i.ax-pr.x,dy=i.ay-pr.y,dz=(i.ah+terrT(p.x,p.y)-pr.h-terrT(pr.x,pr.y))*20;
+    const c=Math.cos(pr.cageYaw),s=Math.sin(pr.cageYaw),cp=Math.cos(pr.cagePitch),sp=Math.sin(pr.cagePitch);
+    if(dx*c*cp+dy*s*cp+dz*sp>10){
+      const yaw=angDiff(Math.atan2(dy,dx),pr.cageYaw);
+      const pitch=clamp(Math.atan2(dz,Math.hypot(dx,dy)),-1.45,1.45)-pr.cagePitch;
+      const step=Math.min(1-Math.exp(-dt/Math.max(0.01,V.response)),V.turn*dt/(Math.hypot(yaw,pitch)||1));
+      pr.cageYaw+=yaw*step;pr.cagePitch+=pitch*step;
+    }
+  }
+  const flat=V.spd*Math.cos(pr.cagePitch);
+  pr.vx=Math.cos(pr.cageYaw)*flat;pr.vy=Math.sin(pr.cageYaw)*flat;pr.vh=V.spd*Math.sin(pr.cagePitch)/20;
+}
 
 // ---------- BA: สะบัดไม้ → ยิงเข็มน้ำ 3 นัดทันที ห่างกันนิดเดียว ตามเมาส์ (ผู้ใช้ 2026-11-08: ไม่มีเส้นน้ำแล้ว) • Moonwater = ลำน้ำ ----------
 const WT_BA_SIDE=12,WT_BA_H=1.15;   // กระสุนเกิดขวามือ 0.6 ม. สูง 1.15 ม. (ตรงปลายไม้ในท่าแทง)
@@ -58,8 +102,10 @@ function waterLineTick(p,dt){const L=p.wln;L.t+=dt;
     b+=rnd(-WAV.baSpr,WAV.baSpr);const sp=Math.hypot(pr.vx,pr.vy);pr.vx=Math.cos(b)*sp;pr.vy=Math.sin(b)*sp;
     pr.h=p.z+WT_BA_H;if(p.inp&&typeof p.inp.ah==='number'&&!p.bot){const dd=Math.max(60,Math.hypot(p.inp.ax-pr.x,p.inp.ay-pr.y));pr.vh=clamp((p.inp.ah-pr.h)/(dd/sp),-sp/5,sp/5);}}
   if(L.n>=WAV.baN&&L.t>=WAV.baT0+WAV.baN*WAV.baGap)p.wln=null;}
-function waterMoonBeam(p){const a=p.ang;p.wmsT=WT_MW.slowT;(G.wtb||(G.wtb=[])).push({o:p.id,team:p.team,x:p.x,y:p.y,h:p.z+1.3,a,t:0,k:0,len:WT_MW.len,w:WT_MW.w,life:WT_MW.life,tick:WT_MW.tick,dmg:WT_MW.dmg});
-  emit({k:'efx',z:'wtmb',x:Math.round(p.x),y:Math.round(p.y),h:p.z,a:Math.round(a*100)/100,id:p.id});}
+function waterMoonBeam(p){const a=p.ang,pt=waterBeamPitch(p);p.wmsT=WT_MW.slowT;
+  const b={o:p.id,team:p.team,x:p.x,y:p.y,h:p.z+WT_BEAM_H,a,pt,t:0,k:0,len:WT_MW.len,w:WT_MW.w,life:WT_MW.life,tick:WT_MW.tick,dmg:WT_MW.dmg};
+  (G.wtb||(G.wtb=[])).push(b);p.wmb=b;
+  emit({k:'efx',z:'wtmb',x:p.x,y:p.y,h:p.z,a,pt,id:p.id});}
 
 // ---------- Dash: จมดิน ทิ้งร่างโคลน → โผล่ห่าง 300 ทิศที่หัน • 6 วิกดอีกที = กลับไปที่โคลน ----------
 function waterDash(p,inp,pr,dt,setCd){
@@ -95,29 +141,44 @@ function waterWaveTick(w,dt){w.t+=dt;const p=G.players[w.o],k=Math.min(1,w.t/WT_
   for(const [t,s] of w.c)if(s!==null){t.vx=ca*WT_RP.out;t.vy=sa*WT_RP.out;}
   return false;}
 
-// ---------- Abyssal Beam: ร่าย 0.5 วิ → ยิงลำน้ำ 3 วิ (ยืนนิ่ง ลอยนิดหน่อย หมุนตามเมาส์ช้าๆ) ----------
+// ---------- Abyssal Beam: ร่าย 1.5 วิ → ยิงลำน้ำ 2.2 วิ (ยืนนิ่ง ลอยนิดหน่อย หมุนตามเมาส์ช้าๆ) ----------
 // ระยะก่อนชนกำแพง/หิน/ตึก (เงื่อนไขเดียวกับกระสุน updateProjectiles) • ชนแล้วลำหยุดตรงนั้น
-function waterBeamStop(p,a,h){const c=Math.cos(a),s=Math.sin(a);
-  for(let d=40;d<WT_AB.len;d+=16){const x=p.x+c*d,y=p.y+s*d,hh=h+terrT(p.x,p.y)-terrT(x,y);
-    if(x<40||x>MW-40||y<40||y>MH-40||(TERR&&terrSolid(x,y,hh)))return d;
-    for(const o of sgNear(sgObs(),x,y,8,_sgPO))if(o.bi===undefined&&!(o.bot!==undefined&&hh<o.bot)&&(o.top!==undefined?terrT(x,y)+hh<o.top:hh<o.hgt)&&(x-o.x)**2+(y-o.y)**2<(o.r+8)**2)return d;
+function waterBeamStop(b){const c=Math.cos(b.a)*Math.cos(b.pt),s=Math.sin(b.a)*Math.cos(b.pt),rise=Math.sin(b.pt)/20;
+  const max=waterBeamWindLimit(b,WT_AB.len),h0=b.h+terrT(b.x,b.y);
+  for(let d=8;d<max;d+=8){const x=b.x+c*d,y=b.y+s*d,hh=h0+rise*d-terrT(x,y);
+    if(x<40||x>MW-40||y<40||y>MH-40||hh<=0||(TERR&&terrSolid(x,y,hh)))return d;
+    for(const o of sgNear(sgObs(),x,y,8,_sgPO))if(o.bi===undefined&&!(o.bot!==undefined&&hh<o.bot)&&(o.top!==undefined?h0+rise*d<o.top:hh<o.hgt)&&(x-o.x)**2+(y-o.y)**2<(o.r+8)**2)return d;
     if(BLDG.length)for(const b of sgNear(sgBld(),x,y,8,_sgPB))if(bldNear(b,x,y,8)&&bldPieceAt(b,x,y,hh,8)>=0)return d;
-    for(const w of G.walls)if(p.team!==w.team&&hh<w.hgt&&(x-w.x)**2+(y-w.y)**2<(w.r+8)**2)return d;
+    for(const w of G.walls)if(b.team!==w.team&&hh<w.hgt&&(x-w.x)**2+(y-w.y)**2<(w.r+8)**2)return d;
     if(citySolidAt(x,y,hh))return d;}
-  return Math.min(WT_AB.len,windBlockLen(p.team,p.x,p.y,a,WT_AB.len,h));}
+  return max;}
 function waterBeamTick(p,dt){const B=p.wab;B.t-=dt;
   if(!p.alive||p.stun>0){p.wab=null;emit({k:'efx',z:'wtaboff',x:p.x,y:p.y,id:p.id});return;}
   p.wflt=0.2;p.wfz=WT_AB.lift;
-  const inp=p.inp||{};if(typeof inp.ax==='number'){const want=Math.atan2(inp.ay-p.y,inp.ax-p.x),da=angDiff(want,B.a),m=WT_AB.turn*dt;B.a+=Math.max(-m,Math.min(m,da));}p.ang=B.a;   // ตัวหันช้าเท่าลำ วงเวทกับลำจึงไปด้วยกัน
+  const i=p.inp,want=Number.isFinite(i?.ax)&&Number.isFinite(i.ay)?Math.atan2(i.ay-p.y,i.ax-p.x):p.ang;
+  const da=angDiff(want,B.a),dp=waterBeamPitch(p)-B.pt;
+  const step=Math.min(1,WT_AB.turn*dt/(Math.hypot(da,dp)||1));
+  B.a=angDiff(B.a+da*step,0);B.pt+=dp*step;p.ang=B.a;
   p.ang=B.a;
   if(B.ph==='cast'){if(B.t<=0){B.ph='fire';B.t=WT_AB.t;B.k=0;emit({k:'efx',z:'wtab',x:Math.round(p.x),y:Math.round(p.y),h:p.z,a:Math.round(B.a*100)/100,id:p.id,n:1});}return;}
   // ไม่ทะลุ: ลำหยุดที่คนแรกในแนว โดนแค่คนนั้น (ผู้ใช้ 2026-11-01)
-  let first=null;B.L=waterBeamStop(p,B.a,p.z+1.3);for(const t of foesOf(p.team))if(wtInBeam(t,p.x,p.y,B.a,WT_AB.len,WT_AB.w,p.z+1.3,p.team)){const d=Math.hypot(t.x-p.x,t.y-p.y);if(d<B.L){B.L=d;first=t;}}
-  B.k-=dt;if(B.k<=0){B.k+=WT_AB.tick;if(first){aoeHit(p,first,WT_AB.dmg,null);emit({k:'efx',z:'wtabhit',x:Math.round(first.x),y:Math.round(first.y),h:cH(first)});}}
-  if(B.t<=0){p.wab=null;emit({k:'efx',z:'wtaboff',x:p.x,y:p.y,id:p.id});}}
-// ลำน้ำ Moonwater (ยิงแล้วหาย ทิศคงที่)
+  Object.assign(B,{x:p.x,y:p.y,h:p.z+WT_BEAM_H,team:p.team,w:WT_AB.w});
+  let first=null;B.L=waterBeamStop(B);
+  for(const t of foesOf(p.team)){const d=waterBeamTarget(t,B);if(d<B.L){B.L=d;first=t;}}
+  const elapsed=WT_AB.t-B.t,interval=Math.max(0.01,WT_AB.tick);
+  // ฮิตแรกทันที ฮิตที่ตรงกับเวลาปิดลำไม่นับ
+  while(B.k*interval<WT_AB.t-1e-6&&B.k*interval<=elapsed+1e-6){
+    B.k++;
+    if(first){aoeHit(p,first,WT_AB.dmg,null);emit({k:'efx',z:'wtabhit',x:Math.round(first.x),y:Math.round(first.y),h:cH(first)});}
+  }
+  if(B.t<=1e-6){p.wab=null;emit({k:'efx',z:'wtaboff',x:p.x,y:p.y,id:p.id});}}
+// ลำน้ำ Moonwater หันตามเป้าทันทีตลอดจังหวะยิง
 function waterMBTick(b,dt){b.t+=dt;b.k-=dt;const p=G.players[b.o];
-  if(b.k<=0&&p){b.k+=b.tick;for(const t of foesOf(b.team))if(wtInBeam(t,b.x,b.y,b.a,b.len,b.w,b.h,b.team))aoeHit(p,t,b.dmg,null);}
+  if(p?.alive&&p.wmb===b&&Number.isFinite(p.inp?.ax)&&Number.isFinite(p.inp.ay)){
+    b.a=Math.atan2(p.inp.ay-b.y,p.inp.ax-b.x);b.pt=waterBeamPitch(p,b.x,b.y,b.h);
+  }
+  if(b.k<=0&&p){b.k+=b.tick;b.L=waterBeamWindLimit(b,b.len);for(const t of foesOf(b.team))if(waterBeamTarget(t,b)<Infinity)aoeHit(p,t,b.dmg,null);}
+  if(b.t>=b.life-1e-6&&p?.wmb===b)p.wmb=null;
   return b.t<b.life-1e-6;}
 
 // ---------- อัลติ Dragon of the Deep ----------
@@ -142,7 +203,9 @@ function updateWater(dt){
   if(G.wtb&&G.wtb.length)G.wtb=G.wtb.filter(b=>waterMBTick(b,dt));
 }
 // snapshot ต่อผู้เล่น: [เกจฮีล, ลูกผู้ช่วย, Moonwater, ลำน้ำ (มุม×100 | null), ร่างโคลน [x,y] | 0, อัลติ 0/1 intro/2 เล็ง/3 พุ่ง]
-function waterSnapP(p){if(!wtOn(p))return undefined;return [Math.floor(p.whg||0),p.wfam>0?1:0,p.wmw>0?1:0,p.wab&&p.wab.ph==='fire'?Math.round(p.wab.a*100):null,p.wcl?[Math.round(p.wcl.x),Math.round(p.wcl.y)]:0,p.wdg?({intro:1,aim:2,dive:3})[p.wdg.ph]:0,p.wab&&p.wab.ph==='fire'?Math.round(p.wab.L||WT_AB.len):0,p.wab?1:0];}
+function waterSnapP(p){if(!wtOn(p))return undefined;
+  const beam=p.wab,fire=beam?.ph==='fire',moon=p.wmb;
+  return [Math.floor(p.whg||0),p.wfam>0?1:0,p.wmw>0?1:0,fire?Math.round(beam.a*100):null,p.wcl?[Math.round(p.wcl.x),Math.round(p.wcl.y)]:0,p.wdg?({intro:1,aim:2,dive:3})[p.wdg.ph]:0,fire?Math.round(beam.L??WT_AB.len):0,beam?1:0,beam?Math.round(beam.pt*1000):0,moon?[Math.round(moon.a*1000),Math.round(moon.pt*1000)]:0,p.wcCharge?Math.round(p.wcCharge/WT_CG.charge*100):0];}
 // snapshot ทั้งเกม: คลื่น WV=[id,x,y,a,k] • ลูกผู้ช่วยที่กำลังพุ่ง WF=[id,x,y,h,เจ้าของ]
 function waterSnapW(){const o={};if(G.wtw&&G.wtw.length)o.WV=G.wtw.map(w=>[w.id,Math.round(w.x),Math.round(w.y),Math.round(w.a*100)/100,Math.round(Math.min(1,w.t/WT_RP.t)*100)/100]);
   if(G.wtf&&G.wtf.length)o.WF=G.wtf.map(f=>[f.id,Math.round(f.x),Math.round(f.y),Math.round(f.h*10)/10,f.o]);return o;}
@@ -152,12 +215,13 @@ const WT_RP=defSpell(WATERP,{id:'riptide',v:{len:400,t:0.8,w:100,dmg:20,out:300}
     emit({k:'efx',z:'wtwave',x:Math.round(p.x),y:Math.round(p.y),h:p.z,a:Math.round(a*100)/100,id:p.id});}}).v;
 const WT_FM=defSpell(WATERP,{id:'tidecaller',v:{t:8,dmg:5,spd:4000},vn:{t:'ลูกผู้ช่วยอยู่ (วิ)',dmg:'ยิงตาม • ดาเมจ',spd:'ยิงตาม • ความเร็ว'},role:'utility',n:'Tidecaller Orb',ic:'🔵',cd:15,d:'เสกลูกน้ำลอยที่ไหล่ 8 วิ • ทุกครั้งที่เราทำดาเมจใส่ศัตรู (การโจมตีอะไรก็ได้) ลูกยิงตามล็อกเป้า โดน 100% ครั้งละ 5',
   cast(p){p.wfam=WT_FM.t;emit({k:'efx',z:'wtfam',x:Math.round(p.x),y:Math.round(p.y),h:p.z,id:p.id});}}).v;
-const WT_CG=defSpell(WATERP,{id:'aquacage',v:{spd:600,range:300,r:14,dmg:0,t:2,lift:0.6},vn:{spd:'ฟอง • ความเร็ว',range:'ฟอง • ระยะ',r:'ฟอง • ขนาดลูก',dmg:'ฟอง • ดาเมจ',t:'ขังนาน (วิ)',lift:'ลอยสูง (ม.)'},role:'control',n:'Aqua Cage',ic:'🫧',cd:14,d:'ยิงฟองน้ำ ไกล 300 • โดน = ขังศัตรูในฟองลอยขึ้นนิดหน่อย 2 วิ (ทำอะไรไม่ได้ ตีได้ ฟองไม่แตก) ไม่มีดาเมจ',
-  cast(p){Object.assign(PDEF.wcage,{spd:WT_CG.spd,r:WT_CG.r,dmg:WT_CG.dmg,life:WT_CG.range/WT_CG.spd});shoot(p,'wcage',{sp:'aquacage'});},
+const WT_CG=defSpell(WATERP,{id:'aquacage',v:{charge:1,spd:400,range:850,response:0.14,turn:2.4,r:14,dmg:0,t:2,lift:0.6},vn:{charge:'ชาร์จ (วิ)',spd:'ฟอง • ความเร็ว',range:'ฟอง • ระยะ',response:'หน่วงการเลี้ยว (วิ)',turn:'ความเร็วเลี้ยวสูงสุด (เรเดียน/วิ)',r:'ฟอง • ขนาดลูก',dmg:'ฟอง • ดาเมจ',t:'ขังนาน (วิ)',lift:'ลอยสูง (ม.)'},role:'control',n:'Aqua Cage',ic:'🫧',cd:14,d:'ชาร์จลูกน้ำข้างตัว 1 วิ แล้วเหวี่ยงออกไปไกล 850 • ลูกค่อย ๆ เลี้ยวตามเป้ากลางจอ • ช่วงชาร์จและคุมลูกทำได้แค่เดินกับเล็ง • โดน = ขังเป้า 2 วิ ไม่มีดาเมจ',
+  cast(p){if(p.wab||p.wdg||p.wtsk||p.dash>0||p.fly)return false;p.wcCharge=1e-6;p.wln=null;},
   hit(pr,t){addStun(t,WT_CG.t);t.wflt=WT_CG.t;t.wfz=WT_CG.lift;
     emit({k:'efx',z:'wtcage',x:Math.round(t.x),y:Math.round(t.y),h:cH(t),n:t.id});}}).v;
-const WT_AB=defSpell(WATERP,{id:'abyssalbeam',v:{cast:1.5,t:3,len:700,w:28,tick:0.3,dmg:10,turn:0.6,lift:1.2},vn:{cast:'ร่าย (วิ)',t:'ยิงนาน (วิ)',len:'ลำ • ยาว',w:'ลำ • ครึ่งความกว้าง',tick:'โดนทุก (วิ)',dmg:'ดาเมจต่อครั้ง',turn:'หมุนตามเมาส์ (เรเดียน/วิ)',lift:'ลอยสูง (ม.)'},role:'damage',n:'Abyssal Beam',ic:'🔱',cd:25,d:'ร่าย 1.5 วิ แล้วยิงลำน้ำ 3 วิ ยาว 700 (หมุนตามเมาส์ช้ามาก) ไม่ทะลุ ชนคนแรกหรือสิ่งกีดขวางแล้วหยุด โดน 10 ครั้ง ครั้งละ 10 (ครบ = 100) • ยืนนิ่ง ลอยขึ้นนิดหน่อย • คอมโบกับ Tidecaller Orb',
-  cast(p){p.wab={ph:'cast',t:WT_AB.cast,a:p.ang,k:0};p.shieldOn=false;p.wln=null;
+PDEF.wcage={spd:WT_CG.spd,r:WT_CG.r,dmg:WT_CG.dmg,life:WT_CG.range/WT_CG.spd,col:'#b9f0ff'};
+const WT_AB=defSpell(WATERP,{id:'abyssalbeam',v:{cast:1.5,t:2.2,len:700,w:28,tick:0.22,dmg:10,turn:0.6,lift:1.2},vn:{cast:'ร่าย (วิ)',t:'ยิงนาน (วิ)',len:'ลำ • ยาว',w:'ลำ • ครึ่งความกว้าง',tick:'โดนทุก (วิ)',dmg:'ดาเมจต่อครั้ง',turn:'หมุนตามเมาส์ (เรเดียน/วิ)',lift:'ลอยสูง (ม.)'},role:'damage',n:'Abyssal Beam',ic:'🔱',cd:25,d:'ร่าย 1.5 วิ แล้วยิงลำน้ำ 2.2 วิ ยาว 700 (หมุนตามเมาส์ช้ามาก) ไม่ทะลุ ชนคนแรกหรือสิ่งกีดขวางแล้วหยุด โดน 10 ครั้ง ครั้งละ 10 (ครบ = 100) • ยืนนิ่ง ลอยขึ้นนิดหน่อย • คอมโบกับ Tidecaller Orb',
+  cast(p){p.wab={ph:'cast',t:WT_AB.cast,a:p.ang,pt:waterBeamPitch(p),k:0};p.shieldOn=false;p.wln=null;
     emit({k:'efx',z:'wtab',x:Math.round(p.x),y:Math.round(p.y),h:p.z,a:Math.round(p.ang*100)/100,id:p.id,n:0});}}).v;
 const WT_MW=defSpell(WATERP,{id:'moonwater',v:{t:8,len:900,w:28,life:0.6,tick:0.2,dmg:10,rate:1.75,slow:0.55,slowT:0.45},vn:{t:'ระยะเวลา (วิ)',len:'ลำ • ยาว',w:'ลำ • ครึ่งความกว้าง',life:'ลำ • ค้าง (วิ)',tick:'ลำ • โดนทุก (วิ)',dmg:'ลำ • ดาเมจต่อครั้ง',rate:'ยิงได้ทุก (วิ)',slow:'ยิงแล้วเดินช้า (เท่า)',slowT:'ยิงแล้วเดินช้านาน (วิ)'},role:'damage',n:'Moonwater Arts',ic:'🌙',cd:20,d:'8 วิ: คลิกซ้ายกลายเป็นลำน้ำ ไกล 900 ยิงแล้วหาย โดน 3 ครั้ง 10/10/10 ยิงได้ทุก 1.75 วิ',
   cast(p){p.wmw=WT_MW.t;p.cd.basic=0;emit({k:'efx',z:'wtmw',x:Math.round(p.x),y:Math.round(p.y),h:p.z,id:p.id});}}).v;

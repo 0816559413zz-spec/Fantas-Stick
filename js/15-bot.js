@@ -117,14 +117,43 @@ function botPlay(p,dt,tg,c0){
   // ---------- ⚡ สายฟ้า ----------
   if(pi===2){
     const st=p.lst|0;
+    inp.ah=cH(tg)+terrT(tg.x,tg.y)-terrT(p.x,p.y);
     if(p.sdome){if(p.sdome.ph===2&&(p.sdome.god||stormDomeCharge(p.sdome.t)>=1))pulse();return;}
-    if(p.rail||p.slnT>0)return;                                       // ร่าย Railgun/เส้นสายฟ้าอยู่ ยืนนิ่ง
-    // เก็บ stack: Dash ทะลุศัตรู • stack ครบแล้วเก็บ Dash ไว้หนี
-    if(p.dch>=1&&!(p.dash>0)&&d>150&&d<430&&(st<2||roll(0.2))&&roll(dt*4))dash();
+    if(p.rail){
+      inp.ap=Math.atan2((inp.ah-p.z-1.5)*20,d);
+      A.aimOv={x:tg.x,y:tg.y};
+      inp.sh=0;
+      return;
+    }
+    if(p.slnT>0)return;
+    if(p.sdHit&&p.dash>0){inp.fire=0;return;}
+    const closeHeight=Math.abs(inp.ah-p.z-1.1)<2.8;
+    const bow=SPELLS.railgun.v;
+    const bowRange=Math.hypot(d,(inp.ah-p.z-1.5)*20)<bow.len;
+    const flyingMatchup=tg.pathIdx===WINDP&&tg.kitIds.includes('featherwing');
+    if(rdy('railgun')&&bowRange&&(!closeHeight||flyingMatchup&&st<bow.cost)){
+      if(st>=bow.cost){go('railgun');return;}
+      if(rdy('thunderline')&&d<580)go('thunderline');
+      inp.fire=0;
+      return;
+    }
+    if((p.emp&&!p.god||p.cEmp&&p.god)&&closeHeight&&d<(p.god?GODL.v.bigR:STORMV.triLen)){
+      inp.fire=p.god||!p.bfPrev?1:0;
+      A.aimOv={x:tg.x,y:tg.y};
+      return;
+    }
+    const marked=G.waveMarks?.get(tg);
+    if(rdy('stormorbs')&&st>=1&&!p.sorb&&closeHeight&&d<330){go('stormorbs');return;}
+    const minCharges=p.god?1:2;
+    if(p.dch>=minCharges&&p.dash<=0&&closeHeight&&d>70&&d<STORMV.dashDist+20&&t>=(A.stDashT||0)){
+      inp.mx=Math.cos(ang);inp.my=Math.sin(ang);inp.fire=0;A.stDashT=t+0.55;dash();return;
+    }
+    if(p.emp&&!p.god)inp.fire=0;
     if(rdy('stormdome')&&st>=stormDomeCost(p)&&d<560)go('stormdome');
     else if(rdy('railgun')&&st>=3&&d<850&&d>200)go('railgun');
+    else if(rdy('speedsiphon')&&st>=1&&d<600&&marked&&!marked.primed&&marked.until>t)go('speedsiphon');
     else if(rdy('triplestrike')&&st>=2&&d<560)go('triplestrike');
-    else if(rdy('speedsiphon')&&st>=2&&d<600)go('speedsiphon');
+    else if(rdy('speedsiphon')&&st>=1&&d<600)go('speedsiphon');
     else if(rdy('stormorbs')&&st>=1&&!p.sorb&&d<500)go('stormorbs');
     else if(rdy('thunderline')&&d<580&&st<3)go('thunderline');
     ult(340);
@@ -152,17 +181,23 @@ function botPlay(p,dt,tg,c0){
     return;
   }
   // ---------- 💧 น้ำ ----------
-  if(pi===8){
+  if(pi===WATERP){
+    inp.ah=cH(tg)+terrT(tg.x,tg.y)-terrT(p.x,p.y);
     if(p.wdg){if(p.wdg.ph==='aim'){inp.gx=tg.x;inp.gy=tg.y;pulse();}return;}   // มังกรน้ำ: เลือกจุดแล้วคลิกดิ่ง
     if(p.wab){inp.mx=inp.my=0;return;}                                          // Abyssal Beam: ยืนนิ่งตอนร่าย/ยิง
-    const caged=tg.wflt>0;
-    if(rdy('aquacage')&&d<290&&d>60)go('aquacage');
-    else if(rdy('abyssalbeam')&&d<650&&d>200&&(caged||roll(0.35)))go('abyssalbeam');   // ขังก่อนแล้วเสียบลำน้ำ
+    const beamReady=rdy('abyssalbeam'),cageReady=rdy('aquacage');
+    const aimHeight=inp.ah-p.z-WT_BEAM_H;
+    const canCage=d>100&&Math.hypot(d,aimHeight*20)<WT_CG.range*0.8;
+    const caged=tg.wflt>0&&tg.stun>0;
+    const beamRange=Math.hypot(d,aimHeight*20)<WT_AB.len;
+    if(waterCageBusy(p))return;
+    if(beamReady&&caged&&beamRange)go('abyssalbeam');
+    else if(cageReady&&canCage)go('aquacage');
+    else if(beamReady&&beamRange&&d>200&&roll(0.35))go('abyssalbeam');
     else if(rdy('moonwater')&&d<850)go('moonwater');
     else if(rdy('tidecaller')&&d<650)go('tidecaller');
     else if(rdy('riptide')&&d<400&&d>110)go('riptide');
     // โล่โดมน้ำฮีลตัวเองเฉพาะตอนมีจังหวะพัก (ไกลศัตรู เลือดไม่เต็ม เกจพอ)
-    if(!A.blk&&hpR<0.7&&d>260&&p.shieldE>20&&p.shieldBroken<=0)inp.sh=1;
     if(p.cd.dodge<=0&&!(p.dash>0)&&(hpR<0.35||d<110)&&roll(dt*2))dash();       // ร่างโคลนหนี
     ult(700);
     return;
@@ -253,12 +288,23 @@ function aiBot(p,dt){
   // Block: ยกโล่ค้างไว้ หันหน้าหากระสุน (ระดับยาก = ยกตอนใกล้โดน → Perfect Parry)
   const canSh=p.pathIdx!==2&&!p.aug&&!p.wwAim&&p.shieldBroken<=0;
   if(p.pathIdx!==2&&!classPlan)inp.sh=0;
+  if(p.pathIdx===WATERP&&!used&&!waterCageBusy(p)&&!p.wab&&p.hp<p.maxHp*.7&&dist2(p,tg)>260*260&&p.whg>0&&p.shieldE>20&&p.shieldBroken<=0)inp.sh=1;
   if(A.blk){const B=A.blk;B.t-=dt;
     if(B.t<=0||!canSh)A.blk=null;
     else if(B.t<=B.hold){inp.sh=1;inp.fire=0;const pr=B.pr&&!B.pr.dead?B.pr:null;if(pr){inp.ax=pr.x;inp.ay=pr.y;}else{inp.ax=tg.x;inp.ay=tg.y;}}}
   // หลบ: กระสุนศัตรูพุ่งเข้าหาในระยะใกล้ → ยกโล่ / กระโดด / Dash ออกข้าง (สุ่มตามระดับ ครั้งละ 1 วิ)
   A.dodT-=dt;
-  if(A.dodT<=0&&!A.blk)for(const pr of G.proj){if(pr.team===p.team)continue;const rx=p.x-pr.x,ry=p.y-pr.y,d=Math.hypot(rx,ry);if(d>260||d<1)continue;const sp=Math.hypot(pr.vx,pr.vy)||1;
+  if(A.dodT<=0&&!A.blk)for(const pr of G.proj){if(pr.team===p.team||pr.dead)continue;const rx=p.x-pr.x,ry=p.y-pr.y,d=Math.hypot(rx,ry);if(d>260||d<1)continue;const sp=Math.hypot(pr.vx,pr.vy)||1;
+    if(p.pathIdx===2){
+      const eta=(rx*pr.vx+ry*pr.vy)/(sp*sp);
+      if(eta<0||eta>0.23||Math.hypot(rx-pr.vx*eta,ry-pr.vy*eta)>PR+pr.r||Math.abs(pr.h+pr.vh*eta-(p.z+1.1))>1.15+pr.r/20)continue;
+      if(p.dch>=1&&p.dash<=0&&Math.random()<L.dodge){
+        const side=Math.sign((p.x-tg.x)*(-pr.vy)+(p.y-tg.y)*pr.vx)||1;
+        inp.mx=-pr.vy/sp*side;inp.my=pr.vx/sp*side;inp.c.sp=(c0.sp|0)+1;
+        inp.fire=0;A.dodT=0.35;
+      }
+      break;
+    }
     if((rx*pr.vx+ry*pr.vy)/(d*sp)<0.9)continue;A.dodT=rnd(0.7,1.3);
     if(canSh&&p.shieldE>30&&Math.random()<L.blk){
       // เวลาก่อนโดน − ช่วง Parry (0.28 วิ): ยกแม่น = ยกก่อนโดนนิดเดียว • ไม่แม่น = ยกเร็ว/ช้าไปบ้าง
@@ -270,6 +316,9 @@ function aiBot(p,dt){
   const nx=p.x+(inp.mx||0)*90,ny=p.y+(inp.my||0)*90;
   if(!botInZone(A.zone,nx,ny,-60)){const dx=A.home.x-p.x,dy=A.home.y-p.y,d=Math.hypot(dx,dy)||1;inp.mx=dx/d;inp.my=dy/d;}
   botCombo(p,dt,tg);   // ท่าต่อเนื่องต่อสาย (js/15-botplay) — หลังเช็คจังหวะเว้นสกิล ไม่โดนตัดทิ้ง
+  if(p.pathIdx===WATERP&&waterCageBusy(p)){
+    inp.ax=tg.x+A.errX;inp.ay=tg.y+A.errY;
+  }
 }
 // คำสั่งเสก/ลบบอทจากห้องฝึก (trCmd js/15): จุดเกิด = แท่นเสกบอท
 function trBotCmd(p,d){

@@ -124,7 +124,9 @@ function clTargets(C){const P=C.outer.geometry.attributes.position,M=C.Tm;
   for(let k=0;k<C.ref.length;k++){_clV.fromBufferAttribute(P,C.ref[k]);C.outer.applyBoneTransform(C.ref[k],_clV);C.outer.localToWorld(_clV);M[k*3]=_clV.x;M[k*3+1]=_clV.y;M[k*3+2]=_clV.z;}
   for(let r=0;r<C.NR;r++){const f=C.rf[r],r0=Math.min(CL_ROWS.length-2,Math.floor(f)),k=f-r0;
     for(let j=0;j<CL_NC;j++){const a=(r0*CL_NC+j)*3,b=((r0+1)*CL_NC+j)*3,i=(r*CL_NC+j)*3;for(let q=0;q<3;q++)C.T[i+q]=M[a+q]+(M[b+q]-M[a+q])*k;}}}
-function clReset(C){C.P.set(C.T);C.Q.set(C.T);C.init=true;}
+function clReset(C){
+  C.P.set(C.T);C.Q.set(C.T);C.lp=null;C.air.x=C.air.z=0;C.acc=0;C.init=true;
+}
 // ดันจุดออกจากแคปซูล (a→b รัศมี rad)
 function clCapsule(P,Q,i,a,b,rad){const ax=a.x,ay=a.y,az=a.z,bx=b.x-ax,by=b.y-ay,bz=b.z-az,px=P[i]-ax,py=P[i+1]-ay,pz=P[i+2]-az,L=bx*bx+by*by+bz*bz||1;
   const t=clamp((px*bx+py*by+pz*bz)/L,0,1),dx=px-bx*t,dy=py-by*t,dz=pz-bz*t,d=Math.sqrt(dx*dx+dy*dy+dz*dz);
@@ -170,7 +172,7 @@ function clothTick(dt){if(!CLOTH.ON||typeof NET==='undefined')return;const o=PM3
   let vis=true;for(let n=C.outer;n;n=n.parent)if(!n.visible){vis=false;break;}
   C.mo.visible=C.mi.visible=vis&&!!o.g.parent;if(!C.mo.visible){C.init=false;return;}
   o.g.updateMatrixWorld(true);clTargets(C);
-  const wj=o.wud!==undefined||(o.wld&&o.wld.t<0.15);if(!C.init||wj){clReset(C);if(wj)C.lp=null;}   // Sonic Boom พุ่ง: ตัวย้ายแทบทันที ไม่ให้ผ้ารับรู้ความเร็ว ไม่งั้นปลิวค้างหลังจบ
+  const wj=o.wud!==undefined||(o.wld&&o.wld.t<0.15);if(!C.init||wj)clReset(C);   // Sonic Boom พุ่ง: ตัวย้ายแทบทันที ไม่ให้ผ้ารับรู้ความเร็ว ไม่งั้นปลิวค้างหลังจบ
   else{const i=0;if(Math.hypot(C.T[i]-C.P[i],C.T[i+1]-C.P[i+1],C.T[i+2]-C.P[i+2])>CLOTH.SNAP)clReset(C);}
   for(let i=0;i<C.caps.length;i++){const q=C.caps[i],c=C.capV[i];q[0].getWorldPosition(c[0]);q[1].getWorldPosition(c[1]);c[2]=CLOTH[q[2]];}
   _clV.setFromMatrixPosition(C.o.g.matrixWorld);if(!C.lp){C.lp=_clV.clone();C.ly=C.o.g.rotation.y;}

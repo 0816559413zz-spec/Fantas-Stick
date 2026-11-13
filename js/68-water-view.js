@@ -14,11 +14,18 @@ const WT_BODY={
 const WMB_POSE={by:1.1,rx:-1.5,ry:0.0,rz:-1.05};
 function waterMoonPose(o,p,dt){o.wmb+=dt;const u=o.wmb,sm=x=>{x=Math.max(0,Math.min(1,x));return x*x*(3-2*x);},w=sm(u/0.08)*(1-sm((u-0.62)/0.25));if(u>0.9||!p.al){o.wmb=undefined;return false;}
   const R=o.armR.rotation,L=o.armL.rotation,P=WMB_POSE,a=o.legs[0].position.x>0?o.legs[0]:o.legs[1],b=a===o.legs[0]?o.legs[1]:o.legs[0];
-  o.b.rotation.y=lerp(o.b.rotation.y,P.by,w);R.x=lerp(R.x,P.rx,w);R.y=lerp(R.y,P.ry,w);R.z=lerp(R.z,P.rz,w);L.x=lerp(L.x,0.35,w);L.z=lerp(L.z,0.55,w);a.rotation.x=lerp(a.rotation.x,0.28,w);b.rotation.x=lerp(b.rotation.x,-0.28,w);o.b.rotation.x=lerp(o.b.rotation.x,0.08,w);return true;}
+  const pitch=p.wt?.[9]?p.wt[9][1]/1000:o.wmbPitch||0;
+  o.b.rotation.y=lerp(o.b.rotation.y,P.by,w);R.x=lerp(R.x,P.rx-pitch*0.65,w);R.y=lerp(R.y,P.ry,w);R.z=lerp(R.z,P.rz,w);L.x=lerp(L.x,0.35,w);L.z=lerp(L.z,0.55,w);a.rotation.x=lerp(a.rotation.x,0.28,w);b.rotation.x=lerp(b.rotation.x,-0.28,w);o.b.rotation.x=lerp(o.b.rotation.x,0.08,w);return true;}
 function waterCharacterPose(o,p,dt,now){
   if(o.wmb!==undefined&&waterMoonPose(o,p,dt))return;
   const A=p.wt;
   if(!A||!p.al||p.dn||p.fl||p.st){o.wBeamPose=null;return;}
+  if(A[10]||o.cageToss>0){
+    const charge=clamp(A[10]/100||0,0,1),toss=o.cageToss>0?1-o.cageToss/0.32:0;
+    o.cageToss=Math.max(0,(o.cageToss||0)-dt);
+    const pose=[lerp(-0.65,-1.9,_cs(Math.min(1,toss*4))),lerp(-1.15,-0.12,toss),lerp(0.65,-0.35,toss),0.1,-0.8,0.4,0.05,0];
+    characterStance(o,pose,null,A[10]?Math.min(1,charge*7):1-_cs(toss));return;
+  }
   let s=o.wBeamPose;
   if(A[7]){
     if(!s)s=o.wBeamPose={phase:0,t:0,w:0,P:WT_BODY.gather.slice()};
@@ -26,6 +33,8 @@ function waterCharacterPose(o,p,dt,now){
     s.t+=dt;s.w=Math.min(1,s.w+dt*10);
     if(phase===1)characterPoseMix(s.P,WT_BODY.gather,WT_BODY.ready,_cs(Math.min(1,s.t/Math.max(0.1,WT_AB.cast-0.15))));
     else{characterPoseMix(s.P,WT_BODY.recoil,WT_BODY.channel,_cs(Math.min(1,s.t/0.22)));s.P[0]+=Math.sin(now/43)*0.016;s.P[3]+=Math.sin(now/71)*0.012;}
+    const pitch=(A[8]||0)/1000;
+    s.P[0]-=pitch*0.65;s.P[4]-=pitch*0.35;
     characterStance(o,s.P,WT_BRACE,s.w);wandTwoHand(o,s.w*0.92);return;
   }
   if(s&&s.phase!==3){s.phase=3;s.t=0;}
@@ -115,18 +124,27 @@ function wtBeamMesh(){const U={time:FIRE_U.time,uLen:{value:1},uR:{value:0.34},u
   const m=new THREE.Mesh(_wtTube,new THREE.ShaderMaterial({uniforms:U,vertexShader:WT_BEAM_V,fragmentShader:WT_BEAM_F,side:THREE.DoubleSide,fog:false})),
     o=new THREE.Mesh(_wtTube,new THREE.ShaderMaterial({uniforms:U2,vertexShader:WT_BEAM_V,fragmentShader:WT_BEAM_O,transparent:true,depthWrite:false,side:THREE.DoubleSide,fog:false}));
   m.add(o);m.frustumCulled=o.frustumCulled=false;m.renderOrder=4;o.renderOrder=5;return m;}
-function wtBeamSync(S,o,p,a,L,dt){if(!S.bm){S.bm=WT_POOL.bm.pop()||wtBeamMesh();scene.add(S.bm);S.bL=0;}S.bL=Math.min(L,S.bL+dt*2400);if(S.bL>L)S.bL=L;S.bL+=(L-S.bL)*Math.min(1,dt*30);
-  const c=Math.cos(a),n=Math.sin(a),y0=o.g.position.y+1.3,L0=56,ex=p.x+c*S.bL,ey=p.y+n*S.bL,gy=GY(ex,ey)+1.1,len=Math.max(0.1,(S.bL-L0)/20),B=S.bm;
-  B.position.set(tx(p.x+c*L0),y0,tz(p.y+n*L0));_wtA.set(tx(ex),Math.min(y0,gy+Math.max(0,y0-gy)*0.35),tz(ey));B.lookAt(_wtA);
-  B.material.uniforms.uLen.value=Math.max(0.1,B.position.distanceTo(_wtA));
+function wtBeamSync(S,o,p,a,pt,L,dt){if(!S.bm){S.bm=WT_POOL.bm.pop()||wtBeamMesh();scene.add(S.bm);S.bL=0;}S.bL=Math.min(L,S.bL+dt*2400);S.bL+=(L-S.bL)*Math.min(1,dt*30);
+  const c=Math.cos(a)*Math.cos(pt),n=Math.sin(a)*Math.cos(pt),rise=Math.sin(pt)/20;
+  const y0=o.g.position.y+WT_BEAM_H,L0=Math.min(56,S.bL),ex=p.x+c*S.bL,ey=p.y+n*S.bL,B=S.bm;
+  B.visible=S.bL-L0>2;
+  B.position.set(tx(p.x+c*L0),y0+rise*L0,tz(p.y+n*L0));_wtA.set(tx(ex),y0+rise*S.bL,tz(ey));
+  if(B.visible)B.lookAt(_wtA);
+  B.material.uniforms.uLen.value=Math.max(0.1,(S.bL-L0)/20);
   const th=Math.max(0,_wtA.y-GY(ex,ey)),I=wtLoop(S,'tip','water/beam_tip',{x:ex,y:ey,h:th,a,aim:false});if(I){I.x=ex;I.y=ey;I.h=th;I.a=a;}}
 function wtBeamOff(S){if(S.bm){scene.remove(S.bm);WT_POOL.bm.push(S.bm);S.bm=null;}wtStop(S,'tip');}
 
 // ---------- ต่อผู้เล่น: โล่ฟองน้ำ/ฮีล • ลูกผู้ช่วยที่ไหล่ • ร่างโคลน + เส้นน้ำ • ลำน้ำ Abyssal • Moonwater • มังกร ----------
 function waterFX(o,p,pz,now,dt){
   const A=p.wt,s=WTV.st.get(p.id);
-  if(!A){if(s){for(const k of ['sh','heal','fam','jaw','cl','clmA','clmB','beam','moon','drg','aim'])wtStop(s,k);wtBeamOff(s);wtFamRiseOff(s);wtMesh(s,'ln');wtMesh(s,'cm');s.cmD=s.cmT=0;}return;}
+  if(!A){if(s){for(const k of ['sh','heal','fam','jaw','cl','clmA','clmB','beam','moon','drg','aim','cageCharge'])wtStop(s,k);wtBeamOff(s);wtFamRiseOff(s);wtMesh(s,'ln');wtMesh(s,'cm');s.cmD=s.cmT=0;}return;}
   const S=wtState(p.id),alive=p.al&&!p.dn,a=p.a||0,t=now/1000;
+  if(alive&&A[10]){
+    const k=clamp(A[10]/100,0,1),side=23-9*k*k,front=4+19*k*k;
+    const x=p.x+Math.cos(a)*front-Math.sin(a)*side,y=p.y+Math.sin(a)*front+Math.cos(a)*side,h=pz+1.4;
+    const I=wtLoop(S,'cageCharge','water/cage_fly',{x,y,h,a,s:0.22});
+    if(I){I.x=x;I.y=y;I.h=h;I.a=a;I.s=0.22+0.78*k;}
+  }else wtStop(S,'cageCharge');
   wtSinkOffset(o,p,dt);
   // โล่ฟองน้ำ + ฮีล (มีเกจ)
   if(alive&&p.sh){wtLoop(S,'sh','water/shield_bubble',{x:p.x,y:p.y,h:0,follow:p.id});if(A[0]>0)wtLoop(S,'heal','water/shield_heal',{x:p.x,y:p.y,h:0,follow:p.id});else wtStop(S,'heal');}
@@ -148,8 +166,14 @@ function waterFX(o,p,pz,now,dt){
   else{wtStop(S,'cl');wtStop(S,'clmA');wtStop(S,'clmB');wtMesh(S,'ln');if(S.cm&&!S.cmD)S.cmD=1e-4;S.cmT=0;}
   // ร่างโคลนหมดเวลา/ถูกเรียกกลับ: ยุบละลายลงพื้น 0.3 วิ แล้วหาย
   if(S.cmD){const k=(S.cmD+=dt)/0.3;if(k>=1){wtMesh(S,'cm');S.cmD=0;}else{S.cm.scale.set(1+k*0.3,1-k,1+k*0.3);S.cm.material.uniforms.uOp.value=0.85*(1-k*0.6);}}
-  // ลำน้ำ Abyssal Beam (3 วิ) — fx ตามตัว หันตามตัวผู้เล่น (host หมุนตัวตามลำ)
-  if(A[3]!==null&&A[3]!==undefined){{const I=wtLoop(S,'beam','water/beam_loop',{x:p.x,y:p.y,h:0,follow:p.id,aim:false,a:A[3]/100});if(I)I.a=A[3]/100;}wtBeamSync(S,o,p,A[3]/100,A[6]||WT_AB.len,dt);}else{wtStop(S,'beam');wtBeamOff(S);}
+  // ลำน้ำ Abyssal Beam — fx ตามตำแหน่งและมุมลำจาก host
+  if(A[3]!==null&&A[3]!==undefined){
+    const a=A[3]/100,pt=(A[8]||0)/1000;
+    const I=wtLoop(S,'beam','water/beam_loop',{x:p.x,y:p.y,h:0,follow:p.id,aim:false,a,aimPitch:pt,pivotY:WT_BEAM_H});
+    if(I){I.a=a;I.o.aimPitch=pt;}
+    wtBeamSync(S,o,p,a,pt,A[6]??WT_AB.len,dt);
+  }else{wtStop(S,'beam');wtBeamOff(S);}
+  if(A[9]&&wtAlive(S.moonBeam)){S.moonBeam.a=A[9][0]/1000;S.moonBeam.o.aimPitch=A[9][1]/1000;o.wmbPitch=S.moonBeam.o.aimPitch;}
   // Moonwater Arts 8 วิ
   if(alive&&A[2])wtLoop(S,'moon','water/moon_aura',{x:p.x,y:p.y,h:0,follow:p.id});else wtStop(S,'moon');
   // มังกร: ลอยเหนือหัวขวาระหว่างเลือกจุด + วงเล็ง (เฉพาะเรา)
@@ -199,12 +223,13 @@ function waterEfx(ev){
     case 'wtfamhit':wtPew(ev.id,x,y,H);fxPlay('water/fam_hit',{x,y,h:H});return true;
     case 'wtwave':fxPlay('water/riptide',{x,y,h:0,a,aim:false});if(near){shake(0.12);snd('cast_pull',ev);}return true;
     case 'wtabhit':fxPlay('water/beam_hit',{x,y,h:H});return true;
+    case 'wtcagetoss':{const o=PM3.get(ev.id);if(o)o.cageToss=0.32;if(near)snd('cast_pull',ev);return true;}
     case 'wtcage':fxPlay('water/cage_bubble',{x,y,h:0,follow:ev.n});wtOutline(ev.n,2.4);return true;   // ลูกน้ำทึบ: คนที่ถูกขังมีขอบขาวเห็นทะลุ (ผู้ใช้ 2026-11-01)
     case 'wtab':if(!ev.n)fxPlay('water/beam_cast',{x,y,h:0,follow:ev.id});if(near)snd(ev.n?'break':'cast_pull',ev);if(ev.n&&near)shake(0.12);return true;
     case 'wtaboff':return true;
     case 'wtmw':fxPlay('water/moon_mark',{x,y,h:0,follow:ev.id});return true;   // ตราดาวตอนเปิด Moonwater (ผู้ใช้ 2026-11-01)
     case 'wtmwoff':return true;
-    case 'wtmb':{fxPlay('water/moon_beam',{x,y,h:0,a,aim:false});const o=PM3.get(ev.id);if(o){o.wmb=0;o.caN=null;o.cpT=0;}if(near)snd('break',ev);return true;}
+    case 'wtmb':{const pt=ev.pt||0;wtState(ev.id).moonBeam=fxPlay('water/moon_beam',{x,y,h:0,feetH:H,a,aim:false,aimPitch:pt,pivotY:WT_BEAM_H});const o=PM3.get(ev.id);if(o){o.wmb=0;o.wmbPitch=pt;o.caN=null;o.cpT=0;}if(near)snd('break',ev);return true;}
     case 'wtdg':wdgStart(ev.id,x,y);if(near){shake(0.2);snd('cast_pull',ev);}return true;
     case 'wtdgaim':return true;
     case 'wtdgdive':{const c=VIEW.cur&&VIEW.cur.P.find(q=>q.id===ev.id),da=c?Math.atan2(y-c.y,x-c.x):0;

@@ -475,6 +475,7 @@ function updateProjectiles(dt){
 }
 function projStep(pr,dt,ps){
   if(pr.bz)windCurveStep(pr,dt);   // ขนนกสายลม: วิ่งตามเส้นโค้ง
+    if(pr.type==='wcage')waterCageSteer(pr,dt);
     if(pr.dead)return;
     {const t0=TERR?terrT(pr.x,pr.y):0;pr.x+=pr.vx*dt;pr.y+=pr.vy*dt;pr.h+=pr.vh*dt;if(TERR)pr.h-=terrT(pr.x,pr.y)-t0;}pr.life-=dt;
     if(pr.flak&&broomFlak(pr))return;   // Flak บนไม้กวาด: ใกล้ศัตรู = แตกเป็นกรวย (js/69)
