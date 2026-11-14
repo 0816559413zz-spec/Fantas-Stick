@@ -34,17 +34,17 @@ FCS_C:7 FCS_WH:8 genFcs:9
 §45 พื้นที่เล่นตามเฟส (กำแพงล่องหน) + เขตจุดเกิดปลอดภัย — ใช้ทั้งโฮสต์ (G…
 SGPH:46 SG_SPR:47 _sgAreaC:48 sgArea:49 sgClamp:55 sgInArea:65
 
-## js/03-spells-core.js (248) — ระบบคาถาใหม่: สาย (path) × คาถา (spell) + สถานะ (status effects)
+## js/03-spells-core.js (249) — ระบบคาถาใหม่: สาย (path) × คาถา (spell) + สถานะ (status effects)
 §6 ไอคอนคาถา: จาก game-icons.net (CC BY 3.0, เครดิตใน "คู่มือ" และ icons…
-ICONS:8 ICOALIAS:9 hasIco:10 ICOBASE:12 icoURL:13 ICO:14 icoTint:15 icoHTML:24 PATHS:25 SPELL_LIST:34 SPELLS:34 defSpell:35 SLOTK:36 BRMAP:36 KITP:37 parseKit:38 cleanKit:54 setKit:55 pathReset:58
-§60 สถานะ (ใช้ได้ทั้งผู้เล่นและศัตรู)
-isBig:61 ccScale:63 ccTouch:64 addStun:65 addRoot:66 addFreeze:67 addSlow:72 addChill:73 ignite:78 FX_SHOCK_CYAN:86 FX_ONFIRE:86 shock:87 knock:92 addWard:93 addFrostSlow:95 frostSlow:96 moveMul:103 BRN_MAX:105 addBurn:106 addOnFire:108 addXBurn:109 addPoison:110 addSil:111 addFear:112 addBlind:113 addMark:114 healT:116 tickStatus:121 clearStatus:144 fxMask:145
-§147 วัตถุในสนามที่คาถาสร้าง: โซน / ฟ้าผ่าหน่วงเวลา / กำแพง / ช่องร่ายต่อเ…
-foesIn:148 shieldFaces:156 aoeHit:166 addZone:172 updateZones:177 addStrike:188 updateStrikes:189 addWall:190 updateWalls:191 updateChan:202 updateSpells:206 aimPoint:208 aimWall:220
-§222 ตัวช่วยคอมโบ (ทุกสายใช้หลักเดียวกัน: ตั้งต้น → ต่อยอด → ปิดจบ)
-ROLE_N:224 takePoison:225
-§227 ความสามารถพื้นฐาน (คลิกซ้าย) ของแต่ละสาย: สะสมสถานะตั้งต้นให้เองทุกๆ …
-PBASIC:228
+ICONS:8 ICOALIAS:9 hasIco:10 ICOBASE:12 icoURL:13 ICO:14 icoTint:15 icoHTML:24 PATHS:25 SPELL_LIST:34 SPELLS:34 defSpell:35 SLOTK:36 BRMAP:36 KITP:37 parseKit:38 cleanKit:55 setKit:56 pathReset:59
+§61 สถานะ (ใช้ได้ทั้งผู้เล่นและศัตรู)
+isBig:62 ccScale:64 ccTouch:65 addStun:66 addRoot:67 addFreeze:68 addSlow:73 addChill:74 ignite:79 FX_SHOCK_CYAN:87 FX_ONFIRE:87 shock:88 knock:93 addWard:94 addFrostSlow:96 frostSlow:97 moveMul:104 BRN_MAX:106 addBurn:107 addOnFire:109 addXBurn:110 addPoison:111 addSil:112 addFear:113 addBlind:114 addMark:115 healT:117 tickStatus:122 clearStatus:145 fxMask:146
+§148 วัตถุในสนามที่คาถาสร้าง: โซน / ฟ้าผ่าหน่วงเวลา / กำแพง / ช่องร่ายต่อเ…
+foesIn:149 shieldFaces:157 aoeHit:167 addZone:173 updateZones:178 addStrike:189 updateStrikes:190 addWall:191 updateWalls:192 updateChan:203 updateSpells:207 aimPoint:209 aimWall:221
+§223 ตัวช่วยคอมโบ (ทุกสายใช้หลักเดียวกัน: ตั้งต้น → ต่อยอด → ปิดจบ)
+ROLE_N:225 takePoison:226
+§228 ความสามารถพื้นฐาน (คลิกซ้าย) ของแต่ละสาย: สะสมสถานะตั้งต้นให้เองทุกๆ …
+PBASIC:229
 
 ## js/04-frost-mech.js (132) — สายน้ำแข็ง: ประชิด/ไกล (V) • ฟันดาบ/ขวาน • ไถลน้ำแข็ง • พื้นน้ำแข็ง/ภ…
 FROSTV:3 FROST_SWING3_HIT:9 frostShieldPitch:10 frostBoom:15 meleeHit:22 mirrorPos:33 frostBasic:34 frostSlam3:58 frostSlam:66 frostDash:72 addIce:77 updateIces:78 frostWavePitch:95 frostWaveSolid:98 updateWaves:104 _stO:122 _stL:122 groundH:123
@@ -134,7 +134,7 @@ waterDragonTick:189
 §203 ทุกเฟรม (ทั้งเกม)
 updateWater:204 waterSnapP:210 waterSnapW:214 WT_RP:217 WT_FM:220 WT_CG:222 WT_AB:227 WT_MW:230 WT_UL:232
 
-## js/09-wind.js (594) — 
+## js/09-wind.js (595) — 
 WINDP:8 WNV:12
 §19 ตัวช่วย
 wOn:20 wGain:21 wSeg:23 wFoeNear:24
@@ -176,7 +176,7 @@ windBladeCast:486 windBladeTick:488 windBladeHit:492
 §498 อัลติ Sonic Boom Strike (เดิม Eye of Heaven)
 windUltCast:502 windUltTick:505 windUltSweep:530 windFloatZ:538 windSnapP:541 windSnapW:542
 §545 สกิล (ผู้ใช้ 2026-11-08: รีดีไซน์ทั้งชุด — id เดิมไว้ให้ชุดสกิล/tune/…
-W_WL:547 W_DR:553 W_VX:559 W_VO:565 W_FW:571 W_UL:580
+W_WL:547 W_DR:553 W_VX:559 W_VO:565 W_FW:571 W_UL:581
 
 ## js/10-net.js (200) — เครือข่าย (PeerJS / WebRTC)
 PREFIX:4 NET:5 RC:9 TURN_SERVERS:12 ICE:13 PEER_OPT:14 TURN_URL:16 ICE_READY:18 JN:22 LAG:24 lagDo:25 hostSend:26 LOBBY:27 genCode:28 sendAll:29 NETD_KEYS:33 NETD:33 netDeltaReset:34 netDelta:35 NET_MAX:49 _netTE:49 netSendSnap:50 NETU:62 netUndelta:63 setStatus:69 hostGame:71 hostPeer:80 netConnect:100 joinWatch:111 joinFail:126 netLost:132 joinGame:147 joinPeer:158 clientOnData:173 leave:188 leaveRoom:190
@@ -809,4 +809,4 @@ surfSync:49 surfQuality:53
 SURF_VS:55 SURF_VS_BODY:56 SURF_FS:67 SURF_FS_BODY:68 surfOk:98 surfApply:99 surfScene:111
 §112 ปรับค่า (tune.html / F8)
 
-(98 files, 26671 lines)
+(98 files, 26673 lines)

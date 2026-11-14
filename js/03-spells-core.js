@@ -41,7 +41,8 @@ function parseKit(str){
   let path=Number.isInteger(a[0])&&a[0]>=0&&a[0]<PATHS.length?a[0]:0;
   if(!SPELL_LIST.some(x=>x.path===path&&!x.ult)||PATHS[path].off)path=0;
   const ids=[];let off=0;
-  const main=SPELL_LIST.filter(x=>x.path===path&&!x.ult).map(x=>x.i);
+  // PATHS[path].def = ลำดับสกิลชุดเริ่มต้น (เช่นสายลม: Featherwing แทน Tailwind — ผู้ใช้ 2026-11-15) แล้วต่อด้วยลำดับเดิม
+  const main=[...new Set([...(PATHS[path].def||[]).map(id=>SPELLS[id]&&SPELLS[id].i).filter(i=>i!==undefined),...SPELL_LIST.filter(x=>x.path===path&&!x.ult).map(x=>x.i)])];
   for(let k=1;k<=4;k++){
     const i=a[k],S=Number.isInteger(i)&&SPELL_LIST[i];
     if(S&&!S.ult&&!PATHS[S.path].off&&!ids.includes(i)&&S.path===path){if(S.path!==path)off++;ids.push(i);}else ids.push(null);
