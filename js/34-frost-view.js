@@ -51,6 +51,18 @@ function makeKiteShield(){
 // ---------- อาวุธน้ำแข็งลอย (ผู้ใช้ 2026-10-22: "ร่ายคาถาให้ดาบฟันเอง ระยะเท่าเดิม" • อัลติ = ดาบ/ขวาน 3 เล่มแทนร่างแยก) ----------
 // o.fw.g = ลูกของ o.g (หันตามตัว: +z หน้า, -x ขวา, +y ขึ้น) ถือดาบ+ขวาน • ตัวอาวุธ: ด้ามที่จุด 0 ใบชี้ทาง -y หน้าแบนตามแกน z
 // ท่าทั้งหมดคิดจาก snapshot เดิม (F[1] นับครั้งฟัน, F[2] จังหวะ, ธง 32 ชาร์จ, ธง 16 อัลติ) → ทุกเครื่องเห็นเหมือนกัน ไม่แก้ protocol • ดาเมจ/ระยะยังเป็นของ host เหมือนเดิม
+// Mirror Legion (ผู้ใช้ 2026-11-14): มงกุฎน้ำแข็งลอยเหนือหัวระหว่างอัลติ (ไม่ติดหัว ลอย หมุนช้า ๆ) • โผล่ตอนเริ่ม หายตอนจบ
+function makeIceCrown(){const g=new THREE.Group(),m=iceMat(0.9,'#3a8ac0'),mg=iceMat(0.95,'#7fd0ff');
+  const band=new THREE.Mesh(new THREE.TorusGeometry(0.2,0.025,6,24),m);band.rotation.x=Math.PI/2;g.add(band);
+  for(let i=0;i<8;i++){const a=i/8*Math.PI*2,big=i%2===0,h=big?0.26:0.15,s=new THREE.Mesh(new THREE.ConeGeometry(big?0.045:0.032,h,4),big?mg:m);s.position.set(Math.cos(a)*0.2,h/2+0.01,Math.sin(a)*0.2);s.rotation.z=-Math.cos(a)*0.12;s.rotation.x=Math.sin(a)*0.12;g.add(s);
+    if(big){const gem=new THREE.Mesh(new THREE.OctahedronGeometry(0.03,0),mg);gem.position.set(Math.cos(a)*0.215,0.02,Math.sin(a)*0.215);g.add(gem);}}
+  return g;}
+function frostCrown(o,on,dt,now){
+  if(on&&!o.iceCrown){o.iceCrown=makeIceCrown();o.iceCrown.scale.setScalar(0.01);o.g.add(o.iceCrown);o.crownK=0;}
+  if(!o.iceCrown)return;o.crownK=Math.max(0,Math.min(1,(o.crownK||0)+(on?dt*3:-dt*4)));const C=o.iceCrown;C.visible=o.crownK>0.01;if(!C.visible)return;
+  const hd=o.fileModel&&(o.hdBone||(o.hdBone=o.fileModel.getObjectByName('head')));let y=2.35;if(hd){hd.updateWorldMatrix(true,false);hd.getWorldPosition(_tv1);o.g.worldToLocal(_tv1);y=_tv1.y+0.55;}
+  const e=1-Math.pow(1-o.crownK,3);C.position.set(0,y+0.06*Math.sin(now/420),0);C.rotation.y=now/1400;C.rotation.z=0.06*Math.sin(now/900);C.scale.setScalar(Math.max(0.01,e*1.5));
+  if(on&&Math.random()<0.25){C.getWorldPosition(_tv2);const q=simOf(_tv2);PARTS.push({x:q.x+rnd(-8,8),y:q.y+rnd(-8,8),h:q.h+rnd(0,0.2),vx:0,vy:0,vh:rnd(-0.6,-0.2),life:0.6,max:0.6,col:Math.random()<0.5?'#ffffff':'#9fe0ff',size:1.4,g:0});}}
 const FWS=1.3,FWA=[[-2.75,0,1.5],[2.75,0,1.5]];   // ขนาดอาวุธลอย • จุดของเล่มเสริมตอนอัลติ (= mirrorPos ฝั่ง host: หน้า 30 px ข้าง 55 px)
 const _fwM=new THREE.Matrix4(),_fwM2=new THREE.Matrix4(),_fwX=new THREE.Vector3(),_fwY=new THREE.Vector3(),_fwZ=new THREE.Vector3(),_fwP=new THREE.Vector3(),_fwS=new THREE.Vector3(FWS,FWS,FWS),_fwQ=new THREE.Quaternion();
 const _eo=t=>1-Math.pow(1-t,3),_ei=t=>t*t*t,_ss=t=>t*t*(3-2*t);
@@ -108,11 +120,10 @@ function frostFX(o,p,pz,now,dt){
   if(F[1]!==o.swN){o.swN=F[1];o.swC=F[2];o.swLen=o.swC===2?0.69:ff?0.48:0.40;o.swT=o.swLen;o.fwK0=0;}
   const SWT=o.swLen||0.40;
   if(o.swT>0)o.swT-=dt;
-  if(flags&16){if(!o.mlOn){o.mlOn=1;o.mlT=0.4;}}else o.mlOn=0;   // อัลติเพิ่งเปิด = พุ่งไปพร้อมกวาดฟันรอบตัวรัว ๆ 0.4 วิ
-  if(o.mlT>0)o.mlT-=dt;
+  // (เดิม: อัลติเพิ่งเปิด = กวาดฟันรัว 0.4 วิ ตอนพุ่ง — เอาออก 2026-11-14 ไม่มีพุ่งแล้ว)
   const fa=o.fa||(o.fa={ax:-1.05,az:0.15,by:0,bx:0}),P=FWP;
   fwIdle(P,now,ff,o.fwSeed||(o.fwSeed=rnd(0,6)));o.fwSub=0;
-  if(fwOn&&o.mlT>0){const k=1-o.mlT/0.4,w=Math.sin(k*Math.PI*3);fwSweep(P,1.75*w,1.35+0.35*Math.cos(k*Math.PI*3),ff);P.strike=true;P.ax=-1.4;P.az=0.85*w;P.ty=0.35*w;P.tx=0.1;}   // ฟันไป-กลับ 3 ครั้งเฉพาะด้านหน้า (ไม่กวาดผ่านหลัง = ไม่บังกล้อง)
+  if(false){}   // (เดิม: กวาดฟันตอนพุ่งอัลติ — เอาออกแล้ว)
   else if(fwOn&&o.swT>0){const k=clamp(1-o.swT/SWT,0,1);fwSwing(P,o.swC,ff,k);if(P.strike){o.fwSub=1;o.fwKs=[o.fwK0||0,k];}o.fwK0=k;}
   // Glacier Rend โหมดประชิด (ผู้ใช้ 2026-11-06): ไม่ชาร์จ • เอาอาวุธลงล่าง ค้างนิดเดียว (nearWind) แล้วฟันงัดขึ้น คลื่นพุ่งตอนงัด
   if(fwOn&&(flags&32)){fwChop(P,2.35,ff);P.rate=26;P.strike=false;o.fwSub=0;P.ax=-0.3;P.az=-0.1;P.tx=0.3;P.ty=0.25;}
@@ -129,15 +140,21 @@ function frostFX(o,p,pz,now,dt){
   if(fwOn&&o.ffRise>0){o.ffRise-=dt;const k=1-Math.max(0,o.ffRise)/FF_RISE,e=1-Math.pow(1-k,3),sp=(1-e)*Math.PI*3,c=Math.cos(sp),s=Math.sin(sp);
     P.y=lerp(-1.1,P.y,e);P.z=lerp(0.85,P.z,e);P.x=lerp(-1.1,P.x,e);
     const bx=P.bx,bz=P.bz,nx=P.nx,nz=P.nz;P.bx=bx*c-bz*s;P.bz=bx*s+bz*c;P.nx=nx*c-nz*s;P.nz=nx*s+nz*c;P.rate=60;P.strike=false;o.fwSub=0;}
+  // Mirror Legion ร่าย 1 วิ (ผู้ใช้ 2026-11-14): อาวุธลอยทำท่าตามแบบที่เลือก • u = 0..1 ของการร่าย
+  if(fwOn&&o.mlcT>0){const u=clamp(1-o.mlcT/(o.mlcT0||1),0,1),N=o.mlcN,E=t=>1-Math.pow(1-clamp(t,0,1),3);P.strike=false;P.rate=18;o.fwSub=0;
+    if(N==='mlraise'){   // ลอยขึ้นเหนือหัว ชี้ฟ้า ชาร์จ → ลอยมาหน้าตัวแล้วหมุนเป็นกังหันเร็วขึ้นเรื่อย ๆ → แยกเป็น 3 เล่มตอนร่ายจบ (ไม่สับลง)
+      if(u<.5){const e=E(u/.25),sp=u*9;P.x=lerp(P.x,0,e);P.y=lerp(P.y,3.3,e);P.z=lerp(P.z,0.25,e);P.bx=0;P.by=1;P.bz=0;P.nx=Math.cos(sp);P.ny=0;P.nz=Math.sin(sp);P.rate=14;}
+      else{const e=E((u-.5)/.12),t=u-.5,a=t*t*95+t*6;P.x=0;P.y=lerp(3.3,1.9,e);P.z=lerp(0.25,2.3,e);P.bx=Math.sin(a);P.by=Math.cos(a);P.bz=0;P.nx=0;P.ny=0;P.nz=1;P.strike=false;P.rate=40;}}
+  }
   // วางอาวุธ: ช่วงฟันจริงวางตรงทุกเฟรม (ทางโค้งคม ไม่ตัดมุม) • นอกนั้นไล่ตามนุ่ม ๆ
   fwAim(P.bx,P.by,P.bz,P.nx,P.ny,P.nz);_fwP.set(P.x,P.y,P.z);
   {const G=o.fw.g;if(P.strike||!o.fwInit){G.position.copy(_fwP);G.quaternion.copy(_fwQ);o.fwInit=1;}else{const r=Math.min(1,dt*P.rate);G.position.lerp(_fwP,r);G.quaternion.slerp(_fwQ,r);}}
   o.fwStrike=fwOn&&P.strike;
-  const sm=(o.swT>0||o.grDown>0||o.grUp>0||o.mlT>0)?Math.min(1,dt*30):Math.min(1,dt*10);
+  const sm=(o.swT>0||o.grDown>0||o.grUp>0||o.mlcT>0)?Math.min(1,dt*30):Math.min(1,dt*10);
   fa.ax+=(ax-fa.ax)*sm;fa.az+=(az-fa.az)*sm;fa.by+=(by-fa.by)*sm;fa.bx+=(bx-fa.bx)*sm;
   if((melee&&!o.caN||rpose)&&!p.fl){o.armR.rotation.x=fa.ax;o.armR.rotation.z=fa.az;o.b.rotation.y=fa.by;if(Math.abs(fa.bx)>0.01)o.b.rotation.x+=fa.bx;
     if(rpose){o.armL.rotation.x=lerp(-0.2,-1.6,o.grUp>0?1:0.5);o.armL.rotation.z=0.25;}
-    if(melee&&!p.sh){const act=o.swT>0||o.grDown>0||(flags&32)||o.mlT>0;o.armL.rotation.x=act?-0.75:-0.4;o.armL.rotation.z=act?0.8:0.35;}}   // มือซ้ายกางทรงตัวตอนร่าย
+    if(melee&&!p.sh){const act=o.swT>0||o.grDown>0||(flags&32)||o.mlcT>0;o.armL.rotation.x=act?-0.75:-0.4;o.armL.rotation.z=act?0.8:0.35;}}   // มือซ้ายกางทรงตัวตอนร่าย
   else o.b.rotation.y*=0.8;
   // เส้นด้ายเวท ปลายไม้ → ด้ามอาวุธ (+ ประกายไหลไปตามเส้น)
   if(fwOn&&o.fwLk){o.tip.getWorldPosition(_tv1);o.fw.g.getWorldPosition(_tv2);const A=o.fwLk.geometry.attributes.position,ar=A.array,amp=o.fwStrike?0.03:0.08;
@@ -236,16 +253,17 @@ function frostFX(o,p,pz,now,dt){
 for(let i=0;i<5;i++){const an=rnd(0,6.283),r=rnd(40,180);PARTS.push({x:p.x+Math.cos(an)*r,y:p.y+Math.sin(an)*r,h:pz+rnd(0.1,2.2),vx:-Math.sin(an)*120,vy:Math.cos(an)*120,vh:rnd(-0.6,0.2),life:0.6,max:0.6,col:i%2?'#ffffff':'#bfeaff',size:rnd(1.6,2.6),g:0,drag:1});}
     if(Math.random()<0.15){const an=rnd(0,6.283),rr=rnd(60,170);PARTS.push({x:p.x+Math.cos(an)*rr,y:p.y+Math.sin(an)*rr,h:pz+0.15,vx:0,vy:0,vh:0.1,life:1,max:1,col:'#d6ecff',size:5,g:0,smoke:true,grow:0.6});}}
   // อัลติ Mirror Legion: อาวุธน้ำแข็งลอยเพิ่ม 2 เล่ม (ซ้าย/ขวา เยื้องหน้า = จุดที่ host ฟันซ้ำ 50%) ทำท่าเดียวกับเล่มหลักทุกจังหวะ
+  frostCrown(o,!!(flags&16),dt,now);
   if(flags&16){
     if(!o.fwx)o.fwx=FWA.map(()=>{const w=fwWeapons();w.g.visible=false;o.g.add(w.g);return w;});
     o.fwx.forEach((c,i)=>{const A=FWA[i];
       if(!!c.sword.userData.file!==!!o.sword.userData.file)for(const k of ['sword','axe']){const old=c[k],nw=k==='sword'?makeIceSword():makeIceAxe();nw.position.set(0,0,0);c.g.add(nw);c.g.remove(old);disposeTree(old);c[k]=nw;}
       c.sword.visible=!ff;c.axe.visible=!!ff;
-      c.g.position.set(o.fw.g.position.x+A[0],o.fw.g.position.y+A[1],o.fw.g.position.z+A[2]);c.g.quaternion.copy(o.fw.g.quaternion);
+      {const sk=1-Math.pow(1-(c.born||0),3);c.g.position.set(o.fw.g.position.x+A[0]*sk,o.fw.g.position.y+A[1]*sk,o.fw.g.position.z+A[2]*sk);}c.g.quaternion.copy(o.fw.g.quaternion);   // เล่มเสริมแยกออกจากเล่มหลัก
       if(!c.on){c.on=1;c.born=0;c.endT=0;c.g.updateWorldMatrix(true,false);_tv1.set(0,-1,0);c.g.localToWorld(_tv1);const q=simOf(_tv1);burst(q.x,q.y,'#dff6ff',10,160,0.4,2,{h:q.h,vh:[1,4],g:2});
         // เศษผลึกพุ่งเข้ามาประกอบเป็นใบอาวุธ
         for(let j=0;j<14;j++){const an=rnd(0,6.283),r=rnd(60,110),sx=q.x+Math.cos(an)*r,sy=q.y+Math.sin(an)*r,hh=Math.max(0.2,q.h+rnd(-1.2,1.2));iceBit(_plateG,sx,sy,hh,0.16,0.16,0.1,{life:0.3,up:0.03,down:0.08,v:[(q.x-sx)/0.28,(q.y-sy)/0.28,(q.h-hh)/0.28],spin:rnd(-8,8)});}}
-      c.born=Math.min(1,c.born+dt*4);c.g.scale.setScalar(FWS*(0.2+0.8*(1-Math.pow(1-c.born,3))));c.g.visible=fwOn;
+      c.born=Math.min(1,c.born+dt*2.2);c.g.scale.setScalar(FWS*(0.2+0.8*(1-Math.pow(1-c.born,3))));c.g.visible=fwOn;
       // หางแสงของเล่มเสริม (ตามท่าเดียวกับเล่มหลัก)
       if(fwOn&&o.fwStrike){const W=ff?c.axe:c.sword;W.updateMatrix();o.g.updateWorldMatrix(true,false);
         if(!c.tr)c.tr=trailNew({sweep:true,col:ff?'#d8ecff':'#e8f8ff',col2:ff?'#1a52c8':'#54c2ff',life:ff?0.24:0.16,k:ff?0.9:1.0});

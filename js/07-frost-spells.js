@@ -22,12 +22,13 @@ const CRYO=defSpell(1,{id:'cryoshell',v:{time:5,heal:3.75},vn:{time:'แช่�
     p.cryo=S.v.time;p.cryoTk=0.5;p.inv=S.v.time;p.shieldOn=false;p.slideT=0;
     emit({k:'efx',z:'cryo',x:p.x,y:p.y,h:p.z+1,id:p.id});
   }});
-const FAURA=defSpell(1,{id:'frostaura',v:{time:5,r:180,dmg:10},vn:{time:'อยู่นาน (วิ)',r:'รัศมี',dmg:'ดาเมจทุก 0.5 วิ'},role:'control',melee:1,n:'Frostbite Aura',ic:'🌨️',cd:15,d:'ออร่าเยือกแข็งรอบตัว 5 วิ (รัศมี ~180): 20 ดาเมจ/วิ (ไม่สลอว์)',fx:'ใช้ได้แม้ตอนแช่แข็งตัวเอง • ใช้ได้เฉพาะโหมดประชิด',
+const FAURA=defSpell(1,{id:'frostaura',v:{time:5,r:180,dmg:10},vn:{cast:'ร่าย (วิ ยืนนิ่ง)',time:'อยู่นาน (วิ)',r:'รัศมี',dmg:'ดาเมจทุก 0.5 วิ'},role:'control',melee:1,n:'Frostbite Aura',ic:'🌨️',cd:15,d:'ออร่าเยือกแข็งรอบตัว 5 วิ (รัศมี ~180): 20 ดาเมจ/วิ (ไม่สลอว์)',fx:'ใช้ได้แม้ตอนแช่แข็งตัวเอง • ใช้ได้เฉพาะโหมดประชิด',
   cast(p,S){p.auraT=S.v.time;p.auraTk=0;emit({k:'efx',z:'aura',x:p.x,y:p.y,h:p.z,id:p.id});}});
-const MIRROR=defSpell(1,{id:'mirrorlegion',v:{time:10,xhp:100,dmgMul:2,clone:0.5,heal:15,healAxe:22,dash:600,dashSp:2000,slash:75,slow:80,slowT:3},vn:{time:'อยู่นาน (วิ)',xhp:'HP เสริม',dmgMul:'ดาเมจเรา (เท่า)',clone:'อาวุธลอย • ดาเมจ (เท่าของเรา)',heal:'ฮีลจังหวะ 3 (ดาบ)',healAxe:'ฮีลจังหวะ 3 (ขวาน)',dash:'พุ่งตอนเปิด • ระยะ',dashSp:'พุ่งตอนเปิด • ความเร็ว',slash:'พุ่งตอนเปิด • ดาเมจ',slow:'พุ่งตอนเปิด • สลอว์ (%)',slowT:'พุ่งตอนเปิด • สลอว์นาน (วิ)'},role:'ult',n:'Mirror Legion',ic:'⚔️',cd:0,ult:true,d:'เวทโบราณสายน้ำแข็ง: เสกดาบ/ขวานน้ำแข็งลอยเพิ่ม 2 เล่มข้างตัว (รวม 3 เล่ม) 10 วิ (ฟันตามเราทุกครั้ง เล่มละ 50%) + HP เสริม 100 • ดาเมจเรา ×2 • ฟันจังหวะ 3 ฮีล 15 (ขวาน 22)',fx:'ตอนเปิด: พุ่งไปข้างหน้า ~600 (อมตะ) พร้อมอาวุธลอยทั้ง 3 เล่ม ฟันตลอดทาง 75 ดาเมจ + ช้าลง 80% 3 วิ',
-  cast(p,S){
-    const V=S.v;p.mirror=V.time;p.xhp=V.xhp;p.fmode=0;
-    p.dash=V.dash/V.dashSp;p.dashSp=V.dashSp;p.dashX=Math.cos(p.ang);p.dashY=Math.sin(p.ang);p.inv=Math.max(p.inv,0.36);p.shieldOn=false;p.slideT=0;
-    p.ultSlash=new Set();
+const MIRROR=defSpell(1,{id:'mirrorlegion',v:{cast:1.5,time:10,xhp:100,dmgMul:2,clone:0.5,heal:15,healAxe:22},vn:{time:'อยู่นาน (วิ)',xhp:'HP เสริม',dmgMul:'ดาเมจเรา (เท่า)',clone:'อาวุธลอย • ดาเมจ (เท่าของเรา)',heal:'ฮีลจังหวะ 3 (ดาบ)',healAxe:'ฮีลจังหวะ 3 (ขวาน)'},role:'ult',n:'Mirror Legion',ic:'⚔️',cd:0,ult:true,d:'เวทโบราณสายน้ำแข็ง: เสกดาบ/ขวานน้ำแข็งลอยเพิ่ม 2 เล่มข้างตัว (รวม 3 เล่ม) 10 วิ (ฟันตามเราทุกครั้ง เล่มละ 50%) + HP เสริม 100 • ดาเมจเรา ×2 • ฟันจังหวะ 3 ฮีล 15 (ขวาน 22)',fx:'ตอนเปิด: ร่ายเรียกอาวุธลอย 2 เล่ม (ไม่มีพุ่งฟันแล้ว)',
+  // ร่าย 1 วิ ยืนนิ่ง (ผู้ใช้ 2026-11-14) แล้วค่อยได้อาวุธลอย — ท่าร่ายเลือกจาก SKANIM.mirrorlegion
+  cast(p,S){p.mlCast=S.v.cast;p.shieldOn=false;p.fmode=0;emit({k:'efx',z:'mlcast',x:p.x,y:p.y,h:p.z,t:S.v.cast,id:p.id});}});
+function mirrorStart(p){
+    const V=MIRROR.v;p.mirror=V.time;p.xhp=V.xhp;p.fmode=0;
+    p.shieldOn=false;   // ไม่มีพุ่งฟันตอนเปิดแล้ว (ผู้ใช้ 2026-11-14): ร่ายแล้วได้อาวุธลอยเพิ่มอย่างเดียว
     emit({k:'efx',z:'mirror',x:p.x,y:p.y,h:p.z,a:Math.round(p.ang*100)/100,id:p.id});
-  }});
+}

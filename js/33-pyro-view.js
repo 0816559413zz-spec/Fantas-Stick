@@ -304,6 +304,26 @@ function novaDome(x,y,h0,h1,R){
 function updateNovaDomes(dt){for(let i=NOVAD.length-1;i>=0;i--){const d=NOVAD[i];d.t+=dt;const g=Math.min(1,d.t/d.grow),e=1-Math.pow(1-g,3),u=Math.min(1,d.t/d.life);
   d.m.scale.setScalar(Math.max(.2,d.R*e));d.m.position.y=d.h0+(d.h1-d.h0)*Math.min(1,g*1.6);const U=d.m.material.uniforms;U.uT.value=d.t;U.uA.value=u<.55?1:Math.max(0,1-(u-.55)/.45);
   if(u>=1){scene.remove(d.m);d.m.material.dispose();NOVAD.splice(i,1);}}}
+// Mirror Legion ร่าย 1 วิ — เอฟเฟกต์น้ำแข็งตามท่าที่เลือก (SKANIM.mirrorlegion) • เรียกหลัง lateSkillPose (อ่านปลายอาวุธหลังใส่ท่า)
+function frostMlCast(o,p,dt,now){
+  o.mlcT-=dt;const u=Math.min(1,1-Math.max(0,o.mlcT)/(o.mlcT0||1)),u0=o.mlcU||0;o.mlcU=u;const N=o.mlcN,cross=a=>u0<a&&u>=a;
+  o.tip.updateWorldMatrix(true,false);o.tip.getWorldPosition(_pw);const s=simOf(_pw),gz=o.zs||0;
+  let dx=s.x-p.x,dy=s.y-p.y,dl=Math.hypot(dx,dy);if(dl<4){dx=Math.cos(o.g.rotation.y);dy=Math.sin(o.g.rotation.y);dl=1;}dx/=dl;dy/=dl;
+  const C=['#ffffff','#bfeaff','#7fd4ff'],shard=(x,y,h,vx,vy,vh,life,size)=>PARTS.push({x,y,h,vx,vy,vh,life,max:life,col:C[(Math.random()*3)|0],size,g:2,sh:4,rot:rnd(0,6.283),vr:rnd(-8,8)});
+  const glow=(x,y,h,sz,col)=>PARTS.push({x,y,h,vx:0,vy:0,vh:0,life:.07,max:.07,col,size:sz,g:0});
+  if(N==='mlraise'){
+    const fw=o.fw&&o.fw.g;let w=s,fx=dx,fy=dy;if(fw){fw.updateWorldMatrix(true,false);fw.getWorldPosition(_tv1);w=simOf(_tv1);const ex=w.x-p.x,ey=w.y-p.y,el=Math.hypot(ex,ey);if(el>8){fx=ex/el;fy=ey/el;}}
+    if(u<.5){const k=Math.min(1,u/.46),c0=simOf(_pw);   // ชาร์จ: เศษแสงดูดเข้าตัวดาบเหนือหัว
+      for(let i=0;i<2+Math.round(3*k);i++){const an=rnd(0,6.283),rr=rnd(40,80),hh=w.h+rnd(-1,2);PARTS.push({x:w.x+Math.cos(an)*rr,y:w.y+Math.sin(an)*rr,h:hh,vx:-Math.cos(an)*rr*4,vy:-Math.sin(an)*rr*4,vh:(w.h+1-hh)*4,life:.25,max:.25,col:C[i%3],size:rnd(1.8,3),g:0,drag:0});}
+      glow(w.x,w.y,w.h+1.2,3+6*k,'#5fc8ff');LREQ.push({abs:1,x:_tv1.x,y:_tv1.y+1.2,z:_tv1.z,col:'#9fe0ff',int:.3+.7*k,dist:5});}
+    else if(u<.97){const k=(u-.5)/.47,R=34+10*k,rx=-fy,ry=fx;   // หมุน: วงประกายรอบดาบที่หมุนอยู่หน้าตัว
+      for(let i=0;i<3+Math.round(4*k);i++){const a=rnd(0,6.283);PARTS.push({x:w.x+rx*Math.cos(a)*R,y:w.y+ry*Math.cos(a)*R,h:w.h+Math.sin(a)*R/20,vx:rx*-Math.sin(a)*R*6,vy:ry*-Math.sin(a)*R*6,vh:Math.cos(a)*R*6/20,life:.18,max:.18,col:C[i%3],size:rnd(1.6,2.8),g:0,drag:0});}
+      glow(w.x,w.y,w.h,4+8*k,'#3fa8e0');LREQ.push({abs:1,x:_tv1.x,y:_tv1.y,z:_tv1.z,col:'#9fe0ff',int:.4+.8*k,dist:6});}
+    if(cross(.97)){FX.flashSprite(w.x,w.y,w.h,'#bfeaff',.25,2.2,.14,1.3);const rx=-fy,ry=fx;   // แยกเป็น 3: แฟลช + เศษน้ำแข็ง + แสงพุ่งไปซ้าย/ขวา
+      for(let i=0;i<18;i++){const an=rnd(0,6.283),sp=rnd(80,220);shard(w.x,w.y,w.h,Math.cos(an)*sp,Math.sin(an)*sp,rnd(-1,3),rnd(.35,.6),rnd(2.5,4));}
+      for(const sg of [-1,1])for(let i=0;i<10;i++)PARTS.push({x:w.x,y:w.y,h:w.h,vx:rx*sg*rnd(260,380),vy:ry*sg*rnd(260,380),vh:rnd(-.5,.5),life:.22,max:.22,col:i%2?'#ffffff':'#9fe0ff',size:rnd(2,3),g:0,drag:3});
+      snd('nova',{x:p.x,y:p.y,vol:.5});}}
+}
 // Inferno Nova charge — เรียกจาก js/35-sync.js หลัง lateSkillPose (ต้องอ่านปลายไม้หลังใส่ท่าแล้ว ไม่งั้นได้ตำแหน่งท่ายืน)
 function pyroNovaCharge(o,dt,now){
   // Inferno Nova: ชูไม้ ปลายไม้ชาร์จไฟสว่างขึ้นเรื่อย ๆ (ลูกไฟปลายไม้แบบ BA โตขึ้น + ไฟถูกดูดเข้า + แสง) แล้ว host ส่ง infnova = ระเบิดจากปลายไม้

@@ -35,6 +35,8 @@ const CANIM={
   sweep:{two:1,d:0.6,st:0.5,tr:[0.2,0.7],k:[[0.25,-1.5,0.9,0.6,0.05,-0.6,0.9,0.05,-0.05,'s'],[0.55,-1.5,-1.2,-0.7,0.1,-1.3,0.2,-0.08,-0.12,'o'],[1,-1.3,-0.9,-0.5,0.05,-0.8,0.5,-0.04,-0.08,'s']]},   // กวาดกว้างแนวนอน (Ring of Embers)
   powerup:{d:0.7,st:0,tr:null,k:[[0.35,0.3,-0.5,0,0.35,0.3,0.5,0,-0.2,'s'],[0.6,-0.9,-1.3,0,-0.2,-0.9,1.3,0,0.05,'o'],[1,-0.6,-0.9,0,-0.1,-0.6,0.9,0,0,'s']],tm:[0.05,0.35]},   // ย่อเกร็ง แล้วกางแขนอกผาย (เพิ่มพลังตัวเอง)
   // Inferno Nova (ผู้ใช้ 2026-11-14): ย่อรวบพลัง → ชูไม้ตรงขึ้นฟ้าค้างไว้ระหว่างปลายไม้ชาร์จ (0.8 วิ) → ดันขึ้นสุดตอนระเบิด แขนซ้ายกางออก → คืนท่า
+  // Mirror Legion ท่าร่าย 1.5 วิ (ผู้ใช้ 2026-11-14 เลือกแบบ 1):
+  mlraise:{d:1.8,st:0.3,tr:null,k:[[0.07,-0.6,0.3,0.2,0.15,-0.5,0.3,0,-0.14,'s'],[0.2,-3.1,0.05,0,-0.12,-0.6,0.5,0,0.06,'o'],[0.46,-3.15,0.04,0,-0.16,-0.7,0.6,0,0.08,'s'],[0.56,-1.55,0.1,0,0.05,-0.8,0.6,0,0,'o'],[0.84,-1.6,0.08,0,0.04,-0.8,0.6,0,0,'s'],[1,-1.2,0.1,0,0.05,-0.4,0.2,0,0,'s']],tm:[0.2,0.46]},   // 1 ชูมือ (ดาบลอยขึ้นชาร์จ) แล้วชี้ไปข้างหน้าสั่งดาบหมุนแยกเป็น 3
   novaup:{d:1.9,st:0.4,tr:[0.06,0.2],k:[[0.08,-0.5,0.25,0.25,0.18,-0.4,0.3,0,-0.16,'s'],[0.17,-3.1,0.04,0,-0.12,-0.7,0.55,0,0.04,'o'],[0.62,-3.12,0.02,0,-0.16,-0.75,0.6,0,0.06,'s'],[0.67,-3.3,0,0,-0.26,-1.5,1.1,0,0.1,'o'],[0.84,-3.0,0.05,0,-0.14,-1.1,0.8,0,0.04,'s'],[1,-1.2,0.1,0,0,-0.4,0.2,0,0,'s']],tm:[0.17,0.62]},
   ultraise:{two:1,d:1.0,st:1,tr:[0.3,0.8],k:[[0.3,-0.5,0.35,0.15,0.25,-0.5,-0.35,0,-0.18,'s'],[0.6,-3.0,0.15,0,-0.25,-3.0,-0.15,0,0.08,'s'],[0.75,-1.2,0.2,0.05,0.4,-1.2,-0.2,0,-0.15,'o'],[1,-1.0,0.1,0,0.25,-1.0,-0.1,0,-0.1,'s']],tm:[0.45,0.6]},   // อัลติ: สองมือรวบไม้ ชูขึ้นฟ้า แล้วฟาดลง
   rend:{d:0.55,st:0.7,tr:[0.25,0.7],k:[[0.3,0.4,-0.6,-0.4,0.2,-0.5,0.5,0.06,-0.15,'s'],[0.6,-2.4,0.4,0.45,-0.1,-0.2,0.7,-0.05,0.02,'o'],[1,-2.0,0.2,0.3,-0.05,-0.3,0.6,0,0,'s']]},   // ตวัดจากพื้นต่ำขวาขึ้นบนซ้าย
@@ -80,7 +82,7 @@ CANIM.dragonland={d:0.7,st:0,k:[[0.12,-0.8,-0.1,0.12,0.34,-0.55,0.65,0.06,-0.28,
 const SKFEET={sweep:[0.25,-0.5,0.1,-0.12],powerup:[-0.25,-0.15,0.16,-0.16],ultraise:[0.25,-0.4,0.13,-0.12],rend:[-0.45,0.25,0.1,-0.06],slam:[-0.65,-0.35,0.18,-0.18],wrap:[-0.4,-0.25,0.08,-0.08],forge:[0.3,-0.4,0.1,-0.1],line:[-0.5,0.3,0.1,-0.08],siphon:[0.35,-0.3,0.15,-0.15],orbs:[0.25,-0.25,0.1,-0.1],upflick:[-0.45,0.3,0.1,-0.08],snap:[0.3,-0.4,0.12,-0.08],pullback:[0.35,-0.45,0.12,-0.12],summon3:[-0.2,-0.2,0.18,-0.18],punchcmd:[-0.5,0.35,0.1,-0.1],ground:[-0.6,0.25,0.15,-0.1],clap:[-0.25,-0.25,0.2,-0.2],burst:[-0.45,-0.25,0.2,-0.2],skycall:[0.3,-0.45,0.1,-0.1],wallpush:[-0.55,0.3,0.15,-0.12],vxpull:[0.5,-0.4,0.14,-0.14],dome:[-0.35,-0.25,0.2,-0.2],tidecall:[0.3,-0.25,0.1,-0.12],wavecast:[0.3,-0.6,0.14,-0.12],cagecast:[-0.5,0.3,0.1,-0.1],moonarts:[0.2,-0.3,0.12,-0.12],dragoncall:[0.25,-0.5,0.13,-0.13],dragoncommand:[-0.5,0.35,0.12,-0.1],fireflare:[-0.35,-0.2,0.2,-0.2],frostbreath:[-0.25,-0.25,0.14,-0.14],godcall:[0.25,-0.4,0.15,-0.15],windlaunch:[-0.6,0.35,0.12,-0.12],wingrise:[-0.3,-0.2,0.18,-0.18],windvoid:[-0.45,0.3,0.12,-0.12],heavenslam:[-0.6,-0.25,0.18,-0.18]};
 // รอบ 2: ใส่ให้สกิลที่เดิมมีแต่ท่าค้าง (ไม่เหวี่ยง) ด้วย — ท่านี้เล่นหลังไฟล์สาย (lateSkillPose) จึงทับท่าค้างช่วงสั้น ๆ แล้วกลับท่าเดิม
 const SKANIM={ringofembers:'sweep',blazeform:'fireflare',colossus:'novaup',kindle:'upflick',ignitionsnap:'snap',
-  frostforge:'forge',glacierrend:'rend',permafrost:'slam',cryoshell:'wrap',frostaura:'frostbreath',mirrorlegion:'summon3',
+  frostforge:'forge',glacierrend:'rend',permafrost:'slam',cryoshell:'wrap',frostaura:'frostbreath',mirrorlegion:'mlraise',
   thunderline:'line',speedsiphon:'staffup',stormorbs:'orbs',stormdome:'dome',triplestrike:'skycall',godlightning:'godcall',
   stonebreaker:'punchcmd',mudswamp:'ground',tectoniccrush:'dome',tectoniccrush_2:'clap',dustburst:'burst',terraauger:'pullback',wrath:'ultraise',
   riptide:'wavecast',tidecaller:'tidecall',aquacage:'cagecast',abyssalbeam:'pullback',moonwater:'moonarts',dragondeep:'dragoncall',dragondeep_dive:'dragoncommand',voidspheres:'windvoid',aegisgale_push:'wallpush',aegisgale_place:'ground',featherwing_2:'wingflick',eyeofheaven:'heavenslam'};
@@ -264,7 +266,7 @@ function syncPlayers(P,mode,now,dt){
     frostFX(o,p,pz,now,dt);
     earthFX(o,p,pz,now,dt);
     windFX(o,p,pz,now,dt);waterFX(o,p,pz,now,dt);
-    lateSkillPose(o,p,dt,now);if(o.novaT>0||o.nvFx||o.nvFx2)pyroNovaCharge(o,dt,now);
+    lateSkillPose(o,p,dt,now);if(o.novaT>0||o.nvFx||o.nvFx2)pyroNovaCharge(o,dt,now);if(o.mlcT>0||o.mlcX)frostMlCast(o,p,dt,now);
     waterCharacterPose(o,p,dt,now);windCharacterPose(o,p,dt,now,v);windLatePose(o,p,dt);stormBowView(o,p,dt,now);stormStaffView(o,p,dt,now);dashPose(o,p,dt,now);   // ท่าพุ่ง (js/72) ทับท่าอื่นตอนพุ่ง
     natHookPose(o);natEmpPose(o);   // Nature Dash / thorn line poses must run before rigSync or the rigged arm never sees them
     const domeKnee=stormDomePose(o,p,pz,now);

@@ -9,7 +9,8 @@ function efxState(ev){
     case 'gwave':{if(o&&!ev.cl)o.grDown=0.3;if(!(ev.len>0))break;if(o)o.grPt=ev.pt||0;WVV.push({n:ev.n,x,y,a:ev.a,len:ev.len,d:0,pt:ev.pt||0,h:ev.h!==undefined?ev.h:1,gnd:0,m:frostSlashGet()});break;}   // คลื่นดาบบางแบบใหม่ (js/21 frostSlash) แทน fx frost/rend_slash
     case 'gwend':{const w=WVV.find(q=>q.n===ev.n);if(w){w.x=x;w.y=y;w.h=ev.h??w.h;w.hitWall=1;w.d=w.len;}break;}   // คลื่นดาบชนกำแพงกลางอากาศ
     case 'glacier':if(o)o.grUp=0.5;if(ev.len>0)GLV.push(makeGlacier(x,y,ev.a,ev.len,ev.t));break;
-    case 'mirror':ULTV.push({x,y,a:ev.a,d:0,acc:100});break;
+    case 'mirror':{if(o&&o.mlcCirc){const c=o.mlcCirc;o.mlcCirc=null;later(0.45,()=>fxStop(c));}break;}
+    case 'mlcast':if(o){o.mlcT=o.mlcT0=ev.t||1.5;o.mlcU=0;o.mlcN=SKANIM.mirrorlegion;if(o.mlcCirc)fxStop(o.mlcCirc);o.mlcCirc=fxPlay('frost/forge_buff',{x,y,h:H,follow:ev.id});}   // วงเวทใต้เท้าระหว่างร่ายsnd('nova',{x,y,vol:.35});break;   // ไม่มีทางพุ่งฟันแล้ว (ULTV เดิม = เส้นน้ำแข็งตามทางพุ่ง)
     case 'colbolt':if(o)o.colShot=performance.now();break;   // Colossus: เวลาปาล่าสุด → ท่าเหวี่ยงแขนในไฟล์เอฟเฟกต์ (param tw) แม้ bind แบบ replace
     case 'stri':if(o)castStart(o,'',4);break;     // สายฟ้าสามเหลี่ยม = ฟาดไม้จากเหนือหัว
     case 'srail':if(o)skAnim({id:ev.id,s:'railgun_release'});break;
@@ -66,7 +67,7 @@ function efxFX(ev){
     case 'grcharge':if(ev.m){playFx('ice_charge',x,y,H);if(near)snd('buff',ev);}break;   // โหมดประชิดไม่ชาร์จแล้ว
     case 'gwave':{if(ev.cl)break;const c=Math.cos(ev.a),sn=Math.sin(ev.a);makeSlash(x-c*20,y-sn*20,0.4,ev.a,85,true,0.1,'#cfefff');burst(x+c*40,y+sn*40,'#dff6ff',30,320,0.4,2.4,{h:0.6,vh:[1,5],g:6,a:ev.a,spread:0.7});FX.flashLight(x,y,1.2,'#8fe0ff',5,14,0.25);}if(near){snd('whoosh',ev);snd('slam',{x,y,vol:0.4});}break;
     case 'glacier':playFx('ice_impact',x,y,0.8,{s:1});if(near){snd('break',ev);shake(5);}break;
-    case 'mirror':playFx('ice_big',x,y,1,{s:1.2});if(near){snd('nova',{x,y,vol:0.7});shake(4);}break;
+    case 'mirror':if(near){snd('nova',{x,y,vol:0.7});shake(2);}break;   // ไม่มีน้ำแข็งที่พื้นแล้ว (ผู้ใช้ 2026-11-14) — ดาบแยก 3 เล่ม = frostMlCast
     case 'mirrorend':burst(x,y,'#dff6ff',40,200,0.5,2,{h:H,g:3});break;
     // ----- สายไฟ (ออกแบบโดยผู้เล่น) -----
     case 'dfrise':

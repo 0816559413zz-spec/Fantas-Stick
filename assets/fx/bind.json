@@ -136,10 +136,6 @@
       "len": "ev.len/20"
     }
   },
-  "efx:mirror": {
-    "fx": "frost/mirror",
-    "mode": "replace"
-  },
   "efx:mirrorend": {
     "fx": "frost/mirrorend",
     "mode": "replace"

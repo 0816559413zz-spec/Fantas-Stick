@@ -248,6 +248,7 @@ function updatePlayer(p,dt,acting){
   p.stun=Math.max(0,p.stun-dt);p.inv=Math.max(0,p.inv-dt);tickStatus(p,dt);
   if(p.breath>0)p.breath-=dt;
   if(p.snapT>0&&p.alive&&!p.downed){p.snapT-=dt;if(p.snapT<=0)pyroSnap(p);}
+  if(p.mlCast>0){if(!p.alive||p.downed)p.mlCast=0;else{p.mlCast-=dt;if(p.mlCast<=0)mirrorStart(p);}}   // Mirror Legion ร่าย 1 วิ
   if(p.novaT>0){if(!p.alive||p.downed)p.novaT=0;else{p.novaT-=dt;if(p.novaT<=0)pyroNova(p);}}
   if(p.colos>0){p.colos-=dt;if(p.colos<=0||!p.alive||p.downed){p.colos=0;emit({k:'efx',z:'colend',x:p.x,y:p.y,h:p.z+2,id:p.id});}}
   if(p.fmCd>0)p.fmCd-=dt;
@@ -385,6 +386,7 @@ function updatePlayer(p,dt,acting){
   const cdr=p.buffs.cdr;
   const setCd=(k,v)=>{p.cd[k]=v;p.cdMax[k]=v;};
   if(p.colos>0){colossusTick(p,inp,dt);return;}
+  if(p.mlCast>0)return;   // กำลังร่าย Mirror Legion: ทำอะไรไม่ได้
   const B=PBASIC[p.pathIdx|0]||PBASIC[0];
   if(pr.v&&p.pathIdx===1&&!(p.fmCd>0)&&!(p.cryo>0)&&!(p.mirror>0)){p.fmode=p.fmode===1?0:1;p.fmCd=1;p.cmbT=0;emit({k:'efx',z:'fswap',x:p.x,y:p.y,h:p.z+1,id:p.id,m:p.fmode});}
   // กระโดด (Space) ทุกสาย
