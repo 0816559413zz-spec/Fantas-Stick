@@ -1,6 +1,6 @@
 // ---------- สายน้ำแข็ง: ประชิด/ไกล (V) • ฟันดาบ/ขวาน • ไถลน้ำแข็ง • พื้นน้ำแข็ง/ภูเขาน้ำแข็ง ----------
 // ตัวเลขพื้นฐานของสายน้ำแข็งอยู่ใน FROSTV + v:{...} ของแต่ละสกิล (js/07) — ปรับได้ใน tune.html / F8
-const FROSTV=PATHS[1].v={icicleDmg:7,icicleCd:0.3,icicleSlow:10,c1:10,c2:10,c3:15,meleeR:120,swingCd:0.46,swing3Cd:0.93,swingShCd:0.66,heal3:10,slamDmg:30,slamR:150,slamCd:0.6,
+const FROSTV=PATHS[1].v={icicleDmg:7,icicleCd:0.4,icicleSlow:10,c1:10,c2:10,c3:15,meleeR:120,swingCd:0.46,swing3Cd:0.93,swingShCd:0.66,heal3:10,slamDmg:30,slamR:150,slamCd:0.6,
   slideT:5,slideCd:11,slowMax:30,slowT:3,slowPath:10,ripT:1.5};
 PATHS[1].vn={icicleDmg:'แท่งน้ำแข็ง (ไกล) • ดาเมจ',icicleCd:'แท่งน้ำแข็ง • เว้นยิง (วิ)',icicleSlow:'แท่งน้ำแข็ง • สลอว์ต่อนัด (%)',c1:'ดาบ • ดาเมจจังหวะ 1',c2:'ดาบ • ดาเมจจังหวะ 2',c3:'ดาบ • ดาเมจจังหวะ 3',meleeR:'ดาบ • ระยะฟัน',
   swingCd:'ดาบ • เว้นฟัน (วิ)',swing3Cd:'ดาบ • เว้นหลังจังหวะ 3 (วิ)',swingShCd:'ดาบ • เว้นฟันตอนยกโล่ (วิ)',heal3:'ดาบ • ฮีลจังหวะ 3',slamDmg:'กระโดดฟาดจากที่สูง • ดาเมจ',slamR:'กระโดดฟาด • รัศมี',slamCd:'กระโดดฟาด • เว้น (วิ)',
