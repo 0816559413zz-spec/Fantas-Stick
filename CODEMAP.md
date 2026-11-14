@@ -52,9 +52,9 @@ FROSTV:3 FROST_SWING3_HIT:9 frostShieldPitch:10 frostBoom:15 meleeHit:22 mirrorP
 ## js/05-terrain.js (44) — พื้นสูงต่ำ (แผนที่จากไฟล์ Blender — กติกาฝั่งคนปั้นใน guides/MAP-DESI…
 TERR:5 TSTEP:6 TSLOPE:6 terrT:7 floorAt:12 terrSolid:14 terrMove:21 updateGlaciers:30
 
-## js/06-pyro.js (204) — สายไฟ — ความร้อน: สะสมด้วยลูกไฟ/กำแพง/พุ่งเพลิง แล้วจุดระเบิดด้วยระเบิดความร้อน/อุกกาบาต
+## js/06-pyro.js (201) — สายไฟ — ความร้อน: สะสมด้วยลูกไฟ/กำแพง/พุ่งเพลิง แล้วจุดระเบิดด้วยระเบิดความร้อน/อุกกาบาต
 §1 สายไฟ: ยิงปกติ 2 โหมด / โล่ระเบิด / พุ่งชาร์จ
-PYV:3 pyroBigBoom:11 pyroBall:19 pyroBasic:20 pyroFlickTick:40 pyroFlick:43 addOrbs:50 pyroParry:51 pyroBlock:52 launchOrbs:54 pyroDash:61 pyroPathEnd:81 updateFirePaths:86 KINDLE:106 DRAGONF:108 dragonfallDive:117 dragonfallTick:118 dragonfallBoom:133 RINGE:138 BLAZEF:145 SNAP:147 COLOS:152 pyroSnap:154 colossusTick:164 updateERings:183
+PYV:3 pyroBigBoom:11 pyroBall:19 pyroBasic:20 PHEAT:41 pyroHeatLv:42 pyroHeatGain:43 pyroHeatTick:44 pyroHeatDmg:45 pyroHeatSpd:46 addOrbs:47 pyroParry:48 pyroBlock:49 launchOrbs:51 pyroDash:58 pyroPathEnd:78 updateFirePaths:83 KINDLE:103 DRAGONF:105 dragonfallDive:114 dragonfallTick:115 dragonfallBoom:130 RINGE:135 BLAZEF:142 SNAP:144 COLOS:149 pyroSnap:151 colossusTick:161 updateERings:180
 
 ## js/07-frost-spells.js (33) — 
 FROSTF:4 GREND:6 frostGlacier:11 PERMA:16 CRYO:18 FAURA:25 MIRROR:27
@@ -187,12 +187,12 @@ G:4 EVL:4 EVN:4 hostLast:4 tickN:4 emit:5 feed:6 banner:7 plist:8 cleanName:9 fr
 §216 ลูปหลักฝั่งโฮสต์
 hostTick:217 angDiff:232 cH:234 vR:235 updatePlayer:237 hitProp:410 damagePropsIn:417 nearUseProp:418 useProp:419
 
-## js/12-buildings.js (535) — สิ่งปลูกสร้างที่พังเป็นชิ้นย่อย (บ้าน) แบบ Battlefield — คู่มือเต็ม: …
+## js/12-buildings.js (536) — สิ่งปลูกสร้างที่พังเป็นชิ้นย่อย (บ้าน) แบบ Battlefield — คู่มือเต็ม: …
 BLDDEF:8 BLD_PIECES:10 BLD_GRID:11 BLD_DOOR:13 BLD_FIRE:14 BLD_ICE:14 BLD_ROOF_MIN:14 BLDG:15 BLDON:15 genBldg:16 bldRect:26 bldChunk:28 bldAlive:35 bldLocal:36 bldWorld:37 rectDist:38 bldNear:39 BLD_MOUND:42 bldGone:43 bldMoundAt:44 bldMoundH:45 hitBldPiece:47 breakBldChunk:58 bldSupport:66 damageEnv:86 bldRay:104 _sgRB:112 aimClip:114 aimLineH:122 aimRay3:123 bldPieceAt:139 projEl:150 bldPush:155 collideBld:161 updateBldg:179 bldSnap:192 bldParse:198
 §202 ของบังในแผนที่ไฟล์ที่พังได้ (หิน เสา รูปปั้น ต้นไม้ โคมไฟ ลัง ...) — …
 BRKDEF:206 BRK_M:206 BRK_MCOL:206 BRK:207 genBrk:208 brkApply:215 brkStage:219 hitBrk:220 damageBrkIn:228 brkSnap:234 brkParse:235
 §236 ตารางช่อง (spatial grid) สำหรับแมพใหญ่: หาเฉพาะของใกล้ ๆ แทนวนทุกชิ้น…
-SG:239 sgObs:240 sgProps:240 sgGrid:242 sgNear:249 _sgCR:254 _sgCW:254 _sgCB:254 _sgCO:254 _sgPO:254 _sgPB:254 _sgPP:254 _sgM:254 _sgE:254 _sgA:254 _cwLast:256 collideWorld:257 shoot:297 eShoot:325 foesOf:332 breakShield:340 ULT_RATE:342 ultActive:343 gainUlt:344 lifesteal:345 damage:347 playerDown:407 killProj:428 explode:439 hitTarget:451 updateProjectiles:468 projStep:476
+SG:239 sgObs:240 sgProps:240 sgGrid:242 sgNear:249 _sgCR:254 _sgCW:254 _sgCB:254 _sgCO:254 _sgPO:254 _sgPB:254 _sgPP:254 _sgM:254 _sgE:254 _sgA:254 _cwLast:256 collideWorld:257 shoot:297 eShoot:325 foesOf:332 breakShield:340 ULT_RATE:342 ultActive:343 gainUlt:344 lifesteal:345 damage:347 playerDown:408 killProj:429 explode:440 hitTarget:452 updateProjectiles:469 projStep:477
 
 ## js/12-city-dmg.js (270) — เมืองพังได้ (designs/city-bot-battle.md ขั้น 4) — ข้อมูลที่ทุกเครื่อง…
 CITY_FL:8 CITY_PW:8 CDMG:9 CITYD:16 cityOn:17 cityLayout:19 cityReset:29 cityApplyBox:45 cityApplyItem:46 cityHex:47 cityMark:48 cityRampSync:49 cityPanelAt:51 cityHitPanel:56 cityTowerStart:70 cityTowerStrip:76 cityTowerFall:80 cityHitItem:91 cityHitObs:100 _sgCD:105 cityDamageIn:107 cityTick:118 _sgCM:129 cityMoundH:130 cityMounds:140
@@ -810,4 +810,4 @@ surfSync:49 surfQuality:53
 SURF_VS:55 SURF_VS_BODY:56 SURF_FS:67 SURF_FS_BODY:68 surfOk:98 surfApply:99 surfScene:111
 §112 ปรับค่า (tune.html / F8)
 
-(98 files, 26370 lines)
+(98 files, 26368 lines)

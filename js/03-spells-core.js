@@ -55,7 +55,7 @@ function cleanKit(s){return parseKit(parseKit(s).str).str;}
 function setKit(p,str){const old=p.pathIdx;p.fmode=0;p.orbs=0;p.orbBlk=0;p.kit=cleanKit(str);const k=parseKit(p.kit);p.pathIdx=k.path;p.kitIds=k.ids.map(i=>SPELL_LIST[i].id);p.ultId=SPELL_LIST[k.ult].id;
   if(old!==undefined&&old!==p.pathIdx&&G&&G.ph!=='lobby')pathReset(p);}
 // เปลี่ยนสายกลางเกม (เมนูทดลอง): ล้างท่าค้างของสายเก่า — ไม่งั้นค้างลอยฟ้า (Wrath) / เดินไม่ได้ (Railgun/Auger) / ร่างเทพค้าง
-function pathReset(p){clearStatus(p);earthReset(p);windReset(p);waterReset(p);natureReset(p);Object.assign(p,{stS:null,stCd:0,god:0,clQ:null,cEmp:0,cEmpT:0,clT:0,xhp:0,sdome:null,rail:null,slnT:0,sorb:null,beam:0,sdHit:null,slam:false,slam3:null,chg:0,dash:0,dashSp:0,trail:null,fpath:null,shieldOn:false});}
+function pathReset(p){p.fheat=0;clearStatus(p);earthReset(p);windReset(p);waterReset(p);natureReset(p);Object.assign(p,{stS:null,stCd:0,god:0,clQ:null,cEmp:0,cEmpT:0,clT:0,xhp:0,sdome:null,rail:null,slnT:0,sorb:null,beam:0,sdHit:null,slam:false,slam3:null,chg:0,dash:0,dashSp:0,trail:null,fpath:null,shieldOn:false});}
 
 // ---------- สถานะ (ใช้ได้ทั้งผู้เล่นและศัตรู) ----------
 const isBig=t=>t.isE&&(t.type==='troll'||t.type==='queen'||(EDEF[t.type]&&EDEF[t.type].boss));
@@ -100,7 +100,7 @@ function frostSlow(t){
   if(t.fslUltT>0)s=MIRROR.v.slow;
   return Math.min(Math.max(80,MIRROR.v.slow),s);
 }
-function moveMul(t){let m=1;const fs=frostSlow(t);if(fs>0)m*=1-fs/100;if(t.chl>0)m*=1-0.1*t.chl;if(t.slowT>0)m*=t.slowF;if(t.haste>0)m*=t.hasteF;if(t.blaze>0)m*=BLAZEF.v.spdUp;if(t.wtlT>0)m*=W_VO.tlUp;return Math.max(t.wbsT>0?0.08:0.25,m)*(t.natureSlow>G.time?2/3:1);}
+function moveMul(t){let m=1;const fs=frostSlow(t);if(fs>0)m*=1-fs/100;if(t.chl>0)m*=1-0.1*t.chl;if(t.slowT>0)m*=t.slowF;if(t.haste>0)m*=t.hasteF;if(t.blaze>0)m*=BLAZEF.v.spdUp;if(t.fheat>0)m*=pyroHeatSpd(t);if(t.wtlT>0)m*=W_VO.tlUp;return Math.max(t.wbsT>0?0.08:0.25,m)*(t.natureSlow>G.time?2/3:1);}
 // Burning (สายไฟ): สูงสุด BRN_MAX ชั้น • เผา 0.3/วิ/ชั้น (แค่ดาเมจเสริม) • ไม่โดนเพิ่ม 6 วิ แล้วลดทีละ 1 ชั้นทุก 1 วิ (เนิร์ฟ 2026-10-27: เดิม 2/วิ, 10 วิ)
 const BRN_MAX=6;
 function addBurn(t,n,src){if(t.dead)return;const was=t.brn|0;t.brn=Math.min(BRN_MAX,was+n);t.brnT=6;t.brnSrc=src;if(!(t.brnTick>0))t.brnTick=0.5;if(t.brn>was)emit({k:'efx',z:'brn',x:t.x,y:t.y,h:cH(t)+0.8,n:t.brn});}
@@ -224,7 +224,7 @@ function takePoison(t){const n=t.psn|0;t.psn=0;t.psnT=0;return n;}
 
 // ---------- ความสามารถพื้นฐาน (คลิกซ้าย) ของแต่ละสาย: สะสมสถานะตั้งต้นให้เองทุกๆ N ครั้งที่ยิงโดน ----------
 const PBASIC=[
-  {id:'b_pyro',type:'spark',n:'ประกายไฟ / ลูกไฟชาร์จ',d:'คลิก = ยิงประกายไฟ (5 ดาเมจ ทุก 0.3 วิ ระยะ ~400) โดนเป้าเดียวครบ 3 นัด = +1 Burning • กดค้าง = รวบรวมลูกไฟที่ปลายไม้ (ไม่ยิง) ครบ 1.6 วิ แล้วปล่อย = ลูกไฟ (20 ดาเมจ ระยะ ~900 +1 Burning) • ยกโล่ + คลิก = สะบัดวงไฟเกลียวรอบตัว (3 ครั้ง คืนทีละ 6 วิ) ดาเมจ 10 ช้า 20% ซ้อนได้ 2 ครั้ง',
+  {id:'b_pyro',type:'spark',n:'ประกายไฟ / ลูกไฟชาร์จ',d:'คลิก = ยิงประกายไฟ (5 ดาเมจ ทุก 0.3 วิ ระยะ ~400) โดนเป้าเดียวครบ 3 นัด = +1 Burning • กดค้าง = รวบรวมลูกไฟที่ปลายไม้ (ไม่ยิง) ครบ 1.6 วิ แล้วปล่อย = ลูกไฟ (20 ดาเมจ ระยะ ~900 +1 Burning) • โล่ไฟ: รับดาเมจ 40 = Heat 1 ขั้น (สูงสุด 4) • ขั้น 2: ดาเมจ +10% เดินเร็ว +10% • ขั้น 3: +15% / +20% • เต็ม: +20% / +30% และ Ignition Snap ครั้งถัดไป 30 ดาเมจ ฮีล 20 ต่อชั้น Burning • ไม่ได้ Heat 4 วิ จะค่อย ๆ ลด • Snap แล้ว Heat หมด',
     shd:'โล่ไฟ: บล็อกปกติ • Parry = ได้ลูกไฟวิญญาณ 2 ลูก (ครั้งเดียวต่อการยกโล่) • บล็อกโดนครบ 3 ครั้ง = ได้ 2 ลูก • สะสมได้สูงสุด 4 ลูก หมุนรอบตัวไม่หายจนกว่าจะใช้ • ลูกไฟ (ชาร์จ/Kindle) โดนศัตรู = ลูกไฟวิญญาณทั้งหมดพุ่งใส่ ลูกละ 4',dsd:'พุ่ง (Shift): กดค้างชาร์จ (สูงสุด 4 วิ ห้ามขยับ ยิ่งชาร์จยิ่งย่อตัวต่ำ) ปล่อย = ระเบิดดันตัวพุ่ง 150-1100 อมตะระหว่างพุ่ง คูลดาวน์ 3 วิ',
     hit(pr,t){damage(t,pr.dmg,pr.owner,'proj');if((t.spkN=(t.spkN|0)+1)>=PYV.sparkN){t.spkN=0;addBurn(t,1,pr.owner);}},
     tick:pyroBasic,onParry:pyroParry,onBlock:pyroBlock,dash:pyroDash,shieldSwing:true},

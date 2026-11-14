@@ -19,8 +19,8 @@ function pyroBigBoom(pr){
 function pyroBall(p){shoot(p,'pfire',{sp:'pyroball',dmg:PYV.ballDmg,hand:1});}   // 2026-11-14: 12→20, charge 1.9→1.6 s
 function pyroBasic(p,inp,dt,setCd){
   const prev=p.bfPrev;p.bfPrev=inp.fire;
-  pyroFlickTick(p,dt);
-  if(p.shieldOn||p.flLow>0){if(p.shieldOn&&inp.fire&&!prev)pyroFlick(p);p.chg=0;return;}   // ยกโล่ + คลิก = สะบัดวงไฟ
+  pyroHeatTick(p,dt);
+  if(p.shieldOn){p.chg=0;return;}   // โล่ไฟ: รับดาเมจเป็น Heat (ไม่มีสะบัดวงไฟแล้ว)
   if(p.dfall){if(p.dfall.ph===2&&inp.fire&&!prev)dragonfallDive(p);p.chg=0;return;}
   if(p.breath>0||p.snapT>0){p.chg=0;return;}
   if(inp.fire&&!prev){
@@ -35,18 +35,15 @@ function pyroBasic(p,inp,dt,setCd){
     p.chg=0;
   }
 }
-// โล่สายไฟใหม่ (ผู้ใช้ 2026-11-11): ไม่มีลูกไฟวิญญาณแล้ว • ยกโล่ + คลิก = หมุนตัวครึ่งรอบ สะบัดวงไฟเกลียวออกรอบตัว
-// ใช้ได้ flN ครั้ง คืนทีละครั้งทุก flCd วิ • โดน = ดาเมจ flDmg + ช้า flSlow ต่อครั้ง ซ้อนได้ flMax ครั้ง นาน flSlowT วิ • ระหว่างสะบัดโล่ลด flLow วิ
-function pyroFlickTick(p,dt){if(p.flN===undefined){p.flN=PYV.flN;p.flT=0;}
-  if(p.flLow>0){p.flLow-=dt;p.shieldOn=false;}if(p.flGapT>0)p.flGapT-=dt;
-  if(p.flN<PYV.flN){p.flT+=dt;if(p.flT>=PYV.flCd){p.flT=0;p.flN++;}}else p.flT=0;}
-function pyroFlick(p){if(!(p.flN>0)||p.flGapT>0)return;p.flN--;p.flGapT=PYV.flGap;p.flLow=PYV.flLow;p.shieldOn=false;
-  emit({k:'efx',z:'pflick',x:Math.round(p.x),y:Math.round(p.y),h:p.z,a:Math.round(p.ang*100)/100,id:p.id});
-  for(const t of foesIn(p.team,p.x,p.y,PYV.flR,p.z+3.5)){const d=Math.hypot(t.x-p.x,t.y-p.y);
-    G.strikes.push({t:Math.max(0.03,d/PYV.flR*PYV.flGrow),fn:()=>{if(t.dead||(!t.isE&&!t.isM&&(!t.alive||t.downed)))return;
-      const n=t.flE>G.time?Math.min(PYV.flMax,(t.flS|0)+1):1;t.flS=n;t.flE=G.time+PYV.flSlowT;
-      aoeHit(p,t,PYV.flDmg,q=>addSlow(q,1-PYV.flSlow*n,PYV.flSlowT));}});}}
-// (เดิม) โล่สายไฟ: เก็บ "ลูกไฟวิญญาณ" (orb) หมุนรอบตัว — Parry +2 / บล็อกครบ 3 ครั้ง +2 / สูงสุด 4 (ลูกละ 5 — เนิร์ฟ 2026-10-27) ไม่หายจนกว่าจะใช้
+// Fire shield heat (user 2026-11-14): every 40 damage the shield absorbs = 1 Heat stack (max 4).
+// Stack 2: +10% damage, +10% walk speed • 3: +15% / +20% • 4 (full): +20% / +30%, and the next Ignition Snap does 30 damage + heals 20 per Burning stack.
+// No heat gained for 4 s = lose 1 stack every 1.5 s. Any Snap empties the bar.
+const PHEAT={per:40,max:4,hold:4,decay:1.5,dmg:[1,1,1.1,1.15,1.2],spd:[1,1,1.1,1.2,1.3],snapDmg:30,snapHeal:20};
+function pyroHeatLv(p){return p.pathIdx===0?Math.min(PHEAT.max,Math.floor((p.fheat||0)/PHEAT.per)):0;}
+function pyroHeatGain(p,amt){if(p.pathIdx!==0||!(amt>0))return;p.fheat=Math.min(PHEAT.per*PHEAT.max,(p.fheat||0)+amt);p.fheatT=G.time;}
+function pyroHeatTick(p,dt){if(p.fheat>0&&G.time-(p.fheatT||0)>PHEAT.hold)p.fheat=Math.max(0,p.fheat-PHEAT.per/PHEAT.decay*dt);}
+function pyroHeatDmg(p){return PHEAT.dmg[pyroHeatLv(p)];}
+function pyroHeatSpd(p){return PHEAT.spd[pyroHeatLv(p)];}
 function addOrbs(p,n){const was=p.orbs|0;p.orbs=Math.min(PYV.orbMax,was+n);if(p.orbs>was)emit({k:'efx',z:'orbget',x:p.x,y:p.y,h:p.z+1.2,id:p.id,n:p.orbs});}
 function pyroParry(p){addOrbs(p,PYV.orbParry);}
 function pyroBlock(p){p.orbBlk=(p.orbBlk|0)+1;if(p.orbBlk>=PYV.orbBlockN){p.orbBlk=0;addOrbs(p,PYV.orbBlock);}}
@@ -144,19 +141,19 @@ const RINGE=defSpell(0,{id:'ringofembers',v:{range:400,r:170,time:3,delay:0.3,dm
   }});
 const BLAZEF=defSpell(0,{id:'blazeform',v:{time:4,dmgUp:1.15,spdUp:1.25,taken:1.25,r:130,aura:1.05,burn:1},vn:{time:'อยู่นาน (วิ)',dmgUp:'ดาเมจเรา (เท่า)',spdUp:'เดินเร็ว (เท่า)',taken:'รับดาเมจ (เท่า)',r:'รัศมีออร่า',aura:'ออร่า • ดาเมจทุก 0.5 วิ',burn:'ออร่า • Burning ครั้งแรก'},role:'utility',n:'Blazeform',ic:'🔥',cd:20,d:'กลายร่างเปลวไฟ 4 วิ: ดาเมจทุกสกิล (รวมเผา Burning) +15% • เดินเร็ว +25% • ออร่าไฟรอบตัว (รัศมี ~130) เผา ~2.4/วิ • ศัตรูที่โดนออร่าครั้งแรก +1 Burning (คนละ 1 ชั้นต่อการใช้ 1 ครั้ง)',fx:'ผลเสีย: เรารับดาเมจ +25% ระหว่างนั้น',
   cast(p,S){p.blaze=S.v.time;p.blzTk=0;p.blzN=0;p.blzHit=new Set();emit({k:'efx',z:'blaze',x:p.x,y:p.y,h:p.z+1,id:p.id});}});
-const SNAP=defSpell(0,{id:'ignitionsnap',v:{range:500,windup:0.6,dmg:15,heal:8},vn:{range:'ระยะ',windup:'ท่าเตรียม (วิ)',dmg:'ดาเมจต่อชั้น Burning',heal:'ฮีลต่อชั้น Burning'},role:'finisher',n:'Ignition Snap',ic:'🫰',cd:15,d:'ท่าเตรียม 0.6 วิ แล้วดีดนิ้ว: ศัตรูทุกคนที่มี Burning ในระยะ 500 ระเบิดพร้อมกัน (ไม่ต้องเล็ง)',fx:'15 ดาเมจต่อ 1 ชั้น Burning (5 ชั้น = 75) และฮีลเรา 8 ต่อชั้น แล้วใช้ Burning หมด • ไม่มีใครติดไฟในระยะ = ไม่เสียคูลดาวน์',
+const SNAP=defSpell(0,{id:'ignitionsnap',v:{range:500,windup:0.6,dmg:15,heal:8},vn:{range:'ระยะ',windup:'ท่าเตรียม (วิ)',dmg:'ดาเมจต่อชั้น Burning',heal:'ฮีลต่อชั้น Burning'},role:'finisher',n:'Ignition Snap',ic:'🫰',cd:15,d:'ท่าเตรียม 0.6 วิ แล้วดีดนิ้ว: ศัตรูทุกคนที่มี Burning ในระยะ 500 ระเบิดพร้อมกัน ชั้นละ 15 ดาเมจ ฮีลเรา 8 (Heat เต็ม: 30 / 20) แล้ว Heat หมด (ไม่ต้องเล็ง)',fx:'15 ดาเมจต่อ 1 ชั้น Burning (5 ชั้น = 75) และฮีลเรา 8 ต่อชั้น แล้วใช้ Burning หมด • ไม่มีใครติดไฟในระยะ = ไม่เสียคูลดาวน์',
   cast(p,S){
     if(!foesOf(p.team).some(t=>t.brn>0&&Math.hypot(t.x-p.x,t.y-p.y)<S.v.range))return false;
     p.snapT=S.v.windup;emit({k:'efx',z:'snapwind',x:p.x,y:p.y,h:p.z+1.4,id:p.id});
   }});
 const COLOS=defSpell(0,{id:'colossus',v:{time:6,shots:3,gap:1,dmg:80,r:200,burn:3,range:1000,env:100},vn:{time:'ร่างยักษ์อยู่นาน (วิ)',shots:'ยิงได้กี่นัด',gap:'เว้นระหว่างนัด (วิ)',dmg:'ดาเมจต่อนัด',r:'รัศมีระเบิด',burn:'Burning ที่ใส่',range:'ระยะยิง',env:'ดาเมจใส่บ้าน/ของ'},role:'ult',n:'Inferno Colossus',ic:'👹',cd:0,ult:true,d:'เวทโบราณสายไฟ: กระโดดขึ้นฟ้าทันที ร่างยักษ์ไฟปรากฏกลางอากาศ 6 วิ (Space = ขึ้น / Ctrl หรือ C = ลง) ถือหน้าไม้ไฟ ยิงได้ 3 นัด (เว้น 1 วิ) นัดละ 80 ดาเมจ ระเบิดวง ~200',fx:'คนโดน +3 Burning และ Extreme Burning (8/วิ 5 วิ) • ลอยเคลื่อนที่ได้ช้า โดนยิงได้ปกติ • ยิงครบ 3 นัด = ร่างหาย',
   cast(p,S){p.colos=S.v.time;p.colN=S.v.shots;p.colCd=0.6;p.colH=9;p.vz=0;p.fly=false;p.shieldOn=false;p.dchgOn=false;p.breath=0;emit({k:'efx',z:'colossus',x:p.x,y:p.y,h:p.z,id:p.id});}});
-function pyroSnap(p){
+function pyroSnap(p){const full=pyroHeatLv(p)>=PHEAT.max;p.fheat=0;
   emit({k:'efx',z:'snap',x:p.x,y:p.y,h:p.z+1.6,id:p.id});
   for(const t of foesOf(p.team)){
     if(!(t.brn>0)||Math.hypot(t.x-p.x,t.y-p.y)>SNAP.v.range)continue;
-    const n=t.brn|0;
-    if(aoeHit(p,t,SNAP.v.dmg*n)){t.brn=0;t.brnT=0;healT(p,SNAP.v.heal*n);}   // เนิร์ฟ 2026-10-27 (ผู้ใช้): 25→20→16→15 ดาเมจ, ฮีล 20→10→8 ต่อชั้น
+    const n=t.brn|0,D=full?PHEAT.snapDmg:SNAP.v.dmg,H=full?PHEAT.snapHeal:SNAP.v.heal;
+    if(aoeHit(p,t,D*n)){t.brn=0;t.brnT=0;healT(p,H*n);}   // เนิร์ฟ 2026-10-27 (ผู้ใช้): 25→20→16→15 ดาเมจ, ฮีล 20→10→8 ต่อชั้น
     emit({k:'efx',z:'snapboom',x:t.x,y:t.y,h:cH(t),n});
   }
 }
