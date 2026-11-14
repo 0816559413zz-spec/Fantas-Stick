@@ -180,7 +180,7 @@ function impactFX(x,y,t,onTarget,H){
   if(onTarget)snd('hit',{x,y});
 }
 // s = ขนาด (1 = ปกติ) — Ignition Snap ใช้ s ตามจำนวน Burning
-function explosionFX(x,y,H,s){s=s||1;
+function explosionFX(x,y,H,s,smk){s=s||1;smk=smk===undefined?1:smk;   // smk = ตัวคูณควัน (Snap ใช้น้อย)
   const low=H<3;
   FX.flashLight(x,y,H+0.2,'#ff8a3a',7*s,22*s,0.45);
   FX.flashSprite(x,y,H,'#ff7a2a',0.6,6*s,0.3,1.6);
@@ -189,7 +189,7 @@ function explosionFX(x,y,H,s){s=s||1;
   if(low){ring(x,y,'#ffb36a',95*s,0.4);SHAPES_Q.push({k:'decal',x,y,col:'#000000',s1:3.2*s,life:6,op:0.55});}
   burst(x,y,'#ffb347',Math.round(50*s),420*s,0.9,2,{h:H,vh:[1,7],g:9});
   burst(x,y,'#ff5a1a',Math.round(30*s),220*s,0.45,5,{h:H,vh:[0,3],g:-2});
-  smoke(x,y,H,Math.round(18*s),'#2a2522',1.8,9*s,140);
+  if(smk>0)smoke(x,y,H,Math.max(1,Math.round(18*s*smk)),'#2a2522',1.8,9*s,140);
 }
 
 // ---------- เอฟเฟกต์คาถาใหม่ ----------

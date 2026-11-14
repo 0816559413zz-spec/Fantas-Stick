@@ -151,7 +151,7 @@ const EFXAUG={
   // สายไฟ
   kindle:['fire_summon',1],dfrise:['fire_charge',1.4,1],dfdive:['fire_charge',1],dfboom:['fire_big',1.2],dfcancel:['fire_pop',1],fblock:['fire_hit',0.9],
   orbget:['fire_pop',1],orbshot:['fire_pop',0.8],orbhit:['fire_hit',0.9],bigboom:['fire_impact',0.8],ering:['fire_impact',1.2],eringhit:['fire_pop',1],
-  blaze:['fire_summon',1.2,1],snapwind:['fire_charge',1],snap:['fire_hit',1],snapboom:['fire_big',1.1],colossus:['fire_big',1,1],colbolt:['fire_hit',1],
+  blaze:['fire_summon',1.2,1],snapwind:['fire_charge',1],snap:['',1],snapboom:['',1],colossus:['fire_big',1,1],colbolt:['fire_hit',1],
   colboom:['fire_impact',1.2],colend:['fire_impact',1],pboom:['fire_impact',1],ember:['fire_pop',1],inferno:['fire_big',1],melt:['fire_hit',0.8],flare:['fire_impact',1],
   // สายฟ้า
   stgain:['storm_pop',0.8],stri:['',1],sdash:['',1],sdashe:['',1],sdhit:['storm_pop',0.8],ston:['storm_summon',1],sthit:['storm_pop',1],

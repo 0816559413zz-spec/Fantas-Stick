@@ -283,18 +283,21 @@ function efxFX(ev){
     case 'blaze':{const o=PM3.get(ev.id);if(o)o.blzIn=0.6;}burst(x,y,'#ff7a2a',30,200,0.6,2.4,{h:H,vh:[1,5],g:-1});ring(x,y,'#ffb347',80,0.4,0.2);FX.flashLight(x,y,H+1,'#ff8a3a',5,16,0.4);if(near)snd('cast_fire',ev);break;
     case 'snapwind':if(near)snd('cast_fire',{x,y,vol:0.5});break;
     case 'snap':{const o=PM3.get(ev.id);let hx=x,hy=y,hh=H+1.2;if(o){o.tip.getWorldPosition(_pw);const q=simOf(_pw);hx=q.x;hy=q.y;hh=q.h;}
-      FX.flashSprite(hx,hy,hh,'#fff6d0',0.3,1.6,0.12,1.8);/* เล็กลง: ดีดนิ้วอยู่หน้ากล้อง (เคยขาวทั้งจอ) */for(let i=0;i<10;i++){const an=rnd(0,6.283);flame(hx,hy,hh-0.2,{vx:Math.cos(an)*rnd(60,140),vy:Math.sin(an)*rnd(60,140),vh:rnd(1,4),life:0.25,size:rnd(4,7),drag:5});}}
-      ring(x,y,'#ffd27a',500,0.35,0.3);FX.flashLight(x,y,H,'#ffb347',5,16,0.25);if(near)snd('parry',{x,y,vol:0.5});break;
-    case 'snapboom':{const n=Math.max(1,ev.n|0);explosionFX(x,y,H,0.45+0.16*Math.min(5,n));   // 1 ชั้น = เล็ก, 5 ชั้น = ใหญ่กว่าระเบิดปกติ
+      FX.flashSprite(hx,hy,hh,'#ffd8a0',0.22,1.1,0.1,1.4);/* เล็กลง: ดีดนิ้วอยู่หน้ากล้อง (เคยขาวทั้งจอ) */for(let i=0;i<10;i++){const an=rnd(0,6.283);flame(hx,hy,hh-0.2,{vx:Math.cos(an)*rnd(60,140),vy:Math.sin(an)*rnd(60,140),vh:rnd(1,4),life:0.25,size:rnd(4,7),drag:5});}}
+      ring(x,y,'#ff8a2a',500,0.3,0.3);FX.flashLight(x,y,H,'#ffb347',2,12,0.2);if(near)snd('parry',{x,y,vol:0.5});break;
+    case 'snapfin':{const big=ev.f&&ev.s>=8||ev.kl>=2;if(ev.id===NET.myId){snapBanner(ev);hitStop(ev.kl?0.14:big?0.09:0.04);}if(near&&big){snd('roar',ev);shake(8+Math.min(6,ev.kl*2));}break;}
+    case 'snapboom':{const n=Math.max(1,ev.n|0);explosionFX(x,y,H,0.3+0.06*Math.min(5,n),0.08);   // ควันน้อยมาก (ผู้ใช้ 2026-11-14)
+      // Heat เต็ม: ระเบิดขาวทองซ้อน + เสาไฟสูงทุกตัว (ผู้ใช้อยากให้ Snap จังหวะเต็มสะใจ)
+      if(ev.f){const gh=GY(x,y);fireGeyser(x,y,0.02,3+n*0.5,0.3+n*0.03,0.55,0.05);ring(x,y,'#ffe08a',60+n*20,0.45,Math.max(0.1,H-gh-1));}   // 1 ชั้น = เล็ก, 5 ชั้น = ใหญ่กว่าระเบิดปกติ
       // ระเบิดไฟชัด ๆ บนตัวศัตรู ใหญ่ขึ้นตามจำนวน Burning (รอบ Pyro 2026-10-19): ลูกไฟ shader + แฟลชส้ม + วงกระแทก • 4 ชั้นขึ้นไป = เสาไฟพุ่ง
-      {const R=1.1+0.42*n,gh=GY(x,y);fireBlast(x,y,Math.max(0.5,H-gh-0.2),R,0.5+0.05*n,{up:0.9});later(0.08,()=>fireBlast(x,y,Math.max(0.6,H-gh+0.2),R*0.7,0.45,{up:1.4}));
+      {const R=0.8+0.22*n,gh=GY(x,y);fireBlast(x,y,Math.max(0.5,H-gh-0.2),R,0.4+0.03*n,{up:0.9});
         ring(x,y,'#ff8a2a',30+n*14,0.35,Math.max(0.1,H-gh-1));
         fireBurn(x,y,0.02,0.5+0.07*Math.min(5,n),1.5+0.25*Math.min(5,n),0.75+0.07*Math.min(5,n));   // ไฟลุกห่อตัวแบบ Ring of Embers แล้วดับ
-        if(n>=4)fireGeyser(x,y,0.02,3+n*0.5,0.35+n*0.04,0.6,0.05);FX.flashLight(x,y,H,'#ff8a3a',3+n,10+n*2,0.3);}
+        if(n>=4&&!ev.f)fireGeyser(x,y,0.02,3+n*0.5,0.35+n*0.04,0.6,0.05);FX.flashLight(x,y,H,'#ff8a3a',2+n*.5,10+n*2,0.3);}
       // ปะทุเป็นเปลวหลายชั้นตามจำนวน stack + สะเก็ดกระเด็น แล้วเหลือควันกับถ่านไฟ
-      for(let L=0;L<n;L++)later(L*0.07,()=>{for(let i=0;i<10;i++){const an=rnd(0,6.283);flame(x+Math.cos(an)*10,y+Math.sin(an)*10,Math.max(0.1,H-1.1)+L*0.35,{vx:Math.cos(an)*rnd(80,170),vy:Math.sin(an)*rnd(80,170),vh:rnd(3,7),life:0.4,size:rnd(9,13)+L,drag:4});}});
-      for(let i=0;i<10+n*4;i++){const an=rnd(0,6.283),sp=rnd(150,380);PARTS.push({x,y,h:H,vx:Math.cos(an)*sp,vy:Math.sin(an)*sp,vh:rnd(1,6),life:rnd(0.3,0.6),max:0.6,col:i%2?'#ffb347':'#fff0b0',size:1.7,g:8,drag:2});}
-      later(0.25+n*0.07,()=>{smoke(x,y,H-0.6,8,'#3a2a22',1.2,7,60);for(let i=0;i<8;i++)PARTS.push({x:x+rnd(-20,20),y:y+rnd(-20,20),h:H-0.8,vx:rnd(-20,20),vy:rnd(-20,20),vh:rnd(0.5,1.5),life:0.8,max:0.8,col:'#ff6a1a',size:1.6,g:-0.3});});
+      for(let L=0;L<Math.min(2,n);L++)later(L*0.07,()=>{for(let i=0;i<6;i++){const an=rnd(0,6.283);flame(x+Math.cos(an)*10,y+Math.sin(an)*10,Math.max(0.1,H-1.1)+L*0.35,{vx:Math.cos(an)*rnd(80,170),vy:Math.sin(an)*rnd(80,170),vh:rnd(3,7),life:0.4,size:rnd(9,13)+L,drag:4});}});
+      for(let i=0;i<6+n*2;i++){const an=rnd(0,6.283),sp=rnd(150,380);PARTS.push({x,y,h:H,vx:Math.cos(an)*sp,vy:Math.sin(an)*sp,vh:rnd(1,6),life:rnd(0.3,0.6),max:0.6,col:i%2?'#ffb347':'#fff0b0',size:1.7,g:8,drag:2});}
+      later(0.25+n*0.07,()=>{smoke(x,y,H-0.6,2,'#3a2a22',0.8,5,40);for(let i=0;i<8;i++)PARTS.push({x:x+rnd(-20,20),y:y+rnd(-20,20),h:H-0.8,vx:rnd(-20,20),vy:rnd(-20,20),vh:rnd(0.5,1.5),life:0.8,max:0.8,col:'#ff6a1a',size:1.6,g:-0.3});});
       if(near){snd('boom',ev);shake(3+n);}break;}
     case 'colossus':for(let i=0;i<6;i++){const an=i/6*6.283;for(let j=0;j<10;j++)flame(x+Math.cos(an)*150,y+Math.sin(an)*150,0.1,{vh:rnd(8,14),life:rnd(0.4,0.6),size:rnd(12,16),g:-1});}burst(x,y,'#ff6a2a',40,300,1,3,{h:H+1,vh:[2,8],g:-1});ring(x,y,'#ffb347',140,0.6,0.2);FX.flashLight(x,y,H+3,'#ff7a2a',8,30,0.6);if(near){snd('roar',ev);shake(6);}break;
     case 'colbolt':{const o=PM3.get(ev.id);if(o)o.colShot=performance.now();}FX.flashSprite(x,y,H,'#ffd27a',0.5,4,0.15,2.4);COLB.push({x,y,h:H,x2:ev.x2,y2:ev.y2,h2:ev.h2,t:0,max:ev.t});if(near)snd('cast_fire',ev);break;

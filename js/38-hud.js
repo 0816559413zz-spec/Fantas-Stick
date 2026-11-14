@@ -432,3 +432,17 @@ function drawFireHeat(fh){const now=performance.now(),dt=Math.min(.1,(now-(FHUD.
   cx.font=`600 ${Math.round(12.5*S)}px Cinzel,Kanit,serif`;cx.textAlign='center';cx.shadowColor='rgba(0,0,0,.9)';cx.shadowBlur=4;cx.fillStyle=full?'#ffe2a8':'#f4ece6';
   cx.fillText(full?'HEAT  MAX':'HEAT  '+lv+' / '+P.max,x0+len*.42,y0-9*S);
   cx.restore();}
+
+// Ignition Snap ป้ายผลบนจอคนดีด (ผู้ใช้ 2026-11-14 อยากให้ "snap boom 5 dead" สะใจ): ×N IGNITED / ×N INCINERATED + ขอบจอวาบส้ม
+const SNAPB={t:0,ev:null};
+function snapBanner(ev){SNAPB.t=performance.now();SNAPB.ev=ev;}
+function drawSnapBanner(){const ev=SNAPB.ev;if(!ev)return;const u=(performance.now()-SNAPB.t)/1000,L=ev.kl?1.8:1.3;if(u>L){SNAPB.ev=null;return;}
+  const big=ev.f&&ev.s>=8||ev.kl>=2,a=u<.08?u/.08:u>L-.35?Math.max(0,(L-u)/.35):1,pop=1+.35*Math.max(0,1-u/.18);
+  // ขอบจอวาบ
+  if(big){const g=cx.createRadialGradient(SW/2,SH/2,Math.min(SW,SH)*.3,SW/2,SH/2,Math.max(SW,SH)*.75);g.addColorStop(0,'rgba(255,120,20,0)');g.addColorStop(1,`rgba(255,${ev.kl?60:110},10,${.5*a*Math.max(0,1-u/.6)})`);cx.fillStyle=g;cx.fillRect(0,0,SW,SH);}
+  const S=Math.min(1.3,Math.max(.8,SH/860)),y=SH*.3;cx.save();cx.textAlign='center';cx.textBaseline='middle';cx.globalAlpha=a;
+  const t1=ev.kl?(ev.kl>=2?'×'+ev.kl+' INCINERATED':'INCINERATED'):(ev.n>=2?'×'+ev.n+' IGNITED':'IGNITED'),fs=Math.round((ev.kl?44:big?36:28)*S*pop);
+  cx.font=`700 ${fs}px Cinzel,'Pirata One',serif`;const gr=cx.createLinearGradient(0,y-fs/2,0,y+fs/2);gr.addColorStop(0,'#fff2b0');gr.addColorStop(.5,'#ff9a2a');gr.addColorStop(1,'#d0200a');
+  cx.shadowColor='rgba(255,90,10,.9)';cx.shadowBlur=18*S;cx.lineWidth=5*S;cx.strokeStyle='rgba(40,4,0,.85)';cx.strokeText(t1,SW/2,y);cx.fillStyle=gr;cx.fillText(t1,SW/2,y);
+  cx.shadowBlur=6*S;cx.font=`600 ${Math.round(15*S)}px Cinzel,Kanit,serif`;cx.fillStyle='#ffe2b0';cx.fillText(ev.s+' BURNING'+(ev.f?'  •  HEAT MAX':''),SW/2,y+fs*.75);
+  cx.restore();}

@@ -52,8 +52,8 @@ FROSTV:3 FROST_SWING3_HIT:9 frostShieldPitch:10 frostBoom:15 meleeHit:22 mirrorP
 ## js/05-terrain.js (44) — พื้นสูงต่ำ (แผนที่จากไฟล์ Blender — กติกาฝั่งคนปั้นใน guides/MAP-DESI…
 TERR:5 TSTEP:6 TSLOPE:6 terrT:7 floorAt:12 terrSolid:14 terrMove:21 updateGlaciers:30
 
-## js/06-pyro.js (220) — สายไฟ: ยิงปกติ 2 โหมด / โล่ระเบิด / พุ่งชาร์จ
-PYV:3 pyroBigBoom:11 pyroBall:19 pyroBasic:20 PHEAT:41 pyroHeatLv:42 pyroHeatGain:43 pyroHeatTick:44 pyroHeatDmg:45 pyroHeatSpd:46 addOrbs:47 pyroParry:48 pyroBlock:49 launchOrbs:51 pyroDash:58 pyroPathEnd:78 updateFirePaths:83 pyroKindleVolley:106 pyroKindleCurve:109 KINDLE:111 DRAGONF:113 dragonfallDive:122 dragonfallTick:123 dragonfallBoom:138 RINGE:144 BLAZEF:151 pyroBlazeAct:154 SNAP:155 COLOS:162 pyroNova:165 pyroSnap:170 colossusTick:180 updateERings:199
+## js/06-pyro.js (222) — สายไฟ: ยิงปกติ 2 โหมด / โล่ระเบิด / พุ่งชาร์จ
+PYV:3 pyroBigBoom:11 pyroBall:19 pyroBasic:20 PHEAT:41 pyroHeatLv:42 pyroHeatGain:43 pyroHeatTick:44 pyroHeatDmg:45 pyroHeatSpd:46 addOrbs:47 pyroParry:48 pyroBlock:49 launchOrbs:51 pyroDash:58 pyroPathEnd:78 updateFirePaths:83 pyroKindleVolley:106 pyroKindleCurve:109 KINDLE:111 DRAGONF:113 dragonfallDive:122 dragonfallTick:123 dragonfallBoom:138 RINGE:143 BLAZEF:150 pyroBlazeAct:153 SNAP:154 COLOS:161 pyroNova:164 pyroSnap:169 colossusTick:182 updateERings:201
 
 ## js/07-frost-spells.js (33) — 
 FROSTF:4 GREND:6 frostGlacier:11 PERMA:16 CRYO:18 FAURA:25 MIRROR:27
@@ -297,7 +297,7 @@ BRKV:313 BRK_COL:313 brkSetup:314 BRK_CM:333 brkCrackMat:334 brkClip:350 brkYc:3
 ## js/24-minions-view.js (68) — สัตว์เวท: โมเดลโปร่งแสง + ซิงก์จาก snapshot (MN)
 MM3:2 makeMinion:3 syncMins:36 drawMinBars:58
 
-## js/25-efx.js (362) — efxFX: ภาพของ event "efx" ทุกคาถา (หนึ่ง case ต่อหนึ่งเอฟเฟกต์)
+## js/25-efx.js (365) — efxFX: ภาพของ event "efx" ทุกคาถา (หนึ่ง case ต่อหนึ่งเอฟเฟกต์)
 efxState:4 efxFX:20
 
 ## js/26-fx-events.js (260) — fx(ev): เอฟเฟกต์+เสียงของทุก event จากโฮสต์ • statusFX (สถานะบนตัว) •…
@@ -402,10 +402,10 @@ lastFrame:2 HSTOP:5 hitStop:6 FXSTUDIO:8
 §9 เก็บ shader ที่ compile แล้วไว้ตลอดเกม (ผู้ใช้ 2026-11-02 "เล่นกับบอท…
 PINMAX:13 PINNED:13 KEEPSRC:16 pinPrograms:22 frame:25 _fpsAcc:41 _fpsN:41 _fpsLast:41 render:42 renderGame:85
 
-## js/38-hud.js (434) — HUD
+## js/38-hud.js (448) — HUD
 rr:2 SLOTS:3 fmtTime:4
 §5 ชิ้นส่วน HUD ธีมทอง-น้ำเงิน
-HG:6 HG2:6 HUDF:8 hudTick:9 readyPulse:11 diaPath:13 plate:15 frameBox:21 bossTrail:29 drawBossBar:30 spellDia:50 thinBar:79 drawHUD:84 raceRankClient:165 drawModeHUD:169 MM:207 drawMinimap:208 slotKey:281 mySlots:282 STATUS_ICO:291 SLOTS_IMP:292 BR_LOCK:293 CLUSTER:295 E_NEEDSTAND:296 slotState:297 drawBottom:316 drawBoard:331 FHUD:356 FHTEX:357 fhFrame:358 FH_EDGE:361 FH_CORE:361 fhMix:362 drawFireHeat:363
+HG:6 HG2:6 HUDF:8 hudTick:9 readyPulse:11 diaPath:13 plate:15 frameBox:21 bossTrail:29 drawBossBar:30 spellDia:50 thinBar:79 drawHUD:84 raceRankClient:165 drawModeHUD:169 MM:207 drawMinimap:208 slotKey:281 mySlots:282 STATUS_ICO:291 SLOTS_IMP:292 BR_LOCK:293 CLUSTER:295 E_NEEDSTAND:296 slotState:297 drawBottom:316 drawBoard:331 FHUD:356 FHTEX:357 fhFrame:358 FH_EDGE:361 FH_CORE:361 fhMix:362 drawFireHeat:363 SNAPB:437 snapBanner:438 drawSnapBanner:439
 
 ## js/39-menu.js (286) — 
 myLook:5 myColor:5 myKit:5 myName:6 renderMyHouse:9
@@ -458,7 +458,7 @@ _wpM:108 fileWeapon:109
 §117 Ice circle (Permafrost): ริบบิ้นแสงวนเป็นก้นหอยบนพื้น + ผลึกลอยหมุนรอ…
 SWIRL_FS:118 ICIRC:122 iceCircle:123 updateIceCircles:134
 
-## js/44-vfx-kit.js (395) — 
+## js/44-vfx-kit.js (395) — ชุดเครื่องมือ VFX กลาง (ขั้น 2 ของแผนอัปเกรด VFX)
 §8 1) หางแสง
 TRMAX:11 TRPTS:11 TRAILS:11 _trL:12 trailLayer:13 trailNew:22 trailPoint:24 trailStop:27 _tv1:28 _tv2:28 _tv3:28 updateTrails:29
 §52 2) สูตรเอฟเฟกต์ = จานสี (ธาตุ) × แม่แบบ (ขนาด/ชนิด)
@@ -809,4 +809,4 @@ surfSync:49 surfQuality:53
 SURF_VS:55 SURF_VS_BODY:56 SURF_FS:67 SURF_FS_BODY:68 surfOk:98 surfApply:99 surfScene:111
 §112 ปรับค่า (tune.html / F8)
 
-(98 files, 26529 lines)
+(98 files, 26548 lines)

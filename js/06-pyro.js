@@ -139,7 +139,6 @@ function dragonfallBoom(p,x,y,gh){
   const V=DRAGONF.v;emit({k:'efx',z:'dfboom',x:Math.round(x),y:Math.round(y),h:gh+0.08,r:V.r,id:p.id});
   for(const t of foesIn(p.team,x,y,V.r,gh+4))aoeHit(p,t,V.dmg,t=>{addBurn(t,V.burn,p.id);addSlow(t,V.slow,V.slowT);});
   damageEnv(x,y,V.r,V.env,p.id,'fireblast',gh);
-  pyroHeatGain(p,PHEAT.per);   // ลงพื้น = Heat +1 ขั้น (ผู้ใช้ 2026-11-14)
 }
 const RINGE=defSpell(0,{id:'ringofembers',v:{range:400,r:170,time:4,inSlow:0.8,delay:0.3,dmg:10,hitCd:0.5,edgeSlow:0.6,edgeT:0.4,push:280,wallH:3.6},vn:{range:'ระยะวาง',r:'รัศมีวง',time:'อยู่นาน (วิ)',inSlow:'คนในวง • ความเร็ว (เท่า)',delay:'อุกกาบาตตก (วิ)',dmg:'ดาเมจตอนพยายามออก',hitCd:'โดนซ้ำได้ทุก (วิ)',edgeSlow:'แตะขอบ • ความเร็ว (เท่า)',edgeT:'แตะขอบ • ช้านาน (วิ)',push:'แรงผลักกลับ',wallH:'ความสูงกำแพง (ม.)'},role:'control',n:'Ring of Embers',ic:'⭕',cd:14,d:'อุกกาบาตไฟตกลงที่จุดเล็ง (ระยะ ~400) ไม่มีดาเมจ แล้วกลายเป็นวงเพลิง (รัศมี ~170) นาน 4 วิ — คนข้างในเดินออกไม่ได้และช้าลง 20%',fx:'พยายามเดินออก = 10 ดาเมจ + ผลักกลับเข้าวง • ใครแตะขอบวงไฟ = ช้าลง 40% • คนข้างนอกเดินเข้าได้ • กำแพงมีความสูง: บินสูงกว่ากำแพงออกได้',
   cast(p,S){
@@ -169,12 +168,15 @@ function pyroNova(p){const V=COLOS.v;emit({k:'efx',z:'infnova',x:p.x,y:p.y,h:p.z
 }
 function pyroSnap(p){const full=pyroHeatLv(p)>=PHEAT.max;p.fheat=0;
   emit({k:'efx',z:'snap',x:p.x,y:p.y,h:p.z+1.6,id:p.id});
+  let hits=0,kills=0,stk=0;
   for(const t of foesOf(p.team)){
     if(!(t.brn>0)||Math.hypot(t.x-p.x,t.y-p.y)>SNAP.v.range)continue;
     const n=t.brn|0,D=full?PHEAT.snapDmg:SNAP.v.dmg,H=full?PHEAT.snapHeal:SNAP.v.heal;
-    if(aoeHit(p,t,D*n)){t.brn=0;t.brnT=0;healT(p,H*n);}   // เนิร์ฟ 2026-10-27 (ผู้ใช้): 25→20→16→15 ดาเมจ, ฮีล 20→10→8 ต่อชั้น
-    emit({k:'efx',z:'snapboom',x:t.x,y:t.y,h:cH(t),n});
+    if(aoeHit(p,t,D*n)){t.brn=0;t.brnT=0;healT(p,H*n);hits++;stk+=n;if(t.dead||t.downed||!(t.hp>0))kills++;}   // เนิร์ฟ 2026-10-27 (ผู้ใช้): 25→20→16→15 ดาเมจ, ฮีล 20→10→8 ต่อชั้น
+    emit({k:'efx',z:'snapboom',x:t.x,y:t.y,h:cH(t),n,f:full?1:0});
   }
+  // จบการดีดนิ้ว: บอกผลรวม (ภาพ/เสียงจังหวะสะใจ + ป้ายบนจอคนดีด)
+  if(hits)emit({k:'efx',z:'snapfin',x:p.x,y:p.y,h:p.z,id:p.id,n:hits,kl:kills,s:stk,f:full?1:0});
 }
 // อัลติ: ลอย/ยิงหน้าไม้ไฟ (คลิกซ้าย) • ใช้แทนการยิงปกติ/โล่/พุ่ง/คาถาระหว่างร่างยักษ์
 function colossusTick(p,inp,dt){
