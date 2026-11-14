@@ -1,6 +1,6 @@
 // Nature combat is simulated by the host. Positions are map units, heights are metres.
 const NATUREP=3;
-const NAT={seedRange:300,hookRange:560,hookSpeed:1700,hookPull:2700,foeHold:.45,lotusRange:220,lotusHaste:.3,treeRange:500,
+const NAT={seedRange:300,hookRange:500,hookSpeed:1700,hookPull:2700,foeHold:.45,lotusRange:220,lotusHaste:.3,treeRange:500,
   treeHeight:23,treeGrow:2.0,treeGrow0:3.4,treeLife:12,peaRadius:55,peaRange:650,ballPull:160,ballRange:450,wallHalf:105,wallThick:12,wallHeight:3.6};
 const natureDist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
 const natureItems=()=>G.nature||(G.nature=[]);
@@ -81,6 +81,7 @@ function natureGround(x,y){
 }
 function natureAimPoint(p,range){
   const i=p.inp;
+  if(!p.bot&&i&&!(i.gx>=0)){const a=p.ang;return {x:clamp(p.x+Math.cos(a)*range,40,MW-40),y:clamp(p.y+Math.sin(a)*range,40,MH-40)};}   // เล็งฟ้า/ไกลเกินพื้น = สุดระยะตามทิศเล็ง (ไม่ไปล็อกศัตรูเอง)
   if(!p.bot||!(i?.gx>=0)||!Number.isFinite(i.gx)||!Number.isFinite(i.gy))return aimPoint(p,range,false);
   const dx=i.gx-p.x,dy=i.gy-p.y,k=Math.min(1,range/(Math.hypot(dx,dy)||1));
   return {x:clamp(p.x+dx*k,40,MW-40),y:clamp(p.y+dy*k,40,MH-40)};
@@ -103,20 +104,20 @@ function naturePlant(p,kind,spot,delay=0){
   natureItems().push(o);
   return o;
 }
-function natureCastPlant(p,kind){
+function natureCastPlant(p,kind,at){
   if(kind==='lotus'&&naturePlants(p,kind).length)return false;
-  let point=natureAimPoint(p,NAT.seedRange);
+  let point=at||natureAimPoint(p,NAT.seedRange);
   if(kind==='turret'){
     const hit=aimRay3(p,p.z+1.35,NAT.seedRange);
     if(hit?.hit==='bld')point=hit;
   }
-  const spot=naturePlace(p,point,kind==='turret');
+  const spot=at||naturePlace(p,point,kind==='turret');
   if(kind==='turret'){
     const current=naturePlants(p,kind);
     if(current.length>=2)current[0].end=G.time;
   }
-  const delay=.18+natureDist(p,spot)/1200;
-  naturePlant(p,kind,spot,delay);
+  const delay=.3+natureDist(p,spot)/750;   // ปาช้าลง + ตกพื้นแล้วดีเลย์ก่อนขึ้น (ผู้ใช้ 2026-11-15)
+  naturePlant(p,kind,spot,delay+.3);
   natureEmit('seed',{x:p.x,y:p.y,h:p.z+1.35},{x2:spot.x,y2:spot.y,h2:spot.h,t:delay,id:p.id});
 }
 function natureLotusToggle(p){
@@ -138,9 +139,10 @@ function natureMovePlants(p){
   natureEmit('pulse',{...p,h:p.z},{r:110,id:p.id});
 }
 // Placement mode for the wall and the ultimate. Wall: hold left click to rotate, quick click to place. Ult: click to place. Right click or pressing the skill again cancels.
-function natureAimSpot(p,A){return naturePlace(p,natureAimPoint(p,A.k==='wall'?260:240),false);}
+function natureAimSpot(p,A){return naturePlace(p,natureAimPoint(p,A.k==='wall'?260:A.k==='lotus'?NAT.seedRange:240),false);}
 function natureAimStart(p,k){if(p.natAim){p.natAim=null;return false;}p.natAim={k,t:G.time,a:p.ang,last:p.ang,hold:0,rotated:false,armed:!p.inp?.fire,s0:!!p.inp?.sh};p.natAim.spot=natureAimSpot(p,p.natAim);return false;}
 function natureAimDone(p,A){const q=A.spot;
+  if(A.k==='lotus'){if(naturePlants(p,'lotus').length)return true;natureCastPlant(p,'lotus',q);const i=p.kitIds.indexOf('bloom');if(i>=0){const k=SLOTK[i],c=SPELLS.bloom.cd*(p.buffs.cdr||1);p.cd[k]=c;p.cdMax[k]=c;}emit({k:'sk',id:p.id,s:'bloom'});return true;}   // ดอกบัว: เลือกจุดวาง (ผู้ใช้ 2026-11-15)
   if(A.k==='wall'){if(natureDist(p,q)<40)return false;natureWallBuild(p,q,A.a);natureWallUse(p);emit({k:'sk',id:p.id,s:'thornburst'});return true;}
   if(p.ult<100)return true;p.ult=0;naturePlant(p,'tree',q,.9);natureEmit('summon',{x:p.x,y:p.y,h:p.z},{id:p.id,x2:q.x,y2:q.y,h2:q.h});emit({k:'sk',id:p.id,s:'worldtree'});return true;}
 function natureAimTick(p,inp,dt,canAct){const A=p.natAim;
@@ -151,10 +153,10 @@ function natureAimTick(p,inp,dt,canAct){const A=p.natAim;
   A.last=p.ang;
   if(!(A.k==='wall'&&A.hold>.16))A.spot=natureAimSpot(p,A);
   if(!A.rotated&&A.k==='wall')A.a=p.ang;
-  if(!inp.fire&&A.hold>0){const quick=A.hold<=.16;A.hold=0;if(quick||A.k==='tree'){natureAimDone(p,A);p.natAim=null;}}
+  if(!inp.fire&&A.hold>0){const quick=A.hold<=.16;A.hold=0;if(quick||A.k!=='wall'){natureAimDone(p,A);p.natAim=null;}}
   return true;
 }
-function natureWallBuild(p,q,a){const wall=addWall({...q,a,wood:true,owner:p.id,team:p.team,r:NAT.wallHalf,hgt:NAT.wallHeight,hp:175,maxHp:175,t:8,born:G.time,burn:Array.from({length:3},()=>({end:0,layers:0,total:0}))});natureEmit('wall_grow',wall,{a:wall.a});}
+function natureWallBuild(p,q,a){const wall=addWall({...q,a,wood:true,owner:p.id,team:p.team,r:NAT.wallHalf,hgt:NAT.wallHeight,hp:175,maxHp:175,t:14,born:G.time,burn:Array.from({length:3},()=>({end:0,layers:0,total:0}))});natureEmit('wall_grow',wall,{a:wall.a});}
 function natureCastWall(p){
   if(!p.bot)return natureAimStart(p,'wall');
   const q=naturePlace(p,natureAimPoint(p,260),false);
@@ -204,6 +206,8 @@ function natureSendSpore(p,t){
   natureItems().push({natKind:'spore',id:++G.zid,owner:p.id,target:t,at:G.time+.27,hp:1});
   natureEmit('spore_send',{...p,h:p.z+1.45},{x2:t.x,y2:t.y,h2:cH(t)});
 }
+// เถาโล่ยกขึ้นแล้วตบลงช้าลง (ผู้ใช้ 2026-11-15: เดิม 0.23 วิ ดูไวไป) — ดาเมจลงตอนเถาถึงพื้น
+const NAT_SHIELD_HIT=0.55;
 function natureShield(p){
   if(!p.shieldOn||G.time-p.shieldT<1.5||G.time<(p.natureSlamAt||0))return;   // thorns finish climbing first, then strike at most two targets per volley
   const last=p.natureShieldHits||(p.natureShieldHits=new Map());
@@ -213,7 +217,7 @@ function natureShield(p){
   for(const t of targets.sort((a,b)=>natureDist(p,a)-natureDist(p,b)).slice(0,2)){
     last.set(t,G.time+.75);
     natureEmit('slam',{...p,h:p.z},{id:p.id,x2:t.x,y2:t.y,h2:groundH(t.x,t.y,t.z??t.h)});
-    if(aoeHit(p,t,10))natureSendSpore(p,t);
+    G.strikes.push({x:t.x,y:t.y,r:0,t:NAT_SHIELD_HIT,fn:()=>{if(p.alive&&!t.dead&&aoeHit(p,t,10))natureSendSpore(p,t);}});
   }
   for(const [t,time] of last)if(time<=G.time)last.delete(t);
 }
@@ -238,7 +242,7 @@ function natureDash(p,inp,pr,dt,setCd){
     const th=cH(t),x=t.x-p.x,y=t.y-p.y,z=(natureY(t)+th-natureY(p)-h)*20;
     const d=Math.hypot(x,y,z),along=x*dx+y*dy+z*dz;
     const miss=Math.sqrt(Math.max(0,d*d-along*along));
-    const radius=t.team===p.team?Math.max(t.natKind?95:90,d*.2):Math.max(18,t.r||PR);   // เพื่อน/พืช: ช่วยเล็งกว้างขึ้น ~11° (ผู้ใช้ 2026-11-10)
+    const radius=t.team===p.team?Math.max(t.natKind?95:90,d*.2):Math.max(48,(t.r||PR)*2.4);   // ดึงศัตรูง่ายขึ้น hitbox ใหญ่ขึ้น (ผู้ใช้ 2026-11-15)   // เพื่อน/พืช: ช่วยเล็งกว้างขึ้น ~11° (ผู้ใช้ 2026-11-10)
     if(d>NAT.hookRange||along<=0||miss>radius||!natureSight(p,t,h,th))continue;
     const value=miss/radius+d/2000;
     if(value<score){score=value;best=t;}
@@ -291,9 +295,9 @@ function natureHookMove(p,dt){
 function natureBall(p){
   const q=natureAimPoint(p,NAT.ballRange),h=groundH(q.x,q.y),wall=natureTrace(p,q,p.z+1.4,h+.12,p.team,true);
   const end=wall?{...wall,x:wall.x-4*Math.cos(p.ang),y:wall.y-4*Math.sin(p.ang)}:{...q,h};
-  const flight=.12+natureDist(p,end)/1700;
+  const flight=.25+natureDist(p,end)/900;   // บอลลอยช้าลง (ผู้ใช้ 2026-11-15)
   const ball={natKind:'ball',id:++G.zid,owner:p.id,team:p.team,x:end.x,y:end.y,h:end.h,
-    born:G.time,land:G.time+flight,stab:G.time+flight+(wall?0:.35),origin:{x:p.x,y:p.y,h:p.z+1.4},hitWall:!!wall,hp:1};
+    born:G.time,land:G.time+flight,stab:G.time+flight+(wall?0:.6),origin:{x:p.x,y:p.y,h:p.z+1.4},hitWall:!!wall,hp:1};
   natureItems().push(ball);
 }
 function natureBallTick(o,p,dt){
@@ -448,7 +452,7 @@ function natureSnapP(p){
   const coil=Math.max(0,(p.natureCoilEnd||0)-G.time);
   const tree=natureLive(p)?natureGuardian(p):null;
   const zone=!!tree||!!G.nature?.some(o=>natureTreeReady(o)&&natureDist(o,p)<=NAT.treeRange);
-  const A=p.natAim,aim=A?[A.k==='wall'?1:2,A.spot.x,A.spot.y,A.spot.h||0,A.a]:0;
+  const A=p.natAim,aim=A?[A.k==='wall'?1:A.k==='lotus'?3:2,A.spot.x,A.spot.y,A.spot.h||0,A.a]:0;
   const nwc=p.nwc??NAT_WALLS,nwr=nwc<NAT_WALLS?Math.round((p.nwr||0)/SPELLS.thornburst.cd*100)/100:0;
   const emp=p.natureEmp&&p.natureEmp.until>G.time?(p.natureEmp.k==='slam'?1:2):0;
   return p.pathIdx===NATUREP||swing||spores||coil||zone||aim?[swing,spores,coil,tree?.id||0,zone,aim,nwc,nwr,emp,p.ndN??NAT_DASH.n]:0;

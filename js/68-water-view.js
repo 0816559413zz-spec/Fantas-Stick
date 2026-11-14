@@ -131,8 +131,24 @@ function wtBeamSync(S,o,p,a,pt,L,dt){if(!S.bm){S.bm=WT_POOL.bm.pop()||wtBeamMesh
   B.position.set(tx(p.x+c*L0),y0+rise*L0,tz(p.y+n*L0));_wtA.set(tx(ex),y0+rise*S.bL,tz(ey));
   if(B.visible)B.lookAt(_wtA);
   B.material.uniforms.uLen.value=Math.max(0.1,(S.bL-L0)/20);
-  const th=Math.max(0,_wtA.y-GY(ex,ey)),I=wtLoop(S,'tip','water/beam_tip',{x:ex,y:ey,h:th,a,aim:false});if(I){I.x=ex;I.y=ey;I.h=th;I.a=a;}}
-function wtBeamOff(S){if(S.bm){scene.remove(S.bm);WT_POOL.bm.push(S.bm);S.bm=null;}wtStop(S,'tip');}
+  const th=Math.max(0,_wtA.y-GY(ex,ey)),I=wtLoop(S,'tip','water/beam_tip',{x:ex,y:ey,h:th,a,aim:false});if(I){I.x=ex;I.y=ey;I.h=th;I.a=a;}
+  // ปลายลำ (ผู้ใช้ 2026-11-15 ref): โดมออร่าน้ำ + วงกลมเรืองฟ้าหันเข้าหาลำ + น้ำสาดกระจายออกจากวงตลอด
+  if(!S.tipD){S.tipD=new THREE.Mesh(new THREE.SphereGeometry(1,32,20),wtTipDomeMat());S.tipD.renderOrder=5;scene.add(S.tipD);
+    S.tipR=new THREE.Mesh(new THREE.RingGeometry(0.78,1,64),new THREE.MeshBasicMaterial({color:hdr('#7fe4ff',2.2),transparent:true,opacity:0.9,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide}));S.tipR.renderOrder=6;scene.add(S.tipR);
+    S.tipR2=new THREE.Mesh(new THREE.CircleGeometry(0.75,48),new THREE.MeshBasicMaterial({color:hdr('#cff6ff',1.6),transparent:true,opacity:0.35,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide}));S.tipR2.renderOrder=6;scene.add(S.tipR2);}
+  const on=B.visible,T=performance.now()/1000,pl=1+0.06*Math.sin(T*9);S.tipD.visible=S.tipR.visible=S.tipR2.visible=on;
+  const TW=S.tipW||(S.tipW=new THREE.Vector3());TW.set(tx(ex),y0+rise*S.bL,tz(ey));   // ปลายลำจริง (_wtA ถูกใช้ซ้ำใน wtLoop)
+  if(on){S.tipD.position.copy(TW);S.tipD.scale.setScalar(1.35*pl);S.tipD.material.uniforms.uT.value=T;
+    _wtV.set(tx(p.x),y0,tz(p.y));for(const R of [S.tipR,S.tipR2]){R.position.copy(TW);R.lookAt(_wtV);}S.tipR.scale.setScalar(1.15*pl);S.tipR2.scale.setScalar(1.15*pl);S.tipR.rotateZ(T*2);
+    const px=-n,py=c;   // ทิศตั้งฉากกับลำ (แนวนอน)
+    for(let i=0;i<5;i++){const an=Math.random()*6.283,ca=Math.cos(an),sa=Math.sin(an),sp=Math.random()*90+110,back=Math.random()*60+20;
+      PARTS.push({x:ex,y:ey,h:th,vx:px*ca*sp-c*back,vy:py*ca*sp-n*back,vh:sa*sp/20+Math.random()*2,life:.45+Math.random()*.3,max:.75,col:i%3?'#bff2ff':'#ffffff',size:2+Math.random()*2.2,g:5,drag:1.5,sh:4,rot:an,vr:Math.random()*6-3});}
+    LREQ.push({x:TW.x,y:TW.y,z:TW.z,col:'#7fe4ff',int:2.2,dist:7});}}
+let _wtTipM=null;
+function wtTipDomeMat(){if(!_wtTipM){_wtTipM=new THREE.ShaderMaterial({uniforms:{uT:{value:0}},transparent:true,depthWrite:false,side:THREE.DoubleSide,blending:THREE.AdditiveBlending,
+  vertexShader:'varying vec3 vN;varying vec3 vV;varying vec3 vP;void main(){vec4 w=modelMatrix*vec4(position,1.);vN=normalize(mat3(modelMatrix)*normal);vV=normalize(cameraPosition-w.xyz);vP=position;gl_Position=projectionMatrix*viewMatrix*w;}',
+  fragmentShader:'uniform float uT;varying vec3 vN;varying vec3 vV;varying vec3 vP;void main(){float fr=pow(1.-abs(dot(vN,vV)),2.4);float w=smoothstep(.75,1.,sin(vP.y*9.+sin(atan(vP.z,vP.x)*3.+uT*2.)*1.2-uT*3.)*.5+.5);float a=fr*.75+w*.25*fr+.03;vec3 col=mix(vec3(.2,.7,1.),vec3(.85,.97,1.),fr);gl_FragColor=vec4(col*a,a);}'});_wtTipM.userData.keep=true;}return _wtTipM;}
+function wtBeamOff(S){if(S.bm){scene.remove(S.bm);WT_POOL.bm.push(S.bm);S.bm=null;}wtStop(S,'tip');for(const k of ['tipD','tipR','tipR2'])if(S[k]){scene.remove(S[k]);S[k].geometry.dispose();if(k!=='tipD')S[k].material.dispose();S[k]=null;}}
 
 // ---------- ต่อผู้เล่น: โล่ฟองน้ำ/ฮีล • ลูกผู้ช่วยที่ไหล่ • ร่างโคลน + เส้นน้ำ • ลำน้ำ Abyssal • Moonwater • มังกร ----------
 function waterFX(o,p,pz,now,dt){

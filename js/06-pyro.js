@@ -38,7 +38,7 @@ function pyroBasic(p,inp,dt,setCd){
 // Fire shield heat (user 2026-11-14): every 40 damage the shield absorbs = 1 Heat stack (max 4).
 // Stack 2: +10% damage, +10% walk speed • 3: +15% / +20% • 4 (full): +20% / +30%, and the next Ignition Snap does 30 damage + heals 20 per Burning stack.
 // No heat gained for 4 s = lose 1 stack every 1.5 s. Any Snap empties the bar.
-const PHEAT={per:40,max:4,hold:4,decay:1.5,dmg:[1,1,1.1,1.15,1.2],spd:[1,1,1.1,1.2,1.3],snapDmg:30,snapHeal:20};
+const PHEAT={per:40,max:4,hold:8,decay:3,dmg:[1,1,1.1,1.15,1.2],spd:[1,1,1.1,1.2,1.3],snapDmg:30,snapHeal:20};
 function pyroHeatLv(p){return p.pathIdx===0?Math.min(PHEAT.max,Math.floor((p.fheat||0)/PHEAT.per)):0;}
 function pyroHeatGain(p,amt){if(p.pathIdx!==0||!(amt>0))return;p.fheat=Math.min(PHEAT.per*PHEAT.max,(p.fheat||0)+amt);p.fheatT=G.time;}
 function pyroHeatTick(p,dt){if(p.fheat>0&&G.time-(p.fheatT||0)>PHEAT.hold)p.fheat=Math.max(0,p.fheat-PHEAT.per/PHEAT.decay*dt);}
@@ -147,7 +147,7 @@ const RINGE=defSpell(0,{id:'ringofembers',v:{range:400,r:170,time:4,inSlow:0.8,d
     (G.erings||(G.erings=[])).push({x:q.x,y:q.y,z:groundH(q.x,q.y),r:V.r,t:V.time,del:V.delay,owner:p.id,team:p.team,in:new Set(),cd:new Map(),ed:new Map()});
     emit({k:'efx',z:'ermet',x:q.x,y:q.y,h:0.2,r:V.r,t:V.delay,id:p.id});
   }});
-const BLAZEF=defSpell(0,{id:'blazeform',v:{time:4,heatSec:0.03,heatAct:0.05,dmgUp:1.15,spdUp:1.25,taken:1.25,r:130,aura:1.05,burn:1},vn:{time:'อยู่นาน (วิ)',heatSec:'Heat ขึ้นเองต่อวิ (สัดส่วนแถบเต็ม)',heatAct:'Heat ต่อการตี/โดนตีตอนกางโล่ (สัดส่วนแถบเต็ม)',dmgUp:'ดาเมจเรา (เท่า)',spdUp:'เดินเร็ว (เท่า)',taken:'รับดาเมจ (เท่า)',r:'รัศมีออร่า',aura:'ออร่า • ดาเมจทุก 0.5 วิ',burn:'ออร่า • Burning ครั้งแรก'},role:'utility',n:'Blazeform',ic:'🔥',cd:20,d:'กลายร่างเปลวไฟ 4 วิ: ดาเมจทุกสกิล (รวมเผา Burning) +15% • เดินเร็ว +25% • ออร่าไฟรอบตัว (รัศมี ~130) เผา ~2.4/วิ • ศัตรูที่โดนออร่าครั้งแรก +1 Burning (คนละ 1 ชั้นต่อการใช้ 1 ครั้ง) • ระหว่างร่าง Heat ขึ้นเอง 3%/วิ และตี/โดนตีตอนกางโล่ +5% ต่อครั้ง (บัฟซ้อนกับ Heat)',fx:'ผลเสีย: เรารับดาเมจ +25% ระหว่างนั้น',
+const BLAZEF=defSpell(0,{id:'blazeform',v:{time:8,heatSec:0.03,heatAct:0.05,dmgUp:1.15,spdUp:1.25,taken:1.25,r:200,aura:1.05,burn:1},vn:{time:'อยู่นาน (วิ)',heatSec:'Heat ขึ้นเองต่อวิ (สัดส่วนแถบเต็ม)',heatAct:'Heat ต่อการตี/โดนตีตอนกางโล่ (สัดส่วนแถบเต็ม)',dmgUp:'ดาเมจเรา (เท่า)',spdUp:'เดินเร็ว (เท่า)',taken:'รับดาเมจ (เท่า)',r:'รัศมีออร่า',aura:'ออร่า • ดาเมจทุก 0.5 วิ',burn:'ออร่า • Burning ครั้งแรก'},role:'utility',n:'Blazeform',ic:'🔥',cd:20,d:'กลายร่างเปลวไฟ 8 วิ: ดาเมจทุกสกิล (รวมเผา Burning) +15% • เดินเร็ว +25% • ออร่าไฟรอบตัว (รัศมี ~200) เผา ~2.4/วิ • ศัตรูที่โดนออร่าครั้งแรก +1 Burning (คนละ 1 ชั้นต่อการใช้ 1 ครั้ง) • ระหว่างร่าง Heat ขึ้นเอง 3%/วิ และตี/โดนตีตอนกางโล่ +5% ต่อครั้ง (บัฟซ้อนกับ Heat)',fx:'ผลเสีย: เรารับดาเมจ +25% ระหว่างนั้น',
   cast(p,S){p.blaze=S.v.time;p.blzTk=0;p.blzN=0;p.blzHit=new Set();emit({k:'efx',z:'blaze',x:p.x,y:p.y,h:p.z+1,id:p.id});}});
 // Blazeform: ตีโดนศัตรู / โดนตีตอนกางโล่ ระหว่างร่าง = Heat +5% ของแถบต่อครั้ง
 function pyroBlazeAct(p){if(p&&p.blaze>0)pyroHeatGain(p,PHEAT.per*PHEAT.max*BLAZEF.v.heatAct);}
@@ -158,7 +158,7 @@ const SNAP=defSpell(0,{id:'ignitionsnap',v:{range:500,windup:0.6,dmg:15,heal:8},
   }});
 // อัลติใหม่ (ผู้ใช้ 2026-11-14): ระเบิดรอบตัว รัศมี 350 ไม่มีดาเมจ • ศัตรูที่โดนติด On Fire 9 วิ (ดับไม่ได้) = Burning +1 ทุก 1.5 วิ
 //   • Heat เต็มทันที + รีคูลดาวน์ Ignition Snap → รอ Burning ขึ้นแล้ว Snap ทีเดียวทั้งทีม  (ร่างยักษ์เดิม colossusTick ไม่ได้ใช้แล้ว)
-const COLOS=defSpell(0,{id:'colossus',v:{wind:1.2,r:350,time:9,every:1.5},vn:{wind:'ชูไม้ชาร์จก่อนระเบิด (วิ)',r:'รัศมีระเบิด',time:'On Fire นาน (วิ)',every:'Burning +1 ทุก (วิ)'},role:'ult',n:'Inferno Nova',ic:'👹',cd:0,ult:true,d:'เวทโบราณสายไฟ: ระเบิดไฟรอบตัว (รัศมี ~350) ไม่มีดาเมจ — ศัตรูที่โดนติด On Fire 9 วิ (ดับไม่ได้) Burning +1 ทุก 1.5 วิ • Heat เต็มทันที และ Ignition Snap พร้อมใช้ทันที',fx:'ศัตรูโดน +1 Burning ทันที แล้ว +1 ทุก 1.5 วิ (ถึง 6 ชั้น) • Snap ตอน Heat เต็ม 6 ชั้น = 180 ดาเมจ',
+const COLOS=defSpell(0,{id:'colossus',v:{wind:1.2,r:520,time:9,every:1.5},vn:{wind:'ชูไม้ชาร์จก่อนระเบิด (วิ)',r:'รัศมีระเบิด',time:'On Fire นาน (วิ)',every:'Burning +1 ทุก (วิ)'},role:'ult',n:'Inferno Nova',ic:'👹',cd:0,ult:true,d:'เวทโบราณสายไฟ: ระเบิดไฟรอบตัว (รัศมี ~520) ไม่มีดาเมจ — ศัตรูที่โดนติด On Fire 9 วิ (ดับไม่ได้) Burning +1 ทุก 1.5 วิ • Heat เต็มทันที และ Ignition Snap พร้อมใช้ทันที',fx:'ศัตรูโดน +1 Burning ทันที แล้ว +1 ทุก 1.5 วิ (ถึง 6 ชั้น) • Snap ตอน Heat เต็ม 6 ชั้น = 180 ดาเมจ',
   // ชูไม้ขึ้นฟ้า ปลายไม้ชาร์จไฟสว่าง (wind วิ) แล้วระเบิดออกจากปลายไม้ (ผู้ใช้ 2026-11-14) — ไม่มีพื้นแตก
   cast(p,S){p.novaT=S.v.wind;emit({k:'efx',z:'novawind',x:p.x,y:p.y,h:p.z,t:S.v.wind,id:p.id});}});
 function pyroNova(p){const V=COLOS.v;emit({k:'efx',z:'infnova',x:p.x,y:p.y,h:p.z,r:V.r,id:p.id});

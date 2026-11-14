@@ -35,13 +35,14 @@ function efxFX(ev){
         if(ev.ax&&!i){for(let j=0;j<7;j++){const an=a+rnd(-0.9,0.9),rr=R*rnd(0.7,1.1);iceChips(px+Math.cos(an)*rr,py+Math.sin(an)*rr,H,2,180,3);}
           burst(px,py,'#eaf8ff',10,R*1.6,0.9,3,{h:H,vh:[0.5,2.5],g:2.4,sh:4,vr:5,c2:'#5ab8ff',a,spread:1});}
         // หมอกเย็นตามแนวฟัน
-        if(!i)for(let j=0;j<(ev.ax?6:3);j++){const an=a+rnd(-1,1),rr=R*rnd(0.6,1);mistPuff(px+Math.cos(an)*rr,py+Math.sin(an)*rr,Math.max(0.1,H-0.6),{vx:-Math.sin(an)*60,vy:Math.cos(an)*60,vh:0.1,size:ev.ax?2.2:1.5,grow:0.5,life:rnd(0.9,1.4),a:ev.ax?0.4:0.3});}
-        for(let j=0;j<(i?5:ev.ax?14:10);j++){const an=a+rnd(-1.05,1.05),rr=R*rnd(0.55,1.05);PARTS.push({x:px+Math.cos(an)*rr,y:py+Math.sin(an)*rr,h:H+(big?rnd(-0.6,1.4):rnd(-0.3,0.5)),vx:Math.cos(an)*rnd(40,140),vy:Math.sin(an)*rnd(40,140),vh:rnd(-0.5,1.5),life:rnd(0.25,0.5),max:0.5,col:j%4===0?'#ffffff':j%4===1?'#e8f8ff':col,size:rnd(1.2,2.4),g:2.5,drag:2.5});}
+        if(false)for(let j=0;j<(ev.ax?6:3);j++){const an=a+rnd(-1,1),rr=R*rnd(0.6,1);mistPuff(px+Math.cos(an)*rr,py+Math.sin(an)*rr,Math.max(0.1,H-0.6),{vx:-Math.sin(an)*60,vy:Math.cos(an)*60,vh:0.1,size:ev.ax?2.2:1.5,grow:0.5,life:rnd(0.9,1.4),a:ev.ax?0.4:0.3});}
+        for(let j=0;j<(i?0:ev.ax?5:3);j++){   // เอฟเฟกต์ฟันเบาลงมาก เหลือหางดาบเป็นหลัก (ผู้ใช้ 2026-11-15)
+const an=a+rnd(-1.05,1.05),rr=R*rnd(0.55,1.05);PARTS.push({x:px+Math.cos(an)*rr,y:py+Math.sin(an)*rr,h:H+(big?rnd(-0.6,1.4):rnd(-0.3,0.5)),vx:Math.cos(an)*rnd(40,140),vy:Math.sin(an)*rnd(40,140),vh:rnd(-0.5,1.5),life:rnd(0.25,0.5),max:0.5,col:j%4===0?'#ffffff':j%4===1?'#e8f8ff':col,size:rnd(1.2,2.4),g:2.5,drag:2.5});}
       });
       if(near&&!big)snd('whoosh',{x,y,vol:0.5});break;}
     case 'iceboom':playFx('ice_impact',x,y,H,{s:ev.r/90,gh:Math.max(0.15,H-1)});smoke(x,y,H,6,'#e8f6ff',1.4,7,ev.r);if(H<1.5)iceBurst(x,y,ev.r*S3*0.85,{life:0.9,hy:0.8});else glacierMist(x,y,ev.r*0.6,8,{h:H-0.5,out:1.5});if(near)snd('break',ev);break;
     case 'slam3':{{const c=Math.cos(ev.a),sn=Math.sin(ev.a),bx=x-c*ev.r*0.8,by=y-sn*ev.r*0.8,col=ev.ax?'#e8f8ff':'#cfefff';const sp=[[bx,by]];if(ev.m)for(const k of [-1,1])sp.push([bx-sn*55*k,by+c*55*k]);
-      sp.forEach(([px,py],i)=>{if(!i)playFx('ice_impact',px+c*ev.r*0.8,py+sn*ev.r*0.8,0.5,{s:ev.ax?1.25:0.95});iceBurst(px+c*ev.r*0.8,py+sn*ev.r*0.8,(ev.ax?1.9:1.5)*(i?0.7:1),{life:0.95,hy:ev.ax?1.25:1,mist:i?2:5});makeSlash(px,py,0.5,ev.a,(ev.r/0.75)*1.15,true,0.12,col);if(!i)makeSlash(px,py,0.5,ev.a,(ev.r/0.75)*0.9,true,0.12,'#ffffff');});if(near)snd('whoosh',{x,y,vol:0.6});}
+      sp.forEach(([px,py],i)=>{if(!i)playFx('ice_impact',px+c*ev.r*0.8,py+sn*ev.r*0.8,0.5,{s:ev.ax?1.25:0.95});if(!i)iceBurst(px+c*ev.r*0.8,py+sn*ev.r*0.8,(ev.ax?1.4:1.1),{life:0.8,hy:ev.ax?1:0.8,mist:0});if(!i)makeSlash(px,py,0.5,ev.a,(ev.r/0.75)*1.1,true,0.12,col);   /* ทุบ: เหลือชั้นเดียว ไม่มีหมอก (ผู้ใช้ 2026-11-15) */});if(near)snd('whoosh',{x,y,vol:0.6});}
       if(ev.ax){dfCracks(x,y,0.06,ev.r*1.3,'#bfeaff',1.2);mistWave(x,y,ev.r*0.5,18);}
       ICEV.push(makeIceFloor(x,y,ev.r,1.4,1));SHAPES_Q.push({k:'ring',x,y,h:0.15,col:'#bfeaff',s1:ev.r*1.2*S3,life:0.35,op:0.5});burst(x,y,'#dff6ff',36,ev.r*3,0.7,2.8,{h:0.4,vh:[3,9],g:10,sh:4,vr:6,c2:'#4a9ef0'});burst(x,y,'#8fe0ff',10,ev.r*1.6,0.45,4,{h:0.3,vh:[0.5,2],g:1,smoke:true});SHAPES_Q.push({k:'decal',x,y,col:'#e8f6ff',s1:ev.r/24,life:3,op:0.6});FX.flashLight(x,y,1.5,'#8fe0ff',4,16,0.3);if(near){snd('slam',ev);snd('break',{x,y,vol:0.6});shake(ev.id===NET.myId?(ev.ax?7:5):2);}
       if(ev.m){const c=Math.cos(ev.a),s=Math.sin(ev.a);for(const k of [-1,1]){const mx=x-s*55*k,my=y+c*55*k;burst(mx,my,'#dff6ff',20,ev.r*2,0.5,2.4,{h:0.4,vh:[2,6],g:9});ring(mx,my,'#bfeaff',ev.r*0.8,0.3,0.15);}}break;}
@@ -55,7 +56,7 @@ function efxFX(ev){
     case 'slide':burst(x,y,'#dff6ff',16,200,0.4,2,{h:0.3,vh:[0.5,2],g:3,sh:4,vr:5,c2:'#5ab8ff'});for(let i=0;i<4;i++){const an=i/4*6.283+rnd(-0.2,0.2),r=rnd(12,26);iceBit(_plateG,x+Math.cos(an)*r,y+Math.sin(an)*r,0.1,rnd(0.35,0.55),0.5,rnd(0.35,0.5),{rx:rnd(-0.6,-0.3),ry:-an,life:0.6,up:0.06,down:0.3});}iceChips(x,y,0.3,8,180,4);if(near)snd('whoosh',ev);break;
     case 'ice':
       ICEV.push(makeIceFloor(x,y,ev.r,ev.t,ev.c,ev.lx,ev.ly,ev.w));
-      if(ev.c)ZV.push({x,y,r:ev.r,t:ev.t,kind:'icering',col:'#8fe0ff',file:zoneFx('icering',x,y,ev.r,ev.t,'#8fe0ff')});
+      if(ev.c)ZV.push({x,y,r:ev.r,t:ev.t,kind:'icering',col:'#8fe0ff',file:null});   // Permafrost: ไม่ใช้ไฟล์โซนเงาวาว (ผู้ใช้ 2026-11-15: สะท้อนแสงเกิน)
       else if(Math.random()<0.5)burst(x,y,'#ffffff',3,60,0.4,1.4,{h:0.2,g:0});
       break;
     case 'perma':for(let k=0;k<5;k++)later(k*0.07,()=>ring(x,y,k%2?'#ffffff':'#bfeaff',ev.r*(0.25+k*0.19),0.45,0.12));playFx('ice_big',x,y,0.6,{s:1.3});iceBurst(x,y,2.6,{life:1.5,hy:0.9,mist:24});mistArea(x,y,ev.r*0.9,6,{rate:6});iceCircle(x,y,ev.r*S3,6);
@@ -104,8 +105,8 @@ function efxFX(ev){
       if(ev.n)floatText(x,y,'⚡'+ev.n,'#fff27a',18,H+2.6);break;}
     case 'slup':if(near)snd('cast_ebolt',ev);break;
     case 'sline':{const a=ev.a,c=Math.cos(a),sn=Math.sin(a),L=ev.len,N=Math.max(3,Math.round(L/110));   // ผู้ใช้ 2026-11-11: ลดเอฟเฟกมาก เส้นบาง ไม่ระเบิดที่พื้น (โดมเล็กจาก storm/line_mix)
-      for(let i=0;i<=N;i++){const d=L*i/N,px=x+c*d,py=y+sn*d;later(0.3*i/N,()=>{(ev.g?tboltB:tbolt)(px+rnd(-10,10),py+rnd(-10,10),H+9,px+rnd(-6,6),py+rnd(-6,6),H+0.1,0.16,0,0.09,0);});}
-      if(near){snd('zap',ev);}break;}
+      for(let i=0;i<=N;i++){const d=L*i/N,px=x+c*d,py=y+sn*d;later(0.3*i/N,()=>{(ev.g?tboltB:tbolt)(px+rnd(-10,10),py+rnd(-10,10),H+9,px+rnd(-6,6),py+rnd(-6,6),H+0.1,0.16,0,0.09,0);if(i%2===0){SHAPES_Q.push({k:'decal',x:px,y:py,col:'#1a1408',s1:1.1,life:3,op:0.45});for(let k=0;k<5;k++)PARTS.push({x:px,y:py,h:H+0.1,vx:rnd(-90,90),vy:rnd(-90,90),vh:rnd(2,5),life:.35,max:.35,col:ev.g?'#7feaff':'#ffe27a',size:1.6,g:9,drag:1});}});}
+      if(near){snd('zap',ev);shake(2.6);}break;}   // ผู้ใช้ 2026-11-15: ฟ้าผ่าต้องสั่น + มี impact (รอยไหม้ + สะเก็ด)
     case 'ssiph':{const T=ev.tg||[];
       // ผู้ใช้ 2026-10-23: ใช้ตัวเลือกรอบ 3 แบบ 1 (เทสลา) แต่สีเหลือง — ส่วนต่อศัตรู (siphon_y ยืดตามระยะ) + ส่วนรอบตัวเรา (siphon_yself)
       for(const t of T){const d=Math.hypot(x-t[0],y-t[1]);if(d>20)fxPlay('storm/siphon_y',{x:t[0],y:t[1],h:t[2],a:Math.atan2(y-t[1],x-t[0]),p:{len:d/20}});}
@@ -144,6 +145,8 @@ function efxFX(ev){
     case 'tstrike':{const R=ev.r;for(let i=0;i<3;i++)(ev.g?tboltB:tbolt)(x+rnd(-14,14),y+rnd(-14,14),H+15,x+rnd(-6,6),y+rnd(-6,6),H+0.1,0.22,0,0.24,2);   // ผู้ใช้ 2026-11-12: ไม่ขาวจ้าทั้งจอ — เส้นบางลง แฟลชเล็ก สี ไม่มีแฟลชขาว ไฟจุดอ่อนลง
       FX.flashSprite(x,y,H+0.6,(ev.g?'#38dfff':'#ffd23a'),0.32,2.2,0.18,1.4);FX.flashLight(x,y,H+3,(ev.g?'#38dfff':'#ffd23a'),2.2,12,0.24);
       ring(x,y,(ev.g?'#23d9ff':'#ffd000'),R*1.3,0.3,H+0.1);ring(x,y,'#ffffff',R*0.7,0.2,H+0.1);
+      SHAPES_Q.push({k:'decal',x,y,col:'#1a1408',s1:R*0.06,life:4,op:0.5});for(let k=0;k<14;k++)PARTS.push({x,y,h:H+0.1,vx:rnd(-160,160),vy:rnd(-160,160),vh:rnd(3,7),life:.45,max:.45,col:k%2?'#9a8a70':(ev.g?'#7feaff':'#ffe27a'),size:rnd(1.5,2.6),g:10,drag:1});   // impact: รอยไหม้ + เศษพื้น
+      {const me2=myPos();if(me2&&Math.hypot(x-me2.x,y-me2.y)<700)shake(3.2);}
       for(let i=0;i<6;i++){const an=rnd(0,6.283);(ev.g?tboltB:tbolt)(x,y,H+0.15,x+Math.cos(an)*R*rnd(0.9,1.5),y+Math.sin(an)*R*rnd(0.9,1.5),H+0.1,0.2,0,0.12);}
       burst(x,y,(ev.g?'#23d9ff':'#ffd000'),34,R*4,0.45,2.4,{h:H+0.3,vh:[2,8],g:8});burst(x,y,'#ffffff',14,R*3,0.3,2,{h:H+0.3,vh:[2,7],g:8});burst(x,y,'#9fd8ff',10,R*3,0.35,1.8,{h:H+0.3,vh:[1,5],g:6});
       SHAPES_Q.push({k:'decal',x,y,col:'#000000',s1:R/36,life:3,op:0.35});

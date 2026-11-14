@@ -106,16 +106,17 @@ function pyroFX(o,p,pz,now,dt){
   // ชาร์จลูกไฟ (กดค้าง): อนุภาคไฟถูกดูดเข้ามารวมเป็นลูกไฟที่ปลายไม้ / Kindle พร้อม: ไฟลุกที่ปลายไม้
   // ชาร์จเต็ม: แฟลชครั้งเดียว + วงไฟ บอกว่าเต็มแล้ว
   const cgFull=(p.cg||0)>=1,dcFull=(p.dc||0)>=1;
-  if(cgFull&&!o.cgFull){o.tip.getWorldPosition(_pw);const s=simOf(_pw);burst(s.x,s.y,'#ffd27a',26,220,0.35,2.4,{h:s.h,g:0});FX.flashLight(s.x,s.y,s.h,'#ffb347',1.6,6,0.2);if(p.id===NET.myId)snd('buff');
+  if(cgFull&&!o.cgFull){pyTip(o);const s=simOf(_pw);burst(s.x,s.y,'#ffd27a',26,220,0.35,2.4,{h:s.h,g:0});FX.flashLight(s.x,s.y,s.h,'#ffb347',1.6,6,0.2);if(p.id===NET.myId)snd('buff');
     o.cgBurst=0.25;ring(p.x,p.y,'#ff8a2a',45,0.3,pz+0.1);for(let i=0;i<12;i++){const an=i/12*6.283;flame(p.x+Math.cos(an)*14,p.y+Math.sin(an)*14,pz+0.05,{vx:Math.cos(an)*70,vy:Math.sin(an)*70,vh:rnd(5,8),life:0.32,size:rnd(7,10),g:-2,drag:3});}}
   if(dcFull&&!o.dcFull){ring(p.x,p.y,'#ffb347',70,0.4,pz+0.15);burst(p.x,p.y,'#ff7a2a',40,260,0.45,3,{h:pz+0.3,vh:[2,6],g:-1});FX.flashLight(p.x,p.y,pz+0.8,'#ff8a3a',5,12,0.3);if(p.id===NET.myId)snd('buff');}
   o.cgFull=cgFull;o.dcFull=dcFull;
   // ลูกไฟชาร์จแบบ B (ผู้ใช้เลือก 2026-10-22): เส้นแสงดูดเข้า + วงหด (ซ้อนอนุภาคเดิม) • เต็ม = แฟลช/วงช็อกขาว
-  if(p.cg>0&&o.pyroOn){if(!o.cgFx)o.cgFx=fxPlay('fire/fireball_charge',{x:p.x,y:p.y,h:pz,follow:p.id});if(cgFull&&!o.cgFx2)o.cgFx2=fxPlay('fire/fireball_full',{x:p.x,y:p.y,h:pz,follow:p.id})||1;
+  if(p.cg>0&&o.pyroOn){if(!o.cgFx)o.cgFx=fxPlay('fire/fireball_charge',{x:p.x,y:p.y,h:pz,aim:false});   // ไม่ follow: วางที่ปลายไม้เองทุกเฟรม (follow = ไปจับปลายไม้ท่ายืน → แสงที่สะโพก)if(cgFull&&!o.cgFx2)o.cgFx2=fxPlay('fire/fireball_full',{x:p.x,y:p.y,h:pz,follow:p.id})||1;
     // ลูกไฟที่ปลายไม้ (ผู้ใช้ 2026-11-11): ระหว่างชาร์จเล็กจาง • เต็ม = ใหญ่ ทึบ นีออนสว่าง
-    o.tip.getWorldPosition(_pw);const s=simOf(_pw),k=cgFull?'cgRd':'cgHd';if(cgFull&&o.cgHd){fxStop(o.cgHd);o.cgHd=null;}
-    if(!o[k])o[k]=fxPlay(cgFull?'fire/fireball_ready':'fire/fireball_hold',{x:s.x,y:s.y,h:Math.max(0,s.h-GY(s.x,s.y)),aim:false});
-    const I=o[k];if(I&&I!==1){I.x=s.x;I.y=s.y;I.h=Math.max(0,s.h-GY(s.x,s.y));}}
+    pyTip(o);const s=simOf(_pw),k=cgFull?'cgRd':'cgHd';if(cgFull&&o.cgHd){fxStop(o.cgHd);o.cgHd=null;}
+    if(!o[k]){o[k]=fxPlay(cgFull?'fire/fireball_ready':'fire/fireball_hold',{x:s.x,y:s.y,h:Math.max(0,s.h-GY(s.x,s.y)),aim:false,s:cgFull?0.55:0.7});if(o[k]&&o[k]!==1)o[k].k=0.7;}   // เล็ก/จางลง (ผู้ใช้ 2026-11-15: เต็มแล้วบังจอ)
+    const I=o[k];if(I&&I!==1){I.x=s.x;I.y=s.y;I.h=Math.max(0,s.h-GY(s.x,s.y));}
+    {const C=o.cgFx;if(C&&C!==1){const hh=Math.max(0,s.h-GY(s.x,s.y));C.x=s.x;C.y=s.y;C.h=hh;C.fz=hh;C.wand=[s.x,s.y,hh];}}}
   else{if(o.cgFx){fxStop(o.cgFx);o.cgFx=null;}o.cgFx2=null;for(const k of ['cgHd','cgRd'])if(o[k]){fxStop(o[k]);o[k]=null;}}
   // ชาร์จเต็ม: ไฟพุ่งจากใต้เท้าแค่แว้บเดียว ~0.4 วิ ตอนเพิ่งเต็ม แล้วหายไป (ผู้เล่น 2026-10-19: ของเดิมเยอะและนานเกิน) — หลังจากนั้นเหลือแค่ลูกไฟที่ปลายไม้บอกว่าเต็ม
   if(o.cgBurst>0){if(!cgFull)o.cgBurst=0;else{o.cgBurst-=dt;const f=Math.max(0,o.cgBurst/0.4);for(let i=0;i<Math.ceil(4*f);i++){const an=rnd(0,6.283),rr=rnd(6,22);flame(p.x+Math.cos(an)*rr,p.y+Math.sin(an)*rr,pz+0.05,{vh:rnd(5,8)*(0.5+0.5*f),life:rnd(0.22,0.32),size:rnd(6,9)*(0.6+0.4*f),g:-2.5});}}}
@@ -123,7 +124,7 @@ function pyroFX(o,p,pz,now,dt){
   if((p.cg||0)>0||p.kd>0){
     // ชาร์จลูกไฟ: ง้างไม้ไว้ข้างไหล่ขวา ตัวบิดหันไหล่ขวาไปหลัง มือซ้ายยื่นไปหน้าเหมือนประคองไฟ • ยิ่งเต็มยิ่งสั่น (ปล่อย = พุ่งแทงแรง castPose ท่า 3)
     if(p.cg>0){const k=Math.min(1,p.cg),tr=(Math.sin(now/27)*0.06+Math.sin(now/61)*0.03)*k;o.b.position.y-=0.06*k;o.b.rotation.x+=Math.sin(now/340)*0.03*k;o.armR.rotation.x=lerp(-1.45,-2.05,k)+tr;o.armR.rotation.z=lerp(-0.15,-0.7,k);o.armL.rotation.x=lerp(-0.6,-1.35,k)+tr;o.armL.rotation.z=lerp(0.3,-0.1,k);o.b.rotation.y=lerp(0,-0.45,k)+Math.sin(now/290)*0.06*k;o.b.rotation.x-=0.06*k;o.armR.updateMatrixWorld(true);}   // ชาร์จ: ตัวบิดมากขึ้นตามแรง + โยกหายใจ
-    o.tip.getWorldPosition(_pw);const s=simOf(_pw),k=p.kd>0?1:p.cg,full=k>=1;
+    pyTip(o);const s=simOf(_pw),k=p.kd>0?1:p.cg,full=k>=1;
     for(let i=0;i<2+Math.floor(k*2);i++){const an=rnd(0,6.283),r=rnd(25,55),hv=rnd(-0.9,0.9);
       PARTS.push({x:s.x+Math.cos(an)*r,y:s.y+Math.sin(an)*r,h:s.h+hv,vx:-Math.cos(an)*r/0.28,vy:-Math.sin(an)*r/0.28,vh:-hv/0.28,life:0.28,max:0.28,col:i%2?'#ffd27a':'#fff0b0',size:rnd(1.2,2),g:0,drag:0});}
     // เปลวส้มแดงวนรอบแกน
@@ -181,7 +182,7 @@ function pyroFX(o,p,pz,now,dt){
   // Ignition Snap: ยกมือ เปลวไฟรวมที่นิ้ว
   if(p.sn){
     o.armR.rotation.x=-2.7;o.armR.rotation.z=-0.2;o.armR.updateMatrixWorld(true);
-    o.tip.getWorldPosition(_pw);const s=simOf(_pw);
+    pyTip(o);const s=simOf(_pw);
     for(let i=0;i<2;i++)flame(s.x+rnd(-4,4),s.y+rnd(-4,4),s.h-0.1,{vh:rnd(1,2.5),life:0.22,size:rnd(3,5),g:-1});
     // เปลวไฟจากศัตรูที่ติด Burning ไหลเป็นเส้นโค้งมารวมที่ปลายนิ้ว + สะเก็ดไฟรอบศัตรูบอกจำนวนชั้น
     const V=VIEW.cur,foes=V?[...(V.P||[]).filter(q=>q.id!==p.id&&q.al&&(q.br|0)>0&&(!(MODES[V.mode]&&MODES[V.mode].team)||q.tm!==p.tm)),...(V.E||[]).filter(e=>(e.br|0)>0)]:[];
@@ -339,6 +340,8 @@ function pyroNovaCharge(o,dt,now){
     if(o.novaT<=0){o.novaT=0;}}
   if(!(o.novaT>0)&&(o.nvFx||o.nvFx2)){for(const kk of ['nvFx','nvFx2'])if(o[kk]){if(o[kk]!==1)fxStop(o[kk]);o[kk]=null;}}
 }
+// ปลายไม้หลังใส่ท่าแล้ว (js/35 เก็บ o.tipW ทุกเฟรม) — อ่าน o.tip ตรง ๆ ระหว่าง sync ได้ตำแหน่งท่ายืน = ลูกไฟไปโผล่ที่สะโพก
+function pyTip(o){if(o.tipW&&performance.now()-(o.tipWT||0)<200)return _pw.copy(o.tipW);return o.tip.getWorldPosition(_pw);}
 // Blazeform (ผู้ใช้ 2026-11-11): เส้นไฟนีออนจากตัวเราไปหาศัตรูทุกคนในระยะออร่า • ขอบตัวเรืองส้มแบบอัลติ Nature
 //   • คนที่อยู่ในระยะ (ถ้าเป็นเรา) ขอบจอแดงส้มเบา ๆ
 const BLZV={el:null,t:0,last:0};

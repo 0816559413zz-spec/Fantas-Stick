@@ -289,7 +289,7 @@ function natThorn(from,to,size,material,parent,bend=.2){
   const curve=new THREE.QuadraticBezierCurve3(from,mid,to);
   return natMesh(natTube(curve,size,.83),material,parent);
 }
-const NAT_SHIELD_K=1.07/.23;   // preview strike reaches the floor at 1.07 s; the host hit lands at .23 s
+const NAT_SHIELD_K=1.07/NAT_SHIELD_HIT;   // vine reaches the floor at 1.07 (strike phase); host hit lands at NAT_SHIELD_HIT s
 function natShieldMake(o){
   const g=new THREE.Group();o.g.add(g);
   const hitWave={value:1},hitAxis={value:natV(.42,.16,1).normalize()};
@@ -319,7 +319,7 @@ function natShieldMake(o){
     v.tube.set(pts,rad,(u,c)=>c.copy(A).lerp(B,u*.35));const list=thornsAlong(pts,rad,2,1.25);v.th.put(list);list.forEach((_,i)=>v.th.setColorAt(i,C[i%3]));if(v.th.instanceColor)v.th.instanceColor.needsUpdate=true;v.built=true;};
   g.userData.nat.vines=vines;
   g.userData.nat.strike=(angle,reach)=>{let best=null,d0=9;for(const v of vines){if(v.strike)continue;let d=Math.abs(angDiff(angle,v.k*Math.PI*2/9));if(d<d0){d0=d;best=v;}}if(best)best.strike={t:0,angle,reach};};
-  g.userData.nat.tick=dt=>{const U=g.userData.nat,age=U.age??9;shield.scale.setScalar(Math.max(.02,natOut(natPhase(age,0,.13))));for(const v of vines){const climb=natEase(natPhase(age,.16+v.k*.05,1.02+v.k*.05));v.tube.visible=v.th.visible=climb>.01;if(climb<1&&!v.strike){build(v,0,0,4.6,climb);v.built=false;continue;}if(v.strike){const S=v.strike;S.t+=dt;const st2=S.t<.23?S.t*SP:1.07+(S.t-.23);if(st2>=1.8){v.strike=null;build(v,0,0,4.6);}else build(v,st2,S.angle,S.reach);}else if(!v.built)build(v,0,0,4.6);}};
+  g.userData.nat.tick=dt=>{const U=g.userData.nat,age=U.age??9;shield.scale.setScalar(Math.max(.02,natOut(natPhase(age,0,.13))));for(const v of vines){const climb=natEase(natPhase(age,.16+v.k*.05,1.02+v.k*.05));v.tube.visible=v.th.visible=climb>.01;if(climb<1&&!v.strike){build(v,0,0,4.6,climb);v.built=false;continue;}if(v.strike){const S=v.strike;S.t+=dt;const st2=S.t<NAT_SHIELD_HIT?S.t*SP:1.07+(S.t-NAT_SHIELD_HIT);if(st2>=1.8){v.strike=null;build(v,0,0,4.6);}else build(v,st2,S.angle,S.reach);}else if(!v.built)build(v,0,0,4.6);}};
   return g;
 }
 function natureCharacter(o,p,now){
@@ -445,7 +445,7 @@ function natMuzzle(ev){
 function natSlam(ev){
   const a=natWorld(ev.x,ev.y,ev.h+.6),b=natWorld(ev.x2,ev.y2,ev.h2+.04),caster=ev.id!=null?PM3.get(ev.id):null;
   if(caster?.natShield){const q=caster.g.worldToLocal(b.clone());caster.natShield.userData.nat.strike(Math.atan2(q.x,q.z),Math.max(1,Math.hypot(q.x,q.z)));}
-  later(.23,()=>{
+  later(NAT_SHIELD_HIT,()=>{
     const {x2:x,y2:y,h2:h}=ev;
     {const F=natFx(),{V3,dirt,leaves,sparks}=F,dd=b.clone().sub(a).setY(0).normalize(),side=V3(dd.z,0,-dd.x);F.O.y=b.y;for(let i=0;i<4;i++){const p=a.clone().lerp(b,.4+i*.2);p.y=b.y+.07;dirt(p,5,2.9,{spread:.42,size:.75});leaves(p,3,1.6,{dir:side.clone().multiplyScalar(i%2?1.65:-1.65),life:.7,size:1.15});sparks(p,3,2.4,'#e9ffa0','#69a83b',{dir:dd,life:.63});}}
     const crack=new THREE.Group(),mat=new THREE.MeshBasicMaterial({color:'#514331',transparent:true,depthWrite:false});
@@ -582,7 +582,8 @@ function natThornLine(ev){const F=natFx(),{V3,T,M,Tube,Thorns,thornsAlong,dirt,l
   const N=16,ca=Math.cos(ev.a),sa=Math.sin(ev.a),line=[];
   for(let i=0;i<N;i++){const d=40+i*(ev.r-40)/(N-1),side=(i%2?1:-1)*(8+Math.random()*14),x=ev.x+ca*d-sa*side,y=ev.y+sa*d+ca*side,base=natWorld(x,y,groundH(x,y,ev.h)),at=.34+i*.018,sz=.75+.5*Math.sin(Math.PI*i/(N-1));
     for(let c=0;c<3;c++){const main=c===0,lean=ev.a+(c===1?.55:c===2?-.55:0)+(Math.random()-.5)*.25,q=spike((main?3+Math.random()*1.2:1.5+Math.random()*.8)*sz,(main?.28:.16)*sz,(main?1.3:1)+(Math.random()-.3)*.3,lean);q.hook=main?.16:.08;q.tw=Math.random()*6;q.base=main?base:base.clone().add(V3(Math.cos(lean)*.22,0,Math.sin(lean)*.22));q.at=at+c*.025;q.done=c>0;q.tube.visible=q.th.visible=false;line.push(q);}}
-  F.clip(1.3,t=>{    for(const q of line){const a=t-q.at;if(a<0)continue;const k2=natOut(natPhase(a,0,.1))*(1-natEase(natPhase(a,.6,.92)));q.tube.visible=q.th.visible=k2>.01;if(q.tube.visible)setSpike(q,q.base,k2);
+  F.clip(2.4,t=>{   // หนามค้างนานขึ้นก่อนหาย (ผู้ใช้ 2026-11-15)
+    for(const q of line){const a=t-q.at;if(a<0)continue;const k2=natOut(natPhase(a,0,.1))*(1-natEase(natPhase(a,1.5,1.9)));q.tube.visible=q.th.visible=k2>.01;if(q.tube.visible)setSpike(q,q.base,k2);
       if(!q.done){q.done=true;F.O.y=q.base.y;dirt(q.base.clone(),7,3.2,{spread:.5});leaves(q.base.clone().add(V3(0,.5,0)),3,2.2);sparks(q.base.clone().add(V3(0,.6,0)),4,2.6,'#eaffa0','#5fa83a');}}
     if(t>=.34&&t-1/60<.34){snd('boom',{x:ev.x,y:ev.y,vol:.6});if(ev.id===NET.myId)shake(8);}},
     ()=>{for(const q of line){F.drop(q.tube);F.drop(q.th);}});}
@@ -660,10 +661,13 @@ const NAT_HOLO={};
 function natHoloMake(k){const g=new THREE.Group(),m=new THREE.MeshBasicMaterial({color:'#47f4ff',transparent:true,opacity:.3,depthWrite:false,side:THREE.DoubleSide}),e=new THREE.LineBasicMaterial({color:'#9ffbff',transparent:true,opacity:.75});
   const add=(geo,x,y,z,ry=0)=>{const b=natMesh(geo,m,g);b.position.set(x,y,z);b.rotation.y=ry;const l=new THREE.LineSegments(new THREE.EdgesGeometry(geo),e);l.position.copy(b.position);l.rotation.y=ry;g.add(l);};
   if(k===1){const H=NAT.wallHeight;for(let i=-2;i<=2;i++)add(new THREE.BoxGeometry(2.05,H,1.05),i*2.1,H/2,-i*i*.19,i*.1);}
+  else if(k===3){const L=natMesh(new THREE.CylinderGeometry(.9,1.1,.5,12),m,g);L.position.y=.25;for(let i=0;i<6;i++){const a=i/6*Math.PI*2;add(new THREE.ConeGeometry(.45,1.4,4),Math.cos(a)*.8,.7,Math.sin(a)*.8);}const r=natMesh(new THREE.RingGeometry(.97,1,96),m,g);r.rotation.x=-Math.PI/2;r.position.y=.1;r.scale.setScalar(NAT.lotusRange*S3);}   // ดอกบัว: ดอก + วงรัศมีบัฟ
   else{add(new THREE.CylinderGeometry(.9,1.8,10,9),0,5,0);add(new THREE.IcosahedronGeometry(6.4,1),0,14,0);const r=natMesh(new THREE.RingGeometry(.975,1,96),m,g);r.rotation.x=-Math.PI/2;r.position.y=.1;r.scale.setScalar(NAT.treeRange*S3);}
   return natAdd(g);}
-function natHolo(me){const A=me?.nt?.[5]&&me.al&&!me.dn?me.nt[5]:0;{const k=A?A[0]:0;if(k&&NAT_HOLO.hint!==k)toast(k===1?'คลิก = วางกำแพง • ค้างซ้าย = หมุน • คลิกขวา = ยกเลิก':'คลิก = เรียกต้นไม้ • คลิกขวา = ยกเลิก');NAT_HOLO.hint=k;}for(const k of [1,2]){const on=A&&A[0]===k;if(on&&!NAT_HOLO[k])NAT_HOLO[k]=natHoloMake(k);if(!NAT_HOLO[k])continue;NAT_HOLO[k].visible=!!on;if(on){natSet(NAT_HOLO[k],A[1],A[2],A[3]);NAT_HOLO[k].rotation.y=Math.PI/2-A[4];const t=performance.now()*.005;NAT_HOLO[k].traverse(q=>{if(q.material&&q.material.isMeshBasicMaterial)q.material.opacity=.26+.08*Math.sin(t);});}}}
-function natHoloClear(){for(const k of [1,2])if(NAT_HOLO[k]){disposeObj(NAT_HOLO[k]);delete NAT_HOLO[k];}}
+function natHolo(me){const A=me?.nt?.[5]&&me.al&&!me.dn?me.nt[5]:0;{const k=A?A[0]:0;if(k&&NAT_HOLO.hint!==k)toast(k===1?'คลิก = วางกำแพง • ค้างซ้าย = หมุน • คลิกขวา = ยกเลิก':k===3?'คลิก = วางดอกบัว • คลิกขวา = ยกเลิก':'คลิก = เรียกต้นไม้ • คลิกขวา = ยกเลิก');NAT_HOLO.hint=k;}
+  {const on=A&&A[0]===3;if(on&&!NAT_HOLO.rng){const g=new THREE.Group(),r=natMesh(new THREE.RingGeometry(.985,1,128),new THREE.MeshBasicMaterial({color:'#9ffbff',transparent:true,opacity:.45,depthWrite:false,side:THREE.DoubleSide}),g);r.rotation.x=-Math.PI/2;r.position.y=.08;r.scale.setScalar(NAT.seedRange*S3);NAT_HOLO.rng=natAdd(g);}if(NAT_HOLO.rng){NAT_HOLO.rng.visible=!!on;if(on)natSet(NAT_HOLO.rng,me.x,me.y,me.z||0);}}   // ระยะวางสูงสุดรอบตัว
+  for(const k of [1,2,3]){const on=A&&A[0]===k;if(on&&!NAT_HOLO[k])NAT_HOLO[k]=natHoloMake(k);if(!NAT_HOLO[k])continue;NAT_HOLO[k].visible=!!on;if(on){natSet(NAT_HOLO[k],A[1],A[2],A[3]);NAT_HOLO[k].rotation.y=Math.PI/2-A[4];const t=performance.now()*.005;NAT_HOLO[k].traverse(q=>{if(q.material&&q.material.isMeshBasicMaterial)q.material.opacity=.26+.08*Math.sin(t);});}}}
+function natHoloClear(){for(const k of [1,2,3,'rng'])if(NAT_HOLO[k]){disposeObj(NAT_HOLO[k]);delete NAT_HOLO[k];}}
 const natDirOf=a=>natFx().V3(Math.cos(a||0),0,Math.sin(a||0));
 function natMoment(ev){
   const F=natFx(),{V3,leaves,sparks,dirt,puff,chips}=F,x=ev.x,y=ev.y,h=ev.h,P=natWorld(x,y,h),base=natWorld(x,y,groundH(x,y,h));F.O.y=base.y;
@@ -814,7 +818,7 @@ function natPlantHud(me,v){
   const key=list.map(o=>o.k+':'+o.id+':'+Math.ceil(o.hp)+':'+Math.ceil(o.left||0)+':'+(NPH.img[o.k]?1:0)).join('|');
   const now=performance.now();if(now-NPH.t>400){NPH.t=now;   // วางตำแหน่งเหนือแถวไพ่
     const cards=H4.q?H4.q.slots.filter(S=>!S.gem).map(S=>S.el.getBoundingClientRect()).filter(r=>r.width>0):[];
-    if(cards.length){const right=Math.max(...cards.map(r=>r.right)),top=Math.min(...cards.map(r=>r.top));el.style.right=Math.round(innerWidth-right)+'px';el.style.bottom=Math.round(innerHeight-top+8)+'px';}}
+    void cards;}   // ตำแหน่งตายตัวซ้ายจอ (css #h4pl)
   if(key===NPH.key)return;NPH.key=key;
   el.innerHTML=list.map(o=>{const hp=Math.ceil(o.hp),low=hp<=o.maxHp*.3,t=o.left!=null&&o.left<9999?Math.ceil(o.left):null;
     const head=NPH.img[o.k]?`<img src="${NPH.img[o.k]}">`:`<svg viewBox="0 0 24 24">${NPH_IC[o.k]}</svg>`;

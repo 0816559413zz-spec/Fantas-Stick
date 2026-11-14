@@ -168,7 +168,7 @@ function frostFX(o,p,pz,now,dt){
   {const W=ff?o.axe:o.sword,sw=W&&o.fwStrike;
     if(sw){if(!o.wtr){const ch=(o.swC===2&&o.swT>0)||o.grDown>0,kk=ch?0.5:1,lk=ch?0.7:1;   // สับแนวตั้ง = ริบบิ้นสูงเป็นกำแพง → หรี่ลง ไม่ให้ขาวทั้งจอ
         o.wtr=trailNew({sweep:true,col:ff?'#d8ecff':ch?'#cfefff':'#ffffff',col2:ff?'#1a52c8':'#54c2ff',life:(ff?0.3:0.2)*lk,k:(ff?1.3:1.7)*kk});
-        o.wtr2=trailNew({sweep:true,col:ff?'#5e9cff':'#a8e6ff',col2:ff?'#0b2f8a':'#2f86ff',life:(ff?0.36:0.24)*lk,k:(ff?0.9:1.0)*kk});o.wAx=!!ff;}
+        o.wAx=!!ff;}   // หางเดียว (ผู้ใช้ 2026-11-15: เดิมมี 2 ชั้น + ของเล่มเสริม)
       o.g.updateWorldMatrix(true,false);W.updateMatrix();W.updateWorldMatrix(true,false);
       // ฟันเร็วมาก (~0.1 วิ ต่อ 200°) → เก็บจุดย่อย 3 จุดต่อเฟรมจากท่าระหว่างเฟรม ให้หางแสงโค้งเนียน
       const ns=o.fwSub?3:1;
@@ -176,7 +176,7 @@ function frostFX(o,p,pz,now,dt){
         _tv1.set(0,ff?-1.0:-0.3,0).applyMatrix4(M);_tv2.set(0,-2.05,0).applyMatrix4(M);
         trailPoint(o.wtr,_tv1.x,_tv1.y,_tv1.z,_tv2.x,_tv2.y,_tv2.z);
         _tv3.set(0,ff?-1.5:-1.3,0).applyMatrix4(M);_ev.set(0,ff?-2.75:-2.9,0).applyMatrix4(M);
-        trailPoint(o.wtr2,_tv3.x,_tv3.y,_tv3.z,_ev.x,_ev.y,_ev.z,0.75);}
+        }
       const q=simOf(_tv2);o.wTip=[q.x,q.y];
       if(ff){// แนวผลึกน้ำแข็งตามทางหัวขวาน
         for(let i=0;i<2;i++){const c=rnd(0.07,0.13);iceBit(_cryG,q.x+rnd(-6,6),q.y+rnd(-6,6),Math.max(0.05,q.h-GY(q.x,q.y)+rnd(-0.25,0.25)),c,c*rnd(2,3.2),c,{life:rnd(0.45,0.7),up:0.03,down:0.3,rx:rnd(-1,1),rz:rnd(-1,1),v:[rnd(-25,25),rnd(-25,25),rnd(-1.5,0.3)],spin:rnd(-4,4)});}
@@ -234,6 +234,7 @@ function frostFX(o,p,pz,now,dt){
     if(Math.random()<0.4)PARTS.push({x:p.x+rnd(-20,20),y:p.y+rnd(-20,20),h:pz+rnd(0.3,2.4),vx:0,vy:0,vh:0.3,life:0.7,max:0.7,col:'#7dff9a',size:1.6,g:-0.5});
   }else{if(o.cryoM)o.cryoM.visible=false;if(o.cryoFx){fxKill(o.cryoFx);o.cryoFx=null;}}
   if(!(flags&4)&&o.auraR)o.auraR.visible=o.auraD.visible=false;
+  if(!(flags&4)&&o.auraTr){o.auraTr.forEach(trailStop);o.auraTr=null;}
   if(flags&4){
     for(let i=0;i<4;i++){const an=now/260+i*1.571,r=24+6*Math.sin(now/300+i),hh=pz+0.3+((now/600+i*0.25)%1)*2.2;PARTS.push({x:p.x+Math.cos(an)*r,y:p.y+Math.sin(an)*r,h:hh,vx:-Math.sin(an)*r*4,vy:Math.cos(an)*r*4,vh:0.6,life:0.25,max:0.25,col:i%2?'#ffffff':'#cfefff',size:i%2?1.6:2.4,g:0});}
     if(Math.random()<0.12){const an=rnd(0,6.283);PARTS.push({x:p.x+Math.cos(an)*26,y:p.y+Math.sin(an)*26,h:pz+rnd(0.1,0.5),vx:-Math.sin(an)*90,vy:Math.cos(an)*90,vh:0.2,life:0.6,max:0.6,col:'#cfe6fa',size:4,g:0,smoke:true,grow:0.6,drag:1});}   // หมอกต่ำแค่ข้อเท้า (เดิมสูงถึงอก บังกล้องจนขาว)
@@ -250,8 +251,11 @@ function frostFX(o,p,pz,now,dt){
       o.auraR.scale.set(180*S3,1,180*S3);o.g.add(o.auraR);
       o.auraD={visible:false};}
     o.auraR.visible=o.auraD.visible=true;o.auraR.position.y=0.07;o.auraR.rotation.y=-o.g.rotation.y+now/900;
-for(let i=0;i<5;i++){const an=rnd(0,6.283),r=rnd(40,180);PARTS.push({x:p.x+Math.cos(an)*r,y:p.y+Math.sin(an)*r,h:pz+rnd(0.1,2.2),vx:-Math.sin(an)*120,vy:Math.cos(an)*120,vh:rnd(-0.6,0.2),life:0.6,max:0.6,col:i%2?'#ffffff':'#bfeaff',size:rnd(1.6,2.6),g:0,drag:1});}
-    if(Math.random()<0.15){const an=rnd(0,6.283),rr=rnd(60,170);PARTS.push({x:p.x+Math.cos(an)*rr,y:p.y+Math.sin(an)*rr,h:pz+0.15,vx:0,vy:0,vh:0.1,life:1,max:1,col:'#d6ecff',size:5,g:0,smoke:true,grow:0.6});}}
+    // Frostbite Aura (ผู้ใช้ 2026-11-15): ลมน้ำแข็งหมุนรอบตัวเบา ๆ 3 สาย + ประกายนิดหน่อย + ควันบางมาก (พื้นเหมือนเดิม)
+    {if(!o.auraTr)o.auraTr=[0,1,2].map(()=>trailNew({col:'#e8f8ff',col2:'#5ab8ff',w:0.09,life:0.55,k:1.2}));o.g.updateWorldMatrix(true,false);
+      for(let k=0;k<3;k++){const an=now/420+k*2.094,rr=1.35+0.15*Math.sin(now/600+k),yy=0.45+k*0.55+0.25*Math.sin(now/500+k*1.7);_tv1.set(Math.cos(an)*rr,yy,Math.sin(an)*rr);o.g.localToWorld(_tv1);trailPoint(o.auraTr[k],_tv1.x,_tv1.y,_tv1.z);
+        if(Math.random()<0.25){const q=simOf(_tv1);PARTS.push({x:q.x,y:q.y,h:q.h,vx:0,vy:0,vh:0.2,life:0.35,max:0.35,col:'#ffffff',size:1.4,g:0});}}}
+    if(Math.random()<0.04){const an=rnd(0,6.283),rr=rnd(60,140);PARTS.push({x:p.x+Math.cos(an)*rr,y:p.y+Math.sin(an)*rr,h:pz+0.15,vx:0,vy:0,vh:0.1,life:1,max:1,col:'#d6ecff',size:4,g:0,smoke:true,grow:0.5});}}
   // อัลติ Mirror Legion: อาวุธน้ำแข็งลอยเพิ่ม 2 เล่ม (ซ้าย/ขวา เยื้องหน้า = จุดที่ host ฟันซ้ำ 50%) ทำท่าเดียวกับเล่มหลักทุกจังหวะ
   frostCrown(o,!!(flags&16),dt,now);
   if(flags&16){
@@ -266,7 +270,7 @@ for(let i=0;i<5;i++){const an=rnd(0,6.283),r=rnd(40,180);PARTS.push({x:p.x+Math.
       c.born=Math.min(1,c.born+dt*2.2);c.g.scale.setScalar(FWS*(0.2+0.8*(1-Math.pow(1-c.born,3))));c.g.visible=fwOn;
       // หางแสงของเล่มเสริม (ตามท่าเดียวกับเล่มหลัก)
       if(fwOn&&o.fwStrike){const W=ff?c.axe:c.sword;W.updateMatrix();o.g.updateWorldMatrix(true,false);
-        if(!c.tr)c.tr=trailNew({sweep:true,col:ff?'#d8ecff':'#e8f8ff',col2:ff?'#1a52c8':'#54c2ff',life:ff?0.24:0.16,k:ff?0.9:1.0});
+        if(false&&!c.tr)c.tr=trailNew({sweep:true,col:ff?'#d8ecff':'#e8f8ff',col2:ff?'#1a52c8':'#54c2ff',life:ff?0.24:0.16,k:ff?0.9:1.0});
         const ns=o.fwSub?3:1;for(let j=1;j<=ns;j++){const M=fwMat(o,W,ns>1?fwSwing(FWT,o.swC,ff,lerp(o.fwKs[0],o.fwKs[1],j/ns)):FWP,A);
           _tv1.set(0,ff?-1.0:-0.3,0).applyMatrix4(M);_tv2.set(0,-2.05,0).applyMatrix4(M);trailPoint(c.tr,_tv1.x,_tv1.y,_tv1.z,_tv2.x,_tv2.y,_tv2.z);}}
       else if(c.tr){trailStop(c.tr);c.tr=null;}});

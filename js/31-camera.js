@@ -94,7 +94,7 @@ const CAM_FRAMES={
   earthBase:{dist:7,h:2.25,side:0,lift:2.4},earthRampage:{dist:9,h:4.1,side:0,lift:3},
   earthShield:{dist:9,h:2.8,side:0,lift:5.5},earthCharge:{dist:10,h:3,side:0,lift:5},
   earthAuger:{dist:12,h:3.3,side:0,lift:3.5},earthSky:{dist:15.2,h:3.8,side:0,lift:3},
-  windShield:{dist:6.2,h:2.45,side:0.34},windFlight:{dist:10.4,h:4.3,side:0.3},
+  windShield:{dist:6.2,h:2.45,side:0.34},windFlight:{dist:10.4,h:4.3,side:0.3},windBase:{dist:6.3,h:2.35,side:0.32},   // สายลม: ปีกใหญ่บังเป้า → ถอยกล้อง + เยื้องข้างมากขึ้น (ผู้ใช้ 2026-11-15)
   waterBeam:{dist:7.8,h:3.5,side:0},waterDragon:{dist:17.2,h:4.8,side:0.30}
 };
 const CAM_FRAME={dist:4.7,h:2.05,side:0.25,lift:0},CAM_TRACK={has:false,key:'',x:0,y:0,z:0,r:0,gy:undefined};
@@ -116,6 +116,7 @@ function cameraFrame(me){
     if(me.df)return CAM_FRAMES.airAim;
     if(me.wn&&me.wn[5])return CAM_FRAMES.windFlight;
     if(me.wn&&me.sh)return CAM_FRAMES.windShield;
+    if(me.wn&&!me.fl)return CAM_FRAMES.windBase;
     if(me.sm&&(me.sm[3]&16))return CAM_FRAMES.rail;
     if(me.kd>0&&me.hv)return CAM_FRAMES.kindle;
   }
@@ -134,7 +135,7 @@ function camRoomK(me,F,x,y,z){
 }
 function updateCamera(me,dt){
   // ร่าย/ยิง Abyssal Beam: กล้องหมุนได้เร็วเท่าลำเท่านั้น (ผู้ใช้ 2026-11-01) เมาส์ยังบังคับทิศลำ
-  if(me.wt&&me.wt[7]&&me.al&&WBY!==null){const m=WT_AB.turn*dt;yaw=WBY+Math.max(-m,Math.min(m,angDiff(yaw,WBY)));}
+  // (เดิม: กล้องหมุนช้าตามลำ Abyssal Beam — ผู้ใช้ 2026-11-15 ไม่ชิน → กล้องหมุนตามเมาส์ปกติ ลำค่อยตามไปเอง)
   WBY=me.wt&&me.wt[7]&&me.al?yaw:null;
   AIMZ+=(((me.kd>0&&me.hv)?.35:0)-AIMZ)*Math.min(1,dt*10);if(AIMZ<0.001)AIMZ=0;
   {const fv=SET.fov*(1-0.25*AIMZ)+WTLF.fov;if(Math.abs(cam.fov-fv)>0.01){cam.fov=fv;cam.updateProjectionMatrix();}}

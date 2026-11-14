@@ -4,8 +4,8 @@
 defSpell(3,{id:'poisondart',ic:'🌱',n:'ป้อมฝักหนาม',role:'utility',cd:10,d:'ปลูกป้อมยิงหนาม 80 HP ยิงไกล 650 อยู่ถาวรจนแตก วางได้ 2 ต้น ยิงเร็วขึ้นเมื่อได้บัฟ',cast:p=>natureCastPlant(p,'turret')});
 defSpell(3,{id:'vinelash',ic:'↔',n:'ย้ายพืช',role:'utility',cd:14,d:'ย้ายพืชมาอ้างอิงตำแหน่งเรา ฟื้น HP 50% และบัฟป้อม 4 วิ',cast:natureMovePlants});
 defSpell(3,{id:'sporecloud',ic:'🌰',n:'บอลไม้หนาม',role:'control',cd:16,d:'โยนบอลไม้โค้งลงตามจุดเล็ง ไกล 450 ดึงเป้ารอบจุดตกเข้าหาลูก ใส่พิษและสโลว์',cast:natureBall});
-defSpell(3,{id:'bloom',ic:'🌸',n:'ดอกบัว',role:'utility',cd:22,d:'วางดอกบัว 100 HP นาน 15 วิ ฮีล 5 ต่อวิ กดซ้ำสลับเป็นบัฟป้อมและเพื่อนตีปกติเร็วขึ้น 30%ในรัศมี 220 หน่วย',toggle:natureLotusToggle,cast:p=>natureCastPlant(p,'lotus')});
-defSpell(3,{id:'thornburst',ic:'🪵',n:'กำแพงไม้',role:'control',cd:18,d:'เลือกจุดวางกำแพงไม้ (มี 2 ชาร์จ) กดซ้ายค้างหมุน คลิกยืนยัน 175 HP อยู่ 8 วิ มี 3 โซนที่ติดไฟได้',toggle:p=>{if(p.natAim?.k!=='wall')return false;p.natAim=null;return true;},cast:natureCastWall});
+defSpell(3,{id:'bloom',ic:'🌸',n:'ดอกบัว',role:'utility',cd:22,d:'วางดอกบัว 100 HP นาน 15 วิ ฮีล 5 ต่อวิ กดซ้ำสลับเป็นบัฟป้อมและเพื่อนตีปกติเร็วขึ้น 30%ในรัศมี 220 หน่วย',toggle:natureLotusToggle,cast:p=>p.bot?natureCastPlant(p,'lotus'):(naturePlants(p,'lotus').length?false:natureAimStart(p,'lotus'))});
+defSpell(3,{id:'thornburst',ic:'🪵',n:'กำแพงไม้',role:'control',cd:18,d:'เลือกจุดวางกำแพงไม้ (มี 2 ชาร์จ) กดซ้ายค้างหมุน คลิกยืนยัน 175 HP อยู่ 14 วิ มี 3 โซนที่ติดไฟได้',toggle:p=>{if(p.natAim?.k!=='wall')return false;p.natAim=null;return true;},cast:natureCastWall});
 defSpell(3,{id:'worldtree',ic:'🌲',ult:true,cd:0,n:'ต้นไม้โลก',role:'ult',d:'ต้นไม้ 350 HP คุ้มครองทีมในระยะ 500 หน่วย 12 วิ รับดาเมจแทน 65% ฮีลทีม 5 ต่อวิ ทุก 3 วิรากพุ่งใส่ศัตรูในวง 10 ดาเมจ ช้าลง 30% ถ้าต้นแตกจะฮีล 125',cast:natureTree});
 
 // =====================================================================

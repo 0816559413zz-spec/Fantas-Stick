@@ -46,7 +46,9 @@ function h4Build(me,v){
   const cards=MYS.filter(s=>s[3]>=1&&s[3]<=4),gems=MYS.filter(s=>(s[3]<=0&&s[3]!==-2)||s[3]===5);
   // ไพ่ 4 ใบ: ตำแหน่ง = SKORD (สลับได้) • .fc = หน้าไพ่ (เล่นท่าดึงขึ้น/สลาย/ไพ่ใหม่แทรก) • .hg = นาฬิกาทรายตอนคูลดาวน์
   let R=`<div class="h4Sh"></div>`+h4Parts(E,16,(a,b)=>[20+a*480,40+b*200]);
-  cards.forEach(s=>{R+=`<div class="h4Cd" data-ci="${s[3]}"><div class="fc"><i class="art"></i>${h4Ico(s[1],62)}<b class="nm">${esc(s[2]||'')}</b><span class="k"></span>${h4Glass(s[3])}</div></div>`;});
+  // สายฟ้า: ใช้กี่ stack = สายฟ้าเล็กเรียงที่มุมไพ่ (ไม่ใช้ตัวหนังสือ — ผู้ใช้ 2026-11-15) • stack ไม่พอ = ไพ่เทา (slotState)
+  const pips=s=>{const S=s[1]&&s[1].id&&SPELLS[s[1].id],n=P.id==='storm'&&S&&S.v&&S.v.cost|0;return n>0?`<span class="h4Pip">${'<i></i>'.repeat(n)}</span>`:'';};
+  cards.forEach(s=>{R+=`<div class="h4Cd" data-ci="${s[3]}"><div class="fc"><i class="art"></i>${h4Ico(s[1],62)}<b class="nm">${esc(s[2]||'')}</b><span class="k"></span>${pips(s)}${h4Glass(s[3])}</div></div>`;});
   R+=`<div class="h4Ic">`+gems.map(s=>`<div class="h4Gm" data-ci="${s[3]}">${h4Ico(s[1],26)}<i class="sh"></i><b class="n"></b><span class="k">${esc(h4Key(s[0]))}</span></div>`).join('')+`</div><div class="h4Tip">ลากไพ่เพื่อสลับตำแหน่ง • ระหว่างเล่น: กด Alt ค้าง + ปุ่มสกิล 2 ปุ่ม</div>`;
   // ไพ่อัลติใบใหญ่ด้านหลังไพ่ 4 ใบ (ผู้ใช้ 2026-10-28): เศษไพ่ขาด 7 ชิ้น ประกอบเข้าทีละชิ้นตามเกจ (h4UltCard) • เต็ม = ไพ่สมบูรณ์ + ออร่าธาตุ
   const au=`<div class="h4Au ${E.pt}"><i class="fl"></i><i class="fl b"></i>${h4AuBits(E.pt)}${h4Parts(E,18,(a,b)=>{const t=a*Math.PI*2,r=50+b*16;return [58+Math.cos(t)*r,58+Math.sin(t)*r];})}</div>`;

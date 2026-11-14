@@ -37,7 +37,7 @@ function botBrain(p,dt,tg0){
     const gap=S.id==='scorchdash'||S.id==='arcblink';
     if(gap?d>420&&d<800:d<r)press(k);
   });
-  if(p.ult>=100&&d<(p.ultId==='colossus'?330:p.ultId==='mirrorlegion'?550:340))press('x');
+  if(p.ult>=100&&d<(p.ultId==='colossus'?500:p.ultId==='mirrorlegion'?550:340))press('x');
   // บอทสายฟ้า: เข้าประชิด ยิงลำค้าง (ปล่อยแว้บเพื่อฟาดสามเหลี่ยม) Dash ทะลุ เปิดโล่ตอนเลือดน้อย
   if(p.pathIdx===2){const w=d>(p.god>0?150:240)?1:0;inp.mx=Math.cos(ang)*w+Math.cos(ang+Math.PI/2)*st*0.5;inp.my=Math.sin(ang)*w+Math.sin(ang+Math.PI/2)*st*0.5;
     inp.fire=d<(p.god>0?190:320)?(p.emp?(Math.floor(G.time*8)%2):1):0;

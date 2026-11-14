@@ -496,6 +496,15 @@ function stBeam(x,y,h,a,len,rad,col,op,nb){
   m.rotation.order='YXZ';m.rotation.y=-a;m.rotation.z=Math.PI/2;m.position.set(tx(x+Math.cos(a)*len/2),h+GY(x,y),tz(y+Math.sin(a)*len/2));return m;
 }
 // จุดบนเปลือกทรงกลมรอบ (x,y,h) รัศมี R (หน่วย sim)
+// โล่สายฟ้า: โดมแก้วทอง ขอบสว่าง (fresnel) + เส้นแสงแนวนอนไหลขึ้นลงเป็นคลื่นเรียบ ๆ (ไม่ใช่เส้นสุ่ม)
+let _stDomeM=null;
+function stormDomeMat(){if(_stDomeM)return _stDomeM.clone();
+  _stDomeM=new THREE.ShaderMaterial({uniforms:{uT:{value:0},uK:{value:0}},transparent:true,depthWrite:false,side:THREE.DoubleSide,blending:THREE.AdditiveBlending,
+    vertexShader:'varying vec3 vN;varying vec3 vV;varying vec3 vP;void main(){vec4 w=modelMatrix*vec4(position,1.);vN=normalize(mat3(modelMatrix)*normal);vV=normalize(cameraPosition-w.xyz);vP=position;gl_Position=projectionMatrix*viewMatrix*w;}',
+    fragmentShader:'uniform float uT,uK;varying vec3 vN;varying vec3 vV;varying vec3 vP;void main(){float fr=pow(1.-abs(dot(vN,vV)),2.2);float an=atan(vP.z,vP.x);float y=vP.y;'+
+      'float w1=sin(y*14.+sin(an*3.+uT*1.3)*0.9-uT*2.4);float w2=sin(y*22.-sin(an*2.-uT*1.1)*1.1+uT*3.1);float ln=smoothstep(0.82,1.,w1)*0.9+smoothstep(0.88,1.,w2)*0.6;'+
+      'float bot=smoothstep(-0.35,0.05,y);float a=(fr*0.9+ln*(0.35+0.4*fr)+0.04)*bot*(0.75+0.35*uK);vec3 c=mix(vec3(1.,0.62,0.12),vec3(1.,0.95,0.7),clamp(fr+ln*0.5,0.,1.));gl_FragColor=vec4(c*a,a);}'});
+  _stDomeM.userData.keep=true;return _stDomeM.clone();}
 function shellPt(x,y,h,R,a,e){return [x+Math.cos(a)*R*Math.cos(e),y+Math.sin(a)*R*Math.cos(e),h+R*S3*Math.sin(e)];}
 function updateStormV(dt){
   for(let i=LATER.length-1;i>=0;i--){const L=LATER[i];L.t-=dt;if(L.t<=0){LATER.splice(i,1);try{vfxOnce(L.fn);}catch(e){}}}
@@ -655,7 +664,7 @@ function stormFX(o,p,pz,now,dt){
   if((p.fm|0)&16){o.b.rotation.z+=Math.sin(now/22)*0.2;o.b.rotation.x+=Math.sin(now/31)*0.08;}
   const M=p.sm;
   stormCape(o,!!(M?.[3]&4));
-  if(!M){if(o.sOrbs)o.sOrbs.forEach(q=>q.visible=false);if(o.railC)o.railC.visible=false;if(o.godG)o.godG.visible=false;if(o.godEyes)o.godEyes.forEach(e=>e.visible=false);if(o.stG)o.stG.visible=false;if(o.claws)o.claws.forEach(c=>c.visible=false);return;}
+  if(!M){if(o.sOrbs)o.sOrbs.forEach(q=>q.visible=false);if(o.railC)o.railC.visible=false;if(o.godG)o.godG.visible=false;if(o.godEyes)o.godEyes.forEach(e=>e.visible=false);if(o.stG)o.stG.visible=false;if(o.stD)o.stD.visible=false;if(o.claws)o.claws.forEach(c=>c.visible=false);return;}
   const f=M[3]|0,isMe=p.id===NET.myId,god=!!(f&4);
   // ลำสายฟ้า (กดค้าง): สายฟ้าหนาจากปลายไม้ไปทุกเป้าที่ล็อก
   const bmT=f&1&&!god?(M[7]||[]):[];   // ล็อกเป้าแล้ว = ลำหลักวิ่งเข้าหาเป้า ไม่พุ่งตรงไปข้างหน้าอีก (ผู้ใช้ 2026-11-10)
@@ -677,11 +686,13 @@ function stormFX(o,p,pz,now,dt){
   if(M[1]&&!god&&Math.random()<0.5){o.tip.getWorldPosition(_pw);const q=simOf(_pw);PARTS.push({x:q.x+rnd(-4,4),y:q.y+rnd(-4,4),h:q.h,vx:rnd(-20,20),vy:rnd(-20,20),vh:rnd(0.5,2),life:0.3,max:0.3,col:Math.random()<0.5?'#ffd000':'#ffffff',size:2.4,g:-1});}
   // โล่สายฟ้า: เปลือกสายฟ้าแตกแขนงล้อมตัว สีเหลืองตลอด ยิ่งดูดมากยิ่งแลบถี่
   if(f&2){o.shield.visible=false;const k=Math.min(1,(M[4]||0)/90),R=30,hc=pz+1.15;
-    for(let j=0;j<4+Math.round(k*5);j++){const a1=rnd(0,6.283),e1=rnd(-0.9,1.2),q=shellPt(p.x,p.y,hc,R,a1,e1),q2=shellPt(p.x,p.y,hc,R,a1+rnd(0.6,1.4),e1+rnd(-0.7,0.7));tbolt(q[0],q[1],q[2],q2[0],q2[1],q2[2],0.1,0,0.08+0.05*k,k>0.4?1:0);}
-    if(!o.stG){o.stG=new THREE.Sprite(glowMat('#ffd23a',0.5));o.stG.material.userData.keep=true;o.stG.position.y=1.15;o.g.add(o.stG);}
-    o.stG.visible=true;o.stG.scale.setScalar(1.9+0.15*Math.sin(now/50));
-    LREQ.push({x:tx(p.x),y:pz+1.2,z:tz(p.y),col:'#ffd23a',int:1.6+2*k,dist:8});
-  }else if(o.stG)o.stG.visible=false;
+    // ผู้ใช้ 2026-11-15 (ref โดมทองแก้ว): โดมขอบชัด + เส้นแสงไหลขึ้นลงเป็นระเบียบรอบโดม (ไม่สุ่มมั่ว) • สายฟ้าแลบแค่นิดหน่อยตามพลังที่ดูดไว้
+    if(!o.stD){o.stD=new THREE.Mesh(new THREE.SphereGeometry(1,48,32),stormDomeMat());o.stD.material.userData.keep=true;o.stD.renderOrder=4;o.g.add(o.stD);}
+    o.stD.visible=true;o.stD.position.y=1.0;o.stD.scale.setScalar(R*S3*(1+0.02*Math.sin(now/90)));const U=o.stD.material.uniforms;U.uT.value=now/1000;U.uK.value=k;
+    if(Math.random()<0.15+0.35*k){const a1=rnd(0,6.283),e1=rnd(-0.3,1.1),q=shellPt(p.x,p.y,hc,R,a1,e1),q2=shellPt(p.x,p.y,hc,R,a1+rnd(0.4,0.9),e1+rnd(-0.4,0.4));tbolt(q[0],q[1],q[2],q2[0],q2[1],q2[2],0.08,0,0.06+0.04*k,0);}
+    LREQ.push({x:tx(p.x),y:pz+1.2,z:tz(p.y),col:'#ffd23a',int:1.2+1.6*k,dist:8});
+  }else if(o.stD)o.stD.visible=false;
+  if(o.stG)o.stG.visible=false;
   // Dash: สายฟ้าหนาหุ้มตัว + เงาติดตา + ร่องสายฟ้าแตกกิ่งที่จางเร็ว
   if(p.ds){const pv=o.dPrev||[p.x,p.y];
     {const a1=rnd(0,6.283),q=shellPt(p.x,p.y,pz+0.3,20,a1,rnd(-0.3,0.3)),q2=shellPt(p.x,p.y,pz+2,20,a1+rnd(2,4),rnd(-0.3,0.3));(god?tboltB:tbolt)(q[0],q[1],q[2],q2[0],q2[1],q2[2],0.06,0,0.08).gk=0.4;}   // ผู้ใช้ 2026-11-12: สายฟ้าหุ้มตัวน้อยลง ไม่รวมกันเป็นก้อนขาว

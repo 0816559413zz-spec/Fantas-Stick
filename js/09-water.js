@@ -8,7 +8,7 @@ const WATERP=PATHS.length;
 // ตัวเลขทั้งหมดของสายน้ำ: WAV = PATHS[WATERP].v (เส้นน้ำ/โล่ฟองน้ำ/Dash) + v:{...} ของแต่ละสกิล (WT_RP WT_FM WT_CG WT_AB WT_MW WT_UL = S.v) — ปรับได้ใน tune.html / F8 (js/73-tune.js)
 PATHS.push({id:'water',n:'สายน้ำ',ic:'💧',col:'#4fc3ff',d:'เล่นง่าย — ยิงน้ำไกล คลื่นผลัก ฮีลตัวเองด้วยโล่ เคลื่อนที่ไหลลื่นด้วยร่างโคลน',
   combo:'Aqua Cage ขังศัตรู 2 วิ → Abyssal Beam / ลำน้ำ Moonwater ใส่เต็มๆ • Tidecaller Orb ยิงตามทุกครั้งที่เราตีโดน (คู่กับลำน้ำ = ยิงรัว) • Riptide พัดศัตรูออก • Dash ร่างโคลน หนีแล้วกลับที่เดิมได้'});
-const WAV=PATHS[WATERP].v={baCd:1.0,baN:3,baT0:0,baGap:0.08,baDmg:5,baSpd:2800,baRange:500,baSpr:0.06,shGauge:70,shHeal:6,shReg:3,
+const WAV=PATHS[WATERP].v={baCd:1.0,baN:3,baT0:0,baGap:0.08,baDmg:5,baSpd:2800,baRange:750,baSpr:0.06,shGauge:70,shHeal:6,shReg:3,
   dsDist:300,dsSink:0.35,dsR:120,dsPush:900,dsBack:6,dsCd:8};
 PATHS[WATERP].vn={baCd:'เส้นน้ำ • ตวัดทุก (วิ)',baN:'เส้นน้ำ • จำนวนนัด',baT0:'เส้นน้ำ • นัดแรกออกหลัง (วิ)',baGap:'เส้นน้ำ • ห่างแต่ละนัด (วิ)',baDmg:'เส้นน้ำ • ดาเมจต่อนัด',baSpd:'เส้นน้ำ • ความเร็วกระสุน',baRange:'เส้นน้ำ • ระยะ',baSpr:'เส้นน้ำ • กระจาย (เรเดียน)',
   shGauge:'โล่ฟองน้ำ • เกจฮีลเต็ม',shHeal:'โล่ฟองน้ำ • ฮีลต่อวิ',shReg:'โล่ฟองน้ำ • เกจคืนต่อวิ',
@@ -69,7 +69,10 @@ function waterCageLaunch(p){
 }
 function waterCageSteer(pr,dt){
   const p=G.players[pr.owner],i=p?.inp,V=WT_CG;
-  if(p?.alive&&!(p.stun>0)&&Number.isFinite(i?.ax)&&Number.isFinite(i.ay)&&Number.isFinite(i.ah)){
+  // ผู้ใช้ 2026-11-15: กดคลิกซ้ายค้าง = คุมลูกเลี้ยวตามเมาส์ • ปล่อย = ลูกพุ่งตรงไปทางเมาส์ตอนนั้นเลย แล้วเราเป็นอิสระ
+  if(!pr.cageFree&&(pr.cgT=(pr.cgT||0)+dt)>0.12&&p&&!i?.fire){pr.cageFree=true;if(Number.isFinite(i?.ax)){const dx=i.ax-pr.x,dy=i.ay-pr.y,dz=(i.ah+terrT(p.x,p.y)-pr.h-terrT(pr.x,pr.y))*20;pr.cageYaw=Math.atan2(dy,dx);pr.cagePitch=clamp(Math.atan2(dz,Math.hypot(dx,dy)),-1.45,1.45);}if(p.wcOrb===pr)p.wcOrb=null;emit({k:'efx',z:'wtcagefree',x:pr.x,y:pr.y,h:pr.h,id:p.id});}
+  if(pr.cageFree){}
+  else if(p?.alive&&!(p.stun>0)&&Number.isFinite(i?.ax)&&Number.isFinite(i.ay)&&Number.isFinite(i.ah)){
     const dx=i.ax-pr.x,dy=i.ay-pr.y,dz=(i.ah+terrT(p.x,p.y)-pr.h-terrT(pr.x,pr.y))*20;
     const c=Math.cos(pr.cageYaw),s=Math.sin(pr.cageYaw),cp=Math.cos(pr.cagePitch),sp=Math.sin(pr.cagePitch);
     if(dx*c*cp+dy*s*cp+dz*sp>10){
@@ -169,7 +172,8 @@ function waterBeamTick(p,dt){const B=p.wab;B.t-=dt;
   // ฮิตแรกทันที ฮิตที่ตรงกับเวลาปิดลำไม่นับ
   while(B.k*interval<WT_AB.t-1e-6&&B.k*interval<=elapsed+1e-6){
     B.k++;
-    if(first){aoeHit(p,first,WT_AB.dmg,null);emit({k:'efx',z:'wtabhit',x:Math.round(first.x),y:Math.round(first.y),h:cH(first)});}
+    if(first){const L3=WT_AB.len/3,dd=B.L,dm=dd<L3?WT_AB.dmg:dd<L3*2?7:5;aoeHit(p,first,dm,null);   // ยิ่งไกลยิ่งเบา 10/7/5 (ผู้ใช้ 2026-11-15)
+      emit({k:'efx',z:'wtabhit',x:Math.round(first.x),y:Math.round(first.y),h:cH(first)});}
   }
   if(B.t<=1e-6){p.wab=null;emit({k:'efx',z:'wtaboff',x:p.x,y:p.y,id:p.id});}}
 // ลำน้ำ Moonwater หันตามเป้าทันทีตลอดจังหวะยิง
@@ -210,17 +214,17 @@ function waterSnapP(p){if(!wtOn(p))return undefined;
 function waterSnapW(){const o={};if(G.wtw&&G.wtw.length)o.WV=G.wtw.map(w=>[w.id,Math.round(w.x),Math.round(w.y),Math.round(w.a*100)/100,Math.round(Math.min(1,w.t/WT_RP.t)*100)/100]);
   if(G.wtf&&G.wtf.length)o.WF=G.wtf.map(f=>[f.id,Math.round(f.x),Math.round(f.y),Math.round(f.h*10)/10,f.o]);return o;}
 
-const WT_RP=defSpell(WATERP,{id:'riptide',v:{len:400,t:0.8,w:100,dmg:20,out:300},vn:{len:'คลื่น • ระยะ',t:'คลื่น • เวลาวิ่ง (วิ)',w:'คลื่น • ครึ่งความกว้าง',dmg:'ดาเมจ',out:'จบคลื่น • ความเร็วไถลต่อ'},role:'control',n:'Riptide',ic:'🌊',cd:10,d:'กวาดไม้ → คลื่นน้ำยักษ์สูง ~4 ม. วิ่งไปข้างหน้า กว้าง 200 ไกล 400 • ศัตรูที่โดนถูกพัดติดไปกับคลื่นจนสุดทาง 20 ดาเมจ',
+const WT_RP=defSpell(WATERP,{id:'riptide',v:{len:480,t:0.8,w:100,dmg:20,out:300},vn:{len:'คลื่น • ระยะ',t:'คลื่น • เวลาวิ่ง (วิ)',w:'คลื่น • ครึ่งความกว้าง',dmg:'ดาเมจ',out:'จบคลื่น • ความเร็วไถลต่อ'},role:'control',n:'Riptide',ic:'🌊',cd:10,d:'กวาดไม้ → คลื่นน้ำยักษ์สูง ~4 ม. วิ่งไปข้างหน้า กว้าง 200 ไกล 480 • ศัตรูที่โดนถูกพัดติดไปกับคลื่นจนสุดทาง 20 ดาเมจ',
   cast(p){const a=p.ang;(G.wtw||(G.wtw=[])).push({id:++G.zid,o:p.id,team:p.team,x:p.x,y:p.y,h:p.z,a,t:0,c:new Map()});
     emit({k:'efx',z:'wtwave',x:Math.round(p.x),y:Math.round(p.y),h:p.z,a:Math.round(a*100)/100,id:p.id});}}).v;
 const WT_FM=defSpell(WATERP,{id:'tidecaller',v:{t:8,dmg:5,spd:4000},vn:{t:'ลูกผู้ช่วยอยู่ (วิ)',dmg:'ยิงตาม • ดาเมจ',spd:'ยิงตาม • ความเร็ว'},role:'utility',n:'Tidecaller Orb',ic:'🔵',cd:15,d:'เสกลูกน้ำลอยที่ไหล่ 8 วิ • ทุกครั้งที่เราทำดาเมจใส่ศัตรู (การโจมตีอะไรก็ได้) ลูกยิงตามล็อกเป้า โดน 100% ครั้งละ 5',
   cast(p){p.wfam=WT_FM.t;emit({k:'efx',z:'wtfam',x:Math.round(p.x),y:Math.round(p.y),h:p.z,id:p.id});}}).v;
-const WT_CG=defSpell(WATERP,{id:'aquacage',v:{charge:1,spd:400,range:850,response:0.14,turn:2.4,r:14,dmg:0,t:2,lift:0.6},vn:{charge:'ชาร์จ (วิ)',spd:'ฟอง • ความเร็ว',range:'ฟอง • ระยะ',response:'หน่วงการเลี้ยว (วิ)',turn:'ความเร็วเลี้ยวสูงสุด (เรเดียน/วิ)',r:'ฟอง • ขนาดลูก',dmg:'ฟอง • ดาเมจ',t:'ขังนาน (วิ)',lift:'ลอยสูง (ม.)'},role:'control',n:'Aqua Cage',ic:'🫧',cd:14,d:'ชาร์จลูกน้ำข้างตัว 1 วิ แล้วเหวี่ยงออกไปไกล 850 • ลูกค่อย ๆ เลี้ยวตามเป้ากลางจอ • ช่วงชาร์จและคุมลูกทำได้แค่เดินกับเล็ง • โดน = ขังเป้า 2 วิ ไม่มีดาเมจ',
+const WT_CG=defSpell(WATERP,{id:'aquacage',v:{charge:1,spd:400,range:2500,response:0.14,turn:2.4,r:14,dmg:0,t:2,lift:0.6},vn:{charge:'ชาร์จ (วิ)',spd:'ฟอง • ความเร็ว',range:'ฟอง • ระยะ',response:'หน่วงการเลี้ยว (วิ)',turn:'ความเร็วเลี้ยวสูงสุด (เรเดียน/วิ)',r:'ฟอง • ขนาดลูก',dmg:'ฟอง • ดาเมจ',t:'ขังนาน (วิ)',lift:'ลอยสูง (ม.)'},role:'control',n:'Aqua Cage',ic:'🫧',cd:14,d:'ชาร์จลูกน้ำข้างตัว 1 วิ แล้วเหวี่ยงออกไปไกล 2500 • กดคลิกซ้ายค้าง = ลูกเลี้ยวตามเมาส์ • ปล่อย = พุ่งตรงไปทางเมาส์ตอนนั้น • ช่วงชาร์จและคุมลูกทำได้แค่เดินกับเล็ง • โดน = ขังเป้า 2 วิ ไม่มีดาเมจ',
   cast(p){if(p.wab||p.wdg||p.wtsk||p.dash>0||p.fly)return false;p.wcCharge=1e-6;p.wln=null;},
   hit(pr,t){addStun(t,WT_CG.t);t.wflt=WT_CG.t;t.wfz=WT_CG.lift;
     emit({k:'efx',z:'wtcage',x:Math.round(t.x),y:Math.round(t.y),h:cH(t),n:t.id});}}).v;
 PDEF.wcage={spd:WT_CG.spd,r:WT_CG.r,dmg:WT_CG.dmg,life:WT_CG.range/WT_CG.spd,col:'#b9f0ff'};
-const WT_AB=defSpell(WATERP,{id:'abyssalbeam',v:{cast:1.5,t:2.2,len:700,w:28,tick:0.22,dmg:10,turn:0.6,lift:1.2},vn:{cast:'ร่าย (วิ)',t:'ยิงนาน (วิ)',len:'ลำ • ยาว',w:'ลำ • ครึ่งความกว้าง',tick:'โดนทุก (วิ)',dmg:'ดาเมจต่อครั้ง',turn:'หมุนตามเมาส์ (เรเดียน/วิ)',lift:'ลอยสูง (ม.)'},role:'damage',n:'Abyssal Beam',ic:'🔱',cd:25,d:'ร่าย 1.5 วิ แล้วยิงลำน้ำ 2.2 วิ ยาว 700 (หมุนตามเมาส์ช้ามาก) ไม่ทะลุ ชนคนแรกหรือสิ่งกีดขวางแล้วหยุด โดน 10 ครั้ง ครั้งละ 10 (ครบ = 100) • ยืนนิ่ง ลอยขึ้นนิดหน่อย • คอมโบกับ Tidecaller Orb',
+const WT_AB=defSpell(WATERP,{id:'abyssalbeam',v:{cast:1.5,t:2.2,len:1000,w:28,tick:0.22,dmg:10,turn:0.9,lift:1.2},vn:{cast:'ร่าย (วิ)',t:'ยิงนาน (วิ)',len:'ลำ • ยาว',w:'ลำ • ครึ่งความกว้าง',tick:'โดนทุก (วิ)',dmg:'ดาเมจต่อครั้ง',turn:'หมุนตามเมาส์ (เรเดียน/วิ)',lift:'ลอยสูง (ม.)'},role:'damage',n:'Abyssal Beam',ic:'🔱',cd:25,d:'ร่าย 1.5 วิ แล้วยิงลำน้ำ 2.2 วิ ยาว 1000 (หมุนตามเมาส์ช้า) ไม่ทะลุ ชนคนแรกหรือสิ่งกีดขวางแล้วหยุด โดน 10 ครั้ง ใกล้ 10 / กลาง 7 / ไกล 5 ต่อครั้ง • ยืนนิ่ง ลอยขึ้นนิดหน่อย • คอมโบกับ Tidecaller Orb',
   cast(p){p.wab={ph:'cast',t:WT_AB.cast,a:p.ang,pt:waterBeamPitch(p),k:0};p.shieldOn=false;p.wln=null;
     emit({k:'efx',z:'wtab',x:Math.round(p.x),y:Math.round(p.y),h:p.z,a:Math.round(p.ang*100)/100,id:p.id,n:0});}}).v;
 const WT_MW=defSpell(WATERP,{id:'moonwater',v:{t:8,len:900,w:28,life:0.6,tick:0.2,dmg:10,rate:1.75,slow:0.55,slowT:0.45},vn:{t:'ระยะเวลา (วิ)',len:'ลำ • ยาว',w:'ลำ • ครึ่งความกว้าง',life:'ลำ • ค้าง (วิ)',tick:'ลำ • โดนทุก (วิ)',dmg:'ลำ • ดาเมจต่อครั้ง',rate:'ยิงได้ทุก (วิ)',slow:'ยิงแล้วเดินช้า (เท่า)',slowT:'ยิงแล้วเดินช้านาน (วิ)'},role:'damage',n:'Moonwater Arts',ic:'🌙',cd:20,d:'8 วิ: คลิกซ้ายกลายเป็นลำน้ำ ไกล 900 ยิงแล้วหาย โดน 3 ครั้ง 10/10/10 ยิงได้ทุก 1.75 วิ',
