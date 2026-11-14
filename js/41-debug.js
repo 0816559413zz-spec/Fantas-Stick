@@ -48,9 +48,16 @@ function botBrain(p,dt,tg0){
 }
 let _obsKeep=null;
 function balArena(on){if(on&&!_obsKeep){_obsKeep=OBS;OBS=[];}else if(!on&&_obsKeep){OBS=_obsKeep;_obsKeep=null;}}
-function balReset(a,b){balArena(true);
+// ดวลต้องเป็น 1v1 จริง (แก้ 2026-11-14): ซ่อนผู้เล่น/บอทอื่นในห้อง และให้ทั้งสองฝั่งใช้ botBrain ตัวเดียวกัน
+//   (เดิมฝั่ง b เป็นบอทห้องฝึกที่มี p.ai = สมองอีกแบบ + บอทอื่นในห้องยังวิ่งตีอยู่ → ฝั่งที่เกิดตัดสินผล)
+let _balStash=null;
+function balIsolate(a,b,on){
+  if(on&&!_balStash){_balStash={order:G.order.slice(),ab:[a,b].map(q=>({q,ai:q.ai,bot:q.bot}))};G.order=[a.id,b.id];a.ai=null;b.ai=null;}   // เหลือ 2 คนในลูปเกม
+  else if(!on&&_balStash){G.order=_balStash.order;for(const s of _balStash.ab){s.q.ai=s.ai;s.q.bot=s.bot;}_balStash=null;}}
+function balReset(a,b){balArena(true);balIsolate(a,b,true);
   clearStormWaveMarks();
-  for(const p of [a,b]){p.maxHp=200;resetBody(p,p===a?MW*0.14:MW*0.86,MH/2);p.hp=p.maxHp;p.ult=0;p.team=p===a?0:1;p.bot=true;p._px=undefined;p.ang=p===a?0:Math.PI;}
+  const jy=(Math.random()-.5)*MH*.3,jx=(Math.random()-.5)*MW*.08;   // สุ่มจุดเกิดนิดหน่อยทุกรอบ (ไม่งั้นผลซ้ำเดิมตามฝั่ง)
+  for(const p of [a,b]){p.maxHp=200;resetBody(p,(p===a?MW*0.14:MW*0.86)+jx,MH/2+(p===a?jy:-jy));p.hp=p.maxHp;p.ult=0;p.team=p===a?0:1;p.bot=true;p._px=undefined;p.ang=p===a?0:Math.PI;}
   G.proj=[];G.zones=[];G.strikes=[];G.walls=[];G.chan=[];G.mins=[];G.nature=[];G.wdb=[];G.wtl=[];G.erings=[];G.ices=[];G.waves=[];G.glac=[];G.eso=[];G.edust=[];G.en=[];G.ph='play';a.focusT=b.focusT=null;G.rw={};G.round=1;G.banner=null;G.result=null;
 }
 function balDuel(kA,kB,rounds,maxT){
@@ -76,7 +83,7 @@ function balTour(kits,rounds,maxT){
     pair[names[i]+' v '+names[j]]=`${r.a}-${r.b}-${r.draw} (${r.avgT}s)`;
     wins[names[i]]+=r.a+r.draw/2;wins[names[j]]+=r.b+r.draw/2;games[names[i]]+=rounds;games[names[j]]+=rounds;
   }
-  balArena(false);
+  balArena(false);balIsolate(null,null,false);
   const rate={};names.forEach(n=>rate[n]=Math.round(wins[n]/games[n]*100)+'%');
   return {rate,pair};
 }

@@ -423,12 +423,12 @@ bpOpen:49 bpOn:49 bpKey:49 bpShow:51 bpSync:53 hovEl:123
 §124 หน้าตั้งค่า
 setRow:125 setTog:126 setTab:127 XHC:128 XHN:128 setOpts:129 SET_ICO:131 SET_EN:134 renderSettings:135 drawXhPrev:157 openSettings:158 closeSettings:160 modeIcon:216 modeTitle:217 renderLobby:218
 
-## js/41-debug.js (172) — 
-botBrain:6 _obsKeep:49 balArena:50 balReset:51 balDuel:56 balTour:71 balCoop:85 balSpellTest:101
-§122 Service Worker (sw.js): เก็บไฟล์เกมไว้ในเครื่อง เปิดครั้งต่อไปเร็วขึ้…
-SWK:123 swSetup:124
-§142 เช็คการ์ดจอตอนเปิดเกม
-GPUC:145 gpuCheck:146
+## js/41-debug.js (179) — 
+botBrain:6 _obsKeep:49 balArena:50 _balStash:53 balIsolate:54 balReset:57 balDuel:63 balTour:78 balCoop:92 balSpellTest:108
+§129 Service Worker (sw.js): เก็บไฟล์เกมไว้ในเครื่อง เปิดครั้งต่อไปเร็วขึ้…
+SWK:130 swSetup:131
+§149 เช็คการ์ดจอตอนเปิดเกม
+GPUC:152 gpuCheck:153
 
 ## js/42-fire-vfx.js (347) — ไฟแบบใหม่ (2026-10-19): shader ไฟเคลื่อนไหวจริง (noise ไหล) ใช้กับลูก…
 FIRE_U:4 FIRE_GLSL:5 fireMat:24
@@ -809,4 +809,4 @@ surfSync:49 surfQuality:53
 SURF_VS:55 SURF_VS_BODY:56 SURF_FS:67 SURF_FS_BODY:68 surfOk:98 surfApply:99 surfScene:111
 §112 ปรับค่า (tune.html / F8)
 
-(98 files, 26548 lines)
+(98 files, 26555 lines)
