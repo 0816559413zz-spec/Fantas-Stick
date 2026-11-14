@@ -204,7 +204,7 @@ function natModelTick(v,s,dt){
   if(s.k==='ball'){
     if(age<s.flight){
       const k=natOut(age/s.flight),a=s.origin;
-      v.g.position.copy(natWorld(a.x,a.y,a.h)).lerp(natWorld(s.x,s.y,s.h),k);v.g.rotation.x=age*19;
+      v.g.position.copy(natWorld(a.x,a.y,a.h)).lerp(natWorld(s.x,s.y,s.h),k);v.g.position.y+=Math.sin(Math.PI*k)*Math.min(4,Math.hypot(s.x-a.x,s.y-a.y)/110);   // lobbed arc down onto the aim pointv.g.rotation.x=age*19;
       v.g.scale.setScalar(lerp(.38,1,k));
     }else{
       if(s.stab-s.flight>.01)v.g.position.y-=.04;
@@ -563,6 +563,17 @@ function natBigSlam(ev){const F=natFx(),{V3,Tube,Thorns,thornsAlong,M,T,dirt,lea
     for(let i=0;i<34;i++){const u=i/33,arc=tip.clone().lerp(top,Math.sin(u*Math.PI*.5)).add(V3(0,Math.sin(u*Math.PI)*.8,0)),hitP=tip.clone().lerp(end,u);hitP.y+=Math.sin(u*Math.PI)*2.2*(1-fall);P.push(arc.lerp(hitP,natEase(fall)).lerp(tip,back));}
     vine.visible=th.visible=grow>.02&&back<.98;if(vine.visible){const rad=u=>(.17*(1-u)+.05)*(1-back*.8);vine.set(P,rad,(u,c)=>c.copy(dark).lerp(lite,u*.4));th.put(thornsAlong(P,rad,2,1.4*(1-back)));}
     if(!hit&&fall>=1){hit=true;F.O.y=end.y;dirt(end,30,5.2,{size:1.5,spread:1.4});leaves(end,18,4);sparks(end,24,4.6,'#eaffa0','#5fa83a',{dir:V3(0,2,0)});natShock(end,'#a8d86a',7,.5);if(ev.id===NET.myId)shake(12);snd('boom',{x:gx,y:gy,vol:.8});}},()=>{F.drop(vine);F.drop(th);});}
+// World tree roots: a pulsing ground mark first, then whip-style roots burst up from it.
+function natRootWarn(ev){const F=natFx(),{T}=F,P=natWorld(ev.x,ev.y,ev.h),R=ev.r*S3,g=new T.Group();F.add(g);g.position.set(P.x,P.y+.06,P.z);
+  const mk=(a,b,c,o)=>{const m=new T.Mesh(new T.RingGeometry(a,b,40),new T.MeshBasicMaterial({color:c,transparent:true,opacity:o,depthWrite:false,side:T.DoubleSide}));m.rotation.x=-Math.PI/2;g.add(m);return m;};
+  const rim=mk(.9,1,'#ff2a1a',.95),fill=mk(0,1,'#ff3a2a',.22),inner=mk(.0,.02,'#ff6a4a',.6);
+  F.clip(ev.t,t=>{const k=t/ev.t;g.scale.setScalar(R);rim.material.opacity=.55+.4*Math.sin(t*28);inner.scale.setScalar(Math.max(.01,k*50));inner.material.opacity=.35*(1-k*.5);fill.material.opacity=.12+.12*k;},()=>{const i=F.ALL.indexOf(g);if(i>=0)F.ALL.splice(i,1);g.parent&&g.parent.remove(g);g.traverse(q=>{q.geometry&&q.geometry.dispose();q.material&&q.material.dispose();});});}
+function natRootUp(ev){const F=natFx(),{V3,T,M,Tube,Thorns,thornsAlong,dirt,leaves,sparks}=F,B=natWorld(ev.x,ev.y,ev.h),R=ev.r*S3*.6,dark=new T.Color('#3a2412'),mid=new T.Color('#5a7a2c'),tipC=new T.Color('#b6ff63'),roots=[];
+  for(let i=0;i<6;i++){const a=i/6*6.283+Math.random()*.5,r=R*(.25+Math.random()*.6);roots.push({tube:Tube(12,7,M.bark),th:Thorns(14,1.1,null,true),x:B.x+Math.cos(a)*r,z:B.z+Math.sin(a)*r,a:a+Math.PI+(Math.random()-.5)*.6,H:1.6+Math.random()*1.4,R:.16+Math.random()*.08,tw:Math.random()*6});}
+  F.O.y=B.y;dirt(B.clone(),22,4,{spread:1.6});leaves(B.clone().add(V3(0,.4,0)),8,2.6);sparks(B.clone().add(V3(0,.5,0)),14,3,'#eaffa0','#5fa83a');natShock(B,'#a8ff6a',3,.4,.5);
+  F.clip(1.1,t=>{const k=natOut(natPhase(t,0,.12))*(1-natEase(natPhase(t,.6,1.05)));for(const q of roots){q.tube.visible=q.th.visible=k>.01;if(!q.tube.visible)continue;const P=[],ax=Math.cos(q.a),az=Math.sin(q.a);for(let i=0;i<12;i++){const u=i/11,h=q.H*u*k,b=q.H*.55*u*u*k,w=Math.sin(u*5+q.tw)*.08*u;P.push(V3(q.x+ax*b-az*w,B.y+h,q.z+az*b+ax*w));}const rad=u=>Math.max(.004,q.R*((1-u)**1.5)*Math.max(.05,k));q.tube.set(P,rad,(u,c)=>c.copy(dark).lerp(mid,Math.min(1,u*1.4)).lerp(tipC,Math.max(0,u-.78)*3));q.th.put(thornsAlong(P,rad,3,.9*k,2.1));}},
+    ()=>{for(const q of roots){F.drop(q.tube);F.drop(q.th);}});
+  snd('boom',{x:ev.x,y:ev.y,vol:.4});}
 function natThornLine(ev){const F=natFx(),{V3,T,M,Tube,Thorns,thornsAlong,dirt,leaves,sparks}=F,o=ev.id!=null?PM3.get(ev.id):null;if(o)o.natEmpC={k:'line',t:0};
   // Whip-style thorns: bark tubes dark at the root, light green toward a bright tip, hooked thorns along them.
   const dark=new T.Color('#19371a'),mid=new T.Color('#4f7f30'),tipC=new T.Color('#b6ff63');
@@ -628,13 +639,18 @@ function natSummon(ev){const F=natFx(),{V3,sparks,leaves,dirt,Tube,ADD,T}=F,o=ev
     beam.visible=t>=FIRE-.08&&t<FIRE+.42;if(beam.visible){const q=natPhase(t,FIRE-.08,FIRE+.06),f=1-natEase(natPhase(t,FIRE+.18,FIRE+.42)),pts=[];const top=end.clone().add(V3(0,9,0));for(let i=0;i<24;i++){const u=i/23,p=tip.clone().lerp(top,Math.min(1,u*2)).lerp(end,Math.max(0,u*2-1));p.y+=Math.sin(u*Math.PI)*2.2;p.x+=Math.sin(u*16+t*30)*.08;pts.push(p);}beam.set(pts,u=>(.05+.16*(1-Math.abs(u-.5)*2)*q)*f+.012,(u,c)=>c.copy(c1).lerp(c2,u).multiplyScalar(.45*f));}
   },()=>{F.drop(beam);mat.dispose();});}
 // Tree aura: range rings, ground motes, and separate root, trunk and crown layers.
-function natTreeAura(v,s,dt){const F=natFx(),{T,V3,ring,glow,GLOWG,GLOWT,sparks,leaves}=F,R=NAT.treeRange*S3,B=natWorld(s.x,s.y,s.h),age=s.age;
-  if(!v.aura){const mk=(a,b,c,o,y)=>{const r=ring(a,b,c,o);r.position.set(B.x,B.y+y,B.z);return r;};const inner=new T.Group();F.add(inner);inner.position.set(B.x,B.y+.08,B.z);const rune=new T.MeshBasicMaterial({color:'#b4ff7a',transparent:true,opacity:.55,depthWrite:false,side:T.DoubleSide,blending:T.AdditiveBlending});const arcs=[];for(let i=0;i<12;i++){const a=new T.Mesh(new T.RingGeometry(.92,1,18,1,i*Math.PI/6,.34),rune);a.rotation.x=-Math.PI/2;inner.add(a);arcs.push(a);}const rootR=mk(.72,1,'#7dff6a',.75,.1),crown=glow(GLOWG,9),crown2=glow(GLOWT,5);crown.position.set(B.x,B.y+NAT.treeHeight*.8,B.z);crown2.position.copy(crown.position);v.aura={rim:mk(.982,1,'#b6ff7a',.95,.09),rim2:mk(.93,.945,'#5dff6e',.55,.09),disc:mk(.02,.98,'#2fd05c',.1,.05),inner,rune,arcs,rootR,crown,crown2,parts:[inner],t:0,leaf:0,mote:0};v.aura.parts.push(v.aura.rim,v.aura.rim2,v.aura.disc,rootR,crown,crown2);}
+// Enemy-owned tree reads red for the other team.
+const NAT_TREE_GREEN=['#b4ff7a','#7dff6a','#b6ff7a','#5dff6e','#2fd05c','#d9ffba','#3fe07a','#8bff5a','#c8ffb4','#42e870'],NAT_TREE_RED=['#ff8a6a','#ff5a3a','#ff9a7a','#ff4a3a','#c8281a','#ffc0b0','#e0402a','#ff6a4a','#ffb4a0','#e8402a'];
+let _natGlowRed=null;function NAT_GLOW_RED(){if(_natGlowRed)return _natGlowRed;const c=document.createElement('canvas');c.width=c.height=64;const x=c.getContext('2d'),g=x.createRadialGradient(32,32,0,32,32,32);g.addColorStop(0,'rgba(255,210,190,1)');g.addColorStop(.35,'rgba(255,70,40,.5)');g.addColorStop(1,'rgba(0,0,0,0)');x.fillStyle=g;x.fillRect(0,0,64,64);_natGlowRed=new THREE.CanvasTexture(c);return _natGlowRed;}
+function natFoe(s){const me=VIEW.cur?.P?.find(q=>q.id===NET.myId);return !!me&&s.team!==undefined&&s.team!==me.tm;}
+function natTreeTint(v,foe){if(v.g&&v.gTint!==foe){v.gTint=foe;v.g.traverse(q=>{if(q.isMesh&&q.material?.color)q.material.color.set(foe?'#8a2a20':'#475631');});}if(v.tinted===foe)return;const m=v.fx?.L?.[0]?.inner;if(!m)return;v.tinted=foe;m.traverse(q=>{if(!q.isMesh||!q.material)return;for(const mat of [].concat(q.material)){if(!mat.userData.natBase)mat.userData.natBase={c:mat.color?.clone(),e:mat.emissive?.clone()};const B=mat.userData.natBase;if(foe){mat.color?.set('#4a0606');mat.emissive?.set('#ff1a0a');if('emissiveIntensity' in mat){B.i??=mat.emissiveIntensity;mat.emissiveIntensity=.12;}}else{B.c&&mat.color?.copy(B.c);B.e&&mat.emissive?.copy(B.e);if(B.i!==undefined)mat.emissiveIntensity=B.i;}}});}
+function natTreeAura(v,s,dt){const F=natFx(),{T,V3,ring,glow,GLOWG,GLOWT,sparks,leaves}=F,foe=natFoe(s),C=foe?NAT_TREE_RED:NAT_TREE_GREEN,R=NAT.treeRange*S3,B=natWorld(s.x,s.y,s.h),age=s.age;
+  if(!v.aura){const mk=(a,b,c,o,y)=>{const r=ring(a,b,c,o);r.position.set(B.x,B.y+y,B.z);return r;};const inner=new T.Group();F.add(inner);inner.position.set(B.x,B.y+.08,B.z);const rune=new T.MeshBasicMaterial({color:C[0],transparent:true,opacity:.55,depthWrite:false,side:T.DoubleSide,blending:T.AdditiveBlending});const arcs=[];for(let i=0;i<12;i++){const a=new T.Mesh(new T.RingGeometry(.92,1,18,1,i*Math.PI/6,.34),rune);a.rotation.x=-Math.PI/2;inner.add(a);arcs.push(a);}const rootR=mk(.72,1,C[1],.75,.1),crown=glow(foe?NAT_GLOW_RED():GLOWG,9),crown2=glow(GLOWT,5);crown.position.set(B.x,B.y+NAT.treeHeight*.8,B.z);crown2.position.copy(crown.position);v.aura={rim:mk(.982,1,C[2],.95,.09),rim2:mk(.93,.945,C[3],.55,.09),disc:mk(.02,.98,C[4],.1,.05),inner,rune,arcs,rootR,crown,crown2,parts:[inner],t:0,leaf:0,mote:0};v.aura.parts.push(v.aura.rim,v.aura.rim2,v.aura.disc,rootR,crown,crown2);}
   const A=v.aura,gr=natOut(natPhase(age,0,NAT.treeGrow*.7)),P=1+.04*Math.sin(age*3);A.rim.scale.setScalar(R*gr);A.rim2.scale.setScalar(R*gr*P);A.disc.scale.setScalar(R*gr);A.inner.scale.setScalar(R*.72*gr);A.inner.rotation.y=age*.35;A.rune.opacity=.55*gr*(.7+.3*Math.sin(age*5));A.rootR.scale.setScalar(5.2*gr*(1+.08*Math.sin(age*6)));A.crown.scale.setScalar((9+Math.sin(age*3)*1.4)*gr);A.crown.material.opacity=.7*gr;A.crown2.scale.setScalar((5+Math.sin(age*5))*gr);A.crown2.material.opacity=.55*gr;
-  if(gr<.15)return;A.t-=dt;if(A.t<=0){A.t=.03;F.O.y=B.y;
-    {const a=F.rnd(0,6.283),r=Math.sqrt(F.rnd(0,1))*R*.96,p=B.clone().add(V3(Math.cos(a)*r,.1,Math.sin(a)*r));sparks(p,2,.5,'#d9ffba','#3fe07a',{dir:V3(0,1.5,0),g:-.6,life:1.5,size:1.1});}
-    {const a=age*3.2,q=B.clone().add(V3(Math.cos(a)*3,.25,Math.sin(a)*3));sparks(q,2,.7,'#fff1a0','#8bff5a',{dir:V3(0,3,0),g:-1,life:1,size:1.5});}
-    {const a=age*2.1,h=((age*2.4)%1)*NAT.treeHeight*.72,rad=2.6-h*.06,q=B.clone().add(V3(Math.cos(a)*rad,h+.5,Math.sin(a)*rad));sparks(q,2,.55,'#c8ffb4','#42e870',{g:-.5,life:1.2,size:1.4});}
+  natTreeTint(v,foe);if(gr<.15)return;A.t-=dt;if(A.t<=0){A.t=.03;F.O.y=B.y;
+    {const a=F.rnd(0,6.283),r=Math.sqrt(F.rnd(0,1))*R*.96,p=B.clone().add(V3(Math.cos(a)*r,.1,Math.sin(a)*r));sparks(p,2,.5,C[5],C[6],{dir:V3(0,1.5,0),g:-.6,life:1.5,size:1.1});}
+    {const a=age*3.2,q=B.clone().add(V3(Math.cos(a)*3,.25,Math.sin(a)*3));sparks(q,2,.7,'#fff1a0',C[7],{dir:V3(0,3,0),g:-1,life:1,size:1.5});}
+    {const a=age*2.1,h=((age*2.4)%1)*NAT.treeHeight*.72,rad=2.6-h*.06,q=B.clone().add(V3(Math.cos(a)*rad,h+.5,Math.sin(a)*rad));sparks(q,2,.55,C[8],C[9],{g:-.5,life:1.2,size:1.4});}
     {const a=F.rnd(0,6.283),q=B.clone().add(V3(Math.cos(a)*F.rnd(1,8),NAT.treeHeight*F.rnd(.7,.95),Math.sin(a)*F.rnd(1,8)));sparks(q,1,.3,'#fff8cc','#ffd76a',{dir:V3(0,-1.8,0),g:.5,life:1.8,size:1.4});}
     A.leaf--;if(A.leaf<=0){A.leaf=4;const a=F.rnd(0,6.283),q=B.clone().add(V3(Math.cos(a)*F.rnd(2,12),NAT.treeHeight*F.rnd(.55,.9),Math.sin(a)*F.rnd(2,12)));leaves(q,2,.9,{dir:V3(0,-.9,0),life:2.4,size:1.5});}}
 }
@@ -692,6 +708,8 @@ function natureEvent(ev){
     case 'nature_coil':natCoil(ev);break;
     case 'nature_bigslam':natBigSlam(ev);break;
     case 'nature_thornline':natThornLine(ev);break;
+    case 'nature_rootwarn':natRootWarn(ev);break;
+    case 'nature_rootup':natRootUp(ev);break;
     case 'nature_slam':natSlam(ev);break;
     case 'nature_summon':case 'nature_shield_block':case 'nature_pea_shot':case 'nature_pulse':case 'nature_plant_hit':case 'nature_ball_land':case 'nature_ball_pop':case 'nature_spore_pop':case 'nature_lotus_switch':break;   // natMoment
     case 'nature_pea_muzzle':natMuzzle(ev);snd('whoosh',{x,y,vol:.6});break;

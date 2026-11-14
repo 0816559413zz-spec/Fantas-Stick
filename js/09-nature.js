@@ -1,7 +1,7 @@
 // Nature combat is simulated by the host. Positions are map units, heights are metres.
 const NATUREP=3;
-const NAT={seedRange:300,hookRange:560,hookSpeed:1700,hookPull:2700,foeHold:.45,lotusRange:160,treeRange:500,
-  treeHeight:23,treeGrow:2.0,treeGrow0:3.4,treeLife:12,peaRadius:55,peaRange:650,ballPull:160,wallHalf:105,wallThick:12,wallHeight:3.6};
+const NAT={seedRange:300,hookRange:560,hookSpeed:1700,hookPull:2700,foeHold:.45,lotusRange:220,lotusHaste:.3,treeRange:500,
+  treeHeight:23,treeGrow:2.0,treeGrow0:3.4,treeLife:12,peaRadius:55,peaRange:650,ballPull:160,ballRange:450,wallHalf:105,wallThick:12,wallHeight:3.6};
 const natureDist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
 const natureItems=()=>G.nature||(G.nature=[]);
 const natureLive=o=>o&&(o.natKind?o.hp>0&&!o.dead&&!o.move:o.isE||o.isM?!o.dead:o.alive&&!o.downed);
@@ -94,7 +94,7 @@ function naturePlace(p,point,onWall){
   return natureGround(wall.x-dx*30,wall.y-dy*30);
 }
 function naturePlant(p,kind,spot,delay=0){
-  const hp={turret:90,lotus:100,tree:350}[kind];
+  const hp={turret:80,lotus:100,tree:350}[kind];
   const life={turret:1e6,lotus:15,tree:NAT.treeLife}[kind];   // ป้อมอยู่ถาวร (ผู้ใช้ 2026-11-10) จนแตก/ปลูกต้นที่ 3 แทนต้นเก่า
   const ready=G.time+delay+(kind==='tree'?NAT.treeGrow:0);
   const o={...spot,z:spot.h,id:++G.zid,isM:true,natKind:kind,type:'nature_'+kind,team:p.team,owner:p.id,
@@ -289,7 +289,7 @@ function natureHookMove(p,dt){
 }
 
 function natureBall(p){
-  const q=natureAimPoint(p,NAT.seedRange),h=groundH(q.x,q.y),wall=natureTrace(p,q,p.z+1.4,h+.12,p.team,true);
+  const q=natureAimPoint(p,NAT.ballRange),h=groundH(q.x,q.y),wall=natureTrace(p,q,p.z+1.4,h+.12,p.team,true);
   const end=wall?{...wall,x:wall.x-4*Math.cos(p.ang),y:wall.y-4*Math.sin(p.ang)}:{...q,h};
   const flight=.12+natureDist(p,end)/1700;
   const ball={natKind:'ball',id:++G.zid,owner:p.id,team:p.team,x:end.x,y:end.y,h:end.h,
@@ -390,6 +390,18 @@ function naturePeaSplash(pr){
   for(const t of foesOf(pr.team))if(natureDist(pr,t)<=NAT.peaRadius&&Math.abs(cH(t)-pr.h)<2.6
     &&!natureTrace(pr,t,pr.h,cH(t),pr.team,true))damage(t,pr.dmg,pr.owner,'aoe');
 }
+// World tree (user 2026-11-14): heals the team 5/s (stacks with the lotus) and every 3 s marks each enemy in range,
+// then roots burst there 0.6 s later: 10 damage + 30% slow for 1 s to anyone still inside the 50-unit mark.
+const NAT_TREE={heal:5,rootEvery:3,warn:.6,rootR:50,rootDmg:10,slow:.7,slowT:1};
+function natureTreeTick(o,p){
+  if(G.time>=(o.healAt||0)){o.healAt=G.time+1;for(const t of plist())if(t.team===o.team&&natureLive(t)&&natureTreeReach(o,t))healT(t,NAT_TREE.heal);}
+  if(!o.rootAt)o.rootAt=G.time+1;
+  if(G.time>=o.rootAt){o.rootAt+=NAT_TREE.rootEvery;
+    for(const t of foesOf(o.team)){if(!natureLive(t)||!natureTreeReach(o,t))continue;const h=groundH(t.x,t.y,t.z??t.h);(o.roots||(o.roots=[])).push({x:t.x,y:t.y,h,at:G.time+NAT_TREE.warn});natureEmit('rootwarn',{x:t.x,y:t.y,h},{r:NAT_TREE.rootR,t:NAT_TREE.warn});}}
+  if(o.roots?.length)o.roots=o.roots.filter(r=>{if(G.time<r.at)return true;
+    for(const t of foesOf(o.team))if(natureLive(t)&&Math.hypot(t.x-r.x,t.y-r.y)<=NAT_TREE.rootR+(t.r||PR)&&cH(t)-r.h<3.5)aoeHit(p,t,NAT_TREE.rootDmg,t=>addSlow(t,NAT_TREE.slow,NAT_TREE.slowT));
+    natureEmit('rootup',{x:r.x,y:r.y,h:r.h},{r:NAT_TREE.rootR});return false;});
+}
 function natureUpdate(dt){
   if(!G.nature?.length)return;
   for(const o of G.nature){
@@ -410,8 +422,10 @@ function natureUpdate(dt){
     }
     if(o.move||G.time<o.ready)continue;
     if(o.natKind==='turret'){natureTurret(o,p);continue;}
+    if(o.natKind==='tree'){natureTreeTick(o,p);continue;}
     if(o.natKind!=='lotus')continue;
     if(G.time>=o.sporeAt){o.sporeAt+=5;if(natureLive(p))natureSpore(p,o);}
+    if(o.mode)for(const t of plist())if(t.team===o.team&&natureLive(t)&&natureDist(o,t)<=NAT.lotusRange){t.baHaste=G.time+.15;if(t.cd.basic>0)t.cd.basic=Math.max(0,t.cd.basic-dt*NAT.lotusHaste);}   // buff mode: teammates in the ring attack faster
     if(G.time<o.healAt)continue;
     o.healAt+=1;
     if(o.mode)continue;

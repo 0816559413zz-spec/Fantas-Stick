@@ -54,12 +54,12 @@ function natureWhipBasic(p,inp,canSwing){
   const combo=swing&&!swing.second&&!swing.cancelled&&age<=NATURE_WHIP.window;
   if(combo&&pressed)swing.queued=true;
   const second=combo&&age+1e-8>=NATURE_WHIP.follow&&(inp.fire||swing.queued);
-  if(!second&&(!inp.fire||p.cd.basic>1e-8||age+1e-8<NATURE_WHIP.cooldown))return;
+  if(!second&&(!inp.fire||p.cd.basic>1e-8||age+1e-8<NATURE_WHIP.cooldown*(p.baHaste>G.time?1/(1+NAT.lotusHaste):1)))return;
   const E=p.natureEmp&&p.natureEmp.until>G.time&&!second?p.natureEmp.k:null;if(E)p.natureEmp=null;
   p.natureWhip={start:G.time,side:swing?-swing.side:1,angle:p.ang,hit:false,cancelled:false,second:!!second||!!E,emp:E,imp:E?.34:undefined};
   if(E)emit({k:'efx',z:E==='slam'?'nature_bigslam':'nature_thornline',x:Math.round(p.x),y:Math.round(p.y),h:p.z,a:Math.round(p.ang*100)/100,id:p.id,r:E==='slam'?NATURE_WHIP.range:NAT_LINE.len,d:E==='slam'?Math.round(natureEmpNear(p)):0});
 
-  p.cd.basic=p.cdMax.basic=NATURE_WHIP.cooldown;
+  p.cd.basic=p.cdMax.basic=NATURE_WHIP.cooldown*(p.baHaste>G.time?1/(1+NAT.lotusHaste):1);
 }
 
 const NW_RINGS=27,NW_SIDES=7;
