@@ -475,7 +475,8 @@ function updateProjectiles(dt){
   G.proj=G.proj.filter(p=>!p.dead);
 }
 function projStep(pr,dt,ps){
-  if(pr.bz)windCurveStep(pr,dt);   // ขนนกสายลม: วิ่งตามเส้นโค้ง
+  if(pr.bz)windCurveStep(pr,dt);
+  if(pr.kc)pyroKindleCurve(pr,dt);   // Kindle side fireballs   // ขนนกสายลม: วิ่งตามเส้นโค้ง
     if(pr.type==='wcage')waterCageSteer(pr,dt);
     if(pr.dead)return;
     {const t0=TERR?terrT(pr.x,pr.y):0;pr.x+=pr.vx*dt;pr.y+=pr.vy*dt;pr.h+=pr.vh*dt;if(TERR)pr.h-=terrT(pr.x,pr.y)-t0;}pr.life-=dt;

@@ -1,0 +1,1 @@
+{"v":1,"desc":"HUD แถบ Heat: ลายไฟไหลในแถบตอน Heat เต็ม (ต่อขอบได้ เลื่อนไปตามแถบ)","gen":"noise","seed":11,"px":256,"cols":1,"rows":1,"kind":"loop","ramp":[[0,"#3a0400"],[0.35,"#b81a04"],[0.6,"#ff5a0a"],[0.82,"#ffb02a"],[1,"#fff4c8"]],"add":true,"p":{"mode":1,"scale":5,"detail":6,"contrast":1.5}}

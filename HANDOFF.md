@@ -1,6 +1,6 @@
 # HANDOFF — Fantas Stick (was "Wizard Duel") (repo: Fantas-Stick)
 
-**งานถัดไป:** Fire breakdown ทีละสกิล — เสร็จ: BA (ลูกไฟชาร์จ 20/1.6 วิ), โล่ Heat (`PHEAT` ใน `js/06-pyro.js`, ค่า `p.fheat` อย่าใช้ `p.heat` ชนกับสถานะเดิม) • ค้าง: HUD แถบ Heat (ผู้ใช้จะคุยทีหลัง ต้องส่ง fheat ใน snapshot + bump PREFIX), Kindle, Dragonfall, Ring of Embers, Blaze Form, Ignition Snap, Colossus
+**งานถัดไป:** Fire breakdown ทีละสกิล — เสร็จ: BA (ลูกไฟชาร์จ 20/1.6 วิ), โล่ Heat (`PHEAT` ใน `js/06-pyro.js`, ค่า `p.fheat` อย่าใช้ `p.heat` ชนกับสถานะเดิม), Kindle 3 ลูก (`pyroKindleVolley`/`pyroKindleCurve`), HUD แถบ Heat (`drawFireHeat` ท้าย `js/38-hud.js`, snapshot `fh`, PREFIX v75, ทดสอบ `shots/_fhb.js`/`_fhg.js`/`_fhi.js`) • ถัดไป: Dragonfall, Ring of Embers, Blaze Form, Ignition Snap, Colossus
 
 **Featherwing ขึ้นบิน 2026-11-13:** กดทิศเดินพร้อมกดสกิลแล้วพุ่ง 60 หน่วยใน 0.32 วิ พร้อมลอยขึ้น ใช้ทิศตอนกดสกิลและชนฉากตามระบบ Dash • ยืนนิ่งแล้วขึ้นบินตรงจุดเดิม • รีเซ็ตแรงเฉื่อยผ้าคลุมเมื่อวาร์ป • รีวิว #34
 

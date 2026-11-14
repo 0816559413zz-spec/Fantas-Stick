@@ -81,6 +81,9 @@ function fireShieldFX(o,p,on,dt){
   o.fshOn=on;const fn=on?fxLoopName('fsh'):null;
   if(fn){if(!o.fshFx||o.fshFxN!==fn){if(o.fshFx)fxStop(o.fshFx);o.fshFx=fxPlay(fn,{x:p.x,y:p.y,h:o.zs||0,follow:p.id,aim:false});o.fshFxN=fn;}}
   else if(o.fshFx){fxStop(o.fshFx);o.fshFx=null;o.fshFxN=null;}
+  // Heat (user 2026-11-14): shield starts dimmer than before and burns brighter than before as Heat fills (k 0.55 → 1.45)
+  if(o.fshFx){const hk=.55+.9*Math.min(1,(p.fh||0)/(PHEAT.per*PHEAT.max));o.fshFx.k=hk;if(o.fshFx.P)o.fshFx.P.k=hk;}
+  {const hf=Math.min(1,(p.fh||0)/(PHEAT.per*PHEAT.max));o.fshK=.55+.9*hf;o.fshH=.42+.58*hf;}   // low heat = smaller, dimmer fire shell
   if(fn&&!fxLoopKeep('fsh'))on=false;
   if(!on){if(o.fshR)o.fshR.visible=false;return;}
   if(!o.fshR){const g=new THREE.Group();
@@ -90,7 +93,7 @@ function fireShieldFX(o,p,on,dt){
   const g=o.fshR,u=g.userData;if(!g.visible)u.age=0;g.visible=true;u.age+=dt;
   // ไฟ 3 มิติจริง (volumetric) เป็นเปลือกไฟหนาหุ้มรอบตัว ลุกจากเท้าเลียขึ้นพ้นหัว (อยู่ในชั้นเอฟเฟกต์ ตามตัวผู้เล่น) — เปลือก shader เดิมซ่อน
   {const h=hazeOf(o,'fshV',()=>fireVol([{c:[0,0,0],ax:[1,0],hx:1.55,h:3.5,hz:1.55,md:1}],{int:1.0,spd:0.8}),true);h.position.set(o.g.position.x,o.g.position.y-0.15,o.g.position.z);
-    h.userData.u.uH.value=Math.max(0.05,Math.min(1,u.age/0.2));u.outer.visible=u.inner.visible=false;}
+    h.userData.u.uH.value=Math.max(0.05,Math.min(1,u.age/0.2)*(o.fshH||1));if(h.userData.u.uInt)h.userData.u.uInt.value=o.fshK;u.outer.visible=u.inner.visible=false;}
   const up=Math.min(1,u.age/0.2),now=performance.now();g.scale.set(1,Math.max(0.05,up*(1+0.04*Math.sin(now/130))),1);
   u.outer.rotation.y+=dt*0.5;u.inner.rotation.y-=dt*0.8;u.m1.uniforms.uHeat.value=-0.08+(u.age<0.3?0.2*(1-u.age/0.3):0);
   if(Math.random()<0.5){const an=rnd(0,6.283);PARTS.push({x:p.x+Math.cos(an)*26,y:p.y+Math.sin(an)*26,h:(o.zs||0)+rnd(1.6,2.6),vx:Math.cos(an)*rnd(5,20),vy:Math.sin(an)*rnd(5,20),vh:rnd(1.5,3),life:0.5,max:0.5,col:'#ffc04a',size:1.3,g:-0.6});}

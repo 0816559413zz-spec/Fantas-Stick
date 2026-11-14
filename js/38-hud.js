@@ -346,3 +346,89 @@ function drawBoard(v,P){
     cx.fillText(p.k,x+w-170,yy);cx.fillText(p.d,x+w-100,yy);cx.fillText(p.dmg,x+w-24,yy);
   });
 }
+
+// Fire Heat bar (user 2026-11-14, ref = thin blade bar: hot core with red neon rim, angled tip on the right, a glowing orb
+// wrapped in flame on the left, flame flicks along the bar). One continuous blade — the 4 stacks show only as faint split
+// lines — and the colour heats up with every stack: dark red → red → hot orange-red → full = orange fire bar.
+// Orb = drawn fire icon (warms with the heat) with a small VFX Studio flame behind it (hud_heat_flame_red/_fire flipbooks).
+// Kept light on effects (user): when full the blade fills with flowing fire = VFX Studio tileable texture hud_heat_flow
+// scrolled along the bar, plus a few embers drifting up off it. A collar joins the orb rim into the blade.
+const FHUD={t:0,v:0,lv:0,pop:0,burst:0,wasFull:false};
+const FHTEX={};function fhTex(n){let t=FHTEX[n];if(!t){const im=new Image();im.src='assets/fx/tex/hud_heat_'+n+'.png';t=FHTEX[n]={im};}return t.im.complete&&t.im.naturalWidth?t:null;}
+function fhFrame(n,cols,rows,fps,T,x,y,w,h,rot,a,off){const t=fhTex(n);if(!t)return;const N=cols*rows,f=Math.floor(T*fps+(off||0))%N,fw=t.im.naturalWidth/cols,fh=t.im.naturalHeight/rows;
+  cx.save();cx.globalAlpha=a;cx.translate(x,y);if(rot)cx.rotate(rot);cx.drawImage(t.im,(f%cols)*fw,Math.floor(f/cols)*fh,fw,fh,-w/2,-h/2,w,h);cx.restore();}
+// heat palette per level 0..4 (edge, core) — lerped by the exact heat so it warms up smoothly
+const FH_EDGE=['#4a0004','#9a0a0a','#c8120a','#e8300a','#ff5a08'],FH_CORE=['#a01a18','#ff3a20','#ff6a28','#ffa040','#fff2c0'];
+function fhMix(A,k){const i=Math.min(A.length-2,Math.floor(k)),f=k-i,a=parseInt(A[i].slice(1),16),b=parseInt(A[i+1].slice(1),16),m=(s)=>Math.round(((a>>s)&255)*(1-f)+((b>>s)&255)*f);return `rgb(${m(16)},${m(8)},${m(0)})`;}
+function drawFireHeat(fh){const now=performance.now(),dt=Math.min(.1,(now-(FHUD.t||now))/1000);FHUD.t=now;const T=now/1000;
+  const P=PHEAT,lvF=Math.max(0,Math.min(P.max,fh/P.per)),lv=Math.floor(lvF+1e-6);FHUD.v+=(lvF-FHUD.v)*Math.min(1,dt*8);
+  if(lv>FHUD.lv)FHUD.pop=1;FHUD.lv=lv;const full=lv>=P.max,heat=FHUD.v;if(full&&!FHUD.wasFull)FHUD.burst=1;FHUD.wasFull=full;
+  const S=Math.min(1.2,Math.max(.8,SH/860)),ox=46*S,oy=SH*0.6,R=15*S,x0=ox+R*.3,len=250*S,h=8*S,tip=10*S,y0=oy-h/2,x1=x0+len;
+  const RIM=full?'#ff7a1a':fhMix(['#a0101a','#c8101a','#e8141a','#ff3a1a','#ff7a1a'],heat),GLOW=full?'rgba(255,120,20,':'rgba(255,30,30,';
+  fhTex('flame_fire');fhTex('flame_red');fhTex('flow');const col=full?'fire':'red';
+  cx.save();cx.lineCap='round';cx.lineJoin='round';
+  const blade=(e)=>{cx.beginPath();cx.moveTo(x0,y0-e);cx.lineTo(x1+e,y0-e);cx.lineTo(x1-tip-e*.4,y0+h+e);cx.lineTo(x0,y0+h+e);cx.closePath();};
+  // full: soft pulsing fire aura around the whole bar + orb
+  if(full){const pu=.75+.25*Math.sin(T*4);
+    cx.save();cx.globalCompositeOperation='lighter';const og2=cx.createRadialGradient(ox,oy,R*.8,ox,oy,R*2.6);og2.addColorStop(0,`rgba(255,130,30,${.35*pu})`);og2.addColorStop(1,'rgba(255,60,0,0)');cx.fillStyle=og2;cx.beginPath();cx.arc(ox,oy,R*2.6,0,Math.PI*2);cx.fill();
+    for(const [e,a,bl] of [[3.5,.5,10],[6,.25,18]]){cx.shadowColor=`rgba(255,110,20,${.9*pu})`;cx.shadowBlur=bl*S;cx.strokeStyle=`rgba(255,130,40,${a*pu})`;cx.lineWidth=2*S;blade(e*S);cx.stroke();}cx.restore();}
+  // trough + red neon rim (outline closed at the tip, no overshoot)
+  blade(2.2*S);cx.fillStyle='rgba(16,0,2,.75)';cx.fill();
+  cx.shadowColor=GLOW+(.6+.35*heat/P.max)+')';cx.shadowBlur=(7+5*heat/P.max)*S;cx.strokeStyle=RIM;cx.lineWidth=1.4*S;
+  cx.beginPath();cx.moveTo(x0,y0-2.2*S);cx.lineTo(x1+2.2*S,y0-2.2*S);cx.lineTo(x1-tip-1*S,y0+h+2.2*S);cx.lineTo(x0,y0+h+2.2*S);cx.stroke();cx.shadowBlur=0;
+  // collar: the orb's rim flows into the blade so they read as one piece
+  {const cxn=ox+R*2.1,e=2.2*S;cx.beginPath();cx.moveTo(ox+R*.55,oy-R*.84);cx.quadraticCurveTo(ox+R*1.2,y0-e-R*.05,cxn,y0-e);cx.lineTo(cxn,y0+h+e);cx.quadraticCurveTo(ox+R*1.2,y0+h+e+R*.05,ox+R*.55,oy+R*.84);cx.closePath();
+    cx.fillStyle='rgba(20,0,2,.85)';cx.fill();cx.shadowColor=GLOW+'.9)';cx.shadowBlur=7*S;cx.strokeStyle=RIM;cx.lineWidth=1.4*S;
+    cx.beginPath();cx.moveTo(ox+R*.55,oy-R*.84);cx.quadraticCurveTo(ox+R*1.2,y0-e-R*.05,cxn,y0-e);cx.moveTo(ox+R*.55,oy+R*.84);cx.quadraticCurveTo(ox+R*1.2,y0+h+e+R*.05,cxn,y0+h+e);cx.stroke();cx.shadowBlur=0;}
+  // one continuous fill, colour from the current heat
+  cx.save();blade(0);cx.clip();
+  const fx=x0+len*heat/P.max;
+  if(heat>0.01){const e=fhMix(FH_EDGE,heat),c=fhMix(FH_CORE,heat),g=cx.createLinearGradient(0,y0,0,y0+h);
+    g.addColorStop(0,e);g.addColorStop(.42,c);g.addColorStop(.58,c);g.addColorStop(1,e);cx.fillStyle=g;cx.fillRect(x0,y0,fx-x0+tip*.5,h);
+    // hot leading edge
+    const lg=cx.createLinearGradient(fx-24*S,0,fx+4*S,0);lg.addColorStop(0,'rgba(255,240,210,0)');lg.addColorStop(1,`rgba(255,240,210,${.35+.15*Math.sin(T*9)})`);cx.fillStyle=lg;cx.fillRect(fx-24*S,y0,28*S,h);
+    if(full){const t=fhTex('flow');if(t){const im=t.im,tw=h*7,sh=im.naturalHeight*.28;
+      for(const [sp,al,yo] of [[42,.9,0],[-23,.5,.45]]){const off=((T*sp*S)%tw+tw)%tw;cx.globalAlpha=al;cx.globalCompositeOperation=al<.8?'lighter':'source-over';
+        for(let x=x0-tw+off;x<x1+tw;x+=tw)cx.drawImage(im,0,im.naturalHeight*yo,im.naturalWidth,sh,x,y0,tw,h);}
+      cx.globalAlpha=1;cx.globalCompositeOperation='source-over';
+      const hg=cx.createLinearGradient(0,y0,0,y0+h);hg.addColorStop(0,'rgba(255,90,10,.35)');hg.addColorStop(.5,'rgba(255,240,200,.25)');hg.addColorStop(1,'rgba(200,30,0,.4)');cx.fillStyle=hg;cx.fillRect(x0,y0,len,h);}}
+    if(FHUD.pop>0){cx.fillStyle=`rgba(255,250,235,${FHUD.pop*.7})`;cx.fillRect(x0,y0,fx-x0,h);FHUD.pop=Math.max(0,FHUD.pop-dt*3);}}
+  // faint stack split lines (only noticeable up close)
+  cx.strokeStyle='rgba(30,0,0,.28)';cx.lineWidth=1*S;for(let i=1;i<P.max;i++){const xn=x0+i*len/P.max;cx.beginPath();cx.moveTo(xn+tip*.5,y0);cx.lineTo(xn,y0+h);cx.stroke();}
+  cx.restore();
+  // full: a few embers drifting up off the bar
+  if(full){for(let j=0;j<5;j++){const u=(T*.5+j*.41)%1,px=x0+((j*.61+.12)%1)*len+Math.sin(T*2+j)*4*S,py=y0-3*S-u*18*S;
+    cx.fillStyle=`rgba(255,${170+60*(1-u)|0},70,${(1-u)*.9})`;cx.beginPath();cx.arc(px,py,(1.6-u)*S,0,Math.PI*2);cx.fill();}}
+  // just hit full: fire burst all around the bar (full ellipse, above + below) + a thin shock ring running from the orb to the tip
+  if(FHUD.burst>0){const k=FHUD.burst,u=1-k,e=1-Math.pow(1-u,3),mx=x0+len*.45,rx=len*(.25+.45*e),ry=R*(.8+2.2*e);cx.save();cx.globalCompositeOperation='lighter';
+    const dg=cx.createRadialGradient(0,0,0,0,0,1);dg.addColorStop(0,`rgba(255,240,200,${.45*k})`);dg.addColorStop(.6,`rgba(255,120,20,${.3*k})`);dg.addColorStop(.92,`rgba(255,80,10,${.5*k})`);dg.addColorStop(1,'rgba(255,40,0,0)');
+    cx.save();cx.translate(mx,oy);cx.scale(rx,ry);cx.fillStyle=dg;cx.beginPath();cx.arc(0,0,1,0,Math.PI*2);cx.fill();cx.restore();
+    cx.strokeStyle=`rgba(255,200,120,${.8*k})`;cx.lineWidth=(2.4-1.4*e)*S;cx.beginPath();cx.ellipse(mx,oy,rx,ry,0,0,Math.PI*2);cx.stroke();
+    for(let j=0;j<16;j++){const a=(j+.5)/16*Math.PI*2,rr=1+.15*e;cx.fillStyle=`rgba(255,${180+(j%3)*25},80,${k})`;cx.beginPath();cx.arc(mx+Math.cos(a)*rx*rr,oy+Math.sin(a)*ry*rr,1.6*S*k+.4,0,Math.PI*2);cx.fill();}
+    // shock ring: thin upright ring sweeping along the blade, fast at first then easing out at the tip
+    const su=Math.min(1,u/.6),se=1-Math.pow(1-su,2),sx=ox+R+(x1-ox-R)*se,sa=su<1?1-su*.6:0;
+    if(sa>0){const sr=R*(1.2+1.4*su);cx.strokeStyle=`rgba(255,235,190,${.9*sa})`;cx.lineWidth=1.6*S;cx.shadowColor='rgba(255,140,40,1)';cx.shadowBlur=8*S;
+      cx.beginPath();cx.ellipse(sx,oy,sr*.32,sr,0,0,Math.PI*2);cx.stroke();cx.strokeStyle=`rgba(255,130,40,${.5*sa})`;cx.lineWidth=1*S;cx.beginPath();cx.ellipse(sx-6*S,oy,sr*.26,sr*.85,0,0,Math.PI*2);cx.stroke();
+      cx.shadowBlur=0;const tg=cx.createLinearGradient(ox+R,0,sx,0);tg.addColorStop(0,'rgba(255,200,120,0)');tg.addColorStop(1,`rgba(255,240,200,${.7*sa})`);cx.fillStyle=tg;cx.fillRect(ox+R,y0-1*S,sx-ox-R,h+2*S);}
+    cx.restore();FHUD.burst=Math.max(0,FHUD.burst-dt/0.8);}
+  // icon: a little VFX Studio flame licking up behind the orb (grows with heat) + a spark or two
+  {const k=heat/P.max;fhFrame('flame_'+col,8,4,24,T,ox+R*.05,oy-R*.75,R*(1.7+.5*k),R*(2.2+.9*k),-.08,.45+.45*k,0);
+    for(let j=0;j<2+(full?2:0);j++){const u=(T*.7+j*.5)%1,a=-1.9+j*.5+Math.sin(T+j)*.2;cx.fillStyle=`rgba(255,${full?190:110},80,${(1-u)*.8})`;cx.beginPath();cx.arc(ox+Math.cos(a)*R*(1+u*.9),oy+Math.sin(a)*R*(1+u*.9),(1.4-u)*S,0,Math.PI*2);cx.fill();}}
+  const og=cx.createRadialGradient(ox-R*.35,oy-R*.35,R*.1,ox,oy,R);
+  if(full){og.addColorStop(0,'#5a1a04');og.addColorStop(.7,'#2a0800');og.addColorStop(1,'#120200');}else{og.addColorStop(0,'#4a0610');og.addColorStop(.7,'#1e0004');og.addColorStop(1,'#0a0002');}
+  cx.shadowColor=GLOW+'1)';cx.shadowBlur=(full?20+6*Math.sin(T*8):8+4*heat)*S;cx.fillStyle=og;cx.beginPath();cx.arc(ox,oy,R,0,Math.PI*2);cx.fill();cx.shadowBlur=0;
+  {cx.save();const s=R*.62,sp=2,mv=full?1:0;// icon flame comes alive only at full Heat (user): flickers, stretches and sways from its base
+    cx.translate(ox,oy+R*.1+s);cx.transform(1,0,mv*(.13*Math.sin(T*4.3*sp)+.05*Math.sin(T*11)),1,0,0);cx.scale(1+mv*.05*Math.sin(T*9*sp),1+mv*(.07*Math.sin(T*7.3*sp)+.04*Math.sin(T*13.7)));cx.translate(0,-s);
+    const fp=(s)=>{cx.beginPath();cx.moveTo(0,s);cx.bezierCurveTo(-s*.85,s*.9,-s*.95,-s*.05,-s*.35,-s*.55);cx.bezierCurveTo(-s*.3,-s*.15,-s*.1,-s*.05,0,-s*.05);
+    cx.bezierCurveTo(-s*.15,-s*.55,s*.05,-s*.85,s*.15,-s*1.1);cx.bezierCurveTo(s*.35,-s*.6,s*.95,-s*.2,s*.75,s*.45);cx.bezierCurveTo(s*.65,s*.85,s*.3,s,0,s);cx.closePath();};fp(s);
+    const k=heat/P.max,fg=cx.createLinearGradient(0,s,0,-s);fg.addColorStop(0,full?'#ff5a10':fhMix(['#a01018','#d01a1a','#ff3a20','#ff6a28','#ff8a20'],heat));fg.addColorStop(1,full?'#fff2b0':fhMix(['#ff8a80','#ffb0a0','#ffd0b0','#ffe2b0','#fff2b0'],heat));
+    cx.fillStyle=fg;cx.shadowColor=full?'rgba(255,200,90,.9)':`rgba(255,120,90,${.3+.5*k})`;cx.shadowBlur=(3+6*k)*S;cx.fill();
+    cx.shadowBlur=0;cx.save();cx.translate(0,s*.45);cx.scale(1,1+mv*.12*Math.sin(T*10.5*sp+1));cx.translate(0,-s*.45);cx.translate(0,s*.3);fp(s*.5);cx.fillStyle=full?'rgba(255,250,215,.95)':`rgba(255,235,210,${.35+.5*k})`;cx.fill();cx.restore();
+    if(FHUD.burst>0){cx.globalCompositeOperation='lighter';cx.globalAlpha=FHUD.burst;cx.scale(1+.5*(1-FHUD.burst),1+.7*(1-FHUD.burst));fp(s);cx.fillStyle='rgba(255,200,110,.7)';cx.fill();cx.globalAlpha=1;cx.globalCompositeOperation='source-over';}
+    cx.restore();}
+  cx.strokeStyle=full?'rgba(255,200,120,.9)':'rgba(255,90,80,.85)';cx.lineWidth=1.3*S;cx.beginPath();cx.arc(ox,oy,R,0,Math.PI*2);cx.stroke();
+  cx.strokeStyle='rgba(255,255,255,.5)';cx.lineWidth=1.2*S;cx.beginPath();cx.arc(ox,oy,R*.78,-2.5,-1.6);cx.stroke();
+  // title above the blade
+  cx.font=`600 ${Math.round(12.5*S)}px Cinzel,Kanit,serif`;cx.textAlign='center';cx.shadowColor='rgba(0,0,0,.9)';cx.shadowBlur=4;cx.fillStyle=full?'#ffe2a8':'#f4ece6';
+  cx.fillText(full?'HEAT  MAX':'HEAT  '+lv+' / '+P.max,x0+len*.42,y0-9*S);
+  cx.restore();}

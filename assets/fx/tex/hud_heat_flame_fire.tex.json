@@ -1,0 +1,1 @@
+{"v": 1, "desc": "HUD แถบ Heat: เปลวไฟบนแถบ (fire)", "gen": "fire", "seed": 5, "px": 128, "cols": 8, "rows": 4, "kind": "loop", "fps": 24, "ramp": [[0, "#100400"], [0.3, "#8a1a04"], [0.55, "#ff4a0a"], [0.8, "#ffa42a"], [1, "#fff6d0"]], "add": true, "p": {"speed": 2, "scale": 4, "detail": 6, "width": 0.45, "height": 1.15, "turb": 1.4, "sharp": 0.8}}

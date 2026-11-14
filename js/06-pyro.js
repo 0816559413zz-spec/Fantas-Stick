@@ -25,7 +25,7 @@ function pyroBasic(p,inp,dt,setCd){
   if(p.breath>0||p.snapT>0){p.chg=0;return;}
   if(inp.fire&&!prev){
     // Kindle: คลิก = ลูกไฟชาร์จเต็มทันที
-    if(p.kindle>0&&p.cd.basic<=0){p.kindle--;if(!p.kindle){p.kindleT=0;p.hover=0;}shoot(p,'pfireb',{sp:'pyrobig',dmg:KINDLE.v.dmg,hand:1});setCd('basic',PYV.ballCd);p.chg=-1;return;}
+    if(p.kindle>0&&p.cd.basic<=0){p.kindle--;if(!p.kindle){p.kindleT=0;p.hover=0;}pyroKindleVolley(p);setCd('basic',PYV.ballCd);p.chg=-1;return;}
     p.chg=0;
   }else if(inp.fire){if(p.chg>=0)p.chg=Math.min(PYV.chargeT,p.chg+dt);}
   else if(prev){
@@ -100,7 +100,15 @@ function updateFirePaths(dt){
 // =====================================================================
 //  สายไฟ — ความร้อน: สะสมด้วยลูกไฟ/กำแพง/พุ่งเพลิง แล้วจุดระเบิดด้วยระเบิดความร้อน/อุกกาบาต
 // =====================================================================
-const KINDLE=defSpell(0,{id:'kindle',v:{shots:2,time:3,jump:15,push:1000,dmg:16,r:90,env:40},vn:{shots:'ลูกไฟใหญ่ได้กี่นัด',time:'ลอยนาน (วิ)',jump:'แรงกระโดด',push:'แรงพุ่งไปข้าง',dmg:'ลูกไฟใหญ่ • ดาเมจ',r:'ลูกไฟใหญ่ • รัศมีระเบิด',env:'ลูกไฟใหญ่ • ดาเมจใส่บ้าน/ของ'},role:'builder',n:'Kindle',ic:'🔥',cd:9,d:'กระโดดสูงไปทางที่กด WASD (ไม่กด = ถอยหลัง) ขึ้นกลางอากาศ แล้วลอยตกช้าๆ 3 วิ (แบบฟาราห์/เฟรย่า) • ยิงปกติ 2 นัดกลายเป็นลูกไฟใหญ่ทันที (16 ดาเมจ ระเบิดวงกว้าง ~90 +1 Burning ทุกคนในวง)',fx:'ยิงครบ 2 ลูกหรือครบ 3 วิ = ตกลงพื้นตามปกติ • ไฟพุ่งจากใต้เท้าตอนลอย',
+// Kindle volley (user 2026-11-14): one click = 3 fireballs. The big middle one flies straight (20 + explosion);
+// the two side ones (10 each) bow out left/right, swing back into the middle line, then keep flying forward. Each ball that hits = +1 Burning.
+SPELLS.kindleside={id:'kindleside',hit(pr,t){damage(t,pr.dmg,pr.owner,'proj');addBurn(t,1,pr.owner);}};
+function pyroKindleVolley(p){const V=KINDLE.v,m=shoot(p,'pfireb',{sp:'pyrobig',dmg:V.dmg,hand:1}),SP=Math.hypot(m.vx,m.vy)||1,ca=m.vx/SP,sa=m.vy/SP;
+  for(const side of [-1,1]){const q=shoot(p,'pfire',{sp:'kindleside',dmg:V.sideDmg,quiet:1});Object.assign(q,{x:m.x,y:m.y,h:m.h,vh:m.vh*V.sideSpd,vx:m.vx*V.sideSpd,vy:m.vy*V.sideSpd,life:m.life/V.sideSpd,
+    kc:{x0:m.x,y0:m.y,ca,sa,side,A:V.bow,L:V.meet,s:0,SP:SP*V.sideSpd}});}}
+function pyroKindleCurve(pr,dt){const K=pr.kc;K.s+=K.SP*dt;const lat=K.s<K.L?K.side*K.A*Math.sin(Math.PI*K.s/K.L):0,
+  x=K.x0+K.ca*K.s-K.sa*lat,y=K.y0+K.sa*K.s+K.ca*lat;pr.vx=(x-pr.x)/dt;pr.vy=(y-pr.y)/dt;if(K.s>=K.L){pr.vx=K.ca*K.SP;pr.vy=K.sa*K.SP;pr.x=x-pr.vx*dt;pr.y=y-pr.vy*dt;pr.kc=null;}}
+const KINDLE=defSpell(0,{id:'kindle',v:{shots:1,sideDmg:10,sideSpd:0.82,bow:70,meet:520,time:3,jump:15,push:1000,dmg:20,r:90,env:40},vn:{shots:'ยิงได้กี่ครั้ง',sideDmg:'ลูกไฟข้าง • ดาเมจ',sideSpd:'ลูกไฟข้าง • ความเร็ว (เท่าของลูกกลาง)',bow:'ลูกไฟข้าง • โค้งออกกว้าง',meet:'ลูกไฟข้าง • ระยะที่โค้งเข้ากลาง',time:'ลอยนาน (วิ)',jump:'แรงกระโดด',push:'แรงพุ่งไปข้าง',dmg:'ลูกไฟใหญ่ • ดาเมจ',r:'ลูกไฟใหญ่ • รัศมีระเบิด',env:'ลูกไฟใหญ่ • ดาเมจใส่บ้าน/ของ'},role:'builder',n:'Kindle',ic:'🔥',cd:9,d:'กระโดดสูงไปทางที่กด WASD (ไม่กด = ถอยหลัง) ขึ้นกลางอากาศ แล้วลอยตกช้าๆ 3 วิ (แบบฟาราห์/เฟรย่า) • คลิก 1 ครั้ง = ลูกไฟ 3 ลูก: ลูกใหญ่ตรงกลาง 20 ดาเมจ ระเบิดวง ~90 • ลูกข้างซ้ายขวา ลูกละ 10 โค้งออกแล้วเข้ากลางแล้วพุ่งต่อ • โดนลูกละ +1 Burning (รวม 40 ดาเมจ 3 Burning)',fx:'ยิงครบ 2 ลูกหรือครบ 3 วิ = ตกลงพื้นตามปกติ • ไฟพุ่งจากใต้เท้าตอนลอย',
   cast(p,S){const V=S.v;p.kindle=V.shots;p.kindleT=V.time;p.hover=V.time;p.vz=V.jump;{const i=p.inp||{};let dx=i.mx||0,dy=i.my||0;const l=Math.hypot(dx,dy);if(l>0.1){dx/=l;dy/=l;}else{dx=-Math.cos(p.ang);dy=-Math.sin(p.ang);}p.vx+=dx*V.push;p.vy+=dy*V.push;}p.shieldOn=false;emit({k:'efx',z:'kindle',x:p.x,y:p.y,h:p.z,id:p.id});}});
 const DRAGONF=defSpell(0,{id:'dragonfall',v:{range:600,rise:6,fly:3,r:120,dmg:20,slow:0.7,slowT:1.2,burn:1,env:60},vn:{range:'ระยะเล็งจุดลง',rise:'บินสูง',fly:'บินนาน (วิ)',r:'รัศมีกระแทก',dmg:'ดาเมจกระแทก',slow:'ความเร็วคนโดน (เท่า)',slowT:'ช้านาน (วิ)',burn:'Burning ที่ใส่',env:'ดาเมจใส่บ้าน/ของ'},role:'builder',n:'Dragonfall',ic:'🐉',cd:13,d:'ทะยานขึ้นฟ้าด้วยเปลวไฟ แล้วบินควบคุมได้ 3 วิ (WASD เคลื่อนช้าๆ • Space ขึ้น / C ลง เล็กน้อย) — จุดที่เล็งคือจุดลง มีวงเตือนบนพื้นตามเป้าเล็งให้ทุกคนเห็น • คลิกยิง = ดิ่งกระแทกทันที • ครบ 3 วิ = ดิ่งลงจุดเล็งล่าสุดอัตโนมัติ',fx:'กระแทกวงรัศมี 120: 20 ดาเมจ +1 Burning + ช้าลง 30% 1.2 วิ (โดนครั้งเดียวต่อคน) • ไม่อมตะระหว่างบิน • โดนสตัน/แช่แข็งระหว่างบิน = ร่วงลงเฉยๆ ไม่กระแทก • ระหว่างบิน: ยิงปกติได้ แต่ใช้โล่/พุ่ง/คาถาอื่นไม่ได้',
   cast(p,S){
