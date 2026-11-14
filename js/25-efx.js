@@ -298,7 +298,12 @@ function efxFX(ev){
       if(near){snd('boom',ev);shake(3+n);}break;}
     case 'colossus':for(let i=0;i<6;i++){const an=i/6*6.283;for(let j=0;j<10;j++)flame(x+Math.cos(an)*150,y+Math.sin(an)*150,0.1,{vh:rnd(8,14),life:rnd(0.4,0.6),size:rnd(12,16),g:-1});}burst(x,y,'#ff6a2a',40,300,1,3,{h:H+1,vh:[2,8],g:-1});ring(x,y,'#ffb347',140,0.6,0.2);FX.flashLight(x,y,H+3,'#ff7a2a',8,30,0.6);if(near){snd('roar',ev);shake(6);}break;
     case 'colbolt':{const o=PM3.get(ev.id);if(o)o.colShot=performance.now();}FX.flashSprite(x,y,H,'#ffd27a',0.5,4,0.15,2.4);COLB.push({x,y,h:H,x2:ev.x2,y2:ev.y2,h2:ev.h2,t:0,max:ev.t});if(near)snd('cast_fire',ev);break;
-    case 'infnova':{FX.flashSprite(x,y,H+0.6,'#fff2d0',0.35,5,0.08,2.2);FX.flashSprite(x,y,H+0.4,'#ff7a2a',0.6,12,0.3,1.6);ring(x,y,'#ff8a2a',ev.r||350,0.55,0.25);ring(x,y,'#ffd27a',(ev.r||350)*0.7,0.4,0.15);burst(x,y,'#ff5a1a',60,ev.r||350,1,3,{h:H+0.6,vh:[1,4],g:-1});FX.flashLight(x,y,H+2,'#ff6a1a',10,40,0.7);if(near){snd('roar',ev);shake(7);}break;}
+    case 'novawind':{const o=PM3.get(ev.id);if(o){o.novaT=ev.t||0.8;o.novaT0=o.novaT;}if(near)snd('cast_fire',{x,y,vol:0.7});break;}
+    case 'infnova':{const o=PM3.get(ev.id);const hx=x,hy=y,hh=H+2.5;if(o)o.novaT=0;const R=ev.r||350;   // ปลายไม้ตอนชูสุด = เหนือหัว ~2.5 ม.
+      // ระเบิดเป็นโดมพลังงานจากปลายไม้ ขยายครอบรัศมีทั้งหมด (ไม่มีไฟ ไม่มีพื้นแตก)
+      FX.flashSprite(hx,hy,hh,'#ffe2b0',0.1,1.4,0.05,1.2);FX.flashSprite(hx,hy,hh,'#ff7a2a',0.25,2.6,0.12,1);
+      novaDome(hx,hy,hh,H,R);ring(x,y,'#ff7a2a',R,0.7,H+0.12);
+      FX.flashLight(hx,hy,hh,'#ff7a2a',2.5,30,0.5);if(near){snd('roar',ev);shake(7);}if(ev.id===NET.myId)hitStop(0.06);break;}
     case 'colboom':explosionFX(x,y,H+0.1);
       for(let i=0;i<40;i++)flame(x+rnd(-30,30),y+rnd(-30,30),H-0.2,{vh:rnd(10,18),life:rnd(0.5,0.8),size:rnd(14,20),g:-1,drag:1.5});
       for(let i=0;i<18;i++){const an=rnd(0,6.283),sp=rnd(150,350);PARTS.push({x,y,h:H+0.2,vx:Math.cos(an)*sp,vy:Math.sin(an)*sp,vh:rnd(5,11),life:rnd(0.7,1),max:1,col:i%2?'#3a2418':'#ff7a2a',size:rnd(2.4,3.6),g:16,drag:0.4});}

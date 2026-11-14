@@ -141,7 +141,7 @@ function tickStatus(t,dt){
   if((t.isE||t.isM)&&t.root>0)t.root-=dt;
   if(t.ward){t.ward.t-=dt;if(t.ward.t<=0)t.ward=null;}
 }
-function clearStatus(t){for(const k of ['wbsT','slowT','shk','frz','sil','chl','chlT','frzImm','chlImm','rootImm','ccT','ccN','haste','ovc','burn','psn','psnT','fear','bld','mrk','heat','heatT','flare','frostA','wallCd','brn','brnT','xb','onF','blaze','kindle','kindleT','hover','fsl','fslT','fslBigT','fslR','fslA','fslP','fslUltT','slip','ripT','ffT','cryo','auraT','mirror','xhp','slideT','grT','breath','dfall','snapT','colos','dchg','mudT','sbk'])t[k]=0;t.dchgOn=false;t.ward=null;t.dr=null;}
+function clearStatus(t){for(const k of ['wbsT','slowT','shk','frz','sil','chl','chlT','frzImm','chlImm','rootImm','ccT','ccN','haste','ovc','burn','psn','psnT','fear','bld','mrk','heat','heatT','flare','frostA','wallCd','brn','brnT','xb','onF','novaT','blaze','kindle','kindleT','hover','fsl','fslT','fslBigT','fslR','fslA','fslP','fslUltT','slip','ripT','ffT','cryo','auraT','mirror','xhp','slideT','grT','breath','dfall','snapT','colos','dchg','mudT','sbk'])t[k]=0;t.dchgOn=false;t.ward=null;t.dr=null;}
 function fxMask(t){return (t.stun>0?1:0)|(t.burn>0?2:0)|((t.chl>0||t.slowT>0||frostSlow(t)>0)?4:0)|(t.frz>0?8:0)|(t.shk>0?(16|(t.shkGod?FX_SHOCK_CYAN:0)):0)|(t.root>0?32:0)|(t.sil>0?64:0)|(t.ward?128:0)|(t.haste>0?256:0)|(t.ovc>0?512:0)|(t.psn>0||t.naturePoison?1024:0)|(t.fear>0?2048:0)|(t.bld>0?4096:0)|(t.mrk>0?8192:0)|(t.dr?16384:0)|((t.heat>0||t.brn>0)?32768:0)|((t.flare>0||t.kindle>0)?65536:0)|(t.blaze>0?131072:0)|(t.xb>0?262144:0)|(t.mudT>0?524288:0)|(t.onF>0?FX_ONFIRE:0);}
 
 // ---------- วัตถุในสนามที่คาถาสร้าง: โซน / ฟ้าผ่าหน่วงเวลา / กำแพง / ช่องร่ายต่อเนื่อง ----------

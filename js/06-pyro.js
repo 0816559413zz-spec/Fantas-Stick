@@ -159,12 +159,14 @@ const SNAP=defSpell(0,{id:'ignitionsnap',v:{range:500,windup:0.6,dmg:15,heal:8},
   }});
 // อัลติใหม่ (ผู้ใช้ 2026-11-14): ระเบิดรอบตัว รัศมี 350 ไม่มีดาเมจ • ศัตรูที่โดนติด On Fire 9 วิ (ดับไม่ได้) = Burning +1 ทุก 1.5 วิ
 //   • Heat เต็มทันที + รีคูลดาวน์ Ignition Snap → รอ Burning ขึ้นแล้ว Snap ทีเดียวทั้งทีม  (ร่างยักษ์เดิม colossusTick ไม่ได้ใช้แล้ว)
-const COLOS=defSpell(0,{id:'colossus',v:{r:350,time:9,every:1.5},vn:{r:'รัศมีระเบิด',time:'On Fire นาน (วิ)',every:'Burning +1 ทุก (วิ)'},role:'ult',n:'Inferno Nova',ic:'👹',cd:0,ult:true,d:'เวทโบราณสายไฟ: ระเบิดไฟรอบตัว (รัศมี ~350) ไม่มีดาเมจ — ศัตรูที่โดนติด On Fire 9 วิ (ดับไม่ได้) Burning +1 ทุก 1.5 วิ • Heat เต็มทันที และ Ignition Snap พร้อมใช้ทันที',fx:'ศัตรูโดน +1 Burning ทันที แล้ว +1 ทุก 1.5 วิ (ถึง 6 ชั้น) • Snap ตอน Heat เต็ม 6 ชั้น = 180 ดาเมจ',
-  cast(p,S){const V=S.v;emit({k:'efx',z:'infnova',x:p.x,y:p.y,h:p.z,r:V.r,id:p.id});
-    for(const t of foesIn(p.team,p.x,p.y,V.r,p.z+6)){if(!t.isE&&!t.isM&&t.inv>0)continue;addOnFire(t,V.time,V.every,p.id);}
-    p.fheat=PHEAT.per*PHEAT.max;p.fheatT=G.time;
-    for(let i=0;i<4;i++)if(p.kitIds[i]==='ignitionsnap'){const k=SLOTK[i];p.cd[k]=0;}
-  }});
+const COLOS=defSpell(0,{id:'colossus',v:{wind:1.2,r:350,time:9,every:1.5},vn:{wind:'ชูไม้ชาร์จก่อนระเบิด (วิ)',r:'รัศมีระเบิด',time:'On Fire นาน (วิ)',every:'Burning +1 ทุก (วิ)'},role:'ult',n:'Inferno Nova',ic:'👹',cd:0,ult:true,d:'เวทโบราณสายไฟ: ระเบิดไฟรอบตัว (รัศมี ~350) ไม่มีดาเมจ — ศัตรูที่โดนติด On Fire 9 วิ (ดับไม่ได้) Burning +1 ทุก 1.5 วิ • Heat เต็มทันที และ Ignition Snap พร้อมใช้ทันที',fx:'ศัตรูโดน +1 Burning ทันที แล้ว +1 ทุก 1.5 วิ (ถึง 6 ชั้น) • Snap ตอน Heat เต็ม 6 ชั้น = 180 ดาเมจ',
+  // ชูไม้ขึ้นฟ้า ปลายไม้ชาร์จไฟสว่าง (wind วิ) แล้วระเบิดออกจากปลายไม้ (ผู้ใช้ 2026-11-14) — ไม่มีพื้นแตก
+  cast(p,S){p.novaT=S.v.wind;emit({k:'efx',z:'novawind',x:p.x,y:p.y,h:p.z,t:S.v.wind,id:p.id});}});
+function pyroNova(p){const V=COLOS.v;emit({k:'efx',z:'infnova',x:p.x,y:p.y,h:p.z,r:V.r,id:p.id});
+  for(const t of foesIn(p.team,p.x,p.y,V.r,p.z+6)){if(!t.isE&&!t.isM&&t.inv>0)continue;addOnFire(t,V.time,V.every,p.id);}
+  p.fheat=PHEAT.per*PHEAT.max;p.fheatT=G.time;
+  for(let i=0;i<4;i++)if(p.kitIds[i]==='ignitionsnap'){const k=SLOTK[i];p.cd[k]=0;}
+}
 function pyroSnap(p){const full=pyroHeatLv(p)>=PHEAT.max;p.fheat=0;
   emit({k:'efx',z:'snap',x:p.x,y:p.y,h:p.z+1.6,id:p.id});
   for(const t of foesOf(p.team)){

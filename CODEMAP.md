@@ -52,8 +52,8 @@ FROSTV:3 FROST_SWING3_HIT:9 frostShieldPitch:10 frostBoom:15 meleeHit:22 mirrorP
 ## js/05-terrain.js (44) — พื้นสูงต่ำ (แผนที่จากไฟล์ Blender — กติกาฝั่งคนปั้นใน guides/MAP-DESI…
 TERR:5 TSTEP:6 TSLOPE:6 terrT:7 floorAt:12 terrSolid:14 terrMove:21 updateGlaciers:30
 
-## js/06-pyro.js (218) — สายไฟ: ยิงปกติ 2 โหมด / โล่ระเบิด / พุ่งชาร์จ
-PYV:3 pyroBigBoom:11 pyroBall:19 pyroBasic:20 PHEAT:41 pyroHeatLv:42 pyroHeatGain:43 pyroHeatTick:44 pyroHeatDmg:45 pyroHeatSpd:46 addOrbs:47 pyroParry:48 pyroBlock:49 launchOrbs:51 pyroDash:58 pyroPathEnd:78 updateFirePaths:83 pyroKindleVolley:106 pyroKindleCurve:109 KINDLE:111 DRAGONF:113 dragonfallDive:122 dragonfallTick:123 dragonfallBoom:138 RINGE:144 BLAZEF:151 pyroBlazeAct:154 SNAP:155 COLOS:162 pyroSnap:168 colossusTick:178 updateERings:197
+## js/06-pyro.js (220) — สายไฟ: ยิงปกติ 2 โหมด / โล่ระเบิด / พุ่งชาร์จ
+PYV:3 pyroBigBoom:11 pyroBall:19 pyroBasic:20 PHEAT:41 pyroHeatLv:42 pyroHeatGain:43 pyroHeatTick:44 pyroHeatDmg:45 pyroHeatSpd:46 addOrbs:47 pyroParry:48 pyroBlock:49 launchOrbs:51 pyroDash:58 pyroPathEnd:78 updateFirePaths:83 pyroKindleVolley:106 pyroKindleCurve:109 KINDLE:111 DRAGONF:113 dragonfallDive:122 dragonfallTick:123 dragonfallBoom:138 RINGE:144 BLAZEF:151 pyroBlazeAct:154 SNAP:155 COLOS:162 pyroNova:165 pyroSnap:170 colossusTick:180 updateERings:199
 
 ## js/07-frost-spells.js (33) — 
 FROSTF:4 GREND:6 frostGlacier:11 PERMA:16 CRYO:18 FAURA:25 MIRROR:27
@@ -181,10 +181,10 @@ W_WL:547 W_DR:553 W_VX:559 W_VO:565 W_FW:571 W_UL:580
 ## js/10-net.js (200) — เครือข่าย (PeerJS / WebRTC)
 PREFIX:4 NET:5 RC:9 TURN_SERVERS:12 ICE:13 PEER_OPT:14 TURN_URL:16 ICE_READY:18 JN:22 LAG:24 lagDo:25 hostSend:26 LOBBY:27 genCode:28 sendAll:29 NETD_KEYS:33 NETD:33 netDeltaReset:34 netDelta:35 NET_MAX:49 _netTE:49 netSendSnap:50 NETU:62 netUndelta:63 setStatus:69 hostGame:71 hostPeer:80 netConnect:100 joinWatch:111 joinFail:126 netLost:132 joinGame:147 joinPeer:158 clientOnData:173 leave:188 leaveRoom:190
 
-## js/11-host.js (424) — 
+## js/11-host.js (425) — 
 G:4 EVL:4 EVN:4 hostLast:4 tickN:4 emit:5 feed:6 banner:7 plist:8 cleanName:9 freshStats:11 newPlayer:18 emptyInput:21 frameOk:23 addPlayer:24 initHostLobby:33 lobbyMsg:40 broadcastLobby:41 INPN:43 hostOnData:44 hostDrop:75 hostRemove:84 validate:97 hostStart:110 hostToLobby:137 MIDJOIN:144 modeCap:145 midJoin:146 CHATT:162 chatRelay:163 emoHost:171 resetBody:173 fmap:179 spawnPts:180 teamPts:182 spSpread:184 placeAll:185 respawn:197
 §216 ลูปหลักฝั่งโฮสต์
-hostTick:217 angDiff:232 cH:234 vR:235 updatePlayer:237 hitProp:411 damagePropsIn:418 nearUseProp:419 useProp:420
+hostTick:217 angDiff:232 cH:234 vR:235 updatePlayer:237 hitProp:412 damagePropsIn:419 nearUseProp:420 useProp:421
 
 ## js/12-buildings.js (537) — สิ่งปลูกสร้างที่พังเป็นชิ้นย่อย (บ้าน) แบบ Battlefield — คู่มือเต็ม: …
 BLDDEF:8 BLD_PIECES:10 BLD_GRID:11 BLD_DOOR:13 BLD_FIRE:14 BLD_ICE:14 BLD_ROOF_MIN:14 BLDG:15 BLDON:15 genBldg:16 bldRect:26 bldChunk:28 bldAlive:35 bldLocal:36 bldWorld:37 rectDist:38 bldNear:39 BLD_MOUND:42 bldGone:43 bldMoundAt:44 bldMoundH:45 hitBldPiece:47 breakBldChunk:58 bldSupport:66 damageEnv:86 bldRay:104 _sgRB:112 aimClip:114 aimLineH:122 aimRay3:123 bldPieceAt:139 projEl:150 bldPush:155 collideBld:161 updateBldg:179 bldSnap:192 bldParse:198
@@ -297,7 +297,7 @@ BRKV:313 BRK_COL:313 brkSetup:314 BRK_CM:333 brkCrackMat:334 brkClip:350 brkYc:3
 ## js/24-minions-view.js (68) — สัตว์เวท: โมเดลโปร่งแสง + ซิงก์จาก snapshot (MN)
 MM3:2 makeMinion:3 syncMins:36 drawMinBars:58
 
-## js/25-efx.js (357) — efxFX: ภาพของ event "efx" ทุกคาถา (หนึ่ง case ต่อหนึ่งเอฟเฟกต์)
+## js/25-efx.js (362) — efxFX: ภาพของ event "efx" ทุกคาถา (หนึ่ง case ต่อหนึ่งเอฟเฟกต์)
 efxState:4 efxFX:20
 
 ## js/26-fx-events.js (260) — fx(ev): เอฟเฟกต์+เสียงของทุก event จากโฮสต์ • statusFX (สถานะบนตัว) •…
@@ -373,24 +373,24 @@ stageMenuFx:135 _sv:146
 §147 ฉากประจำบ้าน (โผล่ตอนเลือกบ้านในหน้าสร้างตัวละคร)
 CRESTTEX:148 crestTex:149 crestBanner:157 buildHouseEnvs:165 TONE0:213 _tc:214 stageTone:215 stageScreen:228 renderStage:229 drawStageLabels:286
 
-## js/33-pyro-view.js (319) — ภาพของสายไฟ (pyroFX: ชาร์จ/พุ่ง/ดีดนิ้ว/กลายร่าง/Dragonfall/Colossus)…
+## js/33-pyro-view.js (344) — ภาพของสายไฟ (pyroFX: ชาร์จ/พุ่ง/ดีดนิ้ว/กลายร่าง/Dragonfall/Colossus)…
 §2 sync ตัวละคร/ศัตรู/ลูกเวท กับ snapshot
 localVel:3
 §11 ภาพของสายไฟ: ชาร์จลูกไฟ / ย่อตัวชาร์จพุ่ง / วงเวทพ่นไฟ / ดีดนิ้ว / กล…
-_pw:12 simOf:13 makeColossus:14 makeMagicCircle:67 _fsGeo:77 fireShieldFX:79 pyroFX:101 BLZV:299 blzOutlineMat:300 blzOutline:302 blazeLinks:307 blazeVignette:316
+_pw:12 simOf:13 makeColossus:14 makeMagicCircle:67 _fsGeo:77 fireShieldFX:79 pyroFX:101 NOVAD:298 _novaGeo:298 novaDome:299 updateNovaDomes:304 pyroNovaCharge:308 BLZV:324 blzOutlineMat:325 blzOutline:327 blazeLinks:332 blazeVignette:341
 
 ## js/34-frost-view.js (263) — ภาพของสายน้ำแข็ง: ดาบ/ขวานน้ำแข็งที่ปลายไม้ ท่าฟัน โล่อัศวิน ไถล แช่แ…
 iceMat:2 iceRim:3 makeIceSword:4 makeIceAxe:23 makeKiteShield:39
 §51 อาวุธน้ำแข็งลอย (ผู้ใช้ 2026-10-22: "ร่ายคาถาให้ดาบฟันเอง ระยะเท่าเดิ…
 FWS:54 FWA:54 _fwM:55 _fwM2:55 _fwX:55 _fwY:55 _fwZ:55 _fwP:55 _fwS:55 _fwQ:55 _eo:56 _ei:56 _ss:56 fwAim:58 fwWeapons:59 FWP:61 FWT:61 fwChop:62 fwSweep:63 FF_RISE:64 fwIdle:65 fwSwing:68 FWL_N:80 fwLink:81 fwMat:84 frostFX:85
 
-## js/35-sync.js (595) — ซิงก์ผู้เล่น/ศัตรู/ลูกเวทจาก snapshot + ฉายตำแหน่งลงจอ (ป้ายชื่อ/ตัวเ…
+## js/35-sync.js (597) — ซิงก์ผู้เล่น/ศัตรู/ลูกเวทจาก snapshot + ฉายตำแหน่งลงจอ (ป้ายชื่อ/ตัวเ…
 §2 ท่าร่ายคาถาแบบนักเวทในหนัง Harry Potter (ผู้ใช้ 2026-10-22: "ยิงปกติท…
 CPOSE_T:7 _ce:7 _cs:7 _cb:7 AMP_B:9 AMP_S:9 CP_BEND:10 CPOSE:12 _cpT:20 _cpR:20 CGUARD:20 CP_STEP:21 CPCOL:22 castStyle:23 castStart:24
 §25 ท่าร่ายสกิล / อัลติ / โล่ (ผู้ใช้ 2026-10-22: "เกือบทุกสกิลควรมีการเห…
-CANIM:30 SKFEET:78 SKANIM:80 skAnim:88 _caT:89 _caR:89 skillPose:90 _g2:116 wandTwoHand:117 characterPoseMix:124 characterStance:125 CBLOCK:132 CBLOCK_PATH:133 blockPose:134 castPose:140 lateSkillPose:146 castPose0:147 clearCharacterCast:176 syncPlayers:181 syncEnemies:284 projGeo:322 tailGeo:323 _t1:324 makeProj:325 _a:346 _b:346 PJFX:348 syncProj:349 _awT:439 animateWorld:440
-§481 ฉายตำแหน่ง 3D ลงจอ (ป้ายชื่อ / ตัวเลขดาเมจ)
-_v:482 toScreen:483 BURNC:491 burnNum:492 NAMETAG:506 nameTag:507 drawLabels:511 TEXTAG:541 textTag:542 drawTexts:546 HITM:558 DIRI:558 drawXh:560 drawCrosshair:570
+CANIM:30 SKFEET:80 SKANIM:82 skAnim:90 _caT:91 _caR:91 skillPose:92 _g2:118 wandTwoHand:119 characterPoseMix:126 characterStance:127 CBLOCK:134 CBLOCK_PATH:135 blockPose:136 castPose:142 lateSkillPose:148 castPose0:149 clearCharacterCast:178 syncPlayers:183 syncEnemies:286 projGeo:324 tailGeo:325 _t1:326 makeProj:327 _a:348 _b:348 PJFX:350 syncProj:351 _awT:441 animateWorld:442
+§483 ฉายตำแหน่ง 3D ลงจอ (ป้ายชื่อ / ตัวเลขดาเมจ)
+_v:484 toScreen:485 BURNC:493 burnNum:494 NAMETAG:508 nameTag:509 drawLabels:513 TEXTAG:543 textTag:544 drawTexts:548 HITM:560 DIRI:560 drawXh:562 drawCrosshair:572
 
 ## js/36-modes-view.js (171) — 
 ROLE:4 KC:4 roleShowT:4 onPriv:5 MO:10 BREATHS:11 clearModeObjs:12 ITEMC:21 healTex:22 makeItem:23 syncModeObjs:39
@@ -809,4 +809,4 @@ surfSync:49 surfQuality:53
 SURF_VS:55 SURF_VS_BODY:56 SURF_FS:67 SURF_FS_BODY:68 surfOk:98 surfApply:99 surfScene:111
 §112 ปรับค่า (tune.html / F8)
 
-(98 files, 26494 lines)
+(98 files, 26529 lines)

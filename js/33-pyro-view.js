@@ -294,6 +294,31 @@ function pyroFX(o,p,pz,now,dt){
   }else{if(o.colo)o.colo.visible=false;o.coOn=0;o.coIn=0;}
 }
 
+// Inferno Nova (ผู้ใช้ 2026-11-14): ระเบิดเป็นโดมพลังงาน (ไม่ใช่ไฟ) ออกจากปลายไม้ ขยายครอบรัศมีอัลติ แล้วจางหาย
+const NOVAD=[],_novaGeo=new THREE.SphereGeometry(1,64,32);
+function novaDome(x,y,h0,h1,R){
+  const m=new THREE.ShaderMaterial({uniforms:{uA:{value:1},uT:{value:0},uC:{value:new THREE.Color('#ff5a10')},uC2:{value:new THREE.Color('#ffb04a')}},transparent:true,depthWrite:false,side:THREE.DoubleSide,
+    vertexShader:'varying vec3 vN;varying vec3 vV;varying vec3 vP;void main(){vec4 w=modelMatrix*vec4(position,1.);vN=normalize(mat3(modelMatrix)*normal);vV=normalize(cameraPosition-w.xyz);vP=position;gl_Position=projectionMatrix*viewMatrix*w;}',
+    fragmentShader:'uniform float uA,uT;uniform vec3 uC,uC2;varying vec3 vN;varying vec3 vV;varying vec3 vP;void main(){float f=pow(1.-abs(dot(vN,vV)),1.7);float bands=.75+.25*sin(vP.y*26.-uT*24.);float a=clamp((f*1.7+.08)*bands,0.,.95)*uA;vec3 c=mix(uC,uC2,clamp(f*f*1.2,0.,1.));gl_FragColor=vec4(c,a);}'});
+  const mesh=new THREE.Mesh(_novaGeo,m);mesh.renderOrder=5;mesh.position.set(tx(x),h0,tz(y));mesh.scale.setScalar(.2);scene.add(mesh);NOVAD.push({m:mesh,R:R*S3,h0,h1,t:0,grow:.6,life:1.6});}
+function updateNovaDomes(dt){for(let i=NOVAD.length-1;i>=0;i--){const d=NOVAD[i];d.t+=dt;const g=Math.min(1,d.t/d.grow),e=1-Math.pow(1-g,3),u=Math.min(1,d.t/d.life);
+  d.m.scale.setScalar(Math.max(.2,d.R*e));d.m.position.y=d.h0+(d.h1-d.h0)*Math.min(1,g*1.6);const U=d.m.material.uniforms;U.uT.value=d.t;U.uA.value=u<.55?1:Math.max(0,1-(u-.55)/.45);
+  if(u>=1){scene.remove(d.m);d.m.material.dispose();NOVAD.splice(i,1);}}}
+// Inferno Nova charge — เรียกจาก js/35-sync.js หลัง lateSkillPose (ต้องอ่านปลายไม้หลังใส่ท่าแล้ว ไม่งั้นได้ตำแหน่งท่ายืน)
+function pyroNovaCharge(o,dt,now){
+  // Inferno Nova: ชูไม้ ปลายไม้ชาร์จไฟสว่างขึ้นเรื่อย ๆ (ลูกไฟปลายไม้แบบ BA โตขึ้น + ไฟถูกดูดเข้า + แสง) แล้ว host ส่ง infnova = ระเบิดจากปลายไม้
+  if(o.novaT>0){o.novaT-=dt;const k=Math.min(1,1-o.novaT/(o.novaT0||.8));o.tip.updateWorldMatrix(true,false);o.tip.getWorldPosition(_pw);const s=simOf(_pw),hh=Math.max(0,s.h-GY(s.x,s.y));
+    // ลูกไฟที่ปลายไม้ = แสงซ้อนชั้น โตขึ้นตามเวลา (fx ลูกไฟ BA ใช้ไม่ได้ — สเกลใหญ่แล้วจุดศูนย์กลางเลื่อนลงมาที่ตัว)
+    {const fl=.85+.15*Math.sin(now/40);PARTS.push({x:s.x,y:s.y,h:s.h,vx:0,vy:0,vh:0,life:.05,max:.05,col:'#ff6a1a',size:(14+40*k)*fl,g:0});
+      PARTS.push({x:s.x,y:s.y,h:s.h,vx:0,vy:0,vh:0,life:.05,max:.05,col:'#ffc860',size:(8+22*k)*fl,g:0});
+      PARTS.push({x:s.x,y:s.y,h:s.h,vx:0,vy:0,vh:0,life:.05,max:.05,col:'#fffbe8',size:(4+10*k)*fl,g:0});
+      if(Math.random()<.4+.6*k)flame(s.x+rnd(-4,4),s.y+rnd(-4,4),s.h+.05,{vh:rnd(2,4)*(0.6+k),life:rnd(.2,.32),size:rnd(4,7)*(0.6+.8*k),g:-2});}
+    for(let i=0;i<2+Math.round(4*k);i++){const an=rnd(0,6.283),el=rnd(-1,1),rr=rnd(28,60)*(1.1-k*.4);PARTS.push({x:s.x+Math.cos(an)*rr,y:s.y+Math.sin(an)*rr,h:s.h+el*rr/20,vx:-Math.cos(an)*rr*4,vy:-Math.sin(an)*rr*4,vh:-el*rr/5,life:.25,max:.25,col:i%3?'#ff7a2a':'#ffe8a0',size:rnd(2,3.4),g:0,drag:0});}
+    if(Math.random()<.5+.5*k)PARTS.push({x:s.x,y:s.y,h:s.h,vx:rnd(-60,60),vy:rnd(-60,60),vh:rnd(-2,4),life:.3,max:.3,col:'#fff2c0',size:1.6,g:0});
+    LREQ.push({abs:1,x:_pw.x,y:_pw.y,z:_pw.z,col:'#ff9a3a',int:.6+1.8*k,dist:5+5*k});
+    if(o.novaT<=0){o.novaT=0;}}
+  if(!(o.novaT>0)&&(o.nvFx||o.nvFx2)){for(const kk of ['nvFx','nvFx2'])if(o[kk]){if(o[kk]!==1)fxStop(o[kk]);o[kk]=null;}}
+}
 // Blazeform (ผู้ใช้ 2026-11-11): เส้นไฟนีออนจากตัวเราไปหาศัตรูทุกคนในระยะออร่า • ขอบตัวเรืองส้มแบบอัลติ Nature
 //   • คนที่อยู่ในระยะ (ถ้าเป็นเรา) ขอบจอแดงส้มเบา ๆ
 const BLZV={el:null,t:0,last:0};

@@ -151,7 +151,7 @@ function frostSlashGet(){let m=FSL.pool.pop();if(!m){m=new THREE.Mesh(frostSlash
 function frostSlashPut(m){scene.remove(m);FSL.pool.push(m);}
 function updateZV(dt){
   {let t=performance.now();const T=k=>{pf('zv.'+k,t);t=performance.now();};   // แยกเวลาแต่ละส่วน (WD.PROF — ปิดอยู่ = ไม่คิดเวลา)
-  updateGlacierVis(dt);updateIceFloors(dt);T('ice');updateSlashes(dt);updateOrbShots(dt);updateDfCracks(dt);T('slash');updateStormV(dt);blazeVignette(dt);T('storm');updateFRV(dt);updateFireV(dt);T('fire');updateFrostV(dt);T('frost');updateVfxKit(dt);T('kit');wbBegin();updateFx(dt);wbEnd();T('fxfile');}
+  updateGlacierVis(dt);updateIceFloors(dt);T('ice');updateSlashes(dt);updateOrbShots(dt);updateDfCracks(dt);T('slash');updateStormV(dt);blazeVignette(dt);updateNovaDomes(dt);T('storm');updateFRV(dt);updateFireV(dt);T('fire');updateFrostV(dt);T('frost');updateVfxKit(dt);T('kit');wbBegin();updateFx(dt);wbEnd();T('fxfile');}
   for(let i=WVV.length-1;i>=0;i--){
     const w=WVV[i],st=Math.min(w.len-w.d,GREND.v.waveSpd*dt),c=Math.cos(w.a),sn=Math.sin(w.a);w.d+=st;
     if(!w.gnd){const cp=Math.cos(w.pt);w.x+=c*cp*st;w.y+=sn*cp*st;w.h+=Math.sin(w.pt)*st/20;

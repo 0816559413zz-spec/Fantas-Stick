@@ -248,6 +248,7 @@ function updatePlayer(p,dt,acting){
   p.stun=Math.max(0,p.stun-dt);p.inv=Math.max(0,p.inv-dt);tickStatus(p,dt);
   if(p.breath>0)p.breath-=dt;
   if(p.snapT>0&&p.alive&&!p.downed){p.snapT-=dt;if(p.snapT<=0)pyroSnap(p);}
+  if(p.novaT>0){if(!p.alive||p.downed)p.novaT=0;else{p.novaT-=dt;if(p.novaT<=0)pyroNova(p);}}
   if(p.colos>0){p.colos-=dt;if(p.colos<=0||!p.alive||p.downed){p.colos=0;emit({k:'efx',z:'colend',x:p.x,y:p.y,h:p.z+2,id:p.id});}}
   if(p.fmCd>0)p.fmCd-=dt;
   if(p.slam3){p.slam3.t-=dt;if(p.slam3.t<=0)frostSlam3(p);}
