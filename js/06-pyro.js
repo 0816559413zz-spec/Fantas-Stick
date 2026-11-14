@@ -1,6 +1,6 @@
 // ---------- สายไฟ: ยิงปกติ 2 โหมด / โล่ระเบิด / พุ่งชาร์จ ----------
 // ตัวเลขทั้งหมดของสายไฟอยู่ใน PYV (ยิงปกติ/โล่/พุ่ง) และ v:{...} ของแต่ละสกิล — ปรับได้ในเครื่องมือ tune.html / F8 (js/73-tune.js)
-const PYV=PATHS[0].v={flN:3,flCd:6,flR:180,flDmg:10,flSlow:0.2,flMax:2,flSlowT:2,flLow:0.35,flGap:0.5,flGrow:0.5,sparkDmg:5,sparkCd:0.3,sparkN:3,chargeT:1.9,ballDmg:12,ballCd:0.5,orbMax:0,orbParry:2,orbBlockN:3,orbBlock:2,orbDmg:4,orbSpd:1300,
+const PYV=PATHS[0].v={flN:3,flCd:6,flR:180,flDmg:10,flSlow:0.2,flMax:2,flSlowT:2,flLow:0.35,flGap:0.5,flGrow:0.5,sparkDmg:5,sparkCd:0.3,sparkN:3,chargeT:1.6,ballDmg:20,ballCd:0.5,orbMax:0,orbParry:2,orbBlockN:3,orbBlock:2,orbDmg:4,orbSpd:1300,
   dashT:4,dashD0:150,dashD1:950,dashSp:2000,dashCd:3,pathT:3,pathW:15,pathDps:8};
 PATHS[0].vn={sparkDmg:'ประกายไฟ (แตะ) • ดาเมจ',sparkN:'ประกายไฟ • โดนกี่นัดได้ Burning',sparkCd:'ประกายไฟ • เว้นยิง (วิ)',chargeT:'ลูกไฟชาร์จ • เวลาชาร์จ (วิ)',ballDmg:'ลูกไฟชาร์จ • ดาเมจ',ballCd:'ลูกไฟชาร์จ • เว้นยิง (วิ)',
   orbMax:'โล่ • ลูกไฟวิญญาณสูงสุด',orbParry:'โล่ • ได้ลูกไฟตอน Parry',orbBlockN:'โล่ • บล็อกกี่ครั้งได้ลูกไฟ',orbBlock:'โล่ • ได้ลูกไฟตอนบล็อกครบ',orbDmg:'ลูกไฟวิญญาณ • ดาเมจต่อลูก',orbSpd:'ลูกไฟวิญญาณ • ความเร็ว',
@@ -16,7 +16,7 @@ function pyroBigBoom(pr){
   for(const t of foesIn(pr.team,pr.x,pr.y,V.r,pr.h+3.5)){aoeHit(o,t,V.dmg,t=>addBurn(t,1,pr.owner));const d=Math.hypot(t.x-pr.x,t.y-pr.y);if(d<bd){bd=d;best=t;}}
   if(best)launchOrbs(o,best);
 }
-function pyroBall(p){shoot(p,'pfire',{sp:'pyroball',dmg:PYV.ballDmg,hand:1});}   // เนิร์ฟ 2026-10-27: 20→15→12
+function pyroBall(p){shoot(p,'pfire',{sp:'pyroball',dmg:PYV.ballDmg,hand:1});}   // 2026-11-14: 12→20, charge 1.9→1.6 s
 function pyroBasic(p,inp,dt,setCd){
   const prev=p.bfPrev;p.bfPrev=inp.fire;
   pyroFlickTick(p,dt);

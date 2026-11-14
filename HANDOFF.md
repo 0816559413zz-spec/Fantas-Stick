@@ -1,6 +1,6 @@
 # HANDOFF — Fantas Stick (was "Wizard Duel") (repo: Fantas-Stick)
 
-**งานถัดไป:** บัฟ Fire กับ Nature ตามที่คุยไว้ เริ่มจากดูว่า Fire มีจังหวะสะสม Burning แล้วปิดด้วย Ignition Snap แค่ไหน และ Peashooter ของ Nature กดดันเป้าที่ออกจากระยะแส้ได้แค่ไหน ก่อนเลือกตัวเลขกับผู้ใช้ • เทสต์ Lightning vs Wind ซ้ำหลัง Featherwing เหลือบิน 5 วิและยิงลูกลมระหว่างร่อน เพื่อเช็กโอกาสเก็บ 3 stack และยิง Railgun ในรุ่นล่าสุด
+**งานถัดไป:** Fire breakdown ทีละสกิลกับผู้ใช้ (BA เสร็จ: ลูกไฟชาร์จ 20 ดาเมจ 1.6 วิ) ต่อด้วยโล่วงไฟเกลียว, Kindle, Dragonfall, Ring of Embers, Blaze Form, Ignition Snap, Colossus • Nature เสร็จ 2 รอบแล้ว
 
 **Featherwing ขึ้นบิน 2026-11-13:** กดทิศเดินพร้อมกดสกิลแล้วพุ่ง 60 หน่วยใน 0.32 วิ พร้อมลอยขึ้น ใช้ทิศตอนกดสกิลและชนฉากตามระบบ Dash • ยืนนิ่งแล้วขึ้นบินตรงจุดเดิม • รีเซ็ตแรงเฉื่อยผ้าคลุมเมื่อวาร์ป • รีวิว #34
 
