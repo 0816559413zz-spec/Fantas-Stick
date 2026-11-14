@@ -254,6 +254,7 @@ function updatePlayer(p,dt,acting){
   if(p.hover>0){p.hover-=dt;if(p.hover<=0||!(p.kindle>0))p.hover=0;}
   if(p.slideT>0)p.slideT-=dt;
   if(p.cryo>0){p.cryo-=dt;p.inv=Math.max(p.inv,0.05);p.cryoTk-=dt;if(p.cryoTk<=0){p.cryoTk=0.5;healT(p,CRYO.v.heal);}if(p.cryo<=0){p.inv=0;emit({k:'efx',z:'cryoend',x:p.x,y:p.y,h:p.z+1,id:p.id});}}
+  if(p.blaze>0&&p.alive&&!p.downed)pyroHeatGain(p,PHEAT.per*PHEAT.max*BLAZEF.v.heatSec*dt);   // Blazeform: Heat ขึ้นเอง 3%/วิ
   if(p.blaze>0&&p.alive&&!p.downed){p.blzTk=(p.blzTk||0)-dt;if(p.blzTk<=0){p.blzTk=0.5;p.blzN=(p.blzN|0)+1;const BV=BLAZEF.v;for(const t of foesIn(p.team,p.x,p.y,BV.r,p.z+3)){damage(t,BV.aura,p.id,'burn');if(!p.blzHit)p.blzHit=new Set();if(!p.blzHit.has(t)){p.blzHit.add(t);addBurn(t,BV.burn,p.id);}}}}
   if(p.auraT>0&&p.alive&&!p.downed){p.auraT-=dt;p.auraTk-=dt;const tk=p.auraTk<=0;if(tk)p.auraTk=0.5;for(const t of foesIn(p.team,p.x,p.y,FAURA.v.r,p.z+3)){if(tk){damage(t,FAURA.v.dmg,p.id,'zone');emit({k:'efx',z:'auhit',x:Math.round(t.x),y:Math.round(t.y),h:cH(t)});}}}
   if(p.mirror>0){p.mirror-=dt;if(p.mirror<=0){p.xhp=0;emit({k:'efx',z:'mirrorend',x:p.x,y:p.y,h:p.z+1,id:p.id});}}

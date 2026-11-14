@@ -365,5 +365,12 @@
     "p": {
       "r": "ev.r/20"
     }
+  },
+  "efx:infnova": {
+    "fx": "fire/df_impact_a",
+    "mode": "add",
+    "p": {
+      "r": "ev.r/20"
+    }
   }
 }

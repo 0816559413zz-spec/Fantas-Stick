@@ -139,23 +139,32 @@ function dragonfallBoom(p,x,y,gh){
   const V=DRAGONF.v;emit({k:'efx',z:'dfboom',x:Math.round(x),y:Math.round(y),h:gh+0.08,r:V.r,id:p.id});
   for(const t of foesIn(p.team,x,y,V.r,gh+4))aoeHit(p,t,V.dmg,t=>{addBurn(t,V.burn,p.id);addSlow(t,V.slow,V.slowT);});
   damageEnv(x,y,V.r,V.env,p.id,'fireblast',gh);
+  pyroHeatGain(p,PHEAT.per);   // ลงพื้น = Heat +1 ขั้น (ผู้ใช้ 2026-11-14)
 }
-const RINGE=defSpell(0,{id:'ringofembers',v:{range:400,r:170,time:3,delay:0.3,dmg:10,hitCd:0.5,edgeSlow:0.6,edgeT:0.4,push:280,wallH:3.6},vn:{range:'ระยะวาง',r:'รัศมีวง',time:'อยู่นาน (วิ)',delay:'อุกกาบาตตก (วิ)',dmg:'ดาเมจตอนพยายามออก',hitCd:'โดนซ้ำได้ทุก (วิ)',edgeSlow:'แตะขอบ • ความเร็ว (เท่า)',edgeT:'แตะขอบ • ช้านาน (วิ)',push:'แรงผลักกลับ',wallH:'ความสูงกำแพง (ม.)'},role:'control',n:'Ring of Embers',ic:'⭕',cd:14,d:'อุกกาบาตไฟตกลงที่จุดเล็ง (ระยะ ~400) ไม่มีดาเมจ แล้วกลายเป็นวงเพลิง (รัศมี ~170) นาน 3 วิ — คนข้างในเดินออกไม่ได้',fx:'พยายามเดินออก = 10 ดาเมจ + ผลักกลับเข้าวง • ใครแตะขอบวงไฟ = ช้าลง 40% • คนข้างนอกเดินเข้าได้ • กำแพงมีความสูง: บินสูงกว่ากำแพงออกได้',
+const RINGE=defSpell(0,{id:'ringofembers',v:{range:400,r:170,time:4,inSlow:0.8,delay:0.3,dmg:10,hitCd:0.5,edgeSlow:0.6,edgeT:0.4,push:280,wallH:3.6},vn:{range:'ระยะวาง',r:'รัศมีวง',time:'อยู่นาน (วิ)',inSlow:'คนในวง • ความเร็ว (เท่า)',delay:'อุกกาบาตตก (วิ)',dmg:'ดาเมจตอนพยายามออก',hitCd:'โดนซ้ำได้ทุก (วิ)',edgeSlow:'แตะขอบ • ความเร็ว (เท่า)',edgeT:'แตะขอบ • ช้านาน (วิ)',push:'แรงผลักกลับ',wallH:'ความสูงกำแพง (ม.)'},role:'control',n:'Ring of Embers',ic:'⭕',cd:14,d:'อุกกาบาตไฟตกลงที่จุดเล็ง (ระยะ ~400) ไม่มีดาเมจ แล้วกลายเป็นวงเพลิง (รัศมี ~170) นาน 4 วิ — คนข้างในเดินออกไม่ได้และช้าลง 20%',fx:'พยายามเดินออก = 10 ดาเมจ + ผลักกลับเข้าวง • ใครแตะขอบวงไฟ = ช้าลง 40% • คนข้างนอกเดินเข้าได้ • กำแพงมีความสูง: บินสูงกว่ากำแพงออกได้',
   cast(p,S){
     const V=S.v,q=aimPoint(p,V.range);
     // อุกกาบาตไฟตกลงจุดที่วาง ~0.3 วิ → ตกถึงพื้น = 10 ดาเมจครั้งเดียว (ผู้เล่นสั่ง 2026-10-19) แล้ววงไฟค่อยเริ่ม (กับดักเริ่มช้าลง 0.3 วิ)
     (G.erings||(G.erings=[])).push({x:q.x,y:q.y,z:groundH(q.x,q.y),r:V.r,t:V.time,del:V.delay,owner:p.id,team:p.team,in:new Set(),cd:new Map(),ed:new Map()});
     emit({k:'efx',z:'ermet',x:q.x,y:q.y,h:0.2,r:V.r,t:V.delay,id:p.id});
   }});
-const BLAZEF=defSpell(0,{id:'blazeform',v:{time:4,dmgUp:1.15,spdUp:1.25,taken:1.25,r:130,aura:1.05,burn:1},vn:{time:'อยู่นาน (วิ)',dmgUp:'ดาเมจเรา (เท่า)',spdUp:'เดินเร็ว (เท่า)',taken:'รับดาเมจ (เท่า)',r:'รัศมีออร่า',aura:'ออร่า • ดาเมจทุก 0.5 วิ',burn:'ออร่า • Burning ครั้งแรก'},role:'utility',n:'Blazeform',ic:'🔥',cd:20,d:'กลายร่างเปลวไฟ 4 วิ: ดาเมจทุกสกิล (รวมเผา Burning) +15% • เดินเร็ว +25% • ออร่าไฟรอบตัว (รัศมี ~130) เผา ~2.4/วิ • ศัตรูที่โดนออร่าครั้งแรก +1 Burning (คนละ 1 ชั้นต่อการใช้ 1 ครั้ง)',fx:'ผลเสีย: เรารับดาเมจ +25% ระหว่างนั้น',
+const BLAZEF=defSpell(0,{id:'blazeform',v:{time:4,heatSec:0.03,heatAct:0.05,dmgUp:1.15,spdUp:1.25,taken:1.25,r:130,aura:1.05,burn:1},vn:{time:'อยู่นาน (วิ)',heatSec:'Heat ขึ้นเองต่อวิ (สัดส่วนแถบเต็ม)',heatAct:'Heat ต่อการตี/โดนตีตอนกางโล่ (สัดส่วนแถบเต็ม)',dmgUp:'ดาเมจเรา (เท่า)',spdUp:'เดินเร็ว (เท่า)',taken:'รับดาเมจ (เท่า)',r:'รัศมีออร่า',aura:'ออร่า • ดาเมจทุก 0.5 วิ',burn:'ออร่า • Burning ครั้งแรก'},role:'utility',n:'Blazeform',ic:'🔥',cd:20,d:'กลายร่างเปลวไฟ 4 วิ: ดาเมจทุกสกิล (รวมเผา Burning) +15% • เดินเร็ว +25% • ออร่าไฟรอบตัว (รัศมี ~130) เผา ~2.4/วิ • ศัตรูที่โดนออร่าครั้งแรก +1 Burning (คนละ 1 ชั้นต่อการใช้ 1 ครั้ง) • ระหว่างร่าง Heat ขึ้นเอง 3%/วิ และตี/โดนตีตอนกางโล่ +5% ต่อครั้ง (บัฟซ้อนกับ Heat)',fx:'ผลเสีย: เรารับดาเมจ +25% ระหว่างนั้น',
   cast(p,S){p.blaze=S.v.time;p.blzTk=0;p.blzN=0;p.blzHit=new Set();emit({k:'efx',z:'blaze',x:p.x,y:p.y,h:p.z+1,id:p.id});}});
+// Blazeform: ตีโดนศัตรู / โดนตีตอนกางโล่ ระหว่างร่าง = Heat +5% ของแถบต่อครั้ง
+function pyroBlazeAct(p){if(p&&p.blaze>0)pyroHeatGain(p,PHEAT.per*PHEAT.max*BLAZEF.v.heatAct);}
 const SNAP=defSpell(0,{id:'ignitionsnap',v:{range:500,windup:0.6,dmg:15,heal:8},vn:{range:'ระยะ',windup:'ท่าเตรียม (วิ)',dmg:'ดาเมจต่อชั้น Burning',heal:'ฮีลต่อชั้น Burning'},role:'finisher',n:'Ignition Snap',ic:'🫰',cd:15,d:'ท่าเตรียม 0.6 วิ แล้วดีดนิ้ว: ศัตรูทุกคนที่มี Burning ในระยะ 500 ระเบิดพร้อมกัน ชั้นละ 15 ดาเมจ ฮีลเรา 8 (Heat เต็ม: 30 / 20) แล้ว Heat หมด (ไม่ต้องเล็ง)',fx:'15 ดาเมจต่อ 1 ชั้น Burning (5 ชั้น = 75) และฮีลเรา 8 ต่อชั้น แล้วใช้ Burning หมด • ไม่มีใครติดไฟในระยะ = ไม่เสียคูลดาวน์',
   cast(p,S){
     if(!foesOf(p.team).some(t=>t.brn>0&&Math.hypot(t.x-p.x,t.y-p.y)<S.v.range))return false;
     p.snapT=S.v.windup;emit({k:'efx',z:'snapwind',x:p.x,y:p.y,h:p.z+1.4,id:p.id});
   }});
-const COLOS=defSpell(0,{id:'colossus',v:{time:6,shots:3,gap:1,dmg:80,r:200,burn:3,range:1000,env:100},vn:{time:'ร่างยักษ์อยู่นาน (วิ)',shots:'ยิงได้กี่นัด',gap:'เว้นระหว่างนัด (วิ)',dmg:'ดาเมจต่อนัด',r:'รัศมีระเบิด',burn:'Burning ที่ใส่',range:'ระยะยิง',env:'ดาเมจใส่บ้าน/ของ'},role:'ult',n:'Inferno Colossus',ic:'👹',cd:0,ult:true,d:'เวทโบราณสายไฟ: กระโดดขึ้นฟ้าทันที ร่างยักษ์ไฟปรากฏกลางอากาศ 6 วิ (Space = ขึ้น / Ctrl หรือ C = ลง) ถือหน้าไม้ไฟ ยิงได้ 3 นัด (เว้น 1 วิ) นัดละ 80 ดาเมจ ระเบิดวง ~200',fx:'คนโดน +3 Burning และ Extreme Burning (8/วิ 5 วิ) • ลอยเคลื่อนที่ได้ช้า โดนยิงได้ปกติ • ยิงครบ 3 นัด = ร่างหาย',
-  cast(p,S){p.colos=S.v.time;p.colN=S.v.shots;p.colCd=0.6;p.colH=9;p.vz=0;p.fly=false;p.shieldOn=false;p.dchgOn=false;p.breath=0;emit({k:'efx',z:'colossus',x:p.x,y:p.y,h:p.z,id:p.id});}});
+// อัลติใหม่ (ผู้ใช้ 2026-11-14): ระเบิดรอบตัว รัศมี 350 ไม่มีดาเมจ • ศัตรูที่โดนติด On Fire 9 วิ (ดับไม่ได้) = Burning +1 ทุก 1.5 วิ
+//   • Heat เต็มทันที + รีคูลดาวน์ Ignition Snap → รอ Burning ขึ้นแล้ว Snap ทีเดียวทั้งทีม  (ร่างยักษ์เดิม colossusTick ไม่ได้ใช้แล้ว)
+const COLOS=defSpell(0,{id:'colossus',v:{r:350,time:9,every:1.5},vn:{r:'รัศมีระเบิด',time:'On Fire นาน (วิ)',every:'Burning +1 ทุก (วิ)'},role:'ult',n:'Inferno Nova',ic:'👹',cd:0,ult:true,d:'เวทโบราณสายไฟ: ระเบิดไฟรอบตัว (รัศมี ~350) ไม่มีดาเมจ — ศัตรูที่โดนติด On Fire 9 วิ (ดับไม่ได้) Burning +1 ทุก 1.5 วิ • Heat เต็มทันที และ Ignition Snap พร้อมใช้ทันที',fx:'ศัตรูโดน +1 Burning ทันที แล้ว +1 ทุก 1.5 วิ (ถึง 6 ชั้น) • Snap ตอน Heat เต็ม 6 ชั้น = 180 ดาเมจ',
+  cast(p,S){const V=S.v;emit({k:'efx',z:'infnova',x:p.x,y:p.y,h:p.z,r:V.r,id:p.id});
+    for(const t of foesIn(p.team,p.x,p.y,V.r,p.z+6)){if(!t.isE&&!t.isM&&t.inv>0)continue;addOnFire(t,V.time,V.every,p.id);}
+    p.fheat=PHEAT.per*PHEAT.max;p.fheatT=G.time;
+    for(let i=0;i<4;i++)if(p.kitIds[i]==='ignitionsnap'){const k=SLOTK[i];p.cd[k]=0;}
+  }});
 function pyroSnap(p){const full=pyroHeatLv(p)>=PHEAT.max;p.fheat=0;
   emit({k:'efx',z:'snap',x:p.x,y:p.y,h:p.z+1.6,id:p.id});
   for(const t of foesOf(p.team)){
@@ -198,7 +207,7 @@ function updateERings(dt){
       if((t.isE?(t.h||0):(t.z||0))-R.z>=V.wallH){R.in.delete(t);continue;}
       // แตะขอบวงไฟ: ช้าลง (ไม่ใส่ Burning แล้ว — ผู้เล่นปรับ 2026-10-18)
       if(Math.abs(d-R.r)<26+tr*0.6&&!(!t.isE&&!t.isM&&t.inv>0)){addSlow(t,V.edgeSlow,V.edgeT);}
-      if(d<R.r-tr*0.5){R.in.add(t);continue;}
+      if(d<R.r-tr*0.5){R.in.add(t);addSlow(t,V.inSlow,0.15);continue;}
       if(!R.in.has(t))continue;
       // อยู่ข้างในแล้วพยายามออก: ผลักกลับเข้าวง
       const m=R.r-tr*0.5-4;t.x=R.x+dx/d*m;t.y=R.y+dy/d*m;t.vx=-dx/d*V.push;t.vy=-dy/d*V.push;if(t.dash>0)t.dash=0;

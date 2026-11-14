@@ -1,6 +1,6 @@
 # HANDOFF — Fantas Stick (was "Wizard Duel") (repo: Fantas-Stick)
 
-**งานถัดไป:** Fire breakdown ทีละสกิล — เสร็จ: BA (ลูกไฟชาร์จ 20/1.6 วิ), โล่ Heat (`PHEAT` ใน `js/06-pyro.js`, ค่า `p.fheat` อย่าใช้ `p.heat` ชนกับสถานะเดิม), Kindle 3 ลูก (`pyroKindleVolley`/`pyroKindleCurve`), HUD แถบ Heat (`drawFireHeat` ท้าย `js/38-hud.js`, snapshot `fh`, PREFIX v75, ทดสอบ `shots/_fhb.js`/`_fhg.js`/`_fhi.js`) • ถัดไป: Dragonfall, Ring of Embers, Blaze Form, Ignition Snap, Colossus
+**งานถัดไป:** Fire breakdown ครบรอบแรกแล้ว — BA ชาร์จ 20/1.6 วิ • โล่ Heat (`PHEAT`, `p.fheat` อย่าใช้ `p.heat`) • Kindle 3 ลูก • HUD แถบ Heat (`drawFireHeat` ท้าย `js/38-hud.js`) • Dragonfall ลงพื้น Heat +1 • Ring 4 วิ คนในวงช้า 20% • Blazeform Heat ขึ้นเอง 3%/วิ + 5%/การตี (`pyroBlazeAct`) • อัลติใหม่ Inferno Nova (id ยังเป็น `colossus`): ระเบิดรอบตัว 350 ไม่มีดาเมจ ศัตรูติด On Fire 9 วิ (`addOnFire`, `t.onF`, บิต `FX_ONFIRE`) Burning +1 ทุก 1.5 วิ, Heat เต็ม + รีคูล Snap • VFX ระเบิดยืม `fire/df_impact_a` (bind `efx:infnova`) ยังไม่มีท่าร่าย • ร่างยักษ์เดิม `colossusTick` ไม่ได้ใช้แล้ว • PREFIX v76 • ทดสอบ `shots/_nova.js`
 
 **Featherwing ขึ้นบิน 2026-11-13:** กดทิศเดินพร้อมกดสกิลแล้วพุ่ง 60 หน่วยใน 0.32 วิ พร้อมลอยขึ้น ใช้ทิศตอนกดสกิลและชนฉากตามระบบ Dash • ยืนนิ่งแล้วขึ้นบินตรงจุดเดิม • รีเซ็ตแรงเฉื่อยผ้าคลุมเมื่อวาร์ป • รีวิว #34
 

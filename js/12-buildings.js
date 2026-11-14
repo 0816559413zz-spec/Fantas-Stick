@@ -349,7 +349,7 @@ function damage(t,amt,srcId,kind,noFlash=false){
   const src=srcId!=null?G.players[srcId]:null;
   if(src&&kind!=='burn')amt*=src.buffs.dmg;
   if(src&&src.fheat>0&&kind!=='burn')amt*=pyroHeatDmg(src);
-  if(src&&src.blaze>0)amt*=BLAZEF.v.dmgUp;   // Blazeform (เนิร์ฟ 2026-10-27: 1.3→1.15)
+  if(src&&src.blaze>0){amt*=BLAZEF.v.dmgUp;if(kind!=='burn'&&src!==t)pyroBlazeAct(src);}   // Blazeform (เนิร์ฟ 2026-10-27: 1.3→1.15)
   if(src&&src.mirror>0&&!src.noMul)amt*=MIRROR.v.dmgMul;
   if(t.natKind){natureDamage(t,amt,srcId);return;}
   if(G.wwl&&G.wwl.length)windDmg(t,amt,srcId);
@@ -378,7 +378,7 @@ function damage(t,amt,srcId,kind,noFlash=false){
   if(G.ball&&G.ball.holder===t.id&&kind!=='burn'&&kind!=='zone')quidDrop(t);
   if(t.stS&&kind!=='burn'){t.stS.abs+=amt;emit({k:'efx',z:'sthit',x:Math.round(t.x),y:Math.round(t.y),h:t.z+1.2,sx:src?Math.round(src.x):undefined,sy:src?Math.round(src.y):undefined,n:Math.round(amt),id:t.id});if(t.stS.abs>90)stormShieldBlast(t);return;}
   if(t.shieldOn&&(kind==='melee'||kind==='aoe')&&shieldFaces(t,src?src.x:null,src?src.y:null,src&&src.z!=null?src.z+1.2:null)){
-    pyroHeatGain(t,amt);if(t.pathIdx===EARTH)earthShHit(t,amt);else{t.shieldE-=amt*((PBASIC[t.pathIdx|0]||{}).shMul||1.5);t.shBlk=(t.shBlk|0)+1;}emit({k:'block',x:t.x,y:t.y,h:t.z+1.2});
+    pyroHeatGain(t,amt);pyroBlazeAct(t);if(t.pathIdx===EARTH)earthShHit(t,amt);else{t.shieldE-=amt*((PBASIC[t.pathIdx|0]||{}).shMul||1.5);t.shBlk=(t.shBlk|0)+1;}emit({k:'block',x:t.x,y:t.y,h:t.z+1.2});
     {const B=PBASIC[t.pathIdx|0];if(B&&B.onBlock)B.onBlock(t);}
     if(t.shieldE<=0)breakShield(t);
     return;
@@ -503,12 +503,12 @@ function projStep(pr,dt,ps){
       if(p.shieldOn&&shieldFaces(p,pr.x-pr.vx*0.05,pr.y-pr.vy*0.05,pr.h)){
         if(G.time-p.shieldT<0.28){
           // Perfect Parry: ปัดกระสุนทิ้ง (ไม่สะท้อนกลับแล้ว) ไม่เสียพลังโล่ + ผลพิเศษของแต่ละสาย
-          pr.dead=true;pyroHeatGain(p,pr.dmg);
+          pr.dead=true;pyroHeatGain(p,pr.dmg);pyroBlazeAct(p);
           if(!ultActive(p))p.ult=Math.min(100,p.ult+12*ULT_RATE);
           emit({k:'parry',x:p.x,y:p.y,h:p.z+1.3,id:p.id});
           {const B=PBASIC[p.pathIdx|0];if(B&&B.onParry&&!p.shPar){p.shPar=1;B.onParry(p);}}
         }else{
-          pyroHeatGain(p,pr.dmg);if(p.pathIdx===EARTH)earthShHit(p,pr.dmg);else{p.shieldE-=pr.dmg*((PBASIC[p.pathIdx|0]||{}).shMul||1.6);p.shBlk=(p.shBlk|0)+1;}pr.dead=true;emit({k:'block',x:pr.x,y:pr.y,h:pr.h});
+          pyroHeatGain(p,pr.dmg);pyroBlazeAct(p);if(p.pathIdx===EARTH)earthShHit(p,pr.dmg);else{p.shieldE-=pr.dmg*((PBASIC[p.pathIdx|0]||{}).shMul||1.6);p.shBlk=(p.shBlk|0)+1;}pr.dead=true;emit({k:'block',x:pr.x,y:pr.y,h:pr.h});
           {const B=PBASIC[p.pathIdx|0];if(B&&B.onBlock)B.onBlock(p);}
           if(p.shieldE<=0)breakShield(p);
         }
