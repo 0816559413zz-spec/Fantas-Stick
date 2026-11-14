@@ -30,7 +30,7 @@ function stormBasic(p,inp,dt,setCd){
   if(p.stStaff>0){p.beam=0;if(p.stWind>0){p.stWind-=dt;if(p.stWind<=0)stormWaveShoot(p);}else if(inp.fire&&p.cd.basic<=0){p.stWind=.13;p.stSide=-(p.stSide||1);emit({k:'efx',z:'sswing',x:Math.round(p.x),y:Math.round(p.y),h:p.z+1.2,n:p.stSide,id:p.id});setCd('basic',SIPH.v.cd);}return;}
   if(p.god>0){
     // อัลติ (ผู้ใช้ 2026-11-11): 1 คลิก = พุ่ง 40 + ข่วน 2 ที 15/15 ห่าง 0.2 วิ แล้วคูล 0.7 • ไม่มี Shock
-    // Special: Dash ชนแล้วคลิกภายใน 1.5 วิ (ใช้ได้แม้ติดคูล) = รอย X ซ้ายแล้วขวาห่าง 0.2 วิ, 30 + Shock ตอนทีที่สอง
+    // Special: Dash ชนแล้วคลิกภายใน 1.5 วิ (ใช้ได้แม้ติดคูล) = กวาดครั้งเดียว 30 + Shock
     p.beam=0;if(p.clT>0)p.clT-=dt;if(p.cEmpT>0){p.cEmpT-=dt;if(p.cEmpT<=0)p.cEmp=0;}
     const GV=GODL.v;
     if(p.clQ){for(const q of p.clQ){q.t-=dt;if(q.t<=0&&!q.done){q.done=1;stormClawStrike(p,q);}}if(p.clQ.every(q=>q.done))p.clQ=null;}
@@ -38,9 +38,9 @@ function stormBasic(p,inp,dt,setCd){
       const big=p.cEmp&&p.cEmpT>0;
       if(big||!(p.clT>0)){
         const L=GV.lunge;p.dashX=Math.cos(p.ang);p.dashY=Math.sin(p.ang);p.dash=0.07;p.dashSp=L/0.07;
-        if(big){p.cEmp=0;p.cEmpT=0;p.clQ=[{t:0.07,n:4,r:GV.bigR,arc:GV.bigArc,dmg:0},{t:0.07+GV.gap,n:5,r:GV.bigR,arc:GV.bigArc,dmg:GV.bigDmg,sh:1}];}
+        if(big){p.cEmp=0;p.cEmpT=0;p.clQ=[{t:0.07,n:3,r:GV.bigR,arc:GV.bigArc,dmg:GV.bigDmg,sh:1}];}
         else p.clQ=[{t:0.07,n:0,r:GV.clawR,arc:GV.clawArc,dmg:GV.c1},{t:0.07+GV.gap,n:1,r:GV.clawR,arc:GV.clawArc,dmg:GV.c2}];
-        p.clT=0.07+GV.gap+GV.clawCd;
+        p.clT=0.07+(big?0:GV.gap)+GV.clawCd;
         emit({k:'efx',z:'sclawgo',x:Math.round(p.x),y:Math.round(p.y),h:p.z+1.1,a:Math.round(p.ang*100)/100,big:big?1:0,id:p.id});
       }}
     return;}
@@ -222,7 +222,7 @@ function stormBowFire(p){const V=RAIL.v;p.rail=null;const h0=p.z+1.5,inp=p.inp||
   damageEnv(ex,ey,40,V.env,p.id,'lightning',eh);
   emit({k:'efx',z:'sbow',x:Math.round(p.x),y:Math.round(p.y),h:h0,x2:Math.round(ex),y2:Math.round(ey),h2:Math.round(eh*10)/10,hit:!!best,id:p.id,g:p.god>0?1:0});}
 // ----- อัลติ: ร่างเทพสายฟ้า 10 วิ -----
-const GODL=defSpell(2,{id:'godlightning',v:{time:10,xhp:75,dashRc:1,dashDmg:15,c1:15,c2:15,gap:0.2,clawCd:0.7,lunge:40,clawR:160,clawArc:0.96,bigR:200,bigArc:1.13,bigDmg:30,bigWin:1.5,slamR:150,slamDmg:80},vn:{time:'อยู่นาน (วิ)',xhp:'HP เสริม',dashRc:'Dash ฟื้นชาร์จละ (วิ)',dashDmg:'Dash • ดาเมจทะลุ',c1:'กรงเล็บ • จังหวะ 1',c2:'กรงเล็บ • จังหวะ 2',gap:'กรงเล็บ • ห่างระหว่าง 2 ที (วิ)',clawCd:'กรงเล็บ • คูล (วิ)',lunge:'กรงเล็บ • พุ่ง',clawR:'กรงเล็บ • ระยะ',clawArc:'กรงเล็บ • ครึ่งมุม (rad)',bigR:'รอย X • ระยะ',bigArc:'รอย X • ครึ่งมุม (rad)',bigDmg:'รอย X • ดาเมจ',bigWin:'รอย X • เวลากด (วิ)',slamR:'ลูกสายฟ้าโดม (อัลติ) • รัศมีทุบ',slamDmg:'ลูกสายฟ้าโดม (อัลติ) • ดาเมจทุบ'},role:'ult',n:'ร่างเทพสายฟ้า',ic:'⚡',cd:0,ult:true,d:'แปลงร่างเทพสายฟ้า 10 วิ: HP เสริม 75 • Dash ฟื้นชาร์จละ 1 วิ ทะลุ 15 ดาเมจ • ยิงปกติเป็นกรงเล็บสายฟ้า 3 จังหวะ ระยะ 200 (15/15/25 จังหวะ 3 = Shock) • Dash โดนศัตรู = ฟันครั้งถัดไปเป็นกรงเล็บใหญ่ ระยะ 280 กว้างขึ้น 25 ดาเมจ + Shock • ใช้โล่ไม่ได้',fx:'สกิลเก่งขึ้น: ดูดความเร็วไกลขึ้น+Shock • ออร์บพุ่งพร้อมกัน • Railgun เตือน 0.5 วิ ไกล 1400 • ฟ้าผ่าสามครั้งมีวงซ้าย/ขวา • ลูกสายฟ้าโดมเป็นทุบลงแบบ Dragonfall 80 ดาเมจ • ลูกสายฟ้าโดมใช้ 3 stacks ในร่างเทพ',
+const GODL=defSpell(2,{id:'godlightning',v:{time:10,xhp:75,dashRc:1,dashDmg:15,c1:15,c2:15,gap:0.2,clawCd:0.7,lunge:40,clawR:160,clawArc:0.96,bigR:200,bigArc:1.13,bigDmg:30,bigWin:1.5,slamR:150,slamDmg:80},vn:{time:'อยู่นาน (วิ)',xhp:'HP เสริม',dashRc:'Dash ฟื้นชาร์จละ (วิ)',dashDmg:'Dash • ดาเมจทะลุ',c1:'กรงเล็บ • จังหวะ 1',c2:'กรงเล็บ • จังหวะ 2',gap:'กรงเล็บ • ห่างระหว่าง 2 ที (วิ)',clawCd:'กรงเล็บ • คูล (วิ)',lunge:'กรงเล็บ • พุ่ง',clawR:'กรงเล็บ • ระยะ',clawArc:'กรงเล็บ • ครึ่งมุม (rad)',bigR:'กรงเล็บพิเศษ • ระยะ',bigArc:'กรงเล็บพิเศษ • ครึ่งมุม (rad)',bigDmg:'กรงเล็บพิเศษ • ดาเมจ',bigWin:'กรงเล็บพิเศษ • เวลากด (วิ)',slamR:'ลูกสายฟ้าโดม (อัลติ) • รัศมีทุบ',slamDmg:'ลูกสายฟ้าโดม (อัลติ) • ดาเมจทุบ'},role:'ult',n:'ร่างเทพสายฟ้า',ic:'⚡',cd:0,ult:true,d:'แปลงร่างเทพสายฟ้า 10 วิ: HP เสริม 75 • Dash ฟื้นชาร์จละ 1 วิ ทะลุ 15 ดาเมจ • โจมตีปกติพุ่งสั้นแล้วข่วน 2 จังหวะ (15/15) • Dash โดนศัตรู = โจมตีครั้งถัดไปภายใน 1.5 วิ ฟันกวาดทีเดียว ระยะ 200 ดาเมจ 30 + Shock • ใช้โล่ไม่ได้',fx:'สกิลเก่งขึ้น: ดูดความเร็วไกลขึ้น+Shock • ออร์บพุ่งพร้อมกัน • Railgun เตือน 0.5 วิ ไกล 1400 • ฟ้าผ่าสามครั้งมีวงซ้าย/ขวา • ลูกสายฟ้าโดมเป็นทุบลงแบบ Dragonfall 80 ดาเมจ • ลูกสายฟ้าโดมใช้ 3 stacks ในร่างเทพ',
   cast(p,S){p.god=S.v.time;p.xhp=S.v.xhp;p.dch=STORMV.dashN;p.cEmp=0;p.cEmpT=0;p.clQ=null;p.clT=0;if(p.stS){p.stS=null;p.stCd=0;}emit({k:'efx',z:'godon',x:p.x,y:p.y,h:p.z,id:p.id,g:1});}});
 // ----- ลูกสายฟ้าโดม: รวมไฟที่พื้น → ทะยานขึ้น → เล็ง → ฟาดไม้ยิงและค้างชี้เป้า -----
 const SDOME_POSE={charge:0.26,lift:0.38,swing:0.19,hold:0.38,recover:0.22};

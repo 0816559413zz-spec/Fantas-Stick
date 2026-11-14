@@ -603,18 +603,19 @@ function updateClawFX(dt){
       PARTS.push({x:q.x,y:q.y,h:q.h,vx:rnd(-60,60),vy:rnd(-60,60),vh:rnd(-0.5,1.6),life:0.35,max:0.35,col:Math.random()<0.5?'#e6fcff':'#2fd6ff',size:rnd(1.2,2.4),g:0.8});}}
     if(c.age>=c.life){scene.remove(c.g);for(const m of c.meshes){m.geometry.dispose();m.material.dispose();}CLAWFX.splice(i,1);}}
 }
-function stormClawSwipe(o,dt){const S=o.clSw,n=S.n,emp=n>=4;S.t+=dt;const k=Math.min(1,S.t/S.dur),e=1-Math.pow(1-k,2.2),R=o.armR,L=o.armL;
+function stormClawSwipe(o,dt){const S=o.clSw,n=S.n,emp=n>=3;S.t+=dt;const k=Math.min(1,S.t/S.dur),e=1-Math.pow(1-k,2.2),R=o.armR,L=o.armL;
   // ผู้ใช้ 2026-11-11: โน้มตัวพุ่ง มือขวาตะปบบน→ล่าง แล้วมือซ้ายตะปบกลับ • Special = รอย X ซ้ายแล้วขวา
   if(n===0){R.rotation.x=lerp(-3.0,-0.35,e);R.rotation.z=lerp(-0.35,0.35,e);}
   else if(n===1){L.rotation.x=lerp(-1.35,-1.55,e);L.rotation.z=lerp(-1.0,1.25,e);R.rotation.x=-0.35;R.rotation.z=0.35;}
+  else if(n===3){R.rotation.x=L.rotation.x=-1.45;R.rotation.z=lerp(-1.7,1.1,e);L.rotation.z=lerp(-0.9,1.7,e);}
   else if(n===4){L.rotation.x=lerp(-2.9,-0.4,e);L.rotation.z=lerp(1.1,-1.0,e);}
   else{R.rotation.x=lerp(-2.9,-0.4,e);R.rotation.z=lerp(-1.1,1.0,e);L.rotation.x=-0.4;L.rotation.z=-1.0;}
   // [บิดตอนง้าง, บิดตอนตามแรง, โน้มหน้าสุด, เอียงข้าง, ย่อ, ก้าวขา]
-  {const P=({0:[-0.3,0.35,0.5,0.1,0.12,1],1:[-0.55,0.65,0.42,-0.12,0.12,0.8],4:[0.7,-0.8,0.5,-0.18,0.16,1],5:[-0.8,0.9,0.55,0.18,0.18,1]})[n]||[0,0,0.3,0,0.1,0.8],
+  {const P=({0:[-0.3,0.35,0.5,0.1,0.12,1],1:[-0.55,0.65,0.42,-0.12,0.12,0.8],3:[0.95,-1.05,0.22,-0.1,0.16,0.7],4:[0.7,-0.8,0.5,-0.18,0.16,1],5:[-0.8,0.9,0.55,0.18,0.18,1]})[n]||[0,0,0.3,0,0.1,0.8],
     w=k<0.08?k/0.08:k>0.8?1-(k-0.8)/0.2:1,bell=Math.sin(Math.min(1,e*1.15)*Math.PI);
     o.b.rotation.y=lerp(P[0],P[1],e)*w;o.b.rotation.x+=(0.18+P[2]*bell)*w;o.b.rotation.z=P[3]*bell*w;o.bz=1;o.b.position.y-=P[4]*bell*w;
     if((o.vsp||0)<0.6){o.legs[1].rotation.x=-0.5*P[5]*bell*w;o.legs[0].rotation.x=0.35*P[5]*bell*w;}}
-  const act=(n===0||n===5)?[o.claws[0]]:[o.claws[1]],B=STCLAW.blades;
+  const act=n===3?o.claws:(n===0||n===5)?[o.claws[0]]:[o.claws[1]],B=STCLAW.blades;
   if(!S.tr){
     S.tr=[];
     for(const c of act)for(const b of (emp?[0,1,2]:[1])){

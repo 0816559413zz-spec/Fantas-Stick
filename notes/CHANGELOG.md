@@ -1,5 +1,7 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
 
+- 2026-11-14 — **Storm อัลติ Special BA:** Dash ชนระหว่างอัลติ แล้วคลิกใน 1.5 วิ = กวาดสองแขนทีเดียว กรงเล็บฟ้า 3 เส้น ระยะ 200 ดาเมจ 30 + Shock
+
 - 2026-11-13 — **`Play-Uncapped.bat`: FPS unlocked past the monitor refresh (benchmark only)** (user: "มันสามารถมีตั้งค่าปลดได้ไหม แบบเอาให้เกิน ลิมิตของจอ") — a browser can only present at the monitor rate, so an in-game setting cannot do it; the .bat starts Chrome/Edge with its own profile `%LocalAppData%\FantasStick-Uncapped` and `--disable-gpu-vsync --disable-frame-rate-limit`, plus the local server. Measured (windowed WebGL page): 55 fps normal, 3714 fps uncapped. Side effects: tearing, GPU at 100%. Merged origin/main; local review item Map Builder is now #29.
 - 2026-11-12 สายฟ้าลดแสงจ้า (รอรีวิว #27): Triple Strike ไม่มีแฟลชขาว ไฟจุด 5.2→2.2 แม่แบบ impact→hit • Dash แฟลชทุกเฟรม (js/20 `p.ds`) จำกัดทุก 0.06 วิ op 1.9→0.32 สายฟ้าหุ้มตัว 2→1 เส้น, fx `storm/dash_*` หางบาง ไม่มีแฟลชแกน • เปิดอัลติ (`godon`) แฟลชฟ้าเล็ก ไฟ 6.5→2.6 แม่แบบ big→impact • `updateBolts`: ออร่า/เรืองของเส้นที่อยู่ใกล้กล้อง <6 ม. จางลง เส้นยาว >8 ม. ×0.62 • เครื่องมือ `tools/motion-sheet.py` (แผ่นรวมเฟรม)
 - 2026-11-12 น้ำแข็ง คลื่นดาบ (รอรีวิว #28): ชนของแข็งกลางอากาศแตก (`frostWaveSolid`, efx `gwend`) • ท่าจบดาบชี้ตามแนวเล็ง (`o.grPt`)

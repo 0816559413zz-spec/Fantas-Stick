@@ -208,12 +208,12 @@ function efxFX(ev){
     case 'godoff':burst(x,y,'#3fdcff',24,160,0.5,2,{h:H,vh:[0,2],g:0});break;
     case 'sclawgo':{const o=PM3.get(ev.id);if(o)o.clLunge=0.12;if(near)snd('whoosh',ev);break;}
     case 'sclaw':{
-      const o=PM3.get(ev.id),big=ev.n>=4;
-      if(o){stormClawStop(o);o.clSw={t:0,n:ev.n,dur:big?0.2:0.15,tr:null};}
-      stormClawRangeFX(ev,H);
+      const o=PM3.get(ev.id),big=ev.n>=3;
+      if(o){stormClawStop(o);o.clSw={t:0,n:ev.n,dur:ev.n===3?0.3:big?0.2:0.15,tr:null};}
+      if(ev.n!==3)stormClawRangeFX(ev,H);
       if(near)snd(big?'zap':'whoosh',ev);
       break;}
-    case 'sclawhit':{const big=ev.n>=4,c=Math.cos(ev.a),s=Math.sin(ev.a);
+    case 'sclawhit':{const big=ev.n>=3,c=Math.cos(ev.a),s=Math.sin(ev.a);
       FX.flashSprite(x,y,H,'#e6fcff',big?0.55:0.35,big?3.4:2.4,0.1,2.2);
       burst(x,y,'#2fd6ff',big?18:9,big?260:180,0.28,2,{h:H,g:2});
       if(big){TBLUE=1;try{for(let i=0;i<3;i++)tbolt(x,y,H,x+c*40+rnd(-30,30),y+s*40+rnd(-30,30),H+rnd(-0.6,0.6),0.12,0,0.06,1);}finally{TBLUE=0;}}
