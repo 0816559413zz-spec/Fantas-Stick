@@ -34,7 +34,8 @@ FCS_C:7 FCS_WH:8 genFcs:9
 §45 พื้นที่เล่นตามเฟส (กำแพงล่องหน) + เขตจุดเกิดปลอดภัย — ใช้ทั้งโฮสต์ (G…
 SGPH:46 SG_SPR:47 _sgAreaC:48 sgArea:49 sgClamp:55 sgInArea:65
 
-## js/03-spells-core.js (246) — 
+## js/03-spells-core.js (246) — ระบบคาถาใหม่: สาย (path) × คาถา (spell) + สถานะ (status effects)
+§6 ไอคอนคาถา: จาก game-icons.net (CC BY 3.0, เครดิตใน "คู่มือ" และ icons…
 ICONS:8 ICOALIAS:9 hasIco:10 ICOBASE:12 icoURL:13 ICO:14 icoTint:15 icoHTML:24 PATHS:25 SPELL_LIST:34 SPELLS:34 defSpell:35 SLOTK:36 BRMAP:36 KITP:37 parseKit:38 cleanKit:54 setKit:55 pathReset:58
 §60 สถานะ (ใช้ได้ทั้งผู้เล่นและศัตรู)
 isBig:61 ccScale:63 ccTouch:64 addStun:65 addRoot:66 addFreeze:67 addSlow:72 addChill:73 ignite:78 FX_SHOCK_CYAN:86 shock:87 knock:92 addWard:93 addFrostSlow:95 frostSlow:96 moveMul:103 BRN_MAX:105 addBurn:106 addXBurn:108 addPoison:109 addSil:110 addFear:111 addBlind:112 addMark:113 healT:115 tickStatus:120 clearStatus:142 fxMask:143
@@ -100,11 +101,11 @@ WRATH_READY_T:221 WRATH_THROW_SWING_T:222 WRATH_DRAW_T:223 WRATH:224 earthWrathA
 §285 ทั้งสนาม: สิ่งก่อสร้างพัง / ฝุ่นหมดเวลา / Stonebreaker ชนกำแพง
 updateEarth:286 earthSnapP:296 earthSnapW:312
 
-## js/09-nature-ba.js (107) — 
-NATURE_BA_TEST:2 NATURE_WHIP:3 natureWhipEnabled:4 natureWhipHit:7 natureWhipBasic:29 NW_RINGS:50 NW_SIDES:50 nwPhase:51 nwEase:52 nwSwingAngle:53 natureWhipPose:59 natureWhipVisualMake:68 natureWhipView:90
+## js/09-nature-ba.js (122) — 
+NATURE_BA_TEST:2 NATURE_WHIP:3 natureWhipEnabled:4 NAT_SLAM:8 NAT_LINE:8 natureEmpNear:9 natureEmpHit:10 natureWhipHit:18 natureWhipBasic:41 NW_RINGS:65 NW_SIDES:65 nwPhase:66 nwEase:67 nwSwingAngle:68 natureWhipPose:74 natureWhipVisualMake:83 natureWhipView:105
 
-## js/09-nature.js (449) — 
-NATUREP:2 NAT:3 natureDist:5 natureItems:6 natureLive:7 naturePlants:8 natureY:9 natureHead:10 natureTreeReady:11 natureEmit:12 natureWallLocal:15 natureWallContains:21 natureWallPush:28 natureBurnWall:36 natureWallDamage:43 natureWallTick:48 natureTrace:57 natureSight:75 natureGround:76 natureAimPoint:82 naturePlace:88 naturePlant:96 natureCastPlant:106 natureLotusToggle:122 natureMovePlants:130 natureAimSpot:141 natureAimStart:142 natureAimDone:143 natureAimTick:146 natureWallBuild:157 natureCastWall:158 NAT_WALLS:165 natureWallUse:166 natureWallCharges:167 naturePoison:174 natureStatus:179 natureSpore:191 natureSendSpore:198 natureShield:207 natureHookCandidates:221 natureDash:225 natureHookMove:251 natureBall:280 natureBallTick:288 natureTree:307 natureTreeReach:312 natureGuardian:317 natureGuard:323 natureDamage:332 natureEnd:338 natureTurret:344 naturePeaSplash:377 natureUpdate:382 natureReset:414 natureSnapP:418 natureLotusCooldown:429 natureSnapW:434
+## js/09-nature.js (462) — 
+NATUREP:2 NAT:3 natureDist:5 natureItems:6 natureLive:7 naturePlants:8 natureY:9 natureHead:10 natureTreeReady:11 natureEmit:12 natureWallLocal:15 natureWallContains:21 natureWallPush:28 natureBurnWall:36 natureWallDamage:43 natureWallTick:48 natureTrace:57 natureSight:75 natureGround:76 natureAimPoint:82 naturePlace:88 naturePlant:96 natureCastPlant:106 natureLotusToggle:122 natureMovePlants:130 natureAimSpot:141 natureAimStart:142 natureAimDone:143 natureAimTick:146 natureWallBuild:157 natureCastWall:158 NAT_WALLS:165 natureWallUse:166 natureWallCharges:167 naturePoison:174 natureStatus:179 natureSpore:191 natureSendSpore:198 natureShield:207 natureHookCandidates:221 NAT_DASH:226 natureDashCharge:227 natureDash:228 natureHookMove:256 natureBall:291 natureBallTick:299 natureTree:318 natureTreeReach:323 natureGuardian:328 natureGuard:334 natureDamage:343 natureEnd:349 natureTurret:355 naturePeaSplash:388 natureUpdate:393 natureReset:425 natureSnapP:430 natureLotusCooldown:442 natureSnapW:447
 
 ## js/09-other-paths.js (176) — 
 §44 สัตว์เวท (minion): AI ฝั่งโฮสต์
@@ -381,13 +382,13 @@ iceMat:2 iceRim:3 makeIceSword:4 makeIceAxe:23 makeKiteShield:39
 §51 อาวุธน้ำแข็งลอย (ผู้ใช้ 2026-10-22: "ร่ายคาถาให้ดาบฟันเอง ระยะเท่าเดิ…
 FWS:54 FWA:54 _fwM:55 _fwM2:55 _fwX:55 _fwY:55 _fwZ:55 _fwP:55 _fwS:55 _fwQ:55 _eo:56 _ei:56 _ss:56 fwAim:58 fwWeapons:59 FWP:61 FWT:61 fwChop:62 fwSweep:63 FF_RISE:64 fwIdle:65 fwSwing:68 FWL_N:80 fwLink:81 fwMat:84 frostFX:85
 
-## js/35-sync.js (593) — ซิงก์ผู้เล่น/ศัตรู/ลูกเวทจาก snapshot + ฉายตำแหน่งลงจอ (ป้ายชื่อ/ตัวเ…
+## js/35-sync.js (594) — ซิงก์ผู้เล่น/ศัตรู/ลูกเวทจาก snapshot + ฉายตำแหน่งลงจอ (ป้ายชื่อ/ตัวเ…
 §2 ท่าร่ายคาถาแบบนักเวทในหนัง Harry Potter (ผู้ใช้ 2026-10-22: "ยิงปกติท…
 CPOSE_T:7 _ce:7 _cs:7 _cb:7 AMP_B:9 AMP_S:9 CP_BEND:10 CPOSE:12 _cpT:20 _cpR:20 CGUARD:20 CP_STEP:21 CPCOL:22 castStyle:23 castStart:24
 §25 ท่าร่ายสกิล / อัลติ / โล่ (ผู้ใช้ 2026-10-22: "เกือบทุกสกิลควรมีการเห…
-CANIM:30 SKFEET:78 SKANIM:80 skAnim:88 _caT:89 _caR:89 skillPose:90 _g2:116 wandTwoHand:117 characterPoseMix:124 characterStance:125 CBLOCK:132 CBLOCK_PATH:133 blockPose:134 castPose:140 lateSkillPose:146 castPose0:147 clearCharacterCast:176 syncPlayers:181 syncEnemies:283 projGeo:321 tailGeo:322 _t1:323 makeProj:324 _a:345 _b:345 PJFX:347 syncProj:348 _awT:438 animateWorld:439
-§480 ฉายตำแหน่ง 3D ลงจอ (ป้ายชื่อ / ตัวเลขดาเมจ)
-_v:481 toScreen:482 BURNC:490 burnNum:491 NAMETAG:505 nameTag:506 drawLabels:510 TEXTAG:540 textTag:541 drawTexts:545 HITM:557 DIRI:557 drawXh:559 drawCrosshair:569
+CANIM:30 SKFEET:78 SKANIM:80 skAnim:88 _caT:89 _caR:89 skillPose:90 _g2:116 wandTwoHand:117 characterPoseMix:124 characterStance:125 CBLOCK:132 CBLOCK_PATH:133 blockPose:134 castPose:140 lateSkillPose:146 castPose0:147 clearCharacterCast:176 syncPlayers:181 syncEnemies:284 projGeo:322 tailGeo:323 _t1:324 makeProj:325 _a:346 _b:346 PJFX:348 syncProj:349 _awT:439 animateWorld:440
+§481 ฉายตำแหน่ง 3D ลงจอ (ป้ายชื่อ / ตัวเลขดาเมจ)
+_v:482 toScreen:483 BURNC:491 burnNum:492 NAMETAG:506 nameTag:507 drawLabels:511 TEXTAG:541 textTag:542 drawTexts:546 HITM:558 DIRI:558 drawXh:560 drawCrosshair:570
 
 ## js/36-modes-view.js (171) — 
 ROLE:4 KC:4 roleShowT:4 onPriv:5 MO:10 BREATHS:11 clearModeObjs:12 ITEMC:21 healTex:22 makeItem:23 syncModeObjs:39
@@ -727,8 +728,8 @@ _natFx:3 natFxClear:4 natFxMake:5 T:6 S:6 O:6 seed:7 ease:8 outQ:8 inQ:8 phase:8
 §69 อนุภาค
 Pool:70 leafGeo:78 LEAF:79 SPK:80 DIRT:81 PUFF:82 CHIP:83 POOLS:84 leafCols:85 leaves:86 sparks:87 dirt:88 puff:89 chips:90 TrailRibbon:92 WHIP_N:103 WHIP_L:103 WHIP_LAG:103 Whip:104 CLIPS:167 tick:168 clip:169 drop:170 natFx:173
 
-## js/68-nature-view.js (736) — 
-NAT_VIEW:2 NAT_MARKS:2 NAT_MOTION:2 natV:3 natWorld:4 natPhase:5 natSmooth:6 natEase:7 natOut:8 natStd:9 natAdd:10 natMesh:11 natRing:12 natLeaf:16 natPlantM:19 natGlow:26 natArt:29 natureProjectileModel:31 natSet:37 natAnimate:38 natTube:39 natTrail:50 natSeed:68 natLotus:77 natBall:93 natPlantView:103 natStartStudy:113 natWearWall:131 natTreeGlow:154 natModelTick:174 natMarker:257 natMarks:268 natThorn:287 NAT_SHIELD_K:292 natShieldMake:293 natureCharacter:325 natOutlineMat:355 natOutline:359 natLinks:371 syncNature:386 natureClear:405 natDome:414 natMuzzle:436 natSlam:446 natHook:463 natCoil:520 natHookPose:541 natHookArm:549 natShock:551 natSprout:552 natHealRims:553 natWhipHit:555 natBallRange:556 natSummon:558 natTreeAura:565 natAuraDrop:575 NAT_HOLO:577 natHoloMake:578 natHolo:583 natHoloClear:584 natDirOf:585 natMoment:586 natureEvent:615 NTHUD:679 drawNatureHud:680 NPH:701 NPH_IC:702 natPortraitObj:708 natPortrait:709 natPlantHud:721
+## js/68-nature-view.js (804) — 
+NAT_VIEW:2 NAT_MARKS:2 NAT_MOTION:2 natV:3 natWorld:4 natPhase:5 natSmooth:6 natEase:7 natOut:8 natStd:9 natAdd:10 natMesh:11 natRing:12 natLeaf:16 natPlantM:19 natGlow:26 natArt:29 natureProjectileModel:31 natSet:37 natAnimate:38 natTube:39 natTrail:50 natSeed:68 natLotus:77 natBall:93 natPlantView:103 natStartStudy:113 natWearWall:131 natTreeGlow:154 natModelTick:174 natMarker:257 natMarks:268 natThorn:287 NAT_SHIELD_K:292 natShieldMake:293 natureCharacter:325 natOutlineMat:354 natOutline:358 natLinks:370 syncNature:385 natureClear:404 natDome:413 natMuzzle:435 natSlam:445 natHook:462 natCoil:519 _nfQ:540 _nfT:540 _nfX:540 natWandTip:542 HOOK_HIT:545 natPullQ:545 natPullE:545 _nwQ:546 natForearmR:548 natEmpPose:552 natBigSlam:560 natThornLine:566 natRest:578 natHookFoePose:583 natHookPose:599 natHookArm:615 natShock:617 natSprout:618 natHealRims:619 natWhipHit:621 natBallRange:622 natSummon:624 natTreeAura:631 natAuraDrop:641 NAT_HOLO:643 natHoloMake:644 natHolo:649 natHoloClear:650 natDirOf:651 natMoment:652 natureEvent:681 NTHUD:747 drawNatureHud:748 NPH:769 NPH_IC:770 natPortraitObj:776 natPortrait:777 natPlantHud:789
 
 ## js/68-storm-bow.js (285) — 
 SB_FULL:2 _sbShard:3 sbShard:4 sbMat:5 sbJag:6 SB_TIP:8 _sbBlade:9 sbBlade:10 sbMake:11 SB_START:33 SB_ANCHOR:33 SB_POLE:33 stormBowView:34 _ikS:90 _ikE:90 _ikH:90 _ikT:90 _ikP:90 _ikD:90 _ikA:90 _ikQ:90 _ikQ2:90 sbAim:91 stormBowForearm:94 stormBowFx:106 sbStaffAxis:122 sbStaffMake:123 stormStaffView:140 stormStaffCast:152 stormStaffSwing:155 _sbWaveG:157 sbWaveGeo:158 SB_WAVE_F:159 stormWaveMake:169 stormWaveTick:173 SMK:181 SWAVE_BURSTS:182 WAVE_BURST_CYAN:183 stormWaveBurst:184 stormWaveBurstTick:209 _smkEye:239 _smkRot:239 stormMarkSet:240 stormMarkClear:262 stormMarkTick:266
@@ -806,4 +807,4 @@ surfSync:49 surfQuality:53
 SURF_VS:55 SURF_VS_BODY:56 SURF_FS:67 SURF_FS_BODY:68 surfOk:98 surfApply:99 surfScene:111
 §112 ปรับค่า (tune.html / F8)
 
-(98 files, 26241 lines)
+(98 files, 26338 lines)

@@ -1,5 +1,7 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
 
+- 2026-11-14 — **Nature:** แส้ 10 • โล่ระยะ 260 • Dash 2 ชาร์จ เกี่ยวศัตรูแล้วดึงเข้าหาเรา มัดหนาม ชาร์จคืนเร็ว • หลัง Dash แส้ถัดไปเป็นหนามพุ่งเป็นเส้น 30 ดาเมจ ช้าลง 40% • ท่าดึงใหม่
+
 - 2026-11-14 — **Storm อัลติ Special BA:** Dash ชนระหว่างอัลติ แล้วคลิกใน 1.5 วิ = กวาดสองแขนทีเดียว กรงเล็บฟ้า 3 เส้น ระยะ 200 ดาเมจ 30 + Shock
 
 - 2026-11-13 — **`Play-Uncapped.bat`: FPS unlocked past the monitor refresh (benchmark only)** (user: "มันสามารถมีตั้งค่าปลดได้ไหม แบบเอาให้เกิน ลิมิตของจอ") — a browser can only present at the monitor rate, so an in-game setting cannot do it; the .bat starts Chrome/Edge with its own profile `%LocalAppData%\FantasStick-Uncapped` and `--disable-gpu-vsync --disable-frame-rate-limit`, plus the local server. Measured (windowed WebGL page): 55 fps normal, 3714 fps uncapped. Side effects: tearing, GPU at 100%. Merged origin/main; local review item Map Builder is now #29.

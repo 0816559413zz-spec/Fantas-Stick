@@ -1,10 +1,22 @@
 // Thorn whip. The old offline preview URL still works with other kits.
 const NATURE_BA_TEST=new URLSearchParams(location.search).get('natureba')==='1';
-const NATURE_WHIP={damage:7,range:280,halfArc:Math.PI/3,cooldown:1,follow:.46,window:.66,impact:.24,duration:.78};
+const NATURE_WHIP={damage:10,range:280,halfArc:Math.PI/3,cooldown:1,follow:.46,window:.66,impact:.24,duration:.78};
 function natureWhipEnabled(id){
   return NATURE_BA_TEST&&NET.isHost&&!NET.online&&G?.mode==='train'&&id===NET.myId;
 }
+// Empowered swings after a Dash (user 2026-11-14): 'slam' after pulling an enemy (30 + stun 0.7), 'line' after dashing to an ally or plant.
+const NAT_SLAM={dmg:30,stun:.7},NAT_LINE={len:340,w:42,dmg:30,slow:.6,slowT:1.5};
+function natureEmpNear(p){let b=180;for(const t of foesOf(p.team)){if(t.dead||t.alive===false||t.downed)continue;const dx=t.x-p.x,dy=t.y-p.y,d=Math.hypot(dx,dy);if(d<=NATURE_WHIP.range&&Math.abs(angDiff(Math.atan2(dy,dx),p.ang))<=NATURE_WHIP.halfArc&&d<b)b=d;}return Math.max(50,b);}
+function natureEmpHit(p,swing){const hit=[],c=Math.cos(swing.angle),s=Math.sin(swing.angle);p.baHit=1;
+  try{for(const t of foesOf(p.team)){const dx=t.x-p.x,dy=t.y-p.y,d=Math.hypot(dx,dy);
+    if(swing.emp==='slam'){if(d>NATURE_WHIP.range+1e-7||!aimLineH(p,p.z+1.1,t,3.2))continue;if(d>1e-7&&Math.abs(angDiff(Math.atan2(dy,dx),swing.angle))>NATURE_WHIP.halfArc+1e-7)continue;}
+    else{const f=dx*c+dy*s,l=-dx*s+dy*c;if(f<0||f>NAT_LINE.len+(t.r||PR)||Math.abs(l)>NAT_LINE.w+(t.r||PR)||!aimLineH(p,p.z+1.1,t,3.2))continue;}
+    if(natureTrace(p,t,p.z+1.1,cH(t),p.team))continue;
+    if(aoeHit(p,t,swing.emp==='slam'?NAT_SLAM.dmg:NAT_LINE.dmg,swing.emp==='slam'?(t=>addStun(t,NAT_SLAM.stun)):(t=>addSlow(t,NAT_LINE.slow,NAT_LINE.slowT)))){hit.push(t);emit({k:'efx',z:'nature_whip_hit',x:t.x,y:t.y,h:cH(t)});}}}
+  finally{p.baHit=0;}
+  if(hit.length)natureSendSpore(p,hit[0]);}
 function natureWhipHit(p,swing){
+  if(swing.emp){natureEmpHit(p,swing);return;}
   const hit=[];
   const wasBasic=p.baHit;
   p.baHit=1;
@@ -35,7 +47,7 @@ function natureWhipBasic(p,inp,canSwing){
     return;
   }
   const age=swing?G.time-swing.start:Infinity;
-  if(swing&&!swing.hit&&!swing.cancelled&&age+1e-8>=NATURE_WHIP.impact){
+  if(swing&&!swing.hit&&!swing.cancelled&&age+1e-8>=(swing.imp??NATURE_WHIP.impact)){
     swing.hit=true;
     natureWhipHit(p,swing);
   }
@@ -43,7 +55,10 @@ function natureWhipBasic(p,inp,canSwing){
   if(combo&&pressed)swing.queued=true;
   const second=combo&&age+1e-8>=NATURE_WHIP.follow&&(inp.fire||swing.queued);
   if(!second&&(!inp.fire||p.cd.basic>1e-8||age+1e-8<NATURE_WHIP.cooldown))return;
-  p.natureWhip={start:G.time,side:swing?-swing.side:1,angle:p.ang,hit:false,cancelled:false,second:!!second};
+  const E=p.natureEmp&&p.natureEmp.until>G.time&&!second?p.natureEmp.k:null;if(E)p.natureEmp=null;
+  p.natureWhip={start:G.time,side:swing?-swing.side:1,angle:p.ang,hit:false,cancelled:false,second:!!second||!!E,emp:E,imp:E?.34:undefined};
+  if(E)emit({k:'efx',z:E==='slam'?'nature_bigslam':'nature_thornline',x:Math.round(p.x),y:Math.round(p.y),h:p.z,a:Math.round(p.ang*100)/100,id:p.id,r:E==='slam'?NATURE_WHIP.range:NAT_LINE.len,d:E==='slam'?Math.round(natureEmpNear(p)):0});
+
   p.cd.basic=p.cdMax.basic=NATURE_WHIP.cooldown;
 }
 

@@ -323,7 +323,6 @@ function natShieldMake(o){
   return g;
 }
 function natureCharacter(o,p,now){
-  natHookPose(o);
   const native=getKit(p.id).path===NATUREP;
   if(native&&p.sh&&p.al&&!p.dn){
     if(!o.natShield)o.natShield=natShieldMake(o);
@@ -468,17 +467,17 @@ function natHook(ev,student){
   for(const stroke of airStrokes){stroke.castShadow=false;stroke.visible=false;}
   const airBright=new T.Color('#efffe3'),airGreen=new T.Color('#8bd19b'),hookFlash=glow(GLOWT,.55);
   const stemDark=new T.Color('#21381c'),stemTip=new T.Color('#71a648'),sapHead=new T.Color('#edffad'),sapTail=new T.Color('#55de53');
-  const parts=[vine,th,speed,hookTrail,tensionLight,...airStrokes,hookFlash],staticEnd=natWorld(ev.x2,ev.y2,ev.h2),HIT=.43,PULL=.73;
+  const parts=[vine,th,speed,hookTrail,tensionLight,...airStrokes,hookFlash],staticEnd=natWorld(ev.x2,ev.y2,ev.h2),HIT=.43,PULL=ev.kind==='foe'?.43+NAT.foeHold:.73;
   const tgt=()=>{const o=ev.tid!=null?PM3.get(ev.tid):null;return o?o.g.localToWorld(V3(0,1.25,.15)):staticEnd.clone();};
   const start=student?student.g.position.clone():natWorld(ev.x,ev.y,ev.h-1.35),d0=start.distanceTo(tgt());
-  const pullT=clamp((d0-1.4)*20/NAT.hookSpeed,.18,.9),DONE=PULL+pullT,dur=ev.hit?DONE+.1:HIT+.26;
+  const pullT=clamp((d0-1.4)*20/(ev.kind==='foe'?NAT.hookPull:NAT.hookSpeed),.18,.9),DONE=PULL+pullT,dur=ev.hit?DONE+.1:HIT+.26;
   let hit=false,land=false,rope=0,frame=0;
-  if(student)student.natHookCast={t:0,dur:ev.hit?DONE:HIT+.2,hit:ev.hit,pull:PULL,done:DONE};
+  if(student)student.natHookCast={t:0,dur:ev.hit?DONE:HIT+.2,hit:ev.hit,pull:PULL,done:DONE,foe:ev.kind==='foe'&&ev.hit};
   F.clip(dur,(st,dt)=>{
     frame++;if(student?.natHookCast)student.natHookCast.t=st;
-    if(student)student.g.updateMatrixWorld(true);
-    const tip=student?student.tip.getWorldPosition(V3()):natWorld(ev.x,ev.y,ev.h),tg=tgt(),fly=phase(st,.20,HIT);
-    const hitAge=st-HIT,pulling=ev.hit&&st>PULL&&st<DONE&&student,pull=phase(st,PULL,DONE);
+    const tip=student?natWandTip(student,V3()):natWorld(ev.x,ev.y,ev.h);if(student&&ev.kind==='foe'&&ev.hit&&student.nwt?.m.parent){const hk=natEase(phase(st,PULL-.04,PULL+.12));if(hk>0)tip.lerp(student.nwt.m.parent.getWorldPosition(V3()),hk);}   // reeling in: the vine is gripped in the fist
+    const _t0=0,tg=tgt(),fly=phase(st,.20,HIT);
+    const hitAge=st-HIT,pulling=ev.hit&&st>PULL&&st<DONE&&student&&ev.kind!=='foe',pull=phase(st,PULL,DONE);
     for(const stroke of airStrokes)stroke.visible=false;
     if(pulling){
       const from=start,dir=V3().subVectors(tg,from).setY(0).normalize(),wake=student.g.position.clone().add(V3(0,.72,0)),across=V3(dir.z,0,-dir.x),burst=phase(st,PULL,PULL+.19*pullT/.45);
@@ -493,18 +492,18 @@ function natHook(ev,student){
       if(frame%2===0)leaves(wake,3,1.6,{dir:dir.clone().multiplyScalar(-2.4),life:.64,size:1.3});
       speed.push([wake.clone().add(V3(0,.32,0)),wake]);
     }else speed.push(null);
-    if(ev.hit&&st>=DONE-.02&&!land&&student){land=true;const q=student.g.position.clone();F.O.y=q.y;dirt(q,16,3);leaves(q.clone().add(V3(0,.3,0)),10,3);}
+    if(ev.hit&&st>=DONE-.02&&!land&&student&&ev.kind!=='foe'){land=true;const q=student.g.position.clone();F.O.y=q.y;dirt(q,16,3);leaves(q.clone().add(V3(0,.3,0)),10,3);}
     vine.visible=th.visible=st>.02&&st<(ev.hit?DONE+.08:dur);
     let trailSample=null;tensionLight.visible=hookFlash.visible=false;
     if(vine.visible){
       const k=ease(fly),side=V3(tip.z-tg.z,0,tg.x-tip.x).normalize(),origin=tip.clone().addScaledVector(side,.8*ease(phase(st,0,.18))),control=tip.clone().lerp(tg,.30).addScaledVector(side,Math.min(25,tip.distanceTo(tg)*2.2));
       const end=origin.multiplyScalar((1-k)*(1-k)).addScaledVector(control,2*k*(1-k)).addScaledVector(tg,k*k),loose=1-ease(phase(st,.36,.48)),pts=[];
       if(st>=HIT&&!rope)rope=tip.distanceTo(tg);
-      const chord=tip.distanceTo(tg),extra=rope?Math.sqrt(Math.max(0,rope**2-chord**2)):0,slack=Math.min(2.8,extra*.35)*ease(phase(st,PULL,PULL+.13)),back=ev.hit?1:1-ease(phase(st,HIT,dur));
+      const chord=tip.distanceTo(tg),extra=rope?Math.sqrt(Math.max(0,rope**2-chord**2)):0,slack=(ev.kind==='foe'?0:1)*Math.min(2.8,extra*.35)*ease(phase(st,PULL,PULL+.13)),back=ev.hit?1:1-ease(phase(st,HIT,dur));
       for(let i=0;i<30;i++){const u=i/29*back,p=V3().lerpVectors(tip,end,u),envelope=Math.sin(u*Math.PI);
         if(st<.20){const a=u*Math.PI*2.5-st*5,rr=.25*u;p.addScaledVector(side,Math.sin(a)*rr);p.y+=Math.cos(a)*rr+u*.14;}
         else{const tipBend=Math.exp(-(((u-.80)/.17)**2))*Math.sin(u*5-st*20)*1.9*loose;p.y+=envelope*(.04+.48*loose)-envelope*Math.min(.55,slack*.30)+envelope*.16*Math.sin(u*7-st*25)*loose;
-          const tensionWave=hitAge>0?ease(phase(hitAge,0,.05))*Math.exp(-hitAge*9)*Math.sin(hitAge*32-u*3)*.65:0;p.addScaledVector(side,envelope*(.8*Math.sin(u*5-st*20)*loose+slack+tensionWave)+tipBend*envelope);}
+          const tensionWave=hitAge>0&&ev.kind!=='foe'?ease(phase(hitAge,0,.05))*Math.exp(-hitAge*9)*Math.sin(hitAge*32-u*3)*.65:0;p.addScaledVector(side,envelope*(.8*Math.sin(u*5-st*20)*loose+slack+tensionWave)+tipBend*envelope);}
         pts.push(p);}
       const rad=u=>.05*(1-.4*u)+.012;
       vine.set(pts,rad,(u,c)=>c.copy(stemDark).lerp(stemTip,.24+.51*u+.10*Math.sin(u*30)));th.put(thornsAlong(pts,rad,2,.8));
@@ -514,7 +513,7 @@ function natHook(ev,student){
       if(ev.hit&&st>=HIT&&!hit){hit=true;sparks(tg,18,4.2,'#f2ffac','#6fd449',{life:.72,size:1.45});leaves(tg,9,2.7,{dir:side.clone().multiplyScalar(.9),life:.7,size:1.35});}
     }
     hookTrail.push(trailSample);
-  },()=>{for(const o of parts)F.drop(o);if(student)student.natHookCast=null;});
+  },()=>{for(const o of parts)F.drop(o);if(student){if(!student.natHookCast?.foe)student.natHookCast=null;student.cgd=0;}});
 }
 // Coil around the hooked target, SKS.dash: helix from legs to chest, 3 s; an ally gets hooked barbs and a heal rim climbing every .5 s; an enemy gets purple thorns with poison sparks.
 function natCoil(ev){
@@ -524,7 +523,7 @@ function natCoil(ev){
   const radius=.58,height=1.45,LIFE=allyOnly?3.33:3;let healTick=-1,frame=0;
   F.clip(LIFE,(st)=>{frame++;
     const P=o?o.g.position:fixed,unwind=allyOnly?ease(phase(st,3,3.33)):ease(phase(st,2.7,3)),wrap=phase(st,0,.24)*(1-unwind);coil.visible=cth.visible=wrap>.005;
-    const coilPoint=u=>{const a=u*Math.PI*7+(allyOnly?.35:st*.6),r=allyOnly?radius+.045*Math.sin(u*27):radius;return V3(P.x+Math.cos(a)*r,P.y+.15+u*height,P.z+Math.sin(a)*r);};
+    const coilPoint=u=>{const a=u*Math.PI*7+.35,r=allyOnly?radius+.045*Math.sin(u*27):radius;return V3(P.x+Math.cos(a)*r,P.y+.15+u*height,P.z+Math.sin(a)*r);};
     if(coil.visible){const pts=[];for(let i=0;i<60;i++)pts.push(coilPoint(i/59*wrap));
       const rad=u=>(allyOnly?.056+.010*Math.sin(u*wrap*34):.035)*(1-unwind*.7);
       coil.set(pts,rad,(u,c)=>c.copy(coilDark).lerp(vineColor,.35+.3*Math.sin(u*20)));
@@ -538,12 +537,79 @@ function natCoil(ev){
   },()=>{for(const x of parts)F.drop(x);});
 }
 // Caster pose for the Dash, SKS.dash: stick flicks out to the side, tug on contact, lean into the pull.
+const _nfQ=new THREE.Quaternion(),_nfT=new THREE.Quaternion(),_nfX=new THREE.Vector3(1,0,0);
+// Tip of the wand the player actually sees: on the rigged model the wand mesh hangs from the hand bone, so o.tip (code arm) drifts once the elbow bends.
+function natWandTip(o,out){if(o.fileModel){if(o.nwt===undefined){o.nwt=null;o.fileModel.traverse(m=>{if(!o.nwt&&m.isMesh&&m.visible&&/^wand_\d+$/.test(m.name)){m.geometry.computeBoundingBox();const b=m.geometry.boundingBox,ext=b.max.clone().sub(b.min),ax=ext.x>ext.y?(ext.x>ext.z?'x':'z'):(ext.y>ext.z?'y':'z'),hand=m.parent?m.parent.getWorldPosition(new THREE.Vector3()):null,lo=b.min.clone(),hi=b.max.clone(),mid=b.min.clone().add(b.max).multiplyScalar(.5);lo.x=hi.x=mid.x;lo.y=hi.y=mid.y;lo.z=hi.z=mid.z;lo[ax]=b.min[ax];hi[ax]=b.max[ax];let tip=hi;if(hand){m.updateWorldMatrix(true,false);const wl=m.localToWorld(lo.clone()),wh=m.localToWorld(hi.clone());tip=wl.distanceTo(hand)>wh.distanceTo(hand)?lo:hi;}o.nwt={m,tip};}});}
+  if(o.nwt&&o.nwt.m.visible){o.nwt.m.updateWorldMatrix(true,false);return o.nwt.m.localToWorld(out.copy(o.nwt.tip));}}
+  o.g.updateMatrixWorld(true);return o.tip.getWorldPosition(out);}
+const HOOK_HIT=.43,natPullQ=new THREE.Quaternion(),natPullE=new THREE.Euler();
+const _nwQ=new THREE.Quaternion();
+// Elbow and wrist bends for Nature poses. The idle clip does not key these bones, so each bend is set from the bone's rest rotation every frame and put back when the pose ends (bending in place made the arm stick and the wand spin).
+function natForearmR(o){if(o.nfa===undefined){const a=o.g.getObjectByName('forearm_R'),b=o.g.getObjectByName('forearm_L'),h=o.g.getObjectByName('hand_R');o.nfa=a&&b?[[a,a.quaternion.clone(),'natFaR',-2.1],[b,b.quaternion.clone(),'natFaL',-1.9],...(h?[[h,h.quaternion.clone(),'natWrist',-.55]]:[])]:null;}
+  if(!o.nfa){o.natFaR=o.natFaL=o.natWrist=0;return;}
+  for(const B of o.nfa){const [bone,q0,key,ang]=B,w=o[key]||0;o[key]=0;if(w>.002){_nfQ.setFromAxisAngle(_nfX,ang*w);bone.quaternion.copy(q0).multiply(_nfQ);B[4]=1;}else if(B[4]){bone.quaternion.copy(q0);B[4]=0;}}}
+// Empowered swing poses and effects.
+function natEmpPose(o){const E=o.natEmpC;if(!E)return;E.t+=1/60;const t=E.t,e=natEase,ph=natPhase;if(t>1.05){o.natEmpC=null;o.cgd=0;return;}const R=o.armR.rotation,L=o.armL.rotation;
+  if(E.k==='slam'){const up=e(ph(t,0,.24)),down=e(ph(t,.26,.36)),rec=e(ph(t,.55,.95)),w=1-rec,dip=down*(1-rec);
+    R.set(lerp(lerp(-.2,-3.05,up),-.85,down),0,lerp(.1,-.15,up));L.set(lerp(lerp(-.1,-2.9,up),-.75,down),0,lerp(-.1,.15,up));R.x=lerp(-.2,R.x,w);L.x=lerp(-.1,L.x,w);o.b.rotation.x+=lerp(-.28*up,.52,down)*w;o.b.position.y-=.24*dip;o.legs[0].rotation.x+=-.5*dip;o.legs[1].rotation.x+=.4*dip;o.natFaR=.6*up*(1-down);}
+  else{if(!E.r0)E.r0=[R.x,R.y,R.z,L.x,L.y,L.z];const r0=E.r0,ch=e(ph(t,0,.26)),up=e(ph(t,.3,.46)),rec=e(ph(t,.75,1.05)),w=1-rec;   // charge: crouch, wand low toward the ground ahead • release: swing the wand up as the thorns rise
+    R.set(lerp(lerp(r0[0],-.95,ch),-2.6,up)*w+r0[0]*rec,lerp(lerp(r0[1],-.1,ch),0,up)*w+r0[1]*rec,lerp(r0[2],0,Math.max(ch,up))*w+r0[2]*rec);
+    L.set(lerp(lerp(r0[3],-.5,ch),-.2,up)*w+r0[3]*rec,0,lerp(lerp(r0[5],-.35,ch),-.25,up)*w+r0[5]*rec);
+    o.b.rotation.x+=(.3*ch*(1-up)-.2*up)*w;o.b.position.y-=.16*ch*(1-up)*w;o.legs[0].rotation.x+=-.4*ch*(1-up)*w;o.legs[1].rotation.x+=.34*ch*(1-up)*w;}
+}
+function natBigSlam(ev){const F=natFx(),{V3,Tube,Thorns,thornsAlong,M,T,dirt,leaves,sparks}=F,o=ev.id!=null?PM3.get(ev.id):null;if(o)o.natEmpC={k:'slam',t:0};
+  const ca=Math.cos(ev.a),sa=Math.sin(ev.a),D=ev.d||Math.min(ev.r,200),gx=ev.x+ca*D,gy=ev.y+sa*D,end=natWorld(gx,gy,groundH(gx,gy,ev.h)),vine=Tube(34,8,M.bark),th=Thorns(80,1.7),dark=new T.Color('#2a4519'),lite=new T.Color('#6d9a3c');let hit=false;
+  F.clip(.9,t=>{const tip=o?o.tip.getWorldPosition(V3()):natWorld(ev.x,ev.y,ev.h+2),grow=natOut(natPhase(t,0,.2)),fall=natPhase(t,.24,.34),back=natEase(natPhase(t,.55,.9)),top=tip.clone().add(V3(-ca*.6,4.6*grow,-sa*.6)),P=[];
+    for(let i=0;i<34;i++){const u=i/33,arc=tip.clone().lerp(top,Math.sin(u*Math.PI*.5)).add(V3(0,Math.sin(u*Math.PI)*.8,0)),hitP=tip.clone().lerp(end,u);hitP.y+=Math.sin(u*Math.PI)*2.2*(1-fall);P.push(arc.lerp(hitP,natEase(fall)).lerp(tip,back));}
+    vine.visible=th.visible=grow>.02&&back<.98;if(vine.visible){const rad=u=>(.17*(1-u)+.05)*(1-back*.8);vine.set(P,rad,(u,c)=>c.copy(dark).lerp(lite,u*.4));th.put(thornsAlong(P,rad,2,1.4*(1-back)));}
+    if(!hit&&fall>=1){hit=true;F.O.y=end.y;dirt(end,30,5.2,{size:1.5,spread:1.4});leaves(end,18,4);sparks(end,24,4.6,'#eaffa0','#5fa83a',{dir:V3(0,2,0)});natShock(end,'#a8d86a',7,.5);if(ev.id===NET.myId)shake(12);snd('boom',{x:gx,y:gy,vol:.8});}},()=>{F.drop(vine);F.drop(th);});}
+function natThornLine(ev){const F=natFx(),{V3,T,M,Tube,Thorns,thornsAlong,dirt,leaves,sparks}=F,o=ev.id!=null?PM3.get(ev.id):null;if(o)o.natEmpC={k:'line',t:0};
+  // Whip-style thorns: bark tubes dark at the root, light green toward a bright tip, hooked thorns along them.
+  const dark=new T.Color('#19371a'),mid=new T.Color('#4f7f30'),tipC=new T.Color('#b6ff63');
+  const spike=(H,R,bend,ang)=>{const tube=Tube(12,7,M.bark),th=Thorns(16,1.05,null,true);tube.castShadow=th.castShadow=true;return {tube,th,H,R,bend,ang};};
+  const setSpike=(q,base,k)=>{const P=[],ax=Math.cos(q.ang),az=Math.sin(q.ang),tw=q.tw||0;for(let i=0;i<12;i++){const u=i/11,h=q.H*u*k,b=q.H*Math.tan(q.tilt||.8)*u*k+q.bend*.1*u*u*k,w=Math.sin(u*5+tw)*.07*u;P.push(V3(base.x+ax*b-az*w,base.y+h,base.z+az*b+ax*w));}const rad=u=>Math.max(.004,q.R*((1-u)**1.7)*(1+.16*Math.sin(u*31+tw))*Math.max(.05,k));q.tube.set(P,rad,(u,c)=>c.copy(dark).lerp(mid,Math.min(1,u*1.5)).lerp(tipC,Math.max(0,u-.74)*2.8).multiplyScalar(.82+.22*Math.sin(u*38+tw)));q.th.put(thornsAlong(P,rad,3,.95*k,2.1));};
+  const N=16,ca=Math.cos(ev.a),sa=Math.sin(ev.a),line=[];
+  for(let i=0;i<N;i++){const d=40+i*(ev.r-40)/(N-1),side=(i%2?1:-1)*(8+Math.random()*14),x=ev.x+ca*d-sa*side,y=ev.y+sa*d+ca*side,base=natWorld(x,y,groundH(x,y,ev.h)),at=.34+i*.018,sz=.75+.5*Math.sin(Math.PI*i/(N-1));
+    for(let c=0;c<3;c++){const main=c===0,lean=ev.a+(c===1?.55:c===2?-.55:0)+(Math.random()-.5)*.25,q=spike((main?3+Math.random()*1.2:1.5+Math.random()*.8)*sz,(main?.28:.16)*sz,(main?1.3:1)+(Math.random()-.3)*.3,lean);q.hook=main?.16:.08;q.tw=Math.random()*6;q.base=main?base:base.clone().add(V3(Math.cos(lean)*.22,0,Math.sin(lean)*.22));q.at=at+c*.025;q.done=c>0;q.tube.visible=q.th.visible=false;line.push(q);}}
+  F.clip(1.3,t=>{    for(const q of line){const a=t-q.at;if(a<0)continue;const k2=natOut(natPhase(a,0,.1))*(1-natEase(natPhase(a,.6,.92)));q.tube.visible=q.th.visible=k2>.01;if(q.tube.visible)setSpike(q,q.base,k2);
+      if(!q.done){q.done=true;F.O.y=q.base.y;dirt(q.base.clone(),7,3.2,{spread:.5});leaves(q.base.clone().add(V3(0,.5,0)),3,2.2);sparks(q.base.clone().add(V3(0,.6,0)),4,2.6,'#eaffa0','#5fa83a');}}
+    if(t>=.34&&t-1/60<.34){snd('boom',{x:ev.x,y:ev.y,vol:.6});if(ev.id===NET.myId)shake(8);}},
+    ()=>{for(const q of line){F.drop(q.tube);F.drop(q.th);}});}
+function natRest(o,dt){const R=o.natRel;if(!R)return;R.t+=dt;const f=Math.min(1,dt*14);for(const k of o.rig||[]){if(k.c!==o.armR&&k.c!==o.armL)continue;const r=k.c.rotation;r.x=lerp(r.x,k.sx,f);r.y=lerp(r.y,0,f);r.z=lerp(r.z,k.sz,f);}if(!o.rig){o.armR.rotation.set(lerp(o.armR.rotation.x,-.18,f),0,lerp(o.armR.rotation.z,.12,f));o.armL.rotation.set(lerp(o.armL.rotation.x,-.12,f),0,lerp(o.armL.rotation.z,-.12,f));}if(R.t>.4)o.natRel=null;}
+// Hooking an enemy, played as one motion (user 2026-11-14):
+// 1 wind-up: wand lifts back over the right shoulder • 2 throw: the arm snaps forward and stays aimed at the enemy, wand in line with the vine
+// 3 hold: arm locked on the target, body braced a little back • 4 reel: torso twists right, elbow drives back to the right side, forearm folds in, left hand comes up in front for balance
+// 5 settle: everything eases back to the stance the character had before the cast
+function natHookFoePose(o,C){if(C.t===C.pt)C.t+=1/60;C.pt=C.t;const st=C.t,e=natEase,ph=natPhase,R=o.armR.rotation,L=o.armL.rotation,H=natHookArm;
+  if(!C.r0){C.r0=[R.x,R.y,R.z,L.x,L.y,L.z];C.q0=o.armR.quaternion.clone();}const r0=C.r0;
+  // 1-2 throw and hold: the approved preview cast (stick flicks out to the side, whips through), then the arm stays aimed straight at the enemy
+  const draw=e(ph(st,0,.17)),swing=e(ph(st,.17,.43)),wind=draw*(1-swing),follow=Math.sin(Math.PI*ph(st,.26,.6))*(1-e(ph(st,.43,.6)));
+  const yaw=-1.64*wind+.24*follow,lift=.16+.29*wind-.29*follow;
+  H.a.set(Math.sin(yaw),lift*(1-swing)+.06*swing,Math.cos(yaw)).normalize();H.cast.setFromUnitVectors(H.down,H.a);
+  const reel=e(ph(st,C.pull-.04,C.pull+.12)),back=e(ph(st,C.done+.02,C.done+.34)),on=1-back;
+  o.armR.quaternion.copy(C.q0).slerp(H.cast,draw);
+  // 3 reel in: torso twists right, elbow drives back to the right side, forearm folds in, left hand comes up in front
+  natPullQ.setFromEuler(natPullE.set(-.35,-.95,-1.25,'YXZ'));o.armR.quaternion.slerp(natPullQ,reel);
+  // 4 settle back to the stance before the cast
+  o.armR.quaternion.slerp(C.q0,back);
+  L.set(lerp(lerp(r0[3],-.24-.1*swing,draw),-1.25,reel)*on+r0[3]*back,lerp(.24*wind,.25,reel)*on+r0[4]*back,lerp(lerp(r0[5],-.13-.3*wind,draw),.4,reel)*on+r0[5]*back);
+  o.b.rotation.y+=(-.54*wind+.24*follow-.85*reel)*on;o.b.rotation.x+=(-.15*wind-.06*swing*(1-reel)-.22*reel)*on;o.b.rotation.z+=(.14*wind)*on;
+  o.natFaR=.95*reel*on;o.natFaL=.8*reel*on;
+  if(st>C.done+.36)o.natHookCast=null;}
 function natHookPose(o){   // SKS.dash arm: draw back, whip through with the vine, tug on contact, ease out
-  const C=o.natHookCast;if(!C)return;const st=C.t,ease=natEase,phase=natPhase,draw=ease(phase(st,0,.17)),swing=ease(phase(st,.17,.43)),letGo=C.hit?ease(phase(st,C.done-.1,C.done+.2)):ease(phase(st,.43,.65));
-  const wind=draw*(1-swing),follow=Math.sin(Math.PI*phase(st,.26,.60)),hitAge=st-.43,snap=hitAge>=0?Math.sin(26*hitAge)*Math.exp(-9*hitAge):0,launch=Math.sin(Math.PI*phase(st,C.pull-.03,C.pull+.18)),yaw=-1.64*wind+.24*follow-.22*snap;
-  natHookArm.a.set(Math.sin(yaw),.16+.29*wind-.29*follow-.19*snap,Math.cos(yaw)).normalize();natHookArm.idle.setFromEuler(new THREE.Euler(-.17,0,.12,'YXZ'));natHookArm.cast.setFromUnitVectors(natHookArm.down,natHookArm.a);
-  o.armR.quaternion.copy(natHookArm.idle).slerp(natHookArm.cast,draw*(1-letGo));
+  const C=o.natHookCast;if(!C)return;
+  if(C.foe){natHookFoePose(o,C);return;}const st=C.t,ease=natEase,phase=natPhase,draw=ease(phase(st,0,.17)),swing=ease(phase(st,.17,.43)),letGo=C.hit?ease(phase(st,C.done-.1,C.done+.2)):ease(phase(st,.43,.65));
+  const wind=draw*(1-swing),follow=C.foe?0:Math.sin(Math.PI*phase(st,.26,.60)),hitAge=st-.43,snap=hitAge>=0&&!C.foe?.5*Math.sin(26*hitAge)*Math.exp(-9*hitAge):0,launch=C.foe?0:Math.sin(Math.PI*phase(st,C.pull-.03,C.pull+.18)),yaw=-1.64*wind+.24*follow-.22*snap;
+  natHookArm.a.set(Math.sin(yaw),.5+.29*wind-.08*follow-.08*snap,Math.cos(yaw)).normalize();natHookArm.idle.setFromEuler(new THREE.Euler(-.17,0,.12,'YXZ'));natHookArm.cast.setFromUnitVectors(natHookArm.down,natHookArm.a);
+  o.armR.quaternion.copy(natHookArm.idle).slerp(natHookArm.cast,draw*(1-letGo));o.natWrist=draw*(1-letGo);
   o.b.rotation.x+=-.15*wind+.19*snap+.22*launch;o.b.rotation.y+=-.54*wind+.24*follow-.12*snap;o.b.rotation.z+=.14*wind-.09*snap;o.armL.rotation.set(-.24-.45*launch,.24*wind,-.13-.30*wind);
+  if(C.hit&&C.foe&&st>HOOK_HIT){   // enemy hooked: hold the tension leaning sideways, then reel in leaning back and twisting right (user 2026-11-14)
+    const sm=ease,ten=sm(phase(st,HOOK_HIT,C.pull))*(1-sm(phase(st,C.pull,C.pull+.3))),k=sm(phase(st,C.pull-.1,C.pull+.06))*(1-sm(phase(st,C.done-.02,C.done+.16)));
+    o.b.rotation.z+=-.24*ten;o.b.rotation.y+=-.22*ten;o.b.rotation.x+=-.1*ten;o.armR.rotation.x+=-.35*ten;   // lean away from the pulling arm so the wand stays up on the vine
+    natPullQ.setFromEuler(natPullE.set(-.12,-.8,-1.38,'XYZ'));o.armR.quaternion.slerp(natPullQ,k);
+    o.b.rotation.y+=-.9*k;o.b.rotation.x+=-.24*k;o.b.rotation.z+=.06*k;
+    o.armL.rotation.set(lerp(o.armL.rotation.x,-1.32,k),lerp(o.armL.rotation.y,.15,k),lerp(o.armL.rotation.z,.35,k));
+    o.legs[0].rotation.x+=-.14*k;o.legs[1].rotation.x+=.12*k;o.natFaR=Math.max(o.natFaR||0,.95*k);o.natFaL=Math.max(o.natFaL||0,.9*k);return;}
   if(C.hit&&st>C.pull&&st<C.done){const pull=phase(st,C.pull,C.done);o.b.rotation.x+=.48*Math.sin(pull*Math.PI);o.legs[0].rotation.x=-.6*Math.sin(pull*Math.PI);o.legs[1].rotation.x=.5*Math.sin(pull*Math.PI);}
 }
 const natHookArm={a:new THREE.Vector3(),down:new THREE.Vector3(0,-1,0),idle:new THREE.Quaternion(),cast:new THREE.Quaternion()};
@@ -619,11 +685,13 @@ function natureEvent(ev){
     case 'nature_seed':natSeed(ev);break;
     case 'nature_spore_gain':case 'nature_spore_send':natSeed(ev,true);break;
     case 'nature_hook':{
-      const student=PM3.get(ev.id);if(student)castStart(student,'vine',1);
+      const student=PM3.get(ev.id);if(student){castStart(student,'vine',1);student.cgd=0;student.gw=0;}   // no guard stance after the Dash (user 2026-11-14)
       natHook(ev,student);
       snd('whoosh',{x,y,vol:.45});break;
     }
     case 'nature_coil':natCoil(ev);break;
+    case 'nature_bigslam':natBigSlam(ev);break;
+    case 'nature_thornline':natThornLine(ev);break;
     case 'nature_slam':natSlam(ev);break;
     case 'nature_summon':case 'nature_shield_block':case 'nature_pea_shot':case 'nature_pulse':case 'nature_plant_hit':case 'nature_ball_land':case 'nature_ball_pop':case 'nature_spore_pop':case 'nature_lotus_switch':break;   // natMoment
     case 'nature_pea_muzzle':natMuzzle(ev);snd('whoosh',{x,y,vol:.6});break;

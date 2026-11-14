@@ -264,12 +264,13 @@ function syncPlayers(P,mode,now,dt){
     windFX(o,p,pz,now,dt);waterFX(o,p,pz,now,dt);
     lateSkillPose(o,p,dt,now);
     waterCharacterPose(o,p,dt,now);windCharacterPose(o,p,dt,now,v);windLatePose(o,p,dt);stormBowView(o,p,dt,now);stormStaffView(o,p,dt,now);dashPose(o,p,dt,now);   // ท่าพุ่ง (js/72) ทับท่าอื่นตอนพุ่ง
+    natHookPose(o);natEmpPose(o);   // Nature Dash / thorn line poses must run before rigSync or the rigged arm never sees them
     const domeKnee=stormDomePose(o,p,pz,now);
     const whip=p.nt?.[0];
-    const activeWhip=whip&&!p.dn&&!p.fl?{start:whip[0],age:whip[1],side:whip[2],angle:whip[3]}:null;
+    const activeWhip=whip&&!p.dn&&!p.fl&&!whip[4]?{start:whip[0],age:whip[1],side:whip[2],angle:whip[3]}:null;   // empowered swings draw their own effect (js/68-nature-view)
     if(activeWhip)natureWhipPose(o,activeWhip);
     else if(o.natureWhipView?.vine.visible)o.armR.rotation.y=0;
-    if(o.rig){rigSync(o,dt);windForearm(o);stormBowForearm(o);earthFistForearm(o);if(domeKnee)dpKnees(o,0,domeKnee);}
+    if(o.rig){rigSync(o,dt);windForearm(o);stormBowForearm(o);earthFistForearm(o);natForearmR(o);if(domeKnee)dpKnees(o,0,domeKnee);}
     if(activeWhip||o.natureWhipView)natureWhipView(o,activeWhip);
     natureCharacter(o,p,now);
     if(ragTick(o,p,v,dt,now))o.tip.scale.setScalar(0.001);   // ล้ม/กระแทกแรง = ragdoll (js/48)

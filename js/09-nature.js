@@ -1,6 +1,6 @@
 // Nature combat is simulated by the host. Positions are map units, heights are metres.
 const NATUREP=3;
-const NAT={seedRange:300,hookRange:560,hookSpeed:1700,lotusRange:160,treeRange:500,
+const NAT={seedRange:300,hookRange:560,hookSpeed:1700,hookPull:2700,foeHold:.45,lotusRange:160,treeRange:500,
   treeHeight:23,treeGrow:2.0,treeGrow0:3.4,treeLife:12,peaRadius:55,peaRange:650,ballPull:160,wallHalf:105,wallThick:12,wallHeight:3.6};
 const natureDist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
 const natureItems=()=>G.nature||(G.nature=[]);
@@ -207,7 +207,7 @@ function natureSendSpore(p,t){
 function natureShield(p){
   if(!p.shieldOn||G.time-p.shieldT<1.5||G.time<(p.natureSlamAt||0))return;   // thorns finish climbing first, then strike at most two targets per volley
   const last=p.natureShieldHits||(p.natureShieldHits=new Map());
-  const targets=foesOf(p.team).filter(t=>natureDist(p,t)<=180&&Math.abs(cH(t)-cH(p))<2.8
+  const targets=foesOf(p.team).filter(t=>natureDist(p,t)<=260&&Math.abs(cH(t)-cH(p))<2.8
     &&G.time>=(last.get(t)||0)&&natureSight(p,t,cH(p),cH(t)));
   if(targets.length)p.natureSlamAt=G.time+.9;
   for(const t of targets.sort((a,b)=>natureDist(p,a)-natureDist(p,b)).slice(0,2)){
@@ -222,10 +222,14 @@ function natureHookCandidates(p){
   return [...plist().filter(q=>q!==p&&natureLive(q)),...G.en.filter(natureLive),
     ...naturePlants(p).filter(o=>G.time>=o.born&&natureLive(o))];
 }
+// Dash: 2 charges, 6 s each; hooking an enemy refills that charge in 3 s (user 2026-11-14).
+const NAT_DASH={n:2,cd:6,hitCd:3,root:1.5,empT:4};
+function natureDashCharge(p,dt){if(p.ndN===undefined){p.ndN=NAT_DASH.n;p.ndT=0;}if(p.ndN<NAT_DASH.n){p.ndT-=dt;if(p.ndT<=0){p.ndN++;p.ndT=p.ndN<NAT_DASH.n?NAT_DASH.cd:0;}}p.cd.dodge=p.ndN>0?0:Math.max(0,p.ndT);p.cdMax.dodge=NAT_DASH.cd;}
 function natureDash(p,inp,pr,dt,setCd){
+  natureDashCharge(p,dt);
   if(p.natureHook)return true;
-  if(!pr.sp||p.cd.dodge>0)return false;
-  setCd('dodge',8);p.shieldOn=false;
+  if(!pr.sp||p.ndN<=0)return false;
+  if(p.ndN===NAT_DASH.n)p.ndT=NAT_DASH.cd;p.ndN--;p.cd.dodge=p.ndN>0?0:p.ndT;p.shieldOn=false;
   const az=p.ang,h=p.z+1.35,pitch=Number.isFinite(inp.ah)
     ?Math.atan2((inp.ah-h)*20,Math.max(1,Math.hypot(inp.ax-p.x,inp.ay-p.y))) : (inp.ap||0);
   const dx=Math.cos(az)*Math.cos(pitch),dy=Math.sin(az)*Math.cos(pitch),dz=Math.sin(pitch);
@@ -245,7 +249,8 @@ function natureDash(p,inp,pr,dt,setCd){
   const end=wall||goal;
   const flight=.43;   // approved Dash timing: vine reaches the target at .43 s, tension until .73 s, then the pull
   natureEmit('hook',{...p,h},{id:p.id,x2:end.x,y2:end.y,h2:wall?.h??goalH,t:flight,hit:!!best,ally:best?.team===p.team,tid:best&&!best.isE&&!best.isM?best.id:null,kind:best?(best.natKind?'plant':best.team===p.team?'ally':'foe'):null});
-  p.natureHook={target:best,at:G.time+flight,pull:G.time+flight+.3,end:G.time+flight+1.3};
+  const foe=!!best&&best.team!==p.team&&!best.natKind,hold=foe?NAT.foeHold:.3;
+  p.natureHook={target:best,at:G.time+flight,pull:G.time+flight+hold,end:G.time+flight+hold+1,foe};
   return true;
 }
 function natureHookMove(p,dt){
@@ -259,11 +264,17 @@ function natureHookMove(p,dt){
     if(!t.natKind){
       t.natureCoilEnd=G.time+3;
       if(t.team===p.team)t.natureWrap={end:G.time+3,next:G.time+.5};
-      else{naturePoison(t,7,3,p.id,'hook');addSlow(t,.5,3);}
+      else{addRoot(t,(hook.end-G.time)+NAT_DASH.root);t.natureCoilEnd=G.time+(hook.end-G.time)+NAT_DASH.root;if(p.ndN<NAT_DASH.n)p.ndT=Math.min(p.ndT,NAT_DASH.hitCd);}   // enemy: bound in thorns, pulled to us
       natureEmit('coil',{...t,h:cH(t)},{id:t.isE||t.isM?null:t.id,ally:t.team===p.team});
     }
   }
   if(G.time<hook.pull)return true;
+  if(hook.foe){   // pull the enemy to us instead of flying to them
+    const d=natureDist(p,t),stop=(t.r||PR)+PR+14,step=Math.min(Math.max(0,d-stop),NAT.hookPull*dt);
+    if(step>0){t.x+=(p.x-t.x)*step/d;t.y+=(p.y-t.y)*step/d;t.vx=t.vy=0;collideWorld(t,t.r||PR,t.z??t.h);}
+    if(d-stop<=step+.1){p.natureHook=null;p.natureEmp={k:'line',until:G.time+NAT_DASH.empT};}
+    return true;
+  }
   const d=natureDist(p,t),stop=(t.r||PR)+PR+3,step=Math.min(Math.max(0,d-stop),NAT.hookSpeed*dt);
   if(step>0){
     p.x+=(t.x-p.x)*step/d;p.y+=(t.y-p.y)*step/d;
@@ -272,7 +283,7 @@ function natureHookMove(p,dt){
   }
   if(d-stop<=step+.1){
     if(t.natKind){p.haste=3;p.hasteF=1.5;if(t.natKind==='turret')t.bigPea=true;}
-    p.natureHook=null;
+    p.natureHook=null;p.natureEmp={k:'line',until:G.time+NAT_DASH.empT};
   }
   return true;
 }
@@ -412,19 +423,21 @@ function natureUpdate(dt){
 }
 
 function natureReset(p){
+  p.ndN=NAT_DASH.n;p.ndT=0;p.natureEmp=null;
   p.natureWhip=p.natureHook=p.natureFocus=p.natureShieldHits=p.natureSpores=p.naturePoison=p.natureWrap=null;
   p.natureFire=false;p.natureCoilEnd=p.natureSlow=0;p.nwc=NAT_WALLS;p.nwr=0;
 }
 function natureSnapP(p){
   const w=p.natureWhip,age=w?G.time-w.start:0;
-  const swing=w&&!w.cancelled&&age<NATURE_WHIP.duration?[w.start,age,w.side,w.angle]:0;
+  const swing=w&&!w.cancelled&&age<NATURE_WHIP.duration?[w.start,age,w.side,w.angle,w.emp==='slam'?1:w.emp==='line'?2:0]:0;
   const spores=p.natureSpores?.filter(o=>o.end>G.time).length||0;
   const coil=Math.max(0,(p.natureCoilEnd||0)-G.time);
   const tree=natureLive(p)?natureGuardian(p):null;
   const zone=!!tree||!!G.nature?.some(o=>natureTreeReady(o)&&natureDist(o,p)<=NAT.treeRange);
   const A=p.natAim,aim=A?[A.k==='wall'?1:2,A.spot.x,A.spot.y,A.spot.h||0,A.a]:0;
   const nwc=p.nwc??NAT_WALLS,nwr=nwc<NAT_WALLS?Math.round((p.nwr||0)/SPELLS.thornburst.cd*100)/100:0;
-  return p.pathIdx===NATUREP||swing||spores||coil||zone||aim?[swing,spores,coil,tree?.id||0,zone,aim,nwc,nwr]:0;
+  const emp=p.natureEmp&&p.natureEmp.until>G.time?(p.natureEmp.k==='slam'?1:2):0;
+  return p.pathIdx===NATUREP||swing||spores||coil||zone||aim?[swing,spores,coil,tree?.id||0,zone,aim,nwc,nwr,emp,p.ndN??NAT_DASH.n]:0;
 }
 function natureLotusCooldown(p){
   const lotus=p.pathIdx===NATUREP&&naturePlants(p,'lotus')[0];
