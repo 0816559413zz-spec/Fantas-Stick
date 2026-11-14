@@ -503,7 +503,7 @@ function stormDomeMat(){if(_stDomeM)return _stDomeM.clone();
     vertexShader:'varying vec3 vN;varying vec3 vV;varying vec3 vP;void main(){vec4 w=modelMatrix*vec4(position,1.);vN=normalize(mat3(modelMatrix)*normal);vV=normalize(cameraPosition-w.xyz);vP=position;gl_Position=projectionMatrix*viewMatrix*w;}',
     fragmentShader:'uniform float uT,uK;varying vec3 vN;varying vec3 vV;varying vec3 vP;void main(){float fr=pow(1.-abs(dot(vN,vV)),2.2);float an=atan(vP.z,vP.x);float y=vP.y;'+
       'float w1=sin(y*14.+sin(an*3.+uT*1.3)*0.9-uT*2.4);float w2=sin(y*22.-sin(an*2.-uT*1.1)*1.1+uT*3.1);float ln=smoothstep(0.82,1.,w1)*0.9+smoothstep(0.88,1.,w2)*0.6;'+
-      'float bot=smoothstep(-0.35,0.05,y);float a=(fr*0.9+ln*(0.35+0.4*fr)+0.04)*bot*(0.75+0.35*uK);vec3 c=mix(vec3(1.,0.62,0.12),vec3(1.,0.95,0.7),clamp(fr+ln*0.5,0.,1.));gl_FragColor=vec4(c*a,a);}'});
+      'float a=(fr*0.9+ln*(0.35+0.4*fr)+0.04)*(0.75+0.35*uK);vec3 c=mix(vec3(1.,0.62,0.12),vec3(1.,0.95,0.7),clamp(fr+ln*0.5,0.,1.));gl_FragColor=vec4(c*a,a);}'});
   _stDomeM.userData.keep=true;return _stDomeM.clone();}
 function shellPt(x,y,h,R,a,e){return [x+Math.cos(a)*R*Math.cos(e),y+Math.sin(a)*R*Math.cos(e),h+R*S3*Math.sin(e)];}
 function updateStormV(dt){
@@ -688,8 +688,8 @@ function stormFX(o,p,pz,now,dt){
   if(f&2){o.shield.visible=false;const k=Math.min(1,(M[4]||0)/90),R=30,hc=pz+1.15;
     // ผู้ใช้ 2026-11-15 (ref โดมทองแก้ว): โดมขอบชัด + เส้นแสงไหลขึ้นลงเป็นระเบียบรอบโดม (ไม่สุ่มมั่ว) • สายฟ้าแลบแค่นิดหน่อยตามพลังที่ดูดไว้
     if(!o.stD){o.stD=new THREE.Mesh(new THREE.SphereGeometry(1,48,32),stormDomeMat());o.stD.material.userData.keep=true;o.stD.renderOrder=4;o.g.add(o.stD);}
-    o.stD.visible=true;o.stD.position.y=1.0;o.stD.scale.setScalar(R*S3*(1+0.02*Math.sin(now/90)));const U=o.stD.material.uniforms;U.uT.value=now/1000;U.uK.value=k;
-    if(Math.random()<0.15+0.35*k){const a1=rnd(0,6.283),e1=rnd(-0.3,1.1),q=shellPt(p.x,p.y,hc,R,a1,e1),q2=shellPt(p.x,p.y,hc,R,a1+rnd(0.4,0.9),e1+rnd(-0.4,0.4));tbolt(q[0],q[1],q[2],q2[0],q2[1],q2[2],0.08,0,0.06+0.04*k,0);}
+    o.stD.visible=true;o.stD.position.y=1.15;o.stD.scale.setScalar(R*S3*(1+0.02*Math.sin(now/90)));const U=o.stD.material.uniforms;U.uT.value=now/1000;U.uK.value=k;
+    // (ไม่มีสายฟ้าแลบบนโล่แล้ว — ผู้ใช้ 2026-11-15)
     LREQ.push({x:tx(p.x),y:pz+1.2,z:tz(p.y),col:'#ffd23a',int:1.2+1.6*k,dist:8});
   }else if(o.stD)o.stD.visible=false;
   if(o.stG)o.stG.visible=false;
