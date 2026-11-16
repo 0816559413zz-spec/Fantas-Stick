@@ -661,8 +661,12 @@ const NAT_HOLO={};
 function natHoloMake(k){const g=new THREE.Group(),m=new THREE.MeshBasicMaterial({color:'#47f4ff',transparent:true,opacity:.3,depthWrite:false,side:THREE.DoubleSide}),e=new THREE.LineBasicMaterial({color:'#9ffbff',transparent:true,opacity:.75});
   const add=(geo,x,y,z,ry=0)=>{const b=natMesh(geo,m,g);b.position.set(x,y,z);b.rotation.y=ry;const l=new THREE.LineSegments(new THREE.EdgesGeometry(geo),e);l.position.copy(b.position);l.rotation.y=ry;g.add(l);};
   if(k===1){const H=NAT.wallHeight;for(let i=-2;i<=2;i++)add(new THREE.BoxGeometry(2.05,H,1.05),i*2.1,H/2,-i*i*.19,i*.1);}
-  else if(k===3){add(new THREE.CylinderGeometry(.16,.24,3.6,8),0,1.8,0);for(let i=0;i<3;i++){const a=i/3*Math.PI*2;add(new THREE.CylinderGeometry(.9,.9,.08,12),Math.cos(a)*.9,.08,Math.sin(a)*.9);}   // ดอกบัวเต็มต้น (ก้าน ~4 ม. + ใบที่โคน + ดอกบนยอด) ให้เห็นทั้งต้นก่อนวาง
-    for(let i=0;i<8;i++){const a=i/8*Math.PI*2;const b=natMesh(new THREE.ConeGeometry(.42,1.5,4),m,g);b.position.set(Math.cos(a)*.7,4.0,Math.sin(a)*.7);b.rotation.set(Math.sin(a)*.7,0,-Math.cos(a)*.7);}add(new THREE.SphereGeometry(.45,10,8),0,3.9,0);const r=natMesh(new THREE.RingGeometry(.97,1,96),m,g);r.rotation.x=-Math.PI/2;r.position.y=.1;r.scale.setScalar(NAT.lotusRange*S3);}   // ดอกบัว: ดอก + วงรัศมีบัฟ
+  else if(k===3){   // ดอกบัว (ผู้ใช้ 2026-11-16): ใช้โมเดลดอกบัวจริงทั้งต้น ทำเป็นโฮโลแกรมโปร่งแสง + ขอบเรือง + วงรัศมีบัฟ
+    const P=natArt.Lotus(1,false),hm=new THREE.ShaderMaterial({transparent:true,depthWrite:false,side:THREE.DoubleSide,
+      vertexShader:'varying vec3 vN;varying vec3 vV;void main(){vec4 mv=modelViewMatrix*vec4(position,1.);vN=normalize(normalMatrix*normal);vV=normalize(-mv.xyz);gl_Position=projectionMatrix*mv;}',
+      fragmentShader:'varying vec3 vN;varying vec3 vV;void main(){float f=pow(1.-abs(dot(normalize(vN),normalize(vV))),1.2);float e=smoothstep(.45,.85,f);vec3 c=mix(vec3(.25,.8,.9),vec3(.85,1.,1.),e);gl_FragColor=vec4(c*(.85+.5*e),.14+.4*f+.45*e);}'});
+    P.set(1,1,0);if(P.g.parent)P.g.parent.remove(P.g);P.g.traverse(o=>{if(o.isSprite||o.isPoints)o.visible=false;else if(o.isMesh){o.material=hm;o.castShadow=o.receiveShadow=false;}});g.add(P.g);
+    const r=natMesh(new THREE.RingGeometry(.97,1,96),m,g);r.rotation.x=-Math.PI/2;r.position.y=.1;r.scale.setScalar(NAT.lotusRange*S3);}
   else{add(new THREE.CylinderGeometry(.9,1.8,10,9),0,5,0);add(new THREE.IcosahedronGeometry(6.4,1),0,14,0);const r=natMesh(new THREE.RingGeometry(.975,1,96),m,g);r.rotation.x=-Math.PI/2;r.position.y=.1;r.scale.setScalar(NAT.treeRange*S3);}
   return natAdd(g);}
 function natHolo(me){const A=me?.nt?.[5]&&me.al&&!me.dn?me.nt[5]:0;{const k=A?A[0]:0;if(k&&NAT_HOLO.hint!==k)toast(k===1?'คลิก = วางกำแพง • ค้างซ้าย = หมุน • คลิกขวา = ยกเลิก':k===3?'คลิก = วางดอกบัว • คลิกขวา = ยกเลิก':'คลิก = เรียกต้นไม้ • คลิกขวา = ยกเลิก');NAT_HOLO.hint=k;}
