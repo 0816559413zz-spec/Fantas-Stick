@@ -361,5 +361,18 @@
     "p": {
       "r": "ev.r/20"
     }
+  },
+  "loop:stsh": {
+    "fx": "storm/shield"
+  },
+  "loop:stsh_hit": {
+    "fx": "storm/shield_hit"
+  },
+  "loop:stsh_dash": {
+    "fx": "storm/shield_dash"
+  },
+  "efx:stbash": {
+    "fx": "storm/shield_bash",
+    "mode": "add"
   }
 }

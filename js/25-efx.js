@@ -90,11 +90,11 @@ const an=a+rnd(-1.05,1.05),rr=R*rnd(0.55,1.05);PARTS.push({x:px+Math.cos(an)*rr,
       else{FX.flashSprite(x,y,H,(ev.g?'#38dfff':'#ffd23a'),0.18,0.8,0.08,1);FX.flashLight(x,y,H,(ev.g?'#38dfff':'#ffd23a'),1.2,6,0.12);}
       for(let i=0;i<7;i++){const an=rnd(0,6.283);(ev.g?tboltB:tbolt)(x,y,H,x+Math.cos(an)*rnd(35,60),y+Math.sin(an)*rnd(35,60),H+rnd(-0.8,0.8),0.14,0,0.12);}
       burst(x,y,(ev.g?'#23d9ff':'#ffd000'),22,320,0.3,2.4,{h:H,vh:[-1,4],g:3});burst(x,y,'#9fd8ff',8,220,0.25,1.8,{h:H,g:3});if(near)snd('zap',ev);break;}
-    case 'ston':for(let i=0;i<3;i++)tbolt(x+rnd(-12,12),y+rnd(-12,12),H+14,x,y,H+1,0.25,0,0.32,2);FX.flashSprite(x,y,H+1.2,'#fff7c0',0.4,1.6,0.12,1.6);FX.flashLight(x,y,H+2,'#ffd23a',2.5,12,0.25);ring(x,y,'#ffd000',60,0.3,H+0.1);if(near){snd('zap',ev);shake(2);}break;
+    case 'ston':FX.flashSprite(x,y,H+1.2,'#fff7c0',0.3,1.4,0.12,1.2);   /* ไม่มีฟ้าผ่าใส่ตัวเองตอนกางโล่ (ผู้ใช้ 2026-11-16) */FX.flashLight(x,y,H+2,'#ffd23a',2.5,12,0.25);ring(x,y,'#ffd000',60,0.3,H+0.1);if(near){snd('zap',ev);shake(2);}break;
     case 'sthit':{const a=ev.sx!==undefined?Math.atan2(ev.sy-y,ev.sx-x):rnd(0,6.283),q=shellPt(x,y,H,30,a,rnd(-0.3,0.5));
-      FX.flashSprite(q[0],q[1],q[2],'#ffffff',0.4,2.6,0.1,2.2);
-      for(let i=0;i<8;i++){const b=shellPt(x,y,H,30,a+rnd(-1.6,1.6),rnd(-0.9,1.1));tbolt(q[0],q[1],q[2],b[0],b[1],b[2],0.16,0,0.1,i<3?1:0);}
-      burst(q[0],q[1],'#ffd000',18,260,0.3,2.2,{h:q[2],g:2});burst(q[0],q[1],'#ffffff',8,200,0.2,1.6,{h:q[2],g:2});if(near)snd('zap',{x,y,vol:0.5});break;}
+      STHIT[ev.id]=[performance.now(),a];if(fxLoopName('stsh_hit'))fxPlay(fxLoopName('stsh_hit'),{x,y,h:Math.max(0,H-1.2),follow:ev.id,aim:false});   // โดนแล้ว = ระลอกแสงวิ่งบนโดม ไม่มีสายฟ้าแลบ (ผู้ใช้ 2026-11-16)
+      burst(q[0],q[1],'#ffd000',8,160,0.25,1.6,{h:q[2],g:2});if(near)snd('zap',{x,y,vol:0.5});break;}
+    case 'stbash':STBASH[ev.id]=[performance.now(),(ev.a||0)+Math.PI,1];if(ev.t!==undefined)STBASH[ev.t]=[performance.now(),ev.a||0,0.8];break;   // เรา: ถูกดันถอยหลัง • คนโดน: ถูกดันไปทางที่เราพุ่ง   // ภาพ = assets/fx/storm/shield_bash (bind efx:stbash)
     case 'stoff':burst(x,y,'#ffd000',10,100,0.3,1.8,{h:H+1,g:1});break;
     case 'stblast':{const R=ev.r;
       for(let k=0;k<4;k++)later(k*0.03,()=>{const rr=30-k*6;for(let j=0;j<4;j++){const a1=rnd(0,6.283),e1=rnd(-0.8,1),q=shellPt(x,y,H+1.15,rr,a1,e1),q2=shellPt(x,y,H+1.15,rr,a1+rnd(0.6,1.4),e1);tbolt(q[0],q[1],q[2],q2[0],q2[1],q2[2],0.06,0,0.1);}});

@@ -1,0 +1,130 @@
+{
+ "v": 1,
+ "desc": "Dash ตอนกางโล่สายฟ้า: สายฟ้าเลื้อยรอบผิวโดมตลอดที่พุ่ง (bind loop:stsh_dash) • ผู้ใช้ 2026-11-16",
+ "tags": [
+  "storm",
+  "shield",
+  "dash",
+  "loop"
+ ],
+ "pal": "storm",
+ "dur": 0.3,
+ "layers": [
+  {
+   "id": "arc_r",
+   "t": "bolt",
+   "att": "feet",
+   "pos": [
+    2.3,
+    1.2,
+    0
+   ],
+   "at": 0,
+   "life": 0.3,
+   "loop": true,
+   "n": 2,
+   "radial": 1.4,
+   "jit": 0.5,
+   "w": 0.1,
+   "br": 2,
+   "acc": true,
+   "blife": 0.08,
+   "rate": 20
+  },
+  {
+   "id": "arc_l",
+   "t": "bolt",
+   "att": "feet",
+   "pos": [
+    -2.3,
+    1.2,
+    0
+   ],
+   "at": 0,
+   "life": 0.3,
+   "loop": true,
+   "n": 2,
+   "radial": 1.4,
+   "jit": 0.5,
+   "w": 0.1,
+   "br": 2,
+   "acc": true,
+   "blife": 0.08,
+   "rate": 20
+  },
+  {
+   "id": "arc_f",
+   "t": "bolt",
+   "att": "feet",
+   "pos": [
+    0,
+    1.2,
+    2.3
+   ],
+   "at": 0,
+   "life": 0.3,
+   "loop": true,
+   "n": 2,
+   "radial": 1.4,
+   "jit": 0.5,
+   "w": 0.1,
+   "br": 2,
+   "acc": true,
+   "blife": 0.08,
+   "rate": 20
+  },
+  {
+   "id": "arc_b",
+   "t": "bolt",
+   "att": "feet",
+   "pos": [
+    0,
+    1.2,
+    -2.3
+   ],
+   "at": 0,
+   "life": 0.3,
+   "loop": true,
+   "n": 2,
+   "radial": 1.4,
+   "jit": 0.5,
+   "w": 0.1,
+   "br": 2,
+   "acc": true,
+   "blife": 0.08,
+   "rate": 20
+  },
+  {
+   "id": "arc_t",
+   "t": "bolt",
+   "att": "feet",
+   "pos": [
+    0,
+    3.0,
+    0
+   ],
+   "at": 0,
+   "life": 0.3,
+   "loop": true,
+   "n": 2,
+   "radial": 1.4,
+   "jit": 0.5,
+   "w": 0.1,
+   "br": 2,
+   "acc": true,
+   "blife": 0.08,
+   "rate": 20
+  },
+  {
+   "id": "glow",
+   "t": "light",
+   "att": "chest",
+   "at": 0,
+   "life": 0.3,
+   "loop": true,
+   "col": "#ffd23a",
+   "int": 2,
+   "dist": 9
+  }
+ ]
+}

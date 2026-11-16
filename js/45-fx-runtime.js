@@ -62,7 +62,7 @@ function fxCol(c,I){if(typeof c!=='string')return '#ffffff';if(c[0]==='$')return
 function fxPal(name,col){if(col&&(name==='col'||!name))return palOf('col',col);return VFXPAL[name]||palOf('col',col||'#ffffff');}
 // ---------- ตำแหน่ง: กรอบของเอฟเฟกต์ (+x ขวา, +y ขึ้น, +z ทิศเล็ง) → พิกัดแผนที่ ----------
 const _fxw=new THREE.Vector3();
-function fxAnchor(I){const o=I.o;if(o.follow==null)return;const P=PM3.get(o.follow);if(!P)return;const q=simOf(P.g.position);I.x=q.x;I.y=q.y;I.fz=Math.max(0,q.h-GY(q.x,q.y));
+function fxAnchor(I){const o=I.o;if(o.follow==null)return;const P=PM3.get(o.follow);if(!P)return;const q=simOf(P.g.position);I.x=q.x;I.y=q.y;I.fz=Math.max(0,q.h-GY(q.x,q.y));if(o.off){I.x+=o.off[0];I.y+=o.off[1];I.fz+=o.off[2]||0;}   // off = เลื่อนชั่วคราว (โล่สายฟ้าเด้งตามตัว)
   if(o.aim!==false){const v=VIEW.cur&&VIEW.cur.P.find(p=>p.id===o.follow);if(v&&v.a!==undefined)I.a=v.a;}
   if(P.tip){if(P.tipW&&performance.now()-(P.tipWT||0)<200)_fxw.copy(P.tipW);else P.tip.getWorldPosition(_fxw);const t=simOf(_fxw);I.wand=[t.x,t.y,Math.max(0,t.h-GY(t.x,t.y))];}}   // tipW = ปลายไม้หลังใส่ท่าแล้ว (getWorldPosition ตรงนี้ได้ท่ายืน → แสงไปอยู่ที่สะโพก)
 function fxBase(I,att){switch(att){case 'ground':return [I.x,I.y,I.o.gh!==undefined?I.o.gh:0];case 'feet':return [I.x,I.y,I.fz];case 'chest':return [I.x,I.y,I.fz+1.2];case 'head':return [I.x,I.y,I.fz+1.9];

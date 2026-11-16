@@ -1,0 +1,14 @@
+{
+  "v": 1,
+  "desc": "โล่สายฟ้า: เส้นแสงคดเคี้ยวตัดกันแบบสุ่ม ไม่ขนานกัน (ref designs/storm_vfx/shield_ref.png) ต่อขอบได้ทั้งแนวนอน/ตั้ง • ภาพวาดด้วย python (ขาว + alpha)",
+  "gen": "image",
+  "seed": 11,
+  "px": 256,
+  "cols": 1,
+  "rows": 1,
+  "kind": "loop",
+  "ramp": "white",
+  "add": true,
+  "p": {},
+  "tags": ["storm", "shield"]
+}
