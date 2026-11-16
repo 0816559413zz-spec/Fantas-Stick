@@ -2195,6 +2195,18 @@
    "dur": 1.8,
    "n": 21
   },
+  "water/beam_end": {
+   "v": "afc720f7",
+   "desc": "ปลาย Abyssal Beam (ผู้ใช้อนุมัติ 2026-11-16, ref designs/water_beam_end_ref.png): ลูกนีออนขาวเล็กขนาดพอ ๆ กับลำ + วงนีออนขาวหันตามลำ + ลูกออร่าน้ำโปร่ง + น้ำสาดการ์ตูนม้วนปลาย (tex/water_splash_curl) + หยดน้ำ • ลำไม่บานที่ปลาย (uFl 0) • เล่นวนที่ปลายลำ (wtLoop 'tip')",
+   "pal": "ice",
+   "tags": [
+    "water",
+    "beam",
+    "loop"
+   ],
+   "dur": 1,
+   "n": 8
+  },
   "water/beam_hit": {
    "v": "bb116b36",
    "desc": "Abyssal Beam โดน (รอบ 5): น้ำสาดใหญ่ที่ตัวคนโดน ชิ้นน้ำการ์ตูนบานออก มงกุฎน้ำ และคลื่น 2 วงดันออกรอบตัว",
@@ -6270,6 +6282,14 @@
    "gen": "image",
    "kind": "loop",
    "cols": 1,
+   "rows": 1
+  },
+  "water_splash_curl": {
+   "v": "534bee7f",
+   "desc": "น้ำสาดการ์ตูนทึบสีฟ้า ม้วนปลายเป็นลอน 4 แบบ + หยดน้ำ (ref designs/water_beam_end_ref.png) ปลาย Abyssal Beam • ภาพวาดด้วย python",
+   "gen": "image",
+   "kind": "loop",
+   "cols": 4,
    "rows": 1
   },
   "water_splash_flakes": {
