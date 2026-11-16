@@ -155,17 +155,18 @@ function updateZV(dt){
   for(let i=WVV.length-1;i>=0;i--){
     const w=WVV[i],st=Math.min(w.len-w.d,GREND.v.waveSpd*dt),c=Math.cos(w.a),sn=Math.sin(w.a);w.d+=st;
     if(!w.gnd){const cp=Math.cos(w.pt);w.x+=c*cp*st;w.y+=sn*cp*st;w.h+=Math.sin(w.pt)*st/20;
-      if(w.h<=0.25){w.gnd=1;w.h=0;iceChips(w.x,w.y,0.6,6,220,4);dfCracks(w.x,w.y,0.06,35,'#bfeaff',0.4);if(nearMe(w.x,w.y,900))snd('break',{x:w.x,y:w.y,vol:0.5});}}
+      if(w.h<=0.25){w.gnd=1;w.h=0;dfCracks(w.x,w.y,0.06,30,'#bfeaff',0.3);   /* ไม่มีน้ำแข็งโผล่จากพื้น (ผู้ใช้ 2026-11-16) */if(nearMe(w.x,w.y,900))snd('break',{x:w.x,y:w.y,vol:0.5});}}
     else{w.x+=c*st;w.y+=sn*st;w.cr=(w.cr||0)+st;if(w.cr>=140){w.cr=0;dfCracks(w.x,w.y,0.06,30,'#bfeaff',0.35);}}
     const x=w.x,y=w.y,px=-sn,py=c,k=w.d/w.len,M=w.m,gy=GY(x,y),wy=gy+(w.gnd?1.05:w.h);
     M.position.set(tx(x),wy,tz(y));
     if(w.gnd)_fsl.set(tx(x+c*40),wy,tz(y+sn*40));else{const cp=Math.cos(w.pt);_fsl.set(tx(x+c*cp*40),wy+Math.sin(w.pt)*2,tz(y+sn*cp*40));}
-    M.lookAt(_fsl);M.scale.setScalar((0.35+0.65*Math.min(1,w.d/80))*1.75);   // ใหญ่ขึ้นเห็นชัด (ผู้ใช้ 2026-11-15)M.material.uniforms.uFade.value=k>0.82?(1-k)/0.18:1;M.material.uniforms.uSeed.value=w.len*0.01+i;
+    // คลื่นใหญ่ขึ้นเห็นชัด ×1.75 (ผู้ใช้ 2026-11-15)
+    M.lookAt(_fsl);M.scale.setScalar((0.35+0.65*Math.min(1,w.d/80))*1.75);M.material.uniforms.uFade.value=k>0.82?(1-k)/0.18:1;M.material.uniforms.uSeed.value=w.len*0.01+i;
     LREQ.push({x:tx(x),y:wy,z:tz(y),col:'#8fe0ff',int:2.6,dist:10});
     for(let q=0;q<4;q++){const s2=rnd(-48,48);PARTS.push({x:x+px*s2,y:y+py*s2,h:(w.gnd?1.05:w.h)+rnd(-0.15,0.15),vx:c*60,vy:sn*60,vh:0,life:0.16,max:0.16,col:q%2?'#ffffff':'#7fd4ff',size:rnd(4,6.5),g:0});}   // แสงแนวคมคลื่น
     // เศษน้ำแข็งเล็กปลิวตามหลัง (น้อย ไม่บังเส้น)
     for(let q=0;q<2;q++){const s=rnd(-34,34);PARTS.push({x:x+px*s-c*10,y:y+py*s-sn*10,h:(w.gnd?0:w.h)+rnd(0.2,1.8),vx:c*120,vy:sn*120,vh:rnd(0,2),life:0.3,max:0.3,col:q?'#ffffff':'#bfeaff',size:rnd(1.4,2.4),g:4,drag:3});}
-    if(w.d>=w.len){if(w.gnd){playFx('ice_impact',x,y,1.2,{s:0.6});iceChips(x,y,1,6,200,4);}
+    if(w.d>=w.len){if(w.gnd){burst(x,y,'#dff6ff',12,170,0.28,1.8,{h:1,g:1});}   // จบ: ประกายเล็ก ไม่มีหมอก/น้ำแข็ง (ผู้ใช้ 2026-11-16)
       else{burst(x,y,'#dff6ff',w.hitWall?26:14,w.hitWall?260:180,0.3,2,{h:w.h,g:1});if(w.hitWall){iceChips(x,y,0.8,10,240,4);if(nearMe(x,y,900))snd('break',{x,y,vol:0.5});}}
       frostSlashPut(M);WVV.splice(i,1);}
   }

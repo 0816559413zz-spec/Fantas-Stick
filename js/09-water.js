@@ -63,12 +63,18 @@ function waterCageLaunch(p){
   p.wcCharge=0;
   const V=WT_CG,a=p.ang,h=p.z+1.45,pt=waterBeamPitch(p,p.x,p.y,h);
   const pr=shoot(p,'wcage',{sp:'aquacage',spd:V.spd,r:V.r,dmg:V.dmg,life:V.range/V.spd,quiet:1,h,cageYaw:a,cagePitch:pt});
-  p.wcOrb=pr;
+  p.wcOrb=pr;pr.cageWait=8;   // ผู้ใช้ 2026-11-16: ลูกค้างอยู่กับที่จนกว่าจะกดค้างคลิก (ค้างนานสุด 8 วิ แล้วพุ่งตรงเอง)
+  pr.cageHeld=!!p.inp?.fire;   // กดค้างอยู่ตั้งแต่ตอนร่าย = ต้องปล่อยก่อนแล้วกดใหม่
   waterCageSteer(pr,0);
   emit({k:'efx',z:'wtcagetoss',x:pr.x,y:pr.y,h:pr.h,id:p.id});
 }
 function waterCageSteer(pr,dt){
   const p=G.players[pr.owner],i=p?.inp,V=WT_CG;
+  if(pr.cageWait>0){if(pr.cageHeld&&!i?.fire)pr.cageHeld=false;
+    pr.cageWait-=dt;pr.life+=dt;pr.vx=pr.vy=pr.vh=0;
+    if(p?.alive&&!pr.cageHeld&&i?.fire){pr.cageWait=0;pr.cgT=0;}   // เริ่มกดค้าง = เริ่มคุมลูก
+    else if(pr.cageWait>0&&p?.alive)return;
+    else{pr.cageWait=0;pr.cgT=1;}}   // ครบเวลา/คนร่ายตาย = ปล่อยพุ่งตรง
   // ผู้ใช้ 2026-11-15: กดคลิกซ้ายค้าง = คุมลูกเลี้ยวตามเมาส์ • ปล่อย = ลูกพุ่งตรงไปทางเมาส์ตอนนั้นเลย แล้วเราเป็นอิสระ
   if(!pr.cageFree&&(pr.cgT=(pr.cgT||0)+dt)>0.12&&p&&!i?.fire){pr.cageFree=true;if(Number.isFinite(i?.ax)){const dx=i.ax-pr.x,dy=i.ay-pr.y,dz=(i.ah+terrT(p.x,p.y)-pr.h-terrT(pr.x,pr.y))*20;pr.cageYaw=Math.atan2(dy,dx);pr.cagePitch=clamp(Math.atan2(dz,Math.hypot(dx,dy)),-1.45,1.45);}if(p.wcOrb===pr)p.wcOrb=null;emit({k:'efx',z:'wtcagefree',x:pr.x,y:pr.y,h:pr.h,id:p.id});}
   if(pr.cageFree){}

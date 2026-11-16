@@ -143,8 +143,8 @@ function frostFX(o,p,pz,now,dt){
   // Mirror Legion ร่าย 1 วิ (ผู้ใช้ 2026-11-14): อาวุธลอยทำท่าตามแบบที่เลือก • u = 0..1 ของการร่าย
   if(fwOn&&o.mlcT>0){const u=clamp(1-o.mlcT/(o.mlcT0||1),0,1),N=o.mlcN,E=t=>1-Math.pow(1-clamp(t,0,1),3);P.strike=false;P.rate=18;o.fwSub=0;
     if(N==='mlraise'){   // ลอยขึ้นเหนือหัว ชี้ฟ้า ชาร์จ → ลอยมาหน้าตัวแล้วหมุนเป็นกังหันเร็วขึ้นเรื่อย ๆ → แยกเป็น 3 เล่มตอนร่ายจบ (ไม่สับลง)
-      if(u<.5){const e=E(u/.25),sp=u*9;P.x=lerp(P.x,0,e);P.y=lerp(P.y,3.3,e);P.z=lerp(P.z,0.25,e);P.bx=0;P.by=1;P.bz=0;P.nx=Math.cos(sp);P.ny=0;P.nz=Math.sin(sp);P.rate=14;}
-      else{const e=E((u-.5)/.12),t=u-.5,a=t*t*95+t*6;P.x=0;P.y=lerp(3.3,1.9,e);P.z=lerp(0.25,2.3,e);P.bx=Math.sin(a);P.by=Math.cos(a);P.bz=0;P.nx=0;P.ny=0;P.nz=1;P.strike=false;P.rate=40;}}
+      // ผู้ใช้ 2026-11-16: ไม่ชูขึ้นฟ้าแล้ว — ดาบพุ่งมาหน้าตัวทันทีแล้วหมุนเป็นกังหันเร็วขึ้นเรื่อย ๆ → แยก 3 เล่มตอนร่ายจบ (ร่ายเร็วขึ้น)
+      {const e=E(u/.18),a=u*u*38+u*8;P.x=lerp(P.x,0,e);P.y=lerp(P.y,1.9,e);P.z=lerp(P.z,2.3,e);P.bx=Math.sin(a);P.by=Math.cos(a);P.bz=0;P.nx=0;P.ny=0;P.nz=1;P.strike=false;P.rate=40;}}
   }
   // วางอาวุธ: ช่วงฟันจริงวางตรงทุกเฟรม (ทางโค้งคม ไม่ตัดมุม) • นอกนั้นไล่ตามนุ่ม ๆ
   fwAim(P.bx,P.by,P.bz,P.nx,P.ny,P.nz);_fwP.set(P.x,P.y,P.z);
@@ -180,9 +180,9 @@ function frostFX(o,p,pz,now,dt){
       const q=simOf(_tv2);o.wTip=[q.x,q.y];
       if(ff){// แนวผลึกน้ำแข็งตามทางหัวขวาน
         for(let i=0;i<2;i++){const c=rnd(0.07,0.13);iceBit(_cryG,q.x+rnd(-6,6),q.y+rnd(-6,6),Math.max(0.05,q.h-GY(q.x,q.y)+rnd(-0.25,0.25)),c,c*rnd(2,3.2),c,{life:rnd(0.45,0.7),up:0.03,down:0.3,rx:rnd(-1,1),rz:rnd(-1,1),v:[rnd(-25,25),rnd(-25,25),rnd(-1.5,0.3)],spin:rnd(-4,4)});}
-        if(Math.random()<0.6)mistPuff(q.x,q.y,Math.max(0.05,q.h-GY(q.x,q.y)-0.4),{vx:rnd(-25,25),vy:rnd(-25,25),vh:-0.3,size:1.8,grow:0.6,life:rnd(0.7,1),a:0.32});}
+        /* ไม่มีหมอกตาม BA (ผู้ใช้ 2026-11-16) */}
       else{PARTS.push({x:q.x,y:q.y,h:q.h,vx:rnd(-40,40),vy:rnd(-40,40),vh:rnd(-0.5,1),life:0.25,max:0.25,col:Math.random()<0.5?'#ffffff':'#bfeaff',size:rnd(1.4,2.2),g:1});
-        if(Math.random()<0.25)mistPuff(q.x,q.y,Math.max(0.05,q.h-GY(q.x,q.y)-0.3),{vx:rnd(-20,20),vy:rnd(-20,20),vh:-0.2,size:1,grow:0.5,life:rnd(0.5,0.8),a:0.2});}}
+        /* ไม่มีหมอกตาม BA (ผู้ใช้ 2026-11-16) */}}
     else if(o.wtr){trailStop(o.wtr);trailStop(o.wtr2);o.wtr=o.wtr2=null;
       if(o.wAx&&o.wTip){// ขวานจบท่า: พื้นตรงปลายทางร้าวเป็นน้ำแข็ง + เศษผลึกกระเด็น + ฝุ่นหิมะ
         const [x,y]=o.wTip;dfCracks(x,y,0.06,70,'#bfeaff',1);iceChips(x,y,0.2,8,200,4);burst(x,y,'#eaf8ff',14,160,0.5,2.4,{h:0.3,vh:[1,4],g:6,c2:'#5ab8ff'});

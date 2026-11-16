@@ -107,7 +107,7 @@ function windFX(o,p,pz,now,dt){
   else if(o.wWings)o.wWings.visible=false;
   if(alive&&p.sh)o.shield.visible=false;   // ไม่ใช้โล่ลูกแก้วปกติ
   if(alive&&A[11]){if(!wvAlive(s.enh))s.enh=fxPlay('wind/slip_ready',{x:p.x,y:p.y,h,aim:false,follow:p.id});}   // แดชแล้ว นัดถัดไปพร้อม: ขนนกนีออนลอยรอบตัว
-  if(guard){if(!wvAlive(s.guard))s.guard=fxPlay('wind/wall_guard',{x:p.x,y:p.y,h,a:p.a,follow:p.id,s:1.3});else s.guard.a=p.a;if(s.guard){const air=A[5]>=1,lim=air?1.5:.6;s.guard.pitch=-clamp(A[12]||0,-lim,lim);}}   // โล่ใหม่ = กำแพงลมตรงหน้า ปีกไม่ห่อแล้ว (ผู้ใช้ 2026-11-08)
+  if(false&&guard){if(!wvAlive(s.guard))s.guard=fxPlay('wind/wall_guard',{x:p.x,y:p.y,h,a:p.a,follow:p.id,s:1.3});else s.guard.a=p.a;if(s.guard){const air=A[5]>=1,lim=air?1.5:.6;s.guard.pitch=-clamp(A[12]||0,-lim,lim);}}   // โล่ใหม่ = กำแพงลมตรงหน้า ปีกไม่ห่อแล้ว (ผู้ใช้ 2026-11-08)
   else if(s.guard){fxKill(s.guard);s.guard=null;}
   // โล่ลม (ผู้ใช้ 2026-11-15): เปลือกโค้งหน้าตัว ขอบชัด + เส้นลมไหลเป็นระเบียบ ให้รู้ชัดว่ากางโล่
   if(guard){if(!o.wShell){const m=windShellMat();o.wShell=new THREE.Mesh(new THREE.SphereGeometry(1,40,24,Math.PI*0.08,Math.PI*0.84,Math.PI*0.08,Math.PI*0.62),m);o.wShell.renderOrder=4;o.g.add(o.wShell);}
@@ -270,31 +270,15 @@ function windShellMat(){if(!_wShellM){_wShellM=new THREE.ShaderMaterial({uniform
     'float f=sin(vU.y*40.+sin(vU.x*6.+uT*2.)*1.2)*0.5+0.5;float flow=smoothstep(0.86,1.,sin(vU.x*18.-uT*5.+vU.y*3.)*0.5+0.5)*smoothstep(0.6,1.,f);'+
     'float a=clamp(fr*0.5+ed*0.95+flow*0.5+0.08,0.,0.9);vec3 c=mix(vec3(0.15,0.85,0.35),vec3(0.75,1.,0.8),clamp(ed+flow*0.6,0.,1.));gl_FragColor=vec4(c,a);}'});_wShellM.userData.keep=true;}
   return _wShellM;}
-function drawWindHud(x,y,A,me){const g=Math.max(0,Math.min(100,A[0]))/100,full=g>=1,R=34,a0=Math.PI*0.62,a1=Math.PI*1.38;
-  cx.lineCap='round';cx.lineWidth=5;cx.strokeStyle='rgba(0,0,0,0.45)';cx.beginPath();cx.arc(x,y,R,a0,a1);cx.stroke();
-  if(g>0){cx.strokeStyle=full?`rgba(239,255,232,${0.75+0.25*Math.sin(performance.now()/120)})`:'#8dff65';cx.lineWidth=full?5:3.5;cx.beginPath();cx.arc(x,y,R,a1-(a1-a0)*g,a1);cx.stroke();}
-  cx.lineCap='butt';cx.font='600 12px Kanit,sans-serif';cx.textAlign='right';cx.fillStyle=full?'#efffe8':'#b8ff85';cx.fillText(full?'GALE':Math.floor(g*100)+'%',x-R-8,y+4);
-  for(let i=0,N=W_WL.max;i<N;i++){
-    cx.beginPath();cx.arc(x-(N-1)*6+i*12,y+R+8,4.5,0,6.283);
-    cx.fillStyle='#17332a';cx.fill();cx.lineWidth=1;cx.strokeStyle='#8aca8b';cx.stroke();
-    if(i<(A[2]|0)){cx.beginPath();cx.arc(x-(N-1)*6+i*12,y+R+8,2.8,0,6.283);cx.fillStyle='#a4ff7e';cx.fill();}
-  }
-  const kit=getKit(me.id),slip=kit.ids.indexOf(SPELLS.vortexbind.i),dx=x+R+8,dy=y+4;
-  const dashCd=CDK.indexOf('dodge'),dashFill=1-clamp((me.cd[dashCd]||0)/(me.cm[dashCd]||1),0,1);
-  const dashKey=slotKey('Shift')+' ↑',slipKey=slip<0?'':slotKey(SLOTK[SKORD.indexOf(slip+1)].toUpperCase());
-  // ผู้ใช้ 2026-11-15: ไม่มีกล่องตาราง — ไอคอนชัด ๆ + วงคูลดาวน์รอบไอคอน • ปุ่มตัวเล็กใต้ไอคอน
+function drawWindHud(x,y,A,me){   // ผู้ใช้ 2026-11-16: HUD สายลมโชว์แค่ Slipstream (ไม่โชว์ Shift/Dash, Downburst, เกจ Gale, ข้อความ)
+  const kit=getKit(me.id),slip=kit.ids.indexOf(SPELLS.vortexbind.i);if(slip<0)return;
+  const slipKey=slotKey(SLOTK[SKORD.indexOf(slip+1)].toUpperCase()),n=W_VX.sMax,x0=x-(n-1)*13;
   const icon=(id,ix,iy,r,fill,ready,key)=>{cx.beginPath();cx.arc(ix,iy,r,0,6.283);cx.fillStyle='rgba(8,24,18,0.55)';cx.fill();
     const im=icoTint(id,ready?'#eafff1':'#7f9a8a',Math.round(r*1.5));if(im)cx.drawImage(im,ix-r*.75,iy-r*.75,r*1.5,r*1.5);
     cx.lineWidth=2.5;cx.strokeStyle='rgba(0,0,0,0.5)';cx.beginPath();cx.arc(ix,iy,r+2,0,6.283);cx.stroke();
     if(fill>0){cx.strokeStyle=ready?'#a4ff7e':'#5fbf5a';cx.beginPath();cx.arc(ix,iy,r+2,-Math.PI/2,-Math.PI/2+6.283*fill);cx.stroke();}
     if(key){cx.font='600 10px Kanit,sans-serif';cx.textAlign='center';cx.fillStyle='rgba(234,255,241,0.8)';cx.fillText(key,ix,iy+r+12);}};
-  icon('dsh_wind',dx+14,dy-6,13,dashFill,dashFill>=1,slotKey('Shift'));
-  if(slip>=0){const n=W_VX.sMax;for(let i=0;i<n;i++){const fill=i<A[10]?1:i===A[10]?clamp((A[13]||0)/100,0,1):0;icon('w_slipstream',dx+46+i*26,dy-6,10,fill,fill>=1,i===0?slipKey:'');}}
-  if(A[3]){cx.textAlign='center';cx.font='600 14px Kanit,sans-serif';cx.fillStyle='#efffe8';cx.fillText('คลิกซ้าย = ดันกำแพง • คลิกขวา = วางตรงจุดเล็ง',x,y+R+30);}
-  if(A[7]===2||A[5]===2&&A[14]>0){
-    cx.textAlign='center';cx.font='600 12px Kanit,sans-serif';cx.fillStyle='#eafff1';
-    cx.fillText('ลูกลม '+(A[14]||0)+'/'+W_FW.fbAmmo,x,y+R+27);
-  }
+  for(let i=0;i<n;i++){const fill=i<A[10]?1:i===A[10]?clamp((A[13]||0)/100,0,1):0;icon('w_slipstream',x0+i*26,y+30,11,fill,fill>=1,i===0?slipKey:'');}
 }
 // ---------- ตัวช่วยเล็งกำแพงลม (เห็นเฉพาะเรา): เส้นโค้งเรืองที่จุดวาง (คลิกขวา) + ลูกศรทางดัน (คลิกซ้าย) ----------
 function wvAimGhost(p,A,h){

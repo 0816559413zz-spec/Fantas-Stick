@@ -1,6 +1,6 @@
 {
  "v": 1,
- "desc": "Dash ตอนกางโล่สายฟ้า: สายฟ้าเลื้อยรอบผิวโดมตลอดที่พุ่ง (bind loop:stsh_dash) • ผู้ใช้ 2026-11-16",
+ "desc": "โล่สายฟ้ามีประจุ Dash ชน: สายฟ้าเล็ก ๆ ช็อตแบบสุ่มรอบผิวโดม 9 จุด ไม่เยอะ (ผู้ใช้ 2026-11-16: รอบ ๆ มั่ว ๆ ไม่ใช่แค่ตรงกลาง) • bind loop:stsh_dash",
  "tags": [
   "storm",
   "shield",
@@ -8,112 +8,196 @@
   "loop"
  ],
  "pal": "storm",
- "dur": 0.3,
+ "dur": 0.9,
  "layers": [
   {
-   "id": "arc_r",
+   "id": "arc0",
    "t": "bolt",
    "att": "feet",
    "pos": [
-    2.3,
-    1.2,
-    0
+    -1.04,
+    1.44,
+    2.09
    ],
-   "at": 0,
-   "life": 0.3,
+   "at": 0.2,
+   "life": 0.6,
    "loop": true,
-   "n": 2,
-   "radial": 1.4,
-   "jit": 0.5,
-   "w": 0.1,
+   "n": 1,
+   "radial": 0.9,
+   "jit": 0.45,
+   "w": 0.09,
    "br": 2,
    "acc": true,
-   "blife": 0.08,
-   "rate": 20
+   "blife": 0.1,
+   "rate": 5.1
   },
   {
-   "id": "arc_l",
+   "id": "arc1",
    "t": "bolt",
    "att": "feet",
    "pos": [
-    -2.3,
-    1.2,
-    0
+    -2.06,
+    1.95,
+    -0.47
    ],
-   "at": 0,
-   "life": 0.3,
+   "at": 0.02,
+   "life": 0.6,
    "loop": true,
-   "n": 2,
-   "radial": 1.4,
-   "jit": 0.5,
-   "w": 0.1,
+   "n": 1,
+   "radial": 0.9,
+   "jit": 0.45,
+   "w": 0.09,
    "br": 2,
-   "acc": true,
-   "blife": 0.08,
-   "rate": 20
+   "acc": false,
+   "blife": 0.1,
+   "rate": 7.2
   },
   {
-   "id": "arc_f",
+   "id": "arc2",
    "t": "bolt",
    "att": "feet",
    "pos": [
-    0,
-    1.2,
-    2.3
+    1.96,
+    2.09,
+    0.47
    ],
-   "at": 0,
-   "life": 0.3,
+   "at": 0.02,
+   "life": 0.6,
    "loop": true,
-   "n": 2,
-   "radial": 1.4,
-   "jit": 0.5,
-   "w": 0.1,
+   "n": 1,
+   "radial": 0.9,
+   "jit": 0.45,
+   "w": 0.09,
    "br": 2,
    "acc": true,
-   "blife": 0.08,
-   "rate": 20
+   "blife": 0.1,
+   "rate": 5.3
   },
   {
-   "id": "arc_b",
+   "id": "arc3",
    "t": "bolt",
    "att": "feet",
    "pos": [
-    0,
-    1.2,
-    -2.3
+    -1.14,
+    2.79,
+    0.59
    ],
-   "at": 0,
-   "life": 0.3,
+   "at": 0.04,
+   "life": 0.6,
    "loop": true,
-   "n": 2,
-   "radial": 1.4,
-   "jit": 0.5,
-   "w": 0.1,
+   "n": 1,
+   "radial": 0.9,
+   "jit": 0.45,
+   "w": 0.09,
    "br": 2,
-   "acc": true,
-   "blife": 0.08,
-   "rate": 20
+   "acc": false,
+   "blife": 0.1,
+   "rate": 5.9
   },
   {
-   "id": "arc_t",
+   "id": "arc4",
    "t": "bolt",
    "att": "feet",
    "pos": [
-    0,
-    3.0,
-    0
+    -0.7,
+    2.93,
+    -0.73
    ],
-   "at": 0,
-   "life": 0.3,
+   "at": 0.17,
+   "life": 0.6,
    "loop": true,
-   "n": 2,
-   "radial": 1.4,
-   "jit": 0.5,
-   "w": 0.1,
+   "n": 1,
+   "radial": 0.9,
+   "jit": 0.45,
+   "w": 0.09,
    "br": 2,
    "acc": true,
-   "blife": 0.08,
-   "rate": 20
+   "blife": 0.1,
+   "rate": 6.7
+  },
+  {
+   "id": "arc5",
+   "t": "bolt",
+   "att": "feet",
+   "pos": [
+    2.37,
+    1.18,
+    -0.36
+   ],
+   "at": 0.26,
+   "life": 0.6,
+   "loop": true,
+   "n": 1,
+   "radial": 0.9,
+   "jit": 0.45,
+   "w": 0.09,
+   "br": 2,
+   "acc": false,
+   "blife": 0.1,
+   "rate": 6.2
+  },
+  {
+   "id": "arc6",
+   "t": "bolt",
+   "att": "feet",
+   "pos": [
+    1.45,
+    1.36,
+    1.86
+   ],
+   "at": 0.09,
+   "life": 0.6,
+   "loop": true,
+   "n": 1,
+   "radial": 0.9,
+   "jit": 0.45,
+   "w": 0.09,
+   "br": 2,
+   "acc": true,
+   "blife": 0.1,
+   "rate": 8.6
+  },
+  {
+   "id": "arc7",
+   "t": "bolt",
+   "att": "feet",
+   "pos": [
+    0.75,
+    2.39,
+    1.61
+   ],
+   "at": 0.19,
+   "life": 0.6,
+   "loop": true,
+   "n": 1,
+   "radial": 0.9,
+   "jit": 0.45,
+   "w": 0.09,
+   "br": 2,
+   "acc": false,
+   "blife": 0.1,
+   "rate": 6.6
+  },
+  {
+   "id": "arc8",
+   "t": "bolt",
+   "att": "feet",
+   "pos": [
+    -2.29,
+    1.22,
+    -0.71
+   ],
+   "at": 0.02,
+   "life": 0.6,
+   "loop": true,
+   "n": 1,
+   "radial": 0.9,
+   "jit": 0.45,
+   "w": 0.09,
+   "br": 2,
+   "acc": true,
+   "blife": 0.1,
+   "rate": 5.8
   },
   {
    "id": "glow",

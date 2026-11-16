@@ -9,35 +9,6 @@
  "dur": 0.4,
  "layers": [
   {
-   "id": "muzzle",
-   "t": "ring",
-   "at": 0,
-   "life": 0.18,
-   "pos": [
-    0,
-    0,
-    0.8
-   ],
-   "vert": true,
-   "col": "#5fe8ff",
-   "r": 0.9,
-   "op": 0.8
-  },
-  {
-   "id": "mflash",
-   "t": "flash",
-   "at": 0,
-   "life": 0.06,
-   "col": "#5fe8ff",
-   "size": 0.8,
-   "size0": 0.2,
-   "pos": [
-    0,
-    0,
-    0.8
-   ]
-  },
-  {
    "id": "snd",
    "t": "sound",
    "at": 0,

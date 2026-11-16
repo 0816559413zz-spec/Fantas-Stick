@@ -666,7 +666,7 @@ function stormFX(o,p,pz,now,dt){
   if((p.fm|0)&16){o.b.rotation.z+=Math.sin(now/22)*0.2;o.b.rotation.x+=Math.sin(now/31)*0.08;}
   const M=p.sm;
   stormCape(o,!!(M?.[3]&4));
-  if(!M){if(o.sOrbs)o.sOrbs.forEach(q=>q.visible=false);if(o.railC)o.railC.visible=false;if(o.godG)o.godG.visible=false;if(o.godEyes)o.godEyes.forEach(e=>e.visible=false);if(o.stG)o.stG.visible=false;if(o.stFx){fxStop(o.stFx);o.stFx=null;}if(o.stDFx){fxStop(o.stDFx);o.stDFx=null;}if(o.claws)o.claws.forEach(c=>c.visible=false);return;}
+  if(!M){if(o.sOrbs)o.sOrbs.forEach(q=>q.visible=false);if(o.railC)o.railC.visible=false;if(o.godG)o.godG.visible=false;if(o.godEyes)o.godEyes.forEach(e=>e.visible=false);if(o.stG)o.stG.visible=false;if(o.stFx){fxStop(o.stFx);o.stFx=null;}if(o.stDFx){fxStop(o.stDFx);o.stDFx=null;}if(o.stDFx2){fxStop(o.stDFx2);o.stDFx2=null;}if(o.claws)o.claws.forEach(c=>c.visible=false);return;}
   const f=M[3]|0,isMe=p.id===NET.myId,god=!!(f&4);
   // ลำสายฟ้า (กดค้าง): สายฟ้าหนาจากปลายไม้ไปทุกเป้าที่ล็อก
   const bmT=f&1&&!god?(M[7]||[]):[];   // ล็อกเป้าแล้ว = ลำหลักวิ่งเข้าหาเป้า ไม่พุ่งตรงไปข้างหน้าอีก (ผู้ใช้ 2026-11-10)
@@ -689,11 +689,17 @@ function stormFX(o,p,pz,now,dt){
   // โล่สายฟ้า: เปลือกสายฟ้าแตกแขนงล้อมตัว สีเหลืองตลอด ยิ่งดูดมากยิ่งแลบถี่
   // โล่สายฟ้า = ไฟล์เอฟเฟกต์ VFX Studio (ผู้ใช้ 2026-11-16): bind.json loop:stsh = assets/fx/storm/shield.fx.json (โดมแก้วทอง + เส้นแสงสุ่ม) เล่นวนตามตัวตอนโล่เปิด
   //   โดนตี (efx sthit) = loop:stsh_hit (สายฟ้าวิ่งรอบผิวโดม + โดมแฟลชสว่าง) • อย่าปรับ k ของโล่ (k สูง = ขาวทั้งจอ)
-  {const fn=f&2?fxLoopName('stsh'):null;
-    if(fn){if(!o.stFx){o.stFx=fxPlay(fn,{x:p.x,y:p.y,h:pz,follow:p.id,aim:false});}}
+  // โล่สายฟ้า (ผู้ใช้ 2026-11-16): f&32 = ยังมีประจุ Dash ชน → โล่เต็มขนาด + สายฟ้าวิ่งรอบโล่ตลอด (Dash อยู่ = สายฟ้าเพิ่มอีกชุด)
+  //   ชนแล้ว (f&2 ไม่มี 32) → สายฟ้าหาย, โล่หรี่ลงและหดเหลือ ~0.72 (ยังใหญ่กว่าหัว)
+  {const fn=f&2?fxLoopName('stsh'):null,used=!!(f&2)&&!(f&32);
+    if(fn){if(o.stFx&&o.stFxUsed!==used){fxStop(o.stFx);o.stFx=null;}
+      if(!o.stFx){o.stFx=fxPlay(fn,{x:p.x,y:p.y,h:pz,follow:p.id,aim:false,s:used?0.72:1});o.stFxUsed=used;}
+      if(used&&o.stFx){o.stFx.k=0.6;if(o.stFx.P)o.stFx.P.k=0.6;}}
     else if(o.stFx){fxStop(o.stFx);o.stFx=null;}
-    {const dn=f&2&&p.ds?fxLoopName('stsh_dash'):null;if(dn){if(!o.stDFx)o.stDFx=fxPlay(dn,{x:p.x,y:p.y,h:pz,follow:p.id,aim:false});}else if(o.stDFx){fxStop(o.stDFx);o.stDFx=null;}}   // Dash ตอนกางโล่: สายฟ้าวิ่งรอบโดม
-    if(f&2){o.shield.visible=false;LREQ.push({x:tx(p.x),y:pz+1.2,z:tz(p.y),col:'#ffd23a',int:1.2+(STHIT[p.id]&&now-STHIT[p.id][0]<300?0.8:0),dist:8});}}
+    const dn=f&2&&f&32?fxLoopName('stsh_dash'):null;
+    if(dn){if(!o.stDFx)o.stDFx=fxPlay(dn,{x:p.x,y:p.y,h:pz,follow:p.id,aim:false});if(p.ds){if(!o.stDFx2)o.stDFx2=fxPlay(dn,{x:p.x,y:p.y,h:pz,follow:p.id,aim:false,s:1.08});}else if(o.stDFx2){fxStop(o.stDFx2);o.stDFx2=null;}}
+    else{if(o.stDFx){fxStop(o.stDFx);o.stDFx=null;}if(o.stDFx2){fxStop(o.stDFx2);o.stDFx2=null;}}
+    if(f&2){o.shield.visible=false;LREQ.push({x:tx(p.x),y:pz+1.2,z:tz(p.y),col:'#ffd23a',int:(used?0.7:1.4)+(p.ds&&!used?1:0)+(STHIT[p.id]&&now-STHIT[p.id][0]<300?0.8:0),dist:8});}}
   if(o.stG)o.stG.visible=false;
   // Dash: สายฟ้าหนาหุ้มตัว + เงาติดตา + ร่องสายฟ้าแตกกิ่งที่จางเร็ว
   if(p.ds){const pv=o.dPrev||[p.x,p.y];

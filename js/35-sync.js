@@ -20,7 +20,7 @@ const CPOSE=[
 const _cpT=[0,0,0,0,0,0],_cpR=[0,0,0,0,0,0],CGUARD=[-1.05,-0.3,0.18,0.04,-0.35,0.45];   // ท่าการ์ด: แขนขวา x/z บิดตัว เอนตัว แขนซ้าย x/z
 const CP_STEP=[0,0,0.7,1,0.4,0.8,0.3];   // ก้าวขา (ยืนนิ่ง) ของแต่ละท่า
 const CPCOL=['#ffb347','#bfeaff','#ffe27a','#c9a46a','#c9a46a','#c9a46a','#d8b46a'];   // สีหางแสงปลายไม้ตามสาย (pyro frost storm … earth)
-function castStyle(t,n){if(t==='pfire'||t==='pfireb'||t==='iceboulder')return 3;if(t==='icicle'||t==='b_frost')return [0,6,2][n%3];return [0,6,2,0,6,1][n%6];}   // ยิงปกติ: ฟันขวา→ย้อนมือซ้าย→แทง... สลับไปมา
+function castStyle(t,n){if(t==='iceboulder')return [0,6][n%2];   /* Frost ยิงไกลเสริม: มือเดียว สลับฟาดขวา-ย้อนซ้าย (ผู้ใช้ 2026-11-16 ไม่เอาสองมือ) */if(t==='pfire'||t==='pfireb')return 3;if(t==='icicle'||t==='b_frost')return [0,6,2][n%3];return [0,6,2,0,6,1][n%6];}   // ยิงปกติ: ฟันขวา→ย้อนมือซ้าย→แทง... สลับไปมา
 function castStart(o,t,style){o.castN=(o.castN|0)+1;o.cpS=style===undefined?castStyle(t,o.castN):style;o.cpT=CPOSE_T;o.cgd=2;o.caN=null;}
 // ---------- ท่าร่ายสกิล / อัลติ / โล่ (ผู้ใช้ 2026-10-22: "เกือบทุกสกิลควรมีการเหวี่ยงไม้คทา ... บิดเอวบิดตัว ... ท่าใหญ่ใช้ 2 มือ")
 // host ส่ง event {k:'sk',id,s:สกิล} ตอนร่ายสำเร็จ → SKANIM เลือกท่า • สกิลที่มีท่าของตัวเองในไฟล์สายอยู่แล้ว (Kindle, Dragonfall,
@@ -36,7 +36,7 @@ const CANIM={
   powerup:{d:0.7,st:0,tr:null,k:[[0.35,0.3,-0.5,0,0.35,0.3,0.5,0,-0.2,'s'],[0.6,-0.9,-1.3,0,-0.2,-0.9,1.3,0,0.05,'o'],[1,-0.6,-0.9,0,-0.1,-0.6,0.9,0,0,'s']],tm:[0.05,0.35]},   // ย่อเกร็ง แล้วกางแขนอกผาย (เพิ่มพลังตัวเอง)
   // Inferno Nova (ผู้ใช้ 2026-11-14): ย่อรวบพลัง → ชูไม้ตรงขึ้นฟ้าค้างไว้ระหว่างปลายไม้ชาร์จ (0.8 วิ) → ดันขึ้นสุดตอนระเบิด แขนซ้ายกางออก → คืนท่า
   // Mirror Legion ท่าร่าย 1.5 วิ (ผู้ใช้ 2026-11-14 เลือกแบบ 1):
-  mlraise:{d:1.8,st:0.3,tr:null,k:[[0.07,-0.6,0.3,0.2,0.15,-0.5,0.3,0,-0.14,'s'],[0.2,-3.1,0.05,0,-0.12,-0.6,0.5,0,0.06,'o'],[0.46,-3.15,0.04,0,-0.16,-0.7,0.6,0,0.08,'s'],[0.56,-1.55,0.1,0,0.05,-0.8,0.6,0,0,'o'],[0.84,-1.6,0.08,0,0.04,-0.8,0.6,0,0,'s'],[1,-1.2,0.1,0,0.05,-0.4,0.2,0,0,'s']],tm:[0.2,0.46]},   // 1 ชูมือ (ดาบลอยขึ้นชาร์จ) แล้วชี้ไปข้างหน้าสั่งดาบหมุนแยกเป็น 3
+  mlraise:{d:1.0,st:0.3,tr:null,k:[[0.12,-1.55,0.1,0.1,0.06,-0.8,0.6,0,0,'o'],[0.8,-1.6,0.08,0,0.04,-0.8,0.6,0,0,'s'],[1,-1.2,0.1,0,0.05,-0.4,0.2,0,0,'s']]},   // ผู้ใช้ 2026-11-16: ไม่ชูมือแล้ว ชี้ไปข้างหน้าสั่งดาบหมุนแยกเป็น 3 เลย   // 1 ชูมือ (ดาบลอยขึ้นชาร์จ) แล้วชี้ไปข้างหน้าสั่งดาบหมุนแยกเป็น 3
   novaup:{d:1.9,st:0.4,tr:[0.06,0.2],k:[[0.08,-0.5,0.25,0.25,0.18,-0.4,0.3,0,-0.16,'s'],[0.17,-3.1,0.04,0,-0.12,-0.7,0.55,0,0.04,'o'],[0.62,-3.12,0.02,0,-0.16,-0.75,0.6,0,0.06,'s'],[0.67,-3.3,0,0,-0.26,-1.5,1.1,0,0.1,'o'],[0.84,-3.0,0.05,0,-0.14,-1.1,0.8,0,0.04,'s'],[1,-1.2,0.1,0,0,-0.4,0.2,0,0,'s']],tm:[0.17,0.62]},
   ultraise:{two:1,d:1.0,st:1,tr:[0.3,0.8],k:[[0.3,-0.5,0.35,0.15,0.25,-0.5,-0.35,0,-0.18,'s'],[0.6,-3.0,0.15,0,-0.25,-3.0,-0.15,0,0.08,'s'],[0.75,-1.2,0.2,0.05,0.4,-1.2,-0.2,0,-0.15,'o'],[1,-1.0,0.1,0,0.25,-1.0,-0.1,0,-0.1,'s']],tm:[0.45,0.6]},   // อัลติ: สองมือรวบไม้ ชูขึ้นฟ้า แล้วฟาดลง
   rend:{d:0.55,st:0.7,tr:[0.25,0.7],k:[[0.3,0.4,-0.6,-0.4,0.2,-0.5,0.5,0.06,-0.15,'s'],[0.6,-2.4,0.4,0.45,-0.1,-0.2,0.7,-0.05,0.02,'o'],[1,-2.0,0.2,0.3,-0.05,-0.3,0.6,0,0,'s']]},   // ตวัดจากพื้นต่ำขวาขึ้นบนซ้าย
@@ -77,6 +77,8 @@ Object.assign(CANIM,{
   wingflick:{d:0.95,st:0.6,k:[[0.25,0.15,-0.6,-0.1,-0.18,0.15,0.6,0,-0.12,'s'],[0.4,-1.75,-0.05,0.12,0.28,-1.65,0.05,0,-0.18,'o'],[0.7,-1.35,-0.2,0.05,0.15,-1.2,0.2,0,-0.06,'s'],[1,-1.0,-0.1,0,0,-0.4,0.3,0,0,'s']]}
 });
 CANIM.railrelease={d:0.65,st:0.6,two:[0,0.45],k:[[0.12,-1.45,-0.08,-0.16,-0.22,-1.5,-0.1,0.04,-0.12,'o'],[0.42,-1.58,-0.05,0.12,0.1,-1.4,-0.15,-0.03,-0.06,'s'],[1,-1.0,-0.1,0,0,-0.4,0.3,0,0,'s']]};
+// Glacier Rend โหมดไกล (ผู้ใช้ 2026-11-16): ชาร์จ 1 วิ = ชี้ไม้ลงพื้นตรงหน้า ตัวเอนหน้าย่อ → น้ำแข็งพุ่ง (แบบโทโดโรกิ) = ตวัดไม้ขึ้นเร็ว ๆ ค้างแป๊บ
+CANIM.rendfar={d:1.5,st:0.5,tr:[0.64,0.8],k:[[0.14,-0.7,-0.15,0,0.14,-0.3,0.4,0,-0.08,'s'],[0.64,-0.72,-0.15,0,0.16,-0.3,0.4,0,-0.09,'s'],[0.74,-2.65,0.1,0.12,-0.15,-0.6,0.6,0,0.05,'o'],[0.9,-2.5,0.1,0.1,-0.1,-0.5,0.55,0,0.02,'s'],[1,-1.8,0,0,0,-0.4,0.4,0,0,'s']]};
 CANIM.dragonland={d:0.7,st:0,k:[[0.12,-0.8,-0.1,0.12,0.34,-0.55,0.65,0.06,-0.28,'o'],[0.45,-1.1,-0.1,0.06,0.12,-0.5,0.4,0.02,-0.1,'s'],[1,-1.0,-0.1,0,0,-0.3,0.3,0,0,'s']]};
 // ขาแยก/ก้าว/ลงน้ำหนักต่างกันตามท่า (เฉพาะตอนหยุดเดิน; ไม่แย่งท่าวิ่ง)
 const SKFEET={sweep:[0.25,-0.5,0.1,-0.12],powerup:[-0.25,-0.15,0.16,-0.16],ultraise:[0.25,-0.4,0.13,-0.12],rend:[-0.45,0.25,0.1,-0.06],slam:[-0.65,-0.35,0.18,-0.18],wrap:[-0.4,-0.25,0.08,-0.08],forge:[0.3,-0.4,0.1,-0.1],line:[-0.5,0.3,0.1,-0.08],siphon:[0.35,-0.3,0.15,-0.15],orbs:[0.25,-0.25,0.1,-0.1],upflick:[-0.45,0.3,0.1,-0.08],snap:[0.3,-0.4,0.12,-0.08],pullback:[0.35,-0.45,0.12,-0.12],summon3:[-0.2,-0.2,0.18,-0.18],punchcmd:[-0.5,0.35,0.1,-0.1],ground:[-0.6,0.25,0.15,-0.1],clap:[-0.25,-0.25,0.2,-0.2],burst:[-0.45,-0.25,0.2,-0.2],skycall:[0.3,-0.45,0.1,-0.1],wallpush:[-0.55,0.3,0.15,-0.12],vxpull:[0.5,-0.4,0.14,-0.14],dome:[-0.35,-0.25,0.2,-0.2],tidecall:[0.3,-0.25,0.1,-0.12],wavecast:[0.3,-0.6,0.14,-0.12],cagecast:[-0.5,0.3,0.1,-0.1],moonarts:[0.2,-0.3,0.12,-0.12],dragoncall:[0.25,-0.5,0.13,-0.13],dragoncommand:[-0.5,0.35,0.12,-0.1],fireflare:[-0.35,-0.2,0.2,-0.2],frostbreath:[-0.25,-0.25,0.14,-0.14],godcall:[0.25,-0.4,0.15,-0.15],windlaunch:[-0.6,0.35,0.12,-0.12],wingrise:[-0.3,-0.2,0.18,-0.18],windvoid:[-0.45,0.3,0.12,-0.12],heavenslam:[-0.6,-0.25,0.18,-0.18]};
@@ -88,8 +90,8 @@ const SKANIM={ringofembers:'sweep',blazeform:'fireflare',colossus:'novaup',kindl
   riptide:'wavecast',tidecaller:'tidecall',aquacage:'cagecast',abyssalbeam:'pullback',moonwater:'moonarts',dragondeep:'dragoncall',dragondeep_dive:'dragoncommand',voidspheres:'windvoid',aegisgale_push:'wallpush',aegisgale_place:'ground',featherwing_2:'wingflick',eyeofheaven:'heavenslam'};
 Object.assign(SKANIM,{poisondart:'natthrow',bloom:'natthrow',sporecloud:'natthrow',vinelash:'natraise',thornburst:'natraise',worldtree:'natsummon'});
 SKANIM.railgun_release='railrelease';SKANIM.terraauger_release='ground';
-SKANIM.dragonfall_land='dragonland';SKFEET.dragonland=[-0.8,0.3,0.12,-0.1];SKFEET.wingflick=[-0.45,0.3,0.12,-0.12];
-function skAnim(ev){const o=PM3.get(ev.id),n=SKANIM[ev.s];if(!o||!n)return;if(ev.s==='stormdome'&&!ev.g)return;o.caN=n;o.caT=0;o.cpT=0;o.cgd=2.2;}
+SKFEET.rendfar=[-0.75,0.5,0.1,-0.08];   /* ขาหน้าก้าวออกไปด้านหน้า ขาหลังยันหลัง ให้ท่าก้มดูมีน้ำหนักตามฟิสิกส์ (ผู้ใช้ 2026-11-16) */SKANIM.dragonfall_land='dragonland';SKFEET.dragonland=[-0.8,0.3,0.12,-0.1];SKFEET.wingflick=[-0.45,0.3,0.12,-0.12];
+function skAnim(ev){const o=PM3.get(ev.id);let n=SKANIM[ev.s];if(ev.s==='glacierrend'){const v=VIEW.cur&&VIEW.cur.P.find(q=>q.id===ev.id);if(v&&v.fr&&v.fr[0]!==0)n='rendfar';}if(!o||!n)return;if(ev.s==='stormdome'&&!ev.g)return;o.caN=n;o.caT=0;o.cpT=0;o.cgd=2.2;}
 const _caT=[0,0,0,0,0,0,0,0],_caR=[0,0,0,0,0,0,0,0];
 function skillPose(o,p,dt,now){
   const A=CANIM[o.caN];if(!A){o.caN=null;return false;}
@@ -361,10 +363,10 @@ function syncProj(v,now){
       if(j.t==='pfire'||j.t==='pfireb'||j.t==='spark'){let bo=null,bd=60;for(const q of (v.P||[])){const d=Math.hypot(q.x-j.x,q.y-j.y);if(d<bd){bd=d;bo=q;}}const so=bo&&PM3.get(bo.id);   // ลูกไฟ/Kindle เริ่มที่ปลายไม้จริง (ผู้ใช้ 2026-11-14) แล้วค่อยเข้ารางจริง
         if(so&&so.tipW&&performance.now()-(so.tipWT||0)<200){const q=simOf(so.tipW),h0=j.h!==undefined?j.h:1.35;o.wOff=[q.x-j.x,q.y-j.y,(q.h-GY(q.x,q.y))-h0];o.wT0=now;}}
       if(PJFX[j.t])o.fx=fxPlay(PJFX[j.t][0],{x:j.x,y:j.y,h:j.h!==undefined?j.h:1.35,a:Math.atan2(j.vy,j.vx)});
-      {const bp=pjPal(j.t);if(BF.on&&(bp==='fire'||bp==='ice'))o.bt=fxPlay('env/bf_'+bp+'_trail',{x:j.x,y:j.y,h:j.h!==undefined?j.h:1.35,s:(j.t==='iceboulder'||j.t==='pfireb')?1.8:1});}   // สนามรบ: หางควัน/ไอเย็น (js/44 BF)
+      {const bp=pjPal(j.t);if(BF.on&&(bp==='fire'||bp==='ice')&&j.t!=='icicle'&&j.t!=='iceboulder')o.bt=fxPlay('env/bf_'+bp+'_trail',{x:j.x,y:j.y,h:j.h!==undefined?j.h:1.35,s:(j.t==='iceboulder'||j.t==='pfireb')?1.8:1});}   // สนามรบ: หางควัน/ไอเย็น (js/44 BF)
       if(j.t==='wcage')o.tr=trailNew({col:'#dff6ff',col2:'#2a8ad8',w:0.3,life:0.4,k:1.4});   // ลูกขังน้ำ: หางน้ำตามหลัง (ผู้ใช้ 2026-11-15)
       else if(fist)o.tr=trailNew({col:'#bb9569',col2:'#76573b',w:j.t==='efistc'?.13:.065,life:.11,k:.65});
-      else if(!o.fx&&j.t!=='swave'){const P=palOf(pjPal(j.t),col),big=j.t==='iceboulder'||j.t==='pfireb';o.tr=trailNew({col:P.hi,col2:P.deep,w:big?0.32:vt==='fire'?0.2:0.11,life:big?0.28:0.17,k:1.7});}}   // หางแสงทุกกระสุน (สีตามธาตุ)
+      else if(!o.fx&&j.t!=='swave'&&j.t!=='iceboulder'&&j.t!=='icicle'){const P=palOf(pjPal(j.t),col),big=j.t==='iceboulder'||j.t==='pfireb';o.tr=trailNew({col:P.hi,col2:P.deep,w:big?0.32:vt==='fire'?0.2:0.11,life:big?0.28:0.17,k:1.7});}}   // หางแสงทุกกระสุน (สีตามธาตุ)
     if(o.col!==col){o.halo.material=glowMat(col,0.9);o.inner.material.color.copy(hdr(col,2.2));o.tail.material.color.copy(hdr(col,1.6));o.col=col;}
     let x=j.x+j.vx*ex,y=j.y+j.vy*ex,H=(j.h!==undefined?j.h:1.35)+(j.vh||0)*ex;
     if(o.wOff){const k=Math.min(1,(now-o.wT0)/160),w=(1-k)*(1-k);x+=o.wOff[0]*w;y+=o.wOff[1]*w;H+=o.wOff[2]*w;if(k>=1)o.wOff=null;}
@@ -385,16 +387,16 @@ function syncProj(v,now){
       case 'efist':case 'efistc':case 'efistshard':o.halo.visible=false;break;
       case 'swave':case 'wshp':case 'wball':case 'wplume':case 'wblade':case 'wdrop':case 'wcage':o.core.visible=o.inner.visible=o.tail.visible=o.halo.visible=false;o.lp=[x,y,H];break;   // น้ำ: เห็นแค่ fx ไม่มีลูกแสงขาว
       case 'icicle':
-        if(o.fx){o.core.visible=o.inner.visible=o.tail.visible=false;o.halo.scale.setScalar(r*2);o.lp=[x,y,H];break;}   // แบบ B: เข็มพลังงานจากไฟล์ fx
+        if(o.fx){o.core.visible=o.inner.visible=o.tail.visible=o.halo.visible=false;o.lp=[x,y,H];break;}   // ไม่มีแสงฟุ้ง/หาง (ผู้ใช้ 2026-11-16) • แบบ B: เข็มพลังงานจากไฟล์ fx
         // แท่งน้ำแข็งแหลม: ยาวตามทิศที่พุ่ง
         o.core.scale.set(r*0.22,r*0.22,r*2.6);o.inner.scale.set(r*0.45,r*0.45,r*3);o.halo.scale.setScalar(r*3.2);o.tail.visible=false;o.lp=[x,y,H];
         PARTS.push({x,y,h:H,vx:0,vy:0,vh:0,life:0.04,max:0.04,col:'#ffffff',size:2.6,g:0});
         if(Math.random()<0.7)PARTS.push({x:x+rnd(-3,3),y:y+rnd(-3,3),h:H+rnd(-0.08,0.08),vx:-j.vx*0.05+rnd(-20,20),vy:-j.vy*0.05+rnd(-20,20),vh:rnd(-0.4,0.2),life:0.3,max:0.3,col:Math.random()<0.5?'#ffffff':'#bfeaff',size:1.4,g:1});
         break;
       case 'iceboulder':
-        o.core.scale.setScalar(r*0.75);o.inner.scale.setScalar(r*1.2*fl);o.halo.scale.setScalar(r*4);
+        o.core.scale.setScalar(r*0.75);o.inner.scale.setScalar(r*1.2*fl);o.halo.visible=false;   // ไม่มีแสงฟุ้ง (ผู้ใช้ 2026-11-16)
         for(let i=0;i<2;i++)PARTS.push({x:x+rnd(-8,8),y:y+rnd(-8,8),h:H+rnd(-0.2,0.2),vx:-j.vx*0.08+rnd(-30,30),vy:-j.vy*0.08+rnd(-30,30),vh:rnd(-0.5,0.5),life:0.45,max:0.45,col:i?'#ffffff':'#9fe0ff',size:2.6,g:2});
-        if(Math.random()<0.3)PARTS.push({x,y,h:H,vx:0,vy:0,vh:0.3,life:0.8,max:0.8,col:'#e8f6ff',size:5,g:-0.2,smoke:true,grow:1.3});
+        // ไม่มีควัน/หมอกตามหลัง (ผู้ใช้ 2026-11-16)
         break;
       case 'spark':
         if(o.fx){o.core.visible=o.inner.visible=o.tail.visible=false;o.halo.scale.setScalar(r*1.3*fl);o.lp=[x,y,H];break;}   // แบบ C: ก้อนถ่านไฟจากไฟล์ fx
