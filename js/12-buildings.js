@@ -398,7 +398,8 @@ function damage(t,amt,srcId,kind,noFlash=false){
   }
   amt=natureGuard(t,amt);
   const real=Math.min(amt,Math.max(0,t.hp));   // ดาเมจจริง (ไม่นับส่วนที่เกินเลือด)
-  t.hp-=amt;t.lastHit=srcId;t.dmgTaken=(t.dmgTaken||0)+real;   // สรุปจบเกม: ดาเมจที่รับ
+  t.hp-=amt;t.lastHit=srcId;t.dmgTaken=(t.dmgTaken||0)+real;
+  if(G.balDmg&&src&&src!==t){const k=src.pathIdx+':'+kind+(src.z>1.5?':air':'');G.balDmg[k]=(G.balDmg[k]||0)+real;if(G.balWho){const w=G.balWho;w[k]=w[k]||{};const st=(new Error().stack||'').split('\n').slice(2,6).map(l=>(l.match(/at (\S+)/)||[])[1]).filter(f=>f&&!/aoeHit|damage|Array|forEach/.test(f)),id=st.slice(0,2).join('<');w[k][id]=(w[k][id]||0)+real;}}   // ดีบัก balance (WD.G.balDmg={})   // สรุปจบเกม: ดาเมจที่รับ
   if(G.mode==='ffa')ffaDmgLog(t,srcId,real,kind);   // assist + จอตอนตาย (js/54)
   if(src&&src!==t){gainUlt(src,amt*0.7);lifesteal(src,amt);src.dmgDealt+=amt;}
   gainUlt(t,amt*0.25);

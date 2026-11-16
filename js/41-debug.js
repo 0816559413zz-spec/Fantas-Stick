@@ -66,12 +66,13 @@ function balDuel(kA,kB,rounds,maxT){
     const sw=r%2===1; // สลับฝั่งเกิดทุกรอบ ตัดความได้เปรียบของตำแหน่ง
     setKit(a,sw?kB:kA);setKit(b,sw?kA:kB);balReset(a,b);
     let t=0;
-    while(t<(maxT||60)){hostTick(1/60);t+=1/60;if(!a.alive||!b.alive)break;}
+    while(t<(maxT||60)){hostTick(1/60);t+=1/60;{const A=sw?b:a,B=sw?a:b;res.zA=(res.zA||0)+(A.z||0)/60;res.zB=(res.zB||0)+(B.z||0)/60;if((A.z||0)>1.5)res.airA=(res.airA||0)+1/60;if((B.z||0)>1.5)res.airB=(res.airB||0)+1/60;}if(!a.alive||!b.alive)break;}   // สถิติดีบัก: ความสูงเฉลี่ย / เวลาลอย (z>1.5) ต่อฝั่ง kA/kB
     G.ph='play';
     const aw=a.alive&&!b.alive,bw=b.alive&&!a.alive;
     if(aw)(sw?res.b++:res.a++);else if(bw)(sw?res.a++:res.b++);else res.draw++;
     res.tw+=t;
   }
+  for(const k of ['zA','zB','airA','airB'])if(res[k]!==undefined)res[k]=+(res[k]/Math.max(1,res.tw)*(k[0]==='z'?1:100)).toFixed(2);
   res.avgT=+(res.tw/rounds).toFixed(1);delete res.tw;return res;
 }
 // ลีกทุกคู่: kits = {ชื่อ:สตริงชุดคาถา} → อัตราชนะรวมของแต่ละชุด
@@ -80,7 +81,7 @@ function balTour(kits,rounds,maxT){
   names.forEach(n=>{wins[n]=0;games[n]=0;});
   for(let i=0;i<names.length;i++)for(let j=i+1;j<names.length;j++){
     const r=balDuel(kits[names[i]],kits[names[j]],rounds,maxT);
-    pair[names[i]+' v '+names[j]]=`${r.a}-${r.b}-${r.draw} (${r.avgT}s)`;
+    pair[names[i]+' v '+names[j]]=`${r.a}-${r.b}-${r.draw} (${r.avgT}s)`+(r.zA!==undefined?` z ${r.zA}/${r.zB} air% ${r.airA}/${r.airB}`:'');
     wins[names[i]]+=r.a+r.draw/2;wins[names[j]]+=r.b+r.draw/2;games[names[i]]+=rounds;games[names[j]]+=rounds;
   }
   balArena(false);balIsolate(null,null,false);
