@@ -527,7 +527,7 @@ function windUltTick(p,dt){const U=p.wult,W=W_UL;
     if(U.air){const F=p.wfw;if(F&&F.ph==='focus')F.t+=W.ext;for(const k of SLOTK)p.cd[k]=0;p.wwc=W_WL.max;}
     else{const k=windSlotOf(p,'featherwing');if(k)p.cd[k]=0;}
     emit({k:'efx',z:'wnsoend',x:Math.round(p.x),y:Math.round(p.y),h:p.z,m:U.air?1:0,id:p.id});U.ph='land';U.t=0;return;}
-  if(U.ph==='land'){U.t+=dt;p.root=Math.max(p.root||0,0.05);p.mvx=p.mvy=p.vx=p.vy=0;for(const k of SLOTK)p.cd[k]=Math.max(p.cd[k]||0,0.05);if(U.t>=(U.air?W.landA:W.land)-W.boomT)p.wult=null;}}
+  if(U.ph==='land'){U.t+=dt;p.root=Math.max(p.root||0,0.05);p.rootSelf=G.time+0.1;   /* ล็อกตัวเองตอนลง ไม่ใช่โดนใย → ไม่ขึ้นข้อความ (ผู้ใช้ 2026-11-16) */p.mvx=p.mvy=p.vx=p.vy=0;for(const k of SLOTK)p.cd[k]=Math.max(p.cd[k]||0,0.05);if(U.t>=(U.air?W.landA:W.land)-W.boomT)p.wult=null;}}
 // กวาดทรงกระบอกตามเส้นพุ่ง (เฟรมนี้) — ระยะ 3 มิติจากเส้น: ≤r1 โดนชน (ครั้งเดียว) • ≤r2 พุ่งผ่าน (เก็บจุดใกล้สุดไว้ผลักตอนบูม)
 function windUltSweep(p,U,x0,y0,h0,x1,y1,h1){const dx=x1-x0,dy=y1-y0,dh=(h1-h0)*20,L2=dx*dx+dy*dy+dh*dh||1,W=W_UL;
   for(const t of foesOf(p.team)){if(t.dead||t.alive===false||t.downed||U.hit.has(t))continue;
