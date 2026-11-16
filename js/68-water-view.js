@@ -120,7 +120,7 @@ const WT_BEAM_F='uniform float time,uLen;varying vec2 vQ;varying vec3 vN;varying
 const WT_BEAM_O='uniform float time,uLen;varying vec2 vQ;varying vec3 vN;varying vec3 vV;void main(){float a=vQ.x,s=vQ.y,fr=1.0-abs(dot(normalize(vN),normalize(vV)));'+
   'if(sin(a*5.0-time*17.0)+sin(a*9.0+time*11.0)>(uLen-s)*1.3)discard;'+
   'float f=sin(s*0.42-time*22.0+a*2.0)+0.6*sin(s*1.3-time*33.0-a*3.0);if(f<0.55)discard;vec3 c=sin(s*0.3-time*8.0)>0.0?vec3(0.1,0.45,1.0):vec3(0.12,0.85,0.9);gl_FragColor=vec4(c,0.8*(1.0-fr*0.4));}';
-function wtBeamMesh(){const U={time:FIRE_U.time,uLen:{value:1},uR:{value:0.34},uAmp:{value:1},uFl:{value:3.2}},U2={time:FIRE_U.time,uLen:U.uLen,uR:{value:0.5},uAmp:{value:1.6},uFl:{value:3.6}};
+function wtBeamMesh(){const U={time:FIRE_U.time,uLen:{value:1},uR:{value:0.34},uAmp:{value:1},uFl:{value:0}},U2={time:FIRE_U.time,uLen:U.uLen,uR:{value:0.5},uAmp:{value:1.6},uFl:{value:0}};   // uFl 0 = ปลายลำไม่บานออก (ผู้ใช้ 2026-11-16: จบเข้าวงกลมขนาดพอ ๆ กับลำ)
   const m=new THREE.Mesh(_wtTube,new THREE.ShaderMaterial({uniforms:U,vertexShader:WT_BEAM_V,fragmentShader:WT_BEAM_F,side:THREE.DoubleSide,fog:false})),
     o=new THREE.Mesh(_wtTube,new THREE.ShaderMaterial({uniforms:U2,vertexShader:WT_BEAM_V,fragmentShader:WT_BEAM_O,transparent:true,depthWrite:false,side:THREE.DoubleSide,fog:false}));
   m.add(o);m.frustumCulled=o.frustumCulled=false;m.renderOrder=4;o.renderOrder=5;return m;}
@@ -131,7 +131,9 @@ function wtBeamSync(S,o,p,a,pt,L,dt){if(!S.bm){S.bm=WT_POOL.bm.pop()||wtBeamMesh
   B.position.set(tx(p.x+c*L0),y0+rise*L0,tz(p.y+n*L0));_wtA.set(tx(ex),y0+rise*S.bL,tz(ey));
   if(B.visible)B.lookAt(_wtA);
   B.material.uniforms.uLen.value=Math.max(0.1,(S.bL-L0)/20);
-  const th=Math.max(0,_wtA.y-GY(ex,ey)),I=wtLoop(S,'tip','water/beam_tip',{x:ex,y:ey,h:th,a,aim:false});if(I){I.x=ex;I.y=ey;I.h=th;I.a=a;}}
+  const th=Math.max(0,_wtA.y-GY(ex,ey)),I=wtLoop(S,'tip','water/beam_end',{x:ex,y:ey,h:th,a,aim:false});if(I){I.x=ex;I.y=ey;I.h=th;I.a=a;}
+  // ปลายลำ = assets/fx/water/beam_end.fx.json (VFX Studio, ผู้ใช้ 2026-11-16 — เอาแบบเก่า beam_tip + โดมในโค้ดออก)
+}
 function wtBeamOff(S){if(S.bm){scene.remove(S.bm);WT_POOL.bm.push(S.bm);S.bm=null;}wtStop(S,'tip');}
 
 // ---------- ต่อผู้เล่น: โล่ฟองน้ำ/ฮีล • ลูกผู้ช่วยที่ไหล่ • ร่างโคลน + เส้นน้ำ • ลำน้ำ Abyssal • Moonwater • มังกร ----------

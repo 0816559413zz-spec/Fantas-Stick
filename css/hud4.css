@@ -119,6 +119,11 @@
 .h4Cd.cd .fc:not(.gf)>.nm{opacity:.5}
 .h4Cd.on .fc{translate:0 -14px;box-shadow:inset 0 0 0 2px #fff,inset 0 0 0 4px #0a0c18,0 0 30px var(--c1)}
 .h4Cd.dim{opacity:.55}
+.h4Cd.dim .fc>.ico,.h4Cd.dim .fc>.art{filter:grayscale(1);opacity:.4}
+/* สายฟ้า: ต้นทุน stack = สายฟ้าเล็กเรียงลงที่มุมขวาบน */
+.h4Pip{position:absolute;right:6px;top:6px;z-index:3;display:flex;flex-direction:column;gap:2px}
+.h4Pip i{width:11px;height:14px;background:#ffd23a;clip-path:polygon(55% 0,10% 58%,45% 58%,30% 100%,90% 38%,55% 38%,75% 0);filter:drop-shadow(0 0 3px #ffb000)}
+.h4Cd.dim .h4Pip i{background:#8a8a8a;filter:none}
 .h4Cd.win .fc{box-shadow:inset 0 0 0 2px #ffc27a,inset 0 0 0 4px #0a0c18,0 0 24px #ff9a4a}
 .h4Cd.pop .fc{animation:h4Pop .55s ease-out}
 .h4Cd .fc.draw{animation:h4Draw .5s cubic-bezier(.2,1.3,.4,1) .32s both}   /* ไพ่ใบใหม่แทรกขึ้นจากใต้จอ */
@@ -332,7 +337,8 @@
 #h4 .cut{animation:h4Cut .32s ease-out}
 @keyframes h4Cut{0%{filter:brightness(1.9) drop-shadow(0 0 8px #fff)}100%{filter:none}}
 /* HP พืช Nature (ไม่มีกรอบ, มินิมอล) — ลอยเหนือไพ่สกิล: หัวซ้ายบน • HP ขวาบน • แถบล่างยาวตลอด • เวลาลอยออกทางซ้าย กลางแถว */
-#h4pl{position:fixed;right:24px;bottom:150px;z-index:2;pointer-events:none;display:flex;flex-direction:column;align-items:flex-end;gap:8px;font-family:'Kanit',sans-serif;color:#fff}
+/* ผู้ใช้ 2026-11-15: เล็กลง ย้ายไปซ้ายกลางจอ */
+#h4pl{position:fixed;left:18px;top:34%;z-index:2;pointer-events:none;display:flex;flex-direction:column;align-items:flex-start;gap:4px;transform:scale(.68);transform-origin:0 0;font-family:'Kanit',sans-serif;color:#fff}
 #h4pl[hidden]{display:none}
 #h4pl .r{position:relative;display:grid;grid-template-columns:auto 1fr;grid-template-rows:auto 3px;align-items:end;column-gap:8px;row-gap:3px;width:170px;filter:drop-shadow(0 1px 2px rgba(0,0,0,.55))}
 #h4pl .hd{grid-column:1;grid-row:1;width:64px;height:64px;display:grid;place-items:center;margin-bottom:6px}

@@ -310,6 +310,8 @@ function slotState(me,v,ci){
   if(ci>=1&&ci<=4&&me.ea&&me.ea[8]&&!st.dim){const S=SPELL_LIST[getKit(me.id).ids[ci-1]];if(S&&S.id==='tectoniccrush'){st.ready=true;st.hl=false;st.ratio=0;st.txt='';st.bar=me.cd[ci]/me.cm[ci];}}
   // สายดิน Stand แตก: สกิลที่ต้องมี Stand (Stonebreaker / Tectonic Crush) ล็อคจนกว่า Stand กลับ
   if(ci>=1&&ci<=4&&me.ea&&me.ea[0]>0){const S=SPELL_LIST[getKit(me.id).ids[ci-1]];if(S&&E_NEEDSTAND[S.id]){st.ratio=1;st.txt='🔒';st.ready=false;st.hl=false;st.bar=0;}}
+  // สายฟ้า: stack ไม่พอ = ไพ่เทา ใช้ไม่ได้
+  if(ci>=1&&ci<=4&&me.sm&&!st.dim){const S=SPELL_LIST[getKit(me.id).ids[ci-1]],n=S&&S.path===2&&S.v&&S.v.cost|0;if(n>0&&(me.sm[0]|0)<n){st.dim=true;st.ready=false;st.hl=false;}}
   if(locked){st.ratio=1;st.txt='🔒';st.ready=false;st.hl=false;}
   return st;
 }

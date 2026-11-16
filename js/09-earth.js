@@ -172,7 +172,7 @@ const TECT=defSpell(EARTH,{id:'tectoniccrush',v:{len:300,gap:240,hp:200,crush2:8
   cast(p,S,i){if(!eStand(p))return eNoStand(p);if(p.aug||p.ramp)return false;
     if(p.tec)for(const id of p.tec.ids){const w=(G.eso||[]).find(q=>q.id===id);if(w)eKill(w);}
     const V=S.v,a=p.ang,c=Math.cos(a),s=Math.sin(a),ids=[],G2=V.gap/2,L=V.len;
-    for(const sd of [-1,1]){const ox=-s*G2*sd,oy=c*G2*sd,w=eAdd({k:'tec',x1:p.x+c*60+ox,y1:p.y+s*60+oy,x2:p.x+c*(60+L)+ox,y2:p.y+s*(60+L)+oy,r:18,hgt:6,hp:V.hp,maxHp:V.hp,team:p.team,owner:p.id,side:sd});ids.push(w.id);
+    for(const sd of [-1,1]){const ox=-s*G2*sd,oy=c*G2*sd,w=eAdd({k:'tec',x1:p.x+c*60+ox,y1:p.y+s*60+oy,x2:p.x+c*(60+L)+ox,y2:p.y+s*(60+L)+oy,r:18,hgt:6,hp:V.hp,maxHp:V.hp,team:p.team,owner:p.id,side:sd,life:10});ids.push(w.id);
       // ใครยืนทับกำแพงที่กำลังโผล่ = กระเด็นออกด้านข้าง (คนที่อยู่ระหว่างกำแพงไม่โดน)
       for(const t of plist().concat(G.en)){if(t===p||t.dead||t.alive===false)continue;const q=eSegD(t.x,t.y,w);if(q.d>=w.r+(t.r||PR)+4)continue;
         const d=q.d||1,f=isBig(t)?150:600,nx=q.d>0.5?(t.x-q.qx)/d:-s*sd,ny=q.d>0.5?(t.y-q.qy)/d:c*sd;t.vx=(t.vx||0)+nx*f;t.vy=(t.vy||0)+ny*f;}}
@@ -191,7 +191,7 @@ function earthCrush(p){const T=p.tec;p.crush=null;if(!T)return;
   for(const w of W)eKill(w,true);p.tec=null;}
 
 // ---------- สกิล 4: Dust Burst ----------
-const DUSTB=defSpell(EARTH,{id:'dustburst',v:{range:500,r:350,time:8,rWeak:200,timeWeak:5,delay:1.1},vn:{range:'ระยะเล็ง',r:'รัศมี (มี Stand)',time:'อยู่นาน (มี Stand)',rWeak:'รัศมี (Stand แตก)',timeWeak:'อยู่นาน (Stand แตก)',delay:'ฝุ่นเกิดหลังกด (วิ)'},role:'utility',n:'Dust Burst',ic:'🌫️',cd:20,d:'เล็งพื้นระยะ ~500: โยนหินขึ้น Stand ต่อยแตกเป็นฝุ่น (Stand แตก = เราทุบเองแบบอ่อนกว่า)',fx:'ศัตรูในฝุ่นมองชัดแค่ ~150 รอบตัว ไกลกว่านั้นจางเป็นสีฝุ่น (ไม่มืดบอด) • ไม่มีดาเมจ เดินออกได้ • Stand: รัศมี 350 นาน 8 วิ • Stand แตก: 200 นาน 5 วิ',
+const DUSTB=defSpell(EARTH,{id:'dustburst',v:{range:500,r:350,time:5,rWeak:200,timeWeak:3,delay:0.6},vn:{range:'ระยะเล็ง',r:'รัศมี (มี Stand)',time:'อยู่นาน (มี Stand)',rWeak:'รัศมี (Stand แตก)',timeWeak:'อยู่นาน (Stand แตก)',delay:'ฝุ่นเกิดหลังกด (วิ)'},role:'utility',n:'Dust Burst',ic:'🌫️',cd:20,d:'เล็งพื้นระยะ ~500: โยนหินขึ้น Stand ต่อยแตกเป็นฝุ่น (Stand แตก = เราทุบเองแบบอ่อนกว่า)',fx:'ศัตรูในฝุ่นมองชัดแค่ ~150 รอบตัว ไกลกว่านั้นจางเป็นสีฝุ่น (ไม่มืดบอด) • ไม่มีดาเมจ เดินออกได้ • Stand: รัศมี 350 นาน 8 วิ • Stand แตก: 200 นาน 5 วิ',
   cast(p,S){if(p.aug||p.ramp)return false;const V=S.v,o=aimPoint(p,V.range),st=eStand(p),r=st?V.r:V.rWeak,t=st?V.time:V.timeWeak;
     emit({k:'efx',z:'edustup',x:Math.round(o.x),y:Math.round(o.y),h:0,x2:Math.round(p.x),y2:Math.round(p.y),n:st?1:0,id:p.id});
     G.strikes.push({x:o.x,y:o.y,t:V.delay,fn(){(G.edust||(G.edust=[])).push({id:++G.zid,x:o.x,y:o.y,r,t,max:t,team:p.team});emit({k:'efx',z:'edust',x:Math.round(o.x),y:Math.round(o.y),h:0,r,n:st?1:0});}});}});
@@ -244,7 +244,7 @@ function earthPillarImpact(p,W){
     const {x,y}=W.target,a=W.a;
     for(const t of foesIn(p.team,x,y,E_WRS.r,30))aoeHit(p,t,E_WRS.hit,t=>knock(t,x,y,E_WRS.knock));damageEnv(x,y,90,E_WRS.env*ERV.env,p.id,'rock',0.6);   // แรงกระแทกทั้งบึง (aoeHit = โล่กันได้)
     const flight=earthWrathFlightAngles(x,y,W.ox,W.oy,W.oh,a);
-    eAdd({k:'pil',x1:x,y1:y,x2:x+Math.cos(a)*0.5,y2:y+Math.sin(a)*0.5,r:35,hgt:9,hp:E_WRS.pilHp,maxHp:E_WRS.pilHp,team:p.team,owner:p.id,flight});
+    eAdd({k:'pil',x1:x,y1:y,x2:x+Math.cos(a)*0.5,y2:y+Math.sin(a)*0.5,r:35,hgt:9,hp:E_WRS.pilHp,maxHp:E_WRS.pilHp,team:p.team,owner:p.id,flight,life:12});
     addZone({x,y,r:E_WRS.r,t:E_WRS.mud,tick:0.15,owner:p.id,team:p.team,kind:'mud',hit(t){addSlow(t,E_WRS.mudSlow,0.3);t.mudT=Math.max(t.mudT||0,0.3);}});
     (G.espk||(G.espk=[])).push({x,y,t:E_WRS.mud,nx:E_WRS.every,owner:p.id,team:p.team});
     emit({k:'efx',z:'epilland',x:Math.round(x),y:Math.round(y),h:0,a:Math.round(a*100)/100});}
@@ -263,6 +263,7 @@ function earthWrathTick(p,dt){const W=p.wr;W.t+=dt;
     return;
   }
   if(W.ph==='aim'){
+    if(W.sx===undefined){W.sx=p.x;W.sy=p.y;}{const dx=p.x-W.sx,dy=p.y-W.sy,d=Math.hypot(dx,dy),R=140;if(d>R){p.x=W.sx+dx/d*R;p.y=W.sy+dy/d*R;}}   // ลอยขยับได้ในวง 140
     W.target=earthWrathAim(p);
     if(W.t>=WRATH_READY_T+E_WRS.aimT){p.ult=100;earthWrathEnd(p);}
     return;

@@ -397,6 +397,7 @@ function eWrathPlayerPose(o,A){
   o.b.rotation.y+=weight*lerp(.18,-.24,cast);
   o.b.position.y-=(phase===3?.23:phase===4?lerp(.23,0,rise):.045*cast)*weight;
   if(phase===3){o.legs[0].rotation.x-=.25*weight;o.legs[1].rotation.x+=.34*weight;}
+  if(phase===1){o.legs[0].rotation.x=-.18;o.legs[1].rotation.x=.26;o.b.rotation.x=-.12;R.x=-2.6+.04*Math.sin(performance.now()/180);}   // ลอยเล็งอยู่: ไม่เดิน ค้างท่าชูไม้รอเหวี่ยงลงพร้อม Stand (ผู้ใช้ 2026-11-15)
   o.eFistBend=(phase===3?.75:phase===4?lerp(.75,.30,rise):.30*(1-cast))*weight;o.eFistLeft=false;
 }
 const _eForearmAxis=new THREE.Vector3(1,0,0),_eForearmQ=new THREE.Quaternion();
@@ -463,7 +464,7 @@ function earthFX(o,p,pz,now,dt){
     }else gop=Math.max(0,(s.gopL||0)-dt*4);
   }
   if(!wr&&!bigBA&&gop>0.02&&(s.gopL||0)<=0.02)eAppear(p.x-fx*20,p.y-fy*20,z0,1.6);
-  s.gopL=gop;standOp(G2,gop*(p.id===NET.myId&&!gp.guard?(wr?.8:bigBA?.72:.5):1),gp.guard?0.5:1);if(gop>0&&!bigBA&&!wr){G2.g.rotation.x=0;standPose(G2,gp);if(Math.random()<0.6)eSandFall(G2,p.x-fx*20,p.y-fy*20,z0+1.3,1);
+  s.gopL=gop;standOp(G2,gop*(p.id===NET.myId&&!gp.guard?(wr?.8:bigBA?.32:.5):1),gp.guard?0.5:1);if(gop>0&&!bigBA&&!wr){G2.g.rotation.x=0;standPose(G2,gp);if(Math.random()<0.6)eSandFall(G2,p.x-fx*20,p.y-fy*20,z0+1.3,1);
     if(gp.guard){const F=EGUARD.fist,E=EGUARD.elbow;G2.g.updateMatrixWorld(true);eArmIK(G2.R,eW(p.x+fx*F[0]+rx*F[1],p.y+fy*F[0]+ry*F[1],z0+F[2]),new THREE.Vector3(-rx*E[0]+fx*E[1],-E[2],-ry*E[0]+fy*E[1]).normalize());}}
   eFistCharge(s,G2,fist,dt);
   if(wr)eWrathPlayerPose(o,A);
@@ -801,7 +802,9 @@ function esbImpact(x,y,h,a,pt,mine){const P=eW(x,y,h),q={x,y},d=eStoneDir(a,pt);
 function earthEfx(ev){
   const z=ev.z,x=ev.x,y=ev.y,H=ev.h!==undefined?ev.h:0,me=myPos(),near=!me||Math.hypot(x-me.x,y-me.y)<1100,mine=ev.id===NET.myId;
   switch(z){
-    case 'epunch':if(near)snd('whoosh',{x,y,vol:0.35});return true;
+    case 'epunch':{if(near)snd('whoosh',{x,y,vol:0.45});const a2=ev.a??(VIEW.cur?.P?.find(q=>q.id===ev.id)?.a)??0,fx2=x+Math.cos(a2)*45,fy2=y+Math.sin(a2)*45;   // ต่อยออก: แรงอัดอากาศ + ฝุ่นพุ่ง (impact)
+      FX.flashSprite(fx2,fy2,H+1.4,'#ffe6b0',.16,1.3,.07,1.4);for(let i=0;i<8;i++){const s2=rnd(-.5,.5);PARTS.push({x:fx2,y:fy2,h:H+1.3+rnd(-.3,.3),vx:Math.cos(a2+s2)*rnd(250,420),vy:Math.sin(a2+s2)*rnd(250,420),vh:rnd(-.5,.8),life:.22,max:.22,col:'#e8d2a6',size:rnd(1.6,2.6),g:0,drag:4});}
+      if(ev.id===NET.myId)shake(1.2);return true;}
     case 'efistfire':{
       const s=eState(ev.id),P=eW(x,y,H),D=eStoneDir(ev.a,ev.pt);
       s.sbFollow={aim:[x,y,H,ev.a,ev.pt,1,ev.n,ev.ox,ev.oy,ev.oh,ev.left],t:0,fist:true};
@@ -860,7 +863,7 @@ function earthEfx(ev){
       rk.position.copy(eW(x,y,-1));scene.add(rk);eDebris(x,y,0.2,12,110);
       const dx=ev.x2-x,dy=ev.y2-y,dl=Math.hypot(dx,dy)||1,G=st?makeStand(1.1,false):null;
       // 0–0.3 หินลอยขึ้นระดับหัว • 0.3–0.4 Stand โผล่ • 0.4–0.65 บีบแรง (หินหดเร็ว สั่น ฝุ่นพ่น) • 0.65–1.1 บีบค้าง หินเรืองขึ้นเรื่อย ๆ • 1.1 ฟุ้งเป็นฝุ่น (host)
-      eAnim({g:rk,life:1.12,end(){if(G)disposeObj(G.g);},fn(a){const t=a.t,up=Math.min(1,t/0.28);rk.position.copy(eW(x,y,lerp(-1,1.9,1-Math.pow(1-up,3))));rk.rotation.y+=0.03;
+      eAnim({g:rk,life:DUSTB.v.delay+0.02,end(){if(G)disposeObj(G.g);},fn(a){const t=a.t*(1.1/DUSTB.v.delay),   /* ท่าเดิมยาว 1.1 วิ → บีบตามดีเลย์จริง (ผู้ใช้ 2026-11-15: ปาไวขึ้น) */up=Math.min(1,t/0.28);rk.position.copy(eW(x,y,lerp(-1,1.9,1-Math.pow(1-up,3))));rk.rotation.y+=0.03;
         const hard=t<0.4?0:Math.min(1,(t-0.4)/0.25),hold=t<0.65?0:Math.min(1,(t-0.65)/0.45);rk.scale.setScalar(1-0.25*(1-Math.pow(1-hard,2))-0.06*hold);m.emissiveIntensity=hard*0.5+hold*1.4;
         if(hard>0){const j=(hard<1?0.09:0.035)*(st?1:0.6);rk.position.x+=rnd(-1,1)*j;rk.position.y+=rnd(-1,1)*j;if(hard<1&&Math.random()<0.6)burst(x,y,ECOL.dust,2,90,0.5,2.2,{h:1.9,g:1,smoke:true,grow:1.3});if(Math.random()<0.3)burst(x,y,ECOL.glow,1,40,0.3,1.6,{h:1.9,g:0});}
         if(G){const k=t<0.3?0:Math.min(1,(t-0.3)/0.1);standOp(G,t>1.06?Math.max(0,1-(t-1.06)/0.06):k);G.g.position.copy(eW(x+dx/dl*42,y+dy/dl*42,0.1));G.g.rotation.y=eYaw(x+dx/dl*42,y+dy/dl*42,x,y);standPose(G,{t,squeeze:Math.min(1,hard*1.2),lean:0.15*hard});if(k>0&&!a.ap){a.ap=1;eAppear(x+dx/dl*42,y+dy/dl*42,0,1);}
@@ -981,7 +984,7 @@ function drawEarthHud(x,y,A,me){
     cx.strokeStyle='rgba(217,180,90,0.7)';cx.lineWidth=1;cx.strokeRect(x-w/2-0.5,yy-0.5,w+1,h+1);};
   if(A[0]>0)txt('🪨 Stand แตก — กลับมาใน '+A[0]+' วิ','#ffb07a');
   if(me&&me.sh&&!A[0])eShieldArc(x,y,A[7]|0);   // ถือโล่: เป้าเล็งซ่อน → โค้ง HP โล่ + ตัวเลข
-  if(A[9]>0){arc(Math.min(1,A[9]/2),'#ffcf6a',46);txt('Stand ใหญ่ชาร์จทุบ…','#ffcf6a');}
+  // (เอาแถบชาร์จ BA ออกแล้ว — ผู้ใช้ 2026-11-15)
   if(A[2]>0){const t=A[2],tier=t>=4.5?3:t>=2?2:1;arc(Math.min(1,t/4.5),['#c9ccd2','#ffb24a','#ff5a2a'][tier-1],40);
     for(const m of [2/4.5,1]){const a=-Math.PI/2+m*Math.PI*2;cx.fillStyle='#fff';cx.fillRect(x+Math.cos(a)*40-2,y+Math.sin(a)*40-2,4,4);}
     txt('Terra Auger ระดับ '+tier,'#ffd86b');}

@@ -108,7 +108,12 @@ function windFX(o,p,pz,now,dt){
   if(alive&&p.sh)o.shield.visible=false;   // ไม่ใช้โล่ลูกแก้วปกติ
   if(alive&&A[11]){if(!wvAlive(s.enh))s.enh=fxPlay('wind/slip_ready',{x:p.x,y:p.y,h,aim:false,follow:p.id});}   // แดชแล้ว นัดถัดไปพร้อม: ขนนกนีออนลอยรอบตัว
   if(guard){if(!wvAlive(s.guard))s.guard=fxPlay('wind/wall_guard',{x:p.x,y:p.y,h,a:p.a,follow:p.id,s:1.3});else s.guard.a=p.a;if(s.guard){const air=A[5]>=1,lim=air?1.5:.6;s.guard.pitch=-clamp(A[12]||0,-lim,lim);}}   // โล่ใหม่ = กำแพงลมตรงหน้า ปีกไม่ห่อแล้ว (ผู้ใช้ 2026-11-08)
-  else if(s.guard){fxKill(s.guard);s.guard=null;}   // ห่อปีกยาว 9.5 วิ → ตัดทิ้งทันทีตอนลดโล่
+  else if(s.guard){fxKill(s.guard);s.guard=null;}
+  // โล่ลม (ผู้ใช้ 2026-11-15): เปลือกโค้งหน้าตัว ขอบชัด + เส้นลมไหลเป็นระเบียบ ให้รู้ชัดว่ากางโล่
+  if(guard){if(!o.wShell){const m=windShellMat();o.wShell=new THREE.Mesh(new THREE.SphereGeometry(1,40,24,Math.PI*0.08,Math.PI*0.84,Math.PI*0.08,Math.PI*0.62),m);o.wShell.renderOrder=4;o.g.add(o.wShell);}
+    o.wShell.visible=true;o.wShell.position.set(0,1.15,0.15);o.wShell.scale.set(1.55,1.45,1.55);o.wShell.material.uniforms.uT.value=performance.now()/1000;
+    const air=A[5]>=1,lim=air?1.5:.6;o.wShell.rotation.x=clamp(A[12]||0,-lim,lim)*0.6;}
+  else if(o.wShell)o.wShell.visible=false;   // ห่อปีกยาว 9.5 วิ → ตัดทิ้งทันทีตอนลดโล่
   if(p.id===NET.myId)wvAimGhost(p,A,h);
   // ยิงขนนก: ชี้ไม้ไปข้างหน้าค้าง + หันตัวเปิดทางให้ปีกที่ยิง (ปีกซ้ายยิง = หันขวา) ค้างแป๊บ ไม่ยิงต่อค่อยกลับ
   {const E=o.wfe;if(E){E.t+=dt;const on=E.t<WFE_HOLD&&alive&&!guard;o.wfeW=(o.wfeW||0)+((on?1:0)-(o.wfeW||0))*Math.min(1,dt*(on?18:7));o.wfeY=(o.wfeY||0)+((on?E.s*wfeTwist(E.t):0)-(o.wfeY||0))*Math.min(1,dt*(on?45:6));
@@ -244,7 +249,7 @@ function windEfx(ev){
     case 'wnfcend':return true;
     case 'wnfast':{const o=WV.ff||(WV.ff=new Map());const old=o.get(ev.id);if(old){fxStop(old);o.delete(ev.id);}
       if(ev.n){const I=fxPlay('wind/fw_fast',{x,y,h:H,a,follow:ev.id});if(I)o.set(ev.id,I);if(near)snd('whoosh',ev);if(mine)toast('บินเร็ว: เมาส์ = บังคับแบบเครื่องบิน • ใช้สกิลไม่ได้ • ปล่อย Shift = กลับบินปกติ');}return true;}
-    case 'wnsochg':fxPlay('wind/sonic_charge',{x,y,h:H,a,follow:ev.id});{const o=PM3.get(ev.id);if(o){o.wso=0;o.wsoAir=!!ev.m;o.wld=null;if(o.wWings)o.wWings.userData.sup={t:0,dis:-1};}}if(near)snd('cast_pull',ev);if(mine)toast('Sonic Boom Strike: ชาร์จ 1.7 วิ แล้วพุ่งไปตามที่เล็ง');return true;
+    case 'wnsochg':fxPlay('wind/sonic_charge',{x,y,h:H,a,follow:ev.id});{const o=PM3.get(ev.id);if(o){o.wso=0;o.wsoAir=!!ev.m;o.wld=null;if(o.wWings)o.wWings.userData.sup={t:0,dis:-1};}}if(near)snd('cast_pull',ev);return true;
     case 'wnsoimp':{const o=PM3.get(ev.id);if(o){o.wso=undefined;o.wud=0;if(o.wWings&&o.wWings.userData.sup)o.wWings.userData.sup.dash=true;}}if(near)impactFrame(1,x,y,H+1.2,W_UL.impT,ev.id);return true;
     case 'wnsodash':fxPlay(ev.m?'wind/sonic_dash':'wind/sonic_dash_g',{x,y,h:H,a,follow:ev.id});{const o=PM3.get(ev.id);if(o){o.wud=undefined;o.wld={t:0,air:!!ev.m};if(o.wWings&&o.wWings.userData.sup){const S=o.wWings.userData.sup;S.dash=false;S.dis=0;}}fxPlay('wind/sonic_end',{x:ev.x2,y:ev.y2,h:H,a});}if(near){snd('boom',ev);snd('whoosh',ev);}return true;
     case 'wnsohit':fxPlay('wind/sonic_hit',{x,y,h:H,a});if(near){snd('break',ev);hitStop(0.1);}return true;
@@ -257,6 +262,14 @@ function windEfx(ev){
   return false;
 }
 // ---------- HUD รอบเป้าเล็ง: GaleBurst / Downburst / Dash / Slipstream ----------
+// เปลือกโล่ลม: ขอบสว่าง (fresnel + ขอบตัด) + เส้นลมแนวนอนไหลไปข้างเดียวกันเป็นจังหวะ
+let _wShellM=null;
+function windShellMat(){if(!_wShellM){_wShellM=new THREE.ShaderMaterial({uniforms:{uT:{value:0}},transparent:true,depthWrite:false,side:THREE.DoubleSide,
+  vertexShader:'varying vec3 vN;varying vec3 vV;varying vec2 vU;void main(){vec4 w=modelMatrix*vec4(position,1.);vN=normalize(mat3(modelMatrix)*normal);vV=normalize(cameraPosition-w.xyz);vU=uv;gl_Position=projectionMatrix*viewMatrix*w;}',
+  fragmentShader:'uniform float uT;varying vec3 vN;varying vec3 vV;varying vec2 vU;void main(){float fr=pow(1.-abs(dot(vN,vV)),2.);float ed=smoothstep(0.08,0.,vU.x)+smoothstep(0.92,1.,vU.x)+smoothstep(0.1,0.,vU.y)+smoothstep(0.9,1.,vU.y);'+
+    'float f=sin(vU.y*40.+sin(vU.x*6.+uT*2.)*1.2)*0.5+0.5;float flow=smoothstep(0.86,1.,sin(vU.x*18.-uT*5.+vU.y*3.)*0.5+0.5)*smoothstep(0.6,1.,f);'+
+    'float a=clamp(fr*0.5+ed*0.95+flow*0.5+0.08,0.,0.9);vec3 c=mix(vec3(0.15,0.85,0.35),vec3(0.75,1.,0.8),clamp(ed+flow*0.6,0.,1.));gl_FragColor=vec4(c,a);}'});_wShellM.userData.keep=true;}
+  return _wShellM;}
 function drawWindHud(x,y,A,me){const g=Math.max(0,Math.min(100,A[0]))/100,full=g>=1,R=34,a0=Math.PI*0.62,a1=Math.PI*1.38;
   cx.lineCap='round';cx.lineWidth=5;cx.strokeStyle='rgba(0,0,0,0.45)';cx.beginPath();cx.arc(x,y,R,a0,a1);cx.stroke();
   if(g>0){cx.strokeStyle=full?`rgba(239,255,232,${0.75+0.25*Math.sin(performance.now()/120)})`:'#8dff65';cx.lineWidth=full?5:3.5;cx.beginPath();cx.arc(x,y,R,a1-(a1-a0)*g,a1);cx.stroke();}
@@ -269,25 +282,14 @@ function drawWindHud(x,y,A,me){const g=Math.max(0,Math.min(100,A[0]))/100,full=g
   const kit=getKit(me.id),slip=kit.ids.indexOf(SPELLS.vortexbind.i),dx=x+R+8,dy=y+4;
   const dashCd=CDK.indexOf('dodge'),dashFill=1-clamp((me.cd[dashCd]||0)/(me.cm[dashCd]||1),0,1);
   const dashKey=slotKey('Shift')+' ↑',slipKey=slip<0?'':slotKey(SLOTK[SKORD.indexOf(slip+1)].toUpperCase());
-  cx.textAlign='left';cx.font='600 11px Kanit,sans-serif';
-  const width=Math.max(38,cx.measureText(dashKey).width,slip<0?0:cx.measureText(slipKey).width+7+13*W_VX.sMax);
-  cx.beginPath();cx.roundRect(dx-6,dy-24,width+12,slip<0?23:43,5);
-  cx.fillStyle='rgba(11,29,25,0.82)';cx.fill();
-  cx.fillStyle='#eafff1';cx.fillText(dashKey,dx,dy-12);
-  cx.fillStyle='rgba(0,0,0,0.55)';cx.fillRect(dx,dy-8,38,3);
-  cx.fillStyle='#8dff65';cx.fillRect(dx,dy-8,38*dashFill,3);
-  if(slip>=0){
-    const sx=dx+cx.measureText(slipKey).width+9;
-    cx.fillStyle='#eafff1';cx.fillText(slipKey,dx,dy+13);
-    for(let i=0;i<W_VX.sMax;i++){
-      const px=sx+i*13,py=dy+9,fill=i<A[10]?1:i===A[10]?clamp((A[13]||0)/100,0,1):0;
-      cx.beginPath();cx.moveTo(px,py-4);cx.lineTo(px+4,py);cx.lineTo(px,py+4);
-      cx.lineWidth=4;cx.strokeStyle='rgba(0,0,0,0.65)';cx.stroke();
-      cx.lineWidth=2;cx.strokeStyle='rgba(212,255,235,0.26)';cx.stroke();
-      if(fill>0){cx.save();cx.beginPath();cx.rect(px-1,py-5,6*fill,10);cx.clip();
-        cx.beginPath();cx.moveTo(px,py-4);cx.lineTo(px+4,py);cx.lineTo(px,py+4);cx.strokeStyle='#a5ffe4';cx.stroke();cx.restore();}
-    }
-  }
+  // ผู้ใช้ 2026-11-15: ไม่มีกล่องตาราง — ไอคอนชัด ๆ + วงคูลดาวน์รอบไอคอน • ปุ่มตัวเล็กใต้ไอคอน
+  const icon=(id,ix,iy,r,fill,ready,key)=>{cx.beginPath();cx.arc(ix,iy,r,0,6.283);cx.fillStyle='rgba(8,24,18,0.55)';cx.fill();
+    const im=icoTint(id,ready?'#eafff1':'#7f9a8a',Math.round(r*1.5));if(im)cx.drawImage(im,ix-r*.75,iy-r*.75,r*1.5,r*1.5);
+    cx.lineWidth=2.5;cx.strokeStyle='rgba(0,0,0,0.5)';cx.beginPath();cx.arc(ix,iy,r+2,0,6.283);cx.stroke();
+    if(fill>0){cx.strokeStyle=ready?'#a4ff7e':'#5fbf5a';cx.beginPath();cx.arc(ix,iy,r+2,-Math.PI/2,-Math.PI/2+6.283*fill);cx.stroke();}
+    if(key){cx.font='600 10px Kanit,sans-serif';cx.textAlign='center';cx.fillStyle='rgba(234,255,241,0.8)';cx.fillText(key,ix,iy+r+12);}};
+  icon('dsh_wind',dx+14,dy-6,13,dashFill,dashFill>=1,slotKey('Shift'));
+  if(slip>=0){const n=W_VX.sMax;for(let i=0;i<n;i++){const fill=i<A[10]?1:i===A[10]?clamp((A[13]||0)/100,0,1):0;icon('w_slipstream',dx+46+i*26,dy-6,10,fill,fill>=1,i===0?slipKey:'');}}
   if(A[3]){cx.textAlign='center';cx.font='600 14px Kanit,sans-serif';cx.fillStyle='#efffe8';cx.fillText('คลิกซ้าย = ดันกำแพง • คลิกขวา = วางตรงจุดเล็ง',x,y+R+30);}
   if(A[7]===2||A[5]===2&&A[14]>0){
     cx.textAlign='center';cx.font='600 12px Kanit,sans-serif';cx.fillStyle='#eafff1';

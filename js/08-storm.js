@@ -4,9 +4,9 @@
 // =====================================================================
 // ตัวเลขพื้นฐานของสายสายฟ้าอยู่ใน STORMV + v:{...} ของแต่ละสกิล — ปรับได้ใน tune.html / F8
 const STORMV=PATHS[2].v={stackMax:5,beamR:300,beamArc:0.6,beamDmg:3,beamTick:0.4,triLen:250,triW:120,triDmg:20,shock:0.3,dashN:3,dashRc:3,dashDist:220,dashT:0.15,dashDmg:10,
-  shieldT:3,shieldCd:10,blastMax:30,blastMul:0.5,blastR:150};
+  shieldT:3,shieldCd:10,blastMax:30,blastMul:0.5,blastR:150,bashDmg:20,bashShock:0.3,bashKnock:260,bashBounce:420,bashBounceT:0.08};
 PATHS[2].vn={stackMax:'Lightning stack สูงสุด',beamR:'ลำสายฟ้า • ระยะ',beamArc:'ลำสายฟ้า • ครึ่งมุมกรวย (เรเดียน)',beamDmg:'ลำสายฟ้า • ดาเมจต่อครั้ง',beamTick:'ลำสายฟ้า • ทุก (วิ)',triLen:'สายฟ้าสามเหลี่ยม • ยาว',triW:'สายฟ้าสามเหลี่ยม • ปลายกว้าง',triDmg:'สายฟ้าสามเหลี่ยม • ดาเมจ',
-  shock:'Shock • นาน (วิ)',dashN:'Dash • จำนวนชาร์จ',dashRc:'Dash • ฟื้นชาร์จละ (วิ)',dashDist:'Dash • ระยะ',dashT:'Dash • เวลา (วิ)',dashDmg:'Dash • ดาเมจทะลุ',shieldT:'โล่ • เปิดนาน (วิ)',shieldCd:'โล่ • คูลดาวน์ (วิ)',blastMax:'โล่ระเบิด • ดาเมจสูงสุด',blastMul:'โล่ระเบิด • ดาเมจ (เท่าของที่ดูดซับ)',blastR:'โล่ระเบิด • รัศมี'};
+  shock:'Shock • นาน (วิ)',dashN:'Dash • จำนวนชาร์จ',dashRc:'Dash • ฟื้นชาร์จละ (วิ)',dashDist:'Dash • ระยะ',dashT:'Dash • เวลา (วิ)',dashDmg:'Dash • ดาเมจทะลุ',shieldT:'โล่ • เปิดนาน (วิ)',shieldCd:'โล่ • คูลดาวน์ (วิ)',blastMax:'โล่ระเบิด • ดาเมจสูงสุด',blastMul:'โล่ระเบิด • ดาเมจ (เท่าของที่ดูดซับ)',blastR:'โล่ระเบิด • รัศมี',bashDmg:'โล่+Dash ชน • ดาเมจ',bashShock:'โล่+Dash ชน • Shock (วิ)',bashKnock:'โล่+Dash ชน • กระเด็น (ต่ำกว่า ~280 = ไม่ล้มแบบ ragdoll)',bashBounce:'โล่+Dash ชน • เราเด้งกลับ (ความเร็ว)',bashBounceT:'โล่+Dash ชน • เด้งกลับนาน (วิ)'};
 function stGain(p,n=1){if(!p||p.pathIdx!==2)return;p.lst=Math.min(STORMV.stackMax,(p.lst|0)+n);p.emp=1;emit({k:'efx',z:'stgain',x:p.x,y:p.y,h:p.z+1.6,id:p.id,n:p.lst|0,g:p.god>0?1:0});}
 function stSpend(p,n){if((p.lst|0)<n){emit({k:'efx',z:'nostack',x:p.x,y:p.y,h:p.z+2.2,id:p.id,n,g:p.god>0?1:0});return false;}p.lst-=n;return true;}
 // ศัตรูในกรวยหน้า (ใช้กับลำสายฟ้า)
@@ -81,8 +81,13 @@ function stormDash(p,inp,pr,dt,setCd){
 function stormDashTick(p){
   if(!p.sdHit)return;
   if(p.dash>0){
-    for(const t of foesOf(p.team)){if(p.sdHit.has(t))continue;if(Math.hypot(t.x-p.x,t.y-p.y)>PR+(t.r||PR)+15||Math.abs(cH(t)-(p.z+1.1))>3)continue;
+    for(const t of foesOf(p.team)){if(p.sdHit.has(t))continue;if(Math.hypot(t.x-p.x,t.y-p.y)>(p.stS&&!(p.god>0)?46:PR)+(t.r||PR)+15||Math.abs(cH(t)-(p.z+1.1))>3)continue;
       p.sdHit.add(t);
+      // ผู้ใช้ 2026-11-16: Dash ตอนกางโล่ = พุ่งชนด้วยโล่ → คนโดนกระเด็นถอยนิด Shock 0.3 วิ ดาเมจ 20 • เราเด้งกลับนิด (จบ Dash ทันที)
+      if(p.stS&&!(p.god>0)){damage(t,STORMV.bashDmg,p.id,'aoe');shock(t,p.id,STORMV.bashShock,true);knock(t,p.x,p.y,STORMV.bashKnock);
+        p.dash=0;p.vx=-p.dashX*STORMV.bashBounce;p.vy=-p.dashY*STORMV.bashBounce;p.stBn=STORMV.bashBounceT;   // เด้งสั้น ๆ เร็ว ๆ แล้วหยุด (ไม่ไถล)
+        emit({k:'efx',z:'stbash',x:Math.round((p.x+t.x)/2),y:Math.round((p.y+t.y)/2),h:Math.round(cH(t)*10)/10,a:Math.round(Math.atan2(p.dashY,p.dashX)*100)/100,id:p.id,t:t.id});
+        if(!p.sdAny){p.sdAny=true;stGain(p);}break;}
       const mark=G.waveMarks?.get(t),advances=!(p.god>0)&&mark&&!mark.primed&&mark.until>G.time,hp=t.hp;
       damage(t,p.god>0?GODL.v.dashDmg:STORMV.dashDmg,p.id,'aoe',advances);
       if(advances&&t.hp<hp)stormWaveMark(p.id,t,false);
@@ -100,6 +105,7 @@ function stormShieldBlast(p){
 }
 // ทุกเฟรม (สายฟ้า): เวลาโล่ / อัลติ / ร่ายเส้นสายฟ้า / Railgun / ออร์บ / Dash
 function stormTick(p,dt){
+  if(p.stBn>0){p.stBn-=dt;if(p.stBn<=0){p.stBn=0;p.vx=p.vy=0;}}
   if(p.stS){p.stS.t-=dt;if(p.stS.t<=0)stormShieldBlast(p);}
   else if(p.stCd>0)p.stCd-=dt;
   p.shieldE=p.stS?100:100*(1-Math.max(0,p.stCd||0)/STORMV.shieldCd);p.shieldBroken=0;
@@ -222,7 +228,7 @@ function stormBowFire(p){const V=RAIL.v;p.rail=null;const h0=p.z+1.5,inp=p.inp||
   damageEnv(ex,ey,40,V.env,p.id,'lightning',eh);
   emit({k:'efx',z:'sbow',x:Math.round(p.x),y:Math.round(p.y),h:h0,x2:Math.round(ex),y2:Math.round(ey),h2:Math.round(eh*10)/10,hit:!!best,id:p.id,g:p.god>0?1:0});}
 // ----- อัลติ: ร่างเทพสายฟ้า 10 วิ -----
-const GODL=defSpell(2,{id:'godlightning',v:{time:10,xhp:75,dashRc:1,dashDmg:15,c1:15,c2:15,gap:0.2,clawCd:0.7,lunge:40,clawR:160,clawArc:0.96,bigR:200,bigArc:1.13,bigDmg:30,bigWin:1.5,slamR:150,slamDmg:80},vn:{time:'อยู่นาน (วิ)',xhp:'HP เสริม',dashRc:'Dash ฟื้นชาร์จละ (วิ)',dashDmg:'Dash • ดาเมจทะลุ',c1:'กรงเล็บ • จังหวะ 1',c2:'กรงเล็บ • จังหวะ 2',gap:'กรงเล็บ • ห่างระหว่าง 2 ที (วิ)',clawCd:'กรงเล็บ • คูล (วิ)',lunge:'กรงเล็บ • พุ่ง',clawR:'กรงเล็บ • ระยะ',clawArc:'กรงเล็บ • ครึ่งมุม (rad)',bigR:'กรงเล็บพิเศษ • ระยะ',bigArc:'กรงเล็บพิเศษ • ครึ่งมุม (rad)',bigDmg:'กรงเล็บพิเศษ • ดาเมจ',bigWin:'กรงเล็บพิเศษ • เวลากด (วิ)',slamR:'ลูกสายฟ้าโดม (อัลติ) • รัศมีทุบ',slamDmg:'ลูกสายฟ้าโดม (อัลติ) • ดาเมจทุบ'},role:'ult',n:'ร่างเทพสายฟ้า',ic:'⚡',cd:0,ult:true,d:'แปลงร่างเทพสายฟ้า 10 วิ: HP เสริม 75 • Dash ฟื้นชาร์จละ 1 วิ ทะลุ 15 ดาเมจ • โจมตีปกติพุ่งสั้นแล้วข่วน 2 จังหวะ (15/15) • Dash โดนศัตรู = โจมตีครั้งถัดไปภายใน 1.5 วิ ฟันกวาดทีเดียว ระยะ 200 ดาเมจ 30 + Shock • ใช้โล่ไม่ได้',fx:'สกิลเก่งขึ้น: ดูดความเร็วไกลขึ้น+Shock • ออร์บพุ่งพร้อมกัน • Railgun เตือน 0.5 วิ ไกล 1400 • ฟ้าผ่าสามครั้งมีวงซ้าย/ขวา • ลูกสายฟ้าโดมเป็นทุบลงแบบ Dragonfall 80 ดาเมจ • ลูกสายฟ้าโดมใช้ 3 stacks ในร่างเทพ',
+const GODL=defSpell(2,{id:'godlightning',v:{time:10,xhp:75,dashRc:1,dashDmg:15,c1:15,c2:15,gap:0.2,clawCd:0.3,lunge:40,clawR:160,clawArc:0.96,bigR:200,bigArc:1.13,bigDmg:30,bigWin:1.5,slamR:150,slamDmg:80},vn:{time:'อยู่นาน (วิ)',xhp:'HP เสริม',dashRc:'Dash ฟื้นชาร์จละ (วิ)',dashDmg:'Dash • ดาเมจทะลุ',c1:'กรงเล็บ • จังหวะ 1',c2:'กรงเล็บ • จังหวะ 2',gap:'กรงเล็บ • ห่างระหว่าง 2 ที (วิ)',clawCd:'กรงเล็บ • คูล (วิ)',lunge:'กรงเล็บ • พุ่ง',clawR:'กรงเล็บ • ระยะ',clawArc:'กรงเล็บ • ครึ่งมุม (rad)',bigR:'กรงเล็บพิเศษ • ระยะ',bigArc:'กรงเล็บพิเศษ • ครึ่งมุม (rad)',bigDmg:'กรงเล็บพิเศษ • ดาเมจ',bigWin:'กรงเล็บพิเศษ • เวลากด (วิ)',slamR:'ลูกสายฟ้าโดม (อัลติ) • รัศมีทุบ',slamDmg:'ลูกสายฟ้าโดม (อัลติ) • ดาเมจทุบ'},role:'ult',n:'ร่างเทพสายฟ้า',ic:'⚡',cd:0,ult:true,d:'แปลงร่างเทพสายฟ้า 10 วิ: HP เสริม 75 • Dash ฟื้นชาร์จละ 1 วิ ทะลุ 15 ดาเมจ • โจมตีปกติพุ่งสั้นแล้วข่วน 2 จังหวะ (15/15) • Dash โดนศัตรู = โจมตีครั้งถัดไปภายใน 1.5 วิ ฟันกวาดทีเดียว ระยะ 200 ดาเมจ 30 + Shock • ใช้โล่ไม่ได้',fx:'สกิลเก่งขึ้น: ดูดความเร็วไกลขึ้น+Shock • ออร์บพุ่งพร้อมกัน • Railgun เตือน 0.5 วิ ไกล 1400 • ฟ้าผ่าสามครั้งมีวงซ้าย/ขวา • ลูกสายฟ้าโดมเป็นทุบลงแบบ Dragonfall 80 ดาเมจ • ลูกสายฟ้าโดมใช้ 3 stacks ในร่างเทพ',
   cast(p,S){p.god=S.v.time;p.xhp=S.v.xhp;p.dch=STORMV.dashN;p.cEmp=0;p.cEmpT=0;p.clQ=null;p.clT=0;if(p.stS){p.stS=null;p.stCd=0;}emit({k:'efx',z:'godon',x:p.x,y:p.y,h:p.z,id:p.id,g:1});}});
 // ----- ลูกสายฟ้าโดม: รวมไฟที่พื้น → ทะยานขึ้น → เล็ง → ฟาดไม้ยิงและค้างชี้เป้า -----
 const SDOME_POSE={charge:0.26,lift:0.38,swing:0.19,hold:0.38,recover:0.22};

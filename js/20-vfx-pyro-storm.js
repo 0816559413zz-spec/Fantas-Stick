@@ -496,6 +496,16 @@ function stBeam(x,y,h,a,len,rad,col,op,nb){
   m.rotation.order='YXZ';m.rotation.y=-a;m.rotation.z=Math.PI/2;m.position.set(tx(x+Math.cos(a)*len/2),h+GY(x,y),tz(y+Math.sin(a)*len/2));return m;
 }
 // จุดบนเปลือกทรงกลมรอบ (x,y,h) รัศมี R (หน่วย sim)
+// โล่สายฟ้า: โดมแก้วทอง ขอบสว่าง (fresnel) + เส้นแสงแนวนอนไหลขึ้นลงเป็นคลื่นเรียบ ๆ (ไม่ใช่เส้นสุ่ม)
+const STHIT={},STBASH={};   // STBASH[id]=[เวลา, ทิศที่ถูกดัน(เรเดียน), แรง] — โล่+Dash ชน: ทั้งเราและคนโดนเอนตัวถอยหลังตามแรงกระแทก
+// โล่+Dash ชน (ผู้ใช้ 2026-11-16): ตัวเอนไปทางที่ถูกดัน (เร็ว) ค้างแป๊บ แล้วกลับ • โดมโล่ (o.stFx) ขยับถอยไปพร้อมตัว
+function stBashLean(o,p,now){const B=STBASH[p.id];if(B&&B!==o.bashSeen){o.bashSeen=B;o.bashT0=now;}
+  const bt=o.bashT0!==undefined?(now-o.bashT0)/1000:9;let e=0;
+  if(bt>=0&&bt<0.26){const w=clamp(bt<0.04?bt/0.04:bt<0.11?1:1-(bt-0.11)/0.15,0,1);   // เข้ากับจังหวะเด้ง (0.08 วิ): โยกตามแรง → โล่หยุดเด้ง → กลับท่าปกติe=w*w*(3-2*w)*(B?B[2]:1);
+    const fa=Math.atan2(Math.cos(o.g.rotation.y),Math.sin(o.g.rotation.y)),rel=(B?B[1]:fa+Math.PI)-fa,bk=-Math.cos(rel),sd=Math.sin(rel);   // ถูกดันไปทางหลัง = bk>0
+    o.b.rotation.x-=0.45*e*bk;o.b.rotation.z-=0.3*e*sd;o.b.position.z-=0.1*e*bk;o.armR.rotation.x-=0.5*e*bk;o.armL.rotation.x-=0.5*e*bk;}
+  if(o.stFx){const B2=B||[0,0];o.stFx.o.off=e>0?[Math.cos(B2[1])*9*e,Math.sin(B2[1])*9*e,-0.1*e]:null;}}
+   // STHIT[id]=[เวลา ms, มุมที่โดน] — ระลอกบนโล่ตอนดูดดาเมจ
 function shellPt(x,y,h,R,a,e){return [x+Math.cos(a)*R*Math.cos(e),y+Math.sin(a)*R*Math.cos(e),h+R*S3*Math.sin(e)];}
 function updateStormV(dt){
   for(let i=LATER.length-1;i>=0;i--){const L=LATER[i];L.t-=dt;if(L.t<=0){LATER.splice(i,1);try{vfxOnce(L.fn);}catch(e){}}}
@@ -652,10 +662,11 @@ function stormClawSwipe(o,dt){const S=o.clSw,n=S.n,emp=n>=3;S.t+=dt;const k=Math
 }
 
 function stormFX(o,p,pz,now,dt){
+  stBashLean(o,p,now);
   if((p.fm|0)&16){o.b.rotation.z+=Math.sin(now/22)*0.2;o.b.rotation.x+=Math.sin(now/31)*0.08;}
   const M=p.sm;
   stormCape(o,!!(M?.[3]&4));
-  if(!M){if(o.sOrbs)o.sOrbs.forEach(q=>q.visible=false);if(o.railC)o.railC.visible=false;if(o.godG)o.godG.visible=false;if(o.godEyes)o.godEyes.forEach(e=>e.visible=false);if(o.stG)o.stG.visible=false;if(o.claws)o.claws.forEach(c=>c.visible=false);return;}
+  if(!M){if(o.sOrbs)o.sOrbs.forEach(q=>q.visible=false);if(o.railC)o.railC.visible=false;if(o.godG)o.godG.visible=false;if(o.godEyes)o.godEyes.forEach(e=>e.visible=false);if(o.stG)o.stG.visible=false;if(o.stFx){fxStop(o.stFx);o.stFx=null;}if(o.stDFx){fxStop(o.stDFx);o.stDFx=null;}if(o.claws)o.claws.forEach(c=>c.visible=false);return;}
   const f=M[3]|0,isMe=p.id===NET.myId,god=!!(f&4);
   // ลำสายฟ้า (กดค้าง): สายฟ้าหนาจากปลายไม้ไปทุกเป้าที่ล็อก
   const bmT=f&1&&!god?(M[7]||[]):[];   // ล็อกเป้าแล้ว = ลำหลักวิ่งเข้าหาเป้า ไม่พุ่งตรงไปข้างหน้าอีก (ผู้ใช้ 2026-11-10)
@@ -676,12 +687,14 @@ function stormFX(o,p,pz,now,dt){
   // ยิงครั้งถัดไปเป็นสายฟ้าสามเหลี่ยม: ประกายเหลืองที่ปลายไม้
   if(M[1]&&!god&&Math.random()<0.5){o.tip.getWorldPosition(_pw);const q=simOf(_pw);PARTS.push({x:q.x+rnd(-4,4),y:q.y+rnd(-4,4),h:q.h,vx:rnd(-20,20),vy:rnd(-20,20),vh:rnd(0.5,2),life:0.3,max:0.3,col:Math.random()<0.5?'#ffd000':'#ffffff',size:2.4,g:-1});}
   // โล่สายฟ้า: เปลือกสายฟ้าแตกแขนงล้อมตัว สีเหลืองตลอด ยิ่งดูดมากยิ่งแลบถี่
-  if(f&2){o.shield.visible=false;const k=Math.min(1,(M[4]||0)/90),R=30,hc=pz+1.15;
-    for(let j=0;j<4+Math.round(k*5);j++){const a1=rnd(0,6.283),e1=rnd(-0.9,1.2),q=shellPt(p.x,p.y,hc,R,a1,e1),q2=shellPt(p.x,p.y,hc,R,a1+rnd(0.6,1.4),e1+rnd(-0.7,0.7));tbolt(q[0],q[1],q[2],q2[0],q2[1],q2[2],0.1,0,0.08+0.05*k,k>0.4?1:0);}
-    if(!o.stG){o.stG=new THREE.Sprite(glowMat('#ffd23a',0.5));o.stG.material.userData.keep=true;o.stG.position.y=1.15;o.g.add(o.stG);}
-    o.stG.visible=true;o.stG.scale.setScalar(1.9+0.15*Math.sin(now/50));
-    LREQ.push({x:tx(p.x),y:pz+1.2,z:tz(p.y),col:'#ffd23a',int:1.6+2*k,dist:8});
-  }else if(o.stG)o.stG.visible=false;
+  // โล่สายฟ้า = ไฟล์เอฟเฟกต์ VFX Studio (ผู้ใช้ 2026-11-16): bind.json loop:stsh = assets/fx/storm/shield.fx.json (โดมแก้วทอง + เส้นแสงสุ่ม) เล่นวนตามตัวตอนโล่เปิด
+  //   โดนตี (efx sthit) = loop:stsh_hit (สายฟ้าวิ่งรอบผิวโดม + โดมแฟลชสว่าง) • อย่าปรับ k ของโล่ (k สูง = ขาวทั้งจอ)
+  {const fn=f&2?fxLoopName('stsh'):null;
+    if(fn){if(!o.stFx){o.stFx=fxPlay(fn,{x:p.x,y:p.y,h:pz,follow:p.id,aim:false});}}
+    else if(o.stFx){fxStop(o.stFx);o.stFx=null;}
+    {const dn=f&2&&p.ds?fxLoopName('stsh_dash'):null;if(dn){if(!o.stDFx)o.stDFx=fxPlay(dn,{x:p.x,y:p.y,h:pz,follow:p.id,aim:false});}else if(o.stDFx){fxStop(o.stDFx);o.stDFx=null;}}   // Dash ตอนกางโล่: สายฟ้าวิ่งรอบโดม
+    if(f&2){o.shield.visible=false;LREQ.push({x:tx(p.x),y:pz+1.2,z:tz(p.y),col:'#ffd23a',int:1.2+(STHIT[p.id]&&now-STHIT[p.id][0]<300?0.8:0),dist:8});}}
+  if(o.stG)o.stG.visible=false;
   // Dash: สายฟ้าหนาหุ้มตัว + เงาติดตา + ร่องสายฟ้าแตกกิ่งที่จางเร็ว
   if(p.ds){const pv=o.dPrev||[p.x,p.y];
     {const a1=rnd(0,6.283),q=shellPt(p.x,p.y,pz+0.3,20,a1,rnd(-0.3,0.3)),q2=shellPt(p.x,p.y,pz+2,20,a1+rnd(2,4),rnd(-0.3,0.3));(god?tboltB:tbolt)(q[0],q[1],q[2],q2[0],q2[1],q2[2],0.06,0,0.08).gk=0.4;}   // ผู้ใช้ 2026-11-12: สายฟ้าหุ้มตัวน้อยลง ไม่รวมกันเป็นก้อนขาว

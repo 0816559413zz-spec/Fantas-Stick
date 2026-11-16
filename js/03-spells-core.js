@@ -41,7 +41,8 @@ function parseKit(str){
   let path=Number.isInteger(a[0])&&a[0]>=0&&a[0]<PATHS.length?a[0]:0;
   if(!SPELL_LIST.some(x=>x.path===path&&!x.ult)||PATHS[path].off)path=0;
   const ids=[];let off=0;
-  const main=SPELL_LIST.filter(x=>x.path===path&&!x.ult).map(x=>x.i);
+  // PATHS[path].def = ลำดับสกิลชุดเริ่มต้น (เช่นสายลม: Featherwing แทน Tailwind — ผู้ใช้ 2026-11-15) แล้วต่อด้วยลำดับเดิม
+  const main=[...new Set([...(PATHS[path].def||[]).map(id=>SPELLS[id]&&SPELLS[id].i).filter(i=>i!==undefined),...SPELL_LIST.filter(x=>x.path===path&&!x.ult).map(x=>x.i)])];
   for(let k=1;k<=4;k++){
     const i=a[k],S=Number.isInteger(i)&&SPELL_LIST[i];
     if(S&&!S.ult&&!PATHS[S.path].off&&!ids.includes(i)&&S.path===path){if(S.path!==path)off++;ids.push(i);}else ids.push(null);
@@ -226,7 +227,7 @@ function takePoison(t){const n=t.psn|0;t.psn=0;t.psnT=0;return n;}
 
 // ---------- ความสามารถพื้นฐาน (คลิกซ้าย) ของแต่ละสาย: สะสมสถานะตั้งต้นให้เองทุกๆ N ครั้งที่ยิงโดน ----------
 const PBASIC=[
-  {id:'b_pyro',type:'spark',n:'ประกายไฟ / ลูกไฟชาร์จ',d:'คลิก = ยิงประกายไฟ (5 ดาเมจ ทุก 0.3 วิ ระยะ ~400) โดนเป้าเดียวครบ 3 นัด = +1 Burning • กดค้าง = รวบรวมลูกไฟที่ปลายไม้ (ไม่ยิง) ครบ 1.6 วิ แล้วปล่อย = ลูกไฟ (20 ดาเมจ ระยะ ~900 +1 Burning) • โล่ไฟ: รับดาเมจ 40 = Heat 1 ขั้น (สูงสุด 4) • ขั้น 2: ดาเมจ +10% เดินเร็ว +10% • ขั้น 3: +15% / +20% • เต็ม: +20% / +30% และ Ignition Snap ครั้งถัดไป 30 ดาเมจ ฮีล 20 ต่อชั้น Burning • ไม่ได้ Heat 4 วิ จะค่อย ๆ ลด • Snap แล้ว Heat หมด',
+  {id:'b_pyro',type:'spark',n:'ประกายไฟ / ลูกไฟชาร์จ',d:'คลิก = ยิงประกายไฟ (5 ดาเมจ ทุก 0.3 วิ ระยะ ~400) โดนเป้าเดียวครบ 3 นัด = +1 Burning • กดค้าง = รวบรวมลูกไฟที่ปลายไม้ (ไม่ยิง) ครบ 1.6 วิ แล้วปล่อย = ลูกไฟ (20 ดาเมจ ระยะ ~900 +1 Burning) • โล่ไฟ: รับดาเมจ 40 = Heat 1 ขั้น (สูงสุด 4) • ขั้น 2: ดาเมจ +10% เดินเร็ว +10% • ขั้น 3: +15% / +20% • เต็ม: +20% / +30% และ Ignition Snap ครั้งถัดไป 30 ดาเมจ ฮีล 20 ต่อชั้น Burning • ไม่ได้ Heat 8 วิ จะค่อย ๆ ลด (เต็มหมดใน 12 วิ) • Snap แล้ว Heat หมด',
     shd:'โล่ไฟ: บล็อกปกติ • Parry = ได้ลูกไฟวิญญาณ 2 ลูก (ครั้งเดียวต่อการยกโล่) • บล็อกโดนครบ 3 ครั้ง = ได้ 2 ลูก • สะสมได้สูงสุด 4 ลูก หมุนรอบตัวไม่หายจนกว่าจะใช้ • ลูกไฟ (ชาร์จ/Kindle) โดนศัตรู = ลูกไฟวิญญาณทั้งหมดพุ่งใส่ ลูกละ 4',dsd:'พุ่ง (Shift): กดค้างชาร์จ (สูงสุด 4 วิ ห้ามขยับ ยิ่งชาร์จยิ่งย่อตัวต่ำ) ปล่อย = ระเบิดดันตัวพุ่ง 150-1100 อมตะระหว่างพุ่ง คูลดาวน์ 3 วิ',
     hit(pr,t){damage(t,pr.dmg,pr.owner,'proj');if((t.spkN=(t.spkN|0)+1)>=PYV.sparkN){t.spkN=0;addBurn(t,1,pr.owner);}},
     tick:pyroBasic,onParry:pyroParry,onBlock:pyroBlock,dash:pyroDash,shieldSwing:true},

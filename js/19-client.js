@@ -156,7 +156,7 @@ function smoke(x,y,h,n,col,life,size,sp){burst(x,y,col||'#3a3640',n,sp||60,life|
 function ring(x,y,col,r,life,h){SHAPES_Q.push({k:'ring',x,y,h:h!==undefined?h:0.15,col,s1:r*S3,life});}
 function floatText(x,y,t,col,size,h){TEXTS.push({x:x+rnd(-8,8),y,h,t:String(t),col,size:size||16,life:0.9,max:0.9});}
 function shake(a){if(!SET.shake)return;shakeA=Math.max(shakeA,a);}
-function wandPos(ev){const a=ev.a||0;return [ev.x+Math.cos(a)*24-Math.sin(a)*6,ev.y+Math.sin(a)*24+Math.cos(a)*6];}
+function wandPos(ev){if(ev.tipd)return [ev.x,ev.y];const a=ev.a||0;return [ev.x+Math.cos(a)*24-Math.sin(a)*6,ev.y+Math.sin(a)*24+Math.cos(a)*6];}
 
 function impactFX(x,y,t,onTarget,H){
   const col=PCOL[t]||'#ffffff';
@@ -228,14 +228,14 @@ function makeIceFloor(x,y,r,t,ring,lx,ly,wv){
   }
   const g=new THREE.Group();g.position.set(tx(x),0.035+GY(x,y),tz(y));scene.add(g);
   const mats=[];
-  const dop=ring?0.6:0.55;   // วง Permafrost ทึบขึ้น (ผู้ใช้ 2026-10-22: ต้องเห็นวงน้ำแข็งชัด เดิม 0.32)
+  const dop=ring?0.38:0.55;   // Permafrost: จางลง สะท้อนน้อยลง (ผู้ใช้ 2026-11-15)   // วง Permafrost ทึบขึ้น (ผู้ใช้ 2026-10-22: ต้องเห็นวงน้ำแข็งชัด เดิม 0.32)
   const disc=new THREE.Mesh(_iceDisc,iceFloorMat(dop));disc.scale.setScalar(r*S3*(ring?1:rnd(0.95,1.2)));disc.rotation.y=rnd(0,6.28);g.add(disc);mats.push([disc.material,dop]);
-  const sheen=new THREE.Mesh(_iceDisc,new THREE.MeshBasicMaterial({color:hdr('#e8f8ff',1),transparent:true,opacity:0.08,blending:THREE.AdditiveBlending,depthWrite:false}));sheen.scale.setScalar(r*S3*0.55);sheen.position.set(rnd(-0.2,0.2)*r*S3,0.01,rnd(-0.2,0.2)*r*S3);g.add(sheen);mats.push([sheen.material,0.08]);
+  const sheen=new THREE.Mesh(_iceDisc,new THREE.MeshBasicMaterial({color:hdr('#e8f8ff',1),transparent:true,opacity:0.08,blending:THREE.AdditiveBlending,depthWrite:false}));sheen.scale.setScalar(r*S3*0.55);sheen.position.set(rnd(-0.2,0.2)*r*S3,0.01,rnd(-0.2,0.2)*r*S3);if(!ring)g.add(sheen);mats.push([sheen.material,0.08]);
   const spikes=[];
   if(ring){
-    const edge=new THREE.Mesh(_iceEdge,new THREE.MeshBasicMaterial({color:hdr('#7fd0ff',0.9),transparent:true,opacity:0.8,blending:THREE.AdditiveBlending,depthWrite:false}));edge.scale.setScalar(r*S3);edge.position.y=0.02;g.add(edge);mats.push([edge.material,0.8]);
+    const edge=new THREE.Mesh(_iceEdge,new THREE.MeshBasicMaterial({color:hdr('#7fd0ff',0.9),transparent:true,opacity:0.5,blending:THREE.AdditiveBlending,depthWrite:false}));edge.scale.setScalar(r*S3);edge.position.y=0.02;g.add(edge);mats.push([edge.material,0.5]);
     const sm=iceMat(0.85);mats.push([sm,0.85]);
-    const n=Math.round(r*S3*2.2);
+    const n=Math.round(r*S3*1.1);
     for(let i=0;i<n;i++){const a=i/n*Math.PI*2+rnd(-0.05,0.05),m=new THREE.Mesh(_iceSpk,sm);const hh=rnd(0.35,0.9),rr=rnd(0.12,0.22);m.position.set(Math.cos(a)*r*S3,0,Math.sin(a)*r*S3);m.rotation.set(Math.sin(a)*0.35,rnd(0,6),-Math.cos(a)*0.35);m.userData={hh,rr};m.scale.set(0.001,0.001,0.001);g.add(m);spikes.push(m);}
     spikes.splice(0,spikes.length,...instz(spikes,g));   // หนามรอบวงวาดรวมก้อนเดียว
   }

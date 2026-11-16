@@ -266,7 +266,8 @@ function syncPlayers(P,mode,now,dt){
     frostFX(o,p,pz,now,dt);
     earthFX(o,p,pz,now,dt);
     windFX(o,p,pz,now,dt);waterFX(o,p,pz,now,dt);
-    lateSkillPose(o,p,dt,now);if(o.novaT>0||o.nvFx||o.nvFx2)pyroNovaCharge(o,dt,now);if(o.mlcT>0||o.mlcX)frostMlCast(o,p,dt,now);
+    lateSkillPose(o,p,dt,now);if(o.tip){o.tip.updateWorldMatrix(true,false);(o.tipW||(o.tipW=new THREE.Vector3())).setFromMatrixPosition(o.tip.matrixWorld);o.tipWT=performance.now();}   // ปลายไม้หลังใส่ท่าครบ (fx att:'wand' / กระสุนเริ่มที่ไม้ อ่านค่านี้)
+    if(o.novaT>0||o.nvFx||o.nvFx2)pyroNovaCharge(o,dt,now);if(o.mlcT>0||o.mlcX)frostMlCast(o,p,dt,now);
     waterCharacterPose(o,p,dt,now);windCharacterPose(o,p,dt,now,v);windLatePose(o,p,dt);stormBowView(o,p,dt,now);stormStaffView(o,p,dt,now);dashPose(o,p,dt,now);   // ท่าพุ่ง (js/72) ทับท่าอื่นตอนพุ่ง
     natHookPose(o);natEmpPose(o);   // Nature Dash / thorn line poses must run before rigSync or the rigged arm never sees them
     const domeKnee=stormDomePose(o,p,pz,now);
@@ -357,12 +358,17 @@ function syncProj(v,now){
     const vt=(j.t==='pfire'||j.t==='pfireb')?'fire':j.t,col=j.rf?'#7ff6ff':PCOL[j.t],r=PDEF[j.t].r*S3*(vt==='fire'?1.4:1),fist=j.t.startsWith('efist');
     let o=JM3.get(j.id);
     if(!o){o=makeProj(col,j.t,!!j.lf);o.pt=j.t;JM3.set(j.id,o);if(j.t==='swave')stormWaveMake(o,j);
+      if(j.t==='pfire'||j.t==='pfireb'||j.t==='spark'){let bo=null,bd=60;for(const q of (v.P||[])){const d=Math.hypot(q.x-j.x,q.y-j.y);if(d<bd){bd=d;bo=q;}}const so=bo&&PM3.get(bo.id);   // ลูกไฟ/Kindle เริ่มที่ปลายไม้จริง (ผู้ใช้ 2026-11-14) แล้วค่อยเข้ารางจริง
+        if(so&&so.tipW&&performance.now()-(so.tipWT||0)<200){const q=simOf(so.tipW),h0=j.h!==undefined?j.h:1.35;o.wOff=[q.x-j.x,q.y-j.y,(q.h-GY(q.x,q.y))-h0];o.wT0=now;}}
       if(PJFX[j.t])o.fx=fxPlay(PJFX[j.t][0],{x:j.x,y:j.y,h:j.h!==undefined?j.h:1.35,a:Math.atan2(j.vy,j.vx)});
       {const bp=pjPal(j.t);if(BF.on&&(bp==='fire'||bp==='ice'))o.bt=fxPlay('env/bf_'+bp+'_trail',{x:j.x,y:j.y,h:j.h!==undefined?j.h:1.35,s:(j.t==='iceboulder'||j.t==='pfireb')?1.8:1});}   // สนามรบ: หางควัน/ไอเย็น (js/44 BF)
-      if(fist)o.tr=trailNew({col:'#bb9569',col2:'#76573b',w:j.t==='efistc'?.13:.065,life:.11,k:.65});
+      if(j.t==='wcage')o.tr=trailNew({col:'#dff6ff',col2:'#2a8ad8',w:0.3,life:0.4,k:1.4});   // ลูกขังน้ำ: หางน้ำตามหลัง (ผู้ใช้ 2026-11-15)
+      else if(fist)o.tr=trailNew({col:'#bb9569',col2:'#76573b',w:j.t==='efistc'?.13:.065,life:.11,k:.65});
       else if(!o.fx&&j.t!=='swave'){const P=palOf(pjPal(j.t),col),big=j.t==='iceboulder'||j.t==='pfireb';o.tr=trailNew({col:P.hi,col2:P.deep,w:big?0.32:vt==='fire'?0.2:0.11,life:big?0.28:0.17,k:1.7});}}   // หางแสงทุกกระสุน (สีตามธาตุ)
     if(o.col!==col){o.halo.material=glowMat(col,0.9);o.inner.material.color.copy(hdr(col,2.2));o.tail.material.color.copy(hdr(col,1.6));o.col=col;}
-    const x=j.x+j.vx*ex,y=j.y+j.vy*ex,X=tx(x),Z=tz(y),H=(j.h!==undefined?j.h:1.35)+(j.vh||0)*ex;
+    let x=j.x+j.vx*ex,y=j.y+j.vy*ex,H=(j.h!==undefined?j.h:1.35)+(j.vh||0)*ex;
+    if(o.wOff){const k=Math.min(1,(now-o.wT0)/160),w=(1-k)*(1-k);x+=o.wOff[0]*w;y+=o.wOff[1]*w;H+=o.wOff[2]*w;if(k>=1)o.wOff=null;}
+    const X=tx(x),Z=tz(y);o.lpA=[x,y,H];
     if(o.fx){o.fx.x=x;o.fx.y=y;o.fx.h=H;o.fx.a=Math.atan2(j.vy,j.vx);}
     if(o.bt){o.bt.x=x;o.bt.y=y;o.bt.h=H;}
     if(o.swv)stormWaveTick(o,X,H+GY(x,y),Z);
@@ -370,7 +376,7 @@ function syncProj(v,now){
     if(j.t==='web'){o.core.material.color.set('#f4f4ff');o.tail.visible=false;if(Math.random()<0.6)PARTS.push({x,y,h:H,vx:rnd(-30,30),vy:rnd(-30,30),vh:rnd(-0.5,0.5),life:0.5,max:0.5,col:'#e8e8f0',size:2.5,g:1,smoke:true});}
     const fl=1+0.15*Math.sin(now/30+j.id);
     o.core.scale.setScalar(r*0.6);o.inner.scale.setScalar(r*1.3*fl);
-    o.halo.scale.setScalar(r*(vt==='fire'?7:6.5)*fl);
+    o.halo.scale.setScalar(r*(vt==='fire'?(o.wOff?3.5:5):6.5)*fl);   // ไฟ: แสงฟุ้งเล็กลง (ช่วงออกจากไม้เล็กกว่าอีก ไม่คลุมตัว)
     o.tail.scale.set(r*1.1,r*1.1,vt==='fire'?2.2:2.8);
     if(o.fileModel){o.core.visible=o.inner.visible=o.tail.visible=false;}
     o.lines.forEach(L=>jag(L.geometry,_a.set(0,0,0),_b.set(0,0,-2.4),0.22));
@@ -429,8 +435,14 @@ function syncProj(v,now){
     }
   }
   for(const [id,o] of JM3)if(!seen.has(id)){
+    // หมัด Stand สายดิน: หินแตกกระจาย + ฝุ่น + กระแทก (ผู้ใช้ 2026-11-15) • หมัดชาร์จ = ใหญ่กว่า + สั่น
+    if(o.lpA&&(o.pt==='efist'||o.pt==='efistc'||o.pt==='efistshard')){const [x,y,H]=o.lpA,big=o.pt==='efistc',n=big?26:12,sp=big?320:200;
+      for(let i=0;i<n;i++){const an=rnd(0,6.283),v=rnd(.4,1)*sp;PARTS.push({x,y,h:H,vx:Math.cos(an)*v,vy:Math.sin(an)*v,vh:rnd(1.5,big?7:4.5),life:rnd(.35,.6),max:.6,col:i%3?'#8a6a48':'#c9a46a',size:rnd(big?3:2,big?5:3.4),g:12,drag:1,sh:4,rot:rnd(0,6.283),vr:rnd(-9,9)});}
+      smoke(x,y,Math.max(0.2,H-0.4),big?10:5,'#b49a74',big?1.1:.8,big?9:6,big?120:70);FX.flashSprite(x,y,H,'#ffe6b0',.18,big?2.4:1.4,.08,1.4);
+      if(big){ring(x,y,'#d9b46a',140,.35,Math.max(0.1,H-1));const me=myPos();if(me&&Math.hypot(x-me.x,y-me.y)<600)shake(4);}}
     if(o.tr)trailStop(o.tr);
     if(o.bt)fxStop(o.bt);
+    if(o.fx&&o.pt==='wshp'){fxKill(o.fx);o.fx=null;}   // โล่ลมที่ปาไป: ชั้นโมเดลยาว 3 วิ ถ้าแค่ stop จะค้างกลางอากาศ (บั๊กผู้ใช้ 2026-11-15)
     if(o.fx){fxStop(o.fx);const hf=PJFX[o.pt]&&PJFX[o.pt][1];if(hf&&o.lp)fxPlay(hf,{x:o.lp[0],y:o.lp[1],h:o.lp[2],a:o.fx.a,s:o.pt==='spark'?(o.lp[2]<0.8?0.5:0.8):1});}   // ประกายไฟชนพื้น: กระเซ็นเล็กลง (ผู้ใช้ 2026-11-11)
     if(o.lp&&o.pt==='icicle'&&!o.fx){const [x,y,H]=o.lp;playFx('ice_hit',x,y,H,{s:0.8});for(let i=0;i<8;i++){const an=rnd(0,6.283),sp=rnd(100,220);PARTS.push({x,y,h:H,vx:Math.cos(an)*sp,vy:Math.sin(an)*sp,vh:rnd(-1,2.5),life:rnd(0.15,0.3),max:0.3,col:i%2?'#ffffff':'#bfeaff',size:1.4,g:6,drag:4});}FX.flashSprite(x,y,H,'#dff6ff',0.25,1.3,0.25,1.6);}
     if(o.lp&&o.pt==='spark'){const [x,y,H]=o.lp;for(let i=0;i<9;i++){const an=rnd(0,6.283),sp=rnd(120,260);PARTS.push({x,y,h:H,vx:Math.cos(an)*sp,vy:Math.sin(an)*sp,vh:rnd(-1,3),life:rnd(0.12,0.22),max:0.22,col:i%3?'#ffc04a':'#fff6c0',size:1.3,g:6,drag:5});}}

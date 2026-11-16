@@ -1,0 +1,17 @@
+{
+ "v": 1,
+ "desc": "น้ำสาดการ์ตูนทึบสีฟ้า ม้วนปลายเป็นลอน 4 แบบ + หยดน้ำ (ref designs/water_beam_end_ref.png) ปลาย Abyssal Beam • ภาพวาดด้วย python",
+ "gen": "image",
+ "seed": 4,
+ "px": 256,
+ "cols": 4,
+ "rows": 1,
+ "kind": "loop",
+ "fps": 4,
+ "ramp": "white",
+ "add": false,
+ "rand": true,
+ "rot": 6.28,
+ "p": {},
+ "tags": ["water", "beam"]
+}

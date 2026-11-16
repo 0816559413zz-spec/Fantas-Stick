@@ -1,0 +1,188 @@
+{
+ "v": 1,
+ "desc": "ปลาย Abyssal Beam (ผู้ใช้อนุมัติ 2026-11-16, ref designs/water_beam_end_ref.png): ลูกนีออนขาวเล็กขนาดพอ ๆ กับลำ + วงนีออนขาวหันตามลำ + ลูกออร่าน้ำโปร่ง + น้ำสาดการ์ตูนม้วนปลาย (tex/water_splash_curl) + หยดน้ำ • ลำไม่บานที่ปลาย (uFl 0) • เล่นวนที่ปลายลำ (wtLoop 'tip')",
+ "tags": [
+  "water",
+  "beam",
+  "loop"
+ ],
+ "pal": "ice",
+ "dur": 1,
+ "seed": 5,
+ "layers": [
+  {
+   "id": "core",
+   "t": "flash",
+   "at": 0,
+   "life": 0.2,
+   "loop": true,
+   "col": "#ffffff",
+   "size": 0.7,
+   "size0": 0.6,
+   "k": 2
+  },
+  {
+   "id": "bubble",
+   "t": "mesh",
+   "shape": "sphere",
+   "mat": "energy",
+   "at": 0,
+   "life": 1,
+   "loop": true,
+   "col": "#0d47c8",
+   "col2": "#2f8fff",
+   "rim": 1.4,
+   "int": 0.7,
+   "op": 0.55,
+   "scroll": 0.3,
+   "scale": {
+    "0": 0.95,
+    "0.5": 1.0,
+    "1": 0.95
+   },
+   "fade": 0
+  },
+  {
+   "id": "neon_glow",
+   "t": "mesh",
+   "shape": "ring",
+   "inner": 0.8,
+   "mat": "glow",
+   "at": 0,
+   "life": 1,
+   "loop": true,
+   "col": "#8fe6ff",
+   "int": 0.8,
+   "op": 0.18,
+   "rot": [
+    90,
+    0,
+    0
+   ],
+   "yaw": 90,
+   "scale": 1.3,
+   "fade": 0,
+   "pos": [
+    0,
+    0,
+    0
+   ]
+  },
+  {
+   "id": "neon",
+   "t": "mesh",
+   "shape": "ring",
+   "inner": 0.9,
+   "mat": "glow",
+   "at": 0,
+   "life": 1,
+   "loop": true,
+   "col": "#ffffff",
+   "int": 1.4,
+   "op": 0.35,
+   "rot": [
+    90,
+    0,
+    0
+   ],
+   "yaw": 90,
+   "scale": 1.22,
+   "fade": 0,
+   "pos": [
+    0,
+    0,
+    0
+   ]
+  },
+  {
+   "id": "orb",
+   "t": "mesh",
+   "shape": "sphere",
+   "mat": "glow",
+   "at": 0,
+   "life": 1,
+   "loop": true,
+   "col": "#ffffff",
+   "int": 1.8,
+   "op": 0.95,
+   "scale": {
+    "0": 0.22,
+    "0.5": 0.25,
+    "1": 0.22
+   },
+   "fade": 0
+  },
+  {
+   "id": "splash",
+   "t": "emit",
+   "at": 0,
+   "life": 1,
+   "loop": true,
+   "burst": 0,
+   "rate": 52,
+   "from": "point",
+   "dir": "out",
+   "spread": 3.2,
+   "speed": [
+    3.5,
+    6
+   ],
+   "plife": [
+    0.35,
+    0.6
+   ],
+   "look": "flake",
+   "fb": "tex/water_splash_curl",
+   "size": [
+    12,
+    20
+   ],
+   "grow": 0.6,
+   "col": "#ffffff",
+   "c2": "#ffffff",
+   "gravity": 1,
+   "drag": 3,
+   "spin": 2,
+   "curl": false
+  },
+  {
+   "id": "drops",
+   "t": "emit",
+   "at": 0,
+   "life": 1,
+   "loop": true,
+   "burst": 0,
+   "rate": 20,
+   "from": "point",
+   "dir": "out",
+   "spread": 3.2,
+   "speed": [
+    3,
+    6
+   ],
+   "plife": [
+    0.3,
+    0.5
+   ],
+   "look": "glow",
+   "size": [
+    1,
+    1.8
+   ],
+   "col": "#ffffff",
+   "c2": "#7fdcff",
+   "gravity": 4,
+   "drag": 2
+  },
+  {
+   "id": "light",
+   "t": "light",
+   "at": 0,
+   "life": 1,
+   "loop": true,
+   "col": "#8fe4ff",
+   "int": 1.6,
+   "dist": 8
+  }
+ ]
+}
