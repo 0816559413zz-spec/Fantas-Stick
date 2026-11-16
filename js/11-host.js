@@ -313,7 +313,7 @@ function updatePlayer(p,dt,acting){
   if(wantSh&&!p.shieldOn){p.shieldOn=true;p.shieldT=G.time;p.shBlk=0;p.shPar=0;}
   if(!wantSh)p.shieldOn=false;
   if(p.shieldOn){p.shieldE-=12*dt*((PBASIC[p.pathIdx|0]||{}).shDrain||1);if(p.shieldE<=0)breakShield(p);}
-  else{p.shieldBroken=Math.max(0,p.shieldBroken-dt);if(p.shieldBroken<=0)p.shieldE=Math.min(100,p.shieldE+18*p.buffs.shReg*dt);}
+  else{p.shieldBroken=Math.max(0,p.shieldBroken-dt);if(p.shieldBroken<=0)p.shieldE=Math.min(100,p.shieldE+9*p.buffs.shReg*dt);}   // ผู้ใช้ 2026-11-16: โล่ทุกสายฟื้นช้าลง 2 เท่า (18→9)
   if(p.shWas&&!p.shieldOn){const B=PBASIC[p.pathIdx|0];if(B&&B.shDrop)B.shDrop(p);}
   p.shWas=p.shieldOn;
   if(p.pathIdx===2)stormTick(p,dt);
