@@ -823,6 +823,8 @@ function drawLightHud(x,y,L){
     cx.shadowBlur=0;cx.strokeStyle=oh?'rgba(255,220,200,0.9)':'rgba(255,250,230,0.95)';cx.lineWidth=1.6;cx.beginPath();cx.arc(cX,y,R,t0,lo);cx.stroke();
     cx.shadowColor=col;cx.shadowBlur=12;dia(t0,3.2+0.8*Math.sin(T/90),'#fffbe8');}   // ประกายเพชรที่ปลายเกจ
   cx.shadowBlur=0;dia(lo,2.6,'rgba(255,226,150,0.7)');   // คริสตัลเล็กปิดท้ายล่าง
-  {const [tx,ty]=P(hi-0.11),r=4.2+0.5*Math.sin(T/260);cx.save();cx.translate(tx,ty);cx.rotate(T/1400);cx.shadowColor=oh?'#ff6a3a':'#ffd36a';cx.shadowBlur=8;   // ดาวแสง 4 แฉกลอยเหนือปลายบนของเกจ (ไม่ติดเส้น)
-    cx.fillStyle=oh?'rgba(255,170,140,0.95)':'rgba(255,244,205,0.95)';cx.beginPath();for(let i=0;i<8;i++){const a=i*Math.PI/4,q=i%2?r*0.32:r;cx.lineTo(Math.cos(a)*q,Math.sin(a)*q);}cx.closePath();cx.fill();cx.restore();}
+  {const [ex,ey]=P(hi),tg=hi-Math.PI/2,c1=oh?'rgba(255,170,140,0.95)':'rgba(255,244,205,0.95)';cx.save();cx.shadowColor=oh?'#ff6a3a':'#ffd36a';cx.shadowBlur=8;cx.fillStyle=c1;   // ปลายบนด้านนอก (ผู้ใช้ 2026-11-17): เศษคริสตัลยื่นต่อจากปลาย + ดาวแสง 4 แฉกลอยเหนือขึ้นไป
+    cx.translate(ex,ey);cx.rotate(tg);cx.beginPath();cx.moveTo(0,-2.6);cx.lineTo(9,0);cx.lineTo(0,2.6);cx.lineTo(-1.5,0);cx.closePath();cx.fill();cx.restore();
+    const [tx,ty]=P(hi-0.19),r=4.2+0.5*Math.sin(T/260);cx.save();cx.translate(tx,ty);cx.rotate(T/1400);cx.shadowColor=oh?'#ff6a3a':'#ffd36a';cx.shadowBlur=8;cx.fillStyle=c1;
+    cx.beginPath();for(let i=0;i<8;i++){const a=i*Math.PI/4,q=i%2?r*0.32:r;cx.lineTo(Math.cos(a)*q,Math.sin(a)*q);}cx.closePath();cx.fill();cx.restore();}
   cx.restore();}
