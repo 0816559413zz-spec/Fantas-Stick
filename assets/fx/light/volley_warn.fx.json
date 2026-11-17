@@ -1,0 +1,110 @@
+{
+ "v": 1,
+ "desc": "Radiance Shard Volley: วงเตือนพื้นตอนคริสตัลหมุนชาร์จ (ขอบทอง + แผ่นด้านในโตตามเวลาชาร์จ) — r = รัศมีระเบิด ม., t = เวลาชาร์จ",
+ "tags": [
+  "light",
+  "radiance",
+  "volley",
+  "ingame"
+ ],
+ "pal": "heal",
+ "dur": 0.6,
+ "seed": 41,
+ "params": {
+  "r": {
+   "def": 7.5,
+   "desc": "รัศมี ม."
+  },
+  "t": {
+   "def": 0.6,
+   "desc": "ชาร์จ วิ"
+  }
+ },
+ "layers": [
+  {
+   "id": "edge",
+   "t": "mesh",
+   "att": "ground",
+   "shape": "torus",
+   "mat": "glow",
+   "col": "#ffcf5a",
+   "inner": 0.95,
+   "at": 0,
+   "life": "t",
+   "pos": [
+    0,
+    0.05,
+    0
+   ],
+   "scale": {
+    "0": "r*0.85",
+    "0.25": "r",
+    "1": "r",
+    "ease": "out"
+   },
+   "op": {
+    "0": 0,
+    "0.2": 0.85,
+    "1": 1
+   },
+   "int": 0.9,
+   "fade": 0
+  },
+  {
+   "id": "fill",
+   "t": "mesh",
+   "att": "ground",
+   "shape": "disc",
+   "mat": "glow",
+   "col": "#ffb847",
+   "at": 0,
+   "life": "t",
+   "pos": [
+    0,
+    0.04,
+    0
+   ],
+   "scale": {
+    "0": 0.1,
+    "1": "r",
+    "ease": "in"
+   },
+   "op": {
+    "0": 0.08,
+    "1": 0.22
+   },
+   "int": 0.8,
+   "fade": 0
+  },
+  {
+   "id": "motes",
+   "t": "emit",
+   "att": "ground",
+   "at": 0,
+   "life": "t",
+   "rate": 40,
+   "from": "disc",
+   "fr": "r",
+   "dir": "up",
+   "spread": 0.2,
+   "speed": [
+    1,
+    2.5
+   ],
+   "plife": [
+    0.3,
+    0.6
+   ],
+   "look": "glow",
+   "size": [
+    2,
+    3
+   ],
+   "col": "#fff0c0",
+   "c2": "#ffb347",
+   "gravity": -1,
+   "drag": 1,
+   "curl": false
+  }
+ ]
+}

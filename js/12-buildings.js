@@ -337,10 +337,10 @@ function foesOf(team){
   if(G.nature)for(const o of G.nature)if(o.isM&&o.team!==team&&natureLive(o)&&G.time>=o.ready)out.push(o);
   return out;
 }
-function breakShield(p){if(p.pathIdx===EARTH){if(!(p.stdB>0))earthBreak(p);return;}p.shieldOn=false;p.shieldE=0;p.shieldBroken=1.5;emit({k:'sbreak',x:p.x,y:p.y,h:p.z+1.3});}
+function breakShield(p){if(p.pathIdx===EARTH){if(!(p.stdB>0))earthBreak(p);return;}p.shieldOn=false;p.shieldE=0;p.shieldBroken=1.5;emit({k:'sbreak',x:p.x,y:p.y,h:p.z+1.3,id:p.id});}
 // อัลติ (ผู้ใช้ 2026-10-22): ชาร์จช้าลง 30% ทุกสาย (ULT_RATE) + ระหว่างอัลติยังทำงานอยู่ไม่ได้ชาร์จเพิ่ม (นับใหม่หลังอัลติจบ)
 const ULT_RATE=0.7;
-function ultActive(p){return p.colos>0||p.god>0||!!p.wr||p.mirror>0||p.pathIdx===NATUREP&&naturePlants(p,'tree').length>0;}
+function ultActive(p){return p.colos>0||p.god>0||!!p.wr||p.mirror>0||!!p.lgUlt||p.pathIdx===NATUREP&&naturePlants(p,'tree').length>0;}
 function gainUlt(p,v){if(ultActive(p))return;p.ult=Math.min(100,p.ult+v*0.5*ULT_RATE*p.buffs.ult);}
 function lifesteal(p,amt){if(p.buffs.life&&p.alive&&!p.downed)healT(p,amt*p.buffs.life);}
 
@@ -351,6 +351,7 @@ function damage(t,amt,srcId,kind,noFlash=false){
   if(src&&src.fheat>0&&kind!=='burn')amt*=pyroHeatDmg(src);
   if(src&&src.blaze>0){amt*=BLAZEF.v.dmgUp;if(kind!=='burn'&&src!==t)pyroBlazeAct(src);}   // Blazeform (เนิร์ฟ 2026-10-27: 1.3→1.15)
   if(src&&src.mirror>0&&!src.noMul)amt*=MIRROR.v.dmgMul;
+  if(src&&kind!=='burn'){amt*=lightDmgOut(src);if(src.lgEmpT>G.time&&kind!=='zone')lightAllyHit(src,t);}   // สายแสง: คริสตัลกับคู่หู ตีแรง 5%/ชิ้น + Empower Light ยิงตาม
   if(t.natKind){natureDamage(t,amt,srcId);return;}
   if(G.wwl&&G.wwl.length)windDmg(t,amt,srcId);
   if(src&&src.wfam>0)waterOnHit(src,t,kind);   // สายน้ำ Tidecaller Orb: ลูกผู้ช่วยยิงตาม   // สายลม: ดาเมจใส่ศัตรูที่ติดกำแพงลม
@@ -378,7 +379,7 @@ function damage(t,amt,srcId,kind,noFlash=false){
   if(G.ball&&G.ball.holder===t.id&&kind!=='burn'&&kind!=='zone')quidDrop(t);
   if(t.stS&&kind!=='burn'){t.stS.abs+=amt;emit({k:'efx',z:'sthit',x:Math.round(t.x),y:Math.round(t.y),h:t.z+1.2,sx:src?Math.round(src.x):undefined,sy:src?Math.round(src.y):undefined,n:Math.round(amt),id:t.id});if(t.stS.abs>90)stormShieldBlast(t);return;}
   if(t.shieldOn&&(kind==='melee'||kind==='aoe')&&shieldFaces(t,src?src.x:null,src?src.y:null,src&&src.z!=null?src.z+1.2:null)){
-    pyroHeatGain(t,amt);pyroBlazeAct(t);if(t.pathIdx===EARTH)earthShHit(t,amt);else{t.shieldE-=amt*((PBASIC[t.pathIdx|0]||{}).shMul||1.5);t.shBlk=(t.shBlk|0)+1;}emit({k:'block',x:t.x,y:t.y,h:t.z+1.2});
+    pyroHeatGain(t,amt);pyroBlazeAct(t);if(t.pathIdx===EARTH)earthShHit(t,amt);else{t.shieldE-=amt*((PBASIC[t.pathIdx|0]||{}).shMul||1.5);t.shBlk=(t.shBlk|0)+1;}emit({k:'block',x:t.x,y:t.y,h:t.z+1.2,id:t.id});
     {const B=PBASIC[t.pathIdx|0];if(B&&B.onBlock)B.onBlock(t);}
     if(t.shieldE<=0)breakShield(t);
     return;
@@ -387,7 +388,10 @@ function damage(t,amt,srcId,kind,noFlash=false){
   if(t.ovc>0)amt*=1.15;
   if(t.blaze>0)amt*=BLAZEF.v.taken;
   if(t.mrk>0&&kind!=='burn')amt*=1.12;
+  if(!t.isM&&!t.isE)amt*=lightDmgIn(t);   // สายแสง: คริสตัลกับคู่หู กัน 5%/ชิ้น • Light Step 30% • อัลติ 30%
   if(t.dr){amt*=t.dr.f;if(src&&src!==t&&kind!=='burn'&&kind!=='zone'&&!(t.drCd>0)){addPoison(src,t.id,1);t.drCd=1;}}
+  if(t.lgUltWard?.hp>0){const absorbed=Math.min(t.lgUltWard.hp,amt);t.lgUltWard.hp-=absorbed;amt-=absorbed;
+    emit({k:'block',x:t.x,y:t.y,h:t.z+1.2});if(amt<=0.01)return;}
   if(t.xhp>0){const ab=Math.min(t.xhp,amt);t.xhp-=ab;amt-=ab;if(amt<=0.01){emit({k:'block',x:t.x,y:t.y,h:t.z+1.2});return;}}
   if(t.ward&&t.ward.t>0){
     const ab=Math.min(t.ward.abs,amt);t.ward.abs-=ab;amt-=ab;
@@ -408,7 +412,7 @@ function damage(t,amt,srcId,kind,noFlash=false){
 }
 function playerDown(t,srcId){
   t.shieldOn=false;t.burn=0;t.fly=false;
-  t.stS=null;t.sdome=null;t.rail=null;t.stStaff=0;t.slnT=0;t.beam=0;t.sdHit=null;earthReset(t);windReset(t);waterReset(t);natureReset(t);if(t.god>0){t.god=0;t.xhp=0;}
+  t.stS=null;t.sdome=null;t.rail=null;t.stStaff=0;t.slnT=0;t.beam=0;t.sdHit=null;earthReset(t);windReset(t);waterReset(t);natureReset(t);lightReset(t,true);if(t.god>0){t.god=0;t.xhp=0;}
   // ท่าที่ง้าง/ค้างอยู่ตอนล้ม: ไม่งั้นคนล้ม (co-op) ยังปล่อยท่าได้ หรือท่าค้างไว้แล้วออกเองทันทีที่ถูกชุบ
   t.dfall=null;t.snapT=0;t.grT=0;t.slam=false;t.slam3=null;t.dchgOn=false;t.dchg=0;t.chg=0;t.dash=0;t.dashSp=0;t.trail=null;
   if(G.mode==='coop'){
@@ -509,7 +513,7 @@ function projStep(pr,dt,ps){
           emit({k:'parry',x:p.x,y:p.y,h:p.z+1.3,id:p.id});
           {const B=PBASIC[p.pathIdx|0];if(B&&B.onParry&&!p.shPar){p.shPar=1;B.onParry(p);}}
         }else{
-          pyroHeatGain(p,pr.dmg);pyroBlazeAct(p);if(p.pathIdx===EARTH)earthShHit(p,pr.dmg);else{p.shieldE-=pr.dmg*((PBASIC[p.pathIdx|0]||{}).shMul||1.6);p.shBlk=(p.shBlk|0)+1;}pr.dead=true;emit({k:'block',x:pr.x,y:pr.y,h:pr.h});
+          pyroHeatGain(p,pr.dmg);pyroBlazeAct(p);if(p.pathIdx===EARTH)earthShHit(p,pr.dmg);else{p.shieldE-=pr.dmg*((PBASIC[p.pathIdx|0]||{}).shMul||1.6);p.shBlk=(p.shBlk|0)+1;}pr.dead=true;emit({k:'block',x:pr.x,y:pr.y,h:pr.h,id:p.id});
           {const B=PBASIC[p.pathIdx|0];if(B&&B.onBlock)B.onBlock(p);}
           if(p.shieldE<=0)breakShield(p);
         }

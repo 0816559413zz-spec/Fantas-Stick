@@ -1,0 +1,15 @@
+{
+ "v": 1,
+ "desc": "Radiant Sovereign: มงกุฎหนามสุริยะ ใบแหลมยาวไม่เท่ากัน กลางยาวสุด มีอัญมณีกลาง ฐานโค้ง ด้านขวาแตก มีเศษลอย • ภาพวาดด้วย python",
+ "gen": "image",
+ "seed": 7,
+ "px": 256,
+ "cols": 1,
+ "rows": 1,
+ "kind": "loop",
+ "fps": 4,
+ "ramp": "white",
+ "add": true,
+ "p": {},
+ "tags": ["light", "crown"]
+}

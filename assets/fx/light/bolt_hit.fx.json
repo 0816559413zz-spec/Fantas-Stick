@@ -1,0 +1,12 @@
+{
+ "v": 1,
+ "desc": "Radiance Empower: เศษคริสตัลโบนัสโดนเป้า — แฟลชเล็ก + ประกายแตก",
+ "tags": ["light","radiance","empower","ingame"],
+ "pal": "heal",
+ "dur": 0.3,
+ "seed": 54,
+ "layers": [
+  {"id":"core","t":"flash","at":0,"life":0.1,"col":"#fff6dc","size":0.8,"size0":0.2,"k":1.5},
+  {"id":"sp","t":"emit","at":0,"life":0.03,"burst":10,"from":"point","dir":"out","spread":1.6,"speed":[2,5],"plife":[0.15,0.3],"look":"flake","size":[2,3],"col":"#ffe39a","c2":"#ff9a2a","gravity":3,"drag":3,"spin":10,"curl":false}
+ ]
+}

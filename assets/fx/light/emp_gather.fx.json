@@ -1,0 +1,12 @@
+{
+ "v": 1,
+ "desc": "Radiance Empower Light: ตอนแบมือ ประกายแสงถูกดูดเข้ามือ (วางที่มือ)",
+ "tags": ["light","radiance","empower","ingame"],
+ "pal": "heal",
+ "dur": 0.4,
+ "seed": 51,
+ "layers": [
+  {"id":"in","t":"emit","at":0,"life":0.3,"rate":70,"from":"sphere","fr":0.9,"dir":"in","spread":0.2,"speed":[3,5],"plife":[0.18,0.24],"look":"glow","size":[2,3],"col":"#fff0c0","c2":"#ffb347","gravity":0,"drag":0,"curl":false},
+  {"id":"orb","t":"halo","at":0,"life":0.38,"col":"#ffd36a","size":0.9,"size0":0.2,"k":1}
+ ]
+}

@@ -1,0 +1,14 @@
+{
+ "v": 1,
+ "desc": "Radiance Sanctum: คนที่ได้ฮีล (ทุก 1 วิ) — วงแสงเขียวทองเล็กที่เท้า + ประกาย/แฟลกเขียวทองลอยขึ้นรอบตัว (follow)",
+ "tags": ["light","radiance","sanctum","heal","ingame"],
+ "pal": "heal",
+ "dur": 0.9,
+ "seed": 64,
+ "params": {"c":{"def":1,"desc":"ความแรง"}},
+ "layers": [
+  {"id":"ring","t":"mesh","att":"feet","shape":"torus","mat":"glow","col":"#c8ff9a","inner":0.9,"at":0,"life":0.5,"pos":[0,0.06,0],"scale":{"0":0.3,"1":0.9,"ease":"out"},"op":{"0":0.8,"1":0},"int":1.2},
+  {"id":"up","t":"emit","att":"feet","at":0,"life":0.3,"rate":"40*c","from":"ring","fr":0.45,"dir":"up","spread":0.15,"speed":[1.2,2.2],"plife":[0.5,0.8],"look":"glow","size":[1.5,2.5],"col":"#d8ffb0","c2":"#ffd36a","gravity":-0.5,"drag":1,"curl":false},
+  {"id":"glint","t":"emit","att":"chest","at":0.05,"life":0.2,"rate":"20*c","from":"sphere","fr":0.5,"dir":"up","spread":0.6,"speed":[0.5,1.2],"plife":[0.4,0.7],"look":"flake","size":[2,3],"col":"#fff0c0","c2":"#c8ff9a","gravity":-0.3,"drag":1,"spin":6,"curl":false}
+ ]
+}

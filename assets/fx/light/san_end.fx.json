@@ -1,0 +1,15 @@
+{
+ "v": 1,
+ "desc": "Radiance Sanctum Crystal จบ: คริสตัลนีออนใหญ่แตกเป็นแสง — แฟลช + เศษนีออนกระจาย + วงแสงพื้นจาง",
+ "tags": ["light","radiance","sanctum","ingame"],
+ "pal": "heal",
+ "dur": 0.8,
+ "seed": 62,
+ "layers": [
+  {"id":"core","t":"flash","at":0,"life":0.18,"pos":[0,1.8,0],"col":"#fff6dc","size":3,"size0":0.8,"k":1.6},
+  {"id":"glow","t":"halo","at":0,"life":0.45,"pos":[0,1.8,0],"col":"#ffb347","size":4,"size0":1.2,"k":0.7},
+  {"id":"shards","t":"emit","at":0.02,"life":0.04,"pos":[0,1.8,0],"burst":36,"from":"sphere","fr":0.5,"dir":"out","spread":1.6,"speed":[3,7],"up":[0,2],"plife":[0.4,0.8],"look":"flake","size":[3,5],"col":"#ffe39a","c2":"#ff9a2a","gravity":6,"drag":2,"spin":12,"curl":false},
+  {"id":"wave","t":"mesh","att":"ground","shape":"torus","mat":"glow","col":"#ffd36a","inner":0.94,"at":0,"life":0.5,"pos":[0,0.06,0],"scale":{"0":1,"1":6,"ease":"out"},"op":{"0":0.7,"1":0},"int":1.2},
+  {"id":"lt","t":"light","at":0,"life":0.4,"col":"#ffb84a","int":{"0":2.2,"1":0},"dist":9}
+ ]
+}

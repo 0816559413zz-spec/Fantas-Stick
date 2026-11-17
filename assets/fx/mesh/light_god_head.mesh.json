@@ -1,0 +1,28 @@
+{
+ "v": 1,
+ "desc": "Radiant Sovereign: หัวทรงไข่ไม่มีหน้า (ไม่ใช่บล็อก)",
+ "mat": "solid",
+ "pal": "col",
+ "tags": [
+  "light",
+  "god"
+ ],
+ "parts": [
+  {
+   "id": "head",
+   "k": "sphere",
+   "r": 0.22,
+   "seg": 20,
+   "pos": [
+    0,
+    1.25,
+    0
+   ],
+   "scale": [
+    0.95,
+    1.15,
+    0.95
+   ]
+  }
+ ]
+}

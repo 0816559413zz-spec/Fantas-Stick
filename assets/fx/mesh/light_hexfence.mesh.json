@@ -1,0 +1,11 @@
+{
+ "v": 1,
+ "desc": "Radiance Light Step (ไปหาคู่หู): รั้วรังผึ้ง แผ่นหกเหลี่ยมตั้งรอบวง 2 แถว รัศมี 1 (ขยายด้วย scale)",
+ "mat": "glow",
+ "pal": "col",
+ "tags": ["light"],
+ "parts": [
+  {"id":"row1","k":"disc","r":0.135,"inner":0.1,"seg":6,"rot":[90,0,0],"pos":[0,0.14,0],"arr":24,"arrMode":"ring","arrR":1},
+  {"id":"row2","k":"disc","r":0.135,"inner":0.1,"seg":6,"rot":[90,7.5,0],"pos":[0,0.37,0],"arr":24,"arrMode":"ring","arrR":1}
+ ]
+}

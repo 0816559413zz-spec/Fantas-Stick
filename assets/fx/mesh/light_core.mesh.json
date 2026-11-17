@@ -1,0 +1,30 @@
+{
+ "v": 1,
+ "desc": "Radiant Sovereign: คริสตัลกลางอก (ผลึกแหลมสองหัว)",
+ "mat": "glow",
+ "pal": "col",
+ "tags": [
+  "light"
+ ],
+ "parts": [
+  {
+   "id": "up",
+   "k": "shard",
+   "h": 0.16,
+   "w": 0.12,
+   "sides": 6
+  },
+  {
+   "id": "dn",
+   "k": "shard",
+   "h": 0.16,
+   "w": 0.12,
+   "sides": 6,
+   "rot": [
+    180,
+    0,
+    0
+   ]
+  }
+ ]
+}

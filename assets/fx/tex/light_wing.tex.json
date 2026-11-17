@@ -1,0 +1,15 @@
+{
+ "v": 1,
+ "desc": "Radiant Sovereign: ปีกแสงทอง ใบมีดยาวแยกกัน 5 ใบ (ref designs/light_ref/ult_god_ref2.webp) โคนอยู่ล่างซ้ายของภาพ • ภาพวาดด้วย python",
+ "gen": "image",
+ "seed": 5,
+ "px": 256,
+ "cols": 1,
+ "rows": 1,
+ "kind": "loop",
+ "fps": 4,
+ "ramp": "white",
+ "add": true,
+ "p": {},
+ "tags": ["light", "wing"]
+}

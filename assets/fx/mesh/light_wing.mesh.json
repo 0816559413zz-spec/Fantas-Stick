@@ -1,0 +1,24 @@
+{
+ "v": 1,
+ "desc": "Radiant Sovereign: ปีกแสงทอง แผ่นแฉกแหลม (ref designs/light_ref/ult_god_ref2.webp)",
+ "mat": "glow",
+ "pal": "col",
+ "tags": [
+  "light",
+  "wing"
+ ],
+ "parts": [
+  {
+   "id": "fan",
+   "k": "fan",
+   "n": 6,
+   "spread": 55,
+   "len": 1.7,
+   "lvar": 0.45,
+   "w": 0.24,
+   "tipw": 0,
+   "curve": 8,
+   "seg": 10
+  }
+ ]
+}

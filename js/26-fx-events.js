@@ -91,8 +91,9 @@ function fx(ev,raw){   // raw = ภาพเดิมในโค้ดเท่
       if(ev.id&&getKit(ev.id).path===1)fxPlay('frost/shield_parry',{x:ev.x,y:ev.y,h:H,follow:ev.id});
       if(ev.id&&getKit(ev.id).path===0&&fxLoopName('fsh_parry'))fxPlay(fxLoopName('fsh_parry'),{x:ev.x,y:ev.y,h:Math.max(0,H-1.3),follow:ev.id,aim:false});   // โล่ไฟ #13: Parry = Force Field เต็มแรง   // โล่ Frost แบบ A: ร้าว + เศษผลึกพุ่งไปทางเล็ง
       break;
-    case 'block':fshHitFx(ev);burst(ev.x,ev.y,'#7ff6ff',12,220,0.3,2,{h:H,g:4});FX.flashLight(ev.x,ev.y,H,'#7ff6ff',2,8,0.15);if(near)snd('block',ev);break;
+    case 'block':if(lightShieldEv(ev,'hit')){if(near)snd('block',ev);break;}fshHitFx(ev);burst(ev.x,ev.y,'#7ff6ff',12,220,0.3,2,{h:H,g:4});FX.flashLight(ev.x,ev.y,H,'#7ff6ff',2,8,0.15);if(near)snd('block',ev);break;
     case 'sbreak':
+      if(lightShieldEv(ev,'brk')){floatText(ev.x,ev.y,'โล่แตก!','#ffd36a',18,H+1.2);snd('break',ev);break;}
       burst(ev.x,ev.y,'#7ff6ff',45,320,0.7,2.5,{h:H,vh:[0,5],g:9});
       FX.flashLight(ev.x,ev.y,H,'#7ff6ff',4,10,0.3);
       floatText(ev.x,ev.y,'โล่แตก!','#7ff6ff',18,H+1.2);snd('break',ev);

@@ -167,6 +167,7 @@ function castSlot(p,i){
   if(p.cryo>0&&S.id!=='frostaura')return false;
   if(p.grT>0||p.dfall||p.sdome||p.rail||p.slnT>0)return false;
   if(p.cd[k]>0||p.sil>0)return false;
+  if(p.shieldOn&&p.pathIdx===LIGHTP)return false;   // Crystal Aegis: ระหว่างกางโล่ใช้สกิลไม่ได้
   if(G.mode==='br'&&!(p.unl&&p.unl[BRMAP[k]]))return false;
   if(S.cast(p,S,i)===false){p.cd[k]=0.5;p.cdMax[k]=0.5;return false;}
   const cd=S.cd*p.buffs.cdr;p.cd[k]=cd;p.cdMax[k]=cd;

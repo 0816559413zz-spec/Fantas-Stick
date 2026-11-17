@@ -1,0 +1,414 @@
+{
+ "v": 1,
+ "desc": "Radiant Sovereign ร่างเทพแห่งแสง — ภาพร่างโมเดล (ref designs/light_ref/ult_god_ref.webp + ult_god_ref2.webp) ดู designs/light.md",
+ "tags": [
+  "light",
+  "ult",
+  "draft"
+ ],
+ "pal": "col",
+ "dur": 2,
+ "layers": [
+  {
+   "id": "body",
+   "t": "mesh",
+   "at": 0,
+   "life": 2,
+   "loop": true,
+   "fade": 0,
+   "shape": "model",
+   "model": "light_god_body",
+   "mat": "solid",
+   "col": "#a8c6ef",
+   "col2": "#5a86d8",
+   "pos": [
+    0,
+    1.0,
+    0
+   ],
+   "scale": 1.25
+  },
+  {
+   "id": "body_glow",
+   "t": "mesh",
+   "at": 0,
+   "life": 2,
+   "loop": true,
+   "fade": 0,
+   "shape": "model",
+   "model": "light_god_body",
+   "mat": "energy",
+   "col": "#bfe0ff",
+   "col2": "#ffffff",
+   "rim": 1.6,
+   "int": 0.2,
+   "op": 0.25,
+   "scroll": 0.3,
+   "pos": [
+    0,
+    1.0,
+    0
+   ],
+   "scale": 1.2875
+  },
+  {
+   "id": "core",
+   "t": "mesh",
+   "at": 0,
+   "life": 2,
+   "loop": true,
+   "fade": 0,
+   "shape": "model",
+   "model": "light_core",
+   "mat": "solid",
+   "col": "#ffffff",
+   "pos": [
+    0,
+    1.6,
+    0.2
+   ],
+   "scale": 1.25,
+   "col2": "#ffe9a8",
+   "op": 1
+  },
+  {
+   "id": "core_glow",
+   "t": "mesh",
+   "at": 0,
+   "life": 2,
+   "loop": true,
+   "fade": 0,
+   "shape": "sphere",
+   "mat": "glow",
+   "col": "#ffd36a",
+   "int": 0.5,
+   "op": 0.35,
+   "pos": [
+    0,
+    1.6,
+    0.2
+   ],
+   "scale": 0.17500000000000002
+  },
+  {
+   "id": "x_f0",
+   "t": "mesh",
+   "at": 0,
+   "life": 2,
+   "loop": true,
+   "fade": 0,
+   "shape": "model",
+   "model": "light_xline_f0",
+   "mat": "solid",
+   "col": "#ffc83d",
+   "pos": [
+    0,
+    -0.06,
+    0
+   ],
+   "scale": 1.25,
+   "col2": "#ffb000",
+   "op": 1
+  },
+  {
+   "id": "x_f1",
+   "t": "mesh",
+   "at": 0,
+   "life": 2,
+   "loop": true,
+   "fade": 0,
+   "shape": "model",
+   "model": "light_xline_f1",
+   "mat": "solid",
+   "col": "#ffc83d",
+   "pos": [
+    0,
+    -0.06,
+    0
+   ],
+   "scale": 1.25,
+   "col2": "#ffb000",
+   "op": 1
+  },
+  {
+   "id": "x_b0",
+   "t": "mesh",
+   "at": 0,
+   "life": 2,
+   "loop": true,
+   "fade": 0,
+   "shape": "model",
+   "model": "light_xline_b0",
+   "mat": "solid",
+   "col": "#ffc83d",
+   "pos": [
+    0,
+    -0.06,
+    0
+   ],
+   "scale": 1.25,
+   "col2": "#ffb000",
+   "op": 1
+  },
+  {
+   "id": "x_b1",
+   "t": "mesh",
+   "at": 0,
+   "life": 2,
+   "loop": true,
+   "fade": 0,
+   "shape": "model",
+   "model": "light_xline_b1",
+   "mat": "solid",
+   "col": "#ffc83d",
+   "pos": [
+    0,
+    -0.06,
+    0
+   ],
+   "scale": 1.25,
+   "col2": "#ffb000",
+   "op": 1
+  },
+  {
+   "id": "handL",
+   "t": "mesh",
+   "at": 0,
+   "life": 2,
+   "loop": true,
+   "fade": 0,
+   "shape": "sphere",
+   "mat": "glow",
+   "col": "#fff7e0",
+   "int": 0.9,
+   "op": 0.55,
+   "pos": [
+    -1.07,
+    1.24,
+    0.19
+   ],
+   "scale": 0.1625
+  },
+  {
+   "id": "handR",
+   "t": "mesh",
+   "at": 0,
+   "life": 2,
+   "loop": true,
+   "fade": 0,
+   "shape": "sphere",
+   "mat": "glow",
+   "col": "#fff7e0",
+   "int": 0.9,
+   "op": 0.55,
+   "pos": [
+    1.07,
+    1.24,
+    0.19
+   ],
+   "scale": 0.1625
+  },
+  {
+   "id": "crown",
+   "t": "mesh",
+   "at": 0,
+   "life": 2,
+   "loop": true,
+   "fade": 0,
+   "shape": "plane",
+   "bill": true,
+   "mat": "tex",
+   "tex": "tex/light_crown",
+   "col": "#ffffff",
+   "col2": "#ffd36a",
+   "rim": 0,
+   "pos": [
+    0,
+    2.72,
+    0.05
+   ],
+   "scale": 1.0
+  },
+  {
+   "id": "ring",
+   "t": "mesh",
+   "at": 0,
+   "life": 2,
+   "loop": true,
+   "fade": 0,
+   "shape": "torus",
+   "inner": 0.92,
+   "mat": "solid",
+   "col": "#ffc83d",
+   "op": 1,
+   "pos": [
+    0,
+    2.5,
+    -0.32
+   ],
+   "rot": [
+    90,
+    0,
+    0
+   ],
+   "scale": 0.5,
+   "col2": "#ffb000"
+  },
+  {
+   "id": "ring2",
+   "t": "mesh",
+   "at": 0,
+   "life": 2,
+   "loop": true,
+   "fade": 0,
+   "shape": "torus",
+   "inner": 0.9,
+   "mat": "solid",
+   "col": "#ffc83d",
+   "op": 1,
+   "pos": [
+    0,
+    2.5,
+    -0.33
+   ],
+   "rot": [
+    90,
+    0,
+    0
+   ],
+   "scale": 0.32,
+   "spin": -30,
+   "col2": "#ffb000"
+  },
+  {
+   "id": "ring_cr",
+   "t": "mesh",
+   "at": 0,
+   "life": 2,
+   "loop": true,
+   "fade": 0,
+   "shape": "model",
+   "model": "light_halo_crystals",
+   "mat": "solid",
+   "col": "#ffc83d",
+   "pos": [
+    0,
+    2.5,
+    -0.32
+   ],
+   "rot": [
+    90,
+    0,
+    0
+   ],
+   "spin": 35,
+   "scale": 1,
+   "col2": "#ffb000",
+   "op": 1
+  },
+  {
+   "id": "wingUL",
+   "t": "mesh",
+   "at": 0,
+   "life": 2,
+   "loop": true,
+   "fade": 0,
+   "shape": "plane",
+   "mat": "tex",
+   "tex": "tex/light_wing",
+   "col": "#ffffff",
+   "col2": "#ffd36a",
+   "rim": 0,
+   "pos": [
+    -1.1,
+    2.55,
+    -0.3
+   ],
+   "rot": [
+    0,
+    180,
+    0
+   ],
+   "scale": 2.8
+  },
+  {
+   "id": "wingUR",
+   "t": "mesh",
+   "at": 0,
+   "life": 2,
+   "loop": true,
+   "fade": 0,
+   "shape": "plane",
+   "mat": "tex",
+   "tex": "tex/light_wing",
+   "col": "#ffffff",
+   "col2": "#ffd36a",
+   "rim": 0,
+   "pos": [
+    1.1,
+    2.55,
+    -0.3
+   ],
+   "rot": [
+    0,
+    0,
+    0
+   ],
+   "scale": 2.8
+  },
+  {
+   "id": "wingLL",
+   "t": "mesh",
+   "at": 0,
+   "life": 2,
+   "loop": true,
+   "fade": 0,
+   "shape": "plane",
+   "mat": "tex",
+   "tex": "tex/light_wing",
+   "col": "#ffffff",
+   "col2": "#ffd36a",
+   "rim": 0,
+   "pos": [
+    -0.9,
+    0.8,
+    -0.3
+   ],
+   "rot": [
+    0,
+    0,
+    180
+   ],
+   "scale": 2.2
+  },
+  {
+   "id": "stars",
+   "t": "emit",
+   "at": 0,
+   "life": 2,
+   "loop": true,
+   "burst": 0,
+   "rate": 40,
+   "from": "mesh",
+   "of": "body",
+   "dir": "random",
+   "speed": [
+    0,
+    0.05
+   ],
+   "plife": [
+    0.4,
+    0.9
+   ],
+   "look": "glow",
+   "size": [
+    0.5,
+    1
+   ],
+   "col": "#ffffff",
+   "c2": "#bfe0ff",
+   "gravity": 0,
+   "drag": 5
+  }
+ ]
+}

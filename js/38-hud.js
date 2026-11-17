@@ -157,6 +157,8 @@ function drawHUD(v,me,P){
   if(me&&me.dn)big('คุณล้ม! รอเพื่อนมายืนข้างๆ เพื่อชุบ',SH*0.62,22,'#ff9a9a');
   if(me&&me.fl&&!showBoard)big(`🧹 บินอยู่ (สูง ${me.z.toFixed(0)} ม.)  •  W เร่ง  •  เมาส์ เลี้ยว/เงยขึ้น-ก้มลง  •  คลิก ยิงลำแสง${broomHud(me)}  •  B ลง`,SH-150,15,'#ffe9a8');
   if(me&&me.rt)big('🕸️ ติดใยแมงมุม! ขยับไม่ได้ชั่วคราว',SH*0.62,20,'#e8e8f0');
+  const lightUlt=me?.lt?.[14];
+  if(lightUlt?.[0]===2&&!showBoard)big(`${lightUlt[1].toFixed(1)} วิ   •   คลิกซ้ายค้างยิง   •   ${slotKey('X')} ยิงท่าปิดท้าย`,SH-150,16,'#ffe9a8');
 
   if(me)drawBottom(me,v);
   if(me&&!showBoard&&SET.mini&&!h4PfMode(v))drawMinimap(v,me,P);   // FFA/TDM = รูปตัวละครแทน (js/66)

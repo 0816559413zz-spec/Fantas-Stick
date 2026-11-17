@@ -1,0 +1,36 @@
+{
+ "v": 1,
+ "desc": "Radiant Sovereign: คริสตัลใหญ่ 6 ชิ้นบนวงแสงหลังหัว (รัศมี 0.5)",
+ "mat": "glow",
+ "pal": "col",
+ "tags": [
+  "light"
+ ],
+ "parts": [
+  {
+   "id": "cr",
+   "k": "shard",
+   "h": 0.26,
+   "w": 0.13,
+   "sides": 4,
+   "arr": 6,
+   "arrMode": "ring",
+   "arrR": 0.5
+  },
+  {
+   "id": "cr2",
+   "k": "shard",
+   "h": 0.26,
+   "w": 0.13,
+   "sides": 4,
+   "rot": [
+    180,
+    0,
+    0
+   ],
+   "arr": 6,
+   "arrMode": "ring",
+   "arrR": 0.5
+  }
+ ]
+}

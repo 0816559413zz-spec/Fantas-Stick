@@ -1,0 +1,15 @@
+{
+ "v": 1,
+ "desc": "Radiance Sanctum Crystal: คริสตัลปักพื้น — แฟลช + คลื่นกระแทกพื้น + เศษแสงกระเด็นขึ้น + ฝุ่นแสง",
+ "tags": ["light","radiance","sanctum","ingame"],
+ "pal": "heal",
+ "dur": 0.6,
+ "seed": 61,
+ "layers": [
+  {"id":"core","t":"flash","at":0,"life":0.14,"pos":[0,0.4,0],"col":"#fff6dc","size":2,"size0":0.5,"k":1.6},
+  {"id":"shock","t":"mesh","att":"ground","shape":"torus","mat":"glow","col":"#ffd36a","inner":0.9,"at":0,"life":0.4,"pos":[0,0.06,0],"scale":{"0":0.3,"1":3.2,"ease":"out"},"op":{"0":1,"1":0},"int":1.6},
+  {"id":"chips","t":"emit","at":0,"life":0.04,"pos":[0,0.2,0],"burst":22,"from":"point","dir":"up","spread":0.9,"speed":[3,6],"plife":[0.35,0.6],"look":"flake","size":[2.5,4],"col":"#ffe39a","c2":"#ff9a2a","gravity":9,"drag":1.5,"spin":10,"curl":false},
+  {"id":"dust","t":"emit","att":"ground","at":0,"life":0.05,"burst":18,"from":"ring","fr":0.4,"dir":"flat","spread":0.2,"speed":[2,4],"up":[0.2,0.6],"plife":[0.4,0.7],"look":"glow","size":[2,3],"col":"#fff0c0","c2":"#ffb347","gravity":-0.3,"drag":2,"curl":true},
+  {"id":"lt","t":"light","at":0,"life":0.35,"col":"#ffb84a","int":{"0":2,"1":0},"dist":7}
+ ]
+}

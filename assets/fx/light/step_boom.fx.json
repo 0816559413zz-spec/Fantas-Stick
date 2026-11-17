@@ -1,0 +1,130 @@
+{
+ "v": 1,
+ "desc": "Radiance Light Step ไปถึงคู่หู: รั้วรังผึ้งแสงกางออกเป็นวงรัศมีดาเมจ + แฟลช + ประกาย",
+ "tags": [
+  "light",
+  "radiance",
+  "dash",
+  "ingame"
+ ],
+ "pal": "heal",
+ "dur": 0.7,
+ "seed": 23,
+ "params": {
+  "r": {
+   "def": 7.5,
+   "desc": "รัศมี ม."
+  }
+ },
+ "layers": [
+  {
+   "id": "fence",
+   "t": "mesh",
+   "att": "ground",
+   "shape": "model",
+   "model": "light_hexfence",
+   "mat": "glow",
+   "col": "#ffb84a",
+   "at": 0,
+   "life": 0.5,
+   "scale": {
+    "0": [
+     "r*0.15",
+     "r*0.15",
+     "r*0.15"
+    ],
+    "0.35": [
+     "r",
+     "r*0.75",
+     "r"
+    ],
+    "1": [
+     "r*1.05",
+     "r*0.5",
+     "r*1.05"
+    ],
+    "ease": "out"
+   },
+   "op": {
+    "0": 1,
+    "0.6": 0.8,
+    "1": 0
+   },
+   "int": 1.0,
+   "fade": 0.3
+  },
+  {
+   "id": "ground",
+   "t": "ring",
+   "at": 0,
+   "life": 0.4,
+   "col": "#ffd36a",
+   "r": "r",
+   "op": 0.5
+  },
+  {
+   "id": "core",
+   "t": "flash",
+   "at": 0,
+   "life": 0.18,
+   "pos": [
+    0,
+    1.1,
+    0
+   ],
+   "col": "#fff6dc",
+   "size": 1.6,
+   "size0": 0.6,
+   "k": 1.4
+  },
+  {
+   "id": "sparks",
+   "t": "emit",
+   "at": 0,
+   "life": 0.05,
+   "pos": [
+    0,
+    0.8,
+    0
+   ],
+   "burst": 36,
+   "from": "point",
+   "dir": "flat",
+   "spread": 0.3,
+   "speed": [
+    "r*1.2",
+    "r*2"
+   ],
+   "up": [
+    0.5,
+    2
+   ],
+   "plife": [
+    0.3,
+    0.5
+   ],
+   "look": "streak",
+   "size": [
+    2.5,
+    4
+   ],
+   "col": "#fff6dc",
+   "c2": "#ff9a2a",
+   "gravity": 2,
+   "drag": 3,
+   "curl": false
+  },
+  {
+   "id": "lt",
+   "t": "light",
+   "at": 0,
+   "life": 0.4,
+   "col": "#ffb84a",
+   "int": {
+    "0": 2.4,
+    "1": 0
+   },
+   "dist": 9
+  }
+ ]
+}

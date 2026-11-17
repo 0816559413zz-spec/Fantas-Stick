@@ -1,0 +1,170 @@
+{
+ "v": 1,
+ "desc": "Radiance Empower Light ระหว่างบัฟ (6 วิ): ประกายแสงทองลอยขึ้นจาง ๆ รอบตัว (follow ผู้เล่น) + วงทองหมุนที่เท้า + แสงพื้น + เส้นแสงพุ่งขึ้น + ประกายวนรอบตัว",
+ "tags": [
+  "light",
+  "radiance",
+  "empower",
+  "ingame"
+ ],
+ "pal": "heal",
+ "dur": 6,
+ "seed": 53,
+ "params": {
+  "t": {
+   "def": 6,
+   "desc": "นาน วิ"
+  }
+ },
+ "layers": [
+  {
+   "id": "motes",
+   "t": "emit",
+   "att": "feet",
+   "at": 0,
+   "life": "t",
+   "rate": 18,
+   "from": "ring",
+   "fr": 0.6,
+   "dir": "up",
+   "spread": 0.3,
+   "speed": [
+    0.6,
+    1.4
+   ],
+   "plife": [
+    0.8,
+    1.4
+   ],
+   "look": "glow",
+   "size": [
+    1.5,
+    2.5
+   ],
+   "col": "#fff0c0",
+   "c2": "#ffb347",
+   "gravity": -0.5,
+   "drag": 0.5,
+   "curl": true
+  },
+  {
+   "id": "ring",
+   "t": "mesh",
+   "att": "feet",
+   "shape": "torus",
+   "mat": "glow",
+   "col": "#ffcf5a",
+   "inner": 0.93,
+   "at": 0,
+   "life": "t",
+   "pos": [
+    0,
+    0.05,
+    0
+   ],
+   "scale": {
+    "0": 0.3,
+    "0.03": 1,
+    "0.95": 1,
+    "1": 0.3,
+    "ease": "out"
+   },
+   "spin": 60,
+   "op": {
+    "0": 0,
+    "0.03": 0.45,
+    "0.95": 0.45,
+    "1": 0
+   },
+   "int": 1.2
+  },
+  {
+   "id": "pool",
+   "t": "mesh",
+   "att": "feet",
+   "shape": "disc",
+   "mat": "glow",
+   "col": "#ffb847",
+   "at": 0,
+   "life": "t",
+   "pos": [
+    0,
+    0.03,
+    0
+   ],
+   "scale": 1.05,
+   "op": {
+    "0": 0,
+    "0.03": 0.12,
+    "0.95": 0.12,
+    "1": 0
+   },
+   "int": 0.7
+  },
+  {
+   "id": "streak",
+   "t": "emit",
+   "att": "feet",
+   "at": 0,
+   "life": "t",
+   "rate": 10,
+   "from": "ring",
+   "fr": 0.9,
+   "dir": "up",
+   "spread": 0.05,
+   "speed": [
+    2.5,
+    4
+   ],
+   "plife": [
+    0.35,
+    0.6
+   ],
+   "look": "streak",
+   "size": [
+    2,
+    3
+   ],
+   "col": "#fff6dc",
+   "c2": "#ffb347",
+   "gravity": 0,
+   "drag": 0.5,
+   "curl": false
+  },
+  {
+   "id": "orbit",
+   "t": "emit",
+   "att": "feet",
+   "at": 0,
+   "life": "t",
+   "rate": 14,
+   "from": "ring",
+   "fr": 0.7,
+   "fh": 1,
+   "dir": "tangent",
+   "spread": 0.2,
+   "speed": [
+    1.5,
+    2.5
+   ],
+   "up": [
+    0.3,
+    0.8
+   ],
+   "plife": [
+    0.6,
+    1
+   ],
+   "look": "spark",
+   "size": [
+    2,
+    3
+   ],
+   "col": "#ffe39a",
+   "c2": "#ff9a2a",
+   "gravity": -0.3,
+   "drag": 0.3,
+   "curl": false
+  }
+ ]
+}

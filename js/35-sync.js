@@ -88,7 +88,7 @@ const SKANIM={ringofembers:'sweep',blazeform:'fireflare',colossus:'novaup',kindl
   thunderline:'line',speedsiphon:'staffup',stormorbs:'orbs',stormdome:'dome',triplestrike:'skycall',godlightning:'godcall',
   stonebreaker:'punchcmd',mudswamp:'ground',tectoniccrush:'dome',tectoniccrush_2:'clap',dustburst:'burst',terraauger:'pullback',wrath:'ultraise',
   riptide:'wavecast',tidecaller:'tidecall',aquacage:'cagecast',abyssalbeam:'pullback',moonwater:'moonarts',dragondeep:'dragoncall',dragondeep_dive:'dragoncommand',voidspheres:'windvoid',aegisgale_push:'wallpush',aegisgale_place:'ground',featherwing_2:'wingflick',eyeofheaven:'heavenslam'};
-Object.assign(SKANIM,{poisondart:'natthrow',bloom:'natthrow',sporecloud:'natthrow',vinelash:'natraise',thornburst:'natraise',worldtree:'natsummon'});
+Object.assign(SKANIM,{poisondart:'natthrow',bloom:'natthrow',sporecloud:'natthrow',vinelash:'natraise',thornburst:'natraise',worldtree:'natsummon',radiantsovereign:'novaup'});
 SKANIM.railgun_release='railrelease';SKANIM.terraauger_release='ground';
 SKFEET.rendfar=[-0.75,0.5,0.1,-0.08];   /* ขาหน้าก้าวออกไปด้านหน้า ขาหลังยันหลัง ให้ท่าก้มดูมีน้ำหนักตามฟิสิกส์ (ผู้ใช้ 2026-11-16) */SKANIM.dragonfall_land='dragonland';SKFEET.dragonland=[-0.8,0.3,0.12,-0.1];SKFEET.wingflick=[-0.45,0.3,0.12,-0.12];
 function skAnim(ev){const o=PM3.get(ev.id);let n=SKANIM[ev.s];if(ev.s==='glacierrend'){const v=VIEW.cur&&VIEW.cur.P.find(q=>q.id===ev.id);if(v&&v.fr&&v.fr[0]!==0)n='rendfar';}if(!o||!n)return;if(ev.s==='stormdome'&&!ev.g)return;o.caN=n;o.caT=0;o.cpT=0;o.cgd=2.2;}
@@ -197,7 +197,7 @@ function syncPlayers(P,mode,now,dt){
     const g=o.g;
     g.visible=p.al&&!(p.iv&&!p.ds&&!(p.fr&&(p.fr[3]&2))&&Math.floor(now/80)%2===0);
     // ผี (หาลอร์ดโวลเดอมอร์): คนเป็นมองไม่เห็นผี / ผีเห็นกันเป็นเงาจางๆ
-    if(p.gh&&!meGhost){g.visible=false;continue;}
+    if(p.gh&&!meGhost){g.visible=false;const l=LGV.st.get(p.id);if(l)lgClear(l);continue;}
     if(!!p.gh!==!!o.ghost){
       o.ghost=!!p.gh;
       setGhost(o,o.ghost);
@@ -207,7 +207,7 @@ function syncPlayers(P,mode,now,dt){
     g.position.set(x,o.zs,z);
     {const A=broomHead(o,p,dt);g.rotation.y=Math.atan2(Math.cos(A),Math.sin(A));}   // บิน = หันตามไม้กวาด (js/69)
     const v=localVel(o,x,z,dt,g.rotation.y);
-    if(!p.al){if(o.natureWhipView)natureWhipView(o,null);if(ragTick(o,p,v,dt,now))ragHideDead(o,p,now);continue;}   // ตาย = ragdoll ค้างจนเกิดใหม่ (js/48)
+    if(!p.al){const l=LGV.st.get(p.id);if(l)lgClear(l);if(o.natureWhipView)natureWhipView(o,null);if(ragTick(o,p,v,dt,now))ragHideDead(o,p,now);continue;}   // ตาย = ragdoll ค้างจนเกิดใหม่ (js/48)
     o.hitT=Math.max(0,(o.hitT||0)-dt);
     o.b.position.set(0,0,0);o.b.rotation.set(0,0,0);   // one-frame pose offsets must not build up (body drifted back / stayed tilted)
     if(o.anim)animTick(o,{down:!!p.dn,fly:!!p.fl,sp:p.wn&&p.wn[5]>=1?0:v.sp,castT:o.castT,hitT:o.hitT},dt,p.id===NET.myId?1:animLod(g));
@@ -267,7 +267,7 @@ function syncPlayers(P,mode,now,dt){
     chillFX(o,p,pz,now,dt);
     frostFX(o,p,pz,now,dt);
     earthFX(o,p,pz,now,dt);
-    windFX(o,p,pz,now,dt);waterFX(o,p,pz,now,dt);
+    windFX(o,p,pz,now,dt);waterFX(o,p,pz,now,dt);lightFX(o,p,pz,now,dt);
     lateSkillPose(o,p,dt,now);if(o.tip){o.tip.updateWorldMatrix(true,false);(o.tipW||(o.tipW=new THREE.Vector3())).setFromMatrixPosition(o.tip.matrixWorld);o.tipWT=performance.now();}   // ปลายไม้หลังใส่ท่าครบ (fx att:'wand' / กระสุนเริ่มที่ไม้ อ่านค่านี้)
     if(o.novaT>0||o.nvFx||o.nvFx2)pyroNovaCharge(o,dt,now);if(o.mlcT>0||o.mlcX)frostMlCast(o,p,dt,now);
     waterCharacterPose(o,p,dt,now);windCharacterPose(o,p,dt,now,v);windLatePose(o,p,dt);stormBowView(o,p,dt,now);stormStaffView(o,p,dt,now);dashPose(o,p,dt,now);   // ท่าพุ่ง (js/72) ทับท่าอื่นตอนพุ่ง
@@ -277,6 +277,7 @@ function syncPlayers(P,mode,now,dt){
     const activeWhip=whip&&!p.dn&&!p.fl&&!whip[4]?{start:whip[0],age:whip[1],side:whip[2],angle:whip[3]}:null;   // empowered swings draw their own effect (js/68-nature-view)
     if(activeWhip)natureWhipPose(o,activeWhip);
     else if(o.natureWhipView?.vine.visible)o.armR.rotation.y=0;
+    lightHeadPose(o);
     if(o.rig){rigSync(o,dt);windForearm(o);stormBowForearm(o);earthFistForearm(o);natForearmR(o);if(domeKnee)dpKnees(o,0,domeKnee);}
     if(activeWhip||o.natureWhipView)natureWhipView(o,activeWhip);
     natureCharacter(o,p,now);
@@ -286,7 +287,7 @@ function syncPlayers(P,mode,now,dt){
     if(p.sh&&!fireSh&&!p.ea&&Math.random()<0.3)burst(p.x,p.y,'#7ff6ff',1,40,0.4,1.4,{h:pz+rnd(0.3,2)});
     if(p.ds)burst(p.x,p.y,'#bfefff',2,30,0.3,2,{h:pz+rnd(0.4,1.6),g:0});
   }
-  for(const [id,o] of PM3)if(!seen.has(id)){if(o.fball)scene.remove(o.fball);if(o.orbG)scene.remove(o.orbG);disposeObj(o.g);PM3.delete(id);}
+  for(const [id,o] of PM3)if(!seen.has(id)){if(o.fball)scene.remove(o.fball);if(o.orbG)scene.remove(o.orbG);lightDropView(id);disposeObj(o.g);PM3.delete(id);}
 }
 function syncEnemies(E,P,now,dt){
   const seen=new Set();

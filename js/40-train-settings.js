@@ -16,7 +16,7 @@ function trSync(v){
   $('#trOpen').classList.toggle('hidden',!on||trOpenF);
   if(!on){if(trOpenF)trToggle(false);return;}
   if(!trOpenF)return;
-  const tr=(v.M&&v.M.tr)||{},me=v.P.find(q=>q.id===NET.myId),myT=me?me.tm:0,k=JSON.stringify(tr)+'|'+trN+'|'+myT;
+  const tr=(v.M&&v.M.tr)||{},me=v.P.find(q=>q.id===NET.myId),myT=me?me.tm:0,light=me&&getKit(me.id).path===LIGHTP,k=JSON.stringify(tr)+'|'+trN+'|'+myT+'|'+light;
   if(k===trKey)return;trKey=k;
   const mons=Object.keys(EDEF);
   $('#trPanel').innerHTML=`<h2>🧪 Test Place</h2>
@@ -24,6 +24,7 @@ function trSync(v){
     <div class="trs">ผู้เล่น</div>
     <div class="trn">${['🤝 ทีมเดียวกัน','⚔️ 2 ทีม','💥 ตัวใครตัวมัน'].map((n,i)=>`<button class="${(tr.pvp|0)===i?'on':''}" data-trp="${i}">${n}</button>`).join('')}</div>
     ${tr.pvp===1?`<div class="trn">${TEAMN.map((n,i)=>`<button class="${myT===i?'on':''}" data-trteam="${i}" style="color:${TEAMC[i]}">${myT===i?'✔ ':''}${n}</button>`).join('')}</div>`:''}
+    ${light?'<button class="trw" data-tr="lightally">✨ วางคู่หูฝึก Radiance</button>':''}
     <div class="trs">ตั้งค่า</div>
     ${TR_OPTS.map(([k2,n])=>`<button class="trt ${tr[k2]?'on':''}" data-trk="${k2}">${n}<b>${tr[k2]?'เปิด':'ปิด'}</b></button>`).join('')}
     <div class="trs">เสกมอนสเตอร์ (ที่วงสีแดง)</div>
@@ -41,6 +42,7 @@ $('#trPanel').addEventListener('click',e=>{
   else if(b.dataset.trteam)trSend({c:'team',v:+b.dataset.trteam});
   else if(b.dataset.trn){trN=+b.dataset.trn;trKey='';}
   else if(b.dataset.tre)trSend({c:'spawn',e:b.dataset.tre,n:trN});
+  else if(b.dataset.tr==='lightally')trSend({c:'lightally'});
   else if(b.dataset.tr==='clear')trSend({c:'clear'});
   else if(b.dataset.tr==='kit'){trToggle(false);openCreator(false,3);}
   if(v)trSync(v);

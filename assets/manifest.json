@@ -33,6 +33,14 @@
    "file": "vfx/storm_claw.glb",
    "v": 1
   },
+  "radiant_sovereign": {
+   "file": "vfx/radiant_sovereign.glb",
+   "v": 3
+  },
+  "radiant_sovereign_crystal": {
+   "file": "vfx/radiant_sovereign_crystal.glb",
+   "v": 1
+  },
   "mesh_ice_burst": {
    "file": "vfx/ice_burst.glb",
    "v": 1

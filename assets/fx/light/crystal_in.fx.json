@@ -1,0 +1,13 @@
+{
+ "v": 1,
+ "desc": "Radiance คริสตัลแวบโผล่ (ที่คู่หู / กลับมาหาเรา): เส้นแสงกางเป็นปริซึมเล็ก + แฟลช + ประกาย",
+ "tags": ["light","radiance","crystal","ingame"],
+ "pal": "heal",
+ "dur": 0.3,
+ "seed": 32,
+ "layers": [
+  {"id":"prism","t":"mesh","shape":"model","model":"light_core","mat":"glow","col":"#fff3c4","at":0,"life":0.12,"scale":{"0":[0.1,4,0.1],"0.35":[1.6,2.4,1.6],"1":[2,2.8,2],"ease":"out"},"op":{"0":1,"1":0},"int":2,"spin":-720,"fade":0.4},
+  {"id":"core","t":"flash","at":0.02,"life":0.1,"col":"#fff6dc","size":0.9,"size0":0.2,"k":1.6},
+  {"id":"sp","t":"emit","at":0.02,"life":0.03,"burst":10,"from":"point","dir":"out","spread":1.6,"speed":[1.5,3],"plife":[0.15,0.3],"look":"glow","size":[2,3],"col":"#fff0c0","c2":"#ffb347","gravity":0,"drag":3,"curl":false}
+ ]
+}

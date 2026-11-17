@@ -83,6 +83,7 @@ function hostDrop(id,conn){
 }
 function hostRemove(id){
   if(!G||!G.players[id])return;NET.conns.delete(id);
+  if(G.players[id].lgUlt)lightUltEnd(G.players[id],false,false);
   const name=G.players[id].name,ai=G.players[id].ai;
   delete G.players[id];G.order=G.order.filter(x=>x!==id);
   if(!ai)toast(name+' ออกจากห้อง');
@@ -173,7 +174,7 @@ function emoHost(id,e){const p=G.players[id];e=e|0;if(!p||!p.alive||p.downed||G.
 function resetBody(p,x,y){
   Object.assign(p,{x,y,z:0,vz:0,fly:false,flyCd:0,root:0,vx:0,vy:0,hp:p.maxHp,alive:true,downed:false,revive:0,stun:0,burn:0,dash:0,inv:0,
     shieldOn:false,shieldE:100,shieldBroken:0,respawn:0,slam:false,slam3:null,dashSp:0,flyOn:false});   // slam: ตายกลางท่ากระโดดฟาด (น้ำแข็ง) แล้วค้าง = ฟันไม่ได้หลังเกิดใหม่
-  for(const k of CDK)p.cd[k]=0;clearStatus(p);p.trail=null;natureReset(p);earthReset(p);windReset(p);waterReset(p);
+  for(const k of CDK)p.cd[k]=0;clearStatus(p);p.trail=null;natureReset(p);earthReset(p);windReset(p);waterReset(p);lightReset(p);
   p.ang=Math.atan2(MH/2-y,MW/2-x);
 }
 function fmap(){const M=MAPS[MAPID];return M&&(M.fm||(M.fmFor&&G?M.fmFor(G.mode):null));}   // fmFor = แผนที่จากโค้ดที่มีจุดเกิด/ห่วง/ภารกิจต่อโหมด (city)
@@ -219,6 +220,7 @@ function hostTick(dt){
   // จบเกมแบบสโลว์ (ผู้ใช้ 2026-10-22 "เวลาหมดเกมช้าลง จอมืดจาง ๆ แล้ว VICTORY/DEFEAT ขึ้น"): endMatch ตั้ง endT → โลกเดินช้า 0.3× จนหมด แล้วค่อยจบจริง
   if(g.endT>0){g.endT-=dt;dt*=0.3;if(g.endT<=0){matchOver();return;}}
   g.time+=dt;
+  lightQueueTick(dt);   // สายแสง: กระสุนแสงโบนัสของคู่หู (Empower Light)
   if(g.ph==='count'){g.cdT-=dt;if(g.cdT<=0)g.ph='play';}
   const acting=g.ph==='play';
   // botThink = สมองบอท + หาทาง (js/15-botnav) • พังที่ผู้เล่นคนเดียว = ข้ามคนนั้นเฟรมนี้ (เดิมทั้งเฟรมหยุด → ทุกคนยืนค้าง เอฟเฟกต์เล่นอยู่กับที่ ผู้ใช้ 2026-11-09)
@@ -242,8 +244,8 @@ function updatePlayer(p,dt,acting){
     if(c!==(p.last[k]|0)){pr[k]=true;p.last[k]=c;}
   }
   const cageBusy=waterCageBusy(p);
-  if(pr.g&&PROPON&&p.alive&&!p.downed&&!p.gh&&!cageBusy)useProp(p);
-  if(G.mode==='siege'&&!cageBusy)sgInput(p,pr,inp);   // G = ร่ายทำลายแกน (js/15-siege)
+  if(pr.g&&PROPON&&p.alive&&!p.downed&&!p.gh&&!cageBusy&&!p.lgUlt)useProp(p);
+  if(G.mode==='siege'&&!cageBusy&&!p.lgUlt)sgInput(p,pr,inp);   // G = ร่ายทำลายแกน (js/15-siege)
   for(const k of CDK)p.cd[k]=Math.max(0,p.cd[k]-dt*(p.ovc>0?1.3:1));
   p.stun=Math.max(0,p.stun-dt);p.inv=Math.max(0,p.inv-dt);tickStatus(p,dt);
   if(p.breath>0)p.breath-=dt;
@@ -285,6 +287,7 @@ function updatePlayer(p,dt,acting){
   }
   if(p.burn>0){p.burn-=dt;p.bt-=dt;if(p.bt<=0){p.bt=1;damage(p,4,p.burnSrc,'burn');if(!p.alive||p.downed)return;}}
   const canAct=acting&&p.stun<=0;
+  if(p.lgUlt){lightUltTick(p,inp,dt,canAct&&!cageBusy,pr.x);return;}
   if(acting&&(inp.ax||inp.ay))p.ang=Math.atan2(inp.ay-p.y,inp.ax-p.x)+(p.bld>0?rnd(-0.22,0.22):0);
   if(p.wr?.ph==='throw')p.ang=p.wr.a;
 
@@ -309,7 +312,7 @@ function updatePlayer(p,dt,acting){
   if(p.wfw)windLandCheck(p);
 
   // โล่
-  const wantSh=canAct&&!p.fly&&!cageBusy&&G.mode!=='imp'&&!(G.ball&&G.ball.holder===p.id)&&inp.sh&&p.shieldBroken<=0&&p.shieldE>5&&p.dash<=0&&!p.natureHook&&!p.dchgOn&&!(p.colos>0)&&!(p.cryo>0)&&!p.dfall&&p.pathIdx!==2&&!p.aug&&!p.ramp&&!p.wr&&!(p.wsbL>0)&&!p.wwAim;
+  const wantSh=canAct&&!p.fly&&!cageBusy&&G.mode!=='imp'&&!(G.ball&&G.ball.holder===p.id)&&inp.sh&&p.shieldBroken<=0&&p.shieldE>5&&!(PBASIC[p.pathIdx|0]?.noShield?.(p))&&p.dash<=0&&!p.natureHook&&!p.dchgOn&&!(p.colos>0)&&!(p.cryo>0)&&!p.dfall&&p.pathIdx!==2&&!p.aug&&!p.ramp&&!p.wr&&!(p.wsbL>0)&&!p.wwAim;
   if(wantSh&&!p.shieldOn){p.shieldOn=true;p.shieldT=G.time;p.shBlk=0;p.shPar=0;}
   if(!wantSh)p.shieldOn=false;
   if(p.shieldOn){p.shieldE-=12*dt*((PBASIC[p.pathIdx|0]||{}).shDrain||1);if(p.shieldE<=0)breakShield(p);}
@@ -320,6 +323,7 @@ function updatePlayer(p,dt,acting){
   if(p.pathIdx===EARTH)earthTick(p,dt);
   if(p.pathIdx===WINDP)windTick(p,dt);
   if(p.pathIdx===WATERP)waterTick(p,dt);
+  if(p.pathIdx===LIGHTP)lightTick(p,dt);
   if(p.pathIdx===NATUREP){natureShield(p);natureWallCharges(p,dt);}
 
   // เคลื่อนที่
@@ -331,7 +335,7 @@ function updatePlayer(p,dt,acting){
   if(p.wr?.ph==='aim'){mx*=0.35;my*=0.35;}   // อัลติดินลอยอยู่: ขยับได้นิดหน่อยทุกทิศ (ผู้ใช้ 2026-11-15) — ตัวค้างท่ารอเหวี่ยงไม้ (js/09 earthWrath จำกัดรัศมี)
   if(!canAct||p.root>0||p.dchgOn||p.cryo>0){mx=my=0;}
   else if(p.fear>0){const fa=Math.atan2(p.y-p.fearY,p.x-p.fearX);mx=Math.cos(fa);my=Math.sin(fa);}
-  const spd=(p.fly?(p.wfo?W_FW.fastSpd:PLAY.fly)*p.buffs.spd:PLAY.walk*p.buffs.spd*(p.shieldOn&&p.pathIdx!==WATERP?PLAY.shSlow:1))*(p.boost>0?1.45:1)*moveMul(p)*(p.wr||p.aug||p.ecb?earthSpd(p):1)*(p.wdr||p.wfw||p.wgs?windSpd(p):1)*(p.wsk||p.wab||p.wmsT>0?waterSpd(p):1)*(p.dfall?(p.dfall.ph===2?0.45:0):p.sdome?(p.sdome.ph===2?0.45:0):p.rail?RAIL.v.slow:(p.kindle>0&&p.hover>0)?0.35:p.breath>0?0.7:(p.snapT>0||p.colos>0||p.grT>0)?0.5:1)*(p.slideT>0?1.8:1+(p.iceB||0));
+  const spd=(p.fly?(p.wfo?W_FW.fastSpd:PLAY.fly)*p.buffs.spd:PLAY.walk*p.buffs.spd*(p.shieldOn&&p.pathIdx!==WATERP?PLAY.shSlow:1))*(p.boost>0?1.45:1)*moveMul(p)*(p.wr||p.aug||p.ecb?earthSpd(p):1)*(p.wdr||p.wfw||p.wgs?windSpd(p):1)*(p.wsk||p.wab||p.wmsT>0?waterSpd(p):1)*(p.dfall?(p.dfall.ph===2?0.45:0):p.sdome?(p.sdome.ph===2?0.45:0):p.rail?RAIL.v.slow:(p.kindle>0&&p.hover>0)?0.35:p.breath>0?0.7:(p.snapT>0||p.colos>0||p.grT>0)?0.5:1)*(p.slideT>0?1.8:1+(p.iceB||0))*(p.lgBeam?LTV.baMove:1);
   p.wSpd=(p.dash>0||p.slideT>0||p.slip>0||!canAct||p.root>0||p.dchgOn||p.cryo>0||p.fear>0||p.gh||p.fly)?0:Math.round(spd);   // ความเร็วเดินตอนนี้ → ลูกข่ายใช้ทำนายตัวเอง (0 = อย่าทำนาย)
   if(p.natureHook&&!canAct)p.natureHook=null;
   if(p.natureHook&&natureHookMove(p,dt)){p.wSpd=0;p.vx=p.vy=0;}

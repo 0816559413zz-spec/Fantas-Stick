@@ -1,0 +1,130 @@
+{
+ "v": 1,
+ "desc": "Radiance โล่รังผึ้งแตก: แฟลชใหญ่ + เศษแก้วทองหกเหลี่ยมกระจาย (แผ่นกระเด็นจริงทำในโค้ด lgShield) แล้วคริสตัลกลับไปวนตัว",
+ "tags": [
+  "light",
+  "radiance",
+  "shield",
+  "ingame"
+ ],
+ "pal": "heal",
+ "dur": 0.8,
+ "seed": 12,
+ "layers": [
+  {
+   "id": "core",
+   "t": "flash",
+   "at": 0,
+   "life": 0.18,
+   "pos": [
+    0,
+    0,
+    1.0
+   ],
+   "col": "#fffbe8",
+   "size": 1.1,
+   "size0": 0.5,
+   "k": 1.3
+  },
+  {
+   "id": "glow",
+   "t": "halo",
+   "at": 0,
+   "life": 0.5,
+   "pos": [
+    0,
+    0,
+    1.0
+   ],
+   "col": "#ffb84a",
+   "size": 2,
+   "size0": 1,
+   "k": 0.6
+  },
+  {
+   "id": "shards",
+   "t": "emit",
+   "at": 0,
+   "life": 0.05,
+   "pos": [
+    0,
+    0,
+    1.05
+   ],
+   "burst": 30,
+   "from": "disc",
+   "fr": 0.7,
+   "dir": "aim",
+   "spread": 1.3,
+   "speed": [
+    3,
+    7
+   ],
+   "up": [
+    1,
+    3
+   ],
+   "plife": [
+    0.4,
+    0.8
+   ],
+   "look": "flake",
+   "size": [
+    3,
+    5
+   ],
+   "col": "#ffd36a",
+   "c2": "#ff8a1e",
+   "gravity": 8,
+   "drag": 1.5,
+   "spin": 8,
+   "curl": false
+  },
+  {
+   "id": "dust",
+   "t": "emit",
+   "at": 0,
+   "life": 0.05,
+   "pos": [
+    0,
+    0,
+    1.05
+   ],
+   "burst": 20,
+   "from": "sphere",
+   "fr": 0.5,
+   "dir": "out",
+   "spread": 1.5,
+   "speed": [
+    2,
+    5
+   ],
+   "plife": [
+    0.3,
+    0.6
+   ],
+   "look": "glow",
+   "size": [
+    2,
+    3
+   ],
+   "col": "#fff3c4",
+   "c2": "#ff9d1e",
+   "gravity": 0,
+   "drag": 3,
+   "curl": false
+  },
+  {
+   "id": "lt",
+   "t": "light",
+   "at": 0,
+   "life": 0.35,
+   "col": "#ffb84a",
+   "int": {
+    "0": 1.4,
+    "1": 0
+   },
+   "dist": 7
+  }
+ ]
+}

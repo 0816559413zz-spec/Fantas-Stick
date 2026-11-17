@@ -95,13 +95,15 @@ const CAM_FRAMES={
   earthShield:{dist:9,h:2.8,side:0,lift:5.5},earthCharge:{dist:10,h:3,side:0,lift:5},
   earthAuger:{dist:12,h:3.3,side:0,lift:3.5},earthSky:{dist:15.2,h:3.8,side:0,lift:3},
   windShield:{dist:6.2,h:2.45,side:0.34},windFlight:{dist:10.4,h:4.3,side:0.3},windBase:{dist:6.3,h:2.35,side:0.32},   // สายลม: ปีกใหญ่บังเป้า → ถอยกล้อง + เยื้องข้างมากขึ้น (ผู้ใช้ 2026-11-15)
-  waterBeam:{dist:7.8,h:3.5,side:0},waterDragon:{dist:17.2,h:4.8,side:0.30}
+  waterBeam:{dist:7.8,h:3.5,side:0},waterDragon:{dist:17.2,h:4.8,side:0.30},
+  radiance:{dist:9.2,h:1.55,side:0.38,lift:2.35}
 };
 const CAM_FRAME={dist:4.7,h:2.05,side:0.25,lift:0},CAM_TRACK={has:false,key:'',x:0,y:0,z:0,r:0,gy:undefined};
 const _camFocus=new THREE.Vector3(),_camAnchor=new THREE.Vector3(),_camWant=new THREE.Vector3();
 function cameraFrame(me){
   if(me.al){
     if(me.co>0)return CAM_FRAMES.colossus;
+    if(me.lt?.[14]?.[0]>1)return CAM_FRAMES.radiance;
     if(me.ea){
       if(me.ea[3]===1)return CAM_FRAMES.earthSky;
       if(me.ea[2]>0)return CAM_FRAMES.earthAuger;

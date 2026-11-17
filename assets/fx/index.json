@@ -1341,6 +1341,250 @@
    "dur": 0.5,
    "n": 3
   },
+  "light/ba_fire": {
+   "v": "80596643",
+   "desc": "Radiance BA: แรงกระแทกตอนลำแสงออกครั้งแรก — แฟลชที่วงคริสตัล + วงกระแทกพุ่งไปข้างหน้า 2 วง + ประกายพุ่งตามลำ",
+   "pal": "heal",
+   "tags": [
+    "light",
+    "radiance",
+    "ingame"
+   ],
+   "dur": 0.6,
+   "n": 7
+  },
+  "light/bolt_hit": {
+   "v": "bd68459b",
+   "desc": "Radiance Empower: เศษคริสตัลโบนัสโดนเป้า — แฟลชเล็ก + ประกายแตก",
+   "pal": "heal",
+   "tags": [
+    "light",
+    "radiance",
+    "empower",
+    "ingame"
+   ],
+   "dur": 0.3,
+   "n": 2
+  },
+  "light/crystal_in": {
+   "v": "b285c258",
+   "desc": "Radiance คริสตัลแวบโผล่ (ที่คู่หู / กลับมาหาเรา): เส้นแสงกางเป็นปริซึมเล็ก + แฟลช + ประกาย",
+   "pal": "heal",
+   "tags": [
+    "light",
+    "radiance",
+    "crystal",
+    "ingame"
+   ],
+   "dur": 0.3,
+   "n": 3
+  },
+  "light/crystal_out": {
+   "v": "f6271826",
+   "desc": "Radiance คริสตัลแวบหาย (ส่งให้คู่หู / เรียกคืน): ปริซึมแสงเล็กหดเป็นเส้น + แฟลช + เศษแสง (วางที่ตัวคริสตัล)",
+   "pal": "heal",
+   "tags": [
+    "light",
+    "radiance",
+    "crystal",
+    "ingame"
+   ],
+   "dur": 0.3,
+   "n": 3
+  },
+  "light/emp_aura": {
+   "v": "d45106e0",
+   "desc": "Radiance Empower Light ระหว่างบัฟ (6 วิ): ประกายแสงทองลอยขึ้นจาง ๆ รอบตัว (follow ผู้เล่น) + วงทองหมุนที่เท้า + แสงพื้น + เส้นแสงพุ่งขึ้น + ประกายวนรอบตัว",
+   "pal": "heal",
+   "tags": [
+    "light",
+    "radiance",
+    "empower",
+    "ingame"
+   ],
+   "dur": 6,
+   "n": 5
+  },
+  "light/emp_burst": {
+   "v": "364587a7",
+   "desc": "Radiance Empower Light: ตอนกำมือดึงลง — แฟลชที่มือ + วงแสงทองกระแทกพื้นรอบตัว 2 วง + ประกายพุ่งขึ้น + รั้วหกเหลี่ยมแสงขึ้นจากพื้น + แสงทองแผ่บนพื้น + ลายเวทเรืองบนพื้น + แสงแตกเป็นรัศมีตามพื้น + รั้วหกเหลี่ยมชั้นสอง + ละอองลอย",
+   "pal": "heal",
+   "tags": [
+    "light",
+    "radiance",
+    "empower",
+    "ingame"
+   ],
+   "dur": 0.6,
+   "n": 11
+  },
+  "light/emp_gather": {
+   "v": "0d23a2ec",
+   "desc": "Radiance Empower Light: ตอนแบมือ ประกายแสงถูกดูดเข้ามือ (วางที่มือ)",
+   "pal": "heal",
+   "tags": [
+    "light",
+    "radiance",
+    "empower",
+    "ingame"
+   ],
+   "dur": 0.4,
+   "n": 2
+  },
+  "light/heal_tick": {
+   "v": "ef3a23c6",
+   "desc": "Radiance Sanctum: คนที่ได้ฮีล (ทุก 1 วิ) — วงแสงเขียวทองเล็กที่เท้า + ประกาย/แฟลกเขียวทองลอยขึ้นรอบตัว (follow)",
+   "pal": "heal",
+   "tags": [
+    "light",
+    "radiance",
+    "sanctum",
+    "heal",
+    "ingame"
+   ],
+   "dur": 0.9,
+   "n": 3
+  },
+  "light/san_end": {
+   "v": "b92bf967",
+   "desc": "Radiance Sanctum Crystal จบ: คริสตัลนีออนใหญ่แตกเป็นแสง — แฟลช + เศษนีออนกระจาย + วงแสงพื้นจาง",
+   "pal": "heal",
+   "tags": [
+    "light",
+    "radiance",
+    "sanctum",
+    "ingame"
+   ],
+   "dur": 0.8,
+   "n": 5
+  },
+  "light/san_plant": {
+   "v": "5b062bc8",
+   "desc": "Radiance Sanctum Crystal: คริสตัลปักพื้น — แฟลช + คลื่นกระแทกพื้น + เศษแสงกระเด็นขึ้น + ฝุ่นแสง",
+   "pal": "heal",
+   "tags": [
+    "light",
+    "radiance",
+    "sanctum",
+    "ingame"
+   ],
+   "dur": 0.6,
+   "n": 5
+  },
+  "light/shield_break": {
+   "v": "895f8713",
+   "desc": "Radiance โล่รังผึ้งแตก: แฟลชใหญ่ + เศษแก้วทองหกเหลี่ยมกระจาย (แผ่นกระเด็นจริงทำในโค้ด lgShield) แล้วคริสตัลกลับไปวนตัว",
+   "pal": "heal",
+   "tags": [
+    "light",
+    "radiance",
+    "shield",
+    "ingame"
+   ],
+   "dur": 0.8,
+   "n": 5
+  },
+  "light/shield_hit": {
+   "v": "a220075c",
+   "desc": "Radiance โล่รังผึ้ง โดนตี: แฟลชทองที่หน้ากำแพง + ประกายกระเด็นออกด้านนอก (ระลอกแสงบนแผ่นหกเหลี่ยมทำในโค้ด lgShield)",
+   "pal": "heal",
+   "tags": [
+    "light",
+    "radiance",
+    "shield",
+    "ingame"
+   ],
+   "dur": 0.4,
+   "n": 3
+  },
+  "light/sovereign_body": {
+   "v": "345d6882",
+   "desc": "Radiant Sovereign: เฉพาะตัวร่างเทพ (บล็อกแบบ Roblox, หัวทรงไข่, ส่วนล่างจางขึ้นจากกลางตัว)",
+   "pal": "col",
+   "tags": [
+    "light",
+    "god"
+   ],
+   "dur": 2,
+   "n": 7
+  },
+  "light/sovereign_draft": {
+   "v": "aa104422",
+   "desc": "Radiant Sovereign ร่างเทพแห่งแสง — ภาพร่างโมเดล (ref designs/light_ref/ult_god_ref.webp + ult_god_ref2.webp) ดู designs/light.md",
+   "pal": "col",
+   "tags": [
+    "light",
+    "ult",
+    "draft"
+   ],
+   "dur": 2,
+   "n": 18
+  },
+  "light/step_boom": {
+   "v": "24d05a3a",
+   "desc": "Radiance Light Step ไปถึงคู่หู: รั้วรังผึ้งแสงกางออกเป็นวงรัศมีดาเมจ + แฟลช + ประกาย",
+   "pal": "heal",
+   "tags": [
+    "light",
+    "radiance",
+    "dash",
+    "ingame"
+   ],
+   "dur": 0.7,
+   "n": 5
+  },
+  "light/step_in": {
+   "v": "b9b3cc47",
+   "desc": "Radiance Light Step จุดใหม่: เส้นแสงกางออกเป็นปริซึมแสง แล้วแตกออกเป็นตัว + แรงกระแทกที่พื้น 2 วง + ประกายวิ่งตามพื้น",
+   "pal": "heal",
+   "tags": [
+    "light",
+    "radiance",
+    "dash",
+    "ingame"
+   ],
+   "dur": 0.55,
+   "n": 8
+  },
+  "light/step_out": {
+   "v": "e48ded10",
+   "desc": "Radiance Light Step จุดเดิม: ร่างกลายเป็นปริซึมแสงนีออน แล้วหดเป็นเส้นพุ่งหาย + แฟลช + เศษแสง",
+   "pal": "heal",
+   "tags": [
+    "light",
+    "radiance",
+    "dash",
+    "ingame"
+   ],
+   "dur": 0.4,
+   "n": 4
+  },
+  "light/volley_boom": {
+   "v": "98d0f42d",
+   "desc": "Radiance Shard Volley ระเบิด: คริสตัลแตกเป็นเสาแสงพุ่งขึ้น + แฟลช + เศษคริสตัลกระจาย + คลื่นกระแทกพื้นรัศมี r",
+   "pal": "heal",
+   "tags": [
+    "light",
+    "radiance",
+    "volley",
+    "ingame"
+   ],
+   "dur": 0.8,
+   "n": 6
+  },
+  "light/volley_warn": {
+   "v": "2363a82e",
+   "desc": "Radiance Shard Volley: วงเตือนพื้นตอนคริสตัลหมุนชาร์จ (ขอบทอง + แผ่นด้านในโตตามเวลาชาร์จ) — r = รัศมีระเบิด ม., t = เวลาชาร์จ",
+   "pal": "heal",
+   "tags": [
+    "light",
+    "radiance",
+    "volley",
+    "ingame"
+   ],
+   "dur": 0.6,
+   "n": 3
+  },
   "nature/tree_break_study": {
    "v": "bb31a617",
    "desc": "Nature — กลางลำต้นโป่งแล้วฉีก ระเบิดจากรอยฉีกเป็นโดมฮีล ต้นทั้งสองท่อนสลายจากขอบบนพร้อมออร่า",
@@ -4638,6 +4882,102 @@
    "mat": "solid",
    "n": 1
   },
+  "light_core": {
+   "v": "85ba980b",
+   "desc": "Radiant Sovereign: คริสตัลกลางอก (ผลึกแหลมสองหัว)",
+   "mat": "glow",
+   "n": 2
+  },
+  "light_crown": {
+   "v": "30143481",
+   "desc": "Radiant Sovereign: มงกุฎหนามสุริยะลอย แท่งคริสตัลแหลม หน้ายาวสุดไล่สั้นไปหลัง ฐานเส้นแสงไม่ครบวง ด้านหลังขวาแตก มีเศษลอย (ผู้ใช้ 2026-11-16)",
+   "mat": "glow",
+   "n": 13
+  },
+  "light_god_body": {
+   "v": "a02cc6c4",
+   "desc": "Radiant Sovereign: ร่างเทพบล็อกแบบ Roblox (ลำตัว 1 ชิ้น แขนข้างละ 2 ชิ้น) ส่วนล่างจาง = light_god_fade • หัวไม่ใช่บล็อก = light_god_head • เอว y=0.2",
+   "mat": "solid",
+   "n": 5
+  },
+  "light_god_fade0": {
+   "v": "5b0a58ad",
+   "desc": "Radiant Sovereign: ลำตัวส่วนล่างชั้น 0 (จางขึ้นเรื่อย ๆ)",
+   "mat": "solid",
+   "n": 1
+  },
+  "light_god_fade1": {
+   "v": "19016288",
+   "desc": "Radiant Sovereign: ลำตัวส่วนล่างชั้น 1 (จางขึ้นเรื่อย ๆ)",
+   "mat": "solid",
+   "n": 1
+  },
+  "light_god_fade2": {
+   "v": "746ccf11",
+   "desc": "Radiant Sovereign: ลำตัวส่วนล่างชั้น 2 (จางขึ้นเรื่อย ๆ)",
+   "mat": "solid",
+   "n": 1
+  },
+  "light_god_fade3": {
+   "v": "ab07b782",
+   "desc": "Radiant Sovereign: ลำตัวส่วนล่างชั้น 3 (จางขึ้นเรื่อย ๆ)",
+   "mat": "solid",
+   "n": 1
+  },
+  "light_god_head": {
+   "v": "d66d6539",
+   "desc": "Radiant Sovereign: หัวทรงไข่ไม่มีหน้า (ไม่ใช่บล็อก)",
+   "mat": "solid",
+   "n": 1
+  },
+  "light_halo_crystals": {
+   "v": "1918c317",
+   "desc": "Radiant Sovereign: คริสตัลใหญ่ 6 ชิ้นบนวงแสงหลังหัว (รัศมี 0.5)",
+   "mat": "glow",
+   "n": 2
+  },
+  "light_hexfence": {
+   "v": "11f20cfb",
+   "desc": "Radiance Light Step (ไปหาคู่หู): รั้วรังผึ้ง แผ่นหกเหลี่ยมตั้งรอบวง 2 แถว รัศมี 1 (ขยายด้วย scale)",
+   "mat": "glow",
+   "n": 2
+  },
+  "light_ring_crystals": {
+   "v": "348c1179",
+   "desc": "Radiant Sovereign: คริสตัล 6 ชิ้นเรียงบนวงแสงหลัง (หมุนตามเส้น)",
+   "mat": "glow",
+   "n": 1
+  },
+  "light_wing": {
+   "v": "c9b66044",
+   "desc": "Radiant Sovereign: ปีกแสงทอง แผ่นแฉกแหลม (ref designs/light_ref/ult_god_ref2.webp)",
+   "mat": "glow",
+   "n": 1
+  },
+  "light_xline_b0": {
+   "v": "df726288",
+   "desc": "Radiant Sovereign: เส้นแสงไขว้ X บนอก/หลัง",
+   "mat": "glow",
+   "n": 1
+  },
+  "light_xline_b1": {
+   "v": "98236f1f",
+   "desc": "Radiant Sovereign: เส้นแสงไขว้ X บนอก/หลัง",
+   "mat": "glow",
+   "n": 1
+  },
+  "light_xline_f0": {
+   "v": "fcb9eca8",
+   "desc": "Radiant Sovereign: เส้นแสงไขว้ X บนอก/หลัง",
+   "mat": "glow",
+   "n": 1
+  },
+  "light_xline_f1": {
+   "v": "60aa8ee2",
+   "desc": "Radiant Sovereign: เส้นแสงไขว้ X บนอก/หลัง",
+   "mat": "glow",
+   "n": 1
+  },
   "nature_root_tree_draft": {
    "v": "d9d4e23d",
    "desc": "ร่างทรงต้นไม้ใหญ่สำหรับสกิลรากยักษ์ — รอรีวิว",
@@ -6086,6 +6426,22 @@
    "v": "54808104",
    "desc": "HUD แถบ Heat: ลายไฟไหลในแถบตอน Heat เต็ม (ต่อขอบได้ เลื่อนไปตามแถบ)",
    "gen": "noise",
+   "kind": "loop",
+   "cols": 1,
+   "rows": 1
+  },
+  "light_crown": {
+   "v": "dd6fa54a",
+   "desc": "Radiant Sovereign: มงกุฎหนามสุริยะ ใบแหลมยาวไม่เท่ากัน กลางยาวสุด มีอัญมณีกลาง ฐานโค้ง ด้านขวาแตก มีเศษลอย • ภาพวาดด้วย python",
+   "gen": "image",
+   "kind": "loop",
+   "cols": 1,
+   "rows": 1
+  },
+  "light_wing": {
+   "v": "e0123455",
+   "desc": "Radiant Sovereign: ปีกแสงทอง ใบมีดยาวแยกกัน 5 ใบ (ref designs/light_ref/ult_god_ref2.webp) โคนอยู่ล่างซ้ายของภาพ • ภาพวาดด้วย python",
+   "gen": "image",
    "kind": "loop",
    "cols": 1,
    "rows": 1

@@ -1,0 +1,26 @@
+{
+ "v": 1,
+ "desc": "Radiant Sovereign: คริสตัล 6 ชิ้นเรียงบนวงแสงหลัง (หมุนตามเส้น)",
+ "mat": "glow",
+ "pal": "col",
+ "tags": [
+  "light"
+ ],
+ "parts": [
+  {
+   "id": "cr",
+   "k": "shard",
+   "h": 0.18,
+   "w": 0.09,
+   "sides": 4,
+   "rot": [
+    0,
+    0,
+    0
+   ],
+   "arr": 6,
+   "arrMode": "ring",
+   "arrR": 0.85
+  }
+ ]
+}
