@@ -48,7 +48,12 @@ function lgBaCore(S,on,a,b,fwd,w,now){
     S.bR=[new THREE.Mesh(new THREE.TorusGeometry(1,0.06,6,48,Math.PI*1.55),rm('#ffd36a')),new THREE.Mesh(new THREE.TorusGeometry(0.72,0.045,6,40,Math.PI*1.2),rm('#fff1c0'))];for(const r of S.bR)scene.add(r);}
   S.bC.visible=S.bEnd.visible=on;for(const g of S.bSp)g.visible=on;const wall=on&&S.bWall;for(const r of S.bR)r.visible=on&&!wall;if(S.bHot&&!wall)S.bHot.visible=S.bHotR.visible=false;if(!on)return;
   const len=a.distanceTo(b),side=new THREE.Vector3().crossVectors(fwd,new THREE.Vector3(0,1,0)).normalize(),up=new THREE.Vector3().crossVectors(side,fwd).normalize();
-  lgAim(S.bC,a,b);S.bC.scale.x=S.bC.scale.y=w*0.32*(1+0.12*Math.sin(now/35));
+  // ลำเต้นเป็นจังหวะ + ร้อนแล้วลำเปลี่ยน (ผู้ใช้ 2026-11-17): ใกล้เต็ม = แกนออกส้มขาว ลำสั่น ประกายร้อนแตกจากปากลำ
+  const hk=clamp(((S.bHeat||0)-0.6)/0.4,0,1),pl=1+0.16*Math.sin(now/150)+0.06*Math.sin(now/53);S.bPulse=pl;
+  if(hk>0){const j=w*0.35*hk;const o=side.clone().multiplyScalar((Math.random()-0.5)*j).addScaledVector(up,(Math.random()-0.5)*j);a=a.clone().add(o.clone().multiplyScalar(0.3));b=b.clone().add(o);
+    if(Math.random()<hk*0.5){const x=a.x/S3+MW/2,y=a.z/S3+MH/2;burst(x,y,Math.random()<0.5?'#ffb070':'#ff8a3a',2,120,0.25,1.8,{h:a.y,vh:[0,3],g:4});}}
+  lgAim(S.bC,a,b);S.bC.scale.x=S.bC.scale.y=w*0.32*pl*(1+0.25*hk)*(1+0.12*Math.sin(now/35));S.bC.material.color.copy(hdr('#fffbe8',1.7)).lerp(hdr('#ff8a30',1.3),hk);
+
   for(const g of S.bSp){const d=g.userData,u=(d.ph+now/450)%1,ang=d.o+u*9,r=w*1.3;
     g.position.copy(a).addScaledVector(fwd,u*len).addScaledVector(side,Math.cos(ang)*r).addScaledVector(up,Math.sin(ang)*r);g.scale.setScalar(0.12+w*0.6);g.material.opacity=Math.min(1,(1-u)*3)*0.9;}
   S.bEnd.position.copy(b);
@@ -598,7 +603,8 @@ function lightFX(o,p,pz,now,dt){
     o.g.position.y=o.lgY0+fl;o.g.updateWorldMatrix(true,false);}
   else{o.lgFlT=0;o.lgY0=undefined;}   // ตัวหันตามทิศลำแสงจริงเสมอ
   {const on=beam!==0&&alive,k=o.lgPose=(o.lgPose||0)+((on?1:0)-(o.lgPose||0))*Math.min(1,dt*(on?6:4));
-    if(k>0.01){const LP=LGPOSE;o.b.rotation.y+=LP.body*k;if(o.armR){o.armR.rotation.x=lerp(o.armR.rotation.x,LP.ax,k);o.armR.rotation.z=lerp(o.armR.rotation.z,LP.az-bp,k);}
+    if(k>0.01){const LP=LGPOSE;o.b.rotation.y+=LP.body*k;if(o.armR){o.armR.rotation.x=lerp(o.armR.rotation.x,LP.ax,k);o.armR.rotation.z=lerp(o.armR.rotation.z,LP.az-bp,k);
+        const ht=(L[16]||0)/100,hs=ht*ht*0.11*k;if(hs>0.002){const t=now;o.armR.rotation.x+=hs*(Math.sin(t/21)+0.6*Math.sin(t/13.7));o.armR.rotation.z+=hs*(Math.sin(t/17.3)+0.6*Math.sin(t/29));}}   // ไม้สั่นตามความร้อน (ผู้ใช้ 2026-11-17)
       o.b.updateWorldMatrix(true,true);}
     o.lgHeadYaw=k>0.01?LGPOSE.head*k:0;}
   if(o.tip){o.tip.getWorldPosition(_lgW);}else _lgW.copy(o.g.position).add(new THREE.Vector3(0,1.4,0));
@@ -633,11 +639,11 @@ function lightFX(o,p,pz,now,dt){
     const end=o.g.position.clone().addScaledVector(up,1.35).addScaledVector(fwd,len),axis=end.clone().sub(ringC);
     const visible=axis.dot(fwd)>0.01;
     S.ring.visible=S.beam.visible=visible;
-    if(visible){lgAim(S.beam,ringC,end);S.beam.scale.x=S.beam.scale.y=w*(empOn?1.45:1);}
+    if(visible){lgAim(S.beam,ringC,end);}
     _lgBeamM.uniforms.uT.value=now/1000;S.ring.position.copy(ringC);S.ring.lookAt(ringC.clone().add(fwd));S.ring.scale.setScalar(0.8+0.25*Math.sin(now/60));
-    axis.normalize();S.bWall=(L[18]|0)===1;
+    axis.normalize();S.bWall=(L[18]|0)===1;S.bHeat=(L[16]||0)/100;
     lgBaCore(S,visible,ringC,end,axis,w*(empOn?1.15:1),now);
-    lgEmpBeam(S,visible&&empOn,ringC,end,axis,w,now);
+    lgEmpBeam(S,visible&&empOn,ringC,end,axis,w,now);if(visible)S.beam.scale.x=S.beam.scale.y=w*(empOn?1.45:1)*(S.bPulse||1);   // ลำเต้นเป็นจังหวะ (S.bPulse จาก lgBaCore)
     LREQ.push({x:ringC.x,y:ringC.y,z:ringC.z,col:'#ffd36a',int:0.7,dist:4});
 }
   else if(S.beam){S.beam.visible=S.ring.visible=false;lgEmpBeam(S,false);lgBaCore(S,false);}
