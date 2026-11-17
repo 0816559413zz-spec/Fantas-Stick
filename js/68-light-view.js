@@ -43,13 +43,33 @@ function lgEmpFx(S,o,on,now,dt){   // ผู้ใช้ 2026-11-17: ไม่�
 function lgBaCore(S,on,a,b,fwd,w,now){
   if(!S.bC){S.bC=lgTube(new THREE.MeshBasicMaterial({color:hdr('#fffbe8',1.7),transparent:true,opacity:0.8,blending:THREE.AdditiveBlending,depthWrite:false}),1);S.bC.renderOrder=6;
     const T=LGV.glowT||(LGV.glowT=lgGlowTex());S.bSp=[];for(let i=0;i<10;i++){const g=new THREE.Sprite(new THREE.SpriteMaterial({map:T,color:hdr(i%2?'#ffe9a8':'#ffc24a',1.8),transparent:true,blending:THREE.AdditiveBlending,depthWrite:false}));g.userData={ph:i/10,o:Math.random()*6.283};scene.add(g);S.bSp.push(g);}
-    S.bEnd=new THREE.Sprite(new THREE.SpriteMaterial({map:T,color:hdr('#fff0c0',2.2),transparent:true,blending:THREE.AdditiveBlending,depthWrite:false}));scene.add(S.bEnd);}
-  S.bC.visible=S.bEnd.visible=on;for(const g of S.bSp)g.visible=on;if(!on)return;
+    S.bEnd=new THREE.Sprite(new THREE.SpriteMaterial({map:T,color:hdr('#fff0c0',2.2),transparent:true,blending:THREE.AdditiveBlending,depthWrite:false}));scene.add(S.bEnd);
+    const rm=c=>new THREE.MeshBasicMaterial({color:hdr(c,1.8),transparent:true,opacity:0.9,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide});
+    S.bR=[new THREE.Mesh(new THREE.TorusGeometry(1,0.06,6,48,Math.PI*1.55),rm('#ffd36a')),new THREE.Mesh(new THREE.TorusGeometry(0.72,0.045,6,40,Math.PI*1.2),rm('#fff1c0'))];for(const r of S.bR)scene.add(r);}
+  S.bC.visible=S.bEnd.visible=on;for(const g of S.bSp)g.visible=on;const wall=on&&S.bWall;for(const r of S.bR)r.visible=on&&!wall;if(S.bHot&&!wall)S.bHot.visible=S.bHotR.visible=false;if(!on)return;
   const len=a.distanceTo(b),side=new THREE.Vector3().crossVectors(fwd,new THREE.Vector3(0,1,0)).normalize(),up=new THREE.Vector3().crossVectors(side,fwd).normalize();
   lgAim(S.bC,a,b);S.bC.scale.x=S.bC.scale.y=w*0.32*(1+0.12*Math.sin(now/35));
   for(const g of S.bSp){const d=g.userData,u=(d.ph+now/450)%1,ang=d.o+u*9,r=w*1.3;
     g.position.copy(a).addScaledVector(fwd,u*len).addScaledVector(side,Math.cos(ang)*r).addScaledVector(up,Math.sin(ang)*r);g.scale.setScalar(0.12+w*0.6);g.material.opacity=Math.min(1,(1-u)*3)*0.9;}
-  S.bEnd.position.copy(b);S.bEnd.scale.setScalar((0.7+w*2.2)*(0.85+0.2*Math.sin(now/45)));}
+  S.bEnd.position.copy(b);
+  if(wall){   // ชนกำแพง/พื้น (ผู้ใช้ 2026-11-17): จุดร้อนเรืองทองติดผนัง + ประกายกระเด็น
+    S.bEnd.material.color.copy(hdr('#ffc04a',2.0));S.bEnd.scale.setScalar((0.7+w*2.4)*(0.85+0.25*Math.sin(now/40)));
+    if(!S.bHot){const T=LGV.glowT||(LGV.glowT=lgGlowTex());S.bHot=new THREE.Mesh(new THREE.CircleGeometry(1,32),new THREE.MeshBasicMaterial({map:T,color:hdr('#ffb238',2.2),transparent:true,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide}));
+      S.bHotR=new THREE.Mesh(new THREE.RingGeometry(0.8,1,40),new THREE.MeshBasicMaterial({color:hdr('#ffe08a',1.6),transparent:true,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide}));scene.add(S.bHot,S.bHotR);}
+    {const ex=b.x/S3+MW/2,ey=b.z/S3+MH/2,gnd=b.y-GY(ex,ey)<0.35,nrm=gnd?new THREE.Vector3(0,1,0):new THREE.Vector3(-fwd.x,0,-fwd.z).normalize();   // พื้น = นอนราบ • ผนัง = หันกลับหาคนยิง
+      const q=b.clone().addScaledVector(nrm,0.03);if(gnd)q.y=GY(ex,ey)+0.03;S.bHot.visible=S.bHotR.visible=true;
+      for(const m of [S.bHot,S.bHotR]){m.position.copy(q);m.lookAt(q.clone().add(nrm));}
+      S.bHot.scale.setScalar((0.55+w*2.2)*(0.9+0.15*Math.sin(now/45)));const u=(now/380)%1;S.bHotR.scale.setScalar((0.3+w*1.2)+u*(0.6+w*2));S.bHotR.material.opacity=0.8*(1-u);}
+    if(!S.bSpkT||now-S.bSpkT>55){S.bSpkT=now;const q=b.clone().addScaledVector(fwd,-0.15),x=q.x/S3+MW/2,y=q.z/S3+MH/2,ba=Math.atan2(fwd.z,fwd.x)+Math.PI;
+      burst(x,y,Math.random()<0.5?'#ffe08a':'#ffb347',5,220,0.4,3,{h:q.y+0.05,vh:[1.5,5],g:9,a:ba,spread:1.5});}
+    LREQ.push({x:b.x,y:b.y,z:b.z,col:'#ffb847',int:1.0,dist:4});}
+  else{   // สุดระยะ (ผู้ใช้ 2026-11-17 แบบลำน้ำ): ลูกแสงขาว + วงนีออนทอง 2 วงหมุนสวนกัน ลำไม่บานที่ปลาย
+    S.bEnd.material.color.copy(hdr('#fffbe8',2.4));S.bEnd.scale.setScalar((0.45+w*1.8)*(0.9+0.15*Math.sin(now/50)));
+    const R=0.22+w*1.9;for(let k=0;k<2;k++){const r=S.bR[k];r.position.copy(b);r.lookAt(b.clone().add(fwd));r.rotateZ((k?-1:1)*now/(k?160:220));r.scale.setScalar(R*(k?1:1)*(1+0.06*Math.sin(now/70+k)));}}}
+// คริสตัลหรี่ตอนร้อนเกิน (วัสดุแชร์ทุกคน → โคลนเป็นของคริสตัลชุดนี้ครั้งแรกที่ต้องใช้) • sp = แวบสว่างตอนชาร์จเสร็จ
+function lgCrDim(S,k,sp){if(!S.crOwn&&k<=0&&sp<=0)return;S.crOwn=1;
+  for(const c of S.cr)c.traverse(m=>{if(!m.material)return;if(!m.userData.lgB){m.material=m.material.clone();m.userData.lgB={op:m.material.opacity,ei:m.material.emissiveIntensity};}
+    const B=m.userData.lgB;m.material.opacity=B.op*(1-0.75*k);if(B.ei!==undefined)m.material.emissiveIntensity=B.ei*(1-0.85*k)*(1+2*sp);});}
 // ลำแสงตอนบัฟ Empower (ผู้ใช้ 2026-11-17): คลื่นวงแหวนวิ่งไปตามลำ + เส้นพลังพุ่งออกจากลำแล้วโค้งกลับเข้าลำ (เหมือนพลังล้นจนแตกออก)
 function lgEmpBeam(S,on,a,b,fwd,w,now){
   if(!S.ew){S.ew=[];S.ea=[];const tm=new THREE.MeshBasicMaterial({color:hdr('#ffe2a0',1.2),transparent:true,opacity:0.6,blending:THREE.AdditiveBlending,depthWrite:false});
@@ -538,6 +558,8 @@ function lightFX(o,p,pz,now,dt){
   {const k=S.empX?(now-S.empX)/1000:9;const base=(L[5]|0)===1?1.8:1.0;S.empR=S.empRr!=null?S.empRr:(k<1.6?base+0.6*Math.max(0,1-k/1.6)*Math.min(1,k/0.15):base);if(!o.empOn)S.empSp=(S.empSp||0)+dt*Math.max(0,3*(1-k/1.6));}
   const empOn=(L[5]|0)===1;if(empOn)S.empSp=(S.empSp||0)+dt*3.5;if(empOn&&S.allyId!=null)LGV.empA[S.allyId]=now;   // ระหว่างบัฟ คริสตัลหมุนเร็วขึ้น + คริสตัลที่เพื่อนเรือง
   lgEmpFx(S,o,empOn,now,dt);
+  {const oh=(L[17]|0)===1;if(S.ohOn&&!oh){S.ohEnd=now;for(const c of S.cr)if(c.visible){const P=c.position;fxPlay('light/crystal_in',{x:P.x/S3+MW/2,y:P.z/S3+MH/2,h:P.y-GY(P.x/S3+MW/2,P.z/S3+MH/2),aim:false,s:0.6});}}S.ohOn=oh;   // ร้อนเกิน: คริสตัลหรี่+ห้อยต่ำ 2 วิ → ครบแล้วหมุนตัวเองแวบ = พร้อมยิง
+    S.ohK=clamp((S.ohK||0)+(oh?dt/0.25:-dt/0.5),0,1);const sp=S.ohEnd?clamp(1-(now-S.ohEnd)/700,0,1):0;S.crSpin=(S.crSpin||0)+dt*sp*sp*28;lgCrDim(S,S.ohK,sp);}
   // ---------- คริสตัลกับตัว ----------
   while(S.cr.length<3){const c=lgCrystalMesh(1);scene.add(c);S.cr.push(c);}
   const beam=L[4]|0,ba=L[10]||0,shOn=L[11]|0,bp=beam!==0?(L[13]||0):0;
@@ -573,7 +595,7 @@ function lightFX(o,p,pz,now,dt){
     if(shOn){   // โล่: คริสตัลเรียงสามเหลี่ยมกลางกำแพงรังผึ้ง (ด้านนอก)
       const a=p.a||0,sx=(i-(n-1)/2)*(n>2?2.2:1.3),sy=1.75+0.12*Math.sin(S.t*2+i);P=o.g.position.clone().add(new THREE.Vector3(Math.cos(a)*(LGSH.R-0.6)-Math.sin(a)*sx,sy,Math.sin(a)*(LGSH.R-0.6)+Math.cos(a)*sx));if(S.shGl){const g=S.shGl[i];g.visible=true;g.position.copy(c.position);g.scale.setScalar(1.5+0.2*Math.sin(S.t*5+i));}c.scale.setScalar(2.2);c.traverse(m=>m.renderOrder=12);   // คริสตัลหลังกำแพง ส่องแสง
       if(i<2)LREQ.push({x:P.x,y:P.y,z:P.z,col:'#ffc04a',int:1.1,dist:4});c.rotation.y+=dt*2;}
-    else{const a=S.t*0.9+i*Math.PI*2/3+(S.empSp||0),er=S.empR||1.0;P=o.g.position.clone().add(new THREE.Vector3(Math.cos(a)*er,1.45+0.08*Math.sin(S.t*2+i),Math.sin(a)*er));c.rotation.y=S.t*1.5;}
+    else{const a=S.t*0.9+i*Math.PI*2/3+(S.empSp||0),er=S.empR||1.0;P=o.g.position.clone().add(new THREE.Vector3(Math.cos(a)*er,1.45-0.3*(S.ohK||0)+0.08*Math.sin(S.t*2+i),Math.sin(a)*er));c.rotation.y=S.t*1.5+(S.crSpin||0);}
     if(S.crSnap)c.position.copy(P);else c.position.lerp(P,Math.min(1,dt*14));}
   S.crSnap=0;
   // ---------- ลำแสง ----------
@@ -584,7 +606,7 @@ function lightFX(o,p,pz,now,dt){
     const kick=Math.max(0,1-(now-(S.fireT||0))/220),len=(L[9]||600)*S3,w=[0.058,0.115,0.185,0.3][Math.min(3,beam-1)]*(1+1.6*kick*kick);S.pb=beam;
     const end=ringC.clone().addScaledVector(fwd,len);S.beam.visible=S.ring.visible=true;lgAim(S.beam,ringC,end);S.beam.scale.x=S.beam.scale.y=w;
     _lgBeamM.uniforms.uT.value=now/1000;S.ring.position.copy(ringC);S.ring.lookAt(end);S.ring.scale.setScalar(0.8+0.25*Math.sin(now/60));
-    lgBaCore(S,true,ringC,end,fwd,w*(empOn?1.15:1),now);
+    S.bWall=(L[18]|0)===1;lgBaCore(S,true,ringC,end,fwd,w*(empOn?1.15:1),now);
     lgEmpBeam(S,empOn,ringC,end,fwd,w,now);if(empOn){S.beam.scale.x=S.beam.scale.y=w*1.45;}   // บัฟ: คลื่นวิ่งตามลำ + สายพลังแตกออกจากลำแล้วโค้งกลับเข้าลำ
     LREQ.push({x:ringC.x,y:ringC.y,z:ringC.z,col:'#ffd36a',int:0.7,dist:4});
 }
@@ -656,7 +678,7 @@ function lightFX(o,p,pz,now,dt){
     LREQ.push({x:P.x,y:P.y+0.6,z:P.z,col:'#ffc04a',int:0.7*k,dist:8});}
   else if(S.veil){S.veil.visible=S.veilR.visible=S.veilF.visible=false;}
 }
-function lgBaseObjects(s){return [...s.cr,...s.ally,s.beam,s.ring,s.shF,s.shE,s.shG,s.orbT,s.aura,s.lkHead,...(s.ew||[]),...(s.ea||[]),...(s.shGl||[]),...(s.mote||[]).map(M=>M.g),s.link,s.prism,s.san,s.sanR,s.sanF,s.sanWv,...(s.sanO||[]),...(s.sanM||[]).map(M=>M.g),...(s.sanTw||[]).map(M=>M.g),s.veil,s.veilR,s.veilF,...(s.eMo||[]),s.eTip,s.bC,s.bEnd,...(s.bSp||[]),...(s.eTr||[])];}
+function lgBaseObjects(s){return [...s.cr,...s.ally,s.beam,s.ring,s.shF,s.shE,s.shG,s.orbT,s.aura,s.lkHead,...(s.ew||[]),...(s.ea||[]),...(s.shGl||[]),...(s.mote||[]).map(M=>M.g),s.link,s.prism,s.san,s.sanR,s.sanF,s.sanWv,...(s.sanO||[]),...(s.sanM||[]).map(M=>M.g),...(s.sanTw||[]).map(M=>M.g),s.veil,s.veilR,s.veilF,...(s.eMo||[]),s.eTip,s.bC,s.bEnd,s.bHot,s.bHotR,...(s.bSp||[]),...(s.bR||[]),...(s.eTr||[])];}
 function lgClearBase(s){for(const m of lgBaseObjects(s))if(m)m.visible=false;}
 function lgClear(s){
   lgClearBase(s);
@@ -730,6 +752,8 @@ function lightEfx(ev){
       if(S&&S.sanO&&o){S.sanO.forEach((c,i)=>{if(!c.visible)return;const from=c.position.clone(),to=o.g.position.clone().add(new THREE.Vector3(Math.cos(i*2.1),1.45,Math.sin(i*2.1)));later(0.05+i*0.06,()=>lgBlip(from,to));});}
       return true;}
     case 'lgveil':{const o=PM3.get(ev.id),a=o?o.g.position.clone().add(new THREE.Vector3(0,1.4,0)):lgWorld(x,y,1.4);if(o){o.stOn=1;o.stT=0;o.stF=0;o.stEv={x,y,r:ev.r};}else lgArcFx(a,lgWorld(x,y,0.4),0.35,1.5);if(near)snd('cast_pull',ev);return true;}
+    case 'lgoh':{const S=LGV.st.get(ev.id);if(S)for(const c of S.cr)if(c.visible){const P=c.position,x=P.x/S3+MW/2,y=P.z/S3+MH/2;burst(x,y,'#ffb347',8,120,0.45,2.6,{h:P.y,vh:[0.5,3],g:2});burst(x,y,'#9a8a78',4,40,0.7,4,{h:P.y,vh:[1,2],g:-1});}
+      if(ev.id===NET.myId)shake(0.15);break;}
     case 'lgveilhit':for(const id of ev.ids||[]){const o=PM3.get(id);if(o)fxPlay('light/bolt_hit',{x:o.g.position.x/S3+MW/2,y:o.g.position.z/S3+MH/2,h:1,s:0.7,aim:false});}return true;
     case 'lgveilarm':if(near)snd('buff',ev);return true;
     case 'lgveilboom':{const P=lgWorld(x,y,0),col=new THREE.Mesh(new THREE.CylinderGeometry(0.6,0.8,6,24,1,true),new THREE.MeshBasicMaterial({color:hdr('#fff1c0',2),transparent:true,opacity:0.8,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide}));
@@ -783,3 +807,22 @@ function lightHeadPose(o){
   const y=o.lgHeadYaw||0;if(Math.abs(y)<0.005){o.lgHeadSet=null;return;}
   o.lgHeadBase=(o.lgHeadBase||new THREE.Quaternion()).copy(hb.quaternion);
   hb.quaternion.multiply(_lgHq.setFromAxisAngle(_lgHy,y));o.lgHeadSet=(o.lgHeadSet||new THREE.Quaternion()).copy(hb.quaternion);}
+// เกจร้อน BA รอบเป้าเล็ง (ผู้ใช้ 2026-11-17): โค้งด้านล่างเป้า ทอง→ส้ม→แดงตามความร้อน • ร้อนเกิน = แดงกะพริบ ลดลงจนชาร์จเสร็จ
+const LGHUD={h:0,a:0};
+function drawLightHud(x,y,L){
+  const tgt=(L[16]||0)/100,oh=(L[17]|0)===1,dt=1/60;LGHUD.h+=(tgt-LGHUD.h)*Math.min(1,dt*12);
+  LGHUD.a=clamp(LGHUD.a+((LGHUD.h>0.01||oh)?dt/0.15:-dt/0.4),0,1);if(LGHUD.a<=0)return;
+  const h=LGHUD.h,R=112,cX=x-52,lo=0.47,hi=-0.47,sp=lo-hi,T=performance.now();   // โค้งด้านขวาเป้า ห่างออกมา (ผู้ใช้ 2026-11-17) • ธีมแสง: ทองเรือง + แกนขาว • เปลี่ยนสีแค่ใกล้เต็ม/ร้อนเกิน
+  const P=t=>[cX+Math.cos(t)*R,y+Math.sin(t)*R],dia=(t,r,c)=>{const [px,py]=P(t);cx.fillStyle=c;cx.beginPath();cx.moveTo(px,py-r*1.6);cx.lineTo(px+r,py);cx.lineTo(px,py+r*1.6);cx.lineTo(px-r,py);cx.closePath();cx.fill();};
+  cx.save();cx.globalAlpha=LGHUD.a;cx.lineCap='round';
+  cx.strokeStyle='rgba(20,14,4,0.45)';cx.lineWidth=7;cx.beginPath();cx.arc(cX,y,R,hi,lo);cx.stroke();
+  cx.strokeStyle='rgba(255,226,150,0.28)';cx.lineWidth=1.2;cx.beginPath();cx.arc(cX,y,R,hi,lo);cx.stroke();
+  const col=oh?`rgb(255,${70+40*Math.sin(T/80)},50)`:h<0.85?'#ffd36a':'#ffa03a';
+  if(h>0.005){const t0=lo-sp*h;cx.shadowColor=col;cx.shadowBlur=oh?14:10;
+    cx.strokeStyle=col;cx.lineWidth=4.5;cx.beginPath();cx.arc(cX,y,R,t0,lo);cx.stroke();
+    cx.shadowBlur=0;cx.strokeStyle=oh?'rgba(255,220,200,0.9)':'rgba(255,250,230,0.95)';cx.lineWidth=1.6;cx.beginPath();cx.arc(cX,y,R,t0,lo);cx.stroke();
+    cx.shadowColor=col;cx.shadowBlur=12;dia(t0,3.2+0.8*Math.sin(T/90),'#fffbe8');}   // ประกายเพชรที่ปลายเกจ
+  cx.shadowBlur=0;dia(lo,2.6,'rgba(255,226,150,0.7)');   // คริสตัลเล็กปิดท้ายล่าง
+  {const [tx,ty]=P(hi-0.11),r=4.2+0.5*Math.sin(T/260);cx.save();cx.translate(tx,ty);cx.rotate(T/1400);cx.shadowColor=oh?'#ff6a3a':'#ffd36a';cx.shadowBlur=8;   // ดาวแสง 4 แฉกลอยเหนือปลายบนของเกจ (ไม่ติดเส้น)
+    cx.fillStyle=oh?'rgba(255,170,140,0.95)':'rgba(255,244,205,0.95)';cx.beginPath();for(let i=0;i<8;i++){const a=i*Math.PI/4,q=i%2?r*0.32:r;cx.lineTo(Math.cos(a)*q,Math.sin(a)*q);}cx.closePath();cx.fill();cx.restore();}
+  cx.restore();}

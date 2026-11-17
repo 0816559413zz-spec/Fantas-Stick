@@ -10,7 +10,7 @@ ICONS.add('radiantsovereign');
 PATHS.push({id:'light',n:'สายแสง',ic:'✨',col:'#ffe9a8',d:'ซัพพอร์ตคู่หู — แบ่งคริสตัล 3 ชิ้นให้ตัวเองหรือเพื่อนที่ลิงก์ ยิงลำแสง ฮีลพื้นที่ วางกับดักล่องหน',
   combo:'Crystal Bond ส่งคริสตัลให้เพื่อน (กัน/ตีแรงขึ้น) • เก็บไว้เอง = ลำแสง/โล่แรงสุด • Empower Light บัฟทั้งเราและเพื่อน • Light Step วาร์ปไปหาเพื่อน ให้โล่ลดดาเมจ'});
 const LTV=PATHS[LIGHTP].v={max:3,linkR:750,linkPick:160,sendT:0.3,holdT:0.4,allyDR:0.05,allyDmg:0.05,
-  baRange:600,baCharge:1.6,baFloat:0.5,baRise:1.5,baMove:0.5,ba0:[5,1.0],ba1:[5,0.7],ba2:[8,0.6],ba3:[10,0.6],baW:[10,14,18,22],
+  baRange:600,baCharge:1.6,heatT:10,heatIdle:2,heatDrain:2,ohT:2,baFloat:0.5,baRise:1.5,baMove:0.5,ba0:[5,1.0],ba1:[5,0.7],ba2:[8,0.6],ba3:[10,0.6],baW:[10,14,18,22],
   shHp:[0,120,180,300],shReg:0.45,
   dsDist:250,dsAllyR:900,dsPick:180,dsCd:8,dsDmg:15,dsR:150,dsDR:0.3,dsDRT:2,
   prismT:20};
@@ -60,6 +60,7 @@ function lightTick(p,dt){
   // ลอยขึ้น 0.5 ม. ตอนชาร์จ/ยิงลำแสง (มีคริสตัล)
   if(p.lgBeam!==0&&(p.lc|0)>0){const g=groundH(p.x,p.y,p.z),tg=g+LTV.baFloat;p.lgFl=Math.min(1,(p.lgFl||0)+dt/LTV.baRise);const u=p.lgFl,e=u*u*u*(u*(u*6-15)+10);p.z=g+LTV.baFloat*e;p.vz=0;p.hover=0.15;}
   if(p.lgBeam===0)p.lgFl=0;
+  lightHeatTick(p,dt);   // เกจร้อน BA เดินทุกเฟรม (ตอนกางโล่ด้วย)
   lightSkillsTick(p,dt);
 }
 function lightSlotOf(p,id){const i=p.kitIds?p.kitIds.indexOf(id):-1;return i<0?null:SLOTK[i];}
@@ -68,6 +69,22 @@ function lightBeamAng(p){const i=p.inp;return i&&Number.isFinite(i.ax)&&Math.hyp
 // เล็งขึ้น/ลง (ผู้ใช้ 2026-11-16): มุมก้มเงยจากความสูงที่เล็ง (inp.ah) — 1 ม. = 20 หน่วย
 function lightBeamPitch(p){const i=p.inp;if(!i||p.bot||!Number.isFinite(i.ah)||!Number.isFinite(i.ax))return 0;
   return clamp(Math.atan2((i.ah-(p.z+1.35))*20,Math.max(1,Math.hypot(i.ax-p.x,i.ay-p.y))),-1.2,1.2);}
+// ลำ BA หยุดที่กำแพง/หิน/บ้าน/ตึก/พื้น (เงื่อนไขเดียวกับ waterBeamStop) • คืนระยะตามลำ (3 มิติ)
+function lightBeamStop(p,a,pt,max){const c=Math.cos(a)*Math.cos(pt),s=Math.sin(a)*Math.cos(pt),rise=Math.sin(pt)/20,h0=p.z+1.35;
+  for(let d=8;d<max;d+=8){const x=p.x+c*d,y=p.y+s*d,ha=h0+rise*d,hh=ha-terrT(x,y);
+    if(x<40||x>MW-40||y<40||y>MH-40||hh<=0||ha<=groundH(x,y,ha)||(TERR&&terrSolid(x,y,hh)))return d;
+    for(const o of sgNear(sgObs(),x,y,8,_sgPO))if(o.bi===undefined&&!(o.bot!==undefined&&hh<o.bot)&&(o.top!==undefined?ha<o.top:hh<o.hgt)&&(x-o.x)**2+(y-o.y)**2<(o.r+8)**2)return d;
+    if(BLDG.length)for(const b of sgNear(sgBld(),x,y,8,_sgPB))if(bldNear(b,x,y,8)&&bldPieceAt(b,x,y,hh,8)>=0)return d;
+    for(const w of G.walls)if(p.team!==w.team&&hh<w.hgt&&(x-w.x)**2+(y-w.y)**2<(w.r+8)**2)return d;
+    if(citySolidAt(x,y,hh))return d;}
+  return max;}
+// เกจร้อน BA (ผู้ใช้ 2026-11-17): ยิงจริง (มีคริสตัล) 10 วิ = เต็ม → คริสตัลชาร์จใหม่ 2 วิ ยิงไม่ได้ • ปล่อยยิง 2 วิ แล้วเกจค่อยลด (เต็ม→0 ใน 2 วิ)
+function lightHeatTick(p,dt){
+  if(p.lgOH>0){p.lgOH-=dt;p.lgHeat=Math.max(0,p.lgOH/LTV.ohT);if(p.lgOH<=0){p.lgOH=0;p.lgHeat=0;p.lgHI=0;p.lgChg=LTV.baCharge;}p.lgFiring=0;return true;}
+  if(p.lgFiring){p.lgHI=0;p.lgHeat=Math.min(1,(p.lgHeat||0)+dt/LTV.heatT);
+    if(p.lgHeat>=1){p.lgOH=LTV.ohT;p.lgChg=0;p.lgBaT=0;emit({k:'efx',z:'lgoh',x:Math.round(p.x),y:Math.round(p.y),h:p.z,id:p.id});p.lgFiring=0;return true;}}
+  else{p.lgHI=(p.lgHI||0)+dt;if(p.lgHI>LTV.heatIdle)p.lgHeat=Math.max(0,(p.lgHeat||0)-dt/LTV.heatDrain);}
+  p.lgFiring=0;return false;}
 function lightBeamHits(p,len,w,pierce){
   const a=lightBeamAng(p),pt=lightBeamPitch(p),c=Math.cos(a),s=Math.sin(a),cp=Math.cos(pt),tp=Math.tan(pt),h0=p.z+1.35,out=[];
   let fl=len*cp;if(pt<-0.02){const g=groundH(p.x,p.y,p.z);fl=Math.min(fl,Math.max(0,(h0-g)*20/-tp));}   // ลำแสงชนพื้น
@@ -75,17 +92,18 @@ function lightBeamHits(p,len,w,pierce){
     const bh=h0+tp*f/20,tz=t.z||0;if(bh<tz-0.3-w/20||bh>tz+2.1+w/20)continue;out.push([f,t]);}
   out.sort((x,y)=>x[0]-y[0]);return pierce?out.map(x=>x[1]):out.slice(0,1).map(x=>x[1]);}
 function lightBasic(p,inp,dt,setCd){
-  p.lgBeam=0;
+  p.lgBeam=0;p.lgBeamW=0;
+  if(p.lgOH>0){p.lgChg=0;p.lgBaT=0;return;}   // ร้อนเกิน: คริสตัลกำลังชาร์จใหม่
   if(p.shieldOn||p.lgUlt||p.lgVol){p.lgChg=0;return;}
   if(!inp.fire){p.lgBaT=0;p.lgChg=0;return;}
   const n=Math.max(0,Math.min(3,p.lc|0)),T=[LTV.ba0,LTV.ba1,LTV.ba2,LTV.ba3][n],emp=p.lgEmp>G.time;
   // มีคริสตัล: ชาร์จ 0.8 วิ (ลอยขึ้น 0.5 ม. คริสตัลเรียงเป็นวงหน้าไม้) แล้วค่อยยิง • 0 ชิ้น = ยิงทันทีจากไม้ ไม่ลอย
   if(n>0&&(p.lgChg||0)<LTV.baCharge){p.lgChg=(p.lgChg||0)+dt;p.lgBeam=-1;p.lgBeamA=lightBeamAng(p);p.lgBeamP=lightBeamPitch(p);return;}
   const rate=emp?1+0.1*n:1,len=LTV.baRange+(emp?50*n:0),w=LTV.baW[n]*(emp?1+0.15*n:1);
-  p.lgBeam=1+n;p.lgBeamA=lightBeamAng(p);p.lgBeamP=lightBeamPitch(p);{const pt=p.lgBeamP;p.lgBeamL=pt<-0.02?Math.min(len,Math.max(0,(p.z+1.35-groundH(p.x,p.y,p.z))*20/Math.sin(-pt))):len;}
+  p.lgBeam=1+n;p.lgBeamA=lightBeamAng(p);p.lgBeamP=lightBeamPitch(p);p.lgBeamL=lightBeamStop(p,p.lgBeamA,p.lgBeamP,len);p.lgBeamW=p.lgBeamL<len-1?1:0;if(n>0)p.lgFiring=1;
   p.lgBaT-=dt;if(p.lgBaT>0)return;
   p.lgBaT=T[1]/rate;
-  const hits=lightBeamHits(p,len,w,n===0);
+  const hits=lightBeamHits(p,p.lgBeamL,w,n===0);
   for(const t of hits){damage(t,T[0],p.id,'aoe');emit({k:'efx',z:'lgbahit',x:Math.round(t.x),y:Math.round(t.y),h:cH(t),n,id:p.id});}
 }
 // ---------- Dash Light Step: วาร์ป 250 ตามทิศเดิน • เล็งคู่หู (ไม่เกิน 900) = วาร์ปไปข้างคู่หู ระเบิด 15 r150 + คู่หูลดดาเมจ 30% 2 วิ • 1 ชาร์จ ----------
@@ -111,7 +129,7 @@ function lightSnapP(p){if(!lgOn(p)&&!(p.lgN>0)&&!p.lgUltWard)return undefined;
   const pos=lgOn(p)?lightLinkPos(p):null,a=lgOn(p)?lightAlly(p):null;
   return [p.lc|0,a?a.id:p.lgA==='prism'?'P':0,pos?[Math.round(pos.x),Math.round(pos.y)]:0,p.lgN|0,p.lgBeam|0,p.lgEmp>G.time?1:0,p.lgDch>=1?1:0,
     p.lgSan?[Math.round(p.lgSan.x),Math.round(p.lgSan.y),p.lgSan.n|0]:0,p.lgVeil?[Math.round(p.lgVeil.x),Math.round(p.lgVeil.y),Math.round(p.lgVeil.t*10)]:0,p.lgBeamL|0,Math.round((p.lgBeamA||p.ang||0)*100)/100,p.shieldOn?1:0,Math.round((p.lgChg||0)*100)/100,Math.round((p.lgBeamP||0)*100)/100,
-    p.lgUlt?lightUltSnap(p.lgUlt):0,p.lgUltWard?1:0];}
+    p.lgUlt?lightUltSnap(p.lgUlt):0,p.lgUltWard?1:0,Math.round((p.lgHeat||0)*100),p.lgOH>0?1:0,p.lgBeamW|0];}
 // ---------- สกิล ----------
 function lightSkillsTick(p,dt){
   const V=p.lgVol;   // Shard Volley: คริสตัลหยุดที่จุด → หมุนชาร์จ → ระเบิด → บินกลับ

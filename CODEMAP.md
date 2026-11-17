@@ -99,18 +99,18 @@ WRATH_READY_T:221 WRATH_THROW_SWING_T:222 WRATH_DRAW_T:223 WRATH:224 earthWrathA
 §286 ทั้งสนาม: สิ่งก่อสร้างพัง / ฝุ่นหมดเวลา / Stonebreaker ชนกำแพง
 updateEarth:287 earthSnapP:297 earthSnapW:313
 
-## js/09-light.js (354) — 
+## js/09-light.js (372) — 
 LIGHTP:8 LTV:12 lgOn:19 lightReset:20 lightAlly:25 lightLinkPos:26 lightUnlink:27
 §31 สกิล 1 Crystal Bond: เล็งเพื่อน + กด = ลิงก์และส่ง 1 ชิ้น • ไม่เล็งเพ…
 lightBondTap:32 lightRecall:47
 §48 ทุกเฟรม
-lightTick:49 lightSlotOf:65
-§66 BA Prism Ray: กดค้าง = ลำแสง • 0 ชิ้น = ลำบางทะลุ 5/1 วิ • 1/2/3 ชิ้น…
-lightBeamAng:67 lightBeamPitch:69 lightBeamHits:71 lightBasic:77
-§91 Dash Light Step: วาร์ป 250 ตามทิศเดิน • เล็งคู่หู (ไม่เกิน 900) = วาร…
-lightDash:92 lightDmgOut:108 lightDmgIn:109 lightSnapP:110
-§115 สกิล
-lightSkillsTick:116 LIGHT_FORM_BASE:136 LIGHT_FORM_SCALE:137 LIGHT_FORM_PIVOT:138 lightFormAngles:139 lightFormRecoil:144 lightFormHand:149 LIGHT_FORM_ARMS:156 lightArmRest:165 _lightArmWork:166 lightArmPose:168 lightArmAim:186 lightUltSnap:193 lightUltEnd:199 _lightFormAngles:212 _lightFormTurn:212 _lightFormHand:212 lightUltOrigin:213 lightUltRay:223 lightUltBeamHit:230 lightUltFinish:244 lightUltTick:252 lightSanEnd:303 lightAimPt:304 LT_BOND:306 LT_VO:309 LT_EM:314 LT_SC:317 LT_VS_S:321 LT_VS:324 LT_UL:325 lightAllyHit:343 lightQueueTick:346
+lightTick:49 lightSlotOf:66
+§67 BA Prism Ray: กดค้าง = ลำแสง • 0 ชิ้น = ลำบางทะลุ 5/1 วิ • 1/2/3 ชิ้น…
+lightBeamAng:68 lightBeamPitch:70 lightBeamStop:73 lightHeatTick:82 lightBeamHits:88 lightBasic:94
+§109 Dash Light Step: วาร์ป 250 ตามทิศเดิน • เล็งคู่หู (ไม่เกิน 900) = วาร…
+lightDash:110 lightDmgOut:126 lightDmgIn:127 lightSnapP:128
+§133 สกิล
+lightSkillsTick:134 LIGHT_FORM_BASE:154 LIGHT_FORM_SCALE:155 LIGHT_FORM_PIVOT:156 lightFormAngles:157 lightFormRecoil:162 lightFormHand:167 LIGHT_FORM_ARMS:174 lightArmRest:183 _lightArmWork:184 lightArmPose:186 lightArmAim:204 lightUltSnap:211 lightUltEnd:217 _lightFormAngles:230 _lightFormTurn:230 _lightFormHand:230 lightUltOrigin:231 lightUltRay:241 lightUltBeamHit:248 lightUltFinish:262 lightUltTick:270 lightSanEnd:321 lightAimPt:322 LT_BOND:324 LT_VO:327 LT_EM:332 LT_SC:335 LT_VS_S:339 LT_VS:342 LT_UL:343 lightAllyHit:361 lightQueueTick:364
 
 ## js/09-nature-ba.js (122) — 
 NATURE_BA_TEST:2 NATURE_WHIP:3 natureWhipEnabled:4 NAT_SLAM:8 NAT_LINE:8 natureEmpNear:9 natureEmpHit:10 natureWhipHit:18 natureWhipBasic:41 NW_RINGS:65 NW_SIDES:65 nwPhase:66 nwEase:67 nwSwingAngle:68 natureWhipPose:74 natureWhipVisualMake:83 natureWhipView:105
@@ -393,7 +393,7 @@ iceMat:2 iceRim:3 makeIceSword:4 makeIceAxe:23 makeKiteShield:39
 §51 อาวุธน้ำแข็งลอย (ผู้ใช้ 2026-10-22: "ร่ายคาถาให้ดาบฟันเอง ระยะเท่าเดิ…
 makeIceCrown:55 frostCrown:60 FWS:66 FWA:66 _fwM:67 _fwM2:67 _fwX:67 _fwY:67 _fwZ:67 _fwP:67 _fwS:67 _fwQ:67 _eo:68 _ei:68 _ss:68 fwAim:70 fwWeapons:71 FWP:73 FWT:73 fwChop:74 fwSweep:75 FF_RISE:76 fwIdle:77 fwSwing:80 FWL_N:92 fwLink:93 fwMat:96 frostFX:97
 
-## js/35-sync.js (614) — ซิงก์ผู้เล่น/ศัตรู/ลูกเวทจาก snapshot + ฉายตำแหน่งลงจอ (ป้ายชื่อ/ตัวเ…
+## js/35-sync.js (615) — ซิงก์ผู้เล่น/ศัตรู/ลูกเวทจาก snapshot + ฉายตำแหน่งลงจอ (ป้ายชื่อ/ตัวเ…
 §2 ท่าร่ายคาถาแบบนักเวทในหนัง Harry Potter (ผู้ใช้ 2026-10-22: "ยิงปกติท…
 CPOSE_T:7 _ce:7 _cs:7 _cb:7 AMP_B:9 AMP_S:9 CP_BEND:10 CPOSE:12 _cpT:20 _cpR:20 CGUARD:20 CP_STEP:21 CPCOL:22 castStyle:23 castStart:24
 §25 ท่าร่ายสกิล / อัลติ / โล่ (ผู้ใช้ 2026-10-22: "เกือบทุกสกิลควรมีการเห…
@@ -730,10 +730,10 @@ BACKDROP:8
 §66 noise เล็ก ๆ (คงที่ต่อ seed)
 bdHash:67 bdNoise:68 bdFbm:69 bdEdge:71 bdRing:73 bdPaint:79 bdTree:82 buildBackdrop:89 bdTower:135 backdropHide:139
 
-## js/68-light-view.js (785) — 
-LGV:7 LGSH:9 LGSH_L:11 _lgM4:14 _lgQ:14 _lgSV:14 _lgS:14 _lgC:14 _lgC2:14 lgGlowTex:15 lgNeon:17 lgEmpFx:25 lgBaCore:43 lgEmpBeam:54 lgNeonCrystal:67 lgHoneyTex:78 lgShield:82 lightShieldEv:114 LGPOSE:117 _lgGlass:118 _lgCore:118 _lgGeo:118 _lgEdge:118 _lgEdgeM:118 lgCrystalMesh:120 lgState:128 _lgV:129 _lgW:129 lgWorld:130 LG_ULT_ASSET:133 LG_CRYSTAL_ASSET:133 LG_ULT_TIME:134 lgUltMaterials:135 lgSovereignFinishes:136 lgSovereignMaterials:137 lgSovereignFinish:190 lgSovereignCrystal:206 lgSkinSovereign:215 lgPoseSovereign:253 lgSovereignRibbon:283 lgSovereignCrossSparks:312 lgBuildSovereign:335 lgReturnMark:379 lgUltVisual:384 lgWardVisual:458 _lgBeamM:474 lgBeamMat:475 _lgUltBeamM:478 lgUltBeamMat:479 _lgLinkM:484 lgLinkMat:485 lgTube:488 lgAim:489 lightFX:490 lgBaseObjects:659 lgClearBase:660 lgClear:661 lightDropView:665
-§670 เหตุการณ์
-lgBlip:672 lgArcFx:676 lgFlyFx:679 lightFxTick:680 lightEfx:684 _lgHq:762 _lgHy:762 lgProcHead:764 lightHeadPose:779
+## js/68-light-view.js (828) — 
+LGV:7 LGSH:9 LGSH_L:11 _lgM4:14 _lgQ:14 _lgSV:14 _lgS:14 _lgC:14 _lgC2:14 lgGlowTex:15 lgNeon:17 lgEmpFx:25 lgBaCore:43 lgCrDim:70 lgEmpBeam:74 lgNeonCrystal:87 lgHoneyTex:98 lgShield:102 lightShieldEv:134 LGPOSE:137 _lgGlass:138 _lgCore:138 _lgGeo:138 _lgEdge:138 _lgEdgeM:138 lgCrystalMesh:140 lgState:148 _lgV:149 _lgW:149 lgWorld:150 LG_ULT_ASSET:153 LG_CRYSTAL_ASSET:153 LG_ULT_TIME:154 lgUltMaterials:155 lgSovereignFinishes:156 lgSovereignMaterials:157 lgSovereignFinish:210 lgSovereignCrystal:226 lgSkinSovereign:235 lgPoseSovereign:273 lgSovereignRibbon:303 lgSovereignCrossSparks:332 lgBuildSovereign:355 lgReturnMark:399 lgUltVisual:404 lgWardVisual:478 _lgBeamM:494 lgBeamMat:495 _lgUltBeamM:498 lgUltBeamMat:499 _lgLinkM:504 lgLinkMat:505 lgTube:508 lgAim:509 lightFX:510 lgBaseObjects:681 lgClearBase:682 lgClear:683 lightDropView:687
+§692 เหตุการณ์
+lgBlip:694 lgArcFx:698 lgFlyFx:701 lightFxTick:702 lightEfx:706 _lgHq:786 _lgHy:786 lgProcHead:788 lightHeadPose:803 LGHUD:811 drawLightHud:812
 
 ## js/68-nature-art.js (171) — 
 naturePlantArt:2 Turret:3 auraTextures:44 auraTex:45 LotusAura:88 glowWallTex:92 M_BUB:95 M_BUBRIM:96 M_DRIP:97 M_POOL:98 lotusPetalVeins:100 Lotus:127
@@ -822,4 +822,4 @@ surfSync:49 surfQuality:53
 SURF_VS:55 SURF_VS_BODY:56 SURF_FS:67 SURF_FS_BODY:68 surfOk:98 surfApply:99 surfScene:111
 §112 ปรับค่า (tune.html / F8)
 
-(100 files, 27847 lines)
+(100 files, 27909 lines)
