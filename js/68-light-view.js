@@ -21,6 +21,35 @@ function lgNeon(o,k){
     for(const m of src){const n=m.isSkinnedMesh?new THREE.SkinnedMesh(m.geometry,o.lgNeonM):new THREE.Mesh(m.geometry,o.lgNeonM);if(m.isSkinnedMesh)n.bind(m.skeleton,m.bindMatrix);
       n.userData.lgNeon=1;n.position.copy(m.position);n.quaternion.copy(m.quaternion);n.scale.copy(m.scale).multiplyScalar(1.03);n.renderOrder=5;n.frustumCulled=false;m.parent.add(n);o.lgNeon.push(n);}}
   o.lgNeonM.opacity=k;for(const m of o.lgNeon)m.visible=true;}
+// ระหว่างบัฟ Empower (ผู้ใช้ 2026-11-17 ขอให้รู้ชัดว่ากำลังบัฟ): ตัวเรืองนีออนทองจาง ๆ เป็นจังหวะ • ห่วงแสงหมุนเหนือหัว • แสงแฟลร์ปลายไม้ • คริสตัลมีหางแสง
+function lgEmpFx(S,o,on,now,dt){   // ผู้ใช้ 2026-11-17: ไม่มีมงกุฎ ไม่เปลี่ยนสีตัว/ผ้าคลุม → ประกายทองหมุนวนลอยขึ้นรอบตัว + แฟลร์ปลายไม้ + หางคริสตัล
+  S.empK=clamp((S.empK||0)+(on?dt/0.3:-dt/0.4),0,1);const k=S.empK;
+  if(!S.eMo&&k>0){const T=LGV.glowT||(LGV.glowT=lgGlowTex());S.eMo=[];
+    for(let i=0;i<22;i++){const g=new THREE.Sprite(new THREE.SpriteMaterial({map:T,color:hdr(i%3?'#ffd36a':'#fff4c8',1.5),transparent:true,opacity:0,blending:THREE.AdditiveBlending,depthWrite:false}));
+      g.userData={ph:Math.random(),a:Math.random()*6.283,sp:0.5+Math.random()*0.5,r:0.45+Math.random()*0.3,s:0.07+Math.random()*0.07};scene.add(g);S.eMo.push(g);}
+    S.eTip=new THREE.Sprite(new THREE.SpriteMaterial({map:T,color:hdr('#ffe08a',1.6),transparent:true,opacity:0,blending:THREE.AdditiveBlending,depthWrite:false}));
+    S.eTr=[];for(let i=0;i<3*6;i++){const g=new THREE.Sprite(new THREE.SpriteMaterial({map:T,color:hdr('#ffc04a',1.2),transparent:true,opacity:0,blending:THREE.AdditiveBlending,depthWrite:false}));scene.add(g);S.eTr.push(g);}
+    S.eH=[[],[],[]];scene.add(S.eTip);}
+  if(!S.eMo)return;const vis=k>0.01&&o.g.visible;S.eTip.visible=vis;
+  const P0=o.g.position;
+  for(const g of S.eMo){const d=g.userData;g.visible=vis;if(!vis)continue;
+    const u=(d.ph+now/1000*d.sp*0.55)%1,a=d.a+u*4.2,r=d.r*(1-0.35*u);   // ขึ้นจากเท้าถึงเหนือหัว หมุนเกลียว วงแคบลงตอนบน
+    g.position.set(P0.x+Math.cos(a)*r,P0.y+0.1+u*2.3,P0.z+Math.sin(a)*r);
+    g.scale.setScalar(d.s*(1+0.4*Math.sin(now/90+d.a))*k);g.material.opacity=k*Math.sin(u*Math.PI)*0.95;}
+  if(vis){if(o.tipW){S.eTip.position.copy(o.tipW);S.eTip.scale.setScalar((0.45+0.12*Math.sin(now/70))*k);S.eTip.material.opacity=0.9*k;}else S.eTip.visible=false;}
+  for(let c=0;c<3;c++){const cr=S.cr&&S.cr[c],H=S.eH[c];if(cr&&cr.visible&&vis){H.unshift(cr.position.clone());if(H.length>6)H.pop();}else H.length=0;
+    for(let j=0;j<6;j++){const g=S.eTr[c*6+j],P=H[j+1];g.visible=!!P&&vis;if(g.visible){g.position.copy(P);g.scale.setScalar(0.32*(1-j/6));g.material.opacity=0.7*k*(1-j/6);}}}}
+// แกนลำแสง BA (ผู้ใช้ 2026-11-17 "ลำดูจาง"): แกนขาวร้อนตรงกลาง + ประกายวิ่งไปตามลำ + แฟลร์ตรงปลาย → อ่านออกบนแมพสว่าง
+function lgBaCore(S,on,a,b,fwd,w,now){
+  if(!S.bC){S.bC=lgTube(new THREE.MeshBasicMaterial({color:hdr('#fffbe8',1.7),transparent:true,opacity:0.8,blending:THREE.AdditiveBlending,depthWrite:false}),1);S.bC.renderOrder=6;
+    const T=LGV.glowT||(LGV.glowT=lgGlowTex());S.bSp=[];for(let i=0;i<10;i++){const g=new THREE.Sprite(new THREE.SpriteMaterial({map:T,color:hdr(i%2?'#ffe9a8':'#ffc24a',1.8),transparent:true,blending:THREE.AdditiveBlending,depthWrite:false}));g.userData={ph:i/10,o:Math.random()*6.283};scene.add(g);S.bSp.push(g);}
+    S.bEnd=new THREE.Sprite(new THREE.SpriteMaterial({map:T,color:hdr('#fff0c0',2.2),transparent:true,blending:THREE.AdditiveBlending,depthWrite:false}));scene.add(S.bEnd);}
+  S.bC.visible=S.bEnd.visible=on;for(const g of S.bSp)g.visible=on;if(!on)return;
+  const len=a.distanceTo(b),side=new THREE.Vector3().crossVectors(fwd,new THREE.Vector3(0,1,0)).normalize(),up=new THREE.Vector3().crossVectors(side,fwd).normalize();
+  lgAim(S.bC,a,b);S.bC.scale.x=S.bC.scale.y=w*0.32*(1+0.12*Math.sin(now/35));
+  for(const g of S.bSp){const d=g.userData,u=(d.ph+now/450)%1,ang=d.o+u*9,r=w*1.3;
+    g.position.copy(a).addScaledVector(fwd,u*len).addScaledVector(side,Math.cos(ang)*r).addScaledVector(up,Math.sin(ang)*r);g.scale.setScalar(0.12+w*0.6);g.material.opacity=Math.min(1,(1-u)*3)*0.9;}
+  S.bEnd.position.copy(b);S.bEnd.scale.setScalar((0.7+w*2.2)*(0.85+0.2*Math.sin(now/45)));}
 // ลำแสงตอนบัฟ Empower (ผู้ใช้ 2026-11-17): คลื่นวงแหวนวิ่งไปตามลำ + เส้นพลังพุ่งออกจากลำแล้วโค้งกลับเข้าลำ (เหมือนพลังล้นจนแตกออก)
 function lgEmpBeam(S,on,a,b,fwd,w,now){
   if(!S.ew){S.ew=[];S.ea=[];const tm=new THREE.MeshBasicMaterial({color:hdr('#ffe2a0',1.2),transparent:true,opacity:0.6,blending:THREE.AdditiveBlending,depthWrite:false});
@@ -507,7 +536,8 @@ function lightFX(o,p,pz,now,dt){
     if(t>=SP+0.06&&!o.stF){o.stF=1;const ev=o.stEv;if(ev){const a=o.tipW?o.tipW.clone():o.g.position.clone().add(new THREE.Vector3(0,1.6,0));lgArcFx(a,lgWorld(ev.x,ev.y,0.4),0.3,1.5,()=>{ring(ev.x,ev.y,'#ffd36a',ev.r||300,0.35,0.1);burst(ev.x,ev.y,'#ffe9a8',18,240,0.45,2,{h:0.5,g:1});});}if(p.id===NET.myId)shake(0.15);}
     if(t>END+0.2)o.stOn=0;}
   {const k=S.empX?(now-S.empX)/1000:9;const base=(L[5]|0)===1?1.8:1.0;S.empR=S.empRr!=null?S.empRr:(k<1.6?base+0.6*Math.max(0,1-k/1.6)*Math.min(1,k/0.15):base);if(!o.empOn)S.empSp=(S.empSp||0)+dt*Math.max(0,3*(1-k/1.6));}
-  const empOn=(L[5]|0)===1;if(empOn)S.empSp=(S.empSp||0)+dt*3.5;   // ระหว่างบัฟ คริสตัลหมุนเร็วขึ้นif(empOn&&S.allyId!=null)LGV.empA[S.allyId]=now;
+  const empOn=(L[5]|0)===1;if(empOn)S.empSp=(S.empSp||0)+dt*3.5;if(empOn&&S.allyId!=null)LGV.empA[S.allyId]=now;   // ระหว่างบัฟ คริสตัลหมุนเร็วขึ้น + คริสตัลที่เพื่อนเรือง
+  lgEmpFx(S,o,empOn,now,dt);
   // ---------- คริสตัลกับตัว ----------
   while(S.cr.length<3){const c=lgCrystalMesh(1);scene.add(c);S.cr.push(c);}
   const beam=L[4]|0,ba=L[10]||0,shOn=L[11]|0,bp=beam!==0?(L[13]||0):0;
@@ -554,10 +584,11 @@ function lightFX(o,p,pz,now,dt){
     const kick=Math.max(0,1-(now-(S.fireT||0))/220),len=(L[9]||600)*S3,w=[0.058,0.115,0.185,0.3][Math.min(3,beam-1)]*(1+1.6*kick*kick);S.pb=beam;
     const end=ringC.clone().addScaledVector(fwd,len);S.beam.visible=S.ring.visible=true;lgAim(S.beam,ringC,end);S.beam.scale.x=S.beam.scale.y=w;
     _lgBeamM.uniforms.uT.value=now/1000;S.ring.position.copy(ringC);S.ring.lookAt(end);S.ring.scale.setScalar(0.8+0.25*Math.sin(now/60));
+    lgBaCore(S,true,ringC,end,fwd,w*(empOn?1.15:1),now);
     lgEmpBeam(S,empOn,ringC,end,fwd,w,now);if(empOn){S.beam.scale.x=S.beam.scale.y=w*1.45;}   // บัฟ: คลื่นวิ่งตามลำ + สายพลังแตกออกจากลำแล้วโค้งกลับเข้าลำ
     LREQ.push({x:ringC.x,y:ringC.y,z:ringC.z,col:'#ffd36a',int:0.7,dist:4});
 }
-  else if(S.beam){S.beam.visible=S.ring.visible=false;lgEmpBeam(S,false);}
+  else if(S.beam){S.beam.visible=S.ring.visible=false;lgEmpBeam(S,false);lgBaCore(S,false);}
   // ---------- โล่รังผึ้ง (ผู้ใช้ 2026-11-16 ref: กำแพงหกเหลี่ยมโค้งรอบหน้า คริสตัลมาก = กว้าง/ใหญ่) ----------
   lgShield(S,o,p,n,shOn&&alive,now,dt);
   // ---------- สายลิงก์ ----------
@@ -625,7 +656,7 @@ function lightFX(o,p,pz,now,dt){
     LREQ.push({x:P.x,y:P.y+0.6,z:P.z,col:'#ffc04a',int:0.7*k,dist:8});}
   else if(S.veil){S.veil.visible=S.veilR.visible=S.veilF.visible=false;}
 }
-function lgBaseObjects(s){return [...s.cr,...s.ally,s.beam,s.ring,s.shF,s.shE,s.shG,s.orbT,s.aura,s.lkHead,...(s.ew||[]),...(s.ea||[]),...(s.shGl||[]),...(s.mote||[]).map(M=>M.g),s.link,s.prism,s.san,s.sanR,s.sanF,s.sanWv,...(s.sanO||[]),...(s.sanM||[]).map(M=>M.g),...(s.sanTw||[]).map(M=>M.g),s.veil,s.veilR,s.veilF];}
+function lgBaseObjects(s){return [...s.cr,...s.ally,s.beam,s.ring,s.shF,s.shE,s.shG,s.orbT,s.aura,s.lkHead,...(s.ew||[]),...(s.ea||[]),...(s.shGl||[]),...(s.mote||[]).map(M=>M.g),s.link,s.prism,s.san,s.sanR,s.sanF,s.sanWv,...(s.sanO||[]),...(s.sanM||[]).map(M=>M.g),...(s.sanTw||[]).map(M=>M.g),s.veil,s.veilR,s.veilF,...(s.eMo||[]),s.eTip,s.bC,s.bEnd,...(s.bSp||[]),...(s.eTr||[])];}
 function lgClearBase(s){for(const m of lgBaseObjects(s))if(m)m.visible=false;}
 function lgClear(s){
   lgClearBase(s);
@@ -681,7 +712,7 @@ function lightEfx(ev){
         LGV.fx.push({m:null,t:0,max:LT_VO.back,fn:k=>{const b=o?o.g.position.clone().add(new THREE.Vector3(0,1.45,0)):lgWorld(x,y,1.45),e=k*k*(3-2*k);c.position.copy(a).lerp(b,e);c.position.y+=Math.sin(k*Math.PI)*1.2;c.rotation.y+=0.2;c.scale.setScalar(0.4+0.6*Math.min(1,k*3));},end:()=>scene.remove(c)});}
       if(near){snd('boom',ev);shake(3);}return true;}
     case 'lgemp':{const o=PM3.get(ev.id);if(o){o.empT=0;o.empOn=1;o.empB=0;}   // ท่า/เอฟเฟกต์ทำต่อใน lightFX (lgEmpPose)
-      if(ev.t!=null){const a=PM3.get(ev.t);if(a)later(0.4,()=>{const P=a.g.position;fxPlay('light/crystal_in',{x:P.x/S3+MW/2,y:P.z/S3+MH/2,h:1.5,aim:false});});}
+      if(ev.t!=null){const a=PM3.get(ev.t);if(a)later(0.4,()=>{const P=a.g.position;fxPlay('light/crystal_in',{x:P.x/S3+MW/2,y:P.z/S3+MH/2,h:1.5,aim:false});fxPlay('light/emp_aura',{x:P.x/S3+MW/2,y:P.z/S3+MH/2,h:0,follow:ev.t,p:{t:LT_EM.t-0.4},aim:false});});}
       if(near)snd('buff',ev);return true;}
     case 'lgbolt':{   // Empower: เศษคริสตัลแสงเล็กพุ่งโค้งมีหางทองไปหาศัตรู → แตกประกาย
       const a=lgWorld(x,y,ev.h||1.6),b=lgWorld(ev.x2,ev.y2,ev.h2||1.2),c=lgCrystalMesh(0.55);scene.add(c);
@@ -729,7 +760,24 @@ function lightEfx(ev){
 
 // หัวหันไปทางเล็ง: ตั้งแบบค่าสัมบูรณ์ทุกเฟรม (กระดูกหัวใน idle เป็นค่าคงที่ mixer ไม่เขียนซ้ำ → ถ้าใช้ += หัวจะหมุนสะสม)
 const _lgHq=new THREE.Quaternion(),_lgHy=new THREE.Vector3(0,1,0);
+// ตัวละครปกติ (ไม่ใช่ไฟล์โมเดล): หัว/ตา/ผม/หมวกติดกับลำตัวตรง ๆ ไม่มีกระดูกหัว → ครั้งแรกย้ายชิ้นที่สูงกว่าคอเข้ากลุ่ม pivot ที่คอ แล้วหมุนกลุ่มนั้น (ผู้ใช้ 2026-11-17 "ทำไมหัวไม่หันไปทางเล็ง")
+function lgProcHead(o){
+  if(o.lgHG===undefined){o.lgHG=null;const b=o.b;if(!b)return;const Y=1.68,P0=1.66,H=new THREE.Group();H.position.set(0,P0,0);let got=0;
+    for(const c of [...b.children]){if(c===o.armR||c===o.armL||c.userData.anim)continue;
+      if(c.position.y>=Y){b.remove(c);c.position.y-=P0;H.add(c);got++;continue;}
+      if(!c.isMesh||c.position.lengthSq()>1e-6||c.rotation.x||c.rotation.y||c.rotation.z)continue;   // ชิ้นที่ mergeBody รวมไว้ (ตำแหน่ง 0) → แยกสามเหลี่ยมที่อยู่สูงกว่าคอออกมา
+      const g0=c.geometry.index?c.geometry.toNonIndexed():c.geometry,pa=g0.attributes.position,n=pa.count/3,keep=[],head=[];
+      for(let t=0;t<n;t++){const hi=pa.getY(t*3)>=Y&&pa.getY(t*3+1)>=Y&&pa.getY(t*3+2)>=Y;(hi?head:keep).push(t);}
+      if(!head.length){if(g0!==c.geometry)g0.dispose();continue;}
+      const pick=(ts,dy)=>{const g=new THREE.BufferGeometry();for(const k of Object.keys(g0.attributes)){const A=g0.attributes[k],sz=A.itemSize,arr=new A.array.constructor(ts.length*3*sz);
+        ts.forEach((t,i)=>{for(let v=0;v<3;v++)for(let j=0;j<sz;j++)arr[(i*3+v)*sz+j]=A.array[(t*3+v)*sz+j];});g.setAttribute(k,new THREE.BufferAttribute(arr,sz));}
+        if(dy)g.translate(0,dy,0);g.computeBoundingSphere();return g;};
+      const hm=new THREE.Mesh(pick(head,-P0),c.material);hm.castShadow=c.castShadow;hm.receiveShadow=c.receiveShadow;H.add(hm);
+      const old=c.geometry;c.geometry=pick(keep,0);old.dispose();if(g0!==old)g0.dispose();got++;}
+    if(!got)return;b.add(H);o.lgHG=H;}
+  if(!o.lgHG)return;o.lgHG.rotation.y=o.lgHeadYaw||0;}
 function lightHeadPose(o){
+  if(!o.fileModel){lgProcHead(o);return;}
   const hb=o.fileModel&&(o.lgHead!==undefined?o.lgHead:(o.lgHead=o.fileModel.getObjectByName('head')||null));if(!hb)return;
   if(o.lgHeadSet&&hb.quaternion.equals(o.lgHeadSet))hb.quaternion.copy(o.lgHeadBase);   // mixer ไม่ได้เขียนทับ = คืนค่าเดิมก่อน
   const y=o.lgHeadYaw||0;if(Math.abs(y)<0.005){o.lgHeadSet=null;return;}
