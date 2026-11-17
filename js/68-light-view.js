@@ -497,6 +497,15 @@ function lightFX(o,p,pz,now,dt){
     // คริสตัล: ตอนแบมือหมุนเร็วเข้ามาใกล้ตัว • กำมือ → กางออกวงกว้างแล้วค่อยกลับ
     S.empSp=(S.empSp||0)+dt*(t<R1?14:t<R2+0.1?24:5);S.empRr=t<R1+0.06?1.5:null;
     if(t>HOLD+0.3){o.empOn=0;}}
+  // ---------- Shard Storm: ชูไม้วนวงเหนือหัว 2 รอบ (คริสตัลหมุนไว) → ฟาดชี้ไปทางเพื่อน ส่งคริสตัล ----------
+  if(o.stOn){o.stT+=dt;const t=o.stT,UP=0.12,SP=0.42,PT=0.58,END=0.9,w=t<UP?t/UP:(t>END?Math.max(0,1-(t-END)/0.2):1);
+    if(o.armR&&w>0){let ax,az,tw=0,lx=0;
+      if(t<SP){const e=clamp(t/UP,0,1),ph=t/SP*Math.PI*4;ax=lerp(-1.0,-2.95,e)+0.22*Math.sin(ph);az=-0.25*Math.cos(ph);tw=-0.12*e;lx=-0.06*e;}   // ชูไม้ วงกลมเหนือหัว
+      else{const e=clamp((t-SP)/(PT-SP),0,1),f=1-(1-e)*(1-e)*(1-e);ax=lerp(-2.95,-1.45,f);az=0;tw=-0.12+0.42*f;lx=-0.06+0.2*f;}   // ฟาดลงชี้ไปข้างหน้า ตัวบิดตามไม้ โน้มหน้า
+      o.armR.rotation.x=lerp(o.armR.rotation.x,ax,w);o.armR.rotation.z=lerp(o.armR.rotation.z,az,w);o.b.rotation.y+=tw*w;o.b.rotation.x+=lx*w;o.b.updateWorldMatrix(true,true);}
+    S.empSp=(S.empSp||0)+dt*(t<SP?22:4);
+    if(t>=SP+0.06&&!o.stF){o.stF=1;const ev=o.stEv;if(ev){const a=o.tipW?o.tipW.clone():o.g.position.clone().add(new THREE.Vector3(0,1.6,0));lgArcFx(a,lgWorld(ev.x,ev.y,0.4),0.3,1.5,()=>{ring(ev.x,ev.y,'#ffd36a',ev.r||300,0.35,0.1);burst(ev.x,ev.y,'#ffe9a8',18,240,0.45,2,{h:0.5,g:1});});}if(p.id===NET.myId)shake(0.15);}
+    if(t>END+0.2)o.stOn=0;}
   {const k=S.empX?(now-S.empX)/1000:9;const base=(L[5]|0)===1?1.8:1.0;S.empR=S.empRr!=null?S.empRr:(k<1.6?base+0.6*Math.max(0,1-k/1.6)*Math.min(1,k/0.15):base);if(!o.empOn)S.empSp=(S.empSp||0)+dt*Math.max(0,3*(1-k/1.6));}
   const empOn=(L[5]|0)===1;if(empOn)S.empSp=(S.empSp||0)+dt*3.5;   // ระหว่างบัฟ คริสตัลหมุนเร็วขึ้นif(empOn&&S.allyId!=null)LGV.empA[S.allyId]=now;
   // ---------- คริสตัลกับตัว ----------
@@ -600,15 +609,23 @@ function lightFX(o,p,pz,now,dt){
       M.g.visible=rise>0.2&&k<16+8*nz;const f=Math.sin(M.t*Math.PI);M.g.position.copy(P).add(new THREE.Vector3(M.x+Math.sin(M.t*6+k)*0.15,M.y+M.t*0.5,M.z));M.g.scale.setScalar(0.16*f*f+0.01);}   // ประกายฮีลกระพริบลอยเบา ๆ ทั่ววง
     LREQ.push({x:P.x,y:P.y+0.3,z:P.z,col:'#ffb847',int:0.5+0.2*nz+pulse*0.5,dist:6+2*nz});}
   else if(S.san){S.sanW=0;S.sanRc=0;S.sanG=0;S.san.visible=S.sanR.visible=S.sanF.visible=false;if(S.sanWv)S.sanWv.visible=false;for(const c of S.sanO)c.visible=false;for(const M of S.sanM)M.g.visible=false;if(S.sanTw)for(const M of S.sanTw)M.g.visible=false;S.sanT0=0;}
-  // ---------- กับดัก Veiled Shard (เจ้าของ/ทีมเห็นจาง ๆ • ศัตรูไม่เห็นหลังวาง) ----------
+  // ---------- Shard Storm: วงใบมีดคริสตัลหมุนอยู่กับที่ (ไม่ตามตัว) ----------
   const W=L[8];
-  if(W){const myTeam=(VIEW.cur&&VIEW.cur.P.find(q=>q.id===NET.myId))?.tm,same=p.id===NET.myId||myTeam!==undefined&&myTeam===p.tm;
-    if(!S.veil){S.veil=lgCrystalMesh(1.2);S.veilR=new THREE.Mesh(new THREE.RingGeometry(0.95,1,64),new THREE.MeshBasicMaterial({color:hdr('#fff1c0',1.8),transparent:true,opacity:0.7,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide}));S.veilR.rotation.x=-Math.PI/2;scene.add(S.veil,S.veilR);}
-    const P=lgWorld(W[0],W[1],0.3);S.veil.position.copy(P);S.veil.visible=same||W[2];S.veil.traverse(m=>{if(m.material)m.material.opacity=W[2]?0.9:0.25;});
-    S.veilR.visible=!!W[2];if(W[2]){S.veilT=(S.veilT||0)+dt;const k=Math.max(0.05,1-S.veilT/LT_VS.arm);S.veilR.position.copy(P).add(new THREE.Vector3(0,-0.25,0));S.veilR.scale.setScalar(LT_VS.r*S3*k);}else S.veilT=0;}
-  else if(S.veil){S.veil.visible=S.veilR.visible=false;S.veilT=0;}
+  if(W){if(!S.veil){S.veil=new THREE.Group();S.vB=[];const sm=new THREE.MeshBasicMaterial({color:hdr('#ffb840',1.1),transparent:true,opacity:0.5,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide});
+      for(let r=0;r<2;r++){const n=r?5:3,ro=r?0.78:0.42;for(let q=0;q<n;q++){const b=new THREE.Group(),c=lgCrystalMesh(1);c.rotation.z=Math.PI/2;c.scale.set(3.6,5.2,2.2);b.add(c);
+        const st=new THREE.Mesh(new THREE.RingGeometry(ro-0.018,ro+0.018,32,1,0,0.8),sm);st.rotation.x=-Math.PI/2;S.veil.add(st);S.vB.push({b,st,r,ro,a0:q*Math.PI*2/n});S.veil.add(b);}}
+      S.veilR=new THREE.Mesh(new THREE.RingGeometry(0.96,1,72),new THREE.MeshBasicMaterial({color:hdr('#ffd36a',1.5),transparent:true,opacity:0.8,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide}));S.veilR.rotation.x=-Math.PI/2;
+      S.veilF=new THREE.Mesh(new THREE.CircleGeometry(1,72),new THREE.MeshBasicMaterial({map:lgHoneyTex(),color:hdr('#ffb040',0.8),transparent:true,opacity:0.25,blending:THREE.AdditiveBlending,depthWrite:false}));S.veilF.rotation.x=-Math.PI/2;scene.add(S.veil,S.veilR,S.veilF);}
+    const P=lgWorld(W[0],W[1],0),R=LT_VS.r*S3,left=W[2]/10,el=LT_VS.t-left,gr=clamp((el-0.8)/0.4,0,1),ge=1-(1-gr)*(1-gr)*(1-gr),fd=clamp(left/0.4,0,1),k=ge*fd;
+    S.veil.visible=S.veilR.visible=S.veilF.visible=k>0.01;S.veil.position.copy(P);S.veil.scale.setScalar(R*ge);
+    for(const B of S.vB){const a=B.a0+(B.r?1:-1)*now/(B.r?140:105);B.b.position.set(Math.cos(a)*B.ro,(0.5+0.25*B.r+0.08*Math.sin(now/180+B.a0))/(R*ge+0.01),Math.sin(a)*B.ro);B.b.rotation.set(0,-a+(B.r?0:Math.PI),0.25);B.b.scale.setScalar(1/(R*ge+0.01));B.b.visible=k>0.01;
+      B.st.position.y=0.06/(R*ge+0.01);B.st.rotation.z=B.r?-a:-a-0.8;B.st.material.opacity=0.35*k;}
+    S.veilR.position.copy(P).add(new THREE.Vector3(0,0.05,0));S.veilR.scale.setScalar(R*ge);S.veilR.material.opacity=(0.7+0.2*Math.sin(now/120))*k;
+    S.veilF.position.copy(P).add(new THREE.Vector3(0,0.04,0));S.veilF.scale.setScalar(R*ge);S.veilF.rotation.z=-now/2500;S.veilF.material.opacity=0.22*k;
+    LREQ.push({x:P.x,y:P.y+0.6,z:P.z,col:'#ffc04a',int:0.7*k,dist:8});}
+  else if(S.veil){S.veil.visible=S.veilR.visible=S.veilF.visible=false;}
 }
-function lgBaseObjects(s){return [...s.cr,...s.ally,s.beam,s.ring,s.shF,s.shE,s.shG,s.orbT,s.aura,s.lkHead,...(s.ew||[]),...(s.ea||[]),...(s.shGl||[]),...(s.mote||[]).map(M=>M.g),s.link,s.prism,s.san,s.sanR,s.sanF,s.sanWv,...(s.sanO||[]),...(s.sanM||[]).map(M=>M.g),...(s.sanTw||[]).map(M=>M.g),s.veil,s.veilR];}
+function lgBaseObjects(s){return [...s.cr,...s.ally,s.beam,s.ring,s.shF,s.shE,s.shG,s.orbT,s.aura,s.lkHead,...(s.ew||[]),...(s.ea||[]),...(s.shGl||[]),...(s.mote||[]).map(M=>M.g),s.link,s.prism,s.san,s.sanR,s.sanF,s.sanWv,...(s.sanO||[]),...(s.sanM||[]).map(M=>M.g),...(s.sanTw||[]).map(M=>M.g),s.veil,s.veilR,s.veilF];}
 function lgClearBase(s){for(const m of lgBaseObjects(s))if(m)m.visible=false;}
 function lgClear(s){
   lgClearBase(s);
@@ -681,7 +698,8 @@ function lightEfx(ev){
       fxPlay('light/san_end',{x,y,h:0,aim:false});const S=LGV.st.get(ev.id),o=PM3.get(ev.id);
       if(S&&S.sanO&&o){S.sanO.forEach((c,i)=>{if(!c.visible)return;const from=c.position.clone(),to=o.g.position.clone().add(new THREE.Vector3(Math.cos(i*2.1),1.45,Math.sin(i*2.1)));later(0.05+i*0.06,()=>lgBlip(from,to));});}
       return true;}
-    case 'lgveil':{const o=PM3.get(ev.id),a=o?o.g.position.clone().add(new THREE.Vector3(0,1.4,0)):lgWorld(x,y,1.4);lgFlyFx(a,lgWorld(x,y,0.3),0.3);if(near)snd('cast_pull',ev);return true;}
+    case 'lgveil':{const o=PM3.get(ev.id),a=o?o.g.position.clone().add(new THREE.Vector3(0,1.4,0)):lgWorld(x,y,1.4);if(o){o.stOn=1;o.stT=0;o.stF=0;o.stEv={x,y,r:ev.r};}else lgArcFx(a,lgWorld(x,y,0.4),0.35,1.5);if(near)snd('cast_pull',ev);return true;}
+    case 'lgveilhit':for(const id of ev.ids||[]){const o=PM3.get(id);if(o)fxPlay('light/bolt_hit',{x:o.g.position.x/S3+MW/2,y:o.g.position.z/S3+MH/2,h:1,s:0.7,aim:false});}return true;
     case 'lgveilarm':if(near)snd('buff',ev);return true;
     case 'lgveilboom':{const P=lgWorld(x,y,0),col=new THREE.Mesh(new THREE.CylinderGeometry(0.6,0.8,6,24,1,true),new THREE.MeshBasicMaterial({color:hdr('#fff1c0',2),transparent:true,opacity:0.8,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide}));
       col.position.copy(P).add(new THREE.Vector3(0,3,0));scene.add(col);LGV.fx.push({m:null,t:0,max:0.5,fn:k=>{col.material.opacity=0.8*(1-k);col.scale.set(1+k,1,1+k);},end:()=>scene.remove(col)});

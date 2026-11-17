@@ -2,7 +2,7 @@
 //  สายแสง ✨ Radiance (ผู้ใช้ออกแบบทั้งหมด — designs/light.md) • ฝั่งโฮสต์ • รอบแรก 2026-11-16: ระบบเกมก่อน ภาพชั่วคราว
 //  กลไกหลัก: คริสตัล 3 ชิ้น — เก็บกับตัว (BA/โล่/สกิลแรงขึ้น) หรือส่งให้คู่หูที่ลิงก์ (กัน/ตีแรง 5% ต่อชิ้น)
 //  BA Prism Ray (ลำแสงตามจำนวนคริสตัล) • โล่ Crystal Aegis (หกเหลี่ยมหน้า HP ตามคริสตัล) • Dash Light Step (วาร์ป/ไปหาคู่หู)
-//  สกิล: Crystal Bond • Shard Volley • Empower Light • Sanctum Crystal • Veiled Shard • Radiant Sovereign
+//  สกิล: Crystal Bond • Shard Volley • Empower Light • Sanctum Crystal • Shard Storm • Radiant Sovereign
 //  สถานะผู้เล่น: p.lc = คริสตัลกับตัว • p.lgA = id คู่หูที่ลิงก์ (หรือ 'prism' = ปริซึมที่วาง) • คู่หู t.lgN = คริสตัลที่ได้ • t.lgFrom = id เรา
 // =====================================================================
 const LIGHTP=PATHS.length;
@@ -110,7 +110,7 @@ function lightDmgIn(t){let k=1;if(t.lgN>0)k*=1-LTV.allyDR*t.lgN;if(t.lgDR>G.time
 function lightSnapP(p){if(!lgOn(p)&&!(p.lgN>0)&&!p.lgUltWard)return undefined;
   const pos=lgOn(p)?lightLinkPos(p):null,a=lgOn(p)?lightAlly(p):null;
   return [p.lc|0,a?a.id:p.lgA==='prism'?'P':0,pos?[Math.round(pos.x),Math.round(pos.y)]:0,p.lgN|0,p.lgBeam|0,p.lgEmp>G.time?1:0,p.lgDch>=1?1:0,
-    p.lgSan?[Math.round(p.lgSan.x),Math.round(p.lgSan.y),p.lgSan.n|0]:0,p.lgVeil?[Math.round(p.lgVeil.x),Math.round(p.lgVeil.y),p.lgVeil.arm?1:0]:0,p.lgBeamL|0,Math.round((p.lgBeamA||p.ang||0)*100)/100,p.shieldOn?1:0,Math.round((p.lgChg||0)*100)/100,Math.round((p.lgBeamP||0)*100)/100,
+    p.lgSan?[Math.round(p.lgSan.x),Math.round(p.lgSan.y),p.lgSan.n|0]:0,p.lgVeil?[Math.round(p.lgVeil.x),Math.round(p.lgVeil.y),Math.round(p.lgVeil.t*10)]:0,p.lgBeamL|0,Math.round((p.lgBeamA||p.ang||0)*100)/100,p.shieldOn?1:0,Math.round((p.lgChg||0)*100)/100,Math.round((p.lgBeamP||0)*100)/100,
     p.lgUlt?lightUltSnap(p.lgUlt):0,p.lgUltWard?1:0];}
 // ---------- สกิล ----------
 function lightSkillsTick(p,dt){
@@ -125,13 +125,10 @@ function lightSkillsTick(p,dt){
       if(ids.length&&Z.e%2===0)emit({k:'efx',z:'lgsanheal',x:Math.round(Z.x),y:Math.round(Z.y),h:Z.h,id:p.id,ids,n:Z.n});}   // ภาพ: คนที่ได้ฮีลมีประกายทอง/เขียวลอยขึ้น (ทุก 1 วิ)
     const k=lightSlotOf(p,'sanctumcrystal');if(k){if(p.inp&&p.inp['h'+k])Z.hold=(Z.hold||0)+dt;else Z.hold=0;}
     if(Z.t<=0||Z.hold>=LTV.holdT)lightSanEnd(p);}
-  const W=p.lgVeil;  // Veiled Shard: วางล่องหน → กดอีกครั้ง = เตรียมระเบิด 2 วิ (ช้า 30%) → ระเบิด สตัน
-  if(W){
-    if(!W.arm){W.t-=dt;if(W.t<=0){p.lgVeil=null;p.lc=Math.min(LTV.max,p.lc+1);}}
-    else{W.k-=dt;for(const t of foesIn(p.team,W.x,W.y,LT_VS.r,W.h+3))addSlow(t,1-LT_VS.slow,0.15);
-      if(W.k<=0){for(const t of foesIn(p.team,W.x,W.y,LT_VS.r,W.h+3))aoeHit(p,t,LT_VS.dmg,t=>addStun(t,LT_VS.stun));
-        emit({k:'efx',z:'lgveilboom',x:Math.round(W.x),y:Math.round(W.y),h:W.h,r:LT_VS.r,id:p.id});
-        p.lgVeil=null;p.lc=Math.min(LTV.max,p.lc+1);const sk=lightSlotOf(p,'veiledshard');if(sk){const c=LT_VS_S.cd*p.buffs.cdr;p.cd[sk]=c;p.cdMax[sk]=c;}}}}
+  const W=p.lgVeil;  // Shard Storm: วงใบมีดคริสตัลอยู่กับที่ ดาเมจทุก tick + ช้า
+  if(W){W.t-=dt;W.k+=dt;const fs=foesIn(p.team,W.x,W.y,LT_VS.r,W.h+3);for(const t of fs)addSlow(t,1-LT_VS.slow,0.2);
+    if(W.k>=LT_VS.tick){W.k-=LT_VS.tick;const ids=[];for(const t of fs){aoeHit(p,t,LT_VS.dmg);ids.push(t.id);}if(ids.length)emit({k:'efx',z:'lgveilhit',x:Math.round(W.x),y:Math.round(W.y),h:W.h,id:p.id,ids});}
+    if(W.t<=0)p.lgVeil=null;}
 }
 
 // Radiant Sovereign uses the caster's actual position above the linked ally.
@@ -321,10 +318,9 @@ const LT_SC=defSpell(LIGHTP,{id:'sanctumcrystal',v:{range:400,t:8,r:200,rUp:25,h
   d:'ชี้ไม้ลงจุด คริสตัลพุ่งโค้งปักพื้น (ไกล 400) คริสตัลแสงใหญ่ลอยขึ้น ฮีลเราและเพื่อนรัศมี 200 วิละ 2 ต่อคริสตัล • กดซ้ำ = เพิ่มคริสตัลเข้าวง • อยู่ 8 วินับจากชิ้นแรก • กดค้าง = เรียกคืน',
   toggle(p){const Z=p.lgSan;if(!Z)return false;if(p.lc>0){p.lc--;Z.n++;emit({k:'efx',z:'lgsanadd',x:Math.round(p.x),y:Math.round(p.y),h:p.z+1.4,x2:Math.round(Z.x),y2:Math.round(Z.y),h2:Z.h,id:p.id});}return true;},
   cast(p,S){if(p.lc<=0)return false;const [x,y,h]=lightAimPt(p,S.v.range);p.lc--;p.lgSan={x,y,h,n:1,t:S.v.t};emit({k:'efx',z:'lgsan',x:Math.round(x),y:Math.round(y),h,r:S.v.r,id:p.id});}}).v;
-const LT_VS_S=defSpell(LIGHTP,{id:'veiledshard',v:{range:600,life:20,arm:2,r:200,slow:0.3,dmg:40,stun:0.8},vn:{range:'วางได้ไกล',life:'ค้างนานสุด (วิ)',arm:'เตรียมระเบิด (วิ)',r:'รัศมี',slow:'ช้า (สัดส่วน)',dmg:'ระเบิด • ดาเมจ',stun:'สตัน (วิ)'},role:'control',n:'Veiled Shard',ic:'👁️',cd:14,
-  d:'ดีดนิ้วส่งคริสตัลฝังพื้น (ไกล 600 ใช้คริสตัล 1 ชิ้น) ล่องหนหลังวาง • กดอีกครั้ง = วงเวท 200 หดเข้าหา 2 วิ ศัตรูในวงช้า 30% → ระเบิดเสาแสง 40 สตัน 0.8 วิ • ไม่กดใน 20 วิ = หายเอง • คูลดาวน์นับตอนระเบิด',
-  toggle(p){const W=p.lgVeil;if(!W)return false;if(!W.arm){W.arm=1;W.k=LT_VS.arm;emit({k:'efx',z:'lgveilarm',x:Math.round(W.x),y:Math.round(W.y),h:W.h,r:LT_VS.r,t:LT_VS.arm,id:p.id});}return true;},
-  cast(p,S){if(p.lc<=0)return false;const [x,y,h]=lightAimPt(p,S.v.range);p.lc--;p.lgVeil={x,y,h,t:S.v.life,arm:0};emit({k:'efx',z:'lgveil',x:Math.round(x),y:Math.round(y),h,id:p.id,team:p.team});}});
+const LT_VS_S=defSpell(LIGHTP,{id:'veiledshard',v:{t:5,r:300,dmg:6,tick:0.5,slow:0.3},vn:{t:'อยู่นาน (วิ)',r:'รัศมี',dmg:'ดาเมจต่อครั้ง',tick:'ตีทุก (วิ)',slow:'ช้า (สัดส่วน)'},role:'control',n:'Shard Storm',ic:'🌀',cd:12,
+  d:'วางพายุใบมีดคริสตัลลงพื้นตรงเพื่อนที่ Bond อยู่ (ไม่มี Bond = ที่ตัวเรา) • วงอยู่กับที่ 5 วิ รัศมี 300 • ศัตรูในวงโดน 6 ดาเมจทุก 0.5 วิ + ช้า 30%',
+  cast(p,S){const a=lightAlly(p),c=a||p;p.lgVeil={x:c.x,y:c.y,h:c.z||0,t:S.v.t,k:0};emit({k:'efx',z:'lgveil',x:Math.round(c.x),y:Math.round(c.y),h:c.z||0,r:S.v.r,id:p.id,t:a?a.id:undefined});}});
 const LT_VS=LT_VS_S.v;
 const LT_UL=defSpell(LIGHTP,{id:'radiantsovereign',v:{t:8,shield:100,dr:0.3,cast:0.45,hover:3.08,
   baRange:800,baDmg:12,baTick:0.3,baHold:1.5,baRest:1.2,baWindup:0.42,width:12,finishCast:0.32,finishRange:900,finishR:250,finishDmg:80},
