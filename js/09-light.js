@@ -18,7 +18,10 @@ PATHS[LIGHTP].vn={max:'คริสตัลสูงสุด',linkR:'ลิง
   baRange:'Prism Ray • ระยะ',shReg:'Crystal Aegis • ฟื้นเกจ (เท่า สายอื่น=1)',dsDist:'Light Step • วาร์ป',dsCd:'Light Step • คูลดาวน์',dsDmg:'Light Step • ระเบิดตอนถึงคู่หู',dsR:'Light Step • รัศมี'};
 const lgOn=p=>p&&p.pathIdx===LIGHTP;
 const lightShieldGauge=p=>100/LTV.shHp[Math.max(1,Math.min(3,p.lc|0))];
-function lightClearBond(a){a.lgN=0;a.lgFrom=null;a.lgEmpT=0;a.lgEmpCd=0;}
+function lightClearBond(a){
+  if(a.lgEmpT>G.time)emit({k:'efx',z:'lgempend',id:a.id,x:Math.round(a.x),y:Math.round(a.y)});
+  a.lgN=0;a.lgFrom=null;a.lgEmpT=0;a.lgEmpCd=0;
+}
 function lightReset(p,restoreUlt=false){
   if(p.lgUlt)lightUltEnd(p,restoreUlt,restoreUlt);
   p.lgUltWard=null;
@@ -197,7 +200,7 @@ function lightDmgIn(t){let k=1;if(t.lgN>0)k*=1-LTV.allyDR*t.lgN;if(t.lgDR>G.time
 function lightSnapP(p){if(!lgOn(p)&&!(p.lgN>0)&&!p.lgUltWard)return undefined;
   const pos=lgOn(p)?lightLinkPos(p):null,a=lgOn(p)?lightAlly(p):null;
   return [p.lc|0,a?a.id:p.lgA==='prism'?'P':0,pos?[Math.round(pos.x),Math.round(pos.y)]:0,p.lgN|0,p.lgBeam|0,p.lgEmp>G.time?1:0,p.lgDch>=1?1:0,
-    p.lgSan?[Math.round(p.lgSan.x),Math.round(p.lgSan.y),p.lgSan.n|0]:0,p.lgVeil?[Math.round(p.lgVeil.x),Math.round(p.lgVeil.y),Math.round(p.lgVeil.t*10)]:0,p.lgBeamL|0,Math.round((p.lgBeamA||p.ang||0)*100)/100,p.shieldOn?1:0,Math.round((p.lgChg||0)*100)/100,Math.round((p.lgBeamP||0)*100)/100,
+    p.lgSan?[Math.round(p.lgSan.x),Math.round(p.lgSan.y),p.lgSan.n|0]:0,p.lgVeil&&p.lgVeil.wind<=0?[Math.round(p.lgVeil.x),Math.round(p.lgVeil.y),Math.round(p.lgVeil.t*10)]:0,p.lgBeamL|0,Math.round((p.lgBeamA||p.ang||0)*100)/100,p.shieldOn?1:0,Math.round((p.lgChg||0)*100)/100,Math.round((p.lgBeamP||0)*100)/100,
     p.lgUlt?lightUltSnap(p.lgUlt):0,p.lgUltWard?1:0,Math.round((p.lgHeat||0)*100),p.lgOH>0?1:0,p.lgBeamW|0];}
 // ---------- สกิล ----------
 function lightSkillsTick(p,dt){
@@ -208,14 +211,29 @@ function lightSkillsTick(p,dt){
     if(V.b>=V.pts.length&&V.t>=LT_VO.wind+(V.pts.length-1)*LT_VO.step+LT_VO.charge+LT_VO.back){p.lc=Math.min(LTV.max,p.lc+V.n);p.lgVol=null;}}
   const Z=p.lgSan;   // Sanctum Crystal: ฮีลรอบวง 2/วิ ต่อคริสตัล
   if(Z){Z.t-=dt;Z.k=(Z.k||0)+dt;
-    if(Z.k>=0.5){Z.k-=0.5;Z.e=(Z.e|0)+1;const ids=[];for(const q of plist())if(q.team===p.team&&q.alive&&!q.downed&&Math.hypot(q.x-Z.x,q.y-Z.y)<=LT_SC.r+LT_SC.rUp*(Z.n-1)){healT(q,LT_SC.heal*Z.n*0.5);ids.push(q.id);}
-      if(ids.length&&Z.e%2===0)emit({k:'efx',z:'lgsanheal',x:Math.round(Z.x),y:Math.round(Z.y),h:Z.h,id:p.id,ids,n:Z.n});}   // ภาพ: คนที่ได้ฮีลมีประกายทอง/เขียวลอยขึ้น (ทุก 1 วิ)
+    if(Z.k>=0.5){
+      Z.k-=0.5;Z.e=(Z.e|0)+1;
+      const radius=LT_SC.r+LT_SC.rUp*(Z.n-1),healed=Z.healed||(Z.healed=new Set());
+      for(const q of plist())if(q.team===p.team&&q.alive&&!q.downed&&Math.hypot(q.x-Z.x,q.y-Z.y)<=radius){
+        const hp=q.hp;healT(q,LT_SC.heal*Z.n*0.5);
+        if(q.hp>hp)healed.add(q.id);
+      }
+      if(Z.e%2===0){   // รวมคนที่ฟื้น HP จากทั้งสองจังหวะ ให้ประกายขึ้นทุก 1 วิ
+        if(healed.size)emit({k:'efx',z:'lgsanheal',x:Math.round(Z.x),y:Math.round(Z.y),h:Z.h,id:p.id,ids:[...healed],n:Z.n});
+        healed.clear();
+      }
+    }
     const k=lightSlotOf(p,'sanctumcrystal');if(k){if(p.inp&&p.inp['h'+k])Z.hold=(Z.hold||0)+dt;else Z.hold=0;}
     if(Z.t<=0||Z.hold>=LTV.holdT)lightSanEnd(p);}
   const W=p.lgVeil;  // Shard Storm: วงใบมีดคริสตัลอยู่กับที่ ดาเมจทุก tick + ช้า
-  if(W){W.t-=dt;W.k+=dt;const fs=foesIn(p.team,W.x,W.y,LT_VS.r,W.h+3);for(const t of fs)addSlow(t,1-LT_VS.slow,0.2);
-    if(W.k>=LT_VS.tick){W.k-=LT_VS.tick;const ids=[];for(const t of fs){aoeHit(p,t,LT_VS.dmg);ids.push(t.id);}if(ids.length)emit({k:'efx',z:'lgveilhit',x:Math.round(W.x),y:Math.round(W.y),h:W.h,id:p.id,ids});}
-    if(W.t<=0)p.lgVeil=null;}
+  if(W){
+    const wind=Math.min(W.wind,dt);W.wind-=wind;
+    if(W.wind>0)return;
+    const active=Math.min(W.t,dt-wind);W.t-=active;W.k+=active;
+    const fs=foesIn(p.team,W.x,W.y,LT_VS.r,W.h+3);for(const t of fs)addSlow(t,1-LT_VS.slow,0.2);
+    if(W.k+1e-6>=LT_VS.tick){W.k=Math.max(0,W.k-LT_VS.tick);const ids=[];for(const t of fs){aoeHit(p,t,LT_VS.dmg);ids.push(t.id);}if(ids.length)emit({k:'efx',z:'lgveilhit',x:Math.round(W.x),y:Math.round(W.y),h:W.h,id:p.id,ids});}
+    if(W.t<=1e-6)p.lgVeil=null;
+  }
 }
 
 // Radiant Sovereign uses the caster's actual position above the linked ally.
@@ -407,9 +425,10 @@ const LT_SC=defSpell(LIGHTP,{id:'sanctumcrystal',v:{range:400,t:8,r:200,rUp:25,h
   d:'ชี้ไม้ลงจุด คริสตัลพุ่งโค้งปักพื้น (ไกล 400) คริสตัลแสงใหญ่ลอยขึ้น ฮีลเราและเพื่อนรัศมี 200 วิละ 2 ต่อคริสตัล • กดซ้ำ = เพิ่มคริสตัลเข้าวง • อยู่ 8 วินับจากชิ้นแรก • กดค้าง = เรียกคืน',
   toggle(p){const Z=p.lgSan;if(!Z)return false;if(p.lc>0){p.lc--;Z.n++;emit({k:'efx',z:'lgsanadd',x:Math.round(p.x),y:Math.round(p.y),h:p.z+1.4,x2:Math.round(Z.x),y2:Math.round(Z.y),h2:Z.h,id:p.id});}return true;},
   cast(p,S){if(p.lc<=0)return false;const [x,y,h]=lightAimPt(p,S.v.range);p.lc--;p.lgSan={x,y,h,n:1,t:S.v.t};emit({k:'efx',z:'lgsan',x:Math.round(x),y:Math.round(y),h,r:S.v.r,id:p.id});}}).v;
+const LT_VS_RELEASE=0.58,LT_VS_TRAVEL=0.3;
 const LT_VS_S=defSpell(LIGHTP,{id:'veiledshard',v:{t:5,r:300,dmg:6,tick:0.5,slow:0.3},vn:{t:'อยู่นาน (วิ)',r:'รัศมี',dmg:'ดาเมจต่อครั้ง',tick:'ตีทุก (วิ)',slow:'ช้า (สัดส่วน)'},role:'control',n:'Shard Storm',ic:'🌀',cd:12,
-  d:'วางพายุใบมีดคริสตัลลงพื้นตรงเพื่อนที่ Bond อยู่ (ไม่มี Bond = ที่ตัวเรา) • วงอยู่กับที่ 5 วิ รัศมี 300 • ศัตรูในวงโดน 6 ดาเมจทุก 0.5 วิ + ช้า 30%',
-  cast(p,S){const a=lightAlly(p),c=a||p;p.lgVeil={x:c.x,y:c.y,h:c.z||0,t:S.v.t,k:0};emit({k:'efx',z:'lgveil',x:Math.round(c.x),y:Math.round(c.y),h:c.z||0,r:S.v.r,id:p.id,t:a?a.id:undefined});}});
+  d:'วางพายุใบมีดคริสตัลลงพื้นตรงเพื่อนที่ Bond อยู่ (ไม่มี Bond = ที่ตัวเรา) • หลังผลึกตก วงอยู่กับที่ 5 วิ รัศมี 300 • ศัตรูในวงโดน 6 ดาเมจทุก 0.5 วิ + ช้า 30%',
+  cast(p,S){const a=lightAlly(p),c=a||p;p.lgVeil={x:c.x,y:c.y,h:c.z||0,wind:LT_VS_RELEASE+LT_VS_TRAVEL,t:S.v.t,k:0};emit({k:'efx',z:'lgveil',x:Math.round(c.x),y:Math.round(c.y),h:c.z||0,r:S.v.r,id:p.id,t:a?a.id:undefined});}});
 const LT_VS=LT_VS_S.v;
 const LT_UL=defSpell(LIGHTP,{id:'radiantsovereign',v:{t:8,shield:100,dr:0.3,cast:0.45,hover:3.08,
   baRange:800,baDmg:12,baTick:0.3,baHold:1.5,baRest:1.2,baWindup:0.42,width:12,finishCast:0.32,finishRange:900,finishR:250,finishDmg:80},
