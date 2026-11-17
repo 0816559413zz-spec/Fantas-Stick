@@ -100,18 +100,18 @@ WRATH_READY_T:221 WRATH_THROW_SWING_T:222 WRATH_DRAW_T:223 WRATH:224 earthWrathA
 §286 ทั้งสนาม: สิ่งก่อสร้างพัง / ฝุ่นหมดเวลา / Stonebreaker ชนกำแพง
 updateEarth:287 earthSnapP:297 earthSnapW:313
 
-## js/09-light.js (354) — 
-LIGHTP:8 LTV:12 lgOn:19 lightReset:20 lightAlly:25 lightLinkPos:26 lightUnlink:27
-§31 สกิล 1 Crystal Bond: เล็งเพื่อน + กด = ลิงก์และส่ง 1 ชิ้น • ไม่เล็งเพ…
-lightBondTap:32 lightRecall:47
-§48 ทุกเฟรม
-lightTick:49 lightSlotOf:65
-§66 BA Prism Ray: กดค้าง = ลำแสง • 0 ชิ้น = ลำบางทะลุ 5/1 วิ • 1/2/3 ชิ้น…
-lightBeamAng:67 lightBeamPitch:69 lightBeamHits:71 lightBasic:77
-§91 Dash Light Step: วาร์ป 250 ตามทิศเดิน • เล็งคู่หู (ไม่เกิน 900) = วาร…
-lightDash:92 lightDmgOut:108 lightDmgIn:109 lightSnapP:110
-§115 สกิล
-lightSkillsTick:116 LIGHT_FORM_BASE:136 LIGHT_FORM_SCALE:137 LIGHT_FORM_PIVOT:138 lightFormAngles:139 lightFormRecoil:144 lightFormHand:149 LIGHT_FORM_ARMS:156 lightArmRest:165 _lightArmWork:166 lightArmPose:168 lightArmAim:186 lightUltSnap:193 lightUltEnd:199 _lightFormAngles:212 _lightFormTurn:212 _lightFormHand:212 lightUltOrigin:213 lightUltRay:223 lightUltBeamHit:230 lightUltFinish:244 lightUltTick:252 lightSanEnd:303 lightAimPt:304 LT_BOND:306 LT_VO:309 LT_EM:314 LT_SC:317 LT_VS_S:321 LT_VS:324 LT_UL:325 lightAllyHit:343 lightQueueTick:346
+## js/09-light.js (411) —
+LIGHTP:8 LTV:12 lgOn:19 lightShieldGauge:20 lightClearBond:21 lightReset:22 lightAlly:27 lightLinkPos:28 lightUnlink:29 lightReleaseAlly:47
+§53 สกิล 1 Crystal Bond: เล็งเพื่อน + กด = ลิงก์และส่ง 1 ชิ้น • ไม่เล็งเพ…
+lightBondTap:54 lightRecall:69
+§70 ทุกเฟรม
+lightTick:71 lightSlotOf:87
+§88 BA Prism Ray: กดค้าง = ลำแสง • 0 ชิ้น = ลำบางทะลุ 5/1 วิ • 1/2/3 ชิ้น…
+lightBeamAng:89 lightBeamPitch:91 lightBeamLength:93 lightBeamHits:101 lightBasic:107
+§121 Dash Light Step: วาร์ป 250 ตามทิศเดิน • เล็งคู่หู (ไม่เกิน 900) = วาร…
+lightStepBehind:122 lightDash:135 lightDmgOut:165 lightDmgIn:166 lightSnapP:167
+§172 สกิล
+lightSkillsTick:173 LIGHT_FORM_BASE:193 LIGHT_FORM_SCALE:194 LIGHT_FORM_PIVOT:195 lightFormAngles:196 lightFormRecoil:201 lightFormHand:206 LIGHT_FORM_ARMS:213 lightArmRest:222 _lightArmWork:223 lightArmPose:225 lightArmAim:243 lightUltSnap:250 lightUltEnd:256 _lightFormAngles:269 _lightFormTurn:269 _lightFormHand:269 lightUltOrigin:270 lightUltRay:280 lightUltBeamHit:287 lightUltFinish:301 lightUltTick:309 lightSanEnd:360 lightAimPt:361 LT_BOND:363 LT_VO:366 LT_EM:371 LT_SC:374 LT_VS_S:378 LT_VS:381 LT_UL:382 lightAllyHit:400 lightQueueTick:403
 
 ## js/09-nature-ba.js (122) — 
 NATURE_BA_TEST:2 NATURE_WHIP:3 natureWhipEnabled:4 NAT_SLAM:8 NAT_LINE:8 natureEmpNear:9 natureEmpHit:10 natureWhipHit:18 natureWhipBasic:41 NW_RINGS:65 NW_SIDES:65 nwPhase:66 nwEase:67 nwSwingAngle:68 natureWhipPose:74 natureWhipVisualMake:83 natureWhipView:105
@@ -191,17 +191,17 @@ W_WL:549 W_DR:555 W_VX:561 W_VO:567 W_FW:573 W_UL:583
 ## js/10-net.js (200) — 
 PREFIX:4 NET:5 RC:9 TURN_SERVERS:12 ICE:13 PEER_OPT:14 TURN_URL:16 ICE_READY:18 JN:22 LAG:24 lagDo:25 hostSend:26 LOBBY:27 genCode:28 sendAll:29 NETD_KEYS:33 NETD:33 netDeltaReset:34 netDelta:35 NET_MAX:49 _netTE:49 netSendSnap:50 NETU:62 netUndelta:63 setStatus:69 hostGame:71 hostPeer:80 netConnect:100 joinWatch:111 joinFail:126 netLost:132 joinGame:147 joinPeer:158 clientOnData:173 leave:188 leaveRoom:190
 
-## js/11-host.js (428) — 
-G:4 EVL:4 EVN:4 hostLast:4 tickN:4 emit:5 feed:6 banner:7 plist:8 cleanName:9 freshStats:11 newPlayer:18 emptyInput:21 frameOk:23 addPlayer:24 initHostLobby:33 lobbyMsg:40 broadcastLobby:41 INPN:43 hostOnData:44 hostDrop:75 hostRemove:84 validate:98 hostStart:111 hostToLobby:138 MIDJOIN:145 modeCap:146 midJoin:147 CHATT:163 chatRelay:164 emoHost:172 resetBody:174 fmap:180 spawnPts:181 teamPts:183 spSpread:185 placeAll:186 respawn:198
-§217 ลูปหลักฝั่งโฮสต์
-hostTick:218 angDiff:234 cH:236 vR:237 updatePlayer:239 hitProp:415 damagePropsIn:422 nearUseProp:423 useProp:424
+## js/11-host.js (430) —
+G:4 EVL:4 EVN:4 hostLast:4 tickN:4 emit:5 feed:6 banner:7 plist:8 cleanName:9 freshStats:11 newPlayer:18 emptyInput:21 frameOk:23 addPlayer:24 initHostLobby:33 lobbyMsg:40 broadcastLobby:41 INPN:43 hostOnData:44 hostDrop:75 hostRemove:84 validate:100 hostStart:113 hostToLobby:140 MIDJOIN:147 modeCap:148 midJoin:149 CHATT:165 chatRelay:166 emoHost:174 resetBody:176 fmap:182 spawnPts:183 teamPts:185 spSpread:187 placeAll:188 respawn:200
+§219 ลูปหลักฝั่งโฮสต์
+hostTick:220 angDiff:236 cH:238 vR:239 updatePlayer:241 hitProp:417 damagePropsIn:424 nearUseProp:425 useProp:426
 
-## js/12-buildings.js (542) — สิ่งปลูกสร้างที่พังเป็นชิ้นย่อย (บ้าน) แบบ Battlefield — คู่มือเต็ม: …
+## js/12-buildings.js (543) — สิ่งปลูกสร้างที่พังเป็นชิ้นย่อย (บ้าน) แบบ Battlefield — คู่มือเต็ม: …
 BLDDEF:8 BLD_PIECES:10 BLD_GRID:11 BLD_DOOR:13 BLD_FIRE:14 BLD_ICE:14 BLD_ROOF_MIN:14 BLDG:15 BLDON:15 genBldg:16 bldRect:26 bldChunk:28 bldAlive:35 bldLocal:36 bldWorld:37 rectDist:38 bldNear:39 BLD_MOUND:42 bldGone:43 bldMoundAt:44 bldMoundH:45 hitBldPiece:47 breakBldChunk:58 bldSupport:66 damageEnv:86 bldRay:104 _sgRB:112 aimClip:114 aimLineH:122 aimRay3:123 bldPieceAt:139 projEl:150 bldPush:155 collideBld:161 updateBldg:179 bldSnap:192 bldParse:198
 §202 ของบังในแผนที่ไฟล์ที่พังได้ (หิน เสา รูปปั้น ต้นไม้ โคมไฟ ลัง ...) — …
 BRKDEF:206 BRK_M:206 BRK_MCOL:206 BRK:207 genBrk:208 brkApply:215 brkStage:219 hitBrk:220 damageBrkIn:228 brkSnap:234 brkParse:235
 §236 ตารางช่อง (spatial grid) สำหรับแมพใหญ่: หาเฉพาะของใกล้ ๆ แทนวนทุกชิ้น…
-SG:239 sgObs:240 sgProps:240 sgGrid:242 sgNear:249 _sgCR:254 _sgCW:254 _sgCB:254 _sgCO:254 _sgPO:254 _sgPB:254 _sgPP:254 _sgM:254 _sgE:254 _sgA:254 _cwLast:256 collideWorld:257 shoot:297 eShoot:325 foesOf:332 breakShield:340 ULT_RATE:342 ultActive:343 gainUlt:344 lifesteal:345 damage:347 playerDown:413 killProj:434 explode:445 hitTarget:457 updateProjectiles:474 projStep:482
+SG:239 sgObs:240 sgProps:240 sgGrid:242 sgNear:249 _sgCR:254 _sgCW:254 _sgCB:254 _sgCO:254 _sgPO:254 _sgPB:254 _sgPP:254 _sgM:254 _sgE:254 _sgA:254 _cwLast:256 collideWorld:257 shoot:297 eShoot:325 foesOf:332 breakShield:340 ULT_RATE:342 ultActive:343 gainUlt:344 lifesteal:345 damage:347 playerDown:413 killProj:435 explode:446 hitTarget:458 updateProjectiles:475 projStep:483
 
 ## js/12-city-dmg.js (270) — เมืองพังได้ (designs/city-bot-battle.md ขั้น 4) — ข้อมูลที่ทุกเครื่อง…
 CITY_FL:8 CITY_PW:8 CDMG:9 CITYD:16 cityOn:17 cityLayout:19 cityReset:29 cityApplyBox:45 cityApplyItem:46 cityHex:47 cityMark:48 cityRampSync:49 cityPanelAt:51 cityHitPanel:56 cityTowerStart:70 cityTowerStrip:76 cityTowerFall:80 cityHitItem:91 cityHitObs:100 _sgCD:105 cityDamageIn:107 cityTick:118 _sgCM:129 cityMoundH:130 cityMounds:140
@@ -733,10 +733,10 @@ BACKDROP:8
 §66 noise เล็ก ๆ (คงที่ต่อ seed)
 bdHash:67 bdNoise:68 bdFbm:69 bdEdge:71 bdRing:73 bdPaint:79 bdTree:82 buildBackdrop:89 bdTower:135 backdropHide:139
 
-## js/68-light-view.js (737) — 
-LGV:7 LGSH:9 LGSH_L:11 _lgM4:14 _lgQ:14 _lgSV:14 _lgS:14 _lgC:14 _lgC2:14 lgGlowTex:15 lgNeon:17 lgEmpBeam:25 lgNeonCrystal:38 lgHoneyTex:49 lgShield:53 lightShieldEv:85 LGPOSE:88 _lgGlass:89 _lgCore:89 _lgGeo:89 _lgEdge:89 _lgEdgeM:89 lgCrystalMesh:91 lgState:99 _lgV:100 _lgW:100 lgWorld:101 LG_ULT_ASSET:104 LG_CRYSTAL_ASSET:104 LG_ULT_TIME:105 lgUltMaterials:106 lgSovereignFinishes:107 lgSovereignMaterials:108 lgSovereignFinish:161 lgSovereignCrystal:177 lgSkinSovereign:186 lgPoseSovereign:224 lgSovereignRibbon:254 lgSovereignCrossSparks:283 lgBuildSovereign:306 lgReturnMark:350 lgUltVisual:355 lgWardVisual:429 _lgBeamM:445 lgBeamMat:446 _lgUltBeamM:449 lgUltBeamMat:450 _lgLinkM:455 lgLinkMat:456 lgTube:459 lgAim:460 lightFX:461 lgBaseObjects:628 lgClearBase:629 lgClear:630 lightDropView:634
-§639 เหตุการณ์
-lgBlip:641 lgArcFx:645 lgFlyFx:648 lightFxTick:649 lightEfx:653 _lgHq:731 _lgHy:731 lightHeadPose:732
+## js/68-light-view.js (797) —
+LGV:7 LGSH:9 LGSH_L:11 _lgM4:14 _lgQ:14 _lgSV:14 _lgS:14 _lgC:14 _lgC2:14 lgGlowTex:15 lgNeon:17 lgEmpBeam:25 lgNeonCrystal:38 lgSanctumFloorTex:48 lgSanctumMoteTex:59 lgHoneyTex:74 lgShield:78 lightShieldEv:110 LGPOSE:113 _lgGlass:114 _lgCore:114 _lgGeo:114 _lgEdge:114 _lgEdgeM:114 lgCrystalMesh:116 lgState:124 _lgV:125 _lgW:125 lgWorld:126 LG_ULT_ASSET:129 LG_CRYSTAL_ASSET:129 LG_ULT_TIME:130 lgUltMaterials:131 lgSovereignFinishes:132 lgSovereignMaterials:133 lgSovereignFinish:186 lgSovereignCrystal:202 lgSkinSovereign:211 lgPoseSovereign:249 lgSovereignRibbon:279 lgSovereignCrossSparks:308 lgBuildSovereign:331 lgReturnMark:375 lgUltVisual:380 lgWardVisual:454 _lgBeamM:470 lgBeamMat:471 _lgUltBeamM:474 lgUltBeamMat:475 _lgLinkM:480 lgLinkMat:481 lgTube:484 lgAim:485 lightFX:486 lgBaseObjects:678 lgClearBase:679 lgClear:680 lightDropView:684
+§689 เหตุการณ์
+lgBlip:691 lgArcFx:695 lgFlyFx:698 lightFxTick:699 lightEfx:703 _lgHq:791 _lgHy:791 lightHeadPose:792
 
 ## js/68-nature-art.js (171) — 
 naturePlantArt:2 Turret:3 auraTextures:44 auraTex:45 LotusAura:88 glowWallTex:92 M_BUB:95 M_BUBRIM:96 M_DRIP:97 M_POOL:98 lotusPetalVeins:100 Lotus:127
