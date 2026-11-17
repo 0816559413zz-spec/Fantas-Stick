@@ -9,11 +9,11 @@ const LIGHTP=PATHS.length;
 ICONS.add('radiantsovereign');
 PATHS.push({id:'light',n:'สายแสง',ic:'✨',col:'#ffe9a8',d:'ซัพพอร์ตคู่หู — แบ่งคริสตัล 3 ชิ้นให้ตัวเองหรือเพื่อนที่ลิงก์ ยิงลำแสง ฮีลพื้นที่ วางกับดักล่องหน',
   combo:'Crystal Bond ส่งคริสตัลให้เพื่อน (กัน/ตีแรงขึ้น) • เก็บไว้เอง = ลำแสง/โล่แรงสุด • Empower Light บัฟทั้งเราและเพื่อน • Light Step วาร์ปไปหาเพื่อน ให้โล่ลดดาเมจ'});
-const LTV=PATHS[LIGHTP].v={max:3,linkR:750,linkPick:160,sendT:0.3,holdT:0.4,allyDR:0.05,allyDmg:0.05,
-  baRange:600,baCharge:1.4,heatT:10,heatIdle:2,heatDrain:2,ohT:2,baFloat:0.5,baRise:1.3,baMove:0.5,ba0:[5,1.0],ba1:[5,0.7],ba2:[8,0.6],ba3:[10,0.6],baW:[10,14,18,22],
+const LTV=PATHS[LIGHTP].v={max:3,linkR:650,linkPick:160,sendT:0.3,holdT:0.4,allyDR:0.05,allyDmg:0.05,
+  baRange:600,baCharge:1.4,heatT:10,heatIdle:2,heatDrain:2,ohT:2,baFloat:0.5,baRise:1.3,baMove:0.7,ba0:[5,1.0],ba1:[7,0.7],ba2:[10,0.6],ba3:[12,0.5],baW:[10,14,18,22],
   shHp:[0,120,180,300],shReg:0.45,
   dsDist:250,dsAllyR:900,dsPick:180,dsCd:8,dsDmg:15,dsR:150,dsDR:0.3,dsDRT:2,
-  prismT:20};
+  prismT:0};   // 0 = ปริซึมอยู่ตลอดจนเรียกคืน/ลิงก์ใหม่ (ผู้ใช้ 2026-11-18)
 PATHS[LIGHTP].vn={max:'คริสตัลสูงสุด',linkR:'ลิงก์ • ระยะหลุด',allyDR:'คริสตัลกับเพื่อน • กันดาเมจ/ชิ้น',allyDmg:'คริสตัลกับเพื่อน • ตีแรง/ชิ้น',
   baRange:'Prism Ray • ระยะ',shReg:'Crystal Aegis • ฟื้นเกจ (เท่า สายอื่น=1)',dsDist:'Light Step • วาร์ป',dsCd:'Light Step • คูลดาวน์',dsDmg:'Light Step • ระเบิดตอนถึงคู่หู',dsR:'Light Step • รัศมี'};
 const lgOn=p=>p&&p.pathIdx===LIGHTP;
@@ -73,7 +73,7 @@ function lightTick(p,dt){
   if(p.lc===undefined)lightReset(p);
   // ลิงก์หลุดเมื่อไกลเกิน / คู่หูตาย
   if(p.lgA&&p.lgA!=='prism'){const a=G.players[p.lgA];if(!a||!a.alive||a.downed||Math.hypot(a.x-p.x,a.y-p.y)>LTV.linkR)lightUnlink(p);}
-  if(p.lgA==='prism'&&p.lgPr){p.lgPr.t-=dt;if(p.lgPr.t<=0)lightUnlink(p);}
+  if(p.lgA==='prism'&&p.lgPr&&LTV.prismT>0){p.lgPr.t-=dt;if(p.lgPr.t<=0)lightUnlink(p);}
   // กดค้างปุ่ม Crystal Bond = เรียกคืน
   {const k=lightSlotOf(p,'crystalbond');if(k){const held=p.inp&&p.inp['h'+k];if(held){p.lgHold+=dt;if(p.lgHold>=LTV.holdT&&p.lgHold-dt<LTV.holdT)lightRecall(p);}else p.lgHold=0;}}
   if(p.lgDch<1)p.lgDch=Math.min(1,p.lgDch+dt/(LTV.dsCd*p.buffs.cdr));
@@ -118,10 +118,21 @@ function lightBeamHits(p,len,w,pierce){
   for(const t of foesOf(p.team)){if(t.dead||t.alive===false||t.downed)continue;const dx=t.x-p.x,dy=t.y-p.y,f=dx*c+dy*s;if(f<0||f>fl)continue;if(Math.abs(-dx*s+dy*c)>w+(t.r||PR))continue;
     const bh=h0+tp*f*S3-terrT(t.x,t.y),tz=t.z??t.h??0;if(bh<tz-0.3-w/20||bh>tz+2.1+w/20)continue;out.push([f,t]);}
   out.sort((x,y)=>x[0]-y[0]);return pierce?out.map(x=>x[1]):out.slice(0,1).map(x=>x[1]);}
+// ไม่มีคริสตัล (ผู้ใช้ 2026-11-17): คลิกหนึ่งครั้ง = ลำแสงสั้น ๆ แวบเดียว ไม่ยิงค้าง • ต้องปล่อยแล้วคลิกใหม่ • ห่างกันอย่างน้อย ba0[1] วิ
+function lightTapShot(p,inp,dt){
+  p.lgTapCd=Math.max(0,(p.lgTapCd||0)-dt);p.lgPulse=Math.max(0,(p.lgPulse||0)-dt);p.lgChg=0;
+  if(inp.fire&&!p.lgTapH&&p.lgTapCd<=0){p.lgTapH=1;p.lgTapCd=LTV.ba0[1];p.lgPulse=0.2;
+    const len=LTV.baRange;p.lgBeamA=lightBeamAng(p);p.lgBeamP=lightBeamPitch(p);p.lgBeamL=lightBeamLength(p,len);p.lgTapW=p.lgBeamL<len?1:0;
+    const t=lightBeamHits(p,p.lgBeamL,LTV.baW[0],false)[0];
+    if(t){const f=(t.x-p.x)*Math.cos(p.lgBeamA)+(t.y-p.y)*Math.sin(p.lgBeamA);p.lgBeamL=Math.max(0,(f-(t.r||PR)*0.7)/Math.cos(p.lgBeamP));p.lgTapW=2;
+      damage(t,LTV.ba0[0],p.id,'aoe');emit({k:'efx',z:'lgbahit',x:Math.round(t.x),y:Math.round(t.y),h:cH(t),n:0,id:p.id});}}
+  if(!inp.fire)p.lgTapH=0;
+  if(p.lgPulse>0){p.lgBeam=1;p.lgBeamW=p.lgTapW|0;}}
 function lightBasic(p,inp,dt,setCd){
   p.lgBeam=0;p.lgBeamW=0;
   if(p.lgOH>0){p.lgChg=0;p.lgBaT=0;return;}   // ร้อนเกิน: คริสตัลกำลังชาร์จใหม่
   if(p.shieldOn||p.lgUlt||p.lgVol){p.lgChg=0;return;}
+  if(Math.max(0,Math.min(3,p.lc|0))===0){lightTapShot(p,inp,dt);return;}   // ไม่มีคริสตัล = ยิงทีละคลิก
   if(!inp.fire){p.lgBaT=0;p.lgChg=0;return;}
   const n=Math.max(0,Math.min(3,p.lc|0)),T=[LTV.ba0,LTV.ba1,LTV.ba2,LTV.ba3][n],emp=p.lgEmp>G.time;
   // มีคริสตัล: ชาร์จ 1.4 วิ (ลอยขึ้น 0.5 ม. คริสตัลเรียงเป็นวงหน้าไม้) แล้วค่อยยิง • 0 ชิ้น = ยิงทันทีจากไม้ ไม่ลอย
@@ -181,7 +192,7 @@ function lightDash(p,inp,pr,dt,setCd){
   }
   return false;}
 // ดาเมจ: คริสตัลกับคู่หู = กัน/ตีแรง 5% ต่อชิ้น • Light Step ลดดาเมจ 30% 2 วิ (เรียกจาก damage js/12)
-function lightDmgOut(src){return src&&src.lgN>0?1+LTV.allyDmg*src.lgN:1;}
+function lightDmgOut(src){if(!(src&&src.lgN>0))return 1;const o=src.lgFrom&&G.players[src.lgFrom],emp=o&&o.lgEmp>G.time?LT_EM.allyPct:0;return 1+(LTV.allyDmg+emp)*src.lgN;}   // Empower (ผู้ใช้ 2026-11-18): เพื่อนตีแรงเพิ่มอีก 5%/คริสตัลตอนบัฟ
 function lightDmgIn(t){let k=1;if(t.lgN>0)k*=1-LTV.allyDR*t.lgN;if(t.lgDR>G.time)k*=1-LTV.dsDR;if(t.lgUltWard)k*=1-LT_UL.dr;return k;}
 function lightSnapP(p){if(!lgOn(p)&&!(p.lgN>0)&&!p.lgUltWard)return undefined;
   const pos=lgOn(p)?lightLinkPos(p):null,a=lgOn(p)?lightAlly(p):null;
@@ -389,7 +400,7 @@ const LT_VO=defSpell(LIGHTP,{id:'shardvolley',v:{d0:250,overlap:25,gap:-15,wind:
     for(let k=0;k<n;k++){const d=k===0?V.d0:second+step*(k-1),x=p.x+Math.cos(a)*d,y=p.y+Math.sin(a)*d;
       pts.push([x,y,groundH(x,y,p.z),k===0?V.r0:V.r]);}
     p.lc=0;p.lgVol={t:0,n,pts};emit({k:'efx',z:'lgvol',x:Math.round(p.x),y:Math.round(p.y),h:p.z+1.4,id:p.id,pts:pts.map(([x,y,h,r])=>[Math.round(x),Math.round(y),r]),t:V.charge,w:V.wind,st:V.step});}}).v;
-const LT_EM=defSpell(LIGHTP,{id:'empowerlight',v:{t:6,ally:5,icd:0.5},vn:{t:'บัฟนาน (วิ)',ally:'เพื่อน • ดาเมจโบนัส/คริสตัล',icd:'เพื่อน • โบนัสทุก (วิ)'},role:'support',n:'Empower Light',ic:'✊',cd:12,
+const LT_EM=defSpell(LIGHTP,{id:'empowerlight',v:{t:6,ally:5,icd:0.5,allyPct:0.05},vn:{t:'บัฟนาน (วิ)',ally:'เพื่อน • ดาเมจโบนัส/คริสตัล',icd:'เพื่อน • โบนัสทุก (วิ)',allyPct:'เพื่อน • ตีแรงขึ้น %/คริสตัล ตอนบัฟ'},role:'support',n:'Empower Light',ic:'✊',cd:12,
   d:'6 วิ: ลำแสงเรายิงถี่ +10% กว้าง +15% ยาว +50 ต่อคริสตัลที่ถือ • เพื่อนที่ลิงก์: ตอนตีโดน คริสตัลยิงกระสุนแสงโค้งตาม +5 ดาเมจต่อชิ้น (ทุก 0.5 วิ)',
   cast(p,S){p.lgEmp=G.time+S.v.t;const a=lightAlly(p);if(a)a.lgEmpT=G.time+S.v.t;emit({k:'efx',z:'lgemp',x:Math.round(p.x),y:Math.round(p.y),h:p.z,id:p.id,t:a?a.id:undefined});}}).v;
 const LT_SC=defSpell(LIGHTP,{id:'sanctumcrystal',v:{range:400,t:8,r:200,rUp:25,heal:2},vn:{rUp:'รัศมีเพิ่ม/คริสตัลที่เพิ่ม',range:'ยิงได้ไกล',t:'วงอยู่ (วิ)',r:'รัศมีฮีล',heal:'ฮีล/วิ ต่อคริสตัล'},role:'support',n:'Sanctum Crystal',ic:'🔆',cd:20,

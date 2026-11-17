@@ -11,13 +11,13 @@ function botBrain(p,dt,tg0){
   if(!tg0){let md=450*450,bm=null;for(const m of G.mins)if(!m.dead&&m.team!==p.team){const dd=(m.x-p.x)**2+(m.y-p.y)**2;if(dd<md){md=dd;bm=m;}}if(bm&&Math.hypot(foe.x-p.x,foe.y-p.y)>240)tg=bm;}
   const dx=tg.x-p.x,dy=tg.y-p.y,d=Math.hypot(dx,dy),t=G.time;
   const fvx=tg._px===undefined?0:(tg.x-tg._px)/Math.max(dt,0.001),fvy=tg._py===undefined?0:(tg.y-tg._py)/Math.max(dt,0.001);tg._px=tg.x;tg._py=tg.y;
-  const lead=d/950;inp.ax=tg.x+fvx*lead;inp.ay=tg.y+fvy*lead;
+  const lead=p.pathIdx===LIGHTP?0.06:d/950;inp.ax=tg.x+fvx*lead;inp.ay=tg.y+fvy*lead;   // Light ลำแสงตรงถึงทันที: ดักนิดเดียว
   const mel=p.pathIdx===1&&p.fmode!==1;
   const P=p.ai&&p.ai.ps,R=P?P.rng:1;   // บอทห้องฝึก: นิสัยสุ่มต่อตัว (botPersona js/15-bot)
   const BR=(p.fmode===1?null:BOT_RANGE[p.pathIdx])||[260,430];   // ระยะที่ชอบยืนต่อสาย (js/15-botplay)
   const ang=Math.atan2(dy,dx),want=mel?(d>95?1:0):d>BR[1]*R?1:d<BR[0]*R?-1:0,st=P?P.sd*Math.sin(t*P.sp+P.ph):Math.sin(t*1.7+p.id.length);
   inp.mx=Math.cos(ang)*want+Math.cos(ang+Math.PI/2)*st*0.8;inp.my=Math.sin(ang)*want+Math.sin(ang+Math.PI/2)*st*0.8;
-  inp.fire=mel?(d<150?1:0):d<900?1:0;
+  inp.fire=mel?(d<150?1:0):p.pathIdx===LIGHTP?((p.lc|0)===0?(d<LTV.baRange-30&&!p.lgTapH?1:0):d<(LTV.baRange-30)?1:(p.lgBeam!==0&&d<LTV.baRange+80?1:0)):d<900?1:0;   // Light: กดค้างในระยะลำ (ปล่อย = ชาร์จใหม่ 1.4 วิ) • ยิงอยู่แล้วเผื่อหลุดระยะนิดหน่อย
   if(botClassPlanFor(p)){if(!p.ai)botClassPlan(p,tg);return;}
   if(p.pathIdx===1&&p.cd.dodge<=0&&d>520)inp.c.sp=(inp.c.sp|0)+1;
   const press=k=>{inp.c[k]=(inp.c[k]|0)+1;};

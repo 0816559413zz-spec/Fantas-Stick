@@ -5,6 +5,7 @@
 //  BOT_RANGE = ระยะที่ชอบยืนต่อสาย [ใกล้สุด, ไกลสุด] — ตัวเลขตั้งต้น ให้ทีมเกมเพลย์ปรับ
 // =====================================================================
 const BOT_RANGE={0:[340,580],1:[0,95],2:[0,240],3:[105,205],6:[300,520],7:[275,480]};
+BOT_RANGE[LIGHTP]=[240,470];   // Light: ยืนในระยะลำแสง (600) เผื่อเป้าวิ่งหนี
 // ความจำบอทเรื่องท่าต่อเนื่อง (ต่อตัว)
 function botMem(p){return p.bp||(p.bp={away:0,clk:0,wall:null,v:0});}
 // มีของแข็ง (กำแพง/ตึก/กำแพงลม-หินของเรา) อยู่หลังเป้าในแนวที่เราผลักไหม — ใช้กับสกิลผลัก (ดิน/ลม)
@@ -49,6 +50,13 @@ function botWant(p,id,tg,d){
     case 'mudswamp':return d<580;
     case 'tectoniccrush':return d>110&&d<330&&(tg.mudT>0||stuck||Math.random()<0.3);
     case 'dustburst':return d<480;
+    // ---- แสง: กดลำแสงค้าง เก็บคริสตัลไว้ยิงแรง • Bond เฉพาะมีเพื่อนร่วมทีม (1v1 ไม่ส่งคริสตัลไปปริซึม ลำจะอ่อน) ----
+    case 'crystalbond':{if(p.lgA)return false;const al=plist().filter(q=>q!==p&&q.team===p.team&&q.alive&&!q.downed&&Math.hypot(q.x-p.x,q.y-p.y)<LTV.linkR*0.9).sort((a,b)=>Math.hypot(a.x-p.x,a.y-p.y)-Math.hypot(b.x-p.x,b.y-p.y))[0];
+      if(!al)return false;if(p.ai)p.ai.aimOv={x:al.x,y:al.y};return true;}
+    case 'shardvolley':return (p.lc|0)>=2&&d>200&&d<820&&(stuck||Math.random()<0.35);
+    case 'empowerlight':return p.lgBeam>0&&d<LTV.baRange;
+    case 'sanctumcrystal':return hp<0.6&&d<520;
+    case 'veiledshard':return d<260;
   }
 }
 
