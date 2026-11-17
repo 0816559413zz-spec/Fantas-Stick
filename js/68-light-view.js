@@ -40,6 +40,28 @@ function lgEmpFx(S,o,on,now,dt){   // ผู้ใช้ 2026-11-17: ไม่�
   for(let c=0;c<3;c++){const cr=S.cr&&S.cr[c],H=S.eH[c];if(cr&&cr.visible&&vis){H.unshift(cr.position.clone());if(H.length>6)H.pop();}else H.length=0;
     for(let j=0;j<6;j++){const g=S.eTr[c*6+j],P=H[j+1];g.visible=!!P&&vis;if(g.visible){g.position.copy(P);g.scale.setScalar(0.32*(1-j/6));g.material.opacity=0.7*k*(1-j/6);}}}}
 // แกนลำแสง BA (ผู้ใช้ 2026-11-17 "ลำดูจาง"): แกนขาวร้อนตรงกลาง + ประกายวิ่งไปตามลำ + แฟลร์ตรงปลาย → อ่านออกบนแมพสว่าง
+// รอยไหม้บนผนัง: q = จุดชน (null = ไม่ได้ชนแล้ว → ค้างจางใน 1 วิ) • โตตามเวลาที่ยิงค้างจุดเดิม
+function lgWallBurn(S,q,nrm,w,now,dt){
+  if(!S.bHot){const T=LGV.glowT||(LGV.glowT=lgGlowTex());S.bHot=new THREE.Mesh(new THREE.CircleGeometry(1,32),new THREE.MeshBasicMaterial({map:T,color:hdr('#ffa830',1.8),transparent:true,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide}));
+    S.bHotR=new THREE.Mesh(new THREE.CircleGeometry(1,24),new THREE.MeshBasicMaterial({map:T,color:hdr('#fff4d0',1.6),transparent:true,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide}));scene.add(S.bHot,S.bHotR);
+    const sm=new THREE.MeshBasicMaterial({color:hdr('#ffe2a0',1.4),transparent:true,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide}),pg=new THREE.PlaneGeometry(1,1).translate(0.5,0,0);
+    S.wSp=[];for(let i=0;i<10;i++){const G=new THREE.Group(),m=new THREE.Mesh(pg,sm.clone());G.add(m);G.userData={m,a:i/10*Math.PI*2+Math.random()*0.4,ph:Math.random()};scene.add(G);S.wSp.push(G);}}
+  if(q){if(!S.wQ||S.wQ.distanceTo(q)>0.6)S.wT=0;S.wQ=(S.wQ||new THREE.Vector3()).copy(q);S.wN=(S.wN||new THREE.Vector3()).copy(nrm);S.wW=w;S.wT=(S.wT||0)+dt;S.wOff=0;}
+  else if(S.wQ&&!S.wOff)S.wOff=now;
+  const fade=!S.wQ?0:S.wOff?Math.max(0,1-(now-S.wOff)/1000):1;
+  if(fade<=0){S.bHot.visible=S.bHotR.visible=false;for(const G of S.wSp)G.visible=false;S.wQ=null;S.wT=0;return;}
+  const P=S.wQ,N=S.wN,gw=0.6+0.9*Math.min(1,(S.wT||0)/2),W=S.wW||0.1,live=!S.wOff;
+  for(const m of [S.bHot,S.bHotR]){m.visible=true;m.position.copy(P);m.lookAt(P.clone().add(N));}
+  S.bHot.scale.setScalar((0.4+W*1.8)*gw*(live?0.92+0.12*Math.sin(now/45):1));S.bHot.material.opacity=fade;
+  S.bHotR.scale.setScalar((0.15+W*0.8)*gw);S.bHotR.material.opacity=fade*(live?1:0.6);
+  for(let i=0;i<S.wSp.length;i++){const G=S.wSp[i],d=G.userData;G.visible=live;if(!live)continue;if(i%2){G.visible=false;continue;}const u=(d.ph+now/320)%1,L=(0.22+W*1.6)*(0.4+u)*gw;   // แสงสาดเป็นพัดไปตามผนัง
+    G.position.copy(P).addScaledVector(N,0.02);G.lookAt(P.clone().add(N));G.rotateZ(d.a+0.3*Math.sin(now/500+i));d.m.position.x=u*L*0.5;d.m.scale.set(L*(1-u*0.5),0.03+W*0.15*(1-u),1);d.m.material.opacity=0.55*(1-u)*fade;}}
+// เศษคริสตัลทองแตกจากตัวศัตรู (พูลเล็ก ๆ ต่อผู้ยิง)
+function lgShardSpawn(S,b,fwd,side,up){
+  if(!S.shd){S.shd=[];const g=new THREE.OctahedronGeometry(0.09,0);g.scale(0.6,1.7,0.6);const m=new THREE.MeshBasicMaterial({color:'#ffcf4a',transparent:true,depthWrite:false});for(let i=0;i<18;i++){const c=new THREE.Mesh(g,m.clone());c.visible=false;c.userData={t:1};scene.add(c);S.shd.push(c);}}
+  const c=S.shd.find(x=>x.userData.t>=1)||S.shd[0],d=c.userData;d.t=0;d.v=fwd.clone().multiplyScalar(-(1+Math.random()*2.5)).addScaledVector(side,(Math.random()-0.5)*8).addScaledVector(up,1.5+Math.random()*3.5);d.r=new THREE.Vector3(Math.random()*12,Math.random()*12,0);
+  c.position.copy(b).addScaledVector(fwd,-0.1);c.visible=true;c.scale.setScalar(0.8+Math.random()*0.7);}
+function lgShardTick(S,dt){if(!S.shd)return;for(const c of S.shd){const d=c.userData;if(d.t>=1){c.visible=false;continue;}d.t+=dt/0.55;d.v.y-=9*dt;c.position.addScaledVector(d.v,dt);c.rotation.x+=d.r.x*dt;c.rotation.z+=d.r.y*dt;c.material.opacity=1-d.t*d.t;}}
 function lgBaCore(S,on,a,b,fwd,w,now){
   if(!S.bC){S.bC=lgTube(new THREE.MeshBasicMaterial({color:hdr('#fffbe8',1.7),transparent:true,opacity:0.8,blending:THREE.AdditiveBlending,depthWrite:false}),1);S.bC.renderOrder=6;
     const T=LGV.glowT||(LGV.glowT=lgGlowTex());S.bSp=[];for(let i=0;i<10;i++){const g=new THREE.Sprite(new THREE.SpriteMaterial({map:T,color:hdr(i%2?'#ffe9a8':'#ffc24a',1.8),transparent:true,blending:THREE.AdditiveBlending,depthWrite:false}));g.userData={ph:i/10,o:Math.random()*6.283};scene.add(g);S.bSp.push(g);}
@@ -47,7 +69,8 @@ function lgBaCore(S,on,a,b,fwd,w,now){
     const rm=c=>new THREE.MeshBasicMaterial({color:hdr(c,1.8),transparent:true,opacity:0.9,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide});
     S.bR=[new THREE.Mesh(new THREE.TorusGeometry(1,0.06,6,48,Math.PI*1.55),rm('#ffd36a')),new THREE.Mesh(new THREE.TorusGeometry(0.72,0.045,6,40,Math.PI*1.2),rm('#fff1c0'))];for(const r of S.bR)scene.add(r);}
   if(!on){for(const r of S.bLR||[])r.visible=false;for(const r of S.mR||[])r.visible=false;}
-  S.bC.visible=S.bEnd.visible=on;for(const g of S.bSp)g.visible=on;const wall=on&&S.bWall;for(const r of S.bR)r.visible=on&&!wall;if(S.bHot&&!wall)S.bHot.visible=S.bHotR.visible=false;if(!on)return;
+  S.bC.visible=S.bEnd.visible=on;for(const g of S.bSp)g.visible=on;const hitK=on?(S.bHitK|0):0,wall=hitK>0;for(const r of S.bR)r.visible=on&&!wall;
+  const bdt=Math.min(0.05,Math.max(0,(now-(S.bNow||now))/1000));S.bNow=now;lgShardTick(S,bdt);if(hitK!==1)lgWallBurn(S,null,null,0,now,bdt);if(hitK!==2&&S.hitO){lgNeon(S.hitO,0);S.hitO=null;}if(!on)return;
   const len=a.distanceTo(b),side=new THREE.Vector3().crossVectors(fwd,new THREE.Vector3(0,1,0)).normalize(),up=new THREE.Vector3().crossVectors(side,fwd).normalize();
   // ลำเต้นเป็นจังหวะ + ร้อนแล้วลำเปลี่ยน (ผู้ใช้ 2026-11-17): ใกล้เต็ม = แกนออกส้มขาว ลำสั่น ประกายร้อนแตกจากปากลำ
   const hk=clamp(((S.bHeat||0)-0.6)/0.4,0,1),pl=1+0.16*Math.sin(now/150)+0.06*Math.sin(now/53);S.bPulse=pl;
@@ -65,17 +88,19 @@ function lgBaCore(S,on,a,b,fwd,w,now){
   for(let k=0;k<S.bLR.length;k++){const r=S.bLR[k];r.visible=st>=2;if(!r.visible)continue;const u=((now/900)+k/S.bLR.length)%1;r.position.copy(a).addScaledVector(fwd,u*len);r.lookAt(r.position.clone().add(fwd));r.scale.setScalar(w*(2.2+0.6*Math.sin(u*Math.PI)));r.material.opacity=0.55*Math.sin(u*Math.PI);}
   for(let k=0;k<2;k++){const r=S.mR[k];r.visible=st>=k+2;if(!r.visible)continue;r.position.copy(a);r.lookAt(a.clone().add(fwd));r.rotateZ((k?-1:1)*now/(k?140:200));r.scale.setScalar((0.32+0.1*k)*(0.8+0.25*st)*(1+0.06*Math.sin(now/60+k)));}
   S.bEnd.position.copy(b);const eK=(S.bSt||0)>=3?1.4:1;
-  if(wall){   // ชนกำแพง/พื้น (ผู้ใช้ 2026-11-17): จุดร้อนเรืองทองติดผนัง + ประกายกระเด็น
-    S.bEnd.material.color.copy(hdr('#ffc04a',1.4));S.bEnd.scale.setScalar((0.7+w*2.4)*(0.85+0.25*Math.sin(now/40)));
-    if(!S.bHot){const T=LGV.glowT||(LGV.glowT=lgGlowTex());S.bHot=new THREE.Mesh(new THREE.CircleGeometry(1,32),new THREE.MeshBasicMaterial({map:T,color:hdr('#ffb238',2.2),transparent:true,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide}));
-      S.bHotR=new THREE.Mesh(new THREE.RingGeometry(0.8,1,40),new THREE.MeshBasicMaterial({color:hdr('#ffe08a',1.6),transparent:true,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide}));scene.add(S.bHot,S.bHotR);}
-    {const ex=b.x/S3+MW/2,ey=b.z/S3+MH/2,gnd=b.y-GY(ex,ey)<0.35,nrm=gnd?new THREE.Vector3(0,1,0):new THREE.Vector3(-fwd.x,0,-fwd.z).normalize();   // พื้น = นอนราบ • ผนัง = หันกลับหาคนยิง
-      const q=b.clone().addScaledVector(nrm,0.03);if(gnd)q.y=GY(ex,ey)+0.03;S.bHot.visible=S.bHotR.visible=true;
-      for(const m of [S.bHot,S.bHotR]){m.position.copy(q);m.lookAt(q.clone().add(nrm));}
-      S.bHot.scale.setScalar((0.55+w*2.2)*eK*(0.9+0.15*Math.sin(now/45)));const u=(now/380)%1;S.bHotR.scale.setScalar((0.3+w*1.2)+u*(0.6+w*2));S.bHotR.material.opacity=0.8*(1-u);}
-    if(!S.bSpkT||now-S.bSpkT>55){S.bSpkT=now;const q=b.clone().addScaledVector(fwd,-0.15),x=q.x/S3+MW/2,y=q.z/S3+MH/2,ba=Math.atan2(fwd.z,fwd.x)+Math.PI;
-      burst(x,y,Math.random()<0.5?'#ffe08a':'#ffb347',5,220,0.4,3,{h:q.y+0.05,vh:[1.5,5],g:9,a:ba,spread:1.5});}
+  if(hitK===1){   // ชนกำแพง/พื้น (ผู้ใช้ 2026-11-17): รอยไหม้เรืองทองโตขึ้นยิ่งยิงนาน ค้าง ~1 วิหลังหยุด + แสงสาดออกเป็นพัดไปตามผนัง + ประกาย + ควันจาง
+    S.bEnd.material.color.copy(hdr('#fff0c0',1.4));S.bEnd.scale.setScalar((0.5+w*1.8)*(0.85+0.25*Math.sin(now/40)));
+    const ex=b.x/S3+MW/2,ey=b.z/S3+MH/2,gnd=b.y-GY(ex,ey)<0.35,nrm=gnd?new THREE.Vector3(0,1,0):new THREE.Vector3(-fwd.x,0,-fwd.z).normalize();
+    const q=gnd?b.clone():b.clone().addScaledVector(fwd,-0.4);if(gnd)q.y=GY(ex,ey)+0.03;else S.bEnd.position.copy(q);lgWallBurn(S,q,nrm,w*eK,now,bdt);   // จุดชนจริงจมในกล่องผนังนิดหน่อย → ดึงรอยไหม้/แสงออกมาหน้าผนัง
+    if(!S.bSpkT||now-S.bSpkT>55){S.bSpkT=now;const qq=b.clone().addScaledVector(fwd,-0.15),x=qq.x/S3+MW/2,y=qq.z/S3+MH/2,ba=Math.atan2(fwd.z,fwd.x)+Math.PI;
+      burst(x,y,Math.random()<0.5?'#ffe08a':'#ffb347',4,220,0.4,3,{h:qq.y+0.05,vh:[1.5,5],g:9,a:ba,spread:1.5});if(Math.random()<0.35)burst(x,y,'#a89a88',1,30,0.9,5,{h:qq.y,vh:[0.6,1.4],g:-0.6});}
     LREQ.push({x:b.x,y:b.y,z:b.z,col:'#ffb847',int:1.0,dist:4});}
+  else if(hitK===2){   // ชนศัตรู (ผู้ใช้ 2026-11-17): จุดแสงบนตัว + เศษคริสตัลทองแตกกระเด็นกลับ ไม่มีวง
+    S.bEnd.material.color.copy(hdr('#ffe7a8',1.2));S.bEnd.scale.setScalar((0.55+w*1.6)*eK*(0.8+0.3*Math.sin(now/30)));
+    {let hit=null,bd=1.3;for(const [,po] of PM3){if(!po||!po.g||po===S.me)continue;const d=Math.hypot(po.g.position.x-b.x,po.g.position.z-b.z);if(d<bd){bd=d;hit=po;}}   // ตัวที่โดนเรืองทองตอนลำแตะ (เห็นชัดจากมุมคนยิง)
+      if(S.hitO&&S.hitO!==hit)lgNeon(S.hitO,0);S.hitO=hit;if(hit)lgNeon(hit,0.3+0.12*Math.sin(now/45));}
+    if(!S.shdT||now-S.shdT>65){S.shdT=now;for(let k=0;k<(st>=3?3:2);k++)lgShardSpawn(S,b,fwd,side,up);const x=b.x/S3+MW/2,y=b.z/S3+MH/2;burst(x,y,'#ffe08a',2,160,0.3,2.2,{h:b.y,vh:[0.5,3],g:6,a:Math.atan2(fwd.z,fwd.x)+Math.PI,spread:1.2});}
+    LREQ.push({x:b.x,y:b.y,z:b.z,col:'#ffd36a',int:0.8,dist:3});}
   else{   // สุดระยะ (ผู้ใช้ 2026-11-17 แบบลำน้ำ): ลูกแสงขาว + วงนีออนทอง 2 วงหมุนสวนกัน ลำไม่บานที่ปลาย
     S.bEnd.material.color.copy(hdr('#fffbe8',1.5));S.bEnd.scale.setScalar((0.45+w*1.8)*eK*(0.9+0.15*Math.sin(now/50)));
     const R=0.22+w*1.9;for(let k=0;k<2;k++){const r=S.bR[k];r.position.copy(b);r.lookAt(b.clone().add(fwd));r.rotateZ((k?-1:1)*now/(k?160:220));r.scale.setScalar(R*(k?1:1)*(1+0.06*Math.sin(now/70+k)));}}}
@@ -649,7 +674,7 @@ function lightFX(o,p,pz,now,dt){
     S.ring.visible=S.beam.visible=visible;
     if(visible){lgAim(S.beam,ringC,end);}
     _lgBeamM.uniforms.uT.value=now/1000;S.ring.position.copy(ringC);S.ring.lookAt(ringC.clone().add(fwd));S.ring.scale.setScalar(0.8+0.25*Math.sin(now/60));
-    axis.normalize();S.bWall=(L[18]|0)===1;S.bHeat=(L[16]||0)/100;S.bSt=Math.max(0,beam-1);
+    axis.normalize();S.bWall=(L[18]|0)>0;S.bHitK=L[18]|0;S.me=o;S.bHeat=(L[16]||0)/100;S.bSt=Math.max(0,beam-1);
     lgBaCore(S,visible,ringC,end,axis,w*(empOn?1.15:1),now);
     lgEmpBeam(S,visible&&empOn,ringC,end,axis,w,now);if(visible)S.beam.scale.x=S.beam.scale.y=w*(empOn?1.45:1)*(S.bPulse||1);   // ลำเต้นเป็นจังหวะ (S.bPulse จาก lgBaCore)
     LREQ.push({x:ringC.x,y:ringC.y,z:ringC.z,col:'#ffd36a',int:0.7,dist:4});
@@ -744,7 +769,7 @@ function lightFX(o,p,pz,now,dt){
     LREQ.push({x:P.x,y:P.y+0.6,z:P.z,col:'#ffc04a',int:0.7*k,dist:8});}
   else if(S.veil){S.veil.visible=S.veilR.visible=S.veilF.visible=false;}
 }
-function lgBaseObjects(s){return [...s.cr,...s.ally,s.beam,s.ring,s.shF,s.shE,s.shG,s.orbT,s.aura,s.lkHead,...(s.ew||[]),...(s.ea||[]),...(s.shGl||[]),...(s.mote||[]).map(M=>M.g),s.link,s.prism,s.san,s.sanR,s.sanTint,s.sanWv,...(s.sanO||[]),...(s.sanM||[]).map(M=>M.g),s.veil,s.veilR,s.veilF,...(s.eMo||[]),s.eTip,s.bC,s.bEnd,...(s.bLR||[]),...(s.mR||[]),s.bHot,s.bHotR,...(s.bSp||[]),...(s.bR||[]),...(s.eTr||[])];}
+function lgBaseObjects(s){return [...s.cr,...s.ally,s.beam,s.ring,s.shF,s.shE,s.shG,s.orbT,s.aura,s.lkHead,...(s.ew||[]),...(s.ea||[]),...(s.shGl||[]),...(s.mote||[]).map(M=>M.g),s.link,s.prism,s.san,s.sanR,s.sanTint,s.sanWv,...(s.sanO||[]),...(s.sanM||[]).map(M=>M.g),s.veil,s.veilR,s.veilF,...(s.eMo||[]),s.eTip,s.bC,s.bEnd,...(s.wSp||[]),...(s.shd||[]),...(s.bLR||[]),...(s.mR||[]),s.bHot,s.bHotR,...(s.bSp||[]),...(s.bR||[]),...(s.eTr||[])];}
 function lgClearBase(s){for(const m of lgBaseObjects(s))if(m)m.visible=false;}
 function lgClear(s){
   lgClearBase(s);
@@ -791,7 +816,7 @@ function lightEfx(ev){
       if(near)snd('cast_pull',ev);return true;}
     case 'lglink':case 'lgprism':FX.flashSprite(x,y,H+1.3,'#fff1c0',0.25,1.2,0.1,1);if(near)snd('buff',ev);return true;
     case 'lgunlink':FX.flashSprite(x,y,H,'#ffd36a',0.2,1,0.1,1);return true;
-    case 'lgbahit':FX.flashSprite(x,y,H,'#fff1c0',0.12,0.8,0.08,0.8);return true;
+    case 'lgbahit':FX.flashSprite(x,y,H,'#fff1c0',0.1,0.45,0.08,0.5);return true;
     case 'lgvol':{   // Shard Volley: คริสตัลหมุนเข้าปลายไม้ (0.15 วิ) → ชี้ไม้ → แวบไปจุด (ตัวใหญ่) → หมุนชาร์จเร็วขึ้น/สว่างขึ้น + วงเตือนพื้น
       const o=PM3.get(ev.id);if(o)castStart(o,'line');const C=ev.t||LT_VO.charge,W=ev.w||LT_VO.wind,ST=ev.st||LT_VO.step,r=(ev.r||LT_VO.r)/20,S=LGV.st.get(ev.id);
       const tip=()=>o&&o.tip?o.tip.getWorldPosition(new THREE.Vector3()):lgWorld(x,y,H);

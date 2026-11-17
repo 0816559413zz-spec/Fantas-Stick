@@ -131,7 +131,7 @@ function lightBasic(p,inp,dt,setCd){
   p.lgBeamW=p.lgBeamL<len?1:0;if(n>0)p.lgFiring=1;
   // ไม่ทะลุศัตรู (ผู้ใช้ 2026-11-17): ลำหยุดที่ศัตรูตัวแรก ภาพปลายลำเหมือนชนกำแพง
   const tgt=lightBeamHits(p,p.lgBeamL,w,false)[0];
-  if(tgt){const f=(tgt.x-p.x)*Math.cos(p.lgBeamA)+(tgt.y-p.y)*Math.sin(p.lgBeamA);p.lgBeamL=Math.max(0,(f-(tgt.r||PR)*0.7)/Math.cos(p.lgBeamP));p.lgBeamW=1;}
+  if(tgt){const f=(tgt.x-p.x)*Math.cos(p.lgBeamA)+(tgt.y-p.y)*Math.sin(p.lgBeamA);p.lgBeamL=Math.max(0,(f-(tgt.r||PR)*0.7)/Math.cos(p.lgBeamP));p.lgBeamW=2;}   // 2 = ชนศัตรู (1 = ชนผนัง/พื้น)
   p.lgBaT-=dt;if(p.lgBaT>0)return;
   p.lgBaT=T[1]/rate;
   const hits=tgt?[tgt]:[];
