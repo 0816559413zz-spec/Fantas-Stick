@@ -10,7 +10,7 @@ ICONS.add('radiantsovereign');
 PATHS.push({id:'light',n:'สายแสง',ic:'✨',col:'#ffe9a8',d:'ซัพพอร์ตคู่หู — แบ่งคริสตัล 3 ชิ้นให้ตัวเองหรือเพื่อนที่ลิงก์ ยิงลำแสง ฮีลพื้นที่ วางกับดักล่องหน',
   combo:'Crystal Bond ส่งคริสตัลให้เพื่อน (กัน/ตีแรงขึ้น) • เก็บไว้เอง = ลำแสง/โล่แรงสุด • Empower Light บัฟทั้งเราและเพื่อน • Light Step วาร์ปไปหาเพื่อน ให้โล่ลดดาเมจ'});
 const LTV=PATHS[LIGHTP].v={max:3,linkR:750,linkPick:160,sendT:0.3,holdT:0.4,allyDR:0.05,allyDmg:0.05,
-  baRange:600,baCharge:1.4,baFloat:0.5,baRise:1.3,baMove:0.5,ba0:[5,1.0],ba1:[5,0.7],ba2:[8,0.6],ba3:[10,0.6],baW:[10,14,18,22],
+  baRange:600,baCharge:1.4,heatT:10,heatIdle:2,heatDrain:2,ohT:2,baFloat:0.5,baRise:1.3,baMove:0.5,ba0:[5,1.0],ba1:[5,0.7],ba2:[8,0.6],ba3:[10,0.6],baW:[10,14,18,22],
   shHp:[0,120,180,300],shReg:0.45,
   dsDist:250,dsAllyR:900,dsPick:180,dsCd:8,dsDmg:15,dsR:150,dsDR:0.3,dsDRT:2,
   prismT:20};
@@ -23,7 +23,8 @@ function lightReset(p,restoreUlt=false){
   if(p.lgUlt)lightUltEnd(p,restoreUlt,restoreUlt);
   p.lgUltWard=null;
   if(p.lgA&&p.lgA!=='prism'){const a=G.players[p.lgA];if(a&&a.lgFrom===p.id)lightClearBond(a);}
-  p.lc=LTV.max;p.lgA=null;p.lgPr=null;p.lgHold=0;p.lgSend=null;p.lgEmp=0;p.lgVol=null;p.lgSan=null;p.lgVeil=null;p.lgUlt=null;p.lgBaT=0;p.lgDch=1;p.lgBeam=0;}
+  p.lc=LTV.max;p.lgA=null;p.lgPr=null;p.lgHold=0;p.lgSend=null;p.lgEmp=0;p.lgVol=null;p.lgSan=null;p.lgVeil=null;p.lgUlt=null;p.lgBaT=0;p.lgDch=1;p.lgBeam=0;
+  p.lgChg=p.lgFl=p.lgHeat=p.lgHI=p.lgOH=p.lgFiring=p.lgBeamW=0;}
 function lightAlly(p){if(!p.lgA||p.lgA==='prism')return null;const a=G.players[p.lgA];return a&&a.alive&&!a.downed?a:null;}
 function lightLinkPos(p){if(p.lgA==='prism'&&p.lgPr)return p.lgPr;const a=lightAlly(p);return a?{x:a.x,y:a.y,h:(a.z||0)}:null;}
 function lightUnlink(p,recall=false,instant=false){
@@ -82,6 +83,7 @@ function lightTick(p,dt){
   const g=p.lgBeam!==0&&p.lc>0?groundH(p.x,p.y,p.z):null;
   if(g!==null&&p.z<=g+LTV.baFloat+0.02){p.lgFl=Math.min(1,(p.lgFl||0)+dt/LTV.baRise);const u=p.lgFl,e=u*u*u*(u*(u*6-15)+10);p.z=g+LTV.baFloat*e;p.vz=0;p.hover=0.15;}
   else p.lgFl=0;
+  lightHeatTick(p,dt);   // เกจร้อน BA เดินทุกเฟรม (ตอนกางโล่ด้วย)
   lightSkillsTick(p,dt);
 }
 function lightSlotOf(p,id){const i=p.kitIds?p.kitIds.indexOf(id):-1;return i<0?null:SLOTK[i];}
@@ -91,13 +93,25 @@ function lightBeamAng(p){const i=p.inp;return i&&Number.isFinite(i.ax)&&Math.hyp
 function lightBeamPitch(p){const i=p.inp;if(!i||p.bot||!Number.isFinite(i.ah)||!Number.isFinite(i.ax))return 0;
   return clamp(Math.atan2((i.ah-(p.z+1.35))*20,Math.max(1,Math.hypot(i.ax-p.x,i.ay-p.y))),-1.2,1.2);}
 function lightBeamLength(p,len){
-  const a=p.lgBeamA,pt=p.lgBeamP,fl=len*Math.cos(pt),h0=p.z+1.35;
-  const end={x:p.x+fl*Math.cos(a),y:p.y+fl*Math.sin(a)};
+  const a=p.lgBeamA,pt=p.lgBeamP,cp=Math.cos(pt),h0=p.z+1.35;
+  const dx=Math.cos(a)*cp,dy=Math.sin(a)*cp;
+  const edgeX=dx?((dx>0?MW-40:40)-p.x)/dx:Infinity;
+  const edgeY=dy?((dy>0?MH-40:40)-p.y)/dy:Infinity;
+  len=Math.max(0,Math.min(len,edgeX,edgeY));
+  if(len===0)return 0;
+  const end={x:p.x+len*dx,y:p.y+len*dy};
   const h1=h0+len*Math.sin(pt)*S3+terrT(p.x,p.y)-terrT(end.x,end.y);
   const hit=natureTrace(p,end,h0,h1,p.team,true);
   // The shared trace samples solids at most six units apart. Stop on the near side.
-  return hit?Math.max(0,len*(hit.t-1/Math.ceil(fl/6))):len;
+  return hit?Math.max(0,len*(hit.t-1/Math.ceil(len*cp/6))):len;
 }
+// เกจร้อน BA (ผู้ใช้ 2026-11-17): ยิงจริง (มีคริสตัล) 10 วิ = เต็ม → คริสตัลชาร์จใหม่ 2 วิ ยิงไม่ได้ • ปล่อยยิง 2 วิ แล้วเกจค่อยลด (เต็ม→0 ใน 2 วิ)
+function lightHeatTick(p,dt){
+  if(p.lgOH>0){p.lgOH-=dt;p.lgHeat=Math.max(0,p.lgOH/LTV.ohT);if(p.lgOH<=0){p.lgOH=0;p.lgHeat=0;p.lgHI=0;p.lgChg=LTV.baCharge;}p.lgFiring=0;return true;}
+  if(p.lgFiring){p.lgHI=0;p.lgHeat=Math.min(1,(p.lgHeat||0)+dt/LTV.heatT);
+    if(p.lgHeat>=1){p.lgOH=LTV.ohT;p.lgChg=0;p.lgBaT=0;emit({k:'efx',z:'lgoh',x:Math.round(p.x),y:Math.round(p.y),h:p.z,id:p.id});p.lgFiring=0;return true;}}
+  else{p.lgHI=(p.lgHI||0)+dt;if(p.lgHI>LTV.heatIdle)p.lgHeat=Math.max(0,(p.lgHeat||0)-dt/LTV.heatDrain);}
+  p.lgFiring=0;return false;}
 function lightBeamHits(p,len,w,pierce){
   if(len<=0)return [];
   const a=p.lgBeamA,pt=p.lgBeamP,c=Math.cos(a),s=Math.sin(a),fl=len*Math.cos(pt),tp=Math.tan(pt),h0=terrT(p.x,p.y)+p.z+1.35,out=[];
@@ -105,7 +119,8 @@ function lightBeamHits(p,len,w,pierce){
     const bh=h0+tp*f*S3-terrT(t.x,t.y),tz=t.z??t.h??0;if(bh<tz-0.3-w/20||bh>tz+2.1+w/20)continue;out.push([f,t]);}
   out.sort((x,y)=>x[0]-y[0]);return pierce?out.map(x=>x[1]):out.slice(0,1).map(x=>x[1]);}
 function lightBasic(p,inp,dt,setCd){
-  p.lgBeam=0;
+  p.lgBeam=0;p.lgBeamW=0;
+  if(p.lgOH>0){p.lgChg=0;p.lgBaT=0;return;}   // ร้อนเกิน: คริสตัลกำลังชาร์จใหม่
   if(p.shieldOn||p.lgUlt||p.lgVol){p.lgChg=0;return;}
   if(!inp.fire){p.lgBaT=0;p.lgChg=0;return;}
   const n=Math.max(0,Math.min(3,p.lc|0)),T=[LTV.ba0,LTV.ba1,LTV.ba2,LTV.ba3][n],emp=p.lgEmp>G.time;
@@ -113,6 +128,7 @@ function lightBasic(p,inp,dt,setCd){
   if(n>0&&(p.lgChg||0)<LTV.baCharge){p.lgChg=(p.lgChg||0)+dt;p.lgBeam=-1;p.lgBeamA=lightBeamAng(p);p.lgBeamP=lightBeamPitch(p);return;}
   const rate=emp?1+0.1*n:1,len=LTV.baRange+(emp?50*n:0),w=LTV.baW[n]*(emp?1+0.15*n:1);
   p.lgBeam=1+n;p.lgBeamA=lightBeamAng(p);p.lgBeamP=lightBeamPitch(p);p.lgBeamL=lightBeamLength(p,len);
+  p.lgBeamW=p.lgBeamL<len?1:0;if(n>0)p.lgFiring=1;
   p.lgBaT-=dt;if(p.lgBaT>0)return;
   p.lgBaT=T[1]/rate;
   const hits=lightBeamHits(p,p.lgBeamL,w,n===0);
@@ -168,7 +184,7 @@ function lightSnapP(p){if(!lgOn(p)&&!(p.lgN>0)&&!p.lgUltWard)return undefined;
   const pos=lgOn(p)?lightLinkPos(p):null,a=lgOn(p)?lightAlly(p):null;
   return [p.lc|0,a?a.id:p.lgA==='prism'?'P':0,pos?[Math.round(pos.x),Math.round(pos.y)]:0,p.lgN|0,p.lgBeam|0,p.lgEmp>G.time?1:0,p.lgDch>=1?1:0,
     p.lgSan?[Math.round(p.lgSan.x),Math.round(p.lgSan.y),p.lgSan.n|0]:0,p.lgVeil?[Math.round(p.lgVeil.x),Math.round(p.lgVeil.y),Math.round(p.lgVeil.t*10)]:0,p.lgBeamL|0,Math.round((p.lgBeamA||p.ang||0)*100)/100,p.shieldOn?1:0,Math.round((p.lgChg||0)*100)/100,Math.round((p.lgBeamP||0)*100)/100,
-    p.lgUlt?lightUltSnap(p.lgUlt):0,p.lgUltWard?1:0];}
+    p.lgUlt?lightUltSnap(p.lgUlt):0,p.lgUltWard?1:0,Math.round((p.lgHeat||0)*100),p.lgOH>0?1:0,p.lgBeamW|0];}
 // ---------- สกิล ----------
 function lightSkillsTick(p,dt){
   const V=p.lgVol;   // Shard Volley: คริสตัลหยุดที่จุด → หมุนชาร์จ → ระเบิด → บินกลับ
