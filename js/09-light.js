@@ -129,9 +129,12 @@ function lightBasic(p,inp,dt,setCd){
   const rate=emp?1+0.1*n:1,len=LTV.baRange+(emp?50*n:0),w=LTV.baW[n]*(emp?1+0.15*n:1);
   p.lgBeam=1+n;p.lgBeamA=lightBeamAng(p);p.lgBeamP=lightBeamPitch(p);p.lgBeamL=lightBeamLength(p,len);
   p.lgBeamW=p.lgBeamL<len?1:0;if(n>0)p.lgFiring=1;
+  // ไม่ทะลุศัตรู (ผู้ใช้ 2026-11-17): ลำหยุดที่ศัตรูตัวแรก ภาพปลายลำเหมือนชนกำแพง
+  const tgt=lightBeamHits(p,p.lgBeamL,w,false)[0];
+  if(tgt){const f=(tgt.x-p.x)*Math.cos(p.lgBeamA)+(tgt.y-p.y)*Math.sin(p.lgBeamA);p.lgBeamL=Math.max(0,(f-(tgt.r||PR)*0.7)/Math.cos(p.lgBeamP));p.lgBeamW=1;}
   p.lgBaT-=dt;if(p.lgBaT>0)return;
   p.lgBaT=T[1]/rate;
-  const hits=lightBeamHits(p,p.lgBeamL,w,n===0);
+  const hits=tgt?[tgt]:[];
   for(const t of hits){damage(t,T[0],p.id,'aoe');emit({k:'efx',z:'lgbahit',x:Math.round(t.x),y:Math.round(t.y),h:cH(t),n,id:p.id});}
 }
 // ---------- Dash Light Step: วาร์ป 250 ตามทิศเดิน • เล็งคู่หู (ไม่เกิน 900) = วาร์ปใกล้ด้านหลังที่ความสูงเดียวกัน ----------
