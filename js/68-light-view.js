@@ -818,10 +818,10 @@ function lightEfx(ev){
     case 'lgunlink':FX.flashSprite(x,y,H,'#ffd36a',0.2,1,0.1,1);return true;
     case 'lgbahit':FX.flashSprite(x,y,H,'#fff1c0',0.1,0.45,0.08,0.5);return true;
     case 'lgvol':{   // Shard Volley: คริสตัลหมุนเข้าปลายไม้ (0.15 วิ) → ชี้ไม้ → แวบไปจุด (ตัวใหญ่) → หมุนชาร์จเร็วขึ้น/สว่างขึ้น + วงเตือนพื้น
-      const o=PM3.get(ev.id);if(o)castStart(o,'line');const C=ev.t||LT_VO.charge,W=ev.w||LT_VO.wind,ST=ev.st||LT_VO.step,r=(ev.r||LT_VO.r)/20,S=LGV.st.get(ev.id);
+      const o=PM3.get(ev.id);if(o)castStart(o,'line');const C=ev.t||LT_VO.charge,W=ev.w||LT_VO.wind,ST=ev.st||LT_VO.step,S=LGV.st.get(ev.id);
       const tip=()=>o&&o.tip?o.tip.getWorldPosition(new THREE.Vector3()):lgWorld(x,y,H);
       (ev.pts||[]).forEach((q,i)=>{const b=lgWorld(q[0],q[1],1.2),c=lgCrystalMesh(1),from=S&&S.cr[i]&&S.cr[i].visible!==undefined?S.cr[i].position.clone():tip();scene.add(c);let bl=0;
-        const B=W+i*ST,T=B+C;   // ชิ้นที่ i: รอที่ปลายไม้จนถึงคิว → แวบไปกลางวงของตัวเอง → หมุนกลางวงขณะวงเตือนนับ (ช้าแล้วเร็วขึ้น)
+        const B=W+i*ST,T=B+C,r=(q[2]??ev.r??LT_VO.r)/20;   // ชิ้นที่ i: รอที่ปลายไม้จนถึงคิว → แวบไปกลางวงของตัวเอง → หมุนกลางวงขณะวงเตือนนับ (ช้าแล้วเร็วขึ้น)
         LGV.fx.push({m:null,t:0,max:T,fn:k=>{const tt=k*T;
           if(tt<B){const e=Math.min(1,tt/W),tp=tip(),a=Math.PI*2*(tt/W)+i*2.1,rr=0.25*(1-e)+(e>=1?0.32:0);c.position.copy(from).lerp(tp,e*e).add(new THREE.Vector3(Math.cos(a)*rr,0.05*i,Math.sin(a)*rr));c.scale.setScalar(1);c.rotation.y=a;}   // รอคิว: วนรอบปลายไม้
           else{if(!bl){bl=1;lgBlip(tip(),b.clone());fxPlay('light/volley_warn',{x:q[0],y:q[1],h:0,p:{r,t:C},aim:false});}

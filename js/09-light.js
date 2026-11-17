@@ -192,8 +192,8 @@ function lightSnapP(p){if(!lgOn(p)&&!(p.lgN>0)&&!p.lgUltWard)return undefined;
 function lightSkillsTick(p,dt){
   const V=p.lgVol;   // Shard Volley: คริสตัลหยุดที่จุด → หมุนชาร์จ → ระเบิด → บินกลับ
   if(V){V.t+=dt;V.b=V.b|0;   // ผู้ใช้ 2026-11-17: ไปทีละชิ้น ใกล้ → ไกล • แต่ละชิ้นนับวงเตือนของตัวเอง แล้วระเบิดทีละลูก
-    while(V.b<V.pts.length&&V.t>=LT_VO.wind+V.b*LT_VO.step+LT_VO.charge){const q=V.pts[V.b];for(const t of foesIn(p.team,q[0],q[1],LT_VO.r,q[2]+3))aoeHit(p,t,LT_VO.dmg,null);
-      emit({k:'efx',z:'lgvolboom',x:Math.round(p.x),y:Math.round(p.y),h:p.z,id:p.id,pts:[[Math.round(q[0]),Math.round(q[1])]],r:LT_VO.r,i:V.b});V.b++;}
+    while(V.b<V.pts.length&&V.t>=LT_VO.wind+V.b*LT_VO.step+LT_VO.charge){const [x,y,h,r]=V.pts[V.b];for(const t of foesIn(p.team,x,y,r,h+13))aoeHit(p,t,LT_VO.dmg,null);   // เสาแสงสูง: โดนถึง 13 ม. (Wind บินได้สูงสุด 12)
+      emit({k:'efx',z:'lgvolboom',x:Math.round(p.x),y:Math.round(p.y),h:p.z,id:p.id,pts:[[Math.round(x),Math.round(y)]],r,i:V.b});V.b++;}
     if(V.b>=V.pts.length&&V.t>=LT_VO.wind+(V.pts.length-1)*LT_VO.step+LT_VO.charge+LT_VO.back){p.lc=Math.min(LTV.max,p.lc+V.n);p.lgVol=null;}}
   const Z=p.lgSan;   // Sanctum Crystal: ฮีลรอบวง 2/วิ ต่อคริสตัล
   if(Z){Z.t-=dt;Z.k=(Z.k||0)+dt;
@@ -382,11 +382,13 @@ function lightAimPt(p,max){const i=p.inp||{};let ax=Number.isFinite(i.ax)?i.ax:p
 const LT_BOND=defSpell(LIGHTP,{id:'crystalbond',v:{},role:'support',n:'Crystal Bond',ic:'🔗',cd:0.25,
   d:'เล็งเพื่อนแล้วกด = ลิงก์ + ส่งคริสตัลให้ 1 ชิ้น (เพื่อนรับดาเมจน้อยลง 5% ตีแรงขึ้น 5% ต่อชิ้น) • ไม่เล็งเพื่อน = วางปริซึมแทน (เล่นคนเดียว) • กดค้าง = เรียกคืนทั้งหมด • ห่างเกิน 750 = ลิงก์หลุด',
   cast(p){return lightBondTap(p)?undefined:false;}});
-const LT_VO=defSpell(LIGHTP,{id:'shardvolley',v:{d0:250,gap:150,wind:0.4,step:0.45,charge:1.4,dmg:30,r:150,back:0.8},vn:{wind:'หมุนเข้าไม้ (วิ)',step:'ไปทีละชิ้น ห่าง (วิ)',d0:'ชิ้นแรก • ระยะ',gap:'ห่างกันชิ้นละ',charge:'หมุนชาร์จ (วิ)',dmg:'ระเบิด • ดาเมจ/ชิ้น',r:'ระเบิด • รัศมี',back:'บินกลับ (วิ)'},role:'damage',n:'Shard Volley',ic:'💠',cd:8,
-  d:'คริสตัลหมุนเข้ามาที่ไม้ ชี้ไปข้างหน้า คริสตัลที่ถือทั้งหมดพุ่งไปเป็นแถว (250 / 400 / 550) หมุนชาร์จแล้วระเบิดลูกละ 30 รัศมี 150 แล้วบินกลับ • ไม่มีคริสตัลกับตัว = ใช้ไม่ได้',
+const LT_VO=defSpell(LIGHTP,{id:'shardvolley',v:{d0:250,overlap:25,gap:-15,wind:0.4,step:0.7,charge:1.4,dmg:30,r0:190,r:150,back:0.8},vn:{wind:'หมุนเข้าไม้ (วิ)',step:'ไปทีละชิ้น ห่าง (วิ)',d0:'ชิ้นแรก • ระยะ',overlap:'วงแรกกับวงสอง • ระยะที่ทับกัน',gap:'วงสองกับวงสาม • ช่องว่างระหว่างขอบ',charge:'หมุนชาร์จ (วิ)',dmg:'ระเบิด • ดาเมจ/ชิ้น',r0:'ระเบิด • รัศมีลูกแรก',r:'ระเบิด • รัศมีลูกถัดไป',back:'บินกลับ (วิ)'},role:'damage',n:'Shard Volley',ic:'💠',cd:8,
+  d:'คริสตัลหมุนเข้ามาที่ไม้ ชี้ไปข้างหน้า คริสตัลที่ถือทั้งหมดพุ่งไปเป็นแถว (250 / 565 / 850) หมุนชาร์จแล้วระเบิดลูกละ 30 รัศมี 190 / 150 / 150 แล้วบินกลับ • ไม่มีคริสตัลกับตัว = ใช้ไม่ได้',
   cast(p,S){if(p.lc<=0||p.lgVol)return false;const V=S.v,a=p.ang,n=p.lc,pts=[];
-    for(let k=0;k<n;k++){const d=V.d0+V.gap*k,x=p.x+Math.cos(a)*d,y=p.y+Math.sin(a)*d;pts.push([x,y,groundH(x,y,p.z)]);}
-    p.lc=0;p.lgVol={t:0,n,pts};emit({k:'efx',z:'lgvol',x:Math.round(p.x),y:Math.round(p.y),h:p.z+1.4,id:p.id,pts:pts.map(q=>[Math.round(q[0]),Math.round(q[1])]),t:V.charge,w:V.wind,st:V.step});}}).v;
+    const second=V.d0+V.r0+V.r-V.overlap,step=2*V.r+V.gap;
+    for(let k=0;k<n;k++){const d=k===0?V.d0:second+step*(k-1),x=p.x+Math.cos(a)*d,y=p.y+Math.sin(a)*d;
+      pts.push([x,y,groundH(x,y,p.z),k===0?V.r0:V.r]);}
+    p.lc=0;p.lgVol={t:0,n,pts};emit({k:'efx',z:'lgvol',x:Math.round(p.x),y:Math.round(p.y),h:p.z+1.4,id:p.id,pts:pts.map(([x,y,h,r])=>[Math.round(x),Math.round(y),r]),t:V.charge,w:V.wind,st:V.step});}}).v;
 const LT_EM=defSpell(LIGHTP,{id:'empowerlight',v:{t:6,ally:5,icd:0.5},vn:{t:'บัฟนาน (วิ)',ally:'เพื่อน • ดาเมจโบนัส/คริสตัล',icd:'เพื่อน • โบนัสทุก (วิ)'},role:'support',n:'Empower Light',ic:'✊',cd:12,
   d:'6 วิ: ลำแสงเรายิงถี่ +10% กว้าง +15% ยาว +50 ต่อคริสตัลที่ถือ • เพื่อนที่ลิงก์: ตอนตีโดน คริสตัลยิงกระสุนแสงโค้งตาม +5 ดาเมจต่อชิ้น (ทุก 0.5 วิ)',
   cast(p,S){p.lgEmp=G.time+S.v.t;const a=lightAlly(p);if(a)a.lgEmpT=G.time+S.v.t;emit({k:'efx',z:'lgemp',x:Math.round(p.x),y:Math.round(p.y),h:p.z,id:p.id,t:a?a.id:undefined});}}).v;
