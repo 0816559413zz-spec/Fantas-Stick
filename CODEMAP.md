@@ -29,10 +29,10 @@ HOUSES:232 HAIRC:237 HAIRSTY:239 WOODC:242 WOODN:243 WCOREC:244 WCOREN:245 WANDS
 ## js/02-fcs-data.js (3) — 
 FCS_DATA:3
 
-## js/02-fcs.js (118) — 
+## js/02-fcs.js (129) — แผนที่ First Castle Strike (โหมดบุกปราสาท 'siege') — แบบ Basic จากภาพร่างของผู้ใช้ใน Map …
 FCS_C:7 FCS_WH:8 genFcs:9
-§92 พื้นที่เล่นตามเฟส (กำแพงล่องหน) + เขตจุดเกิดปลอดภัย — ใช้ทั้งโฮสต์ (G…
-SGPH:93 SG_SPR:94 _sgAreaC:95 sgArea:96 sgClamp:102 sgInArea:112
+§103 พื้นที่เล่นตามเฟส (กำแพงล่องหน) + เขตจุดเกิดปลอดภัย — ใช้ทั้งโฮสต์ (G…
+SGPH:104 SG_SPR:105 _sgAreaC:106 sgArea:107 sgClamp:113 sgInArea:123
 
 ## js/03-spells-core.js (249) — 
 ICONS:8 ICOALIAS:9 hasIco:10 ICOBASE:12 icoURL:13 ICO:14 icoTint:15 icoHTML:24 PATHS:25 SPELL_LIST:34 SPELLS:34 defSpell:35 SLOTK:36 BRMAP:36 KITP:37 parseKit:38 cleanKit:55 setKit:56 pathReset:59
@@ -338,14 +338,14 @@ CITY_STY:181 CITY_VEH:188 cityFacade:190 CITYK:203 _cZ:204 _cT:204 _cR:204 _cC:2
 §259 ตึกไฮไลต์ล้มทั้งตึก (ขั้น 7)
 _ctA:262 _ctB:262 _ctC:262 cityTowerPose:263 cityTowerAnim:271 cityTowerRubble:278 CAREA:292 cityAreaSync:293 cityViewSync:305 cityDebris:349 cityFX:358
 
-## js/28-fcs-build.js (124) — 
-buildFcs:5
-§35 ภาพโหมด (ลูกข่ายทุกเครื่องจาก snapshot M.sg)
-SGV3:36 sgClearView:37 sgViewBuild:38 SGVZR:57 sgBarrier:59 sgSync:73 sgDust:94 sgFx:95
-§100 HUD
-sgTop:101 sgHud:103
+## js/28-fcs-build.js (137) — ภาพแผนที่ First Castle Strike (แบบ Basic: กล่อง/ทรงพื้นฐาน ยังไม่มีโมเดลจริง) + ภาพ/HUD โ…
+buildFcs:5 fcsFences:36
+§48 ภาพโหมด (ลูกข่ายทุกเครื่องจาก snapshot M.sg)
+SGV3:49 sgClearView:50 sgViewBuild:51 SGVZR:70 sgBarrier:72 sgSync:86 sgDust:107 sgFx:108
+§113 HUD
+sgTop:114 sgHud:116
 
-## js/28-fcs-forest.js (202) — ป่าสนหมอก ในแผนที่ First Castle Strike (เฟส 1 = ช่อง x 0–28 ของ Map Editor) — ทำตามรูปอ้า…
+## js/28-fcs-forest.js (202) — 
 FF:7 FF_X1:8 FF_NS:9 ffGroundTex:11 ffParts:33 fcsForest:40 ffMerge:123 ffDetail:131 fcsRuin:158 fcsForestTick:192 FFC:202
 
 ## js/28-maps-build.js (781) — สร้างแผนที่
@@ -838,4 +838,4 @@ _dvCyl:135 _dvMat:136 devOverlay:137
 §157 หน้าต่าง
 _dvPanel:158 _dvBtn:159 devToggle:162 dvBtn:167 dvRow:168 dvTog:169 dvSec:170 devRender:171 devPos:208
 
-(102 files, 28633 lines)
+(102 files, 28657 lines)

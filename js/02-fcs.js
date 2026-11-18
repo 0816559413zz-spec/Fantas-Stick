@@ -21,7 +21,18 @@ function genFcs(){
     obs.push(Object.assign({x:(x+0.5)*C,y:(y+0.5)*C,r},o));
     if(same(x+1,y))obs.push(Object.assign({x:(x+1)*C,y:(y+0.5)*C,r},o));
     if(same(x,y+1))obs.push(Object.assign({x:(x+0.5)*C,y:(y+1)*C,r},o));};
-  for(let y=0;y<h;y++)for(let x=0;x<w;x++){const v=wc(x,y);if(v)cell(x,y,v);}
+  for(let y=0;y<h;y++)for(let x=0;x<w;x++){const v=wc(x,y);if(v&&v!==3)cell(x,y,v);}
+  // รั้วไม้ (ชนิด 3 ใน Map Editor — ผู้ใช้ 2026-11-18: เปลี่ยนกล่องเป็นรั้วจริง เตรียมระบบสภาพธาตุ designs/element-surfaces.md)
+  // ช่องรั้วที่ติดกันแนวนอน/แนวตั้ง = รั้ว 1 แนว (เริ่ม-จบเลยกลางช่องปลาย 0.4 ช่อง) • ช่องเดี่ยว = รั้วสั้นแนวเหนือ-ใต้ • ชนเป็นแนวบาง (วงกลม r 11 ทุก ~0.9 ม.)
+  // obs k:'fcf' + fid (รั้วแนวไหน — ใช้ต่อกับไฟ/ธาตุ) • fences: [x1,y1,x2,y2] พิกัด px ภาพอยู่ js/28-fcs-build.js fcsFences
+  const fences=[];
+  {const F3=(x,y)=>wc(x,y)===3,used=new Set();
+   const seg=(ax,ay,bx,by)=>{const vx=bx-ax,vy=by-ay,L=Math.hypot(vx,vy)||1,ux=vx?vx/L:0,uy=vx?vy/L:1,fid=fences.length,
+       x1=(ax+0.5)*C-ux*0.4*C,y1=(ay+0.5)*C-uy*0.4*C,x2=(bx+0.5)*C+ux*0.4*C,y2=(by+0.5)*C+uy*0.4*C;fences.push([x1,y1,x2,y2]);
+     const n=Math.max(1,Math.round(Math.hypot(x2-x1,y2-y1)/18));for(let i=0;i<=n;i++)obs.push({x:x1+(x2-x1)*i/n,y:y1+(y2-y1)*i/n,r:11,k:'fcf',fid,hgt:FCS_WH[3],s:0});};
+   for(let y=0;y<h;y++)for(let x=0;x<w;x++)if(F3(x,y)&&!F3(x-1,y)&&F3(x+1,y)){let e=x;while(F3(e+1,y))e++;for(let i=x;i<=e;i++)used.add(i+','+y);seg(x,y,e,y);}
+   for(let x=0;x<w;x++)for(let y=0;y<h;y++)if(F3(x,y)&&!F3(x,y-1)&&F3(x,y+1)){let e=y;while(F3(x,e+1))e++;for(let i=y;i<=e;i++)used.add(x+','+i);seg(x,y,x,e);}
+   for(let y=0;y<h;y++)for(let x=0;x<w;x++)if(F3(x,y)&&!used.has(x+','+y))seg(x,y,x,y);}
   const sp={A:{},B:{}},cores=[],bw=[],props=[];
   for(const [t,x,y,ow,oh,n] of D.objs){
     const cx=(x+ow/2)*C,cy=(y+oh/2)*C;
@@ -87,7 +98,7 @@ function genFcs(){
   const phases=[];
   for(const [k,name,x,y,zw,zh] of D.zones){if(k!=='ph')continue;const n=+((String(name).match(/(\d+)/)||[])[1]||0);if(!n)continue;
     (phases[n-1]=phases[n-1]||[]).push({x1:x*C,y1:y*C,x2:(x+zw)*C,y2:(y+zh)*C});}
-  return {W,H,obs,terr,fcs:{sp,cores,bw,props,phases,n:Math.min(cores.length,phases.length)}};
+  return {W,H,obs,terr,fcs:{sp,cores,bw,props,fences,phases,n:Math.min(cores.length,phases.length)}};
 }
 // ---------- พื้นที่เล่นตามเฟส (กำแพงล่องหน) + เขตจุดเกิดปลอดภัย — ใช้ทั้งโฮสต์ (G.sg.ph) และลูกข่าย (snapshot) ----------
 let SGPH=1;

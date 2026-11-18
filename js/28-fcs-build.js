@@ -18,7 +18,7 @@ function buildFcs(){
   const box=sGeo(THREE.BoxGeometry,1,1,1);
   inst(box,stoneMat(1,1,'#7a746a'),cells[1],([x,y])=>{const px=(x+0.5)*C,py=(y+0.5)*C,b=GY(px,py);return m4.makeScale(c3,FCS_WH[1],c3).setPosition(tx(px),b+FCS_WH[1]/2,tz(py)).clone();});
   inst(box,stoneMat(1,1,'#9a8a6a'),cells[2],([x,y])=>{const px=(x+0.5)*C,py=(y+0.5)*C,b=GY(px,py);return m4.makeScale(c3,FCS_WH[2],c3).setPosition(tx(px),b+FCS_WH[2]/2,tz(py)).clone();});
-  inst(box,new THREE.MeshStandardMaterial({color:'#5a4030',roughness:0.9}),cells[3],([x,y])=>{const px=(x+0.5)*C,py=(y+0.5)*C,b=GY(px,py);return m4.makeScale(c3*0.3,FCS_WH[3],c3*0.3).setPosition(tx(px),b+FCS_WH[3]/2,tz(py)).clone();});
+  fcsFences(F.fences||[],inst,box);   // รั้วไม้ (ชนิด 3)
   // ต้นไม้ / ลัง / เสา
   const P=k=>F.props.filter(q=>q[0]===k);
   const inF=q=>q[1]<FF_X1*C,fb=[];   // ต้นไม้ในป่า = กรวยชั่วคราว จนกว่าโมเดลสนจริงโหลดเสร็จ (js/28-fcs-forest.js)
@@ -31,6 +31,19 @@ function buildFcs(){
   // แท่นจุดเกิด (สีทีม)
   for(const [t,L] of [[0,F.sp.A],[1,F.sp.B]])for(const k in L){const s=L[k],m=new THREE.Mesh(new THREE.CircleGeometry(SG_SPR*S3,32),new THREE.MeshBasicMaterial({color:TEAMC[t],transparent:true,opacity:0.18,depthWrite:false}));m.rotation.x=-Math.PI/2;m.position.set(tx(s.x),GY(s.x,s.y)+0.05,tz(s.y));addW(m);}
   try{fcsForest(fb);}catch(e){console.error('fcsForest',e);}
+}
+// รั้วไม้ (ชนิด 3 — js/02-fcs.js fences): เสาไม้ทุก ~1.8 ม. เอียงนิด ๆ + ราว 2 เส้นต่อช่วงเสา ตามพื้นเอียง • InstancedMesh 2 ชุด
+function fcsFences(list,inst,box){
+  if(!list.length)return;const R=mulberry(424242),m4=new THREE.Matrix4(),q=new THREE.Quaternion(),e=new THREE.Euler(),X=new THREE.Vector3(1,0,0),d=new THREE.Vector3(),pos=new THREE.Vector3(),sc=new THREE.Vector3();
+  const posts=[],rails=[];
+  for(const [x1,y1,x2,y2] of list){const L=Math.hypot(x2-x1,y2-y1)*S3,n=Math.max(1,Math.round(L/1.8)),P=[];
+    for(let i=0;i<=n;i++){const x=x1+(x2-x1)*i/n,y=y1+(y2-y1)*i/n,g=GY(x,y),hp=1.22+(R()-0.5)*0.14;P.push([tx(x),g,tz(y)]);
+      posts.push(m4.compose(pos.set(tx(x),g+hp/2-0.05,tz(y)),q.setFromEuler(e.set((R()-0.5)*0.08,R()*3.14,(R()-0.5)*0.08)),sc.set(0.15,hp,0.15)).clone());}
+    for(let i=0;i<n;i++){const [ax,ay,az]=P[i],[bx,by,bz]=P[i+1];
+      for(const hh of [0.42,0.92]){const ja=(R()-0.5)*0.06,jb=(R()-0.5)*0.06;d.set(bx-ax,(by+jb)-(ay+ja),bz-az);const len=d.length()+0.18;d.normalize();
+        rails.push(m4.compose(pos.set((ax+bx)/2,(ay+by)/2+hh+(ja+jb)/2,(az+bz)/2),q.setFromUnitVectors(X,d),sc.set(len,0.1,0.06)).clone());}}}
+  inst(box,new THREE.MeshStandardMaterial({color:'#6b4c32',roughness:0.95}),posts,mm=>mm);
+  inst(box,new THREE.MeshStandardMaterial({color:'#8a6a46',roughness:0.9}),rails,mm=>mm);
 }
 // ---------- ภาพโหมด (ลูกข่ายทุกเครื่องจาก snapshot M.sg) ----------
 const SGV3={g:null,cores:[],bw:[],bar:null,barK:'',beams:new Map(),bwK:''};
