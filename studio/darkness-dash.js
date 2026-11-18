@@ -251,7 +251,7 @@ function stDarkMarkedBurst(parent,x,z){
   };
 }
 
-// One closed ribbon. Only its upper silhouette is torn.
+// The floor and the cast radius stay fixed while the torn ribbons flow around them.
 function stDarkSlashArea(parent,[x,z],radius){
   const group=new THREE.Group();
   group.name='Darkness cast area';
@@ -278,48 +278,80 @@ function stDarkSlashArea(parent,[x,z],radius){
   floor.rotation.x=-Math.PI/2;
   floor.renderOrder=1;
   group.add(floor);
-  const edge=new THREE.BufferGeometry(),positions=[],uvs=[],faces=[];
-  const count=192;
-  const random=n=>{const value=Math.sin(n*187.29+23.77)*43758.5453;return value-Math.floor(value);};
-  for(let i=0;i<=count;i++){
-    const step=i%count;
-    const angle=(step+(step?random(step+8)*.64:0))/count*Math.PI*2;
-    const jag=random(step*17+3),height=jag<.22?.60+1.45*jag:.78+.76*jag;
-    const lip=radius-.36+.40*random(step*13+11);
-    positions.push(Math.cos(angle)*radius,.014,Math.sin(angle)*radius,
-      Math.cos(angle)*lip,height,Math.sin(angle)*lip);
-    uvs.push(i/count,0,i/count,1);
-    if(i<count){const a=i*2;faces.push(a,a+2,a+1,a+1,a+2,a+3);}
+  const edge=new THREE.BufferGeometry(),uvs=[],faces=[],vertices=[];
+  const silhouettes=[
+    [.03,.10,.24,.39,.67,.62,.88,.71,1,.44,.23,.02],
+    [.04,.13,.32,.63,.91,.73,.61,.56,.66,.31,.16,.02],
+    [.03,.08,.20,.38,.47,.80,.65,.93,.65,.37,.23,.02]
+  ];
+  const lower=[.03,.045,.11,.17,.11,.24,.14,.22,.28,.19,.10,.02];
+  // [angle, span, height, radial offset, tilt]. The narrow strokes follow the larger ones.
+  const strips=[
+    [.20,.98,4.05,-.24,-.97], [1.54,.79,2.65,.07,.62], [2.66,1.02,3.65,-.32,-.69],
+    [4.06,.99,4.32,.10,.65], [5.46,.77,3.12,-.18,-.70],
+    [-.12,.62,.72,.31,.29], [.93,.34,1.03,-.32,-.28], [1.89,.46,.71,.20,.24],
+    [2.33,.72,.92,.44,.24], [3.43,.41,.67,-.34,-.29], [3.72,.65,1.04,.36,.29],
+    [4.85,.40,.70,-.38,-.20], [5.13,.52,.82,.36,.28], [5.98,.46,.55,-.35,-.18]
+  ];
+  for(const [index,[angle,span,height,offset,tilt]] of strips.entries()){
+    const upper=silhouettes[index%silhouettes.length],reverse=index%4===1;
+    for(let i=0;i<upper.length;i++){
+      const u=i/(upper.length-1),j=reverse?upper.length-1-i:i;
+      if(i){const a=vertices.length;faces.push(a-2,a,a-1,a-1,a,a+1);}
+      for(const [side,profile] of [[0,lower],[1,upper]]){
+        vertices.push({angle:angle+(u-.5)*span,radius:radius+offset,lift:profile[j],u,height,tilt,index});
+        uvs.push(u,side,index);
+      }
+    }
   }
-  edge.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));
-  edge.setAttribute('uv',new THREE.Float32BufferAttribute(uvs,2));
+  const positions=new THREE.BufferAttribute(new Float32Array(vertices.length*3),3).setUsage(THREE.DynamicDrawUsage);
+  edge.setAttribute('position',positions);
+  edge.setAttribute('strand',new THREE.Float32BufferAttribute(uvs,3));
   edge.setIndex(faces);
   const border=new THREE.Mesh(edge,new THREE.ShaderMaterial({
     uniforms:{strength:{value:0},age:{value:0}},side:THREE.DoubleSide,transparent:true,depthWrite:false,toneMapped:false,
-    vertexShader:`varying vec2 vPanel; void main(){vPanel=uv;
+    vertexShader:`attribute vec3 strand;varying vec3 vPanel;void main(){vPanel=strand;
       gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}`,
-    fragmentShader:`uniform float strength; uniform float age; varying vec2 vPanel;
+    fragmentShader:`uniform float strength,age;varying vec3 vPanel;
       void main(){
-        float grain=fract(sin(floor(fract(vPanel.x)*768.0)*13.17+floor(vPanel.y*9.0)*27.7)*43758.5453);
-        float ridge=step(.78,fract(vPanel.y*5.0+vPanel.x*97.0-age*.96));
-        vec3 shade=mix(vec3(.007,.007,.011),vec3(.042,.045,.062),.34*grain+.12*ridge);
-        float density=mix(.97,.63+.14*grain,vPanel.y);
-        gl_FragColor=vec4(shade,strength*density);
+        float u=vPanel.x,v=vPanel.y,id=vPanel.z;
+        float fold=v-.43*u+.073*sin(u*9.+id);
+        float charcoal=smoothstep(.25,.29,fold)*(1.-smoothstep(.56,.60,fold));
+        float gray=smoothstep(.50,.53,fold)*(1.-smoothstep(.71,.73,fold));
+        float torn=smoothstep(.015,.05,v)*(1.-smoothstep(.95,1.,v));
+        float notch=abs(v-(.78-u*.63));
+        if(u>.30&&u<.52&&notch<.030&&mod(id,3.)<1.)discard;
+        vec3 ink=mix(vec3(.002,.002,.004),vec3(.047,.043,.056),charcoal*torn);
+        ink=mix(ink,vec3(.127,.115,.138),gray*torn*.83);
+        float thread=1.-smoothstep(.006,.014+fwidth(fold)*.65,abs(fold-.544));
+        float glint=.36+.64*(.5+.5*sin((u-age*.85)*11.+id));
+        thread*=smoothstep(.15,.35,u)*(1.-smoothstep(.74,.94,u))*glint;
+        ink=mix(ink,vec3(.36,.32,.38),thread*.44);
+        gl_FragColor=vec4(ink,strength*mix(1.,.76,step(4.5,id)));
         #include <colorspace_fragment>
       }`
   }));
   border.name='Darkness torn area border';
   border.renderOrder=2;
+  border.frustumCulled=false;
   group.add(border);
   return (age,landingAge)=>{
     group.visible=age>=0&&landingAge<.32;
     if(!group.visible)return;
     const strength=stDarkEase(0,.105,age)*(1-stDarkEase(.045,.32,landingAge));
-    border.scale.y=.12+.88*stDarkEase(0,.16,age);
-    border.rotation.y=age*.94;
+    const lift=stDarkEase(0,.19,age),release=stDarkEase(0,.28,landingAge);
+    for(const [i,point] of vertices.entries()){
+      const phase=point.u*7.2-age*10.5+point.index*1.83;
+      const crest=.86+.27*Math.sin(phase)+.09*Math.sin(phase*1.8);
+      const height=point.height*point.lift;
+      const a=point.angle-age*1.28+point.tilt*height*.043+.075*Math.sin(phase-.6)*point.lift*lift;
+      const r=point.radius+point.tilt*point.lift+.36*Math.sin(phase+.9)*point.lift*lift+.46*release*point.u;
+      positions.setXYZ(i,Math.cos(a)*r,.07+height*crest*(.10+.90*lift)*(1+.13*release),Math.sin(a)*r);
+    }
+    positions.needsUpdate=true;
     floor.rotation.z=-age*.69;
     floor.material.uniforms.strength.value=.59*strength;
-    border.material.uniforms.strength.value=.91*strength;
+    border.material.uniforms.strength.value=.96*strength;
     border.material.uniforms.age.value=age;
   };
 }
@@ -369,8 +401,8 @@ function stDarkPose(actor,pose){
   if(actor.rig){for(const limb of actor.rig)limb.w=1;rigSync(actor,0);}
 }
 
-function stDarkWake(parent,atTime,pointAt,heightAt,from,to){
-  const bands=7,count=61,life=.74;
+function stDarkWake(parent,atTime,pointAt,heightAt,from,to,opacity=1,life=.74){
+  const bands=7,count=61;
   const geometry=new THREE.BufferGeometry();
   const position=new THREE.BufferAttribute(new Float32Array(bands*count*6),3).setUsage(THREE.DynamicDrawUsage);
   const alpha=new THREE.BufferAttribute(new Float32Array(bands*count*2),1).setUsage(THREE.DynamicDrawUsage);
@@ -422,9 +454,9 @@ function stDarkWake(parent,atTime,pointAt,heightAt,from,to){
         const a=(b*count+j)*2;
         position.setXYZ(a,x,y-width,z);
         position.setXYZ(a+1,x,y+width,z);
-        const opacity=trailOpacity*(b===0?.99:b<3?.88:.74)*tear;
-        alpha.setX(a,opacity);
-        alpha.setX(a+1,opacity);
+        const bandOpacity=opacity*trailOpacity*(b===0?.99:b<3?.88:.74)*tear;
+        alpha.setX(a,bandOpacity);
+        alpha.setX(a+1,bandOpacity);
       }
     }
     position.needsUpdate=true;
@@ -461,6 +493,89 @@ function stDarkWakeShards(parent,atTime,pointAt,heightAt,from,to){
   };
 }
 
+function stDarkOrbCore(material=new THREE.MeshBasicMaterial({color:0x0d0d12})){
+  return new THREE.Mesh(new THREE.SphereGeometry(1,32,24),material);
+}
+
+function stDarkOrbWeave(parent,pointAt,hopHeight){
+  const ease=stDarkEase,tau=Math.PI*2,axis=new THREE.Vector3(),last=new THREE.Vector3();
+  const strands=104,steps=37;
+  const geometry=new THREE.BufferGeometry();
+  const vertex=new THREE.BufferAttribute(new Float32Array(strands*steps*12),3).setUsage(THREE.DynamicDrawUsage);
+  const color=new THREE.BufferAttribute(new Float32Array(vertex.array.length),3);
+  const faces=[];
+  for(let strand=0;strand<strands;strand++){
+    const bright=strand>=96;
+    const ink=new THREE.Color(bright?'#d6d8df':['#060609','#101015','#18181e','#24242b'][strand%4]);
+    for(let j=0;j<steps;j++){
+      const index=(strand*steps+j)*4;
+      for(let q=0;q<4;q++)color.setXYZ(index+q,ink.r,ink.g,ink.b);
+      if(j+1===steps)continue;
+      faces.push(index,index+4,index+1,index+1,index+4,index+5,
+        index+2,index+6,index+3,index+3,index+6,index+7);
+    }
+  }
+  geometry.setAttribute('position',vertex);
+  geometry.setAttribute('color',color);
+  geometry.setIndex(faces);
+  const fibers=new THREE.Mesh(geometry,new THREE.MeshBasicMaterial({
+    vertexColors:true,side:THREE.DoubleSide,toneMapped:false
+  }));
+  fibers.frustumCulled=false;
+  parent.add(fibers);
+  const samples=Array.from({length:steps},()=>({p:new THREE.Vector3(),right:new THREE.Vector3()}));
+
+  return (t,position,distance,amount,blend,squash,thin,coil)=>{
+    fibers.visible=amount>.005;
+    if(!fibers.visible)return;
+    const trail=lerp(4.65,3.15,thin)*(1-.67*coil),lead=lerp(.6,.20,thin)*(1-.38*coil);
+    for(let j=0;j<steps;j++){
+      const s=j/(steps-1),sample=samples[j],d=distance+lead-s*trail;
+      pointAt(d,sample.p);
+      sample.p.y=hopHeight(d);
+      pointAt(d+.13,axis).sub(pointAt(d-.13,last));
+      axis.y=0;
+      if(axis.lengthSq()<.001)axis.set(0,0,1);
+      else axis.normalize();
+      sample.right.set(axis.z,0,-axis.x);
+    }
+    for(let i=0;i<strands;i++){
+      const bright=i>=96,seed=(i*.618034)%1;
+      const outer=i>=66&&!bright;
+      const angle=tau*seed+t*(8.1+(i%3)*.31)+coil*.56;
+      const spread=bright?.39+.13*seed:outer?.85+.23*seed:.38+.50*seed;
+      const end=bright?.59+(i%3)*.06:outer?.74+.25*seed:.55+.34*seed;
+      const start=bright?.13:.014+(i%9)*.008;
+      const thickness=bright?.017:.023+(i%5)*.005;
+      const drift=(t*4.6+seed)%1;
+      for(let j=0;j<steps;j++){
+        const s=j/(steps-1),sample=samples[j];
+        const angleAlong=angle+s*(3.2+1.5*seed)+.23*Math.sin(s*7+i*.4);
+        const cap=Math.sqrt(Math.max(0,1-Math.pow(1-clamp(s/.25,0,1),2)));
+        const profile=.66*cap*(1-.67*ease(.32,1,s));
+        const pulse=.86+.14*Math.cos(tau*(s*1.6-drift));
+        const radius=spread*profile*pulse*(1+.27*squash)*lerp(1,.26,thin)*(1+.19*coil);
+        const side=Math.cos(angleAlong)*radius,vertical=Math.sin(angleAlong)*radius;
+        const wrapAngle=angle+(s*4.7);
+        const wrapRadius=(.42+.28*Math.sin(Math.PI*s))*spread;
+        const x=lerp(position.x+Math.cos(wrapAngle)*wrapRadius,sample.p.x+sample.right.x*side,blend);
+        const y=lerp(.05+2.19*s,1.10+sample.p.y+vertical,blend);
+        const z=lerp(position.z+Math.sin(wrapAngle)*wrapRadius,sample.p.z+sample.right.z*side,blend);
+        const fade=lerp(ease(.02,.16,s)*(1-ease(.85,.99,s)),
+          ease(start,start+.095,s)*(1-ease(end-.15,end,s)),blend);
+        const shed=bright?blend*(1-thin):1-thin*(i%3===0?.23:1);
+        const width=thickness*amount*fade*shed*(.84+.16*pulse);
+        const a=(i*steps+j)*4;
+        vertex.setXYZ(a,x,y-width,z);
+        vertex.setXYZ(a+1,x,y+width,z);
+        vertex.setXYZ(a+2,x-sample.right.x*width,y,z-sample.right.z*width);
+        vertex.setXYZ(a+3,x+sample.right.x*width,y,z+sample.right.z*width);
+      }
+    }
+    vertex.needsUpdate=true;
+  };
+}
+
 FXCODE.studio_darkness_dash=(_x,_y,_h,args,instance)=>{
   const anchor=instance.L.find(layer=>layer.d.id===args.layer);
   if(!anchor?.obj)return;
@@ -476,7 +591,6 @@ FXCODE.studio_darkness_dash=(_x,_y,_h,args,instance)=>{
     root.removeFromParent();
   });
 
-  const tau=Math.PI*2;
   const ease=stDarkEase;
   const look=getLook(NET.myId);
   const origin=[0,0];
@@ -555,7 +669,7 @@ FXCODE.studio_darkness_dash=(_x,_y,_h,args,instance)=>{
   const wake=stDarkWake(root,atTime,pointAt,hopHeight,firstDeparture,landingTime);
   const wakeShards=stDarkWakeShards(root,atTime,pointAt,hopHeight,firstDeparture,landingTime);
   const darkMat=new THREE.MeshBasicMaterial({color:0x0d0d12});
-  const egg=new THREE.Mesh(new THREE.SphereGeometry(1,32,24),darkMat);
+  const egg=stDarkOrbCore(darkMat);
   egg.name='Darkness initial dash orb';
   root.add(egg);
   const windup=new THREE.Group();
@@ -586,81 +700,7 @@ FXCODE.studio_darkness_dash=(_x,_y,_h,args,instance)=>{
     return spark;
   }));
 
-  const strands=104,steps=37;
-  const geometry=new THREE.BufferGeometry();
-  const vertex=new THREE.BufferAttribute(new Float32Array(strands*steps*12),3).setUsage(THREE.DynamicDrawUsage);
-  const color=new THREE.BufferAttribute(new Float32Array(vertex.array.length),3);
-  const faces=[];
-  for(let strand=0;strand<strands;strand++){
-    const bright=strand>=96;
-    const ink=new THREE.Color(bright?'#d6d8df':['#060609','#101015','#18181e','#24242b'][strand%4]);
-    for(let j=0;j<steps;j++){
-      const index=(strand*steps+j)*4;
-      for(let q=0;q<4;q++)color.setXYZ(index+q,ink.r,ink.g,ink.b);
-      if(j+1===steps)continue;
-      faces.push(index,index+4,index+1,index+1,index+4,index+5,
-        index+2,index+6,index+3,index+3,index+6,index+7);
-    }
-  }
-  geometry.setAttribute('position',vertex);
-  geometry.setAttribute('color',color);
-  geometry.setIndex(faces);
-  const fibers=new THREE.Mesh(geometry,new THREE.MeshBasicMaterial({
-    vertexColors:true,side:THREE.DoubleSide,toneMapped:false
-  }));
-  fibers.frustumCulled=false;
-  root.add(fibers);
-  const samples=Array.from({length:steps},()=>({p:new THREE.Vector3(),right:new THREE.Vector3()}));
-
-  function weave(t,distance,amount,blend,squash,thin,coil){
-    fibers.visible=amount>.005;
-    if(!fibers.visible)return;
-    const trail=lerp(4.65,3.15,thin)*(1-.67*coil),lead=lerp(.6,.20,thin)*(1-.38*coil);
-    for(let j=0;j<steps;j++){
-      const s=j/(steps-1),sample=samples[j],d=distance+lead-s*trail;
-      pointAt(d,sample.p);
-      sample.p.y=hopHeight(d);
-      pointAt(d+.13,axis).sub(pointAt(d-.13,last));
-      axis.y=0;
-      if(axis.lengthSq()<.001)axis.set(0,0,1);
-      else axis.normalize();
-      sample.right.set(axis.z,0,-axis.x);
-    }
-    for(let i=0;i<strands;i++){
-      const bright=i>=96,seed=(i*.618034)%1;
-      const outer=i>=66&&!bright;
-      const angle=tau*seed+t*(8.1+(i%3)*.31)+coil*.56;
-      const spread=bright?.39+.13*seed:outer?.85+.23*seed:.38+.50*seed;
-      const end=bright?.59+(i%3)*.06:outer?.74+.25*seed:.55+.34*seed;
-      const start=bright?.13:.014+(i%9)*.008;
-      const thickness=bright?.017:.023+(i%5)*.005;
-      const drift=(t*4.6+seed)%1;
-      for(let j=0;j<steps;j++){
-        const s=j/(steps-1),sample=samples[j];
-        const angleAlong=angle+s*(3.2+1.5*seed)+.23*Math.sin(s*7+i*.4);
-        const cap=Math.sqrt(Math.max(0,1-Math.pow(1-clamp(s/.25,0,1),2)));
-        const profile=.66*cap*(1-.67*ease(.32,1,s));
-        const pulse=.86+.14*Math.cos(tau*(s*1.6-drift));
-        const radius=spread*profile*pulse*(1+.27*squash)*lerp(1,.26,thin)*(1+.19*coil);
-        const side=Math.cos(angleAlong)*radius,vertical=Math.sin(angleAlong)*radius;
-        const wrapAngle=angle+(s*4.7);
-        const wrapRadius=(.42+.28*Math.sin(Math.PI*s))*spread;
-        const x=lerp(position.x+Math.cos(wrapAngle)*wrapRadius,sample.p.x+sample.right.x*side,blend);
-        const y=lerp(.05+2.19*s,1.10+sample.p.y+vertical,blend);
-        const z=lerp(position.z+Math.sin(wrapAngle)*wrapRadius,sample.p.z+sample.right.z*side,blend);
-        const fade=lerp(ease(.02,.16,s)*(1-ease(.85,.99,s)),
-          ease(start,start+.095,s)*(1-ease(end-.15,end,s)),blend);
-        const shed=bright?blend*(1-thin):1-thin*(i%3===0?.23:1);
-        const width=thickness*amount*fade*shed*(.84+.16*pulse);
-        const a=(i*steps+j)*4;
-        vertex.setXYZ(a,x,y-width,z);
-        vertex.setXYZ(a+1,x,y+width,z);
-        vertex.setXYZ(a+2,x-sample.right.x*width,y,z-sample.right.z*width);
-        vertex.setXYZ(a+3,x+sample.right.x*width,y,z+sample.right.z*width);
-      }
-    }
-    vertex.needsUpdate=true;
-  }
+  const weave=stDarkOrbWeave(root,pointAt,hopHeight);
 
   let lastTime=-1;
   function update(){
@@ -727,7 +767,7 @@ FXCODE.studio_darkness_dash=(_x,_y,_h,args,instance)=>{
     }
     wake(t);
     wakeShards(t);
-    weave(t,distance,amount,blend,squash,thin,coil);
+    weave(t,position,distance,amount,blend,squash,thin,coil);
   }
   instance.updateDarknessDash=update;
   update();

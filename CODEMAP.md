@@ -13,7 +13,7 @@ CITY_MID:140 CITY_C2:140 cityModeData:141 mapArea:157 AREA:158 areaClamp:160
 ## js/02-citytest.js (28) — แมพทดสอบเมืองใหญ่ (กล่องเทา) — ใช้วัดความลื่นของเครื่องยนต์ก่อนสร้างเ…
 CITY_N:4 CITY_B:4 CITY_ROAD:4 genCityTest:5 cityTestProps:19
 
-## js/02-data.js (384) — ค่าคงที่ของเกม
+## js/02-data.js (384) — 
 W:4 H:4 PR:4 PILLARS:6 SPAWNF:7 mulberry:9 genForest:10 genPitch:27 genHogsmeade:36
 §54 แผนที่โล่ง 3 แบบ (ผู้ใช้: ป่ามืดไม่สนุก อยากได้ที่โล่งๆ)
 genMeadow:55 genLake:61 genRuins:66
@@ -29,13 +29,12 @@ HOUSES:232 HAIRC:237 HAIRSTY:239 WOODC:242 WOODN:243 WCOREC:244 WCOREN:245 WANDS
 ## js/02-fcs-data.js (3) — 
 FCS_DATA:3
 
-## js/02-fcs.js (129) — แผนที่ First Castle Strike (โหมดบุกปราสาท 'siege') — แบบ Basic จากภาพร่างของผู้ใช้ใน Map …
+## js/02-fcs.js (129) — 
 FCS_C:7 FCS_WH:8 genFcs:9
 §103 พื้นที่เล่นตามเฟส (กำแพงล่องหน) + เขตจุดเกิดปลอดภัย — ใช้ทั้งโฮสต์ (G…
 SGPH:104 SG_SPR:105 _sgAreaC:106 sgArea:107 sgClamp:113 sgInArea:123
 
-## js/03-spells-core.js (249) — ระบบคาถาใหม่: สาย (path) × คาถา (spell) + สถานะ (status effects)
-§6 ไอคอนคาถา: จาก game-icons.net (CC BY 3.0, เครดิตใน "คู่มือ" และ icons…
+## js/03-spells-core.js (249) — 
 ICONS:8 ICOALIAS:9 hasIco:10 ICOBASE:12 icoURL:13 ICO:14 icoTint:15 icoHTML:24 PATHS:25 SPELL_LIST:34 SPELLS:34 defSpell:35 SLOTK:36 BRMAP:36 KITP:37 parseKit:38 cleanKit:55 setKit:56 pathReset:59
 §61 สถานะ (ใช้ได้ทั้งผู้เล่นและศัตรู)
 isBig:62 ccScale:64 ccTouch:65 addStun:66 addRoot:67 addFreeze:68 addSlow:73 addChill:74 ignite:79 FX_SHOCK_CYAN:87 FX_ONFIRE:87 shock:88 knock:93 addWard:94 addFrostSlow:96 frostSlow:97 moveMul:104 BRN_MAX:106 addBurn:107 addOnFire:109 addXBurn:110 addPoison:111 addSil:112 addFear:113 addBlind:114 addMark:115 healT:117 tickStatus:122 clearStatus:145 fxMask:146
@@ -100,7 +99,7 @@ WRATH_READY_T:221 WRATH_THROW_SWING_T:222 WRATH_DRAW_T:223 WRATH:224 earthWrathA
 §286 ทั้งสนาม: สิ่งก่อสร้างพัง / ฝุ่นหมดเวลา / Stonebreaker ชนกำแพง
 updateEarth:287 earthSnapP:299 earthSnapW:315
 
-## js/09-light.js (463) — 
+## js/09-light.js (532) — 
 LIGHTP:8 LTV:12 lgOn:19 lightShieldGauge:20 lightClearBond:21 lightReset:25 lightAlly:31 lightLinkPos:32 lightUnlink:33 lightReleaseAlly:51
 §57 สกิล 1 Crystal Bond: เล็งเพื่อน + กด = ลิงก์และส่ง 1 ชิ้น • ไม่เล็งเพ…
 lightBondTap:58 lightRecall:73
@@ -111,7 +110,7 @@ lightBeamAng:94 lightBeamPitch:96 lightBeamLength:98 lightHeatTick:112 lightBeam
 §155 Dash Light Step: วาร์ป 250 ตามทิศเดิน • เล็งคู่หู (ไม่เกิน 900) = วาร…
 lightStepBehind:156 lightDash:169 lightDmgOut:199 lightDmgIn:200 lightSnapP:201
 §206 สกิล
-lightSkillsTick:207 LIGHT_FORM_BASE:242 LIGHT_FORM_SCALE:243 LIGHT_FORM_PIVOT:244 lightFormAngles:245 lightFormRecoil:250 lightFormHand:255 LIGHT_FORM_ARMS:262 lightArmRest:271 _lightArmWork:272 lightArmPose:274 lightArmAim:292 lightUltSnap:299 lightUltEnd:305 _lightFormAngles:318 _lightFormTurn:318 _lightFormHand:318 lightUltOrigin:319 lightUltRay:329 lightUltBeamHit:336 lightUltFinish:350 lightUltTick:358 lightSanEnd:409 lightAimPt:410 LT_BOND:412 LT_VO:415 LT_EM:422 LT_SC:425 LT_VS_RELEASE:429 LT_VS_TRAVEL:429 LT_VS_S:430 LT_VS:433 LT_UL:434 lightAllyHit:452 lightQueueTick:455
+lightSkillsTick:207 LIGHT_FORM_BASE:242 LIGHT_FORM_SCALE:243 LIGHT_FORM_PIVOT:244 LIGHT_FORM_PALM:245 LIGHT_FORM_PALM_DEPTH:245 LIGHT_FORM_HEART_Y:246 LIGHT_FORM_HEART_Z:246 lightFinishDrive:247 lightFinishPitch:248 lightFinishPush:249 lightFormAngles:250 lightFormRecoil:254 lightFormHand:258 LIGHT_FORM_ARMS:269 lightArmRest:278 _lightArmWork:279 lightArmPose:281 lightFormOpenPalm:309 lightArmAim:321 lightUltSnap:328 lightUltEnd:335 _lightFormAngles:349 _lightFormTurn:349 _lightFormHand:349 _lightFormAimLocal:350 _lightFormUpLocal:350 lightUltOrigin:351 lightUltRay:366 lightUltBeamHit:373 lightUltFinish:387 lightUltTick:397 lightSanEnd:459 lightAimPt:460 LT_BOND:462 LT_VO:465 LT_EM:472 LT_SC:475 LT_VS_RELEASE:479 LT_VS_TRAVEL:479 LT_VS_S:480 LT_VS:483 LT_UL:484 lightAllyHit:503 lightQueueTick:506
 
 ## js/09-nature-ba.js (122) — 
 NATURE_BA_TEST:2 NATURE_WHIP:3 natureWhipEnabled:4 NAT_SLAM:8 NAT_LINE:8 natureEmpNear:9 natureEmpHit:10 natureWhipHit:18 natureWhipBasic:41 NW_RINGS:65 NW_SIDES:65 nwPhase:66 nwEase:67 nwSwingAngle:68 natureWhipPose:74 natureWhipVisualMake:83 natureWhipView:105
@@ -188,7 +187,7 @@ windUltCast:504 windUltTick:507 windUltSweep:532 windFloatZ:540 windSnapP:543 wi
 §547 สกิล (ผู้ใช้ 2026-11-08: รีดีไซน์ทั้งชุด — id เดิมไว้ให้ชุดสกิล/tune/…
 W_WL:549 W_DR:555 W_VX:561 W_VO:567 W_FW:573 W_UL:583
 
-## js/10-net.js (200) — เครือข่าย (PeerJS / WebRTC)
+## js/10-net.js (200) — 
 PREFIX:4 NET:5 RC:9 TURN_SERVERS:12 ICE:13 PEER_OPT:14 TURN_URL:16 ICE_READY:18 JN:22 LAG:24 lagDo:25 hostSend:26 LOBBY:27 genCode:28 sendAll:29 NETD_KEYS:33 NETD:33 netDeltaReset:34 netDelta:35 NET_MAX:49 _netTE:49 netSendSnap:50 NETU:62 netUndelta:63 setStatus:69 hostGame:71 hostPeer:80 netConnect:100 joinWatch:111 joinFail:126 netLost:132 joinGame:147 joinPeer:158 clientOnData:173 leave:188 leaveRoom:190
 
 ## js/11-host.js (431) — 
@@ -208,7 +207,7 @@ CITY_FL:8 CITY_PW:8 CDMG:9 CITYD:16 cityOn:17 cityLayout:19 cityReset:29 cityApp
 §146 ข้างในตึก (2026-10-28 ผู้ใช้: เดินเข้าได้ 1–3 ชั้น มีทางขึ้น • ผนังนอ…
 CIN:150 cityInterior:151 cinSlabOn:180 cinOpenPanel:182 cityIwHit:184 cityRampHit:186 cinIwSegs:189 cinIwRects:190 cinSecAt:191 citySecHit:193 cinIn:195 cinHole:196 cinRampH:197 _sgCI:198 cityBoxGrid:199 cityRoomAt:200 cityFloorH:202 cityCeilH:207 cinWallRect:211 cityCollideIn:214 cityProjIn:224 _sgCS:242 citySolidAt:243 cityRay:252 cityRoomBox:255 citySnapB:256 citySnapS:257 cityParse:259
 
-## js/12-efs.js (77) — สภาพธาตุบนฉาก (Element Surfaces) — เฟส 1: ไฟบนรั้วไม้ (designs/element-surfaces.md)
+## js/12-efs.js (77) — 
 EFSV:9 EFS:10 efsLv:11 efsBuild:12 efsDist:28 efsHeat:29 efsProj:34 efsEnv:40 _efsHit:44 efsTick:45 efsSnap:66 efsParse:70 efsHostView:77
 
 ## js/13-enemies.js (171) — ศัตรู (โหมด Co-op)
@@ -233,21 +232,20 @@ NAV_MAPS:14 NAV_EYE:14 NAV:15 navOn:17 navSig:18 navEnsure:26 navBuild:32 navCel
 ## js/15-botplay.js (268) — 
 BOT_RANGE:7 botMem:10 botWallBehind:12 _bspd:22 botSave:24 botWant:26 botClassPlanFor:65 botClassAim:66 botClassGround:71 botClassTarget:72 botClassLane:78 botClassPlan:81 botWindPlan:97 botNaturePlan:172 botCombo:242
 
-## js/15-modes.js (433) — โหมดพิเศษ: ควิดดิช / แข่งไม้กวาด / แบทเทิลรอยัล / หาลอร์ดโวลเดอมอร์ / ห้องฝึก
-§4 ส่งข้อความลับถึงผู้เล่นคนเดียว (เช่น บทบาทในโหมดหาลอร์ดโวลเดอมอร์)
-sendPriv:5 TASKF:9 taskPts:10 raceRings:11 modeInit:17 spawnDummy:64 trainTick:69 TR_KEYS:86 trTeams:88 trCmd:102 hostEndTraining:131
-§133 ควิดดิช
-quidThrow:134 quidDrop:140 quidArea:146 quidTick:147 snitchTick:183
-§206 แข่งไม้กวาด
-raceTick:207 raceRank:229
-§239 แบทเทิลรอยัล
-brTick:240 ITEMN:254 brPick:255
-§264 หาลอร์ดโวลเดอมอร์
-impActions:265 startMeeting:303 hostVote:310 meetTick:315 impCheck:334
-§342 ระเบิดที่ตั้งเวลาไว้ (ลูกไฟมังกร / คลื่นไฟ)
-bombTick:343 modeSnap:356
-§381 สร้าง snapshot ส่งให้ทุกเครื่อง
-r1:382 DEFP:384 packP:385 unpackP:386 makeSnap:387 PROF:405 pf:406 hostSent:407 hostLoop:408 HLW:423 pingN:433
+## js/15-modes.js (437) — 
+sendPriv:5 TASKF:9 taskPts:10 raceRings:11 modeInit:17 spawnDummy:64 trainTick:69 TR_KEYS:86 trTeams:88 trCmd:102 hostEndTraining:135
+§137 ควิดดิช
+quidThrow:138 quidDrop:144 quidArea:150 quidTick:151 snitchTick:187
+§210 แข่งไม้กวาด
+raceTick:211 raceRank:233
+§243 แบทเทิลรอยัล
+brTick:244 ITEMN:258 brPick:259
+§268 หาลอร์ดโวลเดอมอร์
+impActions:269 startMeeting:307 hostVote:314 meetTick:319 impCheck:338
+§346 ระเบิดที่ตั้งเวลาไว้ (ลูกไฟมังกร / คลื่นไฟ)
+bombTick:347 modeSnap:360
+§385 สร้าง snapshot ส่งให้ทุกเครื่อง
+r1:386 DEFP:388 packP:389 unpackP:390 makeSnap:391 PROF:409 pf:410 hostSent:411 hostLoop:412 HLW:427 pingN:437
 
 ## js/15-siege.js (203) — 
 SGV:12 SG_TEAM:24 sgF:25 sgCore:26 sgInZone:27 sgSpawn:28 sgInit:29 sgWallsApply:38 sgWallDmg:42 sgWallHit:48 sgWallEnv:49 sgInput:54 sgStop:62 sgTick:63 sgCoreDown:94 sgEnd:107 sgResult:109 sgSnap:115 SGB:124 sgBotTarget:126 sgBotGoal:137 sgUnstick:149 sgBotThink:162
@@ -267,7 +265,7 @@ MY:210 myDB:211 mySave:212 myLoad:215 myDecodeReady:221 myPlay:222 myNext:234 my
 §256 เพลงประกอบ (สร้างสดตามแผนที่)
 MUSIC:257 THEMES:258 padNote:263 musicTick:270 toggleMusic:299
 
-## js/19-client.js (289) — ฝั่งแสดงผล (ทุกเครื่อง รวมโฮสต์ ใช้ snapshot เดียวกัน)
+## js/19-client.js (289) — 
 cv:4 cx:4 DPR:5 SW:5 SH:5 resize:6 VIEW:12 screen:13 lastBuffKey:13 overShown:13 lastCount:13 PARTS:14 TEXTS:14
 §15 งบเอฟเฟกต์ (VFX budget)
 VFXB:20 _apush:21 vfxQual:29 vfxBegin:31 vfxEnd:34 vfxOnce:36 vfxExtra:38 PCOL:39 setScreen:41 onLobby:53
@@ -343,7 +341,7 @@ CITY_STY:181 CITY_VEH:188 cityFacade:190 CITYK:203 _cZ:204 _cT:204 _cR:204 _cC:2
 §259 ตึกไฮไลต์ล้มทั้งตึก (ขั้น 7)
 _ctA:262 _ctB:262 _ctC:262 cityTowerPose:263 cityTowerAnim:271 cityTowerRubble:278 CAREA:292 cityAreaSync:293 cityViewSync:305 cityDebris:349 cityFX:358
 
-## js/28-fcs-build.js (170) — ภาพแผนที่ First Castle Strike (แบบ Basic: กล่อง/ทรงพื้นฐาน ยังไม่มีโมเดลจริง) + ภาพ/HUD โ…
+## js/28-fcs-build.js (170) — 
 buildFcs:5 EFS3:37 fcsFences:38 _efC:55 _efM:55 _efS:55 _efZ:55 efsView:56
 §81 ภาพโหมด (ลูกข่ายทุกเครื่องจาก snapshot M.sg)
 SGV3:82 sgClearView:83 sgViewBuild:84 SGVZR:103 sgBarrier:105 sgSync:119 sgDust:140 sgFx:141
@@ -433,12 +431,12 @@ ROLE_COL:37 roleTag:38 DESIGNED:39 spellTags:40 spellDescHTML:47 baseDescHTML:51
 §222 ฉากเปิด (#intro) + ประกายบนหน้าเมนู (#menuFx)
 TITLE:225 titleSpark:226 TSPR:228 titleSprite:229 titleDraw:230 titleLoop:240 titleGo:251 JOINQ:259 ovResult:279
 
-## js/40-train-settings.js (251) — เมนูทดลอง (ห้องฝึก / Test Place)
+## js/40-train-settings.js (253) — เมนูทดลอง (ห้องฝึก / Test Place)
 trOpenF:2 trKey:2 trN:2 TR_OPTS:3 trToggle:4 trSend:9 trSync:14
-§50 แท่นเสกบอท (โซนเสกบอท ห้องฝึก, trBotPad js/02): ยืนบนแท่น = เมนูขึ้น …
-bpOpen:51 bpOn:51 bpKey:51 bpShow:53 bpSync:55 hovEl:125
-§126 หน้าตั้งค่า
-setRow:127 setTog:128 setTab:129 XHC:130 XHN:130 setOpts:131 SET_ICO:133 SET_EN:136 renderSettings:137 drawXhPrev:159 openSettings:160 closeSettings:162 modeIcon:218 modeTitle:219 renderLobby:220
+§52 แท่นเสกบอท (โซนเสกบอท ห้องฝึก, trBotPad js/02): ยืนบนแท่น = เมนูขึ้น …
+bpOpen:53 bpOn:53 bpKey:53 bpShow:55 bpSync:57 hovEl:127
+§128 หน้าตั้งค่า
+setRow:129 setTog:130 setTab:131 XHC:132 XHN:132 setOpts:133 SET_ICO:135 SET_EN:138 renderSettings:139 drawXhPrev:161 openSettings:162 closeSettings:164 modeIcon:220 modeTitle:221 renderLobby:222
 
 ## js/41-debug.js (181) — 
 botBrain:6 _obsKeep:49 balArena:50 _balStash:53 balIsolate:54 balReset:57 balDuel:63 balTour:79 balCoop:93 balSpellTest:109
@@ -597,7 +595,7 @@ warmOutline:125
 §142 อุ่นฉากเกมระหว่างรอในห้อง (ผู้ใช้ 2026-10-23: "กระตุกตอนเริ่มแมตช์แรก…
 GWARM:147 gameWarmTick:148 gameWarmFree:181
 
-## js/52-social.js (172) — 
+## js/52-social.js (172) — เล่นกับเพื่อน (ผู้ใช้ 2026-10-22): แชท + อีโมต + ดูเพื่อนเล่น (spectator) + ป้ายต่อเน็ตให…
 §6 แชท: Enter = พิมพ์ / Enter อีกที = ส่ง / Esc = ปิด • ข้อความขึ้นมุมซ้…
 CHAT:7 chatOpen:27 chatClose:32 chatSend:42 chatAdd:47 escH:52 onChat:53 drawSocial:59 drawPing:83
 §89 อีโมต: กด Z ค้าง → วงล้อ 6 แบบ ลากเมาส์ไปทางที่ต้องการ ปล่อย Z = เล่น…
@@ -607,7 +605,7 @@ SPEC:141 specTarget:142 specCycle:152 drawSpecHint:157
 §165 ป้าย "กำลังต่อใหม่..." (ลูกข่ายหลุดจากโฮสต์ js/10 netLost)
 drawNetBanner:166
 
-## js/53-victory.js (165) — 
+## js/53-victory.js (165) — จบเกม (ผู้ใช้ 2026-10-22): VICTORY / DEFEAT แบบ Overwatch แต่เป็นเวทมนตร์ (สายฟ้า + ไฟ) +…
 VIC:6 VPAL:7 vicKind:17 vicStart:25 vicStop:31 vicSkip:32 vicBolt:36 vicLoop:42
 §108 จอสรุป: MVP + จุดเด่น (ใส่ใน showOver js/26)
 overMvp:117 overBar:127
@@ -623,22 +621,23 @@ POT3:81 potBottle:82 potMesh:91 syncPots:108 potFx:125
 §130 ภาพ: ป้ายตอนฆ่า / จอตอนตาย / อันดับ / มงกุฎค่าหัว
 FFAV:131 MULTI:132 MULTI_TH:132 STREAK:133 pName:134 ffaKf:135 kfSound:150 KINDN:151 drawFFA:152
 
-## js/55-podium.js (82) — 
+## js/55-podium.js (82) — โพเดียมธีมฮอกวอตส์ (ผู้ใช้ 2026-10-22 "podium but make it magician theme hogwart theme")
 POD:6 POD_X:7 POD_H:7 POD_C:7 podStart:8 podStop:29 podPose:37 renderPodium:49
 
-## js/56-progress.js (94) — 
+## js/56-progress.js (94) — เลเวล + สถิติ + ของปลดล็อค (ผู้ใช้ 2026-10-22: "more skin wand cloak unlock as lvl" → เลื…
+§7 var/function (ไม่ใช่ const): หน้าสร้างตัวละครอาจเปิดตอนโหลด (?nointro…
 LV_MAX:8 DEV_MAXLV:11 lvNeed:12 UNLOCKS:13 PROF_ITEMS:23 lvRewards:31 lvNextReward:32 PROG:33 progSave:34 lvOf:35 progLv:36 xpMax:37 wandKillNeed:39 lookLock:40 lookClampLocks:41 progXP:43 progAward:44 progBox:56 progOpen:64 progChip:76
 
-## js/57-tutorial.js (44) — 
+## js/57-tutorial.js (44) — วิธีเล่นแต่ละสาย (ผู้ใช้ 2026-10-22 "สอนเล่นแต่ละสาย") — ปุ่ม "📖 วิธีเล่นสายนี้" ในหน้าเ…
 TUTTIPS:7 tutOpen:12 tutTry:31
 
-## js/58-deathcam.js (60) — 
+## js/58-deathcam.js (60) — กล้องตอนตาย (ผู้ใช้ 2026-10-22): "when ded make cam focus on person who kill u at ur ded …
 DCAM_T1:10 DCAM_T2:10 DCAM_FADE:10 DCAM:11 dcamDie:12 _dcP:19 _dcL:19 dcamCam:20 drawDeathCam:47
 
-## js/59-podroom.js (151) — 
+## js/59-podroom.js (151) — ห้องโถงใหญ่ฮอกวอตส์สำหรับโพเดียม (ผู้ใช้ 2026-10-22 "design me a new lobby for background…
 PODS:9 PODR:11 podRoomBuild:12 podRoomTick:142
 
-## js/60-menu3d.js (397) — 
+## js/60-menu3d.js (397) — เมนูแรก = ลานดวลเวทใต้ดาว ที่ "เดินได้" (ผู้ใช้ 2026-10-22, รอบ 2: "redesign the menu by …
 MENUS:14 MN:17 MN_FOV:19 MN_R:19 _mv:20 _mcp:20 _mcl:20 mnCrest:21 mnTone:25 mnHit:30 mnBuild:32 MNPOP:223 mnToast:243
 §244 สั่งพ่อมด
 mnGo:245 mnWalkTo:248 mnUse:249 mnClose:254
@@ -708,7 +707,7 @@ skwOpen:289 skwClose:299
 ## js/64-mappick.js (157) — 
 MPK_TXT:7 MPK_SKY:19 MPK_I:21 MPK_DICE:31 MPK:36 mpkE:37 mpkC:37 mpkSnd:38 mpkCut:39 mpkName:40 mpkCardHTML:41 mpkBuild:51 mpkUp:89 mpkMeasure:101 mpkIdx:102 mpkStep:103 mpkTo:104 mpkPick:105 mpkOpen:111 mpkClose:127 mpkLoop:131 mpkTick:133
 
-## js/65-ui3.js (408) — 
+## js/65-ui3.js (408) — UI รอบ 3 (ผู้ใช้ 2026-10-23 — สเปก designs/ui-menu.md "รอบ 3") • สไตล์เดียวกับเมนูใหม่ (c…
 UIG:6 uiGalaxy:7 uiGalaxyOn:15 uiGalRaf:16 uiGalT:16 uiGalLoop:17 uiGalDraw:19 uiShow:36 uiHide:37
 §40 เมนูหยุดเกม
 §44 คู่มือ (แบบ Skill Tree)
@@ -738,10 +737,13 @@ BACKDROP:8
 §66 noise เล็ก ๆ (คงที่ต่อ seed)
 bdHash:67 bdNoise:68 bdFbm:69 bdEdge:71 bdRing:73 bdPaint:79 bdTree:82 buildBackdrop:89 bdTower:135 backdropHide:139
 
-## js/68-light-view.js (950) — 
-LGV:7 LGSH:9 LGSH_L:11 _lgM4:14 _lgQ:14 _lgSV:14 _lgS:14 _lgC:14 _lgC2:14 lgGlowTex:15 lgNeon:17 lgEmpFx:25 lgWallBurn:44 lgShardSpawn:60 lgShardTick:64 lgBaCore:65 lgCrDim:108 lgEmpBeam:112 lgNeonCrystal:125 lgSanctumFloorTex:135 lgSanctumMoteTex:146 lgHoneyTex:161 lgShield:165 lightShieldEv:197 LGPOSE:200 _lgGlass:201 _lgCore:201 _lgGeo:201 _lgEdge:201 _lgEdgeM:201 lgCrystalMesh:203 lgState:211 _lgV:212 _lgW:212 lgWorld:213 LG_ULT_ASSET:216 LG_CRYSTAL_ASSET:216 LG_ULT_TIME:217 lgUltMaterials:218 lgSovereignFinishes:219 lgSovereignMaterials:220 lgSovereignFinish:273 lgSovereignCrystal:289 lgSkinSovereign:298 lgPoseSovereign:336 lgSovereignRibbon:366 lgSovereignCrossSparks:395 lgBuildSovereign:418 lgReturnMark:462 lgUltVisual:467 lgWardVisual:541 _lgBeamM:557 lgBeamMat:558 _lgUltBeamM:561 lgUltBeamMat:562 _lgLinkM:567 lgLinkMat:568 lgTube:571 lgAim:572 lightFX:573 lgBaseObjects:775 lgClearBase:776 lgClear:777 lightDropView:783 lgAllyEmpEnd:789
-§793 เหตุการณ์
-lgBlip:795 lgArcFx:799 lgFlyFx:802 lightFxTick:803 lightEfx:807 _lgHq:904 _lgHy:904 lgProcHead:906 lightHeadPose:921 LGHUD:929 drawLightHud:930
+## js/68-darkness-view.js (105) — 
+nightWaltzStrip:2 nightWaltzBorder:80
+
+## js/68-light-view.js (1777) — 
+LGV:7 LGSH:9 LGSH_L:11 _lgM4:14 _lgQ:14 _lgSV:14 _lgS:14 _lgC:14 _lgC2:14 lgGlowTex:15 lgNeon:17 lgEmpFx:25 lgWallBurn:44 lgShardSpawn:60 lgShardTick:64 lgBaCore:65 lgCrDim:108 lgEmpBeam:112 lgNeonCrystal:125 lgSanctumFloorTex:135 lgSanctumMoteTex:146 lgHoneyTex:161 lgShield:165 lightShieldEv:197 LGPOSE:200 _lgGlass:201 _lgCore:201 _lgGeo:201 _lgEdge:201 _lgEdgeM:201 lgCrystalMesh:203 lgState:211 _lgV:212 _lgW:212 lgWorld:213 LG_ULT_ASSET:216 LG_CRYSTAL_ASSET:216 LG_ULT_INTRO:217 LG_ULT_ARRIVAL_FX:217 LG_ULT_TIME:218 lgUltMaterials:219 lgSovereignFinishes:220 lgSovereignMaterials:221 lgSovereignFinish:282 lgSovereignCrystal:303 lgSkinSovereign:312 lgPoseSovereign:365 lgSovereignHeart:441 LG_SASH_X:467 LG_SASH_Z:467 lgSovereignRibbon:468 lgSovereignFlare:527 LG_PALM_TRAVEL:540 LG_PALM_SCORCH_LIFE:541 LG_PALM_SCORCH_SLOTS:541 lgPalmGateOffset:542 lgSovereignPalmWaves:544 lgPosePalmWaves:553 lgSovereignPalmGate:569 lgSovereignScorchTrail:579 lgPalmScorch:607 lgSovereignCrossSparks:643 lgSovereignGather:666 lgSovereignWingCurrent:699 lgSovereignChargeSeal:728 lgSovereignChestRecoil:745 lgSovereignSeal:755 lgSovereignArmSigils:771 lgBuildSovereign:802 lgReturnMark:879 lgUltVisual:893 lgWardVisual:1101 _lgBeamM:1117 lgBeamMat:1118 lgSovereignChestBeam:1121 lgSovereignPalmBeam:1155 _lgLinkM:1225 lgLinkMat:1226 lgTube:1229 lgAim:1230 lightFX:1231 lgBaseObjects:1433 lgClearBase:1434 lgClear:1435 lightDropView:1442 lgAllyEmpEnd:1448
+§1452 เหตุการณ์
+lgBlip:1454 lgArcFx:1458 lgFlyFx:1461 lgSovereignArrival:1462 lightFxTick:1501 LG_BLAST_EXPAND:1505 LG_BLAST_HOLD:1505 lgImpactDome:1506 lgBlastFloor:1545 lgBlastThreads:1576 lightEfx:1604 _lgHq:1731 _lgHy:1731 lgProcHead:1733 lightHeadPose:1748 LGHUD:1756 drawLightHud:1757
 
 ## js/68-nature-art.js (171) — 
 naturePlantArt:2 Turret:3 auraTextures:44 auraTex:45 LotusAura:88 glowWallTex:92 M_BUB:95 M_BUBRIM:96 M_DRIP:97 M_POOL:98 lotusPetalVeins:100 Lotus:127
@@ -797,13 +799,13 @@ dive:196 PA:197 TA:198 DIVE_DOWN:200 DIVE_POUR:200 DIVE_STEP:200 diveDist:201 la
 §459 เล่น
 WDG_YAW:460 wdgGet:461 wdgStart:462 wdgDive:469 wdgKeep:472 wdgEnd:473 wdgTick:474
 
-## js/71-perfhud.js (72) — 
+## js/71-perfhud.js (72) — ตัววัดประสิทธิภาพบนจอ (ผู้ใช้ 2026-11-05: "อยากได้ตัววัดอื่น ๆ เพิ่ม เอาไว้เก็บข้อมูล opt…
 PERF:9 perfFrame:12 perfDom:26 perfStats:34 perfGraph:38 _gpuName:51 gpuIntegrated:52 perfRows:53 perfPanel:68 perfText:69
 
 ## js/72-dash-pose.js (85) — 
 DPOSE:12 DPT:24 _dpQ:25 _dpX:25 _dpP:25 dpMix:26 dpKnees:28 dpStyle:36 DPDBG:41 dashPose:42 dpApply:75
 
-## js/73-tune.js (142) — แผงปรับค่า 🎚️ (F8 / ปุ่ม "ปรับค่า" ในเมนูพัก และหน้าแรก) — ปรับตัวเลขในเกมสดๆ แล้วเซฟลง …
+## js/73-tune.js (142) — 
 TUNE:8 tuneNum:9 tuneBuild:15
 §81 ใช้ / เก็บค่า
 tuneSetVal:82 tuneApplyFile:85 tuneJson:89
@@ -817,7 +819,7 @@ LOOK:17 lookPreset:27 lookMap:29 lookName:30 lookEnvFor:31 lookApply:41 lookRays
 §71 ลงทะเบียนในเครื่องมือปรับค่า (js/73-tune.js): 1 หมวด "🌗 Look" แยกส่ว…
 LOOK_F:72 lookRegister:78
 
-## js/75-ambient.js (52) — Ambient 🌫️ — ฝุ่นลอย (dust motes) + หมอกลอยต่ำ (mist) ที่ใช้ได้ทุกแมพ ปรับตามพรีเซ็ต Loo…
+## js/75-ambient.js (52) — 
 AMBX:9 AMBX_V:10 AMBX_F:24 ambMesh:27 ambQual:39 ambFrame:40
 
 ## js/76-surface.js (125) — 
@@ -843,4 +845,4 @@ _dvCyl:135 _dvMat:136 devOverlay:137
 §157 หน้าต่าง
 _dvPanel:158 _dvBtn:159 devToggle:162 dvBtn:167 dvRow:168 dvTog:169 dvSec:170 devRender:171 devPos:208
 
-(103 files, 28768 lines)
+(104 files, 29775 lines)

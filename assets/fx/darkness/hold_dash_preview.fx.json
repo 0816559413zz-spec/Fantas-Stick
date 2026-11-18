@@ -1,0 +1,11 @@
+{
+  "v": 1,
+  "desc": "Darkness — Shift ค้าง ชาร์จ 0.5 วิ ริ้วผ้าคลุมไหลเป็นหางลูกเงา อยู่ในร่างลูกเงา 2 วิ",
+  "tags": ["darkness", "preview"],
+  "pal": "arcane",
+  "dur": 3.78,
+  "layers": [
+    {"id": "anchor", "t": "mesh", "shape": "disc", "mat": "black", "op": 0, "at": 0, "life": 3.78},
+    {"id": "dash", "t": "code", "fn": "studio_darkness_shift", "at": 0, "life": 3.78, "args": {"layer": "anchor", "hold": true}}
+  ]
+}

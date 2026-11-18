@@ -1,0 +1,35 @@
+{
+ "v": 1,
+ "desc": "Darkness — ท่าฟัน BA เคียว (พรีวิว): เงื้อ 0.2 วิ กวาดแนวนอนขวา→ซ้าย 120° เปลวบนใบยืดเป็นหาง • วนทุก 1.6 วิ",
+ "tags": [
+  "darkness",
+  "preview",
+  "scythe",
+  "ba"
+ ],
+ "pal": "arcane",
+ "dur": 4.8,
+ "layers": [
+  {
+   "id": "anchor",
+   "t": "mesh",
+   "shape": "disc",
+   "mat": "black",
+   "op": 0,
+   "at": 0,
+   "life": 4.8
+  },
+  {
+   "id": "scythe",
+   "t": "code",
+   "fn": "studio_darkness_scythe",
+   "at": 0,
+   "life": 4.8,
+   "args": {
+    "layer": "anchor",
+    "wrap": "C",
+    "mode": "ba"
+   }
+  }
+ ]
+}

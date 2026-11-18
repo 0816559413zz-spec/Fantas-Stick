@@ -214,6 +214,7 @@ function lgWorld(x,y,h){return new THREE.Vector3(tx(x),GY(x,y)+(h||0),tz(y));}
 
 // glTF geometry stays shared. Uniforms animate the materials without per-actor shader copies.
 const LG_ULT_ASSET='radiant_sovereign',LG_CRYSTAL_ASSET='radiant_sovereign_crystal';
+const LG_ULT_INTRO=1.18,LG_ULT_ARRIVAL_FX=.49;
 const LG_ULT_TIME={value:0};
 let lgUltMaterials=null;
 const lgSovereignFinishes=new Map();
@@ -221,34 +222,42 @@ function lgSovereignMaterials(){
   if(lgUltMaterials)return lgUltMaterials;
   const basic=(col,intensity)=>new THREE.MeshBasicMaterial({color:hdr(col,intensity),toneMapped:false});
   const body=new THREE.MeshStandardMaterial({color:'#ffffff',roughness:.48,transparent:true,alphaTest:.02});
-  body.onBeforeCompile=s=>{
+  body.onBeforeCompile=function(s){
+    s.uniforms.uDissolve=this.userData.dissolve;
     s.vertexShader=s.vertexShader.replace('#include <common>',`#include <common>
-      attribute float _palm_light, _palm_crease, _waist_fade, _body_height;
-      varying vec4 vRadianceBody;`).replace('#include <begin_vertex>',`#include <begin_vertex>
-      vRadianceBody=vec4(_palm_light,_palm_crease,_waist_fade,_body_height);`);
+      attribute float _palm_light, _palm_crease, _waist_fade, _body_height, _arm_sculpt;
+      varying vec4 vRadianceBody;varying float vArmSculpt;varying vec3 vLightStone;`).replace('#include <begin_vertex>',`#include <begin_vertex>
+      vRadianceBody=vec4(_palm_light,_palm_crease,_waist_fade,_body_height);vArmSculpt=_arm_sculpt;vLightStone=position;`);
     s.fragmentShader=s.fragmentShader.replace('#include <common>',`#include <common>
-      varying vec4 vRadianceBody;`).replace('#include <color_fragment>',`#include <color_fragment>
-      vec3 marble=mix(vec3(.61,.42,.21),vec3(.14,.072,.012),smoothstep(3.24,3.43,vRadianceBody.w));
+      uniform float uDissolve;varying vec4 vRadianceBody;varying float vArmSculpt;varying vec3 vLightStone;`).replace('#include <color_fragment>',`#include <color_fragment>
+      float fracture=fract(sin(dot(floor(vLightStone*21.),vec3(71.91,19.32,31.73)))*18732.37);
+      float threshold=.16+.62*fracture+.16*clamp(vLightStone.y-2.,0.,1.);
+      float scatter=1.-smoothstep(threshold-.054,threshold+.035,uDissolve);
+      vec3 marble=mix(vec3(.65,.52,.34),vec3(.16,.097,.036),smoothstep(3.24,3.43,vRadianceBody.w));
+      marble=mix(marble,vec3(.46,.33,.20),.40*vArmSculpt);
       diffuseColor.rgb*=mix(marble,vec3(.82,.59,.20),vRadianceBody.x);
-      diffuseColor.a*=max(smoothstep(0.,1.,vRadianceBody.z),vRadianceBody.x);`)
+      diffuseColor.a*=max(smoothstep(0.,1.,vRadianceBody.z),vRadianceBody.x)*(1.+.13*vArmSculpt)*scatter;`)
       .replace('#include <emissivemap_fragment>',`#include <emissivemap_fragment>
-      totalEmissiveRadiance+=vec3(1.,.70,.16)*(.075+.52*vRadianceBody.x)*(1.-.3*vRadianceBody.y);`);
+      float edge=(1.-smoothstep(.01,.11,abs(uDissolve-threshold)))*step(.055,uDissolve);
+      totalEmissiveRadiance+=vec3(1.,.70,.16)*((.075-.037*vArmSculpt+.52*vRadianceBody.x)*(1.-.3*vRadianceBody.y)+edge*.66);`);
   };
   const current=(base,peak,bodyLine=false)=>{
     const m=basic('#fff5d9',1);m.transparent=true;m.depthWrite=false;
     m.blending=bodyLine?THREE.NormalBlending:THREE.AdditiveBlending;
     m.customProgramCacheKey=()=>`radiance-line-${base}-${peak}-${bodyLine}`;
-    m.onBeforeCompile=s=>{
+    m.onBeforeCompile=function(s){
       s.uniforms.uRadianceTime=LG_ULT_TIME;
+      s.uniforms.uCrossClock=this.userData.crossClock;
+      s.uniforms.uCrossCharge=this.userData.crossCharge;
       s.vertexShader=s.vertexShader.replace('#include <common>',`#include <common>
-        attribute float _flow_distance;varying float vRadianceFlow;`).replace('#include <begin_vertex>',
-        '#include <begin_vertex>\nvRadianceFlow=_flow_distance;');
+        attribute float _flow_distance;uniform float uCrossCharge;varying float vRadianceFlow;`).replace('#include <begin_vertex>',
+        '#include <begin_vertex>\nvRadianceFlow=_flow_distance;transformed+=normal*(.044*uCrossCharge);');
       s.fragmentShader=s.fragmentShader.replace('#include <common>',`#include <common>
-        uniform float uRadianceTime;varying float vRadianceFlow;`).replace('#include <color_fragment>',`#include <color_fragment>
-        float t=fract(vRadianceFlow-uRadianceTime*.58);
+        uniform float uRadianceTime,uCrossClock,uCrossCharge;varying float vRadianceFlow;`).replace('#include <color_fragment>',`#include <color_fragment>
+        float t=fract(vRadianceFlow-uCrossClock);
         float wave=smoothstep(0.,.05,t)*(1.-smoothstep(.05,.23,t));
         float filament=.13*pow(.5+.5*sin(vRadianceFlow*58.-uRadianceTime*14.),6.);
-        diffuseColor.rgb*=mix(vec3(1.,.37,.028),vec3(1.,.94,.75),wave)*(${base}+${peak}*wave+filament);
+        diffuseColor.rgb*=mix(vec3(1.,.37,.028),vec3(1.,.95,.68),wave)*(${base}+${peak}*wave+filament+uCrossCharge*1.33);
         diffuseColor.a*=mix(${bodyLine?'0.88':'0.58'},1.,wave);`);
     };
     return m;
@@ -276,7 +285,12 @@ function lgSovereignFinish(source){
   const m=source.clone(),name=m.name;
   m.userData.keep=true;
   if(name.startsWith('Solar blade')){
-    m.color.multiplyScalar(.76);m.emissiveIntensity*=.28;
+    if(name.includes('amber'))m.color.lerp(new THREE.Color('#bc681f'),.27);
+    else if(name.includes('pale gold')||name.includes('white gold'))m.color.lerp(new THREE.Color('#ffebaf'),.53);
+    m.color.multiplyScalar(.76);m.emissiveIntensity*=.25;
+  }else if(name.includes('face planes')){
+    m.color.lerp(new THREE.Color(name.startsWith('Ivory')?'#fff0cf':'#af947c'),.61);
+    m.emissiveIntensity*=.42;
   }else if(name.startsWith('Wrist sigil')){
     m.color.multiplyScalar(.8);m.emissiveIntensity*=.44;
   }else{
@@ -300,7 +314,9 @@ function lgSkinSovereign(g){
   // Skin attributes are immutable and shared by every clone of this GLB.
   if(!geo.hasAttribute('skinIndex')){
     const pos=geo.attributes.position,ids=new Uint16Array(pos.count*4),weights=new Float32Array(pos.count*4);
+    const curls=LIGHT_FORM_ARMS.map(()=>new Float32Array(pos.count*3));
     const axis=LIGHT_FORM_ARMS.map(a=>a.upper.clone().add(a.lower).normalize());
+    const palmFront=LIGHT_FORM_ARMS.map(a=>new THREE.Vector3(0,0,1).addScaledVector(a.hand,-a.hand.z).normalize());
     const v=new THREE.Vector3(),delta=new THREE.Vector3();
     for(let i=0;i<pos.count;i++){
       v.fromBufferAttribute(pos,i);
@@ -310,9 +326,16 @@ function lgSkinSovereign(g){
       const lower=THREE.MathUtils.smoothstep(elbow,-.17,.19),hand=THREE.MathUtils.smoothstep(wrist,-.10,.12);
       ids.set([0,first,first+1,first+2],offset);
       weights.set([1-active,active*(1-lower),active*lower*(1-hand),active*lower*hand],offset);
+      if(hand>.98){
+        const along=delta.copy(v).sub(a.wrist).dot(a.hand);
+        const curl=THREE.MathUtils.smoothstep(along,.19,.54);
+        if(curl>0)delta.copy(palmFront[side]).multiplyScalar(.23*curl).addScaledVector(a.hand,-.16*curl).toArray(curls[side],i*3);
+      }
     }
     geo.setAttribute('skinIndex',new THREE.BufferAttribute(ids,4));
     geo.setAttribute('skinWeight',new THREE.BufferAttribute(weights,4));
+    geo.morphTargetsRelative=true;
+    geo.morphAttributes.position=curls.map((d,i)=>{const attr=new THREE.BufferAttribute(d,3);attr.name='RelaxedPalm'+i;return attr;});
   }
   const mesh=new THREE.SkinnedMesh(geo,old.material);
   mesh.name=old.name;mesh.position.copy(old.position);mesh.quaternion.copy(old.quaternion);mesh.scale.copy(old.scale);
@@ -325,71 +348,296 @@ function lgSkinSovereign(g){
     upper.name='SovereignShoulder'+tag;lower.name='SovereignElbow'+tag;hand.name='SovereignPalm'+tag;
     upper.position.copy(A.shoulder);lower.position.copy(A.elbow).sub(A.shoulder);hand.position.copy(A.wrist).sub(A.elbow);
     root.add(upper);upper.add(lower);lower.add(hand);bones.push(upper,lower,hand);
-    return {sign,upper,lower,hand,mark:g.getObjectByName('Wrist'+tag),amount:0,
+    return {sign,upper,lower,hand,mark:g.getObjectByName('Wrist'+tag),amount:0,guard:0,
+      restingUpper:new THREE.Vector3(sign*.52,-.84,.14).normalize(),
+      restingLower:new THREE.Vector3(-sign*.33,.24,.91).normalize(),
+      restingHand:new THREE.Vector3(-sign*.41,.15,.87).normalize(),
+      releaseUpper:new THREE.Vector3(sign*.74,-.57,-.36).normalize(),
+      releaseLower:new THREE.Vector3(sign*.63,-.48,-.61).normalize(),
+      palmNormal:new THREE.Vector3(0,0,1).addScaledVector(A.hand,-A.hand.z).normalize(),
       target:new THREE.Vector3(sign*.35,2.3,5),q1:new THREE.Quaternion(),q2:new THREE.Quaternion(),q3:new THREE.Quaternion()};
   });
   g.updateMatrixWorld(true);
   mesh.bind(new THREE.Skeleton(bones));
   for(const a of arms)a.lower.attach(a.mark);
-  return arms;
+  return {arms,curls:mesh.morphTargetInfluences};
 }
-function lgPoseSovereign(V,shot,gesture,opening,dt){
-  const blend=1-Math.exp(-20*dt),speed=1-Math.exp(-48*dt);
+function lgPoseSovereign(V,shot,gesture,opening,bob,finish,lean,release,fireAge,dt){
+  const blend=1-Math.exp(-20*dt),speed=1-Math.exp(-76*dt);
   const amount=gesture?gesture[1]:0;
   const recoil=gesture?lightFormRecoil(gesture[6]??-1):0;
+  const kick=fireAge>=0 ? .14*THREE.MathUtils.smoothstep(fireAge,0,.045)*(1-THREE.MathUtils.smoothstep(fireAge,.05,.23)) : 0;
   if(gesture){
     V.cursor.set(gesture[2],gesture[3],gesture[4]);
-    lightFormAngles(gesture[0],amount,V.cursor,recoil,V.turn);
-  }else V.turn.set(0,0,0,'YXZ');
-  V.hover.quaternion.slerp(V.turnQ.setFromEuler(V.turn),shot?speed:blend);
+    lightFormAngles(gesture[0],amount,V.cursor,V.turn);
+  }else{
+    const jolt=fireAge>=0 ? .027*Math.sin(fireAge*62)+.013*Math.sin(fireAge*104) : 0;
+    V.turn.set(lightFinishPitch(finish,lean)*(1-.24*release)+jolt-kick,0,jolt*.66,'YXZ');
+  }
+  V.hover.quaternion.slerp(V.turnQ.setFromEuler(V.turn),shot||finish>=.89?speed:blend);
   V.inverse.copy(V.hover.quaternion).invert();
+  V.hover.position.copy(LIGHT_FORM_PIVOT).applyQuaternion(V.hover.quaternion).negate().add(LIGHT_FORM_PIVOT);
+  V.hover.position.y+=bob-LIGHT_FORM_BASE;
+  V.hover.position.z+=lightFinishPush(finish)*(1-.35*release)-kick*1.35;
+  if(shot){
+    V.beamEnd.copy(lgWorld(shot[4],shot[5],shot[6]));
+    V.hover.worldToLocal(V.beamEnd);
+    V.palmUp.set(0,1,0).applyQuaternion(V.inverse);
+  }
   const resting=1-THREE.MathUtils.smoothstep(opening,.20,.84);
-  for(const arm of V.arms){
-    const A=lightArmRest(arm.sign),leading=gesture&&gesture[0]===arm.sign;
-    const drop=Math.max(resting,amount*.85);
-    const wanted=leading?lightFormHand(V.cursor,V.inverse,V.aim)
-      :V.aim.set(arm.sign*lerp(1.15,1.97,opening),lerp(.56,1.22,opening),lerp(.9,-.34,opening));
-    arm.target.lerp(wanted,blend);
-    arm.amount=lerp(arm.amount,leading?amount:.84*drop,blend);
-    arm.pull=lerp(arm.pull||0,leading?(gesture[5]||0):.38,leading?speed:blend);
-    const pose=lightArmPose(arm.sign,arm.target,arm.amount,arm.pull);
+  const drive=lightFinishDrive(finish),cup=THREE.MathUtils.smoothstep(finish,.02,.43)*(1-drive);
+  for(const [index,arm] of V.arms.entries()){
+    const A=lightArmRest(arm.sign),leading=gesture&&gesture[0]===arm.sign,firing=shot&&shot[0]===arm.sign;
+    if(leading)arm.target.lerp(lightFormHand(arm.sign,V.cursor,V.inverse,V.aim),speed);
+    arm.amount=lerp(arm.amount,leading?amount:0,leading?speed:blend);
+    arm.pull=lerp(arm.pull||0,leading?(gesture[5]||0):0,leading?speed:blend);
+    const guard=leading?0:Math.max(.83*resting,THREE.MathUtils.smoothstep(amount,.02,.53));
+    arm.guard=lerp(arm.guard,guard,blend);
+    V.curls[index]=Math.max(arm.guard*.48,.62*cup);
+    const target=cup>0?V.aim.set(arm.sign*.31,2.81,1.16):arm.target;
+    const pose=lightArmPose(arm.sign,target,Math.max(arm.amount,cup),arm.pull,leading?recoil:0);
+    pose.upper.lerp(arm.restingUpper,arm.guard).normalize();
+    pose.lower.lerp(arm.restingLower,arm.guard).normalize();
+    pose.hand.lerp(arm.restingHand,arm.guard).normalize();
+    if(cup>0){
+      pose.hand.lerp(V.aim.set(-arm.sign*.48,.82,-.21).normalize(),cup).normalize();
+      pose.palm.set(-arm.sign*.78,-.18,-.58).normalize();
+    }
+    pose.upper.lerp(arm.releaseUpper,drive).normalize();
+    pose.lower.lerp(arm.releaseLower,drive).normalize();
+    pose.hand.lerp(arm.releaseLower,drive).normalize();
+    if(!leading&&shot){
+      pose.upper.z+=.016*recoil*arm.guard;
+      pose.lower.y-=.024*recoil*arm.guard;
+      pose.hand.z+=.024*recoil*arm.guard;
+      pose.upper.normalize();pose.lower.normalize();pose.hand.normalize();
+    }
+    if(firing){
+      V.muzzle.copy(pose.shoulder).addScaledVector(pose.upper,A.a).addScaledVector(pose.lower,A.b);
+      lightFormOpenPalm(V.muzzle,V.beamEnd,V.palmUp,pose.hand,pose.palm);
+      V.muzzle.addScaledVector(pose.hand,LIGHT_FORM_PALM).addScaledVector(pose.palm,LIGHT_FORM_PALM_DEPTH);
+      V.fireDir.copy(pose.palm);
+      const gap=lgPalmGateOffset(V.muzzle.distanceTo(V.beamEnd)*LIGHT_FORM_SCALE)/LIGHT_FORM_SCALE;
+      V.gatePoint.copy(V.muzzle).addScaledVector(V.fireDir,gap);
+    }
     arm.q1.setFromUnitVectors(A.upper,pose.upper);
     arm.q2.setFromUnitVectors(A.lower,pose.lower);
-    arm.q3.setFromUnitVectors(A.hand,pose.hand);
+    V.handDir.copy(A.hand).applyQuaternion(arm.q2);
+    arm.q3.setFromUnitVectors(V.handDir,pose.hand).multiply(arm.q2);
+    if(leading||cup>0){
+      V.palmFacing.copy(arm.palmNormal).applyQuaternion(arm.q3);
+      V.palmTarget.copy(pose.palm).addScaledVector(pose.hand,-pose.palm.dot(pose.hand)).normalize();
+      const cosine=V.palmFacing.dot(V.palmTarget);
+      const sine=V.palmFacing.cross(V.palmTarget).dot(pose.hand);
+      arm.q3.premultiply(V.palmTwist.setFromAxisAngle(pose.hand,Math.atan2(sine,cosine)*(firing?1:Math.max(arm.amount,cup))));
+    }
     arm.upper.quaternion.copy(arm.q1);
+    arm.upper.position.copy(pose.shoulder);
     arm.lower.quaternion.copy(arm.q1).invert().multiply(arm.q2);
     arm.hand.quaternion.copy(arm.q2).invert().multiply(arm.q3);
-    if(shot&&shot[0]===arm.sign)V.muzzle.copy(pose.wrist).addScaledVector(pose.hand,.20);
   }
 }
 
+function lgSovereignHeart(heart){
+  const uniforms={time:LG_ULT_TIME,alpha:{value:0},charge:{value:0}};
+  heart.material=new THREE.ShaderMaterial({uniforms,transparent:true,toneMapped:false,
+    vertexShader:`varying vec3 p;void main(){p=position;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
+    fragmentShader:`varying vec3 p;uniform float time,alpha,charge;
+      void main(){
+        vec3 f=p/vec3(.128,.213,.074);
+        float edge=1.-smoothstep(.025,.078,min(abs(f.x),abs(f.z)));
+        float glint=1.-smoothstep(.025,.34,abs(f.y-(fract(time*.72)*2.6-1.3)));
+        float core=pow(max(0.,f.z),1.8)*(1.-smoothstep(.13,.76,abs(f.y)));
+        vec3 amber=mix(vec3(.45,.12,.014),vec3(.96,.48,.064),.38+.44*step(0.,f.x*f.y));
+        vec3 light=vec3(1.49,1.08,.51);
+        gl_FragColor=vec4(mix(amber,light,clamp(.69*core+.56*glint+charge*.55,0.,1.))
+          +vec3(.52,.31,.064)*edge,alpha);
+      }`});
+  heart.renderOrder=6;
+  const collar=new THREE.Mesh(new THREE.RingGeometry(.89,1.13,4),new THREE.MeshBasicMaterial({
+    color:'#925220',side:THREE.DoubleSide,transparent:true,toneMapped:false}));
+  collar.name='SovereignHeartCollar';collar.scale.set(.134,.22,1);collar.position.z=.006;collar.renderOrder=5;
+  heart.add(collar);
+  const rim=new THREE.Mesh(new THREE.RingGeometry(1.065,1.135,4),new THREE.MeshBasicMaterial({
+    color:hdr('#ffdf90',1.18),side:THREE.DoubleSide,transparent:true,depthWrite:false,toneMapped:false}));
+  rim.name='SovereignHeartRim';rim.scale.copy(collar.scale);rim.position.z=.011;rim.renderOrder=6;heart.add(rim);
+  return {collar,rim,uniforms};
+}
+
+const LG_SASH_X=1.97,LG_SASH_Z=1.44;
 function lgSovereignRibbon(){
   const positions=[],uvs=[],indices=[],steps=88;
-  for(let i=0;i<=steps;i++){
-    const f=i/steps,a=f*Math.PI*2,x=Math.cos(a),z=Math.sin(a);
-    for(const edge of [-1,1]){
-      const r=1+edge*.073;
-      positions.push(1.39*x*r,edge*.061,1.01*z*r);uvs.push(f,(edge+1)/2);
+  for(let lane=0;lane<2;lane++){
+    for(let i=0;i<=steps;i++){
+      const f=i/steps,a=f*Math.PI*2,x=Math.cos(a),z=Math.sin(a);
+      const shoulder=Math.max(0,x)**3;
+      for(const edge of [-1,1]){
+        const r=lane?1.13+edge*.024:1+edge*(.119+.035*Math.sin(a-.36));
+        const y=(lane?-.205+edge*.018:edge*.145)-.32*Math.max(0,z)-.20*Math.max(0,-z)-.17*shoulder;
+        positions.push((LG_SASH_X*x+.32*shoulder)*r,y,LG_SASH_Z*z*r-.61*shoulder);uvs.push(f,2*lane+(edge+1)/2);
+      }
+      if(i<steps){const k=(lane*(steps+1)+i)*2;indices.push(k,k+2,k+1,k+1,k+2,k+3);}
     }
-    if(i<steps){const k=i*2;indices.push(k,k+2,k+1,k+1,k+2,k+3);}
   }
   const geo=new THREE.BufferGeometry();
   geo.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));
   geo.setAttribute('uv',new THREE.Float32BufferAttribute(uvs,2));geo.setIndex(indices);
-  const mat=new THREE.ShaderMaterial({transparent:true,side:THREE.DoubleSide,depthWrite:false,
+  const mat=new THREE.ShaderMaterial({transparent:true,side:THREE.DoubleSide,depthWrite:false,toneMapped:false,
     uniforms:{time:LG_ULT_TIME,alpha:{value:0},surge:{value:0}},
     vertexShader:`varying vec2 v;void main(){v=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
     fragmentShader:`varying vec2 v;uniform float time,alpha,surge;
       void main(){
-        float t=fract(v.x*2.-time*.44),w=sin(3.14159*v.y);
-        float shape=.28+.72*smoothstep(.03,.15,t)*(1.-smoothstep(.83,.99,t));
-        float edging=pow(abs(v.y*2.-1.),6.);
-        float glint=1.-smoothstep(.03,.19,abs(t-.63));
-        vec3 gold=mix(vec3(.92,.41,.057),vec3(1.39,1.08,.59),clamp(edging*.72+glint*.48+surge*.36,0.,1.));
-        gl_FragColor=vec4(gold*(1.+.38*surge),alpha*shape*(.58*w+.90*edging));
+        float lane=step(1.5,v.y),y=v.y-2.*lane;
+        float t=fract(v.x*2.-time*.46);
+        float edges=smoothstep(.74,.95,abs(y*2.-1.));
+        float streak=smoothstep(.17,.32,t)*(1.-smoothstep(.36,.76,t));
+        float thread=(1.-smoothstep(.027,.10,abs(y-.57)))*streak;
+        float cell=abs(fract(v.x*22.-time*.76)-.5);
+        float rune=1.-smoothstep(.09,.16,abs(cell*2.5+abs(y-.48)*2.6-.42));
+        float cut=smoothstep(.05,.15,t)*(1.-smoothstep(.78,.95,t));
+        vec3 gold=mix(vec3(.89,.33,.037),vec3(1.34,1.01,.47),max(max(edges,thread),rune*.70));
+        gl_FragColor=vec4(gold*(1.+.31*surge),alpha*mix(.73+.23*edges,.94*cut,lane));
       }`});
-  const mesh=new THREE.Mesh(geo,mat);mesh.renderOrder=3;mesh.position.y=2.01;
+  const mesh=new THREE.Mesh(geo,mat);mesh.name='SovereignSash';mesh.renderOrder=3;mesh.position.y=2.01;
+  const motesGeo=new THREE.BufferGeometry(),seeds=[];
+  for(let i=0;i<19;i++)seeds.push(i/19,(i*13%19)/19,(i*7%19)/19);
+  motesGeo.setAttribute('position',new THREE.Float32BufferAttribute(seeds,3));
+  const moteMat=new THREE.ShaderMaterial({uniforms:mat.uniforms,transparent:true,depthWrite:false,toneMapped:false,
+    vertexShader:`uniform float time,surge;varying float glow;
+      void main(){
+        float a=position.x*6.283-time*(1.05+.38*position.y);
+        float r=1.04+.17*position.y+.058*sin(a*4.+time*4.);
+        float x=cos(a),z=sin(a),shoulder=pow(max(0.,x),3.);
+        vec3 p=vec3((${LG_SASH_X}*x+.32*shoulder)*r,-.25+.37*position.z+sin(a*3.+time*3.)*.09-.30*abs(z)-.17*shoulder,z*${LG_SASH_Z}*r-.61*shoulder);
+        vec4 q=modelViewMatrix*vec4(p,1.);gl_Position=projectionMatrix*q;
+        gl_PointSize=clamp((22.+36.*position.z+12.*surge)/(-q.z),2.,10.);
+        glow=.52+.44*pow(abs(sin(a*3.5+time*1.7)),5.);
+      }`,
+    fragmentShader:`uniform float alpha;varying float glow;
+      void main(){
+        vec2 q=abs(gl_PointCoord-.5);float d=q.x*.79+q.y;
+        vec3 c=mix(vec3(.93,.39,.025),vec3(1.49,1.13,.58),1.-smoothstep(.04,.29,d));
+        gl_FragColor=vec4(c,alpha*glow*(1.-smoothstep(.30,.49,d)));
+      }`});
+  const motes=new THREE.Points(motesGeo,moteMat);motes.name='SovereignSashMotes';motes.frustumCulled=false;motes.renderOrder=4;
+  mesh.add(motes);
   return mesh;
+}
+
+function lgSovereignFlare(){
+  const pos=[];
+  for(let i=0;i<12;i++){
+    const a=i*Math.PI/6,dx=Math.cos(a),dy=Math.sin(a),length=i%3===0?1:.58;
+    pos.push(-dy*.087,dx*.087,0,dy*.087,-dx*.087,0,dx*length,dy*length,0);
+  }
+  const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));
+  const mat=new THREE.MeshBasicMaterial({color:hdr('#ffda78',2.6),toneMapped:false,side:THREE.DoubleSide,
+    transparent:true,depthWrite:false,blending:THREE.AdditiveBlending});
+  const mesh=new THREE.Mesh(geo,mat);mesh.visible=false;mesh.renderOrder=8;
+  return mesh;
+}
+
+const LG_PALM_TRAVEL=.085;
+const LG_PALM_SCORCH_LIFE=1.8,LG_PALM_SCORCH_SLOTS=88;
+function lgPalmGateOffset(length){return Math.min(.61,length*.33);}
+
+function lgSovereignPalmWaves(){
+  const group=new THREE.Group();group.name='SovereignPalmWaves';group.visible=false;
+  for(const [i,tint] of ['#ffdc8a','#ffab42','#ffc16a'].entries()){
+    const material=new THREE.MeshBasicMaterial({color:hdr(tint,i===0?1.48:1.16),transparent:true,depthWrite:false,toneMapped:false});
+    const mesh=new THREE.Mesh(new THREE.TorusGeometry(.92,i===0?.065:.045,6,42),material);
+    mesh.renderOrder=7;group.add(mesh);
+  }
+  return group;
+}
+function lgPosePalmWaves(V,age){
+  const group=V.palmWaves;group.visible=age>=0;
+  if(age<0)return;
+  group.position.copy(V.gatePoint);group.quaternion.setFromUnitVectors(V.front,V.fireDir);
+  for(const [i,mesh] of group.children.entries()){
+    const t=age-[0,.055,.26][i],duration=i===0 ? .27 : i===1 ? .23 : .21;
+    const elapsed=i===2&&t>=0?t%.37:t;
+    mesh.visible=elapsed>=0&&elapsed<duration;
+    if(!mesh.visible)continue;
+    const k=elapsed/duration,ease=1-(1-k)**2;
+    mesh.position.z=.08+ease*(i===0?2.34:1.75);
+    mesh.scale.setScalar(.35+ease*(i===0?1.69:i===1?1.24:1.06));
+    mesh.material.opacity=(1-k)**1.25*(i===0 ? 1 : i===1 ? .84 : .76);
+  }
+}
+
+function lgSovereignPalmGate(){
+  const root=new THREE.Group();root.name='SovereignPalmGate';root.visible=false;
+  const edge=new THREE.Mesh(new THREE.TorusGeometry(.89,.082,8,48),new THREE.MeshBasicMaterial({
+    color:hdr('#ffc36a',1.27),transparent:true,depthWrite:false,toneMapped:false}));
+  edge.renderOrder=7;root.add(edge);
+  const trim=lgSovereignChargeSeal();trim.name='SovereignPalmGateTrim';trim.position.z=-.048;
+  trim.position.y=0;trim.scale.setScalar(1.30);trim.visible=true;trim.renderOrder=7;root.add(trim);
+  return {root,edge,trim};
+}
+
+function lgSovereignScorchTrail(){
+  const n=LG_PALM_SCORCH_SLOTS,geometry=new THREE.BufferGeometry(),indices=[];
+  const position=new THREE.BufferAttribute(new Float32Array(n*12),3).setUsage(THREE.DynamicDrawUsage);
+  const mark=new THREE.BufferAttribute(new Float32Array(n*16),4).setUsage(THREE.DynamicDrawUsage);
+  for(let i=0;i<n;i++){
+    const k=i*4;indices.push(k,k+2,k+1,k+1,k+2,k+3);
+    for(let v=0;v<4;v++)mark.setW(k+v,-10000);
+  }
+  geometry.setAttribute('position',position);geometry.setAttribute('mark',mark);geometry.setIndex(indices);
+  const material=new THREE.ShaderMaterial({transparent:true,depthWrite:false,side:THREE.DoubleSide,forceSinglePass:true,
+    polygonOffset:true,polygonOffsetFactor:-2,polygonOffsetUnits:-2,toneMapped:false,
+    uniforms:{time:LG_ULT_TIME,life:{value:LG_PALM_SCORCH_LIFE}},
+    vertexShader:`attribute vec4 mark;varying vec4 stroke;
+      void main(){stroke=mark;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
+    fragmentShader:`uniform float time,life;varying vec4 stroke;
+      void main(){
+        float age=time-stroke.w;
+        if(age<0.||age>=life)discard;
+        float cap=max(0.,max(-stroke.x,stroke.x-stroke.z));
+        float d=length(vec2(cap,stroke.y));
+        float edge=1.-smoothstep(.61,.99,d),fade=1.-smoothstep(life-.52,life,age);
+        gl_FragColor=vec4(vec3(.037,.037,.041),.74*edge*fade);
+      }`});
+  const mesh=new THREE.Mesh(geometry,material);mesh.name='SovereignScorchTrail';mesh.renderOrder=1;
+  mesh.frustumCulled=false;scene.add(mesh);
+  return {mesh,position,mark,next:0,index:0,last:null,seen:0};
+}
+
+function lgPalmScorch(S,shot,age,now){
+  if(!shot||age<LG_PALM_TRAVEL||shot[11]!==1){
+    if(S.palmTrail){
+      S.palmTrail.last=null;
+      if(now-S.palmTrail.seen>LG_PALM_SCORCH_LIFE*1000)S.palmTrail.mesh.visible=false;
+    }
+    return;
+  }
+  const trail=S.palmTrail||(S.palmTrail=lgSovereignScorchTrail());
+  if(now<trail.seen)return;
+  const x=shot[4],y=shot[5],h=shot[6],last=trail.last,nowSec=now/1000;
+  const distance=last?Math.hypot(x-last.x,y-last.y):0;
+  const connects=!!last&&now-trail.seen<150&&distance<205&&Math.abs(last.h-h)<1.1;
+  trail.seen=now;
+  trail.mesh.visible=true;
+  if(connects&&distance<8){
+    if(now-last.time>640){
+      for(let v=0;v<4;v++)trail.mark.setW(trail.index+v,nowSec);
+      trail.mark.needsUpdate=true;last.time=now;
+    }
+    return;
+  }
+  const start=connects?last:{x,y,h},length=connects?distance*S3:0;
+  const dx=length>.001?(x-start.x)*S3/length:1,dz=length>.001?(y-start.y)*S3/length:0;
+  const width=.57,index=trail.next*4;
+  for(let v=0;v<4;v++){
+    const atEnd=v>=2,side=v%2?1:-1,point=atEnd?{x,y,h}:start,cap=atEnd?1:-1;
+    const sx=width*(cap*dx-side*dz),sz=width*(cap*dz+side*dx);
+    trail.position.setXYZ(index+v,tx(point.x)+sx,GY(point.x+sx/S3,point.y+sz/S3)+point.h+.029,tz(point.y)+sz);
+    trail.mark.setXYZW(index+v,atEnd?length/width+1:-1,side,length/width,nowSec);
+  }
+  trail.position.needsUpdate=trail.mark.needsUpdate=true;
+  trail.index=index;trail.next=(trail.next+1)%LG_PALM_SCORCH_SLOTS;
+  trail.last={x,y,h,time:now};
 }
 
 function lgSovereignCrossSparks(){
@@ -415,16 +663,161 @@ function lgSovereignCrossSparks(){
   const sparks=new THREE.Points(geo,mat);sparks.frustumCulled=false;sparks.renderOrder=4;
   return sparks;
 }
+function lgSovereignGather(){
+  const geo=new THREE.BufferGeometry(),seeds=[];
+  for(let i=0;i<116;i++)seeds.push(i/116,(i*43%127)/127,(i*71%127)/127);
+  geo.setAttribute('position',new THREE.Float32BufferAttribute(seeds,3));
+  const mat=new THREE.ShaderMaterial({transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,
+    uniforms:{clock:{value:0},power:{value:0},dissolve:{value:0},casting:{value:0}},
+    vertexShader:`uniform float clock,power,dissolve,casting;varying float glow;varying vec2 direction;
+      void main(){
+        float t=fract(position.x+clock*(.70+.41*position.z)),outward=step(.01,casting);
+        float a=position.y*6.283+t*1.87,r=mix(4.4+position.z*2.45,.063,pow(t,.74));
+        r=mix(r,.25+t*(2.9+position.z*2.1),outward);
+        vec3 p=vec3(cos(a)*r,sin(a)*r*.73,(position.z-.32)*r);
+        float shed=clamp((dissolve-position.x*.54)*1.93,0.,1.);
+        float scatterRadius=.38+position.z*2.42+shed*1.7;
+        vec3 scatter=vec3(cos(position.y*6.283)*scatterRadius,(position.z-.49)*2.86+shed*2.1,
+          sin(position.y*6.283)*scatterRadius*.57-shed*.36);
+        p=mix(p,scatter,step(.0001,dissolve));
+        vec4 q=modelViewMatrix*vec4(p,1.);gl_Position=projectionMatrix*q;
+        vec4 center=projectionMatrix*modelViewMatrix*vec4(0.,0.,0.,1.);
+        direction=normalize(gl_Position.xy/max(.01,gl_Position.w)-center.xy/max(.01,center.w)+vec2(.0001));
+        gl_PointSize=clamp((34.+67.*position.z+28.*power)/(-q.z),1.,15.);
+        glow=smoothstep(0.,.16,t)*(1.-smoothstep(mix(.81,.55,outward),1.,t));
+        if(dissolve>0.)glow=smoothstep(0.,.12,shed)*(1.-smoothstep(.51,1.,shed));
+      }`,
+    fragmentShader:`uniform float power;varying float glow;varying vec2 direction;
+      void main(){
+        vec2 p=vec2(gl_PointCoord.x-.5,.5-gl_PointCoord.y);
+        float along=dot(p,direction),across=dot(p,vec2(-direction.y,direction.x));
+        float a=(1.-smoothstep(.08,.24,abs(across)))*(1.-smoothstep(.19,.49,abs(along)));
+        gl_FragColor=vec4(vec3(1.82,1.24,.48),a*glow*power);}`});
+  const points=new THREE.Points(geo,mat);points.frustumCulled=false;points.renderOrder=6;points.visible=false;
+  points.name='SovereignGather';return points;
+}
+function lgSovereignWingCurrent(wing){
+  const vertices=[],uvs=[],indices=[],steps=23,lower=wing.phase<0;
+  for(const [lane,[endX,endY]] of (lower?[[2.1,-1.63],[1.66,-1.80]]:[[2.25,2.52],[2.35,1.76],[1.77,1.10]]).entries()){
+    for(let i=0;i<=steps;i++){
+      const t=i/steps,curve=Math.sin(Math.PI*t),width=.17*curve+.08*Math.sin(t*4)**2;
+      for(const side of [-1,1]){
+        vertices.push(wing.side*(endX*t+side*width),endY*t+.28*curve-side*width*.81,.13+lane*.09+.17*t);
+        uvs.push(t,(side+1)/2);
+      }
+      if(i<steps){const k=(lane*(steps+1)+i)*2;indices.push(k,k+1,k+2,k+2,k+1,k+3);}
+    }
+  }
+  const geometry=new THREE.BufferGeometry();geometry.setAttribute('position',new THREE.Float32BufferAttribute(vertices,3));
+  geometry.setAttribute('uv',new THREE.Float32BufferAttribute(uvs,2));geometry.setIndex(indices);
+  const material=new THREE.ShaderMaterial({transparent:true,depthWrite:false,side:THREE.DoubleSide,toneMapped:false,
+    uniforms:{time:LG_ULT_TIME,power:{value:0},launch:{value:-1}},
+    vertexShader:`varying vec2 p;void main(){p=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
+    fragmentShader:`varying vec2 p;uniform float time,power,launch;
+      void main(){
+        float wave=1.-smoothstep(.03,.23,abs(fract(p.x*2.4-time*2.9)-.53));
+        float edge=smoothstep(.50,.95,abs(p.y*2.-1.));
+        float taper=smoothstep(0.,.12,p.x)*(1.-smoothstep(.84,1.,p.x));
+        float shock=(1.-smoothstep(.06,.28,abs(p.x-(launch-.035)*4.1)))*step(0.,launch);
+        vec3 gold=mix(vec3(.93,.37,.023),vec3(1.73,1.22,.59),clamp(wave*.75+edge*.25+shock*.59,0.,1.));
+        gl_FragColor=vec4(gold,taper*clamp(power*(.33+.49*wave+.16*edge)+shock*.8,0.,1.));
+      }`});
+  const mesh=new THREE.Mesh(geometry,material);mesh.name='SovereignWingCurrent';mesh.visible=false;mesh.renderOrder=4;
+  wing.node.add(mesh);return mesh;
+}
+function lgSovereignChargeSeal(){
+  const material=new THREE.ShaderMaterial({transparent:true,depthWrite:false,side:THREE.DoubleSide,toneMapped:false,
+    uniforms:{power:{value:0}},
+    vertexShader:`varying vec2 p;void main(){p=position.xy;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
+    fragmentShader:`varying vec2 p;uniform float power;
+      void main(){
+        float r=length(p),a=atan(p.y,p.x),cell=fract(a*1.90986+.5);
+        float broken=smoothstep(.065,.13,cell)*(1.-smoothstep(.86,.95,cell));
+        float edge=(1.-smoothstep(.011,.04,abs(r-.98)))+(1.-smoothstep(.009,.025,abs(r-.79)));
+        float rune=(1.-smoothstep(.046,.083,abs(abs(cell-.51)*.82+abs(r-.887)*2.2-.159)));
+        vec3 color=mix(vec3(.94,.38,.035),vec3(1.6,1.12,.48),clamp(edge*.64+rune*.58,0.,1.));
+        gl_FragColor=vec4(color,power*(.21+.56*clamp(edge+rune*.73,0.,1.))*broken);
+      }`});
+  const ring=new THREE.Mesh(new THREE.RingGeometry(.76,1,72),material);
+  ring.name='SovereignChargeSeal';ring.position.set(0,LIGHT_FORM_HEART_Y,.90);ring.visible=false;ring.renderOrder=5;
+  return ring;
+}
+function lgSovereignChestRecoil(){
+  const group=new THREE.Group();group.name='SovereignChestRecoil';group.visible=false;
+  group.position.set(0,LIGHT_FORM_HEART_Y,LIGHT_FORM_HEART_Z+.12);
+  for(const [i,color] of ['#ffce76','#ff9c35'].entries()){
+    const mesh=new THREE.Mesh(new THREE.TorusGeometry(.94,i===0?.056:.028,6,56),new THREE.MeshBasicMaterial({
+      color:hdr(color,1.30),toneMapped:false,transparent:true,depthWrite:false}));
+    mesh.renderOrder=8;group.add(mesh);
+  }
+  return group;
+}
+function lgSovereignSeal(){
+  const mesh=new THREE.Mesh(new THREE.RingGeometry(.68,.715,6),new THREE.MeshBasicMaterial({
+    color:hdr('#ffcb54',1.36),side:THREE.DoubleSide,transparent:true,depthWrite:false,toneMapped:false}));
+  mesh.name='SovereignHaloSeal';mesh.position.z=.035;
+  const pos=[];
+  for(let i=0;i<12;i++){
+    const a=i*Math.PI/6,x=Math.cos(a),y=Math.sin(a),tip=i%3===0?1.37:1.21;
+    pos.push(x*.96-y*.044,y*.96+x*.044,0,x*.96+y*.044,y*.96-x*.044,0,x*tip,y*tip,0);
+  }
+  const geometry=new THREE.BufferGeometry();geometry.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));
+  const rays=new THREE.Mesh(geometry,new THREE.MeshBasicMaterial({
+    color:hdr('#ffc24d',1.55),side:THREE.DoubleSide,transparent:true,depthWrite:false,toneMapped:false}));
+  rays.name='SovereignHaloRays';
+  return {mesh,rays};
+}
+
+function lgSovereignArmSigils(arm){
+  const A=lightArmRest(arm.sign),root=new THREE.Group();
+  root.name='SovereignArmSigils';root.quaternion.setFromUnitVectors(new THREE.Vector3(0,0,1),A.lower);
+  const uniforms={time:LG_ULT_TIME,alpha:{value:0},power:{value:0}};
+  const material=new THREE.ShaderMaterial({uniforms,transparent:true,depthWrite:false,toneMapped:false,
+    vertexShader:`varying vec2 v;void main(){v=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
+    fragmentShader:`varying vec2 v;uniform float time,alpha,power;
+      void main(){
+        float t=fract(v.x-time*1.34),pulse=1.-smoothstep(.04,.23,abs(t-.5));
+        vec3 gold=mix(vec3(.79,.25,.032),vec3(1.45,1.12,.54),.36+pulse*.64);
+        gl_FragColor=vec4(gold*(1.+.46*power),alpha*(.55+.45*pulse));
+      }`});
+  for(const phase of [0,Math.PI]){
+    const points=[];
+    for(let i=0;i<=16;i++){
+      const t=i/16,a=phase+t*Math.PI*2.15,r=lerp(.249,.128,t)+.045*Math.sin(t*Math.PI);
+      points.push(new THREE.Vector3(r*Math.cos(a),r*Math.sin(a),A.b*lerp(.14,.97,t)));
+    }
+    const trace=new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(points),28,.018,5,false),material);
+    trace.renderOrder=4;root.add(trace);
+  }
+  const loops=new THREE.Group(),ringMat=new THREE.MeshBasicMaterial({color:hdr('#ffce57',1.2),
+    side:THREE.DoubleSide,transparent:true,depthWrite:false,toneMapped:false});
+  for(const [along,r] of [[.24,.269],[.58,.232],[.84,.165]]){
+    const loop=new THREE.Mesh(new THREE.RingGeometry(r-.024,r,6),ringMat);
+    loop.position.z=A.b*along;loop.rotation.z=along*7;loop.renderOrder=4;loops.add(loop);
+  }
+  root.add(loops);arm.lower.add(root);
+  return {uniforms,ringMat,loops};
+}
+
 function lgBuildSovereign(){
   const g=modelInst(LG_ULT_ASSET);
   if(!g)return null;
   const {body,flow,wake}=lgSovereignMaterials();
   const skin=lgSkinSovereign(g);
-  const fades=new Map(),wings=[];
+  const fades=new Map(),arrivalLight={value:0};
   const instance=(source,alpha,start=.08,end=.66)=>{
     if(fades.has(source))return fades.get(source).material;
     const material=source.clone();
-    material.onBeforeCompile=source.onBeforeCompile;material.customProgramCacheKey=source.customProgramCacheKey;
+    material.onBeforeCompile=function(s,renderer){
+      source.onBeforeCompile.call(this,s,renderer);
+      s.uniforms.uSovereignArrival=arrivalLight;
+      s.fragmentShader=s.fragmentShader.replace('#include <common>','#include <common>\nuniform float uSovereignArrival;')
+        .replace('#include <opaque_fragment>',`
+          outgoingLight=mix(outgoingLight,vec3(3.65,2.72,1.37),uSovereignArrival);
+          diffuseColor.a=mix(diffuseColor.a,1.,uSovereignArrival*.97);
+          #include <opaque_fragment>`);
+    };
+    material.customProgramCacheKey=()=>source.customProgramCacheKey()+'|sovereign-arrival';
     material.transparent=true;material.opacity=alpha;material.userData.keep=false;
     fades.set(source,{material,alpha,start,end});
     return material;
@@ -432,10 +825,10 @@ function lgBuildSovereign(){
   const set=(name,mat,alpha,start,end)=>g.getObjectByName(name).traverse(o=>{if(o.isMesh)o.material=instance(mat,alpha,start,end);});
   g.traverse(o=>{if(o.isMesh){
     o.castShadow=o.receiveShadow=false;
-    if(/^(SovereignBody|SovereignCross)/.test(o.name))return;
+    if(/^(SovereignBody|SovereignCross|SovereignHeart)/.test(o.name))return;
     const finish=source=>{
       const name=source.name,mat=lgSovereignFinish(source);
-      if(name.startsWith('Solar blade')){wings.push({mesh:o,width:o.scale.x});return instance(mat,.65,.29,.90);}
+      if(name.startsWith('Solar blade'))return instance(mat,.65,.29,.90);
       if(name.startsWith('Wrist sigil'))return instance(mat,.94,.45,.93);
       if(name.startsWith('Eclipse'))return instance(mat,.94,.51,1);
       if(name.startsWith('Warm light'))return instance(mat,.94,0,.32);
@@ -443,26 +836,59 @@ function lgBuildSovereign(){
     };
     o.material=Array.isArray(o.material)?o.material.map(finish):finish(o.material);
   }});
+  const crossClock={value:0},crossCharge={value:0},dissolve={value:0};
   set('SovereignBody',body,.65,.10,.63);set('SovereignCross',flow,.94,.22,.68);set('SovereignCrossWake',wake,.86,.30,.78);
+  fades.get(body).material.userData.dissolve=dissolve;
+  for(const source of [flow,wake])Object.assign(fades.get(source).material.userData,{crossClock,crossCharge});
   g.getObjectByName('SovereignCross').traverse(o=>{if(o.isMesh)o.renderOrder=2;});
   const hover=g.getObjectByName('SovereignHover'),halo=g.getObjectByName('SolarHalo');
+  const head=g.getObjectByName('SovereignHead');
+  const wings=[['SovereignWingLeft',-1,0],['SovereignWingRight',1,.42],['SovereignWingLower',-1,-.78]]
+    .map(([name,side,phase])=>({node:g.getObjectByName(name),side,phase})).filter(w=>w.node);
+  for(const wing of wings)wing.current=lgSovereignWingCurrent(wing);
+  const seal=lgSovereignSeal();halo.add(seal.mesh,seal.rays);
+  const haloHome=halo.position.clone();haloHome.y+=.88;haloHome.z-=.11;
+  const heart=g.getObjectByName('SovereignHeart'),heartFx=lgSovereignHeart(heart);
+  heart.position.set(0,LIGHT_FORM_HEART_Y,LIGHT_FORM_HEART_Z);
+  const gather=lgSovereignGather();gather.position.copy(heart.position);hover.add(gather);
+  const chargeSeal=lgSovereignChargeSeal(),chestFlare=lgSovereignFlare();
+  const chestRecoil=lgSovereignChestRecoil();
+  chestFlare.position.copy(heart.position);chestFlare.position.z+=.18;hover.add(chargeSeal,chestFlare,chestRecoil);
   const sash=lgSovereignRibbon(),sparks=lgSovereignCrossSparks();hover.add(sash,sparks);
+  const blink=lgSovereignFlare(),blast=lgSovereignFlare();
+  blink.position.set(0,2.59,.34);hover.add(blink,blast);
+  const palmWaves=lgSovereignPalmWaves();hover.add(palmWaves);
   const flash=new THREE.Mesh(new THREE.IcosahedronGeometry(1,1),new THREE.MeshBasicMaterial({
     color:hdr('#ffe4a1',2.2),transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,toneMapped:false}));
   flash.visible=false;hover.add(flash);
   const wrists=[1,-1].map(sign=>{
     const name=sign>0?'Positive':'Negative';
-    return {sign,marks:g.getObjectByName('WristMarks'+name),pulse:g.getObjectByName('WristPulse'+name)};
+    return {sign,marks:g.getObjectByName('WristMarks'+name),pulse:g.getObjectByName('WristPulse'+name),
+      sigils:lgSovereignArmSigils(skin.arms.find(a=>a.sign===sign))};
   });
   scene.add(g);
-  return {g,hover,halo,haloHome:halo.position.clone(),heart:g.getObjectByName('SovereignHeart'),wrists,crystals:[],
-    arms:skin,wings,sash,sparks,flash,aim:new THREE.Vector3(),cursor:new THREE.Vector3(),muzzle:new THREE.Vector3(),
+  return {g,hover,head,halo,haloHome,seal,haloSpin:0,haloCore:null,haloLight:[],heart,heartFx,gather,chargeSeal,chestFlare,chestRecoil,
+    channeling:false,crossClock,crossCharge,dissolve,arrivalLight,wrists,crystals:[],
+    ...skin,wings,sash,sparks,flash,blink,blast,palmWaves,aim:new THREE.Vector3(),cursor:new THREE.Vector3(),
+    muzzle:new THREE.Vector3(),gatePoint:new THREE.Vector3(),
+    handDir:new THREE.Vector3(),palmFacing:new THREE.Vector3(),palmTarget:new THREE.Vector3(),palmTwist:new THREE.Quaternion(),
+    palmUp:new THREE.Vector3(),beamEnd:new THREE.Vector3(),
+    fireDir:new THREE.Vector3(0,0,1),front:new THREE.Vector3(0,0,1),
     turn:new THREE.Euler(),turnQ:new THREE.Quaternion(),inverse:new THREE.Quaternion(),fades:[...fades.values()]};
 }
 function lgReturnMark(){
-  const m=new THREE.Mesh(new THREE.RingGeometry(.74,.83,40),new THREE.MeshBasicMaterial({
-    color:hdr('#ffc663',1.5),transparent:true,opacity:.78,depthWrite:false,side:THREE.DoubleSide,blending:THREE.AdditiveBlending}));
-  m.rotation.x=-Math.PI/2;scene.add(m);return m;
+  const root=new THREE.Group();root.name='SovereignCastMark';
+  const base=new THREE.Mesh(new THREE.RingGeometry(.93,1,64),new THREE.MeshBasicMaterial({
+    color:hdr('#ffc663',1.5),transparent:true,depthWrite:false,side:THREE.DoubleSide,blending:THREE.AdditiveBlending}));
+  base.rotation.x=-Math.PI/2;root.add(base);scene.add(root);
+  const glints=new THREE.Group(),material=new THREE.MeshBasicMaterial({color:hdr('#ffc362',1.32),transparent:true,
+    depthWrite:false,side:THREE.DoubleSide,toneMapped:false});
+  const arc=new THREE.RingGeometry(1.19,1.227,24,1,0,Math.PI*.36);
+  for(let i=0;i<3;i++){
+    const streak=new THREE.Mesh(arc,material);streak.rotation.z=i*Math.PI*2/3;glints.add(streak);
+  }
+  glints.rotation.x=-Math.PI/2;glints.position.y=.012;root.add(glints);
+  return {root,base,glints,crystal:null};
 }
 function lgUltVisual(o,p,S,U,alive,now,dt){
   const form=!!(U&&U[0]>1&&alive);
@@ -470,13 +896,37 @@ function lgUltVisual(o,p,S,U,alive,now,dt){
   const rigShot=shot&&Number.isFinite(shot[10])?shot:null;
   const gesture=form&&(U[8]||(rigShot&&[shot[0],shot[10],shot[7],shot[8],shot[9],0,-1]));
   const firingAge=gesture?.[6]??-1;
-  const surge=shot ? Math.exp(-(Math.max(0,firingAge)%LT_UL.baTick)*14)*(firingAge<.29?1:.60) : 0;
+  let shotAge=firingAge>=0?firingAge:LG_PALM_TRAVEL;
+  if(shot){
+    if(S.palmSample?.age!==shotAge||S.palmSample?.side!==shot[0])S.palmSample={age:shotAge,side:shot[0],time:now};
+    shotAge+=clamp((now-S.palmSample.time)*.001,0,.065);
+  }else S.palmSample=null;
+  const surge=shot ? .16+.84*Math.exp(-shotAge*16)+.045*Math.sin(shotAge*43) : 0;
+  const pulseAge=shotAge>=.32?(shotAge-.32)%.37:1;
+  const pulse=shot ? 1-THREE.MathUtils.smoothstep(pulseAge,0,.13) : 0;
   if(U&&alive){
-    if(!S.returnMark)S.returnMark=lgReturnMark();
-    S.returnMark.visible=true;
-    S.returnMark.position.copy(lgWorld(U[3],U[4],U[5]+.06));
-    S.returnMark.material.opacity=.69+.13*Math.sin(now*.007);
-  }else if(S.returnMark)S.returnMark.visible=false;
+    const mark=S.returnMark||(S.returnMark=lgReturnMark());
+    mark.root.visible=true;
+    mark.root.position.copy(lgWorld(U[3],U[4],U[5]+.06));
+    mark.base.material.opacity=.59+.11*Math.sin(now*.004);
+    mark.glints.rotation.z=-now*.00094;
+    mark.glints.scale.setScalar(1+.07*Math.sin(now*.0028));
+    mark.glints.children[0].material.opacity=.29+.11*Math.sin(now*.0036);
+    if(!mark.crystal){
+      const crystal=lgSovereignCrystal();
+      if(crystal){
+        crystal.name='SovereignCastCrystal';crystal.scale.setScalar(1.12);
+        const glass=lgSovereignMaterials().shell.clone();
+        glass.userData.keep=false;glass.color.set('#ffce73');glass.emissive.set('#ffc15c');glass.opacity=.53;
+        crystal.getObjectByName('SovereignCrystalShell').traverse(o=>{if(o.isMesh)o.material=glass;});
+        mark.root.add(crystal);mark.crystal=crystal;
+      }
+    }
+    if(mark.crystal){
+      mark.crystal.position.y=1.43+.12*Math.sin(now*.003);
+      mark.crystal.rotation.set(.12,now*.0026,-.18);
+    }
+  }else if(S.returnMark)S.returnMark.root.visible=false;
   if(form&&!S.sovereign)S.sovereign=lgBuildSovereign();
   const V=S.sovereign;
   if(V){
@@ -484,58 +934,168 @@ function lgUltVisual(o,p,S,U,alive,now,dt){
     if(form){
       V.g.position.copy(o.g.position);V.g.rotation.copy(o.g.rotation);o.g.visible=false;
       V.g.scale.setScalar(LIGHT_FORM_SCALE);
-      const introTime=.98,elapsed=Math.max(0,LT_UL.t-U[1]);
-      V.age=clamp(Math.max(elapsed,(V.age??elapsed)+dt),0,introTime);
-      const opening=V.age/introTime,open=THREE.MathUtils.smoothstep(opening,0,.86);
-      const spread=THREE.MathUtils.smoothstep(opening,.26,.92);
-      if(opening<1)V.g.position.y-=1.22*(1-open);
-      for(const f of V.fades)f.material.opacity=f.alpha*THREE.MathUtils.smoothstep(opening,f.start,f.end);
-      for(const w of V.wings)w.mesh.scale.x=w.width*(.46+.54*spread);
-      lgPoseSovereign(V,rigShot,gesture,opening,dt);
-      V.hover.position.copy(LIGHT_FORM_PIVOT).applyQuaternion(V.hover.quaternion).negate().add(LIGHT_FORM_PIVOT);
-      V.hover.position.y+=-LIGHT_FORM_BASE+.135*open*Math.sin(now*.003);
-      V.sash.rotation.set(.45+Math.sin(now*.003-.6)*.06,Math.sin(now*.00065)*.24,.58+.06*Math.sin(now*.004-.45));
-      V.sash.scale.setScalar(.73+.27*spread+.083*surge);
-      V.sash.material.uniforms.alpha.value=.88*spread;
+      const elapsed=Math.max(0,LT_UL.t-U[1]);
+      V.age=clamp(Math.max(elapsed,(V.age??elapsed)+dt),0,LG_ULT_INTRO);
+      const opening=V.age/LG_ULT_INTRO,open=THREE.MathUtils.smoothstep(opening,.06,.31);
+      const spread=THREE.MathUtils.smoothstep(opening,.18,.70);
+      const bloom=THREE.MathUtils.smoothstep(V.age,.01,.07)*(1-THREE.MathUtils.smoothstep(opening,.26,.85));
+      const settle=THREE.MathUtils.smoothstep(opening,.2,.48)*(1-THREE.MathUtils.smoothstep(opening,.48,.88));
+      V.arrivalLight.value=bloom;
+      const charging=U[0]===3,afterCharge=U[0]===4,dissolving=U[0]===5;
+      const firingLeft=U[7]-LT_UL.finishDelay;
+      const releasing=afterCharge&&firingLeft>0;
+      V.channeling=releasing;
+      const finish=charging?clamp(1-U[7]/LT_UL.finishCast,0,1):afterCharge||dissolving?1:0;
+      const release=dissolving?clamp(1-U[7]/LT_UL.finishDissolve,0,1):0;
+      const fireAge=releasing?Math.max(0,LT_UL.finishRelease-firingLeft):-1;
+      const impact=releasing?Math.exp(-fireAge*13):0;
+      const channel=releasing ? .83+.16*Math.sin(fireAge*20)**2 : 0;
+      const fade=1-THREE.MathUtils.smoothstep(release,.06,1);
+      const load=THREE.MathUtils.smoothstep(finish,.02,.69),drive=lightFinishDrive(finish);
+      V.g.position.y+=-.79*(1-open)+.28*settle;
+      V.dissolve.value=release;
+      for(const f of V.fades){
+        const detail=THREE.MathUtils.smoothstep(opening,f.start*.52,f.end*.69);
+        f.material.opacity=f.alpha*Math.max(detail,bloom*.68)*fade;
+      }
+      if(V.head)V.head.rotation.x=.67*load*(1-drive)-.11*drive*(1-release);
+      for(const w of V.wings){
+        const flap=now*.0032+w.phase;
+        const knock=releasing?THREE.MathUtils.smoothstep(fireAge,.048,.14)*(1-THREE.MathUtils.smoothstep(fireAge,.14,.35)):0;
+        w.node.rotation.set(.045*Math.sin(flap-.4)-.12*load,
+          w.side*(.12*Math.sin(flap-.9)+.45*load+.20*drive*(1-release)+.27*knock),
+          w.side*(.36*(1-spread)-.17*settle+.107*Math.sin(flap)*(1-load*.74)-.13*impact));
+        w.node.scale.setScalar(.53+.47*spread+.11*settle);
+        const wingLight=(.34*load+.61*channel+.32*impact)*fade;
+        w.current.visible=wingLight>.04;w.current.material.uniforms.power.value=wingLight;
+        w.current.material.uniforms.launch.value=fireAge;
+      }
+      const bob=.135*open*Math.sin(now*.003)*(1-load);
+      lgPoseSovereign(V,rigShot,gesture,opening,bob,finish,U[9]||.26,release,fireAge,dt);
+      V.crossClock.value+=dt*(charging?-lerp(.92,4.2,finish):releasing?4.65:.58);
+      V.crossCharge.value=(load+.46*channel+.34*impact)*fade;
+      V.gather.visible=(charging&&finish>.02)||releasing||dissolving;
+      V.gather.material.uniforms.clock.value+=dt*(.46+1.93*finish+1.42*channel);
+      V.gather.material.uniforms.power.value=(1.25*load+.26*channel+.25*impact)*fade;
+      V.gather.material.uniforms.dissolve.value=release;
+      V.gather.material.uniforms.casting.value=channel;
+      const sealPower=(.52*load+.52*channel+.45*impact)*fade;
+      V.chargeSeal.visible=sealPower>.035;
+      V.chargeSeal.rotation.z-=dt*(1.8+2.7*load+4.8*channel);
+      V.chargeSeal.rotation.y=.29*Math.sin(V.chargeSeal.rotation.z*.27);
+      V.chargeSeal.scale.setScalar(1+.56*load+.38*impact);
+      V.chargeSeal.material.uniforms.power.value=sealPower;
+      V.chestFlare.visible=impact>.12;
+      V.chestFlare.rotation.z=now*.004;
+      V.chestFlare.scale.setScalar(.64+2.1*(1-impact));
+      V.chestFlare.material.opacity=impact*.91;
+      V.chestRecoil.visible=releasing&&fireAge<.31;
+      if(V.chestRecoil.visible)for(const [i,ring] of V.chestRecoil.children.entries()){
+        const t=clamp((fireAge-i*.043)/.25,0,1),k=1-(1-t)**2;
+        ring.visible=fireAge>=i*.043&&t<1;
+        ring.scale.setScalar(.34+(i===0?1.72:2.11)*k);
+        ring.position.z=k*(i===0?1.02:.59);
+        ring.material.opacity=(1-t)**1.43*(i===0 ? .94 : .66);
+      }
+      V.sash.rotation.set(.24+.04*Math.sin(now*.003-.6),-.12+.08*Math.sin(now*.00065),.69+.035*Math.sin(now*.004-.45));
+      V.sash.scale.setScalar(.79+.23*spread+.041*surge);
+      V.sash.material.uniforms.alpha.value=spread*fade;
       V.sash.material.uniforms.surge.value=surge;
-      V.sparks.material.uniforms.alpha.value=open;
+      V.sparks.material.uniforms.alpha.value=open*(1-.88*load)*fade;
       V.sparks.material.uniforms.surge.value=surge;
-      V.flash.visible=!!shot&&surge>.12;
-      V.flash.position.copy(V.muzzle);V.flash.scale.set(.19+.27*surge,.18+.18*surge,.42+.28*surge);
-      V.flash.material.opacity=.78*surge;
-      if(opening<1){
-        if(!S.arrivalRing)S.arrivalRing=lgReturnMark();
-        const ring=S.arrivalRing;
-        ring.visible=true;ring.position.copy(V.g.position);ring.position.y+=.15+opening*1.65;
-        ring.scale.setScalar(.30+2.1*open);ring.material.opacity=Math.sin(opening*Math.PI)**2*.87;
-      }else if(S.arrivalRing)S.arrivalRing.visible=false;
-      const finish=U[0]===3?clamp(1-U[7]/LT_UL.finishCast,0,1):0;
-      V.halo.position.copy(V.haloHome).lerp(V.heart.position,finish);
+      const palmFlare=Math.max(surge,.56*pulse);
+      V.flash.visible=!!shot&&palmFlare>.22;
+      V.flash.position.copy(V.gatePoint);V.flash.scale.set(.22+.42*palmFlare,.21+.37*palmFlare,.43+.42*palmFlare);
+      V.flash.material.opacity=.92*palmFlare;
+      const flicker=bloom*(1-THREE.MathUtils.smoothstep(opening,.24,.62));
+      V.blink.visible=flicker>.01;V.blink.material.opacity=flicker;
+      V.blink.scale.set(.70+1.0*open,2.4+1.6*open,1);
+      const launch=shotAge<.23,wave=clamp(launch?shotAge/.23:pulseAge/.13,0,1);
+      V.blast.visible=!!shot&&wave<1;
+      V.blast.position.copy(V.gatePoint).addScaledVector(V.fireDir,.10);
+      V.blast.quaternion.setFromUnitVectors(V.front,V.fireDir);V.blast.rotateZ(now*.012);
+      V.blast.scale.setScalar((launch?1.27:.63)+1.28*wave);
+      V.blast.material.opacity=(launch ? .98 : .73)*(1-wave)**1.65;
+      lgPosePalmWaves(V,shot?shotAge:-1);
+      V.heart.visible=open*fade>.02;
+      V.heart.scale.setScalar(1.66+.06*Math.sin(now*.005)+.13*surge+.42*load+.22*drive*(1-release));
+      V.heart.rotation.y=.16+.19*Math.sin(now*.003+.5);
+      V.heartFx.collar.material.opacity=.94*open*fade;
+      V.heartFx.rim.material.opacity=(.67+.29*load)*open*fade;
+      V.heartFx.uniforms.alpha.value=open*fade;
+      V.heartFx.uniforms.charge.value=.32*surge+finish*(1-.68*release);
+      V.halo.position.copy(V.haloHome).lerp(V.heart.position,.70*drive);
       const haloOpen=THREE.MathUtils.smoothstep(opening,.48,1);
-      V.halo.scale.setScalar((.36+.64*haloOpen)*(1-.72*finish));V.halo.rotation.y=(1-haloOpen)*.96+finish*Math.PI;
-      for(const w of V.wrists){w.marks.rotation.y=w.sign*now*.001;w.pulse.rotation.y=w.sign*now*.0029;}
+      V.halo.scale.setScalar((.36+.64*haloOpen)*(1-.74*drive)*fade);
+      V.haloSpin+=dt*(.69+2.65*load+2.1*channel);
+      V.halo.rotation.set(.10*Math.sin(now*.0017),.19*Math.sin(now*.0013)+(1-haloOpen)*.96+drive*Math.PI,V.haloSpin);
+      V.seal.mesh.rotation.z=-V.haloSpin*2;V.seal.mesh.material.opacity=.79*haloOpen;
+      V.seal.rays.rotation.z=V.haloSpin*.35;V.seal.rays.material.opacity=.95*haloOpen;
+      if(!V.haloCore){
+        V.haloCore=lgSovereignCrystal();
+        if(V.haloCore){
+          V.haloCore.name='SovereignHaloCore';V.haloCore.position.z=.14;V.halo.add(V.haloCore);
+          V.haloCore.getObjectByName('SovereignCrystalCore').traverse(o=>{if(o.isMesh){
+            const source=o.material;o.material=source.clone();o.material.onBeforeCompile=source.onBeforeCompile;
+            o.material.userData.keep=false;V.haloLight.push({material:o.material,color:source.color.clone()});
+          }});
+        }
+      }
+      if(V.haloCore){
+        V.haloCore.rotation.set(.14,now*.0015,-V.halo.rotation.z+.08*Math.sin(now*.003),'ZXY');
+        V.haloCore.scale.setScalar(haloOpen*(.39+.055*Math.sin(now*.004)+.15*finish));
+        const haloCharge=THREE.MathUtils.smoothstep(finish,0,.42)*(1-.79*drive);
+        for(const o of V.haloLight)o.material.color.copy(o.color).multiplyScalar(1+1.7*haloCharge);
+      }
+      for(const w of V.wrists){
+        w.marks.rotation.y=w.sign*now*.001;w.pulse.rotation.y=w.sign*now*.0029;
+        const power=gesture?.[0]===w.sign?gesture[1]:0;
+        w.sigils.uniforms.alpha.value=spread*fade*(.69+.28*power);
+        w.sigils.uniforms.power.value=power*(.48+.52*surge);
+        w.sigils.ringMat.opacity=spread*fade*(.48+.42*power);
+        w.sigils.loops.rotation.z=now*.00078*w.sign;
+      }
       while(V.crystals.length<4){const c=lgSovereignCrystal();if(!c)break;V.halo.add(c);V.crystals.push(c);}
       V.crystals.forEach((c,i)=>{
         const a=now*.00092+i*Math.PI/2;
         c.position.set(Math.cos(a)*1.12,Math.sin(a)*1.12,0);
         c.rotation.set(0,now*.0018,a-Math.PI/2);c.scale.setScalar(.115*haloOpen);
       });
-      LREQ.push({x:o.g.position.x,y:o.g.position.y+.9,z:o.g.position.z,col:'#ffdb83',int:.47,dist:3.7});
+      LREQ.push({x:o.g.position.x,y:o.g.position.y+.9,z:o.g.position.z,col:'#ffdb83',int:(.47+.43*load+.62*impact)*fade,dist:3.7});
     }else{
       V.age=null;
+      V.channeling=false;
       V.hover.rotation.y=0;
-      for(const a of V.arms)a.amount=0;
+      for(const a of V.arms){a.amount=0;a.guard=0;}
     }
   }
-  if(!form&&S.arrivalRing)S.arrivalRing.visible=false;
   if(shot){
-    if(!S.ultBeam)S.ultBeam=lgTube(lgUltBeamMat(),1);
-    const a=V&&rigShot?V.hover.localToWorld(V.muzzle.clone()):lgWorld(shot[1],shot[2],shot[3]);
+    if(!S.ultBeam)S.ultBeam=lgSovereignPalmBeam();
+    const gate=S.palmGate||(S.palmGate=lgSovereignPalmGate());
+    if(!gate.root.parent)scene.add(gate.root);
     const b=lgWorld(shot[4],shot[5],shot[6]);
-    S.ultBeam.visible=true;lgAim(S.ultBeam,a,b);S.ultBeam.scale.x=S.ultBeam.scale.y=.19+.055*surge;
-    S.ultBeam.material.uniforms.uT.value=now/1000;
-    LREQ.push({x:a.x,y:a.y,z:a.z,col:'#ffe399',int:.72,dist:3.5});
-  }else if(S.ultBeam)S.ultBeam.visible=false;
+    const a=V&&rigShot?V.hover.localToWorld(V.gatePoint.clone()):lgWorld(shot[1],shot[2],shot[3]);
+    if(!V||!rigShot){const length=a.distanceTo(b);a.lerp(b,lgPalmGateOffset(length)/Math.max(.001,length));}
+    lgAim(S.ultBeam,a,b);S.ultBeam.visible=S.ultBeam.scale.z>.05;
+    const cutoff=THREE.MathUtils.smoothstep(shotAge,LT_UL.baHold-.13,LT_UL.baHold);
+    gate.root.visible=S.ultBeam.visible;gate.root.position.copy(a);gate.root.quaternion.copy(S.ultBeam.quaternion);
+    gate.root.scale.setScalar((.43+.17*surge+.098*pulse)*(1-.64*cutoff));
+    gate.edge.material.opacity=(.88+.10*surge)*(1-.91*cutoff);
+    gate.trim.rotation.z=now*.0095;
+    gate.trim.material.uniforms.power.value=(.91+.26*surge+.14*pulse)*(1-.91*cutoff);
+    const reach=clamp(shotAge/LG_PALM_TRAVEL,0,1);
+    S.ultBeam.scale.z*=.016+.984*(1-(1-reach)**1.42);
+    S.ultBeam.scale.x=S.ultBeam.scale.y=(.289+.127*surge+.019*pulse)*(1-.925*cutoff);
+    const uniforms=S.ultBeam.material.uniforms;
+    uniforms.lengthM.value=Math.max(.06,S.ultBeam.scale.z);
+    uniforms.ignite.value=1-THREE.MathUtils.smoothstep(shotAge,0,.19);
+    uniforms.age.value=shotAge;
+    LREQ.push({x:a.x,y:a.y,z:a.z,col:'#ffe399',int:.42+.43*surge,dist:3.5});
+  }else{
+    if(S.ultBeam)S.ultBeam.visible=false;
+    if(S.palmGate)S.palmGate.root.visible=false;
+  }
+  lgPalmScorch(S,shot,shotAge,now);
   return form;
 }
 function lgWardVisual(o,S,active,now){
@@ -558,17 +1118,115 @@ let _lgBeamM=null;
 function lgBeamMat(){if(_lgBeamM)return _lgBeamM;_lgBeamM=new THREE.ShaderMaterial({uniforms:{uT:{value:0},uK:{value:1}},transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide,
   vertexShader:'varying vec2 vU;varying vec3 vN,vV;void main(){vU=uv;vec4 mv=modelViewMatrix*vec4(position,1.);vN=normalize(normalMatrix*normal);vV=normalize(-mv.xyz);gl_Position=projectionMatrix*mv;}',
   fragmentShader:'uniform float uT,uK;varying vec2 vU;varying vec3 vN,vV;void main(){float f=abs(dot(normalize(vN),normalize(vV)));float core=smoothstep(0.35,0.95,f);float s=0.75+0.25*sin(vU.y*40.-uT*30.);float fade=smoothstep(1.,0.85,vU.y);vec3 col=mix(vec3(1.,0.7,0.15),vec3(1.,0.9,0.55),core);float a=(0.06+0.6*core)*s*fade*uK;gl_FragColor=vec4(col*a,a);}'});_lgBeamM.userData.keep=true;return _lgBeamM;}
-let _lgUltBeamM=null;
-function lgUltBeamMat(){
-  if(!_lgUltBeamM){_lgUltBeamM=lgBeamMat().clone();_lgUltBeamM.uniforms.uK.value=.78;_lgUltBeamM.userData.keep=true;}
-  return _lgUltBeamM;
+function lgSovereignChestBeam(){
+  const shared={time:LG_ULT_TIME,span:{value:1},age:{value:0},fade:{value:1}};
+  const material=outer=>new THREE.ShaderMaterial({uniforms:{...shared,shell:{value:outer?1:0}},
+    transparent:true,depthWrite:false,side:outer?THREE.DoubleSide:THREE.FrontSide,toneMapped:false,
+    vertexShader:`uniform float span,age,shell;varying vec2 path;varying vec3 n,v;
+      void main(){
+        path=vec2(uv.x,position.z*span);
+        float mouth=mix(.39,1.,smoothstep(0.,min(1.67,span*.32),path.y));
+        float taper=mix(.27,1.,smoothstep(0.,min(1.22,span*.35),span-path.y));
+        float ripple=1.+shell*.09*sin(path.x*18.8496+path.y*2.3-age*31.);
+        vec4 q=modelViewMatrix*vec4(position.xy*mouth*taper*ripple,position.z,1.);
+        n=normalize(normalMatrix*normal);v=-q.xyz;gl_Position=projectionMatrix*q;
+      }`,
+    fragmentShader:`uniform float time,span,age,fade,shell;varying vec2 path;varying vec3 n,v;
+      void main(){
+        float d=path.y,a=path.x*6.283185;
+        float facing=abs(dot(normalize(n),normalize(v)));
+        float fire=exp(-age*10.),flow=fract(d*.57-time*9.4+.12*sin(a*5.));
+        float dash=smoothstep(.053,.14,flow)*(1.-smoothstep(.48,.86,flow));
+        float strand=.5+.5*sin(a*5.+.34*sin(d*.75-time*5.4)+.19*sin(d*2.8-time*13.));
+        float stream=pow(strand,9.)*(.42+.58*dash);
+        float tip=smoothstep(0.,min(.58,span*.28),span-d);
+        vec3 core=mix(vec3(1.13,.45,.041),vec3(1.22,1.08,.84),smoothstep(.0,.85,facing));
+        vec3 fold=mix(vec3(.96,.34,.017),vec3(1.15,.79,.22),dash);
+        float face=gl_FrontFacing?1.:.39;
+        float veil=.066+.84*stream+.09*(1.-facing);
+        vec3 gold=mix(core,fold,shell)*(1.+.21*fire);
+        gl_FragColor=vec4(gold,fade*tip*mix(.86+.14*facing,veil*face,shell));
+      }`});
+  const beam=lgTube(material(false),.68,42);beam.name='SovereignChestBeam';beam.renderOrder=6;
+  const mantle=lgTube(material(true),1.24,46);mantle.name='SovereignChestBeamMantle';mantle.renderOrder=7;
+  beam.add(mantle);
+  return beam;
+}
+function lgSovereignPalmBeam(){
+  const uniforms={time:LG_ULT_TIME,lengthM:{value:1},ignite:{value:0},age:{value:0}};
+  const vertexShader=`uniform float lengthM;varying vec2 path;varying vec3 n,v;
+    void main(){
+      path=vec2(uv.x,position.z);
+      float remaining=(1.-path.y)*lengthM;
+      float taper=mix(.20,1.,smoothstep(0.,min(.78,lengthM*.41),remaining));
+      vec3 p=vec3(position.xy*taper,position.z);
+      vec4 q=modelViewMatrix*vec4(p,1.);v=-q.xyz;n=normalize(normalMatrix*normal);
+      gl_Position=projectionMatrix*q;
+    }`;
+  const coreMat=new THREE.ShaderMaterial({uniforms,vertexShader,transparent:true,depthWrite:false,toneMapped:false,
+    fragmentShader:`uniform float time,lengthM,ignite;varying vec2 path;varying vec3 n,v;
+      void main(){
+        float d=path.y*lengthM,remaining=lengthM-d;
+        float facing=smoothstep(.04,.94,abs(dot(normalize(n),normalize(v))));
+        float seam=.5+.5*sin(d*6.1-time*30.+path.x*18.8496);
+        float moving=pow(seam,7.);
+        float tip=smoothstep(.014,min(.34,lengthM*.27),remaining);
+        vec3 edge=vec3(.94,.38,.037),hot=vec3(1.12,1.01,.75);
+        vec3 color=mix(edge,hot,clamp(.21+.76*facing+.13*moving,0.,1.));
+        gl_FragColor=vec4(color*(1.+.18*ignite),tip*(.63+.30*facing));
+      }`});
+  const beam=lgTube(coreMat,.70,30);beam.name='SovereignPalmBeam';beam.renderOrder=6;
+  const sheathMat=new THREE.ShaderMaterial({uniforms,vertexShader,transparent:true,depthWrite:false,
+    side:THREE.DoubleSide,toneMapped:false,
+    fragmentShader:`uniform float time,lengthM,ignite;varying vec2 path;varying vec3 n,v;
+      void main(){
+        float d=path.y*lengthM,remaining=lengthM-d,a=path.x*6.283185;
+        float rim=pow(1.-abs(dot(normalize(n),normalize(v))),1.5);
+        float offset=a*2.-d*1.9+time*3.8;
+        float weave=pow(.5+.5*cos(offset+.26*sin(d*1.8-time*9.)),9.);
+        float run=fract(d*.59-time*6.4),packet=smoothstep(.09,.28,run)*(1.-smoothstep(.56,.92,run));
+        float tip=smoothstep(0.,min(.61,lengthM*.32),remaining);
+        vec3 gold=mix(vec3(.78,.21,.014),vec3(1.03,.68,.13),packet);
+        float face=gl_FrontFacing ? 1. : .52;
+        gl_FragColor=vec4(gold,tip*face*(.043*rim+.92*weave*(.41+.59*packet))*(1.+.16*ignite));
+      }`});
+  const sheath=lgTube(sheathMat,1.43,36);sheath.name='SovereignPalmCurrent';sheath.renderOrder=7;beam.add(sheath);
+  const seeds=[];
+  for(let i=0;i<26;i++)seeds.push(i/26,(i*17%29)/29,(i*11%31)/31);
+  for(let i=0;i<22;i++)seeds.push(i/22,(i*13%23)/23,1+(i*7%23)/23);
+  const geometry=new THREE.BufferGeometry();geometry.setAttribute('position',new THREE.Float32BufferAttribute(seeds,3));
+  const moteMat=new THREE.ShaderMaterial({uniforms,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,toneMapped:false,
+    vertexShader:`uniform float time,lengthM,ignite,age;varying float fade;
+      void main(){
+        float seed=fract(position.z),flash=step(1.,position.z);
+        float t=fract(position.x+time*(15.+seed*8.)/max(2.,lengthM));
+        float a=position.y*6.283+t*lengthM*.79+time*1.64,r=.90+seed*.82;
+        float repeat=step(.32,age),pulseAge=mod(max(0.,age-.32),.37);
+        float launchAge=max(0.,mix(age,pulseAge,repeat)-position.x*.045);
+        if(flash>.5){
+          t=min(.96,launchAge*(3.5+seed*9.5)/max(.20,lengthM));
+          r=.14+launchAge*(9.5+seed*15.4);a=position.y*6.283+launchAge*6.7;
+        }
+        vec4 q=modelViewMatrix*vec4(cos(a)*r,sin(a)*r,t,1.);
+        gl_Position=projectionMatrix*q;
+        gl_PointSize=clamp((17.+27.*seed+14.*ignite+22.*flash)/(-q.z),1.5,10.);
+        fade=mix(smoothstep(0.,.08,t)*(1.-smoothstep(.71,.995,t)),
+          smoothstep(0.,.015,launchAge)*(1.-smoothstep(.049,mix(.28,.15,repeat),launchAge))*(1.-.42*repeat),flash);
+      }`,
+    fragmentShader:`varying float fade;void main(){
+      vec2 p=abs(gl_PointCoord-.5);
+      float spark=1.-smoothstep(.14,.49,p.x*.82+p.y);
+      gl_FragColor=vec4(1.37,.81,.20,fade*spark);
+    }`});
+  const motes=new THREE.Points(geometry,moteMat);motes.name='SovereignPalmMotes';motes.frustumCulled=false;motes.renderOrder=8;
+  beam.add(motes);return beam;
 }
 // สายลิงก์: ความทึบไม่เท่ากันตามหน้าตัด (ขอบจาง กลางเข้ม เป็นแถบ) + ลายวิ่งไปตลอด
 let _lgLinkM=null;
 function lgLinkMat(){if(_lgLinkM)return _lgLinkM;_lgLinkM=new THREE.ShaderMaterial({uniforms:{uT:{value:0}},transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide,
   vertexShader:'varying vec2 vU;void main(){vU=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',
   fragmentShader:'uniform float uT;varying vec2 vU;void main(){float a=vU.x*6.2832;float band=0.5+0.5*sin(a*3.+vU.y*14.-uT*5.);float band2=0.5+0.5*sin(a*1.-vU.y*9.+uT*3.3);float run=smoothstep(0.6,1.,0.5+0.5*sin(vU.y*30.-uT*12.));float al=(0.12+0.5*band*band2+0.45*run)*smoothstep(0.,0.06,vU.y)*smoothstep(1.,0.94,vU.y);gl_FragColor=vec4(vec3(1.,0.72,0.2)*al*1.6,al);}'});_lgLinkM.userData.keep=true;return _lgLinkM;}
-function lgTube(mat,r){const g=new THREE.CylinderGeometry(r,r,1,16,1,true).translate(0,0.5,0).rotateX(Math.PI/2);const m=new THREE.Mesh(g,mat);m.frustumCulled=false;m.renderOrder=5;scene.add(m);return m;}
+function lgTube(mat,r,segments=1){const g=new THREE.CylinderGeometry(r,r,1,16,segments,true).translate(0,0.5,0).rotateX(Math.PI/2);const m=new THREE.Mesh(g,mat);m.frustumCulled=false;m.renderOrder=5;scene.add(m);return m;}
 function lgAim(m,a,b){m.position.copy(a);m.lookAt(b);m.scale.set(1,1,a.distanceTo(b));}
 function lightFX(o,p,pz,now,dt){
   const L=p.lt,s=LGV.st.get(p.id);
@@ -778,12 +1436,13 @@ function lgClear(s){
   lgClearBase(s);
   fxKill(s.empAura);s.empAura=null;
   lgAllyEmpEnd(s);
-  for(const m of [s.sovereign?.g,s.ultBeam,s.returnMark,s.arrivalRing,...(s.wardCrystals||[])])if(m)m.visible=false;
+  for(const m of [s.sovereign?.g,s.ultBeam,s.palmGate?.root,s.palmTrail?.mesh,s.returnMark?.root,...(s.wardCrystals||[])])if(m)m.visible=false;
+  if(s.palmTrail)s.palmTrail.last=null;
 }
 function lightDropView(id){
   const s=LGV.st.get(id);if(!s)return;
   fxKill(s.empAura);lgAllyEmpEnd(s);
-  for(const m of [...lgBaseObjects(s),s.sovereign?.g,s.returnMark,s.arrivalRing,s.ultBeam,...(s.wardCrystals||[])])if(m)disposeObj(m);
+  for(const m of [...lgBaseObjects(s),s.sovereign?.g,s.returnMark?.root,s.ultBeam,s.palmGate?.root,s.palmTrail?.mesh,...(s.wardCrystals||[])])if(m)disposeObj(m);
   LGV.st.delete(id);
 }
 function lgAllyEmpEnd(s){
@@ -800,10 +1459,148 @@ function lgArcFx(a,b,t,arc,done){const c=lgCrystalMesh(1.2),tr=lgTube(lgBeamMat(
   LGV.fx.push({m:null,t:0,max:t,fn:k=>{const e=k*k;const P=a.clone().lerp(b,e);P.y+=Math.sin(k*Math.PI)*arc*(1-k*0.3);c.position.copy(P);c.rotation.y+=0.4;pts.push(P.clone());if(pts.length>5)pts.shift();if(pts.length>1){tr.visible=true;lgAim(tr,pts[0],P);tr.scale.x=tr.scale.y=0.05;}},
     end:()=>{scene.remove(c);scene.remove(tr);if(done)done();}});}
 function lgFlyFx(a,b,t,scale){const c=lgCrystalMesh(scale||1);scene.add(c);LGV.fx.push({m:c,a,b,t:0,max:t,arc:0.6});}
-function lightFxTick(dt){for(let i=LGV.fx.length-1;i>=0;i--){const f=LGV.fx[i];f.t+=dt;const k=Math.min(1,f.t/f.max);
+function lgSovereignArrival(center){
+  const root=new THREE.Group();root.name='SovereignArrival';root.position.copy(center);
+  const light=(color,intensity)=>new THREE.MeshBasicMaterial({color:hdr(color,intensity),toneMapped:false,
+    transparent:true,depthWrite:false,side:THREE.DoubleSide});
+  const cross=new THREE.Group();cross.name='SovereignArrivalCross';root.add(cross);
+  const g=new THREE.BufferGeometry();
+  g.setAttribute('position',new THREE.Float32BufferAttribute([-1,0,0,0,-.16,0,1,0,0,-1,0,0,1,0,0,0,.16,0],3));
+  const flash=new THREE.ShaderMaterial({transparent:true,depthWrite:false,side:THREE.DoubleSide,toneMapped:false,
+    uniforms:{alpha:{value:1}},
+    vertexShader:`varying vec2 p;void main(){p=position.xy;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
+    fragmentShader:`varying vec2 p;uniform float alpha;void main(){
+      float width=abs(p.y)/max(.008,.16*(1.-abs(p.x)));
+      float edge=1.-smoothstep(.65,1.,width),core=1.-smoothstep(.17,.47,width);
+      vec3 color=mix(vec3(1.35,.49,.057),vec3(3.7,2.86,1.52),core);
+      gl_FragColor=vec4(color,alpha*edge*(.42+.58*core));
+    }`});
+  for(const angle of [-Math.PI/4,Math.PI/4]){
+    const stroke=new THREE.Mesh(g,flash);stroke.rotation.z=angle;stroke.renderOrder=8;cross.add(stroke);
+  }
+  const rings=[-1,1].map((side,i)=>{
+    const ring=new THREE.Mesh(new THREE.TorusGeometry(1,i===0?.051:.027,6,64),light(i===0?'#ffd082':'#fff0ba',1.38));
+    ring.name='SovereignArrivalRing';ring.rotation.set(Math.PI/2+side*.53,side*.57,0);
+    ring.renderOrder=7;root.add(ring);return ring;
+  });
+  scene.add(root);
+  const pose=k=>{
+    cross.quaternion.copy(cam.quaternion);
+    cross.scale.setScalar(.56+6.15*(1-(1-k)**3));
+    flash.uniforms.alpha.value=1-THREE.MathUtils.smoothstep(k,.14,.89);
+    for(const [i,ring] of rings.entries()){
+      const t=clamp((k-i*.07)/(1-i*.07),0,1);
+      ring.visible=k>=i*.07;
+      ring.scale.setScalar(.59+(i===0?4.45:3.64)*(1-(1-t)**2));
+      ring.material.opacity=(i===0?.96:.84)*(1-t)**1.62;
+    }
+  };
+  pose(0);
+  LGV.fx.push({t:0,max:LG_ULT_ARRIVAL_FX,fresh:true,fn:pose,end:()=>disposeObj(root)});
+}
+function lightFxTick(dt){for(let i=LGV.fx.length-1;i>=0;i--){const f=LGV.fx[i];if(f.fresh)f.fresh=false;else f.t+=dt;const k=Math.min(1,(f.t+1e-6)/f.max);
   if(f.m){f.m.position.lerpVectors(f.a,f.b,k);f.m.position.y+=Math.sin(k*Math.PI)*(f.arc||0);f.m.rotation.y+=dt*8;}
   if(f.fn)f.fn(k,f);
   if(k>=1){if(f.m)scene.remove(f.m);if(f.end)f.end(f);LGV.fx.splice(i,1);}}}
+const LG_BLAST_EXPAND=.24,LG_BLAST_HOLD=.23;
+function lgImpactDome(x,y,h,r,duration,kind='impact'){
+  const blast=kind!=='impact',inner=kind==='inner';
+  const uniforms={progress:{value:0},alpha:{value:blast ? .75 : .88},
+    density:{value:inner ? .28 : blast ? .44 : .38},inner:{value:inner?1:0}};
+  const material=new THREE.ShaderMaterial({uniforms,transparent:true,depthWrite:false,side:THREE.DoubleSide,toneMapped:false,
+    vertexShader:`varying vec3 p,n,v;void main(){
+      p=position;n=normalize(normalMatrix*normal);vec4 q=modelViewMatrix*vec4(position,1.);v=-q.xyz;
+      gl_Position=projectionMatrix*q;
+    }`,
+    fragmentShader:`uniform float progress,alpha,density,inner;varying vec3 p,n,v;
+      void main(){
+        float rim=pow(1.-abs(dot(normalize(n),normalize(v))),2.75);
+        float t=fract(p.y*2.7-progress*(4.+inner*1.65)+p.x*.63+.11*sin(p.z*17.+progress*13.));
+        float trace=1.-smoothstep(.025,.095,abs(t-.45));
+        float foot=1.-smoothstep(.012,.093,p.y);
+        vec3 c=mix(mix(vec3(.99,.51,.067),vec3(1.37,.54,.058),inner),vec3(1.57,1.19,.49),max(rim,trace*.74));
+        float facing=gl_FrontFacing ? 1. : .65;
+        gl_FragColor=vec4(c,alpha*facing*clamp(density+rim*.52+trace*.25+foot*.31,0.,1.));
+      }`});
+  const dome=new THREE.Mesh(new THREE.SphereGeometry(1,36,14,0,Math.PI*2,0,Math.PI/2),material);
+  const center=lgWorld(x,y,h+.025);
+  dome.name=inner?'SovereignInnerBlast':blast?'SovereignBlastDome':'SovereignImpactDome';
+  dome.renderOrder=inner?6:7;scene.add(dome);
+  const pose=k=>{
+    const t=k*duration,lag=inner ? .050 : 0;
+    const expand=clamp((t-lag)/LG_BLAST_EXPAND,0,1);
+    const compress=blast?0:THREE.MathUtils.smoothstep(t,duration-.24,duration);
+    const scale=blast?r*(1-(1-expand)**2):r*(.63+.37*THREE.MathUtils.smoothstep(k,0,.55))*(1-.81*compress);
+    const heightRatio=inner ? .82 : blast ? 1 : .69;
+    dome.scale.set(Math.max(.02,scale),Math.max(.02,scale*heightRatio),Math.max(.02,scale));
+    dome.position.copy(center);
+    if(!blast){const jitter=lerp(.055,.16,k)*(1-compress);dome.position.x+=Math.sin(t*102)*jitter;dome.position.z+=Math.sin(t*73+.9)*jitter;}
+    uniforms.progress.value=k;
+    const fade=1-THREE.MathUtils.smoothstep(t,lag+LG_BLAST_EXPAND+LG_BLAST_HOLD,duration);
+    uniforms.alpha.value=inner ? .80*fade*THREE.MathUtils.smoothstep(t,lag,lag+.08)
+      : blast ? .96*fade : .84+.14*k+.09*Math.sin(t*72)+.18*compress;
+  };
+  pose(0);LGV.fx.push({t:0,max:duration,fresh:true,fn:pose,end:()=>disposeObj(dome)});
+}
+function lgBlastFloor(x,y,h,r,duration){
+  const geometry=new THREE.PlaneGeometry(r*2,r*2,24,24).rotateX(-Math.PI/2);
+  const pos=geometry.attributes.position,base=GY(x,y);
+  for(let i=0;i<pos.count;i++){
+    const px=x+pos.getX(i)/S3,py=y+pos.getZ(i)/S3;
+    pos.setY(i,GY(px,py)+groundH(px,py,h)-base-h);
+  }
+  const material=new THREE.ShaderMaterial({transparent:true,depthWrite:false,side:THREE.DoubleSide,toneMapped:false,
+    uniforms:{progress:{value:0},expand:{value:LG_BLAST_EXPAND/duration}},
+    vertexShader:`varying vec2 p;void main(){p=uv*2.-1.;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
+    fragmentShader:`uniform float progress,expand;varying vec2 p;
+      void main(){
+        float r=length(p),a=atan(p.y,p.x),left=1.-clamp(progress/expand,0.,1.);
+        float front=1.-left*left;
+        float echo=.72*smoothstep(.05,.34,progress);
+        float edge=1.-smoothstep(.008,.043,abs(r-front*.982));
+        float sweep=1.-smoothstep(.009,.045,abs(r-echo));
+        float cell=abs(fract(a*3.8197+.5)-.5);
+        float rune=(1.-smoothstep(.030,.063,abs(cell*.81+abs(r-.84)*3.3-.206)))*smoothstep(.74,.82,front);
+        float crack=1.-smoothstep(.008,.032,abs(fract(a*2.228+r*1.1+.11*sin(r*29.)+.05*sin(r*66.))-.5));
+        crack*=(1.-smoothstep(.49,.85,r))*(1.-smoothstep(.03,.105,r-front));
+        float resident=(1.-smoothstep(.02,front*.89+.12,r))*.34;
+        float mark=clamp(edge+.78*sweep+.68*rune+.62*crack,0.,1.);
+        vec3 color=mix(vec3(.92,.37,.042),vec3(1.59,1.14,.44),mark);
+        float fade=smoothstep(0.,.07,progress)*(1.-smoothstep(.52,1.,progress));
+        gl_FragColor=vec4(color,fade*(1.-smoothstep(.986,1.,r))*clamp(.79*mark+resident,0.,1.));
+      }`});
+  const floor=new THREE.Mesh(geometry,material);floor.name='SovereignBlastFloor';floor.renderOrder=4;
+  floor.position.copy(lgWorld(x,y,h+.047));scene.add(floor);
+  LGV.fx.push({t:0,max:duration,fresh:true,fn:k=>{material.uniforms.progress.value=k;},end:()=>disposeObj(floor)});
+}
+function lgBlastThreads(x,y,h,r,duration){
+  const seeds=[],segments=12;
+  for(let i=0;i<26;i++){
+    const a=i/26,phase=(i*13%29)/29;
+    for(let j=0;j<segments;j++)seeds.push(a,phase,j/segments,a,phase,(j+1)/segments);
+  }
+  const geometry=new THREE.BufferGeometry();geometry.setAttribute('position',new THREE.Float32BufferAttribute(seeds,3));
+  const material=new THREE.ShaderMaterial({transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,
+    uniforms:{r:{value:r},progress:{value:0}},
+    vertexShader:`uniform float r,progress;varying float glow;varying float colorMix;
+      void main(){
+        float age=max(0.,progress-position.y*.085),speed=smoothstep(0.,.40,age);
+        float t=position.z,a=position.x*6.283+(.32+position.y*.51)*t+age*.34;
+        float reach=r*speed*(.62+.23*position.y)*t;
+        float h=r*speed*sin(t*2.5)*(.10+.41*position.y)+r*age*.085;
+        vec3 q=vec3(cos(a)*reach,h,sin(a)*reach);
+        glow=smoothstep(0.,.07,age)*(1.-smoothstep(.53,1.,age))*sin(t*3.14159)*(.40+.60*position.y);
+        float front=fract(t*2.-age*2.6+position.y);
+        colorMix=1.-smoothstep(.0,.21,abs(front-.36));
+        gl_Position=projectionMatrix*modelViewMatrix*vec4(q,1.);
+      }`,
+    fragmentShader:`varying float glow,colorMix;
+      void main(){gl_FragColor=vec4(mix(vec3(1.35,.51,.055),vec3(2.1,1.54,.69),colorMix),glow);}`});
+  const threads=new THREE.LineSegments(geometry,material);
+  threads.name='SovereignBlastThreads';threads.frustumCulled=false;threads.renderOrder=5;
+  threads.position.copy(lgWorld(x,y,h+.065));scene.add(threads);
+  LGV.fx.push({t:0,max:duration,fresh:true,fn:k=>{material.uniforms.progress.value=k;},end:()=>disposeObj(threads)});
+}
 function lightEfx(ev){
   const z=ev.z,x=ev.x,y=ev.y,H=ev.h!==undefined?ev.h:0,me=myPos(),near=!me||Math.hypot(x-me.x,y-me.y)<1100;
   switch(z){
@@ -884,16 +1681,46 @@ function lightEfx(ev){
     case 'lgstepboom':later(LGSH.stepOut+LGSH.stepHide,()=>{fxPlay('light/step_boom',{x,y,h:H,gh:H,p:{r:(ev.r||150)/20},aim:false});if(near)shake(2);});return true;
     case 'lgultneed':if(ev.id===NET.myId)toast('ลิงก์คู่หูด้วย Crystal Bond ก่อนใช้ Radiant Sovereign');return true;
     case 'lgult':ring(x,y,'#ffc861',45,.52,H+.06);FX.flashSprite(x,y,H+1.6,'#fff1c0',.4,2.3,.22,1.8);if(near)snd('buff',ev);return true;
-    case 'lgultform':FX.flashSprite(x,y,H+.8,'#fff1c0',.30,2.30,.16,1.24);
-      burst(x,y,'#ffcd68',16,115,.45,1.8,{h:H+.83,g:0});return true;
-    case 'lgultend':FX.flashSprite(x,y,H+1.1,'#ffe895',.24,1.75,.14,1.5);return true;
+    case 'lgultform':
+      lgSovereignArrival(lgWorld(x,y,H+1.10));
+      FX.flashSprite(x,y,H+1.10,'#fff1c0',.32,2.55,.18,1.4);
+      burst(x,y,'#ffcd68',28,186,.54,1.8,{h:H+1.10,g:0});return true;
+    case 'lgultend':
+      if(Number.isFinite(ev.x2))lgBlip(lgWorld(ev.x2,ev.y2,ev.h2+1),lgWorld(x,y,H+1));
+      FX.flashSprite(x,y,H+1.1,'#ffe895',.24,1.75,.14,1.5);return true;
     case 'lgultstrike':{
-      const a=lgWorld(x,y,H),b=lgWorld(ev.x2,ev.y2,ev.h2),ray=lgTube(lgUltBeamMat(),1);
-      lgAim(ray,a,b);
-      LGV.fx.push({t:0,max:.46,fn:k=>{ray.scale.x=ray.scale.y=.46*(1-.87*k);},end:()=>disposeObj(ray)});
-      ring(ev.x2,ev.y2,'#ffe398',ev.r,.52,ev.h2+.10);
-      FX.flashSprite(ev.x2,ev.y2,ev.h2+.42,'#fff1c0',.36,3.3,.19,2.45);
-      burst(ev.x2,ev.y2,'#ffcf55',28,245,.55,2.3,{h:ev.h2+.32,g:1});
+      const a=lgWorld(x,y,H),b=lgWorld(ev.x2,ev.y2,ev.h2),ray=lgSovereignChestBeam();
+      const duration=ev.t||LT_UL.finishRelease;
+      const impactDuration=duration+LT_UL.finishDelay;
+      const sovereign=LGV.st.get(ev.id)?.sovereign,origin=new THREE.Vector3();
+      lgAim(ray,a,b);ray.visible=ray.scale.z>.045;
+      const uniforms=ray.material.uniforms;
+      uniforms.span.value=Math.max(.05,ray.scale.z);
+      ray.scale.x=ray.scale.y=.94;
+      LGV.fx.push({t:0,max:duration,fresh:true,fn:k=>{
+        if(sovereign?.channeling)lgAim(ray,sovereign.heart.getWorldPosition(origin),b);
+        uniforms.span.value=Math.max(.05,ray.scale.z);uniforms.age.value=k*duration;
+        uniforms.fade.value=1-THREE.MathUtils.smoothstep(k,.9,1);
+        ray.scale.x=ray.scale.y=(.73+.21*Math.exp(-k*15))*(1-.79*THREE.MathUtils.smoothstep(k,.91,1));
+      },end:()=>disposeObj(ray)});
+      burst(x,y,'#fff0a7',24,174,.31,1.75,{h:H,g:0});
+      if(ev.ground){
+        dfCracks(ev.x2,ev.y2,ev.h2+.026,66,'#ffbe43',impactDuration+.08);
+        burst(ev.x2,ev.y2,'#917d61',10,58,.33,2.1,{h:ev.h2+.05,vh:[.6,1.65],g:8});
+      }
+      lgImpactDome(ev.x2,ev.y2,ev.h2,1.44,impactDuration);
+      return true;
+    }
+    case 'lgultboom':{
+      const radius=ev.r*S3,duration=1.05;
+      lgImpactDome(x,y,H,radius,duration,'blast');
+      lgImpactDome(x,y,H,radius*.71,duration,'inner');
+      const floorH=groundH(x,y,H);
+      if(Math.abs(H-floorH)<3.5)lgBlastFloor(x,y,floorH,radius,duration+.22);
+      lgBlastThreads(x,y,H,radius,duration);
+      FX.flashSprite(x,y,H+.42,'#fff1c0',.36,3.3,.19,2.45);
+      burst(x,y,'#ffcf55',66,354,.89,2.5,{h:H+.32,vh:[1.7,8],g:9});
+      burst(x,y,'#fff0ac',28,226,.76,1.6,{h:H+.55,vh:[3,10],g:8});
       if(near)snd('boom',ev);return true;
     }
   }

@@ -86,6 +86,46 @@ def sculpt_torso(mesh):
             vertex.co.y -= (chest + abdomen + ribs) * min(1, -y / .20)
 
 
+def sculpt_arms(mesh):
+    # Sculpt around the same joint centers used by LIGHT_FORM_ARMS in the game.
+    arms = (
+        tuple(map(Vector, ((.83, .007, 2.905), (1.67, .041, 2.274), (2.79, -.34, 2.62)))),
+        tuple(map(Vector, ((-.827, .008, 2.878), (-1.62, .035, 2.15), (-2.69, -.435, 2.21)))),
+    )
+    profiles = []
+    for vertex in mesh.vertices:
+        x = vertex.co.x
+        shoulder, elbow, wrist = arms[0 if x > 0 else 1]
+        side = abs(x)
+        start, joint, end = map(abs, (shoulder.x, elbow.x, wrist.x))
+        if side < .67 or side >= end:
+            profiles.append(0)
+            continue
+
+        if side < joint:
+            t = (side - start) / (joint - start)
+            center = shoulder.lerp(elbow, t)
+            cap = exp(-((t - .10) / .34) ** 2)
+            muscle = exp(-((t - .46) / .34) ** 2)
+            width = .16 + .23 * cap + .25 * muscle
+        else:
+            t = (side - joint) / (end - joint)
+            center = elbow.lerp(wrist, t)
+            muscle = exp(-((t - .27) / .39) ** 2)
+            rise = min(1, t / .23)
+            width = (.18 + .29 * muscle * rise * rise * (3 - 2 * rise)) * (1 - t ** 2)
+
+        # Feather the shoulder into the chest. Keep the wrist dock and the palms intact.
+        root = min(1, max(0, (side - .67) / .23))
+        weight = root * root * (3 - 2 * root)
+        radius = vertex.co - center
+        radius.x = 0
+        radius.y *= .93
+        vertex.co += radius * width * weight
+        profiles.append(min(1, weight * width / .40))
+    attribute(mesh, '_arm_sculpt', profiles)
+
+
 def flatten_materials():
     # Runtime recreates Blender's time-dependent emission and transparency.
     # Simple material slots carry the other hues and opacity into glTF.
@@ -118,8 +158,15 @@ def sovereign(source, target):
     root.location.z = 0
     bpy.context.view_layer.update()
     halo = empty('SolarHalo', root, (0, .96, 3.98))
+    head = empty('SovereignHead', root, (0, 0, 3.54))
+    wing_pivots = {
+        'Upper left': empty('SovereignWingLeft', root, (-.79, .44, 3.17)),
+        'Upper right': empty('SovereignWingRight', root, (.79, .44, 3.17)),
+        'Lower left': empty('SovereignWingLower', root, (-.75, .56, 2.55)),
+    }
+    wing_parts = {key: [] for key in wing_pivots}
     bpy.context.view_layer.update()
-    static, orbit, current, echo = [], [], [], []
+    static, face, orbit, current, echo = [], [], [], [], []
     for obj in list(root.children):
         label = obj.name
         if label.startswith('Detached eclipse crystal'):
@@ -132,6 +179,7 @@ def sovereign(source, target):
             bpy.ops.object.modifier_apply(modifier=simplify.name)
             geo = obj.data
             sculpt_torso(geo)
+            sculpt_arms(geo)
             geo.update()
             for key in ('palm_light', 'palm_crease'):
                 geo.attributes[key].name = '_' + key
@@ -154,8 +202,18 @@ def sovereign(source, target):
             (echo if 'wake' in label else current).append(obj)
         elif label == 'Heart of light':
             obj.name = 'SovereignHeart'
+        elif label.startswith(('Carved face of light', 'Swept alabaster crest', 'Secondary carved temple crest',
+                               'Narrow cheek recess', 'Light within the cheek', 'Broken crown', 'Rising crown prism')):
+            face.append(mesh_object(obj))
         elif label.startswith(('Rear solar orbit', 'Crescent light', 'Faint underside')):
             orbit.append(mesh_object(obj))
+        elif label.startswith(tuple(wing_pivots)):
+            key = next(name for name in wing_pivots if label.startswith(name))
+            wing_parts[key].append(mesh_object(obj))
+        elif label.startswith('Broken solar fragment'):
+            middle = sum((v.co for v in obj.data.vertices), Vector()) / len(obj.data.vertices)
+            key = 'Upper right' if middle.x > 0 else 'Upper left' if middle.z >= 2.6 else 'Lower left'
+            wing_parts[key].append(mesh_object(obj))
         elif label.startswith('Wrist magic circle'):
             obj.name = 'WristPositive' if obj.location.x > 0 else 'WristNegative'
             for part in list(obj.children):
@@ -171,7 +229,10 @@ def sovereign(source, target):
         elif obj.type in ('MESH', 'CURVE'):
             static.append(mesh_object(obj))
 
-    merge('SovereignStoneAndWings', static, root)
+    merge('SovereignStone', static, root)
+    merge('SovereignHeadGeometry', face, head)
+    for key, pivot in wing_pivots.items():
+        merge(pivot.name + 'Blades', wing_parts[key], pivot)
     merge('SolarHaloGeometry', orbit, halo)
     merge('SovereignCross', current, root)
     merge('SovereignCrossWake', echo, root)

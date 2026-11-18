@@ -1,0 +1,11 @@
+{
+  "v": 1,
+  "desc": "Night Waltz — ริ้วเงากว้างแบบ B หมุนไหลรอบจุดร่าย ปลายฉีกและทยอยสลาย",
+  "tags": ["darkness", "self"],
+  "pal": "arcane",
+  "dur": 1.65,
+  "layers": [
+    {"id": "anchor", "t": "mesh", "shape": "disc", "mat": "black", "op": 0, "at": 0, "life": 1.65},
+    {"id": "edge", "t": "code", "fn": "darkness_night_waltz", "at": 0, "life": 1.65, "args": {"layer": "anchor"}}
+  ]
+}

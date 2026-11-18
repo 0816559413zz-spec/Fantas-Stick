@@ -105,6 +105,10 @@ function trCmd(p,d){
   if(d.c==='pvp'){const v=clamp(d.v|0,0,2);if(G.tr.pvp!==v){G.tr.pvp=v;trTeams();feed(['🤝 ทุกคนทีมเดียวกัน','⚔️ แบ่ง 2 ทีม','💥 ตัวใครตัวมัน'][v]);}}
   else if(d.c==='team'){p.trT=d.v?1:0;trTeams();if(G.tr.pvp===1)feed(`${p.name} → ${TEAMN[p.trT]}`);}
   else if(d.c==='set'&&TR_KEYS.includes(d.k)){G.tr[d.k]=d.v?1:0;if(d.k==='ult'&&!d.v)for(const q of plist())q.ult=0;}
+  else if(d.c==='nightwaltz'&&!NET.online&&G.ph==='play'&&p.alive&&!p.downed){
+    const h=Math.max(0,p.z-GY(p.x,p.y));
+    emit({k:'efx',z:'dark_nightwaltz',id:p.id,x:p.x,y:p.y,h,a:p.ang});
+  }
   else if(d.c==='lightally'&&lgOn(p)&&p.alive&&!p.downed&&!p.arSide&&!p.lgUlt){
     const x=clamp(p.x+Math.cos(p.ang)*115,40,MW-40),y=clamp(p.y+Math.sin(p.ang)*115,40,MH-40);
     let ally=plist().find(q=>q.ai?.lightAlly&&q.ai.owner===p.id);

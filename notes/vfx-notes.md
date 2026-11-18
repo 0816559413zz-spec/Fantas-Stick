@@ -1,5 +1,7 @@
 # Feature & VFX notes archive + old request lists
 
+> **Night Waltz ขอบ B ผ่าน 2026-11-18 (#77):** ผู้ใช้อนุมัติขอบวงของท่าชิ่งต้นฉบับ แถบเงากว้างซ้อนดำ เทาถ่าน และเทาสว่าง ปลายยกและบิดทรงขณะไหลรอบจุดร่าย พรีวิวอยู่ที่ `darkness/dash_preview` ดู GIF `designs/darkness_ref/night-waltz-original-border-b.gif`
+
 > **Nature ต้นแตก — ภาพอนุมัติรอบ 7:** กลางลำต้นโป่งและฉีกก่อนปล่อยคลื่นฮีลทรงโดม ท่อนยอดสะบัดยกเฉียงเล็กน้อยแล้วผ่อนลง ออร่าไล่สลายจากขอบบนของแต่ละท่อน ดู `designs/nature_vfx/ult_tree_branches_v1/break_v7_approved.gif`
 > Moved out of HANDOFF.md on 2026-10-19 to save tokens. Function/variable names are still valid; find them with `CODEMAP.md` (old `index.html` line numbers no longer apply — the code now lives in `js/`).
 

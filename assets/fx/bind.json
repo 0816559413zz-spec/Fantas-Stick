@@ -375,6 +375,10 @@
     "fx": "storm/shield_bash",
     "mode": "add"
   },
+  "efx:dark_nightwaltz": {
+    "fx": "darkness/night_waltz",
+    "mode": "replace"
+  },
   "efs:b": [
     {
       "fx": "env/brk_break_wood",
