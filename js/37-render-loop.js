@@ -73,7 +73,8 @@ function render(dt,now){
     INPUT.mx=fx*f-fy*s;INPUT.my=fy*f+fx*s;
     INPUT.ax=me.x+fx*2000;INPUT.ay=me.y+fy*2000;
     INPUT.ap=clamp((0.3-pitch)*1.2,-1.5,1.5);
-    if(!dcamCam(P,me,dt))updateCamera(specTarget(P,me,dt)||me,dt);   // ตายนาน ≥2 วิ = ดูคนอื่น (js/52)
+    if(!dcamCam(P,me,dt))updateCamera(specTarget(P,me,dt)||me,dt);
+    if(DEV.fc.on&&devOn())devFcCam(dt);   // Dev Mode กล้องอิสระ (js/77)   // ตายนาน ≥2 วิ = ดูคนอื่น (js/52)
     aimFromCrosshair(me,P,E);
     updatePlaceGhost(me);
     const o=PM3.get(me.id);windUpdate(o?Math.hypot(o.svx,o.svz):0,!!me.fl);
