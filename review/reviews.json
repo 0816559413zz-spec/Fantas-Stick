@@ -1,6 +1,38 @@
 {
- "next": 69,
+ "next": 70,
  "items": [
+  {
+   "id": 69,
+   "title": "Light: Empower ยิงไม่ร้อน + เกจแสงไหล, Sanctum ฮีล 3, อัลติท่าสุดท้ายสโลว์",
+   "text": "ห้องฝึก เลือก Radiance • ยิง BA ให้ร้อนแล้วกด Empower: เกจเต็มมีแสงไหล ยิงค้างได้ไม่ร้อนเกิน • หมดบัฟเกจไหลลงเป็น 0\nGIF: shots/light_empower_gauge.gif",
+   "kind": "สกิล / ตัวเลข",
+   "who": "สายแสง",
+   "status": "wait",
+   "created": "2026-11-18T08:00:43",
+   "updated": "2026-11-18T08:00:43",
+   "imgs": [],
+   "links": [],
+   "checks": [
+    {
+     "t": "เกจแสงไหลตอน Empower ดูชัด",
+     "ok": false
+    },
+    {
+     "t": "หมดบัฟเกจลดลงให้เห็น",
+     "ok": false
+    },
+    {
+     "t": "Sanctum 3/วิ/คริสตัล พอดี",
+     "ok": false
+    },
+    {
+     "t": "อัลติท่าสุดท้ายช้า 40% 2 วิ",
+     "ok": false
+    }
+   ],
+   "feedback": "",
+   "reply": ""
+  },
   {
    "id": 68,
    "title": "Shard Storm ขอบวงขึ้นตอนผลึกตก",

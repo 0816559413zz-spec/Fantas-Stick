@@ -926,10 +926,11 @@ function lightHeadPose(o){
   o.lgHeadBase=(o.lgHeadBase||new THREE.Quaternion()).copy(hb.quaternion);
   hb.quaternion.multiply(_lgHq.setFromAxisAngle(_lgHy,y));o.lgHeadSet=(o.lgHeadSet||new THREE.Quaternion()).copy(hb.quaternion);}
 // เกจร้อน BA รอบเป้าเล็ง (ผู้ใช้ 2026-11-17): โค้งด้านล่างเป้า ทอง→ส้ม→แดงตามความร้อน • ร้อนเกิน = แดงกะพริบ ลดลงจนชาร์จเสร็จ
-const LGHUD={h:0,a:0};
+const LGHUD={h:0,a:0,e:0};   // e = เพิ่งหมด Empower: เกจไหลลงช้า ๆ ให้เห็น
 function drawLightHud(x,y,L){
-  const tgt=(L[16]||0)/100,oh=(L[17]|0)===1,dt=1/60;LGHUD.h+=(tgt-LGHUD.h)*Math.min(1,dt*12);
-  LGHUD.a=clamp(LGHUD.a+((LGHUD.h>0.01||oh)?dt/0.15:-dt/0.4),0,1);if(LGHUD.a<=0)return;
+  const emp=(L[5]|0)===1,tgt=emp?1:(L[16]||0)/100,oh=(L[17]|0)===1,dt=1/60;if(LGHUD.em&&!emp)LGHUD.e=1;LGHUD.em=emp;if(emp||LGHUD.h<0.02)LGHUD.e=0;   // Empower (ผู้ใช้ 2026-11-18): เกจเต็มมีแสงไหล ไม่ร้อน • หมดบัฟ = เกจลดลงจนเป็น 0
+  LGHUD.h+=(tgt-LGHUD.h)*Math.min(1,dt*(LGHUD.e&&tgt<LGHUD.h?2.2:12));
+  LGHUD.a=clamp(LGHUD.a+((LGHUD.h>0.01||oh||emp)?dt/0.15:-dt/0.4),0,1);if(LGHUD.a<=0)return;
   const h=LGHUD.h,R=112,cX=x-52,lo=0.47,hi=-0.47,sp=lo-hi,T=performance.now();   // โค้งด้านขวาเป้า ห่างออกมา (ผู้ใช้ 2026-11-17) • ธีมแสง: ทองเรือง + แกนขาว • เปลี่ยนสีแค่ใกล้เต็ม/ร้อนเกิน
   const P=t=>[cX+Math.cos(t)*R,y+Math.sin(t)*R],dia=(t,r,c)=>{const [px,py]=P(t);cx.fillStyle=c;cx.beginPath();cx.moveTo(px,py-r*1.6);cx.lineTo(px+r,py);cx.lineTo(px,py+r*1.6);cx.lineTo(px-r,py);cx.closePath();cx.fill();};
   cx.save();cx.globalAlpha=LGHUD.a;cx.lineCap='round';
@@ -939,6 +940,7 @@ function drawLightHud(x,y,L){
   if(h>0.005){const t0=lo-sp*h;cx.shadowColor=col;cx.shadowBlur=oh?14:10;
     cx.strokeStyle=col;cx.lineWidth=4.5;cx.beginPath();cx.arc(cX,y,R,t0,lo);cx.stroke();
     cx.shadowBlur=0;cx.strokeStyle=oh?'rgba(255,220,200,0.9)':'rgba(255,250,230,0.95)';cx.lineWidth=1.6;cx.beginPath();cx.arc(cX,y,R,t0,lo);cx.stroke();
+    if(emp){const N=28;for(let k=0;k<N;k++){const a0=lo-sp*k/N,a1=lo-sp*(k+1)/N,w=0.5+0.5*Math.sin(k*0.55-T/90);cx.strokeStyle=`rgba(255,${235+20*w},${150+105*w},${0.25+0.7*w})`;cx.shadowColor='#fff3c0';cx.shadowBlur=6+10*w;cx.lineWidth=4.5;cx.beginPath();cx.arc(cX,y,R,a1,a0);cx.stroke();}cx.shadowBlur=0;}   // แสงไหลไปตามเกจตอน Empower
     cx.shadowColor=col;cx.shadowBlur=12;dia(t0,3.2+0.8*Math.sin(T/90),'#fffbe8');}   // ประกายเพชรที่ปลายเกจ
   cx.shadowBlur=0;dia(lo,2.6,'rgba(255,226,150,0.7)');   // คริสตัลเล็กปิดท้ายล่าง
   {const [ex,ey]=P(hi),tg=hi-Math.PI/2,c1=oh?'rgba(255,170,140,0.95)':'rgba(255,244,205,0.95)';cx.save();cx.shadowColor=oh?'#ff6a3a':'#ffd36a';cx.shadowBlur=8;cx.fillStyle=c1;   // ปลายบนด้านนอก (ผู้ใช้ 2026-11-17): เศษคริสตัลยื่นต่อจากปลาย + ดาวแสง 4 แฉกลอยเหนือขึ้นไป
