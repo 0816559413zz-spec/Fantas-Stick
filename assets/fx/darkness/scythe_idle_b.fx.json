@@ -1,0 +1,33 @@
+{
+ "v": 1,
+ "desc": "Darkness — เคียวลอยข้างตัว (พรีวิว) • พันด้ามแบบ B",
+ "tags": [
+  "darkness",
+  "preview",
+  "scythe"
+ ],
+ "pal": "arcane",
+ "dur": 6,
+ "layers": [
+  {
+   "id": "anchor",
+   "t": "mesh",
+   "shape": "disc",
+   "mat": "black",
+   "op": 0,
+   "at": 0,
+   "life": 6
+  },
+  {
+   "id": "scythe",
+   "t": "code",
+   "fn": "studio_darkness_scythe",
+   "at": 0,
+   "life": 6,
+   "args": {
+    "layer": "anchor",
+    "wrap": "B"
+   }
+  }
+ ]
+}

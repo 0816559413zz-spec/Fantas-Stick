@@ -1,5 +1,6 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
 
+- 2026-11-18 — **Darkness เคียวลอย (พรีวิวใน Studio):** โมเดล `assets/vfx/dark_scythe.glb` (Blender `assets/src/dark_scythe_build.py`, หัวลอกจาก ref, ทุกชิ้นเรียวแหลม, ใบชั้นบนดำ 0% แสง unlit, ชั้นล่างไล่ดำ→เทา) • VFX `studio/darkness-scythe.js` + `darkness/scythe_idle(_b,_c)` เส้นหมึกสสารมืด 3 แบบ • ส่งต่อ: `designs/darkness-scythe.md`
 - 2026-11-18 — **Darkness BA (ออกแบบ):** เคียวลอยเอง ฟัน 1.2 วิ ระยะ 220 ด้านหน้า โดนตรา = เงาฟันตาม 2 เท่า ตีคนบินสูงไม่ได้ • ยังเหลือดาเมจ/มุม/ท่า/VFX
 - 2026-11-18 — **Darkness Studio:** เก็บพรีวิวท่าพุ่งชิ่งและตรา X เวอร์ชันที่ผู้ใช้อนุมัติ พร้อม GIF และสรุปสไตล์ภาพใน `designs/darkness.md`
 

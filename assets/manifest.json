@@ -37,6 +37,10 @@
    "file": "vfx/radiant_sovereign.glb",
    "v": 3
   },
+  "dark_scythe": {
+   "file": "vfx/dark_scythe.glb",
+   "v": 1
+  },
   "radiant_sovereign_crystal": {
    "file": "vfx/radiant_sovereign_crystal.glb",
    "v": 1

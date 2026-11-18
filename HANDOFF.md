@@ -1,5 +1,7 @@
 # HANDOFF — Fantas Stick (was "Wizard Duel") (repo: Fantas-Stick)
 
+**Darkness เคียวลอย 2026-11-18 (พรีวิว Studio, ยังไม่ผูกเกม):** อ่าน `designs/darkness-scythe.md` ก่อน — โมเดล `assets/vfx/dark_scythe.glb` (สคริปต์ Blender `assets/src/dark_scythe_build.py`), VFX `studio/darkness-scythe.js` + `assets/fx/darkness/scythe_idle_c` (ล่าสุด ยังไม่ได้ให้ผู้ใช้ดู) • ref ใน `designs/darkness_ref/scythe_*`
+
 **ส่งต่อสำหรับ ChatGPT:** อ่าน `notes/CHATGPT-LIGHT-HANDOFF.md` สำหรับงาน VFX สาย Light ร่างปกติ
 
 **Darkness 2026-11-18:** บันทึกภาพพรีวิวท่าพุ่งชิ่งที่ผ่านรอบนี้และตรา X ขอบบิ่นที่อนุมัติไว้ใน `designs/darkness.md` พร้อม GIF ใน `designs/darkness_ref/` เปิด `studio.html?fx=darkness/dash_preview` เพื่อดู ชุดสกิลล่าสุดใช้เคียว ส่วน Night Waltz ระเบิดรอบตัวตามบันทึกอีกเซสชัน
