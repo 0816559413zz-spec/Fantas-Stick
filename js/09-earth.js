@@ -9,7 +9,7 @@
 const EARTH=6;   // ตัวเลขของสายดิน: ERV (ท่าพื้นฐาน/โล่/Dash) + v:{...} ของแต่ละสกิล — ปรับได้ใน tune.html / F8
 PATHS.push({id:'earth',n:'สายดิน',ic:'⛰️',col:'#c9a36a',d:'สถาปนิกสนามรบ — Stand หินต่อยแทนเรา ถือโล่ 300 สร้างกำแพง/เสา/เนิน แล้วผลักศัตรูให้ชนของแข็ง',
   combo:'Stonebreaker ผลักศัตรูชนกำแพง (กำแพงแผนที่ / Tectonic Crush / เสา Wrath / กำแพงโดเมน) = +20 ดาเมจ สตัน 2 วิ • Mud Swamp ช้า 50% ห้าม Dash แล้ว Crush กำแพงหนีบ 80 • Dust Burst บังสายตาศัตรู • Terra Auger ชาร์จ 3 ระดับ • โล่แตก = Stand หาย 15 วิ'});
-const ERV=PATHS[EARTH].v={sh:300,shDelay:3,shRegen:10,standOff:15,punch:10,punchR:500,punchCd:0.8,punchDelay:0.34,rockCd:0.35,cbHold:0.25,cbCharge:2,cbDmg:50,cbR:180,cbShardDmg:20,cbStun:0.5,cbCd:6,cbSlow:0.6,
+const ERV=PATHS[EARTH].v={sh:300,shDelay:3,shRegen:4.5,standOff:15,punch:10,punchR:500,punchCd:0.8,punchDelay:0.34,rockCd:0.35,cbHold:0.25,cbCharge:2,cbDmg:50,cbR:180,cbShardDmg:20,cbStun:0.5,cbCd:6,cbSlow:0.6,
   rampT:1.2,rampSp:500,rampDmg:15,rampStun:0.5,rampKnock:650,rampCd:8,slamR:150,slamDmg:20,slamStun:0.8,boostDist:400,boostR:120,boostKnock:900,boostCd:6,env:2.5};
 PATHS[EARTH].vn={sh:'โล่ Stand • HP',shDelay:'โล่ • เริ่มฟื้นหลังไม่ใช้ (วิ)',shRegen:'โล่ • ฟื้นต่อวิ',standOff:'โล่แตก • Stand หาย (วิ)',punch:'หมัด Stand • ดาเมจ',punchR:'หมัด Stand • ระยะล็อก',punchCd:'หมัด Stand • เว้น (วิ)',punchDelay:'หมัด Stand • หน่วงก่อนโดน (วิ)',rockCd:'หินเล็ก (Stand แตก) • เว้นยิง (วิ)',
   cbHold:'หมัดชาร์จ • กดค้างกี่วิเริ่มชาร์จ',cbCharge:'หมัดชาร์จ • ชาร์จ (วิ)',cbDmg:'หมัดชาร์จ • ดาเมจตรง',cbR:'เศษหมัดชาร์จ • ระยะ',cbShardDmg:'เศษหมัดชาร์จ • ดาเมจต่อเป้า',cbStun:'หมัดชาร์จ • สตัน (วิ)',cbCd:'หมัดชาร์จ • คูลดาวน์ (วิ)',cbSlow:'หมัดชาร์จ • ความเร็วเดินตอนชาร์จ (เท่า)',
