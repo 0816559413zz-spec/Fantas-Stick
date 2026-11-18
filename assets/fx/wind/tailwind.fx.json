@@ -375,7 +375,7 @@
         4.5
       ],
       "burst": 0,
-      "rate": 14,
+      "rate": 6,
       "from": "disc",
       "fr": 1.2,
       "dir": "aim",
@@ -411,7 +411,7 @@
         13.5
       ],
       "burst": 0,
-      "rate": 14,
+      "rate": 6,
       "from": "disc",
       "fr": 1.2,
       "dir": "aim",
@@ -447,7 +447,7 @@
         22.5
       ],
       "burst": 0,
-      "rate": 14,
+      "rate": 6,
       "from": "disc",
       "fr": 1.2,
       "dir": "aim",
@@ -483,7 +483,7 @@
         31.5
       ],
       "burst": 0,
-      "rate": 14,
+      "rate": 6,
       "from": "disc",
       "fr": 1.2,
       "dir": "aim",
@@ -519,7 +519,7 @@
         40.5
       ],
       "burst": 0,
-      "rate": 14,
+      "rate": 6,
       "from": "disc",
       "fr": 1.2,
       "dir": "aim",
@@ -555,7 +555,7 @@
         4.5
       ],
       "burst": 0,
-      "rate": 14,
+      "rate": 6,
       "from": "disc",
       "fr": 1.2,
       "dir": "aim",
@@ -591,7 +591,7 @@
         13.5
       ],
       "burst": 0,
-      "rate": 14,
+      "rate": 6,
       "from": "disc",
       "fr": 1.2,
       "dir": "aim",
@@ -627,7 +627,7 @@
         22.5
       ],
       "burst": 0,
-      "rate": 14,
+      "rate": 6,
       "from": "disc",
       "fr": 1.2,
       "dir": "aim",
@@ -663,7 +663,7 @@
         31.5
       ],
       "burst": 0,
-      "rate": 14,
+      "rate": 6,
       "from": "disc",
       "fr": 1.2,
       "dir": "aim",
@@ -699,7 +699,7 @@
         40.5
       ],
       "burst": 0,
-      "rate": 14,
+      "rate": 6,
       "from": "disc",
       "fr": 1.2,
       "dir": "aim",
@@ -735,7 +735,7 @@
         6.0
       ],
       "burst": 0,
-      "rate": 7,
+      "rate": 3,
       "from": "disc",
       "fr": 3.4,
       "dir": "aim",
@@ -771,7 +771,7 @@
         15.0
       ],
       "burst": 0,
-      "rate": 7,
+      "rate": 3,
       "from": "disc",
       "fr": 3.4,
       "dir": "aim",
@@ -807,7 +807,7 @@
         24.0
       ],
       "burst": 0,
-      "rate": 7,
+      "rate": 3,
       "from": "disc",
       "fr": 3.4,
       "dir": "aim",
@@ -843,7 +843,7 @@
         33.0
       ],
       "burst": 0,
-      "rate": 7,
+      "rate": 3,
       "from": "disc",
       "fr": 3.4,
       "dir": "aim",
@@ -879,7 +879,7 @@
         42.0
       ],
       "burst": 0,
-      "rate": 7,
+      "rate": 3,
       "from": "disc",
       "fr": 3.4,
       "dir": "aim",
@@ -915,7 +915,7 @@
         0.0
       ],
       "burst": 0,
-      "rate": 50,
+      "rate": 22,
       "from": "disc",
       "fr": 2.5,
       "dir": "tangent",

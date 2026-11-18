@@ -148,7 +148,7 @@
    "at": 0,
    "end": true,
    "life": 0.1,
-   "burst": 26,
+   "burst": 10,
    "att": "feet",
    "from": "ring",
    "fr": 6.5,
@@ -164,8 +164,8 @@
    ],
    "look": "smoke",
    "size": [
-    10,
-    14
+    7,
+    10
    ],
    "col": "#3a2c24",
    "c2": "#2a2420",

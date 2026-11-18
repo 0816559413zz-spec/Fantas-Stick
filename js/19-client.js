@@ -141,9 +141,12 @@ function myPos(){const v=VIEW.cur;return v?v.P.find(p=>p.id===NET.myId):null;}
 
 // ---------- เอฟเฟกต์ ----------
 // อนุภาค: x,y = พิกัดเกม (px), h = ความสูง (หน่วย 3D), g = แรงโน้มถ่วง (ติดลบ = ลอยขึ้น), smoke = ควัน (ไม่เรืองแสง)
+// ควันทั้งเกม (ผู้ใช้ 2026-11-18 "ลดควันเยอะ ๆ"): ทุก burst ที่เป็นควัน + เอฟเฟกต์ Studio look smoke + หมอก คูณ SMOKE_K
+const SMOKE_K=0.4;let _bskD=0;
 function burst(x,y,col,n,sp,life,size,o){
   o=o||{};
-  if(n>=6&&VFXB.k!==1){const k=VFXB.k;VFXB.k=1;try{burst(x,y,col,n,sp,life,size,o);}finally{VFXB.k=k;}return;}   // burst ใหญ่ = เอฟเฟกต์ครั้งเดียว ไม่หาร
+  if(o.smoke&&!_bskD){const m=n*SMOKE_K;n=Math.floor(m)+(Math.random()<m%1?1:0);if(n<=0)return;}
+  if(n>=6&&VFXB.k!==1){const k=VFXB.k;VFXB.k=1;_bskD++;try{burst(x,y,col,n,sp,life,size,o);}finally{VFXB.k=k;_bskD--;}return;}   // burst ใหญ่ = เอฟเฟกต์ครั้งเดียว ไม่หาร
   for(let i=0;i<n;i++){
     const a=o.a!==undefined?o.a+rnd(-(o.spread||0.5),o.spread||0.5):rnd(0,Math.PI*2),s=rnd(sp*0.2,sp);
     const vh=o.vh?rnd(o.vh[0],o.vh[1]):rnd(-1,3.5);

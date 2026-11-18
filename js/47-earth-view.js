@@ -755,7 +755,7 @@ function syncEarth(v,dt,now){
   const me=myPos();let inEnemy=false;
   for(const d of (v.ED||[])){const [,x,y,r,t,team,boom,ids]=d;
     if(boom){if(me&&me.al&&team!==me.tm&&ids&&ids.includes(NET.myId))inEnemy=true;continue;}   // ระเบิดแล้ว: ไม่มีควัน • บังตาเฉพาะคนที่อยู่ข้างในตอนระเบิด
-    for(let i=0,n=Math.ceil(r/240);i<n;i++){if(Math.random()<0.5)continue;const a=rnd(0,Math.PI*2),rr=r*Math.sqrt(Math.random());smoke(x+Math.cos(a)*rr,y+Math.sin(a)*rr,rnd(0.3,4),1,Math.random()<0.5?ECOL.dust:'#c9b38c',1.3,rnd(10,16),20);}   // ควันน้อยลงและอายุสั้น ระเบิดแล้วหายไว (ผู้ใช้ 2026-11-18)
+    for(let i=0,n=Math.ceil(r/240);i<n;i++){const a=rnd(0,Math.PI*2),rr=r*Math.sqrt(Math.random());smoke(x+Math.cos(a)*rr,y+Math.sin(a)*rr,rnd(0.3,4),1,Math.random()<0.5?ECOL.dust:'#c9b38c',1.3,rnd(10,16),20);}   // ควันน้อยลงและอายุสั้น ระเบิดแล้วหายไว (ผู้ใช้ 2026-11-18)
     if(me&&me.al&&Math.hypot(me.x-x,me.y-y)<r){if(team!==me.tm)inEnemy=true;}}
   earthFog(inEnemy);
   // เส้นขอบขาว: ติดฝุ่นศัตรู = เห็นทุกคน • คนที่ใช้ฝุ่น (ทีมเดียวกับฝุ่น) = เห็นศัตรูที่อยู่ในฝุ่นของเรา (ผู้ใช้ 2026-11-01)

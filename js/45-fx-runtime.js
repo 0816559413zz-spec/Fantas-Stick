@@ -120,7 +120,7 @@ function fxSpawn(S,I,w){const L=S.d,g=k=>fxG(L,k),V=(k,q)=>fxV(g(k),I,q||0),C=k=
     case 'screen':{const nm=g('near')||35;if(!nearMe(w[0],w[1],nm*20))break;const sk=V('shake');if(sk>0)shake(sk*Math.min(1.5,I.s));const fl=V('flash');if(fl>0)screenFlash(C('fcol'),fl,S.life);
       const rd=V('radial');if(rd>0)screenRadial(w[0],w[1],w[2],rd,S.life);const kk=V('kick');if(kk>0)screenKick(kk*Math.min(1.5,I.s));const hu=V('hurt');if(hu>0)screenHurt(hu);S.oneshot=1;break;}
     case 'sound':if(nearMe(w[0],w[1],1000))snd(g('name'),{x:w[0],y:w[1],vol:g('vol')});S.oneshot=1;break;
-    case 'emit':S.acc=0;{const n=fxN(I,V('burst'));if(n>0)vfxOnce(()=>fxEmit(S,I,n,w,0));}break;
+    case 'emit':S.acc=0;{const n=fxN(I,V('burst')*(L.look==='smoke'?SMOKE_K:1));if(n>0)vfxOnce(()=>fxEmit(S,I,n,w,0));}break;
     case 'mesh':fxMeshMake(S,I,w);break;
     case 'warp':fxWarpMake(S,I,w,g,V,C);break;
     case 'vol':fxVolMake(S,I,w,g,V);break;
@@ -137,7 +137,7 @@ function fxSpawn(S,I,w){const L=S.d,g=k=>fxG(L,k),V=(k,q)=>fxV(g(k),I,q||0),C=k=
       else SHAPES_Q.push({k:kd==='glyph'?'rune':'decal',x:w[0],y:w[1],h:kd==='glyph'?0.05:undefined,col:kd==='glyph'?C('col'):'#000000',s1:r,life:S.life,op:g('op')});
       break;}
     case 'debris':{const n=fxN(I,V('n'));if(g('kind')==='ice')iceChips(w[0],w[1],w[2],n,V('speed')*20*I.s,4);else rockChunks(w[0],w[1],w[2],n,V('speed')*Math.sqrt(I.s),{r:V('r')*20*I.s,s:g('size')*Math.sqrt(I.s),life:g('dlife')});S.oneshot=1;break;}
-    case 'mist':glacierMist(w[0],w[1],V('r')*20*I.s,fxN(I,g('n')),{h:w[2],out:g('out')*I.s});S.oneshot=1;break;
+    case 'mist':glacierMist(w[0],w[1],V('r')*20*I.s,fxN(I,g('n')*SMOKE_K),{h:w[2],out:g('out')*I.s});S.oneshot=1;break;
     case 'crown':iceBurst(w[0],w[1],V('r')*I.s,{life:S.life,hy:g('hy'),h:w[2],mist:g('mist')||undefined});S.oneshot=1;break;
     case 'geyser':fireGeyser(w[0],w[1],w[2],V('hgt')*I.s,V('w')*I.s,S.life,0);S.oneshot=1;break;
     case 'use':{const nm=g('fx');if(!nm)break;const p={};const P=g('p')||{};for(const q in P)p[q]=typeof P[q]==='string'?fxEval(P[q],I):P[q];
@@ -149,7 +149,7 @@ function fxSpawn(S,I,w){const L=S.d,g=k=>fxG(L,k),V=(k,q)=>fxV(g(k),I,q||0),C=k=
 function fxTick(S,I,k,dt){const L=S.d;if(S.oneshot)return;const g=q=>fxG(L,q),V=(q)=>fxV(g(q),I,k);
   switch(L.t){
     case 'light':{const w=fxPos(I,S,k);LREQ.push({x:tx(w[0]),y:w[2],z:tz(w[1]),col:fxCol(g('col'),I),int:V('int')*I.k,dist:V('dist')*Math.sqrt(I.s)});break;}
-    case 'emit':{const rate=V('rate');if(rate>0){S.acc+=rate*dt*I.cnt*I.k*(I.far?0.5:1);const n=Math.floor(S.acc);if(n>0){S.acc-=n;const w=fxPos(I,S,k),kq=VFXB.k;VFXB.k=VFXB.on?VFXB.mul:1;try{fxEmit(S,I,n,w,k);}finally{VFXB.k=kq;}}}break;}
+    case 'emit':{const rate=V('rate')*(L.look==='smoke'?SMOKE_K:1);if(rate>0){S.acc+=rate*dt*I.cnt*I.k*(I.far?0.5:1);const n=Math.floor(S.acc);if(n>0){S.acc-=n;const w=fxPos(I,S,k),kq=VFXB.k;VFXB.k=VFXB.on?VFXB.mul:1;try{fxEmit(S,I,n,w,k);}finally{VFXB.k=kq;}}}break;}
     case 'mesh':fxMeshTick(S,I,k,dt);break;
     case 'warp':fxWarpTick(S,I,k,g,V);break;
     case 'vol':fxVolTick(S,I,k,g,V);break;

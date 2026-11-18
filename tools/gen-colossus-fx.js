@@ -96,7 +96,7 @@ function build(V){
   add({id:'s3_volChest',t:'firevol',at:0.45,life:L3+0.15,att:'feet',pos:[0,0.6,0],kind:'pillar',hx:1.5,hz:1.05,h:4.4,hgt:{'0':0.2,'0.08':1},dis:{'0':0,'1':0},int:1.25,den:1.2,spd:1.2});
   add({id:'s3_volHead',t:'firevol',at:0.45,life:L3+0.15,att:'feet',pos:[0,4.2,0.1],kind:'pillar',hx:0.75,hz:0.75,h:2.6,hgt:{'0':0.2,'0.08':1},dis:{'0':0,'1':0},int:1.3,spd:1.6});
   add({id:'s3_volArmR',t:'firevol',at:0.45,life:L3+0.15,att:'feet',pos:[SH[0]+0.3,-0.3,0],kind:'pillar',hx:0.6,hz:0.6,h:4.6,hgt:{'0':0.2,'0.08':1},dis:{'0':0,'1':0},int:1.2,spd:1.3});
-  add({id:'s3_smoke',t:'emit',at:T3,life:L3,att:'feet',pos:[0,6.8,-0.3],burst:0,rate:4,from:'disc',fr:1.4,dir:'up',spread:0.4,speed:[0.8,1.6],plife:[1,1.6],look:'smoke',size:[8,12],col:'#5a4a40',c2:'#221c1a',gravity:-0.5,grow:1,drag:1.5,x:true});
+  add({id:'s3_smoke',t:'emit',at:T3,life:L3,att:'feet',pos:[0,6.8,-0.3],burst:0,rate:4,from:'disc',fr:1.4,dir:'up',spread:0.4,speed:[0.8,1.6],plife:[1,1.6],look:'smoke',size:[6,9],col:'#5a4a40',c2:'#221c1a',gravity:-0.5,grow:1,drag:1.5,x:true});
  }
  add({id:'s3_core',t:'halo',at:T3,life:L3,att:'feet',pos:[0,2.9,0.9],col:A?WHT:HOT,size:A?2.6:2,size0:2.4,k:A?1.3:1});
  add({id:'s3_coreG',t:'halo',at:T3,life:L3,att:'feet',pos:[0,2.9,0.6],col:O,size:6,size0:6,k:0.7});
@@ -131,7 +131,7 @@ function build(V){
   add(Object.assign({id:'s4_arm'+k,t:'mesh',at:3.6,life:0.3,att:'feet',shape:'model',model:'colossus_arm',pos:{'0':[s*SH[0],SH[1],0],'1':[s*SH[0]*1.1,SH[1]+0.9,0]},rot:s<0?hold:[0,0,-6],dis:fadeD,op:{'0':skinOp,'1':0.2},fade:0},skin));}
  add({id:'s4_fire',t:'firevol',at:3.55,life:0.35,att:'feet',pos:[0,-0.5,0],kind:'shell',hx:2.6,hz:2,h:7.5,hgt:{'0':0.6,'0.3':1},dis:{'0':0.1,'1':1},int:1.3,spd:2.4});
  add({id:'s4_embers',t:'emit',at:3.6,life:0.06,att:'feet',pos:[0,3,0],burst:70,from:'box',fr:2.4,fh:5,dir:'up',spread:0.8,speed:[1.5,4],plife:[0.6,1.2],look:'ember',size:[2,3.4],col:HOT,c2:'#ff3a0a',gravity:-1.5});
- add({id:'s4_smoke',t:'emit',at:3.6,life:0.06,att:'feet',pos:[0,4,0],burst:10,from:'box',fr:2,fh:3,dir:'up',spread:0.6,speed:[0.8,1.6],plife:[0.8,1.3],look:'smoke',size:[10,14],col:'#5a4a40',c2:'#221c1a',gravity:-0.5,grow:1,drag:1.5,x:true});
+ add({id:'s4_smoke',t:'emit',at:3.6,life:0.06,att:'feet',pos:[0,4,0],burst:5,from:'box',fr:2,fh:3,dir:'up',spread:0.6,speed:[0.8,1.6],plife:[0.8,1.3],look:'smoke',size:[7,10],col:'#5a4a40',c2:'#221c1a',gravity:-0.5,grow:1,drag:1.5,x:true});
  return {v:1,desc:(A?'Inferno Colossus แบบ A (สตอรี่บอร์ด #14): ร่างยักษ์เกราะพลังงานไฟโปร่ง ขอบเรืองขาวแบบภาพเรฟ + ไฟเลียตามผิว ท่อนล่างเป็นไฟ 3D':'Inferno Colossus แบบ B (สตอรี่บอร์ด #14): ร่างยักษ์ไฟลุกท่วม (ผิวลิ้นไฟ + ไฟ 3D อัดเต็มตัว) ขอบเรืองบาง มีควัน')+' • เกลียวไฟตอนกระโดด → ไฟระเบิดเหนือหัวก่อตัวเป็นร่าง → ถือลูกไฟ/ปา → ไหม้สลาย • ยังไม่ผูกกับเกม',
   tags:['fire','pyro','ult','colossus','storyboard14'],pal:'fire',dur:3.9,seed:14,layers:L};
 }
