@@ -75,12 +75,11 @@ function fcsForest(fallback){
   const hOf={pine_a:20.5,pine_b:26.3,pine_c:15.6,pine_d:31.1,pine_s:6.6,pine_la:24.3,pine_lb:19.5,snag_a:13,snag_b:9,autumn_a:11.4,autumn_b:9.8};
   for(const [x,y] of trees){const [id,h]=pickTree();put(id,x,y,h/hOf[id]);}
   // ผนังต้นไม้รอบขอบ (ไม่ชน): 2 แถว ห่าง ~3.3 ม. สนไกลเบา ๆ ปนสนจริง
-  const edge=(x,y)=>{if(!free(x,y,0)||nearP(x,y,sps,110))return;const q=R(),far=R()<0.42;
+  const edge=(x,y)=>{const q=R(),far=R()<0.42;
     if(far)put(q<0.5?'pine_la':'pine_lb',x,y,(0.55+R()*0.45),{lean:1});
     else{const [id,h]=pickTree();put(id==='autumn_a'||id==='autumn_b'?'pine_a':id,x,y,h/hOf[id==='autumn_a'||id==='autumn_b'?'pine_a':id]*(0.9+R()*0.3),{lean:1});}};
-  for(let row=0;row<2;row++){const d0=60+row*110;
-    for(let y=40;y<H;y+=62+R()*28)edge(d0+R()*60,y+R()*30);                       // ตะวันตก
-    for(let x=100;x<(FF_X1-3)*C;x+=62+R()*28){edge(x+R()*30,d0+R()*50);edge(x+R()*30,H-d0-R()*50);}}   // เหนือ/ใต้
+  // ผนังต้นไม้ขอบแผนที่ (ชนได้ — สร้างใน genFcs js/02-fcs.js) • สนไกลเบา ๆ ปนสนจริง
+  for(const q of F.props)if(q[0]==='te')edge(q[1],q[2]);
   // สนอ่อน (ต้นเล็กแซมใต้ร่ม)
   for(let i=0;i<70;i++){const [bx,by]=trees[(R()*trees.length)|0],a=R()*6.283,d=70+R()*160,x=bx+Math.cos(a)*d,y=by+Math.sin(a)*d;if(free(x,y,1))put('pine_s',x,y,0.7+R()*0.7,{lean:1});}
   // เฟิร์น+พุ่ม เป็นกลุ่มรอบโคนต้นไม้และกลางหย่อม
@@ -90,10 +89,19 @@ function fcsForest(fallback){
   scatter(['stone_a','stone_b','stone_c'],190,260,(id,x,y)=>put(id,x,y,0.8+R()*1.4));
   scatter(['stump_a'],14,300,(id,x,y)=>{if(free(x,y,1))put(id,x,y,0.7+R()*0.5);});
   scatter(['log_a','log_b','log_c'],26,300,(id,x,y)=>{if(free(x,y,1))put(id,x,y,0.8+R()*0.5);});
-  // หินก้อนใหญ่ตามไหล่เนิน/ขอบหน้าผา (ที่ชัน) + หินเล็กรอบ ๆ
-  let nb=0;for(let t=0;t<2600&&nb<44;t++){const x=60+R()*(FF_X1*C-120),y=60+R()*(H-120);if(!free(x,y,1)||slope(x,y)<0.28)continue;
-    const id=['boulder_a','boulder_b','boulder_c','boulder_d','boulder_a','cliff_a'][(R()*6)|0];put(id,x,y,0.7+R()*0.7);nb++;
-    for(let q=0;q<3;q++){const a=R()*6.283,d=30+R()*60,sx=x+Math.cos(a)*d,sy=y+Math.sin(a)*d;if(free(sx,sy,0))put(['stone_a','stone_b','stone_c'][q],sx,sy,1+R()*1.4);}}
+  // หินก้อนใหญ่ (ชนได้ — ตำแหน่ง/ชนิด/ขนาดจาก genFcs) + หินเล็กรอบ ๆ
+  for(const q of F.props){if(q[0]!=='bd')continue;const [,x,y,ty,sz]=q;put(['boulder_a','boulder_b','boulder_c','boulder_d','cliff_a'][ty],x,y,sz);
+    for(let k=0;k<4;k++){const a=R()*6.283,d=40+R()*70,sx=x+Math.cos(a)*d,sy=y+Math.sin(a)*d;if(free(sx,sy,0))put(['stone_a','stone_b','stone_c'][k%3],sx,sy,1+R()*1.6);}}
+  // พื้นมีชีวิต: ของเล็กเกลี่ยทั่วป่า (ไม่ชน) — กอหญ้า, พุ่มใบ, กิ่งไม้, เห็ด, หิน, เฟิร์น
+  const trailP=[[3,40],[4,36],[7,32],[10,28],[12,24],[14,19],[17,15],[20,13.5],[24,14],[28,14]].map(([a,b])=>[(a+0.5)*C,(b+0.5)*C]);
+  const dTrail=(x,y)=>{let m=1e9;for(let i=1;i<trailP.length;i++){const [ax,ay]=trailP[i-1],[bx,by]=trailP[i],dx=bx-ax,dy=by-ay,t=clamp(((x-ax)*dx+(y-ay)*dy)/(dx*dx+dy*dy),0,1);m=Math.min(m,Math.hypot(x-ax-t*dx,y-ay-t*dy));}return m;};
+  const area=(n,fn)=>{for(let i=0;i<n;i++){const x=20+R()*(FF_X1*C-40),y=20+R()*(H-40);if(!free(x,y,0))continue;if(x>(FF_X1-4)*C&&R()<0.75)continue;fn(x,y,dTrail(x,y));}};
+  area(500,(x,y,d)=>{if(d>40)put(R()<0.5?'fern_a':'fern_b',x,y,0.8+R()*1.0);});
+  area(260,(x,y,d)=>{if(d>30)put(['stone_a','stone_b','stone_c'][(R()*3)|0],x,y,0.7+R()*1.8);});
+  area(60,(x,y,d)=>{if(d>60&&free(x,y,1))put(R()<0.5?'shrub_a':'shrub_b',x,y,0.9+R()*0.7);});
+  area(30,(x,y,d)=>{if(d>70&&free(x,y,1))put(['log_b','log_c','stump_a'][(R()*3)|0],x,y,0.8+R()*0.5);});
+  area(40,(x,y,d)=>{if(d>50)put('pine_s',x,y,0.5+R()*0.6,{lean:1});});
+  ffDetail(W,R,area,trees,free);
   // ---------- โหลดโมเดลแล้วสร้าง InstancedMesh ----------
   (typeof gltfLoader==='function'?gltfLoader():Promise.reject('no loader')).then(L=>L.loadAsync('assets/mapkit/gorge.glb?v=9')).then(gltf=>{
     if(!W.parent)return;
@@ -109,6 +117,41 @@ function fcsForest(fallback){
     for(const o of FF.fb){if(!o)continue;W.remove(o);if(o.geometry)o.geometry.dispose();}FF.fb=[];   // ลบต้นไม้กรวยเดิมที่ใช้ชั่วคราว
     if(typeof gl!=='undefined')gl.shadowMap.needsUpdate=true;
   }).catch(err=>console.warn('fcs forest',err));
+}
+// รวมรูปทรงหลายชิ้น (ไม่มี index) เป็นก้อนเดียว พร้อมสีจุดยอด: parts = [[geometry, สี, Matrix4, สีปลาย?]]
+function ffMerge(parts){
+  const P=[],N=[],Cl=[],c=new THREE.Color(),c2=new THREE.Color();
+  for(const [g0,col,m,tip] of parts){const g=(g0.index?g0.toNonIndexed():g0.clone()).applyMatrix4(m);g.computeVertexNormals();
+    const p=g.attributes.position,n=g.attributes.normal;g.computeBoundingBox();const y0=g.boundingBox.min.y,y1=g.boundingBox.max.y;c.set(col);if(tip)c2.set(tip);
+    for(let i=0;i<p.count;i++){P.push(p.getX(i),p.getY(i),p.getZ(i));N.push(n.getX(i),n.getY(i),n.getZ(i));const t=tip?(p.getY(i)-y0)/Math.max(1e-4,y1-y0):0;Cl.push(c.r+(c2.r-c.r)*t,c.g+(c2.g-c.g)*t,c.b+(c2.b-c.b)*t);}g.dispose();}
+  const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(P,3));g.setAttribute('normal',new THREE.Float32BufferAttribute(N,3));g.setAttribute('color',new THREE.Float32BufferAttribute(Cl,3));return g;
+}
+// ของเล็กที่สร้างในโค้ด (InstancedMesh): กอหญ้าแห้ง/เขียว, พุ่มใบเขียวเข้ม, กิ่งไม้ร่วง, เห็ดเป็นกลุ่ม
+function ffDetail(W,R,area,trees,free){
+  const M=new THREE.Matrix4(),q=new THREE.Quaternion(),e=new THREE.Euler(),v=new THREE.Vector3(),sv=new THREE.Vector3(),col=new THREE.Color(),g=new THREE.Group();
+  const gr=mulberry(31),tri=new THREE.BufferGeometry();tri.setAttribute('position',new THREE.Float32BufferAttribute([-0.035,0,0,0.035,0,0,0,1,0],3));
+  const tuft=ffMerge(Array.from({length:9},(_,i)=>{const a=i/9*6.283+gr(),h=0.35+gr()*0.45,lean=0.25+gr()*0.5;e.set(Math.sin(a)*lean,a,Math.cos(a)*lean*0.3);q.setFromEuler(e);
+    return [tri,'#3a3f22',new THREE.Matrix4().compose(v.set(Math.cos(a)*0.06,0,Math.sin(a)*0.06),q,sv.set(1,h,1)),'#a8a46a'];}));
+  const bush=ffMerge(Array.from({length:6},(_,i)=>[new THREE.IcosahedronGeometry(0.45+gr()*0.3,0),i<2?'#2c3a22':'#3a4a2a',new THREE.Matrix4().compose(v.set((gr()-0.5)*0.9,0.35+gr()*0.4,(gr()-0.5)*0.9),q.identity(),sv.set(1,0.8,1))]));
+  const twig=ffMerge([[new THREE.CylinderGeometry(0.03,0.045,1,5),'#4a3a28',new THREE.Matrix4().makeRotationZ(Math.PI/2)],[new THREE.CylinderGeometry(0.015,0.025,0.35,4),'#4a3a28',new THREE.Matrix4().compose(v.set(0.15,0.06,0.08),q.setFromEuler(e.set(0.6,0.8,1.0)),sv.set(1,1,1))]]);
+  const mush=ffMerge([0,1,2].flatMap(i=>{const x=(gr()-0.5)*0.3,z=(gr()-0.5)*0.3,s=0.6+gr()*0.6;return [[new THREE.CylinderGeometry(0.02*s,0.025*s,0.1*s,5),'#d8ceb4',new THREE.Matrix4().makeTranslation(x,0.05*s,z)],[new THREE.ConeGeometry(0.07*s,0.05*s,7),i?'#8a4a2a':'#b0562e',new THREE.Matrix4().makeTranslation(x,0.115*s,z)]];}));
+  const mat=new THREE.MeshStandardMaterial({vertexColors:true,roughness:0.95,side:THREE.DoubleSide});
+  const matF=new THREE.MeshStandardMaterial({vertexColors:true,roughness:0.9,flatShading:true});
+  const make=(geo,m,L,shadow)=>{if(!L.length)return;const im=new THREE.InstancedMesh(geo,m,L.length);
+    L.forEach((o,i)=>{e.set(o.tx||0,o.r,o.tz||0);q.setFromEuler(e);sv.set(o.s,o.sy||o.s,o.s);M.compose(v.set(tx(o.x),GY(o.x,o.y)+(o.dy||0),tz(o.y)),q,sv);im.setMatrixAt(i,M);col.setHSL(o.h||0,o.sat||0,o.l||1);im.setColorAt(i,col);});
+    im.castShadow=!!shadow;im.receiveShadow=true;g.add(im);};
+  const T=[],B=[],K=[],U=[];
+  // กอหญ้า: เป็นหย่อม ๆ (จุดศูนย์กลางสุ่ม + กระจายรอบ) โทนเขียวหม่นถึงเหลืองแห้ง • ไม่ขึ้นกลางทางดิน
+  const tc=[];area(140,(x,y,d)=>tc.push([x,y]));
+  for(const [cx,cy] of tc){const n=8+(R()*22|0),sp=40+R()*90;for(let i=0;i<n;i++){const a=R()*6.283,d=Math.sqrt(R())*sp,x=cx+Math.cos(a)*d,y=cy+Math.sin(a)*d;if(!free(x,y,0))continue;
+    T.push({x,y,s:0.7+R()*0.9,sy:0.6+R()*1.1,r:R()*6.283,tx:(R()-0.5)*0.2,tz:(R()-0.5)*0.2,h:0,sat:0,l:0.75+R()*0.45});}}
+  area(700,(x,y,d)=>{if(d>25)T.push({x,y,s:0.6+R()*0.8,sy:0.5+R(),r:R()*6.283,l:0.7+R()*0.4});});
+  // พุ่มใบ: รอบโคนต้นไม้บางต้น + กลางหย่อม
+  for(let i=0;i<180;i++){const [bx,by]=trees[(R()*trees.length)|0],a=R()*6.283,d=40+R()*120,x=bx+Math.cos(a)*d,y=by+Math.sin(a)*d;if(free(x,y,1))B.push({x,y,s:0.7+R()*0.9,sy:0.6+R()*0.6,r:R()*6.283,l:0.8+R()*0.35,dy:-0.1});}
+  area(380,(x,y,d)=>{if(d>35)K.push({x,y,s:0.6+R()*0.9,r:R()*6.283,dy:0.03,l:0.8+R()*0.3});});
+  area(90,(x,y,d)=>{if(d>40)U.push({x,y,s:0.8+R()*0.8,r:R()*6.283,l:1});});
+  make(tuft,mat,T,0);make(bush,matF,B,1);make(twig,matF,K,0);make(mush,matF,U,0);
+  W.add(g);
 }
 // หมอก/แสงเฉพาะในป่า: ผสมตามตำแหน่งกล้อง (เรียกทุกเฟรมจาก sgSync)
 function fcsForestTick(){

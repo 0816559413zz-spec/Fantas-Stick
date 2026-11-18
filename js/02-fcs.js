@@ -35,6 +35,29 @@ function genFcs(){
     else if(t==='cr'){obs.push({x:cx,y:cy,r:14,k:'fcc',hgt:1.2,s:0});props.push(['cr',cx,cy]);}
     else if(t==='pl'){obs.push({x:cx,y:cy,r:13,k:'fcp',hgt:6,s:0});props.push(['pl',cx,cy]);}
   }
+  // ป่าทึบ (เฟส 1, ช่อง x<28): ต้นไม้/หินชนได้เพิ่มจากที่ผู้ใช้วาง (ผู้ใช้ 2026-11-18 "denser and solid") — สุ่มด้วย seed คงที่ ทุกเครื่องได้ผลเดียวกัน
+  // props: ['tr',x,y,1] ต้นในป่าเพิ่ม • ['te',x,y] ผนังต้นไม้ขอบแผนที่ • ['bd',x,y,ชนิด,ขนาด] หินก้อนใหญ่ — ภาพอยู่ js/28-fcs-forest.js
+  {const R=mulberry(918273),X1=28*C,hAt=(px,py)=>{const fx=clamp(px/c,0,nx-1.001),fy=clamp(py/c,0,ny-1.001),i=fx|0,j=fy|0,u=fx-i,v=fy-j,k=j*nx+i;return (g[k]*(1-u)+g[k+1]*u)*(1-v)+(g[k+nx]*(1-u)+g[k+nx+1]*u)*v;};
+   const slope=(x,y)=>Math.hypot(hAt(x+30,y)-hAt(x-30,y),hAt(x,y+30)-hAt(x,y-30))/3;
+   const spL=[];for(const t of ['A','B'])for(const k in sp[t])spL.push(sp[t][k]);
+   const trail=[[3,40],[4,36],[7,32],[10,28],[12,24],[14,19],[17,15],[20,13.5],[24,14],[28,14]].map(([a,b])=>[(a+0.5)*C,(b+0.5)*C]);
+   const dSeg=(x,y)=>{let m=1e9;for(let i=1;i<trail.length;i++){const [ax,ay]=trail[i-1],[bx,by]=trail[i],dx=bx-ax,dy=by-ay,t=clamp(((x-ax)*dx+(y-ay)*dy)/(dx*dx+dy*dy),0,1);m=Math.min(m,Math.hypot(x-ax-t*dx,y-ay-t*dy));}return m;};
+   const solid=props.map(q=>[q[1],q[2],q[0]==='tr'?100:70]);
+   const ok=(x,y,gap)=>x>20&&y>20&&x<X1-30&&y<H-20&&!wc(Math.floor(x/C),Math.floor(y/C))&&!wc(Math.floor((x+25)/C),Math.floor(y/C))&&!wc(Math.floor((x-25)/C),Math.floor(y/C))
+     &&!spL.some(s=>Math.hypot(s.x-x,s.y-y)<300)&&!cores.some(k=>Math.hypot(k.x-x,k.y-y)<330)&&!bw.some(b=>x>b.x-60&&x<b.x+b.w+60&&y>b.y-60&&y<b.y+b.d+60)
+     &&!solid.some(([sx,sy,r])=>Math.hypot(sx-x,sy-y)<Math.max(r,gap));
+   const add=(k,x,y,r,hg,extra)=>{obs.push({x,y,r,k,hgt:hg,s:0});props.push([k==='fcb2'?'bd':k==='fce'?'te':'tr',x,y,...(extra||[])]);solid.push([x,y,r+60]);};
+   // ผนังต้นไม้รอบขอบ 2 แถว
+   for(let row=0;row<2;row++){const d0=40+row*90;
+     for(let y=60;y<H-40;y+=70+R()*30){const x=d0+R()*50;if(ok(x,y,70))add('fce',x,y,12,7);}
+     for(let x=120;x<X1-150;x+=70+R()*30){for(const y of [d0+R()*40,H-d0-R()*40])if(ok(x,y,70))add('fce',x,y,12,7);}}
+   // ต้นไม้เพิ่มในป่า (ห่างกัน ≥ 5 ม., เว้นทางดินกว้าง ~6 ม.)
+   for(let t=0,n=0;t<6000&&n<170;t++){const x=40+R()*(X1-80),y=40+R()*(H-80);if(dSeg(x,y)<120||!ok(x,y,100))continue;add('fct',x,y,10,7,[1]);n++;}
+   // หินก้อนใหญ่ตามไหล่เนิน (ชนได้) • ชนิด 0-3 boulder_a-d, 4 cliff_a • รัศมีชน ≈ ครึ่งกว้างโมเดล × ขนาด
+   const BD=[[2.3,2.7],[1.3,1.6],[1.1,1.3],[0.9,1.2],[3.9,5.4]];
+   for(let t=0,n=0;t<4000&&n<46;t++){const x=60+R()*(X1-120),y=60+R()*(H-120);if(slope(x,y)<0.28||dSeg(x,y)<90)continue;
+     const ty=[0,1,2,3,0,4][(R()*6)|0],s=0.7+R()*0.6,r=Math.max(14,BD[ty][0]*s*20*0.75);if(!ok(x,y,r+50))continue;add('fcb2',x,y,r,BD[ty][1]*s,[ty,+s.toFixed(3)]);n++;}
+  }
   for(const k of cores)obs.push({x:k.x,y:k.y,r:40,k:'fck',hgt:6,s:0});   // ตัวแกน (คริสตัล) ชนได้
   // เฟส: โซนชนิด "เฟส" ชื่อ "เฟส N" หลายกรอบรวมกัน = พื้นที่เล่นของเฟส N
   const phases=[];
