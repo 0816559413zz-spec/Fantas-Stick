@@ -346,6 +346,7 @@ function lifesteal(p,amt){if(p.buffs.life&&p.alive&&!p.downed)healT(p,amt*p.buff
 
 function damage(t,amt,srcId,kind,noFlash=false){
   if(G.mode==='train'&&G.tr&&G.tr.god&&G.players[t.id]===t)return;   // ห้องฝึก: อมตะ
+  if(devGod(t))return;   // Dev Mode อมตะ (js/77)
   const src=srcId!=null?G.players[srcId]:null;
   if(src&&kind!=='burn')amt*=src.buffs.dmg;
   if(src&&src.fheat>0&&kind!=='burn')amt*=pyroHeatDmg(src);

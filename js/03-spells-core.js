@@ -101,7 +101,7 @@ function frostSlow(t){
   if(t.fslUltT>0)s=MIRROR.v.slow;
   return Math.min(Math.max(80,MIRROR.v.slow),s);
 }
-function moveMul(t){if(t.mlCast>0)return 0;let m=1;const fs=frostSlow(t);if(fs>0)m*=1-fs/100;if(t.chl>0)m*=1-0.1*t.chl;if(t.slowT>0)m*=t.slowF;if(t.haste>0)m*=t.hasteF;if(t.blaze>0)m*=BLAZEF.v.spdUp;if(t.fheat>0)m*=pyroHeatSpd(t);if(t.wtlT>0)m*=W_VO.tlUp;return Math.max(t.wbsT>0?0.08:0.25,m)*(t.natureSlow>G.time?2/3:1);}
+function moveMul(t){if(t.mlCast>0)return 0;let m=1;const fs=frostSlow(t);if(fs>0)m*=1-fs/100;if(t.chl>0)m*=1-0.1*t.chl;if(t.slowT>0)m*=t.slowF;if(t.haste>0)m*=t.hasteF;if(t.blaze>0)m*=BLAZEF.v.spdUp;if(t.fheat>0)m*=pyroHeatSpd(t);if(t.wtlT>0)m*=W_VO.tlUp;return Math.max(t.wbsT>0?0.08:0.25,m)*(t.natureSlow>G.time?2/3:1)*(t.devSpd||1);}
 // Burning (สายไฟ): สูงสุด BRN_MAX ชั้น • เผา 0.3/วิ/ชั้น (แค่ดาเมจเสริม) • ไม่โดนเพิ่ม 6 วิ แล้วลดทีละ 1 ชั้นทุก 1 วิ (เนิร์ฟ 2026-10-27: เดิม 2/วิ, 10 วิ)
 const BRN_MAX=6;
 function addBurn(t,n,src){if(t.dead)return;const was=t.brn|0;t.brn=Math.min(BRN_MAX,was+n);t.brnT=6;t.brnSrc=src;if(!(t.brnTick>0))t.brnTick=0.5;if(t.brn>was)emit({k:'efx',z:'brn',x:t.x,y:t.y,h:cH(t)+0.8,n:t.brn});}

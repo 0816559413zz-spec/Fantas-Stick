@@ -523,3 +523,18 @@ body.crOpenB .mver{display:none}
 .tuRow .tuR{padding:0;visibility:hidden}.tuRow.ch .tuR{visibility:visible}
 .tuFoot{display:flex;gap:6px}.tuFoot .pri{flex:1}
 #tuMsg{color:var(--mute);font-size:11px;min-height:2.6em}
+#devBtn{position:fixed;left:12px;top:60px;z-index:5;opacity:.75}
+#devPanel{position:fixed;left:12px;top:60px;z-index:6;width:330px;max-height:calc(100vh - 80px);overflow-y:auto;scrollbar-width:thin;padding:16px 18px;margin:0}
+#devPanel h2{font-size:18px;margin:0 0 6px;text-align:center}
+#devPanel #devPos{font:12px/1.5 monospace;color:var(--mute);text-align:center;margin-bottom:4px}
+#devPanel .trs{font-size:12px;letter-spacing:2px;color:var(--gold);margin:12px 0 6px}
+#devPanel .trt{display:flex;justify-content:space-between;align-items:center;width:100%;margin:4px 0;padding:6px 10px;font-size:13px;text-align:left}
+#devPanel .trt b{font-size:11px;padding:1px 8px;border-radius:2px;background:#3a2a2a;color:#e99}
+#devPanel .trt.on b{background:#244a2c;color:#9f9}
+#devPanel .trg{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:5px}
+#devPanel .trg button{padding:6px 4px;font-size:12px}
+#devPanel .trn{display:flex;gap:5px;margin-bottom:5px}
+#devPanel .trn button{flex:1;padding:4px;font-size:12px}
+#devPanel .trn button.on,#devPanel .trg button.on{border-color:var(--gold);background:rgba(217,180,90,.25)}
+#devPanel .trw{width:100%;margin-top:4px}
+#devPanel small{display:block;color:var(--mute);font-size:11px;margin-top:8px;text-align:center}

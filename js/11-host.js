@@ -219,6 +219,7 @@ function respawn(p){
 // ---------- ลูปหลักฝั่งโฮสต์ ----------
 function hostTick(dt){
   const g=G;
+  if(DEV.on){dt=devDt(dt);if(dt<0)return;devTick();}   // Dev Mode (js/77): หยุดโลก/สโลว์/โกง
   // จบเกมแบบสโลว์ (ผู้ใช้ 2026-10-22 "เวลาหมดเกมช้าลง จอมืดจาง ๆ แล้ว VICTORY/DEFEAT ขึ้น"): endMatch ตั้ง endT → โลกเดินช้า 0.3× จนหมด แล้วค่อยจบจริง
   if(g.endT>0){g.endT-=dt;dt*=0.3;if(g.endT<=0){matchOver();return;}}
   g.time+=dt;
@@ -226,7 +227,7 @@ function hostTick(dt){
   if(g.ph==='count'){g.cdT-=dt;if(g.cdT<=0)g.ph='play';}
   const acting=g.ph==='play';
   // botThink = สมองบอท + หาทาง (js/15-botnav) • พังที่ผู้เล่นคนเดียว = ข้ามคนนั้นเฟรมนี้ (เดิมทั้งเฟรมหยุด → ทุกคนยืนค้าง เอฟเฟกต์เล่นอยู่กับที่ ผู้ใช้ 2026-11-09)
-  for(const p of plist()){try{if(p.bot)botThink(p,dt);updatePlayer(p,dt,acting);}catch(e){if((p._errN=(p._errN|0)+1)%300===1)console.error('player',p.name,e);}}
+  for(const p of plist()){try{if(p.bot){if(devFreeze())p.inp=emptyInput();else botThink(p,dt);}updatePlayer(p,dt,acting);}catch(e){if((p._errN=(p._errN|0)+1)%300===1)console.error('player',p.name,e);}}
   if(acting){
     updateProjectiles(dt);updateSpells(dt);updateMins(dt);
     if(g.mode==='coop'||g.mode==='train')updateEnemies(dt);
