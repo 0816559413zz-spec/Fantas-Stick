@@ -67,9 +67,9 @@ function fcsForest(fallback){
   const gy=(x,y)=>GY(x,y),slope=(x,y)=>Math.hypot(gy(x+30,y)-gy(x-30,y),gy(x,y+30)-gy(x,y-30))/3;
   const cores=F.cores.map(k=>[k.x,k.y]),sps=[];for(const t of ['A','B'])for(const k in F.sp[t])sps.push([F.sp[t][k].x,F.sp[t][k].y]);
   const nearP=(x,y,L,d)=>L.some(q=>(q[0]-x)**2+(q[1]-y)**2<d*d);
-  const crates=F.props.filter(q=>q[0]==='cr'||q[0]==='pl').map(q=>[q[1],q[2]]);
+  const crates=F.props.filter(q=>q[0]==='cr'||q[0]==='pl').map(q=>[q[1],q[2]]),ruinO=MAPS.fcs.obs.filter(o=>o.k==='fcr');
   const items={};const put=(id,x,y,s,extra)=>{(items[id]=items[id]||[]).push(Object.assign({x,y,s,r:R()*6.283},extra||{}));};
-  const free=(x,y,big)=>x>0&&y>0&&x<FF_X1*C&&y<H&&!wallAt(x,y)&&!(big&&(nearP(x,y,cores,180)||nearP(x,y,sps,150)))&&!nearP(x,y,crates,big?60:28);
+  const free=(x,y,big)=>x>0&&y>0&&x<FF_X1*C&&y<H&&!wallAt(x,y)&&!(big&&(nearP(x,y,cores,180)||nearP(x,y,sps,150)))&&!nearP(x,y,crates,big?60:28)&&!ruinO.some(o=>(o.x-x)**2+(o.y-y)**2<(o.r+(big?50:14))**2);
   // ต้นไม้ชนได้ (ตำแหน่งเดิมของผู้ใช้): สนหลายพันธุ์ + ต้นใบแดง/ไม้ตายนิดหน่อย
   const pickTree=()=>{const q=R();return q<0.27?['pine_a',13+R()*5]:q<0.5?['pine_b',15+R()*5]:q<0.7?['pine_c',10+R()*4]:q<0.84?['pine_d',17+R()*6]:q<0.875?['autumn_a',6+R()*2]:q<0.9?['autumn_b',6+R()*2]:q<0.95?['snag_a',8+R()*3]:['snag_b',7+R()*2];};
   const hOf={pine_a:20.5,pine_b:26.3,pine_c:15.6,pine_d:31.1,pine_s:6.6,pine_la:24.3,pine_lb:19.5,snag_a:13,snag_b:9,autumn_a:11.4,autumn_b:9.8};
@@ -102,6 +102,7 @@ function fcsForest(fallback){
   area(30,(x,y,d)=>{if(d>70&&free(x,y,1))put(['log_b','log_c','stump_a'][(R()*3)|0],x,y,0.8+R()*0.5);});
   area(40,(x,y,d)=>{if(d>50)put('pine_s',x,y,0.5+R()*0.6,{lean:1});});
   ffDetail(W,R,area,trees,free);
+  fcsRuin(W,F);
   // ---------- โหลดโมเดลแล้วสร้าง InstancedMesh ----------
   (typeof gltfLoader==='function'?gltfLoader():Promise.reject('no loader')).then(L=>L.loadAsync('assets/mapkit/gorge.glb?v=9')).then(gltf=>{
     if(!W.parent)return;
@@ -152,6 +153,40 @@ function ffDetail(W,R,area,trees,free){
   area(90,(x,y,d)=>{if(d>40)U.push({x,y,s:0.8+R()*0.8,r:R()*6.283,l:1});});
   make(tuft,mat,T,0);make(bush,matF,B,1);make(twig,matF,K,0);make(mush,matF,U,0);
   W.add(g);
+}
+// ซากปราสาทรอบจุดยึด 1 (ตำแหน่ง/ความสูงจาก genFcs js/02-fcs.js — ตรงกับวงชน): ก้อนหินก่อเรียงสลับแนว ยอดแหว่ง มอสเกาะ + หอกลมพัง + กองหินหล่น
+function fcsRuin(W,F){
+  const R=mulberry(4242),M=new THREE.Matrix4(),q=new THREE.Quaternion(),e=new THREE.Euler(),v=new THREE.Vector3(),sv=new THREE.Vector3(),c=new THREE.Color();
+  const B=[],D=[];   // B = ก้อนหินกล่อง {p,ry,s,col,rx,rz} • D = ก้อนโค้งของหอ/เสา
+  const stoneC=()=>{const t=R();c.setHSL(0.28+R()*0.1,0.05+R()*0.05,0.17+R()*0.09);if(t<0.3)c.lerp(new THREE.Color('#3e4a26'),0.35+R()*0.35);return c.clone();};
+  const moss=(col,y,h)=>{if(R()<(y<0.6?0.55:y>h-0.7?0.4:0.12))col.lerp(new THREE.Color('#3f4d22'),0.35+R()*0.4);return col;};
+  const CH=0.55;
+  for(const p of F.props){
+    if(p[0]==='ru'){const [,x1,y1,x2,y2,th,hs]=p,X1=tx(x1),Z1=tz(y1),X2=tx(x2),Z2=tz(y2),L=Math.hypot(X2-X1,Z2-Z1),ry=-Math.atan2(Z2-Z1,X2-X1),n=hs.length,cw=L/n,T=th*S3;
+      for(let i=0;i<n;i++)for(let k=0;k*CH<hs[i]-0.01;k++){
+        const top=(k+1)*CH>=hs[i]-0.01;if(top&&R()<0.25)continue;   // ยอดแหว่ง
+        const off=(k%2)*0.5*cw,t=(i+0.5)/n,bx=X1+(X2-X1)*t+Math.cos(-ry)*(off-0.25*cw)*0,bz=Z1+(Z2-Z1)*t;
+        // อิฐสลับแนว: ชั้นคี่เลื่อนครึ่งก้อน (ตัดปลายไม่ให้ยื่นเลยกำแพง)
+        const u=((i+0.5)*cw+(k%2?0.5*cw:0))/L;if(u>1)continue;const px=X1+(X2-X1)*u,pz=Z1+(Z2-Z1)*u,base=GY(x1+(x2-x1)*u,y1+(y2-y1)*u);
+        const w=cw*(k%2&&(i===n-1)?0.5:0.97),jit=top?0.12:0.04;
+        B.push({x:px+(R()-0.5)*0.05,y:base+k*CH+CH/2,z:pz+(R()-0.5)*0.05,ry:ry+(R()-0.5)*jit,rx:(R()-0.5)*jit,sx:w*(top?0.75+R()*0.25:1),sy:CH*0.96,sz:T*(0.9+R()*0.14),col:moss(stoneC(),k*CH,hs[i])});}
+      // ฐานกว้างกว่านิดหน่อย (ฐานรากโผล่)
+      for(let i=0;i<n;i++){const u=(i+0.5)/n;B.push({x:X1+(X2-X1)*u,y:GY(x1+(x2-x1)*u,y1+(y2-y1)*u)+0.12,z:Z1+(Z2-Z1)*u,ry,rx:0,sx:cw*1.02,sy:0.3,sz:T*1.35,col:moss(stoneC(),0,1)});}}
+    else if(p[0]==='rt'){const [,x,y,r,h]=p,X=tx(x),Z=tz(y),G=GY(x,y),rr=r*S3,pillar=rr<1;
+      if(pillar){let hh=0;for(let k=0;hh<h-0.05;k++){const dh=Math.min(0.7,h-hh);D.push({x:X+(R()-0.5)*0.04,y:G+hh+dh/2,z:Z,ry:R()*6.3,rx:(R()-0.5)*0.03,sx:rr*0.95,sy:dh*0.97,sz:rr*0.95,col:moss(stoneC(),hh,h)});hh+=dh;}
+        B.push({x:X,y:G+0.15,z:Z,ry:R(),rx:0,sx:rr*2.6,sy:0.3,sz:rr*2.6,col:stoneC()});}
+      else{const nb=Math.max(8,Math.round(6.283*rr/1.1));for(let k=0;k*CH<h;k++)for(let i=0;i<nb;i++){
+          const a=(i+(k%2)*0.5)/nb*6.283,hk=h*(0.55+0.45*Math.cos(a-0.8+Math.sin(i*1.7)*0.3));if(k*CH>hk)continue;   // ยอดหอพังเป็นแนวเฉียง
+          B.push({x:X+Math.cos(a)*rr*0.86,y:G+k*CH+CH/2,z:Z+Math.sin(a)*rr*0.86,ry:-a,rx:(R()-0.5)*0.04,sx:rr*0.34,sy:CH*0.96,sz:6.283*rr/nb*0.97,col:moss(stoneC(),k*CH,hk)});}
+        D.push({x:X,y:G+0.2,z:Z,ry:0,rx:0,sx:rr*0.8,sy:0.4,sz:rr*0.8,col:stoneC()});}}
+    else if(p[0]==='rr'){const [,x,y,s]=p,n=3+(R()*5|0);for(let i=0;i<n;i++){const a=R()*6.283,d=R()*1.4*s,bx=x+Math.cos(a)*d*20,by=y+Math.sin(a)*d*20,w=(0.35+R()*0.5)*s;
+      B.push({x:tx(bx),y:GY(bx,by)+w*0.25,z:tz(by),ry:R()*6.3,rx:(R()-0.5)*0.6,sx:w*1.3,sy:w*0.6,sz:w,col:moss(stoneC(),0,1)});}}
+  }
+  const mk=(geo,L)=>{if(!L.length)return;const m=new THREE.MeshStandardMaterial({roughness:0.95,metalness:0,flatShading:true});
+    const im=new THREE.InstancedMesh(geo,m,L.length);L.forEach((o,i)=>{e.set(o.rx,o.ry,o.rz||0);q.setFromEuler(e);M.compose(v.set(o.x,o.y,o.z),q,sv.set(o.sx,o.sy,o.sz));im.setMatrixAt(i,M);im.setColorAt(i,o.col);});
+    im.castShadow=im.receiveShadow=true;W.add(im);};
+  const box=new THREE.BoxGeometry(1,1,1),bp=box.attributes.position;for(let i=0;i<bp.count;i++){bp.setX(i,bp.getX(i)*(1-0.06*Math.abs(bp.getY(i))));}box.computeVertexNormals();   // ขอบมนนิด ๆ
+  mk(box,B);mk(new THREE.CylinderGeometry(1,1,1,10),D);
 }
 // หมอก/แสงเฉพาะในป่า: ผสมตามตำแหน่งกล้อง (เรียกทุกเฟรมจาก sgSync)
 function fcsForestTick(){
