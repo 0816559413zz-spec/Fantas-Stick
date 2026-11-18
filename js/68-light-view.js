@@ -940,7 +940,7 @@ function drawLightHud(x,y,L){
   if(h>0.005){const t0=lo-sp*h;cx.shadowColor=col;cx.shadowBlur=oh?14:10;
     cx.strokeStyle=col;cx.lineWidth=4.5;cx.beginPath();cx.arc(cX,y,R,t0,lo);cx.stroke();
     cx.shadowBlur=0;cx.strokeStyle=oh?'rgba(255,220,200,0.9)':'rgba(255,250,230,0.95)';cx.lineWidth=1.6;cx.beginPath();cx.arc(cX,y,R,t0,lo);cx.stroke();
-    if(emp){const N=28;for(let k=0;k<N;k++){const a0=lo-sp*k/N,a1=lo-sp*(k+1)/N,w=0.5+0.5*Math.sin(k*0.55-T/90);cx.strokeStyle=`rgba(255,${235+20*w},${150+105*w},${0.25+0.7*w})`;cx.shadowColor='#fff3c0';cx.shadowBlur=6+10*w;cx.lineWidth=4.5;cx.beginPath();cx.arc(cX,y,R,a1,a0);cx.stroke();}cx.shadowBlur=0;}   // แสงไหลไปตามเกจตอน Empower
+    if(emp){const N=28;for(let k=0;k<N;k++){const a0=lo-sp*k/N,a1=lo-sp*(k+1)/N,w=0.5+0.5*Math.sin(k*0.4-T/320);cx.strokeStyle=`rgba(255,${212+30*w},${70+70*w},1)`;cx.shadowColor=w>0.5?'#ffe680':'#ffc93a';cx.shadowBlur=14+10*w;cx.lineWidth=5;cx.beginPath();cx.arc(cX,y,R,a1,a0);cx.stroke();}cx.shadowBlur=0;}   // แสงไหลไปตามเกจตอน Empower
     cx.shadowColor=col;cx.shadowBlur=12;dia(t0,3.2+0.8*Math.sin(T/90),'#fffbe8');}   // ประกายเพชรที่ปลายเกจ
   cx.shadowBlur=0;dia(lo,2.6,'rgba(255,226,150,0.7)');   // คริสตัลเล็กปิดท้ายล่าง
   {const [ex,ey]=P(hi),tg=hi-Math.PI/2,c1=oh?'rgba(255,170,140,0.95)':'rgba(255,244,205,0.95)';cx.save();cx.shadowColor=oh?'#ff6a3a':'#ffd36a';cx.shadowBlur=8;cx.fillStyle=c1;   // ปลายบนด้านนอก (ผู้ใช้ 2026-11-17): เศษคริสตัลยื่นต่อจากปลาย + ดาวแสง 4 แฉกลอยเหนือขึ้นไป
