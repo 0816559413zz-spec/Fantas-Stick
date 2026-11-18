@@ -351,7 +351,7 @@ function windAirMove(p,mx,my,spd,canAct,dt){const K=W_FW,on=(mx||my)&&spd>=1,k=1
 function windFlick(p){const F=p.wfw;if(!F||F.ph!=='focus'||p.fly)return;windFocusEnd(p);if(p.wfFlk)return;p.wfFlk=1;const a=p.ang;   // one wing flick per cast: taking off again with banked time (Featherwing toggle) only lands on the next press, so the flick cannot be repeated without the cooldown
   for(const t of foesOf(p.team)){const dx=t.x-p.x,dy=t.y-p.y,d=Math.hypot(dx,dy);if(d>W_FW.range+(t.r||PR)||Math.abs(angDiff(Math.atan2(dy,dx),a))>(W_FW.cone*Math.PI/180))continue;
     const dz=cH(t)-p.z;if(dz>2||dz<-(W_FW.hgt+2))continue;   // เอียงลงพื้น: โดนคนที่อยู่ต่ำกว่าเราได้
-    aoeHit(p,t,W_FW.dmg,t=>{knock(t,t.x-Math.cos(a)*10,t.y-Math.sin(a)*10,W_FW.push);t.wpush=0.8;});}
+    aoeHit(p,t,W_FW.dmg,null);}   // ไม่ผลักแล้ว (ผู้ใช้ 2026-11-18)
   emit({k:'efx',z:'wnfwflick',x:Math.round(p.x),y:Math.round(p.y),h:p.z,a:Math.round(a*100)/100,id:p.id});}
 // บิน: คลิกซ้าย (กดค้างได้) = ลูกบอลลม — เรียกจาก windBasic / broomAct (โหมดบินเร็ว)
 function windFocusAct(p,inp,dt){p.bbv=0;p.bbf=0;
