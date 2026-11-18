@@ -1,0 +1,11 @@
+{
+  "v": 1,
+  "desc": "Darkness — พรีวิวใน Studio วงเงารัศมี 300 ชิ่งหาเป้ามีตราแล้วไล่เป้าในวง",
+  "tags": ["darkness", "preview"],
+  "pal": "arcane",
+  "dur": 2.25,
+  "layers": [
+    {"id": "anchor", "t": "mesh", "shape": "disc", "mat": "black", "op": 0, "at": 0, "life": 2.25},
+    {"id": "motion", "t": "code", "fn": "studio_darkness_dash", "at": 0, "life": 2.25, "args": {"layer": "anchor"}}
+  ]
+}
