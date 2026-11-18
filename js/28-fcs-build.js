@@ -14,19 +14,23 @@ function buildFcs(){
   // กำแพงจากตาราง (InstancedMesh ต่อชนิด)
   const m4=new THREE.Matrix4(),cells=[[],[],[],[]];
   for(let y=0;y<D.h;y++)for(let x=0;x<D.w;x++){const v=parseInt(D.W[y*D.w+x],36);if(v)cells[v].push([x,y]);}
-  const inst=(geo,mat,list,fn)=>{if(!list.length)return;const im=new THREE.InstancedMesh(geo,mat,list.length);list.forEach((q,i)=>im.setMatrixAt(i,fn(q)));im.castShadow=im.receiveShadow=true;addW(im);};
+  const inst=(geo,mat,list,fn)=>{if(!list.length)return;const im=new THREE.InstancedMesh(geo,mat,list.length);list.forEach((q,i)=>im.setMatrixAt(i,fn(q)));im.castShadow=im.receiveShadow=true;addW(im);return im;};
   const box=sGeo(THREE.BoxGeometry,1,1,1);
   inst(box,stoneMat(1,1,'#7a746a'),cells[1],([x,y])=>{const px=(x+0.5)*C,py=(y+0.5)*C,b=GY(px,py);return m4.makeScale(c3,FCS_WH[1],c3).setPosition(tx(px),b+FCS_WH[1]/2,tz(py)).clone();});
   inst(box,stoneMat(1,1,'#9a8a6a'),cells[2],([x,y])=>{const px=(x+0.5)*C,py=(y+0.5)*C,b=GY(px,py);return m4.makeScale(c3,FCS_WH[2],c3).setPosition(tx(px),b+FCS_WH[2]/2,tz(py)).clone();});
   inst(box,new THREE.MeshStandardMaterial({color:'#5a4030',roughness:0.9}),cells[3],([x,y])=>{const px=(x+0.5)*C,py=(y+0.5)*C,b=GY(px,py);return m4.makeScale(c3*0.3,FCS_WH[3],c3*0.3).setPosition(tx(px),b+FCS_WH[3]/2,tz(py)).clone();});
   // ต้นไม้ / ลัง / เสา
   const P=k=>F.props.filter(q=>q[0]===k);
-  inst(sGeo(THREE.CylinderGeometry,0.22,0.32,1,7),new THREE.MeshStandardMaterial({color:'#5a3f28',roughness:0.95}),P('tr'),([,x,y])=>m4.makeScale(1,3,1).setPosition(tx(x),GY(x,y)+1.5,tz(y)).clone());
-  inst(sGeo(THREE.ConeGeometry,1.5,1,8),new THREE.MeshStandardMaterial({color:'#2f5a2a',roughness:0.9,flatShading:true}),P('tr'),([,x,y])=>m4.makeScale(1,4.5,1).setPosition(tx(x),GY(x,y)+4.6,tz(y)).clone());
+  const inF=q=>q[1]<FF_X1*C,fb=[];   // ต้นไม้ในป่า = กรวยชั่วคราว จนกว่าโมเดลสนจริงโหลดเสร็จ (js/28-fcs-forest.js)
+  fb.push(inst(sGeo(THREE.CylinderGeometry,0.22,0.32,1,7),new THREE.MeshStandardMaterial({color:'#5a3f28',roughness:0.95}),P('tr').filter(inF),([,x,y])=>m4.makeScale(1,3,1).setPosition(tx(x),GY(x,y)+1.5,tz(y)).clone()));
+  fb.push(inst(sGeo(THREE.ConeGeometry,1.5,1,8),new THREE.MeshStandardMaterial({color:'#2f5a2a',roughness:0.9,flatShading:true}),P('tr').filter(inF),([,x,y])=>m4.makeScale(1,4.5,1).setPosition(tx(x),GY(x,y)+4.6,tz(y)).clone()));
+  inst(sGeo(THREE.CylinderGeometry,0.22,0.32,1,7),new THREE.MeshStandardMaterial({color:'#5a3f28',roughness:0.95}),P('tr').filter(q=>!inF(q)),([,x,y])=>m4.makeScale(1,3,1).setPosition(tx(x),GY(x,y)+1.5,tz(y)).clone());
+  inst(sGeo(THREE.ConeGeometry,1.5,1,8),new THREE.MeshStandardMaterial({color:'#2f5a2a',roughness:0.9,flatShading:true}),P('tr').filter(q=>!inF(q)),([,x,y])=>m4.makeScale(1,4.5,1).setPosition(tx(x),GY(x,y)+4.6,tz(y)).clone());
   inst(box,new THREE.MeshStandardMaterial({color:'#8a6238',roughness:0.85}),P('cr'),([,x,y])=>m4.makeScale(1.25,1.2,1.25).setPosition(tx(x),GY(x,y)+0.6,tz(y)).clone());
   inst(sGeo(THREE.CylinderGeometry,0.65,0.75,1,10),stoneMat(1,1,'#bdb5a5'),P('pl'),([,x,y])=>m4.makeScale(1,6,1).setPosition(tx(x),GY(x,y)+3,tz(y)).clone());
   // แท่นจุดเกิด (สีทีม)
   for(const [t,L] of [[0,F.sp.A],[1,F.sp.B]])for(const k in L){const s=L[k],m=new THREE.Mesh(new THREE.CircleGeometry(SG_SPR*S3,32),new THREE.MeshBasicMaterial({color:TEAMC[t],transparent:true,opacity:0.18,depthWrite:false}));m.rotation.x=-Math.PI/2;m.position.set(tx(s.x),GY(s.x,s.y)+0.05,tz(s.y));addW(m);}
+  try{fcsForest(fb);}catch(e){console.error('fcsForest',e);}
 }
 // ---------- ภาพโหมด (ลูกข่ายทุกเครื่องจาก snapshot M.sg) ----------
 const SGV3={g:null,cores:[],bw:[],bar:null,barK:'',beams:new Map(),bwK:''};
@@ -71,7 +75,7 @@ function sgSync(v,P,me,now,dt){
   if(v.mode!=='siege'||!S||MAPID!=='fcs'){if(SGV3.g)sgClearView();return;}
   SGPH=S.ph;
   if(!SGV3.g)sgViewBuild();
-  sgBarrier(S.ph);
+  sgBarrier(S.ph);fcsForestTick();
   SGV3.cores.forEach((c,i)=>{const n=i+1,dead=S.hp[i]<=0,act=n===S.ph,fut=n>S.ph;
     c.cr.visible=c.glow.visible=!dead;c.rub.visible=dead;c.ring.visible=act;
     c.cr.rotation.y+=dt*(act?1.2:0.3);c.cr.position.y=4.3+Math.sin(now/600+i)*0.25;

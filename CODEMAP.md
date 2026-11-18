@@ -338,12 +338,15 @@ CITY_STY:181 CITY_VEH:188 cityFacade:190 CITYK:203 _cZ:204 _cT:204 _cR:204 _cC:2
 §259 ตึกไฮไลต์ล้มทั้งตึก (ขั้น 7)
 _ctA:262 _ctB:262 _ctC:262 cityTowerPose:263 cityTowerAnim:271 cityTowerRubble:278 CAREA:292 cityAreaSync:293 cityViewSync:305 cityDebris:349 cityFX:358
 
-## js/28-fcs-build.js (120) — 
+## js/28-fcs-build.js (124) — 
 buildFcs:5
-§31 ภาพโหมด (ลูกข่ายทุกเครื่องจาก snapshot M.sg)
-SGV3:32 sgClearView:33 sgViewBuild:34 SGVZR:53 sgBarrier:55 sgSync:69 sgDust:90 sgFx:91
-§96 HUD
-sgTop:97 sgHud:99
+§35 ภาพโหมด (ลูกข่ายทุกเครื่องจาก snapshot M.sg)
+SGV3:36 sgClearView:37 sgViewBuild:38 SGVZR:57 sgBarrier:59 sgSync:73 sgDust:94 sgFx:95
+§100 HUD
+sgTop:101 sgHud:103
+
+## js/28-fcs-forest.js (124) — ป่าสนหมอก ในแผนที่ First Castle Strike (เฟส 1 = ช่อง x 0–28 ของ Map Editor) — ทำตามรูปอ้า…
+FF:7 FF_X1:8 FF_NS:9 ffGroundTex:11 ffParts:33 fcsForest:40 fcsForestTick:114 FFC:124
 
 ## js/28-maps-build.js (781) — สร้างแผนที่
 CANDLESYS:2 builtMap:3 builtKey:3 world:3 TORCHES:3 CANDLES:3 FIREFLIES:3 CRYSTAL:3 RUNE:3 SNITCH:3 BANNERS:3 SNOW:3 WCACHE:5 WCACHE_MAX:5 wkey:7 buildWorld:8 addW:42 _prewarmed:44 prewarmShaders:45 batchStatic:64 makeCandles:89 updateCandles:98 buildCastle:107 buildHogsmeade:173 buildGreatHall:261 buildForest:331
@@ -835,4 +838,4 @@ _dvCyl:135 _dvMat:136 devOverlay:137
 §157 หน้าต่าง
 _dvPanel:158 _dvBtn:159 devToggle:162 dvBtn:167 dvRow:168 dvTog:169 dvSec:170 devRender:171 devPos:208
 
-(101 files, 28380 lines)
+(102 files, 28508 lines)
