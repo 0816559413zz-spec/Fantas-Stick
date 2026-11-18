@@ -99,18 +99,18 @@ WRATH_READY_T:221 WRATH_THROW_SWING_T:222 WRATH_DRAW_T:223 WRATH:224 earthWrathA
 §286 ทั้งสนาม: สิ่งก่อสร้างพัง / ฝุ่นหมดเวลา / Stonebreaker ชนกำแพง
 updateEarth:287 earthSnapP:297 earthSnapW:313
 
-## js/09-light.js (462) — 
+## js/09-light.js (463) — 
 LIGHTP:8 LTV:12 lgOn:19 lightShieldGauge:20 lightClearBond:21 lightReset:25 lightAlly:31 lightLinkPos:32 lightUnlink:33 lightReleaseAlly:51
 §57 สกิล 1 Crystal Bond: เล็งเพื่อน + กด = ลิงก์และส่ง 1 ชิ้น • ไม่เล็งเพ…
 lightBondTap:58 lightRecall:73
 §74 ทุกเฟรม
 lightTick:75 lightSlotOf:92
 §93 BA Prism Ray: กดค้าง = ลำแสง • 0 ชิ้น = ลำบางทะลุ 5/1 วิ • 1/2/3 ชิ้น…
-lightBeamAng:94 lightBeamPitch:96 lightBeamLength:98 lightHeatTick:112 lightBeamHits:118 lightTapShot:125 lightBasic:134
-§154 Dash Light Step: วาร์ป 250 ตามทิศเดิน • เล็งคู่หู (ไม่เกิน 900) = วาร…
-lightStepBehind:155 lightDash:168 lightDmgOut:198 lightDmgIn:199 lightSnapP:200
-§205 สกิล
-lightSkillsTick:206 LIGHT_FORM_BASE:241 LIGHT_FORM_SCALE:242 LIGHT_FORM_PIVOT:243 lightFormAngles:244 lightFormRecoil:249 lightFormHand:254 LIGHT_FORM_ARMS:261 lightArmRest:270 _lightArmWork:271 lightArmPose:273 lightArmAim:291 lightUltSnap:298 lightUltEnd:304 _lightFormAngles:317 _lightFormTurn:317 _lightFormHand:317 lightUltOrigin:318 lightUltRay:328 lightUltBeamHit:335 lightUltFinish:349 lightUltTick:357 lightSanEnd:408 lightAimPt:409 LT_BOND:411 LT_VO:414 LT_EM:421 LT_SC:424 LT_VS_RELEASE:428 LT_VS_TRAVEL:428 LT_VS_S:429 LT_VS:432 LT_UL:433 lightAllyHit:451 lightQueueTick:454
+lightBeamAng:94 lightBeamPitch:96 lightBeamLength:98 lightHeatTick:112 lightBeamHits:119 lightTapShot:126 lightBasic:135
+§155 Dash Light Step: วาร์ป 250 ตามทิศเดิน • เล็งคู่หู (ไม่เกิน 900) = วาร…
+lightStepBehind:156 lightDash:169 lightDmgOut:199 lightDmgIn:200 lightSnapP:201
+§206 สกิล
+lightSkillsTick:207 LIGHT_FORM_BASE:242 LIGHT_FORM_SCALE:243 LIGHT_FORM_PIVOT:244 lightFormAngles:245 lightFormRecoil:250 lightFormHand:255 LIGHT_FORM_ARMS:262 lightArmRest:271 _lightArmWork:272 lightArmPose:274 lightArmAim:292 lightUltSnap:299 lightUltEnd:305 _lightFormAngles:318 _lightFormTurn:318 _lightFormHand:318 lightUltOrigin:319 lightUltRay:329 lightUltBeamHit:336 lightUltFinish:350 lightUltTick:358 lightSanEnd:409 lightAimPt:410 LT_BOND:412 LT_VO:415 LT_EM:422 LT_SC:425 LT_VS_RELEASE:429 LT_VS_TRAVEL:429 LT_VS_S:430 LT_VS:433 LT_UL:434 lightAllyHit:452 lightQueueTick:455
 
 ## js/09-nature-ba.js (122) — 
 NATURE_BA_TEST:2 NATURE_WHIP:3 natureWhipEnabled:4 NAT_SLAM:8 NAT_LINE:8 natureEmpNear:9 natureEmpHit:10 natureWhipHit:18 natureWhipBasic:41 NW_RINGS:65 NW_SIDES:65 nwPhase:66 nwEase:67 nwSwingAngle:68 natureWhipPose:74 natureWhipVisualMake:83 natureWhipView:105
@@ -730,7 +730,7 @@ BACKDROP:8
 §66 noise เล็ก ๆ (คงที่ต่อ seed)
 bdHash:67 bdNoise:68 bdFbm:69 bdEdge:71 bdRing:73 bdPaint:79 bdTree:82 buildBackdrop:89 bdTower:135 backdropHide:139
 
-## js/68-light-view.js (948) — 
+## js/68-light-view.js (950) — 
 LGV:7 LGSH:9 LGSH_L:11 _lgM4:14 _lgQ:14 _lgSV:14 _lgS:14 _lgC:14 _lgC2:14 lgGlowTex:15 lgNeon:17 lgEmpFx:25 lgWallBurn:44 lgShardSpawn:60 lgShardTick:64 lgBaCore:65 lgCrDim:108 lgEmpBeam:112 lgNeonCrystal:125 lgSanctumFloorTex:135 lgSanctumMoteTex:146 lgHoneyTex:161 lgShield:165 lightShieldEv:197 LGPOSE:200 _lgGlass:201 _lgCore:201 _lgGeo:201 _lgEdge:201 _lgEdgeM:201 lgCrystalMesh:203 lgState:211 _lgV:212 _lgW:212 lgWorld:213 LG_ULT_ASSET:216 LG_CRYSTAL_ASSET:216 LG_ULT_TIME:217 lgUltMaterials:218 lgSovereignFinishes:219 lgSovereignMaterials:220 lgSovereignFinish:273 lgSovereignCrystal:289 lgSkinSovereign:298 lgPoseSovereign:336 lgSovereignRibbon:366 lgSovereignCrossSparks:395 lgBuildSovereign:418 lgReturnMark:462 lgUltVisual:467 lgWardVisual:541 _lgBeamM:557 lgBeamMat:558 _lgUltBeamM:561 lgUltBeamMat:562 _lgLinkM:567 lgLinkMat:568 lgTube:571 lgAim:572 lightFX:573 lgBaseObjects:775 lgClearBase:776 lgClear:777 lightDropView:783 lgAllyEmpEnd:789
 §793 เหตุการณ์
 lgBlip:795 lgArcFx:799 lgFlyFx:802 lightFxTick:803 lightEfx:807 _lgHq:904 _lgHy:904 lgProcHead:906 lightHeadPose:921 LGHUD:929 drawLightHud:930
@@ -835,4 +835,4 @@ _dvCyl:135 _dvMat:136 devOverlay:137
 §157 หน้าต่าง
 _dvPanel:158 _dvBtn:159 devToggle:162 dvBtn:167 dvRow:168 dvTog:169 dvSec:170 devRender:171 devPos:208
 
-(101 files, 28359 lines)
+(101 files, 28362 lines)
