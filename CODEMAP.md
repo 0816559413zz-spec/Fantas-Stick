@@ -74,7 +74,7 @@ GODL:231
 §233 ลูกสายฟ้าโดม: รวมไฟที่พื้น → ทะยานขึ้น → เล็ง → ฟาดไม้ยิงและค้างชี้เป…
 SDOME_POSE:234 stormDomeCost:235 stormDomeDash:236 stormDomeCharge:237 stormDomeTick:238 stormDomeFire:269 stormDomeSlam:276 updateStorm:281
 
-## js/09-earth.js (321) — 
+## js/09-earth.js (323) — 
 EARTH:9 ERV:12
 §24 ตัวช่วย
 eOn:25 eStand:26 eNoStand:27 eSegD:29 eAdd:30 eCollide:32 eProjHit:39 eKill:42
@@ -97,7 +97,7 @@ AUGER:201 eAugAim:205 earthAugFire:206 earthMound:217
 §220 อัลติ: Wrath — ชาร์จบนพื้น หินดันผู้เล่นขึ้นฟ้า Stand ปาเสาลงจุดเล็ง
 WRATH_READY_T:221 WRATH_THROW_SWING_T:222 WRATH_DRAW_T:223 WRATH:224 earthWrathAim:230 earthWrathFlightAngles:231 earthPillarThrow:237 earthPillarImpact:243 earthWrathTick:251 earthWrathEnd:275 E_WRS:279 earthSpikeTick:280
 §286 ทั้งสนาม: สิ่งก่อสร้างพัง / ฝุ่นหมดเวลา / Stonebreaker ชนกำแพง
-updateEarth:287 earthSnapP:297 earthSnapW:313
+updateEarth:287 earthSnapP:299 earthSnapW:315
 
 ## js/09-light.js (463) — 
 LIGHTP:8 LTV:12 lgOn:19 lightShieldGauge:20 lightClearBond:21 lightReset:25 lightAlly:31 lightLinkPos:32 lightUnlink:33 lightReleaseAlly:51
@@ -262,7 +262,7 @@ MY:210 myDB:211 mySave:212 myLoad:215 myDecodeReady:221 myPlay:222 myNext:234 my
 §256 เพลงประกอบ (สร้างสดตามแผนที่)
 MUSIC:257 THEMES:258 padNote:263 musicTick:270 toggleMusic:299
 
-## js/19-client.js (286) — 
+## js/19-client.js (289) — 
 cv:4 cx:4 DPR:5 SW:5 SH:5 resize:6 VIEW:12 screen:13 lastBuffKey:13 overShown:13 lastCount:13 PARTS:14 TEXTS:14
 §15 งบเอฟเฟกต์ (VFX budget)
 VFXB:20 _apush:21 vfxQual:29 vfxBegin:31 vfxEnd:34 vfxOnce:36 vfxExtra:38 PCOL:39 setScreen:41 onLobby:53
@@ -273,9 +273,9 @@ SBUF:90 NETOLD:91 sbufReset:92 sbufPush:93 sbufAdvance:103
 §115 ทำนายตัวเอง (ลูกข่าย): ตัวเราขยับทันทีที่กด ไม่ต้องรอโฮสต์ตอบ
 PRED:118 predictMe:119 myPos:140
 §142 เอฟเฟกต์
-burst:144 smoke:155 ring:156 floatText:157 shake:158 wandPos:159 impactFX:161 explosionFX:183
-§195 เอฟเฟกต์คาถาใหม่
-ZV:196 COLB:196 WVV:196 GLV:196 ICEV:196 SLV:196 ULTV:196 OBV:196 _iceDisc:198 _iceEdge:199 _iceSpk:200 iceFloorMat:201 _icePlane:202 _icePathMat:203 _iceWvM:203 iceWvMat:205 makeIceFloor:217 ICE_WV:244 updateIceFloors:245 FLASHM:257 FLASHING:258 flashModel:259 endFlash:268 tickFlash:269 GHOSTM:271 SOLIDM:271 ghostOf:272 setGhost:278 hitSparks:286
+SMOKE_K:145 burst:146 smoke:158 ring:159 floatText:160 shake:161 wandPos:162 impactFX:164 explosionFX:186
+§198 เอฟเฟกต์คาถาใหม่
+ZV:199 COLB:199 WVV:199 GLV:199 ICEV:199 SLV:199 ULTV:199 OBV:199 _iceDisc:201 _iceEdge:202 _iceSpk:203 iceFloorMat:204 _icePlane:205 _icePathMat:206 _iceWvM:206 iceWvMat:208 makeIceFloor:220 ICE_WV:247 updateIceFloors:248 FLASHM:260 FLASHING:261 flashModel:262 endFlash:271 tickFlash:272 GHOSTM:274 SOLIDM:274 ghostOf:275 setGhost:281 hitSparks:289
 
 ## js/20-vfx-pyro-storm.js (857) — Dragonfall (ภาพ)
 makeDfCircle:3 stormCircleCyan:20 DFV:25 dfCracks:26 updateDfCracks:36 _domeAim:37 domeChargeOrb:38 _spearUp:46 _spearDir:46 _spearA:46 _spearB:46 DOME_SPEAR_LEN:47 stormDomePath:48 stormDomeSpearFX:52 stormDomeHoverFX:83 stormDomeReadyFX:107 stormDomeGroundPoint:128 stormDomeFracture:131 stormDomeFloorPullFX:177 stormDomeFieldFX:204 stormDomePose:240 dragonfallFX:304
@@ -345,7 +345,7 @@ SGV3:32 sgClearView:33 sgViewBuild:34 SGVZR:53 sgBarrier:55 sgSync:69 sgDust:90 
 §96 HUD
 sgTop:97 sgHud:99
 
-## js/28-maps-build.js (773) — สร้างแผนที่
+## js/28-maps-build.js (781) — สร้างแผนที่
 CANDLESYS:2 builtMap:3 builtKey:3 world:3 TORCHES:3 CANDLES:3 FIREFLIES:3 CRYSTAL:3 RUNE:3 SNITCH:3 BANNERS:3 SNOW:3 WCACHE:5 WCACHE_MAX:5 wkey:7 buildWorld:8 addW:42 _prewarmed:44 prewarmShaders:45 batchStatic:64 makeCandles:89 updateCandles:98 buildCastle:107 buildHogsmeade:173 buildGreatHall:261 buildForest:331
 §428 ทุ่งหญ้าฮอกวอตส์ (เย็น)
 ringTrees:429 grassTex:438 buildMeadow:439
@@ -356,7 +356,7 @@ buildLake:459
 §482 บรรยากาศที่ใช้ร่วมกัน (แผนที่จากโค้ด + แผนที่จากไฟล์ผ่าน fx ใน guides…
 makeSnow:483 makeFireflies:490 makeSnitch:497 fileMapFx:504
 §514 แผนที่จากไฟล์ Blender (guides/MAP-DESIGN.md)
-terrGeo:516 buildFileMap:524 tickM:564 TRPAD:565 ARPAD:565 SHPAD:565 signTex:566 testSign:567 buildTest:574 buildRuins:679 buildPitch:704
+terrGeo:516 buildFileMap:524 tickM:572 TRPAD:573 ARPAD:573 SHPAD:573 signTex:574 testSign:575 buildTest:582 buildRuins:687 buildPitch:712
 
 ## js/29-characters.js (439) — ระบบผ้า (เสื้อคลุมพลิ้วตามการเคลื่อนที่)
 makeCloak:2 updateCloth:10 wandNamed:34 wandSparks:83
@@ -534,7 +534,7 @@ WB:298 wbInit:299 wbBegin:309 wbEnd:310 fxWarpMake:311 fxWarpTick:324
 §332 ไฟ 3 มิติจากการจำลอง (ชั้น vol) — ไฟล์รูปแบบเดียวกับที่เพื่อน bake จา…
 FXVOL:335 fxVolLoad:336 fxVolTex:340 fxVolSet:343 fxVolReady:344 fxVolMake:345 fxVolTick:348 fxPreAssets:353 fxAssetsWait:355
 
-## js/47-earth-view.js (994) — 
+## js/47-earth-view.js (996) — 
 ECOL:9 EGUARD_BIG:14 EGUARD:14 EV:15 eW:16 EARTH_FIST_SCALE:17 eYaw:18
 §19 ลายผิว (วาดเองบน canvas: หิน/ทราย + รอยร้าว + ขอบบล็อกแบบ Roblox)
 ETEX:20 eTex:21 eFadeTex:35 eMat:37 eTMat:38 rockGeo:39 ROCKU:45 rockMesh:46 coneMesh:48 _eChunkM:50 eChunks:51
@@ -553,13 +553,13 @@ ePillarVeins:519 makePillar:537
 §543 กระสุนหิน
 earthFistMat:545 makeEarthFist:549 eFistCrumble:565 earthProjMesh:588 SLAB:598 makeSlab:599 eSlabGeo:604 eSlabMats:615 slabCracks:682
 §685 สิ่งก่อสร้าง + ฝุ่น (เรียกจาก render loop)
-earthClear:686 eMergePartial:694 eMergeKids:699 eMakeSO:707 syncEarth:724 earthFog:768 eMudScreen:771 _eOlMat:778 eOutlines:780 _eCamT:785 eAnim:786 eDebris:787 eWave:789 eAirWave:791 esbImpact:794
-§801 event "efx" ของสายดิน (เรียกจากต้น efxFX) — คืน true = จัดการแล้ว
-earthEfx:802 eWindOut:910 eAirCone:916 eDrillFly:918
-§922 บึงโคลน (Mud Swamp + บึงจากเสาอัลติ): คลื่นกระเพื่อมจากกลางไปขอบ แล้ว…
-earthMudZone:923 earthMudSink:930
-§931 HUD ใต้เป้าเล็ง
-ESM:933 eSmooth:934 ESF:937 eShieldFx:938 eChips:943 eShieldSegs:946 eShieldNum:960 eShieldArc:964 drawEarthHud:977
+earthClear:686 eMergePartial:694 eMergeKids:699 eMakeSO:707 syncEarth:724 earthFog:769 eMudScreen:772 _eOlMat:779 eOutlines:781 _eCamT:786 eAnim:787 eDebris:788 eWave:790 eAirWave:792 esbImpact:795
+§802 event "efx" ของสายดิน (เรียกจากต้น efxFX) — คืน true = จัดการแล้ว
+earthEfx:803 eWindOut:912 eAirCone:918 eDrillFly:920
+§924 บึงโคลน (Mud Swamp + บึงจากเสาอัลติ): คลื่นกระเพื่อมจากกลางไปขอบ แล้ว…
+earthMudZone:925 earthMudSink:932
+§933 HUD ใต้เป้าเล็ง
+ESM:935 eSmooth:936 ESF:939 eShieldFx:940 eChips:945 eShieldSegs:948 eShieldNum:962 eShieldArc:966 drawEarthHud:979
 
 ## js/48-ragdoll.js (227) — 
 RAG:10 RAGJ:23 RAGB:29 RAGS:33 RAGMIN:37 RAGHINGE:39 _rv1:40 _rv2:40 _rv3:40 _rqa:40 _rqb:40 _rm:40 ragBones:41 ragBasis:48 ragTargets:56 ragStart:62 ragBack:88 ragFloor:89 ragStep:90 ragPose:155 ragWrite:170 ragRestore:182 ragEnd:186 ragTick:188 ragHideDead:222
@@ -804,10 +804,10 @@ tuneOpenF:97 tuneFmt:98 tuneRow:99 tuneRefresh:102 tuneMsg:110 tuneToggle:111 tu
 §139 API สำหรับเครื่องมือแยก tune.html (เปิดเกมใน iframe แล้วเรียกผ่าน WD)
 tuneDump:140 tuneSetKey:141
 
-## js/74-look.js (79) — 
-LOOK:17 lookPreset:24 lookMap:26 lookName:27 lookEnvFor:28 lookApply:38 lookRays:53 _lkV:58 lookRaysFrame:60 lookRefresh:67
-§68 ลงทะเบียนในเครื่องมือปรับค่า (js/73-tune.js): 1 หมวด "🌗 Look" แยกส่ว…
-LOOK_F:69 lookRegister:75
+## js/74-look.js (82) — 
+LOOK:17 lookPreset:27 lookMap:29 lookName:30 lookEnvFor:31 lookApply:41 lookRays:56 _lkV:61 lookRaysFrame:63 lookRefresh:70
+§71 ลงทะเบียนในเครื่องมือปรับค่า (js/73-tune.js): 1 หมวด "🌗 Look" แยกส่ว…
+LOOK_F:72 lookRegister:78
 
 ## js/75-ambient.js (52) — Ambient 🌫️ — ฝุ่นลอย (dust motes) + หมอกลอยต่ำ (mist) ที่ใช้ได้ทุกแมพ ปรับตามพรีเซ็ต Loo…
 AMBX:9 AMBX_V:10 AMBX_F:24 ambMesh:27 ambQual:39 ambFrame:40
@@ -835,4 +835,4 @@ _dvCyl:135 _dvMat:136 devOverlay:137
 §157 หน้าต่าง
 _dvPanel:158 _dvBtn:159 devToggle:162 dvBtn:167 dvRow:168 dvTog:169 dvSec:170 devRender:171 devPos:208
 
-(101 files, 28362 lines)
+(101 files, 28380 lines)

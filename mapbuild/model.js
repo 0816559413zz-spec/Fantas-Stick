@@ -15,6 +15,8 @@ export const SURF = [
   { k: 'snow', n: 'หิมะ', c: '#e4eaf0' }, { k: 'wood', n: 'พื้นไม้', c: '#8a6238' }, { k: 'ash', n: 'เถ้า/ไหม้', c: '#2f2c2a' },
   { k: 'mud', n: 'โคลน (ช้า)', c: '#57452f', env: 'mud' }, { k: 'water', n: 'น้ำตื้น', c: '#3f7fa8', env: 'water' },
   { k: 'ice', n: 'น้ำแข็ง (ลื่น)', c: '#a9d4e8', env: 'ice' }, { k: 'lava', n: 'ลาวา', c: '#d8521e', env: 'lava' },
+  // เพิ่มท้ายตาราง (ห้ามแทรกกลาง — ดัชนีถูกเก็บในไฟล์แผนที่) • โทนจางสำหรับป่าหมอก (แมพ gorge)
+  { k: 'moss', n: 'ตะไคร่/มอส', c: '#575837' }, { k: 'litter', n: 'ใบไม้แห้ง/ดินป่า', c: '#5d4a34' }, { k: 'gravel', n: 'กรวดหิน', c: '#7a7569' }, { k: 'duff', n: 'ใบสนทับถม', c: '#4b4332' }, { k: 'trail', n: 'ทางเดินป่า (ดินคล้ำ)', c: '#6f5b44' },
 ];
 export const WALL_PRESET = [
   { n: 'กำแพงหิน', th: 1, h: 3.5, c: '#8a8478', m: 'stone' }, { n: 'กำแพงปราสาท', th: 2, h: 6, c: '#77736c', m: 'stone' },
@@ -227,6 +229,8 @@ export function gameData(M, dim) {
   const data = { fmt: 1, id: M.id, name: M.name, desc: M.desc || '', sky: M.sky || 'day', fog: M.fog || null, modes: M.modes && M.modes.length ? M.modes : null, random: M.random ? 1 : 0,
     weather: M.weather || '', music: M.music || '', W: M.W * PX, H: M.H * PX, c: C * PX, nx, ny, g: i16b64(g), fl, obs, spawns, espawn, rings, tasks, houses, lights, env, brk, fx: M.fx || [], mb: 1 };
   if (props.length || !M.autoProps) data.props = props;
+  if (M.look) data.look = M.look;   // พรีเซ็ต Look (js/74-look.js) • lt = แสง/ฟ้าเฉพาะแมพ (js/28 buildFileMap) — ตั้งโดยแก้ไฟล์ต้นฉบับตรง ๆ (ยังไม่มีช่องใน Editor)
+  if (M.lt) data.lt = M.lt;
   return { data, brkOf, counts: { obs: obs.length, brk: brk.length, spawns: spawns.filter(s => s.t == null).length, red: spawns.filter(s => s.t === 1).length, blue: spawns.filter(s => s.t === 0).length,
     espawn: espawn.length, rings: rings.length, tasks: tasks.length, lights: lights.length, props: props.length, houses: houses.length, floors: fl.length } };
 }

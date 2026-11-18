@@ -28,6 +28,7 @@ Tool: ศูนย์รวม Tool → **Map Builder** • โค้ด: `mapbu
 | `W`, `H` | ขนาด (ม.) • ตารางพื้น `nx = W/0.5+1`, `ny = H/0.5+1` (ช่อง 0.5 ม. = ตารางชนของเกมพอดี → เห็นอย่างไรชนอย่างนั้น) |
 | `hg` | ความสูงพื้น int16 หน่วย ซม. เข้ารหัส base64 (เรียง `j*nx+i`) |
 | `sf` | พื้นผิวต่อจุด uint8 base64 = index ใน `SURF` (`model.js`) — `mud/water/ice/lava` ถูกส่งเป็น `env` ของเกมด้วย |
+| `look`, `lt` | (ไม่บังคับ แก้ไฟล์ตรง ๆ — ยังไม่มีช่องใน Editor) `look` = ชื่อพรีเซ็ต Look (js/74-look.js เช่น `gorge`) • `lt` = `{hemi:[ฟ้า,พื้น,แรง], sun:[สี,แรง,[x,y,z]], sky:'#สี' ฟ้าครึ้มสีเดียว, exp}` แสง/ฟ้าเฉพาะแมพ (js/28 `buildFileMap`) — ตัวอย่าง `maps/build/gorge.json` |
 | `sky`, `fog [สี,เริ่ม,สุด]`, `music`, `weather`, `fx[]`, `modes[]`, `random`, `autoProps`, `skirt` | ค่าของแผนที่ (ความหมายตาม MAP-DESIGN §3) • `skirt` = พื้นยื่นเลยขอบเล่น (ม.) กันเห็นขอบลอย |
 | `walls[]` | `{id, pts:[[x,z]…], th, h, c, m, closed, curve, brk, base}` — `curve` = โค้งผ่านจุด (Catmull-Rom) • `brk` = พังได้ แตกเป็นช่วงละ ~4 ม. • `base` = ความสูงฐานแบบตายตัว (กำแพง/ราวบนชั้นบน; `null` = ตั้งตามพื้น) • `m` = วัสดุตอนพัง `stone/wood/ice` |
 | `floors[]` | พื้นชั้นบน `{id, x, z, w, d, rot, y, y2, th, c, steps}` — สี่เหลี่ยมหมุนได้ ผิวบนสูง `y` ที่ปลาย −d และ `y2` ที่ปลาย +d (ต่างกัน = ทางลาด) • `steps` = หน้าตาเป็นขั้นบันได (การชนยังเป็นทางลาดเรียบ) |
@@ -58,6 +59,9 @@ Tool: ศูนย์รวม Tool → **Map Builder** • โค้ด: `mapbu
 - ทางลอดใต้ดิน/ถ้ำ: ทำเป็นพื้นชั้นบนเป็นหลังคา (พื้นหลักมีชั้นเดียว)
 - พื้นผิวพิเศษ (น้ำ/น้ำแข็ง/ลาวา/โคลน) ตอนนี้เป็นสีบนพื้น + ข้อมูล `env` — ผลกับการเล่นรอระบบเฟส 2 ของเกม (MAP-DESIGN §8)
 - ของจากคลังใช้ภาพผิวของแผนที่ต้นทาง → ใช้ของจากหลายแผนที่ = หลายวัสดุ (draw call เพิ่ม)
+
+## สร้างแผนที่ด้วยโค้ด (ตัวอย่าง: gorge)
+เขียนสคริปต์ node ที่ `import` `mapbuild/model.js` (`newMap/pack/gh/…`) สร้างภูมิประเทศ/ของ/จุดเกิดแล้วเขียน `maps/build/<id>.json` • โมเดลใหม่: เขียน .glb เอง (วัสดุเดียวสีที่จุดยอด) ใส่ `assets/mapkit/` + แถว `user` ใน `kit.json` (`node tools/gorge-assets.mjs` เป็นตัวอย่าง) • ส่งเข้าเกมไม่ต้องกดปุ่ม: `node tools/headless.js --url "mapbuild.html?export=<id>" --js tools/mb-export.js --quiet` • ถ่ายภาพ/ทดสอบ: `tools/gorge-shots.js`, `gorge-walk.js` • SURF index 16–20 (moss/litter/gravel/duff/trail) เพิ่มต่อท้ายแล้ว — ตารางต้องต่อท้ายเสมอ
 
 ## Claude แก้แผนที่เอง
 แก้ `maps/build/<id>.json` ได้ตรง ๆ (ยกเว้น `hg`/`sf` ที่เป็น base64 — ใช้ `mapbuild/model.js`: `unpack` → แก้ `M.hg[j*nx+i]` → `pack`) แล้วเปิด Map Builder กด **⬆ ส่งเข้าเกม** (ต้องใช้เบราว์เซอร์สร้าง .glb) หรือสั่งจากคอนโซลของหน้า: `await __mb.exportGame()`

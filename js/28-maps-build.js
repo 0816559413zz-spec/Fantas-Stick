@@ -527,6 +527,14 @@ function buildFileMap(id){
   scene.fog.color.set(fog[0]);scene.fog.near=+fog[1];scene.fog.far=+fog[2];
   if(night){hemi.color.set('#a8b8e8');hemi.groundColor.set('#2a3448');hemi.intensity=0.6;moonL.intensity=1.0;moonL.color.set('#c8d8ff');}
   else{hemi.color.set('#ffe0b8');hemi.groundColor.set('#4a5a2a');hemi.intensity=0.75;moonL.intensity=1.5;moonL.color.set('#fff0dc');}
+  // แสง/ฟ้าเฉพาะแมพ (ฟิลด์ "lt" ในไฟล์แมพ): hemi:[สีฟ้า,สีพื้น,แรง] • sun:[สี,แรง,[x,y,z]ทิศแสง] • sky:'#สี' = ฟ้าครึ้มสีเดียว (ไม่มีดวงอาทิตย์) • exp = ความสว่างภาพ
+  const LT=F.lt;
+  if(LT){
+    if(LT.hemi){hemi.color.set(LT.hemi[0]);hemi.groundColor.set(LT.hemi[1]);hemi.intensity=LT.hemi[2];}
+    if(LT.sun){moonL.color.set(LT.sun[0]);moonL.intensity=LT.sun[1];if(LT.sun[2]){moonL.position.set(...LT.sun[2]);LDIR.copy(moonL.position).normalize();}}
+    if(LT.sky){SKY.mesh.material.map=null;SKY.mesh.material.color.set(LT.sky);SKY.mesh.material.needsUpdate=true;SKY.sun.visible=false;}
+    if(LT.exp)gl.toneMappingExposure=LT.exp;
+  }
   const W=world,fb=addW(new THREE.Group());
   if(T){
     const tex=t=>{t=t.clone();t.repeat.set(1,1);t.needsUpdate=true;return t;};

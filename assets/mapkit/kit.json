@@ -164,6 +164,34 @@
   {"id":"valley/windmill","name":"กังหันลม · หุบเขา","cat":"build","src":"maps/valley.glb","node":"windmill","col":1,"brk":"stone","ns":0}
  ],
  "user": [
-  
+  {"id":"gorge/pine_a","name":"สนสูง A · หุบเขาหมอก","cat":"tree","src":"mapkit/gorge.glb","node":"g_pine_a","col":1,"brk":0,"ns":0,"v":1794983960854},
+  {"id":"gorge/pine_b","name":"สนสูง B · หุบเขาหมอก","cat":"tree","src":"mapkit/gorge.glb","node":"g_pine_b","col":1,"brk":0,"ns":0,"v":1794983960854},
+  {"id":"gorge/pine_c","name":"สนอวบ · หุบเขาหมอก","cat":"tree","src":"mapkit/gorge.glb","node":"g_pine_c","col":1,"brk":0,"ns":0,"v":1794983960854},
+  {"id":"gorge/pine_d","name":"สนยักษ์ · หุบเขาหมอก","cat":"tree","src":"mapkit/gorge.glb","node":"g_pine_d","col":1,"brk":0,"ns":0,"v":1794983960854},
+  {"id":"gorge/pine_s","name":"สนเล็ก · หุบเขาหมอก","cat":"tree","src":"mapkit/gorge.glb","node":"g_pine_s","col":1,"brk":0,"ns":0,"v":1794983960854},
+  {"id":"gorge/pine_la","name":"สนไกล A (เบา) · หุบเขาหมอก","cat":"tree","src":"mapkit/gorge.glb","node":"g_pine_la","col":1,"brk":0,"ns":0,"v":1794983960854},
+  {"id":"gorge/pine_lb","name":"สนไกล B (เบา) · หุบเขาหมอก","cat":"tree","src":"mapkit/gorge.glb","node":"g_pine_lb","col":1,"brk":0,"ns":0,"v":1794983960854},
+  {"id":"gorge/snag_a","name":"ลำเปลือยสูง · หุบเขาหมอก","cat":"tree","src":"mapkit/gorge.glb","node":"g_snag_a","col":1,"brk":0,"ns":0,"v":1794983960854},
+  {"id":"gorge/snag_b","name":"ไม้ตายผอม · หุบเขาหมอก","cat":"tree","src":"mapkit/gorge.glb","node":"g_snag_b","col":1,"brk":0,"ns":0,"v":1794983960854},
+  {"id":"gorge/autumn_a","name":"ต้นใบเหลืองจาง A · หุบเขาหมอก","cat":"tree","src":"mapkit/gorge.glb","node":"g_autumn_a","col":1,"brk":0,"ns":0,"v":1794983960854},
+  {"id":"gorge/autumn_b","name":"ต้นใบเหลืองจาง B · หุบเขาหมอก","cat":"tree","src":"mapkit/gorge.glb","node":"g_autumn_b","col":1,"brk":0,"ns":0,"v":1794983960854},
+  {"id":"gorge/boulder_a","name":"ก้อนหินมอส ใหญ่ · หุบเขาหมอก","cat":"rock","src":"mapkit/gorge.glb","node":"g_boulder_a","col":1,"brk":0,"ns":0,"v":1794983960854},
+  {"id":"gorge/boulder_b","name":"ก้อนหินมอส กลาง · หุบเขาหมอก","cat":"rock","src":"mapkit/gorge.glb","node":"g_boulder_b","col":1,"brk":0,"ns":0,"v":1794983960854},
+  {"id":"gorge/boulder_c","name":"ก้อนหินกลม · หุบเขาหมอก","cat":"rock","src":"mapkit/gorge.glb","node":"g_boulder_c","col":1,"brk":0,"ns":0,"v":1794983960854},
+  {"id":"gorge/boulder_d","name":"ก้อนหินเหลี่ยม · หุบเขาหมอก","cat":"rock","src":"mapkit/gorge.glb","node":"g_boulder_d","col":1,"brk":0,"ns":0,"v":1794983960854},
+  {"id":"gorge/cliff_a","name":"ผาหินแผ่น · หุบเขาหมอก","cat":"rock","src":"mapkit/gorge.glb","node":"g_cliff_a","col":1,"brk":0,"ns":0,"v":1794983960854},
+  {"id":"gorge/cliff_b","name":"ผาหินสูง · หุบเขาหมอก","cat":"rock","src":"mapkit/gorge.glb","node":"g_cliff_b","col":1,"brk":0,"ns":0,"v":1794983960854},
+  {"id":"gorge/stone_a","name":"หินเล็ก A · หุบเขาหมอก","cat":"rock","src":"mapkit/gorge.glb","node":"g_stone_a","col":0,"brk":0,"ns":1,"v":1794983960854},
+  {"id":"gorge/stone_b","name":"หินเล็ก B · หุบเขาหมอก","cat":"rock","src":"mapkit/gorge.glb","node":"g_stone_b","col":0,"brk":0,"ns":1,"v":1794983960854},
+  {"id":"gorge/stone_c","name":"หินเล็ก C · หุบเขาหมอก","cat":"rock","src":"mapkit/gorge.glb","node":"g_stone_c","col":0,"brk":0,"ns":1,"v":1794983960854},
+  {"id":"gorge/log_a","name":"ขอนไม้ล้มยาว · หุบเขาหมอก","cat":"prop","src":"mapkit/gorge.glb","node":"g_log_a","col":1,"brk":0,"ns":0,"v":1794983960854},
+  {"id":"gorge/log_b","name":"ขอนไม้ล้มสั้น · หุบเขาหมอก","cat":"prop","src":"mapkit/gorge.glb","node":"g_log_b","col":0,"brk":0,"ns":0,"v":1794983960854},
+  {"id":"gorge/log_c","name":"ท่อนไม้ผุ · หุบเขาหมอก","cat":"prop","src":"mapkit/gorge.glb","node":"g_log_c","col":0,"brk":0,"ns":1,"v":1794983960854},
+  {"id":"gorge/stump_a","name":"ตอไม้ · หุบเขาหมอก","cat":"prop","src":"mapkit/gorge.glb","node":"g_stump_a","col":1,"brk":0,"ns":0,"v":1794983960854},
+  {"id":"gorge/shrub_a","name":"พุ่มกิ่งเปลือย · หุบเขาหมอก","cat":"plant","src":"mapkit/gorge.glb","node":"g_shrub_a","col":0,"brk":0,"ns":1,"v":1794983960854},
+  {"id":"gorge/shrub_b","name":"พุ่มกิ่งเปลือยเตี้ย · หุบเขาหมอก","cat":"plant","src":"mapkit/gorge.glb","node":"g_shrub_b","col":0,"brk":0,"ns":1,"v":1794983960854},
+  {"id":"gorge/fern_a","name":"เฟิร์น · หุบเขาหมอก","cat":"plant","src":"mapkit/gorge.glb","node":"g_fern_a","col":0,"brk":0,"ns":1,"v":1794983960854},
+  {"id":"gorge/fern_b","name":"เฟิร์นใหญ่ · หุบเขาหมอก","cat":"plant","src":"mapkit/gorge.glb","node":"g_fern_b","col":0,"brk":0,"ns":1,"v":1794983960854},
+  {"id":"gorge/bridge_cov","name":"สะพานมีหลังคา · หุบเขาหมอก","cat":"build","src":"mapkit/gorge.glb","node":"g_bridge_cov","col":0,"brk":0,"ns":0,"v":1794983960854}
  ]
 }

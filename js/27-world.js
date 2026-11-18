@@ -348,7 +348,7 @@ scene.add(moonL);scene.add(moonL.target);
 const LDIR=new THREE.Vector3(-55,95,-70).normalize();
 function setSky(mode){
   const day=mode==='sunset';
-  SKY.mesh.material.map=day?SKY.sunset:SKY.night;SKY.mesh.material.needsUpdate=true;
+  SKY.mesh.material.map=day?SKY.sunset:SKY.night;SKY.mesh.material.color.set('#ffffff');SKY.mesh.material.needsUpdate=true;   // สีขาว = ภาพฟ้าเดิม (แมพฟ้าครึ้ม lt.sky ใน js/28 ตั้งสีทับทีหลัง)
   SKY.stars.visible=!day;SKY.moon.visible=!day;SKY.sun.visible=day;
   moonL.intensity=day?0.82:1;
   if(day){moonL.color.set('#ffbe8a');moonL.position.set(80,45,-110);gl.toneMappingExposure=1.05;}

@@ -472,6 +472,11 @@
    "file": "maps/demo-builder.glb",
    "data": "maps/demo-builder.json",
    "v": 2
+  },
+  "gorge": {
+   "file": "maps/gorge.glb",
+   "data": "maps/gorge.json",
+   "v": 9
   }
  },
  "ptex": {}
