@@ -10,7 +10,7 @@ ICONS.add('radiantsovereign');
 PATHS.push({id:'light',n:'สายแสง',ic:'✨',col:'#ffe9a8',d:'ซัพพอร์ตคู่หู — แบ่งคริสตัล 3 ชิ้นให้ตัวเองหรือเพื่อนที่ลิงก์ ยิงลำแสง ฮีลพื้นที่ วางกับดักล่องหน',
   combo:'Crystal Bond ส่งคริสตัลให้เพื่อน (กัน/ตีแรงขึ้น) • เก็บไว้เอง = ลำแสง/โล่แรงสุด • Empower Light บัฟทั้งเราและเพื่อน • Light Step วาร์ปไปหาเพื่อน ให้โล่ลดดาเมจ'});
 const LTV=PATHS[LIGHTP].v={max:3,linkR:650,linkPick:160,sendT:0.3,holdT:0.4,allyDR:0.05,allyDmg:0.05,
-  baRange:600,baCharge:1.4,heatT:10,heatIdle:2,heatDrain:2,ohT:2,baFloat:0.5,baRise:1.3,baMove:0.7,ba0:[5,1.0],ba1:[7,0.7],ba2:[10,0.6],ba3:[12,0.5],baW:[10,14,18,22],
+  baRange:600,baCharge:1.4,heatT:8,heatIdle:2,heatDrain:2,ohT:2,baFloat:0.5,baRise:1.3,baMove:0.7,ba0:[5,1.0],ba1:[7,0.7],ba2:[10,0.6],ba3:[12,0.5],baW:[10,14,18,22],
   shHp:[0,120,180,300],shReg:1,
   dsDist:250,dsAllyR:900,dsPick:180,dsCd:8,dsDmg:15,dsR:150,dsDR:0.3,dsDRT:2,
   prismT:0};   // 0 = ปริซึมอยู่ตลอดจนเรียกคืน/ลิงก์ใหม่ (ผู้ใช้ 2026-11-18)
@@ -108,7 +108,7 @@ function lightBeamLength(p,len){
   // The shared trace samples solids at most six units apart. Stop on the near side.
   return hit?Math.max(0,len*(hit.t-1/Math.ceil(len*cp/6))):len;
 }
-// เกจร้อน BA (ผู้ใช้ 2026-11-17): ยิงจริง (มีคริสตัล) 10 วิ = เต็ม → คริสตัลชาร์จใหม่ 2 วิ ยิงไม่ได้ • ปล่อยยิง 2 วิ แล้วเกจค่อยลด (เต็ม→0 ใน 2 วิ)
+// เกจร้อน BA (ผู้ใช้ 2026-11-17): ยิงจริง (มีคริสตัล) 8 วิ = เต็ม (2026-11-18 เดิม 10) → คริสตัลชาร์จใหม่ 2 วิ ยิงไม่ได้ • ปล่อยยิง 2 วิ แล้วเกจค่อยลด (เต็ม→0 ใน 2 วิ)
 function lightHeatTick(p,dt){
   const emp=p.lgEmp>G.time;if(p.lgEmpOn&&!emp){p.lgHeat=0;p.lgHI=0;}p.lgEmpOn=emp;   // Empower (ผู้ใช้ 2026-11-18): ยิงไม่ร้อนตลอดบัฟ หมดบัฟเกจกลับเป็น 0
   if(p.lgOH>0){p.lgOH-=dt;p.lgHeat=Math.max(0,p.lgOH/LTV.ohT);if(p.lgOH<=0){p.lgOH=0;p.lgHeat=0;p.lgHI=0;p.lgChg=LTV.baCharge;}p.lgFiring=0;return true;}
