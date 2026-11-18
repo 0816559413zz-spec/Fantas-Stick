@@ -191,7 +191,7 @@ function earthCrush(p){const T=p.tec;p.crush=null;if(!T)return;
   for(const w of W)eKill(w,true);p.tec=null;}
 
 // ---------- สกิล 4: Dust Burst ----------
-const DUSTB=defSpell(EARTH,{id:'dustburst',v:{range:500,r:350,time:5,rWeak:200,timeWeak:3,delay:0.6},vn:{range:'ระยะเล็ง',r:'รัศมี (มี Stand)',time:'อยู่นาน (มี Stand)',rWeak:'รัศมี (Stand แตก)',timeWeak:'อยู่นาน (Stand แตก)',delay:'ฝุ่นเกิดหลังกด (วิ)'},role:'utility',n:'Dust Burst',ic:'🌫️',cd:20,d:'เล็งพื้นระยะ ~500: โยนหินขึ้น Stand ต่อยแตกเป็นฝุ่น (Stand แตก = เราทุบเองแบบอ่อนกว่า)',fx:'ศัตรูในฝุ่นมองชัดแค่ ~150 รอบตัว ไกลกว่านั้นจางเป็นสีฝุ่น (ไม่มืดบอด) • ไม่มีดาเมจ เดินออกได้ • Stand: รัศมี 350 นาน 8 วิ • Stand แตก: 200 นาน 5 วิ',
+const DUSTB=defSpell(EARTH,{id:'dustburst',v:{range:500,r:350,time:5,rWeak:200,timeWeak:3,delay:0.6,cloud:3},vn:{cloud:'เมฆฝุ่นอยู่ (วิ) แล้วระเบิดหาย • คนที่อยู่ข้างในตอนระเบิดยังมองไม่เห็นจนครบเวลา',range:'ระยะเล็ง',r:'รัศมี (มี Stand)',time:'อยู่นาน (มี Stand)',rWeak:'รัศมี (Stand แตก)',timeWeak:'อยู่นาน (Stand แตก)',delay:'ฝุ่นเกิดหลังกด (วิ)'},role:'utility',n:'Dust Burst',ic:'🌫️',cd:20,d:'เล็งพื้นระยะ ~500: โยนหินขึ้น Stand ต่อยแตกเป็นฝุ่น (Stand แตก = เราทุบเองแบบอ่อนกว่า)',fx:'ศัตรูในฝุ่นมองชัดแค่ ~150 รอบตัว ไกลกว่านั้นจางเป็นสีฝุ่น (ไม่มืดบอด) • ไม่มีดาเมจ เดินออกได้ • Stand: รัศมี 350 นาน 8 วิ • Stand แตก: 200 นาน 5 วิ',
   cast(p,S){if(p.aug||p.ramp)return false;const V=S.v,o=aimPoint(p,V.range),st=eStand(p),r=st?V.r:V.rWeak,t=st?V.time:V.timeWeak;
     emit({k:'efx',z:'edustup',x:Math.round(o.x),y:Math.round(o.y),h:0,x2:Math.round(p.x),y2:Math.round(p.y),n:st?1:0,id:p.id});
     G.strikes.push({x:o.x,y:o.y,t:V.delay,fn(){(G.edust||(G.edust=[])).push({id:++G.zid,x:o.x,y:o.y,r,t,max:t,team:p.team});emit({k:'efx',z:'edust',x:Math.round(o.x),y:Math.round(o.y),h:0,r,n:st?1:0});}});}});
@@ -287,7 +287,9 @@ function earthSpikeTick(S,dt){S.t-=dt;S.nx-=dt;if(S.nx>0)return;S.nx=E_WRS.every
 function updateEarth(dt){
   if(G.espk){for(const S of G.espk)earthSpikeTick(S,dt);G.espk=G.espk.filter(S=>S.t>0);}
   if(G.eso){for(const w of G.eso)if(!w.dead&&(w.hp<=0||w.life!==undefined&&(w.life-=dt)<=0))eKill(w,w.k==='mound');G.eso=G.eso.filter(w=>!w.dead);}
-  if(G.edust){for(const d of G.edust)d.t-=dt;G.edust=G.edust.filter(d=>d.t>0);}
+  if(G.edust){for(const d of G.edust){d.t-=dt;   // ผู้ใช้ 2026-11-18: เมฆอยู่ 3 วิแล้วระเบิดหาย • ศัตรูที่อยู่ข้างในตอนระเบิดยังโดนบังตาจนครบเวลาเดิม คนเดินเข้าทีหลังไม่โดน
+      if(!d.boom&&d.max-d.t>=DUSTB.v.cloud){d.boom=1;d.ids=plist().filter(t=>t.alive&&!t.downed&&t.team!==d.team&&Math.hypot(t.x-d.x,t.y-d.y)<d.r).map(t=>t.id);emit({k:'efx',z:'edustboom',x:Math.round(d.x),y:Math.round(d.y),h:0,r:d.r});}}
+    G.edust=G.edust.filter(d=>d.t>0);}
   for(const t of foesOf(-99)){if(t.mudT>0)t.mudT-=dt;
     if(t.sbk>0){t.sbk-=dt;if((t.solN|0)>(t.sbkN|0)&&Math.hypot(t.vx||0,t.vy||0)>120){t.sbk=0;const o=G.players[t.sbkSrc];
       if(o){o.baHit=0;damage(t,STONEB.v.wallDmg,o.id,'proj');}addStun(t,STONEB.v.wallStun);emit({k:'efx',z:'esbwall',x:Math.round(t.x),y:Math.round(t.y),h:cH(t)});}}}
@@ -311,7 +313,7 @@ function earthSnapP(p){if(!eOn(p))return undefined;const W=p.wr;
   if(W)ea[13]=[W.t,W.target.x,W.target.y,W.ox??p.x,W.oy??p.y,W.oh??p.z,W.a??p.ang,W.baseZ];
   return ea;}
 function earthSnapW(){return {ES:(G.eso||[]).map(w=>[w.id,{tec:0,pil:1,mound:2,dom:3}[w.k],w.k==='pil'?w.x1:Math.round(w.x1),w.k==='pil'?w.y1:Math.round(w.y1),Math.round(w.x2),Math.round(w.y2),w.r,w.maxHp>1e8?100:Math.max(1,Math.round(w.hp/w.maxHp*100)),w.team,w.owner,...(w.flight?[w.flight]:[])]),
-  ED:(G.edust||[]).map(d=>[d.id,Math.round(d.x),Math.round(d.y),d.r,Math.round(d.t*10)/10,d.team])};}
+  ED:(G.edust||[]).map(d=>[d.id,Math.round(d.x),Math.round(d.y),d.r,Math.round(d.t*10)/10,d.team,d.boom?1:0,d.boom?d.ids:0])};}
 
 // ท่าพื้นฐาน + โล่ + Dash ของสาย (PBASIC ต้องอยู่ช่องที่ 6 = ลำดับใน PATHS)
 PBASIC.push({id:'b_earth',type:'erock',n:'หมัดหิน Stand / หินเล็ก',d:'คลิก = Stand เล็กด้านหน้าส่งกำปั้นหินตามแนวเล็ง 3 มิติ ระยะ 500 ดาเมจ 10 ทุก 0.8 วิ • กดค้าง = Stand ใหญ่ด้านหลังง้างชาร์จ 2 วิ แล้วยิงหมัดใหญ่ ดาเมจตรง 50 + ผลักถอยเล็กน้อย เศษหินพุ่งเป็นกรวยด้านหลังเป้า ดาเมจ 20 ต่อเป้า คูลดาวน์ 6 วิ เดินช้า 40% • Stand แตก = ยิงหินเล็ก 5 ดาเมจ ทุก 0.35 วิ',

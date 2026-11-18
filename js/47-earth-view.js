@@ -753,13 +753,14 @@ function syncEarth(v,dt,now){
     if(C.t>(C.boom||9)+0.6){disposeObj(G.g);EV.crush.splice(i,1);}}
   // ฝุ่น Dust Burst
   const me=myPos();let inEnemy=false;
-  for(const d of (v.ED||[])){const [,x,y,r,t,team]=d;
-    for(let i=0,n=Math.ceil(r/120);i<n;i++){const a=rnd(0,Math.PI*2),rr=r*Math.sqrt(Math.random());smoke(x+Math.cos(a)*rr,y+Math.sin(a)*rr,rnd(0.3,4),1,Math.random()<0.5?ECOL.dust:'#c9b38c',2.6,rnd(10,16),20);}
+  for(const d of (v.ED||[])){const [,x,y,r,t,team,boom,ids]=d;
+    if(boom){if(me&&me.al&&team!==me.tm&&ids&&ids.includes(NET.myId))inEnemy=true;continue;}   // ระเบิดแล้ว: ไม่มีควัน • บังตาเฉพาะคนที่อยู่ข้างในตอนระเบิด
+    for(let i=0,n=Math.ceil(r/240);i<n;i++){if(Math.random()<0.5)continue;const a=rnd(0,Math.PI*2),rr=r*Math.sqrt(Math.random());smoke(x+Math.cos(a)*rr,y+Math.sin(a)*rr,rnd(0.3,4),1,Math.random()<0.5?ECOL.dust:'#c9b38c',1.3,rnd(10,16),20);}   // ควันน้อยลงและอายุสั้น ระเบิดแล้วหายไว (ผู้ใช้ 2026-11-18)
     if(me&&me.al&&Math.hypot(me.x-x,me.y-y)<r){if(team!==me.tm)inEnemy=true;}}
   earthFog(inEnemy);
   // เส้นขอบขาว: ติดฝุ่นศัตรู = เห็นทุกคน • คนที่ใช้ฝุ่น (ทีมเดียวกับฝุ่น) = เห็นศัตรูที่อยู่ในฝุ่นของเรา (ผู้ใช้ 2026-11-01)
   {const ids=[];if(me&&me.al){for(const p of (v.P||[])){if(p.id===NET.myId||!p.al)continue;
-      if(inEnemy||(v.ED||[]).some(d=>d[5]===me.tm&&p.tm!==me.tm&&Math.hypot(p.x-d[1],p.y-d[2])<d[3]))ids.push(p.id);}}
+      if(inEnemy||(v.ED||[]).some(d=>d[5]===me.tm&&p.tm!==me.tm&&(d[6]?d[7]&&d[7].includes(p.id):Math.hypot(p.x-d[1],p.y-d[2])<d[3])))ids.push(p.id);}}
     eOutlines(ids);}
   for(let i=EV.anims.length-1;i>=0;i--){const a=EV.anims[i];a.t+=dt;if(a.fn(a)===false||a.t>=a.life){if(a.g)disposeObj(a.g);if(a.end)a.end(a);EV.anims.splice(i,1);}}
 }
@@ -870,6 +871,7 @@ function earthEfx(ev){
           if(hard>0&&hard<1&&!a.sq){a.sq=1;shake(mine?0.15:0.05);if(near)snd('hit',{x,y,vol:0.4});}}}});
       if(!st){const o=PM3.get(ev.id);if(o)o.wdT=0.25;}
       return true;}
+    case 'edustboom':{const R=ev.r;burst(x,y,'#d8c098',14,R*2.4,0.5,5,{h:1.2,vh:[0.5,2.5],g:-0.3,smoke:true,grow:1.6});burst(x,y,ECOL.dust,14,R*2.2,0.6,2.4,{h:1,vh:[1,3],g:2});eWave(x,y,1.2,R*1.15,'#f0dcb0');if(myPos()&&Math.hypot(myPos().x-x,myPos().y-y)<1100)snd('break',ev);return true;}   // เมฆฝุ่นระเบิดกระจายออกแล้วหาย (ผู้ใช้ 2026-11-18)
     case 'edust':{const w=ev.n?1:0.6;smoke(x,y,1.5,Math.round(32*w),ECOL.dust,2.4,15,ev.r*0.9);burst(x,y,'#d8c098',Math.round(22*w),ev.r,1.2,4,{h:2,g:1,smoke:true,grow:2});eWave(x,y,1.5,ev.r*0.9,'#e8d4a8');
       FX.flashLight(x,y,1.9,'#ffcf6a',2.5*w,10,0.2);eChunks(x,y,1.9,Math.round(10*w),220,3,0.12);shake(0.25);if(near)snd('boom',ev);return true;}
     // ----- Terra Auger -----
