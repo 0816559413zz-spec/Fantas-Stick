@@ -314,7 +314,7 @@ function natureBallTick(o,p,dt){
     if(!natureLive(t)||!natureSight(o,t,o.h+.25,cH(t)))continue;
     const d=natureDist(o,t),step=Math.min(Math.max(0,d-24),dt*620);
     if(step>0){t.x+=(o.x-t.x)*step/d;t.y+=(o.y-t.y)*step/d;collideWorld(t,t.r||PR,t.z??t.h);}
-    if(G.time>=o.end){naturePoison(t,4,5,p.id,'ball');addSlow(t,.3,1.5);if(!isBig(t))t.natureSlow=G.time+1.5;}
+    if(G.time>=o.end){naturePoison(t,4,5,p.id,'ball');}   // ไม่ทำให้ช้าแล้ว (ผู้ใช้ 2026-11-18)
   }
   if(G.time>=o.end){o.dead=true;natureEmit('ball_pop',o);}
 }

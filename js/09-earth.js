@@ -9,8 +9,8 @@
 const EARTH=6;   // ตัวเลขของสายดิน: ERV (ท่าพื้นฐาน/โล่/Dash) + v:{...} ของแต่ละสกิล — ปรับได้ใน tune.html / F8
 PATHS.push({id:'earth',n:'สายดิน',ic:'⛰️',col:'#c9a36a',d:'สถาปนิกสนามรบ — Stand หินต่อยแทนเรา ถือโล่ 300 สร้างกำแพง/เสา/เนิน แล้วผลักศัตรูให้ชนของแข็ง',
   combo:'Stonebreaker ผลักศัตรูชนกำแพง (กำแพงแผนที่ / Tectonic Crush / เสา Wrath / กำแพงโดเมน) = +20 ดาเมจ สตัน 2 วิ • Mud Swamp ช้า 50% ห้าม Dash แล้ว Crush กำแพงหนีบ 80 • Dust Burst บังสายตาศัตรู • Terra Auger ชาร์จ 3 ระดับ • โล่แตก = Stand หาย 15 วิ'});
-const ERV=PATHS[EARTH].v={sh:300,shDelay:3,shRegen:4.5,standOff:15,punch:10,punchR:500,punchCd:0.8,punchDelay:0.34,rockCd:0.35,cbHold:0.25,cbCharge:2,cbDmg:50,cbR:180,cbShardDmg:20,cbStun:0.5,cbCd:6,cbSlow:0.6,
-  rampT:1.2,rampSp:500,rampDmg:15,rampStun:0.5,rampKnock:650,rampCd:8,slamR:150,slamDmg:20,slamStun:0.8,boostDist:400,boostR:120,boostKnock:900,boostCd:6,env:2.5};
+const ERV=PATHS[EARTH].v={sh:300,shDelay:3,shRegen:4.5,standOff:15,punch:10,punchR:500,punchCd:0.8,punchDelay:0.34,rockCd:0.35,cbHold:0.25,cbCharge:2,cbDmg:50,cbR:180,cbShardDmg:20,cbStun:0,cbKnock:300,cbCd:6,cbSlow:0.6,
+  rampT:1.2,rampSp:500,rampDmg:15,rampStun:0,rampKnock:350,rampCd:8,slamR:150,slamDmg:20,slamStun:0,slamKnock:300,boostDist:400,boostR:120,boostKnock:900,boostCd:6,env:2.5};
 PATHS[EARTH].vn={sh:'โล่ Stand • HP',shDelay:'โล่ • เริ่มฟื้นหลังไม่ใช้ (วิ)',shRegen:'โล่ • ฟื้นต่อวิ',standOff:'โล่แตก • Stand หาย (วิ)',punch:'หมัด Stand • ดาเมจ',punchR:'หมัด Stand • ระยะล็อก',punchCd:'หมัด Stand • เว้น (วิ)',punchDelay:'หมัด Stand • หน่วงก่อนโดน (วิ)',rockCd:'หินเล็ก (Stand แตก) • เว้นยิง (วิ)',
   cbHold:'หมัดชาร์จ • กดค้างกี่วิเริ่มชาร์จ',cbCharge:'หมัดชาร์จ • ชาร์จ (วิ)',cbDmg:'หมัดชาร์จ • ดาเมจตรง',cbR:'เศษหมัดชาร์จ • ระยะ',cbShardDmg:'เศษหมัดชาร์จ • ดาเมจต่อเป้า',cbStun:'หมัดชาร์จ • สตัน (วิ)',cbCd:'หมัดชาร์จ • คูลดาวน์ (วิ)',cbSlow:'หมัดชาร์จ • ความเร็วเดินตอนชาร์จ (เท่า)',
   rampT:'Rampage • วิ่งนาน (วิ)',rampSp:'Rampage • ความเร็ว',rampDmg:'Rampage • ชนดาเมจ',rampStun:'Rampage • ชนสตัน (วิ)',rampKnock:'Rampage • ชนกระเด็น',rampCd:'Rampage • คูลดาวน์ (วิ)',slamR:'Rampage จบ • รัศมีทุบ',slamDmg:'Rampage จบ • ดาเมจ',slamStun:'Rampage จบ • สตัน (วิ)',
@@ -92,7 +92,7 @@ function earthFistFire(p,charged,left){
   emit({k:'efx',z:'efistfire',x,y,h,a,pt,id:p.id,n:charged?1:0,ox:p.x,oy:p.y,oh:p.z,left});
 }
 SPELLS.efist={hit(pr,t){pr.fistHit=t;damage(t,pr.dmg,pr.owner,'proj',true);}};
-SPELLS.efistc={hit(pr,t){SPELLS.efist.hit(pr,t);addStun(t,ERV.cbStun);}};
+SPELLS.efistc={hit(pr,t){SPELLS.efist.hit(pr,t);const o=G.players[pr.owner];knock(t,o?o.x:pr.x-pr.vx,o?o.y:pr.y-pr.vy,ERV.cbKnock);}};   // หมัดชาร์จ: ผลักถอยนิดหน่อย ไม่สตัน (ผู้ใช้ 2026-11-18)
 function earthFistBreak(pr){
   const a=Math.atan2(pr.vy,pr.vx),pt=Math.atan2(pr.vh*20,Math.hypot(pr.vx,pr.vy)),charged=pr.type==='efistc',split=charged&&!!pr.fistHit;
   emit({k:'efx',z:'efistbreak',x:pr.x,y:pr.y,h:pr.h,a,pt,n:charged?1:0,left:pr.fistLeft});
@@ -110,7 +110,7 @@ function earthDash(p,inp,pr,dt,setCd){
   if(p.ramp){const R=p.ramp;R.t-=dt;
     p.dashX=Math.cos(p.ang);p.dashY=Math.sin(p.ang);p.dash=0.05;p.dashSp=ERV.rampSp;p.eRamp=p.id;p.shieldOn=false;
     for(const t of foesOf(p.team)){if(R.hit.has(t))continue;if(Math.hypot(t.x-p.x,t.y-p.y)>PR+(t.r||PR)+28||Math.abs(cH(t)-(p.z+1.1))>3)continue;
-      R.hit.add(t);if(aoeHit(p,t,ERV.rampDmg,t=>{addStun(t,ERV.rampStun);knock(t,p.x,p.y,ERV.rampKnock);}))emit({k:'efx',z:'erhit',x:Math.round(t.x),y:Math.round(t.y),h:cH(t)});}
+      R.hit.add(t);if(aoeHit(p,t,ERV.rampDmg,t=>{knock(t,p.x,p.y,ERV.rampKnock);}))emit({k:'efx',z:'erhit',x:Math.round(t.x),y:Math.round(t.y),h:cH(t)});}
     for(const w of G.eso||[])if(!w.dead&&w.team!==p.team&&w.k!=='dom'&&eSegD(p.x,p.y,w).d<w.r+PR+20)w.hp=0;   // พังสิ่งก่อสร้างศัตรู
     for(const w of G.walls||[])if(w.team!==p.team&&Math.hypot(w.x-p.x,w.y-p.y)<w.r+PR+20)w.hp=0;
     R.env=(R.env||0)-dt;if(R.env<=0){R.env=0.1;damageEnv(p.x+Math.cos(p.ang)*30,p.y+Math.sin(p.ang)*30,60,12*ERV.env,p.id,'rock',p.z+0.5);}   // วิ่งชนบ้าน/ของพังตามทาง
@@ -128,7 +128,7 @@ function earthDash(p,inp,pr,dt,setCd){
 function earthRampEnd(p,quiet){p.ramp=null;p.dash=0;p.dashSp=0;p.eRamp=null;p.cd.dodge=ERV.rampCd*p.buffs.cdr;p.cdMax.dodge=p.cd.dodge;
   if(quiet){emit({k:'efx',z:'erampoff',x:p.x,y:p.y,h:p.z,id:p.id});return;}
   emit({k:'efx',z:'eslam',x:Math.round(p.x),y:Math.round(p.y),h:p.z,r:ERV.slamR,id:p.id});damageEnv(p.x,p.y,ERV.slamR,30*ERV.env,p.id,'rock',p.z+0.3);
-  for(const t of foesIn(p.team,p.x,p.y,ERV.slamR,p.z+3))aoeHit(p,t,ERV.slamDmg,t=>addStun(t,ERV.slamStun));}
+  for(const t of foesIn(p.team,p.x,p.y,ERV.slamR,p.z+3))aoeHit(p,t,ERV.slamDmg,t=>knock(t,p.x,p.y,ERV.slamKnock));}   // แดชจบ: ผลักนิดหน่อย ไม่สตัน (ผู้ใช้ 2026-11-18)
 
 // ---------- สกิล 1: Stonebreaker ----------
 function earthStoneAim(p,range=60,origin=2){
@@ -140,7 +140,7 @@ function earthStoneAim(p,range=60,origin=2){
   const d=reach*Math.cos(pt),x=p.x+Math.cos(a)*d,y=p.y+Math.sin(a)*d;
   return {x,y,h:h0+reach*Math.sin(pt)/20+terrT(p.x,p.y)-terrT(x,y),a,pt};
 }
-const STONEB=defSpell(EARTH,{id:'stonebreaker',v:{delay:0.45,knock:1800,wallDmg:20,wallStun:2,env:40},vn:{delay:'แผ่นหินพุ่งหลังกด (วิ)',knock:'แรงกระเด็น',wallDmg:'ชนของแข็ง • ดาเมจเพิ่ม',wallStun:'ชนของแข็ง • สตัน (วิ)',env:'แผ่นหินแตก • ดาเมจใส่บ้าน/ของ (×ตัวคูณ)'},role:'finisher',n:'Stonebreaker',ic:'🧱',cd:8,d:'แผ่นหินลอยตามเป้ากลางจอ Stand อยู่หลังแผ่นแล้วต่อยให้พุ่งตามแนวเล็ง 3 มิติ ระยะ 700 โดนศัตรูคนแรกแล้วแตก',fx:'25 ดาเมจ + กระเด็นไกล ~300 • กระเด็นไปชนของแข็ง (กำแพงแผนที่ / กำแพง Tectonic / เสา + กำแพงโดเมน Wrath) = +20 ดาเมจ สตัน 2 วิ (โคลน/เนิน Auger ไม่นับ) • ต้องมี Stand',
+const STONEB=defSpell(EARTH,{id:'stonebreaker',v:{delay:0.45,knock:1800,wallDmg:20,wallStun:1,env:40},vn:{delay:'แผ่นหินพุ่งหลังกด (วิ)',knock:'แรงกระเด็น',wallDmg:'ชนของแข็ง • ดาเมจเพิ่ม',wallStun:'ชนของแข็ง • สตัน (วิ)',env:'แผ่นหินแตก • ดาเมจใส่บ้าน/ของ (×ตัวคูณ)'},role:'finisher',n:'Stonebreaker',ic:'🧱',cd:8,d:'แผ่นหินลอยตามเป้ากลางจอ Stand อยู่หลังแผ่นแล้วต่อยให้พุ่งตามแนวเล็ง 3 มิติ ระยะ 700 โดนศัตรูคนแรกแล้วแตก',fx:'25 ดาเมจ + กระเด็นไกล ~300 • กระเด็นไปชนของแข็ง (กำแพงแผนที่ / กำแพง Tectonic / เสา + กำแพงโดเมน Wrath) = +20 ดาเมจ สตัน 2 วิ (โคลน/เนิน Auger ไม่นับ) • ต้องมี Stand',
   cast(p){if(!eStand(p))return eNoStand(p);if(p.aug||p.ramp||p.ecb)return false;
     // งัดแผ่นหินขึ้นจากพื้นก่อน → Stand โผล่มาต่อย (รอยร้าว) → แผ่นหินพุ่ง (0.45 วิ หลังกด)
     const cast=p.esb={at:G.time};
@@ -314,8 +314,8 @@ function earthSnapW(){return {ES:(G.eso||[]).map(w=>[w.id,{tec:0,pil:1,mound:2,d
   ED:(G.edust||[]).map(d=>[d.id,Math.round(d.x),Math.round(d.y),d.r,Math.round(d.t*10)/10,d.team])};}
 
 // ท่าพื้นฐาน + โล่ + Dash ของสาย (PBASIC ต้องอยู่ช่องที่ 6 = ลำดับใน PATHS)
-PBASIC.push({id:'b_earth',type:'erock',n:'หมัดหิน Stand / หินเล็ก',d:'คลิก = Stand เล็กด้านหน้าส่งกำปั้นหินตามแนวเล็ง 3 มิติ ระยะ 500 ดาเมจ 10 ทุก 0.8 วิ • กดค้าง = Stand ใหญ่ด้านหลังง้างชาร์จ 2 วิ แล้วยิงหมัดใหญ่ ดาเมจตรง 50 + สตัน 0.5 วิ เศษหินพุ่งเป็นกรวยด้านหลังเป้า ดาเมจ 20 ต่อเป้า คูลดาวน์ 6 วิ เดินช้า 40% • Stand แตก = ยิงหินเล็ก 5 ดาเมจ ทุก 0.35 วิ',
+PBASIC.push({id:'b_earth',type:'erock',n:'หมัดหิน Stand / หินเล็ก',d:'คลิก = Stand เล็กด้านหน้าส่งกำปั้นหินตามแนวเล็ง 3 มิติ ระยะ 500 ดาเมจ 10 ทุก 0.8 วิ • กดค้าง = Stand ใหญ่ด้านหลังง้างชาร์จ 2 วิ แล้วยิงหมัดใหญ่ ดาเมจตรง 50 + ผลักถอยเล็กน้อย เศษหินพุ่งเป็นกรวยด้านหลังเป้า ดาเมจ 20 ต่อเป้า คูลดาวน์ 6 วิ เดินช้า 40% • Stand แตก = ยิงหินเล็ก 5 ดาเมจ ทุก 0.35 วิ',
   shd:'โล่ Stand Barrier: Stand ยกโล่หินใหญ่ กันได้รอบตัว 300 HP (มากที่สุดในทุกสาย) • ไม่ได้ใช้ 3 วิ ฟื้น 20/วิ • โล่แตก = Stand หาย 15 วิ (ยิงหินเล็กแทนหมัด, Dash เป็น Rock Boost, สกิลที่ใช้ Stand ใช้ไม่ได้) แล้วกลับมาพร้อมโล่เต็ม 300',
-  dsd:'Stand Rampage (Shift): ขี่ Stand วิ่งชาร์จตามทิศเล็ง 1.2 วิ (~600) กด Shift อีกครั้งหยุดก่อน • ชนศัตรู 15 + สตัน 0.5 วิ + กระเด็น • จบด้วยทุบพื้น 20 + สตัน 0.8 วิ รัศมี 150 • ทะลุกำแพง/เสาของเรา พังของศัตรู • คูลดาวน์ 8 วิ • Stand แตก = Rock Boost Escape: หินดันพุ่ง ~400 ศัตรูรอบจุดเริ่ม (120) กระเด็น คูลดาวน์ 6 วิ',
+  dsd:'Stand Rampage (Shift): ขี่ Stand วิ่งชาร์จตามทิศเล็ง 1.2 วิ (~600) กด Shift อีกครั้งหยุดก่อน • ชนศัตรู 15 + กระเด็นเล็กน้อย • จบด้วยทุบพื้น 20 + ผลักเล็กน้อย รัศมี 150 • ทะลุกำแพง/เสาของเรา พังของศัตรู • คูลดาวน์ 8 วิ • Stand แตก = Rock Boost Escape: หินดันพุ่ง ~400 ศัตรูรอบจุดเริ่ม (120) กระเด็น คูลดาวน์ 6 วิ',
   hit(pr,t){damage(t,pr.dmg,pr.owner,'proj');},tick:earthBasic,dash:earthDash});
 SPELLS.b_earth=PBASIC[EARTH];

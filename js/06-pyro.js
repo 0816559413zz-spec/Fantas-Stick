@@ -137,10 +137,10 @@ function dragonfallTick(p,inp,dt){
 }
 function dragonfallBoom(p,x,y,gh){
   const V=DRAGONF.v;emit({k:'efx',z:'dfboom',x:Math.round(x),y:Math.round(y),h:gh+0.08,r:V.r,id:p.id});
-  for(const t of foesIn(p.team,x,y,V.r,gh+4))aoeHit(p,t,V.dmg,t=>{addBurn(t,V.burn,p.id);addSlow(t,V.slow,V.slowT);});
+  for(const t of foesIn(p.team,x,y,V.r,gh+4))aoeHit(p,t,V.dmg,t=>{addBurn(t,V.burn,p.id);});   // ไม่มีช้าแล้ว (ผู้ใช้ 2026-11-18)
   damageEnv(x,y,V.r,V.env,p.id,'fireblast',gh);
 }
-const RINGE=defSpell(0,{id:'ringofembers',v:{range:400,r:170,time:4,inSlow:0.8,delay:0.3,dmg:10,hitCd:0.5,edgeSlow:0.6,edgeT:0.4,push:280,wallH:3.6},vn:{range:'ระยะวาง',r:'รัศมีวง',time:'อยู่นาน (วิ)',inSlow:'คนในวง • ความเร็ว (เท่า)',delay:'อุกกาบาตตก (วิ)',dmg:'ดาเมจตอนพยายามออก',hitCd:'โดนซ้ำได้ทุก (วิ)',edgeSlow:'แตะขอบ • ความเร็ว (เท่า)',edgeT:'แตะขอบ • ช้านาน (วิ)',push:'แรงผลักกลับ',wallH:'ความสูงกำแพง (ม.)'},role:'control',n:'Ring of Embers',ic:'⭕',cd:14,d:'อุกกาบาตไฟตกลงที่จุดเล็ง (ระยะ ~400) ไม่มีดาเมจ แล้วกลายเป็นวงเพลิง (รัศมี ~170) นาน 4 วิ — คนข้างในเดินออกไม่ได้และช้าลง 20%',fx:'พยายามเดินออก = 10 ดาเมจ + ผลักกลับเข้าวง • ใครแตะขอบวงไฟ = ช้าลง 40% • คนข้างนอกเดินเข้าได้ • กำแพงมีความสูง: บินสูงกว่ากำแพงออกได้',
+const RINGE=defSpell(0,{id:'ringofembers',v:{range:400,r:170,time:4,inSlow:0.8,delay:0.3,dmg:10,hitCd:0.5,edgeSlow:0.6,edgeT:0.4,push:280,wallH:3.6},vn:{range:'ระยะวาง',r:'รัศมีวง',time:'อยู่นาน (วิ)',inSlow:'คนในวง • ความเร็ว (เท่า)',delay:'อุกกาบาตตก (วิ)',dmg:'ดาเมจตอนพยายามออก',hitCd:'โดนซ้ำได้ทุก (วิ)',edgeSlow:'แตะขอบ • ความเร็ว (เท่า)',edgeT:'แตะขอบ • ช้านาน (วิ)',push:'แรงผลักกลับ',wallH:'ความสูงกำแพง (ม.)'},role:'control',n:'Ring of Embers',ic:'⭕',cd:14,d:'อุกกาบาตไฟตกลงที่จุดเล็ง (ระยะ ~400) ไม่มีดาเมจ แล้วกลายเป็นวงเพลิง (รัศมี ~170) นาน 4 วิ — คนข้างในเดินออกไม่ได้',fx:'พยายามเดินออก = 10 ดาเมจ + ผลักกลับเข้าวง • ใครแตะขอบวงไฟ = ช้าลง 40% • คนข้างนอกเดินเข้าได้ • กำแพงมีความสูง: บินสูงกว่ากำแพงออกได้',
   cast(p,S){
     const V=S.v,q=aimPoint(p,V.range);
     // อุกกาบาตไฟตกลงจุดที่วาง ~0.3 วิ → ตกถึงพื้น = 10 ดาเมจครั้งเดียว (ผู้เล่นสั่ง 2026-10-19) แล้ววงไฟค่อยเริ่ม (กับดักเริ่มช้าลง 0.3 วิ)
@@ -210,8 +210,8 @@ function updateERings(dt){
       // วงไฟมีผลแค่ระดับพื้น: สูงเกินกำแพง = ไม่โดนและหลุดจากการกักขัง (ผู้ใช้ 2026-11-09)
       if((t.isE?(t.h||0):(t.z||0))-R.z>=V.wallH){R.in.delete(t);continue;}
       // แตะขอบวงไฟ: ช้าลง (ไม่ใส่ Burning แล้ว — ผู้เล่นปรับ 2026-10-18)
-      if(Math.abs(d-R.r)<26+tr*0.6&&!(!t.isE&&!t.isM&&t.inv>0)){addSlow(t,V.edgeSlow,V.edgeT);}
-      if(d<R.r-tr*0.5){R.in.add(t);addSlow(t,V.inSlow,0.15);continue;}
+         // ขอบวงไม่ทำให้ช้าแล้ว (ผู้ใช้ 2026-11-18)
+      if(d<R.r-tr*0.5){R.in.add(t);continue;}   // ในวงไม่ช้าแล้ว (ผู้ใช้ 2026-11-18)
       if(!R.in.has(t))continue;
       // อยู่ข้างในแล้วพยายามออก: ผลักกลับเข้าวง
       const m=R.r-tr*0.5-4;t.x=R.x+dx/d*m;t.y=R.y+dy/d*m;t.vx=-dx/d*V.push;t.vy=-dy/d*V.push;if(t.dash>0)t.dash=0;
