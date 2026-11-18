@@ -41,7 +41,7 @@ FXCODE.studio_darkness_scythe=(_x,_y,_h,args,instance)=>{
   if(!SHOW_BLADE){ink.material.opacity=0;ink.material.colorWrite=false;}
    // ผู้ใช้: ไม่เอา "สี่เหลี่ยมเยอะ ๆ ที่ออกมาจากไหนไม่รู้" (หยดหมึก)
   // เปลวดำพุ่งจากสันใบ (แบบ C, ผู้ใช้เลือก 2026-11-18): ลิ้นเปลวแหลมงอกจากสันตลอดแนว สะบัดเหมือนไฟ ปลายหลุดเป็นเศษเล็กลอยขึ้น
-  const FN=0,FP=10,fGeo=new THREE.BufferGeometry(),fpos=new Float32Array(Math.max(1,FN)*FP*2*3),fcol=new Float32Array(Math.max(1,FN)*FP*2*4),fidx=[];
+  const FN=WS0()==='C'?(args.shaftInk?1:12):0,FP=10,   /* C ไม่มีหมึกด้าม → 9 ลิ้นเปลวที่ปลายล่าง */fGeo=new THREE.BufferGeometry(),fpos=new Float32Array(Math.max(1,FN)*FP*2*3),fcol=new Float32Array(Math.max(1,FN)*FP*2*4),fidx=[];
   for(let s=0;s<FN;s++)for(let i=0;i<FP-1;i++){const a=(s*FP+i)*2;fidx.push(a,a+1,a+2,a+1,a+3,a+2);}
   fGeo.setAttribute('position',new THREE.BufferAttribute(fpos,3));fGeo.setAttribute('color',new THREE.BufferAttribute(fcol,4));fGeo.setIndex(fidx);
   const flames=new THREE.Mesh(fGeo,stScyInk());flames.frustumCulled=false;flames.renderOrder=9;scy.add(flames);
@@ -56,7 +56,7 @@ FXCODE.studio_darkness_scythe=(_x,_y,_h,args,instance)=>{
   const aura=[...Array(AURA)].map((_,k)=>{const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:auraTex,color:0x000000,transparent:true,depthWrite:false,toneMapped:false}));sp.renderOrder=9;scy.add(sp);return sp;});
   // พันด้าม: A = 3 จุด ribbon เกลียวแน่น • B = เส้นหมึกยาวพันหลวม ๆ ทั้งด้าม มีห่วง/ปลายสะบัดแบบเปลวไฟ (ผู้ใช้ส่ง ref 2026-11-18)
   const WS=args.wrap||'A';
-  const WR=WS==='C'?2:3,WP=WS==='C'?90:WS==='B'?70:26,wrapGeo=new THREE.BufferGeometry(),wpos=new Float32Array(WR*WP*2*3),wcol=new Float32Array(WR*WP*2*4),widx=[];
+  const WR=WS==='C'?(args.shaftInk?1:0):3,   /* รอบ 14: ผู้ใช้เอาหมึกด้ามออก (เปิดคืนด้วย args.shaftInk) */WP=WS==='C'?110:WS==='B'?70:26,wrapGeo=new THREE.BufferGeometry(),wpos=new Float32Array(WR*WP*2*3),wcol=new Float32Array(WR*WP*2*4),widx=[];
   for(let s=0;s<WR;s++)for(let i=0;i<WP-1;i++){const a=(s*WP+i)*2;widx.push(a,a+1,a+2,a+1,a+3,a+2);}
   wrapGeo.setAttribute('position',new THREE.BufferAttribute(wpos,3));wrapGeo.setAttribute('color',new THREE.BufferAttribute(wcol,4));wrapGeo.setIndex(widx);
   const wrap=new THREE.Mesh(wrapGeo,stScyInk());wrap.frustumCulled=false;wrap.renderOrder=8;scy.add(wrap);
@@ -120,7 +120,7 @@ FXCODE.studio_darkness_scythe=(_x,_y,_h,args,instance)=>{
     }
     if(SHC){sGeo.attributes.position.needsUpdate=true;sGeo.attributes.color.needsUpdate=true;}
     // ---------- เปลวดำจากสัน ----------
-    for(let f=0;f<FN;f++){
+    for(let f=0;f<0;f++){   // (ปิด: เปลวสันแบบรอบ 6 ไม่ใช้แล้ว — flames ใช้กับปลายหมึกด้ามแทน)
       const tt=0.04+0.86*f/(FN-1)+0.01*Math.sin(f*7.3),[sx,sy]=bladePt(tt,0.0),[tx,ty]=tan(tt);
       let nx=-ty,ny=tx;const L0=Math.hypot(nx*0.55,ny*0.55+0.45)||1;const dx=nx*0.55/L0,dy=(ny*0.55+0.45)/L0;   // ชี้ออกจากสัน + เอียงขึ้นฟ้า
       const flick=0.6+0.4*Math.sin(T*(7+f%5)+f*1.9)*Math.sin(T*3.1+f),H=(0.13+0.17*Math.abs(Math.sin(f*2.17)))*(1-0.35*tt)*flick,W0=(0.03+0.025*Math.abs(Math.sin(f*3.3)))*(1-0.3*tt);
@@ -152,7 +152,55 @@ FXCODE.studio_darkness_scythe=(_x,_y,_h,args,instance)=>{
     drops.instanceMatrix.needsUpdate=true;
     // ---------- พันด้าม 3 จุด ----------
     const [z0,z1]=stScyLines.shaft;
-    if(WS==='C')for(let s=0;s<WR;s++){   // แบบ C (ref 35.png): 2 เส้นหมึกเรียบ หนา-บางแบบพู่กัน ห่วงใหญ่ออกนอกด้ามแล้ววกกลับ • บนสุดม้วนเป็นวงก้นหอย • ปลายสะบัดเหมือนเปลว
+    if(WS==='C'){   // รอบ 11 (ผู้ใช้): หมึก 3 ช่วงเว้นระยะ • พลิ้วในตัวเอง ไม่หมุน • หนา-บางแบบพู่กัน (ref scythe_ink_ref.png) • ปลายบนสะบัดเป็นเปลวดำ texture เดียวกับใบ
+      for(let s=0;s<WR;s++){
+        const zb=z0-0.25,zt=z1+0.05;   // รอบ 12 (ref scythe_ink_ref.png): เส้นเดียวจากปลายล่างขึ้นถึงใต้หัว • ห่วงใหญ่ซ้าย-ขวาตัดผ่านด้าม (ล่างกว้าง บนแคบ) • บนสุดม้วนก้นหอย
+        let ex=0,ey=0,ez=0,etx=0,ety=1,etz=0;
+        for(let i=0;i<WP;i++){
+          const u=i/(WP-1),a=0;
+          let yy=zb+(zt-zb)*u+0.02*Math.sin(T*1.3+u*6);
+          // รอบ 13 (ผู้ใช้: "ขยับในตัวเอง ไม่ใช่แค่หมุน"): คลื่นวิ่งไปตามเส้น • ห่วงยืด-หดเปลี่ยนรูปทีละห่วง • ก้นหอยม้วนเข้า-คลาย
+          const amp=(0.26*(1-u)+0.07)*(0.8+0.25*Math.sin(T*1.3-u*4));                       // ห่วงพอง-ยุบไม่พร้อมกัน (ไล่จากล่างขึ้นบน)
+          const ph=u*Math.PI*3.2+0.5+0.45*Math.sin(T*0.9-u*2.5);                              // ห่วงเลื่อนตำแหน่ง/บิดรูปไปมา
+          let x=amp*Math.sin(ph)+0.035*Math.sin(u*14-T*3.2)*(0.4+u)+0.012*Math.sin(T*2.1+u*11),zf=0.05*Math.cos(ph)+0.03*Math.sin(u*9-T*2.4);   // คลื่นเล็กวิ่งขึ้นตามเส้น
+          yy+=0.03*Math.sin(u*10-T*2.6);
+          if(u>0.86){const k=(u-0.86)/0.14,sa=k*(7+2.5*Math.sin(T*1.1)),sr=0.07*(1-k*0.8);x=x*(1-k)+Math.sin(sa)*sr;yy=yy+(Math.cos(sa)-1)*sr*0.6;}   // ก้นหอยม้วนเข้า-คลาย
+          const tip=Math.min(1,u/0.12,(1-u)/0.05),thick=0.3+0.85*Math.pow(Math.abs(Math.sin(u*Math.PI*2.2+s-T*1.6)),0.7);   // หนา-บางไหลขึ้นตามเส้น
+          const w=0.016*thick*tip;   // บางลง
+          const b=(s*WP+i)*2*3,c=(s*WP+i)*2*4;
+          wpos[b]=x-Math.sin(a)*w*0.4;wpos[b+1]=yy-w;wpos[b+2]=zf+Math.cos(a)*w*0.4;wpos[b+3]=x+Math.sin(a)*w*0.4;wpos[b+4]=yy+w;wpos[b+5]=zf-Math.cos(a)*w*0.4;
+          wcol[c+3]=wcol[c+7]=1;
+          if(i===Math.round(WP*0.12)){ex=x;ey=yy;ez=zf;}   // เปลวดำสะบัดจากช่วงล่าง (ใน ref มีเปลวเล็กตรงห่วงล่าง)
+        }
+        // เปลวดำที่ปลายบนของเส้น (ลิ้นไฟหยักแบบเดียวกับใบ สะบัดขึ้น)
+        if(s<FN)for(let i=0;i<FP;i++){
+          const u=i/(FP-1),flick=0.65+0.35*Math.sin(T*(6+s)+s*1.9)*Math.sin(T*2.7+s),H=(0.12+0.05*s)*flick;
+          const sw=Math.sin(T*6+s*1.3+u*3)*0.035*u*u+Math.sin(T*2+s)*0.015*u;
+          const cx=ex+0.05*u+sw,cy=ey+H*u,cz=ez;
+          const w=0.03*Math.pow(1-u,1.2)*(1+0.3*Math.sin(u*9+T*8+s));
+          const a=(s*FP+i)*2*3,c=(s*FP+i)*2*4;
+          fpos[a]=cx-w;fpos[a+1]=cy;fpos[a+2]=cz;fpos[a+3]=cx+w;fpos[a+4]=cy;fpos[a+5]=cz;
+          fcol[c+3]=fcol[c+7]=Math.min(1,(1-u)*2.2);
+        }
+      }
+      // รอบ 15 (ผู้ใช้): เปลวดำที่ปลายล่าง — ลิ้นไฟหยักงอกจากการ์ดเพชร/หนามล่าง ลุกขึ้นแบบเดียวกับเปลวบนใบ (สะบัด ยาว-สั้นไม่พร้อมกัน บางลิ้นหลุดแล้วลุกใหม่)
+      if(!args.shaftInk)for(let f=0;f<FN;f++){
+        const ang=f/FN*Math.PI*2+0.3*Math.sin(f*2.3),r0=0.03+0.04*Math.abs(Math.sin(f*1.7)),y0=0.02+0.4*((f*0.37)%1);
+        const cyc=(T*1.1+f*0.31)%1,lift=cyc>0.75?(cyc-0.75)*0.8:0;   // ช่วงท้ายของรอบ ลิ้นหลุดลอยขึ้น
+        const flick=0.6+0.4*Math.sin(T*(7+f%4)+f*1.9)*Math.sin(T*3.3+f),H=(0.26+0.22*Math.abs(Math.sin(f*2.9)))*flick;
+        for(let i=0;i<FP;i++){
+          const u=i/(FP-1),sw=Math.sin(T*6+f*1.3+u*3)*0.03*u*u;
+          const lean=(0.16+0.06*Math.sin(T*1.3+f))*u*u;   // ผู้ใช้อนุมัติ: เปลวเผาขึ้นเอียงไปทางเดียวกับใบ (+x)
+          const rr=r0*(1-0.5*u),cx=Math.cos(ang)*rr+sw*Math.cos(ang+1.6)+lean,cz=Math.sin(ang)*rr+sw*Math.sin(ang+1.6),cy=y0+lift+H*u*(1-0.15*u);
+          const w=0.045*Math.pow(1-u,1.2)*(1+0.3*Math.sin(u*9+T*8+f));
+          const a=(f*FP+i)*2*3,c=(f*FP+i)*2*4;
+          fpos[a]=cx-Math.sin(ang)*w;fpos[a+1]=cy;fpos[a+2]=cz+Math.cos(ang)*w;fpos[a+3]=cx+Math.sin(ang)*w;fpos[a+4]=cy;fpos[a+5]=cz-Math.cos(ang)*w;
+          fcol[c+3]=fcol[c+7]=Math.min(1,(1-u)*2.2)*(lift>0?Math.max(0,1-lift*4):1);
+        }
+      }
+      if(FN){fGeo.attributes.position.needsUpdate=true;fGeo.attributes.color.needsUpdate=true;}
+    }
+    else if(WS==='C_old')for(let s=0;s<WR;s++){   // แบบ C (ref 35.png): 2 เส้นหมึกเรียบ หนา-บางแบบพู่กัน ห่วงใหญ่ออกนอกด้ามแล้ววกกลับ • บนสุดม้วนเป็นวงก้นหอย • ปลายสะบัดเหมือนเปลว
       const zt=(stScyLines.top||2.2)-0.15,zb=z0-0.35;
       for(let i=0;i<WP;i++){
         const u=i/(WP-1),zz=zb+(zt-zb)*u+0.03*Math.sin(T*1.8+u*6+s*3),flow=0.04*Math.sin(T*0.5+s);   // ห่วงเลื่อนขึ้นช้า ๆ (รอบ 3: นิ่งขึ้น)
