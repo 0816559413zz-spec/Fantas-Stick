@@ -13,7 +13,7 @@ CITY_MID:140 CITY_C2:140 cityModeData:141 mapArea:157 AREA:158 areaClamp:160
 ## js/02-citytest.js (28) — แมพทดสอบเมืองใหญ่ (กล่องเทา) — ใช้วัดความลื่นของเครื่องยนต์ก่อนสร้างเ…
 CITY_N:4 CITY_B:4 CITY_ROAD:4 genCityTest:5 cityTestProps:19
 
-## js/02-data.js (384) — 
+## js/02-data.js (384) — ค่าคงที่ของเกม
 W:4 H:4 PR:4 PILLARS:6 SPAWNF:7 mulberry:9 genForest:10 genPitch:27 genHogsmeade:36
 §54 แผนที่โล่ง 3 แบบ (ผู้ใช้: ป่ามืดไม่สนุก อยากได้ที่โล่งๆ)
 genMeadow:55 genLake:61 genRuins:66
@@ -34,7 +34,8 @@ FCS_C:7 FCS_WH:8 genFcs:9
 §103 พื้นที่เล่นตามเฟส (กำแพงล่องหน) + เขตจุดเกิดปลอดภัย — ใช้ทั้งโฮสต์ (G…
 SGPH:104 SG_SPR:105 _sgAreaC:106 sgArea:107 sgClamp:113 sgInArea:123
 
-## js/03-spells-core.js (249) — 
+## js/03-spells-core.js (249) — ระบบคาถาใหม่: สาย (path) × คาถา (spell) + สถานะ (status effects)
+§6 ไอคอนคาถา: จาก game-icons.net (CC BY 3.0, เครดิตใน "คู่มือ" และ icons…
 ICONS:8 ICOALIAS:9 hasIco:10 ICOBASE:12 icoURL:13 ICO:14 icoTint:15 icoHTML:24 PATHS:25 SPELL_LIST:34 SPELLS:34 defSpell:35 SLOTK:36 BRMAP:36 KITP:37 parseKit:38 cleanKit:55 setKit:56 pathReset:59
 §61 สถานะ (ใช้ได้ทั้งผู้เล่นและศัตรู)
 isBig:62 ccScale:64 ccTouch:65 addStun:66 addRoot:67 addFreeze:68 addSlow:73 addChill:74 ignite:79 FX_SHOCK_CYAN:87 FX_ONFIRE:87 shock:88 knock:93 addWard:94 addFrostSlow:96 frostSlow:97 moveMul:104 BRN_MAX:106 addBurn:107 addOnFire:109 addXBurn:110 addPoison:111 addSil:112 addFear:113 addBlind:114 addMark:115 healT:117 tickStatus:122 clearStatus:145 fxMask:146
@@ -207,6 +208,9 @@ CITY_FL:8 CITY_PW:8 CDMG:9 CITYD:16 cityOn:17 cityLayout:19 cityReset:29 cityApp
 §146 ข้างในตึก (2026-10-28 ผู้ใช้: เดินเข้าได้ 1–3 ชั้น มีทางขึ้น • ผนังนอ…
 CIN:150 cityInterior:151 cinSlabOn:180 cinOpenPanel:182 cityIwHit:184 cityRampHit:186 cinIwSegs:189 cinIwRects:190 cinSecAt:191 citySecHit:193 cinIn:195 cinHole:196 cinRampH:197 _sgCI:198 cityBoxGrid:199 cityRoomAt:200 cityFloorH:202 cityCeilH:207 cinWallRect:211 cityCollideIn:214 cityProjIn:224 _sgCS:242 citySolidAt:243 cityRay:252 cityRoomBox:255 citySnapB:256 citySnapS:257 cityParse:259
 
+## js/12-efs.js (77) — สภาพธาตุบนฉาก (Element Surfaces) — เฟส 1: ไฟบนรั้วไม้ (designs/element-surfaces.md)
+EFSV:9 EFS:10 efsLv:11 efsBuild:12 efsDist:28 efsHeat:29 efsProj:34 efsEnv:40 _efsHit:44 efsTick:45 efsSnap:66 efsParse:70 efsHostView:77
+
 ## js/13-enemies.js (171) — ศัตรู (โหมด Co-op)
 spawnEnemy:2 setupWave:19 bossPhase:36 enemySlam:44 updateEnemies:55
 
@@ -229,7 +233,8 @@ NAV_MAPS:14 NAV_EYE:14 NAV:15 navOn:17 navSig:18 navEnsure:26 navBuild:32 navCel
 ## js/15-botplay.js (268) — 
 BOT_RANGE:7 botMem:10 botWallBehind:12 _bspd:22 botSave:24 botWant:26 botClassPlanFor:65 botClassAim:66 botClassGround:71 botClassTarget:72 botClassLane:78 botClassPlan:81 botWindPlan:97 botNaturePlan:172 botCombo:242
 
-## js/15-modes.js (433) — 
+## js/15-modes.js (433) — โหมดพิเศษ: ควิดดิช / แข่งไม้กวาด / แบทเทิลรอยัล / หาลอร์ดโวลเดอมอร์ / ห้องฝึก
+§4 ส่งข้อความลับถึงผู้เล่นคนเดียว (เช่น บทบาทในโหมดหาลอร์ดโวลเดอมอร์)
 sendPriv:5 TASKF:9 taskPts:10 raceRings:11 modeInit:17 spawnDummy:64 trainTick:69 TR_KEYS:86 trTeams:88 trCmd:102 hostEndTraining:131
 §133 ควิดดิช
 quidThrow:134 quidDrop:140 quidArea:146 quidTick:147 snitchTick:183
@@ -262,7 +267,7 @@ MY:210 myDB:211 mySave:212 myLoad:215 myDecodeReady:221 myPlay:222 myNext:234 my
 §256 เพลงประกอบ (สร้างสดตามแผนที่)
 MUSIC:257 THEMES:258 padNote:263 musicTick:270 toggleMusic:299
 
-## js/19-client.js (289) — 
+## js/19-client.js (289) — ฝั่งแสดงผล (ทุกเครื่อง รวมโฮสต์ ใช้ snapshot เดียวกัน)
 cv:4 cx:4 DPR:5 SW:5 SH:5 resize:6 VIEW:12 screen:13 lastBuffKey:13 overShown:13 lastCount:13 PARTS:14 TEXTS:14
 §15 งบเอฟเฟกต์ (VFX budget)
 VFXB:20 _apush:21 vfxQual:29 vfxBegin:31 vfxEnd:34 vfxOnce:36 vfxExtra:38 PCOL:39 setScreen:41 onLobby:53
@@ -338,12 +343,12 @@ CITY_STY:181 CITY_VEH:188 cityFacade:190 CITYK:203 _cZ:204 _cT:204 _cR:204 _cC:2
 §259 ตึกไฮไลต์ล้มทั้งตึก (ขั้น 7)
 _ctA:262 _ctB:262 _ctC:262 cityTowerPose:263 cityTowerAnim:271 cityTowerRubble:278 CAREA:292 cityAreaSync:293 cityViewSync:305 cityDebris:349 cityFX:358
 
-## js/28-fcs-build.js (137) — ภาพแผนที่ First Castle Strike (แบบ Basic: กล่อง/ทรงพื้นฐาน ยังไม่มีโมเดลจริง) + ภาพ/HUD โ…
-buildFcs:5 fcsFences:36
-§48 ภาพโหมด (ลูกข่ายทุกเครื่องจาก snapshot M.sg)
-SGV3:49 sgClearView:50 sgViewBuild:51 SGVZR:70 sgBarrier:72 sgSync:86 sgDust:107 sgFx:108
-§113 HUD
-sgTop:114 sgHud:116
+## js/28-fcs-build.js (170) — ภาพแผนที่ First Castle Strike (แบบ Basic: กล่อง/ทรงพื้นฐาน ยังไม่มีโมเดลจริง) + ภาพ/HUD โ…
+buildFcs:5 EFS3:37 fcsFences:38 _efC:55 _efM:55 _efS:55 _efZ:55 efsView:56
+§81 ภาพโหมด (ลูกข่ายทุกเครื่องจาก snapshot M.sg)
+SGV3:82 sgClearView:83 sgViewBuild:84 SGVZR:103 sgBarrier:105 sgSync:119 sgDust:140 sgFx:141
+§146 HUD
+sgTop:147 sgHud:149
 
 ## js/28-fcs-forest.js (202) — 
 FF:7 FF_X1:8 FF_NS:9 ffGroundTex:11 ffParts:33 fcsForest:40 ffMerge:123 ffDetail:131 fcsRuin:158 fcsForestTick:192 FFC:202
@@ -435,7 +440,7 @@ bpOpen:51 bpOn:51 bpKey:51 bpShow:53 bpSync:55 hovEl:125
 §126 หน้าตั้งค่า
 setRow:127 setTog:128 setTab:129 XHC:130 XHN:130 setOpts:131 SET_ICO:133 SET_EN:136 renderSettings:137 drawXhPrev:159 openSettings:160 closeSettings:162 modeIcon:218 modeTitle:219 renderLobby:220
 
-## js/41-debug.js (180) — 
+## js/41-debug.js (181) — 
 botBrain:6 _obsKeep:49 balArena:50 _balStash:53 balIsolate:54 balReset:57 balDuel:63 balTour:79 balCoop:93 balSpellTest:109
 §130 Service Worker (sw.js): เก็บไฟล์เกมไว้ในเครื่อง เปิดครั้งต่อไปเร็วขึ้…
 SWK:131 swSetup:132
@@ -838,4 +843,4 @@ _dvCyl:135 _dvMat:136 devOverlay:137
 §157 หน้าต่าง
 _dvPanel:158 _dvBtn:159 devToggle:162 dvBtn:167 dvRow:168 dvTog:169 dvSec:170 devRender:171 devPos:208
 
-(102 files, 28657 lines)
+(103 files, 28768 lines)

@@ -374,5 +374,15 @@
   "efx:stbash": {
     "fx": "storm/shield_bash",
     "mode": "add"
-  }
+  },
+  "efs:b": [
+    {
+      "fx": "env/brk_break_wood",
+      "mode": "add",
+      "p": {
+        "r": "ev.r/20",
+        "hh": "ev.hh"
+      }
+    }
+  ]
 }

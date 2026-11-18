@@ -84,7 +84,7 @@ function bldSupport(b){
 }
 // ให้คาถาวงกว้างพังสิ่งแวดล้อม: damageEnv(x,y,รัศมี px,ดาเมจ,id,ธาตุ,ความสูงจุดระเบิด) = ลัง/ถัง (prop) + ชิ้นย่อยบ้านในวง (ขอบวง = เหลือ 30%)
 function damageEnv(x,y,rad,dmg,by,el,h){
-  damagePropsIn(x,y,rad,dmg,by);damageBrkIn(x,y,rad,dmg,h);sgWallEnv(x,y,rad,dmg);   // กำแพงพังได้โหมดบุกปราสาท (js/15-siege)
+  damagePropsIn(x,y,rad,dmg,by);damageBrkIn(x,y,rad,dmg,h);efsEnv(x,y,rad,by,el,h);sgWallEnv(x,y,rad,dmg);   // กำแพงพังได้โหมดบุกปราสาท (js/15-siege)
   for(const w of (G?.walls||[]))if(w.wood&&w.team!==G.players[by]?.team&&natureWallContains(w,x,y,h||0,rad)){
     natureWallDamage(w,dmg,x,y,by,el);
   }
@@ -491,7 +491,7 @@ function projStep(pr,dt,ps){
     if(pr.life<=0||pr.x<20||pr.x>MW-20||pr.y<20||pr.y>MH-20||pr.h>40){killProj(pr);return;}
     if(pr.h<0.05||(TERR&&terrSolid(pr.x,pr.y,pr.h))||(BLDG.length&&pr.h<bldMoundH(pr.x,pr.y))){pr.h=Math.max(pr.h,0.1);killProj(pr);return;}   // + ชนเนินซากบ้าน
     let hp=false;
-    for(const c of sgNear(sgObs(),pr.x,pr.y,pr.r,_sgPO))if(c.bi===undefined&&!(c.bot!==undefined&&pr.h<c.bot)&&(c.top!==undefined?terrT(pr.x,pr.y)+pr.h<c.top:pr.h<c.hgt)&&(pr.x-c.x)**2+(pr.y-c.y)**2<(c.r+pr.r)**2){hp=true;if(c.cb!==undefined||c.ci!==undefined)cityHitObs(c,pr);if(c.sgw!==undefined)sgWallHit(c,pr);break;}
+    for(const c of sgNear(sgObs(),pr.x,pr.y,pr.r,_sgPO))if(c.bi===undefined&&!(c.bot!==undefined&&pr.h<c.bot)&&(c.top!==undefined?terrT(pr.x,pr.y)+pr.h<c.top:pr.h<c.hgt)&&(pr.x-c.x)**2+(pr.y-c.y)**2<(c.r+pr.r)**2){hp=true;if(c.cb!==undefined||c.ci!==undefined)cityHitObs(c,pr);if(c.sgw!==undefined)sgWallHit(c,pr);if(c.efs!==undefined)efsProj(c,pr);break;}
     if(!hp&&BLDG.length)for(const b of sgNear(sgBld(),pr.x,pr.y,pr.r,_sgPB)){if(!bldNear(b,pr.x,pr.y,pr.r))continue;const j=bldPieceAt(b,pr.x,pr.y,pr.h,pr.r);if(j>=0){hitBldPiece(b,j,pr.dmg||5,projEl(pr),pr.x-pr.vx*0.08,pr.y-pr.vy*0.08);hp=true;break;}}
     if(!hp&&PROPON)for(const c of sgNear(sgProps(),pr.x,pr.y,pr.r,_sgPP))if(c.st!==1&&pr.h<c.hgt&&(pr.x-c.x)**2+(pr.y-c.y)**2<(c.r+pr.r)**2){hitProp(c,pr.dmg||5,pr.owner);hp=true;break;}
     if(!hp)for(const w of G.walls)if(w.hp>0&&pr.team!==w.team&&natureWallContains(w,pr.x,pr.y,pr.h,pr.r)){

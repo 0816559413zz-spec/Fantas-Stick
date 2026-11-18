@@ -204,7 +204,7 @@ function updateChan(dt){
   for(const c of G.chan){c.t-=dt;c.tt-=dt;const p=G.players[c.owner];if(!p||!p.alive||p.downed||(c.stun&&p.stun>0)){c.t=0;if(p&&c.stun)p.breath=0;continue;}if(c.tt<=0){c.tt=c.tick;c.fn(c,p);}}
   G.chan=G.chan.filter(c=>c.t>0);
 }
-function updateSpells(dt){updateStorm(dt);updateEarth(dt);updateWind(dt);updateWater(dt);updateZones(dt);updateFirePaths(dt);updateStrikes(dt);updateWalls(dt);natureUpdate(dt);updateChan(dt);updateERings(dt);updateIces(dt);updateWaves(dt);updateGlaciers(dt);updateBldg(dt);}
+function updateSpells(dt){updateStorm(dt);updateEarth(dt);updateWind(dt);updateWater(dt);updateZones(dt);updateFirePaths(dt);efsTick(dt);updateStrikes(dt);updateWalls(dt);natureUpdate(dt);updateChan(dt);updateERings(dt);updateIces(dt);updateWaves(dt);updateGlaciers(dt);updateBldg(dt);}
 // จุดเล็งของคาถาวางพื้น: ถ้ามีศัตรูอยู่ในแนวเล็งให้วางที่ตัวมัน ไม่งั้นวางที่ระยะ 75% ของพิสัย
 function aimPoint(p,range,clip=true){
   // ผู้เล่นจริง: วางตรงจุดที่เป้ากลางจอชี้พื้น (ไม่เกินพิสัย)
