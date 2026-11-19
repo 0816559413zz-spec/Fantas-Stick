@@ -112,7 +112,7 @@ FXCODE.studio_darkness_scythe=(_x,_y,_h,args,instance)=>{
   // ว่าง = เคียวตั้งแนวตั้ง ลอยวนรอบตัวช้า ๆ • ฟันแรกเริ่มจากฝั่งที่เคียวอยู่ (อยู่ข้างหลัง = ไปข้างใดข้างหนึ่งก่อน)
   // แต่ละครั้ง: เงื้อ 0.2 → กวาด 120° ด้านหน้า → ค้าง 0.3 → ควง 0.3 (ละอองหมึกสาด) พร้อมเลื่อนไปจุดเตรียม → ฟันต่อจากฝั่งที่จบ (สลับซ้าย-ขวา)
   // ไม่ได้ฟันเกิน 2 วิ = กลับแนวตั้งแล้ววนต่อ • พรีวิววนลูป: ว่าง 2 วิ → ฟัน 3 ครั้งห่าง 1.2 วิ → รอ 2 วิ → กลับท่าว่าง
-  const LOOP=8,SW0=2.0,GAP=1.2,NSW=3,WU=0.2,SWP=0.18,HOLD=0.15,SPIN=0.3,A=1.05,BK=0.6,RI=1.7,ORB=0.45,REACH=args.reach??7.6;
+  const LOOP=8,SW0=2.0,GAP=1.2,NSW=3,WU=0.27,SWP=0.18,HOLD=0.15,SPIN=0.3,A=1.05,BK=0.6,RI=1.7,ORB=0.45,REACH=args.reach??7.6;
   const wrapA=x=>{x=(x+Math.PI)%(Math.PI*2);if(x<0)x+=Math.PI*2;return x-Math.PI;};
   const orbA=T=>wrapA(-1.2+ORB*T);   // มุมรอบตัวตอนว่าง (0 = หน้า, + = ขวา)
   const radOf=g=>new THREE.Vector3(-Math.sin(g),0,Math.cos(g));   // anchor: +z หน้า, −x ขวา
@@ -154,6 +154,56 @@ FXCODE.studio_darkness_scythe=(_x,_y,_h,args,instance)=>{
   };
   const baPose=T=>baState(T);
   root.userData.baState=baState;   // ดีบัก/ทดสอบ
+  // ---------- ท่าผู้ร่าย (ผู้ใช้ 2026-11-19) ----------
+  // ง้าง: แขนขวาถือคทายืดออกกว้างไปฝั่งที่เคียวอยู่ ลำตัวบิดนิดเดียว → ค้างสั้น ๆ → สะบัดคทาเร็วก่อน ลำตัวบิดตามหน่อย
+  // เคียวกวาดตามหลังมือ ~0.07 วิ • ควง = ข้อมือวนวงเล็กตามเคียว • ปลายคทาดำ มีหางสั้นตอนสะบัด
+  const FL0=0.2,FLD=0.1;   // เริ่มสะบัด (หลังเริ่มง้าง) • เวลาสะบัด
+  const handState=T=>{   // gh = มุมแขน (0 หน้า, + ขวา) • el = เงยแขน • by = บิดตัว • fl = แรงสะบัด (หาง)
+    const kc=Math.floor(T/LOOP),t=T-kc*LOOP,g0=orbA(kc*LOOP+SW0),side0=Math.sin(g0)>=0?1:-1;
+    const IG=0.35,IE=-1.2;let gh=IG,el=IE,by=0,fl=0;
+    const lim=x=>Math.max(-1.3,x);   // แขนขวาข้ามไปฝั่งซ้ายได้ไม่สุด
+    if(t>=SW0){
+      const k=Math.min(NSW-1,Math.floor((t-SW0)/GAP)),u=t-SW0-k*GAP,from=side0*(k%2?-1:1),to=-from;
+      const R1=[1.3,0,0.3],L1=[-0.9,0,-0.35];   // ปลายสะบัด: ขวา = แขนกางกว้าง • ซ้าย = แขนขวาข้ามตัวไปหน้าซ้าย (คทาอยู่มือขวาตลอด)
+      const hold=to>0?R1:L1,back=from>0?[1.65,0.12,0.1]:[-1.1,0.12,-0.22],prev=k===0?[IG,IE,0]:(from>0?R1:L1);
+      const mix=(a,b,e)=>[a[0]+(b[0]-a[0])*e,a[1]+(b[1]-a[1])*e,a[2]+(b[2]-a[2])*e];
+      let P;
+      if(u<FL0){P=mix(prev,back,ez(0,0.14,u));}                                  // ง้างแขนกว้าง แล้วค้าง (หน่วงก่อนสะบัด)
+      else if(u<FL0+FLD){const x=(u-FL0)/FLD,e=x*x*(3-2*x);P=mix(back,hold,e);fl=1;}   // สะบัดเร็ว
+      else{P=hold.slice();fl=Math.max(0,1-(u-FL0-FLD)/0.12);
+        const s0=WU+SWP+HOLD,w=(u-s0)/(SPIN+0.14);if(w>0&&w<1){const a=Math.sin(Math.PI*w),ph=-from*w*Math.PI*2*3;P[0]+=0.14*a*Math.sin(ph);P[1]+=0.14*a*Math.cos(ph);}}   // ข้อมือวนตามเคียวที่ควง
+      if(k===NSW-1){const bk=t-(SW0+(NSW-1)*GAP+WU+SWP)-2.0;if(bk>0)P=mix(P,[IG,IE,0],ez(0,0.5,bk));}   // กลับท่ายืนพร้อมเคียว
+      [gh,el,by]=P;
+    }
+    return {gh:lim(gh),el,by,fl};
+  };
+  let caster=null;const tipBall=new THREE.Mesh(new THREE.SphereGeometry(0.045,10,8),new THREE.MeshBasicMaterial({color:0x000000,toneMapped:false}));
+  if(BA&&typeof stDarkShiftStudent==='function'){
+    const look={...getLook(NET.myId),wn:0};caster=stDarkShiftStudent(root,look,'Darkness BA caster',lookTint(look));
+    caster.wandG.visible=true;caster.tip.visible=false;tipBall.position.set(0,-1.1,0);caster.armR.add(tipBall);
+  }
+  const _d=new THREE.Vector3(),_qb=new THREE.Quaternion(),_dn=new THREE.Vector3(0,-1,0),_tp=new THREE.Vector3();
+  const poseCaster=T=>{const H=handState(T);
+    caster.b.rotation.set(0,-H.by,0);
+    _d.set(-Math.sin(H.gh)*Math.cos(H.el),Math.sin(H.el),Math.cos(H.gh)*Math.cos(H.el));
+    _qb.setFromAxisAngle(new THREE.Vector3(0,1,0),H.by);_d.applyQuaternion(_qb);   // ทิศแขนในพื้นที่ลำตัว (ลำตัวบิด −by)
+    caster.armR.quaternion.setFromUnitVectors(_dn,_d.normalize());
+    caster.armL.rotation.set(0,0,0.18);for(const L of caster.legs)L.rotation.x=0;
+    return H;};
+  const tipAt=(T,out)=>{poseCaster(T);caster.g.updateWorldMatrix(false,false);caster.b.updateMatrix();caster.armR.updateMatrix();tipBall.updateMatrix();
+    out.set(0,0,0);tipBall.updateWorldMatrix(true,false);tipBall.getWorldPosition(out);return root.worldToLocal(out);};
+  // หางปลายคทา: ริบบอนดำบางสั้น ๆ เฉพาะตอนสะบัด
+  const TH=14,ttGeo=new THREE.BufferGeometry(),ttP=new Float32Array(TH*2*3),ttC=new Float32Array(TH*2*4),ttI=[];
+  for(let i=0;i<TH-1;i++){const a=i*2;ttI.push(a,a+1,a+2,a+1,a+3,a+2);}
+  ttGeo.setAttribute('position',new THREE.BufferAttribute(ttP,3));ttGeo.setAttribute('color',new THREE.BufferAttribute(ttC,4));ttGeo.setIndex(ttI);
+  const tipTail=new THREE.Mesh(ttGeo,stScyInk());tipTail.frustumCulled=false;tipTail.renderOrder=8;if(caster)root.add(tipTail);
+  const updCaster=T=>{if(!caster)return;
+    {const me=typeof PM3!=='undefined'&&PM3.get(NET.myId);if(me&&me.g.visible){me.g.visible=false;anchor.geo.addEventListener('dispose',()=>{me.g.visible=true;});}}   // ซ่อนตัวผู้เล่นจริง (ใช้ตัวผู้ร่ายของพรีวิวแทน)
+    for(let i=0;i<TH;i++){const tt=T-i*0.014,a=i/(TH-1);tipAt(tt,_tp);const H=handState(tt),w=0.07*(1-a)+0.01;
+      ttP[i*6]=_tp.x;ttP[i*6+1]=_tp.y-w;ttP[i*6+2]=_tp.z;ttP[i*6+3]=_tp.x;ttP[i*6+4]=_tp.y+w;ttP[i*6+5]=_tp.z;
+      const al=Math.pow(1-a,1.3)*H.fl;ttC[i*8+3]=al;ttC[i*8+7]=al;}
+    ttGeo.attributes.position.needsUpdate=true;ttGeo.attributes.color.needsUpdate=true;
+    poseCaster(T);if(caster.rig){for(const l of caster.rig)l.w=1;rigSync(caster,0);}};
   const update=()=>{
     if(!voidFixed&&holder.children.length){fixVoid();voidFixed=true;}
     // รอบ 9: หยดหมึกตามสัน = ส่วนหนึ่งของ "เปลวหยักติดสัน" ในแบบ B → เปิดไว้
@@ -162,6 +212,7 @@ FXCODE.studio_darkness_scythe=(_x,_y,_h,args,instance)=>{
     pivot.rotation.set(0.12*Math.sin(T*1.3),T*0.9,0.18+0.06*Math.sin(T*0.8));
     pivot.position.y=(args.lift??0.05)+0.08*Math.sin(T*1.7);
     {const k=Math.floor(T/3.1),u=(T-k*3.1)/0.7;if(!BA&&u<1&&k%2===0){pivot.rotation.y+=Math.PI*2*u*u*(3-2*u);}}   // บางครั้งหมุนควงตัวเอง 1 รอบ
+    if(BA)updCaster(T);
     if(BA){const P=baPose(T);if(P.w>0.001){Qi.setFromEuler(pivot.rotation);pivot.quaternion.copy(Qi).slerp(P.QB,P.w);pivot.position.lerp(P.pos,P.w);}
       const me=typeof PM3!=='undefined'&&PM3.get(NET.myId);if(me&&me.b){me.b.userData.scyY??=me.b.rotation.y;me.b.rotation.y=me.b.userData.scyY+P.tw;}   // ตัวบิดตามแรงเหวี่ยง
 
