@@ -124,7 +124,7 @@ FXCODE.studio_darkness_scythe=(_x,_y,_h,args,instance)=>{
     vY.copy(yH).lerp(yV,vert).normalize();vX.copy(xH).lerp(xV,vert).normalize();
     vZ.crossVectors(vX,vY).normalize();vX.crossVectors(vY,vZ).normalize();
     MB.makeBasis(vX,vY,vZ);const q=new THREE.Quaternion().setFromRotationMatrix(MB);
-    if(cock){const th=cock*(vZ.y<0?1:-1);q.premultiply(new THREE.Quaternion().setFromAxisAngle(vY,th));}   // ง้างใบ: บิดใบรอบด้ามให้ปลายเชิดถอยไปหลัง (ผู้ใช้ 2026-11-19: เหมือนชาร์จก่อนฟัน)
+    if(cock){const up=new THREE.Vector3(0,1,0),side=new THREE.Vector3().crossVectors(up,vY).dot(mot);q.premultiply(new THREE.Quaternion().setFromAxisAngle(up,cock*0.55*(side>0?-1:1)));}   // ง้าง (ผู้ใช้ 2026-11-19): หัวเคียวเบี่ยงถอยไปหลังทางแนวนอนเท่านั้น ไม่เงยขึ้น หมุนรอบแกนตั้งที่โคนด้าม
     const self=vert*Math.sin(0)+0;   // แนวตั้งควงตัวเองช้า ๆ ใส่ทีหลังตาม T
     const pos=new THREE.Vector3(0,1.25+(0.05+2.0*S0-1.25)*vert,0).addScaledVector(R,rad);   // จุดหัวเคียว • แนวตั้ง = โคนด้ามอยู่ระดับพื้นเหมือนท่าว่างเดิม
     pos.addScaledVector(vY,-2.0*S0);
