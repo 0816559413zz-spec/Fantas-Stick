@@ -1,5 +1,6 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
 
+- 2026-11-19 — **Darkness เคียว BA รอบ 8:** เคียวหันไปข้างหน้าตลอดตอนฟัน ด้ามชี้ออกจากตัวตามแนวรัศมี ปลายใบนำทางกวาด → หางด้ามเป็นผืนเทากว้าง ใบดำอยู่ขอบนอก
 - 2026-11-19 — **Workflow with Claude:** added rule — no progress narration between tool calls, final reply only.
 
 - 2026-11-19 — **Darkness เคียว BA:** หางด้ามยาวและจางพร้อมหางใบ (ใช้โปรไฟล์ความโปร่งเดียวกัน)

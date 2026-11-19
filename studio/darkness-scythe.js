@@ -111,9 +111,10 @@ FXCODE.studio_darkness_scythe=(_x,_y,_h,args,instance)=>{
     const f=new THREE.Vector3(0,0,1),r=new THREE.Vector3(-1,0,0);   // anchor: +z หน้า, −x ขวา
     const rad=new THREE.Vector3().copy(f).multiplyScalar(Math.cos(ang)).addScaledVector(r,Math.sin(ang)).normalize();
     const mot=new THREE.Vector3().copy(f).multiplyScalar(-Math.sin(ang)).addScaledVector(r,Math.cos(ang)).multiplyScalar(-dir).normalize();   // ทิศกวาด (สลับตามรอบ)
-    vX.copy(rad);vX.y=-0.42;vX.normalize();
-    vY.copy(mot).multiplyScalar(-1);vY.y=0.25;vY.normalize();   // ด้ามนำ คมหันไปทางที่กวาด
-    vZ.crossVectors(vX,vY).normalize();vY.crossVectors(vZ,vX).normalize();
+    // ผู้ใช้ 2026-11-19: เคียวหันไปข้างหน้าตลอด = ด้ามชี้ออกจากตัวตามแนวรัศมี ปลายใบนำทางกวาด → ด้ามกวาดเป็นผืนกว้าง หางด้ามเห็นชัด (เดิมด้ามนอนตามทางกวาด หางเลยเป็นเส้นบาง)
+    vY.copy(rad);vY.y=0.2;vY.normalize();
+    vX.copy(mot);vX.y=0;vX.normalize();
+    vZ.crossVectors(vX,vY).normalize();vX.crossVectors(vY,vZ).normalize();
     MB.makeBasis(vX,vY,vZ);QB.setFromRotationMatrix(MB);
     if(spin){Qi.setFromAxisAngle(vY,spin);QB.premultiply(Qi);}
     const head=new THREE.Vector3(0,1.25+shake,0).addScaledVector(rad,0.55+(args.reach??7.6)*out);
