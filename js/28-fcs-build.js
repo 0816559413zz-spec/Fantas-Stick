@@ -173,27 +173,38 @@ function fcsFallTick(dt){
   for(let i=P.fall.length-1;i>=0;i--){const f=P.fall[i];f.vy-=14*dt;f.x+=f.vx*dt;f.z+=f.vz*dt;f.y+=f.vy*dt;f.rx+=f.w*dt;f.rz+=f.w*0.7*dt;
     const floor=(onDeck(f.x,f.z)?B.DH:TW(f.x,f.z))+f.s*0.3;
     if(f.y<=floor&&f.vy<0){f.y=floor;if(Math.abs(f.vy)>3){f.vy*=-0.3;f.vx*=0.5;f.vz*=0.5;f.w*=0.5;}else f.done=1;}
-    if(f.k===undefined){if(P.nC>=1200){P.fall.splice(i,1);continue;}f.k=P.nC++;}
+    if(f.k===undefined){if(P.freeC&&P.freeC.length)f.k=P.freeC.pop();else if(P.nC>=1200){P.fall.splice(i,1);continue;}else f.k=P.nC++;}
     P.imC.setMatrixAt(f.k,m4.compose(new THREE.Vector3(f.x,f.y,f.z),q.setFromEuler(e.set(f.done?0.1:f.rx,f.ry,f.done?0.05:f.rz)),new THREE.Vector3(f.s*1.4,f.s*0.6,f.s*0.8)));
-    if(f.done)P.fall.splice(i,1);}
+    if(f.done){P.fall.splice(i,1);(P.restC||(P.restC=[])).push({k:f.k,t:performance.now(),m:m4.clone()});}}
   P.imC.count=P.nC;P.imC.instanceMatrix.needsUpdate=true;
 }
 // per frame: push chunk stages into the data texture; a chunk that just broke drops its stones one by one into a rubble pile
 function fcsShellView(dt){
-  fcsFallTick(dt);fcsPileTick(dt);
+  fcsFallTick(dt);fcsPileTick(dt);fcsRubbleFade();
   const P=FCSB;if(!P.shell||P.grp.parent!==world||P.sv===BSKN.ver)return;P.sv=BSKN.ver;
   const D=P.tex.image.data;
   for(const c of BSKN.C){const st=c.st|0;D[c.i*4]=st;if(st>=3&&P.prev[c.i]<3&&P.prev.ok)fcsShellFall(c);P.prev[c.i]=st;}
   P.prev.ok=1;P.tex.needsUpdate=true;gl.shadowMap.needsUpdate=true;
 }
 // fallen stones: one InstancedMesh (unit box scaled to each block), simple tumble, then they stack on a 0.4 m height grid -> piles at the wall foot
-const FPILE={im:null,n:0,cap:7400,live:[],h:new Map(),m4:null,q:null,e:null};
+const FPILE={im:null,n:0,cap:7400,live:[],h:new Map(),m4:null,q:null,e:null,free:[],rest:[],cnt:new Map()};
+// rubble is visual only (no collision) -> like other wreckage it sinks into the ground and vanishes after BF_LIFE s; freed slots are reused
+const _rfP=new THREE.Vector3(),_rfQ=new THREE.Quaternion(),_rfS=new THREE.Vector3();
+function fcsFadeList(im,list,free,gone){if(!im||!list||!list.length)return false;const now=performance.now(),L=BF_LIFE*1000,F=BF_FADE*1000;let up=false;
+  for(let i=list.length-1;i>=0;i--){const r=list[i],age=now-r.t;if(age<L-F)continue;const k=Math.max(0,(L-age)/F);
+    r.m.decompose(_rfP,_rfQ,_rfS);_rfS.multiplyScalar(k);_rfP.y-=(1-k)*0.3;im.setMatrixAt(r.k,_rfS.x>0?new THREE.Matrix4().compose(_rfP,_rfQ,_rfS):new THREE.Matrix4().makeScale(0,0,0));up=true;
+    if(k<=0){list.splice(i,1);free.push(r.k);if(gone)gone(r);}}
+  if(up)im.instanceMatrix.needsUpdate=true;return up;}
+function fcsRubbleFade(){const F=FPILE,P=FCSB;let up=false;
+  up=fcsFadeList(F.im,F.rest,F.free,r=>{const n=(F.cnt.get(r.c)||1)-1;if(n>0)F.cnt.set(r.c,n);else{F.cnt.delete(r.c);F.h.delete(r.c);}})||up;
+  if(P.imC)up=fcsFadeList(P.imC,P.restC,P.freeC||(P.freeC=[]))||up;
+  if(up)gl.shadowMap.needsUpdate=true;}
 function fcsShellFall(c){
   const P=FCSB,bl=P.blk&&P.blk.get(c.i);if(!bl)return;const f=BSKN.F[c.f],nx=f.ax==='y'?f.n:0,nz=f.ax==='y'?0:f.n,R=Math.random,F=FPILE;
   if(!F.im){F.im=new THREE.InstancedMesh(sGeo(THREE.BoxGeometry,1,1,1),stoneMat(1,1,'#c4baa6'),F.cap);F.im.count=0;F.im.castShadow=F.im.receiveShadow=true;F.im.frustumCulled=false;F.m4=new THREE.Matrix4();F.q=new THREE.Quaternion();F.e=new THREE.Euler();}
   if(F.im.parent!==P.grp)P.grp.add(F.im);
-  for(const b of bl){if(F.n>=F.cap)break;const sp=c.rim?0.6+R()*1.4:0.1+R()*0.6,dl=R()*0.25;
-    F.live.push({k:F.n++,x:b.x,y:b.y,z:b.z,sx:Math.max(0.12,b.sx),sy:Math.max(0.12,b.sy),sz:Math.max(0.12,b.sz),vx:nx*sp+(R()-0.5)*0.35,vz:nz*sp+(R()-0.5)*0.35,vy:R()*0.8,
+  for(const b of bl){const k=F.free.length?F.free.pop():F.n<F.cap?F.n++:-1;if(k<0)break;const sp=c.rim?0.6+R()*1.4:0.1+R()*0.6,dl=R()*0.25;
+    F.live.push({k,x:b.x,y:b.y,z:b.z,sx:Math.max(0.12,b.sx),sy:Math.max(0.12,b.sy),sz:Math.max(0.12,b.sz),vx:nx*sp+(R()-0.5)*0.35,vz:nz*sp+(R()-0.5)*0.35,vy:R()*0.8,
       rx:0,ry:0,rz:0,wx:(R()-0.5)*6,wy:(R()-0.5)*3,wz:(R()-0.5)*6,t:-dl});}
   F.im.count=F.n;
 }
@@ -209,13 +220,13 @@ function fcsPileTick(dt){
         for(const [dx,dz] of [[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]]){const h=Math.max(TW(o.x+dx*c,o.z+dz*c),top(o.x+dx*c,o.z+dz*c,0,0))+Math.random()*0.04;if(h<bh){bh=h;bx=dx;bz=dz;}}
         if(!bx&&!bz){o.y=Math.max(TW(o.x,o.z),top(o.x,o.z,0,0))+o.sy*0.5;break;}o.x+=bx*c;o.z+=bz*c;o.y=Math.max(TW(o.x,o.z),top(o.x,o.z,0,0))+o.sy*0.5;}
       o.rx=(Math.random()-0.5)*0.35;o.rz=(Math.random()-0.5)*0.35;const tp=o.y+o.sy*0.65;   // loose packing: a pile grows faster than solid stone   // settle almost flat, add to the pile height
-      {const k=Math.floor(o.x/c)*7919+Math.floor(o.z/c);if(!(H.get(k)>tp))H.set(k,tp);}}   // one cell per stone
+      {const k=Math.floor(o.x/c)*7919+Math.floor(o.z/c);if(!(H.get(k)>tp))H.set(k,tp);o.c=k;F.cnt.set(k,(F.cnt.get(k)||0)+1);}}   // one cell per stone
     F.q.setFromEuler(F.e.set(o.rx,o.ry,o.rz));F.im.setMatrixAt(o.k,F.m4.compose(new THREE.Vector3(o.x,o.y,o.z),F.q,new THREE.Vector3(o.sx,o.sy,o.sz)));
-    if(rest)F.live.splice(i,1);}
+    if(rest){F.live.splice(i,1);F.rest.push({k:o.k,c:o.c,t:performance.now(),m:F.m4.clone()});}}
   F.im.instanceMatrix.needsUpdate=true;gl.shadowMap.needsUpdate=true;
 }
 // Dev repair / new round: clear the piles
-function fcsShellClear(){const F=FPILE;F.live.length=0;F.h.clear();F.n=0;if(F.im)F.im.count=0;const P=FCSB;if(P.imC){P.nC=0;P.fall.length=0;P.imC.count=0;}}
+function fcsShellClear(){const F=FPILE;F.live.length=0;F.h.clear();F.n=0;F.free.length=0;F.rest.length=0;F.cnt.clear();if(F.im)F.im.count=0;const P=FCSB;if(P.imC){P.nC=0;P.fall.length=0;P.imC.count=0;P.restC=[];P.freeC=[];}}
 // รั้วไม้ (ชนิด 3 — js/02-fcs.js fences): เสาไม้ทุก ~1.8 ม. เอียงนิด ๆ + ราว 2 เส้นต่อช่วงเสา ตามพื้นเอียง • InstancedMesh 2 ชุด
 // จำ index เสา/ราวของแต่ละช่วงไว้ใน EFS3 (ลำดับช่วงเดียวกับ EFS.S ของ js/12-efs.js) → efsView ทำไหม้ดำ / พังหาย / เปลวไฟ
 const EFS3={sec:[],posts:null,rails:null,pm:[],rm:[],acc:0};
