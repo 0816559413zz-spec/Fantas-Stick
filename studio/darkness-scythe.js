@@ -112,7 +112,7 @@ FXCODE.studio_darkness_scythe=(_x,_y,_h,args,instance)=>{
   // ว่าง = เคียวตั้งแนวตั้ง ลอยวนรอบตัวช้า ๆ • ฟันแรกเริ่มจากฝั่งที่เคียวอยู่ (อยู่ข้างหลัง = ไปข้างใดข้างหนึ่งก่อน)
   // แต่ละครั้ง: เงื้อ 0.2 → กวาด 120° ด้านหน้า → ค้าง 0.3 → ควง 0.3 (ละอองหมึกสาด) พร้อมเลื่อนไปจุดเตรียม → ฟันต่อจากฝั่งที่จบ (สลับซ้าย-ขวา)
   // ไม่ได้ฟันเกิน 2 วิ = กลับแนวตั้งแล้ววนต่อ • พรีวิววนลูป: ว่าง 2 วิ → ฟัน 3 ครั้งห่าง 1.2 วิ → รอ 2 วิ → กลับท่าว่าง
-  const LOOP=8,SW0=2.0,GAP=1.2,NSW=3,WU=0.2,SWP=0.26,HOLD=0.3,SPIN=0.3,A=1.05,BK=0.35,RI=1.7,ORB=0.45,REACH=args.reach??7.6;
+  const LOOP=8,SW0=2.0,GAP=1.2,NSW=3,WU=0.2,SWP=0.18,HOLD=0.15,SPIN=0.3,A=1.05,BK=0.6,RI=1.7,ORB=0.45,REACH=args.reach??7.6;
   const wrapA=x=>{x=(x+Math.PI)%(Math.PI*2);if(x<0)x+=Math.PI*2;return x-Math.PI;};
   const orbA=T=>wrapA(-1.2+ORB*T);   // มุมรอบตัวตอนว่าง (0 = หน้า, + = ขวา)
   const radOf=g=>new THREE.Vector3(-Math.sin(g),0,Math.cos(g));   // anchor: +z หน้า, −x ขวา
