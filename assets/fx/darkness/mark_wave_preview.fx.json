@@ -1,0 +1,11 @@
+{
+  "v": 1,
+  "desc": "Darkness — พรีวิวเคียวปล่อยคลื่นติดตราเรียวบางและควงกลับ",
+  "tags": ["darkness", "preview", "slash"],
+  "pal": "arcane",
+  "dur": 2.65,
+  "layers": [
+    {"id": "anchor", "t": "mesh", "shape": "disc", "mat": "black", "op": 0, "at": 0, "life": 2.65},
+    {"id": "mark_wave", "t": "code", "fn": "studio_darkness_mark_wave", "at": 0, "life": 2.65, "args": {"layer": "anchor", "showWave": true}}
+  ]
+}

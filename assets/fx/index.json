@@ -24,6 +24,18 @@
    "dur": 2.85,
    "n": 2
   },
+  "darkness/chase_preview": {
+   "v": "cd217d1f",
+   "desc": "Darkness — พรีวิวท่าไล่ตามเป้ามีตราและเคียวฟันสามจังหวะ",
+   "pal": "arcane",
+   "tags": [
+    "darkness",
+    "preview",
+    "slash"
+   ],
+   "dur": 3.16,
+   "n": 2
+  },
   "darkness/dash_preview": {
    "v": "8868f414",
    "desc": "Darkness — พรีวิวใน Studio วงเงารัศมี 300 ชิ่งหาเป้ามีตราแล้วไล่เป้าในวง",
@@ -44,6 +56,18 @@
     "preview"
    ],
    "dur": 3.78,
+   "n": 2
+  },
+  "darkness/mark_wave_preview": {
+   "v": "74f76004",
+   "desc": "Darkness — พรีวิวเคียวปล่อยคลื่นติดตราเรียวบางและควงกลับ",
+   "pal": "arcane",
+   "tags": [
+    "darkness",
+    "preview",
+    "slash"
+   ],
+   "dur": 2.65,
    "n": 2
   },
   "darkness/night_waltz": {
@@ -69,14 +93,14 @@
    "n": 2
   },
   "darkness/quick_dash_preview": {
-   "v": "396d22ab",
+   "v": "16f0761f",
    "desc": "Darkness — Shift แตะ พุ่งสั้นพร้อมเงาซ้อนและเศษเงาพุ่งเข้าคมเคียวที่สว่างขึ้น",
    "pal": "arcane",
    "tags": [
     "darkness",
     "preview"
    ],
-   "dur": 1.25,
+   "dur": 1.9,
    "n": 2
   },
   "darkness/scythe_ba": {

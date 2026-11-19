@@ -155,18 +155,17 @@ function stDarkShieldImpacts(parent,radius,activeAt){
 
 FXCODE.studio_darkness_shield=(_x,_y,_h,args,instance)=>{
   const anchor=instance.L.find(layer=>layer.d.id===args.layer);
-  const scythe=modelInst('dark_scythe');
-  if(!anchor?.obj||!scythe)return;
+  if(!anchor?.obj||!MODELS.ready.has('dark_scythe'))return;
   const root=new THREE.Group();root.name='Scythe Shield preview';anchor.obj.add(root);
   const look={...getLook(NET.myId),ws:-1,wn:0};
   const caster=stDarkShiftStudent(root,look,'Scythe Shield caster',lookTint(look));
   const aimPlane=new THREE.Group();aimPlane.name='Scythe Shield aim plane';root.add(aimPlane);
   const rotor=new THREE.Group();rotor.name='Scythe Shield rotor';aimPlane.add(rotor);
-  scythe.scale.setScalar(1.42);scythe.position.y=-1.06*1.42;rotor.add(scythe);
+  const scythe=stCreateScythePreview(rotor,{wrap:'C',manual:true,scale:1.42,side:0,lift:-1.06*1.42,fwd:0});
   rotor.updateMatrixWorld(true);
   const inverse=rotor.matrixWorld.clone().invert(),sample=new THREE.Vector3();
   let radius=0;
-  scythe.traverse(mesh=>{
+  scythe.model.traverse(mesh=>{
     if(!mesh.isMesh)return;
     const positions=mesh.geometry.attributes.position,relative=inverse.clone().multiply(mesh.matrixWorld);
     for(let i=0;i<positions.count;i++){
@@ -217,6 +216,7 @@ FXCODE.studio_darkness_shield=(_x,_y,_h,args,instance)=>{
     rotor.rotation.z=-(spinUp+steady+coast);
     rotor.visible=blend<.97;
     rotor.scale.setScalar(lerp(.80,1,pose));
+    if(rotor.visible)scythe.update(t);
     ink(rotor.rotation.z,blend);
     flames(t,blend);
     for(const impact of demoImpacts)impact(t);

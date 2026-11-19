@@ -8,7 +8,25 @@
 
 **ส่งต่อสำหรับ ChatGPT:** อ่าน `notes/CHATGPT-LIGHT-HANDOFF.md` สำหรับงาน VFX สาย Light ร่างปกติ
 
-**Darkness Shield จังหวะหมุน 2026-11-19:** พรีวิวเร่งประมาณ 0.9 วิ เมื่อปล่อยให้ดึงเคียวกลับข้างตัวทันทีพร้อมหมุนช้าลง ใช้ประมาณ 0.7 วิดึงเข้าที่แล้วหมุนชะลอต่อจนหยุด ขอบวงเป็นลิ้นเปลวสั้นกับหยดดำเล็ก ๆ หลุดใกล้ขอบตามรูปเรฟล่าสุด จังหวะเหล่านี้ใช้สาธิตภาพใน Studio
+**คำยืนยันผู้ใช้เรื่องเปลวดำบนเคียว 2026-11-19:** “เปลวดำ” คือเอฟเฟกต์เดิมที่ลุกติดสันใบเคียวใน `studio/darkness-scythe.js` (`Scythe spine flame`) ออร่าคลุมใบหลัง Quick Dash เป็นอีกชั้นหนึ่ง ถ้าผู้ใช้ขอเอาเปลวกลับมา ให้เปิดหรือกู้เอฟเฟกต์เดิมเท่านั้น ห้ามสร้างเปลวใหม่ ถ้าไม่แน่ใจว่าผู้ใช้หมายถึงเอฟเฟกต์ไหน ให้ถามก่อนแก้
+
+**Darkness ท่าติดตรา 2026-11-19 (VFX Studio, ผู้ใช้อนุมัติ #88):** `darkness/mark_wave_preview` คลื่นดำสนิท หางหมึกต่อจากกลางเสี้ยวและค้างตามทาง คมเริ่มแตกทันทีที่โดนเป้าแรก ส่วนที่เหลือทะลุตัวและชะลอ ริ้วและฝุ่นไหลย้อนเข้ากลางตัวทำให้ทั้งร่างเป้ามืดลงชั่วครู่ แล้วสีเดิมกลับมาเมื่อตรา X ขึ้น เคียวควงระนาบตั้งหนึ่งรอบระหว่างกลับเข้าที่ สถานะอนุมัติสำหรับภาพและแอนิเมชันใน Studio [GIF เต็มท่า](designs/darkness_ref/mark-wave-preview.gif) · [GIF ซูมแบบสโลว์](designs/darkness_ref/mark-wave-slow.gif)
+
+**Darkness Long Dash (VFX Studio, ผู้ใช้อนุมัติ #79):** ใช้เคียว C กับเปลวดำชุดเดียวกับ BA ร่างมืดลงและริ้วเงาสองเส้นหมุนรอบก่อนหุบเป็นลูกเงา ตามคำขอหลังอนุมัติ เร่งช่วงหุบและเฟดร่างราว 0.04 วิ คงชาร์จ 0.5 วิ และอยู่ในลูกเงา 2 วิ [GIF](designs/darkness_ref/hold-dash-scythe.gif)
+
+**Darkness ท่าไล่ตาม (คอนเซปต์):** โหมดมีตรา เล็งแล้วพุ่งตรงทะลุอาคารในร่างลูกเงาเล็ก เคียวลอยตามเยื้องหลังซ้าย ฟันต่ำขึ้นเอวแล้วฟันย้อนขึ้นอก ระหว่างนั้นลูกเงาบินอ้อมไปหลังเป้า ผู้ร่ายคืนร่างและฟาดคทาสองมือนำ เคียวฟาดตามจากเหนือหัวด้านหลัง ปักพื้นค้างแล้วจาง ก่อนเคียวใหม่ขึ้นที่ท่าพัก โหมดไม่มีตรารอคุย [ลำดับท่า](designs/darkness.md#ท่าไล่ตามเป้ามีตรา)
+
+**Darkness ท่าไล่ตามเป้ามีตรา 2026-11-20 (VFX Studio, #89 รอรีวิว):** ผู้ใช้ให้บันทึกรอบล่าสุดไว้และยังไม่อนุมัติ `darkness/chase_preview` เปิด `scytheOnly` เพื่อดูเคียวโดยซ่อนผู้ร่ายกับลูกเงา ทางพุ่ง 22.5 ม. ในฉากสาธิต เคียวทึบ 50% และเล็กลงตั้งแต่พุ่งจนจบสองฟันแรก ใช้รอยปะทะ BA เดิม ช่วงสองฟันไม่มีหาง ฟันสามขึ้นสูง หันปลายคมเข้าหาเป้าแล้วค่อย ๆ ถอยง้างก่อนฟาด หาง BA เฉพาะใบ มีรอยฟันดำลงถึงพื้นพร้อมคลื่นและเศษเงา รอบนี้ใช้เป้ายืนพื้น รีวิวท่าเคียวก่อนเปิดท่าผู้ร่ายกลับมาดูพร้อมกัน [GIF มุมกว้าง](designs/darkness_ref/marked-chase-scythe.gif) · [GIF ซูม](designs/darkness_ref/marked-chase-scythe-close.gif)
+
+**Darkness Quick Dash → BA 2026-11-19 (VFX Studio):** พรีวิวต่อจากดาววาบไปยังท่าฟัน BA เดิมหนึ่งครั้ง ใช้หางฟันปกติเต็มความเข้ม เพิ่มเศษเปลวตามวงฟัน และขยายมุมกวาดในพรีวิวจากประมาณ 120° เป็น 144° ออร่าคลุมใบจางระหว่างฟัน เปลวดำเดิมที่สันใบยังทำงานตลอด ระบบบัฟกับท่าฟันนี้ยังไม่ได้ผูกเข้ากับเกม [GIF มุมย้อน](designs/darkness_ref/quick-dash-followup.gif)
+
+**Darkness Quick Dash aura tip 2026-11-19:** Incoming particles spiral up from below the cutting edge so the spine reads like the idle scythe before the buff. The upper and lower charged aura starts at the power pulse and tapers to the blade's original tip.
+
+**Darkness Quick Dash blade aura 2026-11-19:** The approved scythe C flame plays at its resting intensity until the power pulse. The boost in flame intensity, the blade glint and the aura on both edges start together at the post-dash power pulse. [GIF](designs/darkness_ref/quick-dash-spiral.gif)
+
+**Darkness Quick Dash timing 2026-11-19:** Particle arrival now converges in the last 25 ms before the power pulse. The scythe draws inward slightly, then the outline, size pulse and star peak together. Preview `darkness/quick_dash_preview`, review #79.
+
+**Darkness Shield จังหวะหมุน 2026-11-19:** ใช้เคียวชุดเดียวกับ BA พร้อมเปลวดำ C เดิมบนสันใบ พรีวิวเร่งประมาณ 0.9 วิ เมื่อปล่อยให้ดึงเคียวกลับข้างตัวทันทีพร้อมหมุนช้าลง ใช้ประมาณ 0.7 วิดึงเข้าที่แล้วหมุนชะลอต่อจนหยุด ขอบวงเป็นลิ้นเปลวสั้นกับหยดดำเล็ก ๆ หลุดใกล้ขอบตามรูปเรฟล่าสุด จังหวะเหล่านี้ใช้สาธิตภาพใน Studio
 
 **Darkness Shield 2026-11-19 (VFX Studio):** `darkness/shield_preview` ใช้ท่า `LGPOSE` กับจังหวะลอย `LTV.baFloat/baRise` ของ Radiance วงหมึกซ้อน 3 ชั้นมีความลึก ด้านในถี่ขึ้น ขอบเป็นแผ่นเปลวดำงอกต่อเนื่องอิงแบบสันเคียว C ลิ้นเปลวฉีกหลุดและงอกใหม่ `&aim=cursor` เล็งด้วยเมาส์และเคลื่อนด้วย WASD พรีวิวจัดจังหวะกระสุนเข้าวงเพื่อดูภาพ ขนาดวงคำนวณจากโมเดลเคียว ส่วนระบบบล็อกและเกจยังรอทำ [GIF โล่](designs/darkness_ref/shield-preview.gif)
 

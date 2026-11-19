@@ -1,6 +1,54 @@
 {
- "next": 88,
+ "next": 90,
  "items": [
+  {
+   "id": 89,
+   "title": "Darkness ท่าไล่ตามเป้ามีตรา รอบเคียวสามฟัน",
+   "text": "ดูเคียวอย่างเดียว ระยะพุ่งยาวขึ้น เคียวเล็กและทึบ 50% ช่วงพุ่งและสองฟันแรก ฟันสามขึ้นสูง ชี้ปลายคมเข้าเป้า ค่อยเอนถอยก่อนฟาดลงพร้อมรอยฟันดำและแรงกระแทกพื้น",
+   "kind": "VFX / แอนิเมชัน",
+   "who": "Darkness",
+   "status": "wait",
+   "created": "2026-11-19",
+   "updated": "2026-11-20",
+   "imgs": [],
+   "links": [
+    "/studio.html?fx=darkness/chase_preview&map=test",
+    "/designs/darkness_ref/marked-chase-scythe.gif",
+    "/designs/darkness_ref/marked-chase-scythe-close.gif"
+   ],
+   "checks": [
+    {
+     "t": "สองฟันแรกสวนเร็วและไม่มีหาง ฟันสามเห็นปลายจริงหันถูกทาง เอนถอยก่อนฟาด หางดำตามใบและรอยฟันดำค้างสั้น ๆ ที่พื้น",
+     "ok": false
+    }
+   ],
+   "reply": "บันทึกรอบพรีวิวตามคำขอ ผู้ใช้ยังไม่อนุมัติ"
+  },
+  {
+   "id": 88,
+   "title": "Darkness เคียวตวัดคลื่นติดตรา X",
+   "text": "คลื่นดำสนิททะลุผ่านเป้าแรกแล้วชะลอ เศษเงาไหลเข้าตัวทำให้เป้ามืดทั้งร่าง ก่อนสีเดิมกลับมาพร้อมตรา X",
+   "kind": "VFX / แอนิเมชัน",
+   "who": "Darkness",
+   "status": "ok",
+   "created": "2026-11-19",
+   "updated": "2026-11-19",
+   "imgs": [],
+   "links": [
+    "/studio.html?fx=darkness/mark_wave_preview&map=test",
+    "/designs/darkness_ref/mark-wave-preview.gif",
+    "/designs/darkness_ref/mark-wave-slow.gif",
+    "/designs/darkness_ref/mark-spin-vertical.gif",
+    "/designs/darkness_ref/mark-scythe-motion.gif"
+   ],
+   "checks": [
+    {
+     "t": "เป้ามืดลงทั้งตัวตอนรับเงา แล้วสีเดิมค่อยกลับมาขณะที่ตรา X ขึ้น ดูช่วงนี้ใน GIF สโลว์",
+     "ok": true
+    }
+   ],
+   "reply": "ผู้ใช้อนุมัติพรีวิวหลังเพิ่มจังหวะที่เป้ามืดทั้งร่างและคืนสีพร้อมตรา X"
+  },
   {
    "id": 87,
    "title": "Darkness บีมลงพื้นและฝูงเงาลดพลังโล่",
@@ -61,7 +109,7 @@
   {
    "id": 80,
    "title": "Darkness Shield เคียวหมุน",
-   "text": "วงหมึกซ้อน 3 ชั้น ขอบเปลวสั้นและหยดดำหลุดใกล้ขอบตามภาพเคียว เมื่อปล่อยดึงเคียวกลับเข้าที่ทันทีพร้อมชะลอ แล้วหมุนช้าลงจนหยุดที่ข้างตัว",
+   "text": "ใช้เคียวชุด BA พร้อมเปลวดำ C เดิมบนสันใบ วงหมึกซ้อน 3 ชั้น ขอบเปลวสั้นและหยดดำหลุดใกล้ขอบตามภาพเคียว เมื่อปล่อยดึงเคียวกลับเข้าที่ทันทีพร้อมชะลอ แล้วหมุนช้าลงจนหยุดที่ข้างตัว",
    "kind": "VFX / แอนิเมชัน",
    "who": "Darkness",
    "status": "wait",
@@ -93,13 +141,17 @@
    "links": [
     "/studio.html?fx=darkness/quick_dash_preview&map=test",
     "/studio.html?fx=darkness/hold_dash_preview&map=test",
-    "/designs/darkness_ref/quick-dash-spiral.gif",
+    "/designs/darkness_ref/quick-dash-followup.gif",
     "/designs/darkness_ref/hold-dash-scythe.gif"
    ],
    "checks": [
     {
-     "t": "แบบแตะอ่านวงอนุภาคที่หุบเข้าคม เห็นขอบเงาคลุมใบเดิมและดาวสี่แฉกขาวนีออนตอนชาร์จเต็ม แบบกดค้างเห็นริ้วผ้าคลุมเปลี่ยนเป็นหางลูกเงาและคลี่ออกตอนคืนร่าง",
+     "t": "แบบแตะดูจังหวะก่อนรับบัฟจากมุมย้อน ออร่าขึ้นหลังดาววาบแล้วจางเมื่อ BA แรกกวาดกว้างขึ้น",
      "ok": false
+    },
+    {
+     "t": "ผู้ใช้อนุมัติแบบกดค้าง ร่างมืดลงแล้วริ้วหมุนหุบเข้าลูกเงา เร่งจังหวะแปลงตามคำขอ",
+     "ok": true
     }
    ]
   },

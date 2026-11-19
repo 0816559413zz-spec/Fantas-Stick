@@ -10,6 +10,68 @@ function stScyInk(){   // วัสดุหมึก: ดำสนิทไม�
   return new THREE.MeshBasicMaterial({color:0x000000,transparent:true,depthWrite:false,side:THREE.DoubleSide,vertexColors:true,toneMapped:false});
 }
 
+function stScytheHitCut(root,base,ghost=false){const g=new THREE.Group();g.name='Scythe BA hit slash';g.position.copy(base);g.scale.setScalar(ghost?0.6:0.8);root.add(g);   // ชัดเท่ากันทั้งคู่ ต่างแค่ขนาด
+    const sides=[-1,1].map(dir=>{const sub=new THREE.Group();g.add(sub);
+      const P=ghost?[[-0.55*dir,1.45,0.25],[0.0,0.1,0.3],[0.6*dir,-1.35,0.22]]:[[1.8*dir,0.55,0.23],[0.1*dir,0.05,0.28],[-1.85*dir,-0.4,0.21]];
+      return {sub,outer:stDarkCut(sub,P,0.26,0x101019,ghost?13:11),white:stDarkCut(sub,P,0.17,0xf7f8fc,ghost?14:12)};});
+    const cameraFacing=new THREE.Vector3(),life=.30;g.traverse(o=>{if(o.material){o.material.depthTest=false;}});   // รอยฟันลอยออกมาหน้าตัวเป้า ไม่จมเข้าตัว (ผู้ใช้ 2026-11-19)
+    return (age,from)=>{g.visible=age>=0&&age<life;if(!g.visible)return;
+      cameraFacing.copy(cam.position);root.worldToLocal(cameraFacing);cameraFacing.sub(base);cameraFacing.y=0;cameraFacing.normalize();g.position.copy(base).addScaledVector(cameraFacing,0.55+1.1*age);g.lookAt(cam.position);
+      for(const sd of sides){const on=(from>0)===(sides.indexOf(sd)===1);sd.sub.visible=on;if(!on)continue;sd.outer(age,life,0.45);sd.white(age,life,0.45);}};}
+
+function stChargedSlashFlakes(root,bladePt,poseAt,scale,start,duration,rnd){
+  const count=72,rows=7,stride=rows*2;
+  const geometry=new THREE.BufferGeometry(),indices=[];
+  const positions=new THREE.BufferAttribute(new Float32Array(count*stride*3),3);
+  const colors=new THREE.BufferAttribute(new Float32Array(count*stride*4),4);
+  for(let i=0;i<count;i++)for(let j=0;j<rows-1;j++){
+    const a=i*stride+j*2;
+    indices.push(a,a+1,a+2,a+1,a+3,a+2);
+  }
+  geometry.setIndex(indices);
+  geometry.setAttribute('position',positions);geometry.setAttribute('color',colors);
+  const material=stScyInk();material.color.setHex(0xffffff);
+  const flakes=new THREE.Mesh(geometry,material);
+  flakes.name='Quick Dash charged slash flakes';flakes.frustumCulled=false;flakes.renderOrder=11;
+  flakes.visible=false;root.add(flakes);
+  const seeds=Array.from({length:count},(_,i)=>{
+    const k=800+i*8;
+    return {born:start+duration*(.17+.83*(i+.5)/count),blade:.44+.54*rnd(k),life:.19+.24*rnd(k+1),
+      width:.07+.15*rnd(k+2),height:.25+.68*rnd(k+3),lift:.32+1.18*rnd(k+4),
+      speed:.65+2.3*rnd(k+5),lean:(rnd(k+6)-.5)*1.5,phase:rnd(k+7)*Math.PI*2};
+  });
+  const center=new THREE.Vector3();
+  return time=>{
+    let active=0;
+    for(const p of seeds){
+      const age=time-p.born;
+      if(age<0||age>=p.life)continue;
+      const state=poseAt(p.born),[x,y]=bladePt(p.blade,.54),u=age/p.life;
+      center.set(x*scale,y*scale,0).applyQuaternion(state.QB).add(state.pos);
+      const r=Math.hypot(center.x,center.z)||1,nx=center.x/r,nz=center.z/r;
+      const drift=1-Math.pow(1-u,1.65),move=p.speed*drift;
+      const alpha=Math.min(1,u*12)*Math.pow(1-u,.72),height=p.height*(1-.62*u);
+      for(let j=0;j<rows;j++){
+        const s=j/(rows-1),wave=Math.sin(p.phase+5*s+u*4),tip=Math.sin(Math.PI*s);
+        const width=p.width*Math.pow(tip,.78)*(1-.63*u);
+        const curl=height*s*s*(.48+.22*wave);
+        const px=center.x+nx*(move-curl)+nz*p.lean*drift;
+        const py=center.y+p.lift*drift+height*s-.65*u*u;
+        const pz=center.z+nz*(move-curl)-nx*p.lean*drift;
+        const a=active*stride+j*2,tone=.025+.09*tip;
+        positions.setXYZ(a,px+nz*width,py,pz-nx*width);
+        positions.setXYZ(a+1,px-nz*width,py+.035*tip,pz+nx*width);
+        colors.setXYZW(a,.019,.012,.038,alpha*tip);
+        colors.setXYZW(a+1,tone*1.16,tone*.78,tone*1.83,alpha*tip);
+      }
+      active++;
+    }
+    flakes.visible=active>0;
+    geometry.setDrawRange(0,active*(rows-1)*6);
+    positions.needsUpdate=true;colors.needsUpdate=true;
+  };
+}
+
 FXCODE.studio_darkness_scythe=(_x,_y,_h,args,instance)=>{
   const anchor=instance.L.find(layer=>layer.d.id===args.layer);
   if(!anchor?.obj)return;
@@ -53,7 +115,7 @@ function stCreateScythePreview(root,args,lifetime){
   const SHC=WS0()==='C'?64:0,SR=8,sGeo=new THREE.BufferGeometry(),spos=new Float32Array(Math.max(1,SHC)*SR*3),scol=new Float32Array(Math.max(1,SHC)*SR*4),sidx=[];
   for(let i=0;i<SHC-1;i++)for(let j=0;j<SR-1;j++){const a=i*SR+j,b=(i+1)*SR+j;sidx.push(a,b,a+1,b,b+1,a+1);}
   sGeo.setAttribute('position',new THREE.BufferAttribute(spos,3));sGeo.setAttribute('color',new THREE.BufferAttribute(scol,4));sGeo.setIndex(sidx);
-  const sheet=new THREE.Mesh(sGeo,stScyInk());sheet.frustumCulled=false;sheet.renderOrder=8;scy.add(sheet);
+  const sheet=new THREE.Mesh(sGeo,stScyInk());sheet.name='Scythe spine flame';sheet.visible=SHC>0;sheet.frustumCulled=false;sheet.renderOrder=8;scy.add(sheet);
   // ออร่าควันดำลอยขึ้นจากตัวใบ (แบบ C) — สไปรต์กลมนุ่ม สีดำ โปร่งตามอายุ
   const AURA=0,auraTex=(()=>{const c=document.createElement('canvas');c.width=c.height=64;const g=c.getContext('2d'),r=g.createRadialGradient(32,32,0,32,32,32);
     r.addColorStop(0,'rgba(0,0,0,1)');r.addColorStop(0.45,'rgba(0,0,0,0.75)');r.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=r;g.fillRect(0,0,64,64);return new THREE.CanvasTexture(c);})();
@@ -75,40 +137,42 @@ function stCreateScythePreview(root,args,lifetime){
   const clock=()=>((typeof stVnow!=='undefined'?stVnow:performance.now())-(typeof stVnow!=='undefined'?(root.userData.v0??(root.userData.v0=stVnow)):t0))/1000;
 
   // ---------- ท่าฟัน BA (args.mode='ba', ผู้ใช้ 2026-11-19): เงื้อ 0.2 วิ → กวาดแนวนอน ขวา→ซ้าย 120° → กลับข้างตัว • เปลวบนใบยืดเป็นหางตามทางที่ใบผ่าน ----------
-  const BA=args.mode==='ba',CYC=args.cycle||2.0,idlePos=pivot.position.clone(),S0=S;
+  const BA=args.mode==='ba',standaloneBA=BA&&!args.followUp,CYC=args.cycle||2.0,idlePos=pivot.position.clone(),S0=S;
+  const hasBATrail=BA||!!args.trailPose;
+  const hasBASpin=BA||!!args.spinPose;
   const HK=22,HH=30,tailGeo=new THREE.BufferGeometry(),tpos=new Float32Array(HK*HH*3),tcol=new Float32Array(HK*HH*4),tidx=[];
   for(let j=0;j<HH-1;j++)for(let k=0;k<HK-1;k++){const a=j*HK+k,b=(j+1)*HK+k;tidx.push(a,b,a+1,b,b+1,a+1);}
   tailGeo.setAttribute('position',new THREE.BufferAttribute(tpos,3));tailGeo.setAttribute('color',new THREE.BufferAttribute(tcol,4));tailGeo.setIndex(tidx);
-  const tail=new THREE.Mesh(tailGeo,stScyInk());tail.frustumCulled=false;tail.renderOrder=7;if(BA)root.add(tail);
+  const tail=new THREE.Mesh(tailGeo,stScyInk());tail.name='Scythe BA blade trail';tail.frustumCulled=false;tail.renderOrder=7;if(hasBATrail)root.add(tail);
   // ขอบบนของหาง = แถบเปลว (ผู้ใช้: "ด้านบนของหางมีเปลว ด้านล่างเป็นหางปกติ")
   const fr2=new THREE.BufferGeometry(),f2pos=new Float32Array(HK*HH*3),f2col=new Float32Array(HK*HH*4);fr2.setAttribute('position',new THREE.BufferAttribute(f2pos,3));fr2.setAttribute('color',new THREE.BufferAttribute(f2col,4));fr2.setIndex(tidx);
-  const fringe=new THREE.Mesh(fr2,stScyInk());fringe.frustumCulled=false;fringe.renderOrder=7;if(BA)root.add(fringe);
+  const fringe=new THREE.Mesh(fr2,stScyInk());fringe.frustumCulled=false;fringe.renderOrder=7;if(hasBATrail)root.add(fringe);
   // ถ่านดำหลุดจากปลายหาง
-  const EMB=BA?28:0,embTex=(()=>{const c=document.createElement('canvas');c.width=c.height=32;const g=c.getContext('2d'),r=g.createRadialGradient(16,16,0,16,16,16);r.addColorStop(0,'rgba(0,0,0,1)');r.addColorStop(0.6,'rgba(0,0,0,0.8)');r.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=r;g.fillRect(0,0,32,32);return new THREE.CanvasTexture(c);})();
+  const EMB=hasBATrail?28:0,embTex=(()=>{const c=document.createElement('canvas');c.width=c.height=32;const g=c.getContext('2d'),r=g.createRadialGradient(16,16,0,16,16,16);r.addColorStop(0,'rgba(0,0,0,1)');r.addColorStop(0.6,'rgba(0,0,0,0.8)');r.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=r;g.fillRect(0,0,32,32);return new THREE.CanvasTexture(c);})();
   const embers=[...Array(EMB)].map(()=>{const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:embTex,color:0x000000,transparent:true,depthWrite:false,toneMapped:false}));sp.renderOrder=8;root.add(sp);return sp;});
   // หางด้าม (ผู้ใช้ 2026-11-19): ชั้นจางกว่า ต่อติดกับหางใบ ตามทางที่ด้ามผ่านจริง
   const SK=10,shGeo=new THREE.BufferGeometry(),shpos=new Float32Array(SK*HH*3),shcol=new Float32Array(SK*HH*4),shidx=[];
   for(let j=0;j<HH-1;j++)for(let k=0;k<SK-1;k++){const a=j*SK+k,b=(j+1)*SK+k;shidx.push(a,b,a+1,b,b+1,a+1);}
   shGeo.setAttribute('position',new THREE.BufferAttribute(shpos,3));shGeo.setAttribute('color',new THREE.BufferAttribute(shcol,4));shGeo.setIndex(shidx);
-  const shMat=stScyInk();shMat.color.set(0xffffff);const shTail=new THREE.Mesh(shGeo,shMat);shTail.frustumCulled=false;shTail.renderOrder=6;if(BA)root.add(shTail);   // ด้าม = เทาเข้มใกล้ใบ → เทาอ่อนทางปลายล่าง (ผู้ใช้ 2026-11-19) — เดิมคอมเมนต์ทับโค้ด ทำให้หางด้ามไม่เคยถูกใส่ในฉาก
+  const shMat=stScyInk();shMat.color.set(0xffffff);const shTail=new THREE.Mesh(shGeo,shMat);shTail.frustumCulled=false;shTail.renderOrder=6;if(hasBATrail)root.add(shTail);   // ด้าม = เทาเข้มใกล้ใบ → เทาอ่อนทางปลายล่าง (ผู้ใช้ 2026-11-19) — เดิมคอมเมนต์ทับโค้ด ทำให้หางด้ามไม่เคยถูกใส่ในฉาก
   // เปลวที่ปลายหาง (ผู้ใช้ 2026-11-19): ลิ้นไฟหยักแบบเดียวกับเปลวปลายล่างของเคียว งอกจากปลายหางที่ยังเห็นอยู่
-  const TF=BA?12:0,TFP=10,tfGeo=new THREE.BufferGeometry(),tfpos=new Float32Array(Math.max(1,TF)*TFP*2*3),tfcol=new Float32Array(Math.max(1,TF)*TFP*2*4),tfidx=[];
+  const TF=hasBATrail?12:0,TFP=10,tfGeo=new THREE.BufferGeometry(),tfpos=new Float32Array(Math.max(1,TF)*TFP*2*3),tfcol=new Float32Array(Math.max(1,TF)*TFP*2*4),tfidx=[];
   for(let q=0;q<TF;q++)for(let i=0;i<TFP-1;i++){const a=(q*TFP+i)*2;tfidx.push(a,a+1,a+2,a+1,a+3,a+2);}
   tfGeo.setAttribute('position',new THREE.BufferAttribute(tfpos,3));tfGeo.setAttribute('color',new THREE.BufferAttribute(tfcol,4));tfGeo.setIndex(tfidx);
-  const tailFlames=new THREE.Mesh(tfGeo,stScyInk());tailFlames.frustumCulled=false;tailFlames.renderOrder=9;if(BA)root.add(tailFlames);
+  const tailFlames=new THREE.Mesh(tfGeo,stScyInk());tailFlames.frustumCulled=false;tailFlames.renderOrder=9;if(hasBATrail)root.add(tailFlames);
   // แผ่นเปลวแบบสันใบที่ปลายหาง (ผู้ใช้ 2026-11-19: "เปลวแบบสันเคียว ที่ปลายหางด้วย")
   const TER=8,teGeo=new THREE.BufferGeometry(),tepos=new Float32Array(HK*TER*3),tecol=new Float32Array(HK*TER*4),teidx=[];
   for(let i=0;i<HK-1;i++)for(let j=0;j<TER-1;j++){const a=i*TER+j,b=(i+1)*TER+j;teidx.push(a,b,a+1,b,b+1,a+1);}
   teGeo.setAttribute('position',new THREE.BufferAttribute(tepos,3));teGeo.setAttribute('color',new THREE.BufferAttribute(tecol,4));teGeo.setIndex(teidx);
-  const tailSheet=new THREE.Mesh(teGeo,stScyInk());tailSheet.frustumCulled=false;tailSheet.renderOrder=9;if(BA)root.add(tailSheet);
+  const tailSheet=new THREE.Mesh(teGeo,stScyInk());tailSheet.frustumCulled=false;tailSheet.renderOrder=9;if(hasBATrail)root.add(tailSheet);
   // ละอองหมึกตอนควง (ผู้ใช้ 2026-11-19: ควงแบบโล่แต่มีละอองสาดออกมามากกว่า)
   const SPL=BA?36:0,splash=[...Array(SPL)].map(()=>{const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:embTex,color:0x000000,transparent:true,depthWrite:false,toneMapped:false}));sp.renderOrder=9;root.add(sp);return sp;});
   // ตอนควงหลังฟัน (ผู้ใช้ 2026-11-19): ใช้ VFX ควงแบบท่าโล่ (จานหมึก + แผ่นเปลวรอบขอบ) + เส้นเปลวดำ 3 เส้นคนละทิศ ควงตามเคียวแล้วหาย
-  const spinG=new THREE.Group();spinG.rotation.x=-Math.PI/2;spinG.visible=false;if(BA)root.add(spinG);
-  const SPR=1.75*S,spinInk=BA&&typeof stDarkShieldInk==='function'?stDarkShieldInk(spinG,SPR):null,spinFl=BA&&typeof stDarkShieldFlames==='function'?stDarkShieldFlames(spinG,SPR):null;
+  const spinG=new THREE.Group();spinG.name='Scythe BA spin';spinG.rotation.x=-Math.PI/2;spinG.visible=false;if(hasBASpin)root.add(spinG);
+  const SPR=1.75*S,spinInk=hasBASpin&&typeof stDarkShieldInk==='function'?stDarkShieldInk(spinG,SPR):null,spinFl=hasBASpin&&typeof stDarkShieldFlames==='function'?stDarkShieldFlames(spinG,SPR):null;
   const LSEG=48,spinLines=[0,1,2].map(n=>{const g=new THREE.BufferGeometry(),p=new Float32Array(LSEG*2*3),c=new Float32Array(LSEG*2*4),ix=[];for(let i=0;i<LSEG-1;i++){const a=i*2;ix.push(a,a+1,a+2,a+1,a+3,a+2);}
     g.setAttribute('position',new THREE.BufferAttribute(p,3));g.setAttribute('color',new THREE.BufferAttribute(c,4));g.setIndex(ix);
-    const m=new THREE.Mesh(g,stScyInk());m.frustumCulled=false;m.renderOrder=12;const holder=new THREE.Group();holder.add(m);if(BA)root.add(holder);
+    const m=new THREE.Mesh(g,stScyInk());m.frustumCulled=false;m.renderOrder=12;const holder=new THREE.Group();holder.add(m);if(hasBASpin)root.add(holder);
     holder.userData={p,c,g,tilt:[[0.35,0,0.1],[-0.3,0.9,-0.25],[0.15,2.1,0.4]][n],dir:n===1?-1:1,ph:n*2.1};return holder;});
   const hist=[];const _p=new THREE.Vector3(),MB=new THREE.Matrix4(),vX=new THREE.Vector3(),vY=new THREE.Vector3(),vZ=new THREE.Vector3(),QB=new THREE.Quaternion(),Qi=new THREE.Quaternion();
   const ez=(a,b,t)=>{t=Math.min(1,Math.max(0,(t-a)/(b-a)));return t*t*(3-2*t);};
@@ -116,7 +180,8 @@ function stCreateScythePreview(root,args,lifetime){
   // ว่าง = เคียวตั้งแนวตั้ง ลอยวนรอบตัวช้า ๆ • ฟันแรกเริ่มจากฝั่งที่เคียวอยู่ (อยู่ข้างหลัง = ไปข้างใดข้างหนึ่งก่อน)
   // แต่ละครั้ง: เงื้อ 0.2 → กวาด 120° ด้านหน้า → ค้าง 0.3 → ควง 0.3 (ละอองหมึกสาด) พร้อมเลื่อนไปจุดเตรียม → ฟันต่อจากฝั่งที่จบ (สลับซ้าย-ขวา)
   // ไม่ได้ฟันเกิน 2 วิ = กลับแนวตั้งแล้ววนต่อ • พรีวิววนลูป: ว่าง 2 วิ → ฟัน 3 ครั้งห่าง 1.2 วิ → รอ 2 วิ → กลับท่าว่าง
-  const LOOP=8,SW0=2.0,GAP=1.2,NSW=3,WU=0.27,SWP=0.18,HOLD=0.15,SPIN=0.3,A=1.05,BK=0.6,RI=1.7,ORB=0.45,REACH=args.reach??7.6;
+  const LOOP=8,SW0=2.0,GAP=1.2,NSW=3,WU=0.27,SWP=0.18,HOLD=args.followUp?.48:.15,
+    SPIN=0.3,A=args.followUp?1.26:1.05,BK=0.6,RI=1.7,ORB=0.45,REACH=args.reach??7.6;
   const wrapA=x=>{x=(x+Math.PI)%(Math.PI*2);if(x<0)x+=Math.PI*2;return x-Math.PI;};
   const orbA=T=>wrapA(-1.2+ORB*T);   // มุมรอบตัวตอนว่าง (0 = หน้า, + = ขวา)
   const radOf=g=>new THREE.Vector3(-Math.sin(g),0,Math.cos(g));   // anchor: +z หน้า, −x ขวา
@@ -154,9 +219,10 @@ function stCreateScythePreview(root,args,lifetime){
     const p=pose(g,rad,vert,dirSweep,spinA,cock);
     if(vert>0.01){const sp=new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,1,0),T*0.9*vert);   // แนวตั้ง: ควงตัวเองเบา ๆ
       const c=p.pos.clone().addScaledVector(new THREE.Vector3(0,1,0),1.1*S0*vert);p.q.premultiply(sp);p.pos.sub(c).applyQuaternion(sp).add(c);}
-    return {w:1,QB:p.q,pos:p.pos,tw,act,spinIdx,spinU,kc,g};
+    return {w:args.followUp?ez(SW0,SW0+.13,t):1,QB:p.q,pos:p.pos,tw,act,spinIdx,spinU,kc,g};
   };
   const baPose=T=>baState(T);
+  const chargedFlakes=args.followUp?stChargedSlashFlakes(root,bladePt,baPose,S,SW0+WU,SWP,rnd):null;
   root.userData.baState=baState;   // ดีบัก/ทดสอบ
   // ---------- ท่าผู้ร่าย (ผู้ใช้ 2026-11-19) ----------
   // ง้าง: แขนขวาถือคทายืดออกกว้างไปฝั่งที่เคียวอยู่ ลำตัวบิดนิดเดียว → ค้างสั้น ๆ → สะบัดคทาเร็วก่อน ลำตัวบิดตามหน่อย
@@ -181,7 +247,7 @@ function stCreateScythePreview(root,args,lifetime){
     return {gh:lim(gh),el,by,bd,tw,fl};
   };
   let caster=null;const tipBall=new THREE.Mesh(new THREE.SphereGeometry(0.045,10,8),new THREE.MeshBasicMaterial({color:0x000000,toneMapped:false}));
-  if(BA&&typeof stDarkShiftStudent==='function'){
+  if(standaloneBA&&typeof stDarkShiftStudent==='function'){
     const look={...getLook(NET.myId),wn:0};caster=stDarkShiftStudent(root,look,'Darkness BA caster',lookTint(look));
     caster.wandG.visible=true;caster.tip.visible=false;tipBall.position.set(0,-1.1,0);caster.armR.add(tipBall);
   }
@@ -218,8 +284,8 @@ function stCreateScythePreview(root,args,lifetime){
   // ---------- เป้าโดนฟัน (ผู้ใช้ 2026-11-19) ----------
   // ทุก BA ที่โดน = รอยฟันดำบนตัวเป้า ~0.3 วิ • เป้ามีตรา = เคียวเงาโปร่ง 40% โผล่ข้างเป้า (หลังเป้า ไม่โดนคนอื่น) ฟันสวนเป็นกากบาท แล้วสลายเป็นหมอกดำ
   //   เคียวเงามีรอยฟันของตัวเอง (จางกว่า) • เป้าสะดุ้งทุกครั้งที่โดน
-  const HIT_LIFE=0.3,LEAD=0.2,GIN=0.3,GHE=0.55,GCH=0.104,GOUT=0.2,GSC=S,GRAD=2*S,GBK=Math.sqrt(4*S*S-0.36),GDN=0.6,GOP=0.7;   // ด้ามล่างสุดลอยเหนือหัวเป้า (สูง 2.3 ม.) หลังเป้า แล้วสับลงมา   // เคียวเงา (ผู้ใช้ 2026-11-19 รอบ 2): โผล่หลังเป้า 0.3 วิหลังโดน ค่อย ๆ โน้มหัวไปหลังเตรียมฟันระหว่าง fade in → ฟันลงเร็ว 0.08 วิ → ฟันเลยไปแล้วชะลอตามแรงเฉื่อยพร้อมจางหาย 0.16 วิ
-  const targets=!BA||typeof stDarkTargetMark!=='function'?[]:[{ang:0,dist:REACH,marked:true},{ang:-0.62,dist:REACH-0.4,marked:false}].map((d,i)=>{
+  const LEAD=0.2,GIN=0.3,GHE=0.55,GCH=0.104,GOUT=0.2,GSC=S,GRAD=2*S,GBK=Math.sqrt(4*S*S-0.36),GDN=0.6,GOP=0.7;   // ด้ามล่างสุดลอยเหนือหัวเป้า (สูง 2.3 ม.) หลังเป้า แล้วสับลงมา   // เคียวเงา (ผู้ใช้ 2026-11-19 รอบ 2): โผล่หลังเป้า 0.3 วิหลังโดน ค่อย ๆ โน้มหัวไปหลังเตรียมฟันระหว่าง fade in → ฟันลงเร็ว 0.08 วิ → ฟันเลยไปแล้วชะลอตามแรงเฉื่อยพร้อมจางหาย 0.16 วิ
+  const targets=!standaloneBA||typeof stDarkTargetMark!=='function'?[]:[{ang:0,dist:REACH,marked:true},{ang:-0.62,dist:REACH-0.4,marked:false}].map((d,i)=>{
     const look={...getLook(NET.myId),h:(i+1)%4,cl:(i+1)%4,hs:i+3,wn:0};const a=makeStudent(look,'darkness-ba-target-'+i);root.add(a.g);
     const R=radOf(d.ang);a.g.position.set(R.x*d.dist,0,R.z*d.dist);a.g.rotation.y=Math.atan2(-R.x,-R.z);useFileModel(a,'char_student',lookTint(look),look);
     if(d.marked)a.updMark=stDarkTargetMark(a.g);return {...d,a};});
@@ -231,15 +297,7 @@ function stCreateScythePreview(root,args,lifetime){
     hitCache.set(kc,out);return out;};
   const lastHit=(T,i)=>{let best=null;for(const kc of [Math.floor(T/LOOP),Math.floor(T/LOOP)-1])for(const h of hitsOf(kc))if(h.i===i&&h.T<=T&&(!best||h.T>best.T))best=h;return best;};
   // รอยฟันบนตัวเป้า: ชั้นดำนอก + เส้นขาวบางตามคม (สไตล์เดียวกับท่าพุ่ง) หันหากล้อง
-  const mkCut=(tg,ghost)=>{const g=new THREE.Group();g.position.set(tg.a.g.position.x,1.15,tg.a.g.position.z);g.scale.setScalar(ghost?0.6:0.8);root.add(g);   // ชัดเท่ากันทั้งคู่ ต่างแค่ขนาด
-    const sides=[-1,1].map(dir=>{const sub=new THREE.Group();g.add(sub);
-      const P=ghost?[[-0.55*dir,1.45,0.25],[0.0,0.1,0.3],[0.6*dir,-1.35,0.22]]:[[1.8*dir,0.55,0.23],[0.1*dir,0.05,0.28],[-1.85*dir,-0.4,0.21]];
-      return {sub,outer:stDarkCut(sub,P,0.26,0x101019,ghost?13:11),white:stDarkCut(sub,P,0.17,0xf7f8fc,ghost?14:12)};});
-    const base=g.position.clone();g.traverse(o=>{if(o.material){o.material.depthTest=false;}});   // รอยฟันลอยออกมาหน้าตัวเป้า ไม่จมเข้าตัว (ผู้ใช้ 2026-11-19)
-    return (age,from)=>{g.visible=age>=0&&age<HIT_LIFE;if(!g.visible)return;
-      _gp.copy(cam.position);root.worldToLocal(_gp);_gp.sub(base);_gp.y=0;_gp.normalize();g.position.copy(base).addScaledVector(_gp,0.55+1.1*age);g.lookAt(cam.position);
-      for(const sd of sides){const on=(from>0)===(sides.indexOf(sd)===1);sd.sub.visible=on;if(!on)continue;sd.outer(age,HIT_LIFE,0.45);sd.white(age,HIT_LIFE,0.45);}};};
-  targets.forEach(tg=>{tg.cut=mkCut(tg,false);if(tg.marked)tg.gcut=mkCut(tg,true);});
+  targets.forEach(tg=>{const p=tg.a.g.position.clone();p.y=1.15;tg.cut=stScytheHitCut(root,p);if(tg.marked)tg.gcut=stScytheHitCut(root,p,true);});
   // เคียวเงา: สำเนาโมเดลเคียว ดำโปร่ง 70% ขนาดเท่าเคียวจริง + เปลว/หมึกชุดเดียวกับเคียวจริง (ใช้ geometry ร่วมกัน)
   const ghostRot=new THREE.Group(),ghostScy=new THREE.Group();ghostScy.scale.setScalar(GSC);ghostRot.add(ghostScy);ghostRot.visible=false;if(targets.length)root.add(ghostRot);
   const ghostMat=new THREE.MeshBasicMaterial({color:0x000000,transparent:true,opacity:GOP,depthWrite:true,toneMapped:false});let ghostBuilt=false;
@@ -285,7 +343,7 @@ function stCreateScythePreview(root,args,lifetime){
       ghostAt(tg,phi,roll,yaw);ghostRot.visible=ghostBuilt;
       ghostMat.opacity=GOP*ez(GIN,GIN+0.1,age)*(1-ez(GHE+GCH,GHE+GCH+GOUT,age));ghostInk.opacity=ghostMat.opacity;updGhostTail(tg,age,roll,ghostMat.opacity/GOP,yaw);});
   };
-  const update=(time,charge=0,drag=0)=>{
+  const update=(time,charge=0,drag=0,swingTime=time)=>{
     if(!voidFixed&&holder.children.length){fixVoid();voidFixed=true;}
     // รอบ 9: หยดหมึกตามสัน = ส่วนหนึ่งของ "เปลวหยักติดสัน" ในแบบ B → เปิดไว้
     const T=time??clock();
@@ -296,17 +354,23 @@ function stCreateScythePreview(root,args,lifetime){
       const k=Math.floor(T/3.1),u=(T-k*3.1)/0.7;
       if(!BA&&u<1&&k%2===0)pivot.rotation.y+=Math.PI*2*u*u*(3-2*u);
     }
-    if(BA){updCaster(T);updHits(T);}
-    if(BA){const P=baPose(T);if(P.w>0.001){Qi.setFromEuler(pivot.rotation);pivot.quaternion.copy(Qi).slerp(P.QB,P.w);pivot.position.lerp(P.pos,P.w);}
-      const me=typeof PM3!=='undefined'&&PM3.get(NET.myId);if(me&&me.b){me.b.userData.scyY??=me.b.rotation.y;me.b.rotation.y=me.b.userData.scyY+P.tw;}   // ตัวบิดตามแรงเหวี่ยง
+    if(standaloneBA){updCaster(T);updHits(T);}
+    const swing=swingTime??T;
+    const baActive=BA&&(!args.followUp||swing>=SW0);
+    if(baActive){const P=baPose(swing);if(P.w>0.001){Qi.setFromEuler(pivot.rotation);pivot.quaternion.copy(Qi).slerp(P.QB,P.w);pivot.position.lerp(P.pos,P.w);}
+      const me=standaloneBA&&typeof PM3!=='undefined'&&PM3.get(NET.myId);if(me&&me.b){me.b.userData.scyY??=me.b.rotation.y;me.b.rotation.y=me.b.userData.scyY+P.tw;}   // ตัวบิดตามแรงเหวี่ยง
 
+    }
+    if(baActive||args.trailPose){
       // หาง (รอบ 2): คำนวณจากท่าฟันย้อนเวลา (ไม่พึ่งเฟรมที่วาด → ผืนต่อเนื่อง ไม่เป็นริ้ว) • โคนผืนทึบเรียบ ปลายหางแตกเป็นเปลว
       if(stScyLines){const Mt=new THREE.Matrix4(),Sv=new THREE.Vector3(S,S,S);
+        chargedFlakes?.(swing);
         const [tipX,tipY]=bladePt(1,0.45),[ttx,tty]=tan(1),acts=[];
-        for(let j=0;j<HH;j++){const Pj=baPose(T-j*0.014),age=j/(HH-1);Mt.compose(Pj.pos,Pj.QB,Sv);acts[j]=Pj.act;
+        const sampleTrail=args.trailPose??baPose;
+        for(let j=0;j<HH;j++){const Pj=sampleTrail(swing-j*0.014),age=j/(HH-1);Mt.compose(Pj.pos,Pj.QB,Sv);acts[j]=Pj.act;
           // หางด้าม: จากปลายล่างของด้ามขึ้นไปต่อกับโคนหางใบ
           {const [rx,ry]=bladePt(0.05,0.45);for(let k=0;k<SK;k++){const u=k/(SK-1);_p.set(rx*u,0.02+(ry-0.02)*u,0).applyMatrix4(Mt);const i3=j*SK+k;shpos[i3*3]=_p.x;shpos[i3*3+1]=_p.y;shpos[i3*3+2]=_p.z;
-            const gy=0.30-0.18*u;shcol[i3*4]=shcol[i3*4+1]=shcol[i3*4+2]=gy;shcol[i3*4+3]=Math.min(1,Math.pow(1-age,1.2)*1.5)*Pj.act*Math.min(1,u/0.1+0.5);   /* ยาวและจางพร้อมหางใบ (ผู้ใช้ 2026-11-19) */}}   // เทาเข้มที่ปลายล่าง → เกือบดำใกล้ใบ ทึบพอเห็นชัด แต่ไม่ดำสนิทเท่าใบ
+            const gy=0.30-0.18*u;shcol[i3*4]=shcol[i3*4+1]=shcol[i3*4+2]=gy;shcol[i3*4+3]=Math.min(1,Math.pow(1-age,1.2)*1.5)*Pj.act*Math.min(1,u/0.1+0.5)*(Pj.shaft===false?0:1);   /* ยาวและจางพร้อมหางใบ (ผู้ใช้ 2026-11-19) */}}   // เทาเข้มที่ปลายล่าง → เกือบดำใกล้ใบ ทึบพอเห็นชัด แต่ไม่ดำสนิทเท่าใบ
           for(let k=0;k<HK;k++){const tk=0.05+1.07*k/(HK-1);let x,y;if(tk<=1)[x,y]=bladePt(tk,0.45);else{const e=(tk-1)*1.15;x=tipX+ttx*e;y=tipY+tty*e;}_p.set(x,y,0).applyMatrix4(Mt);   // ปลายใบ: หางยื่นเลยปลายจริงไปอีกนิด
             const i2=j*HK+k,nz=Math.sin(k*1.7+T*9)*0.5+Math.sin(k*4.1-j*1.3+T*13)*0.5;
             tpos[i2*3]=_p.x;tpos[i2*3+1]=_p.y+(age>0.5?0.08*(age-0.5)*nz:0);tpos[i2*3+2]=_p.z;
@@ -337,10 +401,16 @@ function stCreateScythePreview(root,args,lifetime){
               tecol[c4+3]=je<0?0:al*Math.min(1,aE*1.5)*Math.min(1,tt/0.08);}}
           teGeo.attributes.position.needsUpdate=true;teGeo.attributes.color.needsUpdate=true;}
         // จานควง + เปลวรอบขอบ + เส้นเปลว 3 เส้น (เฉพาะช่วงควง)
-        {const Ps=baPose(T),on=Ps.spinIdx>=0,k=on?Math.sin(Math.PI*Math.min(1,Ps.spinU)):0;
-          const yA=new THREE.Vector3(0,1,0).applyQuaternion(Ps.QB),cen=Ps.pos.clone().addScaledVector(yA,1.1*S);
-          spinG.visible=on;if(on){spinG.position.copy(cen);spinInk&&spinInk(T*28,k);spinFl&&spinFl(T*6,k);}else{spinInk&&spinInk(0,0);spinFl&&spinFl(0,0);}
-          for(const L of spinLines){const U=L.userData;L.visible=on;if(!on)continue;L.position.copy(cen);L.rotation.set(U.tilt[0],U.tilt[1]+U.dir*T*22,U.tilt[2]);
+        if(hasBASpin){const Ps=args.spinPose?args.spinPose(T):baPose(T),on=!!Ps&&Ps.spinIdx>=0,k=on?Math.sin(Math.PI*Math.min(1,Ps.spinU)):0;
+          if(on){
+            const yA=new THREE.Vector3(0,1,0).applyQuaternion(Ps.QB);
+            spinG.position.copy(Ps.pos).addScaledVector(yA,1.1*S);
+            if(Ps.inkOffset)spinG.position.add(Ps.inkOffset);
+            if(Ps.inkPlane)spinG.quaternion.copy(Ps.inkPlane);
+          }
+          spinG.visible=on;if(on){spinInk&&spinInk(T*28,k*(Ps.inkStrength??1));spinFl&&spinFl(T*6,k);}else{spinInk&&spinInk(0,0);spinFl&&spinFl(0,0);}
+          for(const L of spinLines){const U=L.userData;L.visible=on;if(!on)continue;L.position.copy(spinG.position);L.rotation.set(U.tilt[0],U.tilt[1]+U.dir*T*22,U.tilt[2]);
+            if(Ps.spinPlane)L.quaternion.premultiply(Ps.spinPlane);
             const appear=Math.min(1,Math.max(0,(Ps.spinU-U.ph*0.08)/0.25)),gone=1-Math.max(0,(Ps.spinU-0.55-U.ph*0.05)/0.35),al=Math.max(0,Math.min(appear,gone));
             for(let i=0;i<LSEG;i++){const u=i/(LSEG-1),a=u*Math.PI*1.25,rr=SPR*(1.02+0.05*U.ph),sp=Math.abs(((u*16-T*7+U.ph)%1+1)%1*2-1),fl=0.12*S*(0.25+1.1*Math.pow(1-sp,3));   // ยอดเปลวแหลม (ผู้ใช้ 2026-11-19: ไม่เอาโค้งมน)
               U.p[i*6]=Math.cos(a)*rr;U.p[i*6+1]=0;U.p[i*6+2]=Math.sin(a)*rr;U.p[i*6+3]=Math.cos(a)*(rr+fl);U.p[i*6+4]=0.02;U.p[i*6+5]=Math.sin(a)*(rr+fl);
@@ -528,5 +598,5 @@ function stCreateScythePreview(root,args,lifetime){
     ink.onBeforeRender=()=>update();
     update();
   }
-  return {pivot,blade:scy,update};
+  return {pivot,blade:scy,model:holder,update};
 }

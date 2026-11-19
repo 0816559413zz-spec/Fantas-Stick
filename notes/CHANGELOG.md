@@ -1,8 +1,25 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
 
+- 2026-11-20 — **Darkness ท่าไล่ตาม (Studio, รอรีวิว #89)** พรีวิวโหมดเป้ามีตราเน้นเคียวตั้งแต่พุ่งเข้า ฟันสวนสองครั้ง และง้างฟาดลงครั้งสุดท้าย บันทึก GIF มุมกว้างและมุมซูม ผู้ใช้ยังไม่อนุมัติรอบนี้
+
+- 2026-11-20 — **Darkness VFX Studio** บันทึกท่าติดตราที่ผ่านรีวิว #88, Long Dash แบบกดค้างที่อนุมัติใน #79, Quick Dash ต่อ BA และ Shield ที่ใช้เคียว C ชุดเดียวกับ BA
+
 - 2026-11-19 — **Rubble fades:** Castle Strike bridge rubble (fallen stones + chunks) sinks and disappears after 5 s like other wreckage; holes/cracks/broken cover stay (gameplay). Test: `--game --url "index.html?nosw&dev=1"`, F2 mode siege, `damageEnv` on the bridge, override `performance.now` while stepping.
 - 2026-11-19 — **fcs draft in Map Builder:** `tools/fcs-to-mb.mjs` runs the game's `genFcs` and writes `maps/build/fcs-draft.json` (terrain, grid walls, fences, breakable walls/gate, pines/rocks/crates/pillars, ruins, cores, phase spawns, L bridge as floors) — view/sketch only, siege still plays js/02-fcs*.js.
 - 2026-11-19 — **Dev Mode + hub:** with `?dev=1` picking a mode in the hub opens an offline room directly (no online attempt) so F2-F8 work (`js/62-hub-ui.js` hubPickMode).
+
+- 2026-11-19 — **Darkness Quick Dash (Studio):** ต่อพรีวิวด้วย BA แรกหลังรับบัฟ กวาดกว้างขึ้นเล็กน้อยและค่อย ๆ ดับออร่าคลุมใบขณะฟัน
+
+- 2026-11-19 — **Darkness Quick Dash (Studio):** Route the incoming spiral and loose particles below the blade and use the idle flame shape before the buff aura appears.
+
+- 2026-11-19 — **Darkness Quick Dash (Studio):** Fade the incoming particle streaks into dark flecks near the blade. Taper the charged aura along the actual blade tip.
+
+- 2026-11-19 — **Darkness Quick Dash (Studio):** Start the blade glint and charge boost on the same beat as the upper and lower blade aura after the dash.
+
+- 2026-11-19 — **Darkness Quick Dash (Studio):** Restored the complete approved scythe C spine flame with its original ink ribbons and droplets. The charged aura appears along both sides of the blade after the dash.
+
+- 2026-11-19 — **Darkness Quick Dash (Studio):** Tightened particle arrival into a final 25 ms window before the blade wink. The scythe draws inward briefly, then the size pulse, blade charge and star fire together.
+
 - 2026-11-19 — **Darkness Dash (Studio):** แตะพุ่งพร้อมเงาซ้อนและหางดำ อนุภาคหมุนเข้าคม ขอบเงาคลุมใบ และดาวขาววาบเมื่อชาร์จเต็ม • กดค้างให้เคียวม้วนเข้าและวกกลับจากร่างลูกเงา
 
 - 2026-11-19 — **Darkness Studio:** ลดเวลาฝูงเงาเหลือ 2 วิหลังบีมกระทบ ผู้ใช้อนุมัติภาพในรีวิว #87

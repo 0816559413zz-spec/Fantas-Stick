@@ -1,0 +1,11 @@
+{
+  "v": 1,
+  "desc": "Darkness — พรีวิวท่าไล่ตามเป้ามีตราและเคียวฟันสามจังหวะ",
+  "tags": ["darkness", "preview", "slash"],
+  "pal": "arcane",
+  "dur": 3.16,
+  "layers": [
+    {"id": "anchor", "t": "mesh", "shape": "disc", "mat": "black", "op": 0, "at": 0, "life": 3.16},
+    {"id": "chase", "t": "code", "fn": "studio_darkness_chase", "at": 0, "life": 3.16, "args": {"layer": "anchor", "scytheOnly": true}}
+  ]
+}

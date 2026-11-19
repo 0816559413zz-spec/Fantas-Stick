@@ -11,6 +11,41 @@ function stDarkShiftStudent(root,look,name,tint){
   return actor;
 }
 
+function stDarkBodyTint(target,softFade=false){
+  const strength={value:0};
+  const coverage={value:1};
+  let prepared=false;
+  return (amount,bodyCoverage=1)=>{
+    strength.value=amount;coverage.value=bodyCoverage;
+    if(prepared||!target.fileModel)return;
+    const copies=new Map();
+    const darken=source=>{
+      if(copies.has(source))return copies.get(source);
+      const material=source.clone();
+      delete material.userData.keep;
+      if(softFade)material.transparent=true;
+      material.customProgramCacheKey=()=>source.customProgramCacheKey()+'|dark-body-tint';
+      material.onBeforeCompile=(shader,renderer)=>{
+        source.onBeforeCompile.call(material,shader,renderer);
+        shader.uniforms.darkBodyTint=strength;shader.uniforms.darkBodyCoverage=coverage;
+        shader.fragmentShader='uniform float darkBodyTint,darkBodyCoverage;\n'+shader.fragmentShader.replace(
+          '#include <opaque_fragment>',
+          `#include <opaque_fragment>
+          vec3 shadowBody=vec3(.009,.006,.014)+gl_FragColor.rgb*.048;
+          gl_FragColor.rgb=mix(gl_FragColor.rgb,shadowBody,darkBodyTint);
+          gl_FragColor.a*=darkBodyCoverage;`);
+      };
+      copies.set(source,material);
+      return material;
+    };
+    target.fileModel.traverse(mesh=>{
+      if(!mesh.isMesh||!mesh.material)return;
+      mesh.material=Array.isArray(mesh.material)?mesh.material.map(darken):darken(mesh.material);
+    });
+    prepared=true;
+  };
+}
+
 function stDarkMatter(root,name,bursts,origin,opacity=1){
   const colors=[0x0c0c13,0x22212d,0x393747,0x666172];
   const tones=colors.map(color=>new THREE.Color(color));
@@ -88,7 +123,7 @@ function stDarkShiftShroud(root){
 }
 
 function stDarkShiftCloakTrails(root){
-  const bands=6,steps=25;
+  const bands=2,steps=29;
   const positions=new Float32Array(bands*steps*6),shades=new Float32Array(bands*steps*2),indices=[];
   for(let band=0;band<bands;band++){
     for(let i=0;i<steps-1;i++){
@@ -118,62 +153,27 @@ function stDarkShiftCloakTrails(root){
     if(!mesh.visible)return;
     mesh.position.copy(place);mesh.rotation.y=yaw;
     for(let band=0;band<bands;band++){
-      const side=band%2?1:-1,lane=(band>>1)/2;
+      const direction=band===0?1:-1;
       for(let i=0;i<steps;i++){
         const u=i/(steps-1),a=(band*steps+i)*2;
-        const curl=(u*3.5+t*8+lane*1.3)*side;
-        const x=side*(.38+.25*lane)*(1-.57*flow*u)+Math.sin(curl)*(.13+.29*gather)*u;
-        const y=lerp(1.64-.91*u-.22*lane,1.06+Math.cos(curl)*.37*u,flow);
-        const z=lerp(-.13-.71*u,.22-2.53*u,flow)-.17*lane;
-        const taper=Math.pow(Math.sin(Math.PI*u),.66);
-        const half=(.09+.11*(1-lane))*taper*(1-.40*flow)*(1+.21*Math.sin(curl*2));
-        const ink=strength*taper*(.78-.15*lane);
-        geometry.attributes.position.setXYZ(a,x+half*.48*side,y+half,z);
-        geometry.attributes.position.setXYZ(a+1,x-half*.48*side,y-half,z);
+        const turn=-.55+band*Math.PI+t*11.2+gather*2.16-u*3.85;
+        const radius=lerp(.91+.15*u,.40+.29*u,gather);
+        const x=lerp(Math.sin(turn)*radius,direction*.34*(1-.65*u),flow);
+        const orbitY=1.12+direction*.29+direction*.39*(u-.43)+.13*Math.cos(turn);
+        const y=lerp(lerp(orbitY,1.05+direction*.14+.16*u,gather),
+          1.07+direction*.11+.18*Math.sin(u*3+t*8)*u,flow);
+        const z=lerp(Math.cos(turn)*radius,.16-(band===0?2.37:1.71)*u,flow);
+        const taper=Math.sin(Math.PI*u)**.71;
+        const half=(band===0?.123:.083)*taper*(1-.27*flow);
+        const ink=strength*taper*(band===0?.96:.66);
+        geometry.attributes.position.setXYZ(a,x+Math.sin(turn)*half*.38,y+half,z+Math.cos(turn)*half*.38);
+        geometry.attributes.position.setXYZ(a+1,x-Math.sin(turn)*half*.38,y-half,z-Math.cos(turn)*half*.38);
         geometry.attributes.shade.setX(a,ink);
         geometry.attributes.shade.setX(a+1,.59*ink);
       }
     }
     geometry.attributes.position.needsUpdate=true;
     geometry.attributes.shade.needsUpdate=true;
-  };
-}
-
-function stDarkShiftBladeFlame(scythe){
-  // Follow the same exported spine as the scythe's idle and BA previews.
-  const rows=41,steps=6,geometry=new THREE.BufferGeometry();
-  const positions=new Float32Array(rows*steps*3),colors=new Float32Array(rows*steps*4),indices=[];
-  for(let i=0;i<rows-1;i++)for(let j=0;j<steps-1;j++){
-    const a=i*steps+j,b=a+steps;
-    indices.push(a,b,a+1,a+1,b,b+1);
-  }
-  geometry.setAttribute('position',new THREE.BufferAttribute(positions,3));
-  geometry.setAttribute('color',new THREE.BufferAttribute(colors,4));
-  geometry.setIndex(indices);
-  const flame=new THREE.Mesh(geometry,stScyInk());
-  flame.name='Shift scythe spine flame';flame.frustumCulled=false;flame.renderOrder=8;
-  scythe.add(flame);
-  return (t,burn,drag,opacity=1)=>{
-    const spine=stScyLines?.spine,edge=stScyLines?.edge;
-    flame.visible=!!spine&&opacity>.01;
-    if(!flame.visible)return;
-    for(let i=0;i<rows;i++){
-      const u=i/(rows-1),[x,y]=spine[i],cut=edge[i];
-      const flicker=Math.max(0,.49*Math.sin(u*33-t*17)+.30*Math.sin(u*59+t*9)+.26);
-      const taper=Math.sin(Math.PI*u)**.55;
-      const height=(.042+flicker*(.12+.19*burn))*taper;
-      const dx=x-cut[0],dy=y-cut[1],width=Math.hypot(dx,dy)||1;
-      for(let j=0;j<steps;j++){
-        const v=j/(steps-1),rise=height*v,bend=rise*v;
-        const index=i*steps+j,a=index*3;
-        positions[a]=x+rise*dx/width+bend*(.56+.44*Math.sin(u*17-t*12));
-        positions[a+1]=y+rise*dy/width;
-        positions[a+2]=.008+bend*(.35*Math.sin(u*13-t*10)-2.1*drag);
-        colors[index*4+3]=opacity*(1-v)**.56;
-      }
-    }
-    geometry.attributes.position.needsUpdate=true;
-    geometry.attributes.color.needsUpdate=true;
   };
 }
 
@@ -200,25 +200,25 @@ function stDarkChargedBlade(blade){
       const u=i/(rows-1),line=side?stScyLines.edge:stScyLines.spine;
       const [x,y]=line[i],a=line[Math.max(0,i-1)],b=line[Math.min(rows-1,i+1)];
       const dx=b[0]-a[0],dy=b[1]-a[1],length=Math.hypot(dx,dy)||1;
-      const sign=side?-1:1,tip=stDarkEase(.80,1,u);
+      const sign=side?-1:1,tip=1-stDarkEase(.77,1,u);
       const flow=.55*Math.sin(u*27-t*16)+.30*Math.sin(u*62-t*25);
-      const width=(.072+.105*strength+.055*tip+.035*flow)*stDarkEase(0,.12,u);
+      const width=(.072+.105*strength+.035*flow)*stDarkEase(0,.12,u)*tip;
       const seam=.08+.12*flash+.06*stDarkEase(.28,.78,flow);
       for(let j=0;j<columns;j++){
         const index=(side*rows+i)*columns+j,p=index*3,c=index*4,d=widths[j]*width;
-        positions[p]=x+(-sign*dy+dx*tip*.85)*d/length;
-        positions[p+1]=y+(sign*dx+dy*tip*.85)*d/length;
-        positions[p+2]=j===0?.036:.013+.045*tip;
+        positions[p]=x-sign*dy*d/length;
+        positions[p+1]=y+sign*dx*d/length;
+        positions[p+2]=j===0?.036:.013;
         const tint=j===2?seam:.008+(j===1?.024*flash:0);
         colors[c]=tint*.84;colors[c+1]=tint*.77;colors[c+2]=tint;
-        colors[c+3]=alphas[j]*strength*stDarkEase(0,.095,u);
+        colors[c+3]=alphas[j]*strength*stDarkEase(0,.095,u)*Math.sqrt(tip);
       }
     }
     geometry.attributes.position.needsUpdate=true;geometry.attributes.color.needsUpdate=true;
   };
 }
 
-function stDarkChargeScythe(root,blade,launch,impact){
+function stDarkChargeScythe(root,blade,launch,impact,spendAt){
   const count=144,burstCount=36,traces=3;
   const sparks=new THREE.InstancedMesh(new THREE.OctahedronGeometry(1,0),
     new THREE.MeshBasicMaterial({transparent:true,opacity:.97,depthWrite:false,toneMapped:false}),count*traces+burstCount);
@@ -228,7 +228,7 @@ function stDarkChargeScythe(root,blade,launch,impact){
   root.add(sparks);
   const particles=Array.from({length:count},(_,i)=>{
     const seed=i*.618034%1,lane=i%3;
-    return {seed,lane,born:launch-.014+i/count*.282,hit:impact-.077+seed*.079,
+    return {seed,lane,born:launch-.014+i/count*.282,hit:impact-.025+seed*.025,
       angle:lane*2.094+i/count*3.80+(seed-.5)*.46,seat:.09+((i*.75488)%1)*.89};
   });
   const focus=new THREE.Group();
@@ -285,13 +285,15 @@ function stDarkChargeScythe(root,blade,launch,impact){
     const line=stScyLines.edge,[x,y]=line[Math.round(p.seat*(line.length-1))];
     const settle=u*u,r=(1-u**2.35)*(.88+p.seed*.26+p.lane*.15),a=p.angle+u*(6.9+p.lane*.45);
     const cross=Math.sin(a)*r;
-    return out.set(lerp(.48,x,settle)+Math.cos(a)*r*1.14,lerp(1.99,y,settle)+cross*(.63+p.lane*.12),
+    const height=lerp(1.14,y,settle)-r*(.18+.25*Math.abs(Math.sin(a)));
+    return out.set(lerp(.48,x,settle)+Math.cos(a)*r*1.14,height,
       cross*(.45-p.lane*.38)+r*(p.seed-.5)*.22).applyMatrix4(transform);
   };
   return t=>{
     const age=t-impact,flash=stDarkEase(0,.019,age)*(1-stDarkEase(.052,.178,age));
-    const charge=stDarkEase(launch+.06,impact+.027,t),afterglow=1-.22*stDarkEase(.075,.31,age);
-    outline(t,charge*afterglow,flash);
+    const charge=stDarkEase(impact,impact+.035,t);
+    const afterglow=1-.22*stDarkEase(.075,.31,age);
+    outline(t,charge*afterglow*(1-stDarkEase(spendAt,spendAt+.09,t)),flash);
     star.visible=false;sweep.visible=false;halo.visible=false;strokes.visible=false;
     let active=0;
     if(stScyLines&&t>=launch&&age<.35){
@@ -302,7 +304,7 @@ function stDarkChargeScythe(root,blade,launch,impact){
       cam.getWorldPosition(viewPoint).applyMatrix4(rootInverse);
       focus.position.addScaledVector(viewPoint.sub(focus.position).normalize(),.09);
       focus.quaternion.setFromUnitVectors(flow.set(0,0,1),viewPoint);
-      const glint=stDarkEase(-.077,.03,age);
+      const glint=stDarkEase(0,.065,age);
       sweep.visible=glint>0&&glint<1;
       if(sweep.visible){
         const head=.13+.84*glint;
@@ -320,7 +322,7 @@ function stDarkChargeScythe(root,blade,launch,impact){
       star.scale.set(size,size*(1-.22*stDarkEase(.055,.16,age)),1);
       halo.visible=star.visible;halo.scale.setScalar(.50+.49*stDarkEase(0,.10,age));
       halo.material.uniforms.intensity.value=flash*.43;
-      const drawing=stDarkEase(launch+.025,launch+.12,t)*(1-stDarkEase(impact-.055,impact,t));
+      const drawing=stDarkEase(launch+.025,launch+.12,t)*(1-stDarkEase(impact-.026,impact+.008,t));
       strokes.visible=drawing>.01;
       if(strokes.visible){
         const head=clamp((t-launch)/(impact-launch),0,1);
@@ -338,16 +340,19 @@ function stDarkChargeScythe(root,blade,launch,impact){
         const p=particles[i],{born,seed,hit}=p;
         const u=(t-born)/(hit-born);
         if(u<0||u>=1)continue;
+        // As the particles gather, leave individual flecks at the blade.
+        const gather=stDarkEase(.52,.82,u);
         for(let k=0;k<traces;k++){
           const step=u-k*.048;
           if(step<0)continue;
           orbit(p,step,piece.position);
           orbit(p,Math.min(1,step+.025),trail);
           piece.quaternion.setFromUnitVectors(up,flow.copy(trail).sub(piece.position).normalize());
-          const width=(.023+seed*.034)*stDarkEase(0,.17,step)*(1-stDarkEase(.92,1,step))*(1-.28*k);
-          piece.scale.set(width,width*(k?2.7:3.6),width*.53);
+          const width=(.023+seed*.034)*stDarkEase(0,.17,step)*(1-stDarkEase(.92,1,step))*
+            (1-.28*k)*(1-gather*(k?1:.72));
+          piece.scale.set(width,width*(k?2.7:lerp(3.6,1.1,gather)),width*.53);
           piece.updateMatrix();sparks.setMatrixAt(active,piece.matrix);
-          sparks.setColorAt(active++,shades[k?1+k%2:i%11===0?3:i%2]);
+          sparks.setColorAt(active++,shades[gather>.35?0:k?1+k%2:i%11===0?3:i%2]);
         }
       }
       for(let i=0;i<burstCount;i++){
@@ -371,7 +376,9 @@ function stDarkChargeScythe(root,blade,launch,impact){
 
 function stDarkQuickDash(root,caster,look){
   const ease=stDarkEase,launch=.22,arrival=.54,impact=.66,range=4;
-  const scythe=stCreateScythePreview(root,{wrap:'C',manual:true});
+  const slashStart=1.02,spendAt=1.36;
+  const slashRoot=new THREE.Group();root.add(slashRoot);
+  const scythe=stCreateScythePreview(slashRoot,{wrap:'C',mode:'ba',manual:true,followUp:true,reach:8.1});
   scythe.pivot.name='Quick Dash scythe';
   const distanceAt=t=>range*ease(launch,arrival,t);
   const pointAt=(distance,out)=>out.set(0,0,clamp(distance,0,range));
@@ -389,7 +396,7 @@ function stDarkQuickDash(root,caster,look){
     ink:new THREE.MeshBasicMaterial({color:0x14131a,toneMapped:false,transparent:true,depthWrite:false,opacity:0}),
     ready:false
   }));
-  const infuse=stDarkChargeScythe(root,scythe.blade,launch,impact);
+  const infuse=stDarkChargeScythe(root,scythe.blade,launch,impact,spendAt);
   const launchInk=new THREE.Group();
   launchInk.position.y=.055;launchInk.rotation.x=-Math.PI/2;root.add(launchInk);
   const pushOff=stDarkPressure(launchInk);
@@ -398,18 +405,19 @@ function stDarkQuickDash(root,caster,look){
   function poseScythe(pivot,t){
     const lag=distanceAt(t)-distanceAt(t-.065);
     const carry=ease(launch,arrival,t)*(1-ease(arrival,impact+.12,t));
-    const empowered=ease(impact-.018,impact+.047,t);
+    const empowered=ease(impact-.012,impact+.038,t);
     const snap=empowered*(1-ease(impact+.05,impact+.18,t));
-    pivot.position.set(-1.45+.38*carry-.23*snap,.09+.052*Math.sin(t*4)+.16*snap,distanceAt(t)-.76*lag+.19*snap);
-    pivot.rotation.set(.36*lag,.10*Math.sin(t*6)-.17*empowered+.14*carry,-.13-.39*lag+.25*snap);
+    const gather=ease(arrival,impact-.025,t)*(1-ease(impact-.015,impact+.025,t));
+    pivot.position.set(-1.45+.38*carry-.23*snap+.07*gather,
+      .09+.052*Math.sin(t*4)+.16*snap-.045*gather,distanceAt(t)-.76*lag+.19*snap-.055*gather);
+    pivot.rotation.set(.36*lag,.10*Math.sin(t*6)-.17*empowered+.14*carry,-.13-.39*lag+.25*snap-.075*gather);
     pivot.scale.setScalar(1+.10*empowered+.06*snap);
-    return lag;
   }
   const sample=new THREE.Object3D(),bladePoint=new THREE.Vector3();
   const bladeAt=(t,out)=>{
     poseScythe(sample,t);sample.updateMatrix();
-    const spine=stScyLines?.spine,point=spine?.[Math.floor(spine.length*.65)];
-    return out.set(point?.[0]??.66,point?.[1]??1.90,0).multiplyScalar(scythe.blade.scale.x).applyMatrix4(sample.matrix);
+    const edge=stScyLines?.edge,point=edge?.[Math.floor(edge.length*.65)];
+    return out.set(point?.[0]??.66,(point?.[1]??1.90)-.24,0).multiplyScalar(scythe.blade.scale.x).applyMatrix4(sample.matrix);
   };
   const embers=stDarkWakeShards(root,t=>t,bladeAt,t=>bladeAt(t,bladePoint).y-1.08,launch+.025,arrival+.025);
 
@@ -428,9 +436,20 @@ function stDarkQuickDash(root,caster,look){
 
   return t=>{
     pose(caster,t);
-    const lag=poseScythe(scythe.pivot,t);
-    const charge=.35*ease(launch,impact,t)+.77*ease(impact-.10,impact+.028,t)*(1-ease(impact+.09,impact+.34,t));
-    scythe.update(t,charge,lag*2.1);
+    slashRoot.position.z=distanceAt(t);
+    poseScythe(scythe.pivot,t);
+    scythe.pivot.position.z-=slashRoot.position.z;
+    const age=t-impact;
+    const buff=1-ease(spendAt,spendAt+.09,t);
+    const charge=ease(0,.028,age)*(.35+.77*(1-ease(.09,.34,age)))*buff;
+    scythe.pivot.scale.setScalar(lerp(1,scythe.pivot.scale.x,buff));
+    const slashClock=2+t-slashStart;
+    scythe.update(t,charge,0,slashClock);
+    if(t>=slashStart){
+      const swing=slashRoot.userData.baState(slashClock);
+      caster.b.rotation.y=swing.tw*ease(slashStart,slashStart+.12,t)*(1-ease(1.55,1.83,t));
+      if(caster.rig)rigSync(caster,0);
+    }
     pushOff(.32+.77*ease(launch,launch+.17,t),.54*ease(launch-.012,launch+.025,t)*(1-ease(launch+.037,launch+.19,t)),t*9);
     nearTail(t);farTail(t);matter(t);embers(t);infuse(t);
     for(const echo of echoes){
@@ -452,9 +471,9 @@ function stDarkQuickDash(root,caster,look){
   };
 }
 
-function stDarkHoldDash(root,caster,scythe){
-  const ease=stDarkEase,begin=.16,launch=begin+.50,covered=launch+.045,formed=launch+.14,arrival=formed+2;
-  const rollStart=launch-.13,acceleration=.22,braking=.34;
+function stDarkHoldDash(root,caster){
+  const ease=stDarkEase,begin=.16,launch=begin+.50,covered=launch+.032,formed=launch+.105,arrival=formed+2;
+  const rollStart=launch-.13,acceleration=.18,braking=.34;
   const route=[[0,0],[.06,3.6],[2.65,6.9],[2.1,10],[-1.65,13.3]]
     .map(([x,z])=>new THREE.Vector3(x,0,z));
   // This curve demonstrates steering for the Studio camera.
@@ -476,7 +495,9 @@ function stDarkHoldDash(root,caster,scythe){
   const weave=stDarkOrbWeave(root,pointAt,()=>0);
   const shroud=stDarkShiftShroud(root);
   const cloakTrails=stDarkShiftCloakTrails(root);
-  const flame=stDarkShiftBladeFlame(scythe);
+  const scythe=stCreateScythePreview(root,{wrap:'C',manual:true,scale:1.43});
+  const bladePivot=scythe.pivot;bladePivot.name='Shift Dash scythe';
+  const bodyTint=stDarkBodyTint(caster,true);
   const splash=stDarkMatter(root,'Long Dash dark splash',[
     {at:arrival-.01,span:.07,count:52,spread:1.68,lift:1.02,height:.62},
     {at:arrival+.025,span:.08,count:23,spread:1.03,lift:1.57,height:1.00},
@@ -509,19 +530,22 @@ function stDarkHoldDash(root,caster,scythe){
   const up=new THREE.Vector3(0,1,0);
   return t=>{
     const distance=distanceAt(t),age=t-arrival;
-    const charge=ease(begin,launch,t),seal=ease(begin+.14,covered,t);
+    const charge=ease(begin,launch,t);
     const morph=ease(rollStart+.035,formed,t);
     const unveil=ease(covered,formed,t);
     const form=morph*(1-ease(0,.065,age));
     pointAt(distance,at);pointAt(distance+.1,ahead);pointAt(distance-.1,behind);ahead.sub(behind);
     const yaw=Math.atan2(ahead.x,ahead.z);
-    const brace=t<covered?charge:0;
+    const brace=charge*(1-unveil)*(age<0?1:0);
     const push=ease(rollStart,covered,t)*(1-unveil);
     const spring=ease(.03,.081,age)*(1-ease(.106,.224,age));
     const plant=ease(.129,.238,age)*(1-ease(.25,.52,age));
     caster.g.position.copy(at);caster.g.rotation.y=yaw;
     caster.g.position.y=.36*spring;
-    caster.g.visible=t<covered||age>=.045;
+    caster.g.visible=t<formed||age>=.045;
+    const dark=ease(begin+.23,launch-.033,t)*(1-ease(.05,.18,age));
+    const bodyCoverage=age<0?1-ease(launch-.021,formed,t):1;
+    bodyTint(dark,bodyCoverage);
     caster.ring.material.opacity=.7*(1-ease(rollStart-.04,covered,t)+ease(.06,.20,age));
     stDarkPose(caster,{back:.25*brace+.31*push-.24*spring+.46*plant,roll:.08*brace+.20*spring-.16*plant,
       drop:.06*brace+.20*plant,arms:.54*brace+.76*spring+.42*plant,step:.18*brace+.34*push+.68*spring+.37*plant});
@@ -537,13 +561,12 @@ function stDarkHoldDash(root,caster,scythe){
     ball.position.y=1.07+.065*Math.sin(t*16)*(1-travel);
     ball.rotation.y=yaw;
     ball.scale.set((.52-.07*travel)*core,.57*core,(.51+.15*travel)*core);
-    const threads=lerp(.46,.96,charge)*ease(begin,begin+.24,t)*(1-ease(-.02,.15,age));
-    const coil=.62*seal*(1-morph);
-    weave(t,at,distance,threads,morph,0,0,coil);
-    const cloakFlow=ease(rollStart-.055,formed+.16,t);
-    cloakTrails(t,at,yaw,charge,cloakFlow,ease(begin+.07,begin+.25,t)*(1-ease(formed+.03,formed+.37,t)));
-    if(age<0)shroud(t,at,yaw,lerp(-.12,1.38,seal),
-      ease(begin+.14,begin+.27,t)*(1-unveil),1-.70*unveil,.39*push);
+    const threads=.82*ease(covered,formed+.21,t)*(1-ease(-.02,.15,age));
+    weave(t,at,distance,threads,morph,0,0,0);
+    const cloakFlow=ease(launch-.007,formed+.060,t);
+    const orbitAlpha=ease(begin+.13,begin+.23,t)*(1-ease(formed+.075,formed+.34,t));
+    cloakTrails(t,at,yaw,morph,cloakFlow,.83*orbitAlpha);
+    if(age<0)shroud(t,at,yaw,0,0,1);
     else {
       const peel=ease(.049,.18,age);
       shroud(t,at,yaw,lerp(1.38,-.1,peel),.92*ease(-.025,.035,age)*(1-peel),ease(0,.053,age));
@@ -551,16 +574,16 @@ function stDarkHoldDash(root,caster,scythe){
 
     const fuse=ease(begin+.25,covered,t),returning=ease(.093,.38,age);
     const spiral=age<0?fuse*Math.PI*.90:(1-returning)*Math.PI*.76;
-    scythe.visible=t<covered||returning>.03;
+    bladePivot.visible=t<covered||returning>.03;
     const orbit=age<0?1-.87*fuse:.18+.82*returning;
     scytheOffset.set(-1.24*Math.cos(spiral)*orbit,.18+.049*Math.sin(t*4)+.63*(age<0?fuse:1-returning),
       -.97*Math.sin(spiral)*orbit).applyAxisAngle(up,yaw);
-    scythe.position.copy(at).add(scytheOffset);
-    scythe.rotation.set(-.15*brace+.65*spiral,yaw+.21*Math.sin(t*6)-spiral,-.16-.43*brace+.40*plant);
-    scythe.scale.setScalar(1.43*(age<0?1-.97*fuse:returning));
-    flame(t,.22+1.1*(age<0?fuse:1-returning),.28*orbit,age<0?1:stDarkEase(.02,.50,returning));
+    bladePivot.position.copy(at).add(scytheOffset);
+    bladePivot.rotation.set(-.15*brace+.65*spiral,yaw+.21*Math.sin(t*6)-spiral,-.16-.43*brace+.40*plant);
+    bladePivot.scale.setScalar(age<0?1-.97*fuse:returning);
+    if(bladePivot.visible)scythe.update(t,.35*(age<0?fuse:1-returning),.28*orbit);
 
-    inkIn(1.77-1.04*charge,.59*charge*(1-ease(launch,formed,t)),t*4);
+    inkIn(1.40-.76*charge,.28*charge*(1-ease(launch,formed,t)),t*4);
     inkOut(.37+1.37*ease(.04,.31,age),.83*ease(.035,.098,age)*(1-ease(.11,.32,age)),t*6);
     for(const ribbon of ribbons)ribbon(age);
     wake(t);wakeShards(t);splash(t);scytheMatter(t);
@@ -570,13 +593,11 @@ function stDarkHoldDash(root,caster,scythe){
 FXCODE.studio_darkness_shift=(_x,_y,_h,args,instance)=>{
   const anchor=instance.L.find(layer=>layer.d.id===args.layer);
   if(!anchor?.obj)return;
-  const scythe=args.hold?modelInst('dark_scythe'):null;
-  if(args.hold&&!scythe)return;
+  if(args.hold&&!MODELS.ready.has('dark_scythe'))return;
   const root=new THREE.Group();root.name='Darkness Shift preview';anchor.obj.add(root);
   const look={...getLook(NET.myId),ws:-1,wn:0};
   const caster=stDarkShiftStudent(root,look,'Shift Dash caster',lookTint(look));
-  if(scythe){scythe.name='Shift Dash scythe';root.add(scythe);}
-  const update=args.hold?stDarkHoldDash(root,caster,scythe):stDarkQuickDash(root,caster,look);
+  const update=args.hold?stDarkHoldDash(root,caster):stDarkQuickDash(root,caster,look);
   instance.updateDarknessShift=()=>update(instance.t);
   if(args.hold)instance.darknessShiftFocus=out=>{
     out.copy(caster.g.position);

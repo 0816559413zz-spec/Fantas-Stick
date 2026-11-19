@@ -58,10 +58,14 @@ const _stv=new THREE.Vector3();
 function stCam(c){if(ST.cam==='game'||!ST.fx)return;const A=stAnchor();if(!A)return;const lk=(+SQ.get('look')||0)*20,lx=A.x+Math.cos(A.a)*lk,ly=A.y+Math.sin(A.a)*lk,T=_stv.set(tx(lx),GY(lx,ly)+(MK.ws==='fx'&&ST_NATURE_TREE_PREVIEWS.has(ST.name)?13.7:1.1),tz(ly));   // ?look=<m> = มองไปข้างหน้า N ม. (ภาพสตอรี่บอร์ดที่ผู้ร่าย+เป้าอยู่ในภาพเดียว)
   if(ST.name===ST_DARKNESS_DASH&&ST.cam==='orbit'&&!SQ.has('cam')&&!SQ.has('look')){T.x+=3.9;T.z-=4.2;}
   if(ST.cam==='orbit'&&!SQ.has('look')){
-    if(ST.name===ST_DARKNESS_QUICK_DASH)T.x+=2;
+    if(ST.name===ST_DARKNESS_QUICK_DASH)T.x+=4.4;
     if(ST.name===ST_DARKNESS_HOLD_DASH)ST.I?.darknessShiftFocus?.(T);
     if(ST.name===ST_DARKNESS_WARD_DRAIN)T.x+=5.7;
+    if(ST.name===ST_DARKNESS_MARK_WAVE)T.x+=7.2;
+    if(ST.name===ST_DARKNESS_CHASE)T.x+=16.20;
   }
+  if(ST.name===ST_DARKNESS_MARK_WAVE&&ST.cam==='orbit')T.y+=2.15;
+  if(ST.name===ST_DARKNESS_CHASE&&ST.cam==='orbit')T.y+=2.65;
   const f=[Math.cos(A.a),Math.sin(A.a)],r=[-Math.sin(A.a),Math.cos(A.a)];
   if(ST.cam==='side')c.position.set(T.x+r[0]*ST.dist,T.y+2.2*ST.dist/9,T.z+r[1]*ST.dist);
   else if(ST.cam==='front')c.position.set(T.x+f[0]*ST.dist,T.y+2*ST.dist/9,T.z+f[1]*ST.dist);
@@ -71,7 +75,7 @@ function stCam(c){if(ST.cam==='game'||!ST.fx)return;const A=stAnchor();if(!A)ret
 // ---------- เล่น / กรอเวลา (จำลองแน่นอน: dt คงที่ + เลขสุ่มมี seed) ----------
 function stDur(){const F=ST.fx;if(!F)return 2;if(F.dur)return F.dur;let e=0.5;for(const L of F.layers||[]){const g=k=>L[k]!==undefined?L[k]:(FXR.def[L.t]||{})[k];const n=v=>typeof v==='number'?v:Array.isArray(v)?+v[1]||0:0;e=Math.max(e,n(g('at'))+n(g('life')));}return e;}
 function stIsLoop(){return (ST.fx&&ST.fx.layers||[]).some(L=>L.loop);}
-function stRender(dt,draw){stVnow+=dt*1000;FXSTUDIO.noDraw=!draw;try{if(draw){ST.I?.updateNatureWeave?.();ST.I?.updateDarknessDash?.();ST.I?.updateNightWaltz?.();ST.I?.updateDarknessShift?.();ST.I?.updateDarknessShield?.();ST.I?.updateWardDrain?.();}render(dt,stVnow);}catch(e){console.error(e);}finally{FXSTUDIO.noDraw=false;}}
+function stRender(dt,draw){stVnow+=dt*1000;FXSTUDIO.noDraw=!draw;try{if(draw){ST.I?.updateNatureWeave?.();ST.I?.updateDarknessDash?.();ST.I?.updateNightWaltz?.();ST.I?.updateDarknessShift?.();ST.I?.updateDarknessShield?.();ST.I?.updateWardDrain?.();ST.I?.updateMarkWave?.();ST.I?.updateDarknessChase?.();}render(dt,stVnow);}catch(e){console.error(e);}finally{FXSTUDIO.noDraw=false;}}
 function stFlush(){if(ST.I){fxKill(ST.I);ST.I=null;}fxClearAll();for(let i=0;i<34;i++)stRender(0.15,false);PARTS.length=0;SCR.fl.length=0;SCR.rad=null;SCR.chr=0;shakeA=0;}
 function stLayers(){const F=ST.fx;return Object.assign({},F,{layers:(F.layers||[]).filter(L=>!ST.mute[L.id]&&(!ST.solo||ST.solo===L.id))});}
 function stSimKey(){return JSON.stringify(stLayers())+'|'+ST.at+'|'+ST.seed+'|'+ST.map;}
@@ -156,13 +160,14 @@ async function stOpen(name,keepT){try{const r=await fetch('assets/fx/'+name+'.fx
         ST.orb.pitch=SQ.has('opitch')?+SQ.get('opitch'):.64;
       }
     }
-    if(name===ST_DARKNESS_QUICK_DASH||name===ST_DARKNESS_HOLD_DASH||name===ST_DARKNESS_SHIELD){
+    if(name===ST_DARKNESS_QUICK_DASH||name===ST_DARKNESS_HOLD_DASH||name===ST_DARKNESS_SHIELD||name===ST_DARKNESS_MARK_WAVE||name===ST_DARKNESS_CHASE){
       const [student,scythe]=await Promise.all([loadModel('char_student'),loadModel('dark_scythe')]);
       if(!student||!scythe)throw new Error('โหลดโมเดลเคียวหรือตัวละครไม่ได้');
       if(!keepT&&!SQ.has('cam')){
-        ST.cam='orbit';ST.orb.dist=+SQ.get('dist')||(name===ST_DARKNESS_HOLD_DASH?10.6:9);
-        ST.orb.yaw=+SQ.get('oyaw')||(name===ST_DARKNESS_SHIELD?.28:.72);
-        ST.orb.pitch=+SQ.get('opitch')||.49;
+        const quickDash=name===ST_DARKNESS_QUICK_DASH,markWave=name===ST_DARKNESS_MARK_WAVE,chase=name===ST_DARKNESS_CHASE;
+        ST.cam='orbit';ST.orb.dist=+SQ.get('dist')||(chase?22.9:markWave?18.6:quickDash?15:name===ST_DARKNESS_HOLD_DASH?10.6:9);
+        ST.orb.yaw=+SQ.get('oyaw')||(chase?-1.30:markWave?-1.72:quickDash?-2.30:name===ST_DARKNESS_SHIELD?.28:.72);
+        ST.orb.pitch=+SQ.get('opitch')||(chase?.24:markWave?.21:quickDash?.33:.49);
       }
     }
     if(ST_NATURE_TREE_PREVIEWS.has(name)){
