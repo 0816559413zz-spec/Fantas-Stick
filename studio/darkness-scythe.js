@@ -150,7 +150,7 @@ FXCODE.studio_darkness_scythe=(_x,_y,_h,args,instance)=>{
     const p=pose(g,rad,vert,dirSweep,spinA,cock);
     if(vert>0.01){const sp=new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,1,0),T*0.9*vert);   // แนวตั้ง: ควงตัวเองเบา ๆ
       const c=p.pos.clone().addScaledVector(new THREE.Vector3(0,1,0),1.1*S0*vert);p.q.premultiply(sp);p.pos.sub(c).applyQuaternion(sp).add(c);}
-    return {w:1,QB:p.q,pos:p.pos,tw,act,spinIdx,spinU,kc};
+    return {w:1,QB:p.q,pos:p.pos,tw,act,spinIdx,spinU,kc,g};
   };
   const baPose=T=>baState(T);
   root.userData.baState=baState;   // ดีบัก/ทดสอบ
@@ -211,6 +211,67 @@ FXCODE.studio_darkness_scythe=(_x,_y,_h,args,instance)=>{
       const al=Math.pow(1-a,1.3)*H.fl;ttC[i*8+3]=al;ttC[i*8+7]=al;}
     ttGeo.attributes.position.needsUpdate=true;ttGeo.attributes.color.needsUpdate=true;
     poseCaster(T);updAura(T);};
+  // ---------- เป้าโดนฟัน (ผู้ใช้ 2026-11-19) ----------
+  // ทุก BA ที่โดน = รอยฟันดำบนตัวเป้า ~0.3 วิ • เป้ามีตรา = เคียวเงาโปร่ง 40% โผล่ข้างเป้า (หลังเป้า ไม่โดนคนอื่น) ฟันสวนเป็นกากบาท แล้วสลายเป็นหมอกดำ
+  //   เคียวเงามีรอยฟันของตัวเอง (จางกว่า) • เป้าสะดุ้งทุกครั้งที่โดน
+  const HIT_LIFE=0.3,LEAD=0.2,GH0=0.06,GSW0=0.12,GSWP=0.18,GOUT=0.2,GSC=1.6,GRAD=2.05,GOFF=1.6,GTILT=0.65;
+  const targets=!BA||typeof stDarkTargetMark!=='function'?[]:[{ang:0,dist:REACH,marked:true},{ang:-0.62,dist:REACH-0.4,marked:false}].map((d,i)=>{
+    const look={...getLook(NET.myId),h:(i+1)%4,cl:(i+1)%4,hs:i+3,wn:0};const a=makeStudent(look,'darkness-ba-target-'+i);root.add(a.g);
+    const R=radOf(d.ang);a.g.position.set(R.x*d.dist,0,R.z*d.dist);a.g.rotation.y=Math.atan2(-R.x,-R.z);useFileModel(a,'char_student',lookTint(look),look);
+    if(d.marked)a.updMark=stDarkTargetMark(a.g);return {...d,a};});
+  const hitCache=new Map();
+  const hitsOf=kc=>{if(hitCache.has(kc))return hitCache.get(kc);const out=[];   // [{T, target i, from}] ต่อรอบลูป: หาเวลาที่ปลายใบผ่านมุมเป้า
+    for(let k=0;k<NSW;k++){const t0=kc*LOOP+SW0+k*GAP+WU,from=Math.sign(baState(t0+0.001).g)||1;
+      targets.forEach((tg,i)=>{const aim=tg.ang+from*LEAD;let prev=null;
+        for(let t=t0;t<=t0+SWP;t+=0.002){const v=baState(t).g-aim;if(prev!==null&&Math.sign(v)!==Math.sign(prev)){out.push({T:t,i,from});break;}prev=v;}});}
+    hitCache.set(kc,out);return out;};
+  const lastHit=(T,i)=>{let best=null;for(const kc of [Math.floor(T/LOOP),Math.floor(T/LOOP)-1])for(const h of hitsOf(kc))if(h.i===i&&h.T<=T&&(!best||h.T>best.T))best=h;return best;};
+  // รอยฟันบนตัวเป้า: ชั้นดำนอก + เส้นขาวบางตามคม (สไตล์เดียวกับท่าพุ่ง) หันหากล้อง
+  const mkCut=(tg,ghost)=>{const g=new THREE.Group();g.position.set(tg.a.g.position.x,1.15,tg.a.g.position.z);g.scale.setScalar(0.8);root.add(g);
+    const sides=[-1,1].map(dir=>{const sub=new THREE.Group();g.add(sub);
+      const P=ghost?[[1.5*dir,1.25,0.25],[0.05*dir,0.1,0.3],[-1.6*dir,-1.15,0.22]]:[[1.8*dir,0.55,0.23],[0.1*dir,0.05,0.28],[-1.85*dir,-0.4,0.21]];
+      return {sub,outer:stDarkCut(sub,P,ghost?0.2:0.26,0x101019,ghost?13:11),white:stDarkCut(sub,P,ghost?0.12:0.17,ghost?0xc9cad6:0xf7f8fc,ghost?14:12)};});
+    return (age,from)=>{g.visible=age>=0&&age<HIT_LIFE;if(!g.visible)return;g.lookAt(cam.position);
+      for(const sd of sides){const on=(from>0)===(sides.indexOf(sd)===1);sd.sub.visible=on;if(!on)continue;sd.outer(age,HIT_LIFE,0.45);sd.white(age,HIT_LIFE,0.45);
+        if(ghost)sd.sub.traverse(o=>{if(o.material)o.material.opacity*=0.6;});}};};
+  targets.forEach(tg=>{tg.cut=mkCut(tg,false);if(tg.marked)tg.gcut=mkCut(tg,true);});
+  // เคียวเงา: สำเนาโมเดลเคียว ดำโปร่ง 40%
+  const ghostRot=new THREE.Group(),ghostScy=new THREE.Group();ghostScy.scale.setScalar(GSC);ghostRot.add(ghostScy);ghostRot.visible=false;if(targets.length)root.add(ghostRot);
+  const ghostMat=new THREE.MeshBasicMaterial({color:0x000000,transparent:true,opacity:0.4,depthWrite:false,toneMapped:false});let ghostBuilt=false;
+  const mist=[...Array(BA?14:0)].map(()=>{const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:embTex,color:0x000000,transparent:true,depthWrite:false,toneMapped:false}));sp.renderOrder=9;root.add(sp);return sp;});
+  const _gx=new THREE.Vector3(),_gy=new THREE.Vector3(),_gz=new THREE.Vector3(),_gm=new THREE.Matrix4(),_gp=new THREE.Vector3();
+  const GANG=0.9;   // มุมฟันของเคียวเงา (จากแนวนอน) → ตัดกับรอยแรกเป็นกากบาท
+  const ghostAt=(tg,from,phi)=>{   // เคียวเงาฟันเฉียงลงในระนาบที่หันหาผู้ร่าย จุดหมุนอยู่ข้าง-บนเป้า กวาดสวนเคียวจริง
+    const fw=radOf(tg.ang),toC=fw.clone().multiplyScalar(-1),up=new THREE.Vector3(0,1,0);
+    const L=new THREE.Vector3(fw.z,0,-fw.x).multiplyScalar(-from);   // ฝั่ง from ของผู้ร่าย = ทิศที่เคียวเงาวิ่งไป
+    const u=L.clone().multiplyScalar(Math.cos(GANG)).addScaledVector(up,-Math.sin(GANG)),n=L.clone().multiplyScalar(Math.sin(GANG)).addScaledVector(up,Math.cos(GANG));
+    const ez=n.clone().multiplyScalar(-1),ex=u,ey=new THREE.Vector3().crossVectors(ez,ex);
+    ghostRot.position.copy(tg.a.g.position).addScaledVector(fw,0.35).addScaledVector(n,GOFF);ghostRot.position.y+=1.1;
+    _gm.makeBasis(ex,ey,ez);ghostRot.quaternion.setFromRotationMatrix(_gm);
+    const R=new THREE.Vector3(Math.sin(phi),0,Math.cos(phi)),X=new THREE.Vector3(Math.cos(phi),0,-Math.sin(phi));
+    _gz.crossVectors(X,R).normalize();_gx.crossVectors(R,_gz).normalize();_gm.makeBasis(_gx,R,_gz);ghostScy.quaternion.setFromRotationMatrix(_gm);
+    ghostScy.position.copy(R).multiplyScalar(GRAD-2*GSC);};
+  const updHits=T=>{
+    if(!ghostBuilt&&holder.children.length){ghostScy.add(holder.clone(true));ghostScy.traverse(o=>{if(o.isMesh){o.material=ghostMat;o.renderOrder=10;}});ghostBuilt=true;}
+    ghostRot.visible=false;
+    targets.forEach((tg,i)=>{if(tg.updMark)tg.updMark(5,1e9);
+      const h=lastHit(T,i),age=h?T-h.T:99;
+      tg.cut(age,h?h.from:1);tg.a.b.rotation.x=-0.22*Math.exp(-age*9)*Math.min(1,age*40);   // สะดุ้ง
+      if(!tg.marked)return;
+      tg.gcut(age-(GSW0+GSWP*(1-Math.pow(1-1/1.55,1/2.2))),h?-h.from:1);   // รอยของเคียวเงาตอนผ่านตัวเป้า (สวนทาง)
+      const gu=age-GH0;if(!h||gu<0||gu>GSW0-GH0+GSWP+GOUT)return;
+      const x=Math.min(1,Math.max(0,(age-GSW0)/GSWP)),phi=-1.0+1.55*(1-Math.pow(1-x,2.2));
+      ghostAt(tg,h.from,phi);ghostRot.visible=ghostBuilt;
+      ghostMat.opacity=0.4*Math.min(1,gu/0.06)*(1-Math.max(0,(age-GSW0-GSWP)/GOUT));});
+    // หมอกดำตอนเคียวเงาสลาย
+    const tm=targets.findIndex(t=>t.marked),hm=tm<0?null:lastHit(T,tm);
+    mist.forEach((sp,j)=>{const age=hm?T-hm.T-(GSW0+GSWP)-j*0.008:-1,life=0.4;if(age<0||age>life||!hm){sp.material.opacity=0;return;}
+      const tg=targets[tm];ghostAt(tg,hm.from,0.55-0.12*(j%5));ghostRot.updateMatrixWorld(true);_gp.set(0,(1.2+0.15*(j%4))/GSC*GSC,0);
+      ghostScy.localToWorld(_gp.set(0,2*(0.6+0.08*(j%5)),0));root.worldToLocal(_gp);
+      sp.position.set(_gp.x+Math.sin(j*2.3)*age*1.1,_gp.y+age*0.9,_gp.z+Math.cos(j*2.3)*age*1.1);
+      const z=(0.25+0.05*(j%3))*(1+age*1.5);sp.scale.set(z,z,1);sp.material.opacity=0.55*(1-age/life);});
+    if(hm&&T-hm.T>GSW0&&T-hm.T<GSW0+GSWP+GOUT){const age=T-hm.T,x=Math.min(1,Math.max(0,(age-GSW0)/GSWP));ghostAt(targets[tm],hm.from,-1.0+1.55*(1-Math.pow(1-x,2.2)));}   // คืนท่าเคียวเงาหลังคำนวณหมอก
+  };
   const update=()=>{
     if(!voidFixed&&holder.children.length){fixVoid();voidFixed=true;}
     // รอบ 9: หยดหมึกตามสัน = ส่วนหนึ่งของ "เปลวหยักติดสัน" ในแบบ B → เปิดไว้
@@ -219,7 +280,7 @@ FXCODE.studio_darkness_scythe=(_x,_y,_h,args,instance)=>{
     pivot.rotation.set(0.12*Math.sin(T*1.3),T*0.9,0.18+0.06*Math.sin(T*0.8));
     pivot.position.y=(args.lift??0.05)+0.08*Math.sin(T*1.7);
     {const k=Math.floor(T/3.1),u=(T-k*3.1)/0.7;if(!BA&&u<1&&k%2===0){pivot.rotation.y+=Math.PI*2*u*u*(3-2*u);}}   // บางครั้งหมุนควงตัวเอง 1 รอบ
-    if(BA)updCaster(T);
+    if(BA){updCaster(T);updHits(T);}
     if(BA){const P=baPose(T);if(P.w>0.001){Qi.setFromEuler(pivot.rotation);pivot.quaternion.copy(Qi).slerp(P.QB,P.w);pivot.position.lerp(P.pos,P.w);}
       const me=typeof PM3!=='undefined'&&PM3.get(NET.myId);if(me&&me.b){me.b.userData.scyY??=me.b.rotation.y;me.b.rotation.y=me.b.userData.scyY+P.tw;}   // ตัวบิดตามแรงเหวี่ยง
 
