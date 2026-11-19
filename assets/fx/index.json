@@ -13,6 +13,17 @@
    "dur": 12,
    "n": 5
   },
+  "darkness/ward_drain_preview": {
+   "v": "5b12e510",
+   "desc": "Darkness — พรีวิวบีมเงาลงพื้นและฝูงเงาลดพลังโล่",
+   "pal": "arcane",
+   "tags": [
+    "darkness",
+    "preview"
+   ],
+   "dur": 2.85,
+   "n": 2
+  },
   "darkness/dash_preview": {
    "v": "8868f414",
    "desc": "Darkness — พรีวิวใน Studio วงเงารัศมี 300 ชิ่งหาเป้ามีตราแล้วไล่เป้าในวง",

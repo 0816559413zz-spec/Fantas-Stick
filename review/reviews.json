@@ -1,6 +1,33 @@
 {
- "next": 87,
+ "next": 88,
  "items": [
+  {
+   "id": 87,
+   "title": "Darkness บีมลงพื้นและฝูงเงาลดพลังโล่",
+   "text": "บีมกระแทกพื้น วงเงาแผ่ออกเร็ว ฝุ่นและลายพื้นหมุนเป็นเกลียว แล้วจางหมดที่ 2 วิ",
+   "kind": "คอนเซปต์ / VFX",
+   "who": "Darkness",
+   "status": "ok",
+   "created": "2026-11-19",
+   "updated": "2026-11-19",
+   "imgs": [],
+   "links": [
+    "/studio.html?fx=darkness/ward_drain_preview&map=test",
+    "/designs/darkness_ref/ward-drain-preview.gif"
+   ],
+   "checks": [
+    {
+     "t": "เห็นฝุ่นดำไหลเข้าฝ่ามือก่อนยิงบีมลงพื้น",
+     "ok": false
+    },
+    {
+     "t": "วงกระแทกออกเร็ว ฝุ่นหมุนอยู่ในวงก่อนจางหมด อ่านวงกับตราโล่แหว่งแยกกันได้",
+     "ok": false
+    }
+   ],
+   "feedback": "",
+   "reply": "ผู้ใช้อนุมัติพรีวิวหลังลดเวลาฝูงเงาเหลือ 2 วิ"
+  },
   {
    "id": 86,
    "title": "สะพาน Castle Strike: เปลือกหินแตกเป็นชิ้น (eggshell)",
