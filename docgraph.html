@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Doc Graph 3D</title>
+<link rel="stylesheet" href="hub/tool-ui.css">
+<script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.160.0/build/three.module.min.js","three/addons/":"https://unpkg.com/three@0.160.0/examples/jsm/"}}</script>
+<style>
+html,body{margin:0;height:100%;overflow:hidden}
+#app{display:grid;grid-template-rows:auto 1fr;height:100vh}
+#main{position:relative;min-height:0}
+#cv{position:absolute;inset:0}
+#cv canvas{display:block}
+.pane{position:absolute;top:10px;background:var(--bg1);border:1px solid var(--ln);border-radius:var(--r);max-height:calc(100% - 20px);overflow:auto}
+#left{left:10px;width:236px;padding:10px}
+#right{right:10px;width:340px;padding:12px;display:none}
+.sec{color:var(--tx3);font-size:11px;text-transform:uppercase;letter-spacing:.06em;margin:10px 0 6px}
+.sec:first-child{margin-top:0}
+.tp{display:flex;align-items:center;gap:8px;padding:3px 4px;border-radius:var(--r);cursor:pointer;user-select:none}
+.tp:hover{background:var(--hov)}
+.tp .dot{width:10px;height:10px;border-radius:50%;flex:none}
+.tp .n{margin-left:auto;color:var(--tx3);font:11px var(--fu)}
+.tp.off{opacity:.38}
+.row{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.tl-bar .tl-btn{white-space:nowrap}
+.row .tl-btn{padding:3px 8px;font-size:12px;text-decoration:none}
+#q{width:220px}
+#stat{color:var(--tx3);font:12px var(--fu)}
+#right h2{margin:0 0 4px;font-size:15px;font-weight:600;line-height:1.35}
+#right .path{color:var(--acc2);font:12px var(--fu);word-break:break-all}
+#right .meta{color:var(--tx3);font-size:12px;margin:6px 0}
+#right .para{color:var(--tx2);margin:8px 0;font-size:12.5px}
+#right ul{margin:0;padding-left:16px;color:var(--tx2)}
+#right li{margin:2px 0}
+.chip{display:inline-flex;align-items:center;gap:5px;padding:1px 7px;border:1px solid var(--ln2);border-radius:10px;font-size:11.5px;margin:2px 3px 2px 0}
+.chip .dot{width:7px;height:7px;border-radius:50%}
+.nb{display:block;color:var(--tx);text-decoration:none;padding:3px 6px;border-radius:var(--r);font-size:12.5px;cursor:pointer}
+.nb:hover{background:var(--hov)}
+.nb small{color:var(--tx3);font:11px var(--fu);display:block}
+#labels{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.lb{position:absolute;transform:translate(-50%,-140%);white-space:nowrap;font-size:11.5px;color:var(--tx);text-shadow:0 0 3px #000,0 0 6px #000;padding:0 2px}
+.lb.dim{color:var(--tx3)}
+.lb.big{font-size:13px;font-weight:600}
+#tip{position:absolute;pointer-events:none;background:var(--bg2);border:1px solid var(--ln2);border-radius:var(--r);padding:5px 8px;font-size:12px;display:none;max-width:320px}
+#tip small{display:block;color:var(--tx3);font:11px var(--fu)}
+#help{position:absolute;left:10px;bottom:10px;color:var(--tx3);font-size:11.5px}
+.close{float:right;cursor:pointer;color:var(--tx3);padding:0 4px}
+.close:hover{color:var(--tx)}
+</style></head><body>
+<div id="app">
+ <div class="tl-bar">
+  <a class="tl-home" href="hub.html">◂ Tool</a>
+  <h1>กราฟเอกสาร 3D</h1>
+  <input id="q" class="tl-in" placeholder="ค้นหาเอกสาร… (ชื่อ / หัวข้อ / path)">
+  <button class="tl-btn" id="bCode" title="แสดงไฟล์โค้ด/หน้าที่เอกสารอ้างถึง">ไฟล์โค้ด</button>
+  <button class="tl-btn on" id="bLabel">ป้ายชื่อ</button>
+  <button class="tl-btn" id="bRot">หมุนเอง</button>
+  <button class="tl-btn" id="bReset">มุมเริ่มต้น</button>
+  <span class="sp"></span><span id="stat"></span>
+ </div>
+ <div id="main">
+  <div id="cv"></div><div id="labels"></div><div id="tip"></div>
+  <div class="pane" id="left">
+   <div class="sec">ชุดสำเร็จรูป</div>
+   <div class="row" style="margin-top:0">
+    <button class="tl-btn pri" data-preset="castle,env">Castle Strike + สภาพแวดล้อม</button>
+    <button class="tl-btn" data-preset="all">ทั้งหมด</button>
+   </div>
+   <div class="sec">หัวข้อ (คลิกเปิด/ปิดไฮไลต์)</div>
+   <div id="topics"></div>
+   <div class="sec">ประเภทโหนด</div>
+   <div id="kinds"></div>
+  </div>
+  <div class="pane" id="right"></div>
+  <div id="help">ลากซ้าย = หมุน • ลากขวา = เลื่อน • ล้อ = ซูม • คลิก = ดูรายละเอียด • ดับเบิลคลิก = บินไปหา • Esc = ยกเลิก</div>
+ </div>
+</div>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+// Graph content colours (the nodes are "content", not tool chrome)
+const TOPIC_COL = { castle: '#ff8a3d', env: '#3ddc97', map: '#e8d24a', vfx: '#c77dff', class: '#ff5f8f', tech: '#4fb3ff' };
+const KIND_COL = { doc: '#cfd6e0', code: '#6c7480', page: '#8fb9ff', data: '#8a8f6a' };
+const KIND_NAME = { doc: 'เอกสาร .md', code: 'โค้ด (.js/.py/.css)', page: 'หน้า .html', data: 'ข้อมูล (.json ฯลฯ)' };
+
+const G = await (await fetch('docgraph/graph.json?' + Date.now())).json();
+const N = G.nodes, L = G.links, byId = new Map(N.map((n, i) => (n.i = i, [n.id, n])));
+N.forEach(n => { n.nb = new Set(); n.topics = n.topics || []; });
+L.forEach(l => { l.a = byId.get(l.source); l.b = byId.get(l.target); l.a.nb.add(l.b); l.b.nb.add(l.a); });
+
+// ---------- state ----------
+const st = { topics: new Set(['castle', 'env']), kinds: new Set(['doc', 'code', 'page', 'data']), showCode: false, labels: true, sel: null, hov: null, q: '' };
+const colCache = new Map();
+function nodeCol(n) { let c = colCache.get(n); if (!c) { c = new THREE.Color(n.kind === 'doc' ? (n.topics[0] ? TOPIC_COL[n.topics[0]] : KIND_COL.doc) : KIND_COL[n.kind]); colCache.set(n, c); } return c; }
+function radius(n) { return n.kind === 'doc' ? 2.2 + Math.sqrt(n.lines || 1) * 0.16 + Math.sqrt(n.deg) * 0.35 : 1.1 + Math.sqrt(n.deg) * 0.25; }
+function visible(n) { return st.kinds.has(n.kind) && (n.kind === 'doc' || st.showCode); }
+function matchQ(n) { if (!st.q) return true; const q = st.q; return n.id.toLowerCase().includes(q) || (n.title || '').toLowerCase().includes(q) || (n.heads || []).some(h => h.toLowerCase().includes(q)); }
+function lit(n) { // highlighted?
+  if (st.sel) return n === st.sel || st.sel.nb.has(n);
+  if (st.q) return matchQ(n);
+  if (st.topics.size === Object.keys(TOPIC_COL).length) return true;
+  if (n.kind !== 'doc') return [...n.nb].some(m => m.kind === 'doc' && m.topics.some(t => st.topics.has(t)));
+  return n.topics.some(t => st.topics.has(t));
+}
+
+// ---------- 3D force layout ----------
+const P = new Float32Array(N.length * 3), V = new Float32Array(N.length * 3);
+N.forEach((n, i) => { const r = 120 * Math.cbrt(Math.random()), t = Math.random() * 6.283, u = Math.acos(2 * Math.random() - 1); P[i*3] = r*Math.sin(u)*Math.cos(t); P[i*3+1] = r*Math.sin(u)*Math.sin(t); P[i*3+2] = r*Math.cos(u); });
+let alpha = 1;
+function simStep() {
+  if (alpha < 0.004) return false;
+  const n = N.length, act = N.map(visible);
+  for (let i = 0; i < n; i++) { if (!act[i]) continue;
+    for (let j = i + 1; j < n; j++) { if (!act[j]) continue;
+      let dx = P[j*3]-P[i*3], dy = P[j*3+1]-P[i*3+1], dz = P[j*3+2]-P[i*3+2], d2 = dx*dx+dy*dy+dz*dz + 0.01;
+      if (d2 > 90000) continue;
+      const f = (N[i].kind === 'doc' && N[j].kind === 'doc' ? 900 : 380) * alpha / d2, d = Math.sqrt(d2);
+      dx *= f/d; dy *= f/d; dz *= f/d;
+      V[i*3] -= dx; V[i*3+1] -= dy; V[i*3+2] -= dz; V[j*3] += dx; V[j*3+1] += dy; V[j*3+2] += dz; } }
+  for (const l of L) { const i = l.a.i, j = l.b.i; if (!act[i] || !act[j]) continue;
+    const dx = P[j*3]-P[i*3], dy = P[j*3+1]-P[i*3+1], dz = P[j*3+2]-P[i*3+2], d = Math.sqrt(dx*dx+dy*dy+dz*dz) + 0.01;
+    const rest = l.a.kind === 'doc' && l.b.kind === 'doc' ? 38 : 22;
+    const k = (d - rest) / d * 0.045 * alpha / Math.sqrt(Math.min(l.a.deg, l.b.deg) || 1);
+    V[i*3] += dx*k; V[i*3+1] += dy*k; V[i*3+2] += dz*k; V[j*3] -= dx*k; V[j*3+1] -= dy*k; V[j*3+2] -= dz*k; }
+  for (let i = 0; i < n; i++) { for (let c = 0; c < 3; c++) { V[i*3+c] -= P[i*3+c] * 0.006 * alpha; V[i*3+c] *= 0.6; P[i*3+c] += V[i*3+c]; } }
+  alpha *= 0.985; return true;
+}
+for (let k = 0; k < 120; k++) simStep();
+
+// ---------- three.js scene ----------
+const host = document.getElementById('cv');
+const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2)); host.appendChild(renderer.domElement);
+const scene = new THREE.Scene(); scene.background = new THREE.Color(getComputedStyle(document.body).getPropertyValue('--bg0').trim() || '#161616');
+scene.fog = new THREE.FogExp2(scene.background, 0.0016);
+const cam = new THREE.PerspectiveCamera(55, 1, 1, 5000); cam.position.set(0, 60, 330);
+const ctl = new OrbitControls(cam, renderer.domElement); ctl.enableDamping = true; ctl.dampingFactor = 0.08; ctl.autoRotateSpeed = 0.6;
+
+const sphere = new THREE.SphereGeometry(1, 16, 12);
+const mesh = new THREE.InstancedMesh(sphere, new THREE.MeshBasicMaterial({ color: 0xffffff }), N.length);
+mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage); scene.add(mesh);
+// halo sprites (soft glow around each node)
+const cvs = document.createElement('canvas'); cvs.width = cvs.height = 64; const g2 = cvs.getContext('2d');
+const grd = g2.createRadialGradient(32, 32, 0, 32, 32, 32); grd.addColorStop(0, 'rgba(255,255,255,.55)'); grd.addColorStop(.35, 'rgba(255,255,255,.16)'); grd.addColorStop(1, 'rgba(255,255,255,0)');
+g2.fillStyle = grd; g2.fillRect(0, 0, 64, 64);
+const haloGeo = new THREE.BufferGeometry();
+haloGeo.setAttribute('position', new THREE.BufferAttribute(P, 3).setUsage(THREE.DynamicDrawUsage));
+haloGeo.setAttribute('color', new THREE.BufferAttribute(new Float32Array(N.length * 3), 3));
+haloGeo.setAttribute('size', new THREE.BufferAttribute(new Float32Array(N.length), 1));
+const haloMat = new THREE.ShaderMaterial({ uniforms: { map: { value: new THREE.CanvasTexture(cvs) }, scale: { value: 600 } }, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, vertexColors: true,
+  vertexShader: 'attribute float size;varying vec3 vC;uniform float scale;void main(){vC=color;vec4 mv=modelViewMatrix*vec4(position,1.);gl_PointSize=size*scale/-mv.z;gl_Position=projectionMatrix*mv;}',
+  fragmentShader: 'uniform sampler2D map;varying vec3 vC;void main(){gl_FragColor=vec4(vC,1.)*texture2D(map,gl_PointCoord);}' });
+const halo = new THREE.Points(haloGeo, haloMat); halo.frustumCulled = false; scene.add(halo);
+// links
+const lp = new Float32Array(L.length * 6), lc = new Float32Array(L.length * 6);
+const lineGeo = new THREE.BufferGeometry();
+lineGeo.setAttribute('position', new THREE.BufferAttribute(lp, 3).setUsage(THREE.DynamicDrawUsage));
+lineGeo.setAttribute('color', new THREE.BufferAttribute(lc, 3));
+const lines = new THREE.LineSegments(lineGeo, new THREE.LineBasicMaterial({ vertexColors: true, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false }));
+lines.frustumCulled = false; scene.add(lines);
+
+const BG = scene.background.clone(), WHITE = new THREE.Color(1, 1, 1), tmpM = new THREE.Matrix4(), tmpC = new THREE.Color();
+function paint() { // colours + sizes from state
+  const hc = haloGeo.attributes.color.array, hs = haloGeo.attributes.size.array;
+  N.forEach((n, i) => {
+    const vis = visible(n), on = vis && lit(n), c = nodeCol(n);
+    n.vis = vis; n.on = on;
+    tmpC.copy(c); if (!on) tmpC.lerp(BG, 0.82);
+    if (n === st.sel || n === st.hov) tmpC.lerp(WHITE, 0.35);
+    mesh.setColorAt(i, tmpC);
+    const h = on ? (n === st.sel ? 1.0 : 0.6) : 0.05; hc[i*3] = c.r*h; hc[i*3+1] = c.g*h; hc[i*3+2] = c.b*h;
+    hs[i] = vis ? radius(n) * (n === st.sel ? 9 : 6) : 0;
+  });
+  mesh.instanceColor.needsUpdate = true; haloGeo.attributes.color.needsUpdate = true; haloGeo.attributes.size.needsUpdate = true;
+  L.forEach((l, k) => {
+    const vis = l.a.vis && l.b.vis, on = vis && l.a.on && l.b.on;
+    const strong = st.sel && (l.a === st.sel || l.b === st.sel);
+    const ca = nodeCol(l.a), cb = nodeCol(l.b), m = !vis ? 0 : strong ? 0.85 : on ? 0.28 : 0.035;
+    lc[k*6] = ca.r*m; lc[k*6+1] = ca.g*m; lc[k*6+2] = ca.b*m; lc[k*6+3] = cb.r*m; lc[k*6+4] = cb.g*m; lc[k*6+5] = cb.b*m;
+  });
+  lineGeo.attributes.color.needsUpdate = true;
+  place(); updLabels(true); updStat();
+}
+function place() {
+  N.forEach((n, i) => { const r = n.vis ? radius(n) * (n === st.sel ? 1.5 : 1) : 0.0001; tmpM.makeScale(r, r, r); tmpM.setPosition(P[i*3], P[i*3+1], P[i*3+2]); mesh.setMatrixAt(i, tmpM); });
+  mesh.instanceMatrix.needsUpdate = true; mesh.computeBoundingSphere();
+  L.forEach((l, k) => { const a = l.a.i*3, b = l.b.i*3; lp[k*6] = P[a]; lp[k*6+1] = P[a+1]; lp[k*6+2] = P[a+2]; lp[k*6+3] = P[b]; lp[k*6+4] = P[b+1]; lp[k*6+5] = P[b+2]; });
+  lineGeo.attributes.position.needsUpdate = true; haloGeo.attributes.position.needsUpdate = true;
+}
+
+// ---------- labels (HTML, only for important / selected nodes) ----------
+const labelBox = document.getElementById('labels'), pool = [];
+let labelSet = [];
+function updLabels(rebuild) {
+  if (rebuild) {
+    let cand;
+    if (st.sel) cand = [st.sel, ...[...st.sel.nb].filter(n => n.vis)];
+    else cand = N.filter(n => n.vis && n.on && n.kind === 'doc').sort((a, b) => b.deg - a.deg).slice(0, st.q ? 60 : 34);
+    labelSet = st.labels ? cand : (st.sel ? [st.sel] : []);
+    if (st.hov && !labelSet.includes(st.hov)) labelSet = [...labelSet, st.hov];
+  }
+  const w = renderer.domElement.clientWidth, h = renderer.domElement.clientHeight, v = new THREE.Vector3();
+  labelSet.forEach((n, k) => {
+    let el = pool[k]; if (!el) { el = pool[k] = document.createElement('div'); el.className = 'lb'; labelBox.appendChild(el); }
+    v.set(P[n.i*3], P[n.i*3+1], P[n.i*3+2]).project(cam);
+    if (v.z > 1) { el.style.display = 'none'; return; }
+    el.style.display = ''; el.style.left = ((v.x + 1) / 2 * w) + 'px'; el.style.top = ((1 - v.y) / 2 * h) + 'px';
+    const t = n.id.split('/').pop();
+    if (el.textContent !== t) el.textContent = t;
+    el.className = 'lb' + (n === st.sel ? ' big' : '') + (n.on ? '' : ' dim');
+  });
+  for (let k = labelSet.length; k < pool.length; k++) pool[k].style.display = 'none';
+}
+function updStat() {
+  const d = N.filter(n => n.kind === 'doc'), on = d.filter(n => n.on).length;
+  document.getElementById('stat').textContent = `${on}/${d.length} เอกสารไฮไลต์ • ${N.filter(n => n.vis).length} โหนด • ${L.length} เส้น • สร้าง ${G.generated.slice(0, 10)}`;
+}
+
+// ---------- side panels ----------
+function esc(s) { return String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
+function buildLeft() {
+  const cnt = {}; N.forEach(n => n.topics.forEach(t => cnt[t] = (cnt[t] || 0) + 1));
+  document.getElementById('topics').innerHTML = G.topics.map(t => `<div class="tp${st.topics.has(t.id) ? '' : ' off'}" data-t="${t.id}"><span class="dot" style="background:${TOPIC_COL[t.id]}"></span>${esc(t.name)}<span class="n">${cnt[t.id] || 0}</span></div>`).join('');
+  const kc = {}; N.forEach(n => kc[n.kind] = (kc[n.kind] || 0) + 1);
+  document.getElementById('kinds').innerHTML = Object.keys(KIND_NAME).map(k => `<div class="tp${st.kinds.has(k) ? '' : ' off'}" data-k="${k}"><span class="dot" style="background:${KIND_COL[k]}"></span>${KIND_NAME[k]}<span class="n">${kc[k] || 0}</span></div>`).join('');
+}
+document.getElementById('left').addEventListener('click', e => {
+  const t = e.target.closest('[data-t]'), k = e.target.closest('[data-k]'), p = e.target.closest('[data-preset]');
+  if (t) { const id = t.dataset.t; st.topics.has(id) ? st.topics.delete(id) : st.topics.add(id); }
+  if (k) { const id = k.dataset.k; st.kinds.has(id) ? st.kinds.delete(id) : st.kinds.add(id); alpha = Math.max(alpha, 0.3); }
+  if (p) { st.topics = new Set(p.dataset.preset === 'all' ? Object.keys(TOPIC_COL) : p.dataset.preset.split(',')); st.sel = null; document.getElementById('right').style.display = 'none'; }
+  if (t || k || p) { buildLeft(); paint(); }
+});
+function select(n, fly) {
+  st.sel = n; const R = document.getElementById('right');
+  if (!n) { R.style.display = 'none'; paint(); return; }
+  const nb = [...n.nb].sort((a, b) => (b.kind === 'doc') - (a.kind === 'doc') || b.deg - a.deg);
+  const tps = n.topics.map(t => `<span class="chip"><span class="dot" style="background:${TOPIC_COL[t]}"></span>${esc(G.topics.find(x => x.id === t).name)} <span style="color:var(--tx3)">${n.score[t]}</span></span>`).join('');
+  R.innerHTML = `<span class="close" data-close>✕</span><h2>${esc(n.title)}</h2><div class="path">${esc(n.id)}</div>
+   <div class="meta">${KIND_NAME[n.kind]}${n.lines ? ' • ' + n.lines + ' บรรทัด' : ''} • เชื่อม ${n.deg}${n.mtime ? ' • แก้ล่าสุด ' + new Date(n.mtime * 1000).toISOString().slice(0, 10) : ''}</div>
+   ${tps ? '<div>' + tps + '</div>' : ''}
+   ${n.para ? `<div class="para">${esc(n.para)}</div>` : ''}
+   <div class="row"><a class="tl-btn" href="${encodeURI(n.id)}" target="_blank">เปิดไฟล์</a><button class="tl-btn" data-fly>บินไปหา</button></div>
+   ${n.heads && n.heads.length ? `<div class="sec">หัวข้อในไฟล์</div><ul>${n.heads.map(h => `<li>${esc(h)}</li>`).join('')}</ul>` : ''}
+   <div class="sec">เชื่อมกับ (${nb.length})</div>${nb.map(m => `<a class="nb" data-id="${esc(m.id)}"><span style="color:#${nodeCol(m).getHexString()}">●</span> ${esc(m.kind === 'doc' ? m.title : m.id.split('/').pop())}<small>${esc(m.id)}</small></a>`).join('')}`;
+  R.style.display = 'block'; R.scrollTop = 0; paint(); if (fly) flyTo(n);
+}
+document.getElementById('right').addEventListener('click', e => {
+  if (e.target.closest('[data-close]')) select(null);
+  else if (e.target.closest('[data-fly]')) flyTo(st.sel);
+  else { const a = e.target.closest('[data-id]'); if (a) select(byId.get(a.dataset.id), true); }
+});
+
+// ---------- camera fly ----------
+let fly = null;
+function flyTo(n) {
+  const p = new THREE.Vector3(P[n.i*3], P[n.i*3+1], P[n.i*3+2]);
+  const dir = cam.position.clone().sub(ctl.target).normalize();
+  fly = { t: 0, fromP: cam.position.clone(), fromT: ctl.target.clone(), toT: p, toP: p.clone().add(dir.multiplyScalar(90)) };
+}
+
+// ---------- picking ----------
+const ray = new THREE.Raycaster(), mouse = new THREE.Vector2(), tip = document.getElementById('tip');
+function pick(e) {
+  const r = renderer.domElement.getBoundingClientRect(); mouse.set((e.clientX - r.left) / r.width * 2 - 1, -(e.clientY - r.top) / r.height * 2 + 1);
+  ray.setFromCamera(mouse, cam); const hit = ray.intersectObject(mesh).find(h => N[h.instanceId].vis);
+  return hit ? N[hit.instanceId] : null;
+}
+let down = null;
+renderer.domElement.addEventListener('pointerdown', e => down = [e.clientX, e.clientY]);
+renderer.domElement.addEventListener('pointerup', e => { if (down && Math.hypot(e.clientX - down[0], e.clientY - down[1]) < 5 && e.button === 0) select(pick(e)); down = null; });
+renderer.domElement.addEventListener('dblclick', e => { const n = pick(e); if (n) select(n, true); });
+renderer.domElement.addEventListener('pointermove', e => {
+  const n = pick(e); if (n !== st.hov) { st.hov = n; paint(); }
+  renderer.domElement.style.cursor = n ? 'pointer' : '';
+  if (n) { const r = host.getBoundingClientRect(); tip.style.display = 'block'; tip.style.left = (e.clientX - r.left + 14) + 'px'; tip.style.top = (e.clientY - r.top + 12) + 'px'; tip.innerHTML = `${esc(n.title)}<small>${esc(n.id)} • เชื่อม ${n.deg}</small>`; }
+  else tip.style.display = 'none';
+});
+addEventListener('keydown', e => { if (e.key === 'Escape') { document.getElementById('q').value = ''; st.q = ''; select(null); } });
+
+// ---------- top bar ----------
+const q = document.getElementById('q');
+q.addEventListener('input', () => { st.q = q.value.trim().toLowerCase(); paint(); });
+q.addEventListener('keydown', e => { if (e.key === 'Enter') { const m = N.filter(n => n.vis && matchQ(n)).sort((a, b) => (b.kind === 'doc') - (a.kind === 'doc') || b.deg - a.deg)[0]; if (m) select(m, true); } });
+const tog = (id, f) => { const b = document.getElementById(id); b.onclick = () => { b.classList.toggle('on', f()); paint(); }; };
+tog('bCode', () => (st.showCode = !st.showCode, alpha = Math.max(alpha, 0.3), st.showCode));
+tog('bLabel', () => (st.labels = !st.labels));
+tog('bRot', () => (ctl.autoRotate = !ctl.autoRotate));
+document.getElementById('bReset').onclick = () => { fly = { t: 0, fromP: cam.position.clone(), fromT: ctl.target.clone(), toT: new THREE.Vector3(), toP: new THREE.Vector3(0, 60, 330) }; };
+
+// ---------- loop ----------
+function resize() { const w = host.clientWidth, h = host.clientHeight; renderer.setSize(w, h); cam.aspect = w / h; cam.updateProjectionMatrix(); haloMat.uniforms.scale.value = h * 0.9; }
+addEventListener('resize', resize); resize();
+buildLeft(); paint();
+let last = performance.now();
+function frame(now) {
+  const dt = Math.min(0.05, (now - last) / 1000); last = now;
+  if (simStep()) place();
+  if (fly) { fly.t = Math.min(1, fly.t + dt * 1.6); const e = 1 - Math.pow(1 - fly.t, 3); cam.position.lerpVectors(fly.fromP, fly.toP, e); ctl.target.lerpVectors(fly.fromT, fly.toT, e); if (fly.t >= 1) fly = null; }
+  ctl.update(); renderer.render(scene, cam); updLabels(false);
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+// debug / headless screenshot helper
+window.DG = { G, N, st, select, cam, ctl, byId, settle() { for (let k = 0; k < 600 && simStep(); k++); paint(); ctl.update(); renderer.render(scene, cam); updLabels(false); }, shot() { renderer.render(scene, cam); return renderer.domElement.toDataURL('image/jpeg', 0.9); } };
+</script>
+</body></html>
