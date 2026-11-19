@@ -136,12 +136,13 @@ FXCODE.studio_darkness_scythe=(_x,_y,_h,args,instance)=>{
     if(t>=SW0){
       const k=Math.min(NSW-1,Math.floor((t-SW0)/GAP)),u=t-SW0-k*GAP,from=side0*(k%2?-1:1),to=-from;   // ฟันที่ k เริ่มจาก from กวาดไป to
       const outR=0.55+REACH;
-      if(u<WU){const e=ez(0,WU,u);const pg=k===0?g0:to*A*-1;const pr=k===0?RI:outR*0.45;const pv=k===0?1:0;
-        g=pg+wrapA(from*A-pg)*e;rad=pr+(outR-pr)*e;vert=pv*(1-e);dirSweep=-from;tw=0.25*from*e;}   // เงื้อไปจุดเริ่มฝั่ง from (ครั้งแรกจากท่าวน)
+      const S0p=WU+SWP+HOLD,STL=SPIN+0.14,spinTurn=x=>-from*Math.PI*2*4*(1-Math.pow(1-Math.min(1,x),3));   // ควง 4 รอบ เร็วแล้วค่อย ๆ ช้าลงจนหยุดตรงทิศพร้อมฟัน (จบที่รอบเต็ม = ไม่กระตุก)
+      if(u<WU){const e=ez(0,WU,u);const pg=k===0?g0:from*A;const pr=k===0?RI:outR;const pv=k===0?1:0;
+        g=pg+wrapA(from*A-pg)*e+(k===0?0:from*0.12*Math.sin(Math.PI*e));rad=pr+(outR-pr)*e;vert=pv*(1-e);dirSweep=-from;tw=0.25*from*e;}   // เงื้อไปจุดเริ่มฝั่ง from (ครั้งแรกจากท่าวน)
       else if(u<WU+SWP){const e=Math.pow((u-WU)/SWP,2.2);g=from*A+(to*A-from*A)*e;rad=outR;vert=0;dirSweep=-from;act=Math.min(1,(u-WU)/0.04);tw=from*(0.25-0.85*e);}
       else if(u<WU+SWP+HOLD){const e=ez(0,0.12,u-WU-SWP);g=to*A+to*0.18*e;rad=outR;vert=0;dirSweep=-from;act=Math.max(0,1-(u-WU-SWP)/0.12)*0.8;tw=-from*0.6;}   // ค้าง 0.3 วิ (ส่งตามแรงนิดเดียว)
-      else if(u<WU+SWP+HOLD+SPIN){const e=ez(0,SPIN,u-WU-SWP-HOLD);g=to*(A+0.18)+(to*A-to*(A+0.18))*e;rad=outR+(outR*0.45-outR)*e;vert=0;dirSweep=from;spinA=-from*Math.PI*2*e*1.5;spinIdx=k;spinU=(u-WU-SWP-HOLD)/SPIN;tw=-from*0.6*(1-e);}   // ควง 0.3 วิ ไปจุดเตรียม
-      else{const endT=SW0+(NSW-1)*GAP+WU+SWP+HOLD+SPIN;g=to*A;rad=outR*0.45;vert=0;dirSweep=from;
+      else if(u<S0p+STL){const x=(u-S0p)/STL,e=ez(0,SPIN,u-S0p);g=to*(A+0.18)+(to*A-to*(A+0.18))*e;rad=outR;vert=0;dirSweep=from;spinA=spinTurn(x);if(u<S0p+SPIN){spinIdx=k;spinU=(u-S0p)/SPIN;}tw=-from*0.6*(1-e);}   // ควงไปจุดเตรียมฟันต่อ (ระยะเท่าเดิม ไม่ดึงเข้าหาตัว) แล้วหมุนช้าลงจนหยุด
+      else{const endT=SW0+(NSW-1)*GAP+WU+SWP+HOLD+SPIN;g=to*A;rad=outR;vert=0;dirSweep=from;
         if(k===NSW-1&&t>endT){const back=t-(SW0+(NSW-1)*GAP+WU+SWP)-2.0;   // ไม่ได้ฟันเกิน 2 วิ → กลับแนวตั้ง แล้ววนต่อ
           if(back>0){const e=ez(0,0.5,back);const go=orbA(T);g=to*A+wrapA(go-to*A)*e;rad=rad+(RI-rad)*e;vert=e;}}}
     }
