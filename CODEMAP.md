@@ -831,7 +831,7 @@ surfSync:49 surfQuality:53
 SURF_VS:55 SURF_VS_BODY:56 SURF_FS:67 SURF_FS_BODY:68 surfOk:98 surfApply:99 surfScene:111
 §112 ปรับค่า (tune.html / F8)
 
-## js/77-dev.js (260) — Dev Mode: ทดสอบแมพ/สกิลในแมตช์จริง (ผู้ใช้ 2026-11-18)
+## js/77-dev.js (279) — Dev Mode: ทดสอบแมพ/สกิลในแมตช์จริง (ผู้ใช้ 2026-11-18)
 DEV:5 devOn:9 devOff:10 devSoloOk:11 devHold:12 devBroomOk:13 dvMe:14 devSave:15
 §16 hook จากโฮสต์: เรียกต้น hostTick (คืน dt ที่ปรับแล้ว • -1 = หยุดโลก)
 devDt:17 devTick:22 devGod:31 devFreeze:32
@@ -841,7 +841,9 @@ devFcToggle:34 devFcCam:41 devFcTop:47 devFcMe:51 devKey:67 devMount:78 DEV_BOTS
 devTp:108 devSgPhase:112 devBotAdd:123 devAct:132
 §165 ภาพซ้อนไว้ดูแมพ: กล่องชน (OBS) + วงเขตยึด/จุดเกิดปลอดภัย
 _dvCyl:166 _dvMat:167 devOverlay:168
-§188 หน้าต่าง
-_dvPanel:189 _dvBtn:190 devToggle:193 dvBtn:198 dvRow:199 dvTog:200 dvSec:201 devRender:202 devPos:242
+§188 2D overlay map: spawn zones + capture zones + players (click = warp)
+_dvMap:189 devMapDraw:193
+§206 หน้าต่าง
+_dvPanel:207 _dvBtn:208 devToggle:211 dvBtn:216 dvRow:217 dvTog:218 dvSec:219 devRender:220 devPos:260
 
-(104 files, 29811 lines)
+(104 files, 29830 lines)

@@ -3,7 +3,7 @@
 // F2 หน้าต่าง Dev • F3 กล้องอิสระ • F4 หยุดโลก • F6 วาร์ปไปจุดที่เล็ง • F7 คัดลอกพิกัดที่เล็ง • F8 สโลว์โมชัน
 // hook ในไฟล์อื่น: hostTick (js/11) • damage (js/12-buildings) • moveMul (js/03) • renderLoop (js/37) • pointerlock (js/31)
 const DEV={on:false,open:false,key:'',bp:-1,bl:1,bn:1,ov:null,ovK:'',k:{},fc:{on:false,x:0,y:30,z:0,spd:30}};
-DEV.cfg=Object.assign({god:0,nocd:0,ult:0,spd:1,fast:0,ts:1,pause:0,freeze:0,col:0,zon:0,broom:0,noend:1,sbots:1},(()=>{try{return JSON.parse(store('wd_devcfg')||'{}');}catch(e){return {};}})());
+DEV.cfg=Object.assign({god:0,nocd:0,ult:0,spd:1,fast:0,ts:1,omap:0,pause:0,freeze:0,col:0,zon:0,broom:0,noend:1,sbots:1},(()=>{try{return JSON.parse(store('wd_devcfg')||'{}');}catch(e){return {};}})());
 DEV.cfg.pause=0;
 try{const q=new URLSearchParams(location.search).get('dev');if(q==='1')store('wd_dev','1');else if(q==='0')store('wd_dev','');DEV.on=store('wd_dev')==='1';}catch(e){}
 const devOn=()=>DEV.on&&NET.isHost&&!NET.online&&screen==='game'&&!!G&&G.ph!=='lobby';
@@ -185,6 +185,24 @@ function devOverlay(){
   }
   scene.add(g);DEV.ov=g;DEV.ovK=key;
 }
+// ---- 2D overlay map: spawn zones + capture zones + players (click = warp) ----
+const _dvMap=document.createElement('canvas');_dvMap.id='devMap';_dvMap.className='hidden';
+_dvMap.style.cssText='position:fixed;left:12px;bottom:12px;z-index:60;border:1px solid #4a5a7a;background:#0b1020cc;border-radius:6px;cursor:crosshair';
+document.body.appendChild(_dvMap);
+_dvMap.addEventListener('click',e=>{const r=_dvMap.getBoundingClientRect();devTp((e.clientX-r.left)/r.width*MW,(e.clientY-r.top)/r.height*MH);});
+function devMapDraw(){
+  const W=Math.min(360,innerWidth*0.4),H=Math.round(W*MH/MW);
+  if(_dvMap.width!==W||_dvMap.height!==H){_dvMap.width=W;_dvMap.height=H;}
+  const c=_dvMap.getContext('2d'),k=W/MW;c.clearRect(0,0,W,H);
+  c.fillStyle='#3a4258';for(const o of OBS){if(!(o.hgt>0))continue;c.fillRect(o.x*k-1,o.y*k-1,Math.max(2,o.r*k*2),Math.max(2,o.r*k*2));}
+  const ring=(x,y,r,col,txt)=>{c.strokeStyle=col;c.fillStyle=col+'33';c.lineWidth=2;c.beginPath();c.arc(x*k,y*k,Math.max(3,r*k),0,7);c.fill();c.stroke();
+    if(txt){c.fillStyle='#fff';c.font='10px sans-serif';c.textAlign='center';c.fillText(txt,x*k,y*k+3);}};
+  if(MAPID==='fcs'){const F=sgF();
+    F.cores.forEach((q,i)=>{if(q)ring(q.x,q.y,SGV.zoneR,'#39e6ff','C'+(i+1));});
+    for(const t of ['A','B'])for(const ph in F.sp[t]){const q=F.sp[t][ph];if(q)ring(q.x,q.y,SG_SPR,t==='A'?'#ff6a5a':'#5a8aff',(t==='A'?'⚔':'🛡')+ph);}}
+  for(const p of plist()){if(!p.alive)continue;c.fillStyle=p.id===NET.myId?'#fff':(p.team===0?'#4da3ff':p.team===1?'#ff5a5a':'#ffd24d');
+    c.beginPath();c.arc(p.x*k,p.y*k,p.id===NET.myId?4:2.5,0,7);c.fill();}
+}
 // ---- หน้าต่าง ----
 const _dvPanel=document.createElement('div');_dvPanel.id='devPanel';_dvPanel.className='card hidden';
 const _dvBtn=document.createElement('button');_dvBtn.id='devBtn';_dvBtn.className='hidden';_dvBtn.textContent='🛠 DEV [F2]';
@@ -234,7 +252,7 @@ function devRender(){
   const sgm=G.mode==='siege';
   h.push('<div class="trn">'+dvBtn('botadd',sgm?'➕ บอทฝั่งบุก':'➕ บอท',{v:sgm?0:50})+(sgm?dvBtn('botadd','➕ บอทฝั่งรับ',{v:1}):'')+dvBtn('botclr','🧹 ลบบอท')+'</div>',dvTog(C.freeze,'freeze','🧊 บอทหยุดนิ่ง'));
   h.push(dvSec('โลก / ภาพช่วยดูแมพ'),dvRow('set','ts',[[0.25,'×0.25'],[0.5,'×0.5'],[1,'×1'],[2,'×2']],C.ts));
-  h.push(dvTog(C.pause,'pause','⏸ หยุดโลก [F4]'),dvTog(C.col,'col','🟥 โชว์กล่องชน (หิน/เสา/ต้นไม้/กำแพง)'),dvTog(C.zon,'zon','⭕ โชว์เขตยึดแกน + จุดเกิดปลอดภัย'));
+  h.push(dvTog(C.pause,'pause','⏸ หยุดโลก [F4]'),dvTog(C.col,'col','🟥 โชว์กล่องชน (หิน/เสา/ต้นไม้/กำแพง)'),dvTog(C.omap,'omap','🗺️ แผนที่ 2D ซ้อนจอ (คลิก = วาร์ป)'),dvTog(C.zon,'zon','⭕ โชว์เขตยึดแกน + จุดเกิดปลอดภัย'));
   h.push(dvBtn('copy','📍 คัดลอกพิกัดที่เล็ง [F7]').replace('<button','<button class="trw"'),'<small>F2 เปิด/ปิด • คลิกจอ = เล่นต่อ • ?dev=0 ปิด Dev Mode</small>');
   _dvPanel.innerHTML=h.join('');
   devPos();
@@ -252,7 +270,8 @@ setInterval(()=>{
   try{
     const on=devOn();
     _dvBtn.classList.toggle('hidden',!on||DEV.open||DEV.fc.on);
-    if(!on){if(DEV.open)devToggle(false);DEV.fc.on=false;devOverlay();return;}
+    if(!on){_dvMap.classList.add('hidden');if(DEV.open)devToggle(false);DEV.fc.on=false;devOverlay();return;}
+    _dvMap.classList.toggle('hidden',!DEV.cfg.omap);if(DEV.cfg.omap)devMapDraw();
     if(DEV.open){devRender();devPos();}
     devOverlay();
   }catch(e){}
