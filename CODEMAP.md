@@ -707,7 +707,7 @@ skwOpen:289 skwClose:299
 ## js/64-mappick.js (157) — 
 MPK_TXT:7 MPK_SKY:19 MPK_I:21 MPK_DICE:31 MPK:36 mpkE:37 mpkC:37 mpkSnd:38 mpkCut:39 mpkName:40 mpkCardHTML:41 mpkBuild:51 mpkUp:89 mpkMeasure:101 mpkIdx:102 mpkStep:103 mpkTo:104 mpkPick:105 mpkOpen:111 mpkClose:127 mpkLoop:131 mpkTick:133
 
-## js/65-ui3.js (408) — 
+## js/65-ui3.js (427) — 
 UIG:6 uiGalaxy:7 uiGalaxyOn:15 uiGalRaf:16 uiGalT:16 uiGalLoop:17 uiGalDraw:19 uiShow:36 uiHide:37
 §40 เมนูหยุดเกม
 §44 คู่มือ (แบบ Skill Tree)
@@ -719,7 +719,7 @@ PRF:231 prfItem:232 prfLv:233 prfOk:234 prfGet:235 pathIdx:236 BORDERS:238 BRAR_
 §373 การ์ดพลังเสริม (ดันเจียน) + ความหายาก
 BKICO:376 buffShow:380
 §399 จอมืดตอนเริ่มแมตช์ (ผู้ใช้ 2026-10-23: กระตุกตอนเริ่มแมตช์แรก)
-gameCover:402
+BRIEF_PIC:403 gameCover:404
 
 ## js/66-hud4.js (216) — HUD รอบ 4 (ผู้ใช้ 2026-10-23, designs/hud-full-mock.html)
 H4E:5 H4:13 h4God:14 h4Pal:15 hud4Col:17 h4Parts:19 h4AuBits:24 h4Key:39 h4Ico:40 h4Build:41 h4Set:70 hud4Draw:71
@@ -847,4 +847,4 @@ _dvMap:189 devMapDraw:193
 §206 หน้าต่าง
 _dvPanel:207 _dvBtn:208 devToggle:211 dvBtn:216 dvRow:217 dvTog:218 dvSec:219 devRender:220 devPos:260
 
-(104 files, 29900 lines)
+(104 files, 29919 lines)

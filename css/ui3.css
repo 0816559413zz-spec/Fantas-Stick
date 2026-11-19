@@ -513,6 +513,21 @@ body.profOn #hub{display:none}
 @keyframes bkSpin{to{transform:rotate(360deg)}}
 @media (max-width:820px){.bkRow{gap:10px}.bkRow>.bk{--w:30vw}}
 @media (max-height:800px){.pfCard{padding:12px 14px}.pfAv{--sz:66px}.pfL h4{margin:14px 0 8px}.pfS{padding:7px 8px}.pfS b{font-size:17px}}
-/* จอมืดตอนเริ่มแมตช์ (js/65 gameCover) */
-#gameCover{position:fixed;inset:0;z-index:80;background:#04060d;pointer-events:none;opacity:1;transition:opacity .4s ease}
+/* Operation brief at match start (js/65 gameCover) */
+#gameCover{position:fixed;inset:0;z-index:80;background:#04060d;pointer-events:none;opacity:1;transition:opacity .6s ease;overflow:hidden;font-family:'Cinzel','Kanit',sans-serif;color:#e8eefc}
 #gameCover.off{opacity:0}
+#gameCover .bfPic{position:absolute;inset:-4%;background-size:cover;background-position:center;filter:saturate(.9) brightness(.8);animation:bfZoom 8s ease-out both}
+#gameCover .bfVig{position:absolute;inset:0;background:linear-gradient(90deg,rgba(2,4,10,.92) 0%,rgba(2,4,10,.55) 42%,rgba(2,4,10,.1) 75%),linear-gradient(0deg,rgba(2,4,10,.85),transparent 35%)}
+#gameCover .bfBox{position:absolute;left:6vw;bottom:20vh;max-width:min(560px,88vw);animation:bfIn .7s ease-out both}
+#gameCover .bfTag{font-size:13px;letter-spacing:.42em;color:#7fd0ff;border-left:3px solid #7fd0ff;padding-left:10px;margin-bottom:14px}
+#gameCover h1{margin:0 0 4px;font-size:clamp(30px,5vw,58px);font-weight:700;letter-spacing:.04em;text-shadow:0 2px 24px rgba(0,0,0,.8)}
+#gameCover .bfMap{font-size:clamp(16px,2vw,24px);color:#ffd27a;margin-bottom:14px}
+#gameCover p{margin:0 0 6px;font-family:'Kanit',sans-serif;font-size:clamp(14px,1.4vw,18px);line-height:1.5;opacity:.92}
+#gameCover p.bfSub{opacity:.65;font-size:clamp(12px,1.1vw,15px)}
+#gameCover .bfMeta{display:flex;gap:10px;margin-top:12px}
+#gameCover .bfMeta span{font-size:12px;letter-spacing:.18em;border:1px solid rgba(255,255,255,.35);padding:4px 10px;background:rgba(0,0,0,.35)}
+#gameCover .bfBar{position:absolute;left:6vw;right:6vw;bottom:9vh;height:3px;background:rgba(255,255,255,.18)}
+#gameCover .bfBar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#7fd0ff,#ffd27a);box-shadow:0 0 12px #7fd0ff}
+#gameCover .bfLoad{position:absolute;left:6vw;bottom:5.5vh;font-size:12px;letter-spacing:.4em;opacity:.7}
+@keyframes bfZoom{from{transform:scale(1)}to{transform:scale(1.09)}}
+@keyframes bfIn{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}

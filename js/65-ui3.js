@@ -394,15 +394,34 @@ function buffShow(el,me,s){
 document.addEventListener('pointermove',e=>{const c=e.target.closest&&e.target.closest('#buff .bk.flip');document.querySelectorAll('#buff .bk.tilt').forEach(q=>{if(q!==c){q.classList.remove('tilt');q.style.removeProperty('--rx');q.style.removeProperty('--ry');}});
   if(!c)return;const r=c.getBoundingClientRect(),u=(e.clientX-r.left)/r.width,v=(e.clientY-r.top)/r.height;
   c.classList.add('tilt');c.style.setProperty('--ry',((u-0.5)*22).toFixed(2)+'deg');c.style.setProperty('--rx',((0.5-v)*18).toFixed(2)+'deg');c.style.setProperty('--gx',(u*100).toFixed(1)+'%');c.style.setProperty('--gy',(v*100).toFixed(1)+'%');});
-if(typeof WD!=='undefined')Object.assign(WD,{buffShow});
+if(typeof WD!=='undefined')Object.assign(WD,{buffShow,gameCover});
 
 // ---------- จอมืดตอนเริ่มแมตช์ (ผู้ใช้ 2026-10-23: กระตุกตอนเริ่มแมตช์แรก) ----------
 // เฟรมแรกของแมตช์ยังต้องอัปโหลด/compile ของที่สร้างตอนเริ่ม (แท่นขวด ของในฉาก ฯลฯ ~0.3–0.4 วิ ครั้งแรก) → ให้จอเป็นสีดำไว้ก่อน
 // แล้วค่อยเฟดเข้าหลังวาดเฟรมจริงไป 3 เฟรม = ดูเป็นการเปลี่ยนฉาก ไม่ใช่เกมค้าง (CSS เฟดวิ่งบน compositor ไม่โดนบล็อก)
-function gameCover(){
+// Operation brief: map photo + mode info, hides after min time AND ~8 smooth frames (covers the match-start hitch)
+const BRIEF_PIC={fcs:'designs/fcs_forest/01_spawn_view.jpg'};
+function gameCover(om,omp){
   let el=document.getElementById('gameCover');
   if(!el){el=document.createElement('div');el.id='gameCover';document.body.appendChild(el);}
-  el.classList.remove('off');el.style.display='block';clearTimeout(el._t);
-  let n=0;const tick=()=>{if(++n<4){requestAnimationFrame(tick);return;}el.classList.add('off');el._t=setTimeout(()=>{el.style.display='none';},420);};
-  requestAnimationFrame(tick);el._t=setTimeout(()=>{el.classList.add('off');setTimeout(()=>el.style.display='none',420);},2500);   // กันค้าง (แท็บไม่วาดเฟรม)
+  const v=(typeof VIEW!=='undefined'&&VIEW.cur)||{},L=(typeof LOBBY!=='undefined'&&LOBBY)||{};
+  const mode=om||v.mode||L.mode||'',mp=omp||v.mp||L.map||'',MD=(MODES&&MODES[mode])||{},MP=(MAPS&&MAPS[mp])||{};
+  const pic=BRIEF_PIC[mp]||`assets/ui/maps/${mp}.jpg`,n=(L.players&&L.players.length)||0;
+  const esc=t=>String(t==null?'':t).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+  el.innerHTML=`<div class="bfPic" style="background-image:url('${pic}'),url('assets/ui/maps/forest.jpg')"></div><div class="bfVig"></div>
+  <div class="bfBox"><div class="bfTag">OPERATION BRIEF</div><h1>${esc(MD.name||'')}</h1>
+  <div class="bfMap">${esc(MP.name||'')}</div><p>${esc(MD.d||'')}</p><p class="bfSub">${esc(MP.d||'')}</p>
+  <div class="bfMeta">${n?`<span>👥 ${n}</span>`:''}${MD.team?'<span>⚑ TEAM</span>':''}</div></div>
+  <div class="bfBar"><i></i></div><div class="bfLoad">DEPLOYING…</div>`;
+  el.classList.remove('off');el.style.display='block';clearTimeout(el._t);el._gen=(el._gen||0)+1;const gen=el._gen;
+  const t0=performance.now();let last=t0,smooth=0,done=false;
+  const bar=el.querySelector('.bfBar i');
+  const hide=()=>{if(done||gen!==el._gen)return;done=true;el.classList.add('off');el._t=setTimeout(()=>{if(gen===el._gen)el.style.display='none';},650);};
+  const tick=now=>{if(done||gen!==el._gen)return;const dt=now-last;last=now;
+    smooth=dt<34?smooth+1:0;const el_=now-t0;
+    if(bar)bar.style.width=Math.min(100,(el_/2600*100))+'%';
+    if((el_>2600&&smooth>=8)||el_>6000){hide();return;}
+    requestAnimationFrame(tick);};
+  requestAnimationFrame(tick);
+  el._t=setTimeout(hide,7000);   // safety: tab not rendering frames
 }
