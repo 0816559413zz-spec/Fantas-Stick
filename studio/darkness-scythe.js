@@ -214,7 +214,7 @@ FXCODE.studio_darkness_scythe=(_x,_y,_h,args,instance)=>{
   // ---------- เป้าโดนฟัน (ผู้ใช้ 2026-11-19) ----------
   // ทุก BA ที่โดน = รอยฟันดำบนตัวเป้า ~0.3 วิ • เป้ามีตรา = เคียวเงาโปร่ง 40% โผล่ข้างเป้า (หลังเป้า ไม่โดนคนอื่น) ฟันสวนเป็นกากบาท แล้วสลายเป็นหมอกดำ
   //   เคียวเงามีรอยฟันของตัวเอง (จางกว่า) • เป้าสะดุ้งทุกครั้งที่โดน
-  const HIT_LIFE=0.3,LEAD=0.2,GIN=0.3,GHE=0.55,GCH=0.08,GOUT=0.16,GSC=1.6,GRAD=2.05,GBK=1.6,GDN=1.3;   // เคียวเงา (ผู้ใช้ 2026-11-19 รอบ 2): โผล่หลังเป้า 0.3 วิหลังโดน ค่อย ๆ โน้มหัวไปหลังเตรียมฟันระหว่าง fade in → ฟันลงเร็ว 0.08 วิ → ฟันเลยไปแล้วชะลอตามแรงเฉื่อยพร้อมจางหาย 0.16 วิ
+  const HIT_LIFE=0.3,LEAD=0.2,GIN=0.3,GHE=0.55,GCH=0.08,GOUT=0.16,GSC=1.25,GRAD=2.5,GBK=2.24,GDN=1.1;   // ด้ามล่างสุดลอยเหนือหัวเป้า (สูง 2.3 ม.) หลังเป้า แล้วสับลงมา   // เคียวเงา (ผู้ใช้ 2026-11-19 รอบ 2): โผล่หลังเป้า 0.3 วิหลังโดน ค่อย ๆ โน้มหัวไปหลังเตรียมฟันระหว่าง fade in → ฟันลงเร็ว 0.08 วิ → ฟันเลยไปแล้วชะลอตามแรงเฉื่อยพร้อมจางหาย 0.16 วิ
   const targets=!BA||typeof stDarkTargetMark!=='function'?[]:[{ang:0,dist:REACH,marked:true},{ang:-0.62,dist:REACH-0.4,marked:false}].map((d,i)=>{
     const look={...getLook(NET.myId),h:(i+1)%4,cl:(i+1)%4,hs:i+3,wn:0};const a=makeStudent(look,'darkness-ba-target-'+i);root.add(a.g);
     const R=radOf(d.ang);a.g.position.set(R.x*d.dist,0,R.z*d.dist);a.g.rotation.y=Math.atan2(-R.x,-R.z);useFileModel(a,'char_student',lookTint(look),look);
@@ -242,9 +242,10 @@ FXCODE.studio_darkness_scythe=(_x,_y,_h,args,instance)=>{
   const ghostAt=(tg,phi,roll)=>{   // เคียวเงาอยู่หลังเป้า หมุนในระนาบตั้งที่ชี้หาผู้ร่าย • phi 0 = ตั้งตรง, + = โน้มหัวไปหลัง, − = ฟันลงมาทางผู้ร่าย • roll = เอียงข้าง (ตรง/เฉียง)
     const fw=radOf(tg.ang),up=new THREE.Vector3(0,1,0),ey=new THREE.Vector3().crossVectors(up,fw);
     _gm.makeBasis(fw,ey,up);ghostRot.quaternion.setFromRotationMatrix(_gm);ghostRot.rotateX(roll);
-    ghostRot.position.copy(tg.a.g.position).addScaledVector(fw,GBK);ghostRot.position.y=1.2-GDN;   // จุดหมุนหลังเป้า ห่างจากอกเป้าพอดีรัศมีหัวเคียว
+    ghostRot.position.copy(tg.a.g.position).addScaledVector(fw,GBK);ghostRot.position.y=1.2+GDN;   // จุดหมุนหลังเป้า ห่างจากอกเป้าพอดีรัศมีหัวเคียว
     const R=new THREE.Vector3(Math.sin(phi),0,Math.cos(phi)),X=new THREE.Vector3(-Math.cos(phi),0,Math.sin(phi));   // ใบนำทางฟัน (phi ลดลง)
     _gz.crossVectors(X,R).normalize();_gx.crossVectors(R,_gz).normalize();_gm.makeBasis(_gx,R,_gz);ghostScy.quaternion.setFromRotationMatrix(_gm);
+    ghostScy.rotateY(Math.PI/2);   // หันหน้าใบเคียวเข้าหาผู้ร่าย (ผู้ใช้ 2026-11-19)
     ghostScy.position.copy(R).multiplyScalar(GRAD-2*GSC);};
   const updHits=T=>{
     if(!ghostBuilt&&holder.children.length){ghostScy.add(holder.clone(true));ghostScy.traverse(o=>{if(o.isMesh){o.material=ghostMat;o.renderOrder=10;}});ghostBuilt=true;}
@@ -253,12 +254,12 @@ FXCODE.studio_darkness_scythe=(_x,_y,_h,args,instance)=>{
       const h=lastHit(T,i),age=h?T-h.T:99;
       tg.cut(age,h?h.from:1);tg.a.b.rotation.x=-0.22*Math.exp(-age*9)*Math.min(1,age*40);   // สะดุ้ง
       if(!tg.marked)return;
-      const roll=[0,0.38,-0.38][Math.round(h?h.T*100:0)%3],PM=-Math.atan2(GBK,GDN),PB=0.75;   // PM = มุมที่ใบผ่านอกเป้า • PB = โน้มหลังสุดก่อนฟัน
+      const roll=[0,0.38,-0.38][Math.round(h?h.T*100:0)%3],PM=Math.atan2(-GBK,-GDN),PB=0.75;   // PM = มุมที่ใบผ่านอกเป้า • PB = โน้มหลังสุดก่อนฟัน
       tg.gcut(age-(GHE+GCH),h?(roll<0?-1:1):1);   // รอยของเคียวเงา (แนวตั้ง/เฉียงตามการเอียง)
       if(!h||age<GIN||age>GHE+GCH+GOUT)return;
       let phi;if(age<GHE){const e=ez(GIN,GHE,age);phi=0.1+(PB-0.1)*e;}   // ระหว่าง fade in ค่อย ๆ โน้มหัวไปหลัง
       else if(age<GHE+GCH){const x=(age-GHE)/GCH;phi=PB+(PM-PB)*x*x;}      // ฟันลงเร่งความเร็ว
-      else{const x=(age-GHE-GCH)/GOUT;phi=PM-0.85*(1-(1-x)*(1-x));}      // ฟันเลยไปแล้วชะลอ (แรงเฉื่อย)
+      else{const x=(age-GHE-GCH)/GOUT;phi=PM-0.45*(1-(1-x)*(1-x));}      // ฟันเลยไปแล้วชะลอ (แรงเฉื่อย)
       ghostAt(tg,phi,roll);ghostRot.visible=ghostBuilt;
       ghostMat.opacity=0.4*ez(GIN,GIN+0.1,age)*(1-ez(GHE+GCH,GHE+GCH+GOUT,age));});
   };
