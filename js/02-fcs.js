@@ -33,7 +33,7 @@ function genFcs(){
    for(let y=0;y<h;y++)for(let x=0;x<w;x++)if(F3(x,y)&&!F3(x-1,y)&&F3(x+1,y)){let e=x;while(F3(e+1,y))e++;for(let i=x;i<=e;i++)used.add(i+','+y);seg(x,y,e,y);}
    for(let x=0;x<w;x++)for(let y=0;y<h;y++)if(F3(x,y)&&!F3(x,y-1)&&F3(x,y+1)){let e=y;while(F3(x,e+1))e++;for(let i=y;i<=e;i++)used.add(x+','+i);seg(x,y,x,e);}
    for(let y=0;y<h;y++)for(let x=0;x<w;x++)if(F3(x,y)&&!used.has(x+','+y))seg(x,y,x,y);}
-  const sp={A:{},B:{}},cores=[],bw=[],props=[];
+  const sp={A:{},B:{}},cores=[],bw=[],props=[],brkX=[];
   for(const [t,x,y,ow,oh,n] of D.objs){
     const cx=(x+ow/2)*C,cy=(y+oh/2)*C;
     if(t==='sa'||t==='sb')sp[t==='sa'?'A':'B'][n||1]={x:cx,y:cy};
@@ -81,7 +81,7 @@ function genFcs(){
     const gS=hG(ax,yS+280),gE=hG(xE+400,cy),LS=Math.round((DH-gS)/slope*20/45)*45,LE=Math.round((DH-gE)/slope*20/45)*45;
     const B={DH,HW,ax,cy,yS,xE,LS,LE,gS,gE,
       ns:{x1:ax-HW,y1:cy-HW,x2:ax+HW,y2:yS},ew:{x1:ax-HW,y1:cy-HW,x2:xE,y2:cy+HW},
-      rs:{x1:ax-HW,y1:yS,x2:ax+HW,y2:yS+LS},re:{x1:xE,y1:cy-HW,x2:xE+LE,y2:cy+HW},spans:[],par:[]};
+      rs:{x1:ax-HW,y1:yS,x2:ax+HW,y2:yS+LS},re:{x1:xE,y1:cy-HW,x2:xE+LE,y2:cy+HW},spans:[],par:[],parU:[]};
     const rampTop=(px,py)=>{let t;if(py>=yS&&py<=yS+LS&&Math.abs(px-ax)<=HW)t=(py-yS)/LS,t=DH+(gS-DH)*t;else if(px>=xE&&px<=xE+LE&&Math.abs(py-cy)<=HW)t=(px-xE)/LE,t=DH+(gE-DH)*t;else return NaN;return t;};
     B.rampTop=rampTop;
     // floor grid (aligned to the terrain lattice: c = 45 px)
@@ -104,7 +104,11 @@ function genFcs(){
     // parapet: merlon every 1.6 m on the outer edges (no parapet across the ramp mouths)
     const lines=[[ax-HW+6,cy-HW,ax-HW+6,yS],[ax+HW-6,cy+HW,ax+HW-6,yS],[ax-HW,cy-HW+6,xE,cy-HW+6],[ax+HW,cy+HW-6,xE,cy+HW-6]];
     for(const [x1,y1,x2,y2] of lines){const L=Math.hypot(x2-x1,y2-y1),n=Math.max(1,Math.round(L/32));B.par.push([x1,y1,x2,y2,n]);
-      for(let i=0;i<n;i++){const t=(i+0.5)/n,x=x1+(x2-x1)*t,y=y1+(y2-y1)*t;obs.push({x,y,r:12,k:'fbp',top:DH+1.2,hgt:DH+1.2,bot:DH-hG(x,y)-0.3,s:0});}}
+      for(let i=0;i<n;i++){const t=(i+0.5)/n,x=x1+(x2-x1)*t,y=y1+(y2-y1)*t,k=B.parU.length,z0=DH-hG(x,y);
+        B.parU.push({x,y,a:Math.atan2(y2-y1,x2-x1),seg:L/n});
+        // each merlon + its base wall = one breakable unit (cover destruction rules, js/12-buildings.js BRK) • hgt = piece height, top = absolute
+        brkX.push({h:1.2,vh:1.2,v:0.74,m:'stone',n:'parapet',z0,fp:k});
+        obs.push({x,y,r:12,k:'fbp',top:DH+1.2,hgt:1.2,bot:z0-0.3,b:k,s:0});}}
     // footprint test (px margin m): keeps trees / rocks / clutter out
     B.at=(x,y,m)=>[B.ns,B.ew,B.rs,B.re].some(r=>x>r.x1-m&&x<r.x2+m&&y>r.y1-m&&y<r.y2+m);
     return B;})();
@@ -139,7 +143,7 @@ function genFcs(){
   const phases=[];
   for(const [k,name,x,y,zw,zh] of D.zones){if(k!=='ph')continue;const n=+((String(name).match(/(\d+)/)||[])[1]||0);if(!n)continue;
     (phases[n-1]=phases[n-1]||[]).push({x1:x*C,y1:y*C,x2:(x+zw)*C,y2:(y+zh)*C});}
-  return {W,H,obs,terr,fcs:{sp,cores,bw,props,fences,bridge,phases,n:Math.min(cores.length,phases.length)}};
+  return {W,H,obs,terr,brkX,fcs:{sp,cores,bw,props,fences,bridge,phases,n:Math.min(cores.length,phases.length)}};
 }
 // ---------- พื้นที่เล่นตามเฟส (กำแพงล่องหน) + เขตจุดเกิดปลอดภัย — ใช้ทั้งโฮสต์ (G.sg.ph) และลูกข่าย (snapshot) ----------
 let SGPH=1;

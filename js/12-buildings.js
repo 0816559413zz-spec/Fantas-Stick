@@ -84,7 +84,7 @@ function bldSupport(b){
 }
 // ให้คาถาวงกว้างพังสิ่งแวดล้อม: damageEnv(x,y,รัศมี px,ดาเมจ,id,ธาตุ,ความสูงจุดระเบิด) = ลัง/ถัง (prop) + ชิ้นย่อยบ้านในวง (ขอบวง = เหลือ 30%)
 function damageEnv(x,y,rad,dmg,by,el,h){
-  damagePropsIn(x,y,rad,dmg,by);damageBrkIn(x,y,rad,dmg,h);efsEnv(x,y,rad,by,el,h);sgWallEnv(x,y,rad,dmg);   // กำแพงพังได้โหมดบุกปราสาท (js/15-siege)
+  damagePropsIn(x,y,rad,dmg,by);damageBrkIn(x,y,rad,dmg,h);efsEnv(x,y,rad,by,el,h);bskEnv(x,y,rad,dmg,by,el,h);sgWallEnv(x,y,rad,dmg);   // กำแพงพังได้โหมดบุกปราสาท (js/15-siege)
   for(const w of (G?.walls||[]))if(w.wood&&w.team!==G.players[by]?.team&&natureWallContains(w,x,y,h||0,rad)){
     natureWallDamage(w,dmg,x,y,by,el);
   }
@@ -206,7 +206,7 @@ function bldParse(bd){
 const BRKDEF={vol:[15,60],hp:[100,200,400],crack:[0.66,0.33],rub:1/3},BRK_M=['stone','wood','ice'],BRK_MCOL=['#9a9080','#7a5a3a','#cfeefa'];   // ชนิดวัสดุ (map_export) → สีเศษ
 let BRK=[];
 function genBrk(id){
-  const M=MAPS[id],L=(M&&M.fm&&M.fm.brk)||[];
+  const M=MAPS[id],L=((M&&M.fm&&M.fm.brk)||[]).concat((M&&M.brkX)||[]);   // brkX = code-built maps (fcs bridge parapet; obs .b indexes into this list after fm.brk)
   const out=L.map((d,i)=>{const sz=d.v<BRKDEF.vol[0]?0:d.v<BRKDEF.vol[1]?1:2;return {i,d,sz,max:BRKDEF.hp[sz],hp:BRKDEF.hp[sz],st:0,cs:[],x:0,y:0};});
   for(const o of (M&&M.obs)||[])if(o.b!=null&&out[o.b]){if(o.h0===undefined){o.h0=o.hgt;o.t0=o.top;}o.hgt=o.h0;o.top=o.t0;out[o.b].cs.push(o);}
   for(const g of out){if(!g.cs.length)continue;g.x=g.cs.reduce((a,o)=>a+o.x,0)/g.cs.length;g.y=g.cs.reduce((a,o)=>a+o.y,0)/g.cs.length;}
@@ -221,7 +221,7 @@ function hitBrk(g,dmg,ox,oy){
   if(g.st>=3)return;g.hp-=dmg;const st=brkStage(g);if(st<=g.st)return;
   brkApply(g,st);const b=st>=3;
   const mi=Math.max(0,BRK_M.indexOf(g.d.m));
-  emit({k:'brk',t:b?'b':'c',i:g.i,st,mi,col:BRK_MCOL[mi],sz:g.sz,x:Math.round(g.x),y:Math.round(g.y),h:Math.round((g.d.vh||g.d.h)*(b?BRKDEF.rub:0.5)*10)/10,hh:g.d.vh||g.d.h,r:Math.round(Math.max(...g.cs.map(o=>o.r))),
+  emit({k:'brk',t:b?'b':'c',i:g.i,st,mi,col:BRK_MCOL[mi],sz:g.sz,x:Math.round(g.x),y:Math.round(g.y),h:Math.round(((g.d.z0||0)+(g.d.vh||g.d.h)*(b?BRKDEF.rub:0.5))*10)/10,hh:g.d.vh||g.d.h,r:Math.round(Math.max(...g.cs.map(o=>o.r))),
     ox:Math.round(ox==null?g.x:ox),oy:Math.round(oy==null?g.y:oy)});
 }
 // วงระเบิด: ระยะถึงขอบที่ชน (3 มิติ เทียบความสูงจุดระเบิดกับยอด) ขอบวงเหลือ 30% เหมือนบ้าน
@@ -229,7 +229,7 @@ function damageBrkIn(x,y,rad,dmg,h){
   if(!PROPON||!BRK.length)return;h=h||0;const R=rad/20;
   for(const g of BRK){if(g.st>=3||!g.cs.length)continue;
     let d=1e9;for(const o of g.cs)d=Math.min(d,Math.max(0,Math.hypot(o.x-x,o.y-y)-o.r));
-    if(d>rad)continue;const dm=Math.hypot(d/20,Math.max(0,h-g.d.h));if(dm<R)hitBrk(g,dmg*(1-0.7*dm/R),x,y);}
+    if(d>rad)continue;const z0=g.d.z0||0,dm=Math.hypot(d/20,h<z0?z0-h:Math.max(0,h-z0-g.d.h));if(dm<R)hitBrk(g,dmg*(1-0.7*dm/R),x,y);}   // z0 = raised base (bridge parapet)
 }
 function brkSnap(){return PROPON&&BRK.some(g=>g.st)?BRK.map(g=>g.st).join(''):'';}
 function brkParse(s){s=s||'';for(const g of BRK){const st=+(s[g.i]||0);if(st!==g.st)brkApply(g,st);}}

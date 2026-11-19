@@ -1,5 +1,5 @@
 {
- "next": 82,
+ "next": 83,
  "items": [
   {
    "id": 80,
@@ -1887,6 +1887,28 @@
     },
     {
      "t": "Height and width feel right in play"
+    }
+   ]
+  },
+  {
+   "id": 82,
+   "title": "Bridge damage: breakable parapet + brick skin damage",
+   "text": "Castle Strike bridge → hit it with skills. Parapet merlons crack then break (strong skills only, like other cover) leaving rubble. The stone faces get damage at the hit spot: chipped bricks → missing bricks → exposed rubble with fallen bricks; arch hits land on the arch ring.",
+   "kind": "Map / destruction",
+   "who": "Map",
+   "status": "wait",
+   "created": "2026-11-19T09:37:10",
+   "updated": "2026-11-19T09:37:10",
+   "imgs": [],
+   "links": [
+    "/designs/fcs_forest/bridge_damage.jpg"
+   ],
+   "checks": [
+    {
+     "t": "Damage look matches the ruin reference"
+    },
+    {
+     "t": "Parapet break feels right"
     }
    ]
   }

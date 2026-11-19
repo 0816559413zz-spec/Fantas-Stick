@@ -388,5 +388,13 @@
         "hh": "ev.hh"
       }
     }
-  ]
+  ],
+  "bsk": {
+    "fx": "env/brk_break",
+    "mode": "add",
+    "p": {
+      "r": "ev.r/45",
+      "hh": "0.6"
+    }
+  }
 }

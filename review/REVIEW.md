@@ -3,6 +3,18 @@
 > เขียนอัตโนมัติจาก `review.html` (ผ่าน `tools/serve.py`) — อย่าแก้ไฟล์นี้ตรง ๆ, แก้ `review/reviews.json` แล้วรัน `python tools/serve.py --review-md`.
 > **Claude:** ทำเฉพาะหัวข้อสถานะ **✏️ ขอแก้** — อ่านความเห็นผู้ใช้ (`ความเห็นผู้ใช้`) + เปิดรูปด้วย Read → แก้ → ตั้ง `status:"wait"` + เขียน `reply` (ไทยสั้น ๆ ว่าแก้อะไร) เพื่อส่งกลับให้ผู้ใช้รีวิวใหม่. อย่าตั้ง `ok` เอง (ผู้ใช้เป็นคนกดผ่าน). งานที่ **⏳ รอ** = รอผู้ใช้ ไม่ต้องทำอะไร
 
+## #82 Bridge damage: breakable parapet + brick skin damage
+- สถานะ: ⏳ รอผู้ใช้รีวิว • ชนิด: Map / destruction • สาย/ส่วน: Map
+
+**วิธีดู / อะไรรอรีวิว:**
+Castle Strike bridge → hit it with skills. Parapet merlons crack then break (strong skills only, like other cover) leaving rubble. The stone faces get damage at the hit spot: chipped bricks → missing bricks → exposed rubble with fallen bricks; arch hits land on the arch ring.
+
+- ลิงก์/ไฟล์: `/designs/fcs_forest/bridge_damage.jpg`
+
+**เช็กลิสต์:**
+- [ ] Damage look matches the ruin reference
+- [ ] Parapet break feels right
+
 ## #81 L-shaped stone bridge (Castle Strike forest)
 - สถานะ: ⏳ รอผู้ใช้รีวิว • ชนิด: Map • สาย/ส่วน: Map
 
