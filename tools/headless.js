@@ -5,18 +5,43 @@
 //   node tools/headless.js --url "studio.html?fx=frost/slam&sheet=0.1,0.3,0.6&save=x" --wait-shot x     ← รอจน shots/x.jpg ถูกเขียน (contact sheet ของสตูดิโอ)
 //   node tools/headless.js --game --js my-test.js                                                       ← เปิดเกม (?nosw) + โหลด tools/hl-game.js (ตัวช่วย HL) แล้วรันไฟล์ js ในหน้า
 //   node tools/headless.js --game --eval "await HL.solo({kit:'1'});return HL.info()"
+//   node tools/headless.js --fx darkness/scythe_ba --cam top --gif darkness-ba --from 0 --to 2 --still-at 0.7
 // --profile [ชื่อ]: วัด CPU ช่วง console.profile()..profileEnd() ในสคริปต์ → พิมพ์ฟังก์ชันกินเวลาสุด (+ shots/<ชื่อ>.cpuprofile)
 // ตัวเลือก: --w 1280 --h 720 • --timeout 180 (วินาที) • --shot out.jpg (ถ่ายทั้งจอตอนจบ ลง shots/) • --quiet (ไม่พิมพ์ console log ของหน้า)
 // สคริปต์ (--js/--eval) = body ของ async function ในหน้า: return ค่าอะไรก็ได้ (พิมพ์เป็น JSON) •
 //   ถ้าคืน {images:{ชื่อ:dataURL}} → เขียนเป็น shots/<ชื่อ>.jpg|png ให้ Claude เปิดด้วย Read
 // จบแล้วพิมพ์ error ของหน้า (window.onerror / console.error) ทั้งหมด • exit code 1 = สคริปต์ล้ม/หมดเวลา
 const {spawn}=require('child_process'),fs=require('fs'),path=require('path'),os=require('os'),net=require('net');
+const {studioGifOptions,captureStudioGif}=require('./studio-gif');
 const ROOT=path.join(__dirname,'..'),BASE='http://localhost:8765/';
 const CHROME=[process.env.CHROME||'','C:/Program Files/Google/Chrome/Application/chrome.exe','C:/Program Files (x86)/Google/Chrome/Application/chrome.exe','C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe','/usr/bin/google-chrome','/usr/bin/chromium','/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'].find(p=>fs.existsSync(p));
 const A={};{const a=process.argv.slice(2);for(let i=0;i<a.length;i++){if(!a[i].startsWith('--'))continue;const k=a[i].slice(2),v=a[i+1]&&!a[i+1].startsWith('--')?a[++i]:true;A[k]=v;}}
-const W=+(A.w||1280),H=+(A.h||720),TMO=+(A.timeout||180)*1000;
+const W=+(A.w||(A.gif?1450:1280)),H=+(A.h||(A.gif?950:720)),TMO=+(A.timeout||180)*1000;
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 const freePort=()=>new Promise(r=>{const s=net.createServer();s.listen(0,'127.0.0.1',()=>{const p=s.address().port;s.close(()=>r(p));});});
+async function openStudioServer(){
+  const port=await freePort();
+  const url='http://127.0.0.1:'+port+'/';
+  const server=spawn(process.env.PYTHON||'python',[path.join(ROOT,'tools','serve.py'),String(port)],
+    {cwd:ROOT,stdio:'ignore',windowsHide:true});
+  let error;
+  server.on('error',e=>{error=e;});
+  try{
+    for(let i=0;i<40;i++){
+      if(error)throw error;
+      if(server.exitCode!==null)throw new Error('serve.py ปิดก่อน Studio พร้อม');
+      try{
+        const response=await fetch(url+'studio.html',{method:'HEAD',signal:AbortSignal.timeout(500)});
+        if(response.ok)return {server,url};
+      }catch{}
+      await sleep(100);
+    }
+    throw new Error('หมดเวลารอ serve.py');
+  }catch(e){
+    server.kill();
+    throw new Error('เปิดเซิร์ฟเวอร์ Studio ไม่สำเร็จ: '+e.message);
+  }
+}
 function saveImg(name,data){const m=/^data:image\/(png|jpeg);base64,(.*)$/.exec(data);if(!m)return null;const ext=m[1]==='png'?'png':'jpg';const d=path.join(ROOT,'shots');fs.mkdirSync(d,{recursive:true});
   const f=path.join(d,String(name).replace(/[^\w.\-]/g,'_')+'.'+ext);fs.writeFileSync(f,Buffer.from(m[2],'base64'));return path.relative(ROOT,f).replace(/\\/g,'/');}
 function profSum(pf){
@@ -28,15 +53,36 @@ function profSum(pf){
   if(A.profile!==true){const d=path.join(ROOT,'shots');fs.mkdirSync(d,{recursive:true});fs.writeFileSync(path.join(d,String(A.profile)+'.cpuprofile'),JSON.stringify(pf));}
 }
 async function main(){
+  const gif=studioGifOptions(A);
   if(!CHROME)throw new Error('ไม่พบ Chrome / Edge');
-  let url=A.url||(A.game?'index.html?nosw':'');if(!url)throw new Error('ต้องมี --url หรือ --game');
-  if(!/^https?:/.test(url))url=BASE+url.replace(/^\//,'');
-  const port=await freePort(),prof=fs.mkdtempSync(path.join(os.tmpdir(),'wdhl-'));
+  let url=A.url||(A.game?'index.html?nosw':'');
+  if(gif&&A.fx){
+    const query=new URLSearchParams({fx:A.fx});
+    for(const key of ['map','cam','at','dist','look','oyaw','opitch','seed'])if(A[key]!==undefined)query.set(key,A[key]);
+    url='studio.html?'+query;
+  }
+  if(!url)throw new Error('ต้องมี --url, --game หรือ --fx สำหรับอัด GIF');
+  if(gif&&(!/studio\.html|[?&]studio(?:[=&]|$)/.test(url)||A.game||A.js||A.eval||A['wait-shot'])){
+    throw new Error('--gif ใช้กับ VFX Studio ผ่าน --fx หรือ --url');
+  }
+  const port=await freePort();
+  let server;
+  if(!/^https?:/.test(url)){
+    let base=BASE;
+    if(gif)({server,url:base}=await openStudioServer());
+    url=base+url.replace(/^\//,'');
+  }
+  if(gif){
+    const captureUrl=new URL(url);
+    for(const key of ['t','sheet','save'])captureUrl.searchParams.delete(key);
+    url=captureUrl.href;
+  }
+  const prof=fs.mkdtempSync(path.join(os.tmpdir(),'wdhl-'));
   const ch=spawn(CHROME,['--headless=new','--remote-debugging-port='+port,'--user-data-dir='+prof,'--window-size='+W+','+H,'--hide-scrollbars','--no-first-run','--mute-audio','--autoplay-policy=no-user-gesture-required','--enable-unsafe-swiftshader','--ignore-gpu-blocklist','--disable-background-timer-throttling','--disable-renderer-backgrounding',...(process.getuid&&process.getuid()===0?['--no-sandbox']:[]),'about:blank'],{stdio:'ignore'});
   let ws,id=0;const pend={},errs=[],logs=[];
   const timer=setTimeout(()=>{console.error('✗ หมดเวลา '+TMO/1000+' วิ');finish(1);},TMO);
   let done=false;
-  async function finish(code){if(done)return;done=true;clearTimeout(timer);try{ws&&ws.close();}catch(e){}ch.kill();await sleep(300);try{fs.rmSync(prof,{recursive:true,force:true});}catch(e){}process.exit(code);}
+  async function finish(code){if(done)return;done=true;clearTimeout(timer);try{ws&&ws.close();}catch(e){}ch.kill();server?.kill();await sleep(300);try{fs.rmSync(prof,{recursive:true,force:true});}catch(e){}process.exit(code);}
   try{
     let tgt;for(let i=0;i<80&&!tgt;i++){try{tgt=(await (await fetch('http://127.0.0.1:'+port+'/json/list')).json()).find(t=>t.type==='page');}catch(e){}if(!tgt)await sleep(250);}
     if(!tgt)throw new Error('Chrome ไม่ตอบ');
@@ -66,7 +112,7 @@ async function main(){
     if(A.cpu)await cmd('Emulation.setCPUThrottlingRate',{rate:+A.cpu});   // --cpu 4 = จำลอง CPU ช้าลง 4 เท่า (เครื่องผู้เล่นอ่อน)
     await cmd('Page.navigate',{url});
     // รอให้หน้าโหลดเสร็จ: เกม = มี window.WD • สตูดิโอ = STUDIO.state.ready
-    const isStudio=/studio\.html|\?studio/.test(url),isGame=!isStudio&&/^\/(index\.html)?(\?|#|$)/.test(url.replace(/^https?:\/\/[^/]+/,''));
+    const isStudio=/studio\.html|[?&]studio(?:[=&]|$)/.test(url),isGame=!isStudio&&/^\/(index\.html)?(\?|#|$)/.test(url.replace(/^https?:\/\/[^/]+/,''));
     for(let i=0;i<240;i++){await sleep(250);try{if(await ev(isStudio?`!!(window.STUDIO&&STUDIO.state&&STUDIO.state.ready)`:isGame?`!!(window.WD&&window.WD.G!==undefined&&document.readyState==='complete')`:`document.readyState!=='loading'`,false))break;}catch(e){}}
     if(A['wait-shot']){const f=String(A['wait-shot']).replace(/\.(jpg|png)$/,''),c=['jpg','png'].map(x=>path.join(ROOT,'shots',f+'.'+x)),t0=Date.now();
       const old=c.map(p=>fs.existsSync(p)?fs.statSync(p).mtimeMs:0);
@@ -78,6 +124,14 @@ async function main(){
     if(body){const r=await ev(`(async()=>{${body}\n})()`);
       if(r&&r.images){for(const k in r.images){const f=saveImg(k,r.images[k]);if(f)console.log('✓ '+f);}delete r.images;}
       if(r!==undefined)console.log(JSON.stringify(r,null,1).slice(0,20000));}
+    if(gif){
+      const temp=path.join(prof,'frames');
+      fs.mkdirSync(temp);
+      const result=await captureStudioGif({settings:gif,url,evaluate:ev,temp,root:ROOT,pageErrors:errs,timeout:TMO});
+      console.log(JSON.stringify(result));
+      await finish(0);
+      return;
+    }
     if(A.shot){const s=await cmd('Page.captureScreenshot',{format:'jpeg',quality:86});console.log('✓ '+saveImg(String(A.shot).replace(/\.(jpg|png)$/,''),'data:image/jpeg;base64,'+s.data));}
     if(logs.length&&!A.quiet)console.log('--- console ('+logs.length+') ---\n'+logs.slice(-40).join('\n'));
     if(errs.length){console.log('--- page errors ('+errs.length+') ---\n'+[...new Set(errs)].slice(0,30).join('\n'));}
@@ -85,4 +139,4 @@ async function main(){
     await finish(0);
   }catch(e){console.error('✗ '+(e.stack||e.message||e));if(errs.length)console.log('--- page errors ---\n'+[...new Set(errs)].slice(0,30).join('\n'));await finish(1);}
 }
-main();
+main().catch(e=>{console.error('✗ '+e.message);process.exitCode=1;});

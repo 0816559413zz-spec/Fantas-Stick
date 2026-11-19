@@ -567,6 +567,7 @@ function stHelp(){if(document.querySelector('#st .stModal.help'))return;const m=
   $st('st').append(m);m.tabIndex=-1;m.focus();m.addEventListener('keydown',e=>{if(e.key==='Escape')m.remove();});}
 // ---------- API สำหรับ Claude / console ----------
 window.STUDIO={load:n=>stOpen(n),data:()=>ST.fx,name:()=>ST.name,
+  duration:stDur,prepareCapture:()=>fxAssetsWait(ST.fx),
   set(path,v){const [id,...ks]=path.split('.');const L=id==='file'?ST.fx:ST.fx.layers.find(x=>x.id===id);if(!L)return false;let o=L;for(let i=0;i<ks.length-1;i++)o=o[ks[i]];stPush();o[ks[ks.length-1]]=v;stChanged(true);return true;},
   play(){ST.play=true;stRestart();stSync();},pause(){ST.play=false;stSync();},seek:t=>{ST.play=false;stSeek(t);stSync();return ST.met;},sheet:(ts,save)=>stSheet(ts,save),
   add:t=>(stAddLayer(t),ST.sel),select:id=>{ST.sel=id;stTlRender();stInspRender();},del:id=>stDelLayer(id),undo:()=>stUndo(false),redo:()=>stUndo(true),newFx:(n,tpl,pal)=>stNew(n,tpl,pal),
