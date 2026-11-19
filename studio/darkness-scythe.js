@@ -116,7 +116,7 @@ FXCODE.studio_darkness_scythe=(_x,_y,_h,args,instance)=>{
   const wrapA=x=>{x=(x+Math.PI)%(Math.PI*2);if(x<0)x+=Math.PI*2;return x-Math.PI;};
   const orbA=T=>wrapA(-1.2+ORB*T);   // มุมรอบตัวตอนว่าง (0 = หน้า, + = ขวา)
   const radOf=g=>new THREE.Vector3(-Math.sin(g),0,Math.cos(g));   // anchor: +z หน้า, −x ขวา
-  const pose=(g,rad,vert,dirSweep,spinA)=>{   // ทิศทางเคียวที่มุม g • vert: 1 = แนวตั้ง 0 = แนวนอน
+  const pose=(g,rad,vert,dirSweep,spinA,cock)=>{   // ทิศทางเคียวที่มุม g • vert: 1 = แนวตั้ง 0 = แนวนอน
     const R=radOf(g),tg=new THREE.Vector3(Math.cos(g),0,Math.sin(g)).multiplyScalar(-1);   // ทิศเพิ่มมุม (ไปทางขวา)
     const mot=tg.clone().multiplyScalar(dirSweep);
     const yH=R.clone();yH.y=0.2;yH.normalize();const xH=mot.clone();   // แนวนอน: ด้ามชี้ออกจากตัว ปลายใบนำทางกวาด
@@ -124,6 +124,7 @@ FXCODE.studio_darkness_scythe=(_x,_y,_h,args,instance)=>{
     vY.copy(yH).lerp(yV,vert).normalize();vX.copy(xH).lerp(xV,vert).normalize();
     vZ.crossVectors(vX,vY).normalize();vX.crossVectors(vY,vZ).normalize();
     MB.makeBasis(vX,vY,vZ);const q=new THREE.Quaternion().setFromRotationMatrix(MB);
+    if(cock){const th=cock*(vZ.y<0?1:-1);q.premultiply(new THREE.Quaternion().setFromAxisAngle(vY,th));}   // ง้างใบ: บิดใบรอบด้ามให้ปลายเชิดถอยไปหลัง (ผู้ใช้ 2026-11-19: เหมือนชาร์จก่อนฟัน)
     const self=vert*Math.sin(0)+0;   // แนวตั้งควงตัวเองช้า ๆ ใส่ทีหลังตาม T
     const pos=new THREE.Vector3(0,1.25+(0.05+2.0*S0-1.25)*vert,0).addScaledVector(R,rad);   // จุดหัวเคียว • แนวตั้ง = โคนด้ามอยู่ระดับพื้นเหมือนท่าว่างเดิม
     pos.addScaledVector(vY,-2.0*S0);
@@ -132,21 +133,21 @@ FXCODE.studio_darkness_scythe=(_x,_y,_h,args,instance)=>{
   };
   const baState=T=>{   // สถานะล้วนจากเวลา (หางคำนวณย้อนหลังได้)
     const kc=Math.floor(T/LOOP),t=T-kc*LOOP,g0=orbA(kc*LOOP+SW0),side0=Math.sin(g0)>=0?1:-1;   // ฝั่งที่เคียวอยู่ตอนเริ่มฟัน (หลัง = ไปฝั่งที่ใกล้)
-    let g=orbA(T),rad=RI,vert=1,dirSweep=1,spinA=0,act=0,tw=0,spinIdx=-1,spinU=0;
+    let g=orbA(T),rad=RI,vert=1,dirSweep=1,spinA=0,act=0,tw=0,spinIdx=-1,spinU=0,cock=0;
     if(t>=SW0){
       const k=Math.min(NSW-1,Math.floor((t-SW0)/GAP)),u=t-SW0-k*GAP,from=side0*(k%2?-1:1),to=-from;   // ฟันที่ k เริ่มจาก from กวาดไป to
       const outR=0.55+REACH;
       const S0p=WU+SWP+HOLD,STL=SPIN+0.14,spinTurn=x=>-from*Math.PI*2*4*(1-Math.pow(1-Math.min(1,x),3));   // ควง 4 รอบ เร็วแล้วค่อย ๆ ช้าลงจนหยุดตรงทิศพร้อมฟัน (จบที่รอบเต็ม = ไม่กระตุก)
       if(u<WU){const e=ez(0,WU,u);const pg=k===0?g0:from*(A+BK);const pr=k===0?RI:outR;const pv=k===0?1:0;
-        g=pg+wrapA(from*(A+(k?BK:0))-pg)*e+(k===0?0:from*0.12*Math.sin(Math.PI*e));rad=pr+(outR-pr)*e;vert=pv*(1-e);dirSweep=-from;tw=0.25*from*e;}   // เงื้อไปจุดเริ่มฝั่ง from (ครั้งแรกจากท่าวน)
-      else if(u<WU+SWP){const e=Math.pow((u-WU)/SWP,2.2),st=from*(A+(k?BK:0));g=st+(to*A-st)*e;rad=outR;vert=0;dirSweep=-from;act=Math.min(1,(u-WU)/0.04);tw=from*(0.25-0.85*e);}
+        g=pg+wrapA(from*(A+(k?BK:0))-pg)*e+(k===0?0:from*0.12*Math.sin(Math.PI*e));rad=pr+(outR-pr)*e;vert=pv*(1-e);dirSweep=-from;tw=0.25*from*e;cock=1.05*Math.sin(Math.PI/2*e);}   // เงื้อไปจุดเริ่มฝั่ง from (ครั้งแรกจากท่าวน)
+      else if(u<WU+SWP){const e=Math.pow((u-WU)/SWP,2.2),st=from*(A+(k?BK:0));g=st+(to*A-st)*e;cock=1.05*(1-ez(0,0.35,(u-WU)/SWP));rad=outR;vert=0;dirSweep=-from;act=Math.min(1,(u-WU)/0.04);tw=from*(0.25-0.85*e);}
       else if(u<WU+SWP+HOLD){const e=ez(0,0.12,u-WU-SWP);g=to*A+to*0.18*e;rad=outR;vert=0;dirSweep=-from;act=Math.max(0,1-(u-WU-SWP)/0.12)*0.8;tw=-from*0.6;}   // ค้าง 0.3 วิ (ส่งตามแรงนิดเดียว)
       else if(u<S0p+STL){const x=(u-S0p)/STL,e=ez(0,SPIN,u-S0p);g=to*(A+0.18)+(to*(A+BK)-to*(A+0.18))*e;rad=outR;vert=0;dirSweep=from;spinA=spinTurn(x);if(u<S0p+SPIN){spinIdx=k;spinU=(u-S0p)/SPIN;}tw=-from*0.6*(1-e);}   // ควงไปจุดเตรียมฟันต่อ (ระยะเท่าเดิม ไม่ดึงเข้าหาตัว) แล้วหมุนช้าลงจนหยุด
       else{const endT=SW0+(NSW-1)*GAP+WU+SWP+HOLD+SPIN;g=to*(A+BK);rad=outR;vert=0;dirSweep=from;
         if(k===NSW-1&&t>endT){const back=t-(SW0+(NSW-1)*GAP+WU+SWP)-2.0;   // ไม่ได้ฟันเกิน 2 วิ → กลับแนวตั้ง แล้ววนต่อ
           if(back>0){const e=ez(0,0.5,back);const go=orbA(T);g=to*(A+BK)+wrapA(go-to*(A+BK))*e;rad=rad+(RI-rad)*e;vert=e;}}}
     }
-    const p=pose(g,rad,vert,dirSweep,spinA);
+    const p=pose(g,rad,vert,dirSweep,spinA,cock);
     if(vert>0.01){const sp=new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,1,0),T*0.9*vert);   // แนวตั้ง: ควงตัวเองเบา ๆ
       const c=p.pos.clone().addScaledVector(new THREE.Vector3(0,1,0),1.1*S0*vert);p.q.premultiply(sp);p.pos.sub(c).applyQuaternion(sp).add(c);}
     return {w:1,QB:p.q,pos:p.pos,tw,act,spinIdx,spinU,kc};
