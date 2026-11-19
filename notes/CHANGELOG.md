@@ -2,6 +2,7 @@
 
 - 2026-11-19 — **Darkness เคียว BA รอบ 24:** แก้บั๊กเปลวหยักปลายหางค้างตามมาหลังหางจาง (ตอนนี้จางพร้อมหาง) • เคียวเงา: โผล่ 0.3 วิหลังโดน อยู่หลังเป้า ตั้งตรงหรือเฉียงสลับกัน ค้างครู่หนึ่งแล้วฟันลงเร็ว 0.09 วิ ไม่มีหาง ฟันเสร็จจางทันที (เอาหมอกดำออก)
 - 2026-11-19 — **Darkness เคียว BA รอบ 23 (โดนเป้า):** ผู้ใช้อนุมัติท่าผู้ร่าย BA • พรีวิวมีเป้า 2 ตัว (มีตรา + ไม่มีตรา) ระยะ REACH • ทุก BA ที่โดน = รอยฟันดำ + เส้นขาวบนตัวเป้า 0.3 วิ + เป้าสะดุ้ง • เป้ามีตรา = เคียวเงาดำโปร่ง 40% ขนาดเท่าเคียวจริง โผล่ข้าง-บนเป้า (ไม่โดนคนอื่น) ฟันเฉียงลงสวนทางเคียวจริงเป็นกากบาท หลังโดน 0.12 วิ มีรอยฟันจางของตัวเอง แล้วสลายเป็นหมอกดำ
+- 2026-11-19 — **Bridge eggshell shell (protocol v87):** Blender-cut stone shell chunks over a solid core; strong skills break chunks at the hit, rubble core shows, broken deck rim narrows the walk path and drops the parapet above. Pipeline: tools/fcs-bridge-export.js -> assets/src/fcs_bridge_build.py -> assets/buildings/fcs_bridge.glb.
 - 2026-11-19 — **Bridge skin damage rims:** shader adds rough spalled patch, jagged dark edge, cracks and chips around each hole on the Castle Strike bridge (user ref photo). Visual only.
 - 2026-11-19 — **Darkness เคียว BA รอบ 22 (ท่าผู้ร่าย):** แขนฝั่งซ้ายพับเข้าตัวมากขึ้น ยกศอกสูงไว้หน้าอก (งอ 1.65 / 1.7 rad) ไม่ทะลุลำตัว • ช่วงหน่วงก่อนสะบัดแขนถอยไปหลังอีกนิดเหมือนเคียวง้าง (ฝั่งซ้ายพับเพิ่ม)
 - 2026-11-19 — **Darkness เคียว BA รอบ 21 (ท่าผู้ร่าย):** แขนฝั่งซ้ายพับเข้าตัวมากขึ้น ศอกเยื้องเข้ากลางตัว งอมากขึ้น (สะบัดจบ 1.6 / ง้าง 1.75 rad) ปลายคทายังอยู่นอกเสื้อคลุม

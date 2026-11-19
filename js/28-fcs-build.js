@@ -34,31 +34,17 @@ function buildFcs(){
   try{fcsForest(fb);}catch(e){console.error('fcsForest',e);}
 }
 // L-shaped stone bridge (js/02-fcs.js bridge): arched spans (extruded shape, piers 1.6 m), corner block, ramps, crenellated parapet.
+// Starts as the full code-built bridge; when the Blender shell (map_fcs_bridge, assets/src/fcs_bridge_build.py) loads it swaps to
+// an inset core + the pre-broken shell chunks (fcsShellBuild). Shell chunk states come from BSKN (js/12-fcs-bridge.js).
 function fcsBridge(B){
-  const pm=stoneMat(1,1,'#a49a88'),mat=fcsHoleMat(pm),dark=stoneMat(1,1,'#8a8070'),W=B.HW*2*S3,DH=B.DH,grp=new THREE.Group();   // mat = stone with skin-damage holes cut in (fcsHoleMat)
-  const add=(geo,m,x,y,z,ry)=>{const o=new THREE.Mesh(geo,m);o.position.set(x,y,z);o.rotation.y=ry||0;o.castShadow=o.receiveShadow=true;grp.add(o);return o;};
-  // arch spans: shape in (along, up) meters, extruded across the deck width
-  for(const s of B.spans){const L=Math.hypot(s.x2-s.x1,s.y2-s.y1)*S3,r=(L-1.6)/2,ux=(s.x2-s.x1)/(L/S3),uy=(s.y2-s.y1)/(L/S3);
-    const mx=(s.x1+s.x2)/2,my=(s.y1+s.y2)/2,base=Math.min(GY(s.x1,s.y1),GY(s.x2,s.y2),GY(mx,my))-1.2,top=DH-base,spring=DH-1.3-r-base;
-    const sh=new THREE.Shape();sh.moveTo(-L/2,0);sh.lineTo(-r,0);sh.lineTo(-r,spring);sh.absarc(0,spring,r,Math.PI,0,true);sh.lineTo(r,0);sh.lineTo(L/2,0);sh.lineTo(L/2,top);sh.lineTo(-L/2,top);sh.lineTo(-L/2,0);
-    const geo=new THREE.ExtrudeGeometry(sh,{depth:W,bevelEnabled:false,curveSegments:14});geo.translate(0,0,-W/2);
-    add(geo,mat,tx(mx),base,tz(my),-Math.atan2(uy,ux));
-    // string course under the parapet (thin ledge both sides)
-    add(sGeo(THREE.BoxGeometry,L,0.25,W+0.5),dark,tx(mx),DH-0.2,tz(my),-Math.atan2(uy,ux));}
-  // corner block
-  {const x=B.ax,y=B.cy,base=GY(x,y)-1.2;add(sGeo(THREE.BoxGeometry,W+0.4,DH-base,W+0.4),mat,tx(x),base+(DH-base)/2,tz(y));
-   add(sGeo(THREE.BoxGeometry,W+0.9,0.25,W+0.9),dark,tx(x),DH-0.2,tz(y));}
-  // ramps: side profile extruded across the width
-  for(const [R0,alongY,L,gEnd] of [[B.rs,true,B.LS,B.gS],[B.re,false,B.LE,B.gE]]){const Lm=L*S3,x0=alongY?B.ax:B.xE,y0=alongY?B.yS:B.cy,base=Math.min(GY(x0,y0),gEnd)-1.2;
-    const sh=new THREE.Shape();sh.moveTo(0,0);sh.lineTo(Lm+0.3,0);sh.lineTo(Lm+0.3,gEnd-base-0.05);sh.lineTo(0,DH-base);sh.lineTo(0,0);
-    const geo=new THREE.ExtrudeGeometry(sh,{depth:W,bevelEnabled:false});geo.translate(0,0,-W/2);
-    add(geo,mat,tx(x0),base,tz(y0),alongY?-Math.PI/2:0);}
+  const pm=stoneMat(1,1,'#a49a88'),grp=new THREE.Group();
+  FCSB.grp=grp;FCSB.B=B;FCSB.shell=null;FCSB.sv=-1;FCSB.full=fcsCore(B,false);grp.add(FCSB.full);
   // parapet: per unit (B.parU) one base-wall segment + one merlon; each unit breaks via BRK (fcsParView). Rubble lumps hidden until broken.
-  const m4=new THREE.Matrix4(),q=new THREE.Quaternion(),Y=new THREE.Vector3(0,1,0),U=B.parU,box=sGeo(THREE.BoxGeometry,1,1,1),FP=FCSB;
+  const DH=B.DH,m4=new THREE.Matrix4(),q=new THREE.Quaternion(),Y=new THREE.Vector3(0,1,0),U=B.parU,box=sGeo(THREE.BoxGeometry,1,1,1),FP=FCSB;
   FP.base=[];FP.mer=[];FP.rub=[];FP.st=new Int8Array(U.length);FP.off=-1;
   const mk=(n,m)=>{const im=new THREE.InstancedMesh(box,m,n);im.castShadow=im.receiveShadow=true;grp.add(im);return im;};
   FP.imB=mk(U.length,pm);FP.imM=mk(U.length,pm);FP.imR=mk(U.length,pm);
-  FP.imC=mk(1200,pm);FP.imC.count=0;FP.nC=0;FP.fall=[];FP.t0=0;   // fallen parapet chunks (sim then rest)
+  FP.imC=mk(1200,pm);FP.imC.count=0;FP.nC=0;FP.fall=[];FP.t0=0;   // fallen chunks (sim then rest)
   const W1=new THREE.Color(1,1,1);
   U.forEach((u,k)=>{q.setFromAxisAngle(Y,-u.a);const X=tx(u.x),Z=tz(u.y),sl=u.seg*S3+0.02;
     FP.base[k]=[new THREE.Vector3(X,DH+0.25,Z),q.clone(),new THREE.Vector3(sl,0.5,0.45)];
@@ -67,11 +53,54 @@ function fcsBridge(B){
     FP.imB.setMatrixAt(k,m4.compose(...FP.base[k]));FP.imM.setMatrixAt(k,m4.compose(...FP.mer[k]));FP.imR.setMatrixAt(k,m4.makeScale(0,0,0));
     FP.imB.setColorAt(k,W1);FP.imM.setColorAt(k,W1);FP.imR.setColorAt(k,W1);});
   for(const im of [FP.imB,FP.imM,FP.imR]){im.instanceMatrix.needsUpdate=true;im.instanceColor.needsUpdate=true;}
-  FCSB.grp=grp;FCSB.B=B;FCSB.skin=null;FCSB.sv=-1;
   addW(grp);
+  loadModel('map_fcs_bridge').then(r=>{if(r&&FCSB.grp===grp&&BSKN.C.length)try{fcsShellBuild(r.scene,B);}catch(e){console.error('fcsShellBuild',e);}});
 }
-// bridge runtime view: parapet break stages (BRK) + skin damage spots (BSKN). Called every frame from the render loop.
-const FCSB={grp:null,B:null,skin:null,sv:-1,tex:null};
+// bridge body. inset=false: full solid (no shell model). inset=true: core behind the shell — sides pulled in by BSKV.shell,
+// top BSKV.rimH pulled in by BSKV.rimW on both deck edges (rim chunks fill it), darker rough stone shows where the shell broke
+// exposed rubble core (where shell chunks fell off): irregular stones in mortar, world-space cells, no brick texture
+function fcsRubbleMat(){
+  if(FCSB.rubM)return FCSB.rubM;const m=new THREE.MeshStandardMaterial({color:'#ffffff',roughness:1});
+  m.onBeforeCompile=sh=>{
+    sh.vertexShader=sh.vertexShader.replace('#include <common>','#include <common>\nvarying vec3 vRP;').replace('#include <begin_vertex>','#include <begin_vertex>\nvRP=(modelMatrix*vec4(transformed,1.)).xyz;');
+    sh.fragmentShader=sh.fragmentShader.replace('#include <common>','#include <common>\nvarying vec3 vRP;'+
+      'vec2 rbH(vec2 p){return fract(sin(vec2(dot(p,vec2(127.1,311.7)),dot(p,vec2(269.5,183.3))))*43758.5453);}'+
+      'float rbN(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);float a=rbH(i).x,b=rbH(i+vec2(1.,0.)).x,c=rbH(i+vec2(0.,1.)).x,d=rbH(i+vec2(1.,1.)).x;return mix(mix(a,b,f.x),mix(c,d,f.x),f.y);}')
+      .replace('#include <map_fragment>','#include <map_fragment>\n'+
+      'vec2 q=vec2(vRP.x+vRP.z,vRP.y*1.25)*2.8;q+=vec2(rbN(q*0.6),rbN(q*0.6+5.))*0.7-0.35;vec2 ip=floor(q),fp=fract(q);float d1=8.,d2=8.;vec2 id=vec2(0.);'+
+      'for(int j=-1;j<=1;j++)for(int i=-1;i<=1;i++){vec2 g=vec2(float(i),float(j)),o=rbH(ip+g)*0.8+0.1,r=g+o-fp;float d=dot(r,r);if(d<d1){d2=d1;d1=d;id=ip+g;}else if(d<d2)d2=d;}'+
+      'float edge=sqrt(d2)-sqrt(d1),h=rbH(id).y,nz=rbN(vRP.xy*9.+vRP.z*7.);'+
+      'vec3 stone=mix(vec3(0.27,0.25,0.22),vec3(0.40,0.37,0.33),h)*(0.7+0.45*nz);vec3 mortar=vec3(0.17,0.155,0.14)*(0.8+0.4*nz);'+
+      'diffuseColor.rgb=mix(mortar,stone,smoothstep(0.02,0.12+0.08*nz,edge));if(rbN(vRP.zy*23.+vRP.x*5.)>0.78)diffuseColor.rgb*=0.6;');};
+  m.customProgramCacheKey=()=>'fcsRubble';return FCSB.rubM=m;
+}
+function fcsCore(B,inset){
+  const g=new THREE.Group(),pm=inset?stoneMat(1,1,'#958b7c'):stoneMat(1,1,'#a49a88'),rb=inset?fcsRubbleMat():pm,dark=stoneMat(1,1,'#8a8070'),W=B.HW*2*S3,DH=B.DH;
+  // material arrays: extrude [caps = side faces, sides = top/bottom/arch soffit] • box [+x,-x,+y,-y,+z,-z]
+  const mat=[rb,pm],boxZ=[pm,pm,pm,pm,rb,rb];
+  const Ts=inset?BSKV.shell:0,RW=BSKV.rimW,RH=inset?BSKV.rimH:0;
+  const add=(geo,m,x,y,z,ry)=>{const o=new THREE.Mesh(geo,m);o.position.set(x,y,z);o.rotation.y=ry||0;o.castShadow=o.receiveShadow=true;g.add(o);return o;};
+  for(const s of B.spans){const L=Math.hypot(s.x2-s.x1,s.y2-s.y1)*S3,r=(L-1.6)/2,ux=(s.x2-s.x1)/(L/S3),uy=(s.y2-s.y1)/(L/S3),ry=-Math.atan2(uy,ux);
+    const mx=(s.x1+s.x2)/2,my=(s.y1+s.y2)/2,base=Math.min(GY(s.x1,s.y1),GY(s.x2,s.y2),GY(mx,my))-1.2,top=DH-RH-base,spring=DH-1.3-r-base;
+    const sh=new THREE.Shape();sh.moveTo(-L/2,0);sh.lineTo(-r,0);sh.lineTo(-r,spring);sh.absarc(0,spring,r,Math.PI,0,true);sh.lineTo(r,0);sh.lineTo(L/2,0);sh.lineTo(L/2,top);sh.lineTo(-L/2,top);sh.lineTo(-L/2,0);
+    const geo=new THREE.ExtrudeGeometry(sh,{depth:W-2*Ts,bevelEnabled:false,curveSegments:14});geo.translate(0,0,-(W-2*Ts)/2);
+    add(geo,mat,tx(mx),base,tz(my),ry);
+    if(inset)add(sGeo(THREE.BoxGeometry,L,RH,W-2*RW),boxZ,tx(mx),DH-RH/2,tz(my),ry);   // deck core between the rims
+    else add(sGeo(THREE.BoxGeometry,L,0.25,W+0.5),dark,tx(mx),DH-0.2,tz(my),ry);}       // string course
+  {const x=B.ax,y=B.cy,base=GY(x,y)-1.2,h=DH-RH-base;
+   if(inset){const t=Ts*20,rw=RW*20,HW=B.HW;
+     const cb=[pm,rb,pm,pm,pm,rb];   // west (-x) + north (-z) faces are behind the shell
+     add(sGeo(THREE.BoxGeometry,W-Ts,h,W-Ts),cb,tx(x+t/2),base+h/2,tz(y+t/2));
+     add(sGeo(THREE.BoxGeometry,W-RW,RH,W-RW),cb,tx(x+rw/2),DH-RH/2,tz(y+rw/2));}
+   else{add(sGeo(THREE.BoxGeometry,W+0.4,DH-base,W+0.4),pm,tx(x),base+(DH-base)/2,tz(y));add(sGeo(THREE.BoxGeometry,W+0.9,0.25,W+0.9),dark,tx(x),DH-0.2,tz(y));}}
+  for(const [alongY,L,gEnd] of [[true,B.LS,B.gS],[false,B.LE,B.gE]]){const Lm=L*S3,x0=alongY?B.ax:B.xE,y0=alongY?B.yS:B.cy,base=Math.min(GY(x0,y0),gEnd)-1.2,Wr=W-2*Ts;
+    const sh=new THREE.Shape();sh.moveTo(0,0);sh.lineTo(Lm+0.3,0);sh.lineTo(Lm+0.3,gEnd-base-0.05);sh.lineTo(0,DH-base);sh.lineTo(0,0);
+    const geo=new THREE.ExtrudeGeometry(sh,{depth:Wr,bevelEnabled:false});geo.translate(0,0,-Wr/2);
+    add(geo,mat,tx(x0),base,tz(y0),alongY?-Math.PI/2:0);}
+  return g;
+}
+// bridge runtime view: parapet break stages (BRK) + shell chunk states (BSKN). Called every frame from the render loop.
+const FCSB={grp:null,B:null,full:null,core:null,shell:null,sv:-1,tex:null,drop:[]};
 function fcsParView(){
   const P=FCSB,U=P.B&&P.B.parU;if(!U||!P.imM||P.grp.parent!==world)return;
   if(P.off<0){P.off=BRK.findIndex(g=>g.d&&g.d.fp===0);if(P.off<0)return;}
@@ -84,55 +113,38 @@ function fcsParView(){
     P.imM.setColorAt(k,c);P.imB.setColorAt(k,c);P.imB.setMatrixAt(k,m4.compose(...P.base[k]));P.imR.setMatrixAt(k,m4.makeScale(0,0,0));}
   if(ch)for(const im of [P.imB,P.imM,P.imR]){im.instanceMatrix.needsUpdate=true;im.instanceColor.needsUpdate=true;}
 }
-// damage decal textures (stage 1 chipped / 2 missing bricks / 3 exposed rubble), drawn once
-function fcsSkinTex(){
-  if(FCSB.tex)return FCSB.tex;const R=mulberry(7731);FCSB.tex=[1,2,3].map(st=>{
-    const N=128,cv=document.createElement('canvas');cv.width=cv.height=N;const x=cv.getContext('2d');
-    // jagged blob mask
-    const blob=(r0,col)=>{x.beginPath();for(let i=0;i<=24;i++){const a=i/24*6.283,r=r0*(0.72+0.38*R());const px=N/2+Math.cos(a)*r,py=N/2+Math.sin(a)*r*0.85;i?x.lineTo(px,py):x.moveTo(px,py);}x.closePath();x.fillStyle=col;x.fill();};
-    if(st===3){blob(60,'rgba(22,18,14,0.97)');blob(50,'#7d7062');for(let i=0;i<320;i++){const v=85+R()*70|0;x.fillStyle=`rgb(${v},${v-8},${v-18})`;const r=1+R()*4;x.fillRect(N/2+(R()-0.5)*80,N/2+(R()-0.5)*66,r,r);}}
-    else{blob(st===2?54:46,'rgba(128,112,96,0.85)');blob(st===2?44:36,'rgba(96,84,72,0.9)');}   // fresh chipped stone = lighter than the weathered face
-    // missing bricks (dark recesses) on a running-bond grid
-    const bw=22,bh=11,n=st===1?3:st===2?8:5;
-    for(let i=0;i<n;i++){const row=(R()*7|0)-3,col=(R()*5|0)-2,ox=(row&1)*bw/2,px=N/2+col*bw+ox-bw/2,py=N/2+row*bh-bh/2;
-      x.fillStyle='rgba(14,11,9,0.96)';x.fillRect(px+1,py+1,bw-2,bh-2);x.fillStyle='rgba(165,148,124,0.65)';x.fillRect(px+1,py+bh-3,bw-2,2);}
-    // cracks
-    x.strokeStyle='rgba(12,10,8,0.95)';x.lineWidth=2;for(let i=0;i<(st===1?4:6);i++){x.beginPath();let px=N/2,py=N/2;x.moveTo(px,py);for(let k=0;k<5;k++){px+=(R()-0.5)*26;py+=(R()-0.5)*22;x.lineTo(px,py);}x.stroke();}
-    const t=new THREE.CanvasTexture(cv);t.colorSpace=THREE.SRGBColorSpace;return t;});
-  return FCSB.tex;
+// shell material: per-chunk state from a 64x32 data texture (r = stage). Stage 1/2 = darker + crack lines + pushed out a bit,
+// stage 3 = vertices collapsed (chunk gone, a falling copy is spawned by fcsShellView). Same vertex code on the shadow depth material.
+const FSH_V='attribute vec4 cd;uniform sampler2D uSt;varying float vSt;varying vec3 vP;';
+const FSH_B='float stc=floor(texture2D(uSt,vec2((mod(cd.x,64.)+.5)/64.,(floor(cd.x/64.)+.5)/32.)).r*255.+.5);vSt=stc;vP=transformed;'+
+  'if(stc>2.5)transformed=vec3(0.,-500.,0.);else{transformed.xz+=cd.yz*stc*0.03;transformed.y-=stc*0.012;}';
+function fcsShellMat(tex){
+  const inj=sh=>{sh.uniforms.uSt={value:tex};sh.vertexShader=sh.vertexShader.replace('#include <common>','#include <common>\n'+FSH_V).replace('#include <begin_vertex>','#include <begin_vertex>\n'+FSH_B);};
+  const m=stoneMat(1,1,'#a49a88').clone();
+  m.onBeforeCompile=sh=>{inj(sh);
+    sh.fragmentShader=sh.fragmentShader.replace('#include <common>','#include <common>\nvarying float vSt;varying vec3 vP;'+
+      'float fsH(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}'+
+      'float fsN(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(fsH(i),fsH(i+vec2(1.,0.)),f.x),mix(fsH(i+vec2(0.,1.)),fsH(i+vec2(1.,1.)),f.x),f.y);}')
+      .replace('#include <map_fragment>','#include <map_fragment>\nif(vSt>0.5){vec2 q=vec2(vP.x+vP.z,vP.y)*2.2;float c1=abs(fsN(q)*2.-1.),c2=abs(fsN(q*1.9+7.)*2.-1.);'+
+        'float w=0.035*vSt;diffuseColor.rgb*=(1.-0.09*vSt)*(1.-0.65*(1.-smoothstep(0.,w,min(c1,c2))));}');};
+  m.customProgramCacheKey=()=>'fcsShell';
+  const d=new THREE.MeshDepthMaterial({depthPacking:THREE.RGBADepthPacking});d.onBeforeCompile=inj;d.customProgramCacheKey=()=>'fcsShellD';
+  return [m,d];
 }
-// stone material with up to 64 skin-damage holes: fragments on a hole's face plane inside a brick-stepped radius are discarded,
-// the cavity mesh behind (fcsSkinView) shows the inside. uHC = center xyz + radius, uHN = outward normal xyz + seed.
-function fcsHoleMat(base){
-  if(FCSB.hm)return FCSB.hm;const m=base.clone(),U={uHC:{value:[]},uHN:{value:[]},uHNn:{value:0}};
-  for(let i=0;i<64;i++){U.uHC.value.push(new THREE.Vector4());U.uHN.value.push(new THREE.Vector4());}
-  m.onBeforeCompile=sh=>{Object.assign(sh.uniforms,U);
-    sh.vertexShader=sh.vertexShader.replace('#include <common>','#include <common>\nvarying vec3 vHW;').replace('#include <project_vertex>','#include <project_vertex>\nvHW=(modelMatrix*vec4(transformed,1.0)).xyz;');
-    sh.fragmentShader=sh.fragmentShader.replace('#include <common>','#include <common>\nvarying vec3 vHW;uniform vec4 uHC[64];uniform vec4 uHN[64];uniform int uHNn;\n'+
-      'float fhH(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}'+
-      'float fhN(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(fhH(i),fhH(i+vec2(1.,0.)),f.x),mix(fhH(i+vec2(0.,1.)),fhH(i+vec2(1.,1.)),f.x),f.y);}'+
-      'float fhF(vec2 p){return fhN(p)*.5+fhN(p*2.03)*.25+fhN(p*4.1)*.15+fhN(p*8.3)*.1;}')
-      .replace('#include <clipping_planes_fragment>','#include <clipping_planes_fragment>\n'+
-      'for(int i=0;i<64;i++){if(i>=uHNn)break;vec3 c=uHC[i].xyz,n=uHN[i].xyz;vec3 d=vHW-c;if(abs(dot(d,n))>0.26)continue;'+
-      'vec3 ua=normalize(cross(vec3(0.,1.,0.),n));vec2 q=vec2(dot(d,ua),d.y);float row=floor(q.y/0.25+0.5),off=mod(row,2.)*0.25;'+
-      'float bx=(floor((q.x+off)/0.5)+0.5)*0.5-off,by=row*0.25;float h=fract(sin(dot(vec2(bx,by)+uHN[i].w,vec2(12.9898,78.233)))*43758.5453);'+
-      'if(length(vec2(bx,by*1.25))<uHC[i].w*(0.62+0.5*h)*(0.8+0.4*fhF(q*2.5+uHN[i].w)))discard;}')
-      // damaged skin around each hole: irregular spalled patch (face broken off, rough core showing), dark lip at its edge,
-      // hairline cracks running out, small chips scattered further out, dust darkening
-      .replace('#include <map_fragment>','#include <map_fragment>\n'+
-      'for(int i=0;i<64;i++){if(i>=uHNn)break;vec3 c=uHC[i].xyz,n=uHN[i].xyz;vec3 d=vHW-c;if(abs(dot(d,n))>0.32)continue;'+
-      'float r=uHC[i].w,s=uHN[i].w;vec3 ua=normalize(cross(vec3(0.,1.,0.),n));vec2 q=vec2(dot(d,ua),d.y);float L=length(q*vec2(1.,1.12)),R3=r*3.6;if(L>R3)continue;'+
-      'float nz=fhF(q*1.8+s*7.),zone=r*(1.25+1.3*nz),e=zone-L,fo=1.-L/R3;'+
-      'diffuseColor.rgb*=1.-0.22*fo*fo;'+
-      'if(e>0.){float g=fhF(q*9.+s),g2=fhN(q*31.+s);vec3 core=vec3(0.50,0.46,0.41)*(0.5+0.75*g)*(0.72+0.5*g2);if(fhN(q*19.+s*3.)>0.74)core*=0.55;'+
-      'core*=0.6+0.4*smoothstep(r*0.8,r*1.8,L);diffuseColor.rgb=mix(diffuseColor.rgb,core,0.92);'+
-      'diffuseColor.rgb*=1.-0.5*(1.-smoothstep(0.,0.12,e))*smoothstep(-0.2*r,0.3*r,q.y);}'+   // recess: upper lip casts shadow inside
-      'else{float en=fhN(q*7.+s);diffuseColor.rgb*=1.-0.65*step(0.35,en)*(1.-smoothstep(0.,0.035,-e));'+   // dark broken edge of the intact face
-      'diffuseColor.rgb=mix(diffuseColor.rgb,vec3(0.78,0.74,0.66),0.3*(1.-en)*(1.-smoothstep(0.04,0.09,-e))*step(0.035,-e));'+   // fresh light chipped rim
-      'float ang=atan(q.y,q.x),k=ang/6.283*7.+fhN(vec2(L*1.6,s))*0.9+s,ki=floor(k+.5);'+
-      'float cd=abs(k-ki)*6.283/7.*L;if(fhH(vec2(ki,s))>0.35&&L<zone+r*(0.8+1.6*fhH(vec2(s,ki))))diffuseColor.rgb*=1.-0.8*(1.-smoothstep(0.012,0.04,cd))*(0.5+0.5*fo);'+
-      'vec2 cc=floor(q*6.+s);float ch=fhH(cc);if(ch>0.9){float cr=length(fract(q*6.+s)-0.5);if(cr<0.12+0.18*(ch-0.9)*10.*fo)diffuseColor.rgb=mix(diffuseColor.rgb,vec3(0.5,0.46,0.4)*(0.7+0.5*fhN(q*30.)),0.85);}}}');};
-  m.customProgramCacheKey=()=>'fcsHole';FCSB.hm=m;FCSB.hu=U;return m;
+// model loaded: merge all chunks c<i> into one mesh with attribute cd = (chunk id, outward nx, nz, rim), swap code bridge -> core + shell
+function fcsShellBuild(sc,B){
+  const P=FCSB;sc.updateMatrixWorld(true);const geos=[],per=new Map();
+  sc.traverse(o=>{if(!o.isMesh||!/^c\d+$/.test(o.name))return;const id=+o.name.slice(1),c=BSKN.C[id];if(!c)return;const f=BSKN.F[c.f];
+    const g=o.geometry.clone().applyMatrix4(o.matrixWorld);for(const k of Object.keys(g.attributes))if(!['position','normal','uv'].includes(k))g.deleteAttribute(k);
+    if(!g.attributes.uv)return;const n=g.attributes.position.count,cd=new Float32Array(n*4),nx=f.ax==='y'?f.n:0,nz=f.ax==='y'?0:f.n;
+    for(let k=0;k<n;k++){cd[k*4]=id;cd[k*4+1]=nx;cd[k*4+2]=nz;cd[k*4+3]=c.rim;}
+    g.setAttribute('cd',new THREE.BufferAttribute(cd,4));geos.push(g);per.set(id,g);});
+  if(!geos.length)return;
+  const geo=mergeGeometries(geos,false);if(!geo)return;
+  const tex=new THREE.DataTexture(new Uint8Array(64*32*4),64,32,THREE.RGBAFormat);tex.needsUpdate=true;
+  const [m,d]=fcsShellMat(tex),mesh=new THREE.Mesh(geo,m);mesh.customDepthMaterial=d;mesh.castShadow=mesh.receiveShadow=true;mesh.frustumCulled=false;
+  P.grp.remove(P.full);disposeTree(P.full);P.full=null;P.core=fcsCore(B,true);P.grp.add(P.core,mesh);
+  P.shell=mesh;P.tex=tex;P.per=per;P.prev=new Uint8Array(BSKN.C.length);P.sv=-1;P.drop=[];gl.shadowMap.needsUpdate=true;
 }
 // parapet unit broke (brk event): spawn chunks — most fall outward off the bridge to the ground, a few drop on the deck
 function fcsParFall(ev){
@@ -142,8 +154,8 @@ function fcsParFall(ev){
     P.fall.push({x:tx(u.x)+(u.ny?side:0),z:tz(u.y)+(u.nx?side:0),y:P.B.DH+0.6+R()*0.6,vx:(out?u.nx:-u.nx)*sp+(R()-0.5)*1.5,vz:(out?u.ny:-u.ny)*sp+(R()-0.5)*1.5,vy:1+R()*2.5,
       rx:R()*6,ry:R()*6,rz:R()*6,w:R()*8-4,s:0.35+R()*0.35});}
 }
-function fcsFallTick(){
-  const P=FCSB;if(!P.imC)return;const now=performance.now(),dt=Math.min(0.05,P.t0?(now-P.t0)/1000:0);P.t0=now;if(!P.fall.length||!(dt>0))return;
+function fcsFallTick(dt){
+  const P=FCSB;if(!P.imC)return;dt=Math.min(0.05,dt||0);if(!P.fall.length||!(dt>0))return;
   const B=P.B,m4=new THREE.Matrix4(),q=new THREE.Quaternion(),e=new THREE.Euler(),onDeck=(X,Z)=>{const x=X*20+MW/2,y=Z*20+MH/2;return [B.ns,B.ew].some(r=>x>r.x1&&x<r.x2&&y>r.y1&&y<r.y2);};
   for(let i=P.fall.length-1;i>=0;i--){const f=P.fall[i];f.vy-=14*dt;f.x+=f.vx*dt;f.z+=f.vz*dt;f.y+=f.vy*dt;f.rx+=f.w*dt;f.rz+=f.w*0.7*dt;
     const floor=(onDeck(f.x,f.z)?B.DH:TW(f.x,f.z))+f.s*0.3;
@@ -153,39 +165,32 @@ function fcsFallTick(){
     if(f.done)P.fall.splice(i,1);}
   P.imC.count=P.nC;P.imC.instanceMatrix.needsUpdate=true;
 }
-// rebuild skin damage when the spot list changes: stage 1 = chipped decal, 2 = shallow hole, 3 = deep hole (brick-stepped edge, cavity, loose + fallen bricks)
-function fcsSkinView(){
-  fcsFallTick();
-  const P=FCSB;if(!P.grp||P.grp.parent!==world||P.sv===BSKN.ver)return;P.sv=BSKN.ver;
-  if(P.skin){P.grp.remove(P.skin);P.skin.traverse(o=>{if(o.geometry&&o.geometry.userData.tmp)o.geometry.dispose();});}
-  const S=new THREE.Group();P.skin=S;P.grp.add(S);const HU=P.hu;let nh=0;
-  if(BSKN.list.length&&BSKN.F.length){
-  const T=fcsSkinTex();FCSB.plane=FCSB.plane||new THREE.PlaneGeometry(1,1);FCSB.cube=FCSB.cube||new THREE.BoxGeometry(1,1,1);
-  FCSB.mats=FCSB.mats||T.map(t=>new THREE.MeshStandardMaterial({map:t,transparent:true,alphaTest:0.2,depthWrite:false,roughness:1,polygonOffset:true,polygonOffsetFactor:-2,polygonOffsetUnits:-2}));
-  FCSB.cavM=FCSB.cavM||new THREE.MeshStandardMaterial({color:'#3e362f',roughness:1,side:THREE.DoubleSide});FCSB.backM=FCSB.backM||new THREE.MeshStandardMaterial({map:T[2],color:'#6f6457',roughness:1,alphaTest:0.3,side:THREE.DoubleSide});
-  const bricks=[],m4=new THREE.Matrix4(),q=new THREE.Quaternion(),e=new THREE.Euler(),R=mulberry(99),Yv=new THREE.Vector3(0,1,0);
-  BSKN.list.forEach((sp,i)=>{const f=BSKN.F[sp.f];if(!f)return;const ny=f.ax==='y',X=ny?tx(f.c):tx(sp.a),Z=ny?tz(sp.a):tz(f.c),ry=ny?f.n*Math.PI/2:(f.n>0?0:Math.PI);
-    const nx=ny?f.n:0,nz=ny?0:f.n;
-    if(HU&&nh<64){let r=sp.s*[0,0.22,0.38,0.58][sp.st];const dep=[0,0.12,0.32,0.7][sp.st];
-      // hole must fit between the arch ring (or ground) and the deck edge: shrink radius over arch crowns
-      // over an arch crown there is little wall: slide the hole (up to 3 m) toward the pier where it fits bigger
-      const hi=BSKN.B.DH-0.35,fit=a2=>{const gF=GY(ny?f.c:a2,ny?a2:f.c),lo=Math.max(gF+0.3,bskArcAt(f,a2));return [Math.max(0.2,Math.min(r,(hi-lo)*0.5/1.15)),lo];};
-      let ab=sp.a,best=-1e9,lo=0,rb=r;for(let o=-3.2;o<=3.21;o+=0.4){const a2=clamp(sp.a+o*20,f.a0+40,f.a1-40),[rr,l2]=fit(a2),sc=rr-0.06*Math.abs(o);if(sc>best){best=sc;ab=a2;rb=rr;lo=l2;}}
-      r=rb;const X2=ny?X:tx(ab),Z2=ny?tz(ab):Z,zc=clamp(sp.z,lo+r*1.15,hi-r*1.15);
-      HU.uHC.value[nh].set(X2,zc,Z2,r);HU.uHN.value[nh].set(nx,0,nz,i*1.37);nh++;
-      // cavity: open cup going into the wall (radius covers the brick-stepped cut), back plate with rubble texture
-      const cg=new THREE.CylinderGeometry(r*1.15,r*0.85,dep,14,1,true);cg.userData.tmp=1;const cav=new THREE.Mesh(cg,FCSB.cavM);
-      cav.quaternion.setFromUnitVectors(Yv,new THREE.Vector3(nx,0,nz));cav.position.set(X2-nx*dep/2,zc,Z2-nz*dep/2);S.add(cav);
-      const bg=new THREE.CircleGeometry(r*0.9,14);bg.userData.tmp=1;const back=new THREE.Mesh(bg,FCSB.backM);back.position.set(X2-nx*dep,zc,Z2-nz*dep);back.rotation.y=ry;S.add(back);
-      // broken bricks inside the cavity and jutting at the rim
-      for(let k=0;k<[0,2,5,9][sp.st];k++){const a=R()*6.283,rr=r*(0.6+R()*0.5),u=Math.cos(a)*rr,v=Math.sin(a)*rr*0.9,dd=R()*dep*0.9;
-        bricks.push(m4.compose(new THREE.Vector3(X2+(ny?0:u)-nx*dd,zc+v,Z2+(ny?u:0)-nz*dd),q.setFromEuler(e.set((R()-0.5)*0.6,ry+(R()-0.5)*0.8,(R()-0.5)*0.6)),new THREE.Vector3(0.5,0.25,0.3+R()*0.3)).clone());}}
-    // fallen bricks at the foot (more for deeper holes)
-    const g=GY((ny?f.c:sp.a)+nx*30,(ny?sp.a:f.c)+nz*30),nf=sp.st===1?2:sp.st===2?7:14;
-    for(let k=0;k<nf;k++){const u=(R()-0.5)*sp.s*1.6,o=0.3+R()*1.5;bricks.push(m4.compose(new THREE.Vector3(X+(ny?0:u)+nx*o,g+0.1+R()*0.12,Z+(ny?u:0)+nz*o),q.setFromEuler(e.set(R()*3,R()*3,R()*3)),new THREE.Vector3(0.45,0.22,0.25)).clone());}});
-  if(bricks.length){const im=new THREE.InstancedMesh(FCSB.cube,stoneMat(1,1,'#9c9280'),bricks.length);bricks.forEach((mm,i)=>im.setMatrixAt(i,mm));im.castShadow=true;S.add(im);}}
-  if(HU)HU.uHNn.value=nh;
+// per frame: push chunk stages into the data texture; a chunk that just broke drops a copy of itself (tumbles off, rests on the ground)
+function fcsShellView(dt){
+  fcsFallTick(dt);fcsDropTick(dt);
+  const P=FCSB;if(!P.shell||P.grp.parent!==world||P.sv===BSKN.ver)return;P.sv=BSKN.ver;
+  const D=P.tex.image.data;
+  for(const c of BSKN.C){const st=c.st|0;D[c.i*4]=st;if(st>=3&&P.prev[c.i]<3&&P.prev.ok)fcsShellFall(c);P.prev[c.i]=st;}
+  P.prev.ok=1;P.tex.needsUpdate=true;gl.shadowMap.needsUpdate=true;
 }
+function fcsShellFall(c){
+  const P=FCSB,g0=P.per.get(c.i);if(!g0)return;const f=BSKN.F[c.f],nx=f.ax==='y'?f.n:0,nz=f.ax==='y'?0:f.n;
+  const g=g0.clone();g.deleteAttribute('cd');g.computeBoundingBox();const ctr=g.boundingBox.getCenter(new THREE.Vector3());g.translate(-ctr.x,-ctr.y,-ctr.z);
+  const m=new THREE.Mesh(g,stoneMat(1,1,'#a49a88'));m.position.copy(ctr);m.castShadow=m.receiveShadow=true;P.grp.add(m);
+  const R=Math.random,sp=c.rim?1.5+R()*1.5:0.6+R()*1.6;
+  P.drop.push({m,vx:nx*sp+(R()-0.5)*0.6,vz:nz*sp+(R()-0.5)*0.6,vy:c.rim?1+R()*1.5:R()*1.2,wx:(R()-0.5)*5,wz:(R()-0.5)*5,h:(g.boundingBox.max.y-g.boundingBox.min.y)/2});
+  if(P.drop.length>160){const o=P.drop.shift();P.grp.remove(o.m);o.m.geometry.dispose();}
+  // a few small bits too
+  const n=2+(R()*3|0);for(let k=0;k<n;k++)P.fall.push({x:ctr.x+(R()-0.5),z:ctr.z+(R()-0.5),y:ctr.y,vx:nx*(1+R()*2)+(R()-0.5),vz:nz*(1+R()*2)+(R()-0.5),vy:R()*2,rx:R()*6,ry:R()*6,rz:R()*6,w:R()*8-4,s:0.18+R()*0.2});
+}
+function fcsDropTick(dt){
+  const P=FCSB;if(!P.drop||!P.drop.length)return;dt=Math.min(0.05,dt||0);if(!(dt>0))return;
+  for(const o of P.drop){if(o.rest)continue;const m=o.m;o.vy-=14*dt;m.position.x+=o.vx*dt;m.position.y+=o.vy*dt;m.position.z+=o.vz*dt;m.rotation.x+=o.wx*dt;m.rotation.z+=o.wz*dt;
+    const fl=TW(m.position.x,m.position.z)+o.h*0.6;
+    if(m.position.y<=fl&&o.vy<0){m.position.y=fl;if(Math.abs(o.vy)>3){o.vy*=-0.25;o.vx*=0.4;o.vz*=0.4;o.wx*=0.4;o.wz*=0.4;}else{o.rest=1;gl.shadowMap.needsUpdate=true;}}}
+}
+// Dev repair: clear dropped copies
+function fcsShellClear(){const P=FCSB;if(P.drop){for(const o of P.drop){P.grp.remove(o.m);o.m.geometry.dispose();}P.drop=[];}if(P.imC){P.nC=0;P.fall.length=0;P.imC.count=0;}}
 // รั้วไม้ (ชนิด 3 — js/02-fcs.js fences): เสาไม้ทุก ~1.8 ม. เอียงนิด ๆ + ราว 2 เส้นต่อช่วงเสา ตามพื้นเอียง • InstancedMesh 2 ชุด
 // จำ index เสา/ราวของแต่ละช่วงไว้ใน EFS3 (ลำดับช่วงเดียวกับ EFS.S ของ js/12-efs.js) → efsView ทำไหม้ดำ / พังหาย / เปลวไฟ
 const EFS3={sec:[],posts:null,rails:null,pm:[],rm:[],acc:0};

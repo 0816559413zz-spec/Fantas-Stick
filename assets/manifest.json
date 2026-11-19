@@ -424,6 +424,10 @@
   "mesh_water_dragon_dive": {
    "file": "vfx/water_dragon_dive.glb",
    "v": 1
+  },
+  "map_fcs_bridge": {
+   "file": "buildings/fcs_bridge.glb",
+   "v": 1
   }
  },
  "maps": {

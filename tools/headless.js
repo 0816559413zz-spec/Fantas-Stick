@@ -9,6 +9,7 @@
 // --profile [ชื่อ]: วัด CPU ช่วง console.profile()..profileEnd() ในสคริปต์ → พิมพ์ฟังก์ชันกินเวลาสุด (+ shots/<ชื่อ>.cpuprofile)
 // ตัวเลือก: --w 1280 --h 720 • --timeout 180 (วินาที) • --shot out.jpg (ถ่ายทั้งจอตอนจบ ลง shots/) • --quiet (ไม่พิมพ์ console log ของหน้า)
 // สคริปต์ (--js/--eval) = body ของ async function ในหน้า: return ค่าอะไรก็ได้ (พิมพ์เป็น JSON) •
+//   {files:{name:text}} -> shots/<name> (big text output, e.g. tools/fcs-bridge-export.js)
 //   ถ้าคืน {images:{ชื่อ:dataURL}} → เขียนเป็น shots/<ชื่อ>.jpg|png ให้ Claude เปิดด้วย Read
 // จบแล้วพิมพ์ error ของหน้า (window.onerror / console.error) ทั้งหมด • exit code 1 = สคริปต์ล้ม/หมดเวลา
 const {spawn}=require('child_process'),fs=require('fs'),path=require('path'),os=require('os'),net=require('net');
@@ -122,6 +123,7 @@ async function main(){
     if(A.game||A.js||A.eval)await ev(fs.readFileSync(path.join(__dirname,'hl-game.js'),'utf8'),false);
     if(A.js)body=fs.readFileSync(path.resolve(A.js),'utf8');else if(A.eval&&A.eval!==true)body=A.eval;
     if(body){const r=await ev(`(async()=>{${body}\n})()`);
+      if(r&&r.files){for(const k in r.files){const f=path.join(ROOT,'shots',String(k).replace(/[^\w.\-]/g,'_'));fs.mkdirSync(path.dirname(f),{recursive:true});fs.writeFileSync(f,String(r.files[k]));console.log('✓ shots/'+path.basename(f));}delete r.files;}   // {files:{name:text}} -> shots/<name>
       if(r&&r.images){for(const k in r.images){const f=saveImg(k,r.images[k]);if(f)console.log('✓ '+f);}delete r.images;}
       if(r!==undefined)console.log(JSON.stringify(r,null,1).slice(0,20000));}
     if(gif){

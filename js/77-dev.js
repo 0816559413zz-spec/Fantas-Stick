@@ -166,7 +166,7 @@ function devAct(a,k,v){
 }
 
 // ---- Destruction debug (user 2026-11-19): repair / collapse breakables at the aim point, a whole building, or the whole map ----
-// Covers: cover pieces + bridge parapet (BRK), houses (BLDG pieces), fences (EFS sections), bridge skin holes (BSKN), props (PROPS).
+// Covers: cover pieces + bridge parapet (BRK), houses (BLDG pieces), fences (EFS sections), bridge shell chunks (BSKN), props (PROPS).
 // part = everything within DEVD_R of the aim point • whole = the nearest structure (house / fence line / bridge / single cover piece)
 const DEVD_R=60;
 function devBrkFix(g,fix){if(fix){g.hp=g.max;if(g.st)brkApply(g,0);}else if(g.st<3)hitBrk(g,1e6,g.x,g.y);}
@@ -175,12 +175,10 @@ function devBldFix(b,fix,codes){
   b.pc.forEach((q,j)=>{for(let k=0;k<q.nc*q.nr;k++){const c=j*100+k;if((!codes||codes.has(c))&&bldAlive(q,k))hitBldPiece(b,c,1e6,'blast',b.o.x,b.o.y);}});
 }
 function devPropFix(o,fix){const D=PROPDEF[o.k];if(!D||!D.hp)return;if(fix){o.st=0;o.hp=D.hp;}else hitProp(o,1e6,null);}
-function devSkinFix(fix,x,y,all){
-  if(!BSKN.B)return 0;
-  if(fix){const n=BSKN.list.length;BSKN.list=all?[]:BSKN.list.filter(q=>{const f=BSKN.F[q.f],px=f.ax==='y'?f.c:q.a,py=f.ax==='y'?q.a:f.c;return Math.hypot(px-x,py-y)>DEVD_R*1.5;});BSKN.ver++;
-    if(all&&FCSB.imC){FCSB.nC=0;FCSB.fall.length=0;FCSB.imC.count=0;}return n-BSKN.list.length;}
-  if(all){let n=0;for(const f of BSKN.F)for(let a=f.a0+60;a<f.a1-40;a+=140){const px=f.ax==='y'?f.c+f.n*30:a,py=f.ax==='y'?a:f.c+f.n*30;for(let k=0;k<3;k++)bskEnv(px,py,60,50,null,'blast',3+(n%3));n++;}return n;}
-  for(let k=0;k<3;k++)bskEnv(x,y,70,50,null,'blast',4);return 1;
+function devSkinFix(fix,x,y,all){   // bridge shell chunks (BSKN.C): repair or knock off — all, or within 1.5x DEVD_R of the aim point
+  if(!BSKN.B)return 0;const R=all?null:DEVD_R*1.5;
+  if(fix){const n=bskRepair(x,y,R);if(all&&typeof fcsShellClear==='function')fcsShellClear();return n;}
+  let n=0;for(const c of BSKN.C)if(c.st<3&&(all||Math.hypot(c.px-x,c.py-y)<R)){bskHit(c,1e9,x,y);n++;}return n;
 }
 function devDestroy(fix,scope){
   if(!G)return;const x=INPUT.gx,y=INPUT.gy,R=DEVD_R;let n=0;

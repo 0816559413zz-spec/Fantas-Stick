@@ -188,7 +188,7 @@ windUltCast:504 windUltTick:507 windUltSweep:532 windFloatZ:540 windSnapP:543 wi
 §547 สกิล (ผู้ใช้ 2026-11-08: รีดีไซน์ทั้งชุด — id เดิมไว้ให้ชุดสกิล/tune/…
 W_WL:549 W_DR:555 W_VX:561 W_VO:567 W_FW:573 W_UL:583
 
-## js/10-net.js (200) — 
+## js/10-net.js (200) — เครือข่าย (PeerJS / WebRTC)
 PREFIX:4 NET:5 RC:9 TURN_SERVERS:12 ICE:13 PEER_OPT:14 TURN_URL:16 ICE_READY:18 JN:22 LAG:24 lagDo:25 hostSend:26 LOBBY:27 genCode:28 sendAll:29 NETD_KEYS:33 NETD:33 netDeltaReset:34 netDelta:35 NET_MAX:49 _netTE:49 netSendSnap:50 NETU:62 netUndelta:63 setStatus:69 hostGame:71 hostPeer:80 netConnect:100 joinWatch:111 joinFail:126 netLost:132 joinGame:147 joinPeer:158 clientOnData:173 leave:188 leaveRoom:190
 
 ## js/11-host.js (432) — ฝั่งโฮสต์: สถานะเกมทั้งหมดคำนวณที่นี่ (server-authoritative)
@@ -211,8 +211,8 @@ CIN:150 cityInterior:151 cinSlabOn:180 cinOpenPanel:182 cityIwHit:184 cityRampHi
 ## js/12-efs.js (78) — สภาพธาตุบนฉาก (Element Surfaces) — เฟส 1: ไฟบนรั้วไม้ (designs/element-surfaces.md)
 EFSV:9 EFS:10 efsLv:11 efsBuild:12 efsBreak:28 efsRepair:29 efsDist:30 efsHeat:31 efsProj:36 efsEnv:42 _efsHit:46 efsTick:47 efsSnap:67 efsParse:71 efsHostView:78
 
-## js/12-fcs-bridge.js (51) — Castle Strike bridge skin damage (user 2026-11-19): skill hits (damageEnv) leave damage o…
-BSKN:7 bskBuild:9 bskTop:15 bskArch:17 bskArcAt:23 bskEnv:28 bskSnap:42 bskParse:47
+## js/12-fcs-bridge.js (101) — Castle Strike bridge shell destruction (user 2026-11-19 "eggshell"): the bridge = solid c…
+BSKV:10 BSKN:11 bskBuild:14 bskGround:38 bskOutline:40 bskInPoly:53 bskCut:55 bskStage:60 bskSetSt:61 bskHit:65 bskEnv:74 bskSnap:83 bskParse:87 bskRepair:94 bskExport:96
 
 ## js/13-enemies.js (171) — ศัตรู (โหมด Co-op)
 spawnEnemy:2 setupWave:19 bossPhase:36 enemySlam:44 updateEnemies:55
@@ -345,12 +345,12 @@ CITY_STY:181 CITY_VEH:188 cityFacade:190 CITYK:203 _cZ:204 _cT:204 _cR:204 _cC:2
 §259 ตึกไฮไลต์ล้มทั้งตึก (ขั้น 7)
 _ctA:262 _ctB:262 _ctC:262 cityTowerPose:263 cityTowerAnim:271 cityTowerRubble:278 CAREA:292 cityAreaSync:293 cityViewSync:305 cityDebris:349 cityFX:358
 
-## js/28-fcs-build.js (325) — ภาพแผนที่ First Castle Strike (แบบ Basic: กล่อง/ทรงพื้นฐาน ยังไม่มีโมเดลจริง) + ภาพ/HUD โ…
-buildFcs:5 fcsBridge:37 FCSB:74 fcsParView:75 fcsSkinTex:88 fcsHoleMat:106 fcsParFall:138 fcsFallTick:145 fcsSkinView:157 EFS3:191 fcsFences:192 _efC:209 _efM:209 _efS:209 _efZ:209 efsView:210
-§236 ภาพโหมด (ลูกข่ายทุกเครื่องจาก snapshot M.sg)
-SGV3:237 sgClearView:238 sgViewBuild:239 SGVZR:258 sgBarrier:260 sgSync:274 sgDust:295 sgFx:296
-§301 HUD
-sgTop:302 sgHud:304
+## js/28-fcs-build.js (330) — ภาพแผนที่ First Castle Strike (แบบ Basic: กล่อง/ทรงพื้นฐาน ยังไม่มีโมเดลจริง) + ภาพ/HUD โ…
+buildFcs:5 fcsBridge:39 fcsRubbleMat:62 fcsCore:77 FCSB:103 fcsParView:104 FSH_V:118 FSH_B:119 fcsShellMat:121 fcsShellBuild:135 fcsParFall:150 fcsFallTick:157 fcsShellView:169 fcsShellFall:176 fcsDropTick:186 fcsShellClear:193 EFS3:196 fcsFences:197 _efC:214 _efM:214 _efS:214 _efZ:214 efsView:215
+§241 ภาพโหมด (ลูกข่ายทุกเครื่องจาก snapshot M.sg)
+SGV3:242 sgClearView:243 sgViewBuild:244 SGVZR:263 sgBarrier:265 sgSync:279 sgDust:300 sgFx:301
+§306 HUD
+sgTop:307 sgHud:309
 
 ## js/28-fcs-forest.js (202) — ป่าสนหมอก ในแผนที่ First Castle Strike (เฟส 1 = ช่อง x 0–28 ของ Map Editor) — ทำตามรูปอ้า…
 FF:7 FF_X1:8 FF_NS:9 ffGroundTex:11 ffParts:33 fcsForest:40 ffMerge:123 ffDetail:131 fcsRuin:158 fcsForestTick:192 FFC:202
@@ -836,7 +836,7 @@ surfSync:49 surfQuality:53
 SURF_VS:55 SURF_VS_BODY:56 SURF_FS:67 SURF_FS_BODY:68 surfOk:98 surfApply:99 surfScene:111
 §112 ปรับค่า (tune.html / F8)
 
-## js/77-dev.js (336) — Dev Mode: ทดสอบแมพ/สกิลในแมตช์จริง (ผู้ใช้ 2026-11-18)
+## js/77-dev.js (334) — Dev Mode: ทดสอบแมพ/สกิลในแมตช์จริง (ผู้ใช้ 2026-11-18)
 DEV:5 devOn:9 devOff:10 devSoloOk:11 devHold:12 devBroomOk:13 dvMe:14 devSave:15
 §16 hook จากโฮสต์: เรียกต้น hostTick (คืน dt ที่ปรับแล้ว • -1 = หยุดโลก)
 devDt:17 devTick:22 devGod:31 devFreeze:32
@@ -845,12 +845,12 @@ devFcToggle:34 devFcCam:41 devFcTop:47 devFcMe:51 devKey:67 devMount:78 DEV_BOTS
 §107 คำสั่งโฮสต์
 devTp:108 devSgPhase:112 devBotAdd:123 devAct:132
 §168 Destruction debug (user 2026-11-19): repair / collapse breakables at …
-DEVD_R:171 devBrkFix:172 devBldFix:173 devPropFix:177 devSkinFix:178 devDestroy:185
-§220 ภาพซ้อนไว้ดูแมพ: กล่องชน (OBS) + วงเขตยึด/จุดเกิดปลอดภัย
-_dvCyl:221 _dvMat:222 devOverlay:223
-§243 2D overlay map: spawn zones + capture zones + players (click = warp)
-_dvMap:244 devMapDraw:248
-§261 หน้าต่าง
-_dvPanel:262 _dvBtn:263 devToggle:266 dvBtn:271 dvRow:272 dvTog:273 dvSec:274 devRender:275 devPos:317
+DEVD_R:171 devBrkFix:172 devBldFix:173 devPropFix:177 devSkinFix:178 devDestroy:183
+§218 ภาพซ้อนไว้ดูแมพ: กล่องชน (OBS) + วงเขตยึด/จุดเกิดปลอดภัย
+_dvCyl:219 _dvMat:220 devOverlay:221
+§241 2D overlay map: spawn zones + capture zones + players (click = warp)
+_dvMap:242 devMapDraw:246
+§259 หน้าต่าง
+_dvPanel:260 _dvBtn:261 devToggle:264 dvBtn:269 dvRow:270 dvTog:271 dvSec:272 devRender:273 devPos:315
 
-(105 files, 30159 lines)
+(105 files, 30212 lines)
