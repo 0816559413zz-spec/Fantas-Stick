@@ -99,6 +99,13 @@ FXCODE.studio_darkness_scythe=(_x,_y,_h,args,instance)=>{
   const tailSheet=new THREE.Mesh(teGeo,stScyInk());tailSheet.frustumCulled=false;tailSheet.renderOrder=9;if(BA)root.add(tailSheet);
   // ละอองหมึกตอนควง (ผู้ใช้ 2026-11-19: ควงแบบโล่แต่มีละอองสาดออกมามากกว่า)
   const SPL=BA?36:0,splash=[...Array(SPL)].map(()=>{const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:embTex,color:0x000000,transparent:true,depthWrite:false,toneMapped:false}));sp.renderOrder=9;root.add(sp);return sp;});
+  // ตอนควงหลังฟัน (ผู้ใช้ 2026-11-19): ใช้ VFX ควงแบบท่าโล่ (จานหมึก + แผ่นเปลวรอบขอบ) + เส้นเปลวดำ 3 เส้นคนละทิศ ควงตามเคียวแล้วหาย
+  const spinG=new THREE.Group();spinG.rotation.x=-Math.PI/2;spinG.visible=false;if(BA)root.add(spinG);
+  const SPR=1.75*S,spinInk=BA&&typeof stDarkShieldInk==='function'?stDarkShieldInk(spinG,SPR):null,spinFl=BA&&typeof stDarkShieldFlames==='function'?stDarkShieldFlames(spinG,SPR):null;
+  const LSEG=48,spinLines=[0,1,2].map(n=>{const g=new THREE.BufferGeometry(),p=new Float32Array(LSEG*2*3),c=new Float32Array(LSEG*2*4),ix=[];for(let i=0;i<LSEG-1;i++){const a=i*2;ix.push(a,a+1,a+2,a+1,a+3,a+2);}
+    g.setAttribute('position',new THREE.BufferAttribute(p,3));g.setAttribute('color',new THREE.BufferAttribute(c,4));g.setIndex(ix);
+    const m=new THREE.Mesh(g,stScyInk());m.frustumCulled=false;m.renderOrder=12;const holder=new THREE.Group();holder.add(m);if(BA)root.add(holder);
+    holder.userData={p,c,g,tilt:[[0.35,0,0.1],[-0.3,0.9,-0.25],[0.15,2.1,0.4]][n],dir:n===1?-1:1,ph:n*2.1};return holder;});
   const hist=[];const _p=new THREE.Vector3(),MB=new THREE.Matrix4(),vX=new THREE.Vector3(),vY=new THREE.Vector3(),vZ=new THREE.Vector3(),QB=new THREE.Quaternion(),Qi=new THREE.Quaternion();
   const ez=(a,b,t)=>{t=Math.min(1,Math.max(0,(t-a)/(b-a)));return t*t*(3-2*t);};
   // ---------- ท่า BA รอบ 10 (ผู้ใช้ 2026-11-19) ----------
@@ -192,13 +199,23 @@ FXCODE.studio_darkness_scythe=(_x,_y,_h,args,instance)=>{
               let al=Math.pow(1-v,0.6);if(gap){const g0=cyc*0.9,g1=g0+0.22;if(v>g0&&v<g1)al=0;else if(v<g0)al*=Math.min(1,cyc*3);}
               tecol[c4+3]=je<0?0:al*Math.min(1,aE*1.5)*Math.min(1,tt/0.08);}}
           teGeo.attributes.position.needsUpdate=true;teGeo.attributes.color.needsUpdate=true;}
+        // จานควง + เปลวรอบขอบ + เส้นเปลว 3 เส้น (เฉพาะช่วงควง)
+        {const Ps=baPose(T),on=Ps.spinIdx>=0,k=on?Math.sin(Math.PI*Math.min(1,Ps.spinU)):0;
+          const yA=new THREE.Vector3(0,1,0).applyQuaternion(Ps.QB),cen=Ps.pos.clone().addScaledVector(yA,1.1*S);
+          spinG.visible=on;if(on){spinG.position.copy(cen);spinInk&&spinInk(T*28,k);spinFl&&spinFl(T*6,k);}else{spinInk&&spinInk(0,0);spinFl&&spinFl(0,0);}
+          for(const L of spinLines){const U=L.userData;L.visible=on;if(!on)continue;L.position.copy(cen);L.rotation.set(U.tilt[0],U.tilt[1]+U.dir*T*22,U.tilt[2]);
+            const appear=Math.min(1,Math.max(0,(Ps.spinU-U.ph*0.08)/0.25)),gone=1-Math.max(0,(Ps.spinU-0.55-U.ph*0.05)/0.35),al=Math.max(0,Math.min(appear,gone));
+            for(let i=0;i<LSEG;i++){const u=i/(LSEG-1),a=u*Math.PI*1.25,rr=SPR*(1.02+0.05*U.ph),fl=0.2*S*(0.55+0.9*Math.max(0,Math.sin(u*31-T*40+U.ph*3)));
+              U.p[i*6]=Math.cos(a)*rr;U.p[i*6+1]=0;U.p[i*6+2]=Math.sin(a)*rr;U.p[i*6+3]=Math.cos(a)*(rr+fl);U.p[i*6+4]=0.02;U.p[i*6+5]=Math.sin(a)*(rr+fl);
+              const w=Math.min(1,Math.sin(Math.PI*u)*1.6)*al;U.c[i*8+3]=w;U.c[i*8+7]=w*0.9;}
+            U.g.attributes.position.needsUpdate=true;U.g.attributes.color.needsUpdate=true;}}
         // ละอองตอนควง: เกิดที่ปลายใบตอนควง แล้วพุ่งออกจากตัวพร้อมตก
         {const kc=Math.floor(T/LOOP);for(let i=0;i<SPL;i++){const sp=splash[i],kk=i%NSW,b0=kc*LOOP+SW0+kk*GAP+WU+SWP+HOLD+SPIN*((i/NSW|0)/(SPL/NSW)),age=T-b0,life=0.5;
           if(age<0||age>life){sp.material.opacity=0;continue;}
           const Pb=baPose(b0),Mb=new THREE.Matrix4().compose(Pb.pos,Pb.QB,new THREE.Vector3(S,S,S)),[bx,by]=bladePt(0.7+0.3*rnd(i+300),0.3);_p.set(bx,by,0).applyMatrix4(Mb);
           const ox=_p.x,oz=_p.z,ol=Math.hypot(ox,oz)||1,vh=3.5+2.5*rnd(i+301);
           sp.position.set(_p.x+ox/ol*vh*age+(rnd(i+302)-0.5)*age*2,_p.y+(1.2+rnd(i+303))*age-4.5*age*age,_p.z+oz/ol*vh*age);
-          const sz=(0.1+0.1*rnd(i+304))*S*(1-age/life*0.5);sp.scale.set(sz,sz*1.3,1);sp.material.opacity=0.9*(1-age/life);}}
+          const sz=(0.2+0.18*rnd(i+304))*S*(1-age/life*0.5);sp.scale.set(sz,sz*1.3,1);sp.material.opacity=0.9*(1-age/life);}}
         for(let e=0;e<EMB;e++){const sp=embers[e],ph=(T*1.4+rnd(e+80))%1,j=Math.min(HH-1,Math.floor(HH*(0.55+0.4*rnd(e+81)))),k=Math.floor(rnd(e+82)*HK),i2=j*HK+k;
           const al=f2col[i2*4+3];sp.position.set(f2pos[i2*3]+Math.sin(T*3+e)*0.15*ph,f2pos[i2*3+1]+0.2+ph*1.1,f2pos[i2*3+2]+Math.cos(T*2+e)*0.15*ph);
           const sz=(0.12+0.12*rnd(e+83))*(1-ph*0.6);sp.scale.set(sz,sz*1.5,1);sp.material.opacity=Math.min(1,al*2)*Math.sin(ph*Math.PI);}}}

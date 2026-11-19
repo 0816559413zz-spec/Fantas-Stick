@@ -1,5 +1,6 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
 
+- 2026-11-19 — **Darkness เคียว BA รอบ 11:** ตอนควงหลังฟันใช้ VFX ควงของโล่ (จานหมึก + แผ่นเปลวรอบขอบ จาก `studio/darkness-shield.js`) + เส้นเปลวดำ 3 เส้นคนละทิศหมุนรอบเคียวแล้วหาย • ละอองหมึกใหญ่ขึ้น
 - 2026-11-19 — **Darkness เคียว BA รอบ 10 (พรีวิว):** ว่าง = เคียวตั้งแนวตั้งลอยวนรอบตัวช้า ๆ • ฟันแรกเริ่มจากฝั่งที่เคียวอยู่ (อยู่หลัง = ไปข้างที่ใกล้ก่อน) • ฟัน: เงื้อ 0.2 → กวาด 120° → ค้าง 0.3 → ควง 0.3 พร้อมเลื่อนไปจุดเตรียม มีละอองหมึกสาด → ฟันต่อจากฝั่งที่จบ สลับซ้ายขวา • ไม่ฟันเกิน 2 วิ กลับแนวตั้ง • พรีวิวลูป 8.4 วิ (ว่าง → ฟัน 3 → รอ 2 วิ → ว่าง)
 - 2026-11-19 — **Dev Mode 2D overlay map:** toggle in F2 panel; canvas bottom-left shows obstacles, siege spawn zones (red/blue), capture zones (cyan), players; click = warp.
 - 2026-11-19 — **Dev Mode solo modes + broom:** Mode section starts any mode alone (bots optional), matches don't auto-end, broom usable in every mode (toggle + F9). Dev-only hooks in js/11, js/14, js/38, js/66, js/77.
