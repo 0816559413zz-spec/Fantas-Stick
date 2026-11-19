@@ -1,5 +1,6 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
 
+- 2026-11-19 — **Dev Mode solo modes + broom:** Mode section starts any mode alone (bots optional), matches don't auto-end, broom usable in every mode (toggle + F9). Dev-only hooks in js/11, js/14, js/38, js/66, js/77.
 - 2026-11-19 — **Darkness เคียว BA รอบ 9:** ปลายหางมีแผ่นเปลวสูตรเดียวกับเปลวบนสันใบ (ลิ้นหยักวิ่ง + ลิ้นหลุดเป็นช่วง) ลุกจากขอบปลายหางไปทางท้าย
 - 2026-11-19 — **Darkness เคียว BA รอบ 8:** เคียวหันไปข้างหน้าตลอดตอนฟัน ด้ามชี้ออกจากตัวตามแนวรัศมี ปลายใบนำทางกวาด → หางด้ามเป็นผืนเทากว้าง ใบดำอยู่ขอบนอก
 - 2026-11-19 — **Workflow with Claude:** added rule — no progress narration between tool calls, final reply only.

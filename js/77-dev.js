@@ -3,10 +3,14 @@
 // F2 หน้าต่าง Dev • F3 กล้องอิสระ • F4 หยุดโลก • F6 วาร์ปไปจุดที่เล็ง • F7 คัดลอกพิกัดที่เล็ง • F8 สโลว์โมชัน
 // hook ในไฟล์อื่น: hostTick (js/11) • damage (js/12-buildings) • moveMul (js/03) • renderLoop (js/37) • pointerlock (js/31)
 const DEV={on:false,open:false,key:'',bp:-1,bl:1,bn:1,ov:null,ovK:'',k:{},fc:{on:false,x:0,y:30,z:0,spd:30}};
-DEV.cfg=Object.assign({god:0,nocd:0,ult:0,spd:1,fast:0,ts:1,pause:0,freeze:0,col:0,zon:0},(()=>{try{return JSON.parse(store('wd_devcfg')||'{}');}catch(e){return {};}})());
+DEV.cfg=Object.assign({god:0,nocd:0,ult:0,spd:1,fast:0,ts:1,pause:0,freeze:0,col:0,zon:0,broom:0,noend:1,sbots:1},(()=>{try{return JSON.parse(store('wd_devcfg')||'{}');}catch(e){return {};}})());
 DEV.cfg.pause=0;
 try{const q=new URLSearchParams(location.search).get('dev');if(q==='1')store('wd_dev','1');else if(q==='0')store('wd_dev','');DEV.on=store('wd_dev')==='1';}catch(e){}
 const devOn=()=>DEV.on&&NET.isHost&&!NET.online&&screen==='game'&&!!G&&G.ph!=='lobby';
+const devOff=()=>DEV.on&&NET.isHost&&!NET.online;   // dev + offline host (also true in lobby)
+const devSoloOk=()=>devOff()&&!!DEV.solo;   // set only while devStartMode runs
+const devHold=()=>devOff()&&!!DEV.cfg.noend&&!DEV.endNow&&G&&G.ph!=='lobby';   // block auto match end
+const devBroomOk=()=>devOff()&&!!DEV.cfg.broom;   // B works in every mode
 const dvMe=()=>G&&G.players&&G.players[NET.myId];
 const devSave=()=>store('wd_devcfg',JSON.stringify(DEV.cfg));
 // ---- hook จากโฮสต์: เรียกต้น hostTick (คืน dt ที่ปรับแล้ว • -1 = หยุดโลก) ----
@@ -47,7 +51,7 @@ function devFcTop(){   // มองจากบนทั้งแมพ
 function devFcMe(){const me=dvMe();if(!me)return;const F=DEV.fc;if(!F.on)devFcToggle(true);F.x=tx(me.x);F.z=tz(me.y)+8;F.y=GY(me.x,me.y)+9;pitch=0.7;yaw=-Math.PI/2;}
 addEventListener('keydown',e=>{
   if(!DEV.on)return;
-  if(/^F(2|3|4|6|7|8)$/.test(e.code)){if(devOn()){e.preventDefault();e.stopImmediatePropagation();if(!e.repeat)devKey(e.code);}return;}
+  if(/^F(2|3|4|6|7|8|9)$/.test(e.code)){if(devOn()){e.preventDefault();e.stopImmediatePropagation();if(!e.repeat)devKey(e.code);}return;}
   if(!(DEV.fc.on&&devOn()))return;
   DEV.k[e.code]=1;
   if(e.code==='Escape'||e.code==='Tab'||/^F\d+$/.test(e.code))return;
@@ -67,7 +71,31 @@ function devKey(c){
   else if(c==='F4'){C.pause=C.pause?0:1;toast(C.pause?'⏸ หยุดโลก (F4 เล่นต่อ)':'▶ เล่นต่อ');}
   else if(c==='F6'){devTp(INPUT.gx,INPUT.gy);}
   else if(c==='F7')devCopyAim();
+  else if(c==='F9')devMount();
   else if(c==='F8'){const L=[1,0.5,0.25,2];C.ts=L[(L.indexOf(C.ts)+1)%L.length];devSave();toast('⏱ ความเร็วโลก ×'+C.ts);}
+}
+// mount/dismount the broom now (turns the broom on for modes that ban it)
+function devMount(){
+  const p=dvMe();if(!p||!p.alive||p.wfo)return;
+  DEV.cfg.broom=1;devSave();p.fly=!p.fly;p.flyCd=0.8;
+  if(p.fly){p.vz=7;p.shieldOn=false;p.dash=0;emit({k:'mount',x:p.x,y:p.y,h:p.z,id:p.id});}
+  else emit({k:'dismount',x:p.x,y:p.y,h:p.z,id:p.id});
+  toast(p.fly?'🧹 บนไม้กวาด (F9 ลง)':'🧹 ลงจากไม้กวาด');
+}
+// bots needed per mode so every rule has opponents/teammates (bots may only stand still in quid/race/imp)
+const DEV_BOTS={coop:1,train:0,duel:1,ffa:3,tdm:5,quid:3,race:2,br:3,imp:3,siege:5};
+function devStartMode(mode,withBots){
+  const me=dvMe();if(!me||!MODES[mode])return;
+  DEV.solo=1;DEV.endNow=0;
+  try{
+    hostToLobby();removeBots(()=>true);
+    G.mode=mode;me.lteam=0;
+    if(withBots)for(let i=0;i<(DEV_BOTS[mode]||0);i++)if(!lobbyBotAdd(DEV.bp,DEV.bl,1))break;
+    hostStart();
+  }finally{DEV.solo=0;}
+  DEV.key='';
+  if(G.ph==='lobby')toast('เริ่มโหมด '+mode+' ไม่สำเร็จ');
+  else{toast('▶ '+MODES[mode].name+(withBots?' + บอท':' (เล่นคนเดียว)'));}
 }
 function devCell(x,y){return MAPID==='fcs'?'ช่อง ('+Math.floor(x/FCS_C)+','+Math.floor(y/FCS_C)+')':'';}
 function devCopyAim(){
@@ -123,6 +151,9 @@ function devAct(a,k,v){
   else if(a==='time'&&G.sg){G.timer=+v>0?G.timer+ +v:5;}
   else if(a==='win'&&G.sg){sgEnd(+v);}
   else if(a==='walls'&&G.sg){G.sg.bw=sgF().bw.map(b=>b.k==='gate'?-1:(+v?SGV.wallHp:0));sgWallsApply();}
+  else if(a==='mode')devStartMode(String(v),!!C.sbots);
+  else if(a==='mount')devMount();
+  else if(a==='endnow'){DEV.endNow=1;try{endMatch();}finally{DEV.endNow=0;}}
   else if(a==='bp')DEV.bp=+v;
   else if(a==='bl')DEV.bl=+v;
   else if(a==='bn')DEV.bn=+v;
@@ -172,11 +203,14 @@ function devRender(){
   if(!DEV.open||!devOn())return;
   const me=dvMe();if(!me)return;
   const C=DEV.cfg,sg=G.mode==='siege'&&G.sg?G.sg:null,F=sg?sgF():null,path=getKit(me.id).path;
-  const k=JSON.stringify([C,DEV.fc.on,G.mode,sg&&sg.ph,DEV.bp,DEV.bl,DEV.bn,path,me.team]);
+  const k=JSON.stringify([C,DEV.fc.on,G.mode,me.fly,sg&&sg.ph,DEV.bp,DEV.bl,DEV.bn,path,me.team]);
   if(k===DEV.key)return;DEV.key=k;
   const ok=PATHS.map((P,i)=>[i,P]).filter(q=>!q[1].off),nm=P=>P.n.replace('สาย','');
   const h=[];
   h.push('<h2>🛠 Dev Mode</h2><div id="devPos"></div>');
+  h.push(dvSec('Mode (เริ่มใหม่ทันที เล่นคนเดียว)'),'<div class="trg">'+Object.keys(MODES).map(m=>dvBtn('mode',MODES[m].name,{v:m,on:G.mode===m})).join('')+'</div>');
+  h.push(dvTog(C.sbots,'sbots','🤖 เติมบอทตอนเริ่มโหมด'),dvTog(C.noend,'noend','♾️ แมตช์ไม่จบเอง'),'<div class="trn">'+dvBtn('endnow','🏁 จบแมตช์ตอนนี้')+'</div>');
+  h.push(dvSec('ไม้กวาด'),dvTog(C.broom,'broom','🧹 ใช้ไม้กวาดได้ทุกโหมด (กด B)'),dvBtn('mount',me.fly?'⬇ ลงจากไม้กวาด [F9]':'🧹 ขึ้นไม้กวาด [F9]').replace('<button','<button class="trw"'));
   h.push(dvSec('เปลี่ยนสาย (ทันที ไม่ต้องรอแมตช์ใหม่)'),'<div class="trg">'+ok.map(q=>dvBtn('kit',q[1].ic+' '+nm(q[1]),{v:q[0],on:path===q[0]})).join('')+'</div>',dvBtn('creator','🪄 เลือกคาถาละเอียด').replace('<button','<button class="trw"'));
   h.push(dvSec('โกง'),dvTog(C.god,'god','🛡️ อมตะ'),dvTog(C.nocd,'nocd','⏱️ ไม่มีคูลดาวน์'),dvTog(C.ult,'ult','🌟 อัลติเต็มตลอด'),dvTog(C.fast,'fast','⚡ เกิดใหม่ไว 0.5 วิ'));
   h.push(dvRow('set','spd',[[1,'เดิน ×1'],[1.5,'×1.5'],[2,'×2'],[3,'×3']],C.spd));
