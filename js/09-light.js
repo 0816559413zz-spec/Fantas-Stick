@@ -481,12 +481,12 @@ const LT_VS_S=defSpell(LIGHTP,{id:'veiledshard',v:{t:5,r:300,dmg:6,tick:0.5,slow
   d:'วางพายุใบมีดคริสตัลลงพื้นตรงเพื่อนที่ Bond อยู่ (ไม่มี Bond = ที่ตัวเรา) • หลังผลึกตก วงอยู่กับที่ 5 วิ รัศมี 300 • ศัตรูในวงโดน 6 ดาเมจทุก 0.5 วิ + ช้า 30%',
   cast(p,S){const a=lightAlly(p),c=a||p;p.lgVeil={x:c.x,y:c.y,h:c.z||0,wind:LT_VS_RELEASE+LT_VS_TRAVEL,t:S.v.t,k:0};emit({k:'efx',z:'lgveil',x:Math.round(c.x),y:Math.round(c.y),h:c.z||0,r:S.v.r,id:p.id,t:a?a.id:undefined});}});
 const LT_VS=LT_VS_S.v;
-const LT_UL=defSpell(LIGHTP,{id:'radiantsovereign',v:{t:8,shield:100,dr:0.3,cast:0.45,hover:3.08,
+const LT_UL=defSpell(LIGHTP,{id:'radiantsovereign',v:{t:8,shield:75,dr:0.3,cast:0.45,hover:3.08,
   baRange:800,baDmg:12,baTick:0.3,baHold:1.5,baRest:0.62,baWindup:0.18,width:12,
   finishCast:2,finishRise:2.65,finishRelease:1,finishDelay:0.8,finishDissolve:1,finishRange:900,finishR:300,finishDmg:80,finishSlow:0.4,finishSlowT:2},
   vn:{t:'อยู่ (วิ)',shield:'คู่หู • โล่',dr:'คู่หู • ลดดาเมจ',baDmg:'ลำแสงแขน • ดาเมจต่อฮิต',finishDmg:'ท่าสุดท้าย • ดาเมจ'},
   role:'ult',ult:true,n:'Radiant Sovereign',ic:'👑',cd:0,
-  d:'ลิงก์คู่หูแล้วแปลงร่างเหนือหัวเขา 8 วิ • คู่หูได้โล่ 100 และลดดาเมจ 30% • คลิกซ้ายค้างยิงลำแสงสลับแขน • กดอัลติซ้ำเพื่อชาร์จ 2 วิ แล้วยิงลำแสงจากอก 1 วิ • จุดกระทบระเบิดหลังยิงจบ 0.8 วิ โดน 80 ดาเมจและช้า 40% 2 วิ จากนั้นสลายร่าง 1 วิแล้ววาร์ปกลับจุดเดิม',
+  d:'ลิงก์คู่หูแล้วแปลงร่างเหนือหัวเขา 8 วิ • คู่หูได้โล่ 75 และลดดาเมจ 30% • คลิกซ้ายค้างยิงลำแสงสลับแขน • กดอัลติซ้ำเพื่อชาร์จ 2 วิ แล้วยิงลำแสงจากอก 1 วิ • จุดกระทบระเบิดหลังยิงจบ 0.8 วิ โดน 80 ดาเมจและช้า 40% 2 วิ จากนั้นสลายร่าง 1 วิแล้ววาร์ปกลับจุดเดิม',
   cast(p,S){
     const a=lightAlly(p);
     if(!a||a.team!==p.team||a.lgFrom!==p.id){

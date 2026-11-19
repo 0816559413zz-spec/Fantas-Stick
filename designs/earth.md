@@ -264,7 +264,7 @@
 - **Shield HP: 300**, intended to be the **highest shield health among the classes**.
 - Shield HP **regenerates slowly while the shield is not being used**. Exact regeneration delay/rate **OPEN**.
 - When shield HP reaches **0**, the Stand **immediately breaks/disappears**, without a drawn-out break animation.
-- The Stand remains **unavailable for 15 seconds**.
+- The Stand remains **unavailable for 10 seconds**.
 - While broken:
   - No Stand shield.
   - Basic Attack changes to small rock projectiles.
@@ -560,7 +560,7 @@
 ## 12. Design state — explicitly separate locked from unfinished
 
 ### Locked / user-accepted
-- **Shield:** frontal Stand barrier, **300 HP**, slow regen when not used; on zero Stand disappears **15 sec**.
+- **Shield:** frontal Stand barrier, **300 HP**, slow regen when not used; on zero Stand disappears **10 sec**.
 - **Dash:** Stand Rampage when available; Rock Boost Escape when broken.
 - **Skill 1:** Stonebreaker rectangular slab, center Stand punch, fast straight shot, first-hit knockback, bonus terrain collision stun **2 sec**, disabled during Stand break.
 - **Skill 2:** Mud Swamp small enemy-only 5-second area, **0.5-sec telegraph**, 50% slow, blocks Dash/mobility, no damage, usable during Stand break.

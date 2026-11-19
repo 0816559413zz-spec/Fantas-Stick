@@ -337,7 +337,12 @@ function foesOf(team){
   if(G.nature)for(const o of G.nature)if(o.isM&&o.team!==team&&natureLive(o)&&G.time>=o.ready)out.push(o);
   return out;
 }
-function breakShield(p){if(p.pathIdx===EARTH){if(!(p.stdB>0))earthBreak(p);return;}p.shieldOn=false;p.shieldE=0;p.shieldBroken=1.5;emit({k:'sbreak',x:p.x,y:p.y,h:p.z+1.3,id:p.id});}
+function breakShield(p){
+  if(p.pathIdx===EARTH){if(!(p.stdB>0))earthBreak(p);return;}
+  if(p.pathIdx===WINDP)p.wbw=undefined;
+  p.shieldOn=false;p.shieldE=0;p.shieldBroken=SHIELD_BREAK_LOCK;
+  emit({k:'sbreak',x:p.x,y:p.y,h:p.z+1.3,id:p.id});
+}
 // อัลติ (ผู้ใช้ 2026-10-22): ชาร์จช้าลง 30% ทุกสาย (ULT_RATE) + ระหว่างอัลติยังทำงานอยู่ไม่ได้ชาร์จเพิ่ม (นับใหม่หลังอัลติจบ)
 const ULT_RATE=0.7;
 function ultActive(p){return p.colos>0||p.god>0||!!p.wr||p.mirror>0||!!p.lgUlt||p.pathIdx===NATUREP&&naturePlants(p,'tree').length>0;}
@@ -378,7 +383,7 @@ function damage(t,amt,srcId,kind,noFlash=false){
   if(!t.alive||t.downed)return;
   if(t.inv>0&&kind!=='burn')return;
   if(G.ball&&G.ball.holder===t.id&&kind!=='burn'&&kind!=='zone')quidDrop(t);
-  if(t.stS&&kind!=='burn'){t.stS.abs+=amt;emit({k:'efx',z:'sthit',x:Math.round(t.x),y:Math.round(t.y),h:t.z+1.2,sx:src?Math.round(src.x):undefined,sy:src?Math.round(src.y):undefined,n:Math.round(amt),id:t.id});if(t.stS.abs>90)stormShieldBlast(t);return;}
+  if(t.stS&&kind!=='burn'){t.stS.abs+=amt;emit({k:'efx',z:'sthit',x:Math.round(t.x),y:Math.round(t.y),h:t.z+1.2,sx:src?Math.round(src.x):undefined,sy:src?Math.round(src.y):undefined,n:Math.round(amt),id:t.id});if(t.stS.abs>90)stormShieldBlast(t,true);return;}
   if(t.shieldOn&&(kind==='melee'||kind==='aoe')&&shieldFaces(t,src?src.x:null,src?src.y:null,src&&src.z!=null?src.z+1.2:null)){
     pyroHeatGain(t,amt);pyroBlazeAct(t);if(t.pathIdx===EARTH)earthShHit(t,amt);else{t.shieldE-=amt*(lgOn(t)?lightShieldGauge(t):PBASIC[t.pathIdx|0]?.shMul||1.5);t.shBlk=(t.shBlk|0)+1;}emit({k:'block',x:t.x,y:t.y,h:t.z+1.2,id:t.id});
     {const B=PBASIC[t.pathIdx|0];if(B&&B.onBlock)B.onBlock(t);}

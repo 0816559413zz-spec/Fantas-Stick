@@ -86,10 +86,13 @@ const _navFoe=p=>{let b=null,bd=1e18;for(const q of plist()){if(q===p||!q.alive|
 // สมองบอท 1 เฟรม: สมองต่อสู้เดิม + หาทาง (เรียกจาก hostTick)
 function botThink(p,dt){
   if(G.mode==='siege'&&p.ai&&G.sg&&navOn()){sgBotThink(p,dt);return;}   // บุกปราสาท: เดินตามภารกิจ (js/15-siege)
-  if(!navOn()){(p.ai?aiBot:botBrain)(p,dt);return;}
-  const c0=Object.assign({},p.inp.c),tg=p.ai?null:_navFoe(p);
-  if(p.ai)aiBot(p,dt);else botBrain(p,dt,tg);
-  botNav(p,dt,c0,p.ai?p.ai.tg:tg);
+  if(!navOn())(p.ai?aiBot:botBrain)(p,dt);
+  else{
+    const c0=Object.assign({},p.inp.c),tg=p.ai?null:_navFoe(p);
+    if(p.ai)aiBot(p,dt);else botBrain(p,dt,tg);
+    botNav(p,dt,c0,p.ai?p.ai.tg:tg);
+  }
+  if(p.pathIdx===LIGHTP&&p.ai)botLightSupport(p);
 }
 function botNav(p,dt,c0,tg){
   if(!p.alive||p.downed||!tg||p.wult||p.natureHook)return;

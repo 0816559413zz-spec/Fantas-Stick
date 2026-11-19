@@ -1053,3 +1053,18 @@ Latest only — full history in `notes/CHANGELOG.md` (add new entries there too)
 - 2026-10-19 — Creator: face/wand panel (`.cr12`) is now hidden on steps 3-4 (it overlapped the house info — old bug); step tabs move under the title below 900 px wide; **drag to rotate the character** in the creator (`STAGE.rotY/rotV` with inertia, handler in `js/39-menu.js`, cursor grab). Fixed a split regression: spell/path icons in DOM were 404 because `--u:url(icons/…)` resolved against `css/` — `icoURL` now returns an absolute URL (`ICOBASE`).
 - 2026-10-19 — Code split: `index.html` (one 780 KB file) → `index.html` + `css/game.css` + 41 `js/` files loaded as one module; `CODEMAP.md` + `tools/codemap.js` + `tools/check.js`; SW network-first for js/css; removed dead code (old kit-UI CSS, `kitSpells`, `ovc`, `RINGS`, unused `ur`); HANDOFF slimmed (feature notes → `notes/`). No gameplay change, no protocol change. Tested: all 9 modes 200 ticks + every path's 4 spells and ult in training, no console errors.
 - 2026-10-19 — Renamed the game to **Fantas Stick**; magic title font `--fm` (Grenze Gotisch).
+
+
+## งานในเครื่องที่คืนหลัง pull 2026-11-19
+
+**บอทไฟ 2026-11-18:** Inferno Nova ใช้ระยะและความสูงตามตัวสกิล ต่อ Ignition Snap หลังสะสม Burning ถึง 5 ชั้นขณะ Heat เต็ม หรือกดเร็วขึ้นเมื่อดาเมจพอปิดเป้า ทดสอบห้องฝึกและสมองที่ใช้ในเทสต์บาลานซ์
+
+**HUD โล่ 2026-11-18:** กลับไปใช้ป้ายเดิมระหว่างรอออกแบบ HUD เกจฟื้น Stand อิงเวลาจริงจากจูนเกม
+
+**Radiant Sovereign 2026-11-18:** ผู้ใช้ปรับโล่คู่หูจาก 100 เป็น 75 HP โดยยังลดดาเมจ 30% ห้องฝึกจำลองคู่หูเดินส่ายและใช้เป้านิ่ง ลำแขนโดนเป้าหลัก 36 ดาเมจเมื่อถือทิศเดิม เทียบกับ 180 เมื่อคู่หูยืนนิ่งหรือเมื่อสคริปต์ปรับเล็งตามตลอด
+
+**บอท Light 2v2 2026-11-18:** เพิ่มการวาร์ป Light Step หาคู่หูที่โดนกดดันและวาง Sanctum ให้ครอบทางถอย เทียบชุดสังเวียนเดิม 8 รอบ วาร์ปหาคู่หู 0 → 7 ครั้ง ฮีลคู่หูจริง 1 → 5 รอบ ผลชนะ 7/8 → 6/8
+
+**โล่แตก 2026-11-18:** โล่ปกติล็อก 5 วิแล้วเริ่มฟื้นเกจ สายฟ้าที่โล่แตกจากดาเมจใช้คูลดาวน์ 5 วิ ส่วนระเบิดเองหรือหมดเวลาใช้คูลดาวน์เดิม Stand สายดินกลับมาหลัง 10 วิ พร้อมโล่เต็ม 300 HP
+
+**Crystal Aegis 2026-11-18:** เทสต์ห้องฝึกบน `c3e1153` แล้ว 0 ผลึกกางไม่ได้, 1–3 ผลึกบล็อกด้านหน้า ±60° เท่ากัน, โดนด้านหลังหัก HP ปกติ, บล็อก 30 ดาเมจใช้เกจ 25 / 16.67 / 10, กระสุนเข้าจากด้านหน้าให้ผลตรงกัน, กางไว้กินเกจ 3 แต้ม/วิ และฟื้น 4.05 แต้ม/วิ ภาพโล่กว้างขึ้นตามผลึก ข้อต่อไปลอง 2v2 ออนไลน์กับคนจริง

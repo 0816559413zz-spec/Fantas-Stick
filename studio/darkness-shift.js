@@ -139,108 +139,288 @@ function stDarkShiftCloakTrails(root){
   };
 }
 
-function stDarkChargeScythe(root,scythe,distanceAt,launch,impact){
-  const edge=scythe.getObjectByName('blade-edge'),blade=scythe.getObjectByName('blade-top');
-  if(!edge?.isMesh||!blade?.isMesh)return ()=>{};
-  edge.material=edge.material.clone();blade.material=blade.material.clone();
-  const bladeColor=blade.material.color.clone(),bruise=new THREE.Color(0x494053);
-  edge.material.emissive.setHex(0x827298);
-  edge.material.emissiveIntensity=0;
-  const vertices=edge.geometry.attributes.position;
-  edge.geometry.computeBoundingBox();
-  const bounds=edge.geometry.boundingBox;
-  const contact=Array.from({length:7},(_,i)=>{
-    const x=lerp(bounds.min.x,bounds.max.x,.13+i*.125),point=new THREE.Vector3();
-    let best=Infinity;
-    for(let j=0;j<vertices.count;j++){
-      const cost=Math.abs(vertices.getX(j)-x)*5+vertices.getY(j)-bounds.min.y;
-      if(cost>=best)continue;
-      best=cost;point.fromBufferAttribute(vertices,j);
-    }
-    return point;
-  });
-  const count=34;
-  const sparks=new THREE.InstancedMesh(new THREE.OctahedronGeometry(1,0),
-    new THREE.MeshBasicMaterial({transparent:true,opacity:.93,depthWrite:false,toneMapped:false}),count);
-  const shades=[0x34283f,0x513a63,0x79608d,0xa08bb1].map(color=>new THREE.Color(color));
-  for(let i=0;i<count;i++)sparks.setColorAt(i,shades[i%shades.length]);
-  sparks.name='Quick Dash scythe infusion';sparks.frustumCulled=false;sparks.count=0;sparks.renderOrder=9;
-  root.add(sparks);
-  const particles=Array.from({length:count},(_,i)=>{
-    const seed=i*.618034%1,angle=i*2.39996,born=launch+.012+i/count*.185;
-    const radius=1.34+seed*1.44;
-    return {born,angle,seed,hit:impact+(seed-.5)*.09,
-      origin:new THREE.Vector3(Math.cos(angle)*radius,.68+((i*.37)%1)*2.75,
-        distanceAt(born)+Math.sin(angle)*radius)};
-  });
-  const focus=new THREE.Group();
-  root.add(focus);
-  const shock=stDarkPressure(focus);
-  const point=new THREE.Vector3(),flow=new THREE.Vector3(),up=new THREE.Vector3(0,1,0);
-  const viewPoint=new THREE.Vector3(),rootInverse=new THREE.Matrix4();
-  const transform=new THREE.Matrix4(),piece=new THREE.Object3D();
-  return t=>{
-    const glow=stDarkEase(impact-.018,impact+.056,t);
-    const pulse=glow*(.93+.07*Math.sin((t-impact)*26));
-    edge.material.emissiveIntensity=.75*pulse;
-    blade.material.color.copy(bladeColor).lerp(bruise,pulse*.76);
-    const age=t-impact,flash=stDarkEase(-.017,.022,age)*(1-stDarkEase(.028,.19,age));
-    let active=0;
-    if(t>=launch&&t<=impact+.19){
-      edge.updateWorldMatrix(true,false);
-      rootInverse.copy(root.matrixWorld).invert();
-      transform.multiplyMatrices(rootInverse,edge.matrixWorld);
-      focus.position.copy(contact[3]).applyMatrix4(transform);
-      cam.getWorldPosition(viewPoint).applyMatrix4(rootInverse).sub(focus.position);
-      focus.quaternion.setFromUnitVectors(flow.set(0,0,1),viewPoint.normalize());
-      for(let i=0;i<particles.length;i++){
-        const {born,angle,seed,hit,origin}=particles[i];
-        const u=(t-born)/(hit-born);
-        if(u<0||u>=1)continue;
-        const pull=u*u*(2-u),arc=Math.sin(Math.PI*u)*(.27+seed*.36);
-        point.copy(contact[i%contact.length]).applyMatrix4(transform);
-        piece.position.copy(origin).lerp(point,pull);
-        piece.position.x-=Math.sin(angle)*arc;
-        piece.position.y+=Math.cos(angle)*arc;
-        piece.position.z+=Math.cos(angle)*arc*.55;
-        piece.quaternion.setFromUnitVectors(up,flow.copy(point).sub(piece.position).normalize());
-        const size=(.048+seed*.048)*stDarkEase(0,.20,u)*(1-stDarkEase(.87,1,u));
-        piece.scale.set(size,size*(1.4+3.6*pull),size*.62);
-        piece.updateMatrix();sparks.setMatrixAt(active++,piece.matrix);
+function stDarkShiftBladeFlame(scythe){
+  // Follow the same exported spine as the scythe's idle and BA previews.
+  const rows=41,steps=6,geometry=new THREE.BufferGeometry();
+  const positions=new Float32Array(rows*steps*3),colors=new Float32Array(rows*steps*4),indices=[];
+  for(let i=0;i<rows-1;i++)for(let j=0;j<steps-1;j++){
+    const a=i*steps+j,b=a+steps;
+    indices.push(a,b,a+1,a+1,b,b+1);
+  }
+  geometry.setAttribute('position',new THREE.BufferAttribute(positions,3));
+  geometry.setAttribute('color',new THREE.BufferAttribute(colors,4));
+  geometry.setIndex(indices);
+  const flame=new THREE.Mesh(geometry,stScyInk());
+  flame.name='Shift scythe spine flame';flame.frustumCulled=false;flame.renderOrder=8;
+  scythe.add(flame);
+  return (t,burn,drag,opacity=1)=>{
+    const spine=stScyLines?.spine,edge=stScyLines?.edge;
+    flame.visible=!!spine&&opacity>.01;
+    if(!flame.visible)return;
+    for(let i=0;i<rows;i++){
+      const u=i/(rows-1),[x,y]=spine[i],cut=edge[i];
+      const flicker=Math.max(0,.49*Math.sin(u*33-t*17)+.30*Math.sin(u*59+t*9)+.26);
+      const taper=Math.sin(Math.PI*u)**.55;
+      const height=(.042+flicker*(.12+.19*burn))*taper;
+      const dx=x-cut[0],dy=y-cut[1],width=Math.hypot(dx,dy)||1;
+      for(let j=0;j<steps;j++){
+        const v=j/(steps-1),rise=height*v,bend=rise*v;
+        const index=i*steps+j,a=index*3;
+        positions[a]=x+rise*dx/width+bend*(.56+.44*Math.sin(u*17-t*12));
+        positions[a+1]=y+rise*dy/width;
+        positions[a+2]=.008+bend*(.35*Math.sin(u*13-t*10)-2.1*drag);
+        colors[index*4+3]=opacity*(1-v)**.56;
       }
     }
-    shock(.34+.80*stDarkEase(0,.17,age),flash*.65,t*9);
-    sparks.count=active;sparks.instanceMatrix.needsUpdate=true;
+    geometry.attributes.position.needsUpdate=true;
+    geometry.attributes.color.needsUpdate=true;
   };
 }
 
-function stDarkQuickDash(root,caster,scythe,look){
-  const ease=stDarkEase,launch=.22,arrival=.45,impact=.55,range=3.45;
+function stDarkChargedBlade(blade){
+  // Draw a sleeve from the authored outline, leaving the original blade face visible.
+  const rows=41,columns=4,positions=new Float32Array(2*rows*columns*3);
+  const colors=new Float32Array(2*rows*columns*4),indices=[];
+  for(let side=0;side<2;side++)for(let i=0;i<rows-1;i++)for(let j=0;j<columns-1;j++){
+    const a=(side*rows+i)*columns+j,b=a+columns;
+    indices.push(a,b,a+1,a+1,b,b+1);
+  }
+  const geometry=new THREE.BufferGeometry();
+  geometry.setAttribute('position',new THREE.BufferAttribute(positions,3));
+  geometry.setAttribute('color',new THREE.BufferAttribute(colors,4));
+  geometry.setIndex(indices);
+  const material=stScyInk();material.color.setHex(0xffffff);
+  const shell=new THREE.Mesh(geometry,material);
+  shell.name='Quick Dash second blade outline';shell.frustumCulled=false;shell.renderOrder=10;blade.add(shell);
+  const widths=[-.30,.15,.76,1.08],alphas=[.32,.97,.90,0];
+  return (t,strength,flash)=>{
+    shell.visible=!!stScyLines&&strength>.01;
+    if(!shell.visible)return;
+    for(let side=0;side<2;side++)for(let i=0;i<rows;i++){
+      const u=i/(rows-1),line=side?stScyLines.edge:stScyLines.spine;
+      const [x,y]=line[i],a=line[Math.max(0,i-1)],b=line[Math.min(rows-1,i+1)];
+      const dx=b[0]-a[0],dy=b[1]-a[1],length=Math.hypot(dx,dy)||1;
+      const sign=side?-1:1,tip=stDarkEase(.80,1,u);
+      const flow=.55*Math.sin(u*27-t*16)+.30*Math.sin(u*62-t*25);
+      const width=(.072+.105*strength+.055*tip+.035*flow)*stDarkEase(0,.12,u);
+      const seam=.08+.12*flash+.06*stDarkEase(.28,.78,flow);
+      for(let j=0;j<columns;j++){
+        const index=(side*rows+i)*columns+j,p=index*3,c=index*4,d=widths[j]*width;
+        positions[p]=x+(-sign*dy+dx*tip*.85)*d/length;
+        positions[p+1]=y+(sign*dx+dy*tip*.85)*d/length;
+        positions[p+2]=j===0?.036:.013+.045*tip;
+        const tint=j===2?seam:.008+(j===1?.024*flash:0);
+        colors[c]=tint*.84;colors[c+1]=tint*.77;colors[c+2]=tint;
+        colors[c+3]=alphas[j]*strength*stDarkEase(0,.095,u);
+      }
+    }
+    geometry.attributes.position.needsUpdate=true;geometry.attributes.color.needsUpdate=true;
+  };
+}
+
+function stDarkChargeScythe(root,blade,launch,impact){
+  const count=144,burstCount=36,traces=3;
+  const sparks=new THREE.InstancedMesh(new THREE.OctahedronGeometry(1,0),
+    new THREE.MeshBasicMaterial({transparent:true,opacity:.97,depthWrite:false,toneMapped:false}),count*traces+burstCount);
+  const shades=[0x09090c,0x181720,0x34313b,0x76717e].map(color=>new THREE.Color(color));
+  sparks.setColorAt(0,shades[0]);
+  sparks.name='Quick Dash scythe infusion';sparks.frustumCulled=false;sparks.count=0;sparks.renderOrder=9;
+  root.add(sparks);
+  const particles=Array.from({length:count},(_,i)=>{
+    const seed=i*.618034%1,lane=i%3;
+    return {seed,lane,born:launch-.014+i/count*.282,hit:impact-.077+seed*.079,
+      angle:lane*2.094+i/count*3.80+(seed-.5)*.46,seat:.09+((i*.75488)%1)*.89};
+  });
+  const focus=new THREE.Group();
+  root.add(focus);
+  const outline=stDarkChargedBlade(blade);
+  const starShape=new THREE.Shape();
+  starShape.moveTo(0,1);
+  starShape.quadraticCurveTo(.10,.13,.83,0);
+  starShape.quadraticCurveTo(.10,-.13,0,-1);
+  starShape.quadraticCurveTo(-.10,-.13,-.83,0);
+  starShape.quadraticCurveTo(-.10,.13,0,1);
+  starShape.closePath();
+  const star=new THREE.Mesh(new THREE.ShapeGeometry(starShape),new THREE.MeshBasicMaterial({
+    color:new THREE.Color(2.8,2.8,2.8),side:THREE.DoubleSide,transparent:true,depthWrite:false,toneMapped:false
+  }));
+  star.name='Quick Dash blade wink';star.renderOrder=13;focus.add(star);
+  const halo=new THREE.Mesh(new THREE.PlaneGeometry(2,2),new THREE.ShaderMaterial({
+    uniforms:{intensity:{value:0}},transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,toneMapped:false,
+    vertexShader:`varying vec2 v; void main(){v=uv*2.0-1.0;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}`,
+    fragmentShader:`uniform float intensity; varying vec2 v; void main(){
+      float r=length(v);float glow=exp(-9.0*r*r)*(1.0-smoothstep(.60,1.0,r));
+      gl_FragColor=vec4(vec3(1.15,1.15,1.18),glow*intensity);
+    }`
+  }));
+  halo.renderOrder=12;focus.add(halo);
+  const sweepPoints=new THREE.BufferAttribute(new Float32Array(12*3),3);
+  const sweepGeometry=new THREE.BufferGeometry();sweepGeometry.setAttribute('position',sweepPoints);
+  const sweep=new THREE.Line(sweepGeometry,new THREE.LineBasicMaterial({
+    color:new THREE.Color(1.55,1.55,1.62),transparent:true,depthWrite:false,toneMapped:false
+  }));
+  sweep.frustumCulled=false;sweep.renderOrder=12;root.add(sweep);
+  const point=new THREE.Vector3(),trail=new THREE.Vector3(),flow=new THREE.Vector3(),up=new THREE.Vector3(0,1,0);
+  const viewPoint=new THREE.Vector3(),rootInverse=new THREE.Matrix4();
+  const transform=new THREE.Matrix4(),piece=new THREE.Object3D();
+  const lanes=Array.from({length:3},(_,lane)=>({lane,seed:.65,angle:lane*Math.PI*2/3,seat:.20+lane*.27}));
+  const strokeSteps=22,strokePositions=new Float32Array(lanes.length*strokeSteps*6);
+  const strokeColors=new Float32Array(lanes.length*strokeSteps*8),strokeIndices=[];
+  for(let lane=0;lane<lanes.length;lane++)for(let i=0;i<strokeSteps-1;i++){
+    const a=2*(lane*strokeSteps+i);
+    strokeIndices.push(a,a+1,a+2,a+1,a+3,a+2);
+  }
+  const strokeGeometry=new THREE.BufferGeometry();
+  strokeGeometry.setAttribute('position',new THREE.BufferAttribute(strokePositions,3));
+  strokeGeometry.setAttribute('color',new THREE.BufferAttribute(strokeColors,4));
+  strokeGeometry.setIndex(strokeIndices);
+  const strokes=new THREE.Mesh(strokeGeometry,stScyInk());
+  strokes.name='Quick Dash spiral streams';strokes.frustumCulled=false;strokes.renderOrder=8;root.add(strokes);
+  const contact=(u,z=0)=>{
+    const edge=stScyLines.edge,index=u*(edge.length-1),i=Math.floor(index),mix=index-i;
+    const [x,y]=edge[i],next=edge[Math.min(i+1,edge.length-1)];
+    return point.set(lerp(x,next[0],mix),lerp(y,next[1],mix),z).applyMatrix4(transform);
+  };
+  const orbit=(p,u,out)=>{
+    const line=stScyLines.edge,[x,y]=line[Math.round(p.seat*(line.length-1))];
+    const settle=u*u,r=(1-u**2.35)*(.88+p.seed*.26+p.lane*.15),a=p.angle+u*(6.9+p.lane*.45);
+    const cross=Math.sin(a)*r;
+    return out.set(lerp(.48,x,settle)+Math.cos(a)*r*1.14,lerp(1.99,y,settle)+cross*(.63+p.lane*.12),
+      cross*(.45-p.lane*.38)+r*(p.seed-.5)*.22).applyMatrix4(transform);
+  };
+  return t=>{
+    const age=t-impact,flash=stDarkEase(0,.019,age)*(1-stDarkEase(.052,.178,age));
+    const charge=stDarkEase(launch+.06,impact+.027,t),afterglow=1-.22*stDarkEase(.075,.31,age);
+    outline(t,charge*afterglow,flash);
+    star.visible=false;sweep.visible=false;halo.visible=false;strokes.visible=false;
+    let active=0;
+    if(stScyLines&&t>=launch&&age<.35){
+      blade.updateWorldMatrix(true,false);
+      rootInverse.copy(root.matrixWorld).invert();
+      transform.multiplyMatrices(rootInverse,blade.matrixWorld);
+      focus.position.copy(contact(.71));
+      cam.getWorldPosition(viewPoint).applyMatrix4(rootInverse);
+      focus.position.addScaledVector(viewPoint.sub(focus.position).normalize(),.09);
+      focus.quaternion.setFromUnitVectors(flow.set(0,0,1),viewPoint);
+      const glint=stDarkEase(-.077,.03,age);
+      sweep.visible=glint>0&&glint<1;
+      if(sweep.visible){
+        const head=.13+.84*glint;
+        for(let i=0;i<sweepPoints.count;i++){
+          contact(Math.max(.07,head-.23*(1-i/(sweepPoints.count-1))));
+          point.addScaledVector(viewPoint,.058);
+          sweepPoints.setXYZ(i,point.x,point.y,point.z);
+        }
+        sweepPoints.needsUpdate=true;sweep.material.opacity=.63*Math.sin(Math.PI*glint);
+      }
+      star.visible=flash>.01;
+      star.material.opacity=flash;
+      star.rotation.z=-.42+.62*stDarkEase(0,.120,age);
+      const size=(.17+.41*stDarkEase(0,.029,age))*(1-.29*stDarkEase(.046,.15,age));
+      star.scale.set(size,size*(1-.22*stDarkEase(.055,.16,age)),1);
+      halo.visible=star.visible;halo.scale.setScalar(.50+.49*stDarkEase(0,.10,age));
+      halo.material.uniforms.intensity.value=flash*.43;
+      const drawing=stDarkEase(launch+.025,launch+.12,t)*(1-stDarkEase(impact-.055,impact,t));
+      strokes.visible=drawing>.01;
+      if(strokes.visible){
+        const head=clamp((t-launch)/(impact-launch),0,1);
+        for(const lane of lanes)for(let i=0;i<strokeSteps;i++){
+          const u=i/(strokeSteps-1),progress=clamp(head-(1-u)*(.27+lane.lane*.02),0,1);
+          orbit(lane,progress,point);
+          const taper=Math.sin(Math.PI*u),width=(.013+.037*taper)*(1-progress*.52);
+          const index=lane.lane*strokeSteps+i,a=index*6,c=index*8;
+          strokePositions.set([point.x,point.y-width,point.z,point.x,point.y+width,point.z],a);
+          strokeColors[c+3]=drawing*taper*.92;strokeColors[c+7]=drawing*taper*.32;
+        }
+        strokeGeometry.attributes.position.needsUpdate=true;strokeGeometry.attributes.color.needsUpdate=true;
+      }
+      for(let i=0;i<particles.length;i++){
+        const p=particles[i],{born,seed,hit}=p;
+        const u=(t-born)/(hit-born);
+        if(u<0||u>=1)continue;
+        for(let k=0;k<traces;k++){
+          const step=u-k*.048;
+          if(step<0)continue;
+          orbit(p,step,piece.position);
+          orbit(p,Math.min(1,step+.025),trail);
+          piece.quaternion.setFromUnitVectors(up,flow.copy(trail).sub(piece.position).normalize());
+          const width=(.023+seed*.034)*stDarkEase(0,.17,step)*(1-stDarkEase(.92,1,step))*(1-.28*k);
+          piece.scale.set(width,width*(k?2.7:3.6),width*.53);
+          piece.updateMatrix();sparks.setMatrixAt(active,piece.matrix);
+          sparks.setColorAt(active++,shades[k?1+k%2:i%11===0?3:i%2]);
+        }
+      }
+      for(let i=0;i<burstCount;i++){
+        const seed=i*.618034%1,angle=i*2.39996,life=.16+seed*.16,elapsed=age-(i%4)*.011;
+        if(elapsed<0||elapsed>=life)continue;
+        const u=elapsed/life,drift=1-(1-u)**2;
+        piece.position.copy(contact(.13+seed*.79));
+        piece.position.x+=Math.cos(angle)*drift*(.23+.31*seed);
+        piece.position.y+=drift*(.48+.48*seed);
+        piece.position.z+=Math.sin(angle)*drift*.45-.22*drift;
+        piece.rotation.set(angle+elapsed*8,angle*.3,Math.sin(angle)*.86);
+        const width=(.025+.047*seed)*(1-u)**1.1;
+        piece.scale.set(width,width*(2.5-u),width*.56);
+        piece.updateMatrix();sparks.setMatrixAt(active,piece.matrix);
+        sparks.setColorAt(active++,shades[i%7===0?3:i%3]);
+      }
+    }
+    sparks.count=active;sparks.instanceMatrix.needsUpdate=true;sparks.instanceColor.needsUpdate=true;
+  };
+}
+
+function stDarkQuickDash(root,caster,look){
+  const ease=stDarkEase,launch=.22,arrival=.54,impact=.66,range=4;
+  const scythe=stCreateScythePreview(root,{wrap:'C',manual:true});
+  scythe.pivot.name='Quick Dash scythe';
   const distanceAt=t=>range*ease(launch,arrival,t);
   const pointAt=(distance,out)=>out.set(0,0,clamp(distance,0,range));
-  const side=new THREE.Vector3(1,0,0);
-  const nearTail=stDarkWake(root,distanceAt,(d,out)=>pointAt(d,out).addScaledVector(side,-.17),
-    ()=>-.63,launch,arrival,.21,.43);
-  const farTail=stDarkWake(root,distanceAt,(d,out)=>pointAt(d,out).addScaledVector(side,.25),
-    ()=>-.79,launch+.018,arrival+.018,.12,.37);
+  const nearTail=stDarkWake(root,distanceAt,(d,out)=>out.set(-.27+.29*d/range,0,d-.22),
+    d=>-.24-.46*d/range,launch,arrival,.67,.56);
+  const farTail=stDarkWake(root,distanceAt,(d,out)=>out.set(.34-.51*d/range,0,d-.38),
+    d=>-.68+.13*Math.sin(d/range*Math.PI),launch+.024,arrival,.38,.50);
   const matter=stDarkMatter(root,'Quick Dash dark matter',[
-    {at:launch,span:.046,count:25,spread:.82,lift:.78,height:.27,back:.29},
-    {at:launch+.04,span:.18,count:37,spread:.49,lift:.38,height:.77,back:.67},
+    {at:launch,span:.035,count:30,spread:.92,lift:.58,height:.23,back:.61},
+    {at:launch+.04,span:.24,count:29,spread:.48,lift:.36,height:.72,back:.78},
     {at:arrival-.02,span:.04,count:11,spread:.66,lift:.29,height:.22,back:.21}
-  ],(t,out)=>pointAt(distanceAt(t),out),.56);
-  const echoes=[.265,.322,.376].map((stamp,i)=>({
+  ],(t,out)=>pointAt(distanceAt(t),out),.71);
+  const echoes=[.272,.343,.419].map((stamp,i)=>({
     stamp,actor:stDarkShiftStudent(root,look,'Shift Dash afterimage '+(i+1)),
-    ink:new THREE.MeshLambertMaterial({color:0x25212c,emissive:0x16121d,transparent:true,depthWrite:false,opacity:0}),
+    ink:new THREE.MeshBasicMaterial({color:0x14131a,toneMapped:false,transparent:true,depthWrite:false,opacity:0}),
     ready:false
   }));
-  const infuse=stDarkChargeScythe(root,scythe,distanceAt,launch,impact);
+  const infuse=stDarkChargeScythe(root,scythe.blade,launch,impact);
+  const launchInk=new THREE.Group();
+  launchInk.position.y=.055;launchInk.rotation.x=-Math.PI/2;root.add(launchInk);
+  const pushOff=stDarkPressure(launchInk);
   for(const echo of echoes)echo.actor.ring.visible=false;
 
+  function poseScythe(pivot,t){
+    const lag=distanceAt(t)-distanceAt(t-.065);
+    const carry=ease(launch,arrival,t)*(1-ease(arrival,impact+.12,t));
+    const empowered=ease(impact-.018,impact+.047,t);
+    const snap=empowered*(1-ease(impact+.05,impact+.18,t));
+    pivot.position.set(-1.45+.38*carry-.23*snap,.09+.052*Math.sin(t*4)+.16*snap,distanceAt(t)-.76*lag+.19*snap);
+    pivot.rotation.set(.36*lag,.10*Math.sin(t*6)-.17*empowered+.14*carry,-.13-.39*lag+.25*snap);
+    pivot.scale.setScalar(1+.10*empowered+.06*snap);
+    return lag;
+  }
+  const sample=new THREE.Object3D(),bladePoint=new THREE.Vector3();
+  const bladeAt=(t,out)=>{
+    poseScythe(sample,t);sample.updateMatrix();
+    const spine=stScyLines?.spine,point=spine?.[Math.floor(spine.length*.65)];
+    return out.set(point?.[0]??.66,point?.[1]??1.90,0).multiplyScalar(scythe.blade.scale.x).applyMatrix4(sample.matrix);
+  };
+  const embers=stDarkWakeShards(root,t=>t,bladeAt,t=>bladeAt(t,bladePoint).y-1.08,launch+.025,arrival+.025);
+
   function pose(actor,t){
-    const lean=ease(.15,launch,t)*(1-ease(arrival-.02,.64,t));
+    const lean=ease(.15,launch,t)*(1-ease(arrival-.02,arrival+.19,t));
+    const load=ease(.08,.17,t)*(1-ease(.17,launch+.025,t));
+    const catchStep=ease(arrival-.035,arrival+.03,t)*(1-ease(arrival+.04,arrival+.20,t));
     const stride=Math.cos(clamp((t-launch)/(arrival-launch),0,1)*Math.PI*1.38);
-    actor.g.position.set(0,.11*lean,distanceAt(t));
-    stDarkPose(actor,{back:.50*lean,roll:-.09*lean,drop:.11*lean,arms:.25*lean,step:.78*lean*stride});
+    actor.g.position.set(0,.11*lean-.045*catchStep,distanceAt(t));
+    stDarkPose(actor,{back:.52*lean-.13*load-.16*catchStep,roll:-.13*lean+.14*catchStep,
+      drop:.10*lean+.13*load+.13*catchStep,arms:.23*lean+.28*catchStep,step:.78*lean*stride});
     actor.armR.rotation.x+=.50*lean*stride;
     actor.armL.rotation.x-=.57*lean*stride;
     if(actor.rig)rigSync(actor,0);
@@ -248,13 +428,11 @@ function stDarkQuickDash(root,caster,scythe,look){
 
   return t=>{
     pose(caster,t);
-    const lean=ease(.15,launch,t)*(1-ease(arrival-.02,.64,t));
-    const empowered=ease(impact-.018,impact+.047,t);
-    const snap=empowered*(1-ease(impact+.05,impact+.18,t));
-    scythe.position.set(-1.24-.23*snap,.18+.049*Math.sin(t*4)+.18*snap,caster.g.position.z-.47*lean);
-    scythe.rotation.set(.19*lean,.12*Math.sin(t*6)-.36*empowered,-.16-.38*lean+.19*snap);
-    scythe.scale.setScalar(1.43*(1+.10*empowered+.06*snap));
-    nearTail(t);farTail(t);matter(t);infuse(t);
+    const lag=poseScythe(scythe.pivot,t);
+    const charge=.35*ease(launch,impact,t)+.77*ease(impact-.10,impact+.028,t)*(1-ease(impact+.09,impact+.34,t));
+    scythe.update(t,charge,lag*2.1);
+    pushOff(.32+.77*ease(launch,launch+.17,t),.54*ease(launch-.012,launch+.025,t)*(1-ease(launch+.037,launch+.19,t)),t*9);
+    nearTail(t);farTail(t);matter(t);embers(t);infuse(t);
     for(const echo of echoes){
       if(!echo.ready&&echo.actor.fileModel){
         echo.actor.fileModel.traverse(mesh=>{
@@ -266,7 +444,7 @@ function stDarkQuickDash(root,caster,scythe,look){
         echo.ready=true;
       }
       const age=t-echo.stamp;
-      const opacity=.49*ease(.019,.048,age)*(1-ease(.062,.21,age));
+      const opacity=.78*ease(.012,.043,age)*(1-ease(.067,.23,age));
       echo.actor.g.visible=echo.ready&&opacity>.02;
       echo.ink.opacity=opacity;
       if(echo.actor.g.visible)pose(echo.actor,echo.stamp);
@@ -298,11 +476,16 @@ function stDarkHoldDash(root,caster,scythe){
   const weave=stDarkOrbWeave(root,pointAt,()=>0);
   const shroud=stDarkShiftShroud(root);
   const cloakTrails=stDarkShiftCloakTrails(root);
+  const flame=stDarkShiftBladeFlame(scythe);
   const splash=stDarkMatter(root,'Long Dash dark splash',[
     {at:arrival-.01,span:.07,count:52,spread:1.68,lift:1.02,height:.62},
     {at:arrival+.025,span:.08,count:23,spread:1.03,lift:1.57,height:1.00},
     {at:arrival+.15,span:.065,count:27,spread:1.48,lift:.41,height:.23}
   ],(_t,out)=>out.copy(route.at(-1)));
+  const scytheMatter=stDarkMatter(root,'Hold Dash scythe embers',[
+    {at:covered-.088,span:.075,count:19,spread:.62,lift:.42,height:1.12,back:.30},
+    {at:arrival+.135,span:.12,count:23,spread:.79,lift:.66,height:1.30}
+  ],(t,out)=>pointAt(distanceAt(t),out),.84);
   const entry=new THREE.Group(),exit=new THREE.Group();
   entry.position.y=exit.position.y=.06;entry.rotation.x=exit.rotation.x=-Math.PI/2;
   exit.position.add(route.at(-1));root.add(entry,exit);
@@ -366,33 +549,43 @@ function stDarkHoldDash(root,caster,scythe){
       shroud(t,at,yaw,lerp(1.38,-.1,peel),.92*ease(-.025,.035,age)*(1-peel),ease(0,.053,age));
     }
 
-    const fuse=ease(begin+.27,covered,t),returning=ease(.093,.34,age);
+    const fuse=ease(begin+.25,covered,t),returning=ease(.093,.38,age);
+    const spiral=age<0?fuse*Math.PI*.90:(1-returning)*Math.PI*.76;
     scythe.visible=t<covered||returning>.03;
-    scytheOffset.set(-1.24,.18+.049*Math.sin(t*4)+.32*brace,.02).applyAxisAngle(up,yaw);
-    scythe.position.copy(at).addScaledVector(scytheOffset,age<0?1-.67*fuse:.32+.68*returning);
-    scythe.rotation.set(-.15*brace,yaw+.21*Math.sin(t*6)-1.65*returning*(1-returning),-.16-.43*brace+.40*plant);
-    scythe.scale.setScalar(1.43*(age<0?1-.90*fuse:.22+.78*returning));
+    const orbit=age<0?1-.87*fuse:.18+.82*returning;
+    scytheOffset.set(-1.24*Math.cos(spiral)*orbit,.18+.049*Math.sin(t*4)+.63*(age<0?fuse:1-returning),
+      -.97*Math.sin(spiral)*orbit).applyAxisAngle(up,yaw);
+    scythe.position.copy(at).add(scytheOffset);
+    scythe.rotation.set(-.15*brace+.65*spiral,yaw+.21*Math.sin(t*6)-spiral,-.16-.43*brace+.40*plant);
+    scythe.scale.setScalar(1.43*(age<0?1-.97*fuse:returning));
+    flame(t,.22+1.1*(age<0?fuse:1-returning),.28*orbit,age<0?1:stDarkEase(.02,.50,returning));
 
     inkIn(1.77-1.04*charge,.59*charge*(1-ease(launch,formed,t)),t*4);
     inkOut(.37+1.37*ease(.04,.31,age),.83*ease(.035,.098,age)*(1-ease(.11,.32,age)),t*6);
     for(const ribbon of ribbons)ribbon(age);
-    wake(t);wakeShards(t);splash(t);
+    wake(t);wakeShards(t);splash(t);scytheMatter(t);
   };
 }
 
 FXCODE.studio_darkness_shift=(_x,_y,_h,args,instance)=>{
   const anchor=instance.L.find(layer=>layer.d.id===args.layer);
-  const scythe=modelInst('dark_scythe');
-  if(!anchor?.obj||!scythe)return;
+  if(!anchor?.obj)return;
+  const scythe=args.hold?modelInst('dark_scythe'):null;
+  if(args.hold&&!scythe)return;
   const root=new THREE.Group();root.name='Darkness Shift preview';anchor.obj.add(root);
   const look={...getLook(NET.myId),ws:-1,wn:0};
   const caster=stDarkShiftStudent(root,look,'Shift Dash caster',lookTint(look));
-  scythe.name='Shift Dash scythe';root.add(scythe);
-  const update=args.hold?stDarkHoldDash(root,caster,scythe):stDarkQuickDash(root,caster,scythe,look);
+  if(scythe){scythe.name='Shift Dash scythe';root.add(scythe);}
+  const update=args.hold?stDarkHoldDash(root,caster,scythe):stDarkQuickDash(root,caster,look);
   instance.updateDarknessShift=()=>update(instance.t);
+  if(args.hold)instance.darknessShiftFocus=out=>{
+    out.copy(caster.g.position);
+    out.y=1.1;
+    return root.localToWorld(out);
+  };
   anchor.geo=new THREE.BufferGeometry();
   anchor.geo.addEventListener('dispose',()=>{
-    instance.updateDarknessShift=null;disposeTree(root);root.removeFromParent();
+    instance.updateDarknessShift=null;instance.darknessShiftFocus=null;disposeTree(root);root.removeFromParent();
   });
   instance.updateDarknessShift();
 };

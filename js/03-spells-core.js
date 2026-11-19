@@ -154,6 +154,7 @@ function foesIn(team,x,y,r,hMax){
 // ดาเมจวง: โล่/อมตะบล็อกทั้งดาเมจและสถานะ
 // โล่บางสาย (เช่นโล่อัศวินน้ำแข็ง) กันได้เฉพาะด้านหน้า 120°
 // z = ความสูงต้นทาง (ม.) • โล่ที่ aim3d (สายลมตอนบิน/ร่อน) หันตามเป้าเล็ง 3 มิติ: กันได้ทุกทิศที่เล็งไป รวมบน/ล่าง (ผู้ใช้ 2026-11-10)
+const SHIELD_BREAK_LOCK=5;
 function shieldFaces(t,x,y,z){
   if(!t.shieldOn)return false;
   const B=PBASIC[t.pathIdx|0];

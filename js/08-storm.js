@@ -95,8 +95,8 @@ function stormDashTick(p){
       if(!p.sdAny){p.sdAny=true;stGain(p);stormOrbLaunch(p,t.x,t.y,t);if(p.god>0){p.cEmp=1;p.cEmpT=GODL.v.bigWin;}}}
   }else{emit({k:'efx',z:'sdashe',x:Math.round(p.sdX),y:Math.round(p.sdY),h:p.z+1,x2:Math.round(p.x),y2:Math.round(p.y),a:Math.round(Math.atan2(p.y-p.sdY,p.x-p.sdX)*100)/100,len:Math.round(Math.hypot(p.x-p.sdX,p.y-p.sdY)),id:p.id,g:p.sdGod});p.sdHit=null;}
 }
-function stormShieldBlast(p){
-  const S=p.stS;p.stS=null;p.stCd=STORMV.shieldCd;
+function stormShieldBlast(p,broken=false){
+  const S=p.stS;p.stS=null;p.stCd=p.stCdMax=broken?SHIELD_BREAK_LOCK:STORMV.shieldCd;p.shieldE=0;
   if(!S||S.abs<=0){emit({k:'efx',z:'stoff',x:p.x,y:p.y,h:p.z,id:p.id});return;}
   const dm=Math.min(STORMV.blastMax,S.abs*STORMV.blastMul);let any=false;
   emit({k:'efx',z:'stblast',x:p.x,y:p.y,h:p.z,r:STORMV.blastR,n:Math.round(dm),id:p.id});
@@ -108,7 +108,7 @@ function stormTick(p,dt){
   if(p.stBn>0){p.stBn-=dt;if(p.stBn<=0){p.stBn=0;p.vx=p.vy=0;}}
   if(p.stS){p.stS.t-=dt;if(p.stS.t<=0)stormShieldBlast(p);}
   else if(p.stCd>0)p.stCd-=dt;
-  p.shieldE=p.stS?100:100*(1-Math.max(0,p.stCd||0)/STORMV.shieldCd);p.shieldBroken=0;
+  p.shieldE=p.stS||!(p.stCd>0)?100:100*(1-p.stCd/p.stCdMax);p.shieldBroken=0;
   if(p.god>0){p.god-=dt;if(p.god<=0){p.god=0;p.xhp=0;emit({k:'efx',z:'godoff',x:p.x,y:p.y,h:p.z+1,id:p.id,g:1});}}
   if(p.slnT>0){if(p.stun>0){p.slnT=0;}else{p.slnT-=dt;if(p.slnT<=0)stormLine(p);}}
   if(p.rail)stormBowTick(p,dt);if(p.stStaff>0)p.stStaff-=dt;

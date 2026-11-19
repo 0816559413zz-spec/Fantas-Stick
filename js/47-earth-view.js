@@ -945,7 +945,7 @@ function eShieldFx(v){const n=performance.now()/1000;
 function eChips(F,pos,sc){for(const c of ESF.ch){const t=F.n-c.t0,[px,py]=pos(c.q,c.sd);cx.globalAlpha=clamp(1-t/c.l,0,1);
   diaPath(px+c.vx*t*sc,py+(c.vy*t+(c.dk?0:320)*t*t)*sc,c.z*sc);cx.fillStyle=c.dk?'#5a4630':'#d2a46a';cx.fill();}cx.globalAlpha=1;}
 // แถบโล่ Stand มุมซ้ายล่าง แบบ Reinhardt: ช่องหินเอียงติดกัน 15 ช่อง (ช่องละ 20 HP) บนกรอบหินมืด • แตก = ช่องว่าง + แดงจาง ๆ ไล่เติมตามเวลาที่ Stand กลับมา
-function eShieldSegs(x,y,w,A){const n=15,g=2,sk=3,h=10,sw=(w-sk-g*(n-1))/n,brk=A[0]>0,k=brk?0:clamp(A[7]/300,0,1)*n,rc=brk?(1-eSmooth('stb',A[0])/15)*n:0,
+function eShieldSegs(x,y,w,A){const n=15,g=2,sk=3,h=10,sw=(w-sk-g*(n-1))/n,brk=A[0]>0,k=brk?0:clamp(A[7]/300,0,1)*n,rc=brk?clamp(1-eSmooth('stb',A[0])/Math.max(1,ERV.standOff),0,1)*n:0,
     lo=k/n<=0.3,F=eShieldFx(brk?0:A[7]|0);
   cx.save();cx.translate(F.sh,0);
   cx.beginPath();cx.moveTo(x+sk-3,y-3);cx.lineTo(x+w+3,y-3);cx.lineTo(x+w-sk+3,y+h+3);cx.lineTo(x-3,y+h+3);cx.closePath();   // กรอบหิน

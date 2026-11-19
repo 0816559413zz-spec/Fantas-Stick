@@ -22,6 +22,22 @@ function botWallBehind(p,tg,dist){
 const _bspd=t=>Math.hypot(t.vx||0,t.vy||0);
 // สายฟ้า: มีสกิลใช้ 2 stack พร้อม (Triple Strike / Railgun) = เก็บ stack ไว้ ไม่ใช้สกิล 1 stack จนกว่าจะมี 3
 const botSave=p=>p.kitIds.some((id,i)=>(id==='triplestrike'||id==='railgun')&&!(p.cd[SLOTK[i]]>0));
+function botFireCanNova(p){
+  if(p.ult<100||p.sil>0||p.novaT>0||p.snapT>0)return false;
+  return foesIn(p.team,p.x,p.y,COLOS.v.r,p.z+6).some(t=>t.isE||t.isM||!(t.inv>0));
+}
+function botFireCanSnap(p){
+  const full=pyroHeatLv(p)>=PHEAT.max,dmg=full?PHEAT.snapDmg:SNAP.v.dmg;
+  return foesOf(p.team).some(t=>{
+    const stacks=t.brn|0;
+    if(stacks<=0||Math.hypot(t.x-p.x,t.y-p.y)>=SNAP.v.range)return false;
+    if(!t.isE&&(t.inv>0||shieldFaces(t,p.x,p.y,p.z+1.2)))return false;
+    if(t.hp<=dmg*stacks)return true;
+    // Nova เติม Burning ทุก 1.5 วิ รอถึง 5 ชั้นเพื่อให้ Snap จบก่อน Heat เริ่มลด
+    if(full&&t.onF>t.onFTk&&t.onFTk+SNAP.v.windup<PHEAT.hold-(G.time-p.fheatT))return stacks>=5;
+    return stacks>=3;
+  });
+}
 // จะกดสกิล id ตอนนี้ไหม • tg = เป้า • d = ระยะ
 function botWant(p,id,tg,d){
   const M=botMem(p),hp=p.hp/p.maxHp,st=(p.lst|0),stuck=tg.stun>0||tg.root>0||tg.mudT>0||tg.frz>0||_bspd(tg)<90;
@@ -31,7 +47,6 @@ function botWant(p,id,tg,d){
     case 'dragonfall':return d>260&&d<560&&!tg.isE&&!(tg.z>2);
     case 'ringofembers':return d<420&&(stuck||Math.random()<0.5);
     case 'blazeform':return d<480&&((tg.brn|0)>=2||hp<0.6);
-    case 'ignitionsnap':return (tg.brn|0)>=3&&d<480;
     // ---- น้ำแข็ง: นักดาบ คลุกวงใน • ไกล = คลื่นดาบ/ภูเขาน้ำแข็ง ----
     case 'frostforge':return p.fmode===1?d<500:d<200;
     case 'glacierrend':return p.fmode===1?d<650:d>180&&d<560;
@@ -55,9 +70,50 @@ function botWant(p,id,tg,d){
       if(!al)return false;if(p.ai)p.ai.aimOv={x:al.x,y:al.y};return true;}
     case 'shardvolley':return (p.lc|0)>=2&&d>200&&d<820&&(stuck||Math.random()<0.35);
     case 'empowerlight':return p.lgBeam>0&&d<LTV.baRange;
-    case 'sanctumcrystal':return hp<0.6&&d<520;
+    case 'sanctumcrystal':return !p.ai&&hp<0.6&&d<520;
     case 'veiledshard':return d<260;
   }
+}
+
+function botLightSupport(p){
+  const {inp,ai}=p,tg=ai.tg,ally=lightAlly(p),slot=lightSlotOf(p,'sanctumcrystal');
+  if(!tg||ai.still||!p.alive||p.downed||p.stun>0||p.lgUlt||p.shieldOn||inp.sh)return;
+  const pending=k=>k&&(inp.c[k]|0)!==(p.last[k]|0);
+  if(pending('sp')||pending(lightSlotOf(p,'crystalbond'))||pending(lightSlotOf(p,'shardvolley'))||pending('x'))return;
+  const gap=ally?Math.hypot(ally.x-p.x,ally.y-p.y):Infinity;
+  const canStep=ally&&gap>105&&gap<=LTV.dsAllyR&&gap<LTV.linkR&&p.lgDch>=1&&!(p.shk>0)&&p.hp>p.maxHp*.35;
+  const canHeal=slot&&p.lc>0&&!p.lgSan&&p.cd[slot]<=0&&!(p.sil>0)&&!(ai.skT>G.time);
+  if(!canStep&&!canHeal)return;
+
+  let threats=0,nearest=null,nearDist=Infinity;
+  if(ally)for(const foe of plist()){
+    if(foe.team===p.team||!foe.alive||foe.downed||foe.gh)continue;
+    const d=Math.hypot(foe.x-ally.x,foe.y-ally.y);
+    if(d<nearDist){nearDist=d;nearest=foe;}
+    if(d<285||(d<440&&foe.ai?.tg===ally))threats++;
+  }
+  if(canStep&&(threats>=2||(threats>0&&ally.hp<ally.maxHp*.76))&&lightStepBehind(p,ally)){
+    inp.ax=ally.x;inp.ay=ally.y;inp.fire=0;inp.c.sp=(inp.c.sp|0)+1;
+    return;
+  }
+  if(!canHeal)return;
+  if(ally&&ally.hp<ally.maxHp*.82&&gap<=LT_SC.range+LT_SC.r-36){
+    let x=ally.x,y=ally.y;
+    if(nearest){
+      const dx=(ally.x-nearest.x)/(nearDist||1),dy=(ally.y-nearest.y)/(nearDist||1);
+      const vx=(ally.mvx||0)+(ally.vx||0),vy=(ally.mvy||0)+(ally.vy||0);
+      const lead=clamp((vx*dx+vy*dy)*.5,45,95);
+      x+=dx*lead;y+=dy*lead;
+    }
+    const d=Math.hypot(x-p.x,y-p.y);
+    const scale=Math.min(1,LT_SC.range/(d||1));
+    const tx=clamp(p.x+(x-p.x)*scale,40,MW-40),ty=clamp(p.y+(y-p.y)*scale,40,MH-40);
+    if(Math.hypot(tx-ally.x,ty-ally.y)<LT_SC.r-20){inp.ax=tx;inp.ay=ty;}
+    else return;
+  }else if(p.hp<p.maxHp*.6&&Math.hypot(tg.x-p.x,tg.y-p.y)<520){
+    inp.ax=p.x;inp.ay=p.y;
+  }else return;
+  inp.fire=0;inp.c[slot]=(inp.c[slot]|0)+1;
 }
 
 // Both combat bots and balance bots use these inputs. Combos advance from the actual

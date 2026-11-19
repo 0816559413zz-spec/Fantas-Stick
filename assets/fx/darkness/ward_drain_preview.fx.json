@@ -1,0 +1,11 @@
+{
+  "v": 1,
+  "desc": "Darkness — พรีวิวบีมเงาลงพื้นและฝูงเงาลดพลังโล่",
+  "tags": ["darkness", "preview"],
+  "pal": "arcane",
+  "dur": 2.85,
+  "layers": [
+    {"id": "anchor", "t": "mesh", "shape": "disc", "mat": "black", "op": 0, "at": 0, "life": 2.85},
+    {"id": "ward_drain", "t": "code", "fn": "studio_darkness_ward_drain", "at": 0, "life": 2.85, "args": {"layer": "anchor"}}
+  ]
+}

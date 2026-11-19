@@ -21,23 +21,24 @@ function botBrain(p,dt,tg0){
   if(botClassPlanFor(p)){if(!p.ai)botClassPlan(p,tg);return;}
   if(p.pathIdx===1&&p.cd.dodge<=0&&d>520)inp.c.sp=(inp.c.sp|0)+1;
   const press=k=>{inp.c[k]=(inp.c[k]|0)+1;};
-  p.kitIds.forEach((id,i)=>{
+  const fireNova=p.pathIdx===0&&!p.ai&&botFireCanNova(p);
+  if(!fireNova&&!(p.novaT>0||p.snapT>0))p.kitIds.forEach((id,i)=>{
     const S=SPELLS[id],k=SLOTK[i];if(p.cd[k]>0||p.sil>0)return;
     if(S.id==='wispheal'&&p.hp>p.maxHp*0.85)return;
     if(['spiritwolf','firesprite','stonegolem'].includes(S.id)&&G.mins.some(m=>m.owner===p.id&&m.type===({spiritwolf:'wolf',firesprite:'sprite',stonegolem:'golem'})[S.id]))return;
     if(S.id==='soulburst'&&G.mins.filter(m=>m.owner===p.id).length<2)return;
     if(S.id==='soulsiphon'&&!(tg.mrk>0))return;
-    if(S.id==='ignitionsnap'&&!((tg.brn|0)>=3))return;
+    if(S.id==='ignitionsnap'){if(!p.ai&&botFireCanSnap(p))press(k);return;}
     if(S.id==='kindle'&&p.kindle>0)return;
     if(S.id==='cryoshell'&&(p.hp>p.maxHp*0.35||p.cryo>0))return;
     if(S.melee&&p.fmode===1)return;
     const w=tg.isE&&!['dragonfall','stonebreaker','voidspheres','aegisgale'].includes(S.id)?undefined:botWant(p,S.id,tg,d);if(w!==undefined){if(w)press(k);return;}   // วิธีเล่นต่อสาย (js/15-botplay)
     if(S.id==='glacialspike'&&!(tg.chl>0||tg.frz>0))return;
-    const r=({thunderline:560,speedsiphon:180,triplestrike:560,stormorbs:300,railgun:850,stormdome:560,frostforge:200,glacierrend:420,permafrost:240,cryoshell:9999,frostaura:200,dragonfall:560,ringofembers:360,blazeform:500,ignitionsnap:480,emberburst:170,frostnova:170,terror:210,frostarmor:500,overcharge:600,sporecloud:480,blinddust:500,scorchdash:330,arcblink:330,thornburst:170,soulsiphon:650})[S.id]||900;
+    const r=({thunderline:560,speedsiphon:180,triplestrike:560,stormorbs:300,railgun:850,stormdome:560,frostforge:200,glacierrend:420,permafrost:240,cryoshell:9999,frostaura:200,dragonfall:560,ringofembers:360,blazeform:500,emberburst:170,frostnova:170,terror:210,frostarmor:500,overcharge:600,sporecloud:480,blinddust:500,scorchdash:330,arcblink:330,thornburst:170,soulsiphon:650})[S.id]||900;
     const gap=S.id==='scorchdash'||S.id==='arcblink';
     if(gap?d>420&&d<800:d<r)press(k);
   });
-  if(p.ult>=100&&d<(p.ultId==='colossus'?500:p.ultId==='mirrorlegion'?550:340))press('x');
+  if(fireNova||(p.ultId!=='colossus'&&p.ult>=100&&d<(p.ultId==='mirrorlegion'?550:340)))press('x');
   // บอทสายฟ้า: เข้าประชิด ยิงลำค้าง (ปล่อยแว้บเพื่อฟาดสามเหลี่ยม) Dash ทะลุ เปิดโล่ตอนเลือดน้อย
   if(p.pathIdx===2){const w=d>(p.god>0?150:240)?1:0;inp.mx=Math.cos(ang)*w+Math.cos(ang+Math.PI/2)*st*0.5;inp.my=Math.sin(ang)*w+Math.sin(ang+Math.PI/2)*st*0.5;
     inp.fire=d<(p.god>0?190:320)?(p.emp?(Math.floor(G.time*8)%2):1):0;

@@ -171,7 +171,7 @@ function sgBotThink(p,dt){
     if(N.rt<=0||N.rtg!==tg){N.rt=1;N.rtg=tg;navEnsure();N.reach=Math.hypot(tg.x-p.x,tg.y-p.y)<220||!!navPath(p.x,p.y,tg.x,tg.y);}
     if(!N.reach){tg=null;for(const kk of SLOTK.concat(['x']))inp.c[kk]=c0[kk]|0;}
   }
-  if(tg){botNav(p,dt,c0,tg);sgUnstick(p,dt);return;}
+  if(tg){botNav(p,dt,c0,tg);sgUnstick(p,dt);if(p.pathIdx===LIGHTP)botLightSupport(p);return;}
   // ไม่มีศัตรูเกี่ยวข้อง: เดินไปจุดภารกิจตามทาง
   const S=G.sg,g=A.home,d=Math.hypot(g.x-p.x,g.y-p.y);
   inp.fire=0;inp.sh=0;

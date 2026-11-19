@@ -1,6 +1,6 @@
 // =====================================================================
 //  สายดิน ⛰️ (ผู้ใช้ออกแบบทั้งหมด — designs/earth.md §0 FINAL SPEC) • ฝั่งโฮสต์
-//  Stand หิน = ตัวต่อย/ถือโล่ • โล่ 300 HP (p.ehp) แตก = Stand หาย 15 วิ (p.stdB) → ยิงหินเล็ก / Rock Boost / สกิลที่ใช้ Stand ใช้ไม่ได้
+//  Stand หิน = ตัวต่อย/ถือโล่ • โล่ 300 HP (p.ehp) แตก = Stand หาย 10 วิ (p.stdB) → ยิงหินเล็ก / Rock Boost / สกิลที่ใช้ Stand ใช้ไม่ได้
 //  สิ่งก่อสร้างของสายดิน G.eso: {k:'tec' กำแพง Tectonic | 'pil' เสา Wrath | 'mound' เนิน Terra Auger | 'dom' กำแพงโดเมน} เป็นเส้น (x1,y1)-(x2,y2) หนา r
 //  v2 (designs/earth.md §0 FINAL SPEC v2): BA ชาร์จ = Stand ใหญ่ทุบ (คลิกซ้ายค้าง) • Terra Auger เดินช้า 85% เนินสูงเท่าตัว (นับเป็นกำแพง) • Wrath = ปาเสาใหญ่ 1 ต้นจากฟ้า → บึงโคลน r400 → สว่าน 5 อัน 10 วิ
 //  ฝุ่น Dust Burst G.edust: ศัตรูข้างในมองเห็นชัดแค่ ~150 รอบตัว (ฝั่งภาพทำใน js/47-earth-view.js)
@@ -8,8 +8,8 @@
 // Tectonic Crush: Stand ดันช้า (TECT.v.push) แล้วกำแพงปิดเร็ว (TECT.v.slide) • ERV.env = ตัวคูณความแรงพังบ้าน/ของของทุกสกิลสายดิน (ผู้ใช้ 2026-10-21)
 const EARTH=6;   // ตัวเลขของสายดิน: ERV (ท่าพื้นฐาน/โล่/Dash) + v:{...} ของแต่ละสกิล — ปรับได้ใน tune.html / F8
 PATHS.push({id:'earth',n:'สายดิน',ic:'⛰️',col:'#c9a36a',d:'สถาปนิกสนามรบ — Stand หินต่อยแทนเรา ถือโล่ 300 สร้างกำแพง/เสา/เนิน แล้วผลักศัตรูให้ชนของแข็ง',
-  combo:'Stonebreaker ผลักศัตรูชนกำแพง (กำแพงแผนที่ / Tectonic Crush / เสา Wrath / กำแพงโดเมน) = +20 ดาเมจ สตัน 2 วิ • Mud Swamp ช้า 50% ห้าม Dash แล้ว Crush กำแพงหนีบ 80 • Dust Burst บังสายตาศัตรู • Terra Auger ชาร์จ 3 ระดับ • โล่แตก = Stand หาย 15 วิ'});
-const ERV=PATHS[EARTH].v={sh:300,shDelay:3,shRegen:4.5,standOff:15,punch:10,punchR:500,punchCd:0.8,punchDelay:0.34,rockCd:0.35,cbHold:0.25,cbCharge:2,cbDmg:50,cbR:180,cbShardDmg:20,cbStun:0,cbKnock:300,cbCd:6,cbSlow:0.6,
+  combo:'Stonebreaker ผลักศัตรูชนกำแพง (กำแพงแผนที่ / Tectonic Crush / เสา Wrath / กำแพงโดเมน) = +20 ดาเมจ สตัน 2 วิ • Mud Swamp ช้า 50% ห้าม Dash แล้ว Crush กำแพงหนีบ 80 • Dust Burst บังสายตาศัตรู • Terra Auger ชาร์จ 3 ระดับ • โล่แตก = Stand หาย 10 วิ'});
+const ERV=PATHS[EARTH].v={sh:300,shDelay:3,shRegen:4.5,standOff:10,punch:10,punchR:500,punchCd:0.8,punchDelay:0.34,rockCd:0.35,cbHold:0.25,cbCharge:2,cbDmg:50,cbR:180,cbShardDmg:20,cbStun:0,cbKnock:300,cbCd:6,cbSlow:0.6,
   rampT:1.2,rampSp:500,rampDmg:15,rampStun:0,rampKnock:350,rampCd:8,slamR:150,slamDmg:20,slamStun:0,slamKnock:300,boostDist:400,boostR:120,boostKnock:900,boostCd:6,env:2.5};
 PATHS[EARTH].vn={sh:'โล่ Stand • HP',shDelay:'โล่ • เริ่มฟื้นหลังไม่ใช้ (วิ)',shRegen:'โล่ • ฟื้นต่อวิ',standOff:'โล่แตก • Stand หาย (วิ)',punch:'หมัด Stand • ดาเมจ',punchR:'หมัด Stand • ระยะล็อก',punchCd:'หมัด Stand • เว้น (วิ)',punchDelay:'หมัด Stand • หน่วงก่อนโดน (วิ)',rockCd:'หินเล็ก (Stand แตก) • เว้นยิง (วิ)',
   cbHold:'หมัดชาร์จ • กดค้างกี่วิเริ่มชาร์จ',cbCharge:'หมัดชาร์จ • ชาร์จ (วิ)',cbDmg:'หมัดชาร์จ • ดาเมจตรง',cbR:'เศษหมัดชาร์จ • ระยะ',cbShardDmg:'เศษหมัดชาร์จ • ดาเมจต่อเป้า',cbStun:'หมัดชาร์จ • สตัน (วิ)',cbCd:'หมัดชาร์จ • คูลดาวน์ (วิ)',cbSlow:'หมัดชาร์จ • ความเร็วเดินตอนชาร์จ (เท่า)',
@@ -317,7 +317,7 @@ function earthSnapW(){return {ES:(G.eso||[]).map(w=>[w.id,{tec:0,pil:1,mound:2,d
 
 // ท่าพื้นฐาน + โล่ + Dash ของสาย (PBASIC ต้องอยู่ช่องที่ 6 = ลำดับใน PATHS)
 PBASIC.push({id:'b_earth',type:'erock',n:'หมัดหิน Stand / หินเล็ก',d:'คลิก = Stand เล็กด้านหน้าส่งกำปั้นหินตามแนวเล็ง 3 มิติ ระยะ 500 ดาเมจ 10 ทุก 0.8 วิ • กดค้าง = Stand ใหญ่ด้านหลังง้างชาร์จ 2 วิ แล้วยิงหมัดใหญ่ ดาเมจตรง 50 + ผลักถอยเล็กน้อย เศษหินพุ่งเป็นกรวยด้านหลังเป้า ดาเมจ 20 ต่อเป้า คูลดาวน์ 6 วิ เดินช้า 40% • Stand แตก = ยิงหินเล็ก 5 ดาเมจ ทุก 0.35 วิ',
-  shd:'โล่ Stand Barrier: Stand ยกโล่หินใหญ่ กันได้รอบตัว 300 HP (มากที่สุดในทุกสาย) • ไม่ได้ใช้ 3 วิ ฟื้น 20/วิ • โล่แตก = Stand หาย 15 วิ (ยิงหินเล็กแทนหมัด, Dash เป็น Rock Boost, สกิลที่ใช้ Stand ใช้ไม่ได้) แล้วกลับมาพร้อมโล่เต็ม 300',
+  shd:'โล่ Stand Barrier: Stand ยกโล่หินใหญ่ กันได้รอบตัว 300 HP (มากที่สุดในทุกสาย) • ไม่ได้ใช้ 3 วิ ฟื้น 20/วิ • โล่แตก = Stand หาย 10 วิ (ยิงหินเล็กแทนหมัด, Dash เป็น Rock Boost, สกิลที่ใช้ Stand ใช้ไม่ได้) แล้วกลับมาพร้อมโล่เต็ม 300',
   dsd:'Stand Rampage (Shift): ขี่ Stand วิ่งชาร์จตามทิศเล็ง 1.2 วิ (~600) กด Shift อีกครั้งหยุดก่อน • ชนศัตรู 15 + กระเด็นเล็กน้อย • จบด้วยทุบพื้น 20 + ผลักเล็กน้อย รัศมี 150 • ทะลุกำแพง/เสาของเรา พังของศัตรู • คูลดาวน์ 8 วิ • Stand แตก = Rock Boost Escape: หินดันพุ่ง ~400 ศัตรูรอบจุดเริ่ม (120) กระเด็น คูลดาวน์ 6 วิ',
   hit(pr,t){damage(t,pr.dmg,pr.owner,'proj');},tick:earthBasic,dash:earthDash});
 SPELLS.b_earth=PBASIC[EARTH];

@@ -91,13 +91,14 @@ function botPlay(p,dt,tg,c0){
     if(p.dfall){if(p.dfall.ph===2)pulse();return;}                    // Dragonfall: ถึงจุดบินแล้วคลิก = ดิ่งใส่
     if(p.colos>0){if(p.colN>0)pulse();return;}                        // ร่างยักษ์: ยิงหน้าไม้ทีละนัด
     if(p.kindle>0&&d<1000)pulse();                                    // Kindle: ลอยอยู่ ยิงลูกไฟใหญ่
+    if(p.novaT>0||p.snapT>0)return;
+    if(botFireCanNova(p)){inp.c.x=(inp.c.x|0)+1;return;}
     const burn=tg.brn|0;
-    if(rdy('ignitionsnap')&&(burn>=3||(burn>=2&&tg.hp<tg.maxHp*0.35)))go('ignitionsnap');   // ปิดจบเมื่อมีหลายชั้น
+    if(rdy('ignitionsnap')&&botFireCanSnap(p))go('ignitionsnap');
     else if(rdy('ringofembers')&&d<380&&d>90)go('ringofembers');                              // ขังก่อน แล้วลูกไฟชาร์จ
     else if(rdy('blazeform')&&d<300&&hpR>0.5&&(burn>=1||roll(0.4)))go('blazeform');
     else if(rdy('dragonfall')&&d>260&&d<560)go('dragonfall');
     else if(rdy('kindle')&&d>200&&d<650&&!(p.kindle>0))go('kindle');
-    ult(800);
     return;
   }
   // ---------- ❄️ น้ำแข็ง ----------
@@ -267,7 +268,7 @@ function aiBot(p,dt){
   const classPlan=botClassPlanFor(p);
   if(classPlan)botClassPlan(p,tg);
   else if(BOT_PB[p.pathIdx])botPlay(p,dt,tg,c0);
-  if(!classPlan&&(inp.c.x|0)!==(c0.x|0)&&!tg.isE&&tg.hp>tg.maxHp*L.ult)inp.c.x=c0.x|0;
+  if(!classPlan&&p.ultId!=='colossus'&&(inp.c.x|0)!==(c0.x|0)&&!tg.isE&&tg.hp>tg.maxHp*L.ult)inp.c.x=c0.x|0;
   const used=SLOTK.concat(['x']).some(k=>(inp.c[k]|0)!==(c0[k]|0));
   // ผลัดกัน: เพื่อนบอทที่ตีเป้าเดียวกันเพิ่งกดสกิล → รอแป๊บ (ไม่ปล่อยสกิลซ้อนวินาทีเดียวกัน)
   const busy=used&&pals.some(q=>t-q.ai.lastSk<A.ps.wait);
