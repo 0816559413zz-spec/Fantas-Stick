@@ -92,6 +92,11 @@ FXCODE.studio_darkness_scythe=(_x,_y,_h,args,instance)=>{
   for(let q=0;q<TF;q++)for(let i=0;i<TFP-1;i++){const a=(q*TFP+i)*2;tfidx.push(a,a+1,a+2,a+1,a+3,a+2);}
   tfGeo.setAttribute('position',new THREE.BufferAttribute(tfpos,3));tfGeo.setAttribute('color',new THREE.BufferAttribute(tfcol,4));tfGeo.setIndex(tfidx);
   const tailFlames=new THREE.Mesh(tfGeo,stScyInk());tailFlames.frustumCulled=false;tailFlames.renderOrder=9;if(BA)root.add(tailFlames);
+  // แผ่นเปลวแบบสันใบที่ปลายหาง (ผู้ใช้ 2026-11-19: "เปลวแบบสันเคียว ที่ปลายหางด้วย")
+  const TER=8,teGeo=new THREE.BufferGeometry(),tepos=new Float32Array(HK*TER*3),tecol=new Float32Array(HK*TER*4),teidx=[];
+  for(let i=0;i<HK-1;i++)for(let j=0;j<TER-1;j++){const a=i*TER+j,b=(i+1)*TER+j;teidx.push(a,b,a+1,b,b+1,a+1);}
+  teGeo.setAttribute('position',new THREE.BufferAttribute(tepos,3));teGeo.setAttribute('color',new THREE.BufferAttribute(tecol,4));teGeo.setIndex(teidx);
+  const tailSheet=new THREE.Mesh(teGeo,stScyInk());tailSheet.frustumCulled=false;tailSheet.renderOrder=9;if(BA)root.add(tailSheet);
   const hist=[];const _p=new THREE.Vector3(),MB=new THREE.Matrix4(),vX=new THREE.Vector3(),vY=new THREE.Vector3(),vZ=new THREE.Vector3(),QB=new THREE.Quaternion(),Qi=new THREE.Quaternion();
   const ez=(a,b,t)=>{t=Math.min(1,Math.max(0,(t-a)/(b-a)));return t*t*(3-2*t);};
   const baPose=T=>{   // รอบ 4 (ผู้ใช้): วงฟันโค้งตามระยะ (รัศมีคงที่ตอนกวาด) • ซ้าย/ขวาสลับ • ก่อนฟัน: ดึงเข้าตัว ควง 1 รอบ → พุ่งออกไปถึงระยะ → ค้างสะสมแรง → กวาด
@@ -157,7 +162,17 @@ FXCODE.studio_darkness_scythe=(_x,_y,_h,args,instance)=>{
             for(let i=0;i<TFP;i++){const u=i/(TFP-1),sw=Math.sin(T*6+q*1.3+u*3)*0.05*u*u,w=0.06*S*0.5*Math.pow(1-u,1.2)*(1+0.3*Math.sin(u*9+T*8+q));
               const a=(q*TFP+i)*2*3,c=(q*TFP+i)*2*4;tfpos[a]=bx-w+sw;tfpos[a+1]=by+Hf*u;tfpos[a+2]=bz;tfpos[a+3]=bx+w+sw;tfpos[a+4]=by+Hf*u;tfpos[a+5]=bz;
               tfcol[c+3]=tfcol[c+7]=je<0?0:Math.min(1,(1-u)*2.2)*Math.min(1,aE*1.5)*(k>HK*0.75?1:0.8);}}
-          if(TF){tfGeo.attributes.position.needsUpdate=true;tfGeo.attributes.color.needsUpdate=true;}}
+          if(TF){tfGeo.attributes.position.needsUpdate=true;tfGeo.attributes.color.needsUpdate=true;}
+          // แผ่นเปลวแบบสันใบ ลุกจากขอบปลายหางไปทางท้าย (สูตรเดียวกับแผ่นเปลวบนสัน: ลิ้นหยักวิ่ง + ลิ้นหลุดเป็นช่วง)
+          for(let i=0;i<HK;i++){const tt=i/(HK-1),j0=Math.max(1,je),a3=(j0*HK+i)*3,b3=((j0-1)*HK+i)*3;
+            let dx=tpos[a3]-tpos[b3],dy=tpos[a3+1]-tpos[b3+1],dz=tpos[a3+2]-tpos[b3+2];const dl=Math.hypot(dx,dy,dz)||1;dx/=dl;dy/=dl;dz/=dl;
+            const n1=Math.sin(tt*38-T*5.5)*0.5+Math.sin(tt*71+T*3.7)*0.3+Math.sin(tt*17-T*2.1)*0.2,H=(0.07+0.09*Math.max(0,n1+0.35))*S*2.6;
+            const cyc=(T*0.9+Math.sin(tt*13.7)*3.1)%1,gap=Math.sin(tt*9.3+Math.floor(T*0.9+Math.sin(tt*13.7)*3.1)*2.7)>0.35;
+            for(let j=0;j<TER;j++){const v=j/(TER-1),h=H*v*(gap?(1+cyc*1.6):1),lean=0.05*v*v*Math.sin(T*4+tt*20),k3=(i*TER+j)*3,c4=(i*TER+j)*4;
+              tepos[k3]=tpos[a3]+dx*h;tepos[k3+1]=tpos[a3+1]+dy*h+lean+0.06*v;tepos[k3+2]=tpos[a3+2]+dz*h;
+              let al=Math.pow(1-v,0.6);if(gap){const g0=cyc*0.9,g1=g0+0.22;if(v>g0&&v<g1)al=0;else if(v<g0)al*=Math.min(1,cyc*3);}
+              tecol[c4+3]=je<0?0:al*Math.min(1,aE*1.5)*Math.min(1,tt/0.08);}}
+          teGeo.attributes.position.needsUpdate=true;teGeo.attributes.color.needsUpdate=true;}
         for(let e=0;e<EMB;e++){const sp=embers[e],ph=(T*1.4+rnd(e+80))%1,j=Math.min(HH-1,Math.floor(HH*(0.55+0.4*rnd(e+81)))),k=Math.floor(rnd(e+82)*HK),i2=j*HK+k;
           const al=f2col[i2*4+3];sp.position.set(f2pos[i2*3]+Math.sin(T*3+e)*0.15*ph,f2pos[i2*3+1]+0.2+ph*1.1,f2pos[i2*3+2]+Math.cos(T*2+e)*0.15*ph);
           const sz=(0.12+0.12*rnd(e+83))*(1-ph*0.6);sp.scale.set(sz,sz*1.5,1);sp.material.opacity=Math.min(1,al*2)*Math.sin(ph*Math.PI);}}}
