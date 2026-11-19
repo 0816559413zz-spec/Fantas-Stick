@@ -164,8 +164,8 @@ FXCODE.studio_darkness_scythe=(_x,_y,_h,args,instance)=>{
     const lim=x=>Math.max(-1.3,x);   // แขนขวาข้ามไปฝั่งซ้ายได้ไม่สุด
     if(t>=SW0){
       const k=Math.min(NSW-1,Math.floor((t-SW0)/GAP)),u=t-SW0-k*GAP,from=side0*(k%2?-1:1),to=-from;
-      const R1=[1.3,0,0.3,0,0],L1=[-0.2,-0.05,-0.3,args.bend??1.3,args.twist??-1.57];   // ปลายสะบัด: ขวา = แขนกางกว้าง • ซ้าย = ศอกยื่นไปหน้า ท่อนแขนล่างพับไปทางซ้าย (คทาอยู่มือขวาตลอด)
-      const hold=to>0?R1:L1,back=from>0?[1.65,0.12,0.1,0,0]:[-1.1,0.12,-0.22,0,0],prev=k===0?[IG,IE,0,0,0]:(from>0?R1:L1);
+      const R1=[1.3,0,0.3,0,0],L1=[-0.15,-0.05,-0.3,args.bend??1.75,args.twist??-1.57];   // ปลายสะบัด: ขวา = แขนกางกว้าง • ซ้าย = ศอกยื่นไปหน้า ท่อนแขนล่างพับไปทางซ้าย (คทาอยู่มือขวาตลอด)
+      const hold=to>0?R1:L1,back=from>0?[1.65,0.12,0.1,0,0]:[-0.35,0.1,-0.22,1.9,-1.57],prev=k===0?[IG,IE,0,0,0]:(from>0?R1:L1);
       const mix=(a,b,e)=>a.map((v,i)=>v+(b[i]-v)*e);
       let P;
       if(u<FL0){P=mix(prev,back,ez(0,0.14,u));}                                  // ง้างแขนกว้าง แล้วค้าง (หน่วงก่อนสะบัด)
