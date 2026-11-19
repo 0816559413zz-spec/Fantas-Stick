@@ -485,6 +485,11 @@
    "file": "maps/gorge.glb",
    "data": "maps/gorge.json",
    "v": 9
+  },
+  "castle-demo": {
+   "file": "maps/castle-demo.glb",
+   "data": "maps/castle-demo.json",
+   "v": 1
   }
  },
  "ptex": {}

@@ -1,5 +1,7 @@
 # HANDOFF — Fantas Stick (was "Wizard Duel") (repo: Fantas-Stick)
 
+**Map Builder castle parts 2026-11-19:** tool ♜ (key C) in `mapbuild.html`: `M.parts[]` (wall, corner, tower, gate, keep, stairs, ramp, walk, bridge) expanded by `model.js expandParts()` into prim objs + floors, so export/collision/brk reuse the old pipeline (`guides/MAP-BUILDER.md` section 'ชิ้นส่วนปราสาท'). Port snapping `partPorts/snapPart`, Q/E 45°, undo/dup/del via the usual keys. Sample `node tools/castle-sample.mjs` → exported `castle-demo` (walked in game: walls/piers block, open gate passable, wall top + stairs walkable, door brk). No protocol change. Not done: hollow keep interior, siege mode can't load builder maps, parapet has no collision. Test caveat: the browser caches `mapbuild/*.js` modules — `fetch(url,{cache:'reload'})` then reload.
+
 **Darkness เคียวลอย 2026-11-18 (พรีวิว Studio, ยังไม่ผูกเกม):** อ่าน `designs/darkness-scythe.md` ก่อน — โมเดล `assets/vfx/dark_scythe.glb` (สคริปต์ Blender `assets/src/dark_scythe_build.py`), VFX `studio/darkness-scythe.js` + `assets/fx/darkness/scythe_idle_c` (ล่าสุด ยังไม่ได้ให้ผู้ใช้ดู) • ref ใน `designs/darkness_ref/scythe_*`
 
 **ส่งต่อสำหรับ ChatGPT:** อ่าน `notes/CHATGPT-LIGHT-HANDOFF.md` สำหรับงาน VFX สาย Light ร่างปกติ

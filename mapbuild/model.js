@@ -53,7 +53,7 @@ export function newMap(o = {}) {
   const W = o.W || 100, H = o.H || 70, nx = Math.round(W / C) + 1, ny = Math.round(H / C) + 1;
   return { v: 1, id: o.id || '', name: o.name || 'แผนที่ใหม่', desc: '', W, H, nx, ny, hg: new Float32Array(nx * ny), sf: new Uint8Array(nx * ny).fill(o.surf || 0),
     sky: 'day', fog: null, music: '', weather: '', fx: [], modes: ['coop', 'ffa', 'duel', 'tdm'], random: 0, autoProps: 1, skirt: 40,
-    walls: [], floors: [], objs: [], seq: 1 };
+    walls: [], floors: [], objs: [], parts: [], seq: 1 };
 }
 const b64e = u8 => { let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s); };
 const b64d = s => { const b = atob(s), u = new Uint8Array(b.length); for (let i = 0; i < b.length; i++) u[i] = b.charCodeAt(i); return u; };
@@ -68,7 +68,7 @@ export function unpack(j) {
   const n = M.nx * M.ny, hb = b64d(j.hg), h = new Int16Array(hb.buffer, 0, hb.length >> 1);
   M.hg = new Float32Array(n); for (let i = 0; i < n && i < h.length; i++) M.hg[i] = h[i] / 100;
   const s = b64d(j.sf); M.sf = new Uint8Array(n); M.sf.set(s.subarray(0, n));
-  for (const k of ['walls', 'floors', 'objs', 'fx']) if (!Array.isArray(M[k])) M[k] = [];
+  for (const k of ['walls', 'floors', 'objs', 'fx', 'parts']) if (!Array.isArray(M[k])) M[k] = [];
   return M;
 }
 export function resize(M, W, H) {   // keep the content centred
@@ -79,7 +79,7 @@ export function resize(M, W, H) {   // keep the content centred
   }
   const dx = ox * C, dz = oy * C;
   for (const w of M.walls) for (const p of w.pts) { p[0] += dx; p[1] += dz; }
-  for (const o of M.floors.concat(M.objs)) { o.x += dx; o.z += dz; }
+  for (const o of M.floors.concat(M.objs, M.parts || [])) { o.x += dx; o.z += dz; }
   Object.assign(M, { W, H, nx: N.nx, ny: N.ny, hg: N.hg, sf: N.sf });
 }
 
@@ -157,8 +157,8 @@ export function floorTop(f, x, z) {   // top height at a map point, NaN outside
 }
 export function floorCorners(f) { const cs = Math.cos(f.rot || 0), sn = Math.sin(f.rot || 0), o = [];
   for (const [a, b] of [[-1, -1], [1, -1], [1, 1], [-1, 1]]) { const lx = a * f.w / 2, lz = b * f.d / 2; o.push([f.x + lx * cs + lz * sn, f.z - lx * sn + lz * cs]); } return o; }
-export function surfTop(M, x, z, ref) {   // highest walkable surface at or below ref (+step): ground or a floor
-  let h = gh(M, x, z); for (const f of M.floors) { const t = floorTop(f, x, z); if (t > h && (ref == null || t <= ref + TSTEP)) h = t; } return h;
+export function surfTop(M, x, z, ref, fl) {   // highest walkable surface at or below ref (+step): ground or a floor (fl = floor list, default M.floors)
+  let h = gh(M, x, z); for (const f of fl || M.floors) { const t = floorTop(f, x, z); if (t > h && (ref == null || t <= ref + TSTEP)) h = t; } return h;
 }
 
 // ---------- objects ----------
@@ -182,8 +182,8 @@ export function gameData(M, dim) {
   const nx = M.nx, ny = M.ny, g = new Int16Array(nx * ny);
   for (let i = 0; i < g.length; i++) g[i] = cm(M.hg[i]);
   // floors → top/bottom grids on the same 0.5 grid
-  const fl = [];
-  for (const f of M.floors) {
+  const fl = [], XP = expandParts(M), allFloors = M.floors.concat(XP.floors), allObjs = M.objs.concat(XP.objs);
+  for (const f of allFloors) {
     const cs = floorCorners(f), x0 = Math.floor(Math.min(...cs.map(c => c[0])) / C) * C, z0 = Math.floor(Math.min(...cs.map(c => c[1])) / C) * C;
     const fx = Math.round((Math.ceil(Math.max(...cs.map(c => c[0])) / C) * C - x0) / C) + 1, fy = Math.round((Math.ceil(Math.max(...cs.map(c => c[1])) / C) * C - z0) / C) + 1;
     const top = new Int16Array(fx * fy), bot = new Int16Array(fx * fy); let any = 0;
@@ -200,7 +200,7 @@ export function gameData(M, dim) {
     for (const c of chunkCircles(M, w, R)) put(c, gi);
   });
   const spawns = [], espawn = [], rings = [], tasks = [], props = [], houses = [], lights = [];
-  for (const o of M.objs) {
+  for (const o of allObjs) {
     const X = r1(o.x * PX), Y = r1(o.z * PX), rot = o.rot || 0;
     if (o.t === 'spawn' || o.t === 'spawnR' || o.t === 'spawnB') { const s = { x: X, y: Y, a: +Math.atan2(Math.cos(rot), Math.sin(rot)).toFixed(3) }; if (o.t !== 'spawn') s.t = o.t === 'spawnR' ? 1 : 0; spawns.push(s); }
     else if (o.t === 'espawn') espawn.push({ x: X, y: Y });
@@ -232,7 +232,7 @@ export function gameData(M, dim) {
   if (M.look) data.look = M.look;   // พรีเซ็ต Look (js/74-look.js) • lt = แสง/ฟ้าเฉพาะแมพ (js/28 buildFileMap) — ตั้งโดยแก้ไฟล์ต้นฉบับตรง ๆ (ยังไม่มีช่องใน Editor)
   if (M.lt) data.lt = M.lt;
   return { data, brkOf, counts: { obs: obs.length, brk: brk.length, spawns: spawns.filter(s => s.t == null).length, red: spawns.filter(s => s.t === 1).length, blue: spawns.filter(s => s.t === 0).length,
-    espawn: espawn.length, rings: rings.length, tasks: tasks.length, lights: lights.length, props: props.length, houses: houses.length, floors: fl.length } };
+    espawn: espawn.length, rings: rings.length, tasks: tasks.length, lights: lights.length, props: props.length, houses: houses.length, floors: fl.length, parts: (M.parts || []).length } };
 }
 
 // ---------- checks ----------
@@ -264,12 +264,12 @@ export function check(M, G) {
   for (const f of M.floors) { const g = gh(M, f.x, f.z), gap = Math.min(f.y, f.y2 == null ? f.y : f.y2) - (f.th || 0.4) - g;
     if (gap > 0.5 && gap < HEADROOM) add('warn', 'ใต้พื้นชั้นบนสูง ' + gap.toFixed(1) + ' (ต่ำกว่า ' + HEADROOM + ' = เดินลอดไม่ได้)', [f.x, f.z]); }
   // reachability from the first spawn (ground level only, 1-unit cells)
-  const sp = M.objs.filter(o => /^spawn/.test(o.t));
+  const sp = M.objs.filter(o => /^spawn/.test(o.t)), FL = M.floors;   // castle part floors (walkways, gate tops) are left out: the check is ground-level only
   if (sp.length > 1) {
     const w = Math.floor(M.W), h = Math.floor(M.H), blk = new Uint8Array(w * h), seen = new Uint8Array(w * h);
     for (const q of obs) { if (q.bot != null || q.hgt < 0.6) continue; const cx = q.x / PX, cz = q.y / PX, R = q.r / PX + PR * 0.6;
       for (let j = Math.max(0, Math.floor(cz - R)); j <= Math.min(h - 1, Math.ceil(cz + R)); j++) for (let i = Math.max(0, Math.floor(cx - R)); i <= Math.min(w - 1, Math.ceil(cx + R)); i++) if (Math.hypot(i + 0.5 - cx, j + 0.5 - cz) < R) blk[j * w + i] = 1; }
-    const cell = o => clamp(Math.floor(o.z), 0, h - 1) * w + clamp(Math.floor(o.x), 0, w - 1), H = k => surfTop(M, (k % w) + 0.5, ((k / w) | 0) + 0.5, null);
+    const cell = o => clamp(Math.floor(o.z), 0, h - 1) * w + clamp(Math.floor(o.x), 0, w - 1), H = k => surfTop(M, (k % w) + 0.5, ((k / w) | 0) + 0.5, null, FL);
     const st = [cell(sp[0])]; seen[st[0]] = 1;
     while (st.length) { const k = st.pop(), x = k % w, y = (k / w) | 0, hk = H(k);
       for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const X = x + dx, Y = y + dy; if (X < 0 || Y < 0 || X >= w || Y >= h) continue; const q = Y * w + X; if (seen[q] || blk[q]) continue;
@@ -278,4 +278,143 @@ export function check(M, G) {
     if (bad.length) bad.forEach(o => add('warn', 'จุดเกิดนี้เดินไปไม่ถึงจากจุดเกิดแรก (ตรวจคร่าว ๆ)', [o.x, o.z])); else add('ok', 'จุดเกิดทุกจุดเดินถึงกัน');
   }
   return out;
+}
+
+// ---------- castle parts (guides/MAP-BUILDER.md "ชิ้นส่วนปราสาท") ----------
+// M.parts[] = {id, k, x, z, rot, base (absolute bottom height, null = follows the ground), c, brk, + params (PART[k].p) + flags (PART[k].f)}
+// A part is NOT a new pipeline: expandParts() turns it into plain prim objs (box/cyl/cone/wedge → collision circles, glb, brk groups) and floors (walkable tops).
+// Local frame: origin = part centre, +z = length axis, +x = across; rot = rotation.y (same as objs/floors). Expanded items carry _p = part id; hid:1 = collision only (no mesh).
+export const PART = {   // p: name → [default, min, max, step] • f: flag defaults
+  wall:   { n: 'กำแพงตรง', c: '#8a8478', p: { len: [10, 2, 60, 1], th: [2, 0.6, 6, 0.2], h: [6, 1, 20, 0.5] }, f: { bt: 1, wk: 1 }, main: 'len' },
+  corner: { n: 'กำแพงมุม (L)', c: '#8a8478', p: { a: [10, 3, 40, 1], b: [10, 3, 40, 1], th: [2, 0.6, 6, 0.2], h: [6, 1, 20, 0.5] }, f: { bt: 1, wk: 1 }, main: 'a' },
+  tower:  { n: 'หอคอย', c: '#77736c', p: { r: [3.5, 1.5, 10, 0.25], h: [10, 3, 30, 0.5] }, f: { round: 1, roof: 0, bt: 1 }, main: 'r' },
+  gate:   { n: 'ประตูเมือง', c: '#77736c', p: { len: [14, 6, 40, 1], th: [3, 1, 8, 0.5], h: [7, 3, 20, 0.5], gw: [4, 2, 10, 0.5], gh: [4.5, 2.2, 12, 0.25] }, f: { bt: 1, wk: 1, door: 1 }, main: 'len' },
+  keep:   { n: 'ตึกใหญ่ (Keep)', c: '#7d7870', p: { w: [14, 5, 40, 1], d: [12, 5, 40, 1], h: [12, 3, 30, 0.5] }, f: { bt: 1, roof: 0, turrets: 1 }, main: 'w' },
+  stairs: { n: 'บันได', c: '#8a8478', p: { w: [3, 1, 10, 0.5], len: [8, 2, 30, 0.5], rise: [5, 0.5, 20, 0.25] }, f: {}, main: 'len' },
+  ramp:   { n: 'ทางลาด', c: '#8a8478', p: { w: [3, 1, 10, 0.5], len: [10, 2, 40, 0.5], rise: [4, 0.5, 20, 0.25] }, f: {}, main: 'len' },
+  walk:   { n: 'ทางเดินยก', c: '#7a7569', p: { w: [3, 1, 10, 0.5], len: [10, 2, 40, 1], up: [6, 0.5, 20, 0.25] }, f: { rail: 1 }, main: 'len' },
+  bridge: { n: 'สะพาน', c: '#7d7870', p: { w: [4, 2, 12, 0.5], len: [14, 3, 50, 1], up: [3, 0.5, 20, 0.25] }, f: { rail: 1, piers: 1 }, main: 'len' },
+};
+export const PART_P = { len: 'ยาว', th: 'หนา', h: 'สูง', a: 'แขน A', b: 'แขน B', r: 'รัศมี/ครึ่งกว้าง', gw: 'ช่องประตู กว้าง', gh: 'ช่องประตู สูง', w: 'กว้าง', d: 'ลึก', rise: 'สูงขึ้น', up: 'สูงจากพื้น' };
+export const PART_F = { bt: 'ฟันปลายอดกำแพง', wk: 'ทางเดินบนยอด', door: 'บานประตูไม้ (พังได้)', round: 'ทรงกลม', roof: 'หลังคา (แทนยอดโล่ง)', turrets: 'หอมุมเล็ก', rail: 'ราว', piers: 'เสารองใต้สะพาน' };
+export function partNew(k, o = {}) {
+  const D = PART[k], p = { k, x: 0, z: 0, rot: 0, base: null, c: D.c, brk: 0 };
+  for (const q in D.p) p[q] = D.p[q][0];
+  for (const q in D.f) p[q] = D.f[q];
+  return Object.assign(p, o);
+}
+const MERLON = { s: 0.8, h: 0.9, gap: 1.6 }, DOORC = '#6a4a2c', ROOF = '#7a4a36', WTOP = 0.03;   // WTOP: walkway sits a hair above the wall top (no z-fight)
+function pctx(M, p, objs, floors) {
+  const cs = Math.cos(p.rot || 0), sn = Math.sin(p.rot || 0), g0 = gh(M, p.x, p.z), c = { M, base: p.base != null ? p.base : g0, grounded: p.base == null };
+  let n = 0; const W = (lx, lz) => [p.x + lx * cs + lz * sn, p.z - lx * sn + lz * cs];
+  // one prim box/cyl/cone/wedge: lx,lz centre (local), w=sx d=sz, y0 = bottom above part base, h = height; ra = extra rotation
+  c.solid = (t, lx, lz, w, d, y0, h, o = {}) => {
+    const [x, z] = W(lx, lz), sink = c.grounded && y0 === 0 && !o.nosink ? 0.8 : 0, g = gh(M, x, z);
+    const it = { id: 'p' + p.id + '_' + (n++), t, x: +x.toFixed(3), z: +z.toFixed(3), y: +(c.base + y0 - g - sink).toFixed(3), rot: +((p.rot || 0) + (o.ra || 0)).toFixed(4), sx: w, sy: h + sink, sz: d, c: o.c || p.c, col: o.col == null ? 1 : o.col, brk: o.brk ? 1 : 0, _p: p.id };
+    if (o.hid) it.hid = 1;
+    if (o.m) it.m = o.m;
+    objs.push(it); return it;
+  };
+  // big blocks: visible shell (no collision) + a ring of thin hidden strips = exact footprint for the game's circle collision
+  c.block = (lx, lz, w, d, y0, h, o = {}) => {
+    if (Math.min(w, d) <= 3.2 || p.brk) return c.solid('box', lx, lz, w, d, y0, h, o);
+    c.solid('box', lx, lz, w, d, y0, h, Object.assign({}, o, { col: 0 })); const t = 1.6;
+    for (const sg of [-1, 1]) { c.solid('box', lx, lz + sg * (d / 2 - t / 2), w, t, y0, h, { hid: 1 }); c.solid('box', lx + sg * (w / 2 - t / 2), lz, t, d - 2 * t, y0, h, { hid: 1 }); }
+  };
+  c.floor = (lx, lz, w, d, y, y2, th, o = {}) => { const [x, z] = W(lx, lz); floors.push({ id: 'p' + p.id + '_f' + (n++), x: +x.toFixed(3), z: +z.toFixed(3), w, d, rot: +((p.rot || 0) + (o.ra || 0)).toFixed(4), y: +y.toFixed(3), y2: +y2.toFixed(3), th, c: o.c || p.c, steps: o.steps ? 1 : 0, _p: p.id }); };
+  // merlons along a line (centre cx,cz; length len; axis ra: 0 = +z, PI/2 = +x), on both edges; skip(lx,lz) filters
+  c.cren = (cx, cz, len, th, ra, top, skip) => {
+    if (th < 1.2 || len < 1) return;
+    const nn = Math.max(1, Math.floor(len / MERLON.gap)), ux = ra ? 1 : 0, uz = ra ? 0 : 1, off = th / 2 - 0.4;
+    for (const sg of [-1, 1]) for (let i = 0; i < nn; i++) {
+      const t = -len / 2 + (i + 0.5) * len / nn, lx = cx + ux * t + uz * sg * off, lz = cz + uz * t + ux * sg * off;
+      if (skip && skip(lx, lz)) continue;
+      c.solid('box', lx, lz, MERLON.s, MERLON.s, top, MERLON.h, { col: 0, nosink: 1 });
+    }
+  };
+  c.W = W; return c;
+}
+const BRK_CHUNK = 4;
+// a wall bar along an axis: solid body (chunked when breakable) + merlons + walkway
+function bar(c, p, cx, cz, len, ra, skip) {
+  const ux = ra ? 1 : 0, uz = ra ? 0 : 1, th = p.th, h = p.h, nn = p.brk ? Math.max(1, Math.round(len / BRK_CHUNK)) : 1;
+  for (let i = 0; i < nn; i++) { const t = -len / 2 + (i + 0.5) * len / nn; c.solid('box', cx + ux * t, cz + uz * t, th, len / nn + (nn > 1 ? 0.02 : 0), 0, h, { ra, brk: p.brk }); }
+  if (!p.brk) { if (p.bt) c.cren(cx, cz, len, th, ra, h + WTOP, skip); if (p.wk) c.floor(cx, cz, th, len, c.base + h + WTOP, c.base + h + WTOP, 0.3, { ra }); }
+}
+function stairLike(c, p, steps) {   // floor ramp (y at −len/2 end → y+rise at +len/2) + a visual wedge under it
+  if (p.base == null) c.base = gh(c.M, ...c.W(0, -p.len / 2));
+  const th = 0.5; c.floor(0, 0, p.w, p.len, c.base, c.base + p.rise, th, { steps });
+  c.solid('wedge', 0, 0, p.w, p.len, -th, p.rise, { col: 0, nosink: 1 });
+}
+function deck(c, p, th, piers) {
+  c.floor(0, 0, p.w, p.len, c.base, c.base, th);
+  c.solid('box', 0, 0, p.w, p.len, -th, th, { col: 0, nosink: 1 });
+  if (p.rail) for (const sg of [-1, 1]) c.solid('box', sg * (p.w / 2 - 0.3), 0, 0.6, p.len, 0.03, 1.0, { nosink: 1 });
+  if (piers) for (const sg of [-1, 1]) { const lz = sg * (p.len / 2 - 1.2), [x, z] = c.W(0, lz), gp = gh(c.M, x, z), hh = c.base - th - gp + 0.8; if (hh > 0.2) c.solid('box', 0, lz, p.w, 2.4, gp - 0.8 - c.base, hh, { nosink: 1 }); }
+}
+const EXP = {
+  wall(c, p) { bar(c, p, 0, 0, p.len, 0); },
+  corner(c, p) { const th = p.th; bar(c, p, 0, (p.a - th) / 2, p.a, 0, (lx, lz) => lx > 0 && lz < th / 2 + 0.1); bar(c, p, (p.b - th) / 2, 0, p.b, Math.PI / 2, lx => lx < th / 2 + 0.1); },
+  tower(c, p) {
+    const r = p.r, h = p.h, R = p.round ? 1 : 0;
+    if (R) c.solid('cyl', 0, 0, 2 * r, 2 * r, 0, h, { brk: p.brk }); else c.block(0, 0, 2 * r, 2 * r, 0, h, { brk: p.brk });
+    if (p.roof) c.solid('cone', 0, 0, 2 * r + 0.8, 2 * r + 0.8, h, Math.max(2, r * 1.2), { col: 0, c: ROOF, nosink: 1 });
+    else if (!p.brk) {
+      if (p.bt) {
+        if (R) { const rr = r - 0.4, nn = Math.max(6, Math.floor(6.2832 * rr / MERLON.gap)); for (let i = 0; i < nn; i++) { const a = i / nn * 6.2832; c.solid('box', rr * Math.sin(a), rr * Math.cos(a), MERLON.s, MERLON.s, h + WTOP, MERLON.h, { ra: a, col: 0, nosink: 1 }); } }
+        else { c.cren(0, 0, 2 * r, 2 * r, 0, h + WTOP); c.cren(0, 0, 2 * r - 1.6, 2 * r, Math.PI / 2, h + WTOP); }
+      }
+      const y = c.base + h + WTOP; if (R) { c.floor(0, 0, 1.94 * r, 1.2 * r, y, y, 0.3); c.floor(0, 0, 1.2 * r, 1.94 * r, y, y, 0.3); } else c.floor(0, 0, 2 * r - 0.2, 2 * r - 0.2, y, y, 0.3);   // round: plus-shaped floor
+    }
+  },
+  gate(c, p) {
+    const th = p.th, h = p.h, gw = p.gw, g = Math.min(p.gh, h - 0.5), pl = Math.max(0.5, (p.len - gw) / 2);
+    for (const sg of [-1, 1]) c.solid('box', 0, sg * (gw / 2 + pl / 2), th, pl, 0, h, { brk: p.brk });
+    c.solid('box', 0, 0, th, gw, g, h - g, { brk: p.brk });   // lintel (collides only above head height: bot > 0.3)
+    if (p.door) c.solid('box', 0, 0, 0.6, gw - 0.1, 0, g, { brk: 1, c: DOORC, m: 'wood' });
+    if (!p.brk) { if (p.bt) c.cren(0, 0, p.len, th, 0, h + WTOP); if (p.wk) c.floor(0, 0, th, p.len, c.base + h + WTOP, c.base + h + WTOP, 0.3); }
+  },
+  keep(c, p) {
+    const w = p.w, d = p.d, h = p.h;
+    c.block(0, 0, w, d, 0, h, { brk: p.brk });
+    if (p.roof) c.solid('cone', 0, 0, w + 1.4, d + 1.4, h, Math.max(3, h * 0.45), { col: 0, c: ROOF, nosink: 1 });
+    else if (!p.brk) {
+      if (p.bt) { c.cren(0, 0, d, w, 0, h + WTOP); c.cren(0, 0, w - 1.6, d, Math.PI / 2, h + WTOP); }
+      c.floor(0, 0, w, d, c.base + h + WTOP, c.base + h + WTOP, 0.3);
+    }
+    if (p.turrets) for (const sx of [-1, 1]) for (const sz of [-1, 1]) { c.solid('cyl', sx * w / 2, sz * d / 2, 3.2, 3.2, 0, h + 3, { brk: p.brk }); c.solid('cone', sx * w / 2, sz * d / 2, 4, 4, h + 3, 2.4, { col: 0, c: ROOF, nosink: 1 }); }
+  },
+  stairs(c, p) { stairLike(c, p, 1); }, ramp(c, p) { stairLike(c, p, 0); },
+  walk(c, p) { if (p.base == null) c.base += p.up; deck(c, p, 0.5, 0); },
+  bridge(c, p) { if (p.base == null) c.base += p.up; deck(c, p, 0.8, p.piers ? 1 : 0); },
+};
+export function expandParts(M, list) {   // → {objs, floors} (prim objs + floor slabs generated from parts)
+  const objs = [], floors = [];
+  for (const p of list || M.parts || []) { const f = EXP[p.k]; if (!f) continue; f(pctx(M, p, objs, floors), p); }
+  return { objs, floors };
+}
+// connection points for snapping: world x,z + top height `y` (absolute) + dy (height above the part's base)
+export function partPorts(M, p) {
+  const cs = Math.cos(p.rot || 0), sn = Math.sin(p.rot || 0), W = (lx, lz) => [p.x + lx * cs + lz * sn, p.z - lx * sn + lz * cs], out = [];
+  let base = p.base != null ? p.base : gh(M, p.x, p.z);
+  const add = (lx, lz, dy) => { const [x, z] = W(lx, lz); out.push({ x, z, dy, y: base + dy }); };
+  switch (p.k) {
+    case 'wall': add(0, -p.len / 2, p.h); add(0, p.len / 2, p.h); add(0, 0, p.h); break;
+    case 'corner': add(0, p.a - p.th / 2, p.h); add(p.b - p.th / 2, 0, p.h); add(0, 0, p.h); break;
+    case 'tower': add(p.r, 0, p.h); add(-p.r, 0, p.h); add(0, p.r, p.h); add(0, -p.r, p.h); break;
+    case 'gate': add(0, -p.len / 2, p.h); add(0, p.len / 2, p.h); break;
+    case 'keep': for (const a of [-1, 1]) { add(a * p.w / 2, 0, p.h); add(0, a * p.d / 2, p.h); for (const b of [-1, 1]) add(a * p.w / 2, b * p.d / 2, p.h); } break;
+    case 'stairs': case 'ramp': if (p.base == null) base = gh(M, ...W(0, -p.len / 2)); add(0, -p.len / 2, 0); add(0, p.len / 2, p.rise); break;
+    case 'walk': case 'bridge': if (p.base == null) base += p.up; add(0, -p.len / 2, 0); add(0, p.len / 2, 0); break;
+  }
+  return out;
+}
+// shift p so its nearest port meets a port of another part (within `reach`) → {dx, dz, base} or null
+export function snapPart(M, p, reach = 1.6) {
+  const mine = partPorts(M, p), best = { d: reach + 1 };
+  for (const q of M.parts || []) { if (q.id === p.id) continue; for (const e of partPorts(M, q)) for (const m of mine) { const d = Math.hypot(e.x - m.x, e.z - m.z); if (d < best.d) Object.assign(best, { d, dx: e.x - m.x, dz: e.z - m.z, y: e.y, dy: m.dy, raised: q.base != null }); } }
+  if (best.d > reach) return null;
+  // level: only stairs/ramps/walkways/bridges (and anything meeting a raised part) take the neighbour's height; walls/towers keep their own base
+  const lvl = best.raised || ['stairs', 'ramp', 'walk', 'bridge'].includes(p.k);
+  return { dx: best.dx, dz: best.dz, base: lvl ? +(best.y - best.dy).toFixed(3) : undefined };
 }
