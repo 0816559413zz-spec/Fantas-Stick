@@ -13,7 +13,7 @@ CITY_MID:140 CITY_C2:140 cityModeData:141 mapArea:157 AREA:158 areaClamp:160
 ## js/02-citytest.js (28) — แมพทดสอบเมืองใหญ่ (กล่องเทา) — ใช้วัดความลื่นของเครื่องยนต์ก่อนสร้างเ…
 CITY_N:4 CITY_B:4 CITY_ROAD:4 genCityTest:5 cityTestProps:19
 
-## js/02-data.js (384) — 
+## js/02-data.js (384) — ค่าคงที่ของเกม
 W:4 H:4 PR:4 PILLARS:6 SPAWNF:7 mulberry:9 genForest:10 genPitch:27 genHogsmeade:36
 §54 แผนที่โล่ง 3 แบบ (ผู้ใช้: ป่ามืดไม่สนุก อยากได้ที่โล่งๆ)
 genMeadow:55 genLake:61 genRuins:66
@@ -29,12 +29,13 @@ HOUSES:232 HAIRC:237 HAIRSTY:239 WOODC:242 WOODN:243 WCOREC:244 WCOREN:245 WANDS
 ## js/02-fcs-data.js (3) — 
 FCS_DATA:3
 
-## js/02-fcs.js (129) — 
+## js/02-fcs.js (170) — แผนที่ First Castle Strike (โหมดบุกปราสาท 'siege') — แบบ Basic จากภาพร่างของผู้ใช้ใน Map …
 FCS_C:7 FCS_WH:8 genFcs:9
-§103 พื้นที่เล่นตามเฟส (กำแพงล่องหน) + เขตจุดเกิดปลอดภัย — ใช้ทั้งโฮสต์ (G…
-SGPH:104 SG_SPR:105 _sgAreaC:106 sgArea:107 sgClamp:113 sgInArea:123
+§144 พื้นที่เล่นตามเฟส (กำแพงล่องหน) + เขตจุดเกิดปลอดภัย — ใช้ทั้งโฮสต์ (G…
+SGPH:145 SG_SPR:146 _sgAreaC:147 sgArea:148 sgClamp:154 sgInArea:164
 
-## js/03-spells-core.js (249) — 
+## js/03-spells-core.js (249) — ระบบคาถาใหม่: สาย (path) × คาถา (spell) + สถานะ (status effects)
+§6 ไอคอนคาถา: จาก game-icons.net (CC BY 3.0, เครดิตใน "คู่มือ" และ icons…
 ICONS:8 ICOALIAS:9 hasIco:10 ICOBASE:12 icoURL:13 ICO:14 icoTint:15 icoHTML:24 PATHS:25 SPELL_LIST:34 SPELLS:34 defSpell:35 SLOTK:36 BRMAP:36 KITP:37 parseKit:38 cleanKit:55 setKit:56 pathReset:59
 §61 สถานะ (ใช้ได้ทั้งผู้เล่นและศัตรู)
 isBig:62 ccScale:64 ccTouch:65 addStun:66 addRoot:67 addFreeze:68 addSlow:73 addChill:74 ignite:79 FX_SHOCK_CYAN:87 FX_ONFIRE:87 shock:88 knock:93 addWard:94 addFrostSlow:96 frostSlow:97 moveMul:104 BRN_MAX:106 addBurn:107 addOnFire:109 addXBurn:110 addPoison:111 addSil:112 addFear:113 addBlind:114 addMark:115 healT:117 tickStatus:122 clearStatus:145 fxMask:146
@@ -187,10 +188,10 @@ windUltCast:504 windUltTick:507 windUltSweep:532 windFloatZ:540 windSnapP:543 wi
 §547 สกิล (ผู้ใช้ 2026-11-08: รีดีไซน์ทั้งชุด — id เดิมไว้ให้ชุดสกิล/tune/…
 W_WL:549 W_DR:555 W_VX:561 W_VO:567 W_FW:573 W_UL:583
 
-## js/10-net.js (200) — 
+## js/10-net.js (200) — เครือข่าย (PeerJS / WebRTC)
 PREFIX:4 NET:5 RC:9 TURN_SERVERS:12 ICE:13 PEER_OPT:14 TURN_URL:16 ICE_READY:18 JN:22 LAG:24 lagDo:25 hostSend:26 LOBBY:27 genCode:28 sendAll:29 NETD_KEYS:33 NETD:33 netDeltaReset:34 netDelta:35 NET_MAX:49 _netTE:49 netSendSnap:50 NETU:62 netUndelta:63 setStatus:69 hostGame:71 hostPeer:80 netConnect:100 joinWatch:111 joinFail:126 netLost:132 joinGame:147 joinPeer:158 clientOnData:173 leave:188 leaveRoom:190
 
-## js/11-host.js (432) — ฝั่งโฮสต์: สถานะเกมทั้งหมดคำนวณที่นี่ (server-authoritative)
+## js/11-host.js (432) — 
 G:4 EVL:4 EVN:4 hostLast:4 tickN:4 emit:5 feed:6 banner:7 plist:8 cleanName:9 freshStats:11 newPlayer:18 emptyInput:21 frameOk:23 addPlayer:24 initHostLobby:33 lobbyMsg:40 broadcastLobby:41 INPN:43 hostOnData:44 hostDrop:75 hostRemove:84 validate:100 hostStart:114 hostToLobby:141 MIDJOIN:148 modeCap:149 midJoin:150 CHATT:166 chatRelay:167 emoHost:175 resetBody:177 fmap:183 spawnPts:184 teamPts:186 spSpread:188 placeAll:189 respawn:201
 §220 ลูปหลักฝั่งโฮสต์
 hostTick:221 angDiff:238 cH:240 vR:241 updatePlayer:243 hitProp:419 damagePropsIn:426 nearUseProp:427 useProp:428
@@ -207,7 +208,7 @@ CITY_FL:8 CITY_PW:8 CDMG:9 CITYD:16 cityOn:17 cityLayout:19 cityReset:29 cityApp
 §146 ข้างในตึก (2026-10-28 ผู้ใช้: เดินเข้าได้ 1–3 ชั้น มีทางขึ้น • ผนังนอ…
 CIN:150 cityInterior:151 cinSlabOn:180 cinOpenPanel:182 cityIwHit:184 cityRampHit:186 cinIwSegs:189 cinIwRects:190 cinSecAt:191 citySecHit:193 cinIn:195 cinHole:196 cinRampH:197 _sgCI:198 cityBoxGrid:199 cityRoomAt:200 cityFloorH:202 cityCeilH:207 cinWallRect:211 cityCollideIn:214 cityProjIn:224 _sgCS:242 citySolidAt:243 cityRay:252 cityRoomBox:255 citySnapB:256 citySnapS:257 cityParse:259
 
-## js/12-efs.js (77) — 
+## js/12-efs.js (77) — สภาพธาตุบนฉาก (Element Surfaces) — เฟส 1: ไฟบนรั้วไม้ (designs/element-surfaces.md)
 EFSV:9 EFS:10 efsLv:11 efsBuild:12 efsDist:28 efsHeat:29 efsProj:34 efsEnv:40 _efsHit:44 efsTick:45 efsSnap:66 efsParse:70 efsHostView:77
 
 ## js/13-enemies.js (171) — ศัตรู (โหมด Co-op)
@@ -265,7 +266,7 @@ MY:210 myDB:211 mySave:212 myLoad:215 myDecodeReady:221 myPlay:222 myNext:234 my
 §256 เพลงประกอบ (สร้างสดตามแผนที่)
 MUSIC:257 THEMES:258 padNote:263 musicTick:270 toggleMusic:299
 
-## js/19-client.js (289) — 
+## js/19-client.js (289) — ฝั่งแสดงผล (ทุกเครื่อง รวมโฮสต์ ใช้ snapshot เดียวกัน)
 cv:4 cx:4 DPR:5 SW:5 SH:5 resize:6 VIEW:12 screen:13 lastBuffKey:13 overShown:13 lastCount:13 PARTS:14 TEXTS:14
 §15 งบเอฟเฟกต์ (VFX budget)
 VFXB:20 _apush:21 vfxQual:29 vfxBegin:31 vfxEnd:34 vfxOnce:36 vfxExtra:38 PCOL:39 setScreen:41 onLobby:53
@@ -341,14 +342,14 @@ CITY_STY:181 CITY_VEH:188 cityFacade:190 CITYK:203 _cZ:204 _cT:204 _cR:204 _cC:2
 §259 ตึกไฮไลต์ล้มทั้งตึก (ขั้น 7)
 _ctA:262 _ctB:262 _ctC:262 cityTowerPose:263 cityTowerAnim:271 cityTowerRubble:278 CAREA:292 cityAreaSync:293 cityViewSync:305 cityDebris:349 cityFX:358
 
-## js/28-fcs-build.js (170) — 
-buildFcs:5 EFS3:37 fcsFences:38 _efC:55 _efM:55 _efS:55 _efZ:55 efsView:56
-§81 ภาพโหมด (ลูกข่ายทุกเครื่องจาก snapshot M.sg)
-SGV3:82 sgClearView:83 sgViewBuild:84 SGVZR:103 sgBarrier:105 sgSync:119 sgDust:140 sgFx:141
-§146 HUD
-sgTop:147 sgHud:149
+## js/28-fcs-build.js (199) — ภาพแผนที่ First Castle Strike (แบบ Basic: กล่อง/ทรงพื้นฐาน ยังไม่มีโมเดลจริง) + ภาพ/HUD โ…
+buildFcs:5 fcsBridge:37 EFS3:66 fcsFences:67 _efC:84 _efM:84 _efS:84 _efZ:84 efsView:85
+§110 ภาพโหมด (ลูกข่ายทุกเครื่องจาก snapshot M.sg)
+SGV3:111 sgClearView:112 sgViewBuild:113 SGVZR:132 sgBarrier:134 sgSync:148 sgDust:169 sgFx:170
+§175 HUD
+sgTop:176 sgHud:178
 
-## js/28-fcs-forest.js (202) — 
+## js/28-fcs-forest.js (202) — ป่าสนหมอก ในแผนที่ First Castle Strike (เฟส 1 = ช่อง x 0–28 ของ Map Editor) — ทำตามรูปอ้า…
 FF:7 FF_X1:8 FF_NS:9 ffGroundTex:11 ffParts:33 fcsForest:40 ffMerge:123 ffDetail:131 fcsRuin:158 fcsForestTick:192 FFC:202
 
 ## js/28-maps-build.js (781) — สร้างแผนที่
@@ -804,7 +805,7 @@ PERF:9 perfFrame:12 perfDom:26 perfStats:34 perfGraph:38 _gpuName:51 gpuIntegrat
 ## js/72-dash-pose.js (85) — 
 DPOSE:12 DPT:24 _dpQ:25 _dpX:25 _dpP:25 dpMix:26 dpKnees:28 dpStyle:36 DPDBG:41 dashPose:42 dpApply:75
 
-## js/73-tune.js (142) — 
+## js/73-tune.js (142) — แผงปรับค่า 🎚️ (F8 / ปุ่ม "ปรับค่า" ในเมนูพัก และหน้าแรก) — ปรับตัวเลขในเกมสดๆ แล้วเซฟลง …
 TUNE:8 tuneNum:9 tuneBuild:15
 §81 ใช้ / เก็บค่า
 tuneSetVal:82 tuneApplyFile:85 tuneJson:89
@@ -818,7 +819,7 @@ LOOK:17 lookPreset:27 lookMap:29 lookName:30 lookEnvFor:31 lookApply:41 lookRays
 §71 ลงทะเบียนในเครื่องมือปรับค่า (js/73-tune.js): 1 หมวด "🌗 Look" แยกส่ว…
 LOOK_F:72 lookRegister:78
 
-## js/75-ambient.js (52) — 
+## js/75-ambient.js (52) — Ambient 🌫️ — ฝุ่นลอย (dust motes) + หมอกลอยต่ำ (mist) ที่ใช้ได้ทุกแมพ ปรับตามพรีเซ็ต Loo…
 AMBX:9 AMBX_V:10 AMBX_F:24 ambMesh:27 ambQual:39 ambFrame:40
 
 ## js/76-surface.js (125) — 
@@ -846,4 +847,4 @@ _dvMap:189 devMapDraw:193
 §206 หน้าต่าง
 _dvPanel:207 _dvBtn:208 devToggle:211 dvBtn:216 dvRow:217 dvTog:218 dvSec:219 devRender:220 devPos:260
 
-(104 files, 29830 lines)
+(104 files, 29900 lines)

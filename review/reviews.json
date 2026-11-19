@@ -1,5 +1,5 @@
 {
- "next": 81,
+ "next": 82,
  "items": [
   {
    "id": 80,
@@ -1863,6 +1863,30 @@
     },
     {
      "t": "ตัวเลขความร้อน/ลาม/ดาเมจรู้สึกดีตอนเล่นจริง"
+    }
+   ]
+  },
+  {
+   "id": 81,
+   "title": "L-shaped stone bridge (Castle Strike forest)",
+   "text": "Map fcs → bridge from the attacker forest (south ramp near 10.5,23) up to the corner, then east to the defender side (ramp near 23,2). Deck 6 m wide, ~6 m above ground, arches you can walk under, crenellated parapet (shoot through gaps). Bots don't use it yet.",
+   "kind": "Map",
+   "who": "Map",
+   "status": "wait",
+   "created": "2026-11-19T09:13:50",
+   "updated": "2026-11-19T09:13:50",
+   "imgs": [],
+   "links": [
+    "/designs/fcs_forest/bridge_sheet.jpg",
+    "/designs/fcs_forest/bridge_b6_on_deck.jpg",
+    "/designs/fcs_forest/bridge_b2_under.jpg"
+   ],
+   "checks": [
+    {
+     "t": "Bridge position/shape matches the drawing"
+    },
+    {
+     "t": "Height and width feel right in play"
     }
    ]
   }

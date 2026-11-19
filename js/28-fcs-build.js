@@ -19,6 +19,7 @@ function buildFcs(){
   inst(box,stoneMat(1,1,'#7a746a'),cells[1],([x,y])=>{const px=(x+0.5)*C,py=(y+0.5)*C,b=GY(px,py);return m4.makeScale(c3,FCS_WH[1],c3).setPosition(tx(px),b+FCS_WH[1]/2,tz(py)).clone();});
   inst(box,stoneMat(1,1,'#9a8a6a'),cells[2],([x,y])=>{const px=(x+0.5)*C,py=(y+0.5)*C,b=GY(px,py);return m4.makeScale(c3,FCS_WH[2],c3).setPosition(tx(px),b+FCS_WH[2]/2,tz(py)).clone();});
   fcsFences(F.fences||[],inst,box);   // รั้วไม้ (ชนิด 3)
+  if(F.bridge)try{fcsBridge(F.bridge);}catch(e){console.error('fcsBridge',e);}
   // ต้นไม้ / ลัง / เสา
   const P=k=>F.props.filter(q=>q[0]===k);
   const inF=q=>q[1]<FF_X1*C,fb=[];   // ต้นไม้ในป่า = กรวยชั่วคราว จนกว่าโมเดลสนจริงโหลดเสร็จ (js/28-fcs-forest.js)
@@ -31,6 +32,34 @@ function buildFcs(){
   // แท่นจุดเกิด (สีทีม)
   for(const [t,L] of [[0,F.sp.A],[1,F.sp.B]])for(const k in L){const s=L[k],m=new THREE.Mesh(new THREE.CircleGeometry(SG_SPR*S3,32),new THREE.MeshBasicMaterial({color:TEAMC[t],transparent:true,opacity:0.18,depthWrite:false}));m.rotation.x=-Math.PI/2;m.position.set(tx(s.x),GY(s.x,s.y)+0.05,tz(s.y));addW(m);}
   try{fcsForest(fb);}catch(e){console.error('fcsForest',e);}
+}
+// L-shaped stone bridge (js/02-fcs.js bridge): arched spans (extruded shape, piers 1.6 m), corner block, ramps, crenellated parapet.
+function fcsBridge(B){
+  const mat=stoneMat(1,1,'#a49a88'),dark=stoneMat(1,1,'#8a8070'),W=B.HW*2*S3,DH=B.DH,grp=new THREE.Group();
+  const add=(geo,m,x,y,z,ry)=>{const o=new THREE.Mesh(geo,m);o.position.set(x,y,z);o.rotation.y=ry||0;o.castShadow=o.receiveShadow=true;grp.add(o);return o;};
+  // arch spans: shape in (along, up) meters, extruded across the deck width
+  for(const s of B.spans){const L=Math.hypot(s.x2-s.x1,s.y2-s.y1)*S3,r=(L-1.6)/2,ux=(s.x2-s.x1)/(L/S3),uy=(s.y2-s.y1)/(L/S3);
+    const mx=(s.x1+s.x2)/2,my=(s.y1+s.y2)/2,base=Math.min(GY(s.x1,s.y1),GY(s.x2,s.y2),GY(mx,my))-1.2,top=DH-base,spring=DH-1.3-r-base;
+    const sh=new THREE.Shape();sh.moveTo(-L/2,0);sh.lineTo(-r,0);sh.lineTo(-r,spring);sh.absarc(0,spring,r,Math.PI,0,true);sh.lineTo(r,0);sh.lineTo(L/2,0);sh.lineTo(L/2,top);sh.lineTo(-L/2,top);sh.lineTo(-L/2,0);
+    const geo=new THREE.ExtrudeGeometry(sh,{depth:W,bevelEnabled:false,curveSegments:14});geo.translate(0,0,-W/2);
+    add(geo,mat,tx(mx),base,tz(my),-Math.atan2(uy,ux));
+    // string course under the parapet (thin ledge both sides)
+    add(sGeo(THREE.BoxGeometry,L,0.25,W+0.5),dark,tx(mx),DH-0.2,tz(my),-Math.atan2(uy,ux));}
+  // corner block
+  {const x=B.ax,y=B.cy,base=GY(x,y)-1.2;add(sGeo(THREE.BoxGeometry,W+0.4,DH-base,W+0.4),mat,tx(x),base+(DH-base)/2,tz(y));
+   add(sGeo(THREE.BoxGeometry,W+0.9,0.25,W+0.9),dark,tx(x),DH-0.2,tz(y));}
+  // ramps: side profile extruded across the width
+  for(const [R0,alongY,L,gEnd] of [[B.rs,true,B.LS,B.gS],[B.re,false,B.LE,B.gE]]){const Lm=L*S3,x0=alongY?B.ax:B.xE,y0=alongY?B.yS:B.cy,base=Math.min(GY(x0,y0),gEnd)-1.2;
+    const sh=new THREE.Shape();sh.moveTo(0,0);sh.lineTo(Lm+0.3,0);sh.lineTo(Lm+0.3,gEnd-base-0.05);sh.lineTo(0,DH-base);sh.lineTo(0,0);
+    const geo=new THREE.ExtrudeGeometry(sh,{depth:W,bevelEnabled:false});geo.translate(0,0,-W/2);
+    add(geo,mat,tx(x0),base,tz(y0),alongY?-Math.PI/2:0);}
+  // parapet: low base wall + merlons (gaps between = shoot-through)
+  const m4=new THREE.Matrix4(),q=new THREE.Quaternion(),Y=new THREE.Vector3(0,1,0),walls=[],mer=[];
+  for(const [x1,y1,x2,y2,n] of B.par){const L=Math.hypot(x2-x1,y2-y1)*S3,a=-Math.atan2(y2-y1,x2-x1);q.setFromAxisAngle(Y,a);
+    walls.push(m4.compose(new THREE.Vector3(tx((x1+x2)/2),DH+0.25,tz((y1+y2)/2)),q,new THREE.Vector3(L,0.5,0.45)).clone());
+    for(let i=0;i<n;i++){const t=(i+0.5)/n;mer.push(m4.compose(new THREE.Vector3(tx(x1+(x2-x1)*t),DH+0.85,tz(y1+(y2-y1)*t)),q,new THREE.Vector3(1.0,0.75,0.5)).clone());}}
+  for(const [L,m] of [[walls,mat],[mer,mat]]){if(!L.length)continue;const im=new THREE.InstancedMesh(sGeo(THREE.BoxGeometry,1,1,1),m,L.length);L.forEach((mm,i)=>im.setMatrixAt(i,mm));im.castShadow=im.receiveShadow=true;grp.add(im);}
+  addW(grp);
 }
 // รั้วไม้ (ชนิด 3 — js/02-fcs.js fences): เสาไม้ทุก ~1.8 ม. เอียงนิด ๆ + ราว 2 เส้นต่อช่วงเสา ตามพื้นเอียง • InstancedMesh 2 ชุด
 // จำ index เสา/ราวของแต่ละช่วงไว้ใน EFS3 (ลำดับช่วงเดียวกับ EFS.S ของ js/12-efs.js) → efsView ทำไหม้ดำ / พังหาย / เปลวไฟ

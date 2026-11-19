@@ -70,6 +70,44 @@ function genFcs(){
     // กองหินหล่นรอบฐานกำแพง (ภาพล้วน)
     for(let i=0;i<26;i++){const a=(R()-0.5)*26,b=(R()-0.5)*26;if(Math.abs(a)<8.5&&Math.abs(b)<8.5)continue;const [x,y]=P(a,b);props.push(['rr',x,y,+(0.6+R()*0.9).toFixed(2)]);}
    }}
+  // L-shaped stone bridge (user 2026-11-19, designs/fcs_forest/brigde high ground test 1.png). High-ground walkway:
+  // attacker end south (10.5,23) -> corner (10.5,2) -> defender end east (23,2) cells. Deck top = world 7 m (~6 m over ground),
+  // 6 m wide, arches underneath (walk under between piers), crenellated parapet 1.2 m, ramp ~1:2.8 at each end.
+  // Walk on top = TERR floor (terr.fl). Piers / corner block / ramp body = obs k:'fbr' (top = absolute world height).
+  // Parapet merlons = obs k:'fbp' (top/bot so ground players pass under). Visual: fcsBridge (js/28-fcs-build.js).
+  const bridge=(()=>{
+    const hG=(px,py)=>{const fx=clamp(px/c,0,nx-1.001),fy=clamp(py/c,0,ny-1.001),i=fx|0,j=fy|0,u=fx-i,v=fy-j,k=j*nx+i;return (g[k]*(1-u)+g[k+1]*u)*(1-v)+(g[k+nx]*(1-u)+g[k+nx+1]*u)*v;};
+    const DH=7,HW=60,ax=10.5*C,cy=2*C,yS=23*C,xE=23*C,slope=0.35;   // slope < 0.49: one 45 px floor step must stay under TSTEP
+    const gS=hG(ax,yS+280),gE=hG(xE+400,cy),LS=Math.round((DH-gS)/slope*20/45)*45,LE=Math.round((DH-gE)/slope*20/45)*45;
+    const B={DH,HW,ax,cy,yS,xE,LS,LE,gS,gE,
+      ns:{x1:ax-HW,y1:cy-HW,x2:ax+HW,y2:yS},ew:{x1:ax-HW,y1:cy-HW,x2:xE,y2:cy+HW},
+      rs:{x1:ax-HW,y1:yS,x2:ax+HW,y2:yS+LS},re:{x1:xE,y1:cy-HW,x2:xE+LE,y2:cy+HW},spans:[],par:[]};
+    const rampTop=(px,py)=>{let t;if(py>=yS&&py<=yS+LS&&Math.abs(px-ax)<=HW)t=(py-yS)/LS,t=DH+(gS-DH)*t;else if(px>=xE&&px<=xE+LE&&Math.abs(py-cy)<=HW)t=(px-xE)/LE,t=DH+(gE-DH)*t;else return NaN;return t;};
+    B.rampTop=rampTop;
+    // floor grid (aligned to the terrain lattice: c = 45 px)
+    const X0=Math.floor((ax-HW-45)/45)*45,Y0=Math.max(0,Math.floor((cy-HW-45)/45)*45),X1b=Math.ceil((xE+LE+45)/45)*45,Y1b=Math.ceil((yS+LS+45)/45)*45;
+    const fnx=(X1b-X0)/45+1,fny=(Y1b-Y0)/45+1,top=new Float32Array(fnx*fny).fill(NaN),bot=new Float32Array(fnx*fny).fill(NaN);
+    const inR=(r,x,y)=>x>=r.x1-0.5&&x<=r.x2+0.5&&y>=r.y1-0.5&&y<=r.y2+0.5;
+    for(let j=0;j<fny;j++)for(let i=0;i<fnx;i++){const x=X0+i*45,y=Y0+j*45,k=j*fnx+i,gr=hG(x,y);
+      if(inR(B.ns,x,y)||inR(B.ew,x,y)){top[k]=DH;bot[k]=DH-1.2;continue;}
+      const t=rampTop(x,y);if(t===t&&t-gr>0.05){top[k]=t;bot[k]=Math.min(gr,t-0.01);}}
+    terr.fl.push({x0:X0,y0:Y0,nx:fnx,ny:fny,top,bot,k:'bridge'});
+    const ob=(x,y,r,tp)=>obs.push({x,y,r,k:'fbr',top:tp,hgt:tp,s:0});
+    // arch spans: NS from corner block south edge to the south ramp; EW from corner block east edge to the east ramp
+    const runs=[[ax,cy+HW,ax,yS],[ax+HW,cy,xE,cy]];
+    for(const [x1,y1,x2,y2] of runs){const L=Math.hypot(x2-x1,y2-y1),n=Math.max(1,Math.round(L/20/8)),ux=(x2-x1)/L,uy=(y2-y1)/L;
+      for(let i=0;i<n;i++)B.spans.push({x1:x1+ux*L*i/n,y1:y1+uy*L*i/n,x2:x1+ux*L*(i+1)/n,y2:y1+uy*L*(i+1)/n});
+      for(let i=1;i<n;i++){const px=x1+ux*L*i/n,py=y1+uy*L*i/n;for(const o of [-36,0,36])ob(px-uy*o,py+ux*o,24,DH-0.1);}}   // piers (1.6 m thick, full width)
+    for(const a of [-40,0,40])for(const b of [-40,0,40])ob(ax+a,cy+b,30,DH-0.1);   // corner block
+    // ramp side walls only (thin circles on both edges): the middle lane stays clear so the floor can lift players up
+    for(const R0 of [B.rs,B.re]){const alongY=R0===B.rs,L=alongY?LS:LE;for(let d=7;d<L;d+=14)for(const o of [-56,56]){const x=alongY?ax+o:xE+d,y=alongY?yS+d:cy+o,t=rampTop(alongY?ax:x,alongY?y:cy);if(t-hG(x,y)>0.3)ob(x,y,8,t);}}
+    // parapet: merlon every 1.6 m on the outer edges (no parapet across the ramp mouths)
+    const lines=[[ax-HW+6,cy-HW,ax-HW+6,yS],[ax+HW-6,cy+HW,ax+HW-6,yS],[ax-HW,cy-HW+6,xE,cy-HW+6],[ax+HW,cy+HW-6,xE,cy+HW-6]];
+    for(const [x1,y1,x2,y2] of lines){const L=Math.hypot(x2-x1,y2-y1),n=Math.max(1,Math.round(L/32));B.par.push([x1,y1,x2,y2,n]);
+      for(let i=0;i<n;i++){const t=(i+0.5)/n,x=x1+(x2-x1)*t,y=y1+(y2-y1)*t;obs.push({x,y,r:12,k:'fbp',top:DH+1.2,hgt:DH+1.2,bot:DH-hG(x,y)-0.3,s:0});}}
+    // footprint test (px margin m): keeps trees / rocks / clutter out
+    B.at=(x,y,m)=>[B.ns,B.ew,B.rs,B.re].some(r=>x>r.x1-m&&x<r.x2+m&&y>r.y1-m&&y<r.y2+m);
+    return B;})();
   // ป่าทึบ (เฟส 1, ช่อง x<28): ต้นไม้/หินชนได้เพิ่มจากที่ผู้ใช้วาง (ผู้ใช้ 2026-11-18 "denser and solid") — สุ่มด้วย seed คงที่ ทุกเครื่องได้ผลเดียวกัน
   // props: ['tr',x,y,1] ต้นในป่าเพิ่ม • ['te',x,y] ผนังต้นไม้ขอบแผนที่ • ['bd',x,y,ชนิด,ขนาด] หินก้อนใหญ่ — ภาพอยู่ js/28-fcs-forest.js
   {const R=mulberry(918273),X1=28*C,hAt=(px,py)=>{const fx=clamp(px/c,0,nx-1.001),fy=clamp(py/c,0,ny-1.001),i=fx|0,j=fy|0,u=fx-i,v=fy-j,k=j*nx+i;return (g[k]*(1-u)+g[k+1]*u)*(1-v)+(g[k+nx]*(1-u)+g[k+nx+1]*u)*v;};
@@ -80,7 +118,7 @@ function genFcs(){
    const solid=props.map(q=>[q[1],q[2],q[0]==='tr'?100:70]);
    const ok=(x,y,gap)=>x>20&&y>20&&x<X1-30&&y<H-20&&!wc(Math.floor(x/C),Math.floor(y/C))&&!wc(Math.floor((x+25)/C),Math.floor(y/C))&&!wc(Math.floor((x-25)/C),Math.floor(y/C))
      &&!spL.some(s=>Math.hypot(s.x-x,s.y-y)<300)&&!cores.some(k=>Math.hypot(k.x-x,k.y-y)<330)&&!bw.some(b=>x>b.x-60&&x<b.x+b.w+60&&y>b.y-60&&y<b.y+b.d+60)
-     &&!solid.some(([sx,sy,r])=>Math.hypot(sx-x,sy-y)<Math.max(r,gap));
+     &&!solid.some(([sx,sy,r])=>Math.hypot(sx-x,sy-y)<Math.max(r,gap))&&!bridge.at(x,y,gap>=100?100:30);
    const add=(k,x,y,r,hg,extra)=>{obs.push({x,y,r,k,hgt:hg,s:0});props.push([k==='fcb2'?'bd':k==='fce'?'te':'tr',x,y,...(extra||[])]);solid.push([x,y,r+60]);};
    // ผนังต้นไม้รอบขอบ 2 แถว
    for(let row=0;row<2;row++){const d0=40+row*90;
@@ -93,12 +131,15 @@ function genFcs(){
    for(let t=0,n=0;t<4000&&n<46;t++){const x=60+R()*(X1-120),y=60+R()*(H-120);if(slope(x,y)<0.28||dSeg(x,y)<90)continue;
      const ty=[0,1,2,3,0,4][(R()*6)|0],s=0.7+R()*0.6,r=Math.max(14,BD[ty][0]*s*20*0.75);if(!ok(x,y,r+50))continue;add('fcb2',x,y,r,BD[ty][1]*s,[ty,+s.toFixed(3)]);n++;}
   }
+  // user-placed trees/rocks under the bridge: drop them (crowns would poke through the deck)
+  for(let i=obs.length-1;i>=0;i--){const o=obs[i];if((o.k==='fct'||o.k==='fcb2')&&bridge.at(o.x,o.y,o.k==='fct'?100:60))obs.splice(i,1);}
+  for(let i=props.length-1;i>=0;i--){const q=props[i];if((q[0]==='tr'||q[0]==='bd')&&bridge.at(q[1],q[2],q[0]==='tr'?100:60))props.splice(i,1);}
   for(const k of cores)obs.push({x:k.x,y:k.y,r:40,k:'fck',hgt:6,s:0});   // ตัวแกน (คริสตัล) ชนได้
   // เฟส: โซนชนิด "เฟส" ชื่อ "เฟส N" หลายกรอบรวมกัน = พื้นที่เล่นของเฟส N
   const phases=[];
   for(const [k,name,x,y,zw,zh] of D.zones){if(k!=='ph')continue;const n=+((String(name).match(/(\d+)/)||[])[1]||0);if(!n)continue;
     (phases[n-1]=phases[n-1]||[]).push({x1:x*C,y1:y*C,x2:(x+zw)*C,y2:(y+zh)*C});}
-  return {W,H,obs,terr,fcs:{sp,cores,bw,props,fences,phases,n:Math.min(cores.length,phases.length)}};
+  return {W,H,obs,terr,fcs:{sp,cores,bw,props,fences,bridge,phases,n:Math.min(cores.length,phases.length)}};
 }
 // ---------- พื้นที่เล่นตามเฟส (กำแพงล่องหน) + เขตจุดเกิดปลอดภัย — ใช้ทั้งโฮสต์ (G.sg.ph) และลูกข่าย (snapshot) ----------
 let SGPH=1;

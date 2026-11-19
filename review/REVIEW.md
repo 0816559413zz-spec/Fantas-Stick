@@ -3,6 +3,20 @@
 > เขียนอัตโนมัติจาก `review.html` (ผ่าน `tools/serve.py`) — อย่าแก้ไฟล์นี้ตรง ๆ, แก้ `review/reviews.json` แล้วรัน `python tools/serve.py --review-md`.
 > **Claude:** ทำเฉพาะหัวข้อสถานะ **✏️ ขอแก้** — อ่านความเห็นผู้ใช้ (`ความเห็นผู้ใช้`) + เปิดรูปด้วย Read → แก้ → ตั้ง `status:"wait"` + เขียน `reply` (ไทยสั้น ๆ ว่าแก้อะไร) เพื่อส่งกลับให้ผู้ใช้รีวิวใหม่. อย่าตั้ง `ok` เอง (ผู้ใช้เป็นคนกดผ่าน). งานที่ **⏳ รอ** = รอผู้ใช้ ไม่ต้องทำอะไร
 
+## #81 L-shaped stone bridge (Castle Strike forest)
+- สถานะ: ⏳ รอผู้ใช้รีวิว • ชนิด: Map • สาย/ส่วน: Map
+
+**วิธีดู / อะไรรอรีวิว:**
+Map fcs → bridge from the attacker forest (south ramp near 10.5,23) up to the corner, then east to the defender side (ramp near 23,2). Deck 6 m wide, ~6 m above ground, arches you can walk under, crenellated parapet (shoot through gaps). Bots don't use it yet.
+
+- ลิงก์/ไฟล์: `/designs/fcs_forest/bridge_sheet.jpg`
+- ลิงก์/ไฟล์: `/designs/fcs_forest/bridge_b6_on_deck.jpg`
+- ลิงก์/ไฟล์: `/designs/fcs_forest/bridge_b2_under.jpg`
+
+**เช็กลิสต์:**
+- [ ] Bridge position/shape matches the drawing
+- [ ] Height and width feel right in play
+
 ## #80 Darkness Shield เคียวหมุน
 - สถานะ: ⏳ รอผู้ใช้รีวิว • ชนิด: VFX / แอนิเมชัน • สาย/ส่วน: Darkness
 
