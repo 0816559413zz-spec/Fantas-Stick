@@ -3,6 +3,18 @@
 > เขียนอัตโนมัติจาก `review.html` (ผ่าน `tools/serve.py`) — อย่าแก้ไฟล์นี้ตรง ๆ, แก้ `review/reviews.json` แล้วรัน `python tools/serve.py --review-md`.
 > **Claude:** ทำเฉพาะหัวข้อสถานะ **✏️ ขอแก้** — อ่านความเห็นผู้ใช้ (`ความเห็นผู้ใช้`) + เปิดรูปด้วย Read → แก้ → ตั้ง `status:"wait"` + เขียน `reply` (ไทยสั้น ๆ ว่าแก้อะไร) เพื่อส่งกลับให้ผู้ใช้รีวิวใหม่. อย่าตั้ง `ok` เอง (ผู้ใช้เป็นคนกดผ่าน). งานที่ **⏳ รอ** = รอผู้ใช้ ไม่ต้องทำอะไร
 
+## #83 Bridge 3D holes + parapet chunks falling
+- สถานะ: ⏳ รอผู้ใช้รีวิว • ชนิด: Map / destruction • สาย/ส่วน: Map
+
+**วิธีดู / อะไรรอรีวิว:**
+Castle Strike bridge → skill hits now punch real 3D holes in the stone (brick-shaped edges, deep cavity, loose bricks, bricks on the ground). Broken parapet leaves a low stump and chunks fall off to the ground (some land on the deck).
+
+- ลิงก์/ไฟล์: `/designs/fcs_forest/bridge_damage3d.jpg`
+
+**เช็กลิสต์:**
+- [ ] Holes look like Battlefield-style destruction
+- [ ] Parapet remains + falling chunks look right
+
 ## #82 Bridge damage: breakable parapet + brick skin damage
 - สถานะ: ⏳ รอผู้ใช้รีวิว • ชนิด: Map / destruction • สาย/ส่วน: Map
 

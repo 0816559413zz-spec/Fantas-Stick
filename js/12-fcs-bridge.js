@@ -19,6 +19,12 @@ function bskArch(f,a,z){
     if(d<r){const spring=BSKN.B.DH-1.3-r,arc=spring+Math.sqrt(r*r-d*d);if(z<arc)return arc+0.35;}}
   return z;
 }
+// arch ring top (world m) at along a on face f, or -1e9 if not over an arch opening
+function bskArcAt(f,a){
+  for(const s of BSKN.B.spans){const ns=s.x1===s.x2;if(ns!==(f.ax==='y'))continue;const p0=ns?s.y1:s.x1,p1=ns?s.y2:s.x2,L=Math.abs(p1-p0)/20,r=(L-1.6)/2,d=Math.abs(a-(p0+p1)/2)/20;
+    if(d<r+0.3)return BSKN.B.DH-1.3-r+Math.sqrt(Math.max(0,r*r-d*d))+0.15;}
+  return -1e9;
+}
 function bskEnv(x,y,rad,dmg,by,el,h){
   if(!BSKN.B||!BSKN.F.length)return;const hw=terrT(x,y)+(h||0);let best=null,bd=1e9;
   for(let i=0;i<BSKN.F.length;i++){const f=BSKN.F[i],along=f.ax==='y'?y:x,perp=f.ax==='y'?x:y,a=clamp(along,f.a0,f.a1),d=Math.hypot(perp-f.c,along-a);if(d<bd){bd=d;best={i,a};}}

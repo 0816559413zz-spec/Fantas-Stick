@@ -1,5 +1,5 @@
 {
- "next": 83,
+ "next": 84,
  "items": [
   {
    "id": 80,
@@ -1909,6 +1909,28 @@
     },
     {
      "t": "Parapet break feels right"
+    }
+   ]
+  },
+  {
+   "id": 83,
+   "title": "Bridge 3D holes + parapet chunks falling",
+   "text": "Castle Strike bridge → skill hits now punch real 3D holes in the stone (brick-shaped edges, deep cavity, loose bricks, bricks on the ground). Broken parapet leaves a low stump and chunks fall off to the ground (some land on the deck).",
+   "kind": "Map / destruction",
+   "who": "Map",
+   "status": "wait",
+   "created": "2026-11-19T09:47:09",
+   "updated": "2026-11-19T09:47:09",
+   "imgs": [],
+   "links": [
+    "/designs/fcs_forest/bridge_damage3d.jpg"
+   ],
+   "checks": [
+    {
+     "t": "Holes look like Battlefield-style destruction"
+    },
+    {
+     "t": "Parapet remains + falling chunks look right"
     }
    ]
   }

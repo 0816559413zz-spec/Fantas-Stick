@@ -13,7 +13,7 @@ CITY_MID:140 CITY_C2:140 cityModeData:141 mapArea:157 AREA:158 areaClamp:160
 ## js/02-citytest.js (28) — แมพทดสอบเมืองใหญ่ (กล่องเทา) — ใช้วัดความลื่นของเครื่องยนต์ก่อนสร้างเ…
 CITY_N:4 CITY_B:4 CITY_ROAD:4 genCityTest:5 cityTestProps:19
 
-## js/02-data.js (384) — ค่าคงที่ของเกม
+## js/02-data.js (384) — 
 W:4 H:4 PR:4 PILLARS:6 SPAWNF:7 mulberry:9 genForest:10 genPitch:27 genHogsmeade:36
 §54 แผนที่โล่ง 3 แบบ (ผู้ใช้: ป่ามืดไม่สนุก อยากได้ที่โล่งๆ)
 genMeadow:55 genLake:61 genRuins:66
@@ -29,10 +29,10 @@ HOUSES:232 HAIRC:237 HAIRSTY:239 WOODC:242 WOODN:243 WCOREC:244 WCOREN:245 WANDS
 ## js/02-fcs-data.js (3) — 
 FCS_DATA:3
 
-## js/02-fcs.js (174) — แผนที่ First Castle Strike (โหมดบุกปราสาท 'siege') — แบบ Basic จากภาพร่างของผู้ใช้ใน Map …
+## js/02-fcs.js (175) — แผนที่ First Castle Strike (โหมดบุกปราสาท 'siege') — แบบ Basic จากภาพร่างของผู้ใช้ใน Map …
 FCS_C:7 FCS_WH:8 genFcs:9
-§148 พื้นที่เล่นตามเฟส (กำแพงล่องหน) + เขตจุดเกิดปลอดภัย — ใช้ทั้งโฮสต์ (G…
-SGPH:149 SG_SPR:150 _sgAreaC:151 sgArea:152 sgClamp:158 sgInArea:168
+§149 พื้นที่เล่นตามเฟส (กำแพงล่องหน) + เขตจุดเกิดปลอดภัย — ใช้ทั้งโฮสต์ (G…
+SGPH:150 SG_SPR:151 _sgAreaC:152 sgArea:153 sgClamp:159 sgInArea:169
 
 ## js/03-spells-core.js (249) — ระบบคาถาใหม่: สาย (path) × คาถา (spell) + สถานะ (status effects)
 §6 ไอคอนคาถา: จาก game-icons.net (CC BY 3.0, เครดิตใน "คู่มือ" และ icons…
@@ -188,7 +188,7 @@ windUltCast:504 windUltTick:507 windUltSweep:532 windFloatZ:540 windSnapP:543 wi
 §547 สกิล (ผู้ใช้ 2026-11-08: รีดีไซน์ทั้งชุด — id เดิมไว้ให้ชุดสกิล/tune/…
 W_WL:549 W_DR:555 W_VX:561 W_VO:567 W_FW:573 W_UL:583
 
-## js/10-net.js (200) — เครือข่าย (PeerJS / WebRTC)
+## js/10-net.js (200) — 
 PREFIX:4 NET:5 RC:9 TURN_SERVERS:12 ICE:13 PEER_OPT:14 TURN_URL:16 ICE_READY:18 JN:22 LAG:24 lagDo:25 hostSend:26 LOBBY:27 genCode:28 sendAll:29 NETD_KEYS:33 NETD:33 netDeltaReset:34 netDelta:35 NET_MAX:49 _netTE:49 netSendSnap:50 NETU:62 netUndelta:63 setStatus:69 hostGame:71 hostPeer:80 netConnect:100 joinWatch:111 joinFail:126 netLost:132 joinGame:147 joinPeer:158 clientOnData:173 leave:188 leaveRoom:190
 
 ## js/11-host.js (432) — 
@@ -211,8 +211,8 @@ CIN:150 cityInterior:151 cinSlabOn:180 cinOpenPanel:182 cityIwHit:184 cityRampHi
 ## js/12-efs.js (77) — สภาพธาตุบนฉาก (Element Surfaces) — เฟส 1: ไฟบนรั้วไม้ (designs/element-surfaces.md)
 EFSV:9 EFS:10 efsLv:11 efsBuild:12 efsDist:28 efsHeat:29 efsProj:34 efsEnv:40 _efsHit:44 efsTick:45 efsSnap:66 efsParse:70 efsHostView:77
 
-## js/12-fcs-bridge.js (45) — Castle Strike bridge skin damage (user 2026-11-19): skill hits (damageEnv) leave damage o…
-BSKN:7 bskBuild:9 bskTop:15 bskArch:17 bskEnv:22 bskSnap:36 bskParse:41
+## js/12-fcs-bridge.js (51) — Castle Strike bridge skin damage (user 2026-11-19): skill hits (damageEnv) leave damage o…
+BSKN:7 bskBuild:9 bskTop:15 bskArch:17 bskArcAt:23 bskEnv:28 bskSnap:42 bskParse:47
 
 ## js/13-enemies.js (171) — ศัตรู (โหมด Co-op)
 spawnEnemy:2 setupWave:19 bossPhase:36 enemySlam:44 updateEnemies:55
@@ -236,8 +236,7 @@ NAV_MAPS:14 NAV_EYE:14 NAV:15 navOn:17 navSig:18 navEnsure:26 navBuild:32 navCel
 ## js/15-botplay.js (268) — 
 BOT_RANGE:7 botMem:10 botWallBehind:12 _bspd:22 botSave:24 botWant:26 botClassPlanFor:65 botClassAim:66 botClassGround:71 botClassTarget:72 botClassLane:78 botClassPlan:81 botWindPlan:97 botNaturePlan:172 botCombo:242
 
-## js/15-modes.js (437) — โหมดพิเศษ: ควิดดิช / แข่งไม้กวาด / แบทเทิลรอยัล / หาลอร์ดโวลเดอมอร์ / ห้องฝึก
-§4 ส่งข้อความลับถึงผู้เล่นคนเดียว (เช่น บทบาทในโหมดหาลอร์ดโวลเดอมอร์)
+## js/15-modes.js (437) — 
 sendPriv:5 TASKF:9 taskPts:10 raceRings:11 modeInit:17 spawnDummy:64 trainTick:69 TR_KEYS:86 trTeams:88 trCmd:102 hostEndTraining:135
 §137 ควิดดิช
 quidThrow:138 quidDrop:144 quidArea:150 quidTick:151 snitchTick:187
@@ -270,7 +269,7 @@ MY:210 myDB:211 mySave:212 myLoad:215 myDecodeReady:221 myPlay:222 myNext:234 my
 §256 เพลงประกอบ (สร้างสดตามแผนที่)
 MUSIC:257 THEMES:258 padNote:263 musicTick:270 toggleMusic:299
 
-## js/19-client.js (289) — ฝั่งแสดงผล (ทุกเครื่อง รวมโฮสต์ ใช้ snapshot เดียวกัน)
+## js/19-client.js (289) — 
 cv:4 cx:4 DPR:5 SW:5 SH:5 resize:6 VIEW:12 screen:13 lastBuffKey:13 overShown:13 lastCount:13 PARTS:14 TEXTS:14
 §15 งบเอฟเฟกต์ (VFX budget)
 VFXB:20 _apush:21 vfxQual:29 vfxBegin:31 vfxEnd:34 vfxOnce:36 vfxExtra:38 PCOL:39 setScreen:41 onLobby:53
@@ -346,12 +345,12 @@ CITY_STY:181 CITY_VEH:188 cityFacade:190 CITYK:203 _cZ:204 _cT:204 _cR:204 _cC:2
 §259 ตึกไฮไลต์ล้มทั้งตึก (ขั้น 7)
 _ctA:262 _ctB:262 _ctC:262 cityTowerPose:263 cityTowerAnim:271 cityTowerRubble:278 CAREA:292 cityAreaSync:293 cityViewSync:305 cityDebris:349 cityFX:358
 
-## js/28-fcs-build.js (254) — ภาพแผนที่ First Castle Strike (แบบ Basic: กล่อง/ทรงพื้นฐาน ยังไม่มีโมเดลจริง) + ภาพ/HUD โ…
-buildFcs:5 fcsBridge:37 FCSB:73 fcsParView:74 fcsSkinTex:87 fcsSkinView:104 EFS3:121 fcsFences:122 _efC:139 _efM:139 _efS:139 _efZ:139 efsView:140
-§165 ภาพโหมด (ลูกข่ายทุกเครื่องจาก snapshot M.sg)
-SGV3:166 sgClearView:167 sgViewBuild:168 SGVZR:187 sgBarrier:189 sgSync:203 sgDust:224 sgFx:225
-§230 HUD
-sgTop:231 sgHud:233
+## js/28-fcs-build.js (305) — ภาพแผนที่ First Castle Strike (แบบ Basic: กล่อง/ทรงพื้นฐาน ยังไม่มีโมเดลจริง) + ภาพ/HUD โ…
+buildFcs:5 fcsBridge:37 FCSB:74 fcsParView:75 fcsSkinTex:88 fcsHoleMat:106 fcsParFall:119 fcsFallTick:126 fcsSkinView:138 EFS3:172 fcsFences:173 _efC:190 _efM:190 _efS:190 _efZ:190 efsView:191
+§216 ภาพโหมด (ลูกข่ายทุกเครื่องจาก snapshot M.sg)
+SGV3:217 sgClearView:218 sgViewBuild:219 SGVZR:238 sgBarrier:240 sgSync:254 sgDust:275 sgFx:276
+§281 HUD
+sgTop:282 sgHud:284
 
 ## js/28-fcs-forest.js (202) — ป่าสนหมอก ในแผนที่ First Castle Strike (เฟส 1 = ช่อง x 0–28 ของ Map Editor) — ทำตามรูปอ้า…
 FF:7 FF_X1:8 FF_NS:9 ffGroundTex:11 ffParts:33 fcsForest:40 ffMerge:123 ffDetail:131 fcsRuin:158 fcsForestTick:192 FFC:202
@@ -443,8 +442,7 @@ bpOpen:53 bpOn:53 bpKey:53 bpShow:55 bpSync:57 hovEl:127
 §128 หน้าตั้งค่า
 setRow:129 setTog:130 setTab:131 XHC:132 XHN:132 setOpts:133 SET_ICO:135 SET_EN:138 renderSettings:139 drawXhPrev:161 openSettings:162 closeSettings:164 modeIcon:220 modeTitle:221 renderLobby:222
 
-## js/41-debug.js (181) — เครื่องมือทดสอบสมดุล (ใช้ผ่านคอนโซล WD.bal / WD.dmgTest เท่านั้น ผู้เล่นปกติไม่เห็น)
-§5 บอทต่อสู้แบบง่ายๆ: เล็งนำเป้า เดินรักษาระยะ+ส่ายไปมา ร่ายคาถาทุกครั้ง…
+## js/41-debug.js (181) — 
 botBrain:6 _obsKeep:49 balArena:50 _balStash:53 balIsolate:54 balReset:57 balDuel:63 balTour:79 balCoop:93 balSpellTest:109
 §130 Service Worker (sw.js): เก็บไฟล์เกมไว้ในเครื่อง เปิดครั้งต่อไปเร็วขึ้…
 SWK:131 swSetup:132
@@ -852,4 +850,4 @@ _dvMap:189 devMapDraw:193
 §206 หน้าต่าง
 _dvPanel:207 _dvBtn:208 devToggle:211 dvBtn:216 dvRow:217 dvTog:218 dvSec:219 devRender:220 devPos:260
 
-(105 files, 30023 lines)
+(105 files, 30081 lines)

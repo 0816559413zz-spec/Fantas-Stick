@@ -103,9 +103,10 @@ function genFcs(){
     for(const R0 of [B.rs,B.re]){const alongY=R0===B.rs,L=alongY?LS:LE;for(let d=7;d<L;d+=14)for(const o of [-56,56]){const x=alongY?ax+o:xE+d,y=alongY?yS+d:cy+o,t=rampTop(alongY?ax:x,alongY?y:cy);if(t-hG(x,y)>0.3)ob(x,y,8,t);}}
     // parapet: merlon every 1.6 m on the outer edges (no parapet across the ramp mouths)
     const lines=[[ax-HW+6,cy-HW,ax-HW+6,yS],[ax+HW-6,cy+HW,ax+HW-6,yS],[ax-HW,cy-HW+6,xE,cy-HW+6],[ax+HW,cy+HW-6,xE,cy+HW-6]];
-    for(const [x1,y1,x2,y2] of lines){const L=Math.hypot(x2-x1,y2-y1),n=Math.max(1,Math.round(L/32));B.par.push([x1,y1,x2,y2,n]);
+    const outN=[[-1,0],[1,0],[0,-1],[0,1]];   // outward side of each parapet line
+    for(const [li,[x1,y1,x2,y2]] of lines.entries()){const L=Math.hypot(x2-x1,y2-y1),n=Math.max(1,Math.round(L/32));B.par.push([x1,y1,x2,y2,n]);
       for(let i=0;i<n;i++){const t=(i+0.5)/n,x=x1+(x2-x1)*t,y=y1+(y2-y1)*t,k=B.parU.length,z0=DH-hG(x,y);
-        B.parU.push({x,y,a:Math.atan2(y2-y1,x2-x1),seg:L/n});
+        B.parU.push({x,y,a:Math.atan2(y2-y1,x2-x1),seg:L/n,nx:outN[li][0],ny:outN[li][1]});
         // each merlon + its base wall = one breakable unit (cover destruction rules, js/12-buildings.js BRK) • hgt = piece height, top = absolute
         brkX.push({h:1.2,vh:1.2,v:0.74,m:'stone',n:'parapet',z0,fp:k});
         obs.push({x,y,r:12,k:'fbp',top:DH+1.2,hgt:1.2,bot:z0-0.3,b:k,s:0});}}
