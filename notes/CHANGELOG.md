@@ -1,5 +1,6 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
 
+- 2026-11-19 — **Darkness เคียว BA รอบ 13:** ควงไปจุดเตรียมเลยไปทางหลังของฝั่งนั้นอีก ~20° (`BK` 0.35) ฟันต่อได้วงกว้างและลื่นขึ้น • เส้นเปลว 3 เส้นบางลง จางลง ยอดเปลวแหลมแทนโค้งมน • GIF ใช้ `node tools/headless.js --fx … --gif …` ของ Studio
 - 2026-11-19 — **Darkness เคียว BA รอบ 12:** ควงไปจุดเตรียมฟันต่อที่ระยะเดิม (ไม่ดึงเข้าหาตัวแล้วออกใหม่) • ควง 4 รอบ เร็วแล้วช้าลงจนหยุดตรงทิศพร้อมฟัน ไม่มีตัด/วาร์ปตอนจบ • ฟันครั้งต่อไปง้างนิดเดียวเพราะอยู่จุดพร้อมแล้ว
 - 2026-11-19 — **Match-start briefing screen:** `gameCover` (js/65, css/ui3.css) is now an Operation Brief: map photo (`assets/ui/maps/<id>.jpg`, `fcs` uses `designs/fcs_forest/01_spawn_view.jpg`), mode name/description, progress bar. Hides after 2.6 s min and 8 smooth frames (max 6 s) to cover the match-start hitch. Client only.
 - 2026-11-19 — **Darkness เคียว BA รอบ 11:** ตอนควงหลังฟันใช้ VFX ควงของโล่ (จานหมึก + แผ่นเปลวรอบขอบ จาก `studio/darkness-shield.js`) + เส้นเปลวดำ 3 เส้นคนละทิศหมุนรอบเคียวแล้วหาย • ละอองหมึกใหญ่ขึ้น

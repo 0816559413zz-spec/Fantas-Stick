@@ -112,7 +112,7 @@ FXCODE.studio_darkness_scythe=(_x,_y,_h,args,instance)=>{
   // ว่าง = เคียวตั้งแนวตั้ง ลอยวนรอบตัวช้า ๆ • ฟันแรกเริ่มจากฝั่งที่เคียวอยู่ (อยู่ข้างหลัง = ไปข้างใดข้างหนึ่งก่อน)
   // แต่ละครั้ง: เงื้อ 0.2 → กวาด 120° ด้านหน้า → ค้าง 0.3 → ควง 0.3 (ละอองหมึกสาด) พร้อมเลื่อนไปจุดเตรียม → ฟันต่อจากฝั่งที่จบ (สลับซ้าย-ขวา)
   // ไม่ได้ฟันเกิน 2 วิ = กลับแนวตั้งแล้ววนต่อ • พรีวิววนลูป: ว่าง 2 วิ → ฟัน 3 ครั้งห่าง 1.2 วิ → รอ 2 วิ → กลับท่าว่าง
-  const LOOP=8,SW0=2.0,GAP=1.2,NSW=3,WU=0.2,SWP=0.26,HOLD=0.3,SPIN=0.3,A=1.05,RI=1.7,ORB=0.45,REACH=args.reach??7.6;
+  const LOOP=8,SW0=2.0,GAP=1.2,NSW=3,WU=0.2,SWP=0.26,HOLD=0.3,SPIN=0.3,A=1.05,BK=0.35,RI=1.7,ORB=0.45,REACH=args.reach??7.6;
   const wrapA=x=>{x=(x+Math.PI)%(Math.PI*2);if(x<0)x+=Math.PI*2;return x-Math.PI;};
   const orbA=T=>wrapA(-1.2+ORB*T);   // มุมรอบตัวตอนว่าง (0 = หน้า, + = ขวา)
   const radOf=g=>new THREE.Vector3(-Math.sin(g),0,Math.cos(g));   // anchor: +z หน้า, −x ขวา
@@ -137,14 +137,14 @@ FXCODE.studio_darkness_scythe=(_x,_y,_h,args,instance)=>{
       const k=Math.min(NSW-1,Math.floor((t-SW0)/GAP)),u=t-SW0-k*GAP,from=side0*(k%2?-1:1),to=-from;   // ฟันที่ k เริ่มจาก from กวาดไป to
       const outR=0.55+REACH;
       const S0p=WU+SWP+HOLD,STL=SPIN+0.14,spinTurn=x=>-from*Math.PI*2*4*(1-Math.pow(1-Math.min(1,x),3));   // ควง 4 รอบ เร็วแล้วค่อย ๆ ช้าลงจนหยุดตรงทิศพร้อมฟัน (จบที่รอบเต็ม = ไม่กระตุก)
-      if(u<WU){const e=ez(0,WU,u);const pg=k===0?g0:from*A;const pr=k===0?RI:outR;const pv=k===0?1:0;
-        g=pg+wrapA(from*A-pg)*e+(k===0?0:from*0.12*Math.sin(Math.PI*e));rad=pr+(outR-pr)*e;vert=pv*(1-e);dirSweep=-from;tw=0.25*from*e;}   // เงื้อไปจุดเริ่มฝั่ง from (ครั้งแรกจากท่าวน)
-      else if(u<WU+SWP){const e=Math.pow((u-WU)/SWP,2.2);g=from*A+(to*A-from*A)*e;rad=outR;vert=0;dirSweep=-from;act=Math.min(1,(u-WU)/0.04);tw=from*(0.25-0.85*e);}
+      if(u<WU){const e=ez(0,WU,u);const pg=k===0?g0:from*(A+BK);const pr=k===0?RI:outR;const pv=k===0?1:0;
+        g=pg+wrapA(from*(A+(k?BK:0))-pg)*e+(k===0?0:from*0.12*Math.sin(Math.PI*e));rad=pr+(outR-pr)*e;vert=pv*(1-e);dirSweep=-from;tw=0.25*from*e;}   // เงื้อไปจุดเริ่มฝั่ง from (ครั้งแรกจากท่าวน)
+      else if(u<WU+SWP){const e=Math.pow((u-WU)/SWP,2.2),st=from*(A+(k?BK:0));g=st+(to*A-st)*e;rad=outR;vert=0;dirSweep=-from;act=Math.min(1,(u-WU)/0.04);tw=from*(0.25-0.85*e);}
       else if(u<WU+SWP+HOLD){const e=ez(0,0.12,u-WU-SWP);g=to*A+to*0.18*e;rad=outR;vert=0;dirSweep=-from;act=Math.max(0,1-(u-WU-SWP)/0.12)*0.8;tw=-from*0.6;}   // ค้าง 0.3 วิ (ส่งตามแรงนิดเดียว)
-      else if(u<S0p+STL){const x=(u-S0p)/STL,e=ez(0,SPIN,u-S0p);g=to*(A+0.18)+(to*A-to*(A+0.18))*e;rad=outR;vert=0;dirSweep=from;spinA=spinTurn(x);if(u<S0p+SPIN){spinIdx=k;spinU=(u-S0p)/SPIN;}tw=-from*0.6*(1-e);}   // ควงไปจุดเตรียมฟันต่อ (ระยะเท่าเดิม ไม่ดึงเข้าหาตัว) แล้วหมุนช้าลงจนหยุด
-      else{const endT=SW0+(NSW-1)*GAP+WU+SWP+HOLD+SPIN;g=to*A;rad=outR;vert=0;dirSweep=from;
+      else if(u<S0p+STL){const x=(u-S0p)/STL,e=ez(0,SPIN,u-S0p);g=to*(A+0.18)+(to*(A+BK)-to*(A+0.18))*e;rad=outR;vert=0;dirSweep=from;spinA=spinTurn(x);if(u<S0p+SPIN){spinIdx=k;spinU=(u-S0p)/SPIN;}tw=-from*0.6*(1-e);}   // ควงไปจุดเตรียมฟันต่อ (ระยะเท่าเดิม ไม่ดึงเข้าหาตัว) แล้วหมุนช้าลงจนหยุด
+      else{const endT=SW0+(NSW-1)*GAP+WU+SWP+HOLD+SPIN;g=to*(A+BK);rad=outR;vert=0;dirSweep=from;
         if(k===NSW-1&&t>endT){const back=t-(SW0+(NSW-1)*GAP+WU+SWP)-2.0;   // ไม่ได้ฟันเกิน 2 วิ → กลับแนวตั้ง แล้ววนต่อ
-          if(back>0){const e=ez(0,0.5,back);const go=orbA(T);g=to*A+wrapA(go-to*A)*e;rad=rad+(RI-rad)*e;vert=e;}}}
+          if(back>0){const e=ez(0,0.5,back);const go=orbA(T);g=to*(A+BK)+wrapA(go-to*(A+BK))*e;rad=rad+(RI-rad)*e;vert=e;}}}
     }
     const p=pose(g,rad,vert,dirSweep,spinA);
     if(vert>0.01){const sp=new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,1,0),T*0.9*vert);   // แนวตั้ง: ควงตัวเองเบา ๆ
@@ -206,9 +206,9 @@ FXCODE.studio_darkness_scythe=(_x,_y,_h,args,instance)=>{
           spinG.visible=on;if(on){spinG.position.copy(cen);spinInk&&spinInk(T*28,k);spinFl&&spinFl(T*6,k);}else{spinInk&&spinInk(0,0);spinFl&&spinFl(0,0);}
           for(const L of spinLines){const U=L.userData;L.visible=on;if(!on)continue;L.position.copy(cen);L.rotation.set(U.tilt[0],U.tilt[1]+U.dir*T*22,U.tilt[2]);
             const appear=Math.min(1,Math.max(0,(Ps.spinU-U.ph*0.08)/0.25)),gone=1-Math.max(0,(Ps.spinU-0.55-U.ph*0.05)/0.35),al=Math.max(0,Math.min(appear,gone));
-            for(let i=0;i<LSEG;i++){const u=i/(LSEG-1),a=u*Math.PI*1.25,rr=SPR*(1.02+0.05*U.ph),fl=0.2*S*(0.55+0.9*Math.max(0,Math.sin(u*31-T*40+U.ph*3)));
+            for(let i=0;i<LSEG;i++){const u=i/(LSEG-1),a=u*Math.PI*1.25,rr=SPR*(1.02+0.05*U.ph),sp=Math.abs(((u*16-T*7+U.ph)%1+1)%1*2-1),fl=0.12*S*(0.25+1.1*Math.pow(1-sp,3));   // ยอดเปลวแหลม (ผู้ใช้ 2026-11-19: ไม่เอาโค้งมน)
               U.p[i*6]=Math.cos(a)*rr;U.p[i*6+1]=0;U.p[i*6+2]=Math.sin(a)*rr;U.p[i*6+3]=Math.cos(a)*(rr+fl);U.p[i*6+4]=0.02;U.p[i*6+5]=Math.sin(a)*(rr+fl);
-              const w=Math.min(1,Math.sin(Math.PI*u)*1.6)*al;U.c[i*8+3]=w;U.c[i*8+7]=w*0.9;}
+              const w=Math.min(1,Math.sin(Math.PI*u)*1.4)*al*0.75;U.c[i*8+3]=w;U.c[i*8+7]=w*0.9;}
             U.g.attributes.position.needsUpdate=true;U.g.attributes.color.needsUpdate=true;}}
         // ละอองตอนควง: เกิดที่ปลายใบตอนควง แล้วพุ่งออกจากตัวพร้อมตก
         {const kc=Math.floor(T/LOOP);for(let i=0;i<SPL;i++){const sp=splash[i],kk=i%NSW,b0=kc*LOOP+SW0+kk*GAP+WU+SWP+HOLD+SPIN*((i/NSW|0)/(SPL/NSW)),age=T-b0,life=0.5;
