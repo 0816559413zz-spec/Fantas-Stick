@@ -163,6 +163,7 @@ function hubPickMode(k,card){
   store('wd_name',myName());HUI.pend=true;
   const fall=()=>{if(screen==='lobby'||HUI.st!=='flip')return;try{NET.peer&&NET.peer.destroy();}catch(_){}NET.peer=null;hostGame(false,k);toast('ต่ออินเทอร์เน็ตไม่ได้ — เล่นแบบออฟไลน์');};
   clearTimeout(HUI.hostT);
+  if(store('wd_dev')==='1'){hostGame(false,k);return;}   // Dev Mode (?dev=1): เปิดห้องออฟไลน์ตรง ๆ (Dev ใช้ได้เฉพาะออฟไลน์)
   if(typeof Peer==='undefined')HUI.hostT=setTimeout(fall,500);
   else{hostGame(true,k);HUI.hostT=setTimeout(fall,7000);}
 }

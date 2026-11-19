@@ -1,5 +1,6 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
 
+- 2026-11-19 — **Dev Mode + hub:** with `?dev=1` picking a mode in the hub opens an offline room directly (no online attempt) so F2-F8 work (`js/62-hub-ui.js` hubPickMode).
 - 2026-11-19 — **Darkness Dash (Studio):** แตะพุ่งพร้อมเงาซ้อนและหางดำ อนุภาคหมุนเข้าคม ขอบเงาคลุมใบ และดาวขาววาบเมื่อชาร์จเต็ม • กดค้างให้เคียวม้วนเข้าและวกกลับจากร่างลูกเงา
 
 - 2026-11-19 — **Darkness Studio:** ลดเวลาฝูงเงาเหลือ 2 วิหลังบีมกระทบ ผู้ใช้อนุมัติภาพในรีวิว #87
