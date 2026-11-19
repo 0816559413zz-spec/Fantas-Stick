@@ -241,8 +241,8 @@ FXCODE.studio_darkness_scythe=(_x,_y,_h,args,instance)=>{
   const ghostMat=new THREE.MeshBasicMaterial({color:0x000000,transparent:true,opacity:GOP,depthWrite:true,toneMapped:false});let ghostBuilt=false;
   const ghostInk=stScyInk();ghostInk.opacity=GOP;
   const _gx=new THREE.Vector3(),_gy=new THREE.Vector3(),_gz=new THREE.Vector3(),_gm=new THREE.Matrix4(),_gp=new THREE.Vector3();
-  const ghostAt=(tg,phi,roll)=>{   // เคียวเงาอยู่หลังเป้า หมุนในระนาบตั้งที่ชี้หาผู้ร่าย • phi 0 = ตั้งตรง, + = โน้มหัวไปหลัง, − = ฟันลงมาทางผู้ร่าย • roll = เอียงข้าง (ตรง/เฉียง)
-    const fw=radOf(tg.ang),up=new THREE.Vector3(0,1,0),ey=new THREE.Vector3().crossVectors(up,fw);
+  const ghostAt=(tg,phi,roll,yaw=0)=>{   // เคียวเงาอยู่หลังเป้า หมุนในระนาบตั้งที่ชี้หาผู้ร่าย • phi 0 = ตั้งตรง, + = โน้มหัวไปหลัง, − = ฟันลงมาทางผู้ร่าย • roll = เอียงข้าง (ตรง/เฉียง)
+    const fw=radOf(tg.ang+yaw),up=new THREE.Vector3(0,1,0),ey=new THREE.Vector3().crossVectors(up,fw);
     _gm.makeBasis(fw,ey,up);ghostRot.quaternion.setFromRotationMatrix(_gm);ghostRot.rotateX(roll);
     ghostRot.position.copy(tg.a.g.position).addScaledVector(fw,GBK);ghostRot.position.y=1.2+GDN;   // จุดหมุนหลังเป้า ห่างจากอกเป้าพอดีรัศมีหัวเคียว
     const R=new THREE.Vector3(Math.sin(phi),0,Math.cos(phi)),X=new THREE.Vector3(-Math.cos(phi),0,Math.sin(phi));   // ใบนำทางฟัน (phi ลดลง)
@@ -258,12 +258,12 @@ FXCODE.studio_darkness_scythe=(_x,_y,_h,args,instance)=>{
   gtGeo.setAttribute('position',new THREE.BufferAttribute(gtP,3));gtGeo.setAttribute('color',new THREE.BufferAttribute(gtC,4));gtGeo.setIndex(gtI);
   const gTail=new THREE.Mesh(gtGeo,stScyInk());gTail.frustumCulled=false;gTail.renderOrder=7;gTail.visible=false;if(targets.length)root.add(gTail);
   const _gM=new THREE.Matrix4();
-  const updGhostTail=(tg,age,roll,op)=>{if(!stScyLines){gTail.visible=false;return;}gTail.visible=true;
-    for(let i=0;i<GTH;i++){const a=age-i*0.012;ghostAt(tg,ghostPhi(Math.max(GIN,a)),roll);ghostRot.updateMatrix();ghostScy.updateMatrix();_gM.multiplyMatrices(ghostRot.matrix,ghostScy.matrix);
+  const updGhostTail=(tg,age,roll,op,yaw)=>{if(!stScyLines){gTail.visible=false;return;}gTail.visible=true;
+    for(let i=0;i<GTH;i++){const a=age-i*0.012;ghostAt(tg,ghostPhi(Math.max(GIN,a)),roll,yaw);ghostRot.updateMatrix();ghostScy.updateMatrix();_gM.multiplyMatrices(ghostRot.matrix,ghostScy.matrix);
       const live=a>=GHE?1:0,al=live*Math.pow(1-i/(GTH-1),1.3)*op;
       for(let k=0;k<GTK;k++){const tk=0.05+1.05*k/(GTK-1),[bx,by]=bladePt(Math.min(1,tk),0.35);_gp.set(bx,by+(tk>1?(tk-1)*0.6:0),0).applyMatrix4(_gM);const o=(i*GTK+k);
         gtP[o*3]=_gp.x;gtP[o*3+1]=_gp.y;gtP[o*3+2]=_gp.z;gtC[o*4+3]=al*Math.min(1,k/2)*(k===GTK-1?0.5:1);}}
-    gtGeo.attributes.position.needsUpdate=true;gtGeo.attributes.color.needsUpdate=true;ghostAt(tg,ghostPhi(age),roll);};
+    gtGeo.attributes.position.needsUpdate=true;gtGeo.attributes.color.needsUpdate=true;ghostAt(tg,ghostPhi(age),roll,yaw);};
   const updHits=T=>{gTail.visible=false;
     if(!ghostBuilt&&holder.children.length){ghostScy.add(holder.clone(true));ghostScy.traverse(o=>{if(o.isMesh){o.material=ghostMat;o.renderOrder=10;}});
       for(const m of [ink,flames,sheet,wrap]){const g=new THREE.Mesh(m.geometry,ghostInk);g.frustumCulled=false;g.renderOrder=m.renderOrder+3;ghostScy.add(g);}   // เปลว/หมึกบนเคียวเงา = ชุดเดียวกับเคียวจริง
@@ -274,12 +274,12 @@ FXCODE.studio_darkness_scythe=(_x,_y,_h,args,instance)=>{
       const h=lastHit(T,i),age=h?T-h.T:99;
       tg.cut(age,h?h.from:1);tg.a.b.rotation.x=-0.22*Math.exp(-age*9)*Math.min(1,age*40);   // สะดุ้ง
       if(!tg.marked)return;
-      const roll=[0,0.38,-0.38][Math.round(h?h.T*100:0)%3],PM=GPM,PB=GPB;   // PM = มุมที่ใบผ่านอกเป้า • PB = โน้มหลังสุดก่อนฟัน
+      const vi=Math.round(h?h.T*100:0)%3,roll=[0,0.3,-0.3][vi],yaw=[0,0.75,-0.75][vi],PM=GPM,PB=GPB;   // PM = มุมที่ใบผ่านอกเป้า • PB = โน้มหลังสุดก่อนฟัน
       tg.gcut(age-(GHE+GCH),h?(roll<0?-1:1):1);   // รอยของเคียวเงา (แนวตั้ง/เฉียงตามการเอียง)
       if(!h||age<GIN||age>GHE+GCH+GOUT)return;
       const phi=ghostPhi(age);
-      ghostAt(tg,phi,roll);ghostRot.visible=ghostBuilt;
-      ghostMat.opacity=GOP*ez(GIN,GIN+0.1,age)*(1-ez(GHE+GCH,GHE+GCH+GOUT,age));ghostInk.opacity=ghostMat.opacity;updGhostTail(tg,age,roll,ghostMat.opacity/GOP);});
+      ghostAt(tg,phi,roll,yaw);ghostRot.visible=ghostBuilt;
+      ghostMat.opacity=GOP*ez(GIN,GIN+0.1,age)*(1-ez(GHE+GCH,GHE+GCH+GOUT,age));ghostInk.opacity=ghostMat.opacity;updGhostTail(tg,age,roll,ghostMat.opacity/GOP,yaw);});
   };
   const update=()=>{
     if(!voidFixed&&holder.children.length){fixVoid();voidFixed=true;}
