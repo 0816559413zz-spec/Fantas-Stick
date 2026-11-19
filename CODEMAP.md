@@ -345,12 +345,12 @@ CITY_STY:181 CITY_VEH:188 cityFacade:190 CITYK:203 _cZ:204 _cT:204 _cR:204 _cC:2
 §259 ตึกไฮไลต์ล้มทั้งตึก (ขั้น 7)
 _ctA:262 _ctB:262 _ctC:262 cityTowerPose:263 cityTowerAnim:271 cityTowerRubble:278 CAREA:292 cityAreaSync:293 cityViewSync:305 cityDebris:349 cityFX:358
 
-## js/28-fcs-build.js (306) — ภาพแผนที่ First Castle Strike (แบบ Basic: กล่อง/ทรงพื้นฐาน ยังไม่มีโมเดลจริง) + ภาพ/HUD โ…
-buildFcs:5 fcsBridge:37 FCSB:74 fcsParView:75 fcsSkinTex:88 fcsHoleMat:106 fcsParFall:119 fcsFallTick:126 fcsSkinView:138 EFS3:172 fcsFences:173 _efC:190 _efM:190 _efS:190 _efZ:190 efsView:191
-§217 ภาพโหมด (ลูกข่ายทุกเครื่องจาก snapshot M.sg)
-SGV3:218 sgClearView:219 sgViewBuild:220 SGVZR:239 sgBarrier:241 sgSync:255 sgDust:276 sgFx:277
-§282 HUD
-sgTop:283 sgHud:285
+## js/28-fcs-build.js (325) — ภาพแผนที่ First Castle Strike (แบบ Basic: กล่อง/ทรงพื้นฐาน ยังไม่มีโมเดลจริง) + ภาพ/HUD โ…
+buildFcs:5 fcsBridge:37 FCSB:74 fcsParView:75 fcsSkinTex:88 fcsHoleMat:106 fcsParFall:138 fcsFallTick:145 fcsSkinView:157 EFS3:191 fcsFences:192 _efC:209 _efM:209 _efS:209 _efZ:209 efsView:210
+§236 ภาพโหมด (ลูกข่ายทุกเครื่องจาก snapshot M.sg)
+SGV3:237 sgClearView:238 sgViewBuild:239 SGVZR:258 sgBarrier:260 sgSync:274 sgDust:295 sgFx:296
+§301 HUD
+sgTop:302 sgHud:304
 
 ## js/28-fcs-forest.js (202) — ป่าสนหมอก ในแผนที่ First Castle Strike (เฟส 1 = ช่อง x 0–28 ของ Map Editor) — ทำตามรูปอ้า…
 FF:7 FF_X1:8 FF_NS:9 ffGroundTex:11 ffParts:33 fcsForest:40 ffMerge:123 ffDetail:131 fcsRuin:158 fcsForestTick:192 FFC:202
@@ -853,4 +853,4 @@ _dvMap:244 devMapDraw:248
 §261 หน้าต่าง
 _dvPanel:262 _dvBtn:263 devToggle:266 dvBtn:271 dvRow:272 dvTog:273 dvSec:274 devRender:275 devPos:317
 
-(105 files, 30140 lines)
+(105 files, 30159 lines)

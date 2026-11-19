@@ -108,11 +108,30 @@ function fcsHoleMat(base){
   for(let i=0;i<64;i++){U.uHC.value.push(new THREE.Vector4());U.uHN.value.push(new THREE.Vector4());}
   m.onBeforeCompile=sh=>{Object.assign(sh.uniforms,U);
     sh.vertexShader=sh.vertexShader.replace('#include <common>','#include <common>\nvarying vec3 vHW;').replace('#include <project_vertex>','#include <project_vertex>\nvHW=(modelMatrix*vec4(transformed,1.0)).xyz;');
-    sh.fragmentShader=sh.fragmentShader.replace('#include <common>','#include <common>\nvarying vec3 vHW;uniform vec4 uHC[64];uniform vec4 uHN[64];uniform int uHNn;').replace('#include <clipping_planes_fragment>','#include <clipping_planes_fragment>\n'+
+    sh.fragmentShader=sh.fragmentShader.replace('#include <common>','#include <common>\nvarying vec3 vHW;uniform vec4 uHC[64];uniform vec4 uHN[64];uniform int uHNn;\n'+
+      'float fhH(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}'+
+      'float fhN(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(fhH(i),fhH(i+vec2(1.,0.)),f.x),mix(fhH(i+vec2(0.,1.)),fhH(i+vec2(1.,1.)),f.x),f.y);}'+
+      'float fhF(vec2 p){return fhN(p)*.5+fhN(p*2.03)*.25+fhN(p*4.1)*.15+fhN(p*8.3)*.1;}')
+      .replace('#include <clipping_planes_fragment>','#include <clipping_planes_fragment>\n'+
       'for(int i=0;i<64;i++){if(i>=uHNn)break;vec3 c=uHC[i].xyz,n=uHN[i].xyz;vec3 d=vHW-c;if(abs(dot(d,n))>0.26)continue;'+
       'vec3 ua=normalize(cross(vec3(0.,1.,0.),n));vec2 q=vec2(dot(d,ua),d.y);float row=floor(q.y/0.25+0.5),off=mod(row,2.)*0.25;'+
       'float bx=(floor((q.x+off)/0.5)+0.5)*0.5-off,by=row*0.25;float h=fract(sin(dot(vec2(bx,by)+uHN[i].w,vec2(12.9898,78.233)))*43758.5453);'+
-      'if(length(vec2(bx,by*1.25))<uHC[i].w*(0.7+0.4*h))discard;}');};
+      'if(length(vec2(bx,by*1.25))<uHC[i].w*(0.62+0.5*h)*(0.8+0.4*fhF(q*2.5+uHN[i].w)))discard;}')
+      // damaged skin around each hole: irregular spalled patch (face broken off, rough core showing), dark lip at its edge,
+      // hairline cracks running out, small chips scattered further out, dust darkening
+      .replace('#include <map_fragment>','#include <map_fragment>\n'+
+      'for(int i=0;i<64;i++){if(i>=uHNn)break;vec3 c=uHC[i].xyz,n=uHN[i].xyz;vec3 d=vHW-c;if(abs(dot(d,n))>0.32)continue;'+
+      'float r=uHC[i].w,s=uHN[i].w;vec3 ua=normalize(cross(vec3(0.,1.,0.),n));vec2 q=vec2(dot(d,ua),d.y);float L=length(q*vec2(1.,1.12)),R3=r*3.6;if(L>R3)continue;'+
+      'float nz=fhF(q*1.8+s*7.),zone=r*(1.25+1.3*nz),e=zone-L,fo=1.-L/R3;'+
+      'diffuseColor.rgb*=1.-0.22*fo*fo;'+
+      'if(e>0.){float g=fhF(q*9.+s),g2=fhN(q*31.+s);vec3 core=vec3(0.50,0.46,0.41)*(0.5+0.75*g)*(0.72+0.5*g2);if(fhN(q*19.+s*3.)>0.74)core*=0.55;'+
+      'core*=0.6+0.4*smoothstep(r*0.8,r*1.8,L);diffuseColor.rgb=mix(diffuseColor.rgb,core,0.92);'+
+      'diffuseColor.rgb*=1.-0.5*(1.-smoothstep(0.,0.12,e))*smoothstep(-0.2*r,0.3*r,q.y);}'+   // recess: upper lip casts shadow inside
+      'else{float en=fhN(q*7.+s);diffuseColor.rgb*=1.-0.65*step(0.35,en)*(1.-smoothstep(0.,0.035,-e));'+   // dark broken edge of the intact face
+      'diffuseColor.rgb=mix(diffuseColor.rgb,vec3(0.78,0.74,0.66),0.3*(1.-en)*(1.-smoothstep(0.04,0.09,-e))*step(0.035,-e));'+   // fresh light chipped rim
+      'float ang=atan(q.y,q.x),k=ang/6.283*7.+fhN(vec2(L*1.6,s))*0.9+s,ki=floor(k+.5);'+
+      'float cd=abs(k-ki)*6.283/7.*L;if(fhH(vec2(ki,s))>0.35&&L<zone+r*(0.8+1.6*fhH(vec2(s,ki))))diffuseColor.rgb*=1.-0.8*(1.-smoothstep(0.012,0.04,cd))*(0.5+0.5*fo);'+
+      'vec2 cc=floor(q*6.+s);float ch=fhH(cc);if(ch>0.9){float cr=length(fract(q*6.+s)-0.5);if(cr<0.12+0.18*(ch-0.9)*10.*fo)diffuseColor.rgb=mix(diffuseColor.rgb,vec3(0.5,0.46,0.4)*(0.7+0.5*fhN(q*30.)),0.85);}}}');};
   m.customProgramCacheKey=()=>'fcsHole';FCSB.hm=m;FCSB.hu=U;return m;
 }
 // parapet unit broke (brk event): spawn chunks — most fall outward off the bridge to the ground, a few drop on the deck
