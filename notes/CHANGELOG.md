@@ -3,6 +3,8 @@
 - 2026-11-19 — **Darkness เคียว BA รอบ 7:** แก้หางด้ามที่ไม่เคยขึ้น (คอมเมนต์ในบรรทัดเดียวกันทับโค้ด `root.add(shTail)`) • หางด้ามทึบขึ้น เทาเข้มที่ปลายล่าง → เกือบดำใกล้ใบ ต่างจากใบที่ดำสนิท
 - 2026-11-19 — **Darkness เคียว BA รอบ 6 (พรีวิว):** ทั้งเคียวมีหาง: ใบดำเข้มสุด ด้ามเทาเข้มใกล้ใบ → เทาอ่อนทางปลายล่าง • วงฟันโค้งกลมด้านหน้า ~125° (เดิมเกือบครบวง) หางละเอียดขึ้น 30 แถว
 - 2026-11-19 — **Darkness เคียว BA รอบ 5 (พรีวิว Studio):** หางขึ้นเฉพาะตอนฟัน (`act` ใน `baPose`) • หางด้ามชั้นจางต่อติดหางใบ • หางปลายใบยื่นเลยปลายจริงและเข้มกว่า • เปลวแบบปลายล่างเคียวที่ปลายหาง • ท่าเหวี่ยงยังเป็นรอบ 4
+- 2026-11-19 — **Workflow with Claude:** `guides/WORKFLOW-WITH-CLAUDE.md` (all sessions) — stay on topic + related docs map, off-topic ideas to separate session, short English replies (Thai on request), short English code comments. CLAUDE.md rules 3/3b and AGENTS.md now point to it.
+
 - 2026-11-19 — **กราฟเอกสาร 3D ธีม Sci-fi:** bloom, ดาว, กริดโฮโลแกรม, เปลือก wireframe, จุดข้อมูลวิ่งตามเส้น, วงเล็งโหนดที่เลือก, แผงแบบ HUD — ปุ่ม Sci-fi สลับกลับธีม Studio ได้
 
 - 2026-11-19 — **กราฟเอกสาร 3D (Tool):** `docgraph.html` + `tools/docgraph.js` → `docgraph/graph.json` แสดงเอกสารทั้ง repo เป็นโครงข่าย 3D แบบ Obsidian (สีตามหัวข้อ, ค้นหา, คลิกดูหัวข้อ/ไฟล์ที่เชื่อม, บินกล้องไปหา) codemap.js สร้างกราฟใหม่ให้อัตโนมัติ
