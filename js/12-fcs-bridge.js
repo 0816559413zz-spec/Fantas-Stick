@@ -50,6 +50,16 @@ function bskOutline(f){
   P.push([f.dEnd,bR],[f.a1+6,bR],[f.a1+6,gEnd-0.05],[f.dEnd,DH],[f.dEnd,DH-BSKV.rimH],[f.a0,DH-BSKV.rimH]);
   return P;
 }
+function bskSegs(f){
+  const B=BSKN.B,DH=B.DH,S=[],top=DH-BSKV.rimH;
+  if(f.a0<f.corner)S.push({k:'c',p0:f.a0,p1:f.corner,base:GY(B.ax,B.cy)-1.2,top});
+  for(const s of B.spans){const ns=s.x1===s.x2;if(ns!==(f.ax==='y'))continue;
+    const p0=ns?s.y1:s.x1,p1=ns?s.y2:s.x2,L=Math.abs(p1-p0)/20,r=(L-1.6)/2,mx=(s.x1+s.x2)/2,my=(s.y1+s.y2)/2;
+    S.push({k:'s',p0,p1,m:(p0+p1)/2,r,spring:DH-1.3-r,base:Math.min(GY(s.x1,s.y1),GY(s.x2,s.y2),GY(mx,my))-1.2,top});}
+  const alongY=f.ax==='y',gEnd=alongY?B.gS:B.gE;
+  S.push({k:'r',p0:f.dEnd,p1:f.a1+6,base:Math.min(alongY?GY(B.ax,B.yS):GY(B.xE,B.cy),gEnd)-1.2,t0:DH,t1:gEnd-0.05});
+  return S;
+}
 function bskInPoly(P,x,y){let c=false;for(let i=0,j=P.length-1;i<P.length;j=i++){const [xi,yi]=P[i],[xj,yj]=P[j];if((yi>y)!==(yj>y)&&x<(xj-xi)*(y-yi)/(yj-yi)+xi)c=!c;}return c;}
 // walk floor cut: point over a broken rim chunk = no bridge floor there (TERR floor hook, js/05 floorAt)
 function bskCut(x,y){
@@ -96,6 +106,8 @@ function bskRepair(x,y,rad){let n=0;for(const c of BSKN.C){if(!c.st&&c.hp===BSKV
 function bskExport(){
   const B=BSKN.B;if(!B)return null;const wa=(f,a)=>f.ax==='y'?tz(a):tx(a),r3=v=>Math.round(v*1000)/1000;
   return {DH:B.DH,shell:BSKV.shell,rimW:BSKV.rimW,rimH:BSKV.rimH,
-    faces:BSKN.F.map(f=>({ax:f.ax,c:r3(f.ax==='y'?tx(f.c):tz(f.c)),n:f.n,P:f.P.map(([a,z])=>[r3(wa(f,a)),r3(z)])})),
+    faces:BSKN.F.map(f=>({ax:f.ax,c:r3(f.ax==='y'?tx(f.c):tz(f.c)),n:f.n,P:f.P.map(([a,z])=>[r3(wa(f,a)),r3(z)]),
+      segs:bskSegs(f).map(q=>Object.assign({},q,{p0:r3(wa(f,q.p0)),p1:r3(wa(f,q.p1)),m:q.m!=null?r3(wa(f,q.m)):undefined})),
+      ground:(()=>{const g=[];for(let a=f.a0-20;a<=f.a1+30;a+=10)g.push([r3(wa(f,a)),r3(bskGround(f,a))]);return g;})()})),
     chunks:BSKN.C.map(c=>{const f=BSKN.F[c.f];return c.rim?{i:c.i,f:c.f,rim:1,a0:r3(wa(f,c.a0)),a1:r3(wa(f,c.a1))}:{i:c.i,f:c.f,a:r3(wa(f,c.a)),z:r3(c.z)};})};
 }

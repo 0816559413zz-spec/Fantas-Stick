@@ -223,4 +223,5 @@ b.pc.map(q=>q.cb.toString(2))                     // ชิ้นที่พั
 - Model pipeline (re-run when the bridge, ground under it or `BSKV` changes, chunk index must match):
   1. `node tools/headless.js --game --js tools/fcs-bridge-export.js --quiet` then copy `shots/fcs_bridge_layout.json` to `assets/src/`
   2. `D:/Blender/blender.exe -b --python assets/src/fcs_bridge_build.py` -> `assets/buildings/fcs_bridge.glb` (`map_fcs_bridge`)
+- Shell = stone blocks (ashlar courses + arch voussoirs) grouped into chunks; the game splits chunks back into blocks (`fcsBlocks`) so broken stones fall one by one and pile up (`FPILE`).
 - Dev: F2 'ทำลาย / ซ่อม' works on chunks.
