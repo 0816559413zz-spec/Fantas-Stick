@@ -417,7 +417,7 @@ function updatePlayer(p,dt,acting){
 }
 
 function hitProp(o,dmg,by){
-  const D=PROPDEF[o.k];if(!D||!D.hp||o.st!==0)return;
+  const D=PROPDEF[o.k];if(!D||!D.hp||o.st!==0||o.nb)return;   // nb = unbreakable (Map Builder)
   o.hp-=dmg;
   if(o.hp<=0){o.st=1;emit({k:'prop',e:'b',i:o.i,x:Math.round(o.x),y:Math.round(o.y),h:D.hgt*0.5});}
   else if(G.time-o.ht>0.12){o.ht=G.time;emit({k:'prop',e:'h',i:o.i,x:Math.round(o.x),y:Math.round(o.y),h:D.hgt*0.6});}

@@ -3,6 +3,15 @@
 > เขียนอัตโนมัติจาก `review.html` (ผ่าน `tools/serve.py`) — อย่าแก้ไฟล์นี้ตรง ๆ, แก้ `review/reviews.json` แล้วรัน `python tools/serve.py --review-md`.
 > **Claude:** ทำเฉพาะหัวข้อสถานะ **✏️ ขอแก้** — อ่านความเห็นผู้ใช้ (`ความเห็นผู้ใช้`) + เปิดรูปด้วย Read → แก้ → ตั้ง `status:"wait"` + เขียน `reply` (ไทยสั้น ๆ ว่าแก้อะไร) เพื่อส่งกลับให้ผู้ใช้รีวิวใหม่. อย่าตั้ง `ok` เอง (ผู้ใช้เป็นคนกดผ่าน). งานที่ **⏳ รอ** = รอผู้ใช้ ไม่ต้องทำอะไร
 
+## #85 Map Builder: choose breakable / unbreakable
+- สถานะ: ⏳ รอผู้ใช้รีวิว • ชนิด: Tool • สาย/ส่วน: Map
+
+**วิธีดู / อะไรรอรีวิว:**
+mapbuild.html → select a house, crate, barrel or tree → right panel 'พังได้' (on = breakable, default). Turn off → after ⬆ export, that object cannot be damaged in game. Walls and kit objects already had this checkbox.
+
+**เช็กลิสต์:**
+- [ ] Checkbox is where you expect
+
 ## #84 Dev Mode: repair / collapse tool
 - สถานะ: ⏳ รอผู้ใช้รีวิว • ชนิด: Tool • สาย/ส่วน: Dev
 

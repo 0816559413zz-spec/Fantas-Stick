@@ -169,7 +169,7 @@ const FMAPS={pend:new Map(),fail:new Set()};
 function b64i16(b){const bin=atob(b),u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);const v=new Int16Array(u.buffer),f=new Float32Array(v.length);for(let i=0;i<v.length;i++)f[i]=v[i]===-32768?NaN:v[i]/100;return f;}
 function regFileMap(id,e,d){
   const obs=(d.obs||[]).map(o=>Object.assign({x:o.x,y:o.y,r:o.r,hgt:o.hgt,k:o.k||'col',fm:1},o.ring!=null?{ring:o.ring}:{},o.b!=null?{b:o.b}:{},o.st?{st:1}:{},o.bot!=null?{bot:o.bot}:{}));   // bot = วงชนลอย เริ่มสูงจากพื้นเท่านี้ (กำแพง/ของบนพื้นชั้นบนจาก Map Builder — ไม่ขวางคนข้างล่าง)   // st = ยืนบนหลังได้ (โต๊ะห้องโถง) — groundH js/04   // b = กลุ่มของบังที่พังได้ (d.brk[b]) • ring = ความสูงห่วงควิดดิช (k:'hoop')
-  (d.houses||[]).forEach((h,i)=>obs.push({x:h.x,y:h.y,r:Math.max(h.w,h.d)/2,k:'house',hgt:10,w:h.w,d:h.d,s:(i*0.37)%1,ry:h.ry||0}));
+  (d.houses||[]).forEach((h,i)=>obs.push({x:h.x,y:h.y,r:Math.max(h.w,h.d)/2,k:'house',hgt:10,w:h.w,d:h.d,s:(i*0.37)%1,ry:h.ry||0,nb:h.nb?1:0}));
   const terr={c:d.c,nx:d.nx,ny:d.ny,g:b64i16(d.g),fl:(d.fl||[]).map(f=>({x0:f.x0,y0:f.y0,nx:f.nx,ny:f.ny,top:b64i16(f.top),bot:b64i16(f.bot)}))};
   {const keep=TERR;TERR=terr;for(const o of obs)if(o.fm)o.top=terrT(o.x,o.y)+o.hgt;TERR=keep;}   // ที่ชนจากไฟล์: เทียบความสูงจริง (พื้นใต้ตัวกับใต้ที่ชนสูงไม่เท่ากันได้)
   MAPS[id]={name:d.name||id,d:d.desc||'',W:d.W,H:d.H,obs,terr,fm:{file:e.file,v:e.v||0,sky:d.sky||'night',fog:d.fog||null,music:d.music||'',modes:d.modes||null,
@@ -209,7 +209,7 @@ const PROP_USE={pchest(p,o){}};
 let PROPS=[],PROPON=false;
 function genProps(id){
   const M=MAPS[id];if(!M)return [];if(id==='test')return testProps();if(M.props)return M.props();   // แมพจากโค้ดที่วางของเอง (เช่น citytest)
-  if(M.fm&&M.fm.props)return M.fm.props.filter(q=>PROPDEF[q.k]).map((q,i)=>{const D=PROPDEF[q.k];return {i,k:q.k,x:q.x,y:q.y,a:q.a||0,r:D.r,hgt:D.hgt,hp:D.hp||0,st:0,ht:0};});   // วางเองในไฟล์แผนที่
+  if(M.fm&&M.fm.props)return M.fm.props.filter(q=>PROPDEF[q.k]).map((q,i)=>{const D=PROPDEF[q.k];return {i,k:q.k,x:q.x,y:q.y,a:q.a||0,r:D.r,hgt:D.hgt,hp:D.hp||0,st:0,ht:0,nb:q.nb?1:0};});   // วางเองในไฟล์แผนที่
   const rng=mulberry(hashStr('props:'+id)),out=[],W=M.W,H=M.H,obs=M.obs||[];
   const n=Math.min(24,Math.round(W*H/200000)),kinds=Object.keys(PROPDEF),wsum=kinds.reduce((a,k)=>a+PROPDEF[k].w,0),cnt={};
   const spawns=SPAWNF.map(f=>[f[0]*W,f[1]*H]);

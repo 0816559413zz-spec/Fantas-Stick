@@ -607,7 +607,8 @@ function renderSide() {
         it.t === 'light' ? fld('สีแสง', it, 'c', { type: 'color' }) : null, it.t === 'light' ? fld('ความสว่าง', it, 'int', { min: 0 }) : null, it.t === 'light' ? fld('ระยะ', it, 'dist', { min: 1 }) : null,
         d ? fld('ชนได้ (เดิน/ยิงไม่ผ่าน)', it, 'col', { type: 'checkbox', get: () => d.col }) : null,
         d && d.col ? fld('ขนาดที่ชน (เท่า)', it, 'cs', { get: () => it.cs == null ? d.cs : it.cs, min: 0.05 }) : null,
-        d && d.col ? fld('พังได้', it, 'brk', { type: 'checkbox', get: () => it.brk == null ? d.brk : it.brk }) : null, btns)); }
+        d && d.col ? fld('พังได้', it, 'brk', { type: 'checkbox', get: () => it.brk == null ? d.brk : it.brk }) : null,
+        D && D.cat === 'game' && it.t !== 'pchest' ? fld('พังได้', it, 'brk', { type: 'checkbox', get: () => it.brk == null ? 1 : it.brk }) : null, btns)); }   // houses / crates / barrels / trees: off = unbreakable
     else if (sel.k === 'wall') box.append(section('กำแพง' + (it.n ? ' — ' + it.n : ''), true, fld('หนา', it, 'th', { min: 0.2 }), fld('สูง', it, 'h', { min: 0.2 }), fld('สี', it, 'c', { type: 'color' }),
       fld('ฐาน (ความสูง)', it, 'base', { nullable: 1, ph: 'ตามพื้น' }), fld('เส้นโค้ง', it, 'curve', { type: 'checkbox' }), fld('ปิดวง', it, 'closed', { type: 'checkbox' }), fld('พังได้', it, 'brk', { type: 'checkbox' }),
       fld('วัสดุตอนพัง', it, 'm', { type: 'select', items: [['stone', 'หิน'], ['wood', 'ไม้'], ['ice', 'น้ำแข็ง']] }),

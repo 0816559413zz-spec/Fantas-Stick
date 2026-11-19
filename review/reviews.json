@@ -1,5 +1,5 @@
 {
- "next": 85,
+ "next": 86,
  "items": [
   {
    "id": 80,
@@ -1951,6 +1951,23 @@
     },
     {
      "t": "Bridge hole size OK now"
+    }
+   ]
+  },
+  {
+   "id": 85,
+   "title": "Map Builder: choose breakable / unbreakable",
+   "text": "mapbuild.html → select a house, crate, barrel or tree → right panel 'พังได้' (on = breakable, default). Turn off → after ⬆ export, that object cannot be damaged in game. Walls and kit objects already had this checkbox.",
+   "kind": "Tool",
+   "who": "Map",
+   "status": "wait",
+   "created": "2026-11-19T09:58:06",
+   "updated": "2026-11-19T09:58:06",
+   "imgs": [],
+   "links": [],
+   "checks": [
+    {
+     "t": "Checkbox is where you expect"
     }
    ]
   }

@@ -17,7 +17,7 @@ function genBldg(id){
   const M=MAPS[id],out=[];if(!M)return out;
   for(const o of M.obs||[])if(o.k==='house'){
     const D=BLDDEF[o.bt]||BLDDEF.house;o.bi=out.length;
-    out.push({i:out.length,o,D,c:Math.cos(o.ry||0),s:Math.sin(o.ry||0),ht:0,dirty:false,pc:BLD_PIECES.map((n,j)=>{const mx=D.hp[j<4?'wall':'roof'],[nc,nr]=BLD_GRID[j];
+    out.push({i:out.length,o,D,nb:!!o.nb,c:Math.cos(o.ry||0),s:Math.sin(o.ry||0),ht:0,dirty:false,pc:BLD_PIECES.map((n,j)=>{const mx=D.hp[j<4?'wall':'roof'],[nc,nr]=BLD_GRID[j];
       return {n,fl:0,burnT:0,frzT:0,nc,nr,cb:0,max:mx,ch:new Array(nc*nr).fill(mx)};})});
   }
   return out;
@@ -45,7 +45,7 @@ function bldMoundAt(b,x,y){const [lx,ly]=bldLocal(b,x,y),e=(lx/(b.o.w/2+BLD_MOUN
 function bldMoundH(x,y){let g=cityMoundH(x,y);if(!BLDG.length)return g;for(const b of sgNear(sgBld(),x,y,BLD_MOUND.pad,_sgM))if(bldNear(b,x,y,BLD_MOUND.pad)&&bldGone(b)){const v=bldMoundAt(b,x,y);if(v>g)g=v;}return g;}
 // โดนชิ้นย่อย: code = ส่วน*100 + ชิ้นย่อย (ค่าจาก bldPieceAt)
 function hitBldPiece(b,code,dmg,el,ox,oy){
-  const j=Math.floor(code/100),k=code%100,q=b.pc[j];if(!BLDON||!q||!bldAlive(q,k))return;
+  const j=Math.floor(code/100),k=code%100,q=b.pc[j];if(!BLDON||!q||b.nb||!bldAlive(q,k))return;   // nb = set unbreakable in Map Builder
   el=el||'none';const fire=el.includes('fire'),ice=el==='ice',blast=el.includes('blast');
   let m=blast?1.5:ice?0.7:1;
   if(q.frzT>0&&!ice){if(fire){q.frzT=0;q.fl&=~8;}else m*=2;}       // น้ำแข็ง: ไฟละลาย / ตีแรงแตก ×2
@@ -179,7 +179,7 @@ function collideBld(b,o,r,z){
 function updateBldg(dt){
   cityTick(dt);
   if(!BLDON)return;
-  for(const b of BLDG){let br=false;
+  for(const b of BLDG){let br=false;if(b.nb)continue;
     for(let j=0;j<6;j++){
       const q=b.pc[j];if(q.fl&1)continue;
       if(q.frzT>0){q.frzT-=dt;if(q.frzT<=0)q.fl&=~8;}

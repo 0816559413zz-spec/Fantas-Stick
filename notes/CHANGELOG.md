@@ -64,6 +64,7 @@
 - 2026-11-18 — **Darkness Studio:** เก็บพรีวิวท่าพุ่งชิ่งและตรา X เวอร์ชันที่ผู้ใช้อนุมัติ พร้อม GIF และสรุปสไตล์ภาพใน `designs/darkness.md`
 
 - 2026-11-18 — **Darkness (ออกแบบ):** บันทึก `designs/darkness.md` คอนเซปต์ + ภาพท่าพุ่งที่ผ่าน + ชุดสกิลที่ตกลง (เคียวอย่างเดียว ตราทีละคน 8 วิ, ท่าติดตรา, Night Waltz, ท่าไล่ตาม 2 โหมด ฟันกระแทกพาลงพื้น, ฆ่าได้รีเซ็ต) ยังไม่มีในเกม
+- 2026-11-19 — **Map Builder: set game objects unbreakable:** 'พังได้' checkbox for houses, crates, barrels and trees → `nb` in the map file → game ignores damage on them. Tested: flagged house/prop take no damage, normal ones still break.
 - 2026-11-19 — **Dev Mode repair/collapse tool:** F2 → repair or collapse breakables at the aim point, the whole structure at the aim, or the whole map (cover, bridge parapet + holes, houses, fences, props). Bridge holes made smaller. Tests on fcs and hogsmeade pass.
 - 2026-11-19 — **Bridge damage 3D:** skin hits cut real brick-stepped holes in the bridge stone (shader discard + cavity mesh + loose/fallen bricks); parapet breaks leave a stump and throw chunks that fall to the ground/deck and stay.
 - 2026-11-19 — **Bridge damage (protocol v86):** parapet merlons break with cover-destruction rules (BRK units with raised base `z0`); skill hits leave chipped / missing-brick / exposed-rubble damage on the bridge faces at the hit spot (new `js/12-fcs-bridge.js`, snapshot `BS`, view `fcsSkinView`). Tests: spots land at hit position (arch hits on the ring), stages rise with repeat hits, parapet breaks from deck blasts but not from ground blasts below.
