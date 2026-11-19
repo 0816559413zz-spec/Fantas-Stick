@@ -3,6 +3,16 @@
 > เขียนอัตโนมัติจาก `review.html` (ผ่าน `tools/serve.py`) — อย่าแก้ไฟล์นี้ตรง ๆ, แก้ `review/reviews.json` แล้วรัน `python tools/serve.py --review-md`.
 > **Claude:** ทำเฉพาะหัวข้อสถานะ **✏️ ขอแก้** — อ่านความเห็นผู้ใช้ (`ความเห็นผู้ใช้`) + เปิดรูปด้วย Read → แก้ → ตั้ง `status:"wait"` + เขียน `reply` (ไทยสั้น ๆ ว่าแก้อะไร) เพื่อส่งกลับให้ผู้ใช้รีวิวใหม่. อย่าตั้ง `ok` เอง (ผู้ใช้เป็นคนกดผ่าน). งานที่ **⏳ รอ** = รอผู้ใช้ ไม่ต้องทำอะไร
 
+## #84 Dev Mode: repair / collapse tool
+- สถานะ: ⏳ รอผู้ใช้รีวิว • ชนิด: Tool • สาย/ส่วน: Dev
+
+**วิธีดู / อะไรรอรีวิว:**
+Open the game with ?dev=1 → F2 → section 'ทำลาย / ซ่อม'. Point the mouse at something first, then press: repair/collapse at the aim (3 m), the whole structure (house, fence line, bridge, cover piece, prop), or the whole map. Bridge holes are now smaller.
+
+**เช็กลิสต์:**
+- [ ] Repair/collapse works on what you point at
+- [ ] Bridge hole size OK now
+
 ## #83 Bridge 3D holes + parapet chunks falling
 - สถานะ: ⏳ รอผู้ใช้รีวิว • ชนิด: Map / destruction • สาย/ส่วน: Map
 

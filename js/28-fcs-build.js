@@ -81,7 +81,7 @@ function fcsParView(){
     const [pp,pq,ps]=P.mer[k],t=st===2?0.62:st===1?0.82:1;c.setRGB(t,t*0.98,t*0.95);
     const q2=pq.clone().multiply(new THREE.Quaternion().setFromEuler(e.set(st*0.06,0,st*0.09*((k%2)*2-1))));
     P.imM.setMatrixAt(k,m4.compose(new THREE.Vector3(pp.x,pp.y-(st===2?0.18:0),pp.z),q2,new THREE.Vector3(ps.x*(st===2?0.8:1),ps.y*(st===2?0.7:1),ps.z)));
-    P.imM.setColorAt(k,c);P.imB.setColorAt(k,c);P.imR.setMatrixAt(k,m4.makeScale(0,0,0));}
+    P.imM.setColorAt(k,c);P.imB.setColorAt(k,c);P.imB.setMatrixAt(k,m4.compose(...P.base[k]));P.imR.setMatrixAt(k,m4.makeScale(0,0,0));}
   if(ch)for(const im of [P.imB,P.imM,P.imR]){im.instanceMatrix.needsUpdate=true;im.instanceColor.needsUpdate=true;}
 }
 // damage decal textures (stage 1 chipped / 2 missing bricks / 3 exposed rubble), drawn once
@@ -147,7 +147,7 @@ function fcsSkinView(){
   const bricks=[],m4=new THREE.Matrix4(),q=new THREE.Quaternion(),e=new THREE.Euler(),R=mulberry(99),Yv=new THREE.Vector3(0,1,0);
   BSKN.list.forEach((sp,i)=>{const f=BSKN.F[sp.f];if(!f)return;const ny=f.ax==='y',X=ny?tx(f.c):tx(sp.a),Z=ny?tz(sp.a):tz(f.c),ry=ny?f.n*Math.PI/2:(f.n>0?0:Math.PI);
     const nx=ny?f.n:0,nz=ny?0:f.n;
-    if(HU&&nh<64){let r=sp.s*[0,0.32,0.55,0.85][sp.st];const dep=[0,0.15,0.4,0.9][sp.st];
+    if(HU&&nh<64){let r=sp.s*[0,0.22,0.38,0.58][sp.st];const dep=[0,0.12,0.32,0.7][sp.st];
       // hole must fit between the arch ring (or ground) and the deck edge: shrink radius over arch crowns
       // over an arch crown there is little wall: slide the hole (up to 3 m) toward the pier where it fits bigger
       const hi=BSKN.B.DH-0.35,fit=a2=>{const gF=GY(ny?f.c:a2,ny?a2:f.c),lo=Math.max(gF+0.3,bskArcAt(f,a2));return [Math.max(0.2,Math.min(r,(hi-lo)*0.5/1.15)),lo];};
@@ -169,9 +169,9 @@ function fcsSkinView(){
 }
 // รั้วไม้ (ชนิด 3 — js/02-fcs.js fences): เสาไม้ทุก ~1.8 ม. เอียงนิด ๆ + ราว 2 เส้นต่อช่วงเสา ตามพื้นเอียง • InstancedMesh 2 ชุด
 // จำ index เสา/ราวของแต่ละช่วงไว้ใน EFS3 (ลำดับช่วงเดียวกับ EFS.S ของ js/12-efs.js) → efsView ทำไหม้ดำ / พังหาย / เปลวไฟ
-const EFS3={sec:[],posts:null,rails:null,pm:[],acc:0};
+const EFS3={sec:[],posts:null,rails:null,pm:[],rm:[],acc:0};
 function fcsFences(list,inst,box){
-  EFS3.sec=[];EFS3.pm=[];EFS3.posts=EFS3.rails=null;
+  EFS3.sec=[];EFS3.pm=[];EFS3.rm=[];EFS3.posts=EFS3.rails=null;
   if(!list.length)return;const R=mulberry(424242),m4=new THREE.Matrix4(),q=new THREE.Quaternion(),e=new THREE.Euler(),X=new THREE.Vector3(1,0,0),d=new THREE.Vector3(),pos=new THREE.Vector3(),sc=new THREE.Vector3();
   const posts=[],rails=[];
   for(const [x1,y1,x2,y2] of list){const n=Math.max(1,Math.round(Math.hypot(x2-x1,y2-y1)*S3/EFSV.sec)),P=[],p0=posts.length;
@@ -183,7 +183,7 @@ function fcsFences(list,inst,box){
         rails.push(m4.compose(pos.set((ax+bx)/2,(ay+by)/2+hh+(ja+jb)/2,(az+bz)/2),q.setFromUnitVectors(X,d),sc.set(len,0.1,0.06)).clone());}
       EFS3.sec.push({p:[p0+i,p0+i+1],r:[r0,r0+1],lv:0,dm:0,br:0,acc:0});}}
   EFS3.posts=inst(box,new THREE.MeshStandardMaterial({color:'#6b4c32',roughness:0.95}),posts,mm=>mm);
-  EFS3.rails=inst(box,new THREE.MeshStandardMaterial({color:'#8a6a46',roughness:0.9}),rails,mm=>mm);
+  EFS3.rails=inst(box,new THREE.MeshStandardMaterial({color:'#8a6a46',roughness:0.9}),rails,mm=>mm);EFS3.rm=rails;
   const W=new THREE.Color(1,1,1);for(const im of [EFS3.posts,EFS3.rails]){for(let i=0;i<im.count;i++)im.setColorAt(i,W);im.instanceColor.needsUpdate=true;}
 }
 // ภาพไฟรั้ว (ทุกเครื่อง ทุกเฟรม): ไหม้ดำตามแถบความเสียหาย • พัง = ราวหาย เสาที่ไม่มีช่วงเหลือ = ตอดำเตี้ย • เปลว/ควันตามระดับไฟ (เฉพาะใกล้กล้อง)
@@ -198,7 +198,8 @@ function efsView(dt){
       if(s.br&&!v.br){v.br=1;for(const r of v.r)Rl.setMatrixAt(r,_efZ);dR=true;
         for(const pi of v.p){const alive=V.some((w,j)=>!S[j].br&&w.p.includes(pi));if(alive)continue;const [pp,pq,hp,g]=EFS3.pm[pi],h2=0.35+0.2*((pi*7)%5)/5;
           _efM.compose(_efS.set(pp.x,g+h2/2-0.05,pp.z),pq,new THREE.Vector3(0.14,h2,0.14));P.setMatrixAt(pi,_efM);P.setColorAt(pi,char(1));dP=true;}}
-      else if(!s.br){char(s.dm/4);for(const r of v.r)Rl.setColorAt(r,_efC);for(const pi of v.p)P.setColorAt(pi,_efC);dP=dR=true;}}
+      else if(!s.br){if(v.br){v.br=0;for(const r of v.r)Rl.setMatrixAt(r,EFS3.rm[r]);for(const pi of v.p){const [pp,pq,hp]=EFS3.pm[pi];P.setMatrixAt(pi,_efM.compose(pp,pq,_efS.set(0.15,hp,0.15)));}}   // dev repair
+        char(s.dm/4);for(const r of v.r)Rl.setColorAt(r,_efC);for(const pi of v.p)P.setColorAt(pi,_efC);dP=dR=true;}}
     v.lv=s.br?0:s.lv;}
   if(dP){P.instanceMatrix.needsUpdate=true;if(P.instanceColor)P.instanceColor.needsUpdate=true;}
   if(dR){Rl.instanceMatrix.needsUpdate=true;if(Rl.instanceColor)Rl.instanceColor.needsUpdate=true;}

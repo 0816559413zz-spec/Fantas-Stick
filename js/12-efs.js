@@ -25,6 +25,8 @@ function efsBuild(id){
     const t=clamp(((o.x-x1)*dx+(o.y-y1)*dy)/(dx*dx+dy*dy||1),0,0.9999),s=L[Math.floor(t*L.length)];
     if(o.h0===undefined)o.h0=o.hgt;o.hgt=o.h0;o.efs=s.i;s.cs.push(o);}
 }
+function efsBreak(s){s.br=1;s.heat=0;s.hp=0;for(const o of s.cs)o.hgt=0;emit({k:'efs',t:'b',x:Math.round(s.cx),y:Math.round(s.cy),h:0.6,hh:1.2,r:18,mi:1});}
+function efsRepair(s){s.br=0;s.heat=0;s.hp=EFSV.hp;s.team=-1;s.by=null;for(const o of s.cs)o.hgt=o.h0;}
 function efsDist(s,x,y){const dx=s.x2-s.x1,dy=s.y2-s.y1,t=clamp(((x-s.x1)*dx+(y-s.y1)*dy)/(dx*dx+dy*dy||1),0,1);return Math.hypot(x-s.x1-dx*t,y-s.y1-dy*t);}
 function efsHeat(s,amt,by){
   if(s.br||!(amt>0))return;const o=by!=null?G.players[by]:null;
@@ -52,8 +54,7 @@ function efsTick(dt){
     if(L<2&&!s.fed)s.heat=Math.max(0,s.heat-V.decay*dt);   // ไฟเล็ก (ไม่มีช่วงข้างป้อน) ค่อย ๆ ดับ
     if(L<1)continue;
     s.hp-=V.dmg[L]*dt;
-    if(s.hp<=0){s.br=1;s.heat=0;s.hp=0;for(const o of s.cs)o.hgt=0;
-      emit({k:'efs',t:'b',x:Math.round(s.cx),y:Math.round(s.cy),h:0.6,hh:1.2,r:18,mi:1});continue;}
+    if(s.hp<=0){efsBreak(s);continue;}
     const R=V.rad[L]*20,tl=s.team>=0?foesOf(s.team):plist().filter(q=>q.alive&&!q.downed);
     for(const t of tl){if(t.inv>0||((t.isE?(t.h||0):(t.z||0))>V.maxZ))continue;
       if(Math.abs(t.x-s.cx)>R+60||Math.abs(t.y-s.cy)>R+60)continue;

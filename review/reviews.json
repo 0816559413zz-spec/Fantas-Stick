@@ -1,5 +1,5 @@
 {
- "next": 84,
+ "next": 85,
  "items": [
   {
    "id": 80,
@@ -1931,6 +1931,26 @@
     },
     {
      "t": "Parapet remains + falling chunks look right"
+    }
+   ]
+  },
+  {
+   "id": 84,
+   "title": "Dev Mode: repair / collapse tool",
+   "text": "Open the game with ?dev=1 → F2 → section 'ทำลาย / ซ่อม'. Point the mouse at something first, then press: repair/collapse at the aim (3 m), the whole structure (house, fence line, bridge, cover piece, prop), or the whole map. Bridge holes are now smaller.",
+   "kind": "Tool",
+   "who": "Dev",
+   "status": "wait",
+   "created": "2026-11-19T09:53:53",
+   "updated": "2026-11-19T09:53:53",
+   "imgs": [],
+   "links": [],
+   "checks": [
+    {
+     "t": "Repair/collapse works on what you point at"
+    },
+    {
+     "t": "Bridge hole size OK now"
     }
    ]
   }

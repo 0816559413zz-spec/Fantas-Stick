@@ -160,7 +160,62 @@ function devAct(a,k,v){
   else if(a==='botadd')devBotAdd(+v);
   else if(a==='botclr')removeBots();
   else if(a==='copy')devCopyAim();
+  else if(a==='dfix')devDestroy(true,String(v));
+  else if(a==='dbrk')devDestroy(false,String(v));
   DEV.key='';devRender();
+}
+
+// ---- Destruction debug (user 2026-11-19): repair / collapse breakables at the aim point, a whole building, or the whole map ----
+// Covers: cover pieces + bridge parapet (BRK), houses (BLDG pieces), fences (EFS sections), bridge skin holes (BSKN), props (PROPS).
+// part = everything within DEVD_R of the aim point • whole = the nearest structure (house / fence line / bridge / single cover piece)
+const DEVD_R=60;
+function devBrkFix(g,fix){if(fix){g.hp=g.max;if(g.st)brkApply(g,0);}else if(g.st<3)hitBrk(g,1e6,g.x,g.y);}
+function devBldFix(b,fix,codes){
+  if(fix){for(const q of b.pc){q.fl=0;q.cb=0;q.burnT=q.frzT=0;q.ch.fill(q.max);}b.dirty=true;return;}
+  b.pc.forEach((q,j)=>{for(let k=0;k<q.nc*q.nr;k++){const c=j*100+k;if((!codes||codes.has(c))&&bldAlive(q,k))hitBldPiece(b,c,1e6,'blast',b.o.x,b.o.y);}});
+}
+function devPropFix(o,fix){const D=PROPDEF[o.k];if(!D||!D.hp)return;if(fix){o.st=0;o.hp=D.hp;}else hitProp(o,1e6,null);}
+function devSkinFix(fix,x,y,all){
+  if(!BSKN.B)return 0;
+  if(fix){const n=BSKN.list.length;BSKN.list=all?[]:BSKN.list.filter(q=>{const f=BSKN.F[q.f],px=f.ax==='y'?f.c:q.a,py=f.ax==='y'?q.a:f.c;return Math.hypot(px-x,py-y)>DEVD_R*1.5;});BSKN.ver++;
+    if(all&&FCSB.imC){FCSB.nC=0;FCSB.fall.length=0;FCSB.imC.count=0;}return n-BSKN.list.length;}
+  if(all){let n=0;for(const f of BSKN.F)for(let a=f.a0+60;a<f.a1-40;a+=140){const px=f.ax==='y'?f.c+f.n*30:a,py=f.ax==='y'?a:f.c+f.n*30;for(let k=0;k<3;k++)bskEnv(px,py,60,50,null,'blast',3+(n%3));n++;}return n;}
+  for(let k=0;k<3;k++)bskEnv(x,y,70,50,null,'blast',4);return 1;
+}
+function devDestroy(fix,scope){
+  if(!G)return;const x=INPUT.gx,y=INPUT.gy,R=DEVD_R;let n=0;
+  const parG=g=>g.d&&g.d.fp!=null;
+  if(scope==='map'){
+    for(const g of BRK){devBrkFix(g,fix);n++;}
+    for(const b of BLDG){devBldFix(b,fix);n++;}
+    for(const s of EFS.S){fix?efsRepair(s):(!s.br&&efsBreak(s));n++;}
+    for(const o of PROPS){devPropFix(o,fix);n++;}
+    n+=devSkinFix(fix,x,y,true);
+    toast((fix?'🔧 ซ่อมทั้งแมพ':'💥 พังทั้งแมพ')+' ('+n+')');return;}
+  if(scope==='part'){
+    for(const g of BRK)if(g.cs.some(o=>Math.hypot(o.x-x,o.y-y)<R+o.r)){devBrkFix(g,fix);n++;}
+    for(const b of BLDG){if(!bldNear(b,x,y,R))continue;const [lx,ly]=bldLocal(b,x,y),codes=new Set();
+      b.pc.forEach((q,j)=>{for(let k=0;k<q.nc*q.nr;k++)if(rectDist(bldChunk(b,j,k),lx,ly)<R)codes.add(j*100+k);});
+      if(codes.size){fix?devBldFix(b,true):devBldFix(b,false,codes);n+=codes.size;}}
+    for(const s of EFS.S)if(efsDist(s,x,y)<R){fix?efsRepair(s):(!s.br&&efsBreak(s));n++;}
+    for(const o of PROPS)if(Math.hypot(o.x-x,o.y-y)<R+o.r){devPropFix(o,fix);n++;}
+    if(BSKN.B&&BSKN.B.at(x,y,R))n+=devSkinFix(fix,x,y,false);
+    toast((fix?'🔧 ซ่อมตรงที่เล็ง':'💥 พังตรงที่เล็ง')+' ('+n+')');return;}
+  // whole structure: pick the nearest candidate
+  let best=null,bd=R*4;const cand=(d,k,o)=>{if(d<bd){bd=d;best={k,o};}};
+  for(const b of BLDG)if(bldNear(b,x,y,bd)){const [lx,ly]=bldLocal(b,x,y);cand(Math.max(0,Math.hypot(Math.max(0,Math.abs(lx)-b.o.w/2),Math.max(0,Math.abs(ly)-b.o.d/2))),'bld',b);}
+  for(const g of BRK)if(!parG(g))for(const o of g.cs)cand(Math.max(0,Math.hypot(o.x-x,o.y-y)-o.r),'brk',g);
+  for(const s of EFS.S)cand(efsDist(s,x,y),'fence',s.f);
+  if(BSKN.B&&BSKN.B.at(x,y,R*2))cand(0,'bridge',null);
+  for(const o of PROPS)cand(Math.max(0,Math.hypot(o.x-x,o.y-y)-o.r),'prop',o);
+  if(!best){toast('ไม่เจอสิ่งก่อสร้างใกล้จุดเล็ง');return;}
+  const {k,o}=best;
+  if(k==='bld')devBldFix(o,fix);
+  else if(k==='brk')devBrkFix(o,fix);
+  else if(k==='prop')devPropFix(o,fix);
+  else if(k==='fence'){for(const s of EFS.S)if(s.f===o){if(fix)efsRepair(s);else if(!s.br)efsBreak(s);}}
+  else if(k==='bridge'){for(const g of BRK)if(parG(g))devBrkFix(g,fix);devSkinFix(fix,x,y,true);}
+  toast((fix?'🔧 ซ่อมทั้งหลัง: ':'💥 พังทั้งหลัง: ')+({bld:'บ้าน',brk:'ของบัง',prop:'ของในฉาก',fence:'รั้ว',bridge:'สะพาน'}[k]));
 }
 // ---- ภาพซ้อนไว้ดูแมพ: กล่องชน (OBS) + วงเขตยึด/จุดเกิดปลอดภัย ----
 const _dvCyl=new THREE.CylinderGeometry(1,1,1,10,1,true);
@@ -251,6 +306,8 @@ function devRender(){
   h.push(dvRow('bl','',[[0,'ง่าย'],[1,'กลาง'],[2,'เก่ง']],DEV.bl),dvRow('bn','',[[1,'×1'],[2,'×2'],[3,'×3']],DEV.bn));
   const sgm=G.mode==='siege';
   h.push('<div class="trn">'+dvBtn('botadd',sgm?'➕ บอทฝั่งบุก':'➕ บอท',{v:sgm?0:50})+(sgm?dvBtn('botadd','➕ บอทฝั่งรับ',{v:1}):'')+dvBtn('botclr','🧹 ลบบอท')+'</div>',dvTog(C.freeze,'freeze','🧊 บอทหยุดนิ่ง'));
+  h.push(dvSec('ทำลาย / ซ่อม (ที่เล็ง = จุดที่เมาส์ชี้ก่อนเปิดหน้าต่าง)'),'<div class="trn">'+dvBtn('dfix','🔧 ซ่อมตรงที่เล็ง',{v:'part'})+dvBtn('dbrk','💥 พังตรงที่เล็ง',{v:'part'})+'</div>',
+    '<div class="trn">'+dvBtn('dfix','🔧 ซ่อมทั้งหลัง',{v:'whole'})+dvBtn('dbrk','💥 พังทั้งหลัง',{v:'whole'})+'</div>','<div class="trn">'+dvBtn('dfix','🔧 ซ่อมทั้งแมพ',{v:'map'})+dvBtn('dbrk','💥 พังทั้งแมพ',{v:'map'})+'</div>');
   h.push(dvSec('โลก / ภาพช่วยดูแมพ'),dvRow('set','ts',[[0.25,'×0.25'],[0.5,'×0.5'],[1,'×1'],[2,'×2']],C.ts));
   h.push(dvTog(C.pause,'pause','⏸ หยุดโลก [F4]'),dvTog(C.col,'col','🟥 โชว์กล่องชน (หิน/เสา/ต้นไม้/กำแพง)'),dvTog(C.omap,'omap','🗺️ แผนที่ 2D ซ้อนจอ (คลิก = วาร์ป)'),dvTog(C.zon,'zon','⭕ โชว์เขตยึดแกน + จุดเกิดปลอดภัย'));
   h.push(dvBtn('copy','📍 คัดลอกพิกัดที่เล็ง [F7]').replace('<button','<button class="trw"'),'<small>F2 เปิด/ปิด • คลิกจอ = เล่นต่อ • ?dev=0 ปิด Dev Mode</small>');

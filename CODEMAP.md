@@ -208,8 +208,8 @@ CITY_FL:8 CITY_PW:8 CDMG:9 CITYD:16 cityOn:17 cityLayout:19 cityReset:29 cityApp
 §146 ข้างในตึก (2026-10-28 ผู้ใช้: เดินเข้าได้ 1–3 ชั้น มีทางขึ้น • ผนังนอ…
 CIN:150 cityInterior:151 cinSlabOn:180 cinOpenPanel:182 cityIwHit:184 cityRampHit:186 cinIwSegs:189 cinIwRects:190 cinSecAt:191 citySecHit:193 cinIn:195 cinHole:196 cinRampH:197 _sgCI:198 cityBoxGrid:199 cityRoomAt:200 cityFloorH:202 cityCeilH:207 cinWallRect:211 cityCollideIn:214 cityProjIn:224 _sgCS:242 citySolidAt:243 cityRay:252 cityRoomBox:255 citySnapB:256 citySnapS:257 cityParse:259
 
-## js/12-efs.js (77) — สภาพธาตุบนฉาก (Element Surfaces) — เฟส 1: ไฟบนรั้วไม้ (designs/element-surfaces.md)
-EFSV:9 EFS:10 efsLv:11 efsBuild:12 efsDist:28 efsHeat:29 efsProj:34 efsEnv:40 _efsHit:44 efsTick:45 efsSnap:66 efsParse:70 efsHostView:77
+## js/12-efs.js (78) — สภาพธาตุบนฉาก (Element Surfaces) — เฟส 1: ไฟบนรั้วไม้ (designs/element-surfaces.md)
+EFSV:9 EFS:10 efsLv:11 efsBuild:12 efsBreak:28 efsRepair:29 efsDist:30 efsHeat:31 efsProj:36 efsEnv:42 _efsHit:46 efsTick:47 efsSnap:67 efsParse:71 efsHostView:78
 
 ## js/12-fcs-bridge.js (51) — Castle Strike bridge skin damage (user 2026-11-19): skill hits (damageEnv) leave damage o…
 BSKN:7 bskBuild:9 bskTop:15 bskArch:17 bskArcAt:23 bskEnv:28 bskSnap:42 bskParse:47
@@ -345,12 +345,12 @@ CITY_STY:181 CITY_VEH:188 cityFacade:190 CITYK:203 _cZ:204 _cT:204 _cR:204 _cC:2
 §259 ตึกไฮไลต์ล้มทั้งตึก (ขั้น 7)
 _ctA:262 _ctB:262 _ctC:262 cityTowerPose:263 cityTowerAnim:271 cityTowerRubble:278 CAREA:292 cityAreaSync:293 cityViewSync:305 cityDebris:349 cityFX:358
 
-## js/28-fcs-build.js (305) — ภาพแผนที่ First Castle Strike (แบบ Basic: กล่อง/ทรงพื้นฐาน ยังไม่มีโมเดลจริง) + ภาพ/HUD โ…
+## js/28-fcs-build.js (306) — ภาพแผนที่ First Castle Strike (แบบ Basic: กล่อง/ทรงพื้นฐาน ยังไม่มีโมเดลจริง) + ภาพ/HUD โ…
 buildFcs:5 fcsBridge:37 FCSB:74 fcsParView:75 fcsSkinTex:88 fcsHoleMat:106 fcsParFall:119 fcsFallTick:126 fcsSkinView:138 EFS3:172 fcsFences:173 _efC:190 _efM:190 _efS:190 _efZ:190 efsView:191
-§216 ภาพโหมด (ลูกข่ายทุกเครื่องจาก snapshot M.sg)
-SGV3:217 sgClearView:218 sgViewBuild:219 SGVZR:238 sgBarrier:240 sgSync:254 sgDust:275 sgFx:276
-§281 HUD
-sgTop:282 sgHud:284
+§217 ภาพโหมด (ลูกข่ายทุกเครื่องจาก snapshot M.sg)
+SGV3:218 sgClearView:219 sgViewBuild:220 SGVZR:239 sgBarrier:241 sgSync:255 sgDust:276 sgFx:277
+§282 HUD
+sgTop:283 sgHud:285
 
 ## js/28-fcs-forest.js (202) — ป่าสนหมอก ในแผนที่ First Castle Strike (เฟส 1 = ช่อง x 0–28 ของ Map Editor) — ทำตามรูปอ้า…
 FF:7 FF_X1:8 FF_NS:9 ffGroundTex:11 ffParts:33 fcsForest:40 ffMerge:123 ffDetail:131 fcsRuin:158 fcsForestTick:192 FFC:202
@@ -442,7 +442,8 @@ bpOpen:53 bpOn:53 bpKey:53 bpShow:55 bpSync:57 hovEl:127
 §128 หน้าตั้งค่า
 setRow:129 setTog:130 setTab:131 XHC:132 XHN:132 setOpts:133 SET_ICO:135 SET_EN:138 renderSettings:139 drawXhPrev:161 openSettings:162 closeSettings:164 modeIcon:220 modeTitle:221 renderLobby:222
 
-## js/41-debug.js (181) — 
+## js/41-debug.js (181) — เครื่องมือทดสอบสมดุล (ใช้ผ่านคอนโซล WD.bal / WD.dmgTest เท่านั้น ผู้เล่นปกติไม่เห็น)
+§5 บอทต่อสู้แบบง่ายๆ: เล็งนำเป้า เดินรักษาระยะ+ส่ายไปมา ร่ายคาถาทุกครั้ง…
 botBrain:6 _obsKeep:49 balArena:50 _balStash:53 balIsolate:54 balReset:57 balDuel:63 balTour:79 balCoop:93 balSpellTest:109
 §130 Service Worker (sw.js): เก็บไฟล์เกมไว้ในเครื่อง เปิดครั้งต่อไปเร็วขึ้…
 SWK:131 swSetup:132
@@ -835,7 +836,7 @@ surfSync:49 surfQuality:53
 SURF_VS:55 SURF_VS_BODY:56 SURF_FS:67 SURF_FS_BODY:68 surfOk:98 surfApply:99 surfScene:111
 §112 ปรับค่า (tune.html / F8)
 
-## js/77-dev.js (279) — Dev Mode: ทดสอบแมพ/สกิลในแมตช์จริง (ผู้ใช้ 2026-11-18)
+## js/77-dev.js (336) — Dev Mode: ทดสอบแมพ/สกิลในแมตช์จริง (ผู้ใช้ 2026-11-18)
 DEV:5 devOn:9 devOff:10 devSoloOk:11 devHold:12 devBroomOk:13 dvMe:14 devSave:15
 §16 hook จากโฮสต์: เรียกต้น hostTick (คืน dt ที่ปรับแล้ว • -1 = หยุดโลก)
 devDt:17 devTick:22 devGod:31 devFreeze:32
@@ -843,11 +844,13 @@ devDt:17 devTick:22 devGod:31 devFreeze:32
 devFcToggle:34 devFcCam:41 devFcTop:47 devFcMe:51 devKey:67 devMount:78 DEV_BOTS:86 devStartMode:87 devCell:100 devCopyAim:101
 §107 คำสั่งโฮสต์
 devTp:108 devSgPhase:112 devBotAdd:123 devAct:132
-§165 ภาพซ้อนไว้ดูแมพ: กล่องชน (OBS) + วงเขตยึด/จุดเกิดปลอดภัย
-_dvCyl:166 _dvMat:167 devOverlay:168
-§188 2D overlay map: spawn zones + capture zones + players (click = warp)
-_dvMap:189 devMapDraw:193
-§206 หน้าต่าง
-_dvPanel:207 _dvBtn:208 devToggle:211 dvBtn:216 dvRow:217 dvTog:218 dvSec:219 devRender:220 devPos:260
+§168 Destruction debug (user 2026-11-19): repair / collapse breakables at …
+DEVD_R:171 devBrkFix:172 devBldFix:173 devPropFix:177 devSkinFix:178 devDestroy:185
+§220 ภาพซ้อนไว้ดูแมพ: กล่องชน (OBS) + วงเขตยึด/จุดเกิดปลอดภัย
+_dvCyl:221 _dvMat:222 devOverlay:223
+§243 2D overlay map: spawn zones + capture zones + players (click = warp)
+_dvMap:244 devMapDraw:248
+§261 หน้าต่าง
+_dvPanel:262 _dvBtn:263 devToggle:266 dvBtn:271 dvRow:272 dvTog:273 dvSec:274 devRender:275 devPos:317
 
-(105 files, 30081 lines)
+(105 files, 30140 lines)
