@@ -98,6 +98,7 @@ function hostRemove(id){
 }
 
 function validate(){
+  if(devSoloOk())return '';   // Dev Mode: start any mode with 1 human (js/77)
   if(!hostModeEnabled(G.mode))return 'โหมดนี้ปิดชั่วคราว — เลือกโหมดอื่นก่อนเริ่มเกม';
   const ps=plist(),M=MODES[G.mode];
   if(lobbyBots().length&&!BOT_MODES.includes(G.mode))return 'โหมดนี้บอทยังเล่นไม่เป็น — ลบบอทออกก่อน';
@@ -295,7 +296,7 @@ function updatePlayer(p,dt,acting){
   if(p.wr?.ph==='throw')p.ang=p.wr.a;
 
   // ไม้กวาด: B ขึ้น/ลง — โดนสตันหรือใยแมงมุมจะตกจากไม้กวาด • โหมดโวลเดอมอร์ + FFA ไม่มีไม้กวาด (ผู้ใช้ 2026-10-27)
-  if(pr.b&&canAct&&!p.wr&&!cageBusy&&(!p.sdome||p.sdome.god)&&p.flyCd<=0&&!NOBROOM.has(G.mode)&&!p.wfo){
+  if(pr.b&&canAct&&!p.wr&&!cageBusy&&(!p.sdome||p.sdome.god)&&p.flyCd<=0&&(!NOBROOM.has(G.mode)||devBroomOk())&&!p.wfo){
     p.fly=!p.fly;p.flyCd=0.8;
     if(p.fly){p.vz=7;p.shieldOn=false;p.dash=0;emit({k:'mount',x:p.x,y:p.y,h:p.z,id:p.id});}
     else emit({k:'dismount',x:p.x,y:p.y,h:p.z,id:p.id});
@@ -416,7 +417,7 @@ function updatePlayer(p,dt,acting){
 }
 
 function hitProp(o,dmg,by){
-  const D=PROPDEF[o.k];if(!D||!D.hp||o.st!==0)return;
+  const D=PROPDEF[o.k];if(!D||!D.hp||o.st!==0||o.nb)return;   // nb = unbreakable (Map Builder)
   o.hp-=dmg;
   if(o.hp<=0){o.st=1;emit({k:'prop',e:'b',i:o.i,x:Math.round(o.x),y:Math.round(o.y),h:D.hgt*0.5});}
   else if(G.time-o.ht>0.12){o.ht=G.time;emit({k:'prop',e:'h',i:o.i,x:Math.round(o.x),y:Math.round(o.y),h:D.hgt*0.6});}

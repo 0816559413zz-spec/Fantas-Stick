@@ -19,6 +19,7 @@ function buildFcs(){
   inst(box,stoneMat(1,1,'#7a746a'),cells[1],([x,y])=>{const px=(x+0.5)*C,py=(y+0.5)*C,b=GY(px,py);return m4.makeScale(c3,FCS_WH[1],c3).setPosition(tx(px),b+FCS_WH[1]/2,tz(py)).clone();});
   inst(box,stoneMat(1,1,'#9a8a6a'),cells[2],([x,y])=>{const px=(x+0.5)*C,py=(y+0.5)*C,b=GY(px,py);return m4.makeScale(c3,FCS_WH[2],c3).setPosition(tx(px),b+FCS_WH[2]/2,tz(py)).clone();});
   fcsFences(F.fences||[],inst,box);   // รั้วไม้ (ชนิด 3)
+  if(F.bridge)try{fcsBridge(F.bridge);}catch(e){console.error('fcsBridge',e);}
   // ต้นไม้ / ลัง / เสา
   const P=k=>F.props.filter(q=>q[0]===k);
   const inF=q=>q[1]<FF_X1*C,fb=[];   // ต้นไม้ในป่า = กรวยชั่วคราว จนกว่าโมเดลสนจริงโหลดเสร็จ (js/28-fcs-forest.js)
@@ -32,11 +33,194 @@ function buildFcs(){
   for(const [t,L] of [[0,F.sp.A],[1,F.sp.B]])for(const k in L){const s=L[k],m=new THREE.Mesh(new THREE.CircleGeometry(SG_SPR*S3,32),new THREE.MeshBasicMaterial({color:TEAMC[t],transparent:true,opacity:0.18,depthWrite:false}));m.rotation.x=-Math.PI/2;m.position.set(tx(s.x),GY(s.x,s.y)+0.05,tz(s.y));addW(m);}
   try{fcsForest(fb);}catch(e){console.error('fcsForest',e);}
 }
+// L-shaped stone bridge (js/02-fcs.js bridge): arched spans (extruded shape, piers 1.6 m), corner block, ramps, crenellated parapet.
+// Starts as the full code-built bridge; when the Blender shell (map_fcs_bridge, assets/src/fcs_bridge_build.py) loads it swaps to
+// an inset core + the pre-broken shell chunks (fcsShellBuild). Shell chunk states come from BSKN (js/12-fcs-bridge.js).
+function fcsBridge(B){
+  const pm=stoneMat(1,1,'#a49a88'),grp=new THREE.Group();
+  FCSB.grp=grp;FCSB.B=B;FCSB.shell=null;FCSB.sv=-1;FCSB.full=fcsCore(B,false);grp.add(FCSB.full);
+  // parapet: per unit (B.parU) one base-wall segment + one merlon; each unit breaks via BRK (fcsParView). Rubble lumps hidden until broken.
+  const DH=B.DH,m4=new THREE.Matrix4(),q=new THREE.Quaternion(),Y=new THREE.Vector3(0,1,0),U=B.parU,box=sGeo(THREE.BoxGeometry,1,1,1),FP=FCSB;
+  FP.base=[];FP.mer=[];FP.rub=[];FP.st=new Int8Array(U.length);FP.off=-1;
+  const mk=(n,m)=>{const im=new THREE.InstancedMesh(box,m,n);im.castShadow=im.receiveShadow=true;grp.add(im);return im;};
+  FP.imB=mk(U.length,pm);FP.imM=mk(U.length,pm);FP.imR=mk(U.length,pm);
+  FP.imC=mk(1200,pm);FP.imC.count=0;FP.nC=0;FP.fall=[];FP.t0=0;   // fallen chunks (sim then rest)
+  const W1=new THREE.Color(1,1,1);
+  U.forEach((u,k)=>{q.setFromAxisAngle(Y,-u.a);const X=tx(u.x),Z=tz(u.y),sl=u.seg*S3+0.02;
+    FP.base[k]=[new THREE.Vector3(X,DH+0.25,Z),q.clone(),new THREE.Vector3(sl,0.5,0.45)];
+    FP.mer[k]=[new THREE.Vector3(X,DH+0.85,Z),q.clone(),new THREE.Vector3(1.0,0.75,0.5)];
+    FP.rub[k]=[new THREE.Vector3(X,DH+0.13,Z),new THREE.Quaternion().setFromEuler(new THREE.Euler(0.06,-u.a,0.08*((k%3)-1))),new THREE.Vector3(sl*0.96,0.26,0.45)];   // broken = jagged stump stays on the edge
+    FP.imB.setMatrixAt(k,m4.compose(...FP.base[k]));FP.imM.setMatrixAt(k,m4.compose(...FP.mer[k]));FP.imR.setMatrixAt(k,m4.makeScale(0,0,0));
+    FP.imB.setColorAt(k,W1);FP.imM.setColorAt(k,W1);FP.imR.setColorAt(k,W1);});
+  for(const im of [FP.imB,FP.imM,FP.imR]){im.instanceMatrix.needsUpdate=true;im.instanceColor.needsUpdate=true;}
+  addW(grp);
+  loadModel('map_fcs_bridge').then(r=>{if(r&&FCSB.grp===grp&&BSKN.C.length)try{fcsShellBuild(r.scene,B);}catch(e){console.error('fcsShellBuild',e);}});
+}
+// bridge body. inset=false: full solid (no shell model). inset=true: core behind the shell — sides pulled in by BSKV.shell,
+// top BSKV.rimH pulled in by BSKV.rimW on both deck edges (rim chunks fill it), darker rough stone shows where the shell broke
+// exposed rubble core (where shell chunks fell off): irregular stones in mortar, world-space cells, no brick texture
+function fcsRubbleMat(){
+  if(FCSB.rubM)return FCSB.rubM;const m=new THREE.MeshStandardMaterial({color:'#ffffff',roughness:1});
+  m.onBeforeCompile=sh=>{
+    sh.vertexShader=sh.vertexShader.replace('#include <common>','#include <common>\nvarying vec3 vRP;').replace('#include <begin_vertex>','#include <begin_vertex>\nvRP=(modelMatrix*vec4(transformed,1.)).xyz;');
+    sh.fragmentShader=sh.fragmentShader.replace('#include <common>','#include <common>\nvarying vec3 vRP;'+
+      'vec2 rbH(vec2 p){return fract(sin(vec2(dot(p,vec2(127.1,311.7)),dot(p,vec2(269.5,183.3))))*43758.5453);}'+
+      'float rbN(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);float a=rbH(i).x,b=rbH(i+vec2(1.,0.)).x,c=rbH(i+vec2(0.,1.)).x,d=rbH(i+vec2(1.,1.)).x;return mix(mix(a,b,f.x),mix(c,d,f.x),f.y);}')
+      .replace('#include <map_fragment>','#include <map_fragment>\n'+
+      'vec2 q=vec2((vRP.x+vRP.z)*1.5,vRP.y*3.1);q+=vec2(rbN(q*0.6),rbN(q*0.6+5.))*0.7-0.35;vec2 ip=floor(q),fp=fract(q);float d1=8.,d2=8.;vec2 id=vec2(0.);'+
+      'for(int j=-1;j<=1;j++)for(int i=-1;i<=1;i++){vec2 g=vec2(float(i),float(j)),o=rbH(ip+g)*0.8+0.1,r=g+o-fp;float d=dot(r,r);if(d<d1){d2=d1;d1=d;id=ip+g;}else if(d<d2)d2=d;}'+
+      'float edge=sqrt(d2)-sqrt(d1),h=rbH(id).y,nz=rbN(vRP.xy*9.+vRP.z*7.);'+
+      'vec3 stone=mix(vec3(0.30,0.27,0.23),vec3(0.46,0.42,0.36),h)*(0.7+0.45*nz);vec3 mortar=vec3(0.24,0.17,0.11)*(0.75+0.5*nz);'+
+      'diffuseColor.rgb=mix(mortar,stone,smoothstep(0.02,0.12+0.08*nz,edge));if(rbN(vRP.zy*23.+vRP.x*5.)>0.78)diffuseColor.rgb*=0.6;');};
+  m.customProgramCacheKey=()=>'fcsRubble';return FCSB.rubM=m;
+}
+function fcsCore(B,inset){
+  const g=new THREE.Group(),pm=inset?stoneMat(1,1,'#958b7c'):stoneMat(1,1,'#a49a88'),rb=inset?fcsRubbleMat():pm,dark=stoneMat(1,1,'#8a8070'),W=B.HW*2*S3,DH=B.DH;
+  // material arrays: extrude [caps = side faces, sides = top/bottom/arch soffit] • box [+x,-x,+y,-y,+z,-z]
+  const mat=[rb,pm],boxZ=[pm,pm,pm,pm,rb,rb];
+  const Ts=inset?BSKV.shell:0,RW=BSKV.rimW,RH=inset?BSKV.rimH:0;
+  const add=(geo,m,x,y,z,ry)=>{const o=new THREE.Mesh(geo,m);o.position.set(x,y,z);o.rotation.y=ry||0;o.castShadow=o.receiveShadow=true;g.add(o);return o;};
+  for(const s of B.spans){const L=Math.hypot(s.x2-s.x1,s.y2-s.y1)*S3,r=(L-1.6)/2,ux=(s.x2-s.x1)/(L/S3),uy=(s.y2-s.y1)/(L/S3),ry=-Math.atan2(uy,ux);
+    const mx=(s.x1+s.x2)/2,my=(s.y1+s.y2)/2,base=Math.min(GY(s.x1,s.y1),GY(s.x2,s.y2),GY(mx,my))-1.2,top=DH-RH-base,spring=DH-1.3-r-base;
+    const sh=new THREE.Shape();sh.moveTo(-L/2,0);sh.lineTo(-r,0);sh.lineTo(-r,spring);sh.absarc(0,spring,r,Math.PI,0,true);sh.lineTo(r,0);sh.lineTo(L/2,0);sh.lineTo(L/2,top);sh.lineTo(-L/2,top);sh.lineTo(-L/2,0);
+    const geo=new THREE.ExtrudeGeometry(sh,{depth:W-2*Ts,bevelEnabled:false,curveSegments:14});geo.translate(0,0,-(W-2*Ts)/2);
+    add(geo,mat,tx(mx),base,tz(my),ry);
+    if(inset)add(sGeo(THREE.BoxGeometry,L,RH,W-2*RW),boxZ,tx(mx),DH-RH/2,tz(my),ry);   // deck core between the rims
+    else add(sGeo(THREE.BoxGeometry,L,0.25,W+0.5),dark,tx(mx),DH-0.2,tz(my),ry);}       // string course
+  {const x=B.ax,y=B.cy,base=GY(x,y)-1.2,h=DH-RH-base;
+   if(inset){const t=Ts*20,rw=RW*20,HW=B.HW;
+     const cb=[pm,rb,pm,pm,pm,rb];   // west (-x) + north (-z) faces are behind the shell
+     add(sGeo(THREE.BoxGeometry,W-Ts,h,W-Ts),cb,tx(x+t/2),base+h/2,tz(y+t/2));
+     add(sGeo(THREE.BoxGeometry,W-RW,RH,W-RW),cb,tx(x+rw/2),DH-RH/2,tz(y+rw/2));}
+   else{add(sGeo(THREE.BoxGeometry,W+0.4,DH-base,W+0.4),pm,tx(x),base+(DH-base)/2,tz(y));add(sGeo(THREE.BoxGeometry,W+0.9,0.25,W+0.9),dark,tx(x),DH-0.2,tz(y));}}
+  for(const [alongY,L,gEnd] of [[true,B.LS,B.gS],[false,B.LE,B.gE]]){const Lm=L*S3,x0=alongY?B.ax:B.xE,y0=alongY?B.yS:B.cy,base=Math.min(GY(x0,y0),gEnd)-1.2,Wr=W-2*Ts;
+    const sh=new THREE.Shape();sh.moveTo(0,0);sh.lineTo(Lm+0.3,0);sh.lineTo(Lm+0.3,gEnd-base-0.05);sh.lineTo(0,DH-base);sh.lineTo(0,0);
+    const geo=new THREE.ExtrudeGeometry(sh,{depth:Wr,bevelEnabled:false});geo.translate(0,0,-Wr/2);
+    add(geo,mat,tx(x0),base,tz(y0),alongY?-Math.PI/2:0);}
+  return g;
+}
+// bridge runtime view: parapet break stages (BRK) + shell chunk states (BSKN). Called every frame from the render loop.
+const FCSB={grp:null,B:null,full:null,core:null,shell:null,sv:-1,tex:null,blk:null};
+function fcsParView(){
+  const P=FCSB,U=P.B&&P.B.parU;if(!U||!P.imM||P.grp.parent!==world)return;
+  if(P.off<0){P.off=BRK.findIndex(g=>g.d&&g.d.fp===0);if(P.off<0)return;}
+  const m4=new THREE.Matrix4(),c=new THREE.Color(),e=new THREE.Euler();let ch=false;
+  for(let k=0;k<U.length;k++){const g=BRK[P.off+k];if(!g)break;const st=g.st|0;if(st===P.st[k])continue;P.st[k]=st;ch=true;
+    if(st>=3){P.imB.setMatrixAt(k,m4.makeScale(0,0,0));P.imM.setMatrixAt(k,m4.makeScale(0,0,0));P.imR.setMatrixAt(k,m4.compose(...P.rub[k]));P.imR.setColorAt(k,c.setRGB(0.75,0.72,0.68));continue;}
+    const [pp,pq,ps]=P.mer[k],t=st===2?0.62:st===1?0.82:1;c.setRGB(t,t*0.98,t*0.95);
+    const q2=pq.clone().multiply(new THREE.Quaternion().setFromEuler(e.set(st*0.06,0,st*0.09*((k%2)*2-1))));
+    P.imM.setMatrixAt(k,m4.compose(new THREE.Vector3(pp.x,pp.y-(st===2?0.18:0),pp.z),q2,new THREE.Vector3(ps.x*(st===2?0.8:1),ps.y*(st===2?0.7:1),ps.z)));
+    P.imM.setColorAt(k,c);P.imB.setColorAt(k,c);P.imB.setMatrixAt(k,m4.compose(...P.base[k]));P.imR.setMatrixAt(k,m4.makeScale(0,0,0));}
+  if(ch)for(const im of [P.imB,P.imM,P.imR]){im.instanceMatrix.needsUpdate=true;im.instanceColor.needsUpdate=true;}
+}
+// shell material: per-chunk state from a 64x32 data texture (r = stage). Stage 1/2 = darker + crack lines + pushed out a bit,
+// stage 3 = vertices collapsed (chunk gone, a falling copy is spawned by fcsShellView). Same vertex code on the shadow depth material.
+const FSH_V='attribute vec4 cd;uniform sampler2D uSt;varying float vSt;varying vec3 vP;';
+const FSH_B='float stc=floor(texture2D(uSt,vec2((mod(cd.x,64.)+.5)/64.,(floor(cd.x/64.)+.5)/32.)).r*255.+.5);vSt=stc;vP=transformed;'+
+  'if(stc>2.5)transformed=vec3(0.,-500.,0.);else{float lo=step(1.-0.3*stc,cd.w);transformed.xz+=cd.yz*(stc*0.012+lo*stc*0.035);transformed.y-=lo*stc*0.02;}';   // cracked: some blocks work loose
+function fcsShellMat(tex){
+  const inj=sh=>{sh.uniforms.uSt={value:tex};sh.vertexShader=sh.vertexShader.replace('#include <common>','#include <common>\n'+FSH_V).replace('#include <begin_vertex>','#include <begin_vertex>\n'+FSH_B);};
+  const m=stoneMat(1,1,'#a49a88').clone();
+  m.onBeforeCompile=sh=>{inj(sh);
+    sh.fragmentShader=sh.fragmentShader.replace('#include <common>','#include <common>\nvarying float vSt;varying vec3 vP;'+
+      'float fsH(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}'+
+      'float fsN(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(fsH(i),fsH(i+vec2(1.,0.)),f.x),mix(fsH(i+vec2(0.,1.)),fsH(i+vec2(1.,1.)),f.x),f.y);}')
+      .replace('#include <map_fragment>','#include <map_fragment>\nif(vSt>0.5){vec2 q=vec2(vP.x+vP.z,vP.y)*2.2;float c1=abs(fsN(q)*2.-1.),c2=abs(fsN(q*1.9+7.)*2.-1.);'+
+        'float w=0.035*vSt;diffuseColor.rgb*=(1.-0.09*vSt)*(1.-0.65*(1.-smoothstep(0.,w,min(c1,c2))));}');};
+  m.customProgramCacheKey=()=>'fcsShell';
+  const d=new THREE.MeshDepthMaterial({depthPacking:THREE.RGBADepthPacking});d.onBeforeCompile=inj;d.customProgramCacheKey=()=>'fcsShellD';
+  return [m,d];
+}
+// split one chunk geometry into its stone blocks (blocks share corner positions, joints keep blocks apart)
+// -> per-vertex block random (cd.w) + block boxes {x,y,z,sx,sy,sz} for the falling copies
+function fcsBlocks(g,cd){
+  const p=g.attributes.position.array,n=p.length/3,par=new Int32Array(n);for(let i=0;i<n;i++)par[i]=i;
+  const fd=i=>{while(par[i]!==i){par[i]=par[par[i]];i=par[i];}return i;},un=(a,b)=>{a=fd(a);b=fd(b);if(a!==b)par[a]=b;};
+  const ix=g.index?g.index.array:null;
+  if(ix)for(let t=0;t<ix.length;t+=3){un(ix[t],ix[t+1]);un(ix[t],ix[t+2]);}else for(let t=0;t<n;t+=3){un(t,t+1);un(t,t+2);}
+  const key=new Map();for(let i=0;i<n;i++){const k=Math.round(p[i*3]*400)+','+Math.round(p[i*3+1]*400)+','+Math.round(p[i*3+2]*400),o=key.get(k);if(o===undefined)key.set(k,i);else un(i,o);}
+  const comp=new Map(),out=[];
+  for(let i=0;i<n;i++){const r=fd(i);let b=comp.get(r);if(!b){b={a:[1e9,1e9,1e9],b:[-1e9,-1e9,-1e9],rnd:Math.abs(Math.sin(r*12.9898+p[i*3]*78.233)*43758.5453)%1};comp.set(r,b);out.push(b);}
+    for(let k=0;k<3;k++){const v=p[i*3+k];if(v<b.a[k])b.a[k]=v;if(v>b.b[k])b.b[k]=v;}cd[i*4+3]=b.rnd;}
+  return out.map(b=>({x:(b.a[0]+b.b[0])/2,y:(b.a[1]+b.b[1])/2,z:(b.a[2]+b.b[2])/2,sx:b.b[0]-b.a[0],sy:b.b[1]-b.a[1],sz:b.b[2]-b.a[2]}));
+}
+// model loaded: merge all chunks c<i> into one mesh with attribute cd = (chunk id, outward nx, nz, rim), swap code bridge -> core + shell
+function fcsShellBuild(sc,B){
+  const P=FCSB;sc.updateMatrixWorld(true);const geos=[],blk=new Map();fcsShellClear();
+  sc.traverse(o=>{if(!o.isMesh||!/^c\d+$/.test(o.name))return;const id=+o.name.slice(1),c=BSKN.C[id];if(!c)return;const f=BSKN.F[c.f];
+    const g=o.geometry.clone().applyMatrix4(o.matrixWorld);for(const k of Object.keys(g.attributes))if(!['position','normal','uv'].includes(k))g.deleteAttribute(k);
+    if(!g.attributes.uv)return;const n=g.attributes.position.count,cd=new Float32Array(n*4),nx=f.ax==='y'?f.n:0,nz=f.ax==='y'?0:f.n;
+    for(let k=0;k<n;k++){cd[k*4]=id;cd[k*4+1]=nx;cd[k*4+2]=nz;}
+    blk.set(id,fcsBlocks(g,cd));g.setAttribute('cd',new THREE.BufferAttribute(cd,4));geos.push(g);});
+  if(!geos.length)return;
+  const geo=mergeGeometries(geos,false);if(!geo)return;
+  const tex=new THREE.DataTexture(new Uint8Array(64*32*4),64,32,THREE.RGBAFormat);tex.needsUpdate=true;
+  const [m,d]=fcsShellMat(tex),mesh=new THREE.Mesh(geo,m);mesh.customDepthMaterial=d;mesh.castShadow=mesh.receiveShadow=true;mesh.frustumCulled=false;
+  P.grp.remove(P.full);disposeTree(P.full);P.full=null;P.core=fcsCore(B,true);P.grp.add(P.core,mesh);
+  P.shell=mesh;P.tex=tex;P.blk=blk;P.prev=new Uint8Array(BSKN.C.length);P.sv=-1;gl.shadowMap.needsUpdate=true;
+}
+// parapet unit broke (brk event): spawn chunks — most fall outward off the bridge to the ground, a few drop on the deck
+function fcsParFall(ev){
+  const P=FCSB,g=BRK[ev.i];if(!P.B||!g||!g.d||g.d.fp==null)return;const u=P.B.parU[g.d.fp];if(!u)return;
+  const R=Math.random,n=5+(R()*3|0);
+  for(let k=0;k<n;k++){const out=k<n-2,sp=out?2+R()*3:0.6+R()*1.2,side=(R()-0.5)*1.4;
+    P.fall.push({x:tx(u.x)+(u.ny?side:0),z:tz(u.y)+(u.nx?side:0),y:P.B.DH+0.6+R()*0.6,vx:(out?u.nx:-u.nx)*sp+(R()-0.5)*1.5,vz:(out?u.ny:-u.ny)*sp+(R()-0.5)*1.5,vy:1+R()*2.5,
+      rx:R()*6,ry:R()*6,rz:R()*6,w:R()*8-4,s:0.35+R()*0.35});}
+}
+function fcsFallTick(dt){
+  const P=FCSB;if(!P.imC)return;dt=Math.min(0.05,dt||0);if(!P.fall.length||!(dt>0))return;
+  const B=P.B,m4=new THREE.Matrix4(),q=new THREE.Quaternion(),e=new THREE.Euler(),onDeck=(X,Z)=>{const x=X*20+MW/2,y=Z*20+MH/2;return [B.ns,B.ew].some(r=>x>r.x1&&x<r.x2&&y>r.y1&&y<r.y2);};
+  for(let i=P.fall.length-1;i>=0;i--){const f=P.fall[i];f.vy-=14*dt;f.x+=f.vx*dt;f.z+=f.vz*dt;f.y+=f.vy*dt;f.rx+=f.w*dt;f.rz+=f.w*0.7*dt;
+    const floor=(onDeck(f.x,f.z)?B.DH:TW(f.x,f.z))+f.s*0.3;
+    if(f.y<=floor&&f.vy<0){f.y=floor;if(Math.abs(f.vy)>3){f.vy*=-0.3;f.vx*=0.5;f.vz*=0.5;f.w*=0.5;}else f.done=1;}
+    if(f.k===undefined){if(P.nC>=1200){P.fall.splice(i,1);continue;}f.k=P.nC++;}
+    P.imC.setMatrixAt(f.k,m4.compose(new THREE.Vector3(f.x,f.y,f.z),q.setFromEuler(e.set(f.done?0.1:f.rx,f.ry,f.done?0.05:f.rz)),new THREE.Vector3(f.s*1.4,f.s*0.6,f.s*0.8)));
+    if(f.done)P.fall.splice(i,1);}
+  P.imC.count=P.nC;P.imC.instanceMatrix.needsUpdate=true;
+}
+// per frame: push chunk stages into the data texture; a chunk that just broke drops its stones one by one into a rubble pile
+function fcsShellView(dt){
+  fcsFallTick(dt);fcsPileTick(dt);
+  const P=FCSB;if(!P.shell||P.grp.parent!==world||P.sv===BSKN.ver)return;P.sv=BSKN.ver;
+  const D=P.tex.image.data;
+  for(const c of BSKN.C){const st=c.st|0;D[c.i*4]=st;if(st>=3&&P.prev[c.i]<3&&P.prev.ok)fcsShellFall(c);P.prev[c.i]=st;}
+  P.prev.ok=1;P.tex.needsUpdate=true;gl.shadowMap.needsUpdate=true;
+}
+// fallen stones: one InstancedMesh (unit box scaled to each block), simple tumble, then they stack on a 0.4 m height grid -> piles at the wall foot
+const FPILE={im:null,n:0,cap:7400,live:[],h:new Map(),m4:null,q:null,e:null};
+function fcsShellFall(c){
+  const P=FCSB,bl=P.blk&&P.blk.get(c.i);if(!bl)return;const f=BSKN.F[c.f],nx=f.ax==='y'?f.n:0,nz=f.ax==='y'?0:f.n,R=Math.random,F=FPILE;
+  if(!F.im){F.im=new THREE.InstancedMesh(sGeo(THREE.BoxGeometry,1,1,1),stoneMat(1,1,'#c4baa6'),F.cap);F.im.count=0;F.im.castShadow=F.im.receiveShadow=true;F.im.frustumCulled=false;F.m4=new THREE.Matrix4();F.q=new THREE.Quaternion();F.e=new THREE.Euler();}
+  if(F.im.parent!==P.grp)P.grp.add(F.im);
+  for(const b of bl){if(F.n>=F.cap)break;const sp=c.rim?0.6+R()*1.4:0.1+R()*0.6,dl=R()*0.25;
+    F.live.push({k:F.n++,x:b.x,y:b.y,z:b.z,sx:Math.max(0.12,b.sx),sy:Math.max(0.12,b.sy),sz:Math.max(0.12,b.sz),vx:nx*sp+(R()-0.5)*0.35,vz:nz*sp+(R()-0.5)*0.35,vy:R()*0.8,
+      rx:0,ry:0,rz:0,wx:(R()-0.5)*6,wy:(R()-0.5)*3,wz:(R()-0.5)*6,t:-dl});}
+  F.im.count=F.n;
+}
+function fcsPileTick(dt){
+  const F=FPILE;if(!F.live.length)return;dt=Math.min(0.05,dt||0);if(!(dt>0))return;const c=0.4,H=F.h;
+  const top=(x,z,hx,hz)=>{let m=-1e9;for(let i=Math.floor((x-hx)/c);i<=Math.floor((x+hx)/c);i++)for(let j=Math.floor((z-hz)/c);j<=Math.floor((z+hz)/c);j++){const v=H.get(i*7919+j);if(v!==undefined&&v>m)m=v;}return m;};
+  for(let i=F.live.length-1;i>=0;i--){const o=F.live[i];o.t+=dt;if(o.t<0)continue;
+    o.vy-=14*dt;o.x+=o.vx*dt;o.y+=o.vy*dt;o.z+=o.vz*dt;o.rx+=o.wx*dt;o.ry+=o.wy*dt;o.rz+=o.wz*dt;
+    const hx=Math.max(o.sx,o.sz)*0.35,hz=hx,fl=Math.max(TW(o.x,o.z),top(o.x,o.z,0,0));
+    let rest=false;if(o.y-o.sy*0.5<=fl&&o.vy<0){o.y=fl+o.sy*0.5;if(o.vy<-4){o.vy*=-0.22;o.vx*=0.5;o.vz*=0.5;o.wx*=0.4;o.wz*=0.4;}else rest=true;}
+    if(rest){   // angle of repose: roll down to a lower neighbour cell while the pile is steeper than ~1 block per cell
+      for(let it=0;it<14;it++){const h0=Math.max(TW(o.x,o.z),top(o.x,o.z,0,0));let bx=0,bz=0,bh=h0-0.32;   // point samples (cell heights)
+        for(const [dx,dz] of [[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]]){const h=Math.max(TW(o.x+dx*c,o.z+dz*c),top(o.x+dx*c,o.z+dz*c,0,0))+Math.random()*0.04;if(h<bh){bh=h;bx=dx;bz=dz;}}
+        if(!bx&&!bz){o.y=Math.max(TW(o.x,o.z),top(o.x,o.z,0,0))+o.sy*0.5;break;}o.x+=bx*c;o.z+=bz*c;o.y=Math.max(TW(o.x,o.z),top(o.x,o.z,0,0))+o.sy*0.5;}
+      o.rx=(Math.random()-0.5)*0.35;o.rz=(Math.random()-0.5)*0.35;const tp=o.y+o.sy*0.65;   // loose packing: a pile grows faster than solid stone   // settle almost flat, add to the pile height
+      {const k=Math.floor(o.x/c)*7919+Math.floor(o.z/c);if(!(H.get(k)>tp))H.set(k,tp);}}   // one cell per stone
+    F.q.setFromEuler(F.e.set(o.rx,o.ry,o.rz));F.im.setMatrixAt(o.k,F.m4.compose(new THREE.Vector3(o.x,o.y,o.z),F.q,new THREE.Vector3(o.sx,o.sy,o.sz)));
+    if(rest)F.live.splice(i,1);}
+  F.im.instanceMatrix.needsUpdate=true;gl.shadowMap.needsUpdate=true;
+}
+// Dev repair / new round: clear the piles
+function fcsShellClear(){const F=FPILE;F.live.length=0;F.h.clear();F.n=0;if(F.im)F.im.count=0;const P=FCSB;if(P.imC){P.nC=0;P.fall.length=0;P.imC.count=0;}}
 // รั้วไม้ (ชนิด 3 — js/02-fcs.js fences): เสาไม้ทุก ~1.8 ม. เอียงนิด ๆ + ราว 2 เส้นต่อช่วงเสา ตามพื้นเอียง • InstancedMesh 2 ชุด
 // จำ index เสา/ราวของแต่ละช่วงไว้ใน EFS3 (ลำดับช่วงเดียวกับ EFS.S ของ js/12-efs.js) → efsView ทำไหม้ดำ / พังหาย / เปลวไฟ
-const EFS3={sec:[],posts:null,rails:null,pm:[],acc:0};
+const EFS3={sec:[],posts:null,rails:null,pm:[],rm:[],acc:0};
 function fcsFences(list,inst,box){
-  EFS3.sec=[];EFS3.pm=[];EFS3.posts=EFS3.rails=null;
+  EFS3.sec=[];EFS3.pm=[];EFS3.rm=[];EFS3.posts=EFS3.rails=null;
   if(!list.length)return;const R=mulberry(424242),m4=new THREE.Matrix4(),q=new THREE.Quaternion(),e=new THREE.Euler(),X=new THREE.Vector3(1,0,0),d=new THREE.Vector3(),pos=new THREE.Vector3(),sc=new THREE.Vector3();
   const posts=[],rails=[];
   for(const [x1,y1,x2,y2] of list){const n=Math.max(1,Math.round(Math.hypot(x2-x1,y2-y1)*S3/EFSV.sec)),P=[],p0=posts.length;
@@ -48,7 +232,7 @@ function fcsFences(list,inst,box){
         rails.push(m4.compose(pos.set((ax+bx)/2,(ay+by)/2+hh+(ja+jb)/2,(az+bz)/2),q.setFromUnitVectors(X,d),sc.set(len,0.1,0.06)).clone());}
       EFS3.sec.push({p:[p0+i,p0+i+1],r:[r0,r0+1],lv:0,dm:0,br:0,acc:0});}}
   EFS3.posts=inst(box,new THREE.MeshStandardMaterial({color:'#6b4c32',roughness:0.95}),posts,mm=>mm);
-  EFS3.rails=inst(box,new THREE.MeshStandardMaterial({color:'#8a6a46',roughness:0.9}),rails,mm=>mm);
+  EFS3.rails=inst(box,new THREE.MeshStandardMaterial({color:'#8a6a46',roughness:0.9}),rails,mm=>mm);EFS3.rm=rails;
   const W=new THREE.Color(1,1,1);for(const im of [EFS3.posts,EFS3.rails]){for(let i=0;i<im.count;i++)im.setColorAt(i,W);im.instanceColor.needsUpdate=true;}
 }
 // ภาพไฟรั้ว (ทุกเครื่อง ทุกเฟรม): ไหม้ดำตามแถบความเสียหาย • พัง = ราวหาย เสาที่ไม่มีช่วงเหลือ = ตอดำเตี้ย • เปลว/ควันตามระดับไฟ (เฉพาะใกล้กล้อง)
@@ -63,7 +247,8 @@ function efsView(dt){
       if(s.br&&!v.br){v.br=1;for(const r of v.r)Rl.setMatrixAt(r,_efZ);dR=true;
         for(const pi of v.p){const alive=V.some((w,j)=>!S[j].br&&w.p.includes(pi));if(alive)continue;const [pp,pq,hp,g]=EFS3.pm[pi],h2=0.35+0.2*((pi*7)%5)/5;
           _efM.compose(_efS.set(pp.x,g+h2/2-0.05,pp.z),pq,new THREE.Vector3(0.14,h2,0.14));P.setMatrixAt(pi,_efM);P.setColorAt(pi,char(1));dP=true;}}
-      else if(!s.br){char(s.dm/4);for(const r of v.r)Rl.setColorAt(r,_efC);for(const pi of v.p)P.setColorAt(pi,_efC);dP=dR=true;}}
+      else if(!s.br){if(v.br){v.br=0;for(const r of v.r)Rl.setMatrixAt(r,EFS3.rm[r]);for(const pi of v.p){const [pp,pq,hp]=EFS3.pm[pi];P.setMatrixAt(pi,_efM.compose(pp,pq,_efS.set(0.15,hp,0.15)));}}   // dev repair
+        char(s.dm/4);for(const r of v.r)Rl.setColorAt(r,_efC);for(const pi of v.p)P.setColorAt(pi,_efC);dP=dR=true;}}
     v.lv=s.br?0:s.lv;}
   if(dP){P.instanceMatrix.needsUpdate=true;if(P.instanceColor)P.instanceColor.needsUpdate=true;}
   if(dR){Rl.instanceMatrix.needsUpdate=true;if(Rl.instanceColor)Rl.instanceColor.needsUpdate=true;}

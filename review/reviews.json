@@ -1,8 +1,8 @@
 {
- "next": 82,
+ "next": 88,
  "items": [
   {
-   "id": 81,
+   "id": 87,
    "title": "Darkness บีมลงพื้นและฝูงเงาลดพลังโล่",
    "text": "บีมกระแทกพื้น วงเงาแผ่ออกเร็ว ฝุ่นและลายพื้นหมุนเป็นเกลียว แล้วจางหมดที่ 2 วิ",
    "kind": "คอนเซปต์ / VFX",
@@ -13,7 +13,7 @@
    "imgs": [],
    "links": [
     "/studio.html?fx=darkness/ward_drain_preview&map=test",
-    "/shots/darkness-ward-whirl-approved.gif"
+    "/designs/darkness_ref/ward-drain-preview.gif"
    ],
    "checks": [
     {
@@ -27,6 +27,36 @@
    ],
    "feedback": "",
    "reply": "ผู้ใช้อนุมัติพรีวิวหลังลดเวลาฝูงเงาเหลือ 2 วิ"
+  },
+  {
+   "id": 86,
+   "title": "สะพาน Castle Strike: เปลือกหินแตกเป็นชิ้น (eggshell)",
+   "text": "ผิวสะพานเป็นเปลือกหินจาก Blender ตัดเป็นชิ้น ~1.5 ม. สกิลแรงโดนตรงไหน ชิ้นแถวนั้นร้าว แล้วหลุดตกพื้น เห็นแกนหินหยาบข้างใน แกนไม่พัง • ขอบพื้นสะพาน (กว้าง 1 ม.) พังได้ ทางเดินแคบลง และใบเสมาบนนั้นพังตาม • รอบ 2: เปลือกเป็นก้อนหินจริงเรียงเป็นแถว + หินโค้งรอบซุ้ม แตกตามรอยต่อหิน (ขอบหยักเป็นขั้น) หินหลุดทีละก้อนกองที่โคนกำแพง",
+   "kind": "แผนที่ / การพัง",
+   "who": "Castle Strike",
+   "status": "wait",
+   "created": "2026-11-19",
+   "updated": "2026-11-19",
+   "imgs": [],
+   "links": [
+    "/designs/fcs_forest/bridge_shell.jpg",
+    "/designs/fcs_forest/bridge_shell_hit.jpg"
+   ],
+   "checks": [
+    {
+     "t": "ชิ้นที่หลุดดูเหมือนเปลือกหินแตก ไม่เรียบเกินไป",
+     "ok": false
+    },
+    {
+     "t": "แกนข้างในอ่านออกว่าเป็นหินหยาบ",
+     "ok": false
+    },
+    {
+     "t": "ขอบพื้นพังแล้วเดินตกได้จริง (F2 > พังตรงที่เล็ง บนขอบสะพาน)",
+     "ok": false
+    }
+   ],
+   "reply": "ทำตามภาพอ้างอิงแล้ว: ก้อนหินเรียงแถว แตกเป็นขั้น หินร่วงเป็นกองที่โคน"
   },
   {
    "id": 80,
@@ -1890,6 +1920,111 @@
     },
     {
      "t": "ตัวเลขความร้อน/ลาม/ดาเมจรู้สึกดีตอนเล่นจริง"
+    }
+   ]
+  },
+  {
+   "id": 81,
+   "title": "L-shaped stone bridge (Castle Strike forest)",
+   "text": "Map fcs → bridge from the attacker forest (south ramp near 10.5,23) up to the corner, then east to the defender side (ramp near 23,2). Deck 6 m wide, ~6 m above ground, arches you can walk under, crenellated parapet (shoot through gaps). Bots don't use it yet.",
+   "kind": "Map",
+   "who": "Map",
+   "status": "wait",
+   "created": "2026-11-19T09:13:50",
+   "updated": "2026-11-19T09:13:50",
+   "imgs": [],
+   "links": [
+    "/designs/fcs_forest/bridge_sheet.jpg",
+    "/designs/fcs_forest/bridge_b6_on_deck.jpg",
+    "/designs/fcs_forest/bridge_b2_under.jpg"
+   ],
+   "checks": [
+    {
+     "t": "Bridge position/shape matches the drawing"
+    },
+    {
+     "t": "Height and width feel right in play"
+    }
+   ]
+  },
+  {
+   "id": 82,
+   "title": "Bridge damage: breakable parapet + brick skin damage",
+   "text": "Castle Strike bridge → hit it with skills. Parapet merlons crack then break (strong skills only, like other cover) leaving rubble. The stone faces get damage at the hit spot: chipped bricks → missing bricks → exposed rubble with fallen bricks; arch hits land on the arch ring.",
+   "kind": "Map / destruction",
+   "who": "Map",
+   "status": "wait",
+   "created": "2026-11-19T09:37:10",
+   "updated": "2026-11-19T09:37:10",
+   "imgs": [],
+   "links": [
+    "/designs/fcs_forest/bridge_damage.jpg"
+   ],
+   "checks": [
+    {
+     "t": "Damage look matches the ruin reference"
+    },
+    {
+     "t": "Parapet break feels right"
+    }
+   ]
+  },
+  {
+   "id": 83,
+   "title": "Bridge 3D holes + parapet chunks falling",
+   "text": "Castle Strike bridge → skill hits now punch real 3D holes in the stone (brick-shaped edges, deep cavity, loose bricks, bricks on the ground). Broken parapet leaves a low stump and chunks fall off to the ground (some land on the deck).",
+   "kind": "Map / destruction",
+   "who": "Map",
+   "status": "wait",
+   "created": "2026-11-19T09:47:09",
+   "updated": "2026-11-19T09:47:09",
+   "imgs": [],
+   "links": [
+    "/designs/fcs_forest/bridge_damage3d.jpg"
+   ],
+   "checks": [
+    {
+     "t": "Holes look like Battlefield-style destruction"
+    },
+    {
+     "t": "Parapet remains + falling chunks look right"
+    }
+   ]
+  },
+  {
+   "id": 84,
+   "title": "Dev Mode: repair / collapse tool",
+   "text": "Open the game with ?dev=1 → F2 → section 'ทำลาย / ซ่อม'. Point the mouse at something first, then press: repair/collapse at the aim (3 m), the whole structure (house, fence line, bridge, cover piece, prop), or the whole map. Bridge holes are now smaller.",
+   "kind": "Tool",
+   "who": "Dev",
+   "status": "wait",
+   "created": "2026-11-19T09:53:53",
+   "updated": "2026-11-19T09:53:53",
+   "imgs": [],
+   "links": [],
+   "checks": [
+    {
+     "t": "Repair/collapse works on what you point at"
+    },
+    {
+     "t": "Bridge hole size OK now"
+    }
+   ]
+  },
+  {
+   "id": 85,
+   "title": "Map Builder: choose breakable / unbreakable",
+   "text": "mapbuild.html → select a house, crate, barrel or tree → right panel 'พังได้' (on = breakable, default). Turn off → after ⬆ export, that object cannot be damaged in game. Walls and kit objects already had this checkbox.",
+   "kind": "Tool",
+   "who": "Map",
+   "status": "wait",
+   "created": "2026-11-19T09:58:06",
+   "updated": "2026-11-19T09:58:06",
+   "imgs": [],
+   "links": [],
+   "checks": [
+    {
+     "t": "Checkbox is where you expect"
     }
    ]
   }

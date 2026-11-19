@@ -48,3 +48,4 @@ for (const f of files) {
 out += `\n(${files.length} files, ${total} lines)\n`;
 fs.writeFileSync(path.join(ROOT, 'CODEMAP.md'), out);
 console.log('CODEMAP.md:', files.length, 'files,', total, 'lines,', out.length, 'chars');
+require('./docgraph.js'); // also refresh docgraph/graph.json (docgraph.html)

@@ -3,6 +3,79 @@
 > เขียนอัตโนมัติจาก `review.html` (ผ่าน `tools/serve.py`) — อย่าแก้ไฟล์นี้ตรง ๆ, แก้ `review/reviews.json` แล้วรัน `python tools/serve.py --review-md`.
 > **Claude:** ทำเฉพาะหัวข้อสถานะ **✏️ ขอแก้** — อ่านความเห็นผู้ใช้ (`ความเห็นผู้ใช้`) + เปิดรูปด้วย Read → แก้ → ตั้ง `status:"wait"` + เขียน `reply` (ไทยสั้น ๆ ว่าแก้อะไร) เพื่อส่งกลับให้ผู้ใช้รีวิวใหม่. อย่าตั้ง `ok` เอง (ผู้ใช้เป็นคนกดผ่าน). งานที่ **⏳ รอ** = รอผู้ใช้ ไม่ต้องทำอะไร
 
+## #86 สะพาน Castle Strike: เปลือกหินแตกเป็นชิ้น (eggshell)
+- สถานะ: ⏳ รอผู้ใช้รีวิว • ชนิด: แผนที่ / การพัง • สาย/ส่วน: Castle Strike
+
+**วิธีดู / อะไรรอรีวิว:**
+ผิวสะพานเป็นเปลือกหินจาก Blender ตัดเป็นชิ้น ~1.5 ม. สกิลแรงโดนตรงไหน ชิ้นแถวนั้นร้าว แล้วหลุดตกพื้น เห็นแกนหินหยาบข้างใน แกนไม่พัง • ขอบพื้นสะพาน (กว้าง 1 ม.) พังได้ ทางเดินแคบลง และใบเสมาบนนั้นพังตาม • รอบ 2: เปลือกเป็นก้อนหินจริงเรียงเป็นแถว + หินโค้งรอบซุ้ม แตกตามรอยต่อหิน (ขอบหยักเป็นขั้น) หินหลุดทีละก้อนกองที่โคนกำแพง
+
+- ลิงก์/ไฟล์: `/designs/fcs_forest/bridge_shell.jpg`
+- ลิงก์/ไฟล์: `/designs/fcs_forest/bridge_shell_hit.jpg`
+
+**เช็กลิสต์:**
+- [ ] ชิ้นที่หลุดดูเหมือนเปลือกหินแตก ไม่เรียบเกินไป
+- [ ] แกนข้างในอ่านออกว่าเป็นหินหยาบ
+- [ ] ขอบพื้นพังแล้วเดินตกได้จริง (F2 > พังตรงที่เล็ง บนขอบสะพาน)
+
+> **Claude ตอบ:** ทำตามภาพอ้างอิงแล้ว: ก้อนหินเรียงแถว แตกเป็นขั้น หินร่วงเป็นกองที่โคน
+
+## #85 Map Builder: choose breakable / unbreakable
+- สถานะ: ⏳ รอผู้ใช้รีวิว • ชนิด: Tool • สาย/ส่วน: Map
+
+**วิธีดู / อะไรรอรีวิว:**
+mapbuild.html → select a house, crate, barrel or tree → right panel 'พังได้' (on = breakable, default). Turn off → after ⬆ export, that object cannot be damaged in game. Walls and kit objects already had this checkbox.
+
+**เช็กลิสต์:**
+- [ ] Checkbox is where you expect
+
+## #84 Dev Mode: repair / collapse tool
+- สถานะ: ⏳ รอผู้ใช้รีวิว • ชนิด: Tool • สาย/ส่วน: Dev
+
+**วิธีดู / อะไรรอรีวิว:**
+Open the game with ?dev=1 → F2 → section 'ทำลาย / ซ่อม'. Point the mouse at something first, then press: repair/collapse at the aim (3 m), the whole structure (house, fence line, bridge, cover piece, prop), or the whole map. Bridge holes are now smaller.
+
+**เช็กลิสต์:**
+- [ ] Repair/collapse works on what you point at
+- [ ] Bridge hole size OK now
+
+## #83 Bridge 3D holes + parapet chunks falling
+- สถานะ: ⏳ รอผู้ใช้รีวิว • ชนิด: Map / destruction • สาย/ส่วน: Map
+
+**วิธีดู / อะไรรอรีวิว:**
+Castle Strike bridge → skill hits now punch real 3D holes in the stone (brick-shaped edges, deep cavity, loose bricks, bricks on the ground). Broken parapet leaves a low stump and chunks fall off to the ground (some land on the deck).
+
+- ลิงก์/ไฟล์: `/designs/fcs_forest/bridge_damage3d.jpg`
+
+**เช็กลิสต์:**
+- [ ] Holes look like Battlefield-style destruction
+- [ ] Parapet remains + falling chunks look right
+
+## #82 Bridge damage: breakable parapet + brick skin damage
+- สถานะ: ⏳ รอผู้ใช้รีวิว • ชนิด: Map / destruction • สาย/ส่วน: Map
+
+**วิธีดู / อะไรรอรีวิว:**
+Castle Strike bridge → hit it with skills. Parapet merlons crack then break (strong skills only, like other cover) leaving rubble. The stone faces get damage at the hit spot: chipped bricks → missing bricks → exposed rubble with fallen bricks; arch hits land on the arch ring.
+
+- ลิงก์/ไฟล์: `/designs/fcs_forest/bridge_damage.jpg`
+
+**เช็กลิสต์:**
+- [ ] Damage look matches the ruin reference
+- [ ] Parapet break feels right
+
+## #81 L-shaped stone bridge (Castle Strike forest)
+- สถานะ: ⏳ รอผู้ใช้รีวิว • ชนิด: Map • สาย/ส่วน: Map
+
+**วิธีดู / อะไรรอรีวิว:**
+Map fcs → bridge from the attacker forest (south ramp near 10.5,23) up to the corner, then east to the defender side (ramp near 23,2). Deck 6 m wide, ~6 m above ground, arches you can walk under, crenellated parapet (shoot through gaps). Bots don't use it yet.
+
+- ลิงก์/ไฟล์: `/designs/fcs_forest/bridge_sheet.jpg`
+- ลิงก์/ไฟล์: `/designs/fcs_forest/bridge_b6_on_deck.jpg`
+- ลิงก์/ไฟล์: `/designs/fcs_forest/bridge_b2_under.jpg`
+
+**เช็กลิสต์:**
+- [ ] Bridge position/shape matches the drawing
+- [ ] Height and width feel right in play
+
 ## #80 Darkness Shield เคียวหมุน
 - สถานะ: ⏳ รอผู้ใช้รีวิว • ชนิด: VFX / แอนิเมชัน • สาย/ส่วน: Darkness
 
@@ -818,14 +891,14 @@ GIF อัดจากเกมจริง shots/motion_storm_<สกิล>.gi
 - [ ] คลื่นไม้เท้า: ประกายไฟตามคลื่นขึ้นแล้ว
 - [ ] FPS ไม่ตกตอนสายฟ้าเยอะ ๆ
 
-## #81 Darkness บีมลงพื้นและฝูงเงาลดพลังโล่
+## #87 Darkness บีมลงพื้นและฝูงเงาลดพลังโล่
 - สถานะ: ✅ ผ่าน • ชนิด: คอนเซปต์ / VFX • สาย/ส่วน: Darkness
 
 **วิธีดู / อะไรรอรีวิว:**
 บีมกระแทกพื้น วงเงาแผ่ออกเร็ว ฝุ่นและลายพื้นหมุนเป็นเกลียว แล้วจางหมดที่ 2 วิ
 
 - ลิงก์/ไฟล์: `/studio.html?fx=darkness/ward_drain_preview&map=test`
-- ลิงก์/ไฟล์: `/shots/darkness-ward-whirl-approved.gif`
+- ลิงก์/ไฟล์: `/designs/darkness_ref/ward-drain-preview.gif`
 
 **เช็กลิสต์:**
 - [ ] เห็นฝุ่นดำไหลเข้าฝ่ามือก่อนยิงบีมลงพื้น

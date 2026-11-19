@@ -69,7 +69,7 @@ function fcsForest(fallback){
   const nearP=(x,y,L,d)=>L.some(q=>(q[0]-x)**2+(q[1]-y)**2<d*d);
   const crates=F.props.filter(q=>q[0]==='cr'||q[0]==='pl').map(q=>[q[1],q[2]]),ruinO=MAPS.fcs.obs.filter(o=>o.k==='fcr');
   const items={};const put=(id,x,y,s,extra)=>{(items[id]=items[id]||[]).push(Object.assign({x,y,s,r:R()*6.283},extra||{}));};
-  const free=(x,y,big)=>x>0&&y>0&&x<FF_X1*C&&y<H&&!wallAt(x,y)&&!(big&&(nearP(x,y,cores,180)||nearP(x,y,sps,150)))&&!nearP(x,y,crates,big?60:28)&&!ruinO.some(o=>(o.x-x)**2+(o.y-y)**2<(o.r+(big?50:14))**2);
+  const free=(x,y,big)=>x>0&&y>0&&x<FF_X1*C&&y<H&&!wallAt(x,y)&&!(F.bridge&&F.bridge.at(x,y,big?60:25))&&!(big&&(nearP(x,y,cores,180)||nearP(x,y,sps,150)))&&!nearP(x,y,crates,big?60:28)&&!ruinO.some(o=>(o.x-x)**2+(o.y-y)**2<(o.r+(big?50:14))**2);
   // ต้นไม้ชนได้ (ตำแหน่งเดิมของผู้ใช้): สนหลายพันธุ์ + ต้นใบแดง/ไม้ตายนิดหน่อย
   const pickTree=()=>{const q=R();return q<0.27?['pine_a',13+R()*5]:q<0.5?['pine_b',15+R()*5]:q<0.7?['pine_c',10+R()*4]:q<0.84?['pine_d',17+R()*6]:q<0.875?['autumn_a',6+R()*2]:q<0.9?['autumn_b',6+R()*2]:q<0.95?['snag_a',8+R()*3]:['snag_b',7+R()*2];};
   const hOf={pine_a:20.5,pine_b:26.3,pine_c:15.6,pine_d:31.1,pine_s:6.6,pine_la:24.3,pine_lb:19.5,snag_a:13,snag_b:9,autumn_a:11.4,autumn_b:9.8};

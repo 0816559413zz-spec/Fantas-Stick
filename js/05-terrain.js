@@ -9,7 +9,7 @@ function terrT(x,y){
   const T=TERR,fx=clamp(x/T.c,0,T.nx-1.001),fy=clamp(y/T.c,0,T.ny-1.001),i=fx|0,j=fy|0,u=fx-i,v=fy-j,k=j*T.nx+i,a=T.g;
   return (a[k]*(1-u)+a[k+1]*u)*(1-v)+(a[k+T.nx]*(1-u)+a[k+T.nx+1]*u)*v;
 }
-function floorAt(f,x,y,key){const i=Math.round((x-f.x0)/TERR.c),j=Math.round((y-f.y0)/TERR.c);if(i<0||j<0||i>=f.nx||j>=f.ny)return NaN;return f[key][j*f.nx+i];}
+function floorAt(f,x,y,key){if(f.cut&&f.cut(x,y))return NaN;const i=Math.round((x-f.x0)/TERR.c),j=Math.round((y-f.y0)/TERR.c);if(i<0||j<0||i>=f.nx||j>=f.ny)return NaN;return f[key][j*f.nx+i];}
 // จุด (x,y) ที่ความสูง h (จากพื้นหลัก) อยู่ในเนื้อพื้นไหม — ใช้กับกระสุนชนเนิน/สะพาน
 function terrSolid(x,y,h){
   if(h<0)return true;if(!TERR||!TERR.fl.length)return false;

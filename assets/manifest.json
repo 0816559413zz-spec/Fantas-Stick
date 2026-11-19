@@ -424,6 +424,10 @@
   "mesh_water_dragon_dive": {
    "file": "vfx/water_dragon_dive.glb",
    "v": 1
+  },
+  "map_fcs_bridge": {
+   "file": "buildings/fcs_bridge.glb",
+   "v": 2
   }
  },
  "maps": {
@@ -481,6 +485,11 @@
    "file": "maps/gorge.glb",
    "data": "maps/gorge.json",
    "v": 9
+  },
+  "castle-demo": {
+   "file": "maps/castle-demo.glb",
+   "data": "maps/castle-demo.json",
+   "v": 1
   }
  },
  "ptex": {}

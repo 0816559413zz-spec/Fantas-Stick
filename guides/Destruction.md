@@ -215,3 +215,13 @@ b.pc.map(q=>q.cb.toString(2))                     // ชิ้นที่พั
 - **snapshot** `CB` (ตึกคั่น `|`: `x` = ถล่ม + บิตแผ่นแตกฐาน 16) / `CS` (ของ: 0 ปกติ 1 พัง 2 ไฟลุก 3 ซาก) ส่งแบบเฉพาะที่เปลี่ยน (`NETD_KEYS`) • เหตุการณ์ `cb` (h/b/c) / `cs` (b/f) + `boom`
 - **บ้านลอนดอน** (`bt:'ldn'` → `BLDDEF.ldn`, โมเดล `bld_house_ldn`) = ระบบบ้านพังเดิมทุกอย่าง (ชิ้น/ตาราง/กองซาก) แค่หน้าตาใหม่ — สร้างด้วย `assets/src/london_house_build.py` แล้วตัดชิ้นด้วย `house_chunks.py -- house_ldn.glb`
 - ดีบัก: `WD.city.D` (สถานะ) / `WD.city.K.CV` (ภาพ) • ยังไม่มี: ไฟ/น้ำแข็งเกาะผนังตึก, ของตกแต่งในตึก, ตู้คอนเทนเนอร์/ซุ้ม/อัฒจันทร์พัง
+
+## 12. Castle Strike bridge: eggshell shell (2026-11-19)
+- Bridge = solid core (never breaks) + outer stone shell cut into ~1.5 m chunks: side shell 0.35 m on the 4 faces, rim = outer 1 m strip of the deck top.
+- Code: `js/12-fcs-bridge.js` (`BSKN.C` layout, `bskEnv` damage, `bskCut` floor hole, snapshot `BS`) • view `fcsCore` / `fcsShellBuild` / `fcsShellView` in `js/28-fcs-build.js`.
+- Rules: strong skills only (`damageEnv`), cracks at 66 % / 33 %, then the chunk falls off and rubble core shows. Broken rim = no floor there (path narrower) + parapet unit above breaks.
+- Model pipeline (re-run when the bridge, ground under it or `BSKV` changes, chunk index must match):
+  1. `node tools/headless.js --game --js tools/fcs-bridge-export.js --quiet` then copy `shots/fcs_bridge_layout.json` to `assets/src/`
+  2. `D:/Blender/blender.exe -b --python assets/src/fcs_bridge_build.py` -> `assets/buildings/fcs_bridge.glb` (`map_fcs_bridge`)
+- Shell = stone blocks (ashlar courses + arch voussoirs) grouped into chunks; the game splits chunks back into blocks (`fcsBlocks`) so broken stones fall one by one and pile up (`FPILE`).
+- Dev: F2 'ทำลาย / ซ่อม' works on chunks.

@@ -40,7 +40,7 @@ function modeLogic(dt){
     case 'duel':
       if(G.ph==='play'){
         const al=ps.filter(p=>p.alive);
-        if(al.length<=1){
+        if(al.length<=1&&!devHold()){
           const w=al[0];
           if(w){G.rw[w.id]=(G.rw[w.id]||0)+1;banner(`${w.name} ชนะรอบที่ ${G.round}!`,3);}else banner('เสมอ!',3);
           G.ph='rend';G.rendT=3;G.proj=[];
@@ -79,6 +79,7 @@ function modeLogic(dt){
   }
 }
 function endMatch(){
+  if(devHold())return;   // Dev Mode: solo test never auto-ends (js/77)
   if(G.ph==='over'||G.endT>0)return;   // กำลังสโลว์ก่อนจบอยู่แล้ว
   const ps=plist();let title='จบเกม',sub='';let win=[],draw=false;   // win = id ผู้ชนะ (ลูกข่ายใช้เลือก VICTORY / DEFEAT)
   const teamIds=t=>ps.filter(p=>p.team===t).map(p=>p.id);
