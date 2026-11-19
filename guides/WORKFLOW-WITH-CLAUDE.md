@@ -29,6 +29,7 @@ Keep this table updated when a new system or doc appears.
 - Default language: **English**. Short. Answer only what was asked.
 - Style: `Fix: moved X to Y.` / `Done: ...` / `Need: <one decision>`.
 - Fixing a bug without being asked for the cause: do not explain the cause.
+- **While working: write NO progress text between tool calls** (no "now I'm testing…", "still recording…", "found the cause…"). Run tools silently. Speak only in the final reply, or earlier only to ask a blocking question.
 - No preamble, no recap of the user's request, no step-by-step narration, no summary of what is visible.
 - Thai only if the user asks for it. Then: fewest words, simplest words.
 - Keep identifiers, file names, commands, error messages verbatim.
