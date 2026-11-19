@@ -227,15 +227,14 @@ FXCODE.studio_darkness_scythe=(_x,_y,_h,args,instance)=>{
     hitCache.set(kc,out);return out;};
   const lastHit=(T,i)=>{let best=null;for(const kc of [Math.floor(T/LOOP),Math.floor(T/LOOP)-1])for(const h of hitsOf(kc))if(h.i===i&&h.T<=T&&(!best||h.T>best.T))best=h;return best;};
   // รอยฟันบนตัวเป้า: ชั้นดำนอก + เส้นขาวบางตามคม (สไตล์เดียวกับท่าพุ่ง) หันหากล้อง
-  const mkCut=(tg,ghost)=>{const g=new THREE.Group();g.position.set(tg.a.g.position.x,1.15,tg.a.g.position.z);g.scale.setScalar(0.8);root.add(g);
+  const mkCut=(tg,ghost)=>{const g=new THREE.Group();g.position.set(tg.a.g.position.x,1.15,tg.a.g.position.z);g.scale.setScalar(ghost?0.6:0.8);root.add(g);   // ชัดเท่ากันทั้งคู่ ต่างแค่ขนาด
     const sides=[-1,1].map(dir=>{const sub=new THREE.Group();g.add(sub);
       const P=ghost?[[-0.55*dir,1.45,0.25],[0.0,0.1,0.3],[0.6*dir,-1.35,0.22]]:[[1.8*dir,0.55,0.23],[0.1*dir,0.05,0.28],[-1.85*dir,-0.4,0.21]];
-      return {sub,outer:stDarkCut(sub,P,ghost?0.2:0.26,0x101019,ghost?13:11),white:stDarkCut(sub,P,ghost?0.12:0.17,ghost?0xc9cad6:0xf7f8fc,ghost?14:12)};});
+      return {sub,outer:stDarkCut(sub,P,0.26,0x101019,ghost?13:11),white:stDarkCut(sub,P,0.17,0xf7f8fc,ghost?14:12)};});
     const base=g.position.clone();g.traverse(o=>{if(o.material){o.material.depthTest=false;}});   // รอยฟันลอยออกมาหน้าตัวเป้า ไม่จมเข้าตัว (ผู้ใช้ 2026-11-19)
     return (age,from)=>{g.visible=age>=0&&age<HIT_LIFE;if(!g.visible)return;
       _gp.copy(cam.position);root.worldToLocal(_gp);_gp.sub(base);_gp.y=0;_gp.normalize();g.position.copy(base).addScaledVector(_gp,0.55+1.1*age);g.lookAt(cam.position);
-      for(const sd of sides){const on=(from>0)===(sides.indexOf(sd)===1);sd.sub.visible=on;if(!on)continue;sd.outer(age,HIT_LIFE,0.45);sd.white(age,HIT_LIFE,0.45);
-        if(ghost)sd.sub.traverse(o=>{if(o.material)o.material.opacity*=0.6;});}};};
+      for(const sd of sides){const on=(from>0)===(sides.indexOf(sd)===1);sd.sub.visible=on;if(!on)continue;sd.outer(age,HIT_LIFE,0.45);sd.white(age,HIT_LIFE,0.45);}};};
   targets.forEach(tg=>{tg.cut=mkCut(tg,false);if(tg.marked)tg.gcut=mkCut(tg,true);});
   // เคียวเงา: สำเนาโมเดลเคียว ดำโปร่ง 70% ขนาดเท่าเคียวจริง + เปลว/หมึกชุดเดียวกับเคียวจริง (ใช้ geometry ร่วมกัน)
   const ghostRot=new THREE.Group(),ghostScy=new THREE.Group();ghostScy.scale.setScalar(GSC);ghostRot.add(ghostScy);ghostRot.visible=false;if(targets.length)root.add(ghostRot);
@@ -249,7 +248,7 @@ FXCODE.studio_darkness_scythe=(_x,_y,_h,args,instance)=>{
     const R=new THREE.Vector3(Math.sin(phi),0,Math.cos(phi)),X=new THREE.Vector3(-Math.cos(phi),0,Math.sin(phi));   // ใบนำทางฟัน (phi ลดลง)
     _gz.crossVectors(X,R).normalize();_gx.crossVectors(R,_gz).normalize();_gm.makeBasis(_gx,R,_gz);ghostScy.quaternion.setFromRotationMatrix(_gm);
     ghostScy.position.copy(R).multiplyScalar(GRAD-2*GSC);};
-  const GPM=Math.atan2(-GBK,-GDN),GPB=0.75;   // GPM = มุมที่ใบผ่านอกเป้า • GPB = โน้มหลังสุดก่อนฟัน
+  const GPM=Math.atan2(-GBK,-GDN),GPB=0.3;   // ง้างไปหลังนิดเดียวแล้วฟาดลง   // GPM = มุมที่ใบผ่านอกเป้า • GPB = โน้มหลังสุดก่อนฟัน
   const ghostPhi=age=>{if(age<GHE){const e=ez(GIN,GHE,age);return 0.1+(GPB-0.1)*e;}   // ระหว่าง fade in ค่อย ๆ โน้มหัวไปหลัง
     if(age<GHE+GCH){const x=(age-GHE)/GCH;return GPB+(GPM-GPB)*x*x;}                   // ฟันลงเร่งความเร็ว
     const x=Math.min(1,(age-GHE-GCH)/GOUT);return GPM-0.45*(1-(1-x)*(1-x));};          // ฟันเลยไปแล้วชะลอ (แรงเฉื่อย)
