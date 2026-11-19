@@ -97,35 +97,54 @@ FXCODE.studio_darkness_scythe=(_x,_y,_h,args,instance)=>{
   for(let i=0;i<HK-1;i++)for(let j=0;j<TER-1;j++){const a=i*TER+j,b=(i+1)*TER+j;teidx.push(a,b,a+1,b,b+1,a+1);}
   teGeo.setAttribute('position',new THREE.BufferAttribute(tepos,3));teGeo.setAttribute('color',new THREE.BufferAttribute(tecol,4));teGeo.setIndex(teidx);
   const tailSheet=new THREE.Mesh(teGeo,stScyInk());tailSheet.frustumCulled=false;tailSheet.renderOrder=9;if(BA)root.add(tailSheet);
+  // ละอองหมึกตอนควง (ผู้ใช้ 2026-11-19: ควงแบบโล่แต่มีละอองสาดออกมามากกว่า)
+  const SPL=BA?36:0,splash=[...Array(SPL)].map(()=>{const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:embTex,color:0x000000,transparent:true,depthWrite:false,toneMapped:false}));sp.renderOrder=9;root.add(sp);return sp;});
   const hist=[];const _p=new THREE.Vector3(),MB=new THREE.Matrix4(),vX=new THREE.Vector3(),vY=new THREE.Vector3(),vZ=new THREE.Vector3(),QB=new THREE.Quaternion(),Qi=new THREE.Quaternion();
   const ez=(a,b,t)=>{t=Math.min(1,Math.max(0,(t-a)/(b-a)));return t*t*(3-2*t);};
-  const baPose=T=>{   // รอบ 4 (ผู้ใช้): วงฟันโค้งตามระยะ (รัศมีคงที่ตอนกวาด) • ซ้าย/ขวาสลับ • ก่อนฟัน: ดึงเข้าตัว ควง 1 รอบ → พุ่งออกไปถึงระยะ → ค้างสะสมแรง → กวาด
-    const kc=Math.floor(T/CYC),dir=kc%2?-1:1,t=T-kc*CYC;
-    const P1=0.22,P2=0.2,H=0.1,S=0.26,F=0.2,R=0.45;   // ดึงเข้า+ควง • พุ่งออก • ค้าง • กวาด • ส่งตามแรง • กลับ
-    const eIn=x=>x*x*x,eOut=x=>1-Math.pow(1-x,3),A=1.05;   // ผู้ใช้ 2026-11-19: วงโค้งกลมด้านหน้า ไม่ถึง 180° (เดิม 1.8 = กวาดเกือบครบวง)
-    let ang,w,tw,out,spin=0,shake=0;
-    if(t<P1){const u=ez(0,P1,t);ang=-0.2+0.9*u;w=u;tw=0.25*u;out=0.0;spin=Math.PI*2*u;}                      // ดึงเข้าใกล้ตัว + ควงตัวเอง
-    else if(t<P1+P2){const u=eOut((t-P1)/P2);ang=0.7+(A-0.7)*u;w=1;tw=0.25+0.35*u;out=u;}                    // พุ่งออกไปถึงระยะ ไปจุดเริ่มฟัน
-    else if(t<P1+P2+H){ang=A;w=1;tw=0.6;out=1;shake=Math.sin(t*90)*0.04;}                                     // ค้างสะสมแรง สั่นนิด ๆ
-    else if(t<P1+P2+H+S){const u=eIn((t-P1-P2-H)/S);ang=A-2*A*u;w=1;tw=0.6-1.35*u;out=1;}                    // กวาดเร่งขึ้น รัศมีคงที่ = วงโค้งตามระยะ
-    else if(t<P1+P2+H+S+F){const u=eOut((t-P1-P2-H-S)/F);ang=-A-0.2*u;w=1;tw=-0.75-0.1*u;out=1-0.15*u;}       // ส่งตามแรงแล้วช้าลง
-    else{const u=ez(P1+P2+H+S+F,P1+P2+H+S+F+R,t);ang=-A-0.2;w=1-u;tw=-0.85*(1-u);out=0.85*(1-u);}            // กลับข้างตัว
-    // act = กำลังฟัน (ผู้ใช้ 2026-11-19: หางขึ้นเฉพาะตอนเหวี่ยงฟัน/ทำท่า ไม่ตามตลอด)
-    const tS=P1+P2+H,act=t<tS?0:t<tS+S?Math.min(1,(t-tS)/0.04):t<tS+S+F?1-0.35*(t-tS-S)/F:Math.max(0,0.65*(1-(t-tS-S-F)/0.12));
-    ang*=dir;tw*=dir;
-    const f=new THREE.Vector3(0,0,1),r=new THREE.Vector3(-1,0,0);   // anchor: +z หน้า, −x ขวา
-    const rad=new THREE.Vector3().copy(f).multiplyScalar(Math.cos(ang)).addScaledVector(r,Math.sin(ang)).normalize();
-    const mot=new THREE.Vector3().copy(f).multiplyScalar(-Math.sin(ang)).addScaledVector(r,Math.cos(ang)).multiplyScalar(-dir).normalize();   // ทิศกวาด (สลับตามรอบ)
-    // ผู้ใช้ 2026-11-19: เคียวหันไปข้างหน้าตลอด = ด้ามชี้ออกจากตัวตามแนวรัศมี ปลายใบนำทางกวาด → ด้ามกวาดเป็นผืนกว้าง หางด้ามเห็นชัด (เดิมด้ามนอนตามทางกวาด หางเลยเป็นเส้นบาง)
-    vY.copy(rad);vY.y=0.2;vY.normalize();
-    vX.copy(mot);vX.y=0;vX.normalize();
+  // ---------- ท่า BA รอบ 10 (ผู้ใช้ 2026-11-19) ----------
+  // ว่าง = เคียวตั้งแนวตั้ง ลอยวนรอบตัวช้า ๆ • ฟันแรกเริ่มจากฝั่งที่เคียวอยู่ (อยู่ข้างหลัง = ไปข้างใดข้างหนึ่งก่อน)
+  // แต่ละครั้ง: เงื้อ 0.2 → กวาด 120° ด้านหน้า → ค้าง 0.3 → ควง 0.3 (ละอองหมึกสาด) พร้อมเลื่อนไปจุดเตรียม → ฟันต่อจากฝั่งที่จบ (สลับซ้าย-ขวา)
+  // ไม่ได้ฟันเกิน 2 วิ = กลับแนวตั้งแล้ววนต่อ • พรีวิววนลูป: ว่าง 2 วิ → ฟัน 3 ครั้งห่าง 1.2 วิ → รอ 2 วิ → กลับท่าว่าง
+  const LOOP=8,SW0=2.0,GAP=1.2,NSW=3,WU=0.2,SWP=0.26,HOLD=0.3,SPIN=0.3,A=1.05,RI=1.7,ORB=0.45,REACH=args.reach??7.6;
+  const wrapA=x=>{x=(x+Math.PI)%(Math.PI*2);if(x<0)x+=Math.PI*2;return x-Math.PI;};
+  const orbA=T=>wrapA(-1.2+ORB*T);   // มุมรอบตัวตอนว่าง (0 = หน้า, + = ขวา)
+  const radOf=g=>new THREE.Vector3(-Math.sin(g),0,Math.cos(g));   // anchor: +z หน้า, −x ขวา
+  const pose=(g,rad,vert,dirSweep,spinA)=>{   // ทิศทางเคียวที่มุม g • vert: 1 = แนวตั้ง 0 = แนวนอน
+    const R=radOf(g),tg=new THREE.Vector3(Math.cos(g),0,Math.sin(g)).multiplyScalar(-1);   // ทิศเพิ่มมุม (ไปทางขวา)
+    const mot=tg.clone().multiplyScalar(dirSweep);
+    const yH=R.clone();yH.y=0.2;yH.normalize();const xH=mot.clone();   // แนวนอน: ด้ามชี้ออกจากตัว ปลายใบนำทางกวาด
+    const yV=new THREE.Vector3(0,1,0),xV=tg.clone();                    // แนวตั้ง: ด้ามตั้ง ใบหันตามทางวน
+    vY.copy(yH).lerp(yV,vert).normalize();vX.copy(xH).lerp(xV,vert).normalize();
     vZ.crossVectors(vX,vY).normalize();vX.crossVectors(vY,vZ).normalize();
-    MB.makeBasis(vX,vY,vZ);QB.setFromRotationMatrix(MB);
-    if(spin){Qi.setFromAxisAngle(vY,spin);QB.premultiply(Qi);}
-    const head=new THREE.Vector3(0,1.25+shake,0).addScaledVector(rad,0.55+(args.reach??7.6)*out);
-    const pos=head.clone().addScaledVector(vY,-2.0*S0);
-    return {w,QB,pos,tw,act};
+    MB.makeBasis(vX,vY,vZ);const q=new THREE.Quaternion().setFromRotationMatrix(MB);
+    const self=vert*Math.sin(0)+0;   // แนวตั้งควงตัวเองช้า ๆ ใส่ทีหลังตาม T
+    const pos=new THREE.Vector3(0,1.25+(0.05+2.0*S0-1.25)*vert,0).addScaledVector(R,rad);   // จุดหัวเคียว • แนวตั้ง = โคนด้ามอยู่ระดับพื้นเหมือนท่าว่างเดิม
+    pos.addScaledVector(vY,-2.0*S0);
+    if(spinA){const c=pos.clone().addScaledVector(vY,1.1*S0),Qs=new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,1,0),spinA);q.premultiply(Qs);pos.sub(c).applyQuaternion(Qs).add(c);}
+    return {q,pos};
   };
+  const baState=T=>{   // สถานะล้วนจากเวลา (หางคำนวณย้อนหลังได้)
+    const kc=Math.floor(T/LOOP),t=T-kc*LOOP,g0=orbA(kc*LOOP+SW0),side0=Math.sin(g0)>=0?1:-1;   // ฝั่งที่เคียวอยู่ตอนเริ่มฟัน (หลัง = ไปฝั่งที่ใกล้)
+    let g=orbA(T),rad=RI,vert=1,dirSweep=1,spinA=0,act=0,tw=0,spinIdx=-1,spinU=0;
+    if(t>=SW0){
+      const k=Math.min(NSW-1,Math.floor((t-SW0)/GAP)),u=t-SW0-k*GAP,from=side0*(k%2?-1:1),to=-from;   // ฟันที่ k เริ่มจาก from กวาดไป to
+      const outR=0.55+REACH;
+      if(u<WU){const e=ez(0,WU,u);const pg=k===0?g0:to*A*-1;const pr=k===0?RI:outR*0.45;const pv=k===0?1:0;
+        g=pg+wrapA(from*A-pg)*e;rad=pr+(outR-pr)*e;vert=pv*(1-e);dirSweep=-from;tw=0.25*from*e;}   // เงื้อไปจุดเริ่มฝั่ง from (ครั้งแรกจากท่าวน)
+      else if(u<WU+SWP){const e=Math.pow((u-WU)/SWP,2.2);g=from*A+(to*A-from*A)*e;rad=outR;vert=0;dirSweep=-from;act=Math.min(1,(u-WU)/0.04);tw=from*(0.25-0.85*e);}
+      else if(u<WU+SWP+HOLD){const e=ez(0,0.12,u-WU-SWP);g=to*A+to*0.18*e;rad=outR;vert=0;dirSweep=-from;act=Math.max(0,1-(u-WU-SWP)/0.12)*0.8;tw=-from*0.6;}   // ค้าง 0.3 วิ (ส่งตามแรงนิดเดียว)
+      else if(u<WU+SWP+HOLD+SPIN){const e=ez(0,SPIN,u-WU-SWP-HOLD);g=to*(A+0.18)+(to*A-to*(A+0.18))*e;rad=outR+(outR*0.45-outR)*e;vert=0;dirSweep=from;spinA=-from*Math.PI*2*e*1.5;spinIdx=k;spinU=(u-WU-SWP-HOLD)/SPIN;tw=-from*0.6*(1-e);}   // ควง 0.3 วิ ไปจุดเตรียม
+      else{const endT=SW0+(NSW-1)*GAP+WU+SWP+HOLD+SPIN;g=to*A;rad=outR*0.45;vert=0;dirSweep=from;
+        if(k===NSW-1&&t>endT){const back=t-(SW0+(NSW-1)*GAP+WU+SWP)-2.0;   // ไม่ได้ฟันเกิน 2 วิ → กลับแนวตั้ง แล้ววนต่อ
+          if(back>0){const e=ez(0,0.5,back);const go=orbA(T);g=to*A+wrapA(go-to*A)*e;rad=rad+(RI-rad)*e;vert=e;}}}
+    }
+    const p=pose(g,rad,vert,dirSweep,spinA);
+    if(vert>0.01){const sp=new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,1,0),T*0.9*vert);   // แนวตั้ง: ควงตัวเองเบา ๆ
+      const c=p.pos.clone().addScaledVector(new THREE.Vector3(0,1,0),1.1*S0*vert);p.q.premultiply(sp);p.pos.sub(c).applyQuaternion(sp).add(c);}
+    return {w:1,QB:p.q,pos:p.pos,tw,act,spinIdx,spinU,kc};
+  };
+  const baPose=T=>baState(T);
+  root.userData.baState=baState;   // ดีบัก/ทดสอบ
   const update=()=>{
     if(!voidFixed&&holder.children.length){fixVoid();voidFixed=true;}
     // รอบ 9: หยดหมึกตามสัน = ส่วนหนึ่งของ "เปลวหยักติดสัน" ในแบบ B → เปิดไว้
@@ -173,6 +192,13 @@ FXCODE.studio_darkness_scythe=(_x,_y,_h,args,instance)=>{
               let al=Math.pow(1-v,0.6);if(gap){const g0=cyc*0.9,g1=g0+0.22;if(v>g0&&v<g1)al=0;else if(v<g0)al*=Math.min(1,cyc*3);}
               tecol[c4+3]=je<0?0:al*Math.min(1,aE*1.5)*Math.min(1,tt/0.08);}}
           teGeo.attributes.position.needsUpdate=true;teGeo.attributes.color.needsUpdate=true;}
+        // ละอองตอนควง: เกิดที่ปลายใบตอนควง แล้วพุ่งออกจากตัวพร้อมตก
+        {const kc=Math.floor(T/LOOP);for(let i=0;i<SPL;i++){const sp=splash[i],kk=i%NSW,b0=kc*LOOP+SW0+kk*GAP+WU+SWP+HOLD+SPIN*((i/NSW|0)/(SPL/NSW)),age=T-b0,life=0.5;
+          if(age<0||age>life){sp.material.opacity=0;continue;}
+          const Pb=baPose(b0),Mb=new THREE.Matrix4().compose(Pb.pos,Pb.QB,new THREE.Vector3(S,S,S)),[bx,by]=bladePt(0.7+0.3*rnd(i+300),0.3);_p.set(bx,by,0).applyMatrix4(Mb);
+          const ox=_p.x,oz=_p.z,ol=Math.hypot(ox,oz)||1,vh=3.5+2.5*rnd(i+301);
+          sp.position.set(_p.x+ox/ol*vh*age+(rnd(i+302)-0.5)*age*2,_p.y+(1.2+rnd(i+303))*age-4.5*age*age,_p.z+oz/ol*vh*age);
+          const sz=(0.1+0.1*rnd(i+304))*S*(1-age/life*0.5);sp.scale.set(sz,sz*1.3,1);sp.material.opacity=0.9*(1-age/life);}}
         for(let e=0;e<EMB;e++){const sp=embers[e],ph=(T*1.4+rnd(e+80))%1,j=Math.min(HH-1,Math.floor(HH*(0.55+0.4*rnd(e+81)))),k=Math.floor(rnd(e+82)*HK),i2=j*HK+k;
           const al=f2col[i2*4+3];sp.position.set(f2pos[i2*3]+Math.sin(T*3+e)*0.15*ph,f2pos[i2*3+1]+0.2+ph*1.1,f2pos[i2*3+2]+Math.cos(T*2+e)*0.15*ph);
           const sz=(0.12+0.12*rnd(e+83))*(1-ph*0.6);sp.scale.set(sz,sz*1.5,1);sp.material.opacity=Math.min(1,al*2)*Math.sin(ph*Math.PI);}}}

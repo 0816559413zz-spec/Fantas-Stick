@@ -8,7 +8,7 @@
   "ba"
  ],
  "pal": "arcane",
- "dur": 4.8,
+ "dur": 8.4,
  "layers": [
   {
    "id": "anchor",
@@ -17,14 +17,14 @@
    "mat": "black",
    "op": 0,
    "at": 0,
-   "life": 4.8
+   "life": 8.4
   },
   {
    "id": "scythe",
    "t": "code",
    "fn": "studio_darkness_scythe",
    "at": 0,
-   "life": 4.8,
+   "life": 8.4,
    "args": {
     "layer": "anchor",
     "wrap": "C",
