@@ -82,6 +82,16 @@ FXCODE.studio_darkness_scythe=(_x,_y,_h,args,instance)=>{
   // ถ่านดำหลุดจากปลายหาง
   const EMB=BA?28:0,embTex=(()=>{const c=document.createElement('canvas');c.width=c.height=32;const g=c.getContext('2d'),r=g.createRadialGradient(16,16,0,16,16,16);r.addColorStop(0,'rgba(0,0,0,1)');r.addColorStop(0.6,'rgba(0,0,0,0.8)');r.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=r;g.fillRect(0,0,32,32);return new THREE.CanvasTexture(c);})();
   const embers=[...Array(EMB)].map(()=>{const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:embTex,color:0x000000,transparent:true,depthWrite:false,toneMapped:false}));sp.renderOrder=8;root.add(sp);return sp;});
+  // หางด้าม (ผู้ใช้ 2026-11-19): ชั้นจางกว่า ต่อติดกับหางใบ ตามทางที่ด้ามผ่านจริง
+  const SK=10,shGeo=new THREE.BufferGeometry(),shpos=new Float32Array(SK*HH*3),shcol=new Float32Array(SK*HH*4),shidx=[];
+  for(let j=0;j<HH-1;j++)for(let k=0;k<SK-1;k++){const a=j*SK+k,b=(j+1)*SK+k;shidx.push(a,b,a+1,b,b+1,a+1);}
+  shGeo.setAttribute('position',new THREE.BufferAttribute(shpos,3));shGeo.setAttribute('color',new THREE.BufferAttribute(shcol,4));shGeo.setIndex(shidx);
+  const shTail=new THREE.Mesh(shGeo,stScyInk());shTail.frustumCulled=false;shTail.renderOrder=6;if(BA)root.add(shTail);
+  // เปลวที่ปลายหาง (ผู้ใช้ 2026-11-19): ลิ้นไฟหยักแบบเดียวกับเปลวปลายล่างของเคียว งอกจากปลายหางที่ยังเห็นอยู่
+  const TF=BA?12:0,TFP=10,tfGeo=new THREE.BufferGeometry(),tfpos=new Float32Array(Math.max(1,TF)*TFP*2*3),tfcol=new Float32Array(Math.max(1,TF)*TFP*2*4),tfidx=[];
+  for(let q=0;q<TF;q++)for(let i=0;i<TFP-1;i++){const a=(q*TFP+i)*2;tfidx.push(a,a+1,a+2,a+1,a+3,a+2);}
+  tfGeo.setAttribute('position',new THREE.BufferAttribute(tfpos,3));tfGeo.setAttribute('color',new THREE.BufferAttribute(tfcol,4));tfGeo.setIndex(tfidx);
+  const tailFlames=new THREE.Mesh(tfGeo,stScyInk());tailFlames.frustumCulled=false;tailFlames.renderOrder=9;if(BA)root.add(tailFlames);
   const hist=[];const _p=new THREE.Vector3(),MB=new THREE.Matrix4(),vX=new THREE.Vector3(),vY=new THREE.Vector3(),vZ=new THREE.Vector3(),QB=new THREE.Quaternion(),Qi=new THREE.Quaternion();
   const ez=(a,b,t)=>{t=Math.min(1,Math.max(0,(t-a)/(b-a)));return t*t*(3-2*t);};
   const baPose=T=>{   // รอบ 4 (ผู้ใช้): วงฟันโค้งตามระยะ (รัศมีคงที่ตอนกวาด) • ซ้าย/ขวาสลับ • ก่อนฟัน: ดึงเข้าตัว ควง 1 รอบ → พุ่งออกไปถึงระยะ → ค้างสะสมแรง → กวาด
@@ -95,6 +105,8 @@ FXCODE.studio_darkness_scythe=(_x,_y,_h,args,instance)=>{
     else if(t<P1+P2+H+S){const u=eIn((t-P1-P2-H)/S);ang=A-2*A*u;w=1;tw=0.6-1.35*u;out=1;}                    // กวาดเร่งขึ้น รัศมีคงที่ = วงโค้งตามระยะ
     else if(t<P1+P2+H+S+F){const u=eOut((t-P1-P2-H-S)/F);ang=-A-0.4*u;w=1;tw=-0.75-0.1*u;out=1-0.15*u;}       // ส่งตามแรงแล้วช้าลง
     else{const u=ez(P1+P2+H+S+F,P1+P2+H+S+F+R,t);ang=-A-0.4;w=1-u;tw=-0.85*(1-u);out=0.85*(1-u);}            // กลับข้างตัว
+    // act = กำลังฟัน (ผู้ใช้ 2026-11-19: หางขึ้นเฉพาะตอนเหวี่ยงฟัน/ทำท่า ไม่ตามตลอด)
+    const tS=P1+P2+H,act=t<tS?0:t<tS+S?Math.min(1,(t-tS)/0.04):t<tS+S+F?1-0.35*(t-tS-S)/F:Math.max(0,0.65*(1-(t-tS-S-F)/0.12));
     ang*=dir;tw*=dir;
     const f=new THREE.Vector3(0,0,1),r=new THREE.Vector3(-1,0,0);   // anchor: +z หน้า, −x ขวา
     const rad=new THREE.Vector3().copy(f).multiplyScalar(Math.cos(ang)).addScaledVector(r,Math.sin(ang)).normalize();
@@ -106,7 +118,7 @@ FXCODE.studio_darkness_scythe=(_x,_y,_h,args,instance)=>{
     if(spin){Qi.setFromAxisAngle(vY,spin);QB.premultiply(Qi);}
     const head=new THREE.Vector3(0,1.25+shake,0).addScaledVector(rad,0.55+(args.reach??7.6)*out);
     const pos=head.clone().addScaledVector(vY,-2.0*S0);
-    return {w,QB,pos,tw};
+    return {w,QB,pos,tw,act};
   };
   const update=()=>{
     if(!voidFixed&&holder.children.length){fixVoid();voidFixed=true;}
@@ -121,17 +133,30 @@ FXCODE.studio_darkness_scythe=(_x,_y,_h,args,instance)=>{
 
       // หาง (รอบ 2): คำนวณจากท่าฟันย้อนเวลา (ไม่พึ่งเฟรมที่วาด → ผืนต่อเนื่อง ไม่เป็นริ้ว) • โคนผืนทึบเรียบ ปลายหางแตกเป็นเปลว
       if(stScyLines){const Mt=new THREE.Matrix4(),Sv=new THREE.Vector3(S,S,S);
-        for(let j=0;j<HH;j++){const Pj=baPose(T-j*0.026),age=j/(HH-1);Mt.compose(Pj.pos,Pj.QB,Sv);
-          for(let k=0;k<HK;k++){const tk=0.05+0.95*k/(HK-1),[x,y]=bladePt(tk,0.45);_p.set(x,y,0).applyMatrix4(Mt);
+        const [tipX,tipY]=bladePt(1,0.45),[ttx,tty]=tan(1),acts=[];
+        for(let j=0;j<HH;j++){const Pj=baPose(T-j*0.026),age=j/(HH-1);Mt.compose(Pj.pos,Pj.QB,Sv);acts[j]=Pj.act;
+          // หางด้าม: จากปลายล่างของด้ามขึ้นไปต่อกับโคนหางใบ
+          {const [rx,ry]=bladePt(0.05,0.45);for(let k=0;k<SK;k++){const u=k/(SK-1);_p.set(rx*u,0.02+(ry-0.02)*u,0).applyMatrix4(Mt);const i3=j*SK+k;shpos[i3*3]=_p.x;shpos[i3*3+1]=_p.y;shpos[i3*3+2]=_p.z;
+            shcol[i3*4+3]=0.38*Math.pow(1-age,1.3)*Pj.act*Math.min(1,u/0.15+0.2);}}
+          for(let k=0;k<HK;k++){const tk=0.05+1.07*k/(HK-1);let x,y;if(tk<=1)[x,y]=bladePt(tk,0.45);else{const e=(tk-1)*1.15;x=tipX+ttx*e;y=tipY+tty*e;}_p.set(x,y,0).applyMatrix4(Mt);   // ปลายใบ: หางยื่นเลยปลายจริงไปอีกนิด
             const i2=j*HK+k,nz=Math.sin(k*1.7+T*9)*0.5+Math.sin(k*4.1-j*1.3+T*13)*0.5;
             tpos[i2*3]=_p.x;tpos[i2*3+1]=_p.y+(age>0.5?0.08*(age-0.5)*nz:0);tpos[i2*3+2]=_p.z;
             const body=Math.pow(1-age,1.2),flame=age<0.45?1:Math.max(0,Math.min(1,(nz+1.1-age*1.8)*2));   // ปลายหางขาดเป็นลิ้นไฟ (สุ่มตามคลื่น ไม่เป็นริ้ว)
-            tcol[i2*4+3]=Math.min(1,body*1.5)*flame*Math.min(1,Pj.w*1.4)*(tk<0.15?tk/0.15:1);
+            tcol[i2*4+3]=Math.min(1,body*1.5*(tk>0.85?1.35:1))*flame*Pj.act*(tk<0.15?tk/0.15:1)*(tk>1?Math.max(0.35,1-(tk-1)*4):1);   // เฉพาะตอนฟัน • แนวปลายใบเข้มกว่า
             // แถบเปลวบนขอบหาง: จากแนวสันใบ ยกขึ้นเป็นลิ้นไฟหยัก
             {const [sx,sy]=bladePt(tk,0.0);_p.set(sx,sy,0).applyMatrix4(Mt);const hj=(0.12+0.22*Math.max(0,nz+0.3))*(0.5+0.5*(1-age))+(age>0.55?(age-0.55)*1.1*(0.5+0.5*Math.sin(k*2.3+T*14)):0);   // ปลายหางเปลวสูงขึ้น ลุกเป็นลิ้น
               f2pos[i2*3]=_p.x;f2pos[i2*3+1]=_p.y+hj*(j%2?1:0.25);f2pos[i2*3+2]=_p.z;   // แถวสลับสูง-ต่ำ = ลิ้นไฟ
               f2col[i2*4+3]=tcol[i2*4+3]*0.95;}}}
         tailGeo.attributes.position.needsUpdate=true;tailGeo.attributes.color.needsUpdate=true;fr2.attributes.position.needsUpdate=true;fr2.attributes.color.needsUpdate=true;
+        shGeo.attributes.position.needsUpdate=true;shGeo.attributes.color.needsUpdate=true;
+        // เปลวปลายหาง: แถวเก่าสุดที่ยังฟันอยู่ = ปลายหาง • ลิ้นไฟลุกขึ้นแบบเปลวปลายล่างของเคียว
+        {let je=-1;for(let j=HH-1;j>=0;j--)if(acts[j]>0.25){je=j;break;}const aE=je<0?0:acts[je];
+          for(let q=0;q<TF;q++){const k=Math.min(HK-1,Math.round((q+0.5)/TF*(HK-1))),i2=Math.max(0,je)*HK+k,bx=tpos[i2*3],by=tpos[i2*3+1],bz=tpos[i2*3+2];
+            const flick=0.6+0.4*Math.sin(T*(7+q%4)+q*1.9)*Math.sin(T*3.3+q),Hf=(0.3+0.25*Math.abs(Math.sin(q*2.9)))*flick*S*0.6;
+            for(let i=0;i<TFP;i++){const u=i/(TFP-1),sw=Math.sin(T*6+q*1.3+u*3)*0.05*u*u,w=0.06*S*0.5*Math.pow(1-u,1.2)*(1+0.3*Math.sin(u*9+T*8+q));
+              const a=(q*TFP+i)*2*3,c=(q*TFP+i)*2*4;tfpos[a]=bx-w+sw;tfpos[a+1]=by+Hf*u;tfpos[a+2]=bz;tfpos[a+3]=bx+w+sw;tfpos[a+4]=by+Hf*u;tfpos[a+5]=bz;
+              tfcol[c+3]=tfcol[c+7]=je<0?0:Math.min(1,(1-u)*2.2)*Math.min(1,aE*1.5)*(k>HK*0.75?1:0.8);}}
+          if(TF){tfGeo.attributes.position.needsUpdate=true;tfGeo.attributes.color.needsUpdate=true;}}
         for(let e=0;e<EMB;e++){const sp=embers[e],ph=(T*1.4+rnd(e+80))%1,j=Math.min(HH-1,Math.floor(HH*(0.55+0.4*rnd(e+81)))),k=Math.floor(rnd(e+82)*HK),i2=j*HK+k;
           const al=f2col[i2*4+3];sp.position.set(f2pos[i2*3]+Math.sin(T*3+e)*0.15*ph,f2pos[i2*3+1]+0.2+ph*1.1,f2pos[i2*3+2]+Math.cos(T*2+e)*0.15*ph);
           const sz=(0.12+0.12*rnd(e+83))*(1-ph*0.6);sp.scale.set(sz,sz*1.5,1);sp.material.opacity=Math.min(1,al*2)*Math.sin(ph*Math.PI);}}}
