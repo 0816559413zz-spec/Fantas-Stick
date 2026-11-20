@@ -1,5 +1,7 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
 
+- 2026-11-20 — **Darkness ult round 2 (Studio, review #91):** Pose approved (side-on belly charge, left-arm lunge). New shadow-drop creature: teardrop from the left hand, ~7 m head with a low mouth and uneven teeth, pure black, fast-slow-hold-bite timing; old jaw assets removed.
+
 - 2026-11-20 — **FCS sky (user: "sky is one flat colour"):** `ffSkyMat` (js/28-fcs-forest.js) procedural dome over the whole Castle Strike map: gradient + drifting 6-octave fbm clouds (sun-side lit edges, dark bellies, silver lining) + sun glow + horizon blended into the live fog colour. `uK` from `fcsForestTick` blends castle sunset ↔ forest overcast. Review #92.
 - 2026-11-20 — **FCS forest mist no longer erases the bridge (user bug):** the 30 big `Sprite` mist cards in `fcsForest` stacked in front of walls and washed the bridge out to white. Now `ffMist` (js/28-fcs-forest.js): one instanced billboard in `fxScene` with soft depth fade (`softK`, 9 m of fog before a wall = full alpha) + fade under 3–11 m from the camera; shown only while its world is live (`ffMistFrame`, called at the top of `FXPass.render`).
 - 2026-11-20 — **Sketch: open image button:** "📂 เปิดรูป…" moved to the top bar (open an image file from disk as background); persistent hidden file input.

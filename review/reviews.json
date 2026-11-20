@@ -3,8 +3,8 @@
  "items": [
   {
    "id": 91,
-   "title": "Darkness อัลติ ปากเงางับ",
-   "text": "ชาร์จ 1 วิ ยิงปากเงาดำสนิทพุ่งออกเร็วแล้วช้าลง ถึงระยะ 600 ใน 0.8 วิ ค้างแป๊บ อ้าเพิ่ม แล้วงับแรงและสลาย หางยาว มีควันดำตามหลัง เคียวลอยข้างตัวเฉย ๆ",
+   "title": "Darkness อัลติ สัตว์เงาหยดน้ำงับ (ท่าผ่านแล้ว)",
+   "text": "หยดน้ำเงาออกจากมือซ้าย พุ่งเร็วแล้วช้าลง ถึงระยะ 600 ใน 0.8 วิ หัวสูง ~4 คน ปากค่อนล่าง ส่วนบนใหญ่กว่า ฟันสูงต่ำไม่เท่ากัน ค้าง อ้าเพิ่ม แล้วงับแรงและแตก ดำสนิท",
    "kind": "VFX / แอนิเมชัน",
    "who": "Darkness",
    "status": "wait",
@@ -13,24 +13,26 @@
    "imgs": [],
    "links": [
     "/studio.html?fx=darkness/ult_preview&map=test",
-    "/designs/darkness_ref/ult-jaw-side.gif",
-    "/designs/darkness_ref/ult-jaw-game.gif"
+    "/studio.html?fx=darkness/ult_pose_preview&map=test",
+    "/designs/darkness_ref/ult-drop-side.gif",
+    "/designs/darkness_ref/ult-drop-wide.gif",
+    "/designs/darkness_ref/ult-drop-game.gif"
    ],
    "checks": [
     {
-     "t": "จังหวะ เร็ว→ช้า→ค้าง→งับแรง ชัดพอไหม",
+     "t": "ทรงหยดน้ำ ปากค่อนล่าง ฟันไม่เท่ากัน ตรงที่คุย",
      "ok": false
     },
     {
-     "t": "ดำสนิทพอ ไม่ดูเทา",
+     "t": "จังหวะ เร็ว→ช้า→ค้าง→งับแรง",
      "ok": false
     },
     {
-     "t": "ขนาดปากเต็มกรวยอ่านพื้นที่โดนได้",
+     "t": "ดำสนิทพอ",
      "ok": false
     }
    ],
-   "reply": "ทำพรีวิวอัลติปากเงาตามที่คุยใน VFX Studio"
+   "reply": "ทำใหม่เป็นสัตว์เงาทรงหยดน้ำตามที่คุย ท่าใช้แบบที่ผ่านแล้ว"
   },
   {
    "id": 90,

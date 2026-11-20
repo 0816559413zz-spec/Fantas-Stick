@@ -1,8 +1,8 @@
 // Staging for darkness/ult_preview + ult_pose_preview: caster pose, wand, idle scythe, targets + marks.
-// The jaw, tail, smoke and shards are normal fx layers (assets/src/darkness_ult_gen.mjs).
+// The drop head, tail, teeth, smoke and shards are fx layers (assets/src/darkness_ult_drop_gen.mjs).
 const ST_ULT_HALF=40*Math.PI/180,ST_ULT_RANGE=30;
 const ST_ULT_REL=1.0,ST_ULT_TRAVEL=.80,ST_ULT_BITE=ST_ULT_REL+1.02;
-const stUltRim=t=>{const x=clamp((t-ST_ULT_REL)/ST_ULT_TRAVEL,0,1);return 1.67+1+29*(1-(1-x)**4);};   // same curve as the fx
+const stUltRim=t=>{const x=clamp((t-ST_ULT_REL)/ST_ULT_TRAVEL,0,1),R=.3+3.2*(1-(1-x)**3);return 1.65+(30-1.15*3.5-1.65)*(1-(1-x)**4)+1.15*R;};   // head front, same curve as the fx
 
 const _ultV1=new THREE.Vector3(),_ultV2=new THREE.Vector3(),_ultV3=new THREE.Vector3(),_ultV4=new THREE.Vector3(),_ultV5=new THREE.Vector3(),_ultV6=new THREE.Vector3(),_ultV7=new THREE.Vector3(),_ultV8=new THREE.Vector3(),_ultV9=new THREE.Vector3(),_ultV10=new THREE.Vector3(),_ultV11=new THREE.Vector3(),_ultV12=new THREE.Vector3();
 const _ultQ=new THREE.Quaternion(),_ultQ2=new THREE.Quaternion(),_ultQ3=new THREE.Quaternion(),_ultQ4=new THREE.Quaternion(),_ultDown=new THREE.Vector3(0,-1,0);

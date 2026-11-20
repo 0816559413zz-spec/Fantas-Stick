@@ -166,8 +166,8 @@
    "n": 2
   },
   "darkness/ult_preview": {
-   "v": "3b788a8d",
-   "desc": "Darkness — พรีวิวอัลติ ปากสัตว์เงาดำสนิท พุ่งเร็วแล้วช้าลง ค้าง อ้าเพิ่ม งับแรงที่ระยะ 600 แล้วสลาย",
+   "v": "c4f08f5d",
+   "desc": "Darkness — พรีวิวอัลติ สัตว์เงาทรงหยดน้ำ ออกจากมือซ้าย พุ่งเร็วแล้วช้าลง ค้าง อ้าเพิ่ม งับแรงที่ระยะ 600 แล้วแตกสลาย",
    "pal": "arcane",
    "tags": [
     "darkness",
@@ -175,7 +175,18 @@
     "ult"
    ],
    "dur": 2.7,
-   "n": 14
+   "n": 13
+  },
+  "darkness/unmarked_chase_preview": {
+   "v": "cc3842dc",
+   "desc": "Darkness — พรีวิวท่าไล่ตามแบบไม่มีตรา พุ่งแล้วหยุดก่อนงัดขึ้น",
+   "pal": "arcane",
+   "tags": [
+    "darkness",
+    "preview"
+   ],
+   "dur": 1.55,
+   "n": 2
   },
   "darkness/ward_drain_preview": {
    "v": "5b12e510",
@@ -4955,39 +4966,39 @@
    "mat": "ice",
    "n": 2
   },
-  "dark_jaw_lower": {
-   "v": "749bfb70",
-   "desc": "Darkness อัลติ ขากรรไกรล่าง",
+  "dark_drop_lower": {
+   "v": "bcdcadaf",
+   "desc": "Darkness อัลติ หัวหยดน้ำส่วนล่าง (เล็กกว่า)",
    "mat": "energy",
    "n": 1
   },
-  "dark_jaw_shard": {
+  "dark_drop_shard": {
    "v": "0c3bf7f8",
    "desc": "Darkness อัลติ เศษเงาแหลม",
    "mat": "solid",
    "n": 1
   },
-  "dark_jaw_tail": {
-   "v": "59b1b7be",
-   "desc": "Darkness อัลติ หางเส้นเงา (ท้าย z=-1 → คอ z=0)",
+  "dark_drop_tail": {
+   "v": "b9c6673c",
+   "desc": "Darkness อัลติ หางหยดน้ำ (หัว z=0 → มือ z=-1)",
    "mat": "energy",
    "n": 1
   },
-  "dark_jaw_teeth_lower": {
-   "v": "9c048413",
+  "dark_drop_teeth_lower": {
+   "v": "67b7564b",
    "desc": "Darkness อัลติ ฟันล่าง",
    "mat": "solid",
    "n": 1
   },
-  "dark_jaw_teeth_upper": {
-   "v": "d55c117d",
-   "desc": "Darkness อัลติ ฟันบน + เขี้ยวเงาทรงใบเคียว",
+  "dark_drop_teeth_upper": {
+   "v": "14571a1f",
+   "desc": "Darkness อัลติ ฟันบน สูงต่ำ/ห่างไม่เท่ากัน",
    "mat": "solid",
-   "n": 2
+   "n": 1
   },
-  "dark_jaw_upper": {
-   "v": "926cf847",
-   "desc": "Darkness อัลติ ขากรรไกรบน (บานพับที่จุด 0 ยาว 1 ม. ไปทาง +z)",
+  "dark_drop_upper": {
+   "v": "1849f2e1",
+   "desc": "Darkness อัลติ หัวหยดน้ำส่วนบน (ใหญ่กว่า) จุดหมุน = บานพับปาก",
    "mat": "energy",
    "n": 1
   },
@@ -6536,14 +6547,6 @@
    "kind": "loop",
    "cols": 4,
    "rows": 2
-  },
-  "dark_jaw_ink": {
-   "v": "12490f27",
-   "desc": "หมึกดำสนิทของปากเงาอัลติ Darkness: เส้นดำไหลตามแนว x ปนดำกลางบางเส้น ช่องโปร่ง ขอบบน-ล่างฉีกเป็นหนาม • assets/src/darkness_ult_ink.py",
-   "gen": "image",
-   "kind": "loop",
-   "cols": 1,
-   "rows": 1
   },
   "electric_arc": {
    "v": "4b01bed2",
