@@ -89,6 +89,44 @@ function balTour(kits,rounds,maxT){
   const rate={};names.forEach(n=>rate[n]=Math.round(wins[n]/games[n]*100)+'%');
   return {rate,pair};
 }
+// Team battles for the tier list (2026-11-20): botBrain on every bot, same as balDuel.
+// mode 'mono' = every class pair, N same-class bots per side • mode 'mix' = random mixed teams.
+// Per class also returns casts/min and damage dealt/min (team share) so we can flag classes the bot cannot play.
+function balTeamReset(A,B){
+  balArena(true);
+  const jy=(Math.random()-.5)*MH*.25;
+  for(const p of [...A,...B]){const left=A.includes(p),L=left?A:B,i=L.indexOf(p);
+    p.maxHp=200;resetBody(p,(left?MW*.14:MW*.86)+rnd(-30,30),MH/2+(i-(L.length-1)/2)*70+(left?jy:-jy));
+    p.hp=p.maxHp;p.ult=0;p.team=left?0:1;p.bot=true;p.ai=null;p._px=undefined;p.ang=left?0:Math.PI;}
+  G.proj=[];G.zones=[];G.strikes=[];G.walls=[];G.chan=[];G.mins=[];G.nature=[];G.wdb=[];G.wtl=[];G.erings=[];G.ices=[];G.waves=[];G.glac=[];G.eso=[];G.edust=[];G.en=[];
+  G.ph='play';G.rw={};G.round=1;G.banner=null;G.result=null;if(typeof clearStormWaveMarks==='function')clearStormWaveMarks();
+}
+function balTeam(paths,N,rounds,maxT=60,mode='mix'){
+  const keep=G.order.slice(),pool=[];
+  for(let i=0;i<N*2;i++){const id='balT'+i;const p=G.players[id]||addPlayer(id,'bal'+i,null,null,'');pool.push(p);}
+  G.order=pool.map(p=>p.id);
+  const S={};paths.forEach(k=>S[k]={w:0,g:0,casts:0,dmg:0,t:0});const pair={},SL=['basic','q','e','r','f','dodge'];
+  const runOne=(kA,kB)=>{const A=pool.slice(0,N),B=pool.slice(N),all=[...A,...B];
+    A.forEach((p,i)=>setKit(p,botKit(kA[i])));B.forEach((p,i)=>setKit(p,botKit(kB[i])));balTeamReset(A,B);
+    const prev=all.map(p=>SL.map(k=>p.cd[k]||0)),hp=all.map(p=>p.hp),cast=all.map(()=>0),dealtTeam=[0,0];
+    let t=0;while(t<maxT){hostTick(1/60);t+=1/60;
+      all.forEach((p,j)=>{SL.forEach((k,m)=>{const c=p.cd[k]||0;if(c>prev[j][m]+0.05&&prev[j][m]<0.05)cast[j]++;prev[j][m]=c;});
+        const h=p.alive?p.hp:0;if(h<hp[j])dealtTeam[p.team?0:1]+=hp[j]-h;hp[j]=h;});
+      if(!A.some(p=>p.alive)||!B.some(p=>p.alive))break;}
+    all.forEach((p,j)=>{const k=(j<N?kA:kB)[j%N],st=S[k];st.casts+=cast[j];st.dmg+=dealtTeam[p.team]/N;st.t+=t;});
+    const hA=A.reduce((s,p)=>s+(p.alive?p.hp:0),0),hB=B.reduce((s,p)=>s+(p.alive?p.hp:0),0);
+    return hA>hB?1:hB>hA?-1:0;};
+  const score=(k,r)=>{S[k].g++;S[k].w+=r>0?1:r===0?.5:0;};
+  if(mode==='mono'){for(let i=0;i<paths.length;i++)for(let j=i+1;j<paths.length;j++){let a=0,b=0,d=0;
+      for(let r=0;r<rounds;r++){const sw=r%2,ka=sw?paths[j]:paths[i],kb=sw?paths[i]:paths[j],res=runOne(Array(N).fill(ka),Array(N).fill(kb));
+        score(ka,res);score(kb,-res);const iw=sw?res<0:res>0,jw=sw?res>0:res<0;iw?a++:jw?b++:d++;}
+      pair[PATHS[paths[i]].id+'-'+PATHS[paths[j]].id]=a+'/'+b+'/'+d;}}
+  else for(let r=0;r<rounds;r++){const pick=()=>Array.from({length:N},()=>paths[Math.floor(Math.random()*paths.length)]);
+      const kA=pick(),kB=pick(),res=runOne(kA,kB);kA.forEach(k=>score(k,res));kB.forEach(k=>score(k,-res));}
+  for(const p of pool){clearOwned([p.id]);hostRemove(p.id);}G.order=keep;balArena(false);
+  const out={};paths.forEach(k=>{const s=S[k];out[PATHS[k].id]={win:s.g?Math.round(s.w/s.g*100):null,n:s.g,cpm:s.t?+(s.casts/s.t*60).toFixed(1):0,dpm:s.t?Math.round(s.dmg/s.t*60):0};});
+  return {cls:out,pair};
+}
 // ดาเมจ/CC ที่แต่ละคาถาทำใส่เป้านิ่งใน 8 วิ (รวมไฟลุก/โซน) เพื่อเทียบพลังตรงๆ
 // โหมดดันเจียนคนเดียวด้วยบอท: ดูว่าชุดคาถาไหนไปได้ไกลแค่ไหน (ชั้น / เวลา / จำนวนศัตรูที่ฆ่า) — หลายรอบ เฉลี่ย
 function balCoop(kit,maxT,runs){
@@ -124,7 +162,7 @@ function balSpellTest(){
   }
   return out;
 }
-window.WD={SKANIM,get BLDG(){return BLDG;},shieldFaces,SPELL_LIST,tbolt,applyQuality,taaBegin,taaFinish,TAA,coop:balCoop,fakeHello:(id,name,look,kit)=>hostOnData({peer:id,send(){},close(){}},{t:'hello',name,look,kit}),fakeMsg:(id,d)=>hostOnData({peer:id,send(){},close(){}},d),hostOnData:(c,d)=>hostOnData(c,d),hostDrop:(id,c)=>hostDrop(id,c),hostToLobby:()=>hostToLobby(),get NETo(){return NET;},get SPEC(){return SPEC;},get CHAT(){return CHAT;},get EMO(){return EMO;},get SBUFo(){return SBUF;},packP:L=>packP(L),unpackP:s=>unpackP(s),get VIC(){return VIC;},vicFrame:n=>vicLoop(n),get COMBO(){return COMBO;},get FFAV(){return FFAV;},get POD(){return POD;},get PROG(){return PROG;},get MNo(){return MN;},THREE,get STAGEo(){return STAGE;},get stageo(){return stage;},get DCAM(){return DCAM;},lvOf:x=>lvOf(x),balArena,bal:balDuel,tour:balTour,dmgTest:balSpellTest,hostTick:dt=>hostTick(dt),VFXB,QUAL,vfxAug:(on)=>{VFXAUG_ON=on;},get post(){return {fxPass,gradePass,bloom,SOFTU,GRADEU,AOU,AO_ON,SHD,fxScene,composer};},castSlot:(p,i)=>castSlot(p,i),castUlt:p=>castUlt(p),setKit:(p,k)=>setKit(p,k),SPELLS,SPELL_LIST,PATHS,parseKit,foesOf,emitLog:()=>EVL,damage:(...a)=>damage(...a),get G(){return G;},get screen(){return screen;},get VIEW(){return VIEW;},INPUT,NET,render,choosePick,hostToLobby,hostStart,plist,broadcastLobby,setYaw:v=>{yaw=v;},setPitch:v=>{pitch=v;},cam,composer,PM3,tx,tz,addPlayer,hostVote,get ROLE(){return ROLE;},get MO(){return MO;},get PARTS(){return PARTS.length;},partsArr:()=>PARTS,zv:()=>ZV,get AUDIO(){return {AC:AC&&AC.state,sfx:Object.keys(BUF).length,files:Object.values(BUF).reduce((a,b)=>a+b.length,0),music:MUSF.cur,mt:MUSF.els[MUSF.cur]?+MUSF.els[MUSF.cur].el.currentTime.toFixed(1):null,myT:MY.el?+MY.el.currentTime.toFixed(1):null,failed:MUSF.failed,amb:AMB.cur,wind:!!AMB.windBuf,my:MY.list.length};},PROF,get grass(){return {GRASS,AIR,CLW,SCAR,grassBake,airGust,airMark,grassScar,scarPaint,scarReset};},gl,scene,bloom,moonL,LPOOL,stage};
+window.WD={SKANIM,get BLDG(){return BLDG;},shieldFaces,SPELL_LIST,tbolt,applyQuality,taaBegin,taaFinish,TAA,coop:balCoop,fakeHello:(id,name,look,kit)=>hostOnData({peer:id,send(){},close(){}},{t:'hello',name,look,kit}),fakeMsg:(id,d)=>hostOnData({peer:id,send(){},close(){}},d),hostOnData:(c,d)=>hostOnData(c,d),hostDrop:(id,c)=>hostDrop(id,c),hostToLobby:()=>hostToLobby(),get NETo(){return NET;},get SPEC(){return SPEC;},get CHAT(){return CHAT;},get EMO(){return EMO;},get SBUFo(){return SBUF;},packP:L=>packP(L),unpackP:s=>unpackP(s),get VIC(){return VIC;},vicFrame:n=>vicLoop(n),get COMBO(){return COMBO;},get FFAV(){return FFAV;},get POD(){return POD;},get PROG(){return PROG;},get MNo(){return MN;},THREE,get STAGEo(){return STAGE;},get stageo(){return stage;},get DCAM(){return DCAM;},lvOf:x=>lvOf(x),balArena,bal:balDuel,tour:balTour,team:balTeam,dmgTest:balSpellTest,hostTick:dt=>hostTick(dt),VFXB,QUAL,vfxAug:(on)=>{VFXAUG_ON=on;},get post(){return {fxPass,gradePass,bloom,SOFTU,GRADEU,AOU,AO_ON,SHD,fxScene,composer};},castSlot:(p,i)=>castSlot(p,i),castUlt:p=>castUlt(p),setKit:(p,k)=>setKit(p,k),SPELLS,SPELL_LIST,PATHS,parseKit,foesOf,emitLog:()=>EVL,damage:(...a)=>damage(...a),get G(){return G;},get screen(){return screen;},get VIEW(){return VIEW;},INPUT,NET,render,choosePick,hostToLobby,hostStart,plist,broadcastLobby,setYaw:v=>{yaw=v;},setPitch:v=>{pitch=v;},cam,composer,PM3,tx,tz,addPlayer,hostVote,get ROLE(){return ROLE;},get MO(){return MO;},get PARTS(){return PARTS.length;},partsArr:()=>PARTS,zv:()=>ZV,get AUDIO(){return {AC:AC&&AC.state,sfx:Object.keys(BUF).length,files:Object.values(BUF).reduce((a,b)=>a+b.length,0),music:MUSF.cur,mt:MUSF.els[MUSF.cur]?+MUSF.els[MUSF.cur].el.currentTime.toFixed(1):null,myT:MY.el?+MY.el.currentTime.toFixed(1):null,failed:MUSF.failed,amb:AMB.cur,wind:!!AMB.windBuf,my:MY.list.length};},PROF,get grass(){return {GRASS,AIR,CLW,SCAR,grassBake,airGust,airMark,grassScar,scarPaint,scarReset};},gl,scene,bloom,moonL,LPOOL,stage};
 
 // ดีบักโหมดบุกปราสาท (คอนโซล): WD.sg().S = สถานะ, .V = ค่าตัวเลข (js/15-siege)
 WD.sg=()=>({S:G&&G.sg,V:SGV,B:SGB,F:MAPS.fcs.fcs,ph:SGPH,area:AREA,bots:bots()});WD.lobbyBotAdd=(p,l)=>lobbyBotAdd(p,l);

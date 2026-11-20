@@ -1,5 +1,6 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
 
+- 2026-11-20 Tier list tooling: `WD.team` = `balTeam(paths,N,rounds,maxT,'mix'|'mono')` in js/41-debug.js (2v2/6v6 bot battles, per-class win %, casts/min, dmg/min); `tools/bal-tierlist.js` runs 1v1 + 2v2/6v6 mixed + mono in one headless pass (~5 min) and writes only `shots/tier.json` (`?q=1` smoke run). First result: S Wind, A Pyro, B Frost/Storm/Nature, C Light/Earth, D Darkness/Water (bots underplay Storm/Light/Earth/Darkness). HUD: no fire flipbook around the Darkness ult card
 - 2026-11-20 Light + Darkness icons (game-icons.net CC BY 3.0, credits in icons/CREDITS.md): Light 9 icons, Darkness 10 (dk_* aliased by the import session). HUD per-class colours: Light = white-hot radiant cards with gold halo + sun rays, black icons, dark text; Darkness = black to dark-blue cards, blue icons, pale text (H4E light/darkness + --cbot/--ic/--tx vars, #h4[data-el])
 - 2026-11-20 Darkness numbers: marked chase 5/5/15; skill 5 invisible unless attacking (attacking = faint); hold Dash no damage; empowered BA after tap Dash 18 (36 marked), 150°, range 260, 3 s window, 2 uses no stack; BA aims up/down normally (flyer restriction removed)
 - 2026-11-20 Darkness ult numbers: no 50 shield anymore — ult puts the caster into Flow for 6 s; Night Waltz -30% cd per marked kill has no minimum
