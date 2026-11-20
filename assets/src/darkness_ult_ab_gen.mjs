@@ -29,10 +29,8 @@ function jaw(sign){
   for(let i=0;i<=NZ;i++){const z=lerp(Z0,Z1,i/NZ);
     for(let j=0;j<NP;j++){v.push(toHinge(headPt(z,2*Math.PI*j/NP,sign)));
       if(i<NZ){const a=i*NP+j,b=a+NP,a1=i*NP+(j+1)%NP,b1=a1+NP;f.push(sign>0?[a,a1,b1,b]:[a,b,b1,a1]);}}}
-  const back=v.length;v.push(toHinge([0,(yMid(Z0)+(sign>0?yTop(Z0):yBot(Z0)))/2,Z0-.03]));   // cap the neck so the skull is never hollow from behind
-  for(let j=0;j<NP;j++){const a=j,a1=(j+1)%NP;f.push(sign>0?[a1,a,back]:[a,a1,back]);f.push(sign>0?[a,a1,back]:[a1,a,back]);}
   const tip=v.length;v.push(toHinge([0,(yMid(Z1)+(sign>0?yTop(Z1):yBot(Z1)))/2,Z1+.03]));
-  for(let j=0;j<NP;j++){const a=NZ*NP+j,a1=NZ*NP+(j+1)%NP;f.push([a,a1,tip]);f.push([a,tip,a1]);}
+  for(let j=0;j<NP;j++){const a=NZ*NP+j,a1=NZ*NP+(j+1)%NP;f.push(sign>0?[a,a1,tip]:[a,tip,a1]);}
   return {id:sign>0?'upper':'lower',k:'poly',v,f,sub:0};
 }
 // double-sided pyramid helper
@@ -103,15 +101,6 @@ const ribbon={id:'ribbon',k:'poly',sub:0,v:[[-.12,0,0],[.12,0,0],[.10,.02,-.6],[
 const model=(name,desc,parts)=>writeFileSync(`assets/fx/mesh/${name}.mesh.json`,JSON.stringify({v:1,desc,mat:'solid',pal:'arcane',tags:['darkness','ult'],parts})+'\n');
 model('dark_ab_upper','Darkness อัลติ A+B กะโหลกส่วนบน (ใหญ่กว่า หน้าผากลาด) จุดหมุน = มุมปาก',[jaw(1)]);
 model('dark_ab_lower','Darkness อัลติ A+B ขากรรไกรล่าง',[jaw(-1)]);
-function mouth(sign){   // throat surface (roof / floor) just inside the mouth so it reads from the front
-  const NZ=20,NX=10,v=[],f=[];
-  for(let i=0;i<=NZ;i++){const z=lerp(HZ-.05,Z1-.03,i/NZ),w=halfW(z)*.95;
-    for(let j=0;j<=NX;j++){v.push(toHinge([lerp(-w,w,j/NX),yMid(z)-sign*.006,z]));
-      if(i<NZ&&j<NX){const a=i*(NX+1)+j,b=a+NX+1;f.push([a,a+1,b+1,b]);f.push([b,b+1,a+1,a]);}}}
-  return {id:'mouth',k:'poly',v,f,sub:0};
-}
-model('dark_ab_mouth_upper','Darkness อัลติ A+B เพดานปาก',[mouth(1)]);
-model('dark_ab_mouth_lower','Darkness อัลติ A+B พื้นปาก',[mouth(-1)]);
 model('dark_ab_teeth_upper','Darkness อัลติ A+B ฟันบน',[teeth(1)]);
 model('dark_ab_teeth_lower','Darkness อัลติ A+B ฟันล่าง',[teeth(-1)]);
 model('dark_ab_crest','Darkness อัลติ A+B ลิ้นเปลวบนหัว',[crest()]);
@@ -142,7 +131,7 @@ const REL=1.0,LIFE=1.42,TRAVEL=.95,HOLD=1.01,SHUT=1.04,GONE=1.32;   // keeps mov
 const W=[.31,.85,1.65];            // left hand at full thrust (studio stage)
 const HMAX=7.2,RANGE=30,WX=1.6,WXH=1.9;   // wide body, even wider head (user: tip wider)
 const P=[W[0],2.7,W[2]+1.4],PR=3.3;   // shadow portal in front of the hand: the creature comes out of it
-const OPMAX=1;                      // opaque again: see-through showed teeth from behind (user); lighter tone instead
+const OPMAX=.72;                    // not fully black (user: too dark from behind)
 function state(tr){
   const x=Math.min(1,tr/TRAVEL),out4=1-(1-x)**4,out3=1-(1-x)**3;
   const H=HMAX*(.45+.55*out3)+.25*ease(TRAVEL,HOLD,tr)+.3*ease(HOLD,SHUT,tr)*(1-ease(SHUT,SHUT+.08,tr));
@@ -172,17 +161,15 @@ const grow=n=>keys(tr=>{const q=state(tr);return r3(tr<SHUT?n*(q.H/HMAX):0);});
 const rimPts=[...Array(8)].map((_,i)=>{const z=lerp(.45,-.55,i/7);const p=headPt(z,Math.PI/2+(i%2?.35:-.35),1);return toHinge(p);});
 const rimKeys=p=>keys(tr=>{const q=state(tr),a=q.open*.62*Math.PI/180,y=p[1]*Math.cos(a)+p[2]*Math.sin(a),z=p[2]*Math.cos(a)-p[1]*Math.sin(a);return [r3(W[0]+p[0]*q.H),r3(q.hy+y*q.H),r3(q.hz+z*q.H)];});
 
-const BLACK={mat:'black',col:'#0e0e12'},MIDC='#1d1d24',CLOTHC='#18181e',THROATC='#24242d',TOOTHC='#3c3c47';   // throat + teeth lighter so the open mouth reads from the front   // charcoal-black body, not pitch black
+const BLACK={mat:'black'},MIDC='#141419',CLOTHC='#101015';
 function bodyLayers(tex){   // shape layers shared by all versions; tex picks the surface pieces
   const L=[
     {id:'tail',t:'mesh',shape:'model',model:'dark_ab_tail',...BLACK,...base,pos:tailPos,scale:tailScale,rot:tailRot,op:fadeOut},
     {id:'hem',t:'mesh',shape:'model',model:'dark_ab_hem',...BLACK,...base,pos:tailPos,scale:tailScale,rot:tailRot,op:fadeOut},
     {id:'lower',t:'mesh',shape:'model',model:'dark_ab_lower',...BLACK,...base,pos,scale,rot:rotLow,op:fadeOut},
-    {id:'mouth_lower',t:'mesh',shape:'model',model:'dark_ab_mouth_lower',mat:'black',col:THROATC,...base,pos,scale,rot:rotLow,op:fadeOut},
-    {id:'teeth_lower',t:'mesh',shape:'model',model:'dark_ab_teeth_lower',mat:'black',col:TOOTHC,...base,pos,scale,rot:rotLow,op:fadeOut},
+    {id:'teeth_lower',t:'mesh',shape:'model',model:'dark_ab_teeth_lower',...BLACK,...base,pos,scale,rot:rotLow,op:fadeOut},
     {id:'upper',t:'mesh',shape:'model',model:'dark_ab_upper',...BLACK,...base,pos,scale,rot:rotUp,op:fadeOut},
-    {id:'mouth_upper',t:'mesh',shape:'model',model:'dark_ab_mouth_upper',mat:'black',col:THROATC,...base,pos,scale,rot:rotUp,op:fadeOut},
-    {id:'teeth_upper',t:'mesh',shape:'model',model:'dark_ab_teeth_upper',mat:'black',col:TOOTHC,...base,pos,scale,rot:rotUp,op:fadeOut},
+    {id:'teeth_upper',t:'mesh',shape:'model',model:'dark_ab_teeth_upper',...BLACK,...base,pos,scale,rot:rotUp,op:fadeOut},
     {id:'crest',t:'mesh',shape:'model',model:'dark_ab_crest',...BLACK,...base,pos,scale,rot:rotUp,op:fadeOut}];
   if(tex.strands)L.push(
     {id:'strands_upper',t:'mesh',shape:'model',model:'dark_ab_strands_upper',mat:'black',col:MIDC,...base,pos,scale,rot:rotUp,op:fadeOut},
@@ -192,8 +179,8 @@ function bodyLayers(tex){   // shape layers shared by all versions; tex picks th
 }
 const stage=[{id:'anchor',t:'mesh',shape:'disc',mat:'black',op:0,at:0,life:2.7},{id:'stage',t:'code',fn:'studio_darkness_ult',at:0,life:2.7,args:{layer:'anchor'}}];
 const portalFx=[
-  {id:'portal_disc',t:'mesh',shape:'disc',mat:'black',at:.78,life:.82,pos:P,rot:[90,0,0],scale:{'0':.02,'0.25':PR*.92,'0.75':PR*.95,'1':PR*.3,ease:'out'},op:{'0':0,'0.15':1,'0.75':1,'1':0}},
-  {id:'portal',t:'mesh',shape:'model',model:'dark_ab_portal',mat:'black',col:'#0c0c10',at:.75,life:.85,pos:P,spin:0,rot:{'0':[0,0,0],'1':[0,0,-160]},scale:{'0':.05,'0.3':PR,'0.7':PR*1.05,'1':PR*.2,ease:'out'},op:{'0':0,'0.12':1,'0.75':1,'1':0}},
+  {id:'portal_disc',t:'mesh',shape:'disc',mat:'black',at:.78,life:.82,pos:P,rot:[90,0,0],scale:{'0':.02,'0.25':PR*.92,'0.75':PR*.95,'1':PR*.3,ease:'out'},op:{'0':0,'0.2':.55,'0.7':.45,'1':0}},
+  {id:'portal',t:'mesh',shape:'model',model:'dark_ab_portal',mat:'black',col:'#0c0c10',at:.75,life:.85,pos:P,spin:0,rot:{'0':[0,0,0],'1':[0,0,-160]},scale:{'0':.05,'0.3':PR,'0.7':PR*1.05,'1':PR*.2,ease:'out'},op:{'0':0,'0.15':.9,'0.72':.85,'1':0}},
   {id:'portal_ink',t:'emit',at:.75,life:.35,burst:0,rate:120,from:'ring',fr:PR,pos:P,dir:'in',speed:[2,5],plife:[.15,.3],look:'smoke',size:[6,12],grow:-.4,col:'#000000',c2:'#000000',gravity:0,drag:1}];
 const charge=[
   {id:'charge_orb',t:'mesh',shape:'sphere',mat:'black',at:.20,life:.82,pos:[.21,.9,-.21],scale:{'0':.03,'0.85':.17,'1':.2,ease:'in'},op:1},

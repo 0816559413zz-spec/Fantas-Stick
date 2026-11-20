@@ -1,5 +1,7 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
 
+- 2026-11-20 — **Darkness ult v3: reverted round 3** (user disliked the new face); assets back to round 2.
+
 - 2026-11-20 — **Darkness ult v3 round 3 (Studio, review #91):** Opaque charcoal body again (see-through showed teeth from behind), capped skull neck (was hollow from behind), solid portal, lighter throat and teeth so the mouth reads from the front; front POV view added.
 
 - 2026-11-20 — **Darkness ult v3 round 2 (Studio, review #91):** Creature comes out of a vertical shadow portal in front of the hand; 72% opacity; wider head (1.9x) and body (1.6x); keeps moving into a 0.03 s bite with almost no hold.

@@ -16,8 +16,7 @@
     "/designs/darkness_ref/ult-v3-sheet.jpg",
     "/designs/darkness_ref/ult-v3-wide.gif",
     "/designs/darkness_ref/ult-v3-side.gif",
-    "/designs/darkness_ref/ult-v3-game.gif",
-    "/designs/darkness_ref/ult-v3-front.gif"
+    "/designs/darkness_ref/ult-v3-game.gif"
    ],
    "checks": [
     {
@@ -33,7 +32,7 @@
      "ok": false
     }
    ],
-   "reply": "แก้รอบ 3 + มีมุมจากหน้า"
+   "reply": "ย้อนกลับเป็นรอบ 2 แล้ว"
   },
   {
    "id": 90,
