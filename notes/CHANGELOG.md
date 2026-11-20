@@ -1,6 +1,6 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
 
-- 2026-11-20 Darkness numbers locked by user (designs/darkness.md): Flow 6 s; Night Waltz radius 250, cd 12 s; unmarked chase dash 250 / 10 dmg / 0.6 s lift / cd 7 s; marked chase range 600, cd 7 s (same skill)
+- 2026-11-20 Darkness numbers locked by user (designs/darkness.md): Flow 6 s; Night Waltz radius 250, cd 12 s; unmarked chase dash 250 / 10 dmg / 0.6 s lift / cd 7 s; marked chase range 600, cd 7 s (same skill) • also Dash tap 120 / hold 500 / cd 8 per charge; Shield windup ~0.4-0.5, block dia 140, refill 5 s / early stop 1 s wait then 0.35 s/s, cursor gauge; mark wave 1000/s height 150; Ward Drain range 400, no damage, radius 150, -60% shield 4 s, cd 12; skill 5 radius 150, 4 s, cd 20
 - 2026-11-20 Darkness Flow state look (VFX Studio preview `darkness/flow_state_preview`, review #98): black aura on the scythe-side arm with the existing scythe spine flame running along it, faster spine flame on the scythe (no white), 3 shadow orbs with a small single-layer BA-style tail, HUD timer ring + orb dots + darker screen edge with drifting black dots; Storm to-fix list closed per user
 - 2026-11-20 — **Darkness ult (Studio, review #91):** Irregular bursts scatter from the rift edge and the creature sheds more flecks when dissolving. WASD cancels the casting pose on movement input 0.9 s after full extension in the `walk=1` preview.
 
