@@ -26,7 +26,9 @@ function genFcs(){
   // ช่องรั้วที่ติดกันแนวนอน/แนวตั้ง = รั้ว 1 แนว (เริ่ม-จบเลยกลางช่องปลาย 0.4 ช่อง) • ช่องเดี่ยว = รั้วสั้นแนวเหนือ-ใต้ • ชนเป็นแนวบาง (วงกลม r 11 ทุก ~0.9 ม.)
   // obs k:'fcf' + fid (รั้วแนวไหน — ใช้ต่อกับไฟ/ธาตุ) • fences: [x1,y1,x2,y2] พิกัด px ภาพอยู่ js/28-fcs-build.js fcsFences
   const fences=[];
-  {const F3=(x,y)=>wc(x,y)===3,used=new Set();
+  // fence cells inside the zone 1 ruin courtyard (±21.5 m around core 1) are dropped (user 2026-11-20)
+  const k1o=D.objs.find(o=>o[0]==='pt'&&(o[5]||1)===1),inRuin=(x,y)=>k1o&&Math.abs((x+0.5)*C-(k1o[1]+k1o[3]/2)*C)<430&&Math.abs((y+0.5)*C-(k1o[2]+k1o[4]/2)*C)<430;
+  {const F3=(x,y)=>wc(x,y)===3&&!inRuin(x,y),used=new Set();
    const seg=(ax,ay,bx,by)=>{const vx=bx-ax,vy=by-ay,L=Math.hypot(vx,vy)||1,ux=vx?vx/L:0,uy=vx?vy/L:1,fid=fences.length,
        x1=(ax+0.5)*C-ux*0.4*C,y1=(ay+0.5)*C-uy*0.4*C,x2=(bx+0.5)*C+ux*0.4*C,y2=(by+0.5)*C+uy*0.4*C;fences.push([x1,y1,x2,y2]);
      const n=Math.max(1,Math.round(Math.hypot(x2-x1,y2-y1)/18));for(let i=0;i<=n;i++)obs.push({x:x1+(x2-x1)*i/n,y:y1+(y2-y1)*i/n,r:11,k:'fcf',fid,hgt:FCS_WH[3],s:0});};

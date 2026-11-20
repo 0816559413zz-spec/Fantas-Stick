@@ -29,10 +29,10 @@ HOUSES:232 HAIRC:237 HAIRSTY:239 WOODC:242 WOODN:243 WCOREC:244 WCOREN:245 WANDS
 ## js/02-fcs-data.js (3) — 
 FCS_DATA:3
 
-## js/02-fcs.js (192) — แผนที่ First Castle Strike (โหมดบุกปราสาท 'siege') — แบบ Basic จากภาพร่างของผู้ใช้ใน Map …
+## js/02-fcs.js (194) — แผนที่ First Castle Strike (โหมดบุกปราสาท 'siege') — แบบ Basic จากภาพร่างของผู้ใช้ใน Map …
 FCS_C:7 FCS_WH:8 genFcs:9
-§166 พื้นที่เล่นตามเฟส (กำแพงล่องหน) + เขตจุดเกิดปลอดภัย — ใช้ทั้งโฮสต์ (G…
-SGPH:167 SG_SPR:168 _sgAreaC:169 sgArea:170 sgClamp:176 sgInArea:186
+§168 พื้นที่เล่นตามเฟส (กำแพงล่องหน) + เขตจุดเกิดปลอดภัย — ใช้ทั้งโฮสต์ (G…
+SGPH:169 SG_SPR:170 _sgAreaC:171 sgArea:172 sgClamp:178 sgInArea:188
 
 ## js/03-spells-core.js (250) — 
 ICONS:8 ICOALIAS:9 hasIco:10 ICOBASE:12 icoURL:13 ICO:14 icoTint:15 icoHTML:24 PATHS:25 SPELL_LIST:34 SPELLS:34 defSpell:35 SLOTK:36 BRMAP:36 KITP:37 parseKit:38 cleanKit:55 setKit:56 pathReset:59
@@ -851,4 +851,4 @@ _dvMap:242 devMapDraw:246
 §259 หน้าต่าง
 _dvPanel:260 _dvBtn:261 devToggle:264 dvBtn:269 dvRow:270 dvTog:271 dvSec:272 devRender:273 devPos:315
 
-(105 files, 30356 lines)
+(105 files, 30358 lines)
