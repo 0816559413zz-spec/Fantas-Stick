@@ -14,7 +14,7 @@
 
 **Darkness Long Dash (VFX Studio, ผู้ใช้อนุมัติ #79):** ใช้เคียว C กับเปลวดำชุดเดียวกับ BA ร่างมืดลงและริ้วเงาสองเส้นหมุนรอบก่อนหุบเป็นลูกเงา ตามคำขอหลังอนุมัติ เร่งช่วงหุบและเฟดร่างราว 0.04 วิ คงชาร์จ 0.5 วิ และอยู่ในลูกเงา 2 วิ [GIF](designs/darkness_ref/hold-dash-scythe.gif)
 
-**Darkness อัลติปากเงา 2026-11-20 รอบ 2 (VFX Studio, #91 รอรีวิว):** ท่าผ่านแล้ว (`darkness/ult_pose_preview`, staging ใน `studio/darkness-ult.js`) • ปาก = สัตว์เงาทรงหยดน้ำ `darkness/ult_preview` โมเดล `dark_drop_*` จาก `node assets/src/darkness_ult_drop_gen.mjs` หัวสูง ~7 ม. ส่วนบนใหญ่กว่า ปากค่อนล่าง ฟันไม่เท่ากัน ดำสนิท (mat black) • จังหวะ เร็ว→ช้า ถึง 30 ม. ใน 0.8 วิ → ค้างอ้าเพิ่ม → งับ 0.07 วิ → แตก [GIF ข้าง](designs/darkness_ref/ult-drop-side.gif) · [GIF มุมกว้าง](designs/darkness_ref/ult-drop-wide.gif) · [GIF มุมผู้เล่น](designs/darkness_ref/ult-drop-game.gif) • มองไกลจะเทาเพราะหมอกระยะไกลของฉาก
+**Darkness อัลติ A+B 2026-11-20 (VFX Studio, #91 รอเลือก):** ท่าผ่านแล้ว (`darkness/ult_pose_preview`) • สัตว์เงา 3 แบบ `darkness/ult_v1|v2|v3` (v1 = ที่ตกลง) จาก `node assets/src/darkness_ult_ab_gen.mjs` • วัสดุ `black` รับ `col` ไม่รับแสง [ภาพเทียบ](designs/darkness_ref/ult-ab-sheet.jpg)
 
 **Darkness ท่าไล่ตาม (คอนเซปต์):** โหมดมีตรา เล็งแล้วพุ่งตรงทะลุอาคารในร่างลูกเงาเล็ก เคียวลอยตามเยื้องหลังซ้าย ฟันต่ำขึ้นเอวแล้วฟันย้อนขึ้นอก ระหว่างนั้นลูกเงาบินอ้อมไปหลังเป้า ผู้ร่ายคืนร่างและฟาดคทาสองมือนำ เคียวฟาดตามจากเหนือหัวด้านหลัง ปักพื้นค้างแล้วจาง ก่อนเคียวใหม่ขึ้นที่ท่าพัก โหมดไม่มีตรารอคุย [ลำดับท่า](designs/darkness.md#ท่าไล่ตามเป้ามีตรา)
 

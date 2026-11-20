@@ -305,7 +305,7 @@ function fxMeshMake(S,I,w){const L=S.d,g=k=>fxG(L,k),sh=g('shape'),mt=g('mat'),C
     case 'windshell':return fxWindShellMat(C('col'),C('col2'),g('scroll'),g('mode')==='ball');   // mode ball = หุ้มรอบ (ลายต่อกันรอบวง ไม่จางด้านข้าง)
     case 'water':return fxWaterMat(C('col'),C('col2'),g('rim'),g('scroll'),g('disp'));   // น้ำใส ขอบขาว ไฮไลต์ไหล
     case 'toon':{const m=fxToonMat(fxCol('$core',I),C('col'),C('col2'),g('rim'));if(g('zw')){m.depthWrite=true;m.side=THREE.FrontSide;}return m;}   // zw = ทึบ: เขียนความลึก ไม่วาดด้านหลัง (ก้อนน้ำ 3D ไม่โชว์ด้านในทะลุเป็นลาย)   // การ์ตูน 2 เฉด + ขอบสว่าง + ขอบแหว่งด้วย dis (ลม)
-    case 'black':return new THREE.MeshBasicMaterial({color:0x000000,transparent:true,fog:false});   // ดำสนิทไม่รับแสง เขียนความลึก บังของเรืองแสงข้างหลัง (แกนหลุมดำ)
+    case 'black':return new THREE.MeshBasicMaterial({color:L.col!==undefined?C('col'):0x000000,transparent:true,fog:false});   // ดำสนิทไม่รับแสง เขียนความลึก บังของเรืองแสงข้างหลัง (แกนหลุมดำ)
     case 'solid':return new THREE.MeshStandardMaterial({color:C('col'),emissive:C('col2'),emissiveIntensity:0.35,roughness:0.85,metalness:0,flatShading:true,transparent:true});
     case 'tex':{const m=fxTexMat(g('tex'),{col:C('col'),col2:C('col2'),rim:g('rim'),tile:g('uvTile'),scroll:g('uvScroll')});if(L.nodepth)m.depthTest=false;return m;}   // ภาพจากสตูดิโอบนผิวรูปทรง (js/46)
     case 'flip':{const t=fxFlipTex(g('tex')),add=!t||t.add!==false;const m=new THREE.MeshBasicMaterial({map:t?t.map:null,color:add?hdr(C('col'),1.2):C('col'),transparent:true,depthWrite:false,blending:add?THREE.AdditiveBlending:THREE.NormalBlending,side:THREE.DoubleSide});if(t)S.flip=t;return m;}

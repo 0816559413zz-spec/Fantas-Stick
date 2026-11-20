@@ -3,8 +3,8 @@
  "items": [
   {
    "id": 91,
-   "title": "Darkness อัลติ สัตว์เงาหยดน้ำงับ (ท่าผ่านแล้ว)",
-   "text": "หยดน้ำเงาออกจากมือซ้าย พุ่งเร็วแล้วช้าลง ถึงระยะ 600 ใน 0.8 วิ หัวสูง ~4 คน ปากค่อนล่าง ส่วนบนใหญ่กว่า ฟันสูงต่ำไม่เท่ากัน ค้าง อ้าเพิ่ม แล้วงับแรงและแตก ดำสนิท",
+   "title": "Darkness อัลติ สัตว์เงา A+B เลือก 1 ใน 3 แบบ",
+   "text": "ทรงหัวหมึก (A) บนตัวผ้าคลุมขาด (B) • แบบ 1 = ที่คุยกัน: หัวเส้นหมึก ตัวผ้าซ้อน ออร่าสายควันไหลจากขอบตัว • แบบ 2 = ผิวควันเดือด เส้นเงายาวหลุด • แบบ 3 = เส้นหมึก หมอกดำลากหนา ท้ายแตกเป็นเศษ",
    "kind": "VFX / แอนิเมชัน",
    "who": "Darkness",
    "status": "wait",
@@ -12,27 +12,25 @@
    "updated": "2026-11-20",
    "imgs": [],
    "links": [
-    "/studio.html?fx=darkness/ult_preview&map=test",
-    "/studio.html?fx=darkness/ult_pose_preview&map=test",
-    "/designs/darkness_ref/ult-drop-side.gif",
-    "/designs/darkness_ref/ult-drop-wide.gif",
-    "/designs/darkness_ref/ult-drop-game.gif"
+    "/studio.html?fx=darkness/ult_v1&map=test",
+    "/studio.html?fx=darkness/ult_v2&map=test",
+    "/studio.html?fx=darkness/ult_v3&map=test",
+    "/designs/darkness_ref/ult-ab-sheet.jpg",
+    "/designs/darkness_ref/ult-ab-v1.gif",
+    "/designs/darkness_ref/ult-ab-v2.gif",
+    "/designs/darkness_ref/ult-ab-v3.gif"
    ],
    "checks": [
     {
-     "t": "ทรงหยดน้ำ ปากค่อนล่าง ฟันไม่เท่ากัน ตรงที่คุย",
+     "t": "เลือกแบบที่ชอบ (1/2/3)",
      "ok": false
     },
     {
-     "t": "จังหวะ เร็ว→ช้า→ค้าง→งับแรง",
-     "ok": false
-    },
-    {
-     "t": "ดำสนิทพอ",
+     "t": "ทรง A+B ตรงที่คุย",
      "ok": false
     }
    ],
-   "reply": "ทำใหม่เป็นสัตว์เงาทรงหยดน้ำตามที่คุย ท่าใช้แบบที่ผ่านแล้ว"
+   "reply": "ทำ 3 แบบให้เลือก แบบ 1 คือที่คุยกัน"
   },
   {
    "id": 90,
