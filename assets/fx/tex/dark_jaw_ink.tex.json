@@ -1,0 +1,14 @@
+{
+ "v": 1,
+ "desc": "หมึกดำสนิทของปากเงาอัลติ Darkness: เส้นดำไหลตามแนว x ปนดำกลางบางเส้น ช่องโปร่ง ขอบบน-ล่างฉีกเป็นหนาม • assets/src/darkness_ult_ink.py",
+ "gen": "image",
+ "seed": 7,
+ "px": 512,
+ "cols": 1,
+ "rows": 1,
+ "kind": "loop",
+ "fps": 1,
+ "ramp": "white",
+ "add": false,
+ "p": {}
+}

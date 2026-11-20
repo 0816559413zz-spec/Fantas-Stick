@@ -13,7 +13,7 @@ CITY_MID:140 CITY_C2:140 cityModeData:141 mapArea:157 AREA:158 areaClamp:160
 ## js/02-citytest.js (28) — แมพทดสอบเมืองใหญ่ (กล่องเทา) — ใช้วัดความลื่นของเครื่องยนต์ก่อนสร้างเ…
 CITY_N:4 CITY_B:4 CITY_ROAD:4 genCityTest:5 cityTestProps:19
 
-## js/02-data.js (384) — ค่าคงที่ของเกม
+## js/02-data.js (384) — 
 W:4 H:4 PR:4 PILLARS:6 SPAWNF:7 mulberry:9 genForest:10 genPitch:27 genHogsmeade:36
 §54 แผนที่โล่ง 3 แบบ (ผู้ใช้: ป่ามืดไม่สนุก อยากได้ที่โล่งๆ)
 genMeadow:55 genLake:61 genRuins:66
@@ -29,7 +29,7 @@ HOUSES:232 HAIRC:237 HAIRSTY:239 WOODC:242 WOODN:243 WCOREC:244 WCOREN:245 WANDS
 ## js/02-fcs-data.js (3) — 
 FCS_DATA:3
 
-## js/02-fcs.js (194) — แผนที่ First Castle Strike (โหมดบุกปราสาท 'siege') — แบบ Basic จากภาพร่างของผู้ใช้ใน Map …
+## js/02-fcs.js (194) — 
 FCS_C:7 FCS_WH:8 genFcs:9
 §168 พื้นที่เล่นตามเฟส (กำแพงล่องหน) + เขตจุดเกิดปลอดภัย — ใช้ทั้งโฮสต์ (G…
 SGPH:169 SG_SPR:170 _sgAreaC:171 sgArea:172 sgClamp:178 sgInArea:188
@@ -99,7 +99,7 @@ WRATH_READY_T:221 WRATH_THROW_SWING_T:222 WRATH_DRAW_T:223 WRATH:224 earthWrathA
 §286 ทั้งสนาม: สิ่งก่อสร้างพัง / ฝุ่นหมดเวลา / Stonebreaker ชนกำแพง
 updateEarth:287 earthSnapP:299 earthSnapW:315
 
-## js/09-light.js (532) — 
+## js/09-light.js (532) — สายแสง ✨ Radiance (ผู้ใช้ออกแบบทั้งหมด — designs/light.md) • ฝั่งโฮสต์ • รอบแรก 2026-11-1…
 LIGHTP:8 LTV:12 lgOn:19 lightShieldGauge:20 lightClearBond:21 lightReset:25 lightAlly:31 lightLinkPos:32 lightUnlink:33 lightReleaseAlly:51
 §57 สกิล 1 Crystal Bond: เล็งเพื่อน + กด = ลิงก์และส่ง 1 ชิ้น • ไม่เล็งเพ…
 lightBondTap:58 lightRecall:73
@@ -187,10 +187,10 @@ windUltCast:504 windUltTick:507 windUltSweep:532 windFloatZ:540 windSnapP:543 wi
 §547 สกิล (ผู้ใช้ 2026-11-08: รีดีไซน์ทั้งชุด — id เดิมไว้ให้ชุดสกิล/tune/…
 W_WL:549 W_DR:555 W_VX:561 W_VO:567 W_FW:573 W_UL:583
 
-## js/10-net.js (200) — เครือข่าย (PeerJS / WebRTC)
+## js/10-net.js (200) — 
 PREFIX:4 NET:5 RC:9 TURN_SERVERS:12 ICE:13 PEER_OPT:14 TURN_URL:16 ICE_READY:18 JN:22 LAG:24 lagDo:25 hostSend:26 LOBBY:27 genCode:28 sendAll:29 NETD_KEYS:33 NETD:33 netDeltaReset:34 netDelta:35 NET_MAX:49 _netTE:49 netSendSnap:50 NETU:62 netUndelta:63 setStatus:69 hostGame:71 hostPeer:80 netConnect:100 joinWatch:111 joinFail:126 netLost:132 joinGame:147 joinPeer:158 clientOnData:173 leave:188 leaveRoom:190
 
-## js/11-host.js (432) — ฝั่งโฮสต์: สถานะเกมทั้งหมดคำนวณที่นี่ (server-authoritative)
+## js/11-host.js (432) — 
 G:4 EVL:4 EVN:4 hostLast:4 tickN:4 emit:5 feed:6 banner:7 plist:8 cleanName:9 freshStats:11 newPlayer:18 emptyInput:21 frameOk:23 addPlayer:24 initHostLobby:33 lobbyMsg:40 broadcastLobby:41 INPN:43 hostOnData:44 hostDrop:75 hostRemove:84 validate:100 hostStart:114 hostToLobby:141 MIDJOIN:148 modeCap:149 midJoin:150 CHATT:166 chatRelay:167 emoHost:175 resetBody:177 fmap:183 spawnPts:184 teamPts:186 spSpread:188 placeAll:189 respawn:201
 §220 ลูปหลักฝั่งโฮสต์
 hostTick:221 angDiff:238 cH:240 vR:241 updatePlayer:243 hitProp:419 damagePropsIn:426 nearUseProp:427 useProp:428
@@ -207,10 +207,10 @@ CITY_FL:8 CITY_PW:8 CDMG:9 CITYD:16 cityOn:17 cityLayout:19 cityReset:29 cityApp
 §146 ข้างในตึก (2026-10-28 ผู้ใช้: เดินเข้าได้ 1–3 ชั้น มีทางขึ้น • ผนังนอ…
 CIN:150 cityInterior:151 cinSlabOn:180 cinOpenPanel:182 cityIwHit:184 cityRampHit:186 cinIwSegs:189 cinIwRects:190 cinSecAt:191 citySecHit:193 cinIn:195 cinHole:196 cinRampH:197 _sgCI:198 cityBoxGrid:199 cityRoomAt:200 cityFloorH:202 cityCeilH:207 cinWallRect:211 cityCollideIn:214 cityProjIn:224 _sgCS:242 citySolidAt:243 cityRay:252 cityRoomBox:255 citySnapB:256 citySnapS:257 cityParse:259
 
-## js/12-efs.js (78) — สภาพธาตุบนฉาก (Element Surfaces) — เฟส 1: ไฟบนรั้วไม้ (designs/element-surfaces.md)
+## js/12-efs.js (78) — 
 EFSV:9 EFS:10 efsLv:11 efsBuild:12 efsBreak:28 efsRepair:29 efsDist:30 efsHeat:31 efsProj:36 efsEnv:42 _efsHit:46 efsTick:47 efsSnap:67 efsParse:71 efsHostView:78
 
-## js/12-fcs-bridge.js (113) — Castle Strike bridge shell destruction (user 2026-11-19 "eggshell"): the bridge = solid c…
+## js/12-fcs-bridge.js (113) — 
 BSKV:10 BSKN:11 bskBuild:14 bskGround:38 bskOutline:40 bskSegs:53 bskInPoly:63 bskCut:65 bskStage:70 bskSetSt:71 bskHit:75 bskEnv:84 bskSnap:93 bskParse:97 bskRepair:104 bskExport:106
 
 ## js/13-enemies.js (171) — ศัตรู (โหมด Co-op)
@@ -253,7 +253,7 @@ r1:386 DEFP:388 packP:389 unpackP:390 makeSnap:391 PROF:409 pf:410 hostSent:411 
 ## js/15-siege.js (203) — 
 SGV:12 SG_TEAM:24 sgF:25 sgCore:26 sgInZone:27 sgSpawn:28 sgInit:29 sgWallsApply:38 sgWallDmg:42 sgWallHit:48 sgWallEnv:49 sgInput:54 sgStop:62 sgTick:63 sgCoreDown:94 sgEnd:107 sgResult:109 sgSnap:115 SGB:124 sgBotTarget:126 sgBotGoal:137 sgUnstick:149 sgBotThink:162
 
-## js/16-voice.js (89) — 
+## js/16-voice.js (89) — ไมค์ (WebRTC audio แบบ mesh: ทุกคนโทรหากันตรงๆ)
 VOICE:4 rosterIds:5 toggleMic:6 voiceSync:20 teamOn:37 teamOf:38 applyVoiceGates:39 VAC:49 onIncomingCall:50 voiceLevels:62 speakingIds:70 updateVoiceUI:76
 
 ## js/17-input.js (66) — 
@@ -351,7 +351,7 @@ SGV3:278 sgClearView:279 sgViewBuild:280 SGVZR:299 sgBarrier:301 sgSync:315 sgDu
 §342 HUD
 sgTop:343 sgHud:345
 
-## js/28-fcs-forest.js (210) — ป่าสนหมอก ในแผนที่ First Castle Strike (เฟส 1 = ช่อง x 0–28 ของ Map Editor) — ทำตามรูปอ้า…
+## js/28-fcs-forest.js (210) — 
 FF:7 FF_X1:8 FF_NS:9 ffGroundTex:11 ffParts:33 fcsForest:40 ffMerge:123 ffDetail:131 fcsRuin:158 fcsForestTick:200 FFC:210
 
 ## js/28-maps-build.js (781) — สร้างแผนที่
@@ -807,7 +807,7 @@ PERF:9 perfFrame:12 perfDom:26 perfStats:34 perfGraph:38 _gpuName:51 gpuIntegrat
 ## js/72-dash-pose.js (85) — 
 DPOSE:12 DPT:24 _dpQ:25 _dpX:25 _dpP:25 dpMix:26 dpKnees:28 dpStyle:36 DPDBG:41 dashPose:42 dpApply:75
 
-## js/73-tune.js (142) — แผงปรับค่า 🎚️ (F8 / ปุ่ม "ปรับค่า" ในเมนูพัก และหน้าแรก) — ปรับตัวเลขในเกมสดๆ แล้วเซฟลง …
+## js/73-tune.js (142) — 
 TUNE:8 tuneNum:9 tuneBuild:15
 §81 ใช้ / เก็บค่า
 tuneSetVal:82 tuneApplyFile:85 tuneJson:89
@@ -821,7 +821,7 @@ LOOK:17 lookPreset:27 lookMap:29 lookName:30 lookEnvFor:31 lookApply:41 lookRays
 §71 ลงทะเบียนในเครื่องมือปรับค่า (js/73-tune.js): 1 หมวด "🌗 Look" แยกส่ว…
 LOOK_F:72 lookRegister:78
 
-## js/75-ambient.js (52) — Ambient 🌫️ — ฝุ่นลอย (dust motes) + หมอกลอยต่ำ (mist) ที่ใช้ได้ทุกแมพ ปรับตามพรีเซ็ต Loo…
+## js/75-ambient.js (52) — 
 AMBX:9 AMBX_V:10 AMBX_F:24 ambMesh:27 ambQual:39 ambFrame:40
 
 ## js/76-surface.js (125) — 

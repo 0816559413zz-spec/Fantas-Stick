@@ -1,5 +1,7 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
 
+- 2026-11-20 — **Darkness ult jaw (Studio, review #91):** Shadow-jaw ult built as Studio layers (jaw/teeth/tail models, black ink texture, smoke, shards) with a staging code layer for the caster and targets. Fast launch, slow ease to 30 m in 0.8 s, hold while opening wider, hard bite, dissolve.
+
 - 2026-11-20 — **Player hitbox 0.9 m -> 0.4 m (protocol v90):** player radius `PR` 18 -> 8 px to match the character body, for both wall collision and spell hits.
 - 2026-11-20 — **Zone 1 ruin: fence removed (protocol v89):** wooden fence cells inside the ruin courtyard are no longer built.
 - 2026-11-20 — **Zone 1 ruin expanded (protocol v88):** ruin around Castle Strike core 1 grows to ~40 m with inner L/straight wall cover, pillars and a raised 1.2 m platform with a step next to the core.

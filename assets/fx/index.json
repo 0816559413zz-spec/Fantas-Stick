@@ -152,6 +152,18 @@
    "dur": 6.6,
    "n": 2
   },
+  "darkness/ult_preview": {
+   "v": "3b788a8d",
+   "desc": "Darkness — พรีวิวอัลติ ปากสัตว์เงาดำสนิท พุ่งเร็วแล้วช้าลง ค้าง อ้าเพิ่ม งับแรงที่ระยะ 600 แล้วสลาย",
+   "pal": "arcane",
+   "tags": [
+    "darkness",
+    "preview",
+    "ult"
+   ],
+   "dur": 2.7,
+   "n": 14
+  },
   "darkness/ward_drain_preview": {
    "v": "5b12e510",
    "desc": "Darkness — พรีวิวบีมเงาลงพื้นและฝูงเงาลดพลังโล่",
@@ -4930,6 +4942,42 @@
    "mat": "ice",
    "n": 2
   },
+  "dark_jaw_lower": {
+   "v": "749bfb70",
+   "desc": "Darkness อัลติ ขากรรไกรล่าง",
+   "mat": "energy",
+   "n": 1
+  },
+  "dark_jaw_shard": {
+   "v": "0c3bf7f8",
+   "desc": "Darkness อัลติ เศษเงาแหลม",
+   "mat": "solid",
+   "n": 1
+  },
+  "dark_jaw_tail": {
+   "v": "59b1b7be",
+   "desc": "Darkness อัลติ หางเส้นเงา (ท้าย z=-1 → คอ z=0)",
+   "mat": "energy",
+   "n": 1
+  },
+  "dark_jaw_teeth_lower": {
+   "v": "9c048413",
+   "desc": "Darkness อัลติ ฟันล่าง",
+   "mat": "solid",
+   "n": 1
+  },
+  "dark_jaw_teeth_upper": {
+   "v": "d55c117d",
+   "desc": "Darkness อัลติ ฟันบน + เขี้ยวเงาทรงใบเคียว",
+   "mat": "solid",
+   "n": 2
+  },
+  "dark_jaw_upper": {
+   "v": "926cf847",
+   "desc": "Darkness อัลติ ขากรรไกรบน (บานพับที่จุด 0 ยาว 1 ม. ไปทาง +z)",
+   "mat": "energy",
+   "n": 1
+  },
   "earth_slam_rocks": {
    "v": "1c77471b",
    "desc": "หินพุ่งขึ้นเต็มวงทุบของ BA ชาร์จสายดิน (รัศมี ~9 ม. = วง 180) — แท่งหินเหลี่ยมหนา 3 วง + กองกลาง เอียงออกนอกมากขึ้นตามวง ใช้กับ grow ไล่จากกลางออก",
@@ -6475,6 +6523,14 @@
    "kind": "loop",
    "cols": 4,
    "rows": 2
+  },
+  "dark_jaw_ink": {
+   "v": "12490f27",
+   "desc": "หมึกดำสนิทของปากเงาอัลติ Darkness: เส้นดำไหลตามแนว x ปนดำกลางบางเส้น ช่องโปร่ง ขอบบน-ล่างฉีกเป็นหนาม • assets/src/darkness_ult_ink.py",
+   "gen": "image",
+   "kind": "loop",
+   "cols": 1,
+   "rows": 1
   },
   "electric_arc": {
    "v": "4b01bed2",
