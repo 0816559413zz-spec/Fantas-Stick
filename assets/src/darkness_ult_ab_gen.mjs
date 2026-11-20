@@ -50,13 +50,28 @@ function teeth(sign){   // uneven teeth along the U-shaped rim of the mouth
     t+=.035+rnd()*.06;}
   return {id:'teeth',k:'poly',v,f,sub:0};
 }
-function crest(){   // A: torn flame tongues along the top of the skull, peeling back and up
+// spike with a real 4-point base sunk into the surface (so it grows out of the skin, not floating)
+function rootedSpike(v,f,base4,tip){const n=v.length;v.push(...base4.map(q=>q.map(r3)),tip.map(r3));
+  for(const [a,b] of [[0,1],[1,2],[2,3],[3,0]]){f.push([n+a,n+b,n+4]);f.push([n+b,n+a,n+4]);}f.push([n,n+1,n+2,n+3]);f.push([n+3,n+2,n+1,n]);}
+function crest(){   // A: torn blades growing out of the visible skull (front of the join), more on the crown
   const v=[],f=[];seed(41);
-  for(let i=0;i<26;i++){const z=lerp(-.55,.42,rnd()),phi=lerp(.95,2.2,rnd());const b=headPt(z,phi,1);
-    const len=lerp(.10,.42,rnd())*(1-.4*Math.abs(phi-Math.PI/2)),wid=.025+.035*rnd();
-    const tip=[b[0]*1.15,b[1]+len*.55,b[2]-len];
-    spike(v,f,toHinge(b),[0,0,wid],toHinge(tip));}
+  const sunk=(z,ph)=>{const p=headPt(z,ph,1),m=yMid(z),c=[0,m+(yTop(z)-m)*.35,z];return [lerp(c[0],p[0],.96),lerp(c[1],p[1],.96),p[2]];};
+  for(let i=0;i<44;i++){const z=lerp(-.02,.55,Math.pow(rnd(),.8)),ph=lerp(.75,2.39,rnd()),dz=.025+.03*rnd(),dp=.06+.06*rnd();
+    const s0=headPt(z,ph,1),m=yMid(z),out=[s0[0],s0[1]-(m+(yTop(z)-m)*.35),0],ol=Math.hypot(out[0],out[1])||1;
+    const len=lerp(.08,.34,rnd())*(1-.45*Math.abs(ph-Math.PI/2))*(1-.4*Math.max(0,z-.35)/.2);
+    const tip=[s0[0]+out[0]/ol*len,s0[1]+out[1]/ol*len,s0[2]-len*.9];
+    rootedSpike(v,f,[sunk(z-dz,ph-dp),sunk(z-dz,ph+dp),sunk(z+dz,ph+dp),sunk(z+dz,ph-dp)].map(toHinge),toHinge(tip));}
   return {id:'crest',k:'poly',v,f,sub:0};
+}
+function tailSpikes(){   // dorsal blades and shapes along the body back, rooted in the skin
+  const v=[],f=[];seed(97);
+  const P2=(u,ph,k=1)=>{const r=tailR(u)*k;return [Math.cos(ph)*r*.55,Math.sin(ph)*r*.47,-u];};
+  for(let i=0;i<70;i++){const u=lerp(.0,.75,Math.pow(rnd(),1.3)),ph=lerp(.55,2.6,rnd()),du=.008+.012*rnd(),dp=.07+.07*rnd();
+    const s0=P2(u,ph),r=tailR(u),len=lerp(.10,.38,rnd())*r*(1-.5*Math.abs(ph-Math.PI/2))*(1-u*.6);
+    const out=[Math.cos(ph),Math.sin(ph)];
+    const tip=[s0[0]+out[0]*len*.55,s0[1]+out[1]*len*.47*1.6,s0[2]-du*1.5];
+    rootedSpike(v,f,[P2(u-du,ph-dp,.97),P2(u-du,ph+dp,.97),P2(u+du,ph+dp,.97),P2(u+du,ph-dp,.97)],tip);}
+  return {id:'spikes',k:'poly',v,f,sub:0};
 }
 function headStrands(sign){   // texture: ink strands flowing over the head skin (slightly above it)
   const v=[],f=[];seed(sign>0?51:53);
@@ -120,6 +135,7 @@ function tailStrands(){   // texture on the body top: ink strands running back a
   return {id:'strands',k:'poly',v,f,sub:0};
 }
 model('dark_ab_tail_strands','Darkness อัลติ A+B เส้นหมึกบนหลังตัว',[tailStrands()]);
+model('dark_ab_tail_spikes','Darkness อัลติ A+B หนามบนหลังตัว',[tailSpikes()]);
 model('dark_ab_hem','Darkness อัลติ A+B ชายผ้าขาดใต้ตัว',[hem()]);
 model('dark_ab_cloth','Darkness อัลติ A+B แผ่นผ้าซ้อนบนตัว',[cloth()]);
 model('dark_ab_wisp','Darkness อัลติ A+B เส้นเงาหลุด',[wisp]);
@@ -179,6 +195,7 @@ const BLACK={mat:'black'},MIDC='#141419',CLOTHC='#101015';
 function bodyLayers(tex){   // shape layers shared by all versions; tex picks the surface pieces
   const L=[
     {id:'tail',t:'mesh',shape:'model',model:'dark_ab_tail',...BLACK,...base,pos:tailPos,scale:tailScale,rot:tailRot,op:fadeOut},
+    {id:'tail_spikes',t:'mesh',shape:'model',model:'dark_ab_tail_spikes',...BLACK,...base,pos:tailPos,scale:tailScale,rot:tailRot,op:fadeOut},
     {id:'hem',t:'mesh',shape:'model',model:'dark_ab_hem',...BLACK,...base,pos:tailPos,scale:tailScale,rot:tailRot,op:fadeOut},
     {id:'lower',t:'mesh',shape:'model',model:'dark_ab_lower',...BLACK,...base,pos,scale,rot:rotLow,op:fadeOut},
     {id:'teeth_lower',t:'mesh',shape:'model',model:'dark_ab_teeth_lower',...BLACK,...base,pos,scale,rot:rotLow,op:fadeOut},
@@ -193,10 +210,11 @@ function bodyLayers(tex){   // shape layers shared by all versions; tex picks th
   return L;
 }
 const stage=[{id:'anchor',t:'mesh',shape:'disc',mat:'black',op:0,at:0,life:2.7},{id:'stage',t:'code',fn:'studio_darkness_ult',at:0,life:2.7,args:{layer:'anchor'}}];
+const PLIFE=REL+HOLD-.05-.75;   // portal stays open while the monster travels, closes just before the bite (user)
 const portalFx=[
-  {id:'portal_disc',t:'mesh',shape:'disc',mat:'black',at:.78,life:.82,pos:P,rot:[90,0,0],scale:{'0':.02,'0.25':PR*.92,'0.75':PR*.95,'1':PR*.3,ease:'out'},op:{'0':0,'0.2':.55,'0.7':.45,'1':0}},
-  {id:'portal',t:'mesh',shape:'model',model:'dark_ab_portal',mat:'black',col:'#0c0c10',at:.75,life:.85,pos:P,spin:0,rot:{'0':[0,0,0],'1':[0,0,-160]},scale:{'0':.05,'0.3':PR,'0.7':PR*1.05,'1':PR*.2,ease:'out'},op:{'0':0,'0.15':.9,'0.72':.85,'1':0}},
-  {id:'portal_ink',t:'emit',at:.75,life:.35,burst:0,rate:120,from:'ring',fr:PR,pos:P,dir:'in',speed:[2,5],plife:[.15,.3],look:'smoke',size:[6,12],grow:-.4,col:'#000000',c2:'#000000',gravity:0,drag:1}];
+  {id:'portal_disc',t:'mesh',shape:'disc',mat:'black',at:.78,life:PLIFE-.03,pos:P,rot:[90,0,0],scale:{'0':.02,'0.12':PR*.92,'0.9':PR*.95,'1':PR*.2},op:{'0':0,'0.08':1,'0.9':1,'1':0}},
+  {id:'portal',t:'mesh',shape:'model',model:'dark_ab_portal',mat:'black',col:'#0c0c10',at:.75,life:PLIFE,pos:P,spin:0,rot:{'0':[0,0,0],'1':[0,0,-260]},scale:{'0':.05,'0.12':PR,'0.88':PR*1.05,'1':PR*.1},op:{'0':0,'0.08':1,'0.9':1,'1':0}},
+  {id:'portal_ink',t:'emit',at:.75,life:PLIFE*.9,burst:0,rate:120,from:'ring',fr:PR,pos:P,dir:'in',speed:[2,5],plife:[.15,.3],look:'smoke',size:[6,12],grow:-.4,col:'#000000',c2:'#000000',gravity:0,drag:1}];
 const charge=[
   {id:'charge_orb',t:'mesh',shape:'sphere',mat:'black',at:.20,life:.82,pos:[.21,.9,-.21],scale:{'0':.03,'0.85':.17,'1':.2,ease:'in'},op:1},
   {id:'charge_ink',t:'emit',at:.20,life:.78,burst:0,rate:{'0':12,'1':40},from:'sphere',fr:.7,pos:[.21,.9,-.21],dir:'in',speed:[1.2,2.2],plife:[.18,.3],look:'smoke',size:[1,2],grow:-.8,col:'#000000',c2:'#000000',gravity:0,drag:1,spin:5}];

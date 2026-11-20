@@ -1,5 +1,7 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
 
+- 2026-11-20 — **Darkness ult v3 (Studio, review #91):** Portal stays open (fully opaque) while the monster travels and closes just before the bite; head spikes now root into the skin on the visible part of the skull; 70 rooted spikes added along the body back.
+
 - 2026-11-20 — **Darkness ult v3 (Studio, review #91):** Range 800 confirmed. Body starts at the skull's widest section (one continuous shape), swells behind the head; ink strands added on the body top.
 
 - 2026-11-20 — **Darkness ult v3 (Studio, review #91):** Bites right as it slows (0.025 s), head stays dipped, bigger (~8.6 m head) and farther (40 m in the preview), width about the same.
