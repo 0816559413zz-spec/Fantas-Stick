@@ -155,7 +155,7 @@ function specCycle(d){
 }
 addEventListener('mousedown',e=>{if(screen==='game'&&SPEC.on&&locked){if(e.button===0)specCycle(1);else if(e.button===2)specCycle(-1);}});
 function drawSpecHint(P,me){
-  if(!SPEC.on||(DEV.fc.on&&DEV.spec))return;const t=P.find(p=>p.id===SPEC.id);if(!t)return;
+  if(!SPEC.on||((DEV.fc.on||DEV.orb.on)&&DEV.spec))return;const t=P.find(p=>p.id===SPEC.id);if(!t)return;
   cx.save();cx.textAlign='center';cx.textBaseline='middle';cx.font='600 16px Kanit,sans-serif';
   const s='👁 กำลังดู '+t.n+(NET.spec?' (คนดู)':''),w=cx.measureText(s).width+34;
   cx.fillStyle='rgba(6,8,18,.6)';cx.fillRect(SW/2-w/2,SH-118,w,30);cx.fillStyle='#ffe9a8';cx.fillText(s,SW/2,SH-103);

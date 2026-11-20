@@ -737,6 +737,12 @@ class H(SimpleHTTPRequestHandler):
             except Exception as e:
                 chk = 'fx-check ไม่ได้รัน (ไม่มี node?): ' + str(e)
             return self._json(200, {'ok': True, 'path': rel, 'check': chk})
+        if u.path == '/api/video':   # Dev Mode recording (js/78-dev-ui.js) -> recordings/<name>.mp4|webm
+            name = re.sub(r'[^A-Za-z0-9_\-]', '', q.get('name', ['rec'])[0])[:80] or 'rec'
+            ext = 'mp4' if q.get('ext', [''])[0] == 'mp4' else 'webm'
+            d = os.path.join(ROOT, 'recordings'); os.makedirs(d, exist_ok=True)
+            with open(os.path.join(d, name + '.' + ext), 'wb') as f: f.write(self._body())
+            return self._json(200, {'ok': True, 'path': 'recordings/' + name + '.' + ext})
         if u.path == '/api/shot':
             name = re.sub(r'[^a-zA-Z0-9_\-]', '_', q.get('name', ['shot'])[0])[:60] or 'shot'
             data = self._body(); ext = 'png'

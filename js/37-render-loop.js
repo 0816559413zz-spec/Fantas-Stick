@@ -74,11 +74,11 @@ function render(dt,now){
     INPUT.ax=me.x+fx*2000;INPUT.ay=me.y+fy*2000;
     INPUT.ap=clamp((0.3-pitch)*1.2,-1.5,1.5);
     if(!dcamCam(P,me,dt))updateCamera(specTarget(P,me,dt)||me,dt);
-    if(DEV.fc.on&&devOn())devFcCam(dt);   // Dev Mode กล้องอิสระ (js/77)   // ตายนาน ≥2 วิ = ดูคนอื่น (js/52)
+    if(DEV.fc.on&&devOn())devFcCam(dt);else if(DEV.orb.on&&devOn())devOrbCam(dt);   // Dev Mode กล้องอิสระ (js/77)   // ตายนาน ≥2 วิ = ดูคนอื่น (js/52)
     aimFromCrosshair(me,P,E);
     updatePlaceGhost(me);
     const o=PM3.get(me.id);windUpdate(o?Math.hypot(o.svx,o.svz):0,!!me.fl);
-  }else{const sv=specTarget(P,null,dt);if(sv){devSpecAim(sv,dt);updateCamera(sv,dt);}else menuCamera(now);if(DEV.fc.on&&devOn())devFcCam(dt);}   // คนดู (ไม่มีตัวในเกม)
+  }else{const sv=specTarget(P,null,dt);if(sv){devSpecAim(sv,dt);updateCamera(sv,dt);}else menuCamera(now);if(DEV.fc.on&&devOn())devFcCam(dt);else if(DEV.orb.on&&devOn())devOrbCam(dt);}   // คนดู (ไม่มีตัวในเกม)
   shakeA=Math.max(0,shakeA-dt*30);
   vfxBegin(dt);try{renderGame(v,P,E,me,dt,now);}finally{vfxEnd();}
 }
@@ -106,5 +106,5 @@ function renderGame(v,P,E,me,dt,now){
   {let t1=performance.now();const T=k=>{pf('h.'+k,t1);t1=performance.now();};drawMinBars(v,me);T('bars');
   drawTexts(dt);T('texts');
   if(me&&me.al&&!me.dn)drawCrosshair();
-  if(!VIC.on)drawHUD(v,me,P);T('hud');drawSocial(P,me,dt,now);T('social');drawCombo(v,E,now);drawFFA(v,P,me,now);T('ffa');drawDeathCam(me);if(PROPON&&me&&me.al&&!me.dn&&!showBoard)drawPropHint(me);hud4Frame();T('hud4');}pf('hud2d',t0);   // ป้าย VICTORY/DEFEAT = ซ่อน HUD
+  if(!VIC.on)drawHUD(v,me,P);T('hud');drawSocial(P,me,dt,now);T('social');drawCombo(v,E,now);drawFFA(v,P,me,now);T('ffa');drawDeathCam(me);if(PROPON&&me&&me.al&&!me.dn&&!showBoard)drawPropHint(me);hud4Frame();T('hud4');}pf('hud2d',t0);devRecFrame();   // ป้าย VICTORY/DEFEAT = ซ่อน HUD
 }

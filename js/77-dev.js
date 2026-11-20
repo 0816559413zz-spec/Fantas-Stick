@@ -33,7 +33,7 @@ const devFreeze=()=>DEV.on&&DEV.cfg.freeze&&devOn();
 // ---- กล้องอิสระ ----
 function devFcToggle(on){
   const F=DEV.fc;on=on===undefined?!F.on:!!on;if(on===F.on)return;
-  F.on=on;DEV.k={};
+  F.on=on;DEV.k={};if(on&&DEV.orb)DEV.orb.on=false;
   if(on){F.x=cam.position.x;F.y=cam.position.y;F.z=cam.position.z;INPUT.u=INPUT.d=INPUT.l=INPUT.r=INPUT.fire=INPUT.sh=INPUT.jh=INPUT.ch=INPUT.dh=0;
     toast('🎥 กล้องอิสระ: WASD บิน • Space/Ctrl ขึ้นลง • Shift เร็ว • ล้อเมาส์ = ความเร็ว • F3 ออก');}
   else CAM_TRACK.has=false;
@@ -52,7 +52,7 @@ function devFcMe(){const me=dvMe()||(DEV.spec&&VIEW.cur&&SPEC.id&&G.players[SPEC
 addEventListener('keydown',e=>{
   if(!DEV.on)return;
   if(/^F(2|3|4|6|7|8|9)$/.test(e.code)){if(devOn()){e.preventDefault();e.stopImmediatePropagation();if(!e.repeat)devKey(e.code);}return;}
-  if(DEV.spec&&devOn()&&!DEV.fc.on&&!DEV.open&&/^Key[REQ]$/.test(e.code)){e.preventDefault();e.stopImmediatePropagation();if(!e.repeat)devSpecKey(e.code);return;}
+  if(DEV.spec&&devOn()&&!DEV.fc.on&&/^Key[REQ]$/.test(e.code)){e.preventDefault();e.stopImmediatePropagation();if(!e.repeat)devSpecKey(e.code);return;}
   if(!(DEV.fc.on&&devOn()))return;
   DEV.k[e.code]=1;
   if(e.code==='Escape'||e.code==='Tab'||/^F\d+$/.test(e.code))return;
@@ -64,10 +64,10 @@ addEventListener('mousedown',e=>{
   if(!locked){try{cvEl().requestPointerLock();}catch(err){}}
   e.stopImmediatePropagation();
 },true);
-addEventListener('wheel',e=>{if(DEV.on&&DEV.fc.on&&devOn()){DEV.fc.spd=clamp(DEV.fc.spd*Math.exp(-e.deltaY*0.0015),3,600);}},{passive:true,capture:true});
+addEventListener('wheel',e=>{if(DEV.on&&DEV.fc.on&&devOn()&&!(e.target.closest&&e.target.closest('#devPanel'))){DEV.fc.spd=clamp(DEV.fc.spd*Math.exp(-e.deltaY*0.0015),3,600);}},{passive:true,capture:true});
 function devKey(c){
   const C=DEV.cfg;
-  if(c==='F2')devToggle();
+  if(c==='F2')devF2();
   else if(c==='F3')devFcToggle();
   else if(c==='F4'){C.pause=C.pause?0:1;toast(C.pause?'⏸ หยุดโลก (F4 เล่นต่อ)':'▶ เล่นต่อ');}
   else if(c==='F6'){devTp(INPUT.gx,INPUT.gy);}
@@ -297,101 +297,4 @@ function devMapDraw(){
   for(const p of plist()){if(!p.alive)continue;c.fillStyle=p.id===NET.myId?'#fff':(p.team===0?'#4da3ff':p.team===1?'#ff5a5a':'#ffd24d');
     c.beginPath();c.arc(p.x*k,p.y*k,p.id===NET.myId?4:2.5,0,7);c.fill();}
 }
-// ---- หน้าต่าง ----
-const _dvPanel=document.createElement('div');_dvPanel.id='devPanel';_dvPanel.className='card hidden';
-const _dvBtn=document.createElement('button');_dvBtn.id='devBtn';_dvBtn.className='hidden';_dvBtn.textContent='🛠 DEV [F2]';
-document.body.appendChild(_dvPanel);document.body.appendChild(_dvBtn);
-_dvBtn.onclick=()=>devToggle(true);
-function devToggle(on){
-  const want=on===undefined?!DEV.open:!!on;if(want===DEV.open)return;
-  DEV.open=want;_dvPanel.classList.toggle('hidden',!want);
-  if(want){hidePause();trToggle(false);if(document.pointerLockElement)document.exitPointerLock();INPUT.fire=INPUT.sh=0;DEV.key='';devRender();}
-}
-const dvBtn=(d,n,o)=>{o=o||{};return '<button'+(o.on?' class="on"':'')+' data-d="'+d+'"'+(o.k!==undefined?' data-k="'+o.k+'"':'')+(o.v!==undefined?' data-v="'+o.v+'"':'')+'>'+n+'</button>';};
-const dvRow=(act,key,list,cur)=>'<div class="trn">'+list.map(q=>dvBtn(act,q[1],{k:key,v:q[0],on:cur===q[0]})).join('')+'</div>';
-const dvTog=(on,key,n)=>'<button class="trt'+(on?' on':'')+'" data-d="tog" data-k="'+key+'">'+n+'<b>'+(on?'เปิด':'ปิด')+'</b></button>';
-const dvSec=n=>'<div class="trs">'+n+'</div>';
-function devRender(){
-  if(!DEV.open||!devOn())return;
-  const me=dvMe();if(!me){if(DEV.spec)devSpecRender();return;}
-  const C=DEV.cfg,sg=G.mode==='siege'&&G.sg?G.sg:null,F=sg?sgF():null,path=getKit(me.id).path;
-  const k=JSON.stringify([C,DEV.fc.on,G.mode,me.fly,sg&&sg.ph,DEV.bp,DEV.bl,DEV.bn,path,me.team]);
-  if(k===DEV.key)return;DEV.key=k;
-  const ok=PATHS.map((P,i)=>[i,P]).filter(q=>!q[1].off),nm=P=>P.n.replace('สาย','');
-  const h=[];
-  h.push('<h2>🛠 Dev Mode</h2><div id="devPos"></div>');
-  h.push(dvSec('Mode (เริ่มใหม่ทันที เล่นคนเดียว)'),'<div class="trg">'+Object.keys(MODES).map(m=>dvBtn('mode',MODES[m].name,{v:m,on:G.mode===m})).join('')+'</div>');
-  h.push(dvTog(C.sbots,'sbots','🤖 เติมบอทตอนเริ่มโหมด'),dvTog(C.noend,'noend','♾️ แมตช์ไม่จบเอง'),'<div class="trn">'+dvBtn('endnow','🏁 จบแมตช์ตอนนี้')+'</div>');
-  h.push(dvSec('👁 โหมดผู้ชม (ดูบอทสู้กันเต็มห้อง ตัวเราไม่ลงเล่น)'),'<div class="trn">'+dvBtn('spec','⚔️ ดูบอท 6v6 (ทีม)',{v:'tdm'})+dvBtn('spec','🏰 ดูบอทบุกปราสาท 6v6',{v:'siege'})+'</div>','<div class="trn">'+dvBtn('spec','💥 ดูบอท FFA 12 ตัว',{v:'ffa'})+'</div>');
-  h.push(dvSec('ไม้กวาด'),dvTog(C.broom,'broom','🧹 ใช้ไม้กวาดได้ทุกโหมด (กด B)'),dvBtn('mount',me.fly?'⬇ ลงจากไม้กวาด [F9]':'🧹 ขึ้นไม้กวาด [F9]').replace('<button','<button class="trw"'));
-  h.push(dvSec('เปลี่ยนสาย (ทันที ไม่ต้องรอแมตช์ใหม่)'),'<div class="trg">'+ok.map(q=>dvBtn('kit',q[1].ic+' '+nm(q[1]),{v:q[0],on:path===q[0]})).join('')+'</div>',dvBtn('creator','🪄 เลือกคาถาละเอียด').replace('<button','<button class="trw"'));
-  h.push(dvSec('โกง'),dvTog(C.god,'god','🛡️ อมตะ'),dvTog(C.nocd,'nocd','⏱️ ไม่มีคูลดาวน์'),dvTog(C.ult,'ult','🌟 อัลติเต็มตลอด'),dvTog(C.fast,'fast','⚡ เกิดใหม่ไว 0.5 วิ'));
-  h.push(dvRow('set','spd',[[1,'เดิน ×1'],[1.5,'×1.5'],[2,'×2'],[3,'×3']],C.spd));
-  h.push('<div class="trn">'+dvBtn('hp','❤️ เลือดเต็ม')+dvBtn('rev','♻️ เกิดใหม่ทันที')+'</div>');
-  h.push(dvSec('กล้อง'),'<button class="trt'+(DEV.fc.on?' on':'')+'" data-d="fc">🎥 กล้องอิสระ [F3]<b>'+(DEV.fc.on?'เปิด':'ปิด')+'</b></button>');
-  h.push('<div class="trn">'+dvBtn('fctop','⬇ มองจากบน')+dvBtn('fcme','🧍 มาที่ตัวเรา')+'</div>');
-  h.push('<div class="trn">'+dvBtn('tpfc','📍 วาร์ปตัวไปที่กล้อง')+dvBtn('tpaim','🎯 วาร์ปไปจุดเล็ง [F6]')+'</div>');
-  if(F){
-    const cs=F.cores.map((c,i)=>c?dvBtn('tp','🔷 แกน '+(i+1),{v:Math.round(c.x)+','+Math.round(c.y)}):'').join('');
-    const sp=['A','B'].map(t=>{const s=F.sp[t][sg.ph];return s?dvBtn('tp',t==='A'?'⚔️ จุดเกิดบุก':'🛡️ จุดเกิดรับ',{v:Math.round(s.x)+','+Math.round(s.y)}):'';}).join('');
-    h.push(dvSec('วาร์ป'),'<div class="trg">'+cs+sp+'</div>');
-    h.push(dvSec('ปราสาท (siege)'),dvRow('ph','',Array.from({length:F.n},(_,i)=>[i+1,'เฟส '+(i+1)]),sg.ph));
-    h.push('<div class="trn">'+dvBtn('team','🔁 สลับฝั่งฉัน (ตอนนี้ '+(SG_TEAM[me.team]||'-')+')')+'</div>');
-    h.push('<div class="trn">'+dvBtn('skip','⏭ ข้ามเตรียมตัว')+dvBtn('core0','💥 แกนแตก')+dvBtn('corefull','🔷 แกนเต็ม')+'</div>');
-    h.push('<div class="trn">'+dvBtn('time','⏱ +60 วิ',{v:60})+dvBtn('time','⏱ เหลือ 5 วิ',{v:0})+'</div>');
-    h.push('<div class="trn">'+dvBtn('walls','🧱 ซ่อมกำแพง',{v:1})+dvBtn('walls','🔨 พังกำแพง',{v:0})+'</div>');
-    h.push('<div class="trn">'+dvBtn('win','🏆 บุกชนะ',{v:0})+dvBtn('win','🛡️ รับชนะ',{v:1})+'</div>');
-  }
-  h.push(dvSec('บอท'),'<div class="trg">'+[[-1,'🎲 สุ่มสาย']].concat(ok.map(q=>[q[0],q[1].ic+' '+nm(q[1])])).map(q=>dvBtn('bp',q[1],{v:q[0],on:DEV.bp===q[0]})).join('')+'</div>');
-  h.push(dvRow('bl','',[[0,'ง่าย'],[1,'กลาง'],[2,'เก่ง']],DEV.bl),dvRow('bn','',[[1,'×1'],[2,'×2'],[3,'×3']],DEV.bn));
-  const sgm=G.mode==='siege';
-  h.push('<div class="trn">'+dvBtn('botadd',sgm?'➕ บอทฝั่งบุก':'➕ บอท',{v:sgm?0:50})+(sgm?dvBtn('botadd','➕ บอทฝั่งรับ',{v:1}):'')+dvBtn('botclr','🧹 ลบบอท')+'</div>',dvTog(C.freeze,'freeze','🧊 บอทหยุดนิ่ง'));
-  h.push(dvSec('ทำลาย / ซ่อม (ที่เล็ง = จุดที่เมาส์ชี้ก่อนเปิดหน้าต่าง)'),'<div class="trn">'+dvBtn('dfix','🔧 ซ่อมตรงที่เล็ง',{v:'part'})+dvBtn('dbrk','💥 พังตรงที่เล็ง',{v:'part'})+'</div>',
-    '<div class="trn">'+dvBtn('dfix','🔧 ซ่อมทั้งหลัง',{v:'whole'})+dvBtn('dbrk','💥 พังทั้งหลัง',{v:'whole'})+'</div>','<div class="trn">'+dvBtn('dfix','🔧 ซ่อมทั้งแมพ',{v:'map'})+dvBtn('dbrk','💥 พังทั้งแมพ',{v:'map'})+'</div>');
-  h.push(dvSec('โลก / ภาพช่วยดูแมพ'),dvRow('set','ts',[[0.25,'×0.25'],[0.5,'×0.5'],[1,'×1'],[2,'×2']],C.ts));
-  h.push(dvTog(C.pause,'pause','⏸ หยุดโลก [F4]'),dvTog(C.col,'col','🟥 โชว์กล่องชน (หิน/เสา/ต้นไม้/กำแพง)'),dvTog(C.omap,'omap','🗺️ แผนที่ 2D ซ้อนจอ (คลิก = วาร์ป)'),dvTog(C.zon,'zon','⭕ โชว์เขตยึดแกน + จุดเกิดปลอดภัย'));
-  h.push(dvBtn('copy','📍 คัดลอกพิกัดที่เล็ง [F7]').replace('<button','<button class="trw"'),'<small>F2 เปิด/ปิด • คลิกจอ = เล่นต่อ • ?dev=0 ปิด Dev Mode</small>');
-  _dvPanel.innerHTML=h.join('');
-  devPos();
-}
-function devSpecRender(){
-  const C=DEV.cfg,bl=plist().filter(p=>p.alive).map(p=>p.id+p.team).join(',');
-  const k=JSON.stringify(['spec',C,DEV.fc.on,G.mode,DEV.specLock,SPEC.id,bl,DEV.bp,DEV.bl]);
-  if(k===DEV.key)return;DEV.key=k;
-  const ok=PATHS.map((P,i)=>[i,P]).filter(q=>!q[1].off),nm=P=>P.n.replace('สาย',''),h=[];
-  h.push('<h2>👁 โหมดผู้ชม</h2><div id="devPos"></div>');
-  h.push('<div class="trn">'+dvBtn('specstop','⏹ ออกจากโหมดผู้ชม (กลับไปเล่น)')+'</div>');
-  h.push(dvSec('เริ่มใหม่ (บอทเต็มห้อง)'),'<div class="trn">'+dvBtn('spec','⚔️ ทีม 6v6',{v:'tdm',on:G.mode==='tdm'})+dvBtn('spec','🏰 บุกปราสาท 6v6',{v:'siege',on:G.mode==='siege'})+dvBtn('spec','💥 FFA 12',{v:'ffa',on:G.mode==='ffa'})+'</div>');
-  h.push('<div class="trg">'+[[-1,'🎲 สุ่มสาย']].concat(ok.map(q=>[q[0],q[1].ic+' '+nm(q[1])])).map(q=>dvBtn('bp',q[1],{v:q[0],on:DEV.bp===q[0]})).join('')+'</div>');
-  h.push(dvRow('bl','',[[0,'ง่าย'],[1,'กลาง'],[2,'เก่ง']],DEV.bl));
-  h.push(dvSec('กล้อง'),'<button class="trt'+(DEV.fc.on?' on':'')+'" data-d="fc">🎥 กล้องอิสระ [F3]<b>'+(DEV.fc.on?'เปิด':'ปิด')+'</b></button>');
-  h.push('<button class="trt'+(DEV.specLock?' on':'')+'" data-d="slock">🎯 กล้องหันตามบอท [R]<b>'+(DEV.specLock?'เปิด':'ปิด')+'</b></button>');
-  h.push('<div class="trn">'+dvBtn('fctop','⬇ มองจากบน')+dvBtn('fcme','🎥 กล้องอิสระที่บอทนี้')+'</div>');
-  const tn=p=>G.mode==='siege'?(SG_TEAM[p.team]||''):G.mode==='tdm'?(TEAMN[p.team]||''):'';
-  const L=plist().slice().sort((a,b)=>(a.team-b.team)||a.name.localeCompare(b.name));
-  h.push(dvSec('ดูมุมบอท (คลิกซ้าย/ขวา หรือ Q/E ในเกม)'),'<div class="trg">'+L.map(p=>dvBtn('sfol',(p.alive?'':'💀 ')+(tn(p)?'['+tn(p)+'] ':'')+p.name.replace('🤖 ',''),{v:p.id,on:!DEV.fc.on&&SPEC.id===p.id})).join('')+'</div>');
-  h.push(dvSec('โลก / ภาพช่วยดูแมพ'),dvRow('set','ts',[[0.25,'×0.25'],[0.5,'×0.5'],[1,'×1'],[2,'×2']],C.ts));
-  h.push(dvTog(C.pause,'pause','⏸ หยุดโลก [F4]'),dvTog(C.noend,'noend','♾️ แมตช์ไม่จบเอง'),dvTog(C.omap,'omap','🗺️ แผนที่ 2D ซ้อนจอ'),dvTog(C.zon,'zon','⭕ โชว์เขตยึดแกน + จุดเกิดปลอดภัย'));
-  h.push('<small>F2 เปิด/ปิด • คลิกจอ = ดูต่อ</small>');
-  _dvPanel.innerHTML=h.join('');devPos();
-}
-function devPos(){
-  const el=document.getElementById('devPos');if(!el)return;const me=dvMe();if(!me){el.innerHTML=DEV.spec?'👁 ผู้ชม'+(DEV.fc.on?' • กล้องอิสระ ความเร็ว '+Math.round(DEV.fc.spd):''):'';return;}
-  const ax=INPUT.gx,ay=INPUT.gy,f=n=>Math.round(n);
-  el.innerHTML='ตัวเรา '+f(me.x)+','+f(me.y)+' '+devCell(me.x,me.y)+'<br>จุดเล็ง '+(ax>=0?f(ax)+','+f(ay)+' '+devCell(ax,ay):'—')+(DEV.fc.on?'<br>กล้องอิสระ ความเร็ว '+f(DEV.fc.spd):'');
-}
-_dvPanel.addEventListener('click',e=>{
-  const b=e.target.closest('button');if(!b||!b.dataset.d)return;ac();
-  devAct(b.dataset.d,b.dataset.k,b.dataset.v);
-});
-setInterval(()=>{
-  try{
-    const on=devOn();
-    _dvBtn.classList.toggle('hidden',!on||DEV.open||DEV.fc.on);
-    if(!on){_dvMap.classList.add('hidden');if(DEV.open)devToggle(false);DEV.fc.on=false;devOverlay();return;}
-    _dvMap.classList.toggle('hidden',!DEV.cfg.omap);if(DEV.cfg.omap)devMapDraw();
-    if(DEV.open){devRender();devPos();}
-    devOverlay();
-  }catch(e){}
-},200);
-if(window.WD){window.WD.dev=DEV;window.WD.spec=SPEC;window.WD.devSpec=devSpecStart;}   // ไว้ดีบักจาก console / ทดสอบอัตโนมัติ
+// UI (panel, orbit cam, video recording) lives in js/78-dev-ui.js

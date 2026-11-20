@@ -524,17 +524,37 @@ body.crOpenB .mver{display:none}
 .tuFoot{display:flex;gap:6px}.tuFoot .pri{flex:1}
 #tuMsg{color:var(--mute);font-size:11px;min-height:2.6em}
 #devBtn{position:fixed;left:12px;top:60px;z-index:5;opacity:.75}
-#devPanel{position:fixed;left:12px;top:60px;z-index:6;width:330px;max-height:calc(100vh - 80px);overflow-y:auto;scrollbar-width:thin;padding:16px 18px;margin:0}
-#devPanel h2{font-size:18px;margin:0 0 6px;text-align:center}
-#devPanel #devPos{font:12px/1.5 monospace;color:var(--mute);text-align:center;margin-bottom:4px}
-#devPanel .trs{font-size:12px;letter-spacing:2px;color:var(--gold);margin:12px 0 6px}
-#devPanel .trt{display:flex;justify-content:space-between;align-items:center;width:100%;margin:4px 0;padding:6px 10px;font-size:13px;text-align:left}
-#devPanel .trt b{font-size:11px;padding:1px 8px;border-radius:2px;background:#3a2a2a;color:#e99}
-#devPanel .trt.on b{background:#244a2c;color:#9f9}
-#devPanel .trg{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:5px}
-#devPanel .trg button{padding:6px 4px;font-size:12px}
-#devPanel .trn{display:flex;gap:5px;margin-bottom:5px}
-#devPanel .trn button{flex:1;padding:4px;font-size:12px}
-#devPanel .trn button.on,#devPanel .trg button.on{border-color:var(--gold);background:rgba(217,180,90,.25)}
-#devPanel .trw{width:100%;margin-top:4px}
-#devPanel small{display:block;color:var(--mute);font-size:11px;margin-top:8px;text-align:center}
+#devPanel{position:fixed;z-index:6;display:flex;flex-direction:column;min-width:240px;min-height:120px;resize:both;overflow:hidden;--dvop:.78;font:12px/1.35 'Segoe UI',Tahoma,Kanit,sans-serif;color:#e6e7ea;background:rgba(8,8,11,calc(var(--dvop)*.3));border:1px solid rgba(255,255,255,.09);border-radius:3px;box-shadow:0 6px 24px rgba(0,0,0,.3)}
+#devPanel.hidden{display:none}
+#dvHead{display:flex;align-items:center;gap:10px;padding:5px 8px;background:rgba(6,6,8,var(--dvop));cursor:move;user-select:none;border-bottom:1px solid rgba(255,255,255,.07)}
+#dvHead b{font-weight:600;white-space:nowrap}
+#dvHead .sp{flex:1;min-width:0;color:#9aa3ad;font:11px monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#dvHead label{white-space:nowrap;color:#9aa3ad;cursor:default}
+#dvHead input{width:80px;vertical-align:middle;accent-color:#5aa0ff}
+#dvHead .x{cursor:pointer;color:#e05050;font-weight:700;padding:0 4px}
+#dvBody{flex:1;overflow:auto;display:flex;flex-wrap:wrap;align-items:flex-start;align-content:flex-start;gap:8px;padding:8px;scrollbar-width:thin}
+#devPanel .dvc{width:196px;background:rgba(20,20,24,var(--dvop));border:1px solid rgba(255,255,255,.06);border-radius:2px}
+#devPanel .dvc>h4{margin:0;padding:5px 18px 5px 8px;font-size:12px;font-weight:600;text-align:center;background:rgba(0,0,0,.35);position:relative;cursor:pointer;user-select:none}
+#devPanel .dvc>h4::after{content:'';position:absolute;right:7px;top:9px;width:6px;height:6px;border-radius:50%;background:#e04848}
+#devPanel .dvc.cl>h4::after{background:#666}
+#devPanel .dvc.cl>.rows{display:none}
+#devPanel .rows{padding:2px 0 4px}
+#devPanel .dr{display:flex;align-items:center;gap:6px;padding:3px 8px;cursor:pointer;user-select:none;min-height:19px}
+#devPanel .dr:hover{background:rgba(255,255,255,.07)}
+#devPanel .dr span{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#devPanel .dr i{font-style:normal;font-weight:700;font-size:11px;color:#e04848}
+#devPanel .dr.on i{color:#4ade80}
+#devPanel .dr.b i{color:#7c828c}
+#devPanel .dr.b.on{background:rgba(80,140,255,.2)}
+#devPanel .dr.s{flex-wrap:wrap;cursor:default;row-gap:1px}
+#devPanel .dr.s:hover{background:none}
+#devPanel .dr.s em{font:11px monospace;color:#8fc4ff}
+#devPanel .dr.s input{width:100%;margin:0;height:14px;accent-color:#5aa0ff}
+#devPanel .dch{display:flex;flex-wrap:wrap;gap:3px;padding:3px 8px}
+#devPanel .dch b{font-weight:400;padding:1px 6px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);border-radius:2px;cursor:pointer;font-size:11px;user-select:none}
+#devPanel .dch b:hover{background:rgba(255,255,255,.12)}
+#devPanel .dch b.on{background:rgba(80,140,255,.35);border-color:#5aa0ff}
+#devPanel .dvsub{padding:5px 8px 1px;font-size:10px;color:#878d97;letter-spacing:.4px}
+#devPanel .dvnote{padding:3px 8px;font-size:11px;color:#9aa3ad;line-height:1.5;word-break:break-all}
+#devPanel .dvrec,#devRecBadge{color:#ff5a5a;font-weight:700;white-space:nowrap}
+#devRecBadge{position:fixed;top:8px;left:50%;transform:translateX(-50%);z-index:61;font:700 13px monospace;background:rgba(0,0,0,.55);padding:3px 10px;border-radius:3px;pointer-events:none}

@@ -856,7 +856,7 @@ surfSync:49 surfQuality:53
 SURF_VS:55 SURF_VS_BODY:56 SURF_FS:67 SURF_FS_BODY:68 surfOk:98 surfApply:99 surfScene:111
 §112 ปรับค่า (tune.html / F8)
 
-## js/77-dev.js (397) — Dev Mode: ทดสอบแมพ/สกิลในแมตช์จริง (ผู้ใช้ 2026-11-18)
+## js/77-dev.js (300) — Dev Mode: ทดสอบแมพ/สกิลในแมตช์จริง (ผู้ใช้ 2026-11-18)
 DEV:5 devOn:9 devOff:10 devSoloOk:11 devHold:12 devBroomOk:13 dvMe:14 devSave:15
 §16 hook จากโฮสต์: เรียกต้น hostTick (คืน dt ที่ปรับแล้ว • -1 = หยุดโลก)
 devDt:17 devTick:22 devGod:31 devFreeze:32
@@ -872,7 +872,15 @@ DEVD_R:212 devBrkFix:213 devBldFix:214 devPropFix:218 devSkinFix:219 devDestroy:
 _dvCyl:260 _dvMat:261 devOverlay:262
 §282 2D overlay map: spawn zones + capture zones + players (click = warp)
 _dvMap:283 devMapDraw:287
-§300 หน้าต่าง
-_dvPanel:301 _dvBtn:302 devToggle:305 dvBtn:310 dvRow:311 dvTog:312 dvSec:313 devRender:314 devSpecRender:357 devPos:378
 
-(109 files, 31096 lines)
+## js/78-dev-ui.js (243) — Dev Mode UI (user 2026-11-20): one floating window, many small column…
+§10 orbit camera
+devOrbPick:11 devOrbToggle:23 devOrbCam:28
+§42 video recording
+REC:43 _dvBadge:44 devRecStart:45 devRecStop:60 devRecFrame:62 devRecSave:67 devRecAuto:83 devAutoTick:87
+§94 window
+_dvPanel:95 _dvBtn:98 _dvBody:100 _dvHead:100 devUiApply:102 devFreeMouse:110 devToggle:111 devF2:116 devGrave:121
+§130 rows
+dvA:131 dvTg:132 dvB:133 dvCh:134 dvSl:135 dvSub:136 dvCol:137 devKeyOf:138 devRender:143 devPos:193 devUiAct:200
+
+(110 files, 31242 lines)
