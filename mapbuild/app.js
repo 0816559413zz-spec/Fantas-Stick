@@ -216,9 +216,21 @@ function markerMesh(o) {
   else add(new THREE.BoxGeometry(1.5, D.h || 1.4, 1.5), mat(c), 0, (D.h || 1.4) / 2, 0).castShadow = true;
   return g;
 }
+function polyGeo(o) {   // free-shape part: footprint polygon (local x,z) extruded 0..sy, top shrunk toward the centroid by tp
+  const P = o.pts, n = P.length, h = o.sy, tp = o.tp == null ? 1 : o.tp, V = [];
+  let cx = 0, cz = 0, A = 0; for (const q of P) { cx += q[0] / n; cz += q[1] / n; }
+  for (let i = 0; i < n; i++) { const a = P[i], b = P[(i + 1) % n]; A += a[0] * b[1] - b[0] * a[1]; }
+  const top = P.map(q => [cx + (q[0] - cx) * tp, cz + (q[1] - cz) * tp]), sg = A >= 0 ? 1 : -1, buf = [];
+  for (let i = 0; i < n; i++) { const j = (i + 1) % n, a = P[i], b = P[j], ta = top[i], tb = top[j], dx = b[0] - a[0], dz = b[1] - a[1], L = Math.hypot(dx, dz) || 1;
+    quad(buf, [a[0], 0, a[1]], [b[0], 0, b[1]], [tb[0], h, tb[1]], [ta[0], h, ta[1]], [dz / L * sg, 0.3 * (1 - tp), -dx / L * sg]); }
+  const tri2 = THREE.ShapeUtils.triangulateShape(P.map(q => new THREE.Vector2(q[0], q[1])), []);
+  for (const t of tri2) { const [i, j, k] = t; tri(buf, [top[i][0], h, top[i][1]], [top[j][0], h, top[j][1]], [top[k][0], h, top[k][1]], [0, 1, 0]); tri(buf, [P[i][0], 0, P[i][1]], [P[j][0], 0, P[j][1]], [P[k][0], 0, P[k][1]], [0, -1, 0]); }
+  const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(buf, 3)); g.computeVertexNormals(); return g;
+}
 function objMesh(o) {
   let g;
-  if (isPrim(o)) { g = new THREE.Group(); const m = new THREE.Mesh(pg(o.t), mat(o.c || '#8a8478', { name: o.glow ? 'glow' : 'prim', emit: o.glow })); m.castShadow = !o.glow; m.receiveShadow = true; g.add(m); g.scale.set(o.sx || 1, o.sy || 1, o.sz || 1); }
+  if (o.t === 'poly') { g = new THREE.Group(); const m = new THREE.Mesh(polyGeo(o), mat(o.c || '#8a8478', { name: 'prim' })); m.castShadow = m.receiveShadow = true; m.userData.own = 1; g.add(m); }
+  else if (isPrim(o)) { g = new THREE.Group(); const m = new THREE.Mesh(pg(o.t), mat(o.c || '#8a8478', { name: o.glow ? 'glow' : 'prim', emit: o.glow })); m.castShadow = !o.glow; m.receiveShadow = true; g.add(m); g.scale.set(o.sx || 1, o.sy || 1, o.sz || 1); }
   else if (isKit(o)) { const t = tplNow(kitId(o)); if (t) { g = t.obj.clone(true); g.scale.setScalar(o.s || 1); } else { g = new THREE.Group(); g.add(new THREE.Mesh(pg('box'), helpMat('#666', 0.5))); kitTpl(kitId(o)).then(tt => { if (tt && M.objs.includes(o)) syncObj(o); }); } }
   else if (OBJ[o.t]) { g = markerMesh(o); if (o.t === 'house') g.scale.set(o.sx || 1, 1, o.sz || 1); }
   else { g = new THREE.Group(); g.add(new THREE.Mesh(pg('box'), helpMat('#f06a6a', 0.6))); }
@@ -238,8 +250,8 @@ function partGroup(p, ghostMode) {
   for (const f of X.floors) { const m = new THREE.Mesh(floorGeo(f), mat(f.c || '#8a8478', { name: 'floor' })); m.position.set(f.x, 0, f.z); m.rotation.y = f.rot || 0; m.castShadow = m.receiveShadow = true; m.userData = { pf: f }; m.updateMatrix(); g.add(m); }
   g.userData.ref = { k: 'part', id: p.id }; g.name = 'part_' + p.id; return g;
 }
-function syncPart(p) { const old = partNode.get(p.id); if (old) { gParts.remove(old); old.traverse(o => { if (o.isMesh && o.userData.pf) o.geometry.dispose(); }); } const g = partGroup(p); partNode.set(p.id, g); gParts.add(g); if (sel && sel.k === 'part' && sel.id === p.id) updSel(); need(); }
-function syncParts() { for (const c of [...gParts.children]) { gParts.remove(c); c.traverse(o => { if (o.isMesh && o.userData.pf) o.geometry.dispose(); }); } partNode.clear(); for (const p of M.parts) { const g = partGroup(p); partNode.set(p.id, g); gParts.add(g); } }
+function syncPart(p) { const old = partNode.get(p.id); if (old) { gParts.remove(old); old.traverse(o => { if (o.isMesh && (o.userData.pf || o.userData.own)) o.geometry.dispose(); }); } const g = partGroup(p); partNode.set(p.id, g); gParts.add(g); if (sel && sel.k === 'part' && sel.id === p.id) updSel(); need(); }
+function syncParts() { for (const c of [...gParts.children]) { gParts.remove(c); c.traverse(o => { if (o.isMesh && (o.userData.pf || o.userData.own)) o.geometry.dispose(); }); } partNode.clear(); for (const p of M.parts) { const g = partGroup(p); partNode.set(p.id, g); gParts.add(g); } }
 function syncAll() { syncWalls(); syncFloors(); syncObjs(); syncParts(); updSel(); colDirty(); need(); }
 
 // ================= collision preview =================
@@ -352,6 +364,8 @@ function drawLine(pts) {   // [[x,z],[x,z]…] draped on the ground; null = hide
 }
 function drawHandles() {
   for (const c of [...gHandles.children]) gHandles.remove(c);
+  const fh = freeHandles();
+  if (fh) { fh.forEach((q, i) => { const m = new THREE.Mesh(new THREE.SphereGeometry(0.32, 10, 8), helpMat(sel && sel.pt === i && !fdraft ? '#ffffff' : ACC)); m.material.depthTest = false; m.renderOrder = 12; m.position.set(q.x, q.y, q.z); gHandles.add(m); }); return; }
   const pts = draft ? draft.pts : sel && sel.k === 'wall' && find(sel) ? find(sel).pts : null; if (!pts) return;
   const w = draft || find(sel);
   pts.forEach((p, i) => { const m = new THREE.Mesh(new THREE.SphereGeometry(0.32, 10, 8), helpMat(sel && sel.pt === i && !draft ? '#ffffff' : ACC)); m.material.depthTest = false; m.renderOrder = 12; m.position.set(p[0], (w.base != null ? w.base : MD.gh(M, p[0], p[1])) + (w.h || opt.wh) + 0.2, p[1]); gHandles.add(m); });
@@ -393,9 +407,24 @@ function partPP(k) { const D = MD.PART[k], pp = opt.pp[k] || (opt.pp[k] = {}); f
 function snapPartTo(p) { const sn = opt.psnap && MD.snapPart(M, p); if (sn) { p.x = +(p.x + sn.dx).toFixed(3); p.z = +(p.z + sn.dz).toFixed(3); if (sn.base !== undefined) p.base = Math.abs(sn.base - MD.gh(M, p.x, p.z)) < 0.06 ? null : sn.base; } return !!sn; }
 function castleProto(h) { const k = opt.part, p = MD.partNew(k, Object.assign({}, partPP(k), { id: 0, rot: ghostRot, x: snapC(h.x), z: snapC(h.z), base: h.on === 'floor' ? +(Math.round(h.y * 20) / 20).toFixed(2) : null })); snapPartTo(p); return p; }
 function placePart(h) { pushUndo('o'); const p = castleProto(h); p.id = nid(); M.parts.push(p); syncPart(p); sel = { k: 'part', id: p.id }; updSel(); renderSide(); changed(); colDirty(); return p; }
+let fdraft = null;   // free-shape part being drawn: {pts:[[x,z]…] world, base}
+function finishFree() {
+  const d = fdraft; fdraft = null; drawLine(null); drawHandles();
+  if (!d || d.pts.length < 3) { if (d) undo.pop(); need(); return; }
+  const xs = d.pts.map(q => q[0]), zs = d.pts.map(q => q[1]), cx = snapC((Math.min(...xs) + Math.max(...xs)) / 2), cz = snapC((Math.min(...zs) + Math.max(...zs)) / 2);
+  const pt = MD.partNew('free', Object.assign({}, partPP('free'), { id: nid(), x: cx, z: cz, base: d.base, pts: d.pts.map(q => [+(q[0] - cx).toFixed(3), +(q[1] - cz).toFixed(3)]) }));
+  M.parts.push(pt); syncPart(pt); sel = { k: 'part', id: pt.id }; updSel(); renderSide(); changed(); colDirty();
+}
+function freeHandles() {   // vertex handles of the selected free-shape part (world map coords) or of the draft
+  if (fdraft) return fdraft.pts.map(q => ({ x: q[0], z: q[1], y: (fdraft.base != null ? fdraft.base : MD.gh(M, q[0], q[1])) + 0.3 }));
+  const it = sel && sel.k === 'part' && find(sel); if (!it || !it.pts) return null;
+  const cs = Math.cos(it.rot || 0), sn = Math.sin(it.rot || 0), g0 = MD.gh(M, it.x, it.z), b = it.base != null ? it.base : g0;
+  return it.pts.map(q => ({ x: it.x + q[0] * cs + q[1] * sn, z: it.z - q[0] * sn + q[1] * cs, y: b + it.h + 0.3 }));
+}
+const toLocal = (it, x, z) => { const dx = x - it.x, dz = z - it.z, cs = Math.cos(it.rot || 0), sn = Math.sin(it.rot || 0); return [+(dx * cs - dz * sn).toFixed(3), +(dx * sn + dz * cs).toFixed(3)]; };
 let pghost = null, pghostKey = '';
 function updPartGhost() {
-  if (!(tool === 'castle' && hover)) { if (pghost) pghost.visible = false; return; }
+  if (!(tool === 'castle' && hover) || opt.part === 'free') { if (pghost) pghost.visible = false; return; }
   const p = castleProto(hover), key = JSON.stringify(p);
   if (key !== pghostKey) { if (pghost) gHelp.remove(pghost); pghostKey = key; pghost = partGroup(p); pghost.userData = {};
     pghost.traverse(m => { if (m.isMesh) { m.material = m.material.clone(); m.material.transparent = true; m.material.opacity = 0.55; m.castShadow = false; } }); gHelp.add(pghost); }
@@ -420,9 +449,22 @@ cv.addEventListener('pointerdown', e => {
     if (f && draft.pts.length > 2 && Math.hypot(f[0] - p[0], f[1] - p[1]) < 0.8) return finishWall(true);
     draft.pts.push(p); drawHandles(); need();
   } else if (tool === 'floor') { if (hover) drag = { k: 'floor', a: { x: hover.x, z: hover.z, y: hover.y } }; }
-  else if (tool === 'castle') { if (hover) placePart(hover); }
+  else if (tool === 'castle') {
+    if (!hover) return;
+    if (opt.part !== 'free') placePart(hover);
+    else {
+      if (!fdraft) { pushUndo('o'); fdraft = { pts: [], base: hover.on === 'floor' ? +(Math.round(hover.y * 20) / 20).toFixed(2) : null }; }
+      const q = [snapC(hover.x), snapC(hover.z)], f = fdraft.pts[0];
+      if (f && fdraft.pts.length > 2 && Math.hypot(f[0] - q[0], f[1] - q[1]) < 0.8) return finishFree();
+      fdraft.pts.push(q); drawHandles(); need();
+    }
+  }
   else if (tool === 'place') { if (!hover) return; pushUndo('o'); const o = placeObj(hover); if (opt.rrot && isVisual(o)) { ghostRot = Math.random() * 6.2832; } changed(); colDirty(); }
   else if (tool === 'select') {
+    const fh = freeHandles();
+    if (fh && !fdraft) { const r = cv.getBoundingClientRect(); let best = -1, bd = 12;
+      fh.forEach((q, i) => { v3.set(q.x - M.W / 2, q.y, q.z - M.H / 2).project(camera); const d = Math.hypot((v3.x + 1) / 2 * r.width + r.left - e.clientX, (1 - v3.y) / 2 * r.height + r.top - e.clientY); if (d < bd) { bd = d; best = i; } });
+      if (best >= 0) { sel.pt = best; drag = { k: 'fpt', it: find(sel), i: best, moved: 0 }; drawHandles(); renderSide(); need(); return; } }
     // wall point handle first
     const w = sel && sel.k === 'wall' && find(sel);
     if (w) { const r = cv.getBoundingClientRect(); let best = -1, bd = 12;
@@ -431,6 +473,7 @@ cv.addEventListener('pointerdown', e => {
     const p = pickItem(), g = groundHit();
     if (p && p.ref) { const same = sel && sel.k === p.ref.k && sel.id === p.ref.id; sel = { k: p.ref.k, id: p.ref.id };
       if (e.altKey && p.ref.k === 'wall') { insertWallPt(find(sel), p.p.x + M.W / 2, p.p.z + M.H / 2); }
+      else if (e.altKey && p.ref.k === 'part' && find(sel).pts) { insertFreePt(find(sel), p.p.x + M.W / 2, p.p.z + M.H / 2); }
       else if (g) { const it = find(sel); drag = { k: 'move', it, kind: sel.k, gx: g.x, gz: g.z, o: sel.k === 'wall' ? it.pts.map(q => q.slice()) : [it.x, it.z], moved: 0 }; }
       if (!same) renderSide(); updSel(); }
     else { sel = null; renderSide(); updSel(); }
@@ -449,21 +492,23 @@ cv.addEventListener('pointermove', e => {
     if (drag.kind === 'wall') drag.it.pts.forEach((p, i) => { p[0] = snapV(drag.o[i][0] + dx); p[1] = snapV(drag.o[i][1] + dz); }); else if (drag.kind === 'part') { const it = drag.it, sv = opt.csnap ? snapC : snapV; it.x = clamp(sv(drag.o[0] + dx), 0, M.W); it.z = clamp(sv(drag.o[1] + dz), 0, M.H); snapPartTo(it); }
     else { drag.it.x = clamp(snapV(drag.o[0] + dx), 0, M.W); drag.it.z = clamp(snapV(drag.o[1] + dz), 0, M.H); }
     if (drag.kind === 'obj') syncObj(drag.it); else if (drag.kind === 'part') syncPart(drag.it); else if (drag.kind === 'wall') { syncWalls(); updSel(); } else { syncFloors(); updSel(); } }
+  else if (drag && drag.k === 'fpt') { setRay(e); const g = groundHit(); if (!g) return; if (!drag.moved) { pushUndo('o'); drag.moved = 1; } drag.it.pts[drag.i] = toLocal(drag.it, clamp(snapC(g.x), 0, M.W), clamp(snapC(g.z), 0, M.H)); syncPart(drag.it); }
   else if (drag && drag.k === 'pt') { setRay(e); const g = groundHit(); if (!g) return; if (!drag.moved) { pushUndo('o'); drag.moved = 1; } drag.w.pts[drag.i] = [clamp(snapV(g.x), 0, M.W), clamp(snapV(g.z), 0, M.H)]; syncWalls(); updSel(); }
   else if (drag && drag.k === 'ramp' && hover) drawLine([[drag.a.x, drag.a.z], [hover.x, hover.z]]);
   else if (drag && drag.k === 'floor' && hover) { const p = [[drag.a.x, drag.a.z], [hover.x, hover.z]]; drawLine(p); }
   else if (tool === 'wall' && draft && hover) drawLine([...draft.pts, [hover.x, hover.z]]);
+  else if (tool === 'castle' && fdraft && hover) { const l = [...fdraft.pts, [snapC(hover.x), snapC(hover.z)]]; if (l.length > 2) l.push(l[0]); if (fdraft.base != null) l.y = fdraft.base; drawLine(l); }
   need();
 });
 cv.addEventListener('pointerup', e => {
   if (drag && drag.k === 'ramp') { if (hover && Math.hypot(hover.x - drag.a.x, hover.z - drag.a.z) > 1) { pushUndo('t'); applyRamp(drag.a, hover, opt.rad * 2); afterTerrain(); } drawLine(null); }
   else if (drag && drag.k === 'floor') { makeFloor(drag.a, hover || drag.a); drawLine(null); }
-  else if (drag && (drag.k === 'move' || drag.k === 'pt') && drag.moved) { changed(); colDirty(); renderSide(); }
+  else if (drag && (drag.k === 'move' || drag.k === 'pt' || drag.k === 'fpt') && drag.moved) { changed(); colDirty(); renderSide(); }
   if (stroke) { if (stroke.k !== 'scatter' && stroke.moved) afterTerrain(); else if (stroke.k === 'scatter') { changed(); colDirty(); } stroke = null; }
   drag = null; need();
 });
 cv.addEventListener('pointerleave', () => { hover = null; need(); });
-cv.addEventListener('dblclick', () => { if (tool === 'wall' && draft) { draft.pts.pop(); finishWall(false); } });
+cv.addEventListener('dblclick', () => { if (tool === 'wall' && draft) { draft.pts.pop(); finishWall(false); } else if (tool === 'castle' && fdraft) { fdraft.pts.pop(); finishFree(); } });
 cv.addEventListener('wheel', e => { e.preventDefault();
   if (e.shiftKey && (tool === 'sculpt' || tool === 'paint' || tool === 'scatter')) { opt.rad = clamp(+(opt.rad * (e.deltaY > 0 ? 0.9 : 1.11)).toFixed(1), 0.5, 40); renderOpts(); need(); return; }
   if (e.shiftKey && (tool === 'place' || tool === 'castle')) { ghostRot += (e.deltaY > 0 ? 1 : -1) * (tool === 'castle' ? Math.PI / 4 : Math.PI / 12); need(); return; }
@@ -476,6 +521,11 @@ function finishWall(closed) {
     M.walls.push(w); sel = { k: 'wall', id: w.id }; syncWalls(); changed(); colDirty(); renderSide(); }
   else undo.pop();
   updSel();
+}
+function insertFreePt(it, x, z) {   // Alt+click on a free shape: add a vertex on the nearest edge
+  const [lx, lz] = toLocal(it, x, z), P = it.pts, n = P.length; let bi = 0, bd = 1e9;
+  for (let i = 0; i < n; i++) { const a = P[i], b = P[(i + 1) % n], dx = b[0] - a[0], dz = b[1] - a[1], t = clamp(((lx - a[0]) * dx + (lz - a[1]) * dz) / (dx * dx + dz * dz || 1), 0, 1), d = Math.hypot(a[0] + dx * t - lx, a[1] + dz * t - lz); if (d < bd) { bd = d; bi = i; } }
+  pushUndo('o'); P.splice(bi + 1, 0, [lx, lz]); sel.pt = bi + 1; syncPart(it); changed(); colDirty(); renderSide();
 }
 function insertWallPt(w, x, z) {
   let bi = 0, bd = 1e9; const n = w.pts.length, m = w.closed ? n : n - 1;
@@ -516,7 +566,9 @@ addEventListener('keydown', e => {
   if ((e.ctrlKey || e.metaKey) && k === 'd') { e.preventDefault(); dupSel(); return; }
   if (e.ctrlKey || e.metaKey) return;
   const T = TOOLS.find(t => t[3] === k); if (T) { setTool(T[0]); return; }
-  if (k === 'escape') { if (draft) { draft = null; undo.pop(); drawLine(null); drawHandles(); } else { sel = null; renderSide(); updSel(); } need(); }
+  if (k === 'escape') { if (fdraft) { fdraft = null; undo.pop(); drawLine(null); drawHandles(); } else if (draft) { draft = null; undo.pop(); drawLine(null); drawHandles(); } else { sel = null; renderSide(); updSel(); } need(); }
+  else if (k === 'enter' && fdraft) finishFree();
+  else if (k === 'backspace' && fdraft) { fdraft.pts.pop(); if (!fdraft.pts.length) { fdraft = null; undo.pop(); drawLine(null); } drawHandles(); need(); }
   else if (k === 'enter' && draft) finishWall(false);
   else if (k === 'backspace' && draft) { draft.pts.pop(); drawHandles(); need(); }
   else if (k === 'delete' || k === 'backspace') delSel();
@@ -530,13 +582,14 @@ addEventListener('keydown', e => {
 addEventListener('keyup', e => { if (e.code === 'Space') spaceDown = false; });
 function editSel(fn) { const it = find(sel); if (!it) return; pushUndo('o'); fn(it); resync(); renderSide(); }
 function resync() { const it = find(sel); if (sel && sel.k === 'obj' && it) syncObj(it); else if (sel && sel.k === 'part' && it) syncPart(it); else if (sel && sel.k === 'wall') syncWalls(); else syncFloors(); updSel(); changed(); colDirty(); }
-function delSel() { if (!sel) return; const w = sel.k === 'wall' && find(sel);
+function delSel() { if (!sel) return; const w = sel.k === 'wall' && find(sel), fp = sel.k === 'part' && find(sel);
+  if (fp && fp.pts && sel.pt != null && fp.pts.length > 3) { pushUndo('o'); fp.pts.splice(sel.pt, 1); sel.pt = null; resync(); drawHandles(); return; }
   if (w && sel.pt != null && w.pts.length > 2) { pushUndo('o'); w.pts.splice(sel.pt, 1); sel.pt = null; resync(); return; }
   pushUndo('o'); const key = KEYS[sel.k]; M[key] = M[key].filter(v => v.id !== sel.id); sel = null; syncAll(); renderSide(); changed(); }
-function dupSel() { const it = find(sel); if (!it) return; pushUndo('o'); const c = JSON.parse(JSON.stringify(it)); c.id = nid(); if (c.pts) c.pts.forEach(p => { p[0] += 2; p[1] += 2; }); else { c.x += 2; c.z += 2; }
+function dupSel() { const it = find(sel); if (!it) return; pushUndo('o'); const c = JSON.parse(JSON.stringify(it)); c.id = nid(); if (c.pts && sel.k === 'wall') c.pts.forEach(p => { p[0] += 2; p[1] += 2; }); else { c.x += 2; c.z += 2; }
   M[KEYS[sel.k]].push(c); sel = { k: sel.k, id: c.id }; syncAll(); renderSide(); changed(); }
-function rotSel(a) { if (!find(sel)) return; editSel(it => { if (it.pts) { const cx = it.pts.reduce((s, p) => s + p[0], 0) / it.pts.length, cz = it.pts.reduce((s, p) => s + p[1], 0) / it.pts.length, c = Math.cos(a), s = Math.sin(a); it.pts = it.pts.map(p => { const x = p[0] - cx, z = p[1] - cz; return [+(cx + x * c + z * s).toFixed(2), +(cz - x * s + z * c).toFixed(2)]; }); } else it.rot = +(((it.rot || 0) + a) % 6.2832).toFixed(4); }); }
-function scaleSel(k) { if (!find(sel)) return; editSel(it => { if (sel.k === 'obj') { if (isKit(it)) it.s = +((it.s || 1) * k).toFixed(2); else if (isPrim(it) || it.t === 'house') { it.sx = +((it.sx || 1) * k).toFixed(2); it.sz = +((it.sz || 1) * k).toFixed(2); if (isPrim(it)) it.sy = +((it.sy || 1) * k).toFixed(2); } } else if (sel.k === 'part') { const D = MD.PART[it.k], q = D.main, mn = D.p[q][1], mx = D.p[q][2]; it[q] = +clamp(it[q] * k, mn, mx).toFixed(2); } else if (sel.k === 'floor') { it.w = +(it.w * k).toFixed(2); it.d = +(it.d * k).toFixed(2); } else it.h = +(it.h * k).toFixed(2); }); }
+function rotSel(a) { if (!find(sel)) return; editSel(it => { if (it.pts && sel.k === 'wall') { const cx = it.pts.reduce((s, p) => s + p[0], 0) / it.pts.length, cz = it.pts.reduce((s, p) => s + p[1], 0) / it.pts.length, c = Math.cos(a), s = Math.sin(a); it.pts = it.pts.map(p => { const x = p[0] - cx, z = p[1] - cz; return [+(cx + x * c + z * s).toFixed(2), +(cz - x * s + z * c).toFixed(2)]; }); } else it.rot = +(((it.rot || 0) + a) % 6.2832).toFixed(4); }); }
+function scaleSel(k) { if (!find(sel)) return; editSel(it => { if (sel.k === 'obj') { if (isKit(it)) it.s = +((it.s || 1) * k).toFixed(2); else if (isPrim(it) || it.t === 'house') { it.sx = +((it.sx || 1) * k).toFixed(2); it.sz = +((it.sz || 1) * k).toFixed(2); if (isPrim(it)) it.sy = +((it.sy || 1) * k).toFixed(2); } } else if (sel.k === 'part' && it.pts) { it.pts = it.pts.map(q => [+(q[0] * k).toFixed(3), +(q[1] * k).toFixed(3)]); it.h = +clamp(it.h * k, 0.5, 40).toFixed(2); } else if (sel.k === 'part') { const D = MD.PART[it.k], q = D.main, mn = D.p[q][1], mx = D.p[q][2]; it[q] = +clamp(it[q] * k, mn, mx).toFixed(2); } else if (sel.k === 'floor') { it.w = +(it.w * k).toFixed(2); it.d = +(it.d * k).toFixed(2); } else it.h = +(it.h * k).toFixed(2); }); }
 function liftSel(d) { if (!find(sel)) return; editSel(it => { if (sel.k === 'obj') it.y = +Math.max(0, (it.y || 0) + d).toFixed(2); else if (sel.k === 'part') it.base = +((it.base != null ? it.base : MD.gh(M, it.x, it.z)) + d).toFixed(2); else if (sel.k === 'floor') { it.y = +(it.y + d).toFixed(2); it.y2 = +((it.y2 == null ? it.y : it.y2) + d).toFixed(2); } else it.base = +((it.base != null ? it.base : MD.gh(M, it.pts[0][0], it.pts[0][1])) + d).toFixed(2); }); }
 
 // ================= UI: tools + options =================
@@ -550,7 +603,7 @@ const TOOLS = [['select', '⬚', 'เลือก', 'v', 'คลิกเลื�
   ['scatter', '⁘', 'โปรย', 'g', 'ลากเพื่อโปรยของที่เลือก (ต้นไม้ หิน หญ้า) • Shift = ลบของในวง'],
 ];
 const HINT = Object.fromEntries(TOOLS.map(t => [t[0], t[4]]));
-function setTool(t) { if (draft) { draft = null; undo.pop(); drawLine(null); } tool = t; if (t === 'scatter' && !isVisualType(opt.obj)) { const a = KIT.list.find(a => a.cat === 'tree'); if (a) { opt.obj = 'kit:' + a.id; opt.cat = 'tree'; } } renderTools(); renderOpts(); drawHandles(); $('hint').textContent = HINT[t] || ''; need(); }
+function setTool(t) { if (draft) { draft = null; undo.pop(); drawLine(null); } if (fdraft) { fdraft = null; undo.pop(); drawLine(null); } tool = t; if (t === 'scatter' && !isVisualType(opt.obj)) { const a = KIT.list.find(a => a.cat === 'tree'); if (a) { opt.obj = 'kit:' + a.id; opt.cat = 'tree'; } } renderTools(); renderOpts(); drawHandles(); $('hint').textContent = HINT[t] || ''; need(); }
 function renderTools() { const box = $('tools'); box.textContent = ''; for (const t of TOOLS) box.append(el('button', { class: tool === t[0] ? 'on' : '', title: t[2] + ' (' + t[3].toUpperCase() + ')', onclick: () => setTool(t[0]) }, el('b', null, t[1]), el('i', null, t[2]))); }
 const h3 = t => el('h3', null, t);
 function seg(items, cur, on) { const d = el('div', { class: 'seg' }); for (const [v, n, tip] of items) d.append(el('button', { class: 'tl-btn' + (v === cur ? ' on' : ''), title: tip || '', onclick: () => on(v) }, n)); return d; }
@@ -579,6 +632,7 @@ function renderOpts() {
       h3('ตัวเลือก'), ...Object.keys(D.f).map(q => check(MD.PART_F[q], q, pp)),
       el('div', { class: 'row' }, el('label', null, 'สี'), el('input', { type: 'color', value: pp.c, oninput: e => { pp.c = e.target.value; need(); } })),
       check('พังได้ (ทั้งชิ้น)', 'brk', pp), el('p', { class: 'note' }, 'พังได้ = ไม่มีฟันปลา/ทางเดินบนยอด (ชิ้นส่วนลอยไม่ได้) • ปิด = กำแพงทนทาน (ค่าเริ่ม)'),
+      k === 'free' ? el('p', { class: 'note', html: 'ทรงอิสระ: คลิกทีละจุดวาดรูปปิดบนพื้น • คลิกจุดแรก/Enter/ดับเบิลคลิก = จบ • Backspace ถอยจุด • Esc ยกเลิก<br>ได้แล้วเลือกชิ้นแล้วลากจุดฟ้า (Alt+คลิกขอบ = เพิ่มจุด) • "หุบยอด" 1 = ทรงตรง, ต่ำลง = ยอดแคบ/แหลม' }) : null,
       h3('ดูดติด'), el('div', { class: 'row' }, el('label', null, 'กริดวาง'), el('select', { class: 'tl-sel', onchange: e => { opt.csnap = +e.target.value; need(); }, html: [[0, 'อิสระ'], [0.5, '0.5'], [1, '1'], [2, '2']].map(([v, n]) => `<option value="${v}"${v === opt.csnap ? ' selected' : ''}>${n}</option>`).join('') })),
       check('ปลายชิ้นดูดติดชิ้นอื่น (ระดับ+ตำแหน่ง)', 'psnap'),
       el('p', { class: 'note', html: 'ปลายกำแพง/ประตู/ทางเดิน/บันได/มุมตึก ดูดติดกันภายใน 1.6 ม.<br>บันได/ทางลาด: ปลายบนดูดติดยอดกำแพง (ตั้ง "สูงขึ้น" = ความสูงกำแพง)<br>เลือกชิ้นด้วยเครื่องมือเลือก แล้วแก้ขนาดที่แผงขวา' }));
@@ -655,6 +709,7 @@ function renderSide() {
       box.append(section('ปราสาท — ' + D.n, true, fld('ตำแหน่ง X', it, 'x'), fld('ตำแหน่ง Z', it, 'z'), fld('หมุน (องศา)', it, 'rot', { deg: 1 }), fld('ฐาน (ความสูง)', it, 'base', { nullable: 1, ph: 'ตามพื้น' }),
         ...Object.entries(D.p).map(([q, v]) => fld(MD.PART_P[q], it, q, { min: v[1], step: v[3] })), ...Object.keys(D.f).map(q => fld(MD.PART_F[q], it, q, { type: 'checkbox' })),
         fld('สี', it, 'c', { type: 'color' }), fld('พังได้ (ทั้งชิ้น)', it, 'brk', { type: 'checkbox' }),
+        it.pts ? el('p', { class: 'note' }, it.pts.length + ' จุด • ลากจุดฟ้าเพื่อปั้นรูป • Alt+คลิกที่ขอบ = เพิ่มจุด • เลือกจุดแล้ว Del = ลบจุด • ชนเฉพาะขอบรูป (ข้างในกลวง) ไม่มีพื้นเดินบนยอด/พังไม่ได้') : null,
         el('p', { class: 'note' }, 'ปลายชิ้นดูดติดกันตอนลาก/วาง • เว้นช่อง "ฐาน" ว่าง = ตั้งตามพื้น • พังได้ = ไม่มีฟันปลา/ทางเดินบนยอด • บานประตูพังได้เสมอ'), btns)); }
     else box.append(section('พื้นชั้นบน' + (it.n ? ' — ' + it.n : ''), true, fld('ตำแหน่ง X', it, 'x'), fld('ตำแหน่ง Z', it, 'z'), fld('กว้าง', it, 'w', { min: 0.5 }), fld('ยาว', it, 'd', { min: 0.5 }), fld('หมุน (องศา)', it, 'rot', { deg: 1 }),
       fld('สูง (ปลายต้น)', it, 'y'), fld('สูง (ปลายท้าย)', it, 'y2', { get: () => it.y2 == null ? it.y : it.y2 }), fld('หนา', it, 'th', { min: 0.1 }), fld('สี', it, 'c', { type: 'color' }), fld('ทำเป็นขั้นบันได', it, 'steps', { type: 'checkbox' }),

@@ -39,6 +39,7 @@ export const OBJ = {
   pchest: { n: 'หีบสมบัติ', cat: 'game', c: '#e8c060', r: 0.9, h: 1.0, note: 'ไม่เกิน 2 ใบ' },
   ptree: { n: 'ต้นโอ๊ก (พังได้)', cat: 'game', c: '#4f8f3c', r: 1.1, h: 7.5 }, ppine: { n: 'ต้นสน (พังได้)', cat: 'game', c: '#2f6a30', r: 1.0, h: 7 },
   house: { n: 'บ้านพังได้', cat: 'game', c: '#b08a5a', note: 'ต้องอยู่บนพื้นเรียบ' },
+  poly: { n: 'ทรงอิสระ', cat: 'hid' },
   box: { n: 'กล่อง', cat: 'prim' }, cyl: { n: 'ทรงกระบอก', cat: 'prim' }, cone: { n: 'กรวย/หลังคา', cat: 'prim' }, ball: { n: 'ก้อนกลม', cat: 'prim' }, wedge: { n: 'ลิ่ม', cat: 'prim' },
 };
 export const MODES = [['coop', 'Co-op'], ['ffa', 'FFA'], ['duel', 'ดวล'], ['tdm', 'ทีม'], ['br', 'Battle Royale'], ['race', 'แข่งไม้กวาด'], ['imp', 'หาโวลเดอมอร์']];
@@ -293,9 +294,10 @@ export const PART = {   // p: name → [default, min, max, step] • f: flag def
   stairs: { n: 'บันได', c: '#8a8478', p: { w: [3, 1, 10, 0.5], len: [8, 2, 30, 0.5], rise: [5, 0.5, 20, 0.25] }, f: {}, main: 'len' },
   ramp:   { n: 'ทางลาด', c: '#8a8478', p: { w: [3, 1, 10, 0.5], len: [10, 2, 40, 0.5], rise: [4, 0.5, 20, 0.25] }, f: {}, main: 'len' },
   walk:   { n: 'ทางเดินยก', c: '#7a7569', p: { w: [3, 1, 10, 0.5], len: [10, 2, 40, 1], up: [6, 0.5, 20, 0.25] }, f: { rail: 1 }, main: 'len' },
+  free:   { n: 'ทรงอิสระ (วาดเอง)', c: '#8a8478', p: { h: [6, 0.5, 40, 0.5], tp: [1, 0, 1, 0.05] }, f: {}, main: 'h' },   // pts = footprint polygon (local x,z): drawn in the view, vertices draggable
   bridge: { n: 'สะพาน', c: '#7d7870', p: { w: [4, 2, 12, 0.5], len: [14, 3, 50, 1], up: [3, 0.5, 20, 0.25] }, f: { rail: 1, piers: 1 }, main: 'len' },
 };
-export const PART_P = { len: 'ยาว', th: 'หนา', h: 'สูง', a: 'แขน A', b: 'แขน B', r: 'รัศมี/ครึ่งกว้าง', gw: 'ช่องประตู กว้าง', gh: 'ช่องประตู สูง', w: 'กว้าง', d: 'ลึก', rise: 'สูงขึ้น', up: 'สูงจากพื้น' };
+export const PART_P = { tp: 'หุบยอด (1 ตรง, 0 แหลม)', len: 'ยาว', th: 'หนา', h: 'สูง', a: 'แขน A', b: 'แขน B', r: 'รัศมี/ครึ่งกว้าง', gw: 'ช่องประตู กว้าง', gh: 'ช่องประตู สูง', w: 'กว้าง', d: 'ลึก', rise: 'สูงขึ้น', up: 'สูงจากพื้น' };
 export const PART_F = { bt: 'ฟันปลายอดกำแพง', wk: 'ทางเดินบนยอด', door: 'บานประตูไม้ (พังได้)', round: 'ทรงกลม', roof: 'หลังคา (แทนยอดโล่ง)', turrets: 'หอมุมเล็ก', rail: 'ราว', piers: 'เสารองใต้สะพาน' };
 export function partNew(k, o = {}) {
   const D = PART[k], p = { k, x: 0, z: 0, rot: 0, base: null, c: D.c, brk: 0 };
@@ -305,7 +307,7 @@ export function partNew(k, o = {}) {
 }
 const MERLON = { s: 0.8, h: 0.9, gap: 1.6 }, DOORC = '#6a4a2c', ROOF = '#7a4a36', WTOP = 0.03;   // WTOP: walkway sits a hair above the wall top (no z-fight)
 function pctx(M, p, objs, floors) {
-  const cs = Math.cos(p.rot || 0), sn = Math.sin(p.rot || 0), g0 = gh(M, p.x, p.z), c = { M, base: p.base != null ? p.base : g0, grounded: p.base == null };
+  const cs = Math.cos(p.rot || 0), sn = Math.sin(p.rot || 0), g0 = gh(M, p.x, p.z), c = { M, objs, base: p.base != null ? p.base : g0, grounded: p.base == null };
   let n = 0; const W = (lx, lz) => [p.x + lx * cs + lz * sn, p.z - lx * sn + lz * cs];
   // one prim box/cyl/cone/wedge: lx,lz centre (local), w=sx d=sz, y0 = bottom above part base, h = height; ra = extra rotation
   c.solid = (t, lx, lz, w, d, y0, h, o = {}) => {
@@ -383,6 +385,16 @@ const EXP = {
       c.floor(0, 0, w, d, c.base + h + WTOP, c.base + h + WTOP, 0.3);
     }
     if (p.turrets) for (const sx of [-1, 1]) for (const sz of [-1, 1]) { c.solid('cyl', sx * w / 2, sz * d / 2, 3.2, 3.2, 0, h + 3, { brk: p.brk }); c.solid('cone', sx * w / 2, sz * d / 2, 4, 4, h + 3, 2.4, { col: 0, c: ROOF, nosink: 1 }); }
+  },
+  free(c, p) {   // extruded polygon: visual 'poly' obj (no collision) + inward collision strips along every edge (hollow inside, like blocks)
+    const P = p.pts || []; if (P.length < 3) return;
+    const sink = c.grounded ? 0.8 : 0, [x, z] = c.W(0, 0), g = gh(c.M, x, z);
+    c.objs.push({ id: 'p' + p.id + '_v', t: 'poly', x: +x.toFixed(3), z: +z.toFixed(3), y: +(c.base - g - sink).toFixed(3), rot: p.rot || 0, pts: P, sy: p.h + sink, tp: p.tp == null ? 1 : p.tp, c: p.c, col: 0, brk: 0, _p: p.id });
+    let A = 0; for (let i = 0; i < P.length; i++) { const a = P[i], b = P[(i + 1) % P.length]; A += a[0] * b[1] - b[0] * a[1]; }
+    const sg = A >= 0 ? 1 : -1;
+    for (let i = 0; i < P.length; i++) { const a = P[i], b = P[(i + 1) % P.length], dx = b[0] - a[0], dz = b[1] - a[1], L = Math.hypot(dx, dz); if (L < 0.2) continue;
+      const nx = -dz / L * sg, nz = dx / L * sg;   // inward normal (rot-aware via local frame)
+      c.solid('box', (a[0] + b[0]) / 2 + nx * 0.5, (a[1] + b[1]) / 2 + nz * 0.5, 1.0, L, 0, p.h, { ra: Math.atan2(dx, dz), hid: 1 }); }
   },
   stairs(c, p) { stairLike(c, p, 1); }, ramp(c, p) { stairLike(c, p, 0); },
   walk(c, p) { if (p.base == null) c.base += p.up; deck(c, p, 0.5, 0); },

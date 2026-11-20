@@ -344,12 +344,12 @@ CITY_STY:181 CITY_VEH:188 cityFacade:190 CITYK:203 _cZ:204 _cT:204 _cR:204 _cC:2
 §259 ตึกไฮไลต์ล้มทั้งตึก (ขั้น 7)
 _ctA:262 _ctB:262 _ctC:262 cityTowerPose:263 cityTowerAnim:271 cityTowerRubble:278 CAREA:292 cityAreaSync:293 cityViewSync:305 cityDebris:349 cityFX:358
 
-## js/28-fcs-build.js (355) — 
-buildFcs:5 fcsBridge:39 fcsRubbleMat:62 fcsCore:77 FCSB:103 fcsParView:104 FSH_V:118 FSH_B:119 fcsShellMat:121 fcsBlocks:136 fcsShellBuild:148 fcsParFall:163 fcsFallTick:170 fcsShellView:182 FPILE:190 fcsShellFall:191 fcsPileTick:200 fcsShellClear:218 EFS3:221 fcsFences:222 _efC:239 _efM:239 _efS:239 _efZ:239 efsView:240
-§266 ภาพโหมด (ลูกข่ายทุกเครื่องจาก snapshot M.sg)
-SGV3:267 sgClearView:268 sgViewBuild:269 SGVZR:288 sgBarrier:290 sgSync:304 sgDust:325 sgFx:326
-§331 HUD
-sgTop:332 sgHud:334
+## js/28-fcs-build.js (366) — 
+buildFcs:5 fcsBridge:39 fcsRubbleMat:62 fcsCore:77 FCSB:103 fcsParView:104 FSH_V:118 FSH_B:119 fcsShellMat:121 fcsBlocks:136 fcsShellBuild:148 fcsParFall:163 fcsFallTick:170 fcsShellView:182 FPILE:190 _rfP:192 _rfQ:192 _rfS:192 fcsFadeList:193 fcsRubbleFade:198 fcsShellFall:202 fcsPileTick:211 fcsShellClear:229 EFS3:232 fcsFences:233 _efC:250 _efM:250 _efS:250 _efZ:250 efsView:251
+§277 ภาพโหมด (ลูกข่ายทุกเครื่องจาก snapshot M.sg)
+SGV3:278 sgClearView:279 sgViewBuild:280 SGVZR:299 sgBarrier:301 sgSync:315 sgDust:336 sgFx:337
+§342 HUD
+sgTop:343 sgHud:345
 
 ## js/28-fcs-forest.js (202) — 
 FF:7 FF_X1:8 FF_NS:9 ffGroundTex:11 ffParts:33 fcsForest:40 ffMerge:123 ffDetail:131 fcsRuin:158 fcsForestTick:192 FFC:202
@@ -851,4 +851,4 @@ _dvMap:242 devMapDraw:246
 §259 หน้าต่าง
 _dvPanel:260 _dvBtn:261 devToggle:264 dvBtn:269 dvRow:270 dvTog:271 dvSec:272 devRender:273 devPos:315
 
-(105 files, 30320 lines)
+(105 files, 30331 lines)
