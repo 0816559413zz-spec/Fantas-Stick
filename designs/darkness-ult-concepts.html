@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="th"><head><meta charset="utf-8"><title>Darkness ult concepts</title>
+<style>body{margin:0;background:#e6e4de;font-family:system-ui,sans-serif}canvas{display:block}</style></head>
+<body><canvas id="c" width="1500" height="1620"></canvas>
+<script>
+// Three concept styles for the Darkness ult shadow creature: side view + view from the target.
+// Render: node tools/headless.js --url "designs/darkness-ult-concepts.html" --w 1500 --h 1620 --shot darkness_ult_concepts --quiet
+const cv=document.getElementById('c'),g=cv.getContext('2d');
+let S=1;const rnd=()=>{S=(S*16807)%2147483647;return S/2147483647;};const seed=s=>{S=s;};
+const INK='#050507',MID='#16161c',CHAR='#24242c',THROAT='#1d1d24',PANEL='#d9d6ce';
+const L=(a,b,t)=>a+(b-a)*t;
+function qpt(p0,p1,p2,t){const u=1-t;return [u*u*p0[0]+2*u*t*p1[0]+t*t*p2[0],u*u*p0[1]+2*u*t*p1[1]+t*t*p2[1]];}
+function taper(p0,p1,p2,w0,w1,col,n=22){
+  const A=[],B=[];
+  for(let i=0;i<=n;i++){const t=i/n,a=qpt(p0,p1,p2,Math.max(0,t-.02)),b=qpt(p0,p1,p2,Math.min(1,t+.02)),p=qpt(p0,p1,p2,t);
+    let dx=b[0]-a[0],dy=b[1]-a[1];const l=Math.hypot(dx,dy)||1;dx/=l;dy/=l;const w=L(w0,w1,t)/2;A.push([p[0]-dy*w,p[1]+dx*w]);B.push([p[0]+dy*w,p[1]-dx*w]);}
+  g.beginPath();g.moveTo(...A[0]);for(const p of A)g.lineTo(...p);for(const p of B.reverse())g.lineTo(...p);g.closePath();g.fillStyle=col;g.fill();
+}
+// Closed outline through points; points marked [x,y,1] stay sharp, others are smoothed.
+function outline(pts){
+  const n=pts.length;g.beginPath();
+  const mid=(a,b)=>[(a[0]+b[0])/2,(a[1]+b[1])/2];
+  let start=pts[0][2]?pts[0]:mid(pts[n-1],pts[0]);g.moveTo(start[0],start[1]);
+  for(let i=0;i<n;i++){const p=pts[i],q=pts[(i+1)%n];
+    if(p[2]){g.lineTo(p[0],p[1]);if(!q[2]){const m=mid(p,q);g.lineTo(m[0],m[1]);}}
+    else{const m=q[2]?q:mid(p,q);g.quadraticCurveTo(p[0],p[1],m[0],m[1]);}}
+  g.closePath();
+}
+const T=(ox,oy,pts)=>pts.map(([x,y,s])=>[ox+x,oy+y,s]);
+function fill(pts,col){outline(pts);g.fillStyle=col;g.fill();}
+function poly(pts,col){g.beginPath();g.moveTo(...pts[0]);for(const p of pts.slice(1))g.lineTo(...p);g.closePath();g.fillStyle=col;g.fill();}
+function label(x,y,t,size=26,col='#222'){g.fillStyle=col;g.font=`500 ${size}px system-ui,sans-serif`;g.fillText(t,x,y);}
+// soft shadow aura: radial black puffs (dark faded black, no grey tint on top of black)
+function aura(cx,cy,rx,ry,count,s,alpha=.22){seed(s);for(let i=0;i<count;i++){const a=rnd()*6.28,d=Math.sqrt(rnd());const x=cx+Math.cos(a)*rx*d,y=cy+Math.sin(a)*ry*d,r=30+rnd()*70;
+  const gr=g.createRadialGradient(x,y,0,x,y,r);gr.addColorStop(0,`rgba(5,5,7,${alpha})`);gr.addColorStop(1,'rgba(5,5,7,0)');g.fillStyle=gr;g.fillRect(x-r,y-r,r*2,r*2);}}
+function trailSmoke(x0,y0,x1,y1,spread,count,s){seed(s);for(let i=0;i<count;i++){const t=rnd(),x=L(x0,x1,t),y=L(y0,y1,t)+(rnd()-.5)*spread*(1-t*.5),r=20+rnd()*60*(1-t*.6);
+  const gr=g.createRadialGradient(x,y,0,x,y,r);gr.addColorStop(0,`rgba(5,5,7,${.28*(1-t*.6)})`);gr.addColorStop(1,'rgba(5,5,7,0)');g.fillStyle=gr;g.fillRect(x-r,y-r,r*2,r*2);}}
+function tongues(edge,count,len,ang,s,w=18){seed(s);for(let i=0;i<count;i++){const t=rnd(),p=edge(t),a=ang+(rnd()-.5)*.7,l=len*(.45+rnd()*.85);
+  const p2=[p[0]+Math.cos(a)*l,p[1]+Math.sin(a)*l],p1=[L(p[0],p2[0],.5)+(rnd()-.5)*24,L(p[1],p2[1],.5)+(rnd()-.5)*24];taper(p,p1,p2,w*(.5+rnd()),0,INK);}}
+function strands(clipPts,from,to,spread,count,s){g.save();outline(clipPts);g.clip();seed(s);
+  for(let i=0;i<count;i++){const o=(rnd()-.5)*spread,p0=[from[0]-rnd()*60,from[1]+o],p2=[to[0]+rnd()*40,to[1]+o*.25],p1=[L(p0[0],p2[0],.4),L(p0[1],p2[1],.4)+(rnd()-.5)*spread*.5];
+    taper(p0,p1,p2,4+rnd()*12,.5,rnd()<.6?MID:CHAR);}
+  for(let i=0;i<count*.18;i++){const o=(rnd()-.5)*spread*.8,p0=[from[0]-30,from[1]+o],p2=[to[0]+80,to[1]+(rnd()-.5)*30];taper(p0,[L(p0[0],p2[0],.5),L(p0[1],p2[1],.5)+(rnd()-.5)*80],p2,2.5,.3,'#30303a');}
+  g.restore();}
+// crooked teeth along a line (dir +1 = down, -1 = up), uneven size and spacing
+function teeth(a,b,dir,maxLen,s,w0=9){seed(s);let t=.03;
+  while(t<.98){const p=[L(a[0],b[0],t),L(a[1],b[1],t)],w=w0*(.6+rnd()*.9),len=maxLen*(.3+.7*rnd()),lean=(rnd()-.5)*w*1.6;
+    poly([[p[0]-w,p[1]-dir*3],[p[0]+w,p[1]-dir*3],[p[0]+lean,p[1]+dir*len]],INK);
+    g.strokeStyle='rgba(255,255,255,.6)';g.lineWidth=1.3;g.beginPath();g.moveTo(p[0]+w*.4,p[1]+dir*3);g.lineTo(p[0]+lean,p[1]+dir*len*.95);g.stroke();
+    t+=.045+rnd()*.1;}}
+function caster(x,y){g.save();g.translate(x,y);g.fillStyle='#45454c';
+  g.beginPath();g.moveTo(-30,0);g.lineTo(-12,-60);g.lineTo(10,-62);g.lineTo(26,0);g.closePath();g.fill();g.beginPath();g.arc(4,-74,13,0,7);g.fill();
+  taper([6,-54],[28,-52],[50,-50],10,8,'#45454c');g.restore();}
+function panel(y0,title,sub){g.fillStyle=PANEL;g.fillRect(20,y0,1460,520);label(44,y0+42,title,30,'#111');label(44,y0+74,sub,19,'#444');label(1090,y0+505,'มุมจากเป้า (ปากอ้า)',17,'#555');label(60,y0+505,'มุมข้าง · ตอนค้างอ้าปาก',17,'#555');}
+
+// ============ A · Ink maw: strands pour from the hand into a heavy brow; huge low maw ============
+function styleA(y0){
+  panel(y0,'A · หมึกไหลรวมเป็นหัวหนัก','เส้นหมึกไหลจากมือรวมเป็นกะโหลกหน้าผากลาด ปากใหญ่อ้าต่ำ ขอบบนแตกเป็นลิ้นเปลวสะบัดไปข้างหลัง');
+  const ox=90,oy=y0+330;g.save();g.translate(ox,oy);g.scale(.86,.86);g.translate(-ox,-oy);caster(ox-40,oy+60);
+  trailSmoke(ox+200,oy,ox+780,oy-60,170,60,3);
+  const body=T(ox,oy,[[0,-6,1],[160,-28],[340,-95],[520,-175],[640,-215,1],[760,-190],[860,-120],[930,-60,1],[860,-50,1],[720,-20],[560,30,1],[700,80],[820,128],[860,150,1],[780,182],[640,180],[470,130],[280,66],[130,26],[0,8,1]]);
+  tongues(t=>{const x=L(220,860,t);return [ox+x,oy-30-190*Math.sin(Math.PI*Math.min(1,(x-100)/820))];},34,150,Math.PI*1.1,11,22);
+  aura(ox+620,oy-60,300,150,40,5);
+  fill(body,INK);
+  strands(body,[ox+900,oy-60],[ox+10,oy],260,80,7);
+  poly(T(ox,oy,[[560,30],[862,-50],[880,40],[860,150]]),THROAT);      // open mouth / throat
+  teeth([ox+575,oy+20],[ox+855,oy-46],1,62,21,12);
+  teeth([ox+585,oy+42],[ox+850,oy+144],-1,44,22,10);
+  g.restore();
+  const fx=1205,fy=y0+300;
+  aura(fx,fy-40,230,170,30,8);
+  tongues(t=>[fx+L(-180,180,t),fy-150-30*Math.sin(Math.PI*t)],18,80,-Math.PI/2-.1,13,22);
+  fill([[fx-230,fy+30,1],[fx-200,fy-100,1],[fx-120,fy-170,1],[fx-40,fy-150,1],[fx,fy-205,1],[fx+40,fy-150,1],[fx+120,fy-170,1],[fx+200,fy-100,1],[fx+230,fy+30,1],[fx+150,fy+120,1],[fx+60,fy+190,1],[fx-60,fy+190,1],[fx-150,fy+120,1]],INK);
+  fill([[fx-170,fy-5,1],[fx-60,fy-55,1],[fx+60,fy-55,1],[fx+170,fy-5,1],[fx+100,fy+120,1],[fx-100,fy+120,1]],THROAT);
+  teeth([fx-165,fy-8],[fx-60,fy-52],1,60,31,12);teeth([fx-60,fy-52],[fx+60,fy-52],1,70,33,13);teeth([fx+60,fy-52],[fx+165,fy-8],1,60,34,12);teeth([fx-100,fy+116],[fx+100,fy+116],-1,44,32,10);
+}
+// ============ B · Shroud: the Darkness cloak blown huge; a hood overhangs a deep maw ============
+function styleB(y0){
+  panel(y0,'B · ผ้าคลุมเงาขาดวิ่น','ผ้าคลุมของ Darkness ขยายใหญ่ หัวเป็นฮู้ดยื่นปลายแหลมคลุมปาก ชายผ้าขาดเป็นริ้วยาวสะบัดไปข้างหลัง');
+  const ox=90,oy=y0+330;g.save();g.translate(ox,oy);g.scale(.86,.86);g.translate(-ox,-oy);caster(ox-40,oy+60);
+  trailSmoke(ox+150,oy+20,ox+700,oy-40,190,50,23);
+  seed(41);for(let i=0;i<16;i++){const sx=ox+330+rnd()*430,sy=oy-120+rnd()*230,len=260+rnd()*260;   // streamers behind
+    taper([sx,sy],[sx-len*.5,sy+(rnd()-.5)*110],[sx-len,sy+(rnd()-.5)*140],30+rnd()*24,0,i%3?INK:MID);}
+  const body=T(ox,oy,[[0,-6,1],[200,-60],[420,-160],[620,-215],[790,-200],[890,-120],[930,-30,1],[880,-52,1],[760,-40],[600,20,1],[740,80],[840,118,1],[790,112],[640,140,1],[600,110,1],[560,150,1],[510,112,1],[460,140,1],[410,96,1],[350,116,1],[300,72,1],[200,40],[0,8,1]]);
+  aura(ox+600,oy-70,320,160,40,25);
+  fill(body,INK);
+  strands(body,[ox+900,oy-90],[ox+20,oy],240,46,9);
+  poly(T(ox,oy,[[600,20],[880,-52],[900,40],[840,118]]),THROAT);
+  teeth([ox+615,oy+12],[ox+875,oy-48],1,58,51,12);teeth([ox+625,oy+34],[ox+835,oy+112],-1,38,52,10);
+  g.restore();
+  const fx=1205,fy=y0+300;aura(fx,fy-30,230,170,28,27);
+  fill([[fx-220,fy+170,1],[fx-205,fy-40],[fx-150,fy-170],[fx,fy-235,1],[fx+150,fy-170],[fx+205,fy-40],[fx+220,fy+170,1],[fx+160,fy+120,1],[fx+120,fy+175,1],[fx+60,fy+125,1],[fx,fy+180,1],[fx-60,fy+125,1],[fx-120,fy+175,1],[fx-160,fy+120,1]],INK);
+  fill([[fx-140,fy+20,1],[fx-110,fy-90,1],[fx,fy-150,1],[fx+110,fy-90,1],[fx+140,fy+20,1],[fx+80,fy+110,1],[fx-80,fy+110,1]],THROAT);
+  teeth([fx-130,fy-30],[fx,fy-145],1,60,61,11);teeth([fx,fy-145],[fx+130,fy-30],1,60,63,11);teeth([fx-85,fy+106],[fx+85,fy+106],-1,40,62,9);
+}
+// ============ C · Smoke leviathan: wedge head, shard ridge, rear half breaks into fragments ============
+function styleC(y0){
+  panel(y0,'C · ปลาเงาควันแตก','หัวลิ่มคม สันหลังเป็นหนามเศษเงาสูงต่ำไม่เท่ากัน ครีบขาด ครึ่งหลังแตกเป็นเศษเหลี่ยมและควันไล่กลับไปที่มือ');
+  const ox=90,oy=y0+330;g.save();g.translate(ox,oy);g.scale(.86,.86);g.translate(-ox,-oy);caster(ox-40,oy+60);
+  trailSmoke(ox+40,oy,ox+560,oy-20,150,70,33);
+  seed(71);for(let i=0;i<150;i++){const t=rnd()**1.5,x=L(ox+30,ox+560,t),half=L(12,110,t),y=oy+(rnd()-.5)*half*1.8-14*t,s=L(5,20,t)*(.5+rnd());
+    poly([[x,y-s],[x+s*1.7,y],[x,y+s*.7],[x-s*2.4,y+s*.2]],rnd()<.7?INK:MID);}
+  seed(73);for(let i=0;i<12;i++){const x=ox+470+i*32,base=oy-110-Math.sin(i/11*Math.PI)*45,h=40+rnd()*90;poly([[x-16,base+24],[x+12,base+24],[x-22-rnd()*20,base-h]],INK);}
+  poly(T(ox,oy,[[580,60],[680,80],[500,210],[560,150],[450,190]]),INK);
+  const body=T(ox,oy,[[400,-50],[520,-130],[680,-165],[790,-135],[960,-40,1],[900,-32,1],[680,20,1],[820,90],[920,130,1],[840,160],[640,140],[490,90],[420,40]]);
+  aura(ox+680,oy-40,260,140,34,35);
+  fill(body,INK);
+  strands(body,[ox+950,oy-40],[ox+400,oy],200,46,13);
+  poly(T(ox,oy,[[680,20],[900,-32],[930,50],[920,130]]),THROAT);
+  teeth([ox+690,oy+12],[ox+895,oy-28],1,58,81,12);teeth([ox+700,oy+34],[ox+915,oy+124],-1,40,82,10);
+  g.restore();
+  const fx=1205,fy=y0+300;aura(fx,fy-20,230,160,28,37);
+  seed(91);for(let i=0;i<11;i++){const x=fx-110+i*22,h=50+rnd()*80-Math.abs(i-5)*6;poly([[x-10,fy-150+Math.abs(i-5)*12],[x+10,fy-150+Math.abs(i-5)*12],[x+(rnd()-.5)*12,fy-150-h+Math.abs(i-5)*12]],INK);}
+  fill([[fx-240,fy+10,1],[fx-150,fy-90,1],[fx-60,fy-120,1],[fx,fy-170,1],[fx+60,fy-120,1],[fx+150,fy-90,1],[fx+240,fy+10,1],[fx+140,fy+110,1],[fx,fy+160,1],[fx-140,fy+110,1]],INK);
+  poly([[fx-170,fy+5],[fx,fy-40],[fx+170,fy+5],[fx,fy+110]],THROAT);
+  teeth([fx-160,fy+2],[fx,fy-38],1,56,93,10);teeth([fx,fy-38],[fx+160,fy+2],1,56,95,10);teeth([fx-110,fy+52],[fx+110,fy+52],-1,40,94,9);
+}
+g.fillStyle='#e6e4de';g.fillRect(0,0,cv.width,cv.height);
+styleA(20);styleB(560);styleC(1100);
+</script></body></html>
