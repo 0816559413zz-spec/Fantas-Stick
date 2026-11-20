@@ -363,11 +363,13 @@ function stCreateScythePreview(root,args,lifetime){
     }
     if(baActive||args.trailPose){
       // หาง (รอบ 2): คำนวณจากท่าฟันย้อนเวลา (ไม่พึ่งเฟรมที่วาด → ผืนต่อเนื่อง ไม่เป็นริ้ว) • โคนผืนทึบเรียบ ปลายหางแตกเป็นเปลว
-      if(stScyLines){const Mt=new THREE.Matrix4(),Sv=new THREE.Vector3(S,S,S);
+      if(stScyLines){const trailWidth=args.trailWidth??1,Mt=new THREE.Matrix4(),Sv=new THREE.Vector3(S*trailWidth,S*trailWidth,S);
+        const [midX,midY]=bladePt(.50,.45),trailCenter=new THREE.Vector3(midX,midY,0).multiplyScalar(S*(1-trailWidth));
         chargedFlakes?.(swing);
         const [tipX,tipY]=bladePt(1,0.45),[ttx,tty]=tan(1),acts=[];
         const sampleTrail=args.trailPose??baPose;
         for(let j=0;j<HH;j++){const Pj=sampleTrail(swing-j*0.014),age=j/(HH-1);Mt.compose(Pj.pos,Pj.QB,Sv);acts[j]=Pj.act;
+          if(trailWidth!==1)Mt.setPosition(_p.copy(trailCenter).applyQuaternion(Pj.QB).add(Pj.pos));
           // หางด้าม: จากปลายล่างของด้ามขึ้นไปต่อกับโคนหางใบ
           {const [rx,ry]=bladePt(0.05,0.45);for(let k=0;k<SK;k++){const u=k/(SK-1);_p.set(rx*u,0.02+(ry-0.02)*u,0).applyMatrix4(Mt);const i3=j*SK+k;shpos[i3*3]=_p.x;shpos[i3*3+1]=_p.y;shpos[i3*3+2]=_p.z;
             const gy=0.30-0.18*u;shcol[i3*4]=shcol[i3*4+1]=shcol[i3*4+2]=gy;shcol[i3*4+3]=Math.min(1,Math.pow(1-age,1.2)*1.5)*Pj.act*Math.min(1,u/0.1+0.5)*(Pj.shaft===false?0:1);   /* ยาวและจางพร้อมหางใบ (ผู้ใช้ 2026-11-19) */}}   // เทาเข้มที่ปลายล่าง → เกือบดำใกล้ใบ ทึบพอเห็นชัด แต่ไม่ดำสนิทเท่าใบ

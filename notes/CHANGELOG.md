@@ -2,6 +2,11 @@
 
 - 2026-11-20 — **Zone 1 ruin: fence removed (protocol v89):** wooden fence cells inside the ruin courtyard are no longer built.
 - 2026-11-20 — **Zone 1 ruin expanded (protocol v88):** ruin around Castle Strike core 1 grows to ~40 m with inner L/straight wall cover, pillars and a raised 1.2 m platform with a step next to the core.
+
+- 2026-11-20 — **Darkness Marked Chase (Studio):** Added the shadow-ball approach and curve behind the target. The wider third-slash trail holds its shape after impact before fading.
+
+- 2026-11-20 — **Darkness Marked Chase (Studio):** Smaller, more transparent scythe during travel and the first two slashes, with a 0.18 s gap after the first fade. The third slash winds up during fade-in, starts lower, lands faster, and leaves a longer-lasting blade trail.
+
 - 2026-11-20 — **Darkness ท่าไล่ตาม (Studio, รอรีวิว #89)** พรีวิวโหมดเป้ามีตราเน้นเคียวตั้งแต่พุ่งเข้า ฟันสวนสองครั้ง และง้างฟาดลงครั้งสุดท้าย บันทึก GIF มุมกว้างและมุมซูม ผู้ใช้ยังไม่อนุมัติรอบนี้
 
 - 2026-11-20 — **Darkness VFX Studio** บันทึกท่าติดตราที่ผ่านรีวิว #88, Long Dash แบบกดค้างที่อนุมัติใน #79, Quick Dash ต่อ BA และ Shield ที่ใช้เคียว C ชุดเดียวกับ BA
