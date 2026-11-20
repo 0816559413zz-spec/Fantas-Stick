@@ -178,7 +178,7 @@
    "n": 21
   },
   "darkness/ult_v1": {
-   "v": "832d4265",
+   "v": "adad7498",
    "desc": "Darkness อัลติ แบบ 1 (ที่ตกลง): หัวเส้นหมึก ตัวผ้าซ้อน ออร่าเป็นสายควันไหลจากขอบตัว",
    "pal": "arcane",
    "tags": [
@@ -187,10 +187,10 @@
     "ult"
    ],
    "dur": 2.7,
-   "n": 26
+   "n": 31
   },
   "darkness/ult_v2": {
-   "v": "549416e9",
+   "v": "6282e0d2",
    "desc": "Darkness อัลติ แบบ 2: ผิวควันเดือด ออร่าเป็นเส้นเงายาวหลุดออกจากตัว",
    "pal": "arcane",
    "tags": [
@@ -199,10 +199,10 @@
     "ult"
    ],
    "dur": 2.7,
-   "n": 17
+   "n": 22
   },
   "darkness/ult_v3": {
-   "v": "7ef4a93f",
+   "v": "7515ff02",
    "desc": "Darkness อัลติ แบบ 3: เส้นหมึกทั้งตัว ออร่าเป็นหมอกดำลากหนา ท้ายตัวแตกเป็นเศษ",
    "pal": "arcane",
    "tags": [
@@ -211,7 +211,7 @@
     "ult"
    ],
    "dur": 2.7,
-   "n": 18
+   "n": 23
   },
   "darkness/unmarked_chase_preview": {
    "v": "10207cfe",
@@ -5003,25 +5003,25 @@
    "n": 2
   },
   "dark_ab_cloth": {
-   "v": "4a9ff909",
+   "v": "73774eb1",
    "desc": "Darkness อัลติ A+B แผ่นผ้าซ้อนบนตัว",
    "mat": "solid",
    "n": 1
   },
   "dark_ab_crest": {
-   "v": "fc633166",
+   "v": "ca40947f",
    "desc": "Darkness อัลติ A+B ลิ้นเปลวบนหัว",
    "mat": "solid",
    "n": 1
   },
   "dark_ab_hem": {
-   "v": "879daaa5",
+   "v": "15e34c8d",
    "desc": "Darkness อัลติ A+B ชายผ้าขาดใต้ตัว",
    "mat": "solid",
    "n": 1
   },
   "dark_ab_lower": {
-   "v": "44a0a841",
+   "v": "4c33398b",
    "desc": "Darkness อัลติ A+B ขากรรไกรล่าง",
    "mat": "solid",
    "n": 1
@@ -5039,37 +5039,37 @@
    "n": 1
   },
   "dark_ab_strands_lower": {
-   "v": "ad0cd4fc",
+   "v": "b3f12ae0",
    "desc": "Darkness อัลติ A+B เส้นหมึกขากรรไกรล่าง",
    "mat": "solid",
    "n": 1
   },
   "dark_ab_strands_upper": {
-   "v": "43f9050f",
+   "v": "472d823a",
    "desc": "Darkness อัลติ A+B เส้นหมึกบนหัว",
    "mat": "solid",
    "n": 1
   },
   "dark_ab_tail": {
-   "v": "dbf9e742",
+   "v": "9e46608f",
    "desc": "Darkness อัลติ A+B ตัวผ้าคลุม (คอ z=0 → มือ z=-1)",
    "mat": "solid",
    "n": 1
   },
   "dark_ab_teeth_lower": {
-   "v": "ed4f1adb",
+   "v": "0808234b",
    "desc": "Darkness อัลติ A+B ฟันล่าง",
    "mat": "solid",
    "n": 1
   },
   "dark_ab_teeth_upper": {
-   "v": "46cdc7d5",
+   "v": "f1d14c03",
    "desc": "Darkness อัลติ A+B ฟันบน",
    "mat": "solid",
    "n": 1
   },
   "dark_ab_upper": {
-   "v": "ad4997e7",
+   "v": "7f40724c",
    "desc": "Darkness อัลติ A+B กะโหลกส่วนบน (ใหญ่กว่า หน้าผากลาด) จุดหมุน = มุมปาก",
    "mat": "solid",
    "n": 1

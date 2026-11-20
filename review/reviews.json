@@ -3,8 +3,8 @@
  "items": [
   {
    "id": 91,
-   "title": "Darkness อัลติ สัตว์เงา A+B เลือก 1 ใน 3 แบบ",
-   "text": "ทรงหัวหมึก (A) บนตัวผ้าคลุมขาด (B) • แบบ 1 = ที่คุยกัน: หัวเส้นหมึก ตัวผ้าซ้อน ออร่าสายควันไหลจากขอบตัว • แบบ 2 = ผิวควันเดือด เส้นเงายาวหลุด • แบบ 3 = เส้นหมึก หมอกดำลากหนา ท้ายแตกเป็นเศษ",
+   "title": "Darkness อัลติ สัตว์เงา แบบ 3 (แก้ตามที่เลือก)",
+   "text": "แบบ 3 ใหญ่และกว้างขึ้นมากทั้งตัว หัวกลมขึ้น ควันน้อยลง พุ่งช้าลงนิด ปากอ้ากว้าง ใกล้ปลายช้าแต่ไม่หยุด งับแรงเร็วพร้อมผงกหัว แล้วสลายเป็นอนุภาคเยอะ ๆ",
    "kind": "VFX / แอนิเมชัน",
    "who": "Darkness",
    "status": "wait",
@@ -12,25 +12,27 @@
    "updated": "2026-11-20",
    "imgs": [],
    "links": [
-    "/studio.html?fx=darkness/ult_v1&map=test",
-    "/studio.html?fx=darkness/ult_v2&map=test",
     "/studio.html?fx=darkness/ult_v3&map=test",
-    "/designs/darkness_ref/ult-ab-sheet.jpg",
-    "/designs/darkness_ref/ult-ab-v1.gif",
-    "/designs/darkness_ref/ult-ab-v2.gif",
-    "/designs/darkness_ref/ult-ab-v3.gif"
+    "/designs/darkness_ref/ult-v3-sheet.jpg",
+    "/designs/darkness_ref/ult-v3-wide.gif",
+    "/designs/darkness_ref/ult-v3-side.gif",
+    "/designs/darkness_ref/ult-v3-game.gif"
    ],
    "checks": [
     {
-     "t": "เลือกแบบที่ชอบ (1/2/3)",
+     "t": "กว้างพอ ไม่น่าเกลียด",
      "ok": false
     },
     {
-     "t": "ทรง A+B ตรงที่คุย",
+     "t": "จังหวะ ช้าลงแต่ไม่หยุด แล้วงับแรง",
+     "ok": false
+    },
+    {
+     "t": "สลายเป็นอนุภาคพอ",
      "ok": false
     }
    ],
-   "reply": "ทำ 3 แบบให้เลือก แบบ 1 คือที่คุยกัน"
+   "reply": "แก้แบบ 3 ตามที่บอก"
   },
   {
    "id": 90,
