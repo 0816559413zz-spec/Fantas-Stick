@@ -111,33 +111,48 @@ model('dark_ab_hem','Darkness อัลติ A+B ชายผ้าขาดใ
 model('dark_ab_cloth','Darkness อัลติ A+B แผ่นผ้าซ้อนบนตัว',[cloth()]);
 model('dark_ab_wisp','Darkness อัลติ A+B เส้นเงาหลุด',[wisp]);
 model('dark_ab_shard','Darkness อัลติ A+B เศษเงา',[shard]);
+function portal(){   // vertical ring in the XY plane: torn ink blades outward, thin rim, four slash marks inside
+  const v=[],f=[];seed(81);
+  const quad=(a,b,c,d)=>{const n=v.length;v.push(...[a,b,c,d].map(q=>q.map(r3)));f.push([n,n+1,n+2,n+3]);f.push([n+3,n+2,n+1,n]);};
+  const tri=(a,b,c)=>{const n=v.length;v.push(...[a,b,c].map(q=>q.map(r3)));f.push([n,n+1,n+2]);f.push([n+2,n+1,n]);};
+  for(let i=0;i<48;i++){const a0=i/48*Math.PI*2,a1=(i+1)/48*Math.PI*2;if(rnd()<.12)continue;   // rim band with small gaps
+    const r0=.9+.03*rnd(),r1=1.02+.04*rnd();quad([Math.cos(a0)*r0,Math.sin(a0)*r0,0],[Math.cos(a1)*r0,Math.sin(a1)*r0,0],[Math.cos(a1)*r1,Math.sin(a1)*r1,0],[Math.cos(a0)*r1,Math.sin(a0)*r1,0]);}
+  for(let i=0;i<30;i++){const a=rnd()*Math.PI*2,w=.05+.06*rnd(),len=.15+.5*rnd(),sw=.25*(rnd()-.5);   // blades swirl outward
+    tri([Math.cos(a-w)*1.0,Math.sin(a-w)*1.0,0],[Math.cos(a+w)*1.0,Math.sin(a+w)*1.0,0],[Math.cos(a+sw)*(1+len),Math.sin(a+sw)*(1+len),-.05]);}
+  for(let k=0;k<4;k++){const a=k*Math.PI/2+Math.PI/4,c=Math.cos(a),s2=Math.sin(a),tx=-s2,ty=c;   // slash marks (Darkness mark motif)
+    tri([c*.45+tx*.05,s2*.45+ty*.05,0],[c*.45-tx*.05,s2*.45-ty*.05,0],[c*.86,s2*.86,0]);}
+  return {id:'portal',k:'poly',v,f,sub:0};
+}
+model('dark_ab_portal','Darkness อัลติ วงเวทเงาที่สัตว์พุ่งออกมา (แนวตั้ง ระนาบ XY)',[portal()]);
 model('dark_ab_ribbon','Darkness อัลติ A+B ริ้วผ้าสะบัด',[ribbon]);
 
 // ---------- timeline ----------
-const REL=1.0,LIFE=1.55,TRAVEL=.95,HOLD=1.12,SHUT=1.165,GONE=1.45;   // slower launch; keeps drifting while it opens; very fast bite
+const REL=1.0,LIFE=1.42,TRAVEL=.95,HOLD=1.01,SHUT=1.04,GONE=1.32;   // keeps moving to the end, almost no hold, very fast bite
 const W=[.31,.85,1.65];            // left hand at full thrust (studio stage)
-const HMAX=7.2,RANGE=30,WX=1.5;    // bigger overall and 1.5x wider everywhere (head, middle, base)
+const HMAX=7.2,RANGE=30,WX=1.6,WXH=1.9;   // wide body, even wider head (user: tip wider)
+const P=[W[0],2.7,W[2]+1.4],PR=3.3;   // shadow portal in front of the hand: the creature comes out of it
+const OPMAX=.72;                    // not fully black (user: too dark from behind)
 function state(tr){
   const x=Math.min(1,tr/TRAVEL),out4=1-(1-x)**4,out3=1-(1-x)**3;
-  const H=HMAX*(.42+.58*out3)+.25*ease(TRAVEL,HOLD,tr)+.3*ease(HOLD,SHUT,tr)*(1-ease(SHUT,SHUT+.08,tr));
-  const front=W[2]+(RANGE-1.6-W[2])*out4+1.6*Math.min(1,Math.max(0,(tr-TRAVEL)/(SHUT-TRAVEL)));   // slows but never stops before the bite
+  const H=HMAX*(.45+.55*out3)+.25*ease(TRAVEL,HOLD,tr)+.3*ease(HOLD,SHUT,tr)*(1-ease(SHUT,SHUT+.08,tr));
+  const front=P[2]+(RANGE-1.2-P[2])*out3+1.2*Math.min(1,Math.max(0,(tr-TRAVEL)/(SHUT-TRAVEL)));   // still moving at arrival, keeps drifting into the bite
   const hz=front-(Z1-HZ)*H;                        // hinge z
-  const hy=Math.max(W[1],.15+.55*H)+0;             // keep the chin above the floor
+  const hy=Math.max(P[1],.15+.55*H);               // starts at the portal centre, chin above the floor
   const slam=Math.min(1,Math.max(0,(tr-HOLD)/(SHUT-HOLD)))**3;
-  const open=tr<HOLD?8+44*out3+22*ease(TRAVEL,HOLD,tr):74*(1-slam);
+  const open=tr<HOLD?8+52*out3+16*ease(TRAVEL-.05,HOLD,tr):76*(1-slam);
   const nod=14*ease(HOLD,SHUT,tr)*(1-ease(SHUT+.06,SHUT+.25,tr));   // head dips down as it bites
   return {H,hz,hy,open,nod};
 }
 const keys=fn=>{const c={};for(let i=0;i<=104;i++){const k=i/104;c[String(r3(k))]=fn(k*LIFE);}return c;};
 const pos=keys(tr=>{const q=state(tr);return [W[0],r3(q.hy),r3(q.hz)];});
-const scale=keys(tr=>{const H=state(tr).H;return [r3(H*WX),r3(H),r3(H)];});
+const scale=keys(tr=>{const H=state(tr).H;return [r3(H*WXH),r3(H),r3(H)];});
 const rotUp=keys(tr=>{const q=state(tr);return [r3(q.open*.62-q.nod),0,0];}),rotLow=keys(tr=>{const q=state(tr);return [r3(-q.open*.38-q.nod),0,0];});
-const fadeOut=keys(tr=>r3(ease(0,.03,tr)*(1-ease(SHUT+.04,GONE,tr))));
+const fadeOut=keys(tr=>r3(OPMAX*ease(0,.06,tr)*(1-ease(SHUT+.04,GONE,tr))));
 const neck=tr=>{const q=state(tr);return [W[0],q.hy+(0-yMid(HZ))*q.H*0,q.hz+(Z0-HZ)*q.H*.9];};
-const tailLen=tr=>Math.max(.05,neck(tr)[2]-W[2]);
+const tailLen=tr=>Math.max(.05,neck(tr)[2]-P[2]);
 const tailPos=keys(tr=>neck(tr).map(r3));
 const tailScale=keys(tr=>{const q=state(tr),back=1-ease(SHUT,GONE-.03,tr);return [r3(q.H*WX),r3(q.H),r3(tailLen(tr)*back)];});
-const tailRot=keys(tr=>[r3(Math.atan2(neck(tr)[1]-W[1],tailLen(tr))*180/Math.PI),0,0]);
+const tailRot=keys(tr=>[r3(Math.atan2(neck(tr)[1]-P[1],tailLen(tr))*180/Math.PI),0,0]);
 const headC=keys(tr=>{const q=state(tr);return [W[0],r3(q.hy+.15*q.H),r3(q.hz+.2*q.H)];});
 const at=REL,base={at,life:LIFE};
 const end=state(SHUT),bite=[W[0],r3(end.hy),r3(end.hz+.3*end.H)];
@@ -163,6 +178,10 @@ function bodyLayers(tex){   // shape layers shared by all versions; tex picks th
   return L;
 }
 const stage=[{id:'anchor',t:'mesh',shape:'disc',mat:'black',op:0,at:0,life:2.7},{id:'stage',t:'code',fn:'studio_darkness_ult',at:0,life:2.7,args:{layer:'anchor'}}];
+const portalFx=[
+  {id:'portal_disc',t:'mesh',shape:'disc',mat:'black',at:.78,life:.82,pos:P,rot:[90,0,0],scale:{'0':.02,'0.25':PR*.92,'0.75':PR*.95,'1':PR*.3,ease:'out'},op:{'0':0,'0.2':.55,'0.7':.45,'1':0}},
+  {id:'portal',t:'mesh',shape:'model',model:'dark_ab_portal',mat:'black',col:'#0c0c10',at:.75,life:.85,pos:P,spin:0,rot:{'0':[0,0,0],'1':[0,0,-160]},scale:{'0':.05,'0.3':PR,'0.7':PR*1.05,'1':PR*.2,ease:'out'},op:{'0':0,'0.15':.9,'0.72':.85,'1':0}},
+  {id:'portal_ink',t:'emit',at:.75,life:.35,burst:0,rate:120,from:'ring',fr:PR,pos:P,dir:'in',speed:[2,5],plife:[.15,.3],look:'smoke',size:[6,12],grow:-.4,col:'#000000',c2:'#000000',gravity:0,drag:1}];
 const charge=[
   {id:'charge_orb',t:'mesh',shape:'sphere',mat:'black',at:.20,life:.82,pos:[.21,.9,-.21],scale:{'0':.03,'0.85':.17,'1':.2,ease:'in'},op:1},
   {id:'charge_ink',t:'emit',at:.20,life:.78,burst:0,rate:{'0':12,'1':40},from:'sphere',fr:.7,pos:[.21,.9,-.21],dir:'in',speed:[1.2,2.2],plife:[.18,.3],look:'smoke',size:[1,2],grow:-.8,col:'#000000',c2:'#000000',gravity:0,drag:1,spin:5}];
@@ -179,20 +198,20 @@ const write=(name,desc,layers)=>writeFileSync(`assets/fx/darkness/${name}.fx.jso
 
 // v1 (agreed): texture mix (ink strands on the head, cloth plates on the body) + flowing smoke streams
 // that leave evenly spaced rim points, trail back, rise a little and curl (no random puffs)
-write('ult_v1','Darkness อัลติ แบบ 1 (ที่ตกลง): หัวเส้นหมึก ตัวผ้าซ้อน ออร่าเป็นสายควันไหลจากขอบตัว',[...stage,...charge,...bodyLayers({strands:true,cloth:true}),
+write('ult_v1','Darkness อัลติ แบบ 1 (ที่ตกลง): หัวเส้นหมึก ตัวผ้าซ้อน ออร่าเป็นสายควันไหลจากขอบตัว',[...stage,...portalFx,...charge,...bodyLayers({strands:true,cloth:true}),
   ...rimPts.map((p,i)=>({id:'stream'+i,t:'emit',at,life:SHUT,burst:0,rate:grow(70-i*4),pos:rimKeys(p),from:'point',dir:'up',spread:.25,speed:[.4,1],plife:[.35,.6],look:'smoke',size:[lerp(10,5,i/7),lerp(16,8,i/7)],grow:.9,col:'#000000',c2:'#000000',gravity:-.9,drag:1.5,curl:true})),
   {id:'hem_streams',t:'emit',at,life:SHUT,burst:0,rate:grow(90),from:'mesh',of:'hem',dir:'down',speed:[.2,.7],plife:[.3,.5],look:'smoke',size:[5,9],grow:.6,col:'#000000',c2:'#000000',gravity:-.2,drag:2,curl:true},
   {id:'ribbons',t:'emit',at,life:SHUT,burst:0,rate:grow(40),from:'mesh',of:'tail',dir:'out',speed:[.5,1.5],plife:[.25,.45],look:'model',model:'dark_ab_ribbon',mmat:'solid',msize:[1.2,2.6],col:'#030304',c2:'#000000',gravity:-.3,drag:2,bounce:0,mspin:60},
   ...biteFx()]);
 // v2: boiling-smoke skin (toon smoke puffs bubbling from the whole surface) + ink tendrils peeling off
-write('ult_v2','Darkness อัลติ แบบ 2: ผิวควันเดือด ออร่าเป็นเส้นเงายาวหลุดออกจากตัว',[...stage,...charge,...bodyLayers({}),
+write('ult_v2','Darkness อัลติ แบบ 2: ผิวควันเดือด ออร่าเป็นเส้นเงายาวหลุดออกจากตัว',[...stage,...portalFx,...charge,...bodyLayers({}),
   {id:'boil_upper',t:'emit',at,life:SHUT,burst:0,rate:grow(180),from:'mesh',of:'upper',dir:'out',speed:[.3,1],plife:[.2,.36],look:'smoke',fb:'tex/smoke_toon',size:[14,26],grow:.5,col:'#000000',c2:'#000000',gravity:-.2,drag:3},
   {id:'boil_tail',t:'emit',at,life:SHUT,burst:0,rate:grow(170),from:'mesh',of:'tail',dir:'out',speed:[.3,.9],plife:[.2,.34],look:'smoke',fb:'tex/smoke_toon',size:[10,20],grow:.4,col:'#000000',c2:'#000000',gravity:-.2,drag:3},
   {id:'tendrils',t:'emit',at,life:SHUT,burst:0,rate:grow(120),from:'mesh',of:'upper',dir:'out',speed:[1.5,3.5],up:.6,plife:[.3,.55],look:'model',model:'dark_ab_wisp',mmat:'solid',msize:[1.2,3],col:'#020203',c2:'#000000',gravity:-.6,drag:1.6,bounce:0,mspin:80},
   {id:'tendrils_tail',t:'emit',at,life:SHUT,burst:0,rate:grow(90),from:'mesh',of:'tail',dir:'out',speed:[1,2.5],plife:[.3,.5],look:'model',model:'dark_ab_wisp',mmat:'solid',msize:[.8,2],col:'#020203',c2:'#000000',gravity:-.4,drag:1.8,bounce:0,mspin:80},
   ...biteFx('tex/smoke_toon')]);
 // v3: ink strands over everything + heavy dark fog that drags behind; rear body breaks into shards
-write('ult_v3','Darkness อัลติ แบบ 3: เส้นหมึกทั้งตัว ออร่าเป็นหมอกดำลากหนา ท้ายตัวแตกเป็นเศษ',[...stage,...charge,...bodyLayers({strands:true}),
+write('ult_v3','Darkness อัลติ แบบ 3: เส้นหมึกทั้งตัว ออร่าเป็นหมอกดำลากหนา ท้ายตัวแตกเป็นเศษ',[...stage,...portalFx,...charge,...bodyLayers({strands:true}),
   {id:'fog_head',t:'emit',at,life:SHUT,burst:0,rate:grow(75),from:'mesh',of:'upper',dir:'out',speed:[.4,1.4],plife:[.35,.6],look:'smoke',size:[26,44],grow:1,col:'#000000',c2:'#000000',gravity:-.3,drag:2},
   {id:'fog_tail',t:'emit',at,life:SHUT,burst:0,rate:grow(80),from:'mesh',of:'tail',dir:'out',speed:[.3,1],plife:[.4,.7],look:'smoke',size:[20,38],grow:1,col:'#000000',c2:'#000000',gravity:-.2,drag:2},
   {id:'break_tail',t:'emit',at,life:SHUT,burst:0,rate:grow(150),from:'mesh',of:'tail',dir:'out',speed:[.5,2],plife:[.3,.55],look:'model',model:'dark_ab_shard',mmat:'solid',msize:[.3,.9],col:'#030304',c2:'#000000',gravity:.5,drag:2,bounce:0,mspin:300},
