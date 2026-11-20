@@ -1,5 +1,6 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
 
+- 2026-11-20 — **Sketch tool (`sketch.html`):** simple draw/write tool so the user can show Claude what they want: pen, line, arrow, rect, ellipse, text, numbered markers, eraser, select/move, undo/redo, paste/drop a screenshot as background, note box. Saved by `tools/serve.py` (`/api/sketch*`) to `sketch/<id>.json|.png|.md` + `sketch/SKETCH.md`. Registered in `hub/tools.json`.
 - 2026-11-20 — **Darkness ult jaw (Studio, review #91):** Shadow-jaw ult built as Studio layers (jaw/teeth/tail models, black ink texture, smoke, shards) with a staging code layer for the caster and targets. Fast launch, slow ease to 30 m in 0.8 s, hold while opening wider, hard bite, dissolve.
 
 - 2026-11-20 — **Player hitbox 0.9 m -> 0.4 m (protocol v90):** player radius `PR` 18 -> 8 px to match the character body, for both wall collision and spell hits.

@@ -1,0 +1,304 @@
+<!doctype html>
+<html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>สเก็ตช์ — Fantas Stick</title>
+<!-- สเก็ตช์: วาด เขียน วางรูปร่าง ลูกศร เลขลำดับ บนกระดาน/รูปที่วางมา แล้วให้ Claude ดู
+     เก็บใน sketch/<id>.json + .png + .md (serve.py เขียนให้) + sketch/SKETCH.md • ต้องเปิดผ่าน tools/serve.py (Tools.bat) • Claude: อ่าน sketch/SKETCH.md แล้วเปิด .png ด้วย Read -->
+<link rel="stylesheet" href="hub/tool-ui.css">
+<script src="hub/tool-sound.js"></script>
+<style>
+html,body{margin:0;height:100%}
+body{display:flex;flex-direction:column;overflow:hidden}
+.tl-bar input.nm{width:200px}
+#stat{color:var(--tx2);font-size:12px;white-space:nowrap}
+#stat.err{color:var(--serr)}
+#opts{display:flex;align-items:center;gap:14px;padding:6px 12px;background:var(--bg1);border-bottom:1px solid var(--ln);flex-wrap:wrap}
+#opts .g{display:flex;align-items:center;gap:5px}
+#opts label{color:var(--tx3);font-size:12px}
+.sw{width:22px;height:22px;border-radius:50%;border:2px solid var(--ln2);padding:0;cursor:pointer}
+.sw.on{border-color:var(--acc);box-shadow:0 0 0 2px var(--accBg)}
+.seg{display:flex}.seg .tl-btn{border-radius:0;margin-left:-1px;padding:4px 9px}.seg .tl-btn:first-child{border-radius:var(--r) 0 0 var(--r);margin-left:0}.seg .tl-btn:last-child{border-radius:0 var(--r) var(--r) 0}
+main{flex:1;display:flex;min-height:0}
+#tools{width:62px;background:var(--bg1);border-right:1px solid var(--ln);display:flex;flex-direction:column;gap:4px;padding:6px;overflow:auto}
+#tools .tl-btn{padding:6px 0;text-align:center;font-size:16px;line-height:1.1}
+#tools .tl-btn small{display:block;font-size:10px;color:inherit;opacity:.7;margin-top:2px}
+#stage{flex:1;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;background:var(--bg0)}
+#wrap{position:relative;box-shadow:0 0 0 1px var(--ln2),0 6px 24px #0008}
+#cv{display:block;touch-action:none}
+#te{position:absolute;display:none;margin:0;padding:0;border:1px dashed var(--acc);background:transparent;resize:none;overflow:hidden;outline:none;font-family:"Segoe UI","Noto Sans Thai",sans-serif;font-weight:700;line-height:1.25;white-space:pre}
+#drop{position:absolute;inset:8px;border:2px dashed var(--acc);border-radius:8px;display:none;align-items:center;justify-content:center;font-size:18px;color:var(--acc2);background:#4a8cff14;pointer-events:none}
+#noteBar{display:flex;gap:8px;padding:8px 12px;background:var(--bg1);border-top:1px solid var(--ln);align-items:stretch}
+#note{flex:1;height:64px;resize:vertical;min-height:40px;max-height:200px;font:inherit;color:var(--tx);background:var(--bg2);border:1px solid var(--ln2);border-radius:var(--r);padding:6px 8px}
+#noteBar .col{display:flex;flex-direction:column;gap:6px;justify-content:center}
+.hint{color:var(--tx3);font-size:12px}
+kbd{background:var(--bg3);border:1px solid var(--ln2);border-radius:3px;padding:0 4px;font:11px var(--fu)}
+</style></head><body>
+<div class="tl-bar">
+  <a class="tl-home" href="hub.html" title="กลับศูนย์รวม Tool">◂ Tool</a>
+  <h1>✎ สเก็ตช์</h1>
+  <input class="tl-in nm" id="name" placeholder="ชื่อสเก็ตช์" maxlength="60">
+  <select class="tl-sel" id="list" title="เปิดสเก็ตช์เก่า"></select>
+  <button class="tl-btn" id="bNew">＋ ใหม่</button>
+  <button class="tl-btn" id="bDel" title="ย้ายไปถังขยะ (กู้คืนได้ใน sketch/_deleted)">🗑 ลบ</button>
+  <span class="sp"></span>
+  <span id="stat">กำลังโหลด…</span>
+  <a class="tl-btn" id="bPng" download="sketch.png" style="text-decoration:none">⬇ PNG</a>
+  <button class="tl-btn pri" id="bCopy" title="บันทึก + คัดลอกข้อความไปวางในแชท Claude">📋 ส่ง Claude</button>
+  <div data-tool-sound></div>
+</div>
+<div id="opts">
+  <div class="g" id="cols"></div>
+  <div class="g"><label>หนา</label><div class="seg" id="wid"><button class="tl-btn" data-w="3">บาง</button><button class="tl-btn on" data-w="6">กลาง</button><button class="tl-btn" data-w="12">หนา</button></div></div>
+  <div class="g"><button class="tl-btn" id="bFill" title="รูปร่างมีสีเติมพื้นโปร่ง">▨ เติมสี</button></div>
+  <div class="g"><button class="tl-btn" id="bUndo" title="Ctrl+Z">↶ ย้อน</button><button class="tl-btn" id="bRedo" title="Ctrl+Y">↷ ทำซ้ำ</button><button class="tl-btn" id="bClear">ล้างทั้งหมด</button></div>
+  <div class="g"><label>พื้น</label><div class="seg" id="paper"><button class="tl-btn on" data-p="#ffffff">ขาว</button><button class="tl-btn" data-p="#1e1e1e">ดำ</button></div>
+    <button class="tl-btn" id="bGrid">▦ กริด</button></div>
+  <div class="g"><label>ขนาด</label><select class="tl-sel" id="size"><option value="1280x720">1280×720 (16:9)</option><option value="1280x960">1280×960 (4:3)</option><option value="960x960">960×960 (จัตุรัส)</option><option value="720x1280">720×1280 (แนวตั้ง)</option></select>
+    <button class="tl-btn" id="bBg">🖼 รูปพื้นหลัง…</button><button class="tl-btn" id="bBgX" style="display:none">✕ เอารูปออก</button></div>
+</div>
+<main>
+  <div id="tools"></div>
+  <div id="stage"><div id="wrap"><canvas id="cv"></canvas><textarea id="te" spellcheck="false" rows="1"></textarea></div><div id="drop">ปล่อยรูปที่นี่เพื่อใช้เป็นพื้นหลัง</div></div>
+</main>
+<div id="noteBar">
+  <textarea id="note" placeholder="บอก Claude ว่าต้องการอะไร เช่น 'ย้ายปุ่มนี้ไปมุมขวา', 'ศัตรูเดินตามลูกศร 1→2→3', 'วงสีแดง = จุดที่เสีย'"></textarea>
+  <div class="col"><span class="hint">วางรูป <kbd>Ctrl</kbd>+<kbd>V</kbd> (จับภาพจอ <kbd>Win</kbd>+<kbd>Shift</kbd>+<kbd>S</kbd>) หรือลากไฟล์รูปมาวาง</span>
+  <span class="hint">คีย์ลัด: V เลือก • P ปากกา • L เส้น • A ลูกศร • R กรอบ • O วงรี • T ข้อความ • N เลข • E ยางลบ • Shift = เส้นตรง/สี่เหลี่ยมจัตุรัส</span></div>
+</div>
+<script>
+const $=s=>document.querySelector(s);
+const COLS=['#ff3030','#ffb000','#2ee86b','#3aa0ff','#b36bff','#111111','#ffffff'];
+const TOOLS=[['sel','↖','เลือก','V'],['pen','✏','ปากกา','P'],['line','╱','เส้น','L'],['arrow','➜','ลูกศร','A'],['rect','▭','กรอบ','R'],['ellipse','◯','วงรี','O'],['text','T','ข้อความ','T'],['num','①','เลข','N'],['eraser','⌫','ยางลบ','E']];
+const TXTZ={3:28,6:42,12:68};
+const cv=$('#cv'),g=cv.getContext('2d'),te=$('#te');
+let doc,bgImg=null,st={tool:'pen',c:COLS[0],w:6,fill:false,grid:false},sel=null,hist=[],redo=[],view=1,online=false,saveT=0,editing=null,busy=0;
+
+// ---------- doc ----------
+const jstr=o=>JSON.stringify(o,(k,v)=>k[0]==='_'?undefined:v);
+const newId=()=>'sk-'+Date.now().toString(36);
+function blank(){return {id:newId(),name:'สเก็ตช์ '+new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'}),w:1280,h:720,paper:'#ffffff',bg:'',note:'',shapes:[]};}
+function stat(t,err){const s=$('#stat');s.textContent=t;s.className=err?'err':'';}
+function empty(){return !doc.shapes.length&&!doc.bg&&!doc.note.trim();}
+function setDoc(d){
+  doc=d;sel=null;hist=[];redo=[];editing=null;te.style.display='none';
+  $('#name').value=doc.name;$('#note').value=doc.note||'';
+  document.querySelectorAll('#paper [data-p]').forEach(b=>b.classList.toggle('on',b.dataset.p===doc.paper));
+  $('#size').value=doc.w+'x'+doc.h;if($('#size').value!==doc.w+'x'+doc.h){const o=new Option(doc.w+'×'+doc.h,doc.w+'x'+doc.h);$('#size').add(o);$('#size').value=o.value;}
+  loadBg().then(()=>{layout();draw();});
+  layout();draw();refreshBtns();
+}
+function loadBg(){return new Promise(ok=>{bgImg=null;if(!doc.bg)return ok();const im=new Image();im.onload=()=>{bgImg=im;ok();};im.onerror=()=>ok();im.src=doc.bg+'?v='+Date.now();});}
+function refreshBtns(){
+  $('#bUndo').disabled=!hist.length;$('#bRedo').disabled=!redo.length;
+  $('#bBgX').style.display=doc.bg?'':'none';$('#size').disabled=!!doc.bg;
+  $('#bFill').classList.toggle('on',st.fill);$('#bGrid').classList.toggle('on',st.grid);
+  $('#bPng').href=exportURL();$('#bPng').download=(doc.name||'sketch').replace(/[^\w฀-๿\-]+/g,'_')+'.png';
+}
+
+// ---------- save ----------
+function touch(){draw();refreshBtns();clearTimeout(saveT);saveT=setTimeout(save,900);stat('กำลังบันทึก…');}
+function exportURL(){const c=document.createElement('canvas');c.width=doc.w;c.height=doc.h;render(c.getContext('2d'),false);return c.toDataURL('image/png');}
+async function save(){
+  clearTimeout(saveT);if(empty()){stat('ว่าง — ยังไม่บันทึก');return true;}
+  if(!online){stat('⚠ ต้องเปิดผ่าน "Tools.bat" (tools/serve.py) ถึงจะบันทึกให้ Claude ได้ • ใช้ ⬇ PNG เก็บเองได้',1);return false;}
+  try{
+    doc.name=$('#name').value.trim()||doc.name;doc.note=$('#note').value;
+    const r=await fetch('/api/sketch?id='+doc.id,{method:'POST',body:JSON.stringify({doc:JSON.parse(jstr(doc)),png:exportURL()})});
+    const j=await r.json();if(!j.ok)throw j.err;stat('บันทึกแล้ว ✓ '+new Date().toLocaleTimeString('th-TH'));loadList();return true;
+  }catch(e){stat('⚠ บันทึกไม่ได้: '+e,1);return false;}
+}
+async function loadList(){
+  try{
+    const L=await (await fetch('/api/sketches',{cache:'no-store'})).json();online=true;
+    $('#list').innerHTML='<option value="">เปิดสเก็ตช์เก่า… ('+L.length+')</option>'+L.sort((a,b)=>b.t-a.t).map(m=>`<option value="${m.id}">${m.name.replace(/</g,'&lt;')} • ${m.n} ชิ้น</option>`).join('');
+  }catch(e){online=false;}
+}
+
+// ---------- shapes ----------
+function snap(){hist.push(jstr(doc.shapes));if(hist.length>100)hist.shift();redo=[];}
+function undo(){if(!hist.length)return;redo.push(jstr(doc.shapes));doc.shapes=JSON.parse(hist.pop());sel=null;touch();}
+function redoF(){if(!redo.length)return;hist.push(jstr(doc.shapes));doc.shapes=JSON.parse(redo.pop());sel=null;touch();}
+const font=s=>`700 ${s.z}px "Segoe UI","Noto Sans Thai",sans-serif`;
+const numR=s=>10+s.w*2.2;
+function textLines(s){return String(s.s).split('\n');}
+function textBox(s){g.save();g.font=font(s);const w=Math.max(...textLines(s).map(l=>g.measureText(l).width),s.z*.5);g.restore();return [s.x,s.y,s.x+w,s.y+textLines(s).length*s.z*1.25];}
+function bbox(s){
+  if(s.t==='text')return textBox(s);
+  if(s.t==='num'){const r=numR(s);return [s.x-r,s.y-r,s.x+r,s.y+r];}
+  const P=s.t==='pen'?s.p:[s.a,s.b];let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;
+  for(const p of P){x0=Math.min(x0,p[0]);y0=Math.min(y0,p[1]);x1=Math.max(x1,p[0]);y1=Math.max(y1,p[1]);}
+  return [x0,y0,x1,y1];
+}
+function segD(p,a,b){const dx=b[0]-a[0],dy=b[1]-a[1],l=dx*dx+dy*dy;let t=l?((p[0]-a[0])*dx+(p[1]-a[1])*dy)/l:0;t=Math.max(0,Math.min(1,t));return Math.hypot(p[0]-a[0]-t*dx,p[1]-a[1]-t*dy);}
+function hit(s,p){
+  const tol=9/view+s.w/2;
+  if(s.t==='pen'){for(let i=1;i<s.p.length;i++)if(segD(p,s.p[i-1],s.p[i])<tol)return true;return s.p.length===1&&Math.hypot(p[0]-s.p[0][0],p[1]-s.p[0][1])<tol;}
+  if(s.t==='line'||s.t==='arrow')return segD(p,s.a,s.b)<tol;
+  if(s.t==='rect'){const [x0,y0,x1,y1]=bbox(s);if(s.f&&p[0]>x0&&p[0]<x1&&p[1]>y0&&p[1]<y1)return true;
+    return [[[x0,y0],[x1,y0]],[[x1,y0],[x1,y1]],[[x1,y1],[x0,y1]],[[x0,y1],[x0,y0]]].some(e=>segD(p,e[0],e[1])<tol);}
+  if(s.t==='ellipse'){const [x0,y0,x1,y1]=bbox(s),cx=(x0+x1)/2,cy=(y0+y1)/2,rx=Math.max(1,(x1-x0)/2),ry=Math.max(1,(y1-y0)/2),d=Math.hypot((p[0]-cx)/rx,(p[1]-cy)/ry);
+    if(s.f&&d<1)return true;return Math.abs(d-1)*Math.min(rx,ry)<tol;}
+  const [x0,y0,x1,y1]=bbox(s);return p[0]>=x0-4&&p[0]<=x1+4&&p[1]>=y0-4&&p[1]<=y1+4;
+}
+function pick(p){for(let i=doc.shapes.length-1;i>=0;i--)if(hit(doc.shapes[i],p))return doc.shapes[i];return null;}
+function move(s,dx,dy){
+  if(s.t==='pen')s.p.forEach(q=>{q[0]+=dx;q[1]+=dy;});
+  else if(s.a){s.a[0]+=dx;s.a[1]+=dy;s.b[0]+=dx;s.b[1]+=dy;}
+  else{s.x+=dx;s.y+=dy;}
+}
+
+// ---------- render ----------
+function drawShape(c,s){
+  c.lineCap=c.lineJoin='round';c.strokeStyle=c.fillStyle=s.c;c.lineWidth=s.w;
+  if(s.t==='pen'){c.beginPath();s.p.forEach((q,i)=>i?c.lineTo(q[0],q[1]):c.moveTo(q[0],q[1]));if(s.p.length===1)c.lineTo(s.p[0][0]+.1,s.p[0][1]);c.stroke();}
+  else if(s.t==='line'||s.t==='arrow'){
+    c.beginPath();c.moveTo(s.a[0],s.a[1]);c.lineTo(s.b[0],s.b[1]);c.stroke();
+    if(s.t==='arrow'){const an=Math.atan2(s.b[1]-s.a[1],s.b[0]-s.a[0]),h=Math.max(16,s.w*4.2);
+      c.beginPath();c.moveTo(s.b[0],s.b[1]);c.lineTo(s.b[0]-h*Math.cos(an-.45),s.b[1]-h*Math.sin(an-.45));c.lineTo(s.b[0]-h*Math.cos(an+.45),s.b[1]-h*Math.sin(an+.45));c.closePath();c.fill();}}
+  else if(s.t==='rect'||s.t==='ellipse'){
+    const [x0,y0,x1,y1]=bbox(s);c.beginPath();
+    if(s.t==='rect')c.rect(x0,y0,x1-x0,y1-y0);else c.ellipse((x0+x1)/2,(y0+y1)/2,Math.max(.5,(x1-x0)/2),Math.max(.5,(y1-y0)/2),0,0,Math.PI*2);
+    if(s.f){c.save();c.globalAlpha=.28;c.fill();c.restore();}c.stroke();}
+  else if(s.t==='text'){if(s._hide)return;c.font=font(s);c.textBaseline='top';c.fillStyle=s.c;textLines(s).forEach((l,i)=>c.fillText(l,s.x,s.y+i*s.z*1.25));}
+  else if(s.t==='num'){const r=numR(s);c.beginPath();c.arc(s.x,s.y,r,0,Math.PI*2);c.fill();
+    c.fillStyle=['#ffffff','#ffb000','#2ee86b'].includes(s.c)?'#111':'#fff';c.font=`700 ${r*1.15}px "Segoe UI",sans-serif`;c.textAlign='center';c.textBaseline='middle';c.fillText(s.n,s.x,s.y+r*.06);c.textAlign='left';}
+}
+function render(c,ui){
+  c.fillStyle=doc.paper;c.fillRect(0,0,doc.w,doc.h);
+  if(bgImg)c.drawImage(bgImg,0,0,doc.w,doc.h);
+  if(ui&&st.grid){c.strokeStyle=doc.paper==='#ffffff'?'#00000022':'#ffffff22';c.lineWidth=1;c.beginPath();for(let x=0;x<=doc.w;x+=80){c.moveTo(x+.5,0);c.lineTo(x+.5,doc.h);}for(let y=0;y<=doc.h;y+=80){c.moveTo(0,y+.5);c.lineTo(doc.w,y+.5);}c.stroke();}
+  for(const s of doc.shapes)drawShape(c,s);
+  if(ui&&sel&&doc.shapes.includes(sel)&&!sel._hide){const [x0,y0,x1,y1]=bbox(sel),p=6/view;c.save();c.strokeStyle='#4a8cff';c.lineWidth=1.5/view;c.setLineDash([6/view,4/view]);c.strokeRect(x0-p,y0-p,x1-x0+2*p,y1-y0+2*p);c.restore();}
+}
+function draw(){render(g,true);}
+function layout(){
+  cv.width=doc.w;cv.height=doc.h;
+  const st_=$('#stage'),sw=st_.clientWidth-28,sh=st_.clientHeight-28;view=Math.min(sw/doc.w,sh/doc.h,2);if(!(view>0))view=1;
+  cv.style.width=Math.round(doc.w*view)+'px';cv.style.height=Math.round(doc.h*view)+'px';draw();
+}
+addEventListener('resize',layout);
+
+// ---------- pointer ----------
+const pt=e=>{const r=cv.getBoundingClientRect();return [(e.clientX-r.left)*doc.w/r.width,(e.clientY-r.top)*doc.h/r.height];};
+let drag=null;
+cv.onpointerdown=e=>{
+  if(e.button!==0)return;e.preventDefault();if(editing)finishText();
+  cv.setPointerCapture(e.pointerId);const p=pt(e),t=st.tool;
+  if(t==='sel'){const s=pick(p);sel=s;drag=s?{s,last:p,moved:false}:null;draw();return;}
+  if(t==='eraser'){snap();drag={er:true,n:0};eraseAt(p);return;}
+  if(t==='text'){const s=pick(p);if(s&&s.t==='text'){sel=s;startText(s,false);}else startText({t:'text',c:st.c,w:st.w,x:p[0],y:p[1],s:'',z:TXTZ[st.w]},true);return;}
+  if(t==='num'){snap();const n=doc.shapes.filter(s=>s.t==='num').reduce((m,s)=>Math.max(m,s.n),0)+1;const s={t:'num',c:st.c,w:st.w,x:p[0],y:p[1],n};doc.shapes.push(s);sel=s;touch();return;}
+  snap();const s=t==='pen'?{t,c:st.c,w:st.w,p:[p]}:{t,c:st.c,w:st.w,a:p,b:p.slice(),f:st.fill};
+  doc.shapes.push(s);sel=null;drag={s,start:p,made:true};draw();
+};
+cv.onpointermove=e=>{
+  if(!drag)return;const p=pt(e);
+  if(drag.er){eraseAt(p);return;}
+  if(drag.made){const s=drag.s;
+    if(s.t==='pen'){const l=s.p[s.p.length-1];if(Math.hypot(p[0]-l[0],p[1]-l[1])>1.5)s.p.push(p);}
+    else{let q=p;if(e.shiftKey){const dx=p[0]-s.a[0],dy=p[1]-s.a[1];
+      if(s.t==='line'||s.t==='arrow'){const an=Math.round(Math.atan2(dy,dx)/(Math.PI/4))*Math.PI/4,d=Math.hypot(dx,dy);q=[s.a[0]+d*Math.cos(an),s.a[1]+d*Math.sin(an)];}
+      else{const m=Math.max(Math.abs(dx),Math.abs(dy));q=[s.a[0]+Math.sign(dx||1)*m,s.a[1]+Math.sign(dy||1)*m];}}
+      s.b=q;}
+    draw();return;}
+  if(drag.s){if(!drag.moved){snap();drag.moved=true;}move(drag.s,p[0]-drag.last[0],p[1]-drag.last[1]);drag.last=p;draw();}
+};
+cv.onpointerup=()=>{
+  if(!drag)return;const d=drag;drag=null;
+  if(d.er){if(d.n)touch();else hist.pop();refreshBtns();return;}
+  if(d.made){const s=d.s,tiny=s.t==='pen'?false:Math.hypot(s.b[0]-s.a[0],s.b[1]-s.a[1])<4;
+    if(tiny){doc.shapes.pop();hist.pop();draw();refreshBtns();return;}
+    if(s.t==='pen'&&s.p.length>2)s.p=smooth(s.p);touch();return;}
+  if(d.moved)touch();
+};
+cv.ondblclick=e=>{const s=pick(pt(e));if(s&&s.t==='text'){sel=s;startText(s,false);}};
+function eraseAt(p){const s=pick(p);if(s){doc.shapes.splice(doc.shapes.indexOf(s),1);if(sel===s)sel=null;drag.n++;draw();}}
+function smooth(P){const o=[P[0]];for(let i=1;i<P.length-1;i++)o.push([(P[i-1][0]+P[i][0]*2+P[i+1][0])/4,(P[i-1][1]+P[i][1]*2+P[i+1][1])/4]);o.push(P[P.length-1]);return o.map(q=>[Math.round(q[0]*10)/10,Math.round(q[1]*10)/10]);}
+
+// ---------- text edit ----------
+function startText(s,isNew){
+  editing={s,isNew,old:s.s};s._hide=true;
+  te.style.display='block';te.style.left=(s.x*view)+'px';te.style.top=(s.y*view)+'px';te.style.fontSize=(s.z*view)+'px';te.style.color=s.c;
+  te.style.background=s.c==='#ffffff'?'#555':'transparent';te.value=s.s;sizeTe();draw();te.focus();setTimeout(()=>te.focus(),0);
+}
+function sizeTe(){const L=te.value.split('\n');te.rows=L.length;te.style.width=Math.max(60,Math.max(...L.map(l=>l.length))*parseFloat(te.style.fontSize)*.75+24)+'px';te.style.height=(L.length*parseFloat(te.style.fontSize)*1.25+4)+'px';}
+function finishText(cancel){
+  if(!editing)return;const {s,isNew,old}=editing;editing=null;te.style.display='none';delete s._hide;
+  const v=cancel?old:te.value.replace(/\s+$/,'');
+  if(isNew){if(v){snap();s.s=v;doc.shapes.push(s);sel=s;touch();}else draw();return;}
+  if(!v){snap();doc.shapes.splice(doc.shapes.indexOf(s),1);sel=null;touch();}
+  else if(v!==old){snap();s.s=v;touch();}else draw();
+}
+te.oninput=sizeTe;
+te.onblur=()=>finishText();
+te.onkeydown=e=>{e.stopPropagation();if(e.key==='Escape'){finishText(true);}else if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();finishText();}};
+
+// ---------- UI ----------
+function setTool(t){if(editing)finishText();st.tool=t;document.querySelectorAll('#tools .tl-btn').forEach(b=>b.classList.toggle('on',b.dataset.t===t));cv.style.cursor=t==='sel'?'default':t==='text'?'text':t==='eraser'?'not-allowed':'crosshair';}
+$('#tools').innerHTML=TOOLS.map(t=>`<button class="tl-btn" data-t="${t[0]}" title="${t[2]} (${t[3]})">${t[1]}<small>${t[2]}</small></button>`).join('');
+$('#tools').onclick=e=>{const b=e.target.closest('[data-t]');if(b)setTool(b.dataset.t);};
+$('#cols').innerHTML=COLS.map(c=>`<button class="sw${c===st.c?' on':''}" data-c="${c}" style="background:${c}" title="${c}"></button>`).join('');
+$('#cols').onclick=e=>{const c=e.target.dataset.c;if(!c)return;st.c=c;document.querySelectorAll('#cols .sw').forEach(b=>b.classList.toggle('on',b.dataset.c===c));
+  if(sel&&doc.shapes.includes(sel)){snap();sel.c=c;touch();}};
+$('#wid').onclick=e=>{const w=+e.target.dataset.w;if(!w)return;st.w=w;document.querySelectorAll('#wid [data-w]').forEach(b=>b.classList.toggle('on',+b.dataset.w===w));
+  if(sel&&doc.shapes.includes(sel)){snap();sel.w=w;if(sel.t==='text')sel.z=TXTZ[w];touch();}};
+$('#bFill').onclick=()=>{st.fill=!st.fill;if(sel&&(sel.t==='rect'||sel.t==='ellipse')){snap();sel.f=st.fill;touch();}refreshBtns();};
+$('#bGrid').onclick=()=>{st.grid=!st.grid;draw();refreshBtns();};
+$('#bUndo').onclick=undo;$('#bRedo').onclick=redoF;
+$('#bClear').onclick=()=>{if(!doc.shapes.length)return;if(!confirm('ล้างรอยวาดทั้งหมด? (ย้อนกลับด้วย Ctrl+Z ได้)'))return;snap();doc.shapes=[];sel=null;touch();};
+$('#paper').onclick=e=>{const p=e.target.dataset.p;if(!p)return;doc.paper=p;document.querySelectorAll('#paper [data-p]').forEach(b=>b.classList.toggle('on',b.dataset.p===p));touch();};
+$('#size').onchange=e=>{const [w,h]=e.target.value.split('x').map(Number);doc.w=w;doc.h=h;layout();touch();};
+$('#name').oninput=()=>{doc.name=$('#name').value;touch();};
+$('#note').oninput=()=>{doc.note=$('#note').value;touch();};
+$('#bBg').onclick=()=>{const i=document.createElement('input');i.type='file';i.accept='image/*';i.onchange=()=>i.files[0]&&setBg(i.files[0]);i.click();};
+$('#bBgX').onclick=()=>{doc.bg='';bgImg=null;refreshBtns();touch();};
+$('#bNew').onclick=async()=>{await save();setDoc(blank());stat('สเก็ตช์ใหม่');};
+$('#list').onchange=async e=>{const id=e.target.value;if(!id)return;await save();
+  try{const d=await (await fetch('/api/sketch?id='+id,{cache:'no-store'})).json();setDoc(d);stat('เปิด “'+d.name+'”');}catch(err){stat('⚠ เปิดไม่ได้',1);}e.target.value='';};
+$('#bDel').onclick=async()=>{if(!confirm('ลบสเก็ตช์ “'+doc.name+'”? (ย้ายไป sketch/_deleted กู้ได้)'))return;
+  if(online&&!empty()){try{await fetch('/api/sketch-del?id='+doc.id,{method:'POST'});}catch(e){}}clearTimeout(saveT);setDoc(blank());loadList();stat('ลบแล้ว');};
+$('#bCopy').onclick=async()=>{
+  if(editing)finishText();const ok=await save();if(!ok||empty())return;
+  const msg=`ดูสเก็ตช์ "${doc.name}": อ่าน sketch/${doc.id}.md แล้วเปิดรูป sketch/${doc.id}.png ด้วย Read แล้วทำตามที่วาด/เขียนไว้`;
+  try{await navigator.clipboard.writeText(msg);stat('บันทึก + คัดลอกแล้ว — ไปวางในแชท Claude ได้เลย ✓');}catch(e){prompt('คัดลอกข้อความนี้:',msg);}
+};
+
+// ---------- background image ----------
+function fileToImg(f){return new Promise((ok,no)=>{const u=URL.createObjectURL(f),im=new Image();im.onload=()=>{URL.revokeObjectURL(u);ok(im);};im.onerror=no;im.src=u;});}
+async function setBg(f){
+  if(!f||!f.type.startsWith('image/'))return;
+  try{
+    const im=await fileToImg(f),k=Math.min(1,1600/im.width,1200/im.height),c=document.createElement('canvas');c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);
+    c.getContext('2d').drawImage(im,0,0,c.width,c.height);
+    let path='';
+    if(online){stat('กำลังเก็บรูป…');const r=await (await fetch('/api/sketch-img?name='+doc.id+'_bg_'+Date.now().toString(36),{method:'POST',body:c.toDataURL('image/png')})).json();if(!r.ok)throw r.err;path=r.path;}
+    else stat('⚠ ไม่ได้ต่อเซิร์ฟเวอร์ — รูปพื้นหลังจะไม่ถูกเก็บ',1);
+    bgImg=c;doc.bg=path;doc.w=c.width;doc.h=c.height;
+    const o=new Option(doc.w+'×'+doc.h,doc.w+'x'+doc.h);$('#size').add(o);$('#size').value=o.value;layout();touch();
+  }catch(e){stat('⚠ ใช้รูปนี้ไม่ได้: '+e,1);}
+}
+document.addEventListener('paste',e=>{
+  if(/^(INPUT|TEXTAREA)$/.test(document.activeElement.tagName))return;
+  const f=[...(e.clipboardData?.items||[])].filter(i=>i.kind==='file'&&i.type.startsWith('image/')).map(i=>i.getAsFile())[0];
+  if(f){e.preventDefault();setBg(f);}
+});
+const dz=$('#drop');
+addEventListener('dragover',e=>{e.preventDefault();dz.style.display='flex';});
+addEventListener('dragleave',e=>{if(!e.relatedTarget)dz.style.display='none';});
+addEventListener('drop',e=>{e.preventDefault();dz.style.display='none';const f=e.dataTransfer.files[0];if(f)setBg(f);});
+
+// ---------- keys ----------
+document.addEventListener('keydown',e=>{
+  if(/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName))return;
+  const k=e.key.toLowerCase();
+  if((e.ctrlKey||e.metaKey)&&k==='z'){e.preventDefault();e.shiftKey?redoF():undo();return;}
+  if((e.ctrlKey||e.metaKey)&&k==='y'){e.preventDefault();redoF();return;}
+  if(e.ctrlKey||e.metaKey||e.altKey)return;
+  if(k==='delete'||k==='backspace'){if(sel&&doc.shapes.includes(sel)){e.preventDefault();snap();doc.shapes.splice(doc.shapes.indexOf(sel),1);sel=null;touch();}return;}
+  if(k==='escape'){sel=null;setTool('sel');draw();return;}
+  const t=TOOLS.find(t=>t[3].toLowerCase()===k);if(t)setTool(t[0]);
+});
+addEventListener('beforeunload',()=>{if(online&&!empty()){try{navigator.sendBeacon('/api/sketch?id='+doc.id,JSON.stringify({doc:JSON.parse(jstr(doc))}));}catch(e){}}});
+
+setTool('pen');setDoc(blank());loadList().then(()=>stat(online?'พร้อม • บันทึกอัตโนมัติ':'⚠ ต้องเปิดผ่าน "Tools.bat" (tools/serve.py) ถึงจะบันทึกได้',!online));
+</script>
+</body></html>

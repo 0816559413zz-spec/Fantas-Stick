@@ -23,6 +23,9 @@
 #   POST /api/mb-del?id=<id>        → ถอดออกจากเกม + ย้ายต้นฉบับไป maps/build/_deleted/
 #   POST /api/mb-asset?name=<ชื่อ>&label=&cat= → เพิ่ม Asset เอง: เก็บ .glb ลง assets/mapkit/ + ลงทะเบียนใน assets/mapkit/kit.json (user)
 #   GET  /api/sb-skills             → รายการสกิลจากโค้ดเกม (js/*.js: PATHS, PBASIC, defSpell) ให้ปุ่ม Import ของสตอรี่บอร์ด — อ่านสดทุกครั้ง ไม่มีไฟล์ค้าง
+#   GET  /api/sketches              → รายชื่อสเก็ตช์ (sketch.html) ใน sketch/
+#   GET/POST /api/sketch?id=<id>    → อ่าน/บันทึก {doc, png} → sketch/<id>.json + .png + .md แล้วเขียน sketch/SKETCH.md (ให้ Claude อ่าน)
+#   POST /api/sketch-del?id=<id>    → ย้ายไป sketch/_deleted/ (กู้คืนได้) • POST /api/sketch-img?name=<ชื่อ> → เก็บรูปพื้นหลังลง sketch/img/
 # ฟังเฉพาะ 127.0.0.1 (เครื่องตัวเองเท่านั้น)
 import base64, json, os, re, subprocess, sys, time
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
@@ -553,6 +556,102 @@ def q_id(u):
     mid = (parse_qs(u.query).get('id', [''])[0]).strip().lower()
     return mid if MAP_ID.match(mid) else ''
 
+# ---------- สเก็ตช์ (sketch.html): วาด/เขียน/รูปร่างให้ Claude ดู ----------
+SKD = os.path.join(ROOT, 'sketch')
+SK_COL = {'#ff3030': 'red', '#ffb000': 'orange', '#2ee86b': 'green', '#3aa0ff': 'blue', '#b36bff': 'purple', '#111111': 'black', '#ffffff': 'white'}
+
+def sk_list():
+    out = []
+    if os.path.isdir(SKD):
+        for f in sorted(os.listdir(SKD)):
+            if not f.endswith('.json'):
+                continue
+            p = os.path.join(SKD, f)
+            try:
+                j = json.load(open(p, encoding='utf-8'))
+                out.append({'id': f[:-5], 'name': j.get('name') or f[:-5], 'n': len(j.get('shapes', [])), 't': os.path.getmtime(p)})
+            except Exception:
+                pass
+    return out
+
+def sk_md(sid, d):
+    W, H = max(1, int(d.get('w') or 1280)), max(1, int(d.get('h') or 720))
+    pct = lambda x, y: 'x=%d%% y=%d%%' % (round(100 * x / W), round(100 * y / H))
+    sh = d.get('shapes') or []
+    L = ['# สเก็ตช์: %s (`%s`)' % (d.get('name') or sid, sid), '',
+         '> เขียนอัตโนมัติจาก `sketch.html` — อย่าแก้ตรง ๆ. **Claude: เปิดภาพ `sketch/%s.png` ด้วย Read ก่อน** (นี่คือสิ่งที่ผู้ใช้วาด) แล้วอ่านโน้ต/ป้ายข้อความด้านล่างประกอบ. ตำแหน่งเป็น %% ของภาพ (0,0 = มุมซ้ายบน).' % sid, '',
+         '- ขนาดภาพ: %d×%d • พื้น: %s' % (W, H, 'ดำ' if d.get('paper') == '#1e1e1e' else 'ขาว')]
+    if d.get('bg'):
+        L.append('- รูปพื้นหลัง (ต้นฉบับ ไม่มีรอยวาด): `%s`' % d['bg'])
+    L += ['', '## โน้ตจากผู้ใช้', '', (d.get('note') or '(ไม่มี)').strip(), '']
+    marks = [s for s in sh if s.get('t') in ('num', 'text')]
+    if marks:
+        L += ['## ป้ายข้อความ / เลขลำดับ', '', '| ชนิด | ตำแหน่ง | ข้อความ/เลข | สี |', '|---|---|---|---|']
+        for s in marks:
+            c = SK_COL.get(s.get('c'), s.get('c', ''))
+            if s['t'] == 'num':
+                L.append('| ① เลขลำดับ | %s | %s | %s |' % (pct(s['x'], s['y']), s.get('n'), c))
+            else:
+                L.append('| ข้อความ | %s | %s | %s |' % (pct(s['x'], s['y']), str(s.get('s', '')).replace('\n', ' / ').replace('|', '\\|'), c))
+        L.append('')
+    kinds = {'rect': 'กรอบสี่เหลี่ยม', 'ellipse': 'วงรี/วงกลม', 'line': 'เส้นตรง', 'arrow': 'ลูกศร'}
+    geo = [s for s in sh if s.get('t') in kinds]
+    if geo:
+        L += ['## รูปร่าง / เส้น / ลูกศร', '', '| ชนิด | จาก → ถึง | สี | มีพื้นสี |', '|---|---|---|---|']
+        for s in geo:
+            a, b = s['a'], s['b']
+            L.append('| %s | %s → %s | %s | %s |' % (kinds[s['t']], pct(*a), pct(*b), SK_COL.get(s.get('c'), s.get('c', '')), 'ใช่' if s.get('f') else ''))
+        L.append('')
+    pens = [s for s in sh if s.get('t') == 'pen']
+    if pens:
+        L.append('ปากกาลายมือ %d เส้น (ดูในภาพ)' % len(pens))
+    return '\n'.join(L) + '\n'
+
+def sk_index():
+    L = ['# สเก็ตช์ (sketch.html)', '',
+         '> เขียนอัตโนมัติจาก `sketch.html` (ศูนย์รวม Tool → สเก็ตช์). แต่ละอัน: `sketch/<id>.md` (โน้ต + ป้ายข้อความ + ตำแหน่ง), `sketch/<id>.png` (ภาพที่วาด — **เปิดด้วย Read**), `sketch/<id>.json` (ข้อมูลดิบ).',
+         '> ผู้ใช้วาดเพื่อสื่อสารกับ Claude: ภาพ = สิ่งที่อยากได้/ปัญหา, ลูกศร/วงกลม = ชี้จุด, เลขลำดับ = ขั้นตอน/ลำดับ.', '']
+    for m in sorted(sk_list(), key=lambda m: -m['t']):
+        L.append('- **%s** (`%s`) %d ชิ้น — `sketch/%s.md` • `sketch/%s.png` • แก้ล่าสุด %s' % (m['name'], m['id'], m['n'], m['id'], m['id'], time.strftime('%Y-%m-%d %H:%M', time.localtime(m['t']))))
+    open(os.path.join(SKD, 'SKETCH.md'), 'w', encoding='utf-8').write('\n'.join(L) + '\n')
+
+def sk_post(self, u, q):
+    if u.path == '/api/sketch-img':
+        name = re.sub(r'[^a-zA-Z0-9_\-]', '_', q.get('name', ['img'])[0])[:60] or 'img'
+        data, ext = img_body(self._body())
+        d = os.path.join(SKD, 'img'); os.makedirs(d, exist_ok=True)
+        with open(os.path.join(d, name + '.' + ext), 'wb') as f: f.write(data)
+        return self._json(200, {'ok': True, 'path': 'sketch/img/' + name + '.' + ext})
+    sid = q_id(u)
+    if not sid:
+        return self._json(400, {'ok': False, 'err': 'id ใช้ได้เฉพาะ a-z 0-9 _ -'})
+    os.makedirs(SKD, exist_ok=True)
+    if u.path == '/api/sketch-del':
+        d = os.path.join(SKD, '_deleted'); os.makedirs(d, exist_ok=True); st = time.strftime('%Y%m%d-%H%M%S')
+        for ext in ('.json', '.md', '.png', '.jpg'):
+            p = os.path.join(SKD, sid + ext)
+            if os.path.exists(p):
+                os.replace(p, os.path.join(d, sid + '_' + st + ext))
+        sk_index()
+        return self._json(200, {'ok': True})
+    try:
+        b = json.loads(self._body().decode('utf-8')); doc = b['doc']
+        assert isinstance(doc.get('shapes'), list)
+    except Exception as e:
+        return self._json(400, {'ok': False, 'err': 'ข้อมูลผิดรูปแบบ: ' + str(e)})
+    doc['id'] = sid
+    open(os.path.join(SKD, sid + '.json'), 'w', encoding='utf-8').write(json.dumps(doc, ensure_ascii=False, separators=(',', ':')))
+    if b.get('png'):
+        data, ext = img_body(b['png'].encode('ascii'))
+        for e2 in ('png', 'jpg'):
+            if e2 != ext and os.path.exists(os.path.join(SKD, sid + '.' + e2)):
+                os.remove(os.path.join(SKD, sid + '.' + e2))
+        open(os.path.join(SKD, sid + '.' + ext), 'wb').write(data)
+    md = sk_md(sid, doc)
+    open(os.path.join(SKD, sid + '.md'), 'w', encoding='utf-8').write(md)
+    sk_index()
+    return self._json(200, {'ok': True, 'id': sid})
+
 def fx_list():
     out = {}
     for d, _, fs in os.walk(FXD):
@@ -599,6 +698,13 @@ class H(SimpleHTTPRequestHandler):
                 return self._json(200, {'ok': True, 'map': json.load(open(os.path.join(MBD, q_id(u) + '.json'), encoding='utf-8'))})
             except Exception as e:
                 return self._json(404, {'ok': False, 'err': str(e)})
+        if u.path == '/api/sketches':
+            return self._json(200, sk_list())
+        if u.path == '/api/sketch':
+            p = os.path.join(SKD, q_id(u) + '.json')
+            if not q_id(u) or not os.path.exists(p):
+                return self._json(404, {'ok': False, 'err': 'ไม่มีสเก็ตช์นี้'})
+            return self._json(200, json.load(open(p, encoding='utf-8')))
         if u.path == '/api/maps':
             return self._json(200, map_list())
         if u.path == '/api/map':
@@ -710,7 +816,9 @@ class H(SimpleHTTPRequestHandler):
                 open(os.path.join(MAPD, mid + '.png'), 'wb').write(data)
             maps_index()
             return self._json(200, {'ok': True, 'id': mid})
-        if u.path in ('/api/mb', '/api/mb-export', '/api/mb-unexport', '/api/mb-del', '/api/mb-asset'):
+        if u.path in ('/api/sketch', '/api/sketch-del', '/api/sketch-img'):
+            return sk_post(self, u, q)
+        if u.path in ('/api/mb', '/api/mb-export','/api/mb-unexport', '/api/mb-del', '/api/mb-asset'):
             return mb_post(self, u, q)
         if u.path == '/api/map-del':
             mid = q_id(u)
