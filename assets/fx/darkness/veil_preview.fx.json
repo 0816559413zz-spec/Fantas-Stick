@@ -1,0 +1,11 @@
+{
+  "v": 1,
+  "desc": "Darkness — คทากดลง เคียวปักปลายกลางวง เงาแผ่คลุมเพื่อน",
+  "tags": ["darkness", "preview"],
+  "pal": "arcane",
+  "dur": 3.85,
+  "layers": [
+    {"id": "anchor", "t": "mesh", "shape": "disc", "mat": "black", "op": 0, "at": 0, "life": 3.85},
+    {"id": "veil", "t": "code", "fn": "studio_darkness_veil", "at": 0, "life": 3.85, "args": {"layer": "anchor"}}
+  ]
+}

@@ -1,5 +1,12 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
 
+- 2026-11-20 Darkness Flow state look (VFX Studio preview `darkness/flow_state_preview`, review #98): black aura on the scythe-side arm with the existing scythe spine flame running along it, faster spine flame on the scythe (no white), 3 shadow orbs with a small single-layer BA-style tail, HUD timer ring + orb dots + darker screen edge with drifting black dots; Storm to-fix list closed per user
+- 2026-11-20 — **Darkness ult (Studio, review #91):** Irregular bursts scatter from the rift edge and the creature sheds more flecks when dissolving. WASD cancels the casting pose on movement input 0.9 s after full extension in the `walk=1` preview.
+
+- 2026-11-20 — **Darkness ult gate (Studio, review #91):** The cast reaches full extension before the rift opens. The rift has a thicker, recessed wall and begins closing after the creature dissolves.
+
+- 2026-11-20 — **Darkness scythe recovery (Studio):** The scythe drifts into place and eases into its resting angle after Mark Wave, Flow Mark, BA, both Dash and Chase variants, and Shield. Quick Dash now shows the recovery after one empowered BA.
+
 - 2026-11-20 — **Darkness ult rift (Studio, review #91):** Rift now moves: counter-rotating rims, three nested tunnel rims, breathing scale, wisps drifting off the edge, air warp; camera lift only in game cam.
 
 - 2026-11-20 — **Darkness ult v3 (Studio, review #91):** Magic circle replaced with a shadow rift (irregular void, torn shard rim, curling ink tendrils) that tears open sideways and closes before the bite.

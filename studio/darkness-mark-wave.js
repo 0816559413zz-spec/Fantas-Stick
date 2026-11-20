@@ -117,7 +117,7 @@ FXCODE.studio_darkness_mark_wave=(_x,_y,_h,args,instance)=>{
     const flip=flow?ease(0,.095,t):ease(.075,chargeStart+.03,t);
     const gather=flow?0:ease(chargeStart,swingStart,t);
     const cut=ease(swingStart,swingEnd,t);
-    const coast=ease(swingEnd,swingEnd+.35,t),settle=ease(swingEnd+.30,swingEnd+1.04,t);
+    const coast=ease(swingEnd,swingEnd+.35,t),settle=ease(spinEnd,spinEnd+.70,t);
     // Follow the cutting edge around the side, low across the front, then up.
     const arc=lerp(-2.52-.22*gather,1.02,cut)+.10*coast;
     const tilt=lerp(.10+.27*gather,-1.52,cut)-.09*coast;
@@ -125,12 +125,13 @@ FXCODE.studio_darkness_mark_wave=(_x,_y,_h,args,instance)=>{
     const highLift=1.86*Math.max(0,rise)**1.12;
     pos.set(lerp(1.50+.23*gather,.96,cut),2.97+2.14*rise+highLift,-.12+3.35*Math.cos(arc));
     pos.lerp(idleBladeCenter,1-prepare*(1-settle));
+    pos.z+=.36*Math.sin(Math.PI*settle)**2;
     pos.y+=.81*Math.sin(Math.PI*prepare)*(1-settle);
     pos.x+=.43*Math.sin(Math.PI*prepare)*(1-settle);
     rotation.setFromAxisAngle(pitchAxis,tilt).multiply(inverted);
     rotation.slerp(idleRotation,1-flip*(1-settle));
     pos.sub(bladeOffset.copy(bladeCenter).applyQuaternion(rotation));
-    const align=ease(spinStart-.13,spinStart+.053,t)*(1-ease(spinEnd-.035,spinEnd+.21,t));
+    const align=ease(spinStart-.13,spinStart+.053,t)*(1-settle);
     if(align>0){
       const turn=ease(spinStart,spinEnd,t)*Math.PI*2;
       pos.add(bladeOffset.copy(shaftCenter).applyQuaternion(rotation));

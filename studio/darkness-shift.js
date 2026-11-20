@@ -572,7 +572,7 @@ function stDarkHoldDash(root,caster){
       shroud(t,at,yaw,lerp(1.38,-.1,peel),.92*ease(-.025,.035,age)*(1-peel),ease(0,.053,age));
     }
 
-    const fuse=ease(begin+.25,covered,t),returning=ease(.093,.38,age);
+    const fuse=ease(begin+.25,covered,t),returning=ease(.093,.74,age);
     const spiral=age<0?fuse*Math.PI*.90:(1-returning)*Math.PI*.76;
     bladePivot.visible=t<covered||returning>.03;
     const orbit=age<0?1-.87*fuse:.18+.82*returning;

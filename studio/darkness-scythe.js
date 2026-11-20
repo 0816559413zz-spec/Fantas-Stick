@@ -203,8 +203,10 @@ function stCreateScythePreview(root,args,lifetime){
   const baState=T=>{   // สถานะล้วนจากเวลา (หางคำนวณย้อนหลังได้)
     const kc=Math.floor(T/LOOP),t=T-kc*LOOP,g0=orbA(kc*LOOP+SW0),side0=Math.sin(g0)>=0?1:-1;   // ฝั่งที่เคียวอยู่ตอนเริ่มฟัน (หลัง = ไปฝั่งที่ใกล้)
     let g=orbA(T),rad=RI,vert=1,dirSweep=1,spinA=0,act=0,tw=0,spinIdx=-1,spinU=0,cock=0;
+    let settle=0;
     if(t>=SW0){
-      const k=Math.min(NSW-1,Math.floor((t-SW0)/GAP)),u=t-SW0-k*GAP,from=side0*(k%2?-1:1),to=-from;   // ฟันที่ k เริ่มจาก from กวาดไป to
+      const last=args.followUp?0:NSW-1;
+      const k=Math.min(last,Math.floor((t-SW0)/GAP)),u=t-SW0-k*GAP,from=side0*(k%2?-1:1),to=-from;   // ฟันที่ k เริ่มจาก from กวาดไป to
       const outR=0.55+REACH;
       const S0p=WU+SWP+HOLD,STL=SPIN+0.14,spinTurn=x=>-from*Math.PI*2*4*(1-Math.pow(1-Math.min(1,x),3));   // ควง 4 รอบ เร็วแล้วค่อย ๆ ช้าลงจนหยุดตรงทิศพร้อมฟัน (จบที่รอบเต็ม = ไม่กระตุก)
       if(u<WU){const e=ez(0,WU,u);const pg=k===0?g0:from*(A+BK);const pr=k===0?RI:outR;const pv=k===0?1:0;
@@ -212,11 +214,23 @@ function stCreateScythePreview(root,args,lifetime){
       else if(u<WU+SWP){const e=Math.pow((u-WU)/SWP,2.2),st=from*(A+(k?BK:0));g=st+(to*A-st)*e;cock=1.05*(1-ez(0,0.35,(u-WU)/SWP));rad=outR;vert=0;dirSweep=-from;act=Math.min(1,(u-WU)/0.04);tw=from*(0.25-0.85*e);}
       else if(u<WU+SWP+HOLD){const e=ez(0,0.12,u-WU-SWP);g=to*A+to*0.18*e;rad=outR;vert=0;dirSweep=-from;act=Math.max(0,1-(u-WU-SWP)/0.12)*0.8;tw=-from*0.6;}   // ค้าง 0.3 วิ (ส่งตามแรงนิดเดียว)
       else if(u<S0p+STL){const x=(u-S0p)/STL,e=ez(0,SPIN,u-S0p);g=to*(A+0.18)+(to*(A+BK)-to*(A+0.18))*e;rad=outR;vert=0;dirSweep=from;spinA=spinTurn(x);if(u<S0p+SPIN){spinIdx=k;spinU=(u-S0p)/SPIN;}tw=-from*0.6*(1-e);}   // ควงไปจุดเตรียมฟันต่อ (ระยะเท่าเดิม ไม่ดึงเข้าหาตัว) แล้วหมุนช้าลงจนหยุด
-      else{const endT=SW0+(NSW-1)*GAP+WU+SWP+HOLD+SPIN;g=to*(A+BK);rad=outR;vert=0;dirSweep=from;
-        if(k===NSW-1&&t>endT){const back=t-(SW0+(NSW-1)*GAP+WU+SWP)-2.0;   // ไม่ได้ฟันเกิน 2 วิ → กลับแนวตั้ง แล้ววนต่อ
-          if(back>0){const e=ez(0,0.5,back);const go=orbA(T);g=to*(A+BK)+wrapA(go-to*(A+BK))*e;rad=rad+(RI-rad)*e;vert=e;}}}
+      else{g=to*(A+BK);rad=outR;vert=0;dirSweep=from;
+        if(k===last){
+          const returnAt=args.followUp?S0p+STL:WU+SWP+2;
+          settle=ez(returnAt,returnAt+.76,u);
+        }}
     }
     const p=pose(g,rad,vert,dirSweep,spinA,cock);
+    if(settle>0){
+      const idle=pose(orbA(T),RI,1,1,0,0);
+      const center=idle.pos.clone().add(new THREE.Vector3(0,1.1*S0,0));
+      const yaw=new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,1,0),T*.9);
+      idle.pos.sub(center).applyQuaternion(yaw).add(center);
+      idle.q.premultiply(yaw);
+      p.pos.lerp(idle.pos,settle);
+      p.pos.y+=.48*Math.sin(Math.PI*settle)**2;
+      p.q.slerp(idle.q,settle);
+    }
     if(vert>0.01){const sp=new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,1,0),T*0.9*vert);   // แนวตั้ง: ควงตัวเองเบา ๆ
       const c=p.pos.clone().addScaledVector(new THREE.Vector3(0,1,0),1.1*S0*vert);p.q.premultiply(sp);p.pos.sub(c).applyQuaternion(sp).add(c);}
     return {w:args.followUp?ez(SW0,SW0+.13,t):1,QB:p.q,pos:p.pos,tw,act,spinIdx,spinU,kc,g};
@@ -343,10 +357,13 @@ function stCreateScythePreview(root,args,lifetime){
       ghostAt(tg,phi,roll,yaw);ghostRot.visible=ghostBuilt;
       ghostMat.opacity=GOP*ez(GIN,GIN+0.1,age)*(1-ez(GHE+GCH,GHE+GCH+GOUT,age));ghostInk.opacity=ghostMat.opacity;updGhostTail(tg,age,roll,ghostMat.opacity/GOP,yaw);});
   };
+  let flPh=0,flLast=null;   // spine-flame phase: args.flameSpeed scales flow speed without jumps (Flow state)
   const update=(time,charge=0,drag=0,swingTime=time)=>{
     if(!voidFixed&&holder.children.length){fixVoid();voidFixed=true;}
     // รอบ 9: หยดหมึกตามสัน = ส่วนหนึ่งของ "เปลวหยักติดสัน" ในแบบ B → เปิดไว้
     const T=time??clock();
+    flPh+=flLast==null?T:clamp(T-flLast,0,0.1)*(args.flameSpeed||1);flLast=T;
+    const FT=flPh;
     // ลอย + หมุนควงข้างตัว (หมุนรอบแกนด้ามช้า ๆ + โยกเบา ๆ)
     if(!args.manual){
       pivot.rotation.set(0.12*Math.sin(T*1.3),T*0.9,0.18+0.06*Math.sin(T*0.8));
@@ -431,7 +448,7 @@ function stCreateScythePreview(root,args,lifetime){
     if(!stScyLines)return;
     // ---------- หมึกไหลตามใบแล้วม้วนหลุด ----------
     for(let s=0;s<N;s++){
-      const d=strands[s],life=1.6/d.sp,age=((T*d.sp*0.62+d.ph)%1);   // 0..1 วงจรชีวิตของเส้น
+      const d=strands[s],life=1.6/d.sp,age=((FT*d.sp*0.62+d.ph)%1);   // FT = flame phase (faster in Flow)   // 0..1 วงจรชีวิตของเส้น
       const head=age*1.15;                                           // หัวเส้นเดินจากโคน → เลยปลาย
       for(let i=0;i<P;i++){
         const u=i/(P-1),tt=head-u*0.32;                              // หางตามหลังหัว
@@ -456,11 +473,11 @@ function stCreateScythePreview(root,args,lifetime){
     // ---------- แผ่นเปลวจากสัน: ยอดเป็นลิ้นไฟหยัก วิ่งตามใบ • มี "ลิ้นหลุด" เป็นช่วง ๆ (ช่องว่างวิ่งขึ้น แล้วโคนลุกใหม่) ----------
     for(let i=0;i<SHC;i++){
       const tt=0.03+0.9*i/(SHC-1),[sx,sy]=bladePt(tt,0.0),[tx,ty]=tan(tt),nx=-ty,ny=tx;
-      const n1=Math.sin(tt*38-T*5.5)*0.5+Math.sin(tt*71+T*3.7)*0.3+Math.sin(tt*17-T*2.1)*0.2;   // ลิ้นไฟหยักวิ่งไปตามใบ
+      const n1=Math.sin(tt*38-FT*5.5)*0.5+Math.sin(tt*71+FT*3.7)*0.3+Math.sin(tt*17-FT*2.1)*0.2;   // ลิ้นไฟหยักวิ่งไปตามใบ
       const H=(0.07+0.09*Math.max(0,n1+0.35))*(1-0.45*tt)*(1+1.65*charge);
-      const cyc=(T*0.9+Math.sin(tt*13.7)*3.1)%1,gap=Math.sin(tt*9.3+Math.floor(T*0.9+Math.sin(tt*13.7)*3.1)*2.7)>0.35;   // บางช่วงมีลิ้นหลุด
+      const cyc=(FT*0.9+Math.sin(tt*13.7)*3.1)%1,gap=Math.sin(tt*9.3+Math.floor(FT*0.9+Math.sin(tt*13.7)*3.1)*2.7)>0.35;   // บางช่วงมีลิ้นหลุด
       for(let j=0;j<SR;j++){
-        const v=j/(SR-1),lean=0.025*v*v*Math.sin(T*4+tt*20);
+        const v=j/(SR-1),lean=0.025*v*v*Math.sin(FT*4+tt*20);
         const h=H*v*(gap?(1+cyc*1.6):1);
         const k=(i*SR+j)*3,c=(i*SR+j)*4;
         spos[k]=sx+nx*h-tx*0.03*v+(-ny)*lean;spos[k+1]=sy+ny*h+tx*lean;spos[k+2]=-h*v*drag;

@@ -3,9 +3,9 @@
   "desc": "Darkness — Shift แตะ พุ่งสั้นพร้อมเงาซ้อนและเศษเงาพุ่งเข้าคมเคียวที่สว่างขึ้น",
   "tags": ["darkness", "preview"],
   "pal": "arcane",
-  "dur": 1.90,
+  "dur": 3.37,
   "layers": [
-    {"id": "anchor", "t": "mesh", "shape": "disc", "mat": "black", "op": 0, "at": 0, "life": 1.90},
-    {"id": "dash", "t": "code", "fn": "studio_darkness_shift", "at": 0, "life": 1.90, "args": {"layer": "anchor"}}
+    {"id": "anchor", "t": "mesh", "shape": "disc", "mat": "black", "op": 0, "at": 0, "life": 3.37},
+    {"id": "dash", "t": "code", "fn": "studio_darkness_shift", "at": 0, "life": 3.37, "args": {"layer": "anchor"}}
   ]
 }

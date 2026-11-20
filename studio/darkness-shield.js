@@ -184,7 +184,7 @@ FXCODE.studio_darkness_shield=(_x,_y,_h,args,instance)=>{
   const orientation=new THREE.Euler(0,0,0,'YXZ');
   const cursor=SQ.get('aim')==='cursor';
   instance.updateDarknessShield=()=>{
-    const t=instance.t,ready=ease(begin,activeAt,t),letGo=ease(release,release+.70,t),pose=ready*(1-letGo);
+    const t=instance.t,ready=ease(begin,activeAt,t),letGo=ease(release,release+.87,t),pose=ready*(1-letGo);
     const wind=clamp((t-begin)/windup,0,1),brake=clamp((t-release)/braking,0,1);
     const rpm=ease(0,1,wind)*(1-ease(0,1,brake));
     const blend=ease(.16,.87,rpm)*(1-ease(release+.08,release+.66,t));

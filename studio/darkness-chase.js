@@ -219,9 +219,10 @@ FXCODE.studio_darkness_chase=(_x,_y,_h,args,instance)=>{
     const hoverHeight=returnPoint.y*(1-descent**1.65);
     newScythe.pivot.visible=spawn>.003;
     if(newScythe.pivot.visible){
-      newScythe.pivot.position.copy(returnPoint).add(offset.set(1.23,.16,-.08));
-      newScythe.pivot.position.y=hoverHeight+.16;
-      newScythe.pivot.quaternion.copy(idle);
+      const settle=ease(spawnAt,spawnAt+.62,t);
+      newScythe.pivot.position.copy(returnPoint).add(offset.set(
+        lerp(1.78,1.23,settle),hoverHeight+lerp(.52,.16,settle),lerp(.30,-.08,settle)));
+      newScythe.pivot.quaternion.copy(ready).slerp(idle,settle);
       newScythe.update(t);fadeReplacement(spawn);
     }
     const convert=ease(.08,launch,t);
@@ -292,7 +293,7 @@ FXCODE.studio_darkness_unmarked_chase=(_x,_y,_h,args,instance)=>{
     actor.g.rotation.y=Math.PI;
     return {actor,x,z,hit:i<2};
   });
-  const ease=stDarkEase,launch=0,stop=.235,swing=stop,hit=.285,finish=.595,recover=1.37,scale=1.40;
+  const ease=stDarkEase,launch=0,stop=.235,swing=stop,hit=.285,finish=.595,recover=1.52,scale=1.40;
   const distanceAt=t=>range*(1-(1-clamp((t-launch)/(stop-launch),0,1))**2);
   const wake=stDarkWake(root,distanceAt,(d,out)=>out.set(-.20,0,d-.28),()=>-.35,launch,stop,.81,.52);
   const lowWake=stDarkWake(root,distanceAt,(d,out)=>out.set(.32,0,d-.47),()=>-.72,launch,stop,.44,.45);
@@ -351,7 +352,7 @@ FXCODE.studio_darkness_unmarked_chase=(_x,_y,_h,args,instance)=>{
       sample.QB.setFromAxisAngle(swingAxis,angle).multiply(bladeInPlane);
     }else{
       const returnTime=clamp((t-finish)/(recover-finish),0,1);
-      const settle=1-(1-returnTime)**2.4;
+      const settle=returnTime*(1+returnTime*(1-returnTime));
       returnArc.getPoint(settle,sample.pos);
       if(settle<.56)sample.QB.copy(high).slerp(returnTurn,ease(0,.56,settle));
       else sample.QB.copy(returnTurn).slerp(idle,ease(.56,1,settle));

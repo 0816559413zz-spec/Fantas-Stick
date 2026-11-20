@@ -175,8 +175,24 @@ function riftEdge(){const v=[],f=[];seed(83);
       const q=v.length;v.push(...[[a0[0]-n[0]/l*w,a0[1]-n[1]/l*w,a0[2]],[a0[0]+n[0]/l*w,a0[1]+n[1]/l*w,a0[2]],[a1[0]+n[0]/l*w*.8,a1[1]+n[1]/l*w*.8,a1[2]],[a1[0]-n[0]/l*w*.8,a1[1]-n[1]/l*w*.8,a1[2]]].map(p=>p.map(r3)));
       f.push([q,q+1,q+2,q+3]);f.push([q+3,q+2,q+1,q]);}}
   return {id:'edge',k:'poly',v,f,sub:0};}
+function riftWall(){
+  const v=[],f=[],segments=72;
+  const profile=[[.88,.51],[1.13,.30],[1.17,-.12],[.98,-.73],[.70,-.73],[.77,-.20]];
+  profile.forEach(([radius,depth],band)=>{
+    for(let i=0;i<segments;i++){
+      const th=i/segments*Math.PI*2;
+      const r=riftR(th)*(radius+.035*Math.sin(17*th+band*.72));
+      v.push([r3(Math.cos(th)*r*.82),r3(Math.sin(th)*r*1.08),r3(depth+.1*Math.sin(5*th+band*.41))]);
+      const next=(i+1)%segments,back=((band+1)%profile.length)*segments;
+      const a=band*segments+i,b=band*segments+next,c=back+next,d=back+i;
+      f.push([a,b,c,d],[d,c,b,a]);
+    }
+  });
+  return {id:'wall',k:'poly',v,f,sub:0};
+}
 model('dark_ab_rift_void','Darkness อัลติ รอยฉีกเงา: หลุมดำทรงไม่สม่ำเสมอ',[riftVoid()]);
 model('dark_ab_rift_edge','Darkness อัลติ รอยฉีกเงา: ขอบฉีกและหนวดหมึกม้วน',[riftEdge()]);
+model('dark_ab_rift_wall','Darkness อัลติ ผนังประตูเงา',[riftWall()]);
 model('dark_ab_ribbon','Darkness อัลติ A+B ริ้วผ้าสะบัด',[ribbon]);
 
 // ---------- timeline ----------
@@ -249,6 +265,54 @@ const portalFx=[
 const charge=[
   {id:'charge_orb',t:'mesh',shape:'sphere',mat:'black',at:.20,life:.82,pos:[.21,.9,-.21],scale:{'0':.03,'0.85':.17,'1':.2,ease:'in'},op:1},
   {id:'charge_ink',t:'emit',at:.20,life:.78,burst:0,rate:{'0':12,'1':40},from:'sphere',fr:.7,pos:[.21,.9,-.21],dir:'in',speed:[1.2,2.2],plife:[.18,.3],look:'smoke',size:[1,2],grow:-.8,col:'#000000',c2:'#000000',gravity:0,drag:1,spin:5}];
+const V3_TRAVEL=.775,V3_DUR=2.95;
+const v3Time=t=>t<REL+TRAVEL?REL+(t-REL)*V3_TRAVEL/TRAVEL:t-TRAVEL+V3_TRAVEL;
+function fasterMonster(layer){
+  const at=v3Time(layer.at),life=v3Time(layer.at+layer.life)-at;
+  const updated={...layer,at:r3(at),life:r3(life)};
+  for(const field of ['pos','rot','scale','op','rate']){
+    const value=layer[field];
+    if(!value||typeof value!=='object'||Array.isArray(value))continue;
+    updated[field]=Object.fromEntries(Object.entries(value).map(([key,frame])=>[
+      String(r3((v3Time(layer.at+Number(key)*layer.life)-at)/life)),frame]));
+  }
+  return updated;
+}
+const GATE_START=.86,GATE_OPEN=.995,GATE_CLOSE=v3Time(REL+LIFE)+.02,GATE_END=GATE_CLOSE+.29;
+function gateKeys(start,stops){
+  return Object.fromEntries(stops.map(([t,value])=>[String(r3((t-start)/(GATE_END-start))),value]));
+}
+function gateMesh(id,model,col,delay,depth,size,turn,tilt=0){
+  const at=r3(GATE_START+delay);
+  const stops=[[at,.02,.88,.12],[at+.045,.46,.97,.56],[GATE_OPEN,1,1,1],
+    [1.29,1.035,.98,1],[1.62,.985,1.015,1],[1.96,1.025,.99,1],[GATE_CLOSE,1,1,1],
+    [GATE_CLOSE+.14,.48,.93,.58],[GATE_END,.015,.62,.10]];
+  return {id,t:'mesh',shape:'model',model,mat:'black',col,at,life:r3(GATE_END-at),
+    pos:[P[0],P[1],P[2]+depth],
+    rot:{'0':[0,0,tilt],'1':[0,0,tilt+turn]},
+    scale:gateKeys(at,stops.map(([t,x,y,z])=>[t,[r3(PR*size*x),r3(PR*size*y),z]])),
+    op:gateKeys(at,[[at,0],[at+.035,1],[GATE_CLOSE+.15,1],[GATE_END,0]])};
+}
+const v3Gate=[
+  gateMesh('rift_void','dark_ab_rift_void','#030306',.012,-.76,.94,12),
+  gateMesh('rift_wall','dark_ab_rift_wall','#191920',0,0,1,13),
+  gateMesh('rift_tunnel1','dark_ab_rift_edge','#23232b',.025,-.42,.74,108),
+  gateMesh('rift_tunnel2','dark_ab_rift_edge','#2b2b33',.034,-.61,.53,-137),
+  gateMesh('rift_tunnel3','dark_ab_rift_edge','#32323d',.042,-.69,.32,158),
+  gateMesh('rift_edge','dark_ab_rift_edge','#0b0b0f',0,.45,1.06,-56),
+  gateMesh('rift_edge2','dark_ab_rift_edge','#14141b',.019,.28,.95,84,20),
+  {...portalFx.find(layer=>layer.id==='rift_wisps'),at:.93,life:r3(GATE_CLOSE-.93)},
+  {id:'rift_splashes',t:'emit',at:.925,life:r3(GATE_CLOSE-.925),burst:12,
+    rate:{'0':18,'0.06':190,'0.13':16,'0.23':145,'0.29':8,'0.39':30,
+      '0.46':196,'0.52':12,'0.65':165,'0.70':10,'0.82':28,'0.89':170,'1':0},
+    from:'mesh',of:'rift_wall',dir:'random',speed:[3.6,8.2],up:[-.5,1.4],plife:[.20,.53],
+    look:'model',model:'dark_ab_shard',mmat:'solid',msize:[.13,.39],col:'#1d1926',c2:'#050407',
+    gravity:3.2,drag:2.1,bounce:0,mspin:470},
+  {...portalFx.find(layer=>layer.id==='rift_warp'),at:GATE_START,life:r3(GATE_END-GATE_START),
+    size:gateKeys(GATE_START,[[GATE_START,1],[GATE_OPEN,PR*2.6],[GATE_CLOSE,PR*2.7],[GATE_END,1]]),
+    str:gateKeys(GATE_START,[[GATE_START,0],[GATE_OPEN,.9],[GATE_CLOSE,.9],[GATE_END,0]])},
+  {...portalFx.find(layer=>layer.id==='portal_ink'),at:GATE_START,life:r3(GATE_CLOSE-GATE_START)}
+];
 const biteFx=(smokeFb)=>[
   {id:'bite_shards',t:'emit',at:REL+SHUT,life:.05,burst:80,pos:bite,from:'sphere',fr:4,dir:'out',speed:[6,15],up:2,plife:[.3,.6],look:'model',model:'dark_ab_shard',mmat:'solid',msize:[.4,1.2],col:'#030304',c2:'#000000',gravity:5,drag:1.5,bounce:0,mspin:540},
   {id:'bite_smoke',t:'emit',at:REL+SHUT,life:.05,burst:40,pos:bite,from:'sphere',fr:3.5,dir:'out',speed:[3,8],plife:[.18,.35],look:'smoke',...(smokeFb?{fb:smokeFb}:{}),size:[14,26],grow:1.2,col:'#000000',c2:'#000000',gravity:-.3,drag:3},
@@ -258,7 +322,19 @@ const biteFx=(smokeFb)=>[
   {id:'fade_body',t:'emit',at:REL+SHUT+.02,life:GONE-SHUT,burst:80,rate:200,from:'mesh',of:'tail',dir:'out',speed:[.4,1.8],up:.5,plife:[.35,.8],look:'model',model:'dark_ab_shard',mmat:'solid',msize:[.12,.4],col:'#030304',c2:'#000000',gravity:-.5,drag:2,bounce:0,mspin:360},
   {id:'fade_body2',t:'emit',at:REL+SHUT+.05,life:GONE-SHUT,burst:60,rate:150,from:'mesh',of:'hem',dir:'down',speed:[.3,1.4],plife:[.35,.7],look:'model',model:'dark_ab_shard',mmat:'solid',msize:[.12,.35],col:'#030304',c2:'#000000',gravity:-.3,drag:2,bounce:0,mspin:360},
   {id:'fade_dust',t:'emit',at:REL+SHUT+.02,life:GONE-SHUT,burst:0,rate:200,from:'mesh',of:'upper',dir:'out',speed:[.3,1.2],up:.6,plife:[.3,.6],look:'smoke',size:[4,9],grow:.4,col:'#000000',c2:'#000000',gravity:-.6,drag:2}];
-const write=(name,desc,layers)=>writeFileSync(`assets/fx/darkness/${name}.fx.json`,JSON.stringify({v:1,desc,tags:['darkness','preview','ult'],pal:'arcane',dur:2.7,seed:11,layers},null,1)+'\n');
+const v3Burst={
+  fade_head:{msize:[.14,.54],speed:[1.2,4.5]},
+  fade_jaw:{burst:77,rate:185,msize:[.13,.45],speed:[1.1,4.0]},
+  fade_body:{msize:[.12,.45],speed:[.9,3.9]},
+  fade_body2:{burst:78,rate:195,msize:[.11,.37],speed:[.8,3.6]},
+  fade_dust:{burst:36,size:[3,8]}
+};
+const v3Flecks=['upper','tail'].map((of,i)=>({
+  id:'fade_flecks_'+of,t:'emit',at:r3(REL+SHUT+.055+i*.06),life:.21,burst:68,rate:160,
+  from:'mesh',of,dir:'random',speed:[1.5,5],up:.5,plife:[.33,.68],look:'flake',
+  size:[.85,2.4],col:'#130f1b',c2:'#030305',gravity:.6,drag:1.5,spin:8
+}));
+const write=(name,desc,layers,dur=2.7)=>writeFileSync(`assets/fx/darkness/${name}.fx.json`,JSON.stringify({v:1,desc,tags:['darkness','preview','ult'],pal:'arcane',dur,seed:11,layers},null,1)+'\n');
 
 // v1 (agreed): texture mix (ink strands on the head, cloth plates on the body) + flowing smoke streams
 // that leave evenly spaced rim points, trail back, rise a little and curl (no random puffs)
@@ -275,9 +351,12 @@ write('ult_v2','Darkness อัลติ แบบ 2: ผิวควันเ�
   {id:'tendrils_tail',t:'emit',at,life:SHUT,burst:0,rate:grow(90),from:'mesh',of:'tail',dir:'out',speed:[1,2.5],plife:[.3,.5],look:'model',model:'dark_ab_wisp',mmat:'solid',msize:[.8,2],col:'#020203',c2:'#000000',gravity:-.4,drag:1.8,bounce:0,mspin:80},
   ...biteFx('tex/smoke_toon')]);
 // v3: ink strands over everything + heavy dark fog that drags behind; rear body breaks into shards
-write('ult_v3','Darkness อัลติ แบบ 3: เส้นหมึกทั้งตัว ออร่าเป็นหมอกดำลากหนา ท้ายตัวแตกเป็นเศษ',[...stage,...portalFx,...charge,...bodyLayers({strands:true}),
+const v3Monster=[...bodyLayers({strands:true}),
   {id:'fog_head',t:'emit',at,life:SHUT,burst:0,rate:grow(75),from:'mesh',of:'upper',dir:'out',speed:[.4,1.4],plife:[.35,.6],look:'smoke',size:[26,44],grow:1,col:'#000000',c2:'#000000',gravity:-.3,drag:2},
   {id:'fog_tail',t:'emit',at,life:SHUT,burst:0,rate:grow(80),from:'mesh',of:'tail',dir:'out',speed:[.3,1],plife:[.4,.7],look:'smoke',size:[20,38],grow:1,col:'#000000',c2:'#000000',gravity:-.2,drag:2},
   {id:'break_tail',t:'emit',at,life:SHUT,burst:0,rate:grow(150),from:'mesh',of:'tail',dir:'out',speed:[.5,2],plife:[.3,.55],look:'model',model:'dark_ab_shard',mmat:'solid',msize:[.3,.9],col:'#030304',c2:'#000000',gravity:.5,drag:2,bounce:0,mspin:300},
-  ...biteFx()]);
+  ...biteFx().map(layer=>({...layer,...v3Burst[layer.id]})),...v3Flecks];
+write('ult_v3','Darkness อัลติ แบบ 3: ประตูเงาเปิดหลังยื่นมือและปิดหลังสัตว์เงาสลาย',[
+  {...stage[0],life:V3_DUR},{...stage[1],life:V3_DUR,args:{...stage[1].args,thrustAt:.73,walkCancelAfter:.9,travel:V3_TRAVEL}},
+  ...v3Gate,...charge.map(layer=>({...layer,life:.66})),...v3Monster.map(fasterMonster)],V3_DUR);
 console.log('ok bite',r3(REL+SHUT),'H',HMAX,'rim',rimPts.length);

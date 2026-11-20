@@ -1,0 +1,11 @@
+{
+ "v": 1,
+ "desc": "Darkness — ภาพตอนอยู่ใน Flow: แขนออร่าดำ + เปลวลอยขึ้น, เคียวเปลวไหลเร็วขอบสว่าง, ลูกเงา 3 ลูก, HUD วงเวลา + ขอบจอมืด (พรีวิว)",
+ "tags": ["darkness", "preview", "flow"],
+ "pal": "arcane",
+ "dur": 6.5,
+ "layers": [
+  {"id": "anchor", "t": "mesh", "shape": "disc", "mat": "black", "op": 0, "at": 0, "life": 6.5},
+  {"id": "flow", "t": "code", "fn": "studio_darkness_flow", "at": 0, "life": 6.5, "args": {"layer": "anchor"}}
+ ]
+}
