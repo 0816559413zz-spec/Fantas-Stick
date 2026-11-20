@@ -45,13 +45,13 @@ FXCODE.studio_darkness_ult=(_x,_y,_h,args,instance)=>{
   function update(){
     const t=instance.t;
     const avatar=PM3.get(NET.myId);avatar?.g.traverse(hide);hide(avatar?.cloth?.mo);hide(avatar?.cloth?.mi);
-    // Pose (user 2026-11-20, ref: kamehameha figure): charge side-on with the right shoulder to the target,
-    // body turned left, deep crouch, LEFT hand charging at the left hip, head bowed looking at it. Then the
+    // Pose (user 2026-11-20, ref: kamehameha figure): charge side-on, body turned toward the charging (left) hand so the right shoulder
+    // faces the target, deep crouch, LEFT hand charging at the left hip, head bowed looking at it. Then the
     // hand pulls further back (wind-up) and thrusts straight at the target: body bends forward hard, right
     // leg steps out bent, left leg braced straight behind. The jaw bites by itself.
-    const P=Object.assign({turnC:-1.30,turnW:-1.40,turnR:-.35,dropC:.31,dropR:.33,leanC:.22,leanR:.80,
+    const P=Object.assign({turnC:1.30,turnW:1.40,turnR:-.35,dropC:.31,dropR:.33,leanC:.22,leanR:.80,
       frontC:.80,frontR:1.9,kneeFC:.95,kneeFR:1.4,backC:.75,backR:1.15,kneeBC:.75,kneeBR:.05,step:.40,
-      windAt:.55,elbowC:1.75,elbowW:1.95,elbowAxis:'x',elbowSign:-1},globalThis.ULT_TUNE||{});
+      windAt:.55,elbowC:1.75,elbowW:1.95,elbowAxis:'x',elbowSign:-1},args.tune||{},globalThis.ULT_TUNE||{});
     const L=(c,r,k)=>c+(r-c)*k;
     const gather=ease(.04,.28,t),build=ease(.28,ST_ULT_REL,t),wind=ease(P.windAt,ST_ULT_REL-.02,t);
     const lunge=ease(ST_ULT_REL,ST_ULT_REL+.06,t),relax=ease(1.9,2.45,t);
@@ -76,8 +76,8 @@ FXCODE.studio_darkness_ult=(_x,_y,_h,args,instance)=>{
     const toT=_ultV3.copy(aimW).applyQuaternion(bodyInv);
     toT.addScaledVector(worldDown,-toT.dot(worldDown)).normalize();
     const legTo=(leg,spread)=>leg.quaternion.setFromUnitVectors(_ultDown,_ultV4.copy(worldDown).addScaledVector(toT,spread).normalize());
-    legTo(caster.legs[1],L(P.frontC,P.frontR,r)*s);    // left leg toward the target (bent)
-    legTo(caster.legs[0],-L(P.backC,P.backR,r)*s);     // right leg behind (braced straight on release)
+    legTo(caster.legs[0],L(P.frontC,P.frontR,r)*s);    // right leg toward the target (bent)
+    legTo(caster.legs[1],-L(P.backC,P.backR,r)*s);     // left leg behind (braced straight on release)
     const pointArm=(arm,dirW,k)=>{
       const local=dirW.applyQuaternion(_ultQ.copy(arm.parent.getWorldQuaternion(_ultQ)).invert()).normalize();
       arm.quaternion.identity().slerp(_ultQ2.setFromUnitVectors(_ultDown,local),k);
@@ -95,7 +95,7 @@ FXCODE.studio_darkness_ult=(_x,_y,_h,args,instance)=>{
     pointArm(caster.armR,rightC.lerp(rightR,r),s);
     if(caster.rig){for(const k of caster.rig)k.w=1;rigSync(caster,0);}
     if(!shins&&caster.fileModel)shins=['shin_R','shin_L'].map(n=>{const bone=caster.fileModel.getObjectByName(n);return bone?{bone,rest:bone.quaternion.clone()}:null;});
-    shins?.forEach((j,i)=>{if(!j)return;j.bone.quaternion.copy(j.rest);j.bone.rotateX((i?L(P.kneeFC,P.kneeFR,r):L(P.kneeBC,P.kneeBR,r))*s);});
+    shins?.forEach((j,i)=>{if(!j)return;j.bone.quaternion.copy(j.rest);j.bone.rotateX((i?L(P.kneeBC,P.kneeBR,r):L(P.kneeFC,P.kneeFR,r))*s);});
     if(!forearm&&caster.fileModel){const fb=caster.fileModel.getObjectByName('forearm_L');if(fb)forearm={bone:fb,rest:fb.quaternion.clone()};}
     if(forearm){forearm.bone.quaternion.copy(forearm.rest);const ax=P.elbowAxis;forearm.bone['rotate'+ax.toUpperCase()](P.elbowSign*elbowL);}
     // head: bowed toward the charging hand, then up at the target on release
