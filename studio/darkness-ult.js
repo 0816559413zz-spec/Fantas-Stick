@@ -45,57 +45,68 @@ FXCODE.studio_darkness_ult=(_x,_y,_h,args,instance)=>{
   function update(){
     const t=instance.t;
     const avatar=PM3.get(NET.myId);avatar?.g.traverse(hide);hide(avatar?.cloth?.mo);hide(avatar?.cloth?.mi);
-    // Pose (user 2026-11-20): charge side-on (left shoulder to the target), crouched low, hands gathered
-    // at the right hip. Release: lunge, left arm thrusts forward, body leans in, left leg steps out
-    // bent, right leg braced straight behind. The jaw bites by itself; the caster just holds the follow-through.
-    const P=Object.assign({turnC:-1.45,turnR:-1.05,dropC:.30,dropR:.36,leanC:.10,leanR:.52,
-      frontC:.55,frontR:1.0,kneeFC:.65,kneeFR:1.05,backC:.55,backR:.95,kneeBC:.6,kneeBR:.04,step:.42},globalThis.ULT_TUNE||{});
+    // Pose (user 2026-11-20, ref: kamehameha figure): charge side-on with the right shoulder to the target,
+    // body turned left, deep crouch, LEFT hand charging at the left hip, head bowed looking at it. Then the
+    // hand pulls further back (wind-up) and thrusts straight at the target: body bends forward hard, right
+    // leg steps out bent, left leg braced straight behind. The jaw bites by itself.
+    const P=Object.assign({turnC:1.30,turnW:1.55,turnR:.15,dropC:.31,dropR:.33,leanC:.22,leanR:.80,
+      frontC:.80,frontR:1.9,kneeFC:.95,kneeFR:1.4,backC:.75,backR:1.15,kneeBC:.75,kneeBR:.05,step:.40,
+      windAt:.72},globalThis.ULT_TUNE||{});
     const L=(c,r,k)=>c+(r-c)*k;
-    const gather=ease(.04,.30,t),build=ease(.30,ST_ULT_REL,t);
-    const lunge=ease(ST_ULT_REL,ST_ULT_REL+.07,t),relax=ease(1.85,2.4,t);
+    const gather=ease(.04,.28,t),build=ease(.28,ST_ULT_REL,t),wind=ease(P.windAt,ST_ULT_REL-.02,t);
+    const lunge=ease(ST_ULT_REL,ST_ULT_REL+.06,t),relax=ease(1.9,2.45,t);
+    const impact=ease(ST_ULT_REL+.03,ST_ULT_REL+.07,t)*(1-ease(ST_ULT_REL+.08,ST_ULT_REL+.30,t));   // short overshoot on release
     const s=gather*(1-relax),r=lunge;
-    const step=P.step*lunge;
+    const step=P.step*lunge+.08*impact;
     const rootQ=root.getWorldQuaternion(_ultQ3);   // effect frame: +z = aim
     const aimW=_ultV1.set(0,0,1).applyQuaternion(rootQ);
     caster.g.position.set(0,0,step);
-    caster.g.rotation.y=L(P.turnC,P.turnR,r)*s;
+    caster.g.rotation.y=L(L(P.turnC,P.turnW,wind),P.turnR,r)*s;
     caster.g.updateMatrixWorld(true);
-    caster.b.position.y=-(L(P.dropC,P.dropR,r)+.03*build*(1-r))*s;
-    // lean toward the target whatever way the body faces
+    caster.b.position.y=-(L(P.dropC+.04*wind,P.dropR,r)+.05*impact)*s;
     const gInv=_ultQ4.copy(caster.g.getWorldQuaternion(_ultQ4)).invert();
     const leanAxis=_ultV2.set(0,1,0).cross(aimW).normalize().applyQuaternion(gInv);
-    caster.b.quaternion.setFromAxisAngle(leanAxis,L(P.leanC,P.leanR,r)*s);
+    caster.b.quaternion.setFromAxisAngle(leanAxis,(L(P.leanC,P.leanR,r)+.15*impact)*s);
+    // bend at the hips, not the feet: keep the hip point where the crouch puts it
+    const hipY=.86,bent=_ultV8.set(0,hipY,0).applyQuaternion(caster.b.quaternion);
+    caster.b.position.set(-bent.x,caster.b.position.y+hipY-bent.y,-bent.z);
     caster.g.updateMatrixWorld(true);
     const bodyInv=_ultQ4.copy(caster.b.getWorldQuaternion(_ultQ4)).invert();
     const worldDown=_ultV6.set(0,-1,0).applyQuaternion(bodyInv);
     const toT=_ultV3.copy(aimW).applyQuaternion(bodyInv);
     toT.addScaledVector(worldDown,-toT.dot(worldDown)).normalize();
     const legTo=(leg,spread)=>leg.quaternion.setFromUnitVectors(_ultDown,_ultV4.copy(worldDown).addScaledVector(toT,spread).normalize());
-    legTo(caster.legs[1],L(P.frontC,P.frontR,r)*s);    // left leg toward the target
-    legTo(caster.legs[0],-L(P.backC,P.backR,r)*s);     // right leg braced behind
-    // arms: point each one at a world direction
+    legTo(caster.legs[0],L(P.frontC,P.frontR,r)*s);    // right leg toward the target (bent)
+    legTo(caster.legs[1],-L(P.backC,P.backR,r)*s);     // left leg behind (braced straight on release)
     const pointArm=(arm,dirW,k)=>{
       const local=dirW.applyQuaternion(_ultQ.copy(arm.parent.getWorldQuaternion(_ultQ)).invert()).normalize();
       arm.quaternion.identity().slerp(_ultQ2.setFromUnitVectors(_ultDown,local),k);
     };
-    const hip=_ultV5.set(-.05,.55,-.75).applyQuaternion(rootQ).add(caster.g.getWorldPosition(_ultV7));   // charge point: right hip, behind
-    hip.addScaledVector(_ultV8.set(.4,.6,.3).applyQuaternion(rootQ),.03*build*Math.sin(t*57)*(1-r));   // tremble while charging
-    const shL=caster.armL.getWorldPosition(_ultV2),shR=caster.armR.getWorldPosition(_ultV4);
-    const leftC=_ultV9.subVectors(hip,shL).normalize(),rightC=_ultV10.subVectors(hip,shR).normalize();
-    const leftR=_ultV11.set(0,-.08,1).applyQuaternion(rootQ).normalize();           // thrust at the target
-    const rightR=_ultV12.set(-.35,-.55,-1).applyQuaternion(rootQ).normalize();      // wand hand swings back
+    // left hand: charge low at the left hip, pull back, then thrust at the target
+    const base=caster.g.getWorldPosition(_ultV7);
+    const charge=_ultV5.set(.18,.62,-.42).lerp(_ultV8.set(.10,.78,-.85),wind).applyQuaternion(rootQ).add(base);
+    charge.addScaledVector(_ultV8.set(.5,.7,.3).applyQuaternion(rootQ),.025*build*Math.sin(t*57)*(1-r));
+    const shL=caster.armL.getWorldPosition(_ultV2);
+    const leftC=_ultV9.subVectors(charge,shL).normalize();
+    const leftR=_ultV11.set(0,-.12,1).applyQuaternion(rootQ).normalize();
     pointArm(caster.armL,leftC.lerp(leftR,r),s);
+    // right (wand) hand: hangs out low while charging, swings back for balance on release
+    const rightC=_ultV10.set(-.55,-1,.35).applyQuaternion(rootQ).normalize();
+    const rightR=_ultV12.set(-.30,-.45,-1).applyQuaternion(rootQ).normalize();
     pointArm(caster.armR,rightC.lerp(rightR,r),s);
+    instance.ultHand=charge;
     if(caster.rig){for(const k of caster.rig)k.w=1;rigSync(caster,0);}
     if(!shins&&caster.fileModel)shins=['shin_R','shin_L'].map(n=>{const bone=caster.fileModel.getObjectByName(n);return bone?{bone,rest:bone.quaternion.clone()}:null;});
-    shins?.forEach((j,i)=>{if(!j)return;j.bone.quaternion.copy(j.rest);j.bone.rotateX((i?L(P.kneeFC,P.kneeFR,r):L(P.kneeBC,P.kneeBR,r))*s);});
-    // head keeps looking at the target
+    shins?.forEach((j,i)=>{if(!j)return;j.bone.quaternion.copy(j.rest);j.bone.rotateX((i?L(P.kneeBC,P.kneeBR,r):L(P.kneeFC,P.kneeFR,r))*s);});
+    // head: bowed toward the charging hand, then up at the target on release
     if(!headBone&&caster.fileModel){const hb=caster.fileModel.getObjectByName('head');if(hb)headBone={bone:hb,rest:hb.quaternion.clone()};}
     if(headBone){
       const hb=headBone.bone;hb.quaternion.copy(headBone.rest);hb.updateWorldMatrix(true,false);
-      const fwd=_ultV2.set(0,0,1).applyQuaternion(hb.getWorldQuaternion(_ultQ));fwd.y=0;fwd.normalize();
-      const tgt=_ultV4.copy(aimW);tgt.y=0;tgt.normalize();
-      const turnQ=_ultQ2.identity().slerp(_ultQ4.setFromUnitVectors(fwd,tgt),.85*s);
+      const hp=hb.getWorldPosition(_ultV2);
+      const handW=caster.armL.localToWorld(_ultV4.set(0,-.5,0));
+      const want=_ultV5.subVectors(handW,hp).normalize().lerp(_ultV6.copy(aimW).setY(-.15).normalize(),r).normalize();
+      const fwd=_ultV7.set(0,0,1).applyQuaternion(hb.getWorldQuaternion(_ultQ));
+      const turnQ=_ultQ2.identity().slerp(_ultQ4.setFromUnitVectors(fwd,want),.8*s);
       const pq=hb.parent.getWorldQuaternion(_ultQ);
       hb.quaternion.premultiply(_ultQ4.copy(pq).invert().multiply(turnQ).multiply(pq));
     }
