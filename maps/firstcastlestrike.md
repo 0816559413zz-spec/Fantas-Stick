@@ -1,4 +1,4 @@
-# แผนที่: First Castle Strike (`firstcastlestrike`)
+# แผนที่: Cliff Side Castle (`firstcastlestrike`)
 
 > เขียนอัตโนมัติจาก `mapedit.html` (Map Editor) — อย่าแก้ไฟล์นี้ตรงๆ. ภาพ topdown: `maps/firstcastlestrike.png` (เปิดด้วย Read). ข้อมูลดิบ: `maps/firstcastlestrike.json` (รูปแบบ: `guides/MAP-FORMAT.md`).
 > เป็นภาพอ้างอิง/แบบร่างของผู้ใช้ ไม่ใช่ผังที่ล็อกแล้ว เว้นแต่คำอธิบายบอกไว้.

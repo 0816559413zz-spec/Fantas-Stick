@@ -861,6 +861,7 @@ Phase 1 (maps from Blender files) is done — `notes/systems.md` §5e. Work in t
 (Minimap done 2026-10-17.) Vents/secret passages for Voldemort, task mini-games, 3-player Voldemort mode, more bosses (basilisk), more maps (Hogsmeade, Great Hall), cosmetics, ranked/MMR, mobile controls.
 
 ## 11. Changelog
+- 2026-11-20 — **Map name now "Cliff Side Castle"** (ids still `fcs` / `firstcastlestrike`).
 - 2026-11-20 — **Siege Breakthrough transition (v94):** core falls → 20 s retreat window (`SGV.trT`, `sgAreaT`, `sgPhaseGo` in js/15-siege.js), then next phase. Review #96 waiting.
 - 2026-11-20 — **Hall props + destruction (v93):** ~110 breakable props (`roomProp`/`RPK`, view js/28-fcs-props.js), pillar chips, rail rubble, wall hit marks. Review #95 waiting.
 - 2026-11-20 — **FCS room pieces (v92):** rule `guides/MAP-ROOMS.md`; `js/02-fcs-rooms.js` + first room `js/02-room-greathall.js` (roofed hall, gallery, ceilings 21 m); camera `camObsK` no longer enters walls. Review #94 waiting.
