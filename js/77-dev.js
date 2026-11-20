@@ -48,10 +48,11 @@ function devFcTop(){   // มองจากบนทั้งแมพ
   const F=DEV.fc;if(!F.on)devFcToggle(true);
   F.x=0;F.z=0;F.y=Math.max(MW,MH)*S3*0.62;pitch=1.5;yaw=-Math.PI/2;
 }
-function devFcMe(){const me=dvMe();if(!me)return;const F=DEV.fc;if(!F.on)devFcToggle(true);F.x=tx(me.x);F.z=tz(me.y)+8;F.y=GY(me.x,me.y)+9;pitch=0.7;yaw=-Math.PI/2;}
+function devFcMe(){const me=dvMe()||(DEV.spec&&VIEW.cur&&SPEC.id&&G.players[SPEC.id]);if(!me)return;const F=DEV.fc;if(!F.on)devFcToggle(true);F.x=tx(me.x);F.z=tz(me.y)+8;F.y=GY(me.x,me.y)+9;pitch=0.7;yaw=-Math.PI/2;}
 addEventListener('keydown',e=>{
   if(!DEV.on)return;
   if(/^F(2|3|4|6|7|8|9)$/.test(e.code)){if(devOn()){e.preventDefault();e.stopImmediatePropagation();if(!e.repeat)devKey(e.code);}return;}
+  if(DEV.spec&&devOn()&&!DEV.fc.on&&!DEV.open&&/^Key[REQ]$/.test(e.code)){e.preventDefault();e.stopImmediatePropagation();if(!e.repeat)devSpecKey(e.code);return;}
   if(!(DEV.fc.on&&devOn()))return;
   DEV.k[e.code]=1;
   if(e.code==='Escape'||e.code==='Tab'||/^F\d+$/.test(e.code))return;
@@ -97,6 +98,41 @@ function devStartMode(mode,withBots){
   if(G.ph==='lobby')toast('เริ่มโหมด '+mode+' ไม่สำเร็จ');
   else{toast('▶ '+MODES[mode].name+(withBots?' + บอท':' (เล่นคนเดียว)'));}
 }
+// ---- Spectator (user 2026-11-20): watch a full bot match — host steps out, bots fill every slot (6v6 in tdm/siege) ----
+// follow cam = a bot's over-shoulder view like a player (L/R click = next/prev bot, R = turn with the bot / with the mouse) • F3 = free cam
+DEV.spec=0;DEV.specP=null;DEV.specG=null;DEV.specLock=1;DEV.sfill=0;
+function devSpecStart(mode){
+  const me=dvMe();if(!me||!MODES[mode])return;
+  DEV.solo=1;DEV.endNow=0;
+  try{
+    hostToLobby();removeBots(()=>true);G.mode=mode;
+    DEV.specP=me;DEV.specG=G;delete G.players[NET.myId];G.order=G.order.filter(id=>id!==NET.myId);
+    const M=MODES[mode],cap=Math.min(ROOM_MAX,M.max||6,M.team?(M.tmax||3)*2:99);
+    DEV.sfill=1;try{for(let i=0;i<cap;i++)if(!lobbyBotAdd(DEV.bp,DEV.bl,1))break;}finally{DEV.sfill=0;}
+    hostStart();
+  }finally{DEV.solo=0;}
+  DEV.key='';
+  if(G.ph==='lobby'){devSpecRestore();broadcastLobby();toast('เริ่มโหมดผู้ชมไม่สำเร็จ');return;}
+  DEV.spec=1;SPEC.id=null;CAM_TRACK.has=false;if(DEV.fc.on)devFcToggle(false);
+  toast('👁 โหมดผู้ชม: คลิกซ้าย/ขวา = เปลี่ยนบอท • R = กล้องหันตามบอท/หมุนเอง • F3 = กล้องอิสระ • F2 = เมนู');
+}
+// put the host back into the room (hostToLobby calls this) — only into the same room it left
+function devSpecRestore(){
+  const p=DEV.specP,g=DEV.specG;DEV.spec=0;DEV.specP=DEV.specG=null;
+  if(!p||!G||G!==g||G.players[NET.myId])return;
+  G.players[NET.myId]=p;if(!G.order.includes(NET.myId))G.order.unshift(NET.myId);
+  while(plist().length>modeCap()){const L=lobbyBots(),b=L.filter(q=>q.lteam===p.lteam).pop()||L.pop();if(!b)break;hostRemove(b.id);}   // room was full of bots: make space for the host
+}
+function devSpecStop(){const m=G.mode;hostToLobby();devStartMode(MODES[m]?m:'tdm',!!DEV.cfg.sbots);}   // hostToLobby puts the host back first
+// follow cam: turn the camera with the bot (as if looking through its eyes); off = mouse orbits freely
+function devSpecAim(t,dt){
+  if(!(DEV.spec&&DEV.specLock&&devOn())||DEV.fc.on||!t||t.a===undefined)return;
+  const k=1-Math.exp(-7*dt);yaw=lerpAng(yaw,t.a,k);pitch+=(0.28-pitch)*k;
+}
+function devSpecKey(c){
+  if(c==='KeyR'){DEV.specLock^=1;toast(DEV.specLock?'🎯 กล้องหันตามบอท':'🖱 หมุนกล้องเอง');}
+  else if(c==='KeyE'||c==='KeyQ')specCycle(c==='KeyE'?1:-1);
+}
 function devCell(x,y){return MAPID==='fcs'?'ช่อง ('+Math.floor(x/FCS_C)+','+Math.floor(y/FCS_C)+')':'';}
 function devCopyAim(){
   const x=INPUT.gx,y=INPUT.gy;if(!(x>=0))return toast('ไม่มีจุดที่เล็ง');
@@ -130,7 +166,8 @@ function devBotAdd(t){
   }
 }
 function devAct(a,k,v){
-  const me=dvMe(),C=DEV.cfg;if(!me)return;
+  const me=dvMe(),C=DEV.cfg;if(!me&&!DEV.spec)return;
+  if(!me&&/^(kit|creator|hp|rev|team|mount|tpfc|tpaim|tp|botadd)$/.test(a))return;   // spectator has no own player
   if(a==='kit'){const s=parseKit(String(v)).str;setKit(me,s);myKit=s;store('wd_kit2',s);broadcastLobby();toast('🪄 เปลี่ยนเป็น '+PATHS[parseKit(s).path].n);}
   else if(a==='creator'){devToggle(false);openCreator(false,3);}
   else if(a==='tog'){C[k]=C[k]?0:1;devSave();}
@@ -152,6 +189,10 @@ function devAct(a,k,v){
   else if(a==='win'&&G.sg){sgEnd(+v);}
   else if(a==='walls'&&G.sg){G.sg.bw=sgF().bw.map(b=>b.k==='gate'?-1:(+v?SGV.wallHp:0));sgWallsApply();}
   else if(a==='mode')devStartMode(String(v),!!C.sbots);
+  else if(a==='spec')devSpecStart(String(v));
+  else if(a==='specstop')devSpecStop();
+  else if(a==='slock')DEV.specLock^=1;
+  else if(a==='sfol'){if(DEV.fc.on)devFcToggle(false);SPEC.id=String(v);CAM_TRACK.has=false;}
   else if(a==='mount')devMount();
   else if(a==='endnow'){DEV.endNow=1;try{endMatch();}finally{DEV.endNow=0;}}
   else if(a==='bp')DEV.bp=+v;
@@ -272,7 +313,7 @@ const dvTog=(on,key,n)=>'<button class="trt'+(on?' on':'')+'" data-d="tog" data-
 const dvSec=n=>'<div class="trs">'+n+'</div>';
 function devRender(){
   if(!DEV.open||!devOn())return;
-  const me=dvMe();if(!me)return;
+  const me=dvMe();if(!me){if(DEV.spec)devSpecRender();return;}
   const C=DEV.cfg,sg=G.mode==='siege'&&G.sg?G.sg:null,F=sg?sgF():null,path=getKit(me.id).path;
   const k=JSON.stringify([C,DEV.fc.on,G.mode,me.fly,sg&&sg.ph,DEV.bp,DEV.bl,DEV.bn,path,me.team]);
   if(k===DEV.key)return;DEV.key=k;
@@ -281,6 +322,7 @@ function devRender(){
   h.push('<h2>🛠 Dev Mode</h2><div id="devPos"></div>');
   h.push(dvSec('Mode (เริ่มใหม่ทันที เล่นคนเดียว)'),'<div class="trg">'+Object.keys(MODES).map(m=>dvBtn('mode',MODES[m].name,{v:m,on:G.mode===m})).join('')+'</div>');
   h.push(dvTog(C.sbots,'sbots','🤖 เติมบอทตอนเริ่มโหมด'),dvTog(C.noend,'noend','♾️ แมตช์ไม่จบเอง'),'<div class="trn">'+dvBtn('endnow','🏁 จบแมตช์ตอนนี้')+'</div>');
+  h.push(dvSec('👁 โหมดผู้ชม (ดูบอทสู้กันเต็มห้อง ตัวเราไม่ลงเล่น)'),'<div class="trn">'+dvBtn('spec','⚔️ ดูบอท 6v6 (ทีม)',{v:'tdm'})+dvBtn('spec','🏰 ดูบอทบุกปราสาท 6v6',{v:'siege'})+'</div>','<div class="trn">'+dvBtn('spec','💥 ดูบอท FFA 12 ตัว',{v:'ffa'})+'</div>');
   h.push(dvSec('ไม้กวาด'),dvTog(C.broom,'broom','🧹 ใช้ไม้กวาดได้ทุกโหมด (กด B)'),dvBtn('mount',me.fly?'⬇ ลงจากไม้กวาด [F9]':'🧹 ขึ้นไม้กวาด [F9]').replace('<button','<button class="trw"'));
   h.push(dvSec('เปลี่ยนสาย (ทันที ไม่ต้องรอแมตช์ใหม่)'),'<div class="trg">'+ok.map(q=>dvBtn('kit',q[1].ic+' '+nm(q[1]),{v:q[0],on:path===q[0]})).join('')+'</div>',dvBtn('creator','🪄 เลือกคาถาละเอียด').replace('<button','<button class="trw"'));
   h.push(dvSec('โกง'),dvTog(C.god,'god','🛡️ อมตะ'),dvTog(C.nocd,'nocd','⏱️ ไม่มีคูลดาวน์'),dvTog(C.ult,'ult','🌟 อัลติเต็มตลอด'),dvTog(C.fast,'fast','⚡ เกิดใหม่ไว 0.5 วิ'));
@@ -312,8 +354,29 @@ function devRender(){
   _dvPanel.innerHTML=h.join('');
   devPos();
 }
+function devSpecRender(){
+  const C=DEV.cfg,bl=plist().filter(p=>p.alive).map(p=>p.id+p.team).join(',');
+  const k=JSON.stringify(['spec',C,DEV.fc.on,G.mode,DEV.specLock,SPEC.id,bl,DEV.bp,DEV.bl]);
+  if(k===DEV.key)return;DEV.key=k;
+  const ok=PATHS.map((P,i)=>[i,P]).filter(q=>!q[1].off),nm=P=>P.n.replace('สาย',''),h=[];
+  h.push('<h2>👁 โหมดผู้ชม</h2><div id="devPos"></div>');
+  h.push('<div class="trn">'+dvBtn('specstop','⏹ ออกจากโหมดผู้ชม (กลับไปเล่น)')+'</div>');
+  h.push(dvSec('เริ่มใหม่ (บอทเต็มห้อง)'),'<div class="trn">'+dvBtn('spec','⚔️ ทีม 6v6',{v:'tdm',on:G.mode==='tdm'})+dvBtn('spec','🏰 บุกปราสาท 6v6',{v:'siege',on:G.mode==='siege'})+dvBtn('spec','💥 FFA 12',{v:'ffa',on:G.mode==='ffa'})+'</div>');
+  h.push('<div class="trg">'+[[-1,'🎲 สุ่มสาย']].concat(ok.map(q=>[q[0],q[1].ic+' '+nm(q[1])])).map(q=>dvBtn('bp',q[1],{v:q[0],on:DEV.bp===q[0]})).join('')+'</div>');
+  h.push(dvRow('bl','',[[0,'ง่าย'],[1,'กลาง'],[2,'เก่ง']],DEV.bl));
+  h.push(dvSec('กล้อง'),'<button class="trt'+(DEV.fc.on?' on':'')+'" data-d="fc">🎥 กล้องอิสระ [F3]<b>'+(DEV.fc.on?'เปิด':'ปิด')+'</b></button>');
+  h.push('<button class="trt'+(DEV.specLock?' on':'')+'" data-d="slock">🎯 กล้องหันตามบอท [R]<b>'+(DEV.specLock?'เปิด':'ปิด')+'</b></button>');
+  h.push('<div class="trn">'+dvBtn('fctop','⬇ มองจากบน')+dvBtn('fcme','🎥 กล้องอิสระที่บอทนี้')+'</div>');
+  const tn=p=>G.mode==='siege'?(SG_TEAM[p.team]||''):G.mode==='tdm'?(TEAMN[p.team]||''):'';
+  const L=plist().slice().sort((a,b)=>(a.team-b.team)||a.name.localeCompare(b.name));
+  h.push(dvSec('ดูมุมบอท (คลิกซ้าย/ขวา หรือ Q/E ในเกม)'),'<div class="trg">'+L.map(p=>dvBtn('sfol',(p.alive?'':'💀 ')+(tn(p)?'['+tn(p)+'] ':'')+p.name.replace('🤖 ',''),{v:p.id,on:!DEV.fc.on&&SPEC.id===p.id})).join('')+'</div>');
+  h.push(dvSec('โลก / ภาพช่วยดูแมพ'),dvRow('set','ts',[[0.25,'×0.25'],[0.5,'×0.5'],[1,'×1'],[2,'×2']],C.ts));
+  h.push(dvTog(C.pause,'pause','⏸ หยุดโลก [F4]'),dvTog(C.noend,'noend','♾️ แมตช์ไม่จบเอง'),dvTog(C.omap,'omap','🗺️ แผนที่ 2D ซ้อนจอ'),dvTog(C.zon,'zon','⭕ โชว์เขตยึดแกน + จุดเกิดปลอดภัย'));
+  h.push('<small>F2 เปิด/ปิด • คลิกจอ = ดูต่อ</small>');
+  _dvPanel.innerHTML=h.join('');devPos();
+}
 function devPos(){
-  const el=document.getElementById('devPos');if(!el)return;const me=dvMe();if(!me)return;
+  const el=document.getElementById('devPos');if(!el)return;const me=dvMe();if(!me){el.innerHTML=DEV.spec?'👁 ผู้ชม'+(DEV.fc.on?' • กล้องอิสระ ความเร็ว '+Math.round(DEV.fc.spd):''):'';return;}
   const ax=INPUT.gx,ay=INPUT.gy,f=n=>Math.round(n);
   el.innerHTML='ตัวเรา '+f(me.x)+','+f(me.y)+' '+devCell(me.x,me.y)+'<br>จุดเล็ง '+(ax>=0?f(ax)+','+f(ay)+' '+devCell(ax,ay):'—')+(DEV.fc.on?'<br>กล้องอิสระ ความเร็ว '+f(DEV.fc.spd):'');
 }
@@ -331,4 +394,4 @@ setInterval(()=>{
     devOverlay();
   }catch(e){}
 },200);
-if(window.WD)window.WD.dev=DEV;   // ไว้ดีบักจาก console / ทดสอบอัตโนมัติ
+if(window.WD){window.WD.dev=DEV;window.WD.spec=SPEC;window.WD.devSpec=devSpecStart;}   // ไว้ดีบักจาก console / ทดสอบอัตโนมัติ

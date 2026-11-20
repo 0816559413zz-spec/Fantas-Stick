@@ -34,7 +34,7 @@ function botInZone(zk,x,y,pad){
 // เสกบอท: path = เลขสาย (PATHS) • lv 0–2 • ใกล้จุด x,y • owner = id คนเสก
 // fx: 1 = หุ่นผู้เล่น (ยืนนิ่ง ไม่โจมตี ทีม 51) • 2 = บอทโชว์สกิล (ยืนนิ่ง ใช้สกิลตามที่สั่ง trShowCmd ทีม 50) — ไม่นับในเพดานบอท
 function spawnBot(path,lv,x,y,zk,owner,fx){
-  if(!fx&&bots().filter(q=>!q.ai.still).length>=(G.ph==='lobby'?ROOM_MAX-1:BOT_MAX))return null;   // ห้องรอ: เติมบอทได้จนเต็มห้อง (12) • ห้องฝึก/สังเวียนยัง 6
+  if(!fx&&bots().filter(q=>!q.ai.still).length>=(G.ph==='lobby'?ROOM_MAX-(DEV.sfill?0:1):BOT_MAX))return null;   // ห้องรอ: เติมบอทได้จนเต็มห้อง (12) • ห้องฝึก/สังเวียนยัง 6
   G.botN=(G.botN|0)+1;
   const P=PATHS[path]&&!PATHS[path].off?path:0,L=clamp(lv|0,0,2),id=(fx?'fix':'bot')+G.botN+'_'+Math.floor(Math.random()*1e6).toString(36);
   const p=addPlayer(id,fx===2?showName(P):fx?'🎯 หุ่นผู้เล่น':'🤖 '+PATHS[P].n.replace('สาย','')+' ('+BOT_LV[L].n+')',null,null,botKit(P));

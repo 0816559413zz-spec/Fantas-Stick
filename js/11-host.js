@@ -138,7 +138,7 @@ function hostStart(){
   broadcastLobby();
   setScreen('game');
 }
-function hostToLobby(){G.ph='lobby';G.proj=[];G.en=[];
+function hostToLobby(){G.ph='lobby';G.proj=[];G.en=[];devSpecRestore();   // Dev spectator: host rejoins (js/77)
   removeBots(q=>!q.ai.lb);   // บอทห้องฝึกไม่ตามไปล็อบบี้ (บอทห้องรออยู่ต่อ)
   for(const p of plist())if(p.awayT>0)hostRemove(p.id);   // หลุดแล้วไม่กลับ = ลบตอนกลับล็อบบี้
   // คนดู → เป็นผู้เล่นในรอบหน้า (ถ้าห้องยังไม่เต็ม)

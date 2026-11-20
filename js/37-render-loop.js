@@ -78,7 +78,7 @@ function render(dt,now){
     aimFromCrosshair(me,P,E);
     updatePlaceGhost(me);
     const o=PM3.get(me.id);windUpdate(o?Math.hypot(o.svx,o.svz):0,!!me.fl);
-  }else{const sv=specTarget(P,null,dt);if(sv)updateCamera(sv,dt);else menuCamera(now);}   // คนดู (ไม่มีตัวในเกม)
+  }else{const sv=specTarget(P,null,dt);if(sv){devSpecAim(sv,dt);updateCamera(sv,dt);}else menuCamera(now);if(DEV.fc.on&&devOn())devFcCam(dt);}   // คนดู (ไม่มีตัวในเกม)
   shakeA=Math.max(0,shakeA-dt*30);
   vfxBegin(dt);try{renderGame(v,P,E,me,dt,now);}finally{vfxEnd();}
 }

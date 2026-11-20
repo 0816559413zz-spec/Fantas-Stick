@@ -107,7 +107,7 @@ function fcsPropsView(dt){
   frpDebrisTick(dt);
 }
 // brk event (from js/26-fx-events.js): debris for room props
-function fcsRoomBrkFx(ev){const P=FRP.map[ev.i];if(!P)return;(FRP.seen=FRP.seen||{})[ev.i+':'+ev.st]=1;frpDebris(ev.i,ev.st,ev);}
+function fcsRoomBrkFx(ev){const P=FRP.map&&FRP.map[ev.i];if(!P)return;(FRP.seen=FRP.seen||{})[ev.i+':'+ev.st]=1;frpDebris(ev.i,ev.st,ev);}
 const FRP_DEB={table:[16,'#6b4a2e'],hightable:[18,'#6b4a2e'],bench:[7,'#8a6440'],chair:[6,'#8a6440'],throne:[10,'#4f3420'],crate:[12,'#8a6440'],crate2:[18,'#8a6440'],
   barrel:[11,'#7b5332'],barrels:[22,'#7b5332'],keg:[6,'#7b5332'],sack:[6,'#b9a27a'],rack:[9,'#4f3420'],armor:[9,'#8e9298'],shelf:[20,'#4f3420'],desk:[8,'#8a6440'],
   candle:[5,'#3a3836'],woodpile:[9,'#6a4628'],cart:[16,'#8a6440'],rail:[12,'#b4a690'],pillar:[9,'#c2b298']};

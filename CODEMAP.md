@@ -369,7 +369,7 @@ fcsRoomsView:174
 ## js/28-fcs-forest.js (259) — ป่าสนหมอก ในแผนที่ First Castle Strike (เฟส 1 = ช่อง x 0–28 ของ Map Editor) — ทำตามรูปอ้า…
 FF:7 FF_X1:8 FF_NS:9 ffGroundTex:11 ffParts:33 fcsForest:40 ffMerge:123 ffDetail:131 fcsRuin:158 ffSkyMat:201 ffMist:229 ffMistFrame:246 fcsForestTick:248 FFC:259
 
-## js/28-fcs-props.js (156) — 
+## js/28-fcs-props.js (156) — FCS room props — look + destruction (user 2026-11-20). Gameplay side: RPK / roomProp in j…
 FRP:11 FRP_PV:12 FRP_PB:13 frpMat:16
 §26 part builders: local metres, x along the prop, z across, y up. push(g…
 frpBuild:27 fcsPropsBuild:75 fcsPropsView:101 fcsRoomBrkFx:110 FRP_DEB:111 frpDebris:114 _frM:128 _frQ:128 _frS:128 frpSet:129 frpDebrisTick:130
@@ -856,21 +856,23 @@ surfSync:49 surfQuality:53
 SURF_VS:55 SURF_VS_BODY:56 SURF_FS:67 SURF_FS_BODY:68 surfOk:98 surfApply:99 surfScene:111
 §112 ปรับค่า (tune.html / F8)
 
-## js/77-dev.js (334) — Dev Mode: ทดสอบแมพ/สกิลในแมตช์จริง (ผู้ใช้ 2026-11-18)
+## js/77-dev.js (397) — Dev Mode: ทดสอบแมพ/สกิลในแมตช์จริง (ผู้ใช้ 2026-11-18)
 DEV:5 devOn:9 devOff:10 devSoloOk:11 devHold:12 devBroomOk:13 dvMe:14 devSave:15
 §16 hook จากโฮสต์: เรียกต้น hostTick (คืน dt ที่ปรับแล้ว • -1 = หยุดโลก)
 devDt:17 devTick:22 devGod:31 devFreeze:32
 §33 กล้องอิสระ
-devFcToggle:34 devFcCam:41 devFcTop:47 devFcMe:51 devKey:67 devMount:78 DEV_BOTS:86 devStartMode:87 devCell:100 devCopyAim:101
-§107 คำสั่งโฮสต์
-devTp:108 devSgPhase:112 devBotAdd:123 devAct:132
-§168 Destruction debug (user 2026-11-19): repair / collapse breakables at …
-DEVD_R:171 devBrkFix:172 devBldFix:173 devPropFix:177 devSkinFix:178 devDestroy:183
-§218 ภาพซ้อนไว้ดูแมพ: กล่องชน (OBS) + วงเขตยึด/จุดเกิดปลอดภัย
-_dvCyl:219 _dvMat:220 devOverlay:221
-§241 2D overlay map: spawn zones + capture zones + players (click = warp)
-_dvMap:242 devMapDraw:246
-§259 หน้าต่าง
-_dvPanel:260 _dvBtn:261 devToggle:264 dvBtn:269 dvRow:270 dvTog:271 dvSec:272 devRender:273 devPos:315
+devFcToggle:34 devFcCam:41 devFcTop:47 devFcMe:51 devKey:68 devMount:79 DEV_BOTS:87 devStartMode:88
+§101 Spectator (user 2026-11-20): watch a full bot match — host steps out,…
+devSpecStart:104 devSpecRestore:120 devSpecStop:126 devSpecAim:128 devSpecKey:132 devCell:136 devCopyAim:137
+§143 คำสั่งโฮสต์
+devTp:144 devSgPhase:148 devBotAdd:159 devAct:168
+§209 Destruction debug (user 2026-11-19): repair / collapse breakables at …
+DEVD_R:212 devBrkFix:213 devBldFix:214 devPropFix:218 devSkinFix:219 devDestroy:224
+§259 ภาพซ้อนไว้ดูแมพ: กล่องชน (OBS) + วงเขตยึด/จุดเกิดปลอดภัย
+_dvCyl:260 _dvMat:261 devOverlay:262
+§282 2D overlay map: spawn zones + capture zones + players (click = warp)
+_dvMap:283 devMapDraw:287
+§300 หน้าต่าง
+_dvPanel:301 _dvBtn:302 devToggle:305 dvBtn:310 dvRow:311 dvTog:312 dvSec:313 devRender:314 devSpecRender:357 devPos:378
 
-(109 files, 31033 lines)
+(109 files, 31096 lines)
