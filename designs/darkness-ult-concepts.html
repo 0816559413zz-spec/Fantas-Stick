@@ -153,6 +153,39 @@ function styleAB(y0){
   label(tx+930,ty+8,'มุมบน: กว้างราวความสูง ไม่แบน',17,'#555');
 }
 
+// ============ Texture options (close-up of the body surface) ============
+function texPanel(x0,y0,w,h,title,sub,draw){g.fillStyle=PANEL;g.fillRect(x0,y0,w,h);label(x0+20,y0+36,title,24,'#111');label(x0+20,y0+62,sub,16,'#444');
+  const shape=[[x0+30,y0+h-40,1],[x0+60,y0+130],[x0+w*.45,y0+95],[x0+w-60,y0+150],[x0+w-30,y0+h-40,1]];
+  g.save();draw(shape,x0,y0,w,h);g.restore();}
+function textures(y0){
+  label(44,y0+40,'เนื้อผิว: ซูมใกล้ส่วนตัว (ดำสนิทเป็นพื้นเสมอ ไม่มีเทา)',28,'#111');
+  const W2=700,H2=440;
+  texPanel(30,y0+70,W2,H2,'1 · เส้นหมึกไหล','เส้นดำกลางไหลจากหัวไปหาง ปลายขอบแตกเป็นเส้น',(sh,x,y,w,h)=>{
+    seed(201);for(let i=0;i<40;i++){const px=x+80+rnd()*(w-160),py=y+105+rnd()*30;taper([px,py],[px-60,py-40-rnd()*40],[px-140,py-30-rnd()*80],8+rnd()*8,0,INK);}
+    fill(sh,INK);g.save();outline(sh);g.clip();
+    seed(203);for(let i=0;i<160;i++){const yy=y+110+rnd()*(h-150),p0=[x+w+20,yy],p2=[x-20,yy+(rnd()-.5)*60],p1=[x+w/2,yy+(rnd()-.5)*80];taper(p0,p1,p2,2+rnd()*7,.4,rnd()<.6?MID:CHAR);}
+    for(let i=0;i<25;i++){const yy=y+120+rnd()*(h-170);taper([x+w,yy],[x+w/2,yy+(rnd()-.5)*50],[x,yy+(rnd()-.5)*40],2,.3,'#34343e');}
+    g.restore();});
+  texPanel(770,y0+70,W2,H2,'2 · ผ้าเงาซ้อนชั้น','แผ่นผ้าขาดซ้อนกันเป็นชั้น ขอบแผ่นเป็นดำกลาง สะบัดไปข้างหลัง',(sh,x,y,w,h)=>{
+    fill(sh,INK);g.save();outline(sh);g.clip();
+    seed(211);for(let r=0;r<6;r++)for(let i=0;i<9;i++){const cx=x+w-40-i*80-r*20,cy=y+140+r*50+(rnd()-.5)*20,ww=90+rnd()*50,hh=50+rnd()*30;
+      const pts=[[cx,cy-hh/2],[cx+ww*.25,cy-hh*.2],[cx+ww*.3,cy+hh*.5],[cx-ww*.4,cy+hh*.4],[cx-ww*.75,cy+hh*.1],[cx-ww*.55,cy-hh*.1]];
+      poly(pts,'#0b0b0f');g.strokeStyle=r%2?'#2c2c35':'#202028';g.lineWidth=3;g.beginPath();g.moveTo(...pts[0]);g.lineTo(...pts[1]);g.lineTo(...pts[2]);g.stroke();
+      for(let k=0;k<3;k++){const bx=L(pts[3][0],pts[4][0],k/3),by=L(pts[3][1],pts[4][1],k/3);poly([[bx,by],[bx-14,by],[bx-8-rnd()*20,by+16+rnd()*18]],'#0b0b0f');}}
+    g.restore();});
+  texPanel(30,y0+530,W2,H2,'3 · ควันเดือด','ผิวเป็นก้อนควันดำผุดขึ้นตลอด ขอบหลุดเป็นควันดำจาง',(sh,x,y,w,h)=>{
+    aura(x+w/2,y+120,w*.42,40,40,221,.35);fill(sh,INK);g.save();outline(sh);g.clip();
+    seed(223);for(let i=0;i<90;i++){const px=x+40+rnd()*(w-80),py=y+110+rnd()*(h-150),r=18+rnd()*46;const gr=g.createRadialGradient(px-r*.3,py-r*.3,0,px,py,r);
+      gr.addColorStop(0,'rgba(40,40,48,.55)');gr.addColorStop(.6,'rgba(18,18,22,.35)');gr.addColorStop(1,'rgba(5,5,7,0)');g.fillStyle=gr;g.beginPath();g.arc(px,py,r,0,7);g.fill();}
+    g.restore();});
+  texPanel(770,y0+530,W2,H2,'4 · แนะนำ: ผสม','หัว = เส้นหมึกไหล · ตัว = ผ้าซ้อนชั้น · ขอบทั้งตัว = ควันดำหลุดออก',(sh,x,y,w,h)=>{
+    aura(x+w/2,y+125,w*.42,40,36,231,.33);fill(sh,INK);g.save();outline(sh);g.clip();
+    seed(233);for(let r=0;r<6;r++)for(let i=0;i<5;i++){const cx=x+w*.5-40-i*80-r*16,cy=y+140+r*50,ww=90,hh=50;const pts=[[cx,cy-hh/2],[cx+ww*.25,cy-hh*.2],[cx+ww*.3,cy+hh*.5],[cx-ww*.4,cy+hh*.4],[cx-ww*.75,cy+hh*.1]];
+      poly(pts,'#0b0b0f');g.strokeStyle='#26262e';g.lineWidth=3;g.beginPath();g.moveTo(...pts[0]);g.lineTo(...pts[1]);g.lineTo(...pts[2]);g.stroke();}
+    for(let i=0;i<90;i++){const yy=y+110+rnd()*(h-150),p0=[x+w+20,yy],p2=[x+w*.45,yy+(rnd()-.5)*40];taper(p0,[x+w*.72,yy+(rnd()-.5)*50],p2,2+rnd()*6,.4,rnd()<.6?MID:CHAR);}
+    g.restore();label(x+w*.5-60,y+h-12,'← ตัว (ผ้า)       หัว (หมึก) →',15,'#555');});
+}
+
 g.fillStyle='#e6e4de';g.fillRect(0,0,cv.width,cv.height);
-if(location.search.includes('ab')){cv.height=1040;g.fillStyle='#e6e4de';g.fillRect(0,0,cv.width,cv.height);styleAB(20);}else{styleA(20);styleB(560);styleC(1100);}
+if(location.search.includes('tex')){cv.height=1000;g.fillStyle='#e6e4de';g.fillRect(0,0,cv.width,cv.height);textures(0);}else if(location.search.includes('ab')){cv.height=1040;g.fillStyle='#e6e4de';g.fillRect(0,0,cv.width,cv.height);styleAB(20);}else{styleA(20);styleB(560);styleC(1100);}
 </script></body></html>
