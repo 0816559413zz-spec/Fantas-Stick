@@ -859,6 +859,7 @@ Phase 1 (maps from Blender files) is done — `notes/systems.md` §5e. Work in t
 (Minimap done 2026-10-17.) Vents/secret passages for Voldemort, task mini-games, 3-player Voldemort mode, more bosses (basilisk), more maps (Hogsmeade, Great Hall), cosmetics, ranked/MMR, mobile controls.
 
 ## 11. Changelog
+- 2026-11-20 — **FCS cloud sky** `ffSkyMat` (js/28-fcs-forest.js): sunset (castle) ↔ overcast (forest) with fbm clouds; colours = uniforms `uZa..uSb`. Review #92 waiting.
 - 2026-11-20 — **FCS forest mist fix:** mist sprites washed the bridge wall out → soft depth-faded billboards in fxScene (`ffMist`, js/28-fcs-forest.js). Details: notes/CHANGELOG.md.
 - 2026-11-13 — **`Play-Uncapped.bat`** (user: unlock FPS past the monitor limit): opens the game in a separate Chrome/Edge profile with `--disable-gpu-vsync --disable-frame-rate-limit` (+ `--force_high_performance_gpu`), starts `tools/serve.py 8765` if not running. Benchmark only. Measured on a WebGL clear page: 55 → 3714 fps. Also merged origin/main (Earth rework + Storm glare fixes) into the Map Builder commit; local review "Map Builder" renumbered #11 → #29.
 - 2026-11-11 — **Map Builder** (`mapbuild.html`, `mapbuild/`, `guides/MAP-BUILDER.md`, `/api/mb*`, `assets/mapkit/kit.json`, `?playmap=`) — real maps from the browser into the game. See notes/CHANGELOG.md.

@@ -56,9 +56,9 @@ function fcsForest(fallback){
    const m=new THREE.Mesh(geo,mat);
    m.receiveShadow=true;m.renderOrder=1;addW(m);}
   // ฟ้าครึ้มสีเขียวเทา (ผสมเข้าตามตำแหน่งกล้องใน fcsForestTick — ซ้อนทับฟ้าพระอาทิตย์ตกของแมพ)
-  {const t=texCanvas(8,256,(g,w,h)=>{const gr=g.createLinearGradient(0,0,0,h);gr.addColorStop(0,'#c9d1cb');gr.addColorStop(0.55,'#bfc9bd');gr.addColorStop(1,'#b6c1b5');g.fillStyle=gr;g.fillRect(0,0,w,h);});
-   const sk=new THREE.Mesh(new THREE.SphereGeometry(560,24,12),new THREE.MeshBasicMaterial({map:t,side:THREE.BackSide,transparent:true,opacity:0,depthWrite:false,fog:false}));
-   sk.visible=false;sk.frustumCulled=false;sk.renderOrder=-1;sk.userData.ffSky=1;W.add(sk);FF.sky=sk;}
+  // 2026-11-20 (user: "sky is one flat colour"): procedural cloud sky over the whole map — castle side = sunset, forest = overcast (uK)
+  {const sk=new THREE.Mesh(new THREE.SphereGeometry(560,48,24),ffSkyMat());
+   sk.frustumCulled=false;sk.renderOrder=-1;sk.userData.ffSky=1;W.add(sk);FF.sky=sk;}
   // หมอกลอยต่ำ: การ์ดนุ่มขนาดใหญ่เกลี่ยทั่วป่า — อยู่ใน fxScene แบบ soft (จางตามความหนาหมอกก่อนถึงกำแพง + จางใกล้กล้อง)
   // เดิมเป็น Sprite ในฉากหลัก: ซ้อนหลายใบบังกำแพงสะพานจนขาวหายทั้งแถบ (บั๊กผู้ใช้ 2026-11-20)
   {const P=[];for(let i=0;i<30;i++){const x=(0.5+R()*(FF_X1-1.5))*C,y=(0.5+R()*(D.h-1))*C;P.push([tx(x),gy0(x,y)+2.2+R()*2.5,tz(y),34+R()*30,10+R()*8]);}
@@ -196,7 +196,35 @@ function fcsRuin(W,F){
   const box=new THREE.BoxGeometry(1,1,1),bp=box.attributes.position;for(let i=0;i<bp.count;i++){bp.setX(i,bp.getX(i)*(1-0.06*Math.abs(bp.getY(i))));}box.computeVertexNormals();   // ขอบมนนิด ๆ
   mk(box,B);mk(new THREE.CylinderGeometry(1,1,1,10),D);
 }
-// forest mist cards: P = [[x,y,z,w,h]] world units. Instanced billboards in fxScene; soft depth fade (uSoft m of fog before a wall
+// FCS sky dome: gradient + drifting fbm clouds (lit on the sun side, dark bellies) + sun glow through the clouds + horizon melts
+// into the fog colour. uK 0 = castle sunset, 1 = forest overcast (fcsForestTick). Unlit, no fog, drawn behind everything.
+function ffSkyMat(){
+  const C=c=>new THREE.Color(c);
+  return new THREE.ShaderMaterial({side:THREE.BackSide,depthWrite:false,fog:false,transparent:true,
+    uniforms:{uK:{value:0},uT:{value:0},uSun:{value:new THREE.Vector3(0.58,0.09,-0.81)},uFog:{value:C('#c8c0b8')},
+      uZa:{value:C('#28356e')},uMa:{value:C('#8a6f9c')},uHa:{value:C('#ffae78')},uSa:{value:C('#ffd9a0')},   // sunset: zenith / mid / horizon / sun
+      uZb:{value:C('#7e8e92')},uMb:{value:C('#a9b6b0')},uHb:{value:C('#cfd7cd')},uSb:{value:C('#fff4dc')}},  // overcast forest
+    vertexShader:'varying vec3 vD;void main(){vD=normalize((modelMatrix*vec4(position,1.0)).xyz-cameraPosition);gl_Position=projectionMatrix*viewMatrix*modelMatrix*vec4(position,1.0);}',
+    fragmentShader:'uniform float uK;uniform float uT;uniform vec3 uSun;uniform vec3 uFog;uniform vec3 uZa;uniform vec3 uMa;uniform vec3 uHa;uniform vec3 uSa;uniform vec3 uZb;uniform vec3 uMb;uniform vec3 uHb;uniform vec3 uSb;varying vec3 vD;'+
+      'float h2(vec2 p){p=fract(p*vec2(123.34,456.21));p+=dot(p,p+45.32);return fract(p.x*p.y);}'+
+      'float n2(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.0-2.0*f);return mix(mix(h2(i),h2(i+vec2(1,0)),f.x),mix(h2(i+vec2(0,1)),h2(i+vec2(1,1)),f.x),f.y);}'+
+      'float fbm(vec2 p){float s=0.0,a=0.5;mat2 r=mat2(1.6,1.2,-1.2,1.6);for(int i=0;i<6;i++){s+=a*n2(p);p=r*p;a*=0.5;}return s;}'+
+      'void main(){vec3 d=normalize(vD);float h=d.y;'+
+      'vec3 Z=mix(uZa,uZb,uK),M=mix(uMa,uMb,uK),H=mix(uHa,uHb,uK),S=mix(uSa,uSb,uK);'+
+      'float e=max(h,0.0);vec3 c=mix(H,M,smoothstep(0.0,0.28,e));c=mix(c,Z,smoothstep(0.22,0.9,e));'+
+      'float sd=max(dot(d,normalize(uSun)),0.0);'+
+      'c+=S*(pow(sd,6.0)*mix(0.55,0.25,uK)+pow(sd,48.0)*mix(0.6,0.35,uK));'+   // wide warm glow + tighter halo
+      // clouds on a flat layer above: uv = d.xz/d.y
+      'if(h>0.0){vec2 uv=d.xz/(h+0.08)*1.3+vec2(uT*0.006,uT*0.0025);'+
+        'float cov=mix(0.47,0.36,uK);float n=fbm(uv);float cl=smoothstep(cov,cov+mix(0.22,0.32,uK),n);'+
+        'vec2 ts=normalize(uSun.xz+1e-4)*0.06;float n1=fbm(uv+ts);float lit=clamp((n-n1)*5.0+0.5,0.0,1.0);'+   // brighter edge facing the sun
+        'vec3 dark=mix(mix(vec3(0.20,0.18,0.30),Z,0.35),M*0.62,uK),light=mix(mix(H,S,0.5)*1.05,mix(H,vec3(1.0),0.35),uK);'+
+        'vec3 cc=mix(dark,light,lit*0.8+0.2*smoothstep(0.0,0.6,e));cc+=S*pow(sd,10.0)*lit*mix(0.8,0.4,uK);'+   // silver lining near the sun
+        'float fade=smoothstep(0.02,0.2,h);c=mix(c,cc,cl*fade*mix(0.92,0.75,uK));}'+
+      'float hz=1.0-smoothstep(-0.02,0.16,h);c=mix(c,uFog,hz*mix(0.55,0.8,uK));'+   // horizon melts into the map fog
+      'gl_FragColor=vec4(c,1.0);}'});
+}
+// forest mist cards: P =[[x,y,z,w,h]] world units. Instanced billboards in fxScene; soft depth fade (uSoft m of fog before a wall
 // = full alpha) so a card in front of the bridge only tints it by the fog depth instead of washing it out; fades out near the camera.
 function ffMist(P,W){
   if(FF.mist){fxScene.remove(FF.mist);FF.mist.geometry.dispose();FF.mist=null;}
@@ -219,7 +247,8 @@ function ffMistFrame(){if(FF.mist)FF.mist.visible=FF.mistW===world&&!!world.pare
 // หมอก/แสงเฉพาะในป่า: ผสมตามตำแหน่งกล้อง (เรียกทุกเฟรมจาก sgSync)
 function fcsForestTick(){
   const cx=(cam.position.x/S3+MW/2)/FCS_C,k=1-clamp((cx-(FF_X1-8))/9,0,1);
-  if(FF.sky){FF.sky.visible=k>0.01;FF.sky.material.opacity=k*k*(3-2*k);FF.sky.position.copy(cam.position);if(SKY.day)SKY.sun.visible=k<0.6;}
+  if(FF.sky){const U=FF.sky.material.uniforms;U.uK.value=k*k*(3-2*k);U.uT.value=performance.now()/1000;if(scene.fog)U.uFog.value.copy(scene.fog.color);
+    U.uSun.value.copy(SKYB.sun).normalize();FF.sky.position.copy(cam.position);if(SKY.day)SKY.sun.visible=k<0.6;}
   if(k<=0.001){if(FF.on&&FF.base){const B=FF.base;scene.fog.color.copy(B.fc);scene.fog.near=B.fn;scene.fog.far=B.ff;hemi.color.copy(B.hc);hemi.groundColor.copy(B.hg);hemi.intensity=B.hi;moonL.color.copy(B.mc);moonL.intensity=B.mi;}FF.on=false;FF.base=null;return;}
   if(!FF.base)FF.base={fc:scene.fog.color.clone(),fn:scene.fog.near,ff:scene.fog.far,hc:hemi.color.clone(),hg:hemi.groundColor.clone(),hi:hemi.intensity,mc:moonL.color.clone(),mi:moonL.intensity};
   FF.on=true;const B=FF.base,s=k*k*(3-2*k);

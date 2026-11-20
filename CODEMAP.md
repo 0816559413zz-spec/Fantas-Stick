@@ -351,8 +351,8 @@ SGV3:278 sgClearView:279 sgViewBuild:280 SGVZR:299 sgBarrier:301 sgSync:315 sgDu
 §342 HUD
 sgTop:343 sgHud:345
 
-## js/28-fcs-forest.js (230) — ป่าสนหมอก ในแผนที่ First Castle Strike (เฟส 1 = ช่อง x 0–28 ของ Map Editor) — ทำตามรูปอ้า…
-FF:7 FF_X1:8 FF_NS:9 ffGroundTex:11 ffParts:33 fcsForest:40 ffMerge:123 ffDetail:131 fcsRuin:158 ffMist:201 ffMistFrame:218 fcsForestTick:220 FFC:230
+## js/28-fcs-forest.js (259) — ป่าสนหมอก ในแผนที่ First Castle Strike (เฟส 1 = ช่อง x 0–28 ของ Map Editor) — ทำตามรูปอ้า…
+FF:7 FF_X1:8 FF_NS:9 ffGroundTex:11 ffParts:33 fcsForest:40 ffMerge:123 ffDetail:131 fcsRuin:158 ffSkyMat:201 ffMist:229 ffMistFrame:246 fcsForestTick:248 FFC:259
 
 ## js/28-maps-build.js (781) — สร้างแผนที่
 CANDLESYS:2 builtMap:3 builtKey:3 world:3 TORCHES:3 CANDLES:3 FIREFLIES:3 CRYSTAL:3 RUNE:3 SNITCH:3 BANNERS:3 SNOW:3 WCACHE:5 WCACHE_MAX:5 wkey:7 buildWorld:8 addW:42 _prewarmed:44 prewarmShaders:45 batchStatic:64 makeCandles:89 updateCandles:98 buildCastle:107 buildHogsmeade:173 buildGreatHall:261 buildForest:331
@@ -851,4 +851,4 @@ _dvMap:242 devMapDraw:246
 §259 หน้าต่าง
 _dvPanel:260 _dvBtn:261 devToggle:264 dvBtn:269 dvRow:270 dvTog:271 dvSec:272 devRender:273 devPos:315
 
-(105 files, 30379 lines)
+(105 files, 30408 lines)
