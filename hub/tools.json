@@ -90,6 +90,20 @@
      "url": "index.html"
     },
     {
+     "id": "gamedev",
+     "icon": "🛠",
+     "name": "เปิดเกม (Dev)",
+     "desc": "เกมแบบ Dev Mode เล่นออฟไลน์: กด F2 ในเกม = เปลี่ยนสาย กล้องอิสระ โกง บอท โหมดผู้ชม (ดูบอท 6v6) • ปิด Dev ถาวรด้วยปุ่ม เปิดเกม (ปิด Dev)",
+     "url": "index.html?dev=1"
+    },
+    {
+     "id": "gamenodev",
+     "icon": "▶",
+     "name": "เปิดเกม (ปิด Dev)",
+     "desc": "เปิดเกมปกติและปิด Dev Mode ที่เกมจำไว้ในเครื่อง",
+     "url": "index.html?dev=0"
+    },
+    {
      "id": "docgraph",
      "icon": "🕸",
      "name": "กราฟเอกสาร 3D",

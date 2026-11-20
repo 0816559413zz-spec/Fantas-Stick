@@ -2,6 +2,7 @@
 
 - 2026-11-20 — **Darkness ult v3 round 2 (Studio, review #91):** Creature comes out of a vertical shadow portal in front of the hand; 72% opacity; wider head (1.9x) and body (1.6x); keeps moving into a 0.03 s bite with almost no hold.
 
+- 2026-11-20 — **Tool Hub: open the game in Dev Mode (user):** two cards in hub/tools.json — 🛠 เปิดเกม (Dev) = `index.html?dev=1`, เปิดเกม (ปิด Dev) = `index.html?dev=0` (Dev is remembered in localStorage); tools/check.js ignores the `?query` when checking the file exists.
 - 2026-11-20 — **Dev Mode spectator (user: watch a 6v6 bot match in free view or through a bot's camera):** F2 → '👁 โหมดผู้ชม': host steps out, bots fill the room (tdm/siege 6v6, ffa 12); follow a bot's over-shoulder camera (turns with the bot, R = orbit with mouse, Q/E or click = switch bot) or F3 free cam; panel lists bots to follow; ⏹ returns to playing. Fixed `fcsRoomBrkFx` crash on non-castle maps. Files: js/77-dev.js, js/11-host.js, js/15-bot.js, js/37-render-loop.js, js/52-social.js, js/28-fcs-props.js.
 - 2026-11-20 — **Map renamed: First Castle Strike → Cliff Side Castle (user):** display name `MAPS.fcs.name` + Map Editor `maps/firstcastlestrike.json` name (re-exported `js/02-fcs-data.js`, only the name changed). Internal ids stay `fcs` / `firstcastlestrike` / file names (no protocol change).
 - 2026-11-20 — **Darkness ult v3 picked (Studio, review #91):** Bigger and 1.5x wider creature, rounder skull, less fog, slower launch that keeps drifting, wider mouth, very fast bite with a head dip, and a heavy particle break-up after the bite.

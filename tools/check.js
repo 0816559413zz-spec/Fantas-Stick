@@ -25,7 +25,7 @@ catch (e) {
 {
   const reg = JSON.parse(fs.readFileSync(path.join(ROOT, 'hub', 'tools.json'), 'utf8'));
   const urls = new Set(), bad = [];
-  for (const g of reg.groups) for (const t of g.tools) { urls.add(t.url); if (!fs.existsSync(path.join(ROOT, t.url))) bad.push('ไม่มีไฟล์ ' + t.url); }
+  for (const g of reg.groups) for (const t of g.tools) { urls.add(t.url); if (!fs.existsSync(path.join(ROOT, t.url.split('?')[0]))) bad.push('ไม่มีไฟล์ ' + t.url); }
   for (const i of reg.designs.items) if (!fs.existsSync(path.join(ROOT, i.url))) bad.push('ไม่มีไฟล์ ' + i.url);
   for (const f of fs.readdirSync(ROOT)) if (f.endsWith('.html') && f !== 'hub.html' && !urls.has(f)) bad.push(f + ' ยังไม่อยู่ใน hub/tools.json');
   if (bad.length) { console.error('hub/tools.json:', bad.join('\n  ')); process.exit(1); }
