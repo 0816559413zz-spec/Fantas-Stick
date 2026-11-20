@@ -36,6 +36,17 @@
    "dur": 2.25,
    "n": 2
   },
+  "darkness/flow_mark_preview": {
+   "v": "57c4a50a",
+   "desc": "Darkness — พรีวิวเคียวสามคมปล่อยคลื่นติดตราใน Flow",
+   "pal": "arcane",
+   "tags": [
+    "darkness",
+    "preview"
+   ],
+   "dur": 1.95,
+   "n": 2
+  },
   "darkness/hold_dash_preview": {
    "v": "7103d2bd",
    "desc": "Darkness — Shift ค้าง ชาร์จ 0.5 วิ ริ้วผ้าคลุมไหลเป็นหางลูกเงา อยู่ในร่างลูกเงา 2 วิ",
@@ -178,7 +189,7 @@
    "n": 21
   },
   "darkness/ult_v1": {
-   "v": "fe5929d1",
+   "v": "86517b39",
    "desc": "Darkness อัลติ แบบ 1 (ที่ตกลง): หัวเส้นหมึก ตัวผ้าซ้อน ออร่าเป็นสายควันไหลจากขอบตัว",
    "pal": "arcane",
    "tags": [
@@ -187,10 +198,10 @@
     "ult"
    ],
    "dur": 2.7,
-   "n": 34
+   "n": 36
   },
   "darkness/ult_v2": {
-   "v": "b620db16",
+   "v": "bc2fc4d9",
    "desc": "Darkness อัลติ แบบ 2: ผิวควันเดือด ออร่าเป็นเส้นเงายาวหลุดออกจากตัว",
    "pal": "arcane",
    "tags": [
@@ -199,10 +210,10 @@
     "ult"
    ],
    "dur": 2.7,
-   "n": 25
+   "n": 27
   },
   "darkness/ult_v3": {
-   "v": "09d14daf",
+   "v": "8ee363b8",
    "desc": "Darkness อัลติ แบบ 3: เส้นหมึกทั้งตัว ออร่าเป็นหมอกดำลากหนา ท้ายตัวแตกเป็นเศษ",
    "pal": "arcane",
    "tags": [
@@ -211,7 +222,7 @@
     "ult"
    ],
    "dur": 2.7,
-   "n": 26
+   "n": 28
   },
   "darkness/unmarked_chase_preview": {
    "v": "10207cfe",
@@ -5021,8 +5032,20 @@
    "n": 1
   },
   "dark_ab_lower": {
-   "v": "4c33398b",
+   "v": "7146d5b0",
    "desc": "Darkness อัลติ A+B ขากรรไกรล่าง",
+   "mat": "solid",
+   "n": 1
+  },
+  "dark_ab_mouth_lower": {
+   "v": "d8adc86c",
+   "desc": "Darkness อัลติ A+B พื้นปาก",
+   "mat": "solid",
+   "n": 1
+  },
+  "dark_ab_mouth_upper": {
+   "v": "a2ab5b4e",
+   "desc": "Darkness อัลติ A+B เพดานปาก",
    "mat": "solid",
    "n": 1
   },
@@ -5075,7 +5098,7 @@
    "n": 1
   },
   "dark_ab_upper": {
-   "v": "7f40724c",
+   "v": "cc193488",
    "desc": "Darkness อัลติ A+B กะโหลกส่วนบน (ใหญ่กว่า หน้าผากลาด) จุดหมุน = มุมปาก",
    "mat": "solid",
    "n": 1

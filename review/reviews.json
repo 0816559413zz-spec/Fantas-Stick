@@ -4,7 +4,7 @@
   {
    "id": 91,
    "title": "Darkness อัลติ สัตว์เงา แบบ 3 (แก้ตามที่เลือก)",
-   "text": "แบบ 3 รอบ 2: ออกมาจากวงเวทเงาหน้ามือ ตัวโปร่งลง หัวกว้างขึ้น ยังเคลื่อนช้า ๆ จนงับ ค้างแทบไม่มี งับเร็วมาก แล้วสลายเป็นอนุภาค",
+   "text": "แบบ 3 รอบ 3: วงเวททึบ ตัวทึบสีดำถ่าน (ข้างหลังเห็นแค่หลัง ไม่เห็นฟัน) ปิดรูคอ เพดานปากและฟันสีถ่านให้เห็นจากด้านหน้า มี GIF มุมจากเป้าแล้ว",
    "kind": "VFX / แอนิเมชัน",
    "who": "Darkness",
    "status": "wait",
@@ -16,7 +16,8 @@
     "/designs/darkness_ref/ult-v3-sheet.jpg",
     "/designs/darkness_ref/ult-v3-wide.gif",
     "/designs/darkness_ref/ult-v3-side.gif",
-    "/designs/darkness_ref/ult-v3-game.gif"
+    "/designs/darkness_ref/ult-v3-game.gif",
+    "/designs/darkness_ref/ult-v3-front.gif"
    ],
    "checks": [
     {
@@ -32,7 +33,7 @@
      "ok": false
     }
    ],
-   "reply": "แก้รอบ 2: เพิ่มวงเวท ลดความทึบ หัวกว้างขึ้น จังหวะไม่หยุด"
+   "reply": "แก้รอบ 3 + มีมุมจากหน้า"
   },
   {
    "id": 90,
