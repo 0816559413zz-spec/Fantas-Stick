@@ -4,7 +4,7 @@
 //  โมเดล = assets/mapkit/gorge.glb (ชุดเดียวกับแมพ gorge, tools/gorge-assets.mjs) → InstancedMesh ต่อชิ้นส่วน • พื้นป่า = ภาพวาดทับพื้นหญ้า (จางหายตรงขอบปราสาท)
 //  บรรยากาศ: เข้าป่า → หมอกเขียวเทาใกล้ขึ้น + แสงเย็นลง (ค่อย ๆ ผสมตามตำแหน่งกล้อง — ปราสาทเหมือนเดิม) — fcsForestTick() เรียกจาก sgSync
 // =====================================================================
-const FF={base:null,on:false,k:0,fb:[],sky:null};
+const FF={base:null,on:false,k:0,fb:[],sky:null,mist:null,mistW:null};
 const FF_X1=28;   // ขอบป่า (ช่อง)
 const FF_NS=new Set(['stone_a','stone_b','stone_c','log_c','shrub_a','shrub_b','fern_a','fern_b','pine_la','pine_lb']);   // ไม่ทอดเงา (เบา)
 // ภาพวาดพื้นป่า: มอส/ใบสนทับถม/ดินเปียก/กรวด + แนวทางดินจากจุดเกิดไปจุดยึด 1 + วงมืดใต้ต้นไม้ • ขอบตะวันออกจางหายเข้าพื้นปราสาท
@@ -59,10 +59,10 @@ function fcsForest(fallback){
   {const t=texCanvas(8,256,(g,w,h)=>{const gr=g.createLinearGradient(0,0,0,h);gr.addColorStop(0,'#c9d1cb');gr.addColorStop(0.55,'#bfc9bd');gr.addColorStop(1,'#b6c1b5');g.fillStyle=gr;g.fillRect(0,0,w,h);});
    const sk=new THREE.Mesh(new THREE.SphereGeometry(560,24,12),new THREE.MeshBasicMaterial({map:t,side:THREE.BackSide,transparent:true,opacity:0,depthWrite:false,fog:false}));
    sk.visible=false;sk.frustumCulled=false;sk.renderOrder=-1;sk.userData.ffSky=1;W.add(sk);FF.sky=sk;}
-  // หมอกลอยต่ำ: สไปรต์นุ่มขนาดใหญ่ ๆ เกลี่ยทั่วป่า (ไม่เขียนความลึก)
-  {const mt=new THREE.SpriteMaterial({map:glowTex,color:'#cfd8cc',opacity:0.2,depthWrite:false,transparent:true,fog:false}),mg=new THREE.Group();
-   for(let i=0;i<30;i++){const x=(0.5+R()*(FF_X1-1.5))*C,y=(0.5+R()*(D.h-1))*C,sp=new THREE.Sprite(mt);sp.scale.set(34+R()*30,10+R()*8,1);sp.position.set(tx(x),gy0(x,y)+2.2+R()*2.5,tz(y));mg.add(sp);}
-   W.add(mg);}
+  // หมอกลอยต่ำ: การ์ดนุ่มขนาดใหญ่เกลี่ยทั่วป่า — อยู่ใน fxScene แบบ soft (จางตามความหนาหมอกก่อนถึงกำแพง + จางใกล้กล้อง)
+  // เดิมเป็น Sprite ในฉากหลัก: ซ้อนหลายใบบังกำแพงสะพานจนขาวหายทั้งแถบ (บั๊กผู้ใช้ 2026-11-20)
+  {const P=[];for(let i=0;i<30;i++){const x=(0.5+R()*(FF_X1-1.5))*C,y=(0.5+R()*(D.h-1))*C;P.push([tx(x),gy0(x,y)+2.2+R()*2.5,tz(y),34+R()*30,10+R()*8]);}
+   ffMist(P,W);}
   // ---------- วางของ (พิกัด px) ----------
   const gy=(x,y)=>GY(x,y),slope=(x,y)=>Math.hypot(gy(x+30,y)-gy(x-30,y),gy(x,y+30)-gy(x,y-30))/3;
   const cores=F.cores.map(k=>[k.x,k.y]),sps=[];for(const t of ['A','B'])for(const k in F.sp[t])sps.push([F.sp[t][k].x,F.sp[t][k].y]);
@@ -196,6 +196,26 @@ function fcsRuin(W,F){
   const box=new THREE.BoxGeometry(1,1,1),bp=box.attributes.position;for(let i=0;i<bp.count;i++){bp.setX(i,bp.getX(i)*(1-0.06*Math.abs(bp.getY(i))));}box.computeVertexNormals();   // ขอบมนนิด ๆ
   mk(box,B);mk(new THREE.CylinderGeometry(1,1,1,10),D);
 }
+// forest mist cards: P = [[x,y,z,w,h]] world units. Instanced billboards in fxScene; soft depth fade (uSoft m of fog before a wall
+// = full alpha) so a card in front of the bridge only tints it by the fog depth instead of washing it out; fades out near the camera.
+function ffMist(P,W){
+  if(FF.mist){fxScene.remove(FF.mist);FF.mist.geometry.dispose();FF.mist=null;}
+  const n=P.length,g=new THREE.InstancedBufferGeometry();
+  g.setAttribute('position',new THREE.Float32BufferAttribute([-1,-1,0,1,-1,0,1,1,0,-1,1,0],3));g.setIndex([0,1,2,0,2,3]);
+  const A=new Float32Array(n*4),B=new Float32Array(n*2);P.forEach((p,i)=>{A.set([p[0],p[1],p[2],0],i*4);B.set([p[3]*0.5,p[4]*0.5],i*2);});
+  g.setAttribute('aC',new THREE.InstancedBufferAttribute(A,4));g.setAttribute('aS',new THREE.InstancedBufferAttribute(B,2));g.instanceCount=n;
+  g.boundingSphere=new THREE.Sphere(new THREE.Vector3(),1e6);
+  const m=fxMat(new THREE.ShaderMaterial({uniforms:{uMap:{value:glowTex},uCol:{value:new THREE.Color('#cfd8cc')},uA:{value:0.2},uSoft:{value:9},uNr:{value:new THREE.Vector2(3,11)}},
+    vertexShader:'varying float vVZ;attribute vec4 aC;attribute vec2 aS;uniform vec2 uNr;varying vec2 vUv;varying float vA;'+
+      'void main(){vec4 mv=viewMatrix*vec4(aC.xyz,1.0);mv.xy+=position.xy*aS;vVZ=-mv.z;vUv=position.xy*0.5+0.5;vA=smoothstep(uNr.x,uNr.y,-mv.z);gl_Position=projectionMatrix*mv;}',
+    fragmentShader:SOFT_GLSL+'uniform sampler2D uMap;uniform vec3 uCol;uniform float uA;uniform float uSoft;varying vec2 vUv;varying float vA;'+
+      'void main(){float a=texture2D(uMap,vUv).a*uA*vA;if(a<0.002)discard;a*=softK(uSoft);if(a<0.002)discard;gl_FragColor=vec4(uCol,a);}',
+    transparent:true,depthWrite:false}));
+  const mesh=new THREE.Mesh(g,m);mesh.frustumCulled=false;mesh.renderOrder=-2;mesh.userData.keep=true;fxScene.add(mesh);
+  FF.mist=mesh;FF.mistW=W;
+}
+// every frame from FXPass (js/27): show the mist only while its forest world is the live one
+function ffMistFrame(){if(FF.mist)FF.mist.visible=FF.mistW===world&&!!world.parent&&screen==='game';}
 // หมอก/แสงเฉพาะในป่า: ผสมตามตำแหน่งกล้อง (เรียกทุกเฟรมจาก sgSync)
 function fcsForestTick(){
   const cx=(cam.position.x/S3+MW/2)/FCS_C,k=1-clamp((cx-(FF_X1-8))/9,0,1);

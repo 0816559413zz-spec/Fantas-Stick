@@ -320,20 +320,20 @@ onfOutlineMat:4 onFireFX:6 statusFX:16 fx:42
 §232 overlay: เลือกบัฟ / สรุปผล
 choosePick:233 syncOverlays:238 showOver:259
 
-## js/27-world.js (401) — 
+## js/27-world.js (402) — 
 S3:4 tx:4 tz:4 CITY_KERB:7 cityKerb:8 GY:9 TW:9 hdr:10 gl:12
 §20 เงานุ่มแบบ PCSS (contact-hardening): ใกล้จุดสัมผัสคม ไกลจากวัตถุที่บั…
 PCSS:23 scene:50 cam:52 composer:53
 §54 ท่อภาพ (post-processing): ฉาก → ชั้นเอฟเฟกต์นุ่ม (FXPass) → แสงฟุ้ง →…
 rpass:57 fxScene:59 SOFTU:61 SOFT_GLSL:62 FXMATS:64 fxMat:65 softify:67 HAZE_U:72 AOU:76 GFX:82 AO_ON:83 AO_HEAD:84 AO_CALC:88 AO_COPY:102
 §123 TAA (ลบขอบหยักแบบสะสมหลายเฟรม) — กราฟิกสูงเท่านั้น • ปิดด้วย ?notaa
-TAA:126 TAA_FRAG:127 _taaH:142 taaWanted:143 taaBegin:144 taaEnd:152 taaFinish:153 taaResolve:155 AO_RT:165 fxPass:186 bloom:187 GRADEU:194 gradePass:215 aaPass:233
-§235 คุณภาพกราฟิก: auto = ปรับความละเอียดเองตาม FPS / high = สวยสุด / low …
-QUAL:236 QUAL_NAME:237 qualPR:238 applyQuality:244 qualTick:265
-§281 ประหยัด CPU สำหรับเครื่องอ่อน (ผู้ใช้ 2026-11-06 "เครื่องผู้เล่นแย่กว…
-qualCS:285 CULL:286 cullTick:287 texCanvas:298 glowTex:299 stoneTex:300 runeTex:306 glowMats:314 glowMat:315 STONEM:317 stoneMat:318 shadowAll:319 SKY:322 hemi:342 moonL:344 LDIR:348 setSky:349 SKYB:361 skyFollow:362
-§363 เงาตามผู้เล่น
-SHD:367 _shF:368 _shR:368 _shU:368 _shC:368 _shY:368 SHD_DM:372 shadowDepthSplit:373 shadowFollow:378 shadowSoft:398 LPOOL:400
+TAA:126 TAA_FRAG:127 _taaH:142 taaWanted:143 taaBegin:144 taaEnd:152 taaFinish:153 taaResolve:155 AO_RT:165 fxPass:187 bloom:188 GRADEU:195 gradePass:216 aaPass:234
+§236 คุณภาพกราฟิก: auto = ปรับความละเอียดเองตาม FPS / high = สวยสุด / low …
+QUAL:237 QUAL_NAME:238 qualPR:239 applyQuality:245 qualTick:266
+§282 ประหยัด CPU สำหรับเครื่องอ่อน (ผู้ใช้ 2026-11-06 "เครื่องผู้เล่นแย่กว…
+qualCS:286 CULL:287 cullTick:288 texCanvas:299 glowTex:300 stoneTex:301 runeTex:307 glowMats:315 glowMat:316 STONEM:318 stoneMat:319 shadowAll:320 SKY:323 hemi:343 moonL:345 LDIR:349 setSky:350 SKYB:362 skyFollow:363
+§364 เงาตามผู้เล่น
+SHD:368 _shF:369 _shR:369 _shU:369 _shC:369 _shY:369 SHD_DM:373 shadowDepthSplit:374 shadowFollow:379 shadowSoft:399 LPOOL:401
 
 ## js/28-city-build.js (386) — เมืองมักเกิ้ล (ลอนดอน) — ภาพ • ข้อมูลอยู่ js/02-city.js • โมเดลจาก as…
 CITY_WIN:4 cityWinTex:5 cityEmTex:10 cityBoxGeo:16 buildCity:21
@@ -351,8 +351,8 @@ SGV3:278 sgClearView:279 sgViewBuild:280 SGVZR:299 sgBarrier:301 sgSync:315 sgDu
 §342 HUD
 sgTop:343 sgHud:345
 
-## js/28-fcs-forest.js (210) — ป่าสนหมอก ในแผนที่ First Castle Strike (เฟส 1 = ช่อง x 0–28 ของ Map Editor) — ทำตามรูปอ้า…
-FF:7 FF_X1:8 FF_NS:9 ffGroundTex:11 ffParts:33 fcsForest:40 ffMerge:123 ffDetail:131 fcsRuin:158 fcsForestTick:200 FFC:210
+## js/28-fcs-forest.js (230) — ป่าสนหมอก ในแผนที่ First Castle Strike (เฟส 1 = ช่อง x 0–28 ของ Map Editor) — ทำตามรูปอ้า…
+FF:7 FF_X1:8 FF_NS:9 ffGroundTex:11 ffParts:33 fcsForest:40 ffMerge:123 ffDetail:131 fcsRuin:158 ffMist:201 ffMistFrame:218 fcsForestTick:220 FFC:230
 
 ## js/28-maps-build.js (781) — สร้างแผนที่
 CANDLESYS:2 builtMap:3 builtKey:3 world:3 TORCHES:3 CANDLES:3 FIREFLIES:3 CRYSTAL:3 RUNE:3 SNITCH:3 BANNERS:3 SNOW:3 WCACHE:5 WCACHE_MAX:5 wkey:7 buildWorld:8 addW:42 _prewarmed:44 prewarmShaders:45 batchStatic:64 makeCandles:89 updateCandles:98 buildCastle:107 buildHogsmeade:173 buildGreatHall:261 buildForest:331
@@ -851,4 +851,4 @@ _dvMap:242 devMapDraw:246
 §259 หน้าต่าง
 _dvPanel:260 _dvBtn:261 devToggle:264 dvBtn:269 dvRow:270 dvTog:271 dvSec:272 devRender:273 devPos:315
 
-(105 files, 30358 lines)
+(105 files, 30379 lines)

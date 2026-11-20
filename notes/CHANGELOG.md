@@ -1,5 +1,6 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
 
+- 2026-11-20 — **FCS forest mist no longer erases the bridge (user bug):** the 30 big `Sprite` mist cards in `fcsForest` stacked in front of walls and washed the bridge out to white. Now `ffMist` (js/28-fcs-forest.js): one instanced billboard in `fxScene` with soft depth fade (`softK`, 9 m of fog before a wall = full alpha) + fade under 3–11 m from the camera; shown only while its world is live (`ffMistFrame`, called at the top of `FXPass.render`).
 - 2026-11-20 — **Sketch: open image button:** "📂 เปิดรูป…" moved to the top bar (open an image file from disk as background); persistent hidden file input.
 - 2026-11-20 — **Sketch tool (`sketch.html`):** simple draw/write tool so the user can show Claude what they want: pen, line, arrow, rect, ellipse, text, numbered markers, eraser, select/move, undo/redo, paste/drop a screenshot as background, note box. Saved by `tools/serve.py` (`/api/sketch*`) to `sketch/<id>.json|.png|.md` + `sketch/SKETCH.md`. Registered in `hub/tools.json`.
 - 2026-11-20 — **Darkness ult jaw (Studio, review #91):** Shadow-jaw ult built as Studio layers (jaw/teeth/tail models, black ink texture, smoke, shards) with a staging code layer for the caster and targets. Fast launch, slow ease to 30 m in 0.8 s, hold while opening wider, hard bite, dissolve.
