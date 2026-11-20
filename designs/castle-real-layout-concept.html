@@ -1,0 +1,114 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Castle layout concept</title>
+<style>
+body{margin:0;background:#15161a;font-family:Tahoma,"Leelawadee UI",sans-serif;color:#ddd}
+svg text{font-family:Tahoma,"Leelawadee UI",sans-serif}
+</style></head><body>
+<svg id="s" width="1960" height="1080" xmlns="http://www.w3.org/2000/svg"></svg>
+<script>
+// Rough concept only (not an approved layout). Grid = Map Editor cells (140x50), 1 cell = 4.5 m in game.
+const S=14,OX=0,OY=70,svg=document.getElementById('s');
+const el=(t,a,txt)=>{const e=document.createElementNS('http://www.w3.org/2000/svg',t);for(const k in a)e.setAttribute(k,a[k]);if(txt!=null)e.textContent=txt;svg.appendChild(e);return e;};
+const R=(x,y,w,h,f,st,sw=1,extra={})=>el('rect',Object.assign({x:OX+x*S,y:OY+y*S,width:w*S,height:h*S,fill:f,stroke:st||'none','stroke-width':sw},extra));
+const T=(x,y,t,c='#fff',sz=13,w='bold',anc='middle')=>{const e=el('text',{x:OX+x*S,y:OY+y*S,fill:c,'font-size':sz,'font-weight':w,'text-anchor':anc,'paint-order':'stroke',stroke:'#000','stroke-width':3},t);return e;};
+const C=(x,y,r,f,st,sw=2)=>el('circle',{cx:OX+x*S,cy:OY+y*S,r:r*S,fill:f,stroke:st||'none','stroke-width':sw});
+const P=(pts,st,sw,dash,mk)=>el('polyline',{points:pts.map(p=>(OX+p[0]*S)+','+(OY+p[1]*S)).join(' '),fill:'none',stroke:st,'stroke-width':sw,'stroke-dasharray':dash||'','marker-end':mk||'','stroke-linejoin':'round'});
+// arrow markers
+const defs=el('defs',{});
+for(const [id,c] of [['ab','#5aa0ff'],['ao','#ffa040']]){const m=document.createElementNS(svg.namespaceURI,'marker');m.setAttribute('id',id);m.setAttribute('markerWidth','8');m.setAttribute('markerHeight','8');m.setAttribute('refX','5');m.setAttribute('refY','4');m.setAttribute('orient','auto');const p=document.createElementNS(svg.namespaceURI,'path');p.setAttribute('d','M0,0 L8,4 L0,8 z');p.setAttribute('fill',c);m.appendChild(p);defs.appendChild(m);}
+
+T(0.5,-3.2,'ผังหยาบ: ปราสาทแบบ "ของจริง" (ภาพคุยกัน ไม่ใช่ผังล็อก) — ขนาดเท่าแผนที่ FCS เดิม 140×50 ช่อง','#ffd76a',18,'bold','start');
+
+// zone 1 forest
+R(0,0,28,50,'#2f4a2c');for(let i=0;i<70;i++){const x=1+((i*37)%26),y=1+((i*53)%48);C(x+.5,y+.5,.7,'#1f3a1f');}
+T(13,4,'โซน 1: ป่า (เหมือนเดิม)','#bfe3b0',14);
+C(18,12,2.2,'rgba(255,215,90,.25)','#ffd75a');T(18,12.4,'แกน 1','#ffd75a',12);
+R(2,37,3,3,'rgba(255,90,90,.35)','#ff6060');T(3.5,41.5,'บุกเกิด 1','#ff9090',11);
+// moat + bridge
+R(26,0,2,50,'#2b4f66');R(25,22,4,6,'#7a6650');T(27,21.3,'สะพาน','#ddd',11);
+
+// castle ground
+R(28,0,112,50,'#3a3638');
+// --- outer bailey courtyard (open) ---
+R(34,12,27,26,'#6e6658');for(let x=34;x<61;x+=3)for(let y=12;y<38;y+=3)R(x,y,3,3,'none','rgba(0,0,0,.08)');
+T(47.5,15,'ลานหน้า (Outer Courtyard) — โล่ง กว้าง','#fff1c8',14);
+C(47.5,25,1.4,'#4e7f9a','#9cd');T(47.5,22.9,'บ่อน้ำ','#cde',11);
+// carts/hay cover in courtyard
+for(const [x,y] of [[39,20],[54,19],[41,32],[55,31],[47,33]])R(x,y,2,1.4,'#8a6a40','#000');
+T(47.5,36.8,'เกวียน/กองฟาง/ลัง = กำบังเตี้ย','#e8d2a8',11,'normal');
+C(56,25,3.6,'rgba(80,220,255,.18)','#50dcff');T(56,25.4,'แกน 2','#7fe8ff',13);
+// north rooms (barracks/stables)
+const room=(x,y,w,h,name,c='#575058')=>{R(x,y,w,h,c,'#1c1a1d',3);T(x+w/2,y+h/2+.4,name,'#fff',12);};
+room(30,1,10,10,'คอกม้า');room(41,1,10,10,'ค่ายทหาร');room(52,1,9,10,'ห้องเสบียง');
+room(30,39,10,10,'โรงตีเหล็ก');room(41,39,10,10,'คลังอาวุธ');room(52,39,9,10,'ห้องเวร');
+// defender spawn 2 & attacker spawn 2
+R(41,2,4,3,'rgba(90,150,255,.4)','#5a96ff');T(43,6.5,'รับเกิด 2','#9cc0ff',11);
+R(30,22,3,6,'rgba(255,90,90,.35)','#ff6060');T(31.5,29.3,'บุกเกิด 2','#ff9090',11);
+// doors (gaps) on rooms -> drawn as light marks
+const door=(x,y,w,h)=>R(x,y,w,h,'#c8b48a','none');
+door(34,10.6,2,.6);door(45,10.6,2,.6);door(56,10.6,2,.6);door(34,38.6,2,.6);door(45,38.6,2,.6);door(56,38.6,2,.6);
+door(39.6,4,.6,2);door(50.6,4,.6,2);door(39.6,43,.6,2);door(50.6,43,.6,2);
+// --- curtain walls + towers ---
+const W='#1e1b1f';
+R(28,0,112,1,W);R(28,49,112,1,W);R(139,0,1,50,W);
+R(28,0,2,22,W);R(28,28,2,22,W);
+// gatehouse
+R(27,19,6,12,'#2a2629','#000',2);R(28,22,2,6,'#a0703a','#ffcc70',2);T(30,18.4,'ป้อมประตู (Gatehouse)','#ffcc70',12);
+// wall-walk marks (dashed) on outer wall
+P([[29,0.5],[139.5,0.5],[139.5,49.5],[29,49.5]],'#c9a0ff',2,'6 5');
+const tower=(x,y,r=2.4)=>{C(x,y,r,'#2d2930','#000',3);C(x,y,r*.55,'none','#c9a0ff',1.5);};
+for(const [x,y] of [[29,1],[29,49],[62,1],[62,49],[102,1],[102,49],[139,1],[139,49],[27,19],[27,31]])tower(x,y);
+// inner wall (between bailey and inner ward)
+R(62,0,2,21,W);R(62,29,2,21,W);R(61,21,4,8,'#2a2629','#000',2);R(62,22,2,6,'#a0703a','#ffcc70',2);
+T(63,31.3,'ประตูใน (เปิดเมื่อแกน 2 แตก)','#ffcc70',11);
+R(62,10,2,4,'#e09a40','#ffcf80',2);R(62,36,2,4,'#e09a40','#ffcf80',2);T(66.6,12.6,'กำแพงพังได้','#ffcf80',10,'normal');
+
+// --- inner ward ---
+room(66,3,34,15,'',  '#4c4650');
+for(let x=70;x<=96;x+=6){C(x,7,.7,'#2a262c');C(x,14,.7,'#2a262c');}
+T(83,10.9,'ห้องโถงใหญ่ (Great Hall) — ห้องยาว เสาเยอะ','#fff',13);
+door(70,17.6,3,.6);door(92,17.6,3,.6);door(99.6,8,.6,3);
+R(66,20,34,10,'#5f6a52');T(83,23.6,'สวนใน (Inner Garden)','#d8f0c0',13);
+for(const [x,y] of [[72,25],[83,26],[94,25]])C(x,y,1.1,'#3d5a33');
+T(83,28.6,'ลานเล็ก แคบกว่าลานหน้า','#d8f0c0',10,'normal');
+room(66,32,16,16,'โบสถ์ (Chapel)');room(84,32,16,16,'ครัว + ห้องเก็บของ');
+door(72,31.6,3,.6);door(90,31.6,3,.6);door(81.6,40,.6,3);door(99.6,38,.6,3);
+R(66,4,4,3,'rgba(255,90,90,.35)','#ff6060');T(68,8.3,'บุกเกิด 3','#ff9090',10);
+// stairs to wall walk
+for(const [x,y] of [[60,2],[60,46],[100.5,19],[100.5,30]]){R(x,y,2,2,'#9a7fd0','#000');T(x+1,y+1.4,'บันได','#fff',9,'normal');}
+
+// --- keep ---
+R(104,6,33,38,'#2a262c','#000',4);R(107,9,27,32,'#4a4048');
+T(120.5,8,'ป้อมชั้นใน (Keep) — กำแพงสูงสุด','#ffd76a',14);
+R(112,16,17,18,'#5a4a3a','#000',2);T(120.5,15.2,'ห้องบัลลังก์','#ffe0a0',13);
+C(120.5,25,3.3,'rgba(80,220,255,.18)','#50dcff');T(120.5,25.4,'แกน 3','#7fe8ff',13);
+for(const [x,y] of [[114,18],[127,18],[114,32],[127,32]])C(x,y,.8,'#2a262c');
+door(103.6,22,1,6);door(115,40.5,4,1);door(118,5.6,5,1);
+T(108.5,28.5,'ประตูหลัก','#ffcc70',10,'normal');T(117,43.2,'ทางลับ/ทางอ้อม','#ffcc70',10,'normal');T(120.5,4.7,'ทางระเบียงชั้น 2','#c9a0ff',10,'normal');
+R(132,36,4,3,'rgba(90,150,255,.4)','#5a96ff');T(134,40.3,'รับเกิด 3','#9cc0ff',10);
+room(107,9,5,5,'');room(129,9,5,5,'');room(107,36,5,5,'');room(129,36,5,5,'');
+T(109.5,11.9,'หอ','#ccc',10,'normal');T(131.5,11.9,'หอ','#ccc',10,'normal');
+
+// --- routes ---
+P([[5,38],[12,30],[22,25],[31,25],[45,25],[53,25]],'#5aa0ff',4,'','url(#ab)');
+P([[32,22],[35,10.8],[40,5],[52,6],[57,11],[56,21]],'#ffa040',3,'8 6','url(#ao)');
+P([[32,28],[35,39],[46,44],[57,39],[57,30]],'#ffa040',3,'8 6','url(#ao)');
+P([[65,25],[83,25],[103,25],[116,25]],'#5aa0ff',4,'','url(#ab)');
+P([[70,18],[78,12],[96,12],[100,9],[110,5],[118,6],[119,20]],'#ffa040',3,'8 6','url(#ao)');
+P([[72,32],[75,42],[92,42],[100,39],[112,46],[117,41],[119,30]],'#ffa040',3,'8 6','url(#ao)');
+
+// legend + elevation
+const LY=52.5;
+T(0.5,LY,'เส้นฟ้า = ทางหลัก (ตรง โล่ง)   เส้นส้มประ = ทางอ้อม/ผ่านห้อง   เส้นม่วงประ = ทางเดินบนกำแพง (ขึ้นจากบันได/หอ)   ส้มทึบ = กำแพงพังได้/ประตู','#ddd',13,'normal','start');
+T(0.5,LY+1.6,'หลักคิด: แต่ละเฟสมี "ที่โล่ง 1 ที่ + ห้องรอบ ๆ" → สู้กลางลานก็ได้ อ้อมผ่านห้องก็ได้ ขึ้นกำแพงยิงลงก็ได้ • ยิ่งลึกยิ่งแคบและสูง','#ffd76a',13,'normal','start');
+// elevation strip
+const ex=20,ey=OY+56*S+30,mpx=9; // 9 px per metre
+el('text',{x:ex,y:ey-14,fill:'#ffd76a','font-size':14,'font-weight':'bold'},'ภาพด้านข้าง (ความสูงเทียบคน) — ตอนนี้ vs เสนอ');
+el('line',{x1:ex,y1:ey+150,x2:ex+1900,y2:ey+150,stroke:'#777'});
+const bar=(x,h,w,c,lbl)=>{el('rect',{x:ex+x,y:ey+150-h*mpx,width:w,height:h*mpx,fill:c,stroke:'#000'});el('text',{x:ex+x+w/2,y:ey+150-h*mpx-5,fill:'#eee','font-size':11,'text-anchor':'middle'},lbl);};
+const man=x=>{el('rect',{x:ex+x,y:ey+150-1.8*mpx,width:5,height:1.8*mpx,fill:'#ffe066'});};
+bar(0,1.2,60,'#666','กำแพงเตี้ย 1.2 ม.');man(70);bar(90,2.4,60,'#666','ฉาก 2.4 ม.');el('text',{x:ex+20,y:ey+170,fill:'#aaa','font-size':12},'ตอนนี้: เกือบทุกอย่างสูงไม่เกินหัว → มองข้ามได้หมด = เหมือนกระดาน');
+bar(560,4,90,'#6a6060','ผนังห้อง 4–5 ม.');man(660);bar(690,9,70,'#4a4448','กำแพงนอก 9 ม. + ทางเดินบน');man(712);
+bar(800,13,80,'#3a3438','หอมุม 13 ม.');bar(910,16,140,'#2e2a2e','Keep 16 ม.');bar(1080,1,50,'#8a6a40','ลัง 1 ม.');man(1140);
+el('text',{x:ex+560,y:ey+170,fill:'#aaa','font-size':12},'เสนอ: ผนังห้องบังสายตาจริง, คนบนกำแพงได้มุมสูง, ลังยังเป็นกำบังเตี้ยในลาน');
+</script></body></html>

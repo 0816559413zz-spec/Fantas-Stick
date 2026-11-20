@@ -10,13 +10,13 @@ function buildFcs(){
   // พื้น: หญ้าทั้งแผนที่ + พื้นหินปราสาททับตรงช่องพื้นผิวหิน
   const gm=grLive(new THREE.MeshStandardMaterial({map:grassTex('#4f7a38',23,1),roughness:0.95}));
   const gr=new THREE.Mesh(terrGeo((i,j)=>T.g[j*T.nx+i],T.nx,T.ny,T.c,1),gm);gr.receiveShadow=true;addW(gr);
-  const fl=new THREE.Mesh(terrGeo((i,j)=>{const a=[[i,j],[i-1,j],[i,j-1],[i-1,j-1]].every(([a,b])=>surf(Math.max(0,a),Math.max(0,b))===2);return a?T.g[j*T.nx+i]+0.03:NaN;},T.nx,T.ny,T.c,1),stoneMat(1,1,'#a8a294'));fl.receiveShadow=true;addW(fl);
+  const fl=new THREE.Mesh(terrGeo((i,j)=>{const a=[[i,j],[i-1,j],[i,j-1],[i-1,j-1]].every(([a,b])=>surf(Math.max(0,a),Math.max(0,b))===2);return a?T.g[j*T.nx+i]+0.03:NaN;},T.nx,T.ny,T.c,1),fcsCastleMat('f','#b4a68e',{fr:1.3,fc:1.0,moss:0.35}));fl.receiveShadow=true;addW(fl);
   // กำแพงจากตาราง (InstancedMesh ต่อชนิด)
   const m4=new THREE.Matrix4(),cells=[[],[],[],[]];
   for(let y=0;y<D.h;y++)for(let x=0;x<D.w;x++){const v=parseInt(D.W[y*D.w+x],36);if(v)cells[v].push([x,y]);}
   const inst=(geo,mat,list,fn)=>{if(!list.length)return;const im=new THREE.InstancedMesh(geo,mat,list.length);list.forEach((q,i)=>im.setMatrixAt(i,fn(q)));im.castShadow=im.receiveShadow=true;addW(im);return im;};
   const box=sGeo(THREE.BoxGeometry,1,1,1);
-  inst(box,stoneMat(1,1,'#7a746a'),cells[1],([x,y])=>{const px=(x+0.5)*C,py=(y+0.5)*C,b=GY(px,py);return m4.makeScale(c3,FCS_WH[1],c3).setPosition(tx(px),b+FCS_WH[1]/2,tz(py)).clone();});
+  try{fcsCastle();}catch(e){console.error('fcsCastle',e);}   // solid walls (type 1) = castle walls, towers, banners, outer wall + keep (js/28-fcs-castle.js)
   inst(box,stoneMat(1,1,'#9a8a6a'),cells[2],([x,y])=>{const px=(x+0.5)*C,py=(y+0.5)*C,b=GY(px,py);return m4.makeScale(c3,FCS_WH[2],c3).setPosition(tx(px),b+FCS_WH[2]/2,tz(py)).clone();});
   fcsFences(F.fences||[],inst,box);   // รั้วไม้ (ชนิด 3)
   if(F.bridge)try{fcsBridge(F.bridge);}catch(e){console.error('fcsBridge',e);}
@@ -28,7 +28,7 @@ function buildFcs(){
   inst(sGeo(THREE.CylinderGeometry,0.22,0.32,1,7),new THREE.MeshStandardMaterial({color:'#5a3f28',roughness:0.95}),P('tr').filter(q=>!inF(q)),([,x,y])=>m4.makeScale(1,3,1).setPosition(tx(x),GY(x,y)+1.5,tz(y)).clone());
   inst(sGeo(THREE.ConeGeometry,1.5,1,8),new THREE.MeshStandardMaterial({color:'#2f5a2a',roughness:0.9,flatShading:true}),P('tr').filter(q=>!inF(q)),([,x,y])=>m4.makeScale(1,4.5,1).setPosition(tx(x),GY(x,y)+4.6,tz(y)).clone());
   inst(box,new THREE.MeshStandardMaterial({color:'#8a6238',roughness:0.85}),P('cr'),([,x,y])=>m4.makeScale(1.25,1.2,1.25).setPosition(tx(x),GY(x,y)+0.6,tz(y)).clone());
-  inst(sGeo(THREE.CylinderGeometry,0.65,0.75,1,10),stoneMat(1,1,'#bdb5a5'),P('pl'),([,x,y])=>m4.makeScale(1,6,1).setPosition(tx(x),GY(x,y)+3,tz(y)).clone());
+  inst(sGeo(THREE.CylinderGeometry,0.65,0.75,1,10),fcsCastleMat('s','#c2b298'),P('pl'),([,x,y])=>m4.makeScale(1,6,1).setPosition(tx(x),GY(x,y)+3,tz(y)).clone());
   // แท่นจุดเกิด (สีทีม)
   for(const [t,L] of [[0,F.sp.A],[1,F.sp.B]])for(const k in L){const s=L[k],m=new THREE.Mesh(new THREE.CircleGeometry(SG_SPR*S3,32),new THREE.MeshBasicMaterial({color:TEAMC[t],transparent:true,opacity:0.18,depthWrite:false}));m.rotation.x=-Math.PI/2;m.position.set(tx(s.x),GY(s.x,s.y)+0.05,tz(s.y));addW(m);}
   try{fcsForest(fb);}catch(e){console.error('fcsForest',e);}
@@ -317,7 +317,7 @@ function sgSync(v,P,me,now,dt){
   if(v.mode!=='siege'||!S||MAPID!=='fcs'){if(SGV3.g)sgClearView();return;}
   SGPH=S.ph;
   if(!SGV3.g)sgViewBuild();
-  sgBarrier(S.ph);fcsForestTick();
+  sgBarrier(S.ph);fcsForestTick();fcsCastleTick();
   SGV3.cores.forEach((c,i)=>{const n=i+1,dead=S.hp[i]<=0,act=n===S.ph,fut=n>S.ph;
     c.cr.visible=c.glow.visible=!dead;c.rub.visible=dead;c.ring.visible=act;
     c.cr.rotation.y+=dt*(act?1.2:0.3);c.cr.position.y=4.3+Math.sin(now/600+i)*0.25;

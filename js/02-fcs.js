@@ -158,6 +158,34 @@ function genFcs(){
   {const k1=cores.find(k=>k.n===1),inR=(x,y)=>k1&&Math.abs(x-k1.x)<430&&Math.abs(y-k1.y)<430;
    for(let i=obs.length-1;i>=0;i--){const o=obs[i];if((o.k==='fct'||o.k==='fcb2')&&inR(o.x,o.y))obs.splice(i,1);}
    for(let i=props.length-1;i>=0;i--){const q=props[i];if((q[0]==='tr'||q[0]==='bd')&&inR(q[1],q[2]))props.splice(i,1);}}
+  // raised stone terraces = 2nd level (user 2026-11-20 "second floor / balcony"): solid block, walkable top (TERR floor k:'terr'),
+  // stair ramp on one side, parapet (edge obs H+1 m) on chosen sides, other edges open (jump down). Cells from the Map Editor grid.
+  // props ['tc',X0,Y0,X1,Y1,H,side,a0,a1,L,par] (px) — visual js/28-fcs-castle.js
+  {const hN=(i,j)=>g[clamp(j,0,ny-1)*nx+clamp(i,0,nx-1)];
+   const terrace=(cx0,cy0,cx1,cy1,H,side,ra,rb,par)=>{
+     const i0=cx0*2,j0=cy0*2,NI=(cx1+1-cx0)*2+1,NJ=(cy1+1-cy0)*2+1,top=new Float32Array(NI*NJ),bot=new Float32Array(NI*NJ);
+     for(let j=0;j<NJ;j++)for(let i=0;i<NI;i++){const gr=hN(i0+i,j0+j);top[j*NI+i]=gr+H;bot[j*NI+i]=gr-0.05;}
+     terr.fl.push({x0:i0*c,y0:j0*c,nx:NI,ny:NJ,top,bot,k:'terr'});
+     const Ln=Math.ceil(H/0.35/2.25),RN=(rb+1-ra)*2+1,vert=side==='N'||side==='S';
+     {const nI=vert?RN:Ln+1,nJ=vert?Ln+1:RN,rt=new Float32Array(nI*nJ),rbt=new Float32Array(nI*nJ);
+      const bi=side==='E'?(cx1+1)*2:side==='W'?cx0*2-Ln:ra*2,bj=side==='S'?(cy1+1)*2:side==='N'?cy0*2-Ln:ra*2;
+      for(let j=0;j<nJ;j++)for(let i=0;i<nI;i++){const k=side==='S'?j:side==='N'?Ln-j:side==='E'?i:Ln-i,gr=hN(bi+i,bj+j);rt[j*nI+i]=gr+H*(1-k/Ln);rbt[j*nI+i]=gr-0.05;}
+      terr.fl.push({x0:bi*c,y0:bj*c,nx:nI,ny:nJ,top:rt,bot:rbt,k:'terr'});
+      // ramp side walls
+      const L=Ln*c,A0=ra*C,A1=(rb+1)*C;
+      for(let d=7;d<L;d+=14){const hh=H*(1-d/L);if(hh<0.3)continue;
+        for(const a of [A0+6,A1-6]){const p=side==='S'?[a,(cy1+1)*C+d]:side==='N'?[a,cy0*C-d]:side==='E'?[(cx1+1)*C+d,a]:[cx0*C-d,a];obs.push({x:p[0],y:p[1],r:8,k:'fcr',hgt:hh,s:0});}}}
+     const X0=cx0*C,Y0=cy0*C,X1=(cx1+1)*C,Y1=(cy1+1)*C;
+     const edge=(s,x1,y1,x2,y2)=>{const L=Math.hypot(x2-x1,y2-y1),n=Math.max(1,Math.round(L/16));
+       for(let i=0;i<=n;i++){const x=x1+(x2-x1)*i/n,y=y1+(y2-y1)*i/n,al=(s==='N'||s==='S')?x:y;if(s===side&&al>ra*C-2&&al<(rb+1)*C+2)continue;
+         obs.push({x,y,r:9,k:'fcr',hgt:par.includes(s)?H+1:H,s:0});}};
+     edge('N',X0+8,Y0+8,X1-8,Y0+8);edge('S',X0+8,Y1-8,X1-8,Y1-8);edge('W',X0+8,Y0+8,X0+8,Y1-8);edge('E',X1-8,Y0+8,X1-8,Y1-8);
+     props.push(['tc',X0,Y0,X1,Y1,H,side,ra*C,(rb+1)*C,Ln*c,par]);};
+   terrace(56,39,61,41,3.5,'S',58,59,'NW');     // zone 2: east of core 2, against the east wall
+   terrace(40,37,45,39,3.5,'S',41,42,'SE');     // zone 2: north-west of core 2, corner of the walls
+   terrace(96,40,101,43,3.5,'E',41,42,'SN');    // zone 3: west of core 3, under the long wall
+   terrace(122,45,126,49,3.5,'N',123,124,'W');  // zone 3: east of core 3 (defender side), against the wall
+  }
   for(const k of cores)obs.push({x:k.x,y:k.y,r:40,k:'fck',hgt:6,s:0});   // ตัวแกน (คริสตัล) ชนได้
   // เฟส: โซนชนิด "เฟส" ชื่อ "เฟส N" หลายกรอบรวมกัน = พื้นที่เล่นของเฟส N
   const phases=[];
