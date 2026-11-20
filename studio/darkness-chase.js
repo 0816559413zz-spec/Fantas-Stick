@@ -28,6 +28,53 @@ function stChaseScytheOpacity(scythe){
   };
 }
 
+function stChaseBall(root,orb,returnPoint,targetZ,launch,arrival,returnBody){
+  const ease=stDarkEase;
+  const route=new THREE.CatmullRomCurve3([
+    new THREE.Vector3(0,0,0),new THREE.Vector3(.08,0,8.2),new THREE.Vector3(.24,0,16.8),
+    new THREE.Vector3(.78,0,targetZ-2.5),new THREE.Vector3(2.08,0,targetZ-.88),
+    new THREE.Vector3(1.92,0,targetZ+1.20),returnPoint
+  ]);
+  const samplesPerSegment=40;
+  route.arcLengthDivisions=(route.points.length-1)*samplesPerSegment;
+  const lengths=route.getLengths(),length=lengths.at(-1),approach=lengths[3*samplesPerSegment];
+  const turnLength=length-approach;
+  const endSpeed=2*turnLength/(returnBody-arrival);
+  const exitSlope=endSpeed*(arrival-launch)/approach;
+  const distanceAt=t=>{
+    if(t<arrival){
+      const u=clamp((t-launch)/(arrival-launch),0,1);
+      return approach*u*u*(3-2*u+exitSlope*(u-1));
+    }
+    const u=clamp((t-arrival)/(returnBody-arrival),0,1);
+    return approach+turnLength*u*(2-u);
+  };
+  const pointAt=(distance,out)=>route.getPointAt(clamp(distance/length,0,1),out);
+  const lift=distance=>.24*Math.sin(Math.PI*clamp((distance-approach)/turnLength,0,1));
+  const weave=stDarkOrbWeave(root,pointAt,lift);
+  const cloak=stDarkShiftCloakTrails(root);
+  const wake=stDarkWake(root,distanceAt,pointAt,lift,launch,returnBody,.44,.26);
+  const sparks=stDarkWakeShards(root,distanceAt,pointAt,lift,launch+.03,returnBody);
+  const place=new THREE.Vector3(),ahead=new THREE.Vector3(),behind=new THREE.Vector3();
+  return t=>{
+    const distance=distanceAt(t);
+    pointAt(distance,place);pointAt(distance+.10,ahead).sub(pointAt(distance-.10,behind));
+    const yaw=Math.atan2(ahead.x,ahead.z);
+    const compact=ease(.085,launch,t),flight=ease(launch,launch+.12,t)*(1-ease(arrival-.035,arrival+.24,t));
+    const returnFade=ease(returnBody-.056,returnBody+.083,t);
+    const core=ease(.13,.234,t)*(1-returnFade);
+    orb.position.copy(place);orb.position.y=1.10+lift(distance);
+    orb.rotation.y=yaw;
+    orb.scale.set((.315-.073*flight)*core,(.325-.052*flight)*core,(.36+.18*flight)*core);
+    orb.visible=core>.02;
+    const gathered=ease(.155,launch+.045,t);
+    const strands=.93*ease(.126,launch+.048,t)*(1-ease(returnBody-.03,returnBody+.14,t));
+    weave(t,place,distance,strands,gathered,.15*flight,.47,.58*(1-ease(launch,launch+.09,t)));
+    cloak(t,place,yaw,compact,ease(.19,launch+.075,t),.76*ease(.075,.135,t)*(1-ease(launch+.035,launch+.20,t)));
+    wake(t);sparks(t);
+  };
+}
+
 FXCODE.studio_darkness_chase=(_x,_y,_h,args,instance)=>{
   const anchor=instance.L.find(layer=>layer.d.id===args.layer);
   if(!anchor?.obj)return;
@@ -50,8 +97,13 @@ FXCODE.studio_darkness_chase=(_x,_y,_h,args,instance)=>{
   const scale=1.40,ease=stDarkEase,launch=.25,arrival=.80,returnBody=1.53;
   const hit1=stScytheHitCut(root,new THREE.Vector3(-.05,.90,targetZ),false);
   const hit2=stScytheHitCut(root,new THREE.Vector3(.05,1.61,targetZ),false);
-  const firstHit=.89,secondHit=1.05,wandDown=1.91,cutStart=2.035,land=2.245,slashHit=2.186;
+  const firstHit=.89,firstEnd=.935,firstGone=firstEnd+.060;
+  const secondStart=firstGone+.18,secondHit=secondStart+.070;
+  const secondEnd=secondStart+.115,secondGone=secondEnd+.065;
+  const windStart=secondGone+.12,wandDown=1.91,cutStart=2.035;
+  const slashHit=cutStart+.092,land=cutStart+.135;
   const groundFade=land+.13,groundGone=groundFade+.23,spawnAt=groundGone+.038;
+  const trailHold=.24,trailFade=.62;
   const slamCut=new THREE.Group();slamCut.name='Marked chase black impact cut';root.add(slamCut);
   slamCut.position.set(.04,0,targetZ);
   const blackCut=stDarkCut(slamCut,[[.35,3.16,.09],[.11,1.40,.15],[-.20,.04,.12]],.12,0x000000,13);
@@ -84,21 +136,23 @@ FXCODE.studio_darkness_chase=(_x,_y,_h,args,instance)=>{
     {t:.64,p:[1.80,1.95,14.65],q:ready},
     {t:.82,p:[2.77,.67,6.81+extension],q:describePose([-.05,.13,.99],[.99,.10,-.03])},
     {t:.865,p:[1.34,.94,8.89+extension],q:describePose([-.91,.20,.36],[.46,.14,.88])},
-    {t:.935,p:[-2.52,1.26,8.39+extension],q:describePose([-.59,.19,-.78],[-.70,.11,.72])},
-    {t:.980,p:[-2.95,1.38,7.78+extension],q:describePose([.32,.25,.93],[-.96,.19,.11])},
-    {t:1.018,p:[-1.39,1.64,8.68+extension],q:describePose([.94,.28,.25],[-.37,.15,.90])},
-    {t:1.095,p:[2.60,2.12,8.29+extension],q:describePose([.72,.27,-.64],[.62,.40,.68])},
-    tipPose(1.225,[1.28,5.40,targetZ+2.50],[-.14,.65,-.74],[.15,.91,.24]),
-    tipPose(1.39,[.77,7.82,targetZ+3.64],[-.16,-.23,-.96],[.22,.87,-.46]),
-    tipPose(1.70,[.57,8.31,targetZ+4.12],[-.08,.02,-.99],[.17,.98,.05]),
-    tipPose(cutStart,[.48,8.12,targetZ+4.62],[-.06,.34,-.94],[.12,.94,.36]),
-    tipPose(2.135,[.33,5.97,targetZ+2.78],[-.10,-.63,-.77],[.17,.79,-.56]),
+    {t:firstEnd,p:[-2.52,1.26,8.39+extension],q:describePose([-.59,.19,-.78],[-.70,.11,.72])},
+    {t:firstGone,p:[-3.04,1.36,8.03+extension],q:describePose([-.52,.21,-.82],[-.81,.13,.57])},
+    {t:secondStart,p:[-2.95,1.38,7.78+extension],q:describePose([.32,.25,.93],[-.96,.19,.11])},
+    {t:secondStart+.038,p:[-1.39,1.64,8.68+extension],q:describePose([.94,.28,.25],[-.37,.15,.90])},
+    {t:secondEnd,p:[2.60,2.12,8.29+extension],q:describePose([.72,.27,-.64],[.62,.40,.68])},
+    {t:secondGone,p:[3.08,2.28,8.03+extension],q:describePose([.61,.30,-.73],[.68,.37,.64])},
+    tipPose(windStart,[1.12,4.62,targetZ+2.30],[-.21,-.18,-.96],[.16,.89,.31]),
+    tipPose(1.73,[.85,5.98,targetZ+3.27],[-.16,-.04,-.98],[.22,.94,-.19]),
+    tipPose(1.91,[.63,6.77,targetZ+4.05],[-.10,.18,-.98],[.17,.97,.16]),
+    tipPose(cutStart,[.48,6.91,targetZ+4.57],[-.06,.34,-.94],[.12,.94,.36]),
+    tipPose(cutStart+.043,[.33,5.72,targetZ+2.78],[-.10,-.57,-.81],[.17,.79,-.56]),
     tipPose(slashHit,[.20,2.25,targetZ+.58],[-.07,-.86,-.50],[.17,.52,-.86]),
     tipPose(land,[.16,.09,targetZ+.11],[-.04,-.98,-.18],[.17,.15,-.97])
   ];
   const bladeCurve=new THREE.CatmullRomCurve3(keys.map(({p})=>new THREE.Vector3(...p)));
   const offset=new THREE.Vector3(),sample={pos:new THREE.Vector3(),QB:new THREE.Quaternion(),act:0,shaft:false};
-  const scythe=stCreateScythePreview(root,{wrap:'C',manual:true,scale,trailPose:bladeAt});
+  const scythe=stCreateScythePreview(root,{wrap:'C',manual:true,scale,trailPose:bladeAt,trailWidth:1.62});
   scythe.pivot.name='Marked chase scythe';
   const newScythe=stCreateScythePreview(root,{wrap:'C',manual:true,scale});
   newScythe.pivot.name='Marked chase replacement scythe';
@@ -111,6 +165,7 @@ FXCODE.studio_darkness_chase=(_x,_y,_h,args,instance)=>{
     new THREE.MeshStandardMaterial({color:0x5b5354,roughness:.3,metalness:.38}));
   ferrule.position.y=-.69;wand.add(ferrule);
 
+  let trailOpacity=1;
   function bladeAt(t){
     const segment=keys.findIndex((_,i)=>i===keys.length-2||t<=keys[i+1].t);
     const a=keys[segment],b=keys[segment+1],u=clamp((t-a.t)/(b.t-a.t),0,1);
@@ -118,21 +173,39 @@ FXCODE.studio_darkness_chase=(_x,_y,_h,args,instance)=>{
     bladeCurve.getPoint(progress,sample.pos);
     sample.pos.y=Math.max(.20,sample.pos.y);
     sample.QB.copy(a.q).slerp(b.q,u);
-    const small=ease(.11,.31,t)*(1-ease(1.08,1.32,t));
-    sample.size=1-.21*small;
+    const small=ease(.11,.31,t)*(1-ease(secondGone,windStart,t));
+    sample.size=1-.34*small;
     sample.pos.sub(offset.copy(centerLocal).multiplyScalar(sample.size).applyQuaternion(sample.QB));
-    sample.act=ease(cutStart,cutStart+.036,t)*(1-ease(land-.018,land+.026,t));
+    sample.act=trailOpacity*ease(cutStart,cutStart+.036,t)*(1-ease(land-.018,land+.026,t));
     return sample;
   }
 
-  const pathPoint=new THREE.Vector3(),returnPoint=new THREE.Vector3(-.26,0,targetZ+1.98);
+  const returnPoint=new THREE.Vector3(-.26,0,targetZ+1.98);
+  const ballFx=scytheOnly?null:stChaseBall(root,orb,returnPoint,targetZ,launch,arrival,returnBody);
+  const avatarParts=new Map();
+  const hideAvatarPart=object=>{
+    if(!object||avatarParts.has(object))return;
+    avatarParts.set(object,{mask:object.layers.mask,castShadow:object.castShadow});
+    object.layers.disableAll();
+    object.castShadow=false;
+  };
+  if(scytheOnly)orb.visible=false;
   function update(){
-    const t=instance.t,pose=bladeAt(t);
+    const avatar=ballFx?PM3.get(NET.myId):null;
+    avatar?.g.traverse(hideAvatarPart);
+    hideAvatarPart(avatar?.cloth?.mo);
+    hideAvatarPart(avatar?.cloth?.mi);
+    const t=instance.t;
+    trailOpacity=1-ease(land+trailHold,land+trailHold+trailFade,t);
+    const pose=bladeAt(t);
     scythe.pivot.position.copy(pose.pos);scythe.pivot.quaternion.copy(pose.QB);
     scythe.pivot.scale.setScalar(pose.size);
-    scythe.update(t);
-    const ghost=ease(.08,.255,t)*(1-ease(1.095,1.33,t));
-    const oldOpacity=(1-.50*ghost)*(1-ease(groundFade,groundGone,t));
+    // Hold the arc in place after impact, then fade it as a whole.
+    scythe.update(t,0,0,Math.min(t,land));
+    const first=(1-.69*ease(.08,.255,t))*(1-ease(firstEnd,firstGone,t));
+    const second=.31*ease(secondStart,secondStart+.064,t)*(1-ease(secondEnd,secondGone,t));
+    const slam=ease(windStart,windStart+.19,t)*(1-ease(groundFade,groundGone,t));
+    const oldOpacity=first+second+slam;
     fadeBlade(oldOpacity);scythe.pivot.visible=oldOpacity>.003;
     const spawn=ease(spawnAt,spawnAt+.24,t);
     newScythe.pivot.visible=spawn>.003;
@@ -141,12 +214,8 @@ FXCODE.studio_darkness_chase=(_x,_y,_h,args,instance)=>{
       newScythe.pivot.quaternion.copy(idle);
       newScythe.update(t);fadeReplacement(spawn);
     }
-    const convert=ease(.08,launch,t),travel=ease(launch,arrival,t);
-    const orbit=ease(arrival-.01,returnBody,t),angle=Math.PI*(1-orbit);
-    pathPoint.set(1.93*Math.sin(angle),.94+.53*Math.sin(Math.PI*orbit),targetZ+1.98*Math.cos(angle));
-    orb.position.set(0,.94,lerp(0,targetZ-1.98,travel)).lerp(pathPoint,ease(arrival-.10,arrival+.11,t));
-    const appear=1-ease(returnBody-.065,returnBody+.095,t);
-    orb.visible=!scytheOnly&&t>=.09&&appear>.02;orb.scale.setScalar(.265*convert*appear);
+    const convert=ease(.08,launch,t);
+    ballFx?.(t);
     const entryFade=1-ease(.145,launch+.015,t),returnFade=ease(returnBody-.026,returnBody+.14,t);
     caster.g.visible=!scytheOnly&&(entryFade>.01||returnFade>.01);
     if(t<arrival)caster.g.position.set(0,0,0);
@@ -173,6 +242,10 @@ FXCODE.studio_darkness_chase=(_x,_y,_h,args,instance)=>{
   instance.updateDarknessChase=update;
   anchor.geo=new THREE.BufferGeometry();
   anchor.geo.addEventListener('dispose',()=>{
+    for(const [object,{mask,castShadow}] of avatarParts){
+      object.layers.mask=mask;
+      object.castShadow=castShadow;
+    }
     instance.updateDarknessChase=null;disposeTree(root);root.removeFromParent();
   });
   update();
