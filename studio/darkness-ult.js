@@ -132,7 +132,7 @@ FXCODE.studio_darkness_ult=(_x,_y,_h,args,instance)=>{
     if(l<=0)return;
     root.getWorldPosition(camA);camFwd.set(0,0,1).applyQuaternion(root.getWorldQuaternion(camQ));camFwd.y=0;camFwd.normalize();
     c.getWorldDirection(camT0).multiplyScalar(20).add(c.position);
-    c.position.addScaledVector(camUp.set(0,1,0),6.5*l).addScaledVector(camFwd,-6*l);
+    c.position.addScaledVector(camUp.set(0,1,0),11*l).addScaledVector(camFwd,-8*l);
     camT1.copy(camA).addScaledVector(camFwd,22).y+=3.5;
     c.lookAt(camT0.lerp(camT1,l));
   };

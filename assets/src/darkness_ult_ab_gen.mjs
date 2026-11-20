@@ -65,9 +65,9 @@ function crest(){   // A: torn blades growing out of the visible skull (front of
 }
 function tailSpikes(){   // dorsal blades and shapes along the body back, rooted in the skin
   const v=[],f=[];seed(97);
-  const P2=(u,ph,k=1)=>{const r=tailR(u)*k;return [Math.cos(ph)*r*.55,Math.sin(ph)*r*.47,-u];};
+  const P2=(u,ph,k=1)=>{const r=tailRad(u,ph)*k;return [Math.cos(ph)*r*.55,Math.sin(ph)*r*.47,-u];};
   for(let i=0;i<70;i++){const u=lerp(.0,.75,Math.pow(rnd(),1.3)),ph=lerp(.55,2.6,rnd()),du=.008+.012*rnd(),dp=.07+.07*rnd();
-    const s0=P2(u,ph),r=tailR(u),len=lerp(.10,.38,rnd())*r*(1-.5*Math.abs(ph-Math.PI/2))*(1-u*.6);
+    const s0=P2(u,ph),r=tailRad(u,ph),len=lerp(.10,.38,rnd())*r*(1-.5*Math.abs(ph-Math.PI/2))*(1-u*.6);
     const out=[Math.cos(ph),Math.sin(ph)];
     const tip=[s0[0]+out[0]*len*.55,s0[1]+out[1]*len*.47*1.6,s0[2]-du*1.5];
     rootedSpike(v,f,[P2(u-du,ph-dp,.97),P2(u-du,ph+dp,.97),P2(u+du,ph+dp,.97),P2(u+du,ph-dp,.97)],tip);}
@@ -88,23 +88,27 @@ function headStrands(sign){   // texture: ink strands flowing over the head skin
 // ---------- body / tail (B cloak), z=0 at the neck -> z=-1 at the hand; scaled [H,H,len] ----------
 const TIP=.28;   // wide base at the hand (user: wide at the start, middle and tip)
 const tailR=u=>(TIP+(1-TIP)*Math.pow(1-u,1.25))*(1+.30*Math.sin(Math.PI*Math.min(1,u*1.7)));   // u 0 = head join (same size as the skull) .. swells behind the head .. 1 hand
+// rough skin on the body (user: middle -> base was a smooth cone): lumps, folds and ridges, strongest mid-body
+const tailRough=(u,ph)=>{const a=.25+.75*Math.sin(Math.PI*Math.min(1,u*1.15));
+  return 1+a*(.13*Math.sin(ph*5+u*23)+.09*Math.sin(ph*9-u*41+1.3)+.07*Math.sin(ph*3+u*67+.7)+.05*Math.sin(ph*13+u*15))+.06*a*Math.sin(u*90);};
+const tailRad=(u,ph)=>tailR(u)*tailRough(u,ph);
 function tail(){
-  const SEG=30,NP=30,v=[],f=[];
-  for(let i=0;i<=SEG;i++){const u=i/SEG,r=tailR(u);
-    for(let j=0;j<NP;j++){const ph=2*Math.PI*j/NP;v.push([r3(Math.cos(ph)*r*.55/.5*.5),r3(Math.sin(ph)*r*.47),r3(-u)]);
+  const SEG=64,NP=48,v=[],f=[];
+  for(let i=0;i<=SEG;i++){const u=i/SEG;
+    for(let j=0;j<NP;j++){const ph=2*Math.PI*j/NP,r=tailRad(u,ph);v.push([r3(Math.cos(ph)*r*.55),r3(Math.sin(ph)*r*.47),r3(-u)]);
       if(i<SEG){const a=i*NP+j,b=a+NP,a1=i*NP+(j+1)%NP,b1=a1+NP;f.push([a,a1,b1,b]);}}}
   return {id:'tail',k:'poly',v,f,sub:0};
 }
 function hem(){   // B: torn cloth flaps hanging from the underside and sides, swept back
   const v=[],f=[];seed(61);
-  for(let i=0;i<34;i++){const u=lerp(.02,.85,rnd()),ph=lerp(Math.PI*1.15,Math.PI*1.85,rnd()),r=tailR(u);
+  for(let i=0;i<34;i++){const u=lerp(.02,.85,rnd()),ph=lerp(Math.PI*1.15,Math.PI*1.85,rnd()),r=tailRad(u,ph);
     const b=[Math.cos(ph)*r*.55,Math.sin(ph)*r*.47,-u],len=lerp(.10,.30,rnd())*r*1.6,wid=.035+.04*rnd();
     spike(v,f,b.map(r3),[0,0,wid],[b[0]*1.1,b[1]-len,b[2]-wid*2.2].map(r3));}
   return {id:'hem',k:'poly',v,f,sub:0};
 }
 function cloth(){   // texture: overlapping torn cloth plates on the body, edges peel back
   const v=[],f=[];seed(71);
-  for(let i=0;i<70;i++){const u=lerp(.0,.9,rnd()),ph=lerp(.15,Math.PI*2-.15,rnd()),r=tailR(u)*1.015;
+  for(let i=0;i<70;i++){const u=lerp(.0,.9,rnd()),ph=lerp(.15,Math.PI*2-.15,rnd()),r=tailRad(u,ph)*1.015;
     const p=[Math.cos(ph)*r*.55,Math.sin(ph)*r*.47,-u],len=lerp(.05,.12,rnd()),wid=lerp(.08,.18,rnd())*r;
     const t=[-Math.sin(ph)*wid*.55,Math.cos(ph)*wid*.47,0];   // around the body
     const n=v.length;
@@ -128,7 +132,7 @@ function tailStrands(){   // texture on the body top: ink strands running back a
   const v=[],f=[];seed(91);
   for(let k=0;k<80;k++){const ph=lerp(.12,Math.PI-.12,rnd()),w=.008+.02*rnd(),u0=rnd()*.25,u1=lerp(.55,.95,rnd()),wob=rnd()*6;
     const SEG=18,b=v.length;
-    for(let i=0;i<=SEG;i++){const t=i/SEG,u=lerp(u0,u1,t),r=tailR(u)*1.012,a=ph+.05*Math.sin(t*6+wob),ww=w*(1-t*.6);
+    for(let i=0;i<=SEG;i++){const t=i/SEG,u=lerp(u0,u1,t),a=ph+.05*Math.sin(t*6+wob),r=tailRad(u,a)*1.012,ww=w*(1-t*.6);
       const c=[Math.cos(a)*r*.55,Math.sin(a)*r*.47],d=[-Math.sin(a)*.55,Math.cos(a)*.47],l=Math.hypot(...d);
       v.push([r3(c[0]-d[0]/l*ww),r3(c[1]-d[1]/l*ww),r3(-u)],[r3(c[0]+d[0]/l*ww),r3(c[1]+d[1]/l*ww),r3(-u)]);
       if(i<SEG){const q=b+i*2;f.push([q,q+1,q+3,q+2]);f.push([q,q+2,q+3,q+1]);}}}

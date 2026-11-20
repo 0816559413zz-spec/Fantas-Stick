@@ -5014,7 +5014,7 @@
    "n": 2
   },
   "dark_ab_cloth": {
-   "v": "081e94e8",
+   "v": "d1453e73",
    "desc": "Darkness อัลติ A+B แผ่นผ้าซ้อนบนตัว",
    "mat": "solid",
    "n": 1
@@ -5026,7 +5026,7 @@
    "n": 1
   },
   "dark_ab_hem": {
-   "v": "b30b8d8d",
+   "v": "4c4a33fc",
    "desc": "Darkness อัลติ A+B ชายผ้าขาดใต้ตัว",
    "mat": "solid",
    "n": 1
@@ -5068,19 +5068,19 @@
    "n": 1
   },
   "dark_ab_tail": {
-   "v": "c550b3aa",
+   "v": "78d7589a",
    "desc": "Darkness อัลติ A+B ตัวผ้าคลุม (คอ z=0 → มือ z=-1)",
    "mat": "solid",
    "n": 1
   },
   "dark_ab_tail_spikes": {
-   "v": "3fdee405",
+   "v": "f7e1bbd0",
    "desc": "Darkness อัลติ A+B หนามบนหลังตัว",
    "mat": "solid",
    "n": 1
   },
   "dark_ab_tail_strands": {
-   "v": "6df5e87b",
+   "v": "620367e8",
    "desc": "Darkness อัลติ A+B เส้นหมึกบนหลังตัว",
    "mat": "solid",
    "n": 1
