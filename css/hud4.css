@@ -106,12 +106,12 @@
 /* ---------- ขวาล่าง: ไพ่สกิล 4 ใบเรียงแถว (ผู้ใช้ 2026-10-28) — ล่างไพ่จมใต้ขอบจอ, เรียงพัดเอียงนิด ๆ (js/66 h4Place) ---------- */
 .h4Cd{position:absolute;z-index:2;bottom:-26px;width:104px;height:150px;transform-origin:50% 100%;transition:left .34s cubic-bezier(.3,1.35,.5,1),rotate .34s,translate .34s}
 .h4Cd .fc{position:absolute;inset:0;border-radius:10px;box-sizing:border-box;padding-top:22px;display:flex;flex-direction:column;align-items:center;overflow:hidden;
-  background:linear-gradient(180deg,var(--cb),#0a0c18 85%);
+  background:linear-gradient(180deg,var(--cb),var(--cbot,#0a0c18) 85%);
   box-shadow:inset 0 0 0 1px var(--c1),inset 0 0 0 4px #0a0c18,inset 0 0 0 5px color-mix(in srgb,var(--c2) 45%,transparent),0 10px 22px rgba(0,0,0,.6);transition:translate .18s,box-shadow .2s}
 .h4Cd .art{position:absolute;left:8px;right:8px;top:8px;height:60%;border-radius:6px;
   background:radial-gradient(circle at 50% 45%,color-mix(in srgb,var(--c1) 45%,transparent),transparent 70%),repeating-conic-gradient(from 0deg at 50% 45%,color-mix(in srgb,var(--c2) 10%,transparent) 0 6deg,transparent 6deg 18deg)}
 .h4Cd .ico{position:relative;flex:none;filter:drop-shadow(0 0 8px var(--c1))}
-.h4Cd .nm{position:relative;margin-top:13px;max-width:90px;font:600 11px/1.15 'Kanit',sans-serif;text-align:center;color:var(--c2);text-shadow:0 1px 3px #000;
+.h4Cd .nm{position:relative;margin-top:13px;max-width:90px;font:600 11px/1.15 'Kanit',sans-serif;text-align:center;color:var(--tx,var(--c2));text-shadow:var(--txs,0 1px 3px #000);
   overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
 .h4Cd .k{position:absolute;left:6px;top:6px;z-index:3;min-width:20px;height:20px;padding:0 4px;box-sizing:border-box;border-radius:4px;font:700 12px/20px 'Cinzel','Kanit',serif;text-align:center;
   color:#0a0c18;background:var(--c2);box-shadow:0 0 8px var(--c1)}
@@ -157,7 +157,7 @@
 #h4.edit .h4Tip{display:block}
 /* ---------- ไพ่อัลติใบใหญ่ หลังไพ่ 4 ใบ (ผู้ใช้ 2026-10-28): เศษไพ่ขาด .sd ประกอบเข้าตามเกจ (--g = ส่วนที่ยังขาด) • เต็ม = สมบูรณ์ + ออร่า ---------- */
 .h4UC{position:absolute;z-index:1;left:161px;bottom:44px;width:150px;height:215px;rotate:-2deg;translate:0 calc(var(--g,1)*99px);transition:translate .6s cubic-bezier(.3,1.3,.5,1)}   /* เกจน้อย = โผล่นิดเดียว • เต็ม = โผล่ ~60% เหนือไพ่ 4 ใบ (ผู้ใช้ 2026-10-28) */
-.h4UC .stk{position:absolute;inset:0;border-radius:12px;background:linear-gradient(160deg,#1a1d33,#0a0c18);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--c1) 45%,transparent),0 6px 16px rgba(0,0,0,.5);transform:translate(7px,5px) rotate(4deg)}
+.h4UC .stk{position:absolute;inset:0;border-radius:12px;background:linear-gradient(160deg,color-mix(in srgb,var(--cb) 30%,#1a1d33),var(--cbot,#0a0c18));box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--c1) 45%,transparent),0 6px 16px rgba(0,0,0,.5);transform:translate(7px,5px) rotate(4deg)}
 .h4UC .stk.b{transform:translate(-6px,7px) rotate(-5deg);opacity:.8}
 .h4UC .fc{position:absolute;inset:0}
 .h4UC .sd{position:absolute;inset:0;opacity:.14;filter:grayscale(1) brightness(.55);
@@ -165,11 +165,11 @@
 .h4UC .sd.on{opacity:1;filter:saturate(.7) brightness(.9) drop-shadow(0 0 2px var(--c1)) drop-shadow(0 0 5px var(--c0))}
 .h4UC .sd.on{animation:h4ShIn .45s ease-out}
 .h4UC .si{position:absolute;inset:0;border-radius:12px;box-sizing:border-box;padding-top:24px;display:flex;flex-direction:column;align-items:center;
-  background:linear-gradient(180deg,var(--cb),#0a0c18 88%);box-shadow:inset 0 0 0 1px var(--c1),inset 0 0 0 5px #0a0c18,inset 0 0 0 6px color-mix(in srgb,var(--c2) 50%,transparent)}
+  background:linear-gradient(180deg,var(--cb),var(--cbot,#0a0c18) 88%);box-shadow:inset 0 0 0 1px var(--c1),inset 0 0 0 5px #0a0c18,inset 0 0 0 6px color-mix(in srgb,var(--c2) 50%,transparent)}
 .h4UC .art{position:absolute;left:10px;right:10px;top:10px;height:52%;border-radius:8px;
   background:radial-gradient(circle at 50% 42%,color-mix(in srgb,var(--c1) 55%,transparent),transparent 70%),repeating-conic-gradient(from 0deg at 50% 42%,color-mix(in srgb,var(--c2) 12%,transparent) 0 5deg,transparent 5deg 15deg)}
 .h4UC .ico{position:relative;flex:none;filter:drop-shadow(0 0 10px var(--c1))}
-.h4UC .nm{position:relative;margin-top:9px;max-width:130px;font:700 13px/1.15 'Cinzel','Kanit',serif;text-align:center;letter-spacing:.04em;color:var(--c2);text-shadow:0 1px 4px #000}
+.h4UC .nm{position:relative;margin-top:9px;max-width:130px;font:700 13px/1.15 'Cinzel','Kanit',serif;text-align:center;letter-spacing:.04em;color:var(--tx,var(--c2));text-shadow:var(--txs,0 1px 4px #000)}
 .h4UC .edge{position:absolute;inset:0;border-radius:12px;opacity:0;pointer-events:none;box-shadow:inset 0 0 0 2px #fff,0 0 26px var(--c1),0 0 60px color-mix(in srgb,var(--c1) 60%,transparent);transition:opacity .4s}
 .h4UC .k{position:absolute;left:8px;top:8px;z-index:3;min-width:22px;height:22px;padding:0 5px;box-sizing:border-box;border-radius:4px;font:700 13px/22px 'Cinzel','Kanit',serif;text-align:center;color:#0a0c18;background:var(--c2);box-shadow:0 0 8px var(--c1)}
 .h4UC .up{position:absolute;right:9px;top:9px;z-index:3;font:700 13px 'Cinzel',serif;letter-spacing:.06em;color:#fff;text-shadow:0 0 6px var(--c0),0 0 3px #000}
@@ -190,7 +190,7 @@
 @keyframes h4UltUp{0%{transform:none}35%{transform:translateY(-80px) scale(1.25)}100%{transform:translateY(-130px) scale(1.4)}}
 /* ไอคอนเล็กขวาสุด: ตีปกติ / ชาร์จ / โล่ / พุ่ง / ไม้กวาด */
 .h4Ic{position:absolute;right:16px;bottom:16px;display:flex;flex-direction:column-reverse;align-items:center;gap:10px}
-.h4Gm{position:relative;width:46px;height:46px;border-radius:9px;display:grid;place-items:center;background:radial-gradient(circle at 50% 35%,var(--cb),#0a0c18 75%);
+.h4Gm{position:relative;width:46px;height:46px;border-radius:9px;display:grid;place-items:center;background:radial-gradient(circle at 50% 35%,var(--cb),var(--cbot,#0a0c18) 75%);
   box-shadow:inset 0 0 0 1px var(--c1),0 0 0 2px rgba(6,9,20,.55),0 0 0 3px color-mix(in srgb,var(--c2) 45%,transparent)}
 .h4Gm .ico{filter:drop-shadow(0 0 5px var(--c1))}
 .h4Gm .k{position:absolute;left:-10px;bottom:-5px;padding:0 4px;font:700 9px/14px 'Cinzel','Kanit',serif;color:#0a0c18;background:var(--c2);border-radius:3px;white-space:nowrap}
@@ -350,3 +350,16 @@
 #h4pl .tm::after{content:'s';font-size:13px;opacity:.6;margin-left:1px}
 #h4pl .low .hd{animation:h4plBlink .7s infinite}
 @keyframes h4plBlink{50%{opacity:.35}}
+/* Light: bright ult card (black icon, dark % text) • Darkness: black -> dark blue (user 2026-11-20) */
+.h4UX.e-light .fr{background:linear-gradient(170deg,#fffef6,#ffe58a);border-color:#e0b020}
+.h4UX.e-light .fr .ic{filter:none}
+.h4UX.e-light .fr .ic .ico{--c:#0b0b10 !important}
+.h4UX.e-light .pct{color:#1d1604;text-shadow:0 0 6px #fff,0 0 2px #fff}
+.h4UX.e-darkness .fr{background:linear-gradient(170deg,#0f1a52,#000)}
+.h4UX.e-darkness .fr .ic{filter:drop-shadow(0 0 4px #2c46c8)}
+.h4UX.e-darkness .fr .ic .ico{--c:#5c78ff !important}
+/* Light radiance: white-hot cards with a gold halo and soft sun rays behind the icon */
+#h4[data-el=light] .h4Cd .fc,#h4[data-el=light] .h4Gm{box-shadow:inset 0 0 0 1.5px #ffd84a,inset 0 0 18px rgba(255,236,150,.9),0 0 14px rgba(255,226,90,.85),0 0 32px rgba(255,214,60,.5),0 8px 18px rgba(0,0,0,.35)}
+#h4[data-el=light] .h4Cd .art{background:radial-gradient(circle at 50% 45%,#fff 0,rgba(255,244,190,.95) 28%,rgba(255,226,90,.35) 55%,transparent 72%),repeating-conic-gradient(from 0deg at 50% 45%,rgba(255,206,40,.32) 0 5deg,transparent 5deg 15deg)}
+#h4[data-el=light] .h4Cd .ico,#h4[data-el=light] .h4Gm .ico{filter:drop-shadow(0 0 4px #fff) drop-shadow(0 0 10px rgba(255,220,80,.9))}
+.h4UX.e-light .fr{background:radial-gradient(circle at 50% 35%,#fff 0,#fffbe2 40%,#ffe58a 100%);box-shadow:0 0 16px rgba(255,226,90,.9),0 0 36px rgba(255,214,60,.5),inset 0 0 16px rgba(255,236,150,.9)}

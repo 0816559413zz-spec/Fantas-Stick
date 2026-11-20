@@ -9,6 +9,8 @@ const H4E={
   earth:{c0:'#3a2410',c1:'#c9a36a',c2:'#f0dcb4',cb:'#3a2a18',pt:'rock',n:'EARTH'},
   wind:{c0:'#0f3a22',c1:'#8dff65',c2:'#efffe8',cb:'#123a26',pt:'snow',n:'WIND'},
   water:{c0:'#062a4a',c1:'#4fc3ff',c2:'#e3f7ff',cb:'#0c2c48',pt:'snow',n:'WATER'},
+  light:{c0:'#f0b400',c1:'#ffe14d',c2:'#ffffff',cb:'#ffffff',cbot:'#fff0a0',ic:'#0b0b10',tx:'#1d1604',txs:'0 0 3px #fff',pt:'spark',n:'LIGHT'},   // white/yellow very bright cards, black icons + dark text (user 2026-11-20)
+  darkness:{c0:'#010208',c1:'#2c46c8',c2:'#a9baff',cb:'#0f1a52',cbot:'#000000',ic:'#5c78ff',tx:'#d4dcff',txs:'0 1px 3px #000',pt:'ember',n:'DARKNESS'},   // black -> dark blue cards, blue icons
   stormgod:{c0:'#05304a',c1:'#3fe2ff',c2:'#e0fbff',cb:'#0a2c44',pt:'spark',n:'STORM'}};   // ร่างเทพสายฟ้า: ไพ่/HUD เป็นฟ้า (ผู้ใช้ 2026-11-10)
 const H4={pick:null,ordFor:'',el:null,on:false,drawn:false,pid:'',lay:'',cache:{},rdy:{},cdp:{},seg:[],segN:0,trail:1,hold:0,uFull:false};
 const h4God=me=>!!(me&&me.sm&&((me.sm[3]|0)&4));
@@ -37,12 +39,13 @@ function h4AuBits(pt){let o='';const at=(deg,r)=>{const t=deg*Math.PI/180;return
     o+=`<i class="dust"></i><div class="orb">${r}</div>`;}
   return o;}
 const h4Key=k=>({'คลิกซ้าย':'LMB','คลิกขวา':'RMB','กดค้าง':'HOLD'})[k]||k;
-const h4Ico=(ic,sz)=>ic&&typeof ic==='object'?icoHTML(ic.id,'#fff',sz):`<span style="font-size:${Math.round(sz*0.8)}px">${ic||''}</span>`;
+const h4Ico=(ic,sz)=>ic&&typeof ic==='object'?icoHTML(ic.id,'var(--ic,#fff)',sz):`<span style="font-size:${Math.round(sz*0.8)}px">${ic||''}</span>`;
 function h4Build(me,v){
   const [P,E]=h4Pal(me),MYS=mySlots(me),k=getKit(me.id),U=SPELL_LIST[k.ult];
   let root=document.getElementById('h4');
   if(!root){root=document.createElement('div');root.id='h4';root.hidden=true;const cvEl=document.getElementById('cv');cvEl.parentNode.insertBefore(root,cvEl.nextSibling);}
-  root.style.cssText=`--c0:${E.c0};--c1:${E.c1};--c2:${E.c2};--cb:${E.cb}`;
+  root.dataset.el=P.id;   // per-class CSS hooks (Light radiance cards)
+  root.style.cssText=`--c0:${E.c0};--c1:${E.c1};--c2:${E.c2};--cb:${E.cb};--cbot:${E.cbot||'#0a0c18'};--ic:${E.ic||'#fff'};--tx:${E.tx||E.c2};--txs:${E.txs||'0 1px 3px #000'}`;
   const cards=MYS.filter(s=>s[3]>=1&&s[3]<=4),gems=MYS.filter(s=>(s[3]<=0&&s[3]!==-2)||s[3]===5);
   // ไพ่ 4 ใบ: ตำแหน่ง = SKORD (สลับได้) • .fc = หน้าไพ่ (เล่นท่าดึงขึ้น/สลาย/ไพ่ใหม่แทรก) • .hg = นาฬิกาทรายตอนคูลดาวน์
   let R=`<div class="h4Sh"></div>`+h4Parts(E,16,(a,b)=>[20+a*480,40+b*200]);

@@ -1,5 +1,6 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
 
+- 2026-11-20 Light + Darkness icons (game-icons.net CC BY 3.0, credits in icons/CREDITS.md): Light 9 icons, Darkness 10 (dk_* aliased by the import session). HUD per-class colours: Light = white-hot radiant cards with gold halo + sun rays, black icons, dark text; Darkness = black to dark-blue cards, blue icons, pale text (H4E light/darkness + --cbot/--ic/--tx vars, #h4[data-el])
 - 2026-11-20 Darkness numbers: marked chase 5/5/15; skill 5 invisible unless attacking (attacking = faint); hold Dash no damage; empowered BA after tap Dash 18 (36 marked), 150°, range 260, 3 s window, 2 uses no stack; BA aims up/down normally (flyer restriction removed)
 - 2026-11-20 Darkness ult numbers: no 50 shield anymore — ult puts the caster into Flow for 6 s; Night Waltz -30% cd per marked kill has no minimum
 - 2026-11-20 Darkness numbers locked by user (designs/darkness.md): Flow 6 s; Night Waltz radius 250, cd 12 s; unmarked chase dash 250 / 10 dmg / 0.6 s lift / cd 7 s; marked chase range 600, cd 7 s (same skill) • also Dash tap 120 / hold 500 / cd 8 per charge; Shield windup ~0.4-0.5, block dia 140, refill 5 s / early stop 1 s wait then 0.35 s/s, cursor gauge; mark wave 1000/s height 150; Ward Drain range 400, no damage, radius 150, -60% shield 4 s, cd 12; skill 5 radius 150, 4 s, cd 20
