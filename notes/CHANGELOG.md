@@ -1,5 +1,7 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
 
+- 2026-11-20 — **Darkness ult rift (Studio, review #91):** Rift now moves: counter-rotating rims, three nested tunnel rims, breathing scale, wisps drifting off the edge, air warp; camera lift only in game cam.
+
 - 2026-11-20 — **Darkness ult v3 (Studio, review #91):** Magic circle replaced with a shadow rift (irregular void, torn shard rim, curling ink tendrils) that tears open sideways and closes before the bite.
 
 - 2026-11-20 — **Darkness ult preview camera:** lift starts near the end of the charge (0.72-1.0 s) and looks down more.

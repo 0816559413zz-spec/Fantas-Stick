@@ -128,6 +128,7 @@ FXCODE.studio_darkness_ult=(_x,_y,_h,args,instance)=>{
   const prevHook=window.WD?.camHook,camUp=new THREE.Vector3(),camFwd=new THREE.Vector3(),camT0=new THREE.Vector3(),camT1=new THREE.Vector3(),camA=new THREE.Vector3(),camQ=new THREE.Quaternion();
   if(window.WD&&!args.noCamLift)WD.camHook=c=>{
     prevHook?.(c);
+    if(typeof ST!=='undefined'&&ST.cam!=='game')return;   // only the player camera lifts
     const t=instance.t,l=ease(.72,1.0,t)*(1-ease(ST_ULT_BITE+.2,ST_ULT_BITE+.8,t));   // lifts near the end of the charge
     if(l<=0)return;
     root.getWorldPosition(camA);camFwd.set(0,0,1).applyQuaternion(root.getWorldQuaternion(camQ));camFwd.y=0;camFwd.normalize();
