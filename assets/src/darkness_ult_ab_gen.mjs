@@ -72,7 +72,7 @@ function headStrands(sign){   // texture: ink strands flowing over the head skin
 }
 // ---------- body / tail (B cloak), z=0 at the neck -> z=-1 at the hand; scaled [H,H,len] ----------
 const TIP=.28;   // wide base at the hand (user: wide at the start, middle and tip)
-const tailR=u=>TIP+(1-TIP)*Math.pow(1-u,1.25);          // u 0 neck .. 1 hand
+const tailR=u=>(TIP+(1-TIP)*Math.pow(1-u,1.25))*(1+.30*Math.sin(Math.PI*Math.min(1,u*1.7)));   // u 0 = head join (same size as the skull) .. swells behind the head .. 1 hand
 function tail(){
   const SEG=30,NP=30,v=[],f=[];
   for(let i=0;i<=SEG;i++){const u=i/SEG,r=tailR(u);
@@ -109,6 +109,17 @@ model('dark_ab_crest','Darkness อัลติ A+B ลิ้นเปลวบ�
 model('dark_ab_strands_upper','Darkness อัลติ A+B เส้นหมึกบนหัว',[headStrands(1)]);
 model('dark_ab_strands_lower','Darkness อัลติ A+B เส้นหมึกขากรรไกรล่าง',[headStrands(-1)]);
 model('dark_ab_tail','Darkness อัลติ A+B ตัวผ้าคลุม (คอ z=0 → มือ z=-1)',[tail()]);
+function tailStrands(){   // texture on the body top: ink strands running back along the cloak
+  const v=[],f=[];seed(91);
+  for(let k=0;k<80;k++){const ph=lerp(.12,Math.PI-.12,rnd()),w=.008+.02*rnd(),u0=rnd()*.25,u1=lerp(.55,.95,rnd()),wob=rnd()*6;
+    const SEG=18,b=v.length;
+    for(let i=0;i<=SEG;i++){const t=i/SEG,u=lerp(u0,u1,t),r=tailR(u)*1.012,a=ph+.05*Math.sin(t*6+wob),ww=w*(1-t*.6);
+      const c=[Math.cos(a)*r*.55,Math.sin(a)*r*.47],d=[-Math.sin(a)*.55,Math.cos(a)*.47],l=Math.hypot(...d);
+      v.push([r3(c[0]-d[0]/l*ww),r3(c[1]-d[1]/l*ww),r3(-u)],[r3(c[0]+d[0]/l*ww),r3(c[1]+d[1]/l*ww),r3(-u)]);
+      if(i<SEG){const q=b+i*2;f.push([q,q+1,q+3,q+2]);f.push([q,q+2,q+3,q+1]);}}}
+  return {id:'strands',k:'poly',v,f,sub:0};
+}
+model('dark_ab_tail_strands','Darkness อัลติ A+B เส้นหมึกบนหลังตัว',[tailStrands()]);
 model('dark_ab_hem','Darkness อัลติ A+B ชายผ้าขาดใต้ตัว',[hem()]);
 model('dark_ab_cloth','Darkness อัลติ A+B แผ่นผ้าซ้อนบนตัว',[cloth()]);
 model('dark_ab_wisp','Darkness อัลติ A+B เส้นเงาหลุด',[wisp]);
@@ -131,7 +142,7 @@ model('dark_ab_ribbon','Darkness อัลติ A+B ริ้วผ้าสะ
 // ---------- timeline ----------
 const REL=1.0,LIFE=1.45,TRAVEL=1.05,HOLD=1.05,SHUT=1.075,GONE=1.35;   // bites the moment it slows (no wait), 0.025 s bite
 const W=[.31,.85,1.65];            // left hand at full thrust (studio stage)
-const HMAX=8.6,RANGE=40,WX=1.5,WXH=1.2,TY=1.25;   // bigger and farther, width kept about the same (user)
+const HMAX=8.6,RANGE=40,WX=1.4,WXH=1.2,TY=1.15;   // tail front matches the skull's widest section so head and body read as one shape
 const P=[W[0],2.7,W[2]+1.4],PR=3.3;   // shadow portal in front of the hand: the creature comes out of it
 const OPMAX=.93;                    // mostly opaque: you should not see the other side through it (user)
 function state(tr){
@@ -150,7 +161,8 @@ const pos=keys(tr=>{const q=state(tr);return [W[0],r3(q.hy),r3(q.hz)];});
 const scale=keys(tr=>{const H=state(tr).H;return [r3(H*WXH),r3(H),r3(H)];});
 const rotUp=keys(tr=>{const q=state(tr);return [r3(q.open*.62-q.nod),0,0];}),rotLow=keys(tr=>{const q=state(tr);return [r3(-q.open*.38-q.nod),0,0];});
 const fadeOut=keys(tr=>r3(OPMAX*ease(0,.06,tr)*(1-ease(SHUT+.04,GONE,tr))));
-const neck=tr=>{const q=state(tr);return [W[0],q.hy+(0-yMid(HZ))*q.H*0,q.hz+(Z0-HZ)*q.H*.9];};
+const JOINZ=0;   // body starts at the skull's widest section (head z=0), the back half of the head sits inside it
+const neck=tr=>{const q=state(tr);return [W[0],q.hy+((yTop(JOINZ)+yBot(JOINZ))/2-yMid(HZ))*q.H,q.hz+(JOINZ-HZ)*q.H];};
 const tailLen=tr=>Math.max(.05,neck(tr)[2]-P[2]);
 const tailPos=keys(tr=>neck(tr).map(r3));
 const tailScale=keys(tr=>{const q=state(tr),back=1-ease(SHUT,GONE-.03,tr);return [r3(q.H*WX),r3(q.H*TY),r3(tailLen(tr)*back)];});
@@ -174,6 +186,7 @@ function bodyLayers(tex){   // shape layers shared by all versions; tex picks th
     {id:'teeth_upper',t:'mesh',shape:'model',model:'dark_ab_teeth_upper',...BLACK,...base,pos,scale,rot:rotUp,op:fadeOut},
     {id:'crest',t:'mesh',shape:'model',model:'dark_ab_crest',...BLACK,...base,pos,scale,rot:rotUp,op:fadeOut}];
   if(tex.strands)L.push(
+    {id:'strands_body',t:'mesh',shape:'model',model:'dark_ab_tail_strands',mat:'black',col:MIDC,...base,pos:tailPos,scale:tailScale,rot:tailRot,op:fadeOut},
     {id:'strands_upper',t:'mesh',shape:'model',model:'dark_ab_strands_upper',mat:'black',col:MIDC,...base,pos,scale,rot:rotUp,op:fadeOut},
     {id:'strands_lower',t:'mesh',shape:'model',model:'dark_ab_strands_lower',mat:'black',col:MIDC,...base,pos,scale,rot:rotLow,op:fadeOut});
   if(tex.cloth)L.push({id:'cloth',t:'mesh',shape:'model',model:'dark_ab_cloth',mat:'black',col:CLOTHC,...base,pos:tailPos,scale:tailScale,rot:tailRot,op:fadeOut});
