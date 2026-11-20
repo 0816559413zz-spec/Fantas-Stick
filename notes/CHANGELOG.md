@@ -1,5 +1,7 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
 
+- 2026-11-20 — **Darkness ult v3 (Studio, review #91):** Bites right as it slows (0.025 s), head stays dipped, bigger (~8.6 m head) and farther (40 m in the preview), width about the same.
+
 - 2026-11-20 — **Darkness ult v3 (Studio, review #91):** Narrower head (1.35x), bigger body (1.7x wide, 1.25x tall), 93% opacity, capped skull neck; round 2 face kept.
 
 - 2026-11-20 — **Darkness ult v3: reverted round 3** (user disliked the new face); assets back to round 2.

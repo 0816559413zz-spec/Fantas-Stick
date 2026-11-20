@@ -1,8 +1,8 @@
 // Staging for darkness/ult_preview + ult_pose_preview: caster pose, wand, idle scythe, targets + marks.
 // The drop head, tail, teeth, smoke and shards are fx layers (assets/src/darkness_ult_ab_gen.mjs).
-const ST_ULT_HALF=40*Math.PI/180,ST_ULT_RANGE=30;
-const ST_ULT_REL=1.0,ST_ULT_TRAVEL=.95,ST_ULT_BITE=ST_ULT_REL+1.04;
-const stUltRim=t=>{const x=clamp((t-ST_ULT_REL)/ST_ULT_TRAVEL,0,1);return 3.05+(30-1.2-3.05)*(1-(1-x)**3)+1.2*clamp((t-ST_ULT_REL-ST_ULT_TRAVEL)/.09,0,1);};   // head front, same curve as the A+B fx
+const ST_ULT_HALF=40*Math.PI/180,ST_ULT_RANGE=40;
+const ST_ULT_REL=1.0,ST_ULT_TRAVEL=1.05,ST_ULT_BITE=ST_ULT_REL+1.075;
+const stUltRim=t=>{const x=clamp((t-ST_ULT_REL)/ST_ULT_TRAVEL,0,1);return 3.05+(40-.8-3.05)*(1-(1-x)**3)+.8*clamp((t-ST_ULT_REL-ST_ULT_TRAVEL)/.025,0,1);};   // head front, same curve as the A+B fx
 
 const _ultV1=new THREE.Vector3(),_ultV2=new THREE.Vector3(),_ultV3=new THREE.Vector3(),_ultV4=new THREE.Vector3(),_ultV5=new THREE.Vector3(),_ultV6=new THREE.Vector3(),_ultV7=new THREE.Vector3(),_ultV8=new THREE.Vector3(),_ultV9=new THREE.Vector3(),_ultV10=new THREE.Vector3(),_ultV11=new THREE.Vector3(),_ultV12=new THREE.Vector3();
 const _ultQ=new THREE.Quaternion(),_ultQ2=new THREE.Quaternion(),_ultQ3=new THREE.Quaternion(),_ultQ4=new THREE.Quaternion(),_ultDown=new THREE.Vector3(0,-1,0);
@@ -22,7 +22,7 @@ FXCODE.studio_darkness_ult=(_x,_y,_h,args,instance)=>{
   ferrule.position.y=-.69;wand.add(ferrule);
 
   // Four targets inside the 80° cone (one flying), one outside.
-  const spots=args.noTargets?[]:[[-2.5,8,0],[6,14,0],[-11,21,0],[5,27,3.5],[15,11,0]];
+  const spots=args.noTargets?[]:[[-2.5,9,0],[7,18,0],[-13,27,0],[6,36,3.5],[18,13,0]];
   const targets=spots.map(([x,z,y],i)=>{
     const tl={...look,h:i%3,cl:(i+1)%4,hs:i+1};
     const actor=stDarkShiftStudent(root,tl,'Ult target '+(i+1),lookTint(tl));

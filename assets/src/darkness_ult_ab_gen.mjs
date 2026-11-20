@@ -129,20 +129,20 @@ model('dark_ab_portal','Darkness อัลติ วงเวทเงาที�
 model('dark_ab_ribbon','Darkness อัลติ A+B ริ้วผ้าสะบัด',[ribbon]);
 
 // ---------- timeline ----------
-const REL=1.0,LIFE=1.42,TRAVEL=.95,HOLD=1.01,SHUT=1.04,GONE=1.32;   // keeps moving to the end, almost no hold, very fast bite
+const REL=1.0,LIFE=1.45,TRAVEL=1.05,HOLD=1.05,SHUT=1.075,GONE=1.35;   // bites the moment it slows (no wait), 0.025 s bite
 const W=[.31,.85,1.65];            // left hand at full thrust (studio stage)
-const HMAX=7.2,RANGE=30,WX=1.7,WXH=1.35,TY=1.25;   // head less wide (user: face too wide); body bigger/taller to match
+const HMAX=8.6,RANGE=40,WX=1.5,WXH=1.2,TY=1.25;   // bigger and farther, width kept about the same (user)
 const P=[W[0],2.7,W[2]+1.4],PR=3.3;   // shadow portal in front of the hand: the creature comes out of it
 const OPMAX=.93;                    // mostly opaque: you should not see the other side through it (user)
 function state(tr){
   const x=Math.min(1,tr/TRAVEL),out4=1-(1-x)**4,out3=1-(1-x)**3;
   const H=HMAX*(.45+.55*out3)+.25*ease(TRAVEL,HOLD,tr)+.3*ease(HOLD,SHUT,tr)*(1-ease(SHUT,SHUT+.08,tr));
-  const front=P[2]+(RANGE-1.2-P[2])*out3+1.2*Math.min(1,Math.max(0,(tr-TRAVEL)/(SHUT-TRAVEL)));   // still moving at arrival, keeps drifting into the bite
+  const front=P[2]+(RANGE-.8-P[2])*out3+.8*Math.min(1,Math.max(0,(tr-TRAVEL)/(SHUT-TRAVEL)));   // still moving as it slows, bites right away
   const hz=front-(Z1-HZ)*H;                        // hinge z
   const hy=Math.max(P[1],.15+.55*H);               // starts at the portal centre, chin above the floor
   const slam=Math.min(1,Math.max(0,(tr-HOLD)/(SHUT-HOLD)))**3;
-  const open=tr<HOLD?8+52*out3+16*ease(TRAVEL-.05,HOLD,tr):76*(1-slam);
-  const nod=14*ease(HOLD,SHUT,tr)*(1-ease(SHUT+.06,SHUT+.25,tr));   // head dips down as it bites
+  const open=tr<HOLD?8+68*out3:76*(1-slam);
+  const nod=14*ease(HOLD,SHUT,tr);   // head dips down as it bites and stays down
   return {H,hz,hy,open,nod};
 }
 const keys=fn=>{const c={};for(let i=0;i<=104;i++){const k=i/104;c[String(r3(k))]=fn(k*LIFE);}return c;};
