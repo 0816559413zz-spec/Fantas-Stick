@@ -14,9 +14,9 @@ const FCS_C0=90;   // = FCS_C (cell px); rooms load before js/02-fcs.js
 function fcsRoomOf(cx,cy){for(const r of FCS_ROOMS){const [a,b,c,d]=r.rect;if(cx>=a&&cx<=c&&cy>=b&&cy<=d)return r;}return null;}
 function fcsCut(cx,cy){return !!fcsRoomOf(cx,cy);}
 // ---- gen context (called from genFcs) ----
-function fcsRoomK(r,obs,terr,props){
+function fcsRoomK(r,obs,terr,props,brkX){
   const C=FCS_C0,[a,b,c,d]=r.rect,ox=a*C,oy=b*C,T=terr,g=T.g,nx=T.nx,ny=T.ny,cn=T.c;
-  const K={r,C,ox,oy,w:(c+1-a)*C,h:(d+1-b)*C,obs,terr,props,data:{walls:[],cols:[],floors:[],ceil:[],boxes:[]},
+  const K={r,C,ox,oy,w:(c+1-a)*C,h:(d+1-b)*C,obs,terr,props,brkX,data:{walls:[],cols:[],floors:[],ceil:[],boxes:[],props:[]},
     X:u=>ox+u,Y:v=>oy+v,
     gN:(i,j)=>g[clamp(j,0,ny-1)*nx+clamp(i,0,nx-1)],
     g0:0};
@@ -50,3 +50,33 @@ function fcsCeilAt(x,y,z){
 }
 // after each player update (host): flyers / jumpers / lifted bodies stay under room ceilings
 function fcsCeilClamp(p){if(MAPID!=='fcs'||!FCS_ROOMS.length)return;const c=fcsCeilAt(p.x,p.y,p.z||0);if(c<Infinity&&(p.z||0)+1.9>c){p.z=Math.max(0,c-1.9);if(p.vz>0)p.vz=0;}}
+// ---- breakable room props (user 2026-11-20): BRK groups (js/12-buildings.js) — snapshot BK syncs the stage
+// furniture/decor: break = shatter into loose debris, no collision left (rub 0) • rail: break = low rubble, no collision • pillar: chips, stays (rub 1)
+// col = collides before breaking (px radius, 0 = walk through) • h = height (m) • hp • m = BRK material (fx colour) • st = can stand on top
+const RPK={
+  table:{col:20,h:1.0,hp:120,m:'wood',st:1},hightable:{col:22,h:1.1,hp:200,m:'wood',st:1},bench:{col:0,h:0.5,hp:60,m:'wood'},chair:{col:0,h:1.05,hp:40,m:'wood'},
+  throne:{col:16,h:2.2,hp:160,m:'wood'},crate:{col:22,h:1.2,hp:120,m:'wood',st:1},crate2:{col:22,h:2.35,hp:170,m:'wood'},barrel:{col:16,h:1.3,hp:100,m:'wood'},
+  barrels:{col:30,h:1.3,hp:150,m:'wood'},sack:{col:0,h:0.6,hp:30,m:'wood'},rack:{col:0,h:2.0,hp:70,m:'wood'},armor:{col:14,h:2.1,hp:120,m:'stone'},
+  shelf:{col:0,h:3.0,hp:100,m:'wood'},desk:{col:0,h:0.9,hp:60,m:'wood'},candle:{col:0,h:2.2,hp:40,m:'stone'},woodpile:{col:0,h:0.8,hp:60,m:'wood'},
+  cart:{col:30,h:1.6,hp:180,m:'wood'},keg:{col:0,h:0.7,hp:40,m:'wood'},
+  rail:{col:9,h:1.1,hp:150,m:'stone',rub:0},pillar:{col:26,h:24,hp:900,m:'stone',rub:1}};
+// kind at local u,v • o: {L: length px along the axis (tables/rails), a: yaw (0 = along u), z0: base height (gallery), seed}
+function roomProp(K,kind,u,v,o){
+  o=o||{};const P=RPK[kind],i=K.brkX.length,z0=o.z0||0,a=o.a||0,L=o.L||0,ca=Math.cos(a),sa=Math.sin(a);
+  K.brkX.push({h:P.h,vh:P.h,v:1,m:P.m,n:'room',rub:P.rub!=null?P.rub:0,hp:P.hp,z0,rp:K.r.id,pi:K.data.props.length});
+  const pts=[];if(L>0)for(let t=-L/2;t<=L/2+0.1;t+=Math.max(14,(P.col||12)*0.9))pts.push([u+ca*t,v+sa*t]);else pts.push([u,v]);
+  for(const [pu,pv] of pts){const ob={x:K.X(pu),y:K.Y(pv),r:Math.max(10,P.col||12),k:'fcm',b:i,s:0,hgt:P.col?P.h+(z0?z0:0):0};
+    if(z0){ob.bot=z0-0.3;}if(P.st)ob.st=1;K.obs.push(ob);}
+  K.data.props.push({kind,u,v,a,L,z0,b:i,seed:o.seed!=null?o.seed:K.data.props.length});
+}
+// skill hits on room walls (host, from damageEnv): no damage, just an event for debris fx + a scorch/crack mark on the face
+const RWH={t:0};
+function roomWallEnv(x,y,rad,h,el){
+  if(MAPID!=='fcs'||!FCS_ROOMS.length)return;const now=Date.now();if(now-RWH.t<70)return;h=h||0;
+  for(const r of FCS_ROOMS){const D=r.data,K=r.K;if(!D||x<K.ox-rad-60||y<K.oy-rad-60||x>K.ox+K.w+rad+60||y>K.oy+K.h+rad+60)continue;
+    for(const w of D.walls){const along=w.v1===w.v2,u=x-K.ox,v=y-K.oy,s=along?u:v,s0=Math.min(along?w.u1:w.v1,along?w.u2:w.v2),s1=Math.max(along?w.u1:w.v1,along?w.u2:w.v2);
+      if(s<s0||s>s1||w.gaps.some(q=>s>q[0]&&s<q[1]&&h<(q[2]==null?99:q[2])))continue;
+      const d=(along?v-w.v1:u-w.u1),ad=Math.abs(d)-w.th/2;if(ad>rad*0.7||h>w.h)continue;
+      const n=d>=0?1:-1,fx=along?x:K.X(w.u1)+n*w.th/2,fy=along?K.Y(w.v1)+n*w.th/2:y;
+      RWH.t=now;emit({k:'rwh',x:Math.round(fx),y:Math.round(fy),h:Math.round(Math.max(0.6,Math.min(h||1.2,w.h-1))*10)/10,nx:along?0:n,ny:along?n:0,el:el||'',r:Math.round(Math.min(rad,80)),hh:2});return;}}
+}

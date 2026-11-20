@@ -396,5 +396,13 @@
       "r": "ev.r/45",
       "hh": "0.6"
     }
+  },
+  "rwh": {
+    "fx": "env/brk_crack",
+    "mode": "add",
+    "p": {
+      "r": "ev.r/20",
+      "hh": "ev.hh"
+    }
   }
 }

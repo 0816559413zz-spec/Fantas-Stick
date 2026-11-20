@@ -21,13 +21,44 @@ fcsRoomAdd({id:'greathall',name:'ห้องโถงใหญ่ (Great Hall)'
     roomFloor(K,e0,T,e1,gv,(u)=>u<a?G*(u-e0)/rl:u>b?G*(e1-u)/(e1-b):G,'gallery');
     roomCeil(K,a,T,b,gv,G-0.6,G-1);                                          // under the gallery deck
     for(let u=e0+7;u<e1;u+=14){const t=u<a?G*(u-e0)/rl:u>b?G*(e1-u)/(e1-b):-1;if(t>0.3)roomCol(K,u,gv-7,8,t,null,'rampside');}   // ramp fronts solid
-    for(let u=a;u<=b;u+=16){if((u>700&&u<790)||(u>1420&&u<1510))continue;roomCol(K,u,gv-8,9,G+1.1,G-0.3,'rail');}             // railing (floating)
+    // railing: 3 m breakable stone balustrade segments (gaps at 700-790 / 1420-1510 = drop spots)
+    for(const [p,q] of [[a,700],[790,1420],[1510,b]]){const n=Math.max(1,Math.round((q-p)/60));for(let i=0;i<n;i++){const L=(q-p)/n;roomProp(K,'rail',p+L*(i+0.5),gv-8,{L:L-4,z0:G});}}
     for(const u of [560,900,1250,1600,1900])roomCol(K,u,gv-22,16,G,null,'post');
-    // big pillars (floor to roof)
-    for(const v of [450,1080])for(const u of [450,810,1530,1890])roomCol(K,u,v,26,S.H,null,'pillar');
-    roomCol(K,1170,450,26,S.H,null,'pillar');
-    // banquet tables (low cover, stand on top)
-    for(const v of [630,900])for(const [u0,u1] of [[480,750],[1530,1800]]){for(let u=u0;u<=u1;u+=18){K.obs.push({x:K.X(u),y:K.Y(v),r:20,k:'fcm',hgt:1.0,st:1,s:0});}K.data.boxes.push({u0,u1,v,tag:'table'});}
+    // big pillars (floor to roof): breakable = chips only, never fall
+    for(const v of [450,1080])for(const u of [450,810,1530,1890])roomProp(K,'pillar',u,v);
+    roomProp(K,'pillar',1170,450);
+    for(let u=1100;u<=1240;u+=20)roomCol(K,u,1282,14,2.5,null,'hearth');   // fireplace hearth
+    this.decor(K,G);
+  },
+  // furniture / decor (all breakable BRK props, see RPK in js/02-fcs-rooms.js) — a hall that was lived in
+  decor(K,G){const P=(k,u,v,o)=>roomProp(K,k,u,v,o),W=K.w;
+    // banquet: 4 long tables + benches + chairs at the ends
+    for(const v of [630,900])for(const [u0,u1] of [[480,750],[1530,1800]]){P('table',(u0+u1)/2,v,{L:u1-u0});
+      for(const s of [-1,1])P('bench',(u0+u1)/2,v+s*36,{L:u1-u0-20});for(const e of [u0-26,u1+26])P('chair',e,v,{a:e<u0?0:Math.PI});}
+    // high table + throne at the east end (north of the east door)
+    P('hightable',2130,420,{L:300,a:Math.PI/2});P('throne',2215,420,{a:Math.PI});for(const v of [300,360,480,540])P('chair',2185,v,{a:Math.PI});
+    P('candle',2150,250);P('candle',2150,590);P('rack',2270,560,{a:Math.PI});
+    // fireplace wood + kegs by the south wall, sacks / crates near the west doors
+    P('woodpile',1290,1265);P('woodpile',1050,1268);P('keg',1340,1230);P('keg',990,1235);
+    for(const [u,v] of [[90,470],[120,700],[95,760],[90,1060],[130,1230]])P('sack',u,v,{seed:u+v});
+    P('crate',110,1160);P('crate2',160,1210);P('barrel',95,410);
+    // under the gallery (ground): barrels, crates, racks, sacks
+    for(const [u,v] of [[470,95],[505,145],[545,92]])P('barrel',u,v);P('crate',650,95);P('crate2',700,100);P('crate',665,160);
+    P('rack',800,62,{a:Math.PI/2});P('rack',900,62,{a:Math.PI/2});P('sack',955,110);P('sack',935,165);
+    P('barrels',1690,110);P('crate',1730,180);
+    // gallery top (6 m): library — shelves on the north wall, desks, chairs, candles, crates of books
+    for(let u=470;u<1920;u+=150){if(u>1700&&u<1960)continue;P('shelf',u,62,{a:Math.PI/2,z0:G});}
+    for(const u of [620,1100,1400,1800]){P('desk',u,150,{z0:G});P('chair',u,180,{a:-Math.PI/2,z0:G});}
+    for(const u of [520,1250,1880])P('candle',u,130,{z0:G});P('crate',980,110,{z0:G});P('keg',1560,120,{z0:G});
+    // along the south wall: armour stands, benches, barrels, a cart
+    for(const u of [300,700,1640,2040])P('armor',u,1265,{a:-Math.PI/2});P('bench',500,1270,{L:220});P('bench',1850,1270,{L:220});
+    P('barrel',2200,1240);P('barrel',2240,1200);P('crate',2150,1150);P('cart',420,1150,{a:0.3});
+    // cover clusters on the open floor + candelabras along the pillar rows
+    for(const [u,v] of [[260,330],[300,360]])P('crate',u,v);P('barrel',330,300);
+    P('crate2',1990,1000);P('barrel',2030,1040);P('crate',700,1180);P('barrel',740,1215);P('crate',1640,1170);P('keg',1600,1200);
+    for(const u of [630,990,1350,1710])for(const v of [450,1080])if(!(u===990&&v===1080))P('candle',u,v+(v<700?40:-40));
+    // west wall between the doors: weapon racks
+    P('rack',62,765,{a:0});P('armor',70,700,{a:0});P('armor',70,830,{a:0});
   },
   view(K,V){const S=this.S,W=K.w,H=K.h,T=S.T,D=this.data,g0=K.g0,s3=1/20,X=u=>tx(K.X(u)),Z=v=>tz(K.Y(v));
     const B=(L,u,v,y,su,sy,sv)=>V.box(L,X(u),y,Z(v),su*s3,sy,sv*s3);
@@ -48,16 +79,19 @@ fcsRoomAdd({id:'greathall',name:'ห้องโถงใหญ่ (Great Hall)'
     {const G=S.gal,gv=S.galV,a=S.galU0,b=S.galU1,e0=T,e1=W-T;
      B('stone',(a+b)/2,(T+gv)/2,g0+G-0.3,b-a,0.6,gv-T);B('dark',(a+b)/2,gv,g0+G-0.75,b-a,0.5,14);
      const n=Math.ceil(G/0.35);for(const [p,q,up] of [[e0,a,1],[b,e1,-1]])for(let i=0;i<n;i++){const t=(i+1)/n,hh=G*t,u0=up>0?p+(q-p)*i/n:q-(q-p)*(i+1)/n,u1=u0+(q-p)/n;B('stone',(u0+u1)/2,(T+gv)/2,g0+(hh-1)/2,u1-u0+1,hh+1,gv-T);}
-     for(const c of D.cols){if(c.tag==='rail')V.box('wood',X(c.u),g0+G+0.5,Z(c.v),0.25,1.0,0.25);
-       else if(c.tag==='post'){V.box('dark',X(c.u),g0+G/2,Z(c.v),1.4,G,1.4);}}
-     for(const [p,q] of [[a,700],[790,1420],[1510,b]])B('wood',(p+q)/2,gv-8,g0+G+1.05,q-p,0.18,8);}
+     for(const c of D.cols)if(c.tag==='post')V.box('dark',X(c.u),g0+G/2,Z(c.v),1.4,G,1.4);}
     // pillars: octagonal shaft + base + capital, arches between pillar pairs along the rows
-    for(const c of D.cols)if(c.tag==='pillar'){const x=X(c.u),z=Z(c.v),r=c.r*s3;V.cyl('stone',x,g0+S.ceil/2,z,r*0.92,r,S.ceil,8);V.box('dark',x,g0+0.5,z,r*2.6,1,r*2.6);V.box('dark',x,g0+S.ceil-1.2,z,r*2.5,1.2,r*2.5);
-      V.light(x,g0+4.2,z+(c.v<700?1:-1)*(r+0.45));}
+    // pillars / tables / rail / furniture = breakable props (js/28-fcs-props.js) • torch on each pillar
+    for(const q of D.props)if(q.kind==='pillar')V.light(X(q.u),g0+4.2,Z(q.v)+(q.v<700?1:-1)*1.75);
     for(const v of [450,1080])V.box('dark',X(1170),g0+S.ceil-0.6,Z(v),(1890-450)*s3+3,1.2,1.6);   // beams along the pillar rows
     // tables + benches + carpet
-    for(const t of D.boxes)if(t.tag==='table'){B('wood',(t.u0+t.u1)/2,t.v,g0+0.9,t.u1-t.u0+30,0.2,46);for(const s of [-1,1]){B('wood',(t.u0+t.u1)/2,t.v+s*36,g0+0.45,t.u1-t.u0+20,0.12,14);}
-      for(const u of [t.u0,t.u1])for(const s of [-1,1])B('wood',u,t.v+s*16,g0+0.4,8,0.8,8);}
+    // fireplace on the south wall (hearth = low collision in gen)
+    B('dark',1170,1290,g0+3,200,6,40);B('slit',1170,1272,g0+1.4,120,2.4,6);B('dark',1170,1262,g0+2.9,170,0.5,40);B('stone',1170,1290,g0+9.5,120,7,26);
+    for(const u of [1130,1170,1210])V.light(X(u),g0+0.8,Z(1262));
+    // tapestries + shields on the south / west walls, hanging banners from the trusses
+    for(const u of [500,900,1450,1850])V.cloth(X(u),g0+11,Z(H-T-4),2.6,6,0,u%2?'#7a1418':'#23407a');
+    for(let u=T+90;u<W-T;u+=270)V.cloth(X(u),g0+S.ceil-1.5,Z(765),1.8,5,Math.PI/2,'#7a1418');
+    for(const u of [200,1450,1700,2100])for(const k of [0,1])V.shield(X(u+k*60),g0+7.5,Z(H-T-6),0);
     V.box('carpet',X(W/2),g0+0.04,Z(765),(W-2*T-60)*s3,0.04,4);
     // roof: trusses + gabled roof over the whole rect (ridge east-west)
     for(const c of D.cols)if(c.tag==='tower'){const x=X(c.u),z=Z(c.v);V.cyl('stone',x,g0+15,z,4,4.3,32,12);V.cyl('dark',x,g0+31.2,z,4.5,4.1,1.2,12);V.cone('roof',x,g0+38,z,4.9,13,12);

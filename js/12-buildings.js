@@ -84,7 +84,7 @@ function bldSupport(b){
 }
 // ให้คาถาวงกว้างพังสิ่งแวดล้อม: damageEnv(x,y,รัศมี px,ดาเมจ,id,ธาตุ,ความสูงจุดระเบิด) = ลัง/ถัง (prop) + ชิ้นย่อยบ้านในวง (ขอบวง = เหลือ 30%)
 function damageEnv(x,y,rad,dmg,by,el,h){
-  damagePropsIn(x,y,rad,dmg,by);damageBrkIn(x,y,rad,dmg,h);efsEnv(x,y,rad,by,el,h);bskEnv(x,y,rad,dmg,by,el,h);sgWallEnv(x,y,rad,dmg);   // กำแพงพังได้โหมดบุกปราสาท (js/15-siege)
+  damagePropsIn(x,y,rad,dmg,by);damageBrkIn(x,y,rad,dmg,h);efsEnv(x,y,rad,by,el,h);bskEnv(x,y,rad,dmg,by,el,h);sgWallEnv(x,y,rad,dmg);roomWallEnv(x,y,rad,h,el);   // กำแพงพังได้โหมดบุกปราสาท (js/15-siege)
   for(const w of (G?.walls||[]))if(w.wood&&w.team!==G.players[by]?.team&&natureWallContains(w,x,y,h||0,rad)){
     natureWallDamage(w,dmg,x,y,by,el);
   }
@@ -207,14 +207,15 @@ const BRKDEF={vol:[15,60],hp:[100,200,400],crack:[0.66,0.33],rub:1/3},BRK_M=['st
 let BRK=[];
 function genBrk(id){
   const M=MAPS[id],L=((M&&M.fm&&M.fm.brk)||[]).concat((M&&M.brkX)||[]);   // brkX = code-built maps (fcs bridge parapet; obs .b indexes into this list after fm.brk)
-  const out=L.map((d,i)=>{const sz=d.v<BRKDEF.vol[0]?0:d.v<BRKDEF.vol[1]?1:2;return {i,d,sz,max:BRKDEF.hp[sz],hp:BRKDEF.hp[sz],st:0,cs:[],x:0,y:0};});
+  const out=L.map((d,i)=>{const sz=d.v<BRKDEF.vol[0]?0:d.v<BRKDEF.vol[1]?1:2;return {i,d,sz,max:d.hp||BRKDEF.hp[sz],hp:d.hp||BRKDEF.hp[sz],st:0,cs:[],x:0,y:0};});
   for(const o of (M&&M.obs)||[])if(o.b!=null&&out[o.b]){if(o.h0===undefined){o.h0=o.hgt;o.t0=o.top;}o.hgt=o.h0;o.top=o.t0;out[o.b].cs.push(o);}
   for(const g of out){if(!g.cs.length)continue;g.x=g.cs.reduce((a,o)=>a+o.x,0)/g.cs.length;g.y=g.cs.reduce((a,o)=>a+o.y,0)/g.cs.length;}
   return out;
 }
 function brkApply(g,st){
   g.st=st;const vh=g.d.vh||g.d.h;   // vh = ความสูงโมเดล (ต้นไม้: ที่ชนสูงกว่าตัวต้น)
-  for(const o of g.cs){o.hgt=st>=3?Math.min(o.h0,vh*BRKDEF.rub):o.h0;if(o.t0!==undefined)o.top=o.t0-o.h0+o.hgt;}
+  const rub=g.d.rub!=null?g.d.rub:BRKDEF.rub;   // d.rub: 0 = gone (FCS room props), 1 = keeps full collision (pillars)
+  for(const o of g.cs){o.hgt=st>=3?Math.min(o.h0,vh*rub):o.h0;if(o.t0!==undefined)o.top=o.t0-o.h0+o.hgt;}
 }
 function brkStage(g){const f=g.hp/g.max;return g.hp<=0?3:f<BRKDEF.crack[1]?2:f<BRKDEF.crack[0]?1:0;}
 function hitBrk(g,dmg,ox,oy){

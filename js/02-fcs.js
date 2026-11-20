@@ -185,7 +185,7 @@ function genFcs(){
    terrace(96,40,101,43,3.5,'E',41,42,'SN');    // zone 3: west of core 3, under the long wall
    terrace(122,45,126,49,3.5,'N',123,124,'W');  // zone 3: east of core 3 (defender side), against the wall
   }
-  for(const r of FCS_ROOMS)try{r.gen(fcsRoomK(r,obs,terr,props));}catch(e){console.error('room gen',r.id,e);}   // room pieces (js/02-room-*.js)
+  for(const r of FCS_ROOMS)try{r.gen(fcsRoomK(r,obs,terr,props,brkX));}catch(e){console.error('room gen',r.id,e);}   // room pieces (js/02-room-*.js)
   for(const k of cores)obs.push({x:k.x,y:k.y,r:40,k:'fck',hgt:6,s:0});   // ตัวแกน (คริสตัล) ชนได้
   // เฟส: โซนชนิด "เฟส" ชื่อ "เฟส N" หลายกรอบรวมกัน = พื้นที่เล่นของเฟส N
   const phases=[];

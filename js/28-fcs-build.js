@@ -17,7 +17,8 @@ function buildFcs(){
   const inst=(geo,mat,list,fn)=>{if(!list.length)return;const im=new THREE.InstancedMesh(geo,mat,list.length);list.forEach((q,i)=>im.setMatrixAt(i,fn(q)));im.castShadow=im.receiveShadow=true;addW(im);return im;};
   const box=sGeo(THREE.BoxGeometry,1,1,1);
   try{fcsCastle();}catch(e){console.error('fcsCastle',e);}
-  try{fcsRoomsView();}catch(e){console.error('fcsRoomsView',e);}   // room pieces (js/02-room-*.js view)   // solid walls (type 1) = castle walls, towers, banners, outer wall + keep (js/28-fcs-castle.js)
+  try{fcsRoomsView();}catch(e){console.error('fcsRoomsView',e);}
+  try{fcsPropsBuild();}catch(e){console.error('fcsPropsBuild',e);}   // breakable room props (js/28-fcs-props.js)   // room pieces (js/02-room-*.js view)   // solid walls (type 1) = castle walls, towers, banners, outer wall + keep (js/28-fcs-castle.js)
   inst(box,stoneMat(1,1,'#9a8a6a'),cells[2],([x,y])=>{const px=(x+0.5)*C,py=(y+0.5)*C,b=GY(px,py);return m4.makeScale(c3,FCS_WH[2],c3).setPosition(tx(px),b+FCS_WH[2]/2,tz(py)).clone();});
   fcsFences(F.fences||[],inst,box);   // รั้วไม้ (ชนิด 3)
   if(F.bridge)try{fcsBridge(F.bridge);}catch(e){console.error('fcsBridge',e);}
@@ -293,8 +294,9 @@ function sgViewBuild(){
     if(b.k==='gate'){const n=Math.max(2,Math.round(Math.max(b.w,b.d)/20)),horiz=b.w>=b.d;
       for(let q=0;q<n;q++){const t=(q+0.5)/n-0.5,m=new THREE.Mesh(sGeo(THREE.BoxGeometry,0.18,1,0.18),new THREE.MeshStandardMaterial({color:'#3a3a40',metalness:0.6,roughness:0.5}));m.scale.y=b.h;m.position.set(horiz?t*b.w*S3:0,b.h/2,horiz?0:t*b.d*S3);m.castShadow=true;o.add(m);}
       const top=new THREE.Mesh(sGeo(THREE.BoxGeometry,1,0.3,1),new THREE.MeshStandardMaterial({color:'#4a4040',metalness:0.5}));top.scale.set(Math.max(0.3,b.w*S3),1,Math.max(0.3,b.d*S3));top.position.y=b.h;o.add(top);}
-    else{const m=new THREE.Mesh(sGeo(THREE.BoxGeometry,1,1,1),stoneMat(1,1,'#b08a60'));m.scale.set(b.w*S3,b.h,b.d*S3);m.position.y=b.h/2;m.castShadow=m.receiveShadow=true;o.add(m);
-      const cr=new THREE.Mesh(sGeo(THREE.BoxGeometry,1,1,1),new THREE.MeshBasicMaterial({color:'#ffcf6a',transparent:true,opacity:0.18,depthWrite:false}));cr.scale.set(b.w*S3+0.08,b.h+0.08,b.d*S3+0.08);cr.position.y=b.h/2;o.add(cr);}   // ขอบสีทอง = พังได้
+    else{const vh=fcsCut(Math.floor(cx/FCS_C),Math.floor(cy/FCS_C))?Math.min(b.h,5.55):b.h;   // inside a room piece: stay under the gallery deck (6 m)
+      const m=new THREE.Mesh(sGeo(THREE.BoxGeometry,1,1,1),stoneMat(1,1,'#b08a60'));m.scale.set(b.w*S3,vh,b.d*S3);m.position.y=vh/2;m.castShadow=m.receiveShadow=true;o.add(m);
+      const cr=new THREE.Mesh(sGeo(THREE.BoxGeometry,1,1,1),new THREE.MeshBasicMaterial({color:'#ffcf6a',transparent:true,opacity:0.18,depthWrite:false}));cr.scale.set(b.w*S3+0.08,vh+0.08,b.d*S3+0.08);cr.position.y=vh/2;o.add(cr);}   // ขอบสีทอง = พังได้
     SGV3.bw.push(o);});
 }
 function SGVZR(){return (VIEW.cur&&VIEW.cur.M&&VIEW.cur.M.sg&&VIEW.cur.M.sg.zr)||150;}
@@ -318,7 +320,7 @@ function sgSync(v,P,me,now,dt){
   if(v.mode!=='siege'||!S||MAPID!=='fcs'){if(SGV3.g)sgClearView();return;}
   SGPH=S.ph;
   if(!SGV3.g)sgViewBuild();
-  sgBarrier(S.ph);fcsForestTick();fcsCastleTick();
+  sgBarrier(S.ph);fcsForestTick();fcsCastleTick();fcsPropsView(dt);
   SGV3.cores.forEach((c,i)=>{const n=i+1,dead=S.hp[i]<=0,act=n===S.ph,fut=n>S.ph;
     c.cr.visible=c.glow.visible=!dead;c.rub.visible=dead;c.ring.visible=act;
     c.cr.rotation.y+=dt*(act?1.2:0.3);c.cr.position.y=4.3+Math.sin(now/600+i)*0.25;

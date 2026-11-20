@@ -38,7 +38,7 @@ function navBuild(){
   const cells=(x0,y0,x1,y1,fn)=>{const a=clamp(Math.floor(x0/c),0,nx-1),b=clamp(Math.floor(x1/c),0,nx-1),e=clamp(Math.floor(y0/c),0,ny-1),f=clamp(Math.floor(y1/c),0,ny-1);
     for(let j=e;j<=f;j++)for(let i=a;i<=b;i++)fn(j*nx+i,(i+0.5)*c,(j+0.5)*c);};
   const circ=(o,r,hgt)=>{if(hgt<=0.6)return;const eye=hgt>=NAV_EYE;cells(o.x-r-pad,o.y-r-pad,o.x+r+pad,o.y+r+pad,(k,x,y)=>{const d=Math.hypot(x-o.x,y-o.y);if(d<r+pad)w[k]=1;if(eye&&d<r+c*0.35)s[k]=1;});};
-  for(const o of OBS){if(o.bi!==undefined)continue;circ(o,o.r,o.top!==undefined?o.top:o.hgt);}
+  for(const o of OBS){if(o.bi!==undefined||o.bot>2)continue;circ(o,o.r,o.top!==undefined?o.top:o.hgt);}   // bot>2 = floating (door lintels, gallery rails): no block on the ground
   const BX=MAPS[MAPID]&&MAPS[MAPID].boxes;
   if(BX)for(const B of BX){if(B.cl)continue;cells(B.x-pad,B.y-pad,B.x+B.w+pad,B.y+B.d+pad,(k,x,y)=>{w[k]=1;if(B.h>=NAV_EYE&&x>B.x-c*0.35&&x<B.x+B.w+c*0.35&&y>B.y-c*0.35&&y<B.y+B.d+c*0.35)s[k]=1;});}
   for(const b of BLDG){if(bldGone(b))continue;const e=b.o.w*0.75+pad;

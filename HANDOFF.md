@@ -861,6 +861,7 @@ Phase 1 (maps from Blender files) is done — `notes/systems.md` §5e. Work in t
 (Minimap done 2026-10-17.) Vents/secret passages for Voldemort, task mini-games, 3-player Voldemort mode, more bosses (basilisk), more maps (Hogsmeade, Great Hall), cosmetics, ranked/MMR, mobile controls.
 
 ## 11. Changelog
+- 2026-11-20 — **Hall props + destruction (v93):** ~110 breakable props (`roomProp`/`RPK`, view js/28-fcs-props.js), pillar chips, rail rubble, wall hit marks. Review #95 waiting.
 - 2026-11-20 — **FCS room pieces (v92):** rule `guides/MAP-ROOMS.md`; `js/02-fcs-rooms.js` + first room `js/02-room-greathall.js` (roofed hall, gallery, ceilings 21 m); camera `camObsK` no longer enters walls. Review #94 waiting.
 - 2026-11-20 — **FCS real castle + terraces (v91)** `js/28-fcs-castle.js`: stone walls/towers/banners/torches/outer wall + keep (visual only) + 4 walkable 3.5 m terraces (`terrace()` js/02-fcs.js). Review #93 waiting.
 - 2026-11-20 — **FCS cloud sky** `ffSkyMat` (js/28-fcs-forest.js): sunset (castle) ↔ overcast (forest) with fbm clouds; colours = uniforms `uZa..uSb`. Review #92 waiting.

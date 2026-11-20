@@ -172,7 +172,7 @@ function fcsCastleTick(){const t=performance.now()/1000;FCSC.uT.value=t;
   for(const f of FCSC.torch){const k=0.85+0.12*Math.sin(t*13+f.userData.ph)+0.08*Math.sin(t*23.7+f.userData.ph*2);f.scale.set(1.25*k,1.6*k,1);}}
 // ---------- room pieces: look (js/02-room-*.js view(K,V)) — V = shared builder, merged per material
 function fcsRoomsView(){
-  const G={},add=(k,g)=>(G[k]=G[k]||[]).push(g),bx=new THREE.BoxGeometry(1,1,1),lights=[],sprites=[];
+  const G={},add=(k,g)=>(G[k]=G[k]||[]).push(g),bx=new THREE.BoxGeometry(1,1,1),lights=[],sprites=[],cloths=[];
   const V={
     box:(k,x,y,z,sx,sy,sz)=>{const g=bx.clone();g.scale(sx,sy,sz);g.translate(x,y,z);add(k,g);},
     cyl:(k,x,y,z,rt,rb,h,seg)=>{const g=new THREE.CylinderGeometry(rt,rb,h,seg||8);g.translate(x,y,z);add(k,g);},
@@ -182,6 +182,8 @@ function fcsRoomsView(){
       for(const e of [-1,1]){const gg=new THREE.ExtrudeGeometry(gs,{depth:1.2,bevelEnabled:false});gg.translate(0,0,-0.6);gg.rotateY(Math.PI/2);gg.translate(cx+e*(w/2-0.6),y,cz);add('stone',gg);}},
     cone:(k,x,y,z,r,h,seg)=>{const g=new THREE.ConeGeometry(r,h,seg||8);g.translate(x,y,z);add(k,g);},
     light:(x,y,z)=>{sprites.push([x,y,z]);},
+    cloth:(x,y,z,w,h,a,col)=>cloths.push([x,y,z,w,h,a,col]),
+    shield:(x,y,z,a)=>{const g=new THREE.CylinderGeometry(0.75,0.75,0.12,14);g.rotateX(Math.PI/2);g.rotateY(a);g.translate(x,y,z);add('carpet',g);const b=new THREE.SphereGeometry(0.2,8,6);b.translate(x,y,z);add('iron',b);},
     chandelier:(x,y,z)=>{const r=new THREE.TorusGeometry(2.2,0.12,6,24);r.rotateX(Math.PI/2);r.translate(x,y,z);add('iron',r);
       const ch=new THREE.CylinderGeometry(0.05,0.05,6,4);ch.translate(x,y+3,z);add('iron',ch);
       for(let i=0;i<8;i++){const a=i/8*Math.PI*2;sprites.push([x+Math.cos(a)*2.2,y+0.35,z+Math.sin(a)*2.2,0.8]);}lights.push([x,y-0.5,z]);}
@@ -198,5 +200,9 @@ function fcsRoomsView(){
   const gt=fcsGlowTex();
   for(const [x,y,z,s] of sprites){const fl=new THREE.Sprite(new THREE.SpriteMaterial({map:gt,color:'#ffb060',blending:THREE.AdditiveBlending,depthWrite:false,transparent:true}));
     fl.position.set(x,y,z);fl.scale.set(1.3*(s||1),1.6*(s||1),1);fl.userData.ph=Math.random()*9;addW(fl);FCSC.torch.push(fl);}
+  const cm={};for(const [x,y,z,w,h,a,col] of cloths){const m=cm[col]||(cm[col]=new THREE.MeshStandardMaterial({color:col,side:THREE.DoubleSide,roughness:0.9}));
+    const g=new THREE.PlaneGeometry(w,h,1,4);g.translate(0,-h/2,0);const p=g.attributes.position;for(let i=0;i<p.count;i++){const y=p.getY(i);p.setZ(i,Math.sin(y*1.3)*0.08);}
+    const o=new THREE.Mesh(g,m);o.position.set(x,y,z);o.rotation.y=a;o.castShadow=true;addW(o);
+    const gb=new THREE.Mesh(sGeo(THREE.BoxGeometry,w+0.2,0.12,0.12),new THREE.MeshStandardMaterial({color:'#c9a24a',metalness:0.6,roughness:0.4}));gb.position.set(x,y,z);gb.rotation.y=a;addW(gb);}
   for(const [x,y,z] of lights){const L=new THREE.PointLight('#ffb36a',FCSC.pl,46,1.4);L.position.set(x,y,z);addW(L);}
 }
