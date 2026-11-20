@@ -71,7 +71,7 @@ model('dark_drop_shard','Darkness อัลติ เศษเงาแหลม
 // ---------- timeline ----------
 const REL=1.0,LIFE=1.3,TRAVEL=.80,HOLD=.95,SHUT=1.02,GONE=1.20;
 const W=[.31,.85,1.65];            // left hand at full thrust (studio stage)
-const RMAX=3.5,RANGE=30;            // head ~7 m tall (4 people); front of the head reaches 600 = 30 m
+const RMAX=3.0,RANGE=30;   // core; the smoke shell adds ~1 m around it            // head ~7 m tall (4 people); front of the head reaches 600 = 30 m
 function state(tr){
   const x=Math.min(1,tr/TRAVEL),out4=1-(1-x)**4,out3=1-(1-x)**3;
   const R=.30+(RMAX-.30)*out3+.12*ease(TRAVEL,HOLD,tr)+.15*ease(HOLD,SHUT,tr)*(1-ease(SHUT,SHUT+.08,tr));
@@ -98,6 +98,7 @@ const tailRot=keys(tr=>{const q=state(tr);return [r3(Math.atan2(q.cy-W[1],tailLe
 const center=keys(tr=>{const q=state(tr);return [W[0],r3(q.cy),r3(q.cz)];});
 const behind=keys(tr=>{const q=state(tr);return [W[0],r3(q.cy),r3(q.cz-RZ*q.R*1.1)];});   // smoke trails off the back
 const smokeRate=keys(tr=>r3(tr<HOLD?30*(1-.5*ease(0,TRAVEL,tr)):tr<SHUT?10:0));
+const massRate=(n)=>keys(tr=>{const q=state(tr);return r3(tr<SHUT?n*(.25+.75*q.R/RMAX):0);});   // body smoke grows with the head
 const edgeRate=keys(tr=>r3(tr<SHUT?60:0));
 const end=state(SHUT),bite=[W[0],r3(end.cy),r3(end.cz)];
 const CH=[.21,.9,-.21];             // charging hand in front of the belly
@@ -119,9 +120,14 @@ const fx={
     {id:'upper',t:'mesh',shape:'model',model:'dark_drop_upper',...ink,at,life:LIFE,pos,scale,rot:rotUp,op},
     {id:'teeth_upper',t:'mesh',shape:'model',model:'dark_drop_teeth_upper',mat:'black',int:3,at,life:LIFE,pos,scale,rot:rotUp,op:teethOp},
     {id:'edge_shards',t:'emit',at,life:SHUT,burst:0,rate:edgeRate,pos:behind,from:'sphere',fr:2.2,dir:'random',speed:[.5,2],up:.5,plife:[.15,.3],look:'model',model:'dark_drop_shard',mmat:'solid',msize:[.25,.6],col:'#030304',c2:'#000000',gravity:0,drag:3,bounce:0,mspin:300},
+    // smoke shell: the body reads as a big smoky shadow, not a clean drop
+    {id:'mass_upper',t:'emit',at,life:SHUT,burst:0,rate:massRate(200),from:'mesh',of:'upper',dir:'out',speed:[.6,2.2],up:.4,plife:[.2,.42],look:'smoke',fb:'tex/smoke_toon',size:[14,28],grow:.7,col:'#000000',c2:'#000000',gravity:-.6,drag:2.5,spin:1.5},
+    {id:'mass_lower',t:'emit',at,life:SHUT,burst:0,rate:massRate(110),from:'mesh',of:'lower',dir:'out',speed:[.5,1.8],plife:[.2,.4],look:'smoke',fb:'tex/smoke_toon',size:[12,22],grow:.6,col:'#000000',c2:'#000000',gravity:-.3,drag:2.5,spin:1.5},
+    {id:'mass_tail',t:'emit',at,life:SHUT,burst:0,rate:massRate(170),from:'mesh',of:'tail',dir:'out',speed:[.3,1.2],plife:[.18,.36],look:'smoke',fb:'tex/smoke_toon',size:[7,15],grow:.5,col:'#000000',c2:'#000000',gravity:-.4,drag:3,spin:1.2},
+    {id:'haze',t:'emit',at,life:SHUT,burst:0,rate:massRate(45),from:'mesh',of:'upper',dir:'out',speed:[.8,2.5],plife:[.22,.4],look:'smoke',size:[22,40],grow:.9,col:'#000000',c2:'#000000',gravity:-.4,drag:2.5},
     {id:'smoke',t:'emit',at,life:SHUT,burst:0,rate:smokeRate,pos:behind,from:'sphere',fr:1.6,dir:'random',speed:[.3,1.2],plife:[.18,.32],look:'smoke',size:[4,8],grow:.8,col:'#000000',c2:'#000000',gravity:-.3,drag:3},
     {id:'bite_shards',t:'emit',at:REL+SHUT,life:.05,burst:70,pos:bite,from:'sphere',fr:3.2,dir:'out',speed:[6,15],up:2,plife:[.3,.6],look:'model',model:'dark_drop_shard',mmat:'solid',msize:[.4,1.1],col:'#030304',c2:'#000000',gravity:5,drag:1.5,bounce:0,mspin:540},
-    {id:'bite_smoke',t:'emit',at:REL+SHUT,life:.05,burst:14,pos:bite,from:'sphere',fr:3,dir:'out',speed:[2,6],plife:[.15,.3],look:'smoke',size:[8,14],grow:1.2,col:'#000000',c2:'#000000',gravity:-.3,drag:3}
+    {id:'bite_smoke',t:'emit',at:REL+SHUT,life:.05,burst:40,pos:bite,from:'sphere',fr:3,dir:'out',speed:[3,8],plife:[.18,.35],look:'smoke',fb:'tex/smoke_toon',size:[14,26],grow:1.2,col:'#000000',c2:'#000000',gravity:-.3,drag:3}
   ]
 };
 writeFileSync('assets/fx/darkness/ult_preview.fx.json',JSON.stringify(fx,null,1)+'\n');
