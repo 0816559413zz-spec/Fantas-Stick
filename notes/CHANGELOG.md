@@ -1,5 +1,7 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
 
+- 2026-11-20 — **Darkness ult preview camera:** lift starts near the end of the charge (0.72-1.0 s) and looks down more.
+
 - 2026-11-20 — **Darkness ult v3 (Studio, review #91):** Rough body skin (lumps, folds, ridges, strongest mid-body) instead of a smooth cone; camera lift raised to 11 m up / 8 m back.
 
 - 2026-11-20 — **Darkness ult v3 (Studio, review #91):** Camera rises and pulls back during the charge, holds through the flight, returns after the bite (preview via `WD.camHook`); front POV GIF refreshed.
