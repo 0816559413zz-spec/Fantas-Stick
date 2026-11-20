@@ -29,6 +29,8 @@ function jaw(sign){
   for(let i=0;i<=NZ;i++){const z=lerp(Z0,Z1,i/NZ);
     for(let j=0;j<NP;j++){v.push(toHinge(headPt(z,2*Math.PI*j/NP,sign)));
       if(i<NZ){const a=i*NP+j,b=a+NP,a1=i*NP+(j+1)%NP,b1=a1+NP;f.push(sign>0?[a,a1,b1,b]:[a,b,b1,a1]);}}}
+  const back=v.length;v.push(toHinge([0,(yMid(Z0)+(sign>0?yTop(Z0):yBot(Z0)))/2,Z0-.03]));   // cap the neck so the skull is never hollow from behind
+  for(let j=0;j<NP;j++){const a=j,a1=(j+1)%NP;f.push([a1,a,back]);f.push([a,a1,back]);}
   const tip=v.length;v.push(toHinge([0,(yMid(Z1)+(sign>0?yTop(Z1):yBot(Z1)))/2,Z1+.03]));
   for(let j=0;j<NP;j++){const a=NZ*NP+j,a1=NZ*NP+(j+1)%NP;f.push(sign>0?[a,a1,tip]:[a,tip,a1]);}
   return {id:sign>0?'upper':'lower',k:'poly',v,f,sub:0};
@@ -129,9 +131,9 @@ model('dark_ab_ribbon','Darkness อัลติ A+B ริ้วผ้าสะ
 // ---------- timeline ----------
 const REL=1.0,LIFE=1.42,TRAVEL=.95,HOLD=1.01,SHUT=1.04,GONE=1.32;   // keeps moving to the end, almost no hold, very fast bite
 const W=[.31,.85,1.65];            // left hand at full thrust (studio stage)
-const HMAX=7.2,RANGE=30,WX=1.6,WXH=1.9;   // wide body, even wider head (user: tip wider)
+const HMAX=7.2,RANGE=30,WX=1.7,WXH=1.35,TY=1.25;   // head less wide (user: face too wide); body bigger/taller to match
 const P=[W[0],2.7,W[2]+1.4],PR=3.3;   // shadow portal in front of the hand: the creature comes out of it
-const OPMAX=.72;                    // not fully black (user: too dark from behind)
+const OPMAX=.93;                    // mostly opaque: you should not see the other side through it (user)
 function state(tr){
   const x=Math.min(1,tr/TRAVEL),out4=1-(1-x)**4,out3=1-(1-x)**3;
   const H=HMAX*(.45+.55*out3)+.25*ease(TRAVEL,HOLD,tr)+.3*ease(HOLD,SHUT,tr)*(1-ease(SHUT,SHUT+.08,tr));
@@ -151,7 +153,7 @@ const fadeOut=keys(tr=>r3(OPMAX*ease(0,.06,tr)*(1-ease(SHUT+.04,GONE,tr))));
 const neck=tr=>{const q=state(tr);return [W[0],q.hy+(0-yMid(HZ))*q.H*0,q.hz+(Z0-HZ)*q.H*.9];};
 const tailLen=tr=>Math.max(.05,neck(tr)[2]-P[2]);
 const tailPos=keys(tr=>neck(tr).map(r3));
-const tailScale=keys(tr=>{const q=state(tr),back=1-ease(SHUT,GONE-.03,tr);return [r3(q.H*WX),r3(q.H),r3(tailLen(tr)*back)];});
+const tailScale=keys(tr=>{const q=state(tr),back=1-ease(SHUT,GONE-.03,tr);return [r3(q.H*WX),r3(q.H*TY),r3(tailLen(tr)*back)];});
 const tailRot=keys(tr=>[r3(Math.atan2(neck(tr)[1]-P[1],tailLen(tr))*180/Math.PI),0,0]);
 const headC=keys(tr=>{const q=state(tr);return [W[0],r3(q.hy+.15*q.H),r3(q.hz+.2*q.H)];});
 const at=REL,base={at,life:LIFE};
