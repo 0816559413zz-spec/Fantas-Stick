@@ -489,7 +489,7 @@
   "castle-demo": {
    "file": "maps/castle-demo.glb",
    "data": "maps/castle-demo.json",
-   "v": 1
+   "v": 3
   }
  },
  "ptex": {}

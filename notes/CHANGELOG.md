@@ -5,6 +5,7 @@
 
 - 2026-11-20 — **Darkness VFX Studio** บันทึกท่าติดตราที่ผ่านรีวิว #88, Long Dash แบบกดค้างที่อนุมัติใน #79, Quick Dash ต่อ BA และ Shield ที่ใช้เคียว C ชุดเดียวกับ BA
 
+- 2026-11-19 — **Map Builder free-shape part (`free`):** draw a closed polygon in the view (castle tool → ทรงอิสระ), extruded with height + top taper; vertices draggable in the select tool (Alt+click edge adds, Del removes). Collision = inward strips along the edges, no walkable top, unbreakable. For low-poly reference shapes. `castle-demo` got a sample hut.
 - 2026-11-19 — **Rubble fades:** Castle Strike bridge rubble (fallen stones + chunks) sinks and disappears after 5 s like other wreckage; holes/cracks/broken cover stay (gameplay). Test: `--game --url "index.html?nosw&dev=1"`, F2 mode siege, `damageEnv` on the bridge, override `performance.now` while stepping.
 - 2026-11-19 — **fcs draft in Map Builder:** `tools/fcs-to-mb.mjs` runs the game's `genFcs` and writes `maps/build/fcs-draft.json` (terrain, grid walls, fences, breakable walls/gate, pines/rocks/crates/pillars, ruins, cores, phase spawns, L bridge as floors) — view/sketch only, siege still plays js/02-fcs*.js.
 - 2026-11-19 — **Dev Mode + hub:** with `?dev=1` picking a mode in the hub opens an offline room directly (no online attempt) so F2-F8 work (`js/62-hub-ui.js` hubPickMode).

@@ -23,6 +23,7 @@ part('keep', { x: 50, z: 34, w: 12, d: 8, h: 12 });
 part('stairs', { x: 38, z: 31, rot: Math.PI, w: 3, len: 10, rise: 6 });   // up onto the north wall
 part('ramp', { x: 36, z: 45, rot: -H, w: 3, len: 10, rise: 6 });          // up onto the west wall
 part('bridge', { x: 50, z: 70, rot: H, w: 4, len: 16, up: 2.5 });
+part('free', { x: 72, z: 68, h: 4.5, tp: 0.45, pts: [[-4, -3], [4, -3.5], [5, 2], [0, 4.5], [-5, 2]] });   // free-shape low-poly hut (drawn polygon, tapered top)
 const spots = [[44, 46], [56, 46], [40, 38], [60, 38], [50, 48], [50, 62], [42, 64], [58, 64]];
 spots.forEach(([x, z], i) => M.objs.push({ id: M.seq++, t: 'spawn', x, z, y: 0, rot: i < 5 ? Math.PI : 0 }));
 const o = MD.pack(M);
