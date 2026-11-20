@@ -210,7 +210,8 @@ function syncPlayers(P,mode,now,dt){
     if(!p.al){const l=LGV.st.get(p.id);if(l)lgClear(l);if(o.natureWhipView)natureWhipView(o,null);if(ragTick(o,p,v,dt,now))ragHideDead(o,p,now);continue;}   // ตาย = ragdoll ค้างจนเกิดใหม่ (js/48)
     o.hitT=Math.max(0,(o.hitT||0)-dt);
     o.b.position.set(0,0,0);o.b.rotation.set(0,0,0);   // one-frame pose offsets must not build up (body drifted back / stayed tilted)
-    if(o.anim)animTick(o,{down:!!p.dn,fly:!!p.fl,sp:p.wn&&p.wn[5]>=1?0:v.sp,castT:o.castT,hitT:o.hitT},dt,p.id===NET.myId?1:animLod(g));
+    const prismHover=!!p.lt?.[0]&&!!p.lt[4]&&!p.fl&&!p.dn;
+    if(o.anim)animTick(o,{down:!!p.dn,fly:!!p.fl,sp:prismHover||p.wn&&p.wn[5]>=1?0:v.sp,castT:o.castT,hitT:o.hitT},dt,p.id===NET.myId?1:animLod(g));
     if(!o.fileModel)updateCloth(o.cloak,v.lvx,v.lvz,v.sp*(p.fl?1.4:1),now,dt);   // มีโมเดลไฟล์ = ผ้าคลุมโค้ดซ่อนอยู่ (ผ้าจริงคือ js/49)
     o.bsp=v.sp;broomView(o,p,dt,now);o.cocoon.visible=!!p.rt;   // ไม้กวาด: เอียงเลี้ยว + อนิเมชันเรียก/เก็บ (js/69)
     if(p.rt)o.cocoon.rotation.y=now/400;
@@ -229,7 +230,7 @@ function syncPlayers(P,mode,now,dt){
       o.broom.rotation.x=-0.1+Math.sin(now/300)*0.04;o.broom.rotation.z=clamp(-v.lvx*0.02,-0.4,0.4);
       if(Math.random()<0.8){const ha=o.fhS!==undefined?o.fhS:p.a,bx=p.x-Math.cos(ha)*30,by=p.y-Math.sin(ha)*30;PARTS.push({x:bx+rnd(-4,4),y:by+rnd(-4,4),h:(p.z||0)+0.8+rnd(-0.1,0.1),vx:rnd(-20,20),vy:rnd(-20,20),vh:rnd(-0.3,0.3),life:0.6,max:0.6,col:Math.random()<0.5?'#ffe9a8':'#ffffff',size:1.6,g:0.5});}
     }else{
-      const wfly=p.wn&&p.wn[5]>=1;if(!wfly)o.walk+=dt*v.sp*0.8;   // บิน Featherwing: ไม่ก้าวขา ไม่มีเสียงเท้า
+      const wfly=prismHover||p.wn&&p.wn[5]>=1;if(!wfly)o.walk+=dt*v.sp*0.8;   // บิน Featherwing: ไม่ก้าวขา ไม่มีเสียงเท้า
       const sw=wfly?0:Math.sin(o.walk)*Math.min(1,v.sp/5);
       if(p.dn){o.b.rotation.x=-1.4;o.b.position.y=0.4;}
       else{o.b.rotation.x=p.ds?0.4:Math.min(0.12,v.sp*0.01);o.b.position.y=wfly?0:Math.abs(Math.cos(o.walk))*0.05*Math.min(1,v.sp/5);}
@@ -267,7 +268,7 @@ function syncPlayers(P,mode,now,dt){
     chillFX(o,p,pz,now,dt);
     frostFX(o,p,pz,now,dt);
     earthFX(o,p,pz,now,dt);
-    windFX(o,p,pz,now,dt);waterFX(o,p,pz,now,dt);lightFX(o,p,pz,now,dt);
+    windFX(o,p,pz,now,dt);waterFX(o,p,pz,now,dt);lightFX(o,p,pz,now,dt,v);
     lateSkillPose(o,p,dt,now);if(o.tip){o.tip.updateWorldMatrix(true,false);(o.tipW||(o.tipW=new THREE.Vector3())).setFromMatrixPosition(o.tip.matrixWorld);o.tipWT=performance.now();}   // ปลายไม้หลังใส่ท่าครบ (fx att:'wand' / กระสุนเริ่มที่ไม้ อ่านค่านี้)
     if(o.novaT>0||o.nvFx||o.nvFx2)pyroNovaCharge(o,dt,now);if(o.mlcT>0||o.mlcX)frostMlCast(o,p,dt,now);
     waterCharacterPose(o,p,dt,now);windCharacterPose(o,p,dt,now,v);windLatePose(o,p,dt);stormBowView(o,p,dt,now);stormStaffView(o,p,dt,now);dashPose(o,p,dt,now);   // ท่าพุ่ง (js/72) ทับท่าอื่นตอนพุ่ง

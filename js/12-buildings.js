@@ -120,15 +120,27 @@ function aimClip(x0,y0,h0,o,back){
 // คืน {x,y,h,hit:'ground'|'bld'|'edge'|'air'} • null = ไม่มีข้อมูลเล็ง (บอท) ให้ใช้วิธีเดิม
 // Height gate for attacks aimed with the crosshair: t must be near the aim line at its distance, so looking up or down reaches high or low targets.
 function aimLineH(p,h0,t,win){const i=p.inp;if(i&&Number.isFinite(i.ah)&&Number.isFinite(i.ax)){const ad=Math.max(40,Math.hypot(i.ax-p.x,i.ay-p.y)),d=Math.hypot(t.x-p.x,t.y-p.y);return Math.abs(cH(t)-(h0+(i.ah-h0)*d/ad))<=win;}return Math.abs(cH(t)-h0)<=win;}
-function aimRay3(p,h0,range){
+function aimRay3(p,h0,range,worldHeight=false){
   const i=p.inp;if(!i||p.bot||typeof i.ah!=='number')return null;
-  let dx=i.ax-p.x,dy=i.ay-p.y,dh=(i.ah-h0)*20;const L=Math.hypot(dx,dy,dh);
+  const startH=worldHeight?h0+terrT(p.x,p.y):h0;
+  let dx=i.ax-p.x,dy=i.ay-p.y,dh=(i.ah-startH)*20;const L=Math.hypot(dx,dy,dh);
   if(L<1){dx=Math.cos(p.ang);dy=Math.sin(p.ang);dh=0;}else{dx/=L;dy/=L;dh/=L;}
   let x=p.x,y=p.y,h=h0;
   for(let s=10;s<=range;s+=10){
-    const nx=p.x+dx*s,ny=p.y+dy*s,nh=h0+dh*s/20;
+    const nx=p.x+dx*s,ny=p.y+dy*s,nh=startH+dh*s/20-(worldHeight?terrT(nx,ny):0);
     if(nx<40||nx>MW-40||ny<40||ny>MH-40)return {x,y,h,hit:'edge'};
-    const g=groundH(nx,ny);if(nh<=g)return {x:nx,y:ny,h:g,hit:'ground'};
+    const g=groundH(nx,ny);
+    if(nh<=g){
+      if(!worldHeight)return {x:nx,y:ny,h:g,hit:'ground'};
+      let lo=s-10,hi=s;
+      for(let j=0;j<7;j++){
+        const mid=(lo+hi)*.5,mx=p.x+dx*mid,my=p.y+dy*mid;
+        if(startH+dh*mid/20<=terrT(mx,my)+groundH(mx,my))hi=mid;
+        else lo=mid;
+      }
+      const gx=p.x+dx*hi,gy=p.y+dy*hi;
+      return {x:gx,y:gy,h:groundH(gx,gy),hit:'ground'};
+    }
     if(BLDON)for(const b of sgNear(sgBld(),nx,ny,8,_sgA))if(bldNear(b,nx,ny,8)&&bldPieceAt(b,nx,ny,nh,6)>=0)return {x:nx,y:ny,h:nh,hit:'bld'};
     if(citySolidAt(nx,ny,nh))return {x:nx,y:ny,h:nh,hit:'bld'};   // ตึกในเมือง
     x=nx;y=ny;h=nh;

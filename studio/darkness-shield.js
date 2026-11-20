@@ -11,7 +11,7 @@ function stDarkShieldMove(dt){
   stDarkShieldAim.moveZ=clamp(stDarkShieldAim.moveZ+z*scale,-1.7,1.7);
 }
 for(const event of ['keydown','keyup'])addEventListener(event,e=>{
-  if(ST.name!==ST_DARKNESS_SHIELD||SQ.get('aim')!=='cursor'||!['KeyW','KeyA','KeyS','KeyD'].includes(e.code)||
+  if(typeof ST==='undefined'||ST.name!==ST_DARKNESS_SHIELD||SQ.get('aim')!=='cursor'||!['KeyW','KeyA','KeyS','KeyD'].includes(e.code)||
     ['INPUT','TEXTAREA','SELECT'].includes(e.target.tagName))return;
   if(event==='keydown')stDarkShieldAim.keys.add(e.code);else stDarkShieldAim.keys.delete(e.code);
   e.preventDefault();e.stopImmediatePropagation();

@@ -4,7 +4,7 @@ const ST_WALTZ_AREA=7.9,ST_WALTZ_HIT=.56;
 
 function stNightWaltzArea(root,instance){
   const material=new THREE.ShaderMaterial({
-    uniforms:{age:{value:0},impact:{value:ST_WALTZ_HIT}},
+    uniforms:{age:{value:0},impact:{value:instance.impact??ST_WALTZ_HIT}},
     transparent:true,depthWrite:false,toneMapped:false,
     vertexShader:`varying vec2 field;void main(){field=uv*2.-1.;
       gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
@@ -32,6 +32,13 @@ function stNightWaltzArea(root,instance){
   area.rotation.x=-Math.PI/2;area.position.y=.045;area.renderOrder=1;
   area.onBeforeRender=()=>{material.uniforms.age.value=instance.t;};
   root.add(area);
+}
+
+function stNightWaltzPose(caster,t){
+  const ease=stDarkEase,hitAge=t-ST_WALTZ_HIT;
+  const charge=ease(.10,.38,t)*(1-ease(.38,.54,t));
+  const release=ease(-.05,.075,hitAge)*(1-ease(.12,.44,hitAge));
+  stDarkPose(caster,{back:.19*charge-.16*release,roll:0,drop:.14*charge,arms:.27*charge+.66*release,step:0});
 }
 
 FXCODE.studio_night_waltz=(_x,_y,_h,args,instance)=>{
@@ -70,9 +77,7 @@ FXCODE.studio_night_waltz=(_x,_y,_h,args,instance)=>{
   nightWaltzBorder(root,instance,true);
   instance.updateNightWaltz=()=>{
     const t=instance.t,ease=stDarkEase,hitAge=t-ST_WALTZ_HIT;
-    const charge=ease(.10,.38,t)*(1-ease(.38,.54,t));
-    const release=ease(-.05,.075,hitAge)*(1-ease(.12,.44,hitAge));
-    stDarkPose(caster,{back:.19*charge-.16*release,roll:0,drop:.14*charge,arms:.27*charge+.66*release,step:0});
+    stNightWaltzPose(caster,t);
     for(const {student,x,z,distance,marked,mark,cutRoot,outer,core} of targets){
       const reacts=distance<=ST_WALTZ_AREA;
       const impact=reacts?ease(0,.065,hitAge)*(1-ease(.12,.46,hitAge)):0;

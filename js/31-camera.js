@@ -96,14 +96,16 @@ const CAM_FRAMES={
   earthAuger:{dist:12,h:3.3,side:0,lift:3.5},earthSky:{dist:15.2,h:3.8,side:0,lift:3},
   windShield:{dist:6.2,h:2.45,side:0.34},windFlight:{dist:10.4,h:4.3,side:0.3},windBase:{dist:6.3,h:2.35,side:0.32},   // สายลม: ปีกใหญ่บังเป้า → ถอยกล้อง + เยื้องข้างมากขึ้น (ผู้ใช้ 2026-11-15)
   waterBeam:{dist:7.8,h:3.5,side:0},waterDragon:{dist:17.2,h:4.8,side:0.30},
-  radiance:{dist:9.2,h:1.55,side:0.38,lift:2.35}
+  radiance:{dist:9.8,h:1.8,side:0.38,lift:3.25},
+  radianceStrike:{dist:11,h:1.95,side:0.32,lift:4.4}
 };
 const CAM_FRAME={dist:4.7,h:2.05,side:0.25,lift:0},CAM_TRACK={has:false,key:'',x:0,y:0,z:0,r:0,gy:undefined};
 const _camFocus=new THREE.Vector3(),_camAnchor=new THREE.Vector3(),_camWant=new THREE.Vector3();
 function cameraFrame(me){
   if(me.al){
     if(me.co>0)return CAM_FRAMES.colossus;
-    if(me.lt?.[14]?.[0]>1)return CAM_FRAMES.radiance;
+    if(me.lt?.[14]?.[0]>=3)return CAM_FRAMES.radianceStrike;
+    if(me.lt?.[14]?.[0]===2)return CAM_FRAMES.radiance;
     if(me.ea){
       if(me.ea[3]===1)return CAM_FRAMES.earthSky;
       if(me.ea[2]>0)return CAM_FRAMES.earthAuger;
@@ -149,6 +151,10 @@ function camObsK(me,F,x,y,z){
   return k;
 }
 function updateCamera(me,dt){
+  const lightStep=LGV.st.get(me.id)?.step;
+  if(lightStep&&(LGV.now-lightStep.t0)/1000<LGSH.stepOut+LGSH.stepHide){
+    me={...me,x:lightStep.x,y:lightStep.y,z:lightStep.h};
+  }
   // ร่าย/ยิง Abyssal Beam: กล้องหมุนได้เร็วเท่าลำเท่านั้น (ผู้ใช้ 2026-11-01) เมาส์ยังบังคับทิศลำ
   // (เดิม: กล้องหมุนช้าตามลำ Abyssal Beam — ผู้ใช้ 2026-11-15 ไม่ชิน → กล้องหมุนตามเมาส์ปกติ ลำค่อยตามไปเอง)
   WBY=me.wt&&me.wt[7]&&me.al?yaw:null;
@@ -158,7 +164,8 @@ function updateCamera(me,dt){
   if(me.wn&&me.wn[5]&&me.al){const T=CAM_TRACK,k=1-Math.exp(-16*dt);if(T.fk!==builtKey+'|'+me.id||Math.hypot(px-T.fx,pz-T.fz)>6){T.fx=px;T.fz=pz;T.fk=builtKey+'|'+me.id;}else{T.fx+=(px-T.fx)*k;T.fz+=(pz-T.fz)*k;}px=T.fx;pz=T.fz;}else CAM_TRACK.fk='';   // flight: the view follows a smoothed point, so snapshot or prediction jitter does not shake the screen
   const fx=Math.cos(yaw),fz=Math.sin(yaw),rx=-fz,rz=fx;
   const target=cameraFrame(me),key=builtKey+'|'+me.id,ground=GY(me.x,me.y)+(me.z||0),cut=!CAM_TRACK.has||CAM_TRACK.key!==key;
-  const blend=cut?1:1-Math.exp(-(target===CAM_FRAMES.waterDragon?14:8)*dt);
+  const fast=target===CAM_FRAMES.waterDragon||target===CAM_FRAMES.radianceStrike;
+  const blend=cut?1:1-Math.exp(-(fast?14:8)*dt);
   for(const k of ['dist','h','side','lift'])CAM_FRAME[k]=lerp(CAM_FRAME[k],target[k]||0,blend);
   const dist=CAM_FRAME.dist*(1-0.15*AIMZ),cp=Math.cos(pitch),sp=Math.sin(pitch);
   const side=CAM_FRAME.side*dist*Math.tan(cam.fov*Math.PI/360)*cam.aspect;

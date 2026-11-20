@@ -3,14 +3,36 @@
 > เขียนอัตโนมัติจาก `review.html` (ผ่าน `tools/serve.py`) — อย่าแก้ไฟล์นี้ตรง ๆ, แก้ `review/reviews.json` แล้วรัน `python tools/serve.py --review-md`.
 > **Claude:** ทำเฉพาะหัวข้อสถานะ **✏️ ขอแก้** — อ่านความเห็นผู้ใช้ (`ความเห็นผู้ใช้`) + เปิดรูปด้วย Read → แก้ → ตั้ง `status:"wait"` + เขียน `reply` (ไทยสั้น ๆ ว่าแก้อะไร) เพื่อส่งกลับให้ผู้ใช้รีวิวใหม่. อย่าตั้ง `ok` เอง (ผู้ใช้เป็นคนกดผ่าน). งานที่ **⏳ รอ** = รอผู้ใช้ ไม่ต้องทำอะไร
 
-## #99 Darkness สกิล 5 วงล่องหนทีม
-- สถานะ: ⏳ รอผู้ใช้รีวิว • ชนิด: VFX / แอนิเมชัน • สาย/ส่วน: Darkness
+## #102 Radiant Sovereign เพิ่มแรงปะทะลำฝ่ามือและลำจากอก
+- สถานะ: ⏳ รอผู้ใช้รีวิว • ชนิด: VFX • สาย/ส่วน: Radiance
 
 **วิธีดู / อะไรรอรีวิว:**
-ผู้ร่ายเหยียดแขนชูคทาสูง บิดไปขวาแล้วสะบัดชี้ลง เคียวถอยไปง้างก่อนเร่งปลายแหลมลงปักกลางวง
+เทียบแกนขาวทอง วงแรงดันตอนปล่อย และจังหวะแสงกระแทกที่ปลายลำใน Test Place
 
-- ลิงก์/ไฟล์: `/studio.html?fx=darkness/veil_preview&map=test`
-- ลิงก์/ไฟล์: `/shots/darkness-veil-windup.gif`
+- ลิงก์/ไฟล์: `/shots/motion_sovereign_palm_punch.gif`
+- ลิงก์/ไฟล์: `/shots/motion_sovereign_chest_punch.gif`
+
+## #101 Radiance รอบแก้หลังลองเล่น
+- สถานะ: ⏳ รอผู้ใช้รีวิว • ชนิด: Gameplay / VFX • สาย/ส่วน: Radiance
+
+**วิธีดู / อะไรรอรีวิว:**
+เทสต์วงเตือน Shard Volley จำนวนผลึก Crystal Bond ท่าลอยเอน Prism Ray การกางและจางของ Shard Storm แฟลชและจังหวะกล้อง Light Step กับแรงสะท้อนและจังหวะอัลติ Radiant Sovereign
+
+- ลิงก์/ไฟล์: `/shots/motion_radiance_volley.gif`
+- ลิงก์/ไฟล์: `/shots/motion_radiance_bond.gif`
+- ลิงก์/ไฟล์: `/shots/motion_radiance_prism.gif`
+- ลิงก์/ไฟล์: `/shots/motion_radiance_storm.gif`
+- ลิงก์/ไฟล์: `/shots/motion_radiance_step.gif`
+- ลิงก์/ไฟล์: `/shots/motion_radiance_step_ally.gif`
+- ลิงก์/ไฟล์: `/shots/motion_radiance_sovereign.gif`
+
+## #100 Darkness ลงเกมรอบแรก
+- สถานะ: ⏳ รอผู้ใช้รีวิว • ชนิด: Gameplay / VFX • สาย/ส่วน: Darkness
+
+**วิธีดู / อะไรรอรีวิว:**
+เลือก Darkness ใน Test Place แล้วลองติดตรา ต่อด้วย Night Waltz, ไล่ตาม หรือคลิกซ้าย เลือกวงล่องหนลง Q/E/R/F เพื่อดูเคียวปักและถอนในเกม รัศมีวงล่องหนลดเหลือ 105 หน่วย
+
+- ลิงก์/ไฟล์: `/shots/motion_darkness_veil_105.gif`
 
 ## #98 Darkness Flow: ออร่าแขน + เคียวสว่าง + HUD
 - สถานะ: ⏳ รอผู้ใช้รีวิว • ชนิด: VFX / HUD • สาย/ส่วน: ความมืด
@@ -1026,6 +1048,26 @@ GIF อัดจากเกมจริง shots/motion_storm_<สกิล>.gi
 - [ ] ธนู: ท่าเรียก ชาร์จ ปล่อย ดูเท่
 - [ ] คลื่นไม้เท้า: ประกายไฟตามคลื่นขึ้นแล้ว
 - [ ] FPS ไม่ตกตอนสายฟ้าเยอะ ๆ
+
+## #103 Radiance ขอบนีออน แถบเวลา และแรงสะท้อนร่างเทพ
+- สถานะ: ✅ ผ่าน • ชนิด: VFX / HUD / Balance • สาย/ส่วน: Radiance
+
+**วิธีดู / อะไรรอรีวิว:**
+ขอบเตือน Volley ใช้ทองนีออน ลำฝ่ามือมีดาววาบและคลื่นไหลตามลำ ร่างเทพถอยและสะบัดปีกตอนยิง ขยายแถบเวลาขาว 8 วิเป็นกว้างสูงสุด 192 พิกเซล สูง 4 พิกเซล ระเบิดท้ายท่ามีขอบโดมและคลื่นพื้นทองนีออนสว่างขึ้น BA 12 ดาเมจทุก 0.20 วิ
+
+- ลิงก์/ไฟล์: `/shots/motion_volley_gold.gif`
+- ลิงก์/ไฟล์: `/shots/motion_sovereign_timer_192.gif`
+- ลิงก์/ไฟล์: `/shots/motion_sovereign_chest_bright_gold.gif`
+
+## #99 Darkness สกิล 5 วงล่องหนทีม
+- สถานะ: ✅ ผ่าน • ชนิด: VFX / แอนิเมชัน • สาย/ส่วน: Darkness
+
+**วิธีดู / อะไรรอรีวิว:**
+ผู้ใช้อนุมัติภาพวงล่องหนและท่าถอนเคียวใน Studio
+
+- ลิงก์/ไฟล์: `/studio.html?fx=darkness/veil_preview&map=test`
+- ลิงก์/ไฟล์: `/studio.html?fx=darkness/veil_preview&map=test&veilView=ally`
+- ลิงก์/ไฟล์: `/shots/darkness-veil-pull-gesture.gif`
 
 ## #96 Darkness ท่าไล่ตามไม่มีตรา พุ่งแล้วงัดทันที
 - สถานะ: ✅ ผ่าน • ชนิด: VFX / แอนิเมชัน • สาย/ส่วน: Darkness

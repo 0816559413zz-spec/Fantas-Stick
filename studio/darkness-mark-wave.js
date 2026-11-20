@@ -23,9 +23,17 @@ FXCODE.studio_darkness_mark_wave=(_x,_y,_h,args,instance)=>{
   if(!anchor?.obj)return;
   anchor.inner.visible=false;
   const root=new THREE.Group();root.name='Darkness mark wave preview';anchor.obj.add(root);
-  const flow=args.flow===true;
+  const effect=stDarkMarkWave(root,args);
+  instance.updateMarkWave=()=>effect.update(instance.t);
+  anchor.geo=new THREE.BufferGeometry();
+  anchor.geo.addEventListener('dispose',()=>{instance.updateMarkWave=null;effect.dispose();disposeTree(root);root.removeFromParent();});
+  instance.updateMarkWave();
+};
+
+function stDarkMarkWave(root,args){
+  const flow=args.flow===true,live=args.live;
   let target,untouched,showMark,showAbsorption;
-  if(!flow){
+  if(!flow&&!live){
     const look={...getLook(NET.myId),ws:-1,wn:0};
     stDarkShiftStudent(root,look,'Mark wave caster',lookTint(look));
     const targetLook={...look,h:2,cl:2,hs:2},otherLook={...look,h:3,cl:3,hs:3};
@@ -38,10 +46,12 @@ FXCODE.studio_darkness_mark_wave=(_x,_y,_h,args,instance)=>{
     showAbsorption=stDarkBodyTint(target);
   }
   const ease=stDarkEase,chargeStart=flow?0:.36,swingStart=flow?0:chargeStart+.70,swingEnd=swingStart+.235;
-  const release=swingStart+.167,hit=release+.31,markAt=hit+.57;
+  const release=swingStart+.167;
+  let hit=release+.31,markAt=hit+.57;
+  let contact=!live;
   const dissolveTime=.49;
   const spinStart=swingEnd+.31,spinEnd=spinStart+.46;
-  const showWave=flow||args.showWave===true;
+  const showWave=!!live||flow||args.showWave===true;
   const trailSample={pos:new THREE.Vector3(),QB:new THREE.Quaternion(),act:0};
   const scythe=stCreateScythePreview(root,{wrap:'C',manual:true,scale:1.44,trailPose:sampleTrail,spinPose:sampleSpin});
   scythe.pivot.name='Mark wave scythe';
@@ -56,7 +66,7 @@ FXCODE.studio_darkness_mark_wave=(_x,_y,_h,args,instance)=>{
   const absorbBands=7,absorbRows=20;
   const intake=flow?null:stMarkWaveSheet(root,'Mark wave flowing into target',absorbRows,absorbBands*3,11);
   const waveStart=new THREE.Vector3();
-  const hitPoint=flow?new THREE.Vector3(.96,4.43,13.1):target.g.position.clone().add(new THREE.Vector3(0,1.2,0));
+  const hitPoint=live||flow?new THREE.Vector3(.96,4.43,13.1):target.g.position.clone().add(new THREE.Vector3(0,1.2,0));
   const flightEnd=hitPoint.clone().add(new THREE.Vector3(0,-.042,-.45));
   const targetCenter=hitPoint.clone(),intakeStart=new THREE.Vector3();
 
@@ -89,7 +99,7 @@ FXCODE.studio_darkness_mark_wave=(_x,_y,_h,args,instance)=>{
   const releasePose=sampleTrail(release);
   waveStart.copy(bladeCenter).applyQuaternion(releasePose.QB).add(releasePose.pos);
   flight.rotation.x=-Math.atan2(flightEnd.y-waveStart.y,flightEnd.z-waveStart.z);
-  const flankWaves=flow?[-.57,.57].map(yaw=>{
+  const flankWaves=flow&&!live?[-.57,.57].map(yaw=>{
     // Share the animated geometry, rotating each copy around the release point.
     const group=new THREE.Group();
     group.rotation.y=yaw;group.position.copy(waveStart).sub(waveStart.clone().applyAxisAngle(up,yaw));
@@ -110,6 +120,13 @@ FXCODE.studio_darkness_mark_wave=(_x,_y,_h,args,instance)=>{
   if(!showWave){
     target.g.visible=false;untouched.g.visible=false;showMark(-1,8);
     flight.visible=false;trace.mesh.visible=false;intake.mesh.visible=false;hitFlash.mesh.visible=false;
+  }
+
+  function setFlight(end,duration,target){
+    hit=release+Math.max(.001,duration);markAt=hit+.57;
+    flightEnd.copy(end);
+    if(target){contact=true;hitPoint.copy(target);}
+    flight.rotation.x=-Math.atan2(flightEnd.y-waveStart.y,Math.hypot(flightEnd.x-waveStart.x,flightEnd.z-waveStart.z));
   }
 
   function poseScythe(t,pos,rotation){
@@ -161,7 +178,7 @@ FXCODE.studio_darkness_mark_wave=(_x,_y,_h,args,instance)=>{
     const age=Math.max(0,t-hit);
     out.copy(waveStart).lerp(flightEnd,travel);
     // After contact the remaining crescent coasts through the first target.
-    out.z+=1.93*(1-Math.exp(-age*8.2));out.y+=.12*(1-Math.exp(-age*4.0));
+    if(contact){out.z+=1.93*(1-Math.exp(-age*8.2));out.y+=.12*(1-Math.exp(-age*4.0));}
     return out;
   }
 
@@ -306,7 +323,7 @@ FXCODE.studio_darkness_mark_wave=(_x,_y,_h,args,instance)=>{
         point.y+=vertical*waveHeight*growth+u*Math.sin(angle)*.29;
         point.z+=front+(leading?.11+p.phase*.27:-.50-p.phase*1.43);
         size=p.size*(leading?1.07:.93)*Math.sin(Math.PI*(u-lag))**.42;
-      }else if(showWave&&!flow&&t>=hit&&t<markAt+.08){
+      }else if(showWave&&!flow&&contact&&t>=hit&&t<markAt+.08){
         const born=hit+p.phase*.233,u=clamp((t-born)/(markAt+.02-born),0,1);
         if(!u||u>=1)continue;
         const pull=u**1.38,curve=Math.sin(Math.PI*u)*(1-pull)*p.spread;
@@ -363,12 +380,21 @@ FXCODE.studio_darkness_mark_wave=(_x,_y,_h,args,instance)=>{
     launchArc.positions.needsUpdate=true;launchArc.colors.needsUpdate=true;
   }
 
-  const update=()=>{
-    const t=instance.t;
+  const update=(t)=>{
     poseScythe(t,scythe.pivot.position,scythe.pivot.quaternion);
     const power=flow?ease(0,.075,t)*(1-ease(release,swingEnd+.14,t)):
       ease(chargeStart,swingStart,t)*(1-ease(swingStart,swingEnd+.11,t));
     scythe.update(t,.30*power);
+    if(live){
+      scythe.pivot.visible=live.scythe&&t<spinEnd+.70;
+      targetCenter.copy(hitPoint);
+      live.target?.(targetCenter);
+      drawDust(t);
+      if(live.launch){drawFlight(t);drawLingeringTrail(t);}
+      if(contact&&!flow){drawIntake(t);drawContact(t-hit);}
+      if(flow&&live.scythe){launchChips(t);drawLaunchArc(t);}
+      return;
+    }
     if(flow){
       for(const avatar of PM3.values()){
         avatar.g.traverse(hidePart);hidePart(avatar.cloth?.mo);hidePart(avatar.cloth?.mi);
@@ -393,12 +419,9 @@ FXCODE.studio_darkness_mark_wave=(_x,_y,_h,args,instance)=>{
     showAbsorption(absorbed*.96);
     showMark(t-markAt,8);
   };
-  instance.updateMarkWave=update;
-  anchor.geo=new THREE.BufferGeometry();
-  anchor.geo.addEventListener('dispose',()=>{
+  const dispose=()=>{
     for(const [part,{mask,castShadow}] of hiddenParts){part.layers.mask=mask;part.castShadow=castShadow;}
     for(const {group} of flankWaves)group.removeFromParent();
-    instance.updateMarkWave=null;disposeTree(root);root.removeFromParent();
-  });
-  update();
-};
+  };
+  return {update,dispose,setFlight,release,blade:scythe.pivot};
+}

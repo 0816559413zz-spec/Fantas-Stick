@@ -201,13 +201,17 @@ function lightDmgOut(src){if(!(src&&src.lgN>0))return 1;const o=src.lgFrom&&G.pl
 function lightDmgIn(t){let k=1;if(t.lgN>0)k*=1-LTV.allyDR*t.lgN;if(t.lgDR>G.time)k*=1-LTV.dsDR;if(t.lgUltWard)k*=1-LT_UL.dr;return k;}
 function lightSnapP(p){if(!lgOn(p)&&!(p.lgN>0)&&!p.lgUltWard)return undefined;
   const pos=lgOn(p)?lightLinkPos(p):null,a=lgOn(p)?lightAlly(p):null;
-  return [p.lc|0,a?a.id:p.lgA==='prism'?'P':0,pos?[Math.round(pos.x),Math.round(pos.y)]:0,p.lgN|0,p.lgBeam|0,p.lgEmp>G.time?1:0,p.lgDch>=1?1:0,
+  return [lgOn(p)?p.lc|0:0,a?a.id:p.lgA==='prism'?'P':0,pos?[Math.round(pos.x),Math.round(pos.y)]:0,p.lgN|0,p.lgBeam|0,p.lgEmp>G.time?1:0,p.lgDch>=1?1:0,
     p.lgSan?[Math.round(p.lgSan.x),Math.round(p.lgSan.y),p.lgSan.n|0]:0,p.lgVeil&&p.lgVeil.wind<=0?[Math.round(p.lgVeil.x),Math.round(p.lgVeil.y),Math.round(p.lgVeil.t*10)]:0,p.lgBeamL|0,Math.round((p.lgBeamA||p.ang||0)*100)/100,p.shieldOn?1:0,Math.round((p.lgChg||0)*100)/100,Math.round((p.lgBeamP||0)*100)/100,
     p.lgUlt?lightUltSnap(p.lgUlt):0,p.lgUltWard?1:0,Math.round((p.lgHeat||0)*100),p.lgOH>0?1:0,p.lgBeamW|0];}
 // ---------- สกิล ----------
 function lightSkillsTick(p,dt){
   const V=p.lgVol;   // Shard Volley: คริสตัลหยุดที่จุด → หมุนชาร์จ → ระเบิด → บินกลับ
-  if(V){V.t+=dt;V.b=V.b|0;   // ผู้ใช้ 2026-11-17: ไปทีละชิ้น ใกล้ → ไกล • แต่ละชิ้นนับวงเตือนของตัวเอง แล้วระเบิดทีละลูก
+  if(V){V.t+=dt;V.b=V.b|0;V.warned=V.warned|0;
+    while(V.warned<V.pts.length&&V.t>=LT_VO.wind+V.warned*LT_VO.step){
+      const [x,y,h,r]=V.pts[V.warned++];
+      emit({k:'efx',z:'lgvolwarn',x,y,h,r,t:LT_VO.charge,id:p.id});
+    }   // ผู้ใช้ 2026-11-17: ไปทีละชิ้น ใกล้ → ไกล • แต่ละชิ้นนับวงเตือนของตัวเอง แล้วระเบิดทีละลูก
     while(V.b<V.pts.length&&V.t>=LT_VO.wind+V.b*LT_VO.step+LT_VO.charge){const [x,y,h,r]=V.pts[V.b];for(const t of foesIn(p.team,x,y,r,h+13))aoeHit(p,t,LT_VO.dmg,null);   // เสาแสงสูง: โดนถึง 13 ม. (Wind บินได้สูงสุด 12)
       emit({k:'efx',z:'lgvolboom',x:Math.round(p.x),y:Math.round(p.y),h:p.z,id:p.id,pts:[[Math.round(x),Math.round(y)]],r,i:V.b});V.b++;}
     if(V.b>=V.pts.length&&V.t>=LT_VO.wind+(V.pts.length-1)*LT_VO.step+LT_VO.charge+LT_VO.back){p.lc=Math.min(LTV.max,p.lc+V.n);p.lgVol=null;}}
@@ -248,13 +252,14 @@ const LIGHT_FORM_HEART_Y=2.762,LIGHT_FORM_HEART_Z=.569;
 function lightFinishDrive(progress){return THREE.MathUtils.smoothstep(progress,.89,1);}
 function lightFinishPitch(progress,lean){return lerp(.44*THREE.MathUtils.smoothstep(progress,0,.49),lean,lightFinishDrive(progress));}
 function lightFinishPush(progress){return lerp(.12*THREE.MathUtils.smoothstep(progress,0,.42),.55,lightFinishDrive(progress));}
-function lightFormAngles(side,amount,aim,angles){
+function lightFormAngles(side,amount,aim,angles,recoil=0){
   const elevation=Math.atan2(aim.y-2.86,Math.hypot(aim.x,aim.z));
-  return angles.set(amount*clamp(-elevation*.95,-.17,.46),-side*amount*.28,side*.056*amount,'YXZ');
+  return angles.set(amount*clamp(-elevation*.95,-.17,.46)-.12*recoil,
+    -side*(amount*.28+.065*recoil),side*(.056*amount+.072*recoil),'YXZ');
 }
 function lightFormRecoil(age){
   if(age<0)return 0;
-  return .34*Math.sin(age*39)+.18*Math.sin(age*62+.86);
+  return 1.45*Math.exp(-age*17)+.34*Math.sin(age*39)+.18*Math.sin(age*62+.86);
 }
 function lightFormHand(side,aim,rotation,out){
   const distance=Math.hypot(aim.x,aim.z);
@@ -351,7 +356,7 @@ const _lightFormAngles=new THREE.Euler(),_lightFormTurn=new THREE.Quaternion(),_
 const _lightFormAimLocal=new THREE.Vector3(),_lightFormUpLocal=new THREE.Vector3();
 function lightUltOrigin(p,arm,aim,amount,pull=0,recoil=0){
   const c=Math.cos(p.ang),s=Math.sin(p.ang);
-  const turn=_lightFormTurn.setFromEuler(lightFormAngles(arm,amount,aim,_lightFormAngles));
+  const turn=_lightFormTurn.setFromEuler(lightFormAngles(arm,amount,aim,_lightFormAngles,recoil));
   const local=lightFormHand(arm,aim,turn.invert(),_lightFormHand);
   const pose=lightArmPose(arm,local,amount,pull,recoil);
   _lightFormAimLocal.set(aim.x,aim.y-LIGHT_FORM_BASE,aim.z).divideScalar(LIGHT_FORM_SCALE);
@@ -362,22 +367,25 @@ function lightUltOrigin(p,arm,aim,amount,pull=0,recoil=0){
   const palm=pose.wrist.addScaledVector(pose.hand,LIGHT_FORM_PALM).addScaledVector(pose.palm,LIGHT_FORM_PALM_DEPTH)
     .sub(LIGHT_FORM_PIVOT).applyQuaternion(turn.invert())
     .add(LIGHT_FORM_PIVOT).multiplyScalar(LIGHT_FORM_SCALE);
-  return {x:p.x+(c*palm.z+s*palm.x)*20,y:p.y+(s*palm.z-c*palm.x)*20,h:p.z+palm.y-LIGHT_FORM_BASE*LIGHT_FORM_SCALE};
+  palm.z-=.23*recoil*LIGHT_FORM_SCALE;
+  const x=p.x+(c*palm.z+s*palm.x)*20,y=p.y+(s*palm.z-c*palm.x)*20;
+  return {x,y,h:p.z+palm.y-LIGHT_FORM_BASE*LIGHT_FORM_SCALE+terrT(p.x,p.y)-terrT(x,y)};
 }
 function lightUltRay(p,origin,range,target){
   const i=target||p.inp||{};
   const ax=Number.isFinite(i.ax)?i.ax:p.x+Math.cos(p.ang)*range;
   const ay=Number.isFinite(i.ay)?i.ay:p.y+Math.sin(p.ang)*range;
-  const ah=Number.isFinite(i.ah)?i.ah:origin.h;
-  return aimRay3({x:origin.x,y:origin.y,ang:p.ang,inp:{ax,ay,ah}},origin.h,range);
+  const ah=Number.isFinite(i.ah)?i.ah+terrT(target?ax:p.x,target?ay:p.y):origin.h+terrT(origin.x,origin.y);
+  return aimRay3({x:origin.x,y:origin.y,ang:p.ang,inp:{ax,ay,ah}},origin.h,range,true);
 }
 function lightUltBeamHit(p,from,to){
-  const dx=to.x-from.x,dy=to.y-from.y,dz=(to.h-from.h)*20;
+  const fromHeight=from.h+terrT(from.x,from.y);
+  const dx=to.x-from.x,dy=to.y-from.y,dz=(to.h+terrT(to.x,to.y)-fromHeight)*20;
   const lengthSq=dx*dx+dy*dy+dz*dz;
   if(lengthSq<1)return;
   let first=null,near=Infinity;
   for(const t of foesOf(p.team)){
-    const x=t.x-from.x,y=t.y-from.y,z=(cH(t)-from.h)*20;
+    const x=t.x-from.x,y=t.y-from.y,z=(cH(t)+terrT(t.x,t.y)-fromHeight)*20;
     const f=(x*dx+y*dy+z*dz)/lengthSq;
     if(f<0||f>1||f>=near)continue;
     if(Math.hypot(x-f*dx,y-f*dy)>LT_UL.width+(t.r||PR)||Math.abs(z-f*dz)>(vR(t)+.22)*20)continue;
@@ -388,8 +396,9 @@ function lightUltBeamHit(p,from,to){
 function lightUltFinish(p,target){
   const pitch=lightFinishPitch(1,p.lgUlt.lean),delta=LIGHT_FORM_HEART_Y-LIGHT_FORM_PIVOT.y;
   const reach=(LIGHT_FORM_HEART_Z*Math.cos(pitch)+delta*Math.sin(pitch)+lightFinishPush(1))*LIGHT_FORM_SCALE*20;
-  const from={x:p.x+Math.cos(p.ang)*reach,y:p.y+Math.sin(p.ang)*reach,
-    h:p.z+(LIGHT_FORM_PIVOT.y+delta*Math.cos(pitch)-LIGHT_FORM_HEART_Z*Math.sin(pitch)-LIGHT_FORM_BASE)*LIGHT_FORM_SCALE};
+  const x=p.x+Math.cos(p.ang)*reach,y=p.y+Math.sin(p.ang)*reach;
+  const from={x,y,h:p.z+(LIGHT_FORM_PIVOT.y+delta*Math.cos(pitch)-LIGHT_FORM_HEART_Z*Math.sin(pitch)-LIGHT_FORM_BASE)*LIGHT_FORM_SCALE
+    +terrT(p.x,p.y)-terrT(x,y)};
   const to=lightUltRay(p,from,LT_UL.finishRange,target);
   emit({k:'efx',z:'lgultstrike',x:from.x,y:from.y,h:from.h,x2:to.x,y2:to.y,h2:to.h,id:p.id,
     ground:to.hit==='ground',t:LT_UL.finishRelease});
@@ -417,7 +426,7 @@ function lightUltTick(p,inp,dt,canAct,finishPressed){
     u.finish-=dt;
     if(u.phase===3){
       const charge=1-u.finish/LT_UL.finishCast;
-      p.z+=LT_UL.finishRise*THREE.MathUtils.smoothstep(charge,0,1);
+      p.z+=LT_UL.finishRise*(.76*charge+.24*(1-(1-charge)**3));
       u.lean=clamp(Math.atan2(p.z+.65-u.target.ah,Math.hypot(u.target.ax-p.x,u.target.ay-p.y)*.05),.12,.53);
       if(u.finish<=1e-6){u.phase=4;u.finish=LT_UL.finishRelease+LT_UL.finishDelay;lightUltFinish(p,u.target);}
     }else if(u.finish<=1e-6){
@@ -483,11 +492,11 @@ const LT_VS_S=defSpell(LIGHTP,{id:'veiledshard',v:{t:5,r:300,dmg:6,tick:0.5,slow
   cast(p,S){const a=lightAlly(p),c=a||p;p.lgVeil={x:c.x,y:c.y,h:c.z||0,wind:LT_VS_RELEASE+LT_VS_TRAVEL,t:S.v.t,k:0};emit({k:'efx',z:'lgveil',x:Math.round(c.x),y:Math.round(c.y),h:c.z||0,r:S.v.r,id:p.id,t:a?a.id:undefined});}});
 const LT_VS=LT_VS_S.v;
 const LT_UL=defSpell(LIGHTP,{id:'radiantsovereign',v:{t:8,shield:75,dr:0.3,cast:0.45,hover:3.08,
-  baRange:800,baDmg:12,baTick:0.3,baHold:1.5,baRest:0.62,baWindup:0.18,width:12,
-  finishCast:2,finishRise:2.65,finishRelease:1,finishDelay:0.8,finishDissolve:1,finishRange:900,finishR:300,finishDmg:80,finishSlow:0.4,finishSlowT:2},
+  baRange:800,baDmg:12,baTick:0.20,baHold:0.7,baRest:0.39,baWindup:0.14,width:12,
+  finishCast:0.92,finishRise:2.65,finishRelease:0.38,finishDelay:0.14,finishDissolve:0.65,finishRange:900,finishR:300,finishDmg:80,finishSlow:0.4,finishSlowT:2},
   vn:{t:'อยู่ (วิ)',shield:'คู่หู • โล่',dr:'คู่หู • ลดดาเมจ',baDmg:'ลำแสงแขน • ดาเมจต่อฮิต',finishDmg:'ท่าสุดท้าย • ดาเมจ'},
   role:'ult',ult:true,n:'Radiant Sovereign',ic:'👑',cd:0,
-  d:'ลิงก์คู่หูแล้วแปลงร่างเหนือหัวเขา 8 วิ • คู่หูได้โล่ 75 และลดดาเมจ 30% • คลิกซ้ายค้างยิงลำแสงสลับแขน • กดอัลติซ้ำเพื่อชาร์จ 2 วิ แล้วยิงลำแสงจากอก 1 วิ • จุดกระทบระเบิดหลังยิงจบ 0.8 วิ โดน 80 ดาเมจและช้า 40% 2 วิ จากนั้นสลายร่าง 1 วิแล้ววาร์ปกลับจุดเดิม',
+  d:'ลิงก์คู่หูแล้วแปลงร่างเหนือหัวเขา 8 วิ • คู่หูได้โล่ 75 และลดดาเมจ 30% • คลิกซ้ายค้างยิงลำแสงสลับแขน • กดอัลติซ้ำเพื่อชาร์จแล้วปล่อยลำแสงสั้นจากอก • จุดกระทบระเบิดหลังลำแสงแตะพื้น โดน 80 ดาเมจและช้า 40% 2 วิ จากนั้นสลายร่าง 1 วิแล้ววาร์ปกลับจุดเดิม',
   cast(p,S){
     const a=lightAlly(p);
     if(!a||a.team!==p.team||a.lgFrom!==p.id){

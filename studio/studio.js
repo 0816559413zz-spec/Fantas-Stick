@@ -168,7 +168,7 @@ async function stOpen(name,keepT){try{const r=await fetch('assets/fx/'+name+'.fx
       const [student,scythe]=await Promise.all([loadModel('char_student'),loadModel('dark_scythe')]);
       if(!student||!scythe)throw new Error('โหลดโมเดลเคียวหรือตัวละครไม่ได้');
       if(!keepT&&!SQ.has('cam')){
-        ST.cam='orbit';ST.orb.dist=+SQ.get('dist')||12.4;
+        ST.cam='orbit';ST.orb.dist=+SQ.get('dist')||13.5;
         ST.orb.yaw=SQ.has('oyaw')?+SQ.get('oyaw'):1.33;
         ST.orb.pitch=SQ.has('opitch')?+SQ.get('opitch'):.55;
       }

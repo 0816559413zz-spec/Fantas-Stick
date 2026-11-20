@@ -30,12 +30,12 @@ function darkClearCooldown(p,spell){
   const index=p.kitIds.indexOf(spell);
   if(index>=0)p.cd[SLOTK[index]]=0;
 }
-function darkMark(p,t,duration,multiple){
+function darkMark(p,t,duration,multiple,wave){
   const d=darkState(p);
   if(!multiple)d.marks.clear();
   d.marks.set(t,G.time+duration);
   darkClearCooldown(p,'darkchase');
-  darkEvent(p,'darkmarkhit',{x:t.x,y:t.y,h:cH(t),target:t.id});
+  darkEvent(p,'darkmarkhit',{x:t.x,y:t.y,h:cH(t),target:t.id,wave:wave?.id,distance:wave?.travel});
 }
 function darkReveal(p){p.darkReveal=G.time+.65;}
 function darkQueue(p,delay,run){darkState(p).actions.push({at:G.time+delay,run});}
@@ -112,20 +112,23 @@ function darkBeamStop(team,x,y,h,ex,ey,eh){
 function darkDash(p,inp,pr,dt,setCd){
   const d=darkState(p);
   if(p.dash>0||d.chaseUntil>G.time)return true;
-  if(pr.sp&&d.charges.length<2&&!p.shieldOn)d.dashStart=G.time;
+  if(pr.sp&&d.charges.length<2&&!p.shieldOn){
+    d.dashStart=G.time;
+    if(d.charges.length===0&&inp.dh)darkEvent(p,'darkdashcharge');
+  }
   if(d.dashStart==null)return false;
   const held=inp.dh;
   const long=held&&d.charges.length===0&&G.time-d.dashStart>=.5;
   if(held&&!long)return true;
   d.dashStart=null;
-  const cost=long?2:1, duration=long?2:.14,aim=darkAim(p);
+  const cost=long?2:1, duration=long?2.105:.14,aim=darkAim(p);
   for(let i=0;i<cost;i++)d.charges.push(Math.max(G.time,d.charges.at(-1)||0)+DARK_V.dashCd);
   setCd('dodge',d.charges.length===2?d.charges[0]-G.time:0);
   p.dash=duration;p.dashSp=(long?500:120)/duration;
   p.dashX=Math.cos(aim.a);p.dashY=Math.sin(aim.a);
   if(long){d.longUntil=G.time+duration;p.inv=Math.max(p.inv,.45);}
   else d.empower=G.time+3;
-  darkEvent(p,long?'darkdashlong':'darkdashquick');
+  darkEvent(p,long?'darkdashlong':'darkdashquick',{duration});
   return true;
 }
 function darkBasic(p,inp,dt,setCd){
@@ -138,14 +141,14 @@ function darkBasic(p,inp,dt,setCd){
   darkQueue(p,.2,()=>{
     for(const t of darkCone(p,darkAim(p),empowered?260:220,empowered?150:120)){
       const amount=empowered?18:12;
-      aoeHit(p,t,amount);
+      aoeHit(p,t,amount,hit=>darkEvent(p,'darkbahit',{x:hit.x,y:hit.y,h:cH(hit),target:hit.id,empowered}));
       if(d.marks.has(t)&&darkAlive(t))darkQueue(p,.15,()=>{
-        if(darkAlive(t))aoeHit(p,t,empowered?18:13);
+        if(darkAlive(t))aoeHit(p,t,empowered?18:13,hit=>darkEvent(p,'darkbahit',{x:hit.x,y:hit.y,h:cH(hit),target:hit.id,ghost:true}));
       });
     }
   });
 }
-const DARK_MARK=defSpell(DARKP,{id:'darkmark',n:'ท่าติดตรา',ic:'✖',role:'builder',cd:10,
+const DARK_MARK=defSpell(DARKP,{id:'darkmark',n:'Death Sentence',ic:'✖',role:'builder',cd:10,
   v:{range:700,speed:1000,height:150},d:'ปล่อยคลื่นเคียวเพื่อติดตราเงา',
   cast(p,S){
     const d=darkState(p),flow=darkFlow(p);
@@ -153,10 +156,12 @@ const DARK_MARK=defSpell(DARKP,{id:'darkmark',n:'ท่าติดตรา',ic
     darkEvent(p,'darkmarkwind',{flow});
     darkQueue(p,flow?0:.45,()=>{
       const aim=darkAim(p);
-      darkEvent(p,'darkmarkcast',{flow,pitch:p.inp?.ap||0});
-      for(const offset of flow?[-.26,0,.26]:[0]){
+      const cast=G.time;
+      for(const [index,offset] of (flow?[-.26,0,.26]:[0]).entries()){
         const a=aim.a+offset,c=Math.hypot(aim.x,aim.y),dir={x:Math.cos(a)*c,y:Math.sin(a)*c,z:aim.z};
-        d.waves.push({x:p.x,y:p.y,z:p.z,dir,flow,travel:0,spec:S.v});
+        const id=p.id+':'+cast+':'+index;
+        darkEvent(p,'darkmarkcast',{a,flow,pitch:p.inp?.ap||0,wave:id,main:!offset,range:S.v.range,speed:S.v.speed});
+        d.waves.push({id,x:p.x,y:p.y,z:p.z,dir,flow,travel:0,spec:S.v});
       }
     });
   }});
@@ -178,11 +183,11 @@ function darkWaveTick(p,d,dt){
       }
       best=target;nearest=hit.along;
     }
-    if(best){darkMark(p,best,DARK_V.mark,wave.flow);wave.travel=spec.range;}
+    if(best){wave.travel=nearest;darkMark(p,best,DARK_V.mark,wave.flow,wave);wave.travel=spec.range;}
   }
   d.waves=d.waves.filter(wave=>wave.travel<wave.spec.range);
 }
-const DARK_CHASE=defSpell(DARKP,{id:'darkchase',n:'ท่าไล่ตาม',ic:'➶',role:'mobility',cd:7,
+const DARK_CHASE=defSpell(DARKP,{id:'darkchase',n:'Nightfall',ic:'➶',role:'mobility',cd:7,
   v:{range:600,dash:250,lift:.6,dmg:10},d:'พุ่งงัด หรือไล่ตามเป้ามีตราแล้วฟันสามครั้ง',
   cast(p,S){
     const d=darkState(p),aim=darkAim(p);
@@ -217,7 +222,8 @@ const DARK_WALTZ=defSpell(DARKP,{id:'darkwaltz',n:'Night Waltz',ic:'🌑',role:'
     darkReveal(p);darkEvent(p,'dark_nightwaltz',{radius:S.v.r});
     darkQueue(p,.56,()=>{
       for(const t of foesIn(p.team,p.x,p.y,S.v.r,p.z+8)){
-        aoeHit(p,t,p.dark.marks.has(t)?S.v.marked:S.v.dmg);
+        const marked=p.dark.marks.has(t);
+        aoeHit(p,t,marked?S.v.marked:S.v.dmg,hit=>darkEvent(p,'darkwaltzhit',{x:hit.x,y:hit.y,h:cH(hit),target:hit.id,marked}));
       }
     });
   }});
@@ -235,14 +241,14 @@ const DARK_WARD=defSpell(DARKP,{id:'darkward',n:'Ward Drain',ic:'◉',role:'cont
       }
     });
   }});
-const DARK_VEIL=defSpell(DARKP,{id:'darkveil',n:'วงล่องหนทีม',ic:'◌',role:'support',cd:20,
+const DARK_VEIL=defSpell(DARKP,{id:'darkveil',n:'Umbral Veil',ic:'◌',role:'support',cd:20,
   v:{r:105,duration:4},d:'สร้างวงเงาที่ซ่อนเพื่อนร่วมทีม',
   cast(p,S){
     const {x,y,z}=p;
     darkEvent(p,'darkveil',{radius:S.v.r,duration:S.v.duration});
     darkQueue(p,.91,()=>{darkState(p).veil={x,y,z,r:S.v.r,end:G.time+S.v.duration};});
   }});
-const DARK_ULT=defSpell(DARKP,{id:'darkrift',n:'ประตูเงา',ic:'🌘',role:'ult',ult:true,cd:0,
+const DARK_ULT=defSpell(DARKP,{id:'darkrift',n:'Maw of the Abyss',ic:'🌘',role:'ult',ult:true,cd:0,
   v:{range:800,angle:80,dmg:30,mark:12},d:'เปิดประตูให้สัตว์เงางับ ติดตรา และเข้า Flow',
   cast(p,S){
     const d=darkState(p);
@@ -289,7 +295,7 @@ function darkSnap(p){
   if(!own&&!hidden&&!marked)return undefined;
   return [hidden?(p.darkReveal>G.time?2:1):0,marked?1:0,Math.max(0,(own?.flow||0)-G.time),
     own?.shieldStart!=null?clamp((G.time-own.shieldStart)/.45,0,1):0,
-    own?.shield??0,own?.longUntil>G.time||own?.chase?1:0,p.inp?.ap||0,own?2-own.charges.length:0];
+    own?.shield??0,own?.longUntil>G.time||own?.chase?1:0,p.inp?.ap||0,own?2-own.charges.length:0,own?.empower>G.time?1:0];
 }
 function darkMarked(t){
   for(const p of plist())if(darkAlive(p)&&p.dark?.marks.get(t)>G.time)return true;

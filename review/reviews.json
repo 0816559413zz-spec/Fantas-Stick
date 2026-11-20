@@ -1,19 +1,83 @@
 {
- "next": 100,
+ "next": 104,
  "items": [
   {
-   "id": 99,
-   "title": "Darkness สกิล 5 วงล่องหนทีม",
-   "text": "ผู้ร่ายเหยียดแขนชูคทาสูง บิดไปขวาแล้วสะบัดชี้ลง เคียวถอยไปง้างก่อนเร่งปลายแหลมลงปักกลางวง",
-   "kind": "VFX / แอนิเมชัน",
-   "who": "Darkness",
+   "id": 103,
+   "title": "Radiance ขอบนีออน แถบเวลา และแรงสะท้อนร่างเทพ",
+   "text": "ขอบเตือน Volley ใช้ทองนีออน ลำฝ่ามือมีดาววาบและคลื่นไหลตามลำ ร่างเทพถอยและสะบัดปีกตอนยิง ขยายแถบเวลาขาว 8 วิเป็นกว้างสูงสุด 192 พิกเซล สูง 4 พิกเซล ระเบิดท้ายท่ามีขอบโดมและคลื่นพื้นทองนีออนสว่างขึ้น BA 12 ดาเมจทุก 0.20 วิ",
+   "kind": "VFX / HUD / Balance",
+   "who": "Radiance",
+   "status": "ok",
+   "created": "2026-11-20",
+   "updated": "2026-11-20",
+   "imgs": [],
+   "links": [
+    "/shots/motion_volley_gold.gif",
+    "/shots/motion_sovereign_timer_192.gif",
+    "/shots/motion_sovereign_chest_bright_gold.gif"
+   ]
+  },
+  {
+   "id": 102,
+   "title": "Radiant Sovereign เพิ่มแรงปะทะลำฝ่ามือและลำจากอก",
+   "text": "เทียบแกนขาวทอง วงแรงดันตอนปล่อย และจังหวะแสงกระแทกที่ปลายลำใน Test Place",
+   "kind": "VFX",
+   "who": "Radiance",
    "status": "wait",
    "created": "2026-11-20",
    "updated": "2026-11-20",
    "imgs": [],
    "links": [
+    "/shots/motion_sovereign_palm_punch.gif",
+    "/shots/motion_sovereign_chest_punch.gif"
+   ]
+  },
+  {
+   "id": 101,
+   "title": "Radiance รอบแก้หลังลองเล่น",
+   "text": "เทสต์วงเตือน Shard Volley จำนวนผลึก Crystal Bond ท่าลอยเอน Prism Ray การกางและจางของ Shard Storm แฟลชและจังหวะกล้อง Light Step กับแรงสะท้อนและจังหวะอัลติ Radiant Sovereign",
+   "kind": "Gameplay / VFX",
+   "who": "Radiance",
+   "status": "wait",
+   "created": "2026-11-20",
+   "updated": "2026-11-20",
+   "imgs": [],
+   "links": [
+    "/shots/motion_radiance_volley.gif",
+    "/shots/motion_radiance_bond.gif",
+    "/shots/motion_radiance_prism.gif",
+    "/shots/motion_radiance_storm.gif",
+    "/shots/motion_radiance_step.gif",
+    "/shots/motion_radiance_step_ally.gif",
+    "/shots/motion_radiance_sovereign.gif"
+   ]
+  },
+  {
+   "id": 100,
+   "title": "Darkness ลงเกมรอบแรก",
+   "text": "เลือก Darkness ใน Test Place แล้วลองติดตรา ต่อด้วย Night Waltz, ไล่ตาม หรือคลิกซ้าย เลือกวงล่องหนลง Q/E/R/F เพื่อดูเคียวปักและถอนในเกม รัศมีวงล่องหนลดเหลือ 105 หน่วย",
+   "kind": "Gameplay / VFX",
+   "who": "Darkness",
+   "status": "wait",
+   "created": "2026-11-20",
+   "updated": "2026-11-20",
+   "imgs": [],
+   "links": ["/shots/motion_darkness_veil_105.gif"]
+  },
+  {
+   "id": 99,
+   "title": "Darkness สกิล 5 วงล่องหนทีม",
+   "text": "ผู้ใช้อนุมัติภาพวงล่องหนและท่าถอนเคียวใน Studio",
+   "kind": "VFX / แอนิเมชัน",
+   "who": "Darkness",
+   "status": "ok",
+   "created": "2026-11-20",
+   "updated": "2026-11-20",
+   "imgs": [],
+   "links": [
     "/studio.html?fx=darkness/veil_preview&map=test",
-    "/shots/darkness-veil-windup.gif"
+    "/studio.html?fx=darkness/veil_preview&map=test&veilView=ally",
+    "/shots/darkness-veil-pull-gesture.gif"
    ]
   },
   {

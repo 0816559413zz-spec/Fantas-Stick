@@ -374,14 +374,14 @@ function stDarkChargeScythe(root,blade,launch,impact,spendAt){
   };
 }
 
-function stDarkQuickDash(root,caster,look){
+function stDarkQuickDash(root,caster,look,live){
   const ease=stDarkEase,launch=.22,arrival=.54,impact=.66,range=4;
-  const slashStart=1.02,spendAt=1.36;
+  const slashStart=live?Infinity:1.02,spendAt=live?Infinity:1.36;
   const slashRoot=new THREE.Group();root.add(slashRoot);
   const scythe=stCreateScythePreview(slashRoot,{wrap:'C',mode:'ba',manual:true,followUp:true,reach:8.1});
   scythe.pivot.name='Quick Dash scythe';
   const distanceAt=t=>range*ease(launch,arrival,t);
-  const pointAt=(distance,out)=>out.set(0,0,clamp(distance,0,range));
+  const pointAt=(distance,out)=>live?live.pointAt(distance/range,out):out.set(0,0,clamp(distance,0,range));
   const nearTail=stDarkWake(root,distanceAt,(d,out)=>out.set(-.27+.29*d/range,0,d-.22),
     d=>-.24-.46*d/range,launch,arrival,.67,.56);
   const farTail=stDarkWake(root,distanceAt,(d,out)=>out.set(.34-.51*d/range,0,d-.38),
@@ -426,7 +426,7 @@ function stDarkQuickDash(root,caster,look){
     const load=ease(.08,.17,t)*(1-ease(.17,launch+.025,t));
     const catchStep=ease(arrival-.035,arrival+.03,t)*(1-ease(arrival+.04,arrival+.20,t));
     const stride=Math.cos(clamp((t-launch)/(arrival-launch),0,1)*Math.PI*1.38);
-    actor.g.position.set(0,.11*lean-.045*catchStep,distanceAt(t));
+    if(actor!==caster||!live)pointAt(distanceAt(t),actor.g.position).y+=.11*lean-.045*catchStep;
     stDarkPose(actor,{back:.52*lean-.13*load-.16*catchStep,roll:-.13*lean+.14*catchStep,
       drop:.10*lean+.13*load+.13*catchStep,arms:.23*lean+.28*catchStep,step:.78*lean*stride});
     actor.armR.rotation.x+=.50*lean*stride;
@@ -436,20 +436,21 @@ function stDarkQuickDash(root,caster,look){
 
   return t=>{
     pose(caster,t);
-    slashRoot.position.z=distanceAt(t);
+    pointAt(distanceAt(t),slashRoot.position);
     poseScythe(scythe.pivot,t);
-    scythe.pivot.position.z-=slashRoot.position.z;
+    scythe.pivot.position.z-=distanceAt(t);
     const age=t-impact;
     const buff=1-ease(spendAt,spendAt+.09,t);
     const charge=ease(0,.028,age)*(.35+.77*(1-ease(.09,.34,age)))*buff;
     scythe.pivot.scale.setScalar(lerp(1,scythe.pivot.scale.x,buff));
-    const slashClock=2+t-slashStart;
+    const slashClock=live?0:2+t-slashStart;
     scythe.update(t,charge,0,slashClock);
     if(t>=slashStart){
       const swing=slashRoot.userData.baState(slashClock);
       caster.b.rotation.y=swing.tw*ease(slashStart,slashStart+.12,t)*(1-ease(1.55,1.83,t));
       if(caster.rig)rigSync(caster,0);
     }
+    slashRoot.visible=!live?.spent;
     pushOff(.32+.77*ease(launch,launch+.17,t),.54*ease(launch-.012,launch+.025,t)*(1-ease(launch+.037,launch+.19,t)),t*9);
     nearTail(t);farTail(t);matter(t);embers(t);infuse(t);
     for(const echo of echoes){
@@ -471,14 +472,14 @@ function stDarkQuickDash(root,caster,look){
   };
 }
 
-function stDarkHoldDash(root,caster){
+function stDarkHoldDash(root,caster,live){
   const ease=stDarkEase,begin=.16,launch=begin+.50,covered=launch+.032,formed=launch+.105,arrival=formed+2;
   const rollStart=launch-.13,acceleration=.18,braking=.34;
   const route=[[0,0],[.06,3.6],[2.65,6.9],[2.1,10],[-1.65,13.3]]
     .map(([x,z])=>new THREE.Vector3(x,0,z));
   // This curve demonstrates steering for the Studio camera.
   const path=new THREE.CatmullRomCurve3(route),length=path.getLength();
-  const pointAt=(distance,out)=>path.getPointAt(clamp(distance/length,0,1),out);
+  const pointAt=(distance,out)=>live?live.pointAt(clamp(distance/length,0,1),out):path.getPointAt(clamp(distance/length,0,1),out);
   // Keep acceleration independent of the time spent in ball form.
   const duration=arrival-rollStart,travelTime=duration-(acceleration+braking)*.5;
   const speed=length/travelTime;
@@ -497,7 +498,7 @@ function stDarkHoldDash(root,caster){
   const cloakTrails=stDarkShiftCloakTrails(root);
   const scythe=stCreateScythePreview(root,{wrap:'C',manual:true,scale:1.43});
   const bladePivot=scythe.pivot;bladePivot.name='Shift Dash scythe';
-  const bodyTint=stDarkBodyTint(caster,true);
+  const bodyTint=live?.bodyTint??stDarkBodyTint(caster,true);
   const splash=stDarkMatter(root,'Long Dash dark splash',[
     {at:arrival-.01,span:.07,count:52,spread:1.68,lift:1.02,height:.62},
     {at:arrival+.025,span:.08,count:23,spread:1.03,lift:1.57,height:1.00},
@@ -540,9 +541,8 @@ function stDarkHoldDash(root,caster){
     const push=ease(rollStart,covered,t)*(1-unveil);
     const spring=ease(.03,.081,age)*(1-ease(.106,.224,age));
     const plant=ease(.129,.238,age)*(1-ease(.25,.52,age));
-    caster.g.position.copy(at);caster.g.rotation.y=yaw;
-    caster.g.position.y=.36*spring;
-    caster.g.visible=t<formed||age>=.045;
+    if(!live){caster.g.position.copy(at);caster.g.rotation.y=yaw;caster.g.position.y=.36*spring;caster.g.visible=t<formed||age>=.045;}
+    else caster.b.visible=t<formed||age>=.045;
     const dark=ease(begin+.23,launch-.033,t)*(1-ease(.05,.18,age));
     const bodyCoverage=age<0?1-ease(launch-.021,formed,t):1;
     bodyTint(dark,bodyCoverage);
@@ -558,7 +558,7 @@ function stDarkHoldDash(root,caster){
     const core=ease(.14,.96,form),travel=ease(rollStart,rollStart+acceleration,t)*(1-ease(arrival-.11,arrival,t));
     ball.visible=core>.02;
     ball.position.copy(at).addScaledVector(ahead.normalize(),.10*travel);
-    ball.position.y=1.07+.065*Math.sin(t*16)*(1-travel);
+    ball.position.y=at.y+1.07+.065*Math.sin(t*16)*(1-travel);
     ball.rotation.y=yaw;
     ball.scale.set((.52-.07*travel)*core,.57*core,(.51+.15*travel)*core);
     const threads=.82*ease(covered,formed+.21,t)*(1-ease(-.02,.15,age));

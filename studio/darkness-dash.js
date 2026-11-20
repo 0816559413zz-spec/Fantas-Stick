@@ -101,7 +101,7 @@ function stDarkCut(parent,points,width,color,order=12){
   }
   geometry.setAttribute('position',new THREE.Float32BufferAttribute(position,3));
   geometry.setIndex(index);
-  const material=new THREE.MeshBasicMaterial({color,side:THREE.DoubleSide,transparent:true,depthWrite:false,toneMapped:false});
+  const material=new THREE.MeshBasicMaterial({color,side:THREE.DoubleSide,forceSinglePass:true,transparent:true,depthWrite:false,toneMapped:false});
   const mesh=new THREE.Mesh(geometry,material);
   mesh.renderOrder=order;
   parent.add(mesh);
