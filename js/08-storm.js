@@ -48,7 +48,7 @@ function stormBasic(p,inp,dt,setCd){
   if(inp.fire){
     if(!p.beam){p.beam=1;p.bTk=0;}
     const tg=stormCone(p,STORMV.beamR,STORMV.beamArc);p.bTg=tg.slice(0,4).map(t=>[Math.round(t.x),Math.round(t.y),Math.round(cH(t)*10)/10]);
-    p.bTk-=dt;if(p.bTk<=0){p.bTk=STORMV.beamTick;p.baHit=1;for(const t of tg)aoeHit(p,t,STORMV.beamDmg);p.baHit=0;}
+    p.bTk-=dt;if(p.bTk<=0){p.bTk=STORMV.beamTick;p.baHit=1;for(const t of tg)if(!darkShieldCross(t,p.x,p.y,p.z+1.1,t.x,t.y,cH(t)))aoeHit(p,t,STORMV.beamDmg);p.baHit=0;}
   }else p.beam=0;
 }
 // สายฟ้าสามเหลี่ยม: ยาว 250 ปลายกว้าง 120 ฟาดจากฟ้า 20 ดาเมจ + Shock

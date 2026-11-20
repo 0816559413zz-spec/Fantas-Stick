@@ -3,11 +3,13 @@
 // • เส้นหมึกพันด้าม 3 จุด • ค่อนข้างเยอะจนกลบทรงได้บ้าง • fx: assets/fx/darkness/scythe_idle.fx.json
 const ST_SCY_LINES='assets/vfx/dark_scythe.lines.json';
 let stScyLines=null;
-if(typeof loadModel==='function')loadModel('dark_scythe');   // โหลดล่วงหน้า (contact sheet ถ่ายทันที)
-fetch(ST_SCY_LINES).then(r=>r.ok?r.json():null).then(j=>{stScyLines=j;}).catch(()=>{});
+let stScyLinesLoad;
+function loadScytheLines(){
+  return stScyLinesLoad??=fetch(ST_SCY_LINES).then(r=>r.ok?r.json():null).then(j=>{stScyLines=j;}).catch(()=>{});
+}
 
 function stScyInk(){   // วัสดุหมึก: ดำสนิทไม่รับแสง โปร่งตามจุดยอด
-  return new THREE.MeshBasicMaterial({color:0x000000,transparent:true,depthWrite:false,side:THREE.DoubleSide,vertexColors:true,toneMapped:false});
+  return new THREE.MeshBasicMaterial({color:0x000000,transparent:true,depthWrite:false,side:THREE.DoubleSide,forceSinglePass:true,vertexColors:true,toneMapped:false});
 }
 
 function stScytheHitCut(root,base,ghost=false){const g=new THREE.Group();g.name='Scythe BA hit slash';g.position.copy(base);g.scale.setScalar(ghost?0.6:0.8);root.add(g);   // ชัดเท่ากันทั้งคู่ ต่างแค่ขนาด
@@ -84,6 +86,7 @@ FXCODE.studio_darkness_scythe=(_x,_y,_h,args,instance)=>{
 };
 
 function stCreateScythePreview(root,args,lifetime){
+  loadScytheLines();
   const S=args.scale||1.6;          // ผู้ใช้: ใหญ่ขึ้นอีก → เคียวสูง ~3.5 ม. (~1.8 เท่าตัวละคร)
   const pivot=new THREE.Group();pivot.position.set(-(args.side??1.5),args.lift??0.05,args.fwd??-0.3);root.add(pivot);   // anchor (วัดในสตูดิโอ): +z = หน้า, −x = ขวามือตัวละคร
   const scy=new THREE.Group();scy.scale.setScalar(S);pivot.add(scy);
@@ -357,6 +360,8 @@ function stCreateScythePreview(root,args,lifetime){
       ghostAt(tg,phi,roll,yaw);ghostRot.visible=ghostBuilt;
       ghostMat.opacity=GOP*ez(GIN,GIN+0.1,age)*(1-ez(GHE+GCH,GHE+GCH+GOUT,age));ghostInk.opacity=ghostMat.opacity;updGhostTail(tg,age,roll,ghostMat.opacity/GOP,yaw);});
   };
+  let trailSections;
+  const trailSamples=Array.from({length:HH},()=>({pos:new THREE.Vector3(),QB:new THREE.Quaternion(),act:0,shaft:true}));
   let flPh=0,flLast=null;   // spine-flame phase: args.flameSpeed scales flow speed without jumps (Flow state)
   const update=(time,charge=0,drag=0,swingTime=time)=>{
     if(!voidFixed&&holder.children.length){fixVoid();voidFixed=true;}
@@ -384,19 +389,33 @@ function stCreateScythePreview(root,args,lifetime){
         const [midX,midY]=bladePt(.50,.45),trailCenter=new THREE.Vector3(midX,midY,0).multiplyScalar(S*(1-trailWidth));
         chargedFlakes?.(swing);
         const [tipX,tipY]=bladePt(1,0.45),[ttx,tty]=tan(1),acts=[];
+        const sections=trailSections??=Array.from({length:HK},(_,k)=>{
+          const tk=.05+1.07*k/(HK-1),e=(tk-1)*1.15;
+          return {tk,edge:tk<=1?bladePt(tk,.45):[tipX+ttx*e,tipY+tty*e],spine:bladePt(tk,0)};
+        });
         const sampleTrail=args.trailPose??baPose;
-        for(let j=0;j<HH;j++){const Pj=sampleTrail(swing-j*0.014),age=j/(HH-1);Mt.compose(Pj.pos,Pj.QB,Sv);acts[j]=Pj.act;
+        let trailActive=false;
+        for(let j=0;j<HH;j++){
+          const sample=sampleTrail(swing-j*.014);
+          const saved=trailSamples[j];
+          saved.pos.copy(sample.pos);saved.QB.copy(sample.QB);
+          saved.act=sample.act;saved.shaft=sample.shaft;
+          if(sample.act>0)trailActive=true;
+        }
+        tail.visible=fringe.visible=shTail.visible=tailFlames.visible=tailSheet.visible=trailActive;
+        if(trailActive){
+        for(let j=0;j<HH;j++){const Pj=trailSamples[j],age=j/(HH-1);Mt.compose(Pj.pos,Pj.QB,Sv);acts[j]=Pj.act;
           if(trailWidth!==1)Mt.setPosition(_p.copy(trailCenter).applyQuaternion(Pj.QB).add(Pj.pos));
           // หางด้าม: จากปลายล่างของด้ามขึ้นไปต่อกับโคนหางใบ
           {const [rx,ry]=bladePt(0.05,0.45);for(let k=0;k<SK;k++){const u=k/(SK-1);_p.set(rx*u,0.02+(ry-0.02)*u,0).applyMatrix4(Mt);const i3=j*SK+k;shpos[i3*3]=_p.x;shpos[i3*3+1]=_p.y;shpos[i3*3+2]=_p.z;
             const gy=0.30-0.18*u;shcol[i3*4]=shcol[i3*4+1]=shcol[i3*4+2]=gy;shcol[i3*4+3]=Math.min(1,Math.pow(1-age,1.2)*1.5)*Pj.act*Math.min(1,u/0.1+0.5)*(Pj.shaft===false?0:1);   /* ยาวและจางพร้อมหางใบ (ผู้ใช้ 2026-11-19) */}}   // เทาเข้มที่ปลายล่าง → เกือบดำใกล้ใบ ทึบพอเห็นชัด แต่ไม่ดำสนิทเท่าใบ
-          for(let k=0;k<HK;k++){const tk=0.05+1.07*k/(HK-1);let x,y;if(tk<=1)[x,y]=bladePt(tk,0.45);else{const e=(tk-1)*1.15;x=tipX+ttx*e;y=tipY+tty*e;}_p.set(x,y,0).applyMatrix4(Mt);   // ปลายใบ: หางยื่นเลยปลายจริงไปอีกนิด
+          for(let k=0;k<HK;k++){const {tk,edge:[x,y]}=sections[k];_p.set(x,y,0).applyMatrix4(Mt);   // ปลายใบ: หางยื่นเลยปลายจริงไปอีกนิด
             const i2=j*HK+k,nz=Math.sin(k*1.7+T*9)*0.5+Math.sin(k*4.1-j*1.3+T*13)*0.5;
             tpos[i2*3]=_p.x;tpos[i2*3+1]=_p.y+(age>0.5?0.08*(age-0.5)*nz:0);tpos[i2*3+2]=_p.z;
             const body=Math.pow(1-age,1.2),flame=age<0.45?1:Math.max(0,Math.min(1,(nz+1.1-age*1.8)*2));   // ปลายหางขาดเป็นลิ้นไฟ (สุ่มตามคลื่น ไม่เป็นริ้ว)
             tcol[i2*4+3]=Math.min(1,body*1.5*(tk>0.85?1.35:1))*flame*Pj.act*(tk<0.15?tk/0.15:1)*(tk>1?Math.max(0.35,1-(tk-1)*4):1);   // เฉพาะตอนฟัน • แนวปลายใบเข้มกว่า
             // แถบเปลวบนขอบหาง: จากแนวสันใบ ยกขึ้นเป็นลิ้นไฟหยัก
-            {const [sx,sy]=bladePt(tk,0.0);_p.set(sx,sy,0).applyMatrix4(Mt);const hj=(0.12+0.22*Math.max(0,nz+0.3))*(0.5+0.5*(1-age))+(age>0.55?(age-0.55)*1.1*(0.5+0.5*Math.sin(k*2.3+T*14)):0);   // ปลายหางเปลวสูงขึ้น ลุกเป็นลิ้น
+            {const [sx,sy]=sections[k].spine;_p.set(sx,sy,0).applyMatrix4(Mt);const hj=(0.12+0.22*Math.max(0,nz+0.3))*(0.5+0.5*(1-age))+(age>0.55?(age-0.55)*1.1*(0.5+0.5*Math.sin(k*2.3+T*14)):0);   // ปลายหางเปลวสูงขึ้น ลุกเป็นลิ้น
               f2pos[i2*3]=_p.x;f2pos[i2*3+1]=_p.y+hj*(j%2?1:0.25);f2pos[i2*3+2]=_p.z;   // แถวสลับสูง-ต่ำ = ลิ้นไฟ
               f2col[i2*4+3]=tcol[i2*4+3]*0.95;}}}
         tailGeo.attributes.position.needsUpdate=true;tailGeo.attributes.color.needsUpdate=true;fr2.attributes.position.needsUpdate=true;fr2.attributes.color.needsUpdate=true;
@@ -419,6 +438,7 @@ function stCreateScythePreview(root,args,lifetime){
               let al=Math.pow(1-v,0.6);if(gap){const g0=cyc*0.9,g1=g0+0.22;if(v>g0&&v<g1)al=0;else if(v<g0)al*=Math.min(1,cyc*3);}
               tecol[c4+3]=je<0?0:al*Math.min(1,aE*1.5)*Math.min(1,tt/0.08);}}
           teGeo.attributes.position.needsUpdate=true;teGeo.attributes.color.needsUpdate=true;}
+        }
         // จานควง + เปลวรอบขอบ + เส้นเปลว 3 เส้น (เฉพาะช่วงควง)
         if(hasBASpin){const Ps=args.spinPose?args.spinPose(T):baPose(T),on=!!Ps&&Ps.spinIdx>=0,k=on?Math.sin(Math.PI*Math.min(1,Ps.spinU)):0;
           if(on){
@@ -437,13 +457,14 @@ function stCreateScythePreview(root,args,lifetime){
             U.g.attributes.position.needsUpdate=true;U.g.attributes.color.needsUpdate=true;}}
         // ละอองตอนควง: เกิดที่ปลายใบตอนควง แล้วพุ่งออกจากตัวพร้อมตก
         {const kc=Math.floor(T/LOOP);for(let i=0;i<SPL;i++){const sp=splash[i],kk=i%NSW,b0=kc*LOOP+SW0+kk*GAP+WU+SWP+HOLD+SPIN*((i/NSW|0)/(SPL/NSW)),age=T-b0,life=0.5;
-          if(age<0||age>life){sp.material.opacity=0;continue;}
+          sp.visible=age>=0&&age<=life;
+          if(!sp.visible){sp.material.opacity=0;continue;}
           const Pb=baPose(b0),Mb=new THREE.Matrix4().compose(Pb.pos,Pb.QB,new THREE.Vector3(S,S,S)),[bx,by]=bladePt(0.7+0.3*rnd(i+300),0.3);_p.set(bx,by,0).applyMatrix4(Mb);
           const ox=_p.x,oz=_p.z,ol=Math.hypot(ox,oz)||1,vh=3.5+2.5*rnd(i+301);
           sp.position.set(_p.x+ox/ol*vh*age+(rnd(i+302)-0.5)*age*2,_p.y+(1.2+rnd(i+303))*age-4.5*age*age,_p.z+oz/ol*vh*age);
           const sz=(0.2+0.18*rnd(i+304))*S*(1-age/life*0.5);sp.scale.set(sz,sz*1.3,1);sp.material.opacity=0.9*(1-age/life);}}
         for(let e=0;e<EMB;e++){const sp=embers[e],ph=(T*1.4+rnd(e+80))%1,j=Math.min(HH-1,Math.floor(HH*(0.55+0.4*rnd(e+81)))),k=Math.floor(rnd(e+82)*HK),i2=j*HK+k;
-          const al=f2col[i2*4+3];sp.position.set(f2pos[i2*3]+Math.sin(T*3+e)*0.15*ph,f2pos[i2*3+1]+0.2+ph*1.1,f2pos[i2*3+2]+Math.cos(T*2+e)*0.15*ph);
+          const al=f2col[i2*4+3];sp.visible=trailActive&&al>0;if(!sp.visible){sp.material.opacity=0;continue;}sp.position.set(f2pos[i2*3]+Math.sin(T*3+e)*0.15*ph,f2pos[i2*3+1]+0.2+ph*1.1,f2pos[i2*3+2]+Math.cos(T*2+e)*0.15*ph);
           const sz=(0.12+0.12*rnd(e+83))*(1-ph*0.6);sp.scale.set(sz,sz*1.5,1);sp.material.opacity=Math.min(1,al*2)*Math.sin(ph*Math.PI);}}}
     if(!stScyLines)return;
     // ---------- หมึกไหลตามใบแล้วม้วนหลุด ----------

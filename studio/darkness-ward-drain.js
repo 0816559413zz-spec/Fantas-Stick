@@ -10,48 +10,6 @@ const ST_WARD_DRAIN_FADE=2;
 const ST_WARD_DRAIN_SPIN=.94;
 const ST_WARD_DRAIN_TURN=Math.PI*2;
 
-function stWardDrainPool(parent){
-  const material=new THREE.ShaderMaterial({
-    uniforms:{
-      age:{value:0},spread:{value:ST_WARD_DRAIN_SPREAD},
-      hold:{value:ST_WARD_DRAIN_HOLD},fade:{value:ST_WARD_DRAIN_FADE},spin:{value:ST_WARD_DRAIN_SPIN}
-    },
-    transparent:true,depthWrite:false,toneMapped:false,
-    vertexShader:`varying vec2 field;void main(){field=uv*2.-1.;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
-    fragmentShader:`uniform float age,spread,hold,fade,spin;varying vec2 field;
-    void main(){
-      float launch=clamp(age/spread,0.,1.);
-      float expansion=1.-pow(1.-launch,2.4);
-      float reach=mix(.035,1.,expansion);
-      float r=length(field),a=atan(field.y,field.x);
-      float edge=reach*(.979+.018*sin(a*13.+age*5.));
-      float softness=reach*mix(.080,.028,expansion);
-      float alpha=(1.-smoothstep(edge-softness,edge,r))*
-        smoothstep(0.,.033,age)*(1.-smoothstep(hold,fade,age));
-      float twist=a+age*spin;
-      float streak=smoothstep(.18,.96,cos(twist*3.+r*11.+.32*sin(r*22.)));
-      float breaks=.48+.52*smoothstep(-.38,.82,sin(twist*5.-r*5.));
-      float swirl=streak*breaks*smoothstep(.12,.34,r)*(1.-smoothstep(.76,.98,r));
-      swirl*=smoothstep(.09,.23,age);
-      float shock=(1.-smoothstep(.024,.095,abs(r-reach*.88)))*
-        smoothstep(.004,.029,age)*(1.-smoothstep(.055,.20,age))*(.64+.36*sin(a*11.+r*6.));
-      vec3 shade=vec3(.035,.029,.063)*swirl+vec3(.24,.169,.34)*shock;
-      gl_FragColor=vec4(shade,alpha);
-      #include <colorspace_fragment>
-    }`
-  });
-  const pool=new THREE.Mesh(new THREE.CircleGeometry(ST_WARD_DRAIN_RADIUS,80),material);
-  pool.name='Ward drain warning';
-  pool.position.y=.031;
-  pool.rotation.x=-Math.PI/2;
-  pool.renderOrder=2;
-  parent.add(pool);
-  return age=>{
-    pool.visible=age>=0&&age<ST_WARD_DRAIN_FADE;
-    material.uniforms.age.value=age;
-  };
-}
-
 function stWardDrainBadge(parent){
   const badge=new THREE.Group();
   badge.name='Ward drain shield icon';
@@ -109,7 +67,7 @@ FXCODE.studio_darkness_ward_drain=(_x,_y,_h,args,instance)=>{
     return {student,inside,badge:inside?stWardDrainBadge(student.g):null};
   });
 
-  const updatePool=stWardDrainPool(zone);
+  const updatePool=stWardDrainPool(zone,ST_WARD_DRAIN_RADIUS,ST_WARD_DRAIN_FADE);
   const solid=(geometry,color,parent=root)=>{
     const mesh=new THREE.Mesh(geometry,new THREE.MeshBasicMaterial({color,toneMapped:false}));
     parent.add(mesh);

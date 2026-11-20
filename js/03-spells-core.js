@@ -6,7 +6,7 @@
 // ไอคอนคาถา: จาก game-icons.net (CC BY 3.0, เครดิตใน "คู่มือ" และ icons/CREDITS.md) ไฟล์อยู่ที่ icons/<id>.svg (Service Worker เก็บไว้เล่นออฟไลน์)
 // เพิ่มไอคอนใหม่ = วางไฟล์ icons/<id>.svg (สีขาวล้วน) แล้วเพิ่ม id ใน ICONS • ICOALIAS = ใช้ไอคอนเดิมซ้ำ
 const ICONS=new Set(['p_light','b_light','sh_light','dsh_light','crystalbond','shardvolley','empowerlight','sanctumcrystal','veiledshard','p_darkness','b_darkness','sh_darkness','dsh_darkness','dk_mark','dk_chase','dk_waltz','dk_drain','dk_veil','dk_ult','w_featherwing','w_downburst','w_plume','w_sonic','w_tailwind','w_slipstream','p_water','b_water','sh_water','dsh_water','riptide','tidecaller','aquacage','abyssalbeam','moonwater','dragondeep','p_wind','b_wind','sh_wind','dsh_wind','aegisgale','windrift','vortexbind','voidspheres','featherwing','eyeofheaven','p_earth','b_earth','sh_earth','dsh_earth','cb_earth','tectoniccrush_sq','stonebreaker','mudswamp','tectoniccrush','dustburst','terraauger','wrath','b_frost','b_frost_m','b_hex','b_nature','b_pyro','b_storm','b_summon','blazeform','blinddust','bloom','colossus','cryoshell','darkness','dragonbreath','dsh_frost','dsh_pyro','dsh_storm','firesprite','frostaura','frostforge','glacierrend','godlightning','hexmark','ignitionsnap','kindle','legion','mirrorlegion','p_frost','p_hex','p_nature','p_pyro','p_storm','p_summon','permafrost','poisondart','railgun','ringofembers','sh_frost','sh_pyro','sh_storm','silencecurse','soulburst','soulsiphon','speedsiphon','spiritwolf','sporecloud','staticfield','stonegolem','stormorbs','terror','thornburst','thunderline','triplestrike','vinelash','wispheal','worldtree']);
-const ICOALIAS={featherwing:'w_featherwing',aegisgale:'w_downburst',windrift:'w_plume',eyeofheaven:'w_sonic',voidspheres:'w_tailwind',vortexbind:'w_slipstream',dragonfall:'dragonbreath',stormdome:'staticfield'};   // Dragonfall ใช้ไอคอนมังกรเดิม • ลูกสายฟ้าโดมใช้ไอคอนโดมสายฟ้า
+const ICOALIAS={darkmark:'dk_mark',darkchase:'dk_chase',darkwaltz:'dk_waltz',darkward:'dk_drain',darkveil:'dk_veil',darkrift:'dk_ult',featherwing:'w_featherwing',aegisgale:'w_downburst',windrift:'w_plume',eyeofheaven:'w_sonic',voidspheres:'w_tailwind',vortexbind:'w_slipstream',dragonfall:'dragonbreath',stormdome:'staticfield'};   // Dragonfall ใช้ไอคอนมังกรเดิม • ลูกสายฟ้าโดมใช้ไอคอนโดมสายฟ้า
 const hasIco=id=>ICONS.has(ICOALIAS[id]||id);
 // URL เต็ม: ค่านี้ไปอยู่ใน CSS var(--u) ซึ่งเบราว์เซอร์จะอ่าน url() เทียบกับไฟล์ css/game.css ถ้าเป็นที่อยู่แบบสั้น
 const ICOBASE=new URL('icons/',location.href).href;
@@ -56,7 +56,7 @@ function cleanKit(s){return parseKit(parseKit(s).str).str;}
 function setKit(p,str){const old=p.pathIdx;p.fmode=0;p.orbs=0;p.orbBlk=0;p.kit=cleanKit(str);const k=parseKit(p.kit);p.pathIdx=k.path;p.kitIds=k.ids.map(i=>SPELL_LIST[i].id);p.ultId=SPELL_LIST[k.ult].id;
   if(old!==undefined&&old!==p.pathIdx&&G&&G.ph!=='lobby')pathReset(p);}
 // เปลี่ยนสายกลางเกม (เมนูทดลอง): ล้างท่าค้างของสายเก่า — ไม่งั้นค้างลอยฟ้า (Wrath) / เดินไม่ได้ (Railgun/Auger) / ร่างเทพค้าง
-function pathReset(p){p.fheat=0;clearStatus(p);earthReset(p);windReset(p);waterReset(p);natureReset(p);lightReset(p,true);Object.assign(p,{stS:null,stCd:0,god:0,clQ:null,cEmp:0,cEmpT:0,clT:0,xhp:0,sdome:null,rail:null,slnT:0,sorb:null,beam:0,sdHit:null,slam:false,slam3:null,chg:0,dash:0,dashSp:0,trail:null,fpath:null,shieldOn:false});}
+function pathReset(p){p.fheat=0;clearStatus(p);earthReset(p);windReset(p);waterReset(p);natureReset(p);lightReset(p,true);darkReset(p);Object.assign(p,{stS:null,stCd:0,god:0,clQ:null,cEmp:0,cEmpT:0,clT:0,xhp:0,sdome:null,rail:null,slnT:0,sorb:null,beam:0,sdHit:null,slam:false,slam3:null,chg:0,dash:0,dashSp:0,trail:null,fpath:null,shieldOn:false});}
 
 // ---------- สถานะ (ใช้ได้ทั้งผู้เล่นและศัตรู) ----------
 const isBig=t=>t.isE&&(t.type==='troll'||t.type==='queen'||(EDEF[t.type]&&EDEF[t.type].boss));
@@ -156,7 +156,7 @@ function foesIn(team,x,y,r,hMax){
 // z = ความสูงต้นทาง (ม.) • โล่ที่ aim3d (สายลมตอนบิน/ร่อน) หันตามเป้าเล็ง 3 มิติ: กันได้ทุกทิศที่เล็งไป รวมบน/ล่าง (ผู้ใช้ 2026-11-10)
 const SHIELD_BREAK_LOCK=5;
 function shieldFaces(t,x,y,z){
-  if(!t.shieldOn)return false;
+  if(!t.shieldOn||t.pathIdx===DARKP)return false;
   const B=PBASIC[t.pathIdx|0];
   if(B&&B.front&&x!=null){const A=B.frontA||Math.PI/3;
     if(B.aim3d&&B.aim3d(t)){const ap=t.pathIdx===1?frostShieldPitch(t):clamp((t.inp&&t.inp.ap)||0,-1.5,1.5),c=Math.cos(ap),ax=c*Math.cos(t.ang),ay=c*Math.sin(t.ang),az=Math.sin(ap);

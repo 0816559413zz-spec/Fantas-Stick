@@ -160,7 +160,8 @@ function waterBeamStop(b){const c=Math.cos(b.a)*Math.cos(b.pt),s=Math.sin(b.a)*M
     if(BLDG.length)for(const b of sgNear(sgBld(),x,y,8,_sgPB))if(bldNear(b,x,y,8)&&bldPieceAt(b,x,y,hh,8)>=0)return d;
     for(const w of G.walls)if(b.team!==w.team&&hh<w.hgt&&(x-w.x)**2+(y-w.y)**2<(w.r+8)**2)return d;
     if(citySolidAt(x,y,hh))return d;}
-  return max;}
+  const x=b.x+c*max,y=b.y+s*max,h=h0+rise*max-terrT(x,y);
+  return max*darkBeamStop(b.team,b.x,b.y,b.h,x,y,h);}
 function waterBeamTick(p,dt){const B=p.wab;B.t-=dt;
   if(!p.alive||p.stun>0){p.wab=null;emit({k:'efx',z:'wtaboff',x:p.x,y:p.y,id:p.id});return;}
   p.wflt=0.2;p.wfz=WT_AB.lift;
@@ -173,7 +174,7 @@ function waterBeamTick(p,dt){const B=p.wab;B.t-=dt;
   // ไม่ทะลุ: ลำหยุดที่คนแรกในแนว โดนแค่คนนั้น (ผู้ใช้ 2026-11-01)
   Object.assign(B,{x:p.x,y:p.y,h:p.z+WT_BEAM_H,team:p.team,w:WT_AB.w});
   let first=null;B.L=waterBeamStop(B);
-  for(const t of foesOf(p.team)){const d=waterBeamTarget(t,B);if(d<B.L){B.L=d;first=t;}}
+  for(const t of foesOf(p.team)){const d=waterBeamTarget(t,B);if(d<B.L&&!darkShieldCross(t,B.x,B.y,B.h,t.x,t.y,cH(t))){B.L=d;first=t;}}
   const elapsed=WT_AB.t-B.t,interval=Math.max(0.01,WT_AB.tick);
   // ฮิตแรกทันที ฮิตที่ตรงกับเวลาปิดลำไม่นับ
   while(B.k*interval<WT_AB.t-1e-6&&B.k*interval<=elapsed+1e-6){

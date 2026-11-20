@@ -106,7 +106,8 @@ function lightBeamLength(p,len){
   const h1=h0+len*Math.sin(pt)*S3+terrT(p.x,p.y)-terrT(end.x,end.y);
   const hit=natureTrace(p,end,h0,h1,p.team,true);
   // The shared trace samples solids at most six units apart. Stop on the near side.
-  return hit?Math.max(0,len*(hit.t-1/Math.ceil(len*cp/6))):len;
+  const stop=darkBeamStop(p.team,p.x,p.y,h0,end.x,end.y,h1);
+  return Math.min(len*stop,hit?Math.max(0,len*(hit.t-1/Math.ceil(len*cp/6))):len);
 }
 // เกจร้อน BA (ผู้ใช้ 2026-11-17): ยิงจริง (มีคริสตัล) 8 วิ = เต็ม (2026-11-18 เดิม 10) → คริสตัลชาร์จใหม่ 2 วิ ยิงไม่ได้ • ปล่อยยิง 2 วิ แล้วเกจค่อยลด (เต็ม→0 ใน 2 วิ)
 function lightHeatTick(p,dt){
@@ -120,7 +121,7 @@ function lightBeamHits(p,len,w,pierce){
   if(len<=0)return [];
   const a=p.lgBeamA,pt=p.lgBeamP,c=Math.cos(a),s=Math.sin(a),fl=len*Math.cos(pt),tp=Math.tan(pt),h0=terrT(p.x,p.y)+p.z+1.35,out=[];
   for(const t of foesOf(p.team)){if(t.dead||t.alive===false||t.downed)continue;const dx=t.x-p.x,dy=t.y-p.y,f=dx*c+dy*s;if(f<0||f>fl)continue;if(Math.abs(-dx*s+dy*c)>w+(t.r||PR))continue;
-    const bh=h0+tp*f*S3-terrT(t.x,t.y),tz=t.z??t.h??0;if(bh<tz-0.3-w/20||bh>tz+2.1+w/20)continue;out.push([f,t]);}
+    const bh=h0+tp*f*S3-terrT(t.x,t.y),tz=t.z??t.h??0;if(bh<tz-0.3-w/20||bh>tz+2.1+w/20)continue;if(darkShieldCross(t,p.x,p.y,p.z+1.35,t.x,t.y,bh))continue;out.push([f,t]);}
   out.sort((x,y)=>x[0]-y[0]);return pierce?out.map(x=>x[1]):out.slice(0,1).map(x=>x[1]);}
 // ไม่มีคริสตัล (ผู้ใช้ 2026-11-17): คลิกหนึ่งครั้ง = ลำแสงสั้น ๆ แวบเดียว ไม่ยิงค้าง • ต้องปล่อยแล้วคลิกใหม่ • ห่างกันอย่างน้อย ba0[1] วิ
 function lightTapShot(p,inp,dt){
@@ -382,7 +383,7 @@ function lightUltBeamHit(p,from,to){
     if(Math.hypot(x-f*dx,y-f*dy)>LT_UL.width+(t.r||PR)||Math.abs(z-f*dz)>(vR(t)+.22)*20)continue;
     near=f;first=t;
   }
-  if(first)damage(first,LT_UL.baDmg,p.id,'aoe',true);
+  if(first&&!darkShieldCross(first,from.x,from.y,from.h,to.x,to.y,to.h))damage(first,LT_UL.baDmg,p.id,'aoe',true);
 }
 function lightUltFinish(p,target){
   const pitch=lightFinishPitch(1,p.lgUlt.lean),delta=LIGHT_FORM_HEART_Y-LIGHT_FORM_PIVOT.y;

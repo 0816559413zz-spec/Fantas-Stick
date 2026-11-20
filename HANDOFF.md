@@ -1,5 +1,7 @@
 # HANDOFF — Fantas Stick (was "Wizard Duel") (repo: Fantas-Stick)
 
+**Darkness ในเกม (2026-11-20):** เลือกสาย Darkness แล้วจัด Q/E/R/F ได้สี่ท่าจากห้าท่า กลไกฝั่งโฮสต์อยู่ใน `js/09-darkness.js` และภาพอยู่ใน `js/68-darkness-view.js` โปรโตคอล v95 รองรับคลาสใหม่ เกมใช้เคียว C กับเปลวสันเดิม ขอบ Night Waltz โมเดลประตูและสัตว์เงา ผืนเงาและทางเคียวปัก/ถอนจาก Studio ภาพ BA, Dash, Chase, Mark Wave และ Ward Drain เป็นรอบเชื่อมเกมแรก ยังรอเกลาเทียบพรีวิว
+
 **Darkness Flow ภาพตอนอยู่ใน Flow (VFX Studio, รอรีวิว #98):** `darkness/flow_state_preview` → `studio/darkness-flow.js` (`FXCODE.studio_darkness_flow`, เรียกผ่าน `ST.I.updateDarknessFlow` ใน studio.js): แขนขวาออร่าดำ + เปลวสันเคียวเดิม (ลอจิกชั้น `Scythe spine flame`) วิ่งตามแขน • เคียวเปลวไหลเร็วขึ้น (`args.flameSpeed` ใน darkness-scythe.js) ไม่มีขาว • ลูกเงา 3 ลูกหางชั้นเดียวแบบหาง BA (CustomBlending รักษา alpha — ดำโปร่งแบบปกติทำให้พื้นขาวหน้าเว็บทะลุ) • HUD บน plane หน้ากล้อง: วงเวลา + จุด 3 จุด + ขอบจอมืด + จุดดำลอยจากขอบ • GIF: เครื่องนี้ไม่มี FFmpeg → อัดเฟรมด้วย `--js` + `tools/pack-motion-gif.py` • ยังไม่ผูกเกม
 
 **Darkness สกิล 5 วงล่องหนทีม (VFX Studio, รอรีวิว #99):** `darkness/veil_preview` ผู้ร่ายเหยียดแขนชูคทาสูง บิดไปขวาแล้วสะบัดชี้ลง เคียว C ถอยขึ้นไปง้างก่อนเร่งปลายแหลมลงปักกลางวง เงาแผ่ออกหลังแตะพื้น ผู้ร่ายกับเพื่อนในวงค่อย ๆ หายไป ขนาดและเวลาที่เห็นใช้จัดฉากใน Studio

@@ -171,7 +171,8 @@ function castSlot(p,i){
   if(G.mode==='br'&&!(p.unl&&p.unl[BRMAP[k]]))return false;
   if(S.cast(p,S,i)===false){p.cd[k]=0.5;p.cdMax[k]=0.5;return false;}
   const cd=S.cd*p.buffs.cdr;p.cd[k]=cd;p.cdMax[k]=cd;
+  if(S.role!=='support')darkReveal(p);
   emit({k:'sk',id:p.id,s:S.id,...(S.id==='stormdome'&&p.sdome.god?{g:1}:null)});   // ภาพ: ท่าร่ายสกิล (js/35 skAnim)
   return true;
 }
-function castUlt(p){if(p.wr||waterCageBusy(p))return false;const S=SPELLS[p.ultId];if(!S||p.ult<100||p.sil>0||p.cryo>0)return false;if(S.cast(p,S)===false)return false;p.ult=0;emit({k:'sk',id:p.id,s:S.id});return true;}
+function castUlt(p){if(p.wr||waterCageBusy(p))return false;const S=SPELLS[p.ultId];if(!S||p.ult<100||p.sil>0||p.cryo>0)return false;if(S.cast(p,S)===false)return false;p.ult=0;darkReveal(p);emit({k:'sk',id:p.id,s:S.id});return true;}

@@ -281,10 +281,11 @@ function syncPlayers(P,mode,now,dt){
     if(o.rig){rigSync(o,dt);windForearm(o);stormBowForearm(o);earthFistForearm(o);natForearmR(o);if(domeKnee)dpKnees(o,0,domeKnee);}
     if(activeWhip||o.natureWhipView)natureWhipView(o,activeWhip);
     natureCharacter(o,p,now);
+    darknessCharacter(o,p,myP,now);
     if(ragTick(o,p,v,dt,now))o.tip.scale.setScalar(0.001);   // ล้ม/กระแทกแรง = ragdoll (js/48)
     if(p.bn&&Math.random()<0.7)burst(p.x,p.y,'#ff6a2a',1,30,0.45,3.5,{h:pz+rnd(0.3,1.8),vh:[1,2.5],g:-1});
     if(p.u>=100&&Math.random()<0.35)burst(p.x+rnd(-18,18),p.y+rnd(-18,18),'#ffd86b',1,10,0.9,1.8,{h:pz+rnd(0,0.4),vh:[1.5,3],g:-0.3});
-    if(p.sh&&!fireSh&&!p.ea&&Math.random()<0.3)burst(p.x,p.y,'#7ff6ff',1,40,0.4,1.4,{h:pz+rnd(0.3,2)});
+    if(p.sh&&!fireSh&&!p.ea&&getKit(p.id).path!==DARKP&&Math.random()<0.3)burst(p.x,p.y,'#7ff6ff',1,40,0.4,1.4,{h:pz+rnd(0.3,2)});
     if(p.ds)burst(p.x,p.y,'#bfefff',2,30,0.3,2,{h:pz+rnd(0.4,1.6),g:0});
   }
   for(const [id,o] of PM3)if(!seen.has(id)){if(o.fball)scene.remove(o.fball);if(o.orbG)scene.remove(o.orbG);lightDropView(id);disposeObj(o.g);PM3.delete(id);}
@@ -322,6 +323,7 @@ function syncEnemies(E,P,now,dt){
     o.stars.visible=!!e.st;o.stars.rotation.y=now/250;
     if(o.tele){o.tele.visible=!!e.sl;if(e.sl)o.tele.material.opacity=0.2+0.2*Math.sin(now/60);if(o.club)o.club.rotation.x=e.sl?-0.6:Math.PI/2.6;}
     if(e.bn&&Math.random()<0.7)burst(e.x,e.y,'#ff6a2a',1,30,0.45,3.5,{h:o.hs+rnd(0.3,o.h*0.8),vh:[1,2.5],g:-1});
+    darknessMarkView(o,e.dk,(o.h||2)*.65);
     statusFX(o,e.fm|0,e.x,e.y,o.hs||0,Math.max(1.2,(o.h||2)*0.9),now);
     if(e.t==='wiz'&&Math.random()<0.15)smoke(e.x,e.y,0.2,1,'#1a2a14',1.2,4,20);
   }
@@ -546,6 +548,7 @@ function drawLabels(P,E,v,me,spk){
   for(const p of P){
     if(!p.al||p.id===NET.myId)continue;
     if(p.gh&&!meGh)continue;
+    if(p.dk?.[0]&&me&&p.tm!==me.tm)continue;
     const s=toScreen(p.x,(p.z||0)+2.55,p.y);if(!s)continue;
     {const tg=nameTag((p.aw?'📶 ':'')+p.n+(p.hb?' 🔴':''),teamOn(v)?TEAMC[p.tm]:mates.includes(p.id)?'#ff6b6b':'#ffffff');cx.drawImage(tg,s[0]-tg._w/2,s[1]-23,tg._w,tg._h);}   // 📶 = เน็ตหลุด รอต่อกลับ
     if(v.mode==='imp')continue;
@@ -605,6 +608,7 @@ function drawCrosshair(){
   if(_me&&_me.nt&&_me.nt.length>6&&_me.al)drawNatureHud(x,y,_me.nt);
   if(_me&&_me.wt&&_me.al)drawWaterHud(x,y,_me.wt,_me);
   if(_me&&_me.lt&&_me.al)drawLightHud(x,y,_me.lt);
+  if(_me?.dk&&_me.al&&getKit(_me.id).path===DARKP)drawDarknessHud(x,y,_me.dk);
   if(_me&&_me.fh!==undefined&&_me.al)drawFireHeat(_me.fh);drawSnapBanner();
   if(!locked&&!VIC.on&&!(VIEW.cur&&VIEW.cur.ph==='over')){
     cx.font='600 17px Kanit,sans-serif';cx.textAlign='center';

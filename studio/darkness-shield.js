@@ -18,48 +18,6 @@ for(const event of ['keydown','keyup'])addEventListener(event,e=>{
 },true);
 addEventListener('blur',()=>stDarkShieldAim.keys.clear());
 
-function stDarkShieldInk(parent,radius){
-  const material=new THREE.ShaderMaterial({
-    uniforms:{spin:{value:0},strength:{value:0}},
-    transparent:true,depthWrite:false,side:THREE.DoubleSide,toneMapped:false,
-    vertexShader:`varying vec2 inkUV;
-      void main(){inkUV=uv*2.-1.;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
-    fragmentShader:`uniform float spin,strength; varying vec2 inkUV;
-      void main(){
-        float r=length(inkUV),a=atan(inkUV.y,inkUV.x);
-        float turn=a-spin;
-        float rag=sin(turn*7.+r*26.)*.35+sin(turn*19.-r*12.)*.19;
-        float bands=r*72.+.23*sin(turn*3.+r*17.)+.12*sin(turn*13.);
-        float hair=1.-smoothstep(.095,.285,abs(fract(bands)-.50));
-        float cut=smoothstep(-.52,.43,sin(turn*3.+r*8.)+rag);
-        float arc=smoothstep(.10,.77,sin(turn*5.-r*10.)+rag);
-        float edge=smoothstep(.84,.975,r)*(1.-smoothstep(.987,1.,r));
-        float thickness=smoothstep(.22,.67,r)*(1.-smoothstep(.97,1.,r));
-        float alpha=thickness*(.16+hair*(.42+.44*cut)+arc*.42)+edge*(.59+.57*cut);
-        vec3 ink=mix(vec3(.002,.002,.005),vec3(.12,.11,.16),hair*(.29+.35*edge)*(1.-arc*.65));
-        gl_FragColor=vec4(ink,clamp(alpha,0.,.95)*strength);
-        #include <colorspace_fragment>
-      }`
-  });
-  const geometry=new THREE.PlaneGeometry(2*radius,2*radius);
-  const sheets=[0,1,2].map(i=>{
-    const mesh=new THREE.Mesh(geometry,i===0?material:material.clone());
-    mesh.name=i===0?'Scythe Shield ink disc':'Scythe Shield inner layer '+i;
-    mesh.renderOrder=7+i;
-    mesh.position.z=(i-1)*.075;
-    mesh.scale.setScalar(1-i*.085);
-    parent.add(mesh);
-    return mesh;
-  });
-  return (angle,strength)=>{
-    for(const [i,mesh] of sheets.entries()){
-      mesh.visible=strength>.01;
-      mesh.material.uniforms.spin.value=(i===1?-angle*.82:angle)+i*1.71;
-      mesh.material.uniforms.strength.value=strength*(i===0?1:i===1?.38:.29);
-    }
-  };
-}
-
 function stDarkShieldFlames(parent,radius){
   const columns=193,rows=10,positions=[],colors=[],indices=[];
   for(let i=0;i<columns;i++)for(let j=0;j<rows;j++){

@@ -92,7 +92,17 @@ function nightWaltzBorder(parent,instance,preview=false){
   if(preview)bands.forEach(([radius,angle,span,height,lean],i)=>{
     root.add(nightWaltzStrip(radius-.32,angle-span*.38,span*.82,height*.25,lean*.55,1.63,17+i,true,.66));
   });
-  for(const strip of root.children)strip.onBeforeRender=()=>{strip.material.uniforms.age.value=instance.t;};
+  for(const strip of root.children){
+    const uniforms=strip.material.uniforms;
+    const delay=(uniforms.seed.value%5)*.025;
+    const first=delay+.05,last=delay+1.53+(preview?.22:0);
+    const count=strip.geometry.index.count;
+    strip.onBeforeRender=()=>{
+      const age=instance.t;
+      uniforms.age.value=age;
+      strip.geometry.setDrawRange(0,age>first&&age<last?count:0);
+    };
+  }
   return root;
 }
 
@@ -100,6 +110,411 @@ FXCODE.darkness_night_waltz=(_x,_y,_h,args,instance)=>{
   const anchor=instance.L.find(layer=>layer.d.id===args.layer);
   if(!anchor?.obj)return;
   const root=nightWaltzBorder(anchor.obj,instance);
+  if(instance.P.ev?.radius)root.scale.setScalar(instance.P.ev.radius*S3/7.9);
   anchor.geo=new THREE.BufferGeometry();
   anchor.geo.addEventListener('dispose',()=>{disposeTree(root);root.removeFromParent();});
 };
+
+function stDarkVeilGround(root,radius){
+  const material=new THREE.ShaderMaterial({
+    uniforms:{age:{value:0},reach:{value:0},opacity:{value:0}},
+    transparent:true,depthWrite:false,toneMapped:false,
+    vertexShader:`varying vec2 groundUV;
+      void main(){groundUV=(uv*2.-1.)*1.32;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
+    fragmentShader:`uniform float age,reach,opacity;
+      varying vec2 groundUV;
+      float ringWave(float r,float a,float time,float duration,float distance,float phase){
+        float p=clamp(time/duration,0.,1.);
+        float edge=.035+distance*(1.-pow(1.-p,1.6));
+        edge*=1.+.014*sin(a*9.+phase)+.015*cos(a*5.-p*4.);
+        float d=r-edge;
+        float leading=1.-smoothstep(.010,.034,abs(d));
+        float wake=(1.-smoothstep(.015,.11,abs(d+.048)))*.47;
+        float tear=.64+.36*smoothstep(-.34,.82,sin(a*17.+phase+p*3.2));
+        return max(leading,wake)*tear*smoothstep(0.,.13,p)*(1.-smoothstep(.61,1.,p));
+      }
+      void main(){
+        float r=length(groundUV),a=atan(groundUV.y,groundUV.x);
+        float rim=reach*(.95+.019*sin(7.*a-age*2.1)+.013*cos(13.*a+age*1.8));
+        float n=r/max(reach,.02);
+        float broken=.4+.6*smoothstep(-.3,.65,sin(a*9.+r*18.-age*3.)+.48*sin(a*17.+age));
+        float border=(1.-smoothstep(.02,.10,abs(r-rim)))*broken;
+        float inside=1.-smoothstep(rim-.085,rim,r);
+        float bands=.5+.5*sin(n*29.+a*3.-age*5.+sin(a*5.+age*1.2)*1.5);
+        float ink=inside*smoothstep(.24,.76,n)*smoothstep(.41,.96,bands)*broken;
+        float wave=ringWave(r,a,age,.54,1.24,0.);
+        float echo=.61*ringWave(r,a,age-.085,.49,1.10,1.7);
+        float hit=(1.-smoothstep(.025,.22,r))*(1.-smoothstep(.035,.22,age));
+        float pulse=max(wave,echo);
+        vec3 col=mix(vec3(.009,.008,.013),vec3(.074,.066,.102),.56*ink+.19*pulse);
+        float base=max(.37*inside,.75*border);
+        gl_FragColor=vec4(col,opacity*max(base,max(pulse*.96,hit*.76)));
+        #include <colorspace_fragment>
+      }`
+  });
+  const pool=new THREE.Mesh(new THREE.PlaneGeometry(radius*2.12*1.32,radius*2.12*1.32),material);
+  pool.name='Darkness veil ground';pool.position.y=.035;pool.rotation.x=-Math.PI/2;pool.renderOrder=2;
+  root.add(pool);
+  const wispsMat=new THREE.ShaderMaterial({
+    uniforms:{...material.uniforms,radius:{value:radius*1.06}},
+    transparent:true,depthWrite:false,toneMapped:false,side:THREE.DoubleSide,
+    vertexShader:`uniform float age,reach,radius;varying vec2 inkUV;
+      void main(){
+        inkUV=uv;
+        vec3 p=position;
+        float a=atan(-p.z,p.x);
+        float v=uv.y;
+        float rim=.95+.019*sin(7.*a-age*2.1)+.013*cos(13.*a+age*1.8);
+        float height=.26+.42*pow(.5+.5*sin(a*10.+age*4.)*cos(a*7.-age*2.),2.);
+        p.y=.05+v*height;
+        p.xz*=radius*reach*rim+v*(.13*sin(9.*a-age*3.)+.10);
+        gl_Position=projectionMatrix*modelViewMatrix*vec4(p,1.);
+      }`,
+    fragmentShader:`uniform float age,reach,opacity;varying vec2 inkUV;
+      void main(){
+        float h=inkUV.y,u=inkUV.x*6.283185;
+        float wave=sin(u*23.+age*4.1+h*h*2.4)+.53*sin(u*39.-age*2.5-h*2.);
+        float wisps=smoothstep(-.30,.95,wave-h*.76);
+        float strands=smoothstep(.25,.88,sin(u*73.+h*9.-age*4.7));
+        float a=opacity*smoothstep(.46,.90,reach)*wisps*(1.-smoothstep(.36,1.,h));
+        gl_FragColor=vec4(mix(vec3(.006,.005,.012),vec3(.054,.044,.078),strands*h),a*.76);
+        #include <colorspace_fragment>
+      }`
+  });
+  const wisps=new THREE.Mesh(new THREE.CylinderGeometry(1,1,1,144,7,true),wispsMat);
+  wisps.name='Darkness veil rising edge';wisps.renderOrder=4;wisps.frustumCulled=false;root.add(wisps);
+  return (age,reach,opacity)=>{
+    pool.visible=opacity>.005;
+    wisps.visible=pool.visible;
+    material.uniforms.age.value=age;
+    material.uniforms.reach.value=reach;
+    material.uniforms.opacity.value=opacity;
+  };
+}
+
+function darkFxMesh(geometry,color,opacity=1){
+  return new THREE.Mesh(geometry,new THREE.MeshBasicMaterial({
+    color,transparent:opacity<1,opacity,depthWrite:opacity>=1,
+    toneMapped:false,side:THREE.DoubleSide,forceSinglePass:true
+  }));
+}
+function drawDarknessHud(x,y,state){
+  cx.save();
+  cx.lineWidth=3;
+  cx.strokeStyle='#8c70a7';
+  if(state[2]>0){
+    cx.beginPath();cx.arc(x,y,21,-Math.PI/2,-Math.PI/2+Math.PI*2*state[2]/6);cx.stroke();
+  }
+  if(state[3]>0){
+    cx.fillStyle='#352744';cx.fillRect(x+24,y-2,32,4);
+    cx.fillStyle='#aa8acb';cx.fillRect(x+24,y-2,32*state[4]/3,4);
+  }
+  for(let i=0;i<2;i++){
+    cx.fillStyle=i<state[7]?'#aa8acb':'#352744';
+    cx.beginPath();cx.arc(x-4+i*8,y+27,2.8,0,Math.PI*2);cx.fill();
+  }
+  cx.restore();
+}
+function darknessMarkView(o,visible,height){
+  if(visible&&!o.darkMark){
+    const mark=new THREE.Group();
+    for(const angle of [-.75,.75]){
+      const line=darkFxMesh(new THREE.PlaneGeometry(.105,.57),0x16121d);
+      line.rotation.z=angle;mark.add(line);
+    }
+    mark.position.set(0,height,.4);o.g.add(mark);o.darkMark=mark;
+  }
+  if(o.darkMark)o.darkMark.visible=!!visible;
+  if(visible)o.darkMark.lookAt(cam.position);
+}
+let darkViewNow=0;
+function darknessCharacter(o,p,viewer,now){
+  darkViewNow=now;
+  const state=p.dk;
+  if(state?.[0]===1&&viewer&&p.tm!==viewer.tm&&p.id!==viewer.id)o.g.visible=false;
+  const faint=!!state?.[0]&&!o.ghost;
+  if(faint!==!!o.darkFaint){
+    o.darkFaint=faint;
+    if(!o.ghost)setGhost(o,faint);
+  }
+  darknessMarkView(o,state?.[1],1.42);
+  if(getKit(p.id).path!==DARKP){if(o.darkGear)o.darkGear.visible=false;return;}
+  if(!o.darkGear){
+    fxLoad('darkness/ult_v3');
+    o.darkGear=new THREE.Group();
+    o.darkSwordRoot=new THREE.Group();o.darkGear.add(o.darkSwordRoot);
+    const blade=stDarkVeilBlade(1.4);
+    const scytheArgs={wrap:'C',manual:true,scale:1.4,side:-1.5,trailPose:blade};
+    o.darkScythe=stCreateScythePreview(o.darkSwordRoot,scytheArgs);
+    o.darkVeilBlade=blade;o.darkScytheArgs=scytheArgs;
+    const sample={pos:new THREE.Vector3(),QB:new THREE.Quaternion(),act:0,shaft:false};
+    const rotation=new THREE.Euler();
+    o.darkSwingPose=(t)=>{
+      const wind=THREE.MathUtils.smoothstep(t,0,.2),strike=THREE.MathUtils.smoothstep(t,.2,.32);
+      const recover=THREE.MathUtils.smoothstep(t,.33,.8),lift=o.darkSwingKind==='up';
+      const weight=1-recover;
+      const outward=wind*(1-strike);
+      const sweep=(1.15*outward-1.9*strike)*weight;
+      sample.pos.set(1.5+sweep,.08+weight*(lift?2.35*strike:.64*strike),weight*(-1.5*outward+3.6*strike));
+      rotation.set(weight*(lift?-1.65*strike:.4*outward),weight*(-.35-.8*outward+1.46*strike),
+        .16+weight*(lift?1.55*outward-.9*strike:1.4*outward+.75*strike));
+      sample.QB.setFromEuler(rotation);
+      sample.act=o.darkSwingKind==='cutOnly'?0:THREE.MathUtils.smoothstep(t,.19,.23)*(1-THREE.MathUtils.smoothstep(t,.3,.39));
+      return sample;
+    };
+    o.darkWeapon=o.darkScythe.pivot;
+    o.darkDisc=new THREE.Group();
+    o.darkDiscInk=stDarkShieldInk(o.darkDisc,3.5);
+    o.darkDisc.position.y=1.4;o.darkGear.add(o.darkDisc);
+    o.darkOrb=darkFxMesh(new THREE.SphereGeometry(.72,20,16),0x101017);
+    o.darkOrb.position.y=1.1;o.darkGear.add(o.darkOrb);
+    o.darkFlowOrbs=Array.from({length:3},()=>{
+      const orb=darkFxMesh(new THREE.SphereGeometry(.16,10,8),0x15111d);
+      o.darkGear.add(orb);return orb;
+    });
+    o.g.add(o.darkGear);
+  }
+  o.darkGear.visible=!p.dn;
+  o.shield.visible=false;
+  const gear=o.darkWeapon,age=(now-(o.darkSwingAt??-1e4))/1000;
+  const swing=age>=0&&age<.92;
+  gear.visible=!state?.[5]||swing;
+  gear.position.set(1.5,.08+Math.sin(now*.002)*.09,0);
+  gear.rotation.set(.25,now*.0015,.16);
+  const veil=o.darkVeilCast,t=veil?(now-veil.at)/1000:Infinity;
+  const planting=t>=0&&t<2.55;
+  o.darkScytheArgs.trailPose=planting?o.darkVeilBlade:swing?o.darkSwingPose:null;
+  o.darkSwordRoot.position.set(0,0,0);
+  o.darkSwordRoot.rotation.y=0;
+  if(planting){
+    const settle=THREE.MathUtils.smoothstep(t,2.09,2.55);
+    const plant=o.darkVeilBlade(t);
+    gear.position.lerp(plant.pos,1-settle);
+    gear.quaternion.slerp(plant.QB,1-settle);
+    o.darkSwordRoot.position.copy(veil.world);
+    o.g.worldToLocal(o.darkSwordRoot.position).multiplyScalar(1-settle);
+    o.darkSwordRoot.rotation.y=angDiff(Math.PI/2-veil.a,o.g.rotation.y)*(1-settle);
+  }else if(swing){
+    const blade=o.darkSwingPose(age),weight=1-THREE.MathUtils.smoothstep(age,.64,.92);
+    gear.position.lerp(blade.pos,weight);gear.quaternion.slerp(blade.QB,weight);
+  }
+  if(gear.visible&&o.g.visible)o.darkScythe.update(now/1000,0,0,planting?t:age);
+  const disc=o.darkDisc,shield=state?.[3]||0;
+  disc.visible=shield>0&&state[4]>0;
+  if(disc.visible){
+    const pitch=state[6]||0;
+    disc.position.set(0,1.4+Math.sin(pitch)*1.6,Math.cos(pitch)*1.6);
+    disc.rotation.set(-pitch,0,0);
+    disc.scale.setScalar(.8+.2*shield);
+    o.darkDiscInk(now*.025,shield);
+    o.armR.rotation.x=lerp(o.armR.rotation.x,-Math.PI/2-pitch,shield);
+    o.armR.rotation.z=lerp(o.armR.rotation.z,0,shield);
+    if(o.rig)rigSync(o,0);
+  }
+  o.darkOrb.visible=!!state?.[5];
+  if(o.darkOrb.visible)o.b.visible=false;
+  else if(o.darkOrbWas)o.b.visible=true;
+  o.darkOrbWas=o.darkOrb.visible;
+  for(const [i,orb] of o.darkFlowOrbs.entries()){
+    orb.visible=state?.[2]>0;
+    if(orb.visible){const a=now*.004+i*Math.PI*2/3;orb.position.set(Math.cos(a)*1.7,1.1+Math.sin(a*2)*.37,Math.sin(a)*1.7);}
+  }
+}
+function darknessEfx(ev){
+  const {z,x,y,h=0,a=0}=ev,o=PM3.get(ev.id);
+  if(z==='dark_nightwaltz'){
+    const r=ev.radius||158;
+    ring(x,y,'#211829',r,.54,h+.07);
+    return true;
+  }
+  if(z==='darkrift'){
+    const recipe=fxData('darkness/ult_v3');
+    if(recipe)fxStart({...recipe,layers:recipe.layers.filter(l=>l.t!=='code')},{x,y,h,a},'darkness/ult_v3');
+    if(o)castStart(o,'line');
+    return true;
+  }
+  if(z==='darkveil'){
+    const root=new THREE.Group();
+    root.position.set(tx(x),GY(x,y)+h,tz(y));
+    const update=stDarkVeilGround(root,ev.radius*S3),life=.91+ev.duration+.36;
+    const materials=[];root.traverse(m=>{if(m.material)materials.push(m.material);});
+    update(0,0,0);
+    fireTemp(root,materials,life,(_v,k)=>{
+      const t=k*life-.91,opacity=t<0?0:1-clamp((t-ev.duration)/.36,0,1);
+      update(t,clamp(t/.29,0,1),opacity);
+    });
+    if(o){o.darkVeilCast={at:darkViewNow||performance.now(),world:root.position.clone(),a};castStart(o,'line');}
+    return true;
+  }
+  if(z==='darkmarkcast'){
+    for(const offset of ev.flow?[-.26,0,.26]:[0]){
+      const angle=a+offset, pitch=ev.pitch||0;
+      const wave=darkFxMesh(new THREE.RingGeometry(2.42,2.68,26,1,-1.17,2.34),0x08070b,.94);
+      wave.rotation.set(0,Math.PI/2-angle,Math.PI/2);
+      fireTemp(wave,[wave.material],.7,(_v,k)=>{
+        const d=700*k*S3;
+        wave.position.set(tx(x)+Math.cos(angle)*Math.cos(pitch)*d,GY(x,y)+h+1.3+Math.sin(pitch)*d,tz(y)+Math.sin(angle)*Math.cos(pitch)*d);
+        wave.material.opacity=.94*(1-k**5);
+      });
+    }
+    return true;
+  }
+  if(z==='darkmarkwind'){
+    if(o){o.darkSwingAt=darkViewNow||performance.now();o.darkSwingKind='up';castStart(o,'line');}
+    return true;
+  }
+  if(z==='darkward'){
+    const root=new THREE.Group(),life=.42+ev.duration;
+    root.position.set(tx(ev.x2),GY(ev.x2,ev.y2)+ev.h2,tz(ev.y2));
+    const pool=stWardDrainPool(root,ev.radius*S3,ev.duration);
+    const from=new THREE.Vector3(tx(x),GY(x,y)+h+1.45,tz(y));
+    const beam=darkFxMesh(new THREE.CylinderGeometry(.075,.14,1,10,1,true),0x130d1d,.92);
+    const direction=from.clone().sub(root.position);
+    beam.position.copy(direction).multiplyScalar(.5);
+    beam.scale.y=direction.length();
+    beam.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),direction.normalize());
+    root.add(beam);beam.visible=false;
+    pool(-1);
+    fireTemp(root,root.children.map(mesh=>mesh.material),life,(_v,k)=>{
+      const age=k*life-.42;
+      pool(age);
+      beam.visible=age>=-.07&&age<.16;
+      beam.material.opacity=.92*(1-THREE.MathUtils.smoothstep(age,0,.16));
+    });
+    if(o)castStart(o,'line');
+    return true;
+  }
+  if(['darkba','darkchaseplain','darkchasehit','darkmarkhit','darkdashquick','darkdashlong','darkshield','darkflow','darkchasemarked','darkbite'].includes(z)){
+    if(o&&['darkba','darkchaseplain','darkchasehit'].includes(z)){
+      o.darkSwingAt=darkViewNow||performance.now();
+      o.darkSwingKind=z==='darkchaseplain'?'up':z==='darkchasehit'&&!ev.last?'cutOnly':'sweep';
+      castStart(o,'line');
+    }
+    if(z==='darkchasehit'||z==='darkmarkhit'||z==='darkdashquick')burst(x,y,'#100c18',12,115,.4,2.4,{h:h+1,g:5});
+    return true;
+  }
+  return false;
+}
+
+
+function stDarkShieldInk(parent,radius){
+  const material=new THREE.ShaderMaterial({
+    uniforms:{spin:{value:0},strength:{value:0}},
+    transparent:true,depthWrite:false,side:THREE.DoubleSide,toneMapped:false,
+    vertexShader:`varying vec2 inkUV;
+      void main(){inkUV=uv*2.-1.;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
+    fragmentShader:`uniform float spin,strength; varying vec2 inkUV;
+      void main(){
+        float r=length(inkUV),a=atan(inkUV.y,inkUV.x);
+        float turn=a-spin;
+        float rag=sin(turn*7.+r*26.)*.35+sin(turn*19.-r*12.)*.19;
+        float bands=r*72.+.23*sin(turn*3.+r*17.)+.12*sin(turn*13.);
+        float hair=1.-smoothstep(.095,.285,abs(fract(bands)-.50));
+        float cut=smoothstep(-.52,.43,sin(turn*3.+r*8.)+rag);
+        float arc=smoothstep(.10,.77,sin(turn*5.-r*10.)+rag);
+        float edge=smoothstep(.84,.975,r)*(1.-smoothstep(.987,1.,r));
+        float thickness=smoothstep(.22,.67,r)*(1.-smoothstep(.97,1.,r));
+        float alpha=thickness*(.16+hair*(.42+.44*cut)+arc*.42)+edge*(.59+.57*cut);
+        vec3 ink=mix(vec3(.002,.002,.005),vec3(.12,.11,.16),hair*(.29+.35*edge)*(1.-arc*.65));
+        gl_FragColor=vec4(ink,clamp(alpha,0.,.95)*strength);
+        #include <colorspace_fragment>
+      }`
+  });
+  const geometry=new THREE.PlaneGeometry(2*radius,2*radius);
+  const sheets=[0,1,2].map(i=>{
+    const mesh=new THREE.Mesh(geometry,i===0?material:material.clone());
+    mesh.name=i===0?'Scythe Shield ink disc':'Scythe Shield inner layer '+i;
+    mesh.renderOrder=7+i;
+    mesh.position.z=(i-1)*.075;
+    mesh.scale.setScalar(1-i*.085);
+    parent.add(mesh);
+    return mesh;
+  });
+  return (angle,strength)=>{
+    for(const [i,mesh] of sheets.entries()){
+      mesh.visible=strength>.01;
+      mesh.material.uniforms.spin.value=(i===1?-angle*.82:angle)+i*1.71;
+      mesh.material.uniforms.strength.value=strength*(i===0?1:i===1?.38:.29);
+    }
+  };
+}
+
+
+function stDarkVeilBlade(scale){
+  const ease=(a,b,t)=>THREE.MathUtils.smoothstep(t,a,b),plant=.91;
+  const up=new THREE.Vector3(0,1,0);
+  const tip=new THREE.Vector3(1.0553,1.6965,0).multiplyScalar(scale);
+  const idle=new THREE.Quaternion().setFromEuler(new THREE.Euler(.05,-.39,-.06));
+  const lean=new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,0,1),-2.16);
+  const pointed=new THREE.Quaternion().setFromAxisAngle(up,-1.04).multiply(lean);
+  const drawnBack=new THREE.Quaternion().setFromEuler(new THREE.Euler(.25,-.28,-.94));
+  const idleTip=tip.clone().applyQuaternion(idle).add(new THREE.Vector3(-1.35,.055,-1.6));
+  const tipAt=new THREE.Vector3(),plantedAt=new THREE.Vector3(0,.042,0);
+  const drawPoint=new THREE.Vector3(-2.05,2.96,-2.34);
+  const drawBack=new THREE.QuadraticBezierCurve3(idleTip,new THREE.Vector3(-1.70,2.65,-2.22),drawPoint);
+  const drop=new THREE.CubicBezierCurve3(drawPoint,new THREE.Vector3(-1.87,3.12,-1.61),
+    new THREE.Vector3(-.25,.85,-.22),plantedAt);
+  const pullAt=plant+.71,pullClear=pullAt+.18,pullDone=pullClear+.51;
+  const buriedTip=plantedAt.clone().add(new THREE.Vector3(0,-.28,0));
+  const releasedTip=new THREE.Vector3(.03,.47,-.04);
+  const liftAway=new THREE.CubicBezierCurve3(releasedTip,new THREE.Vector3(.08,1.38,-.14),
+    new THREE.Vector3(-.74,3.33,-1.35),idleTip);
+  const bladeSample={pos:new THREE.Vector3(),QB:new THREE.Quaternion(),act:0,shaft:false};
+  const bladeOffset=new THREE.Vector3();
+  return function bladePose(t){
+    const draw=ease(.19,.67,t),fall=clamp((t-.76)/(plant-.76),0,1)**1.7;
+    if(t<.76)drawBack.getPoint(draw,tipAt);
+    else if(t<plant)drop.getPoint(fall,tipAt);
+    else if(t<pullAt)tipAt.copy(plantedAt).lerp(buriedTip,ease(plant,plant+.09,t));
+    else if(t<pullClear)tipAt.copy(buriedTip).lerp(releasedTip,clamp((t-pullAt)/(pullClear-pullAt),0,1)**1.6);
+    else liftAway.getPoint(ease(pullClear,pullDone,t),tipAt);
+    const turn=ease(.76,plant-.015,t);
+    bladeSample.QB.copy(idle).slerp(drawnBack,draw).slerp(pointed,turn).slerp(idle,ease(pullClear,pullDone,t));
+    bladeSample.pos.copy(tipAt).sub(bladeOffset.copy(tip).applyQuaternion(bladeSample.QB));
+    bladeSample.act=ease(.765,.805,t)*(1-ease(plant,plant+.06,t));
+    return bladeSample;
+  };
+
+}
+
+function stWardDrainPool(parent,radius,fade){
+  const material=new THREE.ShaderMaterial({
+    uniforms:{
+      age:{value:0},spread:{value:.145},
+      hold:{value:fade-.56},fade:{value:fade},spin:{value:.94}
+    },
+    transparent:true,depthWrite:false,toneMapped:false,
+    vertexShader:`varying vec2 field;void main(){field=uv*2.-1.;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
+    fragmentShader:`uniform float age,spread,hold,fade,spin;varying vec2 field;
+    void main(){
+      float launch=clamp(age/spread,0.,1.);
+      float expansion=1.-pow(1.-launch,2.4);
+      float reach=mix(.035,1.,expansion);
+      float r=length(field),a=atan(field.y,field.x);
+      float edge=reach*(.979+.018*sin(a*13.+age*5.));
+      float softness=reach*mix(.080,.028,expansion);
+      float alpha=(1.-smoothstep(edge-softness,edge,r))*
+        smoothstep(0.,.033,age)*(1.-smoothstep(hold,fade,age));
+      float twist=a+age*spin;
+      float streak=smoothstep(.18,.96,cos(twist*3.+r*11.+.32*sin(r*22.)));
+      float breaks=.48+.52*smoothstep(-.38,.82,sin(twist*5.-r*5.));
+      float swirl=streak*breaks*smoothstep(.12,.34,r)*(1.-smoothstep(.76,.98,r));
+      swirl*=smoothstep(.09,.23,age);
+      float shock=(1.-smoothstep(.024,.095,abs(r-reach*.88)))*
+        smoothstep(.004,.029,age)*(1.-smoothstep(.055,.20,age))*(.64+.36*sin(a*11.+r*6.));
+      vec3 shade=vec3(.035,.029,.063)*swirl+vec3(.24,.169,.34)*shock;
+      gl_FragColor=vec4(shade,alpha);
+      #include <colorspace_fragment>
+    }`
+  });
+  const pool=new THREE.Mesh(new THREE.CircleGeometry(radius,80),material);
+  pool.name='Ward drain warning';
+  pool.position.y=.031;
+  pool.rotation.x=-Math.PI/2;
+  pool.renderOrder=2;
+  parent.add(pool);
+  return age=>{
+    pool.visible=age>=0&&age<fade;
+    material.uniforms.age.value=age;
+  };
+}

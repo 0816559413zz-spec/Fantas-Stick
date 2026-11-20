@@ -346,7 +346,7 @@ function breakShield(p){
 }
 // อัลติ (ผู้ใช้ 2026-10-22): ชาร์จช้าลง 30% ทุกสาย (ULT_RATE) + ระหว่างอัลติยังทำงานอยู่ไม่ได้ชาร์จเพิ่ม (นับใหม่หลังอัลติจบ)
 const ULT_RATE=0.7;
-function ultActive(p){return p.colos>0||p.god>0||!!p.wr||p.mirror>0||!!p.lgUlt||p.pathIdx===NATUREP&&naturePlants(p,'tree').length>0;}
+function ultActive(p){return p.colos>0||p.god>0||!!p.wr||p.mirror>0||!!p.lgUlt||p.dark?.ultBiteUntil>G.time||p.pathIdx===NATUREP&&naturePlants(p,'tree').length>0;}
 function gainUlt(p,v){if(ultActive(p))return;p.ult=Math.min(100,p.ult+v*0.5*ULT_RATE*p.buffs.ult);}
 function lifesteal(p,amt){if(p.buffs.life&&p.alive&&!p.downed)healT(p,amt*p.buffs.life);}
 
@@ -354,6 +354,7 @@ function damage(t,amt,srcId,kind,noFlash=false){
   if(G.mode==='train'&&G.tr&&G.tr.god&&G.players[t.id]===t)return;   // ห้องฝึก: อมตะ
   if(devGod(t))return;   // Dev Mode อมตะ (js/77)
   const src=srcId!=null?G.players[srcId]:null;
+  if(src&&src!==t&&kind!=='burn'&&kind!=='zone')darkReveal(src);
   if(src&&kind!=='burn')amt*=src.buffs.dmg;
   if(src&&src.fheat>0&&kind!=='burn')amt*=pyroHeatDmg(src);
   if(src&&src.blaze>0){amt*=BLAZEF.v.dmgUp;if(kind!=='burn'&&src!==t)pyroBlazeAct(src);}   // Blazeform (เนิร์ฟ 2026-10-27: 1.3→1.15)
@@ -378,14 +379,14 @@ function damage(t,amt,srcId,kind,noFlash=false){
     t.hp-=amt;
     emit({k:'hit',x:t.x,y:t.y,h:cH(t)+vR(t)+0.4,n:Math.round(amt),nf:noFlash?1:undefined,e:t.id,s:srcId||undefined,ns:src&&src.baHit?1:undefined,b:kind==='burn'?1:undefined,kl:t.hp<=0?1:undefined,a:(kind==='aoe'||kind==='zone')?1:undefined});
     if(src){gainUlt(src,amt);lifesteal(src,amt);src.dmgDealt+=amt;}
-    if(t.hp<=0){t.dead=true;if(src)src.kills++;emit({k:'die',x:t.x,y:t.y,h:cH(t),c:EDEF[t.type].col,t:t.type});}
+    if(t.hp<=0){t.dead=true;t.lastHit=srcId;if(src)src.kills++;emit({k:'die',x:t.x,y:t.y,h:cH(t),c:EDEF[t.type].col,t:t.type});}
     return;
   }
   if(!t.alive||t.downed)return;
   if(t.inv>0&&kind!=='burn')return;
   if(G.ball&&G.ball.holder===t.id&&kind!=='burn'&&kind!=='zone')quidDrop(t);
   if(t.stS&&kind!=='burn'){t.stS.abs+=amt;emit({k:'efx',z:'sthit',x:Math.round(t.x),y:Math.round(t.y),h:t.z+1.2,sx:src?Math.round(src.x):undefined,sy:src?Math.round(src.y):undefined,n:Math.round(amt),id:t.id});if(t.stS.abs>90)stormShieldBlast(t,true);return;}
-  if(t.shieldOn&&(kind==='melee'||kind==='aoe')&&shieldFaces(t,src?src.x:null,src?src.y:null,src&&src.z!=null?src.z+1.2:null)){
+  if(t.pathIdx!==DARKP&&t.shieldOn&&(kind==='melee'||kind==='aoe')&&shieldFaces(t,src?src.x:null,src?src.y:null,src&&src.z!=null?src.z+1.2:null)){
     pyroHeatGain(t,amt);pyroBlazeAct(t);if(t.pathIdx===EARTH)earthShHit(t,amt);else{t.shieldE-=amt*(lgOn(t)?lightShieldGauge(t):PBASIC[t.pathIdx|0]?.shMul||1.5);t.shBlk=(t.shBlk|0)+1;}emit({k:'block',x:t.x,y:t.y,h:t.z+1.2,id:t.id});
     {const B=PBASIC[t.pathIdx|0];if(B&&B.onBlock)B.onBlock(t);}
     if(t.shieldE<=0)breakShield(t);
@@ -407,6 +408,7 @@ function damage(t,amt,srcId,kind,noFlash=false){
     if(t.ward.abs<=0)t.ward=null;
     if(amt<=0.01)return;
   }
+  if(darkFlow(t))amt*=.8;
   amt=natureGuard(t,amt);
   const real=Math.min(amt,Math.max(0,t.hp));   // ดาเมจจริง (ไม่นับส่วนที่เกินเลือด)
   t.hp-=amt;t.lastHit=srcId;t.dmgTaken=(t.dmgTaken||0)+real;
@@ -420,7 +422,7 @@ function damage(t,amt,srcId,kind,noFlash=false){
 function playerDown(t,srcId){
   lightReleaseAlly(t);
   t.shieldOn=false;t.burn=0;t.fly=false;
-  t.stS=null;t.sdome=null;t.rail=null;t.stStaff=0;t.slnT=0;t.beam=0;t.sdHit=null;earthReset(t);windReset(t);waterReset(t);natureReset(t);lightReset(t,true);if(t.god>0){t.god=0;t.xhp=0;}
+  t.stS=null;t.sdome=null;t.rail=null;t.stStaff=0;t.slnT=0;t.beam=0;t.sdHit=null;earthReset(t);windReset(t);waterReset(t);natureReset(t);lightReset(t,true);darkReset(t);if(t.god>0){t.god=0;t.xhp=0;}
   // ท่าที่ง้าง/ค้างอยู่ตอนล้ม: ไม่งั้นคนล้ม (co-op) ยังปล่อยท่าได้ หรือท่าค้างไว้แล้วออกเองทันทีที่ถูกชุบ
   t.dfall=null;t.snapT=0;t.grT=0;t.slam=false;t.slam3=null;t.dchgOn=false;t.dchg=0;t.chg=0;t.dash=0;t.dashSp=0;t.trail=null;
   if(G.mode==='coop'){
@@ -492,6 +494,7 @@ function projStep(pr,dt,ps){
   if(pr.kc)pyroKindleCurve(pr,dt);   // Kindle side fireballs   // ขนนกสายลม: วิ่งตามเส้นโค้ง
     if(pr.type==='wcage')waterCageSteer(pr,dt);
     if(pr.dead)return;
+    const prevX=pr.x,prevY=pr.y,prevH=pr.h;
     {const t0=TERR?terrT(pr.x,pr.y):0;pr.x+=pr.vx*dt;pr.y+=pr.vy*dt;pr.h+=pr.vh*dt;if(TERR)pr.h-=terrT(pr.x,pr.y)-t0;}pr.life-=dt;
     if(pr.flak&&broomFlak(pr))return;   // Flak บนไม้กวาด: ใกล้ศัตรู = แตกเป็นกรวย (js/69)
     if(pr.life<=0||pr.x<20||pr.x>MW-20||pr.y<20||pr.y>MH-20||pr.h>40){killProj(pr);return;}
@@ -510,10 +513,13 @@ function projStep(pr,dt,ps){
     if(hp){killProj(pr);return;}
     for(const p of ps){
       if(!p.alive||p.downed||p.id===pr.owner||p.team===pr.team||(pr.hs&&pr.hs.has(p)))continue;
+      if(darkShieldCross(p,prevX,prevY,prevH,pr.x,pr.y,pr.h)){
+        pr.dead=true;emit({k:'block',x:pr.x,y:pr.y,h:pr.h,id:p.id});break;
+      }
       if((p.x-pr.x)**2+(p.y-pr.y)**2>(PR+(pr.hw||pr.r))**2)continue;
       if(Math.abs(pr.h-cH(p))>vR(p)+pr.r/20)continue;
       if(p.inv>0)continue;
-      if(p.shieldOn&&shieldFaces(p,pr.x-pr.vx*0.05,pr.y-pr.vy*0.05,pr.h)){
+      if(p.pathIdx!==DARKP&&p.shieldOn&&shieldFaces(p,pr.x-pr.vx*0.05,pr.y-pr.vy*0.05,pr.h)){
         if(G.time-p.shieldT<0.28){
           // Perfect Parry: ปัดกระสุนทิ้ง (ไม่สะท้อนกลับแล้ว) ไม่เสียพลังโล่ + ผลพิเศษของแต่ละสาย
           pr.dead=true;pyroHeatGain(p,pr.dmg);pyroBlazeAct(p);

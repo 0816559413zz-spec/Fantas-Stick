@@ -177,7 +177,7 @@ function emoHost(id,e){const p=G.players[id];e=e|0;if(!p||!p.alive||p.downed||G.
 function resetBody(p,x,y){
   Object.assign(p,{x,y,z:0,vz:0,fly:false,flyCd:0,root:0,vx:0,vy:0,hp:p.maxHp,alive:true,downed:false,revive:0,stun:0,burn:0,dash:0,inv:0,
     shieldOn:false,shieldE:100,shieldBroken:0,respawn:0,slam:false,slam3:null,dashSp:0,flyOn:false});   // slam: ตายกลางท่ากระโดดฟาด (น้ำแข็ง) แล้วค้าง = ฟันไม่ได้หลังเกิดใหม่
-  for(const k of CDK)p.cd[k]=0;clearStatus(p);p.trail=null;natureReset(p);earthReset(p);windReset(p);waterReset(p);lightReset(p);
+  for(const k of CDK)p.cd[k]=0;clearStatus(p);p.trail=null;natureReset(p);earthReset(p);windReset(p);waterReset(p);lightReset(p);darkReset(p);
   p.ang=Math.atan2(MH/2-y,MW/2-x);
 }
 function fmap(){const M=MAPS[MAPID];return M&&(M.fm||(M.fmFor&&G?M.fmFor(G.mode):null));}   // fmFor = แผนที่จากโค้ดที่มีจุดเกิด/ห่วง/ภารกิจต่อโหมด (city)
@@ -293,6 +293,11 @@ function updatePlayer(p,dt,acting){
   const canAct=acting&&p.stun<=0;
   if(p.lgUlt){lightUltTick(p,inp,dt,canAct&&!cageBusy,pr.x);return;}
   if(acting&&(inp.ax||inp.ay))p.ang=Math.atan2(inp.ay-p.y,inp.ax-p.x)+(p.bld>0?rnd(-0.22,0.22):0);
+  if(p.pathIdx===DARKP){
+    if(!canAct&&p.dark){p.dark.actions.length=0;p.dark.dashStart=null;p.dark.chase=null;}
+    darkTick(p,dt);
+    if(darkMoveChase(p))return;
+  }
   if(p.wr?.ph==='throw')p.ang=p.wr.a;
 
   // ไม้กวาด: B ขึ้น/ลง — โดนสตันหรือใยแมงมุมจะตกจากไม้กวาด • โหมดโวลเดอมอร์ + FFA ไม่มีไม้กวาด (ผู้ใช้ 2026-10-27)
@@ -317,10 +322,14 @@ function updatePlayer(p,dt,acting){
 
   // โล่
   const wantSh=canAct&&!p.fly&&!cageBusy&&G.mode!=='imp'&&!(G.ball&&G.ball.holder===p.id)&&inp.sh&&p.shieldBroken<=0&&p.shieldE>5&&!(PBASIC[p.pathIdx|0]?.noShield?.(p))&&p.dash<=0&&!p.natureHook&&!p.dchgOn&&!(p.colos>0)&&!(p.cryo>0)&&!p.dfall&&p.pathIdx!==2&&!p.aug&&!p.ramp&&!p.wr&&!(p.wsbL>0)&&!p.wwAim;
+  if(p.pathIdx===DARKP)darkShieldTick(p,wantSh&&!(p.dark?.ultUntil>G.time),dt);
+  else{
   if(wantSh&&!p.shieldOn){p.shieldOn=true;p.shieldT=G.time;p.shBlk=0;p.shPar=0;}
   if(!wantSh)p.shieldOn=false;
   if(p.shieldOn){p.shieldE-=12*dt*((PBASIC[p.pathIdx|0]||{}).shDrain||1);if(p.shieldE<=0)breakShield(p);}
   else{p.shieldBroken=Math.max(0,p.shieldBroken-dt);if(p.shieldBroken<=0)p.shieldE=Math.min(100,p.shieldE+4.05*p.buffs.shReg*dt);}   // ผู้ใช้ 2026-11-16: โล่ทุกสายฟื้นช้าลง 2 เท่า (18→9) • 2026-11-18: ทุกสายเท่า Radiance 4.05/วิ (เต็มใน ~25 วิ)
+  }
+  if(p.darkDrain>G.time)p.shieldE=Math.min(p.shieldE,40);
   if(p.shWas&&!p.shieldOn){const B=PBASIC[p.pathIdx|0];if(B&&B.shDrop)B.shDrop(p);}
   p.shWas=p.shieldOn;
   if(p.pathIdx===2)stormTick(p,dt);
@@ -339,12 +348,12 @@ function updatePlayer(p,dt,acting){
   if(p.wr?.ph==='aim'){mx*=0.35;my*=0.35;}   // อัลติดินลอยอยู่: ขยับได้นิดหน่อยทุกทิศ (ผู้ใช้ 2026-11-15) — ตัวค้างท่ารอเหวี่ยงไม้ (js/09 earthWrath จำกัดรัศมี)
   if(!canAct||p.root>0||p.dchgOn||p.cryo>0){mx=my=0;}
   else if(p.fear>0){const fa=Math.atan2(p.y-p.fearY,p.x-p.fearX);mx=Math.cos(fa);my=Math.sin(fa);}
-  const spd=(p.fly?(p.wfo?W_FW.fastSpd:PLAY.fly)*p.buffs.spd:PLAY.walk*p.buffs.spd*(p.shieldOn&&p.pathIdx!==WATERP?PLAY.shSlow:1))*(p.boost>0?1.45:1)*moveMul(p)*(p.wr||p.aug||p.ecb?earthSpd(p):1)*(p.wdr||p.wfw||p.wgs?windSpd(p):1)*(p.wsk||p.wab||p.wmsT>0?waterSpd(p):1)*(p.dfall?(p.dfall.ph===2?0.45:0):p.sdome?(p.sdome.ph===2?0.45:0):p.rail?RAIL.v.slow:(p.kindle>0&&p.hover>0)?0.35:p.breath>0?0.7:(p.snapT>0||p.colos>0||p.grT>0)?0.5:1)*(p.slideT>0?1.8:1+(p.iceB||0))*(p.lgBeam?LTV.baMove:1);
+  const spd=(p.fly?(p.wfo?W_FW.fastSpd:PLAY.fly)*p.buffs.spd:PLAY.walk*p.buffs.spd*(p.shieldOn&&p.pathIdx!==WATERP?PLAY.shSlow:1))*(p.boost>0?1.45:1)*moveMul(p)*(p.wr||p.aug||p.ecb?earthSpd(p):1)*(p.wdr||p.wfw||p.wgs?windSpd(p):1)*(p.wsk||p.wab||p.wmsT>0?waterSpd(p):1)*(p.dfall?(p.dfall.ph===2?0.45:0):p.sdome?(p.sdome.ph===2?0.45:0):p.rail?RAIL.v.slow:(p.kindle>0&&p.hover>0)?0.35:p.breath>0?0.7:(p.snapT>0||p.colos>0||p.grT>0)?0.5:1)*(p.slideT>0?1.8:1+(p.iceB||0))*(p.lgBeam?LTV.baMove:1)*(darkFlow(p)?1.25:1);
   p.wSpd=(p.dash>0||p.slideT>0||p.slip>0||!canAct||p.root>0||p.dchgOn||p.cryo>0||p.fear>0||p.gh||p.fly)?0:Math.round(spd);   // ความเร็วเดินตอนนี้ → ลูกข่ายใช้ทำนายตัวเอง (0 = อย่าทำนาย)
   if(p.natureHook&&!canAct)p.natureHook=null;
   if(p.natureHook&&natureHookMove(p,dt)){p.wSpd=0;p.vx=p.vy=0;}
   else if(p.dash>0){
-    const dashDt=p.wfw?.takeoff?Math.min(dt,p.dash):dt;
+    const dashDt=p.pathIdx===DARKP||p.wfw?.takeoff?Math.min(dt,p.dash):dt;
     p.dash-=dt;const ds=p.dashSp||900;
     // ก้าวย่อย ≤8 หน่วย + ชนโลกทุกก้าว: กันพุ่งทะลุผนังบ้านบาง (ก้าวเดียวอาจยาว 30+ หน่วย)
     const ns=Math.max(1,Math.ceil(ds*dashDt/8)),sk=ds*dashDt/ns;
@@ -403,10 +412,11 @@ function updatePlayer(p,dt,acting){
     p.dash=0.18;p.dashX=dx;p.dashY=dy;p.inv=0.24;p.shieldOn=false;setCd('dodge',2.5*cdr);
     emit({k:'dash',x:p.x,y:p.y});
   }
+  if(p.pathIdx===DARKP&&(p.dark?.shieldStart!=null||p.dark?.ultUntil>G.time))return;
   if(p.shieldOn&&!B.shieldSwing)return;
   if(!natureWhip){
     if(B.tick)B.tick(p,inp,dt,setCd);
-    else if(inp.fire&&p.cd.basic<=0){shoot(p,B.type,{sp:B.id});setCd('basic',0.35);}
+    else if(inp.fire&&p.cd.basic<=0){darkReveal(p);shoot(p,B.type,{sp:B.id});setCd('basic',0.35);}
   }
   if(p.shieldOn)return;
   if(pr.q)castSlot(p,0);
