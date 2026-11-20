@@ -4,7 +4,7 @@ const ST_ULT_HALF=40*Math.PI/180,ST_ULT_RANGE=30;
 const ST_ULT_REL=1.0,ST_ULT_TRAVEL=.80,ST_ULT_BITE=ST_ULT_REL+1.02;
 const stUltRim=t=>{const x=clamp((t-ST_ULT_REL)/ST_ULT_TRAVEL,0,1);return 1.67+1+29*(1-(1-x)**4);};   // same curve as the fx
 
-const _ultV1=new THREE.Vector3(),_ultV2=new THREE.Vector3(),_ultV3=new THREE.Vector3(),_ultV4=new THREE.Vector3(),_ultV5=new THREE.Vector3(),_ultV6=new THREE.Vector3();
+const _ultV1=new THREE.Vector3(),_ultV2=new THREE.Vector3(),_ultV3=new THREE.Vector3(),_ultV4=new THREE.Vector3(),_ultV5=new THREE.Vector3(),_ultV6=new THREE.Vector3(),_ultV7=new THREE.Vector3(),_ultV8=new THREE.Vector3(),_ultV9=new THREE.Vector3(),_ultV10=new THREE.Vector3(),_ultV11=new THREE.Vector3(),_ultV12=new THREE.Vector3();
 const _ultQ=new THREE.Quaternion(),_ultQ2=new THREE.Quaternion(),_ultQ3=new THREE.Quaternion(),_ultQ4=new THREE.Quaternion(),_ultDown=new THREE.Vector3(0,-1,0);
 
 FXCODE.studio_darkness_ult=(_x,_y,_h,args,instance)=>{
@@ -39,53 +39,71 @@ FXCODE.studio_darkness_ult=(_x,_y,_h,args,instance)=>{
   if(args.noScythe)scythe.pivot.visible=false;
 
   instance.ultWandTip=new THREE.Vector3();instance.ultCaster=caster;
-  let shins=null;
+  let shins=null,headBone=null;
   const hidden=new Map();   // staged caster replaces the studio player
   const hide=o=>{if(!o||hidden.has(o))return;hidden.set(o,{mask:o.layers.mask,castShadow:o.castShadow});o.layers.disableAll();o.castShadow=false;};
   function update(){
     const t=instance.t;
     const avatar=PM3.get(NET.myId);avatar?.g.traverse(hide);hide(avatar?.cloth?.mo);hide(avatar?.cloth?.mi);
-    // Pose A (user 2026-11-20): right shoulder toward the target, front leg braced, back leg bent,
-    // wand straight forward, left hand on the right wrist. On release: wand kicks up, body slides back.
-    const P=Object.assign({turn:.30,lean:.20,spreadF:.95,spreadB:.55,knee:.25,drop:.17,kick:.75,slide:.55},globalThis.ULT_TUNE||{});
+    // Pose (user 2026-11-20): charge side-on (left shoulder to the target), crouched low, hands gathered
+    // at the right hip. Release: lunge, left arm thrusts forward, body leans in, left leg steps out
+    // bent, right leg braced straight behind. The jaw bites by itself; the caster just holds the follow-through.
+    const P=Object.assign({turnC:-1.45,turnR:-1.05,dropC:.30,dropR:.36,leanC:.10,leanR:.52,
+      frontC:.55,frontR:1.0,kneeFC:.65,kneeFR:1.05,backC:.55,backR:.95,kneeBC:.6,kneeBR:.04,step:.42},globalThis.ULT_TUNE||{});
+    const L=(c,r,k)=>c+(r-c)*k;
     const gather=ease(.04,.30,t),build=ease(.30,ST_ULT_REL,t);
-    const kick=ease(ST_ULT_REL,ST_ULT_REL+.05,t),settle=ease(ST_ULT_REL+.12,1.55,t),relax=ease(1.75,2.25,t);
-    const recoil=kick*(1-.65*settle)*(1-relax);
-    const slide=P.slide*ease(ST_ULT_REL,ST_ULT_REL+.13,t);
-    const stance=gather*(1-relax*.85);
-    caster.g.position.set(0,0,-slide);
-    caster.g.rotation.y=P.turn*stance;
-    caster.b.position.y=-(P.drop+.04*build+.05*recoil)*stance;
-    caster.b.rotation.set((P.lean+.06*build)*stance-.34*recoil,0,0);   // lean toward the target (body faces it)
-    caster.g.updateMatrixWorld(true);
-    // legs: front foot toward the target, back foot away (directions in body space)
+    const lunge=ease(ST_ULT_REL,ST_ULT_REL+.07,t),relax=ease(1.85,2.4,t);
+    const s=gather*(1-relax),r=lunge;
+    const step=P.step*lunge;
     const rootQ=root.getWorldQuaternion(_ultQ3);   // effect frame: +z = aim
-    const toTarget=_ultV1.set(0,0,1).applyQuaternion(rootQ).applyQuaternion(_ultQ.copy(caster.b.getWorldQuaternion(_ultQ)).invert());
-    const bodyInv=_ultQ4.copy(caster.b.getWorldQuaternion(_ultQ4)).invert();
-    const worldDown=_ultV6.set(0,-1,0).applyQuaternion(bodyInv);   // legs stay planted while the body leans
-    toTarget.addScaledVector(worldDown,toTarget.dot(worldDown)*-1).normalize();
-    const legDir=(spread,out)=>out.copy(worldDown).addScaledVector(toTarget,spread).normalize();
-    caster.legs[0].quaternion.setFromUnitVectors(_ultDown,legDir(P.spreadF*stance,_ultV2));
-    caster.legs[1].quaternion.setFromUnitVectors(_ultDown,legDir(-(P.spreadB+.12*recoil)*stance,_ultV2));
-    // right arm: wand along the aim, kicked upward on release; tiny tremble while charging
-    const pitch=P.kick*recoil+.03*build*Math.sin(t*61)*(1-kick);
-    const aim=_ultV3.set(0,Math.sin(pitch),Math.cos(pitch)).applyQuaternion(rootQ);
-    const armR0=_ultQ2.setFromUnitVectors(_ultDown,aim.applyQuaternion(_ultQ.copy(caster.armR.parent.getWorldQuaternion(_ultQ)).invert()));
-    caster.armR.quaternion.identity().slerp(armR0,gather*(1-relax));
+    const aimW=_ultV1.set(0,0,1).applyQuaternion(rootQ);
+    caster.g.position.set(0,0,step);
+    caster.g.rotation.y=L(P.turnC,P.turnR,r)*s;
     caster.g.updateMatrixWorld(true);
-    // left arm: reach for the right wrist, lets go on release
-    const wrist=caster.armR.localToWorld(_ultV4.set(0,-.42,0));
-    const shoulder=caster.armL.getWorldPosition(_ultV5);
-    const reach=wrist.sub(shoulder).applyQuaternion(_ultQ.copy(caster.armL.parent.getWorldQuaternion(_ultQ)).invert()).normalize();
-    caster.armL.quaternion.identity().slerp(_ultQ2.setFromUnitVectors(_ultDown,reach),gather*(1-.75*kick)*(1-relax));
+    caster.b.position.y=-(L(P.dropC,P.dropR,r)+.03*build*(1-r))*s;
+    // lean toward the target whatever way the body faces
+    const gInv=_ultQ4.copy(caster.g.getWorldQuaternion(_ultQ4)).invert();
+    const leanAxis=_ultV2.set(0,1,0).cross(aimW).normalize().applyQuaternion(gInv);
+    caster.b.quaternion.setFromAxisAngle(leanAxis,L(P.leanC,P.leanR,r)*s);
+    caster.g.updateMatrixWorld(true);
+    const bodyInv=_ultQ4.copy(caster.b.getWorldQuaternion(_ultQ4)).invert();
+    const worldDown=_ultV6.set(0,-1,0).applyQuaternion(bodyInv);
+    const toT=_ultV3.copy(aimW).applyQuaternion(bodyInv);
+    toT.addScaledVector(worldDown,-toT.dot(worldDown)).normalize();
+    const legTo=(leg,spread)=>leg.quaternion.setFromUnitVectors(_ultDown,_ultV4.copy(worldDown).addScaledVector(toT,spread).normalize());
+    legTo(caster.legs[1],L(P.frontC,P.frontR,r)*s);    // left leg toward the target
+    legTo(caster.legs[0],-L(P.backC,P.backR,r)*s);     // right leg braced behind
+    // arms: point each one at a world direction
+    const pointArm=(arm,dirW,k)=>{
+      const local=dirW.applyQuaternion(_ultQ.copy(arm.parent.getWorldQuaternion(_ultQ)).invert()).normalize();
+      arm.quaternion.identity().slerp(_ultQ2.setFromUnitVectors(_ultDown,local),k);
+    };
+    const hip=_ultV5.set(-.05,.55,-.75).applyQuaternion(rootQ).add(caster.g.getWorldPosition(_ultV7));   // charge point: right hip, behind
+    hip.addScaledVector(_ultV8.set(.4,.6,.3).applyQuaternion(rootQ),.03*build*Math.sin(t*57)*(1-r));   // tremble while charging
+    const shL=caster.armL.getWorldPosition(_ultV2),shR=caster.armR.getWorldPosition(_ultV4);
+    const leftC=_ultV9.subVectors(hip,shL).normalize(),rightC=_ultV10.subVectors(hip,shR).normalize();
+    const leftR=_ultV11.set(0,-.08,1).applyQuaternion(rootQ).normalize();           // thrust at the target
+    const rightR=_ultV12.set(-.35,-.55,-1).applyQuaternion(rootQ).normalize();      // wand hand swings back
+    pointArm(caster.armL,leftC.lerp(leftR,r),s);
+    pointArm(caster.armR,rightC.lerp(rightR,r),s);
     if(caster.rig){for(const k of caster.rig)k.w=1;rigSync(caster,0);}
     if(!shins&&caster.fileModel)shins=['shin_R','shin_L'].map(n=>{const bone=caster.fileModel.getObjectByName(n);return bone?{bone,rest:bone.quaternion.clone()}:null;});
-    shins?.forEach((j,i)=>{if(!j)return;j.bone.quaternion.copy(j.rest);j.bone.rotateX((i?P.knee+.25*recoil:.06)*stance);});
+    shins?.forEach((j,i)=>{if(!j)return;j.bone.quaternion.copy(j.rest);j.bone.rotateX((i?L(P.kneeFC,P.kneeFR,r):L(P.kneeBC,P.kneeBR,r))*s);});
+    // head keeps looking at the target
+    if(!headBone&&caster.fileModel){const hb=caster.fileModel.getObjectByName('head');if(hb)headBone={bone:hb,rest:hb.quaternion.clone()};}
+    if(headBone){
+      const hb=headBone.bone;hb.quaternion.copy(headBone.rest);hb.updateWorldMatrix(true,false);
+      const fwd=_ultV2.set(0,0,1).applyQuaternion(hb.getWorldQuaternion(_ultQ));fwd.y=0;fwd.normalize();
+      const tgt=_ultV4.copy(aimW);tgt.y=0;tgt.normalize();
+      const turnQ=_ultQ2.identity().slerp(_ultQ4.setFromUnitVectors(fwd,tgt),.85*s);
+      const pq=hb.parent.getWorldQuaternion(_ultQ);
+      hb.quaternion.premultiply(_ultQ4.copy(pq).invert().multiply(turnQ).multiply(pq));
+    }
     caster.g.updateMatrixWorld(true);
     instance.ultWandTip.set(0,-1.52,0);caster.armR.localToWorld(instance.ultWandTip);root.worldToLocal(instance.ultWandTip);
 
     scythe.pivot.rotation.set(.12*Math.sin(t*1.3),t*.9,.18+.06*Math.sin(t*.8));
-    scythe.pivot.position.set(-1.5,.05+.08*Math.sin(t*1.7),-.3-slide);
+    scythe.pivot.position.set(-1.5,.05+.08*Math.sin(t*1.7),-.3+step);
     if(!args.noScythe)scythe.update(t);
 
     for(const tg of targets){
