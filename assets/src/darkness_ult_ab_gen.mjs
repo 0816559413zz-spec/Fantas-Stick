@@ -156,7 +156,27 @@ function portal(){   // vertical ring in the XY plane: torn ink blades outward, 
     tri([c*.45+tx*.05,s2*.45+ty*.05,0],[c*.45-tx*.05,s2*.45-ty*.05,0],[c*.86,s2*.86,0]);}
   return {id:'portal',k:'poly',v,f,sub:0};
 }
-model('dark_ab_portal','Darkness อัลติ วงเวทเงาที่สัตว์พุ่งออกมา (แนวตั้ง ระนาบ XY)',[portal()]);
+// Shadow rift (user: not a literal magic circle): an irregular tear in the air. Void = ragged black hole,
+// rim = jagged torn edge, tendrils = ink strands curling out and back around the edge.
+const riftR=th=>1+.16*Math.sin(th*3+.4)+.10*Math.sin(th*7+1.9)+.06*Math.sin(th*13+.8);   // uneven outline, taller than wide below
+function riftVoid(){const v=[[0,0,0]],f=[],N=72;
+  for(let i=0;i<N;i++){const th=i/N*Math.PI*2,r=riftR(th)*(i%2?.93:1);v.push([r3(Math.cos(th)*r*.82),r3(Math.sin(th)*r*1.08),0]);}
+  for(let i=0;i<N;i++){f.push([0,1+i,1+(i+1)%N]);f.push([0,1+(i+1)%N,1+i]);}
+  return {id:'void',k:'poly',v,f,sub:0};}
+function riftEdge(){const v=[],f=[];seed(83);
+  const tri=(a,b,c)=>{const n=v.length;v.push(...[a,b,c].map(q=>q.map(r3)));f.push([n,n+1,n+2]);f.push([n+2,n+1,n]);};
+  const P3=(th,k)=>{const r=riftR(th)*k;return [Math.cos(th)*r*.82,Math.sin(th)*r*1.08,0];};
+  for(let i=0;i<54;i++){const th=rnd()*Math.PI*2,w=.03+.05*rnd(),len=.12+.42*rnd()*(rnd()<.2?1.8:1),curl=(rnd()-.5)*.9;   // torn shards, some long
+    const tip=P3(th+curl*.25,1+len);tip[2]=-.04*rnd();tri(P3(th-w,.97),P3(th+w,.97),tip);}
+  for(let k=0;k<22;k++){const th0=rnd()*Math.PI*2,dir=rnd()<.5?1:-1,L=.5+.7*rnd(),S=12,w0=.035+.03*rnd();   // curling tendrils
+    for(let i=0;i<S;i++){const t0=i/S,t1=(i+1)/S;
+      const pt=t=>{const th=th0+dir*t*L,k2=1+.05+t*(.35+.25*Math.sin(t*3+k));const p=P3(th,k2);p[2]=-t*.15;return p;};
+      const a0=pt(t0),a1=pt(t1),w=w0*(1-t0),n=[-(a1[1]-a0[1]),a1[0]-a0[0]],l=Math.hypot(...n)||1;
+      const q=v.length;v.push(...[[a0[0]-n[0]/l*w,a0[1]-n[1]/l*w,a0[2]],[a0[0]+n[0]/l*w,a0[1]+n[1]/l*w,a0[2]],[a1[0]+n[0]/l*w*.8,a1[1]+n[1]/l*w*.8,a1[2]],[a1[0]-n[0]/l*w*.8,a1[1]-n[1]/l*w*.8,a1[2]]].map(p=>p.map(r3)));
+      f.push([q,q+1,q+2,q+3]);f.push([q+3,q+2,q+1,q]);}}
+  return {id:'edge',k:'poly',v,f,sub:0};}
+model('dark_ab_rift_void','Darkness อัลติ รอยฉีกเงา: หลุมดำทรงไม่สม่ำเสมอ',[riftVoid()]);
+model('dark_ab_rift_edge','Darkness อัลติ รอยฉีกเงา: ขอบฉีกและหนวดหมึกม้วน',[riftEdge()]);
 model('dark_ab_ribbon','Darkness อัลติ A+B ริ้วผ้าสะบัด',[ribbon]);
 
 // ---------- timeline ----------
@@ -216,9 +236,10 @@ function bodyLayers(tex){   // shape layers shared by all versions; tex picks th
 const stage=[{id:'anchor',t:'mesh',shape:'disc',mat:'black',op:0,at:0,life:2.7},{id:'stage',t:'code',fn:'studio_darkness_ult',at:0,life:2.7,args:{layer:'anchor'}}];
 const PLIFE=REL+HOLD-.05-.75;   // portal stays open while the monster travels, closes just before the bite (user)
 const portalFx=[
-  {id:'portal_disc',t:'mesh',shape:'disc',mat:'black',at:.78,life:PLIFE-.03,pos:P,rot:[90,0,0],scale:{'0':.02,'0.12':PR*.92,'0.9':PR*.95,'1':PR*.2},op:{'0':0,'0.08':1,'0.9':1,'1':0}},
-  {id:'portal',t:'mesh',shape:'model',model:'dark_ab_portal',mat:'black',col:'#0c0c10',at:.75,life:PLIFE,pos:P,spin:0,rot:{'0':[0,0,0],'1':[0,0,-260]},scale:{'0':.05,'0.12':PR,'0.88':PR*1.05,'1':PR*.1},op:{'0':0,'0.08':1,'0.9':1,'1':0}},
-  {id:'portal_ink',t:'emit',at:.75,life:PLIFE*.9,burst:0,rate:120,from:'ring',fr:PR,pos:P,dir:'in',speed:[2,5],plife:[.15,.3],look:'smoke',size:[6,12],grow:-.4,col:'#000000',c2:'#000000',gravity:0,drag:1}];
+  {id:'rift_void',t:'mesh',shape:'model',model:'dark_ab_rift_void',mat:'black',at:.76,life:PLIFE-.02,pos:P,scale:{'0':[PR*.05,PR*.9,1],'0.1':[PR*.7,PR,1],'0.16':[PR,PR,1],'0.88':[PR*1.04,PR*1.02,1],'1':[PR*.05,PR*.7,1]},op:{'0':0,'0.05':1,'0.95':1,'1':0}},
+  {id:'rift_edge',t:'mesh',shape:'model',model:'dark_ab_rift_edge',mat:'black',col:'#0b0b0f',at:.75,life:PLIFE,pos:P,spin:0,rot:{'0':[0,0,0],'1':[0,0,-35]},scale:{'0':[PR*.05,PR*.9,1],'0.1':[PR*.75,PR,1],'0.16':[PR,PR,1],'0.88':[PR*1.06,PR*1.04,1],'1':[PR*.05,PR*.6,1]},op:{'0':0,'0.05':1,'0.95':1,'1':0}},
+  {id:'rift_edge2',t:'mesh',shape:'model',model:'dark_ab_rift_edge',mat:'black',col:'#16161c',at:.8,life:PLIFE-.05,pos:P,rot:{'0':[0,180,20],'1':[0,180,60]},scale:{'0':[PR*.05,PR*.9,1],'0.12':[PR*.9,PR*.95,1],'0.88':[PR*.95,PR*.98,1],'1':[PR*.05,PR*.6,1]},op:{'0':0,'0.06':1,'0.94':1,'1':0}},
+  {id:'portal_ink',t:'emit',at:.75,life:PLIFE*.9,burst:0,rate:90,from:'ring',fr:PR*.95,pos:P,dir:'in',speed:[1.5,3.5],plife:[.2,.35],look:'smoke',size:[5,10],grow:-.4,col:'#000000',c2:'#000000',gravity:0,drag:1}];
 const charge=[
   {id:'charge_orb',t:'mesh',shape:'sphere',mat:'black',at:.20,life:.82,pos:[.21,.9,-.21],scale:{'0':.03,'0.85':.17,'1':.2,ease:'in'},op:1},
   {id:'charge_ink',t:'emit',at:.20,life:.78,burst:0,rate:{'0':12,'1':40},from:'sphere',fr:.7,pos:[.21,.9,-.21],dir:'in',speed:[1.2,2.2],plife:[.18,.3],look:'smoke',size:[1,2],grow:-.8,col:'#000000',c2:'#000000',gravity:0,drag:1,spin:5}];
