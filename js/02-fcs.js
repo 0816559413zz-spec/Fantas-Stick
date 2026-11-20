@@ -9,7 +9,7 @@ const FCS_WH=[0,6,1.2,1.1];   // ความสูงกำแพง (ม.) ต
 function genFcs(){
   const D=FCS_DATA,C=FCS_C,w=D.w,h=D.h,W=w*C,H=h*C,obs=[];
   const at=(s,x,y)=>parseInt(s[clamp(y,0,h-1)*w+clamp(x,0,w-1)],36)||0;
-  const hc=(x,y)=>at(D.H,x,y)*D.lvl,wc=(x,y)=>x<0||y<0||x>=w||y>=h?0:at(D.W,x,y);
+  const hc=(x,y)=>at(D.H,x,y)*D.lvl,wc=(x,y)=>x<0||y<0||x>=w||y>=h||fcsCut(x,y)?0:at(D.W,x,y);   // room pieces own their rect (js/02-fcs-rooms.js)
   // ตารางพื้น: จุดคี่ = กลางช่อง, จุดคู่ = ขอบช่อง (เฉลี่ยช่องที่ติดกัน)
   const c=C/2,nx=2*w+1,ny=2*h+1,g=new Float32Array(nx*ny);
   const cs=i=>i%2?[(i-1)/2]:[i/2-1,i/2];
@@ -38,6 +38,7 @@ function genFcs(){
   const sp={A:{},B:{}},cores=[],bw=[],props=[],brkX=[];
   for(const [t,x,y,ow,oh,n] of D.objs){
     const cx=(x+ow/2)*C,cy=(y+oh/2)*C;
+    if((t==='tr'||t==='cr'||t==='pl')&&fcsCut(Math.floor(x+ow/2),Math.floor(y+oh/2)))continue;   // room interiors: the piece places its own props
     if(t==='sa'||t==='sb')sp[t==='sa'?'A':'B'][n||1]={x:cx,y:cy};
     else if(t==='pt')cores[(n||cores.length+1)-1]={n:n||cores.length+1,x:cx,y:cy,s:Math.max(ow,oh)*C};
     else if(t==='bw'||t==='gt'){
@@ -181,11 +182,10 @@ function genFcs(){
          obs.push({x,y,r:9,k:'fcr',hgt:par.includes(s)?H+1:H,s:0});}};
      edge('N',X0+8,Y0+8,X1-8,Y0+8);edge('S',X0+8,Y1-8,X1-8,Y1-8);edge('W',X0+8,Y0+8,X0+8,Y1-8);edge('E',X1-8,Y0+8,X1-8,Y1-8);
      props.push(['tc',X0,Y0,X1,Y1,H,side,ra*C,(rb+1)*C,Ln*c,par]);};
-   terrace(56,39,61,41,3.5,'S',58,59,'NW');     // zone 2: east of core 2, against the east wall
-   terrace(40,37,45,39,3.5,'S',41,42,'SE');     // zone 2: north-west of core 2, corner of the walls
    terrace(96,40,101,43,3.5,'E',41,42,'SN');    // zone 3: west of core 3, under the long wall
    terrace(122,45,126,49,3.5,'N',123,124,'W');  // zone 3: east of core 3 (defender side), against the wall
   }
+  for(const r of FCS_ROOMS)try{r.gen(fcsRoomK(r,obs,terr,props));}catch(e){console.error('room gen',r.id,e);}   // room pieces (js/02-room-*.js)
   for(const k of cores)obs.push({x:k.x,y:k.y,r:40,k:'fck',hgt:6,s:0});   // ตัวแกน (คริสตัล) ชนได้
   // เฟส: โซนชนิด "เฟส" ชื่อ "เฟส N" หลายกรอบรวมกัน = พื้นที่เล่นของเฟส N
   const phases=[];

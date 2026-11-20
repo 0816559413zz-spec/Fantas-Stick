@@ -133,7 +133,20 @@ function camRoomK(me,F,x,y,z){
     if(Math.abs(lx)>=hw||Math.abs(ly)>=hd||mz>=b.D.wh||bldGone(b))continue;
     const [cx,cy]=bldLocal(b,x/S3+MW/2,z/S3+MH/2),[fx,fy]=bldLocal(b,F.x/S3+MW/2,F.z/S3+MH/2),m=6;
     fit(fx,cx,-hw+m,hw-m);fit(fy,cy,-hd+m,hd-m);fit(F.y,y,0.3,GY(b.o.x,b.o.y)+b.D.wh+b.D.rh*0.45);return Math.max(0.12,k);}
-  return 1;
+  return camObsK(me,F,x,y,z);
+}
+// FCS (thick castle walls / room pieces): march anchor -> camera, pull in before the first wall / pillar / ceiling it would enter
+// (user 2026-11-20: back to a wall = camera went inside the wall). Thin things (fences, trees, rails, low cover) are ignored.
+const _camOB=[];
+function camObsK(me,F,x,y,z){
+  if(MAPID!=='fcs')return 1;const N=14,M=7;let k=1;const grid=sgObs(),mz=me.z||0;
+  for(let i=1;i<=N;i++){const f=i/N,X=F.x+(x-F.x)*f,Y=F.y+(y-F.y)*f,Z=F.z+(z-F.z)*f,px=X/S3+MW/2,py=Z/S3+MH/2;let hit=false;
+    const c=fcsCeilAt(px,py,mz);if(c<Infinity&&Y>GY(px,py)+c-0.3&&F.y<GY(px,py)+c)hit=true;
+    if(!hit)for(const q of sgNear(grid,px,py,M,_camOB)){if(q.r<14||q.k==='tfence'||q.k==='fcf'||q.k==='fct'||q.k==='fce')continue;
+      const g0=GY(q.x,q.y),y0=q.top!==undefined?-50:g0+(q.bot||0),y1=q.top!==undefined?q.top:g0+(q.hgt||0);if(Y<y0||Y>y1+0.3)continue;
+      const dx=px-q.x,dy=py-q.y;if(dx*dx+dy*dy<(q.r+M)*(q.r+M)){hit=true;break;}}
+    if(hit){k=Math.max(0.12,(i-1)/N-0.02);break;}}
+  return k;
 }
 function updateCamera(me,dt){
   // ร่าย/ยิง Abyssal Beam: กล้องหมุนได้เร็วเท่าลำเท่านั้น (ผู้ใช้ 2026-11-01) เมาส์ยังบังคับทิศลำ

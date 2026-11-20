@@ -13,10 +13,11 @@ function buildFcs(){
   const fl=new THREE.Mesh(terrGeo((i,j)=>{const a=[[i,j],[i-1,j],[i,j-1],[i-1,j-1]].every(([a,b])=>surf(Math.max(0,a),Math.max(0,b))===2);return a?T.g[j*T.nx+i]+0.03:NaN;},T.nx,T.ny,T.c,1),fcsCastleMat('f','#b4a68e',{fr:1.3,fc:1.0,moss:0.35}));fl.receiveShadow=true;addW(fl);
   // กำแพงจากตาราง (InstancedMesh ต่อชนิด)
   const m4=new THREE.Matrix4(),cells=[[],[],[],[]];
-  for(let y=0;y<D.h;y++)for(let x=0;x<D.w;x++){const v=parseInt(D.W[y*D.w+x],36);if(v)cells[v].push([x,y]);}
+  for(let y=0;y<D.h;y++)for(let x=0;x<D.w;x++){const v=parseInt(D.W[y*D.w+x],36);if(v&&!fcsCut(x,y))cells[v].push([x,y]);}
   const inst=(geo,mat,list,fn)=>{if(!list.length)return;const im=new THREE.InstancedMesh(geo,mat,list.length);list.forEach((q,i)=>im.setMatrixAt(i,fn(q)));im.castShadow=im.receiveShadow=true;addW(im);return im;};
   const box=sGeo(THREE.BoxGeometry,1,1,1);
-  try{fcsCastle();}catch(e){console.error('fcsCastle',e);}   // solid walls (type 1) = castle walls, towers, banners, outer wall + keep (js/28-fcs-castle.js)
+  try{fcsCastle();}catch(e){console.error('fcsCastle',e);}
+  try{fcsRoomsView();}catch(e){console.error('fcsRoomsView',e);}   // room pieces (js/02-room-*.js view)   // solid walls (type 1) = castle walls, towers, banners, outer wall + keep (js/28-fcs-castle.js)
   inst(box,stoneMat(1,1,'#9a8a6a'),cells[2],([x,y])=>{const px=(x+0.5)*C,py=(y+0.5)*C,b=GY(px,py);return m4.makeScale(c3,FCS_WH[2],c3).setPosition(tx(px),b+FCS_WH[2]/2,tz(py)).clone();});
   fcsFences(F.fences||[],inst,box);   // รั้วไม้ (ชนิด 3)
   if(F.bridge)try{fcsBridge(F.bridge);}catch(e){console.error('fcsBridge',e);}

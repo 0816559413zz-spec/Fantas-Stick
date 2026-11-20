@@ -29,10 +29,18 @@ HOUSES:232 HAIRC:237 HAIRSTY:239 WOODC:242 WOODN:243 WCOREC:244 WCOREN:245 WANDS
 ## js/02-fcs-data.js (3) — 
 FCS_DATA:3
 
+## js/02-fcs-rooms.js (52) — 
+FCS_ROOMS:11 fcsRoomAdd:12 FCS_C0:13 fcsRoomOf:14 fcsCut:15
+§16 gen context (called from genFcs)
+fcsRoomK:17 roomWall:27 roomCol:36 roomFloor:38 roomCeil:44 fcsCeilAt:46 fcsCeilClamp:52
+
 ## js/02-fcs.js (222) — 
 FCS_C:7 FCS_WH:8 genFcs:9
 §196 พื้นที่เล่นตามเฟส (กำแพงล่องหน) + เขตจุดเกิดปลอดภัย — ใช้ทั้งโฮสต์ (G…
 SGPH:197 SG_SPR:198 _sgAreaC:199 sgArea:200 sgClamp:206 sgInArea:216
+
+## js/02-room-greathall.js (71) — 
+
 
 ## js/03-spells-core.js (250) — 
 ICONS:8 ICOALIAS:9 hasIco:10 ICOBASE:12 icoURL:13 ICO:14 icoTint:15 icoHTML:24 PATHS:25 SPELL_LIST:34 SPELLS:34 defSpell:35 SLOTK:36 BRMAP:36 KITP:37 parseKit:38 cleanKit:55 setKit:56 pathReset:59
@@ -190,7 +198,7 @@ W_WL:549 W_DR:555 W_VX:561 W_VO:567 W_FW:573 W_UL:583
 ## js/10-net.js (200) — 
 PREFIX:4 NET:5 RC:9 TURN_SERVERS:12 ICE:13 PEER_OPT:14 TURN_URL:16 ICE_READY:18 JN:22 LAG:24 lagDo:25 hostSend:26 LOBBY:27 genCode:28 sendAll:29 NETD_KEYS:33 NETD:33 netDeltaReset:34 netDelta:35 NET_MAX:49 _netTE:49 netSendSnap:50 NETU:62 netUndelta:63 setStatus:69 hostGame:71 hostPeer:80 netConnect:100 joinWatch:111 joinFail:126 netLost:132 joinGame:147 joinPeer:158 clientOnData:173 leave:188 leaveRoom:190
 
-## js/11-host.js (432) — ฝั่งโฮสต์: สถานะเกมทั้งหมดคำนวณที่นี่ (server-authoritative)
+## js/11-host.js (432) — 
 G:4 EVL:4 EVN:4 hostLast:4 tickN:4 emit:5 feed:6 banner:7 plist:8 cleanName:9 freshStats:11 newPlayer:18 emptyInput:21 frameOk:23 addPlayer:24 initHostLobby:33 lobbyMsg:40 broadcastLobby:41 INPN:43 hostOnData:44 hostDrop:75 hostRemove:84 validate:100 hostStart:114 hostToLobby:141 MIDJOIN:148 modeCap:149 midJoin:150 CHATT:166 chatRelay:167 emoHost:175 resetBody:177 fmap:183 spawnPts:184 teamPts:186 spSpread:188 placeAll:189 respawn:201
 §220 ลูปหลักฝั่งโฮสต์
 hostTick:221 angDiff:238 cH:240 vR:241 updatePlayer:243 hitProp:419 damagePropsIn:426 nearUseProp:427 useProp:428
@@ -344,15 +352,17 @@ CITY_STY:181 CITY_VEH:188 cityFacade:190 CITYK:203 _cZ:204 _cT:204 _cR:204 _cC:2
 §259 ตึกไฮไลต์ล้มทั้งตึก (ขั้น 7)
 _ctA:262 _ctB:262 _ctC:262 cityTowerPose:263 cityTowerAnim:271 cityTowerRubble:278 CAREA:292 cityAreaSync:293 cityViewSync:305 cityDebris:349 cityFX:358
 
-## js/28-fcs-build.js (366) — 
-buildFcs:5 fcsBridge:39 fcsRubbleMat:62 fcsCore:77 FCSB:103 fcsParView:104 FSH_V:118 FSH_B:119 fcsShellMat:121 fcsBlocks:136 fcsShellBuild:148 fcsParFall:163 fcsFallTick:170 fcsShellView:182 FPILE:190 _rfP:192 _rfQ:192 _rfS:192 fcsFadeList:193 fcsRubbleFade:198 fcsShellFall:202 fcsPileTick:211 fcsShellClear:229 EFS3:232 fcsFences:233 _efC:250 _efM:250 _efS:250 _efZ:250 efsView:251
-§277 ภาพโหมด (ลูกข่ายทุกเครื่องจาก snapshot M.sg)
-SGV3:278 sgClearView:279 sgViewBuild:280 SGVZR:299 sgBarrier:301 sgSync:315 sgDust:336 sgFx:337
-§342 HUD
-sgTop:343 sgHud:345
+## js/28-fcs-build.js (367) — 
+buildFcs:5 fcsBridge:40 fcsRubbleMat:63 fcsCore:78 FCSB:104 fcsParView:105 FSH_V:119 FSH_B:120 fcsShellMat:122 fcsBlocks:137 fcsShellBuild:149 fcsParFall:164 fcsFallTick:171 fcsShellView:183 FPILE:191 _rfP:193 _rfQ:193 _rfS:193 fcsFadeList:194 fcsRubbleFade:199 fcsShellFall:203 fcsPileTick:212 fcsShellClear:230 EFS3:233 fcsFences:234 _efC:251 _efM:251 _efS:251 _efZ:251 efsView:252
+§278 ภาพโหมด (ลูกข่ายทุกเครื่องจาก snapshot M.sg)
+SGV3:279 sgClearView:280 sgViewBuild:281 SGVZR:300 sgBarrier:302 sgSync:316 sgDust:337 sgFx:338
+§343 HUD
+sgTop:344 sgHud:346
 
-## js/28-fcs-castle.js (172) — 
+## js/28-fcs-castle.js (202) — 
 FCSC:9 fcsCastleMat:10 fcsBannerTex:34 fcsGlowTex:44 fcsCastle:46 fcsCastleTick:171
+§173 room pieces: look (js/02-room-*.js view(K,V)) — V = shared builder, m…
+fcsRoomsView:174
 
 ## js/28-fcs-forest.js (259) — ป่าสนหมอก ในแผนที่ First Castle Strike (เฟส 1 = ช่อง x 0–28 ของ Map Editor) — ทำตามรูปอ้า…
 FF:7 FF_X1:8 FF_NS:9 ffGroundTex:11 ffParts:33 fcsForest:40 ffMerge:123 ffDetail:131 fcsRuin:158 ffSkyMat:201 ffMist:229 ffMistFrame:246 fcsForestTick:248 FFC:259
@@ -384,8 +394,8 @@ FLAME_STYLE:71 PTIME:72 NOISETEX:74 FLAMETEX_V1:80 FLAMETEX_V2:85 PSYS:95 FLAMEL
 §235 เอฟเฟกต์รูปทรง: แฟลช / วงแหวน / โดม / รอยไหม้ / สายฟ้า / แสงชั่วคราว
 SHAPES_Q:236 SHAPES:236 FLASHL:236 LINES:236 LREQ:237 ringGeo:238 ringVGeo:239 arcGeo:240 domeGeo:241 fullGeo:242 discGeo:243 decalTex:244 FX:245 jag:259 SHB:273 _sbM:273 _sbQ:273 _sbE:273 _sbS:273 _sbC:273 SHB_GEO:274 _sbDecalMat:275 shbMat:276 shbMake:287 spawnShape:299 updateShapes:309 _cp:339 updateLights:340
 
-## js/31-camera.js (193) — กล้องมุมหลังไหล่ (แบบ Hogwarts Legacy)
-yaw:2 pitch:2 lastPh:2 locked:2 CAMRS:3 SENS:4 saveSet:5 applySettings:6 camPos:14 camLook:14 overlayOpen:17 showPause:18 hidePause:19 MAPCAM:20 PLACE:22 placeKey:23 updatePlaceGhost:31 _aimD:45 rayTerr:47 aimFromCrosshair:53 AIMZ:85 WBY:85 CAM_FRAMES:89 CAM_FRAME:101 CAM_TRACK:101 _camFocus:102 _camAnchor:102 _camWant:102 cameraFrame:103 camRoomK:128 updateCamera:138 menuCamera:189
+## js/31-camera.js (206) — กล้องมุมหลังไหล่ (แบบ Hogwarts Legacy)
+yaw:2 pitch:2 lastPh:2 locked:2 CAMRS:3 SENS:4 saveSet:5 applySettings:6 camPos:14 camLook:14 overlayOpen:17 showPause:18 hidePause:19 MAPCAM:20 PLACE:22 placeKey:23 updatePlaceGhost:31 _aimD:45 rayTerr:47 aimFromCrosshair:53 AIMZ:85 WBY:85 CAM_FRAMES:89 CAM_FRAME:101 CAM_TRACK:101 _camFocus:102 _camAnchor:102 _camWant:102 cameraFrame:103 camRoomK:128 _camOB:140 camObsK:141 updateCamera:151 menuCamera:202
 
 ## js/32-stage.js (315) — เวทีเมนู/ล็อบบี้: ห้องโถงมืด แท่นวงเวททอง เทียนลอย (ฉากแยกจากแผนที่)
 stage:2 STAGE:5 STAGE_Y:6 stageSpots:58 stageChar:74 POSES:81 stageIdle:87
@@ -854,4 +864,4 @@ _dvMap:242 devMapDraw:246
 §259 หน้าต่าง
 _dvPanel:260 _dvBtn:261 devToggle:264 dvBtn:269 dvRow:270 dvTog:271 dvSec:272 devRender:273 devPos:315
 
-(106 files, 30608 lines)
+(108 files, 30775 lines)

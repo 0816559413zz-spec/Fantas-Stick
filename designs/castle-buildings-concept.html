@@ -1,0 +1,41 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Castle buildings concept</title>
+<style>body{margin:0;background:#15161a;font-family:Tahoma,"Leelawadee UI",sans-serif}</style></head><body>
+<canvas id="c" width="1800" height="900"></canvas>
+<script src="../js/02-fcs-data.js"></script>
+<script>
+// Rough concept (not a locked layout): current FCS wall grid underneath, proposed buildings/rooms/courtyards on top.
+const D=FCS_DATA,S=12.5,OX=10,OY=60,cv=document.getElementById('c'),x=cv.getContext('2d');
+x.fillStyle='#15161a';x.fillRect(0,0,1800,900);
+const at=(i,j)=>parseInt(D.W[j*D.w+i],36)||0;
+for(let j=0;j<D.h;j++)for(let i=0;i<D.w;i++){const v=at(i,j);x.fillStyle=i<28?'#2c4529':'#3a3739';x.fillRect(OX+i*S,OY+j*S,S,S);
+  if(v===1){x.fillStyle='rgba(0,0,0,.55)';x.fillRect(OX+i*S,OY+j*S,S,S);}}
+const R=(a,b,w,h,f,st,lbl,sub,lc='#fff')=>{x.fillStyle=f;x.fillRect(OX+a*S,OY+b*S,w*S,h*S);x.lineWidth=3;x.strokeStyle=st;x.strokeRect(OX+a*S,OY+b*S,w*S,h*S);
+  x.textAlign='center';x.font='bold 15px Tahoma';x.lineWidth=4;x.strokeStyle='#000';x.fillStyle=lc;const cx=OX+(a+w/2)*S,cy=OY+(b+h/2)*S;x.strokeText(lbl,cx,cy-2);x.fillText(lbl,cx,cy-2);
+  if(sub){x.font='12px Tahoma';x.strokeText(sub,cx,cy+15);x.fillStyle='#e6e6e6';x.fillText(sub,cx,cy+15);}};
+const ROOF='rgba(70,120,230,.38)',RST='#7fb0ff',OPEN='rgba(110,200,90,.30)',OST='#9be07f';
+// zone 2
+R(30,0,32,9,OPEN,OST,'ลานหน้า (Front Court)','โล่ง ฟ้าเปิด • หอสูงรอบลาน');
+R(30,11,22,8,ROOF,RST,'ห้องโถงทางเข้า (Entrance Hall)','มีหลังคา สูง ~12 ม. • บุกเกิด 2');
+R(30,21,8,28,ROOF,RST,'ห้องทหาร','รับเกิด 2');
+R(40,21,22,14,OPEN,OST,'ลานกลาง (Central Court)','โล่ง กว้าง • กำบังเตี้ย');
+R(40,37,22,13,ROOF,RST,'ห้องโถงใหญ่ (Great Hall)','หลังคาสูง ~18 ม. เสาใหญ่ • แกน 2 อยู่ในห้องนี้','#ffe08a');
+// zone 3
+R(64,0,18,28,OPEN,OST,'ลานใน (Inner Court)','ระเบียงทางเดินรอบลาน');
+R(64,30,29,20,ROOF,RST,'ห้องยาว (Long Gallery)','ห้องใหญ่ยาว ชั้นลอยสองข้าง');
+R(93,29,9,11,ROOF,RST,'โบสถ์','ห้องเล็ก');
+R(104,0,18,21,ROOF,RST,'ห้องโถงป้อม (Keep Hall)','ใต้หอคอยใหญ่');
+R(124,0,16,34,OPEN,OST,'ลานตะวันออก','');
+R(102,36,38,14,OPEN,OST,'ลานป้อม (Keep Court)','แกน 3 กลางลาน • รับเกิด 3','#ffe08a');
+// big towers
+const T=(i,j,r,l)=>{x.beginPath();x.arc(OX+i*S,OY+j*S,r*S,0,7);x.fillStyle='rgba(255,190,90,.55)';x.fill();x.lineWidth=3;x.strokeStyle='#ffcf70';x.stroke();
+  x.font='bold 13px Tahoma';x.textAlign='center';x.lineWidth=4;x.strokeStyle='#000';x.fillStyle='#ffe2a8';x.strokeText(l,OX+i*S,OY+(j+r)*S+15);x.fillText(l,OX+i*S,OY+(j+r)*S+15);};
+T(29,10,2.2,'หอประตู');T(29,20,2.2,'');T(62,0.5,2.4,'');T(52,20,2.4,'หอกลาง');T(86,18,4,'หอคอยใหญ่ ~60 ม.');T(103,33,3,'หอดาว');T(122,35,2.6,'');T(139,0.5,2.6,'');
+// cores
+for(const o of D.objs)if(o[0]==='pt'){x.beginPath();x.arc(OX+(o[1]+o[3]/2)*S,OY+(o[2]+o[4]/2)*S,1.6*S,0,7);x.strokeStyle='#50dcff';x.lineWidth=3;x.stroke();}
+x.font='bold 20px Tahoma';x.textAlign='left';x.fillStyle='#ffd76a';x.fillText('ผังหยาบ: ปราสาทเป็น "ตึก" (ห้องมีหลังคา + ลานโล่ง) วางบนเส้นทาง/แกน/จุดเกิด FCS เดิม — ภาพคุยกัน ไม่ใช่ผังล็อก',OX,30);
+x.font='14px Tahoma';x.fillStyle='#ddd';
+const L=[['#7fb0ff','ฟ้า = ห้องมีหลังคา (เดินเข้าไปสู้ข้างในได้ ห้องสูงโปร่ง)'],['#9be07f','เขียว = ลานโล่ง ฟ้าเปิด'],['#ffcf70','ส้ม = หอสูง (ภาพ/จุดสังเกต ส่วนใหญ่เข้าไม่ได้)'],['#50dcff','วงฟ้า = แกนเดิม'],['#000','สีดำจาง = กำแพงเดิม → กลายเป็นผนังตึก']];
+L.forEach(([c,t],i)=>{x.fillStyle=c;x.fillRect(OX+i*350,OY+50*S+18,14,14);x.fillStyle='#ddd';x.fillText(t,OX+i*350+20,OY+50*S+30);});
+x.fillStyle='#ffd76a';x.fillText('ภายนอก: ตึกหลังคาจั่วสูงชัน หอทรงกลม/เหลี่ยมหลังคากรวย หน้าต่างโค้งสูง ตั้งบนเนินหิน — แรงบันดาลใจโทนเดียวกับรูป แต่ออกแบบเอง',OX,OY+50*S+62);
+</script></body></html>

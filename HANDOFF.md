@@ -777,6 +777,7 @@ On a broom (2026-10-29, `js/69-broom.js`): mouse = steer (banked turns, look up 
 `git add -A && git commit && git push` on `main` → GitHub Pages rebuilds in ~1 min (check: `gh api repos/0816559413zz-spec/Fantas-Stick/pages/builds/latest`). End commit messages with the Co-Authored-By line used in history.
 
 ## 9. Status / known issues
+- 🏛️ **FCS rooms (2026-11-20):** each room = `js/02-room-<id>.js` (read `guides/MAP-ROOMS.md`). Only the Great Hall is done; next per `designs/castle-buildings-concept.html`. Bots don't know stairs/galleries. Breakable wall in the hall's north gap still the old box (sits under the gallery).
 - 🏰 **FCS castle look (2026-11-20):** `js/28-fcs-castle.js` dresses wall type 1 (collision still the grid). Static FCS meshes are batched to world space: animate with `uv`, not `position`. Terraces = TERR floors + edge obs in `genFcs`; bots don't path onto them yet. Breakable walls/gate still the old plain boxes.
 - 🌫️ **FCS forest mist (2026-11-20):** mist cards now soft-fade into walls (`ffMist` js/28-fcs-forest.js, in `fxScene`) — fixes the bridge vanishing in fog. Tune `uSoft`/`uNr`/`uA` there if fog is too weak/strong.
 - ⚡ **Big-fight perf pass 2026-11-07:** CPU −17 %, p95 −13 %, draws −12 % in the 6v6 bench (details: changelog + `guides/OPTIMIZE.md` §R). New helpers to reuse: `matTwin` (js/22) when one material would be shared between skinned/rigid or instanced/plain meshes, `forceSinglePass:true` for flat transparent DoubleSide effects, `addUpdateRange` for big dynamic buffers. Next: pool fx runtime materials (js/45 `fxMeshMake`).
@@ -860,6 +861,7 @@ Phase 1 (maps from Blender files) is done — `notes/systems.md` §5e. Work in t
 (Minimap done 2026-10-17.) Vents/secret passages for Voldemort, task mini-games, 3-player Voldemort mode, more bosses (basilisk), more maps (Hogsmeade, Great Hall), cosmetics, ranked/MMR, mobile controls.
 
 ## 11. Changelog
+- 2026-11-20 — **FCS room pieces (v92):** rule `guides/MAP-ROOMS.md`; `js/02-fcs-rooms.js` + first room `js/02-room-greathall.js` (roofed hall, gallery, ceilings 21 m); camera `camObsK` no longer enters walls. Review #94 waiting.
 - 2026-11-20 — **FCS real castle + terraces (v91)** `js/28-fcs-castle.js`: stone walls/towers/banners/torches/outer wall + keep (visual only) + 4 walkable 3.5 m terraces (`terrace()` js/02-fcs.js). Review #93 waiting.
 - 2026-11-20 — **FCS cloud sky** `ffSkyMat` (js/28-fcs-forest.js): sunset (castle) ↔ overcast (forest) with fbm clouds; colours = uniforms `uZa..uSb`. Review #92 waiting.
 - 2026-11-20 — **FCS forest mist fix:** mist sprites washed the bridge wall out → soft depth-faded billboards in fxScene (`ffMist`, js/28-fcs-forest.js). Details: notes/CHANGELOG.md.

@@ -204,7 +204,7 @@ function cityFloorH(x,y,z){const d=cityRoomAt(x,y,0);if(!d)return 0;const I=d.I,
   for(const R of I.ramps){const h=cinRampH(R,x,y);if(h>=0&&h<=a&&h>g)g=h;}
   return g;}
 // เพดานเหนือเท้าที่ z (ใต้แผ่นพื้นชั้นถัดไป / ใต้ส่วนทึบด้านบน) • Infinity = ไม่อยู่ในตึก
-function cityCeilH(x,y,z){const d=cityRoomAt(x,y,0);if(!d)return Infinity;const I=d.I;let c=I.ring?Infinity:I.top-CIN.slab;
+function cityCeilH(x,y,z){const d=cityRoomAt(x,y,0);if(!d)return fcsCeilAt(x,y,z);const I=d.I;let c=I.ring?Infinity:I.top-CIN.slab;
   for(const S of I.slabs){const b=S.z-CIN.slab;if(b>z+0.2&&b<c&&cinSlabOn(d,S,x,y))c=b;}
   return c;}
 // แผ่นผนังนอกแผ่น p เป็นสี่เหลี่ยม [cx,cy,hx,hy] (px) ตามช่วง u0..u1 ตามแนวผนัง (0 = กลางแผ่น)

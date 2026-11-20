@@ -6,7 +6,7 @@
 //  - square towers on wall ends / corners (outline convex corners, clustered), some with tiled roofs + corner turrets
 //  - banners (sway) + torches (flicker) on faces • outer curtain wall + keep outside the map edges (silhouette)
 // =====================================================================
-const FCSC={uT:{value:0},torch:[],mat:{},n:{}};
+const FCSC={uT:{value:0},torch:[],mat:{},n:{},pl:2};   // pl = hall chandelier PointLight intensity
 function fcsCastleMat(k,col,o={}){
   if(FCSC.mat[k])return FCSC.mat[k];
   const m=new THREE.MeshStandardMaterial({color:col,roughness:o.r||0.93});
@@ -45,7 +45,7 @@ function fcsGlowTex(){if(FCSC.gt)return FCSC.gt;const c=document.createElement('
   g.addColorStop(0,'rgba(255,240,200,1)');g.addColorStop(.3,'rgba(255,150,50,.6)');g.addColorStop(1,'rgba(0,0,0,0)');x.fillStyle=g;x.fillRect(0,0,64,64);const t=new THREE.CanvasTexture(c);t.userData.keep=true;return FCSC.gt=t;}
 function fcsCastle(){
   const D=FCS_DATA,C=FCS_C,w=D.w,h=D.h,c3=C*S3,WH=FCS_WH[1],R=mulberry(424242);
-  const at=(x,y)=>x<0||y<0||x>=w||y>=h?-1:parseInt(D.W[y*w+x],36)||0,isW=(x,y)=>at(x,y)===1;
+  const at=(x,y)=>x<0||y<0||x>=w||y>=h?-1:fcsCut(x,y)?0:parseInt(D.W[y*w+x],36)||0,isW=(x,y)=>at(x,y)===1;
   const bwCell=new Set();for(const [t,x,y,ow,oh] of D.objs)if(t==='bw'||t==='gt')for(let j=y;j<y+oh;j++)for(let i=x;i<x+ow;i++)bwCell.add(i+','+j);
   const G={stone:[],dark:[],roof:[],slit:[],lit:[],wood:[],iron:[]},bx=new THREE.BoxGeometry(1,1,1);
   const B=(L,x,y,z,sx,sy,sz)=>{const g=bx.clone();g.scale(sx,sy,sz);g.translate(x,y,z);L.push(g);};
@@ -170,3 +170,33 @@ function fcsCastle(){
 }
 function fcsCastleTick(){const t=performance.now()/1000;FCSC.uT.value=t;
   for(const f of FCSC.torch){const k=0.85+0.12*Math.sin(t*13+f.userData.ph)+0.08*Math.sin(t*23.7+f.userData.ph*2);f.scale.set(1.25*k,1.6*k,1);}}
+// ---------- room pieces: look (js/02-room-*.js view(K,V)) — V = shared builder, merged per material
+function fcsRoomsView(){
+  const G={},add=(k,g)=>(G[k]=G[k]||[]).push(g),bx=new THREE.BoxGeometry(1,1,1),lights=[],sprites=[];
+  const V={
+    box:(k,x,y,z,sx,sy,sz)=>{const g=bx.clone();g.scale(sx,sy,sz);g.translate(x,y,z);add(k,g);},
+    cyl:(k,x,y,z,rt,rb,h,seg)=>{const g=new THREE.CylinderGeometry(rt,rb,h,seg||8);g.translate(x,y,z);add(k,g);},
+    roof:(cx,y,cz,w,d,h)=>{const s=new THREE.Shape();s.moveTo(-d/2-0.6,0);s.lineTo(0,h);s.lineTo(d/2+0.6,0);s.lineTo(d/2+0.6,-0.6);s.lineTo(0,h-0.75);s.lineTo(-d/2-0.6,-0.6);s.lineTo(-d/2-0.6,0);
+      const g=new THREE.ExtrudeGeometry(s,{depth:w+1.2,bevelEnabled:false});g.translate(0,0,-(w+1.2)/2);g.rotateY(Math.PI/2);g.translate(cx,y,cz);add('roof',g);
+      const gs=new THREE.Shape();gs.moveTo(-d/2,0);gs.lineTo(0,h-0.4);gs.lineTo(d/2,0);gs.lineTo(-d/2,0);   // stone gable ends
+      for(const e of [-1,1]){const gg=new THREE.ExtrudeGeometry(gs,{depth:1.2,bevelEnabled:false});gg.translate(0,0,-0.6);gg.rotateY(Math.PI/2);gg.translate(cx+e*(w/2-0.6),y,cz);add('stone',gg);}},
+    cone:(k,x,y,z,r,h,seg)=>{const g=new THREE.ConeGeometry(r,h,seg||8);g.translate(x,y,z);add(k,g);},
+    light:(x,y,z)=>{sprites.push([x,y,z]);},
+    chandelier:(x,y,z)=>{const r=new THREE.TorusGeometry(2.2,0.12,6,24);r.rotateX(Math.PI/2);r.translate(x,y,z);add('iron',r);
+      const ch=new THREE.CylinderGeometry(0.05,0.05,6,4);ch.translate(x,y+3,z);add('iron',ch);
+      for(let i=0;i<8;i++){const a=i/8*Math.PI*2;sprites.push([x+Math.cos(a)*2.2,y+0.35,z+Math.sin(a)*2.2,0.8]);}lights.push([x,y-0.5,z]);}
+  };
+  for(const r of FCS_ROOMS)if(r.view&&r.K)try{r.view(r.K,V);}catch(e){console.error('room view',r.id,e);}
+  const mats={stone:fcsCastleMat('s','#c2b298'),dark:fcsCastleMat('d','#8f8270',{row:0.32,blk:0.9,moss:0.3}),
+    roof:new THREE.MeshStandardMaterial({color:'#5d6470',roughness:0.75,flatShading:true,side:THREE.DoubleSide}),
+    lit:new THREE.MeshStandardMaterial({color:'#2a1a0a',emissive:'#ffc77a',emissiveIntensity:0.55}),
+    wood:new THREE.MeshStandardMaterial({color:'#5a3f28',roughness:0.85}),iron:new THREE.MeshStandardMaterial({color:'#2b2a2a',roughness:0.5,metalness:0.7}),
+    carpet:new THREE.MeshStandardMaterial({color:'#7a1a20',roughness:1}),slit:new THREE.MeshBasicMaterial({color:'#17120e'})};
+  for(const k in G){const geo=mergeGeometries(G[k].map(g=>g.index?g.toNonIndexed():g),false);G[k].forEach(g=>g.dispose());if(!geo)continue;
+    const m=new THREE.Mesh(geo,mats[k]||mats.stone);m.castShadow=k!=='lit'&&k!=='carpet';m.receiveShadow=true;addW(m);}
+  bx.dispose();
+  const gt=fcsGlowTex();
+  for(const [x,y,z,s] of sprites){const fl=new THREE.Sprite(new THREE.SpriteMaterial({map:gt,color:'#ffb060',blending:THREE.AdditiveBlending,depthWrite:false,transparent:true}));
+    fl.position.set(x,y,z);fl.scale.set(1.3*(s||1),1.6*(s||1),1);fl.userData.ph=Math.random()*9;addW(fl);FCSC.torch.push(fl);}
+  for(const [x,y,z] of lights){const L=new THREE.PointLight('#ffb36a',FCSC.pl,46,1.4);L.position.set(x,y,z);addW(L);}
+}
