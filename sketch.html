@@ -38,6 +38,7 @@ kbd{background:var(--bg3);border:1px solid var(--ln2);border-radius:3px;padding:
   <input class="tl-in nm" id="name" placeholder="ชื่อสเก็ตช์" maxlength="60">
   <select class="tl-sel" id="list" title="เปิดสเก็ตช์เก่า"></select>
   <button class="tl-btn" id="bNew">＋ ใหม่</button>
+  <button class="tl-btn" id="bBg" title="เปิดไฟล์รูปจากเครื่อง (PNG/JPG/WebP…) มาเป็นพื้นหลังให้วาดทับ">📂 เปิดรูป…</button>
   <button class="tl-btn" id="bDel" title="ย้ายไปถังขยะ (กู้คืนได้ใน sketch/_deleted)">🗑 ลบ</button>
   <span class="sp"></span>
   <span id="stat">กำลังโหลด…</span>
@@ -53,7 +54,7 @@ kbd{background:var(--bg3);border:1px solid var(--ln2);border-radius:3px;padding:
   <div class="g"><label>พื้น</label><div class="seg" id="paper"><button class="tl-btn on" data-p="#ffffff">ขาว</button><button class="tl-btn" data-p="#1e1e1e">ดำ</button></div>
     <button class="tl-btn" id="bGrid">▦ กริด</button></div>
   <div class="g"><label>ขนาด</label><select class="tl-sel" id="size"><option value="1280x720">1280×720 (16:9)</option><option value="1280x960">1280×960 (4:3)</option><option value="960x960">960×960 (จัตุรัส)</option><option value="720x1280">720×1280 (แนวตั้ง)</option></select>
-    <button class="tl-btn" id="bBg">🖼 รูปพื้นหลัง…</button><button class="tl-btn" id="bBgX" style="display:none">✕ เอารูปออก</button></div>
+    <button class="tl-btn" id="bBgX" style="display:none">✕ เอารูปออก</button></div>
 </div>
 <main>
   <div id="tools"></div>
@@ -249,7 +250,9 @@ $('#paper').onclick=e=>{const p=e.target.dataset.p;if(!p)return;doc.paper=p;docu
 $('#size').onchange=e=>{const [w,h]=e.target.value.split('x').map(Number);doc.w=w;doc.h=h;layout();touch();};
 $('#name').oninput=()=>{doc.name=$('#name').value;touch();};
 $('#note').oninput=()=>{doc.note=$('#note').value;touch();};
-$('#bBg').onclick=()=>{const i=document.createElement('input');i.type='file';i.accept='image/*';i.onchange=()=>i.files[0]&&setBg(i.files[0]);i.click();};
+const pick_=document.createElement('input');pick_.type='file';pick_.accept='image/*';pick_.style.display='none';document.body.append(pick_);
+pick_.onchange=()=>{if(pick_.files[0])setBg(pick_.files[0]);pick_.value='';};
+$('#bBg').onclick=()=>pick_.click();
 $('#bBgX').onclick=()=>{doc.bg='';bgImg=null;refreshBtns();touch();};
 $('#bNew').onclick=async()=>{await save();setDoc(blank());stat('สเก็ตช์ใหม่');};
 $('#list').onchange=async e=>{const id=e.target.value;if(!id)return;await save();
