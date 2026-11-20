@@ -166,7 +166,7 @@
    "n": 2
   },
   "darkness/ult_preview": {
-   "v": "8f52782d",
+   "v": "aedd0e81",
    "desc": "Darkness — พรีวิวอัลติ สัตว์เงาทรงหยดน้ำ ออกจากมือซ้าย พุ่งเร็วแล้วช้าลง ค้าง อ้าเพิ่ม งับแรงที่ระยะ 600 แล้วแตกสลาย",
    "pal": "arcane",
    "tags": [
@@ -175,7 +175,7 @@
     "ult"
    ],
    "dur": 2.7,
-   "n": 17
+   "n": 21
   },
   "darkness/unmarked_chase_preview": {
    "v": "cc3842dc",
@@ -4979,7 +4979,7 @@
    "n": 1
   },
   "dark_drop_tail": {
-   "v": "b9c6673c",
+   "v": "b7602cd7",
    "desc": "Darkness อัลติ หางหยดน้ำ (หัว z=0 → มือ z=-1)",
    "mat": "energy",
    "n": 1
@@ -5000,6 +5000,12 @@
    "v": "1849f2e1",
    "desc": "Darkness อัลติ หัวหยดน้ำส่วนบน (ใหญ่กว่า) จุดหมุน = บานพับปาก",
    "mat": "energy",
+   "n": 1
+  },
+  "dark_drop_wisp": {
+   "v": "4f4cae6a",
+   "desc": "Darkness อัลติ เงาเส้นยาวหลุดจากตัว",
+   "mat": "solid",
    "n": 1
   },
   "earth_slam_rocks": {
