@@ -1,5 +1,7 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
 
+- 2026-11-20 — **Darkness ult v3 (Studio, review #91):** Camera rises and pulls back during the charge, holds through the flight, returns after the bite (preview via `WD.camHook`); front POV GIF refreshed.
+
 - 2026-11-20 — **Darkness ult v3 (Studio, review #91):** Portal stays open (fully opaque) while the monster travels and closes just before the bite; head spikes now root into the skin on the visible part of the skull; 70 rooted spikes added along the body back.
 
 - 2026-11-20 — **Darkness ult v3 (Studio, review #91):** Range 800 confirmed. Body starts at the skull's widest section (one continuous shape), swells behind the head; ink strands added on the body top.

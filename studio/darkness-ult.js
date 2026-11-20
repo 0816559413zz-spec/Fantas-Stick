@@ -123,8 +123,21 @@ FXCODE.studio_darkness_ult=(_x,_y,_h,args,instance)=>{
       tg.mark?.(t-ST_ULT_BITE,12);
     }
   }
+  // Camera (user 2026-11-20): rises and pulls back while charging so the whole creature fits, holds through
+  // the flight, then returns after the bite. Preview only: hooks the game camera via WD.camHook.
+  const prevHook=window.WD?.camHook,camUp=new THREE.Vector3(),camFwd=new THREE.Vector3(),camT0=new THREE.Vector3(),camT1=new THREE.Vector3(),camA=new THREE.Vector3(),camQ=new THREE.Quaternion();
+  if(window.WD&&!args.noCamLift)WD.camHook=c=>{
+    prevHook?.(c);
+    const t=instance.t,l=ease(.1,.75,t)*(1-ease(ST_ULT_BITE+.2,ST_ULT_BITE+.8,t));
+    if(l<=0)return;
+    root.getWorldPosition(camA);camFwd.set(0,0,1).applyQuaternion(root.getWorldQuaternion(camQ));camFwd.y=0;camFwd.normalize();
+    c.getWorldDirection(camT0).multiplyScalar(20).add(c.position);
+    c.position.addScaledVector(camUp.set(0,1,0),6.5*l).addScaledVector(camFwd,-6*l);
+    camT1.copy(camA).addScaledVector(camFwd,22).y+=3.5;
+    c.lookAt(camT0.lerp(camT1,l));
+  };
   instance.updateDarknessUlt=update;
   anchor.geo=new THREE.BufferGeometry();
-  anchor.geo.addEventListener('dispose',()=>{instance.updateDarknessUlt=null;for(const [o,{mask,castShadow}] of hidden){o.layers.mask=mask;o.castShadow=castShadow;}disposeTree(root);root.removeFromParent();});
+  anchor.geo.addEventListener('dispose',()=>{instance.updateDarknessUlt=null;if(window.WD&&!args.noCamLift)WD.camHook=prevHook;for(const [o,{mask,castShadow}] of hidden){o.layers.mask=mask;o.castShadow=castShadow;}disposeTree(root);root.removeFromParent();});
   update();
 };
