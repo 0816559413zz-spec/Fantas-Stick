@@ -1,0 +1,11 @@
+{
+  "v": 1,
+  "desc": "Darkness — ท่าตัวละครอัลติ (ยังไม่มีเอฟเฟกต์): ยืนเฉียงขาหน้ายัน ขาหลังย่อ ชาร์จ 1 วิ ยิงแล้วคทาดีดขึ้น ตัวไถลถอย",
+  "tags": ["darkness", "preview", "ult", "pose"],
+  "pal": "arcane",
+  "dur": 2.6,
+  "layers": [
+    {"id": "anchor", "t": "mesh", "shape": "disc", "mat": "black", "op": 0, "at": 0, "life": 2.6},
+    {"id": "stage", "t": "code", "fn": "studio_darkness_ult", "at": 0, "life": 2.6, "args": {"layer": "anchor", "noScythe": true, "noTargets": true}}
+  ]
+}
