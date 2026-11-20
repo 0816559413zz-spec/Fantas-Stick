@@ -186,6 +186,42 @@ function textures(y0){
     g.restore();label(x+w*.5-60,y+h-12,'← ตัว (ผ้า)       หัว (หมึก) →',15,'#555');});
 }
 
+// ============ Smoke aura that flows (not random puffs): streams peel off the rim, trail back, curl ============
+function smokeStream(p,tan,nor,len,width,alpha,s){   // soft smoke ribbon that leaves the rim, hugs the body, drifts out and curls
+  seed(s);const pts=[];let x=p[0],y=p[1];
+  for(let i=0;i<=26;i++){const t=i/26,out=Math.pow(t,1.6)*len*.16,curl=t>.7?(t-.7)/.3:0;
+    const ang=curl*2.6;const cx=Math.cos(ang),sx=Math.sin(ang);
+    const dx=tan[0]*t*len+nor[0]*out,dy=tan[1]*t*len+nor[1]*out-Math.pow(t,2)*len*.05;
+    pts.push([p[0]+dx+(nor[0]*cx-tan[0]*sx)*curl*width*.45,p[1]+dy+(nor[1]*cx-tan[1]*sx)*curl*width*.45]);}
+  g.save();g.filter='blur(7px)';
+  for(const [k,a] of [[1.4,alpha*.35],[.9,alpha*.6],[.5,alpha]]){g.strokeStyle=`rgba(5,5,7,${a})`;g.lineCap='round';
+    for(let i=1;i<pts.length;i++){const t=i/pts.length;g.lineWidth=width*k*(1-t*.55)*(.8+.2*Math.sin(t*9+s));g.beginPath();g.moveTo(...pts[i-1]);g.lineTo(...pts[i]);g.stroke();}}
+  g.filter='none';g.strokeStyle=`rgba(5,5,7,${alpha*.9})`;   // a crisp inner thread so it reads as flowing, not fog
+  g.lineWidth=2;g.beginPath();g.moveTo(...pts[0]);for(const q of pts)g.lineTo(...q);g.stroke();g.restore();
+}
+function auraConcept(y0){
+  g.fillStyle=PANEL;g.fillRect(20,y0,1460,560);
+  label(44,y0+42,'ออร่าเงาแบบควันไหล (ไม่ใช่ก้อนสุ่ม)',30,'#111');
+  label(44,y0+74,'ควันหลุดจากขอบตัวเป็นสาย เรียงตามแนวลิ้นเปลว ไหลไปข้างหลังตามทิศที่พุ่ง ยกขึ้นนิด ๆ แล้วม้วนปลาย หัวมีสายหนาสุด ไล่บางลงไปทางหาง',18,'#444');
+  const ox=90,oy=y0+370;g.save();g.translate(ox,oy);g.scale(.85,.85);g.translate(-ox,-oy);caster(ox-40,oy+60);
+  const body=T(ox,oy,[[0,-8,1],[180,-70],[380,-170],[560,-230],[680,-250,1],[800,-215],[900,-140],[960,-70,1],[890,-60,1],[740,-25],[590,30,1],[730,90],[860,140],[900,165,1],[820,200],[680,200,1],[640,165,1],[590,205,1],[540,160,1],[480,190,1],[430,140,1],[370,160,1],[320,105,1],[250,118,1],[200,70],[0,10,1]]);
+  // streams start ON the rim at even spacing, flow back along the body (tangent) and drift outward/up, then curl
+  const top=t=>{const x=L(930,180,t);return [ox+x,oy-70-180*Math.sin(Math.PI*Math.min(1,(x-60)/900))];};
+  for(let i=0;i<12;i++){const t=i/11,p=top(t),q=top(Math.min(1,t+.02)),tx=q[0]-p[0],ty=q[1]-p[1],l=Math.hypot(tx,ty)||1;
+    const tan=[tx/l,ty/l],nor=[ty/l,-tx/l];
+    smokeStream(p,tan,nor[1]<0?nor:[-nor[0],-nor[1]],L(330,150,t),L(48,22,t),L(.5,.3,t),300+i);}
+  for(let i=0;i<7;i++){const t=i/6,p=[ox+L(860,330,t),oy+L(190,120,t)];smokeStream(p,[-1,-.05],[0,1],L(220,110,t),L(34,18,t),.35,400+i);}
+  tongues(t=>{const x=L(560,900,t);return [ox+x,oy-60-180*Math.sin(Math.PI*Math.min(1,(x-450)/520))];},26,140,Math.PI*1.1,11,20);
+  fill(body,INK);
+  strands(body,[ox+950,oy-80],[ox+20,oy],280,70,7);
+  poly(T(ox,oy,[[590,30],[890,-60],[915,40],[900,165]]),THROAT);
+  teeth([ox+605,oy+20],[ox+885,oy-56],1,66,21,12);teeth([ox+615,oy+44],[ox+890,oy+158],-1,46,22,10);
+  g.restore();
+  // motion arrow
+  g.strokeStyle='#555';g.lineWidth=2;g.beginPath();g.moveTo(1100,y0+470);g.lineTo(1380,y0+470);g.stroke();poly([[1380,y0+462],[1396,y0+470],[1380,y0+478]],'#555');
+  label(1100,y0+500,'ทิศพุ่ง → ควันไหลสวนไปข้างหลัง',17,'#555');
+}
+
 g.fillStyle='#e6e4de';g.fillRect(0,0,cv.width,cv.height);
-if(location.search.includes('tex')){cv.height=1000;g.fillStyle='#e6e4de';g.fillRect(0,0,cv.width,cv.height);textures(0);}else if(location.search.includes('ab')){cv.height=1040;g.fillStyle='#e6e4de';g.fillRect(0,0,cv.width,cv.height);styleAB(20);}else{styleA(20);styleB(560);styleC(1100);}
+if(location.search.includes('aura')){cv.height=600;g.fillStyle='#e6e4de';g.fillRect(0,0,cv.width,cv.height);auraConcept(20);}else if(location.search.includes('tex')){cv.height=1000;g.fillStyle='#e6e4de';g.fillRect(0,0,cv.width,cv.height);textures(0);}else if(location.search.includes('ab')){cv.height=1040;g.fillStyle='#e6e4de';g.fillRect(0,0,cv.width,cv.height);styleAB(20);}else{styleA(20);styleB(560);styleC(1100);}
 </script></body></html>
