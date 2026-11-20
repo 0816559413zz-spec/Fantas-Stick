@@ -198,23 +198,48 @@ function darkFxMesh(geometry,color,opacity=1){
     toneMapped:false,side:THREE.DoubleSide,forceSinglePass:true
   }));
 }
+const darkShieldHud={alpha:0,held:false,changedAt:null,from:0};
 function drawDarknessHud(x,y,state){
+  const t=darkViewNow/1000,flow=state[2]>0,radius=Math.min(54,SH*.085);
+  if(flow)darkFlowHud??=stDarkFlowHud({timer:false});
+  if(darkFlowHud&&t-(darkFlowHud.lastDraw??-Infinity)>=1/30){
+    darkFlowHud.draw(t,flow?1:0);
+    darkFlowHud.lastDraw=t;
+  }
+
   cx.save();
-  cx.lineWidth=3;
-  cx.strokeStyle='#8c70a7';
-  if(state[2]>0){
-    cx.beginPath();cx.arc(x,y,21,-Math.PI/2,-Math.PI/2+Math.PI*2*state[2]/6);cx.stroke();
-  }
-  if(state[3]>0){
-    cx.fillStyle='#352744';cx.fillRect(x+24,y-2,32,4);
-    cx.fillStyle='#aa8acb';cx.fillRect(x+24,y-2,32*state[4]/3,4);
-  }
+  if(flow)drawDarkFlowTimer(cx,x,y,radius,state[2]/DARK_V.flow);
+  drawDarkShieldMeter(x,y-radius-22,state[4]/DARK_V.shieldTime,t,!!INPUT.sh);
+
+  const dashY=y+radius+19;
   for(let i=0;i<2;i++){
-    cx.fillStyle=i<state[7]?'#aa8acb':'#352744';
-    cx.beginPath();cx.arc(x-4+i*8,y+27,2.8,0,Math.PI*2);cx.fill();
+    const charge=i<state[7]?1:i===state[7]?(state[9]||0):0;
+    drawDarkHudBar(x+(i-1)*24+2,dashY,20,3,charge);
   }
   cx.restore();
 }
+
+function drawDarkHudBar(x,y,width,height,amount){
+  cx.fillStyle='rgba(255,255,255,0.26)';
+  cx.fillRect(x,y,width,height);
+  cx.fillStyle='#fff';
+  cx.fillRect(x,y,width*clamp(amount,0,1),height);
+}
+
+function drawDarkShieldMeter(x,y,remaining,t,held){
+  const hud=darkShieldHud;
+  if(hud.held!==held){hud.held=held;hud.changedAt=t;hud.from=hud.alpha;}
+  if(hud.changedAt!=null){
+    const fade=stDarkEase(0,held?.085:.115,t-hud.changedAt);
+    hud.alpha=lerp(hud.from,held?1:0,fade);
+  }
+  if(hud.alpha<=.005)return;
+  const width=Math.min(124,SW*.25);
+  cx.save();cx.globalAlpha*=hud.alpha;
+  drawDarkHudBar(x-width/2,y,width,4,remaining);
+  cx.restore();
+}
+
 function darknessMarkView(o,visible,height){
   if(visible&&!o.darkMark){
     const mark=new THREE.Group();
@@ -223,9 +248,9 @@ function darknessMarkView(o,visible,height){
   }
   const age=o.darkMarkedAt==null?1:(darkViewNow-o.darkMarkedAt)/1000;
   if(o.darkMark)o.darkMark(visible?age-.57:-1,Infinity);
-  if(o.darkTint&&!o.darkDashFx?.hold)o.darkTint(stDarkEase(.085,.483,age)*(1-stDarkEase(.548,.76,age))*.96);
+  if(o.darkTint&&!o.darkDashFx?.hold&&!o.darkChaseFx)o.darkTint(stDarkEase(.085,.483,age)*(1-stDarkEase(.548,.76,age))*.96);
 }
-const darkWaveViews=new Map();
+const darkWaveViews=new Map(),darkActiveViews=new Map();
 function darkViewRoot(ev,name){
   const root=new THREE.Group();
   root.name=name;root.position.set(tx(ev.x),GY(ev.x,ev.y)+(ev.h||0),tz(ev.y));
@@ -233,19 +258,34 @@ function darkViewRoot(ev,name){
   return root;
 }
 function darkViewTemp(root,life,update,finish){
-  return fireTemp(root,[],life,(_view,k)=>{
-    if(k<1){update(k*life);return;}
+  function dispose(){
+    darkActiveViews.delete(root);
     finish?.();
-    disposeTree(root);root.clear();
+    disposeTree(root);root.clear();root.removeFromParent();
+  }
+  fireTemp(root,[],life,(_view,k)=>{
+    if(k<1)update(k*life);
+    else dispose();
   });
+  darkActiveViews.set(root,dispose);
+}
+function darknessClear(){
+  for(let i=FIREV.length-1;i>=0;i--){
+    const dispose=darkActiveViews.get(FIREV[i].g);
+    if(dispose){dispose();FIREV.splice(i,1);}
+  }
+  darkWaveViews.clear();
+  darkFlowHud?.dispose();darkFlowHud=null;
+  darkShieldHud.alpha=0;darkShieldHud.held=false;darkShieldHud.changedAt=null;
 }
 function darkWorldAt(ev,out){
   return out.set(tx(ev.x),GY(ev.x,ev.y)+(ev.h||0),tz(ev.y));
 }
 function darkMarkWind(ev,o){
   const root=darkViewRoot(ev,'Darkness Mark Wave');
-  const live={scythe:!ev.flow,launch:false};
-  const wave=stDarkMarkWave(root,{live,flow:ev.flow});
+  const live={scythe:false,launch:false};
+  const wave=stDarkMarkWave(root,{live,flow:ev.flow,visualOnly:ev.main===false});
+  live.scythe=!!wave.blade;
   const view={root,live,wave,elapsed:0,clock:0};
   if(o)o.darkMarkCast=view;
   const windup=ev.flow?0:.45;
@@ -281,7 +321,7 @@ function darkMarkContact(ev){
   if(target){target.darkMarkedAt=darkViewNow||performance.now();target.darkTint??=stDarkBodyTint(target);}
   const view=darkWaveViews.get(ev.wave);
   if(!view)return;
-  const world=darkWorldAt(ev,new THREE.Vector3());world.y+=1.1;
+  const world=darkWorldAt(ev,new THREE.Vector3());
   const center=view.root.worldToLocal(world);
   const end=view.direction.clone().multiplyScalar(ev.distance*S3).add(new THREE.Vector3(0,1.1,0));
   view.wave.setFlight(end,Math.max(0,view.clock-view.wave.release),center);
@@ -289,7 +329,7 @@ function darkMarkContact(ev){
     target.g.getWorldPosition(out);out.y+=1.1;view.root.worldToLocal(out);
   };
 }
-let darkViewNow=0;
+let darkViewNow=0,darkFlowHud=null;
 function darkDashView(ev,o,hold,charging){
   if(!o)return;
   if(hold&&!charging&&o.darkDashFx?.hold){
@@ -336,6 +376,10 @@ function darkDashView(ev,o,hold,charging){
 function darknessCharacter(o,p,viewer,now){
   darkViewNow=now;
   const state=p.dk;
+  const previous=o.darkLastPosition;
+  o.darkMoving=!!previous&&previous.distanceToSquared(o.g.position)>.0009;
+  (o.darkLastPosition??=new THREE.Vector3()).copy(o.g.position);
+  o.darkDown=!!p.dn;
   if(state?.[0]===1&&viewer&&p.tm!==viewer.tm&&p.id!==viewer.id)o.g.visible=false;
   const faint=!!state?.[0]&&!o.ghost;
   if(faint!==!!o.darkFaint){
@@ -353,41 +397,22 @@ function darknessCharacter(o,p,viewer,now){
     o.darkScythe=stCreateScythePreview(o.darkSwordRoot,scytheArgs);
     o.darkVeilBlade=blade;o.darkScytheArgs=scytheArgs;
     o.darkBuffBlade=stDarkChargedBlade(o.darkScythe.blade);
-    const sample={pos:new THREE.Vector3(),QB:new THREE.Quaternion(),act:0,shaft:false};
-    const rotation=new THREE.Euler();
-    o.darkSwingPose=(t)=>{
-      const wind=THREE.MathUtils.smoothstep(t,0,.2),strike=THREE.MathUtils.smoothstep(t,.2,.32);
-      const recover=THREE.MathUtils.smoothstep(t,.33,.8),lift=o.darkSwingKind==='up';
-      const weight=1-recover;
-      const outward=wind*(1-strike);
-      const sweep=(1.15*outward-1.9*strike)*weight;
-      sample.pos.set(1.5+sweep,.08+weight*(lift?2.35*strike:.64*strike),weight*(-1.5*outward+3.6*strike));
-      rotation.set(weight*(lift?-1.65*strike:.4*outward),weight*(-.35-.8*outward+1.46*strike),
-        .16+weight*(lift?1.55*outward-.9*strike:1.4*outward+.75*strike));
-      sample.QB.setFromEuler(rotation);
-      sample.act=o.darkSwingKind==='cutOnly'?0:THREE.MathUtils.smoothstep(t,.19,.23)*(1-THREE.MathUtils.smoothstep(t,.3,.39));
-      return sample;
-    };
     o.darkWeapon=o.darkScythe.pivot;
     o.darkDisc=new THREE.Group();
     o.darkDiscInk=stDarkShieldInk(o.darkDisc,3.5);
     o.darkDiscFlames=stDarkShieldFlames(o.darkDisc,3.5);
+    o.darkShieldQ=new THREE.Quaternion();o.darkShieldEuler=new THREE.Euler();
     o.darkDisc.position.y=1.4;o.darkGear.add(o.darkDisc);
     o.darkOrb=darkFxMesh(new THREE.SphereGeometry(.72,20,16),0x101017);
     o.darkOrb.position.y=1.1;o.darkGear.add(o.darkOrb);
-    o.darkFlowOrbs=Array.from({length:3},()=>{
-      const orb=darkFxMesh(new THREE.SphereGeometry(.16,10,8),0x15111d);
-      o.darkGear.add(orb);return orb;
-    });
     o.g.add(o.darkGear);
   }
   o.darkGear.visible=!p.dn;
   o.shield.visible=false;
   const gear=o.darkWeapon,age=(now-(o.darkSwingAt??-1e4))/1000;
-  const swing=age>=0&&age<.92&&o.darkSwingKind!=='ba';
-  const basic=age>=0&&age<1.55&&o.darkSwingKind==='ba';
+  const basic=age>=0&&age<1.55;
   const baseClock=basic?2+age*1.48:0;
-  gear.visible=(!state?.[5]||swing)&&!o.darkMarkCast?.wave.blade.visible&&(!o.darkDashFx||o.darkDashFx.spent);
+  gear.visible=!state?.[5]&&!o.darkMarkCast?.wave.blade?.visible&&(!o.darkDashFx||o.darkDashFx.spent)&&!o.darkChaseFx;
   if(o.darkDashFx?.cancelled||p.dn){if(o.darkDashFx)o.darkDashFx.cancelled=true;o.b.visible=true;}
   const waltzAge=(now-(o.darkWaltzAt??-Infinity))/1000;
   if(waltzAge>=0&&waltzAge<1.01)stNightWaltzPose(o,waltzAge);
@@ -395,9 +420,15 @@ function darknessCharacter(o,p,viewer,now){
   gear.rotation.set(.25,now*.0015,.16);
   const veil=o.darkVeilCast,t=veil?(now-veil.at)/1000:Infinity;
   const planting=t>=0&&t<2.55;
-  o.darkScytheArgs.trailPose=planting?o.darkVeilBlade:swing?o.darkSwingPose:null;
+  o.darkScytheArgs.trailPose=planting?o.darkVeilBlade:null;
   o.darkSwordRoot.position.set(0,0,0);
-  o.darkSwordRoot.rotation.y=0;
+  o.darkSwordRoot.rotation.set(0,0,0);
+  if(basic){
+    const pitch=(o.darkBaPitch||0)*(1-stDarkEase(.55,1.54,age));
+    o.darkSwordRoot.rotation.x=-pitch;
+    o.darkSwordRoot.position.y=1.1*(1-Math.cos(pitch));
+    o.darkSwordRoot.position.z=1.1*Math.sin(pitch);
+  }
   if(planting){
     const settle=THREE.MathUtils.smoothstep(t,2.09,2.55);
     const plant=o.darkVeilBlade(t);
@@ -406,24 +437,25 @@ function darknessCharacter(o,p,viewer,now){
     o.darkSwordRoot.position.copy(veil.world);
     o.g.worldToLocal(o.darkSwordRoot.position).multiplyScalar(1-settle);
     o.darkSwordRoot.rotation.y=angDiff(Math.PI/2-veil.a,o.g.rotation.y)*(1-settle);
-  }else if(swing){
-    const blade=o.darkSwingPose(age),weight=1-THREE.MathUtils.smoothstep(age,.64,.92);
-    gear.position.lerp(blade.pos,weight);gear.quaternion.slerp(blade.QB,weight);
   }
+  const flow=state?.[2]>0?stDarkEase(0,.28,DARK_V.flow-state[2])*(1-stDarkEase(0,.25,.25-state[2])):0;
+  o.darkScytheArgs.flameSpeed=1+1.8*flow;
   o.darkScytheArgs.empowered=basic&&o.darkBaEmpowered;
+  o.darkScytheArgs.range=(o.darkScytheArgs.empowered?DARK_BA.powerRange:DARK_BA.range)*S3;
+  o.darkScytheArgs.arc=(o.darkScytheArgs.empowered?DARK_BA.powerArc:DARK_BA.arc)*Math.PI/360;
   gear.scale.setScalar(state?.[8]?1.10:1);
   o.darkBuffBlade(now/1000,state?.[8]&&!o.darkDashFx?1:0,0);
-  if(gear.visible&&o.g.visible)o.darkScythe.update(now/1000,0,0,planting?t:swing?age:baseClock);
+  if(gear.visible&&o.g.visible)o.darkScythe.update(now/1000,0,0,planting?t:baseClock);
   if(basic){
     o.b.rotation.y=o.darkSwordRoot.userData.baState(baseClock).tw;
     if(o.rig)rigSync(o,0);
   }
   const disc=o.darkDisc,shield=state?.[3]||0;
-  if(shield>0){o.darkShieldAt=now;o.darkShieldSpin=shield;}
+  if(shield>0){o.darkShieldAt=now;o.darkShieldSpin=shield;o.darkShieldPitch=state[6]||0;}
   const brake=(now-(o.darkShieldAt??-Infinity))/1000;
   if(shield>0||brake<.9){
-    const pitch=state?.[6]||0,rotation=Math.max(0,o.darkShieldSpin)*(1-stDarkEase(0,.9,brake));
-    const position=stDarkEase(0,.65,shield||1)*(1-stDarkEase(0,.87,brake));
+    const pitch=o.darkShieldPitch,rotation=o.darkShieldSpin*(1-stDarkEase(0,.9,brake));
+    const position=stDarkEase(0,.65,o.darkShieldSpin)*(1-stDarkEase(0,.87,brake));
     const opaque=state?.[4]>0?stDarkEase(.28,.98,rotation):0;
     o.darkSpinAngle=(o.darkSpinAngle||0)+(o.darkRenderAt==null?0:Math.min(.05,(now-o.darkRenderAt)/1000))*37*rotation;
     disc.visible=opaque>.01;
@@ -433,8 +465,8 @@ function darknessCharacter(o,p,viewer,now){
     o.darkDiscFlames(now/1000,opaque);
     gear.visible=opaque<.97;
     gear.position.lerp(disc.position,position);
-    const shieldQ=new THREE.Quaternion().setFromEuler(new THREE.Euler(-pitch,0,-o.darkSpinAngle));
-    gear.quaternion.slerp(shieldQ,position);
+    o.darkShieldQ.setFromEuler(o.darkShieldEuler.set(-pitch,0,-o.darkSpinAngle));
+    gear.quaternion.slerp(o.darkShieldQ,position);
     o.b.rotation.y=LGPOSE.body*position;
     o.armR.rotation.set(LGPOSE.ax*position,0,(LGPOSE.az-pitch)*position);
     o.lgHeadYaw=LGPOSE.head*position;
@@ -443,13 +475,28 @@ function darknessCharacter(o,p,viewer,now){
   }else disc.visible=false;
   o.darkRenderAt=now;
   o.darkDashFx?.update(now);
-  o.darkOrb.visible=!!state?.[5]&&!o.darkDashFx?.hold;
+  o.darkOrb.visible=!!state?.[5]&&!o.darkDashFx?.hold&&!o.darkChaseFx;
   if(o.darkOrb.visible)o.b.visible=false;
   else if(o.darkOrbWas&&!o.darkDashFx?.hold)o.b.visible=true;
   o.darkOrbWas=o.darkOrb.visible;
-  for(const [i,orb] of o.darkFlowOrbs.entries()){
-    orb.visible=state?.[2]>0;
-    if(orb.visible){const a=now*.004+i*Math.PI*2/3;orb.position.set(Math.cos(a)*1.7,1.1+Math.sin(a*2)*.37,Math.sin(a)*1.7);}
+  o.darkUltFx?.updateDarknessUlt?.();
+  if(flow>0&&!o.darkFlowView){
+    const root=new THREE.Group();o.darkGear.add(root);
+    const arm=stDarkFlowArm(root),flames=stDarkFlowFlames(root),orbs=stDarkFlowOrbs(root);
+    o.darkFlowView={root,arm,flames,orbs,points:Array.from({length:4},()=>new THREE.Vector3()),chest:new THREE.Vector3(),phase:0};
+  }
+  const effect=o.darkFlowView;
+  if(effect){
+    effect.root.visible=flow>0;
+    if(flow>0){
+      const clock=now/1000;
+      effect.phase+=effect.last==null?0:clamp(clock-effect.last,0,.05)*(1+1.8*flow);
+      effect.last=clock;
+      stDarkFlowArmPath(o,effect.points);
+      for(const point of effect.points)effect.root.worldToLocal(point);
+      effect.arm.update(effect.points,clock,flow);effect.flames(effect.arm.curve,effect.phase,flow);
+      effect.chest.copy(o.b.position);effect.chest.y+=1.25;effect.orbs(effect.chest,clock,flow);
+    }
   }
 }
 function darknessEfx(ev){
@@ -459,12 +506,14 @@ function darknessEfx(ev){
     root.scale.setScalar(ev.radius*S3/ST_WALTZ_AREA);
     stNightWaltzArea(root,clock);nightWaltzBorder(root,clock,true);
     if(o)o.darkWaltzAt=darkViewNow||performance.now();
-    darkViewTemp(root,1.9,t=>{clock.t=t;});
+    darkViewTemp(root,1.9,t=>{
+      clock.t=t;
+      if(o&&t<=ST_WALTZ_HIT)o.g.getWorldPosition(root.position);
+    });
     return true;
   }
   if(z==='darkwaltzhit'){
     const root=darkViewRoot(ev,'Night Waltz hit');
-    root.position.y+=1.15;
     const marked=ev.marked,span=marked?1.1:.70,points=[[-span,-.36,0],[.10,.25,.03],[span,.32,0]];
     const outer=stDarkCut(root,points,marked?.15:.10,0x111015);
     const core=stDarkCut(root,points,marked?.038:.019,marked?0xd1cbd8:0x857c8d,13);
@@ -473,21 +522,30 @@ function darknessEfx(ev){
   }
   if(z==='darkrift'){
     const recipe=fxData('darkness/ult_v3');
-    if(recipe)fxStart({...recipe,layers:recipe.layers.filter(l=>l.t!=='code')},{x,y,h,a},'darkness/ult_v3');
-    if(o)castStart(o,'line');
+    if(recipe){
+      const fx=fxStart(recipe,{x,y,h,a,ev:{...ev,darkness:true}},'darkness/ult_v3');
+      if(o)o.darkUltFx=fx;
+    }
     return true;
   }
   if(z==='darkveil'){
     const root=new THREE.Group();
     root.position.set(tx(x),GY(x,y)+h,tz(y));
+    root.rotation.y=Math.PI/2-a;
     const update=stDarkVeilGround(root,ev.radius*S3),life=.91+ev.duration+.36;
-    const materials=[];root.traverse(m=>{if(m.material)materials.push(m.material);});
+    const pose=o&&stDarkVeilCaster(root,o);
+    const splash=stDarkMatter(root,'Veil ground flecks',[
+      {at:.91,span:.10,count:44,spread:1.6,lift:.65,height:.10},
+      {at:1.07,span:.20,count:28,spread:2.35,lift:.34,height:.08},
+      {at:1.76,span:.07,count:17,spread:.42,lift:.66,height:.07}
+    ],(_t,out)=>out.set(0,0,0),.86);
     update(0,0,0);
-    fireTemp(root,materials,life,(_v,k)=>{
-      const t=k*life-.91,opacity=t<0?0:1-clamp((t-ev.duration)/.36,0,1);
-      update(t,clamp(t/.29,0,1),opacity);
+    darkViewTemp(root,life,clock=>{
+      const t=clock-.91,opacity=stDarkEase(0,.10,t)*(1-stDarkEase(ev.duration,ev.duration+.36,t));
+      update(t,stDarkEase(0,.37,t),opacity);splash(clock);
+      if(o&&!o.darkDown&&clock<2.32)pose(clock);
     });
-    if(o){o.darkVeilCast={at:darkViewNow||performance.now(),world:root.position.clone(),a};castStart(o,'line');}
+    if(o)o.darkVeilCast={at:darkViewNow||performance.now(),world:root.position.clone(),a};
     return true;
   }
   if(z==='darkmarkwind'){darkMarkWind(ev,o);return true;}
@@ -499,47 +557,61 @@ function darknessEfx(ev){
   }
   if(z==='darkba'){
     if(o){
-      o.darkSwingAt=darkViewNow||performance.now();o.darkSwingKind='ba';o.darkBaEmpowered=ev.empowered;
+      o.darkSwingAt=darkViewNow||performance.now();o.darkBaEmpowered=ev.empowered;o.darkBaPitch=ev.pitch;
       if(o.darkDashFx&&!o.darkDashFx.hold)o.darkDashFx.spent=true;
     }
     return true;
   }
   if(z==='darkbahit'){
     const root=darkViewRoot(ev,'Darkness BA impact');
-    const cut=stScytheHitCut(root,new THREE.Vector3(0,1.15,0),ev.ghost);
+    const cut=stScytheHitCut(root,new THREE.Vector3(),ev.ghost);
     darkViewTemp(root,.32,t=>cut(t,ev.ghost?-1:1));
     return true;
   }
   if(z==='darkward'){
-    const root=new THREE.Group(),life=.42+ev.duration;
-    root.position.set(tx(ev.x2),GY(ev.x2,ev.y2)+ev.h2,tz(ev.y2));
-    const pool=stWardDrainPool(root,ev.radius*S3,ev.duration);
-    const from=new THREE.Vector3(tx(x),GY(x,y)+h+1.45,tz(y));
-    const beam=darkFxMesh(new THREE.CylinderGeometry(.075,.14,1,10,1,true),0x130d1d,.92);
-    const direction=from.clone().sub(root.position);
-    beam.position.copy(direction).multiplyScalar(.5);
-    beam.scale.y=direction.length();
-    beam.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),direction.normalize());
-    root.add(beam);beam.visible=false;
-    pool(-1);
-    fireTemp(root,root.children.map(mesh=>mesh.material),life,(_v,k)=>{
-      const age=k*life-.42;
-      pool(age);
-      beam.visible=age>=-.07&&age<.16;
-      beam.material.opacity=.92*(1-THREE.MathUtils.smoothstep(age,0,.16));
-    });
-    if(o)castStart(o,'line');
+    if(!o)return true;
+    const root=darkViewRoot(ev,'Ward Drain'),zone=new THREE.Group();
+    const dest=darkWorldAt({x:ev.x2,y:ev.y2,h:ev.h2},new THREE.Vector3());
+    zone.position.copy(root.worldToLocal(dest));root.add(zone);
+    const update=stWardDrainEffect(root,zone,{liveCaster:o,radius:ev.radius*S3,duration:ev.duration});
+    const wind=ST_WARD_DRAIN_LAND;
+    darkViewTemp(root,.42+ev.duration,t=>update(t<.42?t*wind/.42:wind+t-.42));
     return true;
   }
-  if(['darkchaseplain','darkchasehit','darkshield','darkflow','darkchasemarked','darkbite'].includes(z)){
-    if(o&&['darkchaseplain','darkchasehit'].includes(z)){
-      o.darkSwingAt=darkViewNow||performance.now();
-      o.darkSwingKind=z==='darkchaseplain'?'up':z==='darkchasehit'&&!ev.last?'cutOnly':'sweep';
-      castStart(o,'line');
+  if(z==='darkwardhit'){
+    const target=PM3.get(ev.target);
+    if(target){
+      const root=new THREE.Group();
+      const badge=stWardDrainBadge(root);
+      darkViewTemp(root,1.5,t=>{
+        target.g.getWorldPosition(root.position);
+        badge(t);
+      });
     }
-    if(z==='darkchasehit')burst(x,y,'#100c18',12,115,.4,2.4,{h:h+1,g:5});
     return true;
   }
+  if(z==='darkflow')return true;
+  if(z==='darkchaseplain'||z==='darkchasemarked'){
+    if(!o)return true;
+    const marked=z==='darkchasemarked',root=darkViewRoot(ev,marked?'Nightfall marked':'Nightfall');
+    if(marked)o.darkTint??=stDarkBodyTint(o,true);
+    const markedFx=marked?stDarkMarkedChase(root,{live:{id:ev.id,caster:o,distance:ev.distance,bodyTint:o.darkTint}}):null;
+    const update=markedFx?markedFx.update:stDarkUnmarkedChase(root,{id:ev.id,caster:o,range:ev.range*S3});
+    const sequence={root};
+    o.darkChaseFx=sequence;
+    darkViewTemp(root,marked?3.43:1.54,t=>{
+      root.visible=!o.darkDown&&o.darkChaseFx===sequence&&o.g.visible;
+      if(root.visible)update(marked?t:t<=ev.duration?t*.235/ev.duration:.235+t-ev.duration);
+    },()=>{
+      markedFx?.dispose();
+      if(o.darkChaseFx===sequence){
+        o.darkChaseFx=null;o.b.visible=true;
+        if(marked)o.darkTint(0,1);
+      }
+    });
+    return true;
+  }
+  if(z==='darkchasehit'||z==='darkshield'||z==='darkbite')return true;
   return false;
 }
 

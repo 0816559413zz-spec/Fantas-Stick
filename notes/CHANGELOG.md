@@ -1,5 +1,9 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
 
+- 2026-11-20 Darkness: Quick Dash resets basic attack cooldown. The HUD uses Radiance-style white lines with a translucent track for the Flow ring, the two Dash charges, and the shield timer above the reticle.
+
+- 2026-11-20 Darkness uses the Studio effects in live casts. Test Place checks covered Death Sentence contact and absorption, both Nightfall branches, Night Waltz, Umbral Veil, shift and shield, Ward Drain, and Maw of the Abyss with Flow. Protocol v97.
+
 - 2026-11-20 Darkness class in game (js/09-darkness.js + view, from the import session): skills named Death Sentence / Nightfall / Night Waltz / Ward Drain / Umbral Veil / ult Maw of the Abyss; headless check: BA 12, empowered BA on mark 36, Night Waltz marked 50, Nightfall marked 25, ult 30 + mark + Flow. Protocol v96. Includes pending Light/Water/Storm edits from that session
 - 2026-11-20 Tier list tooling: `WD.team` = `balTeam(paths,N,rounds,maxT,'mix'|'mono')` in js/41-debug.js (2v2/6v6 bot battles, per-class win %, casts/min, dmg/min); `tools/bal-tierlist.js` runs 1v1 + 2v2/6v6 mixed + mono in one headless pass (~5 min) and writes only `shots/tier.json` (`?q=1` smoke run). First result: S Wind, A Pyro, B Frost/Storm/Nature, C Light/Earth, D Darkness/Water (bots underplay Storm/Light/Earth/Darkness). HUD: no fire flipbook around the Darkness ult card
 - 2026-11-20 Light + Darkness icons (game-icons.net CC BY 3.0, credits in icons/CREDITS.md): Light 9 icons, Darkness 10 (dk_* aliased by the import session). HUD per-class colours: Light = white-hot radiant cards with gold halo + sun rays, black icons, dark text; Darkness = black to dark-blue cards, blue icons, pale text (H4E light/darkness + --cbot/--ic/--tx vars, #h4[data-el])

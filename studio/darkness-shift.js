@@ -14,10 +14,11 @@ function stDarkShiftStudent(root,look,name,tint){
 function stDarkBodyTint(target,softFade=false){
   const strength={value:0};
   const coverage={value:1};
-  let prepared=false;
+  let prepared=null;
   return (amount,bodyCoverage=1)=>{
     strength.value=amount;coverage.value=bodyCoverage;
-    if(prepared||!target.fileModel)return;
+    const model=target.fileModel||target.b;
+    if(!model||prepared===model)return;
     const copies=new Map();
     const darken=source=>{
       if(copies.has(source))return copies.get(source);
@@ -38,11 +39,11 @@ function stDarkBodyTint(target,softFade=false){
       copies.set(source,material);
       return material;
     };
-    target.fileModel.traverse(mesh=>{
+    model.traverse(mesh=>{
       if(!mesh.isMesh||!mesh.material)return;
       mesh.material=Array.isArray(mesh.material)?mesh.material.map(darken):darken(mesh.material);
     });
-    prepared=true;
+    prepared=model;
   };
 }
 
@@ -376,7 +377,7 @@ function stDarkChargeScythe(root,blade,launch,impact,spendAt){
 
 function stDarkQuickDash(root,caster,look,live){
   const ease=stDarkEase,launch=.22,arrival=.54,impact=.66,range=4;
-  const slashStart=live?Infinity:1.02,spendAt=live?Infinity:1.36;
+  const slashStart=live?9:1.02,spendAt=live?9:1.36;
   const slashRoot=new THREE.Group();root.add(slashRoot);
   const scythe=stCreateScythePreview(slashRoot,{wrap:'C',mode:'ba',manual:true,followUp:true,reach:8.1});
   scythe.pivot.name='Quick Dash scythe';

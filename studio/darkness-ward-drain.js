@@ -42,14 +42,18 @@ FXCODE.studio_darkness_ward_drain=(_x,_y,_h,args,instance)=>{
   zone.position.z=ST_WARD_DRAIN_POINT;
   root.add(zone);
   anchor.obj.add(root);
+  const update=stWardDrainEffect(root,zone,{});
+  instance.updateWardDrain=()=>update(instance.t);
   anchor.geo=new THREE.BufferGeometry();
   anchor.geo.addEventListener('dispose',()=>{
     instance.updateWardDrain=null;
     disposeTree(root);
     root.removeFromParent();
   });
+};
 
-  const random=stRng(74831),look=getLook(NET.myId);
+function stWardDrainEffect(root,zone,{liveCaster,radius=ST_WARD_DRAIN_RADIUS,duration=ST_WARD_DRAIN_FADE}={}){
+  const live=!!liveCaster,random=live?mkRng(74831):stRng(74831),look=getLook(NET.myId);
   const actor=(name,appearance,x,z)=>{
     const student=makeStudent(appearance,name);
     student.g.name=name;
@@ -59,15 +63,15 @@ FXCODE.studio_darkness_ward_drain=(_x,_y,_h,args,instance)=>{
     student.wandG.visible=false;
     return student;
   };
-  const caster=actor('Ward drain caster',look,0,0);
-  const targets=[[-2.15,10.35],[2.05,12.17],[6.0,13]].map(([x,z],i)=>{
+  const caster=liveCaster||actor('Ward drain caster',look,0,0);
+  const targets=(live?[]:[[-2.15,10.35],[2.05,12.17],[6.0,13]]).map(([x,z],i)=>{
     const student=actor('Ward drain target '+(i+1),{...look,h:i,hs:i+1,cl:i},x,z);
     student.g.rotation.y=Math.atan2(-x,-z);
     const inside=Math.hypot(x,z-ST_WARD_DRAIN_POINT)<=ST_WARD_DRAIN_RADIUS;
     return {student,inside,badge:inside?stWardDrainBadge(student.g):null};
   });
 
-  const updatePool=stWardDrainPool(zone,ST_WARD_DRAIN_RADIUS,ST_WARD_DRAIN_FADE);
+  const updatePool=stWardDrainPool(zone,radius,duration);
   const solid=(geometry,color,parent=root)=>{
     const mesh=new THREE.Mesh(geometry,new THREE.MeshBasicMaterial({color,toneMapped:false}));
     parent.add(mesh);
@@ -80,33 +84,41 @@ FXCODE.studio_darkness_ward_drain=(_x,_y,_h,args,instance)=>{
   const filament=solid(new THREE.CylinderGeometry(.6,1,1,5),0x9273b5,tracer);
   filament.scale.set(.19,1,.19);
   filament.position.x=.54;
-  const ash=solid(new THREE.OctahedronGeometry(1,0),0x22162e);
+  const dustGeometry=new THREE.OctahedronGeometry(1,0);
+  const dustMaterial=new THREE.MeshBasicMaterial({color:0x22162e,toneMapped:false});
+  const poolParticles=new THREE.InstancedMesh(dustGeometry,dustMaterial,142);
+  const chargeParticles=new THREE.InstancedMesh(dustGeometry,dustMaterial,37);
+  for(const mesh of [poolParticles,chargeParticles]){
+    mesh.count=0;mesh.frustumCulled=false;
+    mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+  }
+  zone.add(poolParticles);root.add(chargeParticles);
+  const particle=new THREE.Object3D();
   const poolDust=Array.from({length:142},(_,i)=>{
-    const mesh=ash.clone();
-    zone.add(mesh);
     const afterSpread=i>=60;
     return {
-      mesh,born:afterSpread?.19+(i-60)*.017:i*.0026,
+      born:afterSpread?.19+(i-60)*.017:i*.0026,
       start:afterSpread?lerp(.36,.68,random()):0,angle:random()*ST_WARD_DRAIN_TURN,
-      radius:lerp(.33,1,Math.sqrt(random()))*ST_WARD_DRAIN_RADIUS,seed:random()
+      radius:lerp(.33,1,Math.sqrt(random()))*radius,seed:random()
     };
   });
   const chargeDust=Array.from({length:37},()=>({
-    mesh:ash.clone(),seed:random(),angle:random()*ST_WARD_DRAIN_TURN,height:random()-.44
+    seed:random(),angle:random()*ST_WARD_DRAIN_TURN,height:random()-.44
   }));
-  for(const {mesh} of chargeDust)root.add(mesh);
-  ash.visible=false;
-  const wrist=new THREE.Vector3(),end=new THREE.Vector3(0,.055,ST_WARD_DRAIN_POINT);
+  const wrist=new THREE.Vector3(),end=zone.position.clone();end.y+=.055;
   const direction=new THREE.Vector3(),up=new THREE.Vector3(0,1,0);
 
-  instance.updateWardDrain=()=>{
-    const time=instance.t,poolAge=time-ST_WARD_DRAIN_LAND;
+  return time=>{
+    const poolAge=time-ST_WARD_DRAIN_LAND;
     const hitAge=poolAge-ST_WARD_DRAIN_HIT_DELAY,beamAge=poolAge+.045;
     const gather=stDarkEase(.035,.32,time);
     const release=stDarkEase(-.08,.025,beamAge)*(1-stDarkEase(.12,.39,beamAge));
-    stDarkPose(caster,{back:.16*gather-.30*release,roll:-.12*gather,drop:.11*gather,arms:.16*gather,step:.25*release});
-    caster.armR.rotation.set(-1.54*gather+.38*release,0,-.62*gather+.50*release);
-    caster.armL.rotation.set(-.31*gather,0,.46*gather);
+    if(!live||poolAge<.25){
+      stDarkPose(caster,{back:.16*gather-.30*release,roll:-.12*gather,drop:.11*gather,arms:.16*gather,step:.25*release});
+      caster.armR.rotation.set(-1.54*gather+.38*release,0,-.62*gather+.50*release);
+      caster.armL.rotation.set(-.31*gather,0,.46*gather);
+      if(caster.rig)rigSync(caster,0);
+    }
     wrist.set(0,-.72,.07);
     caster.armR.localToWorld(wrist);
     root.worldToLocal(wrist);
@@ -114,16 +126,19 @@ FXCODE.studio_darkness_ward_drain=(_x,_y,_h,args,instance)=>{
     orb.position.copy(wrist);
     orb.visible=time>.07&&beamAge<.057;
     orb.scale.setScalar((.07+.22*stDarkEase(.07,.59,time))*(1-stDarkEase(0,.057,beamAge)));
-    for(const {mesh,seed,angle,height} of chargeDust){
+    let chargeCount=0;
+    for(const {seed,angle,height} of chargeDust){
+      if(time<=.06+seed*.17||beamAge>=-.007)continue;
       const phase=((time*2.9+seed)%1);
       const distance=.16+1.68*(1-phase)**1.45;
       const spin=angle+phase*2.0+time*1.7;
-      mesh.visible=time>.06+seed*.17&&beamAge<-.007;
-      mesh.position.set(wrist.x+Math.cos(spin)*distance,wrist.y+height*distance,wrist.z+Math.sin(spin)*distance);
+      particle.position.set(wrist.x+Math.cos(spin)*distance,wrist.y+height*distance,wrist.z+Math.sin(spin)*distance);
       const size=(.032+.071*seed)*Math.sin(Math.PI*phase)*gather;
-      mesh.scale.set(size*.51,size*.73,size*2.4);
-      mesh.rotation.set(height,spin+Math.PI*.5,0);
+      particle.scale.set(size*.51,size*.73,size*2.4);
+      particle.rotation.set(height,spin+Math.PI*.5,0);particle.updateMatrix();
+      chargeParticles.setMatrixAt(chargeCount++,particle.matrix);
     }
+    chargeParticles.count=chargeCount;chargeParticles.instanceMatrix.needsUpdate=chargeCount>0;
 
     tracer.visible=beamAge>=0&&beamAge<.13;
     if(tracer.visible){
@@ -137,21 +152,23 @@ FXCODE.studio_darkness_ward_drain=(_x,_y,_h,args,instance)=>{
     }
 
     updatePool(poolAge);
-    const disperse=1-stDarkEase(ST_WARD_DRAIN_HOLD,ST_WARD_DRAIN_FADE,poolAge);
-    for(const {mesh,born,start,angle,radius,seed} of poolDust){
+    const disperse=1-stDarkEase(ST_WARD_DRAIN_HOLD,duration,poolAge);
+    let poolCount=0;
+    for(const {born,start,angle,radius,seed} of poolDust){
       const age=poolAge-born,life=.55+.44*seed;
-      mesh.visible=age>0&&age<life&&poolAge<ST_WARD_DRAIN_FADE;
-      if(!mesh.visible)continue;
+      if(age<=0||age>=life||poolAge>=duration)continue;
       const phase=age/life;
       const spin=angle+poolAge*ST_WARD_DRAIN_SPIN+phase*.34;
       const expansion=1-(1-clamp(phase/(start===0?.50:.95),0,1))**2;
       const reach=radius*lerp(start,1,expansion);
       const height=.065+(start===0?1.06:0)*Math.sin(Math.PI*phase)+phase*(.74+1.22*seed);
-      mesh.position.set(Math.cos(spin)*reach,height,Math.sin(spin)*reach);
+      particle.position.set(Math.cos(spin)*reach,height,Math.sin(spin)*reach);
       const size=(.066+.107*seed)*stDarkEase(0,.13,phase)*(1-stDarkEase(.54,1,phase))*disperse;
-      mesh.scale.set(size,size*1.65,size*.60);
-      mesh.rotation.set(phase*5,spin,angle+phase*2);
+      particle.scale.set(size,size*1.65,size*.60);
+      particle.rotation.set(phase*5,spin,angle+phase*2);particle.updateMatrix();
+      poolParticles.setMatrixAt(poolCount++,particle.matrix);
     }
+    poolParticles.count=poolCount;poolParticles.instanceMatrix.needsUpdate=poolCount>0;
     for(const {student,inside,badge} of targets){
       const impact=inside?stDarkEase(0,.08,hitAge)*(1-stDarkEase(.12,.49,hitAge)):0;
       stDarkPose(student,{back:-.42*impact,roll:.20*impact,drop:.16*impact,arms:.53*impact,step:.26*impact});

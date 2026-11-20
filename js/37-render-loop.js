@@ -106,5 +106,6 @@ function renderGame(v,P,E,me,dt,now){
   {let t1=performance.now();const T=k=>{pf('h.'+k,t1);t1=performance.now();};drawMinBars(v,me);T('bars');
   drawTexts(dt);T('texts');
   if(me&&me.al&&!me.dn)drawCrosshair();
+  else if(darkFlowHud)darkFlowHud.plane.visible=false;
   if(!VIC.on)drawHUD(v,me,P);T('hud');drawSocial(P,me,dt,now);T('social');drawCombo(v,E,now);drawFFA(v,P,me,now);T('ffa');drawDeathCam(me);if(PROPON&&me&&me.al&&!me.dn&&!showBoard)drawPropHint(me);hud4Frame();T('hud4');}pf('hud2d',t0);devRecFrame();   // ป้าย VICTORY/DEFEAT = ซ่อน HUD
 }

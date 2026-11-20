@@ -1,6 +1,22 @@
 {
- "next": 104,
+ "next": 105,
  "items": [
+  {
+   "id": 104,
+   "title": "Darkness วงเวลา Flow, ชาร์จ Dash และเกจโล่",
+   "text": "Quick Dash รีเซ็ต BA ทันที Flow ใช้วงขาวเส้นบาง Dash ใช้ขีดขาวสองขีด และเกจโล่เป็นเส้นขาวเหนือเป้าเล็งแบบ Radiance เฟดเร็วตอนกดและปล่อย",
+   "kind": "Gameplay / HUD",
+   "who": "Darkness",
+   "status": "wait",
+   "created": "2026-11-20",
+   "updated": "2026-11-20",
+   "imgs": [],
+   "links": [
+    "/shots/motion_darkness_quick_hud_v5.gif",
+    "/shots/motion_darkness_flow_hud_v5.gif",
+    "/shots/motion_darkness_shield_hud_v5.gif"
+   ]
+  },
   {
    "id": 103,
    "title": "Radiance ขอบนีออน แถบเวลา และแรงสะท้อนร่างเทพ",

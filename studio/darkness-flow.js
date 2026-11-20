@@ -7,7 +7,10 @@
 const ST_DARK_FLOW={enter:.6,refresh:3.4,end:5.6,len:6};
 
 function stDarkFlowArmPath(actor,out){   // shoulder -> elbow -> wrist -> fingertip (world)
-  const B=actor.flowBones||(actor.flowBones=['upper_arm_R','forearm_R','hand_R'].map(n=>actor.g.getObjectByName(n)));
+  const B=actor.flowBones??=['upper_arm_R','forearm_R','hand_R'].map(n=>actor.g.getObjectByName(n));
+  if(B.some(b=>!b)&&actor.fileModel&&!actor.flowBoneModel){
+    actor.flowBoneModel=actor.fileModel;actor.flowBones=null;return stDarkFlowArmPath(actor,out);
+  }
   if(B.some(b=>!b)){   // fallback: code arm
     const a=actor.armR;a.updateWorldMatrix(true,false);
     for(let i=0;i<4;i++)out[i].set(0,-0.22*i,0).applyMatrix4(a.matrixWorld);
@@ -101,14 +104,24 @@ function stDarkFlowOrbs(root){   // 3 shadow balls, each with ONE small ribbon t
     geo.attributes.position.needsUpdate=geo.attributes.color.needsUpdate=true;};
 }
 
-function stDarkFlowHud(){   // screen-space HUD drawn on a canvas plane parked in front of the camera
+function drawDarkFlowTimer(ctx,x,y,radius,timeLeft){
+  const start=-Math.PI/2,turn=Math.PI*2;
+  ctx.save();
+  ctx.lineWidth=2.5;ctx.strokeStyle='rgba(255,255,255,0.26)';
+  ctx.beginPath();ctx.arc(x,y,radius,0,turn);ctx.stroke();
+  ctx.strokeStyle='#fff';
+  ctx.beginPath();ctx.arc(x,y,radius,start,start+clamp(timeLeft,0,1)*turn);ctx.stroke();
+  ctx.restore();
+}
+
+function stDarkFlowHud({timer=true}={}){   // vignette and drifting particles on a camera plane
   const W=1024,cv=document.createElement('canvas'),ctx=cv.getContext('2d'),tex=new THREE.CanvasTexture(cv);tex.colorSpace=THREE.SRGBColorSpace;
   const mat=new THREE.MeshBasicMaterial({map:tex,transparent:true,depthTest:false,depthWrite:false,toneMapped:false});
   const plane=new THREE.Mesh(new THREE.PlaneGeometry(1,1),mat);plane.name='Flow HUD';plane.frustumCulled=false;plane.renderOrder=999;cam.add(plane);
   if(!cam.parent)scene.add(cam);
   const rnd=i=>{const x=Math.sin(i*91.7+17.3)*43758.5453;return x-Math.floor(x);};
   const dots=Array.from({length:34},(_,i)=>({edge:i%3,p:rnd(i),d:.005+rnd(i+20)*.06,life:2+2.4*rnd(i+40),off:rnd(i+60),r:4+(rnd(i+80)<.2?10*rnd(i+90):5*rnd(i+100)),a:.25+.75*rnd(i+120)}));   // black dots drifting in from left/right/bottom
-  return {plane,draw(t,flow,timeLeft,flash){
+  return {plane,draw(t,flow,timeLeft){
     const H=Math.round(W/cam.aspect);if(cv.width!==W||cv.height!==H){cv.width=W;cv.height=H;}
     const d=.5,vh=2*Math.tan(cam.fov*Math.PI/360)*d;plane.position.set(0,0,-d);plane.scale.set(vh*cam.aspect,vh,1);
     ctx.clearRect(0,0,W,H);plane.visible=flow>.01;if(!plane.visible){tex.needsUpdate=true;return;}
@@ -121,13 +134,10 @@ function stDarkFlowHud(){   // screen-space HUD drawn on a canvas plane parked i
       if(e.edge===2){x=W*(.08+.84*e.p)+Math.sin(t*1.3+e.off*9)*8;y=H*(1-e.d)-u*H*.22;}
       else{x=e.edge?W*(1-e.d):W*e.d;x+=Math.sin(t*1.1+e.off*7)*6;y=H*(1.02-u*1.04);}
       ctx.globalAlpha=flow*e.a*Math.min(1,u*5)*Math.pow(1-u,.9);ctx.beginPath();ctx.arc(x,y,e.r*(1-.35*u),0,Math.PI*2);ctx.fill();}
-    // timer ring around the crosshair + 3 orb dots
-    const cx=W/2,cy=H/2,r=38,k=clamp(timeLeft,0,1);
-    ctx.globalAlpha=flow*.55;ctx.lineWidth=7;ctx.strokeStyle='#0a0a10';ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.stroke();
-    ctx.globalAlpha=flow;ctx.lineCap='round';ctx.lineWidth=6;ctx.strokeStyle='#08080c';ctx.beginPath();ctx.arc(cx,cy,r,-Math.PI/2,-Math.PI/2+Math.PI*2*k);ctx.stroke();
-    ctx.lineWidth=1.6;ctx.strokeStyle=`rgba(235,236,245,${.75+.25*flash})`;ctx.beginPath();ctx.arc(cx,cy,r+3.2,-Math.PI/2,-Math.PI/2+Math.PI*2*k);ctx.stroke();
-    if(flash>0){ctx.globalAlpha=flow*flash;ctx.lineWidth=3;ctx.strokeStyle='#ffffff';ctx.beginPath();ctx.arc(cx,cy,r+6+14*(1-flash),0,Math.PI*2);ctx.stroke();}
-    ctx.globalAlpha=flow;for(let i=0;i<3;i++){const x=cx+(i-1)*15,y=cy+r+16;ctx.fillStyle='#07070b';ctx.beginPath();ctx.arc(x,y,5,0,Math.PI*2);ctx.fill();ctx.strokeStyle='rgba(230,232,240,.8)';ctx.lineWidth=1.2;ctx.stroke();}
+    if(timer){
+      ctx.globalAlpha=flow;
+      drawDarkFlowTimer(ctx,W/2,H/2,64,timeLeft);
+    }
     ctx.globalAlpha=1;tex.needsUpdate=true;
   },dispose(){plane.removeFromParent();plane.geometry.dispose();mat.dispose();tex.dispose();}};
 }
@@ -149,7 +159,6 @@ FXCODE.studio_darkness_flow=(_x,_y,_h,args,instance)=>{
     const t=instance.t;
     const flow=ease(F.enter,F.enter+.35,t)*(1-ease(F.end,F.end+.4,t));
     const left=t<F.refresh?1-(t-F.enter)/F.len:1-(t-F.refresh)/F.len;   // ring drains; refresh fills it again
-    const flash=Math.max(1-Math.abs(t-F.enter-.2)/.25,1-Math.abs(t-F.refresh-.12)/.25,0);
     // idle breathing pose, right arm slightly raised so the aura reads
     stDarkPose(caster,{back:-.04+.02*Math.sin(t*1.8),roll:0,drop:.02*Math.sin(t*1.8),arms:.08,step:0});
     caster.armR.rotation.set(-.55-.1*flow+.04*Math.sin(t*2.1),0,-.75);
@@ -158,7 +167,7 @@ FXCODE.studio_darkness_flow=(_x,_y,_h,args,instance)=>{
     stDarkFlowArmPath(caster,path);root.updateWorldMatrix(true,false);for(const v of path)root.worldToLocal(v);   // bones are world-space, meshes live in root
     arm.update(path,t,flow);armPh+=armLast==null?t:clamp(t-armLast,0,.1)*(1+1.8*flow);armLast=t;flames(arm.curve,armPh,flow);
     caster.b.getWorldPosition(chest);root.worldToLocal(chest);chest.y+=1.25;orbs(chest,t,flow);
-    hud.draw(t,flow,clamp(left,0,1),flash);
+    hud.draw(t,flow,clamp(left,0,1));
   };
   arm.curve.points.forEach(p=>p.set(0,1,0));
   instance.updateDarknessFlow=tick;tick();

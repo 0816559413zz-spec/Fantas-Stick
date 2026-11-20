@@ -205,19 +205,20 @@ function stCreateScythePreview(root,args,lifetime){
   };
   const baState=T=>{   // สถานะล้วนจากเวลา (หางคำนวณย้อนหลังได้)
     const kc=Math.floor(T/LOOP),t=T-kc*LOOP,g0=orbA(kc*LOOP+SW0),side0=Math.sin(g0)>=0?1:-1;   // ฝั่งที่เคียวอยู่ตอนเริ่มฟัน (หลัง = ไปฝั่งที่ใกล้)
+    const arc=args.arc??A;
     let g=orbA(T),rad=RI,vert=1,dirSweep=1,spinA=0,act=0,tw=0,spinIdx=-1,spinU=0,cock=0;
     let settle=0;
     if(t>=SW0){
       const last=args.followUp||args.liveBA?0:NSW-1;
       const k=Math.min(last,Math.floor((t-SW0)/GAP)),u=t-SW0-k*GAP,from=side0*(k%2?-1:1),to=-from;   // ฟันที่ k เริ่มจาก from กวาดไป to
-      const outR=0.55+(args.liveBA?(args.empowered?8.1:7.6):REACH);
+      const outR=args.range??(.55+REACH);
       const S0p=WU+SWP+HOLD,STL=SPIN+0.14,spinTurn=x=>-from*Math.PI*2*4*(1-Math.pow(1-Math.min(1,x),3));   // ควง 4 รอบ เร็วแล้วค่อย ๆ ช้าลงจนหยุดตรงทิศพร้อมฟัน (จบที่รอบเต็ม = ไม่กระตุก)
-      if(u<WU){const e=ez(0,WU,u);const pg=k===0?g0:from*(A+BK);const pr=k===0?RI:outR;const pv=k===0?1:0;
-        g=pg+wrapA(from*(A+(k?BK:0))-pg)*e+(k===0?0:from*0.12*Math.sin(Math.PI*e));rad=pr+(outR-pr)*e;vert=pv*(1-e);dirSweep=-from;tw=0.25*from*e;cock=1.05*Math.sin(Math.PI/2*e);}   // เงื้อไปจุดเริ่มฝั่ง from (ครั้งแรกจากท่าวน)
-      else if(u<WU+SWP){const e=Math.pow((u-WU)/SWP,2.2),st=from*(A+(k?BK:0));g=st+(to*A-st)*e;cock=1.05*(1-ez(0,0.35,(u-WU)/SWP));rad=outR;vert=0;dirSweep=-from;act=Math.min(1,(u-WU)/0.04);tw=from*(0.25-0.85*e);}
-      else if(u<WU+SWP+HOLD){const e=ez(0,0.12,u-WU-SWP);g=to*A+to*0.18*e;rad=outR;vert=0;dirSweep=-from;act=Math.max(0,1-(u-WU-SWP)/0.12)*0.8;tw=-from*0.6;}   // ค้าง 0.3 วิ (ส่งตามแรงนิดเดียว)
-      else if(u<S0p+STL){const x=(u-S0p)/STL,e=ez(0,SPIN,u-S0p);g=to*(A+0.18)+(to*(A+BK)-to*(A+0.18))*e;rad=outR;vert=0;dirSweep=from;spinA=spinTurn(x);if(u<S0p+SPIN){spinIdx=k;spinU=(u-S0p)/SPIN;}tw=-from*0.6*(1-e);}   // ควงไปจุดเตรียมฟันต่อ (ระยะเท่าเดิม ไม่ดึงเข้าหาตัว) แล้วหมุนช้าลงจนหยุด
-      else{g=to*(A+BK);rad=outR;vert=0;dirSweep=from;
+      if(u<WU){const e=ez(0,WU,u);const pg=k===0?g0:from*(arc+BK);const pr=k===0?RI:outR;const pv=k===0?1:0;
+        g=pg+wrapA(from*(arc+(k?BK:0))-pg)*e+(k===0?0:from*0.12*Math.sin(Math.PI*e));rad=pr+(outR-pr)*e;vert=pv*(1-e);dirSweep=-from;tw=0.25*from*e;cock=1.05*Math.sin(Math.PI/2*e);}   // เงื้อไปจุดเริ่มฝั่ง from (ครั้งแรกจากท่าวน)
+      else if(u<WU+SWP){const e=Math.pow((u-WU)/SWP,2.2),st=from*(arc+(k?BK:0));g=st+(to*arc-st)*e;cock=1.05*(1-ez(0,0.35,(u-WU)/SWP));rad=outR;vert=0;dirSweep=-from;act=Math.min(1,(u-WU)/0.04);tw=from*(0.25-0.85*e);}
+      else if(u<WU+SWP+HOLD){const e=ez(0,0.12,u-WU-SWP);g=to*arc+to*0.18*e;rad=outR;vert=0;dirSweep=-from;act=Math.max(0,1-(u-WU-SWP)/0.12)*0.8;tw=-from*0.6;}   // ค้าง 0.3 วิ (ส่งตามแรงนิดเดียว)
+      else if(u<S0p+STL){const x=(u-S0p)/STL,e=ez(0,SPIN,u-S0p);g=to*(arc+0.18)+(to*(arc+BK)-to*(arc+0.18))*e;rad=outR;vert=0;dirSweep=from;spinA=spinTurn(x);if(u<S0p+SPIN){spinIdx=k;spinU=(u-S0p)/SPIN;}tw=-from*0.6*(1-e);}   // ควงไปจุดเตรียมฟันต่อ (ระยะเท่าเดิม ไม่ดึงเข้าหาตัว) แล้วหมุนช้าลงจนหยุด
+      else{g=to*(arc+BK);rad=outR;vert=0;dirSweep=from;
         if(k===last){
           const returnAt=args.followUp||args.liveBA?S0p+STL:WU+SWP+2;
           settle=ez(returnAt,returnAt+.76,u);

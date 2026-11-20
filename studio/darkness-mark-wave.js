@@ -53,8 +53,8 @@ function stDarkMarkWave(root,args){
   const spinStart=swingEnd+.31,spinEnd=spinStart+.46;
   const showWave=!!live||flow||args.showWave===true;
   const trailSample={pos:new THREE.Vector3(),QB:new THREE.Quaternion(),act:0};
-  const scythe=stCreateScythePreview(root,{wrap:'C',manual:true,scale:1.44,trailPose:sampleTrail,spinPose:sampleSpin});
-  scythe.pivot.name='Mark wave scythe';
+  const scythe=args.visualOnly?null:stCreateScythePreview(root,{wrap:'C',manual:true,scale:1.44,trailPose:sampleTrail,spinPose:sampleSpin});
+  if(scythe)scythe.pivot.name='Mark wave scythe';
   const flight=new THREE.Group();flight.name='Mark wave flying crescent';root.add(flight);
   const wave=stMarkWaveSheet(flight,'Mark wave flame tail',65,8,8);
   const edge=stMarkWaveSheet(flight,'Mark wave leading edge',65,5,9);
@@ -65,7 +65,7 @@ function stDarkMarkWave(root,args){
   for(const layer of [edge,wave,wind,trace])layer.mesh.material.color.setHex(0x000000);
   const absorbBands=7,absorbRows=20;
   const intake=flow?null:stMarkWaveSheet(root,'Mark wave flowing into target',absorbRows,absorbBands*3,11);
-  const waveStart=new THREE.Vector3();
+  const waveStart=new THREE.Vector3(),gameOrigin=new THREE.Vector3(0,1.1,0);
   const hitPoint=live||flow?new THREE.Vector3(.96,4.43,13.1):target.g.position.clone().add(new THREE.Vector3(0,1.2,0));
   const flightEnd=hitPoint.clone().add(new THREE.Vector3(0,-.042,-.45));
   const targetCenter=hitPoint.clone(),intakeStart=new THREE.Vector3();
@@ -98,6 +98,7 @@ function stDarkMarkWave(root,args){
   const idleBladeCenter=new THREE.Vector3(1.44,3.18,-1.20);
   const releasePose=sampleTrail(release);
   waveStart.copy(bladeCenter).applyQuaternion(releasePose.QB).add(releasePose.pos);
+  const flightOrigin=live?gameOrigin:waveStart;
   flight.rotation.x=-Math.atan2(flightEnd.y-waveStart.y,flightEnd.z-waveStart.z);
   const flankWaves=flow&&!live?[-.57,.57].map(yaw=>{
     // Share the animated geometry, rotating each copy around the release point.
@@ -126,7 +127,7 @@ function stDarkMarkWave(root,args){
     hit=release+Math.max(.001,duration);markAt=hit+.57;
     flightEnd.copy(end);
     if(target){contact=true;hitPoint.copy(target);}
-    flight.rotation.x=-Math.atan2(flightEnd.y-waveStart.y,Math.hypot(flightEnd.x-waveStart.x,flightEnd.z-waveStart.z));
+    flight.rotation.x=-Math.atan2(flightEnd.y-flightOrigin.y,Math.hypot(flightEnd.x-flightOrigin.x,flightEnd.z-flightOrigin.z));
   }
 
   function poseScythe(t,pos,rotation){
@@ -176,7 +177,8 @@ function stDarkMarkWave(root,args){
   function wavePosition(t,out){
     const travel=clamp((t-release)/(hit-release),0,1);
     const age=Math.max(0,t-hit);
-    out.copy(waveStart).lerp(flightEnd,travel);
+    out.copy(flightOrigin).lerp(flightEnd,travel);
+    if(live&&t<release+.08)out.lerp(waveStart,1-ease(release,release+.08,t));
     // After contact the remaining crescent coasts through the first target.
     if(contact){out.z+=1.93*(1-Math.exp(-age*8.2));out.y+=.12*(1-Math.exp(-age*4.0));}
     return out;
@@ -234,7 +236,7 @@ function stDarkMarkWave(root,args){
       const travel=i/(traceRows-1),born=lerp(release,hit,travel),age=t-born;
       const envelope=ease(.008,.073,age)*(1-ease(.26,traceLife,age));
       const endpoint=ease(.015,.24,travel)*(1-ease(.96,1,travel));
-      tracePoint.copy(waveStart).lerp(flightEnd,travel);
+      tracePoint.copy(flightOrigin).lerp(flightEnd,travel);
       const curl=.16*Math.sin(travel*12.6-age*7)+.075*Math.sin(travel*28+age*4);
       const y=tracePoint.y+curl+age*.43;
       const width=(.19+.61*travel**.66)*(.67+.33*ease(0,.20,age));
@@ -301,7 +303,7 @@ function stDarkMarkWave(root,args){
     for(let i=0;i<dustCount;i++){
       const p=dustSeeds[i];
       let size=0,angle=p.angle;
-      const gathering=t>=chargeStart&&t<swingStart&&i<60;
+      const gathering=scythe&&t>=chargeStart&&t<swingStart&&i<60;
       if(gathering){
         const entry=chargeStart+p.phase*.53,arrive=entry+.15+p.spread*.06;
         if(t<=entry||t>=arrive)continue;
@@ -318,7 +320,7 @@ function stDarkMarkWave(root,args){
         const vertical=clamp(p.height*(leading?.92:.33)+Math.sin(angle)*.09,-1,1);
         const growth=.81+.19*ease(0,.16,u);
         const front=(.49-waveBow*vertical*vertical+.075*vertical)*growth;
-        point.copy(waveStart).lerp(flightEnd,u-lag);
+        point.copy(flightOrigin).lerp(flightEnd,u-lag);
         point.x+=Math.cos(angle)*(.15+u*.23)*p.spread;
         point.y+=vertical*waveHeight*growth+u*Math.sin(angle)*.29;
         point.z+=front+(leading?.11+p.phase*.27:-.50-p.phase*1.43);
@@ -351,7 +353,7 @@ function stDarkMarkWave(root,args){
       if(age<=0||age>=life)continue;
       const u=age/life,alpha=ease(0,.13,u)*(1-ease(.42,1,u));
       const size=p.size*.54*alpha;
-      point.copy(waveStart).lerp(flightEnd,travel);
+      point.copy(flightOrigin).lerp(flightEnd,travel);
       point.x+=Math.cos(p.angle+age*3)*p.spread*.34;
       point.y+=p.height*.97+age*.42;point.z-=age*(.28+.44*p.phase);
       leaf.position.copy(point);leaf.rotation.set(.99+p.height*.3,p.angle,age*4);
@@ -381,12 +383,12 @@ function stDarkMarkWave(root,args){
   }
 
   const update=(t)=>{
-    poseScythe(t,scythe.pivot.position,scythe.pivot.quaternion);
+    if(scythe)poseScythe(t,scythe.pivot.position,scythe.pivot.quaternion);
     const power=flow?ease(0,.075,t)*(1-ease(release,swingEnd+.14,t)):
       ease(chargeStart,swingStart,t)*(1-ease(swingStart,swingEnd+.11,t));
-    scythe.update(t,.30*power);
+    if(scythe)scythe.update(t,.30*power);
     if(live){
-      scythe.pivot.visible=live.scythe&&t<spinEnd+.70;
+      if(scythe)scythe.pivot.visible=live.scythe&&t<spinEnd+.70;
       targetCenter.copy(hitPoint);
       live.target?.(targetCenter);
       drawDust(t);
@@ -423,5 +425,5 @@ function stDarkMarkWave(root,args){
     for(const [part,{mask,castShadow}] of hiddenParts){part.layers.mask=mask;part.castShadow=castShadow;}
     for(const {group} of flankWaves)group.removeFromParent();
   };
-  return {update,dispose,setFlight,release,blade:scythe.pivot};
+  return {update,dispose,setFlight,release,blade:scythe?.pivot};
 }

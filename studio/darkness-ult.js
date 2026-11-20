@@ -9,7 +9,7 @@ const _ultQ=new THREE.Quaternion(),_ultQ2=new THREE.Quaternion(),_ultQ3=new THRE
 const stUltWalkKeys=new Set();
 for(const event of ['keydown','keyup'])addEventListener(event,e=>{
   if(event==='keyup')stUltWalkKeys.delete(e.code);
-  if(ST.name!=='darkness/ult_v3'||SQ.get('walk')!=='1'||!['KeyW','KeyA','KeyS','KeyD'].includes(e.code)||
+  if(typeof ST==='undefined'||ST.name!=='darkness/ult_v3'||SQ.get('walk')!=='1'||!['KeyW','KeyA','KeyS','KeyD'].includes(e.code)||
     ['INPUT','TEXTAREA','SELECT'].includes(e.target.tagName)||e.target.isContentEditable)return;
   if(event==='keydown')stUltWalkKeys.add(e.code);
   e.preventDefault();e.stopImmediatePropagation();
@@ -22,19 +22,22 @@ FXCODE.studio_darkness_ult=(_x,_y,_h,args,instance)=>{
   anchor.inner.visible=false;
   const ease=stDarkEase,thrustAt=args.thrustAt??ST_ULT_REL;
   const travel=args.travel??ST_ULT_TRAVEL,biteAt=ST_ULT_REL+travel+ST_ULT_SNAP;
-  const walkMode=SQ.get('walk'),walkAt=thrustAt+.06+(args.walkCancelAfter??Infinity);
+  const live=instance.P.ev?.darkness===true;
+  const walkMode=live?null:SQ.get('walk'),walkAt=thrustAt+.06+(args.walkCancelAfter??Infinity);
   let walkX=0,walkZ=0,walkYaw=0,walkDistance=0,walkStarted=Infinity,lastTime=0;
   const root=new THREE.Group();root.name='Darkness ult stage';anchor.obj.add(root);
   const look={...getLook(NET.myId),ws:-1,wn:0};
-  const caster=stDarkShiftStudent(root,look,'Ult caster',lookTint(look));
-  const wand=new THREE.Group();wand.name='Ult wand';caster.armR.add(wand);
+  const caster=live?PM3.get(instance.P.ev.id):stDarkShiftStudent(root,look,'Ult caster',lookTint(look));
+  if(!caster)return;
+  const wand=new THREE.Group();wand.name='Ult wand';if(!live)caster.armR.add(wand);else root.add(wand);
+  wand.visible=!live;
   const wood=new THREE.Mesh(new THREE.CylinderGeometry(.019,.031,.96,8),new THREE.MeshStandardMaterial({color:0x251c27,roughness:.55}));
   wood.position.y=-1.04;wand.add(wood);
   const ferrule=new THREE.Mesh(new THREE.CylinderGeometry(.033,.027,.21,8),new THREE.MeshStandardMaterial({color:0x5b5354,roughness:.3,metalness:.38}));
   ferrule.position.y=-.69;wand.add(ferrule);
 
   // Four targets inside the 80° cone (one flying), one outside.
-  const spots=args.noTargets?[]:[[-2.5,9,0],[7,18,0],[-13,27,0],[6,36,3.5],[18,13,0]];
+  const spots=live||args.noTargets?[]:[[-2.5,9,0],[7,18,0],[-13,27,0],[6,36,3.5],[18,13,0]];
   const targets=spots.map(([x,z,y],i)=>{
     const tl={...look,h:i%3,cl:(i+1)%4,hs:i+1};
     const actor=stDarkShiftStudent(root,tl,'Ult target '+(i+1),lookTint(tl));
@@ -48,9 +51,8 @@ FXCODE.studio_darkness_ult=(_x,_y,_h,args,instance)=>{
   });
 
   // The scythe just floats beside the caster (user 2026-11-20).
-  const scythe=stCreateScythePreview(root,{wrap:'C',manual:true,scale:1.4});
-  scythe.pivot.name='Ult idle scythe';
-  if(args.noScythe)scythe.pivot.visible=false;
+  const scythe=live?null:stCreateScythePreview(root,{wrap:'C',manual:true,scale:1.4});
+  if(scythe){scythe.pivot.name='Ult idle scythe';if(args.noScythe)scythe.pivot.visible=false;}
 
   instance.ultWandTip=new THREE.Vector3();instance.ultCaster=caster;
   let shins=null,headBone=null,forearm=null,elbowL=0;
@@ -78,7 +80,9 @@ FXCODE.studio_darkness_ult=(_x,_y,_h,args,instance)=>{
     }
     const walkBlend=t>=walkStarted?ease(walkStarted,walkStarted+.13,t):0;
     const stride=walking?Math.sin(walkDistance*5.7)*walkBlend:0;
-    const avatar=PM3.get(NET.myId);avatar?.g.traverse(hide);hide(avatar?.cloth?.mo);hide(avatar?.cloth?.mi);
+    if(!live){const avatar=PM3.get(NET.myId);avatar?.g.traverse(hide);hide(avatar?.cloth?.mo);hide(avatar?.cloth?.mi);}
+    if(live&&t>=walkAt&&caster.darkMoving)walkStarted=Math.min(walkStarted,t);
+    if(live&&(caster.darkDown||t>=walkStarted+.13||t>=2.45))return;
     // Pose (user 2026-11-20, ref: kamehameha figure): charge side-on, body turned toward the charging (left) hand so the right shoulder
     // faces the target, deep crouch, LEFT hand charging at the left hip, head bowed looking at it. Then the
     // hand pulls further back (wind-up) and thrusts straight at the target: body bends forward hard, right
@@ -94,13 +98,14 @@ FXCODE.studio_darkness_ult=(_x,_y,_h,args,instance)=>{
     const step=P.step*lunge+.08*impact;
     const rootQ=root.getWorldQuaternion(_ultQ3);   // effect frame: +z = aim
     const aimW=_ultV1.set(0,0,1).applyQuaternion(rootQ);
-    caster.g.position.set(walkX,0,step+walkZ);
-    caster.g.rotation.y=L(L(P.turnC,P.turnW,wind),P.turnR,r)*s+walkYaw*walkBlend;
+    const turn=L(L(P.turnC,P.turnW,wind),P.turnR,r)*s;
+    if(!live){caster.g.position.set(walkX,0,step+walkZ);caster.g.rotation.y=turn+walkYaw*walkBlend;}
     caster.g.updateMatrixWorld(true);
     caster.b.position.y=-(L(P.dropC+.04*wind,P.dropR,r)+.05*impact)*s;
     const gInv=_ultQ4.copy(caster.g.getWorldQuaternion(_ultQ4)).invert();
     const leanAxis=_ultV2.set(0,1,0).cross(aimW).normalize().applyQuaternion(gInv);
     caster.b.quaternion.setFromAxisAngle(leanAxis,(L(P.leanC,P.leanR,r)+.15*impact)*s);
+    if(live)caster.b.rotateY(turn);
     // bend at the hips, not the feet: keep the hip point where the crouch puts it
     const hipY=.86,bent=_ultV8.set(0,hipY,0).applyQuaternion(caster.b.quaternion);
     caster.b.position.set(-bent.x,caster.b.position.y+hipY-bent.y,-bent.z);
@@ -149,9 +154,10 @@ FXCODE.studio_darkness_ult=(_x,_y,_h,args,instance)=>{
     caster.g.updateMatrixWorld(true);
     instance.ultWandTip.set(0,-1.52,0);caster.armR.localToWorld(instance.ultWandTip);root.worldToLocal(instance.ultWandTip);
 
-    scythe.pivot.rotation.set(.12*Math.sin(t*1.3),t*.9,.18+.06*Math.sin(t*.8));
+    if(scythe){scythe.pivot.rotation.set(.12*Math.sin(t*1.3),t*.9,.18+.06*Math.sin(t*.8));
     scythe.pivot.position.set(-1.5+walkX,.05+.08*Math.sin(t*1.7),-.3+step+walkZ);
     if(!args.noScythe)scythe.update(t);
+    }
 
     for(const tg of targets){
       const age=t-tg.hit,impact=tg.inside?ease(0,.06,age)*(1-ease(.12,.5,age)):0;
@@ -167,7 +173,7 @@ FXCODE.studio_darkness_ult=(_x,_y,_h,args,instance)=>{
   // Camera (user 2026-11-20): rises and pulls back near the end of the charge, looks down so the whole creature fits, holds through
   // the flight, then returns after the bite. Preview only: hooks the game camera via WD.camHook.
   const prevHook=window.WD?.camHook,camUp=new THREE.Vector3(),camFwd=new THREE.Vector3(),camT0=new THREE.Vector3(),camT1=new THREE.Vector3(),camA=new THREE.Vector3(),camQ=new THREE.Quaternion();
-  if(window.WD&&!args.noCamLift)WD.camHook=c=>{
+  if(window.WD&&!live&&!args.noCamLift)WD.camHook=c=>{
     prevHook?.(c);
     if(typeof ST!=='undefined'&&ST.cam!=='game')return;   // only the player camera lifts
     const t=instance.t,l=ease(.72,1.0,t)*(1-ease(biteAt+.2,biteAt+.8,t));   // lifts near the end of the charge
@@ -180,6 +186,6 @@ FXCODE.studio_darkness_ult=(_x,_y,_h,args,instance)=>{
   };
   instance.updateDarknessUlt=update;
   anchor.geo=new THREE.BufferGeometry();
-  anchor.geo.addEventListener('dispose',()=>{instance.updateDarknessUlt=null;if(window.WD&&!args.noCamLift)WD.camHook=prevHook;for(const [o,{mask,castShadow}] of hidden){o.layers.mask=mask;o.castShadow=castShadow;}disposeTree(root);root.removeFromParent();});
+  anchor.geo.addEventListener('dispose',()=>{instance.updateDarknessUlt=null;if(window.WD&&!live&&!args.noCamLift)WD.camHook=prevHook;for(const [o,{mask,castShadow}] of hidden){o.layers.mask=mask;o.castShadow=castShadow;}disposeTree(root);root.removeFromParent();});
   update();
 };
