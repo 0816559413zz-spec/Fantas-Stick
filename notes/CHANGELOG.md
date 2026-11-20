@@ -22,6 +22,8 @@
 
 - 2026-11-20 — **Darkness ult v3 round 3 (Studio, review #91):** Opaque charcoal body again (see-through showed teeth from behind), capped skull neck (was hollow from behind), solid portal, lighter throat and teeth so the mouth reads from the front; front POV view added.
 
+- 2026-11-20 — **Darkness Flow mark (Studio, review #97):** Reused the regular mark-wave scythe swing, recovery spin, and ink trail. Flow swings immediately and releases three waves with a launch ripple and shadow fragments, with the caster and targets hidden.
+
 - 2026-11-20 — **Darkness ult v3 round 2 (Studio, review #91):** Creature comes out of a vertical shadow portal in front of the hand; 72% opacity; wider head (1.9x) and body (1.6x); keeps moving into a 0.03 s bite with almost no hold.
 
 - 2026-11-20 — **Dev Mode window, orbit camera and video recording (user: cheat-menu style columns in one movable, resizable, see-through window; play while it is open; orbit around bots and record 15 s):** new js/78-dev-ui.js; js/77 keeps logic; hooks in js/31 (no pause when the menu frees the mouse), js/37 (orbit cam + record frame), js/52; tools/serve.py `/api/video` → recordings/ (git-ignored).
@@ -42,6 +44,8 @@
 - 2026-11-20 — **FCS real castle look + raised terraces (protocol v91, user: "keep the FCS layout, add castle models + play space + detail"; picked "second floor/balcony" + "visuals" + warm stone):** new file `js/28-fcs-castle.js` (FILES after `28-fcs-forest`). `fcsCastleMat` = world-space ashlar stone (`onBeforeCompile`, walls = coursed blocks, top faces = flagstones, grime at the foot, moss), also used for the castle floor and the 'pl' pillars. `fcsCastle()` replaces the old 6 m grey box instances for wall type 1: body + cap course + plinth + parapet/merlons + pilasters + arrow slits / lit windows + banners (sway) + torches (flicker sprites, `fcsCastleTick` from sgSync). Square towers at wall ends/corners (outline convex corners clustered, bbox grown to 2 cells inside the wall, +0.35 m visual only), some with tiled roofs, corner turrets and flags. Outer curtain wall + towers + keep outside the N/S/E map edges (silhouette). Collision of walls unchanged. **Gameplay:** 4 raised stone terraces 3.5 m (js/02-fcs.js `terrace()`, TERR floors k:'terr' + stair ramp floor 0.35 m/2.25 m, edge obs hgt H on open sides / H+1 on parapet sides, ramp side walls): zone 2 east + north-west of core 2, zone 3 west + east of core 3. Headless walk test: ramp 0 → 3.5 m, stays on top. Batching gotcha: static FCS meshes get merged into world space, so vertex sway must use `uv`, not `position`. Review #93 waiting.
 - 2026-11-20 — **Darkness ult round 2 (Studio, review #91):** Pose approved (side-on belly charge, left-arm lunge). New shadow-drop creature: teardrop from the left hand, ~7 m head with a low mouth and uneven teeth, pure black, fast-slow-hold-bite timing; old jaw assets removed.
 
+- 2026-11-20 — **Darkness Unmarked Chase (Studio):** Added a dash, a short stop, and a diagonal scythe uppercut on nearby targets.
+
 - 2026-11-20 — **FCS sky (user: "sky is one flat colour"):** `ffSkyMat` (js/28-fcs-forest.js) procedural dome over the whole Castle Strike map: gradient + drifting 6-octave fbm clouds (sun-side lit edges, dark bellies, silver lining) + sun glow + horizon blended into the live fog colour. `uK` from `fcsForestTick` blends castle sunset ↔ forest overcast. Review #92.
 - 2026-11-20 — **FCS forest mist no longer erases the bridge (user bug):** the 30 big `Sprite` mist cards in `fcsForest` stacked in front of walls and washed the bridge out to white. Now `ffMist` (js/28-fcs-forest.js): one instanced billboard in `fxScene` with soft depth fade (`softK`, 9 m of fog before a wall = full alpha) + fade under 3–11 m from the camera; shown only while its world is live (`ffMistFrame`, called at the top of `FXPass.render`).
 - 2026-11-20 — **Sketch: open image button:** "📂 เปิดรูป…" moved to the top bar (open an image file from disk as background); persistent hidden file input.
@@ -49,6 +53,11 @@
 - 2026-11-20 — **Darkness ult jaw (Studio, review #91):** Shadow-jaw ult built as Studio layers (jaw/teeth/tail models, black ink texture, smoke, shards) with a staging code layer for the caster and targets. Fast launch, slow ease to 30 m in 0.8 s, hold while opening wider, hard bite, dissolve.
 
 - 2026-11-20 — **Player hitbox 0.9 m -> 0.4 m (protocol v90):** player radius `PR` 18 -> 8 px to match the character body, for both wall collision and spell hits.
+
+- 2026-11-20 — **Darkness Marked Chase (Studio):** Added torso rotation through the wand swing and a staggered landing timed to the scythe impact.
+
+- 2026-11-20 — **Darkness Marked Chase (Studio):** Smaller ball and blade trail, rising loop around the target, and an airborne wand swing beneath the scythe.
+
 - 2026-11-20 — **Zone 1 ruin: fence removed (protocol v89):** wooden fence cells inside the ruin courtyard are no longer built.
 - 2026-11-20 — **Zone 1 ruin expanded (protocol v88):** ruin around Castle Strike core 1 grows to ~40 m with inner L/straight wall cover, pillars and a raised 1.2 m platform with a step next to the core.
 

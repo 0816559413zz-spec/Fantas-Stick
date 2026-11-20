@@ -1,4 +1,5 @@
 const ST_DARKNESS_MARK_WAVE='darkness/mark_wave_preview';
+const ST_DARKNESS_FLOW_MARK='darkness/flow_mark_preview';
 
 function stMarkWaveSheet(parent,name,rows,columns,order){
   const geometry=new THREE.BufferGeometry(),indices=[];
@@ -22,21 +23,25 @@ FXCODE.studio_darkness_mark_wave=(_x,_y,_h,args,instance)=>{
   if(!anchor?.obj)return;
   anchor.inner.visible=false;
   const root=new THREE.Group();root.name='Darkness mark wave preview';anchor.obj.add(root);
-  const look={...getLook(NET.myId),ws:-1,wn:0};
-  stDarkShiftStudent(root,look,'Mark wave caster',lookTint(look));
-  const targetLook={...look,h:2,cl:2,hs:2},otherLook={...look,h:3,cl:3,hs:3};
-  const target=stDarkShiftStudent(root,targetLook,'Mark wave first target',lookTint(targetLook));
-  const untouched=stDarkShiftStudent(root,otherLook,'Mark wave target behind',lookTint(otherLook));
-  const ease=stDarkEase,chargeStart=.36,swingStart=chargeStart+.70,swingEnd=swingStart+.235;
+  const flow=args.flow===true;
+  let target,untouched,showMark,showAbsorption;
+  if(!flow){
+    const look={...getLook(NET.myId),ws:-1,wn:0};
+    stDarkShiftStudent(root,look,'Mark wave caster',lookTint(look));
+    const targetLook={...look,h:2,cl:2,hs:2},otherLook={...look,h:3,cl:3,hs:3};
+    target=stDarkShiftStudent(root,targetLook,'Mark wave first target',lookTint(targetLook));
+    untouched=stDarkShiftStudent(root,otherLook,'Mark wave target behind',lookTint(otherLook));
+    // A gently raised aim with a second target in the same lane.
+    target.g.position.set(.96,2.75,15.3);target.g.rotation.y=Math.PI;
+    untouched.g.position.set(.96,2.90,18.1);untouched.g.rotation.y=Math.PI;
+    showMark=stDarkTargetMark(target.g);
+    showAbsorption=stDarkBodyTint(target);
+  }
+  const ease=stDarkEase,chargeStart=flow?0:.36,swingStart=flow?0:chargeStart+.70,swingEnd=swingStart+.235;
   const release=swingStart+.167,hit=release+.31,markAt=hit+.57;
   const dissolveTime=.49;
   const spinStart=swingEnd+.31,spinEnd=spinStart+.46;
-  const showWave=args.showWave===true;
-  // This take shows a gently raised aim with a second target in the same lane.
-  target.g.position.set(.96,2.75,15.3);target.g.rotation.y=Math.PI;
-  untouched.g.position.set(.96,2.90,18.1);untouched.g.rotation.y=Math.PI;
-  const showMark=stDarkTargetMark(target.g);
-  const showAbsorption=stDarkBodyTint(target);
+  const showWave=flow||args.showWave===true;
   const trailSample={pos:new THREE.Vector3(),QB:new THREE.Quaternion(),act:0};
   const scythe=stCreateScythePreview(root,{wrap:'C',manual:true,scale:1.44,trailPose:sampleTrail,spinPose:sampleSpin});
   scythe.pivot.name='Mark wave scythe';
@@ -49,9 +54,9 @@ FXCODE.studio_darkness_mark_wave=(_x,_y,_h,args,instance)=>{
   const trace=stMarkWaveSheet(root,'Mark wave lingering trail',traceRows,traceColumns,7);
   for(const layer of [edge,wave,wind,trace])layer.mesh.material.color.setHex(0x000000);
   const absorbBands=7,absorbRows=20;
-  const intake=stMarkWaveSheet(root,'Mark wave flowing into target',absorbRows,absorbBands*3,11);
+  const intake=flow?null:stMarkWaveSheet(root,'Mark wave flowing into target',absorbRows,absorbBands*3,11);
   const waveStart=new THREE.Vector3();
-  const hitPoint=target.g.position.clone().add(new THREE.Vector3(0,1.2,0));
+  const hitPoint=flow?new THREE.Vector3(.96,4.43,13.1):target.g.position.clone().add(new THREE.Vector3(0,1.2,0));
   const flightEnd=hitPoint.clone().add(new THREE.Vector3(0,-.042,-.45));
   const targetCenter=hitPoint.clone(),intakeStart=new THREE.Vector3();
 
@@ -71,7 +76,7 @@ FXCODE.studio_darkness_mark_wave=(_x,_y,_h,args,instance)=>{
   const bladeCenter=new THREE.Vector3(.70,2.05,0).multiplyScalar(1.44);
   const bladeOffset=new THREE.Vector3(),tracePoint=new THREE.Vector3();
   const spinTurn=new THREE.Quaternion(),shaftCenter=new THREE.Vector3(0,1.1*1.44,0);
-  const hitFlash=stMarkWaveSheet(root,'Mark wave contact flare',3,5,12);
+  const hitFlash=flow?null:stMarkWaveSheet(root,'Mark wave contact flare',3,5,12);
   const inverted=new THREE.Quaternion().setFromRotationMatrix(new THREE.Matrix4().makeBasis(
     new THREE.Vector3(0,0,1),new THREE.Vector3(0,-1,0),new THREE.Vector3(1,0,0)));
   const idleRotation=new THREE.Quaternion().setFromAxisAngle(up,-1.03);
@@ -84,14 +89,33 @@ FXCODE.studio_darkness_mark_wave=(_x,_y,_h,args,instance)=>{
   const releasePose=sampleTrail(release);
   waveStart.copy(bladeCenter).applyQuaternion(releasePose.QB).add(releasePose.pos);
   flight.rotation.x=-Math.atan2(flightEnd.y-waveStart.y,flightEnd.z-waveStart.z);
+  const flankWaves=flow?[-.57,.57].map(yaw=>{
+    // Share the animated geometry, rotating each copy around the release point.
+    const group=new THREE.Group();
+    group.rotation.y=yaw;group.position.copy(waveStart).sub(waveStart.clone().applyAxisAngle(up,yaw));
+    const crescent=flight.clone(),ribbon=trace.mesh.clone();
+    group.add(crescent,ribbon);root.add(group);
+    return {group,crescent,ribbon};
+  }):[];
+  const launchChips=flow?stDarkMatter(root,'Flow mark launch shards',[
+    {at:release-.02,span:.11,count:86,spread:3.5,lift:1.65,height:waveStart.y,back:.35}
+  ],(_t,out)=>out.copy(waveStart)):null;
+  const launchArc=flow?stMarkWaveSheet(root,'Flow mark launch ripple',49,4,11):null;
+  const hiddenParts=new Map();
+  function hidePart(part){
+    if(!part||hiddenParts.has(part))return;
+    hiddenParts.set(part,{mask:part.layers.mask,castShadow:part.castShadow});
+    part.layers.disableAll();part.castShadow=false;
+  }
   if(!showWave){
     target.g.visible=false;untouched.g.visible=false;showMark(-1,8);
     flight.visible=false;trace.mesh.visible=false;intake.mesh.visible=false;hitFlash.mesh.visible=false;
   }
 
   function poseScythe(t,pos,rotation){
-    const prepare=ease(.015,chargeStart+.07,t),flip=ease(.075,chargeStart+.03,t);
-    const gather=ease(chargeStart,swingStart,t);
+    const prepare=flow?ease(0,.085,t):ease(.015,chargeStart+.07,t);
+    const flip=flow?ease(0,.095,t):ease(.075,chargeStart+.03,t);
+    const gather=flow?0:ease(chargeStart,swingStart,t);
     const cut=ease(swingStart,swingEnd,t);
     const coast=ease(swingEnd,swingEnd+.35,t),settle=ease(swingEnd+.30,swingEnd+1.04,t);
     // Follow the cutting edge around the side, low across the front, then up.
@@ -281,7 +305,7 @@ FXCODE.studio_darkness_mark_wave=(_x,_y,_h,args,instance)=>{
         point.y+=vertical*waveHeight*growth+u*Math.sin(angle)*.29;
         point.z+=front+(leading?.11+p.phase*.27:-.50-p.phase*1.43);
         size=p.size*(leading?1.07:.93)*Math.sin(Math.PI*(u-lag))**.42;
-      }else if(showWave&&t>=hit&&t<markAt+.08){
+      }else if(showWave&&!flow&&t>=hit&&t<markAt+.08){
         const born=hit+p.phase*.233,u=clamp((t-born)/(markAt+.02-born),0,1);
         if(!u||u>=1)continue;
         const pull=u**1.38,curve=Math.sin(Math.PI*u)*(1-pull)*p.spread;
@@ -320,11 +344,42 @@ FXCODE.studio_darkness_mark_wave=(_x,_y,_h,args,instance)=>{
     if(dust.instanceColor)dust.instanceColor.needsUpdate=true;
   }
 
+  function drawLaunchArc(t){
+    const age=t-release,spread=ease(0,.23,age);
+    const fade=ease(0,.028,age)*(1-ease(.065,.29,age));
+    launchArc.mesh.visible=fade>.003;
+    if(!launchArc.mesh.visible)return;
+    for(let i=0;i<49;i++){
+      const u=i/48,a=lerp(-2.72,1.63,u),tip=Math.sin(Math.PI*u)**.64;
+      const tear=.09*Math.sin(u*73+t*28)+.045*Math.sin(u*113);
+      for(let j=0;j<4;j++){
+        const v=j/3,k=4*i+j,r=.24+2.35*spread+v*.34*tip+tear*spread;
+        launchArc.positions.setXYZ(k,waveStart.x+Math.cos(a)*r*.75,
+          waveStart.y+Math.sin(a)*r,waveStart.z+spread*.62+Math.cos(a)*r*.44);
+        launchArc.colors.setXYZW(k,0,0,0,fade*tip*(1-v*v)*.68);
+      }
+    }
+    launchArc.positions.needsUpdate=true;launchArc.colors.needsUpdate=true;
+  }
+
   const update=()=>{
     const t=instance.t;
     poseScythe(t,scythe.pivot.position,scythe.pivot.quaternion);
-    const power=ease(chargeStart,swingStart,t)*(1-ease(swingStart,swingEnd+.11,t));
+    const power=flow?ease(0,.075,t)*(1-ease(release,swingEnd+.14,t)):
+      ease(chargeStart,swingStart,t)*(1-ease(swingStart,swingEnd+.11,t));
     scythe.update(t,.30*power);
+    if(flow){
+      for(const avatar of PM3.values()){
+        avatar.g.traverse(hidePart);hidePart(avatar.cloth?.mo);hidePart(avatar.cloth?.mi);
+      }
+      for(const enemy of EM3.values())enemy.g?.traverse(hidePart);
+      drawDust(t);drawFlight(t);drawLingeringTrail(t);launchChips(t);
+      for(const {crescent,ribbon} of flankWaves){
+        crescent.position.copy(flight.position);crescent.visible=flight.visible;ribbon.visible=trace.mesh.visible;
+      }
+      drawLaunchArc(t);
+      return;
+    }
     const recoil=showWave?ease(hit,hit+.055,t)*(1-ease(hit+.11,hit+.37,t)):0;
     targetCenter.copy(hitPoint);targetCenter.z+=.28*recoil;
     drawDust(t);
@@ -340,6 +395,8 @@ FXCODE.studio_darkness_mark_wave=(_x,_y,_h,args,instance)=>{
   instance.updateMarkWave=update;
   anchor.geo=new THREE.BufferGeometry();
   anchor.geo.addEventListener('dispose',()=>{
+    for(const [part,{mask,castShadow}] of hiddenParts){part.layers.mask=mask;part.castShadow=castShadow;}
+    for(const {group} of flankWaves)group.removeFromParent();
     instance.updateMarkWave=null;disposeTree(root);root.removeFromParent();
   });
   update();

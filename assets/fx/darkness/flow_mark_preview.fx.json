@@ -1,0 +1,11 @@
+{
+  "v": 1,
+  "desc": "Darkness — เคียวตวัดทันที ปล่อยคลื่นติดตราสามทางใน Flow",
+  "tags": ["darkness", "preview"],
+  "pal": "arcane",
+  "dur": 1.95,
+  "layers": [
+    {"id": "anchor", "t": "mesh", "shape": "disc", "mat": "black", "op": 0, "at": 0, "life": 1.95},
+    {"id": "flow_mark", "t": "code", "fn": "studio_darkness_mark_wave", "at": 0, "life": 1.95, "args": {"layer": "anchor", "flow": true}}
+  ]
+}

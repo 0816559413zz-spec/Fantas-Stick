@@ -62,10 +62,14 @@ function stCam(c){if(ST.cam==='game'||!ST.fx)return;const A=stAnchor();if(!A)ret
     if(ST.name===ST_DARKNESS_HOLD_DASH)ST.I?.darknessShiftFocus?.(T);
     if(ST.name===ST_DARKNESS_WARD_DRAIN)T.x+=5.7;
     if(ST.name===ST_DARKNESS_MARK_WAVE)T.x+=7.2;
+    if(ST.name===ST_DARKNESS_FLOW_MARK)T.x+=5.3;
     if(ST.name===ST_DARKNESS_CHASE)T.x+=16.20;
+    if(ST.name===ST_DARKNESS_UNMARKED_CHASE)T.x+=4.65;
   }
   if(ST.name===ST_DARKNESS_MARK_WAVE&&ST.cam==='orbit')T.y+=2.15;
+  if(ST.name===ST_DARKNESS_FLOW_MARK&&ST.cam==='orbit')T.y+=2.4;
   if(ST.name===ST_DARKNESS_CHASE&&ST.cam==='orbit')T.y+=2.65;
+  if(ST.name===ST_DARKNESS_UNMARKED_CHASE&&ST.cam==='orbit')T.y+=1.12;
   const f=[Math.cos(A.a),Math.sin(A.a)],r=[-Math.sin(A.a),Math.cos(A.a)];
   if(ST.cam==='side')c.position.set(T.x+r[0]*ST.dist,T.y+2.2*ST.dist/9,T.z+r[1]*ST.dist);
   else if(ST.cam==='front')c.position.set(T.x+f[0]*ST.dist,T.y+2*ST.dist/9,T.z+f[1]*ST.dist);
@@ -160,14 +164,23 @@ async function stOpen(name,keepT){try{const r=await fetch('assets/fx/'+name+'.fx
         ST.orb.pitch=SQ.has('opitch')?+SQ.get('opitch'):.64;
       }
     }
-    if(name===ST_DARKNESS_QUICK_DASH||name===ST_DARKNESS_HOLD_DASH||name===ST_DARKNESS_SHIELD||name===ST_DARKNESS_MARK_WAVE||name===ST_DARKNESS_CHASE){
+    if(name===ST_DARKNESS_FLOW_MARK){
+      if(!await loadModel('dark_scythe'))throw new Error('โหลดโมเดลเคียวไม่ได้');
+      if(!keepT&&!SQ.has('cam')){
+        ST.cam='orbit';ST.orb.dist=+SQ.get('dist')||16;
+        ST.orb.yaw=SQ.has('oyaw')?+SQ.get('oyaw'):-1.83;
+        ST.orb.pitch=SQ.has('opitch')?+SQ.get('opitch'):.51;
+      }
+    }
+    if(name===ST_DARKNESS_QUICK_DASH||name===ST_DARKNESS_HOLD_DASH||name===ST_DARKNESS_SHIELD||name===ST_DARKNESS_MARK_WAVE||name===ST_DARKNESS_CHASE||name===ST_DARKNESS_UNMARKED_CHASE){
       const [student,scythe]=await Promise.all([loadModel('char_student'),loadModel('dark_scythe')]);
       if(!student||!scythe)throw new Error('โหลดโมเดลเคียวหรือตัวละครไม่ได้');
       if(!keepT&&!SQ.has('cam')){
         const quickDash=name===ST_DARKNESS_QUICK_DASH,markWave=name===ST_DARKNESS_MARK_WAVE,chase=name===ST_DARKNESS_CHASE;
-        ST.cam='orbit';ST.orb.dist=+SQ.get('dist')||(chase?22.9:markWave?18.6:quickDash?15:name===ST_DARKNESS_HOLD_DASH?10.6:9);
-        ST.orb.yaw=+SQ.get('oyaw')||(chase?-1.30:markWave?-1.72:quickDash?-2.30:name===ST_DARKNESS_SHIELD?.28:.72);
-        ST.orb.pitch=+SQ.get('opitch')||(chase?.24:markWave?.21:quickDash?.33:.49);
+        const unmarked=name===ST_DARKNESS_UNMARKED_CHASE;
+        ST.cam='orbit';ST.orb.dist=+SQ.get('dist')||(chase?22.9:markWave?18.6:quickDash?15:name===ST_DARKNESS_HOLD_DASH?10.6:unmarked?14.8:9);
+        ST.orb.yaw=+SQ.get('oyaw')||(chase?-1.30:markWave?-1.72:quickDash?-2.30:name===ST_DARKNESS_SHIELD?.28:unmarked?-1.34:.72);
+        ST.orb.pitch=+SQ.get('opitch')||(chase?.24:markWave?.21:quickDash?.33:unmarked?.35:.49);
       }
     }
     if(ST_NATURE_TREE_PREVIEWS.has(name)){

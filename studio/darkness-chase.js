@@ -1,4 +1,5 @@
 const ST_DARKNESS_CHASE='darkness/chase_preview';
+const ST_DARKNESS_UNMARKED_CHASE='darkness/unmarked_chase_preview';
 
 function stChaseScytheOpacity(scythe){
   const materials=new Map();
@@ -31,9 +32,12 @@ function stChaseScytheOpacity(scythe){
 function stChaseBall(root,orb,returnPoint,targetZ,launch,arrival,returnBody){
   const ease=stDarkEase;
   const route=new THREE.CatmullRomCurve3([
-    new THREE.Vector3(0,0,0),new THREE.Vector3(.08,0,8.2),new THREE.Vector3(.24,0,16.8),
-    new THREE.Vector3(.78,0,targetZ-2.5),new THREE.Vector3(2.08,0,targetZ-.88),
-    new THREE.Vector3(1.92,0,targetZ+1.20),returnPoint
+    new THREE.Vector3(0,0,0),new THREE.Vector3(.32,0,8.2),new THREE.Vector3(2.55,.08,17.2),
+    new THREE.Vector3(3.28,.32,targetZ+.42),new THREE.Vector3(1.82,.69,targetZ+3.08),
+    new THREE.Vector3(.28,.96,targetZ+2.68),new THREE.Vector3(2.12,1.36,targetZ+.45),
+    new THREE.Vector3(1.68,1.78,targetZ-1.67),new THREE.Vector3(-.10,2.19,targetZ-2.12),
+    new THREE.Vector3(-2.02,2.59,targetZ-1.15),new THREE.Vector3(-2.24,3.13,targetZ+.86),
+    new THREE.Vector3(-.86,returnPoint.y+.35,targetZ+2.88),returnPoint
   ]);
   const samplesPerSegment=40;
   route.arcLengthDivisions=(route.points.length-1)*samplesPerSegment;
@@ -50,10 +54,11 @@ function stChaseBall(root,orb,returnPoint,targetZ,launch,arrival,returnBody){
     return approach+turnLength*u*(2-u);
   };
   const pointAt=(distance,out)=>route.getPointAt(clamp(distance/length,0,1),out);
-  const lift=distance=>.24*Math.sin(Math.PI*clamp((distance-approach)/turnLength,0,1));
+  const heightSample=new THREE.Vector3();
+  const lift=distance=>pointAt(distance,heightSample).y;
   const weave=stDarkOrbWeave(root,pointAt,lift);
   const cloak=stDarkShiftCloakTrails(root);
-  const wake=stDarkWake(root,distanceAt,pointAt,lift,launch,returnBody,.44,.26);
+  const wake=stDarkWake(root,distanceAt,pointAt,lift,launch,returnBody,.33,.22);
   const sparks=stDarkWakeShards(root,distanceAt,pointAt,lift,launch+.03,returnBody);
   const place=new THREE.Vector3(),ahead=new THREE.Vector3(),behind=new THREE.Vector3();
   return t=>{
@@ -65,11 +70,11 @@ function stChaseBall(root,orb,returnPoint,targetZ,launch,arrival,returnBody){
     const core=ease(.13,.234,t)*(1-returnFade);
     orb.position.copy(place);orb.position.y=1.10+lift(distance);
     orb.rotation.y=yaw;
-    orb.scale.set((.315-.073*flight)*core,(.325-.052*flight)*core,(.36+.18*flight)*core);
+    orb.scale.set((.24-.051*flight)*core,(.25-.042*flight)*core,(.27+.11*flight)*core);
     orb.visible=core>.02;
     const gathered=ease(.155,launch+.045,t);
     const strands=.93*ease(.126,launch+.048,t)*(1-ease(returnBody-.03,returnBody+.14,t));
-    weave(t,place,distance,strands,gathered,.15*flight,.47,.58*(1-ease(launch,launch+.09,t)));
+    weave(t,place,distance,strands,gathered,.15*flight,.66,.58*(1-ease(launch,launch+.09,t)));
     cloak(t,place,yaw,compact,ease(.19,launch+.075,t),.76*ease(.075,.135,t)*(1-ease(launch+.035,launch+.20,t)));
     wake(t);sparks(t);
   };
@@ -94,13 +99,13 @@ FXCODE.studio_darkness_chase=(_x,_y,_h,args,instance)=>{
   const shockLayer=new THREE.Group();shockLayer.position.z=.017;impact.add(shockLayer);
   const shock=stDarkPressure(shockLayer);
 
-  const scale=1.40,ease=stDarkEase,launch=.25,arrival=.80,returnBody=1.53;
+  const scale=1.40,ease=stDarkEase,launch=.25,arrival=.80,returnBody=1.72;
   const hit1=stScytheHitCut(root,new THREE.Vector3(-.05,.90,targetZ),false);
   const hit2=stScytheHitCut(root,new THREE.Vector3(.05,1.61,targetZ),false);
   const firstHit=.89,firstEnd=.935,firstGone=firstEnd+.060;
   const secondStart=firstGone+.18,secondHit=secondStart+.070;
   const secondEnd=secondStart+.115,secondGone=secondEnd+.065;
-  const windStart=secondGone+.12,wandDown=1.91,cutStart=2.035;
+  const windStart=secondGone+.12,wandDown=1.955,cutStart=2.035;
   const slashHit=cutStart+.092,land=cutStart+.135;
   const groundFade=land+.13,groundGone=groundFade+.23,spawnAt=groundGone+.038;
   const trailHold=.24,trailFade=.62;
@@ -152,7 +157,7 @@ FXCODE.studio_darkness_chase=(_x,_y,_h,args,instance)=>{
   ];
   const bladeCurve=new THREE.CatmullRomCurve3(keys.map(({p})=>new THREE.Vector3(...p)));
   const offset=new THREE.Vector3(),sample={pos:new THREE.Vector3(),QB:new THREE.Quaternion(),act:0,shaft:false};
-  const scythe=stCreateScythePreview(root,{wrap:'C',manual:true,scale,trailPose:bladeAt,trailWidth:1.62});
+  const scythe=stCreateScythePreview(root,{wrap:'C',manual:true,scale,trailPose:bladeAt,trailWidth:1.23});
   scythe.pivot.name='Marked chase scythe';
   const newScythe=stCreateScythePreview(root,{wrap:'C',manual:true,scale});
   newScythe.pivot.name='Marked chase replacement scythe';
@@ -180,7 +185,9 @@ FXCODE.studio_darkness_chase=(_x,_y,_h,args,instance)=>{
     return sample;
   }
 
-  const returnPoint=new THREE.Vector3(-.26,0,targetZ+1.98);
+  const returnPoint=new THREE.Vector3(.55,1.8*1.7,targetZ+2.25);
+  const facing=Math.atan2(-returnPoint.x,targetZ-returnPoint.z);
+  let shins=null;
   const ballFx=scytheOnly?null:stChaseBall(root,orb,returnPoint,targetZ,launch,arrival,returnBody);
   const avatarParts=new Map();
   const hideAvatarPart=object=>{
@@ -208,9 +215,12 @@ FXCODE.studio_darkness_chase=(_x,_y,_h,args,instance)=>{
     const oldOpacity=first+second+slam;
     fadeBlade(oldOpacity);scythe.pivot.visible=oldOpacity>.003;
     const spawn=ease(spawnAt,spawnAt+.24,t);
+    const descent=clamp((t-wandDown)/(land-wandDown),0,1);
+    const hoverHeight=returnPoint.y*(1-descent**1.65);
     newScythe.pivot.visible=spawn>.003;
     if(newScythe.pivot.visible){
       newScythe.pivot.position.copy(returnPoint).add(offset.set(1.23,.16,-.08));
+      newScythe.pivot.position.y=hoverHeight+.16;
       newScythe.pivot.quaternion.copy(idle);
       newScythe.update(t);fadeReplacement(spawn);
     }
@@ -219,17 +229,34 @@ FXCODE.studio_darkness_chase=(_x,_y,_h,args,instance)=>{
     const entryFade=1-ease(.145,launch+.015,t),returnFade=ease(returnBody-.026,returnBody+.14,t);
     caster.g.visible=!scytheOnly&&(entryFade>.01||returnFade>.01);
     if(t<arrival)caster.g.position.set(0,0,0);
-    else caster.g.position.copy(returnPoint);
-    caster.g.rotation.y=t<arrival?0:Math.PI;
+    else caster.g.position.set(returnPoint.x,hoverHeight,returnPoint.z);
+    caster.ring.visible=t<arrival||hoverHeight<.03;
     bodyTint(t<arrival?convert:1-returnFade,t<arrival?entryFade:returnFade);
     wand.visible=t>=returnBody-.025;
     const raise=ease(returnBody-.035,wandDown-.042,t);
-    const lower=ease(wandDown,wandDown+.155,t),recover=ease(land+.060,groundGone+.16,t);
+    const lower=ease(wandDown,wandDown+.112,t),recover=ease(land+.28,land+.68,t);
     const overhead=raise*(1-lower),follow=lower*(1-recover);
-    stDarkPose(caster,{back:.20*overhead-.34*follow,roll:0,drop:.10*follow,arms:0,step:.15*follow});
-    caster.armR.rotation.set(-2.78*overhead-1.04*follow,0,.36*overhead+.26*follow);
-    caster.armL.rotation.set(-2.74*overhead-1.14*follow,0,-.40*overhead-.33*follow);
+    const brace=ease(land-.070,land+.024,t)*(1-recover);
+    const lean=-.17*overhead+.23*follow+.22*brace;
+    caster.g.rotation.y=t<arrival?0:facing-.26*overhead+.15*follow;
+    stDarkPose(caster,{back:lean,roll:-.15*overhead+.14*follow,drop:.15*brace,arms:0,step:0});
+    caster.b.rotation.y=-.39*overhead+.33*follow;
+    caster.armR.rotation.set(-2.83*overhead-.58*follow,-.22*overhead+.31*follow,.47*overhead+.21*follow);
+    caster.armL.rotation.set(-2.58*overhead-.87*follow,.13*overhead-.19*follow,-.34*overhead-.58*follow);
+    caster.legs[0].rotation.set(.24*overhead+.25*brace-lean,0,-.16*brace);
+    caster.legs[1].rotation.set(-.38*overhead-.59*brace-lean,0,.19*brace);
     if(caster.rig)rigSync(caster,0);
+    if(!shins&&caster.fileModel){
+      shins=['shin_R','shin_L'].map(name=>{
+        const bone=caster.fileModel.getObjectByName(name);
+        return bone?{bone,rest:bone.quaternion.clone()}:null;
+      });
+    }
+    shins?.forEach((joint,i)=>{
+      if(!joint)return;
+      joint.bone.quaternion.copy(joint.rest);
+      joint.bone.rotateX((i?.57:.26)*overhead+(i?1.04:.66)*brace);
+    });
     hit1(t-firstHit,1);hit2(t-secondHit,-1);
     mark(.54,8);
     slamCut.lookAt(cam.position);
@@ -246,6 +273,163 @@ FXCODE.studio_darkness_chase=(_x,_y,_h,args,instance)=>{
       object.layers.mask=mask;
       object.castShadow=castShadow;
     }
+    instance.updateDarknessChase=null;disposeTree(root);root.removeFromParent();
+  });
+  update();
+};
+
+FXCODE.studio_darkness_unmarked_chase=(_x,_y,_h,args,instance)=>{
+  const anchor=instance.L.find(layer=>layer.d.id===args.layer);
+  if(!anchor?.obj)return;
+  anchor.inner.visible=false;
+  const root=new THREE.Group();root.name='Darkness unmarked chase preview';anchor.obj.add(root);
+  const look={...getLook(NET.myId),ws:-1,wn:0};
+  const caster=stDarkShiftStudent(root,look,'Unmarked chase caster',lookTint(look));
+  const range=6.25,targetZ=range+2.85;
+  const targetLook={...look,h:2,cl:2,hs:2};
+  const targets=[[-.72,targetZ],[.78,targetZ+.44],[3.25,targetZ+.23]].map(([x,z],i)=>{
+    const actor=stDarkShiftStudent(root,targetLook,'Unmarked chase target '+i,lookTint(targetLook));
+    actor.g.rotation.y=Math.PI;
+    return {actor,x,z,hit:i<2};
+  });
+  const ease=stDarkEase,launch=0,stop=.235,swing=stop,hit=.285,finish=.595,recover=1.37,scale=1.40;
+  const distanceAt=t=>range*(1-(1-clamp((t-launch)/(stop-launch),0,1))**2);
+  const wake=stDarkWake(root,distanceAt,(d,out)=>out.set(-.20,0,d-.28),()=>-.35,launch,stop,.81,.52);
+  const lowWake=stDarkWake(root,distanceAt,(d,out)=>out.set(.32,0,d-.47),()=>-.72,launch,stop,.44,.45);
+  const echoes=[.031,.081,.146].map((time,i)=>{
+    const actor=stDarkShiftStudent(root,look,'Unmarked chase echo '+i);
+    const ink=new THREE.MeshBasicMaterial({color:0x121019,toneMapped:false,transparent:true,depthWrite:false});
+    actor.ring.visible=false;
+    return {time,actor,ink,ready:false};
+  });
+  const swingHeight=3.35,swingReach=2.92,startAngle=-.325,hitAngle=.361,topAngle=Math.PI+.20;
+  const swingForward=new THREE.Vector3(.20,0,.98).normalize();
+  const swingCenter=new THREE.Vector3(-1.46,.25+swingHeight*Math.cos(startAngle),range+1.04)
+    .addScaledVector(swingForward,-swingReach*Math.sin(startAngle));
+  function sweepTip(angle,out){
+    out.copy(swingCenter).addScaledVector(swingForward,swingReach*Math.sin(angle));
+    out.y-=swingHeight*Math.cos(angle);
+  }
+  const apex=new THREE.Vector3();sweepTip(topAngle,apex);
+  const carry=new THREE.Vector3(-.66,3.28,-.25),rest=carry.clone().add(new THREE.Vector3(0,0,range));
+  const returnLead=apex.clone().addScaledVector(swingForward,.88*swingReach/swingHeight*Math.cos(topAngle));
+  returnLead.y+=.88*Math.sin(topAngle);
+  const returnArc=new THREE.CubicBezierCurve3(apex,returnLead,
+    new THREE.Vector3(-.59,3.76,range-.08),rest);
+  const tip=new THREE.Vector3(1.0553,1.6965,0).multiplyScalar(scale),offset=new THREE.Vector3();
+  const idle=new THREE.Quaternion().setFromEuler(new THREE.Euler(.05,-.32,-.08));
+  const tipAngle=Math.atan2(2.17-1.6965,1.0553-.04);
+  const tipCorrection=new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,0,1),tipAngle);
+  const aimBlade=(direction,shaft)=>{
+    const x=new THREE.Vector3(...direction).normalize(),y=new THREE.Vector3(...shaft);
+    y.addScaledVector(x,-x.dot(y)).normalize();
+    const z=new THREE.Vector3().crossVectors(x,y);
+    return new THREE.Quaternion().setFromRotationMatrix(new THREE.Matrix4().makeBasis(x,y,z)).multiply(tipCorrection);
+  };
+  const low=aimBlade([-.12,-.85,.51],[-.41,-.56,-.66]);
+  const bladeInPlane=aimBlade(swingForward.toArray(),[0,-1,0]);
+  const swingAxis=new THREE.Vector3(-swingForward.z,0,swingForward.x);
+  const swingRotation=new THREE.Quaternion();
+  const high=new THREE.Quaternion().setFromAxisAngle(swingAxis,topAngle).multiply(bladeInPlane);
+  const returnTurn=aimBlade([-swingForward.x,-.32,-swingForward.z],[0,1,0]);
+  const sample={pos:new THREE.Vector3(),QB:new THREE.Quaternion(),act:0,shaft:false};
+  function bladeAt(t){
+    if(t<swing){
+      const drag=ease(stop-.083,swing,t);
+      sample.pos.set(-1.46,.25,distanceAt(t-.028*(1-drag))+lerp(-.74,1.04,drag));
+      sample.QB.copy(low);
+    }else if(t<hit){
+      const raise=clamp((t-swing)/(hit-swing),0,1);
+      sweepTip(lerp(startAngle,hitAngle,raise),sample.pos);
+      swingRotation.setFromAxisAngle(swingAxis,lerp(-.85,hitAngle,raise)).multiply(bladeInPlane);
+      sample.QB.copy(low).slerp(swingRotation,ease(0,.28,raise));
+    }else if(t<finish){
+      const rise=clamp((t-hit)/(finish-hit),0,1);
+      const sweep=rise*(1.35-.35*rise);
+      const angle=lerp(hitAngle,topAngle,sweep);
+      sweepTip(angle,sample.pos);
+      sample.QB.setFromAxisAngle(swingAxis,angle).multiply(bladeInPlane);
+    }else{
+      const returnTime=clamp((t-finish)/(recover-finish),0,1);
+      const settle=1-(1-returnTime)**2.4;
+      returnArc.getPoint(settle,sample.pos);
+      if(settle<.56)sample.QB.copy(high).slerp(returnTurn,ease(0,.56,settle));
+      else sample.QB.copy(returnTurn).slerp(idle,ease(.56,1,settle));
+    }
+    sample.pos.sub(offset.copy(tip).applyQuaternion(sample.QB));
+    const returnFade=ease(finish+.12,recover,t);
+    sample.act=ease(swing,swing+.014,t)*(1-.19*ease(finish,finish+.11,t))*(1-returnFade);
+    return sample;
+  }
+  const scythe=stCreateScythePreview(root,{wrap:'C',manual:true,scale,trailPose:bladeAt,trailWidth:1.42});
+  const liftDust=stDarkMatter(root,'Unmarked chase lift debris',[
+    {at:hit-.012,span:.042,count:44,spread:1.43,lift:3.27,height:.35},
+    {at:hit+.025,span:.098,count:23,spread:1.18,lift:2.50,height:.91}
+  ],(_t,out)=>out.set(0,0,targetZ-.38),.84);
+  const ground=new THREE.Group();ground.position.set(0,.055,targetZ-.65);ground.rotation.x=-Math.PI/2;root.add(ground);
+  const pressure=stDarkPressure(ground);
+  const forearms=new WeakMap();
+  function bendForearms(actor,right,left){
+    if(!actor.fileModel)return;
+    if(!forearms.has(actor))forearms.set(actor,['forearm_R','forearm_L'].map(name=>{
+      const bone=actor.fileModel.getObjectByName(name);
+      return bone?{bone,rest:bone.quaternion.clone()}:null;
+    }));
+    forearms.get(actor).forEach((joint,i)=>{
+      if(!joint)return;
+      joint.bone.quaternion.copy(joint.rest);
+      joint.bone.rotateX(-(i?left:right));
+    });
+  }
+  function poseCaster(actor,t){
+    const drive=ease(launch,launch+.032,t)*(1-ease(stop-.085,stop+.008,t));
+    const plant=ease(stop-.094,swing+.018,t)*(1-ease(hit+.013,hit+.30,t));
+    const whip=ease(swing,hit+.043,t)*(1-ease(hit+.20,finish+.13,t));
+    const ready=ease(hit+.14,finish+.12,t)*(1-ease(recover-.19,recover+.13,t));
+    const turn=-.26*drive-.43*plant+.65*whip+.13*ready;
+    actor.g.position.z=distanceAt(t);
+    stDarkPose(actor,{back:.57*drive+.24*plant-.27*whip+.10*ready,
+      roll:-.14*drive-.14*plant+.22*whip,drop:.09*drive+.24*plant-.07*whip,arms:0,step:0});
+    actor.b.rotation.y=turn;
+    actor.armR.rotation.set(.84*drive+.47*plant-2.23*whip-.49*ready,
+      .12*drive+.22*plant-.43*whip,-.23-.26*plant-.38*whip);
+    actor.armL.rotation.set(-.33*drive-.56*plant+.29*whip-.29*ready,.12*whip,.27+.62*whip);
+    actor.legs[0].rotation.set(.60*drive+.30*plant-.14*whip,0,-.09*plant);
+    actor.legs[1].rotation.set(-.85*drive-.77*plant-.19*whip,0,.13*plant);
+    if(actor.rig)rigSync(actor,0);
+    dpKnees(actor,.36*drive+.56*plant+.17*whip,.86*drive+.98*plant+.42*whip);
+    bendForearms(actor,.45*drive+.89*plant+.24*whip+.60*ready,.65*drive+.53*plant+.36*whip+.36*ready);
+  }
+  function update(){
+    const t=instance.t,pose=bladeAt(t);
+    scythe.pivot.position.copy(pose.pos);scythe.pivot.quaternion.copy(pose.QB);
+    scythe.update(t);
+    poseCaster(caster,t);
+    for(const echo of echoes){
+      if(!echo.ready&&echo.actor.fileModel){
+        echo.actor.fileModel.traverse(part=>{
+          if(!part.isMesh)return;
+          part.material=echo.ink;part.castShadow=false;part.receiveShadow=false;
+        });
+        echo.ready=true;
+      }
+      const elapsed=t-echo.time,opacity=.65*ease(0,.026,elapsed)*(1-ease(.065,.235,elapsed));
+      echo.actor.g.visible=echo.ready&&opacity>.02;echo.ink.opacity=opacity;
+      if(echo.actor.g.visible)poseCaster(echo.actor,echo.time);
+    }
+    for(const {actor,x,z,hit:affected} of targets){
+      const u=affected?clamp((t-hit)/.70,0,1):0;
+      const height=4*u*(1-u),recoil=height*(1-.3*u);
+      actor.g.position.set(x,2.08*height,z);
+      stDarkPose(actor,{back:-.37*recoil,roll:x*.15*recoil,drop:0,arms:.66*recoil,step:.45*recoil});
+    }
+    const contact=t-hit;
+    pressure(.42+1.75*ease(0,.20,contact),.75*ease(-.01,.028,contact)*(1-ease(.065,.24,contact)),contact*6);
+    liftDust(t);wake(t);lowWake(t);
+  }
+  instance.updateDarknessChase=update;
+  anchor.geo=new THREE.BufferGeometry();
+  anchor.geo.addEventListener('dispose',()=>{
     instance.updateDarknessChase=null;disposeTree(root);root.removeFromParent();
   });
   update();

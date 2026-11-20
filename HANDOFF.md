@@ -1,5 +1,9 @@
 # HANDOFF — Fantas Stick (was "Wizard Duel") (repo: Fantas-Stick)
 
+**Darkness Flow ติดตรา (VFX Studio, รอรีวิว #97):** `darkness/flow_mark_preview` ใช้จังหวะตวัดและควงกลับของท่าติดตราเดิม ตัดช่วงชาร์จออก เพิ่มวงกระแทกกับเศษเงาตอนปล่อย คลื่นดำพร้อมหางหมึกออกสามทาง เห็นเฉพาะเคียว C พรีวิวยังไม่ผูกกับเกม
+
+**Darkness ไล่ตามไม่มีตรา (Studio, #96 ผู้ใช้อนุมัติ):** ผู้ใช้โอเคกับวงงัดของเคียวแล้ว `darkness/unmarked_chase_preview` เกลาท่าพุ่ง ลงน้ำหนัก บิดสะโพกและไหล่ ส่งศอกกับแขนงัดขึ้น ก่อนกลับเข้าท่าพร้อมร่าย ศัตรูถูกล็อกการเคลื่อนที่หลังโดนงัดจนลงพื้น ติดตราสำเร็จรีเซ็ตท่าไล่ตาม ค่าระยะและเวลาลอยของท่าจริงยังรอเลือก
+
 **fcs ใน Map Builder 2026-11-19:** `node tools/fcs-to-mb.mjs` → `mapbuild.html?id=fcs-draft` (ร่างไว้ดู/ดราฟ, รายละเอียด guides/MAP-BUILDER.md หัวข้อ "ร่างจากแผนที่ในเกม") • siege ยังเล่น js/02-fcs*.js
 
 **Map Builder castle parts 2026-11-19:** tool ♜ (key C) in `mapbuild.html`: `M.parts[]` (wall, corner, tower, gate, keep, stairs, ramp, walk, bridge) expanded by `model.js expandParts()` into prim objs + floors, so export/collision/brk reuse the old pipeline (`guides/MAP-BUILDER.md` section 'ชิ้นส่วนปราสาท'). Port snapping `partPorts/snapPart`, Q/E 45°, undo/dup/del via the usual keys. Sample `node tools/castle-sample.mjs` → exported `castle-demo` (walked in game: walls/piers block, open gate passable, wall top + stairs walkable, door brk). No protocol change. Free-shape part `free` (draw polygon, drag vertices, taper) added too. Not done: hollow keep interior, siege mode can't load builder maps, parapet has no collision. Test caveat: the browser caches `mapbuild/*.js` modules — `fetch(url,{cache:'reload'})` then reload.
@@ -18,7 +22,9 @@
 
 **Darkness ท่าไล่ตาม (คอนเซปต์):** โหมดมีตรา เล็งแล้วพุ่งตรงทะลุอาคารในร่างลูกเงาเล็ก เคียวลอยตามเยื้องหลังซ้าย ฟันต่ำขึ้นเอวแล้วฟันย้อนขึ้นอก ระหว่างนั้นลูกเงาบินอ้อมไปหลังเป้า ผู้ร่ายคืนร่างและฟาดคทาสองมือนำ เคียวฟาดตามจากเหนือหัวด้านหลัง ปักพื้นค้างแล้วจาง ก่อนเคียวใหม่ขึ้นที่ท่าพัก โหมดไม่มีตรารอคุย [ลำดับท่า](designs/darkness.md#ท่าไล่ตามเป้ามีตรา)
 
-**Darkness ท่าไล่ตามเป้ามีตรา 2026-11-20 (VFX Studio, #89 รอรีวิว):** `darkness/chase_preview` แสดงผู้ร่ายกับลูกเงา ริ้วผ้าคลุมหุบเข้าลูกเงา พุ่งไปหาเป้า แล้วโค้งไปคืนร่างด้านหลังขณะเคียวฟันสองจังหวะแรก เคียวใช้ขนาด 66% และทึบ 31% ช่วงเดินทางกับสองฟันแรก เว้น 0.18 วิหลังเคียวจางก่อนฟันย้อน ฟันที่สามคืนขนาดปกติและเริ่มง้างพร้อมเฟดเข้า หางฟันสามกว้างขึ้น ค้างทรงเดิม 0.24 วิหลังแตะพื้นแล้วค่อยจาง ใช้ `scytheOnly: true` ใน args เพื่อดูเคียวอย่างเดียวได้
+**Darkness ท่าไล่ตามเป้ามีตรา 2026-11-20 (VFX Studio, #89 approved):** `darkness/chase_preview` ใช้ลูกเงาเล็กลง อ้อมหลังแล้วเลี้ยวจากซ้ายผ่านหน้าไปขวา ไต่กลับไปด้านหลังฝั่งซ้ายก่อนคืนร่างใต้เคียว ผู้ร่ายลอย 1.7 เท่าความสูงตัวเองแล้วเหวี่ยงคทาลง เคียวช่วงเดินทางและสองฟันแรกขนาด 66% ทึบ 31% และเว้น 0.18 วิหลังเคียวจางก่อนฟันย้อน ฟันสามคืนขนาดปกติ หางแคบลงจากรอบก่อนและค้างทรง 0.24 วิหลังแตะพื้น ใช้ `scytheOnly: true` ใน args เพื่อดูเคียวอย่างเดียวได้
+
+**Darkness Marked Chase ลงพื้น (Studio, ผู้ใช้อนุมัติ #89):** ผู้ใช้โอเคกับลูกเงาและท่าลงพื้น ผู้ร่ายบิดลำตัวตอนง้างและหมุนกลับตามแขนตอนเหวี่ยงคทา ลงพื้นพร้อมเคียว ค้างท่าโน้มตัว งอเข่าและวางเท้าเหลื่อมกันก่อนลุก
 
 **Darkness Quick Dash → BA 2026-11-19 (VFX Studio):** พรีวิวต่อจากดาววาบไปยังท่าฟัน BA เดิมหนึ่งครั้ง ใช้หางฟันปกติเต็มความเข้ม เพิ่มเศษเปลวตามวงฟัน และขยายมุมกวาดในพรีวิวจากประมาณ 120° เป็น 144° ออร่าคลุมใบจางระหว่างฟัน เปลวดำเดิมที่สันใบยังทำงานตลอด ระบบบัฟกับท่าฟันนี้ยังไม่ได้ผูกเข้ากับเกม [GIF มุมย้อน](designs/darkness_ref/quick-dash-followup.gif)
 
