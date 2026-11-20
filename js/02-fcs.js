@@ -47,8 +47,10 @@ function genFcs(){
     else if(t==='pl'){obs.push({x:cx,y:cy,r:13,k:'fcp',hgt:6,s:0});props.push(['pl',cx,cy]);}
   }
   // ซากปราสาทรอบจุดยึด 1 (ผู้ใช้ 2026-11-18: ฝ่ายบุกยึดกลางทุ่งโล่ง ฝ่ายรับยิงง่าย ไม่มีที่กำบัง) — สุ่ม seed คงที่ ทุกเครื่องเหมือนกัน
-  // ผังจตุรัส ~22×22 ม. รอบแกน: ฝั่งตะวันออก (หันหาปราสาท/ฝ่ายรับ) สูงและยาวสุด มีช่องประตู + กำแพงบังด้านใน • เหนือ/ใต้เป็นท่อน ๆ • ตะวันตก (ฝั่งบุกเข้า) เหลือแค่ฐานเตี้ย
-  // props: ['ru',x1,y1,x2,y2,หนา(px),[สูงต่อช่อง 1 ม.]] กำแพง • ['rt',x,y,รัศมี(px),สูง] หอพัง/เสา • ['rr',x,y,ขนาด] กองหินหล่น (ไม่ชน) — ภาพ js/28-fcs-forest.js fcsRuin
+  // 2026-11-20 user: bigger + more cover -> ~40×40 m (outer walls just outside the 33 m capture circle), inner L / straight wall pieces,
+  // raised broken platform east of the core (1.2 m, west column 0.55 m = step). East side (faces the defenders) tallest, west (attacker entry) low.
+  // props: ['ru',x1,y1,x2,y2,หนา(px),[สูงต่อช่อง 1 ม.]] กำแพง • ['rt',x,y,รัศมี(px),สูง] หอพัง/เสา • ['rr',x,y,ขนาด] กองหินหล่น (ไม่ชน)
+  //        ['rp',x0,y0,cell,[[h per node col] per row]] platform (node-aligned cells, TERR floor k:'ruinp') — ภาพ js/28-fcs-forest.js fcsRuin
   {const k1=cores.find(k=>k.n===1);
    if(k1){const R=mulberry(551177),m=20,P=(a,b)=>[k1.x+a*m,k1.y+b*m];
     const wall=(a1,b1,a2,b2,th,h0,h1)=>{const [x1,y1]=P(a1,b1),[x2,y2]=P(a2,b2),L=Math.hypot(x2-x1,y2-y1),n=Math.max(1,Math.round(L/m)),hs=[];
@@ -56,19 +58,30 @@ function genFcs(){
       props.push(['ru',x1,y1,x2,y2,th,hs]);
       for(let i=0;i<n;i++){const t=(i+0.5)/n;obs.push({x:x1+(x2-x1)*t,y:y1+(y2-y1)*t,r:Math.max(th/2,13),k:'fcr',hgt:hs[i],s:0});}};
     const tower=(a,b,r,h)=>{const [x,y]=P(a,b);props.push(['rt',x,y,r,h]);obs.push({x,y,r,k:'fcr',hgt:h,s:0});};
-    // ตะวันออก: สองท่อนสูง เว้นช่องประตูกลาง + กำแพงบังด้านในหลังช่อง
-    wall(11,-11,11,-3,24,2.8,4.5);wall(11,2.5,11,11,24,2.8,4.5);wall(6,-4,6,3.5,20,1.7,2.4);
-    // เหนือ: ท่อนตะวันตกเตี้ย-กลาง, ท่อนตะวันออกสูงต่อหอมุม
-    wall(-11,-11,-4.5,-11,22,1.1,2.8);wall(1.5,-11,9,-11,22,2.2,4);
-    // ใต้: ท่อนตะวันออกสูงกลาง ๆ ต่อหอมุม (ฝั่งตะวันตกมีกำแพงเดิมของแผนที่บังอยู่แล้ว)
-    wall(1,10.5,9,10.5,22,1.7,3.3);
-    // ตะวันตก (ทางเข้าฝ่ายบุก): ฐานเตี้ยกระท่อนกระแท่น
-    wall(-11,-7,-11,-2,20,1.1,1.7);wall(-11,3,-11,6.5,20,1.1,1.7);
-    // หอมุมพัง + เสาข้างใน (เสาบังตัวได้ 1 คน)
-    tower(11,-11,46,5.5);tower(11,10.5,38,3.6);tower(-11,-11,30,2.6);
-    for(const [a,b,h] of [[-4.5,-4.5,4.2],[-4.5,4.5,2.6],[1.5,-5.5,3.4],[1,5.5,1.9]])tower(a,b,15,h);
-    // กองหินหล่นรอบฐานกำแพง (ภาพล้วน)
-    for(let i=0;i<26;i++){const a=(R()-0.5)*26,b=(R()-0.5)*26;if(Math.abs(a)<8.5&&Math.abs(b)<8.5)continue;const [x,y]=P(a,b);props.push(['rr',x,y,+(0.6+R()*0.9).toFixed(2)]);}
+    // outer ring (±20 m)
+    wall(20,-20,20,-5,24,2.8,4.5);wall(20,4,20,19,24,2.8,4.5);wall(14,-6,14,5,20,1.7,2.4);          // east: tall halves + gate gap + inner screen
+    wall(-20,-20,-9,-20,22,1.1,2.8);wall(-3,-20,6,-20,22,1.7,3.3);wall(10,-20,20,-20,22,2.5,4.2);     // north
+    wall(-15,19,-4,19,22,1.5,3);wall(3,19,20,19,22,1.8,3.5);                                          // south
+    wall(-20,-14,-20,-6,20,1.1,1.7);wall(-20,5,-20,13,20,1.1,1.7);                                     // west (attacker entry): low
+    tower(20,-20,46,5.5);tower(20,19,40,3.8);tower(-20,-20,32,2.6);tower(-20,19,28,2);
+    // inner wall pieces (waist to head high)
+    wall(-13,-12,-7,-12,20,1.1,2.2);wall(-13,-12,-13,-7,20,1.1,2.2);                                  // NW L
+    wall(-13,12,-7,12,20,1.1,2.2);wall(-13,7,-13,12,20,1.1,2.2);                                      // SW L
+    wall(-2,-13,5,-13,20,1.1,1.7);wall(-3,12,4,12,20,1.1,2.2);                                        // north / south straight
+    wall(9,-14,9,-9,20,1.7,2.4);wall(9,9,9,14,20,1.7,2.4);                                            // east inner
+    wall(-7,-3,-7,3,18,1.1,1.1);                                                                       // waist wall west of the core
+    for(const [a,b,h] of [[-4,-7,4.2],[-4,7,2.6],[13,-12,3.4],[13,12,1.9]])tower(a,b,15,h);           // pillars
+    // raised platform east of the core: node cells (TERR lattice c), main 1.2 m, west column 0.55 m (step up)
+    {const i0=Math.round((k1.x+70)/c),j0=Math.round((k1.y-70)/c),NI=3,NJ=4,hs=[],x0=i0*c,y0=j0*c,top=new Float32Array(NI*NJ),bot=new Float32Array(NI*NJ);
+     for(let j=0;j<NJ;j++){const row=[];for(let i=0;i<NI;i++){const h=i===0?0.55:1.2,gx=x0+i*c,gy=y0+j*c,gi=Math.round(gx/c),gj=Math.round(gy/c),gr=g[gj*nx+gi];top[j*NI+i]=gr+h;bot[j*NI+i]=gr-0.05;row.push(h);}hs.push(row);}
+     terr.fl.push({x0,y0,nx:NI,ny:NJ,top,bot,k:'ruinp'});props.push(['rp',x0,y0,c,hs]);
+     // side walls: main block edges block ground walkers (players on top are higher than hgt)
+     const e0=x0+c/2,e1=x0+(NI-1)*c+c/2,f0=y0-c/2,f1=y0+(NJ-1)*c+c/2;
+     for(let x=e0+c+8;x<e1;x+=16){obs.push({x,y:f0+8,r:9,k:'fcr',hgt:1.2,s:0});obs.push({x,y:f1-8,r:9,k:'fcr',hgt:1.2,s:0});}   // main block only (step column open on 3 sides)
+     for(let y=f0+8;y<f1;y+=16)obs.push({x:e1-8,y,r:9,k:'fcr',hgt:1.2,s:0});
+     /* west face = step column (0.55 m): open, players step up from the courtyard */}
+    // fallen stone heaps around wall feet (visual only)
+    for(let i=0;i<40;i++){const a=(R()-0.5)*44,b=(R()-0.5)*44;if(Math.abs(a)<16&&Math.abs(b)<16)continue;const [x,y]=P(a,b);props.push(['rr',x,y,+(0.6+R()*0.9).toFixed(2)]);}
    }}
   // L-shaped stone bridge (user 2026-11-19, designs/fcs_forest/brigde high ground test 1.png). High-ground walkway:
   // attacker end south (10.5,23) -> corner (10.5,2) -> defender end east (23,2) cells. Deck top = world 7 m (~6 m over ground),
@@ -139,6 +152,10 @@ function genFcs(){
   // user-placed trees/rocks under the bridge: drop them (crowns would poke through the deck)
   for(let i=obs.length-1;i>=0;i--){const o=obs[i];if((o.k==='fct'||o.k==='fcb2')&&bridge.at(o.x,o.y,o.k==='fct'?100:60))obs.splice(i,1);}
   for(let i=props.length-1;i>=0;i--){const q=props[i];if((q[0]==='tr'||q[0]==='bd')&&bridge.at(q[1],q[2],q[0]==='tr'?100:60))props.splice(i,1);}
+  // zone 1 ruin courtyard (±21 m around core 1): no trees / boulders inside (cover there = ruin pieces only)
+  {const k1=cores.find(k=>k.n===1),inR=(x,y)=>k1&&Math.abs(x-k1.x)<430&&Math.abs(y-k1.y)<430;
+   for(let i=obs.length-1;i>=0;i--){const o=obs[i];if((o.k==='fct'||o.k==='fcb2')&&inR(o.x,o.y))obs.splice(i,1);}
+   for(let i=props.length-1;i>=0;i--){const q=props[i];if((q[0]==='tr'||q[0]==='bd')&&inR(q[1],q[2]))props.splice(i,1);}}
   for(const k of cores)obs.push({x:k.x,y:k.y,r:40,k:'fck',hgt:6,s:0});   // ตัวแกน (คริสตัล) ชนได้
   // เฟส: โซนชนิด "เฟส" ชื่อ "เฟส N" หลายกรอบรวมกัน = พื้นที่เล่นของเฟส N
   const phases=[];

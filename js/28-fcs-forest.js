@@ -179,6 +179,14 @@ function fcsRuin(W,F){
           const a=(i+(k%2)*0.5)/nb*6.283,hk=h*(0.55+0.45*Math.cos(a-0.8+Math.sin(i*1.7)*0.3));if(k*CH>hk)continue;   // ยอดหอพังเป็นแนวเฉียง
           B.push({x:X+Math.cos(a)*rr*0.86,y:G+k*CH+CH/2,z:Z+Math.sin(a)*rr*0.86,ry:-a,rx:(R()-0.5)*0.04,sx:rr*0.34,sy:CH*0.96,sz:6.283*rr/nb*0.97,col:moss(stoneC(),k*CH,hk)});}
         D.push({x:X,y:G+0.2,z:Z,ry:0,rx:0,sx:rr*0.8,sy:0.4,sz:rr*0.8,col:stoneC()});}}
+    else if(p[0]==='rp'){const [,x0,y0,cc,hs]=p,cw=cc*S3;   // raised platform: stone courses on the sides + flagstones on top, per node cell
+      hs.forEach((row,j)=>row.forEach((h,i)=>{const cx=x0+i*cc,cy=y0+j*cc,X=tx(cx),Z=tz(cy),G=GY(cx,cy);
+        B.push({x:X,y:G+h/2-0.06,z:Z,ry:0,rx:0,sx:cw,sy:h,sz:cw,col:stoneC()});   // body
+        for(let k=0;k*CH<h-0.05;k++)for(const [dx,dz,ry] of [[0,-0.5,0],[0,0.5,0],[-0.5,0,Math.PI/2],[0.5,0,Math.PI/2]])for(let u=0;u<2;u++){   // side stones
+          const off=(u+0.5)/2-0.5+(k%2)*0.25,px=X+dx*cw+(dz?off*cw:0),pz=Z+dz*cw+(dx?off*cw:0),dh=Math.min(CH,h-k*CH);
+          if(Math.abs(off)>0.5)continue;B.push({x:px,y:G+k*CH+dh/2,z:pz,ry:ry+(R()-0.5)*0.05,rx:(R()-0.5)*0.04,sx:cw*0.48,sy:dh*0.95,sz:0.32,col:moss(stoneC(),k*CH,h)});}
+        for(let a=0;a<2;a++)for(let b=0;b<2;b++){if(R()<0.12)continue;   // flagstones, a few missing (broken floor)
+          B.push({x:X+(a-0.5)*cw*0.5,y:G+h+0.02,z:Z+(b-0.5)*cw*0.5,ry:(R()-0.5)*0.08,rx:(R()-0.5)*0.05,sx:cw*0.47,sy:0.14,sz:cw*0.47,col:moss(stoneC(),h,h)});}}));}
     else if(p[0]==='rr'){const [,x,y,s]=p,n=3+(R()*5|0);for(let i=0;i<n;i++){const a=R()*6.283,d=R()*1.4*s,bx=x+Math.cos(a)*d*20,by=y+Math.sin(a)*d*20,w=(0.35+R()*0.5)*s;
       B.push({x:tx(bx),y:GY(bx,by)+w*0.25,z:tz(by),ry:R()*6.3,rx:(R()-0.5)*0.6,sx:w*1.3,sy:w*0.6,sz:w,col:moss(stoneC(),0,1)});}}
   }

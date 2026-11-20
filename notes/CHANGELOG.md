@@ -1,5 +1,6 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
 
+- 2026-11-20 — **Zone 1 ruin expanded (protocol v88):** ruin around Castle Strike core 1 grows to ~40 m with inner L/straight wall cover, pillars and a raised 1.2 m platform with a step next to the core.
 - 2026-11-20 — **Darkness ท่าไล่ตาม (Studio, รอรีวิว #89)** พรีวิวโหมดเป้ามีตราเน้นเคียวตั้งแต่พุ่งเข้า ฟันสวนสองครั้ง และง้างฟาดลงครั้งสุดท้าย บันทึก GIF มุมกว้างและมุมซูม ผู้ใช้ยังไม่อนุมัติรอบนี้
 
 - 2026-11-20 — **Darkness VFX Studio** บันทึกท่าติดตราที่ผ่านรีวิว #88, Long Dash แบบกดค้างที่อนุมัติใน #79, Quick Dash ต่อ BA และ Shield ที่ใช้เคียว C ชุดเดียวกับ BA
