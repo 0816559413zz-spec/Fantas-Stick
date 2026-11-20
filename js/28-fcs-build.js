@@ -301,10 +301,11 @@ function sgViewBuild(){
 }
 function SGVZR(){return (VIEW.cur&&VIEW.cur.M&&VIEW.cur.M.sg&&VIEW.cur.M.sg.zr)||150;}
 // ขอบพื้นที่เล่นของเฟส: ม่านโปร่งบาง ๆ ตามเส้นขอบรวมของทุกกรอบ
-function sgBarrier(ph){
-  if(SGV3.barK===ph+'')return;SGV3.barK=ph+'';
+// mode 'atk' = phase transition seen by an attacker: the old area (where attackers are held) instead of the new one
+function sgBarrier(ph,mode){
+  const key=ph+'|'+(mode||'');if(SGV3.barK===key)return;SGV3.barK=key;
   if(SGV3.bar){SGV3.g.remove(SGV3.bar);disposeTree(SGV3.bar);SGV3.bar=null;}
-  const A=sgArea(ph),R=A.rects,ins=(x,y)=>R.some(q=>x>=q.x1&&x<=q.x2&&y>=q.y1&&y<=q.y2),step=FCS_C,pos=[],H=5;
+  const R=mode==='atk'&&ph>1?(MAPS.fcs.fcs.phases[ph-2]||sgArea(ph).rects):sgArea(ph).rects,ins=(x,y)=>R.some(q=>x>=q.x1&&x<=q.x2&&y>=q.y1&&y<=q.y2),step=FCS_C,pos=[],H=5;
   const seg=(x0,y0,x1,y1)=>{const b0=GY(x0,y0),b1=GY(x1,y1);pos.push(tx(x0),b0,tz(y0),tx(x1),b1,tz(y1),tx(x1),b1+H,tz(y1),tx(x0),b0,tz(y0),tx(x1),b1+H,tz(y1),tx(x0),b0+H,tz(y0));};
   for(const q of R){
     for(let x=q.x1;x<q.x2;x+=step){for(const [y,o] of [[q.y1,-2],[q.y2,2]]){const mx=x+step/2;if(y<=2||y>=MH-2)continue;if(!ins(mx,y+o))seg(x,y,x+step,y);}}
@@ -318,9 +319,9 @@ function sgBarrier(ph){
 function sgSync(v,P,me,now,dt){
   const S=v.M&&v.M.sg;
   if(v.mode!=='siege'||!S||MAPID!=='fcs'){if(SGV3.g)sgClearView();return;}
-  SGPH=S.ph;
+  SGPH=S.ph;SGTR=S.tr||0;
   if(!SGV3.g)sgViewBuild();
-  sgBarrier(S.ph);fcsForestTick();fcsCastleTick();fcsPropsView(dt);
+  sgBarrier(S.ph,S.tr>0&&me&&me.tm===0?'atk':'');fcsForestTick();fcsCastleTick();fcsPropsView(dt);
   SGV3.cores.forEach((c,i)=>{const n=i+1,dead=S.hp[i]<=0,act=n===S.ph,fut=n>S.ph;
     c.cr.visible=c.glow.visible=!dead;c.rub.visible=dead;c.ring.visible=act;
     c.cr.rotation.y+=dt*(act?1.2:0.3);c.cr.position.y=4.3+Math.sin(now/600+i)*0.25;
@@ -344,7 +345,7 @@ function sgFx(ev){
 }
 // ---------- HUD ----------
 function sgTop(v){const S=v.M&&v.M.sg;if(!S)return '🏰 บุกปราสาท';const i=S.ph-1,pc=Math.ceil(S.hp[i]/S.mx*100);
-  return `🏰 เฟส ${S.ph}/${S.n}   •   แกน ${S.ph} เหลือ ${pc}%   •   `+(S.pr>0?`เตรียมตัว ${S.pr} วิ`:S.ot?`⏱ ต่อเวลา! (ผ่อนผัน ${S.gr.toFixed(1)} วิ)`:`⏱ ${fmtTime(v.tm)}`);}
+  return `🏰 เฟส ${S.ph}/${S.n}   •   แกน ${S.ph} เหลือ ${pc}%   •   `+(S.pr>0?`เตรียมตัว ${S.pr} วิ`:S.tr>0?`🔁 เฟสถัดไปเริ่มใน ${S.tr} วิ`:S.ot?`⏱ ต่อเวลา! (ผ่อนผัน ${S.gr.toFixed(1)} วิ)`:`⏱ ${fmtTime(v.tm)}`);}
 function sgHud(v,me,big){
   const S=v.M&&v.M.sg;if(!S||!me)return;
   const atk=me.tm===0,F=MAPS.fcs.fcs,k=F.cores[S.ph-1];
@@ -361,9 +362,13 @@ function sgHud(v,me,big){
   if(k&&me.al){const s=toScreen(k.x,(GY(k.x,k.y)||0)+4,k.y),d=Math.round(Math.hypot(k.x-me.x,k.y-me.y)/20);
     if(s&&s[0]>30&&s[0]<SW-30&&s[1]>30&&s[1]<SH-30){cx.save();cx.translate(s[0],s[1]);cx.rotate(Math.PI/4);cx.strokeStyle=S.atk?'#ff6a5a':'#9fd8ff';cx.lineWidth=2.5;cx.strokeRect(-9,-9,18,18);cx.restore();
       cx.font='600 13px Kanit,sans-serif';cx.fillStyle='#efe6cf';cx.fillText(`แกน ${S.ph} • ${d} ม.`,s[0],s[1]-18);}}
-  if(atk&&me.al&&S.pr<=0&&k){const inz=Math.hypot(me.x-k.x,me.y-k.y)<S.zr+PR;
+  if(atk&&me.al&&S.pr<=0&&!(S.tr>0)&&k){const inz=Math.hypot(me.x-k.x,me.y-k.y)<S.zr+PR;
     if(me.sc)big('🔮 กำลังร่ายทำลายแกน… (ยิง / โล่ / สกิล / พุ่ง = หยุด • G = หยุด)',SH-170,17,'#9fd8ff');
     else if(inz)big('กด G เพื่อร่ายทำลายแกน',SH-170,18,'#ffe9a8');}
+  if(S.tr>0){const inNew=me.al&&sgInArea(me.x,me.y,S.ph);
+    if(atk)big(`ฝ่ายรับกำลังถอย — บุกเฟส ${S.ph} ได้ใน ${S.tr} วิ`,SH*0.36,22,'#ffe9a8');
+    else if(me.al&&!inNew)big(`⚠️ ถอยเข้าเขตใหม่! เหลือ ${S.tr} วิ — อยู่นอกเขต = ตาย`,SH*0.36,24,'#ff8a7a');
+    else big(`ตั้งแนวป้องกันแกน ${S.ph} — ฝ่ายบุกมาใน ${S.tr} วิ`,SH*0.36,22,'#ffe9a8');}
   if(atk&&S.pr>0)big(`ฝ่ายรับกำลังเตรียมตัว — ประตูเปิดใน ${S.pr} วิ`,SH*0.36,22,'#ffe9a8');
   if(!atk&&S.pr>0)big(`เตรียมแนวป้องกัน — ฝ่ายบุกออกมาใน ${S.pr} วิ`,SH*0.36,22,'#ffe9a8');
 }

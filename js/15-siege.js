@@ -19,7 +19,8 @@ const SGV={
   defMul:0.5,    // มีฝ่ายรับในเขต: เหลือส่วนนี้ (ช่วงปกติ)
   zoneR:330,     // รัศมีเขตแกน (px)
   wallHp:400,    // เลือดกำแพงพังได้
-  grace0:5,graceMin:1,graceT:60,   // ผ่อนผันตอนต่อเวลา: เริ่ม 5 วิ หดเหลือ 1 วิ ภายใน 60 วิของการต่อเวลา
+  grace0:5,graceMin:1,graceT:60,
+  trT:20,        // core fell: seconds for defenders to retreat into the next area before the next phase starts (attackers held at the old line, timer paused)   // ผ่อนผันตอนต่อเวลา: เริ่ม 5 วิ หดเหลือ 1 วิ ภายใน 60 วิของการต่อเวลา
 };
 const SG_TEAM=['ฝ่ายบุก','ฝ่ายรับ'];
 function sgF(){return MAPS.fcs.fcs;}
@@ -27,8 +28,8 @@ function sgCore(){const S=G.sg;return S?sgF().cores[S.ph-1]:null;}
 function sgInZone(p,k){k=k||sgCore();return !!k&&Math.hypot(p.x-k.x,p.y-k.y)<SGV.zoneR+PR;}
 function sgSpawn(t,ph){const s=sgF().sp[t?'B':'A'][ph||G.sg.ph];return s||{x:MW/2,y:MH/2};}
 function sgInit(){
-  const F=sgF();SGPH=1;
-  G.sg={ph:1,prep:SGV.prep,ot:false,otT:0,grace:SGV.grace0,win:-1,atk:0,hp:F.cores.map(()=>SGV.coreHp),bw:F.bw.map(b=>b.k==='gate'?-1:SGV.wallHp),t0:0};
+  const F=sgF();SGPH=1;SGTR=0;
+  G.sg={tr:0,ph:1,prep:SGV.prep,ot:false,otT:0,grace:SGV.grace0,win:-1,atk:0,hp:F.cores.map(()=>SGV.coreHp),bw:F.bw.map(b=>b.k==='gate'?-1:SGV.wallHp),t0:0};
   G.timer=SGV.time0;AREA=mapArea(G.map,G.mode);
   sgWallsApply();
   for(const p of plist())p.sgc=0;
@@ -56,7 +57,7 @@ function sgInput(p,pr,inp){
   if(p.sgc&&(inp.fire||inp.sh||pr.q||pr.e||pr.r||pr.f||pr.x||pr.sp||p.dash>0))sgStop(p);
   if(!pr.g||!p.alive||p.downed)return;
   if(p.sgc){sgStop(p);return;}
-  if(p.team!==0||S.prep>0||!sgInZone(p)||p.stun>0)return;
+  if(p.team!==0||S.prep>0||S.tr>0||!sgInZone(p)||p.stun>0)return;
   p.sgc=1;emit({k:'sgch',id:p.id,on:1});
 }
 function sgStop(p){if(!p.sgc)return;p.sgc=0;emit({k:'sgch',id:p.id,on:0});}
@@ -68,6 +69,11 @@ function sgTick(dt){
     S.prep-=dt;
     for(const p of ps){if(p.team!==0||!p.alive)continue;const s=sgSpawn(0),d=Math.hypot(p.x-s.x,p.y-s.y),m=SG_SPR-PR;if(d>m){p.x=s.x+(p.x-s.x)/d*m;p.y=s.y+(p.y-s.y)/d*m;}}
     if(S.prep<=0){S.prep=0;banner('⚔️ ประตูเปิด! บุกได้',3);}
+    return;
+  }
+  if(S.tr>0){   // phase transition: no core casting, timer paused
+    S.tr-=dt;SGTR=Math.max(0,S.tr);
+    if(S.tr<=0)sgPhaseGo();
     return;
   }
   // ร่ายแกน
@@ -97,12 +103,20 @@ function sgCoreDown(){
   const k=sgCore();emit({k:'sgcore',n:S.ph,x:Math.round(k.x),y:Math.round(k.y)});
   if(S.ph>=F.n){sgEnd(0);return;}
   S.ph++;SGPH=S.ph;S.ot=false;S.otT=0;G.timer+=SGV.add;
+  // Breakthrough-style: nobody is teleported now. Defenders get SGV.trT s to fall back into the new area, attackers are held at the old
+  // line (area = old + new, attackers clamped to the old rects — sgAreaT js/02-fcs), respawns already use the new spawns.
+  S.tr=SGV.trT;SGTR=S.tr;
   AREA=mapArea(G.map,G.mode);sgWallsApply();
-  banner(`💥 แกน ${S.ph-1} แตก! ${S.ph===2?'ประตูเปิด • ':''}เวลา +${SGV.add} วิ — ไปแกน ${S.ph}`,4);
-  // ใครอยู่นอกพื้นที่เฟสใหม่ (หรือฝ่ายรับที่อยู่หลังแนว) = ย้ายไปจุดเกิดใหม่ของทีม (เลือดคงเดิม)
+  banner(`💥 แกน ${S.ph-1} แตก! ${S.ph===2?'ประตูเปิด • ':''}${SG_TEAM[1]}ถอยเข้าเขตใหม่ — เฟส ${S.ph} เริ่มใน ${SGV.trT} วิ`,4);
+}
+// transition over: next phase live. Defenders still outside the new area die (out of bounds), attackers left behind move to their new spawn.
+function sgPhaseGo(){
+  const S=G.sg;S.tr=0;SGTR=0;AREA=mapArea(G.map,G.mode);
   let i=0;
-  for(const p of plist()){if(!p.alive||(p.team!==0&&p.team!==1))continue;
-    if(!sgInArea(p.x,p.y,S.ph)){const s=sgSpawn(p.team),a=i*1.047,rr=i%6?80:0,q=[s.x+Math.cos(a)*rr,s.y+Math.sin(a)*rr];i++;p.x=q[0];p.y=q[1];p.z=0;p.vz=0;collideWorld(p,PR);p.inv=Math.max(p.inv,1.5);emit({k:'revive',x:p.x,y:p.y});}}
+  for(const p of plist()){if(!p.alive||(p.team!==0&&p.team!==1)||sgInArea(p.x,p.y,S.ph))continue;
+    if(p.team===1){p.inv=0;damage(p,99999,null,'zone',true);continue;}
+    const s=sgSpawn(p.team),a=i*1.047,rr=i%6?80:0,q=[s.x+Math.cos(a)*rr,s.y+Math.sin(a)*rr];i++;p.x=q[0];p.y=q[1];p.z=0;p.vz=0;collideWorld(p,PR);p.inv=Math.max(p.inv,1.5);emit({k:'revive',x:p.x,y:p.y});}
+  banner(`⚔️ เฟส ${S.ph} เริ่ม! ไปแกน ${S.ph}`,3);
 }
 function sgEnd(w){const S=G.sg;if(S.win>=0)return;S.win=w;endMatch();}
 // ผลจบเกม (endMatch js/14)
@@ -114,7 +128,7 @@ function sgResult(ps){
 }
 function sgSnap(){
   const S=G.sg;if(!S)return null;
-  return {ph:S.ph,n:sgF().n,pr:Math.ceil(S.prep),hp:S.hp.map(v=>Math.max(0,Math.round(v))),mx:SGV.coreHp,ot:S.ot?1:0,gr:S.ot?Math.round(S.grace*10)/10:0,atk:S.atk|0,def:S.def|0,
+  return {ph:S.ph,n:sgF().n,pr:Math.ceil(S.prep),tr:Math.ceil(S.tr||0),hp:S.hp.map(v=>Math.max(0,Math.round(v))),mx:SGV.coreHp,ot:S.ot?1:0,gr:S.ot?Math.round(S.grace*10)/10:0,atk:S.atk|0,def:S.def|0,
     bw:S.bw.map((v,i)=>sgF().bw[i].k==='gate'?(S.ph>=2?1:0):v<=0?1:0).join(''),zr:SGV.zoneR};
 }
 // =====================================================================
@@ -137,6 +151,7 @@ function sgBotTarget(p){
 function sgBotGoal(p){
   const S=G.sg,k=sgCore();if(!S||!k)return {x:p.x,y:p.y};
   if(p.team===0&&S.prep>0)return sgSpawn(0);
+  if(p.team===0&&S.tr>0){const o=sgF().phases[S.ph-2];if(o){const k=sgCore();let bx=p.x,by=p.y,bd=1e18;for(const q of o){const x=clamp(k.x,q.x1+60,q.x2-60),y=clamp(k.y,q.y1+60,q.y2-60),d=(x-k.x)**2+(y-k.y)**2;if(d<bd){bd=d;bx=x;by=y;}}return {x:bx,y:by};}}   // wait at the old line, nearest the new core
   if(p.team===0){const h=hashStr(p.id)%628/100,r=SGB.ring*0.6;return {x:k.x+Math.cos(h)*r,y:k.y+Math.sin(h)*r};}
   // ฝ่ายรับ: เดินลาดตระเวนรอบแกน (เปลี่ยนจุดทุก 4–8 วิ) — เดิมยืนนิ่งจุดเดียวจนดูเหมือนค้าง (ผู้ใช้ 2026-11-08)
   const A=p.ai;if(!A.pat||A.pat.k!==S.ph||G.time>A.pat.t){
@@ -194,7 +209,7 @@ function sgBotThink(p,dt){
   if(N.kick>0){N.kick-=dt;inp.mx=Math.cos(N.ka);inp.my=Math.sin(N.ka);}
   // ฝ่ายบุกถึงเขตแกน = กด G ร่าย แล้วยืนนิ่ง
   for(const kk of SLOTK.concat(['x']))inp.c[kk]=c0[kk]|0;   // ไม่มีเป้า = ไม่กดสกิลใส่อากาศ
-  if(p.team===0&&S&&S.prep<=0&&sgInZone(p)){
+  if(p.team===0&&S&&S.prep<=0&&!(S.tr>0)&&sgInZone(p)){
     const k=sgCore();inp.ax=k.x;inp.ay=k.y;
     if(!p.sgc&&!(p.stun>0)){A.gT=(A.gT||0)-dt;if(A.gT<=0){A.gT=0.6;inp.c.g=(inp.c.g|0)+1;}}
     if(p.sgc){inp.mx=inp.my=0;}

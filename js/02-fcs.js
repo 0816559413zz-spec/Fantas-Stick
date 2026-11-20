@@ -194,7 +194,7 @@ function genFcs(){
   return {W,H,obs,terr,brkX,fcs:{sp,cores,bw,props,fences,bridge,phases,n:Math.min(cores.length,phases.length)}};
 }
 // ---------- พื้นที่เล่นตามเฟส (กำแพงล่องหน) + เขตจุดเกิดปลอดภัย — ใช้ทั้งโฮสต์ (G.sg.ph) และลูกข่าย (snapshot) ----------
-let SGPH=1;
+let SGPH=1,SGTR=0;   // SGTR = seconds left of the phase transition (core just fell: defenders retreat, attackers held at the old line)
 const SG_SPR=220;   // รัศมีเขตจุดเกิด (px): ศัตรูเข้าไม่ได้ • คนในทีมที่อยู่ข้างในไม่โดนดาเมจ (js/15-siege) ⚠ ค่าตั้งต้น
 const _sgAreaC=[];
 function sgArea(ph){
@@ -202,11 +202,19 @@ function sgArea(ph){
   if(!_sgAreaC[k])_sgAreaC[k]={sg:k,rects:F.phases[k-1],sp:[[F.sp.A[k],0],[F.sp.B[k],1]].filter(q=>q[0]).map(([q,t])=>({x:q.x,y:q.y,r:SG_SPR,t}))};
   return _sgAreaC[k];
 }
+// transition into phase ph (Breakthrough-style, user 2026-11-20): play area = old + new rects; attackers (team 0) stay inside the OLD rects
+// until the countdown ends, defenders retreat into the new area (outside it at the end = killed, js/15-siege sgPhaseGo)
+const _sgAreaT=[];
+function sgAreaT(ph){
+  const F=MAPS.fcs.fcs,k=clamp(ph|0,2,F.n);
+  if(!_sgAreaT[k]){const n=sgArea(k),o=F.phases[k-2]||[];_sgAreaT[k]={sg:k,tr:1,rects:o.concat(n.rects),atk:o,sp:n.sp};}
+  return _sgAreaT[k];
+}
 // ดันกลับเข้าพื้นที่ (เรียกจาก areaClamp js/02-city) • o.team = ผู้เล่น (ดันออกจากเขตจุดเกิดของอีกทีม) • ไม่มี team = ช่องตารางทางเดินบอท
 function sgClamp(o,r,A){
   const x=o.x,y=o.y;
   if(o.team===0||o.team===1)for(const s of A.sp){if(s.t===o.team)continue;const dx=o.x-s.x,dy=o.y-s.y,d=Math.hypot(dx,dy),m=s.r+r;if(d<m){const a=d>0.01?Math.atan2(dy,dx):1;o.x=s.x+Math.cos(a)*m;o.y=s.y+Math.sin(a)*m;}}
-  const R=A.rects;
+  const R=A.atk&&o.team===0?A.atk:A.rects;
   if(!R.some(q=>o.x>=q.x1&&o.x<=q.x2&&o.y>=q.y1&&o.y<=q.y2)){
     let bx=o.x,by=o.y,bd=1e18;
     for(const q of R){const px=clamp(o.x,q.x1+r,q.x2-r),py=clamp(o.y,q.y1+r,q.y2-r),d=(px-o.x)**2+(py-o.y)**2;if(d<bd){bd=d;bx=px;by=py;}}
@@ -215,7 +223,7 @@ function sgClamp(o,r,A){
 }
 function sgInArea(x,y,ph){return sgArea(ph).rects.some(q=>x>=q.x1&&x<=q.x2&&y>=q.y1&&y<=q.y2);}
 MAPS.fcs=Object.assign({name:'🏰 ปราสาท First Castle Strike',d:'แผนที่โหมดบุกปราสาท (แบบ Basic) — บุก 3 เฟส ทำลายแกนทีละจุด',build:'fcs',only:'siege',navTerr:1,navC:FCS_C},genFcs());
-MAPS.fcs.areas={get siege(){return sgArea(SGPH);}};
+MAPS.fcs.areas={get siege(){return SGTR>0&&SGPH>1?sgAreaT(SGPH):sgArea(SGPH);}};
 // จุดเกิดของเฟสปัจจุบัน (teamPts / placeAll / respawn ใช้ผ่าน fmap) • t 0 = ฝ่ายบุก 1 = ฝ่ายรับ
 MAPS.fcs.fmFor=mode=>{const F=MAPS.fcs.fcs,k=clamp(SGPH,1,F.n),a=F.sp.A[k],b=F.sp.B[k];
   const ring=(q,t)=>q?[0,1,2,3,4,5].map(i=>i?{x:q.x+Math.cos(i*1.047)*80,y:q.y+Math.sin(i*1.047)*80,t}:{x:q.x,y:q.y,t}):[];   // 6 จุดชิดกันในเขตจุดเกิด (คนละจุดต่อคน ไม่กระจายข้ามกำแพง)

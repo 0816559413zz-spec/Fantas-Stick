@@ -111,7 +111,7 @@ function devTp(x,y,p){
 }
 function devSgPhase(n){
   const S=G.sg,F=sgF();if(!S)return;
-  n=clamp(n|0,1,F.n);S.ph=n;SGPH=n;S.ot=false;S.otT=0;S.prep=0;S.win=-1;
+  n=clamp(n|0,1,F.n);S.ph=n;SGPH=n;S.tr=0;SGTR=0;S.ot=false;S.otT=0;S.prep=0;S.win=-1;
   S.hp=S.hp.map((v,i)=>i<n-1?0:SGV.coreHp);
   AREA=mapArea(G.map,G.mode);sgWallsApply();
   for(const p of plist())sgStop(p);
