@@ -551,6 +551,7 @@ function buildFileMap(id){
   }
   // ไฟประจำจุด (light_) → ใช้ชุดไฟรวมของเกม (เปิดจริงเฉพาะดวงที่ใกล้กล้อง)
   if(MAPS[id].fcs)try{sgFileBuild(id);}catch(e){console.error('sgFileBuild',e);}
+  if(PNL.length)try{pnlBuild();}catch(e){console.error('pnlBuild',e);}
   FCSC.torch=[];if(MAPS[id].rooms)try{fcsPropsBuild();}catch(e){console.error('fcsPropsBuild',e);}
   if(MAPS[id].deco)try{fcsDecoFile(MAPS[id].deco);}catch(e){console.error('fcsDecoFile',e);}   // decor drawn by the game (js/28-fcs-castle.js)   // breakable room props (js/28-fcs-props.js)   // Map Builder siege map: fences + spawn pads (js/28-fcs-build.js)
   fileMapFx(F.fx);

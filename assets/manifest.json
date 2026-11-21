@@ -505,6 +505,11 @@
    "file": "maps/fcs-file.glb",
    "data": "maps/fcs-file.json",
    "v": 2
+  },
+  "pnl-demo": {
+   "file": "maps/pnl-demo.glb",
+   "data": "maps/pnl-demo.json",
+   "v": 1
   }
  },
  "ptex": {}

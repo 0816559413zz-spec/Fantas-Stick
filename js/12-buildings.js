@@ -42,7 +42,7 @@ function bldNear(b,x,y,pad){return Math.abs(x-b.o.x)<b.o.w*0.75+pad&&Math.abs(y-
 const BLD_MOUND={h:1.8,pad:40};   // 2026-10-28: ผู้ใช้ขอเนินเพิ่มนิดนึง (เดิม 1.5 / 30)
 function bldGone(b){return b.pc.every(q=>q.fl&1);}
 function bldMoundAt(b,x,y){const [lx,ly]=bldLocal(b,x,y),e=(lx/(b.o.w/2+BLD_MOUND.pad))**2+(ly/(b.o.d/2+BLD_MOUND.pad))**2;return e<1?BLD_MOUND.h*Math.min(1,1.6*(1-e)):0;}
-function bldMoundH(x,y){let g=cityMoundH(x,y);if(!BLDG.length)return g;for(const b of sgNear(sgBld(),x,y,BLD_MOUND.pad,_sgM))if(bldNear(b,x,y,BLD_MOUND.pad)&&bldGone(b)){const v=bldMoundAt(b,x,y);if(v>g)g=v;}return g;}
+function bldMoundH(x,y){let g=Math.max(cityMoundH(x,y),pnlMoundH(x,y));if(!BLDG.length)return g;for(const b of sgNear(sgBld(),x,y,BLD_MOUND.pad,_sgM))if(bldNear(b,x,y,BLD_MOUND.pad)&&bldGone(b)){const v=bldMoundAt(b,x,y);if(v>g)g=v;}return g;}
 // โดนชิ้นย่อย: code = ส่วน*100 + ชิ้นย่อย (ค่าจาก bldPieceAt)
 function hitBldPiece(b,code,dmg,el,ox,oy){
   const j=Math.floor(code/100),k=code%100,q=b.pc[j];if(!BLDON||!q||b.nb||!bldAlive(q,k))return;   // nb = set unbreakable in Map Builder
@@ -84,7 +84,7 @@ function bldSupport(b){
 }
 // ให้คาถาวงกว้างพังสิ่งแวดล้อม: damageEnv(x,y,รัศมี px,ดาเมจ,id,ธาตุ,ความสูงจุดระเบิด) = ลัง/ถัง (prop) + ชิ้นย่อยบ้านในวง (ขอบวง = เหลือ 30%)
 function damageEnv(x,y,rad,dmg,by,el,h){
-  damagePropsIn(x,y,rad,dmg,by);damageBrkIn(x,y,rad,dmg,h);efsEnv(x,y,rad,by,el,h);bskEnv(x,y,rad,dmg,by,el,h);sgWallEnv(x,y,rad,dmg);roomWallEnv(x,y,rad,h,el);   // กำแพงพังได้โหมดบุกปราสาท (js/15-siege)
+  damagePropsIn(x,y,rad,dmg,by);damageBrkIn(x,y,rad,dmg,h);pnlEnv(x,y,rad,dmg,el,h);efsEnv(x,y,rad,by,el,h);bskEnv(x,y,rad,dmg,by,el,h);sgWallEnv(x,y,rad,dmg);roomWallEnv(x,y,rad,h,el);   // กำแพงพังได้โหมดบุกปราสาท (js/15-siege)
   for(const w of (G?.walls||[]))if(w.wood&&w.team!==G.players[by]?.team&&natureWallContains(w,x,y,h||0,rad)){
     natureWallDamage(w,dmg,x,y,by,el);
   }
@@ -102,7 +102,8 @@ function damageEnv(x,y,rad,dmg,by,el,h){
 }
 // เส้นจาก (x0,y0,h0) → (x1,y1,h1) ชนชิ้นบ้านแรกตรงไหน (ก้าวละ 10 px) • null = ไม่ชน
 function bldRay(x0,y0,h0,x1,y1,h1){
-  const c=cityRay(x0,y0,h0,x1,y1,h1);   // ตึกในเมือง (js/12-city-dmg) — ชนก่อนบ้านไหม
+  let c=cityRay(x0,y0,h0,x1,y1,h1);{const q=pnlRay(x0,y0,h0,x1,y1,h1);if(q&&(!c||q.t<c.t))c=q;}   // breakable panels (js/12-pnl)
+    // ตึกในเมือง (js/12-city-dmg) — ชนก่อนบ้านไหม
   if(!BLDON)return c;const L=Math.hypot(x1-x0,y1-y0),mx=(x0+x1)/2,my=(y0+y1)/2,near=sgNear(sgBld(),mx,my,L/2+20,_sgRB).filter(b=>bldNear(b,mx,my,L/2+20));
   if(!near.length)return c;const n=Math.max(1,Math.ceil(L/10));
   for(let i=1;i<=n;i++){const t=i/n;if(c&&t>c.t)return c;const x=lerp(x0,x1,t),y=lerp(y0,y1,t),h=lerp(h0,h1,t);
@@ -142,6 +143,7 @@ function aimRay3(p,h0,range,worldHeight=false){
       return {x:gx,y:gy,h:groundH(gx,gy),hit:'ground'};
     }
     if(BLDON)for(const b of sgNear(sgBld(),nx,ny,8,_sgA))if(bldNear(b,nx,ny,8)&&bldPieceAt(b,nx,ny,nh,6)>=0)return {x:nx,y:ny,h:nh,hit:'bld'};
+    if(PNL.length){const q=pnlRay(x,y,h,nx,ny,nh);if(q)return {x:q.x,y:q.y,h:q.h,hit:'bld'};}   // breakable panels
     if(citySolidAt(nx,ny,nh))return {x:nx,y:ny,h:nh,hit:'bld'};   // ตึกในเมือง
     x=nx;y=ny;h=nh;
   }
@@ -189,7 +191,7 @@ function collideBld(b,o,r,z){
   if(moved){o.x=b.o.x+lx*b.c+ly*b.s;o.y=b.o.y-lx*b.s+ly*b.c;}
 }
 function updateBldg(dt){
-  cityTick(dt);
+  cityTick(dt);pnlTick(dt);
   if(!BLDON)return;
   for(const b of BLDG){let br=false;if(b.nb)continue;
     for(let j=0;j<6;j++){
@@ -296,6 +298,7 @@ function collideWorld(o,r,z){
   }
   sol+=eCollide(o,r,z);   // สิ่งก่อสร้างสายดิน
   sol+=windCollide(o,r,z);   // กำแพงลมสายลม: กันศัตรูเดินผ่าน
+  sol+=pnlCollide(o,r,z);   // breakable panels (js/12-pnl)
   sol+=cityCollideIn(o,r,z);   // ผนังตึกกลวงในเมือง ทีละแผ่นทีละชั้น (js/12-city-dmg)
   // กล่องตึกทึบ (แมพเมือง MAPS[id].boxes {x,y,w,d,h}): ขอบชนด้วยวงกลม cwall แล้ว — ตรงนี้กันกรณีหลุดเข้าไปข้างใน (วาร์ป/จุดสุ่ม) → ดันออกด้านที่ใกล้สุด
   const BX=MAPS[MAPID]&&MAPS[MAPID].boxes;
@@ -510,7 +513,7 @@ function projStep(pr,dt,ps){
     {const t0=TERR?terrT(pr.x,pr.y):0;pr.x+=pr.vx*dt;pr.y+=pr.vy*dt;pr.h+=pr.vh*dt;if(TERR)pr.h-=terrT(pr.x,pr.y)-t0;}pr.life-=dt;
     if(pr.flak&&broomFlak(pr))return;   // Flak บนไม้กวาด: ใกล้ศัตรู = แตกเป็นกรวย (js/69)
     if(pr.life<=0||pr.x<20||pr.x>MW-20||pr.y<20||pr.y>MH-20||pr.h>40){killProj(pr);return;}
-    if(pr.h<0.05||(TERR&&terrSolid(pr.x,pr.y,pr.h))||(BLDG.length&&pr.h<bldMoundH(pr.x,pr.y))){pr.h=Math.max(pr.h,0.1);killProj(pr);return;}   // + ชนเนินซากบ้าน
+    if(pr.h<0.05||(TERR&&terrSolid(pr.x,pr.y,pr.h))||((BLDG.length||PNL.length)&&pr.h<bldMoundH(pr.x,pr.y))){pr.h=Math.max(pr.h,0.1);killProj(pr);return;}   // + ชนเนินซากบ้าน
     let hp=false;
     for(const c of sgNear(sgObs(),pr.x,pr.y,pr.r,_sgPO))if(c.bi===undefined&&!(c.bot!==undefined&&pr.h<c.bot)&&(c.top!==undefined?terrT(pr.x,pr.y)+pr.h<c.top:pr.h<c.hgt)&&(pr.x-c.x)**2+(pr.y-c.y)**2<(c.r+pr.r)**2){hp=true;if(c.cb!==undefined||c.ci!==undefined)cityHitObs(c,pr);if(c.sgw!==undefined)sgWallHit(c,pr);if(c.efs!==undefined)efsProj(c,pr);break;}
     if(!hp&&BLDG.length)for(const b of sgNear(sgBld(),pr.x,pr.y,pr.r,_sgPB)){if(!bldNear(b,pr.x,pr.y,pr.r))continue;const j=bldPieceAt(b,pr.x,pr.y,pr.h,pr.r);if(j>=0){hitBldPiece(b,j,pr.dmg||5,projEl(pr),pr.x-pr.vx*0.08,pr.y-pr.vy*0.08);hp=true;break;}}
@@ -521,6 +524,7 @@ function projStep(pr,dt,ps){
     }
     if(!hp&&eProjHit(pr))hp=true;
     if(!hp&&windProjHit(pr,dt))hp=true;
+    if(!hp&&pnlProj(pr,dt))hp=true;   // breakable panels (js/12-pnl)
     if(!hp&&cityProjIn(pr,dt))hp=true;   // ตึกกลวงในเมือง: ผนังนอกทีละแผ่น / พื้นชั้นบน / ทางลาด
     if(hp){killProj(pr);return;}
     for(const p of ps){

@@ -106,6 +106,9 @@ Tool: ศูนย์รวม Tool → **Map Builder** • โค้ด: `mapbu
 ## แผนที่ fcs เป็นไฟล์ (`fcs-file`) — MAP-STANDARD รอบ 5
 `node tools/fcs-to-mb.mjs` → `maps/build/fcs-file.json` (ไฟล์เดียว แก้ได้ทุกจุด) + `maps/build/room-greathall.json` • เปิด `mapbuild.html?id=fcs-file` • ส่งเข้าเกมแล้วเป็นแผนที่ `fcs-file` (บุกปราสาท) เล่น: `index.html?nosw&playmap=fcs-file&pm=siege` • ตัวแปลงรันโค้ดเกมจริง: `genFcs` (พื้น ที่ชน ชั้น พื้นที่เฟส แกน จุดเกิด) + `fcsCastle` และ `view()` ของห้อง แบบบันทึกคำสั่ง → ของตกแต่ง `dc_*` ~6,600 ชิ้น (ตัวกำแพง เชิงเทิน หอ หลังคาแดง ช่องธนู หน้าต่าง ธง คบไฟ ลานยกสูง) • กำแพงทึบจากผัง = `vis 0` (ที่ชน) • ลานยกสูง = พื้นชั้นบน + ที่ชนเดิม • ที่ชนสะพาน = ทรงกระบอก `vis 0` • ยังไม่มี: ป่า (พื้นวาด หมอกเฉพาะโซน ฟ้าครึ้ม เฟิร์น/หินเล็ก) สะพานซุ้มโค้ง + แตกแบบเปลือกไข่ ภาพซากปราสาท (`fcsRuin`) • `--prefab` = เก็บห้องเป็นห้องผูกไฟล์
 
+## แผ่นพัง `pn_wall` (รอบ A 2026-11-21)
+ผนังที่แบ่งเป็นช่อง ช่องละเลือด: `L` ยาว, `sy` สูง, `T` หนา (ม.), `y` ฐานยกจากพื้น, `cs` ขนาดช่อง, `hp` ต่อช่อง, `mat` (brick/plaster/stone/wood/glass/metal), `m` = `g` หายทั้งแผ่น / `p` เป็นรู+กองซาก / `l` ผิวหลุดเป็นชั้น (`thru:0` ไม่ทะลุ), `g` = กลุ่ม (ค้ำกัน) → ส่งเป็น `data.pnl` • รายละเอียด `guides/Destruction.md` §13 • ใน Editor ตอนนี้เห็นเป็นกล่อง+เส้นช่อง (แผง/วาดเต็มรูปแบบ = รอบ B) • ตัวอย่าง `tools/pnl-sample.mjs`
+
 ## สร้างแผนที่ด้วยโค้ด (ตัวอย่าง: gorge)
 เขียนสคริปต์ node ที่ `import` `mapbuild/model.js` (`newMap/pack/gh/…`) สร้างภูมิประเทศ/ของ/จุดเกิดแล้วเขียน `maps/build/<id>.json` • โมเดลใหม่: เขียน .glb เอง (วัสดุเดียวสีที่จุดยอด) ใส่ `assets/mapkit/` + แถว `user` ใน `kit.json` (`node tools/gorge-assets.mjs` เป็นตัวอย่าง) • ส่งเข้าเกมไม่ต้องกดปุ่ม: `node tools/headless.js --url "mapbuild.html?export=<id>" --js tools/mb-export.js --quiet` • ถ่ายภาพ/ทดสอบ: `tools/gorge-shots.js`, `gorge-walk.js` • SURF index 16–20 (moss/litter/gravel/duff/trail) เพิ่มต่อท้ายแล้ว — ตารางต้องต่อท้ายเสมอ
 

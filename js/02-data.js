@@ -161,7 +161,7 @@ const MAP_OFF=new Set([]);
 const PLAYMAP=new URLSearchParams(location.search).get('playmap')||'';   // Map Builder "ทดลองเล่น": index.html?playmap=<id>[&pm=<โหมด>] → เริ่มเล่นคนเดียวบนแผนที่นั้นทันที (js/40)
 const RANDOM_MAPS=['castle','pitch','hogsmeade','greathall','meadow','lake','ruins'];
 let MAPID='castle',MW=W,MH=H,OBS=MAPS.castle.obs;
-function setMapVars(id){if(!MAPS[id])id='castle';MAPID=id;MW=MAPS[id].W;MH=MAPS[id].H;OBS=MAPS[id].obs;TERR=MAPS[id].terr||null;if(MAPS[id].reset)MAPS[id].reset();PROPS=genProps(id);BLDG=genBldg(id);BRK=genBrk(id);efsBuild(id);bskBuild(id);}
+function setMapVars(id){if(!MAPS[id])id='castle';MAPID=id;MW=MAPS[id].W;MH=MAPS[id].H;OBS=MAPS[id].obs;TERR=MAPS[id].terr||null;if(MAPS[id].reset)MAPS[id].reset();PROPS=genProps(id);BLDG=genBldg(id);BRK=genBrk(id);efsBuild(id);bskBuild(id);pnlGen(id);}
 // ---------- แผนที่จากไฟล์ (Blender → assets/maps/<id>.json + .glb, สคริปต์ assets/src/map_export.py, กติกา guides/MAP-DESIGN.md) ----------
 // manifest "maps":{id:{file,data,v}} • ไฟล์ .json = ข้อมูลเกม (ทุกเครื่องโหลดไฟล์เดียวกัน → คำนวณตรงกัน) • .glb = หน้าตา (โหลดตอนสร้างฉาก)
 // id ซ้ำกับแผนที่จากโค้ด = แทนที่ของเดิม • โหลดไม่ได้ = ใช้แผนที่จากโค้ดตามเดิม
@@ -176,6 +176,7 @@ function regFileMap(id,e,d){
     spawns:d.spawns||[],props:d.props,espawn:d.espawn||[],rings:d.rings||[],tasks:d.tasks||[],lights:d.lights||[],env:d.env||[],weather:d.weather||'',fx:d.fx||[],brk:d.brk||[],look:d.look||'',lt:d.lt||null}};   // look = ชื่อพรีเซ็ต Look (js/74) • lt = แสง/ฟ้าเฉพาะแมพ (js/28 buildFileMap: hemi/sun/sky)
   MAPS[id].deco=d.deco||null;   // decor drawn by the game (fcsDecoFile js/28-fcs-castle.js)
   if(d.ceil)MAPS[id].ceil=d.ceil.map(q=>({x0:q.x0,y0:q.y0,x1:q.x1,y1:q.y1,h:q.h,zmax:q.zmax==null?Infinity:q.zmax}));   // room ceilings (fcsCeilAt)
+  if(d.pnl)MAPS[id].pnl=d.pnl;   // breakable panels (js/12-pnl)
   roomsFromFile(MAPS[id],d,id);   // breakable room props + stone wall faces (js/02-fcs-rooms.js) — MAP-STANDARD round 3
   if(d.siege)sgFromFile(MAPS[id],d,id);   // Map Builder siege map (js/02-fcs.js) — MAP-STANDARD round 2
   const ri=RANDOM_MAPS.indexOf(id);

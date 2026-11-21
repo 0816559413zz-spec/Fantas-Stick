@@ -225,3 +225,16 @@ b.pc.map(q=>q.cb.toString(2))                     // ชิ้นที่พั
   2. `D:/Blender/blender.exe -b --python assets/src/fcs_bridge_build.py` -> `assets/buildings/fcs_bridge.glb` (`map_fcs_bridge`)
 - Shell = stone blocks (ashlar courses + arch voussoirs) grouped into chunks; the game splits chunks back into blocks (`fcsBlocks`) so broken stones fall one by one and pile up (`FPILE`).
 - Dev: F2 'ทำลาย / ซ่อม' works on chunks.
+
+## 13. Breakable panels from Map Builder (แผ่นพัง) — 2026-11-21 (MAP-STANDARD round A)
+Generic system for building any breakable structure in Map Builder: a wall panel cut into cells, HP per cell. Parts that must not break are normal walls/boxes/decor.
+- Map Builder object `pn_wall` → `data.pnl[]` {x,y px, a, L, T px, z0, H m, cs cell size m, hp per cell, mat, m mode, thru, g group}. Editor UI for it = round B (now: place via file/script, see `tools/pnl-sample.mjs`).
+- Modes `m`: **`g` gone** = one HP pool, whole panel shatters (glass, doors) • **`p` pile** = cells break into holes, rubble heap at the base • **`l` layer** = crack → outer skin falls off (still solid, inner layer shows) → through; `thru:0` = damage only, never a hole.
+- Materials `mat`: brick, plaster (skin over brick), stone, wood (burns), glass, metal — HP defaults `PNDEF.mat` in `js/12-pnl.js`.
+- Cell stages 0 ok / 1 crack (< 65 %) / 2 skin gone (layer < 40 %) / 3 broken. Hits splash 25 % to the 4 neighbours (organic holes). Element: blast ×1.5, ice ×0.7, glass ×1.5, fire sets wood burning (`PNDEF.burn`/`dps`).
+- Support: panels with the same `g` link where their cells touch (side by side or stacked). A cell stays while connected through unbroken cells to a cell on the ground; cut off = falls (`el:'fall'`). Example: lintel over a door falls when both wall pieces beside it are gone.
+- Collision: columns that block the body (feet → +1.75 m) push like house walls; holes are walkable. Bullets: segment test through the slab (no tunnelling). Aim/skills/camera use `pnlRay`. Rubble heap adds walkable ground (`pnlMoundH` in `bldMoundH`), lower right under the wall line so holes stay passable.
+- Net: snapshot `PN` (panels joined by `|`, 3 cells per char, delta per panel in `NETD_KEYS`) • events `{k:'pn',e:'h'|'b',i,c}` → `pnlFX`. Protocol v102.
+- View `js/28-pnl-build.js`: one box per panel; damage = DataTexture (1 texel per cell) sampled smooth + noise; brick/stone/wood sample at the brick/plank centre so holes step along whole bricks; holes/recesses are ray-marched through the thickness (rim + inner layer visible). Pattern coords are world-continuous so panels line up. Shadow depth material cuts the holes too.
+- Test map `pnl-demo` (`node tools/pnl-sample.mjs` → export). Debug: `WD.PNL`, `WD.pnlHit(panel,cell,dmg)`, `WD.damageEnv(...)`, `WD.pnlSnap/pnlParse`.
+- Not yet: floor/roof slabs, Map Builder palette/inspector/cell preview (round B), converting the old houses (round C), burning flames on panels, bots do not path around panels.

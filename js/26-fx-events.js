@@ -220,6 +220,7 @@ function fx(ev,raw){   // raw = ภาพเดิมในโค้ดเท่
       break;}
     case 'brk':if(ev.t==='b'){brkFall(ev);fcsParFall(ev);}if(ev.t!=='land')fcsRoomBrkFx(ev);break;
     case 'rwh':fcsWallHit(ev);break;   // skill hit a room wall (js/28-fcs-props.js)
+    case 'pn':pnlFX(ev,H,near);break;   // breakable panels (js/28-pnl-build)
     case 'cb':case 'cs':cityFX(ev,H,near);break;   // ตึก/ของในเมืองพัง (js/28-city-build)   // ของบังพัง: ส่วนบนล้ม (เศษ/ฝุ่น/เสียง = assets/fx/env/brk_*.fx.json ผูกใน bind.json brk:c / brk:b / brk:land)
     case 'heal':floatText(ev.x,ev.y,'+'+ev.n,'#7dff9a',ev.id===NET.myId?20:15,ev.h);if(ev.id===NET.myId)burst(ev.x,ev.y,'#7dff9a',8,60,0.6,1.6,{h:ev.h-1,vh:[0.5,2],g:-0.5});break;
     case 'fbomb':

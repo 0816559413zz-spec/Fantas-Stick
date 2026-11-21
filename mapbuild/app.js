@@ -263,6 +263,10 @@ function markerMesh(o) {
     if (/^spawn/.test(o.t)) { const a = add(new THREE.ConeGeometry(0.35, 0.9, 10), helpMat(c), 0, 0.3, 1.2); a.rotation.x = Math.PI / 2; } else add(new THREE.OctahedronGeometry(0.35), helpMat(c), 0, 2.3, 0); }
   else if (o.t === 'ring') { const r = add(new THREE.TorusGeometry(2, 0.12, 8, 28), helpMat(c), 0, 0, 0); }
   else if (o.t === 'light') { add(new THREE.SphereGeometry(0.28, 12, 8), helpMat(o.c || c), 0, 0, 0); const l = new THREE.PointLight(o.c || c, (o.int == null ? 2.4 : o.int) * 6, o.dist || 14, 1.6); g.add(l); }
+  else if (o.t === 'pn_wall') { const L = o.L || 4, H = o.sy || 3, T = o.T || 0.3, b = add(new THREE.BoxGeometry(L, H, T), mat({ brick: '#b0603c', plaster: '#cfc6b4', stone: '#9a9488', wood: '#8a6440', glass: '#bfe4f0', metal: '#7c8288' }[o.mat || 'brick'] || c), 0, H / 2, 0); b.castShadow = true;
+    const cs = o.cs || 1, nc = Math.max(1, Math.round(L / cs)), nr = Math.max(1, Math.round(H / cs)), pts = [];
+    for (let i = 1; i < nc; i++) { const x = -L / 2 + i * L / nc; pts.push(x, 0, T / 2 + 0.01, x, H, T / 2 + 0.01); } for (let j = 1; j < nr; j++) { const y = j * H / nr; pts.push(-L / 2, y, T / 2 + 0.01, L / 2, y, T / 2 + 0.01); }
+    const lg = new THREE.BufferGeometry(); lg.setAttribute('position', new THREE.Float32BufferAttribute(pts, 3)); g.add(new THREE.LineSegments(lg, new THREE.LineBasicMaterial({ color: '#2a2a2a', transparent: true, opacity: 0.45 }))); }
   else if (o.t === 'house') { const b = add(new THREE.BoxGeometry(8, 4.2, 6.5), mat('#b08a5a'), 0, 2.1, 0); b.castShadow = true; const r = add(PRIM.cone(), mat('#7a4a36'), 0, 4.2, 0); r.scale.set(6.2, 2.6, 5); add(new THREE.BoxGeometry(1.2, 2.2, 0.2), helpMat('#3a2a1c'), 0, 1.1, 3.3); }
   else if (o.t === 'ptree' || o.t === 'ppine') { add(new THREE.CylinderGeometry(0.3, 0.45, 3, 8), mat('#6a4a2c'), 0, 1.5, 0).castShadow = true; const top = o.t === 'ptree' ? add(new THREE.IcosahedronGeometry(2.6, 1), mat(c), 0, 5, 0) : add(new THREE.ConeGeometry(2, 5.5, 8), mat(c), 0, 4.6, 0); top.castShadow = true; }
   else if (o.t === 'pbarrel') add(new THREE.CylinderGeometry(0.7, 0.7, 1.6, 12), mat(c), 0, 0.8, 0).castShadow = true;

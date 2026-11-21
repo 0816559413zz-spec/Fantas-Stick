@@ -39,6 +39,7 @@ export const OBJ = {
   pchest: { n: 'หีบสมบัติ', cat: 'game', c: '#e8c060', r: 0.9, h: 1.0, note: 'ไม่เกิน 2 ใบ' },
   ptree: { n: 'ต้นโอ๊ก (พังได้)', cat: 'game', c: '#4f8f3c', r: 1.1, h: 7.5 }, ppine: { n: 'ต้นสน (พังได้)', cat: 'game', c: '#2f6a30', r: 1.0, h: 7 },
   house: { n: 'บ้านพังได้', cat: 'game', c: '#b08a5a', note: 'ต้องอยู่บนพื้นเรียบ' },
+  pn_wall: { n: 'แผ่นพัง (ผนัง)', cat: 'game', c: '#c0703c', note: 'แบ่งเป็นช่อง ช่องละเลือด • กลุ่มเดียวกัน = ค้ำกัน (guides/Destruction.md §13)' },
   poly: { n: 'ทรงอิสระ', cat: 'hid' },
   box: { n: 'กล่อง', cat: 'prim' }, cyl: { n: 'ทรงกระบอก', cat: 'prim' }, cone: { n: 'กรวย/หลังคา', cat: 'prim' }, ball: { n: 'ก้อนกลม', cat: 'prim' }, wedge: { n: 'ลิ่ม', cat: 'prim' },
   // siege mode markers (guides/MAP-STANDARD.md) — exported as data.siege, the game builds collision/visuals itself
@@ -245,7 +246,7 @@ export function gameData(M, dim) {
     });
   }
   const spawns = [], espawn = [], rings = [], tasks = [], props = [], houses = [], lights = [];
-  const sg = { cores: [], sp: { A: {}, B: {} }, phases: [], bw: [] }, ceil = [], rprops = [], deco = [];
+  const sg = { cores: [], sp: { A: {}, B: {} }, phases: [], bw: [] }, ceil = [], rprops = [], deco = [], pnl = [];
   const rect = o => { const w = (o.sx || 1) * PX, d = (o.sz || 1) * PX; return { x0: r1(o.x * PX - w / 2), y0: r1(o.z * PX - d / 2), x1: r1(o.x * PX + w / 2), y1: r1(o.z * PX + d / 2) }; };
   for (const o of allObjs) {
     const X = r1(o.x * PX), Y = r1(o.z * PX), rot = o.rot || 0;
@@ -260,6 +261,8 @@ export function gameData(M, dim) {
     else if (o.t === 'ring') rings.push({ x: X, y: Y, h: r2(Math.max(1, o.y || 6)) });
     else if (o.t === 'task') tasks.push({ x: X, y: Y });
     else if (o.t === 'light') lights.push({ x: X, y: Y, h: r2(o.y == null ? 2.2 : o.y), col: o.c || '#ffb060', int: o.int == null ? 2.4 : o.int, dist: o.dist || 14 });
+    else if (o.t === 'pn_wall') pnl.push(Object.assign({ x: X, y: Y, a: +(-rot).toFixed(4), L: r1((o.L || 4) * PX), T: r1((o.T || 0.3) * PX), H: r2(o.sy || 3), cs: o.cs || 1, mat: o.mat || 'brick', m: o.m || 'p' },
+      o.y ? { z0: r2(o.y) } : {}, o.hp ? { hp: o.hp } : {}, o.thru === 0 ? { thru: 0 } : {}, o.g != null && o.g !== '' ? { g: o.g } : {}));   // breakable panel (js/12-pnl)
     else if (o.t === 'house') houses.push(Object.assign({ x: X, y: Y, w: r1(160 * (o.sx || 1)), d: r1(130 * (o.sz || 1)), ry: +rot.toFixed(3) }, o.brk === 0 ? { nb: 1 } : {}));   // nb = unbreakable (inspector 'พังได้' off)
     else if (OBJ[o.t] && OBJ[o.t].cat === 'game') props.push(Object.assign({ k: o.t, x: X, y: Y, a: +rot.toFixed(3) }, o.brk === 0 ? { nb: 1 } : {}));
     else { const d = dim(o); if (!d) continue; const cs = objCircles(M, o, d); if (!cs.length) continue;
@@ -296,6 +299,7 @@ export function gameData(M, dim) {
   if (M.style) data.style = M.style;
   if (M.style === 'forest-mist' && !M.look) data.look = 'gorge';   // forest look preset (js/74-look.js)
   if (deco.length) data.deco = deco;
+  if (pnl.length) data.pnl = pnl;
   if (sg.cores.length || sg.bw.length || sg.phases.length || Object.keys(sg.sp.A).length || Object.keys(sg.sp.B).length) data.siege = sg;
   if (ceil.length) data.ceil = ceil;
   if (rprops.length) data.rprops = rprops;

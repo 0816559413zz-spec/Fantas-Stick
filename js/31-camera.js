@@ -71,6 +71,7 @@ function aimFromCrosshair(me,P,E){
   for(const e of E||[]){const D=EDEF[e.t];if(D){const g0=GY(e.x,e.y)+(e.h||0);cyl(tx(e.x),tz(e.y),Math.max(0.4,D.r*S3),g0,g0+D.ch+0.8);}}
   // เส้นเล็งลงพื้นก่อนชนอะไร = ยิงไปจุดนั้นบนพื้นตรงเป้า (ล็อกเป้าอัตโนมัติใน shoot() ยังช่วยถ้าเล็งใกล้ศัตรู)
   if(MAPID==='city')for(let t=tMin;t<T;t+=0.4){const X=o.x+dx*t,Z=o.z+dz*t;if(citySolidAt(X/S3+MW/2,Z/S3+MH/2,o.y+dy*t)){T=t;break;}}   // ตึกในเมือง (ผนังที่ยังไม่แตก/ส่วนทึบ)
+  if(PNL.length){const sx=v=>v/S3+MW/2,sz=v=>v/S3+MH/2,x0=sx(o.x+dx*tMin),y0=sz(o.z+dz*tMin),x1=sx(o.x+dx*T),y1=sz(o.z+dz*T),q=pnlRay(x0,y0,o.y+dy*tMin-GY(x0,y0),x1,y1,o.y+dy*T-GY(x1,y1));if(q)T=tMin+(T-tMin)*q.t;}   // breakable panels
   const tw=T;   // ระยะถึงสิ่งที่ชนก่อนพื้น (ใช้จำกัดจุดวางสกิลบนพื้นด้วย)
   const tg=TERR?rayTerr(o,_aimD,tMin,T):(dy<-1e-4?-o.y/dy:1e9);if(tg>tMin&&tg<T)T=tg;
   let X=o.x+dx*T,Z=o.z+dz*T,Y=Math.max(TW(X,Z)+0.1,o.y+dy*T);
