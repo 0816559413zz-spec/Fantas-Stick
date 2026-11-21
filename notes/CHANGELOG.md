@@ -1,5 +1,23 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
 
+- 2026-11-21 Darkness release (protocol v106): includes grounded and point-blank BA hits, world-space slash trails, WASD dash controls with BA resets, and the approved smaller Long Dash head with the layered wake.
+
+- 2026-11-21 Darkness: restored the layered Long Dash wake from review #130 with the smaller head from review #132.
+
+- 2026-11-21 Darkness: reduced the Long Dash form by about 25% and opened the wake into four independently tapering ribbons.
+
+- 2026-11-21 Darkness: Long Dash uses one continuous surface and one flowing line pattern from the nose through the curved wake.
+
+- 2026-11-21 Darkness: Long Dash has 16 matching lines across the nose and wake, with a slightly clearer surface pattern.
+
+- 2026-11-21 Darkness: Long Dash nose lines are drawn on the orb surface, and wake ribbons begin flush with that surface.
+
+- 2026-11-21 Darkness: fine Long Dash lines emerge gradually across the orb's curved nose and flow into the same ribbons that form the wake.
+
+- 2026-11-21 Darkness: layered Long Dash ribbons wrap the orb's midpoint as its rear surface dissolves into the wake.
+
+- 2026-11-21 Darkness: BA covers a 25-unit point-blank radius and uses the blade's sweep plane for directional hits. The animated slash stays in world space when aiming changes, and downward cuts make visible ground contact. Both Shift dash modes follow movement input and reset BA. Long Dash has a stretched orb and a thicker, continuous wake.
+
 - 2026-11-21 Map Builder: objects may sit below ground (negative height via gizmo, PgDn or the Inspector); Snap to Ground button / End key drops the selection so its lowest point meets the lowest ground under its footprint (no gap on slopes).
 
 - 2026-11-21 Darkness: the BA shaft trail fades out about 0.4 seconds after the cut. The blade trail retains its 0.9-second fade.

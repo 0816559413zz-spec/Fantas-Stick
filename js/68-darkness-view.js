@@ -336,6 +336,21 @@ function darkIdleWeaponPose(now,position,rotation){
   position.set(1.5,.08+Math.sin(now*.002)*.09,0);
   rotation.set(.25,now*.0015,.16);
 }
+function darkBAGroundImpact(point,yaw){
+  const root=new THREE.Group();root.name='Darkness BA ground impact';root.position.copy(point);
+  root.rotation.y=Math.PI/2-yaw;
+  const floor=new THREE.Group();floor.rotation.x=-Math.PI/2;root.add(floor);
+  const scar=stDarkCut(floor,[[-1.36,-.16],[0,.06],[1.36,.20]],.14,0x09070e,11);
+  const rim=stDarkCut(floor,[[-1.12,-.15],[0,.045],[1.10,.17]],.046,0x5b4b69,12);
+  const splash=stDarkCut(root,[[-1.16,.055],[-.24,.26],[.49,.15],[1.25,.035]],.15,0x21192c,12);
+  const pressure=stDarkPressure(floor);
+  const grit=stDarkMatter(root,'BA ground grit',[{at:0,span:.075,count:22,spread:1.25,lift:.87,height:.03}],(_t,out)=>out.set(0,0,0));
+  darkViewTemp(root,.55,t=>{
+    scar(t,.42,.84);rim(t,.22,.48);splash(t,.22,.71);
+    pressure(.14+2.02*stDarkEase(0,.28,t),.56*(1-stDarkEase(.04,.30,t)),t*8);
+    grit(t);
+  });
+}
 function darkSettleWeapon(o,blade,duration=.52){
   if(!o?.darkWeapon||!blade?.visible)return;
   const pos=blade.getWorldPosition(new THREE.Vector3()),rot=blade.getWorldQuaternion(new THREE.Quaternion());
@@ -470,8 +485,19 @@ function darknessCharacter(o,p,viewer,now){
     fxLoad('darkness/ult_v3');
     o.darkGear=new THREE.Group();
     o.darkSwordRoot=new THREE.Group();o.darkGear.add(o.darkSwordRoot);
+    o.darkBATrail=new THREE.Group();o.darkBATrail.name='Darkness BA world trail';o.darkSwordRoot.add(o.darkBATrail);
+    o.darkBAPose={pos:new THREE.Vector3(),q:new THREE.Quaternion(),scratch:new THREE.Quaternion(),lift:new THREE.Vector3(),euler:new THREE.Euler(0,0,0,'YXZ')};
+    const worldTip=new THREE.Vector3();
+    o.darkGroundBA=(space,tip,pos,contact)=>{
+      worldTip.copy(tip);space.localToWorld(worldTip);
+      const floor=darkBAFloor(worldTip.x/S3+MW/2,worldTip.z/S3+MH/2,o.darkBAAnchor?.y??o.zs)+.08;
+      if(worldTip.y>=floor)return;
+      worldTip.y=floor;
+      if(contact&&!o.darkBAGroundContact){o.darkBAGroundContact=true;darkBAGroundImpact(worldTip,o.darkBaYaw);}
+      pos.add(space.worldToLocal(worldTip).sub(tip));
+    };
     const blade=stDarkVeilBlade(1.4);
-    const scytheArgs={wrap:'C',manual:true,scale:1.4,side:-1.5,trailPose:blade,mode:'ba',liveBA:true};
+    const scytheArgs={wrap:'C',manual:true,scale:1.4,side:-1.5,trailPose:blade,trailRoot:o.darkBATrail,mode:'ba',liveBA:true,cutHeight:DARK_BA.height};
     o.darkScythe=stCreateScythePreview(o.darkSwordRoot,scytheArgs);
     o.darkVeilBlade=blade;o.darkScytheArgs=scytheArgs;
     o.darkBuffBlade=stDarkChargedBlade(o.darkScythe.blade);
@@ -509,15 +535,23 @@ function darknessCharacter(o,p,viewer,now){
   const veil=o.darkVeilCast,t=veil?(now-veil.at)/1000:Infinity;
   const planting=t>=0&&t<2.55;
   o.darkScytheArgs.trailPose=planting?o.darkVeilBlade:null;
+  o.darkScytheArgs.groundBA=basic&&!planting&&o.darkBaPitch<-.07?o.darkGroundBA:null;
+  o.darkBATrail.position.set(0,0,0);
+  o.darkBATrail.quaternion.identity();
   o.darkSwordRoot.position.set(0,0,0);
   o.darkSwordRoot.rotation.set(0,0,0);
-  if(basic){
+  if(basic&&!planting){
     const aimWeight=1-stDarkEase(.55,1.10,age);
-    const pitch=(o.darkBaPitch||0)*aimWeight;
-    o.darkSwordRoot.rotation.y=angDiff(Math.PI/2-o.darkBaYaw,o.g.rotation.y)*aimWeight;
-    o.darkSwordRoot.rotation.x=-pitch;
-    o.darkSwordRoot.position.y=1.1*(1-Math.cos(pitch));
-    o.darkSwordRoot.position.z=1.1*Math.sin(pitch);
+    const {pos,q,scratch,lift,euler}=o.darkBAPose;
+    if(o.darkBAAnchor)pos.copy(o.darkBAAnchor);else o.g.getWorldPosition(pos);
+    q.setFromEuler(euler.set(-o.darkBaPitch,Math.PI/2-o.darkBaYaw,0));
+    pos.y+=DARK_BA.height;
+    pos.sub(lift.set(0,DARK_BA.height,0).applyQuaternion(q));
+    o.darkSwordRoot.position.copy(pos);
+    o.darkGear.worldToLocal(o.darkSwordRoot.position).multiplyScalar(aimWeight);
+    o.darkSwordRoot.quaternion.slerp(o.darkGear.getWorldQuaternion(scratch).invert().multiply(q),aimWeight);
+    o.darkSwordRoot.worldToLocal(o.darkBATrail.position.copy(pos));
+    o.darkBATrail.quaternion.copy(o.darkSwordRoot.getWorldQuaternion(scratch).invert().multiply(q));
   }
   if(planting){
     const settle=THREE.MathUtils.smoothstep(t,1.82,2.55);
@@ -752,6 +786,7 @@ function darknessEfx(ev){
         o.darkTint?.(0,1);
       }
       o.darkVeilCast=null;
+      o.darkBAAnchor=null;o.darkBAGroundContact=false;
       o.darkSwingAt=now;o.darkBaEmpowered=ev.empowered;o.darkBaPitch=ev.pitch;o.darkBaYaw=ev.a||0;o.darkBaSide=ev.side;
       const dash=o.darkDashFx;
       if(dash&&!dash.spent&&!dash.cancelled){
@@ -760,6 +795,10 @@ function darknessEfx(ev){
         if(dash.hold){dash.cancelled=true;o.b.visible=true;o.darkTint?.(0,1);}
       }
     }
+    return true;
+  }
+  if(z==='darkbasweep'){
+    if(o&&o.darkSwingAt!=null)(o.darkBAAnchor??=new THREE.Vector3()).set(tx(x),GY(x,y)+h,tz(y));
     return true;
   }
   if(z==='darkbahit'){

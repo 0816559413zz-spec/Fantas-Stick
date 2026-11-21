@@ -418,7 +418,7 @@ function stDarkPose(actor,pose){
   if(actor.rig){for(const limb of actor.rig)limb.w=1;rigSync(actor,0);}
 }
 
-function stDarkWake(parent,atTime,pointAt,heightAt,from,to,opacity=1,life=.74){
+function stDarkWake(parent,atTime,pointAt,heightAt,from,to,opacity=1,life=.74,widthScale=1){
   const bands=7,count=61;
   const geometry=new THREE.BufferGeometry();
   const position=new THREE.BufferAttribute(new Float32Array(bands*count*6),3).setUsage(THREE.DynamicDrawUsage);
@@ -461,12 +461,12 @@ function stDarkWake(parent,atTime,pointAt,heightAt,from,to,opacity=1,life=.74){
         *(1-stDarkEase(to-.035,to,born))*(1-stDarkEase(to+.51,to+.625,t));
       const trailOpacity=Math.pow(fade,.65);
       for(let b=0;b<bands;b++){
-        const spread=(b-3)*(.065+.085*stDarkEase(0,.47,age));
+        const spread=(b-3)*(.065+.085*stDarkEase(0,.47,age))*widthScale;
         const angle=born*23+age*8+b*.47;
         const twist=spread*Math.cos(angle);
         const x=p.x+forward.z/length*twist,z=p.z-forward.x/length*twist;
         const y=1.09+heightAt(d)+spread*Math.sin(angle)+(b-3)*.032;
-        const width=(b===0?.135:b<3?.071:.035)*(.28+.72*fade);
+        const width=(b===0?.135:b<3?.071:.035)*(.28+.72*fade)*widthScale;
         const tear=b<3?1:(.42+.58*stDarkEase(-.58,.25,Math.sin(born*91+b*7.6+age*16)));
         const a=(b*count+j)*2;
         position.setXYZ(a,x,y-width,z);
@@ -542,7 +542,7 @@ function stDarkWaltzForm(parent,pointAt,heightAt){
   };
 }
 
-function stDarkOrbWeave(parent,pointAt,hopHeight){
+function stDarkOrbWeave(parent,pointAt,hopHeight,trailScale=1){
   const ease=stDarkEase,tau=Math.PI*2,axis=new THREE.Vector3(),last=new THREE.Vector3();
   const strands=104,steps=37;
   const geometry=new THREE.BufferGeometry();
@@ -573,7 +573,7 @@ function stDarkOrbWeave(parent,pointAt,hopHeight){
   return (t,position,distance,amount,blend,squash,thin,coil)=>{
     fibers.visible=amount>.005;
     if(!fibers.visible)return;
-    const trail=lerp(4.65,3.15,thin)*(1-.67*coil),lead=lerp(.6,.20,thin)*(1-.38*coil);
+    const trail=lerp(4.65,3.15,thin)*(1-.67*coil)*trailScale,lead=lerp(.6,.20,thin)*(1-.38*coil);
     for(let j=0;j<steps;j++){
       const s=j/(steps-1),sample=samples[j],d=distance+lead-s*trail;
       pointAt(d,sample.p);

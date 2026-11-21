@@ -478,6 +478,145 @@ function stDarkQuickDash(root,caster,look,live){
   return update;
 }
 
+function stDarkDashHead(root){
+  const sides=36,headRings=10,tailRings=5,columns=sides+1;
+  const vertices=(headRings+tailRings+1)*columns;
+  const positions=new THREE.BufferAttribute(new Float32Array(vertices*3),3).setUsage(THREE.DynamicDrawUsage);
+  const uv=new THREE.BufferAttribute(new Float32Array(vertices*2),2);
+  const indices=[];
+  for(let row=0;row<=headRings+tailRings;row++){
+    const along=row<=headRings?.32*row/headRings:lerp(.32,.49,(row-headRings)/tailRings);
+    for(let col=0;col<=sides;col++){
+      const a=row*columns+col;
+      uv.setXY(a,col/sides,along);
+      if(row<headRings+tailRings&&col<sides){
+        const b=a+columns;
+        indices.push(a,b,a+1,a+1,b,b+1);
+      }
+    }
+  }
+  const geometry=new THREE.BufferGeometry();
+  geometry.setAttribute('position',positions);
+  geometry.setAttribute('uv',uv);
+  geometry.setIndex(indices);
+  const material=new THREE.ShaderMaterial({
+    toneMapped:false,transparent:true,side:THREE.DoubleSide,forceSinglePass:true,
+    uniforms:{time:{value:0},cover:{value:0}},
+    vertexShader:`varying vec2 surfaceUV;
+      void main(){surfaceUV=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
+    fragmentShader:`uniform float time;uniform float cover;varying vec2 surfaceUV;
+      void main(){
+        float s=surfaceUV.y,angle=surfaceUV.x*6.2831853;
+        float bend=angle-time*2.7+s*2.35+.09*sin(s*15.-time*4.);
+        float ridge=smoothstep(.78,.996,cos(16.*bend));
+        float flow=.68+.32*sin(time*13.-s*22.+sin(angle*3.));
+        float line=ridge*flow*smoothstep(.025,.19,s);
+        float light=pow(.5+.5*sin(angle),2.)*.010;
+        vec3 ink=vec3(.006,.005,.010)+vec3(.71,.67,1.)*light;
+        ink+=vec3(.027,.020,.037)*line;
+        float opacity=cover*(1.-smoothstep(.31,.48,s));
+        if(opacity<.025)discard;
+        gl_FragColor=vec4(ink,opacity);
+        #include <colorspace_fragment>
+      }`
+  });
+  const mesh=new THREE.Mesh(geometry,material);
+  mesh.name='Long Dash small shadow head';mesh.frustumCulled=false;mesh.renderOrder=7;root.add(mesh);
+  const center=new THREE.Vector3(),forward=new THREE.Vector3(),right=new THREE.Vector3();
+  const head={position:new THREE.Vector3(),scale:new THREE.Vector3()};
+  return (t,at,heading,form,travel)=>{
+    mesh.visible=form>.015;
+    if(!mesh.visible)return head;
+    material.uniforms.time.value=t;
+    material.uniforms.cover.value=stDarkEase(.015,.58,form);
+    forward.copy(heading);forward.y=0;forward.normalize();
+    head.position.copy(at).addScaledVector(forward,.10*travel);
+    head.position.y=at.y+1.07+.065*Math.sin(t*16)*(1-travel);
+    const width=(.51-.07*travel)*form,height=(.54-.06*travel)*form,reach=(.53+.36*travel)*form;
+    head.scale.set(width,height,reach);
+    right.set(forward.z,0,-forward.x);
+    for(let row=0;row<=headRings+tailRings;row++){
+      let radius,tail=0;
+      if(row<=headRings){
+        const latitude=row/headRings*Math.PI/2;
+        center.copy(head.position).addScaledVector(forward,reach*Math.cos(latitude));
+        radius=Math.sin(latitude);
+      }else{
+        tail=(row-headRings)/tailRings;
+        center.copy(head.position).addScaledVector(forward,-tail*reach*.54);
+        radius=Math.sqrt(1-(tail*.54)**2);
+      }
+      for(let col=0;col<=sides;col++){
+        const angle=col/sides*Math.PI*2;
+        const lateral=Math.cos(angle)*width*radius;
+        const vertical=Math.sin(angle)*height*radius;
+        positions.setXYZ(row*columns+col,center.x+right.x*lateral,center.y+vertical,center.z+right.z*lateral);
+      }
+    }
+    positions.needsUpdate=true;
+    return head;
+  };
+}
+
+function stDarkDashMantle(root,pointAt){
+  const strips=16,steps=20,columns=4,verts=strips*steps*columns;
+  const cross=[-1,-.11,.04,1];
+  const pos=new THREE.BufferAttribute(new Float32Array(verts*3),3).setUsage(THREE.DynamicDrawUsage);
+  const rgba=new THREE.BufferAttribute(new Float32Array(verts*4),4).setUsage(THREE.DynamicDrawUsage);
+  const indices=[];
+  for(let i=0;i<strips;i++)for(let j=0;j<steps-1;j++){
+    const row=(i*steps+j)*columns;
+    for(let k=0;k<columns-1;k++){
+      const a=row+k,b=a+columns;
+      indices.push(a,b,a+1,a+1,b,b+1);
+    }
+  }
+  const geometry=new THREE.BufferGeometry();
+  geometry.setAttribute('position',pos);geometry.setAttribute('color',rgba);geometry.setIndex(indices);
+  const material=new THREE.MeshBasicMaterial({vertexColors:true,transparent:true,depthWrite:false,side:THREE.DoubleSide,
+    toneMapped:false,forceSinglePass:true});
+  const mesh=new THREE.Mesh(geometry,material);
+  mesh.name='Long Dash overlapping dark mantle';mesh.frustumCulled=false;mesh.renderOrder=8;root.add(mesh);
+  const center=new THREE.Vector3(),axis=new THREE.Vector3(),back=new THREE.Vector3(),right=new THREE.Vector3();
+  return (t,head,d,forward,amount)=>{
+    mesh.visible=amount>.015;
+    if(!mesh.visible)return;
+    for(let j=0;j<steps;j++){
+      const tail=j/(steps-1),u=lerp(.37,1,tail),along=d-tail*2.9;
+      pointAt(along,center);
+      pointAt(along+.10,axis).sub(pointAt(along-.12,back));axis.y=0;
+      if(axis.lengthSq()<.0001){axis.copy(forward);axis.y=0;}
+      axis.normalize();
+      center.addScaledVector(axis,.28*(1-tail)+Math.min(0,along));
+      center.y+=1.07;
+      const settle=stDarkEase(0,.33,tail);
+      center.lerp(head.position,1-settle);
+      right.copy(forward);right.y=0;
+      axis.lerp(right,1-settle).normalize();
+      right.set(axis.z,0,-axis.x);
+      const fit=lerp(1,4/3,stDarkEase(.04,.36,tail));
+      const radius=fit*(1+.025*stDarkEase(.16,.47,tail))*(1-.92*stDarkEase(.20,1,tail));
+      for(let i=0;i<strips;i++){
+        const theta=i*Math.PI*2/strips+t*2.7-u*2.28-tail*(i%3)*.27;
+        const flutter=1+.075*stDarkEase(.12,.39,tail)*Math.sin(u*16-t*12+i*2.2);
+        const width=(.36+.075*Math.sin(i*4.7)*stDarkEase(.05,.32,tail))*(1-.42*tail);
+        const fade=amount*stDarkEase(0,.15,tail)*(1-stDarkEase(.55+i%3*.05,1,tail));
+        for(let k=0;k<columns;k++){
+          const angle=theta+cross[k]*width;
+          const side=Math.cos(angle)*head.scale.x*radius*flutter;
+          const lift=Math.sin(angle)*head.scale.y*radius*flutter;
+          const v=(i*steps+j)*columns+k;
+          pos.setXYZ(v,center.x+right.x*side,center.y+lift,center.z+right.z*side);
+          const crease=k===2,flow=.74+.26*Math.sin(t*13-u*24+i*1.4);
+          const ink=crease?(.030+(i%3)*.006)*flow:.006+(i%3)*.005;
+          rgba.setXYZW(v,ink*.77,ink*.71,ink,fade*(k===0?.52:crease?.98:.86));
+        }
+      }
+    }
+    pos.needsUpdate=true;rgba.needsUpdate=true;
+  };
+}
+
 function stDarkHoldDash(root,caster,live){
   const ease=stDarkEase,begin=.16,launch=begin+.50,covered=launch+.032,formed=launch+.105,arrival=formed+2;
   const rollStart=launch-.13,acceleration=.18,braking=.34;
@@ -497,25 +636,10 @@ function stDarkHoldDash(root,caster,live){
     return speed*(elapsed-acceleration*.5);
   };
   const heightSample=new THREE.Vector3(),heightAt=d=>pointAt(d,heightSample).y;
-  const wake=stDarkWake(root,distanceAt,pointAt,heightAt,launch,arrival,.81,.55);
+  const wake=stDarkWake(root,distanceAt,pointAt,heightAt,launch,arrival,.94,.76,2.1);
   const wakeShards=stDarkWakeShards(root,distanceAt,pointAt,heightAt,launch,arrival);
-  const ball=stDarkOrbCore(new THREE.ShaderMaterial({
-    toneMapped:false,
-    vertexShader:`varying vec3 viewNormal;void main(){
-      viewNormal=normalize(normalMatrix*normal);
-      gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);
-    }`,
-    fragmentShader:`varying vec3 viewNormal;void main(){
-      vec3 n=normalize(viewNormal);
-      float rim=pow(1.-max(0.,n.z),2.8);
-      float top=clamp(n.y*.63-n.x*.39,0.,1.);
-      vec3 ink=vec3(.004,.004,.008)+vec3(.038,.027,.054)*rim*top;
-      gl_FragColor=vec4(ink,1.);
-      #include <colorspace_fragment>
-    }`
-  }));
-  ball.name='Shift Dash shadow ball';root.add(ball);
-  const weave=stDarkOrbWeave(root,pointAt,heightAt);
+  const shadowHead=stDarkDashHead(root),mantle=stDarkDashMantle(root,pointAt);
+  const weave=stDarkOrbWeave(root,pointAt,heightAt,1.42);
   const shroud=stDarkShiftShroud(root);
   const cloakTrails=stDarkShiftCloakTrails(root);
   const scythe=stCreateScythePreview(root,{wrap:'C',manual:true,scale:1.43});
@@ -579,13 +703,10 @@ function stDarkHoldDash(root,caster,live){
     }
 
     const core=ease(.14,.96,form),travel=ease(rollStart,rollStart+acceleration,t)*(1-ease(arrival-.11,arrival,t));
-    ball.visible=core>.02;
-    ball.position.copy(at).addScaledVector(ahead.normalize(),.10*travel);
-    ball.position.y=at.y+1.07+.065*Math.sin(t*16)*(1-travel);
-    ball.rotation.y=yaw;
-    ball.scale.set((.68-.035*travel)*core,.72*core,(.70+.05*travel)*core);
+    const head=shadowHead(t,at,ahead,core,travel);
+    mantle(t,head,distance,ahead,core*ease(0,.86,core));
     const threads=.94*ease(covered,formed+.12,t)*(1-ease(-.02,.15,age));
-    weave(t,at,Math.max(0,distance-.42*travel),threads*(1-.26*core),morph,0,.26*travel,0);
+    weave(t,at,Math.max(0,distance-.30*travel),threads*(1-.16*core),morph,0,.10*travel,0);
     const cloakFlow=ease(launch-.007,formed+.060,t);
     const orbitAlpha=ease(begin+.13,begin+.23,t)*(1-ease(formed+.075,formed+.34,t));
     cloakTrails(t,at,yaw,morph,cloakFlow,.83*orbitAlpha);

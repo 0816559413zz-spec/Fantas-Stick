@@ -1,6 +1,121 @@
 {
- "next": 126,
+ "next": 134,
  "items": [
+  {
+   "id": 133,
+   "title": "Darkness Long Dash คืนหางริ้วเดิม",
+   "text": "คืนหางเส้นยาวแบบ #130 พร้อมเก็บหัวลูกเงาขนาดเล็กจาก #132",
+   "kind": "VFX",
+   "who": "Darkness",
+   "status": "wait",
+   "created": "2026-11-21",
+   "updated": "2026-11-21",
+   "imgs": [],
+   "links": [
+    "/shots/motion_darkness_long_dash_restored_tail_tdm.gif"
+   ]
+  },
+  {
+   "id": 132,
+   "title": "Darkness Long Dash ตัวเล็กลงและหางแยกริ้ว",
+   "text": "ย่อหัวลูกเงาราว 25% ให้หางปลิวแยกเป็นสี่ริ้วก่อนจาง",
+   "kind": "VFX",
+   "who": "Darkness",
+   "status": "wait",
+   "created": "2026-11-21",
+   "updated": "2026-11-21",
+   "imgs": [],
+   "links": [
+    "/shots/motion_darkness_long_dash_separate_ribbons_tdm.gif"
+   ]
+  },
+  {
+   "id": 131,
+   "title": "Darkness Long Dash ใช้ผิวเดียวจากหัวถึงหาง",
+   "text": "ริ้ว 16 เส้นไหลบนผิวโค้งชิ้นเดียวตลอดหัวและหาง ลดขอบและชั้นซ้อนตรงคอ",
+   "kind": "VFX",
+   "who": "Darkness",
+   "status": "wait",
+   "created": "2026-11-21",
+   "updated": "2026-11-21",
+   "imgs": [],
+   "links": [
+    "/shots/motion_darkness_long_dash_same_surface_tdm.gif"
+   ]
+  },
+  {
+   "id": 130,
+   "title": "Darkness Long Dash เพิ่มริ้วบนหัว",
+   "text": "เพิ่มเส้นแนบผิวจาก 10 เป็น 16 เส้นและให้ตรงกับริ้วหาง",
+   "kind": "VFX",
+   "who": "Darkness",
+   "status": "wait",
+   "created": "2026-11-21",
+   "updated": "2026-11-21",
+   "imgs": [],
+   "links": [
+    "/shots/motion_darkness_long_dash_more_head_lines_tdm.gif"
+   ]
+  },
+  {
+   "id": 129,
+   "title": "Darkness Long Dash เส้นเรียบไปกับผิว",
+   "text": "เส้นช่วงหัวอยู่บนผิวจริง ริ้วหางเริ่มที่ระดับผิวเดียวกันแล้วค่อยคลี่ออก",
+   "kind": "VFX",
+   "who": "Darkness",
+   "status": "wait",
+   "created": "2026-11-21",
+   "updated": "2026-11-21",
+   "imgs": [],
+   "links": [
+    "/shots/motion_darkness_long_dash_flush_lines_tdm.gif"
+   ]
+  },
+  {
+   "id": 128,
+   "title": "Darkness Long Dash ริ้วโค้งคลุมถึงหัว",
+   "text": "เส้นเงาค่อย ๆ โผล่จากปลายหัว โค้งแนบตามทรงและต่อกับริ้วหางโดยไม่มีจุดเริ่มแข็ง",
+   "kind": "VFX",
+   "who": "Darkness",
+   "status": "wait",
+   "created": "2026-11-21",
+   "updated": "2026-11-21",
+   "imgs": [],
+   "links": [
+    "/shots/motion_darkness_long_dash_wrapped_tip_tdm.gif"
+   ]
+  },
+  {
+   "id": 127,
+   "title": "Darkness Long Dash หางคลุมครึ่งหลัง",
+   "text": "ริ้วเงาซ้อนตั้งแต่กึ่งกลางลูกเงา ผิวครึ่งหลังละลายเข้าหางระหว่างพุ่งและเลี้ยว",
+   "kind": "VFX",
+   "who": "Darkness",
+   "status": "wait",
+   "created": "2026-11-21",
+   "updated": "2026-11-21",
+   "imgs": [],
+   "links": [
+    "/shots/motion_darkness_long_dash_merged_tail_tdm.gif"
+   ]
+  },
+  {
+   "id": 126,
+   "title": "Darkness ฮิตบ็อกซ์ BA รอยฟันพื้น และทิศ Dash",
+   "text": "BA โดนรอบตัวในรัศมี 25 หน่วย รอยกวาดค้างในโลก ริ้วปลายคมขยับและฟันลงมีสะเก็ดกระทบพื้น Dash ตาม WASD และรีเซ็ต BA ลูกเงามีหางยาวแนบลำตัว",
+   "kind": "Gameplay / VFX",
+   "who": "Darkness",
+   "status": "wait",
+   "created": "2026-11-21",
+   "updated": "2026-11-21",
+   "imgs": [],
+   "links": [
+    "/shots/motion_darkness_ba_world_arc_tdm.gif",
+    "/shots/motion_darkness_ba_ground_contact_tdm.gif",
+    "/shots/motion_darkness_wasd_quick_tdm.gif",
+    "/shots/motion_darkness_wasd_long_tdm.gif"
+   ]
+  },
   {
    "id": 125,
    "title": "Darkness BA หางด้ามจางเร็วขึ้น",
