@@ -329,7 +329,7 @@ function sgSync(v,P,me,now,dt){
   if(v.mode!=='siege'||!S||!(MAPS[MAPID]&&MAPS[MAPID].fcs)){if(SGV3.g)sgClearView();return;}
   SGPH=S.ph;SGTR=S.tr||0;
   if(!SGV3.g||SGV3.map!==MAPID){sgViewBuild();SGV3.map=MAPID;}
-  sgBarrier(S.ph,S.tr>0&&me&&me.tm===0?'atk':'');if(MAPID==='fcs'){fcsForestTick();fcsCastleTick();fcsPropsView(dt);}
+  sgBarrier(S.ph,S.tr>0&&me&&me.tm===0?'atk':'');if(MAPID==='fcs'){fcsForestTick();fcsCastleTick();}   // fcsPropsView runs in the render loop (all maps)
   SGV3.cores.forEach((c,i)=>{const n=i+1,dead=S.hp[i]<=0,act=n===S.ph,fut=n>S.ph;
     c.cr.visible=c.glow.visible=!dead;c.rub.visible=dead;c.ring.visible=act;
     c.cr.rotation.y+=dt*(act?1.2:0.3);c.cr.position.y=4.3+Math.sin(now/600+i)*0.25;

@@ -7,6 +7,7 @@ const MD = await import('/mapbuild/model.js');
 const r = await (await fetch('/api/mb?id=' + id)).json();
 if (!r.ok) throw new Error(r.err);
 __mb.setMap(MD.unpack(r.map));
+if (__mb.loadRooms) { await __mb.loadRooms(); __mb.syncAll(); }   // room prefabs (room-*.json)
 for (let i = 0; i < 200; i++) { await new Promise(r => setTimeout(r, 100)); const o = __mb.M.objs.filter(o => o.t.startsWith('kit:')); if (o.every(q => __mb.KIT.tplNow && __mb.KIT.tplNow.get(q.t.slice(4)))) break; }
 const ok = await __mb.exportGame();
 return { ok, stat: document.getElementById('stat').textContent, check: [...document.querySelectorAll('#chk li')].map(li => li.className + ': ' + li.textContent) };

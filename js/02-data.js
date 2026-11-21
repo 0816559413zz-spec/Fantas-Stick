@@ -175,6 +175,7 @@ function regFileMap(id,e,d){
   MAPS[id]={name:d.name||id,d:d.desc||'',W:d.W,H:d.H,obs,terr,fm:{file:e.file,v:e.v||0,sky:d.sky||'night',fog:d.fog||null,music:d.music||'',modes:d.modes||null,
     spawns:d.spawns||[],props:d.props,espawn:d.espawn||[],rings:d.rings||[],tasks:d.tasks||[],lights:d.lights||[],env:d.env||[],weather:d.weather||'',fx:d.fx||[],brk:d.brk||[],look:d.look||'',lt:d.lt||null}};   // look = ชื่อพรีเซ็ต Look (js/74) • lt = แสง/ฟ้าเฉพาะแมพ (js/28 buildFileMap: hemi/sun/sky)
   if(d.ceil)MAPS[id].ceil=d.ceil.map(q=>({x0:q.x0,y0:q.y0,x1:q.x1,y1:q.y1,h:q.h,zmax:q.zmax==null?Infinity:q.zmax}));   // room ceilings (fcsCeilAt)
+  roomsFromFile(MAPS[id],d,id);   // breakable room props + stone wall faces (js/02-fcs-rooms.js) — MAP-STANDARD round 3
   if(d.siege)sgFromFile(MAPS[id],d,id);   // Map Builder siege map (js/02-fcs.js) — MAP-STANDARD round 2
   const ri=RANDOM_MAPS.indexOf(id);
   if(d.random===0){if(ri>=0)RANDOM_MAPS.splice(ri,1);}else if(ri<0&&!MAP_OFF.has(id))RANDOM_MAPS.push(id);

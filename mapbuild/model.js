@@ -79,7 +79,7 @@ export function newMap(o = {}) {
   const W = o.W || 100, H = o.H || 70, nx = Math.round(W / C) + 1, ny = Math.round(H / C) + 1;
   return { v: 1, id: o.id || '', name: o.name || 'แผนที่ใหม่', desc: '', W, H, nx, ny, hg: new Float32Array(nx * ny), sf: new Uint8Array(nx * ny).fill(o.surf || 0),
     sky: 'day', fog: null, music: '', weather: '', fx: [], modes: ['coop', 'ffa', 'duel', 'tdm'], random: 0, autoProps: 1, skirt: 40,
-    walls: [], floors: [], objs: [], parts: [], seq: 1 };
+    walls: [], floors: [], objs: [], parts: [], rooms: [], seq: 1 };
 }
 const b64e = u8 => { let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s); };
 const b64d = s => { const b = atob(s), u = new Uint8Array(b.length); for (let i = 0; i < b.length; i++) u[i] = b.charCodeAt(i); return u; };
@@ -94,7 +94,7 @@ export function unpack(j) {
   const n = M.nx * M.ny, hb = b64d(j.hg), h = new Int16Array(hb.buffer, 0, hb.length >> 1);
   M.hg = new Float32Array(n); for (let i = 0; i < n && i < h.length; i++) M.hg[i] = h[i] / 100;
   const s = b64d(j.sf); M.sf = new Uint8Array(n); M.sf.set(s.subarray(0, n));
-  for (const k of ['walls', 'floors', 'objs', 'fx', 'parts']) if (!Array.isArray(M[k])) M[k] = [];
+  for (const k of ['walls', 'floors', 'objs', 'fx', 'parts', 'rooms']) if (!Array.isArray(M[k])) M[k] = [];
   return M;
 }
 export function resize(M, W, H) {   // keep the content centred
@@ -259,7 +259,7 @@ export function gameData(M, dim) {
   for (const w of M.walls) {
     const P = wallPath(w), xs = P.map(p => p[0]), zs = P.map(p => p[1]);
     if (w.sg) sg.bw.push({ k: w.sg, x: r1((Math.min(...xs) - w.th / 2) * PX), y: r1((Math.min(...zs) - w.th / 2) * PX), w: r1((Math.max(...xs) - Math.min(...xs) + w.th) * PX), d: r1((Math.max(...zs) - Math.min(...zs) + w.th) * PX), h: r2(w.h), id: w.id });
-    if (w.sys && !(w.sg && w.sys === 'fence')) for (let i = 1; i < P.length; i++) (sys[w.sys] = sys[w.sys] || []).push([r1(P[i - 1][0] * PX), r1(P[i - 1][1] * PX), r1(P[i][0] * PX), r1(P[i][1] * PX), r2(w.th), r2(w.h)]);
+    if (w.sys && !(w.sg && w.sys === 'fence') && !(w.sys === 'stonewall' && w.base != null)) for (let i = 1; i < P.length; i++) (sys[w.sys] = sys[w.sys] || []).push([r1(P[i - 1][0] * PX), r1(P[i - 1][1] * PX), r1(P[i][0] * PX), r1(P[i][1] * PX), r2(w.th), r2(w.h)]);
   }
   for (const f of M.floors) if (f.sys) (sys[f.sys] = sys[f.sys] || []).push(floorCorners(f).map(c => [r1(c[0] * PX), r1(c[1] * PX)]));
   sg.cores.sort((a, b) => a.n - b.n);
@@ -352,6 +352,30 @@ export function check(M, G) {
   }
   return out;
 }
+
+// ---------- room prefabs (MAP-STANDARD §1.4, round 3) ----------
+// A room = its own Map Builder map with id 'room-<name>' (flat ground at 0, its content in local coords 0..W, 0..H).
+// A map places instances M.rooms[] = {id, ref, x, z, rot} (x,z = room centre in the map, rot = multiple of 90°).
+// Heights inside the room are relative to its own ground → +ground height of the map at the instance centre.
+export const isRoomId = id => /^room-/.test(id || '');
+export function roomExpand(M, inst, R) {
+  const rot = Math.round((inst.rot || 0) / (Math.PI / 2)) * (Math.PI / 2), c = Math.cos(rot), s = Math.sin(rot), g0 = gh(M, inst.x, inst.z);
+  const P = (x, z) => { const lx = x - R.W / 2, lz = z - R.H / 2; return [+(inst.x + lx * c + lz * s).toFixed(3), +(inst.z - lx * s + lz * c).toFixed(3)]; };   // same as three rotation.y
+  const tag = (o, k) => Object.assign(o, { id: 'r' + inst.id + k + o.id, room: inst.id, rref: inst.ref });
+  const walls = R.walls.map(w => tag(Object.assign({}, w, { pts: w.pts.map(p => P(p[0], p[1])) }, w.base != null ? { base: +(w.base + g0).toFixed(2) } : {}), 'w'));
+  const floors = R.floors.map(f => { const [x, z] = P(f.x, f.z); return tag(Object.assign({}, f, { x, z, rot: (f.rot || 0) + rot, y: +(f.y + g0).toFixed(2) }, f.y2 != null ? { y2: +(f.y2 + g0).toFixed(2) } : {}), 'f'); });
+  const objs = R.objs.map(o => { const [x, z] = P(o.x, o.z); return tag(Object.assign({}, o, { x, z, rot: o.t === 'phase' || o.t === 'ceil' ? 0 : (o.rot || 0) + rot }, (o.t === 'phase' || o.t === 'ceil') && Math.abs(s) > 0.5 ? { sx: o.sz, sz: o.sx } : {}), 'o'); });
+  const parts = (R.parts || []).map(p => { const [x, z] = P(p.x, p.z); return tag(Object.assign({}, p, { x, z, rot: (p.rot || 0) + rot }, p.base != null ? { base: +(p.base + g0).toFixed(2) } : {}), 'p'); });
+  return { walls, floors, objs, parts };
+}
+// RM: Map ref → unpacked room map • → {walls, floors, objs, parts} of every instance (missing rooms skipped)
+export function flatRooms(M, RM) {
+  const out = { walls: [], floors: [], objs: [], parts: [] };
+  for (const inst of M.rooms || []) { const R = RM && RM.get(inst.ref); if (!R) continue; const X = roomExpand(M, inst, R); for (const k in out) out[k].push(...X[k]); }
+  return out;
+}
+// map + its expanded rooms as one plain map (for gameData / check / export)
+export function withRooms(M, RX) { return RX && (RX.walls.length || RX.floors.length || RX.objs.length || RX.parts.length) ? Object.assign({}, M, { walls: M.walls.concat(RX.walls), floors: M.floors.concat(RX.floors), objs: M.objs.concat(RX.objs), parts: (M.parts || []).concat(RX.parts) }) : M; }
 
 // ---------- castle parts (guides/MAP-BUILDER.md "ชิ้นส่วนปราสาท") ----------
 // M.parts[] = {id, k, x, z, rot, base (absolute bottom height, null = follows the ground), c, brk, + params (PART[k].p) + flags (PART[k].f)}

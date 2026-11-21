@@ -72,11 +72,26 @@ function roomProp(K,kind,u,v,o){
     if(z0){ob.bot=z0-0.3;}if(P.st)ob.st=1;K.obs.push(ob);}
   K.data.props.push({kind,u,v,a,L,z0,b:i,seed:o.seed!=null?o.seed:K.data.props.length});
 }
+// Map Builder file maps (MAP-STANDARD round 3): data.rprops + data.sys.stonewall → one pseudo room in map coords (K = identity),
+// so roomProp collision/BRK, fcsPropsBuild (look) and roomWallEnv (wall hit marks) work like on fcs. Called from regFileMap.
+function roomsFromFile(M,d,id){
+  const sw=(d.sys&&d.sys.stonewall)||[],rp=d.rprops||[];if(!sw.length&&!rp.length){M.rooms=null;return;}
+  const off=((M.fm&&M.fm.brk)||[]).length;M.brkX=[];
+  const r={id:'mb_'+id},K={r,C:FCS_C0,ox:0,oy:0,w:M.W,h:M.H,obs:M.obs,terr:M.terr,props:[],brkX:M.brkX,data:{walls:[],cols:[],floors:[],ceil:[],boxes:[],props:[]},X:u=>u,Y:v=>v,g0:0};
+  r.data=K.data;r.K=K;
+  for(const q of rp)if(RPK[q.k]){const n0=M.obs.length;roomProp(K,q.k,q.x,q.y,{a:q.a||0,L:q.L||0,z0:q.z0||0});const P=K.data.props[K.data.props.length-1];
+    P.b+=off;for(let i=n0;i<M.obs.length;i++)M.obs[i].b=P.b;}   // global BRK index (file brk groups come first)
+  for(const [x1,y1,x2,y2,th,h] of sw){const ax=Math.abs(y2-y1)<1;if(!ax&&Math.abs(x2-x1)>=1)continue;   // axis-aligned faces only (room walls)
+    K.data.walls.push(ax?{u1:Math.min(x1,x2),v1:y1,u2:Math.max(x1,x2),v2:y1,th:th*20,h,gaps:[]}:{u1:x1,v1:Math.min(y1,y2),u2:x1,v2:Math.max(y1,y2),th:th*20,h,gaps:[]});}
+  M.rooms=[r];
+}
+// room pieces of the current map: fcs code rooms or the file map pseudo room
+function roomsCur(){return MAPID==='fcs'?FCS_ROOMS:((MAPS[MAPID]&&MAPS[MAPID].rooms)||[]);}
 // skill hits on room walls (host, from damageEnv): no damage, just an event for debris fx + a scorch/crack mark on the face
 const RWH={t:0};
 function roomWallEnv(x,y,rad,h,el){
-  if(MAPID!=='fcs'||!FCS_ROOMS.length)return;const now=Date.now();if(now-RWH.t<70)return;h=h||0;
-  for(const r of FCS_ROOMS){const D=r.data,K=r.K;if(!D||x<K.ox-rad-60||y<K.oy-rad-60||x>K.ox+K.w+rad+60||y>K.oy+K.h+rad+60)continue;
+  const RL=roomsCur();if(!RL.length)return;const now=Date.now();if(now-RWH.t<70)return;h=h||0;
+  for(const r of RL){const D=r.data,K=r.K;if(!D||x<K.ox-rad-60||y<K.oy-rad-60||x>K.ox+K.w+rad+60||y>K.oy+K.h+rad+60)continue;
     for(const w of D.walls){const along=w.v1===w.v2,u=x-K.ox,v=y-K.oy,s=along?u:v,s0=Math.min(along?w.u1:w.v1,along?w.u2:w.v2),s1=Math.max(along?w.u1:w.v1,along?w.u2:w.v2);
       if(s<s0||s>s1||w.gaps.some(q=>s>q[0]&&s<q[1]&&h<(q[2]==null?99:q[2])))continue;
       const d=(along?v-w.v1:u-w.u1),ad=Math.abs(d)-w.th/2;if(ad>rad*0.7||h>w.h)continue;

@@ -106,39 +106,47 @@ for (const k of F.cores) obj({ t: 'core', x: m(k.x), z: m(k.y), n: k.n, s: +m(k.
 for (const [t, key] of [['sgA', 'A'], ['sgB', 'B']]) for (const n in F.sp[key]) { const s = F.sp[key][n]; obj({ t, x: m(s.x), z: m(s.y), ph: +n }); }
 F.phases.forEach((rs, i) => { for (const q of rs || []) obj({ t: 'phase', ph: i + 1, x: m((q.x1 + q.x2) / 2), z: m((q.y1 + q.y2) / 2), sx: m(q.x2 - q.x1), sz: m(q.y2 - q.y1) }); });
 
-// ---------- room pieces (js/02-room-*.js) ----------
+// ---------- room pieces (js/02-room-*.js) → room prefab maps maps/build/room-<id>.json + an instance in this map ----------
+// Room map = local metres (0..W, 0..H), flat ground 0, heights relative to the room's ground (K.g0). MAP-STANDARD §1.4
+const roomMaps = [];
 for (const r of ROOMS) {
   const K = r.K, D2 = r.data; if (!K || !D2) continue;
-  const X = u => m(K.ox + u), Z = v => m(K.oy + v), RS = { c: '#8a8478', m: 'stone', closed: 0, curve: 0, brk: 0, sys: 'stonewall', style: 'room-hall', room: r.id };
+  const RM = MD.newMap({ id: 'room-' + r.id, name: 'ห้อง: ' + (r.name || r.id), W: m(K.w), H: m(K.h), surf: 6 });
+  RM.desc = 'ห้องสำเร็จ (prefab) จาก js/02-room-' + r.id + '.js (tools/fcs-to-mb.mjs) • ประตู: ' + (r.doors || []).map(d => d.side + '@' + m(d.at) + 'm/' + m(d.w) + 'm/' + d.kind).join(', ');
+  RM.modes = []; RM.random = 0; RM.autoProps = 0; RM.style = 'room-hall'; RM.sky = 'day';
+  let rid = 1; const rn = () => rid++, ro = o => RM.objs.push(Object.assign({ id: rn(), y: 0, rot: 0 }, o));
+  const X = u => +m(u).toFixed(3), Z = v => +m(v).toFixed(3), RS = { c: '#8a8478', m: 'stone', closed: 0, curve: 0, brk: 0, sys: 'stonewall' };
   for (const w of D2.walls) {   // axis-aligned: split at door gaps, lintel pieces above gaps that have one
     const along = w.v1 === w.v2, a0 = Math.min(along ? w.u1 : w.v1, along ? w.u2 : w.v2), a1 = Math.max(along ? w.u1 : w.v1, along ? w.u2 : w.v2);
     const P = a => along ? [X(a), Z(w.v1)] : [X(w.u1), Z(a)], gaps = (w.gaps || []).slice().sort((p, q) => p[0] - q[0]);
     let s = a0;
     for (const [p, q, lh] of gaps) {
-      if (p > s) M.walls.push(Object.assign({ id: nid(), pts: [P(s), P(p)], th: m(w.th), h: w.h }, RS));
-      if (lh != null && lh < w.h) { const mid = P((p + q) / 2); M.walls.push(Object.assign({ id: nid(), pts: [P(p), P(q)], th: m(w.th), h: +(w.h - lh).toFixed(2), base: +(MD.gh(M, mid[0], mid[1]) + lh).toFixed(2) }, RS)); }
+      if (p > s) RM.walls.push(Object.assign({ id: rn(), pts: [P(s), P(p)], th: m(w.th), h: w.h }, RS));
+      if (lh != null && lh < w.h) RM.walls.push(Object.assign({ id: rn(), pts: [P(p), P(q)], th: m(w.th), h: +(w.h - lh).toFixed(2), base: lh }, RS));
       s = Math.max(s, q);
     }
-    if (a1 > s) M.walls.push(Object.assign({ id: nid(), pts: [P(s), P(a1)], th: m(w.th), h: w.h }, RS));
+    if (a1 > s) RM.walls.push(Object.assign({ id: rn(), pts: [P(s), P(a1)], th: m(w.th), h: w.h }, RS));
   }
-  for (const c of D2.cols) obj({ t: 'cyl', x: X(c.u), z: Z(c.v), sx: +(m(c.r) * 2).toFixed(2), sz: +(m(c.r) * 2).toFixed(2), y: c.bot || 0, sy: +Math.max(0.2, c.h - (c.bot || 0)).toFixed(2), c: '#7d7870', style: 'room-hall', room: r.id, tag: c.tag || '' });
-  for (const q of D2.ceil) { const o = { t: 'ceil', x: m((q.x0 + q.x1) / 2), z: m((q.y0 + q.y1) / 2), sx: m(q.x1 - q.x0), sz: m(q.y1 - q.y0), y: q.h, room: r.id }; if (q.zmax !== Infinity && q.zmax != null) o.zmax = q.zmax; obj(o); }
-  for (const p of D2.props) { const o = { t: 'rp_' + p.kind, x: X(p.u), z: Z(p.v), rot: -(p.a || 0), y: p.z0 || 0, room: r.id }; if (p.L) o.L = +m(p.L).toFixed(2); obj(o); }
-}
-// room walkable floors (terr.fl k:'room'): split each grid into straight pieces along x (gallery deck + end ramps)
-for (const f of T.fl) {
-  if (f.k !== 'room') continue;
-  const j = f.ny >> 1, top = i => f.top[j * f.nx + i], gnd = i => terrH(f.x0 + i * tc, f.y0 + j * tc), z0 = m(f.y0), z1 = m(f.y0 + (f.ny - 1) * tc);
-  let i0 = 0;
-  while (i0 < f.nx - 1) {
-    const sl = top(i0 + 1) - top(i0); let i1 = i0 + 1;
-    while (i1 < f.nx - 1 && Math.abs(top(i1 + 1) - top(i1) - sl) < 0.02) i1++;
-    if (Math.max(top(i0) - gnd(i0), top(i1) - gnd(i1)) > 0.1) {
-      const x0 = m(f.x0 + i0 * tc), x1 = m(f.x0 + i1 * tc);
-      M.floors.push({ id: nid(), x: (x0 + x1) / 2, z: (z0 + z1) / 2, w: z1 - z0, d: x1 - x0, rot: Math.PI / 2, y: +top(i0).toFixed(2), y2: +top(i1).toFixed(2), th: 0.6, c: '#7a5a3a', style: 'room-hall' });
+  for (const c of D2.cols) ro({ t: 'cyl', x: X(c.u), z: Z(c.v), sx: +(m(c.r) * 2).toFixed(2), sz: +(m(c.r) * 2).toFixed(2), y: c.bot || 0, sy: +Math.max(0.2, c.h - (c.bot || 0)).toFixed(2), c: '#7d7870', tag: c.tag || '' });
+  for (const q of D2.ceil) { const o = { t: 'ceil', x: X((q.x0 + q.x1) / 2 - K.ox), z: Z((q.y0 + q.y1) / 2 - K.oy), sx: m(q.x1 - q.x0), sz: m(q.y1 - q.y0), y: q.h }; if (q.zmax !== Infinity && q.zmax != null) o.zmax = q.zmax; ro(o); }
+  for (const p of D2.props) { const o = { t: 'rp_' + p.kind, x: X(p.u), z: Z(p.v), rot: -(p.a || 0), y: p.z0 || 0 }; if (p.L) o.L = +m(p.L).toFixed(2); ro(o); }
+  // walkable floors of this room (terr.fl k:'room' inside its rect): straight pieces along x (gallery deck + end ramps)
+  for (const f of T.fl) {
+    if (f.k !== 'room' || f.x0 < K.ox - 1 || f.x0 > K.ox + K.w || f.y0 < K.oy - 1 || f.y0 > K.oy + K.h) continue;
+    const j = f.ny >> 1, top = i => f.top[j * f.nx + i], gnd = i => terrH(f.x0 + i * tc, f.y0 + j * tc), z0 = Z(f.y0 - K.oy), z1 = Z(f.y0 + (f.ny - 1) * tc - K.oy);
+    let i0 = 0;
+    while (i0 < f.nx - 1) {
+      const sl = top(i0 + 1) - top(i0); let i1 = i0 + 1;
+      while (i1 < f.nx - 1 && Math.abs(top(i1 + 1) - top(i1) - sl) < 0.02) i1++;
+      if (Math.max(top(i0) - gnd(i0), top(i1) - gnd(i1)) > 0.1) {
+        const x0 = X(f.x0 + i0 * tc - K.ox), x1 = X(f.x0 + i1 * tc - K.ox);
+        RM.floors.push({ id: rn(), x: (x0 + x1) / 2, z: (z0 + z1) / 2, w: z1 - z0, d: x1 - x0, rot: Math.PI / 2, y: +(top(i0) - K.g0).toFixed(2), y2: +(top(i1) - K.g0).toFixed(2), th: 0.6, c: '#7a5a3a' });
+      }
+      i0 = i1;
     }
-    i0 = i1;
   }
+  RM.seq = rid; roomMaps.push(RM);
+  M.rooms.push({ id: nid(), ref: RM.id, x: +m(K.ox + K.w / 2).toFixed(3), z: +m(K.oy + K.h / 2).toFixed(3), rot: 0 });
 }
 
 // ---------- L bridge (deck + ramps as floors, parapet as raised walls, piers as boxes) ----------
@@ -162,4 +170,5 @@ if (B) {
 M.seq = id;
 fs.mkdirSync('maps/build', { recursive: true });
 fs.writeFileSync('maps/build/fcs-draft.json', JSON.stringify(MD.pack(M)));
-console.log(`fcs-draft: ${W}x${H} m, grid ${nx}x${ny}, walls ${M.walls.length}, floors ${M.floors.length}, objs ${M.objs.length}`);
+for (const R of roomMaps) fs.writeFileSync('maps/build/' + R.id + '.json', JSON.stringify(MD.pack(R)));
+console.log(`fcs-draft: ${W}x${H} m, grid ${nx}x${ny}, walls ${M.walls.length}, floors ${M.floors.length}, objs ${M.objs.length}, rooms ${roomMaps.map(R => R.id + ' (' + R.walls.length + ' walls, ' + R.floors.length + ' floors, ' + R.objs.length + ' objs)').join(', ')}`);

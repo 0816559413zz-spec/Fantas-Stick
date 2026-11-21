@@ -550,7 +550,8 @@ function buildFileMap(id){
     im.castShadow=im.receiveShadow=true;fb.add(im);
   }
   // ไฟประจำจุด (light_) → ใช้ชุดไฟรวมของเกม (เปิดจริงเฉพาะดวงที่ใกล้กล้อง)
-  if(MAPS[id].fcs)try{sgFileBuild(id);}catch(e){console.error('sgFileBuild',e);}   // Map Builder siege map: fences + spawn pads (js/28-fcs-build.js)
+  if(MAPS[id].fcs)try{sgFileBuild(id);}catch(e){console.error('sgFileBuild',e);}
+  if(MAPS[id].rooms)try{fcsPropsBuild();}catch(e){console.error('fcsPropsBuild',e);}   // breakable room props (js/28-fcs-props.js)   // Map Builder siege map: fences + spawn pads (js/28-fcs-build.js)
   fileMapFx(F.fx);
   W.userData.lights=(F.lights||[]).map(L=>({abs:1,x:tx(L.x),y:GY(L.x,L.y)+(L.h||2),z:tz(L.y),col:L.col||'#ffb060',int:L.int||2,dist:L.dist||14}));
   if(!F.file)return;

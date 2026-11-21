@@ -75,7 +75,7 @@ function frpBuild(q,R){
 function fcsPropsBuild(){
   FRP.mesh=null;FRP.lights=[];FRP.map=[];FRP.st=new Int8Array(0);FRP.dn=0;FRP.dl=[];FRP.mn=0;
   const geos=[],col=new THREE.Color(),rot=new THREE.Matrix4(),tr=new THREE.Matrix4();let maxB=0;
-  for(const r of FCS_ROOMS){const D=r.data,K=r.K;if(!D||!K)continue;
+  for(const r of roomsCur()){const D=r.data,K=r.K;if(!D||!K)continue;   // fcs rooms or a Map Builder map's props (roomsFromFile)
     for(const q of D.props){const R=mulberry(9001+q.b*131+(q.seed|0)),parts=frpBuild(q,R),g0=GY(K.X(q.u),K.Y(q.v))+(q.z0||0);
       rot.makeRotationY(-(q.a||0));tr.makeTranslation(tx(K.X(q.u)),g0,tz(K.Y(q.v)));const M=tr.clone().multiply(rot);
       for(const [g,cs,rn] of parts){const gg=(g.index?g.toNonIndexed():g);gg.applyMatrix4(M);for(const k of Object.keys(gg.attributes))if(k!=='position'&&k!=='normal')gg.deleteAttribute(k);
