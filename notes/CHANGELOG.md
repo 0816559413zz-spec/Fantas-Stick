@@ -1,5 +1,7 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
 
+- 2026-11-21 Breakable panels round B (Map Builder): tool ▦ แผ่นพัง (N) draws panel lines (one panel per segment, new group per line, closed loop = house), presets, inspector fields, door/window cut buttons, in-editor test-break showing what falls (same support rules as the game), checks for cell budget / dense panels / floating panels.
+
 - 2026-11-21 Breakable panels (round A, protocol v102): Map Builder `pn_wall` panels split into cells with HP per cell and three break modes (gone / holes + rubble pile / layer skin then through). Same-group panels hold each other up, cut-off cells fall. Smooth ray-marched holes with brick-stepped edges and visible thickness, plaster over brick shows bricks when the skin falls. Collision, bullets, aim, camera, rubble ground and snapshot `PN`. Test map `pnl-demo`. Guide: Destruction.md §13.
 
 - 2026-11-21 Darkness combo QA and Radiance release (protocol v101): marked Nightfall hands off the visible scythe to BA, Flow Nightfall returns camera control toward the target sooner and clears the Death Sentence scythe, and Umbral Veil blends the pulled scythe into BA while the veil persists. The release includes the latest Map Builder changes on main.

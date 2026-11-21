@@ -228,7 +228,7 @@ b.pc.map(q=>q.cb.toString(2))                     // ชิ้นที่พั
 
 ## 13. Breakable panels from Map Builder (แผ่นพัง) — 2026-11-21 (MAP-STANDARD round A)
 Generic system for building any breakable structure in Map Builder: a wall panel cut into cells, HP per cell. Parts that must not break are normal walls/boxes/decor.
-- Map Builder object `pn_wall` → `data.pnl[]` {x,y px, a, L, T px, z0, H m, cs cell size m, hp per cell, mat, m mode, thru, g group}. Editor UI for it = round B (now: place via file/script, see `tools/pnl-sample.mjs`).
+- Map Builder object `pn_wall` → `data.pnl[]` {x,y px, a, L, T px, z0, H m, cs cell size m, hp per cell, mat, m mode, thru, g group}. Editor: tool ▦ แผ่นพัง (N), door/window cut, in-editor test-break and checks — guides/MAP-BUILDER.md.
 - Modes `m`: **`g` gone** = one HP pool, whole panel shatters (glass, doors) • **`p` pile** = cells break into holes, rubble heap at the base • **`l` layer** = crack → outer skin falls off (still solid, inner layer shows) → through; `thru:0` = damage only, never a hole.
 - Materials `mat`: brick, plaster (skin over brick), stone, wood (burns), glass, metal — HP defaults `PNDEF.mat` in `js/12-pnl.js`.
 - Cell stages 0 ok / 1 crack (< 65 %) / 2 skin gone (layer < 40 %) / 3 broken. Hits splash 25 % to the 4 neighbours (organic holes). Element: blast ×1.5, ice ×0.7, glass ×1.5, fire sets wood burning (`PNDEF.burn`/`dps`).
@@ -237,4 +237,4 @@ Generic system for building any breakable structure in Map Builder: a wall panel
 - Net: snapshot `PN` (panels joined by `|`, 3 cells per char, delta per panel in `NETD_KEYS`) • events `{k:'pn',e:'h'|'b',i,c}` → `pnlFX`. Protocol v102.
 - View `js/28-pnl-build.js`: one box per panel; damage = DataTexture (1 texel per cell) sampled smooth + noise; brick/stone/wood sample at the brick/plank centre so holes step along whole bricks; holes/recesses are ray-marched through the thickness (rim + inner layer visible). Pattern coords are world-continuous so panels line up. Shadow depth material cuts the holes too.
 - Test map `pnl-demo` (`node tools/pnl-sample.mjs` → export). Debug: `WD.PNL`, `WD.pnlHit(panel,cell,dmg)`, `WD.damageEnv(...)`, `WD.pnlSnap/pnlParse`.
-- Not yet: floor/roof slabs, Map Builder palette/inspector/cell preview (round B), converting the old houses (round C), burning flames on panels, bots do not path around panels.
+- Not yet: floor/roof slabs, game-look preview inside the editor, converting the old houses (round C), burning flames on panels, bots do not path around panels.

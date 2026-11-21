@@ -20,7 +20,7 @@ const el = (tag, props, ...kids) => { const e = document.createElement(tag); if 
 let M = null, online = false, dirty = false, saveT = 0, list = [];
 let tool = 'select', sel = null;   // sel = {k:'wall'|'floor'|'obj', id, pt?}
 const opt = { smode: 'up', rad: 4, str: 4, soft: 1, hval: 2, surf: 0, wall: 0, wth: 1, wh: 3.5, wc: '#8a8478', wm: 'stone', wcurve: 0, wbrk: 0, floor: 0, fw: 4, fh: 3, fauto: 1, obj: 'spawn', cat: 'sys',
-  rrot: 1, rscale: 0, dens: 3, snap: 0, part: 'wall', pp: {}, csnap: 1, psnap: 1, prim: { c: '#8a8478', sx: 2, sy: 2, sz: 2 } };
+  rrot: 1, rscale: 0, dens: 3, snap: 0, part: 'wall', pp: {}, csnap: 1, psnap: 1, prim: { c: '#8a8478', sx: 2, sy: 2, sz: 2 }, pn: { pre: 0, mat: 'brick', m: 'p', thru: 1, sy: 3.6, T: 0.3, cs: 0.6, hp: 0, y: 0 } };
 const show = { steep: true, col: false, grid: false, sky: true, area: true };
 let undo = [], redo = [];
 let hover = null, stroke = null, drag = null, draft = null, ghostRot = 0, spaceDown = false;
@@ -263,7 +263,7 @@ function markerMesh(o) {
     if (/^spawn/.test(o.t)) { const a = add(new THREE.ConeGeometry(0.35, 0.9, 10), helpMat(c), 0, 0.3, 1.2); a.rotation.x = Math.PI / 2; } else add(new THREE.OctahedronGeometry(0.35), helpMat(c), 0, 2.3, 0); }
   else if (o.t === 'ring') { const r = add(new THREE.TorusGeometry(2, 0.12, 8, 28), helpMat(c), 0, 0, 0); }
   else if (o.t === 'light') { add(new THREE.SphereGeometry(0.28, 12, 8), helpMat(o.c || c), 0, 0, 0); const l = new THREE.PointLight(o.c || c, (o.int == null ? 2.4 : o.int) * 6, o.dist || 14, 1.6); g.add(l); }
-  else if (o.t === 'pn_wall') { const L = o.L || 4, H = o.sy || 3, T = o.T || 0.3, b = add(new THREE.BoxGeometry(L, H, T), mat({ brick: '#b0603c', plaster: '#cfc6b4', stone: '#9a9488', wood: '#8a6440', glass: '#bfe4f0', metal: '#7c8288' }[o.mat || 'brick'] || c), 0, H / 2, 0); b.castShadow = true;
+  else if (o.t === 'pn_wall') { const L = o.L || 4, H = o.sy || 3, T = o.T || 0.3, b = add(new THREE.BoxGeometry(L, H, T), mat(MD.PN_COL[o.mat || 'brick'] || c), 0, H / 2, 0); b.castShadow = true;
     const cs = o.cs || 1, nc = Math.max(1, Math.round(L / cs)), nr = Math.max(1, Math.round(H / cs)), pts = [];
     for (let i = 1; i < nc; i++) { const x = -L / 2 + i * L / nc; pts.push(x, 0, T / 2 + 0.01, x, H, T / 2 + 0.01); } for (let j = 1; j < nr; j++) { const y = j * H / nr; pts.push(-L / 2, y, T / 2 + 0.01, L / 2, y, T / 2 + 0.01); }
     const lg = new THREE.BufferGeometry(); lg.setAttribute('position', new THREE.Float32BufferAttribute(pts, 3)); g.add(new THREE.LineSegments(lg, new THREE.LineBasicMaterial({ color: '#2a2a2a', transparent: true, opacity: 0.45 }))); }
@@ -478,7 +478,7 @@ function protoObj(x, z) {
 }
 
 // ================= pointer =================
-function updHover(e) { setRay(e); hover = (tool === 'place' || tool === 'floor' || tool === 'wall' || tool === 'scatter' || tool === 'castle') ? surfHit() : groundHit(); if (hover && tool === 'scatter') hover.y = MD.gh(M, hover.x, hover.z); }
+function updHover(e) { setRay(e); hover = (tool === 'place' || tool === 'floor' || tool === 'wall' || tool === 'pnl' || tool === 'scatter' || tool === 'castle') ? surfHit() : groundHit(); if (hover && tool === 'scatter') hover.y = MD.gh(M, hover.x, hover.z); }
 function placeObj(h, extra) {
   if (opt.obj.startsWith('room:')) { const r = { id: nid(), ref: opt.obj.slice(5), x: snapV(h.x), z: snapV(h.z), rot: Math.round(ghostRot / (Math.PI / 2)) * (Math.PI / 2) };
     M.rooms.push(r); sel = { k: 'room', id: r.id }; loadRooms().then(() => { syncRooms(); renderSide(); }); return r; }
@@ -526,7 +526,7 @@ cv.addEventListener('pointerdown', e => {
     pushUndo('t'); stroke = { k: 'sculpt', inv, h0: hover.y, seed: Math.random() * 99 };
   } else if (tool === 'paint') { if (!hover) return; if (e.altKey) { opt.surf = M.sf[clamp(Math.round(hover.z / C), 0, M.ny - 1) * M.nx + clamp(Math.round(hover.x / C), 0, M.nx - 1)]; renderOpts(); return; } pushUndo('t'); stroke = { k: 'paint', inv }; paintSurf(inv); }
   else if (tool === 'scatter') { if (!hover) return; pushUndo('o'); stroke = { k: 'scatter', inv, acc: 1 }; }
-  else if (tool === 'wall') {
+  else if (tool === 'wall' || tool === 'pnl') {
     if (!hover) return;
     if (!draft) { pushUndo('o'); draft = { pts: [], base: hover.on === 'floor' ? +hover.y.toFixed(2) : null, h: opt.wh }; }
     const p = [snapV(hover.x), snapV(hover.z)], f = draft.pts[0];
@@ -545,6 +545,7 @@ cv.addEventListener('pointerdown', e => {
   }
   else if (tool === 'place') { if (!hover) return; pushUndo('o'); const o = placeObj(hover); if (opt.rrot && isVisual(o)) { ghostRot = Math.random() * 6.2832; } changed(); colDirty(); }
   else if (tool === 'select') {
+    if (PNT.on) { const h = pickItem(), it2 = h && h.ref && h.ref.k === 'obj' && find(h.ref); if (it2 && it2.t === 'pn_wall') { pnTestHit(it2, h.p, e.shiftKey); return; } }
     const fh = freeHandles();
     if (fh && !fdraft) { const r = cv.getBoundingClientRect(); let best = -1, bd = 12;
       fh.forEach((q, i) => { v3.set(q.x - M.W / 2, q.y, q.z - M.H / 2).project(camera); const d = Math.hypot((v3.x + 1) / 2 * r.width + r.left - e.clientX, (1 - v3.y) / 2 * r.height + r.top - e.clientY); if (d < bd) { bd = d; best = i; } });
@@ -580,7 +581,7 @@ cv.addEventListener('pointermove', e => {
   else if (drag && drag.k === 'pt') { setRay(e); const g = groundHit(); if (!g) return; if (!drag.moved) { pushUndo('o'); drag.moved = 1; } drag.w.pts[drag.i] = [clamp(snapV(g.x), 0, M.W), clamp(snapV(g.z), 0, M.H)]; syncWalls(); updSel(); }
   else if (drag && drag.k === 'ramp' && hover) drawLine([[drag.a.x, drag.a.z], [hover.x, hover.z]]);
   else if (drag && drag.k === 'floor' && hover) { const p = [[drag.a.x, drag.a.z], [hover.x, hover.z]]; drawLine(p); }
-  else if (tool === 'wall' && draft && hover) drawLine([...draft.pts, [hover.x, hover.z]]);
+  else if ((tool === 'wall' || tool === 'pnl') && draft && hover) drawLine([...draft.pts, [hover.x, hover.z]]);
   else if (tool === 'castle' && fdraft && hover) { const l = [...fdraft.pts, [snapC(hover.x), snapC(hover.z)]]; if (l.length > 2) l.push(l[0]); if (fdraft.base != null) l.y = fdraft.base; drawLine(l); }
   need();
 });
@@ -592,7 +593,7 @@ cv.addEventListener('pointerup', e => {
   drag = null; need();
 });
 cv.addEventListener('pointerleave', () => { hover = null; need(); });
-cv.addEventListener('dblclick', () => { if (tool === 'wall' && draft) { draft.pts.pop(); finishWall(false); } else if (tool === 'castle' && fdraft) { fdraft.pts.pop(); finishFree(); } });
+cv.addEventListener('dblclick', () => { if ((tool === 'wall' || tool === 'pnl') && draft) { draft.pts.pop(); finishWall(false); } else if (tool === 'castle' && fdraft) { fdraft.pts.pop(); finishFree(); } });
 cv.addEventListener('wheel', e => { e.preventDefault();
   if (e.shiftKey && (tool === 'sculpt' || tool === 'paint' || tool === 'scatter')) { opt.rad = clamp(+(opt.rad * (e.deltaY > 0 ? 0.9 : 1.11)).toFixed(1), 0.5, 40); renderOpts(); need(); return; }
   if (e.shiftKey && (tool === 'place' || tool === 'castle')) { ghostRot += (e.deltaY > 0 ? 1 : -1) * (tool === 'castle' ? Math.PI / 4 : Math.PI / 12); need(); return; }
@@ -600,6 +601,7 @@ cv.addEventListener('wheel', e => { e.preventDefault();
 
 function afterTerrain() { syncAll(); buildGrid(); changed(); }
 function finishWall(closed) {
+  if (tool === 'pnl') return finishPnl(closed);
   const d = draft; draft = null; drawLine(null);
   if (d && d.pts.length >= 2) { const P = MD.WALL_PRESET[opt.wall] || {}; const w = { id: nid(), pts: d.pts, th: opt.wth, h: opt.wh, c: opt.wc, m: opt.wm, closed: closed ? 1 : 0, curve: opt.wcurve ? 1 : 0, brk: opt.wbrk ? 1 : 0, base: d.base, n: P.n };
     M.walls.push(w); sel = { k: 'wall', id: w.id }; syncWalls(); changed(); colDirty(); renderSide(); }
@@ -673,14 +675,72 @@ function delSel() { if (!sel) return; const w = sel.k === 'wall' && find(sel), f
 function dupSel() { const it = find(sel); if (!it) return; pushUndo('o'); const c = JSON.parse(JSON.stringify(it)); c.id = nid(); if (c.pts && sel.k === 'wall') c.pts.forEach(p => { p[0] += 2; p[1] += 2; }); else { c.x += 2; c.z += 2; }
   M[KEYS[sel.k]].push(c); sel = { k: sel.k, id: c.id }; syncAll(); renderSide(); changed(); }
 function rotSel(a) { if (!find(sel)) return; if (sel.k === 'room') { editSel(it => { it.rot = +((((it.rot || 0) + Math.sign(a) * Math.PI / 2) % 6.2832 + 6.2832) % 6.2832).toFixed(4); }); return; } editSel(it => { if (it.pts && sel.k === 'wall') { const cx = it.pts.reduce((s, p) => s + p[0], 0) / it.pts.length, cz = it.pts.reduce((s, p) => s + p[1], 0) / it.pts.length, c = Math.cos(a), s = Math.sin(a); it.pts = it.pts.map(p => { const x = p[0] - cx, z = p[1] - cz; return [+(cx + x * c + z * s).toFixed(2), +(cz - x * s + z * c).toFixed(2)]; }); } else it.rot = +(((it.rot || 0) + a) % 6.2832).toFixed(4); }); }
-function scaleSel(k) { if (!find(sel)) return; editSel(it => { if (sel.k === 'obj') { if (isKit(it)) it.s = +((it.s || 1) * k).toFixed(2); else if (isPrim(it) || it.t === 'house' || it.t === 'phase' || it.t === 'ceil') { it.sx = +((it.sx || 1) * k).toFixed(2); it.sz = +((it.sz || 1) * k).toFixed(2); if (isPrim(it)) it.sy = +((it.sy || 1) * k).toFixed(2); } else if (it.t === 'core') it.s = +((it.s || 4) * k).toFixed(2); else if (MD.isRP(it.t) && it.L) it.L = +(it.L * k).toFixed(2); } else if (sel.k === 'part' && it.pts) { it.pts = it.pts.map(q => [+(q[0] * k).toFixed(3), +(q[1] * k).toFixed(3)]); it.h = +clamp(it.h * k, 0.5, 40).toFixed(2); } else if (sel.k === 'part') { const D = MD.PART[it.k], q = D.main, mn = D.p[q][1], mx = D.p[q][2]; it[q] = +clamp(it[q] * k, mn, mx).toFixed(2); } else if (sel.k === 'floor') { it.w = +(it.w * k).toFixed(2); it.d = +(it.d * k).toFixed(2); } else it.h = +(it.h * k).toFixed(2); }); }
+function scaleSel(k) { if (!find(sel)) return; editSel(it => { if (sel.k === 'obj') { if (isKit(it)) it.s = +((it.s || 1) * k).toFixed(2); else if (isPrim(it) || it.t === 'house' || it.t === 'phase' || it.t === 'ceil') { it.sx = +((it.sx || 1) * k).toFixed(2); it.sz = +((it.sz || 1) * k).toFixed(2); if (isPrim(it)) it.sy = +((it.sy || 1) * k).toFixed(2); } else if (it.t === 'core') it.s = +((it.s || 4) * k).toFixed(2); else if ((MD.isRP(it.t) || it.t === 'pn_wall') && it.L) it.L = +(it.L * k).toFixed(2); } else if (sel.k === 'part' && it.pts) { it.pts = it.pts.map(q => [+(q[0] * k).toFixed(3), +(q[1] * k).toFixed(3)]); it.h = +clamp(it.h * k, 0.5, 40).toFixed(2); } else if (sel.k === 'part') { const D = MD.PART[it.k], q = D.main, mn = D.p[q][1], mx = D.p[q][2]; it[q] = +clamp(it[q] * k, mn, mx).toFixed(2); } else if (sel.k === 'floor') { it.w = +(it.w * k).toFixed(2); it.d = +(it.d * k).toFixed(2); } else it.h = +(it.h * k).toFixed(2); }); }
 function liftSel(d) { if (!find(sel)) return; editSel(it => { if (sel.k === 'obj') it.y = +Math.max(0, (it.y || 0) + d).toFixed(2); else if (sel.k === 'part') it.base = +((it.base != null ? it.base : MD.gh(M, it.x, it.z)) + d).toFixed(2); else if (sel.k === 'floor') { it.y = +(it.y + d).toFixed(2); it.y2 = +((it.y2 == null ? it.y : it.y2) + d).toFixed(2); } else it.base = +((it.base != null ? it.base : MD.gh(M, it.pts[0][0], it.pts[0][1])) + d).toFixed(2); }); }
 
 // ================= UI: tools + options =================
+// breakable panels: each segment of the drawn line = one pn_wall, all in a new group (they hold each other up); joints overlap by half the thickness
+function finishPnl(closed) {
+  const d = draft; draft = null; drawLine(null); drawHandles();
+  if (!d || d.pts.length < 2) { undo.pop(); return; }
+  const P = d.pts.slice(); if (closed) P.push(P[0]);
+  const q = opt.pn, g = MD.pnNewGroup(M), T = q.T, add = [];
+  for (let i = 0; i + 1 < P.length; i++) { const [ax, az] = P[i], [bx, bz] = P[i + 1], dx = bx - ax, dz = bz - az, L = Math.hypot(dx, dz); if (L < 0.3) continue;
+    const eA = closed || i > 0 ? T / 2 : 0, eB = closed || i + 2 < P.length ? T / 2 : 0, ux = dx / L, uz = dz / L, x = (ax + bx) / 2 + ux * (eB - eA) / 2, z = (az + bz) / 2 + uz * (eB - eA) / 2;
+    const y = d.base != null ? Math.max(0, d.base - MD.gh(M, x, z)) : q.y;
+    const o = { id: nid(), t: 'pn_wall', x: +x.toFixed(3), z: +z.toFixed(3), y: +y.toFixed(2), rot: +Math.atan2(-dz, dx).toFixed(4), L: +(L + eA + eB).toFixed(3), sy: q.sy, T, cs: q.cs, mat: q.mat, m: q.m, g };
+    if (q.m === 'l' && !q.thru) o.thru = 0; if (q.hp > 0) o.hp = q.hp; add.push(o); }
+  if (!add.length) { undo.pop(); return; }
+  M.objs.push(...add); sel = { k: 'obj', id: add[add.length - 1].id }; syncObjs(); changed(); renderSide(); stat(add.length + ' แผ่น (กลุ่ม ' + g + ')', 'ok');
+}
+function pnCut(it, kind) {
+  const Q = MD.pnOpening(it, kind), i = M.objs.indexOf(it); if (!Q || i < 0) { stat('แผ่นนี้สั้น/เตี้ยเกินกว่าจะเจาะ', 'err'); return; }
+  pushUndo('o'); if (it.g == null || it.g === '') { const g = MD.pnNewGroup(M); Q.forEach(q => q.g = g); }
+  Q.forEach(q => q.id = nid()); M.objs.splice(i, 1, ...Q); sel = { k: 'obj', id: Q[0].id }; syncObjs(); changed(); renderSide(); pnTestDraw();
+}
+const selRow = (label, items, cur, on) => el('div', { class: 'row' }, el('label', null, label), el('select', { class: 'tl-sel', onchange: e => on(e.target.value), html: items.map(([v, n]) => `<option value="${v}"${v === cur ? ' selected' : ''}>${n}</option>`).join('') }));
+function pnFields(it) {
+  const d = MD.pnDims(it), mat = it.mat || 'brick', hp = it.hp || MD.PN_HP[mat];
+  return [fld('วัสดุ', it, 'mat', { type: 'select', items: MD.PN_MAT, get: () => mat }), fld('แบบพัง', it, 'm', { type: 'select', items: MD.PN_MODE, get: () => it.m || 'p', after: () => { resync(); renderSide(); } }),
+    it.m === 'l' ? fld('ทะลุได้ (ปิด = แค่เสียหาย)', it, 'thru', { type: 'checkbox', get: () => it.thru !== 0, set: v => { if (v) delete it.thru; else it.thru = 0; } }) : null,
+    fld('ยาว', it, 'L', { min: 0.2 }), fld('สูง', it, 'sy', { min: 0.2 }), fld('หนา', it, 'T', { min: 0.03, step: 0.05 }), fld('ขนาดช่อง', it, 'cs', { min: 0.2, step: 0.05 }),
+    fld('HP ต่อช่อง', it, 'hp', { nullable: 1, ph: 'ตามวัสดุ (' + MD.PN_HP[mat] + ')', min: 1, step: 5 }),
+    fld('กลุ่ม (ค้ำกัน)', it, 'g', { type: 'text', get: () => it.g == null ? '' : it.g, set: v => { if (v === '' || v == null) delete it.g; else it.g = v; } }),
+    el('p', { class: 'note' }, d.nc + ' × ' + d.nr + ' = ' + d.nc * d.nr + ' ช่อง (ช่องละ ' + (d.L / d.nc).toFixed(2) + ' × ' + (d.H / d.nr).toFixed(2) + ' ม.) • ' + ((it.m || 'p') === 'g' ? 'HP ทั้งแผ่น ' + hp : 'HP ' + hp + ' ต่อช่อง') + ' • แผ่นกลุ่มเดียวกันที่แตะกันค้ำกัน — ไม่มีอะไรค้ำถึงพื้น = ร่วง'),
+    el('div', { class: 'seg' }, el('button', { class: 'tl-btn', title: 'แบ่งแผ่นเป็นซ้าย/ขวา/คานบน เว้นช่องประตู 1.4 × 2.4 ม. กลางแผ่น', onclick: () => pnCut(it, 'door') }, 'เจาะประตู'),
+      el('button', { class: 'tl-btn', title: 'เว้นช่องหน้าต่าง 1.2 × 1.2 ม. สูงจากฐาน 1 ม.', onclick: () => pnCut(it, 'window') }, 'เจาะหน้าต่าง'),
+      el('button', { class: 'tl-btn' + (PNT.on ? ' on' : ''), title: 'คลิกบนแผ่นเพื่อทุบทีละช่อง ดูว่าส่วนไหนจะร่วงตาม', onclick: () => { PNT.on = !PNT.on; if (!PNT.on) PNT.br.clear(); pnTestDraw(); renderSide(); } }, PNT.on ? 'ปิดลองทุบ' : 'ลองทุบ')),
+    PNT.on ? el('p', { class: 'note' }, 'คลิกบนแผ่นพัง = ทุบ 1 ช่อง (Shift = 3×3) • แดง = ที่ทุบ • ส้ม = ส่วนที่จะร่วงตาม • ไม่บันทึกลงไฟล์') : null];
+}
+// editor test-break: broken cells per panel id (not saved) → red = broken, orange = would fall (same support rules as the game)
+const PNT = { on: false, br: new Map() }, gPnT = new THREE.Group();
+function pnTestDraw() {
+  if (!gPnT.parent && gObjs.parent) gObjs.parent.add(gPnT);
+  for (const c of [...gPnT.children]) { gPnT.remove(c); c.geometry.dispose(); }
+  if (!PNT.on || !PNT.br.size) { need(); return; }
+  const G = MD.pnGraph(M, M.objs), br = new Set(), list = [];
+  for (const p of G.ps) { const st = PNT.br.get(p.o.id); if (st) for (const k of st) if (k < p.nc * p.nr) br.add(p.base + k); }
+  const S = MD.pnSupported(G, br);
+  for (const p of G.ps) for (let k = 0; k < p.nc * p.nr; k++) { const id = p.base + k; if (S.dead[id]) list.push([p, k, '#e02a2a']); else if (!S.seen[id]) list.push([p, k, '#ff9a2a']); }
+  if (!list.length) { need(); return; }
+  const im = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshBasicMaterial({ transparent: true, opacity: 0.62, depthWrite: false }), list.length), m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), col = new THREE.Color(), Y = new THREE.Vector3(0, 1, 0);
+  list.forEach(([p, k, c], i) => { const cc = k % p.nc, r = (k / p.nc) | 0, cw = p.L / p.nc, ch = p.H / p.nr, u = -p.L / 2 + (cc + 0.5) * cw;
+    q.setFromAxisAngle(Y, p.o.rot || 0); m4.compose(new THREE.Vector3(p.o.x + u * p.c, p.zb + (r + 0.5) * ch, p.o.z + u * p.s), q, new THREE.Vector3(cw * 0.96, ch * 0.96, p.T + 0.08));
+    im.setMatrixAt(i, m4); im.setColorAt(i, col.set(c)); });
+  im.renderOrder = 6; gPnT.add(im); need();
+}
+function pnTestHit(o, pt, big) {
+  const d = MD.pnDims(o), r = o.rot || 0, mx = pt.x + M.W / 2, mz = pt.z + M.H / 2, u = (mx - o.x) * Math.cos(r) - (mz - o.z) * Math.sin(r), h = pt.y - MD.gh(M, o.x, o.z) - (o.y || 0);
+  const c0 = Math.floor((u + d.L / 2) / (d.L / d.nc)), r0 = Math.floor(h / (d.H / d.nr)); if (!PNT.br.has(o.id)) PNT.br.set(o.id, new Set());
+  const st = PNT.br.get(o.id), R = big ? 1 : 0;
+  for (let a = -R; a <= R; a++) for (let b = -R; b <= R; b++) { const cc = c0 + a, rr = r0 + b; if (cc >= 0 && cc < d.nc && rr >= 0 && rr < d.nr) st.add(rr * d.nc + cc); }
+  pnTestDraw();
+}
 const TOOLS = [['select', '⬚', 'เลือก', 'v', 'คลิกเลือก ลากเพื่อย้าย • Q/E หมุน • [ ] ย่อขยาย • PgUp/PgDn ยกขึ้นลง • Ctrl+D ทำซ้ำ • Del ลบ • กำแพง: ลากจุดขาว, Alt+คลิกเพิ่มจุด'],
   ['sculpt', '⛰', 'ปั้นพื้น', 'b', 'ลากเพื่อปั้น • Shift = กลับทิศ • Shift+ล้อ หรือ [ ] = ขนาดแปรง • สีแดง = ชันเกินเดินขึ้น'],
   ['paint', '🖌', 'พื้นผิว', 'p', 'ลากเพื่อระบายพื้นผิว • Shift = ลบกลับเป็นหญ้า • Alt+คลิก = ดูดชนิดพื้นผิว'],
   ['wall', '▤', 'กำแพง', 'w', 'คลิกทีละจุดเพื่อลากเส้นกำแพง • ดับเบิลคลิก/Enter = จบ • คลิกจุดแรก = ปิดวง • Backspace = ถอยจุด • Esc = ยกเลิก'],
+  ['pnl', '▦', 'แผ่นพัง', 'n', 'คลิกทีละจุดวางแนวผนังพังได้ (แต่ละช่วง = 1 แผ่น กลุ่มเดียวกัน) • คลิกจุดแรก = ปิดวง (บ้าน) • ดับเบิลคลิก/Enter = จบ • Backspace ถอยจุด • Esc ยกเลิก'],
   ['floor', '▭', 'ชั้นบน', 'l', 'ลากจากจุด A ไป B = สะพาน/ทางลาดเชื่อมสองจุด • คลิกเฉย ๆ = วางชานขนาดมาตรฐาน • เดินลอดข้างใต้ได้ถ้าสูง ≥ 2.8'],
   ['castle', '♜', 'ปราสาท', 'c', 'เลือกชิ้นส่วน แล้วคลิกวาง • Q/E หมุน 45° (Shift = 15°) หรือ Shift+ล้อ • ปลายชิ้นดูดติดกันเอง • คลิกบนยอดกำแพง/ทางเดิน = วางต่อที่ความสูงนั้น • ใช้เครื่องมือเลือกเพื่อย้าย/แก้ขนาด'],
   ['place', '◈', 'วางของ', 'o', 'คลิกเพื่อวาง • Q/E หรือ Shift+ล้อ = หมุน • วางบนพื้นชั้นบนได้'],
@@ -709,6 +769,11 @@ function renderOpts() {
     b.append(h3('แบบกำแพง'), pal(MD.WALL_PRESET, opt.wall, i => { const P = MD.WALL_PRESET[i]; Object.assign(opt, { wall: i, wth: P.th, wh: P.h, wc: P.c, wm: P.m }); renderOpts(); }, 'one'),
       h3('ค่า'), slider('หนา', 'wth', 0.3, 4, 0.1), slider('สูง', 'wh', 0.4, 14, 0.1), el('div', { class: 'row' }, el('label', null, 'สี'), el('input', { type: 'color', value: opt.wc, oninput: e => { opt.wc = e.target.value; } })),
       check('เส้นโค้ง (ลากผ่านจุด)', 'wcurve'), check('พังได้ (แตกเป็นช่วง)', 'wbrk'), el('p', { class: 'note' }, 'เริ่มคลิกบนพื้นชั้นบน = กำแพง/ราวตั้งบนชั้นนั้น (ไม่ขวางข้างล่าง) • กำแพงยิ่งบางยิ่งใช้ที่ชนเยอะ'));
+  } else if (tool === 'pnl') { const q = opt.pn;
+    b.append(h3('แบบแผ่น'), pal(MD.PN_PRESET.map(p => ({ n: p.n, c: MD.PN_COL[p.mat] })), q.pre, i => { const P = MD.PN_PRESET[i]; Object.assign(q, { pre: i, mat: P.mat, m: P.m, thru: P.thru === 0 ? 0 : 1, sy: P.sy, T: P.T, cs: P.cs, y: P.y || 0, hp: 0 }); renderOpts(); }, 'one'),
+      h3('ค่า'), selRow('วัสดุ', MD.PN_MAT, q.mat, v => { q.mat = v; renderOpts(); }), selRow('แบบพัง', MD.PN_MODE, q.m, v => { q.m = v; renderOpts(); }), ...(q.m === 'l' ? [check('ทะลุได้ (ปิด = แค่เสียหาย)', 'thru', q)] : []),
+      slider('สูง', 'sy', 0.3, 12, 0.1, q), slider('หนา', 'T', 0.05, 1.5, 0.05, q), slider('ขนาดช่อง', 'cs', 0.25, 3, 0.05, q), slider('ฐานยกจากพื้น', 'y', 0, 10, 0.1, q), slider('HP ต่อช่อง (0 = ตามวัสดุ)', 'hp', 0, 500, 5, q),
+      el('p', { class: 'note', html: 'แบบพัง: <b>เป็นรู</b> = แตกเป็นช่อง มีกองซาก • <b>ผิวหลุด</b> = ร้าว → ผิวนอกหลุด (ยังกันได้) → ทะลุ • <b>แตกทั้งแผ่น</b> = HP ก้อนเดียว (กระจก/ประตู)<br>HP ตามวัสดุ: ' + MD.PN_HP[q.mat] + ' ต่อช่อง • ส่วนที่ไม่อยากให้พังใช้กำแพง/กล่องปกติ<br>เลือกแผ่นแล้วกด "เจาะประตู/หน้าต่าง" หรือ "ลองทุบ" ที่แผงขวา' }));
   } else if (tool === 'castle') {
     const k = opt.part, D = MD.PART[k], pp = partPP(k), keys = Object.keys(MD.PART);
     b.append(h3('ชิ้นส่วนปราสาท'), pal(keys.map(q => ({ n: MD.PART[q].n, c: MD.PART[q].c })), keys.indexOf(k), i => { opt.part = keys[i]; renderOpts(); need(); }),
@@ -803,7 +868,7 @@ function renderSide() {
         isPrim(it) || it.t === 'house' ? fld(it.t === 'house' ? 'กว้าง (เท่า)' : 'กว้าง', it, 'sx', { min: 0.1 }) : null, isPrim(it) ? fld('สูง', it, 'sy', { min: 0.1 }) : null, isPrim(it) || it.t === 'house' ? fld(it.t === 'house' ? 'ลึก (เท่า)' : 'ลึก', it, 'sz', { min: 0.1 }) : null,
         isPrim(it) ? fld('สี', it, 'c', { type: 'color' }) : null, isPrim(it) ? fld('เรืองแสง', it, 'glow', { type: 'checkbox' }) : null,
         isPrim(it) || it.t === 'poly' ? fld('มองเห็น (ส่งภาพเข้าเกม)', it, 'vis', { type: 'checkbox', get: () => it.vis !== 0, set: v => { if (v) delete it.vis; else it.vis = 0; } }) : null,
-        ...(MD.isDeco(it.t) ? decoFields(it) : []),
+        ...(MD.isDeco(it.t) ? decoFields(it) : []), ...(it.t === 'pn_wall' ? pnFields(it) : []),
         it.t === 'core' ? fld('เลขแกน (ลำดับ)', it, 'n', { min: 1, step: 1 }) : null, it.t === 'core' ? fld('ขนาดแกน', it, 's', { min: 1 }) : null,
         it.t === 'sgA' || it.t === 'sgB' || it.t === 'phase' ? fld('เฟส', it, 'ph', { min: 1, step: 1 }) : null,
         it.t === 'phase' || it.t === 'ceil' ? fld('กว้าง (X)', it, 'sx', { min: 1 }) : null, it.t === 'phase' || it.t === 'ceil' ? fld('ยาว (Z)', it, 'sz', { min: 1 }) : null,
@@ -813,7 +878,7 @@ function renderSide() {
         d ? fld('ชนได้ (เดิน/ยิงไม่ผ่าน)', it, 'col', { type: 'checkbox', get: () => d.col }) : null,
         d && d.col ? fld('ขนาดที่ชน (เท่า)', it, 'cs', { get: () => it.cs == null ? d.cs : it.cs, min: 0.05 }) : null,
         d && d.col ? fld('พังได้', it, 'brk', { type: 'checkbox', get: () => it.brk == null ? d.brk : it.brk }) : null,
-        D && D.cat === 'game' && it.t !== 'pchest' ? fld('พังได้', it, 'brk', { type: 'checkbox', get: () => it.brk == null ? 1 : it.brk }) : null, btns)); }   // houses / crates / barrels / trees: off = unbreakable
+        D && D.cat === 'game' && it.t !== 'pchest' && it.t !== 'pn_wall' ? fld('พังได้', it, 'brk', { type: 'checkbox', get: () => it.brk == null ? 1 : it.brk }) : null, btns)); }   // houses / crates / barrels / trees: off = unbreakable
     else if (sel.k === 'wall') box.append(section('กำแพง' + (it.n ? ' — ' + it.n : ''), true, fld('หนา', it, 'th', { min: 0.2 }), fld('สูง', it, 'h', { min: 0.2 }), fld('สี', it, 'c', { type: 'color' }),
       fld('ฐาน (ความสูง)', it, 'base', { nullable: 1, ph: 'ตามพื้น' }), fld('เส้นโค้ง', it, 'curve', { type: 'checkbox' }), fld('ปิดวง', it, 'closed', { type: 'checkbox' }), fld('พังได้', it, 'brk', { type: 'checkbox' }),
       fld('วัสดุตอนพัง', it, 'm', { type: 'select', items: [['stone', 'หิน'], ['wood', 'ไม้'], ['ice', 'น้ำแข็ง']] }),
@@ -896,7 +961,7 @@ async function openMap(id) {
   try { const r = await (await fetch('/api/mb?id=' + id)).json(); if (!r.ok) throw new Error(r.err); setMap(MD.unpack(r.map)); localStorage.setItem('mb_last', id); stat('เปิดแล้ว', 'ok'); } catch (e) { stat('เปิดไม่ได้: ' + e.message, 'err'); }
 }
 function setMap(m) {
-  M = m; sel = null; undo = []; redo = []; draft = null; dirty = false; GD = null;
+  M = m; sel = null; undo = []; redo = []; draft = null; PNT.br.clear(); dirty = false; GD = null;
   buildTerrain(); applySky(); syncAll(); fit(); renderList(); renderSide(); renderOpts();
   if (M.rooms && M.rooms.length) loadRooms().then(() => { if (M === m) { syncAll(); renderSide(); } });   // room prefabs (room-*.json)
   for (const o of M.objs) if (isKit(o)) kitTpl(kitId(o)).then(() => { clearTimeout(setMap.t); setMap.t = setTimeout(() => { if (M === m) { syncObjs(); updSel(); colDirty(); } }, 60); });

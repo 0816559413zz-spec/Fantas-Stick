@@ -154,6 +154,58 @@ export function wallPath(w) {   // control points → polyline (curve = Catmull-
   }
   return P;
 }
+// ---- breakable panels (pn_wall → data.pnl, game js/12-pnl.js) ----
+export const PN_MAT = [['brick', 'อิฐ'], ['plaster', 'ปูนฉาบ (ข้างในอิฐ)'], ['stone', 'หิน'], ['wood', 'ไม้ (ติดไฟ)'], ['glass', 'กระจก'], ['metal', 'เหล็ก']];
+export const PN_HP = { brick: 60, plaster: 50, stone: 90, wood: 35, glass: 12, metal: 120 };   // mirror PNDEF.mat in js/12-pnl.js
+export const PN_COL = { brick: '#b0603c', plaster: '#cfc6b4', stone: '#9a9488', wood: '#8a6440', glass: '#bfe4f0', metal: '#7c8288' };
+export const PN_MODE = [['p', 'เป็นรู + กองซาก'], ['l', 'ผิวหลุดเป็นชั้น'], ['g', 'แตกทั้งแผ่น']];
+export const PN_PRESET = [
+  { n: 'ผนังอิฐ', mat: 'brick', m: 'p', sy: 3.6, T: 0.3, cs: 0.6 }, { n: 'ผนังปูนฉาบ', mat: 'plaster', m: 'l', sy: 3.6, T: 0.3, cs: 0.5 },
+  { n: 'กำแพงหิน (ไม่ทะลุ)', mat: 'stone', m: 'l', thru: 0, sy: 2.5, T: 0.5, cs: 0.8 }, { n: 'รั้ว / ผนังไม้', mat: 'wood', m: 'p', sy: 2.2, T: 0.15, cs: 0.5 },
+  { n: 'กระจก', mat: 'glass', m: 'g', sy: 1.8, T: 0.1, cs: 1, y: 1 }, { n: 'แผ่นเหล็ก', mat: 'metal', m: 'p', sy: 3, T: 0.1, cs: 1 }];
+export function pnDims(o) { const L = o.L || 4, H = o.sy || 3, cs = o.cs || 1; return { L, H, T: o.T || 0.3, cs, nc: Math.max(1, Math.round(L / cs)), nr: Math.max(1, Math.round(H / cs)) }; }
+const pnSegD = (ax, ay, bx, by, cx, cy, dx, dy) => { const pt = (px, py, x0, y0, x1, y1) => { const vx = x1 - x0, vy = y1 - y0, t = clamp(((px - x0) * vx + (py - y0) * vy) / (vx * vx + vy * vy || 1), 0, 1); return Math.hypot(px - x0 - vx * t, py - y0 - vy * t); };
+  return Math.min(pt(ax, ay, cx, cy, dx, dy), pt(bx, by, cx, cy, dx, dy), pt(cx, cy, ax, ay, bx, by), pt(dx, dy, ax, ay, bx, by)); };
+// support graph, same rules as the game (pnlLinks): 4-way inside a panel + touching cells of same-group panels; grounded = bottom row on the ground
+export function pnGraph(M, objs) {
+  const ps = objs.filter(o => o.t === 'pn_wall').map(o => { const d = pnDims(o), r = o.rot || 0; return Object.assign({ o, c: Math.cos(r), s: -Math.sin(r), zb: gh(M, o.x, o.z) + (o.y || 0) }, d); });
+  const at = (p, u) => [p.o.x + u * p.c, p.o.z + u * p.s], cu = (p, col) => -p.L / 2 + (col + 0.5) * p.L / p.nc;
+  let n = 0; for (const p of ps) { p.base = n; n += p.nc * p.nr; }
+  const nb = Array.from({ length: n }, () => []), gr = new Uint8Array(n), cells = [];
+  for (const p of ps) for (let k = 0; k < p.nc * p.nr; k++) { const col = k % p.nc, r = (k / p.nc) | 0, id = p.base + k; cells.push([p, k]);
+    if (col > 0) nb[id].push(id - 1); if (col < p.nc - 1) nb[id].push(id + 1); if (r > 0) nb[id].push(id - p.nc); if (r < p.nr - 1) nb[id].push(id + p.nc);
+    if (r === 0) { const [x, z] = at(p, cu(p, col)); if (p.zb - gh(M, x, z) < 0.35) gr[id] = 1; } }
+  const grp = o => o.g != null && o.g !== '' ? 'g' + o.g : null;
+  for (let a = 0; a < ps.length; a++) for (let b = a + 1; b < ps.length; b++) { const A = ps[a], B = ps[b]; if (!grp(A.o) || grp(A.o) !== grp(B.o)) continue;
+    if (Math.hypot(A.o.x - B.o.x, A.o.z - B.o.z) > (A.L + B.L + A.T + B.T) / 2 + 1.2) continue; const lim = (A.T + B.T) / 2 + 0.6;
+    for (let ca = 0; ca < A.nc; ca++) { const ua = cu(A, ca), wa = A.L / A.nc / 2, [a0x, a0z] = at(A, ua - wa), [a1x, a1z] = at(A, ua + wa);
+      for (let cb = 0; cb < B.nc; cb++) { const ub = cu(B, cb), wb = B.L / B.nc / 2, [b0x, b0z] = at(B, ub - wb), [b1x, b1z] = at(B, ub + wb); if (pnSegD(a0x, a0z, a1x, a1z, b0x, b0z, b1x, b1z) > lim) continue;
+        for (let ra = 0; ra < A.nr; ra++) { const z0 = A.zb + ra * A.H / A.nr, z1 = z0 + A.H / A.nr;
+          for (let rb = 0; rb < B.nr; rb++) { const w0 = B.zb + rb * B.H / B.nr, w1 = w0 + B.H / B.nr; if (Math.max(z0, w0) > Math.min(z1, w1) + 0.15) continue;
+            const i = A.base + ra * A.nc + ca, j = B.base + rb * B.nc + cb; nb[i].push(j); nb[j].push(i); } } } } }
+  return { ps, n, nb, gr, cells };
+}
+// cells still held up when `broken` (Set of global cell ids) are gone → {seen: 1 = stands, dead}. 'g' panels: one broken cell = whole panel gone
+export function pnSupported(G, broken) {
+  const dead = new Uint8Array(G.n); for (const i of broken) dead[i] = 1;
+  for (const p of G.ps) if ((p.o.m || 'p') === 'g') { let any = false; for (let k = 0; k < p.nc * p.nr; k++) if (dead[p.base + k]) any = true; if (any) for (let k = 0; k < p.nc * p.nr; k++) dead[p.base + k] = 1; }
+  const seen = new Uint8Array(G.n), q = [];
+  for (let i = 0; i < G.n; i++) if (G.gr[i] && !dead[i]) { seen[i] = 1; q.push(i); }
+  while (q.length) { const i = q.pop(); for (const j of G.nb[i]) if (!seen[j] && !dead[j]) { seen[j] = 1; q.push(j); } }
+  return { seen, dead };
+}
+// cut a door / window opening in the middle of a panel → replacement pieces (same group, no ids)
+export function pnOpening(o, kind) {
+  const { L, H } = pnDims(o), w = Math.min(kind === 'door' ? 1.4 : 1.2, L - 0.6), sill = kind === 'door' ? 0 : Math.min(1, H - 0.6), top = Math.min(H - 0.3, kind === 'door' ? 2.4 : sill + 1.2);
+  if (w < 0.6 || top <= sill + 0.3) return null;
+  const r = o.rot || 0, c = Math.cos(r), s = -Math.sin(r), y0 = o.y || 0, side = (L - w) / 2, out = [];
+  const piece = (u, len, y, h) => { const q = JSON.parse(JSON.stringify(o)); delete q.id; Object.assign(q, { x: +(o.x + u * c).toFixed(3), z: +(o.z + u * s).toFixed(3), L: +len.toFixed(3), y: +y.toFixed(3), sy: +h.toFixed(3) }); if (!q.y) q.y = 0; out.push(q); };
+  piece(-L / 2 + side / 2, side, y0, H); piece(L / 2 - side / 2, side, y0, H);
+  if (H - top > 0.05) piece(0, w, y0 + top, H - top);
+  if (sill > 0.05) piece(0, w, y0, sill);
+  return out;
+}
+export function pnNewGroup(M) { const used = new Set(M.objs.filter(o => o.t === 'pn_wall' && o.g != null).map(o => String(o.g))); let i = 1; while (used.has('G' + i)) i++; return 'G' + i; }
 export function pathLen(P) { let L = 0; for (let i = 1; i < P.length; i++) L += Math.hypot(P[i][0] - P[i - 1][0], P[i][1] - P[i - 1][1]); return L; }
 // polyline → points every `step` along it (corners kept). Returns [[x,z,dist]…]
 export function resample(P, step) {
@@ -340,6 +392,14 @@ export function check(M, G) {
   }
   for (const q of G.ceil) if (q.zmax == null && q.h < 20) add('warn', 'เพดานสูง ' + q.h + ' (ห้องมีหลังคาควร ≥ 20 ให้ตัวบินเล่นได้ • ใต้ชั้นลอยให้ใส่ "ใช้กับคนที่ต่ำกว่า")', [(q.x0 + q.x1) / 2 / PX, (q.y0 + q.y1) / 2 / PX]);
   if (c.lights > 12) add('warn', 'ไฟ ' + c.lights + ' ดวง (แนะนำไม่เกิน 12)');
+  { const P = M.objs.filter(o => o.t === 'pn_wall');
+    if (P.length) { const G2 = pnGraph(M, M.objs), S = pnSupported(G2, new Set()), lim = 12000, warnN = 6000;
+      if (G2.n > lim) add('err', 'แผ่นพัง ' + G2.n + ' ช่อง — มากเกิน (ไม่ควรเกิน ' + lim + '): ขยายขนาดช่อง');
+      else if (G2.n > warnN) add('warn', 'แผ่นพัง ' + G2.n + ' ช่อง — ค่อนข้างเยอะ (เน็ต/ที่ชน) ลองขยายขนาดช่องบางแผ่น');
+      else add('ok', 'แผ่นพัง ' + P.length + ' แผ่น / ' + G2.n + ' ช่อง');
+      for (const p of G2.ps) { if (p.nc * p.nr > 600) add('warn', 'แผ่นพังช่องเยอะ (' + p.nc + '×' + p.nr + ') — ขนาดช่องเล็กไป', [p.o.x, p.o.z]);
+        let fl = 0; for (let k = 0; k < p.nc * p.nr; k++) if (!S.seen[p.base + k]) fl++;
+        if (fl) add('warn', 'แผ่นพังลอย ' + fl + ' ช่อง (ไม่มีอะไรค้ำถึงพื้น — ตั้ง "กลุ่ม" ให้ตรงกับแผ่นข้างล่าง/ข้าง ๆ) จะร่วงเมื่อกลุ่มนี้โดนครั้งแรก', [p.o.x, p.o.z]); } } }
   const obsLim = Math.max(2000, Math.round(M.W * M.H * 0.035)), obsWarn = Math.round(obsLim * 0.6);   // budget scales with map area (spatial grid keeps cost local)
   if (c.obs > obsLim) add('err', 'ที่ชน ' + c.obs + ' วง — หนักเกิน (ไม่ควรเกิน ' + obsLim + '): ลดกำแพงบางยาว ๆ หรือทำให้หนาขึ้น');
   else if (c.obs > obsWarn) add('warn', 'ที่ชน ' + c.obs + ' วง (เริ่มหนัก — กำแพงยิ่งบางยิ่งใช้วงเยอะ)');
