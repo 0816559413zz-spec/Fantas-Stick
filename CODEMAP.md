@@ -85,8 +85,8 @@ GODL:231
 §233 ลูกสายฟ้าโดม: รวมไฟที่พื้น → ทะยานขึ้น → เล็ง → ฟาดไม้ยิงและค้างชี้เป…
 SDOME_POSE:234 stormDomeCost:235 stormDomeDash:236 stormDomeCharge:237 stormDomeTick:238 stormDomeFire:269 stormDomeSlam:276 updateStorm:281
 
-## js/09-darkness.js (414) —
-DARKP:2 DARK_V:6 DARK_BA:7 DARK_CHASE_FLOW:8 DARK_MAW:9 DARK_CHASE_T:10 darkFlow:11 darkAlive:12 darkReset:13 darkState:14 darkEvent:15 darkAim:18 darkTarget:25 darkCone:29 darkClearCooldown:36 darkMark:40 darkReveal:47 darkQueue:48 darkGainFlow:49 darkTick:54 darkShieldTick:89 darkShieldCrossAt:109 darkShieldCross:118 darkBeamStop:119 darkDash:128 darkBasic:153 DARK_MARK:174 darkWaveTick:191 DARK_CHASE:213 darkMoveWaltz:260 DARK_WALTZ:285 DARK_WARD:307 DARK_VEIL:322 DARK_ULT:329 darkUltBite:344 darkMoveChase:354 darkSnap:392 darkMarked:411
+## js/09-darkness.js (416) —
+DARKP:2 DARK_V:6 DARK_BA:7 DARK_CHASE_FLOW:8 DARK_MAW:9 DARK_VEIL_PULL_CLEAR:10 DARK_CHASE_T:11 darkFlow:12 darkAlive:13 darkReset:14 darkState:15 darkEvent:16 darkAim:19 darkTarget:26 darkCone:30 darkClearCooldown:37 darkMark:41 darkReveal:48 darkQueue:49 darkGainFlow:50 darkTick:55 darkShieldTick:90 darkShieldCrossAt:110 darkShieldCross:119 darkBeamStop:120 darkDash:129 darkBasic:154 DARK_MARK:175 darkWaveTick:192 DARK_CHASE:214 darkMoveWaltz:261 DARK_WALTZ:286 DARK_WARD:308 DARK_VEIL:323 DARK_ULT:331 darkUltBite:346 darkMoveChase:356 darkSnap:394 darkMarked:413
 
 ## js/09-earth.js (323) — 
 EARTH:9 ERV:12
@@ -767,8 +767,8 @@ BACKDROP:8
 §66 noise เล็ก ๆ (คงที่ต่อ seed)
 bdHash:67 bdNoise:68 bdFbm:69 bdEdge:71 bdRing:73 bdPaint:79 bdTree:82 buildBackdrop:89 bdTower:135 backdropHide:139
 
-## js/68-darkness-view.js (990) —
-nightWaltzStrip:2 nightWaltzBorder:80 stDarkVeilGround:118 darkFxMesh:195 darkShieldHud:201 drawDarknessHud:202 drawDarkHudBar:222 drawDarkShieldMeter:229 darknessMarkView:243 darkWaveViews:253 darkActiveViews:253 darkViewRoot:254 darkViewTemp:260 darknessClear:272 darkWorldAt:281 darkMarkWind:284 darkMarkLaunch:309 darkMarkContact:321 darkViewNow:334 darkFlowHud:334 darkSettleWeapon:335 darkBlendWeapon:345 darkTrailHistory:357 darkDashView:396 darknessCharacter:441 darknessEfx:626 stDarkShieldInk:870 stDarkVeilBlade:913 stWardDrainPool:950
+## js/68-darkness-view.js (998) —
+nightWaltzStrip:2 nightWaltzBorder:80 stDarkVeilGround:118 darkFxMesh:195 darkShieldHud:201 drawDarknessHud:202 drawDarkHudBar:222 drawDarkShieldMeter:229 darknessMarkView:243 darkWaveViews:253 darkActiveViews:253 darkViewRoot:254 darkViewTemp:260 darknessClear:272 darkWorldAt:281 darkMarkWind:284 darkMarkLaunch:309 darkMarkContact:321 darkViewNow:334 darkFlowHud:334 darkSettleWeapon:335 darkBlendWeapon:345 darkTrailHistory:357 darkDashView:396 darknessCharacter:441 darknessEfx:626 stDarkShieldInk:878 stDarkVeilBlade:921 stWardDrainPool:958
 
 ## js/68-light-view.js (1937) —
 LGV:7 LGSH:9 LGSH_L:11 _lgM4:14 _lgQ:14 _lgSV:14 _lgS:14 _lgC:14 _lgC2:14 lgGlowTex:15 lgNeon:17 lgEmpFx:25 lgWallBurn:44 lgShardSpawn:60 lgShardTick:64 lgBaCore:65 lgCrDim:108 lgEmpBeam:112 lgNeonCrystal:126 lgSanctumFloorTex:136 lgSanctumMoteTex:147 lgHoneyTex:162 lgShield:166 _lgShieldEuler:202 lightShieldEv:203 LGPOSE:206 _lgGlass:207 _lgCore:207 _lgGeo:207 _lgEdge:207 _lgEdgeM:207 lgCrystalMesh:209 lgState:217 _lgV:218 _lgW:218 lgWorld:219 LG_ULT_ASSET:222 LG_CRYSTAL_ASSET:222 LG_ULT_INTRO:223 LG_ULT_ARRIVAL_FX:223 LG_ULT_TIME:224 lgUltMaterials:225 lgSovereignFinishes:226 lgSovereignMaterials:227 lgSovereignFinish:288 lgSovereignCrystal:309 lgSkinSovereign:318 lgPoseSovereign:371 lgSovereignHeart:447 LG_SASH_X:473 LG_SASH_Z:473 lgSovereignRibbon:474 lgSovereignFlare:533 LG_PALM_TRAVEL:546 LG_PALM_SCORCH_LIFE:547 LG_PALM_SCORCH_SLOTS:547 lgPalmGateOffset:548 lgSovereignPalmWaves:550 lgPosePalmWaves:559 lgPoseBeamWaves:565 lgSovereignPalmGate:577 lgSovereignScorchTrail:587 lgPalmScorch:615 lgSovereignCrossSparks:651 lgSovereignGather:674 lgSovereignWingCurrent:707 lgSovereignChargeSeal:736 lgSovereignChestRecoil:753 lgSovereignSeal:763 lgSovereignArmSigils:779 lgBuildSovereign:810 lgReturnMark:887 lgUltVisual:901 lgWardVisual:1138 _lgBeamM:1154 lgBeamMat:1155 lgSovereignChestBeam:1158 lgSovereignPalmBeam:1195 _lgLinkM:1265 lgLinkMat:1266 lgUnitTube:1269 lgTube:1270 lgAim:1278 lightFX:1279 lgBaseObjects:1510 lgClearBase:1511 lgClear:1512 lightDropView:1519 lgAllyEmpEnd:1525
@@ -889,4 +889,4 @@ _dvPanel:95 _dvBtn:98 _dvBody:100 _dvHead:100 devUiApply:102 devFreeMouse:110 de
 §130 rows
 dvA:131 dvTg:132 dvB:133 dvCh:134 dvSl:135 dvSub:136 dvCol:137 devKeyOf:138 devRender:143 devPos:193 devUiAct:200
 
-(111 files, 32953 lines)
+(111 files, 32963 lines)

@@ -23,7 +23,7 @@ FXCODE.studio_darkness_veil=(_x,_y,_h,args,instance)=>{
   wand.name='Veil wand';root.add(wand);
   const poseCaster=stDarkVeilCaster(root,caster,wand);
   const scale=1.38,bladePose=stDarkVeilBlade(scale);
-  const pullAt=plant+.71,pullClear=pullAt+.18,pullDone=pullClear+.51;
+  const pullClear=DARK_VEIL_PULL_CLEAR,pullDone=pullClear+.51;
   const scythe=stCreateScythePreview(root,{wrap:'C',manual:true,scale,trailPose:bladePose});
   scythe.pivot.name='Veil scythe';
   const fadeScythe=stChaseScytheOpacity(scythe);
@@ -70,7 +70,7 @@ FXCODE.studio_darkness_veil=(_x,_y,_h,args,instance)=>{
 };
 
 function stDarkVeilCaster(root,caster,wand){
-  const ease=stDarkEase,release=.70,plant=.91,pullAt=plant+.71,pullClear=pullAt+.18,pullDone=pullClear+.51;
+  const ease=stDarkEase,release=.70,plant=.91,pullAt=plant+.71,pullClear=DARK_VEIL_PULL_CLEAR,pullDone=pullClear+.51;
   const hand=new THREE.Vector3(),wandAim=new THREE.Vector3(),up=new THREE.Vector3(0,1,0);
   const rightDown=new THREE.Vector3(0,-1,0),armAim=new THREE.Vector3(),parentRotation=new THREE.Quaternion();
   const wandRest=new THREE.Vector3(.15,-.94,.21),wandRaised=new THREE.Vector3(-.45,.88,-.17);

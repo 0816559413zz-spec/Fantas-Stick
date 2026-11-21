@@ -1,5 +1,7 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
 
+- 2026-11-21 Darkness combo QA and Radiance release (protocol v101): marked Nightfall hands off the visible scythe to BA, Flow Nightfall returns camera control toward the target sooner and clears the Death Sentence scythe, and Umbral Veil blends the pulled scythe into BA while the veil persists. The release includes the latest Map Builder changes on main.
+
 - 2026-11-21 Darkness: both BA directions trace a 120° arc centered on the player and their aim. The blade and hit cone share the same angle for regular and empowered swings.
 
 - 2026-11-21 Darkness: BA uses the Studio wand windup and flick in both swing directions. The shield's visual and blocking diameter is 100.

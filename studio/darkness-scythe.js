@@ -455,7 +455,7 @@ function stCreateScythePreview(root,args,lifetime){
     }
     if(standaloneBA){updCaster(T);updHits(T);}
     const swing=swingTime??T;
-    const baActive=BA&&(!(args.followUp||args.liveBA)||swing>=SW0);
+    const baActive=BA&&!(args.liveBA&&args.trailPose)&&(!(args.followUp||args.liveBA)||swing>=SW0);
     if(faceRibbon)faceRibbon.visible=false;
     if(baActive){const P=baPose(swing);if(P.w>0){Qi.setFromEuler(pivot.rotation);pivot.quaternion.copy(Qi).slerp(P.QB,P.w);pivot.position.lerp(P.pos,P.w);}
       const me=standaloneBA&&typeof PM3!=='undefined'&&PM3.get(NET.myId);if(me&&me.b){me.b.userData.scyY??=me.b.rotation.y;me.b.rotation.y=me.b.userData.scyY+P.tw;}   // ตัวบิดตามแรงเหวี่ยง

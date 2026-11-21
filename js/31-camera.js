@@ -175,7 +175,7 @@ function updateCamera(me,dt){
   const chase=me.id===NET.myId&&me.al?me.dk?.[11]:null;
   if(chase){
     const [x,y,t,flow]=chase;
-    if(t>(flow?DARK_CHASE_FLOW.hit-.045:.67))yaw=lerpAng(yaw,Math.atan2(y-me.y,x-me.x),1-Math.exp(-12*dt));
+    if(t>(flow?DARK_CHASE_FLOW.hit-.045:.67))yaw=lerpAng(yaw,Math.atan2(y-me.y,x-me.x),1-Math.exp(-(flow?20:12)*dt));
   }
   const fx=Math.cos(yaw),fz=Math.sin(yaw),rx=-fz,rz=fx;
   const target=cameraFrame(me),key=builtKey+'|'+me.id,ground=GY(me.x,me.y)+(me.z||0),cut=!CAM_TRACK.has||CAM_TRACK.key!==key;

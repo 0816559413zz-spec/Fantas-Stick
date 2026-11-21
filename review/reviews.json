@@ -1,6 +1,23 @@
 {
- "next": 120,
+ "next": 121,
  "items": [
+  {
+   "id": 120,
+   "title": "Darkness เทสต์คอมโบ Team PvP",
+   "text": "Quick Dash ต่อ BA สองฝั่ง, Death Sentence ต่อ Nightfall แบบติดตราและ Flow, Umbral Veil ถอนเคียวแล้วฟันต่อขณะวงยังอยู่",
+   "kind": "Animation / Gameplay",
+   "who": "Darkness",
+   "status": "wait",
+   "created": "2026-11-21",
+   "updated": "2026-11-21",
+   "imgs": [],
+   "links": [
+    "/shots/motion_darkness_combo_dash_ba.gif",
+    "/shots/motion_darkness_combo_marked_nightfall.gif",
+    "/shots/motion_darkness_combo_flow_nightfall.gif",
+    "/shots/motion_darkness_combo_veil_ba.gif"
+   ]
+  },
   {
    "id": 119,
    "title": "Darkness BA กวาดตรงกลาง 120°",

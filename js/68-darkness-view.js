@@ -706,6 +706,8 @@ function darknessEfx(ev){
     root.rotation.y=Math.PI/2-a;
     const update=stDarkVeilGround(root,ev.radius*S3),life=.91+ev.duration+.36;
     const pose=o&&stDarkVeilCaster(root,o);
+    const sequence={at:darkViewNow||performance.now(),world:root.position.clone(),a};
+    if(o)o.darkVeilCast=sequence;
     const splash=stDarkMatter(root,'Veil ground flecks',[
       {at:.91,span:.10,count:44,spread:1.6,lift:.65,height:.10},
       {at:1.07,span:.20,count:28,spread:2.35,lift:.34,height:.08},
@@ -715,9 +717,8 @@ function darknessEfx(ev){
     darkViewTemp(root,life,clock=>{
       const t=clock-.91,opacity=stDarkEase(0,.10,t)*(1-stDarkEase(ev.duration,ev.duration+.36,t));
       update(t,stDarkEase(0,.37,t),opacity);splash(clock);
-      if(o&&!o.darkDown&&clock<2.32)pose(clock);
+      if(o?.darkVeilCast===sequence&&!o.darkDown&&clock<2.32)pose(clock);
     });
-    if(o)o.darkVeilCast={at:darkViewNow||performance.now(),world:root.position.clone(),a};
     return true;
   }
   if(z==='darkmarkwind'){darkMarkWind(ev,o);return true;}
@@ -739,11 +740,14 @@ function darknessEfx(ev){
       const now=darkViewNow||performance.now();
       const wind=ST_DARK_LIVE_BA.wind/ST_DARK_LIVE_BA.rate;
       const chase=o.darkChaseFx;
-      if(chase?.unmarked){
+      if(chase){
         darkSettleWeapon(o,chase.blade(),wind);
         chase.root.visible=false;
         o.darkChaseFx=null;
+        o.b.visible=true;
+        if(!chase.unmarked)o.darkTint?.(0,1);
       }else darkSettleWeapon(o,o.darkWeapon,wind);
+      o.darkVeilCast=null;
       o.darkSwingAt=now;o.darkBaEmpowered=ev.empowered;o.darkBaPitch=ev.pitch;o.darkBaYaw=ev.a||0;o.darkBaSide=ev.side;
       const dash=o.darkDashFx;
       if(dash&&!dash.spent&&!dash.cancelled){
@@ -800,6 +804,10 @@ function darknessEfx(ev){
   }
   if(z==='darkchaseflow'){
     if(!o)return true;
+    if(o.darkMarkCast){
+      o.darkMarkCast.live.scythe=false;
+      if(o.darkMarkCast.wave.blade)o.darkMarkCast.wave.blade.visible=false;
+    }
     const root=darkViewRoot(ev,'Nightfall Flow dash');
     const view={at:darkViewNow||performance.now(),a,root};
     o.darkFlowStrike=view;
@@ -924,7 +932,7 @@ function stDarkVeilBlade(scale){
   const drawBack=new THREE.QuadraticBezierCurve3(idleTip,new THREE.Vector3(-1.70,2.65,-2.22),drawPoint);
   const drop=new THREE.CubicBezierCurve3(drawPoint,new THREE.Vector3(-1.87,3.12,-1.61),
     new THREE.Vector3(-.25,.85,-.22),plantedAt);
-  const pullAt=plant+.71,pullClear=pullAt+.18,pullDone=pullClear+.51;
+  const pullAt=plant+.71,pullClear=DARK_VEIL_PULL_CLEAR,pullDone=pullClear+.51;
   const buriedTip=plantedAt.clone().add(new THREE.Vector3(0,-.28,0));
   const releasedTip=new THREE.Vector3(.03,.47,-.04);
   const liftAway=new THREE.CubicBezierCurve3(releasedTip,new THREE.Vector3(.08,1.38,-.14),

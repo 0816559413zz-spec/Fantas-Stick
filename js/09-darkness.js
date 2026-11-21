@@ -7,6 +7,7 @@ const DARK_V={mark:8,markPrep:.58,waltzForm:.73,flow:6,dashCd:8,shieldTime:3,shi
 const DARK_BA={range:175,powerRange:210,arc:120};
 const DARK_CHASE_FLOW={wind:.095,hit:.255,exit:.335,end:.72,damage:20};
 const DARK_MAW={release:.73,walkAgain:1.69,bite:1.8,cameraEnd:2.48};
+const DARK_VEIL_PULL_CLEAR=1.8;
 const DARK_CHASE_T={launch:.25,arrival:.80,reappear:1.72,wandDown:1.955,land:2.17,end:2.29,hits:[.89,1.245,2.127]};
 const darkFlow=p=>p.dark?.flow>G.time;
 const darkAlive=t=>!t.dead&&t.alive!==false&&!t.downed;
@@ -151,7 +152,7 @@ function darkDash(p,inp,pr,dt,setCd){
   return true;
 }
 function darkBasic(p,inp,dt,setCd){
-  if(!inp.fire||p.cd.basic>0||p.sil>0||p.dark?.shieldStart!=null)return;
+  if(!inp.fire||p.cd.basic>0||p.sil>0||p.dark?.shieldStart!=null||p.dark?.veilPullUntil>G.time)return;
   const d=darkState(p),empowered=d.empower>G.time;
   const side=d.baSide??-1;
   d.baSide=-side;
@@ -323,6 +324,7 @@ const DARK_VEIL=defSpell(DARKP,{id:'darkveil',n:'Umbral Veil',ic:'◌',role:'sup
   v:{r:105,duration:4},d:'สร้างวงเงาที่ซ่อนเพื่อนร่วมทีม',
   cast(p,S){
     const {x,y,z}=p;
+    darkState(p).veilPullUntil=G.time+DARK_VEIL_PULL_CLEAR;
     darkEvent(p,'darkveil',{radius:S.v.r,duration:S.v.duration});
     darkQueue(p,.91,()=>{darkState(p).veil={x,y,z,r:S.v.r,end:G.time+S.v.duration};});
   }});
