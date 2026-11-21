@@ -1,5 +1,7 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
 
+- 2026-11-21 Map Builder Unity-style UI in English: toolbar with Hand/Move/Rotate/Scale (Q/W/E/R) and a centred Play button, Hierarchy (tree of walls, upper floors, breakable panel groups, objects by category, castle pieces, rooms; search, click to select, double-click to frame) and Tool Settings on the left, Scene with a view toolbar and a floating tool strip, Inspector on the right. All UI text and asset library names are English. Wall tool key W → K, item rotate Q/E → , and . ; right-drag + WASD flies the camera.
+
 - 2026-11-21 Map Builder gizmo: the selected item shows drag handles — move arrows (green = height), a rotate ring and size boxes along the item's own axes (panel length/height/thickness, prim sizes, floor width/length, wall spread/height, kit/castle uniform). Bar at the top right of the view or keys 1/2/3, 0 hides. One undo step per drag.
 
 - 2026-11-21 Old breakable-house system removed (protocol v104): BLDG chunks, BD snapshot, house view/debris models, house glb + Blender scripts, tune keys bld.house.* (now pnl.<material>.hp; previous wall/roof values carried over). Callers (ice/water rays, bot nav, camera inside houses, cloth, grass, dev destroy tool) use breakable panels instead.

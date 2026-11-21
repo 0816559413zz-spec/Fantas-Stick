@@ -3,87 +3,87 @@
 // Units: 1 unit = 1 m in the 3D world = 20 game px. Map coords: x east (0..W), z south (0..H), y up. Game px: X = x*20, Y = z*20.
 // Format + rules: guides/MAP-BUILDER.md
 
-export const C = 0.5, PX = 20, NONE = -32768;   // height grid spacing (units) — the game's collision grid uses the same 0.5
+export const C = 0.5, PX = 20, NONE = -32768;   // height grid spacing (units) — the game’s collision grid uses the same 0.5
 export const HMIN = -8, HMAX = 40;
 export const TSLOPE = 1.6, TSTEP = 1.1, HEADROOM = 2.8, PR = 0.9;   // game rules (js/05-terrain.js, guides/MAP-DESIGN.md §4) — keep in sync
 
-// surfaces: painted per grid point. env = gameplay surface kind written to the game's "env" masks (MAP-DESIGN §8)
+// surfaces: painted per grid point. env = gameplay surface kind written to the game’s "env" masks (MAP-DESIGN §8)
 export const SURF = [
-  { k: 'grass', n: 'หญ้า', c: '#4f8a38' }, { k: 'grass2', n: 'หญ้าเข้ม', c: '#35642c' }, { k: 'dry', n: 'หญ้าแห้ง', c: '#8f8d48' },
-  { k: 'dirt', n: 'ดิน', c: '#7a5c3c' }, { k: 'path', n: 'ทางดินอัด', c: '#a08a62' }, { k: 'rock', n: 'หิน/กรวด', c: '#77736c' },
-  { k: 'pave', n: 'พื้นหินปู', c: '#9c978e' }, { k: 'dark', n: 'หินเข้ม', c: '#4a4a52' }, { k: 'sand', n: 'ทราย', c: '#cdb97c' },
-  { k: 'snow', n: 'หิมะ', c: '#e4eaf0' }, { k: 'wood', n: 'พื้นไม้', c: '#8a6238' }, { k: 'ash', n: 'เถ้า/ไหม้', c: '#2f2c2a' },
-  { k: 'mud', n: 'โคลน (ช้า)', c: '#57452f', env: 'mud' }, { k: 'water', n: 'น้ำตื้น', c: '#3f7fa8', env: 'water' },
-  { k: 'ice', n: 'น้ำแข็ง (ลื่น)', c: '#a9d4e8', env: 'ice' }, { k: 'lava', n: 'ลาวา', c: '#d8521e', env: 'lava' },
+  { k: 'grass', n: 'Grass', c: '#4f8a38' }, { k: 'grass2', n: 'Dark Grass', c: '#35642c' }, { k: 'dry', n: 'Dry Grass', c: '#8f8d48' },
+  { k: 'dirt', n: 'Dirt', c: '#7a5c3c' }, { k: 'path', n: 'Packed Path', c: '#a08a62' }, { k: 'rock', n: 'Rock/Gravel', c: '#77736c' },
+  { k: 'pave', n: 'Paved Stone', c: '#9c978e' }, { k: 'dark', n: 'Dark Rock', c: '#4a4a52' }, { k: 'sand', n: 'Sand', c: '#cdb97c' },
+  { k: 'snow', n: 'Snow', c: '#e4eaf0' }, { k: 'wood', n: 'Wood Floor', c: '#8a6238' }, { k: 'ash', n: 'Ash/Burnt', c: '#2f2c2a' },
+  { k: 'mud', n: 'Mud (slow)', c: '#57452f', env: 'mud' }, { k: 'water', n: 'Shallow Water', c: '#3f7fa8', env: 'water' },
+  { k: 'ice', n: 'Ice (slippery)', c: '#a9d4e8', env: 'ice' }, { k: 'lava', n: 'Lava', c: '#d8521e', env: 'lava' },
   // เพิ่มท้ายตาราง (ห้ามแทรกกลาง — ดัชนีถูกเก็บในไฟล์แผนที่) • โทนจางสำหรับป่าหมอก (แมพ gorge)
-  { k: 'moss', n: 'ตะไคร่/มอส', c: '#575837' }, { k: 'litter', n: 'ใบไม้แห้ง/ดินป่า', c: '#5d4a34' }, { k: 'gravel', n: 'กรวดหิน', c: '#7a7569' }, { k: 'duff', n: 'ใบสนทับถม', c: '#4b4332' }, { k: 'trail', n: 'ทางเดินป่า (ดินคล้ำ)', c: '#6f5b44' },
+  { k: 'moss', n: 'Moss', c: '#575837' }, { k: 'litter', n: 'Leaf Litter/Forest Soil', c: '#5d4a34' }, { k: 'gravel', n: 'Pebbles', c: '#7a7569' }, { k: 'duff', n: 'Pine Needles', c: '#4b4332' }, { k: 'trail', n: 'Forest Path (dark dirt)', c: '#6f5b44' },
 ];
 export const WALL_PRESET = [
-  { n: 'กำแพงหิน', th: 1, h: 3.5, c: '#8a8478', m: 'stone' }, { n: 'กำแพงปราสาท', th: 2, h: 6, c: '#77736c', m: 'stone' },
-  { n: 'กำแพงเตี้ย/ที่กำบัง', th: 0.8, h: 1.2, c: '#8a8478', m: 'stone' }, { n: 'กำแพงอิฐ', th: 0.7, h: 3.2, c: '#8c5a48', m: 'stone' },
-  { n: 'ผนังไม้', th: 0.5, h: 3, c: '#7a5a3a', m: 'wood' }, { n: 'รั้วไม้', th: 0.4, h: 1.1, c: '#8a6a44', m: 'wood' },
-  { n: 'พุ่มไม้ตัดแต่ง', th: 1.2, h: 1.8, c: '#3f6a34', m: 'wood' }, { n: 'กำแพงน้ำแข็ง', th: 1, h: 3, c: '#bfe0ee', m: 'ice' },
+  { n: 'Stone Wall', th: 1, h: 3.5, c: '#8a8478', m: 'stone' }, { n: 'Castle Wall', th: 2, h: 6, c: '#77736c', m: 'stone' },
+  { n: 'Low Wall/Cover', th: 0.8, h: 1.2, c: '#8a8478', m: 'stone' }, { n: 'Brick Wall', th: 0.7, h: 3.2, c: '#8c5a48', m: 'stone' },
+  { n: 'Wood Wall', th: 0.5, h: 3, c: '#7a5a3a', m: 'wood' }, { n: 'Wood Fence', th: 0.4, h: 1.1, c: '#8a6a44', m: 'wood' },
+  { n: 'Trimmed Hedge', th: 1.2, h: 1.8, c: '#3f6a34', m: 'wood' }, { n: 'Ice Wall', th: 1, h: 3, c: '#bfe0ee', m: 'ice' },
 ];
 export const FLOOR_PRESET = [
-  { n: 'ชานหิน', w: 8, d: 8, th: 0.5, c: '#8a8478' }, { n: 'สะพานหิน', w: 4, d: 14, th: 0.6, c: '#7d7870' }, { n: 'สะพานไม้', w: 3, d: 12, th: 0.35, c: '#7a5a3a' },
-  { n: 'ทางลาด', w: 4, d: 8, th: 0.4, c: '#8a8478', ramp: 1 }, { n: 'บันได', w: 4, d: 7, th: 0.4, c: '#8a8478', ramp: 1, steps: 1 }, { n: 'ระเบียง', w: 12, d: 4, th: 0.4, c: '#7a5a3a' },
+  { n: 'Stone Platform', w: 8, d: 8, th: 0.5, c: '#8a8478' }, { n: 'Stone Bridge', w: 4, d: 14, th: 0.6, c: '#7d7870' }, { n: 'Wood Bridge', w: 3, d: 12, th: 0.35, c: '#7a5a3a' },
+  { n: 'Ramp', w: 4, d: 8, th: 0.4, c: '#8a8478', ramp: 1 }, { n: 'Stairs', w: 4, d: 7, th: 0.4, c: '#8a8478', ramp: 1, steps: 1 }, { n: 'Balcony', w: 12, d: 4, th: 0.4, c: '#7a5a3a' },
 ];
 // built-in object types (kit assets are 'kit:<id>' and come from assets/mapkit/kit.json)
 export const OBJ = {
-  spawn: { n: 'จุดเกิด', cat: 'sys', c: '#4a8cff', note: 'FFA / ดวล / Co-op (ควรมี 6+)' },
-  spawnR: { n: 'จุดเกิดทีมแดง', cat: 'sys', c: '#f06a6a' }, spawnB: { n: 'จุดเกิดทีมน้ำเงิน', cat: 'sys', c: '#5aa0ff' },
-  espawn: { n: 'จุดเกิดมอนสเตอร์', cat: 'sys', c: '#c77dff', note: 'Co-op' },
-  ring: { n: 'ห่วงแข่งไม้กวาด', cat: 'sys', c: '#f2d45e', note: 'เรียงตามลำดับที่วาง (10 ห่วง)' }, task: { n: 'จุดภารกิจ', cat: 'sys', c: '#6fcf97', note: 'โหมดหาโวลเดอมอร์ (6–8)' },
-  light: { n: 'ไฟ (แสง)', cat: 'sys', c: '#ffb060', note: 'ไม่เกิน 12 ดวง' },
-  pcrate: { n: 'ลังไม้', cat: 'game', c: '#a07a46', r: 0.9, h: 1.4 }, pbarrel: { n: 'ถังไม้', cat: 'game', c: '#8a5a32', r: 0.75, h: 1.6 },
-  pchest: { n: 'หีบสมบัติ', cat: 'game', c: '#e8c060', r: 0.9, h: 1.0, note: 'ไม่เกิน 2 ใบ' },
-  ptree: { n: 'ต้นโอ๊ก (พังได้)', cat: 'game', c: '#4f8f3c', r: 1.1, h: 7.5 }, ppine: { n: 'ต้นสน (พังได้)', cat: 'game', c: '#2f6a30', r: 1.0, h: 7 },
-  house: { n: 'บ้านพังได้', cat: 'game', c: '#b08a5a', note: 'ต้องอยู่บนพื้นเรียบ' },
-  pn_wall: { n: 'แผ่นพัง (ผนัง)', cat: 'game', c: '#c0703c', note: 'แบ่งเป็นช่อง ช่องละเลือด • กลุ่มเดียวกัน = ค้ำกัน (guides/Destruction.md §13)' },
-  poly: { n: 'ทรงอิสระ', cat: 'hid' },
-  box: { n: 'กล่อง', cat: 'prim' }, cyl: { n: 'ทรงกระบอก', cat: 'prim' }, cone: { n: 'กรวย/หลังคา', cat: 'prim' }, ball: { n: 'ก้อนกลม', cat: 'prim' }, wedge: { n: 'ลิ่ม', cat: 'prim' },
+  spawn: { n: 'Spawn Point', cat: 'sys', c: '#4a8cff', note: 'FFA / Duel / Co-op (6+ recommended)' },
+  spawnR: { n: 'Red Team Spawn', cat: 'sys', c: '#f06a6a' }, spawnB: { n: 'Blue Team Spawn', cat: 'sys', c: '#5aa0ff' },
+  espawn: { n: 'Monster Spawn', cat: 'sys', c: '#c77dff', note: 'Co-op' },
+  ring: { n: 'Broom Race Ring', cat: 'sys', c: '#f2d45e', note: 'ordered as placed (10 rings)' }, task: { n: 'Task Point', cat: 'sys', c: '#6fcf97', note: 'Find Voldemort mode (6–8)' },
+  light: { n: 'Light', cat: 'sys', c: '#ffb060', note: '12 max' },
+  pcrate: { n: 'Wood Crate', cat: 'game', c: '#a07a46', r: 0.9, h: 1.4 }, pbarrel: { n: 'Wood Barrel', cat: 'game', c: '#8a5a32', r: 0.75, h: 1.6 },
+  pchest: { n: 'Treasure Chest', cat: 'game', c: '#e8c060', r: 0.9, h: 1.0, note: '2 max' },
+  ptree: { n: 'Oak Tree (breakable)', cat: 'game', c: '#4f8f3c', r: 1.1, h: 7.5 }, ppine: { n: 'Pine Tree (breakable)', cat: 'game', c: '#2f6a30', r: 1.0, h: 7 },
+  house: { n: 'Breakable House', cat: 'game', c: '#b08a5a', note: 'needs flat ground' },
+  pn_wall: { n: 'Breakable Panel (wall)', cat: 'game', c: '#c0703c', note: 'split into cells, HP per cell • same group = hold each other up (guides/Destruction.md §13)' },
+  poly: { n: 'Free Shape', cat: 'hid' },
+  box: { n: 'Box', cat: 'prim' }, cyl: { n: 'Cylinder', cat: 'prim' }, cone: { n: 'Cone/Roof', cat: 'prim' }, ball: { n: 'Sphere', cat: 'prim' }, wedge: { n: 'Wedge', cat: 'prim' },
   // siege mode markers (guides/MAP-STANDARD.md) — exported as data.siege, the game builds collision/visuals itself
-  core: { n: 'แกน (จุดยึด)', cat: 'mode', c: '#7fd8ff', note: 'เลข 1–N = ลำดับที่ต้องทำลาย' },
-  sgA: { n: 'จุดเกิดฝ่ายบุก (ต่อเฟส)', cat: 'mode', c: '#f0a04a', note: 'เฟสละ 1 จุด (เกมวาง 6 คนรอบจุด)' },
-  sgB: { n: 'จุดเกิดฝ่ายรับ (ต่อเฟส)', cat: 'mode', c: '#5aa0ff', note: 'เฟสละ 1 จุด' },
-  phase: { n: 'พื้นที่เล่นของเฟส', cat: 'mode', c: '#f2d45e', note: 'สี่เหลี่ยม (ไม่หมุน) • หลายกรอบต่อเฟสได้' },
+  core: { n: 'Core (anchor)', cat: 'mode', c: '#7fd8ff', note: 'number 1–N = order to destroy' },
+  sgA: { n: 'Attacker Spawn (per phase)', cat: 'mode', c: '#f0a04a', note: '1 per phase (the game puts 6 players around it)' },
+  sgB: { n: 'Defender Spawn (per phase)', cat: 'mode', c: '#5aa0ff', note: '1 per phase' },
+  phase: { n: 'Phase Play Area', cat: 'mode', c: '#f2d45e', note: 'rectangle (no rotation) • several per phase allowed' },
   // room helpers
-  ceil: { n: 'เพดาน', cat: 'room', c: '#c77dff', note: 'กดคน/ตัวบิน/กล้องไว้ใต้เพดาน • ห้องมีหลังคาสูง ≥ 20' },
+  ceil: { n: 'Ceiling', cat: 'room', c: '#c77dff', note: 'keeps players/fliers/camera below the ceiling • roofed rooms ≥ 20 high' },
 };
 // breakable room props — mirror of RPK in js/02-fcs-rooms.js (keep in sync) • col = collision radius px (0 = walk through), h m
 // L = has a length (tables, benches, rails) • w = editor proxy width (m) • look is drawn by the game (js/28-fcs-props.js frpBuild)
 export const RPK = {
-  table: { n: 'โต๊ะยาว', col: 20, h: 1.0, L: 1, w: 1.6 }, hightable: { n: 'โต๊ะประธาน', col: 22, h: 1.1, L: 1, w: 1.8 }, bench: { n: 'ม้านั่งยาว', col: 0, h: 0.5, L: 1, w: 0.5 },
-  chair: { n: 'เก้าอี้', col: 0, h: 1.05, w: 0.6 }, throne: { n: 'บัลลังก์', col: 16, h: 2.2, w: 1.4 }, crate: { n: 'ลัง', col: 22, h: 1.2, w: 1.4 }, crate2: { n: 'ลังซ้อน', col: 22, h: 2.35, w: 1.4 },
-  barrel: { n: 'ถัง', col: 16, h: 1.3, w: 1.1 }, barrels: { n: 'กองถัง', col: 30, h: 1.3, w: 2.4 }, sack: { n: 'กระสอบ', col: 0, h: 0.6, w: 0.8 }, rack: { n: 'ชั้นวางอาวุธ', col: 0, h: 2.0, w: 1.6 },
-  armor: { n: 'ชุดเกราะตั้ง', col: 14, h: 2.1, w: 0.9 }, shelf: { n: 'ชั้นหนังสือ', col: 0, h: 3.0, w: 2.0 }, desk: { n: 'โต๊ะเขียน', col: 0, h: 0.9, w: 1.4 },
-  candle: { n: 'เชิงเทียนตั้ง', col: 0, h: 2.2, w: 0.5 }, woodpile: { n: 'กองฟืน', col: 0, h: 0.8, w: 1.6 }, cart: { n: 'เกวียน', col: 30, h: 1.6, w: 2.6 }, keg: { n: 'ถังเล็ก', col: 0, h: 0.7, w: 0.7 },
-  rail: { n: 'ราวกันตก', col: 9, h: 1.1, L: 1, w: 0.5 }, pillar: { n: 'เสาใหญ่', col: 26, h: 24, w: 2.6 },
+  table: { n: 'Long Table', col: 20, h: 1.0, L: 1, w: 1.6 }, hightable: { n: 'High Table', col: 22, h: 1.1, L: 1, w: 1.8 }, bench: { n: 'Long Bench', col: 0, h: 0.5, L: 1, w: 0.5 },
+  chair: { n: 'Chair', col: 0, h: 1.05, w: 0.6 }, throne: { n: 'Throne', col: 16, h: 2.2, w: 1.4 }, crate: { n: 'Crate', col: 22, h: 1.2, w: 1.4 }, crate2: { n: 'Crate Stack', col: 22, h: 2.35, w: 1.4 },
+  barrel: { n: 'Barrel', col: 16, h: 1.3, w: 1.1 }, barrels: { n: 'Barrel Pile', col: 30, h: 1.3, w: 2.4 }, sack: { n: 'Sack', col: 0, h: 0.6, w: 0.8 }, rack: { n: 'Weapon Rack', col: 0, h: 2.0, w: 1.6 },
+  armor: { n: 'Armor Stand', col: 14, h: 2.1, w: 0.9 }, shelf: { n: 'Bookshelf', col: 0, h: 3.0, w: 2.0 }, desk: { n: 'Desk', col: 0, h: 0.9, w: 1.4 },
+  candle: { n: 'Candle Stand', col: 0, h: 2.2, w: 0.5 }, woodpile: { n: 'Firewood Pile', col: 0, h: 0.8, w: 1.6 }, cart: { n: 'Cart', col: 30, h: 1.6, w: 2.6 }, keg: { n: 'Small Barrel', col: 0, h: 0.7, w: 0.7 },
+  rail: { n: 'Railing', col: 9, h: 1.1, L: 1, w: 0.5 }, pillar: { n: 'Big Pillar', col: 26, h: 24, w: 2.6 },
 };
 for (const k in RPK) OBJ['rp_' + k] = { n: RPK[k].n, cat: 'room', c: '#a07a56', rp: k };
 export const isRP = t => t.startsWith('rp_');
 // decor drawn by the game (MAP-STANDARD round 4): the same builder the code rooms use (js/28-fcs-castle.js fcsDecoKit) — no collision,
 // not in the .glb. k = material key: stone/dark (castle ashlar), roof, lit (glowing window), wood, iron, carpet, slit (dark opening)
 // y = lift of the shape centre above the ground (roof/cloth: base/top) • rot = yaw (roof ridge, cloth/shield facing)
-export const DECO_MAT = [['stone', 'หินปราสาท'], ['dark', 'หินเข้ม'], ['roof', 'หลังคา'], ['lit', 'หน้าต่างมีไฟ'], ['wood', 'ไม้'], ['iron', 'เหล็ก'], ['carpet', 'พรมแดง'], ['slit', 'ช่องมืด'], ['floor', 'พื้นหินปราสาท'], ['roof2', 'หลังคาแดง (ปราสาท)'], ['lit2', 'หน้าต่างไฟสว่าง (ปราสาท)']];
+export const DECO_MAT = [['stone', 'castle stone'], ['dark', 'Dark Rock'], ['roof', 'Roof'], ['lit', 'Lit Window'], ['wood', 'Wood'], ['iron', 'Metal'], ['carpet', 'Red Carpet'], ['slit', 'Dark Opening'], ['floor', 'Castle Floor Stone'], ['roof2', 'Red Roof (castle)'], ['lit2', 'Bright Lit Window (castle)']];
 export const DECO_COL = { stone: '#c2b298', dark: '#8f8270', roof: '#5d6470', lit: '#ffc77a', wood: '#5a3f28', iron: '#2b2a2a', carpet: '#7a1a20', slit: '#17120e', floor: '#b4a68e', roof2: '#8c4a32', lit2: '#ffb15a' };
 Object.assign(OBJ, {
-  dc_box: { n: 'กล่องตกแต่ง', cat: 'deco', c: '#c2b298' }, dc_cyl: { n: 'ทรงกระบอกตกแต่ง', cat: 'deco', c: '#c2b298' }, dc_cone: { n: 'กรวย/ยอดหอ', cat: 'deco', c: '#5d6470' },
-  dc_roof: { n: 'หลังคาจั่ว', cat: 'deco', c: '#5d6470' }, dc_flame: { n: 'เปลวไฟ (คบ/เทียน)', cat: 'deco', c: '#ffb060' }, dc_cloth: { n: 'ผ้าแขวน/ธง', cat: 'deco', c: '#7a1418' },
-  dc_shield: { n: 'โล่ประดับผนัง', cat: 'deco', c: '#7a1a20' }, dc_chand: { n: 'โคมระย้า (มีแสง)', cat: 'deco', c: '#ffb36a' },
-  dc_banner: { n: 'ธงแขวนผนังปราสาท', cat: 'deco', c: '#9a1c20' }, dc_torch: { n: 'คบไฟผนัง', cat: 'deco', c: '#ffb060' },
-  dc_flag: { n: 'ธงยอดหอ', cat: 'deco', c: '#9a1c20' }, dc_post: { n: 'เปลวไฟบนเสา', cat: 'deco', c: '#ffb060' },
+  dc_box: { n: 'Decor Box', cat: 'deco', c: '#c2b298' }, dc_cyl: { n: 'Decor Cylinder', cat: 'deco', c: '#c2b298' }, dc_cone: { n: 'Cone/Spire', cat: 'deco', c: '#5d6470' },
+  dc_roof: { n: 'Gable Roof', cat: 'deco', c: '#5d6470' }, dc_flame: { n: 'Flame (torch/candle)', cat: 'deco', c: '#ffb060' }, dc_cloth: { n: 'Hanging Cloth/Banner', cat: 'deco', c: '#7a1418' },
+  dc_shield: { n: 'Wall Shield', cat: 'deco', c: '#7a1a20' }, dc_chand: { n: 'Chandelier (lit)', cat: 'deco', c: '#ffb36a' },
+  dc_banner: { n: 'Castle Wall Banner', cat: 'deco', c: '#9a1c20' }, dc_torch: { n: 'Wall Torch', cat: 'deco', c: '#ffb060' },
+  dc_flag: { n: 'Tower Flag', cat: 'deco', c: '#9a1c20' }, dc_post: { n: 'Flame on Pole', cat: 'deco', c: '#ffb060' },
 });
 export const isDeco = t => t.startsWith('dc_');
 // game systems bound by tag, not by map name (MAP-STANDARD §1.7)
-export const SYS_WALL = [['', '(ไม่มี)'], ['fence', 'รั้วไหม้ได้'], ['stonewall', 'ผนังหิน (รอยแตก/ไหม้)']];
-export const SYS_FLOOR = [['', '(ไม่มี)'], ['eggshell', 'แตกแบบเปลือกไข่ (สะพาน)']];
-export const SG_WALL = [['', '(ไม่ใช่)'], ['wall', 'กำแพงเป้าหมาย'], ['gate', 'ประตูเป้าหมาย']];
+export const SYS_WALL = [['', '(none)'], ['fence', 'Burnable Fence'], ['stonewall', 'Stone Wall (cracks/burns)']];
+export const SYS_FLOOR = [['', '(none)'], ['eggshell', 'Eggshell Break (bridge)']];
+export const SG_WALL = [['', '(no)'], ['wall', 'Target Wall'], ['gate', 'Target Gate']];
 // look presets drawn by game code (MAP-STANDARD §1.5) — map default + per wall/floor/part override
-export const STYLE = [['', '(ปกติ)'], ['castle-stone', 'ปราสาทหิน'], ['room-hall', 'ห้องโถงปราสาท'], ['forest-mist', 'ป่าสนหมอก']];
-export const MODES = [['coop', 'Co-op'], ['ffa', 'FFA'], ['duel', 'ดวล'], ['tdm', 'ทีม'], ['br', 'Battle Royale'], ['race', 'แข่งไม้กวาด'], ['imp', 'หาโวลเดอมอร์'], ['siege', 'บุกปราสาท']];
-export const SKY = [['day', 'กลางวัน'], ['sunset', 'เย็น'], ['night', 'กลางคืน'], ['indoor', 'ในอาคาร']];
-export const FXS = [['snow', 'หิมะตก'], ['fireflies', 'หิ่งห้อย'], ['candles', 'เทียนลอย'], ['snitch', 'ลูกสนิช'], ['rune', 'วงเวทกลางแผนที่']];
+export const STYLE = [['', '(normal)'], ['castle-stone', 'Stone Castle'], ['room-hall', 'Castle Hall'], ['forest-mist', 'Misty Pine Forest']];
+export const MODES = [['coop', 'Co-op'], ['ffa', 'FFA'], ['duel', 'Duel'], ['tdm', 'Team'], ['br', 'Battle Royale'], ['race', 'Broom Race'], ['imp', 'Find Voldemort'], ['siege', 'Siege']];
+export const SKY = [['day', 'Day'], ['sunset', 'Evening'], ['night', 'Night'], ['indoor', 'Indoor']];
+export const FXS = [['snow', 'Snowfall'], ['fireflies', 'Fireflies'], ['candles', 'Floating Candles'], ['snitch', 'Snitch'], ['rune', 'Magic Circle in the Centre']];
 export const MUSIC = ['', 'castle', 'meadow', 'forest', 'hogsmeade', 'lake', 'ruins', 'greathall', 'pitch'];
 
 const clamp = (v, a, b) => v < a ? a : v > b ? b : v;
@@ -91,7 +91,7 @@ const clamp = (v, a, b) => v < a ? a : v > b ? b : v;
 // ---------- create / pack ----------
 export function newMap(o = {}) {
   const W = o.W || 100, H = o.H || 70, nx = Math.round(W / C) + 1, ny = Math.round(H / C) + 1;
-  return { v: 1, id: o.id || '', name: o.name || 'แผนที่ใหม่', desc: '', W, H, nx, ny, hg: new Float32Array(nx * ny), sf: new Uint8Array(nx * ny).fill(o.surf || 0),
+  return { v: 1, id: o.id || '', name: o.name || 'New Map', desc: '', W, H, nx, ny, hg: new Float32Array(nx * ny), sf: new Uint8Array(nx * ny).fill(o.surf || 0),
     sky: 'day', fog: null, music: '', weather: '', fx: [], modes: ['coop', 'ffa', 'duel', 'tdm'], random: 0, autoProps: 1, skirt: 40,
     walls: [], floors: [], objs: [], parts: [], rooms: [], seq: 1 };
 }
@@ -124,7 +124,7 @@ export function resize(M, W, H) {   // keep the content centred
 }
 
 // ---------- terrain ----------
-export function gh(M, x, z) {   // ground height, bilinear (same maths as the game's terrT)
+export function gh(M, x, z) {   // ground height, bilinear (same maths as the game’s terrT)
   const fx = clamp(x / C, 0, M.nx - 1.001), fz = clamp(z / C, 0, M.ny - 1.001), i = fx | 0, j = fz | 0, u = fx - i, v = fz - j, k = j * M.nx + i, a = M.hg;
   return (a[k] * (1 - u) + a[k + 1] * u) * (1 - v) + (a[k + M.nx] * (1 - u) + a[k + M.nx + 1] * u) * v;
 }
@@ -155,15 +155,15 @@ export function wallPath(w) {   // control points → polyline (curve = Catmull-
   return P;
 }
 // ---- breakable panels (pn_wall → data.pnl, game js/12-pnl.js) ----
-export const PN_MAT = [['brick', 'อิฐ'], ['plaster', 'ปูนฉาบ (ข้างในอิฐ)'], ['stone', 'หิน'], ['wood', 'ไม้ (ติดไฟ)'], ['glass', 'กระจก'], ['metal', 'เหล็ก'],
-  ['timber', 'ปูน + โครงไม้'], ['roof', 'หลังคากระเบื้อง'], ['snowroof', 'หลังคาหิมะ'], ['litwin', 'หน้าต่างไฟ (กระจก)']];
+export const PN_MAT = [['brick', 'Brick'], ['plaster', 'Plaster (brick inside)'], ['stone', 'Rocks'], ['wood', 'Wood (burns)'], ['glass', 'Glass'], ['metal', 'Metal'],
+  ['timber', 'Plaster + Timber Frame'], ['roof', 'Tile Roof'], ['snowroof', 'Snow Roof'], ['litwin', 'Lit Window (glass)']];
 export const PN_HP = { brick: 60, plaster: 50, stone: 90, wood: 35, glass: 12, metal: 120, roof: 40, snowroof: 40, timber: 45, litwin: 10 };   // mirror PNDEF.mat in js/12-pnl.js
 export const PN_COL = { brick: '#b0603c', plaster: '#cfc6b4', stone: '#9a9488', wood: '#8a6440', glass: '#bfe4f0', metal: '#7c8288', roof: '#4a4e58', snowroof: '#e8eef4', timber: '#d8ccb4', litwin: '#ffcf80' };
-export const PN_MODE = [['p', 'เป็นรู + กองซาก'], ['l', 'ผิวหลุดเป็นชั้น'], ['g', 'แตกทั้งแผ่น']];
+export const PN_MODE = [['p', 'Holes + Rubble'], ['l', 'Peels in Layers'], ['g', 'Whole Panel']];
 export const PN_PRESET = [
-  { n: 'ผนังอิฐ', mat: 'brick', m: 'p', sy: 3.6, T: 0.3, cs: 0.6 }, { n: 'ผนังปูนฉาบ', mat: 'plaster', m: 'l', sy: 3.6, T: 0.3, cs: 0.5 },
-  { n: 'กำแพงหิน (ไม่ทะลุ)', mat: 'stone', m: 'l', thru: 0, sy: 2.5, T: 0.5, cs: 0.8 }, { n: 'รั้ว / ผนังไม้', mat: 'wood', m: 'p', sy: 2.2, T: 0.15, cs: 0.5 },
-  { n: 'กระจก', mat: 'glass', m: 'g', sy: 1.8, T: 0.1, cs: 1, y: 1 }, { n: 'แผ่นเหล็ก', mat: 'metal', m: 'p', sy: 3, T: 0.1, cs: 1 }];
+  { n: 'Brick Wall', mat: 'brick', m: 'p', sy: 3.6, T: 0.3, cs: 0.6 }, { n: 'Plaster Wall', mat: 'plaster', m: 'l', sy: 3.6, T: 0.3, cs: 0.5 },
+  { n: 'Stone Wall (no break-through)', mat: 'stone', m: 'l', thru: 0, sy: 2.5, T: 0.5, cs: 0.8 }, { n: 'Fence / Wood Wall', mat: 'wood', m: 'p', sy: 2.2, T: 0.15, cs: 0.5 },
+  { n: 'Glass', mat: 'glass', m: 'g', sy: 1.8, T: 0.1, cs: 1, y: 1 }, { n: 'Metal Sheet', mat: 'metal', m: 'p', sy: 3, T: 0.1, cs: 1 }];
 export function pnDims(o) { const L = o.L || 4, H = o.sy || 3, cs = o.cs || 1; return { L, H, T: o.T || 0.3, cs, nc: Math.max(1, Math.round(L / cs)), nr: Math.max(1, Math.round(H / cs)) }; }
 // panel frame in map coords [x, up, z]: U along the length, W up the slab, V slab normal (same as js/12-pnl.js, editor rot = −game a)
 export function pnFrame(M, o) {
@@ -345,7 +345,7 @@ export function gameData(M, dim) {
     else if (o.t === 'pn_wall') pnl.push(Object.assign({ x: X, y: Y, a: +(-rot).toFixed(4), L: r1((o.L || 4) * PX), T: r1((o.T || 0.3) * PX), H: r2(o.sy || 3), cs: o.cs || 1, mat: o.mat || 'brick', m: o.m || 'p' },
       o.y ? { z0: r2(o.y) } : {}, o.hp ? { hp: o.hp } : {}, o.thru === 0 ? { thru: 0 } : {}, o.g != null && o.g !== '' ? { g: o.g } : {},
       o.tl ? { tl: +(+o.tl).toFixed(4) } : {}, o.sh === 'tri' ? { sh: 'tri' } : {}, o.ho && o.ho.length ? { ho: o.ho.slice(0, 4) } : {}, o.nb ? { nb: 1 } : {}));   // breakable panel (js/12-pnl)
-    else if (o.t === 'house') houses.push(Object.assign({ x: X, y: Y, w: r1(160 * (o.sx || 1)), d: r1(130 * (o.sz || 1)), ry: +rot.toFixed(3) }, o.brk === 0 ? { nb: 1 } : {}));   // nb = unbreakable (inspector 'พังได้' off)
+    else if (o.t === 'house') houses.push(Object.assign({ x: X, y: Y, w: r1(160 * (o.sx || 1)), d: r1(130 * (o.sz || 1)), ry: +rot.toFixed(3) }, o.brk === 0 ? { nb: 1 } : {}));   // nb = unbreakable (inspector 'Breakable' off)
     else if (OBJ[o.t] && OBJ[o.t].cat === 'game') props.push(Object.assign({ k: o.t, x: X, y: Y, a: +rot.toFixed(3) }, o.brk === 0 ? { nb: 1 } : {}));
     else { const d = dim(o); if (!d) continue; const cs = objCircles(M, o, d); if (!cs.length) continue;
       let gi = null; const isBrk = o.brk == null ? d.brk : o.brk;
@@ -397,56 +397,56 @@ export function check(M, G) {
   const out = [], c = G.counts, has = m => !M.modes || !M.modes.length || M.modes.includes(m), add = (lv, t, at) => out.push({ lv, t, at });
   const siegeOnly = M.modes && M.modes.length === 1 && M.modes[0] === 'siege';   // siege uses its own per-phase spawns
   if (siegeOnly) { /* general spawns not needed */ }
-  else if (!c.spawns && !c.red && !c.blue) add('err', 'ยังไม่มีจุดเกิด — วางอย่างน้อย 6 จุด (เครื่องมือ "จุดเกม")');
-  else if (c.spawns < 6) add('warn', 'จุดเกิดทั่วไปมี ' + c.spawns + ' จุด (ควรมี 6 กระจายห่างกัน)');
-  else add('ok', 'จุดเกิดทั่วไป ' + c.spawns + ' จุด');
-  if (has('tdm') && !siegeOnly) { if (c.red >= 3 && c.blue >= 3) add('ok', 'จุดเกิดทีม แดง ' + c.red + ' / น้ำเงิน ' + c.blue); else add('warn', 'โหมดทีม: จุดเกิดทีมมี แดง ' + c.red + ' / น้ำเงิน ' + c.blue + ' (ควรฝ่ายละ 3 — ไม่มี = เกมแบ่งจากจุดเกิดทั่วไปซ้าย/ขวา)'); }
-  if (M.modes && M.modes.includes('race') && c.rings < 10) add('warn', 'แข่งไม้กวาด: ห่วงมี ' + c.rings + ' (ต้อง 10)');
-  if (M.modes && M.modes.includes('imp') && c.tasks < 6) add('warn', 'หาโวลเดอมอร์: จุดภารกิจมี ' + c.tasks + ' (ควร 6–8)');
-  if (has('coop') && c.espawn && c.espawn < 4) add('warn', 'Co-op: จุดเกิดมอนสเตอร์มี ' + c.espawn + ' (ควร 4+ หรือไม่วางเลยให้เกมสุ่มตามขอบ)');
+  else if (!c.spawns && !c.red && !c.blue) add('err', 'No spawn points yet — place at least 6 (tool "Game Points") "Game Points")');
+  else if (c.spawns < 6) add('warn', 'General spawns: ' + c.spawns + ' points (6 spread apart recommended)');
+  else add('ok', 'General spawns: ' + c.spawns + ' points');
+  if (has('tdm') && !siegeOnly) { if (c.red >= 3 && c.blue >= 3) add('ok', 'Team spawns: red ' + c.red + ' / blue ' + c.blue); else add('warn', 'Team mode: team spawns red ' + c.red + ' / blue ' + c.blue + ' (3 per side recommended — none = the game splits the general spawns left/right)'); }
+  if (M.modes && M.modes.includes('race') && c.rings < 10) add('warn', 'Broom race: rings ' + c.rings + ' (need 10)');
+  if (M.modes && M.modes.includes('imp') && c.tasks < 6) add('warn', 'Find Voldemort: task points ' + c.tasks + ' (6–8 recommended)');
+  if (has('coop') && c.espawn && c.espawn < 4) add('warn', 'Co-op: Monster spawns: ' + c.espawn + ' (4+ recommended, or none to let the game spawn along the edges)');
   if (M.modes && M.modes.includes('siege')) {
     const S = G.sg, N = S.cores.length;
-    if (!N) add('err', 'บุกปราสาท: ยังไม่มีแกน (วางของ → โหมดบุกปราสาท → แกน)');
+    if (!N) add('err', 'Siege: no cores yet (Place → Siege Mode → Core)');
     else {
       const ns = S.cores.map(k => k.n);
-      if (ns.some((n, i) => n !== i + 1)) add('err', 'บุกปราสาท: เลขแกนต้องเป็น 1–' + N + ' ไม่ซ้ำ (ตอนนี้ ' + ns.join(', ') + ')'); else add('ok', 'บุกปราสาท: แกน ' + N + ' จุด');
+      if (ns.some((n, i) => n !== i + 1)) add('err', 'Siege: core numbers must be 1–' + N + ' with no repeats (now ' + ns.join(', ') + ')'); else add('ok', 'Siege: cores ' + N + ' points');
       for (let p = 1; p <= N; p++) {
-        const miss = [!S.sp.A[p] && 'จุดเกิดฝ่ายบุก', !S.sp.B[p] && 'จุดเกิดฝ่ายรับ', !S.phases[p - 1] && 'พื้นที่เล่น'].filter(Boolean);
-        if (miss.length) { add('err', 'บุกปราสาท เฟส ' + p + ': ยังไม่มี ' + miss.join(', ')); continue; }
+        const miss = [!S.sp.A[p] && 'attacker spawn', !S.sp.B[p] && 'defender spawn', !S.phases[p - 1] && 'play area'].filter(Boolean);
+        if (miss.length) { add('err', 'Siege phase ' + p + ': missing ' + miss.join(', ')); continue; }
         const inA = q => S.phases[p - 1].some(r => q.x >= r.x1 && q.x <= r.x2 && q.y >= r.y1 && q.y <= r.y2);
-        const k = S.cores.find(c => c.n === p); if (k && !inA(k)) add('warn', 'บุกปราสาท เฟส ' + p + ': แกน ' + p + ' อยู่นอกพื้นที่เล่นของเฟส', [k.x / PX, k.y / PX]);
-        for (const [t, n] of [['A', 'ฝ่ายบุก'], ['B', 'ฝ่ายรับ']]) if (!inA(S.sp[t][p])) add('warn', 'บุกปราสาท เฟส ' + p + ': จุดเกิด' + n + 'อยู่นอกพื้นที่เล่น', [S.sp[t][p].x / PX, S.sp[t][p].y / PX]);
+        const k = S.cores.find(c => c.n === p); if (k && !inA(k)) add('warn', 'Siege phase ' + p + ': Core ' + p + ' is outside the phase play area', [k.x / PX, k.y / PX]);
+        for (const [t, n] of [['A', 'attacker'], ['B', 'defender']]) if (!inA(S.sp[t][p])) add('warn', 'Siege phase ' + p + ': ' + n + ' spawn is outside the play area', [S.sp[t][p].x / PX, S.sp[t][p].y / PX]);
       }
-      add(S.bw.length ? 'ok' : 'warn', 'บุกปราสาท: กำแพง/ประตูเป้าหมาย ' + S.bw.length + ' ชิ้น');
+      add(S.bw.length ? 'ok' : 'warn', 'Siege: target walls/gates ' + S.bw.length + ' pieces');
     }
   }
-  for (const q of G.ceil) if (q.zmax == null && q.h < 20) add('warn', 'เพดานสูง ' + q.h + ' (ห้องมีหลังคาควร ≥ 20 ให้ตัวบินเล่นได้ • ใต้ชั้นลอยให้ใส่ "ใช้กับคนที่ต่ำกว่า")', [(q.x0 + q.x1) / 2 / PX, (q.y0 + q.y1) / 2 / PX]);
-  if (c.lights > 12) add('warn', 'ไฟ ' + c.lights + ' ดวง (แนะนำไม่เกิน 12)');
+  for (const q of G.ceil) if (q.zmax == null && q.h < 20) add('warn', 'Ceiling height ' + q.h + ' (roofed rooms should be ≥ 20 so fliers can play • under mezzanines set "Only for players lower than")', [(q.x0 + q.x1) / 2 / PX, (q.y0 + q.y1) / 2 / PX]);
+  if (c.lights > 12) add('warn', 'Lights ' + c.lights + ' (12 max recommended)');
   { const P = M.objs.filter(o => o.t === 'pn_wall');
     if (P.length) { const G2 = pnGraph(M, M.objs), S = pnSupported(G2, new Set()), lim = 12000, warnN = 6000;
-      if (G2.n > lim) add('err', 'แผ่นพัง ' + G2.n + ' ช่อง — มากเกิน (ไม่ควรเกิน ' + lim + '): ขยายขนาดช่อง');
-      else if (G2.n > warnN) add('warn', 'แผ่นพัง ' + G2.n + ' ช่อง — ค่อนข้างเยอะ (เน็ต/ที่ชน) ลองขยายขนาดช่องบางแผ่น');
-      else add('ok', 'แผ่นพัง ' + P.length + ' แผ่น / ' + G2.n + ' ช่อง');
-      for (const p of G2.ps) { if (p.nc * p.nr > 600) add('warn', 'แผ่นพังช่องเยอะ (' + p.nc + '×' + p.nr + ') — ขนาดช่องเล็กไป', [p.o.x, p.o.z]);
+      if (G2.n > lim) add('err', 'Breakable Panel ' + G2.n + ' cells — too many (limit ' + lim + '): use bigger cells');
+      else if (G2.n > warnN) add('warn', 'Breakable Panel ' + G2.n + ' cells — quite a lot (network/collision), try bigger cells on some panels');
+      else add('ok', 'Breakable Panel ' + P.length + ' panels / ' + G2.n + ' cells');
+      for (const p of G2.ps) { if (p.nc * p.nr > 600) add('warn', 'Dense breakable panel (' + p.nc + '×' + p.nr + ') — cells too small', [p.o.x, p.o.z]);
         let fl = 0; for (let k = 0; k < p.nc * p.nr; k++) if (!S.seen[p.base + k]) fl++;
-        if (fl) add('warn', 'แผ่นพังลอย ' + fl + ' ช่อง (ไม่มีอะไรค้ำถึงพื้น — ตั้ง "กลุ่ม" ให้ตรงกับแผ่นข้างล่าง/ข้าง ๆ) จะร่วงเมื่อกลุ่มนี้โดนครั้งแรก', [p.o.x, p.o.z]); } } }
+        if (fl) add('warn', 'Floating breakable panel ' + fl + ' cells (nothing reaching the ground — set "Group" to match the panel below/beside) will fall on the group’s first hit', [p.o.x, p.o.z]); } } }
   const obsLim = Math.max(2000, Math.round(M.W * M.H * 0.035)), obsWarn = Math.round(obsLim * 0.6);   // budget scales with map area (spatial grid keeps cost local)
-  if (c.obs > obsLim) add('err', 'ที่ชน ' + c.obs + ' วง — หนักเกิน (ไม่ควรเกิน ' + obsLim + '): ลดกำแพงบางยาว ๆ หรือทำให้หนาขึ้น');
-  else if (c.obs > obsWarn) add('warn', 'ที่ชน ' + c.obs + ' วง (เริ่มหนัก — กำแพงยิ่งบางยิ่งใช้วงเยอะ)');
-  else add('ok', 'ที่ชน ' + c.obs + ' วง');
-  if (c.props > 0 && M.objs.filter(o => o.t === 'pchest').length > 2) add('warn', 'หีบสมบัติเกิน 2 ใบ');
+  if (c.obs > obsLim) add('err', 'Colliders ' + c.obs + ' circles — too heavy (limit ' + obsLim + '): cut down long thin walls or make them thicker');
+  else if (c.obs > obsWarn) add('warn', 'Colliders ' + c.obs + ' circles (getting heavy — thinner walls use more circles)');
+  else add('ok', 'Colliders ' + c.obs + ' circles');
+  if (c.props > 0 && M.objs.filter(o => o.t === 'pchest').length > 2) add('warn', 'More than 2 treasure chests');
   let lo = 1e9, hi = -1e9; for (const h of M.hg) { if (h < lo) lo = h; if (h > hi) hi = h; }
-  if (lo < -5 || hi > 20) add('warn', 'ระดับพื้น ' + lo.toFixed(1) + ' ถึง ' + hi.toFixed(1) + ' (กล้อง/มินิแมพตั้งไว้ราว −5 ถึง +20)');
+  if (lo < -5 || hi > 20) add('warn', 'Ground level ' + lo.toFixed(1) + ' to ' + hi.toFixed(1) + ' (camera/minimap set for about −5 to +20)');
   // spawn points: on walkable ground and clear of collision
   const obs = G.data.obs;
   M.objs.filter(o => /^spawn/.test(o.t)).forEach((o, n) => {
     const i = clamp(Math.round(o.x / C), 0, M.nx - 1), j = clamp(Math.round(o.z / C), 0, M.ny - 1);
-    if (slopeAt(M, i, j) > TSLOPE) add('warn', 'จุดเกิดอยู่บนทางชัน', [o.x, o.z]);
-    if (obs.some(q => q.bot == null && Math.hypot(q.x - o.x * PX, q.y - o.z * PX) < q.r + 1.5 * PX)) add('warn', 'จุดเกิดชิดที่ชนเกินไป (ควรโล่งรัศมี 4)', [o.x, o.z]);
+    if (slopeAt(M, i, j) > TSLOPE) add('warn', 'Spawn point on a steep slope', [o.x, o.z]);
+    if (obs.some(q => q.bot == null && Math.hypot(q.x - o.x * PX, q.y - o.z * PX) < q.r + 1.5 * PX)) add('warn', 'Spawn point too close to colliders (keep radius 4 clear)', [o.x, o.z]);
   });
   // floors: walk-under headroom
   for (const f of M.floors) { const g = gh(M, f.x, f.z), gap = Math.min(f.y, f.y2 == null ? f.y : f.y2) - (f.th || 0.4) - g;
-    if (gap > 0.5 && gap < HEADROOM) add('warn', 'ใต้พื้นชั้นบนสูง ' + gap.toFixed(1) + ' (ต่ำกว่า ' + HEADROOM + ' = เดินลอดไม่ได้)', [f.x, f.z]); }
+    if (gap > 0.5 && gap < HEADROOM) add('warn', 'Clearance under upper floor ' + gap.toFixed(1) + ' (below ' + HEADROOM + ' = can’t walk under)', [f.x, f.z]); }
   // reachability from the first spawn (ground level only, 1-unit cells)
   const sp = M.objs.filter(o => /^spawn/.test(o.t)), FL = M.floors;   // castle part floors (walkways, gate tops) are left out: the check is ground-level only
   if (sp.length > 1) {
@@ -459,7 +459,7 @@ export function check(M, G) {
       for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const X = x + dx, Y = y + dy; if (X < 0 || Y < 0 || X >= w || Y >= h) continue; const q = Y * w + X; if (seen[q] || blk[q]) continue;
         if (H(q) - hk > TSLOPE) continue; seen[q] = 1; st.push(q); } }
     const bad = sp.filter(o => !seen[cell(o)]);
-    if (bad.length) bad.forEach(o => add('warn', 'จุดเกิดนี้เดินไปไม่ถึงจากจุดเกิดแรก (ตรวจคร่าว ๆ)', [o.x, o.z])); else add('ok', 'จุดเกิดทุกจุดเดินถึงกัน');
+    if (bad.length) bad.forEach(o => add('warn', 'This spawn can’t be reached from the first spawn (rough check)', [o.x, o.z])); else add('ok', 'All spawns are reachable from each other');
   }
   return out;
 }
@@ -486,8 +486,8 @@ export function flatRooms(M, RM) {
   for (const inst of M.rooms || []) { const R = RM && RM.get(inst.ref); if (!R) continue; const X = roomExpand(M, inst, R); for (const k in out) out[k].push(...X[k]); }
   return out;
 }
-// "แตกห้องเข้าแผนที่": copy an instance's content into the map as normal editable items (no longer linked to the room file),
-// flatten the ground under the room to the room floor and paint the room's surfaces onto it. Mutates M. (user 2026-11-21: one-file maps)
+// "Unpack Room into Map": copy an instance's content into the map as normal editable items (no longer linked to the room file),
+// flatten the ground under the room to the room floor and paint the room’s surfaces onto it. Mutates M. (user 2026-11-21: one-file maps)
 export function roomUnpack(M, inst, R) {
   const X = roomExpand(M, inst, R), g0 = gh(M, inst.x, inst.z);
   let seq = M.seq || 1;
@@ -505,24 +505,24 @@ export function roomUnpack(M, inst, R) {
 // map + its expanded rooms as one plain map (for gameData / check / export)
 export function withRooms(M, RX) { return RX && (RX.walls.length || RX.floors.length || RX.objs.length || RX.parts.length) ? Object.assign({}, M, { walls: M.walls.concat(RX.walls), floors: M.floors.concat(RX.floors), objs: M.objs.concat(RX.objs), parts: (M.parts || []).concat(RX.parts) }) : M; }
 
-// ---------- castle parts (guides/MAP-BUILDER.md "ชิ้นส่วนปราสาท") ----------
+// ---------- castle parts (guides/MAP-BUILDER.md "Castle Pieces") ----------
 // M.parts[] = {id, k, x, z, rot, base (absolute bottom height, null = follows the ground), c, brk, + params (PART[k].p) + flags (PART[k].f)}
 // A part is NOT a new pipeline: expandParts() turns it into plain prim objs (box/cyl/cone/wedge → collision circles, glb, brk groups) and floors (walkable tops).
 // Local frame: origin = part centre, +z = length axis, +x = across; rot = rotation.y (same as objs/floors). Expanded items carry _p = part id; hid:1 = collision only (no mesh).
 export const PART = {   // p: name → [default, min, max, step] • f: flag defaults
-  wall:   { n: 'กำแพงตรง', c: '#8a8478', p: { len: [10, 2, 60, 1], th: [2, 0.6, 6, 0.2], h: [6, 1, 20, 0.5] }, f: { bt: 1, wk: 1 }, main: 'len' },
-  corner: { n: 'กำแพงมุม (L)', c: '#8a8478', p: { a: [10, 3, 40, 1], b: [10, 3, 40, 1], th: [2, 0.6, 6, 0.2], h: [6, 1, 20, 0.5] }, f: { bt: 1, wk: 1 }, main: 'a' },
-  tower:  { n: 'หอคอย', c: '#77736c', p: { r: [3.5, 1.5, 10, 0.25], h: [10, 3, 30, 0.5] }, f: { round: 1, roof: 0, bt: 1 }, main: 'r' },
-  gate:   { n: 'ประตูเมือง', c: '#77736c', p: { len: [14, 6, 40, 1], th: [3, 1, 8, 0.5], h: [7, 3, 20, 0.5], gw: [4, 2, 10, 0.5], gh: [4.5, 2.2, 12, 0.25] }, f: { bt: 1, wk: 1, door: 1 }, main: 'len' },
-  keep:   { n: 'ตึกใหญ่ (Keep)', c: '#7d7870', p: { w: [14, 5, 40, 1], d: [12, 5, 40, 1], h: [12, 3, 30, 0.5] }, f: { bt: 1, roof: 0, turrets: 1 }, main: 'w' },
-  stairs: { n: 'บันได', c: '#8a8478', p: { w: [3, 1, 10, 0.5], len: [8, 2, 30, 0.5], rise: [5, 0.5, 20, 0.25] }, f: {}, main: 'len' },
-  ramp:   { n: 'ทางลาด', c: '#8a8478', p: { w: [3, 1, 10, 0.5], len: [10, 2, 40, 0.5], rise: [4, 0.5, 20, 0.25] }, f: {}, main: 'len' },
-  walk:   { n: 'ทางเดินยก', c: '#7a7569', p: { w: [3, 1, 10, 0.5], len: [10, 2, 40, 1], up: [6, 0.5, 20, 0.25] }, f: { rail: 1 }, main: 'len' },
-  free:   { n: 'ทรงอิสระ (วาดเอง)', c: '#8a8478', p: { h: [6, 0.5, 40, 0.5], tp: [1, 0, 1, 0.05] }, f: {}, main: 'h' },   // pts = footprint polygon (local x,z): drawn in the view, vertices draggable
-  bridge: { n: 'สะพาน', c: '#7d7870', p: { w: [4, 2, 12, 0.5], len: [14, 3, 50, 1], up: [3, 0.5, 20, 0.25] }, f: { rail: 1, piers: 1 }, main: 'len' },
+  wall:   { n: 'Straight Wall', c: '#8a8478', p: { len: [10, 2, 60, 1], th: [2, 0.6, 6, 0.2], h: [6, 1, 20, 0.5] }, f: { bt: 1, wk: 1 }, main: 'len' },
+  corner: { n: 'Corner Wall (L)', c: '#8a8478', p: { a: [10, 3, 40, 1], b: [10, 3, 40, 1], th: [2, 0.6, 6, 0.2], h: [6, 1, 20, 0.5] }, f: { bt: 1, wk: 1 }, main: 'a' },
+  tower:  { n: 'Tower', c: '#77736c', p: { r: [3.5, 1.5, 10, 0.25], h: [10, 3, 30, 0.5] }, f: { round: 1, roof: 0, bt: 1 }, main: 'r' },
+  gate:   { n: 'Gatehouse', c: '#77736c', p: { len: [14, 6, 40, 1], th: [3, 1, 8, 0.5], h: [7, 3, 20, 0.5], gw: [4, 2, 10, 0.5], gh: [4.5, 2.2, 12, 0.25] }, f: { bt: 1, wk: 1, door: 1 }, main: 'len' },
+  keep:   { n: 'Keep', c: '#7d7870', p: { w: [14, 5, 40, 1], d: [12, 5, 40, 1], h: [12, 3, 30, 0.5] }, f: { bt: 1, roof: 0, turrets: 1 }, main: 'w' },
+  stairs: { n: 'Stairs', c: '#8a8478', p: { w: [3, 1, 10, 0.5], len: [8, 2, 30, 0.5], rise: [5, 0.5, 20, 0.25] }, f: {}, main: 'len' },
+  ramp:   { n: 'Ramp', c: '#8a8478', p: { w: [3, 1, 10, 0.5], len: [10, 2, 40, 0.5], rise: [4, 0.5, 20, 0.25] }, f: {}, main: 'len' },
+  walk:   { n: 'Raised Walkway', c: '#7a7569', p: { w: [3, 1, 10, 0.5], len: [10, 2, 40, 1], up: [6, 0.5, 20, 0.25] }, f: { rail: 1 }, main: 'len' },
+  free:   { n: 'Free Shape (draw)', c: '#8a8478', p: { h: [6, 0.5, 40, 0.5], tp: [1, 0, 1, 0.05] }, f: {}, main: 'h' },   // pts = footprint polygon (local x,z): drawn in the view, vertices draggable
+  bridge: { n: 'Bridge', c: '#7d7870', p: { w: [4, 2, 12, 0.5], len: [14, 3, 50, 1], up: [3, 0.5, 20, 0.25] }, f: { rail: 1, piers: 1 }, main: 'len' },
 };
-export const PART_P = { tp: 'หุบยอด (1 ตรง, 0 แหลม)', len: 'ยาว', th: 'หนา', h: 'สูง', a: 'แขน A', b: 'แขน B', r: 'รัศมี/ครึ่งกว้าง', gw: 'ช่องประตู กว้าง', gh: 'ช่องประตู สูง', w: 'กว้าง', d: 'ลึก', rise: 'สูงขึ้น', up: 'สูงจากพื้น' };
-export const PART_F = { bt: 'ฟันปลายอดกำแพง', wk: 'ทางเดินบนยอด', door: 'บานประตูไม้ (พังได้)', round: 'ทรงกลม', roof: 'หลังคา (แทนยอดโล่ง)', turrets: 'หอมุมเล็ก', rail: 'ราว', piers: 'เสารองใต้สะพาน' };
+export const PART_P = { tp: 'Taper (1 straight, 0 pointed)', len: 'Length', th: 'Thickness', h: 'Height', a: 'Arm A', b: 'Arm B', r: 'Radius/Half Width', gw: 'Door Width', gh: 'Door Height', w: 'Width', d: 'Depth', rise: 'Rise', up: 'Height Above Ground' };
+export const PART_F = { bt: 'Battlements', wk: 'Walkway on Top', door: 'Wooden Gate Door (breakable)', round: 'Round', roof: 'Roof (instead of open top)', turrets: 'Small Corner Towers', rail: 'Rail', piers: 'Under-bridge Supports' };
 export function partNew(k, o = {}) {
   const D = PART[k], p = { k, x: 0, z: 0, rot: 0, base: null, c: D.c, brk: 0 };
   for (const q in D.p) p[q] = D.p[q][0];
@@ -541,7 +541,7 @@ function pctx(M, p, objs, floors) {
     if (o.m) it.m = o.m;
     objs.push(it); return it;
   };
-  // big blocks: visible shell (no collision) + a ring of thin hidden strips = exact footprint for the game's circle collision
+  // big blocks: visible shell (no collision) + a ring of thin hidden strips = exact footprint for the game’s circle collision
   c.block = (lx, lz, w, d, y0, h, o = {}) => {
     if (Math.min(w, d) <= 3.2 || p.brk) return c.solid('box', lx, lz, w, d, y0, h, o);
     c.solid('box', lx, lz, w, d, y0, h, Object.assign({}, o, { col: 0 })); const t = 1.6;

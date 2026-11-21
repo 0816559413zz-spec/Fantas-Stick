@@ -1,58 +1,94 @@
 <!doctype html>
-<html lang="th">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Map Builder — Fantas Stick</title>
 <script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.160.0/build/three.module.min.js","three/addons/":"https://unpkg.com/three@0.160.0/examples/jsm/"}}</script>
-<!-- Map Builder: ทำแผนที่จริงที่เกมโหลดได้ (ปั้นพื้นเนียน ระบายพื้นผิว กำแพงอิสระ พื้นชั้นบน/สะพาน วางของอิสระ จุดเกิด แสง/ท้องฟ้า) แล้ว "ส่งเข้าเกม"
-     ต้นฉบับ: maps/build/<id>.json • ส่งออก: assets/maps/<id>.json + .glb + assets/manifest.json (รูปแบบเดียวกับแผนที่จาก Blender)
-     โค้ด: mapbuild/*.js • รูปแบบ/วิธีใช้: guides/MAP-BUILDER.md • กฎ UI: guides/TOOL-UI-RULES.md -->
+<!-- Map Builder: builds real maps the game loads (terrain sculpt/paint, walls, breakable panels, upper floors/bridges, props, spawns, light/sky), then "Export".
+     Unity-style layout: toolbar (Q/W/E/R) • Hierarchy + Tool Settings (left) • Scene (centre) • Inspector (right) • status bar.
+     source: maps/build/<id>.json • export: assets/maps/<id>.json + .glb + assets/manifest.json (same format as Blender maps)
+     code: mapbuild/*.js • format/how-to: guides/MAP-BUILDER.md • UI rules: guides/TOOL-UI-RULES.md -->
 <link rel="stylesheet" href="hub/tool-ui.css">
 <style>
 html,body{margin:0;height:100%;overflow:hidden}
-body{display:flex;flex-direction:column}
-.tl-bar{flex-wrap:wrap}
-.tl-bar .grp{display:flex;gap:4px;align-items:center}
-#mapSel{max-width:230px}
+body{display:flex;flex-direction:column;font-size:12px}
+/* ---------- toolbar (Unity main toolbar) ---------- */
+.tl-bar{padding:4px 8px;gap:6px;background:var(--bg2);border-bottom:1px solid var(--bg0)}
+.tl-bar h1{font-size:13px;margin-right:4px}
+.tl-bar .tl-btn,.tl-bar .tl-sel{padding:3px 9px;font-size:12px}
+.tl-bar .grp{display:flex;gap:0;align-items:center}
+.tl-bar .grp.gap{gap:4px}
+#mapSel{max-width:220px}
+.tseg{display:flex;border:1px solid var(--ln2);border-radius:var(--r);overflow:hidden}
+.tseg button{font:inherit;font-size:14px;line-height:1;width:30px;height:24px;background:var(--bg3);color:var(--tx);border:0;border-right:1px solid var(--ln2);cursor:pointer;padding:0}
+.tseg button:last-child{border-right:0}
+.tseg button:hover{background:var(--bg4)}
+.tseg button.on{background:var(--acc);color:#fff}
+.tseg.play button{width:40px;font-size:12px}
 #stat{color:var(--tx2);font-size:12px;white-space:nowrap}
 #stat.err{color:var(--serr)}#stat.ok{color:var(--sok)}#stat.warn{color:var(--swarn)}
-main{flex:1;display:flex;min-height:0}
-#tools{width:52px;background:var(--bg1);border-right:1px solid var(--ln);display:flex;flex-direction:column;align-items:center;padding:6px 0;gap:2px;overflow-y:auto}
-#tools button{width:44px;height:42px;background:transparent;border:1px solid transparent;border-radius:var(--r);color:var(--tx2);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;font:inherit;padding:0}
-#tools button b{font-size:16px;font-weight:400;line-height:18px}
-#tools button i{font-style:normal;font-size:9.5px;line-height:12px;white-space:nowrap}
-#tools button:hover{background:var(--bg3);color:var(--tx)}
-#tools button.on{background:var(--accBg);border-color:var(--acc);color:#fff}
-#tools hr{width:32px;border:0;border-top:1px solid var(--ln);margin:4px 0}
-#opts{width:236px;background:var(--bg1);border-right:1px solid var(--ln);overflow-y:auto;padding:8px 10px}
-#side{width:300px;background:var(--bg1);border-left:1px solid var(--ln);overflow-y:auto}
-#view{flex:1;position:relative;min-width:0;background:var(--bg0);overflow:hidden}
+/* ---------- docks ---------- */
+main{flex:1;display:flex;min-height:0;gap:2px;background:var(--bg0)}
+.dock{display:flex;flex-direction:column;min-height:0;background:var(--bg1)}
+.tabs{display:flex;background:var(--bg0);height:24px;flex:none;align-items:flex-end}
+.tab{padding:0 12px;height:22px;line-height:22px;font-size:12px;color:var(--tx2);background:var(--bg2);border-top:2px solid transparent;border-radius:3px 3px 0 0;margin-left:2px;white-space:nowrap}
+.tab.on{background:var(--bg1);color:var(--tx);border-top-color:var(--acc)}
+.pbody{flex:1;overflow-y:auto;min-height:0}
+#left{width:250px;flex:none;gap:2px;background:var(--bg0)}
+#left .pane{display:flex;flex-direction:column;min-height:0;background:var(--bg1)}
+#hierPane{flex:1 1 45%}
+#optPane{flex:1 1 55%}
+#opts{padding:6px 10px}
+#right{width:310px;flex:none}
+#center{flex:1;min-width:0}
+/* ---------- hierarchy ---------- */
+.hsearch{padding:4px 6px;border-bottom:1px solid var(--ln)}
+.hsearch .tl-in{width:100%;padding:2px 6px;font-size:12px;background:var(--bg0)}
+#hier{padding:2px 0 8px;font-size:12px}
+.hrow{display:flex;align-items:center;gap:4px;height:20px;padding-right:6px;cursor:default;white-space:nowrap;overflow:hidden;color:var(--tx)}
+.hrow:hover{background:var(--hov)}
+.hrow.on{background:var(--accBg);box-shadow:inset 2px 0 var(--acc)}
+.hrow.root{font-weight:600}
+.hgrp{color:var(--tx2)}
+.harr{width:12px;flex:none;color:var(--tx3);font-size:10px;text-align:center}
+.hic{width:12px;flex:none;color:var(--tx3);font-size:10px;text-align:center}
+.hcnt{margin-left:auto;color:var(--tx3);font:11px var(--fu)}
+.hdim{color:var(--tx3)}
+/* ---------- scene view ---------- */
+#vbar{display:flex;flex-wrap:wrap;gap:2px 10px;align-items:center;padding:3px 8px;background:var(--bg2);border-bottom:1px solid var(--bg0);flex:none}
+#vbar .tl-btn,#vbar .tl-sel{padding:1px 8px;font-size:12px}
+#vbar .vsep{width:1px;height:16px;background:var(--ln2)}
+#vbar label.lbl{color:var(--tx2);font-size:12px}
+#view{flex:1;position:relative;min-height:0;background:var(--bg0);overflow:hidden}
 #cv{position:absolute;inset:0;width:100%;height:100%;display:block;outline:none;cursor:crosshair}
-#vbar{position:absolute;top:8px;left:8px;display:flex;flex-wrap:wrap;gap:4px 10px;align-items:center;background:var(--bg1);border:1px solid var(--ln2);border-radius:var(--r);padding:4px 8px}
-#vbar .tl-btn{padding:2px 8px;font-size:12px}
-#gbar{position:absolute;top:8px;right:8px;display:flex;gap:4px;background:var(--bg1);border:1px solid var(--ln2);border-radius:var(--r);padding:4px 6px}
-#gbar .tl-btn{padding:2px 8px;font-size:12px}
-#gbar .tl-btn.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+#cv.hand{cursor:grab}
+#tools{position:absolute;top:8px;left:8px;display:flex;flex-direction:column;gap:1px;background:var(--bg2);border:1px solid var(--ln2);border-radius:var(--r);padding:2px;box-shadow:0 2px 6px rgba(0,0,0,.4)}
+#tools button{width:30px;height:28px;background:transparent;border:0;border-radius:3px;color:var(--tx);cursor:pointer;font:inherit;font-size:15px;padding:0}
+#tools button:hover{background:var(--bg4)}
+#tools button.on{background:var(--acc);color:#fff}
 #vmsg{position:absolute;top:45%;left:0;right:0;text-align:center;color:var(--tx2);pointer-events:none}
-#status{display:flex;gap:14px;padding:3px 10px;background:var(--bg1);border-top:1px solid var(--ln);font:12px var(--fu);color:var(--tx2);white-space:nowrap;overflow:hidden}
+/* ---------- status bar ---------- */
+#status{display:flex;gap:14px;padding:2px 10px;background:var(--bg2);border-top:1px solid var(--bg0);font:11.5px var(--fu);color:var(--tx2);white-space:nowrap;overflow:hidden}
 #status #hint{font-family:var(--ui);color:var(--tx3);overflow:hidden;text-overflow:ellipsis}
+/* ---------- panels / inspector ---------- */
 h3{margin:12px 0 6px;font-size:11px;font-weight:600;color:var(--tx3);text-transform:uppercase;letter-spacing:.04em}
 h3:first-child{margin-top:2px}
-.sec{border-bottom:1px solid var(--ln);padding:8px 12px}
-.sec>summary{cursor:pointer;font-size:12px;font-weight:600;color:var(--tx2);list-style:none;padding:2px 0}
+.sec{border-bottom:1px solid var(--bg0);padding:0 0 6px}
+.sec>*:not(summary){margin-left:10px;margin-right:10px}
+.sec>summary{cursor:pointer;font-size:12px;font-weight:600;color:var(--tx);list-style:none;padding:4px 8px;background:var(--bg2);border-bottom:1px solid var(--ln);margin-bottom:4px}
 .sec>summary::before{content:'▸ ';color:var(--tx3)}.sec[open]>summary::before{content:'▾ '}
-.row{display:flex;align-items:center;gap:6px;margin:5px 0}
-.row>label{width:92px;flex:none;color:var(--tx2);font-size:12px}
-.row .tl-in,.row .tl-sel{flex:1;min-width:0;padding:3px 6px}
+.row{display:flex;align-items:center;gap:6px;margin:3px 0}
+.row>label{width:42%;max-width:130px;flex:none;color:var(--tx2);font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row .tl-in,.row .tl-sel{flex:1;min-width:0;padding:2px 6px;font-size:12px;background:var(--bg0)}
 .row input[type=number]{width:70px;flex:none}
 .row input[type=range]{flex:1;min-width:0}
-.row input[type=color]{width:44px;height:24px;padding:0;border:1px solid var(--ln2);background:var(--bg2);border-radius:var(--r);flex:none}
+.row input[type=color]{width:44px;height:20px;padding:0;border:1px solid var(--ln2);background:var(--bg2);border-radius:var(--r);flex:none}
 .row output{width:38px;text-align:right;font:12px var(--fu);color:var(--tx2);flex:none}
 textarea.tl-in{width:100%;min-height:48px;resize:vertical;padding:4px 6px}
 .chk{display:flex;align-items:center;gap:6px;margin:4px 0;color:var(--tx2);font-size:12px;cursor:pointer}
 .seg{display:flex;flex-wrap:wrap;gap:3px;margin:4px 0}
-.seg .tl-btn{padding:3px 8px;font-size:12px;flex:1;white-space:nowrap}
+.seg .tl-btn{padding:2px 8px;font-size:12px;flex:1;white-space:nowrap}
 .pal{display:grid;grid-template-columns:1fr 1fr;gap:3px}
 .pal button{display:flex;align-items:center;gap:6px;text-align:left;font:inherit;font-size:12px;color:var(--tx);background:var(--bg2);border:1px solid var(--ln2);border-radius:var(--r);padding:3px 6px;cursor:pointer;min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
 .pal button:hover{background:var(--bg3)}
@@ -81,39 +117,60 @@ dialog .btns{display:flex;justify-content:flex-end;gap:8px;margin-top:14px}
 </head>
 <body>
 <div class="tl-bar">
-  <a class="tl-home" href="hub.html">◂ Tool</a>
+  <a class="tl-home" href="hub.html">◂ Tools</a>
   <h1>Map Builder</h1>
-  <div class="grp"><select id="mapSel" class="tl-sel" title="แผนที่"></select><button id="bNew" class="tl-btn">＋ ใหม่</button><button id="bSave" class="tl-btn" title="Ctrl+S">บันทึก</button></div>
-  <div class="grp"><button id="bUndo" class="tl-btn" title="Ctrl+Z">↶</button><button id="bRedo" class="tl-btn" title="Ctrl+Y">↷</button></div>
-  <span id="stat"></span>
+  <div class="grp gap"><select id="mapSel" class="tl-sel" title="Map"></select><button id="bNew" class="tl-btn">＋ New</button><button id="bSave" class="tl-btn" title="Save (Ctrl+S)">Save</button></div>
+  <div class="tseg"><button id="bUndo" title="Undo (Ctrl+Z)">↶</button><button id="bRedo" title="Redo (Ctrl+Y)">↷</button></div>
+  <div class="tseg" id="gbar">
+    <button data-g="hand" title="Hand Tool (Q) — left-drag pans the view, no gizmo">✋</button>
+    <button data-g="translate" title="Move Tool (W) — green arrow = up/down">✥</button>
+    <button data-g="rotate" title="Rotate Tool (E)">⟳</button>
+    <button data-g="scale" title="Scale Tool (R) — centre cube = uniform">⤢</button>
+  </div>
   <span class="sp"></span>
-  <a class="tl-btn" href="mapedit.html" title="Map Editor เดิม: ผังร่างมุมบนสำหรับคุยออกแบบ">ผังร่าง ▸</a>
-  <button id="bPlay" class="tl-btn" title="ส่งเข้าเกมแล้วเปิดเกมที่แผนที่นี้">▶ ทดลองเล่น</button>
-  <button id="bExport" class="tl-btn pri" title="เขียนไฟล์แผนที่ลง assets/maps ให้เกมใช้">⬆ ส่งเข้าเกม</button>
+  <div class="tseg play"><button id="bPlay" title="Play — export to the game, then open the game on this map">▶</button></div>
+  <span class="sp"></span>
+  <span id="stat"></span>
+  <a class="tl-btn" href="mapedit.html" title="Map Editor (old): top-down sketch layout for design talks">Sketch ▸</a>
+  <button id="bExport" class="tl-btn pri" title="Export — write the map files to assets/maps for the game">⬆ Export</button>
 </div>
 <main>
-  <div id="tools"></div>
-  <div id="opts"></div>
-  <div id="view">
-    <canvas id="cv" tabindex="0"></canvas>
-    <div id="vbar">
-      <button class="tl-btn" id="vTop" title="มองจากด้านบน (T)">มุมบน</button>
-      <button class="tl-btn" id="vFit" title="เห็นทั้งแผนที่ (Home)">ทั้งแผนที่</button>
-      <label class="chk" style="margin:0"><input type="checkbox" id="oSteep" checked>ชันเกินเดิน</label>
-      <label class="chk" style="margin:0"><input type="checkbox" id="oCol">ที่ชน</label>
-      <label class="chk" style="margin:0"><input type="checkbox" id="oGrid">กริด</label>
-      <label class="chk" style="margin:0" title="พื้นที่เฟส / เพดาน (เครื่องหมายบุกปราสาท)"><input type="checkbox" id="oArea" checked>พื้นที่/เพดาน</label>
-      <label class="chk" style="margin:0"><input type="checkbox" id="oSky" checked>แสงตามแผนที่</label>
+  <div id="left" class="dock">
+    <div class="pane" id="hierPane">
+      <div class="tabs"><span class="tab on">☰ Hierarchy</span></div>
+      <div class="hsearch"><input id="hq" class="tl-in" placeholder="Search…" autocomplete="off"></div>
+      <div id="hier" class="pbody"></div>
     </div>
-    <div id="gbar" title="ลูกศรบนของที่เลือก">
-      <button class="tl-btn" data-g="translate" title="เลื่อนตำแหน่ง (1) — ลูกศรเขียว = ยกขึ้น/ลง">✥ เลื่อน</button>
-      <button class="tl-btn" data-g="rotate" title="หมุน (2)">⟳ หมุน</button>
-      <button class="tl-btn" data-g="scale" title="ปรับขนาด (3) — กล่องกลาง = ทุกด้านเท่ากัน">⤢ ขนาด</button>
-      <button class="tl-btn" data-g="off" title="ซ่อนลูกศร (0)">ซ่อน</button>
+    <div class="pane" id="optPane">
+      <div class="tabs"><span class="tab on" id="optTitle">⚙ Tool Settings</span></div>
+      <div id="opts" class="pbody"></div>
     </div>
-    <div id="vmsg">กำลังโหลด…</div>
   </div>
-  <div id="side"></div>
+  <div id="center" class="dock">
+    <div class="tabs"><span class="tab on"># Scene</span></div>
+    <div id="vbar">
+      <button class="tl-btn" id="vTop" title="Top view (T)">Top</button>
+      <button class="tl-btn" id="vFit" title="Frame the whole map (Home)">Frame All</button>
+      <span class="vsep"></span>
+      <label class="lbl" for="snapSel" title="Grid snap for moving (Move tool + dragging)">Snap</label>
+      <select id="snapSel" class="tl-sel"><option value="0">Off</option><option value="0.25">0.25</option><option value="0.5">0.5</option><option value="1">1</option><option value="2">2</option></select>
+      <span class="vsep"></span>
+      <label class="chk" style="margin:0"><input type="checkbox" id="oGrid">Grid</label>
+      <label class="chk" style="margin:0" title="Slopes too steep to walk up are shown red"><input type="checkbox" id="oSteep" checked>Too Steep</label>
+      <label class="chk" style="margin:0" title="Show the game's collision shapes"><input type="checkbox" id="oCol">Colliders</label>
+      <label class="chk" style="margin:0" title="Phase areas / ceilings (siege markers)"><input type="checkbox" id="oArea" checked>Areas</label>
+      <label class="chk" style="margin:0" title="Sky, fog and light from the map settings"><input type="checkbox" id="oSky" checked>Map Lighting</label>
+    </div>
+    <div id="view">
+      <canvas id="cv" tabindex="0"></canvas>
+      <div id="tools" title="Tools"></div>
+      <div id="vmsg">Loading…</div>
+    </div>
+  </div>
+  <div id="right" class="dock">
+    <div class="tabs"><span class="tab on">ⓘ Inspector</span></div>
+    <div id="side" class="pbody"></div>
+  </div>
 </main>
 <div id="status"><span id="sPos">–</span><span id="sInfo"></span><span id="hint"></span></div>
 <dialog id="dlg"></dialog>

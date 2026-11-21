@@ -25,6 +25,7 @@ const opt = { smode: 'up', rad: 4, str: 4, soft: 1, hval: 2, surf: 0, wall: 0, w
 const show = { steep: true, col: false, grid: false, sky: true, area: true };
 let undo = [], redo = [];
 let hover = null, stroke = null, drag = null, draft = null, ghostRot = 0, spaceDown = false;
+const fly = new Set();   // keys held while right-dragging (WASD fly, Q/E down/up)
 const cam = { x: 50, z: 35, dist: 90, yaw: 0, pitch: 0.95 };
 
 // ================= three setup =================
@@ -163,7 +164,7 @@ function syncFloors() {
 
 // ================= asset kit =================
 const KIT = { list: [], byId: new Map(), files: new Map(), tpl: new Map(), thumbs: new Map() };
-const CATS = [['sys', 'จุดเกม'], ['mode', 'โหมดบุกปราสาท'], ['prefab', 'ห้องสำเร็จ (prefab)'], ['room', 'ห้อง / ของพังได้'], ['deco', 'ของตกแต่ง (เกมวาด)'], ['game', 'ของในเกม'], ['prim', 'ทรงพื้นฐาน'], ['tree', 'ต้นไม้'], ['rock', 'หิน'], ['plant', 'พืชเล็ก'], ['build', 'สิ่งก่อสร้าง'], ['prop', 'ของประกอบ'], ['light', 'โคม/ไฟ'], ['fence', 'รั้ว'], ['user', 'เพิ่มเอง']];
+const CATS = [['sys', 'Game Points'], ['mode', 'Siege Mode'], ['prefab', 'Room Prefabs'], ['room', 'Room / Breakables'], ['deco', 'Decor (game-drawn)'], ['game', 'Game Objects'], ['prim', 'Primitives'], ['tree', 'Trees'], ['rock', 'Rocks'], ['plant', 'Small Plants'], ['build', 'Buildings'], ['prop', 'Props'], ['light', 'Lamps/Lights'], ['fence', 'Fences'], ['user', 'Custom']];
 const CS_DEF = { tree: 0.22, light: 0.4, plant: 0.6 };
 let gltfL = null;
 function loader() { if (!gltfL) { gltfL = new GLTFLoader(); const d = new DRACOLoader(); d.setDecoderPath('https://unpkg.com/three@0.160.0/examples/jsm/libs/draco/gltf/'); gltfL.setDRACOLoader(d); gltfL.setMeshoptDecoder(MeshoptDecoder); } return gltfL; }
@@ -258,9 +259,9 @@ function markerMesh(o) {
   if (MD.isDeco(o.t)) return decoMesh(o);
   const D = OBJ[o.t], g = new THREE.Group(), c = D.c || '#888';
   const add = (geo, m, x = 0, y = 0, z = 0) => { const me = new THREE.Mesh(geo, m); me.position.set(x, y, z); g.add(me); return me; };
-  if (o.t === 'core') { const s = o.s || 4; add(new THREE.CylinderGeometry(s / 2, s / 2, 0.2, 24), helpMat(c, 0.5), 0, 0.1, 0); add(new THREE.OctahedronGeometry(s * 0.3), mat(c, { emit: 1 }), 0, 3, 0); const l = labelSprite('แกน ' + (o.n || '?'), c); l.position.y = 5.6; g.add(l); return g; }
-  if (o.t === 'sgA' || o.t === 'sgB') { add(new THREE.CylinderGeometry(4, 4, 0.1, 28), helpMat(c, 0.35), 0, 0.06, 0); add(new THREE.CylinderGeometry(0.08, 0.08, 2.6, 6), helpMat(c), 0, 1.3, 0); const l = labelSprite((o.t === 'sgA' ? 'บุก ' : 'รับ ') + (o.ph || 1), c); l.position.y = 3.2; g.add(l); return g; }
-  if (o.t === 'phase') { areaMesh(o, g, c, 0.15); const l = labelSprite('เฟส ' + (o.ph || 1), c); l.position.y = 2.6; g.add(l); return g; }
+  if (o.t === 'core') { const s = o.s || 4; add(new THREE.CylinderGeometry(s / 2, s / 2, 0.2, 24), helpMat(c, 0.5), 0, 0.1, 0); add(new THREE.OctahedronGeometry(s * 0.3), mat(c, { emit: 1 }), 0, 3, 0); const l = labelSprite('Core ' + (o.n || '?'), c); l.position.y = 5.6; g.add(l); return g; }
+  if (o.t === 'sgA' || o.t === 'sgB') { add(new THREE.CylinderGeometry(4, 4, 0.1, 28), helpMat(c, 0.35), 0, 0.06, 0); add(new THREE.CylinderGeometry(0.08, 0.08, 2.6, 6), helpMat(c), 0, 1.3, 0); const l = labelSprite((o.t === 'sgA' ? 'Atk ' : 'Def ') + (o.ph || 1), c); l.position.y = 3.2; g.add(l); return g; }
+  if (o.t === 'phase') { areaMesh(o, g, c, 0.15); const l = labelSprite('Phase ' + (o.ph || 1), c); l.position.y = 2.6; g.add(l); return g; }
   if (o.t === 'ceil') { areaMesh(o, g, c, 0); return g; }
   if (D.rp) { const R = MD.RPK[D.rp], L = R.L ? Math.max(0.3, o.L || 4) : R.w, w = R.L ? R.w : R.w;
     const b = add(new THREE.BoxGeometry(L, R.h, w), mat(R.col ? c : '#b89a76'), 0, R.h / 2, 0); b.castShadow = true; return g; }
@@ -529,7 +530,7 @@ cv.addEventListener('contextmenu', e => e.preventDefault());
 cv.addEventListener('pointerdown', e => {
   if (e.button === 0 && !spaceDown && tc.object && (tc.axis || tc.dragging)) return;   // gizmo handle grabbed
   cv.focus(); cv.setPointerCapture(e.pointerId); updHover(e);
-  if (e.button === 2 || e.button === 1 || (e.button === 0 && spaceDown)) { drag = { k: e.button === 2 ? 'orbit' : 'pan', x: e.clientX, y: e.clientY }; return; }
+  if (e.button === 2 || e.button === 1 || (e.button === 0 && (spaceDown || (tool === 'select' && gmode === 'hand')))) { drag = { k: e.button === 2 ? 'orbit' : 'pan', x: e.clientX, y: e.clientY }; return; }
   if (e.button !== 0) return;
   const inv = e.shiftKey;
   if (tool === 'sculpt') {
@@ -602,6 +603,7 @@ cv.addEventListener('pointerup', e => {
   else if (drag && drag.k === 'floor') { makeFloor(drag.a, hover || drag.a); drawLine(null); }
   else if (drag && (drag.k === 'move' || drag.k === 'pt' || drag.k === 'fpt') && drag.moved) { changed(); colDirty(); renderSide(); }
   if (stroke) { if (stroke.k !== 'scatter' && stroke.moved) afterTerrain(); else if (stroke.k === 'scatter') { changed(); colDirty(); } stroke = null; }
+  if (drag && drag.k === 'orbit') fly.clear();
   drag = null; need();
 });
 cv.addEventListener('pointerleave', () => { hover = null; need(); });
@@ -656,7 +658,7 @@ const isVisualType = t => t.startsWith('kit:') || (OBJ[t] && OBJ[t].cat === 'pri
 // ================= gizmo: arrows / ring / boxes on the selection (three TransformControls) =================
 // 1 = move (world axes, Y = height) • 2 = rotate (Y ring) • 3 = size (local axes of the item) • 0 = off. One undo step per drag.
 // The anchor sits in `root` (map coords); each drag maps the anchor's change onto the item's own fields from a copy taken at mouse-down.
-let gmode = 'translate', gz = null;
+let gmode = 'translate', gz = null;   // 'hand' | 'translate' | 'rotate' | 'scale'
 const yawOf = q => 2 * Math.atan2(q.y, q.w), r2 = v => +v.toFixed(2), r3 = v => +v.toFixed(3);
 const flatRot = it => it.t === 'phase' || it.t === 'ceil' || it.t === 'dc_box';   // axis-aligned in the game
 const isDeco = it => OBJ[it.t] && OBJ[it.t].cat === 'deco';
@@ -666,7 +668,7 @@ function gScaleKind(k, it) {   // how [3] size maps onto this item: 'u' uniform 
   if (isPrim(it) || isDeco(it)) return 'xyz'; if (it.t === 'house' || it.t === 'phase' || it.t === 'ceil') return 'xz'; return null;
 }
 function placeGizmo() {
-  if (gz) return; const it = tool === 'select' && gmode !== 'off' && sel && sel.pt == null ? find(sel) : null;
+  if (gz) return; const it = tool === 'select' && gmode !== 'hand' && sel && sel.pt == null ? find(sel) : null;
   syncGbar(); if (!it) { tc.detach(); need(); return; }
   const k = sel.k, b = selBox && selBox.box;
   const px = k === 'wall' ? it.pts.reduce((s, p) => s + p[0], 0) / it.pts.length : it.x, pz = k === 'wall' ? it.pts.reduce((s, p) => s + p[1], 0) / it.pts.length : it.z;
@@ -681,8 +683,8 @@ function placeGizmo() {
   tc.setTranslationSnap(opt.snap || null); tc.setRotationSnap(k === 'room' ? Math.PI / 2 : Math.PI / 36);
   if (tc.object !== gAnchor) tc.attach(gAnchor); need();
 }
-function setGizmo(m) { gmode = gmode === m && m !== 'off' ? 'off' : m; placeGizmo(); }
-function syncGbar() { for (const b of document.querySelectorAll('#gbar [data-g]')) b.classList.toggle('on', b.dataset.g === gmode); }
+function setGizmo(m) { gmode = m; if (tool !== 'select') setTool('select'); else placeGizmo(); }
+function syncGbar() { for (const b of document.querySelectorAll('#gbar [data-g]')) b.classList.toggle('on', tool === 'select' && b.dataset.g === gmode); cv.classList.toggle('hand', tool === 'select' && gmode === 'hand'); }
 tc.addEventListener('change', need);
 tc.addEventListener('mouseDown', () => { const it = find(sel); if (!it) return; gz = { it, k: sel.k, s: JSON.parse(JSON.stringify(it)), j: JSON.stringify(it), p: gAnchor.position.clone(), r0: yawOf(gAnchor.quaternion) }; pushUndo('o'); });
 tc.addEventListener('mouseUp', () => { const z = gz; if (!z) return; gz = null;
@@ -714,17 +716,62 @@ tc.addEventListener('objectChange', () => {
   if (k === 'obj') syncObj(it); else if (k === 'part') syncPart(it); else if (k === 'room') syncRooms(); else if (k === 'wall') { syncWalls(); updSel(); } else { syncFloors(); updSel(); }
 });
 
+// ================= Hierarchy (left dock, Unity-style tree of the map’s content) =================
+// Groups: Walls / Upper Floors / Breakable Panels (by group) / Objects (by category) / Castle / Rooms • click = select, double-click = frame • search filters by name
+const hOpen = new Set(['walls', 'floors', 'pnl', 'objs', 'parts', 'rooms']); let hRAF = 0;
+const hierSoon = () => { cancelAnimationFrame(hRAF); hRAF = requestAnimationFrame(renderHier); };
+const catOf = o => isKit(o) ? ((KIT.byId.get(kitId(o)) || {}).cat || 'user') : (OBJ[o.t] ? OBJ[o.t].cat : 'other');
+const catName = c => (CATS.find(x => x[0] === c) || [c, c])[1];
+function hName(k, it) {
+  if (k === 'wall') return 'Wall ' + it.id; if (k === 'floor') return 'Upper Floor ' + it.id; if (k === 'room') return 'Room ' + it.ref;
+  if (k === 'part') return (MD.PART[it.k] ? MD.PART[it.k].n : it.k) + ' ' + it.id;
+  if (isKit(it)) { const a = KIT.byId.get(kitId(it)); return a ? a.name : kitId(it); }
+  return (OBJ[it.t] ? OBJ[it.t].n : it.t) + (it.t === 'pn_wall' ? ' ' + it.id : '');
+}
+function hKeys(k, it) {   // groups that must be open to show this item
+  if (k === 'wall') return ['walls']; if (k === 'floor') return ['floors']; if (k === 'part') return ['parts']; if (k === 'room') return ['rooms'];
+  if (it.t === 'pn_wall') return ['pnl', 'pnl/' + (it.g == null || it.g === '' ? '–' : it.g)]; return ['objs', 'objs/' + catOf(it)];
+}
+function hierSel() { const it = find(sel); if (it) for (const k of hKeys(sel.k, it)) hOpen.add(k); renderHier(); }
+function renderHier() {
+  const box = $('hier'); if (!box || !M) return; const top = box.scrollTop; box.textContent = '';
+  const q = (($('hq') || {}).value || '').trim().toLowerCase(), match = n => !q || n.toLowerCase().includes(q), pad = d => 'padding-left:' + (4 + d * 14) + 'px';
+  const leaf = (d, k, it) => { const n = hName(k, it); if (!match(n)) return 0; const on = sel && sel.k === k && sel.id === it.id;
+    box.append(el('div', { class: 'hrow' + (on ? ' on' : ''), style: pad(d), onclick: () => { sel = { k, id: it.id }; renderSide(); updSel(); }, ondblclick: () => { sel = { k, id: it.id }; frameSel(); } },
+      el('span', { class: 'hic' }, '▪'), n, it.vis === 0 ? el('span', { class: 'hdim' }, '  (hidden)') : null)); return 1; };
+  const group = (d, key, label, items, sub) => {   // items = [[k, it]] • sub = [[key, label, items]]
+    const total = items.length + (sub ? sub.reduce((a, g) => a + g[2].length, 0) : 0); if (!total) return;
+    const open = hOpen.has(key) || !!q;
+    box.append(el('div', { class: 'hrow hgrp', style: pad(d), onclick: () => { hOpen.has(key) ? hOpen.delete(key) : hOpen.add(key); renderHier(); } }, el('span', { class: 'harr' }, open ? '▾' : '▸'), label, el('span', { class: 'hcnt' }, String(total))));
+    if (!open) return;
+    if (sub) for (const g of sub) group(d + 1, key + '/' + g[0], g[1], g[2]);
+    let n = 0; for (const [k, it] of items) { if (n >= 300) { box.append(el('div', { class: 'hrow hdim', style: pad(d + 1) }, '… more (use Search)')); break; } n += leaf(d + 1, k, it); }
+  };
+  box.append(el('div', { class: 'hrow root' + (sel ? '' : ' on'), style: pad(0), onclick: () => { sel = null; renderSide(); updSel(); } }, el('span', { class: 'harr' }, '◆'), M.name || M.id || 'Untitled'));
+  box.append(el('div', { class: 'hrow', style: pad(1), title: 'Terrain: use the Sculpt / Paint tools • click = map settings in the Inspector', onclick: () => { sel = null; renderSide(); updSel(); } }, el('span', { class: 'hic' }, '⛰'), 'Terrain ' + M.W + ' × ' + M.H));
+  group(1, 'walls', 'Walls', M.walls.map(w => ['wall', w]));
+  group(1, 'floors', 'Upper Floors', M.floors.map(f => ['floor', f]));
+  const pg = new Map(), oc = new Map();
+  for (const o of M.objs) { if (o.t === 'pn_wall') { const g = o.g == null || o.g === '' ? '–' : o.g; if (!pg.has(g)) pg.set(g, []); pg.get(g).push(['obj', o]); } else { const c = catOf(o); if (!oc.has(c)) oc.set(c, []); oc.get(c).push(['obj', o]); } }
+  group(1, 'pnl', 'Breakable Panels', [], [...pg].sort((a, b) => String(a[0]).localeCompare(String(b[0]))).map(([g, L]) => [g, 'Group ' + g, L]));
+  group(1, 'objs', 'Objects', [], [...oc].map(([c, L]) => [c, catName(c), L]));
+  group(1, 'parts', 'Castle', M.parts.map(p => ['part', p]));
+  group(1, 'rooms', 'Rooms', (M.rooms || []).map(r => ['room', r]));
+  box.scrollTop = top; const on = box.querySelector('.hrow.on:not(.root)'); if (on && (on.offsetTop < box.scrollTop || on.offsetTop > box.scrollTop + box.clientHeight - 20)) on.scrollIntoView({ block: 'nearest' });
+}
+
 // ================= keyboard =================
 addEventListener('keydown', e => {
   if (e.code === 'Space' && !/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)) { spaceDown = true; e.preventDefault(); }
   if (/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)) { if (e.key === 'Escape') document.activeElement.blur(); return; }
+  if (drag && drag.k === 'orbit' && /^Key[WASDQE]$/.test(e.code)) { fly.add(e.code); fly.fast = e.shiftKey; e.preventDefault(); return; }   // right-drag + WASD = fly (Unity)
   const k = e.key.toLowerCase();
   if ((e.ctrlKey || e.metaKey) && k === 's') { e.preventDefault(); save(); return; }
   if ((e.ctrlKey || e.metaKey) && k === 'z') { e.preventDefault(); e.shiftKey ? doRedo() : doUndo(); return; }
   if ((e.ctrlKey || e.metaKey) && k === 'y') { e.preventDefault(); doRedo(); return; }
   if ((e.ctrlKey || e.metaKey) && k === 'd') { e.preventDefault(); dupSel(); return; }
   if (e.ctrlKey || e.metaKey) return;
-  if (k === '1' || k === '2' || k === '3' || k === '0') { setGizmo(['off', 'translate', 'rotate', 'scale'][+k]); return; }
+  if (k === 'q' || k === 'w' || k === 'e' || k === 'r') { setGizmo({ q: 'hand', w: 'translate', e: 'rotate', r: 'scale' }[k]); return; }   // Unity transform tools
   const T = TOOLS.find(t => t[3] === k); if (T) { setTool(T[0]); return; }
   if (k === 'escape') { if (fdraft) { fdraft = null; undo.pop(); drawLine(null); drawHandles(); } else if (draft) { draft = null; undo.pop(); drawLine(null); drawHandles(); } else { sel = null; renderSide(); updSel(); } need(); }
   else if (k === 'enter' && fdraft) finishFree();
@@ -734,12 +781,13 @@ addEventListener('keydown', e => {
   else if (k === 'delete' || k === 'backspace') delSel();
   else if (k === 'home') fit();
   else if (k === 't') { cam.pitch = 1.55; cam.yaw = 0; camApply(); }
-  else if (k === 'f' && find(sel)) { const it = find(sel); cam.x = it.x != null ? it.x : it.pts[0][0]; cam.z = it.z != null ? it.z : it.pts[0][1]; cam.dist = Math.min(cam.dist, 30); camApply(); }
-  else if (k === 'q' || k === 'e' || k === 'r') { const cst = tool === 'castle' || (sel && sel.k === 'part'), a = (k === 'q' ? 1 : -1) * (cst ? (e.shiftKey ? Math.PI / 12 : Math.PI / 4) : (e.shiftKey ? Math.PI / 36 : Math.PI / 12)) * (k === 'r' ? -1 : 1); if (tool === 'place' || tool === 'floor' || tool === 'castle') { ghostRot += a; need(); } else rotSel(a); }
+  else if (k === 'f') frameSel();
+  else if (k === ',' || k === '.' || k === '<' || k === '>') { const cst = tool === 'castle' || (sel && sel.k === 'part'), a = (k === ',' || k === '<' ? 1 : -1) * (cst ? (e.shiftKey ? Math.PI / 12 : Math.PI / 4) : (e.shiftKey ? Math.PI / 36 : Math.PI / 12)); if (tool === 'place' || tool === 'floor' || tool === 'castle') { ghostRot += a; need(); } else rotSel(a); }
   else if (k === '[' || k === ']') { if (tool === 'sculpt' || tool === 'paint' || tool === 'scatter') { opt.rad = clamp(+(opt.rad * (k === '[' ? 0.85 : 1.18)).toFixed(1), 0.5, 40); renderOpts(); } else scaleSel(k === '[' ? 0.9 : 1.1); need(); }
   else if (k === 'pageup' || k === 'pagedown') { e.preventDefault(); liftSel((k === 'pageup' ? 1 : -1) * (e.shiftKey ? 0.05 : 0.25)); }
 });
-addEventListener('keyup', e => { if (e.code === 'Space') spaceDown = false; });
+addEventListener('keyup', e => { if (e.code === 'Space') spaceDown = false; fly.delete(e.code); fly.fast = e.shiftKey; });
+function frameSel() { const it = find(sel); if (!it) return; cam.x = it.x != null ? it.x : it.pts[0][0]; cam.z = it.z != null ? it.z : it.pts[0][1]; cam.dist = Math.min(cam.dist, 30); camApply(); }
 function editSel(fn) { const it = find(sel); if (!it) return; pushUndo('o'); fn(it); resync(); renderSide(); }
 function resync() { const it = find(sel); if (sel && sel.k === 'room') { syncAll(); changed(); return; } if (sel && sel.k === 'obj' && it) syncObj(it); else if (sel && sel.k === 'part' && it) syncPart(it); else if (sel && sel.k === 'wall') syncWalls(); else syncFloors(); updSel(); changed(); colDirty(); }
 function delSel() { if (!sel) return; const w = sel.k === 'wall' && find(sel), fp = sel.k === 'part' && find(sel);
@@ -765,10 +813,10 @@ function finishPnl(closed) {
     const o = { id: nid(), t: 'pn_wall', x: +x.toFixed(3), z: +z.toFixed(3), y: +y.toFixed(2), rot: +Math.atan2(-dz, dx).toFixed(4), L: +(L + eA + eB).toFixed(3), sy: q.sy, T, cs: q.cs, mat: q.mat, m: q.m, g };
     if (q.m === 'l' && !q.thru) o.thru = 0; if (q.hp > 0) o.hp = q.hp; add.push(o); }
   if (!add.length) { undo.pop(); return; }
-  M.objs.push(...add); sel = { k: 'obj', id: add[add.length - 1].id }; syncObjs(); changed(); renderSide(); stat(add.length + ' แผ่น (กลุ่ม ' + g + ')', 'ok');
+  M.objs.push(...add); sel = { k: 'obj', id: add[add.length - 1].id }; syncObjs(); changed(); renderSide(); stat(add.length + ' panels (group ' + g + ')', 'ok');
 }
 function pnCut(it, kind) {   // opening = hole in the same panel (+ a lit glass pane for windows, same group)
-  const q = MD.pnOpening(it, kind); if (!q || !M.objs.includes(it)) { stat('เจาะไม่ได้: แผ่นสั้น/เตี้ยเกิน หรือมีช่องครบ 4 แล้ว', 'err'); return; }
+  const q = MD.pnOpening(it, kind); if (!q || !M.objs.includes(it)) { stat('Can’t cut: panel too short/low, or it already has 4 openings', 'err'); return; }
   pushUndo('o'); if (it.g == null || it.g === '') it.g = MD.pnNewGroup(M); it.ho = (it.ho || []).concat([q]);
   if (kind === 'window') { const F = MD.pnFrame(M, it), d = MD.pnDims(it), u = (q[0] + q[1]) / 2 - d.L / 2;
     M.objs.push({ id: nid(), t: 'pn_wall', x: +(it.x + F.U[0] * u).toFixed(3), z: +(it.z + F.U[2] * u).toFixed(3), y: +((it.y || 0) + q[2] - 0.05).toFixed(3), rot: it.rot || 0, L: +(q[1] - q[0] + 0.1).toFixed(3), sy: +(q[3] - q[2] + 0.1).toFixed(3), T: 0.1, cs: 9, mat: 'litwin', m: 'g', g: it.g }); }
@@ -776,23 +824,23 @@ function pnCut(it, kind) {   // opening = hole in the same panel (+ a lit glass 
 }
 function pnFromHouse(it, ldn) {   // old breakable house → panel objects (fully editable)
   const i = M.objs.indexOf(it); if (i < 0) return; pushUndo('o'); const Q = MD.pnHouseObjs(M, it, MD.pnNewGroup(M), ldn); Q.forEach(q => q.id = nid());
-  M.objs.splice(i, 1, ...Q); sel = { k: 'obj', id: Q[0].id }; syncObjs(); changed(); renderSide(); stat(Q.length + ' แผ่น (กลุ่ม ' + Q[0].g + ')', 'ok');
+  M.objs.splice(i, 1, ...Q); sel = { k: 'obj', id: Q[0].id }; syncObjs(); changed(); renderSide(); stat(Q.length + ' panels (group ' + Q[0].g + ')', 'ok');
 }
 const selRow = (label, items, cur, on) => el('div', { class: 'row' }, el('label', null, label), el('select', { class: 'tl-sel', onchange: e => on(e.target.value), html: items.map(([v, n]) => `<option value="${v}"${v === cur ? ' selected' : ''}>${n}</option>`).join('') }));
 function pnFields(it) {
   const d = MD.pnDims(it), mat = it.mat || 'brick', hp = it.hp || MD.PN_HP[mat];
-  return [fld('วัสดุ', it, 'mat', { type: 'select', items: MD.PN_MAT, get: () => mat }), fld('แบบพัง', it, 'm', { type: 'select', items: MD.PN_MODE, get: () => it.m || 'p', after: () => { resync(); renderSide(); } }),
-    it.m === 'l' ? fld('ทะลุได้ (ปิด = แค่เสียหาย)', it, 'thru', { type: 'checkbox', get: () => it.thru !== 0, set: v => { if (v) delete it.thru; else it.thru = 0; } }) : null,
-    fld('ยาว', it, 'L', { min: 0.2 }), fld('สูง (ตามแผ่น)', it, 'sy', { min: 0.2 }), fld('หนา', it, 'T', { min: 0.03, step: 0.05 }), fld('ขนาดช่อง', it, 'cs', { min: 0.2, step: 0.05 }),
-    fld('เอียง (องศา, หลังคา)', it, 'tl', { deg: 1, nullable: 1, ph: '0 = ตั้งตรง' }), fld('รูปทรง', it, 'sh', { type: 'select', items: [['', 'สี่เหลี่ยม'], ['tri', 'สามเหลี่ยม (จั่ว)']], get: () => it.sh || '', set: v => { if (v) it.sh = v; else delete it.sh; } }),
-    it.ho && it.ho.length ? el('div', { class: 'row' }, el('label', null, 'ช่องเจาะ ' + it.ho.length + ' ช่อง'), el('button', { class: 'tl-btn', onclick: () => { pushUndo('o'); delete it.ho; resync(); renderSide(); } }, 'ล้างช่อง')) : null,
-    fld('HP ต่อช่อง', it, 'hp', { nullable: 1, ph: 'ตามวัสดุ (' + MD.PN_HP[mat] + ')', min: 1, step: 5 }),
-    fld('กลุ่ม (ค้ำกัน)', it, 'g', { type: 'text', get: () => it.g == null ? '' : it.g, set: v => { if (v === '' || v == null) delete it.g; else it.g = v; } }),
-    el('p', { class: 'note' }, d.nc + ' × ' + d.nr + ' = ' + d.nc * d.nr + ' ช่อง (ช่องละ ' + (d.L / d.nc).toFixed(2) + ' × ' + (d.H / d.nr).toFixed(2) + ' ม.) • ' + ((it.m || 'p') === 'g' ? 'HP ทั้งแผ่น ' + hp : 'HP ' + hp + ' ต่อช่อง') + ' • แผ่นกลุ่มเดียวกันที่แตะกันค้ำกัน — ไม่มีอะไรค้ำถึงพื้น = ร่วง'),
-    el('div', { class: 'seg' }, el('button', { class: 'tl-btn', title: 'เจาะช่องประตู 1.4 × 2.4 ม. กลางแผ่น (สูงสุด 4 ช่องต่อแผ่น)', onclick: () => pnCut(it, 'door') }, 'เจาะประตู'),
-      el('button', { class: 'tl-btn', title: 'เจาะช่องหน้าต่าง 1.2 × 1.2 ม. สูงจากฐาน 1 ม. + ใส่กระจกไฟ', onclick: () => pnCut(it, 'window') }, 'เจาะหน้าต่าง'),
-      el('button', { class: 'tl-btn' + (PNT.on ? ' on' : ''), title: 'คลิกบนแผ่นเพื่อทุบทีละช่อง ดูว่าส่วนไหนจะร่วงตาม', onclick: () => { PNT.on = !PNT.on; if (!PNT.on) PNT.br.clear(); pnTestDraw(); renderSide(); } }, PNT.on ? 'ปิดลองทุบ' : 'ลองทุบ')),
-    PNT.on ? el('p', { class: 'note' }, 'คลิกบนแผ่นพัง = ทุบ 1 ช่อง (Shift = 3×3) • แดง = ที่ทุบ • ส้ม = ส่วนที่จะร่วงตาม • ไม่บันทึกลงไฟล์') : null];
+  return [fld('Material', it, 'mat', { type: 'select', items: MD.PN_MAT, get: () => mat }), fld('Break Mode', it, 'm', { type: 'select', items: MD.PN_MODE, get: () => it.m || 'p', after: () => { resync(); renderSide(); } }),
+    it.m === 'l' ? fld('Breaks Through (off = damage only)', it, 'thru', { type: 'checkbox', get: () => it.thru !== 0, set: v => { if (v) delete it.thru; else it.thru = 0; } }) : null,
+    fld('Length', it, 'L', { min: 0.2 }), fld('Height (along panel)', it, 'sy', { min: 0.2 }), fld('Thickness', it, 'T', { min: 0.03, step: 0.05 }), fld('Cell Size', it, 'cs', { min: 0.2, step: 0.05 }),
+    fld('Tilt (deg, roof)', it, 'tl', { deg: 1, nullable: 1, ph: '0 = upright' }), fld('Shape', it, 'sh', { type: 'select', items: [['', 'Rectangle'], ['tri', 'Triangle (gable)']], get: () => it.sh || '', set: v => { if (v) it.sh = v; else delete it.sh; } }),
+    it.ho && it.ho.length ? el('div', { class: 'row' }, el('label', null, 'Openings: ' + it.ho.length), el('button', { class: 'tl-btn', onclick: () => { pushUndo('o'); delete it.ho; resync(); renderSide(); } }, 'Clear Openings')) : null,
+    fld('HP per cell', it, 'hp', { nullable: 1, ph: 'material default (' + MD.PN_HP[mat] + ')', min: 1, step: 5 }),
+    fld('Group (supports)', it, 'g', { type: 'text', get: () => it.g == null ? '' : it.g, set: v => { if (v === '' || v == null) delete it.g; else it.g = v; } }),
+    el('p', { class: 'note' }, d.nc + ' × ' + d.nr + ' = ' + d.nc * d.nr + ' cells (each ' + (d.L / d.nc).toFixed(2) + ' × ' + (d.H / d.nr).toFixed(2) + ' m) • ' + ((it.m || 'p') === 'g' ? 'HP (whole panel) ' + hp : 'HP ' + hp + ' per cell') + ' • Touching panels in the same group hold each other up — nothing reaching the ground = falls'),
+    el('div', { class: 'seg' }, el('button', { class: 'tl-btn', title: 'Cut a 1.4 × 2.4 m door in the middle of the panel (max 4 openings per panel)', onclick: () => pnCut(it, 'door') }, 'Cut Door'),
+      el('button', { class: 'tl-btn', title: 'Cut a 1.2 × 1.2 m window, 1 m above the base, with a lit glass pane', onclick: () => pnCut(it, 'window') }, 'Cut Window'),
+      el('button', { class: 'tl-btn' + (PNT.on ? ' on' : ''), title: 'Click a panel to break one cell at a time and see what falls with it', onclick: () => { PNT.on = !PNT.on; if (!PNT.on) PNT.br.clear(); pnTestDraw(); renderSide(); } }, PNT.on ? 'Stop Test Break' : 'Test Break')),
+    PNT.on ? el('p', { class: 'note' }, 'Click a breakable panel = break 1 cell (Shift = 3×3) • red = broken • orange = will fall • not saved to the file') : null];
 }
 // editor test-break: broken cells per panel id (not saved) → red = broken, orange = would fall (same support rules as the game)
 const PNT = { on: false, br: new Map() }, gPnT = new THREE.Group();
@@ -817,19 +865,19 @@ function pnTestHit(o, pt, big) {
   for (let a = -R; a <= R; a++) for (let b = -R; b <= R; b++) { const cc = c0 + a, rr = r0 + b; if (cc >= 0 && cc < d.nc && rr >= 0 && rr < d.nr) st.add(rr * d.nc + cc); }
   pnTestDraw();
 }
-const TOOLS = [['select', '⬚', 'เลือก', 'v', 'คลิกเลือก ลากเพื่อย้าย • Q/E หมุน • [ ] ย่อขยาย • PgUp/PgDn ยกขึ้นลง • Ctrl+D ทำซ้ำ • Del ลบ • กำแพง: ลากจุดขาว, Alt+คลิกเพิ่มจุด'],
-  ['sculpt', '⛰', 'ปั้นพื้น', 'b', 'ลากเพื่อปั้น • Shift = กลับทิศ • Shift+ล้อ หรือ [ ] = ขนาดแปรง • สีแดง = ชันเกินเดินขึ้น'],
-  ['paint', '🖌', 'พื้นผิว', 'p', 'ลากเพื่อระบายพื้นผิว • Shift = ลบกลับเป็นหญ้า • Alt+คลิก = ดูดชนิดพื้นผิว'],
-  ['wall', '▤', 'กำแพง', 'w', 'คลิกทีละจุดเพื่อลากเส้นกำแพง • ดับเบิลคลิก/Enter = จบ • คลิกจุดแรก = ปิดวง • Backspace = ถอยจุด • Esc = ยกเลิก'],
-  ['pnl', '▦', 'แผ่นพัง', 'n', 'คลิกทีละจุดวางแนวผนังพังได้ (แต่ละช่วง = 1 แผ่น กลุ่มเดียวกัน) • คลิกจุดแรก = ปิดวง (บ้าน) • ดับเบิลคลิก/Enter = จบ • Backspace ถอยจุด • Esc ยกเลิก'],
-  ['floor', '▭', 'ชั้นบน', 'l', 'ลากจากจุด A ไป B = สะพาน/ทางลาดเชื่อมสองจุด • คลิกเฉย ๆ = วางชานขนาดมาตรฐาน • เดินลอดข้างใต้ได้ถ้าสูง ≥ 2.8'],
-  ['castle', '♜', 'ปราสาท', 'c', 'เลือกชิ้นส่วน แล้วคลิกวาง • Q/E หมุน 45° (Shift = 15°) หรือ Shift+ล้อ • ปลายชิ้นดูดติดกันเอง • คลิกบนยอดกำแพง/ทางเดิน = วางต่อที่ความสูงนั้น • ใช้เครื่องมือเลือกเพื่อย้าย/แก้ขนาด'],
-  ['place', '◈', 'วางของ', 'o', 'คลิกเพื่อวาง • Q/E หรือ Shift+ล้อ = หมุน • วางบนพื้นชั้นบนได้'],
-  ['scatter', '⁘', 'โปรย', 'g', 'ลากเพื่อโปรยของที่เลือก (ต้นไม้ หิน หญ้า) • Shift = ลบของในวง'],
+const TOOLS = [['select', '⬚', 'Select', 'v', 'Click to select, drag to move • W/E/R = move/rotate/scale gizmo • Q = hand (pan) • , . rotate • [ ] scale • PgUp/PgDn raise/lower • F frame • Ctrl+D duplicate • Del delete • Walls: drag white points, Alt+click adds a point'],
+  ['sculpt', '⛰', 'Sculpt', 'b', 'Drag to sculpt • Shift = invert • Shift+wheel or [ ] = brush size • red = too steep to walk up'],
+  ['paint', '🖌', 'Paint', 'p', 'Drag to paint the surface • Shift = erase back to grass • Alt+click = pick surface type'],
+  ['wall', '▤', 'Wall', 'k', 'Click point by point to draw a wall line • double-click/Enter = finish • click the first point = close loop • Backspace = undo point • Esc = cancel'],
+  ['pnl', '▦', 'Breakable Panel', 'n', 'Click point by point to lay a breakable wall line (each segment = 1 panel, same group) • click the first point = close loop (house) • double-click/Enter = finish • Backspace undo point • Esc cancel'],
+  ['floor', '▭', 'Upper Floor', 'l', 'Drag from A to B = bridge/ramp joining two points • plain click = standard platform • walkable underneath if height ≥ 2.8'],
+  ['castle', '♜', 'Castle', 'c', 'Pick a piece, then click to place • , . rotate 45° (Shift = 15°) or Shift+wheel • piece ends snap together • click on top of a wall/walkway = place at that height • use Select to move/resize'],
+  ['place', '◈', 'Place', 'o', 'Click to place • , . or Shift+wheel = rotate • can be placed on upper floors'],
+  ['scatter', '⁘', 'Scatter', 'g', 'Drag to scatter the chosen item (trees, rocks, grass) • Shift = remove items in the circle'],
 ];
 const HINT = Object.fromEntries(TOOLS.map(t => [t[0], t[4]]));
 function setTool(t) { if (draft) { draft = null; undo.pop(); drawLine(null); } if (fdraft) { fdraft = null; undo.pop(); drawLine(null); } tool = t; if (t === 'scatter' && !isVisualType(opt.obj)) { const a = KIT.list.find(a => a.cat === 'tree'); if (a) { opt.obj = 'kit:' + a.id; opt.cat = 'tree'; } } renderTools(); renderOpts(); drawHandles(); $('hint').textContent = HINT[t] || ''; placeGizmo(); need(); }
-function renderTools() { const box = $('tools'); box.textContent = ''; for (const t of TOOLS) box.append(el('button', { class: tool === t[0] ? 'on' : '', title: t[2] + ' (' + t[3].toUpperCase() + ')', onclick: () => setTool(t[0]) }, el('b', null, t[1]), el('i', null, t[2]))); }
+function renderTools() { const box = $('tools'); box.textContent = ''; for (const t of TOOLS) box.append(el('button', { class: tool === t[0] ? 'on' : '', title: t[2] + ' (' + t[3].toUpperCase() + ')', onclick: () => setTool(t[0]) }, el('b', null, t[1]))); const T = TOOLS.find(x => x[0] === tool); if ($('optTitle')) $('optTitle').textContent = '⚙ ' + (T ? T[2] : '') + ' Settings'; }
 const h3 = t => el('h3', null, t);
 function seg(items, cur, on) { const d = el('div', { class: 'seg' }); for (const [v, n, tip] of items) d.append(el('button', { class: 'tl-btn' + (v === cur ? ' on' : ''), title: tip || '', onclick: () => on(v) }, n)); return d; }
 function slider(label, key, min, max, step, obj = opt, after) { const out = el('output', null, String(obj[key])); const r = el('input', { type: 'range', min, max, step, value: obj[key], oninput: () => { obj[key] = +r.value; out.textContent = r.value; if (after) after(); need(); } }); return el('div', { class: 'row' }, el('label', null, label), r, out); }
@@ -837,61 +885,60 @@ function check(label, key, obj = opt, after) { const c = el('input', { type: 'ch
 function pal(items, cur, on, cls) { const d = el('div', { class: 'pal ' + (cls || '') }); items.forEach((it, i) => d.append(el('button', { class: i === cur ? 'on' : '', title: it.n, onclick: () => on(i) }, it.c ? el('span', { class: 'sw', style: 'background:' + it.c }) : null, it.n))); return d; }
 function renderOpts() {
   const b = $('opts'); b.textContent = '';
-  const brush = () => { b.append(h3('แปรง'), slider('ขนาด (รัศมี)', 'rad', 0.5, 40, 0.5), tool !== 'paint' && tool !== 'scatter' ? slider('แรง', 'str', 0.5, 12, 0.5) : null, tool !== 'scatter' ? check('ขอบนุ่ม', 'soft') : null); };
-  if (tool === 'select') { b.append(h3('ย้าย'), el('div', { class: 'row' }, el('label', null, 'ดูดเข้ากริด'), el('select', { class: 'tl-sel', onchange: e => { opt.snap = +e.target.value; }, html: [[0, 'อิสระ'], [0.25, '0.25'], [0.5, '0.5'], [1, '1'], [2, '2']].map(([v, n]) => `<option value="${v}"${v === opt.snap ? ' selected' : ''}>${n}</option>`).join('') })),
-    el('p', { class: 'note', html: 'คลิกของ/กำแพง/พื้นชั้นบนเพื่อเลือก แล้วแก้ค่าละเอียดที่แผงขวา<br>ลากลูกศร/วง/กล่องบนของที่เลือก:<br><kbd>1</kbd> เลื่อน (ลูกศรเขียว = สูงต่ำ) <kbd>2</kbd> หมุน <kbd>3</kbd> ขนาด <kbd>0</kbd> ซ่อน<br><kbd>Q</kbd><kbd>E</kbd> หมุน 15° (Shift = 5°)<br><kbd>[</kbd><kbd>]</kbd> ย่อ/ขยาย<br><kbd>PgUp</kbd><kbd>PgDn</kbd> ยกขึ้น/ลง<br><kbd>F</kbd> ซูมไปที่ของ<br><kbd>Ctrl+D</kbd> ทำซ้ำ • <kbd>Del</kbd> ลบ' })); }
+  const brush = () => { b.append(h3('Brush'), slider('Size (radius)', 'rad', 0.5, 40, 0.5), tool !== 'paint' && tool !== 'scatter' ? slider('Strength', 'str', 0.5, 12, 0.5) : null, tool !== 'scatter' ? check('Soft Edge', 'soft') : null); };
+  if (tool === 'select') { b.append(el('p', { class: 'note', html: 'Click an item in the Scene or the Hierarchy, then edit it in the Inspector.<br><kbd>Q</kbd> Hand (pan) <kbd>W</kbd> Move <kbd>E</kbd> Rotate <kbd>R</kbd> Scale<br>Green arrow = height • centre cube = uniform scale • one drag = one undo<br><kbd>,</kbd><kbd>.</kbd> rotate 15° (Shift = 5°)<br><kbd>[</kbd><kbd>]</kbd> scale down/up<br><kbd>PgUp</kbd><kbd>PgDn</kbd> raise/lower<br><kbd>F</kbd> frame selected (or double-click in the Hierarchy) • <kbd>T</kbd> top view<br><kbd>Ctrl+D</kbd> duplicate • <kbd>Del</kbd> delete<br>Camera: right-drag orbit (hold it + <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> fly, <kbd>Q</kbd><kbd>E</kbd> down/up, Shift = fast) • middle-drag or Space+drag pan • wheel zoom' })); }
   else if (tool === 'sculpt') {
-    b.append(h3('ปั้นพื้น'), seg([['up', 'ยกขึ้น'], ['down', 'กดลง'], ['smooth', 'เกลี่ย'], ['flat', 'ปรับระดับ', 'ดึงพื้นให้เท่าจุดที่เริ่มลาก'], ['set', 'ตั้งความสูง'], ['noise', 'ขรุขระ'], ['ramp', 'ทางลาด', 'ลากจาก A ไป B = ทางลาดเรียบเชื่อมสองระดับ']], opt.smode, v => { opt.smode = v; renderOpts(); }));
-    if (opt.smode === 'set') b.append(slider('ความสูง', 'hval', -5, 20, 0.25));
-    if (opt.smode === 'ramp') b.append(slider('กว้าง', 'rad', 0.5, 20, 0.5, opt), check('ขอบนุ่ม', 'soft'), el('p', { class: 'note' }, 'ลากจากจุดต่ำไปจุดสูง: พื้นระหว่างทางจะเป็นทางลาดเรียบ (กว้าง = 2 × ค่านี้)')); else brush();
-    b.append(el('p', { class: 'note', html: 'ทางชันเกิน ~58° (สูง 1.6 ต่อระยะ 1) เดินขึ้นไม่ได้ — ขึ้นสีแดง<br>กระโดดได้สูง ~1.4' }));
-  } else if (tool === 'paint') { b.append(h3('พื้นผิว'), pal(SURF, opt.surf, i => { opt.surf = i; renderOpts(); })); brush(); b.append(el('p', { class: 'note' }, 'สีเขียว = เกมปลูกหญ้า 3D ให้เอง • โคลน/น้ำ/น้ำแข็ง/ลาวา ถูกบันทึกเป็นพื้นผิวพิเศษของเกม')); }
+    b.append(h3('Sculpt'), seg([['up', 'Raise'], ['down', 'Lower'], ['smooth', 'Smooth'], ['flat', 'Flatten', 'Pull the ground to the height where the drag started'], ['set', 'Set Height'], ['noise', 'Noise'], ['ramp', 'Ramp', 'Drag from A to B = smooth ramp joining two levels']], opt.smode, v => { opt.smode = v; renderOpts(); }));
+    if (opt.smode === 'set') b.append(slider('Height', 'hval', -5, 20, 0.25));
+    if (opt.smode === 'ramp') b.append(slider('Width', 'rad', 0.5, 20, 0.5, opt), check('Soft Edge', 'soft'), el('p', { class: 'note' }, 'Drag from the low point to the high point: the ground in between becomes a smooth ramp (width = 2 × this value)')); else brush();
+    b.append(el('p', { class: 'note', html: 'Slopes steeper than ~58° (1.6 up per 1 across) can’t be walked up — shown red<br>jump height ~1.4' }));
+  } else if (tool === 'paint') { b.append(h3('Paint'), pal(SURF, opt.surf, i => { opt.surf = i; renderOpts(); })); brush(); b.append(el('p', { class: 'note' }, 'Green = the game grows 3D grass • mud/water/ice/lava are saved as special game surfaces')); }
   else if (tool === 'wall') {
-    b.append(h3('แบบกำแพง'), pal(MD.WALL_PRESET, opt.wall, i => { const P = MD.WALL_PRESET[i]; Object.assign(opt, { wall: i, wth: P.th, wh: P.h, wc: P.c, wm: P.m }); renderOpts(); }, 'one'),
-      h3('ค่า'), slider('หนา', 'wth', 0.3, 4, 0.1), slider('สูง', 'wh', 0.4, 14, 0.1), el('div', { class: 'row' }, el('label', null, 'สี'), el('input', { type: 'color', value: opt.wc, oninput: e => { opt.wc = e.target.value; } })),
-      check('เส้นโค้ง (ลากผ่านจุด)', 'wcurve'), check('พังได้ (แตกเป็นช่วง)', 'wbrk'), el('p', { class: 'note' }, 'เริ่มคลิกบนพื้นชั้นบน = กำแพง/ราวตั้งบนชั้นนั้น (ไม่ขวางข้างล่าง) • กำแพงยิ่งบางยิ่งใช้ที่ชนเยอะ'));
+    b.append(h3('Wall Preset'), pal(MD.WALL_PRESET, opt.wall, i => { const P = MD.WALL_PRESET[i]; Object.assign(opt, { wall: i, wth: P.th, wh: P.h, wc: P.c, wm: P.m }); renderOpts(); }, 'one'),
+      h3('Settings'), slider('Thickness', 'wth', 0.3, 4, 0.1), slider('Height', 'wh', 0.4, 14, 0.1), el('div', { class: 'row' }, el('label', null, 'Color'), el('input', { type: 'color', value: opt.wc, oninput: e => { opt.wc = e.target.value; } })),
+      check('Curved (through points)', 'wcurve'), check('Breakable (in segments)', 'wbrk'), el('p', { class: 'note' }, 'Start the click on an upper floor = wall/rail standing on that floor (doesn’t block below) • thinner walls use more colliders'));
   } else if (tool === 'pnl') { const q = opt.pn;
-    b.append(h3('แบบแผ่น'), pal(MD.PN_PRESET.map(p => ({ n: p.n, c: MD.PN_COL[p.mat] })), q.pre, i => { const P = MD.PN_PRESET[i]; Object.assign(q, { pre: i, mat: P.mat, m: P.m, thru: P.thru === 0 ? 0 : 1, sy: P.sy, T: P.T, cs: P.cs, y: P.y || 0, hp: 0 }); renderOpts(); }, 'one'),
-      h3('ค่า'), selRow('วัสดุ', MD.PN_MAT, q.mat, v => { q.mat = v; renderOpts(); }), selRow('แบบพัง', MD.PN_MODE, q.m, v => { q.m = v; renderOpts(); }), ...(q.m === 'l' ? [check('ทะลุได้ (ปิด = แค่เสียหาย)', 'thru', q)] : []),
-      slider('สูง', 'sy', 0.3, 12, 0.1, q), slider('หนา', 'T', 0.05, 1.5, 0.05, q), slider('ขนาดช่อง', 'cs', 0.25, 3, 0.05, q), slider('ฐานยกจากพื้น', 'y', 0, 10, 0.1, q), slider('HP ต่อช่อง (0 = ตามวัสดุ)', 'hp', 0, 500, 5, q),
-      el('p', { class: 'note', html: 'แบบพัง: <b>เป็นรู</b> = แตกเป็นช่อง มีกองซาก • <b>ผิวหลุด</b> = ร้าว → ผิวนอกหลุด (ยังกันได้) → ทะลุ • <b>แตกทั้งแผ่น</b> = HP ก้อนเดียว (กระจก/ประตู)<br>HP ตามวัสดุ: ' + MD.PN_HP[q.mat] + ' ต่อช่อง • ส่วนที่ไม่อยากให้พังใช้กำแพง/กล่องปกติ<br>เลือกแผ่นแล้วกด "เจาะประตู/หน้าต่าง" หรือ "ลองทุบ" ที่แผงขวา' }));
+    b.append(h3('Panel Preset'), pal(MD.PN_PRESET.map(p => ({ n: p.n, c: MD.PN_COL[p.mat] })), q.pre, i => { const P = MD.PN_PRESET[i]; Object.assign(q, { pre: i, mat: P.mat, m: P.m, thru: P.thru === 0 ? 0 : 1, sy: P.sy, T: P.T, cs: P.cs, y: P.y || 0, hp: 0 }); renderOpts(); }, 'one'),
+      h3('Settings'), selRow('Material', MD.PN_MAT, q.mat, v => { q.mat = v; renderOpts(); }), selRow('Break Mode', MD.PN_MODE, q.m, v => { q.m = v; renderOpts(); }), ...(q.m === 'l' ? [check('Breaks Through (off = damage only)', 'thru', q)] : []),
+      slider('Height', 'sy', 0.3, 12, 0.1, q), slider('Thickness', 'T', 0.05, 1.5, 0.05, q), slider('Cell Size', 'cs', 0.25, 3, 0.05, q), slider('Base Offset', 'y', 0, 10, 0.1, q), slider('HP per cell (0 = material default)', 'hp', 0, 500, 5, q),
+      el('p', { class: 'note', html: 'Break modes: <b>Holes</b> = breaks into cells, leaves rubble • <b>Skin Peel</b> = crack → outer skin falls (still blocks) → through • <b>Whole Panel</b> = HP as one piece (glass/door)<br>HP by material: ' + MD.PN_HP[q.mat] + ' per cell • parts that must not break: use normal walls/boxes<br>Select a panel, then press "Cut Door/Window" or "Test Break" in the Inspector' }));
   } else if (tool === 'castle') {
     const k = opt.part, D = MD.PART[k], pp = partPP(k), keys = Object.keys(MD.PART);
-    b.append(h3('ชิ้นส่วนปราสาท'), pal(keys.map(q => ({ n: MD.PART[q].n, c: MD.PART[q].c })), keys.indexOf(k), i => { opt.part = keys[i]; renderOpts(); need(); }),
-      h3('ขนาด'), ...Object.entries(D.p).map(([q, v]) => slider(MD.PART_P[q], q, v[1], v[2], v[3], pp)),
-      h3('ตัวเลือก'), ...Object.keys(D.f).map(q => check(MD.PART_F[q], q, pp)),
-      el('div', { class: 'row' }, el('label', null, 'สี'), el('input', { type: 'color', value: pp.c, oninput: e => { pp.c = e.target.value; need(); } })),
-      check('พังได้ (ทั้งชิ้น)', 'brk', pp), el('p', { class: 'note' }, 'พังได้ = ไม่มีฟันปลา/ทางเดินบนยอด (ชิ้นส่วนลอยไม่ได้) • ปิด = กำแพงทนทาน (ค่าเริ่ม)'),
-      k === 'free' ? el('p', { class: 'note', html: 'ทรงอิสระ: คลิกทีละจุดวาดรูปปิดบนพื้น • คลิกจุดแรก/Enter/ดับเบิลคลิก = จบ • Backspace ถอยจุด • Esc ยกเลิก<br>ได้แล้วเลือกชิ้นแล้วลากจุดฟ้า (Alt+คลิกขอบ = เพิ่มจุด) • "หุบยอด" 1 = ทรงตรง, ต่ำลง = ยอดแคบ/แหลม' }) : null,
-      h3('ดูดติด'), el('div', { class: 'row' }, el('label', null, 'กริดวาง'), el('select', { class: 'tl-sel', onchange: e => { opt.csnap = +e.target.value; need(); }, html: [[0, 'อิสระ'], [0.5, '0.5'], [1, '1'], [2, '2']].map(([v, n]) => `<option value="${v}"${v === opt.csnap ? ' selected' : ''}>${n}</option>`).join('') })),
-      check('ปลายชิ้นดูดติดชิ้นอื่น (ระดับ+ตำแหน่ง)', 'psnap'),
-      el('p', { class: 'note', html: 'ปลายกำแพง/ประตู/ทางเดิน/บันได/มุมตึก ดูดติดกันภายใน 1.6 ม.<br>บันได/ทางลาด: ปลายบนดูดติดยอดกำแพง (ตั้ง "สูงขึ้น" = ความสูงกำแพง)<br>เลือกชิ้นด้วยเครื่องมือเลือก แล้วแก้ขนาดที่แผงขวา' }));
+    b.append(h3('Castle Pieces'), pal(keys.map(q => ({ n: MD.PART[q].n, c: MD.PART[q].c })), keys.indexOf(k), i => { opt.part = keys[i]; renderOpts(); need(); }),
+      h3('Size'), ...Object.entries(D.p).map(([q, v]) => slider(MD.PART_P[q], q, v[1], v[2], v[3], pp)),
+      h3('Options'), ...Object.keys(D.f).map(q => check(MD.PART_F[q], q, pp)),
+      el('div', { class: 'row' }, el('label', null, 'Color'), el('input', { type: 'color', value: pp.c, oninput: e => { pp.c = e.target.value; need(); } })),
+      check('Breakable (whole piece)', 'brk', pp), el('p', { class: 'note' }, 'Breakable = no battlements/walkway on top (pieces can’t float) • off = sturdy wall (default)'),
+      k === 'free' ? el('p', { class: 'note', html: 'Free shape: click point by point to draw a closed outline on the ground • click the first point/Enter/double-click = finish • Backspace undo point • Esc cancel<br>Then select the piece and drag the blue points (Alt+click an edge = add point) • "Taper" 1 = straight, lower = narrow/pointed top' }) : null,
+      h3('Snap'), el('div', { class: 'row' }, el('label', null, 'Place Grid'), el('select', { class: 'tl-sel', onchange: e => { opt.csnap = +e.target.value; need(); }, html: [[0, 'Off'], [0.5, '0.5'], [1, '1'], [2, '2']].map(([v, n]) => `<option value="${v}"${v === opt.csnap ? ' selected' : ''}>${n}</option>`).join('') })),
+      check('Piece ends snap to other pieces (level + position)', 'psnap'),
+      el('p', { class: 'note', html: 'Ends of walls/gates/walkways/stairs/building corners snap within 1.6 m<br>Stairs/ramps: the upper end snaps to a wall top (set "Rise" = wall height)<br>Select the piece with the Select tool, then resize it in the Inspector' }));
   } else if (tool === 'floor') {
-    b.append(h3('แบบ'), pal(MD.FLOOR_PRESET, opt.floor, i => { opt.floor = i; opt.fw = MD.FLOOR_PRESET[i].w; renderOpts(); }, 'one'), h3('ค่า'), slider('กว้าง', 'fw', 1, 30, 0.5), slider('สูงจากพื้น', 'fh', 0.5, 15, 0.25),
-      MD.FLOOR_PRESET[opt.floor].ramp ? null : check('ลากข้าม: สูงเท่าปลายที่สูงกว่า', 'fauto'),
-      el('p', { class: 'note', html: MD.FLOOR_PRESET[opt.floor].ramp ? 'ลากจากปลายล่างไปปลายบน: ทางลาดเชื่อมความสูงของสองจุด (ปลายบนวางบนชานได้)<br>เดินขึ้นได้ถ้าไม่ชันเกิน 1.6 ต่อ 1' : 'ลากจาก A ไป B = สะพานพาดสองฝั่ง • ขอบพื้นชั้นบนก้าวขึ้นได้ถ้าสูงไม่เกิน 1.1' }));
+    b.append(h3('Preset'), pal(MD.FLOOR_PRESET, opt.floor, i => { opt.floor = i; opt.fw = MD.FLOOR_PRESET[i].w; renderOpts(); }, 'one'), h3('Settings'), slider('Width', 'fw', 1, 30, 0.5), slider('Height Above Ground', 'fh', 0.5, 15, 0.25),
+      MD.FLOOR_PRESET[opt.floor].ramp ? null : check('Drag across: height of the higher end', 'fauto'),
+      el('p', { class: 'note', html: MD.FLOOR_PRESET[opt.floor].ramp ? 'Drag from the low end to the high end: a ramp joining the two heights (the top end can sit on a platform)<br>walkable if not steeper than 1.6 per 1' : 'Drag from A to B = bridge spanning both sides • upper floor edges can be stepped onto if no higher than 1.1' }));
   } else if (tool === 'place' || tool === 'scatter') {
-    if (tool === 'scatter') b.append(h3('โปรย'), slider('ขนาด (รัศมี)', 'rad', 0.5, 40, 0.5), slider('ความหนาแน่น', 'dens', 0.5, 12, 0.5), slider('สุ่มขนาด ±', 'rscale', 0, 0.6, 0.05));
-    b.append(check('สุ่มหมุน', 'rrot'));
+    if (tool === 'scatter') b.append(h3('Scatter'), slider('Size (radius)', 'rad', 0.5, 40, 0.5), slider('Density', 'dens', 0.5, 12, 0.5), slider('Random Scale ±', 'rscale', 0, 0.6, 0.05));
+    b.append(check('Random Rotation', 'rrot'));
     const cats = tool === 'scatter' ? CATS.filter(c => !['sys', 'game', 'mode', 'prefab', 'room', 'deco'].includes(c[0])) : CATS;
     if (!cats.some(c => c[0] === opt.cat)) opt.cat = cats[0][0];
-    b.append(h3('คลัง'), el('select', { class: 'tl-sel', style: 'width:100%;margin-bottom:6px', onchange: e => { opt.cat = e.target.value; renderOpts(); }, html: cats.map(([k, n]) => `<option value="${k}"${k === opt.cat ? ' selected' : ''}>${n}${OBJ_CATN(k)}</option>`).join('') }));
+    b.append(h3('Library'), el('select', { class: 'tl-sel', style: 'width:100%;margin-bottom:6px', onchange: e => { opt.cat = e.target.value; renderOpts(); }, html: cats.map(([k, n]) => `<option value="${k}"${k === opt.cat ? ' selected' : ''}>${n}${OBJ_CATN(k)}</option>`).join('') }));
     const items = OBJ_IN(opt.cat);
     if (opt.cat === 'sys' || opt.cat === 'game' || opt.cat === 'prim' || opt.cat === 'mode' || opt.cat === 'room' || opt.cat === 'prefab' || opt.cat === 'deco') { b.append(pal(items.map(([t, D]) => ({ n: D.n, c: D.c })), items.findIndex(([t]) => t === opt.obj), i => { opt.obj = items[i][0]; renderOpts(); need(); }, 'one'));
       const D = OBJ[opt.obj]; if (D && D.note) b.append(el('p', { class: 'note' }, D.note));
-      if (opt.cat === 'prim') b.append(h3('ขนาด/สี'), slider('กว้าง', 'sx', 0.2, 30, 0.1, opt.prim), slider('สูง', 'sy', 0.2, 30, 0.1, opt.prim), slider('ลึก', 'sz', 0.2, 30, 0.1, opt.prim), el('div', { class: 'row' }, el('label', null, 'สี'), el('input', { type: 'color', value: opt.prim.c, oninput: e => { opt.prim.c = e.target.value; need(); } })));
-      if (opt.cat === 'game') b.append(el('p', { class: 'note' }, 'ของชุดนี้เกมใส่โมเดลและระบบพังให้เอง (ในนี้เห็นเป็นรูปทรงแทน)'));
-      if (opt.cat === 'deco') b.append(el('p', { class: 'note' }, 'ของตกแต่งที่เกมวาดเอง (แบบห้องโถงในเกม): ไม่มีที่ชน ไม่อยู่ใน .glb • กล่อง/ทรงกระบอกใช้วัสดุ "หินปราสาท" ฯลฯ ตั้งในแผงขวา'));
-      if (opt.cat === 'prefab') b.append(el('p', { class: 'note' }, items.length ? 'คลิกวางห้อง (จุดกลางห้อง) • Shift+ล้อ = หมุน 90° • ห้อง = แผนที่ชื่อ room-… ทำ/แก้ได้เหมือนแผนที่ทั่วไป' : 'ยังไม่มีห้อง — สร้างแผนที่ใหม่ชื่อ id ขึ้นต้นด้วย room- (พื้นราบ) แล้ววางของในห้อง'));
-      if (opt.cat === 'mode') b.append(el('p', { class: 'note' }, 'ติ๊ก "บุกปราสาท" ในโหมดที่เล่นได้ แล้วดูตัวตรวจ • เกมสร้างแกน/เขตจุดเกิดเอง (ในนี้เห็นเป็นเครื่องหมาย) • กำแพง/ประตูเป้าหมาย = เลือกกำแพงแล้วตั้ง "เป้าหมายบุกปราสาท"'));
-      if (opt.cat === 'room') b.append(el('p', { class: 'note' }, 'ของในห้องพังได้ (เกมวาดหน้าตาจริงเอง ในนี้เป็นกล่องแทน) • โต๊ะ/ม้านั่ง/ราว ปรับความยาวได้ • ยกจากพื้น = วางบนชั้นลอย'));
+      if (opt.cat === 'prim') b.append(h3('Size/Color'), slider('Width', 'sx', 0.2, 30, 0.1, opt.prim), slider('Height', 'sy', 0.2, 30, 0.1, opt.prim), slider('Depth', 'sz', 0.2, 30, 0.1, opt.prim), el('div', { class: 'row' }, el('label', null, 'Color'), el('input', { type: 'color', value: opt.prim.c, oninput: e => { opt.prim.c = e.target.value; need(); } })));
+      if (opt.cat === 'game') b.append(el('p', { class: 'note' }, 'The game adds the models and break system for these (shown as stand-in shapes here)'));
+      if (opt.cat === 'deco') b.append(el('p', { class: 'note' }, 'Decor the game draws itself (hall style): no collision, not in the .glb • boxes/cylinders use materials "castle stone" etc., set in the Inspector'));
+      if (opt.cat === 'prefab') b.append(el('p', { class: 'note' }, items.length ? 'Click to place a room (room centre) • Shift+wheel = rotate 90° • a room = a map named room-…, made/edited like any map' : 'No rooms yet — create a new map whose id starts with room- (flat ground) and place the room’s items in it'));
+      if (opt.cat === 'mode') b.append(el('p', { class: 'note' }, 'Tick "Siege" in Playable Modes, then check the Validation list • the game builds the cores/spawn zones (shown as markers here) • target wall/gate = select a wall and set "Siege Target"'));
+      if (opt.cat === 'room') b.append(el('p', { class: 'note' }, 'Breakable room props (the game draws the real look, boxes here) • tables/benches/rails have adjustable length • Height Above Ground = place on a mezzanine'));
     } else {
       const g = el('div', { class: 'kit' });
       for (const a of items) { const img = el('span', { class: 'ph' }); const bt = el('button', { class: opt.obj === 'kit:' + a.id ? 'on' : '', title: a.name, onclick: () => { opt.obj = 'kit:' + a.id; renderOpts(); need(); } }, img, el('span', null, a.name.split(' · ')[0])); g.append(bt);
         thumb(a.id).then(u => { if (u) { const im = el('img', { src: u }); img.replaceWith(im); } }); }
       b.append(g);
-      if (!items.length) b.append(el('p', { class: 'note' }, 'ยังไม่มี Asset ในหมวดนี้'));
-      if (opt.cat === 'user') b.append(el('button', { class: 'tl-btn', style: 'width:100%;margin-top:8px', onclick: addAsset }, '＋ เพิ่ม Asset (.glb)'), el('p', { class: 'note' }, 'ไฟล์ .glb จาก Blender (1 หน่วย = 1 เมตร, ฐานอยู่ที่พื้น) เก็บใน assets/mapkit/'));
+      if (!items.length) b.append(el('p', { class: 'note' }, 'No assets in this category yet'));
+      if (opt.cat === 'user') b.append(el('button', { class: 'tl-btn', style: 'width:100%;margin-top:8px', onclick: addAsset }, '＋ Add Asset (.glb)'), el('p', { class: 'note' }, '.glb file from Blender (1 unit = 1 m, base at the ground) stored in assets/mapkit/'));
     }
   }
 }
@@ -899,10 +946,10 @@ const OBJ_IN = cat => cat === 'prefab' ? list.filter(m => MD.isRoomId(m.id) && (
 const OBJ_CATN = k => { const n = OBJ_IN(k).length; return n ? ' (' + n + ')' : ''; };
 function addAsset() {
   const inp = el('input', { type: 'file', accept: '.glb' });
-  inp.onchange = async () => { const f = inp.files[0]; if (!f) return; const label = prompt('ชื่อที่จะแสดงในคลัง', f.name.replace(/\.glb$/i, '')); if (label == null) return;
+  inp.onchange = async () => { const f = inp.files[0]; if (!f) return; const label = prompt('Name shown in the library', f.name.replace(/\.glb$/i, '')); if (label == null) return;
     const name = f.name.replace(/\.glb$/i, '').toLowerCase().replace(/[^a-z0-9_-]/g, '_');
     try { const r = await (await fetch('/api/mb-asset?name=' + encodeURIComponent(name) + '&label=' + encodeURIComponent(label), { method: 'POST', body: await f.arrayBuffer() })).json(); if (!r.ok) throw new Error(r.err);
-      KIT.tpl.delete(r.asset.id); KIT.thumbs.delete(r.asset.id); KIT.files.delete(r.asset.src); await loadKit(); opt.obj = 'kit:' + r.asset.id; opt.cat = 'user'; renderOpts(); stat('เพิ่ม Asset แล้ว', 'ok'); } catch (e) { stat('เพิ่ม Asset ไม่ได้: ' + e.message, 'err'); } };
+      KIT.tpl.delete(r.asset.id); KIT.thumbs.delete(r.asset.id); KIT.files.delete(r.asset.src); await loadKit(); opt.obj = 'kit:' + r.asset.id; opt.cat = 'user'; renderOpts(); stat('Asset added', 'ok'); } catch (e) { stat('Couldn’t add asset: ' + e.message, 'err'); } };
   inp.click();
 }
 
@@ -920,13 +967,13 @@ function fld(label, it, key, o = {}) {   // bound field: number / text / color /
 }
 function decoFields(it) {   // inspector rows for dc_* decor
   const t = it.t.slice(3), F = [];
-  if (t === 'box' || t === 'cyl' || t === 'cone') F.push(fld('วัสดุ', it, 'k', { type: 'select', items: MD.DECO_MAT, get: () => it.k || 'stone' }));
-  if (t === 'box' || t === 'roof' || t === 'cloth') F.push(fld(t === 'roof' ? 'ยาว (สัน)' : 'กว้าง', it, 'sx', { min: 0.05 }));
-  if (t !== 'flame' && t !== 'shield' && t !== 'chand') F.push(fld('สูง', it, 'sy', { min: 0.05 }));
-  if (t === 'box' || t === 'roof') F.push(fld(t === 'roof' ? 'กว้าง' : 'ลึก', it, 'sz', { min: 0.05 }));
-  if (t === 'cyl') F.push(fld('รัศมีบน', it, 'rt', { min: 0 }), fld('รัศมีล่าง', it, 'rb', { min: 0 }));
-  if (t === 'cone') F.push(fld('รัศมี', it, 'r', { min: 0.05 }));
-  if (t === 'cloth') F.push(fld('สี', it, 'c', { type: 'color' }));
+  if (t === 'box' || t === 'cyl' || t === 'cone') F.push(fld('Material', it, 'k', { type: 'select', items: MD.DECO_MAT, get: () => it.k || 'stone' }));
+  if (t === 'box' || t === 'roof' || t === 'cloth') F.push(fld(t === 'roof' ? 'Length (ridge)' : 'Width', it, 'sx', { min: 0.05 }));
+  if (t !== 'flame' && t !== 'shield' && t !== 'chand') F.push(fld('Height', it, 'sy', { min: 0.05 }));
+  if (t === 'box' || t === 'roof') F.push(fld(t === 'roof' ? 'Width' : 'Depth', it, 'sz', { min: 0.05 }));
+  if (t === 'cyl') F.push(fld('Top Radius', it, 'rt', { min: 0 }), fld('Bottom Radius', it, 'rb', { min: 0 }));
+  if (t === 'cone') F.push(fld('Radius', it, 'r', { min: 0.05 }));
+  if (t === 'cloth') F.push(fld('Color', it, 'c', { type: 'color' }));
   return F;
 }
 function section(title, open, ...kids) { const d = el('details', { class: 'sec', open }); d.append(el('summary', null, title), ...kids.filter(Boolean)); return d; }
@@ -934,84 +981,84 @@ function renderSide() {
   const box = $('side'); box.textContent = ''; if (!M) return;
   const it = find(sel);
   if (it) {
-    const btns = el('div', { class: 'seg' }, el('button', { class: 'tl-btn', onclick: dupSel }, 'ทำซ้ำ'), el('button', { class: 'tl-btn', onclick: () => { sel.pt = null; delSel(); } }, 'ลบ'));
+    const btns = el('div', { class: 'seg' }, el('button', { class: 'tl-btn', onclick: dupSel }, 'Duplicate'), el('button', { class: 'tl-btn', onclick: () => { sel.pt = null; delSel(); } }, 'Delete'));
     if (sel.k === 'room') { const R = RM.get(it.ref), rooms = list.filter(m => MD.isRoomId(m.id) && m.id !== M.id);
-      box.append(section('ห้อง (prefab) — ' + (R ? R.name : it.ref), true,
-        fld('ห้อง', it, 'ref', { type: 'select', items: rooms.map(m => [m.id, m.name]), after: () => loadRooms().then(() => { syncAll(); renderSide(); changed(); }) }),
-        fld('ตำแหน่ง X (กลางห้อง)', it, 'x'), fld('ตำแหน่ง Z (กลางห้อง)', it, 'z'), fld('หมุน (องศา, ทีละ 90)', it, 'rot', { deg: 1, step: 90 }),
-        el('div', { class: 'seg' }, el('button', { class: 'tl-btn', onclick: () => { location.href = 'mapbuild.html?id=' + encodeURIComponent(it.ref); } }, 'เปิดแก้ห้องนี้'),
-          el('button', { class: 'tl-btn', title: 'คัดลอกของในห้องเข้าแผนที่นี้ แก้ได้ทุกชิ้น (ไม่ผูกกับไฟล์ห้องแล้ว) • พื้นใต้ห้องปรับราบ + ทาสีตามห้อง', onclick: () => { if (!R) return; pushUndo('a'); MD.roomUnpack(M, it, R); sel = null; buildTerrain(); syncAll(); renderSide(); changed(); } }, 'แตกห้องเข้าแผนที่')),
-        el('p', { class: 'note' }, R ? 'ขนาด ' + R.W + ' × ' + R.H + ' ม. • ของในห้องแก้ที่ไฟล์ห้อง (ทุกแผนที่ที่ใช้ห้องนี้เปลี่ยนตาม) • Q/E หมุน 90° • ลากเพื่อย้าย' : 'ยังโหลดห้องไม่ได้ (' + it.ref + ')'), btns)); }
+      box.append(section('Room (prefab) — ' + (R ? R.name : it.ref), true,
+        fld('Room', it, 'ref', { type: 'select', items: rooms.map(m => [m.id, m.name]), after: () => loadRooms().then(() => { syncAll(); renderSide(); changed(); }) }),
+        fld('Position X (room centre)', it, 'x'), fld('Position Z (room centre)', it, 'z'), fld('Rotation (deg, steps of 90)', it, 'rot', { deg: 1, step: 90 }),
+        el('div', { class: 'seg' }, el('button', { class: 'tl-btn', onclick: () => { location.href = 'mapbuild.html?id=' + encodeURIComponent(it.ref); } }, 'Open This Room'),
+          el('button', { class: 'tl-btn', title: 'Copy the room’s contents into this map, every piece editable (no longer linked to the room file) • ground under the room is flattened + painted like the room', onclick: () => { if (!R) return; pushUndo('a'); MD.roomUnpack(M, it, R); sel = null; buildTerrain(); syncAll(); renderSide(); changed(); } }, 'Unpack Room into Map')),
+        el('p', { class: 'note' }, R ? 'Size ' + R.W + ' × ' + R.H + ' m • edit the room’s contents in its own file (every map using it updates) • , . rotate 90° • drag to move' : 'Room not loaded yet (' + it.ref + ')'), btns)); }
     else if (sel.k === 'obj') { const D = OBJ[it.t], a = isKit(it) && KIT.byId.get(kitId(it)), d = dim(it);
       box.append(section((D ? D.n : a ? a.name : it.t), true,
-        fld('ตำแหน่ง X', it, 'x'), fld('ตำแหน่ง Z', it, 'z'), it.t === 'light' || it.t === 'ring' || MD.isDeco(it.t) ? fld('สูงจากพื้น', it, 'y') : fld('ยกจากพื้น', it, 'y', { min: 0 }), fld('หมุน (องศา)', it, 'rot', { deg: 1 }),
-        isKit(it) ? fld('ขนาด (เท่า)', it, 's', { min: 0.05 }) : null,
-        isPrim(it) || it.t === 'house' ? fld(it.t === 'house' ? 'กว้าง (เท่า)' : 'กว้าง', it, 'sx', { min: 0.1 }) : null, isPrim(it) ? fld('สูง', it, 'sy', { min: 0.1 }) : null, isPrim(it) || it.t === 'house' ? fld(it.t === 'house' ? 'ลึก (เท่า)' : 'ลึก', it, 'sz', { min: 0.1 }) : null,
-        isPrim(it) ? fld('สี', it, 'c', { type: 'color' }) : null, isPrim(it) ? fld('เรืองแสง', it, 'glow', { type: 'checkbox' }) : null,
-        isPrim(it) || it.t === 'poly' ? fld('มองเห็น (ส่งภาพเข้าเกม)', it, 'vis', { type: 'checkbox', get: () => it.vis !== 0, set: v => { if (v) delete it.vis; else it.vis = 0; } }) : null,
+        fld('Position X', it, 'x'), fld('Position Z', it, 'z'), it.t === 'light' || it.t === 'ring' || MD.isDeco(it.t) ? fld('Height Above Ground', it, 'y') : fld('Height Above Ground', it, 'y', { min: 0 }), fld('Rotation (deg)', it, 'rot', { deg: 1 }),
+        isKit(it) ? fld('Scale (×)', it, 's', { min: 0.05 }) : null,
+        isPrim(it) || it.t === 'house' ? fld(it.t === 'house' ? 'Width (×)' : 'Width', it, 'sx', { min: 0.1 }) : null, isPrim(it) ? fld('Height', it, 'sy', { min: 0.1 }) : null, isPrim(it) || it.t === 'house' ? fld(it.t === 'house' ? 'Depth (×)' : 'Depth', it, 'sz', { min: 0.1 }) : null,
+        isPrim(it) ? fld('Color', it, 'c', { type: 'color' }) : null, isPrim(it) ? fld('Emissive', it, 'glow', { type: 'checkbox' }) : null,
+        isPrim(it) || it.t === 'poly' ? fld('Visible (exported to the game)', it, 'vis', { type: 'checkbox', get: () => it.vis !== 0, set: v => { if (v) delete it.vis; else it.vis = 0; } }) : null,
         ...(MD.isDeco(it.t) ? decoFields(it) : []), ...(it.t === 'pn_wall' ? pnFields(it) : []),
-        it.t === 'core' ? fld('เลขแกน (ลำดับ)', it, 'n', { min: 1, step: 1 }) : null, it.t === 'core' ? fld('ขนาดแกน', it, 's', { min: 1 }) : null,
-        it.t === 'sgA' || it.t === 'sgB' || it.t === 'phase' ? fld('เฟส', it, 'ph', { min: 1, step: 1 }) : null,
-        it.t === 'phase' || it.t === 'ceil' ? fld('กว้าง (X)', it, 'sx', { min: 1 }) : null, it.t === 'phase' || it.t === 'ceil' ? fld('ยาว (Z)', it, 'sz', { min: 1 }) : null,
-        it.t === 'ceil' ? fld('ใช้กับคนที่ต่ำกว่า (ม.)', it, 'zmax', { nullable: 1, ph: 'ทุกคน', min: 0 }) : null,
-        MD.isRP(it.t) && MD.RPK[it.t.slice(3)].L ? fld('ความยาว', it, 'L', { min: 0.3 }) : null,
-        it.t === 'light' ? fld('สีแสง', it, 'c', { type: 'color' }) : null, it.t === 'light' ? fld('ความสว่าง', it, 'int', { min: 0 }) : null, it.t === 'light' ? fld('ระยะ', it, 'dist', { min: 1 }) : null,
-        d ? fld('ชนได้ (เดิน/ยิงไม่ผ่าน)', it, 'col', { type: 'checkbox', get: () => d.col }) : null,
-        d && d.col ? fld('ขนาดที่ชน (เท่า)', it, 'cs', { get: () => it.cs == null ? d.cs : it.cs, min: 0.05 }) : null,
-        d && d.col ? fld('พังได้', it, 'brk', { type: 'checkbox', get: () => it.brk == null ? d.brk : it.brk }) : null,
-        it.t === 'house' ? el('div', { class: 'seg' }, el('button', { class: 'tl-btn', title: 'แปลงเป็นแผ่นพัง (ผนังปูนฉาบ หลังคาหิมะ หน้าต่างไฟ) แก้ได้ทีละแผ่น', onclick: () => pnFromHouse(it, false) }, 'แตกเป็นแผ่นพัง (บ้านหิมะ)'),
-          el('button', { class: 'tl-btn', title: 'แปลงเป็นแผ่นพัง แบบบ้านอิฐลอนดอน', onclick: () => pnFromHouse(it, true) }, '(บ้านอิฐ)')) : null,
-        it.t === 'house' ? el('p', { class: 'note' }, 'ในเกมบ้านนี้เป็นแผ่นพังอยู่แล้ว (แปลงอัตโนมัติ) • กดแตกเมื่ออยากแก้ผนัง/หน้าต่าง/หลังคาทีละแผ่น') : null,
-        D && D.cat === 'game' && it.t !== 'pchest' && it.t !== 'pn_wall' ? fld('พังได้', it, 'brk', { type: 'checkbox', get: () => it.brk == null ? 1 : it.brk }) : null, btns)); }   // houses / crates / barrels / trees: off = unbreakable
-    else if (sel.k === 'wall') box.append(section('กำแพง' + (it.n ? ' — ' + it.n : ''), true, fld('หนา', it, 'th', { min: 0.2 }), fld('สูง', it, 'h', { min: 0.2 }), fld('สี', it, 'c', { type: 'color' }),
-      fld('ฐาน (ความสูง)', it, 'base', { nullable: 1, ph: 'ตามพื้น' }), fld('เส้นโค้ง', it, 'curve', { type: 'checkbox' }), fld('ปิดวง', it, 'closed', { type: 'checkbox' }), fld('พังได้', it, 'brk', { type: 'checkbox' }),
-      fld('วัสดุตอนพัง', it, 'm', { type: 'select', items: [['stone', 'หิน'], ['wood', 'ไม้'], ['ice', 'น้ำแข็ง']] }),
-      fld('เป้าหมายบุกปราสาท', it, 'sg', { type: 'select', items: MD.SG_WALL, get: () => it.sg || '', after: () => { if (it.sg && !it.brk) it.brk = 1; resync(); renderSide(); } }),
-      fld('มองเห็น (ส่งภาพเข้าเกม)', it, 'vis', { type: 'checkbox', get: () => it.vis !== 0, set: v => { if (v) delete it.vis; else it.vis = 0; } }),
-      fld('ระบบ', it, 'sys', { type: 'select', items: MD.SYS_WALL, get: () => it.sys || '' }), fld('สไตล์', it, 'style', { type: 'select', items: MD.STYLE, get: () => it.style || '' }),
-      el('p', { class: 'note' }, it.pts.length + ' จุด • ยาว ' + MD.pathLen(MD.wallPath(it)).toFixed(1) + ' • ลากจุดขาวเพื่อดัด • Alt+คลิกบนกำแพง = เพิ่มจุด • เลือกจุดแล้ว Del = ลบจุด • เว้นช่อง "ฐาน" ว่าง = ตั้งตามพื้น'), btns));
+        it.t === 'core' ? fld('Core Number (order)', it, 'n', { min: 1, step: 1 }) : null, it.t === 'core' ? fld('Core Size', it, 's', { min: 1 }) : null,
+        it.t === 'sgA' || it.t === 'sgB' || it.t === 'phase' ? fld('Phase', it, 'ph', { min: 1, step: 1 }) : null,
+        it.t === 'phase' || it.t === 'ceil' ? fld('Width (X)', it, 'sx', { min: 1 }) : null, it.t === 'phase' || it.t === 'ceil' ? fld('Length (Z)', it, 'sz', { min: 1 }) : null,
+        it.t === 'ceil' ? fld('Only for players lower than (m)', it, 'zmax', { nullable: 1, ph: 'everyone', min: 0 }) : null,
+        MD.isRP(it.t) && MD.RPK[it.t.slice(3)].L ? fld('Length', it, 'L', { min: 0.3 }) : null,
+        it.t === 'light' ? fld('Light Color', it, 'c', { type: 'color' }) : null, it.t === 'light' ? fld('Intensity', it, 'int', { min: 0 }) : null, it.t === 'light' ? fld('Range', it, 'dist', { min: 1 }) : null,
+        d ? fld('Collides (blocks walking/shots)', it, 'col', { type: 'checkbox', get: () => d.col }) : null,
+        d && d.col ? fld('Collider Size (×)', it, 'cs', { get: () => it.cs == null ? d.cs : it.cs, min: 0.05 }) : null,
+        d && d.col ? fld('Breakable', it, 'brk', { type: 'checkbox', get: () => it.brk == null ? d.brk : it.brk }) : null,
+        it.t === 'house' ? el('div', { class: 'seg' }, el('button', { class: 'tl-btn', title: 'Convert to breakable panels (plaster walls, snow roof, lit windows), editable panel by panel', onclick: () => pnFromHouse(it, false) }, 'Break into Panels (snow house)'),
+          el('button', { class: 'tl-btn', title: 'Convert to breakable panels, London brick house style', onclick: () => pnFromHouse(it, true) }, '(brick house)')) : null,
+        it.t === 'house' ? el('p', { class: 'note' }, 'In the game this house is already breakable panels (auto-converted) • break it apart when you want to edit walls/windows/roof panel by panel') : null,
+        D && D.cat === 'game' && it.t !== 'pchest' && it.t !== 'pn_wall' ? fld('Breakable', it, 'brk', { type: 'checkbox', get: () => it.brk == null ? 1 : it.brk }) : null, btns)); }   // houses / crates / barrels / trees: off = unbreakable
+    else if (sel.k === 'wall') box.append(section('Wall' + (it.n ? ' — ' + it.n : ''), true, fld('Thickness', it, 'th', { min: 0.2 }), fld('Height', it, 'h', { min: 0.2 }), fld('Color', it, 'c', { type: 'color' }),
+      fld('Base (height)', it, 'base', { nullable: 1, ph: 'follow ground' }), fld('Curved', it, 'curve', { type: 'checkbox' }), fld('Closed Loop', it, 'closed', { type: 'checkbox' }), fld('Breakable', it, 'brk', { type: 'checkbox' }),
+      fld('Break Material', it, 'm', { type: 'select', items: [['stone', 'Rocks'], ['wood', 'Wood'], ['ice', 'Ice']] }),
+      fld('Siege Target', it, 'sg', { type: 'select', items: MD.SG_WALL, get: () => it.sg || '', after: () => { if (it.sg && !it.brk) it.brk = 1; resync(); renderSide(); } }),
+      fld('Visible (exported to the game)', it, 'vis', { type: 'checkbox', get: () => it.vis !== 0, set: v => { if (v) delete it.vis; else it.vis = 0; } }),
+      fld('System', it, 'sys', { type: 'select', items: MD.SYS_WALL, get: () => it.sys || '' }), fld('Style', it, 'style', { type: 'select', items: MD.STYLE, get: () => it.style || '' }),
+      el('p', { class: 'note' }, it.pts.length + ' points • length ' + MD.pathLen(MD.wallPath(it)).toFixed(1) + ' • drag the white points to bend • Alt+click on the wall = add point • select a point then Del = delete point • leave "Base" empty = follow the ground'), btns));
     else if (sel.k === 'part') { const D = MD.PART[it.k];
-      box.append(section('ปราสาท — ' + D.n, true, fld('ตำแหน่ง X', it, 'x'), fld('ตำแหน่ง Z', it, 'z'), fld('หมุน (องศา)', it, 'rot', { deg: 1 }), fld('ฐาน (ความสูง)', it, 'base', { nullable: 1, ph: 'ตามพื้น' }),
+      box.append(section('Castle — ' + D.n, true, fld('Position X', it, 'x'), fld('Position Z', it, 'z'), fld('Rotation (deg)', it, 'rot', { deg: 1 }), fld('Base (height)', it, 'base', { nullable: 1, ph: 'follow ground' }),
         ...Object.entries(D.p).map(([q, v]) => fld(MD.PART_P[q], it, q, { min: v[1], step: v[3] })), ...Object.keys(D.f).map(q => fld(MD.PART_F[q], it, q, { type: 'checkbox' })),
-        fld('สี', it, 'c', { type: 'color' }), fld('พังได้ (ทั้งชิ้น)', it, 'brk', { type: 'checkbox' }), fld('สไตล์', it, 'style', { type: 'select', items: MD.STYLE, get: () => it.style || '' }),
-        it.pts ? el('p', { class: 'note' }, it.pts.length + ' จุด • ลากจุดฟ้าเพื่อปั้นรูป • Alt+คลิกที่ขอบ = เพิ่มจุด • เลือกจุดแล้ว Del = ลบจุด • ชนเฉพาะขอบรูป (ข้างในกลวง) ไม่มีพื้นเดินบนยอด/พังไม่ได้') : null,
-        el('p', { class: 'note' }, 'ปลายชิ้นดูดติดกันตอนลาก/วาง • เว้นช่อง "ฐาน" ว่าง = ตั้งตามพื้น • พังได้ = ไม่มีฟันปลา/ทางเดินบนยอด • บานประตูพังได้เสมอ'), btns)); }
-    else box.append(section('พื้นชั้นบน' + (it.n ? ' — ' + it.n : ''), true, fld('ตำแหน่ง X', it, 'x'), fld('ตำแหน่ง Z', it, 'z'), fld('กว้าง', it, 'w', { min: 0.5 }), fld('ยาว', it, 'd', { min: 0.5 }), fld('หมุน (องศา)', it, 'rot', { deg: 1 }),
-      fld('สูง (ปลายต้น)', it, 'y'), fld('สูง (ปลายท้าย)', it, 'y2', { get: () => it.y2 == null ? it.y : it.y2 }), fld('หนา', it, 'th', { min: 0.1 }), fld('สี', it, 'c', { type: 'color' }), fld('ทำเป็นขั้นบันได', it, 'steps', { type: 'checkbox' }),
-      fld('มองเห็น (ส่งภาพเข้าเกม)', it, 'vis', { type: 'checkbox', get: () => it.vis !== 0, set: v => { if (v) delete it.vis; else it.vis = 0; } }),
-      fld('ระบบ', it, 'sys', { type: 'select', items: MD.SYS_FLOOR, get: () => it.sys || '' }), fld('สไตล์', it, 'style', { type: 'select', items: MD.STYLE, get: () => it.style || '' }),
-      el('div', { class: 'seg' }, el('button', { class: 'tl-btn', title: 'ปลายต้นลงมาแตะพื้นตรงนั้น', onclick: () => editSel(f => { const c = MD.floorCorners(f); f.y = +MD.gh(M, (c[0][0] + c[1][0]) / 2, (c[0][1] + c[1][1]) / 2).toFixed(2); }) }, 'ปลายต้นแตะพื้น'), el('button', { class: 'tl-btn', onclick: () => editSel(f => { f.y2 = f.y; }) }, 'ทำให้ราบ')),
-      el('p', { class: 'note' }, 'ใต้พื้นสูง ' + (Math.min(it.y, it.y2 == null ? it.y : it.y2) - (it.th || 0.4) - MD.gh(M, it.x, it.z)).toFixed(1) + ' (ต้อง ≥ 2.8 ถึงเดินลอดได้)'), btns));
+        fld('Color', it, 'c', { type: 'color' }), fld('Breakable (whole piece)', it, 'brk', { type: 'checkbox' }), fld('Style', it, 'style', { type: 'select', items: MD.STYLE, get: () => it.style || '' }),
+        it.pts ? el('p', { class: 'note' }, it.pts.length + ' points • drag the blue points to shape • Alt+click an edge = add point • select a point then Del = delete point • collides only at the outline (hollow inside), no walkable top, not breakable') : null,
+        el('p', { class: 'note' }, 'Piece ends snap together while dragging/placing • leave "Base" empty = follow the ground • breakable = no battlements/walkway on top • gate doors are always breakable'), btns)); }
+    else box.append(section('Upper Floor' + (it.n ? ' — ' + it.n : ''), true, fld('Position X', it, 'x'), fld('Position Z', it, 'z'), fld('Width', it, 'w', { min: 0.5 }), fld('Length', it, 'd', { min: 0.5 }), fld('Rotation (deg)', it, 'rot', { deg: 1 }),
+      fld('Height (start)', it, 'y'), fld('Height (end)', it, 'y2', { get: () => it.y2 == null ? it.y : it.y2 }), fld('Thickness', it, 'th', { min: 0.1 }), fld('Color', it, 'c', { type: 'color' }), fld('Make Steps', it, 'steps', { type: 'checkbox' }),
+      fld('Visible (exported to the game)', it, 'vis', { type: 'checkbox', get: () => it.vis !== 0, set: v => { if (v) delete it.vis; else it.vis = 0; } }),
+      fld('System', it, 'sys', { type: 'select', items: MD.SYS_FLOOR, get: () => it.sys || '' }), fld('Style', it, 'style', { type: 'select', items: MD.STYLE, get: () => it.style || '' }),
+      el('div', { class: 'seg' }, el('button', { class: 'tl-btn', title: 'Bring the start end down to touch the ground there', onclick: () => editSel(f => { const c = MD.floorCorners(f); f.y = +MD.gh(M, (c[0][0] + c[1][0]) / 2, (c[0][1] + c[1][1]) / 2).toFixed(2); }) }, 'Start Touches Ground'), el('button', { class: 'tl-btn', onclick: () => editSel(f => { f.y2 = f.y; }) }, 'Make Level')),
+      el('p', { class: 'note' }, 'Clearance below ' + (Math.min(it.y, it.y2 == null ? it.y : it.y2) - (it.th || 0.4) - MD.gh(M, it.x, it.z)).toFixed(1) + ' (need ≥ 2.8 to walk under)'), btns));
   }
   const mset = (k, o) => fld(o.label, M, k, Object.assign({ after: () => { applySky(); changed(); renderList(); } }, o));
-  box.append(section('แผนที่', !it,
-    mset('name', { label: 'ชื่อ', type: 'text' }), mset('desc', { label: 'คำอธิบาย', type: 'text' }),
-    el('div', { class: 'row' }, el('label', null, 'ขนาด'), el('span', { style: 'flex:1;font-family:var(--fu)' }, M.W + ' × ' + M.H + ' ม.'), el('button', { class: 'tl-btn', style: 'padding:2px 8px', onclick: resizeDlg }, 'เปลี่ยน')),
-    mset('sky', { label: 'ท้องฟ้า', type: 'select', items: MD.SKY }),
-    mset('style', { label: 'สไตล์หลัก', type: 'select', items: MD.STYLE, get: () => M.style || '' }),
-    fld('หมอก: สี', M, 'fog', { type: 'color', get: () => (M.fog || fogDef())[0], set: v => { M.fog = [v, (M.fog || fogDef())[1], (M.fog || fogDef())[2]]; }, after: () => { applySky(); changed(); } }),
-    fld('หมอก: เริ่ม', M, 'fog', { get: () => (M.fog || fogDef())[1], set: v => { const f = M.fog || fogDef(); M.fog = [f[0], v || 0, f[2]]; }, after: () => { applySky(); changed(); }, step: 10 }),
-    fld('หมอก: สุด', M, 'fog', { get: () => (M.fog || fogDef())[2], set: v => { const f = M.fog || fogDef(); M.fog = [f[0], f[1], v || 300]; }, after: () => { applySky(); changed(); }, step: 10 }),
-    mset('music', { label: 'เพลง', type: 'select', items: MD.MUSIC.map(m => [m, m || '(ค่าเริ่มต้น)']) }),
-    mset('weather', { label: 'อากาศ', type: 'text', ph: 'clear:60,rain:40' }),
-    mset('skirt', { label: 'ขอบนอกสนาม', step: 5, min: 0 }),
-    el('p', { class: 'note' }, 'ขอบนอกสนาม = พื้นที่ยื่นเลยขอบเล่นออกไป (หน่วย ม.) ให้ไม่เห็นขอบแผนที่ลอย')));
+  box.append(section('Map', !it,
+    mset('name', { label: 'Name', type: 'text' }), mset('desc', { label: 'Description', type: 'text' }),
+    el('div', { class: 'row' }, el('label', null, 'Size'), el('span', { style: 'flex:1;font-family:var(--fu)' }, M.W + ' × ' + M.H + ' m'), el('button', { class: 'tl-btn', style: 'padding:2px 8px', onclick: resizeDlg }, 'Change')),
+    mset('sky', { label: 'Sky', type: 'select', items: MD.SKY }),
+    mset('style', { label: 'Main Style', type: 'select', items: MD.STYLE, get: () => M.style || '' }),
+    fld('Fog: Color', M, 'fog', { type: 'color', get: () => (M.fog || fogDef())[0], set: v => { M.fog = [v, (M.fog || fogDef())[1], (M.fog || fogDef())[2]]; }, after: () => { applySky(); changed(); } }),
+    fld('Fog: Start', M, 'fog', { get: () => (M.fog || fogDef())[1], set: v => { const f = M.fog || fogDef(); M.fog = [f[0], v || 0, f[2]]; }, after: () => { applySky(); changed(); }, step: 10 }),
+    fld('Fog: End', M, 'fog', { get: () => (M.fog || fogDef())[2], set: v => { const f = M.fog || fogDef(); M.fog = [f[0], f[1], v || 300]; }, after: () => { applySky(); changed(); }, step: 10 }),
+    mset('music', { label: 'Music', type: 'select', items: MD.MUSIC.map(m => [m, m || '(default)']) }),
+    mset('weather', { label: 'Weather', type: 'text', ph: 'clear:60,rain:40' }),
+    mset('skirt', { label: 'Outer Border', step: 5, min: 0 }),
+    el('p', { class: 'note' }, 'Outer border = ground extending past the play edge (in m) so the map edge isn’t seen floating')));
   const modes = el('div', { class: 'pal' }); for (const [k, n] of MD.MODES) { const c = el('input', { type: 'checkbox', checked: M.modes.includes(k), onchange: () => { pushUndo('o'); M.modes = MD.MODES.map(m => m[0]).filter(m => m === k ? c.checked : M.modes.includes(m)); changed(); colDirty(); } }); modes.append(el('label', { class: 'chk' }, c, n)); }
   const fx = el('div', { class: 'pal' }); for (const [k, n] of MD.FXS) { const on = M.fx.some(f => f.split(':')[0] === k), c = el('input', { type: 'checkbox', checked: on, onchange: () => { pushUndo('o'); M.fx = M.fx.filter(f => f.split(':')[0] !== k); if (c.checked) M.fx.push(k); changed(); } }); fx.append(el('label', { class: 'chk' }, c, n)); }
-  box.append(section('โหมดที่เล่นได้', false, modes, check('อยู่ในรายการสุ่มแผนที่', 'random', M, changed), check('ให้เกมสุ่มวางลัง/ถังเอง (ถ้าไม่ได้วางเอง)', 'autoProps', M, () => { changed(); colDirty(); })),
-    section('เอฟเฟกต์บรรยากาศ', false, fx));
-  box.append(el('details', { class: 'sec', open: true, id: 'chkSec' }, el('summary', null, 'ตรวจก่อนส่งเข้าเกม'), el('ul', { class: 'lst', id: 'chk' })));
-  renderCheck();
+  box.append(section('Playable Modes', false, modes, check('In the random map pool', 'random', M, changed), check('Let the game place crates/barrels randomly (if none placed)', 'autoProps', M, () => { changed(); colDirty(); })),
+    section('Ambient Effects', false, fx));
+  box.append(el('details', { class: 'sec', open: true, id: 'chkSec' }, el('summary', null, 'Validation (before export)'), el('ul', { class: 'lst', id: 'chk' })));
+  renderCheck(); hierSel();
 }
 const fogDef = () => M.sky === 'day' ? ['#a9c4d6', 110, 420] : M.sky === 'sunset' ? ['#d8a888', 130, 520] : ['#16223a', 90, 380];
 function renderCheck() {
   const ul = $('chk'); if (!ul || !M) return; ul.textContent = '';
-  let G; try { G = gameData(); } catch (e) { ul.append(el('li', { class: 'err' }, 'คำนวณไม่ได้: ' + e.message)); return; }
+  let G; try { G = gameData(); } catch (e) { ul.append(el('li', { class: 'err' }, 'Couldn’t compute: ' + e.message)); return; }
   const loading = M.objs.some(o => isKit(o) && !tplNow(kitId(o)) && KIT.byId.has(kitId(o))), lost = M.objs.filter(o => isKit(o) && !KIT.byId.has(kitId(o))).length;
-  if (loading) ul.append(el('li', { class: 'warn' }, 'กำลังโหลดโมเดล…'));
-  if (lost) ul.append(el('li', { class: 'err' }, 'มีของ ' + lost + ' ชิ้นที่หา Asset ไม่เจอ (จะไม่ถูกส่งออก)'));
-  for (const r of MD.check(ALLM(), G)) { const li = el('li', { class: r.lv }, r.t); if (r.at) li.append(' ', el('a', { onclick: () => { cam.x = r.at[0]; cam.z = r.at[1]; cam.dist = Math.min(cam.dist, 35); camApply(); } }, '[ไปดู]')); ul.append(li); }
-  const c = G.counts; $('sInfo').textContent = `กำแพง ${M.walls.length} • ชั้นบน ${M.floors.length} • ปราสาท ${M.parts.length} • ของ ${M.objs.length} • ที่ชน ${c.obs} • พังได้ ${c.brk}`;
+  if (loading) ul.append(el('li', { class: 'warn' }, 'Loading models…'));
+  if (lost) ul.append(el('li', { class: 'err' }, 'Has ' + lost + ' items whose asset is missing (won’t be exported)'));
+  for (const r of MD.check(ALLM(), G)) { const li = el('li', { class: r.lv }, r.t); if (r.at) li.append(' ', el('a', { onclick: () => { cam.x = r.at[0]; cam.z = r.at[1]; cam.dist = Math.min(cam.dist, 35); camApply(); } }, '[go]')); ul.append(li); }
+  const c = G.counts; $('sInfo').textContent = `Walls ${M.walls.length} • Floors ${M.floors.length} • Castle ${M.parts.length} • Objects ${M.objs.length} • Colliders ${c.obs} • Breakable ${c.brk}`;
 }
 
 // ================= sky / light preview =================
@@ -1027,22 +1074,22 @@ function applySky() {
 
 // ================= save / load =================
 function stat(t, cls) { const s = $('stat'); s.textContent = t; s.className = cls || ''; }
-function changed() { dirty = true; GD = null; stat('ยังไม่ได้บันทึก', 'warn'); clearTimeout(saveT); if (online && M.id) saveT = setTimeout(save, 4000); need(); }
+function changed() { hierSoon(); dirty = true; GD = null; stat('Unsaved', 'warn'); clearTimeout(saveT); if (online && M.id) saveT = setTimeout(save, 4000); need(); }
 async function save() {
   clearTimeout(saveT); if (!M) return false;
-  if (!M.id) { stat('ยังไม่มี id', 'err'); return false; }
+  if (!M.id) { stat('No id yet', 'err'); return false; }
   try { const r = await (await fetch('/api/mb?id=' + M.id, { method: 'POST', body: JSON.stringify({ map: MD.pack(M) }) })).json(); if (!r.ok) throw new Error(r.err);
-    dirty = false; stat('บันทึกแล้ว ' + new Date().toLocaleTimeString('th-TH'), 'ok'); localStorage.setItem('mb_last', M.id); return true; }
-  catch (e) { stat('บันทึกไม่ได้: ' + e.message + (online ? '' : ' (เปิดผ่าน Tools.bat)'), 'err'); return false; }
+    dirty = false; stat('Saved ' + new Date().toLocaleTimeString('th-TH'), 'ok'); localStorage.setItem('mb_last', M.id); return true; }
+  catch (e) { stat('Couldn’t save: ' + e.message + (online ? '' : ' (open through Tools.bat)'), 'err'); return false; }
 }
 async function refreshList() { try { const r = await (await fetch('/api/mb-list')).json(); list = r.maps || []; online = true; } catch (e) { online = false; list = []; } renderList(); }
 function renderList() { const s = $('mapSel'); s.innerHTML = ''; const ids = new Set(list.map(m => m.id));
   if (M && M.id && !ids.has(M.id)) s.append(el('option', { value: M.id }, M.name));
-  for (const m of list) s.append(el('option', { value: m.id }, (M && m.id === M.id ? M.name : m.name) + (m.game ? '  ✓ในเกม' : '')));
+  for (const m of list) s.append(el('option', { value: m.id }, (M && m.id === M.id ? M.name : m.name) + (m.game ? '  ✓ in game' : '')));
   if (M) s.value = M.id; }
 async function openMap(id) {
   if (dirty) await save();
-  try { const r = await (await fetch('/api/mb?id=' + id)).json(); if (!r.ok) throw new Error(r.err); setMap(MD.unpack(r.map)); localStorage.setItem('mb_last', id); stat('เปิดแล้ว', 'ok'); } catch (e) { stat('เปิดไม่ได้: ' + e.message, 'err'); }
+  try { const r = await (await fetch('/api/mb?id=' + id)).json(); if (!r.ok) throw new Error(r.err); setMap(MD.unpack(r.map)); localStorage.setItem('mb_last', id); stat('Opened', 'ok'); } catch (e) { stat('Couldn’t open: ' + e.message, 'err'); }
 }
 function setMap(m) {
   M = m; sel = null; undo = []; redo = []; draft = null; PNT.br.clear(); dirty = false; GD = null;
@@ -1053,27 +1100,27 @@ function setMap(m) {
 }
 function dlg(title, body, okText, onOk) {
   const d = $('dlg'); d.textContent = ''; const err = el('p', { class: 'note', style: 'color:var(--serr)' });
-  d.append(el('h2', null, title), body, err, el('div', { class: 'btns' }, el('button', { class: 'tl-btn', onclick: () => d.close() }, 'ยกเลิก'), el('button', { class: 'tl-btn pri', onclick: async () => { try { const r = await onOk(); if (r !== false) d.close(); } catch (e) { err.textContent = e.message; } } }, okText)));
+  d.append(el('h2', null, title), body, err, el('div', { class: 'btns' }, el('button', { class: 'tl-btn', onclick: () => d.close() }, 'Cancel'), el('button', { class: 'tl-btn pri', onclick: async () => { try { const r = await onOk(); if (r !== false) d.close(); } catch (e) { err.textContent = e.message; } } }, okText)));
   d.showModal();
 }
 function newDlg() {
-  const v = { name: 'แผนที่ใหม่', id: '', W: 100, H: 70, surf: 0 }, body = el('div');
+  const v = { name: 'New Map', id: '', W: 100, H: 70, surf: 0 }, body = el('div');
   const f = (label, key, type, extra) => { const i = el('input', Object.assign({ class: 'tl-in', type: type || 'text', value: v[key], oninput: () => { v[key] = type === 'number' ? +i.value : i.value; } }, extra || {})); body.append(el('div', { class: 'row' }, el('label', null, label), i)); return i; };
-  f('ชื่อ', 'name'); f('id (อังกฤษ)', 'id', 'text', { placeholder: 'เช่น cliffs' }); f('กว้าง (ม.)', 'W', 'number', { min: 30, max: 260, step: 10 }); f('ยาว (ม.)', 'H', 'number', { min: 30, max: 260, step: 10 });
-  body.append(el('div', { class: 'row' }, el('label', null, 'พื้นเริ่มต้น'), el('select', { class: 'tl-sel', onchange: e => { v.surf = +e.target.value; }, html: SURF.map((s, i) => `<option value="${i}">${s.n}</option>`).join('') })),
-    el('p', { class: 'note', html: 'ขนาดเทียบ: ลานปราสาท 80×50 (เล็ก) • ห้องโถง 120×75 • ทุ่งหญ้า 150×90 (ใหญ่)<br>2–6 คน แนะนำด้านยาว 100–150' }));
-  dlg('แผนที่ใหม่', body, 'สร้าง', async () => {
-    const id = v.id.trim().toLowerCase(); if (!/^[a-z0-9][a-z0-9_-]{0,40}$/.test(id)) throw new Error('id ใช้ได้เฉพาะ a-z 0-9 _ -');
-    if (list.some(m => m.id === id)) throw new Error('มี id นี้แล้ว');
+  f('Name', 'name'); f('id (English)', 'id', 'text', { placeholder: 'e.g. cliffs' }); f('Width (m)', 'W', 'number', { min: 30, max: 260, step: 10 }); f('Length (m)', 'H', 'number', { min: 30, max: 260, step: 10 });
+  body.append(el('div', { class: 'row' }, el('label', null, 'Starting Ground'), el('select', { class: 'tl-sel', onchange: e => { v.surf = +e.target.value; }, html: SURF.map((s, i) => `<option value="${i}">${s.n}</option>`).join('') })),
+    el('p', { class: 'note', html: 'Size guide: castle courtyard 80×50 (small) • hall 120×75 • meadow 150×90 (large)<br>2–6 players, longer side 100–150 recommended' }));
+  dlg('New Map', body, 'Create', async () => {
+    const id = v.id.trim().toLowerCase(); if (!/^[a-z0-9][a-z0-9_-]{0,40}$/.test(id)) throw new Error('id Only a-z 0-9 _ - allowed');
+    if (list.some(m => m.id === id)) throw new Error('That id already exists');
     const W = clamp(Math.round(v.W), 30, 260), H = clamp(Math.round(v.H), 30, 260);
     if (dirty) await save();
     const m = MD.newMap({ id, name: v.name || id, W, H, surf: v.surf }); setMap(m); if (!await save()) throw new Error($('stat').textContent); await refreshList();
   });
 }
 function resizeDlg() {
-  const v = { W: M.W, H: M.H }, body = el('div'); for (const [l, k] of [['กว้าง (ม.)', 'W'], ['ยาว (ม.)', 'H']]) { const i = el('input', { class: 'tl-in', type: 'number', min: 30, max: 260, value: v[k], oninput: () => { v[k] = +i.value; } }); body.append(el('div', { class: 'row' }, el('label', null, l), i)); }
-  body.append(el('p', { class: 'note' }, 'ของเดิมจะอยู่ตรงกลาง ขยาย = พื้นขอบถูกยืดออก ย่อ = ส่วนที่เกินถูกตัด (กด ↶ ย้อนได้)'));
-  dlg('เปลี่ยนขนาดแผนที่', body, 'ตกลง', () => { const W = clamp(Math.round(v.W), 30, 260), H = clamp(Math.round(v.H), 30, 260); pushUndo('a'); MD.resize(M, W, H); buildTerrain(); syncAll(); fit(); renderSide(); changed(); });
+  const v = { W: M.W, H: M.H }, body = el('div'); for (const [l, k] of [['Width (m)', 'W'], ['Length (m)', 'H']]) { const i = el('input', { class: 'tl-in', type: 'number', min: 30, max: 260, value: v[k], oninput: () => { v[k] = +i.value; } }); body.append(el('div', { class: 'row' }, el('label', null, l), i)); }
+  body.append(el('p', { class: 'note' }, 'Existing content stays centred; grow = edge ground is stretched, shrink = the excess is cut (↶ undo works)'));
+  dlg('Resize Map', body, 'OK', () => { const W = clamp(Math.round(v.W), 30, 260), H = clamp(Math.round(v.H), 30, 260); pushUndo('a'); MD.resize(M, W, H); buildTerrain(); syncAll(); fit(); renderSide(); changed(); });
 }
 
 // ================= export to the game =================
@@ -1120,21 +1167,23 @@ async function buildExport() {
 }
 function ab64(buf) { const u = new Uint8Array(buf); let s = ''; for (let i = 0; i < u.length; i += 0x8000) s += String.fromCharCode.apply(null, u.subarray(i, i + 0x8000)); return btoa(s); }
 async function exportGame() {
-  if (!M.id) return false; stat('กำลังส่งเข้าเกม…');
+  if (!M.id) return false; stat('Exporting…');
   try { if (!await save()) return false; const { G, glb, tris } = await buildExport();
     const r = await (await fetch('/api/mb-export?id=' + M.id, { method: 'POST', body: JSON.stringify({ data: G.data, glb: ab64(glb) }) })).json(); if (!r.ok) throw new Error(r.err);
-    stat(`ส่งเข้าเกมแล้ว (v${r.v}) • ${r.glb_kb} KB • ${tris.toLocaleString()} สามเหลี่ยม`, r.glb_kb > 5000 || tris > 150000 ? 'warn' : 'ok'); await refreshList(); return true; }
-  catch (e) { console.error(e); stat('ส่งเข้าเกมไม่ได้: ' + e.message, 'err'); return false; }
+    stat(`Exported (v${r.v}) • ${r.glb_kb} KB • ${tris.toLocaleString()} triangles`, r.glb_kb > 5000 || tris > 150000 ? 'warn' : 'ok'); await refreshList(); return true; }
+  catch (e) { console.error(e); stat('Couldn’t export: ' + e.message, 'err'); return false; }
 }
 
 // ================= loop =================
 let dirtyView = true, last = performance.now();
 function need() { dirtyView = true; }
-function status() { $('sPos').textContent = hover ? `x ${hover.x.toFixed(1)}  z ${hover.z.toFixed(1)}  สูง ${hover.y.toFixed(2)}` : '–'; }
+function status() { $('sPos').textContent = hover ? `x ${hover.x.toFixed(1)}  z ${hover.z.toFixed(1)}  height ${hover.y.toFixed(2)}` : '–'; }
 function frame(t) {
   requestAnimationFrame(frame); const dt = Math.min(0.05, (t - last) / 1000); last = t; if (!M) return;
   if (stroke) { if (stroke.k === 'sculpt') sculpt(dt, stroke.inv); else if (stroke.k === 'paint') paintSurf(stroke.inv); else scatter(dt, stroke.inv); dirtyView = true; }
   const w = host.clientWidth, h = host.clientHeight; if (cv.width !== Math.round(w * renderer.getPixelRatio()) || cv.height !== Math.round(h * renderer.getPixelRatio())) { renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); dirtyView = true; }
+  if (fly.size && drag && drag.k === 'orbit') { camera.getWorldDirection(v3); v3.y = 0; v3.normalize(); const sp = Math.max(8, cam.dist * 0.9) * dt * (fly.fast ? 3 : 1), fw = (fly.has('KeyW') ? 1 : 0) - (fly.has('KeyS') ? 1 : 0), rt = (fly.has('KeyD') ? 1 : 0) - (fly.has('KeyA') ? 1 : 0);
+    cam.x = clamp(cam.x + (v3.x * fw - v3.z * rt) * sp, -20, M.W + 20); cam.z = clamp(cam.z + (v3.z * fw + v3.x * rt) * sp, -20, M.H + 20); if (fly.has('KeyE')) cam.dist *= 1 + dt; if (fly.has('KeyQ')) cam.dist = Math.max(3, cam.dist * (1 - dt * 0.9)); camApply(); }
   if (!dirtyView) return; dirtyView = false;
   drawRing(); updGhost(); updPartGhost(); gCol.visible = show.col; renderer.render(scene, camera);
 }
@@ -1144,6 +1193,8 @@ $('bNew').onclick = newDlg; $('bSave').onclick = save; $('bUndo').onclick = doUn
 $('bPlay').onclick = async () => { const w = window.open('about:blank', 'mb_play'); if (await exportGame()) w.location = 'index.html?nosw&playmap=' + M.id + (M.modes.length === 1 && M.modes[0] === 'siege' ? '&pm=siege' : '') + '&t=' + Date.now(); else w.close(); };
 $('mapSel').onchange = e => openMap(e.target.value);
 for (const b of document.querySelectorAll('#gbar [data-g]')) b.onclick = () => setGizmo(b.dataset.g);
+$('snapSel').value = String(opt.snap); $('snapSel').onchange = e => { opt.snap = +e.target.value; placeGizmo(); };
+$('hq').oninput = renderHier;
 $('vTop').onclick = () => { cam.pitch = 1.55; cam.yaw = 0; camApply(); }; $('vFit').onclick = fit;
 $('oSteep').onchange = e => { show.steep = e.target.checked; updTerrain(0, 0, M.nx - 1, M.ny - 1); need(); };
 $('oCol').onchange = e => { show.col = e.target.checked; buildCol(); need(); };
@@ -1157,6 +1208,6 @@ window.__mb = { get M() { return M; }, get RX() { return RX; }, loadRooms, MD, o
   await Promise.all([loadKit(), refreshList()]);
   const want = new URLSearchParams(location.search).get('id') || localStorage.getItem('mb_last');
   if (want && list.some(m => m.id === want)) await openMap(want); else if (list.length) await openMap(list[0].id);
-  if (!M) { setMap(MD.newMap({ id: '', name: 'ยังไม่ได้ตั้งชื่อ' })); $('vmsg').textContent = ''; stat(online ? 'กด "＋ ใหม่" เพื่อเริ่มแผนที่' : 'ออฟไลน์ — เปิดผ่าน Tools.bat เพื่อบันทึก', 'warn'); if (online) newDlg(); }
+  if (!M) { setMap(MD.newMap({ id: '', name: 'Untitled' })); $('vmsg').textContent = ''; stat(online ? 'Press "＋ New" to start a map' : 'Offline — open through Tools.bat to save', 'warn'); if (online) newDlg(); }
   requestAnimationFrame(frame);
 })();
