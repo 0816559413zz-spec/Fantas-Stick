@@ -1,6 +1,20 @@
 {
- "next": 139,
+ "next": 140,
  "items": [
+  {
+   "id": 139,
+   "title": "Darkness เกจโล่เหนือแถบเลือดและท่าค้าง BA",
+   "text": "เกจเวลาโล่แสดงตลอดเหนือแถบเลือด ท่าค้างหลังฟันซ้ายไปขวาโน้มช่วงบนน้อยลง",
+   "kind": "VFX",
+   "who": "Darkness",
+   "status": "wait",
+   "created": "2026-11-22",
+   "updated": "2026-11-22",
+   "imgs": [],
+   "links": [
+    "/shots/motion_darkness_ba_lighter_left_hold.gif"
+   ]
+  },
   {
    "id": 138,
    "title": "Darkness BA ขา หัว และเคียวเงา",

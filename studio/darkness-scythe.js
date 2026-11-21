@@ -450,10 +450,13 @@ function stCreateScythePreview(root,args,lifetime){
     const u=T-SW0,cut=WU+SWP;
     const easeIn=ez(0,.14,u);
     const settle=1-ez(ST_DARK_LIVE_BA.idleAfter,ST_DARK_LIVE_BA.idleAfter+ST_DARK_LIVE_BA.returnTime,u/ST_DARK_LIVE_BA.rate);
+    const load=(.8*ez(0,.15,u)+.2*ez(.065,.22,u))*(1-ez(.205,cut-.055,u));
+    const carry=ez(.285,cut+.062,u)*settle;
+    const brace=ez(.30,cut+.025,u)*(1-.72*ez(cut+.07,cut+.41,u))*settle;
+    const lean=side===-1?1-.22*ez(cut+.025,cut+.25,u):1;
     return {side,weight:easeIn*settle,
-      load:(.8*ez(0,.15,u)+.2*ez(.065,.22,u))*(1-ez(.205,cut-.055,u)),
-      drive:ez(.202,cut-.013,u)*settle,carry:ez(.285,cut+.062,u)*settle,
-      brace:ez(.30,cut+.025,u)*(1-.72*ez(cut+.07,cut+.41,u))*settle};
+      load,carry,drive:ez(.202,cut-.013,u)*settle,
+      pitch:(.13*load+.24*brace)*lean,roll:side*(.16*load-.22*carry)*lean};
   }
   function liveHandPose(actor,T,previous,aimPitch=0,aimYaw=0){
     resetLiveHandPose();
@@ -478,10 +481,9 @@ function stCreateScythePreview(root,args,lifetime){
       }
     }
     if(weight<=0||!actor.armR)return;
-    const side=current.side,load=mixPose('load'),drive=mixPose('drive'),carry=mixPose('carry'),brace=mixPose('brace');
+    const side=current.side,load=mixPose('load'),drive=mixPose('drive'),carry=mixPose('carry');
     const turn=lerp(side*(-.83*current.load+.62*current.drive+.29*current.carry),
       old?old.side*(-.83*old.load+.62*old.drive+.29*old.carry):0,handoff);
-    const twist=lerp(side*(.16*current.load-.22*current.carry),old?old.side*(.16*old.load-.22*old.carry):0,handoff);
     actor.armL.rotation.x-=.50*load+.96*drive-.28*carry;
     actor.armL.rotation.z+=.28*load+.50*carry;
     const H=handState(T,side,old?handState(previous.clock,previous.side):null);
@@ -491,7 +493,7 @@ function stCreateScythePreview(root,args,lifetime){
     if(spine){
       const posed=saveBonePose(0,spine);
       spine.parent.getWorldQuaternion(boneParent).invert().multiply(bodyWorld);
-      spineTurn.setFromEuler(spineEuler.set(.13*load+.24*brace,turn,twist));
+      spineTurn.setFromEuler(spineEuler.set(mixPose('pitch'),turn,mixPose('roll')));
       spine.quaternion.premultiply(spineTurn.premultiply(boneParent).multiply(boneParent.invert()));
       posed.copy(spine.quaternion);
     }

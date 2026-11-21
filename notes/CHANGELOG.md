@@ -1,5 +1,7 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
 
+- 2026-11-22 Darkness: moved the shield timer above the health bar and reduced upper-body lean in the held left-to-right BA finish.
+
 - 2026-11-22 Darkness: isolated the held BA twist above the legs, kept the gaze on aim, and added a spectral scythe with a clearer follow-up slash on marked targets. Credited kills grant or refresh Flow regardless of mark.
 
 - 2026-11-22 Map Builder: Decor Box / Decor Cylinder get a "Collides" checkbox (off by default, so existing castle decor is unchanged); ticked = exported as collision circles sized to the box/cylinder and its height (centred decor, lift-aware).

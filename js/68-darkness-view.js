@@ -198,7 +198,6 @@ function darkFxMesh(geometry,color,opacity=1){
     toneMapped:false,side:THREE.DoubleSide,forceSinglePass:true
   }));
 }
-const darkShieldHud={alpha:0,held:false,changedAt:null,from:0};
 function drawDarknessHud(x,y,state){
   const t=darkViewNow/1000,flow=state[2]>0,radius=Math.min(54,SH*.085);
   if(flow)darkFlowHud??=stDarkFlowHud({timer:false});
@@ -209,7 +208,6 @@ function drawDarknessHud(x,y,state){
 
   cx.save();
   if(flow)drawReticleTimer(cx,x,y,radius,state[2]/DARK_V.flow);
-  drawDarkShieldMeter(x,y-radius-22,state[4]/DARK_V.shieldTime,t,!!INPUT.sh);
 
   const dashY=y+radius+19;
   for(let i=0;i<2;i++){
@@ -224,20 +222,6 @@ function drawDarkHudBar(x,y,width,height,amount){
   cx.fillRect(x,y,width,height);
   cx.fillStyle='#fff';
   cx.fillRect(x,y,width*clamp(amount,0,1),height);
-}
-
-function drawDarkShieldMeter(x,y,remaining,t,held){
-  const hud=darkShieldHud;
-  if(hud.held!==held){hud.held=held;hud.changedAt=t;hud.from=hud.alpha;}
-  if(hud.changedAt!=null){
-    const fade=stDarkEase(0,held?.085:.115,t-hud.changedAt);
-    hud.alpha=lerp(hud.from,held?1:0,fade);
-  }
-  if(hud.alpha<=.005)return;
-  const width=Math.min(160,SW*.32);
-  cx.save();cx.globalAlpha*=hud.alpha;
-  drawDarkHudBar(x-width/2,y,width,5,remaining);
-  cx.restore();
 }
 
 function darknessMarkView(o,visible,height){
@@ -276,7 +260,6 @@ function darknessClear(){
   }
   darkWaveViews.clear();
   darkFlowHud?.dispose();darkFlowHud=null;
-  darkShieldHud.alpha=0;darkShieldHud.held=false;darkShieldHud.changedAt=null;
 }
 function darkWorldAt(ev,out){
   return out.set(tx(ev.x),GY(ev.x,ev.y)+(ev.h||0),tz(ev.y));

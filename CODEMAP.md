@@ -757,24 +757,24 @@ BKICO:376 buffShow:380
 §399 จอมืดตอนเริ่มแมตช์ (ผู้ใช้ 2026-10-23: กระตุกตอนเริ่มแมตช์แรก)
 BRIEF_PIC:403 gameCover:404
 
-## js/66-hud4.js (222) — HUD รอบ 4 (ผู้ใช้ 2026-10-23, designs/hud-full-mock.html)
+## js/66-hud4.js (224) — HUD รอบ 4 (ผู้ใช้ 2026-10-23, designs/hud-full-mock.html)
 H4E:5 H4:15 h4God:16 h4Pal:17 hud4Col:19 h4Parts:21 h4AuBits:26 h4Key:41 h4Ico:42 h4Build:43 h4Set:73 hud4Draw:74
-§128 ไพ่สกิล: นาฬิกาทราย / ท่าใช้ / สลับตำแหน่ง
-h4Glass:130 h4Bits:136 h4Fx:138 h4CardUse:140 h4GlassOut:144 h4Place:148 h4OrdKey:151 h4OrdLoad:152 h4Swap:155 h4Pick:158 h4AltKey:160 h4CardWire:164
-§175 ไพ่อัลติ
-H4SH:177 h4UltCard:179 h4UltUse:184 hud4Frame:186 hud4Hide:187
-§188 ไพ่อัลติกลางจอ (ผู้ใช้ 2026-11-01)
-h4UltX:191
-§198 รูปตัวละครเรา (FFA / TDM แทนแผนที่ย่อ)
-H4PF:200 h4PfMode:201 h4PfAvatar:203 h4Portrait:205 h4PfRead:216 h4MapBox:222
+§130 ไพ่สกิล: นาฬิกาทราย / ท่าใช้ / สลับตำแหน่ง
+h4Glass:132 h4Bits:138 h4Fx:140 h4CardUse:142 h4GlassOut:146 h4Place:150 h4OrdKey:153 h4OrdLoad:154 h4Swap:157 h4Pick:160 h4AltKey:162 h4CardWire:166
+§177 ไพ่อัลติ
+H4SH:179 h4UltCard:181 h4UltUse:186 hud4Frame:188 hud4Hide:189
+§190 ไพ่อัลติกลางจอ (ผู้ใช้ 2026-11-01)
+h4UltX:193
+§200 รูปตัวละครเรา (FFA / TDM แทนแผนที่ย่อ)
+H4PF:202 h4PfMode:203 h4PfAvatar:205 h4Portrait:207 h4PfRead:218 h4MapBox:224
 
 ## js/67-backdrop.js (139) — 
 BACKDROP:8
 §66 noise เล็ก ๆ (คงที่ต่อ seed)
 bdHash:67 bdNoise:68 bdFbm:69 bdEdge:71 bdRing:73 bdPaint:79 bdTree:82 buildBackdrop:89 bdTower:135 backdropHide:139
 
-## js/68-darkness-view.js (1132) —
-nightWaltzStrip:2 nightWaltzBorder:80 stDarkVeilGround:118 darkFxMesh:195 darkShieldHud:201 drawDarknessHud:202 drawDarkHudBar:222 drawDarkShieldMeter:229 darknessMarkView:243 darkWaveViews:253 darkActiveViews:253 darkViewRoot:254 darkViewTemp:260 darknessClear:272 darkWorldAt:281 darkMarkWind:284 darkMarkLaunch:312 darkMarkContact:324 darkViewNow:337 darkFlowHud:337 darkIdleWeaponPose:338 darkBAGroundImpact:342 darkSettleWeapon:357 darkBlendWeapon:368 darkShowWeaponReturn:391 darkTrailHistory:398 darkDashView:437 darknessCharacter:483 darknessEfx:715 stDarkShieldInk:1012 stDarkVeilBlade:1055 stWardDrainPool:1092
+## js/68-darkness-view.js (1115) —
+nightWaltzStrip:2 nightWaltzBorder:80 stDarkVeilGround:118 darkFxMesh:195 drawDarknessHud:201 drawDarkHudBar:220 darknessMarkView:227 darkWaveViews:237 darkActiveViews:237 darkViewRoot:238 darkViewTemp:244 darknessClear:256 darkWorldAt:264 darkMarkWind:267 darkMarkLaunch:295 darkMarkContact:307 darkViewNow:320 darkFlowHud:320 darkIdleWeaponPose:321 darkBAGroundImpact:325 darkSettleWeapon:340 darkBlendWeapon:351 darkShowWeaponReturn:374 darkTrailHistory:381 darkDashView:420 darknessCharacter:466 darknessEfx:698 stDarkShieldInk:995 stDarkVeilBlade:1038 stWardDrainPool:1075
 
 ## js/68-light-view.js (1937) — 
 LGV:7 LGSH:9 LGSH_L:11 _lgM4:14 _lgQ:14 _lgSV:14 _lgS:14 _lgC:14 _lgC2:14 lgGlowTex:15 lgNeon:17 lgEmpFx:25 lgWallBurn:44 lgShardSpawn:60 lgShardTick:64 lgBaCore:65 lgCrDim:108 lgEmpBeam:112 lgNeonCrystal:126 lgSanctumFloorTex:136 lgSanctumMoteTex:147 lgHoneyTex:162 lgShield:166 _lgShieldEuler:202 lightShieldEv:203 LGPOSE:206 _lgGlass:207 _lgCore:207 _lgGeo:207 _lgEdge:207 _lgEdgeM:207 lgCrystalMesh:209 lgState:217 _lgV:218 _lgW:218 lgWorld:219 LG_ULT_ASSET:222 LG_CRYSTAL_ASSET:222 LG_ULT_INTRO:223 LG_ULT_ARRIVAL_FX:223 LG_ULT_TIME:224 lgUltMaterials:225 lgSovereignFinishes:226 lgSovereignMaterials:227 lgSovereignFinish:288 lgSovereignCrystal:309 lgSkinSovereign:318 lgPoseSovereign:371 lgSovereignHeart:447 LG_SASH_X:473 LG_SASH_Z:473 lgSovereignRibbon:474 lgSovereignFlare:533 LG_PALM_TRAVEL:546 LG_PALM_SCORCH_LIFE:547 LG_PALM_SCORCH_SLOTS:547 lgPalmGateOffset:548 lgSovereignPalmWaves:550 lgPosePalmWaves:559 lgPoseBeamWaves:565 lgSovereignPalmGate:577 lgSovereignScorchTrail:587 lgPalmScorch:615 lgSovereignCrossSparks:651 lgSovereignGather:674 lgSovereignWingCurrent:707 lgSovereignChargeSeal:736 lgSovereignChestRecoil:753 lgSovereignSeal:763 lgSovereignArmSigils:779 lgBuildSovereign:810 lgReturnMark:887 lgUltVisual:901 lgWardVisual:1138 _lgBeamM:1154 lgBeamMat:1155 lgSovereignChestBeam:1158 lgSovereignPalmBeam:1195 _lgLinkM:1265 lgLinkMat:1266 lgUnitTube:1269 lgTube:1270 lgAim:1278 lightFX:1279 lgBaseObjects:1510 lgClearBase:1511 lgClear:1512 lightDropView:1519 lgAllyEmpEnd:1525
@@ -895,4 +895,4 @@ _dvPanel:95 _dvBtn:98 _dvBody:100 _dvHead:100 devUiApply:102 devFreeMouse:110 de
 §130 rows
 dvA:131 dvTg:132 dvB:133 dvCh:134 dvSl:135 dvSub:136 dvCol:137 devKeyOf:138 devRender:143 devPos:193 devUiAct:200
 
-(113 files, 33257 lines)
+(113 files, 33242 lines)

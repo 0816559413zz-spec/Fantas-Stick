@@ -89,9 +89,11 @@ function hud4Draw(me,v){
   for(let i=0;i<nx;i++){const f=clamp((xh-i*per)/per,0,1);h4Set('s'+(nh+i),f.toFixed(3),x=>H4.seg[nh+i][1].style.width=x*100+'%');}
   h4Set('hp',hpv,x=>Q.hp.textContent=x);h4Set('mh',me.mh,x=>Q.mh.textContent='/ '+x);h4Set('xh',xh,x=>Q.xh.textContent=x>0?'+'+x:'');
   h4Set('low',hr<0.35&&me.al,x=>H4.el.classList.toggle('low',x));
-  // แถบรอง: พลังโล่ / สายดิน = HP โล่ Stand (แตก = แถบส้มนับฟื้น)
+  // The secondary bar shows shield HP, Darkness guard time, or Stand HP.
   const stand=me.ea,standBroken=stand&&stand[0]>0;
-  const shieldFill=stand?(standBroken?1-eSmooth('stb',stand[0])/Math.max(1,ERV.standOff):stand[7]/300):me.se/100;
+  const darkness=k.path===DARKP;
+  const shieldFill=darkness?(me.dk?.[4]??DARK_V.shieldTime)/DARK_V.shieldTime:
+    stand?(standBroken?1-eSmooth('stb',stand[0])/Math.max(1,ERV.standOff):stand[7]/300):me.se/100;
   const shieldText=stand?(standBroken?'Stand แตก':(stand[7]|0)+' / 300'):'โล่';
   h4Set('sb',clamp(shieldFill,0,1).toFixed(3),x=>Q.subB.style.width=x*100+'%');
   h4Set('st',shieldText,x=>Q.subT.textContent=x);

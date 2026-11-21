@@ -100,6 +100,7 @@
 .h4Sub>i b{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,var(--c2),var(--c1));box-shadow:0 0 8px var(--c1)}
 .h4Sub small{font:600 11px 'Kanit',sans-serif;color:rgba(255,255,255,.8);text-shadow:0 1px 3px #000;white-space:nowrap}
 .h4Sub.brk>i b{background:linear-gradient(90deg,#ffb08a,#ff6a3a)}
+#h4[data-el="darkness"] .h4Sub>i b{background:#fff;box-shadow:none}
 .h4Chips{display:flex;gap:5px}
 .h4Chips span{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:12px;background:rgba(9,12,30,.7);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--c1) 60%,transparent)}
 
