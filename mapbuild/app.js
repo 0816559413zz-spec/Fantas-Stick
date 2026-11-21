@@ -839,7 +839,8 @@ function frameSel() { const it = find(sel); if (!it) return; cam.x = it.x != nul
 function editSel(fn) { const it = find(sel); if (!it) return; pushUndo('o'); fn(it); resync(); renderSide(); }
 function resync() { const it = find(sel); if (sel && sel.k === 'room') { syncAll(); changed(); return; } if (sel && sel.k === 'obj' && it) syncObj(it); else if (sel && sel.k === 'part' && it) syncPart(it); else if (sel && sel.k === 'wall') syncWalls(); else syncFloors(); updSel(); changed(); colDirty(); }
 function delSel() { if (!sel) return;
-  if (msel.length) { pushUndo('o'); for (const q of selAll()) M[KEYS[q.k]] = M[KEYS[q.k]].filter(v => v.id !== q.id); sel = null; msel = []; syncAll(); renderSide(); changed(); return; }   // multi const w = sel.k === 'wall' && find(sel), fp = sel.k === 'part' && find(sel);
+  if (msel.length) { pushUndo('o'); for (const q of selAll()) M[KEYS[q.k]] = M[KEYS[q.k]].filter(v => v.id !== q.id); sel = null; msel = []; syncAll(); renderSide(); changed(); return; }   // multi
+  const w = sel.k === 'wall' && find(sel), fp = sel.k === 'part' && find(sel);
   if (fp && fp.pts && sel.pt != null && fp.pts.length > 3) { pushUndo('o'); fp.pts.splice(sel.pt, 1); sel.pt = null; resync(); drawHandles(); return; }
   if (w && sel.pt != null && w.pts.length > 2) { pushUndo('o'); w.pts.splice(sel.pt, 1); sel.pt = null; resync(); return; }
   pushUndo('o'); const key = KEYS[sel.k]; M[key] = M[key].filter(v => v.id !== sel.id); sel = null; syncAll(); renderSide(); changed(); }
