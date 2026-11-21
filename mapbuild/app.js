@@ -699,7 +699,7 @@ tc.addEventListener('objectChange', () => {
     const dx = gAnchor.position.x - z.p.x, dy = gAnchor.position.y - z.p.y, dz = gAnchor.position.z - z.p.z, up = Math.abs(dy) > 0.004;
     if (k === 'wall') { it.pts = s.pts.map(p => [r2(clamp(p[0] + dx, 0, M.W)), r2(clamp(p[1] + dz, 0, M.H))]); if (up) it.base = r2((s.base != null ? s.base : MD.gh(M, s.pts[0][0], s.pts[0][1])) + dy); }
     else { it.x = r2(clamp(s.x + dx, 0, M.W)); it.z = r2(clamp(s.z + dz, 0, M.H));
-      if (up && k === 'obj') it.y = r2(Math.max(0, (s.y != null ? s.y : it.t === 'ring' ? 6 : it.t === 'light' ? 2.2 : it.t === 'ceil' ? 21 : 0) + dy));
+      if (up && k === 'obj') it.y = r2((s.y != null ? s.y : it.t === 'ring' ? 6 : it.t === 'light' ? 2.2 : it.t === 'ceil' ? 21 : 0) + dy);   // may go below 0 = sunk into the ground
       else if (up && k === 'part') it.base = r2((s.base != null ? s.base : MD.gh(M, s.x, s.z)) + dy);
       else if (up && k === 'floor') { it.y = r2(s.y + dy); it.y2 = r2((s.y2 == null ? s.y : s.y2) + dy); } }
   } else if (gmode === 'rotate') {
@@ -790,6 +790,7 @@ addEventListener('keydown', e => {
   else if (k === 'f') frameSel();
   else if (k === ',' || k === '.' || k === '<' || k === '>') { const cst = tool === 'castle' || (sel && sel.k === 'part'), a = (k === ',' || k === '<' ? 1 : -1) * (cst ? (e.shiftKey ? Math.PI / 12 : Math.PI / 4) : (e.shiftKey ? Math.PI / 36 : Math.PI / 12)); if (tool === 'place' || tool === 'floor' || tool === 'castle') { ghostRot += a; need(); } else rotSel(a); }
   else if (k === '[' || k === ']') { if (tool === 'sculpt' || tool === 'paint' || tool === 'scatter') { opt.rad = clamp(+(opt.rad * (k === '[' ? 0.85 : 1.18)).toFixed(1), 0.5, 40); renderOpts(); } else scaleSel(k === '[' ? 0.9 : 1.1); need(); }
+  else if (k === 'end') { e.preventDefault(); snapGround(); }
   else if (k === 'pageup' || k === 'pagedown') { e.preventDefault(); liftSel((k === 'pageup' ? 1 : -1) * (e.shiftKey ? 0.05 : 0.25)); }
 });
 addEventListener('keyup', e => { if (e.code === 'Space') spaceDown = false; fly.delete(e.code); fly.fast = e.shiftKey; });
@@ -804,7 +805,17 @@ function dupSel() { const it = find(sel); if (!it) return; pushUndo('o'); const 
   M[KEYS[sel.k]].push(c); sel = { k: sel.k, id: c.id }; syncAll(); renderSide(); changed(); }
 function rotSel(a) { if (!find(sel)) return; if (sel.k === 'room') { editSel(it => { it.rot = +((((it.rot || 0) + Math.sign(a) * Math.PI / 2) % 6.2832 + 6.2832) % 6.2832).toFixed(4); }); return; } editSel(it => { if (it.pts && sel.k === 'wall') { const cx = it.pts.reduce((s, p) => s + p[0], 0) / it.pts.length, cz = it.pts.reduce((s, p) => s + p[1], 0) / it.pts.length, c = Math.cos(a), s = Math.sin(a); it.pts = it.pts.map(p => { const x = p[0] - cx, z = p[1] - cz; return [+(cx + x * c + z * s).toFixed(2), +(cz - x * s + z * c).toFixed(2)]; }); } else it.rot = +(((it.rot || 0) + a) % 6.2832).toFixed(4); }); }
 function scaleSel(k) { if (!find(sel)) return; editSel(it => { if (sel.k === 'obj') { if (isKit(it)) it.s = +((it.s || 1) * k).toFixed(2); else if (isPrim(it) || it.t === 'house' || it.t === 'phase' || it.t === 'ceil') { it.sx = +((it.sx || 1) * k).toFixed(2); it.sz = +((it.sz || 1) * k).toFixed(2); if (isPrim(it)) it.sy = +((it.sy || 1) * k).toFixed(2); } else if (it.t === 'core') it.s = +((it.s || 4) * k).toFixed(2); else if ((MD.isRP(it.t) || it.t === 'pn_wall') && it.L) it.L = +(it.L * k).toFixed(2); } else if (sel.k === 'part' && it.pts) { it.pts = it.pts.map(q => [+(q[0] * k).toFixed(3), +(q[1] * k).toFixed(3)]); it.h = +clamp(it.h * k, 0.5, 40).toFixed(2); } else if (sel.k === 'part') { const D = MD.PART[it.k], q = D.main, mn = D.p[q][1], mx = D.p[q][2]; it[q] = +clamp(it[q] * k, mn, mx).toFixed(2); } else if (sel.k === 'floor') { it.w = +(it.w * k).toFixed(2); it.d = +(it.d * k).toFixed(2); } else it.h = +(it.h * k).toFixed(2); }); }
-function liftSel(d) { if (!find(sel)) return; editSel(it => { if (sel.k === 'obj') it.y = +Math.max(0, (it.y || 0) + d).toFixed(2); else if (sel.k === 'part') it.base = +((it.base != null ? it.base : MD.gh(M, it.x, it.z)) + d).toFixed(2); else if (sel.k === 'floor') { it.y = +(it.y + d).toFixed(2); it.y2 = +((it.y2 == null ? it.y : it.y2) + d).toFixed(2); } else it.base = +((it.base != null ? it.base : MD.gh(M, it.pts[0][0], it.pts[0][1])) + d).toFixed(2); }); }
+function snapGround() {   // End: move the selection so its lowest point meets the LOWEST ground under its footprint (sinks into slopes, no gap below)
+  const it = find(sel), b = selBox && selBox.box; if (!it || !b || b.isEmpty() || sel.k === 'floor' || sel.k === 'room') return;
+  if (sel.k === 'obj' && (it.t === 'ring' || it.t === 'light' || it.t === 'ceil' || it.t === 'phase')) return;
+  const d = sel.k === 'obj' ? (it.t === 'pn_wall' ? { ex: (it.L || 4) / 2, ez: (it.T || 0.3) / 2 } : dim(it)) : null, pts = [];
+  if (d && !it.rx && !it.rz && !it.tl) { const c = Math.cos(it.rot || 0), sn = Math.sin(it.rot || 0);   // true (rotated) footprint
+    for (let i = 0; i <= 6; i++) for (let j = 0; j <= 6; j++) { const lx = (i / 3 - 1) * d.ex, lz = (j / 3 - 1) * d.ez; pts.push([it.x + lx * c + lz * sn, it.z - lx * sn + lz * c]); } }
+  else for (let i = 0; i <= 6; i++) for (let j = 0; j <= 6; j++) pts.push([b.min.x + M.W / 2 + (b.max.x - b.min.x) * i / 6, b.min.z + M.H / 2 + (b.max.z - b.min.z) * j / 6]);   // selection box (world → map coords)
+  const g = Math.min(...pts.map(([x, z]) => MD.gh(M, clamp(x, 0, M.W), clamp(z, 0, M.H)))), dy = +(g - b.min.y).toFixed(3);
+  if (Math.abs(dy) > 0.004) liftSel(dy);
+}
+function liftSel(d) { if (!find(sel)) return; editSel(it => { if (sel.k === 'obj') it.y = +((it.y || 0) + d).toFixed(3); else if (sel.k === 'part') it.base = +((it.base != null ? it.base : MD.gh(M, it.x, it.z)) + d).toFixed(2); else if (sel.k === 'floor') { it.y = +(it.y + d).toFixed(2); it.y2 = +((it.y2 == null ? it.y : it.y2) + d).toFixed(2); } else it.base = +((it.base != null ? it.base : MD.gh(M, it.pts[0][0], it.pts[0][1])) + d).toFixed(2); }); }
 
 // ================= UI: tools + options =================
 // breakable panels: each segment of the drawn line = one pn_wall, all in a new group (they hold each other up); joints overlap by half the thickness
@@ -871,7 +882,7 @@ function pnTestHit(o, pt, big) {
   for (let a = -R; a <= R; a++) for (let b = -R; b <= R; b++) { const cc = c0 + a, rr = r0 + b; if (cc >= 0 && cc < d.nc && rr >= 0 && rr < d.nr) st.add(rr * d.nc + cc); }
   pnTestDraw();
 }
-const TOOLS = [['select', '⬚', 'Select', 'v', 'Click to select, drag to move • W/E/R = move/rotate/scale gizmo • Q = hand (pan) • , . rotate • [ ] scale • PgUp/PgDn raise/lower • F frame • Ctrl+D duplicate • Del delete • Walls: drag white points, Alt+click adds a point'],
+const TOOLS = [['select', '⬚', 'Select', 'v', 'Click to select, drag to move • W/E/R = move/rotate/scale gizmo • Q = hand (pan) • , . rotate • [ ] scale • PgUp/PgDn raise/lower (below ground OK) • End snap to ground • F frame • Ctrl+D duplicate • Del delete • Walls: drag white points, Alt+click adds a point'],
   ['sculpt', '⛰', 'Sculpt', 'b', 'Drag to sculpt • Shift = invert • Shift+wheel or [ ] = brush size • red = too steep to walk up'],
   ['paint', '🖌', 'Paint', 'p', 'Drag to paint the surface • Shift = erase back to grass • Alt+click = pick surface type'],
   ['wall', '▤', 'Wall', 'k', 'Click point by point to draw a wall line • double-click/Enter = finish • click the first point = close loop • Backspace = undo point • Esc = cancel'],
@@ -892,7 +903,7 @@ function pal(items, cur, on, cls) { const d = el('div', { class: 'pal ' + (cls |
 function renderOpts() {
   const b = $('opts'); b.textContent = '';
   const brush = () => { b.append(h3('Brush'), slider('Size (radius)', 'rad', 0.5, 40, 0.5), tool !== 'paint' && tool !== 'scatter' ? slider('Strength', 'str', 0.5, 12, 0.5) : null, tool !== 'scatter' ? check('Soft Edge', 'soft') : null); };
-  if (tool === 'select') { b.append(el('p', { class: 'note', html: 'Click an item in the Scene or the Hierarchy, then edit it in the Inspector.<br><kbd>Q</kbd> Hand (pan) <kbd>W</kbd> Move <kbd>E</kbd> Rotate <kbd>R</kbd> Scale<br>Green arrow = height • centre cube = uniform scale • one drag = one undo<br><kbd>,</kbd><kbd>.</kbd> rotate 15° (Shift = 5°)<br><kbd>[</kbd><kbd>]</kbd> scale down/up<br><kbd>PgUp</kbd><kbd>PgDn</kbd> raise/lower<br><kbd>F</kbd> frame selected (or double-click in the Hierarchy) • <kbd>T</kbd> top view<br><kbd>Ctrl+D</kbd> duplicate • <kbd>Del</kbd> delete<br>Camera: right-drag orbit (hold it + <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> fly, <kbd>Q</kbd><kbd>E</kbd> down/up, Shift = fast) • middle-drag or Space+drag pan • wheel zoom' })); }
+  if (tool === 'select') { b.append(el('p', { class: 'note', html: 'Click an item in the Scene or the Hierarchy, then edit it in the Inspector.<br><kbd>Q</kbd> Hand (pan) <kbd>W</kbd> Move <kbd>E</kbd> Rotate <kbd>R</kbd> Scale<br>Green arrow = height • centre cube = uniform scale • one drag = one undo<br><kbd>,</kbd><kbd>.</kbd> rotate 15° (Shift = 5°)<br><kbd>[</kbd><kbd>]</kbd> scale down/up<br><kbd>PgUp</kbd><kbd>PgDn</kbd> raise/lower (can sink below ground) <kbd>End</kbd> snap to ground<br><kbd>F</kbd> frame selected (or double-click in the Hierarchy) • <kbd>T</kbd> top view<br><kbd>Ctrl+D</kbd> duplicate • <kbd>Del</kbd> delete<br>Camera: right-drag orbit (hold it + <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> fly, <kbd>Q</kbd><kbd>E</kbd> down/up, Shift = fast) • middle-drag or Space+drag pan • wheel zoom' })); }
   else if (tool === 'sculpt') {
     b.append(h3('Sculpt'), seg([['up', 'Raise'], ['down', 'Lower'], ['smooth', 'Smooth'], ['flat', 'Flatten', 'Pull the ground to the height where the drag started'], ['set', 'Set Height'], ['noise', 'Noise'], ['ramp', 'Ramp', 'Drag from A to B = smooth ramp joining two levels']], opt.smode, v => { opt.smode = v; renderOpts(); }));
     if (opt.smode === 'set') b.append(slider('Height', 'hval', -5, 20, 0.25));
@@ -987,7 +998,7 @@ function renderSide() {
   const box = $('side'); box.textContent = ''; if (!M) return;
   const it = find(sel);
   if (it) {
-    const btns = el('div', { class: 'seg' }, el('button', { class: 'tl-btn', onclick: dupSel }, 'Duplicate'), el('button', { class: 'tl-btn', onclick: () => { sel.pt = null; delSel(); } }, 'Delete'));
+    const btns = el('div', { class: 'seg' }, el('button', { class: 'tl-btn', title: 'End key: lowest point of the item meets the lowest ground under it (sinks into slopes, no gap)', onclick: snapGround }, 'Snap to Ground'), el('button', { class: 'tl-btn', onclick: dupSel }, 'Duplicate'), el('button', { class: 'tl-btn', onclick: () => { sel.pt = null; delSel(); } }, 'Delete'));
     if (sel.k === 'room') { const R = RM.get(it.ref), rooms = list.filter(m => MD.isRoomId(m.id) && m.id !== M.id);
       box.append(section('Room (prefab) — ' + (R ? R.name : it.ref), true,
         fld('Room', it, 'ref', { type: 'select', items: rooms.map(m => [m.id, m.name]), after: () => loadRooms().then(() => { syncAll(); renderSide(); changed(); }) }),
@@ -997,7 +1008,7 @@ function renderSide() {
         el('p', { class: 'note' }, R ? 'Size ' + R.W + ' × ' + R.H + ' m • edit the room’s contents in its own file (every map using it updates) • , . rotate 90° • drag to move' : 'Room not loaded yet (' + it.ref + ')'), btns)); }
     else if (sel.k === 'obj') { const D = OBJ[it.t], a = isKit(it) && KIT.byId.get(kitId(it)), d = dim(it);
       box.append(section((D ? D.n : a ? a.name : it.t), true,
-        fld('Position X', it, 'x'), fld('Position Z', it, 'z'), it.t === 'light' || it.t === 'ring' || MD.isDeco(it.t) ? fld('Height Above Ground', it, 'y') : fld('Height Above Ground', it, 'y', { min: 0 }), fld('Rotation (deg)', it, 'rot', { deg: 1 }),
+        fld('Position X', it, 'x'), fld('Position Z', it, 'z'), it.t === 'light' || it.t === 'ring' || MD.isDeco(it.t) ? fld('Height Above Ground', it, 'y') : fld('Height Above Ground', it, 'y', { ph: '0 (negative = sunk)' }), fld('Rotation (deg)', it, 'rot', { deg: 1 }),
         tiltOk(it) ? fld('Tilt X (deg)', it, 'rx', { deg: 1, ph: '0' }) : null, tiltOk(it) ? fld('Tilt Z (deg)', it, 'rz', { deg: 1, ph: '0' }) : null,
         isKit(it) ? fld('Scale (×)', it, 's', { min: 0.05 }) : null,
         isPrim(it) || it.t === 'house' ? fld(it.t === 'house' ? 'Width (×)' : 'Width', it, 'sx', { min: 0.1 }) : null, isPrim(it) ? fld('Height', it, 'sy', { min: 0.1 }) : null, isPrim(it) || it.t === 'house' ? fld(it.t === 'house' ? 'Depth (×)' : 'Depth', it, 'sz', { min: 0.1 }) : null,

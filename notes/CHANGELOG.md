@@ -1,5 +1,7 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
 
+- 2026-11-21 Map Builder: objects may sit below ground (negative height via gizmo, PgDn or the Inspector); Snap to Ground button / End key drops the selection so its lowest point meets the lowest ground under its footprint (no gap on slopes).
+
 - 2026-11-21 Darkness: the BA shaft trail fades out about 0.4 seconds after the cut. The blade trail retains its 0.9-second fade.
 
 - 2026-11-21 Fixes: black flicker on raised walkways (Map Builder deco used the same castle material as .glb walls and was coplanar: own material copies + polygonOffset); skill placement ring now drapes over ground, upper floors and standable props instead of a flat disc; Map Builder visual objects can tilt (rx/rz, gizmo X/Z rings, Tilt X/Z fields; collision unchanged); file siege maps use a 30 px bot nav grid so bots path around pillars and cylinders.
