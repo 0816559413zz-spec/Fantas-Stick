@@ -1,6 +1,20 @@
 {
- "next": 124,
+ "next": 125,
  "items": [
+  {
+   "id": 124,
+   "title": "Darkness BA หางฟันค้างชัดขึ้น",
+   "text": "BA กวาด 150° ข้างละ 75° หางค้างให้เห็นเต็มช่วงสั้นแล้วจางจนหมดราว 0.9 วิหลังฟัน",
+   "kind": "Animation / VFX",
+   "who": "Darkness",
+   "status": "wait",
+   "created": "2026-11-21",
+   "updated": "2026-11-21",
+   "imgs": [],
+   "links": [
+    "/shots/motion_darkness_ba_150_linger_tdm.gif"
+   ]
+  },
   {
    "id": 123,
    "title": "Darkness คืนเคียวหลัง Nightfall ไม่มีตรา",

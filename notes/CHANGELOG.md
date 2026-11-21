@@ -1,5 +1,7 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
 
+- 2026-11-21 Darkness release (protocol v105): BA lingers for about 0.9 seconds after the cut, with a brief hold before the fade. Includes the 150° BA, grounded shield, and Nightfall recovery.
+
 - 2026-11-21 Darkness: unmarked Nightfall carries the uppercut's movement and rotation into one continuous return to the live hover pose.
 
 - 2026-11-21 Darkness: buffer a BA pressed near the end of marked or Flow Nightfall and blend into the slash as soon as the dash releases control. The shield uses an 80-unit diameter and allows normal grounded walking.

@@ -438,6 +438,9 @@ function stCreateScythePreview(root,args,lifetime){
   };
   let trailSections;
   let baFxVisible=args.liveBA;
+  const trailStep=.014,cutEnd=SW0+WU+SWP,trailHoldAt=cutEnd+.025;
+  const trailFadeAt=trailHoldAt+.30*ST_DARK_LIVE_BA.rate;
+  const trailEnd=cutEnd+.12+(HH-1)*trailStep;
   const trailSamples=Array.from({length:HH},()=>({pos:new THREE.Vector3(),QB:new THREE.Quaternion(),act:0,shaft:true}));
   let flPh=0,flLast=null;   // spine-flame phase: args.flameSpeed scales flow speed without jumps (Flow state)
   const update=(time,charge=0,drag=0,swingTime=time)=>{
@@ -461,7 +464,9 @@ function stCreateScythePreview(root,args,lifetime){
       const me=standaloneBA&&typeof PM3!=='undefined'&&PM3.get(NET.myId);if(me&&me.b){me.b.userData.scyY??=me.b.rotation.y;me.b.rotation.y=me.b.userData.scyY+P.tw;}   // ตัวบิดตามแรงเหวี่ยง
 
     }
-    const baEffects=baActive&&(!args.liveBA||swing<SW0+WU+SWP+HOLD+liveSplashSpread+splashLife);
+    // Preserve the full slash briefly, then fade its trail without slowing the weapon.
+    const trailTime=args.liveBA&&baActive?Math.min(swing,trailHoldAt)+.60*Math.max(0,swing-trailFadeAt):swing;
+    const baEffects=baActive&&(!args.liveBA||trailTime<trailEnd||swing<cutEnd+HOLD+liveSplashSpread+splashLife);
     const showTrail=baEffects||!!args.trailPose;
     if(args.liveBA&&baFxVisible&&!showTrail){
       tail.visible=fringe.visible=shTail.visible=tailFlames.visible=tailSheet.visible=spinG.visible=false;
@@ -481,11 +486,9 @@ function stCreateScythePreview(root,args,lifetime){
           return {tk,edge:tk<=1?bladePt(tk,.45):[tipX+ttx*e,tipY+tty*e],spine:bladePt(tk,0)};
         });
         const sampleTrail=args.trailPose??baPose;
-        // Let the cast finish at full speed, then advance the trail's fade more slowly.
-        const trailTime=args.liveBA&&baActive?swing-.35*Math.max(0,swing-SW0-WU-SWP):swing;
         let trailActive=false;
         for(let j=0;j<HH;j++){
-          const sample=sampleTrail(trailTime-j*.014);
+          const sample=sampleTrail(trailTime-j*trailStep);
           const saved=trailSamples[j];
           saved.pos.copy(sample.pos);saved.QB.copy(sample.QB);
           saved.act=sample.act;saved.shaft=sample.shaft;
