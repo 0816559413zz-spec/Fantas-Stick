@@ -17,7 +17,7 @@ User-defined rules for all Claude sessions in this repo. They override the expla
 | VFX | `VFX-STUDIO-CLAUDE.md`, `guides/FX-FORMAT.md`, `guides/VFX.md`; owning skill's design doc in `designs/`; `guides/OPTIMIZE.md` (cost) |
 | Balance / numbers | `assets/tune.json`, the skill/class doc, `review/REVIEW.md` (approved values) |
 | Castle Strike mode | `designs/castle-gameplay-concept.md`, `notes/PROJECT-DESIGN-DIRECTION.md`, `maps/firstcastlestrike.md`, map guides; class roles; Dev Mode (`HANDOFF.md`) |
-| Map / Map Builder | `guides/MAP-DESIGN.md`, `MAP-BUILDER.md`, `MAP-FORMAT.md`, `maps/MAPS.md`; destruction + environment docs; Castle Strike concept |
+| Map / Map Builder | `guides/MAP-STANDARD.md` (standard + fcs migration plan), `guides/MAP-DESIGN.md`, `MAP-BUILDER.md`, `MAP-FORMAT.md`, `maps/MAPS.md`; destruction + environment docs; Castle Strike concept |
 | Environment interaction / destruction | `guides/Destruction.md`, `designs/element-surfaces.md`, `designs/battlefield.md`; skills that hit terrain; map docs |
 | Bug fix | `bugs/BUGS.md` entry + the code area only |
 | Tool UI | `guides/TOOL-UI-RULES.md`, `hub/tools.json` |

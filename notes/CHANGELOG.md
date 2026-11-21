@@ -1,5 +1,6 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
 
+- 2026-11-21 — **Map standard:** user chose Map Builder as the single standard for all maps. `guides/MAP-STANDARD.md` = rules for new maps (source `maps/build/<id>.json`, room prefabs, gameplay data vs `style` presets, `sys` tags, mode markers, budgets, tests) + gap table + 6-step plan to move fcs off code. Linked from CLAUDE.md 7c, MAP-BUILDER.md, MAP-ROOMS.md, WORKFLOW map. No code changed.
 - 2026-11-21 Darkness: raised the grounded camera to show the blade trail from above while keeping the centered reticle and its normal aiming behavior.
 
 - 2026-11-21 Darkness: the BA scythe carries its hover velocity into one continuous return to idle.
