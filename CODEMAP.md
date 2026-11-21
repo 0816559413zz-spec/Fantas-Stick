@@ -29,12 +29,12 @@ HOUSES:232 HAIRC:237 HAIRSTY:239 WOODC:242 WOODN:243 WCOREC:244 WCOREN:245 WANDS
 ## js/02-fcs-data.js (3) — 
 FCS_DATA:3
 
-## js/02-fcs-rooms.js (82) — 
+## js/02-fcs-rooms.js (83) — FCS room pieces (rule: guides/MAP-ROOMS.md — user 2026-11-20: every room/courtyard is a s…
 FCS_ROOMS:11 fcsRoomAdd:12 FCS_C0:13 fcsRoomOf:14 fcsCut:15
 §16 gen context (called from genFcs)
 fcsRoomK:17 roomWall:27 roomCol:36 roomFloor:38 roomCeil:44 fcsCeilAt:46 fcsCeilClamp:52
 §53 breakable room props (user 2026-11-20): BRK groups (js/12-buildings.j…
-RPK:56 roomProp:64 RWH:73 roomWallEnv:74
+RPK:57 roomProp:65 RWH:74 roomWallEnv:75
 
 ## js/02-fcs.js (230) — 
 FCS_C:7 FCS_WH:8 genFcs:9
@@ -886,4 +886,4 @@ _dvPanel:95 _dvBtn:98 _dvBody:100 _dvHead:100 devUiApply:102 devFreeMouse:110 de
 §130 rows
 dvA:131 dvTg:132 dvB:133 dvCh:134 dvSl:135 dvSub:136 dvCol:137 devKeyOf:138 devRender:143 devPos:193 devUiAct:200
 
-(111 files, 32729 lines)
+(111 files, 32730 lines)

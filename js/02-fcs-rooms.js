@@ -53,6 +53,7 @@ function fcsCeilClamp(p){if(MAPID!=='fcs'||!FCS_ROOMS.length)return;const c=fcsC
 // ---- breakable room props (user 2026-11-20): BRK groups (js/12-buildings.js) — snapshot BK syncs the stage
 // furniture/decor: break = shatter into loose debris, no collision left (rub 0) • rail: break = low rubble, no collision • pillar: chips, stays (rub 1)
 // col = collides before breaking (px radius, 0 = walk through) • h = height (m) • hp • m = BRK material (fx colour) • st = can stand on top
+// mirror for the map editor: RPK in mapbuild/model.js (keep kinds + col/h in sync)
 const RPK={
   table:{col:20,h:1.0,hp:120,m:'wood',st:1},hightable:{col:22,h:1.1,hp:200,m:'wood',st:1},bench:{col:0,h:0.5,hp:60,m:'wood'},chair:{col:0,h:1.05,hp:40,m:'wood'},
   throne:{col:16,h:2.2,hp:160,m:'wood'},crate:{col:22,h:1.2,hp:120,m:'wood',st:1},crate2:{col:22,h:2.35,hp:170,m:'wood'},barrel:{col:16,h:1.3,hp:100,m:'wood'},

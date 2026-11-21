@@ -2,10 +2,12 @@
 // Run: node tools/fcs-to-mb.mjs   → open mapbuild.html?id=fcs-draft (python tools/serve.py)
 // Draft only: for looking at / sketching on the real map in 3D. Siege mode still plays js/02-fcs*.js —
 // do NOT press "⬆ ส่งเข้าเกม" expecting it to replace fcs (it would become a separate map 'fcs-draft').
-// Source = the same genFcs() the game runs (js/02-fcs-data.js + js/02-fcs.js), so terrain, walls, fences,
-// breakable walls/gate, trees/crates/pillars, extra forest trees/rocks, castle ruins and the L bridge match the game.
-// Not carried over (code-only visuals): castle building look (js/28-fcs-build.js), forest ground paint / fog
-// (js/28-fcs-forest.js), rubble piles, bridge arches/eggshell (js/12-fcs-bridge.js), phase zones (only noted in desc).
+// Source = the same genFcs() the game runs (js/02-fcs-data.js + rooms js/02-fcs-rooms.js + js/02-room-*.js + js/02-fcs.js),
+// so terrain, walls, fences, breakable walls/gate, trees/crates/pillars, extra forest trees/rocks, castle ruins, the L bridge,
+// room pieces (walls with door gaps + lintels, columns, gallery floors, ceilings, breakable props) and the siege markers
+// (cores, per-phase spawns, phase areas) match the game.
+// Not carried over (code-only visuals, MAP-STANDARD round 4 = style presets): castle/room look (js/28-fcs-build.js,
+// js/28-fcs-castle.js), forest ground paint / fog (js/28-fcs-forest.js), rubble piles, bridge arches.
 import fs from 'fs';
 import vm from 'vm';
 import * as MD from '../mapbuild/model.js';
@@ -13,23 +15,25 @@ import * as MD from '../mapbuild/model.js';
 // ---------- run the game's genFcs in a sandbox ----------
 const src = fs.readFileSync('js/02-fcs.js', 'utf8');
 const body = src.slice(src.indexOf('const FCS_C'), src.indexOf('// ---------- พื้นที่เล่นตามเฟส'));
+// room pieces load between 02-fcs-data and 02-fcs (index.html FILES order)
+const files = (fs.readFileSync('index.html', 'utf8').match(/const FILES=\[([^\]]*)\]/)[1].match(/'([^']+)'/g) || []).map(s => s.slice(1, -1));
+const rooms = files.slice(files.indexOf('02-fcs-rooms'), files.indexOf('02-fcs')).map(f => fs.readFileSync('js/' + f + '.js', 'utf8'));
 const sb = {};
 vm.createContext(sb);
 vm.runInContext([
   'const clamp=(v,a,b)=>v<a?a:v>b?b:v;',
   'function mulberry(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}',
-  fs.readFileSync('js/02-fcs-data.js', 'utf8'), body,
-  'globalThis.OUT=genFcs();globalThis.D=FCS_DATA;globalThis.CC=FCS_C;globalThis.WH=FCS_WH;',
+  fs.readFileSync('js/02-fcs-data.js', 'utf8'), ...rooms, body,
+  'globalThis.OUT=genFcs();globalThis.D=FCS_DATA;globalThis.CC=FCS_C;globalThis.WH=FCS_WH;globalThis.ROOMS=FCS_ROOMS;',
 ].join('\n'), sb);
-const { OUT, D, CC, WH } = sb;
+const { OUT, D, CC, WH, ROOMS } = sb;
 const F = OUT.fcs, T = OUT.terr, PX = MD.PX, m = v => v / PX;   // game px → metres
 
 // ---------- map + terrain ----------
 const W = Math.round(m(OUT.W)), H = Math.round(m(OUT.H));
 const M = MD.newMap({ id: 'fcs-draft', name: 'FCS ร่าง (จากเกม)', W, H, surf: 3 });
-M.desc = 'ร่างจากแผนที่ First Castle Strike ในเกม (tools/fcs-to-mb.mjs) — ไว้ดู/ดราฟ ไม่ใช่แผนที่ที่โหมดบุกปราสาทใช้. ' +
-  'เฟส: ' + F.phases.map((r, i) => (i + 1) + '=' + r.map(q => `x${m(q.x1)}-${m(q.x2)} z${m(q.y1)}-${m(q.y2)}`).join('+')).join(' • ');
-M.modes = ['tdm']; M.sky = 'day'; M.autoProps = 0; M.fog = ['#c9d6e2', 500, 1600];   // big map: push fog out so the whole map reads
+M.desc = 'ร่างจากแผนที่ First Castle Strike ในเกม (tools/fcs-to-mb.mjs) — ไว้ดู/ดราฟ ยังไม่ใช่แผนที่ที่โหมดบุกปราสาทใช้ (MAP-STANDARD รอบ 2–6)';
+M.modes = ['siege']; M.sky = 'day'; M.autoProps = 0; M.random = 0; M.style = 'castle-stone'; M.fog = ['#c9d6e2', 500, 1600];   // big map: push fog out so the whole map reads
 const { nx, ny } = M;
 const tc = T.c;   // terrain lattice spacing (px)
 const terrH = (px, py) => {   // same bilinear maths as the game
@@ -72,12 +76,12 @@ for (const v of [1, 2]) {
   }
 }
 // fences (type 3) — the game's own fence lines
-for (const [x1, y1, x2, y2] of F.fences) M.walls.push({ id: nid(), pts: [[m(x1), m(y1)], [m(x2), m(y2)]], th: 0.4, h: WH[3], c: '#8a6a44', m: 'wood', closed: 0, curve: 0, brk: 0 });
-// breakable walls + gate (siege targets) — reddish so they stand out
+for (const [x1, y1, x2, y2] of F.fences) M.walls.push({ id: nid(), pts: [[m(x1), m(y1)], [m(x2), m(y2)]], th: 0.4, h: WH[3], c: '#8a6a44', m: 'wood', closed: 0, curve: 0, brk: 0, sys: 'fence' });
+// breakable walls + gate = siege targets (sg) — reddish so they stand out
 for (const b of F.bw) {
   const horiz = b.w >= b.d, th = m(horiz ? b.d : b.w);
   const pts = horiz ? [[m(b.x), m(b.y + b.d / 2)], [m(b.x + b.w), m(b.y + b.d / 2)]] : [[m(b.x + b.w / 2), m(b.y)], [m(b.x + b.w / 2), m(b.y + b.d)]];
-  M.walls.push({ id: nid(), pts, th, h: b.h, c: b.k === 'gate' ? '#7a5a3a' : '#9a6a5a', m: b.k === 'gate' ? 'wood' : 'stone', closed: 0, curve: 0, brk: 1 });
+  M.walls.push({ id: nid(), pts, th, h: b.h, c: b.k === 'gate' ? '#7a5a3a' : '#9a6a5a', m: b.k === 'gate' ? 'wood' : 'stone', closed: 0, curve: 0, brk: 1, sg: b.k });
 }
 
 // ---------- props ----------
@@ -97,9 +101,45 @@ for (const q of F.props) {
   } else if (k === 'rt') obj({ t: 'cyl', x, z, sx: m(q[3]) * 2, sy: q[4], sz: m(q[3]) * 2, c: '#7d7870' });
   // 'rr' rubble piles: visual only, skipped
 }
-// capture points (crystals) + spawns per phase
-for (const k of F.cores) obj({ t: 'cyl', x: m(k.x), z: m(k.y), sx: 4, sy: 6, sz: 4, c: '#7fd8ff', glow: 1, n: k.n, note: 'จุดยึด ' + k.n });
-for (const [t, key] of [['spawnR', 'A'], ['spawnB', 'B']]) for (const n in F.sp[key]) { const s = F.sp[key][n]; obj({ t, x: m(s.x), z: m(s.y), ph: +n, note: (key === 'A' ? 'ฝ่ายบุก' : 'ฝ่ายรับ') + ' เฟส ' + n }); }
+// siege markers: cores, spawns per phase, phase play areas
+for (const k of F.cores) obj({ t: 'core', x: m(k.x), z: m(k.y), n: k.n, s: +m(k.s).toFixed(2) });
+for (const [t, key] of [['sgA', 'A'], ['sgB', 'B']]) for (const n in F.sp[key]) { const s = F.sp[key][n]; obj({ t, x: m(s.x), z: m(s.y), ph: +n }); }
+F.phases.forEach((rs, i) => { for (const q of rs || []) obj({ t: 'phase', ph: i + 1, x: m((q.x1 + q.x2) / 2), z: m((q.y1 + q.y2) / 2), sx: m(q.x2 - q.x1), sz: m(q.y2 - q.y1) }); });
+
+// ---------- room pieces (js/02-room-*.js) ----------
+for (const r of ROOMS) {
+  const K = r.K, D2 = r.data; if (!K || !D2) continue;
+  const X = u => m(K.ox + u), Z = v => m(K.oy + v), RS = { c: '#8a8478', m: 'stone', closed: 0, curve: 0, brk: 0, sys: 'stonewall', style: 'room-hall', room: r.id };
+  for (const w of D2.walls) {   // axis-aligned: split at door gaps, lintel pieces above gaps that have one
+    const along = w.v1 === w.v2, a0 = Math.min(along ? w.u1 : w.v1, along ? w.u2 : w.v2), a1 = Math.max(along ? w.u1 : w.v1, along ? w.u2 : w.v2);
+    const P = a => along ? [X(a), Z(w.v1)] : [X(w.u1), Z(a)], gaps = (w.gaps || []).slice().sort((p, q) => p[0] - q[0]);
+    let s = a0;
+    for (const [p, q, lh] of gaps) {
+      if (p > s) M.walls.push(Object.assign({ id: nid(), pts: [P(s), P(p)], th: m(w.th), h: w.h }, RS));
+      if (lh != null && lh < w.h) { const mid = P((p + q) / 2); M.walls.push(Object.assign({ id: nid(), pts: [P(p), P(q)], th: m(w.th), h: +(w.h - lh).toFixed(2), base: +(MD.gh(M, mid[0], mid[1]) + lh).toFixed(2) }, RS)); }
+      s = Math.max(s, q);
+    }
+    if (a1 > s) M.walls.push(Object.assign({ id: nid(), pts: [P(s), P(a1)], th: m(w.th), h: w.h }, RS));
+  }
+  for (const c of D2.cols) obj({ t: 'cyl', x: X(c.u), z: Z(c.v), sx: +(m(c.r) * 2).toFixed(2), sz: +(m(c.r) * 2).toFixed(2), y: c.bot || 0, sy: +Math.max(0.2, c.h - (c.bot || 0)).toFixed(2), c: '#7d7870', style: 'room-hall', room: r.id, tag: c.tag || '' });
+  for (const q of D2.ceil) { const o = { t: 'ceil', x: m((q.x0 + q.x1) / 2), z: m((q.y0 + q.y1) / 2), sx: m(q.x1 - q.x0), sz: m(q.y1 - q.y0), y: q.h, room: r.id }; if (q.zmax !== Infinity && q.zmax != null) o.zmax = q.zmax; obj(o); }
+  for (const p of D2.props) { const o = { t: 'rp_' + p.kind, x: X(p.u), z: Z(p.v), rot: -(p.a || 0), y: p.z0 || 0, room: r.id }; if (p.L) o.L = +m(p.L).toFixed(2); obj(o); }
+}
+// room walkable floors (terr.fl k:'room'): split each grid into straight pieces along x (gallery deck + end ramps)
+for (const f of T.fl) {
+  if (f.k !== 'room') continue;
+  const j = f.ny >> 1, top = i => f.top[j * f.nx + i], gnd = i => terrH(f.x0 + i * tc, f.y0 + j * tc), z0 = m(f.y0), z1 = m(f.y0 + (f.ny - 1) * tc);
+  let i0 = 0;
+  while (i0 < f.nx - 1) {
+    const sl = top(i0 + 1) - top(i0); let i1 = i0 + 1;
+    while (i1 < f.nx - 1 && Math.abs(top(i1 + 1) - top(i1) - sl) < 0.02) i1++;
+    if (Math.max(top(i0) - gnd(i0), top(i1) - gnd(i1)) > 0.1) {
+      const x0 = m(f.x0 + i0 * tc), x1 = m(f.x0 + i1 * tc);
+      M.floors.push({ id: nid(), x: (x0 + x1) / 2, z: (z0 + z1) / 2, w: z1 - z0, d: x1 - x0, rot: Math.PI / 2, y: +top(i0).toFixed(2), y2: +top(i1).toFixed(2), th: 0.6, c: '#7a5a3a', style: 'room-hall' });
+    }
+    i0 = i1;
+  }
+}
 
 // ---------- L bridge (deck + ramps as floors, parapet as raised walls, piers as boxes) ----------
 const B = F.bridge;
@@ -107,7 +147,7 @@ if (B) {
   const rect = (r, _y, _y2, alongZ) => { const w = m(r.x2 - r.x1), d = m(r.y2 - r.y1);
     // floor's +d end is local +z; ramps: rs runs south (+z) going down; re runs east (+x) going down → rot +90° puts its +d end east
     return alongZ ? { x: m(r.x1) + w / 2, z: m(r.y1) + d / 2, w, d, rot: 0 } : { x: m(r.x1) + w / 2, z: m(r.y1) + d / 2, w: d, d: w, rot: Math.PI / 2 }; };
-  const fl = (o, y, y2) => M.floors.push(Object.assign({ id: nid(), y, y2, th: 0.6, c: '#7d7870' }, o));
+  const fl = (o, y, y2) => M.floors.push(Object.assign({ id: nid(), y, y2, th: 0.6, c: '#7d7870', sys: 'eggshell' }, o));
   fl(rect(B.ns, 0, 0, true), B.DH, B.DH);
   fl(rect(B.ew, 0, 0, true), B.DH, B.DH);
   fl(rect(B.rs, 0, 0, true), B.DH, B.gS);

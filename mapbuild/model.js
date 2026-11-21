@@ -41,8 +41,33 @@ export const OBJ = {
   house: { n: 'บ้านพังได้', cat: 'game', c: '#b08a5a', note: 'ต้องอยู่บนพื้นเรียบ' },
   poly: { n: 'ทรงอิสระ', cat: 'hid' },
   box: { n: 'กล่อง', cat: 'prim' }, cyl: { n: 'ทรงกระบอก', cat: 'prim' }, cone: { n: 'กรวย/หลังคา', cat: 'prim' }, ball: { n: 'ก้อนกลม', cat: 'prim' }, wedge: { n: 'ลิ่ม', cat: 'prim' },
+  // siege mode markers (guides/MAP-STANDARD.md) — exported as data.siege, the game builds collision/visuals itself
+  core: { n: 'แกน (จุดยึด)', cat: 'mode', c: '#7fd8ff', note: 'เลข 1–N = ลำดับที่ต้องทำลาย' },
+  sgA: { n: 'จุดเกิดฝ่ายบุก (ต่อเฟส)', cat: 'mode', c: '#f0a04a', note: 'เฟสละ 1 จุด (เกมวาง 6 คนรอบจุด)' },
+  sgB: { n: 'จุดเกิดฝ่ายรับ (ต่อเฟส)', cat: 'mode', c: '#5aa0ff', note: 'เฟสละ 1 จุด' },
+  phase: { n: 'พื้นที่เล่นของเฟส', cat: 'mode', c: '#f2d45e', note: 'สี่เหลี่ยม (ไม่หมุน) • หลายกรอบต่อเฟสได้' },
+  // room helpers
+  ceil: { n: 'เพดาน', cat: 'room', c: '#c77dff', note: 'กดคน/ตัวบิน/กล้องไว้ใต้เพดาน • ห้องมีหลังคาสูง ≥ 20' },
 };
-export const MODES = [['coop', 'Co-op'], ['ffa', 'FFA'], ['duel', 'ดวล'], ['tdm', 'ทีม'], ['br', 'Battle Royale'], ['race', 'แข่งไม้กวาด'], ['imp', 'หาโวลเดอมอร์']];
+// breakable room props — mirror of RPK in js/02-fcs-rooms.js (keep in sync) • col = collision radius px (0 = walk through), h m
+// L = has a length (tables, benches, rails) • w = editor proxy width (m) • look is drawn by the game (js/28-fcs-props.js frpBuild)
+export const RPK = {
+  table: { n: 'โต๊ะยาว', col: 20, h: 1.0, L: 1, w: 1.6 }, hightable: { n: 'โต๊ะประธาน', col: 22, h: 1.1, L: 1, w: 1.8 }, bench: { n: 'ม้านั่งยาว', col: 0, h: 0.5, L: 1, w: 0.5 },
+  chair: { n: 'เก้าอี้', col: 0, h: 1.05, w: 0.6 }, throne: { n: 'บัลลังก์', col: 16, h: 2.2, w: 1.4 }, crate: { n: 'ลัง', col: 22, h: 1.2, w: 1.4 }, crate2: { n: 'ลังซ้อน', col: 22, h: 2.35, w: 1.4 },
+  barrel: { n: 'ถัง', col: 16, h: 1.3, w: 1.1 }, barrels: { n: 'กองถัง', col: 30, h: 1.3, w: 2.4 }, sack: { n: 'กระสอบ', col: 0, h: 0.6, w: 0.8 }, rack: { n: 'ชั้นวางอาวุธ', col: 0, h: 2.0, w: 1.6 },
+  armor: { n: 'ชุดเกราะตั้ง', col: 14, h: 2.1, w: 0.9 }, shelf: { n: 'ชั้นหนังสือ', col: 0, h: 3.0, w: 2.0 }, desk: { n: 'โต๊ะเขียน', col: 0, h: 0.9, w: 1.4 },
+  candle: { n: 'เชิงเทียนตั้ง', col: 0, h: 2.2, w: 0.5 }, woodpile: { n: 'กองฟืน', col: 0, h: 0.8, w: 1.6 }, cart: { n: 'เกวียน', col: 30, h: 1.6, w: 2.6 }, keg: { n: 'ถังเล็ก', col: 0, h: 0.7, w: 0.7 },
+  rail: { n: 'ราวกันตก', col: 9, h: 1.1, L: 1, w: 0.5 }, pillar: { n: 'เสาใหญ่', col: 26, h: 24, w: 2.6 },
+};
+for (const k in RPK) OBJ['rp_' + k] = { n: RPK[k].n, cat: 'room', c: '#a07a56', rp: k };
+export const isRP = t => t.startsWith('rp_');
+// game systems bound by tag, not by map name (MAP-STANDARD §1.7)
+export const SYS_WALL = [['', '(ไม่มี)'], ['fence', 'รั้วไหม้ได้'], ['stonewall', 'ผนังหิน (รอยแตก/ไหม้)']];
+export const SYS_FLOOR = [['', '(ไม่มี)'], ['eggshell', 'แตกแบบเปลือกไข่ (สะพาน)']];
+export const SG_WALL = [['', '(ไม่ใช่)'], ['wall', 'กำแพงเป้าหมาย'], ['gate', 'ประตูเป้าหมาย']];
+// look presets drawn by game code (MAP-STANDARD §1.5) — map default + per wall/floor/part override
+export const STYLE = [['', '(ปกติ)'], ['castle-stone', 'ปราสาทหิน'], ['room-hall', 'ห้องโถงปราสาท'], ['forest-mist', 'ป่าสนหมอก']];
+export const MODES = [['coop', 'Co-op'], ['ffa', 'FFA'], ['duel', 'ดวล'], ['tdm', 'ทีม'], ['br', 'Battle Royale'], ['race', 'แข่งไม้กวาด'], ['imp', 'หาโวลเดอมอร์'], ['siege', 'บุกปราสาท']];
 export const SKY = [['day', 'กลางวัน'], ['sunset', 'เย็น'], ['night', 'กลางคืน'], ['indoor', 'ในอาคาร']];
 export const FXS = [['snow', 'หิมะตก'], ['fireflies', 'หิ่งห้อย'], ['candles', 'เทียนลอย'], ['snitch', 'ลูกสนิช'], ['rune', 'วงเวทกลางแผนที่']];
 export const MUSIC = ['', 'castle', 'meadow', 'forest', 'hogsmeade', 'lake', 'ruins', 'greathall', 'pitch'];
@@ -201,9 +226,16 @@ export function gameData(M, dim) {
     for (const c of chunkCircles(M, w, R)) put(c, gi);
   });
   const spawns = [], espawn = [], rings = [], tasks = [], props = [], houses = [], lights = [];
+  const sg = { cores: [], sp: { A: {}, B: {} }, phases: [], bw: [] }, ceil = [], rprops = [];
+  const rect = o => { const w = (o.sx || 1) * PX, d = (o.sz || 1) * PX; return { x0: r1(o.x * PX - w / 2), y0: r1(o.z * PX - d / 2), x1: r1(o.x * PX + w / 2), y1: r1(o.z * PX + d / 2) }; };
   for (const o of allObjs) {
     const X = r1(o.x * PX), Y = r1(o.z * PX), rot = o.rot || 0;
-    if (o.t === 'spawn' || o.t === 'spawnR' || o.t === 'spawnB') { const s = { x: X, y: Y, a: +Math.atan2(Math.cos(rot), Math.sin(rot)).toFixed(3) }; if (o.t !== 'spawn') s.t = o.t === 'spawnR' ? 1 : 0; spawns.push(s); }
+    if (o.t === 'core') sg.cores.push({ n: o.n || sg.cores.length + 1, x: X, y: Y, s: r1((o.s || 4) * PX) });
+    else if (o.t === 'sgA' || o.t === 'sgB') sg.sp[o.t === 'sgA' ? 'A' : 'B'][o.ph || 1] = { x: X, y: Y };
+    else if (o.t === 'phase') { const q = rect(o), k = (o.ph || 1) - 1; (sg.phases[k] = sg.phases[k] || []).push({ x1: q.x0, y1: q.y0, x2: q.x1, y2: q.y1 }); }
+    else if (o.t === 'ceil') ceil.push(Object.assign(rect(o), { h: r2(o.y == null ? 21 : o.y) }, o.zmax != null ? { zmax: r2(o.zmax) } : {}));
+    else if (isRP(o.t)) rprops.push(Object.assign({ k: o.t.slice(3), x: X, y: Y, a: +(-rot).toFixed(3) }, o.L ? { L: r1(o.L * PX) } : {}, o.y ? { z0: r2(o.y) } : {}));
+    else if (o.t === 'spawn' || o.t === 'spawnR' || o.t === 'spawnB') { const s = { x: X, y: Y, a: +Math.atan2(Math.cos(rot), Math.sin(rot)).toFixed(3) }; if (o.t !== 'spawn') s.t = o.t === 'spawnR' ? 1 : 0; spawns.push(s); }
     else if (o.t === 'espawn') espawn.push({ x: X, y: Y });
     else if (o.t === 'ring') rings.push({ x: X, y: Y, h: r2(Math.max(1, o.y || 6)) });
     else if (o.t === 'task') tasks.push({ x: X, y: Y });
@@ -216,6 +248,15 @@ export function gameData(M, dim) {
       for (const c of cs) put(c, gi); }
   }
   spawns.sort((a, b) => (a.t == null ? -1 : a.t) - (b.t == null ? -1 : b.t));
+  // siege target walls/gate (axis-aligned bounding rect of the wall) + tagged systems
+  const sys = {};
+  for (const w of M.walls) {
+    const P = wallPath(w), xs = P.map(p => p[0]), zs = P.map(p => p[1]);
+    if (w.sg) sg.bw.push({ k: w.sg, x: r1((Math.min(...xs) - w.th / 2) * PX), y: r1((Math.min(...zs) - w.th / 2) * PX), w: r1((Math.max(...xs) - Math.min(...xs) + w.th) * PX), d: r1((Math.max(...zs) - Math.min(...zs) + w.th) * PX), h: r2(w.h), id: w.id });
+    if (w.sys) for (let i = 1; i < P.length; i++) (sys[w.sys] = sys[w.sys] || []).push([r1(P[i - 1][0] * PX), r1(P[i - 1][1] * PX), r1(P[i][0] * PX), r1(P[i][1] * PX), r2(w.th), r2(w.h)]);
+  }
+  for (const f of M.floors) if (f.sys) (sys[f.sys] = sys[f.sys] || []).push(floorCorners(f).map(c => [r1(c[0] * PX), r1(c[1] * PX)]));
+  sg.cores.sort((a, b) => a.n - b.n);
   // gameplay surfaces → top-down bit masks on a 1-unit grid
   const env = [], kinds = {};
   SURF.forEach((s, i) => { if (s.env) kinds[i] = s.env; });
@@ -232,21 +273,46 @@ export function gameData(M, dim) {
   if (props.length || !M.autoProps) data.props = props;
   if (M.look) data.look = M.look;   // พรีเซ็ต Look (js/74-look.js) • lt = แสง/ฟ้าเฉพาะแมพ (js/28 buildFileMap) — ตั้งโดยแก้ไฟล์ต้นฉบับตรง ๆ (ยังไม่มีช่องใน Editor)
   if (M.lt) data.lt = M.lt;
+  if (M.style) data.style = M.style;
+  if (sg.cores.length || sg.bw.length || sg.phases.length || Object.keys(sg.sp.A).length || Object.keys(sg.sp.B).length) data.siege = sg;
+  if (ceil.length) data.ceil = ceil;
+  if (rprops.length) data.rprops = rprops;
+  if (Object.keys(sys).length) data.sys = sys;
   return { data, brkOf, counts: { obs: obs.length, brk: brk.length, spawns: spawns.filter(s => s.t == null).length, red: spawns.filter(s => s.t === 1).length, blue: spawns.filter(s => s.t === 0).length,
-    espawn: espawn.length, rings: rings.length, tasks: tasks.length, lights: lights.length, props: props.length, houses: houses.length, floors: fl.length, parts: (M.parts || []).length } };
+    espawn: espawn.length, rings: rings.length, tasks: tasks.length, lights: lights.length, props: props.length, houses: houses.length, floors: fl.length, parts: (M.parts || []).length,
+    rprops: rprops.length, ceil: ceil.length }, sg, ceil };
 }
 
 // ---------- checks ----------
 // → [{lv:'ok'|'warn'|'err', t:text, at:[x,z]?}]
 export function check(M, G) {
   const out = [], c = G.counts, has = m => !M.modes || !M.modes.length || M.modes.includes(m), add = (lv, t, at) => out.push({ lv, t, at });
-  if (!c.spawns && !c.red && !c.blue) add('err', 'ยังไม่มีจุดเกิด — วางอย่างน้อย 6 จุด (เครื่องมือ "จุดเกม")');
+  const siegeOnly = M.modes && M.modes.length === 1 && M.modes[0] === 'siege';   // siege uses its own per-phase spawns
+  if (siegeOnly) { /* general spawns not needed */ }
+  else if (!c.spawns && !c.red && !c.blue) add('err', 'ยังไม่มีจุดเกิด — วางอย่างน้อย 6 จุด (เครื่องมือ "จุดเกม")');
   else if (c.spawns < 6) add('warn', 'จุดเกิดทั่วไปมี ' + c.spawns + ' จุด (ควรมี 6 กระจายห่างกัน)');
   else add('ok', 'จุดเกิดทั่วไป ' + c.spawns + ' จุด');
-  if (has('tdm')) { if (c.red >= 3 && c.blue >= 3) add('ok', 'จุดเกิดทีม แดง ' + c.red + ' / น้ำเงิน ' + c.blue); else add('warn', 'โหมดทีม: จุดเกิดทีมมี แดง ' + c.red + ' / น้ำเงิน ' + c.blue + ' (ควรฝ่ายละ 3 — ไม่มี = เกมแบ่งจากจุดเกิดทั่วไปซ้าย/ขวา)'); }
+  if (has('tdm') && !siegeOnly) { if (c.red >= 3 && c.blue >= 3) add('ok', 'จุดเกิดทีม แดง ' + c.red + ' / น้ำเงิน ' + c.blue); else add('warn', 'โหมดทีม: จุดเกิดทีมมี แดง ' + c.red + ' / น้ำเงิน ' + c.blue + ' (ควรฝ่ายละ 3 — ไม่มี = เกมแบ่งจากจุดเกิดทั่วไปซ้าย/ขวา)'); }
   if (M.modes && M.modes.includes('race') && c.rings < 10) add('warn', 'แข่งไม้กวาด: ห่วงมี ' + c.rings + ' (ต้อง 10)');
   if (M.modes && M.modes.includes('imp') && c.tasks < 6) add('warn', 'หาโวลเดอมอร์: จุดภารกิจมี ' + c.tasks + ' (ควร 6–8)');
   if (has('coop') && c.espawn && c.espawn < 4) add('warn', 'Co-op: จุดเกิดมอนสเตอร์มี ' + c.espawn + ' (ควร 4+ หรือไม่วางเลยให้เกมสุ่มตามขอบ)');
+  if (M.modes && M.modes.includes('siege')) {
+    const S = G.sg, N = S.cores.length;
+    if (!N) add('err', 'บุกปราสาท: ยังไม่มีแกน (วางของ → โหมดบุกปราสาท → แกน)');
+    else {
+      const ns = S.cores.map(k => k.n);
+      if (ns.some((n, i) => n !== i + 1)) add('err', 'บุกปราสาท: เลขแกนต้องเป็น 1–' + N + ' ไม่ซ้ำ (ตอนนี้ ' + ns.join(', ') + ')'); else add('ok', 'บุกปราสาท: แกน ' + N + ' จุด');
+      for (let p = 1; p <= N; p++) {
+        const miss = [!S.sp.A[p] && 'จุดเกิดฝ่ายบุก', !S.sp.B[p] && 'จุดเกิดฝ่ายรับ', !S.phases[p - 1] && 'พื้นที่เล่น'].filter(Boolean);
+        if (miss.length) { add('err', 'บุกปราสาท เฟส ' + p + ': ยังไม่มี ' + miss.join(', ')); continue; }
+        const inA = q => S.phases[p - 1].some(r => q.x >= r.x1 && q.x <= r.x2 && q.y >= r.y1 && q.y <= r.y2);
+        const k = S.cores.find(c => c.n === p); if (k && !inA(k)) add('warn', 'บุกปราสาท เฟส ' + p + ': แกน ' + p + ' อยู่นอกพื้นที่เล่นของเฟส', [k.x / PX, k.y / PX]);
+        for (const [t, n] of [['A', 'ฝ่ายบุก'], ['B', 'ฝ่ายรับ']]) if (!inA(S.sp[t][p])) add('warn', 'บุกปราสาท เฟส ' + p + ': จุดเกิด' + n + 'อยู่นอกพื้นที่เล่น', [S.sp[t][p].x / PX, S.sp[t][p].y / PX]);
+      }
+      add(S.bw.length ? 'ok' : 'warn', 'บุกปราสาท: กำแพง/ประตูเป้าหมาย ' + S.bw.length + ' ชิ้น');
+    }
+  }
+  for (const q of G.ceil) if (q.zmax == null && q.h < 20) add('warn', 'เพดานสูง ' + q.h + ' (ห้องมีหลังคาควร ≥ 20 ให้ตัวบินเล่นได้ • ใต้ชั้นลอยให้ใส่ "ใช้กับคนที่ต่ำกว่า")', [(q.x0 + q.x1) / 2 / PX, (q.y0 + q.y1) / 2 / PX]);
   if (c.lights > 12) add('warn', 'ไฟ ' + c.lights + ' ดวง (แนะนำไม่เกิน 12)');
   if (c.obs > 2000) add('err', 'ที่ชน ' + c.obs + ' วง — หนักเกิน (ไม่ควรเกิน 2000): ลดกำแพงบางยาว ๆ หรือทำให้หนาขึ้น');
   else if (c.obs > 1200) add('warn', 'ที่ชน ' + c.obs + ' วง (เริ่มหนัก — กำแพงยิ่งบางยิ่งใช้วงเยอะ)');

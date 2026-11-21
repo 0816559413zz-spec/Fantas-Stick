@@ -50,4 +50,5 @@
 
 ## 4. สถานะ
 
-- 2026-11-21: ตั้งมาตรฐาน + แผนนี้ • มีแล้ว: `tools/fcs-to-mb.mjs` → `maps/build/fcs-draft.json` (ร่างไว้ดู ยังไม่รวมห้อง Great Hall) • รอบถัดไป = รอบ 1
+- 2026-11-21: ตั้งมาตรฐาน + แผนนี้ • มีแล้ว: `tools/fcs-to-mb.mjs` → `maps/build/fcs-draft.json`
+- 2026-11-21: **รอบ 1 เสร็จ** — Map Builder มีของหมวดบุกปราสาท (`core`, `sgA/sgB`, `phase`), กำแพงเป้าหมาย (`sg`), เพดาน (`ceil`), ของพังได้ `rp_*` (RPK), แท็ก `sys` (fence/stonewall/eggshell), `style` (แผนที่ + ต่อชิ้น) และส่งออกเป็น `data.siege/ceil/rprops/sys/style` (รายละเอียด MAP-BUILDER.md) • ตัวแปลง fcs ใช้ของใหม่ + รวมห้อง Great Hall แล้ว • รอบถัดไป = รอบ 2 (เกมอ่าน siege จากไฟล์)
