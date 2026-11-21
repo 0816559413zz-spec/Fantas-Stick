@@ -499,7 +499,7 @@
   "room-demo": {
    "file": "maps/room-demo.glb",
    "data": "maps/room-demo.json",
-   "v": 1
+   "v": 3
   }
  },
  "ptex": {}

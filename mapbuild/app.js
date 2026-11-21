@@ -149,16 +149,16 @@ function syncRooms() { syncAll(); }
 const ALLM = () => MD.withRooms(M, RX);
 function syncWalls() {
   clearGroup(gWalls);
-  for (const w of M.walls.concat(RX.walls)) MD.wallChunks(w).forEach((R, ci) => { const m = new THREE.Mesh(wallGeo(w, R), mat(w.c || '#8a8478', { name: w.m === 'ice' ? 'ice' : 'wall' })); m.castShadow = m.receiveShadow = true; m.userData = { ref: refOfItem(w, 'wall'), wid: w.id, own: 1, ci }; m.name = 'wall_' + w.id + '_' + ci; gWalls.add(m); });
+  for (const w of M.walls.concat(RX.walls)) MD.wallChunks(w).forEach((R, ci) => { const m = new THREE.Mesh(wallGeo(w, R), mat(w.c || '#8a8478', { name: w.m === 'ice' ? 'ice' : 'wall' })); m.castShadow = m.receiveShadow = true; m.userData = { ref: refOfItem(w, 'wall'), wid: w.id, own: 1, ci }; m.name = 'wall_' + w.id + '_' + ci; if (w.vis === 0) ghostify(m); gWalls.add(m); });
 }
 function syncFloors() {
   clearGroup(gFloors);
-  for (const f of M.floors.concat(RX.floors)) { const m = new THREE.Mesh(floorGeo(f), mat(f.c || '#8a8478', { name: 'floor' })); m.position.set(f.x, 0, f.z); m.rotation.y = f.rot || 0; m.castShadow = m.receiveShadow = true; m.userData = { ref: refOfItem(f, 'floor'), wid: f.id, own: 1 }; m.name = 'floorv_' + f.id; gFloors.add(m); }
+  for (const f of M.floors.concat(RX.floors)) { const m = new THREE.Mesh(floorGeo(f), mat(f.c || '#8a8478', { name: 'floor' })); m.position.set(f.x, 0, f.z); m.rotation.y = f.rot || 0; m.castShadow = m.receiveShadow = true; m.userData = { ref: refOfItem(f, 'floor'), wid: f.id, own: 1 }; m.name = 'floorv_' + f.id; if (f.vis === 0) ghostify(m); gFloors.add(m); }
 }
 
 // ================= asset kit =================
 const KIT = { list: [], byId: new Map(), files: new Map(), tpl: new Map(), thumbs: new Map() };
-const CATS = [['sys', 'จุดเกม'], ['mode', 'โหมดบุกปราสาท'], ['prefab', 'ห้องสำเร็จ (prefab)'], ['room', 'ห้อง / ของพังได้'], ['game', 'ของในเกม'], ['prim', 'ทรงพื้นฐาน'], ['tree', 'ต้นไม้'], ['rock', 'หิน'], ['plant', 'พืชเล็ก'], ['build', 'สิ่งก่อสร้าง'], ['prop', 'ของประกอบ'], ['light', 'โคม/ไฟ'], ['fence', 'รั้ว'], ['user', 'เพิ่มเอง']];
+const CATS = [['sys', 'จุดเกม'], ['mode', 'โหมดบุกปราสาท'], ['prefab', 'ห้องสำเร็จ (prefab)'], ['room', 'ห้อง / ของพังได้'], ['deco', 'ของตกแต่ง (เกมวาด)'], ['game', 'ของในเกม'], ['prim', 'ทรงพื้นฐาน'], ['tree', 'ต้นไม้'], ['rock', 'หิน'], ['plant', 'พืชเล็ก'], ['build', 'สิ่งก่อสร้าง'], ['prop', 'ของประกอบ'], ['light', 'โคม/ไฟ'], ['fence', 'รั้ว'], ['user', 'เพิ่มเอง']];
 const CS_DEF = { tree: 0.22, light: 0.4, plant: 0.6 };
 let gltfL = null;
 function loader() { if (!gltfL) { gltfL = new GLTFLoader(); const d = new DRACOLoader(); d.setDecoderPath('https://unpkg.com/three@0.160.0/examples/jsm/libs/draco/gltf/'); gltfL.setDRACOLoader(d); gltfL.setMeshoptDecoder(MeshoptDecoder); } return gltfL; }
@@ -225,7 +225,28 @@ function areaMesh(o, g, c, h) {   // flat rect (phase) or slab at height (ceilin
   const e = noPick(new THREE.LineSegments(new THREE.EdgesGeometry(box), new THREE.LineBasicMaterial({ color: c }))); e.position.y = h; e.userData.area = 1; g.add(e);
   const hd = new THREE.Mesh(new THREE.OctahedronGeometry(0.9), helpMat(c)); hd.position.y = h + 0.9; g.add(hd);
 }
+// decor drawn by the game (dc_*): editor proxy close to the game builder (js/28-fcs-castle.js fcsDecoKit)
+function decoMesh(o) {
+  const g = new THREE.Group(), t = o.t.slice(3), c = t === 'cloth' ? (o.c || '#7a1418') : MD.DECO_COL[o.k || (t === 'roof' || t === 'cone' ? 'roof' : 'stone')] || '#c2b298';
+  const add = (geo, m) => { const me = new THREE.Mesh(geo, m); me.userData.own = 1; me.castShadow = me.receiveShadow = true; g.add(me); return me; };
+  if (t === 'box') add(new THREE.BoxGeometry(o.sx || 1, o.sy || 1, o.sz || 1), mat(c));
+  else if (t === 'cyl') add(new THREE.CylinderGeometry(o.rt != null ? o.rt : 0.5, o.rb != null ? o.rb : 0.5, o.sy || 1, o.seg || 8), mat(c));
+  else if (t === 'cone') add(new THREE.ConeGeometry(o.r != null ? o.r : 0.5, o.sy || 1, o.seg || 8), mat(c));
+  else if (t === 'roof') { const w = o.sx || 10, d = o.sz || 8, h = o.sy || 4, s = new THREE.Shape(); s.moveTo(-d / 2 - 0.6, 0); s.lineTo(0, h); s.lineTo(d / 2 + 0.6, 0); s.lineTo(-d / 2 - 0.6, 0);
+    const geo = new THREE.ExtrudeGeometry(s, { depth: w + 1.2, bevelEnabled: false }); geo.translate(0, 0, -(w + 1.2) / 2); geo.rotateY(Math.PI / 2); add(geo, mat(c)); }
+  else if (t === 'flame') add(new THREE.SphereGeometry(0.3, 10, 8), mat('#ffb060', { emit: 1 }));
+  else if (t === 'cloth') { const geo = new THREE.PlaneGeometry(o.sx || 2, o.sy || 4); geo.translate(0, -(o.sy || 4) / 2, 0); const m = add(geo, mat(c)); m.material = m.material.clone(); m.material.side = THREE.DoubleSide; }
+  else if (t === 'shield') { const geo = new THREE.CylinderGeometry(0.75, 0.75, 0.12, 14); geo.rotateX(Math.PI / 2); add(geo, mat(c)); }
+  else if (t === 'chand') { const geo = new THREE.TorusGeometry(2.2, 0.12, 6, 24); geo.rotateX(Math.PI / 2); add(geo, mat('#2b2a2a')); add(new THREE.SphereGeometry(0.4, 8, 6), mat('#ffb36a', { emit: 1 })); }
+  return g;
+}
+const ghostMats = new Map();
+function ghostify(g) {   // vis 0 = collision only (not in the .glb): see-through in the editor
+  g.traverse(m => { if (!m.isMesh) return; const k = m.material.uuid; let gm = ghostMats.get(k); if (!gm) { gm = m.material.clone(); gm.transparent = true; gm.opacity = 0.22; gm.depthWrite = false; ghostMats.set(k, gm); } m.material = gm; m.castShadow = false; });
+  return g;
+}
 function markerMesh(o) {
+  if (MD.isDeco(o.t)) return decoMesh(o);
   const D = OBJ[o.t], g = new THREE.Group(), c = D.c || '#888';
   const add = (geo, m, x = 0, y = 0, z = 0) => { const me = new THREE.Mesh(geo, m); me.position.set(x, y, z); g.add(me); return me; };
   if (o.t === 'core') { const s = o.s || 4; add(new THREE.CylinderGeometry(s / 2, s / 2, 0.2, 24), helpMat(c, 0.5), 0, 0.1, 0); add(new THREE.OctahedronGeometry(s * 0.3), mat(c, { emit: 1 }), 0, 3, 0); const l = labelSprite('แกน ' + (o.n || '?'), c); l.position.y = 5.6; g.add(l); return g; }
@@ -263,7 +284,8 @@ function objMesh(o) {
   else if (OBJ[o.t]) { g = markerMesh(o); if (o.t === 'house') g.scale.set(o.sx || 1, 1, o.sz || 1); }
   else { g = new THREE.Group(); g.add(new THREE.Mesh(pg('box'), helpMat('#f06a6a', 0.6))); }
   const lift = o.t === 'ring' ? Math.max(1, o.y || 6) : o.t === 'light' ? (o.y == null ? 2.2 : o.y) : o.t === 'ceil' ? (o.y == null ? 21 : o.y) : (o.y || 0);
-  g.position.set(o.x, MD.gh(M, o.x, o.z) + lift, o.z); g.rotation.y = o.t === 'phase' || o.t === 'ceil' ? 0 : o.rot || 0;   // areas are axis-aligned in the game
+  g.position.set(o.x, MD.gh(M, o.x, o.z) + lift, o.z); g.rotation.y = o.t === 'phase' || o.t === 'ceil' || o.t === 'dc_box' ? 0 : o.rot || 0;   // areas + decor boxes are axis-aligned in the game
+  if (o.vis === 0) ghostify(g);
   if (!show.area) g.traverse(m => { if (m.userData.area) m.visible = false; });
   g.userData.ref = refOfItem(o, 'obj'); g.name = 'obj_' + o.id;
   return g;
@@ -427,6 +449,8 @@ function protoObj(x, z) {
   else if (t === 'phase') Object.assign(o, { ph: 1, sx: 40, sz: 40, rot: 0 });
   else if (t === 'ceil') Object.assign(o, { sx: 20, sz: 20, y: 21, rot: 0 });
   else if (MD.isRP(t) && MD.RPK[t.slice(3)].L) o.L = 4;
+  else if (MD.isDeco(t)) Object.assign(o, { box: { k: 'stone', sx: 2, sy: 2, sz: 2, y: 1, rot: 0 }, cyl: { k: 'stone', rt: 1, rb: 1, sy: 4, seg: 12, y: 2 }, cone: { k: 'roof', r: 2, sy: 3, seg: 8, y: 1.5 },
+    roof: { sx: 12, sz: 8, sy: 4, y: 6 }, flame: { y: 2.5 }, cloth: { sx: 2, sy: 4, c: '#7a1418', y: 6 }, shield: { y: 3 }, chand: { y: 12 } }[t.slice(3)] || {});
   return o;
 }
 
@@ -435,7 +459,7 @@ function updHover(e) { setRay(e); hover = (tool === 'place' || tool === 'floor' 
 function placeObj(h, extra) {
   if (opt.obj.startsWith('room:')) { const r = { id: nid(), ref: opt.obj.slice(5), x: snapV(h.x), z: snapV(h.z), rot: Math.round(ghostRot / (Math.PI / 2)) * (Math.PI / 2) };
     M.rooms.push(r); sel = { k: 'room', id: r.id }; loadRooms().then(() => { syncRooms(); renderSide(); }); return r; }
-  const o = protoObj(snapV(h.x), snapV(h.z)); o.id = nid(); if (o.t !== 'light' && o.t !== 'ring' && o.t !== 'ceil') o.y = +(Math.max(0, h.y - MD.gh(M, o.x, o.z))).toFixed(2); Object.assign(o, extra || {});
+  const o = protoObj(snapV(h.x), snapV(h.z)); o.id = nid(); if (o.t !== 'light' && o.t !== 'ring' && o.t !== 'ceil' && !MD.isDeco(o.t)) o.y = +(Math.max(0, h.y - MD.gh(M, o.x, o.z))).toFixed(2); Object.assign(o, extra || {});
   M.objs.push(o); syncObj(o); return o;
 }
 // castle parts: proto at the hover point (grid snap + port snap to other parts), then place
@@ -680,14 +704,15 @@ function renderOpts() {
   } else if (tool === 'place' || tool === 'scatter') {
     if (tool === 'scatter') b.append(h3('โปรย'), slider('ขนาด (รัศมี)', 'rad', 0.5, 40, 0.5), slider('ความหนาแน่น', 'dens', 0.5, 12, 0.5), slider('สุ่มขนาด ±', 'rscale', 0, 0.6, 0.05));
     b.append(check('สุ่มหมุน', 'rrot'));
-    const cats = tool === 'scatter' ? CATS.filter(c => !['sys', 'game', 'mode', 'prefab', 'room'].includes(c[0])) : CATS;
+    const cats = tool === 'scatter' ? CATS.filter(c => !['sys', 'game', 'mode', 'prefab', 'room', 'deco'].includes(c[0])) : CATS;
     if (!cats.some(c => c[0] === opt.cat)) opt.cat = cats[0][0];
     b.append(h3('คลัง'), el('select', { class: 'tl-sel', style: 'width:100%;margin-bottom:6px', onchange: e => { opt.cat = e.target.value; renderOpts(); }, html: cats.map(([k, n]) => `<option value="${k}"${k === opt.cat ? ' selected' : ''}>${n}${OBJ_CATN(k)}</option>`).join('') }));
     const items = OBJ_IN(opt.cat);
-    if (opt.cat === 'sys' || opt.cat === 'game' || opt.cat === 'prim' || opt.cat === 'mode' || opt.cat === 'room' || opt.cat === 'prefab') { b.append(pal(items.map(([t, D]) => ({ n: D.n, c: D.c })), items.findIndex(([t]) => t === opt.obj), i => { opt.obj = items[i][0]; renderOpts(); need(); }, 'one'));
+    if (opt.cat === 'sys' || opt.cat === 'game' || opt.cat === 'prim' || opt.cat === 'mode' || opt.cat === 'room' || opt.cat === 'prefab' || opt.cat === 'deco') { b.append(pal(items.map(([t, D]) => ({ n: D.n, c: D.c })), items.findIndex(([t]) => t === opt.obj), i => { opt.obj = items[i][0]; renderOpts(); need(); }, 'one'));
       const D = OBJ[opt.obj]; if (D && D.note) b.append(el('p', { class: 'note' }, D.note));
       if (opt.cat === 'prim') b.append(h3('ขนาด/สี'), slider('กว้าง', 'sx', 0.2, 30, 0.1, opt.prim), slider('สูง', 'sy', 0.2, 30, 0.1, opt.prim), slider('ลึก', 'sz', 0.2, 30, 0.1, opt.prim), el('div', { class: 'row' }, el('label', null, 'สี'), el('input', { type: 'color', value: opt.prim.c, oninput: e => { opt.prim.c = e.target.value; need(); } })));
       if (opt.cat === 'game') b.append(el('p', { class: 'note' }, 'ของชุดนี้เกมใส่โมเดลและระบบพังให้เอง (ในนี้เห็นเป็นรูปทรงแทน)'));
+      if (opt.cat === 'deco') b.append(el('p', { class: 'note' }, 'ของตกแต่งที่เกมวาดเอง (แบบห้องโถงในเกม): ไม่มีที่ชน ไม่อยู่ใน .glb • กล่อง/ทรงกระบอกใช้วัสดุ "หินปราสาท" ฯลฯ ตั้งในแผงขวา'));
       if (opt.cat === 'prefab') b.append(el('p', { class: 'note' }, items.length ? 'คลิกวางห้อง (จุดกลางห้อง) • Shift+ล้อ = หมุน 90° • ห้อง = แผนที่ชื่อ room-… ทำ/แก้ได้เหมือนแผนที่ทั่วไป' : 'ยังไม่มีห้อง — สร้างแผนที่ใหม่ชื่อ id ขึ้นต้นด้วย room- (พื้นราบ) แล้ววางของในห้อง'));
       if (opt.cat === 'mode') b.append(el('p', { class: 'note' }, 'ติ๊ก "บุกปราสาท" ในโหมดที่เล่นได้ แล้วดูตัวตรวจ • เกมสร้างแกน/เขตจุดเกิดเอง (ในนี้เห็นเป็นเครื่องหมาย) • กำแพง/ประตูเป้าหมาย = เลือกกำแพงแล้วตั้ง "เป้าหมายบุกปราสาท"'));
       if (opt.cat === 'room') b.append(el('p', { class: 'note' }, 'ของในห้องพังได้ (เกมวาดหน้าตาจริงเอง ในนี้เป็นกล่องแทน) • โต๊ะ/ม้านั่ง/ราว ปรับความยาวได้ • ยกจากพื้น = วางบนชั้นลอย'));
@@ -701,7 +726,7 @@ function renderOpts() {
     }
   }
 }
-const OBJ_IN = cat => cat === 'prefab' ? list.filter(m => MD.isRoomId(m.id) && (!M || m.id !== M.id)).map(m => ['room:' + m.id, { n: m.name, c: '#c9a86a' }]) : cat === 'sys' || cat === 'game' || cat === 'prim' || cat === 'mode' || cat === 'room' ? Object.entries(OBJ).filter(([, D]) => D.cat === cat) : KIT.list.filter(a => a.cat === cat);
+const OBJ_IN = cat => cat === 'prefab' ? list.filter(m => MD.isRoomId(m.id) && (!M || m.id !== M.id)).map(m => ['room:' + m.id, { n: m.name, c: '#c9a86a' }]) : cat === 'deco' || cat === 'sys' || cat === 'game' || cat === 'prim' || cat === 'mode' || cat === 'room' ? Object.entries(OBJ).filter(([, D]) => D.cat === cat) : KIT.list.filter(a => a.cat === cat);
 const OBJ_CATN = k => { const n = OBJ_IN(k).length; return n ? ' (' + n + ')' : ''; };
 function addAsset() {
   const inp = el('input', { type: 'file', accept: '.glb' });
@@ -724,6 +749,17 @@ function fld(label, it, key, o = {}) {   // bound field: number / text / color /
   else { let v = get(); if (type === 'number' && v != null) v = +(o.deg ? v * 180 / Math.PI : v).toFixed(o.deg ? 1 : 2); inp = el('input', { class: type === 'color' ? '' : 'tl-in', type, value: v == null ? '' : v, step: o.step || (o.deg ? 5 : 0.1), onchange: commit }); if (o.min != null) inp.min = o.min; if (o.ph) inp.placeholder = o.ph; }
   return el('div', { class: 'row' }, el('label', null, label), inp);
 }
+function decoFields(it) {   // inspector rows for dc_* decor
+  const t = it.t.slice(3), F = [];
+  if (t === 'box' || t === 'cyl' || t === 'cone') F.push(fld('วัสดุ', it, 'k', { type: 'select', items: MD.DECO_MAT, get: () => it.k || 'stone' }));
+  if (t === 'box' || t === 'roof' || t === 'cloth') F.push(fld(t === 'roof' ? 'ยาว (สัน)' : 'กว้าง', it, 'sx', { min: 0.05 }));
+  if (t !== 'flame' && t !== 'shield' && t !== 'chand') F.push(fld('สูง', it, 'sy', { min: 0.05 }));
+  if (t === 'box' || t === 'roof') F.push(fld(t === 'roof' ? 'กว้าง' : 'ลึก', it, 'sz', { min: 0.05 }));
+  if (t === 'cyl') F.push(fld('รัศมีบน', it, 'rt', { min: 0 }), fld('รัศมีล่าง', it, 'rb', { min: 0 }));
+  if (t === 'cone') F.push(fld('รัศมี', it, 'r', { min: 0.05 }));
+  if (t === 'cloth') F.push(fld('สี', it, 'c', { type: 'color' }));
+  return F;
+}
 function section(title, open, ...kids) { const d = el('details', { class: 'sec', open }); d.append(el('summary', null, title), ...kids.filter(Boolean)); return d; }
 function renderSide() {
   const box = $('side'); box.textContent = ''; if (!M) return;
@@ -734,14 +770,17 @@ function renderSide() {
       box.append(section('ห้อง (prefab) — ' + (R ? R.name : it.ref), true,
         fld('ห้อง', it, 'ref', { type: 'select', items: rooms.map(m => [m.id, m.name]), after: () => loadRooms().then(() => { syncAll(); renderSide(); changed(); }) }),
         fld('ตำแหน่ง X (กลางห้อง)', it, 'x'), fld('ตำแหน่ง Z (กลางห้อง)', it, 'z'), fld('หมุน (องศา, ทีละ 90)', it, 'rot', { deg: 1, step: 90 }),
-        el('div', { class: 'seg' }, el('button', { class: 'tl-btn', onclick: () => { location.href = 'mapbuild.html?id=' + encodeURIComponent(it.ref); } }, 'เปิดแก้ห้องนี้')),
+        el('div', { class: 'seg' }, el('button', { class: 'tl-btn', onclick: () => { location.href = 'mapbuild.html?id=' + encodeURIComponent(it.ref); } }, 'เปิดแก้ห้องนี้'),
+          el('button', { class: 'tl-btn', title: 'คัดลอกของในห้องเข้าแผนที่นี้ แก้ได้ทุกชิ้น (ไม่ผูกกับไฟล์ห้องแล้ว) • พื้นใต้ห้องปรับราบ + ทาสีตามห้อง', onclick: () => { if (!R) return; pushUndo('a'); MD.roomUnpack(M, it, R); sel = null; buildTerrain(); syncAll(); renderSide(); changed(); } }, 'แตกห้องเข้าแผนที่')),
         el('p', { class: 'note' }, R ? 'ขนาด ' + R.W + ' × ' + R.H + ' ม. • ของในห้องแก้ที่ไฟล์ห้อง (ทุกแผนที่ที่ใช้ห้องนี้เปลี่ยนตาม) • Q/E หมุน 90° • ลากเพื่อย้าย' : 'ยังโหลดห้องไม่ได้ (' + it.ref + ')'), btns)); }
     else if (sel.k === 'obj') { const D = OBJ[it.t], a = isKit(it) && KIT.byId.get(kitId(it)), d = dim(it);
       box.append(section((D ? D.n : a ? a.name : it.t), true,
-        fld('ตำแหน่ง X', it, 'x'), fld('ตำแหน่ง Z', it, 'z'), it.t === 'light' || it.t === 'ring' ? fld('สูงจากพื้น', it, 'y') : fld('ยกจากพื้น', it, 'y', { min: 0 }), fld('หมุน (องศา)', it, 'rot', { deg: 1 }),
+        fld('ตำแหน่ง X', it, 'x'), fld('ตำแหน่ง Z', it, 'z'), it.t === 'light' || it.t === 'ring' || MD.isDeco(it.t) ? fld('สูงจากพื้น', it, 'y') : fld('ยกจากพื้น', it, 'y', { min: 0 }), fld('หมุน (องศา)', it, 'rot', { deg: 1 }),
         isKit(it) ? fld('ขนาด (เท่า)', it, 's', { min: 0.05 }) : null,
         isPrim(it) || it.t === 'house' ? fld(it.t === 'house' ? 'กว้าง (เท่า)' : 'กว้าง', it, 'sx', { min: 0.1 }) : null, isPrim(it) ? fld('สูง', it, 'sy', { min: 0.1 }) : null, isPrim(it) || it.t === 'house' ? fld(it.t === 'house' ? 'ลึก (เท่า)' : 'ลึก', it, 'sz', { min: 0.1 }) : null,
         isPrim(it) ? fld('สี', it, 'c', { type: 'color' }) : null, isPrim(it) ? fld('เรืองแสง', it, 'glow', { type: 'checkbox' }) : null,
+        isPrim(it) || it.t === 'poly' ? fld('มองเห็น (ส่งภาพเข้าเกม)', it, 'vis', { type: 'checkbox', get: () => it.vis !== 0, set: v => { if (v) delete it.vis; else it.vis = 0; } }) : null,
+        ...(MD.isDeco(it.t) ? decoFields(it) : []),
         it.t === 'core' ? fld('เลขแกน (ลำดับ)', it, 'n', { min: 1, step: 1 }) : null, it.t === 'core' ? fld('ขนาดแกน', it, 's', { min: 1 }) : null,
         it.t === 'sgA' || it.t === 'sgB' || it.t === 'phase' ? fld('เฟส', it, 'ph', { min: 1, step: 1 }) : null,
         it.t === 'phase' || it.t === 'ceil' ? fld('กว้าง (X)', it, 'sx', { min: 1 }) : null, it.t === 'phase' || it.t === 'ceil' ? fld('ยาว (Z)', it, 'sz', { min: 1 }) : null,
@@ -756,6 +795,7 @@ function renderSide() {
       fld('ฐาน (ความสูง)', it, 'base', { nullable: 1, ph: 'ตามพื้น' }), fld('เส้นโค้ง', it, 'curve', { type: 'checkbox' }), fld('ปิดวง', it, 'closed', { type: 'checkbox' }), fld('พังได้', it, 'brk', { type: 'checkbox' }),
       fld('วัสดุตอนพัง', it, 'm', { type: 'select', items: [['stone', 'หิน'], ['wood', 'ไม้'], ['ice', 'น้ำแข็ง']] }),
       fld('เป้าหมายบุกปราสาท', it, 'sg', { type: 'select', items: MD.SG_WALL, get: () => it.sg || '', after: () => { if (it.sg && !it.brk) it.brk = 1; resync(); renderSide(); } }),
+      fld('มองเห็น (ส่งภาพเข้าเกม)', it, 'vis', { type: 'checkbox', get: () => it.vis !== 0, set: v => { if (v) delete it.vis; else it.vis = 0; } }),
       fld('ระบบ', it, 'sys', { type: 'select', items: MD.SYS_WALL, get: () => it.sys || '' }), fld('สไตล์', it, 'style', { type: 'select', items: MD.STYLE, get: () => it.style || '' }),
       el('p', { class: 'note' }, it.pts.length + ' จุด • ยาว ' + MD.pathLen(MD.wallPath(it)).toFixed(1) + ' • ลากจุดขาวเพื่อดัด • Alt+คลิกบนกำแพง = เพิ่มจุด • เลือกจุดแล้ว Del = ลบจุด • เว้นช่อง "ฐาน" ว่าง = ตั้งตามพื้น'), btns));
     else if (sel.k === 'part') { const D = MD.PART[it.k];
@@ -766,6 +806,7 @@ function renderSide() {
         el('p', { class: 'note' }, 'ปลายชิ้นดูดติดกันตอนลาก/วาง • เว้นช่อง "ฐาน" ว่าง = ตั้งตามพื้น • พังได้ = ไม่มีฟันปลา/ทางเดินบนยอด • บานประตูพังได้เสมอ'), btns)); }
     else box.append(section('พื้นชั้นบน' + (it.n ? ' — ' + it.n : ''), true, fld('ตำแหน่ง X', it, 'x'), fld('ตำแหน่ง Z', it, 'z'), fld('กว้าง', it, 'w', { min: 0.5 }), fld('ยาว', it, 'd', { min: 0.5 }), fld('หมุน (องศา)', it, 'rot', { deg: 1 }),
       fld('สูง (ปลายต้น)', it, 'y'), fld('สูง (ปลายท้าย)', it, 'y2', { get: () => it.y2 == null ? it.y : it.y2 }), fld('หนา', it, 'th', { min: 0.1 }), fld('สี', it, 'c', { type: 'color' }), fld('ทำเป็นขั้นบันได', it, 'steps', { type: 'checkbox' }),
+      fld('มองเห็น (ส่งภาพเข้าเกม)', it, 'vis', { type: 'checkbox', get: () => it.vis !== 0, set: v => { if (v) delete it.vis; else it.vis = 0; } }),
       fld('ระบบ', it, 'sys', { type: 'select', items: MD.SYS_FLOOR, get: () => it.sys || '' }), fld('สไตล์', it, 'style', { type: 'select', items: MD.STYLE, get: () => it.style || '' }),
       el('div', { class: 'seg' }, el('button', { class: 'tl-btn', title: 'ปลายต้นลงมาแตะพื้นตรงนั้น', onclick: () => editSel(f => { const c = MD.floorCorners(f); f.y = +MD.gh(M, (c[0][0] + c[1][0]) / 2, (c[0][1] + c[1][1]) / 2).toFixed(2); }) }, 'ปลายต้นแตะพื้น'), el('button', { class: 'tl-btn', onclick: () => editSel(f => { f.y2 = f.y; }) }, 'ทำให้ราบ')),
       el('p', { class: 'note' }, 'ใต้พื้นสูง ' + (Math.min(it.y, it.y2 == null ? it.y : it.y2) - (it.th || 0.4) - MD.gh(M, it.x, it.z)).toFixed(1) + ' (ต้อง ≥ 2.8 ถึงเดินลอดได้)'), btns));
@@ -886,10 +927,10 @@ async function buildExport() {
   const bucket = new Map(), put = (mesh, geo, st) => { st = st || M.style || ''; const k = mesh.material.uuid + '|' + st; if (!bucket.has(k)) bucket.set(k, { m: mesh.material, g: [], st }); bucket.get(k).g.push(geo); };
   const AM = ALLM(), styleOf = (k, id) => { const it = (k === 'wall' ? AM.walls : k === 'floor' ? AM.floors : AM.parts).find(q => q.id === id); return it && it.style; };
   let tris = 0;
-  for (const w of gWalls.children) { const wd = AM.walls.find(q => q.id === w.userData.wid); if (wd && (wd.sg || wd.sys === 'fence')) continue;   // siege targets + burnable fences: the game draws them
+  for (const w of gWalls.children) { const wd = AM.walls.find(q => q.id === w.userData.wid); if (wd && (wd.sg || wd.sys === 'fence' || wd.vis === 0)) continue;   // siege targets + burnable fences: the game draws them
     const gi = G.brkOf.get('w' + w.userData.wid + ':' + w.userData.ci), st = styleOf('wall', w.userData.wid) || M.style;
     if (gi != null) { const c = new THREE.Mesh(w.geometry, w.material); c.name = w.name; c.userData = { brk: gi }; if (st) c.userData.style = st; R.add(c); } else put(w, w.geometry, st); }
-  for (const f of gFloors.children) { f.updateMatrix(); put(f, f.geometry.clone().applyMatrix4(f.matrix), styleOf('floor', f.userData.wid)); }
+  for (const f of gFloors.children) { const fd = AM.floors.find(q => q.id === f.userData.wid); if (fd && fd.vis === 0) continue; f.updateMatrix(); put(f, f.geometry.clone().applyMatrix4(f.matrix), styleOf('floor', f.userData.wid)); }
   const flat = g => { g = g.index ? g.toNonIndexed() : g; g.deleteAttribute('uv'); return g; };   // same attribute set as the hand-made wall/floor geometry so they merge
   for (const g of gParts.children) for (const nd of g.children) {
     const pst = styleOf('part', g.userData.pid);
@@ -899,7 +940,7 @@ async function buildExport() {
     else { nd.updateMatrix(); nd.traverse(m => { if (m.isMesh) put(m, flat(m.geometry.clone().applyMatrix4(nd.matrix)), pst); }); }
   }
   let n = 0; for (const b of bucket.values()) { const g = b.g.length > 1 ? mergeGeometries(b.g, false) : b.g[0]; const m = new THREE.Mesh(g, b.m); m.name = 'mb_static_' + (n++); if (b.st) m.userData.style = b.st; R.add(m); }
-  for (const o of AM.objs) { if (!isVisual(o) || (isKit(o) && !tplNow(kitId(o)))) continue; const src = objNode.get(o.id); if (!src) continue; const c = src.clone(true); const a = isKit(o) && KIT.byId.get(kitId(o));
+  for (const o of AM.objs) { if (!isVisual(o) || o.vis === 0 || (isKit(o) && !tplNow(kitId(o)))) continue; const src = objNode.get(o.id); if (!src) continue; const c = src.clone(true); const a = isKit(o) && KIT.byId.get(kitId(o));
     c.userData = {}; const gi = G.brkOf.get('o' + o.id); if (gi != null) c.userData.brk = gi; c.traverse(m => { if (m !== c) m.userData = {}; if (m.isMesh && ((a && a.ns) || o.glow)) m.userData.ns = 1; }); R.add(c); }
   sc.updateMatrixWorld(true); sc.traverse(o => { if (o.isMesh) tris += (o.geometry.index ? o.geometry.index.count : o.geometry.attributes.position.count) / 3; });
   const glb = await new GLTFExporter().parseAsync(sc, { binary: true });

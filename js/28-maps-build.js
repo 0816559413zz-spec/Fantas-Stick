@@ -551,7 +551,8 @@ function buildFileMap(id){
   }
   // ไฟประจำจุด (light_) → ใช้ชุดไฟรวมของเกม (เปิดจริงเฉพาะดวงที่ใกล้กล้อง)
   if(MAPS[id].fcs)try{sgFileBuild(id);}catch(e){console.error('sgFileBuild',e);}
-  if(MAPS[id].rooms)try{fcsPropsBuild();}catch(e){console.error('fcsPropsBuild',e);}   // breakable room props (js/28-fcs-props.js)   // Map Builder siege map: fences + spawn pads (js/28-fcs-build.js)
+  FCSC.torch=[];if(MAPS[id].rooms)try{fcsPropsBuild();}catch(e){console.error('fcsPropsBuild',e);}
+  if(MAPS[id].deco)try{fcsDecoFile(MAPS[id].deco);}catch(e){console.error('fcsDecoFile',e);}   // decor drawn by the game (js/28-fcs-castle.js)   // breakable room props (js/28-fcs-props.js)   // Map Builder siege map: fences + spawn pads (js/28-fcs-build.js)
   fileMapFx(F.fx);
   W.userData.lights=(F.lights||[]).map(L=>({abs:1,x:tx(L.x),y:GY(L.x,L.y)+(L.h||2),z:tz(L.y),col:L.col||'#ffb060',int:L.int||2,dist:L.dist||14}));
   if(!F.file)return;
@@ -561,7 +562,8 @@ function buildFileMap(id){
     const sc=gltf.scene,skip=new Set();
     sc.traverse(o=>{if(/^anim_/i.test(o.name))skip.add(o);if(!o.isMesh)return;o.receiveShadow=true;o.castShadow=!(o.userData&&o.userData.ns);
       if(/^ground/i.test(o.name))o.material=Array.isArray(o.material)?o.material.map(m=>grLive(m.clone())):grLive(o.material.clone());});   // พื้นหลัก: สีเป็นหย่อม + รอยสนามรบ (js/50)
-    if(typeof surfScene==='function')surfScene(sc,true);   // ผิววัสดุ (js/76): แมพนิ่ง = ฉายตามพิกัดโลก
+    if(typeof surfScene==='function')surfScene(sc,true);
+    fileStyleScene(sc);   // style presets (js/28-fcs-castle.js) — MAP-STANDARD round 4   // ผิววัสดุ (js/76): แมพนิ่ง = ฉายตามพิกัดโลก
     backdropHide(id,sc);   // ของไกลเดิมที่ฉากหลัง (js/67) มาแทน
     W.remove(fb);setTimeout(()=>disposeTree(fb),5000);W.add(sc);W.userData.grPend=0;   // ทิ้งพื้นสำรองทีหลัง (กำลังอุ่นเชดเดอร์อยู่ได้)
     brkSetup(sc,skip);   // ของบังที่พังได้: แยกออกจาก batch (js/23)

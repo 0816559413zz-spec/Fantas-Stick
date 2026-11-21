@@ -13,18 +13,18 @@ CITY_MID:140 CITY_C2:140 cityModeData:141 mapArea:157 AREA:158 areaClamp:160
 ## js/02-citytest.js (28) — แมพทดสอบเมืองใหญ่ (กล่องเทา) — ใช้วัดความลื่นของเครื่องยนต์ก่อนสร้างเ…
 CITY_N:4 CITY_B:4 CITY_ROAD:4 genCityTest:5 cityTestProps:19
 
-## js/02-data.js (387) — 
+## js/02-data.js (388) — 
 W:4 H:4 PR:4 PILLARS:6 SPAWNF:7 mulberry:9 genForest:10 genPitch:27 genHogsmeade:36
 §54 แผนที่โล่ง 3 แบบ (ผู้ใช้: ป่ามืดไม่สนุก อยากได้ที่โล่งๆ)
 genMeadow:55 genLake:61 genRuins:66
 §73 Test Place (ห้องฝึก): พื้นโล่งไม่มีสิ่งกีดขวาง
 TEST_W:75 TEST_H:75 TEST_C:75 TEST_VIL:75 TEST_GW:77 TEST_Z:78 TEST_ST:85 TEST_PH:86 testWalls:88 testDummySpots:90 testFences:92 genTest:105 testProps:120 trZone:133 trBotPad:134 trFixSpots:136 trShow:138 genGreatHall:139 MAPS:147 MAP_OFF:160 PLAYMAP:161 RANDOM_MAPS:162 MAPID:163 MW:163 MH:163 OBS:163 setMapVars:164
 §165 แผนที่จากไฟล์ (Blender → assets/maps/<id>.json + .glb, สคริปต์ assets…
-FMAPS:168 b64i16:169 regFileMap:170 loadMapData:185 loadAllMapData:193 mapReady:196 mapOkFor:197
-§198 ของประกอบฉากที่พังได้ / ใช้ได้ (prop)
-PROPDEF:202 PROP_OFF_MODES:209 PROP_USE:211 PROPS:212 PROPON:212 genProps:213
-§233 ตัวละคร: บ้านฮอกวอตส์ + หน้าตา
-HOUSES:235 HAIRC:240 HAIRSTY:242 WOODC:245 WOODN:246 WCOREC:247 WCOREN:248 WANDSTY:249 WANDN:254 WANDNN:269 EYEC:270 SKINC:271 CLOAKC:272 TIESTY:273 LOOKK:274 LOOKN:274 lookStr:275 parseLook:276 randLook:277 LOOKS:278 LOOKP:278 KITS:278 getKit:279 getLook:280 CREST_SH:281 CREST_PAT:282 starPts:287 CREST_ANI:289 crestSVG:295 houseColor:303 TEAMC:304 TEAMN:304 NOBROOM:306 ROOM_MAX:308 MODES:309 hostModeEnabled:321 PLAY:323 PDEF:324 EDEF:351 POOLS:364 CDK:374 BUFFS:377 BRAR:386 rollRar:387
+FMAPS:168 b64i16:169 regFileMap:170 loadMapData:186 loadAllMapData:194 mapReady:197 mapOkFor:198
+§199 ของประกอบฉากที่พังได้ / ใช้ได้ (prop)
+PROPDEF:203 PROP_OFF_MODES:210 PROP_USE:212 PROPS:213 PROPON:213 genProps:214
+§234 ตัวละคร: บ้านฮอกวอตส์ + หน้าตา
+HOUSES:236 HAIRC:241 HAIRSTY:243 WOODC:246 WOODN:247 WCOREC:248 WCOREN:249 WANDSTY:250 WANDN:255 WANDNN:270 EYEC:271 SKINC:272 CLOAKC:273 TIESTY:274 LOOKK:275 LOOKN:275 lookStr:276 parseLook:277 randLook:278 LOOKS:279 LOOKP:279 KITS:279 getKit:280 getLook:281 CREST_SH:282 CREST_PAT:283 starPts:288 CREST_ANI:290 crestSVG:296 houseColor:304 TEAMC:305 TEAMN:305 NOBROOM:307 ROOM_MAX:309 MODES:310 hostModeEnabled:322 PLAY:324 PDEF:325 EDEF:352 POOLS:365 CDK:375 BUFFS:378 BRAR:387 rollRar:388
 
 ## js/02-fcs-data.js (3) — 
 FCS_DATA:3
@@ -364,10 +364,10 @@ SGV3:280 sgClearView:281 sgFileBuild:284 sgViewBuild:290 SGVZR:310 sgBarrier:313
 §354 HUD
 sgTop:355 sgHud:357
 
-## js/28-fcs-castle.js (208) — 
+## js/28-fcs-castle.js (232) — FCS castle dressing (user 2026-11-20: keep the FCS layout, make it look like a real warm-…
 FCSC:9 fcsCastleMat:10 fcsBannerTex:34 fcsGlowTex:44 fcsCastle:46 fcsCastleTick:171
 §173 room pieces: look (js/02-room-*.js view(K,V)) — V = shared builder, m…
-fcsRoomsView:174
+fcsRoomsView:174 fcsDecoFile:176 fcsDecoKit:189 MB_STYLE:226 fileStyleScene:227
 
 ## js/28-fcs-forest.js (259) — 
 FF:7 FF_X1:8 FF_NS:9 ffGroundTex:11 ffParts:33 fcsForest:40 ffMerge:123 ffDetail:131 fcsRuin:158 ffSkyMat:201 ffMist:229 ffMistFrame:246 fcsForestTick:248 FFC:259
@@ -379,7 +379,7 @@ frpBuild:27 fcsPropsBuild:75 fcsPropsView:101 fcsRoomBrkFx:110 FRP_DEB:111 frpDe
 §139 wall hit marks (event 'rwh'): decal quads on the wall face, ring buff…
 frpMarkTex:140 fcsWallHit:144
 
-## js/28-maps-build.js (783) — สร้างแผนที่
+## js/28-maps-build.js (785) — สร้างแผนที่
 CANDLESYS:2 builtMap:3 builtKey:3 world:3 TORCHES:3 CANDLES:3 FIREFLIES:3 CRYSTAL:3 RUNE:3 SNITCH:3 BANNERS:3 SNOW:3 WCACHE:5 WCACHE_MAX:5 wkey:7 buildWorld:8 addW:42 _prewarmed:44 prewarmShaders:45 batchStatic:64 makeCandles:89 updateCandles:98 buildCastle:107 buildHogsmeade:173 buildGreatHall:261 buildForest:331
 §428 ทุ่งหญ้าฮอกวอตส์ (เย็น)
 ringTrees:429 grassTex:438 buildMeadow:439
@@ -390,7 +390,7 @@ buildLake:459
 §482 บรรยากาศที่ใช้ร่วมกัน (แผนที่จากโค้ด + แผนที่จากไฟล์ผ่าน fx ใน guides…
 makeSnow:483 makeFireflies:490 makeSnitch:497 fileMapFx:504
 §514 แผนที่จากไฟล์ Blender (guides/MAP-DESIGN.md)
-terrGeo:516 buildFileMap:524 tickM:574 TRPAD:575 ARPAD:575 SHPAD:575 signTex:576 testSign:577 buildTest:584 buildRuins:689 buildPitch:714
+terrGeo:516 buildFileMap:524 tickM:576 TRPAD:577 ARPAD:577 SHPAD:577 signTex:578 testSign:579 buildTest:586 buildRuins:691 buildPitch:716
 
 ## js/29-characters.js (439) — ระบบผ้า (เสื้อคลุมพลิ้วตามการเคลื่อนที่)
 makeCloak:2 updateCloth:10 wandNamed:34 wandSparks:83
@@ -889,4 +889,4 @@ _dvPanel:95 _dvBtn:98 _dvBody:100 _dvHead:100 devUiApply:102 devFreeMouse:110 de
 §130 rows
 dvA:131 dvTg:132 dvB:133 dvCh:134 dvSl:135 dvSub:136 dvCol:137 devKeyOf:138 devRender:143 devPos:193 devUiAct:200
 
-(111 files, 32786 lines)
+(111 files, 32813 lines)

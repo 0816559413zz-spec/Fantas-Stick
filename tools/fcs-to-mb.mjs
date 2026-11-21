@@ -1,5 +1,7 @@
 // Converts the game's First Castle Strike map (fcs) into a Map Builder draft: maps/build/fcs-draft.json
 // Run: node tools/fcs-to-mb.mjs   → open mapbuild.html?id=fcs-draft (python tools/serve.py)
+//   Rooms are written as prefab files (maps/build/room-<id>.json) AND unpacked into fcs-draft (one file, every piece editable —
+//   user 2026-11-21). --prefab = keep them as linked room instances instead.
 // Draft only: for looking at / sketching on the real map in 3D. Siege mode still plays js/02-fcs*.js —
 // do NOT press "⬆ ส่งเข้าเกม" expecting it to replace fcs (it would become a separate map 'fcs-draft').
 // Source = the same genFcs() the game runs (js/02-fcs-data.js + rooms js/02-fcs-rooms.js + js/02-room-*.js + js/02-fcs.js),
@@ -115,7 +117,7 @@ for (const r of ROOMS) {
   RM.desc = 'ห้องสำเร็จ (prefab) จาก js/02-room-' + r.id + '.js (tools/fcs-to-mb.mjs) • ประตู: ' + (r.doors || []).map(d => d.side + '@' + m(d.at) + 'm/' + m(d.w) + 'm/' + d.kind).join(', ');
   RM.modes = []; RM.random = 0; RM.autoProps = 0; RM.style = 'room-hall'; RM.sky = 'day';
   let rid = 1; const rn = () => rid++, ro = o => RM.objs.push(Object.assign({ id: rn(), y: 0, rot: 0 }, o));
-  const X = u => +m(u).toFixed(3), Z = v => +m(v).toFixed(3), RS = { c: '#8a8478', m: 'stone', closed: 0, curve: 0, brk: 0, sys: 'stonewall' };
+  const X = u => +m(u).toFixed(3), Z = v => +m(v).toFixed(3), RS = { c: '#8a8478', m: 'stone', closed: 0, curve: 0, brk: 0, sys: 'stonewall', vis: 0 };   // vis 0 = collision only: the decor below draws the look
   for (const w of D2.walls) {   // axis-aligned: split at door gaps, lintel pieces above gaps that have one
     const along = w.v1 === w.v2, a0 = Math.min(along ? w.u1 : w.v1, along ? w.u2 : w.v2), a1 = Math.max(along ? w.u1 : w.v1, along ? w.u2 : w.v2);
     const P = a => along ? [X(a), Z(w.v1)] : [X(w.u1), Z(a)], gaps = (w.gaps || []).slice().sort((p, q) => p[0] - q[0]);
@@ -127,8 +129,25 @@ for (const r of ROOMS) {
     }
     if (a1 > s) RM.walls.push(Object.assign({ id: rn(), pts: [P(s), P(a1)], th: m(w.th), h: w.h }, RS));
   }
-  for (const c of D2.cols) ro({ t: 'cyl', x: X(c.u), z: Z(c.v), sx: +(m(c.r) * 2).toFixed(2), sz: +(m(c.r) * 2).toFixed(2), y: c.bot || 0, sy: +Math.max(0.2, c.h - (c.bot || 0)).toFixed(2), c: '#7d7870', tag: c.tag || '' });
+  for (const c of D2.cols) ro({ vis: 0, t: 'cyl', x: X(c.u), z: Z(c.v), sx: +(m(c.r) * 2).toFixed(2), sz: +(m(c.r) * 2).toFixed(2), y: c.bot || 0, sy: +Math.max(0.2, c.h - (c.bot || 0)).toFixed(2), c: '#7d7870', tag: c.tag || '' });
   for (const q of D2.ceil) { const o = { t: 'ceil', x: X((q.x0 + q.x1) / 2 - K.ox), z: Z((q.y0 + q.y1) / 2 - K.oy), sx: m(q.x1 - q.x0), sz: m(q.y1 - q.y0), y: q.h }; if (q.zmax !== Infinity && q.zmax != null) o.zmax = q.zmax; ro(o); }
+  // look: replay the room's view(K,V) with a recording V → decor objects dc_* (game draws them with the same builder, js/28-fcs-castle.js)
+  if (r.view) {
+    sb.tx = px => px / PX; sb.tz = py => py / PX;   // view works in world metres; here = map metres from the top-left
+    const LX = x => +(x - m(K.ox)).toFixed(3), LZ = z => +(z - m(K.oy)).toFixed(3), LY = y => +(y - K.g0).toFixed(3);
+    const V = {
+      box: (k, x, y, z, sx, sy, sz) => ro({ t: 'dc_box', k, x: LX(x), z: LZ(z), y: LY(y), sx: +sx.toFixed(3), sy: +sy.toFixed(3), sz: +sz.toFixed(3) }),
+      cyl: (k, x, y, z, rt, rb, h, seg) => ro({ t: 'dc_cyl', k, x: LX(x), z: LZ(z), y: LY(y), rt, rb, sy: h, seg: seg || 8 }),
+      cone: (k, x, y, z, r, h, seg) => ro({ t: 'dc_cone', k, x: LX(x), z: LZ(z), y: LY(y), r, sy: h, seg: seg || 8 }),
+      roof: (x, y, z, w, d, h) => ro({ t: 'dc_roof', x: LX(x), z: LZ(z), y: LY(y), sx: +w.toFixed(3), sz: +d.toFixed(3), sy: h }),
+      light: (x, y, z) => ro({ t: 'dc_flame', x: LX(x), z: LZ(z), y: LY(y) }),
+      cloth: (x, y, z, w, h, a, col) => ro({ t: 'dc_cloth', x: LX(x), z: LZ(z), y: LY(y), sx: w, sy: h, c: col, rot: a || 0 }),
+      shield: (x, y, z, a) => ro({ t: 'dc_shield', x: LX(x), z: LZ(z), y: LY(y), rot: a || 0 }),
+      chandelier: (x, y, z) => ro({ t: 'dc_chand', x: LX(x), z: LZ(z), y: LY(y) }),
+    };
+    r.view(K, V);
+    ro({ t: 'dc_box', k: 'floor', x: +(RM.W / 2).toFixed(3), z: +(RM.H / 2).toFixed(3), y: 0.02, sx: RM.W, sy: 0.04, sz: RM.H });   // castle floor (fcs paints it from the Map Editor surface)
+  }
   for (const p of D2.props) { const o = { t: 'rp_' + p.kind, x: X(p.u), z: Z(p.v), rot: -(p.a || 0), y: p.z0 || 0 }; if (p.L) o.L = +m(p.L).toFixed(2); ro(o); }
   // walkable floors of this room (terr.fl k:'room' inside its rect): straight pieces along x (gallery deck + end ramps)
   for (const f of T.fl) {
@@ -140,13 +159,15 @@ for (const r of ROOMS) {
       while (i1 < f.nx - 1 && Math.abs(top(i1 + 1) - top(i1) - sl) < 0.02) i1++;
       if (Math.max(top(i0) - gnd(i0), top(i1) - gnd(i1)) > 0.1) {
         const x0 = X(f.x0 + i0 * tc - K.ox), x1 = X(f.x0 + i1 * tc - K.ox);
-        RM.floors.push({ id: rn(), x: (x0 + x1) / 2, z: (z0 + z1) / 2, w: z1 - z0, d: x1 - x0, rot: Math.PI / 2, y: +(top(i0) - K.g0).toFixed(2), y2: +(top(i1) - K.g0).toFixed(2), th: 0.6, c: '#7a5a3a' });
+        RM.floors.push({ vis: 0, id: rn(), x: (x0 + x1) / 2, z: (z0 + z1) / 2, w: z1 - z0, d: x1 - x0, rot: Math.PI / 2, y: +(top(i0) - K.g0).toFixed(2), y2: +(top(i1) - K.g0).toFixed(2), th: 0.6, c: '#7a5a3a' });
       }
       i0 = i1;
     }
   }
   RM.seq = rid; roomMaps.push(RM);
-  M.rooms.push({ id: nid(), ref: RM.id, x: +m(K.ox + K.w / 2).toFixed(3), z: +m(K.oy + K.h / 2).toFixed(3), rot: 0 });
+  const inst = { id: nid(), ref: RM.id, x: +m(K.ox + K.w / 2).toFixed(3), z: +m(K.oy + K.h / 2).toFixed(3), rot: 0 };
+  M.rooms.push(inst);
+  if (!process.argv.includes('--prefab')) { M.seq = id; MD.roomUnpack(M, inst, RM); id = M.seq + 1; }   // one-file map
 }
 
 // ---------- L bridge (deck + ramps as floors, parapet as raised walls, piers as boxes) ----------

@@ -171,15 +171,30 @@ function fcsCastle(){
 function fcsCastleTick(){const t=performance.now()/1000;FCSC.uT.value=t;
   for(const f of FCSC.torch){const k=0.85+0.12*Math.sin(t*13+f.userData.ph)+0.08*Math.sin(t*23.7+f.userData.ph*2);f.scale.set(1.25*k,1.6*k,1);}}
 // ---------- room pieces: look (js/02-room-*.js view(K,V)) — V = shared builder, merged per material
-function fcsRoomsView(){
+function fcsRoomsView(){const D=fcsDecoKit();for(const r of FCS_ROOMS)if(r.view&&r.K)try{r.view(r.K,D.V);}catch(e){console.error('room view',r.id,e);}D.done();}
+// Map Builder decor (data.deco, MAP-STANDARD round 4): same builder; x,y px • h = lift above the ground (m) • a = yaw
+function fcsDecoFile(list){
+  const D=fcsDecoKit(),V=D.V;
+  for(const o of list)try{const x=tx(o.x),z=tz(o.y),y=GY(o.x,o.y)+(o.h||0),k=o.k||'stone';
+    if(o.t==='box')V.box(k,x,y,z,o.sx||1,o.sy||1,o.sz||1);
+    else if(o.t==='cyl')V.cyl(k,x,y,z,o.rt!=null?o.rt:(o.sx||1)/2,o.rb!=null?o.rb:(o.sx||1)/2,o.sy||1,o.seg);
+    else if(o.t==='cone')V.cone(k,x,y,z,o.r!=null?o.r:(o.sx||1)/2,o.sy||1,o.seg);
+    else if(o.t==='roof')V.roof(x,y,z,o.sx||10,o.sz||8,o.sy||4,o.a||0);
+    else if(o.t==='flame')V.light(x,y,z);
+    else if(o.t==='cloth')V.cloth(x,y,z,o.sx||2,o.sy||4,o.a||0,o.c||'#7a1418');
+    else if(o.t==='shield')V.shield(x,y,z,o.a||0);
+    else if(o.t==='chand')V.chandelier(x,y,z);}catch(e){console.error('deco',o,e);}
+  D.done();
+}
+function fcsDecoKit(){
   const G={},add=(k,g)=>(G[k]=G[k]||[]).push(g),bx=new THREE.BoxGeometry(1,1,1),lights=[],sprites=[],cloths=[];
   const V={
     box:(k,x,y,z,sx,sy,sz)=>{const g=bx.clone();g.scale(sx,sy,sz);g.translate(x,y,z);add(k,g);},
     cyl:(k,x,y,z,rt,rb,h,seg)=>{const g=new THREE.CylinderGeometry(rt,rb,h,seg||8);g.translate(x,y,z);add(k,g);},
-    roof:(cx,y,cz,w,d,h)=>{const s=new THREE.Shape();s.moveTo(-d/2-0.6,0);s.lineTo(0,h);s.lineTo(d/2+0.6,0);s.lineTo(d/2+0.6,-0.6);s.lineTo(0,h-0.75);s.lineTo(-d/2-0.6,-0.6);s.lineTo(-d/2-0.6,0);
-      const g=new THREE.ExtrudeGeometry(s,{depth:w+1.2,bevelEnabled:false});g.translate(0,0,-(w+1.2)/2);g.rotateY(Math.PI/2);g.translate(cx,y,cz);add('roof',g);
+    roof:(cx,y,cz,w,d,h,rot)=>{rot=rot||0;const s=new THREE.Shape();s.moveTo(-d/2-0.6,0);s.lineTo(0,h);s.lineTo(d/2+0.6,0);s.lineTo(d/2+0.6,-0.6);s.lineTo(0,h-0.75);s.lineTo(-d/2-0.6,-0.6);s.lineTo(-d/2-0.6,0);
+      const g=new THREE.ExtrudeGeometry(s,{depth:w+1.2,bevelEnabled:false});g.translate(0,0,-(w+1.2)/2);g.rotateY(Math.PI/2+rot);g.translate(cx,y,cz);add('roof',g);
       const gs=new THREE.Shape();gs.moveTo(-d/2,0);gs.lineTo(0,h-0.4);gs.lineTo(d/2,0);gs.lineTo(-d/2,0);   // stone gable ends
-      for(const e of [-1,1]){const gg=new THREE.ExtrudeGeometry(gs,{depth:1.2,bevelEnabled:false});gg.translate(0,0,-0.6);gg.rotateY(Math.PI/2);gg.translate(cx+e*(w/2-0.6),y,cz);add('stone',gg);}},
+      for(const e of [-1,1]){const gg=new THREE.ExtrudeGeometry(gs,{depth:1.2,bevelEnabled:false}),ex=e*(w/2-0.6);gg.translate(0,0,-0.6);gg.rotateY(Math.PI/2+rot);gg.translate(cx+ex*Math.cos(rot),y,cz-ex*Math.sin(rot));add('stone',gg);}},
     cone:(k,x,y,z,r,h,seg)=>{const g=new THREE.ConeGeometry(r,h,seg||8);g.translate(x,y,z);add(k,g);},
     light:(x,y,z)=>{sprites.push([x,y,z]);},
     cloth:(x,y,z,w,h,a,col)=>cloths.push([x,y,z,w,h,a,col]),
@@ -188,14 +203,14 @@ function fcsRoomsView(){
       const ch=new THREE.CylinderGeometry(0.05,0.05,6,4);ch.translate(x,y+3,z);add('iron',ch);
       for(let i=0;i<8;i++){const a=i/8*Math.PI*2;sprites.push([x+Math.cos(a)*2.2,y+0.35,z+Math.sin(a)*2.2,0.8]);}lights.push([x,y-0.5,z]);}
   };
-  for(const r of FCS_ROOMS)if(r.view&&r.K)try{r.view(r.K,V);}catch(e){console.error('room view',r.id,e);}
+  return {V,done(){
   const mats={stone:fcsCastleMat('s','#c2b298'),dark:fcsCastleMat('d','#8f8270',{row:0.32,blk:0.9,moss:0.3}),
     roof:new THREE.MeshStandardMaterial({color:'#5d6470',roughness:0.75,flatShading:true,side:THREE.DoubleSide}),
     lit:new THREE.MeshStandardMaterial({color:'#2a1a0a',emissive:'#ffc77a',emissiveIntensity:0.55}),
     wood:new THREE.MeshStandardMaterial({color:'#5a3f28',roughness:0.85}),iron:new THREE.MeshStandardMaterial({color:'#2b2a2a',roughness:0.5,metalness:0.7}),
-    carpet:new THREE.MeshStandardMaterial({color:'#7a1a20',roughness:1}),slit:new THREE.MeshBasicMaterial({color:'#17120e'})};
+    carpet:new THREE.MeshStandardMaterial({color:'#7a1a20',roughness:1}),floor:fcsCastleMat('f','#b4a68e',{fr:1.3,fc:1.0,moss:0.35}),slit:new THREE.MeshBasicMaterial({color:'#17120e'})};
   for(const k in G){const geo=mergeGeometries(G[k].map(g=>g.index?g.toNonIndexed():g),false);G[k].forEach(g=>g.dispose());if(!geo)continue;
-    const m=new THREE.Mesh(geo,mats[k]||mats.stone);m.castShadow=k!=='lit'&&k!=='carpet';m.receiveShadow=true;addW(m);}
+    const m=new THREE.Mesh(geo,mats[k]||mats.stone);m.castShadow=k!=='lit'&&k!=='carpet'&&k!=='floor';m.receiveShadow=true;addW(m);}
   bx.dispose();
   const gt=fcsGlowTex();
   for(const [x,y,z,s] of sprites){const fl=new THREE.Sprite(new THREE.SpriteMaterial({map:gt,color:'#ffb060',blending:THREE.AdditiveBlending,depthWrite:false,transparent:true}));
@@ -205,4 +220,13 @@ function fcsRoomsView(){
     const o=new THREE.Mesh(g,m);o.position.set(x,y,z);o.rotation.y=a;o.castShadow=true;addW(o);
     const gb=new THREE.Mesh(sGeo(THREE.BoxGeometry,w+0.2,0.12,0.12),new THREE.MeshStandardMaterial({color:'#c9a24a',metalness:0.6,roughness:0.4}));gb.position.set(x,y,z);gb.rotation.y=a;addW(gb);}
   for(const [x,y,z] of lights){const L=new THREE.PointLight('#ffb36a',FCSC.pl,46,1.4);L.position.set(x,y,z);addW(L);}
+  }};
+}
+// Map Builder style presets on .glb meshes (userData.style, MAP-STANDARD §1.5): castle ashlar shader for walls/shapes, castle floor for floors
+const MB_STYLE={'castle-stone':1,'room-hall':1};
+function fileStyleScene(sc){
+  sc.traverse(o=>{if(!o.isMesh||!o.userData||!MB_STYLE[o.userData.style])return;const n=(o.material&&o.material.name)||'';
+    if(/^glow|^ice/.test(n))return;
+    if(!o.geometry.attributes.normal)o.geometry.computeVertexNormals();   // MB meshes are flat-shaded without normals; the ashlar shader needs them
+    o.material=/^floor/.test(n)?fcsCastleMat('f','#b4a68e',{fr:1.3,fc:1.0,moss:0.35}):fcsCastleMat('s','#c2b298');});
 }

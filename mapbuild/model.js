@@ -61,6 +61,17 @@ export const RPK = {
 };
 for (const k in RPK) OBJ['rp_' + k] = { n: RPK[k].n, cat: 'room', c: '#a07a56', rp: k };
 export const isRP = t => t.startsWith('rp_');
+// decor drawn by the game (MAP-STANDARD round 4): the same builder the code rooms use (js/28-fcs-castle.js fcsDecoKit) — no collision,
+// not in the .glb. k = material key: stone/dark (castle ashlar), roof, lit (glowing window), wood, iron, carpet, slit (dark opening)
+// y = lift of the shape centre above the ground (roof/cloth: base/top) • rot = yaw (roof ridge, cloth/shield facing)
+export const DECO_MAT = [['stone', 'หินปราสาท'], ['dark', 'หินเข้ม'], ['roof', 'หลังคา'], ['lit', 'หน้าต่างมีไฟ'], ['wood', 'ไม้'], ['iron', 'เหล็ก'], ['carpet', 'พรมแดง'], ['slit', 'ช่องมืด'], ['floor', 'พื้นหินปราสาท']];
+export const DECO_COL = { stone: '#c2b298', dark: '#8f8270', roof: '#5d6470', lit: '#ffc77a', wood: '#5a3f28', iron: '#2b2a2a', carpet: '#7a1a20', slit: '#17120e', floor: '#b4a68e' };
+Object.assign(OBJ, {
+  dc_box: { n: 'กล่องตกแต่ง', cat: 'deco', c: '#c2b298' }, dc_cyl: { n: 'ทรงกระบอกตกแต่ง', cat: 'deco', c: '#c2b298' }, dc_cone: { n: 'กรวย/ยอดหอ', cat: 'deco', c: '#5d6470' },
+  dc_roof: { n: 'หลังคาจั่ว', cat: 'deco', c: '#5d6470' }, dc_flame: { n: 'เปลวไฟ (คบ/เทียน)', cat: 'deco', c: '#ffb060' }, dc_cloth: { n: 'ผ้าแขวน/ธง', cat: 'deco', c: '#7a1418' },
+  dc_shield: { n: 'โล่ประดับผนัง', cat: 'deco', c: '#7a1a20' }, dc_chand: { n: 'โคมระย้า (มีแสง)', cat: 'deco', c: '#ffb36a' },
+});
+export const isDeco = t => t.startsWith('dc_');
 // game systems bound by tag, not by map name (MAP-STANDARD §1.7)
 export const SYS_WALL = [['', '(ไม่มี)'], ['fence', 'รั้วไหม้ได้'], ['stonewall', 'ผนังหิน (รอยแตก/ไหม้)']];
 export const SYS_FLOOR = [['', '(ไม่มี)'], ['eggshell', 'แตกแบบเปลือกไข่ (สะพาน)']];
@@ -232,7 +243,7 @@ export function gameData(M, dim) {
     });
   }
   const spawns = [], espawn = [], rings = [], tasks = [], props = [], houses = [], lights = [];
-  const sg = { cores: [], sp: { A: {}, B: {} }, phases: [], bw: [] }, ceil = [], rprops = [];
+  const sg = { cores: [], sp: { A: {}, B: {} }, phases: [], bw: [] }, ceil = [], rprops = [], deco = [];
   const rect = o => { const w = (o.sx || 1) * PX, d = (o.sz || 1) * PX; return { x0: r1(o.x * PX - w / 2), y0: r1(o.z * PX - d / 2), x1: r1(o.x * PX + w / 2), y1: r1(o.z * PX + d / 2) }; };
   for (const o of allObjs) {
     const X = r1(o.x * PX), Y = r1(o.z * PX), rot = o.rot || 0;
@@ -240,6 +251,7 @@ export function gameData(M, dim) {
     else if (o.t === 'sgA' || o.t === 'sgB') sg.sp[o.t === 'sgA' ? 'A' : 'B'][o.ph || 1] = { x: X, y: Y };
     else if (o.t === 'phase') { const q = rect(o), k = (o.ph || 1) - 1; (sg.phases[k] = sg.phases[k] || []).push({ x1: q.x0, y1: q.y0, x2: q.x1, y2: q.y1 }); }
     else if (o.t === 'ceil') ceil.push(Object.assign(rect(o), { h: r2(o.y == null ? 21 : o.y) }, o.zmax != null ? { zmax: r2(o.zmax) } : {}));
+    else if (isDeco(o.t)) deco.push(Object.assign({ t: o.t.slice(3), x: X, y: Y, h: r2(o.y || 0) }, ...['k', 'sx', 'sy', 'sz', 'rt', 'rb', 'r', 'seg', 's', 'c'].filter(q => o[q] != null).map(q => ({ [q]: o[q] })), rot ? { a: +rot.toFixed(4) } : {}));
     else if (isRP(o.t)) rprops.push(Object.assign({ k: o.t.slice(3), x: X, y: Y, a: +(-rot).toFixed(3) }, o.L ? { L: r1(o.L * PX) } : {}, o.y ? { z0: r2(o.y) } : {}));
     else if (o.t === 'spawn' || o.t === 'spawnR' || o.t === 'spawnB') { const s = { x: X, y: Y, a: +Math.atan2(Math.cos(rot), Math.sin(rot)).toFixed(3) }; if (o.t !== 'spawn') s.t = o.t === 'spawnR' ? 1 : 0; spawns.push(s); }
     else if (o.t === 'espawn') espawn.push({ x: X, y: Y });
@@ -280,6 +292,8 @@ export function gameData(M, dim) {
   if (M.look) data.look = M.look;   // พรีเซ็ต Look (js/74-look.js) • lt = แสง/ฟ้าเฉพาะแมพ (js/28 buildFileMap) — ตั้งโดยแก้ไฟล์ต้นฉบับตรง ๆ (ยังไม่มีช่องใน Editor)
   if (M.lt) data.lt = M.lt;
   if (M.style) data.style = M.style;
+  if (M.style === 'forest-mist' && !M.look) data.look = 'gorge';   // forest look preset (js/74-look.js)
+  if (deco.length) data.deco = deco;
   if (sg.cores.length || sg.bw.length || sg.phases.length || Object.keys(sg.sp.A).length || Object.keys(sg.sp.B).length) data.siege = sg;
   if (ceil.length) data.ceil = ceil;
   if (rprops.length) data.rprops = rprops;
@@ -364,7 +378,8 @@ export function roomExpand(M, inst, R) {
   const tag = (o, k) => Object.assign(o, { id: 'r' + inst.id + k + o.id, room: inst.id, rref: inst.ref });
   const walls = R.walls.map(w => tag(Object.assign({}, w, { pts: w.pts.map(p => P(p[0], p[1])) }, w.base != null ? { base: +(w.base + g0).toFixed(2) } : {}), 'w'));
   const floors = R.floors.map(f => { const [x, z] = P(f.x, f.z); return tag(Object.assign({}, f, { x, z, rot: (f.rot || 0) + rot, y: +(f.y + g0).toFixed(2) }, f.y2 != null ? { y2: +(f.y2 + g0).toFixed(2) } : {}), 'f'); });
-  const objs = R.objs.map(o => { const [x, z] = P(o.x, o.z); return tag(Object.assign({}, o, { x, z, rot: o.t === 'phase' || o.t === 'ceil' ? 0 : (o.rot || 0) + rot }, (o.t === 'phase' || o.t === 'ceil') && Math.abs(s) > 0.5 ? { sx: o.sz, sz: o.sx } : {}), 'o'); });
+  const swap = o => (o.t === 'phase' || o.t === 'ceil' || o.t === 'dc_box') && Math.abs(s) > 0.5;   // axis-aligned boxes: swap sizes on 90°/270°
+  const objs = R.objs.map(o => { const [x, z] = P(o.x, o.z); return tag(Object.assign({}, o, { x, z, rot: o.t === 'phase' || o.t === 'ceil' || o.t === 'dc_box' ? 0 : (o.rot || 0) + rot }, swap(o) ? { sx: o.sz, sz: o.sx } : {}), 'o'); });
   const parts = (R.parts || []).map(p => { const [x, z] = P(p.x, p.z); return tag(Object.assign({}, p, { x, z, rot: (p.rot || 0) + rot }, p.base != null ? { base: +(p.base + g0).toFixed(2) } : {}), 'p'); });
   return { walls, floors, objs, parts };
 }
@@ -373,6 +388,22 @@ export function flatRooms(M, RM) {
   const out = { walls: [], floors: [], objs: [], parts: [] };
   for (const inst of M.rooms || []) { const R = RM && RM.get(inst.ref); if (!R) continue; const X = roomExpand(M, inst, R); for (const k in out) out[k].push(...X[k]); }
   return out;
+}
+// "แตกห้องเข้าแผนที่": copy an instance's content into the map as normal editable items (no longer linked to the room file),
+// flatten the ground under the room to the room floor and paint the room's surfaces onto it. Mutates M. (user 2026-11-21: one-file maps)
+export function roomUnpack(M, inst, R) {
+  const X = roomExpand(M, inst, R), g0 = gh(M, inst.x, inst.z);
+  let seq = M.seq || 1;
+  for (const k of ['walls', 'floors', 'objs', 'parts']) for (const o of X[k]) { delete o.room; delete o.rref; o.id = ++seq; (M[k] = M[k] || []).push(o); }
+  const rot = Math.round((inst.rot || 0) / (Math.PI / 2)) * (Math.PI / 2), c = Math.cos(rot), s = Math.sin(rot);
+  for (let j = 0; j < M.ny; j++) for (let i = 0; i < M.nx; i++) {
+    const dx = i * C - inst.x, dz = j * C - inst.z, rx = dx * c - dz * s + R.W / 2, rz = dx * s + dz * c + R.H / 2;
+    if (rx < -1e-6 || rz < -1e-6 || rx > R.W + 1e-6 || rz > R.H + 1e-6) continue;
+    const ri = clamp(Math.round(rx / C), 0, R.nx - 1), rj = clamp(Math.round(rz / C), 0, R.ny - 1), k = j * M.nx + i;
+    M.hg[k] = g0 + R.hg[rj * R.nx + ri]; M.sf[k] = R.sf[rj * R.nx + ri];
+  }
+  M.rooms = (M.rooms || []).filter(r => r.id !== inst.id); M.seq = seq;
+  return M;
 }
 // map + its expanded rooms as one plain map (for gameData / check / export)
 export function withRooms(M, RX) { return RX && (RX.walls.length || RX.floors.length || RX.objs.length || RX.parts.length) ? Object.assign({}, M, { walls: M.walls.concat(RX.walls), floors: M.floors.concat(RX.floors), objs: M.objs.concat(RX.objs), parts: (M.parts || []).concat(RX.parts) }) : M; }
