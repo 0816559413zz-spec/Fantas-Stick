@@ -97,7 +97,11 @@ const CAM_FRAMES={
   windShield:{dist:6.2,h:2.45,side:0.34},windFlight:{dist:10.4,h:4.3,side:0.3},windBase:{dist:6.3,h:2.35,side:0.32},   // สายลม: ปีกใหญ่บังเป้า → ถอยกล้อง + เยื้องข้างมากขึ้น (ผู้ใช้ 2026-11-15)
   waterBeam:{dist:7.8,h:3.5,side:0},waterDragon:{dist:17.2,h:4.8,side:0.30},
   radiance:{dist:9.8,h:1.8,side:0.38,lift:3.25},
-  radianceStrike:{dist:11,h:1.95,side:0.32,lift:4.4}
+  radianceStrike:{dist:11,h:1.95,side:0.32,lift:4.4},
+  darkness:{dist:6.65,h:2.35,side:.28,lift:2.1},
+  darknessChase:{dist:7.4,h:2.7,side:.17},
+  darknessWaltz:{dist:10.4,h:1.8,side:.12,lift:4.4},
+  darknessMaw:{dist:12,h:3.4,side:.17,lift:4.0}
 };
 const CAM_FRAME={dist:4.7,h:2.05,side:0.25,lift:0},CAM_TRACK={has:false,key:'',x:0,y:0,z:0,r:0,gy:undefined};
 const _camFocus=new THREE.Vector3(),_camAnchor=new THREE.Vector3(),_camWant=new THREE.Vector3();
@@ -106,6 +110,12 @@ function cameraFrame(me){
     if(me.co>0)return CAM_FRAMES.colossus;
     if(me.lt?.[14]?.[0]>=3)return CAM_FRAMES.radianceStrike;
     if(me.lt?.[14]?.[0]===2)return CAM_FRAMES.radiance;
+    if(getKit(me.id).path===DARKP){
+      if(me.dk?.[10]>.12&&me.dk[10]<1.91)return CAM_FRAMES.darknessMaw;
+      if(me.dk?.[11])return CAM_FRAMES.darknessChase;
+      if(me.dk?.[5]===3)return CAM_FRAMES.darknessWaltz;
+      if(!me.fl)return CAM_FRAMES.darkness;
+    }
     if(me.ea){
       if(me.ea[3]===1)return CAM_FRAMES.earthSky;
       if(me.ea[2]>0)return CAM_FRAMES.earthAuger;
@@ -162,9 +172,14 @@ function updateCamera(me,dt){
   {const fv=SET.fov*(1-0.25*AIMZ)+WTLF.fov;if(Math.abs(cam.fov-fv)>0.01){cam.fov=fv;cam.updateProjectionMatrix();}}
   let px=tx(me.x),pz=tz(me.y);
   if(me.wn&&me.wn[5]&&me.al){const T=CAM_TRACK,k=1-Math.exp(-16*dt);if(T.fk!==builtKey+'|'+me.id||Math.hypot(px-T.fx,pz-T.fz)>6){T.fx=px;T.fz=pz;T.fk=builtKey+'|'+me.id;}else{T.fx+=(px-T.fx)*k;T.fz+=(pz-T.fz)*k;}px=T.fx;pz=T.fz;}else CAM_TRACK.fk='';   // flight: the view follows a smoothed point, so snapshot or prediction jitter does not shake the screen
+  const chase=me.id===NET.myId&&me.al?me.dk?.[11]:null;
+  if(chase){
+    const [x,y,t,flow]=chase;
+    if(t>(flow?.42:.67))yaw=lerpAng(yaw,Math.atan2(y-me.y,x-me.x),1-Math.exp(-12*dt));
+  }
   const fx=Math.cos(yaw),fz=Math.sin(yaw),rx=-fz,rz=fx;
   const target=cameraFrame(me),key=builtKey+'|'+me.id,ground=GY(me.x,me.y)+(me.z||0),cut=!CAM_TRACK.has||CAM_TRACK.key!==key;
-  const fast=target===CAM_FRAMES.waterDragon||target===CAM_FRAMES.radianceStrike;
+  const fast=target===CAM_FRAMES.waterDragon||target===CAM_FRAMES.radianceStrike||target===CAM_FRAMES.darknessMaw;
   const blend=cut?1:1-Math.exp(-(fast?14:8)*dt);
   for(const k of ['dist','h','side','lift'])CAM_FRAME[k]=lerp(CAM_FRAME[k],target[k]||0,blend);
   const dist=CAM_FRAME.dist*(1-0.15*AIMZ),cp=Math.cos(pitch),sp=Math.sin(pitch);

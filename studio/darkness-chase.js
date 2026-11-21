@@ -287,7 +287,7 @@ function stDarkMarkedChase(root,args){
     shock(.29+3.30*ease(0,.31,contact-.054),.52*ease(.033,.083,contact)*(1-ease(.14,.36,contact)),contact*5);
     grit(t);
   }
-  return {update,dispose(){
+  return {update,blade:()=>newScythe.pivot.visible?newScythe.pivot:scythe.pivot,dispose(){
     for(const [object,{mask,castShadow}] of avatarParts){
       object.layers.mask=mask;object.castShadow=castShadow;
     }
@@ -425,7 +425,7 @@ function stDarkUnmarkedChase(root,live){
     dpKnees(actor,.36*drive+.56*plant+.17*whip,.86*drive+.98*plant+.42*whip);
     bendForearms(actor,.45*drive+.89*plant+.24*whip+.60*ready,.65*drive+.53*plant+.36*whip+.36*ready);
   }
-  return t=>{
+  const update=t=>{
     const pose=bladeAt(t);
     scythe.pivot.position.copy(pose.pos);scythe.pivot.quaternion.copy(pose.QB);
     scythe.update(t);
@@ -452,4 +452,6 @@ function stDarkUnmarkedChase(root,live){
     pressure(.42+1.75*ease(0,.20,contact),.75*ease(-.01,.028,contact)*(1-ease(.065,.24,contact)),contact*6);
     liftDust(t);wake(t);lowWake(t);
   };
+  update.blade=scythe.pivot;
+  return update;
 }

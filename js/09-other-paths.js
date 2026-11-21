@@ -169,7 +169,7 @@ function castSlot(p,i){
   if(p.cd[k]>0||p.sil>0)return false;
   if(p.shieldOn&&p.pathIdx===LIGHTP)return false;   // Crystal Aegis: ระหว่างกางโล่ใช้สกิลไม่ได้
   if(G.mode==='br'&&!(p.unl&&p.unl[BRMAP[k]]))return false;
-  if(S.cast(p,S,i)===false){p.cd[k]=0.5;p.cdMax[k]=0.5;return false;}
+  if(S.cast(p,S,i)===false){if(S.id!=='crystalbond'){p.cd[k]=0.5;p.cdMax[k]=0.5;}return false;}
   const cd=S.cd*p.buffs.cdr;p.cd[k]=cd;p.cdMax[k]=cd;
   if(S.role!=='support')darkReveal(p);
   emit({k:'sk',id:p.id,s:S.id,...(S.id==='stormdome'&&p.sdome.god?{g:1}:null)});   // ภาพ: ท่าร่ายสกิล (js/35 skAnim)

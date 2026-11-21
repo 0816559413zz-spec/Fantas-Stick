@@ -1,3 +1,12 @@
+function drawReticleTimer(ctx,x,y,radius,timeLeft){
+  const start=-Math.PI/2,turn=Math.PI*2;
+  ctx.save();
+  ctx.lineWidth=2.5;ctx.strokeStyle='rgba(255,255,255,0.26)';
+  ctx.beginPath();ctx.arc(x,y,radius,0,turn);ctx.stroke();
+  ctx.strokeStyle='#fff';
+  ctx.beginPath();ctx.arc(x,y,radius,start,start+clamp(timeLeft,0,1)*turn);ctx.stroke();
+  ctx.restore();
+}
 // ---------- HUD ----------
 function rr(x,y,w,h,r){cx.beginPath();cx.moveTo(x+r,y);cx.arcTo(x+w,y,x+w,y+h,r);cx.arcTo(x+w,y+h,x,y+h,r);cx.arcTo(x,y+h,x,y,r);cx.arcTo(x,y,x+w,y,r);cx.closePath();}
 const SLOTS=[['คลิกซ้าย','✨','ยิง',0],['คลิกขวา','🛡️','โล่',-1],['Q','🔥','ลูกไฟ',1],['E','⚡','สตัน',2],['R','💨','ผลัก',3],['F','🌀','ดึง',4],['Shift','💫','หลบ',5],['X','🌟','เวทโบราณ',-2],['B','🧹','ไม้กวาด',-3]];
@@ -157,15 +166,6 @@ function drawHUD(v,me,P){
   if(me&&me.dn)big('คุณล้ม! รอเพื่อนมายืนข้างๆ เพื่อชุบ',SH*0.62,22,'#ff9a9a');
   if(me&&me.fl&&!showBoard)big(`🧹 บินอยู่ (สูง ${me.z.toFixed(0)} ม.)  •  W เร่ง  •  เมาส์ เลี้ยว/เงยขึ้น-ก้มลง  •  คลิก ยิงลำแสง${broomHud(me)}  •  B ลง`,SH-150,15,'#ffe9a8');
   if(me&&me.rt)big('🕸️ ติดใยแมงมุม! ขยับไม่ได้ชั่วคราว',SH*0.62,20,'#e8e8f0');
-  const lightUlt=me?.lt?.[14];
-  if(lightUlt?.[0]===2&&!showBoard){
-    const width=Math.min(192,SW*.35),left=(SW-width)/2,y=SH-150;
-    cx.fillStyle='rgba(255,255,255,0.26)';
-    cx.fillRect(left,y,width,4);
-    cx.fillStyle='#fff';
-    cx.fillRect(left,y,width*clamp(lightUlt[1]/LT_UL.t,0,1),4);
-  }
-
   if(me)drawBottom(me,v);
   if(me&&!showBoard&&SET.mini&&!h4PfMode(v))drawMinimap(v,me,P);   // FFA/TDM = รูปตัวละครแทน (js/66)
   if(showBoard)drawBoard(v,P);
@@ -320,6 +320,9 @@ function slotState(me,v,ci){
   if(ci>=1&&ci<=4&&me.ea&&me.ea[0]>0){const S=SPELL_LIST[getKit(me.id).ids[ci-1]];if(S&&E_NEEDSTAND[S.id]){st.ratio=1;st.txt='🔒';st.ready=false;st.hl=false;st.bar=0;}}
   // สายฟ้า: stack ไม่พอ = ไพ่เทา ใช้ไม่ได้
   if(ci>=1&&ci<=4&&me.sm&&!st.dim){const S=SPELL_LIST[getKit(me.id).ids[ci-1]],n=S&&S.path===2&&S.v&&S.v.cost|0;if(n>0&&(me.sm[0]|0)<n){st.dim=true;st.ready=false;st.hl=false;}}
+  if(ci>=1&&ci<=4&&me.lt&&SPELL_LIST[getKit(me.id).ids[ci-1]]?.id==='crystalbond'&&!me.lt[20]){
+    st.dim=true;st.ready=false;st.hl=false;st.txt='🔒';
+  }
   if(locked){st.ratio=1;st.txt='🔒';st.ready=false;st.hl=false;}
   return st;
 }

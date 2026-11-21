@@ -161,6 +161,10 @@ function stDarkMarkWave(root,args){
 
   function sampleTrail(t){
     poseScythe(t,trailSample.pos,trailSample.QB);
+    if(live){
+      trailSample.pos.x=trailSample.pos.x*.74+.38;
+      trailSample.pos.y*=.73;trailSample.pos.z*=.74;
+    }
     trailSample.act=ease(swingStart+.014,swingStart+.064,t)*(1-ease(swingEnd-.04,swingEnd+.056,t));
     return trailSample;
   }
@@ -383,7 +387,7 @@ function stDarkMarkWave(root,args){
   }
 
   const update=(t)=>{
-    if(scythe)poseScythe(t,scythe.pivot.position,scythe.pivot.quaternion);
+    if(scythe){const pose=sampleTrail(t);scythe.pivot.position.copy(pose.pos);scythe.pivot.quaternion.copy(pose.QB);}
     const power=flow?ease(0,.075,t)*(1-ease(release,swingEnd+.14,t)):
       ease(chargeStart,swingStart,t)*(1-ease(swingStart,swingEnd+.11,t));
     if(scythe)scythe.update(t,.30*power);
@@ -425,5 +429,5 @@ function stDarkMarkWave(root,args){
     for(const [part,{mask,castShadow}] of hiddenParts){part.layers.mask=mask;part.castShadow=castShadow;}
     for(const {group} of flankWaves)group.removeFromParent();
   };
-  return {update,dispose,setFlight,release,blade:scythe?.pivot};
+  return {update,dispose,setFlight,release,finish:spinEnd+.70,blade:scythe?.pivot};
 }

@@ -3,6 +3,7 @@ const ST_DARKNESS_DASH='darkness/dash_preview';
 const ST_DARKNESS_RADIUS=300/20;
 const ST_DARKNESS_MAX_TARGETS=4;
 const ST_DARKNESS_MARK_HOLD=.25;
+const ST_DARKNESS_WALTZ_LAUNCH=.432;
 const ST_DARKNESS_MARK_CUT_LIFE=.72;
 const ST_DARKNESS_CUT_LIFE=.61;
 const stDarkEase=(a,b,v)=>{const t=clamp((v-a)/(b-a),0,1);return t*t*(3-2*t);};
@@ -252,18 +253,23 @@ function stDarkMarkedBurst(parent,x,z){
 }
 
 // The floor and the cast radius stay fixed while the torn ribbons flow around them.
-function stDarkSlashArea(parent,[x,z],radius){
+function stDarkSlashArea(parent,[x,z],radius,floorAt){
   const group=new THREE.Group();
   group.name='Darkness cast area';
   group.position.set(x,0,z);
   parent.add(group);
-  const floor=new THREE.Mesh(new THREE.CircleGeometry(radius,96),new THREE.ShaderMaterial({
-    uniforms:{strength:{value:0}},transparent:true,depthWrite:false,toneMapped:false,
+  const floorGeometry=floorAt?new THREE.RingGeometry(0,radius,48,6):new THREE.CircleGeometry(radius,96);
+  if(floorAt){
+    const p=floorGeometry.attributes.position;
+    for(let i=0;i<p.count;i++)p.setZ(i,floorAt(p.getX(i),-p.getY(i)));
+  }
+  const floor=new THREE.Mesh(floorGeometry,new THREE.ShaderMaterial({
+    uniforms:{strength:{value:0},turn:{value:0}},transparent:true,depthWrite:false,toneMapped:false,
     vertexShader:`varying vec2 vPlane; void main(){vPlane=position.xy/${radius.toFixed(2)};
       gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}`,
-    fragmentShader:`uniform float strength; varying vec2 vPlane;
+    fragmentShader:`uniform float strength,turn; varying vec2 vPlane;
       void main(){
-        float r=length(vPlane),a=atan(vPlane.y,vPlane.x);
+        float r=length(vPlane),a=atan(vPlane.y,vPlane.x)+turn;
         float curl=a*5.0-r*13.0+.75*sin(a*3.0+r*7.0);
         float folds=sin(curl)+.31*sin(a*11.0-r*19.0);
         float band=smoothstep(.22,.96,folds)*smoothstep(.13,.52,r);
@@ -279,6 +285,7 @@ function stDarkSlashArea(parent,[x,z],radius){
   floor.renderOrder=1;
   group.add(floor);
   const edge=new THREE.BufferGeometry(),uvs=[],faces=[],vertices=[];
+  const scale=radius/ST_DARKNESS_RADIUS;
   const silhouettes=[
     [.03,.10,.24,.39,.67,.62,.88,.71,1,.44,.23,.02],
     [.04,.13,.32,.63,.91,.73,.61,.56,.66,.31,.16,.02],
@@ -299,12 +306,16 @@ function stDarkSlashArea(parent,[x,z],radius){
       const u=i/(upper.length-1),j=reverse?upper.length-1-i:i;
       if(i){const a=vertices.length;faces.push(a-2,a,a-1,a-1,a,a+1);}
       for(const [side,profile] of [[0,lower],[1,upper]]){
-        vertices.push({angle:angle+(u-.5)*span,radius:radius+offset,lift:profile[j],u,height,tilt,index});
+        vertices.push({angle:angle+(u-.5)*span,radius:radius+offset*scale,lift:profile[j],u,height,tilt,index});
         uvs.push(u,side,index);
       }
     }
   }
   const positions=new THREE.BufferAttribute(new Float32Array(vertices.length*3),3).setUsage(THREE.DynamicDrawUsage);
+  const rimGround=floorAt&&Array.from({length:96},(_,i)=>{
+    const a=i*Math.PI/48;
+    return floorAt(Math.cos(a)*radius,Math.sin(a)*radius);
+  });
   edge.setAttribute('position',positions);
   edge.setAttribute('strand',new THREE.Float32BufferAttribute(uvs,3));
   edge.setIndex(faces);
@@ -345,11 +356,17 @@ function stDarkSlashArea(parent,[x,z],radius){
       const crest=.86+.27*Math.sin(phase)+.09*Math.sin(phase*1.8);
       const height=point.height*point.lift;
       const a=point.angle-age*1.28+point.tilt*height*.043+.075*Math.sin(phase-.6)*point.lift*lift;
-      const r=point.radius+point.tilt*point.lift+.36*Math.sin(phase+.9)*point.lift*lift+.46*release*point.u;
-      positions.setXYZ(i,Math.cos(a)*r,.07+height*crest*(.10+.90*lift)*(1+.13*release),Math.sin(a)*r);
+      const r=point.radius+scale*(point.tilt*point.lift+.36*Math.sin(phase+.9)*point.lift*lift+.46*release*point.u);
+      let base=0;
+      if(rimGround){
+        const sample=THREE.MathUtils.euclideanModulo(a*48/Math.PI,96),j=Math.floor(sample);
+        base=lerp(rimGround[j],rimGround[(j+1)%96],sample-j);
+      }
+      positions.setXYZ(i,Math.cos(a)*r,base+scale*(.07+height*crest*(.10+.90*lift)*(1+.13*release)),Math.sin(a)*r);
     }
     positions.needsUpdate=true;
-    floor.rotation.z=-age*.69;
+    if(floorAt)floor.material.uniforms.turn.value=age*.69;
+    else floor.rotation.z=-age*.69;
     floor.material.uniforms.strength.value=.59*strength;
     border.material.uniforms.strength.value=.96*strength;
     border.material.uniforms.age.value=age;
@@ -362,7 +379,7 @@ function stDarkChainTargets(origin,enemies,radius){
   const chain=[];
   let from=origin;
   while(remaining.length&&chain.length<ST_DARKNESS_MAX_TARGETS){
-    remaining.sort((a,b)=>Number(b.marked)-Number(a.marked)||distance(from,a)-distance(from,b));
+    remaining.sort((a,b)=>(chain.length?0:Number(b.marked)-Number(a.marked))||distance(from,a)-distance(from,b));
     const next=remaining.shift();
     chain.push(next);
     from=next.point;
@@ -497,6 +514,34 @@ function stDarkOrbCore(material=new THREE.MeshBasicMaterial({color:0x0d0d12})){
   return new THREE.Mesh(new THREE.SphereGeometry(1,32,24),material);
 }
 
+function stDarkWaltzForm(parent,pointAt,heightAt){
+  const egg=stDarkOrbCore(),axis=new THREE.Vector3(),back=new THREE.Vector3();
+  egg.name='Darkness initial dash orb';
+  parent.add(egg);
+  const weave=stDarkOrbWeave(parent,pointAt,heightAt);
+  return (t,position,distance,first,departure,landing,marked)=>{
+    const ease=stDarkEase,launch=ST_DARKNESS_WALTZ_LAUNCH;
+    const collapse=ease(.105,.30,t),release=ease(landing-.015,landing+.26,t);
+    const thin=ease(first+.012,first+.096,t);
+    const contact=marked?1-.86*ease(first,first+.10,t)*(1-ease(departure-.064,departure+.026,t)):1;
+    const amount=collapse*(1-release)*contact;
+    const blend=ease(.272,.335,t)*(1-ease(landing-.022,landing+.16,t));
+    const coil=ease(.31,launch-.017,t)*(1-ease(launch,launch+.047,t));
+    const squash=marked?ease(first-.028,first,t)*(1-ease(first,first+.095,t)):0;
+    pointAt(distance+.12,axis).sub(pointAt(distance-.12,back));
+    axis.y=0;
+    if(axis.lengthSq()>.0001)axis.normalize();else axis.set(0,0,1);
+    egg.visible=blend>.08&&amount>.04&&thin<.985;
+    egg.position.copy(position).addScaledVector(axis,.11);
+    egg.position.y+=1.1;
+    egg.rotation.y=Math.atan2(axis.x,axis.z);
+    const dissolving=blend*(1-thin);
+    egg.scale.set((.44+.19*squash+.07*coil)*dissolving,(.53+.08*squash)*dissolving,
+      (.64-.26*squash-.23*coil)*dissolving);
+    weave(t,position,distance,amount,blend,squash,thin,coil);
+  };
+}
+
 function stDarkOrbWeave(parent,pointAt,hopHeight){
   const ease=stDarkEase,tau=Math.PI*2,axis=new THREE.Vector3(),last=new THREE.Vector3();
   const strands=104,steps=37;
@@ -559,7 +604,7 @@ function stDarkOrbWeave(parent,pointAt,hopHeight){
         const wrapAngle=angle+(s*4.7);
         const wrapRadius=(.42+.28*Math.sin(Math.PI*s))*spread;
         const x=lerp(position.x+Math.cos(wrapAngle)*wrapRadius,sample.p.x+sample.right.x*side,blend);
-        const y=lerp(.05+2.19*s,1.10+sample.p.y+vertical,blend);
+        const y=lerp(position.y+.05+2.19*s,1.10+sample.p.y+vertical,blend);
         const z=lerp(position.z+Math.sin(wrapAngle)*wrapRadius,sample.p.z+sample.right.z*side,blend);
         const fade=lerp(ease(.02,.16,s)*(1-ease(.85,.99,s)),
           ease(start,start+.095,s)*(1-ease(end-.15,end,s)),blend);
@@ -607,7 +652,7 @@ FXCODE.studio_darkness_dash=(_x,_y,_h,args,instance)=>{
   const [endX,endZ]=points.at(-1),[prevX,prevZ]=points.at(-2);
   const endLength=Math.hypot(endX-prevX,endZ-prevZ);
   points.push([endX+(endX-prevX)*1.25/endLength,endZ+(endZ-prevZ)*1.25/endLength]);
-  const times=[.432,.542];
+  const times=[ST_DARKNESS_WALTZ_LAUNCH,.542];
   for(let i=2;i<=chain.length;i++){
     const [x,z]=points[i],[px,pz]=points[i-1];
     const wait=i===2?ST_DARKNESS_MARK_HOLD:.015;
@@ -669,9 +714,6 @@ FXCODE.studio_darkness_dash=(_x,_y,_h,args,instance)=>{
   const wake=stDarkWake(root,atTime,pointAt,hopHeight,firstDeparture,landingTime);
   const wakeShards=stDarkWakeShards(root,atTime,pointAt,hopHeight,firstDeparture,landingTime);
   const darkMat=new THREE.MeshBasicMaterial({color:0x0d0d12});
-  const egg=stDarkOrbCore(darkMat);
-  egg.name='Darkness initial dash orb';
-  root.add(egg);
   const windup=new THREE.Group();
   windup.position.set(0,1.07,0);
   root.add(windup);
@@ -700,7 +742,7 @@ FXCODE.studio_darkness_dash=(_x,_y,_h,args,instance)=>{
     return spark;
   }));
 
-  const weave=stDarkOrbWeave(root,pointAt,hopHeight);
+  const form=stDarkWaltzForm(root,pointAt,hopHeight);
 
   let lastTime=-1;
   function update(){
@@ -716,16 +758,10 @@ FXCODE.studio_darkness_dash=(_x,_y,_h,args,instance)=>{
     pointAt(distance+.12,axis).sub(pointAt(distance-.12,last));
     const turn=Math.atan2(axis.x,axis.z);
     const collapse=ease(.105,.30,t),release=ease(landingTime-.015,landingTime+.26,t);
-    const thin=ease(hits[0]+.012,hits[0]+.096,t);
-    const contact=1-.86*ease(hits[0],hits[0]+.10,t)*(1-ease(firstDeparture-.064,firstDeparture+.026,t));
-    const amount=collapse*(1-release)*contact;
-    const blend=ease(.272,.335,t)*(1-ease(landingTime-.022,landingTime+.16,t));
-    const coil=ease(.31,times[0]-.017,t)*(1-ease(times[0],times[0]+.047,t));
     const charge=ease(.302,times[0],t);
     const launchAge=t-times[0];
     launchWave(launchAge<0?lerp(1.28,.32,charge):.44+1.23*ease(0,.09,launchAge),
       launchAge<0?.70*ease(.304,.343,t):.87*(1-ease(.015,.127,launchAge)),t*18);
-    const squash=ease(hits[0]-.028,hits[0],t)*(1-ease(hits[0],hits[0]+.095,t));
     caster.g.visible=t<.307||t>landingTime+.075;
     caster.g.position.copy(position);
     caster.g.rotation.y=turn;
@@ -736,12 +772,6 @@ FXCODE.studio_darkness_dash=(_x,_y,_h,args,instance)=>{
     orb.scale.setScalar(petScale);
     orb.position.copy(position).add(normal.set(.47*petScale,1.57+.065*Math.sin(t*6),.10));
     orb.rotation.y=turn;
-    egg.visible=blend>.08&&amount>.04&&thin<.985;
-    egg.position.copy(position).add(normal.set(0,1.1,0)).addScaledVector(axis.normalize(),.11);
-    egg.rotation.y=turn;
-    const dissolving=blend*(1-thin);
-    egg.scale.set((.44+.19*squash+.07*coil)*dissolving,(.53+.08*squash)*dissolving,
-      (.64-.26*squash-.23*coil)*dissolving);
     for(const [j,target] of targets.entries()){
       const age=t-hits[j];
       const heavy=j===0;
@@ -767,7 +797,7 @@ FXCODE.studio_darkness_dash=(_x,_y,_h,args,instance)=>{
     }
     wake(t);
     wakeShards(t);
-    weave(t,position,distance,amount,blend,squash,thin,coil);
+    form(t,position,distance,hits[0],firstDeparture,landingTime,true);
   }
   instance.updateDarknessDash=update;
   update();

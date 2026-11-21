@@ -210,8 +210,8 @@ function syncPlayers(P,mode,now,dt){
     if(!p.al){const l=LGV.st.get(p.id);if(l)lgClear(l);if(o.natureWhipView)natureWhipView(o,null);if(ragTick(o,p,v,dt,now))ragHideDead(o,p,now);continue;}   // ตาย = ragdoll ค้างจนเกิดใหม่ (js/48)
     o.hitT=Math.max(0,(o.hitT||0)-dt);
     o.b.position.set(0,0,0);o.b.rotation.set(0,0,0);   // one-frame pose offsets must not build up (body drifted back / stayed tilted)
-    const prismHover=!!p.lt?.[0]&&!!p.lt[4]&&!p.fl&&!p.dn;
-    if(o.anim)animTick(o,{down:!!p.dn,fly:!!p.fl,sp:prismHover||p.wn&&p.wn[5]>=1?0:v.sp,castT:o.castT,hitT:o.hitT},dt,p.id===NET.myId?1:animLod(g));
+    const hoverPose=(!!p.lt?.[0]&&!!p.lt[4]||p.dk?.[3]>0)&&!p.fl&&!p.dn;
+    if(o.anim)animTick(o,{down:!!p.dn,fly:!!p.fl,sp:hoverPose||p.wn&&p.wn[5]>=1?0:v.sp,castT:o.castT,hitT:o.hitT},dt,p.id===NET.myId?1:animLod(g));
     if(!o.fileModel)updateCloth(o.cloak,v.lvx,v.lvz,v.sp*(p.fl?1.4:1),now,dt);   // มีโมเดลไฟล์ = ผ้าคลุมโค้ดซ่อนอยู่ (ผ้าจริงคือ js/49)
     o.bsp=v.sp;broomView(o,p,dt,now);o.cocoon.visible=!!p.rt;   // ไม้กวาด: เอียงเลี้ยว + อนิเมชันเรียก/เก็บ (js/69)
     if(p.rt)o.cocoon.rotation.y=now/400;
@@ -230,7 +230,7 @@ function syncPlayers(P,mode,now,dt){
       o.broom.rotation.x=-0.1+Math.sin(now/300)*0.04;o.broom.rotation.z=clamp(-v.lvx*0.02,-0.4,0.4);
       if(Math.random()<0.8){const ha=o.fhS!==undefined?o.fhS:p.a,bx=p.x-Math.cos(ha)*30,by=p.y-Math.sin(ha)*30;PARTS.push({x:bx+rnd(-4,4),y:by+rnd(-4,4),h:(p.z||0)+0.8+rnd(-0.1,0.1),vx:rnd(-20,20),vy:rnd(-20,20),vh:rnd(-0.3,0.3),life:0.6,max:0.6,col:Math.random()<0.5?'#ffe9a8':'#ffffff',size:1.6,g:0.5});}
     }else{
-      const wfly=prismHover||p.wn&&p.wn[5]>=1;if(!wfly)o.walk+=dt*v.sp*0.8;   // บิน Featherwing: ไม่ก้าวขา ไม่มีเสียงเท้า
+      const wfly=hoverPose||p.wn&&p.wn[5]>=1;if(!wfly)o.walk+=dt*v.sp*0.8;   // บิน Featherwing: ไม่ก้าวขา ไม่มีเสียงเท้า
       const sw=wfly?0:Math.sin(o.walk)*Math.min(1,v.sp/5);
       if(p.dn){o.b.rotation.x=-1.4;o.b.position.y=0.4;}
       else{o.b.rotation.x=p.ds?0.4:Math.min(0.12,v.sp*0.01);o.b.position.y=wfly?0:Math.abs(Math.cos(o.walk))*0.05*Math.min(1,v.sp/5);}

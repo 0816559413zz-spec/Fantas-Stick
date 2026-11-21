@@ -44,8 +44,7 @@ SGPH:197 SGTR:197 SG_SPR:198 _sgAreaC:199 sgArea:200 _sgAreaT:207 sgAreaT:208 sg
 ## js/02-room-greathall.js (105) — 
 
 
-## js/03-spells-core.js (250) — ระบบคาถาใหม่: สาย (path) × คาถา (spell) + สถานะ (status effects)
-§6 ไอคอนคาถา: จาก game-icons.net (CC BY 3.0, เครดิตใน "คู่มือ" และ icons…
+## js/03-spells-core.js (250) —
 ICONS:8 ICOALIAS:9 hasIco:10 ICOBASE:12 icoURL:13 ICO:14 icoTint:15 icoHTML:24 PATHS:25 SPELL_LIST:34 SPELLS:34 defSpell:35 SLOTK:36 BRMAP:36 KITP:37 parseKit:38 cleanKit:55 setKit:56 pathReset:59
 §61 สถานะ (ใช้ได้ทั้งผู้เล่นและศัตรู)
 isBig:62 ccScale:64 ccTouch:65 addStun:66 addRoot:67 addFreeze:68 addSlow:73 addChill:74 ignite:79 FX_SHOCK_CYAN:87 FX_ONFIRE:87 shock:88 knock:93 addWard:94 addFrostSlow:96 frostSlow:97 moveMul:104 BRN_MAX:106 addBurn:107 addOnFire:109 addXBurn:110 addPoison:111 addSil:112 addFear:113 addBlind:114 addMark:115 healT:117 tickStatus:122 clearStatus:145 fxMask:146
@@ -86,8 +85,8 @@ GODL:231
 §233 ลูกสายฟ้าโดม: รวมไฟที่พื้น → ทะยานขึ้น → เล็ง → ฟาดไม้ยิงและค้างชี้เป…
 SDOME_POSE:234 stormDomeCost:235 stormDomeDash:236 stormDomeCharge:237 stormDomeTick:238 stormDomeFire:269 stormDomeSlam:276 updateStorm:281
 
-## js/09-darkness.js (320) —
-DARKP:2 DARK_V:6 DARK_BA:7 DARK_CHASE_T:8 darkFlow:9 darkAlive:10 darkReset:11 darkState:12 darkEvent:13 darkAim:16 darkTarget:23 darkCone:27 darkClearCooldown:34 darkMark:38 darkReveal:45 darkQueue:46 darkGainFlow:47 darkTick:52 darkShieldTick:80 darkShieldCrossAt:98 darkShieldCross:107 darkBeamStop:108 darkDash:117 darkBasic:142 DARK_MARK:160 darkWaveTick:177 DARK_CHASE:199 DARK_WALTZ:229 DARK_WARD:240 DARK_VEIL:255 DARK_ULT:262 darkUltBite:275 darkMoveChase:285 darkSnap:302 darkMarked:317
+## js/09-darkness.js (395) —
+DARKP:2 DARK_V:6 DARK_BA:7 DARK_CHASE_FLOW:8 DARK_CHASE_T:9 darkFlow:10 darkAlive:11 darkReset:12 darkState:13 darkEvent:14 darkAim:17 darkTarget:24 darkCone:28 darkClearCooldown:35 darkMark:39 darkReveal:46 darkQueue:47 darkGainFlow:48 darkTick:53 darkShieldTick:82 darkShieldCrossAt:100 darkShieldCross:109 darkBeamStop:110 darkDash:119 darkBasic:144 DARK_MARK:164 darkWaveTick:181 DARK_CHASE:203 darkMoveWaltz:244 DARK_WALTZ:269 DARK_WARD:291 DARK_VEIL:306 DARK_ULT:313 darkUltBite:326 darkMoveChase:336 darkSnap:373 darkMarked:392
 
 ## js/09-earth.js (323) — 
 EARTH:9 ERV:12
@@ -114,18 +113,16 @@ WRATH_READY_T:221 WRATH_THROW_SWING_T:222 WRATH_DRAW_T:223 WRATH:224 earthWrathA
 §286 ทั้งสนาม: สิ่งก่อสร้างพัง / ฝุ่นหมดเวลา / Stonebreaker ชนกำแพง
 updateEarth:287 earthSnapP:299 earthSnapW:315
 
-## js/09-light.js (542) — สายแสง ✨ Radiance (ผู้ใช้ออกแบบทั้งหมด — designs/light.md) • ฝั่งโฮสต์ • รอบแรก 2026-11-1…
-LIGHTP:8 LTV:12 lgOn:19 lightShieldGauge:20 lightClearBond:21 lightReset:25 lightAlly:31 lightLinkPos:32 lightUnlink:33 lightReleaseAlly:51
-§57 สกิล 1 Crystal Bond: เล็งเพื่อน + กด = ลิงก์และส่ง 1 ชิ้น • ไม่เล็งเพ…
-lightBondTap:58 lightRecall:73
-§74 ทุกเฟรม
-lightTick:75 lightSlotOf:92
-§93 BA Prism Ray: กดค้าง = ลำแสง • 0 ชิ้น = ลำบางทะลุ 5/1 วิ • 1/2/3 ชิ้น…
-lightBeamAng:94 lightBeamPitch:96 lightBeamLength:98 lightHeatTick:113 lightBeamHits:120 lightTapShot:127 lightBasic:136
-§156 Dash Light Step: วาร์ป 250 ตามทิศเดิน • เล็งคู่หู (ไม่เกิน 900) = วาร…
-lightStepBehind:157 lightDash:170 lightDmgOut:200 lightDmgIn:201 lightSnapP:202
-§207 สกิล
-lightSkillsTick:208 LIGHT_FORM_BASE:247 LIGHT_FORM_SCALE:248 LIGHT_FORM_PIVOT:249 LIGHT_FORM_PALM:250 LIGHT_FORM_PALM_DEPTH:250 LIGHT_FORM_HEART_Y:251 LIGHT_FORM_HEART_Z:251 lightFinishDrive:252 lightFinishPitch:253 lightFinishPush:254 lightFormAngles:255 lightFormRecoil:260 lightFormHand:264 LIGHT_FORM_ARMS:275 lightArmRest:284 _lightArmWork:285 lightArmPose:287 lightFormOpenPalm:315 lightArmAim:327 lightUltSnap:334 lightUltEnd:341 _lightFormAngles:355 _lightFormTurn:355 _lightFormHand:355 _lightFormAimLocal:356 _lightFormUpLocal:356 lightUltOrigin:357 lightUltRay:374 lightUltBeamHit:381 lightUltFinish:396 lightUltTick:407 lightSanEnd:469 lightAimPt:470 LT_BOND:472 LT_VO:475 LT_EM:482 LT_SC:485 LT_VS_RELEASE:489 LT_VS_TRAVEL:489 LT_VS_S:490 LT_VS:493 LT_UL:494 lightAllyHit:513 lightQueueTick:516
+## js/09-light.js (564) —
+LIGHTP:8 LTV:12 lgOn:19 lightShieldPitch:20 lightShieldGauge:21 lightClearBond:22 lightReset:26 lightAlly:32 lightLinkPos:33 lightUnlink:34 lightReleaseAlly:52 lightBondTarget:59 lightBondTap:79 lightRecall:94
+§95 ทุกเฟรม
+lightTick:96 lightSlotOf:113
+§114 BA Prism Ray: กดค้าง = ลำแสง • 0 ชิ้น = ลำบางทะลุ 5/1 วิ • 1/2/3 ชิ้น…
+lightBeamAng:115 lightBeamPitch:117 lightBeamLength:119 lightHeatTick:134 lightBeamHits:141 lightTapShot:148 lightBasic:157
+§177 Dash Light Step: วาร์ป 250 ตามทิศเดิน • เล็งคู่หู (ไม่เกิน 900) = วาร…
+lightStepBehind:178 lightDash:191 lightDmgOut:221 lightDmgIn:222 lightSnapP:223
+§229 สกิล
+lightSkillsTick:230 LIGHT_FORM_BASE:269 LIGHT_FORM_SCALE:270 LIGHT_FORM_PIVOT:271 LIGHT_FORM_PALM:272 LIGHT_FORM_PALM_DEPTH:272 LIGHT_FORM_HEART_Y:273 LIGHT_FORM_HEART_Z:273 lightFinishDrive:274 lightFinishPitch:275 lightFinishPush:276 lightFormAngles:277 lightFormRecoil:282 lightFormHand:286 LIGHT_FORM_ARMS:297 lightArmRest:306 _lightArmWork:307 lightArmPose:309 lightFormOpenPalm:337 lightArmAim:349 lightUltSnap:356 lightUltEnd:363 _lightFormAngles:377 _lightFormTurn:377 _lightFormHand:377 _lightFormAimLocal:378 _lightFormUpLocal:378 lightUltOrigin:379 lightUltRay:396 lightUltBeamHit:403 lightUltFinish:418 lightUltTick:429 lightSanEnd:491 lightAimPt:492 LT_BOND:494 LT_VO:497 LT_EM:504 LT_SC:507 LT_VS_RELEASE:511 LT_VS_TRAVEL:511 LT_VS_S:512 LT_VS:515 LT_UL:516 lightAllyHit:535 lightQueueTick:538
 
 ## js/09-nature-ba.js (122) — 
 NATURE_BA_TEST:2 NATURE_WHIP:3 natureWhipEnabled:4 NAT_SLAM:8 NAT_LINE:8 natureEmpNear:9 natureEmpHit:10 natureWhipHit:18 natureWhipBasic:41 NW_RINGS:65 NW_SIDES:65 nwPhase:66 nwEase:67 nwSwingAngle:68 natureWhipPose:74 natureWhipVisualMake:83 natureWhipView:105
@@ -133,12 +130,9 @@ NATURE_BA_TEST:2 NATURE_WHIP:3 natureWhipEnabled:4 NAT_SLAM:8 NAT_LINE:8 natureE
 ## js/09-nature.js (480) — 
 NATUREP:2 NAT:3 natureDist:5 natureItems:6 natureLive:7 naturePlants:8 natureY:9 natureHead:10 natureTreeReady:11 natureEmit:12 natureWallLocal:15 natureWallContains:21 natureWallPush:28 natureBurnWall:36 natureWallDamage:43 natureWallTick:48 natureTrace:57 natureSight:75 natureGround:76 natureAimPoint:82 naturePlace:89 naturePlant:97 natureCastPlant:107 natureLotusToggle:123 natureMovePlants:131 natureAimSpot:142 natureAimStart:143 natureAimDone:144 natureAimTick:148 natureWallBuild:159 natureCastWall:160 NAT_WALLS:167 natureWallUse:168 natureWallCharges:169 naturePoison:176 natureStatus:181 natureSpore:193 natureSendSpore:200 NAT_SHIELD_HIT:210 natureShield:211 natureHookCandidates:225 NAT_DASH:230 natureDashCharge:231 natureDash:232 natureHookMove:260 natureBall:295 natureBallTick:303 natureTree:322 natureTreeReach:327 natureGuardian:332 natureGuard:338 natureDamage:347 natureEnd:353 natureTurret:359 naturePeaSplash:392 NAT_TREE:399 natureTreeTick:400 natureUpdate:409 natureReset:443 natureSnapP:448 natureLotusCooldown:460 natureSnapW:465
 
-## js/09-other-paths.js (178) — สายธรรมชาติ — ป้อมพืช แส้ และการคุ้มครองทีม
-§12 สายคำสาป — ตรามรณะ: ตีตรา (ดาเมจ +25%) → คำสาปทุกชนิดแรงขึ้นกับคนมีตร…
+## js/09-other-paths.js (178) —
 §44 สัตว์เวท (minion): AI ฝั่งโฮสต์
-MIND:45 summonMin:51 minTarget:60 minShoot:67 updateMins:72 aimTarget:112
-§122 สายอัญเชิญ — สัตว์เวท: เรียกกองทัพ → วิญญาณเสริมพลัง → ระเบิดวิญญาณปิ…
-SDOME:149
+MIND:45 summonMin:51 minTarget:60 minShoot:67 updateMins:72 aimTarget:112 SDOME:149
 §160 ร่ายคาถา
 castSlot:161 castUlt:178
 
@@ -208,10 +202,10 @@ W_WL:549 W_DR:555 W_VX:561 W_VO:567 W_FW:573 W_UL:583
 ## js/10-net.js (200) —
 PREFIX:4 NET:5 RC:9 TURN_SERVERS:12 ICE:13 PEER_OPT:14 TURN_URL:16 ICE_READY:18 JN:22 LAG:24 lagDo:25 hostSend:26 LOBBY:27 genCode:28 sendAll:29 NETD_KEYS:33 NETD:33 netDeltaReset:34 netDelta:35 NET_MAX:49 _netTE:49 netSendSnap:50 NETU:62 netUndelta:63 setStatus:69 hostGame:71 hostPeer:80 netConnect:100 joinWatch:111 joinFail:126 netLost:132 joinGame:147 joinPeer:158 clientOnData:173 leave:188 leaveRoom:190
 
-## js/11-host.js (442) —
+## js/11-host.js (449) —
 G:4 EVL:4 EVN:4 hostLast:4 tickN:4 emit:5 feed:6 banner:7 plist:8 cleanName:9 freshStats:11 newPlayer:18 emptyInput:21 frameOk:23 addPlayer:24 initHostLobby:33 lobbyMsg:40 broadcastLobby:41 INPN:43 hostOnData:44 hostDrop:75 hostRemove:84 validate:100 hostStart:114 hostToLobby:141 MIDJOIN:148 modeCap:149 midJoin:150 CHATT:166 chatRelay:167 emoHost:175 resetBody:177 fmap:183 spawnPts:184 teamPts:186 spSpread:188 placeAll:189 respawn:201
 §220 ลูปหลักฝั่งโฮสต์
-hostTick:221 angDiff:238 cH:240 vR:241 updatePlayer:243 hitProp:429 damagePropsIn:436 nearUseProp:437 useProp:438
+hostTick:221 angDiff:238 cH:240 vR:241 updatePlayer:243 hitProp:436 damagePropsIn:443 nearUseProp:444 useProp:445
 
 ## js/12-buildings.js (568) — สิ่งปลูกสร้างที่พังเป็นชิ้นย่อย (บ้าน) แบบ Battlefield — คู่มือเต็ม: …
 BLDDEF:8 BLD_PIECES:10 BLD_GRID:11 BLD_DOOR:13 BLD_FIRE:14 BLD_ICE:14 BLD_ROOF_MIN:14 BLDG:15 BLDON:15 genBldg:16 bldRect:26 bldChunk:28 bldAlive:35 bldLocal:36 bldWorld:37 rectDist:38 bldNear:39 BLD_MOUND:42 bldGone:43 bldMoundAt:44 bldMoundH:45 hitBldPiece:47 breakBldChunk:58 bldSupport:66 damageEnv:86 bldRay:104 _sgRB:112 aimClip:114 aimLineH:122 aimRay3:123 bldPieceAt:151 projEl:162 bldPush:167 collideBld:173 updateBldg:191 bldSnap:204 bldParse:210
@@ -412,8 +406,8 @@ FLAME_STYLE:71 PTIME:72 NOISETEX:74 FLAMETEX_V1:80 FLAMETEX_V2:85 PSYS:95 FLAMEL
 §235 เอฟเฟกต์รูปทรง: แฟลช / วงแหวน / โดม / รอยไหม้ / สายฟ้า / แสงชั่วคราว
 SHAPES_Q:236 SHAPES:236 FLASHL:236 LINES:236 LREQ:237 ringGeo:238 ringVGeo:239 arcGeo:240 domeGeo:241 fullGeo:242 discGeo:243 decalTex:244 FX:245 jag:259 SHB:273 _sbM:273 _sbQ:273 _sbE:273 _sbS:273 _sbC:273 SHB_GEO:274 _sbDecalMat:275 shbMat:276 shbMake:287 spawnShape:299 updateShapes:309 _cp:339 updateLights:340
 
-## js/31-camera.js (213) — กล้องมุมหลังไหล่ (แบบ Hogwarts Legacy)
-yaw:2 pitch:2 lastPh:2 locked:2 CAMRS:3 SENS:4 saveSet:5 applySettings:6 camPos:14 camLook:14 overlayOpen:17 showPause:18 hidePause:19 MAPCAM:20 PLACE:22 placeKey:23 updatePlaceGhost:31 _aimD:45 rayTerr:47 aimFromCrosshair:53 AIMZ:85 WBY:85 CAM_FRAMES:89 CAM_FRAME:102 CAM_TRACK:102 _camFocus:103 _camAnchor:103 _camWant:103 cameraFrame:104 camRoomK:130 _camOB:142 camObsK:143 updateCamera:153 menuCamera:209
+## js/31-camera.js (228) — กล้องมุมหลังไหล่ (แบบ Hogwarts Legacy)
+yaw:2 pitch:2 lastPh:2 locked:2 CAMRS:3 SENS:4 saveSet:5 applySettings:6 camPos:14 camLook:14 overlayOpen:17 showPause:18 hidePause:19 MAPCAM:20 PLACE:22 placeKey:23 updatePlaceGhost:31 _aimD:45 rayTerr:47 aimFromCrosshair:53 AIMZ:85 WBY:85 CAM_FRAMES:89 CAM_FRAME:106 CAM_TRACK:106 _camFocus:107 _camAnchor:107 _camWant:107 cameraFrame:108 camRoomK:140 _camOB:152 camObsK:153 updateCamera:163 menuCamera:224
 
 ## js/32-stage.js (315) — เวทีเมนู/ล็อบบี้: ห้องโถงมืด แท่นวงเวททอง เทียนลอย (ฉากแยกจากแผนที่)
 stage:2 STAGE:5 STAGE_Y:6 stageSpots:58 stageChar:74 POSES:81 stageIdle:87
@@ -451,10 +445,12 @@ lastFrame:2 HSTOP:5 hitStop:6 FXSTUDIO:8
 §9 เก็บ shader ที่ compile แล้วไว้ตลอดเกม (ผู้ใช้ 2026-11-02 "เล่นกับบอท…
 PINMAX:13 PINNED:13 KEEPSRC:16 pinPrograms:22 frame:25 _fpsAcc:41 _fpsN:41 _fpsLast:41 render:42 renderGame:86
 
-## js/38-hud.js (458) — HUD
-rr:2 SLOTS:3 fmtTime:4
-§5 ชิ้นส่วน HUD ธีมทอง-น้ำเงิน
-HG:6 HG2:6 HUDF:8 hudTick:9 readyPulse:11 diaPath:13 plate:15 frameBox:21 bossTrail:29 drawBossBar:30 spellDia:50 thinBar:79 drawHUD:84 raceRankClient:173 drawModeHUD:177 MM:215 drawMinimap:216 slotKey:289 mySlots:290 STATUS_ICO:299 SLOTS_IMP:300 BR_LOCK:301 CLUSTER:303 E_NEEDSTAND:304 slotState:305 drawBottom:326 drawBoard:341 FHUD:366 FHTEX:367 fhFrame:368 FH_EDGE:371 FH_CORE:371 fhMix:372 drawFireHeat:373 SNAPB:447 snapBanner:448 drawSnapBanner:449
+## js/38-hud.js (461) —
+drawReticleTimer:1
+§10 HUD
+rr:11 SLOTS:12 fmtTime:13
+§14 ชิ้นส่วน HUD ธีมทอง-น้ำเงิน
+HG:15 HG2:15 HUDF:17 hudTick:18 readyPulse:20 diaPath:22 plate:24 frameBox:30 bossTrail:38 drawBossBar:39 spellDia:59 thinBar:88 drawHUD:93 raceRankClient:173 drawModeHUD:177 MM:215 drawMinimap:216 slotKey:289 mySlots:290 STATUS_ICO:299 SLOTS_IMP:300 BR_LOCK:301 CLUSTER:303 E_NEEDSTAND:304 slotState:305 drawBottom:329 drawBoard:344 FHUD:369 FHTEX:370 fhFrame:371 FH_EDGE:374 FH_CORE:374 fhMix:375 drawFireHeat:376 SNAPB:450 snapBanner:451 drawSnapBanner:452
 
 ## js/39-menu.js (286) — 
 myLook:5 myColor:5 myKit:5 myName:6 renderMyHouse:9
@@ -771,13 +767,13 @@ BACKDROP:8
 §66 noise เล็ก ๆ (คงที่ต่อ seed)
 bdHash:67 bdNoise:68 bdFbm:69 bdEdge:71 bdRing:73 bdPaint:79 bdTree:82 buildBackdrop:89 bdTower:135 backdropHide:139
 
-## js/68-darkness-view.js (739) —
-nightWaltzStrip:2 nightWaltzBorder:80 stDarkVeilGround:118 darkFxMesh:195 darkShieldHud:201 drawDarknessHud:202 drawDarkHudBar:222 drawDarkShieldMeter:229 darknessMarkView:243 darkWaveViews:253 darkActiveViews:253 darkViewRoot:254 darkViewTemp:260 darknessClear:272 darkWorldAt:281 darkMarkWind:284 darkMarkLaunch:307 darkMarkContact:319 darkViewNow:332 darkFlowHud:332 darkDashView:333 darknessCharacter:376 darknessEfx:502 stDarkShieldInk:619 stDarkVeilBlade:662 stWardDrainPool:699
+## js/68-darkness-view.js (941) —
+nightWaltzStrip:2 nightWaltzBorder:80 stDarkVeilGround:118 darkFxMesh:195 darkShieldHud:201 drawDarknessHud:202 drawDarkHudBar:222 drawDarkShieldMeter:229 darknessMarkView:243 darkWaveViews:253 darkActiveViews:253 darkViewRoot:254 darkViewTemp:260 darknessClear:272 darkWorldAt:281 darkMarkWind:284 darkMarkLaunch:309 darkMarkContact:321 darkViewNow:334 darkFlowHud:334 darkSettleWeapon:335 darkBlendWeapon:345 darkTrailHistory:357 darkDashView:395 darknessCharacter:440 darknessEfx:619 stDarkShieldInk:821 stDarkVeilBlade:864 stWardDrainPool:901
 
-## js/68-light-view.js (1867) — สายแสง ✨ ภาพฝั่งเครื่องผู้เล่น (รอบแรก 2026-11-16 — ภาพชั่วคราวตามสเปก designs/light.md ร…
-LGV:7 LGSH:9 LGSH_L:11 _lgM4:14 _lgQ:14 _lgSV:14 _lgS:14 _lgC:14 _lgC2:14 lgGlowTex:15 lgNeon:17 lgEmpFx:25 lgWallBurn:44 lgShardSpawn:60 lgShardTick:64 lgBaCore:65 lgCrDim:108 lgEmpBeam:112 lgNeonCrystal:126 lgSanctumFloorTex:136 lgSanctumMoteTex:147 lgHoneyTex:162 lgShield:166 lightShieldEv:199 LGPOSE:202 _lgGlass:203 _lgCore:203 _lgGeo:203 _lgEdge:203 _lgEdgeM:203 lgCrystalMesh:205 lgState:213 _lgV:214 _lgW:214 lgWorld:215 LG_ULT_ASSET:218 LG_CRYSTAL_ASSET:218 LG_ULT_INTRO:219 LG_ULT_ARRIVAL_FX:219 LG_ULT_TIME:220 lgUltMaterials:221 lgSovereignFinishes:222 lgSovereignMaterials:223 lgSovereignFinish:284 lgSovereignCrystal:305 lgSkinSovereign:314 lgPoseSovereign:367 lgSovereignHeart:443 LG_SASH_X:469 LG_SASH_Z:469 lgSovereignRibbon:470 lgSovereignFlare:529 LG_PALM_TRAVEL:542 LG_PALM_SCORCH_LIFE:543 LG_PALM_SCORCH_SLOTS:543 lgPalmGateOffset:544 lgSovereignPalmWaves:546 lgPosePalmWaves:555 lgPoseBeamWaves:561 lgSovereignPalmGate:573 lgSovereignScorchTrail:583 lgPalmScorch:611 lgSovereignCrossSparks:647 lgSovereignGather:670 lgSovereignWingCurrent:703 lgSovereignChargeSeal:732 lgSovereignChestRecoil:749 lgSovereignSeal:759 lgSovereignArmSigils:775 lgBuildSovereign:806 lgReturnMark:883 lgUltVisual:897 lgWardVisual:1124 _lgBeamM:1140 lgBeamMat:1141 lgSovereignChestBeam:1144 lgSovereignPalmBeam:1181 _lgLinkM:1251 lgLinkMat:1252 lgUnitTube:1255 lgTube:1256 lgAim:1264 lightFX:1265 lgBaseObjects:1482 lgClearBase:1483 lgClear:1484 lightDropView:1491 lgAllyEmpEnd:1497
-§1501 เหตุการณ์
-lgBlip:1503 lgArcFx:1507 lgFlyFx:1510 lgSovereignArrival:1511 lightFxTick:1550 LG_BLAST_EXPAND:1554 LG_BLAST_HOLD:1554 lgImpactDome:1555 lgBlastFloor:1595 lgBlastThreads:1626 lgVolleyWarning:1654 lightEfx:1677 _lgHq:1821 _lgHy:1821 lgProcHead:1823 lightHeadPose:1838 LGHUD:1846 drawLightHud:1847
+## js/68-light-view.js (1884) —
+LGV:7 LGSH:9 LGSH_L:11 _lgM4:14 _lgQ:14 _lgSV:14 _lgS:14 _lgC:14 _lgC2:14 lgGlowTex:15 lgNeon:17 lgEmpFx:25 lgWallBurn:44 lgShardSpawn:60 lgShardTick:64 lgBaCore:65 lgCrDim:108 lgEmpBeam:112 lgNeonCrystal:126 lgSanctumFloorTex:136 lgSanctumMoteTex:147 lgHoneyTex:162 lgShield:166 _lgShieldEuler:202 lightShieldEv:203 LGPOSE:206 _lgGlass:207 _lgCore:207 _lgGeo:207 _lgEdge:207 _lgEdgeM:207 lgCrystalMesh:209 lgState:217 _lgV:218 _lgW:218 lgWorld:219 LG_ULT_ASSET:222 LG_CRYSTAL_ASSET:222 LG_ULT_INTRO:223 LG_ULT_ARRIVAL_FX:223 LG_ULT_TIME:224 lgUltMaterials:225 lgSovereignFinishes:226 lgSovereignMaterials:227 lgSovereignFinish:288 lgSovereignCrystal:309 lgSkinSovereign:318 lgPoseSovereign:371 lgSovereignHeart:447 LG_SASH_X:473 LG_SASH_Z:473 lgSovereignRibbon:474 lgSovereignFlare:533 LG_PALM_TRAVEL:546 LG_PALM_SCORCH_LIFE:547 LG_PALM_SCORCH_SLOTS:547 lgPalmGateOffset:548 lgSovereignPalmWaves:550 lgPosePalmWaves:559 lgPoseBeamWaves:565 lgSovereignPalmGate:577 lgSovereignScorchTrail:587 lgPalmScorch:615 lgSovereignCrossSparks:651 lgSovereignGather:674 lgSovereignWingCurrent:707 lgSovereignChargeSeal:736 lgSovereignChestRecoil:753 lgSovereignSeal:763 lgSovereignArmSigils:779 lgBuildSovereign:810 lgReturnMark:887 lgUltVisual:901 lgWardVisual:1128 _lgBeamM:1144 lgBeamMat:1145 lgSovereignChestBeam:1148 lgSovereignPalmBeam:1185 _lgLinkM:1255 lgLinkMat:1256 lgUnitTube:1259 lgTube:1260 lgAim:1268 lightFX:1269 lgBaseObjects:1486 lgClearBase:1487 lgClear:1488 lightDropView:1495 lgAllyEmpEnd:1501
+§1505 เหตุการณ์
+lgBlip:1507 lgArcFx:1511 lgFlyFx:1514 lgSovereignArrival:1515 lightFxTick:1554 LG_BLAST_EXPAND:1558 LG_BLAST_HOLD:1558 lgImpactDome:1559 lgBlastFloor:1599 lgBlastThreads:1630 lgVolleyWarning:1658 lightEfx:1681 _lgHq:1825 _lgHy:1825 lgProcHead:1827 lightHeadPose:1842 LGHUD:1850 drawLightHud:1851
 
 ## js/68-nature-art.js (171) — 
 naturePlantArt:2 Turret:3 auraTextures:44 auraTex:45 LotusAura:88 glowWallTex:92 M_BUB:95 M_BUBRIM:96 M_DRIP:97 M_POOL:98 lotusPetalVeins:100 Lotus:127
@@ -893,4 +889,4 @@ _dvPanel:95 _dvBtn:98 _dvBody:100 _dvHead:100 devUiApply:102 devFreeMouse:110 de
 §130 rows
 dvA:131 dvTg:132 dvB:133 dvCh:134 dvSl:135 dvSub:136 dvCol:137 devKeyOf:138 devRender:143 devPos:193 devUiAct:200
 
-(111 files, 32388 lines)
+(111 files, 32729 lines)

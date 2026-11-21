@@ -435,7 +435,7 @@ function stDarkQuickDash(root,caster,look,live){
     if(actor.rig)rigSync(actor,0);
   }
 
-  return t=>{
+  const update=t=>{
     pose(caster,t);
     pointAt(distanceAt(t),slashRoot.position);
     poseScythe(scythe.pivot,t);
@@ -471,6 +471,8 @@ function stDarkQuickDash(root,caster,look,live){
       if(echo.actor.g.visible)pose(echo.actor,echo.stamp);
     }
   };
+  update.blade=scythe.pivot;
+  return update;
 }
 
 function stDarkHoldDash(root,caster,live){
@@ -485,16 +487,32 @@ function stDarkHoldDash(root,caster,live){
   const duration=arrival-rollStart,travelTime=duration-(acceleration+braking)*.5;
   const speed=length/travelTime;
   const distanceAt=t=>{
+    if(live)return length*clamp((t-launch)/(arrival-launch),0,1);
     const elapsed=clamp(t-rollStart,0,duration),remaining=duration-elapsed;
     if(elapsed<acceleration)return speed*elapsed*elapsed/(2*acceleration);
     if(remaining<braking)return length-speed*remaining*remaining/(2*braking);
     return speed*(elapsed-acceleration*.5);
   };
-  const wake=stDarkWake(root,distanceAt,pointAt,()=>0,launch,arrival,.64);
-  const wakeShards=stDarkWakeShards(root,distanceAt,pointAt,()=>0,launch,arrival);
-  const ball=stDarkOrbCore();
+  const heightSample=new THREE.Vector3(),heightAt=d=>pointAt(d,heightSample).y;
+  const wake=stDarkWake(root,distanceAt,pointAt,heightAt,launch,arrival,.81,.55);
+  const wakeShards=stDarkWakeShards(root,distanceAt,pointAt,heightAt,launch,arrival);
+  const ball=stDarkOrbCore(new THREE.ShaderMaterial({
+    toneMapped:false,
+    vertexShader:`varying vec3 viewNormal;void main(){
+      viewNormal=normalize(normalMatrix*normal);
+      gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);
+    }`,
+    fragmentShader:`varying vec3 viewNormal;void main(){
+      vec3 n=normalize(viewNormal);
+      float rim=pow(1.-max(0.,n.z),2.8);
+      float top=clamp(n.y*.63-n.x*.39,0.,1.);
+      vec3 ink=vec3(.004,.004,.008)+vec3(.038,.027,.054)*rim*top;
+      gl_FragColor=vec4(ink,1.);
+      #include <colorspace_fragment>
+    }`
+  }));
   ball.name='Shift Dash shadow ball';root.add(ball);
-  const weave=stDarkOrbWeave(root,pointAt,()=>0);
+  const weave=stDarkOrbWeave(root,pointAt,heightAt);
   const shroud=stDarkShiftShroud(root);
   const cloakTrails=stDarkShiftCloakTrails(root);
   const scythe=stCreateScythePreview(root,{wrap:'C',manual:true,scale:1.43});
@@ -504,7 +522,7 @@ function stDarkHoldDash(root,caster,live){
     {at:arrival-.01,span:.07,count:52,spread:1.68,lift:1.02,height:.62},
     {at:arrival+.025,span:.08,count:23,spread:1.03,lift:1.57,height:1.00},
     {at:arrival+.15,span:.065,count:27,spread:1.48,lift:.41,height:.23}
-  ],(_t,out)=>out.copy(route.at(-1)));
+  ],(_t,out)=>pointAt(length,out));
   const scytheMatter=stDarkMatter(root,'Hold Dash scythe embers',[
     {at:covered-.088,span:.075,count:19,spread:.62,lift:.42,height:1.12,back:.30},
     {at:arrival+.135,span:.12,count:23,spread:.79,lift:.66,height:1.30}
@@ -529,14 +547,15 @@ function stDarkHoldDash(root,caster,live){
     };
   });
   const at=new THREE.Vector3(),ahead=new THREE.Vector3(),behind=new THREE.Vector3(),scytheOffset=new THREE.Vector3();
-  const up=new THREE.Vector3(0,1,0);
-  return t=>{
+  const up=new THREE.Vector3(0,1,0),endpoint=new THREE.Vector3();
+  const update=t=>{
     const distance=distanceAt(t),age=t-arrival;
     const charge=ease(begin,launch,t);
     const morph=ease(rollStart+.035,formed,t);
     const unveil=ease(covered,formed,t);
     const form=morph*(1-ease(0,.065,age));
-    pointAt(distance,at);pointAt(distance+.1,ahead);pointAt(distance-.1,behind);ahead.sub(behind);
+    pointAt(distance,at);pointAt(distance+.12,ahead);pointAt(distance-.45,behind);ahead.sub(behind);
+    if(ahead.lengthSq()<.0001)ahead.set(0,0,1);
     const yaw=Math.atan2(ahead.x,ahead.z);
     const brace=charge*(1-unveil)*(age<0?1:0);
     const push=ease(rollStart,covered,t)*(1-unveil);
@@ -561,9 +580,9 @@ function stDarkHoldDash(root,caster,live){
     ball.position.copy(at).addScaledVector(ahead.normalize(),.10*travel);
     ball.position.y=at.y+1.07+.065*Math.sin(t*16)*(1-travel);
     ball.rotation.y=yaw;
-    ball.scale.set((.52-.07*travel)*core,.57*core,(.51+.15*travel)*core);
-    const threads=.82*ease(covered,formed+.21,t)*(1-ease(-.02,.15,age));
-    weave(t,at,distance,threads,morph,0,0,0);
+    ball.scale.set((.68-.035*travel)*core,.72*core,(.70+.05*travel)*core);
+    const threads=.94*ease(covered,formed+.12,t)*(1-ease(-.02,.15,age));
+    weave(t,at,Math.max(0,distance-.42*travel),threads*(1-.26*core),morph,0,.26*travel,0);
     const cloakFlow=ease(launch-.007,formed+.060,t);
     const orbitAlpha=ease(begin+.13,begin+.23,t)*(1-ease(formed+.075,formed+.34,t));
     cloakTrails(t,at,yaw,morph,cloakFlow,.83*orbitAlpha);
@@ -584,11 +603,17 @@ function stDarkHoldDash(root,caster,live){
     bladePivot.scale.setScalar(age<0?1-.97*fuse:returning);
     if(bladePivot.visible)scythe.update(t,.35*(age<0?fuse:1-returning),.28*orbit);
 
+    if(live&&age>-.1){
+      pointAt(length,endpoint);exit.position.copy(endpoint);exit.position.y+=.06;
+      splinters.position.copy(endpoint);
+    }
     inkIn(1.40-.76*charge,.28*charge*(1-ease(launch,formed,t)),t*4);
     inkOut(.37+1.37*ease(.04,.31,age),.83*ease(.035,.098,age)*(1-ease(.11,.32,age)),t*6);
     for(const ribbon of ribbons)ribbon(age);
     wake(t);wakeShards(t);splash(t);scytheMatter(t);
   };
+  update.blade=bladePivot;
+  return update;
 }
 
 FXCODE.studio_darkness_shift=(_x,_y,_h,args,instance)=>{

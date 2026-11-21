@@ -2,7 +2,7 @@
 const ST_NIGHT_WALTZ='darkness/night_waltz_preview';
 const ST_WALTZ_AREA=7.9,ST_WALTZ_HIT=.56;
 
-function stNightWaltzArea(root,instance){
+function stNightWaltzArea(root,instance,floorAt){
   const material=new THREE.ShaderMaterial({
     uniforms:{age:{value:0},impact:{value:instance.impact??ST_WALTZ_HIT}},
     transparent:true,depthWrite:false,toneMapped:false,
@@ -21,15 +21,18 @@ function stNightWaltzArea(root,instance){
         stroke*=smoothstep(-.18,.78,sin(a*9.+r*7.-age*4.5))*smoothstep(.12,.36,r);
         float burst=(1.-smoothstep(.025,.115,abs(r-front)))*smoothstep(start+.045,start+.15,age)*(1.-smoothstep(impact,impact+.16,age));
         float cut=.40+.60*smoothstep(-.8,.36,sin(a*9.-r*14.)+.42*sin(a*19.));
-        float alpha=edge*(spread*swept*(.19+.25*stroke)+.57*burst*cut);
+        float alpha=edge*(spread*swept*(.34+.30*stroke)+.76*burst*cut);
         vec3 shade=mix(vec3(.003,.004,.008),vec3(.11,.098,.14),clamp(.45*stroke+.33*burst,0.,1.));
         gl_FragColor=vec4(shade,alpha);
         #include <colorspace_fragment>
       }`
   });
-  const area=new THREE.Mesh(new THREE.CircleGeometry(ST_WALTZ_AREA,96),material);
+  const geometry=floorAt?new THREE.RingGeometry(0,ST_WALTZ_AREA,48,6):new THREE.CircleGeometry(ST_WALTZ_AREA,96);
+  const positions=geometry.attributes.position;
+  if(floorAt)for(let i=0;i<positions.count;i++)positions.setZ(i,floorAt(positions.getX(i),-positions.getY(i)));
+  const area=new THREE.Mesh(geometry,material);
   area.name='Night Waltz attack area';
-  area.rotation.x=-Math.PI/2;area.position.y=.045;area.renderOrder=1;
+  area.rotation.x=-Math.PI/2;area.position.y=.07;area.renderOrder=1;
   area.onBeforeRender=()=>{material.uniforms.age.value=instance.t;};
   root.add(area);
 }

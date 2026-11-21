@@ -294,9 +294,16 @@ function updatePlayer(p,dt,acting){
   if(p.lgUlt){lightUltTick(p,inp,dt,canAct&&!cageBusy,pr.x);return;}
   if(acting&&(inp.ax||inp.ay))p.ang=Math.atan2(inp.ay-p.y,inp.ax-p.x)+(p.bld>0?rnd(-0.22,0.22):0);
   if(p.pathIdx===DARKP){
-    if(!canAct&&p.dark){p.dark.actions.length=0;p.dark.dashStart=null;p.dark.chase=null;}
+    if(!canAct&&p.dark){
+      if(p.dark.dashStart!=null||p.dark.longUntil>G.time)darkEvent(p,'darkdashcancel');
+      if(p.dark.chase)darkEvent(p,'darkchasecancel');
+      if(p.dark.waltz)darkEvent(p,'darkwaltzcancel');
+      p.dark.waltz=null;p.dark.waltzUntil=0;
+      p.dark.actions.length=0;p.dark.dashStart=null;p.dark.chase=null;p.dark.longUntil=0;p.dark.chaseUntil=0;
+      if(p.pathIdx===DARKP)p.dash=0;
+    }
     darkTick(p,dt);
-    if(darkMoveChase(p))return;
+    if(darkMoveWaltz(p)||darkMoveChase(p))return;
   }
   if(p.wr?.ph==='throw')p.ang=p.wr.a;
 
@@ -346,7 +353,7 @@ function updatePlayer(p,dt,acting){
   else{mx=(inp.r?1:0)-(inp.l?1:0);my=(inp.d?1:0)-(inp.u?1:0);}
   const ml=Math.hypot(mx,my);if(ml){mx/=ml;my/=ml;}
   if(p.wr?.ph==='aim'){mx*=0.35;my*=0.35;}   // อัลติดินลอยอยู่: ขยับได้นิดหน่อยทุกทิศ (ผู้ใช้ 2026-11-15) — ตัวค้างท่ารอเหวี่ยงไม้ (js/09 earthWrath จำกัดรัศมี)
-  if(!canAct||p.root>0||p.dchgOn||p.cryo>0||p.dark?.ultUntil>G.time){mx=my=0;}
+  if(!canAct||p.root>0||p.dchgOn||p.cryo>0||p.dark?.ultUntil>G.time||p.dark?.waltzUntil>G.time){mx=my=0;}
   else if(p.fear>0){const fa=Math.atan2(p.y-p.fearY,p.x-p.fearX);mx=Math.cos(fa);my=Math.sin(fa);}
   const spd=(p.fly?(p.wfo?W_FW.fastSpd:PLAY.fly)*p.buffs.spd:PLAY.walk*p.buffs.spd*(p.shieldOn&&p.pathIdx!==WATERP?PLAY.shSlow:1))*(p.boost>0?1.45:1)*moveMul(p)*(p.wr||p.aug||p.ecb?earthSpd(p):1)*(p.wdr||p.wfw||p.wgs?windSpd(p):1)*(p.wsk||p.wab||p.wmsT>0?waterSpd(p):1)*(p.dfall?(p.dfall.ph===2?0.45:0):p.sdome?(p.sdome.ph===2?0.45:0):p.rail?RAIL.v.slow:(p.kindle>0&&p.hover>0)?0.35:p.breath>0?0.7:(p.snapT>0||p.colos>0||p.grT>0)?0.5:1)*(p.slideT>0?1.8:1+(p.iceB||0))*(p.lgBeam?LTV.baMove:1)*(darkFlow(p)?1.25:1);
   p.wSpd=(p.dash>0||p.slideT>0||p.slip>0||!canAct||p.root>0||p.dchgOn||p.cryo>0||p.fear>0||p.gh||p.fly)?0:Math.round(spd);   // ความเร็วเดินตอนนี้ → ลูกข่ายใช้ทำนายตัวเอง (0 = อย่าทำนาย)

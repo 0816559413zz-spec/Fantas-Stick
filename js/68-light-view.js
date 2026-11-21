@@ -169,36 +169,40 @@ function lgShield(S,o,p,n,on,now,dt){
     S.shF=mk(new THREE.CircleGeometry(LGSH.s*0.9,6).rotateZ(Math.PI/6),0.3,true);S.shE=mk(new THREE.RingGeometry(LGSH.s*0.84,LGSH.s*0.93,6).rotateZ(Math.PI/6),1,true);S.shG=mk(new THREE.CircleGeometry(LGSH.s*0.84,6).rotateZ(Math.PI/6),0.35,true);
     S.shGl=[];for(let k=0;k<3;k++){const g=new THREE.Sprite(new THREE.SpriteMaterial({map:LGV.glowT||(LGV.glowT=lgGlowTex()),color:hdr('#ff9a1a',2.4),transparent:true,blending:THREE.AdditiveBlending,depthWrite:false,depthTest:false}));g.renderOrder=11;g.visible=false;scene.add(g);S.shGl.push(g);}}
   for(let k=0;k<3;k++)if(!on||k>=n)S.shGl[k].visible=false;
-  if(on){if(!S.shOn0){S.shOn0=now;S.shN=n;}S.shN=n;S.shA=p.a||0;(S.shP??=new THREE.Vector3()).copy(o.g.position);S.brk=0;}
+  if(on){if(!S.shOn0){S.shOn0=now;S.shN=n;}S.shN=n;S.shA=p.a||0;S.shPitch=p.lt?.[19]||0;(S.shP??=new THREE.Vector3()).copy(o.g.position);S.brk=0;}
   else if(S.shOn0){S.shOn0=0;if(S.brkReq&&now-S.brkReq<400)S.brk=now;}
   const brk=S.brk&&now-S.brk<LGSH.brkT*1000?(now-S.brk)/(LGSH.brkT*1000):-1;
   if(!on&&brk<0){S.shF.visible=S.shE.visible=S.shG.visible=false;for(const g of S.shGl)g.visible=false;if(S.mote)for(const M of S.mote)M.g.visible=false;return;}
   const K=Math.max(1,Math.min(3,S.shN||n)),a=S.shA,P=on?o.g.position:S.shP,cx=P.x,cz=P.z,y0=P.y+1.25,t=on?(now-S.shOn0)/1000:0;
+  const pitch=S.shPitch||0,cp=Math.cos(pitch),sp=Math.sin(pitch),ca=Math.cos(a),sa=Math.sin(a);
   const hit=S.hitT&&now-S.hitT<LGSH.hitT*1000?(now-S.hitT)/(LGSH.hitT*1000):-1;let i=0;
   const TL=LGSH_L[K],dm=TL[TL.length-1].d;
   for(const T of TL){
     let sc=1,b=(1-0.5*T.u)*(1+0.35*Math.sin(now/260+T.x*1.6-T.y*0.9));   // แสงไหลวิบวับข้ามแผ่น   // กลางสว่าง ขอบจาง
     if(on){const u=clamp((t-T.d*LGSH.open)/0.12,0,1);sc=u<1?u*(1.25-0.25*u):1;}   // เปิด: แผ่นเด้งออกจากกลางทีละวง
     if(hit>=0){const w=hit*(dm+1.2),dd=Math.abs(T.d-w);b+=1.6*Math.exp(-dd*dd*6)*(1-hit);}   // โดนตี: ระลอกแสงจากกลาง
-    const yy=y0+T.y;if(yy<P.y+0.05)continue;   // แผ่นเรียบ (ไม่โค้ง) หน้าตัว • แผ่นที่จมดินไม่วาด
-    const ca=Math.cos(a),sa=Math.sin(a),ang=a;let px=cx+ca*LGSH.R-sa*T.x,pz=cz+sa*LGSH.R+ca*T.x,py=yy;
+    const reach=LGSH.R*cp-T.y*sp,yy=y0+LGSH.R*sp+T.y*cp;
+    if(yy<P.y+0.05)continue;
+    const ang=a;let px=cx+ca*reach-sa*T.x,pz=cz+sa*reach+ca*T.x,py=yy;
     if(brk>=0){const f=brk;px+=Math.cos(ang)*f*1.4;pz+=Math.sin(ang)*f*1.4;py+=f*0.6-f*f*2.2;sc=1-f*0.6;b*=1-f;}   // แตก: แผ่นกระเด็นออก ตก จาง
-    _lgSV.set(px,py,pz);_lgQ.setFromAxisAngle(_lgS.set(0,1,0),Math.PI/2-a);
+    _lgSV.set(px,py,pz);_lgQ.setFromEuler(_lgShieldEuler.set(-pitch,Math.PI/2-a,0,'YXZ'));
     if(brk>=0)_lgQ.multiply(new THREE.Quaternion().setFromAxisAngle(_lgS.set(1,0.3,0).normalize(),brk*4*(T.d%1.7)));
     _lgM4.compose(_lgSV,_lgQ,_lgS.set(sc,sc,sc));S.shF.setMatrixAt(i,_lgM4);S.shE.setMatrixAt(i,_lgM4);
     S.shF.setColorAt(i,_lgC.set('#ff9a2a').lerp(_lgC2.set('#ffe2a0'),clamp(1-T.u,0,1)*0.45).multiplyScalar(0.45+0.45*clamp(b,0,1.8)));S.shE.setColorAt(i,_lgC.set('#ffcf5a').multiplyScalar(Math.max(0,b)*1.9));S.shG.setColorAt(i,_lgC.set('#ffb030').multiplyScalar(Math.max(0,b)*(0.45+0.55*(1-T.u))));S.shG.setMatrixAt(i,_lgM4);i++;}
   // ละอองแสงลอยขึ้นจากกำแพง
   if(!S.mote){S.mote=[];for(let k=0;k<26;k++){const g=new THREE.Sprite(new THREE.SpriteMaterial({map:LGV.glowT||(LGV.glowT=lgGlowTex()),color:hdr('#fff0c0',2),transparent:true,blending:THREE.AdditiveBlending,depthWrite:false}));g.visible=false;scene.add(g);S.mote.push({g,t:Math.random(),x:0,y:0});}}
   {const W=TL[TL.length-1].x>0?Math.max(...TL.map(t=>Math.abs(t.x))):1;for(const M of S.mote){M.t+=dt/1.6;if(M.t>=1){M.t-=1;M.x=(Math.random()*2-1)*W;M.y=(Math.random()*2-1)*0.9;}
-    const u=M.t,ca=Math.cos(a),sa=Math.sin(a),f=on?1:Math.max(0,1-brk*2);M.g.visible=f>0&&(on||brk>=0);if(!M.g.visible)continue;
-    M.g.position.set(cx+ca*(LGSH.R+0.08)-sa*M.x,y0+M.y+u*1.1,cz+sa*(LGSH.R+0.08)+ca*M.x);M.g.scale.setScalar(0.12*Math.sin(u*Math.PI)+0.02);M.g.material.opacity=Math.sin(u*Math.PI)*f;}}
+    const u=M.t,f=on?1:Math.max(0,1-brk*2);M.g.visible=f>0&&(on||brk>=0);if(!M.g.visible)continue;
+    const reach=(LGSH.R+.08)*cp-M.y*sp;
+    M.g.position.set(cx+ca*reach-sa*M.x,y0+(LGSH.R+.08)*sp+M.y*cp+u*1.1,cz+sa*reach+ca*M.x);M.g.scale.setScalar(0.12*Math.sin(u*Math.PI)+0.02);M.g.material.opacity=Math.sin(u*Math.PI)*f;}}
   for(const m of [S.shF,S.shE,S.shG]){m.count=i;m.visible=true;m.instanceMatrix.needsUpdate=true;m.instanceColor.needsUpdate=true;}
   if(on){LREQ.push({x:cx+Math.cos(a)*LGSH.R,y:y0-0.6,z:cz+Math.sin(a)*LGSH.R,col:'#ffb84a',int:0.6+0.2*K,dist:4});
-    if(o.armL){const k=clamp(t/0.15,0,1);o.armL.rotation.x=lerp(o.armL.rotation.x,-1.45,k);o.armL.rotation.z=lerp(o.armL.rotation.z,0.15,k);}}}   // ท่า: ยื่นมือซ้ายไปหน้า
+    if(o.armL){const k=clamp(t/0.15,0,1);o.armL.rotation.x=lerp(o.armL.rotation.x,-1.45-pitch,k);o.armL.rotation.z=lerp(o.armL.rotation.z,0.15,k);}}}   // ท่า: ยื่นมือซ้ายไปหน้า
 // โดนตีโล่ / โล่แตก (เหตุการณ์ block / sbreak จาก host มี id) — คืน true = ไม่ต้องเล่นเอฟเฟกต์โล่ฟ้าปกติ
+const _lgShieldEuler=new THREE.Euler();
 function lightShieldEv(ev,kind){const S=ev.id!=null&&LGV.st.get(ev.id);if(!S||!(S.shOn0||kind==='brk'&&S.shF&&S.shF.visible))return false;
-  const now=LGV.now||performance.now();if(kind==='hit'){S.hitT=now;fxPlay('light/shield_hit',{x:ev.x,y:ev.y,h:ev.h||1.2,a:S.shA,aim:false});}
-  else{S.brkReq=now;S.brk=now;S.shOn0=0;fxPlay('light/shield_break',{x:ev.x,y:ev.y,h:ev.h||1.2,a:S.shA,aim:false});}return true;}
+  const now=LGV.now||performance.now();if(kind==='hit'){S.hitT=now;fxPlay('light/shield_hit',{x:ev.x,y:ev.y,h:ev.h||1.2,a:S.shA,aimPitch:S.shPitch,aim:false});}
+  else{S.brkReq=now;S.brk=now;S.shOn0=0;fxPlay('light/shield_break',{x:ev.x,y:ev.y,h:ev.h||1.2,a:S.shA,aimPitch:S.shPitch,aim:false});}return true;}
 const LGPOSE={body:1.45,head:-1.3,ax:-0.1,az:-1.5};   // ท่า BA: หมุนตัว / หัวกลับ / แขนขวา (x,z) — ปรับได้
 let _lgGlass=null,_lgCore=null,_lgGeo=null,_lgEdge=null,_lgEdgeM=null;
 // คริสตัล (ผู้ใช้ 2026-11-16 ออกแบบใหม่): แก้วทองทึบขึ้นเห็นชัด + ขอบเส้นสว่าง + แกนนีออนเหลืองกลางชิ้น
@@ -1845,6 +1849,19 @@ function lightHeadPose(o){
 // เกจร้อน BA รอบเป้าเล็ง (ผู้ใช้ 2026-11-17): โค้งด้านล่างเป้า ทอง→ส้ม→แดงตามความร้อน • ร้อนเกิน = แดงกะพริบ ลดลงจนชาร์จเสร็จ
 const LGHUD={h:0,a:0,e:0};   // e = เพิ่งหมด Empower: เกจไหลลงช้า ๆ ให้เห็น
 function drawLightHud(x,y,L){
+  if(L[14]?.[0]===2){
+    drawReticleTimer(cx,x,y,Math.min(58,SH*.12),L[14][1]/LT_UL.t);
+    return;
+  }
+  const target=L[20]&&VIEW.cur?.P?.find(p=>p.id===L[20]);
+  const aim=target&&toScreen(target.x,(target.z||0)+1.35,target.y);
+  if(aim){
+    cx.save();cx.translate(...aim);cx.lineWidth=1.65;cx.strokeStyle='#fff1bf';
+    for(const [sx,sy] of [[-1,-1],[-1,1],[1,-1],[1,1]]){
+      cx.beginPath();cx.moveTo(sx*7,sy*14);cx.lineTo(sx*14,sy*14);cx.lineTo(sx*14,sy*7);cx.stroke();
+    }
+    cx.restore();
+  }
   const emp=(L[5]|0)===1,tgt=emp?1:(L[16]||0)/100,oh=(L[17]|0)===1,dt=1/60;if(LGHUD.em&&!emp)LGHUD.e=1;LGHUD.em=emp;if(emp||LGHUD.h<0.02)LGHUD.e=0;   // Empower (ผู้ใช้ 2026-11-18): เกจเต็มมีแสงไหล ไม่ร้อน • หมดบัฟ = เกจลดลงจนเป็น 0
   LGHUD.h+=(tgt-LGHUD.h)*Math.min(1,dt*(LGHUD.e&&tgt<LGHUD.h?2.2:12));
   LGHUD.a=clamp(LGHUD.a+((LGHUD.h>0.01||oh||emp)?dt/0.15:-dt/0.4),0,1);if(LGHUD.a<=0)return;

@@ -1,5 +1,19 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
 
+- 2026-11-21 Darkness: raised the grounded camera to show the blade trail from above while keeping the centered reticle and its normal aiming behavior.
+
+- 2026-11-21 Darkness: the BA scythe carries its hover velocity into one continuous return to idle.
+
+- 2026-11-21 Darkness: BA recovery eases from the spin into a moving hover and follows a curved path back to idle.
+
+- 2026-11-21 Darkness: the BA scythe holds the finishing side until two seconds have passed since the last attack, then smoothly floats and turns back to its left-side idle pose.
+
+- 2026-11-21 Darkness: BA alternates left and right and restores the recovery spin effects. Night Waltz shares its orb animation with Studio, keeps the B boundary aligned with the terrain, and pulls the player camera back during the cast.
+
+- 2026-11-21 Darkness: restored the approved Night Waltz B border and marked impact, followed by ricochets to nearby targets. Flow Nightfall leads with the shadow orb and a trailing scythe for one pass-through slash. Hold Dash has a connected orb and wake. BA has a fuller blade trail and a slower visible recovery spin.
+
+- 2026-11-21 Darkness: shorter left-to-right BA, Night Waltz ground field and orb, single-hit Flow Nightfall, persistent scythe recovery, larger shield meter, grounded leg poses while hovering, and wider base camera with Maw and chase framing. Radiance: Bond target lock and teammate aim marker, vertical shield aiming, shoulder-level Sovereign BA, and a reticle timer. Protocol v98.
+
 - 2026-11-20 Darkness: Quick Dash resets basic attack cooldown. The HUD uses Radiance-style white lines with a translucent track for the Flow ring, the two Dash charges, and the shield timer above the reticle.
 
 - 2026-11-20 Darkness uses the Studio effects in live casts. Test Place checks covered Death Sentence contact and absorption, both Nightfall branches, Night Waltz, Umbral Veil, shift and shield, Ward Drain, and Maw of the Abyss with Flow. Protocol v97.

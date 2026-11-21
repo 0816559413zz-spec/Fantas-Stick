@@ -159,7 +159,7 @@ function shieldFaces(t,x,y,z){
   if(!t.shieldOn||t.pathIdx===DARKP)return false;
   const B=PBASIC[t.pathIdx|0];
   if(B&&B.front&&x!=null){const A=B.frontA||Math.PI/3;
-    if(B.aim3d&&B.aim3d(t)){const ap=t.pathIdx===1?frostShieldPitch(t):clamp((t.inp&&t.inp.ap)||0,-1.5,1.5),c=Math.cos(ap),ax=c*Math.cos(t.ang),ay=c*Math.sin(t.ang),az=Math.sin(ap);
+    if(B.aim3d&&B.aim3d(t)){const ap=t.pathIdx===1?frostShieldPitch(t):(B.shieldPitch?.(t)??clamp((t.inp&&t.inp.ap)||0,-1.5,1.5)),c=Math.cos(ap),ax=c*Math.cos(t.ang),ay=c*Math.sin(t.ang),az=Math.sin(ap);
       const dx=x-t.x,dy=y-t.y,dz=z!=null?(z-((t.z||0)+1.2))*20:0,L=Math.hypot(dx,dy,dz);if(L<1)return true;
       return Math.acos(clamp((dx*ax+dy*ay+dz*az)/L,-1,1))<=A;}
     return Math.abs(angDiff(Math.atan2(y-t.y,x-t.x),t.ang))<=A;}

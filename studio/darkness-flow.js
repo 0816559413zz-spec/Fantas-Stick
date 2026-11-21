@@ -104,16 +104,6 @@ function stDarkFlowOrbs(root){   // 3 shadow balls, each with ONE small ribbon t
     geo.attributes.position.needsUpdate=geo.attributes.color.needsUpdate=true;};
 }
 
-function drawDarkFlowTimer(ctx,x,y,radius,timeLeft){
-  const start=-Math.PI/2,turn=Math.PI*2;
-  ctx.save();
-  ctx.lineWidth=2.5;ctx.strokeStyle='rgba(255,255,255,0.26)';
-  ctx.beginPath();ctx.arc(x,y,radius,0,turn);ctx.stroke();
-  ctx.strokeStyle='#fff';
-  ctx.beginPath();ctx.arc(x,y,radius,start,start+clamp(timeLeft,0,1)*turn);ctx.stroke();
-  ctx.restore();
-}
-
 function stDarkFlowHud({timer=true}={}){   // vignette and drifting particles on a camera plane
   const W=1024,cv=document.createElement('canvas'),ctx=cv.getContext('2d'),tex=new THREE.CanvasTexture(cv);tex.colorSpace=THREE.SRGBColorSpace;
   const mat=new THREE.MeshBasicMaterial({map:tex,transparent:true,depthTest:false,depthWrite:false,toneMapped:false});
@@ -136,7 +126,7 @@ function stDarkFlowHud({timer=true}={}){   // vignette and drifting particles on
       ctx.globalAlpha=flow*e.a*Math.min(1,u*5)*Math.pow(1-u,.9);ctx.beginPath();ctx.arc(x,y,e.r*(1-.35*u),0,Math.PI*2);ctx.fill();}
     if(timer){
       ctx.globalAlpha=flow;
-      drawDarkFlowTimer(ctx,W/2,H/2,64,timeLeft);
+      drawReticleTimer(ctx,W/2,H/2,64,timeLeft);
     }
     ctx.globalAlpha=1;tex.needsUpdate=true;
   },dispose(){plane.removeFromParent();plane.geometry.dispose();mat.dispose();tex.dispose();}};

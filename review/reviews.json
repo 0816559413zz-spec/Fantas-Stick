@@ -1,6 +1,132 @@
 {
- "next": 105,
+ "next": 113,
  "items": [
+  {
+   "id": 112,
+   "title": "Darkness ยกกล้องให้เห็นหางฟันบนพื้น",
+   "text": "ยกกล้องหลังผู้เล่นขึ้นโดยใช้ระยะถอยเดิม เป้าอยู่กลางจอและเล็งสูงต่ำตามเดิม",
+   "kind": "Camera / VFX",
+   "who": "Darkness",
+   "status": "wait",
+   "created": "2026-11-21",
+   "updated": "2026-11-21",
+   "imgs": [],
+   "links": [
+    "/shots/motion_darkness_ground_slash_camera_tdm.gif"
+   ]
+  },
+  {
+   "id": 111,
+   "title": "Darkness BA ไหลกลับต่อจากจังหวะลอย",
+   "text": "เคียวลอยฝั่งที่ฟันจบแล้วใช้ความเร็วเดิมต่อเข้าทางกลับซ้ายเมื่อเว้น BA ครบ 2 วิ ชะลอเมื่อถึงท่าพัก",
+   "kind": "Animation / VFX",
+   "who": "Darkness",
+   "status": "wait",
+   "created": "2026-11-21",
+   "updated": "2026-11-21",
+   "imgs": [],
+   "links": [
+    "/shots/motion_darkness_ba_glide_tdm.gif"
+   ]
+  },
+  {
+   "id": 110,
+   "title": "Darkness BA เคียวลอยต่อจากแรงควง",
+   "text": "ช่วงรอฝั่งที่ฟันจบ เคียวค่อย ๆ เอียงและลอยเบา ๆ ต่อจากแรงควง ครบ 2 วิแล้วไหลเป็นโค้งกลับทางซ้าย",
+   "kind": "Animation / VFX",
+   "who": "Darkness",
+   "status": "wait",
+   "created": "2026-11-21",
+   "updated": "2026-11-21",
+   "imgs": [],
+   "links": [
+    "/shots/motion_darkness_ba_hover_return_tdm.gif"
+   ]
+  },
+  {
+   "id": 109,
+   "title": "Darkness BA ค้างเคียวฝั่งที่ฟันจบ",
+   "text": "เคียวควงแล้วค้างที่ฝั่งจบจนเว้น BA ครบ 2 วิ จากนั้นลอยพร้อมหมุนกลับข้างซ้าย ยังกดฟันสลับฝั่งต่อได้จากตำแหน่งที่ค้าง",
+   "kind": "Animation / VFX",
+   "who": "Darkness",
+   "status": "wait",
+   "created": "2026-11-21",
+   "updated": "2026-11-21",
+   "imgs": [],
+   "links": [
+    "/shots/motion_darkness_ba_wait_return_tdm.gif"
+   ]
+  },
+  {
+   "id": 108,
+   "title": "Darkness คืนลูกเงาและวงหมึกตอนเคียวควง",
+   "text": "BA ฟันสลับซ้าย→ขวาและขวา→ซ้าย พร้อม VFX ตอนควง Night Waltz ใช้ลูกเงาทรงรีและริ้วขดร่วมกับ Studio ขอบ B แนบพื้นจริงและกล้องยกให้เห็นทางชิ่ง",
+   "kind": "Gameplay / VFX",
+   "who": "Darkness",
+   "status": "wait",
+   "created": "2026-11-21",
+   "updated": "2026-11-21",
+   "imgs": [],
+   "links": [
+    "/shots/motion_darkness_ba_alternate_tdm.gif",
+    "/shots/motion_darkness_waltz_approved_tdm.gif"
+   ]
+  },
+  {
+   "id": 107,
+   "title": "Darkness ขอบ Night Waltz เดิมและพุ่งชิ่งกลับมา",
+   "text": "Night Waltz ชนเป้ามีตราก่อนแล้วชิ่งในวงเดิม, Flow Nightfall ใช้ลูกเงากับเคียวด้านซ้ายหลังและฟันทีเดียว, Long Dash หัวลูกเงาต่อกับหาง, BA ซ้ายไปขวาเพิ่มหางซ้อนชั้นและควงหนึ่งรอบ",
+   "kind": "Gameplay / VFX",
+   "who": "Darkness",
+   "status": "wait",
+   "created": "2026-11-21",
+   "updated": "2026-11-21",
+   "imgs": [],
+   "links": [
+    "/shots/motion_darkness_waltz_chain_tdm.gif",
+    "/shots/motion_darkness_nightfall_flow_orb_tdm.gif",
+    "/shots/motion_darkness_hold_ball_tdm.gif",
+    "/shots/motion_darkness_ba_tail_spin_tdm.gif"
+   ]
+  },
+  {
+   "id": 106,
+   "title": "Radiance ล็อกเป้า Crystal Bond, มุมโล่ และท่ามือร่างเทพ",
+   "text": "ล็อก Bond จนเล็งเพื่อนในระยะ มีเส้นมุมบางบนเพื่อนที่เลือก โล่เงยก้มตามทิศเล็ง มือร่างเทพยิงจากแนวไหล่ เกจเวลาเป็นวงขาวเส้นบางรอบเป้าเล็ง",
+   "kind": "Gameplay / VFX / HUD",
+   "who": "Radiance",
+   "status": "wait",
+   "created": "2026-11-21",
+   "updated": "2026-11-21",
+   "imgs": [],
+   "links": [
+    "/shots/motion_light_bond_fixes.gif",
+    "/shots/motion_light_shield_fixes.gif",
+    "/shots/motion_light_sovereign_cursor_fixes.gif"
+   ]
+  },
+  {
+   "id": 105,
+   "title": "Darkness แก้กล้องและจังหวะคืนเคียวในแมตช์",
+   "text": "BA ฟันซ้ายไปขวา ระยะกับมุมลดลง หนีด้วยลูกเงาที่หางตามตัวจริง โล่ลอยแล้วขาไม่ก้าว ขยายแถบเวลา Night Waltz มีพื้นกับลูกเงา Nightfall ใน Flow พุ่งฟันครั้งเดียวและกล้องตามเป้า คืนเคียวต่อเนื่องหลังจบสกิล",
+   "kind": "Gameplay / VFX / HUD",
+   "who": "Darkness",
+   "status": "wait",
+   "created": "2026-11-21",
+   "updated": "2026-11-21",
+   "imgs": [],
+   "links": [
+    "/shots/motion_darkness_ba_fixes.gif",
+    "/shots/motion_darkness_hold_fixes.gif",
+    "/shots/motion_darkness_shield_fixes.gif",
+    "/shots/motion_darkness_waltz_fixes.gif",
+    "/shots/motion_darkness_nightfall_flow_fixes.gif",
+    "/shots/motion_darkness_nightfall_marked_fixes.gif",
+    "/shots/motion_darkness_veil_fixes.gif",
+    "/shots/motion_darkness_sentence_fixes.gif",
+    "/shots/motion_darkness_maw_fixes.gif"
+   ]
+  },
   {
    "id": 104,
    "title": "Darkness วงเวลา Flow, ชาร์จ Dash และเกจโล่",
