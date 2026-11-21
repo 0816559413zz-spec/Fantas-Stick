@@ -259,6 +259,19 @@ function ghostify(g) {   // vis 0 = collision only (not in the .glb): see-throug
   g.traverse(m => { if (!m.isMesh) return; const k = m.material.uuid; let gm = ghostMats.get(k); if (!gm) { gm = m.material.clone(); gm.transparent = true; gm.opacity = 0.22; gm.depthWrite = false; ghostMats.set(k, gm); } m.material = gm; m.castShadow = false; });
   return g;
 }
+let FRPB = null;   // game room-prop builder (js/28-fcs-props.js frpBuild) → props look exactly like in the game
+fetch('js/28-fcs-props.js').then(r => r.text()).then(t => { const i = t.indexOf('function frpBuild('), j = t.indexOf('\nfunction ', i + 10); if (i < 0 || j < 0) return;
+  FRPB = new Function('THREE', t.slice(i, j) + '\nreturn frpBuild;')(THREE); if (M) { syncObjs(); updSel(); } }).catch(() => {});
+const rpSeed = s => () => { s = (s + 0x6D2B79F5) | 0; let x = Math.imul(s ^ (s >>> 15), 1 | s); x = (x + Math.imul(x ^ (x >>> 7), 61 | x)) ^ x; return ((x ^ (x >>> 14)) >>> 0) / 4294967296; };
+function rpLook(o, rp) {   // merged vertex-coloured mesh of one room prop, or null while the builder loads
+  if (!FRPB) return null; let parts; try { parts = FRPB({ kind: rp, L: (o.L || 4) * MD.PX }, rpSeed(9001 + (o.id | 0) * 131)); } catch (e) { return null; } if (!parts || !parts.length) return null;
+  const col = new THREE.Color(), gs = [];
+  for (const [g, c] of parts) { const gg = g.index ? g.toNonIndexed() : g; for (const k of Object.keys(gg.attributes)) if (k !== 'position' && k !== 'normal') gg.deleteAttribute(k);
+    const n = gg.attributes.position.count, ca = new Float32Array(n * 3); col.set(c); for (let i = 0; i < n; i++) { ca[i * 3] = col.r; ca[i * 3 + 1] = col.g; ca[i * 3 + 2] = col.b; }
+    gg.setAttribute('color', new THREE.BufferAttribute(ca, 3)); gs.push(gg); }
+  const m = new THREE.Mesh(mergeGeometries(gs, false), RP_MAT); m.castShadow = m.receiveShadow = true; return m;
+}
+const RP_MAT = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.85 });
 function markerMesh(o) {
   if (MD.isDeco(o.t)) return decoMesh(o);
   const D = OBJ[o.t], g = new THREE.Group(), c = D.c || '#888';
@@ -267,7 +280,7 @@ function markerMesh(o) {
   if (o.t === 'sgA' || o.t === 'sgB') { add(new THREE.CylinderGeometry(4, 4, 0.1, 28), helpMat(c, 0.35), 0, 0.06, 0); add(new THREE.CylinderGeometry(0.08, 0.08, 2.6, 6), helpMat(c), 0, 1.3, 0); const l = labelSprite((o.t === 'sgA' ? 'Atk ' : 'Def ') + (o.ph || 1), c); l.position.y = 3.2; g.add(l); return g; }
   if (o.t === 'phase') { areaMesh(o, g, c, 0.15); const l = labelSprite('Phase ' + (o.ph || 1), c); l.position.y = 2.6; g.add(l); return g; }
   if (o.t === 'ceil') { areaMesh(o, g, c, 0); return g; }
-  if (D.rp) { const R = MD.RPK[D.rp], L = R.L ? Math.max(0.3, o.L || 4) : R.w, w = R.L ? R.w : R.w;
+  if (D.rp) { const R = MD.RPK[D.rp], L = R.L ? Math.max(0.3, o.L || 4) : R.w, w = R.L ? R.w : R.w; const lk = rpLook(o, D.rp); if (lk) { g.add(lk); return g; }
     const b = add(new THREE.BoxGeometry(L, R.h, w), mat(R.col ? c : '#b89a76'), 0, R.h / 2, 0); b.castShadow = true; return g; }
   if (/^spawn|espawn|task/.test(o.t)) { add(new THREE.CylinderGeometry(0.9, 0.9, 0.12, 20), helpMat(c, 0.75), 0, 0.08, 0); add(new THREE.CylinderGeometry(0.06, 0.06, 2.1, 6), helpMat(c), 0, 1.05, 0);
     if (/^spawn/.test(o.t)) { const a = add(new THREE.ConeGeometry(0.35, 0.9, 10), helpMat(c), 0, 0.3, 1.2); a.rotation.x = Math.PI / 2; } else add(new THREE.OctahedronGeometry(0.35), helpMat(c), 0, 2.3, 0); }
@@ -280,8 +293,9 @@ function markerMesh(o) {
     const b = add(geo, mat(MD.PN_COL[o.mat || 'brick'] || c), 0, 0, 0); b.castShadow = true;
     if (o.mat === 'litwin' || o.mat === 'glass') { b.material = b.material.clone(); b.material.transparent = true; b.material.opacity = 0.6; }
     const cs = o.cs || 1, one = o.nb && !(o.ho && o.ho.length), nc = one ? 1 : Math.max(1, Math.round(L / cs)), nr = one ? 1 : Math.max(1, Math.round(H / cs)), pts = [];   // unbreakable = no cell lines
-    for (let i = 1; i < nc; i++) { const x = -L / 2 + i * L / nc, top = o.sh === 'tri' ? H * (1 - Math.abs(x) / (L / 2)) : H; pts.push(x, 0, T / 2 + 0.01, x, top, T / 2 + 0.01); }
-    for (let j = 1; j < nr; j++) { const y = j * H / nr, hw = o.sh === 'tri' ? L / 2 * (1 - y / H) : L / 2; pts.push(-hw, y, T / 2 + 0.01, hw, y, T / 2 + 0.01); }
+    for (const zf of [T / 2 + 0.01, -T / 2 - 0.01]) {   // cell lines on both faces
+      for (let i = 1; i < nc; i++) { const x = -L / 2 + i * L / nc, top = o.sh === 'tri' ? H * (1 - Math.abs(x) / (L / 2)) : H; pts.push(x, 0, zf, x, top, zf); }
+      for (let j = 1; j < nr; j++) { const y = j * H / nr, hw = o.sh === 'tri' ? L / 2 * (1 - y / H) : L / 2; pts.push(-hw, y, zf, hw, y, zf); } }
     const lg = new THREE.BufferGeometry(); lg.setAttribute('position', new THREE.Float32BufferAttribute(pts, 3)); if (o.tl) lg.rotateX(o.tl); g.add(new THREE.LineSegments(lg, new THREE.LineBasicMaterial({ color: '#2a2a2a', transparent: true, opacity: 0.45 }))); }
   else if (o.t === 'house') { const b = add(new THREE.BoxGeometry(8, 4.2, 6.5), mat('#b08a5a'), 0, 2.1, 0); b.castShadow = true; const r = add(PRIM.cone(), mat('#7a4a36'), 0, 4.2, 0); r.scale.set(6.2, 2.6, 5); add(new THREE.BoxGeometry(1.2, 2.2, 0.2), helpMat('#3a2a1c'), 0, 1.1, 3.3); }
   else if (o.t === 'ptree' || o.t === 'ppine') { add(new THREE.CylinderGeometry(0.3, 0.45, 3, 8), mat('#6a4a2c'), 0, 1.5, 0).castShadow = true; const top = o.t === 'ptree' ? add(new THREE.IcosahedronGeometry(2.6, 1), mat(c), 0, 5, 0) : add(new THREE.ConeGeometry(2, 5.5, 8), mat(c), 0, 4.6, 0); top.castShadow = true; }

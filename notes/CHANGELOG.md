@@ -3,6 +3,7 @@
 - 2026-11-22 Darkness: moved the shield timer above the health bar and reduced upper-body lean in the held left-to-right BA finish.
 
 - 2026-11-22 Darkness: isolated the held BA twist above the legs, kept the gaze on aim, and added a spectral scythe with a clearer follow-up slash on marked targets. Credited kills grant or refresh Flow regardless of mark.
+- 2026-11-22 Map Builder: room props (rp_*) show their real in-game look in the editor (same frpBuild code the game uses, read from js/28-fcs-props.js), so type and facing are visible instead of a plain box; breakable-wall cell lines are drawn on both faces.
 
 - 2026-11-22 Map Builder: Decor Box / Decor Cylinder get a "Collides" checkbox (off by default, so existing castle decor is unchanged); ticked = exported as collision circles sized to the box/cylinder and its height (centred decor, lift-aware).
 
