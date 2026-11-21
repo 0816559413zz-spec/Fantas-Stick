@@ -93,7 +93,9 @@ const PN_RUB={roof:['#4a4e58','#3a3e48','#5a5e68'],snowroof:['#e8eef4','#4a4e58'
 const PN_HEAP={roof:'#4e5058',snowroof:'#8a8c90',timber:'#968c7c',litwin:'#888',brick:'#7a5a48',plaster:'#968c7c',stone:'#7e786e',wood:'#5a4632',glass:'#888',metal:'#5c5e60'};
 // Real geometry for a panel: the slab is split on cell lines (+ exact opening edges, + gable slope crossings) into sub-rects;
 // each sub-rect is full thickness (stage ≤1), a thinner core (stage 2 = outer skin gone on both faces) or empty (stage 3 / opening / above the gable).
-// Faces between different depths become cut faces (aPk 2), recess floors aPk 1, outer surface aPk 0. Same-depth faces are merged (greedy) → few triangles.
+// Faces between different depths become cut faces (aPk 2), recess floors aPk 1, outer surface aPk 0. Untouched cells are merged (greedy) → few triangles.
+// Damage edges are tiles cut on the fly: each cut edge bites into the cell in brick-sized steps (PN_ZU), continuous along a run of cut edges,
+// flat near run ends so corners never cross; the core bites less than the outer skin. Door/window/gable/border edges stay straight.
 // Rebuilt only when a cell changes depth class (pnlSyncOne), so the render cost is a plain mesh.
 function pnlCls(p){   // depth class per cell: 0 full • 1 core • 2 gone
   const n=p.st.length,c=new Uint8Array(n);
@@ -102,48 +104,87 @@ function pnlCls(p){   // depth class per cell: 0 full • 1 core • 2 gone
     for(const [dc,dr] of [[-1,0],[1,0],[0,-1],[0,1]]){const cc=col+dc,rr=r+dr;if(cc<0||rr<0||cc>=p.nc||rr>=p.nr)continue;const q=c[rr*p.nc+cc];if(q<b)b=q;}c[k]=b;}
   return c;
 }
+// stair size along a cut edge [horizontal, vertical] m per material (brick-sized bites)
+const PN_ZU={brick:[0.17,0.12],stone:[0.4,0.21],plaster:[0.15,0.15],wood:[0.11,0.3],timber:[0.15,0.15],roof:[0.15,0.1],snowroof:[0.15,0.1]};
 function pnlGeo(p,cls,Lm,H,Tm,rec){
-  const hL=Lm/2,hH=H/2,hT=Tm/2,cw=Lm/p.nc,ch=H/p.nr,ho=(p.d.ho||[]).slice(0,4),tri=p.tri;
+  const hL=Lm/2,hH=H/2,hT=Tm/2,cz=hT-rec,cw=Lm/p.nc,ch=H/p.nr,ho=(p.d.ho||[]).slice(0,4),tri=p.tri;
   const slope=x=>tri?-hH+H*(1-Math.abs(x)/hL):1e9;
   const xs=new Set([-hL,hL]),ys=new Set([-hH,hH]);
   for(let i=1;i<p.nc;i++)xs.add(-hL+i*cw);for(let j=1;j<p.nr;j++)ys.add(-hH+j*ch);
   for(const q of ho){xs.add(Math.max(-hL,Math.min(hL,q[0]-hL)));xs.add(Math.max(-hL,Math.min(hL,q[1]-hL)));ys.add(Math.max(-hH,Math.min(hH,q[2]-hH)));ys.add(Math.max(-hH,Math.min(hH,q[3]-hH)));}
   if(tri){xs.add(0);for(const y of ys){const u=hL*(1-(y+hH)/H);xs.add(u);xs.add(-u);}}
-  const X=[...xs].sort((a,b)=>a-b).filter((v,i,a)=>!i||v-a[i-1]>1e-4),Y=[...ys].sort((a,b)=>a-b).filter((v,i,a)=>!i||v-a[i-1]>1e-4),NX=X.length-1,NY=Y.length-1;
-  const ext=[hT,hT-rec,0],E=new Float32Array(NX*NY),T0=new Float32Array(NX*NY),T1=new Float32Array(NX*NY),CL=new Uint8Array(NX*NY);   // E half-depth, T0/T1 top at left/right (gable clip)
+  const X=[...xs].sort((a,b)=>a-b).filter((v,i,a)=>!i||v-a[i-1]>1e-4),Y=[...ys].sort((a,b)=>a-b).filter((v,i,a)=>!i||v-a[i-1]>1e-4),NX=X.length-1,NY=Y.length-1,NN=NX*NY;
+  // per sub-rect: GE geometric presence (not opening / above gable) • C damage class 0 full / 1 core / 2 gone • CL gable-clipped (T0/T1 top)
+  const GE=new Uint8Array(NN),C=new Uint8Array(NN),CL=new Uint8Array(NN),T0=new Float32Array(NN),T1=new Float32Array(NN);
   for(let j=0;j<NY;j++)for(let i=0;i<NX;i++){const id=j*NX+i,x0=X[i],x1=X[i+1],y0=Y[j],y1=Y[j+1];
     const t0=Math.min(y1,slope(x0)),t1=Math.min(y1,slope(x1));T0[id]=t0;T1[id]=t1;
-    if(t0<=y0+1e-5&&t1<=y0+1e-5){E[id]=0;continue;}
+    if(t0<=y0+1e-5&&t1<=y0+1e-5)continue;
     const cx=(x0+x1)/2,cy=(y0+Math.min(y1,(t0+t1)/2))/2;
-    if(ho.some(q=>cx>q[0]-hL&&cx<q[1]-hL&&cy>q[2]-hH&&cy<q[3]-hH)){E[id]=0;continue;}
-    const col=Math.min(p.nc-1,Math.max(0,Math.floor((cx+hL)/cw))),r=Math.min(p.nr-1,Math.max(0,Math.floor((cy+hH)/ch)));E[id]=ext[cls[r*p.nc+col]];
-    CL[id]=(t0<y1-1e-5||t1<y1-1e-5)?1:0;}
+    if(ho.some(q=>cx>q[0]-hL&&cx<q[1]-hL&&cy>q[2]-hH&&cy<q[3]-hH))continue;
+    GE[id]=1;CL[id]=(t0<y1-1e-5||t1<y1-1e-5)?1:0;
+    const col=Math.min(p.nc-1,Math.max(0,Math.floor((cx+hL)/cw))),r=Math.min(p.nr-1,Math.max(0,Math.floor((cy+hH)/ch)));C[id]=cls[r*p.nc+col];}
+  const has=(L,i,j)=>i>=0&&j>=0&&i<NX&&j<NY&&GE[j*NX+i]&&C[j*NX+i]<=L;   // layer L: 0 outer skin, 1 core
+  const DI=[[0,-1],[1,0],[0,1],[-1,0]];   // edge dir: 0 bottom • 1 right • 2 top • 3 left
+  // edge type: 'n' neighbour has this layer (no face) • 'b' panel border / opening / gable (straight outer face) • 'c' damage cut (stepped face)
+  const et=(L,i,j,d)=>{const id=j*NX+i;if(d===2&&CL[id])return 'b';const ni=i+DI[d][0],nj=j+DI[d][1];
+    if(ni<0||nj<0||ni>=NX||nj>=NY||!GE[nj*NX+ni])return 'b';return has(L,ni,nj)?'n':'c';};
+  // stepped depth along a cut run (global coordinate s → equal on both cells of a run); 0 near run ends so corners never cross
+  const A=Math.min(0.2,0.25*Math.min(cw,ch)),Lf=A*1.05,ZU=PN_ZU[p.mat]||[0.1,0.1],H0=n=>{const v=Math.sin(n*12.9898+p.i*78.233)*43758.5453;return v-Math.floor(v);};
+  const runC={};
+  const run=(L,d,i,j)=>{const k=L+','+d+','+i+','+j;if(runC[k])return runC[k];const hz=d%2===0,ok=(a,b)=>has(L,a,b)&&!CL[b*NX+a]&&et(L,a,b,d)==='c';
+    let a=hz?i:j,b=a;if(hz){while(ok(a-1,j))a--;while(ok(b+1,j))b++;}else{while(ok(i,a-1))a--;while(ok(i,b+1))b++;}
+    const r=hz?[X[a],X[b+1]]:[Y[a],Y[b+1]];
+    for(let q=a;q<=b;q++)runC[L+','+d+','+(hz?q:i)+','+(hz?j:q)]=r;return r;};
+  const unit=(d,len)=>Math.max(0.04,Math.min(d%2===0?ZU[0]:ZU[1],len/5));
+  const raw=(d,i,j,s,u)=>{const line=d===0?j:d===2?j+1:d===1?i+1:i,k=Math.floor(s/u),h=H0(k*1.731+line*101.3+d*17.1);return {k,dep:h<0.2?0:A*(0.3+0.7*H0(k*3.17+line*7.7+d*5.3))};};
+  const depth=(L,d,i,j,s)=>{   // inward depth of layer L's face on cell (i,j) edge d at coordinate s
+    const id=j*NX+i;if(CL[id]||et(L,i,j,d)!=='c')return 0;
+    const [s0,s1]=run(L,d,i,j),u=unit(d,s1-s0),{k,dep}=raw(d,i,j,s,u),ps=k*u,pe=ps+u;
+    if(ps<s0+Lf||pe>s1-Lf)return 0;return L===0?dep:dep*0.55;};   // core bites less than the skin → the skin never overhangs empty space
   const P=[],N=[],K=[],I=[];
-  const quad=(a,b,c,d,n,k)=>{const o=P.length/3;P.push(...a,...b,...c,...d);for(let q=0;q<4;q++){N.push(...n);K.push(k);}
-    const ux=b[0]-a[0],uy=b[1]-a[1],uz=b[2]-a[2],vx=c[0]-a[0],vy=c[1]-a[1],vz=c[2]-a[2],dt=(uy*vz-uz*vy)*n[0]+(uz*vx-ux*vz)*n[1]+(ux*vy-uy*vx)*n[2];
-    if(dt>=0)I.push(o,o+1,o+2,o,o+2,o+3);else I.push(o,o+2,o+1,o,o+3,o+2);};
-  const zk=e=>e>=hT-1e-5?0:1;   // outer face or recess floor
-  // front/back faces: greedy rectangles of equal depth (gable-clipped sub-rects emitted alone)
-  const used=new Uint8Array(NX*NY);
-  for(let j=0;j<NY;j++)for(let i=0;i<NX;i++){const id=j*NX+i,e=E[id];if(used[id]||e<=0)continue;
-    if(CL[id]){used[id]=1;const x0=X[i],x1=X[i+1],y0=Y[j];for(const s of [1,-1])quad([x0,y0,s*e],[x1,y0,s*e],[x1,T1[id],s*e],[x0,T0[id],s*e],[0,0,s],zk(e));continue;}
-    let w=1;while(i+w<NX&&!used[id+w]&&!CL[id+w]&&E[id+w]===e)w++;
-    let h=1;grow:while(j+h<NY){for(let q=0;q<w;q++){const k2=(j+h)*NX+i+q;if(used[k2]||CL[k2]||E[k2]!==e)break grow;}h++;}
+  const tri3=(a,b,c,n,k)=>{const o=P.length/3;P.push(...a,...b,...c);for(let q=0;q<3;q++){N.push(...n);K.push(k);}
+    const ux=b[0]-a[0],uy=b[1]-a[1],uz=b[2]-a[2],vx=c[0]-a[0],vy=c[1]-a[1],vz=c[2]-a[2];
+    if((uy*vz-uz*vy)*n[0]+(uz*vx-ux*vz)*n[1]+(ux*vy-uy*vx)*n[2]>=0)I.push(o,o+1,o+2);else I.push(o,o+2,o+1);};
+  const quad=(a,b,c,d,n,k)=>{tri3(a,b,c,n,k);tri3(a,c,d,n,k);};
+  const bands=L=>L===0?[[cz,hT],[-hT,-cz]]:[[-cz,cz]];
+  const wall=(L,a,b,k)=>{const dx=b[0]-a[0],dy=b[1]-a[1],l=Math.hypot(dx,dy);if(l<1e-6)return;const n=[dy/l,-dx/l,0];
+    for(const [z0,z1] of bands(L))quad([a[0],a[1],z0],[b[0],b[1],z0],[b[0],b[1],z1],[a[0],a[1],z1],n,k);};
+  // cells with no cut edge (and not gable-clipped) = plain blocks → merged below; the rest get per-layer polygons
+  const plain=new Uint8Array(NN);
+  for(let j=0;j<NY;j++)for(let i=0;i<NX;i++){const id=j*NX+i;if(!GE[id]||C[id]>1||CL[id])continue;let ok=1;
+    for(let L=0;L<=1&&ok;L++)if(has(L,i,j))for(let d=0;d<4;d++)if(et(L,i,j,d)==='c'){ok=0;break;}plain[id]=ok;}
+  // greedy caps for plain cells (top layer only; hidden inner faces skipped)
+  const used=new Uint8Array(NN),ext=c=>c===0?hT:cz;
+  for(let j=0;j<NY;j++)for(let i=0;i<NX;i++){const id=j*NX+i;if(used[id]||!plain[id])continue;const c=C[id];
+    let w=1;while(i+w<NX&&!used[id+w]&&plain[id+w]&&C[id+w]===c)w++;
+    let h=1;grow:while(j+h<NY){for(let q=0;q<w;q++){const k2=(j+h)*NX+i+q;if(used[k2]||!plain[k2]||C[k2]!==c)break grow;}h++;}
     for(let r=0;r<h;r++)for(let q=0;q<w;q++)used[(j+r)*NX+i+q]=1;
-    const x0=X[i],x1=X[i+w],y0=Y[j],y1=Y[j+h];for(const s of [1,-1])quad([x0,y0,s*e],[x1,y0,s*e],[x1,y1,s*e],[x0,y1,s*e],[0,0,s],zk(e));}
-  // side faces where the depth steps down (cut faces) or at the panel border / gable slope (outer edge)
-  const side=(ea,eb,pa,pb,n,k)=>{   // strip between depth eb and ea on both faces (eb 0 = one band through the core)
-    if(eb<=0){quad([...pa,-ea],[...pb,-ea],[...pb,ea],[...pa,ea],n,k);return;}
-    quad([...pa,eb],[...pb,eb],[...pb,ea],[...pa,ea],n,k);quad([...pa,-ea],[...pb,-ea],[...pb,-eb],[...pa,-eb],n,k);};
-  for(let j=0;j<NY;j++)for(let i=0;i<NX;i++){const id=j*NX+i,e=E[id];if(e<=0)continue;const x0=X[i],x1=X[i+1],y0=Y[j];
-    // ±x neighbours (vertical edge, height up to the clipped top at that x)
-    for(const [di,xe,t] of [[-1,x0,T0[id]],[1,x1,T1[id]]]){const ii=i+di,eb=ii<0||ii>=NX?0:Math.min(E[j*NX+ii],e);if(eb>=e-1e-6||t<=y0+1e-5)continue;
-      const k=ii<0||ii>=NX?0:2;side(e,eb,[xe,y0],[xe,t],[di,0,0],k);}
-    // −y neighbour
-    {const eb=j===0?0:Math.min(E[(j-1)*NX+i],e);if(eb<e-1e-6)side(e,eb,[x0,y0],[x1,y0],[0,-1,0],j===0?0:2);}
-    // top: clipped = gable slope (outer edge) • else +y neighbour
-    if(CL[id]){const dx=x1-x0,dy=T1[id]-T0[id],l=Math.hypot(dx,dy);side(e,0,[x0,T0[id]],[x1,T1[id]],[-dy/l,dx/l,0],0);}
-    else{const top=j===NY-1,eb=top?0:Math.min(E[(j+1)*NX+i],e);if(eb<e-1e-6)side(e,eb,[x0,Y[j+1]],[x1,Y[j+1]],[0,1,0],top?0:2);}}
+    const e=ext(c),x0=X[i],x1=X[i+w],y0=Y[j],y1=Y[j+h];for(const s of [1,-1])quad([x0,y0,s*e],[x1,y0,s*e],[x1,y1,s*e],[x0,y1,s*e],[0,0,s],c===0?0:1);}
+  for(let j=0;j<NY;j++)for(let i=0;i<NX;i++){const id=j*NX+i;if(!GE[id]||C[id]>1)continue;const x0=X[i],x1=X[i+1],y0=Y[j],y1=Y[j+1];
+    if(plain[id]){   // straight outer faces only
+      for(let L=0;L<=1;L++){if(!has(L,i,j))continue;
+        if(et(L,i,j,0)==='b')wall(L,[x0,y0],[x1,y0],0);if(et(L,i,j,1)==='b')wall(L,[x1,y0],[x1,y1],0);
+        if(et(L,i,j,2)==='b')wall(L,[x1,y1],[x0,y1],0);if(et(L,i,j,3)==='b')wall(L,[x0,y1],[x0,y0],0);}
+      continue;}
+    for(let L=0;L<=1;L++){if(!has(L,i,j))continue;
+      const t0=T0[id],t1=T1[id];
+      // edge paths in CCW order: bottom x0→x1, right y0→t1, top/slope x1→x0, left t0→y0 • points [x,y,type of the segment that starts here]
+      const path=(d,a,b,map)=>{const ty=et(L,i,j,d),out=[];if(ty!=='c'||CL[id]){out.push([...map(a,0),ty]);return out;}
+        const [s0,s1]=run(L,d,i,j),u=unit(d,s1-s0),lo=Math.min(a,b),hi=Math.max(a,b),cuts=[];for(let s=Math.ceil(lo/u-1e-6)*u;s<hi-1e-6;s+=u)if(s>lo+1e-6)cuts.push(s);
+        const seq=a<b?cuts:cuts.reverse(),dir=a<b?1:-1;let prev=a;out.push([...map(a,depth(L,d,i,j,a+dir*1e-5)),ty]);
+        for(const s of seq){out.push([...map(s,depth(L,d,i,j,s-dir*1e-5)),ty]);out.push([...map(s,depth(L,d,i,j,s+dir*1e-5)),ty]);prev=s;}
+        return out;};
+      const E=[path(0,x0,x1,(s,dd)=>[s,y0+dd]),path(1,y0,t1,(s,dd)=>[x1-dd,s]),CL[id]?[[x1,t1,'b']]:path(2,x1,x0,(s,dd)=>[s,y1-dd]),path(3,t0,y0,(s,dd)=>[x0+dd,s])];
+      // corners: combine the inward shift of both edges meeting there (only one is ever non-zero)
+      const cn=[[x1,y0,depth(L,1,i,j,y0+1e-5),depth(L,0,i,j,x1-1e-5),-1,1],[x1,t1,CL[id]?0:depth(L,1,i,j,t1-1e-5),CL[id]?0:depth(L,2,i,j,x1-1e-5),-1,-1],
+        [x0,t0,CL[id]?0:depth(L,3,i,j,t0-1e-5),CL[id]?0:depth(L,2,i,j,x0+1e-5),1,-1],[x0,y0,depth(L,3,i,j,y0+1e-5),depth(L,0,i,j,x0+1e-5),1,1]];
+      const pts=[];for(let e=0;e<4;e++){const seg=E[e];const c0=cn[(e+3)%4];seg[0][0]=c0[0]+c0[4]*c0[2];seg[0][1]=c0[1]+c0[5]*c0[3];for(const q of seg)pts.push(q);}
+      const ring=[];for(const q of pts){const l=ring[ring.length-1];if(!l||Math.abs(l[0]-q[0])>1e-6||Math.abs(l[1]-q[1])>1e-6)ring.push(q);else l[2]=q[2];}
+      while(ring.length>1&&Math.abs(ring[0][0]-ring[ring.length-1][0])<1e-6&&Math.abs(ring[0][1]-ring[ring.length-1][1])<1e-6)ring.pop();
+      if(ring.length<3)continue;
+      for(let q=0;q<ring.length;q++){const a=ring[q],b=ring[(q+1)%ring.length];if(a[2]==='c')wall(L,a,b,2);else if(a[2]==='b')wall(L,a,b,0);}
+      const z=L===0?hT:cz,tr=THREE.ShapeUtils.triangulateShape(ring.map(q=>new THREE.Vector2(q[0],q[1])),[]);
+      for(const s of [1,-1])for(const t of tr)tri3([ring[t[0]][0],ring[t[0]][1],s*z],[ring[t[1]][0],ring[t[1]][1],s*z],[ring[t[2]][0],ring[t[2]][1],s*z],[0,0,s],L===0?0:1);}}
   const g=new THREE.BufferGeometry();
   g.setAttribute('position',new THREE.Float32BufferAttribute(P,3));g.setAttribute('normal',new THREE.Float32BufferAttribute(N,3));g.setAttribute('aPk',new THREE.Float32BufferAttribute(K,1));g.setIndex(I);
   g.computeBoundingSphere();g.computeBoundingBox();return g;

@@ -1,5 +1,6 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
 
+- 2026-11-22 Breakable panels: damage edges are cut as tiles from the neighbour cells — each cut edge bites into the cell in brick-sized steps (per material), continuous along a run of cut edges, so holes look like knocked-out bricks instead of grid squares. The outer skin bites deeper than the core (layered broken edge, plaster peels to jagged brick). Door/window/gable/border edges stay straight; untouched cells stay merged.
 - 2026-11-22 Darkness: BA holds its follow-through for the reverse swing or relaxes alongside the scythe after two seconds. Fixed the blade flip into the BA spin and smoothed recovery handoffs across active scythe skills.
 
 - 2026-11-22 Breakable panels are real geometry: each panel is a mesh built from its cells (full / thinner core / gone, greedy-merged faces, exact door/window and gable edges), rebuilt only when a cell changes depth. Replaces the fragment-shader raymarch: no more stacked-layer look at any angle and no per-pixel loop (better FPS). Holes now follow the cell grid.
