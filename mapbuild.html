@@ -31,6 +31,9 @@ main{flex:1;display:flex;min-height:0}
 #cv{position:absolute;inset:0;width:100%;height:100%;display:block;outline:none;cursor:crosshair}
 #vbar{position:absolute;top:8px;left:8px;display:flex;flex-wrap:wrap;gap:4px 10px;align-items:center;background:var(--bg1);border:1px solid var(--ln2);border-radius:var(--r);padding:4px 8px}
 #vbar .tl-btn{padding:2px 8px;font-size:12px}
+#gbar{position:absolute;top:8px;right:8px;display:flex;gap:4px;background:var(--bg1);border:1px solid var(--ln2);border-radius:var(--r);padding:4px 6px}
+#gbar .tl-btn{padding:2px 8px;font-size:12px}
+#gbar .tl-btn.on{background:var(--acc);color:#fff;border-color:var(--acc)}
 #vmsg{position:absolute;top:45%;left:0;right:0;text-align:center;color:var(--tx2);pointer-events:none}
 #status{display:flex;gap:14px;padding:3px 10px;background:var(--bg1);border-top:1px solid var(--ln);font:12px var(--fu);color:var(--tx2);white-space:nowrap;overflow:hidden}
 #status #hint{font-family:var(--ui);color:var(--tx3);overflow:hidden;text-overflow:ellipsis}
@@ -101,6 +104,12 @@ dialog .btns{display:flex;justify-content:flex-end;gap:8px;margin-top:14px}
       <label class="chk" style="margin:0"><input type="checkbox" id="oGrid">กริด</label>
       <label class="chk" style="margin:0" title="พื้นที่เฟส / เพดาน (เครื่องหมายบุกปราสาท)"><input type="checkbox" id="oArea" checked>พื้นที่/เพดาน</label>
       <label class="chk" style="margin:0"><input type="checkbox" id="oSky" checked>แสงตามแผนที่</label>
+    </div>
+    <div id="gbar" title="ลูกศรบนของที่เลือก">
+      <button class="tl-btn" data-g="translate" title="เลื่อนตำแหน่ง (1) — ลูกศรเขียว = ยกขึ้น/ลง">✥ เลื่อน</button>
+      <button class="tl-btn" data-g="rotate" title="หมุน (2)">⟳ หมุน</button>
+      <button class="tl-btn" data-g="scale" title="ปรับขนาด (3) — กล่องกลาง = ทุกด้านเท่ากัน">⤢ ขนาด</button>
+      <button class="tl-btn" data-g="off" title="ซ่อนลูกศร (0)">ซ่อน</button>
     </div>
     <div id="vmsg">กำลังโหลด…</div>
   </div>

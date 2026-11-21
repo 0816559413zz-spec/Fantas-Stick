@@ -1,13 +1,14 @@
 // Map Builder (mapbuild.html) — 3D editor for real game maps. Data model + game export: mapbuild/model.js • format/how-to: guides/MAP-BUILDER.md
 // Saves the source to maps/build/<id>.json and exports assets/maps/<id>.json + .glb (+ manifest) through tools/serve.py (/api/mb*).
 // Scene: everything lives in `root` (map coords: x east 0..W, z south 0..H, y up); root is shifted so the map centre is the world origin, like the game.
-// Mouse: left = current tool • right-drag = orbit • middle-drag / Space+drag = pan • wheel = zoom.
+// Mouse: left = current tool • right-drag = orbit • middle-drag / Space+drag = pan • wheel = zoom • gizmo on the selection (1 move / 2 rotate / 3 size / 0 off).
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
 import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
 import { GLTFExporter } from 'three/addons/exporters/GLTFExporter.js';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
+import { TransformControls } from 'three/addons/controls/TransformControls.js';
 import * as MD from './model.js';
 const { C, SURF, OBJ } = MD;
 
@@ -41,6 +42,10 @@ root.add(gWalls, gFloors, gObjs, gParts, gHelp, gCol);
 const ACC = new THREE.Color(css('--acc') || '#4a8cff');
 let terr = null, gridLines = null, bounds = null, selBox = null;
 const ray = new THREE.Raycaster(), v2 = new THREE.Vector2(), v3 = new THREE.Vector3();
+// selection gizmo (see 'gizmo' below) — made before the canvas listeners so its pointerdown runs first and sets tc.dragging
+const gAnchor = new THREE.Object3D(); root.add(gAnchor);
+const tc = new TransformControls(camera, cv); tc.setSize(0.9); scene.add(tc);
+tc.traverse(o => { o.renderOrder = 30; });
 
 const matCache = new Map();
 function mat(c, o = {}) {   // shared material per colour (few materials = few draw calls in the game after batching)
@@ -458,7 +463,7 @@ function updSel() {
     const nodes = bxN ? [bxN] : sel.k === 'obj' ? [objNode.get(it.id)] : sel.k === 'part' ? [partNode.get(it.id)] : sel.k === 'room' ? [gWalls, gFloors, gObjs, gParts].flatMap(g => g.children.filter(c => c.userData.ref && c.userData.ref.k === 'room' && c.userData.ref.id === it.id)) : (sel.k === 'wall' ? gWalls : gFloors).children.filter(c => c.userData.ref.id === it.id);
     root.updateMatrixWorld(true); for (const n of nodes) if (n) { t.setFromObject(n); b.union(t); }
     if (!b.isEmpty()) { selBox = new THREE.Box3Helper(b, 0xffffff); selBox.material.depthTest = false; selBox.renderOrder = 9; scene.add(selBox); } }
-  drawHandles(); need();
+  drawHandles(); placeGizmo(); need();
 }
 function updGhost() {
   const key = (tool === 'place' && !opt.obj.startsWith('room:') ? opt.obj + '|' + JSON.stringify(opt.prim) : '');
@@ -522,6 +527,7 @@ function updPartGhost() {
 }
 cv.addEventListener('contextmenu', e => e.preventDefault());
 cv.addEventListener('pointerdown', e => {
+  if (e.button === 0 && !spaceDown && tc.object && (tc.axis || tc.dragging)) return;   // gizmo handle grabbed
   cv.focus(); cv.setPointerCapture(e.pointerId); updHover(e);
   if (e.button === 2 || e.button === 1 || (e.button === 0 && spaceDown)) { drag = { k: e.button === 2 ? 'orbit' : 'pan', x: e.clientX, y: e.clientY }; return; }
   if (e.button !== 0) return;
@@ -647,6 +653,67 @@ function scatter(dt, inv) {
 }
 const isVisualType = t => t.startsWith('kit:') || (OBJ[t] && OBJ[t].cat === 'prim');
 
+// ================= gizmo: arrows / ring / boxes on the selection (three TransformControls) =================
+// 1 = move (world axes, Y = height) • 2 = rotate (Y ring) • 3 = size (local axes of the item) • 0 = off. One undo step per drag.
+// The anchor sits in `root` (map coords); each drag maps the anchor's change onto the item's own fields from a copy taken at mouse-down.
+let gmode = 'translate', gz = null;
+const yawOf = q => 2 * Math.atan2(q.y, q.w), r2 = v => +v.toFixed(2), r3 = v => +v.toFixed(3);
+const flatRot = it => it.t === 'phase' || it.t === 'ceil' || it.t === 'dc_box';   // axis-aligned in the game
+const isDeco = it => OBJ[it.t] && OBJ[it.t].cat === 'deco';
+function gScaleKind(k, it) {   // how [3] size maps onto this item: 'u' uniform s, 'p' panel L/sy/T, 'L' length, 'xyz' / 'xz' sizes, 'f' floor, 'w' wall, 'fp' free shape, 'cp' castle part, null = none
+  if (k === 'room') return null; if (k === 'wall') return 'w'; if (k === 'floor') return 'f'; if (k === 'part') return it.pts ? 'fp' : 'cp';
+  if (isKit(it) || it.t === 'core') return 'u'; if (it.t === 'pn_wall') return 'p'; if (MD.isRP(it.t) && it.L) return 'L';
+  if (isPrim(it) || isDeco(it)) return 'xyz'; if (it.t === 'house' || it.t === 'phase' || it.t === 'ceil') return 'xz'; return null;
+}
+function placeGizmo() {
+  if (gz) return; const it = tool === 'select' && gmode !== 'off' && sel && sel.pt == null ? find(sel) : null;
+  syncGbar(); if (!it) { tc.detach(); need(); return; }
+  const k = sel.k, b = selBox && selBox.box;
+  const px = k === 'wall' ? it.pts.reduce((s, p) => s + p[0], 0) / it.pts.length : it.x, pz = k === 'wall' ? it.pts.reduce((s, p) => s + p[1], 0) / it.pts.length : it.z;
+  gAnchor.position.set(px, b && !b.isEmpty() ? (b.min.y + b.max.y) / 2 : MD.gh(M, px, pz), pz);
+  gAnchor.quaternion.setFromAxisAngle(THREE.Object3D.DEFAULT_UP, gmode === 'translate' || k === 'wall' || flatRot(it) ? 0 : it.rot || 0); gAnchor.scale.set(1, 1, 1);
+  const sk = gScaleKind(k, it);
+  if (gmode === 'translate') { tc.showX = tc.showZ = true; tc.showY = k !== 'room'; }
+  else if (gmode === 'rotate') { tc.showX = tc.showZ = false; tc.showY = !flatRot(it); }
+  else { tc.showX = tc.showZ = !!sk && sk !== 'u' && sk !== 'cp' && sk !== 'L'; tc.showY = !!sk && sk !== 'xz' && sk !== 'L'; if (sk === 'u' || sk === 'cp' || sk === 'L') tc.showX = tc.showY = tc.showZ = true; }
+  if (!tc.showX && !tc.showY && !tc.showZ) { tc.detach(); need(); return; }
+  tc.setMode(gmode); tc.setSpace(gmode === 'translate' ? 'world' : 'local');
+  tc.setTranslationSnap(opt.snap || null); tc.setRotationSnap(k === 'room' ? Math.PI / 2 : Math.PI / 36);
+  if (tc.object !== gAnchor) tc.attach(gAnchor); need();
+}
+function setGizmo(m) { gmode = gmode === m && m !== 'off' ? 'off' : m; placeGizmo(); }
+function syncGbar() { for (const b of document.querySelectorAll('#gbar [data-g]')) b.classList.toggle('on', b.dataset.g === gmode); }
+tc.addEventListener('change', need);
+tc.addEventListener('mouseDown', () => { const it = find(sel); if (!it) return; gz = { it, k: sel.k, s: JSON.parse(JSON.stringify(it)), j: JSON.stringify(it), p: gAnchor.position.clone(), r0: yawOf(gAnchor.quaternion) }; pushUndo('o'); });
+tc.addEventListener('mouseUp', () => { const z = gz; if (!z) return; gz = null;
+  if (JSON.stringify(z.it) === z.j) undo.pop(); else { changed(); colDirty(); renderSide(); } updSel(); });
+tc.addEventListener('objectChange', () => {
+  const z = gz; if (!z) return; const { it, k, s } = z;
+  if (gmode === 'translate') {
+    const dx = gAnchor.position.x - z.p.x, dy = gAnchor.position.y - z.p.y, dz = gAnchor.position.z - z.p.z, up = Math.abs(dy) > 0.004;
+    if (k === 'wall') { it.pts = s.pts.map(p => [r2(clamp(p[0] + dx, 0, M.W)), r2(clamp(p[1] + dz, 0, M.H))]); if (up) it.base = r2((s.base != null ? s.base : MD.gh(M, s.pts[0][0], s.pts[0][1])) + dy); }
+    else { it.x = r2(clamp(s.x + dx, 0, M.W)); it.z = r2(clamp(s.z + dz, 0, M.H));
+      if (up && k === 'obj') it.y = r2(Math.max(0, (s.y != null ? s.y : it.t === 'ring' ? 6 : it.t === 'light' ? 2.2 : it.t === 'ceil' ? 21 : 0) + dy));
+      else if (up && k === 'part') it.base = r2((s.base != null ? s.base : MD.gh(M, s.x, s.z)) + dy);
+      else if (up && k === 'floor') { it.y = r2(s.y + dy); it.y2 = r2((s.y2 == null ? s.y : s.y2) + dy); } }
+  } else if (gmode === 'rotate') {
+    let a = yawOf(gAnchor.quaternion) - z.r0; a = Math.atan2(Math.sin(a), Math.cos(a));
+    if (k === 'wall') { const cx = z.p.x, cz = z.p.z, c = Math.cos(a), sn = Math.sin(a); it.pts = s.pts.map(p => { const x = p[0] - cx, q = p[1] - cz; return [r2(cx + x * c + q * sn), r2(cz - x * sn + q * c)]; }); }
+    else { const r = ((s.rot || 0) + a) % 6.2832; it.rot = +(r < 0 ? r + 6.2832 : r).toFixed(4); }
+  } else {
+    const S = gAnchor.scale, f = [S.x, S.y, S.z].reduce((m, v) => Math.abs(Math.log(Math.max(v, 1e-3))) > Math.abs(Math.log(Math.max(m, 1e-3))) ? v : m, 1), sk = gScaleKind(k, it), mn = v => Math.max(0.05, v);
+    if (sk === 'u') it.s = r2(mn((s.s || (it.t === 'core' ? 4 : 1)) * f));
+    else if (sk === 'p') { it.L = r3(mn((s.L || 4) * S.x)); it.sy = r3(mn((s.sy || 3) * S.y)); it.T = r3(Math.max(0.03, (s.T || 0.3) * S.z)); }
+    else if (sk === 'L') it.L = r2(mn(s.L * f));
+    else if (sk === 'xyz' || sk === 'xz') { it.sx = r2(mn((s.sx || 1) * S.x)); it.sz = r2(mn((s.sz || 1) * S.z)); if (sk === 'xyz') it.sy = r2(mn((s.sy || 1) * S.y)); }
+    else if (sk === 'f') { it.w = r2(mn(s.w * S.x)); it.d = r2(mn(s.d * S.z)); if (s.th) it.th = r2(mn(s.th * S.y)); }
+    else if (sk === 'fp') { it.pts = s.pts.map(q => [r3(q[0] * S.x), r3(q[1] * S.z)]); it.h = r2(clamp(s.h * S.y, 0.5, 40)); }
+    else if (sk === 'cp') { const D = MD.PART[it.k], q = D.main; it[q] = r2(clamp(s[q] * f, D.p[q][1], D.p[q][2])); }
+    else if (sk === 'w') { const cx = z.p.x, cz = z.p.z; it.pts = s.pts.map(p => [r2(cx + (p[0] - cx) * S.x), r2(cz + (p[1] - cz) * S.z)]); it.h = r2(mn(s.h * S.y)); }
+  }
+  if (k === 'obj') syncObj(it); else if (k === 'part') syncPart(it); else if (k === 'room') syncRooms(); else if (k === 'wall') { syncWalls(); updSel(); } else { syncFloors(); updSel(); }
+});
+
 // ================= keyboard =================
 addEventListener('keydown', e => {
   if (e.code === 'Space' && !/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)) { spaceDown = true; e.preventDefault(); }
@@ -657,6 +724,7 @@ addEventListener('keydown', e => {
   if ((e.ctrlKey || e.metaKey) && k === 'y') { e.preventDefault(); doRedo(); return; }
   if ((e.ctrlKey || e.metaKey) && k === 'd') { e.preventDefault(); dupSel(); return; }
   if (e.ctrlKey || e.metaKey) return;
+  if (k === '1' || k === '2' || k === '3' || k === '0') { setGizmo(['off', 'translate', 'rotate', 'scale'][+k]); return; }
   const T = TOOLS.find(t => t[3] === k); if (T) { setTool(T[0]); return; }
   if (k === 'escape') { if (fdraft) { fdraft = null; undo.pop(); drawLine(null); drawHandles(); } else if (draft) { draft = null; undo.pop(); drawLine(null); drawHandles(); } else { sel = null; renderSide(); updSel(); } need(); }
   else if (k === 'enter' && fdraft) finishFree();
@@ -760,7 +828,7 @@ const TOOLS = [['select', '⬚', 'เลือก', 'v', 'คลิกเลื�
   ['scatter', '⁘', 'โปรย', 'g', 'ลากเพื่อโปรยของที่เลือก (ต้นไม้ หิน หญ้า) • Shift = ลบของในวง'],
 ];
 const HINT = Object.fromEntries(TOOLS.map(t => [t[0], t[4]]));
-function setTool(t) { if (draft) { draft = null; undo.pop(); drawLine(null); } if (fdraft) { fdraft = null; undo.pop(); drawLine(null); } tool = t; if (t === 'scatter' && !isVisualType(opt.obj)) { const a = KIT.list.find(a => a.cat === 'tree'); if (a) { opt.obj = 'kit:' + a.id; opt.cat = 'tree'; } } renderTools(); renderOpts(); drawHandles(); $('hint').textContent = HINT[t] || ''; need(); }
+function setTool(t) { if (draft) { draft = null; undo.pop(); drawLine(null); } if (fdraft) { fdraft = null; undo.pop(); drawLine(null); } tool = t; if (t === 'scatter' && !isVisualType(opt.obj)) { const a = KIT.list.find(a => a.cat === 'tree'); if (a) { opt.obj = 'kit:' + a.id; opt.cat = 'tree'; } } renderTools(); renderOpts(); drawHandles(); $('hint').textContent = HINT[t] || ''; placeGizmo(); need(); }
 function renderTools() { const box = $('tools'); box.textContent = ''; for (const t of TOOLS) box.append(el('button', { class: tool === t[0] ? 'on' : '', title: t[2] + ' (' + t[3].toUpperCase() + ')', onclick: () => setTool(t[0]) }, el('b', null, t[1]), el('i', null, t[2]))); }
 const h3 = t => el('h3', null, t);
 function seg(items, cur, on) { const d = el('div', { class: 'seg' }); for (const [v, n, tip] of items) d.append(el('button', { class: 'tl-btn' + (v === cur ? ' on' : ''), title: tip || '', onclick: () => on(v) }, n)); return d; }
@@ -771,7 +839,7 @@ function renderOpts() {
   const b = $('opts'); b.textContent = '';
   const brush = () => { b.append(h3('แปรง'), slider('ขนาด (รัศมี)', 'rad', 0.5, 40, 0.5), tool !== 'paint' && tool !== 'scatter' ? slider('แรง', 'str', 0.5, 12, 0.5) : null, tool !== 'scatter' ? check('ขอบนุ่ม', 'soft') : null); };
   if (tool === 'select') { b.append(h3('ย้าย'), el('div', { class: 'row' }, el('label', null, 'ดูดเข้ากริด'), el('select', { class: 'tl-sel', onchange: e => { opt.snap = +e.target.value; }, html: [[0, 'อิสระ'], [0.25, '0.25'], [0.5, '0.5'], [1, '1'], [2, '2']].map(([v, n]) => `<option value="${v}"${v === opt.snap ? ' selected' : ''}>${n}</option>`).join('') })),
-    el('p', { class: 'note', html: 'คลิกของ/กำแพง/พื้นชั้นบนเพื่อเลือก แล้วแก้ค่าละเอียดที่แผงขวา<br><kbd>Q</kbd><kbd>E</kbd> หมุน 15° (Shift = 5°)<br><kbd>[</kbd><kbd>]</kbd> ย่อ/ขยาย<br><kbd>PgUp</kbd><kbd>PgDn</kbd> ยกขึ้น/ลง<br><kbd>F</kbd> ซูมไปที่ของ<br><kbd>Ctrl+D</kbd> ทำซ้ำ • <kbd>Del</kbd> ลบ' })); }
+    el('p', { class: 'note', html: 'คลิกของ/กำแพง/พื้นชั้นบนเพื่อเลือก แล้วแก้ค่าละเอียดที่แผงขวา<br>ลากลูกศร/วง/กล่องบนของที่เลือก:<br><kbd>1</kbd> เลื่อน (ลูกศรเขียว = สูงต่ำ) <kbd>2</kbd> หมุน <kbd>3</kbd> ขนาด <kbd>0</kbd> ซ่อน<br><kbd>Q</kbd><kbd>E</kbd> หมุน 15° (Shift = 5°)<br><kbd>[</kbd><kbd>]</kbd> ย่อ/ขยาย<br><kbd>PgUp</kbd><kbd>PgDn</kbd> ยกขึ้น/ลง<br><kbd>F</kbd> ซูมไปที่ของ<br><kbd>Ctrl+D</kbd> ทำซ้ำ • <kbd>Del</kbd> ลบ' })); }
   else if (tool === 'sculpt') {
     b.append(h3('ปั้นพื้น'), seg([['up', 'ยกขึ้น'], ['down', 'กดลง'], ['smooth', 'เกลี่ย'], ['flat', 'ปรับระดับ', 'ดึงพื้นให้เท่าจุดที่เริ่มลาก'], ['set', 'ตั้งความสูง'], ['noise', 'ขรุขระ'], ['ramp', 'ทางลาด', 'ลากจาก A ไป B = ทางลาดเรียบเชื่อมสองระดับ']], opt.smode, v => { opt.smode = v; renderOpts(); }));
     if (opt.smode === 'set') b.append(slider('ความสูง', 'hval', -5, 20, 0.25));
@@ -1075,6 +1143,7 @@ function frame(t) {
 $('bNew').onclick = newDlg; $('bSave').onclick = save; $('bUndo').onclick = doUndo; $('bRedo').onclick = doRedo; $('bExport').onclick = exportGame;
 $('bPlay').onclick = async () => { const w = window.open('about:blank', 'mb_play'); if (await exportGame()) w.location = 'index.html?nosw&playmap=' + M.id + (M.modes.length === 1 && M.modes[0] === 'siege' ? '&pm=siege' : '') + '&t=' + Date.now(); else w.close(); };
 $('mapSel').onchange = e => openMap(e.target.value);
+for (const b of document.querySelectorAll('#gbar [data-g]')) b.onclick = () => setGizmo(b.dataset.g);
 $('vTop').onclick = () => { cam.pitch = 1.55; cam.yaw = 0; camApply(); }; $('vFit').onclick = fit;
 $('oSteep').onchange = e => { show.steep = e.target.checked; updTerrain(0, 0, M.nx - 1, M.ny - 1); need(); };
 $('oCol').onchange = e => { show.col = e.target.checked; buildCol(); need(); };

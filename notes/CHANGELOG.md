@@ -1,5 +1,7 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
 
+- 2026-11-21 Map Builder gizmo: the selected item shows drag handles — move arrows (green = height), a rotate ring and size boxes along the item's own axes (panel length/height/thickness, prim sizes, floor width/length, wall spread/height, kit/castle uniform). Bar at the top right of the view or keys 1/2/3, 0 hides. One undo step per drag.
+
 - 2026-11-21 Old breakable-house system removed (protocol v104): BLDG chunks, BD snapshot, house view/debris models, house glb + Blender scripts, tune keys bld.house.* (now pnl.<material>.hp; previous wall/roof values carried over). Callers (ice/water rays, bot nav, camera inside houses, cloth, grass, dev destroy tool) use breakable panels instead.
 
 - 2026-11-21 Breakable panels round C (protocol v103): all old breakable houses (snow + London, every map) are rebuilt as panel groups at map load: plaster-over-brick or brick walls with door/window openings, lit window panes, gable triangles and two sloped roof panels that fall when the walls under them go. New panel features: tilt, triangle shape, openings, roof/snowroof/timber/litwin materials. Map Builder: house → panels button, tilt/shape/opening fields. Fix: grass floating next to broken walls (panels hidden during the grass bake, no grass under walls or inside houses).
