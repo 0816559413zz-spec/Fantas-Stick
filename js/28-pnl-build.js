@@ -1,7 +1,7 @@
 // ---------- Breakable panels — view (state = PNL in js/12-pnl.js) ----------
 // One box mesh per panel. Damage = small DataTexture (1 texel per cell: R crack, G outer skin gone, B through) sampled with linear filter + noise,
 // so holes are smooth and merge across cells. Brick/stone sample the field at the brick centre → hole edges step along whole bricks.
-// Holes/recesses are ray-marched through the box in the fragment shader (any face; bisected hits = straight cut faces; no geometry rebuild).
+// Holes/recesses are real geometry (pnlGeo: greedy-merged faces, rebuilt only when a cell changes depth) — the shader only paints (aPk = surface kind).
 // Pattern coordinates are world-continuous (along the wall + world height) so neighbouring panels line up.
 // Rubble: dusty heap strip + instanced chunks at the foot of broken cells (same heights as pnlMoundH).
 const PNV={list:[],mats:new Map()};
@@ -43,26 +43,11 @@ function pnlMat(mat){
   const m=new THREE.MeshStandardMaterial({color:'#ffffff',roughness:mi===4||mi===9?0.15:mi===5?0.55:0.92,metalness:mi===5?0.4:0,transparent:mi===4,opacity:mi===4?0.55:1});
   m.defines={PNM:mi};
   m.onBeforeCompile=sh=>{Object.assign(sh.uniforms,m.userData.U);
-    sh.vertexShader=sh.vertexShader.replace('#include <common>','#include <common>\nvarying vec3 vLP;varying vec3 vCamL;varying vec3 vAx;varying vec3 vAy;varying vec3 vAz;')
-      .replace('#include <begin_vertex>','#include <begin_vertex>\nvLP=position;vCamL=(inverse(modelMatrix)*vec4(cameraPosition,1.)).xyz;vAx=normalize(normalMatrix*vec3(1.,0.,0.));vAy=normalize(normalMatrix*vec3(0.,1.,0.));vAz=normalize(normalMatrix*vec3(0.,0.,1.));');
-    sh.fragmentShader=sh.fragmentShader.replace('#include <common>','#include <common>\nvarying vec3 vLP;varying vec3 vCamL;varying vec3 vAx;varying vec3 vAy;varying vec3 vAz;'+PN_GLSL)
+    sh.vertexShader=sh.vertexShader.replace('#include <common>','#include <common>\nattribute float aPk;varying vec3 vLP;varying float vPk;')
+      .replace('#include <begin_vertex>','#include <begin_vertex>\nvLP=position;vPk=aPk;');
+    sh.fragmentShader=sh.fragmentShader.replace('#include <common>','#include <common>\nvarying vec3 vLP;varying float vPk;'+PN_GLSL)
       .replace('#include <map_fragment>',`#include <map_fragment>
-int pk=0;vec3 nR=vec3(0.);vec2 lp=vLP.xy;float dep=0.,pnGlow=0.;
-float hT=uSz.z*0.5;
-if(hT-abs(vLP.z)+0.002<pnM(lp)){
-  // carved material = prism along z: solid(P) = distance to nearest face >= pnM(P.xy). Walk the real 3D ray through the box
-  // (any face, side caps too), fine even steps up to 160, then bisect every hit → straight cut faces, no stacked 'slices' at grazing angles
-  vec3 D=normalize(vLP-vCamL),sD=vec3(D.x<0.?-1.:1.,D.y<0.?-1.:1.,D.z<0.?-1.:1.),bh=vec3(uSz.xy*0.5,hT);
-  vec3 tx=(sD*bh-vLP)*sD/max(abs(D),vec3(1e-5));float tE=max(min(tx.x,min(tx.y,tx.z)),0.);
-  int N=int(clamp(ceil(tE/0.012),4.,160.));float stp=tE/float(N),tp=0.;bool hit=false;
-  for(int i=1;i<=160;i++){if(i>N)break;float t=stp*float(i);vec3 P=vLP+D*t;
-    if(hT-abs(P.z)>=pnM(P.xy)){float a=tp,b=t;for(int j=0;j<8;j++){float h=(a+b)*0.5;vec3 Q=vLP+D*h;if(hT-abs(Q.z)>=pnM(Q.xy))b=h;else a=h;}
-      vec3 H=vLP+D*b,A=vLP+D*a;lp=H.xy;dep=hT-abs(H.z);pk=pnM(A.xy)>pnM(H.xy)+1e-4?2:1;if(pk==1)nR=vec3(0.,0.,sign(H.z));hit=true;break;}
-    tp=t;}
-  if(!hit)discard;
-  if(pk==2){float e=0.025;float a=step(pnM(lp-vec2(e,0.)),dep)-step(pnM(lp+vec2(e,0.)),dep),b=step(pnM(lp-vec2(0.,e)),dep)-step(pnM(lp+vec2(0.,e)),dep);
-    nR=length(vec2(a,b))>0.?normalize(vec3(a,b,0.)):normalize(vec3(-D.xy,0.001));}
-}
+int pk=int(vPk+0.5);vec2 lp=vLP.xy;float dep=uSz.z*0.5-abs(vLP.z),pnGlow=0.;   // pk 0 outer surface • 1 recess floor • 2 cut face (real geometry, pnlGeo)
 vec2 q=lp+uOff;vec3 fd=pnF(lp);float nz=pnN(q*1.7)*0.55+pnN(q*7.3)*0.45;vec3 c;
 #if PNM==1
   if(pk==0){c=vec3(0.72,0.68,0.61)*(0.88+0.16*nz);c*=1.-0.12*smoothstep(0.55,0.9,pnN(q*0.6+2.));}
@@ -99,22 +84,70 @@ if(pk==0){float cr=smoothstep(0.35,0.85,fd.r+(nz-0.5)*0.45);vec2 w=q*1.4+vec2(pn
   float ln=max(1.-smoothstep(0.,0.01+0.012*cr,abs(pnN(w*2.)-0.5)),0.7*(1.-smoothstep(0.,0.007,abs(pnN(w*4.6+3.)-0.5))));c*=1.-0.75*cr*ln;
   c*=1.-0.3*smoothstep(0.15,0.5,fd.b*0.8+fd.g*0.5);}
 diffuseColor.rgb=pow(max(c,vec3(0.)),vec3(2.2));`)   // palette written in sRGB → linear
-      .replace('#include <normal_fragment_maps>','#include <normal_fragment_maps>\nif(pk!=0)normal=normalize(nR.x*vAx+nR.y*vAy+nR.z*vAz);')
       .replace('#include <emissivemap_fragment>','#include <emissivemap_fragment>\n#if PNM==9\ntotalEmissiveRadiance=vec3(1.,0.6,0.26)*1.4*pnGlow;\n#endif');
   };
   m.customProgramCacheKey=()=>'pnl'+mi;
   return m;
 }
-function pnlDepthMat(mat,U){
-  const m=new THREE.MeshDepthMaterial({depthPacking:THREE.RGBADepthPacking});m.defines={PNM:PN_MI[mat]??0};
-  m.onBeforeCompile=sh=>{Object.assign(sh.uniforms,U);
-    sh.vertexShader=sh.vertexShader.replace('#include <common>','#include <common>\nvarying vec3 vLP;').replace('#include <begin_vertex>','#include <begin_vertex>\nvLP=position;');
-    sh.fragmentShader=sh.fragmentShader.replace('#include <common>','#include <common>\nvarying vec3 vLP;'+PN_GLSL).replace('#include <clipping_planes_fragment>','#include <clipping_planes_fragment>\nif(pnM(vLP.xy)>=9.)discard;');};
-  m.customProgramCacheKey=()=>'pnld'+(PN_MI[mat]??0);
-  return m;
-}
 const PN_RUB={roof:['#4a4e58','#3a3e48','#5a5e68'],snowroof:['#e8eef4','#4a4e58','#cfd8e0'],timber:['#d8ccb4','#5a3e28','#9a5a3c'],litwin:['#ffd89a','#cfeef8'],brick:['#8a4a32','#a85a3a','#7c7468','#6a3a28'],plaster:['#bdb5a5','#9a5a3c','#8c8478','#a8a090'],stone:['#8a857a','#6e6a62','#9a948a'],wood:['#6a4a2c','#4a3420','#7a5a38'],glass:['#cfeef8'],metal:['#6a6e72','#55585c']};
 const PN_HEAP={roof:'#4e5058',snowroof:'#8a8c90',timber:'#968c7c',litwin:'#888',brick:'#7a5a48',plaster:'#968c7c',stone:'#7e786e',wood:'#5a4632',glass:'#888',metal:'#5c5e60'};
+// Real geometry for a panel: the slab is split on cell lines (+ exact opening edges, + gable slope crossings) into sub-rects;
+// each sub-rect is full thickness (stage ≤1), a thinner core (stage 2 = outer skin gone on both faces) or empty (stage 3 / opening / above the gable).
+// Faces between different depths become cut faces (aPk 2), recess floors aPk 1, outer surface aPk 0. Same-depth faces are merged (greedy) → few triangles.
+// Rebuilt only when a cell changes depth class (pnlSyncOne), so the render cost is a plain mesh.
+function pnlCls(p){   // depth class per cell: 0 full • 1 core • 2 gone
+  const n=p.st.length,c=new Uint8Array(n);
+  for(let k=0;k<n;k++)c[k]=!p.ex[k]?3:p.st[k]>=3?2:p.st[k]>=2?1:0;
+  for(let k=0;k<n;k++)if(c[k]===3){const col=k%p.nc,r=(k/p.nc)|0;let b=2;   // missing cell (opening / gable): follow its live neighbours (exact edge comes from the clip)
+    for(const [dc,dr] of [[-1,0],[1,0],[0,-1],[0,1]]){const cc=col+dc,rr=r+dr;if(cc<0||rr<0||cc>=p.nc||rr>=p.nr)continue;const q=c[rr*p.nc+cc];if(q<b)b=q;}c[k]=b;}
+  return c;
+}
+function pnlGeo(p,cls,Lm,H,Tm,rec){
+  const hL=Lm/2,hH=H/2,hT=Tm/2,cw=Lm/p.nc,ch=H/p.nr,ho=(p.d.ho||[]).slice(0,4),tri=p.tri;
+  const slope=x=>tri?-hH+H*(1-Math.abs(x)/hL):1e9;
+  const xs=new Set([-hL,hL]),ys=new Set([-hH,hH]);
+  for(let i=1;i<p.nc;i++)xs.add(-hL+i*cw);for(let j=1;j<p.nr;j++)ys.add(-hH+j*ch);
+  for(const q of ho){xs.add(Math.max(-hL,Math.min(hL,q[0]-hL)));xs.add(Math.max(-hL,Math.min(hL,q[1]-hL)));ys.add(Math.max(-hH,Math.min(hH,q[2]-hH)));ys.add(Math.max(-hH,Math.min(hH,q[3]-hH)));}
+  if(tri){xs.add(0);for(const y of ys){const u=hL*(1-(y+hH)/H);xs.add(u);xs.add(-u);}}
+  const X=[...xs].sort((a,b)=>a-b).filter((v,i,a)=>!i||v-a[i-1]>1e-4),Y=[...ys].sort((a,b)=>a-b).filter((v,i,a)=>!i||v-a[i-1]>1e-4),NX=X.length-1,NY=Y.length-1;
+  const ext=[hT,hT-rec,0],E=new Float32Array(NX*NY),T0=new Float32Array(NX*NY),T1=new Float32Array(NX*NY),CL=new Uint8Array(NX*NY);   // E half-depth, T0/T1 top at left/right (gable clip)
+  for(let j=0;j<NY;j++)for(let i=0;i<NX;i++){const id=j*NX+i,x0=X[i],x1=X[i+1],y0=Y[j],y1=Y[j+1];
+    const t0=Math.min(y1,slope(x0)),t1=Math.min(y1,slope(x1));T0[id]=t0;T1[id]=t1;
+    if(t0<=y0+1e-5&&t1<=y0+1e-5){E[id]=0;continue;}
+    const cx=(x0+x1)/2,cy=(y0+Math.min(y1,(t0+t1)/2))/2;
+    if(ho.some(q=>cx>q[0]-hL&&cx<q[1]-hL&&cy>q[2]-hH&&cy<q[3]-hH)){E[id]=0;continue;}
+    const col=Math.min(p.nc-1,Math.max(0,Math.floor((cx+hL)/cw))),r=Math.min(p.nr-1,Math.max(0,Math.floor((cy+hH)/ch)));E[id]=ext[cls[r*p.nc+col]];
+    CL[id]=(t0<y1-1e-5||t1<y1-1e-5)?1:0;}
+  const P=[],N=[],K=[],I=[];
+  const quad=(a,b,c,d,n,k)=>{const o=P.length/3;P.push(...a,...b,...c,...d);for(let q=0;q<4;q++){N.push(...n);K.push(k);}
+    const ux=b[0]-a[0],uy=b[1]-a[1],uz=b[2]-a[2],vx=c[0]-a[0],vy=c[1]-a[1],vz=c[2]-a[2],dt=(uy*vz-uz*vy)*n[0]+(uz*vx-ux*vz)*n[1]+(ux*vy-uy*vx)*n[2];
+    if(dt>=0)I.push(o,o+1,o+2,o,o+2,o+3);else I.push(o,o+2,o+1,o,o+3,o+2);};
+  const zk=e=>e>=hT-1e-5?0:1;   // outer face or recess floor
+  // front/back faces: greedy rectangles of equal depth (gable-clipped sub-rects emitted alone)
+  const used=new Uint8Array(NX*NY);
+  for(let j=0;j<NY;j++)for(let i=0;i<NX;i++){const id=j*NX+i,e=E[id];if(used[id]||e<=0)continue;
+    if(CL[id]){used[id]=1;const x0=X[i],x1=X[i+1],y0=Y[j];for(const s of [1,-1])quad([x0,y0,s*e],[x1,y0,s*e],[x1,T1[id],s*e],[x0,T0[id],s*e],[0,0,s],zk(e));continue;}
+    let w=1;while(i+w<NX&&!used[id+w]&&!CL[id+w]&&E[id+w]===e)w++;
+    let h=1;grow:while(j+h<NY){for(let q=0;q<w;q++){const k2=(j+h)*NX+i+q;if(used[k2]||CL[k2]||E[k2]!==e)break grow;}h++;}
+    for(let r=0;r<h;r++)for(let q=0;q<w;q++)used[(j+r)*NX+i+q]=1;
+    const x0=X[i],x1=X[i+w],y0=Y[j],y1=Y[j+h];for(const s of [1,-1])quad([x0,y0,s*e],[x1,y0,s*e],[x1,y1,s*e],[x0,y1,s*e],[0,0,s],zk(e));}
+  // side faces where the depth steps down (cut faces) or at the panel border / gable slope (outer edge)
+  const side=(ea,eb,pa,pb,n,k)=>{   // strip between depth eb and ea on both faces (eb 0 = one band through the core)
+    if(eb<=0){quad([...pa,-ea],[...pb,-ea],[...pb,ea],[...pa,ea],n,k);return;}
+    quad([...pa,eb],[...pb,eb],[...pb,ea],[...pa,ea],n,k);quad([...pa,-ea],[...pb,-ea],[...pb,-eb],[...pa,-eb],n,k);};
+  for(let j=0;j<NY;j++)for(let i=0;i<NX;i++){const id=j*NX+i,e=E[id];if(e<=0)continue;const x0=X[i],x1=X[i+1],y0=Y[j];
+    // ±x neighbours (vertical edge, height up to the clipped top at that x)
+    for(const [di,xe,t] of [[-1,x0,T0[id]],[1,x1,T1[id]]]){const ii=i+di,eb=ii<0||ii>=NX?0:Math.min(E[j*NX+ii],e);if(eb>=e-1e-6||t<=y0+1e-5)continue;
+      const k=ii<0||ii>=NX?0:2;side(e,eb,[xe,y0],[xe,t],[di,0,0],k);}
+    // −y neighbour
+    {const eb=j===0?0:Math.min(E[(j-1)*NX+i],e);if(eb<e-1e-6)side(e,eb,[x0,y0],[x1,y0],[0,-1,0],j===0?0:2);}
+    // top: clipped = gable slope (outer edge) • else +y neighbour
+    if(CL[id]){const dx=x1-x0,dy=T1[id]-T0[id],l=Math.hypot(dx,dy);side(e,0,[x0,T0[id]],[x1,T1[id]],[-dy/l,dx/l,0],0);}
+    else{const top=j===NY-1,eb=top?0:Math.min(E[(j+1)*NX+i],e);if(eb<e-1e-6)side(e,eb,[x0,Y[j+1]],[x1,Y[j+1]],[0,1,0],top?0:2);}}
+  const g=new THREE.BufferGeometry();
+  g.setAttribute('position',new THREE.Float32BufferAttribute(P,3));g.setAttribute('normal',new THREE.Float32BufferAttribute(N,3));g.setAttribute('aPk',new THREE.Float32BufferAttribute(K,1));g.setIndex(I);
+  g.computeBoundingSphere();g.computeBoundingBox();return g;
+}
 function pnlBuild(){
   PNV.list=[];if(!PNL.length)return;
   const grp=addW(new THREE.Group()),rg=new THREE.DodecahedronGeometry(1,0);
@@ -124,9 +157,9 @@ function pnlBuild(){
     const Lm=p.hl*2*S3,Tm=p.ht*2*S3,cx=tx(p.x),cz=tz(p.y),mid=pnP3(p,0,p.Hp/2);
     const U={uDmg:{value:tex},uSz:{value:new THREE.Vector3(Lm,p.H,Tm)},uOff:{value:new THREE.Vector2(cx*p.c+cz*p.s,p.tl?p.H/2:p.zb+p.H/2)},uRec:{value:Math.min(0.12,Tm*0.4)},uTri:{value:p.tri?1:0},uNHo:{value:Math.min(4,(p.d.ho||[]).length)},uHo:{value:[0,1,2,3].map(i=>{const h=(p.d.ho||[])[i]||[0,0,0,0];return new THREE.Vector4(h[0],h[1],h[2],h[3]);})}};
     const mat=pnlMat(p.mat);mat.userData.U=U;
-    const m=new THREE.Mesh(new THREE.BoxGeometry(Lm,p.H,Tm),mat);m.position.set(tx(mid[0]),mid[2],tz(mid[1]));m.rotation.order='YXZ';m.rotation.y=-p.a;m.rotation.x=p.tl;m.castShadow=m.receiveShadow=true;
-    m.customDepthMaterial=pnlDepthMat(p.mat,U);grp.add(m);
-    const e={p,m,tex,data,ver:-1,heap:null,rub:null};
+    const rec=U.uRec.value,cls=pnlCls(p),m=new THREE.Mesh(pnlGeo(p,cls,Lm,p.H,Tm,rec),mat);m.position.set(tx(mid[0]),mid[2],tz(mid[1]));m.rotation.order='YXZ';m.rotation.y=-p.a;m.rotation.x=p.tl;m.castShadow=m.receiveShadow=true;
+    grp.add(m);
+    const e={p,m,tex,data,ver:-1,heap:null,rub:null,ck:cls.join(''),Lm,Tm,rec};
     if(p.mode!=='g'&&!p.tl){
       const S=PNDEF.pile.sp*S3,W=Lm+2*S,D=Tm+2*S,hg=new THREE.PlaneGeometry(W,D,Math.max(2,Math.ceil(W/0.35)),12);hg.rotateX(-Math.PI/2);
       const hm=new THREE.Mesh(hg,new THREE.MeshStandardMaterial({color:PN_HEAP[p.mat]||'#7a6a5a',roughness:1,flatShading:true}));hm.position.set(cx,0,cz);hm.rotation.y=-p.a;hm.receiveShadow=true;hm.visible=false;grp.add(hm);
@@ -139,6 +172,7 @@ function pnlSyncOne(e){
   const p=e.p,d=e.data;e.ver=p.ver;let alive=false;
   for(let k=0;k<p.st.length;k++){const s=p.st[k];d[k*4]=s>=1?255:0;d[k*4+1]=s>=2?255:0;d[k*4+2]=s>=3?255:0;d[k*4+3]=255;if(s<3)alive=true;}
   e.tex.needsUpdate=true;e.m.visible=alive;
+  if(alive){const cls=pnlCls(p),ck=cls.join('');if(ck!==e.ck){e.ck=ck;e.m.geometry.dispose();e.m.geometry=pnlGeo(p,cls,e.Lm,p.H,e.Tm,e.rec);}}   // depth changed → rebuild this panel only
   if(!e.heap)return;
   const ph=pnPileCols(p);e.heap.visible=!!ph;if(!ph){e.rub.count=0;return;}
   // heap strip: vertex heights from pnPileAt (local grid → world)

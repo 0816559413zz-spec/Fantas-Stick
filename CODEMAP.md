@@ -398,8 +398,8 @@ makeSnow:471 makeFireflies:478 makeSnitch:485 fileMapFx:492
 §502 แผนที่จากไฟล์ Blender (guides/MAP-DESIGN.md)
 terrGeo:504 buildFileMap:512 tickM:565 TRPAD:566 ARPAD:566 SHPAD:566 signTex:567 testSign:568 buildTest:575 buildRuins:680 buildPitch:705
 
-## js/28-pnl-build.js (170) — Breakable panels — view (state = PNL in js/12-pnl.js)
-PNV:7 PN_MI:8 PN_GLSL:9 pnlMat:41 pnlDepthMat:108 PN_RUB:116 PN_HEAP:117 pnlBuild:118 pnlSyncOne:138 pnlView:159 pnlFX:162
+## js/28-pnl-build.js (204) — Breakable panels — view (state = PNL in js/12-pnl.js)
+PNV:7 PN_MI:8 PN_GLSL:9 pnlMat:41 PN_RUB:92 PN_HEAP:93 pnlCls:98 pnlGeo:105 pnlBuild:151 pnlSyncOne:171 pnlView:193 pnlFX:196
 
 ## js/29-characters.js (439) — ระบบผ้า (เสื้อคลุมพลิ้วตามการเคลื่อนที่)
 makeCloak:2 updateCloth:10 wandNamed:34 wandSparks:83
@@ -898,4 +898,4 @@ _dvPanel:95 _dvBtn:98 _dvBody:100 _dvHead:100 devUiApply:102 devFreeMouse:110 de
 §130 rows
 dvA:131 dvTg:132 dvB:133 dvCh:134 dvSl:135 dvSub:136 dvCol:137 devKeyOf:138 devRender:143 devPos:193 devUiAct:200
 
-(113 files, 33093 lines)
+(113 files, 33127 lines)
