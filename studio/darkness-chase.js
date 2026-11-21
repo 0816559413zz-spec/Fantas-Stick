@@ -376,14 +376,10 @@ function stDarkUnmarkedChase(root,live){
   const highOffset=tip.clone().applyQuaternion(high);
   const returnStart=new THREE.Vector3();
   sweepTip(topAngle,returnStart);returnStart.sub(highOffset);
-  const turnSpeed=(topAngle-hitAngle)*.65/(finish-hit);
-  const returnVelocity=swingForward.clone().multiplyScalar(swingReach*Math.cos(topAngle));
-  returnVelocity.y=swingHeight*Math.sin(topAngle);
-  returnVelocity.sub(new THREE.Vector3().crossVectors(swingAxis,highOffset)).multiplyScalar(turnSpeed);
   const restPosition=new THREE.Vector3(1.5,.08,range);
   const restRotation=new THREE.Quaternion().setFromEuler(new THREE.Euler(.25,-.32,.16));
-  const firstRestRotation=restRotation.clone(),returnTurn=new THREE.Quaternion();
-  let returnStarted=false;
+  const returnReference=restRotation.clone(),returnOffset=new THREE.Quaternion(),returnCorrection=new THREE.Quaternion();
+  let returning=false;
   const sample={pos:new THREE.Vector3(),QB:new THREE.Quaternion(),act:0,shaft:false};
   const landingOffset=new THREE.Vector3(),approachPoint=new THREE.Vector3();
   function bladeAt(t){
@@ -399,20 +395,16 @@ function stDarkUnmarkedChase(root,live){
       sample.QB.copy(low).slerp(swingRotation,ease(0,.28,raise));
     }else if(t<finish){
       const rise=clamp((t-hit)/(finish-hit),0,1);
-      const sweep=rise*(1.35-.35*rise);
+      const sweep=rise*(1.35+rise*(.30-.65*rise));
       const angle=lerp(hitAngle,topAngle,sweep);
       sweepTip(angle,sample.pos);
       sample.QB.setFromAxisAngle(swingAxis,angle).multiply(bladeInPlane);
     }else{
       const returnTime=clamp((t-finish)/(recover-finish),0,1);
       const settle=returnTime*returnTime*(3-2*returnTime);
-      const coast=.18*(1-Math.exp(-Math.max(0,t-finish)/.18))*(1-settle);
-      // Carry the swing's outgoing speed and turn into the same hover pose used in the match.
-      sample.pos.copy(returnStart).add(landingOffset).lerp(restPosition,settle).addScaledVector(returnVelocity,coast);
-      sample.pos.x+=.55*Math.sin(Math.PI*returnTime)**2;
-      sample.QB.copy(high).slerp(firstRestRotation,settle);
-      sample.QB.premultiply(returnTurn.setFromAxisAngle(swingAxis,turnSpeed*coast));
-      sample.QB.slerp(restRotation,ease(.42,1,returnTime));
+      sample.pos.copy(returnStart).add(landingOffset).lerp(restPosition,settle);
+      sample.pos.x+=.33*Math.sin(Math.PI*settle)**2;
+      stDarkReturnRotation(sample.QB,high,returnReference,restRotation,ease(.19,1,returnTime),returnOffset,returnCorrection);
     }
     if(t<finish){
       if(t>=swing)sample.pos.add(landingOffset);
@@ -464,12 +456,11 @@ function stDarkUnmarkedChase(root,live){
   }
   const update=t=>{
     if(travel){pathAt(distanceAt(stop),landingOffset);landingOffset.z-=range;}
-    if(t<finish)returnStarted=false;
+    if(t<finish)returning=false;
     else if(live?.restPose){
-      const remaining=Math.max(0,recover-t);
-      live.restPose(remaining*remaining/(recover-finish),restPosition,restRotation);
-      if(!returnStarted)firstRestRotation.copy(restRotation);
-      returnStarted=true;
+      live.restPose(0,restPosition,restRotation);
+      if(!returning)returnReference.copy(restRotation);
+      returning=true;
     }
     ground.position.copy(landingOffset).addScaledVector(impactForward,targetZ-.65);ground.position.y+=.055;
     const pose=bladeAt(t);

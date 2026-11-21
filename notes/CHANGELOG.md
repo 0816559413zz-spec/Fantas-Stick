@@ -1,10 +1,18 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
 
+- 2026-11-22 Darkness: BA holds its follow-through for the reverse swing or relaxes alongside the scythe after two seconds. Fixed the blade flip into the BA spin and smoothed recovery handoffs across active scythe skills.
+
 - 2026-11-22 Breakable panels are real geometry: each panel is a mesh built from its cells (full / thinner core / gone, greedy-merged faces, exact door/window and gable edges), rebuilt only when a cell changes depth. Replaces the fragment-shader raymarch: no more stacked-layer look at any angle and no per-pixel loop (better FPS). Holes now follow the cell grid.
 
 - 2026-11-21 Breakable panels: the inside of holes/recesses is ray-traced along the real 3D ray through the panel box (adaptive steps up to 160, bisection on every hit, side faces too) instead of 48 fixed depth steps, so broken walls look like solid 3D chunks at any angle (no stacked 'slices'); recess floors get proper normals.
 
 - 2026-11-21 Map Builder + panels round: stand on breakable-panel tops (`pnlTopH` in `groundH`); ramps/stairs get solid fill under them in the export (`k:'flr'` circles, floor Inspector "Solid Below"); castle floor/deco polygonOffset against black patches; Collision Shapes category (`col_box`/`col_cyl`, invisible); Resize tool T (one face moves, other stays, snapped); Shift/Ctrl multi-select (Scene + Hierarchy, gizmo/drag/delete/dup act on all); first click only selects, click again + drag moves (Drag Move toggle off = gizmo only); Duplicate keeps the copy in place; Top view moved to Shift+T; panels: Unbreakable one-piece option (`nb`), new mode "Holes, No Rubble" (`np`), finer hole raymarch (inside of broken walls), camera no longer hides through panel cells; Storm line skills clipped by panels.
+- 2026-11-21 Darkness: gave BA a deeper windup, a hip-led release, and a weighted follow-through that settles back into locomotion.
+
+- 2026-11-21 Darkness: made the BA blade-trail grain more visible, added outward-moving tip flecks, and reduced shaft-trail opacity to 46% of its previous value.
+
+- 2026-11-21 Darkness: added flowing ink grain to the black BA blade trail and used the scythe spine flame at the outer tip with small ink flecks.
+
 - 2026-11-21 Darkness release (protocol v106): includes grounded and point-blank BA hits, world-space slash trails, WASD dash controls with BA resets, and the approved smaller Long Dash head with the layered wake.
 
 - 2026-11-21 Darkness: restored the layered Long Dash wake from review #130 with the smaller head from review #132.

@@ -296,8 +296,11 @@ function darkMarkWind(ev,o){
       o.g.getWorldQuaternion(root.quaternion);
     }
     view.clock=live.launch?wave.release+t-view.launchAt:Math.min(wave.release-.001,t*wave.release/(windup||.001));
-    const returnBlade=wave.blade?.visible&&view.clock>=wave.finish;
-    if(returnBlade)darkSettleWeapon(o,wave.blade);
+    if(live.scythe&&live.launch&&view.clock>=wave.finish){
+      wave.update(wave.finish);
+      if(o?.darkMarkCast===view)darkShowWeaponReturn(o,wave.blade);
+      live.scythe=false;
+    }
     wave.update(view.clock);
   },()=>{
     if(o?.darkMarkCast===view){darkSettleWeapon(o,wave.blade);o.darkMarkCast=null;}
@@ -351,27 +354,46 @@ function darkBAGroundImpact(point,yaw){
     grit(t);
   });
 }
-function darkSettleWeapon(o,blade,duration=.52){
+function darkSettleWeapon(o,blade,duration=.88,liftSpeed=0){
   if(!o?.darkWeapon||!blade?.visible)return;
-  const pos=blade.getWorldPosition(new THREE.Vector3()),rot=blade.getWorldQuaternion(new THREE.Quaternion());
+  const pos=blade.getWorldPosition(new THREE.Vector3()).sub(o.g.getWorldPosition(new THREE.Vector3()));
+  const rot=blade.getWorldQuaternion(new THREE.Quaternion());
   o.darkWeaponReturn={
-    pos:o.g.worldToLocal(pos),
-    rot:o.g.getWorldQuaternion(new THREE.Quaternion()).invert().multiply(rot),
-    blendPos:new THREE.Vector3(),blendRot:new THREE.Quaternion(),worldRot:new THREE.Quaternion(),
+    pos,rot,scale:blade.getWorldScale(new THREE.Vector3()).x,recovery:duration>.4,liftSpeed,
+    blendPos:new THREE.Vector3(),blendRot:new THREE.Quaternion(),rest:new THREE.Quaternion(),
+    offset:new THREE.Quaternion(),correction:new THREE.Quaternion(),started:false,
     duration,at:darkViewNow||performance.now()
   };
 }
 function darkBlendWeapon(o,now){
   const back=o.darkWeaponReturn;
   if(!back)return;
-  const blend=stDarkEase(0,back.duration,(now-back.at)/1000);
-  if(blend>=1){o.darkWeaponReturn=null;return;}
+  const age=(now-back.at)/1000;
+  const travel=stDarkEase(0,back.duration,age);
+  if(travel>=1){o.darkWeaponReturn=null;return;}
+  const turn=back.recovery?stDarkEase(back.duration*.20,back.duration,age):travel;
   const parent=o.darkWeapon.parent;
-  parent.worldToLocal(o.g.localToWorld(back.blendPos.copy(back.pos)));
-  o.g.getWorldQuaternion(back.worldRot).multiply(back.rot);
-  parent.getWorldQuaternion(back.blendRot).invert().multiply(back.worldRot);
-  o.darkWeapon.position.lerp(back.blendPos,1-blend);
-  o.darkWeapon.quaternion.slerp(back.blendRot,1-blend);
+  o.g.getWorldPosition(back.blendPos).add(back.pos);
+  parent.worldToLocal(back.blendPos);
+  o.darkWeapon.position.lerp(back.blendPos,1-travel);
+  if(back.recovery)o.darkWeapon.position.y+=.21*Math.sin(Math.PI*travel)+back.liftSpeed*Math.max(0,age)*(1-travel)**5;
+  if(back.recovery){
+    o.darkWeapon.getWorldQuaternion(back.blendRot);
+    if(!back.started){back.rest.copy(back.blendRot);back.started=true;}
+    stDarkReturnRotation(o.darkWeapon.quaternion,back.rot,back.rest,back.blendRot,turn,back.offset,back.correction);
+    o.darkWeapon.quaternion.premultiply(parent.getWorldQuaternion(back.blendRot).invert());
+  }else{
+    parent.getWorldQuaternion(back.blendRot).invert().multiply(back.rot);
+    o.darkWeapon.quaternion.slerp(back.blendRot,1-turn);
+  }
+  o.darkWeapon.scale.setScalar(lerp(back.scale,o.darkWeapon.scale.x,travel));
+}
+function darkShowWeaponReturn(o,blade,duration){
+  if(!o?.darkWeapon||o.darkDown||!blade?.visible)return;
+  darkSettleWeapon(o,blade,duration);
+  // Temporary effects update after character sync. Make the receiving blade visible this frame.
+  o.darkWeapon.visible=o.darkSwordRoot.visible=true;
+  darkBlendWeapon(o,o.darkWeaponReturn.at);
 }
 function darkTrailHistory(root,distanceBased=false){
   const points=[{at:0,length:0,position:new THREE.Vector3()}],sample=new THREE.Vector3();
@@ -418,6 +440,7 @@ function darkDashView(ev,o,hold,charging){
     o.darkDashFx.launchAt=darkViewNow||performance.now();
     return;
   }
+  o.darkSwingAt=undefined;
   const root=darkViewRoot(ev,hold?'Long Dash':'Quick Dash');
   const at=darkViewNow||performance.now();
   const travel=hold?2.105:ev.duration;
@@ -452,7 +475,7 @@ function darkDashView(ev,o,hold,charging){
     if(o.darkDashFx!==live)root.visible=false;
   },()=>{
     if(o.darkDashFx!==live)return;
-    if(!live.cancelled&&!live.spent)darkSettleWeapon(o,live.blade);
+    if(!live.cancelled&&!live.spent)darkShowWeaponReturn(o,live.blade);
     o.darkDashFx=null;o.b.visible=true;
     if(hold)o.darkTint(0,1);
   });
@@ -520,6 +543,8 @@ function darknessCharacter(o,p,viewer,now){
   }
   o.darkGear.visible=!p.dn;
   o.shield.visible=false;
+  const shield=state?.[3]||0;
+  if(shield>0){o.darkSwingAt=undefined;o.darkWeaponReturn=null;}
   if(o.darkChaseFx?.recovered)o.darkChaseFx=null;
   const gear=o.darkWeapon,age=(now-(o.darkSwingAt??-1e4))/1000;
   const basic=age>=0&&age<1.55;
@@ -533,7 +558,7 @@ function darknessCharacter(o,p,viewer,now){
   const waltzTint=stDarkEase(.105,.30,waltzAge)*(1-stDarkEase(landing,landing+.15,waltzAge));
   darkIdleWeaponPose(now,gear.position,gear.rotation);
   const veil=o.darkVeilCast,t=veil?(now-veil.at)/1000:Infinity;
-  const planting=t>=0&&t<2.55;
+  const planting=t>=0&&t<DARK_VEIL_PULL_CLEAR;
   o.darkScytheArgs.trailPose=planting?o.darkVeilBlade:null;
   o.darkScytheArgs.groundBA=basic&&!planting&&o.darkBaPitch<-.07?o.darkGroundBA:null;
   o.darkBATrail.position.set(0,0,0);
@@ -554,13 +579,21 @@ function darknessCharacter(o,p,viewer,now){
     o.darkBATrail.quaternion.copy(o.darkSwordRoot.getWorldQuaternion(scratch).invert().multiply(q));
   }
   if(planting){
-    const settle=THREE.MathUtils.smoothstep(t,1.82,2.55);
     const plant=o.darkVeilBlade(t);
-    gear.position.lerp(plant.pos,1-settle);
-    gear.quaternion.slerp(plant.QB,1-settle);
+    gear.position.copy(plant.pos);
+    gear.quaternion.copy(plant.QB);
     o.darkSwordRoot.position.copy(veil.world);
-    o.g.worldToLocal(o.darkSwordRoot.position).multiplyScalar(1-settle);
-    o.darkSwordRoot.rotation.y=angDiff(Math.PI/2-veil.a,o.g.rotation.y)*(1-settle);
+    o.g.worldToLocal(o.darkSwordRoot.position);
+    o.darkSwordRoot.rotation.y=angDiff(Math.PI/2-veil.a,o.g.rotation.y);
+  }else if(veil&&t>=DARK_VEIL_PULL_CLEAR&&!veil.released){
+    veil.released=true;
+    if(!basic){
+      const exit=o.darkVeilBlade(DARK_VEIL_PULL_CLEAR),source=new THREE.Object3D();
+      source.rotation.y=Math.PI/2-veil.a;
+      source.position.copy(exit.pos).applyQuaternion(source.quaternion).add(veil.world);
+      source.quaternion.multiply(exit.QB);
+      darkSettleWeapon(o,source,.88,5.7);
+    }
   }
   const flow=state?.[2]>0?stDarkEase(0,.28,DARK_V.flow-state[2])*(1-stDarkEase(0,.25,.25-state[2])):0;
   o.darkScytheArgs.flameSpeed=1+1.8*flow;
@@ -575,8 +608,9 @@ function darknessCharacter(o,p,viewer,now){
   const flowStrike=o.darkFlowStrike,flowAge=flowStrike?(now-flowStrike.at)/1000:-Infinity;
   const F=DARK_CHASE_FLOW;
   const flowOrb=stDarkEase(.035,F.wind,flowAge)*(1-stDarkEase(F.exit-.035,F.exit+.11,flowAge));
-  if(flowStrike&&flowAge>=0&&flowAge<F.end&&!basic&&!planting){
-    const ready=stDarkEase(.02,F.wind,flowAge)*(1-stDarkEase(F.exit,F.end,flowAge));
+  const flowReturnAt=F.exit+.07;
+  if(flowStrike&&flowAge>=0&&flowAge<flowReturnAt&&!basic&&!planting){
+    const ready=stDarkEase(.02,F.wind,flowAge);
     const slash=stDarkEase(F.hit-.052,F.hit+.066,flowAge);
     const turn=angDiff(Math.PI/2-flowStrike.a,o.g.rotation.y)*ready;
     gear.visible=true;
@@ -584,17 +618,25 @@ function darknessCharacter(o,p,viewer,now){
     gear.position.lerp(o.darkFlowBladePosition.set(lerp(1.44,-1.45,slash),lerp(.36,.97,slash),lerp(-1.18,1.15,slash)),ready);
     gear.quaternion.slerp(o.darkFlowBladeQ.setFromEuler(o.darkFlowBladeEuler.set(
       lerp(-.72,-.32,slash),lerp(-.44,1.50,slash),lerp(.54,-.84,slash))),ready);
+    flowStrike.returnFrom??=new THREE.Object3D();
+    gear.getWorldPosition(flowStrike.returnFrom.position);
+    gear.getWorldQuaternion(flowStrike.returnFrom.quaternion);
     const emerge=stDarkEase(F.exit-.025,F.exit+.055,flowAge)*(1-stDarkEase(F.exit+.12,F.exit+.33,flowAge));
     if(emerge>0)stDarkPose(o,{back:.32*emerge,roll:-.14*emerge,drop:.16*emerge,arms:.38*emerge,step:.32*emerge});
-  }else if(flowStrike&&flowAge>=F.end)o.darkFlowStrike=null;
-  if(gear.visible&&!planting&&!(state?.[3]>0))darkBlendWeapon(o,now);
-  o.darkScythe.liveHandPose(o,basic&&o.darkGear.visible&&gear.visible&&!planting&&!(state?.[3]>0)?baseClock:0);
-  const disc=o.darkDisc,shield=state?.[3]||0;
+  }else if(flowStrike&&flowAge>=flowReturnAt){
+    if(flowStrike.returnFrom&&!basic&&!planting)darkSettleWeapon(o,flowStrike.returnFrom,1.06);
+    o.darkFlowStrike=null;
+  }
+  const poseBA=o.darkGear.visible&&gear.visible&&!planting&&!(state?.[3]>0)&&baseClock>0;
+  o.darkScythe.liveHandPose(o,poseBA?baseClock:0,poseBA?o.darkBAFrom:null);
+  const disc=o.darkDisc;
   if(shield>0){o.darkShieldAt=now;o.darkShieldSpin=shield;o.darkShieldPitch=state[6]||0;}
   const brake=(now-(o.darkShieldAt??-Infinity))/1000;
-  if(shield>0||brake<.9){
-    const pitch=o.darkShieldPitch,rotation=o.darkShieldSpin*(1-stDarkEase(0,.9,brake));
-    const position=stDarkEase(0,.65,o.darkShieldSpin)*(1-stDarkEase(0,.87,brake));
+  const shieldReturning=!basic&&brake<.60;
+  if(shield>0||shieldReturning){
+    const pitch=o.darkShieldPitch,rotation=o.darkShieldSpin*(1-stDarkEase(0,.60,brake));
+    const grip=stDarkEase(0,.65,o.darkShieldSpin);
+    const position=grip*(1-stDarkEase(0,.60,brake));
     const opaque=state?.[4]>0?stDarkEase(.28,.98,rotation):0;
     o.darkSpinAngle=(o.darkSpinAngle||0)+(o.darkRenderAt==null?0:Math.min(.05,(now-o.darkRenderAt)/1000))*37*rotation;
     disc.visible=opaque>.01;
@@ -604,15 +646,25 @@ function darknessCharacter(o,p,viewer,now){
     o.darkDiscFlames(now/1000,opaque);
     o.darkDiscEdge.material.opacity=.52*opaque;
     gear.visible=opaque<.97;
-    gear.position.lerp(disc.position,position);
+    gear.position.lerp(disc.position,grip);
     o.darkShieldQ.setFromEuler(o.darkShieldEuler.set(-pitch,0,-o.darkSpinAngle));
-    gear.quaternion.slerp(o.darkShieldQ,position);
+    gear.quaternion.slerp(o.darkShieldQ,grip);
+    o.darkShieldFrom??=new THREE.Object3D();
+    gear.getWorldPosition(o.darkShieldFrom.position);
+    gear.getWorldQuaternion(o.darkShieldFrom.quaternion);
     o.b.rotation.y=LGPOSE.body*position;
     o.armR.rotation.set(LGPOSE.ax*position,0,(LGPOSE.az-pitch)*position);
     o.lgHeadYaw=LGPOSE.head*position;
     if(o.rig)rigSync(o,0);
     lightHeadPose(o);
-  }else disc.visible=false;
+  }else{
+    disc.visible=false;
+    if(o.darkShieldFrom){
+      if(!basic&&!planting&&gear.visible)darkSettleWeapon(o,o.darkShieldFrom);
+      o.darkShieldFrom=null;
+    }
+  }
+  if(gear.visible&&!planting&&shield<=0&&!shieldReturning)darkBlendWeapon(o,now);
   o.darkRenderAt=now;
   o.darkDashFx?.update(now);
   const rolling=state?.[5]===1&&!o.darkDashFx?.hold;
@@ -740,7 +792,7 @@ function darknessEfx(ev){
     const update=stDarkVeilGround(root,ev.radius*S3),life=.91+ev.duration+.36;
     const pose=o&&stDarkVeilCaster(root,o);
     const sequence={at:darkViewNow||performance.now(),world:root.position.clone(),a};
-    if(o)o.darkVeilCast=sequence;
+    if(o){o.darkVeilCast=sequence;o.darkSwingAt=undefined;}
     const splash=stDarkMatter(root,'Veil ground flecks',[
       {at:.91,span:.10,count:44,spread:1.6,lift:.65,height:.10},
       {at:1.07,span:.20,count:28,spread:2.35,lift:.34,height:.08},
@@ -754,7 +806,7 @@ function darknessEfx(ev){
     });
     return true;
   }
-  if(z==='darkmarkwind'){darkMarkWind(ev,o);return true;}
+  if(z==='darkmarkwind'){if(o)o.darkSwingAt=undefined;darkMarkWind(ev,o);return true;}
   if(z==='darkmarkcast'){darkMarkLaunch(ev,o);return true;}
   if(z==='darkmarkhit'){darkMarkContact(ev);return true;}
   if(z==='darkdashcancel'){
@@ -772,6 +824,9 @@ function darknessEfx(ev){
     if(o){
       const now=darkViewNow||performance.now();
       const wind=ST_DARK_LIVE_BA.wind/ST_DARK_LIVE_BA.rate;
+      const previousAge=(now-(o.darkSwingAt??-Infinity))/1000;
+      o.darkBAFrom=previousAge>=0&&previousAge<ST_DARK_LIVE_BA.idleAfter+ST_DARK_LIVE_BA.returnTime
+        ?{clock:ST_DARK_LIVE_BA.start+previousAge*ST_DARK_LIVE_BA.rate,side:o.darkBaSide??-1}:null;
       const chase=o.darkChaseFx;
       if(chase){
         darkSettleWeapon(o,chase.blade(),wind);
@@ -779,6 +834,10 @@ function darknessEfx(ev){
         o.darkChaseFx=null;
         o.b.visible=true;
         if(!chase.unmarked)o.darkTint?.(0,1);
+      }else if(o.darkMarkCast?.wave.blade?.visible){
+        const mark=o.darkMarkCast;
+        darkSettleWeapon(o,mark.wave.blade,wind);
+        mark.live.scythe=mark.wave.blade.visible=false;
       }else darkSettleWeapon(o,o.darkWeapon,wind);
       if(o.darkFlowStrike){
         o.darkFlowStrike=null;
@@ -910,12 +969,16 @@ function darknessEfx(ev){
         }
         if(!marked&&!sequence.landed)travel.record(Math.min(t,ev.duration),o.g);
         const recovered=update(marked?t:t<=ev.duration?t*.235/ev.duration:.235+t-ev.duration);
-        if(!marked)sequence.recovered=recovered;
+        if(!marked&&recovered){
+          darkShowWeaponReturn(o,sequence.blade(),.12);
+          sequence.recovered=true;
+          root.visible=false;
+        }
       }
     },()=>{
       markedFx?.dispose();
       if(o.darkChaseFx===sequence){
-        if(marked)darkSettleWeapon(o,sequence.blade());
+        if(marked)darkShowWeaponReturn(o,sequence.blade());
         o.darkChaseFx=null;o.b.visible=true;
         if(marked)o.darkTint(0,1);
       }

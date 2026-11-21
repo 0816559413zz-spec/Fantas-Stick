@@ -392,7 +392,7 @@ function stDarkMarkWave(root,args){
       ease(chargeStart,swingStart,t)*(1-ease(swingStart,swingEnd+.11,t));
     if(scythe)scythe.update(t,.30*power);
     if(live){
-      if(scythe)scythe.pivot.visible=live.scythe&&t<spinEnd+.70;
+      if(scythe)scythe.pivot.visible=live.scythe;
       targetCenter.copy(hitPoint);
       live.target?.(targetCenter);
       drawDust(t);
@@ -429,5 +429,5 @@ function stDarkMarkWave(root,args){
     for(const [part,{mask,castShadow}] of hiddenParts){part.layers.mask=mask;part.castShadow=castShadow;}
     for(const {group} of flankWaves)group.removeFromParent();
   };
-  return {update,dispose,setFlight,release,finish:spinEnd+.70,blade:scythe?.pivot};
+  return {update,dispose,setFlight,release,finish:spinEnd,blade:scythe?.pivot};
 }

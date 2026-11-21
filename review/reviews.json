@@ -1,6 +1,63 @@
 {
- "next": 134,
+ "next": 138,
  "items": [
+  {
+   "id": 137,
+   "title": "Darkness BA ค้างท่าและเก็บเคียว",
+   "text": "BA ฟันสลับจากท่าค้าง เว้น 2 วิแล้วคลายตัวตามเคียว เช็กการลอยและการหมุนกลับหลังท่า",
+   "kind": "VFX",
+   "who": "Darkness",
+   "status": "wait",
+   "created": "2026-11-22",
+   "updated": "2026-11-22",
+   "imgs": [],
+   "links": [
+    "/shots/motion_darkness_ba_hold_chain_front.gif",
+    "/shots/motion_darkness_scythe_recovery_audit.gif"
+   ]
+  },
+  {
+   "id": 136,
+   "title": "Darkness BA ท่าบิดตัวตามแรงฟัน",
+   "text": "ถ่ายน้ำหนักฝั่งง้างก่อนบิดสะโพกนำ ไหล่ตามแรงฟันแล้วค่อยคลายเข้าท่ายืนหรือเดิน",
+   "kind": "VFX",
+   "who": "Darkness",
+   "status": "wait",
+   "created": "2026-11-21",
+   "updated": "2026-11-21",
+   "imgs": [],
+   "links": [
+    "/shots/motion_darkness_ba_body_twist_tdm.gif"
+   ]
+  },
+  {
+   "id": 135,
+   "title": "Darkness BA สะเก็ดปลายคมและหางด้าม",
+   "text": "สะเก็ดหมึกปลิวออกพ้นขอบคม เพิ่มความต่างของริ้วในแถบดำ และลดความทึบหางด้ามเหลือ 46% ของเดิม",
+   "kind": "VFX",
+   "who": "Darkness",
+   "status": "wait",
+   "created": "2026-11-21",
+   "updated": "2026-11-21",
+   "imgs": [],
+   "links": [
+    "/shots/motion_darkness_ba_tip_particles_tdm.gif"
+   ]
+  },
+  {
+   "id": 134,
+   "title": "Darkness BA ลายหมึกและเปลวที่ปลายคม",
+   "text": "ลายหมึกวิ่งในแถบดำฝั่งใบมีด เปลวปลายคมใช้รูปจากสันเคียวและมีเศษหมึก หางด้ามใช้จังหวะเดิม",
+   "kind": "VFX",
+   "who": "Darkness",
+   "status": "wait",
+   "created": "2026-11-21",
+   "updated": "2026-11-21",
+   "imgs": [],
+   "links": [
+    "/shots/motion_darkness_ba_blade_texture_tdm.gif"
+   ]
+  },
   {
    "id": 133,
    "title": "Darkness Long Dash คืนหางริ้วเดิม",
