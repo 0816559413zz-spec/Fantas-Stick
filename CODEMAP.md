@@ -198,7 +198,7 @@ windUltCast:504 windUltTick:507 windUltSweep:532 windFloatZ:540 windSnapP:543 wi
 §547 สกิล (ผู้ใช้ 2026-11-08: รีดีไซน์ทั้งชุด — id เดิมไว้ให้ชุดสกิล/tune/…
 W_WL:549 W_DR:555 W_VX:561 W_VO:567 W_FW:573 W_UL:583
 
-## js/10-net.js (200) — เครือข่าย (PeerJS / WebRTC)
+## js/10-net.js (200) — 
 PREFIX:4 NET:5 RC:9 TURN_SERVERS:12 ICE:13 PEER_OPT:14 TURN_URL:16 ICE_READY:18 JN:22 LAG:24 lagDo:25 hostSend:26 LOBBY:27 genCode:28 sendAll:29 NETD_KEYS:33 NETD:33 netDeltaReset:34 netDelta:35 NET_MAX:49 _netTE:49 netSendSnap:50 NETU:62 netUndelta:63 setStatus:69 hostGame:71 hostPeer:80 netConnect:100 joinWatch:111 joinFail:126 netLost:132 joinGame:147 joinPeer:158 clientOnData:173 leave:188 leaveRoom:190
 
 ## js/11-host.js (459) — 
@@ -224,8 +224,10 @@ EFSV:9 EFS:10 efsLv:11 efsBuild:12 efsBreak:28 efsRepair:29 efsDist:30 efsHeat:3
 ## js/12-fcs-bridge.js (113) — 
 BSKV:10 BSKN:11 bskBuild:14 bskGround:38 bskOutline:40 bskSegs:53 bskInPoly:63 bskCut:65 bskStage:70 bskSetSt:71 bskHit:75 bskEnv:84 bskSnap:93 bskParse:97 bskRepair:104 bskExport:106
 
-## js/12-pnl.js (157) — Breakable panels (แผ่นพัง) — Map Builder pn_wall → data.pnl (guides/D…
-PNDEF:9 PN_BODY:11 PN_CH:12 PNL:13 PNG:13 pnGT:14 sgPnl:15 _sgPN:16 _sgPN2:16 pnlGen:17 pnLoc:24 pnWorld:25 pnCU:26 pnCell:27 pnMark:28 pnSegD:30 pnlLinks:34 pnlSupport:53 pnEmit:61 pnBreakAll:67 pnStage:68 pnlHit:70 pnDmgCell:84 pnHitFx:89 pnlEnv:91 pnSeg:101 pnlRay:108 pnlSolidAt:113 pnlProj:116 pnlCollide:121 pnPileCols:133 pnPileAt:136 pnlMoundH:139 pnlTick:141 pnlSnap:147 pnlParse:152
+## js/12-pnl.js (208) — Breakable panels (แผ่นพัง) — Map Builder pn_wall → data.pnl (guides/D…
+PNDEF:13 PN_BODY:16 PN_CH:17 PNL:18 PNG:18 pnGT:19 sgPnl:20 _sgPN:21 _sgPN2:21 pnlGen:22 pnLoc:34 pnWorld:35 pnCU:36 pnL3:38 pnP3:40 pnCellPos:41 pnCellUW:42 pnSolid:43 pnMark:44 pnlLinks:46 pnlSupport:64 pnEmit:72 pnBreakAll:76 pnStage:77 pnlHit:79 pnDmgCell:93 pnHitFx:98 pnlEnv:100 pnSeg:110 pnlRay:117 pnlSolidAt:122 pnlProj:125 pnlCollide:131 pnPileCols:148 pnPileAt:151 pnlMoundH:154 pnlTick:156 pnlSnap:162 pnlParse:167
+§173 old houses → panel groups (same footprint as BLDDEF: walls wh m, gabl…
+PN_HOUSE:176 pnHouse:177 pnlHouseConv:205
 
 ## js/13-enemies.js (171) — ศัตรู (โหมด Co-op)
 spawnEnemy:2 setupWave:19 bossPhase:36 enemySlam:44 updateEnemies:55
@@ -383,21 +385,21 @@ frpBuild:27 fcsPropsBuild:75 fcsPropsView:101 fcsRoomBrkFx:110 FRP_DEB:111 frpDe
 §139 wall hit marks (event 'rwh'): decal quads on the wall face, ring buff…
 frpMarkTex:140 fcsWallHit:144
 
-## js/28-maps-build.js (786) — สร้างแผนที่
-CANDLESYS:2 builtMap:3 builtKey:3 world:3 TORCHES:3 CANDLES:3 FIREFLIES:3 CRYSTAL:3 RUNE:3 SNITCH:3 BANNERS:3 SNOW:3 WCACHE:5 WCACHE_MAX:5 wkey:7 buildWorld:8 addW:42 _prewarmed:44 prewarmShaders:45 batchStatic:64 makeCandles:89 updateCandles:98 buildCastle:107 buildHogsmeade:173 buildGreatHall:261 buildForest:331
-§428 ทุ่งหญ้าฮอกวอตส์ (เย็น)
-ringTrees:429 grassTex:438 buildMeadow:439
-§458 ทะเลสาบน้ำแข็ง (กลางคืน)
-buildLake:459
-§480 ซากลานประลอง (เย็น ทราย)
-§481 Test Place (ห้องฝึก): พื้นตารางเรียบๆ กลางวัน + วงโซนเสกมอนสเตอร์
-§482 บรรยากาศที่ใช้ร่วมกัน (แผนที่จากโค้ด + แผนที่จากไฟล์ผ่าน fx ใน guides…
-makeSnow:483 makeFireflies:490 makeSnitch:497 fileMapFx:504
-§514 แผนที่จากไฟล์ Blender (guides/MAP-DESIGN.md)
-terrGeo:516 buildFileMap:524 tickM:577 TRPAD:578 ARPAD:578 SHPAD:578 signTex:579 testSign:580 buildTest:587 buildRuins:692 buildPitch:717
+## js/28-maps-build.js (788) — สร้างแผนที่
+CANDLESYS:2 builtMap:3 builtKey:3 world:3 TORCHES:3 CANDLES:3 FIREFLIES:3 CRYSTAL:3 RUNE:3 SNITCH:3 BANNERS:3 SNOW:3 WCACHE:5 WCACHE_MAX:5 wkey:7 buildWorld:8 addW:44 _prewarmed:46 prewarmShaders:47 batchStatic:66 makeCandles:91 updateCandles:100 buildCastle:109 buildHogsmeade:175 buildGreatHall:263 buildForest:333
+§430 ทุ่งหญ้าฮอกวอตส์ (เย็น)
+ringTrees:431 grassTex:440 buildMeadow:441
+§460 ทะเลสาบน้ำแข็ง (กลางคืน)
+buildLake:461
+§482 ซากลานประลอง (เย็น ทราย)
+§483 Test Place (ห้องฝึก): พื้นตารางเรียบๆ กลางวัน + วงโซนเสกมอนสเตอร์
+§484 บรรยากาศที่ใช้ร่วมกัน (แผนที่จากโค้ด + แผนที่จากไฟล์ผ่าน fx ใน guides…
+makeSnow:485 makeFireflies:492 makeSnitch:499 fileMapFx:506
+§516 แผนที่จากไฟล์ Blender (guides/MAP-DESIGN.md)
+terrGeo:518 buildFileMap:526 tickM:579 TRPAD:580 ARPAD:580 SHPAD:580 signTex:581 testSign:582 buildTest:589 buildRuins:694 buildPitch:719
 
-## js/28-pnl-build.js (146) — Breakable panels — view (state = PNL in js/12-pnl.js)
-PNV:7 PN_MI:8 PN_GLSL:9 pnlMat:37 pnlDepthMat:85 PN_RUB:93 PN_HEAP:94 pnlBuild:95 pnlSyncOne:115 pnlView:136 pnlFX:138
+## js/28-pnl-build.js (165) — Breakable panels — view (state = PNL in js/12-pnl.js)
+PNV:7 PN_MI:8 PN_GLSL:9 pnlMat:41 pnlDepthMat:103 PN_RUB:111 PN_HEAP:112 pnlBuild:113 pnlSyncOne:133 pnlView:154 pnlFX:157
 
 ## js/29-characters.js (439) — ระบบผ้า (เสื้อคลุมพลิ้วตามการเคลื่อนที่)
 makeCloak:2 updateCloth:10 wandNamed:34 wandSparks:83
@@ -611,7 +613,7 @@ RAG:10 RAGJ:23 RAGB:29 RAGS:33 RAGMIN:37 RAGHINGE:39 _rv1:40 _rv2:40 _rv3:40 _rq
 ## js/49-cloth.js (189) — 
 CLOTH:10 CL_ROWS:26 CL_NC:26 CL_GAP:26 CL_IN:26 _clV:27 _clA:27 _clB:27 clPinK:29 clBind:31 cloakPanelGrid:33 cloakBodyIndices:47 stormCape:56 clothSetup:94 clTargets:123 clReset:127 clCapsule:131 _clO:135 clWorld:136 clWorldHit:145 clStep:150 clDraw:163 clothTick:170
 
-## js/50-grass.js (400) — 
+## js/50-grass.js (403) — ลม + หญ้า 3D (ภาพบนเครื่องตัวเองล้วน ไม่แตะโฮสต์/โปรโตคอล)
 AIR:10 AIR_MAP:17 AIR_NG:20 airGust:21 airGustOff:26 airEnv:27 airGs:28 airMark:30 airForMap:33 _airV:34 airAt:35 airGv:41 airTick:42
 §45 ต่อเข้ากับเอฟเฟกต์เดิม (ไม่ต้องแก้ทุกสกิล): แสงวาบ = ลมกระโชก • วงคลื…
 CLW:54
@@ -622,9 +624,9 @@ SCAR:62 scarReset:64 scarPaint:71 grassScar:86
 §91 ไฟลามหญ้า (ภาพล้วน: ไม่มีดาเมจ ไม่ซิงก์ — แต่ละเครื่องลามไม่เหมือนกัน…
 FIRE:97 GR_FIRE:100 fireReset:102 fireBuild:104 fireLight:111 fireIgnite:113 fireFx:125 fireStep:130 fireTick:154
 §159 พื้นหญ้ามีชีวิต: สีเป็นหย่อม (เขียวเข้ม / แห้งเหลือง / ดินโผล่) + จุด…
-GR_NOISE:162 GR_LIVE:167 grLive:185 GR_GLSL_V:193 GR_BEGIN:198 grassMat:245 grassBuild:263 _grBasic:277 grassBake:278 grassCount:334 grassTick:339
-§377 สกิลลม → หญ้า (ภาพล้วน เรียกจาก windEfx js/68)
-WIND_GRASS:379 airWind:393
+GR_NOISE:162 GR_LIVE:167 grLive:185 GR_GLSL_V:193 GR_BEGIN:198 grassMat:245 grassBuild:263 _grBasic:277 grassBake:278 grassCount:337 grassTick:342
+§380 สกิลลม → หญ้า (ภาพล้วน เรียกจาก windEfx js/68)
+WIND_GRASS:382 airWind:396
 
 ## js/51-warmup.js (189) — 
 WARM:11 WARM_FXDIR:12 WARM_COMMON:12 WARM_X:13 WARM_Y:13 warmKeep:15 warmStaticModels:21 glReady:30 warmCompile:31 warmDraw:34 WARM_SKIP:44 warmAssets:47 warmFx:57 warmFxEnd:68 warmGather:70 warmPaths:72 warmStep:74 warmTick:106
@@ -896,4 +898,4 @@ _dvPanel:95 _dvBtn:98 _dvBody:100 _dvHead:100 devUiApply:102 devFreeMouse:110 de
 §130 rows
 dvA:131 dvTg:132 dvB:133 dvCh:134 dvSl:135 dvSub:136 dvCol:137 devKeyOf:138 devRender:143 devPos:193 devUiAct:200
 
-(113 files, 33274 lines)
+(113 files, 33349 lines)

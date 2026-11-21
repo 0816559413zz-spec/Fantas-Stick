@@ -263,10 +263,16 @@ function markerMesh(o) {
     if (/^spawn/.test(o.t)) { const a = add(new THREE.ConeGeometry(0.35, 0.9, 10), helpMat(c), 0, 0.3, 1.2); a.rotation.x = Math.PI / 2; } else add(new THREE.OctahedronGeometry(0.35), helpMat(c), 0, 2.3, 0); }
   else if (o.t === 'ring') { const r = add(new THREE.TorusGeometry(2, 0.12, 8, 28), helpMat(c), 0, 0, 0); }
   else if (o.t === 'light') { add(new THREE.SphereGeometry(0.28, 12, 8), helpMat(o.c || c), 0, 0, 0); const l = new THREE.PointLight(o.c || c, (o.int == null ? 2.4 : o.int) * 6, o.dist || 14, 1.6); g.add(l); }
-  else if (o.t === 'pn_wall') { const L = o.L || 4, H = o.sy || 3, T = o.T || 0.3, b = add(new THREE.BoxGeometry(L, H, T), mat(MD.PN_COL[o.mat || 'brick'] || c), 0, H / 2, 0); b.castShadow = true;
+  else if (o.t === 'pn_wall') { const L = o.L || 4, H = o.sy || 3, T = o.T || 0.3, sh = new THREE.Shape();
+    if (o.sh === 'tri') { sh.moveTo(-L / 2, 0); sh.lineTo(L / 2, 0); sh.lineTo(0, H); sh.lineTo(-L / 2, 0); } else { sh.moveTo(-L / 2, 0); sh.lineTo(L / 2, 0); sh.lineTo(L / 2, H); sh.lineTo(-L / 2, H); sh.lineTo(-L / 2, 0); }
+    for (const q of o.ho || []) { const h = new THREE.Path(), a = q[0] - L / 2, b = q[1] - L / 2; h.moveTo(a, q[2]); h.lineTo(a, q[3]); h.lineTo(b, q[3]); h.lineTo(b, q[2]); h.lineTo(a, q[2]); sh.holes.push(h); }
+    const geo = new THREE.ExtrudeGeometry(sh, { depth: T, bevelEnabled: false }); geo.translate(0, 0, -T / 2); if (o.tl) geo.rotateX(o.tl);
+    const b = add(geo, mat(MD.PN_COL[o.mat || 'brick'] || c), 0, 0, 0); b.castShadow = true;
+    if (o.mat === 'litwin' || o.mat === 'glass') { b.material = b.material.clone(); b.material.transparent = true; b.material.opacity = 0.6; }
     const cs = o.cs || 1, nc = Math.max(1, Math.round(L / cs)), nr = Math.max(1, Math.round(H / cs)), pts = [];
-    for (let i = 1; i < nc; i++) { const x = -L / 2 + i * L / nc; pts.push(x, 0, T / 2 + 0.01, x, H, T / 2 + 0.01); } for (let j = 1; j < nr; j++) { const y = j * H / nr; pts.push(-L / 2, y, T / 2 + 0.01, L / 2, y, T / 2 + 0.01); }
-    const lg = new THREE.BufferGeometry(); lg.setAttribute('position', new THREE.Float32BufferAttribute(pts, 3)); g.add(new THREE.LineSegments(lg, new THREE.LineBasicMaterial({ color: '#2a2a2a', transparent: true, opacity: 0.45 }))); }
+    for (let i = 1; i < nc; i++) { const x = -L / 2 + i * L / nc, top = o.sh === 'tri' ? H * (1 - Math.abs(x) / (L / 2)) : H; pts.push(x, 0, T / 2 + 0.01, x, top, T / 2 + 0.01); }
+    for (let j = 1; j < nr; j++) { const y = j * H / nr, hw = o.sh === 'tri' ? L / 2 * (1 - y / H) : L / 2; pts.push(-hw, y, T / 2 + 0.01, hw, y, T / 2 + 0.01); }
+    const lg = new THREE.BufferGeometry(); lg.setAttribute('position', new THREE.Float32BufferAttribute(pts, 3)); if (o.tl) lg.rotateX(o.tl); g.add(new THREE.LineSegments(lg, new THREE.LineBasicMaterial({ color: '#2a2a2a', transparent: true, opacity: 0.45 }))); }
   else if (o.t === 'house') { const b = add(new THREE.BoxGeometry(8, 4.2, 6.5), mat('#b08a5a'), 0, 2.1, 0); b.castShadow = true; const r = add(PRIM.cone(), mat('#7a4a36'), 0, 4.2, 0); r.scale.set(6.2, 2.6, 5); add(new THREE.BoxGeometry(1.2, 2.2, 0.2), helpMat('#3a2a1c'), 0, 1.1, 3.3); }
   else if (o.t === 'ptree' || o.t === 'ppine') { add(new THREE.CylinderGeometry(0.3, 0.45, 3, 8), mat('#6a4a2c'), 0, 1.5, 0).castShadow = true; const top = o.t === 'ptree' ? add(new THREE.IcosahedronGeometry(2.6, 1), mat(c), 0, 5, 0) : add(new THREE.ConeGeometry(2, 5.5, 8), mat(c), 0, 4.6, 0); top.castShadow = true; }
   else if (o.t === 'pbarrel') add(new THREE.CylinderGeometry(0.7, 0.7, 1.6, 12), mat(c), 0, 0.8, 0).castShadow = true;
@@ -693,22 +699,30 @@ function finishPnl(closed) {
   if (!add.length) { undo.pop(); return; }
   M.objs.push(...add); sel = { k: 'obj', id: add[add.length - 1].id }; syncObjs(); changed(); renderSide(); stat(add.length + ' แผ่น (กลุ่ม ' + g + ')', 'ok');
 }
-function pnCut(it, kind) {
-  const Q = MD.pnOpening(it, kind), i = M.objs.indexOf(it); if (!Q || i < 0) { stat('แผ่นนี้สั้น/เตี้ยเกินกว่าจะเจาะ', 'err'); return; }
-  pushUndo('o'); if (it.g == null || it.g === '') { const g = MD.pnNewGroup(M); Q.forEach(q => q.g = g); }
-  Q.forEach(q => q.id = nid()); M.objs.splice(i, 1, ...Q); sel = { k: 'obj', id: Q[0].id }; syncObjs(); changed(); renderSide(); pnTestDraw();
+function pnCut(it, kind) {   // opening = hole in the same panel (+ a lit glass pane for windows, same group)
+  const q = MD.pnOpening(it, kind); if (!q || !M.objs.includes(it)) { stat('เจาะไม่ได้: แผ่นสั้น/เตี้ยเกิน หรือมีช่องครบ 4 แล้ว', 'err'); return; }
+  pushUndo('o'); if (it.g == null || it.g === '') it.g = MD.pnNewGroup(M); it.ho = (it.ho || []).concat([q]);
+  if (kind === 'window') { const F = MD.pnFrame(M, it), d = MD.pnDims(it), u = (q[0] + q[1]) / 2 - d.L / 2;
+    M.objs.push({ id: nid(), t: 'pn_wall', x: +(it.x + F.U[0] * u).toFixed(3), z: +(it.z + F.U[2] * u).toFixed(3), y: +((it.y || 0) + q[2] - 0.05).toFixed(3), rot: it.rot || 0, L: +(q[1] - q[0] + 0.1).toFixed(3), sy: +(q[3] - q[2] + 0.1).toFixed(3), T: 0.1, cs: 9, mat: 'litwin', m: 'g', g: it.g }); }
+  syncObjs(); changed(); renderSide(); pnTestDraw();
+}
+function pnFromHouse(it, ldn) {   // old breakable house → panel objects (fully editable)
+  const i = M.objs.indexOf(it); if (i < 0) return; pushUndo('o'); const Q = MD.pnHouseObjs(M, it, MD.pnNewGroup(M), ldn); Q.forEach(q => q.id = nid());
+  M.objs.splice(i, 1, ...Q); sel = { k: 'obj', id: Q[0].id }; syncObjs(); changed(); renderSide(); stat(Q.length + ' แผ่น (กลุ่ม ' + Q[0].g + ')', 'ok');
 }
 const selRow = (label, items, cur, on) => el('div', { class: 'row' }, el('label', null, label), el('select', { class: 'tl-sel', onchange: e => on(e.target.value), html: items.map(([v, n]) => `<option value="${v}"${v === cur ? ' selected' : ''}>${n}</option>`).join('') }));
 function pnFields(it) {
   const d = MD.pnDims(it), mat = it.mat || 'brick', hp = it.hp || MD.PN_HP[mat];
   return [fld('วัสดุ', it, 'mat', { type: 'select', items: MD.PN_MAT, get: () => mat }), fld('แบบพัง', it, 'm', { type: 'select', items: MD.PN_MODE, get: () => it.m || 'p', after: () => { resync(); renderSide(); } }),
     it.m === 'l' ? fld('ทะลุได้ (ปิด = แค่เสียหาย)', it, 'thru', { type: 'checkbox', get: () => it.thru !== 0, set: v => { if (v) delete it.thru; else it.thru = 0; } }) : null,
-    fld('ยาว', it, 'L', { min: 0.2 }), fld('สูง', it, 'sy', { min: 0.2 }), fld('หนา', it, 'T', { min: 0.03, step: 0.05 }), fld('ขนาดช่อง', it, 'cs', { min: 0.2, step: 0.05 }),
+    fld('ยาว', it, 'L', { min: 0.2 }), fld('สูง (ตามแผ่น)', it, 'sy', { min: 0.2 }), fld('หนา', it, 'T', { min: 0.03, step: 0.05 }), fld('ขนาดช่อง', it, 'cs', { min: 0.2, step: 0.05 }),
+    fld('เอียง (องศา, หลังคา)', it, 'tl', { deg: 1, nullable: 1, ph: '0 = ตั้งตรง' }), fld('รูปทรง', it, 'sh', { type: 'select', items: [['', 'สี่เหลี่ยม'], ['tri', 'สามเหลี่ยม (จั่ว)']], get: () => it.sh || '', set: v => { if (v) it.sh = v; else delete it.sh; } }),
+    it.ho && it.ho.length ? el('div', { class: 'row' }, el('label', null, 'ช่องเจาะ ' + it.ho.length + ' ช่อง'), el('button', { class: 'tl-btn', onclick: () => { pushUndo('o'); delete it.ho; resync(); renderSide(); } }, 'ล้างช่อง')) : null,
     fld('HP ต่อช่อง', it, 'hp', { nullable: 1, ph: 'ตามวัสดุ (' + MD.PN_HP[mat] + ')', min: 1, step: 5 }),
     fld('กลุ่ม (ค้ำกัน)', it, 'g', { type: 'text', get: () => it.g == null ? '' : it.g, set: v => { if (v === '' || v == null) delete it.g; else it.g = v; } }),
     el('p', { class: 'note' }, d.nc + ' × ' + d.nr + ' = ' + d.nc * d.nr + ' ช่อง (ช่องละ ' + (d.L / d.nc).toFixed(2) + ' × ' + (d.H / d.nr).toFixed(2) + ' ม.) • ' + ((it.m || 'p') === 'g' ? 'HP ทั้งแผ่น ' + hp : 'HP ' + hp + ' ต่อช่อง') + ' • แผ่นกลุ่มเดียวกันที่แตะกันค้ำกัน — ไม่มีอะไรค้ำถึงพื้น = ร่วง'),
-    el('div', { class: 'seg' }, el('button', { class: 'tl-btn', title: 'แบ่งแผ่นเป็นซ้าย/ขวา/คานบน เว้นช่องประตู 1.4 × 2.4 ม. กลางแผ่น', onclick: () => pnCut(it, 'door') }, 'เจาะประตู'),
-      el('button', { class: 'tl-btn', title: 'เว้นช่องหน้าต่าง 1.2 × 1.2 ม. สูงจากฐาน 1 ม.', onclick: () => pnCut(it, 'window') }, 'เจาะหน้าต่าง'),
+    el('div', { class: 'seg' }, el('button', { class: 'tl-btn', title: 'เจาะช่องประตู 1.4 × 2.4 ม. กลางแผ่น (สูงสุด 4 ช่องต่อแผ่น)', onclick: () => pnCut(it, 'door') }, 'เจาะประตู'),
+      el('button', { class: 'tl-btn', title: 'เจาะช่องหน้าต่าง 1.2 × 1.2 ม. สูงจากฐาน 1 ม. + ใส่กระจกไฟ', onclick: () => pnCut(it, 'window') }, 'เจาะหน้าต่าง'),
       el('button', { class: 'tl-btn' + (PNT.on ? ' on' : ''), title: 'คลิกบนแผ่นเพื่อทุบทีละช่อง ดูว่าส่วนไหนจะร่วงตาม', onclick: () => { PNT.on = !PNT.on; if (!PNT.on) PNT.br.clear(); pnTestDraw(); renderSide(); } }, PNT.on ? 'ปิดลองทุบ' : 'ลองทุบ')),
     PNT.on ? el('p', { class: 'note' }, 'คลิกบนแผ่นพัง = ทุบ 1 ช่อง (Shift = 3×3) • แดง = ที่ทุบ • ส้ม = ส่วนที่จะร่วงตาม • ไม่บันทึกลงไฟล์') : null];
 }
@@ -721,17 +735,16 @@ function pnTestDraw() {
   const G = MD.pnGraph(M, M.objs), br = new Set(), list = [];
   for (const p of G.ps) { const st = PNT.br.get(p.o.id); if (st) for (const k of st) if (k < p.nc * p.nr) br.add(p.base + k); }
   const S = MD.pnSupported(G, br);
-  for (const p of G.ps) for (let k = 0; k < p.nc * p.nr; k++) { const id = p.base + k; if (S.dead[id]) list.push([p, k, '#e02a2a']); else if (!S.seen[id]) list.push([p, k, '#ff9a2a']); }
+  for (const p of G.ps) for (let k = 0; k < p.nc * p.nr; k++) { const id = p.base + k; if (!G.ex[id]) continue; if (S.dead[id]) list.push([p, id, '#e02a2a']); else if (!S.seen[id]) list.push([p, id, '#ff9a2a']); }
   if (!list.length) { need(); return; }
-  const im = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshBasicMaterial({ transparent: true, opacity: 0.62, depthWrite: false }), list.length), m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), col = new THREE.Color(), Y = new THREE.Vector3(0, 1, 0);
-  list.forEach(([p, k, c], i) => { const cc = k % p.nc, r = (k / p.nc) | 0, cw = p.L / p.nc, ch = p.H / p.nr, u = -p.L / 2 + (cc + 0.5) * cw;
-    q.setFromAxisAngle(Y, p.o.rot || 0); m4.compose(new THREE.Vector3(p.o.x + u * p.c, p.zb + (r + 0.5) * ch, p.o.z + u * p.s), q, new THREE.Vector3(cw * 0.96, ch * 0.96, p.T + 0.08));
-    im.setMatrixAt(i, m4); im.setColorAt(i, col.set(c)); });
+  const im = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshBasicMaterial({ transparent: true, opacity: 0.62, depthWrite: false }), list.length), m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), col = new THREE.Color(), eu = new THREE.Euler(0, 0, 0, 'YXZ');
+  list.forEach(([p, id, c], i) => { eu.set(p.o.tl || 0, p.o.rot || 0, 0); q.setFromEuler(eu);
+    m4.compose(new THREE.Vector3(G.C[id * 3], G.C[id * 3 + 1], G.C[id * 3 + 2]), q, new THREE.Vector3(p.cw * 0.96, p.ch * 0.96, p.T + 0.08)); im.setMatrixAt(i, m4); im.setColorAt(i, col.set(c)); });
   im.renderOrder = 6; gPnT.add(im); need();
 }
 function pnTestHit(o, pt, big) {
-  const d = MD.pnDims(o), r = o.rot || 0, mx = pt.x + M.W / 2, mz = pt.z + M.H / 2, u = (mx - o.x) * Math.cos(r) - (mz - o.z) * Math.sin(r), h = pt.y - MD.gh(M, o.x, o.z) - (o.y || 0);
-  const c0 = Math.floor((u + d.L / 2) / (d.L / d.nc)), r0 = Math.floor(h / (d.H / d.nr)); if (!PNT.br.has(o.id)) PNT.br.set(o.id, new Set());
+  const d = MD.pnDims(o), F = MD.pnFrame(M, o), D = [pt.x + M.W / 2 - F.B[0], pt.y - F.B[1], pt.z + M.H / 2 - F.B[2]], dot = A => A[0] * D[0] + A[1] * D[1] + A[2] * D[2], u = dot(F.U), w = dot(F.W);
+  const c0 = Math.floor((u + d.L / 2) / (d.L / d.nc)), r0 = Math.floor(w / (d.H / d.nr)); if (!PNT.br.has(o.id)) PNT.br.set(o.id, new Set());
   const st = PNT.br.get(o.id), R = big ? 1 : 0;
   for (let a = -R; a <= R; a++) for (let b = -R; b <= R; b++) { const cc = c0 + a, rr = r0 + b; if (cc >= 0 && cc < d.nc && rr >= 0 && rr < d.nr) st.add(rr * d.nc + cc); }
   pnTestDraw();
@@ -878,6 +891,9 @@ function renderSide() {
         d ? fld('ชนได้ (เดิน/ยิงไม่ผ่าน)', it, 'col', { type: 'checkbox', get: () => d.col }) : null,
         d && d.col ? fld('ขนาดที่ชน (เท่า)', it, 'cs', { get: () => it.cs == null ? d.cs : it.cs, min: 0.05 }) : null,
         d && d.col ? fld('พังได้', it, 'brk', { type: 'checkbox', get: () => it.brk == null ? d.brk : it.brk }) : null,
+        it.t === 'house' ? el('div', { class: 'seg' }, el('button', { class: 'tl-btn', title: 'แปลงเป็นแผ่นพัง (ผนังปูนฉาบ หลังคาหิมะ หน้าต่างไฟ) แก้ได้ทีละแผ่น', onclick: () => pnFromHouse(it, false) }, 'แตกเป็นแผ่นพัง (บ้านหิมะ)'),
+          el('button', { class: 'tl-btn', title: 'แปลงเป็นแผ่นพัง แบบบ้านอิฐลอนดอน', onclick: () => pnFromHouse(it, true) }, '(บ้านอิฐ)')) : null,
+        it.t === 'house' ? el('p', { class: 'note' }, 'ในเกมบ้านนี้เป็นแผ่นพังอยู่แล้ว (แปลงอัตโนมัติ) • กดแตกเมื่ออยากแก้ผนัง/หน้าต่าง/หลังคาทีละแผ่น') : null,
         D && D.cat === 'game' && it.t !== 'pchest' && it.t !== 'pn_wall' ? fld('พังได้', it, 'brk', { type: 'checkbox', get: () => it.brk == null ? 1 : it.brk }) : null, btns)); }   // houses / crates / barrels / trees: off = unbreakable
     else if (sel.k === 'wall') box.append(section('กำแพง' + (it.n ? ' — ' + it.n : ''), true, fld('หนา', it, 'th', { min: 0.2 }), fld('สูง', it, 'h', { min: 0.2 }), fld('สี', it, 'c', { type: 'color' }),
       fld('ฐาน (ความสูง)', it, 'base', { nullable: 1, ph: 'ตามพื้น' }), fld('เส้นโค้ง', it, 'curve', { type: 'checkbox' }), fld('ปิดวง', it, 'closed', { type: 'checkbox' }), fld('พังได้', it, 'brk', { type: 'checkbox' }),

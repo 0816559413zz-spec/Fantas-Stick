@@ -6,6 +6,7 @@ const WCACHE=new Map(),WCACHE_MAX=3;
 // key ของแคช = id + เวอร์ชันไฟล์ (เมนูสร้างแผนที่จากโค้ดไว้ก่อนไฟล์แผนที่ id เดียวกันโหลดเสร็จ → ห้ามเอาของเก่ามาใช้)
 function wkey(id){const f=MAPS[id]&&MAPS[id].fm;return f?id+'#'+(f.v||0):id;}
 function buildWorld(id){
+  pnlHouseConv(id);if(PNL._id!==id)pnlGen(id);   // houses → panels before anything draws them (lobby builds the map before setMapVars)
   if(world){
     scene.remove(world);
     if(PROPV.g){if(PROPV.g.parent)PROPV.g.parent.remove(PROPV.g);disposeTree(PROPV.g);PROPV.g=null;}   // prop สร้างใหม่ทุกเกมจาก snapshot
@@ -28,6 +29,7 @@ function buildWorld(id){
     world=new THREE.Group();scene.add(world);
     builtMap=id;builtKey=wkey(id);CANDLESYS=null;TORCHES=[];CANDLES=[];FIREFLIES=null;CRYSTAL=null;RUNE=null;SNITCH=null;BANNERS=[];SNOW=null;
     if(FM)buildFileMap(id);else if(id==='forest')buildForest();else if(id==='pitch')buildPitch();else if(id==='hogsmeade')buildHogsmeade();else if(id==='greathall')buildGreatHall();else if(id==='meadow')buildMeadow();else if(id==='lake')buildLake();else if(id==='ruins')buildRuins();else if(id==='test')buildTest();else if(MAPS[id]&&MAPS[id].build==='city')buildCity();else if(MAPS[id]&&MAPS[id].build==='fcs')buildFcs();else buildCastle();
+    if(!FM&&PNL.length)try{pnlBuild();}catch(e){console.error('pnlBuild',e);}   // breakable panels / houses on code maps (file maps: buildFileMap)
     buildBackdrop(id);   // ฉากหลังนอกพื้นที่เล่น (js/67, เฉพาะแผนที่ที่มีใน BACKDROP)
     batchStatic(world,new Set([RUNE,CRYSTAL,SNITCH,FIREFLIES&&FIREFLIES.pts,...CANDLES.map(c=>c.g),...BANNERS.map(b=>b.m)].filter(Boolean)));
     setTimeout(prewarmShaders,0);

@@ -281,6 +281,7 @@ function grassBake(){
   const rw=Math.max(32,Math.round(res*hx/Math.max(hx,hz))),rh=Math.max(32,Math.round(res*hz/Math.max(hx,hz)));
   const oc=new THREE.OrthographicCamera(-hx,hx,hz,-hz,1,600);oc.position.set(0,300,0);oc.up.set(0,0,-1);oc.lookAt(0,0,0);oc.updateMatrixWorld();
   const hidden=[];for(const o of scene.children)if(o!==world&&o.visible){o.visible=false;hidden.push(o);}
+  for(const e of PNV.list)for(const o of [e.m,e.heap,e.rub])if(o&&o.visible){o.visible=false;hidden.push(o);}   // breakable panels: bake bare ground (else blades next to a wall take the wall-top height and float once it breaks) — strip removed below
   const swaps=[];world.traverse(o=>{if(!o.visible){return;}if(o.isSprite||o.isPoints||o.isLine){o.visible=false;hidden.push(o);return;}
     if(!o.isMesh)return;const ms=[].concat(o.material);const nb=ms.map(m=>{let b=_grBasic.get(m);if(!b){b=new THREE.MeshBasicMaterial({color:m.color?m.color.clone():new THREE.Color(0),map:m.map||null,vertexColors:!!m.vertexColors,side:THREE.DoubleSide,transparent:!!m.transparent,opacity:m.opacity??1});if(m.userData&&m.userData.grLive)grLive(b);_grBasic.set(m,b);}return b;});
     swaps.push([o,o.material]);o.material=Array.isArray(o.material)?nb:nb[0];});
@@ -313,6 +314,8 @@ function grassBake(){
       j0=Math.max(0,Math.floor((hz-(y1-MH/2)*S3)/(2*hz)*rh)),j1=Math.min(rh-1,Math.ceil((hz-(y0-MH/2)*S3)/(2*hz)*rh));
     for(let j=j0;j<=j1;j++)for(let i=i0;i<=i1;i++){const x=(-hx+(i+0.5)/rw*2*hx)/S3+MW/2,y=(hz-(j+0.5)/rh*2*hz)/S3+MH/2;if(inside(x,y)){D[j*rw+i]=0;st[j*rw+i]=2;}}};
   for(const b of BLDG){const r=Math.hypot(b.o.w,b.o.d)/2+6;noGrass(b.o.x-r,b.o.y-r,b.o.x+r,b.o.y+r,(x,y)=>{const [lx,ly]=bldLocal(b,x,y);return Math.abs(lx)<b.o.w/2+6&&Math.abs(ly)<b.o.d/2+6;});}
+  for(const h of (MAPS[MAPID]&&MAPS[MAPID].pnHB)||[]){const c=Math.cos(h.ry||0),s=Math.sin(h.ry||0),r=Math.hypot(h.w,h.d)/2+6;noGrass(h.x-r,h.y-r,h.x+r,h.y+r,(x,y)=>{const dx=x-h.x,dy=y-h.y;return Math.abs(dx*c-dy*s)<h.w/2+6&&Math.abs(dx*s+dy*c)<h.d/2+6;});}   // inside houses (now panels)
+  for(const p of PNL){if(p.tl||p.zb-pnGT(p.x,p.y)>0.5)continue;const e=p.hl+p.ht+10;noGrass(p.x-e,p.y-e,p.x+e,p.y+e,(x,y)=>{const [u,v]=pnLoc(p,x,y);return Math.abs(u)<p.hl+4&&Math.abs(v)<p.ht+6;});}   // under breakable panels
   for(const B of (MAPS[MAPID]&&MAPS[MAPID].boxes)||[])noGrass(B.x,B.y,B.x+B.w,B.y+B.d,()=>true);
   // เติมใต้พุ่มไม้: ค่อย ๆ ลามสี/ความสูง/ความหนาแน่นจากช่องข้าง ๆ เข้าไป (พุ่มใหญ่เกินไปตรงกลางยังว่าง)
   for(let it=0;it<24;it++){const fill=[];
