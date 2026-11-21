@@ -168,12 +168,14 @@ function setMapVars(id){if(!MAPS[id])id='castle';MAPID=id;MW=MAPS[id].W;MH=MAPS[
 const FMAPS={pend:new Map(),fail:new Set()};
 function b64i16(b){const bin=atob(b),u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);const v=new Int16Array(u.buffer),f=new Float32Array(v.length);for(let i=0;i<v.length;i++)f[i]=v[i]===-32768?NaN:v[i]/100;return f;}
 function regFileMap(id,e,d){
-  const obs=(d.obs||[]).map(o=>Object.assign({x:o.x,y:o.y,r:o.r,hgt:o.hgt,k:o.k||'col',fm:1},o.ring!=null?{ring:o.ring}:{},o.b!=null?{b:o.b}:{},o.st?{st:1}:{},o.bot!=null?{bot:o.bot}:{}));   // bot = วงชนลอย เริ่มสูงจากพื้นเท่านี้ (กำแพง/ของบนพื้นชั้นบนจาก Map Builder — ไม่ขวางคนข้างล่าง)   // st = ยืนบนหลังได้ (โต๊ะห้องโถง) — groundH js/04   // b = กลุ่มของบังที่พังได้ (d.brk[b]) • ring = ความสูงห่วงควิดดิช (k:'hoop')
+  const obs=(d.obs||[]).map(o=>Object.assign({x:o.x,y:o.y,r:o.r,hgt:o.hgt,k:o.k||'col',fm:1},o.ring!=null?{ring:o.ring}:{},o.b!=null?{b:o.b}:{},o.st?{st:1}:{},o.bot!=null?{bot:o.bot}:{},o.fid!=null?{fid:o.fid}:{}));   // fid = fence section (k:'fcf', js/12-efs)   // bot = วงชนลอย เริ่มสูงจากพื้นเท่านี้ (กำแพง/ของบนพื้นชั้นบนจาก Map Builder — ไม่ขวางคนข้างล่าง)   // st = ยืนบนหลังได้ (โต๊ะห้องโถง) — groundH js/04   // b = กลุ่มของบังที่พังได้ (d.brk[b]) • ring = ความสูงห่วงควิดดิช (k:'hoop')
   (d.houses||[]).forEach((h,i)=>obs.push({x:h.x,y:h.y,r:Math.max(h.w,h.d)/2,k:'house',hgt:10,w:h.w,d:h.d,s:(i*0.37)%1,ry:h.ry||0,nb:h.nb?1:0}));
   const terr={c:d.c,nx:d.nx,ny:d.ny,g:b64i16(d.g),fl:(d.fl||[]).map(f=>({x0:f.x0,y0:f.y0,nx:f.nx,ny:f.ny,top:b64i16(f.top),bot:b64i16(f.bot)}))};
   {const keep=TERR;TERR=terr;for(const o of obs)if(o.fm)o.top=terrT(o.x,o.y)+o.hgt;TERR=keep;}   // ที่ชนจากไฟล์: เทียบความสูงจริง (พื้นใต้ตัวกับใต้ที่ชนสูงไม่เท่ากันได้)
   MAPS[id]={name:d.name||id,d:d.desc||'',W:d.W,H:d.H,obs,terr,fm:{file:e.file,v:e.v||0,sky:d.sky||'night',fog:d.fog||null,music:d.music||'',modes:d.modes||null,
     spawns:d.spawns||[],props:d.props,espawn:d.espawn||[],rings:d.rings||[],tasks:d.tasks||[],lights:d.lights||[],env:d.env||[],weather:d.weather||'',fx:d.fx||[],brk:d.brk||[],look:d.look||'',lt:d.lt||null}};   // look = ชื่อพรีเซ็ต Look (js/74) • lt = แสง/ฟ้าเฉพาะแมพ (js/28 buildFileMap: hemi/sun/sky)
+  if(d.ceil)MAPS[id].ceil=d.ceil.map(q=>({x0:q.x0,y0:q.y0,x1:q.x1,y1:q.y1,h:q.h,zmax:q.zmax==null?Infinity:q.zmax}));   // room ceilings (fcsCeilAt)
+  if(d.siege)sgFromFile(MAPS[id],d,id);   // Map Builder siege map (js/02-fcs.js) — MAP-STANDARD round 2
   const ri=RANDOM_MAPS.indexOf(id);
   if(d.random===0){if(ri>=0)RANDOM_MAPS.splice(ri,1);}else if(ri<0&&!MAP_OFF.has(id))RANDOM_MAPS.push(id);
   if(builtMap===id)builtMap='';                                   // ฉากที่สร้างไว้เป็นแบบโค้ด (เช่นเมนู) → ให้สร้างใหม่ครั้งหน้า

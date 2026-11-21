@@ -116,7 +116,9 @@ function hostStart(){
   const err=validate();if(err){toast(err);return;}
   // สุ่มแผนที่ทุกครั้งที่เริ่มเกม (ไม่ซ้ำกับรอบที่แล้วถ้าเป็นไปได้)
   const MD=MODES[G.mode];
-  if(PLAYMAP&&MAPS[PLAYMAP]&&G.mode!=='siege')G.map=PLAYMAP;   // ทดลองเล่นจาก Map Builder (ห้องฝึกก็ใช้แผนที่นี้)
+  const sgOk=id=>!!(id&&MAPS[id]&&MAPS[id].fcs&&mapOkFor(id,'siege'));   // siege-capable: code fcs or a Map Builder map with data.siege
+  if(PLAYMAP&&MAPS[PLAYMAP]&&(G.mode!=='siege'||sgOk(PLAYMAP)))G.map=PLAYMAP;   // ทดลองเล่นจาก Map Builder (ห้องฝึกก็ใช้แผนที่นี้)
+  else if(G.mode==='siege'&&sgOk(G.mapPick))G.map=G.mapPick;   // siege on a picked Map Builder siege map
   else if(MD.map&&(G.mode==='siege'||!(G.mode!=='train'&&MAPS[G.mapPick]&&MAPS[G.mapPick].allModes)))G.map=MD.map;   // บุกปราสาท = แผนที่ของโหมดเสมอ   // โหมดที่มีแผนที่ประจำ: เลือกแผนที่ allModes (เมือง) แทนได้
   else if(G.mapPick&&MAPS[G.mapPick]&&!MAP_OFF.has(G.mapPick))G.map=G.mapPick;
   else{let ks=RANDOM_MAPS.filter(k=>k!==G.lastMap&&MAPS[k]&&mapOkFor(k,G.mode));if(!ks.length)ks=['castle'];G.map=ks[Math.floor(Math.random()*ks.length)];}
@@ -180,7 +182,7 @@ function resetBody(p,x,y){
   for(const k of CDK)p.cd[k]=0;clearStatus(p);p.trail=null;natureReset(p);earthReset(p);windReset(p);waterReset(p);lightReset(p);darkReset(p);
   p.ang=Math.atan2(MH/2-y,MW/2-x);
 }
-function fmap(){const M=MAPS[MAPID];return M&&(M.fm||(M.fmFor&&G?M.fmFor(G.mode):null));}   // fmFor = แผนที่จากโค้ดที่มีจุดเกิด/ห่วง/ภารกิจต่อโหมด (city)
+function fmap(){const M=MAPS[MAPID];if(M&&M.fm&&M.fmFor&&G&&G.mode==='siege')return Object.assign({},M.fm,M.fmFor(G.mode));return M&&(M.fm||(M.fmFor&&G?M.fmFor(G.mode):null));}   // file map + siege: per-phase spawns over the file data   // fmFor = แผนที่จากโค้ดที่มีจุดเกิด/ห่วง/ภารกิจต่อโหมด (city)
 function spawnPts(){const f=fmap(),sp=f&&f.spawns.filter(s=>s.t===undefined);if(sp&&sp.length)return sp.map(s=>[s.x,s.y]);return SPAWNF.map(f=>[f[0]*MW,f[1]*MH]);}
 // จุดเกิดของทีม t จากไฟล์แผนที่ (ไม่มี = แบ่งจุดเกิดทั่วไปซ้าย/ขวา) — คืน null ถ้าแผนที่ไม่มีจุดเกิดจากไฟล์
 function teamPts(t){const f=fmap();if(!f||!f.spawns.length)return null;let a=f.spawns.filter(s=>s.t===t);if(!a.length){a=f.spawns.filter(s=>t?s.x>MW/2:s.x<=MW/2);if(!a.length)a=f.spawns;}return a.map(s=>[s.x,s.y]);}

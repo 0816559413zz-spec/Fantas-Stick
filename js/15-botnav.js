@@ -11,10 +11,10 @@
 //   - ติดอยู่กับที่ → คิดทางใหม่ + ก้าวข้างสุ่ม
 //  ค่าระยะ/เวลา = ค่าตั้งต้น ให้ทีมเกมเพลย์ปรับ
 // =====================================================================
-const NAV_MAPS=new Set(['city','fcs']),NAV_EYE=2.2;
+const NAV_MAPS=new Set(['city','fcs']),NAV_EYE=2.2;   // + any siege map (MAPS[id].fcs, Map Builder)
 const NAV={c:60,nx:0,ny:0,w:null,s:null,key:'',sig:-1,t:-9,
   g:null,f:null,par:null,gen:null,cl:null,gn:0,heap:null};
-const navOn=()=>NAV_MAPS.has(MAPID);
+const navOn=()=>NAV_MAPS.has(MAPID)||!!(MAPS[MAPID]&&MAPS[MAPID].fcs);
 function navSig(){
   let s=0;
   if(cityOn()){for(const d of CITYD.b)s+=d.cl*3;for(const it of CITYD.it)if(it.st===1)s++;}

@@ -490,6 +490,11 @@
    "file": "maps/castle-demo.glb",
    "data": "maps/castle-demo.json",
    "v": 3
+  },
+  "siege-demo": {
+   "file": "maps/siege-demo.glb",
+   "data": "maps/siege-demo.json",
+   "v": 1
   }
  },
  "ptex": {}

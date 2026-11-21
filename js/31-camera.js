@@ -151,7 +151,7 @@ function camRoomK(me,F,x,y,z){
 // (user 2026-11-20: back to a wall = camera went inside the wall). Thin things (fences, trees, rails, low cover) are ignored.
 const _camOB=[];
 function camObsK(me,F,x,y,z){
-  if(MAPID!=='fcs')return 1;const N=14,M=7;let k=1;const grid=sgObs(),mz=me.z||0;
+  if(MAPID!=='fcs'&&!(MAPS[MAPID]&&MAPS[MAPID].fcs))return 1;const N=14,M=7;let k=1;const grid=sgObs(),mz=me.z||0;   // + Map Builder siege maps
   for(let i=1;i<=N;i++){const f=i/N,X=F.x+(x-F.x)*f,Y=F.y+(y-F.y)*f,Z=F.z+(z-F.z)*f,px=X/S3+MW/2,py=Z/S3+MH/2;let hit=false;
     const c=fcsCeilAt(px,py,mz);if(c<Infinity&&Y>GY(px,py)+c-0.3&&F.y<GY(px,py)+c)hit=true;
     if(!hit)for(const q of sgNear(grid,px,py,M,_camOB)){if(q.r<14||q.k==='tfence'||q.k==='fcf'||q.k==='fct'||q.k==='fce')continue;

@@ -248,6 +248,8 @@ applyQuality();
 buildWorld('castle');
 loadAllMapData();
 if(PLAYMAP)loadAllMapData().then(()=>{if(!MAPS[PLAYMAP]){toast('ไม่พบแผนที่ '+PLAYMAP);return;}$('#btnSolo').click();   // ค่าเริ่มต้น = ห้องฝึก (เดินดูอิสระ ไม่มีศัตรู)
-  const t=setInterval(()=>{if(!(G&&G.ph==='lobby'&&NET.isHost))return;clearInterval(t);G.mode=new URLSearchParams(location.search).get('pm')||'train';G.mapPick=PLAYMAP;broadcastLobby();hostStart();},150);});   // ข้อมูลแผนที่จากไฟล์ (เล็ก) — พร้อมให้สุ่ม/เลือกก่อนเริ่มเกม
+  const t=setInterval(()=>{if(!(G&&G.ph==='lobby'&&NET.isHost))return;clearInterval(t);G.mode=new URLSearchParams(location.search).get('pm')||'train';G.mapPick=PLAYMAP;
+    if(G.mode==='siege'&&plist().length<2){lobbyBotAdd('1',1,true);plist().forEach(p=>{p.lteam=p.id===NET.myId?0:1;});}   // siege test play: one defender bot, you attack
+    broadcastLobby();hostStart();},150);});   // ข้อมูลแผนที่จากไฟล์ (เล็ก) — พร้อมให้สุ่ม/เลือกก่อนเริ่มเกม
 setScreen('menu');
 requestAnimationFrame(frame);

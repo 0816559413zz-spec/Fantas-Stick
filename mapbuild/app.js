@@ -867,7 +867,8 @@ async function buildExport() {
   const bucket = new Map(), put = (mesh, geo, st) => { st = st || M.style || ''; const k = mesh.material.uuid + '|' + st; if (!bucket.has(k)) bucket.set(k, { m: mesh.material, g: [], st }); bucket.get(k).g.push(geo); };
   const styleOf = (k, id) => { const it = (k === 'wall' ? M.walls : k === 'floor' ? M.floors : M.parts).find(q => q.id === id); return it && it.style; };
   let tris = 0;
-  for (const w of gWalls.children) { const gi = G.brkOf.get('w' + w.userData.ref.id + ':' + w.userData.ci), st = styleOf('wall', w.userData.ref.id) || M.style;
+  for (const w of gWalls.children) { const wd = M.walls.find(q => q.id === w.userData.ref.id); if (wd && (wd.sg || wd.sys === 'fence')) continue;   // siege targets + burnable fences: the game draws them
+    const gi = G.brkOf.get('w' + w.userData.ref.id + ':' + w.userData.ci), st = styleOf('wall', w.userData.ref.id) || M.style;
     if (gi != null) { const c = new THREE.Mesh(w.geometry, w.material); c.name = w.name; c.userData = { brk: gi }; if (st) c.userData.style = st; R.add(c); } else put(w, w.geometry, st); }
   for (const f of gFloors.children) { f.updateMatrix(); put(f, f.geometry.clone().applyMatrix4(f.matrix), styleOf('floor', f.userData.ref.id)); }
   const flat = g => { g = g.index ? g.toNonIndexed() : g; g.deleteAttribute('uv'); return g; };   // same attribute set as the hand-made wall/floor geometry so they merge
@@ -908,7 +909,7 @@ function frame(t) {
 
 // ================= boot =================
 $('bNew').onclick = newDlg; $('bSave').onclick = save; $('bUndo').onclick = doUndo; $('bRedo').onclick = doRedo; $('bExport').onclick = exportGame;
-$('bPlay').onclick = async () => { const w = window.open('about:blank', 'mb_play'); if (await exportGame()) w.location = 'index.html?nosw&playmap=' + M.id + '&t=' + Date.now(); else w.close(); };
+$('bPlay').onclick = async () => { const w = window.open('about:blank', 'mb_play'); if (await exportGame()) w.location = 'index.html?nosw&playmap=' + M.id + (M.modes.length === 1 && M.modes[0] === 'siege' ? '&pm=siege' : '') + '&t=' + Date.now(); else w.close(); };
 $('mapSel').onchange = e => openMap(e.target.value);
 $('vTop').onclick = () => { cam.pitch = 1.55; cam.yaw = 0; camApply(); }; $('vFit').onclick = fit;
 $('oSteep').onchange = e => { show.steep = e.target.checked; updTerrain(0, 0, M.nx - 1, M.ny - 1); need(); };

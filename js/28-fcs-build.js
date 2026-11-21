@@ -279,8 +279,16 @@ function efsView(dt){
 // ---------- ภาพโหมด (ลูกข่ายทุกเครื่องจาก snapshot M.sg) ----------
 const SGV3={g:null,cores:[],bw:[],bar:null,barK:'',beams:new Map(),bwK:''};
 function sgClearView(){if(SGV3.g){scene.remove(SGV3.g);disposeTree(SGV3.g);}SGV3.g=null;SGV3.cores=[];SGV3.bw=[];SGV3.bar=null;SGV3.barK='';SGV3.bwK='';SGV3.beams.clear();}
+// Map Builder siege map (MAPS[id].fcs from sgFromFile): parts the game draws itself — burnable fences + team spawn pads
+// (target walls/gate + cores come from sgViewBuild like on fcs). Called from buildFileMap (js/28-maps-build.js).
+function sgFileBuild(id){
+  const F=MAPS[id].fcs,box=sGeo(THREE.BoxGeometry,1,1,1);
+  const inst=(geo,mat,list,fn)=>{if(!list.length)return;const im=new THREE.InstancedMesh(geo,mat,list.length);list.forEach((q,i)=>im.setMatrixAt(i,fn(q)));im.castShadow=im.receiveShadow=true;addW(im);return im;};
+  fcsFences(F.fences||[],inst,box);
+  for(const [t,L] of [[0,F.sp.A],[1,F.sp.B]])for(const k in L){const s=L[k],m=new THREE.Mesh(new THREE.CircleGeometry(SG_SPR*S3,32),new THREE.MeshBasicMaterial({color:TEAMC[t],transparent:true,opacity:0.18,depthWrite:false}));m.rotation.x=-Math.PI/2;m.position.set(tx(s.x),GY(s.x,s.y)+0.05,tz(s.y));addW(m);}
+}
 function sgViewBuild(){
-  sgClearView();const F=MAPS.fcs.fcs,g=new THREE.Group();scene.add(g);SGV3.g=g;
+  sgClearView();const F=sgFD(),g=new THREE.Group();scene.add(g);SGV3.g=g;
   F.cores.forEach((k,i)=>{const o=new THREE.Group();o.position.set(tx(k.x),GY(k.x,k.y),tz(k.y));g.add(o);
     const base=new THREE.Mesh(new THREE.CylinderGeometry(1.1,1.4,0.6,8),stoneMat(1,1,'#6a6258'));base.position.y=0.3;base.castShadow=true;o.add(base);
     const cm=new THREE.MeshStandardMaterial({color:'#9fd8ff',emissive:'#3a8cff',emissiveIntensity:1.2,roughness:0.2,transparent:true,opacity:0.92});
@@ -294,7 +302,7 @@ function sgViewBuild(){
     if(b.k==='gate'){const n=Math.max(2,Math.round(Math.max(b.w,b.d)/20)),horiz=b.w>=b.d;
       for(let q=0;q<n;q++){const t=(q+0.5)/n-0.5,m=new THREE.Mesh(sGeo(THREE.BoxGeometry,0.18,1,0.18),new THREE.MeshStandardMaterial({color:'#3a3a40',metalness:0.6,roughness:0.5}));m.scale.y=b.h;m.position.set(horiz?t*b.w*S3:0,b.h/2,horiz?0:t*b.d*S3);m.castShadow=true;o.add(m);}
       const top=new THREE.Mesh(sGeo(THREE.BoxGeometry,1,0.3,1),new THREE.MeshStandardMaterial({color:'#4a4040',metalness:0.5}));top.scale.set(Math.max(0.3,b.w*S3),1,Math.max(0.3,b.d*S3));top.position.y=b.h;o.add(top);}
-    else{const vh=fcsCut(Math.floor(cx/FCS_C),Math.floor(cy/FCS_C))?Math.min(b.h,5.55):b.h;   // inside a room piece: stay under the gallery deck (6 m)
+    else{const vh=MAPID==='fcs'&&fcsCut(Math.floor(cx/FCS_C),Math.floor(cy/FCS_C))?Math.min(b.h,5.55):b.h;   // inside a room piece: stay under the gallery deck (6 m)
       const m=new THREE.Mesh(sGeo(THREE.BoxGeometry,1,1,1),stoneMat(1,1,'#b08a60'));m.scale.set(b.w*S3,vh,b.d*S3);m.position.y=vh/2;m.castShadow=m.receiveShadow=true;o.add(m);
       const cr=new THREE.Mesh(sGeo(THREE.BoxGeometry,1,1,1),new THREE.MeshBasicMaterial({color:'#ffcf6a',transparent:true,opacity:0.18,depthWrite:false}));cr.scale.set(b.w*S3+0.08,vh+0.08,b.d*S3+0.08);cr.position.y=vh/2;o.add(cr);}   // ขอบสีทอง = พังได้
     SGV3.bw.push(o);});
@@ -305,7 +313,7 @@ function SGVZR(){return (VIEW.cur&&VIEW.cur.M&&VIEW.cur.M.sg&&VIEW.cur.M.sg.zr)|
 function sgBarrier(ph,mode){
   const key=ph+'|'+(mode||'');if(SGV3.barK===key)return;SGV3.barK=key;
   if(SGV3.bar){SGV3.g.remove(SGV3.bar);disposeTree(SGV3.bar);SGV3.bar=null;}
-  const R=mode==='atk'&&ph>1?(MAPS.fcs.fcs.phases[ph-2]||sgArea(ph).rects):sgArea(ph).rects,ins=(x,y)=>R.some(q=>x>=q.x1&&x<=q.x2&&y>=q.y1&&y<=q.y2),step=FCS_C,pos=[],H=5;
+  const R=mode==='atk'&&ph>1?(sgFD().phases[ph-2]||sgArea(ph).rects):sgArea(ph).rects,ins=(x,y)=>R.some(q=>x>=q.x1&&x<=q.x2&&y>=q.y1&&y<=q.y2),step=FCS_C,pos=[],H=5;
   const seg=(x0,y0,x1,y1)=>{const b0=GY(x0,y0),b1=GY(x1,y1);pos.push(tx(x0),b0,tz(y0),tx(x1),b1,tz(y1),tx(x1),b1+H,tz(y1),tx(x0),b0,tz(y0),tx(x1),b1+H,tz(y1),tx(x0),b0+H,tz(y0));};
   for(const q of R){
     for(let x=q.x1;x<q.x2;x+=step){for(const [y,o] of [[q.y1,-2],[q.y2,2]]){const mx=x+step/2;if(y<=2||y>=MH-2)continue;if(!ins(mx,y+o))seg(x,y,x+step,y);}}
@@ -318,10 +326,10 @@ function sgBarrier(ph,mode){
 }
 function sgSync(v,P,me,now,dt){
   const S=v.M&&v.M.sg;
-  if(v.mode!=='siege'||!S||MAPID!=='fcs'){if(SGV3.g)sgClearView();return;}
+  if(v.mode!=='siege'||!S||!(MAPS[MAPID]&&MAPS[MAPID].fcs)){if(SGV3.g)sgClearView();return;}
   SGPH=S.ph;SGTR=S.tr||0;
-  if(!SGV3.g)sgViewBuild();
-  sgBarrier(S.ph,S.tr>0&&me&&me.tm===0?'atk':'');fcsForestTick();fcsCastleTick();fcsPropsView(dt);
+  if(!SGV3.g||SGV3.map!==MAPID){sgViewBuild();SGV3.map=MAPID;}
+  sgBarrier(S.ph,S.tr>0&&me&&me.tm===0?'atk':'');if(MAPID==='fcs'){fcsForestTick();fcsCastleTick();fcsPropsView(dt);}
   SGV3.cores.forEach((c,i)=>{const n=i+1,dead=S.hp[i]<=0,act=n===S.ph,fut=n>S.ph;
     c.cr.visible=c.glow.visible=!dead;c.rub.visible=dead;c.ring.visible=act;
     c.cr.rotation.y+=dt*(act?1.2:0.3);c.cr.position.y=4.3+Math.sin(now/600+i)*0.25;
@@ -329,7 +337,7 @@ function sgSync(v,P,me,now,dt){
     c.ring.material.color.set(hit?'#ff6a5a':S.def?'#ffb060':'#7fc0ff');c.ring.material.opacity=0.35+0.25*Math.sin(now/(hit?120:400));});
   if(S.bw!==SGV3.bwK){const old=SGV3.bwK;SGV3.bwK=S.bw;SGV3.bw.forEach((o,i)=>{o.visible=S.bw[i]!=='1';if(old&&old[i]!=='1'&&S.bw[i]==='1')sgDust(o.position);});gl.shadowMap.needsUpdate=true;}
   // ลำแสงร่าย: จากมือคนร่ายไปยอดแกน
-  const k=MAPS.fcs.fcs.cores[S.ph-1],seen=new Set();
+  const k=sgFD().cores[S.ph-1],seen=new Set();
   if(k)for(const p of P){if(!p.sc||!p.al)continue;seen.add(p.id);let b=SGV3.beams.get(p.id);
     if(!b){b=new THREE.Mesh(new THREE.CylinderGeometry(0.05,0.12,1,6,1,true),new THREE.MeshBasicMaterial({color:hdr('#8fd0ff',2),transparent:true,opacity:0.8,blending:THREE.AdditiveBlending,depthWrite:false}));SGV3.g.add(b);SGV3.beams.set(p.id,b);}
     const a=new THREE.Vector3(tx(p.x),GY(p.x,p.y)+(p.z||0)+1.3,tz(p.y)),e=new THREE.Vector3(tx(k.x),GY(k.x,k.y)+4.3,tz(k.y)),d=e.clone().sub(a),L=d.length();
@@ -348,7 +356,7 @@ function sgTop(v){const S=v.M&&v.M.sg;if(!S)return '🏰 บุกปราส�
   return `🏰 เฟส ${S.ph}/${S.n}   •   แกน ${S.ph} เหลือ ${pc}%   •   `+(S.pr>0?`เตรียมตัว ${S.pr} วิ`:S.tr>0?`🔁 เฟสถัดไปเริ่มใน ${S.tr} วิ`:S.ot?`⏱ ต่อเวลา! (ผ่อนผัน ${S.gr.toFixed(1)} วิ)`:`⏱ ${fmtTime(v.tm)}`);}
 function sgHud(v,me,big){
   const S=v.M&&v.M.sg;if(!S||!me)return;
-  const atk=me.tm===0,F=MAPS.fcs.fcs,k=F.cores[S.ph-1];
+  const atk=me.tm===0,F=sgFD(),k=F.cores[S.ph-1];
   // แถบเลือดแกนทั้ง 3 (ใต้แถบบน)
   const bw=Math.min(110,(SW-80)/S.n-10),x0=SW/2-(bw+10)*S.n/2;
   for(let i=0;i<S.n;i++){const x=x0+i*(bw+10),r=S.hp[i]/S.mx,act=i===S.ph-1;

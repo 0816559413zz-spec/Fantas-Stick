@@ -218,13 +218,19 @@ export function gameData(M, dim) {
   }
   // collision + breakable groups
   const obs = [], brk = [], brkOf = new Map();
-  const put = (c, gi) => { const o = { x: r1(c.x * PX), y: r1(c.z * PX), r: r1(c.r * PX), hgt: r2(c.hgt), k: 'col' }; if (c.bot != null) o.bot = r2(c.bot); if (gi != null) o.b = gi; obs.push(o); };
-  for (const w of M.walls) wallChunks(w).forEach((R, ci) => {
-    let gi = null;
-    if (w.brk) { gi = brk.length; brkOf.set('w' + w.id + ':' + ci, gi); const L = R[R.length - 1][2] - R[0][2];
-      brk.push({ h: r2(w.h), vh: r2(w.h), v: r1(L * w.th * w.h), m: w.m || 'stone', n: 'wall_' + w.id + '_' + ci }); }
-    for (const c of chunkCircles(M, w, R)) put(c, gi);
-  });
+  const put = (c, gi, ex) => { const o = { x: r1(c.x * PX), y: r1(c.z * PX), r: r1(c.r * PX), hgt: r2(c.hgt), k: 'col' }; if (c.bot != null) o.bot = r2(c.bot); if (gi != null) o.b = gi; if (ex) Object.assign(o, ex); obs.push(o); };
+  let fenceN = 0;   // fence segment index (same order as data.sys.fence below) → obs k:'fcf' + fid (js/12-efs lowers burnt sections)
+  for (const w of M.walls) {
+    if (w.sg) continue;   // siege target wall/gate: the game builds its collision + look from data.siege.bw (js/02-fcs sgFromFile)
+    const P = w.sys === 'fence' ? wallPath(w) : null, f0 = fenceN; if (P) fenceN += P.length - 1;
+    const fid = c => { let best = 0, bd = 1e9; for (let i = 1; i < P.length; i++) { const [ax, az] = P[i - 1], [bx, bz] = P[i], dx = bx - ax, dz = bz - az, t = clamp(((c.x - ax) * dx + (c.z - az) * dz) / (dx * dx + dz * dz || 1), 0, 1), d = Math.hypot(c.x - ax - dx * t, c.z - az - dz * t); if (d < bd) { bd = d; best = i - 1; } } return f0 + best; };
+    wallChunks(w).forEach((R, ci) => {
+      let gi = null;
+      if (w.brk && !P) { gi = brk.length; brkOf.set('w' + w.id + ':' + ci, gi); const L = R[R.length - 1][2] - R[0][2];
+        brk.push({ h: r2(w.h), vh: r2(w.h), v: r1(L * w.th * w.h), m: w.m || 'stone', n: 'wall_' + w.id + '_' + ci }); }
+      for (const c of chunkCircles(M, w, R)) put(c, gi, P ? { k: 'fcf', fid: fid(c) } : null);
+    });
+  }
   const spawns = [], espawn = [], rings = [], tasks = [], props = [], houses = [], lights = [];
   const sg = { cores: [], sp: { A: {}, B: {} }, phases: [], bw: [] }, ceil = [], rprops = [];
   const rect = o => { const w = (o.sx || 1) * PX, d = (o.sz || 1) * PX; return { x0: r1(o.x * PX - w / 2), y0: r1(o.z * PX - d / 2), x1: r1(o.x * PX + w / 2), y1: r1(o.z * PX + d / 2) }; };
@@ -253,7 +259,7 @@ export function gameData(M, dim) {
   for (const w of M.walls) {
     const P = wallPath(w), xs = P.map(p => p[0]), zs = P.map(p => p[1]);
     if (w.sg) sg.bw.push({ k: w.sg, x: r1((Math.min(...xs) - w.th / 2) * PX), y: r1((Math.min(...zs) - w.th / 2) * PX), w: r1((Math.max(...xs) - Math.min(...xs) + w.th) * PX), d: r1((Math.max(...zs) - Math.min(...zs) + w.th) * PX), h: r2(w.h), id: w.id });
-    if (w.sys) for (let i = 1; i < P.length; i++) (sys[w.sys] = sys[w.sys] || []).push([r1(P[i - 1][0] * PX), r1(P[i - 1][1] * PX), r1(P[i][0] * PX), r1(P[i][1] * PX), r2(w.th), r2(w.h)]);
+    if (w.sys && !(w.sg && w.sys === 'fence')) for (let i = 1; i < P.length; i++) (sys[w.sys] = sys[w.sys] || []).push([r1(P[i - 1][0] * PX), r1(P[i - 1][1] * PX), r1(P[i][0] * PX), r1(P[i][1] * PX), r2(w.th), r2(w.h)]);
   }
   for (const f of M.floors) if (f.sys) (sys[f.sys] = sys[f.sys] || []).push(floorCorners(f).map(c => [r1(c[0] * PX), r1(c[1] * PX)]));
   sg.cores.sort((a, b) => a.n - b.n);

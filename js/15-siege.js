@@ -23,7 +23,7 @@ const SGV={
   trT:20,        // core fell: seconds for defenders to retreat into the next area before the next phase starts (attackers held at the old line, timer paused)   // ผ่อนผันตอนต่อเวลา: เริ่ม 5 วิ หดเหลือ 1 วิ ภายใน 60 วิของการต่อเวลา
 };
 const SG_TEAM=['ฝ่ายบุก','ฝ่ายรับ'];
-function sgF(){return MAPS.fcs.fcs;}
+function sgF(){return sgFD();}   // js/02-fcs.js: code fcs or a Map Builder siege map
 function sgCore(){const S=G.sg;return S?sgF().cores[S.ph-1]:null;}
 function sgInZone(p,k){k=k||sgCore();return !!k&&Math.hypot(p.x-k.x,p.y-k.y)<SGV.zoneR+PR;}
 function sgSpawn(t,ph){const s=sgF().sp[t?'B':'A'][ph||G.sg.ph];return s||{x:MW/2,y:MH/2};}
@@ -48,7 +48,7 @@ function sgWallDmg(i,dmg,x,y){
 // กระสุนชนวงกำแพงพังได้ (updateProjectiles js/12) • คาถาวงกว้าง (damageEnv)
 function sgWallHit(c,pr){if(G.mode==='siege')sgWallDmg(c.sgw,pr.dmg||8,pr.x,pr.y);}
 function sgWallEnv(x,y,rad,dmg){
-  if(G.mode!=='siege'||!G.sg||MAPID!=='fcs')return;
+  if(G.mode!=='siege'||!G.sg||!(MAPS[MAPID]&&MAPS[MAPID].fcs))return;
   sgF().bw.forEach((b,i)=>{if(G.sg.bw[i]<=0)return;const dx=Math.max(b.x-x,0,x-(b.x+b.w)),dy=Math.max(b.y-y,0,y-(b.y+b.d));if(Math.hypot(dx,dy)<rad)sgWallDmg(i,dmg,x,y);});
 }
 // ปุ่ม (updatePlayer js/11): G = เริ่ม/หยุดร่ายที่แกน • ยิง/โล่/สกิล/พุ่ง = หยุดร่าย

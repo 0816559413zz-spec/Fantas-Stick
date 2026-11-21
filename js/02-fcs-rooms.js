@@ -44,12 +44,14 @@ function roomFloor(K,u0,v0,u1,v1,top,tag){
 function roomCeil(K,u0,v0,u1,v1,h,zmax){K.data.ceil.push({x0:K.X(u0),y0:K.Y(v0),x1:K.X(u1),y1:K.Y(v1),h,zmax:zmax==null?Infinity:zmax});}
 // lowest ceiling over (x,y) px for feet height z (m above ground) on the FCS map; Infinity = open sky
 function fcsCeilAt(x,y,z){
-  if(MAPID!=='fcs')return Infinity;let c=Infinity;
+  if(MAPID!=='fcs'){const L=MAPS[MAPID]&&MAPS[MAPID].ceil;if(!L)return Infinity;let c=Infinity;   // Map Builder ceilings (regFileMap)
+    for(const q of L)if(x>=q.x0&&x<=q.x1&&y>=q.y0&&y<=q.y1&&(z||0)<q.zmax&&q.h<c)c=q.h;return c;}
+  let c=Infinity;
   for(const r of FCS_ROOMS){const D=r.data;if(!D)continue;for(const q of D.ceil)if(x>=q.x0&&x<=q.x1&&y>=q.y0&&y<=q.y1&&(z||0)<q.zmax&&q.h<c)c=q.h;}
   return c;
 }
 // after each player update (host): flyers / jumpers / lifted bodies stay under room ceilings
-function fcsCeilClamp(p){if(MAPID!=='fcs'||!FCS_ROOMS.length)return;const c=fcsCeilAt(p.x,p.y,p.z||0);if(c<Infinity&&(p.z||0)+1.9>c){p.z=Math.max(0,c-1.9);if(p.vz>0)p.vz=0;}}
+function fcsCeilClamp(p){if(MAPID==='fcs'?!FCS_ROOMS.length:!(MAPS[MAPID]&&MAPS[MAPID].ceil))return;const c=fcsCeilAt(p.x,p.y,p.z||0);if(c<Infinity&&(p.z||0)+1.9>c){p.z=Math.max(0,c-1.9);if(p.vz>0)p.vz=0;}}
 // ---- breakable room props (user 2026-11-20): BRK groups (js/12-buildings.js) — snapshot BK syncs the stage
 // furniture/decor: break = shatter into loose debris, no collision left (rub 0) • rail: break = low rubble, no collision • pillar: chips, stays (rub 1)
 // col = collides before breaking (px radius, 0 = walk through) • h = height (m) • hp • m = BRK material (fx colour) • st = can stand on top
