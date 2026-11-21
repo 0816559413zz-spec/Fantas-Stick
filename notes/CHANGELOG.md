@@ -1,5 +1,7 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
 
+- 2026-11-22 Map Builder: Decor Box / Decor Cylinder get a "Collides" checkbox (off by default, so existing castle decor is unchanged); ticked = exported as collision circles sized to the box/cylinder and its height (centred decor, lift-aware).
+
 - 2026-11-22 Map Builder: Delete key works again (the multi-select change had turned the single-delete line into a comment).
 
 - 2026-11-22 Breakable panels: damage edges are cut as tiles from the neighbour cells — each cut edge bites into the cell in brick-sized steps (per material), continuous along a run of cut edges, so holes look like knocked-out bricks instead of grid squares. The outer skin bites deeper than the core (layered broken edge, plaster peels to jagged brick). Door/window/gable/border edges stay straight; untouched cells stay merged.

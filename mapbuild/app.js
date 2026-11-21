@@ -214,6 +214,9 @@ const isKit = o => o.t.startsWith('kit:'), kitId = o => o.t.slice(4), isPrim = o
 const tiltOk = o => !!o && !!o.t && (isKit(o) || isPrim(o) || o.t === 'poly');   // visual objects that may tilt (rx/rz, look only: game collision stays the rot footprint)
 const isVisual = o => isKit(o) || isPrim(o);   // exported into the .glb (everything else is a marker the game fills in itself)
 function dim(o) {   // footprint for collision (model.js objCircles)
+  if (o.t === 'dc_box' || o.t === 'dc_cyl') {   // decor: centred on its height (game V.box/V.cyl) • collision only when ticked (col 1)
+    const sy = o.sy || 1, cy = o.t === 'dc_cyl', r = cy ? Math.max(o.rt != null ? o.rt : (o.sx || 1) / 2, o.rb != null ? o.rb : (o.sx || 1) / 2) : 0;
+    return { ex: cy ? r : (o.sx || 1) / 2, ez: cy ? r : (o.sz || 1) / 2, h: sy, yo: -sy / 2, col: o.col ? 1 : 0, brk: 0, m: 'stone', cs: cy ? 0.92 : 1 }; }
   if (isPrim(o)) { const sx = o.sx || 1, sz = o.sz || 1, round = o.t === 'cyl' || o.t === 'ball' || o.t === 'cone'; return { ex: sx / 2, ez: sz / 2, h: (o.sy || 1) * (o.t === 'ball' ? 0.84 : 1), col: o.col == null ? 1 : o.col, brk: 0, m: o.m || 'stone', cs: round ? 0.92 : 1 }; }
   if (isKit(o)) { const a = KIT.byId.get(kitId(o)), t = tplNow(kitId(o)); if (!a || !t) return null; const s = o.s || 1;
     return { ex: t.ex * s, ez: t.ez * s, h: t.h * s, col: o.col == null ? a.col : o.col, brk: a.brk ? 1 : 0, m: a.brk || 'stone', cs: CS_DEF[a.cat] || 0.85 }; }
@@ -1070,7 +1073,7 @@ function renderSide() {
         it.t === 'light' ? fld('Light Color', it, 'c', { type: 'color' }) : null, it.t === 'light' ? fld('Intensity', it, 'int', { min: 0 }) : null, it.t === 'light' ? fld('Range', it, 'dist', { min: 1 }) : null,
         d ? fld('Collides (blocks walking/shots)', it, 'col', { type: 'checkbox', get: () => d.col }) : null,
         d && d.col ? fld('Collider Size (×)', it, 'cs', { get: () => it.cs == null ? d.cs : it.cs, min: 0.05 }) : null,
-        d && d.col ? fld('Breakable', it, 'brk', { type: 'checkbox', get: () => it.brk == null ? d.brk : it.brk }) : null,
+        d && d.col && !MD.isDeco(it.t) ? fld('Breakable', it, 'brk', { type: 'checkbox', get: () => it.brk == null ? d.brk : it.brk }) : null,
         it.t === 'house' ? el('div', { class: 'seg' }, el('button', { class: 'tl-btn', title: 'Convert to breakable panels (plaster walls, snow roof, lit windows), editable panel by panel', onclick: () => pnFromHouse(it, false) }, 'Break into Panels (snow house)'),
           el('button', { class: 'tl-btn', title: 'Convert to breakable panels, London brick house style', onclick: () => pnFromHouse(it, true) }, '(brick house)')) : null,
         it.t === 'house' ? el('p', { class: 'note' }, 'In the game this house is already breakable panels (auto-converted) • break it apart when you want to edit walls/windows/roof panel by panel') : null,
