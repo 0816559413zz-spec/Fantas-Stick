@@ -157,7 +157,7 @@ function waterBeamStop(b){const c=Math.cos(b.a)*Math.cos(b.pt),s=Math.sin(b.a)*M
   for(let d=8;d<max;d+=8){const x=b.x+c*d,y=b.y+s*d,hh=h0+rise*d-terrT(x,y);
     if(x<40||x>MW-40||y<40||y>MH-40||hh<=0||(TERR&&terrSolid(x,y,hh)))return d;
     for(const o of sgNear(sgObs(),x,y,8,_sgPO))if(o.bi===undefined&&!(o.bot!==undefined&&hh<o.bot)&&(o.top!==undefined?h0+rise*d<o.top:hh<o.hgt)&&(x-o.x)**2+(y-o.y)**2<(o.r+8)**2)return d;
-    if(BLDG.length)for(const b of sgNear(sgBld(),x,y,8,_sgPB))if(bldNear(b,x,y,8)&&bldPieceAt(b,x,y,hh,8)>=0)return d;
+    if(PNL.length&&pnlSolidAt(x,y,hh))return d;   // breakable panels / houses
     for(const w of G.walls)if(b.team!==w.team&&hh<w.hgt&&(x-w.x)**2+(y-w.y)**2<(w.r+8)**2)return d;
     if(citySolidAt(x,y,hh))return d;}
   const x=b.x+c*max,y=b.y+s*max,h=h0+rise*max-terrT(x,y);

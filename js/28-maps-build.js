@@ -10,7 +10,6 @@ function buildWorld(id){
   if(world){
     scene.remove(world);
     if(PROPV.g){if(PROPV.g.parent)PROPV.g.parent.remove(PROPV.g);disposeTree(PROPV.g);PROPV.g=null;}   // prop สร้างใหม่ทุกเกมจาก snapshot
-    if(BLDV.g){if(BLDV.g.parent)BLDV.g.parent.remove(BLDV.g);disposeTree(BLDV.g);BLDV.g=null;}   // บ้านพังได้ก็เช่นกัน
     WCACHE.delete(builtKey);WCACHE.set(builtKey,{world,CANDLESYS,TORCHES,CANDLES,FIREFLIES,CRYSTAL,RUNE,SNITCH,BANNERS,SNOW});
     const key=wkey(id);
     for(const [k,v] of WCACHE){if(WCACHE.size<=WCACHE_MAX)break;if(k===key)continue;WCACHE.delete(k);disposeTree(v.world);}
@@ -200,20 +199,7 @@ function buildHogsmeade(){
   const lampSpr=new THREE.SpriteMaterial({map:glowTex,color:hdr('#ffc870',2.4),blending:THREE.AdditiveBlending,depthWrite:false,transparent:true});
   for(const o of OBS){
     const x=tx(o.x),z=tz(o.y);
-    if(o.k==='house'&&o.bi!==undefined)continue;        // บ้านพังได้ สร้างใน syncBld
-    if(o.k==='house'){
-      const g=new THREE.Group(),w=o.w*S3,d=o.d*S3,wh=4.2;
-      const wall=new THREE.Mesh(new THREE.BoxGeometry(w,wh,d),wallMs[Math.floor(o.s*4)%4]);wall.position.y=wh/2;g.add(wall);
-      for(const sx of[-1,1])for(const sz of[-1,1]){const b=new THREE.Mesh(new THREE.BoxGeometry(0.28,wh,0.28),beamM);b.position.set(sx*w/2,wh/2,sz*d/2);g.add(b);}
-      const rg=new THREE.Group();rg.scale.set(w*0.78,1,d*0.78);rg.position.y=wh+1.7;
-      const roof=new THREE.Mesh(new THREE.ConeGeometry(1,3.4,4),roofM);roof.rotation.y=Math.PI/4;rg.add(roof);
-      const cap=new THREE.Mesh(new THREE.ConeGeometry(0.84,2.9,4),capM);cap.rotation.y=Math.PI/4;cap.position.y=0.22;rg.add(cap);g.add(rg);
-      const ch=new THREE.Mesh(new THREE.BoxGeometry(0.9,2.8,0.9),stoneM);ch.position.set(w*0.25,wh+2.2,-d*0.12);g.add(ch);
-      const chc=new THREE.Mesh(new THREE.BoxGeometry(1.05,0.3,1.05),capM);chc.position.set(w*0.25,wh+3.7,-d*0.12);g.add(chc);
-      for(const sx of[-1,1]){const wn=new THREE.Mesh(new THREE.PlaneGeometry(0.95,1.2),winM);wn.position.set(sx*w*0.27,2.5,d/2+0.03);g.add(wn);const wb=wn.clone();wb.position.z=-d/2-0.03;wb.rotation.y=Math.PI;g.add(wb);}
-      const dr=new THREE.Mesh(new THREE.PlaneGeometry(1.1,2.2),doorM);dr.position.set(0,1.1,d/2+0.03);g.add(dr);
-      g.rotation.y=o.ry;g.position.set(x,0,z);shadowAll(g);addW(g);
-    }else if(o.k==='stall'){
+    if(o.k==='stall'){
       const g=new THREE.Group();
       const tb=new THREE.Mesh(new THREE.BoxGeometry(3.2,1,1.8),barM);tb.position.y=0.5;g.add(tb);
       for(const sx of[-1,1])for(const sz of[-1,1]){const p=new THREE.Mesh(new THREE.CylinderGeometry(0.07,0.07,3.2,6),woodD);p.position.set(sx*1.55,1.6,sz*0.95);g.add(p);}

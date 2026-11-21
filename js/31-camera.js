@@ -65,7 +65,7 @@ function aimFromCrosshair(me,P,E){
     if(t<=tMin||t>=T)return;
     const y=o.y+dy*t;if(y>=y0&&y<=y1)T=t;
   };
-  for(const q of OBS){if(q.k==='tfence'||q.bi!==undefined&&BLDG[q.bi]&&BLDG[q.bi].pc.some(p=>p.fl&1)||q.bot>=q.hgt)continue;{const g0=GY(q.x,q.y);cyl(tx(q.x),tz(q.y),q.r*S3,q.top!==undefined?-50:g0+(q.bot||0),q.top!==undefined?q.top:g0+(q.hgt||9));}}
+  for(const q of OBS){if(q.k==='tfence'||q.bot>=q.hgt)continue;{const g0=GY(q.x,q.y);cyl(tx(q.x),tz(q.y),q.r*S3,q.top!==undefined?-50:g0+(q.bot||0),q.top!==undefined?q.top:g0+(q.hgt||9));}}
   if(PROPON)for(const q of PROPS)if(q.st!==1){const g0=GY(q.x,q.y);cyl(tx(q.x),tz(q.y),q.r*S3,g0,g0+q.hgt);}
   for(const q of P||[])if(q.id!==me.id&&q.al&&!q.dn&&!q.gh){const g0=GY(q.x,q.y)+(q.z||0);cyl(tx(q.x),tz(q.y),0.55,g0,g0+2);}
   for(const e of E||[]){const D=EDEF[e.t];if(D){const g0=GY(e.x,e.y)+(e.h||0);cyl(tx(e.x),tz(e.y),Math.max(0.4,D.r*S3),g0,g0+D.ch+0.8);}}
@@ -142,10 +142,10 @@ function camRoomK(me,F,x,y,z){
   const mz=me.z||0;let k=1;const fit=(f,c,lo,hi)=>{if(c<lo&&f>lo)k=Math.min(k,(f-lo)/(f-c));else if(c>hi&&f<hi)k=Math.min(k,(hi-f)/(c-f));};
   const R=cityRoomBox(me.x,me.y,mz);
   if(R){fit(F.x,x,tx(R.x0)+0.3,tx(R.x1)-0.3);fit(F.z,z,tz(R.y0)+0.3,tz(R.y1)-0.3);fit(F.y,y,R.z0+0.3,R.z1-0.25);return Math.max(0.12,k);}
-  if(BLDG.length)for(const b of BLDG){const [lx,ly]=bldLocal(b,me.x,me.y),hw=b.o.w/2-b.D.th/2,hd=b.o.d/2-b.D.th/2;
-    if(Math.abs(lx)>=hw||Math.abs(ly)>=hd||mz>=b.D.wh||bldGone(b))continue;
-    const [cx,cy]=bldLocal(b,x/S3+MW/2,z/S3+MH/2),[fx,fy]=bldLocal(b,F.x/S3+MW/2,F.z/S3+MH/2),m=6;
-    fit(fx,cx,-hw+m,hw-m);fit(fy,cy,-hd+m,hd-m);fit(F.y,y,0.3,GY(b.o.x,b.o.y)+b.D.wh+b.D.rh*0.45);return Math.max(0.12,k);}
+  for(const h of (MAPS[MAPID]&&MAPS[MAPID].pnHB)||[]){const c=Math.cos(h.ry||0),s=Math.sin(h.ry||0),L=(px,py)=>{const dx=px-h.x,dy=py-h.y;return [dx*c-dy*s,dx*s+dy*c];};   // inside a house (panel walls)
+    const [lx,ly]=L(me.x,me.y),hw=h.w/2-3,hd=h.d/2-3;if(Math.abs(lx)>=hw||Math.abs(ly)>=hd||mz>=PN_HOUSE.wh)continue;
+    const [cx,cy]=L(x/S3+MW/2,z/S3+MH/2),[fx,fy]=L(F.x/S3+MW/2,F.z/S3+MH/2),m=6;
+    fit(fx,cx,-hw+m,hw-m);fit(fy,cy,-hd+m,hd-m);fit(F.y,y,0.3,GY(h.x,h.y)+PN_HOUSE.wh+PN_HOUSE.rh*0.45);return Math.max(0.12,k);}
   return camObsK(me,F,x,y,z);
 }
 // FCS (thick castle walls / room pieces): march anchor -> camera, pull in before the first wall / pillar / ceiling it would enter

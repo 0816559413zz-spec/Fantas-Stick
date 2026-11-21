@@ -18,7 +18,7 @@ const navOn=()=>NAV_MAPS.has(MAPID)||!!(MAPS[MAPID]&&MAPS[MAPID].fcs);
 function navSig(){
   let s=0;
   if(cityOn()){for(const d of CITYD.b)s+=d.cl*3;for(const it of CITYD.it)if(it.st===1)s++;}
-  for(const b of BLDG)if(bldGone(b))s+=1009;
+  for(const p of PNL)if(!p.tl)for(let c=0;c<p.nc;c++)if(!pnSolid(p,c))s+=1009+c;   // breakable panels: bottom row opened
   if(PROPON)for(const o of PROPS)if(o.st===1)s+=7919;
   if(G&&G.sg)G.sg.bw.forEach((v,i)=>{if(v===0)s+=3301*(i+1);});   // กำแพงพังได้โหมดบุกปราสาท (js/15-siege)
   return s;
@@ -41,8 +41,10 @@ function navBuild(){
   for(const o of OBS){if(o.bi!==undefined||o.bot>2)continue;circ(o,o.r,o.top!==undefined?o.top:o.hgt);}   // bot>2 = floating (door lintels, gallery rails): no block on the ground
   const BX=MAPS[MAPID]&&MAPS[MAPID].boxes;
   if(BX)for(const B of BX){if(B.cl)continue;cells(B.x-pad,B.y-pad,B.x+B.w+pad,B.y+B.d+pad,(k,x,y)=>{w[k]=1;if(B.h>=NAV_EYE&&x>B.x-c*0.35&&x<B.x+B.w+c*0.35&&y>B.y-c*0.35&&y<B.y+B.d+c*0.35)s[k]=1;});}
-  for(const b of BLDG){if(bldGone(b))continue;const e=b.o.w*0.75+pad;
-    cells(b.o.x-e,b.o.y-e,b.o.x+e,b.o.y+e,(k,x,y)=>{const [lx,ly]=bldLocal(b,x,y);if(Math.abs(lx)<b.o.w/2+pad&&Math.abs(ly)<b.o.d/2+pad)w[k]=1;if(Math.abs(lx)<b.o.w/2&&Math.abs(ly)<b.o.d/2)s[k]=1;});}
+  for(const p of PNL){if(p.tl||p.zb-pnGT(p.x,p.y)>1)continue;   // breakable panels (houses): columns still blocking the body = wall, eye-height cell solid = blocks sight
+    const rB=Math.min(p.nr-1,Math.floor(PN_BODY/p.chh)),rE=Math.min(p.nr-1,Math.floor(NAV_EYE/p.chh)),e=p.hl+p.ht+pad,band=Math.max(pad,c*0.5);
+    cells(p.x-e,p.y-e,p.x+e,p.y+e,(k,x,y)=>{const [u,v]=pnLoc(p,x,y);if(Math.abs(v)>p.ht+band||Math.abs(u)>p.hl+pad)return;const col=clamp(Math.floor((u+p.hl)/p.cw),0,p.nc-1);
+      for(let r=0;r<=rB;r++)if(pnSolid(p,r*p.nc+col)){w[k]=1;break;}if(Math.abs(v)<p.ht+c*0.35&&pnSolid(p,rE*p.nc+col))s[k]=1;});}
   if(PROPON)for(const o of PROPS)if(o.st!==1)circ(o,o.r,o.hgt);
   const m=Math.ceil((40+pad)/c);for(let j=0;j<ny;j++)for(let i=0;i<nx;i++)if(i<m||j<m||i>=nx-m||j>=ny-m)w[j*nx+i]=1;
   if(TERR&&MAPS[MAPID]&&MAPS[MAPID].navTerr){const q=c*0.5,lim=TSLOPE*q/20;   // พื้นสูงต่ำ: ช่องที่ชันเกินเดินขึ้น (หน้าผา/ขอบแท่น) = เดินไม่ได้

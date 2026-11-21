@@ -16,7 +16,7 @@ function warmKeep(o,fxs){(o.parent||scene).remove(o);(fxs?WARM.holdF:WARM.hold).
   o.traverse(q=>{if(!q.material)return;for(const m of [].concat(q.material)){if(!m||m.userData.warm)continue;m.userData.warm=1;m.dispose=()=>{};
     for(const k in m){const v=m[k];if(v&&v.isTexture&&v.image)try{gl.initTexture(v);}catch(e){}}
     if(m.uniforms)for(const k in m.uniforms){const v=m.uniforms[k]&&m.uniforms[k].value;if(v&&v.isTexture&&v.image)try{gl.initTexture(v);}catch(e){}}}});}
-// บ้านไกลถูก syncBld สร้างเมื่อกล้องเข้าใกล้ จึงอาจไม่มีอยู่ตอน compile ฉากรอบแรก
+// Far models may not exist yet when the scene first compiles
 // อุ่นต้นแบบจากไฟล์ทันทีที่โหลดเสร็จ โดยไม่สร้างบ้านจริงทุกหลังหรือเปิดเงาที่ซ่อนอยู่
 function warmStaticModels(names){for(const name of new Set(names.filter(Boolean))){
   const key='model:'+name;if(WARM.done.has(key))continue;WARM.done.add(key);

@@ -71,9 +71,8 @@ function tuneBuild(){
   for(const k of Object.keys(PLN))tuneNum(PL,'ค่าพื้นฐาน','play.'+k,PLN[k][0],()=>PLAY[k],v=>{PLAY[k]=v;},PLN[k][1]);
   // --- บ้าน / ของพังได้ ---
   const BD=['bld','🏠 บ้าน & ของในแมพ'];
-  tuneNum(BD,'บ้าน','bld.house.wall','เลือดชิ้นกำแพง',()=>BLDDEF.house.hp.wall,v=>{BLDDEF.house.hp.wall=v;},{max:500,step:1});
-  tuneNum(BD,'บ้าน','bld.house.roof','เลือดชิ้นหลังคา',()=>BLDDEF.house.hp.roof,v=>{BLDDEF.house.hp.roof=v;},{max:500,step:1});
   ['เล็ก','กลาง','ใหญ่'].forEach((n,i)=>tuneNum(BD,'สิ่งก่อสร้างในแมพที่พังได้','bld.brk.hp'+i,'เลือด ขนาด'+n,()=>BRKDEF.hp[i],v=>{BRKDEF.hp[i]=v;},{max:3000,step:10}));
+  for(const k of Object.keys(PNDEF.mat))tuneNum(BD,'แผ่นพัง (บ้าน/ผนัง) • เลือดต่อช่อง','pnl.'+k+'.hp',k,()=>PNDEF.mat[k].hp,v=>{PNDEF.mat[k].hp=v;},{max:500,step:1});   // js/12-pnl.js
   for(const id of Object.keys(PROPDEF)){const D=PROPDEF[id];
     if(typeof D.hp==='number')tuneNum(BD,'ของในแมพ','prop.'+id+'.hp',D.n+' • เลือด',()=>D.hp,v=>{D.hp=v;},{max:500,step:1});
     if(typeof D.w==='number')tuneNum(BD,'ของในแมพ','prop.'+id+'.w',D.n+' • โอกาสสุ่มลงแมพ',()=>D.w,v=>{D.w=v;},{max:20,step:1});}

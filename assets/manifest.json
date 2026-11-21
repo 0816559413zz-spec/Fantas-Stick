@@ -13,18 +13,6 @@
    "file": "enemies/goblin.glb",
    "v": 1
   },
-  "bld_house": {
-   "file": "buildings/house.glb",
-   "v": 2
-  },
-  "debris_stone": {
-   "file": "buildings/debris_stone.glb",
-   "v": 1
-  },
-  "debris_wood": {
-   "file": "buildings/debris_wood.glb",
-   "v": 1
-  },
   "mesh_fire_wing": {
    "file": "vfx/fire_wing.glb",
    "v": 2
@@ -324,10 +312,6 @@
   "city_cw_win": {
    "file": "city/cw_win.glb",
    "v": 2
-  },
-  "bld_house_ldn": {
-   "file": "buildings/house_ldn.glb",
-   "v": 1
   },
   "city_cc_hole": {
    "file": "city/cc_hole.glb",

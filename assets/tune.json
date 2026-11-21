@@ -2,7 +2,9 @@
  "v": 1,
  "set": {
   "bld.brk.hp0": 50,
-  "bld.house.roof": 50,
-  "bld.house.wall": 60
+  "pnl.plaster.hp": 60,
+  "pnl.brick.hp": 60,
+  "pnl.roof.hp": 50,
+  "pnl.snowroof.hp": 50
  }
 }

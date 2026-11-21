@@ -136,16 +136,15 @@ const _clO={x:0,y:0};
 function clWorld(cx,cy){const R=140,c=[],b=[],s=[],near=q=>Math.abs(q.x-cx)<R+q.r&&Math.abs(q.y-cy)<R+q.r;
   if(PROPON)for(const q of PROPS)if(q.st!==1&&near(q))c.push([q.x,q.y,q.r,q.hgt,0]);
   for(const q of OBS)if(q.bi===undefined&&near(q))c.push(q.top!==undefined?[q.x,q.y,q.r,q.top,1]:[q.x,q.y,q.r,q.hgt,0]);
-  for(const q of BLDG)if(bldNear(q,cx,cy,R))b.push(q);
   if(G&&G.walls)for(const q of G.walls)if(near(q))c.push([q.x,q.y,q.r,q.hgt,0]);
   if(G&&G.eso){for(const w of G.eso)if(!w.dead&&w.k!=='mound'&&w.k!=='dom')s.push([w.x1,w.y1,w.x2,w.y2,w.r,w.hgt]);}
   else for(const o of EV.es.values())if(o.k===0||o.k===1)s.push([o.x1,o.y1,o.x2,o.y2,o.k?35:18,o.k?9:6]);
-  return c.length||b.length||s.length?{c,b,s}:null;}
+  return c.length||s.length||PNL.length?{c,b,s}:null;}
 // ดันจุดผ้าออกจากของในโลก (แนวนอน) • เลื่อน Q ตาม = ไม่เด้ง
 function clWorldHit(P,Q,i,W){const sx=P[i]/S3+MW/2,sy=P[i+2]/S3+MH/2,zh=P[i+1]-GY(sx,sy),r=4;let x=sx,y=sy;
   for(const c of W.c){if(zh>=(c[4]?c[3]-(TERR?terrT(x,y):0):c[3]))continue;const dx=x-c[0],dy=y-c[1],d=Math.sqrt(dx*dx+dy*dy),m=c[2]+r;if(d<m&&d>0.001){x=c[0]+dx/d*m;y=c[1]+dy/d*m;}}
   for(const q of W.s){if(zh>=q[5])continue;const e=eSegD(x,y,{x1:q[0],y1:q[1],x2:q[2],y2:q[3]}),m=q[4]+r;if(e.d<m&&e.d>0.001){x=e.qx+(x-e.qx)/e.d*m;y=e.qy+(y-e.qy)/e.d*m;}}
-  if(W.b.length){_clO.x=x;_clO.y=y;for(const b of W.b)collideBld(b,_clO,r,Math.max(0,zh));x=_clO.x;y=_clO.y;}
+  if(PNL.length){_clO.x=x;_clO.y=y;if(pnlCollide(_clO,r,Math.max(0,zh))){x=_clO.x;y=_clO.y;}}   // breakable panels / houses
   if(x!==sx||y!==sy){const ax=(x-sx)*S3,az=(y-sy)*S3;P[i]+=ax;P[i+2]+=az;Q[i]+=ax;Q[i+2]+=az;}}
 function clStep(C,h,gy,caps,bv,W){const P=C.P,Q=C.Q,T=C.T,pk=C.pk,E=C.E,N=C.N,g=CLOTH.G*h*h,D=CLOTH.DAMP;C.t+=h;
   for(let n=0;n<N;n++){const i=n*3,k=pk[n];

@@ -79,7 +79,7 @@ function snapApply(s,live){
   if(!NET.isHost&&s.M&&s.M.sg){SGPH=s.M.sg.ph;SGTR=s.M.sg.tr||0;}   // เฟสบุกปราสาท → พื้นที่เล่น (js/02-fcs)
   if(!NET.isHost&&s.mp)AREA=mapArea(s.mp,s.mode);
   PROPON=!!s.PB;if(s.PB)for(let i=0;i<PROPS.length;i++)PROPS[i].st=+(s.PB[i]||0);
-  if(!NET.isHost){bldParse(s.BD);brkParse(s.BK);efsParse(s.EF);bskParse(s.BS);cityParse(s.CB,s.CS);pnlParse(s.PN);}
+  if(!NET.isHost){brkParse(s.BK);efsParse(s.EF);bskParse(s.BS);cityParse(s.CB,s.CS);pnlParse(s.PN);}
   if(live){VIEW.prev=VIEW.cur;VIEW.tPrev=VIEW.tCur;VIEW.cur=s;VIEW.tCur=performance.now();VIEW.a=VIEW.ex=null;if(NET.isHost)hbPush(s);}
   if(s.ev&&!(NET.isHost&&document.hidden))for(const ev of s.ev)fx(ev);   // โฮสต์ย่อแท็บ: ไม่สร้างเอฟเฟกต์ (ไม่มีใครเห็น กันอนุภาคค้างเต็มหน่วยความจำ)
   syncOverlays(s);

@@ -207,17 +207,6 @@ function fx(ev,raw){   // raw = ภาพเดิมในโค้ดเท่
       else if(ev.e==='u'){burst(ev.x,ev.y,'#ffd86b',22,120,0.9,2.4,{h:H,vh:[1,4],g:-0.5});FX.flashLight(ev.x,ev.y,H+0.5,'#ffd86b',3,8,0.4);if(near)snd('pickup',ev);}
       break;
     }
-    case 'bld':{
-      const el=ev.el||'none',fire=el.includes('fire'),ice=el==='ice',col=ice?'#dff6ff':fire?'#ff8a3a':'#c8b89a';
-      if(ev.e==='h'){burst(ev.x,ev.y,col,8,90,0.45,2.2,{h:H,vh:[0.5,3],g:6});smoke(ev.x,ev.y,H,2,'#8a7a68',0.8,5,40);if(near)snd('thud',{x:ev.x,y:ev.y,vol:0.5});}
-      else{
-        bldDebris(ev);
-        smoke(ev.x,ev.y,H,14,fire?'#2a2522':ice?'#e8f6ff':'#7a6a58',1.8,9,120);
-        burst(ev.x,ev.y,col,ice?40:26,200,0.8,3,{h:H,vh:[1,6],g:9});
-        if(fire){burst(ev.x,ev.y,'#ffb347',30,160,1.1,2.4,{h:H,vh:[2,6],g:-1});FX.flashLight(ev.x,ev.y,H+1,'#ff7a2a',5,16,0.4);}
-        if(near){snd('break',ev);if(el.includes('blast'))snd('boom',{x:ev.x,y:ev.y,vol:0.6});shake(el.includes('blast')?6:3);}
-      }
-      break;}
     case 'brk':if(ev.t==='b'){brkFall(ev);fcsParFall(ev);}if(ev.t!=='land')fcsRoomBrkFx(ev);break;
     case 'rwh':fcsWallHit(ev);break;   // skill hit a room wall (js/28-fcs-props.js)
     case 'pn':pnlFX(ev,H,near);break;   // breakable panels (js/28-pnl-build)

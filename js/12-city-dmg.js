@@ -255,7 +255,7 @@ function cityRay(x0,y0,h0,x1,y1,h1){if(!cityOn())return null;const n=Math.max(1,
 function cityRoomBox(x,y,z){const d=cityRoomAt(x,y,0);if(!d||z>=d.I.top)return null;const I=d.I;return {x0:I.x0,y0:I.y0,x1:I.x1,y1:I.y1,z0:cityFloorH(x,y,z),z1:cityCeilH(x,y,z)};}
 function citySnapB(){if(!cityOn())return '';let any=false;const s=CITYD.b.map(d=>{if(d.s)any=true;return d.s;});return any?s.join('|'):'';}
 function citySnapS(){if(!cityOn())return '';let any=false;const s=CITYD.it.map(it=>{if(it.st)any=true;return it.st;});return any?s.join(''):'';}
-// ลูกข่าย: อ่านสถานะจาก snapshot (เหมือน bldParse)
+// ลูกข่าย: อ่านสถานะจาก snapshot (เหมือน pnlParse)
 function cityParse(cb,cs){
   if(!CITYD||MAPID!=='city')return;
   const H=(cb||'').split('|');

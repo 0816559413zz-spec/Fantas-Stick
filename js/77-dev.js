@@ -207,13 +207,13 @@ function devAct(a,k,v){
 }
 
 // ---- Destruction debug (user 2026-11-19): repair / collapse breakables at the aim point, a whole building, or the whole map ----
-// Covers: cover pieces + bridge parapet (BRK), houses (BLDG pieces), fences (EFS sections), bridge shell chunks (BSKN), props (PROPS).
+// Covers: cover pieces + bridge parapet (BRK), breakable panels / houses (PNL cells), fences (EFS sections), bridge shell chunks (BSKN), props (PROPS).
 // part = everything within DEVD_R of the aim point • whole = the nearest structure (house / fence line / bridge / single cover piece)
 const DEVD_R=60;
 function devBrkFix(g,fix){if(fix){g.hp=g.max;if(g.st)brkApply(g,0);}else if(g.st<3)hitBrk(g,1e6,g.x,g.y);}
-function devBldFix(b,fix,codes){
-  if(fix){for(const q of b.pc){q.fl=0;q.cb=0;q.burnT=q.frzT=0;q.ch.fill(q.max);}b.dirty=true;return;}
-  b.pc.forEach((q,j)=>{for(let k=0;k<q.nc*q.nr;k++){const c=j*100+k;if((!codes||codes.has(c))&&bldAlive(q,k))hitBldPiece(b,c,1e6,'blast',b.o.x,b.o.y);}});
+function devPnlFix(p,fix,cells){   // breakable panel: repair all / break all or only `cells`
+  if(fix){p.hp.fill(p.max);p.st.fill(0);p.burnT=0;p.ver++;return;}
+  for(let k=0;k<p.st.length;k++)if(!cells||cells.has(k))pnlHit(p,k,1e9,'blast',p.x,p.y,true);
 }
 function devPropFix(o,fix){const D=PROPDEF[o.k];if(!D||!D.hp)return;if(fix){o.st=0;o.hp=D.hp;}else hitProp(o,1e6,null);}
 function devSkinFix(fix,x,y,all){   // bridge shell chunks (BSKN.C): repair or knock off — all, or within 1.5x DEVD_R of the aim point
@@ -226,30 +226,29 @@ function devDestroy(fix,scope){
   const parG=g=>g.d&&g.d.fp!=null;
   if(scope==='map'){
     for(const g of BRK){devBrkFix(g,fix);n++;}
-    for(const b of BLDG){devBldFix(b,fix);n++;}
+    for(const p of PNL){devPnlFix(p,fix);n++;}
     for(const s of EFS.S){fix?efsRepair(s):(!s.br&&efsBreak(s));n++;}
     for(const o of PROPS){devPropFix(o,fix);n++;}
     n+=devSkinFix(fix,x,y,true);
     toast((fix?'🔧 ซ่อมทั้งแมพ':'💥 พังทั้งแมพ')+' ('+n+')');return;}
   if(scope==='part'){
     for(const g of BRK)if(g.cs.some(o=>Math.hypot(o.x-x,o.y-y)<R+o.r)){devBrkFix(g,fix);n++;}
-    for(const b of BLDG){if(!bldNear(b,x,y,R))continue;const [lx,ly]=bldLocal(b,x,y),codes=new Set();
-      b.pc.forEach((q,j)=>{for(let k=0;k<q.nc*q.nr;k++)if(rectDist(bldChunk(b,j,k),lx,ly)<R)codes.add(j*100+k);});
-      if(codes.size){fix?devBldFix(b,true):devBldFix(b,false,codes);n+=codes.size;}}
+    for(const p of PNL){const za=pnGT(x,y)+1,cells=new Set();for(let k=0;k<p.st.length;k++){const q=pnCellPos(p,k);if(Math.hypot(q[0]-x,q[1]-y,(q[2]-za)*20)<R)cells.add(k);}
+      if(cells.size){fix?devPnlFix(p,true):devPnlFix(p,false,cells);n+=cells.size;}}
     for(const s of EFS.S)if(efsDist(s,x,y)<R){fix?efsRepair(s):(!s.br&&efsBreak(s));n++;}
     for(const o of PROPS)if(Math.hypot(o.x-x,o.y-y)<R+o.r){devPropFix(o,fix);n++;}
     if(BSKN.B&&BSKN.B.at(x,y,R))n+=devSkinFix(fix,x,y,false);
     toast((fix?'🔧 ซ่อมตรงที่เล็ง':'💥 พังตรงที่เล็ง')+' ('+n+')');return;}
   // whole structure: pick the nearest candidate
   let best=null,bd=R*4;const cand=(d,k,o)=>{if(d<bd){bd=d;best={k,o};}};
-  for(const b of BLDG)if(bldNear(b,x,y,bd)){const [lx,ly]=bldLocal(b,x,y);cand(Math.max(0,Math.hypot(Math.max(0,Math.abs(lx)-b.o.w/2),Math.max(0,Math.abs(ly)-b.o.d/2))),'bld',b);}
+  for(const p of PNL){const [u,v]=pnLoc(p,x,y);cand(Math.hypot(Math.max(0,Math.abs(u)-p.hl),Math.max(0,Math.abs(v)-p.ht)),'bld',p);}   // nearest panel → its whole group (house)
   for(const g of BRK)if(!parG(g))for(const o of g.cs)cand(Math.max(0,Math.hypot(o.x-x,o.y-y)-o.r),'brk',g);
   for(const s of EFS.S)cand(efsDist(s,x,y),'fence',s.f);
   if(BSKN.B&&BSKN.B.at(x,y,R*2))cand(0,'bridge',null);
   for(const o of PROPS)cand(Math.max(0,Math.hypot(o.x-x,o.y-y)-o.r),'prop',o);
   if(!best){toast('ไม่เจอสิ่งก่อสร้างใกล้จุดเล็ง');return;}
   const {k,o}=best;
-  if(k==='bld')devBldFix(o,fix);
+  if(k==='bld'){for(const p of PNL)if(p===o||(o.g!=null&&p.g===o.g))devPnlFix(p,fix);}
   else if(k==='brk')devBrkFix(o,fix);
   else if(k==='prop')devPropFix(o,fix);
   else if(k==='fence'){for(const s of EFS.S)if(s.f===o){if(fix)efsRepair(s);else if(!s.br)efsBreak(s);}}
