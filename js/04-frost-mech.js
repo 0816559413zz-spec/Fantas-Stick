@@ -126,7 +126,8 @@ function groundH(x,y,z){
   if(G&&G.glac)for(const s of G.glac)if(s.h>0&&(x-s.x)**2+(y-s.y)**2<s.r*s.r&&s.h>g)g=s.h;
   if(G&&G.eso)for(const w of G.eso)if(w.k==='mound'&&!w.dead){const d2=(x-w.x1)**2+(y-w.y1)**2,r2=w.r*w.r;if(d2<r2){const v=w.hgt*(1-d2/r2);if(v>g)g=v;}}   // เนินสายดิน = พื้นโดมเดินขึ้นได้
   {const m=bldMoundH(x,y);if(m>g)g=m;}
-  {const c=cityFloorH(x,y,z);if(c>g)g=c;}   // พื้นชั้นบน/ทางลาดในตึกเมือง (js/12-city-dmg)   // เนินซากบ้านที่พังครบทั้งหลัง (js/12)
+  {const c=cityFloorH(x,y,z);if(c>g)g=c;}
+  {const pt=pnlTopH(x,y,z);if(pt>g)g=pt;}   // top of breakable panels (js/12-pnl)   // พื้นชั้นบน/ทางลาดในตึกเมือง (js/12-city-dmg)   // เนินซากบ้านที่พังครบทั้งหลัง (js/12)
   {const S=standObs();if(S.length){const t=TERR?terrT(x,y):0,a=t+(z||0)+0.35;for(const o of S){if((x-o.x)**2+(y-o.y)**2>=o.r*o.r)continue;const v=o.top!==undefined?o.top:t+o.hgt;if(v<=a&&v-t>g)g=v-t;}}}   // โต๊ะ (st): ลงยืนได้เมื่อกระโดดสูงพอ — เดินชนยังกั้นอยู่ (ก้าวขึ้นได้แค่ 0.35 ไม่ใช่ TSTEP)
   return g;
 }

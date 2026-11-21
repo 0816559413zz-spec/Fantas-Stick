@@ -15,7 +15,7 @@ function stormCone(p,range,arc){const out=[],ph=p.z+1.1;
     if(d>14&&Math.abs(angDiff(Math.atan2(dy,dx),p.ang))>arc)continue;if(!aimLineH(p,ph,t,3))continue;out.push(t);}
   return out;}
 // ศัตรูในแนวเส้นตรง (เส้นสายฟ้า / Railgun)
-function stormLineFoes(p,x,y,a,len,half,from){const c=Math.cos(a),sn=Math.sin(a),out=[];len=Math.min(len,windBlockLen(p.team,x,y,a,len,p.z+1.1));   // กำแพงลมศัตรูกันเส้นยิง
+function stormLineFoes(p,x,y,a,len,half,from){const c=Math.cos(a),sn=Math.sin(a),out=[];len=Math.min(len,windBlockLen(p.team,x,y,a,len,p.z+1.1));{const q=bldRay(x,y,p.z+1.1,x+c*len,y+sn*len,p.z+1.1);if(q)len=q.t*len;}   // กำแพงลมศัตรูกันเส้นยิง
   for(const t of foesOf(p.team)){const dx=t.x-x,dy=t.y-y,u=dx*c+dy*sn;if(u<(from||0)-(t.r||PR)||u>len+(t.r||PR))continue;
     if(Math.abs(-dx*sn+dy*c)>half+(t.r||PR))continue;if(!aimLineH(p,p.z+1.1,t,4))continue;out.push(t);}
   return out;}
@@ -120,6 +120,7 @@ const TLINE=defSpell(2,{id:'thunderline',v:{windup:0.5,len:600,w:50,dmg:20,trave
 function stormLine(p){
   const a=p.ang,c=Math.cos(a),sn=Math.sin(a),L0=TLINE.v.len;let len=L0;
   for(let d=40;d<=L0;d+=20){const x=p.x+c*d,y=p.y+sn*d;if(x<30||x>MW-30||y<30||y>MH-30){len=d-20;break;}}
+  {const q=bldRay(p.x,p.y,p.z+1.1,p.x+c*len,p.y+sn*len,p.z+1.1);if(q)len=Math.max(20,q.t*len);}   // stops at breakable panels / city walls
   (G.slines||(G.slines=[])).push({x:p.x,y:p.y,a,len,d:0,hit:new Set(),owner:p.id,team:p.team,any:false});
   emit({k:'efx',z:'sline',x:Math.round(p.x),y:Math.round(p.y),h:p.z,a:Math.round(a*1000)/1000,len:Math.round(len),id:p.id,g:p.god>0?1:0});
 }

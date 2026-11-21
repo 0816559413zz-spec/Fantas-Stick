@@ -41,6 +41,8 @@ export const OBJ = {
   house: { n: 'Breakable House', cat: 'game', c: '#b08a5a', note: 'needs flat ground' },
   pn_wall: { n: 'Breakable Panel (wall)', cat: 'game', c: '#c0703c', note: 'split into cells, HP per cell • same group = hold each other up (guides/Destruction.md §13)' },
   poly: { n: 'Free Shape', cat: 'hid' },
+  // collision shapes: placed as an invisible box/cylinder primitive (vis 0, collider on) — collision only, nothing drawn in the game
+  col_box: { n: 'Collision Box', cat: 'collide', c: '#ff5a5a', note: 'Invisible in the game, blocks players/spells • size in the Inspector (or the R/T gizmo)' }, col_cyl: { n: 'Collision Cylinder', cat: 'collide', c: '#ff5a5a', note: 'Invisible in the game, blocks players/spells (round footprint)' },
   box: { n: 'Box', cat: 'prim' }, cyl: { n: 'Cylinder', cat: 'prim' }, cone: { n: 'Cone/Roof', cat: 'prim' }, ball: { n: 'Sphere', cat: 'prim' }, wedge: { n: 'Wedge', cat: 'prim' },
   // siege mode markers (guides/MAP-STANDARD.md) — exported as data.siege, the game builds collision/visuals itself
   core: { n: 'Core (anchor)', cat: 'mode', c: '#7fd8ff', note: 'number 1–N = order to destroy' },
@@ -159,7 +161,7 @@ export const PN_MAT = [['brick', 'Brick'], ['plaster', 'Plaster (brick inside)']
   ['timber', 'Plaster + Timber Frame'], ['roof', 'Tile Roof'], ['snowroof', 'Snow Roof'], ['litwin', 'Lit Window (glass)']];
 export const PN_HP = { brick: 60, plaster: 50, stone: 90, wood: 35, glass: 12, metal: 120, roof: 40, snowroof: 40, timber: 45, litwin: 10 };   // mirror PNDEF.mat in js/12-pnl.js
 export const PN_COL = { brick: '#b0603c', plaster: '#cfc6b4', stone: '#9a9488', wood: '#8a6440', glass: '#bfe4f0', metal: '#7c8288', roof: '#4a4e58', snowroof: '#e8eef4', timber: '#d8ccb4', litwin: '#ffcf80' };
-export const PN_MODE = [['p', 'Holes + Rubble'], ['l', 'Peels in Layers'], ['g', 'Whole Panel']];
+export const PN_MODE = [['p', 'Holes + Rubble'], ['pn', 'Holes, No Rubble'], ['l', 'Peels in Layers'], ['g', 'Whole Panel']];   // pn → game m:'p' + np:1
 export const PN_PRESET = [
   { n: 'Brick Wall', mat: 'brick', m: 'p', sy: 3.6, T: 0.3, cs: 0.6 }, { n: 'Plaster Wall', mat: 'plaster', m: 'l', sy: 3.6, T: 0.3, cs: 0.5 },
   { n: 'Stone Wall (no break-through)', mat: 'stone', m: 'l', thru: 0, sy: 2.5, T: 0.5, cs: 0.8 }, { n: 'Fence / Wood Wall', mat: 'wood', m: 'p', sy: 2.2, T: 0.15, cs: 0.5 },
@@ -326,6 +328,16 @@ export function gameData(M, dim) {
       for (const c of chunkCircles(M, w, R)) put(c, gi, P ? { k: 'fcf', fid: fid(c) } : null);
     });
   }
+  // floors that are solid underneath (sol 1, or auto = a ramp/stair starting at the ground): collision circles below the slab, tops just under the
+  // walking surface so feet on the ramp never touch them; parts lower than a step are left out (you walk onto the ramp there). k:'flr' = bots path over it.
+  for (const f of allFloors) {
+    const ramp = f.y2 != null && f.y2 !== f.y; if (!(f.sol === 1 || (f.sol == null && ramp && Math.min(f.y, f.y2) - gh(M, f.x, f.z) < 0.6))) continue;
+    const r = clamp(Math.min(f.w, f.d) / 4, 0.5, 1), cs = Math.cos(f.rot || 0), sn = Math.sin(f.rot || 0), ln = (L, i, n) => n < 2 ? 0 : -L / 2 + r + (L - 2 * r) * i / (n - 1);
+    const na = Math.max(1, Math.ceil((f.w - 2 * r) / (r * 1.4)) + 1), nb = Math.max(1, Math.ceil((f.d - 2 * r) / (r * 1.4)) + 1);
+    for (let i = 0; i < na; i++) for (let j = 0; j < nb; j++) { const a = ln(f.w, i, na), b = ln(f.d, j, nb), x = f.x + a * cs + b * sn, z = f.z - a * sn + b * cs;
+      let top = Infinity; for (const [ox, oz] of [[0, 0], [r, 0], [-r, 0], [0, r], [0, -r]]) { const t = floorTop(f, x + ox, z + oz); if (t === t && t < top) top = t; }
+      const g = gh(M, x, z), h = top - 0.15 - g; if (h === h && h < 1e9 && h > TSTEP) put({ x, z, r, hgt: h }, null, { k: 'flr' }); }
+  }
   const spawns = [], espawn = [], rings = [], tasks = [], props = [], houses = [], lights = [];
   const sg = { cores: [], sp: { A: {}, B: {} }, phases: [], bw: [] }, ceil = [], rprops = [], deco = [], pnl = [];
   const rect = o => { const w = (o.sx || 1) * PX, d = (o.sz || 1) * PX; return { x0: r1(o.x * PX - w / 2), y0: r1(o.z * PX - d / 2), x1: r1(o.x * PX + w / 2), y1: r1(o.z * PX + d / 2) }; };
@@ -342,7 +354,7 @@ export function gameData(M, dim) {
     else if (o.t === 'ring') rings.push({ x: X, y: Y, h: r2(Math.max(1, o.y || 6)) });
     else if (o.t === 'task') tasks.push({ x: X, y: Y });
     else if (o.t === 'light') lights.push({ x: X, y: Y, h: r2(o.y == null ? 2.2 : o.y), col: o.c || '#ffb060', int: o.int == null ? 2.4 : o.int, dist: o.dist || 14 });
-    else if (o.t === 'pn_wall') pnl.push(Object.assign({ x: X, y: Y, a: +(-rot).toFixed(4), L: r1((o.L || 4) * PX), T: r1((o.T || 0.3) * PX), H: r2(o.sy || 3), cs: o.cs || 1, mat: o.mat || 'brick', m: o.m || 'p' },
+    else if (o.t === 'pn_wall') pnl.push(Object.assign({ x: X, y: Y, a: +(-rot).toFixed(4), L: r1((o.L || 4) * PX), T: r1((o.T || 0.3) * PX), H: r2(o.sy || 3), cs: o.cs || 1, mat: o.mat || 'brick', m: o.m === 'pn' ? 'p' : o.m || 'p' }, o.m === 'pn' ? { np: 1 } : {},
       o.y ? { z0: r2(o.y) } : {}, o.hp ? { hp: o.hp } : {}, o.thru === 0 ? { thru: 0 } : {}, o.g != null && o.g !== '' ? { g: o.g } : {},
       o.tl ? { tl: +(+o.tl).toFixed(4) } : {}, o.sh === 'tri' ? { sh: 'tri' } : {}, o.ho && o.ho.length ? { ho: o.ho.slice(0, 4) } : {}, o.nb ? { nb: 1 } : {}));   // breakable panel (js/12-pnl)
     else if (o.t === 'house') houses.push(Object.assign({ x: X, y: Y, w: r1(160 * (o.sx || 1)), d: r1(130 * (o.sz || 1)), ry: +rot.toFixed(3) }, o.brk === 0 ? { nb: 1 } : {}));   // nb = unbreakable (inspector 'Breakable' off)

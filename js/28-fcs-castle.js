@@ -219,7 +219,7 @@ function fcsDecoKit(){
     wood:new THREE.MeshStandardMaterial({color:'#5a3f28',roughness:0.85}),iron:new THREE.MeshStandardMaterial({color:'#2b2a2a',roughness:0.5,metalness:0.7}),
     roof2:new THREE.MeshStandardMaterial({color:'#8c4a32',roughness:0.8,flatShading:true,side:THREE.DoubleSide}),lit2:new THREE.MeshStandardMaterial({color:'#2a1a0a',emissive:'#ffb15a',emissiveIntensity:1.6}),   // castle roofs / windows (fcsCastle)
     carpet:new THREE.MeshStandardMaterial({color:'#7a1a20',roughness:1}),floor:fcsCastleMat('f~','#b4a68e',{fr:1.3,fc:1.0,moss:0.35}),slit:new THREE.MeshBasicMaterial({color:'#17120e'})};
-  for(const k in mats){const m=mats[k];m.polygonOffset=true;m.polygonOffsetFactor=-1;m.polygonOffsetUnits=-2;}
+  for(const k in mats){const m=mats[k];m.polygonOffset=true;m.polygonOffsetFactor=-2;m.polygonOffsetUnits=-4;}
   for(const k in G){const geo=mergeGeometries(G[k].map(g=>g.index?g.toNonIndexed():g),false);G[k].forEach(g=>g.dispose());if(!geo)continue;
     const m=new THREE.Mesh(geo,mats[k]||mats.stone);m.castShadow=k!=='lit'&&k!=='carpet'&&k!=='floor';m.receiveShadow=true;addW(m);}
   bx.dispose();
@@ -236,9 +236,12 @@ function fcsDecoKit(){
 }
 // Map Builder style presets on .glb meshes (userData.style, MAP-STANDARD §1.5): castle ashlar shader for walls/shapes, castle floor for floors
 const MB_STYLE={'castle-stone':1,'room-hall':1};
+const _poOn=(m,f,u)=>{if(m&&!m.polygonOffset){m.polygonOffset=true;m.polygonOffsetFactor=f;m.polygonOffsetUnits=u;}return m;};
 function fileStyleScene(sc){
+  // upper floors win depth ties with coplanar tops of walls/boxes/siege walls (black z-fight patches on walkways); Map Builder deco wins over floors (-2/-4)
+  sc.traverse(o=>{if(o.isMesh&&o.material&&/^floor/.test(o.material.name||''))_poOn(o.material,-1,-1);});
   sc.traverse(o=>{if(!o.isMesh||!o.userData||!MB_STYLE[o.userData.style])return;const n=(o.material&&o.material.name)||'';
     if(/^glow|^ice/.test(n))return;
     if(!o.geometry.attributes.normal)o.geometry.computeVertexNormals();   // MB meshes are flat-shaded without normals; the ashlar shader needs them
-    o.material=/^floor/.test(n)?fcsCastleMat('f','#b4a68e',{fr:1.3,fc:1.0,moss:0.35}):fcsCastleMat('s','#c2b298');});
+    o.material=/^floor/.test(n)?_poOn(fcsCastleMat('f','#b4a68e',{fr:1.3,fc:1.0,moss:0.35}),-1,-1):fcsCastleMat('s','#c2b298');});
 }

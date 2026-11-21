@@ -50,9 +50,10 @@ function pnlMat(mat){
 int pk=0;vec3 nR=vec3(0.);vec2 lp=vLP.xy;float dep=0.,pnGlow=0.;
 if(abs(vLP.z)>uSz.z*0.5-0.003){
   if(pnM(lp)>0.){
-    float sg=sign(vLP.z);vec3 D=normalize(vLP-vCamL);float dz=max(-sg*D.z,0.08);const int NS=16;float stp=uSz.z/float(NS),pd=0.;bool hit=false;
+    // march into the hole (48 steps + bisection on the hole wall: thick walls showed stepped 'slices' with 16 steps)
+    float sg=sign(vLP.z);vec3 D=normalize(vLP-vCamL);float dz=max(-sg*D.z,0.08);const int NS=48;float stp=uSz.z/float(NS),pd=0.;bool hit=false;
     for(int i=1;i<=NS;i++){float d=stp*float(i);vec3 P=vLP+D*(d/dz);if(abs(P.x)>uSz.x*0.5||abs(P.y)>uSz.y*0.5)break;
-      float m=pnM(P.xy);if(m<=d){if(m>pd+1e-4){pk=1;dep=m;lp=(vLP+D*(m/dz)).xy;}else{pk=2;dep=d;lp=P.xy;}hit=true;break;}pd=d;}
+      float m=pnM(P.xy);if(m<=d){if(m>pd+1e-4){pk=1;dep=m;lp=(vLP+D*(m/dz)).xy;}else{float a=pd,b=d;for(int j=0;j<6;j++){float h=(a+b)*0.5;if(pnM((vLP+D*(h/dz)).xy)<=h)b=h;else a=h;}pk=2;dep=b;lp=(vLP+D*(b/dz)).xy;}hit=true;break;}pd=d;}
     if(!hit)discard;
     if(pk==2){float e=0.025;float a=step(pnM(lp-vec2(e,0.)),dep)-step(pnM(lp+vec2(e,0.)),dep),b=step(pnM(lp-vec2(0.,e)),dep)-step(pnM(lp+vec2(0.,e)),dep);
       nR=length(vec2(a,b))>0.?normalize(vec3(a,b,0.)):normalize(vec3(-D.xy,0.001));}

@@ -178,6 +178,7 @@ function camObsK(me,F,x,y,z){
     if(!hit)for(const q of sgNear(grid,px,py,M,_camOB)){if(q.r<14||q.k==='tfence'||q.k==='fcf'||q.k==='fct'||q.k==='fce')continue;
       const g0=GY(q.x,q.y),y0=q.top!==undefined?-50:g0+(q.bot||0),y1=q.top!==undefined?q.top:g0+(q.hgt||0);if(Y<y0||Y>y1+0.3)continue;
       const dx=px-q.x,dy=py-q.y;if(dx*dx+dy*dy<(q.r+M)*(q.r+M)){hit=true;break;}}
+    if(!hit&&PNL.length&&pnlSolidAt(px,py,Y-GY(px,py)))hit=true;   // thick breakable panels (camera went inside = the wall vanished)
     if(hit){k=Math.max(0.12,(i-1)/N-0.02);break;}}
   return k;
 }

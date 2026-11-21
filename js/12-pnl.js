@@ -18,10 +18,10 @@ const PN_CH='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
 let PNL=[],PNG=[];
 const pnGT=(x,y)=>TERR?terrT(x,y):0;
 const sgPnl=()=>sgGrid('pn',PNL,p=>p.bb);
-const _sgPN=[],_sgPN2=[];
+const _sgPN=[],_sgPN2=[],_sgPN3=[];
 function pnlGen(id){
   const M=MAPS[id],L=((M&&M.pnl)||[]).concat((M&&M.pnH)||[]);
-  PNL=L.map((d,i)=>{const cs=d.cs||1,nc=Math.max(1,Math.round(d.L/20/cs)),nr=Math.max(1,Math.round(d.H/cs)),n=nc*nr,Md=PNDEF.mat[d.mat]||PNDEF.mat.brick,mx=d.hp||Md.hp,a=d.a||0,tl=d.tl||0;
+  PNL=L.map((d,i)=>{const cs=d.cs||1,one=d.nb&&!(d.ho&&d.ho.length),nc=one?1:Math.max(1,Math.round(d.L/20/cs)),nr=one?1:Math.max(1,Math.round(d.H/cs)),n=nc*nr,Md=PNDEF.mat[d.mat]||PNDEF.mat.brick,mx=d.hp||Md.hp,a=d.a||0,tl=d.tl||0;
     const c=Math.cos(a),s=Math.sin(a),ct=Math.cos(tl),stl=Math.sin(tl),zb=pnGT(d.x,d.y)+(d.z0||0),hl=d.L/2,Hp=d.H*20;
     const p={i,d,x:d.x,y:d.y,a,c,s,tl,W:[-s*stl,c*stl,ct],V:[-s*ct,c*ct,-stl],hl,ht:Math.max(1.5,(d.T||6)/2),zb,H:d.H,Hp,nc,nr,cw:d.L/nc,chp:Hp/nr,chh:d.H/nr,tri:d.sh==='tri',
       mode:d.m||'p',thru:d.thru!==0,nb:!!d.nb,mat:d.mat||'brick',g:d.g,max:mx,hp:new Float32Array(n).fill(mx),st:new Uint8Array(n),ex:new Uint8Array(n).fill(1),burnT:0,t:0,ver:1,ph:null,phv:0};
@@ -145,12 +145,19 @@ function pnlCollide(o,r,z){
   return n;
 }
 // rubble heap at the foot of broken cells (upright panels, modes p/l): extra ground height (walk up, low cover) • column height from broken cells above it
-function pnPileCols(p){if(p.phv===p.ver)return p.ph;p.phv=p.ver;const ph=new Float32Array(p.nc);let any=false;
+function pnPileCols(p){if(p.phv===p.ver)return p.ph;p.phv=p.ver;if(p.d.np)return p.ph=null;   // np = breaks without a rubble heap
+  const ph=new Float32Array(p.nc);let any=false;
   if(p.mode!=='g'&&!p.tl)for(let c=0;c<p.nc;c++){let nb=0;for(let r=0;r<p.nr;r++)if(p.ex[r*p.nc+c]&&p.st[r*p.nc+c]>=3)nb++;if(nb){any=true;ph[c]=Math.min(PNDEF.pile.max,PNDEF.pile.k*nb*p.chh);}}
   return p.ph=any?ph:null;}
 function pnPileAt(p,x,y){const ph=pnPileCols(p);if(!ph)return 0;const [u,v]=pnLoc(p,x,y),S=PNDEF.pile.sp,w=Math.max(0,Math.abs(v)-p.ht)/S;if(w>=1)return 0;
   const f=clamp((u+p.hl)/p.cw-0.5,0,p.nc-1),i=Math.floor(f),t=f-i,hc=ph[i]+(ph[Math.min(p.nc-1,i+1)]-ph[i])*t,eu=Math.max(0,Math.abs(u)-p.hl)/S;if(eu>=1)return 0;
   const sm=e=>1-e*e*(3-2*e),av=Math.abs(v),mid=av<p.ht?0.55+0.45*av/p.ht:1;return hc*mid*sm(w)*sm(eu);}   // lower right under the wall line (holes stay passable)
+// standing on top of an upright panel (wall top, or a solid cell under a hole): height above terrain, only tops at/below z+0.5 (jump up onto it)
+function pnlTopH(x,y,z){if(!PNL.length)return 0;const t=pnGT(x,y),a=t+(z||0)+0.5;let g=0;
+  for(const p of sgNear(sgPnl(),x,y,0,_sgPN3)){if(p.tl)continue;const [u,v]=pnLoc(p,x,y);if(Math.abs(v)>p.ht+2||Math.abs(u)>p.hl)continue;
+    const col=clamp(Math.floor((u+p.hl)/p.cw),0,p.nc-1);
+    for(let r=p.nr-1;r>=0;r--){const k=r*p.nc+col;if(!pnSolid(p,k)||(r+1<p.nr&&pnSolid(p,k+p.nc)))continue;const top=p.zb+(r+1)*p.chh;if(top<=a){if(top-t>g)g=top-t;break;}}}
+  return g;}
 function pnlMoundH(x,y){if(!PNL.length)return 0;let g=0;for(const p of sgNear(sgPnl(),x,y,PNDEF.pile.sp,_sgPN2)){const h=pnPileAt(p,x,y);if(h>g)g=h;}return g;}
 // burning wood (host)
 function pnlTick(dt){

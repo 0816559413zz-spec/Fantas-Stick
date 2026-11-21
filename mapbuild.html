@@ -126,6 +126,7 @@ dialog .btns{display:flex;justify-content:flex-end;gap:8px;margin-top:14px}
     <button data-g="translate" title="Move Tool (W) — green arrow = up/down">✥</button>
     <button data-g="rotate" title="Rotate Tool (E)">⟳</button>
     <button data-g="scale" title="Scale Tool (R) — centre cube = uniform">⤢</button>
+    <button data-g="resize" title="Resize Tool (T) — drag one face, the opposite face stays put (like Roblox/Unity Rect)">⇥</button>
   </div>
   <span class="sp"></span>
   <div class="tseg play"><button id="bPlay" title="Play — export to the game, then open the game on this map">▶</button></div>
@@ -149,12 +150,13 @@ dialog .btns{display:flex;justify-content:flex-end;gap:8px;margin-top:14px}
   <div id="center" class="dock">
     <div class="tabs"><span class="tab on"># Scene</span></div>
     <div id="vbar">
-      <button class="tl-btn" id="vTop" title="Top view (T)">Top</button>
+      <button class="tl-btn" id="vTop" title="Top view (Shift+T)">Top</button>
       <button class="tl-btn" id="vFit" title="Frame the whole map (Home)">Frame All</button>
       <span class="vsep"></span>
       <label class="lbl" for="snapSel" title="Grid snap for moving (Move tool + dragging)">Snap</label>
       <select id="snapSel" class="tl-sel"><option value="0">Off</option><option value="0.25">0.25</option><option value="0.5">0.5</option><option value="1">1</option><option value="2">2</option></select>
       <span class="vsep"></span>
+      <label class="chk" style="margin:0" title="On: click a selected object again and drag to move it (first click only selects). Off: move only with the gizmo (W)"><input type="checkbox" id="oDrag" checked>Drag Move</label>
       <label class="chk" style="margin:0"><input type="checkbox" id="oGrid">Grid</label>
       <label class="chk" style="margin:0" title="Slopes too steep to walk up are shown red"><input type="checkbox" id="oSteep" checked>Too Steep</label>
       <label class="chk" style="margin:0" title="Show the game's collision shapes"><input type="checkbox" id="oCol">Colliders</label>
