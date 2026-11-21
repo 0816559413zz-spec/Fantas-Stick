@@ -1,7 +1,7 @@
 // ---------- Breakable panels — view (state = PNL in js/12-pnl.js) ----------
 // One box mesh per panel. Damage = small DataTexture (1 texel per cell: R crack, G outer skin gone, B through) sampled with linear filter + noise,
 // so holes are smooth and merge across cells. Brick/stone sample the field at the brick centre → hole edges step along whole bricks.
-// Holes/recesses are ray-marched through the slab thickness in the fragment shader (rim + inner layer visible, no geometry rebuild).
+// Holes/recesses are ray-marched through the box in the fragment shader (any face; bisected hits = straight cut faces; no geometry rebuild).
 // Pattern coordinates are world-continuous (along the wall + world height) so neighbouring panels line up.
 // Rubble: dusty heap strip + instanced chunks at the foot of broken cells (same heights as pnlMoundH).
 const PNV={list:[],mats:new Map()};
@@ -48,17 +48,21 @@ function pnlMat(mat){
     sh.fragmentShader=sh.fragmentShader.replace('#include <common>','#include <common>\nvarying vec3 vLP;varying vec3 vCamL;varying vec3 vAx;varying vec3 vAy;varying vec3 vAz;'+PN_GLSL)
       .replace('#include <map_fragment>',`#include <map_fragment>
 int pk=0;vec3 nR=vec3(0.);vec2 lp=vLP.xy;float dep=0.,pnGlow=0.;
-if(abs(vLP.z)>uSz.z*0.5-0.003){
-  if(pnM(lp)>0.){
-    // march into the hole (48 steps + bisection on the hole wall: thick walls showed stepped 'slices' with 16 steps)
-    float sg=sign(vLP.z);vec3 D=normalize(vLP-vCamL);float dz=max(-sg*D.z,0.08);const int NS=48;float stp=uSz.z/float(NS),pd=0.;bool hit=false;
-    for(int i=1;i<=NS;i++){float d=stp*float(i);vec3 P=vLP+D*(d/dz);if(abs(P.x)>uSz.x*0.5||abs(P.y)>uSz.y*0.5)break;
-      float m=pnM(P.xy);if(m<=d){if(m>pd+1e-4){pk=1;dep=m;lp=(vLP+D*(m/dz)).xy;}else{float a=pd,b=d;for(int j=0;j<6;j++){float h=(a+b)*0.5;if(pnM((vLP+D*(h/dz)).xy)<=h)b=h;else a=h;}pk=2;dep=b;lp=(vLP+D*(b/dz)).xy;}hit=true;break;}pd=d;}
-    if(!hit)discard;
-    if(pk==2){float e=0.025;float a=step(pnM(lp-vec2(e,0.)),dep)-step(pnM(lp+vec2(e,0.)),dep),b=step(pnM(lp-vec2(0.,e)),dep)-step(pnM(lp+vec2(0.,e)),dep);
-      nR=length(vec2(a,b))>0.?normalize(vec3(a,b,0.)):normalize(vec3(-D.xy,0.001));}
-  }
-}else if(pnM(lp)>=9.)discard;
+float hT=uSz.z*0.5;
+if(hT-abs(vLP.z)+0.002<pnM(lp)){
+  // carved material = prism along z: solid(P) = distance to nearest face >= pnM(P.xy). Walk the real 3D ray through the box
+  // (any face, side caps too), fine even steps up to 160, then bisect every hit → straight cut faces, no stacked 'slices' at grazing angles
+  vec3 D=normalize(vLP-vCamL),sD=vec3(D.x<0.?-1.:1.,D.y<0.?-1.:1.,D.z<0.?-1.:1.),bh=vec3(uSz.xy*0.5,hT);
+  vec3 tx=(sD*bh-vLP)*sD/max(abs(D),vec3(1e-5));float tE=max(min(tx.x,min(tx.y,tx.z)),0.);
+  int N=int(clamp(ceil(tE/0.012),4.,160.));float stp=tE/float(N),tp=0.;bool hit=false;
+  for(int i=1;i<=160;i++){if(i>N)break;float t=stp*float(i);vec3 P=vLP+D*t;
+    if(hT-abs(P.z)>=pnM(P.xy)){float a=tp,b=t;for(int j=0;j<8;j++){float h=(a+b)*0.5;vec3 Q=vLP+D*h;if(hT-abs(Q.z)>=pnM(Q.xy))b=h;else a=h;}
+      vec3 H=vLP+D*b,A=vLP+D*a;lp=H.xy;dep=hT-abs(H.z);pk=pnM(A.xy)>pnM(H.xy)+1e-4?2:1;if(pk==1)nR=vec3(0.,0.,sign(H.z));hit=true;break;}
+    tp=t;}
+  if(!hit)discard;
+  if(pk==2){float e=0.025;float a=step(pnM(lp-vec2(e,0.)),dep)-step(pnM(lp+vec2(e,0.)),dep),b=step(pnM(lp-vec2(0.,e)),dep)-step(pnM(lp+vec2(0.,e)),dep);
+    nR=length(vec2(a,b))>0.?normalize(vec3(a,b,0.)):normalize(vec3(-D.xy,0.001));}
+}
 vec2 q=lp+uOff;vec3 fd=pnF(lp);float nz=pnN(q*1.7)*0.55+pnN(q*7.3)*0.45;vec3 c;
 #if PNM==1
   if(pk==0){c=vec3(0.72,0.68,0.61)*(0.88+0.16*nz);c*=1.-0.12*smoothstep(0.55,0.9,pnN(q*0.6+2.));}
@@ -95,7 +99,7 @@ if(pk==0){float cr=smoothstep(0.35,0.85,fd.r+(nz-0.5)*0.45);vec2 w=q*1.4+vec2(pn
   float ln=max(1.-smoothstep(0.,0.01+0.012*cr,abs(pnN(w*2.)-0.5)),0.7*(1.-smoothstep(0.,0.007,abs(pnN(w*4.6+3.)-0.5))));c*=1.-0.75*cr*ln;
   c*=1.-0.3*smoothstep(0.15,0.5,fd.b*0.8+fd.g*0.5);}
 diffuseColor.rgb=pow(max(c,vec3(0.)),vec3(2.2));`)   // palette written in sRGB → linear
-      .replace('#include <normal_fragment_maps>','#include <normal_fragment_maps>\nif(pk==2)normal=normalize(nR.x*vAx+nR.y*vAy+nR.z*vAz);')
+      .replace('#include <normal_fragment_maps>','#include <normal_fragment_maps>\nif(pk!=0)normal=normalize(nR.x*vAx+nR.y*vAy+nR.z*vAz);')
       .replace('#include <emissivemap_fragment>','#include <emissivemap_fragment>\n#if PNM==9\ntotalEmissiveRadiance=vec3(1.,0.6,0.26)*1.4*pnGlow;\n#endif');
   };
   m.customProgramCacheKey=()=>'pnl'+mi;
