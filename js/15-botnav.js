@@ -31,25 +31,26 @@ function navEnsure(){
 }
 function navBuild(){
   NAV.c=(MAPS[MAPID]&&MAPS[MAPID].navC)||60;   // แมพที่ทางแคบ (ปราสาท) ใช้ช่องเล็กลง
-  const c=NAV.c,nx=Math.ceil(MW/c),ny=Math.ceil(MH/c),N=nx*ny,w=new Uint8Array(N),s=new Uint8Array(N),pad=PR+4;
-  Object.assign(NAV,{nx,ny,w,s});
-  if(window.WD&&!WD.nav)Object.defineProperty(WD,'nav',{get:()=>({NAV,path:navPath,ray:navRay,build:navBuild})});   // ดีบัก
+  const c=NAV.c,nx=Math.ceil(MW/c),ny=Math.ceil(MH/c),N=nx*ny,w=new Uint8Array(N),s=new Uint8Array(N),bk=new Uint16Array(N),pad=PR+4;
+  Object.assign(NAV,{nx,ny,w,s,bk});   // bk = cell blocked only by a breakable (1+siege wall i, 256+panel i) → navPath(...,brk) may plan through it
+  if(window.WD&&!WD.nav)Object.defineProperty(WD,'nav',{get:()=>({NAV,path:navPath,ray:navRay,build:navBuild,brk:NAV_BRK})});   // ดีบัก
   if(!NAV.g||NAV.g.length!==N)Object.assign(NAV,{g:new Float32Array(N),f:new Float32Array(N),par:new Int32Array(N),gen:new Uint32Array(N),cl:new Uint32Array(N),heap:new Int32Array(N*2),gn:0});
   const cells=(x0,y0,x1,y1,fn)=>{const a=clamp(Math.floor(x0/c),0,nx-1),b=clamp(Math.floor(x1/c),0,nx-1),e=clamp(Math.floor(y0/c),0,ny-1),f=clamp(Math.floor(y1/c),0,ny-1);
     for(let j=e;j<=f;j++)for(let i=a;i<=b;i++)fn(j*nx+i,(i+0.5)*c,(j+0.5)*c);};
-  const circ=(o,r,hgt)=>{if(hgt<=0.6)return;const eye=hgt>=NAV_EYE;cells(o.x-r-pad,o.y-r-pad,o.x+r+pad,o.y+r+pad,(k,x,y)=>{const d=Math.hypot(x-o.x,y-o.y);if(d<r+pad)w[k]=1;if(eye&&d<r+c*0.35)s[k]=1;});};
-  for(const o of OBS){if(o.bi!==undefined||o.bot>2||o.k==='flr')continue;circ(o,o.r,o.top!==undefined?o.top:o.hgt);}   // bot>2 = floating (door lintels, gallery rails): no block on the ground
+  const circ=(o,r,hgt,b)=>{if(hgt<=0.6)return;const eye=hgt>=NAV_EYE;cells(o.x-r-pad,o.y-r-pad,o.x+r+pad,o.y+r+pad,(k,x,y)=>{const d=Math.hypot(x-o.x,y-o.y);if(d<r+pad){if(b)bk[k]=b;else w[k]=1;}if(eye&&d<r+c*0.35)s[k]=1;});};
+  for(const o of OBS){if(o.bi!==undefined||o.bot>2||o.k==='flr')continue;circ(o,o.r,o.top!==undefined?o.top:o.hgt,o.sgw!==undefined&&!o.nb&&G&&G.sg&&G.sg.bw[o.sgw]>0?1+o.sgw:0);}   // bot>2 = floating (door lintels, gallery rails): no block on the ground
   const BX=MAPS[MAPID]&&MAPS[MAPID].boxes;
   if(BX)for(const B of BX){if(B.cl)continue;cells(B.x-pad,B.y-pad,B.x+B.w+pad,B.y+B.d+pad,(k,x,y)=>{w[k]=1;if(B.h>=NAV_EYE&&x>B.x-c*0.35&&x<B.x+B.w+c*0.35&&y>B.y-c*0.35&&y<B.y+B.d+c*0.35)s[k]=1;});}
   for(const p of PNL){if(p.tl||p.zb-pnGT(p.x,p.y)>1)continue;   // breakable panels (houses): columns still blocking the body = wall, eye-height cell solid = blocks sight
     const rB=Math.min(p.nr-1,Math.floor(PN_BODY/p.chh)),rE=Math.min(p.nr-1,Math.floor(NAV_EYE/p.chh)),e=p.hl+p.ht+pad,band=Math.max(pad,c*0.5);
     cells(p.x-e,p.y-e,p.x+e,p.y+e,(k,x,y)=>{const [u,v]=pnLoc(p,x,y);if(Math.abs(v)>p.ht+band||Math.abs(u)>p.hl+pad)return;const col=clamp(Math.floor((u+p.hl)/p.cw),0,p.nc-1);
-      for(let r=0;r<=rB;r++)if(pnSolid(p,r*p.nc+col)){w[k]=1;break;}if(Math.abs(v)<p.ht+c*0.35&&pnSolid(p,rE*p.nc+col))s[k]=1;});}
+      for(let r=0;r<=rB;r++)if(pnSolid(p,r*p.nc+col)){if(p.nb)w[k]=1;else bk[k]=256+p.i;break;}if(Math.abs(v)<p.ht+c*0.35&&pnSolid(p,rE*p.nc+col))s[k]=1;});}
   if(PROPON)for(const o of PROPS)if(o.st!==1)circ(o,o.r,o.hgt);
   const m=Math.ceil((40+pad)/c);for(let j=0;j<ny;j++)for(let i=0;i<nx;i++)if(i<m||j<m||i>=nx-m||j>=ny-m)w[j*nx+i]=1;
   if(TERR&&MAPS[MAPID]&&MAPS[MAPID].navTerr){const q=c*0.5,lim=TSLOPE*q/20;   // พื้นสูงต่ำ: ช่องที่ชันเกินเดินขึ้น (หน้าผา/ขอบแท่น) = เดินไม่ได้
     for(let j=0;j<ny;j++)for(let i=0;i<nx;i++){const x=(i+0.5)*c,y=(j+0.5)*c,t0=terrT(x,y);if([[q,0],[-q,0],[0,q],[0,-q]].some(([a,b])=>Math.abs(terrT(x+a,y+b)-t0)>lim))w[j*nx+i]=1;}}
   if(AREA)for(let j=0;j<ny;j++)for(let i=0;i<nx;i++){const o={x:(i+0.5)*c,y:(j+0.5)*c};if(areaClamp(o,pad))w[j*nx+i]=1;}   // นอกพื้นที่เล่นของโหมด = เดินไม่ได้
+  NAV.h=w.slice();for(let k=0;k<N;k++)if(bk[k]){if(NAV.h[k])bk[k]=0;else w[k]=1;}   // h = hard blocks only • w = hard + breakables (normal walking)
 }
 const navCell=(x,y)=>clamp(Math.floor(y/NAV.c),0,NAV.ny-1)*NAV.nx+clamp(Math.floor(x/NAV.c),0,NAV.nx-1);
 const navWalk=(x,y)=>!NAV.w[navCell(x,y)];
@@ -65,8 +66,18 @@ function navFree(k,r){   // ช่องว่างใกล้ k ที่ส�
   return -1;
 }
 // A* (8 ทิศ ห้ามตัดมุม) → จุดทาง [{x,y}] หลังตัดจุดที่มองเห็นกันได้ทิ้ง • null = ไปไม่ได้
-function navPath(x0,y0,x1,y1){
-  const nx=NAV.nx,w=NAV.w,c=NAV.c;let s=navFree(navCell(x0,y0),3),t=navFree(navCell(x1,y1),4);if(s<0||t<0)return null;if(s===t)return [{x:x1,y:y1}];
+// breakable cost (cells of walking) of id from NAV.bk: time to break it × walking speed • Infinity = cannot break
+const NAV_BRK={dps:30,spd:190,add:3};   // ⚠ starting values: team dps at a wall, walk px/s, flat extra (cells)
+function navBrkPen(id){
+  let hp=Infinity;
+  if(id<256){const S=G.sg,i=id-1;if(S&&S.bw[i]>0)hp=S.bw[i];}
+  else{const p=PNL[id-256];if(p&&!p.nb){const rB=Math.min(p.nr-1,Math.floor(PN_BODY/p.chh)),cols=Math.max(1,Math.ceil((PR*2+8)/p.cw));let tot=0;
+    for(let col=0;col<p.nc;col++)for(let r=0;r<=rB;r++){const k=r*p.nc+col;if(pnSolid(p,k))tot+=p.hp[k];}hp=tot/p.nc*cols;}}
+  return hp/NAV_BRK.dps*NAV_BRK.spd/NAV.c+NAV_BRK.add;
+}
+// brk: false = walk only • true / number (cost scale) = may go through breakables (cost = navBrkPen); points inside one get .b = id
+function navPath(x0,y0,x1,y1,brk){
+  const nx=NAV.nx,c=NAV.c,bk=NAV.bk,w=brk&&NAV.h?NAV.h:NAV.w,bs=brk===true?1:+brk||1,pc=new Map(),pen=id=>{let v=pc.get(id);if(v===undefined){v=navBrkPen(id)*bs*(G.sg&&G.sg.bt&&G.sg.bt[id]>G.time?0.6:1);pc.set(id,v);}return v;};let s=navFree(navCell(x0,y0),3),t=navFree(navCell(x1,y1),4);if(s<0||t<0)return null;if(s===t)return [{x:x1,y:y1}];
   const gn=++NAV.gn,g=NAV.g,f=NAV.f,par=NAV.par,gen=NAV.gen,cl=NAV.cl,H=NAV.heap;let hn=0;
   const ti=t%nx,tj=(t/nx)|0,h=k=>{const dx=Math.abs(k%nx-ti),dy=Math.abs(((k/nx)|0)-tj);return (dx+dy)+(1.4142-2)*Math.min(dx,dy);};
   const push=k=>{let i=hn++;H[i]=k;while(i>0){const p=(i-1)>>1;if(f[H[p]]<=f[k])break;H[i]=H[p];i=p;}H[i]=k;};
@@ -77,9 +88,9 @@ function navPath(x0,y0,x1,y1){
     const i=k%nx,j=(k/nx)|0;
     for(const [di,dj,cost] of D){const a=i+di,b=j+dj;if(a<0||b<0||a>=nx||b>=NAV.ny)continue;const q=b*nx+a;if(w[q]||cl[q]===gn)continue;
       if(di&&dj&&(w[j*nx+a]||w[b*nx+i]))continue;
-      const ng=g[k]+cost;if(gen[q]===gn&&ng>=g[q])continue;gen[q]=gn;g[q]=ng;par[q]=k;f[q]=ng+h(q)*1.05;push(q);}}
+      let ng=g[k]+cost;if(brk&&bk[q]&&bk[q]!==bk[k]){const pv=pen(bk[q]);if(!isFinite(pv))continue;ng+=pv;}if(gen[q]===gn&&ng>=g[q])continue;gen[q]=gn;g[q]=ng;par[q]=k;f[q]=ng+h(q)*1.05;push(q);}}
   if(!found)return null;
-  const pts=[];for(let k=t;k>=0&&k!==s;k=par[k])pts.push({x:(k%nx+0.5)*c,y:(((k/nx)|0)+0.5)*c});
+  const pts=[];for(let k=t;k>=0&&k!==s;k=par[k]){const o={x:(k%nx+0.5)*c,y:(((k/nx)|0)+0.5)*c};if(brk&&bk[k]&&NAV.w[k])o.b=bk[k];pts.push(o);}
   pts.reverse();if(pts.length)pts[pts.length-1]={x:x1,y:y1};
   return pts;
 }

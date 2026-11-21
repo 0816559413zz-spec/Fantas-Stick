@@ -135,7 +135,7 @@ function sgSnap(){
 //  บอทเล่นบุกปราสาท: ฝ่ายบุก = เดินไปแกนแล้วร่าย (เจอศัตรูใกล้ = สู้ก่อน) • ฝ่ายรับ = เฝ้ารอบแกน ไล่คนที่เข้าใกล้แกน
 //  ต่อสู้ใช้สมองเดิม (aiBot + botPlay ตามสาย) • เดินไกลใช้ตารางหาทาง (js/15-botnav)
 // =====================================================================
-const SGB={atkSee:800,defSee:850,defCore:2200,ring:200};   // ระยะสนใจศัตรู (px) • รัศมียืนรอบแกน ⚠ ค่าตั้งต้น
+const SGB={atkSee:800,defSee:850,defCore:2200,ring:200,brkD:70,brkDps:10};   // brkD = stand this close (px) to a wall being broken   // ระยะสนใจศัตรู (px) • รัศมียืนรอบแกน ⚠ ค่าตั้งต้น
 // เป้าที่ "เกี่ยวกับภารกิจ": บุก = ศัตรูใกล้ตัว • รับ = ศัตรูใกล้ตัวหรือใกล้แกน
 function sgBotTarget(p){
   const k=sgCore();let best=null,bd=1e18;
@@ -147,11 +147,59 @@ function sgBotTarget(p){
     const s=p.team===1?Math.min(d,dk*0.8):d;if(s<bd){bd=s;best=q;}}
   return best;
 }
+// ---- team plan (user 2026-11-22: don't trickle in one by one) ----
+// attackers: rally point R on the planned route ~SGT.rally px before the core • gather there, push together as a "wave" when enough are in,
+// join a live push if friends are already fighting at the core, fall back to R when alone + outnumbered + hurt • defenders: fall back to the core
+const SGT={rally:950,rallyR:380,maxWait:20,waveEnd:6,pushT:45,outn:2,hurt:0.55,near:600};   // ⚠ starting values
+function sgTeamPlan(t){
+  const S=G.sg;if(!S)return null;S.tp=S.tp||[{},{}];const T=S.tp[t],k=sgCore();
+  if(T.at>G.time-0.4&&T.ph===S.ph)return T;T.at=G.time;
+  if(T.ph!==S.ph){T.ph=S.ph;T.R=null;T.rt=0;T.wave=0;T.wt=G.time;}
+  const all=plist().filter(q=>q.team===t&&!q.gh),alive=all.filter(q=>q.alive&&!q.downed),foes=plist().filter(q=>q.team!==t&&q.alive&&!q.downed&&!q.gh);
+  if(t===0&&k&&(!T.R||G.time>T.rt)){T.rt=G.time+5;navEnsure();const sp=sgSpawn(0),P=navPath(sp.x,sp.y,k.x,k.y,true);let R=sp;
+    if(P){const pts=[sp].concat(P);for(let i=pts.length-1;i>=0;i--)if(Math.hypot(pts[i].x-k.x,pts[i].y-k.y)>=SGT.rally&&!pts[i].b){R=pts[i];break;}}
+    T.R={x:R.x,y:R.y};}
+  const fz=SGV.zoneR*1.7;
+  T.front=alive.filter(q=>k&&Math.hypot(q.x-k.x,q.y-k.y)<fz).length;
+  T.atR=T.R?alive.filter(q=>Math.hypot(q.x-T.R.x,q.y-T.R.y)<SGT.rallyR).length:0;
+  T.foes=foes.length;T.n=all.length;
+  const soon=all.filter(q=>!q.alive&&(q.respawn||0)<6).length;   // friends respawning soon are worth waiting for
+  T.need=Math.max(1,Math.min(all.length,Math.max(2,Math.ceil(foes.length*0.8))));
+  const late=S.ot||G.timer<SGT.pushT;
+  const sp0=sgSpawn(t);T.com=T.R?alive.filter(q=>Math.hypot(q.x-T.R.x,q.y-T.R.y)>SGT.rallyR&&Math.hypot(q.x-sp0.x,q.y-sp0.y)>400&&!(q.ai&&q.ai.sgm==='back')).length:0;   // committed = out past the rally point
+  if(T.wave&&T.com===0&&!alive.some(q=>q.sgn&&q.sgn.bz)&&G.time-T.wt>SGT.waveEnd){T.wave=0;T.wt=G.time;}   // push died out (nobody left out front) → gather again
+  if(!T.wave&&(late||T.atR>=T.need||(T.atR>=1&&T.atR+soon<T.need&&T.atR>=alive.length)&&G.time-T.wt>SGT.maxWait||G.time-T.wt>SGT.maxWait*2)){T.wave=1;T.wt=G.time;}
+  T.late=late;return T;
+}
+// should this bot push to the core now, go to the rally point, or fall back? → 'push' | 'rally' | 'back'
+function sgBotMode(p){
+  const S=G.sg;if(!S||S.prep>0||S.tr>0)return 'push';
+  const T=sgTeamPlan(p.team),k=sgCore();if(!T||!k)return 'push';
+  if(p.sgc||sgInZone(p))return 'push';
+  const nf=plist().filter(q=>q.team!==p.team&&q.alive&&!q.downed&&!q.gh&&Math.hypot(q.x-p.x,q.y-p.y)<SGT.near).length,
+        na=plist().filter(q=>q!==p&&q.team===p.team&&q.alive&&!q.downed&&Math.hypot(q.x-p.x,q.y-p.y)<SGT.near).length;
+  if(nf>=na+1+SGT.outn&&p.hp<p.maxHp*SGT.hurt&&!T.late)return 'back';   // alone + outnumbered + hurt
+  if(p.team===1)return 'push';
+  if(T.late||T.n<=1)return 'push';
+  if(T.wave&&(T.front>=2||(T.R&&Math.hypot(p.x-T.R.x,p.y-T.R.y)<SGT.rallyR+150)||Math.hypot(p.x-k.x,p.y-k.y)<SGT.rally+250))return 'push';   // late respawner: join only a push that is still alive
+  if(T.front>=Math.max(1,T.need-1))return 'push';   // friends already fighting at the core → regroup with them
+  return 'rally';
+}
+// first breakable on a planned path → where to stand/aim {x,y,ah,id} (siege wall box or breakable panel cell)
+function sgBreachAim(p,id,px,py){
+  if(id<256){const b=sgF().bw[id-1];if(!b)return null;return {id,x:clamp(p.x,b.x,b.x+b.w),y:clamp(p.y,b.y,b.y+b.d),ah:2};}
+  const q=PNL[id-256];if(!q)return null;const [u0]=pnLoc(q,px,py),c0=clamp(Math.floor((u0+q.hl)/q.cw),0,q.nc-1),rB=Math.min(q.nr-1,Math.floor(PN_BODY/q.chh));
+  for(const dc of [0,-1,1,-2,2])for(let r=0;r<=rB;r++){const col=c0+dc,kk=r*q.nc+col;if(col<0||col>=q.nc||!pnSolid(q,kk))continue;const P3=pnCellPos(q,kk);return {id,k:kk,x:P3[0],y:P3[1],ah:P3[2]};}
+  return null;
+}
 // จุดที่บอทควรไป
 function sgBotGoal(p){
   const S=G.sg,k=sgCore();if(!S||!k)return {x:p.x,y:p.y};
   if(p.team===0&&S.prep>0)return sgSpawn(0);
   if(p.team===0&&S.tr>0){const o=sgF().phases[S.ph-2];if(o){const k=sgCore();let bx=p.x,by=p.y,bd=1e18;for(const q of o){const x=clamp(k.x,q.x1+60,q.x2-60),y=clamp(k.y,q.y1+60,q.y2-60),d=(x-k.x)**2+(y-k.y)**2;if(d<bd){bd=d;bx=x;by=y;}}return {x:bx,y:by};}}   // wait at the old line, nearest the new core
+  const md=p.ai.sgm=sgBotMode(p),T=S.tp&&S.tp[p.team];
+  if(md==='back'&&p.team===1){const h=hashStr(p.id)%628/100;return {x:k.x+Math.cos(h)*SGB.ring*0.5,y:k.y+Math.sin(h)*SGB.ring*0.5};}
+  if(p.team===0&&md!=='push'&&T&&T.R){const h=hashStr(p.id)%628/100,r=120;return {x:T.R.x+Math.cos(h)*r,y:T.R.y+Math.sin(h)*r};}
   if(p.team===0){const h=hashStr(p.id)%628/100,r=SGB.ring*0.6;return {x:k.x+Math.cos(h)*r,y:k.y+Math.sin(h)*r};}
   // ฝ่ายรับ: เดินลาดตระเวนรอบแกน (เปลี่ยนจุดทุก 4–8 วิ) — เดิมยืนนิ่งจุดเดียวจนดูเหมือนค้าง (ผู้ใช้ 2026-11-08)
   const A=p.ai;if(!A.pat||A.pat.k!==S.ph||G.time>A.pat.t){
@@ -181,6 +229,8 @@ function sgBotThink(p,dt){
   const c0=Object.assign({},inp.c);
   aiBot(p,dt);
   let tg=A.tg&&A.tg.alive&&!A.tg.downed?A.tg:null;
+  if(tg&&A.sgm==='back'&&Math.hypot(tg.x-p.x,tg.y-p.y)>200){tg=null;for(const kk of SLOTK.concat(['x']))inp.c[kk]=c0[kk]|0;}   // falling back: don't stop to trade shots
+  if(tg&&p.team===0&&A.sgm==='rally'&&Math.hypot(tg.x-p.x,tg.y-p.y)>SGB.atkSee*0.6){tg=null;for(const kk of SLOTK.concat(['x']))inp.c[kk]=c0[kk]|0;}   // gathering: only fight what comes close
   if(tg){   // เดินไปหาเป้าไม่ได้ (กำแพงพังได้ขวาง) = ไม่สนเป้านี้ ไปทำภารกิจ/พังกำแพงก่อน
     const N=p.sgn||(p.sgn={path:null,t:0,gx:0,gy:0});N.rt=(N.rt||0)-dt;
     if(N.rt<=0||N.rtg!==tg){N.rt=1;N.rtg=tg;navEnsure();N.reach=Math.hypot(tg.x-p.x,tg.y-p.y)<220||!!navPath(p.x,p.y,tg.x,tg.y);}
@@ -191,10 +241,14 @@ function sgBotThink(p,dt){
   const S=G.sg,g=A.home,d=Math.hypot(g.x-p.x,g.y-p.y);
   inp.fire=0;inp.sh=0;
   if(d>60){navEnsure();const N=p.sgn||(p.sgn={path:null,t:0,gx:0,gy:0});N.t-=dt;
-    if(N.t<=0||!N.path||Math.hypot(g.x-N.gx,g.y-N.gy)>80){N.t=rnd(0.7,1.1);N.gx=g.x;N.gy=g.y;N.path=navPath(p.x,p.y,g.x,g.y);}
+    if(N.t<=0||!N.path||Math.hypot(g.x-N.gx,g.y-N.gy)>80){N.t=rnd(0.7,1.1);N.gx=g.x;N.gy=g.y;N.path=navPath(p.x,p.y,g.x,g.y,p.team===0?1:2);}   // may plan through breakable walls (defenders prefer walking: ×2 cost)
     const P=N.path;
-    if(P&&P.length){while(P.length>1&&Math.hypot(P[0].x-p.x,P[0].y-p.y)<NAV.c*0.7)P.shift();
-      for(let j=Math.min(P.length-1,6);j>0;j--)if(!navRay(p.x,p.y,P[j].x,P[j].y,false)){P.splice(0,j);break;}
+    N.bz=null;
+    if(P&&P.length){while(P.length>1&&Math.hypot(P[0].x-p.x,P[0].y-p.y)<NAV.c*0.7&&!P[0].b)P.shift();
+      for(let j=Math.min(P.length-1,6);j>0;j--){if(P.slice(0,j).some(o=>o.b))continue;if(!navRay(p.x,p.y,P[j].x,P[j].y,false)){P.splice(0,j);break;}}
+      const bi=P.findIndex(o=>o.b);   // planned route goes through a breakable: walk up to it, then shoot it open
+      if(bi>=0&&(bi<=1||Math.hypot(P[bi].x-p.x,P[bi].y-p.y)<300)&&!NAV.w[navCell(p.x,p.y)]){const a=sgBreachAim(p,P[bi].b,P[bi].x,P[bi].y);
+        if(a){N.bz=a;S.bt=S.bt||{};S.bt[a.id]=G.time+2;}else N.path=null;}
       const wx=P[0].x-p.x,wy=P[0].y-p.y,wd=Math.hypot(wx,wy)||1;inp.mx=wx/wd;inp.my=wy/wd;}
     else{inp.mx=(g.x-p.x)/d;inp.my=(g.y-p.y)/d;}
     inp.ax=p.x+inp.mx*300;inp.ay=p.y+inp.my*300;
@@ -202,6 +256,11 @@ function sgBotThink(p,dt){
     if(!P&&S){let bb=null,bd=3000;sgF().bw.forEach((b,i)=>{if(S.bw[i]<=0||!sgInArea(b.x+b.w/2,b.y+b.d/2,S.ph))return;const qx=clamp(p.x,b.x,b.x+b.w),qy=clamp(p.y,b.y,b.y+b.d),dd=Math.hypot(qx-p.x,qy-p.y);if(dd<bd){bd=dd;bb={x:qx,y:qy};}});
       if(bb){inp.ax=bb.x;inp.ay=bb.y;inp.ah=2;inp.fire=(G.time%0.5<0.25)?1:0;if(bd>260){const P2=navPath(p.x,p.y,bb.x,bb.y);const t=P2&&P2[0]||bb,tx2=t.x-p.x,ty2=t.y-p.y,td=Math.hypot(tx2,ty2)||1;inp.mx=tx2/td;inp.my=ty2/td;}else inp.mx=inp.my=0;
         N.kick=0;}N.br=bb?1:0;}else N.br=0;
+    if(N.bz){const a=N.bz,bd2=Math.hypot(a.x-p.x,a.y-p.y);inp.ax=a.x;inp.ay=a.y;inp.ah=a.ah;inp.fire=(G.time%0.5<0.25)?1:0;N.br=1;N.kick=0;
+      if(bd2>SGB.brkD){inp.mx=(a.x-p.x)/bd2;inp.my=(a.y-p.y)/bd2;}else inp.mx=inp.my=0;   // close: short-range basics (water drops) must reach
+      if(bd2<SGB.brkD+40){const dm=SGB.brkDps*dt;   // melee/beam basics (frost sword, storm beam, nature whip) don't hit walls → bot breaching = steady wall damage
+        if(a.id<256)sgWallDmg(a.id-1,dm,a.x,a.y);else{const q=PNL[a.id-256];if(q&&a.k>=0)pnlHit(q,a.k,dm,'none',p.x,p.y,true);}}
+      for(const kk of SLOTK.concat(['x']))inp.c[kk]=0;}
   }else{inp.mx=inp.my=0;}
   // ติด: ก้าวข้างสุ่ม
   const N=p.sgn||(p.sgn={});N.st=(N.st||1.5)-dt;
