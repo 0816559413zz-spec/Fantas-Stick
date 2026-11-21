@@ -383,10 +383,13 @@ function stDarkQuickDash(root,caster,look,live){
   scythe.pivot.name='Quick Dash scythe';
   const distanceAt=t=>range*ease(launch,arrival,t);
   const pointAt=(distance,out)=>live?live.pointAt(distance/range,out):out.set(0,0,clamp(distance,0,range));
-  const nearTail=stDarkWake(root,distanceAt,(d,out)=>out.set(-.27+.29*d/range,0,d-.22),
-    d=>-.24-.46*d/range,launch,arrival,.67,.56);
-  const farTail=stDarkWake(root,distanceAt,(d,out)=>out.set(.34-.51*d/range,0,d-.38),
-    d=>-.68+.13*Math.sin(d/range*Math.PI),launch+.024,arrival,.38,.50);
+  const heightPoint=new THREE.Vector3();
+  const nearTail=stDarkWake(root,distanceAt,(d,out)=>{
+    pointAt(d,out);out.x+=-.27+.29*d/range;out.z-=.22;return out;
+  },d=>pointAt(d,heightPoint).y-.24-.46*d/range,launch,arrival,.59,.47);
+  const farTail=stDarkWake(root,distanceAt,(d,out)=>{
+    pointAt(d,out);out.x+=.34-.51*d/range;out.z-=.38;return out;
+  },d=>pointAt(d,heightPoint).y-.68+.13*Math.sin(d/range*Math.PI),launch+.024,arrival,.30,.41);
   const matter=stDarkMatter(root,'Quick Dash dark matter',[
     {at:launch,span:.035,count:30,spread:.92,lift:.58,height:.23,back:.61},
     {at:launch+.04,span:.24,count:29,spread:.48,lift:.36,height:.72,back:.78},

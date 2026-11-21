@@ -1,6 +1,113 @@
 {
- "next": 113,
+ "next": 120,
  "items": [
+  {
+   "id": 119,
+   "title": "Darkness BA กวาดตรงกลาง 120°",
+   "text": "ฟันทั้งสองฝั่งจากขอบ 60° ผ่านแนวเล็งกลางไปถึง 60° อีกฝั่ง คมและกรวยโดนใช้มุมเดียวกันทั้ง BA ปกติและเสริม",
+   "kind": "Animation / Gameplay",
+   "who": "Darkness",
+   "status": "wait",
+   "created": "2026-11-21",
+   "updated": "2026-11-21",
+   "imgs": [],
+   "links": [
+    "/shots/motion_darkness_ba_centered_tdm.gif"
+   ]
+  },
+  {
+   "id": 118,
+   "title": "Darkness ท่าคทา BA และขนาดโล่",
+   "text": "ใช้ท่าคทาจาก Studio ทั้งสองฝั่งใน BA และย่อโล่จาก 112 เหลือ 100 หน่วยทั้งภาพและระยะกันจริง",
+   "kind": "Animation / VFX",
+   "who": "Darkness",
+   "status": "wait",
+   "created": "2026-11-21",
+   "updated": "2026-11-21",
+   "imgs": [],
+   "links": [
+    "/shots/motion_darkness_ba_wand_tdm.gif",
+    "/shots/motion_darkness_shield_compact_tdm.gif"
+   ]
+  },
+  {
+   "id": 117,
+   "title": "Radiance HUD ช่วยเล็ง Crystal Bond และพื้น Shard Storm",
+   "text": "เส้นทองสองข้างเพื่อนที่เล็งได้ยาวและหนาขึ้นเล็กน้อย เส้นจางลงระหว่างคูลดาวน์ พื้น Storm มีรังผึ้งกับขอบทองชัดขึ้นและแนบพื้น",
+   "kind": "HUD / VFX",
+   "who": "Radiance",
+   "status": "wait",
+   "created": "2026-11-21",
+   "updated": "2026-11-21",
+   "imgs": [],
+   "links": [
+    "/shots/motion_radiance_bond_clear_tdm.gif",
+    "/shots/motion_radiance_storm_ground_tdm.gif"
+   ]
+  },
+  {
+   "id": 116,
+   "title": "Radiance และ Darkness แก้บั๊กและเกลา VFX จาก QA",
+   "text": "ย่อโล่ Darkness เหลือ 112, Ward Drain กดเพดานครบเวลา, Nightfall ยึดจุดหยุดจริง, Radiance ใช้ผลึกเสริมเฉพาะตอนอัลติ พร้อมเกลาคิวแสงและวงเตือนของทั้งสองสาย",
+   "kind": "Gameplay / VFX",
+   "who": "Radiance / Darkness",
+   "status": "wait",
+   "created": "2026-11-21",
+   "updated": "2026-11-21",
+   "imgs": [],
+   "links": [
+    "/shots/motion_darkness_qapass.gif",
+    "/shots/motion_radiance_qapass.gif"
+   ]
+  },
+  {
+   "id": 115,
+   "title": "Darkness หางด้าม BA และเคียว Nightfall มีตรา",
+   "text": "คืนหางด้ามชั้นเดิมจาก Studio ให้ BA ทั้งสองฝั่ง Nightfall มีตราให้เคียวลอยต่ำแนวนอนเยื้องซ้าย หันปลายคมเข้าหาเป้าตอนพุ่ง และมองเห็นก่อนคมถึงเป้าทั้งสองครั้ง",
+   "kind": "Animation / VFX",
+   "who": "Darkness",
+   "status": "wait",
+   "created": "2026-11-21",
+   "updated": "2026-11-21",
+   "imgs": [],
+   "links": [
+    "/shots/scythe_ba_top.gif",
+    "/shots/motion_darkness_ba_shaft_tdm.gif",
+    "/shots/motion_darkness_nightfall_marked_aim_tdm.gif"
+   ]
+  },
+  {
+   "id": 114,
+   "title": "Darkness จังหวะ Maw, BA, Nightfall และ Ward Drain",
+   "text": "ชาร์จ Maw เดินได้และหยุดตอนปล่อย BA กว้างขึ้นตามปลายเคียว Flow Nightfall พุ่งเร็วขึ้น แบบมีตราลูกเงาเล็กและเห็นเคียวชัดขึ้น Ward Drain ขึ้นโล่ร้าวตามผู้โดนครบ 4 วิ",
+   "kind": "Gameplay / Animation / VFX",
+   "who": "Darkness",
+   "status": "wait",
+   "created": "2026-11-21",
+   "updated": "2026-11-21",
+   "imgs": [],
+   "links": [
+    "/shots/motion_darkness_maw_charge_walk_tdm.gif",
+    "/shots/motion_darkness_ba_wide_tdm.gif",
+    "/shots/motion_darkness_nightfall_flow_fast_tdm.gif",
+    "/shots/motion_darkness_nightfall_marked_clear_tdm.gif",
+    "/shots/motion_darkness_ward_drain_target_tdm.gif"
+   ]
+  },
+  {
+   "id": 113,
+   "title": "Darkness แก้วงควงค้างตอน Nightfall ไม่มีตรา",
+   "text": "ฟัน BA ให้เห็นวงควงแล้วกด Nightfall ไม่มีตรา วงควงเดิมหายตามเคียว จากนั้นกด BA ระหว่างเคียว Nightfall คืนท่า เคียวเริ่มฟันต่อจากตำแหน่งปัจจุบัน",
+   "kind": "Bug / VFX",
+   "who": "Darkness",
+   "status": "wait",
+   "created": "2026-11-21",
+   "updated": "2026-11-21",
+   "imgs": [],
+   "links": [
+    "/shots/motion_darkness_nightfall_plain_combo_tdm.gif"
+   ]
+  },
   {
    "id": 112,
    "title": "Darkness ยกกล้องให้เห็นหางฟันบนพื้น",

@@ -159,9 +159,9 @@ function lgSanctumMoteTex(){
   return LGV.sanMoteTex=tex;
 }
 // ลายรังผึ้งบนพื้น Shard Storm
-function lgHoneyTex(){if(LGV.honey)return LGV.honey;const N=512,c=document.createElement('canvas');c.width=c.height=N;const x=c.getContext('2d'),s=26,h=s*Math.sqrt(3);x.strokeStyle='rgba(255,220,140,1)';x.lineWidth=2.2;
+function lgHoneyTex(){if(LGV.honey)return LGV.honey;const N=512,c=document.createElement('canvas');c.width=c.height=N;const x=c.getContext('2d'),s=29,h=s*Math.sqrt(3);x.strokeStyle='rgba(255,220,140,1)';x.lineWidth=3.9;
   for(let row=-1;row<N/h+1;row++)for(let col=-1;col<N/(s*1.5)+1;col++){const cx=col*s*1.5,cy=row*h+(col%2?h/2:0);x.beginPath();for(let k=0;k<6;k++){const a=k*Math.PI/3;x[k?'lineTo':'moveTo'](cx+Math.cos(a)*s*0.94,cy+Math.sin(a)*s*0.94);}x.closePath();x.stroke();}
-  x.globalCompositeOperation='destination-in';const g=x.createRadialGradient(N/2,N/2,0,N/2,N/2,N/2);g.addColorStop(0,'rgba(0,0,0,0.35)');g.addColorStop(0.75,'rgba(0,0,0,0.8)');g.addColorStop(0.97,'rgba(0,0,0,1)');g.addColorStop(1,'rgba(0,0,0,0)');x.fillStyle=g;x.fillRect(0,0,N,N);
+  x.globalCompositeOperation='destination-in';const g=x.createRadialGradient(N/2,N/2,0,N/2,N/2,N/2);g.addColorStop(0,'rgba(0,0,0,0.54)');g.addColorStop(0.75,'rgba(0,0,0,0.91)');g.addColorStop(0.97,'rgba(0,0,0,1)');g.addColorStop(1,'rgba(0,0,0,0)');x.fillStyle=g;x.fillRect(0,0,N,N);
   LGV.honey=new THREE.CanvasTexture(c);return LGV.honey;}
 function lgShield(S,o,p,n,on,now,dt){
   if(!S.shF&&!on)return;
@@ -1083,6 +1083,16 @@ function lgUltVisual(o,p,S,U,alive,now,dt){
       for(const a of V.arms){a.amount=0;a.guard=0;}
     }
   }
+  if(!shot&&gesture?.[1]>.55&&V?.arms?.length){
+    if(!S.palmReady){
+      S.palmReady=true;
+      const arm=V.arms.find(part=>part.sign===gesture[0]);
+      if(arm){
+        const a=arm.hand.getWorldPosition(new THREE.Vector3()),x=a.x/S3+MW/2,y=a.z/S3+MH/2;
+        FX.flashSprite(x,y,a.y-GY(x,y),'#ffe5a3',.12,.52,.09,1.55);
+      }
+    }
+  }else S.palmReady=false;
   if(shot){
     if(!S.ultBeam)S.ultBeam=lgSovereignPalmBeam();
     const gate=S.palmGate||(S.palmGate=lgSovereignPalmGate());
@@ -1092,7 +1102,7 @@ function lgUltVisual(o,p,S,U,alive,now,dt){
     lgAim(S.ultBeam,a,b);S.ultBeam.visible=S.ultBeam.scale.z>.05;
     if(!S.palmFiring||shotAge<(S.lastPalmAge||0)-.14){
       const h=a.y-GY(a.x/S3+MW/2,a.z/S3+MH/2);
-      FX.flashSprite(a.x/S3+MW/2,a.z/S3+MH/2,h,'#fff7dc',.25,2.15,.14,2.6);
+      FX.flashSprite(a.x/S3+MW/2,a.z/S3+MH/2,h,'#fff7dc',.20,1.12,.105,1.98);
       if(p.id===NET.myId){shake(.7);screenKick(.24);}
     }
     if(shotAge>=LG_PALM_TRAVEL&&(!S.palmImpact||now-S.palmImpact>200)){
@@ -1115,7 +1125,7 @@ function lgUltVisual(o,p,S,U,alive,now,dt){
     uniforms.lengthM.value=Math.max(.06,S.ultBeam.scale.z);
     uniforms.ignite.value=1-THREE.MathUtils.smoothstep(shotAge,0,.19);
     uniforms.age.value=shotAge;
-    LREQ.push({x:a.x,y:a.y,z:a.z,col:'#ffe399',int:.42+.43*surge,dist:3.5});
+    LREQ.push({x:a.x,y:a.y,z:a.z,col:'#ffe399',int:.30+.26*surge,dist:2.8});
   }else{
     S.palmFiring=false;
     S.palmImpact=0;
@@ -1286,7 +1296,7 @@ function lightFX(o,p,pz,now,dt,velocity){
     if(t<T1){o.g.visible=true;o.g.position.copy(st.a0);o.g.updateWorldMatrix(true,false);const k=clamp(t/0.05,0,1);lgNeon(o,k);
       o.b.rotation.x-=0.2*k;if(o.armL&&o.armR){o.armL.rotation.z-=0.5*k;o.armR.rotation.z+=0.5*k;}o.b.updateWorldMatrix(true,true);}   // ท่าก่อนแวบ: ตัวเอนหลังนิด แขนหุบ
     else{if(!st.outD){st.outD=1;FX.flashSprite(st.x,st.y,st.h+1.1,'#fff1c6',.24,1.9,.13,1.6);fxPlay('light/step_out',{x:st.x,y:st.y,h:st.h,aim:false});}
-      if(!st.inD&&t>=T2){st.inD=1;FX.flashSprite(st.x2,st.y2,st.h2+1.1,'#fff1c6',.3,2.1,.15,1.7);fxPlay('light/step_in',{x:st.x2,y:st.y2,h:st.h2,gh:st.h2,aim:false});if(p.id===NET.myId){shake(.32);screenFlash('#ffedb9',.15,.12);}}
+      if(!st.inD&&t>=T2){st.inD=1;FX.flashSprite(st.x2,st.y2,st.h2+1.1,'#fff1c6',.35,2.25,.13,1.8);if(!st.air)ring(st.x2,st.y2,'#ffc96b',39,.19,st.h2+.06);fxPlay('light/step_in',{x:st.x2,y:st.y2,h:st.h2,gh:st.h2,aim:false});if(p.id===NET.myId){shake(.32);screenFlash('#ffedb9',.13,.10);}}
       const lt=t-T1;if(lt<0.12){S.orbT.visible=true;lgAim(S.orbT,st.a,st.b);S.orbT.scale.x=S.orbT.scale.y=0.22*(1-lt/0.12);}else S.orbT.visible=false;   // เส้นแสงแวบระหว่าง 2 จุด
       o.g.visible=t>=T2;S.crHide=t<T2;if(t>=T2&&!st.crS){st.crS=1;S.crSnap=1;}
       const u=clamp((t-T2)/0.25,0,1);lgNeon(o,t<T2?0:0.85*(1-u*u));   // ร่างแสงนีออน → ตัวปกติ
@@ -1351,6 +1361,12 @@ function lightFX(o,p,pz,now,dt,velocity){
   if(o.tip){o.tip.getWorldPosition(_lgW);}else _lgW.copy(o.g.position).add(new THREE.Vector3(0,1.4,0));
   const fwd=new THREE.Vector3(Math.cos(ba)*Math.cos(bp),Math.sin(bp),Math.sin(ba)*Math.cos(bp)),side=new THREE.Vector3(-Math.sin(ba),0,Math.cos(ba)),up=new THREE.Vector3(0,1,0),rUp=new THREE.Vector3().crossVectors(side,fwd).normalize();
   const ringC=_lgW.clone().addScaledVector(fwd,0.35);
+  const nearRelease=beam<0&&(L[12]||0)>LTV.baCharge-.12;
+  if(nearRelease&&!S.prismReady){
+    const wx=ringC.x/S3+MW/2,wy=ringC.z/S3+MH/2;
+    FX.flashSprite(wx,wy,ringC.y-GY(wx,wy),'#ffe7a8',.13,.65,.10,1.30);
+  }
+  S.prismReady=nearRelease;
   for(let i=0;i<3;i++){const c=S.cr[i];c.visible=alive&&i<n&&!S.crHide;if(!c.visible)continue;if(!shOn)c.scale.setScalar(empOn?1.2+0.08*Math.sin(now/90+i):1);
     let P;
     if(beam!==0&&n>0){   // คริสตัลบินไปรวมที่ปลายไม้ทีละชิ้นก่อนชาร์จเต็ม • ยิง: หมุนช้าลง (1 ชิ้น = อยู่กลาง ไม่หมุน)
@@ -1439,7 +1455,7 @@ function lightFX(o,p,pz,now,dt,velocity){
     U.heart.material.opacity=Math.min(0.95,0.35+0.26*stage+0.18*pulse+bt);
     U.heart.scale.set(0.2*hs,0.34*hs,0.2*hs);
     U.glow.material.opacity=0.14+0.095*stage+0.1*pulse;
-    S.sanR.position.copy(P).add(new THREE.Vector3(0,0.05,0));S.sanR.scale.setScalar(R*Math.min(1,0.2+rise*1.5));S.sanR.material.opacity=0.64+0.14*pulse;
+    S.sanR.position.copy(P).add(new THREE.Vector3(0,0.05,0));S.sanR.scale.setScalar(R);S.sanR.material.opacity=.68*rise;
     S.sanTint.visible=true;S.sanTint.position.set(P.x,P.y+0.025,P.z);S.sanTint.scale.copy(S.sanR.scale);
     S.sanTint.material.opacity=rise*(0.17+0.18*stage);
     if(!S.sanWv){S.sanWv=new THREE.Mesh(new THREE.RingGeometry(0.982,1,72),new THREE.MeshBasicMaterial({color:'#ffe08a',transparent:true,opacity:0,depthWrite:false,side:THREE.DoubleSide}));S.sanWv.rotation.x=-Math.PI/2;scene.add(S.sanWv);}
@@ -1471,16 +1487,24 @@ function lightFX(o,p,pz,now,dt,velocity){
           return {material,opacity:material.opacity};
         });
         const st=new THREE.Mesh(new THREE.RingGeometry(ro-0.018,ro+0.018,32,1,0,0.8),sm);st.rotation.x=-Math.PI/2;S.veil.add(st);S.vB.push({b,st,r,ro,a0:q*Math.PI*2/n,materials});S.veil.add(b);}}
-      S.veilR=new THREE.Mesh(new THREE.RingGeometry(0.978,1,96),new THREE.MeshBasicMaterial({color:'#df9f45',transparent:true,opacity:0.65,depthWrite:false,side:THREE.DoubleSide}));S.veilR.rotation.x=-Math.PI/2;
-      S.veilF=new THREE.Mesh(new THREE.CircleGeometry(1,72),new THREE.MeshBasicMaterial({map:lgHoneyTex(),color:hdr('#ffb040',0.8),transparent:true,opacity:0.25,blending:THREE.AdditiveBlending,depthWrite:false}));S.veilF.rotation.x=-Math.PI/2;scene.add(S.veil,S.veilR,S.veilF);}
-    const P=lgWorld(W[0],W[1],0),R=LT_VS.r*S3,left=W[2]/10,el=LT_VS.t-left,gr=clamp(el/0.4,0,1),ge=1-(1-gr)*(1-gr)*(1-gr),fd=clamp(left/0.4,0,1),k=ge*fd;
+      S.veilR=new THREE.Mesh(new THREE.RingGeometry(.976,1,88).rotateX(-Math.PI/2),new THREE.MeshBasicMaterial({color:hdr('#ffc652',1.20),transparent:true,depthWrite:false,side:THREE.DoubleSide,toneMapped:false}));
+      S.veilF=new THREE.Mesh(new THREE.RingGeometry(0,1,56,7).rotateX(-Math.PI/2),new THREE.MeshBasicMaterial({map:lgHoneyTex(),color:hdr('#ffb845',1.10),transparent:true,blending:THREE.AdditiveBlending,depthWrite:false,toneMapped:false}));
+      S.veilR.name='Shard Storm active ground edge';S.veilF.name='Shard Storm active ground pattern';scene.add(S.veil,S.veilR,S.veilF);}
+    const floor=groundH(W[0],W[1],(W[3]??0)/100);
+    const P=lgWorld(W[0],W[1],floor),R=LT_VS.r*S3,left=W[2]/10,el=LT_VS.t-left,gr=clamp(el/0.4,0,1),ge=1-(1-gr)*(1-gr)*(1-gr),fd=clamp(left/0.4,0,1),k=ge*fd;
+    const groundKey=`${W[0]}|${W[1]}|${floor}|${R}`;
+    if(S.veilGround!==groundKey){
+      S.veilGround=groundKey;
+      lgFitGround(S.veilR.geometry,W[0],W[1],floor,R,.082);
+      lgFitGround(S.veilF.geometry,W[0],W[1],floor,R,.054);
+    }
     S.veilR.visible=k>.01;S.veil.visible=S.veilF.visible=k>0.01;S.veil.position.copy(P);S.veil.scale.setScalar(R*ge);
     for(const B of S.vB){const a=B.a0+(B.r?1:-1)*now/(B.r?380:300);B.b.position.set(Math.cos(a)*B.ro,(-.30+ge*(.83+.24*B.r+.07*Math.sin(now/250+B.a0))-.45*(1-fd))/Math.max(.01,R*ge),Math.sin(a)*B.ro);B.b.rotation.set(0,-a+(B.r?0:Math.PI),0.25);B.b.scale.setScalar(k/Math.max(.01,R*ge));B.b.visible=k>0.01;
-      B.st.position.y=0.06/(R*ge+0.01);B.st.rotation.z=B.r?-a:-a-0.8;B.st.material.opacity=.12*k;
-      for(const {material,opacity} of B.materials)material.opacity=opacity*k;}
-    S.veilR.position.copy(P).add(new THREE.Vector3(0,0.05,0));S.veilR.scale.setScalar(R*ge);S.veilR.material.opacity=(.48+.045*Math.sin(now/180))*k;
-    S.veilF.position.copy(P).add(new THREE.Vector3(0,0.04,0));S.veilF.scale.setScalar(R*ge);S.veilF.rotation.z=-now/4500;S.veilF.material.opacity=.095*k;
-    LREQ.push({x:P.x,y:P.y+0.6,z:P.z,col:'#ffc04a',int:0.7*k,dist:8});}
+      B.st.position.y=0.06/(R*ge+0.01);B.st.rotation.z=B.r?-a:-a-0.8;B.st.material.opacity=.075*k;
+      for(const {material,opacity} of B.materials)material.opacity=opacity*.66*k;}
+    S.veilR.position.copy(P);S.veilR.scale.setScalar(R);S.veilR.material.opacity=.91*k;
+    S.veilF.position.copy(P);S.veilF.scale.setScalar(R);S.veilF.material.opacity=.29*k;
+    LREQ.push({x:P.x,y:P.y+0.6,z:P.z,col:'#ffc04a',int:.47*k,dist:8});}
   else if(S.veil){S.veil.visible=S.veilR.visible=S.veilF.visible=false;}
 }
 function lgBaseObjects(s){return [...s.cr,...s.ally,s.beam,s.ring,s.shF,s.shE,s.shG,s.orbT,s.aura,s.lkHead,...(s.ew||[]),...(s.ea||[]),...(s.shGl||[]),...(s.mote||[]).map(M=>M.g),s.link,s.prism,s.san,s.sanR,s.sanTint,s.sanWv,...(s.sanO||[]),...(s.sanM||[]).map(M=>M.g),s.veil,s.veilR,s.veilF,...(s.eMo||[]),s.eTip,s.bC,s.bEnd,...(s.wSp||[]),...(s.shd||[]),...(s.bLR||[]),...(s.mR||[]),s.bHot,s.bHotR,...(s.bSp||[]),...(s.bR||[]),...(s.eTr||[])];}
@@ -1655,27 +1679,26 @@ function lgBlastThreads(x,y,h,r,duration){
   threads.position.copy(lgWorld(x,y,h+.065));scene.add(threads);
   LGV.fx.push({t:0,max:duration,fresh:true,fn:k=>{material.uniforms.progress.value=k;},end:()=>disposeObj(threads)});
 }
-function lgVolleyWarning(x,y,h,radius,duration){
+function lgFitGround(geometry,x,y,h,scale,offset){
+  const points=geometry.attributes.position,base=GY(x,y)+h;
+  for(let i=0;i<points.count;i++){
+    const wx=x+points.getX(i)*scale/S3,wy=y+points.getZ(i)*scale/S3;
+    points.setY(i,(GY(wx,wy)+groundH(wx,wy,h)-base+offset)/scale);
+  }
+  points.needsUpdate=true;
+  geometry.computeBoundingSphere();
+}
+function lgGroundWarning(x,y,h,radius,duration,storm=false){
   const root=new THREE.Group();
-  root.name='Shard Volley warning';
+  root.name=storm?'Shard Storm landing warning':'Shard Volley warning';
   root.position.copy(lgWorld(x,y,h));
-  root.scale.setScalar(radius);
-  const edge=(inner,outer,offset)=>{
-    const material=new THREE.MeshBasicMaterial({color:hdr('#ffcf5a',1.65),transparent:true,depthWrite:false,
-      side:THREE.DoubleSide,forceSinglePass:true,toneMapped:false});
-    const mesh=new THREE.Mesh(new THREE.RingGeometry(inner,outer,80),material);
-    mesh.rotation.x=-Math.PI/2;
-    mesh.position.y=offset/radius;
-    mesh.renderOrder=7;
-    root.add(mesh);
-    return mesh;
-  };
-  const border=edge(.982,1,.076);
-  const countdown=edge(.98,1,.087);
-  fireTemp(root,root.children.map(mesh=>mesh.material),duration,(_v,k)=>{
-    border.material.opacity=.91+.09*k;
-    countdown.scale.setScalar(.18+.78*k);
-    countdown.material.opacity=.54+.30*k;
+  const geo=new THREE.RingGeometry(radius-(storm?.055:.14),radius,88).rotateX(-Math.PI/2);
+  lgFitGround(geo,x,y,h,1,.07);
+  const material=new THREE.MeshBasicMaterial({color:hdr('#ffc547',storm?1.06:1.4),transparent:true,depthWrite:false,
+    side:THREE.DoubleSide,forceSinglePass:true,toneMapped:false});
+  const border=new THREE.Mesh(geo,material);border.renderOrder=7;root.add(border);
+  fireTemp(root,[material],duration,(_v,k)=>{
+    material.opacity=storm?.28+.43*k:.78+.22*k;
   });
 }
 function lightEfx(ev){
@@ -1683,7 +1706,14 @@ function lightEfx(ev){
   switch(z){
     case 'lgsanadd':{const o=PM3.get(ev.id);if(o)castStart(o,'line');const a=o&&o.tip?o.tip.getWorldPosition(new THREE.Vector3()):lgWorld(x,y,H);lgArcFx(a,lgWorld(ev.x2,ev.y2,1.4),0.4,1.6,()=>fxPlay('light/crystal_in',{x:ev.x2,y:ev.y2,h:1.4,aim:false}));if(near)snd('cast_pull',ev);return true;}   // เพิ่ม: พุ่งโค้งเข้าวง (วงสว่างขึ้นใน lightFX)
     case 'lgsend':{   // Crystal Bond ส่ง: สะบัดไม้ชี้หาคู่หู • คริสตัลแวบหายที่เรา → เส้นแสงแวบ → แวบโผล่ที่คู่หู
-      const o=PM3.get(ev.id);if(o)castStart(o,'line');lgBlip(lgWorld(x,y,H+0.1),lgWorld(ev.x2,ev.y2,(ev.h2||1.4)+0.15));if(near)snd('cast_pull',ev);return true;}
+      const o=PM3.get(ev.id);if(o)castStart(o,'line');lgBlip(lgWorld(x,y,H+0.1),lgWorld(ev.x2,ev.y2,(ev.h2||1.4)+0.15));
+      later(.055,()=>{
+        const gifted=lgState(ev.t).ally.filter(c=>c.visible).at(-1);
+        if(!gifted)return;
+        const P=gifted.position,wx=P.x/S3+MW/2,wy=P.z/S3+MH/2;
+        FX.flashSprite(wx,wy,P.y-GY(wx,wy),'#ffe0a0',.19,.72,.14,1.43);
+      });
+      if(near)snd('cast_pull',ev);return true;}
     case 'lgrecall':{   // กดค้างหรือคู่หูล้ม: ดึงไม้กลับและให้คริสตัลแวบกลับทีละชิ้น
       skAnim({id:ev.id,s:'lgrecall'});
       const S=LGV.st.get(ev.id);
@@ -1701,7 +1731,7 @@ function lightEfx(ev){
     case 'lglink':case 'lgprism':FX.flashSprite(x,y,H+1.3,'#fff1c0',0.25,1.2,0.1,1);if(near)snd('buff',ev);return true;
     case 'lgunlink':FX.flashSprite(x,y,H,'#ffd36a',0.2,1,0.1,1);return true;
     case 'lgbahit':FX.flashSprite(x,y,H,'#fff1c0',0.1,0.45,0.08,0.5);return true;
-    case 'lgvolwarn':lgVolleyWarning(x,y,H,ev.r*S3,ev.t);return true;
+    case 'lgvolwarn':lgGroundWarning(x,y,H,ev.r*S3,ev.t);return true;
     case 'lgvol':{   // Shard Volley: คริสตัลหมุนเข้าปลายไม้ (0.15 วิ) → ชี้ไม้ → แวบไปจุด (ตัวใหญ่) → หมุนชาร์จเร็วขึ้น/สว่างขึ้น + วงเตือนพื้น
       const o=PM3.get(ev.id);if(o)castStart(o,'line');const C=ev.t||LT_VO.charge,W=ev.w||LT_VO.wind,ST=ev.st||LT_VO.step,S=LGV.st.get(ev.id);
       const tip=()=>o&&o.tip?o.tip.getWorldPosition(new THREE.Vector3()):lgWorld(x,y,H);
@@ -1730,7 +1760,10 @@ function lightEfx(ev){
       if(near)snd('buff',ev);return true;}
     case 'lgempend':{const S=LGV.st.get(ev.id);if(S)lgAllyEmpEnd(S);return true;}
     case 'lgbolt':{   // Empower: เศษคริสตัลแสงเล็กพุ่งโค้งมีหางทองไปหาศัตรู → แตกประกาย
-      const a=lgWorld(x,y,ev.h||1.6),b=lgWorld(ev.x2,ev.y2,ev.h2||1.2),c=lgCrystalMesh(0.55);scene.add(c);
+      const gift=LGV.st.get(ev.id)?.ally.find(c=>c.visible);
+      const a=gift?gift.position.clone():lgWorld(x,y,ev.h||1.6),b=lgWorld(ev.x2,ev.y2,ev.h2||1.2),c=lgCrystalMesh(0.55);scene.add(c);
+      const wx=a.x/S3+MW/2,wy=a.z/S3+MH/2;
+      FX.flashSprite(wx,wy,a.y-GY(wx,wy),'#ffe3a2',.15,.56,.10,1.16);
       const side=new THREE.Vector3(-(b.z-a.z),0,b.x-a.x).normalize().multiplyScalar((Math.random()<0.5?-1:1)*(0.6+Math.random()*0.6)),pts=[];
       const tr=lgTube(lgBeamMat(),1);tr.visible=false;
       LGV.fx.push({m:null,t:0,max:0.28,fn:k=>{const P=a.clone().lerp(b,k).addScaledVector(side,Math.sin(k*Math.PI)).add(new THREE.Vector3(0,Math.sin(k*Math.PI)*0.4,0));c.position.copy(P);c.rotation.y+=0.5;
@@ -1744,7 +1777,9 @@ function lightEfx(ev){
       fxPlay('light/san_end',{x,y,h:0,aim:false});const S=LGV.st.get(ev.id),o=PM3.get(ev.id);
       if(S&&S.sanO&&o){S.sanO.forEach((c,i)=>{if(!c.visible)return;const from=c.position.clone(),to=o.g.position.clone().add(new THREE.Vector3(Math.cos(i*2.1),1.45,Math.sin(i*2.1)));later(0.05+i*0.06,()=>lgBlip(from,to));});}
       return true;}
-    case 'lgveil':{const o=PM3.get(ev.id);if(o){o.stOn=1;o.stT=0;o.stF=0;o.stEv={x,y,r:ev.r};}else later(LT_VS_RELEASE,()=>lgArcFx(lgWorld(x,y,1.4),lgWorld(x,y,0.4),LT_VS_TRAVEL,1.5));if(near)snd('cast_pull',ev);return true;}
+    case 'lgveil':{const o=PM3.get(ev.id);if(o){o.stOn=1;o.stT=0;o.stF=0;o.stEv={x,y,r:ev.r};}else later(LT_VS_RELEASE,()=>lgArcFx(lgWorld(x,y,1.4),lgWorld(x,y,0.4),LT_VS_TRAVEL,1.5));
+      lgGroundWarning(x,y,groundH(x,y,H),ev.r*S3,LT_VS_RELEASE+LT_VS_TRAVEL,true);
+      if(near)snd('cast_pull',ev);return true;}
     case 'lgoh':{const S=LGV.st.get(ev.id);if(S)for(const c of S.cr)if(c.visible){const P=c.position,x=P.x/S3+MW/2,y=P.z/S3+MH/2;burst(x,y,'#ffb347',8,120,0.45,2.6,{h:P.y,vh:[0.5,3],g:2});burst(x,y,'#9a8a78',4,40,0.7,4,{h:P.y,vh:[1,2],g:-1});}
       if(ev.id===NET.myId)shake(0.15);break;}
     case 'lgveilhit':for(const id of ev.ids||[]){const o=PM3.get(id);if(o)fxPlay('light/bolt_hit',{x:o.g.position.x/S3+MW/2,y:o.g.position.z/S3+MH/2,h:1,s:0.7,aim:false});}return true;
@@ -1793,15 +1828,16 @@ function lightEfx(ev){
       FX.flashSprite(x,y,H,'#fff1c2',.33,2.85,.14,2.65);
       burst(x,y,'#fff0a7',32,244,.31,1.75,{h:H,g:0});
       if(ev.id===NET.myId){shake(1.1);screenKick(.42);}
-      later(duration*.24,()=>{
-        FX.flashSprite(ev.x2,ev.y2,ev.h2+.20,'#fff3c6',.23,2.2,.12,2.1);
-        burst(ev.x2,ev.y2,'#ffc56b',24,205,.39,1.8,{h:ev.h2+.10,vh:[1,5],g:7});
+      const travel=duration*.24;
+      later(travel,()=>{
+        FX.flashSprite(ev.x2,ev.y2,ev.h2+.20,'#fff3c6',.18,1.25,.09,1.75);
+        burst(ev.x2,ev.y2,'#ffc56b',14,168,.29,1.55,{h:ev.h2+.10,vh:[1,4],g:7});
+        if(ev.ground){
+          dfCracks(ev.x2,ev.y2,ev.h2+.026,66,'#ffbe43',impactDuration-travel+.08);
+          burst(ev.x2,ev.y2,'#917d61',10,58,.33,2.1,{h:ev.h2+.05,vh:[.6,1.65],g:8});
+        }
+        lgImpactDome(ev.x2,ev.y2,ev.h2,1.20,impactDuration-travel);
       });
-      if(ev.ground){
-        dfCracks(ev.x2,ev.y2,ev.h2+.026,66,'#ffbe43',impactDuration+.08);
-        burst(ev.x2,ev.y2,'#917d61',10,58,.33,2.1,{h:ev.h2+.05,vh:[.6,1.65],g:8});
-      }
-      lgImpactDome(ev.x2,ev.y2,ev.h2,1.44,impactDuration);
       return true;
     }
     case 'lgultboom':{
@@ -1848,20 +1884,37 @@ function lightHeadPose(o){
   hb.quaternion.multiply(_lgHq.setFromAxisAngle(_lgHy,y));o.lgHeadSet=(o.lgHeadSet||new THREE.Quaternion()).copy(hb.quaternion);}
 // เกจร้อน BA รอบเป้าเล็ง (ผู้ใช้ 2026-11-17): โค้งด้านล่างเป้า ทอง→ส้ม→แดงตามความร้อน • ร้อนเกิน = แดงกะพริบ ลดลงจนชาร์จเสร็จ
 const LGHUD={h:0,a:0,e:0};   // e = เพิ่งหมด Empower: เกจไหลลงช้า ๆ ให้เห็น
-function drawLightHud(x,y,L){
+const lgBondScreen=new THREE.Vector3();
+function drawCrystalBondHud(me){
+  const target=VIEW.cur?.P?.find(p=>p.id===me.lt[20]&&p.al&&!p.dn);
+  const avatar=target&&PM3.get(target.id);
+  if(!avatar?.g.visible)return;
+  lgBondScreen.copy(avatar.g.position);lgBondScreen.y+=1.26;
+  const gap=clamp(245/cam.position.distanceTo(lgBondScreen),13,27);
+  const half=clamp(gap*.46,6,10);
+  lgBondScreen.project(cam);
+  if(Math.abs(lgBondScreen.z)>1||Math.abs(lgBondScreen.x)>1||Math.abs(lgBondScreen.y)>1)return;
+  const slot=getKit(me.id).ids.findIndex(id=>SPELL_LIST[id]?.id==='crystalbond');
+  if(slot<0)return;
+  const ready=(me.cd?.[slot+1]??0)<=0;
+  cx.save();cx.lineCap='round';
+  cx.translate((lgBondScreen.x+1)*SW*.5,(1-lgBondScreen.y)*SH*.5);
+  cx.beginPath();
+  for(const side of [-1,1]){
+    cx.moveTo(side*(gap-2),-half);
+    cx.quadraticCurveTo(side*(gap+4),0,side*(gap-2),half);
+  }
+  cx.lineWidth=2.25;cx.strokeStyle=ready?'#ffe1a0':'#ba9564';
+  cx.globalAlpha=ready?1:.56;cx.stroke();
+  cx.restore();
+}
+function drawLightHud(x,y,me){
+  const L=me.lt;
   if(L[14]?.[0]===2){
     drawReticleTimer(cx,x,y,Math.min(58,SH*.12),L[14][1]/LT_UL.t);
     return;
   }
-  const target=L[20]&&VIEW.cur?.P?.find(p=>p.id===L[20]);
-  const aim=target&&toScreen(target.x,(target.z||0)+1.35,target.y);
-  if(aim){
-    cx.save();cx.translate(...aim);cx.lineWidth=1.65;cx.strokeStyle='#fff1bf';
-    for(const [sx,sy] of [[-1,-1],[-1,1],[1,-1],[1,1]]){
-      cx.beginPath();cx.moveTo(sx*7,sy*14);cx.lineTo(sx*14,sy*14);cx.lineTo(sx*14,sy*7);cx.stroke();
-    }
-    cx.restore();
-  }
+  if(L[20])drawCrystalBondHud(me);
   const emp=(L[5]|0)===1,tgt=emp?1:(L[16]||0)/100,oh=(L[17]|0)===1,dt=1/60;if(LGHUD.em&&!emp)LGHUD.e=1;LGHUD.em=emp;if(emp||LGHUD.h<0.02)LGHUD.e=0;   // Empower (ผู้ใช้ 2026-11-18): เกจเต็มมีแสงไหล ไม่ร้อน • หมดบัฟ = เกจลดลงจนเป็น 0
   LGHUD.h+=(tgt-LGHUD.h)*Math.min(1,dt*(LGHUD.e&&tgt<LGHUD.h?2.2:12));
   LGHUD.a=clamp(LGHUD.a+((LGHUD.h>0.01||oh||emp)?dt/0.15:-dt/0.4),0,1);if(LGHUD.a<=0)return;

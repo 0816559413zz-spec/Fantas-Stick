@@ -281,7 +281,7 @@ function stDarkMarkWave(root,args){
           const k=(i*absorbBands+band)*3+j,side=j-1;
           intake.positions.setXYZ(k,x+side*width*.4,y+side*width,z-side*width*.8);
           const tone=j===1?.025:.099;
-          intake.colors.setXYZW(k,tone,tone*.82,tone*1.36,alpha*(j===1?.93:0));
+          intake.colors.setXYZW(k,tone,tone*.82,tone*1.36,alpha*(j===1?1:.085));
         }
       }
     }

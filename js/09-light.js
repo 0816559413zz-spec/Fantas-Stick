@@ -222,8 +222,8 @@ function lightDmgOut(src){if(!(src&&src.lgN>0))return 1;const o=src.lgFrom&&G.pl
 function lightDmgIn(t){let k=1;if(t.lgN>0)k*=1-LTV.allyDR*t.lgN;if(t.lgDR>G.time)k*=1-LTV.dsDR;if(t.lgUltWard)k*=1-LT_UL.dr;return k;}
 function lightSnapP(p){if(!lgOn(p)&&!(p.lgN>0)&&!p.lgUltWard)return undefined;
   const pos=lgOn(p)?lightLinkPos(p):null,a=lgOn(p)?lightAlly(p):null;
-  return [lgOn(p)?p.lc|0:0,a?a.id:p.lgA==='prism'?'P':0,pos?[Math.round(pos.x),Math.round(pos.y)]:0,p.lgN|0,p.lgBeam|0,p.lgEmp>G.time?1:0,p.lgDch>=1?1:0,
-    p.lgSan?[Math.round(p.lgSan.x),Math.round(p.lgSan.y),p.lgSan.n|0]:0,p.lgVeil&&p.lgVeil.wind<=0?[Math.round(p.lgVeil.x),Math.round(p.lgVeil.y),Math.round(p.lgVeil.t*10)]:0,p.lgBeamL|0,Math.round((p.lgBeamA||p.ang||0)*100)/100,p.shieldOn?1:0,Math.round((p.lgChg||0)*100)/100,Math.round((p.lgBeamP||0)*100)/100,
+  return [lgOn(p)?(p.lgUlt?LTV.max:p.lc|0):0,a?a.id:p.lgA==='prism'?'P':0,pos?[Math.round(pos.x),Math.round(pos.y)]:0,p.lgN|0,p.lgBeam|0,p.lgEmp>G.time?1:0,p.lgDch>=1?1:0,
+    p.lgSan?[Math.round(p.lgSan.x),Math.round(p.lgSan.y),p.lgSan.n|0]:0,p.lgVeil&&p.lgVeil.wind<=0?[Math.round(p.lgVeil.x),Math.round(p.lgVeil.y),Math.round(p.lgVeil.t*10),Math.round(p.lgVeil.h*100)]:0,p.lgBeamL|0,Math.round((p.lgBeamA||p.ang||0)*100)/100,p.shieldOn?1:0,Math.round((p.lgChg||0)*100)/100,Math.round((p.lgBeamP||0)*100)/100,
     p.lgUlt?lightUltSnap(p.lgUlt):0,p.lgUltWard?1:0,Math.round((p.lgHeat||0)*100),p.lgOH>0?1:0,p.lgBeamW|0,p.shieldOn&&lgOn(p)?lightShieldPitch(p):0,
     lgOn(p)&&!p.lgUlt&&!p.shieldOn&&lightSlotOf(p,'crystalbond')?lightBondTarget(p)?.id??null:null];}
 // ---------- สกิล ----------
@@ -492,7 +492,7 @@ function lightSanEnd(p){const Z=p.lgSan;if(!Z)return;p.lc=Math.min(LTV.max,p.lc+
 function lightAimPt(p,max){const i=p.inp||{};let ax=Number.isFinite(i.ax)?i.ax:p.x+Math.cos(p.ang)*max,ay=Number.isFinite(i.ay)?i.ay:p.y+Math.sin(p.ang)*max;
   const d=Math.hypot(ax-p.x,ay-p.y);if(d>max){ax=p.x+(ax-p.x)/d*max;ay=p.y+(ay-p.y)/d*max;}return [ax,ay,groundH(ax,ay,p.z)];}
 const LT_BOND=defSpell(LIGHTP,{id:'crystalbond',v:{},role:'support',n:'Crystal Bond',ic:'🔗',cd:0.25,
-  d:'เล็งเพื่อนแล้วกด = ลิงก์ + ส่งคริสตัลให้ 1 ชิ้น (เพื่อนรับดาเมจน้อยลง 5% ตีแรงขึ้น 5% ต่อชิ้น) • ต้องเล็งเพื่อนที่อยู่ในระยะ • กดค้าง = เรียกคืนทั้งหมด • ห่างเกิน 750 = ลิงก์หลุด',
+  d:`เล็งเพื่อนแล้วกด = ลิงก์ + ส่งคริสตัลให้ 1 ชิ้น (เพื่อนรับดาเมจน้อยลง 5% ตีแรงขึ้น 5% ต่อชิ้น) • ต้องเล็งเพื่อนที่อยู่ในระยะ • กดค้าง = เรียกคืนทั้งหมด • ห่างเกิน ${LTV.linkR} = ลิงก์หลุด`,
   cast(p){return lightBondTap(p)?undefined:false;}});
 const LT_VO=defSpell(LIGHTP,{id:'shardvolley',v:{d0:250,overlap:25,gap:-15,wind:0.4,step:0.7,charge:1.4,dmg:30,r0:190,r:150,back:0.8},vn:{wind:'หมุนเข้าไม้ (วิ)',step:'ไปทีละชิ้น ห่าง (วิ)',d0:'ชิ้นแรก • ระยะ',overlap:'วงแรกกับวงสอง • ระยะที่ทับกัน',gap:'วงสองกับวงสาม • ช่องว่างระหว่างขอบ',charge:'หมุนชาร์จ (วิ)',dmg:'ระเบิด • ดาเมจ/ชิ้น',r0:'ระเบิด • รัศมีลูกแรก',r:'ระเบิด • รัศมีลูกถัดไป',back:'บินกลับ (วิ)'},role:'damage',n:'Shard Volley',ic:'💠',cd:8,
   d:'คริสตัลหมุนเข้ามาที่ไม้ ชี้ไปข้างหน้า คริสตัลที่ถือทั้งหมดพุ่งไปเป็นแถว (250 / 565 / 850) หมุนชาร์จแล้วระเบิดลูกละ 30 รัศมี 190 / 150 / 150 แล้วบินกลับ • ไม่มีคริสตัลกับตัว = ใช้ไม่ได้',
@@ -525,7 +525,7 @@ const LT_UL=defSpell(LIGHTP,{id:'radiantsovereign',v:{t:8,shield:75,dr:0.3,cast:
       emit({k:'efx',z:'lgultneed',x:p.x,y:p.y,id:p.id});return false;
     }
     if(p.lgUlt||p.shieldOn||p.fly||p.dash>0)return false;
-    p.lc=LTV.max;p.lgBeam=0;p.lgChg=0;p.lgFl=0;
+    p.lgBeam=0;p.lgChg=0;p.lgFl=0;
     a.lgUltWard={owner:p.id,hp:S.v.shield};
     p.lgUlt={phase:1,t:S.v.t,cast:S.v.cast,ally:a.id,arm:1,burst:0,rest:0,wind:0,home:{x:p.x,y:p.y,h:p.z}};
     emit({k:'efx',z:'lgult',x:p.x,y:p.y,h:p.z,id:p.id,t:a.id});
@@ -554,7 +554,7 @@ function lightQueueTick(dt){
     }
   }
 }
-PBASIC.push({id:'b_light',type:'lgray',n:'Prism Ray',d:'กดค้าง = ชาร์จ 0.8 วิ (ลอยขึ้นนิด คริสตัลเรียงเป็นวงหน้าไม้) แล้วยิงลำแสงจากกลางวง ไกล 600 • 0 คริสตัล = ลำบางทะลุ 5 ทุก 1 วิ • 1/2/3 คริสตัล = 5/0.7 วิ • 8/0.6 วิ • 10/0.6 วิ (ไม่ทะลุ)',
+PBASIC.push({id:'b_light',type:'lgray',n:'Prism Ray',d:`กดค้าง = ชาร์จ ${LTV.baCharge} วิ (ลอยขึ้นนิด คริสตัลเรียงเป็นวงหน้าไม้) แล้วยิงจากกลางวง ไกล ${LTV.baRange} • 0 คริสตัล = แตะยิง ${LTV.ba0[0]} ดาเมจ • 1/2/3 คริสตัล = ${[LTV.ba1,LTV.ba2,LTV.ba3].map(([d,t])=>d+'/'+t+' วิ').join(' • ')} • ลำหยุดที่เป้าแรก`,
   shd:'Crystal Aegis: คริสตัลบินมาเรียงเป็นโล่หกเหลี่ยมหน้าตัว กันได้แค่ด้านหน้า • เกจ 120/180/300 ตามคริสตัลที่ถือ • 0 ชิ้น = กางไม่ได้ • ระหว่างกางใช้สกิลไม่ได้',
   dsd:'Light Step (Shift): วาร์ป 250 ตามทิศเดิน • เล็งคู่หูที่ลิงก์ = วาร์ปใกล้ด้านหลังที่ความสูงเดียวกัน ถ้าไม่มีพื้นจะตก • ระเบิด 15 รัศมี 150 + คู่หูลดดาเมจ 30% 2 วิ • 1 ชาร์จ คูล 8 วิ',
   front:true,frontA:Math.PI/3,shDrain:0.25,aim3d:()=>true,shieldPitch:lightShieldPitch,

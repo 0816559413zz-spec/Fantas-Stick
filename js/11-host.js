@@ -299,7 +299,12 @@ function updatePlayer(p,dt,acting){
     if(!canAct&&p.dark){
       if(p.dark.dashStart!=null||p.dark.longUntil>G.time)darkEvent(p,'darkdashcancel');
       if(p.dark.chase)darkEvent(p,'darkchasecancel');
+      if(p.dark.plainDash){darkEvent(p,'darkchasecancel');p.dark.plainDash=null;}
       if(p.dark.waltz)darkEvent(p,'darkwaltzcancel');
+      if(p.dark.ultBiteUntil>G.time){
+        darkEvent(p,'darkriftcancel');
+        p.dark.ultUntil=p.dark.ultBiteUntil=p.dark.ultCamUntil=0;
+      }
       p.dark.waltz=null;p.dark.waltzUntil=0;
       p.dark.actions.length=0;p.dark.dashStart=null;p.dark.chase=null;p.dark.longUntil=0;p.dark.chaseUntil=0;
       if(p.pathIdx===DARKP)p.dash=0;
@@ -338,7 +343,7 @@ function updatePlayer(p,dt,acting){
   if(p.shieldOn){p.shieldE-=12*dt*((PBASIC[p.pathIdx|0]||{}).shDrain||1);if(p.shieldE<=0)breakShield(p);}
   else{p.shieldBroken=Math.max(0,p.shieldBroken-dt);if(p.shieldBroken<=0)p.shieldE=Math.min(100,p.shieldE+4.05*p.buffs.shReg*dt);}   // ผู้ใช้ 2026-11-16: โล่ทุกสายฟื้นช้าลง 2 เท่า (18→9) • 2026-11-18: ทุกสายเท่า Radiance 4.05/วิ (เต็มใน ~25 วิ)
   }
-  if(p.darkDrain>G.time)p.shieldE=Math.min(p.shieldE,40);
+  if(p.darkDrain>G.time)p.shieldE=Math.min(p.shieldE,100*(1-DARK_WARD.v.drain));
   if(p.shWas&&!p.shieldOn){const B=PBASIC[p.pathIdx|0];if(B&&B.shDrop)B.shDrop(p);}
   p.shWas=p.shieldOn;
   if(p.pathIdx===2)stormTick(p,dt);
@@ -355,12 +360,14 @@ function updatePlayer(p,dt,acting){
   else{mx=(inp.r?1:0)-(inp.l?1:0);my=(inp.d?1:0)-(inp.u?1:0);}
   const ml=Math.hypot(mx,my);if(ml){mx/=ml;my/=ml;}
   if(p.wr?.ph==='aim'){mx*=0.35;my*=0.35;}   // อัลติดินลอยอยู่: ขยับได้นิดหน่อยทุกทิศ (ผู้ใช้ 2026-11-15) — ตัวค้างท่ารอเหวี่ยงไม้ (js/09 earthWrath จำกัดรัศมี)
-  if(!canAct||p.root>0||p.dchgOn||p.cryo>0||p.dark?.ultUntil>G.time||p.dark?.waltzUntil>G.time){mx=my=0;}
+  const mawBrace=p.dark?.ultUntil>G.time&&p.dark.ultReleaseAt<=G.time;
+  if(!canAct||p.root>0||p.dchgOn||p.cryo>0||mawBrace||p.dark?.waltzUntil>G.time){mx=my=0;}
   else if(p.fear>0){const fa=Math.atan2(p.y-p.fearY,p.x-p.fearX);mx=Math.cos(fa);my=Math.sin(fa);}
   const spd=(p.fly?(p.wfo?W_FW.fastSpd:PLAY.fly)*p.buffs.spd:PLAY.walk*p.buffs.spd*(p.shieldOn&&p.pathIdx!==WATERP?PLAY.shSlow:1))*(p.boost>0?1.45:1)*moveMul(p)*(p.wr||p.aug||p.ecb?earthSpd(p):1)*(p.wdr||p.wfw||p.wgs?windSpd(p):1)*(p.wsk||p.wab||p.wmsT>0?waterSpd(p):1)*(p.dfall?(p.dfall.ph===2?0.45:0):p.sdome?(p.sdome.ph===2?0.45:0):p.rail?RAIL.v.slow:(p.kindle>0&&p.hover>0)?0.35:p.breath>0?0.7:(p.snapT>0||p.colos>0||p.grT>0)?0.5:1)*(p.slideT>0?1.8:1+(p.iceB||0))*(p.lgBeam?LTV.baMove:1)*(darkFlow(p)?1.25:1);
   p.wSpd=(p.dash>0||p.slideT>0||p.slip>0||!canAct||p.root>0||p.dchgOn||p.cryo>0||p.fear>0||p.gh||p.fly)?0:Math.round(spd);   // ความเร็วเดินตอนนี้ → ลูกข่ายใช้ทำนายตัวเอง (0 = อย่าทำนาย)
   if(p.natureHook&&!canAct)p.natureHook=null;
   if(p.natureHook&&natureHookMove(p,dt)){p.wSpd=0;p.vx=p.vy=0;}
+  else if(mawBrace){p.mvx=p.mvy=0;}
   else if(p.dash>0){
     const dashDt=p.pathIdx===DARKP||p.wfw?.takeoff?Math.min(dt,p.dash):dt;
     p.dash-=dt;const ds=p.dashSp||900;
@@ -410,6 +417,7 @@ function updatePlayer(p,dt,acting){
   const setCd=(k,v)=>{p.cd[k]=v;p.cdMax[k]=v;};
   if(p.colos>0){colossusTick(p,inp,dt);return;}
   if(p.mlCast>0)return;   // กำลังร่าย Mirror Legion: ทำอะไรไม่ได้
+  if(p.dark?.ultUntil>G.time)return;
   const B=PBASIC[p.pathIdx|0]||PBASIC[0];
   if(pr.v&&p.pathIdx===1&&!(p.fmCd>0)&&!(p.cryo>0)&&!(p.mirror>0)){p.fmode=p.fmode===1?0:1;p.fmCd=1;p.cmbT=0;emit({k:'efx',z:'fswap',x:p.x,y:p.y,h:p.z+1,id:p.id,m:p.fmode});}
   // กระโดด (Space) ทุกสาย
@@ -421,7 +429,7 @@ function updatePlayer(p,dt,acting){
     p.dash=0.18;p.dashX=dx;p.dashY=dy;p.inv=0.24;p.shieldOn=false;setCd('dodge',2.5*cdr);
     emit({k:'dash',x:p.x,y:p.y});
   }
-  if(p.pathIdx===DARKP&&(p.dark?.shieldStart!=null||p.dark?.ultUntil>G.time))return;
+  if(p.pathIdx===DARKP&&p.dark?.shieldStart!=null)return;
   if(p.shieldOn&&!B.shieldSwing)return;
   if(!natureWhip){
     if(B.tick)B.tick(p,inp,dt,setCd);

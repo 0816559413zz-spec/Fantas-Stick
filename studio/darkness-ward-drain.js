@@ -10,10 +10,10 @@ const ST_WARD_DRAIN_FADE=2;
 const ST_WARD_DRAIN_SPIN=.94;
 const ST_WARD_DRAIN_TURN=Math.PI*2;
 
-function stWardDrainBadge(parent){
+function stWardDrainBadge(parent,duration=1.50){
   const badge=new THREE.Group();
   badge.name='Ward drain shield icon';
-  badge.position.set(.12,1.53,0);
+  badge.position.set(.12,duration>1.5?2.18:1.53,0);
   parent.add(badge);
   const fill=(points,color,order)=>{
     const shape=new THREE.Shape(points.map(([x,y])=>new THREE.Vector2(x,y)));
@@ -26,11 +26,35 @@ function stWardDrainBadge(parent){
   fill([[-.32,.24],[0,.38],[.33,.24],[.30,-.04],[.23,-.24],[0,-.38],[-.24,-.22],[-.31,-.03]],0x0a0612,21);
   fill([[-.23,.19],[-.025,.29],[-.068,.06],[.03,-.04],[-.043,-.125],[.012,-.28],[-.17,-.18],[-.235,-.035]],0xdad4f0,22);
   fill([[.05,.275],[.24,.184],[.218,-.03],[.161,-.175],[.074,-.242],[.04,-.126],[.13,-.047],[.026,.076]],0x473362,22);
+  const worldPos=new THREE.Vector3();
   return age=>{
-    badge.visible=age>=0&&age<1.50;
+    badge.visible=age>=0&&age<duration;
     if(!badge.visible)return;
     badge.lookAt(cam.position);
-    badge.scale.setScalar(.51+.49*stDarkEase(0,.095,age)+.21*(1-stDarkEase(0,.20,age)));
+    const readability=duration>1.5?clamp(cam.position.distanceTo(badge.getWorldPosition(worldPos))/12,1,1.90):1;
+    badge.scale.setScalar(readability*(.51+.49*stDarkEase(0,.095,age)+.21*(1-stDarkEase(0,.20,age)))*(1-stDarkEase(duration-.20,duration,age)));
+  };
+}
+
+function stWardDrainTarget(root,duration){
+  const badge=stWardDrainBadge(root,duration);
+  const floor=new THREE.Group();
+  floor.position.y=.076;
+  floor.rotation.x=-Math.PI/2;
+  root.add(floor);
+  const ripple=stDarkPressure(floor);
+  const band=new THREE.Mesh(new THREE.RingGeometry(.74,.79,36),new THREE.MeshBasicMaterial({
+    color:0x5d397c,transparent:true,depthWrite:false,side:THREE.DoubleSide,toneMapped:false
+  }));
+  floor.add(band);
+  const fragments=stDarkMatter(root,'Ward drain shield fragments',[
+    {at:0,span:.07,count:18,spread:.91,lift:.43,height:1.42}
+  ],(_t,out)=>out.set(0,0,0),.85);
+  return t=>{
+    badge(t);
+    ripple(.44+1.11*stDarkEase(0,.32,t),.83*(1-stDarkEase(.09,.43,t)),t*9);
+    band.material.opacity=(.49+.12*Math.sin(t*5))*(1-stDarkEase(duration-.34,duration,t));
+    fragments(t);
   };
 }
 

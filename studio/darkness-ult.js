@@ -56,10 +56,13 @@ FXCODE.studio_darkness_ult=(_x,_y,_h,args,instance)=>{
 
   instance.ultWandTip=new THREE.Vector3();instance.ultCaster=caster;
   let shins=null,headBone=null,forearm=null,elbowL=0;
+  const walkLegs=[new THREE.Quaternion(),new THREE.Quaternion()];
+  let chargeWalk=0;
   const hidden=new Map();   // staged caster replaces the studio player
   const hide=o=>{if(!o||hidden.has(o))return;hidden.set(o,{mask:o.layers.mask,castShadow:o.castShadow});o.layers.disableAll();o.castShadow=false;};
   function update(){
     const t=instance.t;
+    const frame=clamp(t-lastTime,0,.05);
     if(t<lastTime){walkX=walkZ=walkYaw=walkDistance=0;walkStarted=Infinity;}
     const dt=clamp(t-Math.max(lastTime,walkAt),0,.05);
     lastTime=t;
@@ -95,6 +98,11 @@ FXCODE.studio_darkness_ult=(_x,_y,_h,args,instance)=>{
     const lunge=ease(thrustAt,thrustAt+.06,t),relax=ease(1.9,2.45,t);
     const impact=ease(thrustAt+.03,thrustAt+.07,t)*(1-ease(thrustAt+.08,thrustAt+.30,t));   // short overshoot on release
     const s=gather*(1-relax)*(1-walkBlend),r=lunge;
+    if(live){
+      const walkingNow=t<thrustAt&&caster.darkMoving;
+      chargeWalk=lerp(chargeWalk,walkingNow?1:0,1-Math.exp(-frame*22));
+      for(let i=0;i<2;i++)walkLegs[i].copy(caster.legs[i].quaternion);
+    }
     const step=P.step*lunge+.08*impact;
     const rootQ=root.getWorldQuaternion(_ultQ3);   // effect frame: +z = aim
     const aimW=_ultV1.set(0,0,1).applyQuaternion(rootQ);
@@ -117,6 +125,7 @@ FXCODE.studio_darkness_ult=(_x,_y,_h,args,instance)=>{
     const legTo=(leg,spread)=>leg.quaternion.setFromUnitVectors(_ultDown,_ultV4.copy(worldDown).addScaledVector(toT,spread).normalize());
     legTo(caster.legs[0],L(P.frontC,P.frontR,r)*s);    // right leg toward the target (bent)
     legTo(caster.legs[1],-L(P.backC,P.backR,r)*s);     // left leg behind (braced straight on release)
+    if(live&&chargeWalk>.001)for(let i=0;i<2;i++)caster.legs[i].quaternion.slerp(walkLegs[i],chargeWalk);
     caster.legs[0].rotateX(.57*stride);caster.legs[1].rotateX(-.57*stride);
     const pointArm=(arm,dirW,k)=>{
       const local=dirW.applyQuaternion(_ultQ.copy(arm.parent.getWorldQuaternion(_ultQ)).invert()).normalize();

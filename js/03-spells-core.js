@@ -165,9 +165,9 @@ function shieldFaces(t,x,y,z){
     return Math.abs(angDiff(Math.atan2(y-t.y,x-t.x),t.ang))<=A;}
   return true;
 }
-function aoeHit(p,t,dmg,fn){
+function aoeHit(p,t,dmg,fn,noFlash=false){
   const blocked=!t.isE&&(shieldFaces(t,p.x,p.y,p.z!=null?p.z+1.2:null)||t.inv>0);
-  damage(t,dmg,p.id,'aoe');
+  damage(t,dmg,p.id,'aoe',noFlash);
   if(!blocked&&fn)fn(t);
   return !blocked;
 }

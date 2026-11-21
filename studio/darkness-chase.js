@@ -56,8 +56,8 @@ function stDarkChaseRoute(returnPoint,targetZ,launch,arrival,returnBody){
   const pointAt=(distance,out)=>route.getPointAt(clamp(distance/length,0,1),out);
   return {distanceAt,pointAt};
 }
-function stChaseBall(root,orb,returnPoint,targetZ,launch,arrival,returnBody){
-  const {distanceAt,pointAt}=stDarkChaseRoute(returnPoint,targetZ,launch,arrival,returnBody);
+function stChaseBall(root,orb,route,launch,arrival,returnBody,size=1){
+  const {distanceAt,pointAt}=route;
   const ease=stDarkEase;
   const heightSample=new THREE.Vector3();
   const lift=distance=>pointAt(distance,heightSample).y;
@@ -75,11 +75,11 @@ function stChaseBall(root,orb,returnPoint,targetZ,launch,arrival,returnBody){
     const core=ease(.13,.234,t)*(1-returnFade);
     orb.position.copy(place);orb.position.y=1.10+lift(distance);
     orb.rotation.y=yaw;
-    orb.scale.set((.24-.051*flight)*core,(.25-.042*flight)*core,(.27+.11*flight)*core);
+    orb.scale.set((.24-.051*flight)*core,(.25-.042*flight)*core,(.27+.11*flight)*core).multiplyScalar(size);
     orb.visible=core>.02;
     const gathered=ease(.155,launch+.045,t);
     const strands=.93*ease(.126,launch+.048,t)*(1-ease(returnBody-.03,returnBody+.14,t));
-    weave(t,place,distance,strands,gathered,.15*flight,.66,.58*(1-ease(launch,launch+.09,t)));
+    weave(t,place,distance,strands*size,gathered,.15*flight,lerp(.66,.86,1-size),.58*(1-ease(launch,launch+.09,t)));
     cloak(t,place,yaw,compact,ease(.19,launch+.075,t),.76*ease(.075,.135,t)*(1-ease(launch+.035,launch+.20,t)));
     wake(t);sparks(t);
   };
@@ -174,6 +174,11 @@ function stDarkMarkedChase(root,args){
     tipPose(land,[.16,.09,targetZ+.11],[-.04,-.98,-.18],[.17,.15,-.97])
   ];
   const bladeCurve=new THREE.CatmullRomCurve3(keys.map(({p})=>new THREE.Vector3(...p)));
+  const returnPoint=new THREE.Vector3(.55,1.8*1.7,targetZ+2.25);
+  const route=stDarkChaseRoute(returnPoint,targetZ,launch,arrival,returnBody);
+  const carryPoint=new THREE.Vector3();
+  const carryAim=new THREE.Vector3(),carryShaft=new THREE.Vector3(),carryNormal=new THREE.Vector3();
+  const carryBasis=new THREE.Matrix4(),carryTurn=new THREE.Quaternion();
   const offset=new THREE.Vector3(),sample={pos:new THREE.Vector3(),QB:new THREE.Quaternion(),act:0,shaft:false};
   const scythe=stCreateScythePreview(root,{wrap:'C',manual:true,scale,trailPose:bladeAt,trailWidth:1.23});
   scythe.pivot.name='Marked chase scythe';
@@ -197,17 +202,29 @@ function stDarkMarkedChase(root,args){
     bladeCurve.getPoint(progress,sample.pos);
     sample.pos.y=Math.max(.20,sample.pos.y);
     sample.QB.copy(a.q).slerp(b.q,u);
+    const carrying=ease(.07,launch,t)*(1-ease(arrival-.10,arrival+.02,t));
+    if(carrying>0){
+      route.pointAt(route.distanceAt(t),carryPoint);
+      carryPoint.x+=2.02;
+      carryPoint.y+=.76;
+      carryPoint.z-=.82;
+      sample.pos.lerp(carryPoint,carrying);
+      carryAim.set(-carryPoint.x,0,targetZ-carryPoint.z).normalize();
+      carryShaft.set(carryAim.z,.13,-carryAim.x).normalize();
+      carryNormal.crossVectors(carryAim,carryShaft);
+      carryTurn.setFromRotationMatrix(carryBasis.makeBasis(carryAim,carryShaft,carryNormal)).multiply(fixTipRoll);
+      sample.QB.slerp(carryTurn,carrying);
+    }
     const small=ease(.11,.31,t)*(1-ease(secondGone,windStart,t));
-    sample.size=1-.34*small;
+    sample.size=1-(live?.17:.34)*small;
     sample.pos.sub(offset.copy(centerLocal).multiplyScalar(sample.size).applyQuaternion(sample.QB));
     sample.act=trailOpacity*ease(cutStart,cutStart+.036,t)*(1-ease(land-.018,land+.026,t));
     return sample;
   }
 
-  const returnPoint=new THREE.Vector3(.55,1.8*1.7,targetZ+2.25);
   const facing=Math.atan2(-returnPoint.x,targetZ-returnPoint.z);
   let shins=null;
-  const ballFx=scytheOnly?null:stChaseBall(root,orb,returnPoint,targetZ,launch,arrival,returnBody);
+  const ballFx=scytheOnly?null:stChaseBall(root,orb,route,launch,arrival,returnBody,live?.72:1);
   const avatarParts=new Map();
   const hideAvatarPart=object=>{
     if(!object||avatarParts.has(object))return;
@@ -230,7 +247,11 @@ function stDarkMarkedChase(root,args){
     const first=(1-.69*ease(.08,.255,t))*(1-ease(firstEnd,firstGone,t));
     const second=.31*ease(secondStart,secondStart+.064,t)*(1-ease(secondEnd,secondGone,t));
     const slam=ease(windStart,windStart+.19,t)*(1-ease(groundFade,groundGone,t));
-    const oldOpacity=live?first+.19*ease(.08,.255,t)*(1-ease(firstEnd,firstGone,t))+second*.5/.31+slam:first+second+slam;
+    const approach=lerp(1,.86,ease(.08,.255,t));
+    const firstLive=approach*(1-ease(firstEnd,firstGone,t));
+    const between=.34*ease(firstEnd,firstGone,t)*(1-ease(secondStart-.067,secondStart,t));
+    const secondLive=.91*ease(secondStart-.085,secondStart-.005,t)*(1-ease(secondEnd,secondGone,t));
+    const oldOpacity=live?clamp(firstLive+between+secondLive+slam,0,1):first+second+slam;
     fadeBlade(oldOpacity);scythe.pivot.visible=oldOpacity>.003;
     const spawn=ease(spawnAt,spawnAt+.24,t);
     const descent=clamp((t-wandDown)/(land-wandDown),0,1);
@@ -309,7 +330,7 @@ FXCODE.studio_darkness_unmarked_chase=(_x,_y,_h,args,instance)=>{
 function stDarkUnmarkedChase(root,live){
   const look={...getLook(live?.id??NET.myId),ws:-1,wn:0};
   const caster=live?.caster??stDarkShiftStudent(root,look,'Unmarked chase caster',lookTint(look));
-  let range=live?.range??6.25;
+  const range=live?.range??6.25;
   const targetZ=range+2.85;
   const targetLook={...look,h:2,cl:2,hs:2};
   const targets=(live?[]:[[-.72,targetZ],[.78,targetZ+.44],[3.25,targetZ+.23]]).map(([x,z],i)=>{
@@ -318,9 +339,12 @@ function stDarkUnmarkedChase(root,live){
     return {actor,x,z,hit:i<2};
   });
   const ease=stDarkEase,launch=0,stop=.235,swing=stop,hit=.285,finish=.595,recover=1.52,scale=1.40;
-  const distanceAt=t=>range*(1-(1-clamp((t-launch)/(stop-launch),0,1))**2);
-  const wake=stDarkWake(root,distanceAt,(d,out)=>out.set(-.20,0,d-.28),()=>-.35,launch,stop,.81,.52);
-  const lowWake=stDarkWake(root,distanceAt,(d,out)=>out.set(.32,0,d-.47),()=>-.72,launch,stop,.44,.45);
+  const travel=live?.travel;
+  const distanceAt=t=>travel?travel.clock(clamp(t/stop,0,1)*live.duration):range*(1-(1-clamp((t-launch)/(stop-launch),0,1))**2);
+  const pathAt=(d,out)=>travel?travel.pointAt(d,out):out.set(0,0,d);
+  const wakeHeight=new THREE.Vector3(),wakeOffset=new THREE.Vector3(-.20,0,-.28),lowOffset=new THREE.Vector3(.32,0,-.47);
+  const wake=stDarkWake(root,distanceAt,(d,out)=>pathAt(d,out).add(wakeOffset),d=>pathAt(d,wakeHeight).y-.35,launch,stop,.81,.52);
+  const lowWake=stDarkWake(root,distanceAt,(d,out)=>pathAt(d,out).add(lowOffset),d=>pathAt(d,wakeHeight).y-.72,launch,stop,.44,.45);
   const echoes=[.031,.081,.146].map((time,i)=>{
     const actor=stDarkShiftStudent(root,look,'Unmarked chase echo '+i);
     const ink=new THREE.MeshBasicMaterial({color:0x121019,toneMapped:false,transparent:true,depthWrite:false});
@@ -358,10 +382,12 @@ function stDarkUnmarkedChase(root,live){
   const high=new THREE.Quaternion().setFromAxisAngle(swingAxis,topAngle).multiply(bladeInPlane);
   const returnTurn=aimBlade([-swingForward.x,-.32,-swingForward.z],[0,1,0]);
   const sample={pos:new THREE.Vector3(),QB:new THREE.Quaternion(),act:0,shaft:false};
+  const landingOffset=new THREE.Vector3(),approachPoint=new THREE.Vector3();
   function bladeAt(t){
     if(t<swing){
       const drag=ease(stop-.083,swing,t);
-      sample.pos.set(-1.46,.25,distanceAt(t-.028*(1-drag))+lerp(-.74,1.04,drag));
+      pathAt(distanceAt(t-.028*(1-drag)),approachPoint);
+      sample.pos.set(approachPoint.x-1.46,approachPoint.y+.25,approachPoint.z+lerp(-.74,1.04,drag));
       sample.QB.copy(low);
     }else if(t<hit){
       const raise=clamp((t-swing)/(hit-swing),0,1);
@@ -381,6 +407,7 @@ function stDarkUnmarkedChase(root,live){
       if(settle<.56)sample.QB.copy(high).slerp(returnTurn,ease(0,.56,settle));
       else sample.QB.copy(returnTurn).slerp(idle,ease(.56,1,settle));
     }
+    if(t>=swing)sample.pos.add(landingOffset);
     sample.pos.sub(offset.copy(tip).applyQuaternion(sample.QB));
     const returnFade=ease(finish+.12,recover,t);
     sample.act=ease(swing,swing+.014,t)*(1-.19*ease(finish,finish+.11,t))*(1-returnFade);
@@ -390,7 +417,8 @@ function stDarkUnmarkedChase(root,live){
   const liftDust=stDarkMatter(root,'Unmarked chase lift debris',[
     {at:hit-.012,span:.042,count:44,spread:1.43,lift:3.27,height:.35},
     {at:hit+.025,span:.098,count:23,spread:1.18,lift:2.50,height:.91}
-  ],(_t,out)=>out.set(0,0,targetZ-.38),.84);
+  ],(_t,out)=>out.copy(landingOffset).addScaledVector(impactForward,targetZ-.38),.84);
+  const impactForward=new THREE.Vector3(0,0,1);
   const ground=new THREE.Group();ground.position.set(0,.055,targetZ-.65);ground.rotation.x=-Math.PI/2;root.add(ground);
   const pressure=stDarkPressure(ground);
   const forearms=new WeakMap();
@@ -412,7 +440,7 @@ function stDarkUnmarkedChase(root,live){
     const whip=ease(swing,hit+.043,t)*(1-ease(hit+.20,finish+.13,t));
     const ready=ease(hit+.14,finish+.12,t)*(1-ease(recover-.19,recover+.13,t));
     const turn=-.26*drive-.43*plant+.65*whip+.13*ready;
-    if(!live||actor!==caster)actor.g.position.z=distanceAt(t);
+    if(!live||actor!==caster)pathAt(distanceAt(t),actor.g.position);
     stDarkPose(actor,{back:.57*drive+.24*plant-.27*whip+.10*ready,
       roll:-.14*drive-.14*plant+.22*whip,drop:.09*drive+.24*plant-.07*whip,arms:0,step:0});
     actor.b.rotation.y=turn;
@@ -426,6 +454,8 @@ function stDarkUnmarkedChase(root,live){
     bendForearms(actor,.45*drive+.89*plant+.24*whip+.60*ready,.65*drive+.53*plant+.36*whip+.36*ready);
   }
   const update=t=>{
+    if(travel){pathAt(distanceAt(stop),landingOffset);landingOffset.z-=range;}
+    ground.position.copy(landingOffset).addScaledVector(impactForward,targetZ-.65);ground.position.y+=.055;
     const pose=bladeAt(t);
     scythe.pivot.position.copy(pose.pos);scythe.pivot.quaternion.copy(pose.QB);
     scythe.update(t);

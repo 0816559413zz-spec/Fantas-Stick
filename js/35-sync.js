@@ -210,6 +210,7 @@ function syncPlayers(P,mode,now,dt){
     if(!p.al){const l=LGV.st.get(p.id);if(l)lgClear(l);if(o.natureWhipView)natureWhipView(o,null);if(ragTick(o,p,v,dt,now))ragHideDead(o,p,now);continue;}   // ตาย = ragdoll ค้างจนเกิดใหม่ (js/48)
     o.hitT=Math.max(0,(o.hitT||0)-dt);
     o.b.position.set(0,0,0);o.b.rotation.set(0,0,0);   // one-frame pose offsets must not build up (body drifted back / stayed tilted)
+    if(o.darkGear?.visible)o.armR.rotation.y=0;   // BA wand twist is applied fresh each frame
     const hoverPose=(!!p.lt?.[0]&&!!p.lt[4]||p.dk?.[3]>0)&&!p.fl&&!p.dn;
     if(o.anim)animTick(o,{down:!!p.dn,fly:!!p.fl,sp:hoverPose||p.wn&&p.wn[5]>=1?0:v.sp,castT:o.castT,hitT:o.hitT},dt,p.id===NET.myId?1:animLod(g));
     if(!o.fileModel)updateCloth(o.cloak,v.lvx,v.lvz,v.sp*(p.fl?1.4:1),now,dt);   // มีโมเดลไฟล์ = ผ้าคลุมโค้ดซ่อนอยู่ (ผ้าจริงคือ js/49)
@@ -608,7 +609,7 @@ function drawCrosshair(){
   if(_me&&_me.wn&&_me.al)drawWindHud(x,y,_me.wn,_me);
   if(_me&&_me.nt&&_me.nt.length>6&&_me.al)drawNatureHud(x,y,_me.nt);
   if(_me&&_me.wt&&_me.al)drawWaterHud(x,y,_me.wt,_me);
-  if(_me&&_me.lt&&_me.al)drawLightHud(x,y,_me.lt);
+  if(_me&&_me.lt&&_me.al)drawLightHud(x,y,_me);
   if(_me?.dk&&_me.al&&getKit(_me.id).path===DARKP)drawDarknessHud(x,y,_me.dk);
   else if(darkFlowHud)darkFlowHud.plane.visible=false;
   if(_me&&_me.fh!==undefined&&_me.al)drawFireHeat(_me.fh);drawSnapBanner();
