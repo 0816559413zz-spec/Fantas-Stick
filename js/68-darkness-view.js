@@ -587,7 +587,10 @@ function darknessCharacter(o,p,viewer,now){
   o.darkScytheArgs.arc=DARK_BA.arc*Math.PI/360;
   gear.scale.setScalar(state?.[8]?1.10:1);
   o.darkBuffBlade(now/1000,state?.[8]&&!o.darkDashFx?1:0,0);
-  if(gear.visible&&o.g.visible)o.darkScythe.update(now/1000,0,0,planting?t:baseClock);
+  // far idle scythe (other players ≥ ANIM_NEAR from the camera, not swinging): rebuild its ink/flame every 2nd/3rd frame like animLod
+  //   (motion is clock-based, so a skipped frame only lowers the update rate; own character and any swing stay every frame) — 2026-11-22
+  if(gear.visible&&o.g.visible){const lod=o.id===NET.myId||baseClock>0||planting||o.darkUltFx?1:animLod(o.g);o.darkLodN=(o.darkLodN||0)+1;
+    if(lod===1||o.darkLodN%lod===0)o.darkScythe.update(now/1000,0,0,planting?t:baseClock);}
   const flowStrike=o.darkFlowStrike,flowAge=flowStrike?(now-flowStrike.at)/1000:-Infinity;
   const F=DARK_CHASE_FLOW;
   const flowOrb=stDarkEase(.035,F.wind,flowAge)*(1-stDarkEase(F.exit-.035,F.exit+.11,flowAge));

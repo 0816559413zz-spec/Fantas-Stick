@@ -9,7 +9,8 @@
 //  (ไม่งั้นทุกครั้งที่เอฟเฟกต์จบแล้วกดใหม่ จะ compile ใหม่อีก) • ฝั่ง client ล้วน ไม่เปลี่ยนโปรโตคอล
 // =====================================================================
 const WARM={reg:{},done:new Set(),prepared:new Set(),hold:new THREE.Group(),holdF:new THREE.Group(),rt:null,key:'',q:[],late:false,busy:false,log:[]};
-const WARM_FXDIR={pyro:'fire',frost:'frost',storm:'storm',earth:'earth',wind:'wind',water:'water'},WARM_COMMON=['tpl','sig','rec'];   // storm เพิ่ม 2026-11-02 (เดิมขาด → เอฟเฟกต์สายฟ้า compile กลางไฟต์)
+const WARM_FXDIR={pyro:'fire',frost:'frost',storm:'storm',earth:'earth',wind:'wind',water:'water',light:'light',darkness:'darkness',nature:'nature'},WARM_COMMON=['tpl','sig','rec'];   // light/darkness/nature added 2026-11-22 (were never warmed; their 'code' layers still are not, shReadyPre covers those) •   // storm เพิ่ม 2026-11-02 (เดิมขาด → เอฟเฟกต์สายฟ้า compile กลางไฟต์)
+const WARM_SLICE=!/[?&]nowarmslice/.test(location.search);
 const WARM_X=-20000,WARM_Y=-20000;   // นอกแผนที่ ~1 กม. (หมอก/ระยะกล้องซ่อนหมด, ไม่มีเสียงเพราะ nearMe)
 // ย้ายของไป hold ของ scene เดิม (fxScene ไม่มีไฟ → program คนละแบบกับ scene) • วัสดุ dispose = ไม่ทำอะไร • อัปโหลด texture ไว้เลย
 function warmKeep(o,fxs){(o.parent||scene).remove(o);(fxs?WARM.holdF:WARM.hold).add(o);
@@ -72,10 +73,24 @@ function warmGather(){for(const sc of [scene,fxScene])for(const o of sc.children
 function warmPaths(v){const s=new Set();for(const p of (v&&v.P)||[]){const k=getKit(p.id);if(k&&PATHS[k.path])s.add(PATHS[k.path].id);}return [...s];}
 // งาน 1 ขั้น: 'common' / 'fx:<สาย>' / 'reg:<สาย>:<i>' / 'compile'
 function warmStep(step){
-  if(step==='compile'){WARM.busy=true;scene.add(WARM.hold);fxScene.add(WARM.holdF);const t0=performance.now(),hid=[];
-    for(const sc of [scene,fxScene])sc.traverse(o=>{if(!o.visible&&!o.isLight){o.visible=true;hid.push(o);}});   // ไฟที่ซ่อนอยู่ห้ามเปิด (จำนวนไฟเปลี่ยน = เชดเดอร์คนละชุดกับตอนเล่นจริง) • ของซ่อน (ระบบอนุภาค/ของรอใช้) — compile ปกติข้ามไป
-    const fin=()=>{try{warmDraw();}catch(e){console.warn('warm draw',e);}WARM.busy=false;WARM.log.push('compile/upload '+(performance.now()-t0).toFixed(0)+'ms');};let ps=[];
-    // compileAsync สร้าง program ทันที (ส่วน async แค่รอ GPU) → คืนค่า visible + เอา hold ออกได้เลย ไม่มีเฟรมไหนวาดของพวกนี้
+  if(step==='compile'){WARM.busy=true;const t0=performance.now(),jobs=[];
+    const fin=()=>{try{warmDraw();}catch(e){console.warn('warm draw',e);}WARM.busy=false;WARM.log.push('compile/upload '+(performance.now()-t0).toFixed(0)+'ms');};
+    // compile in ~5 ms slices, one per frame (2026-11-22): the one-shot compile of scene + fxScene + hold froze the lobby/countdown
+    //   for 0.6–1.5 s. three's compile() visits materials whether visible or not, so nothing has to be un-hidden; lights come from the
+    //   real scene (visible ones only, same as before). `?nowarmslice` = old one-shot path.
+    if(WARM_SLICE){
+      for(const [sc,h] of [[scene,WARM.hold],[fxScene,WARM.holdF]]){const L=[];sc.traverse(o=>{if(o.material)L.push(o);});if(h.parent!==sc)h.traverse(o=>{if(o.material)L.push(o);});jobs.push([sc,L]);}
+      let ji=0,i=0,part=[];const fk={traverse(f){for(const o of part)f(o);},traverseVisible(){}};
+      const tick=()=>{const tEnd=performance.now()+5,prev=gl.getRenderTarget();gl.setRenderTarget(composer.renderTarget1);
+        try{while(ji<jobs.length&&performance.now()<tEnd){const [sc,L]=jobs[ji];part=L.slice(i,i+24);i+=24;
+          for(const o of part)if(o.isMesh&&!Array.isArray(o.material))flatMark(o.material,o.geometry);
+          if(part.length)gl.compile(fk,cam,sc);if(i>=L.length){ji++;i=0;}}}
+        catch(e){console.warn('warm compile',e);ji=jobs.length;}finally{gl.setRenderTarget(prev);part=[];}
+        if(ji<jobs.length)requestAnimationFrame(tick);else Promise.race([glReady(),new Promise(r=>setTimeout(r,4000))]).then(fin,fin);};
+      tick();return;}
+    scene.add(WARM.hold);fxScene.add(WARM.holdF);const hid=[];
+    for(const sc of [scene,fxScene])sc.traverse(o=>{if(!o.visible&&!o.isLight){o.visible=true;hid.push(o);}});   // ไฟที่ซ่อนอยู่ห้ามเปิด (จำนวนไฟเปลี่ยน = เชดเดอร์คนละชุดกับตอนเล่น)
+    let ps=[];
     try{ps=warmCompile([scene,fxScene]);}finally{for(const o of hid)o.visible=false;scene.remove(WARM.hold);fxScene.remove(WARM.holdF);}
     Promise.race([Promise.all(ps),new Promise(r=>setTimeout(r,4000))]).then(fin,fin);return;}
   if(WARM.done.has(step))return;
@@ -85,6 +100,12 @@ function warmStep(step){
     const finish=()=>{WARM.prepared.add(step);WARM.q.unshift(step);WARM.busy=false;};
     warmAssets(step==='common'?WARM_COMMON:[WARM_FXDIR[step.slice(3)]]).then(finish,e=>{console.warn('warm assets',step,e);finish();});return;
   }
+  // cracked look of this map's own breakable pieces (real material + geometry: uv/colour attributes change the shader too) — was compiled at the first hit mid-fight (2026-11-22)
+  //   per map: the group is rebuilt for every new map (old map's geometry is not kept alive)
+  if(step==='brk'){const B=WARM.brk||(WARM.brk=new THREE.Group());if(!B.parent)WARM.hold.add(B);B.clear();const seen=new Set();
+    for(const q of BRKV.grp||[])for(const p of (q&&q.parts)||[]){const k=p.geo.uuid+'|'+p.mat.uuid;if(seen.has(k)||seen.size>=48)continue;seen.add(k);
+      for(const lv of [1,2]){const o=new THREE.Mesh(p.geo,brkCrackMat(p.mat,lv));o.castShadow=!!(p.e&&p.e.cs);o.receiveShadow=true;o.position.set(tx(WARM_X),-1000,tz(WARM_Y));o.frustumCulled=false;B.add(o);}}
+    WARM.log.push('brk '+seen.size);return;}
   WARM.done.add(step);const t0=performance.now();
   if(step==='common'){const T=trailLayer();if(!T.mesh.parent)WARM.holdF.add(T.mesh);
     // เศษหินใช้ได้ทุกสาย (ไฟ/ของพังด้วย) ทั้ง mesh เดี่ยวและ instanced ไม่ใช่เฉพาะ Earth
@@ -103,11 +124,23 @@ function warmStep(step){
     warmGather();}
   WARM.log.push(step+' '+(performance.now()-t0).toFixed(0)+'ms');}
 // เรียกทุกเฟรมจาก render loop — ตอนเข้านับถอยหลังสร้างคิวงาน แล้วทำเฟรมละ 1 ขั้น
+function warmQueue(ps,key){WARM.key=key;WARM.late=false;WARM.q=['common'];
+  for(const p of ps){if(WARM_FXDIR[p])WARM.q.push('fx:'+p);(WARM.reg[p]||[]).forEach((f,i)=>WARM.q.push('reg:'+p+':'+i));}
+  WARM.q=WARM.q.filter(s=>!WARM.done.has(s));WARM.q.push('brk','compile');}
+// Same queue while players wait in the lobby (2026-11-22): the 3 s countdown was too short — in a 10-player match the class
+// effects + compile (1.2–2 s) ran into the first seconds of the fight. Starts once the lobby's game-scene warm-up is done; the
+// countdown then finds the same key and only adds the late compile. `?nolobbywarm` = old path.
+const WARM_LOBBY=!/[?&]nolobbywarm/.test(location.search);
+function warmLobbyTick(){
+  if(!WARM_LOBBY||GWARM.busy||!GWARM.key||!LOBBY||LOBBY.ph!=='lobby'||!world||screen!=='lobby')return;
+  const ps=[...new Set(LOBBY.players.map(p=>{const k=getKit(p.id);return k&&PATHS[k.path]?PATHS[k.path].id:null;}).filter(Boolean))].sort(),key=builtKey+'|'+ps.join(',');
+  if(key!==WARM.key)warmQueue(ps,key);
+  if(!WARM.q.length||WARM.busy)return;
+  const step=WARM.q.shift();try{warmStep(step);}catch(e){console.warn('warmup',step,e);WARM.busy=false;}
+}
 function warmTick(v){
   if(v.ph==='count'){const ps=warmPaths(v).sort(),key=builtKey+'|'+ps.join(',');
-    if(key!==WARM.key){WARM.key=key;WARM.late=false;WARM.q=['common'];
-      for(const p of ps){if(WARM_FXDIR[p])WARM.q.push('fx:'+p);(WARM.reg[p]||[]).forEach((f,i)=>WARM.q.push('reg:'+p+':'+i));}
-      WARM.q=WARM.q.filter(s=>!WARM.done.has(s));WARM.q.push('compile');}
+    if(key!==WARM.key)warmQueue(ps,key);
     if(!WARM.late&&v.cd<=1){WARM.late=true;WARM.q.push('compile');}}
   if(!WARM.q.length||WARM.busy)return;
   const step=WARM.q.shift();try{warmStep(step);}catch(e){console.warn('warmup',step,e);WARM.busy=false;}
@@ -184,6 +217,60 @@ function gameWarmFree(dt){
   for(const o of GWARM.chars.values())disposeObj(o.g);
   GWARM.chars.clear();GWARM.key='';GWARM.ft=0;
 }
+// ---------- Shader never seen before mid-match: compile in the background, hide that object until the GPU is done (2026-11-22) ----------
+// three r160 links a new program at its first draw and then blocks on getProgramParameter (50–500 ms per program on a laptop):
+// in a 6v4 bot match that was ~10% of all CPU time and the 0.5–1.2 s freezes. Every object added to the scene (Object3D.add hook,
+// whole subtree, hidden pool pieces too) whose material has no program yet is compiled right away (KHR_parallel_shader_compile links
+// on a driver thread); while its program is still linking the object is hidden for that frame (usually 2–6 frames, max SHR_MAX ms).
+// A new material that reuses an existing shader is ready at once and never hidden. `?noshready` = old path.
+// isReady() = getProgramParameter = a synchronous round trip to the GPU process: never asked for a shader that already existed, and at
+// most once per frame, only after SHR_MIN ms (most links finish by then).
+const SHR={seen:new Set(),on:!/[?&]noshready/.test(location.search),q:[],retry:new Map(),pend:new Map(),wait:[],hid:[],list:[],rdy:new WeakSet(),polled:false,
+  fake:{traverse(f){for(const o of SHR.list)f(o);},traverseVisible(){}},lit:new Map()},SHR_MIN=60,SHR_MAX=1500;
+// compile() takes the lights from the scene it is given (a full traverse, ~0.25 ms in a fight): a stand-in with the scene's fog/environment
+// and its light list (refreshed every 2 s; visibility checked live) gives the same program key
+function shrLights(sc,now){let L=SHR.lit.get(sc);
+  if(!L||now-L.t>2000){const a=[];sc.traverse(o=>{if(o.isLight)a.push(o);});
+    if(!L){L={t:now,a,px:{get fog(){return sc.fog;},get environment(){return sc.environment;},get background(){return sc.background;},isScene:true,
+      traverseVisible(f){for(const l of L.a){let v=l;while(v&&v.visible)v=v.parent;if(!v)f(l);}}}};SHR.lit.set(sc,L);}else{L.a=a;L.t=now;}}
+  return L.px;}
+{const add0=THREE.Object3D.prototype.add;THREE.Object3D.prototype.add=function(o){
+  if(SHR.on){for(let i=0;i<arguments.length;i++){const a=arguments[i];if(a&&a!==this&&a.isObject3D)SHR.q.push(a);}}
+  return add0.apply(this,arguments);};}
+function shrRoot(o){while(o.parent)o=o.parent;return o;}
+function shrCollect(o){const m=o.material;
+  if(m){for(const x of Array.isArray(m)?m:[m]){if(!x||x.userData.shr===1||SHR.pend.has(x))continue;
+    if(gl.properties.get(x).currentProgram!==undefined){x.userData.shr=1;continue;}
+    if(o.isMesh)flatMark(x,o.geometry);SHR.pend.set(x,{t:0,pg:null});if(SHR.list[SHR.list.length-1]!==o)SHR.list.push(o);}}
+  const c=o.children;for(let i=0;i<c.length;i++)shrCollect(c[i]);}
+// material still linking? (polls at most one program per frame)
+function shrPending(m,now){const e=SHR.pend.get(m);if(!e)return false;
+  if(e.pg===null||now-e.t>SHR_MAX||SHR.rdy.has(e.pg)){SHR.pend.delete(m);m.userData.shr=1;return false;}
+  if(!SHR.polled&&now-e.t>=SHR_MIN){SHR.polled=true;if(e.pg.isReady()){SHR.rdy.add(e.pg);SHR.pend.delete(m);m.userData.shr=1;return false;}}
+  return true;}
+function shReadyPre(){
+  shReadyPost();if(!SHR.on||!SHR.ext){SHR.q.length=0;return;}
+  const now=performance.now();SHR.polled=false;
+  if(SHR.q.length){const Q=SHR.q;SHR.q=[];SHR.seen.clear();const per=new Map();
+    for(const o of Q){const r=shrRoot(o);
+      if(SHR.seen.has(o))continue;SHR.seen.add(o);
+      if(r===scene||r===fxScene){SHR.retry.delete(o);let L=per.get(r);if(!L)per.set(r,L=[]);L.push(o);}
+      else{const n=(SHR.retry.get(o)||0)+1;if(n<30){SHR.retry.set(o,n);SHR.q.push(o);}else SHR.retry.delete(o);}}   // built first, put in the scene later
+    const prev=gl.getRenderTarget();
+    for(const [sc,L] of per){SHR.list.length=0;for(const o of L)shrCollect(o);if(!SHR.list.length)continue;
+      const before=new Set(gl.info.programs),vis=SHR.list.map(o=>o.visible);for(const o of SHR.list)o.visible=true;
+      gl.setRenderTarget(composer.renderTarget1);try{gl.compile(SHR.fake,cam,shrLights(sc,now));}catch(err){console.warn('shReady',err);}finally{gl.setRenderTarget(prev);}
+      SHR.list.forEach((o,i)=>{o.visible=vis[i];let w=false;
+        for(const m of [].concat(o.material)){const e=m&&SHR.pend.get(m);if(!e)continue;
+          if(e.pg===null){const pg=gl.properties.get(m).currentProgram;if(!pg||before.has(pg)||SHR.rdy.has(pg)){SHR.pend.delete(m);m.userData.shr=1;continue;}e.pg=pg;e.t=now;}
+          w=true;}
+        if(w)SHR.wait.push(o);});
+      SHR.list.length=0;}}
+  if(SHR.wait.length){let j=0;for(const o of SHR.wait){let w=false;for(const m of [].concat(o.material))if(m&&shrPending(m,now))w=true;
+      if(!w)continue;SHR.wait[j++]=o;if(o.visible){o.visible=false;SHR.hid.push(o);}}SHR.wait.length=j;}}
+function shReadyPost(){if(!SHR.hid.length)return;for(const o of SHR.hid)o.visible=true;SHR.hid.length=0;}
+SHR.ext=!!gl.getContext().getExtension('KHR_parallel_shader_compile');
+if(window.WD)window.WD.SHR=SHR;
 if(window.WD)window.WD.warm=WARM;
 if(window.WD)window.WD.gwarm=GWARM;
 if(window.WD)window.WD.WARM=WARM;

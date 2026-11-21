@@ -1,5 +1,7 @@
 # HANDOFF — Fantas Stick (was "Wizard Duel") (repo: Fantas-Stick)
 
+**ลดแลค TDM 6v4 กับบอท (2026-11-22):** วัดด้วย `tools/bench-tdm.js` (เฟรมจริง, 10 คน): 34.7 → 40.8 fps, p99 200 → 58 ms, จำลองเครื่องช้า `--cpu 2` 13.5 → 14.5 fps. ตัวหลัก = shader ใหม่กลางแมตช์ (compile เบื้องหลังแล้วซ่อนชิ้นนั้น 2–6 เฟรม `shReadyPre` js/51), อุ่นเครื่องตอนรอในห้อง + สาย Light/Darkness/Nature, ซ่อนชุดอนุภาคว่าง, แคชแถบ Heat, ท่อหนาม Nature, เคียว Darkness ไกลกล้อง. รายละเอียด + ที่เหลือ: `guides/OPTIMIZE.md` §U
+
 **Darkness เกจโล่และท่าค้าง BA (2026-11-22, รีวิว #139):** เกจเวลาโล่อยู่เหนือแถบเลือดตลอดแมตช์ ลดเอียงและโน้มช่วงบนเล็กน้อยเฉพาะท่าค้างหลังฟันจากซ้ายไปขวา.
 
 **Darkness BA ขากับทิศเล็ง และ Flow จากทุกคิล (2026-11-22, รีวิว #138):** บิดเฉพาะลำตัวส่วนบน ขาใช้ท่าเดินหรือยืนจากโมเดล หัวแยกเล็งตามเป้า. BA กับเป้ามีตราเห็นเคียวเงาและรอยสวนชัดขึ้น. คิลเป้าที่มีตราหรือไม่มีตราให้ Flow 6 วิ.
@@ -900,6 +902,7 @@ On a broom (2026-10-29, `js/69-broom.js`): mouse = steer (banked turns, look up 
 `git add -A && git commit && git push` on `main` → GitHub Pages rebuilds in ~1 min (check: `gh api repos/0816559413zz-spec/Fantas-Stick/pages/builds/latest`). End commit messages with the Co-Authored-By line used in history.
 
 ## 9. Status / known issues
+- ⚡ **TDM bot-fight perf round 2026-11-22 (`guides/OPTIMIZE.md` §U):** new objects whose shader is not linked yet are hidden 2–6 frames instead of freezing the frame (`SHR`, `?noshready`); warm-up also runs in the lobby (`?nolobbywarm`) and compiles in 5 ms slices (`?nowarmslice`). If an effect seems to pop in a few frames late the first time, that is this. Left: `gpuSubmit` ~10 ms (map breakables = ~100 single InstancedMeshes), sporadic NaN bounding-sphere console error in bot fights. A/B old code: worktree + `serve.py 8799` + `--url` (headless always uses :8765).
 - 🏛️ **FCS rooms (2026-11-20):** each room = `js/02-room-<id>.js` (read `guides/MAP-ROOMS.md`). Only the Great Hall is done; next per `designs/castle-buildings-concept.html`. Bots don't know stairs/galleries. Breakable wall in the hall's north gap still the old box (sits under the gallery).
 - 🏰 **FCS castle look (2026-11-20):** `js/28-fcs-castle.js` dresses wall type 1 (collision still the grid). Static FCS meshes are batched to world space: animate with `uv`, not `position`. Terraces = TERR floors + edge obs in `genFcs`; bots don't path onto them yet. Breakable walls/gate still the old plain boxes.
 - 🌫️ **FCS forest mist (2026-11-20):** mist cards now soft-fade into walls (`ffMist` js/28-fcs-forest.js, in `fxScene`) — fixes the bridge vanishing in fog. Tune `uSoft`/`uNr`/`uA` there if fog is too weak/strong.
@@ -984,6 +987,7 @@ Phase 1 (maps from Blender files) is done — `notes/systems.md` §5e. Work in t
 (Minimap done 2026-10-17.) Vents/secret passages for Voldemort, task mini-games, 3-player Voldemort mode, more bosses (basilisk), more maps (Hogsmeade, Great Hall), cosmetics, ranked/MMR, mobile controls.
 
 ## 11. Changelog
+- 2026-11-22 — **TDM perf round:** 34.7 → 40.8 fps / p99 200 → 58 ms in a 10-player bot TDM (`tools/bench-tdm.js`); shader-ready hiding, lobby + sliced warm-up, Light/Darkness/Nature warmed, empty particle batches hidden, Heat HUD cache, Nature tubes, far Darkness scythe LOD. §U in OPTIMIZE.
 - 2026-11-20 — **Map name now "Cliff Side Castle"** (ids still `fcs` / `firstcastlestrike`).
 - 2026-11-20 — **Siege Breakthrough transition (v94):** core falls → 20 s retreat window (`SGV.trT`, `sgAreaT`, `sgPhaseGo` in js/15-siege.js), then next phase. Review #96 waiting.
 - 2026-11-20 — **Hall props + destruction (v93):** ~110 breakable props (`roomProp`/`RPK`, view js/28-fcs-props.js), pillar chips, rail rubble, wall hit marks. Review #95 waiting.

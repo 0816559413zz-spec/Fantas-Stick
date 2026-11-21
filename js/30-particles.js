@@ -63,7 +63,7 @@ function makePointSys(additive){
   });
   softify(mat,additive?0.35:0.8);
   const pts=new THREE.Points(geo,mat);pts.frustumCulled=false;pts.renderOrder=additive?3:2;fxScene.add(pts);
-  const S={geo,pos,col,size,shp,vel,age,n:0};if(PGPU)pgpuGeo(geo,S);return S;
+  const S={geo,pos,col,size,shp,vel,age,pts,n:0};if(PGPU)pgpuGeo(geo,S);return S;
 }
 // เปลวไฟรูปหยดน้ำ (ฐานเหลืองขาว → ส้ม → ปลายแดงจาง) ใช้กับอนุภาค fl:true — ผสมสีปกติ เห็นชัดแม้พื้นสว่าง
 // ===== เปลวไฟ: FLAME_STYLE 0 = อนุภาคกลมเรืองแสง (ไม่ใช้รูปเปลว) • 2 = แบบใหม่ (ลิ้นไฟ 4 แบบ คมปลาย มีแกนสว่าง ไม่กลับหัว หดเล็กและเปลี่ยนสีเหลือง→ส้ม→แดงตามอายุ)
@@ -186,10 +186,12 @@ function updateParticlesG(dt){
   for(;i<PARTS.length;i++)pgpuSpawn(PARTS[i],T);
   // PARTS เหลือไว้นับจำนวน/เพดาน: ทิ้งเม็ดหมดอายุทุก 6 เฟรม (GPU ซ่อนเองตามอายุอยู่แล้ว)
   if(++_pgF%6===0){let w=0;for(let k=0;k<PARTS.length;k++){const p=PARTS[k];if(T-p.t0<p.life)PARTS[w++]=p;}PARTS.length=w;}
-  for(const S of ALL){if(!S.a)continue;
+  for(const S of ALL){if(!S.a){if(S.pts)S.pts.visible=false;continue;}
     if(S.head<S.top)S.rg.push(S.head,S.top-S.head);S.top=S.head;
     if(S.rg.length){for(let k=0;k<S.rg.length;k+=2)S.ib.addUpdateRange(S.rg[k]*PGPU_F,S.rg[k+1]*PGPU_F);S.ib.needsUpdate=true;S.rg.length=0;}
-    if(T>=S.die){if(S.low<PMAX){S.head=S.top=S.low=PMAX;S.geo.setDrawRange(0,0);}}else S.geo.setDrawRange(S.low,PMAX-S.low);}
+    if(T>=S.die){if(S.low<PMAX){S.head=S.top=S.low=PMAX;S.geo.setDrawRange(0,0);}}else S.geo.setDrawRange(S.low,PMAX-S.low);
+    // empty batch: hide it — three still binds program, uniforms and buffers for a drawRange of 0 (48 of ~55 batches empty in a 10-player fight, 2026-11-22)
+    if(S.pts)S.pts.visible=S.geo.drawRange.count>0;}
 }
 function updateParticles(dt){
   if(PGPU)return updateParticlesG(dt);

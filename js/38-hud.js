@@ -213,6 +213,7 @@ function drawModeHUD(v,me,P,big){
 }
 // แผนที่ย่อมุมขวาบน (kill feed เลื่อนลงมาอยู่ใต้แผนที่): วงกลมหมุนตามมุมกล้อง (ด้านหน้า = ขึ้นบน) ตัวเราอยู่กลาง
 const MM={r:82,view:620,col:{pillar:'#7d8499',stone:'#7d8499',rock:'#6e7482',tree:'#2f6b3f',crate:'#8a6a3e',hay:'#a8883e',hoop:'#e8c25a',house:'#9a8a78',stall:'#c0603a',lamp:'#ffd070',barrel:'#8a6a3e',well:'#6a7a94',table:'#8a6a3e',tfence:'#c8a060',tgate:'#f0d070'}};
+const MMB=new Map();
 function drawMinimap(v,me,P){
   if(!me)return;
   // แผนที่ย่อสี่เหลี่ยมมุมซ้ายล่าง (ผู้ใช้ 2026-10-28) — กรอบตาม h4MapBox (js/66) • R = ครึ่งความกว้าง
@@ -234,11 +235,14 @@ function drawMinimap(v,me,P){
     cx.fillStyle='rgba(40,52,86,0.55)';cx.fill();cx.strokeStyle='rgba(217,180,90,0.5)';cx.lineWidth=1.5;cx.stroke();
   }
   // สิ่งกีดขวาง
+  // one path + one fill per colour (was one fill per obstacle: ~100+ canvas fills a frame on tree maps, 2026-11-22; colours are opaque → same picture)
+  {const B=MMB;for(const L of B.values())L.length=0;
   for(const o of OBS){
     if(Math.abs(o.x-me.x)>MM.view+o.r||Math.abs(o.y-me.y)>MM.view+o.r)continue;
     const q=pt(o.x,o.y,false);if(!q)continue;
-    cx.beginPath();cx.arc(q[0],q[1],Math.max(1.6,o.r*sc),0,Math.PI*2);cx.fillStyle=MM.col[o.k]||'#7d8499';cx.fill();
+    const c=MM.col[o.k]||'#7d8499';let L=B.get(c);if(!L)B.set(c,L=[]);L.push(q[0],q[1],Math.max(1.6,o.r*sc));
   }
+  for(const [c,L] of B){if(!L.length)continue;cx.beginPath();for(let i=0;i<L.length;i+=3){cx.moveTo(L[i]+L[i+2],L[i+1]);cx.arc(L[i],L[i+1],L[i+2],0,Math.PI*2);}cx.fillStyle=c;cx.fill();}}
   if(PROPON)for(const o of PROPS){
     if(o.st===1||Math.abs(o.x-me.x)>MM.view||Math.abs(o.y-me.y)>MM.view)continue;
     const q=pt(o.x,o.y,false);if(!q)continue;const d=Math.max(2.2,o.r*sc*1.3);
@@ -373,6 +377,11 @@ function fhFrame(n,cols,rows,fps,T,x,y,w,h,rot,a,off){const t=fhTex(n);if(!t)ret
 // heat palette per level 0..4 (edge, core) — lerped by the exact heat so it warms up smoothly
 const FH_EDGE=['#4a0004','#9a0a0a','#c8120a','#e8300a','#ff5a08'],FH_CORE=['#a01a18','#ff3a20','#ff6a28','#ffa040','#fff2c0'];
 function fhMix(A,k){const i=Math.min(A.length-2,Math.floor(k)),f=k-i,a=parseInt(A[i].slice(1),16),b=parseInt(A[i+1].slice(1),16),m=(s)=>Math.round(((a>>s)&255)*(1-f)+((b>>s)&255)*f);return `rgb(${m(16)},${m(8)},${m(0)})`;}
+// cached HUD piece (canvas covering the heat bar area, device pixels): key + size/DPR → drawn once, pasted every frame
+const FHC=new Map();
+function fhLayer(key,S,oy,x1,R,draw){const d=DPR||1,top=oy-R*3.4,w=x1+40*S,h=R*6.2,k=key+'|'+S.toFixed(3)+'|'+oy.toFixed(1)+'|'+d+'|'+(document.fonts&&document.fonts.status);let c=FHC.get(k);   // font status: never keep a picture drawn before Cinzel loaded
+  if(!c){if(FHC.size>120)FHC.clear();c=document.createElement('canvas');c.width=Math.ceil(w*d);c.height=Math.ceil(h*d);const g=c.getContext('2d');g.setTransform(d,0,0,d,0,-top*d);draw(g);c._w=c.width/d;c._h=c.height/d;c._t=top;FHC.set(k,c);}
+  cx.drawImage(c,0,c._t,c._w,c._h);}
 function drawFireHeat(fh){const now=performance.now(),dt=Math.min(.1,(now-(FHUD.t||now))/1000);FHUD.t=now;const T=now/1000;
   const P=PHEAT,lvF=Math.max(0,Math.min(P.max,fh/P.per)),lv=Math.floor(lvF+1e-6);FHUD.v+=(lvF-FHUD.v)*Math.min(1,dt*8);
   if(lv>FHUD.lv)FHUD.pop=1;FHUD.lv=lv;const full=lv>=P.max,heat=FHUD.v;if(full&&!FHUD.wasFull)FHUD.burst=1;FHUD.wasFull=full;
@@ -380,19 +389,25 @@ function drawFireHeat(fh){const now=performance.now(),dt=Math.min(.1,(now-(FHUD.
   const RIM=full?'#ff7a1a':fhMix(['#a0101a','#c8101a','#e8141a','#ff3a1a','#ff7a1a'],heat),GLOW=full?'rgba(255,120,20,':'rgba(255,30,30,';
   fhTex('flame_fire');fhTex('flame_red');fhTex('flow');const col=full?'fire':'red';
   cx.save();cx.lineCap='round';cx.lineJoin='round';
+  const bladeG=(g,e)=>{g.beginPath();g.moveTo(x0,y0-e);g.lineTo(x1+e,y0-e);g.lineTo(x1-tip-e*.4,y0+h+e);g.lineTo(x0,y0+h+e);g.closePath();};
   const blade=(e)=>{cx.beginPath();cx.moveTo(x0,y0-e);cx.lineTo(x1+e,y0-e);cx.lineTo(x1-tip-e*.4,y0+h+e);cx.lineTo(x0,y0+h+e);cx.closePath();};
   // full: soft pulsing fire aura around the whole bar + orb
   if(full){const pu=.75+.25*Math.sin(T*4);
     cx.save();cx.globalCompositeOperation='lighter';const og2=cx.createRadialGradient(ox,oy,R*.8,ox,oy,R*2.6);og2.addColorStop(0,`rgba(255,130,30,${.35*pu})`);og2.addColorStop(1,'rgba(255,60,0,0)');cx.fillStyle=og2;cx.beginPath();cx.arc(ox,oy,R*2.6,0,Math.PI*2);cx.fill();
     for(const [e,a,bl] of [[3.5,.5,10],[6,.25,18]]){cx.shadowColor=`rgba(255,110,20,${.9*pu})`;cx.shadowBlur=bl*S;cx.strokeStyle=`rgba(255,130,40,${a*pu})`;cx.lineWidth=2*S;blade(e*S);cx.stroke();}cx.restore();}
+  // trough + rim + collar: shadowBlur strokes are the costly part of this HUD (≈1.5 ms/frame) → drawn once per heat step into a small
+  // offscreen image and pasted (2026-11-22). Same pixels; the heat colour is stepped by 1/50 of a stack.
+  {const hq=Math.round(heat*50)/50;fhLayer('A'+(full?1:0)+'|'+hq,S,oy,x1,R,g=>{const heat=hq;g.lineCap='round';g.lineJoin='round';
+    const RIM=full?'#ff7a1a':fhMix(['#a0101a','#c8101a','#e8141a','#ff3a1a','#ff7a1a'],heat);
   // trough + red neon rim (outline closed at the tip, no overshoot)
-  blade(2.2*S);cx.fillStyle='rgba(16,0,2,.75)';cx.fill();
-  cx.shadowColor=GLOW+(.6+.35*heat/P.max)+')';cx.shadowBlur=(7+5*heat/P.max)*S;cx.strokeStyle=RIM;cx.lineWidth=1.4*S;
-  cx.beginPath();cx.moveTo(x0,y0-2.2*S);cx.lineTo(x1+2.2*S,y0-2.2*S);cx.lineTo(x1-tip-1*S,y0+h+2.2*S);cx.lineTo(x0,y0+h+2.2*S);cx.stroke();cx.shadowBlur=0;
+  bladeG(g,2.2*S);g.fillStyle='rgba(16,0,2,.75)';g.fill();
+  g.shadowColor=GLOW+(.6+.35*heat/P.max)+')';g.shadowBlur=(7+5*heat/P.max)*S;g.strokeStyle=RIM;g.lineWidth=1.4*S;
+  g.beginPath();g.moveTo(x0,y0-2.2*S);g.lineTo(x1+2.2*S,y0-2.2*S);g.lineTo(x1-tip-1*S,y0+h+2.2*S);g.lineTo(x0,y0+h+2.2*S);g.stroke();g.shadowBlur=0;
   // collar: the orb's rim flows into the blade so they read as one piece
-  {const cxn=ox+R*2.1,e=2.2*S;cx.beginPath();cx.moveTo(ox+R*.55,oy-R*.84);cx.quadraticCurveTo(ox+R*1.2,y0-e-R*.05,cxn,y0-e);cx.lineTo(cxn,y0+h+e);cx.quadraticCurveTo(ox+R*1.2,y0+h+e+R*.05,ox+R*.55,oy+R*.84);cx.closePath();
-    cx.fillStyle='rgba(20,0,2,.85)';cx.fill();cx.shadowColor=GLOW+'.9)';cx.shadowBlur=7*S;cx.strokeStyle=RIM;cx.lineWidth=1.4*S;
-    cx.beginPath();cx.moveTo(ox+R*.55,oy-R*.84);cx.quadraticCurveTo(ox+R*1.2,y0-e-R*.05,cxn,y0-e);cx.moveTo(ox+R*.55,oy+R*.84);cx.quadraticCurveTo(ox+R*1.2,y0+h+e+R*.05,cxn,y0+h+e);cx.stroke();cx.shadowBlur=0;}
+  {const cxn=ox+R*2.1,e=2.2*S;g.beginPath();g.moveTo(ox+R*.55,oy-R*.84);g.quadraticCurveTo(ox+R*1.2,y0-e-R*.05,cxn,y0-e);g.lineTo(cxn,y0+h+e);g.quadraticCurveTo(ox+R*1.2,y0+h+e+R*.05,ox+R*.55,oy+R*.84);g.closePath();
+    g.fillStyle='rgba(20,0,2,.85)';g.fill();g.shadowColor=GLOW+'.9)';g.shadowBlur=7*S;g.strokeStyle=RIM;g.lineWidth=1.4*S;
+    g.beginPath();g.moveTo(ox+R*.55,oy-R*.84);g.quadraticCurveTo(ox+R*1.2,y0-e-R*.05,cxn,y0-e);g.moveTo(ox+R*.55,oy+R*.84);g.quadraticCurveTo(ox+R*1.2,y0+h+e+R*.05,cxn,y0+h+e);g.stroke();g.shadowBlur=0;}
+  });}
   // one continuous fill, colour from the current heat
   cx.save();blade(0);cx.clip();
   const fx=x0+len*heat/P.max;
@@ -427,23 +442,27 @@ function drawFireHeat(fh){const now=performance.now(),dt=Math.min(.1,(now-(FHUD.
   // icon: a little VFX Studio flame licking up behind the orb (grows with heat) + a spark or two
   {const k=heat/P.max;fhFrame('flame_'+col,8,4,24,T,ox+R*.05,oy-R*.75,R*(1.7+.5*k),R*(2.2+.9*k),-.08,.45+.45*k,0);
     for(let j=0;j<2+(full?2:0);j++){const u=(T*.7+j*.5)%1,a=-1.9+j*.5+Math.sin(T+j)*.2;cx.fillStyle=`rgba(255,${full?190:110},80,${(1-u)*.8})`;cx.beginPath();cx.arc(ox+Math.cos(a)*R*(1+u*.9),oy+Math.sin(a)*R*(1+u*.9),(1.4-u)*S,0,Math.PI*2);cx.fill();}}
-  const og=cx.createRadialGradient(ox-R*.35,oy-R*.35,R*.1,ox,oy,R);
+  // orb + icon + ring + title: static while not full → cached the same way (full = animated, drawn live)
+  const orb=(g,heat)=>{
+  const og=g.createRadialGradient(ox-R*.35,oy-R*.35,R*.1,ox,oy,R);
   if(full){og.addColorStop(0,'#5a1a04');og.addColorStop(.7,'#2a0800');og.addColorStop(1,'#120200');}else{og.addColorStop(0,'#4a0610');og.addColorStop(.7,'#1e0004');og.addColorStop(1,'#0a0002');}
-  cx.shadowColor=GLOW+'1)';cx.shadowBlur=(full?20+6*Math.sin(T*8):8+4*heat)*S;cx.fillStyle=og;cx.beginPath();cx.arc(ox,oy,R,0,Math.PI*2);cx.fill();cx.shadowBlur=0;
-  {cx.save();const s=R*.62,sp=2,mv=full?1:0;// icon flame comes alive only at full Heat (user): flickers, stretches and sways from its base
-    cx.translate(ox,oy+R*.1+s);cx.transform(1,0,mv*(.13*Math.sin(T*4.3*sp)+.05*Math.sin(T*11)),1,0,0);cx.scale(1+mv*.05*Math.sin(T*9*sp),1+mv*(.07*Math.sin(T*7.3*sp)+.04*Math.sin(T*13.7)));cx.translate(0,-s);
-    const fp=(s)=>{cx.beginPath();cx.moveTo(0,s);cx.bezierCurveTo(-s*.85,s*.9,-s*.95,-s*.05,-s*.35,-s*.55);cx.bezierCurveTo(-s*.3,-s*.15,-s*.1,-s*.05,0,-s*.05);
-    cx.bezierCurveTo(-s*.15,-s*.55,s*.05,-s*.85,s*.15,-s*1.1);cx.bezierCurveTo(s*.35,-s*.6,s*.95,-s*.2,s*.75,s*.45);cx.bezierCurveTo(s*.65,s*.85,s*.3,s,0,s);cx.closePath();};fp(s);
-    const k=heat/P.max,fg=cx.createLinearGradient(0,s,0,-s);fg.addColorStop(0,full?'#ff5a10':fhMix(['#a01018','#d01a1a','#ff3a20','#ff6a28','#ff8a20'],heat));fg.addColorStop(1,full?'#fff2b0':fhMix(['#ff8a80','#ffb0a0','#ffd0b0','#ffe2b0','#fff2b0'],heat));
-    cx.fillStyle=fg;cx.shadowColor=full?'rgba(255,200,90,.9)':`rgba(255,120,90,${.3+.5*k})`;cx.shadowBlur=(3+6*k)*S;cx.fill();
-    cx.shadowBlur=0;cx.save();cx.translate(0,s*.45);cx.scale(1,1+mv*.12*Math.sin(T*10.5*sp+1));cx.translate(0,-s*.45);cx.translate(0,s*.3);fp(s*.5);cx.fillStyle=full?'rgba(255,250,215,.95)':`rgba(255,235,210,${.35+.5*k})`;cx.fill();cx.restore();
-    if(FHUD.burst>0){cx.globalCompositeOperation='lighter';cx.globalAlpha=FHUD.burst;cx.scale(1+.5*(1-FHUD.burst),1+.7*(1-FHUD.burst));fp(s);cx.fillStyle='rgba(255,200,110,.7)';cx.fill();cx.globalAlpha=1;cx.globalCompositeOperation='source-over';}
-    cx.restore();}
-  cx.strokeStyle=full?'rgba(255,200,120,.9)':'rgba(255,90,80,.85)';cx.lineWidth=1.3*S;cx.beginPath();cx.arc(ox,oy,R,0,Math.PI*2);cx.stroke();
-  cx.strokeStyle='rgba(255,255,255,.5)';cx.lineWidth=1.2*S;cx.beginPath();cx.arc(ox,oy,R*.78,-2.5,-1.6);cx.stroke();
+  g.shadowColor=GLOW+'1)';g.shadowBlur=(full?20+6*Math.sin(T*8):8+4*heat)*S;g.fillStyle=og;g.beginPath();g.arc(ox,oy,R,0,Math.PI*2);g.fill();g.shadowBlur=0;
+  {g.save();const s=R*.62,sp=2,mv=full?1:0;// icon flame comes alive only at full Heat (user): flickers, stretches and sways from its base
+    g.translate(ox,oy+R*.1+s);g.transform(1,0,mv*(.13*Math.sin(T*4.3*sp)+.05*Math.sin(T*11)),1,0,0);g.scale(1+mv*.05*Math.sin(T*9*sp),1+mv*(.07*Math.sin(T*7.3*sp)+.04*Math.sin(T*13.7)));g.translate(0,-s);
+    const fp=(s)=>{g.beginPath();g.moveTo(0,s);g.bezierCurveTo(-s*.85,s*.9,-s*.95,-s*.05,-s*.35,-s*.55);g.bezierCurveTo(-s*.3,-s*.15,-s*.1,-s*.05,0,-s*.05);
+    g.bezierCurveTo(-s*.15,-s*.55,s*.05,-s*.85,s*.15,-s*1.1);g.bezierCurveTo(s*.35,-s*.6,s*.95,-s*.2,s*.75,s*.45);g.bezierCurveTo(s*.65,s*.85,s*.3,s,0,s);g.closePath();};fp(s);
+    const k=heat/P.max,fg=g.createLinearGradient(0,s,0,-s);fg.addColorStop(0,full?'#ff5a10':fhMix(['#a01018','#d01a1a','#ff3a20','#ff6a28','#ff8a20'],heat));fg.addColorStop(1,full?'#fff2b0':fhMix(['#ff8a80','#ffb0a0','#ffd0b0','#ffe2b0','#fff2b0'],heat));
+    g.fillStyle=fg;g.shadowColor=full?'rgba(255,200,90,.9)':`rgba(255,120,90,${.3+.5*k})`;g.shadowBlur=(3+6*k)*S;g.fill();
+    g.shadowBlur=0;g.save();g.translate(0,s*.45);g.scale(1,1+mv*.12*Math.sin(T*10.5*sp+1));g.translate(0,-s*.45);g.translate(0,s*.3);fp(s*.5);g.fillStyle=full?'rgba(255,250,215,.95)':`rgba(255,235,210,${.35+.5*k})`;g.fill();g.restore();
+    if(FHUD.burst>0){g.globalCompositeOperation='lighter';g.globalAlpha=FHUD.burst;g.scale(1+.5*(1-FHUD.burst),1+.7*(1-FHUD.burst));fp(s);g.fillStyle='rgba(255,200,110,.7)';g.fill();g.globalAlpha=1;g.globalCompositeOperation='source-over';}
+    g.restore();}
+  g.strokeStyle=full?'rgba(255,200,120,.9)':'rgba(255,90,80,.85)';g.lineWidth=1.3*S;g.beginPath();g.arc(ox,oy,R,0,Math.PI*2);g.stroke();
+  g.strokeStyle='rgba(255,255,255,.5)';g.lineWidth=1.2*S;g.beginPath();g.arc(ox,oy,R*.78,-2.5,-1.6);g.stroke();
   // title above the blade
-  cx.font=`600 ${Math.round(12.5*S)}px Cinzel,Kanit,serif`;cx.textAlign='center';cx.shadowColor='rgba(0,0,0,.9)';cx.shadowBlur=4;cx.fillStyle=full?'#ffe2a8':'#f4ece6';
-  cx.fillText(full?'HEAT  MAX':'HEAT  '+lv+' / '+P.max,x0+len*.42,y0-9*S);
+  g.font=`600 ${Math.round(12.5*S)}px Cinzel,Kanit,serif`;g.textAlign='center';g.shadowColor='rgba(0,0,0,.9)';g.shadowBlur=4;g.fillStyle=full?'#ffe2a8':'#f4ece6';
+  g.fillText(full?'HEAT  MAX':'HEAT  '+lv+' / '+P.max,x0+len*.42,y0-9*S);
+  };
+  if(full||FHUD.burst>0)orb(cx,heat);else{const hq=Math.round(heat*50)/50;fhLayer('B'+lv+'|'+hq,S,oy,x1,R,g=>{g.lineCap='round';g.lineJoin='round';orb(g,hq);});}
   cx.restore();}
 
 // Ignition Snap ป้ายผลบนจอคนดีด (ผู้ใช้ 2026-11-14 อยากให้ "snap boom 5 dead" สะใจ): ×N IGNITED / ×N INCINERATED + ขอบจอวาบส้ม

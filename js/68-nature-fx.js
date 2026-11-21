@@ -36,7 +36,7 @@ function ring(r0,r1,col,op=.6,p){const m=new T.Mesh(new T.RingGeometry(r0,r1,64)
 function Tube(n,sides,mat,p){
   const g=new T.BufferGeometry(),V=n*(sides+1),pos=new Float32Array(V*3),col=new Float32Array(V*3),idx=[];
   for(let i=0;i<n-1;i++)for(let j=0;j<sides;j++){const a=i*(sides+1)+j,b=a+sides+1;idx.push(a,b,a+1,a+1,b,b+1);}
-  g.setAttribute('position',new T.BufferAttribute(pos,3));g.setAttribute('color',new T.BufferAttribute(col,3));g.setIndex(idx);
+  const nrm=new Float32Array(V*3);g.setAttribute('position',new T.BufferAttribute(pos,3));g.setAttribute('color',new T.BufferAttribute(col,3));g.setAttribute('normal',new T.BufferAttribute(nrm,3));g.setIndex(idx);
   const m=mesh(g,mat,p);m.receiveShadow=true;
   const tg=V3(),nr=V3(),bn=V3(),up=V3(0,1,0),ax=V3(1,0,0),c=new T.Color();
   m.set=(pts,rad,colFn)=>{const k=pts.length;
@@ -45,8 +45,10 @@ function Tube(n,sides,mat,p){
       nr.crossVectors(tg,Math.abs(tg.y)>.92?ax:up).normalize();bn.crossVectors(nr,tg).normalize();
       const r=i<k?rad(ii/(k-1||1),ii):0;colFn(ii/(k-1||1),c);
       for(let j=0;j<=sides;j++){const a=j/sides*Math.PI*2,o=(i*(sides+1)+j)*3,cs=Math.cos(a)*r,sn=Math.sin(a)*r;
-        pos[o]=P.x+nr.x*cs+bn.x*sn;pos[o+1]=P.y+nr.y*cs+bn.y*sn;pos[o+2]=P.z+nr.z*cs+bn.z*sn;col[o]=c.r;col[o+1]=c.g;col[o+2]=c.b;}}
-    g.attributes.position.needsUpdate=true;g.attributes.color.needsUpdate=true;g.computeVertexNormals();g.computeBoundingSphere();};
+        const ca=Math.cos(a),sa=Math.sin(a);   // ring normal straight from the frame (was computeVertexNormals every frame per tube)
+        pos[o]=P.x+nr.x*cs+bn.x*sn;pos[o+1]=P.y+nr.y*cs+bn.y*sn;pos[o+2]=P.z+nr.z*cs+bn.z*sn;col[o]=c.r;col[o+1]=c.g;col[o+2]=c.b;
+        nrm[o]=nr.x*ca+bn.x*sa;nrm[o+1]=nr.y*ca+bn.y*sa;nrm[o+2]=nr.z*ca+bn.z*sa;}}
+    g.attributes.position.needsUpdate=true;g.attributes.color.needsUpdate=true;g.attributes.normal.needsUpdate=true;g.computeBoundingSphere();};
   return m;}
 function V3(x=0,y=0,z=0){return new T.Vector3(x,y,z);}
 // หนามตามหลอด (InstancedMesh)
