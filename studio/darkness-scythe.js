@@ -494,7 +494,9 @@ function stCreateScythePreview(root,args,lifetime){
           saved.act=sample.act;saved.shaft=sample.shaft;
           if(sample.act>0)trailActive=true;
         }
-        tail.visible=fringe.visible=shTail.visible=tailFlames.visible=tailSheet.visible=trailActive;
+        tail.visible=fringe.visible=tailFlames.visible=tailSheet.visible=trailActive;
+        const shaftFade=args.liveBA&&baActive?1-ez(cutEnd+.08*ST_DARK_LIVE_BA.rate,cutEnd+.40*ST_DARK_LIVE_BA.rate,swing):1;
+        shTail.visible=trailActive&&shaftFade>0;
         if(faceRibbon&&baActive&&trailActive){
           faceRibbon.visible=true;
           const cut=bladePt(.74,.58);
@@ -514,8 +516,8 @@ function stCreateScythePreview(root,args,lifetime){
         for(let j=0;j<HH;j++){const Pj=trailSamples[j],age=j/(HH-1);Mt.compose(Pj.pos,Pj.QB,Sv);acts[j]=Pj.act;
           if(trailWidth!==1)Mt.setPosition(_p.copy(trailCenter).applyQuaternion(Pj.QB).add(Pj.pos));
           // หางด้าม: จากปลายล่างของด้ามขึ้นไปต่อกับโคนหางใบ
-          {const [rx,ry]=bladePt(0.05,0.45);for(let k=0;k<SK;k++){const u=k/(SK-1);_p.set(rx*u,0.02+(ry-0.02)*u,0).applyMatrix4(Mt);const i3=j*SK+k;shpos[i3*3]=_p.x;shpos[i3*3+1]=_p.y;shpos[i3*3+2]=_p.z;
-            const gy=0.30-0.18*u;shcol[i3*4]=shcol[i3*4+1]=shcol[i3*4+2]=gy;shcol[i3*4+3]=Math.min(1,Math.pow(1-age,1.2)*1.5)*Pj.act*Math.min(1,u/0.1+0.5)*(Pj.shaft===false?0:1);   /* ยาวและจางพร้อมหางใบ (ผู้ใช้ 2026-11-19) */}}   // เทาเข้มที่ปลายล่าง → เกือบดำใกล้ใบ ทึบพอเห็นชัด แต่ไม่ดำสนิทเท่าใบ
+          if(shTail.visible){const [rx,ry]=bladePt(0.05,0.45);for(let k=0;k<SK;k++){const u=k/(SK-1);_p.set(rx*u,0.02+(ry-0.02)*u,0).applyMatrix4(Mt);const i3=j*SK+k;shpos[i3*3]=_p.x;shpos[i3*3+1]=_p.y;shpos[i3*3+2]=_p.z;
+            const gy=0.30-0.18*u;shcol[i3*4]=shcol[i3*4+1]=shcol[i3*4+2]=gy;shcol[i3*4+3]=shaftFade*Math.min(1,Math.pow(1-age,1.2)*1.5)*Pj.act*Math.min(1,u/0.1+0.5)*(Pj.shaft===false?0:1);}}   // เทาเข้มที่ปลายล่าง → เกือบดำใกล้ใบ ทึบพอเห็นชัด แต่ไม่ดำสนิทเท่าใบ
           for(let k=0;k<HK;k++){const {tk,edge:[x,y]}=sections[k];_p.set(x,y,0).applyMatrix4(Mt);   // ปลายใบ: หางยื่นเลยปลายจริงไปอีกนิด
             const i2=j*HK+k,nz=Math.sin(k*1.7+T*9)*0.5+Math.sin(k*4.1-j*1.3+T*13)*0.5;
             tpos[i2*3]=_p.x;tpos[i2*3+1]=_p.y+(age>0.5?0.08*(age-0.5)*nz:0);tpos[i2*3+2]=_p.z;
@@ -526,7 +528,7 @@ function stCreateScythePreview(root,args,lifetime){
               f2pos[i2*3]=_p.x;f2pos[i2*3+1]=_p.y+hj*(j%2?1:0.25);f2pos[i2*3+2]=_p.z;   // แถวสลับสูง-ต่ำ = ลิ้นไฟ
               f2col[i2*4+3]=tcol[i2*4+3]*0.95;}}}
         tailGeo.attributes.position.needsUpdate=true;tailGeo.attributes.color.needsUpdate=true;fr2.attributes.position.needsUpdate=true;fr2.attributes.color.needsUpdate=true;
-        shGeo.attributes.position.needsUpdate=true;shGeo.attributes.color.needsUpdate=true;
+        if(shTail.visible){shGeo.attributes.position.needsUpdate=true;shGeo.attributes.color.needsUpdate=true;}
         // เปลวปลายหาง: แถวเก่าสุดที่ยังฟันอยู่ = ปลายหาง • ลิ้นไฟลุกขึ้นแบบเปลวปลายล่างของเคียว
         {let je=-1;for(let j=HH-1;j>=0;j--)if(acts[j]>0.25){je=j;break;}let rowA=0;if(je>=0)for(let k=0;k<HK;k++)rowA=Math.max(rowA,tcol[(je*HK+k)*4+3]);const aE=je<0?0:acts[je]*Math.min(1,rowA*1.6);   // จางตามหาง (บั๊ก: เปลวปลายหางค้างตามมาหลังหางจางหมด)
           for(let q=0;q<TF;q++){const k=Math.min(HK-1,Math.round((q+0.5)/TF*(HK-1))),i2=Math.max(0,je)*HK+k,bx=tpos[i2*3],by=tpos[i2*3+1],bz=tpos[i2*3+2];

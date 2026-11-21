@@ -1,6 +1,20 @@
 {
- "next": 125,
+ "next": 126,
  "items": [
+  {
+   "id": 125,
+   "title": "Darkness BA หางด้ามจางเร็วขึ้น",
+   "text": "หลังฟัน หางด้ามจางหมดราว 0.4 วิ หางคมอยู่ราว 0.9 วิ",
+   "kind": "VFX",
+   "who": "Darkness",
+   "status": "wait",
+   "created": "2026-11-21",
+   "updated": "2026-11-21",
+   "imgs": [],
+   "links": [
+    "/shots/motion_darkness_ba_short_shaft_tdm.gif"
+   ]
+  },
   {
    "id": 124,
    "title": "Darkness BA หางฟันค้างชัดขึ้น",
